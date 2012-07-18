@@ -128,11 +128,10 @@ G_meas(static_cast < int >(parms["FLAVORS"]) * (static_cast < int >(parms["N"]) 
   }
 
   segments.resize(FLAVORS);
-  M.resize(FLAVORS, blas::matrix(0));
+  M.resize(FLAVORS, alps::numeric::matrix<double>());
   // initialize list of segments
   for (int i = 0; i < FLAVORS; i++) {
     segments[i].clear();
-    M[i].clear();
   }
 
   // create measurement objects
@@ -235,8 +234,9 @@ void HybridizationRun::dostep()
           end_times[i] = it1->t_end();
           ++i;
         }
-        for (int i = 0; i < (int) M[j].size1(); i++) {
-          for (int k = 0; k < (int) M[j].size1(); k++) {
+        assert(num_rows(M[j]) == num_cols(M[j]));
+        for (int i = 0; i < (int) num_cols(M[j]); i++) {
+          for (int k = 0; k < (int) num_rows(M[j]); k++) {
             if (M[j] (k, i) != 0.) {
               double argument = end_times[i] - start_times[k];
               double bubble_sign = 1.;
@@ -295,7 +295,7 @@ void HybridizationRun::dostep()
   if (overlap)
     measurements.get < RealVectorObservable > ("overlap") << overlap_meas;
 
-  measurements.get < RealObservable > ("MatrixSize") << M[0].size1();
+  measurements.get < RealObservable > ("MatrixSize") << num_rows(M[0]);
 }
 
 

@@ -84,7 +84,7 @@ inline alps::IDump& operator >> (alps::IDump& idump, dense_matrix& m) {
 
 /// compute Green's function matrix for a given spin configuration, from Greens
 //function for spins set to zero. Return sign of det.
-double update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<int> & spins, double l);
+void update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<int> & spins, double l);
 
 
 /// attempt single spin flip and (if successful) compute Green's function matrix for the new configuration

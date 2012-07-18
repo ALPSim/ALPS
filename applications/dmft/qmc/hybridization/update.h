@@ -31,9 +31,9 @@
 
 
 
-template <class G> void construct_matrix(blas_matrix & M, segment_container_t & segments, double BETA,  G& F) {
+template <class G> void construct_matrix(alps_matrix & M, segment_container_t & segments, double BETA,  G& F) {
   int N = segments.size();
-  M.resize(N,N);
+  resize(M,N,N);
   int row=-1;
   int column=-1;
   for (segment_container_t::const_iterator it1=segments.begin(); it1!=segments.end(); it1++) {
@@ -179,7 +179,7 @@ double compute_overlap(times segment, S& other_segments, int other_full_line, do
 
 // functions required to compute determinant ratios and perform fast matrix updates 
 
-template <class G, class S, class V> double det_rat_up(const times & new_segment, blas_matrix & M, const S& segments_old, G& F, V&Fe, V&Fs, double BETA, double & det_rat_sign, double & overlap) {
+template <class G, class S, class V> double det_rat_up(const times & new_segment, alps_matrix & M, const S& segments_old, G& F, V&Fe, V&Fs, double BETA, double & det_rat_sign, double & overlap) {
   
   typename S::const_iterator it=segments_old.begin();
   for (int i=0; i<(int)segments_old.size(); i++) {
@@ -189,9 +189,10 @@ template <class G, class S, class V> double det_rat_up(const times & new_segment
   }
   
   double det_rat = interpolate_F(new_segment.t_end()-new_segment.t_start(), BETA, F);
-  det_rat -= Fe*M*Fs;
-  /*for (int i=0; i<(int)M.size1(); i++) {
-   for (int j=0; j<(int)M.size1(); j++) {
+  if(Fs.size() > 0)
+      det_rat -= scalar_product(Fe,M*Fs);
+  /*for (int i=0; i<(int)num_rows(M); i++) {
+   for (int j=0; j<(int)num_cols(M); j++) {
    det_rat -= Fe[i]*M(i,j)*Fs[j];
    }
    }*/
@@ -216,9 +217,9 @@ template <class G, class S, class V> double det_rat_up(const times & new_segment
   return det_rat;
 }
 
-template <class V> void compute_M_up(int k, blas_matrix & M, V& Fs, V& Fe, double det_rat) {
-  
-  blas_matrix M_new(M.size1()+1,M.size1()+1);
+template <class V> void compute_M_up(int k, alps_matrix & M, V& Fs, V& Fe, double det_rat) {
+  assert( num_rows(M) == num_cols(M) );
+  alps_matrix M_new(num_rows(M)+1,num_cols(M)+1);
   int i_new, j_new;
   double det_rat_inv=1./det_rat;
   
@@ -226,13 +227,13 @@ template <class V> void compute_M_up(int k, blas_matrix & M, V& Fs, V& Fe, doubl
   M_new(k,k) = det_rat_inv;
   
   // row k and column k
-  for (int i=0; i<(int)M.size1(); i++) {
+  for (int i=0; i<(int)num_rows(M); i++) {
     //set kth row and column  to zero.
     i_new = (i<k ? i : i+1);
     M_new(i_new,k) = 0;
     M_new(k,i_new) = 0;
     
-    for (int n=0; n<(int)M.size1(); n++) {
+    for (int n=0; n<(int)num_rows(M); n++) {
       M_new(i_new,k) -= M(i,n)*Fs(n);
       M_new(k,i_new) -= M(n,i)*Fe(n);    
     } 
@@ -241,16 +242,17 @@ template <class V> void compute_M_up(int k, blas_matrix & M, V& Fs, V& Fe, doubl
   }
   
   // remaining elements
-  for (int i=0; i<(int)M.size1(); i++) {
+  for (int i=0; i<(int)num_rows(M); i++) {
     i_new = (i<k ? i : i+1);
-    for (int j=0; j<(int)M.size1(); j++) {
+    for (int j=0; j<(int)num_cols(M); j++) {
       j_new = (j<k ? j : j+1);
       M_new(i_new,j_new) = M(i,j) + det_rat*M_new(i_new,k)*M_new(k,j_new);
     }
   }
- //   swap(M,M_new);
-  M_new.swap(M);
-  /*blas::matrix M2(M);
+  swap(M,M_new);
+  /*
+     //TODO Can this code be removed?
+   blas::matrix M2(M);
    blas::vector k_row(M.size());
    blas::vector k_col(M.size());
    blas::vector f_start(M.size());
@@ -277,7 +279,7 @@ template <class V> void compute_M_up(int k, blas_matrix & M, V& Fs, V& Fe, doubl
 }  
 
 
-template <class S> double det_rat_down(int k, blas_matrix & M, const S& segments_old, double & det_rat_sign) {
+template <class S> double det_rat_down(int k, alps_matrix & M, const S& segments_old, double & det_rat_sign) {
   
   double det_rat = M(k,k);
   
@@ -302,15 +304,17 @@ template <class S> double det_rat_down(int k, blas_matrix & M, const S& segments
 
 template<class Mat> void compute_M_down(int k, Mat& M) {
   
-  blas_matrix M_new(M.size1()-1, M.size1()-1);
+  assert(num_rows(M) == num_cols(M) );
+  assert(num_rows(M) > 0);
+  Mat M_new(num_rows(M)-1, num_cols(M)-1);
   int i_old;
   double Mkk_inv=1./M(k,k);
-  for (int i=0; i<(int)M_new.size1(); i++) {
+  for (int i=0; i<(int)num_rows(M_new); i++) {
     i_old = (i<k ? i : i+1);
     for (int j=0; j<k; j++) {
       M_new(i,j) = M(i_old, j)-M(i_old,k)*M(k,j)*Mkk_inv;
     }
-    for (int j=k; j<(int)M_new.size1(); ){
+    for (int j=k; j<(int)num_cols(M_new); ){
       j++;
       M_new(i,j-1) = M(i_old, j)-M(i_old,k)*M(k,j)*Mkk_inv; //one year in prison for writing it like this.
     }
@@ -327,29 +331,27 @@ template<class Mat> void compute_M_down(int k, Mat& M) {
    M.remove_row_column(k);
    if(M.size()>0)
    M.add_outer_product(row_k, col_k, -1./Mkk);*/
-  //M.swap(M_new);
     swap(M_new,M);
   //if(M != M_new)
   //  std::cout<<"algo is wrong: "<<M<<" "<<M_new<<std::endl;
 }
 
 // move segment without changin its length
-template <class G, class S> double det_rat_move(times & new_segment, int k, blas_matrix & M, const S& segments_old, G& F, double BETA, double & det_rat_sign, double & overlap) {
+template <class G, class S> double det_rat_move(times & new_segment, int k, alps_matrix & M, const S& segments_old, G& F, double BETA, double & det_rat_sign, double & overlap) {
   
-  double F_i, F_j;
-  typename S::const_iterator it1, it2;
+  assert(num_rows(M) == num_cols(M));
   
   double det_rat = M(k,k)*interpolate_F(new_segment.t_end()-new_segment.t_start(), BETA, F);
   
-  it1=segments_old.begin();
-  for (int i=0; i<M.size1(); i++) {
+  typename S::const_iterator it1=segments_old.begin();
+  for (int i=0; i<num_rows(M); i++) {
     if (i != k) {
-      F_i = interpolate_F(new_segment.t_end()-it1->t_start(), BETA, F);
+      double F_i = interpolate_F(new_segment.t_end()-it1->t_start(), BETA, F);
       
-      it2=segments_old.begin();
-      for (int j=0; j<M.size1(); j++) {
+      typename S::const_iterator it2=segments_old.begin();
+      for (int j=0; j<num_cols(M); j++) {
         if (j != k) {
-          F_j = interpolate_F(it2->t_end()-new_segment.t_start(), BETA, F);
+          double F_j = interpolate_F(it2->t_end()-new_segment.t_start(), BETA, F);
           det_rat -= F_i*(M(k,k)*M(i,j)-M(i,k)*M(k,j))*F_j;
         }
         it2++;
@@ -381,20 +383,21 @@ template <class G, class S> double det_rat_move(times & new_segment, int k, blas
 }
 
 
-template <class G, class S> void compute_M_move(times & new_segment, int k, blas_matrix & M, const S& segments_old, G& F, double BETA, double det_rat) {
+template <class G, class S> void compute_M_move(times & new_segment, int k, alps_matrix & M, const S& segments_old, G& F, double BETA, double det_rat) {
   
-  blas_matrix M_new(M.size1(),M.size1());
+  assert( num_rows(M) == num_cols(M) );
+  alps_matrix M_new(num_rows(M), num_cols(M));
   //double argument;
   
   // row k and column k
   double det_rat_inv=1./det_rat;
-  for (int i=0; i<M.size1(); i++) {
+  for (int i=0; i< num_rows(M); i++) {
     if (i!=k) {
       M_new(i,k) = 0;
       M_new(k,i) = 0;
       
       typename S::const_iterator it=segments_old.begin();
-      for (int n=0; n<M.size1(); n++) {
+      for (int n=0; n< num_rows(M); n++) {
         if (n!=k) {
           M_new(i,k) -= det_rat_inv*(M(k,k)*M(i,n)-M(i,k)*M(k,n))*interpolate_F(it->t_end()-new_segment.t_start(), BETA, F);
           M_new(k,i) -= det_rat_inv*(M(k,k)*M(n,i)-M(n,k)*M(k,i))*interpolate_F(new_segment.t_end()-it->t_start(), BETA, F);      
@@ -408,27 +411,24 @@ template <class G, class S> void compute_M_move(times & new_segment, int k, blas
   }
   
   // remaining elements
-  for (int i=0; i<(int)M.size1(); i++) {
+  for (int i=0; i<(int) num_rows(M); i++) {
     if (i!=k) {
-      for (int j=0; j<(int)M.size1(); j++) {
+      for (int j=0; j<(int) num_cols(M); j++) {
         if (j!=k)
           M_new(i,j) = M(i,j) + (-M(i,k)*M(k,j)+det_rat*M_new(i,k)*M_new(k,j))/M(k,k);
       }
     }
   }
-    swap(M,M_new);
-  //M_new.swap(M);
-  return;
+  swap(M,M_new);
 }  
 
 // shift end point of segment
-template <class G, class S> double det_rat_shift(times & new_segment, int k, blas_matrix & M, S& segments_old, G& F, double BETA, double & det_rat_sign, double & overlap) {
+template <class G, class S> double det_rat_shift(times & new_segment, int k, alps_matrix & M, S& segments_old, G& F, double BETA, double & det_rat_sign, double & overlap) {
   
-  typename S::const_iterator it;
   double det_rat = 0;
   
-  it=segments_old.begin();
-  for (int i=0; i<(int)M.size1(); i++) {
+  typename S::const_iterator it=segments_old.begin();
+  for (int i=0; i<(int)num_rows(M); i++) {
     det_rat += interpolate_F(new_segment.t_end()-it->t_start(), BETA, F)*M(i,k);
     it++;
   }
@@ -456,8 +456,10 @@ template <class G, class S> double det_rat_shift(times & new_segment, int k, bla
 }
 
 
-template <class G, class S> void compute_M_shift(times & new_segment, unsigned k, blas_matrix & M, const S& segments_old, G& F, double BETA, double det_rat) {
-  std::vector<double> R(M.size1(),0), M_k(M.size1(),0), Fe(M.size1(),0);
+template <class G, class S> void compute_M_shift(times & new_segment, unsigned k, alps_matrix & M, const S& segments_old, G& F, double BETA, double det_rat) {
+
+  assert( num_rows(M) == num_cols(M) );
+  std::vector<double> R(num_rows(M),0), M_k(num_rows(M),0), Fe(num_rows(M),0);
   
   typename S::const_iterator it=segments_old.begin();
   for (unsigned i=0; i<M_k.size(); i++) {
@@ -473,14 +475,14 @@ template <class G, class S> void compute_M_shift(times & new_segment, unsigned k
     } 
   }   
   
-  for (unsigned m=0; m<(unsigned)M.size1(); m++) {
+  for (unsigned m=0; m < num_cols(M); m++) {
     if (m!=k) {
-      for (unsigned n=0; n<(unsigned)M.size1(); n++) {
+      for (unsigned n=0; n < num_rows(M); n++) {
         M(n,m) -= M_k[n]*R[m]/det_rat;
       }
     }
     else {
-      for (int n=0; n<M.size1(); n++) {
+      for (int n=0; n < num_rows(M); n++) {
         M(n,m) = M_k[n]/det_rat;
       }
     }
@@ -499,12 +501,13 @@ template <class G, class S> void compute_M_shift(times & new_segment, unsigned k
    R(k)=1.;
    M.add_outer_product(M_k, R, -1./det_rat);
    */ 
-  return;
 }  
 
 
-template <class G, class S, class V> double det_rat_insert_anti(times & anti_segment, blas_matrix & M, S& segments_old, G& F, double BETA, double & det_rat_sign, double & overlap, V& R) {
+template <class G, class S, class V> double det_rat_insert_anti(times & anti_segment, alps_matrix & M, S& segments_old, G& F, double BETA, double & det_rat_sign, double & overlap, V& R) {
   
+  assert(num_rows(M) == R.size());
+  assert(num_cols(M) == R.size());
   std::vector<double> F_k(R.size());
   
   typename S::const_iterator it=segments_old.begin();
@@ -550,18 +553,18 @@ inline int cycle(int i, int size) {
   return (i>0 ? i-1 : size-1); 
 }
 
-template <class G, class S, class V> void compute_M_insert_anti(times & anti_segment, int s, int r, blas_matrix & M, S& segments_old, G& F, double BETA, double det_rat, V& R) {
-  
-  blas_matrix M_new(M.size1()+1,M.size1()+1);
+template <class G, class S, class V> void compute_M_insert_anti(times & anti_segment, int s, int r, alps_matrix & M, S& segments_old, G& F, double BETA, double det_rat, V& R) {
+  assert(num_rows(M) == num_cols(M));
+  alps_matrix M_new(num_rows(M)+1,num_cols(M)+1);
   //std::vector<double> F_kp1(R.size()), L(R.size());
-  blas::vector F_kp1(R.size()), L(R.size());
+  alps::numeric::vector<double> F_kp1(R.size()), L(R.size());
   
   typename S::const_iterator it=segments_old.begin();
   for (int i=0; i<(int)F_kp1.size(); i++) {
     F_kp1(i)=interpolate_F(it->t_end()-anti_segment.t_end(), BETA, F);
     it++;
   }
-  M.right_multiply(F_kp1, L);
+  L = M * F_kp1;
   /*for (int i=0; i<(int)L.size(); i++) {
    L[i]=0;
    for (int l=0; l<(int)L.size(); l++) {  
@@ -570,7 +573,7 @@ template <class G, class S, class V> void compute_M_insert_anti(times & anti_seg
    }*/
   
   int i_new, j_new;
-  int size=(int)M.size1();
+  int size=(int)num_rows(M);
   
   // element (k+1,k)
   M_new(r,s) = -1./det_rat;
@@ -617,12 +620,10 @@ template <class G, class S, class V> void compute_M_insert_anti(times & anti_seg
       }
     }  
   }
-    //swap(M_new,M);
-  M_new.swap(M);
-  return;
+  swap(M,M_new);
 }
 
-template <class G, class S> double det_rat_remove_anti(times anti_segment, int r, int s, blas_matrix & M,const S& segments_old, G& F, double BETA, double & det_rat_sign) {
+template <class G, class S> double det_rat_remove_anti(times anti_segment, int r, int s, alps_matrix const& M,const S& segments_old, G& F, double BETA, double & det_rat_sign) {
   
   // r is the index of the segment which is removed
   // s is the index of the segment which is shifted
@@ -660,10 +661,11 @@ template <class G, class S> double det_rat_remove_anti(times anti_segment, int r
 
 
 template<class Mat> void compute_M_remove_anti(Mat & M, int s, int r) {
-  
-  blas_matrix M_new(M.size1()-1,M.size1()-1);
+  assert(num_rows(M) == num_cols(M));
+  assert(num_rows(M) > 0);
+  Mat M_new(num_rows(M)-1,num_cols(M)-1);
   int i_old;
-  int size=M_new.size1();
+  int size= num_rows(M_new);
   
   if(r!=0) { // order of segments remains unchanged
     for (int i=0; i<size; i++) {
@@ -684,8 +686,6 @@ template<class Mat> void compute_M_remove_anti(Mat & M, int s, int r) {
     }  
   }
     swap(M,M_new);
-  //M_new.swap( M);
-  return;
 }
 
 

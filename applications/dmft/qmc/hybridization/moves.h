@@ -88,7 +88,7 @@ template < class RNG, class S > void insert_remove_full_line(RNG & rng, double m
 
 
 template < class RNG, class S, class G > void insert_remove_segment(RNG & rng, double t, double BETA, double mu, U_matrix & u, G & F,
-                                                                    S & segments, blas_matrix & M, double &sign,
+                                                                    S & segments, alps_matrix & M, double &sign,
                                                                     std::vector < S > &other_segments, std::vector < int >other_full_line,
                                                                     int this_flavor)
 {
@@ -123,7 +123,7 @@ template < class RNG, class S, class G > void insert_remove_segment(RNG & rng, d
         otherlength_u += other_length * u(i, this_flavor);
       }
       double log_prob, overlap, det_rat, det_rat_sign;
-      blas::vector Fe(segments.size()), Fs(segments.size());
+      alps::numeric::vector<double> Fe(segments.size()), Fs(segments.size());
       
       det_rat = det_rat_up(segment_insert, M, segments, F, Fe, Fs, BETA, det_rat_sign, overlap);
       
@@ -187,7 +187,7 @@ template < class RNG, class S, class G > void insert_remove_segment(RNG & rng, d
 
 
 template < class RNG, class S, class G > void insert_remove_antisegment(RNG & rng, double t, double BETA, double mu, U_matrix & u, G & F,
-                                                                        int &full_line, S & segments, blas_matrix & M, double &sign,
+                                                                        int &full_line, S & segments, alps_matrix & M, double &sign,
                                                                         std::vector < S > &other_segments,
                                                                         std::vector < int >&other_full_line, int this_flavor)
 {
@@ -207,7 +207,7 @@ template < class RNG, class S, class G > void insert_remove_antisegment(RNG & rn
       times segment_remove(t, t_end);
       
       double log_prob, overlap, det_rat, det_rat_sign;
-      blas::vector Fe(segments.size()), Fs(segments.size());
+      alps::numeric::vector<double> Fe(segments.size()), Fs(segments.size());
       det_rat = det_rat_up(segment_insert, M, segments, F, Fe, Fs, BETA, det_rat_sign, overlap);
       
       double otherlength_u = 0;
@@ -257,8 +257,7 @@ template < class RNG, class S, class G > void insert_remove_antisegment(RNG & rn
         }
         
         double log_prob, overlap, det_rat, det_rat_sign;
-        blas::vector R(segments.size());
-        //std::vector<double> R(segments.size());
+        alps::numeric::vector<double> R(segments.size());
         det_rat = det_rat_insert_anti(anti_segment, M, segments, F, BETA, det_rat_sign, overlap, R);
         
         log_prob = log(BETA * (-t_down) / (segments.size() + 1) * det_rat) - length * mu + otherlength_u;
@@ -476,7 +475,7 @@ template < class RNG, class S, class G > void insert_remove_antisegment(RNG & rn
 
 // shift segment
 template < class RNG, class S, class G > void shift_segment(RNG & rng, S & segments, double BETA, double mu, U_matrix & u, G & F,
-                                                            blas_matrix & M, double &sign, std::vector < S > &other_segments,
+                                                            alps_matrix & M, double &sign, std::vector < S > &other_segments,
                                                             std::vector < int >&other_full_line, int this_flavor)
 {
   

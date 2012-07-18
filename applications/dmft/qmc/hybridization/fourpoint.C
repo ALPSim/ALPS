@@ -99,8 +99,9 @@ void HybridizationRun::measure_fourpoint()
           end_times[i]=it1->t_end();
           ++i;
         }
-        for (int i=0; i<(int)M[j].size1(); i++) {
-          for (int k=0; k<(int)M[j].size1(); k++) {
+        assert( num_rows(M[j]) == num_cols(M[j]) );
+        for (int i=0; i<(int)num_cols(M[j]); i++) {
+          for (int k=0; k<(int)num_rows(M[j]); k++) {
             if (M[j](k,i)!=0.) {
               double argument = end_times[i]-start_times[k];
               double bubble_sign=1.;
@@ -119,8 +120,9 @@ void HybridizationRun::measure_fourpoint()
                   end_times_1[z]=it1->t_end();
                   ++z;
                 }
-                for (int p=0; p<(int)M[1].size1(); p++) {
-                  for (int q=0; q<(int)M[1].size1(); q++) {
+                assert( num_rows(M[1]) == num_cols(M[1]) );
+                for (int p=0; p<(int)num_rows(M[1]); p++) {
+                  for (int q=0; q<(int)num_cols(M[1]); q++) {
                     if (M[1](p,q)!=0.) {
                       double argument_1 = end_times_1[p]-start_times_1[q];
                       double bubble_sign_1=1.;

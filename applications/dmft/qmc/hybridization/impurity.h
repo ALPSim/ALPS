@@ -40,14 +40,12 @@
 #include <alps/osiris/std/vector.h>
 #include <cmath>
 #include <alps/osiris/std/list.h>
-#include <alps/numeric/detail/matrix.hpp>
-#include <alps/numeric/detail/vector.hpp>
+#include <alps/numeric/matrix.hpp>
 #include "green_function.h"
 #include "U_matrix.h"
 #include "alps_solver.h"
 
-//typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> blas_matrix;
-typedef blas::matrix blas_matrix;
+typedef alps::numeric::matrix<double> alps_matrix;
 class times
 {
 public:
@@ -132,7 +130,7 @@ private:
   std::vector<segment_container_t >    segments;        // stores configurations with 0,1,... segments (but not full line)
   std::vector<int>                    full_line;                    // if 1 means that particle occupies full time-line
   std::vector<double>                sign;                    // sign of Z_n_up
-  std::vector<blas_matrix>            M;                // inverse matrix for up-spins
+  std::vector<alps_matrix>            M;                // inverse matrix for up-spins
   std::valarray<double> G_meas;
 };
 

@@ -37,10 +37,8 @@
 #include "fouriertransform.h"
 #include <alps/alea.h>
 #include <cmath>
-#include <alps/numeric/detail/matrix.hpp>
-#ifdef FOURPOINT
-#include <alps/numeric/detail/vector.hpp>
-#endif
+#include <alps/numeric/matrix.hpp>
+#include <alps/numeric/matrix/algorithms.hpp>
 
 #include <alps/config.h> // needed to set up correct bindings
 #include <boost/filesystem/operations.hpp>
@@ -60,15 +58,24 @@ double norm_max(dense_matrix & m) {
   
 }
 
+// TODO remove once dense_matrix is removed
+alps::numeric::matrix<double> alps_matrix_from_dense_matrix(dense_matrix const& m) {
+    alps::numeric::matrix<double> r(m.size1(),m.size2());
+    // Matrices are column major
+    for(std::size_t j=0; j < m.size2(); ++j)
+        for(std::size_t i=0; i < m.size1(); ++i)
+            r(i,j) = m(i,j);
+    return r;
+}
+
 /// compute Green's function for given spin configuration from Green0
-double update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<int> & spins, double l) {
+void update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<int> & spins, double l) {
   
-  blas::matrix M(Green.size1()); //for sign problem cases: figure out determinant...
-  M.convert_from(Green); 
+  alps::numeric::matrix<double> M(alps_matrix_from_dense_matrix(Green)); // for sign problem cases: figure out determinant...
   int N(spins.size());
   std::vector<double> e_ls(N);
   for(int i=0;i<N;++i){
-  	e_ls[i]=exp(l*spins[i]);
+    e_ls[i]=exp(l*spins[i]);
   }
   // calculate a = 1 + (1-g)*(exp(v')-1) 
   dense_matrix a(N, N);
@@ -83,9 +90,6 @@ double update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector
   Green = Green0; 
   boost::numeric::ublas::vector<fortran_int_t> ipivot(N);
   boost::numeric::bindings::lapack::gesv(a,ipivot, Green);
-  M.convert_from(Green); 
-  double det_new=M.determinant();
-  return det_new>0?1:-1;
 }
 
 
@@ -235,10 +239,10 @@ void HirschFyeRun::dostep()
     int s=Green_up.size1();
     int s3=s*s*s;
     int s2=s*s;
-    static blas::vector G_ijkl_uu(s*s*s, 0);
-    static blas::vector G_ijkl_dd(s*s*s, 0);
-    static blas::vector G_ijkl_du(s*s*s, 0);
-    static blas::vector G_ijkl_ud(s*s*s, 0);
+    static alps::numeric::vector<double> G_ijkl_uu(s*s*s, 0);
+    static alps::numeric::vector<double> G_ijkl_dd(s*s*s, 0);
+    static alps::numeric::vector<double> G_ijkl_du(s*s*s, 0);
+    static alps::numeric::vector<double> G_ijkl_ud(s*s*s, 0);
     static int fpsteps=0;
     fpsteps++;
     for(int j=0;j<s;++j){
