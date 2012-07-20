@@ -49,6 +49,7 @@ MaxEntSimulation::MaxEntSimulation(const alps::ProcessList& w, const boost::file
 , avspec_str(boost::filesystem::absolute(name+"avspec.dat", dir).string().c_str())
 , maxspec_str(boost::filesystem::absolute(name+"maxspec.dat", dir).string().c_str())
 , chispec_str(boost::filesystem::absolute(name+"chispec.dat", dir).string().c_str())
+, fits_str(boost::filesystem::absolute(name+"fits.dat", dir).string().c_str())
 , prob_str(boost::filesystem::absolute(name+"prob.dat", dir).string().c_str())
 {
   if(norm != 1.) std::cerr<<"WARNING: Redefinition of parameter NORM: Input (and output) data are assumed to be normalized to NORM."<<std::endl;
@@ -86,8 +87,9 @@ void MaxEntSimulation::dostep()
     vector_type A = get_spectrum(u);
     //computation of normalization
     std::cerr << "norm: " << boost::numeric::ublas::sum(transform_into_real_space(u)) << "\t";
+    spex_str<<"# alpha: "<<alpha[a]<<std::endl;
     for (std::size_t i=0; i<A.size(); ++i) 
-      spex_str << alpha[a] << " " << omega_coord(i) << " " << A[i] << "\n";
+      spex_str << omega_coord(i) << " " << A[i] << "\n";
     spex_str << "\n";
     //computation of probability
     lprob[a] = log_prob(u, alpha[a]);
@@ -95,7 +97,8 @@ void MaxEntSimulation::dostep()
     //computation of chi2
     double chi_squared = chi2(transform_into_real_space(u));
     chi_sq[a] = chi_squared;
-    std::cerr << "chi2  : " << chi_squared << std::endl;
+    std::cerr << "0.5*chi2  : " << 0.5*chi_squared << std::endl;
+    print_chi2(transform_into_real_space(u), fits_str);
   }
   
   //everything from here on down is evaluation.
@@ -158,7 +161,14 @@ void MaxEntSimulation::dostep()
       maxspec_anom_str << omega_coord(i) << " " << spectra[max_a][i]*norm*omega_coord(i)*M_PI << std::endl;
     }
   }
-  if(parms.defined("SELF")){ //for the self energy: use Im Sigma(omega)=-A(omega)*pi
+  if(parms.defined("SELF")){
+    // A quick word about normalization here. Usually we have G(iomega_n) = -1/pi \int_{-\infty}^\infty Im G(omega)/(omega_n - omega).
+    // However, we are not interested in Im G but instead in A. In the case of the self-energy we have, analogously,
+    // Sigma(i\omega_n) = -1/pi \int_{-\infty}^\infty Im \Sigma(omega)/(omega_n - omega); and we define A_\Sigma(omega) = -1/pi Sigma(omega). This makes
+    // A_\Sigma be always positive, whereas Im Sigma(omega) is always negative.
+    // here we compute Im Sigma out of A:
+    //
+    // for the self energy: use Im Sigma(omega)=-A(omega)*pi
     std::ofstream maxspec_self_str(boost::filesystem::absolute(name+"maxspec_self.dat", dir).string().c_str());
     std::ofstream avspec_self_str (boost::filesystem::absolute(name+"avspec_self.dat", dir).string().c_str());
     for (std::size_t  i=0; i<avspec.size(); ++i){ 
@@ -207,7 +217,7 @@ MaxEntSimulation::vector_type MaxEntSimulation::levenberg_marquardt(vector_type 
       break;
   }
   std::cerr <<"Iterations: " << it+1 << "\t"
-  << "Q: " << Q1 << "\t";
+  << "Q = 0.5chi^2-\\alpha*entropy: " << Q1 << "\t entropy: "<<entropy(transform_into_real_space(u))<<"\talpha*entropy: "<<alpha*entropy(transform_into_real_space(u))<<"\t ";
   return u;
 }
 

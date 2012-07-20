@@ -161,10 +161,11 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
            p.value_or_default("PARTICLE_HOLE_SYMMETRY", false)) {
     std::cerr << "using particle hole symmetric kernel for bosonic data" << std::endl;
     for (int i=0; i<ndat(); ++i) {
-      double omegan = (2*i+1)*M_PI*T_;
+      double Omegan = (2*i)*M_PI*T_;
+      //double omegan = (2*i+1)*M_PI*T_;
       for (int j=0; j<ntab; ++j) {
-        double omega = freq[j]; 
-        K_(i,j) =  -omega*omega / (omegan*omegan + omega*omega);
+        double Omega = freq[j]; 
+        K_(i,j) =  -Omega*Omega / (Omegan*Omegan + Omega*Omega);
       }
     }
   } 
@@ -202,7 +203,7 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
         for (int j=1; j<ntab; ++j) {
           double omega = freq[j]; 
           //Kc(i,j) =  -1. / (iomegan - omega);
-          Kc(i,j) =  -omega / (iomegan - omega);
+          Kc(i,j) =  omega / (iomegan - omega);
         }
       }    
     }
@@ -258,9 +259,9 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
 
   //this enforces a strict normalization if needed.
   //not sure that this is done properly. recheck!
-  if(p.value_or_default("ENFORCE_STRICT_NORMALIZATION",false)){
+  if(p.value_or_default("ENFORCE_NORMALIZATION",false)){
     std::cout<<"enforcing strict normalization."<<std::endl;
-    double artificial_norm_enforcement_sigma=1.e-4;
+    double artificial_norm_enforcement_sigma=static_cast<double>(p["SIGMA_NORMALIZATION"])/static_cast<double>(p["NORM"]);
     for(int j=0;j<ntab;++j){
       K_(ndat()-1,j) = 1./artificial_norm_enforcement_sigma;
     }

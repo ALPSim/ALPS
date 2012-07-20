@@ -65,8 +65,7 @@ public :
 
   //compute the 'free energy' Q (eq. 6.8 in Sebastian's thesis) according to equation D.8 in Sebastian's thesis
   double Q(const vector_type& u, const double alpha) const {
-    using namespace boost::numeric::ublas;
-    vector_type A = transform_into_real_space(u);
+    vector_type A=transform_into_real_space(u);
     return 0.5*chi2(A)-alpha*entropy(A);
   }
     
@@ -82,6 +81,7 @@ public :
   double log_prob(const vector_type& u, const double alpha) const;
   double chi_scale_factor(vector_type A, const double chi_sq, const double alpha) const;
   double chi2(const vector_type& u) const;
+  void print_chi2(const vector_type& u, std::ostream &os) const;
   double entropy(const vector_type& u) const;
   
 vector_type prec_prod(const matrix_type &p, const vector_type &q) const{
@@ -160,6 +160,7 @@ private:
   std::ofstream avspec_str;
   std::ofstream maxspec_str;
   std::ofstream chispec_str;
+  std::ofstream fits_str;
   std::ofstream prob_str;
 }; 
 

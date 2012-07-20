@@ -34,6 +34,21 @@
 #include <boost/shared_ptr.hpp>
 
 
+//Note the slightly crooked structure here:
+
+//class DefaultModel
+// -> FlatDefaultModel : public DefaultModel
+// -> GeneralDefaultModel : public DefaultModel
+//  and GeneralDefaultModel contains a 'Model' object.
+
+//class Model
+// -> Gaussian : public Model 
+//    -> ShiftedGaussian : public Gaussian
+//      -> DoubleGaussian : public ShiftedGaussian
+//        -> GeneralDoubleGaussian : public ShiftedGaussian
+// ->  TabFunction : public Model
+// ->  LinearRiseExpDecay : public Model
+// ->  QuadraticRiseExpDecay : public Model
 
 class DefaultModel 
 {
@@ -46,10 +61,19 @@ public:
   {}
 
   virtual ~DefaultModel(){}
+  
+  //omega returns a frequency point, given x between 0 and 1.
   virtual double omega(const double x) const = 0;
+  
+  //D returns the derivative of the integrated default model
   virtual double D(const double omega) const = 0;
+  
+  //returns the integrated default model
   virtual double x(const double t=0) const = 0;
+  
+  //equidistant mapping from [0,1] to [omega_min, omega_max]
   double omega_of_t(const double t) const { return omega_min + (omega_max-omega_min)*t; }
+  //equidistant mapping from [omega_min, omega_max] to [0,1]
   double t_of_omega(const double omega) const { return (omega-omega_min)/(omega_max-omega_min); }
   double blow_up() const { return blow_up_; }
 
@@ -132,7 +156,27 @@ public:
   }
 };
 
+class LinearRiseExpDecay : public Model{
+public:
+  LinearRiseExpDecay(const alps::Parameters &p): lambda_(p["LAMBDA"]){}
+  double operator()(const double omega) {
+    return lambda_*lambda_*omega*std::exp(-lambda_*omega);
+  }
 
+private:
+  const double lambda_;
+};
+
+class QuadraticRiseExpDecay : public Model{
+public:
+  QuadraticRiseExpDecay(const alps::Parameters &p): lambda_(p["LAMBDA"]){}
+  double operator()(const double omega) {
+    return (lambda_*lambda_*lambda_)/2.*(omega*omega)*std::exp(-lambda_*omega);
+  }
+  
+private:
+  const double lambda_;
+};
 
 class GeneralDoubleGaussian : public ShiftedGaussian
 {
@@ -203,6 +247,7 @@ public:
   {
     double sum = 0;
     xtab[0] = 0.;
+    //this is an evaluation on an equidistant grid; sum integrated by trapezoidal rule
     double delta_omega = (omega_max-omega_min)/(ntab-1);
     for (int o=1; o<ntab; ++o) {
       double omega1 = omega_min + (o-1)*delta_omega;
@@ -213,10 +258,20 @@ public:
     for (int o=0; o<ntab; ++o) {
       xtab[o] *= blow_up()/sum;
     }
+    /*std::cout<<std::setprecision(14)<<"tabulated a model, these are the values: "<<std::endl;
+    for(int i=0;i<ntab;++i){
+      std::cout<<i<<" "<<xtab[i]<<std::endl;
+    }
+    std::cout<<"total sum is: "<<sum<<std::endl;*/
+    
+    /*for(int N=0;N<=1000;++N){
+      double d=1./1000.*N;
+      std::cout<<omega(d)<<" "<<D(omega(d))<<" "<<x(d)<<" "<<d<<std::endl;
+    }*/
   }
   
   double omega(const double x) const {
-    assert(x<=blow_up() && x>=0.);
+    if(!(x<=blow_up() && x>=0.)) throw std::logic_error("parameter x is out of bounds!"); //DNDEBUG switches off debug assertions
     std::vector<double>::const_iterator ub = std::upper_bound(xtab.begin(), xtab.end(), x);
     int omega_index = ub - xtab.begin();
     if (ub==xtab.end())
@@ -228,12 +283,14 @@ public:
     return -(om2-om1)/(x2-x1)*(x2-x)+om2;      
   }
   
+  //this returns the value of the model function at frequency omega
   double D(const double omega) const {
     return (*Mod)(omega);
   }
   
+  //I have no idea what this does.
   double x(const double t) const {
-    assert(t<=1. && t>=0.);
+    if(t>1. || t<0.) throw std::logic_error("parameter t is out of bounds!");
     int od = (int)(t*(ntab-1));
     if (od==(ntab-1)) 
       return blow_up();
@@ -245,7 +302,7 @@ public:
 private:
   boost::shared_ptr<Model> Mod;
   const int ntab;
-  std::vector<double> xtab;
+  std::vector<double> xtab; //xtab has an equidistantly tabulated discretized model function
 };
 
 
@@ -280,7 +337,18 @@ inline boost::shared_ptr<DefaultModel> make_default_model(const alps::Parameters
       std::cerr << "Using general double Gaussian default model" << std::endl;
     boost::shared_ptr<Model> Mod(new GeneralDoubleGaussian(parms));
     return boost::shared_ptr<DefaultModel>(new GeneralDefaultModel(parms, Mod));
-
+  }
+  else if (parms[name] == "linear rise exp decay") {
+    if (alps::is_master())
+      std::cerr << "Using linear rise exponential decay default model" << std::endl;
+    boost::shared_ptr<Model> Mod(new LinearRiseExpDecay(parms));
+    return boost::shared_ptr<DefaultModel>(new GeneralDefaultModel(parms, Mod));
+  }
+  else if (parms[name] == "quadratic rise exp decay") {
+    if (alps::is_master())
+      std::cerr << "Using quadratic rise exponential decay default model" << std::endl;
+    boost::shared_ptr<Model> Mod(new QuadraticRiseExpDecay(parms));
+    return boost::shared_ptr<DefaultModel>(new GeneralDefaultModel(parms, Mod));
   }
   else { 
     if (alps::is_master())
