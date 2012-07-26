@@ -130,7 +130,7 @@ if(NOT HAVE_MKL AND NOT LAPACK_LIBRARY_INIT)
       endif()
     endif()
 
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "i386")
+    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "i386" OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "i686")
       if(${MKL_VERSION} MATCHES "10\\.3\\.[0-9]+")
         if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
           set(LAPACK_LIBRARY -L${mkl_home}/lib -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm)
@@ -380,7 +380,7 @@ ENDIF(USE_SCALAPACK)
 # Finalize (setting some variables).
 ###################################################
 
-message(STATUS "LAPACK DEBUG::LAPACK_LIBRARY = is ${LAPACK_LIBRARY}")
+message(STATUS "LAPACK DEBUG::LAPACK_LIBRARY = ${LAPACK_LIBRARY}")
 
 if(BLAS_LIBRARY)
   SET(BLAS_LIBRARIES ${BLAS_LIBRARY})
