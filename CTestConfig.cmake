@@ -4,6 +4,7 @@
 ## # The following are required to uses Dart and the Cdash dashboard
 ##   ENABLE_TESTING()
 ##   INCLUDE(CTest)
+
 set(CTEST_PROJECT_NAME "ALPS")
 set(CTEST_NIGHTLY_START_TIME "01:00:00 UTC")
 

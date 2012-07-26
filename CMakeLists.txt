@@ -122,6 +122,11 @@ else(ALPS_BUILD_FORTRAN)
   project(alps C CXX)
 endif(ALPS_BUILD_FORTRAN)
 
+# print extensive compiler information
+if(NOT WIN32)
+  execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version COMMAND head -n1 OUTPUT_VARIABLE ALPS_COMPILER_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+  message(STATUS "Compiler version: ${ALPS_COMPILER_VERSION}")
+endif(NOT WIN32)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Type of build" FORCE)
@@ -1081,6 +1086,7 @@ endif(ALPS_DOWNLOAD_PACKAGES)
 ######################################################################
 
 if (ALPS_BUILD_TESTS AND NOT ALPS_BUILD_SOURCE)
+  include(ALPSBuildname)
   enable_testing()
   include(CTest)
   add_subdirectory(test)
