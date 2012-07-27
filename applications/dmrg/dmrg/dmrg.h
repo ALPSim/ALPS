@@ -609,13 +609,13 @@ DMRGTask<value_type>::build_site_operator(alps::SiteOperator const& siteop, int 
   int type = site_type(site);
   alps::expression::ParameterEvaluator<value_type> coords(coordinate_as_parameter(site));
   for (typename V::iterator it=ops.begin(); it!=ops.end();++it) {
-    std::string name = simplify_name(it->get<1>());
+    std::string name = simplify_name(it->template get<1>());
     dmtk::BasicOp<value_type> op1(name.c_str(),site);
-    op1 = create_site_operator(name,it->get<1>(),type);
+    op1 = create_site_operator(name,it->template get<1>(),type);
     op1.set_site(site);
     dmtk::Term<value_type> real_t = op1;
-    it->get<0>().partial_evaluate(coords);
-    real_t.coef() = it->get<0>().value();
+    it->template get<0>().partial_evaluate(coords);
+    real_t.coef() = it->template get<0>().value();
     this_hami += real_t;
   }
 }
@@ -630,16 +630,16 @@ DMRGTask<value_type>::build_2site_operator(std::pair<alps::SiteOperator,alps::Si
   V  ops2 = siteops.second.template templated_split<value_type>();
   for (typename V::const_iterator tit1=ops1.begin(); tit1!=ops1.end();++tit1)
     for (typename V::const_iterator tit2=ops2.begin(); tit2!=ops2.end();++tit2) {
-      std::string s_name1 = simplify_name(tit1->get<1>());
-      std::string s_name2 = simplify_name(tit2->get<1>());
+      std::string s_name1 = simplify_name(tit1->template get<1>());
+      std::string s_name2 = simplify_name(tit2->template get<1>());
       dmtk::BasicOp<value_type > op1(s_name1.c_str(),sites.first); 
       dmtk::BasicOp<value_type > op2(s_name2.c_str(),sites.second); 
-      op1 = create_site_operator(s_name1,tit1->get<1>(),site_type(sites.first));
-      op2 = create_site_operator(s_name2,tit2->get<1>(),site_type(sites.second));
+      op1 = create_site_operator(s_name1,tit1->template get<1>(),site_type(sites.first));
+      op2 = create_site_operator(s_name2,tit2->template get<1>(),site_type(sites.second));
       op1.set_site(sites.first);
       op2.set_site(sites.second);
       dmtk::Term<value_type > real_t = op1*op2;
-      real_t.coef() = tit1->get<0>().value()*tit2->get<0>().value();
+      real_t.coef() = tit1->template get<0>().value()*tit2->template get<0>().value();
       this_hami += real_t;
    }
 }
@@ -656,21 +656,21 @@ DMRGTask<value_type>::build_bond_operator(alps::BondOperator const& bondop, bond
   
   V  ops = bondop.template templated_split<value_type>(b1,b2);
   for (typename V::iterator tit=ops.begin(); tit!=ops.end();++tit) {
-    std::string s_name1 = simplify_name(tit->get<1>());
-    std::string s_name2 = simplify_name(tit->get<2>());
+    std::string s_name1 = simplify_name(tit->template get<1>());
+    std::string s_name2 = simplify_name(tit->template get<2>());
     dmtk::BasicOp<value_type > op1(s_name1.c_str(),source(b)); 
     dmtk::BasicOp<value_type > op2(s_name2.c_str(),target(b)); 
-    op1 = create_site_operator(s_name1,tit->get<1>(),site_type(source(b)));
-    op2 = create_site_operator(s_name2,tit->get<2>(),site_type(target(b)));
+    op1 = create_site_operator(s_name1,tit->template get<1>(),site_type(source(b)));
+    op2 = create_site_operator(s_name2,tit->template get<2>(),site_type(target(b)));
     op1.set_site(source(b));
     op2.set_site(target(b));
-    tit->get<0>().partial_evaluate(coords);
+    tit->template get<0>().partial_evaluate(coords);
     dmtk::Term<value_type > real_t = op1*op2;
     if (s_name1=="0")    
       real_t = op2;
     else if (s_name2=="0")
       real_t = op1;
-    real_t.coef() = tit->get<0>().value();
+    real_t.coef() = tit->template get<0>().value();
     this_hami += real_t;
   }
 }
