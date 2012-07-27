@@ -62,7 +62,7 @@ void load(
 
 int main() {
 
-    std::string const filename = "example.h5";
+    std::string const filename = "example_enum_as_class.h5";
 
     if (boost::filesystem::exists(boost::filesystem::path(filename)))
         boost::filesystem::remove(boost::filesystem::path(filename));
