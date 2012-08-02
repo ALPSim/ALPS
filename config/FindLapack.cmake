@@ -319,7 +319,8 @@ ENDIF(NOT LAPACK_LIBRARY_INIT)
 ###################################################
 
 IF(NOT BLAS_LIBRARY_INIT AND NOT LAPACK_LIBRARY_INIT)
-  enable_language(Fortran)
+  #enable_language(Fortran) # since we compile CXX we should manually add -lgfortran for this to work.
+                            # better to look for CXX libs from the beginning
   message("Falling back to CMake provied LAPACK/BLAS detection.")
   find_package(BLAS)
   if(BLAS_FOUND)
