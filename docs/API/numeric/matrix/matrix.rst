@@ -11,6 +11,6 @@ Description
 
 .. doxygenclass:: alps::numeric::matrix
    :members: 
-   
+
 
 
