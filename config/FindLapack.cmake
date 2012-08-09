@@ -32,6 +32,9 @@
 #       - look for MKL on Windows
 #       - look for goto2
 
+# Includes
+include(CheckFunctionExists)
+
 
 ###################################################
 # BLAS_LIBRARY, LAPACK_LIBRARY manually defined.
@@ -156,12 +159,24 @@ if(NOT HAVE_MKL AND NOT LAPACK_LIBRARY_INIT)
 endif(NOT HAVE_MKL AND NOT LAPACK_LIBRARY_INIT)
 
 IF(HAVE_MKL)
-  message(STATUS "Found intel/mkl library")
-  set(LAPACK_LIBRARY_INIT 1)
-  set(BLAS_LIBRARY_INIT 1)
-  set(MKL_INC_PATHS $ENV{mkl_home}/include ${MKL_PATHS}) 
-  find_path(MKL_INCLUDE_DIR mkl.h ${MKL_INC_PATHS})
-  include_directories(${MKL_INCLUDE_DIR})
+  # Checking if it works
+  set(CMAKE_REQUIRED_LIBRARIES ${BLAS_LIBRARY} ${LAPACK_LIBRARY})
+  check_function_exists("sgemm" _libraries_work)
+  set(CMAKE_REQUIRED_LIBRARIES)
+  
+  if(NOT _libraries_work)
+    set(BLAS_LIBRARY)
+    set(LAPACK_LIBRARY)
+    set(HAVE_MKL)
+    message(WARNING "MKL was detected but I'm not able to use it.")
+  else()
+    message(STATUS "Found intel/mkl library")
+    set(LAPACK_LIBRARY_INIT 1)
+    set(BLAS_LIBRARY_INIT 1)
+    set(MKL_INC_PATHS $ENV{mkl_home}/include ${MKL_PATHS}) 
+    find_path(MKL_INCLUDE_DIR mkl.h ${MKL_INC_PATHS})
+    include_directories(${MKL_INCLUDE_DIR})
+  endif(NOT _libraries_work)
 ENDIF(HAVE_MKL)
 
 
@@ -319,9 +334,7 @@ ENDIF(NOT LAPACK_LIBRARY_INIT)
 ###################################################
 
 IF(NOT BLAS_LIBRARY_INIT AND NOT LAPACK_LIBRARY_INIT)
-  #enable_language(Fortran) # since we compile CXX we should manually add -lgfortran for this to work.
-                            # better to look for CXX libs from the beginning
-  message("Falling back to CMake provied LAPACK/BLAS detection.")
+  message(STATUS "Falling back to CMake provied LAPACK/BLAS detection.")
   find_package(BLAS)
   if(BLAS_FOUND)
     SET(BLAS_LIBRARY_INIT 1)
@@ -332,6 +345,21 @@ IF(NOT BLAS_LIBRARY_INIT AND NOT LAPACK_LIBRARY_INIT)
       SET(LAPACK_LIBRARY ${LAPACK_LIBRARIES})
     endif(LAPACK_FOUND)
   endif(BLAS_FOUND)
+  if(NOT BLAS_LIBRARY_INIT AND NOT LAPACK_LIBRARY_INIT)
+    message(STATUS "Enabling Fortran for LAPACK/BLAS detection.")
+    enable_language(Fortran)
+    find_package(BLAS)
+    if(BLAS_FOUND)
+      SET(BLAS_LIBRARY_INIT 1)
+      SET(BLAS_LIBRARIES "${BLAS_LIBRARIES} -lgfortran")
+      SET(BLAS_LIBRARY ${BLAS_LIBRARIES})
+      find_package(LAPACK)
+      if(LAPACK_FOUND)
+        SET(LAPACK_LIBRARY_INIT 1)
+        SET(LAPACK_LIBRARY ${LAPACK_LIBRARIES})
+      endif(LAPACK_FOUND)
+    endif(BLAS_FOUND)
+  endif(NOT BLAS_LIBRARY_INIT AND NOT LAPACK_LIBRARY_INIT)
 ENDIF(NOT BLAS_LIBRARY_INIT AND NOT LAPACK_LIBRARY_INIT)
 
 
