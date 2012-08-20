@@ -30,12 +30,18 @@ This module contains two classes: iArchive and oArchive, used to read or
 write HDF5 files
 """
 
-from pyhdf5_c import *
+from ngs import *
 
-class iArchive(archive):
+class iArchive(h5ar):
     def __init__(self, filename):
-        archive.__init__(self, str(filename), 0)
+        h5ar.__init__(self, str(filename), 'r')
+    def read(self, path):
+        return h5ar.load(self, path)
 
-class oArchive(archive):
+class oArchive(h5ar):
     def __init__(self, filename):
-        archive.__init__(self, str(filename), 1)
+        h5ar.__init__(self, str(filename), 'w')
+    def read(self, path):
+        return h5ar.load(self, path)
+    def write(self, path, value):
+        h5ar.save(self, path, value)

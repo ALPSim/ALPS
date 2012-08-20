@@ -14,14 +14,12 @@ if (ALPS_HAVE_PYTHON)
   set(PYALEA_SOURCES ../../src/alps/python/pyalea.cpp )
   set(PYMCDATA_SOURCES ../../src/alps/python/pymcdata.cpp )
   set(PYTOOLS_SOURCES ../../src/alps/python/pytools.cpp)
-  set(PYHDF5_SOURCES ../../src/alps/python/pyhdf5.cpp)
 
   python_add_module(pyalea_c ${PYALEA_SOURCES})
   python_add_module(pymcdata_c ${PYMCDATA_SOURCES})
   python_add_module(pytools_c ${PYTOOLS_SOURCES})
-  python_add_module(pyhdf5_c ${PYHDF5_SOURCES})
 
-  set(PYALPS_SOURCES pyhdf5_c pyalea_c pymcdata_c pytools_c)
+  set(PYALPS_SOURCES pyalea_c pymcdata_c pytools_c)
   if (ALPS_BUILD_NGS)
       set(PYALPS_SOURCES ${PYALPS_SOURCES} 
           pyngsparams_c pyngshdf5_c pyngsbase_c pyngsobservable_c pyngsobservables_c pyngsresult_c pyngsresults_c pyngsapi_c

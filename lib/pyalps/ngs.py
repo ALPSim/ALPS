@@ -68,6 +68,7 @@ class mcbase(mcbase_impl):
         mcbase_impl.run(self, callback)
 
 from pyngshdf5_c import *
+#TODO: move __getitem__, __setitem__ to cpp file
 class h5ar(hdf5_archive_impl):
     def __init__(self, filename, mode = 'r'):
         hdf5_archive_impl.__init__(self, filename, mode)
@@ -75,13 +76,5 @@ class h5ar(hdf5_archive_impl):
         return self.load(path)
     def __setitem__(self, path, value):
         self.save(path, value)
-    def save(self, path, data):
-        if hasattr(data, 'save') and type(getattr(data, 'save')) == types.MethodType:
-            current = self.context
-            self.set_context(path)
-            data.save(self)
-            self.set_context(current)
-        else:
-            hdf5_archive_impl.save(self, path, data)
 
 from pyngsapi_c import *
