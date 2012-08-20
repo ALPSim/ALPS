@@ -27,7 +27,7 @@
 
 """ 
 This module contains two classes: iArchive and oArchive, used to read or
-write HDF5 files
+write HDF5 files. His interface is deprecated! use pyalps.ngs.h5ar
 """
 
 from ngs import *
@@ -36,12 +36,12 @@ class iArchive(h5ar):
     def __init__(self, filename):
         h5ar.__init__(self, str(filename), 'r')
     def read(self, path):
-        return h5ar.load(self, path)
+        return h5ar.__getitem__(self, path)
 
 class oArchive(h5ar):
     def __init__(self, filename):
         h5ar.__init__(self, str(filename), 'w')
     def read(self, path):
-        return h5ar.load(self, path)
+        return h5ar.__getitem__(self, path)
     def write(self, path, value):
-        h5ar.save(self, path, value)
+        h5ar.__setitem__(self, path, value)
