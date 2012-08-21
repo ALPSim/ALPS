@@ -142,6 +142,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
       p["DELTA_IN_HDF5"]=1;
       p["DELTA"]=infile;
       p["MU"]=mu+U/2.;
+      p["DMFT_FRAMEWORK"]=1;
     }
     solver_input<<alps::make_pvp("/parameters", p);//hier problem
     G0_omega.write_hdf5(solver_input, "/G0");
