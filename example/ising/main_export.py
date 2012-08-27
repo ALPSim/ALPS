@@ -29,12 +29,14 @@ import pyalps.ngs as ngs
 import numpy as np
 import sys, time
 
-import pyising
+#TODO: enable mpi
+
+import ising
 
 def main(limit, resume, output):
     #implement nice argv parsing ...
 
-    sim = pyising.sim({
+    sim = ising.sim({
         'L': 100,
         'SWEEPS': 1000,
         'T': 2,

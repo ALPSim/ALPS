@@ -99,11 +99,11 @@ if (ALPS_BUILD_NGS AND ALPS_BUILD_EXAMPLES)
         endif(BUILD_SHARED_LIBS)
         target_link_libraries(pyising alps ${LINK_LIBRARIES})
 
-#        install(TARGETS pyising
-#                COMPONENT python
-#                RUNTIME DESTINATION example/ising
-#                ARCHIVE DESTINATION example/ising
-#                LIBRARY DESTINATION example/ising)
+        install(TARGETS pyising
+                COMPONENT python
+                RUNTIME DESTINATION example/ising
+                ARCHIVE DESTINATION example/ising
+                LIBRARY DESTINATION example/ising)
 
         add_test(ngs_ising_python_single
             ${CMAKE_COMMAND}

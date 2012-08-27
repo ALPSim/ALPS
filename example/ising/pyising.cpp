@@ -58,6 +58,7 @@ namespace alps {
                 }
 
                 // TODO: move to base class
+                // rename params to m_params and add function parameters_type & params() { reutrn m_params; }
                 mcbase::parameters_type & get_params() {
                     return mcbase::params;
                 }
@@ -90,7 +91,7 @@ namespace alps {
     }
 }
 
-BOOST_PYTHON_MODULE(pyising) {
+BOOST_PYTHON_MODULE(ising) {
 
     boost::python::class_<alps::detail::ising_export, boost::noncopyable, boost::python::bases<alps::mcbase> >(
           "sim",
