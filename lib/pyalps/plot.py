@@ -269,11 +269,13 @@ class MplXYPlot_core:
                     legend_loc = self.plt['legend']['location']
                 else:
                     legend_loc = 0
-
+                showframe = True
+                if 'show_frame' in self.plt['legend'] and not self.plt['legend']['show_frame']:
+                    showframe = False
                 if len(legend_prop) > 0:
-                    plt.legend(loc=legend_loc,prop=FontProperties(legend_prop))
+                    plt.legend(loc=legend_loc,prop=FontProperties(legend_prop), frameon=showframe)
                 else:
-                    plt.legend(loc=legend_loc)
+                    plt.legend(loc=legend_loc, frameon=showframe)
         
         if 'title' in self.plt:
             plt.title(self.plt['title'])

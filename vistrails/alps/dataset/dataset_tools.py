@@ -81,6 +81,29 @@ class RestrictYRange(FitPrototype):
         data.x = data.x[selection]
         data.y = data.y[selection]
 
+class SortByProps(Module):
+    """
+    Sort datasets according to the list of props in 'sort_props'.
+    """
+    my_input_ports = [
+        PortDescriptor('input',DataSets),
+        PortDescriptor('sort_props',basic.List)
+    ]
+    my_output_ports = [
+        PortDescriptor('output',DataSets)
+    ]
+    
+    def compute(self):
+        sets = self.getInputFromPort('input')
+        sortprops = self.getInputFromPort('sort_props')
+        
+        q2 = []
+        for d in flatten(sets):
+            q2.append(d)
+        for sp in reversed(sortprops):
+            q2 = sorted(q2, key=lambda d: d.props[sp])
+        self.setResult('output', q2)
+
 class WriteTxt(Module):
     my_input_ports = [PortDescriptor('input',DataSets)]
     my_output_ports = []

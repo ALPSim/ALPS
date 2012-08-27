@@ -59,7 +59,8 @@ class Legend(Descriptor, Module):
     my_input_ports = [
         PortDescriptor('location',basic.Integer),
         PortDescriptor('fontsize',basic.Integer),
-        PortDescriptor('scatter_labels',basic.Boolean)
+        PortDescriptor('scatter_labels',basic.Boolean),
+        PortDescriptor('show_frame',basic.Boolean)
     ]
 
 class PreparePlot(Descriptor, Module):
