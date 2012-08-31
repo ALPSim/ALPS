@@ -27,6 +27,8 @@
 
 #include "ising_parallel.hpp"
 
+#include <boost/lexical_cast.hpp>
+
 using namespace alps;
 
 typedef parallel2<parallel_ising_sim<mcbase> > sim_type;

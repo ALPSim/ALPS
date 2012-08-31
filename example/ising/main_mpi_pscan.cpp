@@ -28,6 +28,8 @@
 
 #include "ising.hpp"
 
+#include <boost/lexical_cast.hpp>
+
 using namespace alps;
 
 typedef mcmpisim<ising_sim<mcbase> > sim_type;
