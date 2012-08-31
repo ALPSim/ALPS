@@ -3,8 +3,8 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-if (ALPS_BUILD_NGS AND ALPS_BUILD_EXAMPLES)
+if (ALPS_BUILD_EXAMPLES)
 
     add_subdirectory(alea)
 
-endif (ALPS_BUILD_NGS AND ALPS_BUILD_EXAMPLES)
+endif (ALPS_BUILD_EXAMPLES)

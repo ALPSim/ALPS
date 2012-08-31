@@ -59,11 +59,3 @@ else()
 endif(Boost_ROOT_DIR)
 
 set(BUILDNAME "${BUILDNAME} v${Boost_MAJOR_VERSION}_${Boost_MINOR_VERSION}_${Boost_SUBMINOR_VERSION}")
-
-
-# Add NGS settings
-if(ALPS_BUILD_NGS)
- set(BUILDNAME "${BUILDNAME} - NGS enabled")
-else(ALPS_BUILD_NGS)
-  set(BUILDNAME "${BUILDNAME} - NGS disabled")
-endif(ALPS_BUILD_NGS)

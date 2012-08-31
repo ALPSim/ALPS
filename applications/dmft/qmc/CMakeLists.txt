@@ -27,8 +27,7 @@ if(LAPACK_FOUND)
        interaction_expansion/measurements.cpp 
       interaction_expansion/model.cpp)
 
-IF(ALPS_BUILD_NGS)
-  set (DMFT_QMC_INTERACTION_EXPANSION2_SOURCE 
+  set (DMFT_QMC_INTERACTION_EXPANSION2_SOURCE
        fouriertransform.C
        interaction_expansion2/auxiliary.cpp
        interaction_expansion2/observables.cpp 
@@ -40,13 +39,12 @@ IF(ALPS_BUILD_NGS)
        interaction_expansion2/interaction_expansion.cpp 
        interaction_expansion2/measurements.cpp 
        interaction_expansion2/model.cpp)
-ENDIF(ALPS_BUILD_NGS)
 
   set (DMFT_QMC_HYBRIDIZATION_SOURCE
        hybridization/impurity.C 
        hybridization/fourpoint.C)
 
-IF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
+IF(ALPS_HAVE_MPI)
   set (DMFT_QMC_HYBRIDIZATION2_SOURCE
        hybridization2/impurity.C 
        fouriertransform.C
@@ -62,7 +60,7 @@ IF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
 #       hybridization3/hybconfig.cpp
 #       hybridization3/hybupdates.cpp
 #       hybridization3/hybmeasurements.cpp)
-ENDIF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
+ENDIF(ALPS_HAVE_MPI)
 
   set (DMFT_QMC_SOLVERS "")
  
@@ -74,15 +72,14 @@ ENDIF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
   set (DMFT_QMC_SOLVERS ${DMFT_QMC_SOLVERS} hybridization_impl)
   add_library (hybridization_impl STATIC ${DMFT_QMC_HYBRIDIZATION_SOURCE})
   
-IF(ALPS_BUILD_NGS)
   #Interaction Expansion - separate solver
   add_library (interaction_expansion2_impl STATIC  ${DMFT_QMC_INTERACTION_EXPANSION2_SOURCE})
-ENDIF(ALPS_BUILD_NGS)
-IF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
+
+IF(ALPS_HAVE_MPI)
   #Hybridization Expansion - separate solver
   add_library (hybridization2_impl STATIC ${DMFT_QMC_HYBRIDIZATION2_SOURCE})
 #  add_library (hybridization3_impl STATIC ${DMFT_QMC_HYBRIDIZATION3_SOURCE})
-ENDIF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
+ENDIF(ALPS_HAVE_MPI)
 
   target_link_libraries(dmft_qmc_impl alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
   add_definitions(${LAPACK_DEFINITIONS} )
@@ -91,7 +88,8 @@ ENDIF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
 
   add_executable(dmft main.C selfconsistency.C)
   add_executable(hirschfye solver_main.C hirschfyesim.C)
-IF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
+
+IF(ALPS_HAVE_MPI)
   add_executable(hybridization hybridization2/main.C)
 #  add_executable(hybridization3 hybridization3/hybmain.cpp)
 if(ALPS_LLVM_WORKAROUND)
@@ -101,12 +99,12 @@ else(ALPS_LLVM_WORKAROUND)
   hybridization2/hybridization_evaluate_mpi.C)
 endif(ALPS_LLVM_WORKAROUND)
   add_executable(interaction interaction_expansion2/main.cpp)
-ENDIF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
+ENDIF(ALPS_HAVE_MPI)
 
   target_link_libraries(dmft dmft_qmc_impl  ${DMFT_QMC_SOLVERS})
   target_link_libraries(hirschfye dmft_qmc_impl)
 
-IF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
+IF(ALPS_HAVE_MPI)
   target_link_libraries(hybridization dmft_qmc_impl hybridization2_impl)
 #  target_link_libraries(hybridization3 dmft_qmc_impl hybridization3_impl)
 if(ALPS_LLVM_WORKAROUND)
@@ -114,11 +112,11 @@ else(ALPS_LLVM_WORKAROUND)
   target_link_libraries(hybridization_evaluate dmft_qmc_impl hybridization2_impl)
 endif(ALPS_LLVM_WORKAROUND)
   target_link_libraries(interaction dmft_qmc_impl interaction_expansion2_impl)
-ENDIF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
+ENDIF(ALPS_HAVE_MPI)
 
   install(TARGETS dmft RUNTIME DESTINATION bin COMPONENT applications)
   install(TARGETS hirschfye  RUNTIME DESTINATION bin COMPONENT applications)
-IF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
+IF(ALPS_HAVE_MPI)
   install(TARGETS hybridization RUNTIME DESTINATION bin COMPONENT applications)
 #  install(TARGETS hybridization3 RUNTIME DESTINATION bin COMPONENT applications)
   install(TARGETS interaction RUNTIME DESTINATION bin COMPONENT applications)
@@ -126,10 +124,7 @@ if(ALPS_LLVM_WORKAROUND)
 else(ALPS_LLVM_WORKAROUND)
   install(TARGETS hybridization_evaluate RUNTIME DESTINATION bin COMPONENT applications)
 endif(ALPS_LLVM_WORKAROUND)
-ENDIF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
-#IF(ALPS_BUILD_NGS)
-#  install(TARGETS interaction RUNTIME DESTINATION bin COMPONENT applications)
-#ENDIF(ALPS_BUILD_NGS)
+ENDIF(ALPS_HAVE_MPI)
 
 else(LAPACK_FOUND)
   message(STATUS "dmft will not be built since the lapack library has not been found")

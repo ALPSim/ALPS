@@ -3,7 +3,7 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-if (ALPS_BUILD_NGS AND ALPS_BUILD_EXAMPLES)
+if (ALPS_BUILD_EXAMPLES)
 
     add_executable(ngs_ising_single main_single.cpp)
     add_dependencies(ngs_ising_single alps)
@@ -136,4 +136,4 @@ if (ALPS_BUILD_NGS AND ALPS_BUILD_EXAMPLES)
 
     endif (ALPS_HAVE_PYTHON)
 
-endif (ALPS_BUILD_NGS AND ALPS_BUILD_EXAMPLES)
+endif (ALPS_BUILD_EXAMPLES)
