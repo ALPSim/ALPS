@@ -98,7 +98,7 @@ namespace ietl
             const magnitude_type& theta,
             const vector_type& r,
             const Matrix & m)
-        : u_(u), theta_(theta), r_(r), m_(m) { }
+        : u_(u), r_(r), theta_(theta), m_(m) { }
         
         void operator()(vector_type const & x, vector_type & y) const;
         

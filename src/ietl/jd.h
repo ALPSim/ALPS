@@ -313,7 +313,7 @@ namespace solver {
         typedef typename real_type<scalar_type>::type real_type;
 
         jd_solver (SOLV& s, const MATRIX& A, const std::vector<vector_type>& Q, const VS& vspace)
-            : solv_(s), Adef_(A, 0, Q), vspace_(vspace), Q_(Q), x0_(new_vector(vspace))
+            : Adef_(A, 0, Q), vspace_(vspace), x0_(new_vector(vspace)), Q_(Q), solv_(s)
              {}
         
         template <class IT>

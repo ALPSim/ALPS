@@ -41,8 +41,8 @@ hybridization::hybridization(const parameters_type &parms, int crank)
 sweeps(0),                                                                                       //Sweeps currently done
 thermalization_sweeps(static_cast<int>(parms["THERMALIZATION"])),                                //Sweeps to be done for thermalization
 total_sweeps(static_cast<int>(parms["SWEEPS"])),                                                 //Sweeps to be done in total
-FLAVORS(static_cast<int>(parms["FLAVORS"])),                                                     //number of orbitals
 mu_e(static_cast<int>(parms["FLAVORS"])),                                                        //level energy of each segment
+FLAVORS(static_cast<int>(parms["FLAVORS"])),                                                     //number of orbitals
 u(static_cast<int>(parms["FLAVORS"]),static_cast<int>(parms["FLAVORS"])),                        //interaction matrix
 t(static_cast<double>(parms["t"])),                                                              //overall energy unit.
 full_line(static_cast<int>(parms["FLAVORS"]),0),                                                 //vector, is full_line[j] if orbital j is fully occuppied for all times.
@@ -53,21 +53,21 @@ N_nn(parms["N_nn"] | 0),																		 //number of tau-points on which densi
 N_w(parms["N_w"] | 0),                                                                           //number of Matsubara frequencies for gw
 N_w2(parms["N_w2"] | 0),                                                                         //number of Matsubara frequencies for two-particle Green's function
 N_W(parms["N_W"] | 0),                                                                           //number of bosonic frequncies for the two-particle Green's function
-N_l(parms["N_l"] | 0),                                                                           //number of Legendre coefficients
 N_order(static_cast<int>(parms["N_ORDER"])),                                                     //number of orders that are measured for the order histogram
+N_l(parms["N_l"] | 0),                                                                           //number of Legendre coefficients
 G_meas(static_cast<int>(parms["FLAVORS"])*(static_cast<int>(parms["N"])+1)),                     //Measured Green's function
 N_meas(static_cast<int>(parms["N_MEAS"])),                                                       //number of updates per measurement
 N_shift(parms["N_SHIFT"] | 0),                                                                   //number of times a segment start / end point is shifted per insertion/removal update
-N_swap(parms["N_SWAP"] | 0),                                                                     //number of times an orbital swap move is attempted.
 F(static_cast<int>(parms["FLAVORS"]), std::vector<double>(static_cast<int>(parms["N"])+1,0.)),   //hybridization function
+N_swap(parms["N_SWAP"] | 0),                                                                     //number of times an orbital swap move is attempted.
 MEASURE_gw(parms["MEASURE_gw"] | 0),                                                             //measure Green's function on Matsubara frequencies
 MEASURE_fw(parms["MEASURE_fw"] | 0),                                                             //measure Sigma*G on Matsubara frequencies
 MEASURE_gl(parms["MEASURE_gl"] | 0),                                                             //measure Green's function in Legendre basis
 MEASURE_fl(parms["MEASURE_fl"] | 0),                                                             //measure Sigma*G in Legendre basis
 MEASURE_g2w(parms["MEASURE_g2w"] | 0),                                                           //measure two-particle Green's function
 MEASURE_hw(parms["MEASURE_hw"] | 0),                                                             //measure correlator for vertex function
-MEASURE_nnt(parms["MEASURE_nnt"] | 0),                                                           //measure density-density correlation function
-MEASURE_nn(parms["MEASURE_nn"] | 0)                                                              //measure density-density correlation function at equal times
+MEASURE_nn(parms["MEASURE_nn"] | 0),                                                             //measure density-density correlation function at equal times
+MEASURE_nnt(parms["MEASURE_nnt"] | 0)                                                            //measure density-density correlation function
 {
   
   /*reading parameters from the self consistency*/

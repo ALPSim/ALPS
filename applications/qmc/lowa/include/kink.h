@@ -117,27 +117,24 @@ public:
   {}
 
   kink(size_type const size, basis_type const before, basis_type const after, site_type const from, site_type const to, time_type const time) 
-    : _size(size)
-    , _assoc(new iterator_type [size])
-
-    , _time(time)
+    : _time(time)
     , _before(before)
     , _after(after)
     , _from(from)
     , _to(to)
+    , _size(size)
+    , _assoc(new iterator_type [size])
   {}
 
   kink(kink<site_type,time_type> const & mykink)
-    : _size(mykink._size)  
-    , _assoc(new iterator_type [mykink._size])
-
-    , _name(-1)          // *** check its significance...
+    : _name(-1)          // *** check its significance...
     , _time(mykink._time)
     , _before(mykink._before)
     , _after(mykink._after)
     , _from(mykink._from)
     , _to(mykink._to)
-
+    , _size(mykink._size)
+    , _assoc(new iterator_type [mykink._size])
   {
     std::copy(&mykink._assoc[0],&mykink._assoc[_size],&_assoc[0]);
   }
