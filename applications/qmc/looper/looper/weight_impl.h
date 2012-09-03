@@ -380,9 +380,10 @@ public:
     bond_offset_ = 0;
     BOOST_FOREACH(site_weight_t const& w, site_weights_) site_offset_ += w.second.offset;
     BOOST_FOREACH(bond_weight_t const& w, bond_weights_) bond_offset_ += w.second.offset;
-    if (m.has_d_term())
+    if (m.has_d_term()) {
       BOOST_FOREACH(typename real_site_descriptor<LAT>::type rs, sites(lat.rg()))
         site_offset_ -= 0.25 * m.site(rs, lat.rg()).s.get_twice() * m.site(rs, lat.rg()).d;
+    }
   }
 
   std::pair<site_weight_iterator, site_weight_iterator>

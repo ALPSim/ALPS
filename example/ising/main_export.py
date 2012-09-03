@@ -31,12 +31,12 @@ import sys, time
 
 #TODO: enable mpi
 
-import ising
+import pyising
 
 def main(limit, resume, output):
     #implement nice argv parsing ...
 
-    sim = ising.sim({
+    sim = pyising.sim({
         'L': 100,
         'SWEEPS': 1000,
         'T': 2,

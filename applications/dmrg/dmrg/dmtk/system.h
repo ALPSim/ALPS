@@ -3346,8 +3346,9 @@ product_default(const System<T>& ss, const VectorState<T>& vv, const Hami<T>* ha
 //" " << top1.description() << " " << top1.site() << " " << top2.site() << " " << b1 << " " << b2 << endl;
 
           if(op1 && op2) {
-            if(ss.verbose() > 0)
+            if(ss.verbose() > 0) {
               COUT_PRODUCT(t);
+            }
             product(*op2, *op1, vv, res, b2, b1, T(t.coef()), calc_hc);
           }
 
@@ -3358,11 +3359,12 @@ product_default(const System<T>& ss, const VectorState<T>& vv, const Hami<T>* ha
           BasicOp<T> aux_op(t);
           const BasicOp<T>* op = ss(aux_op);
 
-          if(ss.verbose() > 1)
+          if(ss.verbose() > 1) {
             if(calc_hc) 
               cout << "PRODUCT EXTERN " << t.coef() << "*" << top1.name() << "(" << top1.site() << ")" << top2.name() << "(" << top2.site() << ") + h.c." << endl;
             else 
               cout << "PRODUCT EXTERN " << t.coef() << "*" << top1.name() << "(" << top1.site() << ")" << top2.name() << "(" << top2.site() << ")" << endl;
+          }
   
           if(op){
             product(*op, vv, res, b1, T(t.coef()));
@@ -3397,11 +3399,12 @@ product_default(const System<T>& ss, const VectorState<T>& vv, const Hami<T>* ha
         bool calc_hc = h.use_hc();
         if (op1 && op1->is_diagonal()) calc_hc = false;
 
-        if(ss.verbose() > 1)
+        if(ss.verbose() > 1) {
           if(calc_hc)
             cout << "PRODUCT LOCAL " << t.coef() << "*" << top.name() << "(" << top.site() << ") + h.c." << endl;
           else
             cout << "PRODUCT LOCAL " << t.coef() << "*" << top.name() << "(" << top.site() << ")" << endl;
+        }
 
         if(op1){
           product(*op1, vv, res, b1, T(t.coef()));

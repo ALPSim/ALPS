@@ -54,7 +54,7 @@ class Hami : public std::vector<Term<T> >
         sites.resize(lattice.size()); 
         if(__name) _name = std::string(__name); else _name = std::string("H"); 
       };
-    Hami(const Hami& h): _V(h), _lattice(h._lattice), site(h.site), sites(h.sites), _name(h._name), _val(h._val), _use_hc(h._use_hc)
+    Hami(const Hami& h): _V(h), _lattice(h._lattice), _name(h._name), _val(h._val), _use_hc(h._use_hc), site(h.site), sites(h.sites)
       { sites.resize(_lattice.size()); } 
 
     Hami& operator=(const Hami<T> &h)

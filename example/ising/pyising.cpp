@@ -91,7 +91,7 @@ namespace alps {
     }
 }
 
-BOOST_PYTHON_MODULE(ising) {
+BOOST_PYTHON_MODULE(pyising) {
 
     boost::python::class_<alps::detail::ising_export, boost::noncopyable, boost::python::bases<alps::mcbase> >(
           "sim",

@@ -94,7 +94,7 @@ class BasicOp: public dmtk::BMatrix<T>
       BMatrix<T>(b), _site(site), _label(label), _internal_site(internal_site), _is_fermion(false), _type(OP_SYSTEM), _name(name),  _is_term(false), _is_hami(false) {}
     BasicOp(const char *name, const Matrix<T> &_m, const Basis& b, int site, int internal_site = 0, int label = -1):
        BMatrix<T>(b), _site(site),  _label(label), _internal_site(internal_site), _is_fermion(false), _type(OP_SYSTEM), _name(name), _is_term(false), _is_hami(false) {}
-    BasicOp(const BasicOp<T> &o): BMatrix<T>(o), _internal_site(o._internal_site), _site(o._site), _type(o._type), _name(o._name), _label(o._label), dqn(o.dqn), _is_fermion(o._is_fermion), _is_term(o._is_term), _term(o._term), _is_hami(o._is_hami), _hami(o._hami) {}
+    BasicOp(const BasicOp<T> &o): BMatrix<T>(o), _site(o._site), _label(o._label), _internal_site(o._internal_site), _is_fermion(o._is_fermion), _type(o._type), _name(o._name), _term(o._term), _is_term(o._is_term), _hami(o._hami), _is_hami(o._is_hami), dqn(o.dqn) {}
 
 
     BasicOp(const Term<T>& t): _type(OP_SYSTEM)
