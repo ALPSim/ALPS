@@ -482,7 +482,7 @@ template <class G, class S> void compute_M_shift(times & new_segment, unsigned k
       }
     }
     else {
-      for (int n=0; n < num_rows(M); n++) {
+      for (unsigned n=0; n < num_rows(M); n++) {
         M(n,m) = M_k[n]/det_rat;
       }
     }
