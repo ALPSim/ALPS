@@ -72,11 +72,11 @@ double compute_overlap(times segment, segment_container_t& other_segments, int o
 
 double det_rat_up(times & new_segment, alps_matrix const& M, segment_container_t& segments_old, hybridization_t & F, vector_t& Fs, vector_t& Fe, double BETA, double & det_rat_sign, double & overlap); 
 
-void compute_M_up(int k, alps_matrix & M, vector_t& Fs, vector_t& Fe, double det_rat);
+void compute_M_up(std::size_t k, alps_matrix & M, vector_t& Fs, vector_t& Fe, double det_rat);
 
 double det_rat_down(std::size_t k, alps_matrix const& M, segment_container_t& segments_old, double & det_rat_sign);
 
-void compute_M_down(int k, alps_matrix & M);
+void compute_M_down(std::size_t k, alps_matrix & M);
 
 // move segment without changin its length
 double det_rat_move(times & new_segment, int k, alps_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign, double & overlap);
