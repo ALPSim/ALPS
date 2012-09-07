@@ -156,8 +156,8 @@ public:
   bool check()
   {
     bool pass=true;
-    for(unsigned int i=0;i<size_;++i){
-      for(unsigned int j=0;j<size_;++j){
+    for(int i=0;i<size_;++i){
+      for(int j=0;j<size_;++j){
         if(operator()(i,j)>2){
           std::cout<<"M is really large: "<<i<<" "<<j<<" "<<operator()(i,j)<<" "<<size_<<std::endl;
           pass=false;
@@ -173,7 +173,7 @@ public:
     double* rowmax = new double[size_];
 
     fortran_int_t rowmax_index, max_index, inc=1;
-    for(unsigned int i=0;i<size_;++i){
+    for(int i=0;i<size_;++i){
       rowmax_index=FORTRAN_ID(idamax)(&size_, values_+i*memory_size_,&inc);
       rowmax[i]=*(values_+i*memory_size_+rowmax_index-1); //fortran convention: start counting from one
     }

@@ -19,7 +19,7 @@ void invert(alps_matrix & A, double & det) {
   gesv(A,ipivot,B);
   swap(A,B);
   det = 1;
-  for (int i=0; i<num_rows(B); i++) {
+  for (std::size_t i=0; i<num_rows(B); i++) {
     det *= B(i,i);
   }
   det = std::fabs(det);
@@ -211,12 +211,12 @@ void compute_M_up(int k, alps_matrix & M, vector_t& Fs, vector_t &Fe, double det
   M_new(k,k) = 1./det_rat;
   
   // row k and column k
-  for (int i=0; i < num_rows(M); i++) {
+  for (std::size_t i=0; i < num_rows(M); i++) {
     i_new = (i<k ? i : i+1);
     M_new(i_new,k) = 0;
     M_new(k,i_new) = 0;
     
-    for (int n=0; n<num_rows(M); n++) {
+    for (std::size_t n=0; n<num_rows(M); n++) {
       M_new(i_new,k) -= M(i,n)*Fs[n];
       M_new(k,i_new) -= M(n,i)*Fe[n];  
     } 
@@ -225,9 +225,9 @@ void compute_M_up(int k, alps_matrix & M, vector_t& Fs, vector_t &Fe, double det
   }
   
   // remaining elements
-  for (int j=0; j<num_cols(M); j++) {
+  for (std::size_t j=0; j<num_cols(M); j++) {
     j_new = (j<k ? j : j+1);
-    for (int i=0; i<num_rows(M); i++) {
+    for (std::size_t i=0; i<num_rows(M); i++) {
       i_new = (i<k ? i : i+1);
       M_new(i_new,j_new) = M(i,j) + det_rat*M_new(i_new,k)*M_new(k,j_new);
     }
@@ -266,9 +266,9 @@ void compute_M_down(int k, alps_matrix & M) {
   assert(num_rows(M) > 0);
   alps_matrix M_new(num_rows(M)-1, num_cols(M)-1);
   
-  for (int j=0; j<num_cols(M_new); j++) {
+  for (std::size_t j=0; j<num_cols(M_new); j++) {
     int j_old = (j<k ? j : j+1);
-    for (int i=0; i<num_rows(M_new); i++) {
+    for (std::size_t i=0; i<num_rows(M_new); i++) {
       int i_old = (i<k ? i : i+1);
       M_new(i,j) = M(i_old, j_old)-M(i_old,k)*M(k,j_old)/M(k,k);
     }
@@ -332,13 +332,13 @@ void compute_M_move(times & new_segment, int k, alps_matrix & M, segment_contain
   //double argument;
   
   // row k and column k
-  for (int i=0; i<num_rows(M); i++) {
+  for (std::size_t i=0; i<num_rows(M); i++) {
     if (i!=k) {
       M_new(i,k) = 0;
       M_new(k,i) = 0;
       
       segment_container_t::iterator it=segments_old.begin();
-      for (int n=0; n<num_rows(M); n++) {
+      for (std::size_t n=0; n<num_rows(M); n++) {
         if (n!=k) {
           M_new(i,k) -= 1/det_rat*(M(k,k)*M(i,n)-M(i,k)*M(k,n))*interpolate_F(it->t_end()-new_segment.t_start(), BETA, F);
           M_new(k,i) -= 1/det_rat*(M(k,k)*M(n,i)-M(n,k)*M(k,i))*interpolate_F(new_segment.t_end()-it->t_start(), BETA, F);    
@@ -352,9 +352,9 @@ void compute_M_move(times & new_segment, int k, alps_matrix & M, segment_contain
   }
   
   // remaining elements
-  for (int j=0; j<num_cols(M); j++) {
+  for (std::size_t j=0; j<num_cols(M); j++) {
     if (j!=k) {
-      for (int i=0; i<num_rows(M); i++) {
+      for (std::size_t i=0; i<num_rows(M); i++) {
         if (i!=k)
           M_new(i,j) = M(i,j) + (-M(i,k)*M(k,j)+det_rat*M_new(i,k)*M_new(k,j))/M(k,k);
       }
@@ -372,7 +372,7 @@ double det_rat_shift(times & new_segment, std::size_t k, alps_matrix const& M, s
   double det_rat = 0;
   
   it=segments_old.begin();
-  for (int i=0; i<num_rows(M); i++) {
+  for (std::size_t i=0; i<num_rows(M); i++) {
     det_rat += interpolate_F(new_segment.t_end()-it->t_start(), BETA, F)*M(i,k);
     it++;
   }
@@ -421,12 +421,12 @@ void compute_M_shift(times & new_segment, std::size_t k, alps_matrix & M, segmen
   
   for (std::size_t m=0; m<num_cols(M); m++) {
     if (m!=k) {
-      for (int n=0; n<num_rows(M); n++) {
+      for (std::size_t n=0; n<num_rows(M); n++) {
         M(n,m) -= M_k[n]*R[m]/det_rat;
       }
     }
     else {
-      for (int n=0; n<num_rows(M); n++) {
+      for (std::size_t n=0; n<num_rows(M); n++) {
         M(n,m) = M_k[n]/det_rat;
       }    
     }

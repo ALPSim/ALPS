@@ -636,9 +636,9 @@ void measure_GF_imp(prng_t& rng, int N, double BETA, double mu, alps_matrix cons
     
     segment_container_t::iterator it1, it2;
     assert(num_rows(M) == num_cols(M));
-    for (int i=0; i<num_cols(M); i++) {
+    for (std::size_t i=0; i<num_cols(M); i++) {
       (i==0 ? it1 = segments.begin() : it1++);
-      for (int k=0; k<num_rows(M); k++) {
+      for (std::size_t k=0; k<num_rows(M); k++) {
         (k==0 ? it2 = segments.begin() : it2++);
         if (M(k,i)!=0) {
           double argument = it1->t_end()-it2->t_start();

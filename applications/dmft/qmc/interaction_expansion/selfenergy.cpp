@@ -104,12 +104,12 @@ void InteractionExpansionRun::measure_Wk(std::vector<std::vector<std::valarray<s
           const std::complex<double>* exparray_annihilators = M[z].annihilators()[q].exp_iomegat();
           std::complex<double> tmp = M[z](p,q);
 #ifndef SSE
-#pragma ivdep
+//#pragma ivdep
           for(unsigned int o=0; o<nfreq; ++o){      
             *Wk_z_k1_k2++ += (*exparray_creators++)*(*exparray_annihilators++)*tmp;
           }
 #else
-#pragma ivdep
+//#pragma ivdep
           for(int o=0;o<nfreq;o+=2) {
             twocomplex exp_c(*exparray_creators++,    *exparray_creators++); //load it all into xmm registers
             twocomplex exp_a(*exparray_annihilators++,*exparray_annihilators++);
@@ -294,8 +294,8 @@ void InteractionExpansionSim::evaluate_selfenergy_measurement_matsubara(const al
   Wk.clear();
   matsubara_green_function_t reduced_bare_green_matsubara(n_matsubara, n_site, n_flavors);
   reduced_bare_green_matsubara.clear();
-  for(unsigned int z=0;z<n_flavors;++z){
-    for (unsigned int k=0; k<n_site; k++) {                   
+  for(int z=0;z<n_flavors;++z){
+    for (int k=0; k<n_site; k++) {                   
       std::stringstream Wk_real_name, Wk_imag_name;
       Wk_real_name  <<"Wk_real_"  <<z<<"_"<<k << "_" << k;
       Wk_imag_name  <<"Wk_imag_"  <<z<<"_"<<k << "_" << k;
@@ -305,9 +305,9 @@ void InteractionExpansionSim::evaluate_selfenergy_measurement_matsubara(const al
       Weval_imag /= beta*n_site;
       std::valarray<double> mean_real = Weval_real.mean();
       std::valarray<double> mean_imag = Weval_imag.mean();
-      for(unsigned int w=0;w<n_matsubara;++w)
+      for(int w=0;w<n_matsubara;++w)
         Wk(w, k, k, z) = std::complex<double>(mean_real[w], mean_imag[w]);
-      for(unsigned int w=0;w<n_matsubara;++w)
+      for(int w=0;w<n_matsubara;++w)
         reduced_bare_green_matsubara(w, k, k, z) = bare_green_matsubara(w, k, k, z);
       std::valarray<double> error_real = Weval_real.error();
       std::valarray<double> error_imag = Weval_imag.error();

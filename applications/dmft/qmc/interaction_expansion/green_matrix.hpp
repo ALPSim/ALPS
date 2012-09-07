@@ -78,10 +78,10 @@ public:
   
   void resize(const unsigned int new_nop)
   {
-    if(new_nop<=nop_){ //down is easy
+    if(new_nop<=(unsigned int)nop_){ //down is easy
       nop_=new_nop;
       return;
-    } else if(new_nop<= memory_size_){ //up is easy as long as we don't have to allocate new memory
+    } else if(new_nop<= (unsigned int)memory_size_){ //up is easy as long as we don't have to allocate new memory
       nop_=new_nop;
     } else{ //get new memory
       double *new_values_=new double[nt_*new_nop];
