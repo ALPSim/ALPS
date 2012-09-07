@@ -205,27 +205,27 @@ if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE AND Boost_R
   endforeach(S)
 
   if (BOOST_MPI_PYTHON_SOURCES)
-    python_add_module(mpi ${BOOST_MPI_PYTHON_SOURCES})
+    python_add_module(mpi_c ${BOOST_MPI_PYTHON_SOURCES})
     if(BUILD_SHARED_LIBS)
-      set_target_properties(mpi PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
+      set_target_properties(mpi_c PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
     if(WIN32 AND NOT UNIX)
-      set_target_properties(mpi PROPERTIES SUFFIX ".pyd")
+      set_target_properties(mpi_c PROPERTIES SUFFIX ".pyd")
     endif(WIN32 AND NOT UNIX)
     endif (BUILD_SHARED_LIBS)
 
-    set_target_properties(mpi PROPERTIES PREFIX "")
-    target_link_libraries(mpi ${ALPS_BOOST_LIBRARY_NAME} ${BOOST_LINK_LIBS})
+    set_target_properties(mpi_c PROPERTIES PREFIX "")
+    target_link_libraries(mpi_c ${ALPS_BOOST_LIBRARY_NAME} ${BOOST_LINK_LIBS})
 
 
     if(ALPS_INSTALL_VISTRAILS_PACKAGES) 
-        install(TARGETS mpi  COMPONENT vistrails
+        install(TARGETS mpi_c COMPONENT vistrails
                 RUNTIME DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}
                 ARCHIVE DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}
                 LIBRARY DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR})
     endif(ALPS_INSTALL_VISTRAILS_PACKAGES) 
                 
     if(NOT ALPS_FOR_VISTRAILS)
-      install(TARGETS mpi COMPONENT python
+      install(TARGETS mpi_c COMPONENT python
               RUNTIME DESTINATION bin
               ARCHIVE DESTINATION lib/pyalps
               LIBRARY DESTINATION lib/pyalps)

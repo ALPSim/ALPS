@@ -34,7 +34,7 @@
 #include "matrices.h"
 
 template <class T, int N>
-class ScaledTinyVector;
+struct ScaledTinyVector;
 
 template <class T, int N>
 class TinyVector {

@@ -343,8 +343,9 @@ void loop_worker::flip(alps::ObservableSet& obs) {
   typename looper::collector<estimator_t>::type coll = get_collector(estimator);
   coll.set_num_operators(operators.size());
   coll.set_num_clusters(nc);
-  if (IMPROVE())
+  if (IMPROVE()) {
     BOOST_FOREACH(looper::estimate<estimator_t>::type const& est, estimates) { coll += est; }
+  }
 
   // determine whether clusters are flipped or not
   double improved_sign = sign;

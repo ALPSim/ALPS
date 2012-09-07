@@ -25,56 +25,7 @@
  #                                                                                 #
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-import pyalps.ngs as ngs
-import pyalps.mpi as mpi
-import numpy as np
-import sys, time
+# TODO: this file should be removed! It is here just of compatibility reason
+# use pyalps.mpi instead!
 
-import ising
-
-def main(limit, resume, output):
-    #implement nice argv parsing ...
-
-    sim = ising.sim({
-        'L': 100,
-        'SWEEPS': 1000,
-        'T': 2,
-        'THERMALIZATION': 100
-    }, mpi.world if mpi.size > 1 else None)
-
-    if resume == 't':
-        ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump.h5'), 'r')
-        sim.load(ar)
-        del ar
-
-    if limit == 0:
-        sim.run()
-    else:
-        start = time.time()
-        sim.run(lambda: time.time() > start + int(limit))
-
-    ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump.h5') + ('.' + str(mpi.rank) if mpi.size > 1 else ''), 'a')
-    sim.save(ar)
-    del ar
-
-    results = ngs.collectResults(sim)
-
-    if mpi.rank == 0:
-        print "Correlations:           ", results["Correlations"]
-        print "Energy:                 ", results["Energy"]
-
-        print "Mean of Energy:         ", results["Energy"].mean
-        print "Error of Energy:        ", results["Energy"].error
-        print "Mean of Correlations:   ", results["Correlations"].mean
-
-        print "-2 * Energy / 13:        ", -2. * results["Energy"] / 13.
-        print "1 / Correlations        ", 1. / results["Correlations"]
-        print "Energy - Magnetization: ", results["Energy"] - results["Magnetization"]
-
-        print "Sin(Energy):            ", results["Energy"].sin()
-        print "Tanh(Correlations):     ", results["Correlations"].tanh()
-
-        ngs.saveResults(results, sim.params, ngs.h5ar(output, 'a'), "/simulation/results")
-
-if __name__ == "__main__":
-    apply(main, sys.argv[1:])
+from pyalps.mpi import *

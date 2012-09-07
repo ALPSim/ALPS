@@ -40,7 +40,6 @@ endif (NOT_ALPS_BUILD_PYTHON)
 
 option(ALPS_MACOS106 "Build ALPS for MacOS X 10.6" OFF)
 
-
 option(ALPS_INSTALL_DEPRECATED "Install deprecated headers for ALPS" OFF)
 option(ALPS_BUILD_DEVELOPER_TOOLS "Build tools used by developers to maintain ALPS" OFF)
 option(ALPS_ENABLE_OPENMP "Enable OpenMP parallelization" OFF)
@@ -104,7 +103,6 @@ if(CMAKE_SIZEOF_VOID_P EQUAL 8 OR CMAKE_GENERATOR MATCHES Win64)
   endif (NOT ALPS_VISTRAILS_32BIT)
 endif(CMAKE_SIZEOF_VOID_P EQUAL 8 OR CMAKE_GENERATOR MATCHES Win64)
 
-
 #maintenance building options
 
 include (CMakeDetermineSystem)
@@ -126,6 +124,13 @@ if(NOT WIN32)
   execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version COMMAND head -n1 OUTPUT_VARIABLE ALPS_COMPILER_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
   message(STATUS "Compiler version: ${ALPS_COMPILER_VERSION}")
 endif(NOT WIN32)
+
+# set convenient warning flags for clang
+STRING(REGEX MATCH "clang" IS_CLANG "${ALPS_COMPILER_VERSION}")
+if(IS_CLANG)
+    message("-- Add clang error flags")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unknown-pragmas -Wno-unused-function -Wno-overloaded-virtual -Wno-unneeded-internal-declaration -Wno-unused-variable -Wno-return-type-c-linkage")
+endif(IS_CLANG)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Type of build" FORCE)
