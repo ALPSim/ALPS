@@ -202,10 +202,10 @@ double det_rat_up(times & new_segment, alps_matrix const& M, segment_container_t
   return det_rat;
 }
 
-void compute_M_up(int k, alps_matrix & M, vector_t& Fs, vector_t &Fe, double det_rat) {
+void compute_M_up(std::size_t k, alps_matrix & M, vector_t& Fs, vector_t &Fe, double det_rat) {
   assert( num_rows(M) == num_cols(M) );
   alps_matrix M_new(num_rows(M)+1,num_cols(M)+1);
-  int i_new, j_new;
+  std::size_t i_new, j_new;
   
   // element (k,k)
   M_new(k,k) = 1./det_rat;
@@ -261,15 +261,15 @@ double det_rat_down(std::size_t k, alps_matrix const& M, segment_container_t& se
 }
 
 
-void compute_M_down(int k, alps_matrix & M) {
+void compute_M_down(std::size_t k, alps_matrix & M) {
   assert(num_rows(M) == num_cols(M));
   assert(num_rows(M) > 0);
   alps_matrix M_new(num_rows(M)-1, num_cols(M)-1);
   
   for (std::size_t j=0; j<num_cols(M_new); j++) {
-    int j_old = (j<k ? j : j+1);
+    std::size_t j_old = (j<k ? j : j+1);
     for (std::size_t i=0; i<num_rows(M_new); i++) {
-      int i_old = (i<k ? i : i+1);
+      std::size_t i_old = (i<k ? i : i+1);
       M_new(i,j) = M(i_old, j_old)-M(i_old,k)*M(k,j_old)/M(k,k);
     }
   }
@@ -326,7 +326,7 @@ double det_rat_move(times & new_segment, std::size_t k, alps_matrix const& M, se
 }
 
 
-void compute_M_move(times & new_segment, int k, alps_matrix & M, segment_container_t & segments_old, hybridization_t& F, double BETA, double det_rat) {
+void compute_M_move(times & new_segment, std::size_t k, alps_matrix & M, segment_container_t & segments_old, hybridization_t& F, double BETA, double det_rat) {
   assert(num_rows(M) == num_cols(M)); 
   alps_matrix M_new(num_rows(M),num_cols(M));
   //double argument;
