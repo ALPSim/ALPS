@@ -8,7 +8,7 @@
 #
 #  This module checks that : 
 #  - the python interpreter is working and version >= 2.6
-#  - it has modules : distutils, numpy, tables
+#  - it has modules : distutils, numpy, tables, scipy
 # 
 #  This module defines the variables
 #  - PYTHON_INTERPRETER : name of the python interpreter
@@ -100,6 +100,7 @@ ENDIF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
 IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
   EXEC_PYTHON_SCRIPT ("import distutils " nulle) # check that distutils is there...
   EXEC_PYTHON_SCRIPT ("import numpy" nulle) # check that numpy is there...
+  EXEC_PYTHON_SCRIPT ("import scipy" nulle) # check that scipy is there...
   #EXEC_PYTHON_SCRIPT ("import tables" nulle) # check that tables is there...
   MESSAGE(STATUS "Python interpreter ok : version ${PYTHON_VERSION}" )
 
