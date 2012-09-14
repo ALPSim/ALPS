@@ -52,6 +52,20 @@ int main(int argc, char** argv)
       alps::results_type<hybridization>::type results = collect_results(s);
       save_results(results, parms, options.output_file, "/simulation/results");
       
+      
+      /*{
+           alps::mcresult img, temp;
+          img = results["gw_im"];
+          temp = img + img;
+          std::vector<double> temp_mean, img_mean;
+          temp_mean = temp.mean<std::vector<double> >();
+          img_mean = img.mean<std::vector<double> >();
+          
+          using alps::short_print;
+          std::cout << short_print(temp_mean) << "\t" << short_print(img_mean) << std::endl;
+    }*/
+    
+      
       if(!(parms.defined("EXTERNAL_INPUT_DATA") && ((bool)(parms["EXTERNAL_INPUT_DATA"])==true))){//if external input data is used, we skip this step
       //compute the output Green's function and Fourier transform it, store in the right path
       int N = static_cast < int >(parms["N"]);

@@ -36,12 +36,12 @@ import pyising
 def main(limit, resume, output):
     #implement nice argv parsing ...
 
-    sim = pyising.sim({
+    sim = pyising.sim(ngs.params({
         'L': 100,
         'SWEEPS': 1000,
         'T': 2,
         'THERMALIZATION': 100
-    })
+    }))
 
     if resume == 't':
         ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump'), 'r')
@@ -54,6 +54,8 @@ def main(limit, resume, output):
         start = time.time()
         sim.run(lambda: time.time() > start + int(limit))
 
+    p = sim.params
+
     ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump'), 'w')
     sim.save(ar)
     del ar
@@ -65,17 +67,14 @@ def main(limit, resume, output):
 
     print "Mean of Energy:         ", results["Energy"].mean
     print "Error of Energy:        ", results["Energy"].error
-#TODO: implement!
-#    print "Mean of Correlations:   ", results["Correlations"].mean
+    print "Mean of Correlations:   ", results["Correlations"].mean
 
     print "-2 * Energy / 13:       ", -2. * results["Energy"] / 13.
-#TODO: implement!
-#    print "1 / Correlations        ", 1. / results["Correlations"]
+    print "1 / Correlations        ", 1. / results["Correlations"]
     print "Energy - Magnetization: ", results["Energy"] - results["Magnetization"]
 
     print "Sin(Energy):            ", results["Energy"].sin()
-#TODO: implement!
-#    print "Tanh(Correlations):     ", results["Correlations"].tanh()
+    print "Tanh(Correlations):     ", results["Correlations"].tanh()
 
     ngs.saveResults(results, sim.params, ngs.h5ar(output, 'w'), "/simulation/results")
 

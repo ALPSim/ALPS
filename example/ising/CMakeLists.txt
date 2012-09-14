@@ -38,9 +38,14 @@ if (ALPS_BUILD_EXAMPLES)
     
         add_test(ngs_ising_mpi
             ${CMAKE_COMMAND}
-                -Dsourcedir=${PROJECT_SOURCE_DIR}
-                -Dbinarydir=${PROJECT_BINARY_DIR}
-                -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
+                -Dmpiexec=${MPIEXEC}
+                -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
+                -Dprocs=4
+                -Dmpiexec_preflags=${MPIEXEC_PREFLAGS}
+                -Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}
+                -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
+                -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
+                -Ddllexedir=${PROJECT_BINARY_DIR}/bin
                 -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_test.cmake
         )
 

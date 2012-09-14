@@ -5,7 +5,6 @@
  * ALPS Libraries                                                                  *
  *                                                                                 *
  * Copyright (C) 2010 - 2011 by Lukas Gamper <gamperl@gmail.com>                   *
- *                              Matthias Troyer <troyer@comp-phys.org>             *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -26,14 +25,28 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define PY_ARRAY_UNIQUE_SYMBOL pyising_PyArrayHandle
+#ifndef ALPS_NGS_DETAIL_EXPORT_SIM_TO_PYTHON_HPP
+#define ALPS_NGS_DETAIL_EXPORT_SIM_TO_PYTHON_HPP
 
-#include "ising.hpp"
+#include <alps/ngs/boost_python.hpp>
 
-#include <alps/ngs/detail/export_sim_to_python.hpp>
+#include <alps/python/make_copy.hpp>
 
-BOOST_PYTHON_MODULE(pyising) {
-    ALPS_EXPORT_SIM_TO_PYTHON(sim, ising_sim)
-        .add_property("done", &ising_sim<alps::mcbase>::fraction_completed)
-    ;
-}
+#include <boost/bind.hpp>
+#include <boost/python/dict.hpp>
+#include <boost/python/wrapper.hpp>
+#include <boost/python/return_internal_reference.hpp>
+
+#define ALPS_EXPORT_SIM_TO_PYTHON(NAME, CLASS)                                                                                                                  \
+    boost::python::class_< CLASS <alps::mcbase>, boost::noncopyable, boost::python::bases<alps::mcbase> >(                                                      \
+          #NAME ,                                                                                                                                               \
+          boost::python::init< CLASS <alps::mcbase>::parameters_type const &, boost::python::optional<std::size_t> >()                                          \
+    )                                                                                                                                                           \
+        .add_property("params", boost::python::make_function(& CLASS <alps::mcbase>::get_params, boost::python::return_internal_reference<>()))                 \
+        .add_property("measurements", boost::python::make_function(& CLASS <alps::mcbase>::get_measurements, boost::python::return_internal_reference<>()))     \
+        .def("run", static_cast<bool( CLASS <alps::mcbase>::*)(boost::python::object)>(& CLASS <alps::mcbase>::run))                                            \
+        .def("random", & CLASS <alps::mcbase>::get_random)                                                                                                      \
+        .def("save", static_cast<void( CLASS <alps::mcbase>::*)(alps::hdf5::archive &) const>(& CLASS <alps::mcbase>::save))                                    \
+        .def("load", static_cast<void( CLASS <alps::mcbase>::*)(alps::hdf5::archive &)>(& CLASS <alps::mcbase>::load))                                          \
+
+#endif
