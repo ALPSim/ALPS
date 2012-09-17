@@ -67,7 +67,5 @@ int main(int argc, char *argv[]) {
         std::cout << "Binder Cumulant         " << results["Magnetization^2"] * results["Magnetization^2"] / results["Magnetization^4"]<< std::endl;
 
         save_results(results, params, options.output_file, "/simulation/results");
-
     }
-
 }

@@ -29,5 +29,7 @@ if(not_successful)
     message(SEND_ERROR "error runing test 'ngs_ising_single': ${err}; shell output: ${not_successful}!")
 endif(not_successful)
 
+file(REMOVE dump)
+file(REMOVE sim.single)
 file(REMOVE ngs_ising_single_output_1)
 file(REMOVE ngs_ising_single_output_2)

@@ -3,7 +3,7 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-file(WRITE run_ngs_ising_python_tmp.sh "PYTHONPATH=\$PYTHONPATH:${binarydir}/lib/pyalps:${binarydir}/src/boost:${binarydir}/example/ising:${sourcedir}/lib ${python_interpreter} ${currentdir}/main_export.py 15 f sim.ising.h5")
+file(WRITE run_ngs_ising_python_tmp.sh "PYTHONPATH=\$PYTHONPATH:${binarydir}/lib/pyalps:${binarydir}/src/boost:${binarydir}/example/ising:${sourcedir}/lib ${python_interpreter} ${currentdir}/main_export.py 15 f sim.python.single")
 
 execute_process(
     COMMAND sh run_ngs_ising_python_tmp.sh
@@ -14,10 +14,11 @@ execute_process(
 )
 
 file(REMOVE run_ngs_ising_python_tmp.sh)
-file(REMOVE sim.ising.h5)
+file(REMOVE sim.python.single)
 
 if(not_successful)
     message(SEND_ERROR "error runing test 'ngs_ising_python': ${err}; shell output: ${not_successful}!")
 endif(not_successful)
 
-file(REMOVE ${cmd}_output)
+file(REMOVE dump)
+file(REMOVE run_ngs_ising_python_output)

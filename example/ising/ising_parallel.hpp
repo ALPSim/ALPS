@@ -69,7 +69,6 @@ template<typename Impl> class parallel_ising_sim : public Impl {
             , spins(local_length)
         {
             init();
-            std::cerr << total_sweeps << " " << thermalization_sweeps << std::endl;
         }
 
         void update() {
@@ -83,7 +82,6 @@ template<typename Impl> class parallel_ising_sim : public Impl {
 
         void measure() {
             sweeps++;
-            std::cerr << comm.rank() << ' ' << sweeps << std::endl;
             if (sweeps > thermalization_sweeps) {
                 double my_energy = 0;
                 double my_mag = 0;

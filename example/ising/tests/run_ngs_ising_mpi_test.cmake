@@ -4,7 +4,6 @@
 #          http://www.boost.org/LICENSE_1_0.txt)
 
 find_program(cmd_path ${cmd} ${binarydir} ${dllexedir})
-find_program(mpi_cmd_path ${mpirun} ${binarydir} ${dllexedir})
 
 set(ENV{OMP_NUM_THREADS} 1)
 
@@ -32,6 +31,7 @@ if(not_successful)
     message(SEND_ERROR "error runing test 'ngs_ising_mpi': ${err}; shell output: ${not_successful}!")
 endif(not_successful)
 
+file(REMOVE sim.mpi)
 file(REMOVE dump)
 file(REMOVE ngs_ising_mpi_output)
 file(REMOVE ngs_ising_mpi_output_continue)
