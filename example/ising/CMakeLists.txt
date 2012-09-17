@@ -38,6 +38,7 @@ if (ALPS_BUILD_EXAMPLES)
     
         add_test(ngs_ising_mpi
             ${CMAKE_COMMAND}
+                -Dcmd=ngs_ising_mpi
                 -Dmpiexec=${MPIEXEC}
                 -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
                 -Dprocs=4
@@ -68,9 +69,14 @@ if (ALPS_BUILD_EXAMPLES)
     
         add_test(ngs_ising_mpi_pscan
             ${CMAKE_COMMAND}
-                -Dsourcedir=${PROJECT_SOURCE_DIR}
-                -Dbinarydir=${PROJECT_BINARY_DIR}
-                -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
+                -Dmpiexec=${MPIEXEC}
+                -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
+                -Dprocs=4
+                -Dmpiexec_preflags=${MPIEXEC_PREFLAGS}
+                -Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}
+                -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
+                -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
+                -Ddllexedir=${PROJECT_BINARY_DIR}/bin
                 -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_pscan_test.cmake
         )
 
@@ -80,9 +86,15 @@ if (ALPS_BUILD_EXAMPLES)
    
         add_test(ngs_ising_mpi2
             ${CMAKE_COMMAND}
-                -Dsourcedir=${PROJECT_SOURCE_DIR}
-                -Dbinarydir=${PROJECT_BINARY_DIR}
-                -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
+                -Dcmd=ngs_ising_mpi2
+                -Dmpiexec=${MPIEXEC}
+                -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
+                -Dprocs=4
+                -Dmpiexec_preflags=${MPIEXEC_PREFLAGS}
+                -Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}
+                -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
+                -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
+                -Ddllexedir=${PROJECT_BINARY_DIR}/bin
                 -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_test.cmake
         )
 
@@ -132,9 +144,16 @@ if (ALPS_BUILD_EXAMPLES)
             add_test(ngs_ising_python_native_mpi
                 ${CMAKE_COMMAND}
                     -Dpython_interpreter=${PYTHON_INTERPRETER}
-                    -Dsourcedir=${PROJECT_SOURCE_DIR}
-                    -Dbinarydir=${PROJECT_BINARY_DIR}
-                    -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
+                    -Dmpiexec=${MPIEXEC}
+                    -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
+                    -Dprocs=4
+                    -Dmpiexec_preflags=${MPIEXEC_PREFLAGS}
+                    -Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}
+                    -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
+                    -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
+                    -Dproject_sourcedir=${PROJECT_SOURCE_DIR}
+                    -Dproject_binarydir=${PROJECT_BINARY_DIR}
+                    -Ddllexedir=${PROJECT_BINARY_DIR}/bin
                     -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_python_native_mpi_test.cmake
             )
         endif(MPI_FOUND)

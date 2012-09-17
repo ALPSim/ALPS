@@ -3,7 +3,7 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-find_program(cmd_path ngs_ising_mpi ${binarydir} ${dllexedir})
+find_program(cmd_path ${cmd} ${binarydir} ${dllexedir})
 find_program(mpi_cmd_path ${mpirun} ${binarydir} ${dllexedir})
 
 set(ENV{OMP_NUM_THREADS} 1)
