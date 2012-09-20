@@ -84,19 +84,19 @@ if (ALPS_BUILD_EXAMPLES)
         add_dependencies(ngs_ising_mpi2 alps)
         target_link_libraries(ngs_ising_mpi2 alps)
    
-        add_test(ngs_ising_mpi2
-            ${CMAKE_COMMAND}
-                -Dcmd=ngs_ising_mpi2
-                -Dmpiexec=${MPIEXEC}
-                -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
-                -Dprocs=4
-                -Dmpiexec_preflags=${MPIEXEC_PREFLAGS}
-                -Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}
-                -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
-                -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
-                -Ddllexedir=${PROJECT_BINARY_DIR}/bin
-                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_test.cmake
-        )
+#        add_test(ngs_ising_mpi2
+#            ${CMAKE_COMMAND}
+#                -Dcmd=ngs_ising_mpi2
+#                -Dmpiexec=${MPIEXEC}
+#                -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
+#                -Dprocs=4
+#                -Dmpiexec_preflags=${MPIEXEC_PREFLAGS}
+#                -Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}
+#                -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
+#                -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
+#                -Ddllexedir=${PROJECT_BINARY_DIR}/bin
+#                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_test.cmake
+#        )
 
     endif(MPI_FOUND)
 

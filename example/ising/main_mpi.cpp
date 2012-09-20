@@ -73,7 +73,5 @@ int main(int argc, char *argv[]) {
         std::cout << "Tanh(Correlations):     " << tanh(results["Correlations"]) << std::endl;
 
         save_results(results, params, options.output_file, "/simulation/results");
-
     }
-
 }
