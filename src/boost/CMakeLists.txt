@@ -195,14 +195,16 @@ if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE AND Boost_R
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/mpi/src/python")
   set(SOURCES collectives.cpp py_communicator.cpp datatypes.cpp 
       documentation.cpp py_environment.cpp py_nonblocking.cpp py_exception.cpp
-      module.cpp py_request.cpp skeleton_and_content.cpp status.cpp py_timer.cpp 
-      serialize.cpp
+      py_request.cpp skeleton_and_content.cpp status.cpp py_timer.cpp serialize.cpp
   )
   foreach(S ${SOURCES})
     if(EXISTS ${DIRECTORY}/${S})
       set(BOOST_MPI_PYTHON_SOURCES ${BOOST_MPI_PYTHON_SOURCES} ${DIRECTORY}/${S})
     endif(EXISTS ${DIRECTORY}/${S})
   endforeach(S)
+
+  # renmae mpi module to mpi_c
+  set(BOOST_MPI_PYTHON_SOURCES ${BOOST_MPI_PYTHON_SOURCES} mpi/module.cpp)
 
   if (BOOST_MPI_PYTHON_SOURCES)
     python_add_module(mpi_c ${BOOST_MPI_PYTHON_SOURCES})
@@ -215,7 +217,6 @@ if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE AND Boost_R
 
     set_target_properties(mpi_c PROPERTIES PREFIX "")
     target_link_libraries(mpi_c ${ALPS_BOOST_LIBRARY_NAME} ${BOOST_LINK_LIBS})
-
 
     if(ALPS_INSTALL_VISTRAILS_PACKAGES) 
         install(TARGETS mpi_c COMPONENT vistrails
