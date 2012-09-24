@@ -196,16 +196,17 @@ int main()
     
     cout << i << endl;
     
-    detail::weak_type_ptr a(i);
+    //~ detail::weak_type_ptr a(i);
+    //~ 
+    //~ detail::make_data<int> b(5);
+    //~ 
+    //~ ++b().cast<int>();
+    //~ 
+    //~ cout << b.get() << endl;
+    //~ 
+    //~ ++a.cast<int>();
+    //~ 
+    //~ cout << i << endl;
     
-    detail::make_data<int> b(5);
-    
-    ++b().cast<int>();
-    
-    cout << b.get() << endl;
-    
-    ++a.cast<int>();
-    
-    cout << i << endl;
-    
+    accumulator<int> aa;
 }
