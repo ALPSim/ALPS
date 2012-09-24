@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
     
         {
             hdf5::archive ar(options.input_file);
-            ar >> make_pvp("/parameters", params);
+            ar["/parameters"] >> params;
         }
         broadcast(c, params);
 

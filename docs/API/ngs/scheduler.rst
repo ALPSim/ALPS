@@ -47,8 +47,8 @@ Simulation concepts
         * ``alps::results_type<S>::type`` is the type of the associative container returned by ``collect_results(c)``
         * ``alps::result_names_type<S>::type`` is the type of the sequence returned by ``result_names(s)`` and ``unsaved_result_names(s)``
         * ``S(p)``, ``S s(p)``
-        * ``ar << make_pvp(h5path, s)``, ``s.save(path)`` writes a checkpoint, not necessarily containing all accumulators -- could also be empty if we always use a completely new simulation upon restart
-        * ``ar >> make_pvp(h5path, s)``, ``s.load(path)`` reads a checkpoint, not necessarily containing all accumulators
+        * ``ar[h5path] << s``, ``s.save(path)`` writes a checkpoint, not necessarily containing all accumulators -- could also be empty if we always use a completely new simulation upon restart
+        * ``ar[h5path] >> s``, ``s.load(path)`` reads a checkpoint, not necessarily containing all accumulators
         * ``s.run(stop_callback)``, runs the simulation, regularly calling ``stop_callback``. Returns a value convertible to ``bool``:
             * ``true``: the simulation has finished 
             * ``false``: the simulation is still running '''TBD: in which case is this possible?'''

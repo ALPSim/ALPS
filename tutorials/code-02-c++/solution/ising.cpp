@@ -137,15 +137,15 @@ public:
     
     void save(std::string const & filename){
         alps::hdf5::archive ar(filename, "a");
-        ar << alps::make_pvp("/simulation/results/"+energy_.representation(), energy_);
-        ar << alps::make_pvp("/simulation/results/"+magnetization_.representation(), magnetization_);
-        ar << alps::make_pvp("/simulation/results/"+abs_magnetization_.representation(), abs_magnetization_);
-        ar << alps::make_pvp("/simulation/results/"+m2_.representation(), m2_);
-        ar << alps::make_pvp("/simulation/results/"+m4_.representation(), m4_);
-        ar << alps::make_pvp("/parameters/L", L_);
-        ar << alps::make_pvp("/parameters/BETA", beta_);
-        ar << alps::make_pvp("/parameters/SWEEPS", sweeps_);
-        ar << alps::make_pvp("/parameters/THERMALIZATION", thermalization_);
+        ar["/simulation/results/"+energy_.representation()] << energy_;
+        ar["/simulation/results/"+magnetization_.representation()] << magnetization_;
+        ar["/simulation/results/"+abs_magnetization_.representation()] << abs_magnetization_;
+        ar["/simulation/results/"+m2_.representation()] << m2_;
+        ar["/simulation/results/"+m4_.representation()] << m4_;
+        ar["/parameters/L"] << L_;
+        ar["/parameters/BETA"] << beta_;
+        ar["/parameters/SWEEPS"] << sweeps_;
+        ar["/parameters/THERMALIZATION"] << thermalization_;
     }
     
     protected:

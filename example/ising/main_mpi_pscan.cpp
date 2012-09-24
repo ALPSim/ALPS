@@ -47,10 +47,7 @@ int main(int argc, char *argv[]) {
     parameters_type<sim_type>::type params;
     if (!comm_local.rank()) {
         hdf5::archive ar(options.input_file + "." + boost::lexical_cast<std::string>(color));
-        ar >> make_pvp("/parameters", params);
-        
-        std::cout << "read " + boost::lexical_cast<std::string>(color) << std::endl;
-        
+        ar["/parameters"] >> params;
     }
     broadcast(comm_local, params);
     

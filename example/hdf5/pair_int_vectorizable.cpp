@@ -118,18 +118,14 @@ int main() {
 
     {
         alps::hdf5::archive ar(filename, "a");
-        ar 
-          << alps::make_pvp("/enum/scalar", scalar_write)
-          << alps::make_pvp("/enum/vector", vector_write)
-        ;
+        ar["/enum/scalar"] << scalar_write;
+        ar["/enum/vector"] << vector_write;
     }
 
     {
         alps::hdf5::archive ar(filename);
-        ar 
-          >> alps::make_pvp("/enum/scalar", scalar_read)
-          >> alps::make_pvp("/enum/vector", vector_read)
-        ;
+        ar["/enum/scalar"] >> scalar_read;
+        ar["/enum/vector"] >> vector_read;
     }
 
     boost::filesystem::remove(boost::filesystem::path(filename));

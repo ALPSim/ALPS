@@ -91,7 +91,7 @@ int main(int argc, char** argv)
 		
     alps::hdf5::archive ar(infile, "r");
 		alps::Parameters parms;
-    ar>>alps::make_pvp("/parameters", parms);
+    ar["/parameters"] >> parms;
     parms["INFILE"]=infile;
     parms["OUTFILE"]=outfile;
     int N=(int)parms["NMATSUBARA"];

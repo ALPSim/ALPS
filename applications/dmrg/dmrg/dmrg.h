@@ -532,7 +532,7 @@ void DMRGTask<value_type>::save(alps::hdf5::archive & ar) const
   typename std::map<std::string,std::vector<value_type> >::const_iterator it = this->average_values.find("Energy");
   if (it != this->average_values.end()) {
     std::vector<double> energies = real(it->second);
-    ar << alps::make_pvp("spectrum/energies",energies);
+    ar["spectrum/energies"] << energies;
   }
   
   std::string context = ar.get_context();
@@ -540,11 +540,11 @@ void DMRGTask<value_type>::save(alps::hdf5::archive & ar) const
   alps::EigenvectorMeasurements<value_type>::save(ar);
   ar.set_context(context);
   
-//  ar << alps::make_pvp("spectrum",static_cast<const alps::EigenvectorMeasurements<value_type >&>(*this));
+//  ar["spectrum"] << static_cast<const alps::EigenvectorMeasurements<value_type >&>(*this);
 
   typedef typename std::map<std::string,std::vector<double> >::const_iterator IT;
   for (IT it=iteration_measurements.begin(); it != iteration_measurements.end();++it)
-      ar << alps::make_pvp("simulation/results/Iteration "+alps::hdf5_name_encode(it->first)+"/mean/value",it->second);
+      ar["simulation/results/Iteration "+alps::hdf5_name_encode(it->first)+"/mean/value"] << it->second;
 }
 #endif
 

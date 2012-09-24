@@ -34,8 +34,8 @@ int main(int argc, char** argv) {
     alps::hdf5::archive ar(argv[i]);
     alps::Parameters params;
     alps::clone_info info;
-    ar >> make_pvp("/parameters", params)
-       >> make_pvp("/log/alps", info);
+    ar["/parameters"] >> params;
+    ar["/log/alps"] >> info;
     std::vector<alps::ObservableSet> obs;
     alps::load_observable(ar, info.clone_id(), obs);
     os << alps::start_tag("CLONE")

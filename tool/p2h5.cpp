@@ -42,5 +42,5 @@ int main(int argc, char **argv) {
     if (boost::filesystem::exists(boost::filesystem::path(argv[1])))
         boost::filesystem::remove(boost::filesystem::path(argv[1]));
     alps::hdf5::archive ar(argv[1], "w");
-    ar << make_pvp("/parameters", parms);
+    ar["/parameters"] << parms;
 }
