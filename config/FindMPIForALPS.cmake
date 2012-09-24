@@ -16,4 +16,11 @@ if(NOT MPI_FOUND AND APPLE)
   set(MPI_C_COMPILER openmpicc)
   set(MPI_CXX_COMPILER openmpicxx)
   find_package(MPI)
+  if(MPI_FOUND)
+	  find_program(MPIEXEC
+	    NAMES "openmpirun"
+	    # PATHS ${_MPI_PREFIX_PATH}
+	    PATH_SUFFIXES bin
+	    DOC "Executable for running MPI programs.")
+  endif(MPI_FOUND)
 endif(NOT MPI_FOUND AND APPLE)
