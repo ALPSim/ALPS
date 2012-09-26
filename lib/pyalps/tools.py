@@ -370,10 +370,11 @@ def writeParameterFile(fname,parms):
 def recursiveGlob(dirname,pattern):
     ret = glob.glob(os.path.join(dirname, pattern))
     for d in os.listdir(dirname):
+        d = os.path.join(dirname, d)
         if os.path.isdir(d):
-            ret += recursiveGlob(os.path.join(dirname, d), pattern)
+            ret += recursiveGlob(d, pattern)
     return ret
-    
+
 def getResultFiles(dirname='.',pattern=None,prefix=None):
     """ get all result files matching the given pattern or prefix 
     
