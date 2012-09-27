@@ -71,6 +71,7 @@ protected:
   unsigned maximum_sitetype;
   state_type maximum_number_of_states;
   std::map<int,int> number_states_for_site_type_;
+  std::vector<int>        site_site_type;
   std::vector<state_type> site_number_of_states; 
 
   std::map<std::string,std::vector<std::vector<double> > > diagonal_matrix_element;
@@ -171,6 +172,7 @@ void QMCRun<G,StateType>::initialize_site_states()
     unsigned int sitetype=alps::scheduler::LatticeModelMCRun<G>::site_type(*it);
     if (sitetype > maximum_sitetype)
       maximum_sitetype = sitetype;
+    site_site_type.push_back(sitetype);
     std::map<int,int>::const_iterator found = number_states_for_site_type_.find(sitetype);
     if (found != number_states_for_site_type_.end())
       site_number_of_states.push_back(found->second);
