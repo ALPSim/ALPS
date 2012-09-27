@@ -43,6 +43,7 @@
 
 #include <alps/ngs/scheduler/mcbase.hpp>
 #include <alps/ngs/scheduler/mpimcsim.hpp>
+#include <alps/ngs/scheduler/mpiparallelsim.hpp>
 
 // TODO: remove these deprecated headers:
 #include <alps/ngs/mcresult.hpp>

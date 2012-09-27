@@ -4,7 +4,7 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2012 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2010 - 2011 by Lukas Gamper <gamperl@gmail.com>                   *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -25,47 +25,47 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "ising_parallel.hpp"
+#ifndef ALPS_NGS_SCHEDULER_MPIPARALLELIM_HPP
+#define ALPS_NGS_SCHEDULER_MPIPARALLELIM_HPP
 
-#include <boost/lexical_cast.hpp>
+#include <alps/ngs/stacktrace.hpp>
 
-using namespace alps;
+#include <boost/mpi.hpp>
 
-typedef mpiparallelsim<parallel_ising_sim<mcbase> > sim_type;
+#include <stdexcept>
 
-int main(int argc, char *argv[]) {
+namespace alps {
 
-    mcoptions options(argc, argv);
-    boost::mpi::environment env(argc, argv);
-    boost::mpi::communicator c;
+    #ifdef ALPS_HAVE_MPI
 
-    parameters_type<sim_type>::type params;
-    if (c.rank() == 0) {
-        hdf5::archive ar(options.input_file);
-        ar["/parameters"] >> params;
-    }
-    broadcast(c, params);
+        template<typename Impl> class mpiparallelsim : public Impl {
+            public:
+                using Impl::collect_results;
+                
+                mpiparallelsim(typename alps::parameters_type<Impl>::type const & p) {
+                    throw std::runtime_error("No communicator passed" + ALPS_STACKTRACE);
+                }
 
-    sim_type sim(params, c);
+                mpiparallelsim(typename alps::parameters_type<Impl>::type const & p, boost::mpi::communicator const & c) 
+                    : Impl(p, c)
+                    , communicator(c)
+                {
+                    MPI_Errhandler_set(communicator, MPI_ERRORS_RETURN);
+                }
 
-    if (options.resume)
-        sim.load((params["DUMP"] | "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
+                double fraction_completed() const {
+                    return Impl::fraction_completed();
+                }
 
-    sim.run(boost::bind(&basic_stop_callback, options.time_limit));
+                typename results_type<Impl>::type collect_results(typename result_names_type<Impl>::type const & names) const {
+                    return Impl::collect_results(names);
+                }
 
-    sim.save((params["DUMP"] | "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
+            private:
+                boost::mpi::communicator communicator;
+        };
 
-    results_type<sim_type>::type results = collect_results(sim);
-
-    if (c.rank() == 0) {
-        std::cout << "Energy:                 " << results["Energy"] << std::endl;
-
-        std::cout << "Mean of Energy:         " << results["Energy"].mean<double>() << std::endl;
-        std::cout << "Error of Energy:        " << results["Energy"].error<double>() << std::endl;
-        std::cout << "Energy^2:               " << results["Energy^2"] << std::endl;
-        std::cout << "Magnetization           " << results["Magnetization"] << std::endl;
-        std::cout << "Binder Cumulant         " << results["Magnetization^2"] * results["Magnetization^2"] / results["Magnetization^4"]<< std::endl;
-
-        save_results(results, params, options.output_file, "/simulation/results");
-    }
+    #endif
 }
+
+#endif
