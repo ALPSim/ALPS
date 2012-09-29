@@ -54,7 +54,7 @@ using namespace alps::alea;
 
 int main()
 {
-
+ 
     //accumulator with all the features so far
     typedef accumulator<  int
                         , features<  tag::fixed_size_binning
