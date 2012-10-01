@@ -654,7 +654,7 @@ void
       std::vector<int>    _states           = alps::applications::numeric::vector_cast<int>(worldline.states());
       std::vector<int>    _states2          = _states * _states;
       std::vector<double> _hopping_energies = alps::applications::numeric::vector_cast<double>(worldline.vertices())/(-2.*beta);
-      std::vector<double> _onsite_energies  = onsite_energies(_states);
+      std::vector<double> _onsite_energies  = onsite_energies(_states)/beta;
       std::vector<double> _energies         = _hopping_energies + _onsite_energies;
       std::vector<double> _energies2        = _energies * _energies;
 
@@ -664,13 +664,12 @@ void
       double total_onsite_energy   = std::accumulate(_onsite_energies.begin(), _onsite_energies.end(), 0.);     
       double total_energy          = total_hopping_energy + total_onsite_energy;
 
+/*
       std::cout << "Measuring " 
-//                << _sweep_counter  
+                << _sweep_counter  
                 << " ... N = " << total_particle_number 
-//                << " ... Eo= " << total_hopping_energy
-//                << " ... Ed= " << total_onsite_energy
-//                << " ... E = " << total_energy
                 << "\n";
+*/
 
       measurements["Total Particle Number"]     << total_particle_number;
       measurements["Total Particle Number^2"]   << total_particle_number * total_particle_number;
