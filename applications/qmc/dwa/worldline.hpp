@@ -55,10 +55,10 @@ public:
   typedef kink<Site,Time,State> Kink;
   typedef std::vector<Kink>     Line;
   typedef std::vector<Line>     Lines;
-  typedef typename Line::iterator         LineIterator;
-  typedef typename Line::const_iterator   LineConstIterator;
-  typedef typename Lines::iterator        LinesIterator;
-  typedef typename Lines::const_iterator  LinesConstIterator;     
+  typedef Line::iterator         LineIterator;
+  typedef Line::const_iterator   LineConstIterator;
+  typedef Lines::iterator        LinesIterator;
+  typedef Lines::const_iterator  LinesConstIterator;     
 
   Worldline() : _initialized(false)  {}
   Worldline (Site const total_number_of_sites_, Site const line_capacity_);
