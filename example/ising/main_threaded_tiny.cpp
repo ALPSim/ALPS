@@ -29,9 +29,8 @@
 
 using namespace alps;
 
-typedef ising_sim<multithread<base> > sim_type;
+typedef ising_sim<multithreadedsim<mcbase> > sim_type;
 
-// TODO: synchonize with main_thread_tiny
 int main(int argc, char *argv[]) {
 
     mcoptions options(argc, argv);
@@ -43,22 +42,17 @@ int main(int argc, char *argv[]) {
 
     threaded_callback_wrapper stopper(boost::bind<bool>(&basic_stop_callback, options.time_limit));
     boost::thread thread(&sim_type::run, boost::ref(sim), static_cast<boost::function<bool()> >(boost::ref(stopper)));
-
-  //TODO: create one sensible exampel: progress every 5 minutes, checkpoint every hour
-  // and call this a "tiny" example main_threaded_tiny
   
     boost::posix_time::ptime progress_time = boost::posix_time::second_clock::local_time();
     boost::posix_time::ptime checkpoint_time = boost::posix_time::second_clock::local_time();
     do {
         alps::sleep(0.1 * 1e9);
 
-        //TODO: print progress every 5s
         if (boost::posix_time::second_clock::local_time() > progress_time + boost::posix_time::seconds(5)) {
             std::cout << "progress: " << sim.fraction_completed() << std::endl;
             progress_time = boost::posix_time::second_clock::local_time();
         }
 
-        //TODO: checkpoint every 15 s
         if (boost::posix_time::second_clock::local_time() > checkpoint_time + boost::posix_time::seconds(15)) {
             std::cout << "checkpointing ... " << std::endl;
             sim.save(params["DUMP"] | "dump");
@@ -80,6 +74,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Mean of Energy:         " << results["Energy"].mean<double>() << std::endl;
     std::cout << "Error of Energy:        " << results["Energy"].error<double>() << std::endl;
     std::cout << "Mean of Correlations:   " << short_print(results["Correlations"].mean<std::vector<double> >()) << std::endl;
+    std::cout << "Covariance E/M:         " << short_print(results["Energy"].covariance<double>(results["Magnetization"])) << std::endl;
 
     std::cout << "-2 * Energy / 13:       " << -2. * results["Energy"] / 13. << std::endl;
     std::cout << "1 / Correlations        " << 1. / results["Correlations"] << std::endl;
@@ -87,6 +82,4 @@ int main(int argc, char *argv[]) {
 
     std::cout << "Sin(Energy):            " << sin(results["Energy"]) << std::endl;
     std::cout << "Tanh(Correlations):     " << tanh(results["Correlations"]) << std::endl;
-
-
 }
