@@ -25,23 +25,25 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <iostream>
+#include <alps/ngs.hpp>
 
-#ifndef ALPS_NGS_ALEA_FIX_SIZE_BIN_TRAIT_HEADER
-#define ALPS_NGS_ALEA_FIX_SIZE_BIN_TRAIT_HEADER
+using namespace std;
+using namespace alps::alea;
 
-#include <vector>
-#include <alps/ngs/alea/fixed_size_bin_proxy.hpp>
-//= = = = = = = = = F I X   S I Z E   B I N   T R A I T = = = = = = = = = = =
-
-namespace alps
+int main()
 {
-    namespace alea
-    {
-        template <typename T>
-        struct fixed_size_bin_type
-        {
-            typedef fixed_size_bin_proxy_type<T> type;
-        };
-    }//end alea namespace 
-}//end alps namespace
-#endif // ALPS_NGS_ALEA_FIX_SIZE_BIN_TRAIT_HEADER
+    #ifdef ALPS_NGS_USE_NEW_ALEA
+        accumulator_set set;
+        
+        set << alps::ngs::RealObservable("Energy");
+        set["Energy"] << 1.;
+        set["Energy"] << 2.;
+        set["Energy"] << 3.;
+        
+        cout << "mean: " << set["Energy"].mean<double>() << endl;
+        
+    #else
+        std::cout << "ALPS_NGS_USE_NEW_ALEA is OFF" << std::endl;
+    #endif
+}

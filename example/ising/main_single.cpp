@@ -33,6 +33,11 @@ typedef ising_sim<mcbase> sim_type;
 
 int main(int argc, char *argv[]) {
 
+    #ifdef ALPS_NGS_USE_NEW_ALEA
+    std::cout << "new alea!" << std::endl;
+    #endif
+    
+
     mcoptions options(argc, argv);
 // TODO: create other examples using text (or XML)
     parameters_type<sim_type>::type params(hdf5::archive(options.input_file));
