@@ -27,6 +27,7 @@ if(LAPACK_FOUND)
        interaction_expansion/measurements.cpp 
       interaction_expansion/model.cpp)
 
+IF(ALPS_HAVE_MPI)
   set (DMFT_QMC_INTERACTION_EXPANSION2_SOURCE
        fouriertransform.C
        interaction_expansion2/auxiliary.cpp
@@ -39,6 +40,7 @@ if(LAPACK_FOUND)
        interaction_expansion2/interaction_expansion.cpp 
        interaction_expansion2/measurements.cpp 
        interaction_expansion2/model.cpp)
+ENDIF(ALPS_HAVE_MPI)
 
   set (DMFT_QMC_HYBRIDIZATION_SOURCE
        hybridization/impurity.C 
@@ -73,7 +75,9 @@ ENDIF(ALPS_HAVE_MPI)
   add_library (hybridization_impl STATIC ${DMFT_QMC_HYBRIDIZATION_SOURCE})
   
   #Interaction Expansion - separate solver
+IF(ALPS_HAVE_MPI)
   add_library (interaction_expansion2_impl STATIC  ${DMFT_QMC_INTERACTION_EXPANSION2_SOURCE})
+ENDIF(ALPS_HAVE_MPI)
 
 IF(ALPS_HAVE_MPI)
   #Hybridization Expansion - separate solver

@@ -116,8 +116,8 @@ void update_single_spin(RNG & rng, dense_matrix & Green_up, dense_matrix & Green
     double alpha_up=tmp1/(1+(1-Green_up(site,site))*tmp1);
     double alpha_dn=tmp2/(1+(1-Green_down(site,site))*tmp2);
     for(int i=0;i<N;++i){
-      vi_up[i]=Green_up(i,site)-(i==site);
-      vi_dn[i]=Green_down(i,site)-(i==site);
+      vi_up[i]=Green_up(i,site)-(i==(int)site);
+      vi_dn[i]=Green_down(i,site)-(i==(int)site);
       uj_up[i]=Green_up  (site, i);
       uj_dn[i]=Green_down(site, i);
     }

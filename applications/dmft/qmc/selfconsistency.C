@@ -186,7 +186,7 @@ void selfconsistency_loop_omega(alps::Parameters& parms, MatsubaraImpuritySolver
     G0_tau.write((parms["G0TAU_input"]).c_str());
   
   FourierTransformer::generate_transformer(parms, fourier_ptr);    // with H
-  double max_diff;	
+  double max_diff=0.;	
   int iteration_ctr = 0;
   do {
     iteration_ctr++;
