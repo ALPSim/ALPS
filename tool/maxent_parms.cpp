@@ -132,6 +132,7 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
         }
       }    
     }
+    //for zero temperature, only positive frequency matters 
     else if (p["KERNEL"] == "Boris") {
       if (alps::is_master())
         std::cerr << "Using Boris' kernel" << std::endl;
@@ -139,7 +140,7 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
         double tau = p["TAU_"+boost::lexical_cast<std::string>(i)]; 
         for (int j=0; j<ntab; ++j) {
           double omega = freq[j];
-          K_(i,j) = std::exp(-omega*tau);
+          K_(i,j) = -std::exp(-omega*tau);
         }
       }    
     }
