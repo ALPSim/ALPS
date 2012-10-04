@@ -43,6 +43,8 @@
 #include <complex>
 #include <vector>
 
+#include <boost/function.hpp>
+
 namespace ietl
 {
     enum DesiredEigenvalue { Largest, Smallest };
@@ -87,14 +89,14 @@ namespace ietl
     };
     
     template<class Matrix, class VS, class Vector>
-    class jcd_gmres_solver_operator
+    class jcd_solver_operator
     {
     public:
         typedef typename vectorspace_traits<VS>::vector_type vector_type;
         typedef typename vectorspace_traits<VS>::scalar_type scalar_type;
         typedef typename ietl::number_traits<scalar_type>::magnitude_type magnitude_type;
         
-        jcd_gmres_solver_operator(const vector_type& u,
+        jcd_solver_operator(const vector_type& u,
             const magnitude_type& theta,
             const vector_type& r,
             const Matrix & m)
@@ -109,13 +111,14 @@ namespace ietl
     };
     
     template<class Matrix, class VS, class Vector>
-    void mult(jcd_gmres_solver_operator<Matrix, VS, Vector> const & m,
-        typename jcd_gmres_solver_operator<Matrix, VS, Vector>::vector_type const & x,
-        typename jcd_gmres_solver_operator<Matrix, VS, Vector>::vector_type & y)
+    void mult(jcd_solver_operator<Matrix, VS, Vector> const & m,
+        typename jcd_solver_operator<Matrix, VS, Vector>::vector_type const & x,
+        typename jcd_solver_operator<Matrix, VS, Vector>::vector_type & y)
     {
         m(x,y);
     }
     
+    // kept for backward compatibility
     template<class Matrix, class VS>
     class jcd_gmres_solver
     {
@@ -126,24 +129,71 @@ namespace ietl
         
         jcd_gmres_solver(Matrix const & matrix, VS const & vec,
             std::size_t max_iter = 5, bool verbose = false)
-        : matrix_(matrix), vecspace_(vec), n_(vec_dimension(vec))
-        , max_iter_(max_iter), verbose_(verbose){ }
+        : matrix_(matrix)
+        , vecspace_(vec)
+        , n_(vec_dimension(vec))
+        , max_iter_(max_iter)
+        , verbose_(verbose) { }
         
-        void operator()(const vector_type& u, const magnitude_type& theta, const vector_type& r, vector_type& t, const magnitude_type& rel_tol)
+        void operator()(const vector_type& u,
+                        const magnitude_type& theta,
+                        const vector_type& r, vector_type& t,
+                        const magnitude_type& rel_tol)
         {
-            jcd_gmres_solver_operator<Matrix, VS, vector_type> op(u, theta, r, matrix_);
+            jcd_solver_operator<Matrix, VS, vector_type> op(u, theta, r, matrix_);
+            ietl_gmres gmres(max_iter_, verbose_);
             
             vector_type inh = -r;
             
             // initial guess for better convergence
             t = -r + ietl::dot(r,u)/ietl::dot(u,u)*u;
             if (max_iter_ > 0)
-                t = ietl_gmres(op, inh, t, max_iter_, rel_tol, verbose_);
+                t = gmres(op, inh, t, rel_tol);
         }
         
     private:
-        Matrix matrix_;
+        Matrix const & matrix_;
         VS vecspace_;
+        std::size_t n_, max_iter_;
+        bool verbose_;
+    };
+    
+    template<class Matrix, class VS>
+    class jcd_solver
+    {
+    public:
+        typedef typename vectorspace_traits<VS>::vector_type vector_type;
+        typedef typename vectorspace_traits<VS>::scalar_type scalar_type;
+        typedef typename ietl::number_traits<scalar_type>::magnitude_type magnitude_type;
+        
+        template<class Solver>
+        jcd_solver(Matrix const & matrix,
+                         VS const & vec,
+                         Solver solv)
+        : matrix_(matrix)
+        , vecspace_(vec)
+        , solv_(solv)
+        , n_(vec_dimension(vec)) { }
+        
+        void operator()(const vector_type& u,
+                        const magnitude_type& theta,
+                        const vector_type& r, vector_type& t,
+                        const magnitude_type& rel_tol)
+        {
+            jcd_solver_operator<Matrix, VS, vector_type> op(u, theta, r, matrix_);
+            
+            vector_type inh = -r;
+            
+            // initial guess for better convergence
+            t = -r + ietl::dot(r,u)/ietl::dot(u,u)*u;
+            if (max_iter_ > 0)
+                t = solv_(op, inh, t, rel_tol);
+        }
+        
+    private:
+        Matrix const & matrix_;
+        VS vecspace_;
+        boost::function<vector_type(jcd_solver_operator<Matrix, VS, vector_type> const &, vector_type const &, vector_type const &, double)> solv_;
         std::size_t n_, max_iter_;
         bool verbose_;
     };
@@ -170,7 +220,7 @@ namespace ietl
     private:
         void get_extremal_eigenvalue(magnitude_type& theta, std::vector<double>& s, fortran_int_t dim);
         void get_extremal_eigenvalue(magnitude_type& theta, std::vector<std::complex<double> >& s, fortran_int_t dim);
-        MATRIX matrix_;
+        MATRIX const & matrix_;
         VS vecspace_;
         int n_;
         FortranMatrix<scalar_type> M;
@@ -197,7 +247,7 @@ namespace ietl
     }
     
     template<class Matrix, class VS, class Vector>
-    void jcd_gmres_solver_operator<Matrix, VS, Vector>::operator()(vector_type const & x, vector_type & y) const
+    void jcd_solver_operator<Matrix, VS, Vector>::operator()(vector_type const & x, vector_type & y) const
     {
         // calculate (1-uu*)(A-theta*1)(1-uu*)
         
@@ -376,7 +426,7 @@ namespace ietl
             
             // r = u^A - \theta u
             r = uA-theta*u;
-            // std::cout << "Iteration " << iter.iterations() << ", resid = " << ietl::two_norm(r) << std::endl;
+            std::cout << "Iteration " << iter.iterations() << ", resid = " << ietl::two_norm(r) << std::endl;
             
             // if (|r|_2 < \epsilon) stop
             ++iter;

@@ -40,6 +40,9 @@
 #include <algorithm>
 #include <exception>
 #include <limits>
+
+#include <boost/function.hpp>
+
 #include <boost/numeric/ublas/hermitian.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
@@ -64,30 +67,7 @@ namespace ietl{
     namespace ublas=boost::numeric::ublas;
     namespace lapack=boost::numeric::bindings::lapack;
 
-//solver wrapper///////////////////////////////////////////////////
-    // MAKE_WRAPPER(name,solver)
-    // creates a function object / class name_wrapper
-    #undef MAKE_WRAPPER
-    #define MAKE_WRAPPER(name,solver) \
-    class name##_wrapper { \
-        public: \
-            name##_wrapper(size_t i = 5) \
-                : maxiter_(i) {} \
-            template <class VECTOR, class MATRIX, class REAL> \
-            VECTOR operator() ( const MATRIX & A, \
-                                const VECTOR & b, \
-                                const VECTOR & x0, \
-                                REAL abstol ) \
-                { \
-                    return solver (A, b, x0, maxiter_, abstol); \
-                } \
-        private: \
-            size_t maxiter_; \
-    };
-    MAKE_WRAPPER(gmres,ietl::ietl_gmres)
-    #undef MAKE_WRAPPER
-
-//solver wrapper///////////////////////////////////////////////////
+    
 //jd_iterator//////////////////////////////////////////////////////
     template <class T>
     class jd_iteration : public basic_iteration<T> {
@@ -366,8 +346,8 @@ namespace solver {
         template <class SOLV, class IT, class GEN>
         void eigensystem(IT& iter, GEN& gen, size_type k_max, SOLV f, bool search_highest = false)
         #else
-        template <class SOLV=gmres_wrapper, class IT, class GEN>
-        void eigensystem(IT& iter, GEN& gen, size_type k_max, SOLV f = gmres_wrapper(), bool search_highest = false)
+        template <class SOLV=ietl_gmres, class IT, class GEN>
+        void eigensystem(IT& iter, GEN& gen, size_type k_max, SOLV f = ietl_gmres(), bool search_highest = false)
         #endif
             {
                 typedef solver::jd_solver<SOLV,MATRIX,VS> solver_type;
@@ -607,18 +587,22 @@ namespace solver {
                 m = m_min;
             }// restart
 
+            //assure t is orthogonal to Q
+            do {
+              norm_t = ietl::two_norm(t);
+              for(size_t i = 0; i< X_.size();++i)
+                t -= ietl::dot(t,X_[i])*X_[i];
+            } while (ietl::two_norm(t) < kappa * norm_t);
+
             // correction equation
             solver(Theta[0], r, t, iter); //solver is allowed to change r
 
             //assure t is orthogonal to Q
-            norm_t = ietl::two_norm(t);
-
-            for(size_t i = 0; i< X_.size();++i)
+            do {
+              norm_t = ietl::two_norm(t);
+              for(size_t i = 0; i< X_.size();++i)
                 t -= ietl::dot(t,X_[i])*X_[i];
-
-            if(ietl::two_norm(t) <= kappa * norm_t)
-                for(size_t i = 0; i< X_.size();++i)
-                    t -= ietl::dot(t,X_[i])*X_[i];
+            } while (ietl::two_norm(t) < kappa * norm_t);
 
             ++iter;
             if(iter.error_code() == 1)

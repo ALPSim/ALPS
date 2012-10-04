@@ -123,7 +123,7 @@ int main () {
     boost::timer clock;
 
     //correction equation solver
-    ietl::gmres_wrapper solver;
+    ietl::ietl_gmres solver;
 
     //search k lowest eigenvalue
     try{
@@ -156,7 +156,7 @@ int main () {
     jd_test.reset();
     // correction equation solver steps are more expensive with preconditioning,
     // but fewer are needed to have 'good' convergence
-    ietl::gmres_wrapper solver2(3);
+    ietl::ietl_gmres solver2(3);
 
     std::cout << "solve with jacobi preconditioning...";
     std::cout.flush();

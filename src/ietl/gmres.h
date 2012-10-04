@@ -75,65 +75,75 @@ namespace ietl
         }
     }
     
-    template<class Vector, class Matrix>
-    Vector ietl_gmres(Matrix const & A,
-        Vector const & b,
-        Vector const & x0,
-        std::size_t max_iter = 100,
-        double abs_tol = 1e-6,
-        bool verbose = false)
-    {   
-        std::vector<typename Vector::value_type> s(max_iter+1), cs(max_iter+1), sn(max_iter+1);
-        std::vector<Vector> v(max_iter+1);
+    class ietl_gmres
+    {
+    private:
+        std::size_t max_iter;
+        bool verbose;
         
-        Vector r, w;
+    public:
+        ietl_gmres(std::size_t max_iter = 100, bool verbose = false)
+        : max_iter(max_iter)
+        , verbose(verbose) { }
         
-        mult(A, x0, v[0]);
-        r = b - v[0];
-        s[0] = two_norm(r);
-        
-        if (std::abs(s[0]) < abs_tol) {
-            if (verbose)
-                std::cout << "Already done with x0." << std::endl;
-            return x0;
-        }
-        
-        v[0] = r / s[0];
-        
-        boost::numeric::ublas::matrix<typename Vector::value_type> H(max_iter+1, max_iter+1);
-        std::size_t i = 0;
-        
-        for ( ; i < max_iter-1; ++i)
-        {
-            mult(A, v[i], w);
-            for (std::size_t k = 0; k <= i; ++k) {
-                H(k,i) = dot(w, v[k]);
-                w -= H(k,i) * v[k];
+        template<class Vector, class Matrix>
+        Vector operator()(Matrix const & A,
+            Vector const & b,
+            Vector const & x0,
+            double abs_tol = 1e-6)
+        {   
+            std::vector<typename Vector::value_type> s(max_iter+1), cs(max_iter+1), sn(max_iter+1);
+            std::vector<Vector> v(max_iter+1);
+            
+            Vector r, w;
+            
+            mult(A, x0, v[0]);
+            r = b - v[0];
+            s[0] = two_norm(r);
+            
+            if (std::abs(s[0]) < abs_tol) {
+                if (verbose)
+                    std::cout << "Already done with x0." << std::endl;
+                return x0;
             }
             
-            H(i+1, i) = two_norm(w);
-            v[i+1] = w / H(i+1, i);
+            v[0] = r / s[0];
             
+            boost::numeric::ublas::matrix<typename Vector::value_type> H(max_iter+1, max_iter+1);
+            std::size_t i = 0;
+            
+            for ( ; i < max_iter-1; ++i)
+            {
+                mult(A, v[i], w);
+                for (std::size_t k = 0; k <= i; ++k) {
+                    H(k,i) = dot(w, v[k]);
+                    w -= H(k,i) * v[k];
+                }
+                
+                H(i+1, i) = two_norm(w);
+                v[i+1] = w / H(i+1, i);
+                
+                for (std::size_t k = 0; k < i; ++k)
+                    detail::ApplyPlaneRotation(H(k,i), H(k+1,i), cs[k], sn[k]);
+                
+                detail::GeneratePlaneRotation(H(i,i), H(i+1,i), cs[i], sn[i]);
+                detail::ApplyPlaneRotation(H(i,i), H(i+1,i), cs[i], sn[i]);
+                detail::ApplyPlaneRotation(s[i], s[i+1], cs[i], sn[i]);
+                
+                if (verbose)
+                    std::cout << "GMRES iteration " << i << ", resid = " << std::abs(s[i+1]) << std::endl;
+                
+                if (std::abs(s[i+1]) < abs_tol)
+                    break;
+            }
+            
+            std::vector<typename Vector::value_type> y = detail::Update(H, s, i);
+            r = x0;
             for (std::size_t k = 0; k < i; ++k)
-                detail::ApplyPlaneRotation(H(k,i), H(k+1,i), cs[k], sn[k]);
-            
-            detail::GeneratePlaneRotation(H(i,i), H(i+1,i), cs[i], sn[i]);
-            detail::ApplyPlaneRotation(H(i,i), H(i+1,i), cs[i], sn[i]);
-            detail::ApplyPlaneRotation(s[i], s[i+1], cs[i], sn[i]);
-            
-            if (verbose)
-                std::cout << "GMRES iteration " << i << ", resid = " << std::abs(s[i+1]) << std::endl;
-            
-            if (std::abs(s[i+1]) < abs_tol)
-                break;
+                r += y[k] * v[k];
+            return r;
         }
-        
-        std::vector<typename Vector::value_type> y = detail::Update(H, s, i);
-        r = x0;
-        for (std::size_t k = 0; k < i; ++k)
-            r += y[k] * v[k];
-        return r;
-    }
+    };
 }
  
 #endif

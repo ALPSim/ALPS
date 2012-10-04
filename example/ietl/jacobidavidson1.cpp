@@ -132,10 +132,10 @@ int main(int argc, char **argv)
     // on default 5 steps are used
 
     ietl::jd_iteration<double> iter(max_iter, m_min, m_max, rel_tol, abs_tol);
-    ietl::jd<Hamiltonian<vector_t>, vecspace_t> jd(H, vs /*, 2 for verbose mode */ );
+    ietl::jd<Hamiltonian<vector_t>, vecspace_t> jd(H, vs, 1 /* for verbose mode */);
 
     // the correction equation solver must be an function object
-    ietl::gmres_wrapper gmres(max_cor_iter);
+    ietl::ietl_gmres gmres(max_cor_iter);
     
     // to find degenerated (or not well seperated) eigenvalues in the right order
     // the correction equation has to be solved exactly, this is very expensive. 
@@ -144,9 +144,12 @@ int main(int argc, char **argv)
             jd.eigensystem(iter, gen, n_evals/2, gmres);
             jd.eigensystem(iter, gen2, n_evals-n_evals/2, gmres);
     } catch (std::runtime_error& e) {
-            cerr << "Error in eigenpair calculation: " << e.what() << "\n";
+            cerr << "Error in eigenpair calculation with GMRES: " << e.what() << "\n";
             return 1;
     }
+    
+    cout << "Iterations used: " << iter.iterations() << endl;
+    
     // if you use std=c++0x gmres is used as default
 
     std::vector<double> evals = jd.eigenvalues(); // copy eigenvalues
@@ -157,12 +160,12 @@ int main(int argc, char **argv)
     std::copy(evals.begin(), evals.end(), std::ostream_iterator<double>(cout, "\n"));
     //<-
     // calculate some more eigenvalues
-    ietl::bicgstab_wrapper<double,2> bicgstab;
+    ietl::ietl_bicgstabl<double> bicgstab(2);
 
     try {
-        jd.eigensystem(iter, gen, n_evals, bicgstab);
+        jd.eigensystem(iter, gen, 2*n_evals, bicgstab);
     } catch (std::runtime_error& e) {
-            cerr << "Error in eigenpair calculation: " << e.what() << "\n";
+            cerr << "Error in eigenpair calculation with BiCG-Stab: " << e.what() << "\n";
             return 1;
     }
 
