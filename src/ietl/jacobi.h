@@ -426,7 +426,7 @@ namespace ietl
             
             // r = u^A - \theta u
             r = uA-theta*u;
-            std::cout << "Iteration " << iter.iterations() << ", resid = " << ietl::two_norm(r) << std::endl;
+            // std::cout << "Iteration " << iter.iterations() << ", resid = " << ietl::two_norm(r) << std::endl;
             
             // if (|r|_2 < \epsilon) stop
             ++iter;
