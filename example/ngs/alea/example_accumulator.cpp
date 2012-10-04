@@ -209,10 +209,4 @@ int main()
     //~ cout << i << endl;
     
     accumulator<int> aa;
-    
-    #ifdef ALPS_NGS_USE_NEW_ALEA
-        std::cout << "ALPS_NGS_USE_NEW_ALEA is ON" << std::endl;
-    #else
-        std::cout << "ALPS_NGS_USE_NEW_ALEA is OFF" << std::endl;
-    #endif
 }

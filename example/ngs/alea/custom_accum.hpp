@@ -44,71 +44,65 @@
 
 // = = = = = = = = = = C U S T O M   A C C U M = = = = = = = = = = = = =
 
-namespace alps
+struct myVector: public std::vector<int>
 {
-    namespace alea
-    {
-        struct myVector: public std::vector<int>
-        {
-        };
+};
 
-        /* it's better to typedef a derived struct because 
-         * typedef std::vector<int> custom_accum 
-         * creates namespace problems
-         */
-        typedef myVector custom_accum;
+/* it's better to typedef a derived struct because 
+ * typedef std::vector<int> custom_accum 
+ * creates namespace problems
+ */
+typedef myVector custom_accum;
 
 
-        // with this specialisation the detail::accumulator_wrapper knows, that custom_accum has a mean function
-        template<> struct has_mean<custom_accum> 
-        {
-            enum{value = true};
-        };
+// with this specialisation the detail::accumulator_wrapper knows, that custom_accum has a mean function
+template<> struct has_mean<custom_accum> 
+{
+    enum{value = true};
+};
 
 
-        // all traits (has_X) that are not specialised are set to false 
-        // unless custom_accum has a memberfunction that is called X() const
+// all traits (has_X) that are not specialised are set to false 
+// unless custom_accum has a memberfunction that is called X() const
 
-        // the value_type trait must be specialised
-        template<>
-        struct value_type<custom_accum>
-        {
-            typedef int type;
-        };
+// the value_type trait must be specialised
+template<>
+struct value_type<custom_accum>
+{
+    typedef int type;
+};
 
-        // this is the free mean function for the custom_accum (return value via mean trait)
-        mean_type<value_type<custom_accum>::type>::type mean(const custom_accum & arg)
-        {
-            typedef mean_type<value_type<custom_accum>::type>::type mean_type;
-            
-            return mean_type(std::accumulate(arg.begin(), arg.end(), 0))/arg.size();
-        }
+// this is the free mean function for the custom_accum (return value via mean trait)
+mean_type<value_type<custom_accum>::type>::type mean(const custom_accum & arg)
+{
+    typedef mean_type<value_type<custom_accum>::type>::type mean_type;
+    
+    return mean_type(std::accumulate(arg.begin(), arg.end(), 0))/arg.size();
+}
 
-        //the count op returns the count of the accum
-        boost::uint64_t count(custom_accum const & arg)
-        {
-            return arg.size();
-        }
+//the count op returns the count of the accum
+boost::uint64_t count(custom_accum const & arg)
+{
+    return arg.size();
+}
 
-        // the two stream ops must also be provided. This one takes in a value of type value_type
-        custom_accum & operator<<(custom_accum & acc, int a)
-        {
-            acc.push_back(a);
-            return acc;
-        }
+// the two stream ops must also be provided. This one takes in a value of type value_type
+custom_accum & operator<<(custom_accum & acc, int a)
+{
+    acc.push_back(a);
+    return acc;
+}
 
-        // normal ostream operator
-        std::ostream& operator<<(std::ostream& os,  custom_accum const & arg)
-        {
-            os << "custom_accum(";
-            os << "count = ";
-            os << count(arg);
-            os << " mean = ";
-            os << mean(arg);
-            os << ")";
-            return os;
-        }
-    }//end alea namespace
-}//end alps namespace
+// normal ostream operator
+std::ostream& operator<<(std::ostream& os,  custom_accum const & arg)
+{
+    os << "custom_accum(";
+    os << "count = ";
+    os << count(arg);
+    os << " mean = ";
+    os << mean(arg);
+    os << ")";
+    return os;
+}
 
 #endif //EXAMPLE_NGS_CUSTOM_ACCUM_HEADER

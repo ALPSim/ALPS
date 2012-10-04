@@ -41,7 +41,7 @@ int main()
         set["Energy"] << 2.;
         set["Energy"] << 3.;
         
-        cout << "mean: " << set["Energy"].mean<double>() << endl;
+        cout << "mean: " << set["Energy"].get<double>().mean() << endl;
         
     #else
         std::cout << "ALPS_NGS_USE_NEW_ALEA is OFF" << std::endl;
