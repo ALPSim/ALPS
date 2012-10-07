@@ -72,6 +72,12 @@ hybridization::hybridization(const alps::params &parms, int crank_)
   //create measurement objects
   create_measurements();
 
+  if(crank==0){
+    std::cout<<"Hybridization Expansion Simulation CT-HYB"<<std::endl;
+    std::cout<<"Part of the ALPS DMFT Project"<<std::endl;
+    std::cout<<"Usage requires citation of the ALPS CT-HYB paper and the ALPS paper"<<std::endl;
+    std::cout<<"Refer to the documentation for more information."<<std::endl;
+  }
   std::cout<<"process " << crank << " starting simulation"<<std::endl;
 }
 
