@@ -1,0 +1,126 @@
+/****************************************************************************
+ *
+ * ALPS DMFT Project
+ *
+ * Copyright (C) 2012 by Emanuel Gull <gull@pks.mpg.de>,
+ *                   
+ *  based on an earlier version by Philipp Werner and Emanuel Gull
+ *
+ *
+ * This software is part of the ALPS Applications, published under the ALPS
+ * Application License; you can use, redistribute it and/or modify it under
+ * the terms of the license, either version 1 or (at your option) any later
+ * version.
+ * 
+ * You should have received a copy of the ALPS Application License along with
+ * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
+ * available from http://alps.comp-phys.org/.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+ * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+ * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ *****************************************************************************/
+
+#include"hybfun.hpp"
+//construct a hybridization function. ntime: number of time slices.
+//noffidag_orbitals: number of offdiagonal orbitals. ndiag_orbitals: number
+//of diagonal orbitals. 
+hybfun::hybfun(const alps::params &p):
+green_function<double>(p["N_TAU"]+1, 1, p["N_ORBITALS"])
+{
+  if(!p.defined("N_TAU") || (int)(p["N_TAU"])==0) throw std::invalid_argument("define parameter N_TAU, the number of hybridization time slices!");
+  beta_=p["BETA"];
+
+  //read in Green's function from a file
+  read_hybridization_function(p);
+  hybridization_function_sanity_check();
+
+  extern int global_mpi_rank;
+  if(global_mpi_rank==0){
+    std::cout<<*this<<std::endl;
+  }
+}
+
+void hybfun::hybridization_function_sanity_check(void){
+for(std::size_t i=0; i<ntime();++i)
+  for(std::size_t j=0; j<nflavor();++j)
+    if(operator()(i,j)>0.) throw std::invalid_argument("Problem with hybridization function: Delta(\\tau) > 0. Delta should always be negative!");
+}
+
+//this routine reads in the hybridization function, either from a text file or from an hdf5 file (for easy passing of binary data).
+//In case of text files the file format is index - hyb_1 - hyb2 - hyb3 - ... in columns that go from time=0 to time=beta. Note that
+//the hybridization function is in imaginary time and always positive between zero and \beta.
+void hybfun::read_hybridization_function(const alps::params &p){
+  if(!p.defined("DELTA")) throw(std::invalid_argument(std::string("Parameter DELTA missing, filename for hybridization function not specified.")));
+  std::string fname=p["DELTA"];
+  if(p.defined("DELTA_IN_HDF5") && p["DELTA_IN_HDF5"]){//attempt to read from h5 archive
+    alps::hdf5::archive ar(fname, alps::hdf5::archive::READ);
+    if(p.defined("DMFT_FRAMEWORK") && p["DMFT_FRAMEWORK"]){//read in as green_function
+      read_hdf5(ar,"/Delta");
+    }
+    else{//plain hdf5
+      std::vector<double> tmp(nflavor()*ntime());
+      ar>>alps::make_pvp("/Delta",tmp);
+      for(std::size_t j=0; j<nflavor(); j++)
+        for(std::size_t i=0; i<ntime(); i++)
+          operator()(i,j)=tmp[j*ntime()+i];
+      tmp.clear();
+    }
+  }
+  else{//read from text file
+    std::ifstream infile(fname.c_str());
+    if(!infile.good()){
+      throw(std::invalid_argument(std::string("could not open hybridization file (text format) ") + p["DELTA"] + " for Delta function"));
+    }
+    for (std::size_t i=0; i<ntime(); i++) {
+      if(!infile.good()){
+        throw(std::invalid_argument(std::string("could not read hybridization file (text format) ") + p["DELTA"] + ". probably wrong number of lines"));
+      }
+      double dummy;
+      infile >> dummy;
+      //std::cout<<i<<" "<<ntime()<<" "<<"dummy: "<<dummy<<std::endl;
+      for (std::size_t j=0; j<nflavor(); j++){
+        if(!infile.good()){
+          throw(std::invalid_argument(std::string("could not read hybridization file (text format) ") + p["DELTA"] + ". probably wrong number of columns"));
+        }
+        double delta;
+        infile >> delta;
+        operator()(i,j)=delta;
+      }
+    }
+  }
+}
+
+std::ostream &operator<<(std::ostream &os, const hybfun &hyb){
+  os<<"the hybridization function is: "<<std::endl;
+  for(int i=0;i<10;++i){ std::cout<<i<<" "; for(std::size_t j=0;j<hyb.nflavor();++j){ std::cout<<hyb(i,j)<<" ";} std::cout<<std::endl; }
+  os<<"... *** etc *** ...\n";
+  os<<hyb.ntime()-1<<" "; for(std::size_t j=0;j<hyb.nflavor();++j){ std::cout<<hyb(hyb.ntime()-1,j)<<" ";} std::cout<<std::endl;
+  return os;
+}
+
+//linear interpolation of the hybridization function. 
+double hybfun::interpolate(double time, int orbital) const{
+
+  ///TODO: do a spline here, write a better/faster interpolation routine.
+  double sign=1;
+  if (time<0) {
+    time += beta_;
+    sign=-1;
+  }
+
+  //this is the overall flip of Delta (in comparison to F)
+  sign*=-1;
+  //the code takes Delta as input, but internally works with F(tau)=-Delta(beta-tau)
+  time=beta_-time;
+
+  double n = time/beta_*(ntime()-1);
+  int n_lower = (int)n; // interpolate linearly between n_lower and n_lower+1
+
+  return sign*(operator()(n_lower,orbital) + (n-n_lower)*(operator()(n_lower+1,orbital)-operator()(n_lower,orbital)));
+}
