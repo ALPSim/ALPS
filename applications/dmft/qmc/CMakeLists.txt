@@ -42,26 +42,19 @@ IF(ALPS_HAVE_MPI)
        interaction_expansion2/model.cpp)
 ENDIF(ALPS_HAVE_MPI)
 
-  set (DMFT_QMC_HYBRIDIZATION_SOURCE
-       hybridization/impurity.C 
-       hybridization/fourpoint.C)
-
 IF(ALPS_HAVE_MPI)
-  set (DMFT_QMC_HYBRIDIZATION2_SOURCE
-       hybridization2/impurity.C 
-       fouriertransform.C
-       hybridization2/moves.C
-       hybridization2/measurements.C
-       hybridization2/update.C)
-#  set (DMFT_QMC_HYBRIDIZATION3_SOURCE
-#       hybridization3/hybsim.cpp
-#       hybridization3/hyblocal.cpp
-#       hybridization3/hybint.cpp
-#       hybridization3/hybfun.cpp
-#       hybridization3/hybmatrix.cpp
-#       hybridization3/hybconfig.cpp
-#       hybridization3/hybupdates.cpp
-#       hybridization3/hybmeasurements.cpp)
+  set (DMFT_QMC_HYBRIDIZATION_SOURCE
+       hybridization/hybsim.cpp
+       hybridization/hyblocal.cpp
+       hybridization/hybint.cpp
+       hybridization/hybfun.cpp
+       hybridization/hybretintfun.cpp
+       hybridization/hybmatrix.cpp
+       hybridization/hybmatrix_ft.cpp
+       hybridization/hybconfig.cpp
+       hybridization/hybupdates.cpp
+       hybridization/hybevaluate.cpp
+       hybridization/hybmeasurements.cpp)
 ENDIF(ALPS_HAVE_MPI)
 
   set (DMFT_QMC_SOLVERS "")
@@ -70,9 +63,6 @@ ENDIF(ALPS_HAVE_MPI)
   set (DMFT_QMC_SOLVERS ${DMFT_QMC_SOLVERS} interaction_expansion_impl)
   add_library (interaction_expansion_impl STATIC ${DMFT_QMC_INTERACTION_EXPANSION_SOURCE})
   
-  #Hybridization Expansion
-  set (DMFT_QMC_SOLVERS ${DMFT_QMC_SOLVERS} hybridization_impl)
-  add_library (hybridization_impl STATIC ${DMFT_QMC_HYBRIDIZATION_SOURCE})
   
   #Interaction Expansion - separate solver
 IF(ALPS_HAVE_MPI)
@@ -81,8 +71,7 @@ ENDIF(ALPS_HAVE_MPI)
 
 IF(ALPS_HAVE_MPI)
   #Hybridization Expansion - separate solver
-  add_library (hybridization2_impl STATIC ${DMFT_QMC_HYBRIDIZATION2_SOURCE})
-#  add_library (hybridization3_impl STATIC ${DMFT_QMC_HYBRIDIZATION3_SOURCE})
+  add_library (hybridization_impl STATIC ${DMFT_QMC_HYBRIDIZATION_SOURCE})
 ENDIF(ALPS_HAVE_MPI)
 
   target_link_libraries(dmft_qmc_impl alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
@@ -94,14 +83,7 @@ ENDIF(ALPS_HAVE_MPI)
   add_executable(hirschfye solver_main.C hirschfyesim.C)
 
 IF(ALPS_HAVE_MPI)
-  add_executable(hybridization hybridization2/main.C)
-#  add_executable(hybridization3 hybridization3/hybmain.cpp)
-if(ALPS_LLVM_WORKAROUND)
-  message(STATUS "hybridization_evaluate will not be built since llvm workaround is enabled")
-else(ALPS_LLVM_WORKAROUND)
-  add_executable(hybridization_evaluate
-  hybridization2/hybridization_evaluate_mpi.C)
-endif(ALPS_LLVM_WORKAROUND)
+  add_executable(hybridization hybridization/hybmain.cpp)
   add_executable(interaction interaction_expansion2/main.cpp)
 ENDIF(ALPS_HAVE_MPI)
 
@@ -109,12 +91,7 @@ ENDIF(ALPS_HAVE_MPI)
   target_link_libraries(hirschfye dmft_qmc_impl)
 
 IF(ALPS_HAVE_MPI)
-  target_link_libraries(hybridization dmft_qmc_impl hybridization2_impl)
-#  target_link_libraries(hybridization3 dmft_qmc_impl hybridization3_impl)
-if(ALPS_LLVM_WORKAROUND)
-else(ALPS_LLVM_WORKAROUND)
-  target_link_libraries(hybridization_evaluate dmft_qmc_impl hybridization2_impl)
-endif(ALPS_LLVM_WORKAROUND)
+  target_link_libraries(hybridization dmft_qmc_impl hybridization_impl)
   target_link_libraries(interaction dmft_qmc_impl interaction_expansion2_impl)
 ENDIF(ALPS_HAVE_MPI)
 
@@ -122,12 +99,7 @@ ENDIF(ALPS_HAVE_MPI)
   install(TARGETS hirschfye  RUNTIME DESTINATION bin COMPONENT applications)
 IF(ALPS_HAVE_MPI)
   install(TARGETS hybridization RUNTIME DESTINATION bin COMPONENT applications)
-#  install(TARGETS hybridization3 RUNTIME DESTINATION bin COMPONENT applications)
   install(TARGETS interaction RUNTIME DESTINATION bin COMPONENT applications)
-if(ALPS_LLVM_WORKAROUND)
-else(ALPS_LLVM_WORKAROUND)
-  install(TARGETS hybridization_evaluate RUNTIME DESTINATION bin COMPONENT applications)
-endif(ALPS_LLVM_WORKAROUND)
 ENDIF(ALPS_HAVE_MPI)
 
 else(LAPACK_FOUND)

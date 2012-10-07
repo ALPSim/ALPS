@@ -49,7 +49,6 @@
 #endif
 
 #include "interaction_expansion/interaction_expansion.hpp"
-#include "hybridization/impurity.h"
 
 
 
@@ -112,11 +111,7 @@ int main(int argc, char** argv)
           selfconsistency_loop(parms, *solver_ptr, transform);
         }
         else if (parms["SOLVER"]=="Hybridization") {
-          std::cout<<"Using Single Site Hybridization Expansion Solver"<<std::endl;
-          alps::scheduler::BasicFactory<HybridizationSimItime,HybridizationRun> factory;
-          solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
-          itime_green_function_t G_tau = transform.initial_G0(parms);
-          F_selfconsistency_loop(parms, *solver_ptr, G_tau);
+          throw std::invalid_argument("The internal hybridization solver has been replaced by a standalone hybridzation solver.\nPlease use the \'hybridization\' program");
         }
         else {
             /*boost::filesystem::path*/ std::string p(parms["SOLVER"]/**/);
@@ -129,7 +124,6 @@ int main(int argc, char** argv)
         alps::scheduler::BasicFactory<InteractionExpansionSim,HalfFillingHubbardInteractionExpansionRun> interaction_expansion_factory_sshf;
         alps::scheduler::BasicFactory<InteractionExpansionSim,HubbardInteractionExpansionRun> interaction_expansion_factory_ss; 
         alps::scheduler::BasicFactory<InteractionExpansionSim,MultiBandDensityHubbardInteractionExpansionRun> interaction_expansion_factory_mbd; 
-        alps::scheduler::BasicFactory<HybridizationSimFrequency,HybridizationRun> werner_factory;
         //perform self consistency loop in Matsubara frequency omega
         FrequencySpaceHilbertTransformer *transform_ptr;
         if(!parms.defined("DOSFILE") && !parms.defined("TWODBS")){
@@ -178,8 +172,7 @@ int main(int argc, char** argv)
         }
         else
           if (parms["SOLVER"]=="Hybridization") {
-            std::cout<<"Using Single Site Hybridization Expansion Solver"<<std::endl;
-            solver_ptr.reset(new alps::ImpuritySolver(werner_factory,argc,argv));
+          throw std::invalid_argument("The internal hybridization solver has been replaced by a standalone hybridzation solver.\nPlease use the \'hybridization\' program");
           }
           else
           {
