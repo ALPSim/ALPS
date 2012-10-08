@@ -29,6 +29,9 @@
 
 #include "hyb.hpp"
 #include "hybevaluate.hpp"
+
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
 typedef alps::mcmpisim<hybridization> sim_type;
 
 //stops the simulation if time > end_time or if signals received.
