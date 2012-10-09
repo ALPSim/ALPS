@@ -65,6 +65,9 @@ mark_as_advanced(ALPS_BUILD_TUTORIALS_PACKAGE)
 mark_as_advanced(ALPS_INSTALL_BOOST_TEST)
 mark_as_advanced(ALPS_PATCH_VISTRAILS)
 mark_as_advanced(ALPS_NGS_USE_NEW_ALEA)
+
+option(ALPS_USE_MKL_PARALLEL "Use parallel version of MKL" OFF)
+mark_as_advanced(ALPS_USE_MKL_PARALLEL)
     
 if (ALPS_FOR_VISTRAILS)
   if (NOT WIN32 AND NOT APPLE)
@@ -317,6 +320,7 @@ if(ALPS_ENABLE_OPENMP)
 endif(ALPS_ENABLE_OPENMP)
 
 # Lapack
+# For parallel MKL, this section should be executed after OpenMP check.
 if (NOT ALPS_FOR_VISTRAILS)
   if (NOT LAPACK_FOUND)
     find_package(Lapack)

@@ -20,7 +20,7 @@
 #  Copyright (C)  2009-2010 Bela Bauer
 #  Copyright (C)  2009-2010 Brigitte Surer
 #  Copyright (C)  2009-2010 Lukas Gamper
-#  Copyright (C)  2009-2010 Ryo IGARASHI <rigarash@hosi.phys.s.u-tokyo.ac.jp>
+#  Copyright (C)  2009-2012 Ryo IGARASHI <rigarash@hosi.phys.s.u-tokyo.ac.jp>
 #  Copyright (C)       2010 Emanuel Gull <gull@phys.columbia.edu>
 #  Copyright (C)       2012 Michele Dolfi <dolfim@phys.ethz.ch>
 #
@@ -28,8 +28,7 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 #
-# TODO: - enable MKL parallel as advanced option
-#       - look for MKL on Windows
+# TODO: - look for MKL on Windows
 #       - look for goto2
 
 # Includes
@@ -47,9 +46,12 @@ ENDIF(BLAS_LIBRARY AND LAPACK_LIBRARY)
 
 ########################################################################################################
 # Looking for MKL.
+#   For parallel MKL, OpenMP check has to be done beforehand.
 # 0) $ENV{MKL} can be defined from http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor
 #    if specified, this settings are chosen
-# 1) If compiler is Intel >= 12, the option -mkl=sequential is loading MKL automatically
+# 1) If compiler is Intel >= 12
+# 1.1) When OPENMP_FOUND=ON and ALPS_USE_MKL_PARALLEL=ON, use -mkl=parallel
+# 1.2) When OPENMP_FOUND=OFF or ALPS_USE_MKL_PARALLEL=OFF, use -mkl=sequential
 # 2) If $ENV{MKLROOT} / $ENV{MKL_HOME} defined (done by MKL tools/environment scripts), use the linking from advisor
 # 3) Look for MKL libraries in MKL_PATHS
 ########################################################################################################
@@ -78,7 +80,11 @@ if(NOT HAVE_MKL AND NOT LAPACK_LIBRARY_INIT)
     endif()
     
     if(INTEL_WITH_MKL)
-      set(LAPACK_LIBRARY "-mkl=sequential")
+      if(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
+        set(LAPACK_LIBRARY "-mkl=parallel")
+      else(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
+        set(LAPACK_LIBRARY "-mkl=sequential")
+      endif(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
       set(BLAS_LIBRARY "")
       set(HAVE_MKL TRUE)
     endif(INTEL_WITH_MKL)
@@ -120,14 +126,24 @@ if(NOT HAVE_MKL AND NOT LAPACK_LIBRARY_INIT)
     if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64")
       if(${MKL_VERSION} MATCHES "10\\.3\\.[0-9]+" )
         if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+          # TODO: Not touched since rigarash do not know much about MacOSX linker flags
           set(LAPACK_LIBRARY -L${mkl_home}/lib -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm)
         else()
-          set(LAPACK_LIBRARY -L${mkl_home}/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm)
+          if(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
+            set(LAPACK_LIBRARY -L${mkl_home}/lib/intel64 -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lguide -lpthread -lm)
+          else(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
+            set(LAPACK_LIBRARY -L${mkl_home}/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm)
+          endif(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
         endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       else()
         if(${MKL_VERSION} MATCHES "10\\.[0-2]\\.[0-7]")
-          set(LAPACK_LIBRARY -L${mkl_home}/lib/em64t -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm)
+          if(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
+            set(LAPACK_LIBRARY -L${mkl_home}/lib/em64t -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lguide -lpthread -lm)
+          else(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
+            set(LAPACK_LIBRARY -L${mkl_home}/lib/em64t -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm)
+          endif(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
         else()
+          # TODO: This old version always link threaded MKL regardless of the value of OPENMP_FOUND
           set(LAPACK_LIBRARY -L${mkl_home}/lib/em64t -lmkl_lapack -lmkl -lguide)
         endif()
       endif()
@@ -136,14 +152,24 @@ if(NOT HAVE_MKL AND NOT LAPACK_LIBRARY_INIT)
     if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "i386" OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "i686")
       if(${MKL_VERSION} MATCHES "10\\.3\\.[0-9]+")
         if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+          # TODO: Not touched since rigarash do not know much about MacOSX linker flags
           set(LAPACK_LIBRARY -L${mkl_home}/lib -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm)
         else()
-          set(LAPACK_LIBRARY -L${mkl_home}/lib/ia32 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm)
+          if(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
+            set(LAPACK_LIBRARY -L${mkl_home}/lib/ia32 -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lguide -lpthread -lm)
+          else(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
+            set(LAPACK_LIBRARY -L${mkl_home}/lib/ia32 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm)
+          endif(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
         endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       else()
         if(${MKL_VERSION} MATCHES "10\\.[0-2]\\.[0-7]")
-          set(LAPACK_LIBRARY -L${mkl_home}/lib/32 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm)
+          if(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
+            set(LAPACK_LIBRARY -L${mkl_home}/lib/32 -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lguide -lpthread -lm)
+          else(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
+            set(LAPACK_LIBRARY -L${mkl_home}/lib/32 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm)
+          endif(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
         else()
+          # TODO: This old version always link threaded MKL regardless of the value of OPENMP_FOUND
           set(LAPACK_LIBRARY -L${mkl_home}/lib/ia32 -lmkl_lapack -lmkl -lguide)
         endif()
       endif()
