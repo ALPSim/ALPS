@@ -72,4 +72,17 @@ class h5ar(hdf5_archive_impl):
     def __init__(self, filename, mode = 'r'):
         hdf5_archive_impl.__init__(self, filename, mode)
 
+    def __str__(self,path="/"):
+        if self.is_group(path):
+            ret = ""
+            for child in self.list_children(path):
+                ret += "<%s>\n" % child
+                ret += self.__str__(path+("" if path[-1] == "/" else "/" )+child) 
+                ret += "\n</%s>" % child
+            return ret
+        else:
+            return "%s" %(str(self[path]))
+
+
+
 from pyngsapi_c import *

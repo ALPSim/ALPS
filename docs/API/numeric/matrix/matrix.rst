@@ -6,11 +6,30 @@ alps::numeric::matrix is a matrix class that models the concept of a [wiki:conce
 In header ``#include <alps/numeric/matrix.hpp>``
 
 
-Description
------------
+Synopsis
+--------
 
-.. doxygenclass:: alps::numeric::matrix
-   :members: 
+Public
+++++++
+.. doxygen:: class/synopsis
+   alps::numeric::matrix
+   :public:
+   :all:
 
+Private
++++++++
+.. doxygen:: class/synopsis
+   alps::numeric::matrix
+   :private:
+   :all:
+
+
+Member description
+------------------
+.. doxygen:: class/members
+   alps::numeric::matrix
+   :primary:
+   :public:
+   :all:
 
 

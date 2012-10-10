@@ -193,8 +193,13 @@ TAB_SIZE               = 8
 # will result in a user-defined paragraph with heading "Side Effects:".
 # You can put \n's in the value part of an alias to insert newlines.
 
-ALIASES = "rst=\verbatim embed:rst"
-ALIASES += "endrst=\endverbatim"
+ALIASES = "postcond=\xrefitem postcond \"Post condition\" \"Post condition\" "
+ALIASES += "precond=\xrefitem precond \"Pre condition\" \"Pre condition\" "
+
+ALIASES += "new_in{1}=\xrefitem newfeature \"New feature\" \"New feature\" \xmlonly <version>\1</version> \endxmlonly"
+ALIASES += "changed_in{1}=\xrefitem changed \"Changed feature\" \"Changed feature\" \xmlonly <version>\1</version> \endxmlonly"
+ALIASES += "deprecated_from{1}=\xrefitem deprecated \"Deprecated feature\" \"Deprecated feature\" \xmlonly <version>\1</version> \endxmlonly"
+
 
 
 # This tag can be used to specify a number of word-keyword mappings (TCL only).
