@@ -25,6 +25,8 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// TODO: merge changes back from main_dualthread_tiny!
+
 #include "ising.hpp"
 
 using namespace alps;
@@ -41,7 +43,7 @@ int main(int argc, char *argv[]) {
     if (options.resume)
         sim.load(params["DUMP"] | "dump");
 
-    threaded_callback_wrapper stopper(boost::bind<bool>(&basic_stop_callback, options.time_limit));
+    threaded_callback_wrapper stopper(boost::bind<bool>(&stop_callback, options.time_limit));
     boost::thread thread(&sim_type::run, boost::ref(sim), static_cast<boost::function<bool()> >(boost::ref(stopper)));
 
   //TODO: create one sensible exampel: progress every 5 minutes, checkpoint every hour

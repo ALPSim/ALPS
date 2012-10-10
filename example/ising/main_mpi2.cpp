@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
     if (options.resume)
         sim.load((params["DUMP"] | "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
 
-    sim.run(boost::bind(&basic_stop_callback, options.time_limit));
+    sim.run(boost::bind(&stop_callback, options.time_limit));
 
     sim.save((params["DUMP"] | "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
 

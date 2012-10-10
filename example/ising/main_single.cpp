@@ -29,7 +29,7 @@
 
 using namespace alps;
 
-typedef ising_sim<mcbase> sim_type;
+typedef ising_sim sim_type;
 
 int main(int argc, char *argv[]) {
 
@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
     if (options.resume)
         sim.load(params["DUMP"] | "dump");
 
-    sim.run(boost::bind(&basic_stop_callback, options.time_limit));
+    sim.run(boost::bind(&stop_callback, options.time_limit));
 
     sim.save(params["DUMP"] | "dump");
 
@@ -49,6 +49,7 @@ int main(int argc, char *argv[]) {
   
     save_results(results, params, options.output_file, "/simulation/results");
 
+    std::cout << "#Sweeps:                " << results["Energy"].count() << std::endl;
     std::cout << "Correlations:           " << results["Correlations"] << std::endl;
     std::cout << "Energy:                 " << results["Energy"] << std::endl;
 

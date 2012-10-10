@@ -6,9 +6,9 @@
 find_program(cmd_path ngs_ising_single ${binarydir} ${dllexedir})
 
 execute_process(
-    COMMAND ${cmd_path} -T 15 ${currentdir}/params/param.h5 sim.single
+    COMMAND ${cmd_path} -T 15 ${currentdir}/params/param.h5 sim.sgl
     RESULT_VARIABLE not_successful
-    OUTPUT_FILE ngs_ising_single_output_1
+    OUTPUT_FILE ngs_ising_sgl_output
     ERROR_VARIABLE err
     TIMEOUT 600
 )
@@ -18,9 +18,9 @@ if(not_successful)
 endif(not_successful)
 
 execute_process(
-    COMMAND ${cmd_path} -T 15 --continue ${currentdir}/params/param.h5 sim.single
+    COMMAND ${cmd_path} -T 15 --continue ${currentdir}/params/param.h5 sim.sgl
     RESULT_VARIABLE not_successful
-    OUTPUT_FILE ngs_ising_single_output_2
+    OUTPUT_FILE ngs_ising_sgl_output_continue
     ERROR_VARIABLE err
     TIMEOUT 600
 )
@@ -30,6 +30,6 @@ if(not_successful)
 endif(not_successful)
 
 file(REMOVE dump)
-file(REMOVE sim.single)
-file(REMOVE ngs_ising_single_output_1)
-file(REMOVE ngs_ising_single_output_2)
+file(REMOVE sim.sgl)
+file(REMOVE ngs_ising_sgl_output)
+file(REMOVE ngs_ising_sgl_output_continue)

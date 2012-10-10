@@ -34,6 +34,6 @@
 
 BOOST_PYTHON_MODULE(pyising) {
     ALPS_EXPORT_SIM_TO_PYTHON(sim, ising_sim)
-        .add_property("done", &ising_sim<alps::mcbase>::fraction_completed)
+        .add_property("done", &ising_sim::fraction_completed)
     ;
 }

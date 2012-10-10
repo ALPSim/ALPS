@@ -27,11 +27,13 @@
 
 #include "ising.hpp"
 
+#include <alps/ngs/scheduler/proto/mpisim.hpp>
+
 #include <boost/lexical_cast.hpp>
 
 using namespace alps;
 
-typedef mcmpisim<ising_sim<mcbase> > sim_type;
+typedef mpisim_ng<ising_sim> sim_type;
 
 int main(int argc, char *argv[]) {
 
@@ -40,7 +42,7 @@ int main(int argc, char *argv[]) {
     boost::mpi::communicator c;
 
     parameters_type<sim_type>::type params;
-    if (c.rank() == 0) {
+    if (!c.rank()) {
         hdf5::archive ar(options.input_file);
         ar["/parameters"] >> params;
     }
@@ -51,13 +53,14 @@ int main(int argc, char *argv[]) {
     if (options.resume)
         sim.load((params["DUMP"] | "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
 
-    sim.run(boost::bind(&basic_stop_callback, options.time_limit));
+    sim.run(boost::bind(&stop_callback, options.time_limit));
 
     sim.save((params["DUMP"] | "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
 
     results_type<sim_type>::type results = collect_results(sim);
 
-    if (c.rank() == 0) {
+    if (!c.rank()) {
+        std::cout << "#Sweeps:                " << results["Energy"].count() << std::endl;
         std::cout << "Correlations:           " << results["Correlations"] << std::endl;
         std::cout << "Energy:                 " << results["Energy"] << std::endl;
 

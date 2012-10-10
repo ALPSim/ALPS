@@ -17,18 +17,19 @@ if (ALPS_BUILD_EXAMPLES)
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_single_test.cmake
     )
 
-# TODO: implement
-#    add_executable(ngs_ising_threaded main_threaded.cpp)
-#    add_dependencies(ngs_ising_threaded alps)
-#    target_link_libraries(ngs_ising_threaded alps)
+    add_executable(ngs_ising_dualthread main_dualthread_tiny.cpp)
+    add_dependencies(ngs_ising_dualthread alps)
+    target_link_libraries(ngs_ising_dualthread alps)
 
-#    add_test(ngs_ising_threaded
-#        ${CMAKE_COMMAND}
-#            -Dsourcedir=${PROJECT_SOURCE_DIR}
-#            -Dbinarydir=${PROJECT_BINARY_DIR}
-#            -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
-#            -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_threaded_test.cmake
-#    )
+    add_test(ngs_ising_dualthread
+        ${CMAKE_COMMAND}
+            -Dsourcedir=${PROJECT_SOURCE_DIR}
+            -Dbinarydir=${PROJECT_BINARY_DIR}
+            -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_dualthread_test.cmake
+    )
+    
+    # TODO: compile ngs_ising_dualthreaded not only _tiny
 
     if (MPI_FOUND)
     
@@ -50,18 +51,25 @@ if (ALPS_BUILD_EXAMPLES)
                 -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_test.cmake
         )
 
-# TODO: Implement
-#        add_executable(ngs_ising_mpi_threaded main_mpi_threaded.cpp)
-#        add_dependencies(ngs_ising_mpi_threaded alps)
-#        target_link_libraries(ngs_ising_mpi_threaded alps)
-    
-#        add_test(ngs_ising_mpi_threaded
-#            ${CMAKE_COMMAND}
-#                -Dsourcedir=${PROJECT_SOURCE_DIR}
-#                -Dbinarydir=${PROJECT_BINARY_DIR}
-#                -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
-#                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_threaded_test.cmake
-#        )
+        add_executable(ngs_ising_mpi_dualthread main_mpi_dualthread_tiny.cpp)
+        add_dependencies(ngs_ising_mpi_dualthread alps)
+        target_link_libraries(ngs_ising_mpi_dualthread alps)
+
+        add_test(ngs_ising_mpi_dualthread
+            ${CMAKE_COMMAND}
+                -Dcmd=ngs_ising_mpi
+                -Dmpiexec=${MPIEXEC}
+                -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
+                -Dprocs=4
+                -Dmpiexec_preflags=${MPIEXEC_PREFLAGS}
+                -Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}
+                -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
+                -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
+                -Ddllexedir=${PROJECT_BINARY_DIR}/bin
+                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_dualthread_test.cmake
+        )
+
+        # TODO: compile ngs_ising_mpi_dualthreaded not only _tiny
 
         add_executable(ngs_ising_mpi_pscan main_mpi_pscan.cpp)
         add_dependencies(ngs_ising_mpi_pscan alps)
@@ -80,10 +88,11 @@ if (ALPS_BUILD_EXAMPLES)
                 -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_pscan_test.cmake
         )
 
-        add_executable(ngs_ising_mpi2 main_mpi2.cpp)
-        add_dependencies(ngs_ising_mpi2 alps)
-        target_link_libraries(ngs_ising_mpi2 alps)
-   
+# TODO: implement
+#        add_executable(ngs_ising_mpi2 main_mpi2.cpp)
+#        add_dependencies(ngs_ising_mpi2 alps)
+#        target_link_libraries(ngs_ising_mpi2 alps)
+#
 #        add_test(ngs_ising_mpi2
 #            ${CMAKE_COMMAND}
 #                -Dcmd=ngs_ising_mpi2

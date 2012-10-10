@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
         if (options.resume)
             sim.load((params["DUMP"] | "dump") + ".0");
 
-        threaded_callback_wrapper stopper(boost::bind<bool>(&basic_stop_callback, options.time_limit));
+        threaded_callback_wrapper stopper(boost::bind<bool>(&stop_callback, options.time_limit));
         boost::thread thread(boost::bind<bool>(&parallel<ising_sim<multithread<base> > >::run, boost::ref(sim), stopper));
         
         boost::posix_time::ptime progress_time = boost::posix_time::second_clock::local_time();
@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
         if (options.resume)
             sim.load((params["DUMP"] | "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
 
-        sim.run(boost::bind(&basic_stop_callback, options.time_limit));
+        sim.run(boost::bind(&stop_callback, options.time_limit));
 
         sim.save((params["DUMP"] | "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
 

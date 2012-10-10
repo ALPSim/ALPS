@@ -25,60 +25,69 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 #include "ising.hpp"
+
+#include <alps/ngs/scheduler/proto/mpisim.hpp>
+#include <alps/ngs/scheduler/proto/dualthreadsim.hpp>
 
 #include <boost/lexical_cast.hpp>
 
-#include <alps/ngs/scheduler/proto/mpisim.hpp>
-
 using namespace alps;
 
-typedef mpisim_ng<ising_sim> sim_type;
+typedef mpisim_ng<dualthreadsim_ng<ising_sim> > sim_type;
 
 int main(int argc, char *argv[]) {
 
     mcoptions options(argc, argv);
     boost::mpi::environment env(argc, argv);
-    boost::mpi::communicator comm_world;
-
-    std::size_t color = comm_world.rank() % 2;
-
-    boost::mpi::communicator comm_local = comm_world.split(color);
+    boost::mpi::communicator c;
 
     parameters_type<sim_type>::type params;
-    if (!comm_local.rank()) {
-        hdf5::archive ar(options.input_file + "." + boost::lexical_cast<std::string>(color));
+    if (!c.rank()) {
+        hdf5::archive ar(options.input_file);
         ar["/parameters"] >> params;
     }
-    broadcast(comm_local, params);
-    
-    std::cout << "color: " << color << ", "
-              << "global rank: " << boost::lexical_cast<std::string>(comm_world.rank()) << ", "
-              << "local rank: " << boost::lexical_cast<std::string>(comm_local.rank()) << ", "
-              << "L: " << params["L"] << std::endl;
+    broadcast(c, params);
 
-    sim_type sim(params, comm_local);
+    sim_type sim(params, c);
 
     if (options.resume)
-        sim.load(
-              (params["DUMP"] | "dump")
-            + "." + boost::lexical_cast<std::string>(color) 
-            + "." + boost::lexical_cast<std::string>(comm_local.rank())
-        );
-
-    sim.run(boost::bind(&stop_callback, options.time_limit));
-
-    sim.save(
-          (params["DUMP"] | "dump")
-        + "." + boost::lexical_cast<std::string>(color) 
-        + "." + boost::lexical_cast<std::string>(comm_local.rank())
+        sim.load((params["DUMP"] | "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
+    
+    boost::thread thread(
+          static_cast<bool(sim_type::*)(boost::function<bool ()> const &)>(&sim_type::run)
+        , boost::ref(sim)
+        , static_cast<boost::function<bool()> >(boost::bind(&stop_callback, options.time_limit))
     );
+
+    boost::posix_time::ptime progress_time = boost::posix_time::second_clock::local_time();
+    boost::posix_time::ptime checkpoint_time = boost::posix_time::second_clock::local_time();
+    do {
+
+        alps::sleep(0.1 * 1e9);
+
+        if (!c.rank()) {
+            if (boost::posix_time::second_clock::local_time() > progress_time + boost::posix_time::seconds(5)) {
+                std::cout << "progress: " << sim.fraction_completed() << std::endl;
+                progress_time = boost::posix_time::second_clock::local_time();
+            }
+
+            if (boost::posix_time::second_clock::local_time() > checkpoint_time + boost::posix_time::seconds(13)) {
+                std::cout << "checkpointing rank " << c.rank() << "... " << std::endl;
+                sim.save(params["DUMP"] | "dump");
+                checkpoint_time = boost::posix_time::second_clock::local_time();
+            }
+        }
+
+        sim.check_callback();
+
+    } while (!sim.finished());
+
+    sim.save((params["DUMP"] | "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
 
     results_type<sim_type>::type results = collect_results(sim);
 
-    if (!comm_local.rank()) {
-        std::cout << "Results of group " << color << std::endl;
+    if (!c.rank()) {
         std::cout << "#Sweeps:                " << results["Energy"].count() << std::endl;
         std::cout << "Correlations:           " << results["Correlations"] << std::endl;
         std::cout << "Energy:                 " << results["Energy"] << std::endl;
@@ -86,6 +95,7 @@ int main(int argc, char *argv[]) {
         std::cout << "Mean of Energy:         " << results["Energy"].mean<double>() << std::endl;
         std::cout << "Error of Energy:        " << results["Energy"].error<double>() << std::endl;
         std::cout << "Mean of Correlations:   " << short_print(results["Correlations"].mean<std::vector<double> >()) << std::endl;
+        std::cout << "Covariance E/M:         " << short_print(results["Energy"].covariance<double>(results["Magnetization"])) << std::endl;
 
         std::cout << "-2 * Energy / 13:       " << -2. * results["Energy"] / 13. << std::endl;
         std::cout << "1 / Correlations        " << 1. / results["Correlations"] << std::endl;
@@ -94,8 +104,6 @@ int main(int argc, char *argv[]) {
         std::cout << "Sin(Energy):            " << sin(results["Energy"]) << std::endl;
         std::cout << "Tanh(Correlations):     " << tanh(results["Correlations"]) << std::endl;
 
-        save_results(results, params, options.output_file + "." + boost::lexical_cast<std::string>(color), "/simulation/results");
-
+        save_results(results, params, options.output_file, "/simulation/results");
     }
-
 }

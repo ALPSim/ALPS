@@ -27,9 +27,11 @@
 
 #include "ising.hpp"
 
+#include <alps/ngs/scheduler/proto/dualthreadsim.hpp>
+
 using namespace alps;
 
-typedef ising_sim<multithreadedsim<mcbase> > sim_type;
+typedef dualthreadsim_ng<ising_sim> sim_type;
 
 int main(int argc, char *argv[]) {
 
@@ -40,9 +42,12 @@ int main(int argc, char *argv[]) {
     if (options.resume)
         sim.load(params["DUMP"] | "dump");
 
-    threaded_callback_wrapper stopper(boost::bind<bool>(&basic_stop_callback, options.time_limit));
-    boost::thread thread(&sim_type::run, boost::ref(sim), static_cast<boost::function<bool()> >(boost::ref(stopper)));
-  
+    boost::thread thread(
+          static_cast<bool(sim_type::*)(boost::function<bool ()> const &)>(&sim_type::run)
+        , boost::ref(sim)
+        , static_cast<boost::function<bool()> >(boost::bind(&stop_callback, options.time_limit))
+    );
+
     boost::posix_time::ptime progress_time = boost::posix_time::second_clock::local_time();
     boost::posix_time::ptime checkpoint_time = boost::posix_time::second_clock::local_time();
     do {
@@ -53,14 +58,15 @@ int main(int argc, char *argv[]) {
             progress_time = boost::posix_time::second_clock::local_time();
         }
 
-        if (boost::posix_time::second_clock::local_time() > checkpoint_time + boost::posix_time::seconds(15)) {
+        if (boost::posix_time::second_clock::local_time() > checkpoint_time + boost::posix_time::seconds(13)) {
             std::cout << "checkpointing ... " << std::endl;
             sim.save(params["DUMP"] | "dump");
             checkpoint_time = boost::posix_time::second_clock::local_time();
         }
 
-    } while (!stopper.check());
-    thread.join();
+        sim.check_callback();
+
+    } while (!sim.finished());
 
     sim.save(params["DUMP"] | "dump");
 
@@ -68,6 +74,7 @@ int main(int argc, char *argv[]) {
 
     save_results(results, params, options.output_file, "/simulation/results");
 
+    std::cout << "#Sweeps:                " << results["Energy"].count() << std::endl;
     std::cout << "Correlations:           " << results["Correlations"] << std::endl;
     std::cout << "Energy:                 " << results["Energy"] << std::endl;
 

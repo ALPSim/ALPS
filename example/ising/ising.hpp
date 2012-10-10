@@ -26,15 +26,16 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <alps/ngs.hpp>
+#include <alps/ngs/scheduler/proto/mcbase.hpp>
 
 #include <boost/lambda/lambda.hpp>
 
-template<typename Base> class ising_sim : public Base {
+class ising_sim : public alps::mcbase_ng {
 
     public:
 
-        ising_sim(typename Base::parameters_type const & params, std::size_t seed_offset = 42)
-            : Base(params, seed_offset)
+        ising_sim(parameters_type const & params, std::size_t seed_offset = 42)
+            : mcbase_ng(params, seed_offset)
             , length(params["L"])
             , thermalization_sweeps(int(params["THERMALIZATION"]))
             , total_sweeps(int(params["SWEEPS"]))
@@ -44,8 +45,8 @@ template<typename Base> class ising_sim : public Base {
             init();
         }
 
-        template <typename Arg> ising_sim(typename Base::parameters_type const & params, Arg comm)
-            : Base(params, comm)
+        template <typename Arg> ising_sim(parameters_type const & params, Arg comm)
+            : mcbase_ng(params, comm)
             , length(params["L"])
             , thermalization_sweeps(int(params["THERMALIZATION"]))
             , total_sweeps(int(params["SWEEPS"]))
@@ -84,15 +85,18 @@ template<typename Base> class ising_sim : public Base {
                 std::transform(corr.begin(), corr.end(), corr.begin(), boost::lambda::_1 / double(length));
                 ten /= length;
                 tmag /= length;
-                this->measurements["Energy"] << ten;
-                this->measurements["Magnetization"] << tmag;
-                this->measurements["Magnetization^2"] << tmag * tmag;
-                this->measurements["Magnetization^4"] << tmag * tmag * tmag * tmag;
-                this->measurements["Correlations"] << corr;
+                // CHECK: this is ugly, we need a nicer solution here ...
+                this->measurements()["Energy"] << ten;
+                this->measurements()["Magnetization"] << tmag;
+                this->measurements()["Magnetization^2"] << tmag * tmag;
+                this->measurements()["Magnetization^4"] << tmag * tmag * tmag * tmag;
+                this->measurements()["Correlations"] << corr;
             }
         };
 
         double fraction_completed() const {
+            // TODO: can we avoid this?
+            lock_guard_type data_lock(data_mutex);
             return (sweeps < thermalization_sweeps ? 0. : ( sweeps - thermalization_sweeps ) / double(total_sweeps));
         }
 
@@ -101,7 +105,7 @@ template<typename Base> class ising_sim : public Base {
         void init() {
             for(int i = 0; i < length; ++i)
                 spins[i] = (this->random() < 0.5 ? 1 : -1);
-            this->measurements
+            this->measurements()
                 << alps::ngs::RealObservable("Energy")
                 << alps::ngs::RealObservable("Magnetization")
                 << alps::ngs::RealObservable("Magnetization^2")
