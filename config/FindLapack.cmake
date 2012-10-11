@@ -20,7 +20,7 @@
 #  Copyright (C)  2009-2010 Bela Bauer
 #  Copyright (C)  2009-2010 Brigitte Surer
 #  Copyright (C)  2009-2010 Lukas Gamper
-#  Copyright (C)  2009-2012 Ryo IGARASHI <rigarash@hosi.phys.s.u-tokyo.ac.jp>
+#  Copyright (C)  2009-2012 Ryo IGARASHI <rigarash@issp.u-tokyo.ac.jp>
 #  Copyright (C)       2010 Emanuel Gull <gull@phys.columbia.edu>
 #  Copyright (C)       2012 Michele Dolfi <dolfim@phys.ethz.ch>
 #
@@ -49,7 +49,7 @@ ENDIF(BLAS_LIBRARY AND LAPACK_LIBRARY)
 #   For parallel MKL, OpenMP check has to be done beforehand.
 # 0) $ENV{MKL} can be defined from http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor
 #    if specified, this settings are chosen
-# 1) If compiler is Intel >= 12
+# 1) If compiler is Intel >= 12 (Intel Composer XE 2011/2013, Intel Compiler Pro)
 # 1.1) When OPENMP_FOUND=ON and ALPS_USE_MKL_PARALLEL=ON, use -mkl=parallel
 # 1.2) When OPENMP_FOUND=OFF or ALPS_USE_MKL_PARALLEL=OFF, use -mkl=sequential
 # 2) If $ENV{MKLROOT} / $ENV{MKL_HOME} defined (done by MKL tools/environment scripts), use the linking from advisor
@@ -67,7 +67,7 @@ endif($ENV{MKL} MATCHES "mkl")
 
 # 1) Intel compiler >= 12
 if(NOT HAVE_MKL AND NOT LAPACK_LIBRARY_INIT)
-  if(${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
+  if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
     set(INTEL_WITH_MKL FALSE)
     if(DEFINED CMAKE_CXX_COMPILER_VERSION)
       if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 12
@@ -88,19 +88,16 @@ if(NOT HAVE_MKL AND NOT LAPACK_LIBRARY_INIT)
       set(BLAS_LIBRARY "")
       set(HAVE_MKL TRUE)
     endif(INTEL_WITH_MKL)
-  endif(${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
+  endif(${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
 endif(NOT HAVE_MKL AND NOT LAPACK_LIBRARY_INIT)
 
 # 2) Use MKLROOT / MKL_HOME and standard linking
 if(NOT HAVE_MKL AND NOT LAPACK_LIBRARY_INIT)
   set(mkl_home "")
-  
   if($ENV{MKLROOT} MATCHES "mkl")
     set(mkl_home $ENV{MKLROOT})
-  else()
-    if($ENV{MKL_HOME} MATCHES "mkl")
-      set(mkl_home $ENV{MKL_HOME})
-    endif()
+  elseif($ENV{MKL_HOME} MATCHES "mkl")
+    set(mkl_home $ENV{MKL_HOME})
   endif()
 
   if(mkl_home MATCHES "mkl")
@@ -123,61 +120,80 @@ if(NOT HAVE_MKL AND NOT LAPACK_LIBRARY_INIT)
     message(STATUS "LAPACK DEBUG::MKL_VERSION (raw) ${MKL_VERSION_RAW}")
     message(STATUS "LAPACK DEBUG::MKL_VERSION ${MKL_VERSION}")
     
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64")
-      if(${MKL_VERSION} MATCHES "10\\.3\\.[0-9]+" )
-        if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-          # TODO: Not touched since rigarash do not know much about MacOSX linker flags
-          set(LAPACK_LIBRARY -L${mkl_home}/lib -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm)
-        else()
-          if(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
-            set(LAPACK_LIBRARY -L${mkl_home}/lib/intel64 -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lguide -lpthread -lm)
-          else(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
-            set(LAPACK_LIBRARY -L${mkl_home}/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm)
-          endif(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
-        endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    # OS thread library (pthread required by MKL)
+    find_package(Threads REQUIRED)
+    # MKL core
+    if(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
+      # No parallel mode support for MKL < 10.0
+      if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
+        # Intel with Intel OpenMP
+        set(MKL_CORE -lmkl_intel_thread -lmkl_core -liomp5)
+      elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+        # GCC with GNU OpenMP
+        # MKL with g++ needs gfortran
+        set(MKL_CORE -lmkl_gnu_thread -lmkl_core -lgfortran)
+      endif()
+    else()
+      if(${MKL_VERSION} MATCHES "1[0-1]\\.[0-3]\\.[0-9]+")
+        set(MKL_CORE -lmkl_sequential -lmkl_core)
+      else() # MKL < 10.0
+        set(MKL_CORE -lmkl_lapack -lmkl -lguide)
+      endif()
+    endif()
+    # basic data type model interface
+    # - assuming ILP32 or LP64
+    if(${MKL_VERSION} MATCHES "1[0-1]\\.[0-3]\\.[0-9]+")
+      if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64" OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "ia64")
+        set(MKL_INTERFACE -lmkl_intel_lp64)
+      elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "i386" OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "i686")
+        set(MKL_INTERFACE -lmkl_intel)
       else()
-        if(${MKL_VERSION} MATCHES "10\\.[0-2]\\.[0-7]")
-          if(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
-            set(LAPACK_LIBRARY -L${mkl_home}/lib/em64t -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lguide -lpthread -lm)
-          else(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
-            set(LAPACK_LIBRARY -L${mkl_home}/lib/em64t -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm)
-          endif(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
+        message(SEND_ERROR "MKL: the processor type of this system is not supported")
+      endif()
+    else() # MKL < 10.0
+      set(MKL_INTERFACE "")
+    endif()
+    # MKL library path
+    if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+      if(${MKL_VERSION} MATCHES "11\\.0\\.[0-9]+" OR ${MKL_VERSION} MATCHES "10\\.3\\.[0-9]+")
+        set(MKL_LIBRARY_PATH -L${mkl_home}/lib)
+      else() # MKL < 10.3
+        if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64")
+          set(MKL_LIBRARY_PATH -L${mkl_home}/lib/em64t)
+        elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "i386" OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "i686")
+          set(MKL_LIBRARY_PATH -L${mkl_home}/lib/32)
         else()
-          # TODO: This old version always link threaded MKL regardless of the value of OPENMP_FOUND
-          set(LAPACK_LIBRARY -L${mkl_home}/lib/em64t -lmkl_lapack -lmkl -lguide)
+          message(SEND_ERROR "MKL: the processor type of this system is not supported")
+        endif()
+      endif()
+    elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+      if(${MKL_VERSION} MATCHES "11\\.0\\.[0-9]+" OR ${MKL_VERSION} MATCHES "10\\.3\\.[0-9]+")
+        if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64")
+          set(MKL_LIBRARY_PATH -L${mkl_home}/lib/intel64)
+        elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "i386" OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "i686")
+          set(MKL_LIBRARY_PATH -L${mkl_home}/lib/ia32)
+        else()
+          message(SEND_ERROR "MKL: the processor type of this system is not supported")
+        endif()
+      else() # MKL < 10.3 have the same PATH
+        if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64")
+          set(MKL_LIBRARY_PATH -L${mkl_home}/lib/em64t)
+        elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "i386" OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "i686")
+          set(MKL_LIBRARY_PATH -L${mkl_home}/lib/32)
+        elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "ia64")
+          set(MKL_LIBRARY_PATH -L${mkl_home}/lib/64)
+        else()
+          message(SEND_ERROR "MKL: the processor type of this system is not supported")
         endif()
       endif()
     endif()
+    # combine together
+    set(LAPACK_LIBRARY ${MKL_LIBRARY_PATH} ${MKL_INTERFACE} ${MKL_CORE} ${CMAKE_THREAD_LIBS_INIT} -lm)
 
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "i386" OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "i686")
-      if(${MKL_VERSION} MATCHES "10\\.3\\.[0-9]+")
-        if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-          # TODO: Not touched since rigarash do not know much about MacOSX linker flags
-          set(LAPACK_LIBRARY -L${mkl_home}/lib -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm)
-        else()
-          if(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
-            set(LAPACK_LIBRARY -L${mkl_home}/lib/ia32 -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lguide -lpthread -lm)
-          else(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
-            set(LAPACK_LIBRARY -L${mkl_home}/lib/ia32 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm)
-          endif(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
-        endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-      else()
-        if(${MKL_VERSION} MATCHES "10\\.[0-2]\\.[0-7]")
-          if(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
-            set(LAPACK_LIBRARY -L${mkl_home}/lib/32 -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lguide -lpthread -lm)
-          else(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
-            set(LAPACK_LIBRARY -L${mkl_home}/lib/32 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm)
-          endif(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
-        else()
-          # TODO: This old version always link threaded MKL regardless of the value of OPENMP_FOUND
-          set(LAPACK_LIBRARY -L${mkl_home}/lib/ia32 -lmkl_lapack -lmkl -lguide)
-        endif()
-      endif()
-    endif()
-
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "ia64")
-      set(LAPACK_LIBRARY -L${mkl_home}/lib/64 -lmkl_lapack -lmkl -lguide)
-    endif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "ia64")
+    # unset local variables
+    unset(MKL_LIBRARY_PATH)
+    unset(MKL_INTERFACE)
+    unset(MKL_CORE)
 
     set(BLAS_LIBRARY "")
     set(HAVE_MKL TRUE)
