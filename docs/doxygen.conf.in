@@ -194,7 +194,15 @@ TAB_SIZE               = 8
 # You can put \n's in the value part of an alias to insert newlines.
 
 ALIASES = "postcond=\xrefitem postcond \"Post condition\" \"Post condition\" "
+ALIASES += "semantics=\xrefitem semantics \"Semantics\" \"Semantics\" "
 ALIASES += "precond=\xrefitem precond \"Pre condition\" \"Pre condition\" "
+
+
+ALIASES += "complexity_worst{1}=\xrefitem complexityworst \"Worst case complexity\" \"Worst case complexity\" \xmlonly <complexity>\1</complexity> \endxmlonly"
+ALIASES += "complexity_average{1}=\xrefitem complexityaverage \"Average complexity\" \"Average complexity\" \xmlonly <complexity>\1</complexity> \endxmlonly"
+
+ALIASES += "requirement{1}=\xrefitem requirement \"requirement\" \"requirement\" \xmlonly <requirement>\1</requirement> \endxmlonly"
+ALIASES += "concepttitle{1}=\xrefitem concepttitle \"concepttitle\" \"concepttitle\" \xmlonly <title>\1</title> \endxmlonly"
 
 ALIASES += "new_in{1}=\xrefitem newfeature \"New feature\" \"New feature\" \xmlonly <version>\1</version> \endxmlonly"
 ALIASES += "changed_in{1}=\xrefitem changed \"Changed feature\" \"Changed feature\" \xmlonly <version>\1</version> \endxmlonly"
