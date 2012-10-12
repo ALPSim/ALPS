@@ -17,19 +17,19 @@ if (ALPS_BUILD_EXAMPLES)
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_single_test.cmake
     )
 
-    add_executable(ngs_ising_dualthread main_dualthread_tiny.cpp)
-    add_dependencies(ngs_ising_dualthread alps)
-    target_link_libraries(ngs_ising_dualthread alps)
+    add_executable(ngs_ising_controlthread main_controlthread_tiny.cpp)
+    add_dependencies(ngs_ising_controlthread alps)
+    target_link_libraries(ngs_ising_controlthread alps)
 
-    add_test(ngs_ising_dualthread
+    add_test(ngs_ising_controlthread
         ${CMAKE_COMMAND}
             -Dsourcedir=${PROJECT_SOURCE_DIR}
             -Dbinarydir=${PROJECT_BINARY_DIR}
             -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
-            -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_dualthread_test.cmake
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_controlthread_test.cmake
     )
     
-    # TODO: compile ngs_ising_dualthreaded not only _tiny
+    # TODO: compile ngs_ising_controlthreaded not only _tiny
 
     if (MPI_FOUND)
     
@@ -51,13 +51,13 @@ if (ALPS_BUILD_EXAMPLES)
                 -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_test.cmake
         )
 
-        add_executable(ngs_ising_mpi_dualthread main_mpi_dualthread_tiny.cpp)
-        add_dependencies(ngs_ising_mpi_dualthread alps)
-        target_link_libraries(ngs_ising_mpi_dualthread alps)
+        add_executable(ngs_ising_mpi_controlthread main_mpi_controlthread_tiny.cpp)
+        add_dependencies(ngs_ising_mpi_controlthread alps)
+        target_link_libraries(ngs_ising_mpi_controlthread alps)
 
-        add_test(ngs_ising_mpi_dualthread
+        add_test(ngs_ising_mpi_controlthread
             ${CMAKE_COMMAND}
-                -Dcmd=ngs_ising_mpi
+                -Dcmd=ngs_ising_mpi_controlthread
                 -Dmpiexec=${MPIEXEC}
                 -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
                 -Dprocs=4
@@ -66,10 +66,10 @@ if (ALPS_BUILD_EXAMPLES)
                 -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
                 -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
                 -Ddllexedir=${PROJECT_BINARY_DIR}/bin
-                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_dualthread_test.cmake
+                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_controlthread_test.cmake
         )
 
-        # TODO: compile ngs_ising_mpi_dualthreaded not only _tiny
+        # TODO: compile ngs_ising_mpi_controlthreaded not only _tiny
 
         add_executable(ngs_ising_mpi_pscan main_mpi_pscan.cpp)
         add_dependencies(ngs_ising_mpi_pscan alps)

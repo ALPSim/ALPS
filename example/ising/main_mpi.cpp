@@ -33,7 +33,7 @@
 
 using namespace alps;
 
-typedef mpisim_ng<ising_sim> sim_type;
+typedef mpisim_ng<ising_sim> sim_type; //TODO: make template param for dual/single (make usefull default at compile time)
 
 int main(int argc, char *argv[]) {
 
@@ -48,14 +48,14 @@ int main(int argc, char *argv[]) {
     }
     broadcast(c, params);
 
-    sim_type sim(params, c);
+    sim_type sim(params, c); // TODO: automatic controlthread / singlethreaded machen
 
     if (options.resume)
         sim.load((params["DUMP"] | "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
 
     sim.run(boost::bind(&stop_callback, options.time_limit));
 
-    sim.save((params["DUMP"] | "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
+    sim.save(params["DUMP"] | "dump");
 
     results_type<sim_type>::type results = collect_results(sim);
 

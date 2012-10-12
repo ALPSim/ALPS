@@ -3,7 +3,7 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-find_program(cmd_path ngs_ising_dualthread ${binarydir} ${dllexedir})
+find_program(cmd_path ngs_ising_controlthread ${binarydir} ${dllexedir})
 
 execute_process(
     COMMAND ${cmd_path} -T 15 ${currentdir}/params/param.h5 sim.dth
@@ -14,7 +14,7 @@ execute_process(
 )
 
 if(not_successful)
-    message(SEND_ERROR "error runing test 'ngs_ising_dualthread': ${err}; shell output: ${not_successful}!")
+    message(SEND_ERROR "error runing test 'ngs_ising_controlthread': ${err}; shell output: ${not_successful}!")
 endif(not_successful)
 
 execute_process(
@@ -26,7 +26,7 @@ execute_process(
 )
 
 if(not_successful)
-    message(SEND_ERROR "error runing test 'ngs_ising_dualthread': ${err}; shell output: ${not_successful}!")
+    message(SEND_ERROR "error runing test 'ngs_ising_controlthread': ${err}; shell output: ${not_successful}!")
 endif(not_successful)
 
 file(REMOVE dump)

@@ -25,7 +25,7 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// TODO: merge changes back from main_dualthread_tiny!
+// TODO: merge changes back from main_controlthread_tiny!
 
 #include "ising.hpp"
 

@@ -27,11 +27,11 @@
 
 #include "ising.hpp"
 
-#include <alps/ngs/scheduler/proto/dualthreadsim.hpp>
+#include <alps/ngs/scheduler/proto/controlthreadsim.hpp>
 
 using namespace alps;
 
-typedef dualthreadsim_ng<ising_sim> sim_type;
+typedef controlthreadsim_ng<ising_sim> sim_type;
 
 int main(int argc, char *argv[]) {
 
@@ -64,9 +64,7 @@ int main(int argc, char *argv[]) {
             checkpoint_time = boost::posix_time::second_clock::local_time();
         }
 
-        sim.check_callback();
-
-    } while (!sim.finished());
+    } while (sim.status() != ising_sim::finished);
 
     sim.save(params["DUMP"] | "dump");
 

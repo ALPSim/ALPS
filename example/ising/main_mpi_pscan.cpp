@@ -71,8 +71,7 @@ int main(int argc, char *argv[]) {
 
     sim.save(
           (params["DUMP"] | "dump")
-        + "." + boost::lexical_cast<std::string>(color) 
-        + "." + boost::lexical_cast<std::string>(comm_local.rank())
+        + "." + boost::lexical_cast<std::string>(color)
     );
 
     results_type<sim_type>::type results = collect_results(sim);

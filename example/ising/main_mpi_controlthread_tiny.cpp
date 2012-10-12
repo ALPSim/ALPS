@@ -28,13 +28,13 @@
 #include "ising.hpp"
 
 #include <alps/ngs/scheduler/proto/mpisim.hpp>
-#include <alps/ngs/scheduler/proto/dualthreadsim.hpp>
+#include <alps/ngs/scheduler/proto/controlthreadsim.hpp>
 
 #include <boost/lexical_cast.hpp>
 
 using namespace alps;
 
-typedef mpisim_ng<dualthreadsim_ng<ising_sim> > sim_type;
+typedef mpisim_ng<controlthreadsim_ng<ising_sim> > sim_type;
 
 int main(int argc, char *argv[]) {
 
@@ -79,11 +79,11 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        sim.check_callback();
+        sim.check_communication();
 
-    } while (!sim.finished());
+    } while (sim.status() != ising_sim::finished);
 
-    sim.save((params["DUMP"] | "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
+    sim.save((params["DUMP"] | "dump"));
 
     results_type<sim_type>::type results = collect_results(sim);
 

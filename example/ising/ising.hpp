@@ -85,19 +85,21 @@ class ising_sim : public alps::mcbase_ng {
                 std::transform(corr.begin(), corr.end(), corr.begin(), boost::lambda::_1 / double(length));
                 ten /= length;
                 tmag /= length;
-                // CHECK: this is ugly, we need a nicer solution here ...
-                this->measurements()["Energy"] << ten;
-                this->measurements()["Magnetization"] << tmag;
-                this->measurements()["Magnetization^2"] << tmag * tmag;
-                this->measurements()["Magnetization^4"] << tmag * tmag * tmag * tmag;
-                this->measurements()["Correlations"] << corr;
+                this->measurements["Energy"] << ten;
+                this->measurements["Magnetization"] << tmag;
+                this->measurements["Magnetization^2"] << tmag * tmag;
+                this->measurements["Magnetization^4"] << tmag * tmag * tmag * tmag;
+                this->measurements["Correlations"] << corr;
             }
         };
 
         double fraction_completed() const {
             // TODO: can we avoid this?
             lock_guard_type data_lock(data_mutex);
-            return (sweeps < thermalization_sweeps ? 0. : ( sweeps - thermalization_sweeps ) / double(total_sweeps));
+            return (sweeps < thermalization_sweeps
+                ? 0.
+                : ( sweeps - thermalization_sweeps ) / double(total_sweeps))
+            ;
         }
 
     private:
@@ -105,7 +107,7 @@ class ising_sim : public alps::mcbase_ng {
         void init() {
             for(int i = 0; i < length; ++i)
                 spins[i] = (this->random() < 0.5 ? 1 : -1);
-            this->measurements()
+            this->measurements
                 << alps::ngs::RealObservable("Energy")
                 << alps::ngs::RealObservable("Magnetization")
                 << alps::ngs::RealObservable("Magnetization^2")

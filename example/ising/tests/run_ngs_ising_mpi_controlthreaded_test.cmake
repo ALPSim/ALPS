@@ -16,7 +16,7 @@ execute_process(
 )
 
 if(not_successful)
-    message(SEND_ERROR "error runing test 'ngs_ising_mpi_dualthread': ${err}; shell output: ${not_successful}!")
+    message(SEND_ERROR "error runing test 'ngs_ising_mpi_controlthread': ${err}; shell output: ${not_successful}!")
 endif(not_successful)
 
 execute_process(
@@ -28,7 +28,7 @@ execute_process(
 )
 
 if(not_successful)
-    message(SEND_ERROR "error runing test 'ngs_ising_mpi_dualthread': ${err}; shell output: ${not_successful}!")
+    message(SEND_ERROR "error runing test 'ngs_ising_mpi_controlthread': ${err}; shell output: ${not_successful}!")
 endif(not_successful)
 
 file(REMOVE sim.mpi)
