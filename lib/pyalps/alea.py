@@ -104,10 +104,10 @@ _max & _min: fits the autocorrelation between the values where it is at _max and
 returns: StdPairDouble object FIT with the parameters of the fit\n\
   Note: The equation is FIT.first * exp(FIT.second * t)"
   if (_from != None and _to != None):
-    return detail.exponential_autocorrelation_time_distance(timeseries, _from, _to)
+    return detail.exponential_autocorrelation_time_distance(autocorrelation, _from, _to)
   if (_max != None and _min != None):
-    return detail.exponential_autocorrelation_time_limit(timeseries, _max, _min)
-  print "Usage: exponential_autocorrelation_time(timeseries, [_from = XXX, _to = XXX | _max = XXX, _min = XXX] )"
+    return detail.exponential_autocorrelation_time_limit(autocorrelation, _max, _min)
+  print "Usage: exponential_autocorrelation_time(autocorrelation, [_from = XXX, _to = XXX | _max = XXX, _min = XXX] )"
 
 binning = "binning"
 uncorrelated = "uncorrelated"
