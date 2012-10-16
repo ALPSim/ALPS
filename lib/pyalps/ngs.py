@@ -67,22 +67,103 @@ class mcbase(mcbase_impl):
     def run(self, callback = lambda: True):
         mcbase_impl.run(self, callback)
 
-from pyngshdf5_c import *
-class h5ar(hdf5_archive_impl):
-    def __init__(self, filename, mode = 'r'):
-        hdf5_archive_impl.__init__(self, filename, mode)
+from pyngsapi_c import *
 
-    def __str__(self,path="/"):
-        if self.is_group(path):
+
+
+
+
+
+from pyngshdf5_c import hdf5_archive_impl
+class ArchiveIOException(IOError):
+    pass
+
+class ArchivePathException(ArchiveIOException):
+    def __init__(self, msg, path):
+        super(ArchivePathException,self).__init__(msg)
+        self.path = path
+
+class archive:
+    def __init__(self, filename, mode = "r",*args, **kwargs):
+        """
+        Opens an archive in specified mode. If no mode is specified 'r'
+        is used as default.
+        """
+        self._archive = hdf5_archive_impl(filename, mode, *args, **kwargs)
+
+        def wrapper(name):
+            def f(*args, **kwargs):
+                if self.closed: raise ArchiveIOException("I/O operation on closed file")
+                return getattr(self._archive, name)(*args, **kwargs)
+            return f
+        
+        excp = [] #["__setitem__", "__getitem__"]
+        for name in dir(self._archive):
+            if name.startswith("_") and name not in excp: continue
+            setattr(self, name, wrapper(name) )
+
+    @property
+    def closed(self):
+        """
+        Property to check whether the file is open or closed.
+        """
+        return self._archive is None
+
+    def __getitem__(self, path):
+        """
+        The getter of the archive is a work around for the missing C++
+        implementation of the exceptions. 
+        TODO: 
+        """
+        try:
+            return self._archive[path]
+        except:
+            raise ArchivePathException("could not read '%s'"%path, path)
+
+    def __setitem__(self, path, value):
+        """
+        The setter of the archive is a work around for the missing C++
+        implementation of the exceptions.  
+        TODO: 
+        """
+        try:
+            self._archive[path] = value
+        except:
+            raise ArchivePathException("no write access to '%s'"%path, path)
+
+    def close(self):
+        """
+        Closes the archive.
+        """
+        del self._archive
+        self._archive = None
+
+    def __enter__(self, *args, **kwargs):
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        self.close()
+        return self
+
+    def xml(self,path="/"):
+        """
+        Returns an XML formatted string of the archive.         
+        This function still needs to have attributes implemented.
+        """
+        if self.closed: ArchiveIOException("I/O operation on closed file")
+        if self._archive.is_group(path):
             ret = ""
-            for child in self.list_children(path):
+            for child in self._archive.list_children(path):
                 ret += "<%s>\n" % child
-                ret += self.__str__(path+("" if path[-1] == "/" else "/" )+child) 
+                ret += self.as_xml(path+("" if path[-1] == "/" else "/" )+child) 
                 ret += "\n</%s>" % child
             return ret
         else:
-            return "%s" %(str(self[path]))
+            return "%s" %(str(self._archive[path]))
 
 
-
-from pyngsapi_c import *
+import warnings
+def h5ar(*args, **kwargs):
+    warnings.warn("The object 'h5ar' is deprecated and will be removed. Use 'archive' instead.", DeprecationWarning)
+    return archive(*args, **kwargs)
+        
