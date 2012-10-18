@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
         parallel<ising_sim<multithread<base> > > sim(params, c);
 
         if (options.resume)
-            sim.load((params["DUMP"] | "dump") + ".0");
+            sim.load((params["DUMP"] | "checkpoint") + ".0");
 
         threaded_callback_wrapper stopper(boost::bind<bool>(&stop_callback, options.time_limit));
         boost::thread thread(boost::bind<bool>(&parallel<ising_sim<multithread<base> > >::run, boost::ref(sim), stopper));
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
         } while (!stopper.check());
         thread.join();
 
-        sim.save((params["DUMP"] | "dump") + ".0");
+        sim.save((params["DUMP"] | "checkpoint") + ".0");
 
         results_type<base>::type results = collect_results(sim);
 
@@ -97,11 +97,11 @@ int main(int argc, char *argv[]) {
         parallel<ising_sim<base> > sim(params, c);
 
         if (options.resume)
-            sim.load((params["DUMP"] | "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
+            sim.load((params["DUMP"] | "checkpoint") + "." + boost::lexical_cast<std::string>(c.rank()));
 
         sim.run(boost::bind(&stop_callback, options.time_limit));
 
-        sim.save((params["DUMP"] | "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
+        sim.save((params["DUMP"] | "checkpoint") + "." + boost::lexical_cast<std::string>(c.rank()));
 
         results_type<base>::type results = collect_results(sim);
 

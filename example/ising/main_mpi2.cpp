@@ -49,11 +49,11 @@ int main(int argc, char *argv[]) {
     sim_type sim(params, c);
 
     if (options.resume)
-        sim.load((params["DUMP"] | "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
+        sim.load((params["DUMP"] | "checkpoint") + "." + boost::lexical_cast<std::string>(c.rank()));
 
     sim.run(boost::bind(&stop_callback, options.time_limit));
 
-    sim.save((params["DUMP"] | "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
+    sim.save((params["DUMP"] | "checkpoint") + "." + boost::lexical_cast<std::string>(c.rank()));
 
     results_type<sim_type>::type results = collect_results(sim);
 

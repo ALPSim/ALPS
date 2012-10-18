@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
 
     if (options.resume)
         sim.load(
-              (params["DUMP"] | "dump")
+              (params["DUMP"] | "checkpoint")
             + "." + boost::lexical_cast<std::string>(color) 
             + "." + boost::lexical_cast<std::string>(comm_local.rank())
         );
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
     sim.run(boost::bind(&stop_callback, options.time_limit));
 
     sim.save(
-          (params["DUMP"] | "dump")
+          (params["DUMP"] | "checkpoint")
         + "." + boost::lexical_cast<std::string>(color)
     );
 

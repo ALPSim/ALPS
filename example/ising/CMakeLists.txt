@@ -5,6 +5,7 @@
 
 if (ALPS_BUILD_EXAMPLES)
 
+# TODO: make this file simpler ...
     add_executable(ngs_ising_single main_single.cpp)
     add_dependencies(ngs_ising_single alps)
     target_link_libraries(ngs_ising_single alps)
@@ -30,6 +31,15 @@ if (ALPS_BUILD_EXAMPLES)
     )
     
     # TODO: compile ngs_ising_controlthreaded not only _tiny
+    
+    add_executable(alpscontrol alpscontrol.cpp)
+    add_dependencies(alpscontrol alps)
+    target_link_libraries(alpscontrol alps)
+
+    # TODO: make test!
+    add_executable(ngs_ising_server main_server_tiny.cpp)
+    add_dependencies(ngs_ising_server alps)
+    target_link_libraries(ngs_ising_server alps)
 
     if (MPI_FOUND)
     
@@ -70,6 +80,24 @@ if (ALPS_BUILD_EXAMPLES)
         )
 
         # TODO: compile ngs_ising_mpi_controlthreaded not only _tiny
+
+        add_executable(ngs_ising_server_mpi main_server_mpi_tiny.cpp)
+        add_dependencies(ngs_ising_server_mpi alps)
+        target_link_libraries(ngs_ising_server_mpi alps)
+
+        add_test(ngs_ising_server_mpi
+            ${CMAKE_COMMAND}
+                -Dcmd=ngs_ising_server_mpi
+                -Dmpiexec=${MPIEXEC}
+                -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
+                -Dprocs=4
+                -Dmpiexec_preflags=${MPIEXEC_PREFLAGS}
+                -Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}
+                -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
+                -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
+                -Ddllexedir=${PROJECT_BINARY_DIR}/bin
+                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_test.cmake
+        )
 
         add_executable(ngs_ising_mpi_pscan main_mpi_pscan.cpp)
         add_dependencies(ngs_ising_mpi_pscan alps)

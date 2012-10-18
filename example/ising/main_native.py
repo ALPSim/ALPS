@@ -30,6 +30,8 @@ import pyalps.mpi as mpi
 import numpy as np
 import sys, time
 
+#TODO: why does ist toke only 1 s, it should take 30s?
+
 import ising
 
 def main(limit, resume, output):

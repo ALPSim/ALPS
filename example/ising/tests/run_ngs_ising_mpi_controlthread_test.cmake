@@ -8,7 +8,7 @@ find_program(cmd_path ${cmd} ${binarydir} ${dllexedir})
 set(ENV{OMP_NUM_THREADS} 1)
 
 execute_process(
-    COMMAND ${mpiexec} ${mpiexec_numproc_flag} ${procs} ${cmd_path} -T 15 ${sourcedir}/params/param.h5 sim.mpi_dth
+    COMMAND ${mpiexec} ${mpiexec_numproc_flag} ${procs} ${cmd_path} -T 15 ${sourcedir}/params/param.h5 sim.mpi.cth
     RESULT_VARIABLE not_successful
     OUTPUT_FILE ngs_ising_mpi_dth_output
     ERROR_VARIABLE err
@@ -20,7 +20,7 @@ if(not_successful)
 endif(not_successful)
 
 execute_process(
-    COMMAND ${mpiexec} ${mpiexec_numproc_flag} ${procs} ${cmd_path} -T 15 --continue ${sourcedir}/params/param.h5 sim.mpi_dth
+    COMMAND ${mpiexec} ${mpiexec_numproc_flag} ${procs} ${cmd_path} -T 15 --continue ${sourcedir}/params/param.h5 sim.mpi.cth
     RESULT_VARIABLE not_successful
     OUTPUT_FILE ngs_ising_mpi_dth_output_continue
     ERROR_VARIABLE err

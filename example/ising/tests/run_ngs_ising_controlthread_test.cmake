@@ -6,7 +6,7 @@
 find_program(cmd_path ngs_ising_controlthread ${binarydir} ${dllexedir})
 
 execute_process(
-    COMMAND ${cmd_path} -T 15 ${currentdir}/params/param.h5 sim.dth
+    COMMAND ${cmd_path} -T 15 ${currentdir}/params/param.h5 sim.cth
     RESULT_VARIABLE not_successful
     OUTPUT_FILE ngs_ising_dth_output
     ERROR_VARIABLE err
@@ -18,7 +18,7 @@ if(not_successful)
 endif(not_successful)
 
 execute_process(
-    COMMAND ${cmd_path} -T 15 --continue ${currentdir}/params/param.h5 sim.dth
+    COMMAND ${cmd_path} -T 15 --continue ${currentdir}/params/param.h5 sim.cth
     RESULT_VARIABLE not_successful
     OUTPUT_FILE ngs_ising_dth_output_continue
     ERROR_VARIABLE err

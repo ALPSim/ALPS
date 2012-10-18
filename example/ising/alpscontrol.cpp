@@ -4,8 +4,7 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2011 by Lukas Gamper <gamperl@gmail.com>                   *
- *                              Matthias Troyer <troyer@comp-phys.org>             *
+ * Copyright (C) 2010 - 2012 by Lukas Gamper <gamperl@gmail.com>                   *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -26,27 +25,37 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define PY_ARRAY_UNIQUE_SYMBOL pyngsapi_PyArrayHandle
+#include <boost/asio.hpp>
 
-#include <alps/ngs.hpp>
-#include <alps/ngs/hdf5.hpp>
-#include <alps/ngs/scheduler/proto/mcbase.hpp>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
 
-namespace alps {
-    namespace detail {
-
-        void save_results_export(mcresults const & res, params const & par, alps::hdf5::archive & ar, std::string const & path) {
-            ar["/parameters"] << par;
-            if (res.size())
-                ar[path] << res;
+int main(int argc, char* argv[]) {
+    try {
+        if (argc != 4) {
+            // TODO: use boost programm options
+            std::cerr << "Usage: alpscontrol <host> <port> <command>\n";
+            return EXIT_FAILURE;
         }
+
+        boost::asio::io_service io_service;
+        boost::asio::ip::tcp::resolver resolver(io_service);
+        boost::asio::ip::tcp::resolver::query query(boost::asio::ip::tcp::v4(), argv[1], argv[2]);
+        boost::asio::ip::tcp::resolver::iterator iterator = resolver.resolve(query);
+        boost::asio::ip::tcp::socket s(io_service);
+        boost::asio::connect(s, iterator);
+        boost::asio::write(s, boost::asio::buffer(argv[3], std::strlen(argv[3])));
+
+        char buffer[1028];
+        boost::asio::read(s, boost::asio::buffer(buffer, 1028));
+        uint32_t size = *(uint32_t *)buffer;
+        std::string msg(buffer + 4, std::min(size, (uint32_t)1024));
+        std::cout << msg << std::endl;
+
+    } catch (std::exception & e) {
+        std::cerr << "Error: " << e.what() << "\n";
     }
-}
 
-BOOST_PYTHON_MODULE(pyngsapi_c) {
-
-    boost::python::def("collectResults", static_cast<alps::results_type<alps::mcbase_ng>::type (*)(alps::mcbase_ng const &)>(&alps::collect_results<alps::mcbase_ng>));
-
-    boost::python::def("saveResults", &alps::detail::save_results_export);
-
+    return EXIT_SUCCESS;
 }

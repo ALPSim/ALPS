@@ -27,13 +27,25 @@
 
 #include "ising.hpp"
 
+// TODO: move to ngs.hpp
 #include <alps/ngs/scheduler/proto/mpisim.hpp>
+#include <alps/ngs/scheduler/proto/tcpserver.hpp>
+#include <alps/ngs/scheduler/proto/controlthreadsim.hpp>
 
+#include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
+
+#include <iostream>
 
 using namespace alps;
 
-typedef mpisim_ng<ising_sim> sim_type; //TODO: make template param for dual/single (make usefull default at compile time)
+typedef mpisim_ng<controlthreadsim_ng<ising_sim> > master_sim_type;
+typedef mpisim_ng<ising_sim> worker_sim_type;
+
+std::string do_checkpoint(master_sim_type & sim, std::string const & path) {
+    sim.save(path);
+    return "done";
+}
 
 int main(int argc, char *argv[]) {
 
@@ -41,25 +53,62 @@ int main(int argc, char *argv[]) {
     boost::mpi::environment env(argc, argv);
     boost::mpi::communicator c;
 
-    parameters_type<sim_type>::type params;
+    parameters_type<ising_sim>::type params;
     if (!c.rank()) {
         hdf5::archive ar(options.input_file);
         ar["/parameters"] >> params;
     }
     broadcast(c, params);
 
-    sim_type sim(params, c); // TODO: automatic controlthread / singlethreaded machen
+    if (c.rank() > 0) {
 
-    if (options.resume)
-        sim.load((params["DUMP"] | "checkpoint") + "." + boost::lexical_cast<std::string>(c.rank()));
+        worker_sim_type sim(params, c);
 
-    sim.run(boost::bind(&stop_callback, options.time_limit));
+        if (options.resume)
+            sim.load((params["DUMP"] | "checkpoint") + "." + boost::lexical_cast<std::string>(c.rank()));
 
-    sim.save(params["DUMP"] | "checkpoint");
+        sim.run(boost::bind(&stop_callback, options.time_limit));
 
-    results_type<sim_type>::type results = collect_results(sim);
+        sim.save((params["DUMP"] | "checkpoint"));
 
-    if (!c.rank()) {
+        results_type<ising_sim>::type results = collect_results(sim);
+
+    } else {
+
+        master_sim_type sim(params, c);
+
+        if (options.resume)
+            sim.load((params["DUMP"] | "checkpoint") + "." + boost::lexical_cast<std::string>(c.rank()));
+
+        boost::thread thread(
+              static_cast<bool(master_sim_type::*)(boost::function<bool ()> const &)>(&master_sim_type::run)
+            , boost::ref(sim)
+            , static_cast<boost::function<bool()> >(boost::bind(&stop_callback, options.time_limit))
+        );
+
+        tcpserver server(params["PORT"] | 2485); // TODO: which port should we take?
+        server.add_action("progress", boost::bind(&boost::lexical_cast<std::string, double>, boost::bind(&master_sim_type::fraction_completed, boost::ref(sim))));
+        server.add_action("checkpoint", boost::bind(&do_checkpoint, boost::ref(sim), params["DUMP"] | "checkpoint"));
+
+        boost::posix_time::ptime progress_time = boost::posix_time::second_clock::local_time();
+        do {
+            alps::sleep(0.1 * 1e9);
+
+            if (boost::posix_time::second_clock::local_time() > progress_time + boost::posix_time::seconds(5)) {
+                std::cout << "progress: " << sim.fraction_completed() << std::endl;
+                progress_time = boost::posix_time::second_clock::local_time();
+            }
+
+            server.poll();
+            sim.check_communication();
+
+        } while (sim.status() != ising_sim::finished);
+        server.stop();
+
+        sim.save((params["DUMP"] | "checkpoint"));
+
+        results_type<ising_sim>::type results = collect_results(sim);
+
         std::cout << "#Sweeps:                " << results["Energy"].count() << std::endl;
         std::cout << "Correlations:           " << results["Correlations"] << std::endl;
         std::cout << "Energy:                 " << results["Energy"] << std::endl;
@@ -67,6 +116,7 @@ int main(int argc, char *argv[]) {
         std::cout << "Mean of Energy:         " << results["Energy"].mean<double>() << std::endl;
         std::cout << "Error of Energy:        " << results["Energy"].error<double>() << std::endl;
         std::cout << "Mean of Correlations:   " << short_print(results["Correlations"].mean<std::vector<double> >()) << std::endl;
+        std::cout << "Covariance E/M:         " << short_print(results["Energy"].covariance<double>(results["Magnetization"])) << std::endl;
 
         std::cout << "-2 * Energy / 13:       " << -2. * results["Energy"] / 13. << std::endl;
         std::cout << "1 / Correlations        " << 1. / results["Correlations"] << std::endl;

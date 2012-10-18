@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
     sim_type sim(params, c);
 
     if (options.resume)
-        sim.load((params["DUMP"] | "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
+        sim.load((params["DUMP"] | "checkpoint") + "." + boost::lexical_cast<std::string>(c.rank()));
     
     boost::thread thread(
           static_cast<bool(sim_type::*)(boost::function<bool ()> const &)>(&sim_type::run)
@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
 
             if (boost::posix_time::second_clock::local_time() > checkpoint_time + boost::posix_time::seconds(13)) {
                 std::cout << "checkpointing rank " << c.rank() << "... " << std::endl;
-                sim.save(params["DUMP"] | "dump");
+                sim.save(params["DUMP"] | "checkpoint");
                 checkpoint_time = boost::posix_time::second_clock::local_time();
             }
         }
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
 
     } while (sim.status() != ising_sim::finished);
 
-    sim.save((params["DUMP"] | "dump"));
+    sim.save((params["DUMP"] | "checkpoint"));
 
     results_type<sim_type>::type results = collect_results(sim);
 

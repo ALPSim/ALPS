@@ -39,11 +39,11 @@ int main(int argc, char *argv[]) {
     sim_type sim(params);
 
     if (options.resume)
-        sim.load(params["DUMP"] | "dump");
+        sim.load(params["DUMP"] | "checkpoint");
 
     sim.run(boost::bind(&stop_callback, options.time_limit));
 
-    sim.save(params["DUMP"] | "dump");
+    sim.save(params["DUMP"] | "checkpoint");
 
     results_type<sim_type>::type results = collect_results(sim);
   

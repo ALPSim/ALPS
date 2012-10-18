@@ -37,23 +37,21 @@ class ising_sim : public alps::mcbase_ng {
         ising_sim(parameters_type const & params, std::size_t seed_offset = 42)
             : mcbase_ng(params, seed_offset)
             , length(params["L"])
+            , sweeps(0)
             , thermalization_sweeps(int(params["THERMALIZATION"]))
             , total_sweeps(int(params["SWEEPS"]))
             , beta(1. / double(params["T"]))
             , spins(length)
         {
-            init();
-        }
-
-        template <typename Arg> ising_sim(parameters_type const & params, Arg comm)
-            : mcbase_ng(params, comm)
-            , length(params["L"])
-            , thermalization_sweeps(int(params["THERMALIZATION"]))
-            , total_sweeps(int(params["SWEEPS"]))
-            , beta(1. / double(params["T"]))
-            , spins(length)
-        {
-            init();
+            for(int i = 0; i < length; ++i)
+                spins[i] = (this->random() < 0.5 ? 1 : -1);
+            this->measurements
+                << alps::ngs::RealObservable("Energy")
+                << alps::ngs::RealObservable("Magnetization")
+                << alps::ngs::RealObservable("Magnetization^2")
+                << alps::ngs::RealObservable("Magnetization^4")
+                << alps::ngs::RealVectorObservable("Correlations")
+            ;
         }
 
         void update() {
@@ -94,8 +92,6 @@ class ising_sim : public alps::mcbase_ng {
         };
 
         double fraction_completed() const {
-            // TODO: can we avoid this?
-            lock_guard_type data_lock(data_mutex);
             return (sweeps < thermalization_sweeps
                 ? 0.
                 : ( sweeps - thermalization_sweeps ) / double(total_sweeps))
@@ -103,18 +99,6 @@ class ising_sim : public alps::mcbase_ng {
         }
 
     private:
-
-        void init() {
-            for(int i = 0; i < length; ++i)
-                spins[i] = (this->random() < 0.5 ? 1 : -1);
-            this->measurements
-                << alps::ngs::RealObservable("Energy")
-                << alps::ngs::RealObservable("Magnetization")
-                << alps::ngs::RealObservable("Magnetization^2")
-                << alps::ngs::RealObservable("Magnetization^4")
-                << alps::ngs::RealVectorObservable("Correlations")
-            ;
-        }
 
         int length;
         int sweeps;
