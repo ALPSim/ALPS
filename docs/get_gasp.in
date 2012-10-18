@@ -1,0 +1,39 @@
+#!/bin/bash
+if python -c "import gasp" > /dev/null 2>&1 ; then
+    echo "Gasp already exists on the system."
+    exit 0
+else
+    echo "Gasp does not exist on the system."
+fi;
+if command -v tar >/dev/null ; then
+    echo "Downloading Gasp as .tar.gz"
+    URL=https://github.com/troelsfr/Gasp/tarball/master
+    FILENAME="gasp.tar.gz"
+elif command -v unzip >/dev/null ; then
+    echo "Downloading Gasp as .zip"
+    URL=https://github.com/troelsfr/Gasp/zipball/master
+    FILENAME="gasp.zip"
+fi
+
+rm -rf $FILENAME
+if command -v wget >/dev/null ; then
+    wget -O $FILENAME $URL > /dev/null 2>&1
+elif command -v curl >/dev/null ; then
+    curl -L $URL -o $FILENAME > /dev/null 2>&1
+fi
+
+if command -v tar >/dev/null ; then
+    echo "Unpacking $FILENAME"
+    X=`tar -xvf $FILENAME`
+#    echo $X
+    X=`echo $X | awk '{ print $1 }'`
+elif command -v unzip >/dev/null ; then
+    echo "Unzipping $FILENAME"
+    X=`unzip -l $FILENAME | grep Gasp | awk '{ print $4 }' | head -n 1`
+    unzip -o $FILENAME > /dev/null 2>&1
+fi
+echo "Moving $X -> python"
+
+rm -rf gasp/
+mv -f $X* ./
+rm -rf $X

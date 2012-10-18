@@ -10,6 +10,21 @@ find_package(Doxygen REQUIRED)
 # location of doxygen xml output
 set(DOXYGENDOCS_DIR "${CMAKE_CURRENT_BINARY_DIR}/doxygen")
 
+
+configure_file(get_gasp.in "${CMAKE_CURRENT_BINARY_DIR}/get_gasp")
+
+add_custom_target(gasp ALL
+    "/bin/bash"
+    "${CMAKE_CURRENT_BINARY_DIR}/get_gasp"
+    COMMENT "Getting Gasp")
+
+add_custom_target(test_pp ALL
+    "python"
+    "/home/tfr/test.py"
+    COMMENT "Testing python path")
+
+
+
 configure_file(doxygen.conf.in "${CMAKE_CURRENT_BINARY_DIR}/doxygen.conf")
 
 
@@ -40,7 +55,7 @@ add_custom_target(html ALL
     "${SPHINX_SOURCE_DIR}"
     "${CMAKE_CURRENT_BINARY_DIR}/html"
     COMMENT "Building HTML documentation with Sphinx")
-add_dependencies(html doxygendocs)
+add_dependencies(html doxygendocs gasp)
 
 add_custom_target(man ALL
     ${SPHINX_EXECUTABLE}
@@ -50,7 +65,7 @@ add_custom_target(man ALL
     "${SPHINX_SOURCE_DIR}"
     "${CMAKE_CURRENT_BINARY_DIR}/man"
     COMMENT "Building manual pages with Sphinx")
-add_dependencies(man doxygendocs)
+add_dependencies(man doxygendocs gasp)
 
 
 
