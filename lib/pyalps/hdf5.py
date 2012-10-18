@@ -32,16 +32,16 @@ write HDF5 files. His interface is deprecated! use pyalps.ngs.h5ar
 
 from ngs import *
 
-class iArchive(h5ar):
+class iArchive(archive):
     def __init__(self, filename):
-        h5ar.__init__(self, str(filename), 'r')
+        archive.__init__(self, str(filename), 'r')
     def read(self, path):
-        return h5ar.__getitem__(self, path)
+        return archive.__getitem__(self, path)
 
-class oArchive(h5ar):
+class oArchive(archive):
     def __init__(self, filename):
-        h5ar.__init__(self, str(filename), 'w')
+        archive.__init__(self, str(filename), 'w')
     def read(self, path):
-        return h5ar.__getitem__(self, path)
+        return archive.__getitem__(self, path)
     def write(self, path, value):
-        h5ar.__setitem__(self, path, value)
+        archive.__setitem__(self, path, value)

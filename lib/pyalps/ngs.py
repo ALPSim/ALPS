@@ -70,22 +70,20 @@ class mcbase(mcbase_impl):
 
 from pyngsapi_c import *
 
-
-
-
-
-
 from pyngshdf5_c import hdf5_archive_impl
+
 class ArchiveIOException(IOError):
     pass
 
+# TODO: export hdf5archive errors from c++
 class ArchivePathException(ArchiveIOException):
     def __init__(self, msg, path):
         super(ArchivePathException,self).__init__(msg)
         self.path = path
 
+# TODO: either do hdf5.archive or renmae it to hdf5Archive
 class archive:
-    def __init__(self, filename, mode = "r",*args, **kwargs):
+    def __init__(self, filename, mode = "r", *args, **kwargs):
         """
         Opens an archive in specified mode. If no mode is specified 'r'
         is used as default.
@@ -161,7 +159,6 @@ class archive:
             return ret
         else:
             return "%s" %(str(self._archive[path]))
-
 
 import warnings
 def h5ar(*args, **kwargs):
