@@ -18,10 +18,6 @@ add_custom_target(gasp ALL
     "${CMAKE_CURRENT_BINARY_DIR}/get_gasp"
     COMMENT "Getting Gasp")
 
-add_custom_target(test_pp ALL
-    "python"
-    "/home/tfr/test.py"
-    COMMENT "Testing python path")
 
 
 
