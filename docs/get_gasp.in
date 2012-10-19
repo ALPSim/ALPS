@@ -16,24 +16,24 @@ elif command -v unzip >/dev/null ; then
 fi
 
 rm -rf $FILENAME
-if command -v wget >/dev/null ; then
+if command -v wgetx >/dev/null ; then
     wget -O $FILENAME $URL > /dev/null 2>&1
 elif command -v curl >/dev/null ; then
     curl -L $URL -o $FILENAME > /dev/null 2>&1
 fi
 
 if command -v tar >/dev/null ; then
+    echo $PWD
     echo "Unpacking $FILENAME"
-    X=`tar -xvf $FILENAME`
-#    echo $X
-    X=`echo $X | awk '{ print $1 }'`
+    tar -xf $FILENAME > /dev/null 2>&1
 elif command -v unzip >/dev/null ; then
     echo "Unzipping $FILENAME"
-    X=`unzip -l $FILENAME | grep Gasp | awk '{ print $4 }' | head -n 1`
     unzip -o $FILENAME > /dev/null 2>&1
 fi
-echo "Moving $X -> python"
+X=`find *Gasp* | head -n 1`
+echo $X
+echo "Moving $X/* -> ./"
 
 rm -rf gasp/
-mv -f $X* ./
+mv -f $X/* ./
 rm -rf $X
