@@ -168,12 +168,15 @@ namespace ietl
         
         template<class Solver>
         jcd_solver(Matrix const & matrix,
-                         VS const & vec,
-                         Solver solv)
+                   VS const & vec,
+                   Solver solv)
         : matrix_(matrix)
         , vecspace_(vec)
         , solv_(solv)
         , n_(vec_dimension(vec)) { }
+        
+        template<class Solver>
+        void replace_solver(Solver solv) { solv_ = solv; }
         
         void operator()(const vector_type& u,
                         const magnitude_type& theta,
