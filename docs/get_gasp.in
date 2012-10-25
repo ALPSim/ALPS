@@ -14,12 +14,16 @@ elif command -v unzip >/dev/null ; then
     URL=https://github.com/troelsfr/Gasp/zipball/master
     FILENAME="gasp.zip"
 fi
-
-rm -rf $FILENAME
-if command -v wgetx >/dev/null ; then
-    wget -O $FILENAME $URL > /dev/null 2>&1
+if [[ $FILENAME ]] ; then
+  rm -rf $FILENAME
+else
+  echo "Could not find tar nor unzip"
+  exit -1
+fi
+if command -v wget >/dev/null ; then
+    wget -O $FILENAME $URL #> /dev/null 2>&1
 elif command -v curl >/dev/null ; then
-    curl -L $URL -o $FILENAME > /dev/null 2>&1
+    curl -L $URL -o $FILENAME #> /dev/null 2>&1
 fi
 
 if command -v tar >/dev/null ; then
@@ -30,10 +34,17 @@ elif command -v unzip >/dev/null ; then
     echo "Unzipping $FILENAME"
     unzip -o $FILENAME > /dev/null 2>&1
 fi
-X=`find *Gasp* | head -n 1`
-echo $X
-echo "Moving $X/* -> ./"
 
-rm -rf gasp/
-mv -f $X/* ./
-rm -rf $X
+X=`find *Gasp* | head -n 1`
+
+if [[ $X ]]; then
+    echo $X
+    echo "Moving $X/* -> ./"
+
+    rm -rf gasp/
+    mv -f $X/* ./
+    rm -rf $X
+else 
+    echo "Gasp not found!"
+    exit -1
+fi
