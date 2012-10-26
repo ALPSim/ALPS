@@ -44,8 +44,8 @@ class ising_sim : public alps::mcbase_ng {
             , spins(length)
         {
             for(int i = 0; i < length; ++i)
-                spins[i] = (this->random() < 0.5 ? 1 : -1);
-            this->measurements
+                spins[i] = (random() < 0.5 ? 1 : -1);
+            measurements
                 << alps::ngs::RealObservable("Energy")
                 << alps::ngs::RealObservable("Magnetization")
                 << alps::ngs::RealObservable("Magnetization^2")
@@ -57,11 +57,11 @@ class ising_sim : public alps::mcbase_ng {
         void update() {
             for (int j = 0; j < length; ++j) {
                 using std::exp;
-                int i = int(double(length) * this->random());
+                int i = int(double(length) * random());
                 int right = ( i + 1 < length ? i + 1 : 0 );
                 int left = ( i - 1 < 0 ? length - 1 : i - 1 );
                 double p = exp( 2. * beta * spins[i] * ( spins[right] + spins[left] ));
-                if ( p >= 1. || this->random() < p )
+                if ( p >= 1. || random() < p )
                     spins[i] = -spins[i];
             }
         };
@@ -83,19 +83,16 @@ class ising_sim : public alps::mcbase_ng {
                 std::transform(corr.begin(), corr.end(), corr.begin(), boost::lambda::_1 / double(length));
                 ten /= length;
                 tmag /= length;
-                this->measurements["Energy"] << ten;
-                this->measurements["Magnetization"] << tmag;
-                this->measurements["Magnetization^2"] << tmag * tmag;
-                this->measurements["Magnetization^4"] << tmag * tmag * tmag * tmag;
-                this->measurements["Correlations"] << corr;
+                measurements["Energy"] << ten;
+                measurements["Magnetization"] << tmag;
+                measurements["Magnetization^2"] << tmag * tmag;
+                measurements["Magnetization^4"] << tmag * tmag * tmag * tmag;
+                measurements["Correlations"] << corr;
             }
         };
 
         double fraction_completed() const {
-            return (sweeps < thermalization_sweeps
-                ? 0.
-                : ( sweeps - thermalization_sweeps ) / double(total_sweeps))
-            ;
+            return (sweeps < thermalization_sweeps ? 0. : ( sweeps - thermalization_sweeps ) / double(total_sweeps));
         }
 
     private:

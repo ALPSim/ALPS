@@ -25,47 +25,74 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "ising_parallel.hpp"
+#include "src/ising.hpp"
 
 #include <boost/lexical_cast.hpp>
 
+#include <alps/ngs/scheduler/proto/mpisim.hpp>
+
 using namespace alps;
 
-typedef mpiparallelsim<parallel_ising_sim<mcbase> > sim_type;
+typedef mpisim_ng<ising_sim> sim_type;
 
 int main(int argc, char *argv[]) {
 
     mcoptions options(argc, argv);
     boost::mpi::environment env(argc, argv);
-    boost::mpi::communicator c;
+    boost::mpi::communicator comm_world;
+
+    std::size_t color = comm_world.rank() % 2;
+
+    boost::mpi::communicator comm_local = comm_world.split(color);
 
     parameters_type<sim_type>::type params;
-    if (c.rank() == 0) {
-        hdf5::archive ar(options.input_file);
+    if (!comm_local.rank()) {
+        hdf5::archive ar(options.input_file + "." + boost::lexical_cast<std::string>(color));
         ar["/parameters"] >> params;
     }
-    broadcast(c, params);
+    broadcast(comm_local, params);
+    
+    std::cout << "color: " << color << ", "
+              << "global rank: " << boost::lexical_cast<std::string>(comm_world.rank()) << ", "
+              << "local rank: " << boost::lexical_cast<std::string>(comm_local.rank()) << ", "
+              << "L: " << params["L"] << std::endl;
 
-    sim_type sim(params, c);
+    sim_type sim(params, comm_local);
 
     if (options.resume)
-        sim.load((params["DUMP"] | "checkpoint") + "." + boost::lexical_cast<std::string>(c.rank()));
+        sim.load(
+              (params["DUMP"] | "checkpoint")
+            + "." + boost::lexical_cast<std::string>(color)
+        );
 
     sim.run(boost::bind(&stop_callback, options.time_limit));
 
-    sim.save((params["DUMP"] | "checkpoint") + "." + boost::lexical_cast<std::string>(c.rank()));
+    sim.save(
+          (params["DUMP"] | "checkpoint")
+        + "." + boost::lexical_cast<std::string>(color)
+    );
 
     results_type<sim_type>::type results = collect_results(sim);
 
-    if (c.rank() == 0) {
+    if (!comm_local.rank()) {
+        std::cout << "Results of group " << color << std::endl;
+        std::cout << "#Sweeps:                " << results["Energy"].count() << std::endl;
+        std::cout << "Correlations:           " << results["Correlations"] << std::endl;
         std::cout << "Energy:                 " << results["Energy"] << std::endl;
 
         std::cout << "Mean of Energy:         " << results["Energy"].mean<double>() << std::endl;
         std::cout << "Error of Energy:        " << results["Energy"].error<double>() << std::endl;
-        std::cout << "Energy^2:               " << results["Energy^2"] << std::endl;
-        std::cout << "Magnetization           " << results["Magnetization"] << std::endl;
-        std::cout << "Binder Cumulant         " << results["Magnetization^2"] * results["Magnetization^2"] / results["Magnetization^4"]<< std::endl;
+        std::cout << "Mean of Correlations:   " << short_print(results["Correlations"].mean<std::vector<double> >()) << std::endl;
 
-        save_results(results, params, options.output_file, "/simulation/results");
+        std::cout << "-2 * Energy / 13:       " << -2. * results["Energy"] / 13. << std::endl;
+        std::cout << "1 / Correlations        " << 1. / results["Correlations"] << std::endl;
+        std::cout << "Energy - Magnetization: " << results["Energy"] - results["Magnetization"] << std::endl;
+
+        std::cout << "Sin(Energy):            " << sin(results["Energy"]) << std::endl;
+        std::cout << "Tanh(Correlations):     " << tanh(results["Correlations"]) << std::endl;
+
+        save_results(results, params, options.output_file + "." + boost::lexical_cast<std::string>(color), "/simulation/results");
+
     }
+
 }

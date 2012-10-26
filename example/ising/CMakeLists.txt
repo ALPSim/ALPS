@@ -5,135 +5,48 @@
 
 if (ALPS_BUILD_EXAMPLES)
 
-# TODO: make this file simpler ...
-    add_executable(ngs_ising_single main_single.cpp)
-    add_dependencies(ngs_ising_single alps)
-    target_link_libraries(ngs_ising_single alps)
-
-    add_test(ngs_ising_single
-        ${CMAKE_COMMAND}
-            -Dsourcedir=${PROJECT_SOURCE_DIR}
-            -Dbinarydir=${PROJECT_BINARY_DIR}
-            -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
-            -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_single_test.cmake
-    )
-
-    add_executable(ngs_ising_controlthread main_controlthread_tiny.cpp)
-    add_dependencies(ngs_ising_controlthread alps)
-    target_link_libraries(ngs_ising_controlthread alps)
-
-    add_test(ngs_ising_controlthread
-        ${CMAKE_COMMAND}
-            -Dsourcedir=${PROJECT_SOURCE_DIR}
-            -Dbinarydir=${PROJECT_BINARY_DIR}
-            -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
-            -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_controlthread_test.cmake
-    )
-    
-    # TODO: compile ngs_ising_controlthreaded not only _tiny
-    
     add_executable(alpscontrol alpscontrol.cpp)
     add_dependencies(alpscontrol alps)
     target_link_libraries(alpscontrol alps)
 
-    # TODO: make test!
-    add_executable(ngs_ising_server main_server_tiny.cpp)
-    add_dependencies(ngs_ising_server alps)
-    target_link_libraries(ngs_ising_server alps)
+    foreach (name single controlthread_tiny server_tiny)
+    
+        add_executable(ngs_ising_${name} ${name}.cpp)
+        add_dependencies(ngs_ising_${name} alps)
+        target_link_libraries(ngs_ising_${name} alps)
+
+        add_test(ngs_ising_${name}
+            ${CMAKE_COMMAND}
+                -Dcmd=ngs_ising_${name}
+                -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
+                -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
+                -Dbindir=${PROJECT_BINARY_DIR}/bin
+                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_test.cmake
+        )
+
+    endforeach(name)
 
     if (MPI_FOUND)
-    
-        add_executable(ngs_ising_mpi main_mpi.cpp)
-        add_dependencies(ngs_ising_mpi alps)
-        target_link_libraries(ngs_ising_mpi alps)
-    
-        add_test(ngs_ising_mpi
-            ${CMAKE_COMMAND}
-                -Dcmd=ngs_ising_mpi
-                -Dmpiexec=${MPIEXEC}
-                -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
-                -Dprocs=4
-                -Dmpiexec_preflags=${MPIEXEC_PREFLAGS}
-                -Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}
-                -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
-                -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
-                -Ddllexedir=${PROJECT_BINARY_DIR}/bin
-                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_test.cmake
-        )
 
-        add_executable(ngs_ising_mpi_controlthread main_mpi_controlthread_tiny.cpp)
-        add_dependencies(ngs_ising_mpi_controlthread alps)
-        target_link_libraries(ngs_ising_mpi_controlthread alps)
+        foreach (name mpi mpi_pscan mpi_controlthread_tiny mpi_server_tiny parallel)
+        
+            add_executable(ngs_ising_${name} ${name}.cpp)
+            add_dependencies(ngs_ising_${name} alps)
+            target_link_libraries(ngs_ising_${name} alps)
 
-        add_test(ngs_ising_mpi_controlthread
-            ${CMAKE_COMMAND}
-                -Dcmd=ngs_ising_mpi_controlthread
-                -Dmpiexec=${MPIEXEC}
-                -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
-                -Dprocs=4
-                -Dmpiexec_preflags=${MPIEXEC_PREFLAGS}
-                -Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}
-                -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
-                -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
-                -Ddllexedir=${PROJECT_BINARY_DIR}/bin
-                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_controlthread_test.cmake
-        )
+            add_test(ngs_ising_${name}
+                ${CMAKE_COMMAND}
+                    -Dcmd=ngs_ising_${name}
+                    -Dmpiexec=${MPIEXEC}
+                    -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
+                    -Dprocs=4
+                    -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
+                    -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
+                    -Dbindir=${PROJECT_BINARY_DIR}/bin
+                    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_test.cmake
+            )
 
-        # TODO: compile ngs_ising_mpi_controlthreaded not only _tiny
-
-        add_executable(ngs_ising_server_mpi main_server_mpi_tiny.cpp)
-        add_dependencies(ngs_ising_server_mpi alps)
-        target_link_libraries(ngs_ising_server_mpi alps)
-
-        add_test(ngs_ising_server_mpi
-            ${CMAKE_COMMAND}
-                -Dcmd=ngs_ising_server_mpi
-                -Dmpiexec=${MPIEXEC}
-                -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
-                -Dprocs=4
-                -Dmpiexec_preflags=${MPIEXEC_PREFLAGS}
-                -Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}
-                -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
-                -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
-                -Ddllexedir=${PROJECT_BINARY_DIR}/bin
-                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_test.cmake
-        )
-
-        add_executable(ngs_ising_mpi_pscan main_mpi_pscan.cpp)
-        add_dependencies(ngs_ising_mpi_pscan alps)
-        target_link_libraries(ngs_ising_mpi_pscan alps)
-    
-        add_test(ngs_ising_mpi_pscan
-            ${CMAKE_COMMAND}
-                -Dmpiexec=${MPIEXEC}
-                -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
-                -Dprocs=4
-                -Dmpiexec_preflags=${MPIEXEC_PREFLAGS}
-                -Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}
-                -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
-                -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
-                -Ddllexedir=${PROJECT_BINARY_DIR}/bin
-                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_pscan_test.cmake
-        )
-
-# TODO: implement
-#        add_executable(ngs_ising_mpi2 main_mpi2.cpp)
-#        add_dependencies(ngs_ising_mpi2 alps)
-#        target_link_libraries(ngs_ising_mpi2 alps)
-#
-#        add_test(ngs_ising_mpi2
-#            ${CMAKE_COMMAND}
-#                -Dcmd=ngs_ising_mpi2
-#                -Dmpiexec=${MPIEXEC}
-#                -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
-#                -Dprocs=4
-#                -Dmpiexec_preflags=${MPIEXEC_PREFLAGS}
-#                -Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}
-#                -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
-#                -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
-#                -Ddllexedir=${PROJECT_BINARY_DIR}/bin
-#                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_test.cmake
-#        )
+        endforeach(name)
 
     endif(MPI_FOUND)
 
@@ -142,7 +55,7 @@ if (ALPS_BUILD_EXAMPLES)
         set(ALPS_SHARED_CPPFLAGS ALPS_EXPORTS=1)
         set(ALPS_STATIC_CPPFLAGS "")
 
-        python_add_module(pyising pyising.cpp)
+        python_add_module(pyising src/pyising.cpp)
 
         if(BUILD_SHARED_LIBS)
             set_target_properties(pyising PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
@@ -159,40 +72,37 @@ if (ALPS_BUILD_EXAMPLES)
                 ARCHIVE DESTINATION example/ising
                 LIBRARY DESTINATION example/ising)
 
-        add_test(ngs_ising_python_single
-            ${CMAKE_COMMAND}
-                -Dpython_interpreter=${PYTHON_INTERPRETER} 
-                -Dsourcedir=${PROJECT_SOURCE_DIR}
-                -Dbinarydir=${PROJECT_BINARY_DIR}
-                -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
-                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_python_single_test.cmake
-        )
+        foreach (name export native)
 
-        add_test(ngs_ising_python_native
-            ${CMAKE_COMMAND}
-                -Dpython_interpreter=${PYTHON_INTERPRETER}
-                -Dsourcedir=${PROJECT_SOURCE_DIR}
-                -Dbinarydir=${PROJECT_BINARY_DIR}
-                -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
-                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_python_native_test.cmake
-        )
+            add_test(ngs_ising_python_${name}
+                ${CMAKE_COMMAND}
+                    -Dcmd=${name}
+                    -Dpython_interpreter=${PYTHON_INTERPRETER}
+                    -Dsourcedir=${PROJECT_SOURCE_DIR}
+                    -Dbinarydir=${PROJECT_BINARY_DIR}
+                    -Dbindir=${PROJECT_BINARY_DIR}/bin
+                    -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
+                    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_python_test.cmake
+            )
+            
+        endforeach(name)
 
         if(MPI_FOUND)
-            add_test(ngs_ising_python_native_mpi
+
+            add_test(ngs_ising_python_mpi_native
                 ${CMAKE_COMMAND}
+                    -Dcmd=native
                     -Dpython_interpreter=${PYTHON_INTERPRETER}
                     -Dmpiexec=${MPIEXEC}
                     -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
                     -Dprocs=4
-                    -Dmpiexec_preflags=${MPIEXEC_PREFLAGS}
-                    -Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}
-                    -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
-                    -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
-                    -Dproject_sourcedir=${PROJECT_SOURCE_DIR}
-                    -Dproject_binarydir=${PROJECT_BINARY_DIR}
-                    -Ddllexedir=${PROJECT_BINARY_DIR}/bin
-                    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_python_native_mpi_test.cmake
+                    -Dsourcedir=${PROJECT_SOURCE_DIR}
+                    -Dbinarydir=${PROJECT_BINARY_DIR}
+                    -Dbindir=${PROJECT_BINARY_DIR}/bin
+                    -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
+                    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_python_ising_test.cmake
             )
+
         endif(MPI_FOUND)
 
     endif (ALPS_HAVE_PYTHON)

@@ -25,11 +25,11 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "ising.hpp"
+#include "src/ising.hpp"
 
 // TODO: move to ngs.hpp
 #include <alps/ngs/scheduler/proto/mpisim.hpp>
-#include <alps/ngs/scheduler/proto/tcpserver.hpp>
+#include <alps/ngs/tcpserver.hpp>
 #include <alps/ngs/scheduler/proto/controlthreadsim.hpp>
 
 #include <boost/bind.hpp>
@@ -39,10 +39,9 @@
 
 using namespace alps;
 
-typedef mpisim_ng<controlthreadsim_ng<ising_sim> > master_sim_type;
-typedef mpisim_ng<ising_sim> worker_sim_type;
+typedef mpisim_ng<controlthreadsim_ng<ising_sim> > sim_type;
 
-std::string do_checkpoint(master_sim_type & sim, std::string const & path) {
+std::string do_checkpoint(sim_type & sim, std::string const & path) {
     sim.save(path);
     return "done";
 }
@@ -60,14 +59,24 @@ int main(int argc, char *argv[]) {
     }
     broadcast(c, params);
 
+    sim_type sim(params, c);
+
+    // TODO: make file suffix
+    if (options.resume)
+        sim.load((params["DUMP"] | "checkpoint"));
+
+    boost::thread thread(
+          static_cast<bool(sim_type::*)(boost::function<bool ()> const &)>(&sim_type::run)
+        , boost::ref(sim)
+        , static_cast<boost::function<bool()> >(boost::bind(&stop_callback, options.time_limit))
+    );
+
     if (c.rank() > 0) {
 
-        worker_sim_type sim(params, c);
-
-        if (options.resume)
-            sim.load((params["DUMP"] | "checkpoint") + "." + boost::lexical_cast<std::string>(c.rank()));
-
-        sim.run(boost::bind(&stop_callback, options.time_limit));
+        do {
+            alps::sleep(0.1 * 1e9);
+            sim.check_communication();
+        } while (sim.status() != ising_sim::finished);
 
         sim.save((params["DUMP"] | "checkpoint"));
 
@@ -75,19 +84,8 @@ int main(int argc, char *argv[]) {
 
     } else {
 
-        master_sim_type sim(params, c);
-
-        if (options.resume)
-            sim.load((params["DUMP"] | "checkpoint") + "." + boost::lexical_cast<std::string>(c.rank()));
-
-        boost::thread thread(
-              static_cast<bool(master_sim_type::*)(boost::function<bool ()> const &)>(&master_sim_type::run)
-            , boost::ref(sim)
-            , static_cast<boost::function<bool()> >(boost::bind(&stop_callback, options.time_limit))
-        );
-
         tcpserver server(params["PORT"] | 2485); // TODO: which port should we take?
-        server.add_action("progress", boost::bind(&boost::lexical_cast<std::string, double>, boost::bind(&master_sim_type::fraction_completed, boost::ref(sim))));
+        server.add_action("progress", boost::bind(&boost::lexical_cast<std::string, double>, boost::bind(&sim_type::fraction_completed, boost::ref(sim))));
         server.add_action("checkpoint", boost::bind(&do_checkpoint, boost::ref(sim), params["DUMP"] | "checkpoint"));
 
         boost::posix_time::ptime progress_time = boost::posix_time::second_clock::local_time();

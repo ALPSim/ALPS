@@ -2,14 +2,12 @@
 # Adapted for ALPS by
 #                      Michele Dolfi <dolfim@phys.ethz.ch>
 
-
 find_package(Sphinx REQUIRED)
 find_package(Doxygen REQUIRED)
 
 ## Doxygen settings
 # location of doxygen xml output
 set(DOXYGENDOCS_DIR "${CMAKE_CURRENT_BINARY_DIR}/doxygen")
-
 
 configure_file(get_gasp.in "${CMAKE_CURRENT_BINARY_DIR}/get_gasp")
 
@@ -18,11 +16,7 @@ add_custom_target(gasp ALL
     "${CMAKE_CURRENT_BINARY_DIR}/get_gasp"
     COMMENT "Getting Gasp")
 
-
-
-
 configure_file(doxygen.conf.in "${CMAKE_CURRENT_BINARY_DIR}/doxygen.conf")
-
 
 ## Sphinx settings
 # path to ext modules
@@ -33,7 +27,6 @@ set(SPHINX_BINARY_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/_build")
 set(SPHINX_CACHE_DIR "${CMAKE_CURRENT_BINARY_DIR}/_doctrees")
 
 configure_file(conf.py.in "${CMAKE_CURRENT_BINARY_DIR}/conf.py")
-
 
 ## Doxygen target
 add_custom_target(doxygendocs ALL

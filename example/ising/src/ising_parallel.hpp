@@ -26,6 +26,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <alps/ngs.hpp>
+#include <alps/ngs/scheduler/proto/mcbase.hpp>
 
 #include <boost/lambda/lambda.hpp>
 
@@ -33,33 +34,43 @@
 // i = size() are also accessible
 template<typename T> class tabbed_vector {
     public:
+
         typedef T value_type;
         typedef typename std::vector<value_type>::size_type size_type;
 
-        explicit tabbed_vector(size_type n = 0) : vector_(n + 2) {}
-        explicit tabbed_vector(size_type n, value_type x) : vector_(n + 2, x) {}
-        void resize(size_type n, value_type x = value_type()) { vector_.resize(n + 2, x); }
+        explicit tabbed_vector(size_type n = 0)
+            : vector_(n + 2)
+        {}
 
-        size_type size() const { return vector_.size() - 2; }
-        value_type const& operator[](int i) const { return vector_[i+1]; }
-        value_type& operator[](int i) { return vector_[i+1]; }
+        explicit tabbed_vector(size_type n, value_type x)
+            : vector_(n + 2, x)
+        {}
+
+        void resize(size_type n, value_type x = value_type()) {
+            vector_.resize(n + 2, x);
+        }
+
+        size_type size() const {
+            return vector_.size() - 2;
+        }
+
+        value_type const & operator[](int i) const {
+            return vector_[i+1];
+        }
+
+        value_type& operator[](int i) {
+            return vector_[i+1];
+        }
 
     private:
-    std::vector<value_type> vector_;
+        std::vector<value_type> vector_;
 };
 
-
-// rename Impl to Base or similar
-template<typename Impl> class parallel_ising_sim : public Impl {
+class ising_parallel_sim : public alps::mcbase_ng {
     public:
 
-        parallel_ising_sim(typename Impl::parameters_type const & params, std::size_t seed_offset) 
-        {
-            throw std::runtime_error("No communicator passed" + ALPS_STACKTRACE);
-        }
-  
-        template <typename Communicator> parallel_ising_sim(typename Impl::parameters_type const & params, Communicator c)
-            : Impl(params, c)
+        template <typename Communicator> ising_parallel_sim(parameters_type const & params, Communicator c)
+            : mcbase_ng(params, c.rank())
             , comm(c)
             , length(params["L"])
             , local_length(comm.rank() == 0 ? length - (comm.size() - 1) * (length / comm.size()) : length / comm.size())
@@ -74,7 +85,7 @@ template<typename Impl> class parallel_ising_sim : public Impl {
         void update() {
             for (int i = 0; i < local_length; ++i) {
                 double diff = 4 * (spins[i-1] ^ spins[i] + spins[i] ^ spins[i+1]) - 4;
-                if (Impl::random() < 0.5 * (1 + std::tanh(-0.5 * beta * diff))) spins[i] ^= 1;
+                if (random() < 0.5 * (1 + std::tanh(-0.5 * beta * diff))) spins[i] ^= 1;
                 if (i == 0) copy2left();
                 if (i == local_length - 1) copy2right();
             }
@@ -95,11 +106,11 @@ template<typename Impl> class parallel_ising_sim : public Impl {
                     reduce(comm, my_mag, mag, std::plus<double>(), 0);
                     energy /= length;
                     mag /= length;
-                    Impl::measurements["Energy"] << energy;
-                    Impl::measurements["Energy^2"] << energy * energy;
-                    Impl::measurements["Magnetization"] << mag;
-                    Impl::measurements["Magnetization^2"] << mag * mag;
-                    Impl::measurements["Magnetization^4"] << mag * mag * mag * mag;
+                    measurements["Energy"] << energy;
+                    measurements["Energy^2"] << energy * energy;
+                    measurements["Magnetization"] << mag;
+                    measurements["Magnetization^2"] << mag * mag;
+                    measurements["Magnetization^4"] << mag * mag * mag * mag;
                 } else {
                     boost::mpi::reduce(comm, my_energy, std::plus<double>(), 0);
                     reduce(comm, my_mag, std::plus<double>(), 0);
@@ -115,15 +126,15 @@ template<typename Impl> class parallel_ising_sim : public Impl {
 
         void init() {
             for(int i = 0; i < local_length; ++i)
-                spins[i] = (Impl::random() < 0.5 ? 1 : 0);
+                spins[i] = (random() < 0.5 ? 1 : 0);
             copy2right();
             copy2left();
             if (comm.rank() == 0) {
-                Impl::measurements << alps::ngs::RealObservable("Energy")
-                                   << alps::ngs::RealObservable("Energy^2")
-                                   << alps::ngs::RealObservable("Magnetization")
-                                   << alps::ngs::RealObservable("Magnetization^2")
-                                   << alps::ngs::RealObservable("Magnetization^4")
+                measurements << alps::ngs::RealObservable("Energy")
+                             << alps::ngs::RealObservable("Energy^2")
+                             << alps::ngs::RealObservable("Magnetization")
+                             << alps::ngs::RealObservable("Magnetization^2")
+                             << alps::ngs::RealObservable("Magnetization^4")
                 ;
             }
         }

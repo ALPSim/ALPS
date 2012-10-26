@@ -25,51 +25,28 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "ising.hpp"
-
-#include <alps/ngs/scheduler/proto/controlthreadsim.hpp>
+#include "src/ising.hpp"
 
 using namespace alps;
 
-typedef controlthreadsim_ng<ising_sim> sim_type;
+typedef ising_sim sim_type;
 
 int main(int argc, char *argv[]) {
 
     mcoptions options(argc, argv);
+// TODO: create other examples using text (or XML)
     parameters_type<sim_type>::type params(hdf5::archive(options.input_file));
     sim_type sim(params);
 
     if (options.resume)
         sim.load(params["DUMP"] | "checkpoint");
 
-    boost::thread thread(
-          static_cast<bool(sim_type::*)(boost::function<bool ()> const &)>(&sim_type::run)
-        , boost::ref(sim)
-        , static_cast<boost::function<bool()> >(boost::bind(&stop_callback, options.time_limit))
-    );
-
-    boost::posix_time::ptime progress_time = boost::posix_time::second_clock::local_time();
-    boost::posix_time::ptime checkpoint_time = boost::posix_time::second_clock::local_time();
-    do {
-        alps::sleep(0.1 * 1e9);
-
-        if (boost::posix_time::second_clock::local_time() > progress_time + boost::posix_time::seconds(5)) {
-            std::cout << "progress: " << sim.fraction_completed() << std::endl;
-            progress_time = boost::posix_time::second_clock::local_time();
-        }
-
-        if (boost::posix_time::second_clock::local_time() > checkpoint_time + boost::posix_time::seconds(13)) {
-            std::cout << "checkpointing ... " << std::endl;
-            sim.save(params["DUMP"] | "checkpoint");
-            checkpoint_time = boost::posix_time::second_clock::local_time();
-        }
-
-    } while (sim.status() != ising_sim::finished);
+    sim.run(boost::bind(&stop_callback, options.time_limit));
 
     sim.save(params["DUMP"] | "checkpoint");
 
     results_type<sim_type>::type results = collect_results(sim);
-
+  
     save_results(results, params, options.output_file, "/simulation/results");
 
     std::cout << "#Sweeps:                " << results["Energy"].count() << std::endl;

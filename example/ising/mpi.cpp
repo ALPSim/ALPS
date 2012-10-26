@@ -25,7 +25,7 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "ising.hpp"
+#include "src/ising.hpp"
 
 #include <alps/ngs/scheduler/proto/mpisim.hpp>
 
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
     sim_type sim(params, c); // TODO: automatic controlthread / singlethreaded machen
 
     if (options.resume)
-        sim.load((params["DUMP"] | "checkpoint") + "." + boost::lexical_cast<std::string>(c.rank()));
+        sim.load(params["DUMP"] | "checkpoint");
 
     sim.run(boost::bind(&stop_callback, options.time_limit));
 

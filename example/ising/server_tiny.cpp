@@ -25,85 +25,79 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "ising.hpp"
+#include "src/ising.hpp"
 
-#include <alps/ngs/scheduler/proto/mpisim.hpp>
+// TODO: move to ngs.hpp
+#include <alps/ngs/tcpserver.hpp>
 #include <alps/ngs/scheduler/proto/controlthreadsim.hpp>
 
+#include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
+
+#include <iostream>
 
 using namespace alps;
 
-typedef mpisim_ng<controlthreadsim_ng<ising_sim> > sim_type;
+typedef controlthreadsim_ng<ising_sim> sim_type;
+
+std::string do_checkpoint(sim_type & sim, std::string const & path) {
+    sim.save(path);
+    return "done";
+}
 
 int main(int argc, char *argv[]) {
 
     mcoptions options(argc, argv);
-    boost::mpi::environment env(argc, argv);
-    boost::mpi::communicator c;
-
-    parameters_type<sim_type>::type params;
-    if (!c.rank()) {
-        hdf5::archive ar(options.input_file);
-        ar["/parameters"] >> params;
-    }
-    broadcast(c, params);
-
-    sim_type sim(params, c);
+    parameters_type<sim_type>::type params(hdf5::archive(options.input_file));
+    sim_type sim(params);
 
     if (options.resume)
-        sim.load((params["DUMP"] | "checkpoint") + "." + boost::lexical_cast<std::string>(c.rank()));
-    
-    boost::thread thread(
+        sim.load(params["DUMP"] | "checkpoint");
+
+    boost::thread worker(
           static_cast<bool(sim_type::*)(boost::function<bool ()> const &)>(&sim_type::run)
         , boost::ref(sim)
         , static_cast<boost::function<bool()> >(boost::bind(&stop_callback, options.time_limit))
     );
 
+    tcpserver server(params["PORT"] | 2485); // TODO: which port should we take?
+    server.add_action("progress", boost::bind(&boost::lexical_cast<std::string, double>, boost::bind(&sim_type::fraction_completed, boost::ref(sim))));
+    server.add_action("checkpoint", boost::bind(&do_checkpoint, boost::ref(sim), params["DUMP"] | "checkpoint"));
+
     boost::posix_time::ptime progress_time = boost::posix_time::second_clock::local_time();
     boost::posix_time::ptime checkpoint_time = boost::posix_time::second_clock::local_time();
     do {
-
         alps::sleep(0.1 * 1e9);
 
-        if (!c.rank()) {
-            if (boost::posix_time::second_clock::local_time() > progress_time + boost::posix_time::seconds(5)) {
-                std::cout << "progress: " << sim.fraction_completed() << std::endl;
-                progress_time = boost::posix_time::second_clock::local_time();
-            }
-
-            if (boost::posix_time::second_clock::local_time() > checkpoint_time + boost::posix_time::seconds(13)) {
-                std::cout << "checkpointing rank " << c.rank() << "... " << std::endl;
-                sim.save(params["DUMP"] | "checkpoint");
-                checkpoint_time = boost::posix_time::second_clock::local_time();
-            }
+        if (boost::posix_time::second_clock::local_time() > progress_time + boost::posix_time::seconds(5)) {
+            std::cout << "progress: " << sim.fraction_completed() << std::endl;
+            progress_time = boost::posix_time::second_clock::local_time();
         }
 
-        sim.check_communication();
-
+        server.poll();
     } while (sim.status() != ising_sim::finished);
+    server.stop();
 
-    sim.save((params["DUMP"] | "checkpoint"));
+    sim.save(params["DUMP"] | "checkpoint");
 
     results_type<sim_type>::type results = collect_results(sim);
 
-    if (!c.rank()) {
-        std::cout << "#Sweeps:                " << results["Energy"].count() << std::endl;
-        std::cout << "Correlations:           " << results["Correlations"] << std::endl;
-        std::cout << "Energy:                 " << results["Energy"] << std::endl;
+    save_results(results, params, options.output_file, "/simulation/results");
 
-        std::cout << "Mean of Energy:         " << results["Energy"].mean<double>() << std::endl;
-        std::cout << "Error of Energy:        " << results["Energy"].error<double>() << std::endl;
-        std::cout << "Mean of Correlations:   " << short_print(results["Correlations"].mean<std::vector<double> >()) << std::endl;
-        std::cout << "Covariance E/M:         " << short_print(results["Energy"].covariance<double>(results["Magnetization"])) << std::endl;
+    // TODO: move to external function for all ising examples
+    std::cout << "#Sweeps:                " << results["Energy"].count() << std::endl;
+    std::cout << "Correlations:           " << results["Correlations"] << std::endl;
+    std::cout << "Energy:                 " << results["Energy"] << std::endl;
 
-        std::cout << "-2 * Energy / 13:       " << -2. * results["Energy"] / 13. << std::endl;
-        std::cout << "1 / Correlations        " << 1. / results["Correlations"] << std::endl;
-        std::cout << "Energy - Magnetization: " << results["Energy"] - results["Magnetization"] << std::endl;
+    std::cout << "Mean of Energy:         " << results["Energy"].mean<double>() << std::endl;
+    std::cout << "Error of Energy:        " << results["Energy"].error<double>() << std::endl;
+    std::cout << "Mean of Correlations:   " << short_print(results["Correlations"].mean<std::vector<double> >()) << std::endl;
+    std::cout << "Covariance E/M:         " << short_print(results["Energy"].covariance<double>(results["Magnetization"])) << std::endl;
 
-        std::cout << "Sin(Energy):            " << sin(results["Energy"]) << std::endl;
-        std::cout << "Tanh(Correlations):     " << tanh(results["Correlations"]) << std::endl;
+    std::cout << "-2 * Energy / 13:       " << -2. * results["Energy"] / 13. << std::endl;
+    std::cout << "1 / Correlations        " << 1. / results["Correlations"] << std::endl;
+    std::cout << "Energy - Magnetization: " << results["Energy"] - results["Magnetization"] << std::endl;
 
-        save_results(results, params, options.output_file, "/simulation/results");
-    }
+    std::cout << "Sin(Energy):            " << sin(results["Energy"]) << std::endl;
+    std::cout << "Tanh(Correlations):     " << tanh(results["Correlations"]) << std::endl;
 }
