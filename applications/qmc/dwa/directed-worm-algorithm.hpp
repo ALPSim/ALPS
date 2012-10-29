@@ -25,8 +25,8 @@
 *
 *****************************************************************************/
 
-#ifndef ALPS_APPLICATIONS_DIRECTED_WORM_ALGORITHM_HPP
-#define ALPS_APPLICATIONS_DIRECTED_WORM_ALGORITHM_HPP
+#ifndef DIRECTED_WORM_ALGORITHM_HPP
+#define DIRECTED_WORM_ALGORITHM_HPP
 
 
 #include <cassert>
@@ -45,36 +45,24 @@
 
 #include <boost/cstdint.hpp>
 #include <boost/lambda/lambda.hpp>
+#include <boost/math/constants/constants.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #include <alps/alea.h>
+#include <alps/numeric/vector_functions.hpp>
 #include <alps/osiris/comm.h>
 
-#include "numeric.hpp"
-#include "worldline.hpp"
+#include "worldlines.hpp"
 
 #include "../qmc.h"
-
-
-namespace alps {
-namespace applications {
 
 
 class directed_worm_algorithm  
   : public QMCRun<>     
 {
 public:
-  typedef  boost::uint64_t                count_type;
-  typedef  unsigned short                 State;
-  typedef  double                         Time;
-  typedef  site_descriptor                Site;
-  typedef  Worldline::Kink                Kink;
-  typedef  Worldline::Line                Line;
-  typedef  Worldline::Lines               Lines;
-  typedef  Worldline::LineIterator        LineIterator;
-  typedef  Worldline::LineConstIterator   LineConstIterator;
-  typedef  Worldline::LinesIterator       LinesIterator;
-  typedef  Worldline::LinesConstIterator  LinesConstIterator;
+  typedef boost::uint64_t                count_type;
+  typedef worldlines::location_type      location_type;
 
   directed_worm_algorithm
     ( const alps::ProcessList &  processes
@@ -88,18 +76,19 @@ public:
 private:
   /// private member functions 
 
-  // I/O
-  ////void  save(alps::ODump & dump) const { worldline.save(dump); } 
-  ////void  load(alps::IDump & dump)       { worldline.load(dump); }
+  // i/o
+  void save(alps::hdf5::archive & ar) const;
+  void load(alps::hdf5::archive & ar)  { ar >> alps::make_pvp("/simulation/worldlines", wl); }
 
   // regarding simulation backbone (ESSENTIAL)
   void  start();          
-  void  dostep();                         // Check this out to see how the current diagonal configuration is being updated.
+  void  dostep();     
+  void  docheckpoint(bool const & measure_);
 
   // regarding simulation interprocess (ESSENTIAL)
-  bool   wormhead_propagation_until_halted_by_wormtail (State const & wormpair_state);
-  void   insert_jump_or_bounce        (double const onsite_energy_relative_);
-  void   delete_relink_jump_or_bounce ();
+  bool   wormhead_propagates_till_collision_with_wormtail (unsigned short wormpair_state, std::pair<neighbor_iterator, neighbor_iterator> const & neighbors_, bool const & measure_);
+  void   insert_jump_or_bounce        (double onsite_energy_relative_, std::pair<neighbor_iterator, neighbor_iterator> const & neighbors_);
+  void   delete_relink_jump_or_bounce (std::pair<neighbor_iterator, neighbor_iterator> const & neighbors_);
 
   // regarding simulation performance 
   bool   is_thermalized()  const         {  return _sweep_counter >= _total_thermalization_sweeps;  }
@@ -111,79 +100,39 @@ private:
   void initialize_hamiltonian();
   void print_hamiltonian(std::ostream & out);
 
-  std::vector<double> onsite_hamiltonian(const site_descriptor & site);
+  std::vector<double> onsite_hamiltonian(unsigned int site_type);
   inline boost::multi_array<double,4>  
                       bond_hamiltonian(const bond_descriptor & bond);
   boost::tuple<std::vector<double>, std::vector<double>, std::vector<double>, std::vector<double> > 
                       bond_ladder_hamiltonians(const bond_descriptor & bond);
 
-  inline double onsite_energy (Site const site_, State const state_) const  { return onsite_matrix[site_type(site_)][state_]; }     
-  inline double onsite_energy_relative (Kink const & kink_, bool const forward_) const;
-  inline double hopping_energy (bond_descriptor const & bond_, State const targetstate_, bool const increasing_) const;
+  inline double onsite_energy (unsigned int site_, unsigned short state_) const  { return onsite_matrix[site_type(site_)][state_]; }     
+  double onsite_energy_relative (unsigned int site_, unsigned short state_, bool forward_, bool creation_) const;
+  double hopping_energy (bond_descriptor const & bond_, unsigned short targetstate_, bool increasing_) const;
 
-  std::vector<double> onsite_energies (std::vector<int> const & states_) const
+  std::vector<double> onsite_energies (std::vector<unsigned short> const & states_) const
   {
     std::vector<double> _onsite_energies;
     _onsite_energies.reserve(num_sites());
-    for (Site site=0; site<num_sites(); ++site)
+    for (unsigned int site=0; site<num_sites(); ++site)
       _onsite_energies.push_back(onsite_energy(site,states_[site]));
     return _onsite_energies;
   }
 
+  // regarding lookups
+  void initialize_lookups();
+  void print_lookups(std::ostream & out) const;
+
   // regarding lattice
-  std::vector<double> position(const site_descriptor & site) 
-  {
-    using alps::numeric::operator-;
-    using boost::numeric::operators::operator-;
-    using boost::numeric::operators::operator/;
-      
-    return coordinate(site) - alps::applications::numeric::vector_cast<double>(lattice().extent() - 1)/2.;
-  }
+  std::vector<double> position(unsigned int site)                   const  { return position_lookup[site]; }
+  double              position(unsigned int site, unsigned int dim) const  { return position_lookup[site][dim]; } 
 
-  int idx(const std::vector<int> & idx_vector) const
-  {
-    int _index = idx_vector[0];
-    for (int i=0; i<dimension()-1; ++i)
-      _index += (idx_vector[i+1]*lattice().extent()[i]);
-    return _index;
-  } 
+  std::vector<double> component_momenta()                  const  { return component_momenta_lookup; }
+  double              component_momentum(unsigned int idx) const  { return component_momenta_lookup[idx]; }
+  unsigned int        num_component_momenta()              const  { return num_component_momenta_; }
 
-  std::vector<int> nearest_neighbor_idx(const site_descriptor & site) const 
-  {
-    std::set<std::vector<int> > _unit_vectors;
-    for (neighbor_bond_iterator it=neighbor_bonds(site).first; it != neighbor_bonds(site).second; ++it)
-      _unit_vectors.insert(alps::applications::numeric::iround(alps::numeric::abs(bond_vector(*it))));
-    std::vector<int> _nearest_neighbor_idx;
-    _nearest_neighbor_idx.reserve(_unit_vectors.size());
-    for (std::set<std::vector<int> >::iterator it=_unit_vectors.begin(); it!=_unit_vectors.end(); ++it)
-      _nearest_neighbor_idx.push_back(idx(*it));
-    std::sort(_nearest_neighbor_idx.begin(), _nearest_neighbor_idx.end());
-    return _nearest_neighbor_idx;
-  }
-
-  std::vector<int> periodicize (const std::vector<int> & idx_vector_) const
-  {
-    std::vector<int> _vector = idx_vector_;
-    for (int i=0; i<dimension(); ++i)
-    {
-      if (_vector[i] < 0)
-        _vector[i] = lattice().extent()[i] + _vector[i];
-    }
-    return _vector;
-  }
-
-  std::vector<int> winding (const std::vector<int> & idx_vector_)  const
-  {
-    std::vector<int> _vector = idx_vector_;
-    for (int i=0; i<dimension(); ++i)
-    {
-      if (_vector[i] == lattice().extent()[i]-1)
-        _vector[i] = -1;
-      else if (_vector[i] == -(lattice().extent()[i]-1))
-        _vector[i] = 1;
-    }
-    return _vector;
-  }
+  // regarding experiment
+  double phase(unsigned int site) const  { return finite_tof ? phase_lookup[site] : 0.; }  
 
   // regarding worldline
   void print_worldline(std::ostream & out) const; 
@@ -195,11 +144,6 @@ private:
 
   // regarding on fly measurements
   void reinitialize_on_fly_measurements();
-
-  // regarding random numbers
-  bool  randombool()   {  return random() < 0.5;          }  
-  Site  randomsite()   {  return random() * num_sites();  }
-  Time  randomtime()   {  return random();                }
 
 
   // private member objects
@@ -214,9 +158,11 @@ private:
   count_type  _total_sweeps;
   count_type  _sweep_per_measurement;
 
+  std::pair<std::time_t, std::time_t>  _simulation_timer;  
+
   // regarding model
-  std::vector<State> state_minimum;         // arg: site site type
-  std::vector<State> state_maximum;         // arg: site site type
+  std::vector<unsigned short> state_minimum;         // arg: site site type
+  std::vector<unsigned short> state_maximum;         // arg: site site type
 
   std::vector<std::vector<double> > onsite_matrix;               // onsite matrix      - arg1: sitetype, arg2: state  
   std::vector<std::vector<double> > site_oneup_matrix;           // site 1-up matrix   - arg1: sitetype, arg2: state
@@ -224,37 +170,52 @@ private:
 
   std::vector<double> bond_strength_matrix;                      // bond strength matrix - arg: bondtype
 
-  // regarding disorder
-  std::vector<double> percentage_error_hopping_t;
-  std::vector<double> percentage_error_onsite_U;
-  std::vector<double> percentage_error_onsite_mu;
+  // regarding lookups
+  std::vector<std::vector<double> > position_lookup;
+  std::vector<double>               component_momenta_lookup;
+  std::vector<double>               phase_lookup;
+
+  // regarding lattice
+  bool is_periodic_;
+  int  num_component_momenta_;
+
+  std::vector<std::vector<double> > lattice_vector_;
 
   // regarding experiment
-  bool is_experiment;
-
-  static const double hbar = 1.05457148;
-  static const double amu  = 1.66053886;
-
-  std::vector<double> phase;
+  bool finite_tof;
 
   // regarding worldline
-  Worldline            worldline;
-  std::pair<Kink,Kink> wormpair;
+  worldlines wl;
+  wormpair   worm;
 
   // regarding measurements
-  bool _measure_now;
+  bool measure_simulation_speed_;
+  bool measure_winding_number_;
+  bool measure_local_density_;
+  bool measure_local_density2_;
+  bool measure_local_magnetization_;
+  bool measure_local_magnetization2_;
+  bool measure_local_energy_;
+  bool measure_green_function_;
+  bool measure_momentum_density_;
+  bool measure_tof_image_;
 
   // regarding on-fly measurements
-  bool _on_fly_measurements_reinitialized;
+  double  green_onsite;
+  double  green_neighbors;
+  double  zero_momentum_density;
+  double  zero_momentum_density_tof;
 
-  std::vector<double>  green_tof;
   std::vector<double>  green;
-  std::vector<int>     winding_number;
+  std::vector<double>  green_tof;
+  std::vector<double>  momentum_density;
+  std::vector<double>  momentum_density_tof;
+
+  // regarding caches (for optimization purpose)
+#ifdef HEATBATH_ALGORITHM
+  std::vector<location_type>  _neighborlocations_cache;
+  std::vector<double>         _cummulative_weights_cache; 
+#endif
 };
-
-
-} // ending namespace applications
-} // ending namespace alps
-
 
 #endif

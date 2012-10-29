@@ -28,8 +28,9 @@
 #include "directed-worm-algorithm.hpp"
 
 
-namespace alps {
-namespace applications {
+// ==================================================
+// directed_worm_algorithm member functions
+// ==================================================
 
 void
   directed_worm_algorithm
@@ -69,12 +70,11 @@ void
   directed_worm_algorithm
     ::print_simulation (std::ostream & out)
     {
-
+      using alps::numeric::operator<<;
       out << "Parameters\n"
           << "==========\n\n"
           << parms
           << "\n\n";
-
       out << "Simulation\n"
           << "==========\n\n"
           << "\t Total thermalization sweeps       : " << _total_thermalization_sweeps   << "\n"
@@ -85,18 +85,36 @@ void
           << "\t Propagation counter               : " << _propagation_counter           << "\n"
           << "\t Propagation failure counter       : " << _propagation_failure_counter   << "\n"
           << "\n\n";
-
       out << "Lattice\n"
           << "=======\n\n"
           << "Name              : " << static_cast<std::string>(parms["LATTICE"]) << "\n"
           << "Dimension         : " << dimension()                                << "\n"
           << "Total Sites/Bonds : " << num_sites() << "\t/\t" << num_bonds()      << "\n"
-          << "Periodic          : " << !inhomogeneous() << "\n"
+          << "Periodic          : " << is_periodic_ << "\n"
 #ifdef DEBUGMODE
           << "Graph             : " << "\n"
           << graph()
 #endif
           << "\n\n";
+      out << "Model\n"
+          << "=====\n\n"
+          << "Name         : " << model().name()   << "\n"
+          << "Charge model : " << is_charge_model_ << "\n"
+          << "Spin model   : " << is_spin_model_   << "\n"
+          << "Site Basis   : " << model().basis().site_basis().name() << "\n"
+          << "unsigned shorts       : " << diagonal_matrix_element.begin()->second[0] << "\n"
+          << "\n\n";
+      out << "Measurements\n"
+          << "============\n"
+          << "Measure Simulation Speed    : " << measure_simulation_speed_    << "\n"
+          << "Measure Local Energy        : " << measure_local_energy_        << "\n"
+          << "Measure Local Density       : " << measure_local_density_       << "\n" 
+          << "Measure Local Magnetization : " << measure_local_magnetization_ << "\n"
+          << "Measure Green's Function    : " << measure_green_function_      << "\n"
+          << "Measure Momentum Density    : " << measure_momentum_density_    << "\n"
+          << "Measure TOF Image           : " << measure_tof_image_           << "\n"
+          << "Measure Winding Number      : " << measure_winding_number_      << "\n"
+          << "\n\n"; 
     }
 
 directed_worm_algorithm
@@ -106,7 +124,6 @@ directed_worm_algorithm
     , int                        processnode
     )
     : QMCRun<>(processes, parameters, processnode)
-
     // regarding MC simulation
     , _sweep_counter               (0)
     , _sweep_failure_counter       (0)
@@ -115,23 +132,60 @@ directed_worm_algorithm
     , _total_thermalization_sweeps (parameters.value_or_default("THERMALIZATION",0))
     , _total_sweeps                (parameters.value_or_default("TOTAL_SWEEPS",10000000))   
     , _sweep_per_measurement       (parameters.value_or_default("SKIP",1))
-
+    // regarding lattice
+    , is_periodic_ (std::find((this->lattice().boundary()).begin(), (this->lattice().boundary()).end(), "open") == (this->lattice().boundary()).end())
+    , num_component_momenta_ (1 + static_cast<int>(parameters.value_or_default("MOMENTUM_EXTENT",10)))
     // regarding worldline
-    , worldline (num_sites(), parameters.value_or_default("LINE_CAPACITY",1))
-
+    , wl (num_sites())
     // regarding experiment
-    , is_experiment (static_cast<bool>(parameters.value_or_default("experiment",false)))
-
+    , finite_tof (is_periodic_ ? false : (0. != static_cast<double>(parameters.value_or_default("time_of_flight",0.))))
     // regarding measurements
-    , _measure_now (false)
-
-    // regarding on-fly measurements
-    , _on_fly_measurements_reinitialized (false)
+    , measure_simulation_speed_     (parameters.value_or_default("MEASURE[Simulation Speed]",false))
+    , measure_winding_number_       (is_periodic_ ? static_cast<bool>(parameters.value_or_default("MEASURE[Winding Number]",false)) : false)
+    , measure_local_density_        (this->is_charge_model_ ? static_cast<bool>(parameters.value_or_default("MEASURE[Local Density]",false)) : false)
+    , measure_local_density2_       (this->is_charge_model_ ? static_cast<bool>(parameters.value_or_default("MEASURE[Local Density^2]",false)) : false)
+    , measure_local_magnetization_  (this->is_spin_model_ ? static_cast<bool>(parameters.value_or_default("MEASURE[Local Magnetization]",false)) : false)
+    , measure_local_magnetization2_ (this->is_spin_model_ ? static_cast<bool>(parameters.value_or_default("MEASURE[Local Magnetization^2]",false)) : false)
+    , measure_local_energy_         (parameters.value_or_default("MEASURE[Local Energy]",false))
+    , measure_green_function_       (is_periodic_ ? static_cast<bool>(parameters.value_or_default("MEASURE[Green Function]",false)) : false)
+    , measure_momentum_density_     (parameters.value_or_default("MEASURE[Momentum Density]",false))
+    , measure_tof_image_            (finite_tof ? static_cast<bool>(parameters.value_or_default("MEASURE[TOF Image]",false)) : false) 
   {
+    // lattice enhancement
+    using alps::numeric::operator*;
+    for (int i=0; i<dimension(); ++i)
+      lattice_vector_.push_back(*(basis_vectors().first + i) * lattice().extent()[i]);
+
+    // other initialization
     initialize_site_states();
     initialize_hamiltonian();
+    initialize_lookups();
     initialize_measurements();
+
+    // regarding caches
+#ifdef HEATBATH_ALGORITHM
+    unsigned int maximum_num_neighbors=0;
+    for (site_iterator it=sites().first; it!=sites().second; ++it)
+      if (num_neighbors(*it) > maximum_num_neighbors)
+        maximum_num_neighbors = num_neighbors(*it);
+    
+    _neighborlocations_cache.reserve(maximum_num_neighbors);
+    _cummulative_weights_cache.reserve(maximum_num_neighbors+1);
+#endif
   }
+
+void
+  directed_worm_algorithm
+    ::save(alps::hdf5::archive & ar) const
+    {
+      ar << alps::make_pvp("/simulation/worldlines", wl);
+      if (measure_local_density_ || measure_local_density2_ || measure_local_magnetization_ || measure_local_magnetization2_ || measure_local_energy_)
+        ar << alps::make_pvp("/simulation/positions", position_lookup);
+      if (measure_green_function_)
+        ar << alps::make_pvp("/simulation/green_coordinates", lattice().distance_labels());
+      if (measure_momentum_density_ || measure_tof_image_)
+        ar << alps::make_pvp("/simulation/momenta", component_momenta_lookup);
+    }
 
 void
   directed_worm_algorithm
@@ -140,8 +194,12 @@ void
       print_simulation (std::cout);
 #ifdef DEBUGMODE
       print_hamiltonian(std::cout);
+      print_lookups    (std::cout);
       print_worldline  (std::cout);
 #endif
+
+      if (measure_simulation_speed_)
+        std::time(&_simulation_timer.first);
     }
 
 void
@@ -151,24 +209,8 @@ void
       // setup state_minimum and state_maximum
       for (int i=0; i<maximum_sitetype+1; ++i)
       {
-        state_minimum.push_back(alps::applications::numeric::iround(diagonal_matrix_element.begin()->second[i].front()));
-        state_maximum.push_back(alps::applications::numeric::iround(diagonal_matrix_element.begin()->second[i].back()));
-      }
-
-      // this part takes care of experimental details
-      if (is_experiment && model().name() == "trapped boson Hubbard")
-      {
-        phase = std::vector<double>(dimension(), 
-          1e-8 * static_cast<double>(parms["mass"])*amu*alps::numeric::sq(static_cast<double>(parms["lambda"])) 
-          / (8*static_cast<double>(parms["time_of_flight"])*hbar));
-      }
-
-      // this part takes care of disorders
-      if (model().name() == "trapped boson Hubbard")
-      {
-        percentage_error_hopping_t.resize(num_bonds(), 1. + (2*random()-1)*static_cast<double>(parms.value_or_default("t_disorder",0)));
-        percentage_error_onsite_U .resize(num_sites(), 1. + (2*random()-1)*static_cast<double>(parms.value_or_default("U_disorder",0)));
-        percentage_error_onsite_mu.resize(num_sites(), 1. + (2*random()-1)*static_cast<double>(parms.value_or_default("mu_disorder",0)));
+        state_minimum.push_back(boost::math::iround(diagonal_matrix_element.begin()->second[i].front()));
+        state_maximum.push_back(boost::math::iround(diagonal_matrix_element.begin()->second[i].back()));
       }
 
       // iterate all sites and build onsite matrix 
@@ -178,7 +220,7 @@ void
         { 
           using boost::numeric::operators::operator*;
           onsite_matrix.resize(this_site_type+1);
-          onsite_matrix[this_site_type] = onsite_hamiltonian(*it) * beta;
+          onsite_matrix[this_site_type] = onsite_hamiltonian(this_site_type) * beta;
         }
       }
 
@@ -228,12 +270,6 @@ void
 
         bond_strength_matrix.push_back(bond_strength_matrix_temporary[this_bond_type]); 
       }
-
-      if (model().name() == "trapped boson Hubbard")
-      {
-        using boost::numeric::operators::operator*;
-        bond_strength_matrix = bond_strength_matrix * percentage_error_hopping_t; 
-      }
     }
 
 void
@@ -250,7 +286,7 @@ void
       for (site_iterator it=sites().first; it!=sites().second; ++it)
       {
         out << "Site/Site Type/Position : " << *it << "\t/\t" << site_site_type[*it] << "\t/\t" << position(*it) << "\n\n"
-            << "States     : " << (diagonal_matrix_element.begin()->second)[site_site_type[*it]]  << "\n\n"
+            << "unsigned shorts     : " << (diagonal_matrix_element.begin()->second)[site_site_type[*it]]  << "\n\n"
             << "Onsite H   : " << onsite_matrix[inhomogeneous_site_type(*it)] << "\n\n"
             << "+ operator : " << site_oneup_matrix  [site_site_type[*it]] << "\n\n"
             << "- operator : " << site_onedown_matrix[site_site_type[*it]] << "\n\n"
@@ -271,11 +307,75 @@ void
 
 void
   directed_worm_algorithm
+    ::initialize_lookups()
+    {
+      // position lookup table
+      position_lookup.reserve(num_sites());
+      for (unsigned int site=0; site<num_sites(); ++site)
+      {
+        std::vector<double> _position = coordinate(site);
+        for (int i=0; i<dimension(); ++i)
+          _position[i] -= static_cast<double>(lattice().extent()[i]-1)/2.;
+        position_lookup.push_back(_position);
+      }
+
+      // component momenta lookup table 
+      component_momenta_lookup.reserve(num_component_momenta_);
+      for (unsigned int idx=0; idx < num_component_momenta(); ++idx)
+        component_momenta_lookup.push_back(idx*boost::math::double_constants::pi/lattice().extent()[0]/(num_component_momenta()-1));
+
+      // phase and phase lookup table
+      if (finite_tof)
+      {
+        std::vector<double> inverse_tof = std::vector<double>(dimension(), 1./static_cast<double>(parms["time_of_flight"]));
+        phase_lookup.reserve(num_sites());
+        for (unsigned int site=0; site<num_sites(); ++site) 
+          phase_lookup.push_back(std::inner_product(inverse_tof.begin(), inverse_tof.end(), (alps::numeric::sq(position(site))).begin(), 0.));
+      }
+    }
+
+void
+  directed_worm_algorithm
+    ::print_lookups(std::ostream & out) const
+    {
+      using alps::numeric::operator<<;
+   
+      out << "Lookup Tables:\n"
+          << "=============\n\n";
+
+      // position lookup table
+      out << "Position Lookup Table:\n"
+          << "----------------------\n\n";
+      for (unsigned int site=0; site<num_sites(); ++site)
+        out << "Site : " << site << " , Site position : " << position(site) << "\n";
+      out << "\n";
+
+      // component lookup table
+      out << "Component Momenta Lookup Table:\n"
+          << "-------------------------------\n\n";
+      for (unsigned int idx=0; idx<num_component_momenta(); ++idx)
+        out << "Index : " << idx << " , Component Momentum : " << component_momentum(idx) << "\n";
+      out << "\n";
+
+      // phase lookup table
+      out << "Phase Lookup Table:\n"
+          << "----------------------\n\n";
+      for (unsigned int site=0; site<num_sites(); ++site)
+        out << "Site : " << site << " , Phase : " << phase(site) << "\n";
+      out << "\n";
+
+      out << "\n\n";
+
+      std::cin.get();
+    }
+
+void
+  directed_worm_algorithm
     ::print_worldline(std::ostream & out) const
     {
       out << "Worldline:\n"
           << "==========\n\n"
-          << worldline << "\n"
+          << wl << "\n"
           << "==========\n\n";
     }
 
@@ -293,63 +393,94 @@ void
         << alps::RealObservable             ("Onsite Energy")
         << alps::RealObservable             ("Energy")
         << alps::RealObservable             ("Energy^2")
+        << alps::RealObservable             ("Hopping Energy Density")
+        << alps::RealObservable             ("Onsite Energy Density")
         << alps::RealObservable             ("Energy Density")
         << alps::RealObservable             ("Energy Density^2")
-        << alps::SimpleIntVectorObservable  ("Local Density")
-        << alps::SimpleIntVectorObservable  ("Local Density^2")
-        << alps::SimpleRealVectorObservable ("Local Hopping Energy")
-        << alps::SimpleRealVectorObservable ("Local Onsite Energy")
-        << alps::SimpleRealVectorObservable ("Local Energy")
-        << alps::SimpleRealVectorObservable ("Local Energy^2")
       ;
+
+      if (measure_winding_number_)
+        measurements << alps::RealVectorObservable ("Winding Number^2");
+
+      if (measure_local_density_)
+        measurements << alps::SimpleRealVectorObservable ("Local Density");
+
+      if (measure_local_density2_)
+        measurements << alps::SimpleRealVectorObservable ("Local Density^2");
+
+      if (measure_local_magnetization_)
+        measurements << alps::SimpleRealVectorObservable  ("Local Magnetization");
+   
+      if (measure_local_magnetization2_)
+        measurements << alps::SimpleRealVectorObservable  ("Local Magnetization^2");
 
       // regarding on-fly measurements
-      measurements 
-        << alps::SimpleRealVectorObservable ("Green's Function")
-        << alps::RealObservable             ("Onsite Green's Function")
-        << alps::RealVectorObservable       ("N.N. Green's Function")
-        << alps::RealObservable             ("Condensate Fraction")
-      ;
+      reinitialize_on_fly_measurements();
 
-      if (is_experiment && model().name() == "trapped boson Hubbard")
-      {
       measurements
-        << alps::SimpleRealVectorObservable ("TOF Green's Function")
-        << alps::RealObservable             ("TOF Onsite Green's Function")
-        << alps::RealVectorObservable       ("TOF N.N. Green's Function")
-        << alps::RealObservable             ("TOF Condensate Fraction")
-      ;
+        << alps::RealObservable  ("Green's Function Onsite")
+        << alps::RealObservable  ("Green's Function Neighbors")
+        << alps::RealObservable  ("Zero Momentum Density")
+        ;
+
+      if (measure_green_function_)
+      {
+        green.resize(lattice().num_distances(),0.);
+        measurements << alps::SimpleRealVectorObservable ("Green's Function");
       }
 
-      if (!inhomogeneous())
-      measurements << alps::IntVectorObservable ("Winding Number^2");
+      if (measure_momentum_density_)
+      {
+        momentum_density.resize(num_component_momenta(),0.);
+        measurements << alps::SimpleRealVectorObservable ("Momentum Density");
+      }
+
+      if (finite_tof)
+      {
+        measurements << alps::RealObservable  ("Zero TOF Image");
+
+        if (measure_green_function_)
+        {
+          green_tof.resize(lattice().num_distances(),0.);
+          measurements << alps::SimpleRealVectorObservable ("TOF Green's Function");
+        }
+
+        if (measure_tof_image_)
+        {
+          momentum_density_tof.resize(num_component_momenta(),0.);
+          measurements << alps::SimpleRealVectorObservable ("TOF Image");
+        }
+      }
     }
 
 void
   directed_worm_algorithm
     ::reinitialize_on_fly_measurements()
     {
-      // density matrix
-      green.clear();
-      green.resize(num_sites(), 0.);
+      green_onsite          = 0.;
+      green_neighbors       = 0.;
+      zero_momentum_density = 0.;
 
-      if (is_experiment && model().name() == "trapped boson Hubbard")
+      if (measure_green_function_)
+        std::fill(green.begin(),green.end(),0.);
+      if (measure_momentum_density_)
+        std::fill(momentum_density.begin(),momentum_density.end(),0.);
+
+      if (finite_tof)
       {
-      green_tof.clear();
-      green_tof.resize(num_sites(), 0.);
-      }
+        zero_momentum_density_tof = 0.;
 
-      // winding number
-      winding_number.clear();
-      winding_number.resize(dimension(), 0);
+        if (measure_green_function_)
+          std::fill(green_tof.begin(),green_tof.end(),0.);
+        if (measure_tof_image_)
+          std::fill(momentum_density_tof.begin(),momentum_density_tof.end(),0.);
+      }
     }
 
 std::vector<double> 
   directed_worm_algorithm
-    ::onsite_hamiltonian(const site_descriptor& site) 
+    ::onsite_hamiltonian( unsigned int this_site_type)
     {
-      unsigned int this_site_type = site_type(site);
-
       std::vector<alps::SiteTermDescriptor> all_site_terms = model().site_terms();
       std::map<std::string, alps::SiteTermDescriptor> this_site_terms;
       for (std::vector<alps::SiteTermDescriptor>::iterator it=all_site_terms.begin(); it!=all_site_terms.end(); ++it)
@@ -357,78 +488,42 @@ std::vector<double>
           this_site_terms.insert(std::make_pair(it->name(), *it));
 
       std::vector<double> this_onsite_hamiltonian;
-
-      // For trapped boson Hubbard model
-      if (model().name() == "trapped boson Hubbard")
+      for (std::map<std::string, alps::SiteTermDescriptor>::iterator it=this_site_terms.begin(); it!=this_site_terms.end(); ++it)
       {
-        { // U term
-          boost::multi_array<double,2> this_onsite_matrix =
-            alps::get_matrix( double(), this_site_terms.find("U term")->second
-                            , model().basis().site_basis(this_site_type), parms);
-          std::vector<double> this_onsite_matrix_diagonal;
-          for (state_type i=0; i < this_onsite_matrix.shape()[0]; ++i)
-            this_onsite_matrix_diagonal.push_back(this_onsite_matrix[i][i]);
-          using boost::numeric::operators::operator+;
-          using alps::numeric::operator*;
-          this_onsite_matrix_diagonal = this_onsite_matrix_diagonal * percentage_error_onsite_U[site];
-          if (this_onsite_hamiltonian.empty())
-            this_onsite_hamiltonian = this_onsite_matrix_diagonal;
-          else
-            this_onsite_hamiltonian = this_onsite_hamiltonian + this_onsite_matrix_diagonal;
+        alps::Parameters this_parms;
+        if(inhomogeneous_sites()) {
+          alps::throw_if_xyz_defined(parms,this_site_type);      // check whether x, y, or z is set
+          this_parms << coordinate_as_parameter(this_site_type); // set x, y and z
         }
-        { // mu term
-          boost::multi_array<double,2> this_onsite_matrix =
-            alps::get_matrix( double(), this_site_terms.find("mu term")->second
-                            , model().basis().site_basis(this_site_type), parms);
-          std::vector<double> this_onsite_matrix_diagonal;
-          for (state_type i=0; i < this_onsite_matrix.shape()[0]; ++i)
-            this_onsite_matrix_diagonal.push_back(this_onsite_matrix[i][i]);
-          using boost::numeric::operators::operator+;
-          using alps::numeric::operator*;
-          this_onsite_matrix_diagonal = this_onsite_matrix_diagonal * percentage_error_onsite_mu[site];
-          if (this_onsite_hamiltonian.empty())
-            this_onsite_hamiltonian = this_onsite_matrix_diagonal;
-          else
-            this_onsite_hamiltonian = this_onsite_hamiltonian + this_onsite_matrix_diagonal;
-        }
-        { // trapping term
-          using boost::numeric::operators::operator+;
-          using alps::numeric::operator*;
-          using alps::applications::numeric::norm;
-          this_onsite_hamiltonian = this_onsite_hamiltonian 
-                                  + (static_cast<double>(parms["K"]) * norm(position(site))) * diagonal_matrix_element["n"][site_site_type[site]];
-        }
-        return this_onsite_hamiltonian;
+        boost::multi_array<double,2> this_onsite_matrix =
+          alps::get_matrix( double(), it->second
+                          , model().basis().site_basis(this_site_type), this_parms);
+        std::vector<double> this_onsite_matrix_diagonal;
+        for (unsigned short i=0; i < this_onsite_matrix.shape()[0]; ++i)
+          this_onsite_matrix_diagonal.push_back(this_onsite_matrix[i][i]);
+        using boost::numeric::operators::operator+;
+        if (this_onsite_hamiltonian.empty())
+          this_onsite_hamiltonian = this_onsite_matrix_diagonal;
+        else
+          this_onsite_hamiltonian = this_onsite_hamiltonian + this_onsite_matrix_diagonal;
       }
-
-      // For any other models
-      {
-        for (std::map<std::string, alps::SiteTermDescriptor>::iterator it=this_site_terms.begin(); it!=this_site_terms.end(); ++it)
-        {
-          boost::multi_array<double,2> this_onsite_matrix =
-            alps::get_matrix( double(), it->second
-                            , model().basis().site_basis(this_site_type), parms);
-          std::vector<double> this_onsite_matrix_diagonal;
-          for (state_type i=0; i < this_onsite_matrix.shape()[0]; ++i)
-            this_onsite_matrix_diagonal.push_back(this_onsite_matrix[i][i]);
-          using boost::numeric::operators::operator+;
-          if (this_onsite_hamiltonian.empty())
-            this_onsite_hamiltonian = this_onsite_matrix_diagonal;
-          else
-            this_onsite_hamiltonian = this_onsite_hamiltonian + this_onsite_matrix_diagonal;
-        }
-        return this_onsite_hamiltonian;
-      }
+      return this_onsite_hamiltonian;
     }   
 
 inline boost::multi_array<double,4>
   directed_worm_algorithm
     ::bond_hamiltonian(const bond_descriptor & bond)
     {
+      alps::Parameters this_parms;
+      if(inhomogeneous_bonds()) {
+        alps::throw_if_xyz_defined(parms,bond);      // check whether x, y, or z is set
+        this_parms << coordinate_as_parameter(bond); // set x, y and z
+      }
+
       return alps::get_matrix( double(), model().bond_term(bond_type(bond))
                              , model().basis().site_basis(site_type(source(bond)))
                              , model().basis().site_basis(site_type(target(bond)))
-                             , parms);
+                             , this_parms);
     }
 
 boost::tuple<std::vector<double>, std::vector<double>, std::vector<double>, std::vector<double> >
@@ -452,10 +547,15 @@ boost::tuple<std::vector<double>, std::vector<double>, std::vector<double>, std:
 
       for (std::set<std::string>::iterator site_operator_it = site_operators.begin(); site_operator_it != site_operators.end(); ++site_operator_it)
       {
+        alps::Parameters this_parms;
+        if(inhomogeneous_bonds()) {
+          alps::throw_if_xyz_defined(parms,bond);      // check whether x, y, or z is set
+          this_parms << coordinate_as_parameter(bond); // set x, y and z
+        }
         boost::multi_array<double,2> this_sourcesite_operator_matrix 
-          = alps::get_matrix(double(), SiteOperator(*site_operator_it), model().basis().site_basis(source(bond)), parms);
+          = alps::get_matrix(double(), alps::SiteOperator(*site_operator_it), model().basis().site_basis(source(bond)), this_parms);
         boost::multi_array<double,2> this_targetsite_operator_matrix
-          = alps::get_matrix(double(), SiteOperator(*site_operator_it), model().basis().site_basis(target(bond)), parms);
+          = alps::get_matrix(double(), alps::SiteOperator(*site_operator_it), model().basis().site_basis(target(bond)), this_parms);
 
         for (unsigned int i=0; i < source_num_states-1; ++i)
         {
@@ -474,22 +574,22 @@ boost::tuple<std::vector<double>, std::vector<double>, std::vector<double>, std:
                                       );
     }
 
-inline double
+double
   directed_worm_algorithm
-    ::onsite_energy_relative (Kink const & kink_, bool const forward_) const 
+    ::onsite_energy_relative (unsigned int site_, unsigned short state_, bool forward_, bool creation_) const 
     {
-      double energy_offset = 0.1;   // Note: Ask Lode for a better automation method
+      const double energy_offset = 0.1;  
 
-      double _onsite_energy       = onsite_energy(kink_.site(), kink_.state());
-      double _onsite_energy_after = onsite_energy(kink_.site(), kink_.state_after());
+      const double _onsite_energy        = onsite_energy(site_, state_);
+      const double _onsite_energy_before = onsite_energy(site_, creation_ ? state_-1 : state_+1);
 
-      return (forward_ ? _onsite_energy       - std::min(_onsite_energy, _onsite_energy_after) + energy_offset
-                       : _onsite_energy_after - std::min(_onsite_energy, _onsite_energy_after) + energy_offset); 
+      return (forward_ ? _onsite_energy_before  - std::min(_onsite_energy_before, _onsite_energy) + energy_offset
+                       : _onsite_energy         - std::min(_onsite_energy_before, _onsite_energy) + energy_offset); 
     }
 
-inline double
+double
   directed_worm_algorithm
-    ::hopping_energy (bond_descriptor const & bond_, State const targetstate_, bool const increasing_) const 
+    ::hopping_energy (bond_descriptor const & bond_, unsigned short targetstate_, bool increasing_) const 
     {  
       return (increasing_ ? (bond_strength_matrix[index(bond_)] * site_oneup_matrix[site_site_type[target(bond_)]][targetstate_] * site_onedown_matrix[site_site_type[target(bond_)]][targetstate_+1]) : (bond_strength_matrix[index(bond_)] * site_onedown_matrix[site_site_type[target(bond_)]][targetstate_] * site_oneup_matrix[site_site_type[target(bond_)]][targetstate_-1]));
     }
@@ -498,148 +598,185 @@ void
   directed_worm_algorithm
     ::dostep()
     {
-      //
-      // 1) The dostep() function attempts to do an update on the (closed) worldline configuration through a series of worm updates.
-      // 2) It starts off with wormpair creation. If unsuccessful, dostep() will be return-ed.
-      // 3) Then, by moving the wormhead "detailed-balance"-ly, vertices are created, deleted, or relinked according to the parameters characterized by the boson hubbard model.
-      // 4) It ends off by annihilating the wormpair, and a new worldline configuration arises most probably.
-      // 5) dostep() will then return-ed.
-      //
-
       ++_sweep_counter;
-
-      // are we ready to perform measurements?
-      if (_sweep_counter % _sweep_per_measurement == 0)
-        _measure_now = true;
-
-      // shall we reinitialize on fly measurements?
-      if (!_on_fly_measurements_reinitialized)
-      {
-        reinitialize_on_fly_measurements();
-        _on_fly_measurements_reinitialized = true;
-      }
-
 #ifdef DEBUGMODE
-      if (_sweep_counter >= DEBUGMODE_START_COUNTER && _sweep_counter <= DEBUGMODE_END_COUNTER) {
+//      if (_sweep_counter >= DEBUGMODE_START_COUNTER && _sweep_counter <= DEBUGMODE_END_COUNTER) 
+      {
         std::cout << "\n\nSweep : " << _sweep_counter << "\t(Propagation sweep: " << _propagation_counter << ")"
                   << "\n============"
                   << "\n\n";
+        //std::cin.get();
       }
 #endif
 
-      // Step 1: Attempt to create a worm-pair
-      bool _wormpair_has_found_suitable_insertion_location = false;
-      while (!_wormpair_has_found_suitable_insertion_location)
+      // Step 1A: Generate a random wormpair
+      const unsigned int _site     = random()*num_sites();
+      const double       _time     = random();
+      const bool         _forward  = (random()<0.5);
+      const bool         _creation = (random()<0.5);
+
+      location_type      _location = wl.location(_site,_time);
+#ifdef DEBUGMODE
+//      if (_sweep_counter >= DEBUGMODE_START_COUNTER && _sweep_counter <= DEBUGMODE_END_COUNTER) 
       {
-        Site _currentsite       = randomsite();
-        Time _currenttime       = randomtime();
-        bool _currentcreation   = randombool();
-        bool _currentforward    = randombool();
-
-        _wormpair_has_found_suitable_insertion_location = worldline.unoccupied(_currentsite, _currenttime);
-        if (_wormpair_has_found_suitable_insertion_location) 
-        {
-          State _state = worldline.state(_currentsite, _currenttime);
-
-          // Check if state is at minimum or maximum ?
-          if (  (_state == state_minimum[site_site_type[_currentsite]] && !alps::applications::increasing(_currentforward, _currentcreation)) 
-             || (_state == state_maximum[site_site_type[_currentsite]] && alps::applications::increasing(_currentforward, _currentcreation))  
-             )
-          {
-            ++_sweep_failure_counter;      // worm insertion is unsuccessful          
-            green[0] += _state;
-            if (is_experiment && model().name() == "trapped boson Hubbard")
-            green_tof[0] += _state;
-#ifdef DEBUGMODE
-            if (_sweep_counter >= DEBUGMODE_START_COUNTER && _sweep_counter <= DEBUGMODE_END_COUNTER) {
-            std::cout << "\n\n"
-                      << "\nWormpair creation fails!" 
-                      << "\n========================"
-                      << worldline
-                      << "\nEnded (Wormpair creation fails!)"
-                      << "\n--------------------------------"
-                      << "\n\n";
-            }
-#endif
-            if (_measure_now) {
-              perform_diagonal_measurements();
-              _measure_now = false;
-              _on_fly_measurements_reinitialized = false;
-            }
-            return;
-          }
-
-          State _newstate = alps::applications::increasing(_currentforward, _currentcreation) ? _state + 1 : _state - 1;
-
-          wormpair = std::make_pair<Kink, Kink>
-               ( Kink(true, _currentcreation,  _currentforward,  _newstate, _currenttime, _currentsite, _currentsite, false)     // wormhead
-               , Kink(true, !_currentcreation, !_currentforward, _state,    _currenttime, _currentsite, _currentsite, true)      // wormtail
-               );
-          if (!_currentforward)
-            swap_state(wormpair.first, wormpair.second);
-
-          worldline.wormpair_insertion(wormpair);
-        }
+        std::cout << "\n\nA random wormpair is generated:"
+                  << "\n----------------------------------"
+                  << "\nSite       : " << _site
+                  << "\nTime       : " << _time
+                  << "\nForward    : " << _forward
+                  << "\nCreation   : " << _creation
+                  << "\nIncreasing : " << wormpair::increasing(_forward,_creation)
+                  << "\nLocation is kink-unoccupied : " << wl.location_is_kink_unoccupied(_location,_time)
+                  << "\n\n";
+        //std::cin.get();
       }
+#endif
+      if (!wl.location_is_kink_unoccupied(_location,_time))
+      { // redo this sweep if location is occupied by kink
+        --_sweep_counter;
+        return;  
+      } 
+
+      const bool checkpoint_sweep = (_sweep_counter % _sweep_per_measurement == 0);
+      const bool _measure = (is_thermalized() && !measure_simulation_speed_);
+
+      // Step 1B: Check state to see if we can insert wormpair 
+      const unsigned short _state = wl.state_before(_location);
+
+      if (  (_state == state_minimum[site_site_type[_site]] && !wormpair::increasing(_forward, _creation)) 
+         || (_state == state_maximum[site_site_type[_site]] && wormpair::increasing(_forward, _creation))  
+         )
+      {
+        ++_sweep_failure_counter;      // worm insertion is unsuccessful         
+        if (_measure && _state != 0) 
+        {
+          green_onsite          += _state;
+          zero_momentum_density += _state;
+
+          if (measure_green_function_)
+            green[0] += _state;
+          if (measure_momentum_density_)
+            for (unsigned int idx=0; idx<num_component_momenta();++idx)
+              momentum_density[idx] += _state;
+
+          if (finite_tof)
+          {
+            zero_momentum_density_tof += _state;
+
+            if (measure_green_function_)
+              green_tof[0] += _state;
+            if (measure_tof_image_)
+              for (unsigned int idx=0; idx<num_component_momenta();++idx)
+                momentum_density_tof[idx] += _state;
+          }
+        }
 #ifdef DEBUGMODE
-      if (_sweep_counter >= DEBUGMODE_START_COUNTER && _sweep_counter <= DEBUGMODE_END_COUNTER) {
+//        if (_sweep_counter >= DEBUGMODE_START_COUNTER && _sweep_counter <= DEBUGMODE_END_COUNTER) 
+        {
+          std::cout << "\n\n"
+                    << "\nWormpair creation fails!" 
+                    << "\n========================"
+                    << wl
+                    << "\nEnded (Wormpair creation fails!)"
+                    << "\n--------------------------------"
+                    << "\n\n";
+          //std::cin.get();
+        }
+#endif
+        if (checkpoint_sweep) 
+          docheckpoint(_measure);
+        return;
+      }
+
+      // Step 1C: Insert wormpair
+      worm = wormpair(_location, kink(_site,_time,_state), _forward, _creation);
+#ifdef DEBUGMODE
+//      if (_sweep_counter >= DEBUGMODE_START_COUNTER && _sweep_counter <= DEBUGMODE_END_COUNTER) 
+      {
         std::cout << "\n\n"
                   << "\nWormpair creation!" 
                   << "\n=================="
-                  << worldline
-                  << "\n"
+                  << wl
                   << "\n\n"
-                  << "\nWormhead"
-                  << "\n--------"
-                  << wormpair.first
-                  << "\n"
-                  << "\nWormtail"
-                  << "\n--------"
-                  << wormpair.second
-                  << "\n"
+                  << worm
                   << "\nEnded (Wormpair creation!)"
-                  << "\n--------------------------"
+                  << "\n--------------------------------"
                   << "\n\n";
+        //std::cin.get();
       }
 #endif
 
-      // Step 2: Propagates the wormhead until it collides with wormtail
-      //         Note -- density matrix is being measured everytime wormhead passes through equal time plane
-      State  _wormpair_state = (wormpair.second.creation() ? wormpair.first.state() : wormpair.second.state() );
-      while(wormhead_propagation_until_halted_by_wormtail(_wormpair_state));      
+      // Step 2: Wormhead propagates till collision with wormtail
+      while(wormhead_propagates_till_collision_with_wormtail(worm.wormpair_state(), neighbors(worm.wormtail_site()), _measure));      
+      const unsigned short termination_state = (worm.forward() ? worm.state_before() : worm.state());
 
+      if (_measure && termination_state != 0)
+      {
+        green_onsite          += termination_state;
+        zero_momentum_density += termination_state;
+
+        if (measure_green_function_)
+          green[0] += termination_state;
+        if (measure_momentum_density_)
+          for (unsigned int idx=0; idx<num_component_momenta();++idx)
+            momentum_density[idx] += termination_state;
+            
+        if (finite_tof)
+        {
+          zero_momentum_density_tof += termination_state;
+
+          if (measure_green_function_)
+            green_tof[0] += termination_state;
+          if (measure_tof_image_)
+            for (unsigned int idx=0; idx<num_component_momenta();++idx)
+              momentum_density_tof[idx] += termination_state;
+        }
+      }
+
+      worm.wormhead_annihilates_wormtail();
 #ifdef DEBUGMODE
-       if (_sweep_counter >= DEBUGMODE_START_COUNTER && _sweep_counter <= DEBUGMODE_END_COUNTER) {
-       std::cout << "\n\n"
-                 << "\nMeasuring Green's function... (annilation)"
-                 << "\n\n";
-       }
-#endif
-
-      wormpair.first = worldline.wormhead(); 
-
-      green[0] += (wormpair.first.forward() ? wormpair.first.state() : wormpair.first.state_after());
-      if (is_experiment && model().name() == "trapped boson Hubbard")
-      green_tof[0] += (wormpair.first.forward() ? wormpair.first.state() : wormpair.first.state_after());
-
-      worldline.wormpair_removal();
-#ifdef DEBUGMODE
-      if (_sweep_counter >= DEBUGMODE_START_COUNTER && _sweep_counter <= DEBUGMODE_END_COUNTER) {
+//      if (_sweep_counter >= DEBUGMODE_START_COUNTER && _sweep_counter <= DEBUGMODE_END_COUNTER) 
+      {
       std::cout << "\n\n"
                 << "\nWormpair annihilation!"
                 << "\n======================"
-                << worldline
+                << wl
                 << "\nEnded (Wormpair annihilation!)"
                 << "\n------------------------------------------------------"
                 << "\n\n";
+      //std::cin.get();
       }
 #endif
-      if (_measure_now) {
-        perform_diagonal_measurements();
-        _measure_now = false;
-        _on_fly_measurements_reinitialized = false;
-      }
+
+      if (checkpoint_sweep) 
+        docheckpoint(_measure);
       return;
+    }
+
+void
+  directed_worm_algorithm
+    ::docheckpoint(bool const & measure_)
+    {
+      std::cout << "Checkpoint Sweep " << _sweep_counter
+                << " ... Probability : " << probability_worm_insertion() << " / " << probability_bounce() 
+                ;
+
+      // measurements
+      if (measure_)
+      {
+        perform_diagonal_measurements();
+        reinitialize_on_fly_measurements();
+      }
+
+      // simulation timer
+      if (measure_simulation_speed_)
+      {
+        std::time(&_simulation_timer.second);
+        std::cout << " ... speed = " << std::difftime(_simulation_timer.second, _simulation_timer.first)/_sweep_per_measurement; 
+        std::time(&_simulation_timer.first);
+      }      
+
+      std::cout << "\n";
     }
 
 void
@@ -647,373 +784,229 @@ void
     ::perform_diagonal_measurements()
     {
       // regarding measurements
-      using boost::numeric::operators::operator+;
       using boost::numeric::operators::operator*;
       using boost::numeric::operators::operator/;
 
-      std::vector<int>    _states           = alps::applications::numeric::vector_cast<int>(worldline.states());
-      std::vector<int>    _states2          = _states * _states;
-      std::vector<double> _hopping_energies = alps::applications::numeric::vector_cast<double>(worldline.vertices())/(-2.*beta);
-      std::vector<double> _onsite_energies  = onsite_energies(_states)/beta;
-      std::vector<double> _energies         = _hopping_energies + _onsite_energies;
-      std::vector<double> _energies2        = _energies * _energies;
+      int total_density  = 0;
+      int total_density2 = 0;
+      double total_onsite_energy  = 0.;
+      double total_hopping_energy = 0.;
+      double total_energy  = 0.;
+      double total_energy2 = 0.;
 
-      int total_particle_number = std::accumulate(_states.begin(), _states.end(), 0);
+      for (unsigned int site=0; site < num_sites(); ++site)
+      {
+        total_density  += wl.site_state(site);
+        total_density2 += wl.site_state(site) * wl.site_state(site);
+        const double this_onsite_energy  = onsite_energy(site, wl.site_state(site));
+        const double this_hopping_energy = -static_cast<double>(wl.num_kinks(site)-1)/2;
+        const double this_energy = this_onsite_energy+this_hopping_energy;
+        total_onsite_energy  += this_onsite_energy;
+        total_hopping_energy += this_hopping_energy;
+        total_energy  += this_energy;
+        total_energy2 += this_energy*this_energy;
+      }
+      total_onsite_energy  /= beta;
+      total_hopping_energy /= beta;
+      total_energy  /= beta;
+      total_energy2 /= (beta*beta); 
 
-      double total_hopping_energy  = std::accumulate(_hopping_energies.begin(), _hopping_energies.end(), 0.); 
-      double total_onsite_energy   = std::accumulate(_onsite_energies.begin(), _onsite_energies.end(), 0.);     
-      double total_energy          = total_hopping_energy + total_onsite_energy;
+      std::cout << " ... Measuring " 
+                << " ... N = " << total_density 
+                << " ... E = " << total_energy
+                ;
 
-/*
-      std::cout << "Measuring " 
-                << _sweep_counter  
-                << " ... N = " << total_particle_number 
-                << "\n";
-*/
-
-      measurements["Total Particle Number"]     << total_particle_number;
-      measurements["Total Particle Number^2"]   << total_particle_number * total_particle_number;
-      measurements["Density"]                   << static_cast<double>(total_particle_number)/num_sites();
-      measurements["Density^2"]                 << static_cast<double>(std::accumulate(_states2.begin(), _states2.end(), 0))/num_sites();
+      measurements["Total Particle Number"]     << total_density;
+      measurements["Total Particle Number^2"]   << total_density * total_density;
+      measurements["Density"]                   << static_cast<double>(total_density)/num_sites();
+      measurements["Density^2"]                 << static_cast<double>(total_density2)/num_sites();
       measurements["Hopping Energy"]            << total_hopping_energy;
       measurements["Onsite Energy"]             << total_onsite_energy;
       measurements["Energy"]                    << total_energy;
       measurements["Energy^2"]                  << total_energy * total_energy;
+      measurements["Hopping Energy Density"]    << total_hopping_energy/num_sites();
+      measurements["Onsite Energy Density"]     << total_onsite_energy/num_sites();
       measurements["Energy Density"]            << total_energy/num_sites();
-      measurements["Energy Density^2"]          << std::accumulate(_energies2.begin(), _energies2.end(), 0.)/num_sites();
-      measurements["Local Density"]             << alps::numeric::vector2valarray(_states);
-      measurements["Local Density^2"]           << alps::numeric::vector2valarray(_states2);
-      measurements["Local Hopping Energy"]      << alps::numeric::vector2valarray(_hopping_energies);
-      measurements["Local Onsite Energy"]       << alps::numeric::vector2valarray(_onsite_energies);
-      measurements["Local Energy"]              << alps::numeric::vector2valarray(_energies);
-      measurements["Local Energy^2"]            << alps::numeric::vector2valarray(_energies2);
+      measurements["Energy Density^2"]          << total_energy2/num_sites();
+
+      if (measure_winding_number_)
+      {
+        std::vector<double> winding_number(dimension(), 0.);
+        for (bond_iterator it=bonds().first; it!=bonds().second; ++it)
+        {
+          const int net_number = wl.net_number_of_directed_hops(source(*it),target(*it));
+          const std::vector<double> vec = bond_vector_relative(*it);
+          for (int i=0; i<dimension(); ++i)
+            winding_number[i] += net_number * vec[i];
+        }
+        measurements["Winding Number^2"]        << alps::numeric::vector2valarray(alps::numeric::sq(winding_number));
+      }      
+
+      if (measure_local_density_)
+        measurements["Local Density"]             << alps::numeric::vector2valarray(wl.states());
+
+      if (measure_local_density2_)
+        measurements["Local Density^2"]           << alps::numeric::vector2valarray(alps::numeric::sq(wl.states()));
+
+      if (measure_local_density_)
+        measurements["Local Density"]             << alps::numeric::vector2valarray(wl.states());
+
+      if (measure_local_density2_)
+        measurements["Local Density^2"]           << alps::numeric::vector2valarray(alps::numeric::sq(wl.states()));
 
       // regarding on-fly measurements
-      measurements["Green's Function"]          << alps::numeric::vector2valarray(green);
+      measurements["Green's Function Onsite"]    << green_onsite/num_sites();
+      measurements["Green's Function Neighbors"] << green_neighbors/num_sites();
+      measurements["Zero Momentum Density"]      << zero_momentum_density/(num_sites()*num_sites());
 
-      std::vector<double> _nn_green;
-      _nn_green.reserve(dimension());
-      for (int i=0; i<dimension(); ++i)
-        _nn_green.push_back(green[nearest_neighbor_idx(0)[i]]);
+      if (measure_green_function_)
+        measurements["Green's Function"]         << alps::numeric::vector2valarray(green/num_sites());
+      if (measure_momentum_density_)
+        measurements["Momentum Density"]         << alps::numeric::vector2valarray(momentum_density/(num_sites()*num_sites()));
 
-      measurements["Onsite Green's Function"]   << green[0];
-      measurements["N.N. Green's Function"]     << alps::numeric::vector2valarray(_nn_green);
-
-      if (!inhomogeneous())
-      measurements["Condensate Fraction"]       << std::accumulate(green.begin(), green.end(), 0.);
-      else
-      measurements["Condensate Fraction"]       << (2. * std::accumulate(green.begin(), green.end(), 0.)) - green[0];
-
-      if (is_experiment && model().name() == "trapped boson Hubbard")
+      if (finite_tof)
       {
-      measurements["TOF Green's Function"]          << alps::numeric::vector2valarray(green_tof);
+        measurements["Zero TOF Image"]           << zero_momentum_density_tof/(num_sites()*num_sites());
 
-      std::vector<double> _nn_green_tof;
-      _nn_green_tof.reserve(dimension());
-      for (int i=0; i<dimension(); ++i)
-        _nn_green_tof.push_back(green_tof[nearest_neighbor_idx(0)[i]]);
-
-      measurements["TOF Onsite Green's Function"]   << green_tof[0];
-      measurements["TOF N.N. Green's Function"]     << alps::numeric::vector2valarray(_nn_green_tof);
-
-      if (!inhomogeneous())
-      measurements["TOF Condensate Fraction"]       << std::accumulate(green_tof.begin(), green_tof.end(), 0.);
-      else
-      measurements["TOF Condensate Fraction"]       << (2. * std::accumulate(green_tof.begin(), green_tof.end(), 0.)) - green_tof[0];
+        if (measure_green_function_)
+          measurements["TOF Green's Function"]   << alps::numeric::vector2valarray(green_tof/num_sites());
+        if (measure_tof_image_)
+          measurements["TOF Image"]              << alps::numeric::vector2valarray(momentum_density_tof/(num_sites()*num_sites()));
       }
-
-      if (!inhomogeneous())
-      measurements["Winding Number^2"]              << alps::numeric::vector2valarray(winding_number*winding_number);
     }
 
 bool
   directed_worm_algorithm
-    ::wormhead_propagation_until_halted_by_wormtail(State const & wormpair_state_)
+    ::wormhead_propagates_till_collision_with_wormtail(unsigned short wormpair_state_, std::pair<neighbor_iterator,neighbor_iterator> const & neighbors_, bool const & measure_)
     {
       ++_propagation_counter;
 
-      double _onsite_energy_relative = onsite_energy_relative(worldline.wormhead(), worldline.forward());
-
       // Step 1: Wormhead movement
-      bool _halted;
-      Time _deltatime       = -std::log(1.- randomtime())/_onsite_energy_relative;
-      Time _deltatime_pause;
-      Time _deltatime_halt;
+      const double _time2next     = worm.time2next();
+      const double _time2wormtail = worm.time2wormtail();
 
-      if (worldline.forward())
+      const double _onsite_energy_relative = onsite_energy_relative(worm.site(), worm.state(), worm.forward(), worm.creation());
+
+      double _deltatime = -std::log(1.- random())/_onsite_energy_relative;
+
+      const bool _halted = (_deltatime >= _time2next);
+      if (_halted)
+        _deltatime = _time2next;
+
+      double _newtime = worm.forward() ? worm.time() + _deltatime : worm.time() - _deltatime;
+      bool   _winding_over_time = (_newtime < 0. || _newtime >= 1.);
+
+      if      (!_halted && _winding_over_time)
+        _newtime = wormpair::modone(_newtime);
+      else if (_halted)
+        _newtime = worm.forward() ? worm.next_time()-std::numeric_limits<double>::epsilon() : worm.next_time()+std::numeric_limits<double>::epsilon();
+
+      worm.wormhead_moves_to_new_time(_newtime,_winding_over_time);
+      
+#ifdef DEBUGMODE
+//      if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER 
+//         && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
+//         ) 
       {
-        _deltatime_pause = alps::applications::numeric::mod(wormpair.second.time() - worldline.time());  
-        if (worldline.wormhead_touches_end())
-        {
-          _deltatime_halt = 1.- worldline.time();
-#ifdef DEBUGMODE
-          if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER 
-             && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-             ) 
-          {
-          std::cout << "\n\n"
-                    << "\nPropagation step : " << _propagation_counter
-                    << "\n------------------------------------"
-                    << "\nAttempting to move the wormhead over a time interval of " << _deltatime << " ( " << _deltatime_pause << " / " << _deltatime_halt << " ) "
-                    << "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-                    << "\n\n";
-
-          }
-#endif
-          if (_deltatime < _deltatime_halt)
-          {
-            worldline.wormhead_moves_to_new_time_without_winding(worldline.time()+_deltatime);
-            _deltatime_pause -= _deltatime;
-            _halted = false;
-          }
-          else
-          {
-            worldline.wormhead_moves_to_new_time_with_winding(0.);
-            _deltatime_pause -= _deltatime_halt;
-            _deltatime       -= _deltatime_halt;
-
-            _deltatime_halt = worldline.forwardlineit()->time() - worldline.time();
-
-            if (_deltatime < _deltatime_halt)
-            {
-              worldline.wormhead_moves_to_new_time_without_winding(worldline.time()+_deltatime);
-              _deltatime_pause -= _deltatime;
-              _halted = false;
-            }
-            else
-            {
-              worldline.wormhead_moves_to_new_time_without_winding(worldline.time()+_deltatime_halt);
-              _deltatime_pause -= _deltatime_halt;
-              _halted = true;
-            }
-          }
-        }
-        else
-        {
-          _deltatime_halt = worldline.forwardlineit()->time() - worldline.time();
-#ifdef DEBUGMODE
-          if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
-             && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-             ) 
-          {
-          std::cout << "\n\n"
-                    << "\nPropagation step : " << _propagation_counter
-                    << "\n------------------------------------"
-                    << "\nAttempting to move the wormhead over a time interval of " << _deltatime << " ( " << _deltatime_pause << " / " << _deltatime_halt << " ) "
-                    << "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-                    << "\n\n";
-          }
-#endif
-          if (_deltatime < _deltatime_halt)
-          {
-            worldline.wormhead_moves_to_new_time_without_winding(worldline.time()+_deltatime);
-            _deltatime_pause -= _deltatime;
-            _halted = false;
-          }
-          else
-          {
-            worldline.wormhead_moves_to_new_time_without_winding(worldline.time()+_deltatime_halt);
-            _deltatime_pause -= _deltatime_halt;
-            _halted = true;
-          }
-        }
-      }
-      else  // backward
-      {
-        _deltatime_pause = alps::applications::numeric::mod(worldline.time() - wormpair.second.time());
-        if (worldline.wormhead_touches_begin())
-        {
-          _deltatime_halt = worldline.time();
-#ifdef DEBUGMODE
-          if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
-             && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-             ) 
-          {
-          std::cout << "\n\n"
-                    << "\nPropagation step : " << _propagation_counter
-                    << "\n------------------------------------"
-                    << "\nAttempting to move the wormhead over a time interval of " << _deltatime << " ( " << _deltatime_pause << " / " << _deltatime_halt << " ) "
-                    << "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-                    << "\n\n";
-          }
-#endif
-          if (_deltatime < _deltatime_halt)
-          {
-            worldline.wormhead_moves_to_new_time_without_winding(worldline.time()-_deltatime);
-            _deltatime_pause -= _deltatime;
-            _halted = false;
-          }
-          else
-          {
-            worldline.wormhead_moves_to_new_time_with_winding(1.);
-            _deltatime_pause -= _deltatime_halt;
-            _deltatime       -= _deltatime_halt;
-
-            _deltatime_halt = worldline.time() - worldline.backwardlineit()->time();
-
-            if (_deltatime < _deltatime_halt)
-            {
-              worldline.wormhead_moves_to_new_time_without_winding(worldline.time()-_deltatime);
-              _deltatime_pause -= _deltatime;
-              _halted = false;
-            }
-            else
-            {
-              worldline.wormhead_moves_to_new_time_without_winding(worldline.time()-_deltatime_halt);
-              _deltatime_pause -= _deltatime_halt;
-              _halted = true;
-            }
-          }
-        }
-        else
-        {
-          _deltatime_halt = worldline.time() - worldline.backwardlineit()->time();
-#ifdef DEBUGMODE
-          if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
-             && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-             )  
-          {
-          std::cout << "\n\n"
-                    << "\nPropagation step : " << _propagation_counter
-                    << "\n------------------------------------"
-                    << "\nAttempting to move the wormhead over a time interval of " << _deltatime << " ( " << _deltatime_pause << " / " << _deltatime_halt << " ) "
-                    << "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-                    << "\n\n";
-          }
-#endif
-          if (_deltatime < _deltatime_halt)
-          {
-            worldline.wormhead_moves_to_new_time_without_winding(worldline.time()-_deltatime);
-            _deltatime_pause -= _deltatime;
-            _halted = false;
-          }
-          else
-          {
-            worldline.wormhead_moves_to_new_time_without_winding(worldline.time()-_deltatime_halt);
-            _deltatime_pause -= _deltatime_halt;
-            _halted = true;
-          }
-        }
-      }
-
-#ifdef DEBUGMODE
-      if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
-         && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-         ) 
-      {
-      std::cout << "\n\n"
-                << "\nWormhead moves to time " << worldline.time() << " ( " << (_halted ? "HALTED" : "NOT HALTED") << " ) "
-                << "\n============================================================================"
-                << "\n" << worldline
-                << "\n\n"
-                << "\nWormhead"
-                << "\n--------"
-                << worldline.wormhead()
-                << "\n"
-                << "\nWormtail"
-                << "\n--------"
-                << wormpair.second
-                << "\n"
-                << "\nEnded (Wormhead movement)!"
-                << "\n--------------------------"
-                << "\n\n";
-      }
-#endif
-
-      if (_deltatime_pause < 0.)   // Measure Green's function
-      {
-        using boost::numeric::operators::operator-;
-        std::vector<int> wormpair_displacement = alps::applications::numeric::iround(coordinate(worldline.site()) - coordinate(wormpair.second.site()));
-
-        if (inhomogeneous())
-          green[idx(alps::numeric::abs(wormpair_displacement))]  += (0.5 * wormpair_state_);
-        else
-          green[idx(periodicize(wormpair_displacement))]         += wormpair_state_;
-
-        if (is_experiment && model().name() == "trapped boson Hubbard")
-        {
-          using boost::numeric::operators::operator*;
-          using alps::numeric::sq;
-          using alps::applications::numeric::inner_product;
-
-          if (inhomogeneous())
-            green_tof[idx(alps::numeric::abs(wormpair_displacement))] += 
-              (0.5 * wormpair_state_ * std::cos(inner_product(phase,sq(position(worldline.site()))-sq(position(wormpair.second.site())))));
-          else
-            green_tof[idx(periodicize(wormpair_displacement))] +=
-              (wormpair_state_ * std::cos(inner_product(phase,sq(position(worldline.site()))-sq(position(wormpair.second.site())))));
-        }
-
-#ifdef DEBUGMODE
-        if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
-           && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-           )
-        {
-        using alps::numeric::operator<<;
         std::cout << "\n\n"
-                  << "\nMeasuring Green's function within offdiagonal process... "  
-                  << "\n"
-                  << "\nInformation: "
-                  << "\n"
-                  << "\nWormhead site:         " << worldline.site() << "\t( " << coordinate(worldline.site()) << " ) "
-                  << "\nWormtail site:         " << wormpair.second.site() << "\t( " << coordinate(wormpair.second.site()) << " )"
-                  << "\nWormpair displacement: " << wormpair_displacement 
-                  << "\nDensity Matrix Index:  " << (inhomogeneous() ? idx(alps::numeric::abs(wormpair_displacement)) : idx(wormpair_displacement % lattice().extent()))
+                  << "\nPropagation step : " << _propagation_counter
+                  << "\n------------------------------------"
+                  << "\nAttempting to move wormhead by a time of " << _deltatime << " ( " << _time2next << " / " << _time2wormtail << " ) "
+                  << "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
                   << "\n\n";
-        }
+        //std::cin.get();
+        std::cout << "\nWormhead moves to time " << worm.time() << " ( " << (_halted ? "HALTED" : "NOT HALTED") << " ) "
+                  << "\n============================================================================"
+                  << "\n" << wl
+                  << "\n\n"
+                  << "\nWormpair"
+                  << "\n--------"
+                  << "\n"
+                  << worm
+                  << "\n"
+                  << "\nEnded (Wormhead movement)!"
+                  << "\n--------------------------"
+                  << "\n\n";
+        //std::cin.get();
+      }
 #endif
+
+      if (measure_ && (_deltatime > _time2wormtail) && (worm.site() != worm.wormtail_site()))   
+      {
+        using alps::numeric::operator+;
+        using alps::numeric::operator+=;
+        using alps::numeric::operator*;
+
+        if (worm.neighbor2wormtail())
+          green_neighbors += wormpair_state_;
+        zero_momentum_density += wormpair_state_;
+
+        int green_distance;
+        if (measure_green_function_)
+          green_distance = lattice().distance(worm.wormtail_site(), worm.site());
+
+        double component_displacement;
+        if (measure_momentum_density_ || measure_tof_image_)   // Achtung!!! Bitte "green_distance" nicht hier benutzen! Das ist SEHR langsam! (Tamama)
+        {
+          component_displacement = position(worm.site(),0) - position(worm.wormtail_site(),0);
+          if (is_periodic_)
+            if (component_displacement < 0)
+              component_displacement += lattice_vector_[0][0];
+        }
+
+        if (measure_green_function_)
+          green[green_distance] += wormpair_state_;
+        if (measure_momentum_density_)
+          for (unsigned int idx=0; idx<num_component_momenta(); ++idx)
+            momentum_density[idx] += wormpair_state_*std::cos(component_momentum(idx)*component_displacement);
+
+        if (finite_tof)
+        {
+          const double tof_phase = phase(worm.site())-phase(worm.wormtail_site()); 
+
+          zero_momentum_density_tof += wormpair_state_ * std::cos(tof_phase);
+
+          if (measure_green_function_)
+            green_tof[green_distance] += wormpair_state_ * std::cos(tof_phase);
+          if (measure_tof_image_)
+            for (unsigned int idx=0; idx<num_component_momenta(); ++idx)
+              momentum_density_tof[idx] += wormpair_state_ * std::cos(component_momentum(idx)*component_displacement + tof_phase);
+        }
       }
 
       if (!_halted)
       {
         // Step 2A: Wormhead either inserts vertex or rebounces
-        Site _site = worldline.site();
-        insert_jump_or_bounce(_onsite_energy_relative); 
-        if (!inhomogeneous())
-        {
-          using alps::numeric::operator+=;
-          using boost::numeric::operators::operator-;
-          using alps::applications::numeric::iround;
-          winding_number += winding(iround(coordinate(worldline.site()) - coordinate(_site)));
-        }
+        insert_jump_or_bounce(_onsite_energy_relative,neighbors_); 
         return true;
       }
 
       else
       {
-        LineIterator _vertexlineit = (worldline.forward() ? worldline.forwardlineit() : worldline.backwardlineit());
-
         // Step 2B: Wormhead touches wormtail (offdiagonal process ends)
-        if (_vertexlineit->wormtail())
+        if (worm.wormhead_reaches_wormtail())
            return false;
 
         // Step 2C: Wormhead crosses kink
-        if (  ( worldline.creation() &&  _vertexlineit->creation())
-           || (!worldline.creation() && !_vertexlineit->creation())
-           )
+        if (worm.wormhead_is_same_type_as_next())
         {
-          worldline.wormhead_crosses_vertex();
+          worm.wormhead_crosses_vertex();
 #ifdef DEBUGMODE
-          if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
-             && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-             )
+//          if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
+//             && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
+//             )
           {
-          std::cout << "\n\n"
-                    << "\nWormhead crosses kink"
-                    << "\n============================================================================"
-                    << "\n" << worldline
-                    << "\n\n"
-                    << "\nWormhead"
-                    << "\n--------"
-                    << worldline.wormhead()
-                    << "\n"
-                    << "\nWormtail"
-                    << "\n--------"
-                    << wormpair.second
-                    << "\n"
-                    << "\nEnded (Wormhead crosses kink)!"
-                    << "\n--------------------------"
-                    << "\n\n";
+            std::cout << "\n\n"
+                      << "\nWormhead crosses kink"
+                      << "\n============================================================================"
+                      << "\n" << wl
+                      << "\n\n"
+                      << worm
+                      << "\n\n"
+                      << "\nEnded (Wormhead crosses kink)!"
+                      << "\n--------------------------"
+                      << "\n\n";
+            //std::cin.get();
           }
 #endif
           return true;
@@ -1021,15 +1014,7 @@ bool
         // Step 2D: Wormhead either deletes/relinks vertex or rebounces
         else
         {
-          Site _site = worldline.site();
-          delete_relink_jump_or_bounce();
-          if (!inhomogeneous())
-          {
-            using alps::numeric::operator+=;
-            using boost::numeric::operators::operator-;
-            using alps::applications::numeric::iround;
-            winding_number += winding(iround(coordinate(worldline.site()) - coordinate(_site)));
-          }
+          delete_relink_jump_or_bounce(neighbors_);
           return true;
         }
       }
@@ -1037,293 +1022,200 @@ bool
 
 void
   directed_worm_algorithm
-    ::insert_jump_or_bounce (double const onsite_energy_relative_)
+    ::insert_jump_or_bounce (double const onsite_energy_relative_, std::pair<neighbor_iterator,neighbor_iterator> const & neighbors_)
     {
-      std::vector<LineIterator> _neighborlineitsprev;  
-      _neighborlineitsprev.reserve(num_neighbors(worldline.site()));
-
-      std::vector<double>  _weights;
-      _weights.reserve(num_neighbors(worldline.site()));
-
-#ifdef DEBUGMODE
-      if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
-         && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-         )
-      std::cout << "\n\nAttempting to insert into 1 of these neighbors : ";
-#endif
-
-      for (neighbor_bond_iterator _neighborbondit = neighbor_bonds(worldline.site()).first; _neighborbondit != neighbor_bonds(worldline.site()).second; ++_neighborbondit)
+#ifndef HEATBATH_ALGORITHM
+      neighbor_bond_iterator it=neighbor_bonds(worm.site()).first + random()*num_neighbors(worm.site());
+      location_type _neighborlocation  = wl.location(target(*it), worm.time());
+      const unsigned short _targetstate = (_neighborlocation.second-1)->state();
+      const bool _increasing = worm.increasing();
+      if (  ( worm.increasing() && _targetstate == state_maximum[site_site_type[target(*it)]])
+         || (!worm.increasing() && _targetstate == state_minimum[site_site_type[target(*it)]])
+         )  // new configuration is not possible... only bouncing allowed...
       {
-#ifdef DEBUGMODE
-        if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
-           && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-           )
-        std::cout << "\t" << target(*_neighborbondit);
-#endif
-        LineIterator  _neighborlineitprev  = --(worldline.lineit(target(*_neighborbondit), worldline.time())); 
-        _neighborlineitsprev.push_back(_neighborlineitprev);                                              
-
-        State _targetstate = _neighborlineitprev->state_after();
-        bool  _increasing = alps::applications::increasing(worldline.forward(), worldline.creation());
-        if (  ( _increasing && _targetstate == state_maximum[site_site_type[target(*_neighborbondit)]])
-           || (!_increasing && _targetstate == state_minimum[site_site_type[target(*_neighborbondit)]])
-           )
-           _weights.push_back(0);
-        else
-           _weights.push_back(hopping_energy(*_neighborbondit, _targetstate, _increasing));
-      }
-#ifdef DEBUGMODE
-      if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
-         && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-         )
-      std::cout << "\n\n";
-#endif
-
-      double _total_weight = std::accumulate(_weights.begin(), _weights.end(), onsite_energy_relative_);
-      double _weight       = random()*_total_weight;
-#ifdef DEBUGMODE
-      if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
-         && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-         )
-      {
-      std::cout << "\n\nTransition weights:\t" << onsite_energy_relative_ << "\t";
-      std::copy(_weights.begin(), _weights.end(), std::ostream_iterator<double>(std::cout,"\t"));
-      std::cout << "Total (selected) =\t" << _total_weight << " ( " << _weight << " ) ";
-      std::cout << "\n------------------------------------------------" << "\n\n";
-      }
-#endif
-
-      if (_weight < onsite_energy_relative_) 
-      {
-        worldline.wormhead_changes_its_direction();
+        worm.wormhead_turns_around();
         ++_propagation_failure_counter;
-#ifdef DEBUGMODE
-        if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
-           && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-           )
+        return;
+      }
+      else
+      {
+        const double _weight_new = hopping_energy(*it, _targetstate, worm.increasing());
+        if (_weight_new >= onsite_energy_relative_ || random() < (_weight_new/onsite_energy_relative_))  // insert vertex
         {
-        std::cout << "\n\n"
-                  << "\nWormhead bounces\n"
-                  << "\n================"
-                  << "\n" << worldline
-                  << "\n\n"
-                  << "\nWormhead"
-                  << "\n--------"
-                  << worldline.wormhead()
-                  << "\n"
-                  << "\nWormtail"
-                  << "\n--------"
-                  << wormpair.second
-                  << "\n"
-                  << "\nEnded (Wormhead bounces)!)"
-                  << "\n--------------------------"
-                  << "\n\n";
+          worm.wormhead_inserts_vertex_and_jumps_to_new_site(_neighborlocation);
+          worm.set_neighbor2wormtail(std::find(neighbors_.first, neighbors_.second, worm.site()) != neighbors_.second);
+          return;
         }
-#endif           
+        else  // or bounce
+        {
+          worm.wormhead_turns_around();
+          ++_propagation_failure_counter;
+          return;
+        }
+      }
+
+#else
+      _neighborlocations_cache.clear();
+      _cummulative_weights_cache.clear();
+
+      double _total_weight = 0.;
+      for (neighbor_bond_iterator _neighborbondit=neighbor_bonds(worm.site()).first; _neighborbondit!=neighbor_bonds(worm.site()).second; ++_neighborbondit)
+      {
+        location_type  _neighborlocation  = wl.location(target(*_neighborbondit), worm.time());
+        _neighborlocations_cache.push_back(_neighborlocation);                                              
+
+        const unsigned short _targetstate = (_neighborlocation.second-1)->state();
+        const bool _increasing = worm.increasing();
+        if (  ( worm.increasing() && _targetstate == state_maximum[site_site_type[target(*_neighborbondit)]])
+           || (!worm.increasing() && _targetstate == state_minimum[site_site_type[target(*_neighborbondit)]])
+           )
+           _cummulative_weights_cache.push_back(_total_weight);
+        else
+        {
+           _total_weight += hopping_energy(*_neighborbondit, _targetstate, worm.increasing());
+           _cummulative_weights_cache.push_back(_total_weight);
+        }
+      }
+   
+      _total_weight += onsite_energy_relative_;
+      _cummulative_weights_cache.push_back(_total_weight);
+
+      const int which_neighbor = std::distance(_cummulative_weights_cache.begin(), std::lower_bound(_cummulative_weights_cache.begin(),_cummulative_weights_cache.end(), random()*_total_weight));
+
+      if (which_neighbor == _neighborlocations_cache.size())
+      {
+        worm.wormhead_turns_around();
+        ++_propagation_failure_counter;
         return;    
       }
-      _weight -= onsite_energy_relative_;
 
-      for (neighbors_size_type _which_neighbor=0; _which_neighbor < num_neighbors(worldline.site()); ++_which_neighbor) 
-      {
-        if (_weight < _weights.back())
-        {
-          worldline.wormhead_jumps_to_new_site_and_inserts_vertex(_neighborlineitsprev.back());
-#ifdef DEBUGMODE
-          if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
-             && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-             )
-          {
-          std::cout << "\n\n"
-                    << "\nInserting an interaction to site " << _neighborlineitsprev.back()->site()
-                    << "\n====================================================================="
-                    << "\n" << worldline
-                    << "\nWormhead"
-                    << "\n--------"
-                    << worldline.wormhead()
-                    << "\n"
-                    << "\nWormtail"
-                    << "\n--------"
-                    << wormpair.second
-                    << "\n"
-                    << "\nEnded (Inserting an interaction)!)"
-                    << "\n----------------------------------"
-                    << "\n\n";
-          }
+      worm.wormhead_inserts_vertex_and_jumps_to_new_site(_neighborlocations_cache[which_neighbor]);
+      worm.set_neighbor2wormtail(std::find(neighbors_.first, neighbors_.second, worm.site()) != neighbors_.second);
+      return;
 #endif
-          return ;
-        } 
-        _weight -= _weights.back();
-        _neighborlineitsprev .pop_back();
-        _weights             .pop_back();
-      }
     }
 
 void
   directed_worm_algorithm
-    ::delete_relink_jump_or_bounce()
+    ::delete_relink_jump_or_bounce(std::pair<neighbor_iterator,neighbor_iterator> const & neighbors_)
     {
-      LineIterator  _vertexlineit = worldline.forward() ? worldline.forwardlineit() : worldline.backwardlineit();
-      LineIterator  _sourcelineit = worldline.lineit(_vertexlineit->partnersite(), _vertexlineit->time());
-      bool          _forward      = !worldline.forward();    // Note: Here, we consider the direction of the reverse move.
+      location_type _sourcelocation = wl.location(worm.next_partnersite(), worm.next_time());
 
-      std::vector<LineIterator> _neighborlineitsprev;  
-      _neighborlineitsprev.reserve(num_neighbors(_sourcelineit->site()));
+#ifndef HEATBATH_ALGORITHM
+      const std::pair<neighbor_bond_iterator, neighbor_bond_iterator> _neighbor_bonds = neighbor_bonds(worm.next_partnersite());
 
-      std::vector<double>  _weights;              
-      _weights.reserve(num_neighbors(_sourcelineit->site()));
-#ifdef DEBUGMODE
-      if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
-         && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-         )
-      std::cout << "\n\nAttempting to delete/relink to 1 of these neighbors : ";
-#endif
-      for (neighbor_bond_iterator _neighborbondit = neighbor_bonds(_sourcelineit->site()).first; _neighborbondit != neighbor_bonds(_sourcelineit->site()).second; ++_neighborbondit)
+      double _weight;
+      for (neighbor_bond_iterator it=_neighbor_bonds.first; it!=_neighbor_bonds.second; ++it)
+        if (target(*it) == worm.site())
+        {
+          _weight = hopping_energy(*it, (wl.location(target(*it), worm.next_time()).second-1)->state(), !worm.increasing());
+          break;
+        }
+     
+      neighbor_bond_iterator it=_neighbor_bonds.first + random()*num_neighbors(worm.next_partnersite());
+
+      if (target(*it) == worm.site())    // delete vertex or bounce
       {
-#ifdef DEBUGMODE
-        if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
-           && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-           )
-        std::cout << "\t" << target(*_neighborbondit);
-#endif
-        LineIterator _neighborlineitprev  = --worldline.lineit(target(*_neighborbondit), _sourcelineit->time());
-        _neighborlineitsprev.push_back(_neighborlineitprev);
+        const double _weight_new = onsite_energy_relative(worm.next_partnersite(),_sourcelocation.second->state(),!worm.forward(),worm.creation());
 
-        State  _targetstate = _neighborlineitprev->state_after();
-        if (target(*_neighborbondit) == worldline.site())
-          _targetstate = (_forward ? worldline.state_after() : worldline.state());
-#ifdef DEBUGMODE
-        if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
-           && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
+        if (_weight_new >= _weight || random() < (_weight_new/_weight))
+        {
+          worm.wormhead_deletes_vertex_and_jumps_to_new_site(_sourcelocation);
+          worm.set_neighbor2wormtail(std::find(neighbors_.first, neighbors_.second, worm.site()) != neighbors_.second);
+          return;
+        }
+        else
+        {
+          worm.wormhead_turns_around();
+          ++_propagation_failure_counter;
+          return;
+        }
+      }
+      else     // relink vertex
+      {
+        location_type _neighborlocation  = wl.location(target(*it), worm.next_time());
+        const unsigned short _targetstate = (_neighborlocation.second-1)->state();
+        const bool _increasing = !worm.increasing();
+        if (  ( _increasing && _targetstate == state_maximum[site_site_type[target(*it)]])
+           || (!_increasing && _targetstate == state_minimum[site_site_type[target(*it)]])
            )
-        std::cout << "(" << _targetstate << ")";
-#endif
-        bool  _increasing = alps::applications::increasing(_forward, _sourcelineit->creation());
+        {
+          worm.wormhead_turns_around();
+          ++_propagation_failure_counter;
+          return;
+        }
+        else
+        {
+          const double _weight_new = hopping_energy(*it, _targetstate, _increasing);
+
+          if (_weight_new >= _weight || random() < (_weight_new/_weight))
+          {
+            worm.wormhead_relinks_vertex_and_jumps_to_new_site(_sourcelocation, _neighborlocation);
+            worm.set_neighbor2wormtail(std::find(neighbors_.first, neighbors_.second, worm.site()) != neighbors_.second);
+            return;
+          }
+          else
+          {
+            worm.wormhead_turns_around();
+            ++_propagation_failure_counter;
+            return;
+          }
+        }
+      }
+
+#else
+      _neighborlocations_cache.clear();
+      _cummulative_weights_cache.clear();
+
+      double _total_weight = 0.;
+      for (neighbor_bond_iterator _neighborbondit=neighbor_bonds(worm.next_partnersite()).first; _neighborbondit!=neighbor_bonds(worm.next_partnersite()).second; ++_neighborbondit)
+      {
+        location_type _neighborlocation  = wl.location(target(*_neighborbondit), worm.next_time());
+
+        _neighborlocations_cache.push_back(_neighborlocation);
+
+        const unsigned short _targetstate = (_neighborlocation.second-1)->state();
+        const bool _increasing = !worm.increasing();
         if (  ( _increasing && _targetstate == state_maximum[site_site_type[target(*_neighborbondit)]])
            || (!_increasing && _targetstate == state_minimum[site_site_type[target(*_neighborbondit)]])
            )
-           _weights.push_back(0);
+           _cummulative_weights_cache.push_back(_total_weight);
         else
-           _weights.push_back(hopping_energy(*_neighborbondit, _targetstate, _increasing));
-      }
-#ifdef DEBUGMODE
-      if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
-         && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-         )
-      std::cout << "\n\n";
-#endif
-
-      double _onsite_energy_relative = onsite_energy_relative(*_sourcelineit, _forward);
-      double _total_weight = std::accumulate(_weights.begin(), _weights.end(), _onsite_energy_relative);
-      double _weight       = random() * _total_weight;
-#ifdef DEBUGMODE
-      if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
-         && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-         )
-      {
-      std::cout << "\n\nTransition weights:\t" << _onsite_energy_relative << "\t";
-      std::copy(_weights.begin(), _weights.end(), std::ostream_iterator<double>(std::cout,"\t"));
-      std::cout << "Total (selected) =\t" << _total_weight << " ( " << _weight << " ) ";
-      std::cout << "\n------------------------------------------------" << "\n\n";
-      }
-#endif
-
-      if (_weight < _onsite_energy_relative)
-      {
-        worldline.wormhead_deletes_vertex_and_jumps_to_new_site(_sourcelineit);
-#ifdef DEBUGMODE
-        if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
-           && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-           )
         {
-        std::cout << "\n\n"
-                  << "\nWormhead deletes vertex"
-                  << "\n======================="
-                  << "\n" << worldline
-                  << "\nWormhead"
-                  << "\n--------"
-                  << worldline.wormhead()
-                  << "\n"
-                  << "\nWormtail"
-                  << "\n--------"
-                  << wormpair.second
-                  << "\n"
-                  << "\nEnded (Deleting a vertex)!)"
-                  << "\n----------------------------------"
-                  << "\n\n";
+           _total_weight += hopping_energy(*_neighborbondit, _targetstate, _increasing);
+           _cummulative_weights_cache.push_back(_total_weight);
         }
-#endif
+      }
+
+      _total_weight += onsite_energy_relative(worm.next_partnersite(),_sourcelocation.second->state(),!worm.forward(),worm.creation());
+      _cummulative_weights_cache.push_back(_total_weight);
+
+      const int which_neighbor = std::distance(_cummulative_weights_cache.begin(), std::lower_bound(_cummulative_weights_cache.begin(),_cummulative_weights_cache.end(), random()*_total_weight));
+
+      if (which_neighbor == _neighborlocations_cache.size())
+      {
+        worm.wormhead_deletes_vertex_and_jumps_to_new_site(_sourcelocation);
+        worm.set_neighbor2wormtail(std::find(neighbors_.first, neighbors_.second, worm.site()) != neighbors_.second);
         return;
       }
-      _weight -= _onsite_energy_relative;
 
-      for (neighbors_size_type _which_neighbor=0; _which_neighbor < num_neighbors(_sourcelineit->site()); ++_which_neighbor)
+      if (_neighborlocations_cache[which_neighbor].first->begin()->siteindicator() == worm.site())
       {
-        if (_weight < _weights.back())
-        {
-          LineIterator  _targetlineitprev  = _neighborlineitsprev.back();
-          if (_targetlineitprev->site() == worldline.site())
-          {
-            worldline.wormhead_changes_its_direction();
-            ++_propagation_failure_counter;
-#ifdef DEBUGMODE
-            if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
-               && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-               )  
-            {
-            std::cout << "\n\n"
-                      << "\nWormhead rebounces" 
-                      << "\n=================="
-                      << "\n" << worldline
-                      << "\nWormhead"
-                      << "\n--------"
-                      << worldline.wormhead()
-                      << "\n"
-                      << "\nWormtail"
-                      << "\n--------"
-                      << wormpair.second
-                      << "\n"                    
-                      << "\nEnded (Wormhead rebounces)!)"
-                      << "\n----------------------------"                    
-                      << "\n\n";
-            }
-#endif
-            return;
-          }
-          worldline.wormhead_relinks_vertex_and_jumps_to_new_site(_sourcelineit, _targetlineitprev);  
-#ifdef DEBUGMODE
-          if (  _sweep_counter       >= DEBUGMODE_START_COUNTER   && _sweep_counter       <= DEBUGMODE_END_COUNTER
-             && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-             )
-          {          
-          std::cout << "\n\n"
-                    << "\nWormhead relinks vertex to site " << _targetlineitprev->site() << " (which_neighbor ? " << _which_neighbor << " )"              
-                    << "\n=================================================================================================="
-                    << "\n" << worldline
-                    << "\nWormhead"
-                    << "\n--------"
-                    << worldline.wormhead()
-                    << "\n"
-                    << "\nWormtail"
-                    << "\n--------"
-                    << wormpair.second
-                    << "\n"
-                    << "\nEnded (Wormhead relink)!)"
-                    << "\n-------------------------"
-                    << "\n\n";
-          }
-#endif
-          return;
-        }
-        _weight -= _weights.back();
-        _neighborlineitsprev .pop_back();
-        _weights             .pop_back();
+        worm.wormhead_turns_around();
+        ++_propagation_failure_counter;
+        return;
       }
+
+      worm.wormhead_relinks_vertex_and_jumps_to_new_site(_sourcelocation, _neighborlocations_cache[which_neighbor]);  
+      worm.set_neighbor2wormtail(std::find(neighbors_.first, neighbors_.second, worm.site()) != neighbors_.second);
+      return;
+#endif
     }
 
-} // ending namespace applications
-} // ending namespace alps
 
+// ==================================================
+// main 
+// ==================================================
 
 int main(int argc, char** argv)
 {
@@ -1331,7 +1223,7 @@ int main(int argc, char** argv)
   try 
   {
 #endif
-   return alps::scheduler::start(argc, argv, alps::scheduler::SimpleMCFactory<alps::applications::directed_worm_algorithm>());
+   return alps::scheduler::start(argc, argv, alps::scheduler::SimpleMCFactory<directed_worm_algorithm>());
 #ifndef BOOST_NO_EXCEPTIONS
   }
   catch (std::exception& exc) 
