@@ -31,13 +31,11 @@ if(not_successful)
     message(SEND_ERROR "error runing test '${cmd}': ${err}; shell output: ${not_successful}!")
 endif(not_successful)
 
-#TODO: remove file of each tests ...
 file(REMOVE ${cmd}.result)
-file(REMOVE dump)
 file(REMOVE ${cmd}_output)
 file(REMOVE ${cmd}_output_continue)
 
-#math(EXPR max_rank ${procs}-1)
-#foreach(rank RANGE ${max_rank})
-#    file(REMOVE dump.${rank})
-#endforeach(rank RANGE ${max_rank})
+file(GLOB checkpoint_files checkpoint*)
+foreach (name ${checkpoint_files})
+    file(REMOVE ${name})
+endforeach(name)

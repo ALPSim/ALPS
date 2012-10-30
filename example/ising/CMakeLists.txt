@@ -100,7 +100,7 @@ if (ALPS_BUILD_EXAMPLES)
                     -Dbinarydir=${PROJECT_BINARY_DIR}
                     -Dbindir=${PROJECT_BINARY_DIR}/bin
                     -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
-                    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_python_ising_test.cmake
+                    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_python_test.cmake
             )
 
         endif(MPI_FOUND)
