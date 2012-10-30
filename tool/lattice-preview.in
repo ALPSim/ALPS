@@ -24,7 +24,7 @@ if test `uname -s 2> /dev/null` = Darwin && test `(uname -r | cut -s -d. -f1) 2>
   # for Mac OS X Snow Leopard
   VERSIONER_PYTHON_PREFER_32_BIT=yes
   export VERSIONER_PYTHON_PREFER_32_BIT
-  arch -i386 @PYTHON_EXECUTABLE@ "$SCRIPTDIR/preview.py" $@ < /dev/null &
+  arch -i386 @PYTHON_INTERPRETER@ "$SCRIPTDIR/preview.py" "$@" < /dev/null &
 else
-  @PYTHON_EXECUTABLE@ "$SCRIPTDIR/preview.py" $@ < /dev/null &
+  @PYTHON_INTERPRETER@ "$SCRIPTDIR/preview.py" "$@" < /dev/null &
 fi
