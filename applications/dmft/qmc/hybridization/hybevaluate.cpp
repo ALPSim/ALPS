@@ -42,7 +42,8 @@ void evaluate_basics(const alps::results_type<hybridization>::type &results,
     std::ofstream sim_file("simulation.dat");
     sim_file << "simulation details:" << std::endl;
     sim_file << "average sign: " << results["Sign"].mean<double>() << std::endl;
-    sim_file << "total number of sweeps: " << results["Sign"].count()*(double)parms["N_MEAS"]*(double)parms["N_ACCU"] << std::endl;
+    int N_accu = parms["N_ACCU"]|100;
+    sim_file << "total (effective) number of sweeps, normalized by N_meas and N_accu: " << results["Sign"].count()*(double)parms["N_MEAS"]*N_accu << std::endl;
     sim_file << "number thermalization sweeps: " << parms["THERMALIZATION"] << std::endl;
     sim_file << "inverse temperature: " << beta << std::endl;
     sim_file << "perturbation order:" << std::endl;
