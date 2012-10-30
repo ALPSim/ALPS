@@ -61,15 +61,14 @@ class sim(ngs.mcbase):
                 tmag += self.spins[i]
                 sign *= self.spins[i]
                 ten += -self.spins[i] * self.spins[i + 1 if i + 1 < self.length else 0]
-                for d in range(self.length):
-                    corr[d] += self.spins[i] * self.spins[(i + d) % self.length]
-            corr = np.array([x / float(self.length) for x in corr])
+            for d in range(self.length):
+                corr[d] = np.inner(self.spins, np.roll(self.spins, d)) / float(self.length)
             ten /= self.length
             tmag /= self.length
             self.measurements["Energy"] << ten
             self.measurements["Magnetization"] << tmag
-            self.measurements["Magnetization^2"] << (tmag * tmag)
-            self.measurements["Magnetization^4"] << (tmag * tmag * tmag * tmag)
+            self.measurements["Magnetization^2"] << tmag**2
+            self.measurements["Magnetization^4"] << tmag**4
             self.measurements["Correlations"] << corr
     def fraction_completed(self):
         return 0 if self.sweeps < self.thermalization_sweeps else (self.sweeps - self.thermalization_sweeps) / float(self.total_sweeps)

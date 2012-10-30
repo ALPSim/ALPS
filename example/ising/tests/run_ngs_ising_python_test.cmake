@@ -3,7 +3,7 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-file(WRITE ${cmd}_tmp.sh "PYTHONPATH=\$PYTHONPATH:${binarydir}/lib/pyalps:${binarydir}/src/boost:${sourcedir}/lib:${bindir} ${runexec} ${python_interpreter} ${currentdir}/${cmd}.py 15 f ${cmd}.h5")
+file(WRITE ${cmd}_tmp.sh "PYTHONPATH=\$PYTHONPATH:${binarydir}/lib/pyalps:${binarydir}/src/boost:${sourcedir}/lib:${bindir}:${currentdir}/src ${runexec} ${python_interpreter} ${currentdir}/${cmd}.py 15 f ${cmd}.h5")
 
 execute_process(
     COMMAND sh ${cmd}_tmp.sh
@@ -17,6 +17,6 @@ if(not_successful)
     message(SEND_ERROR "error runing test '${cmd}': ${err}; shell output: ${not_successful}!")
 endif(not_successful)
 
-file(REMOVE ${cmd}_tmp.sh)
-file(REMOVE ${cmd}.h5)
-file(REMOVE ${cmd}_output)
+#file(REMOVE ${cmd}_tmp.sh)
+#file(REMOVE ${cmd}.h5)
+#file(REMOVE ${cmd}_output)

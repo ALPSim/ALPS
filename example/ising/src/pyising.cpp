@@ -32,7 +32,7 @@
 
 #include <alps/ngs/detail/export_sim_to_python.hpp>
 
-BOOST_PYTHON_MODULE(pyising) {
+BOOST_PYTHON_MODULE(ngsising_c) {
     ALPS_EXPORT_SIM_TO_PYTHON(sim, ising_sim)
         .add_property("done", &ising_sim::fraction_completed)
     ;

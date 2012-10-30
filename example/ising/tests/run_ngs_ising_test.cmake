@@ -31,9 +31,15 @@ if(not_successful)
     message(SEND_ERROR "error runing test '${cmd}': ${err}; shell output: ${not_successful}!")
 endif(not_successful)
 
+file(REMOVE checkpoint)
 file(REMOVE ${cmd}.result)
 file(REMOVE ${cmd}_output)
 file(REMOVE ${cmd}_output_continue)
+
+file(GLOB result_files ${cmd}.result*)
+foreach (name ${result_files})
+    file(REMOVE ${name})
+endforeach(name)
 
 file(GLOB checkpoint_files checkpoint*)
 foreach (name ${checkpoint_files})

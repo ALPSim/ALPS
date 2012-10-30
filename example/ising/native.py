@@ -30,8 +30,6 @@ import pyalps.mpi as mpi
 import numpy as np
 import sys, time
 
-#TODO: why does ist toke only 1 s, it should take 30s?
-
 import ising
 
 def main(limit, resume, output):
@@ -39,9 +37,9 @@ def main(limit, resume, output):
 
     sim = ising.sim({
         'L': 100,
+        'THERMALIZATION': 100,
         'SWEEPS': 1000,
-        'T': 2,
-        'THERMALIZATION': 100
+        'T': 2
     }, mpi.world if mpi.size > 1 else None)
 
     if resume == 't':
@@ -62,6 +60,7 @@ def main(limit, resume, output):
     results = ngs.collectResults(sim)
 
     if mpi.rank == 0:
+        print "#Sweeps:                ", results["Energy"].count
         print "Correlations:           ", results["Correlations"]
         print "Energy:                 ", results["Energy"]
 

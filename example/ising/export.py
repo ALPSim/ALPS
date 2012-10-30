@@ -30,18 +30,17 @@ import numpy as np
 import sys, time
 
 #TODO: enable mpi
-#TODO: why does ist toke only 1 s, it should take 30s?
 
-import pyising
+import ngsising_c as ising
 
 def main(limit, resume, output):
     #implement nice argv parsing ...
 
-    sim = pyising.sim(ngs.params({
+    sim = ising.sim(ngs.params({
         'L': 100,
-        'SWEEPS': 1000,
-        'T': 2,
-        'THERMALIZATION': 100
+        'THERMALIZATION': 1000,
+        'SWEEPS': 10000,
+        'T': 2
     }))
 
     if resume == 't':
@@ -63,6 +62,7 @@ def main(limit, resume, output):
 
     results = ngs.collectResults(sim)
 
+    print "#Sweeps:                ", results["Energy"].count
     print "Correlations:           ", results["Correlations"]
     print "Energy:                 ", results["Energy"]
 

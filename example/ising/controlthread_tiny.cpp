@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
         alps::sleep(0.1 * 1e9);
 
         if (boost::posix_time::second_clock::local_time() > progress_time + boost::posix_time::seconds(5)) {
-            std::cout << "progress: " << sim.fraction_completed() << std::endl;
+            std::cout << "progress: " << std::setprecision(2) << 100 * sim.fraction_completed() << "%" << std::endl;
             progress_time = boost::posix_time::second_clock::local_time();
         }
 

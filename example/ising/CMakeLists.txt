@@ -55,18 +55,18 @@ if (ALPS_BUILD_EXAMPLES)
         set(ALPS_SHARED_CPPFLAGS ALPS_EXPORTS=1)
         set(ALPS_STATIC_CPPFLAGS "")
 
-        python_add_module(pyising src/pyising.cpp)
+        python_add_module(ngsising_c src/pyising.cpp)
 
         if(BUILD_SHARED_LIBS)
-            set_target_properties(pyising PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
-            set_target_properties(pyising PROPERTIES PREFIX "")
+            set_target_properties(ngsising_c PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
+            set_target_properties(ngsising_c PROPERTIES PREFIX "")
             if(WIN32 AND NOT UNIX)
-                set_target_properties(pyising PROPERTIES SUFFIX ".pyd")
+                set_target_properties(ngsising_c PROPERTIES SUFFIX ".pyd")
             endif(WIN32 AND NOT UNIX)
         endif(BUILD_SHARED_LIBS)
-        target_link_libraries(pyising alps ${LINK_LIBRARIES})
+        target_link_libraries(ngsising_c alps ${LINK_LIBRARIES})
 
-        install(TARGETS pyising
+        install(TARGETS ngsising_c
                 COMPONENT python
                 RUNTIME DESTINATION example/ising
                 ARCHIVE DESTINATION example/ising
