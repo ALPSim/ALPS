@@ -38,6 +38,10 @@ int main(int argc, char *argv[]) {
     parameters_type<sim_type>::type params(hdf5::archive(options.input_file));
     sim_type sim(params);
 
+// TODO: calculate a default based on the input_file name
+// TODO: allow to specify out file name on command line as optional second positional argument
+// TODO: change continuation to specification of checkpoint file and drop DUMP
+  
     if (options.resume)
         sim.load(params["DUMP"] | "checkpoint");
 
@@ -49,6 +53,9 @@ int main(int argc, char *argv[]) {
   
     save_results(results, params, options.output_file, "/simulation/results");
 
+    // TODO: add a function to print all results in a nice way
+    // std::cout << results << std::endl;
+  
     std::cout << "#Sweeps:                " << results["Energy"].count() << std::endl;
     std::cout << "Correlations:           " << results["Correlations"] << std::endl;
     std::cout << "Energy:                 " << results["Energy"] << std::endl;
