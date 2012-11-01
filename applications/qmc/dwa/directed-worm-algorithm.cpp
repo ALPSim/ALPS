@@ -322,7 +322,12 @@ void
       // component momenta lookup table 
       component_momenta_lookup.reserve(num_component_momenta_);
       for (unsigned int idx=0; idx < num_component_momenta(); ++idx)
-        component_momenta_lookup.push_back(idx*boost::math::double_constants::pi/lattice().extent()[0]/(num_component_momenta()-1));
+        #if BOOST_VERSION >= 105000
+            component_momenta_lookup.push_back(idx*boost::math::double_constants::pi/lattice().extent()[0]/(num_component_momenta()-1));
+        #else
+            component_momenta_lookup.push_back(idx*boost::math::constants::pi/lattice().extent()[0]/(num_component_momenta()-1));
+        #endif
+      
 
       // phase and phase lookup table
       if (finite_tof)
