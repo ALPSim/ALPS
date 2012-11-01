@@ -46,6 +46,10 @@ int main(int argc, char *argv[]) {
     boost::mpi::communicator comm_local = comm_world.split(color);
 
     parameters_type<sim_type>::type params;
+    if (comm_local.rank() == 0)
+        hdf5::archive(options.input_file)["/parameters"] >> params;
+    
+    
     if (!comm_local.rank()) {
         hdf5::archive ar(options.input_file + "." + boost::lexical_cast<std::string>(color));
         ar["/parameters"] >> params;
@@ -75,24 +79,7 @@ int main(int argc, char *argv[]) {
     results_type<sim_type>::type results = collect_results(sim);
 
     if (!comm_local.rank()) {
-        std::cout << "Results of group " << color << std::endl;
-        std::cout << "#Sweeps:                " << results["Energy"].count() << std::endl;
-        std::cout << "Correlations:           " << results["Correlations"] << std::endl;
-        std::cout << "Energy:                 " << results["Energy"] << std::endl;
-
-        std::cout << "Mean of Energy:         " << results["Energy"].mean<double>() << std::endl;
-        std::cout << "Error of Energy:        " << results["Energy"].error<double>() << std::endl;
-        std::cout << "Mean of Correlations:   " << short_print(results["Correlations"].mean<std::vector<double> >()) << std::endl;
-
-        std::cout << "-2 * Energy / 13:       " << -2. * results["Energy"] / 13. << std::endl;
-        std::cout << "1 / Correlations        " << 1. / results["Correlations"] << std::endl;
-        std::cout << "Energy - Magnetization: " << results["Energy"] - results["Magnetization"] << std::endl;
-
-        std::cout << "Sin(Energy):            " << sin(results["Energy"]) << std::endl;
-        std::cout << "Tanh(Correlations):     " << tanh(results["Correlations"]) << std::endl;
-
+        std::cout << results << std::endl;
         save_results(results, params, options.output_file + "." + boost::lexical_cast<std::string>(color), "/simulation/results");
-
     }
-
 }

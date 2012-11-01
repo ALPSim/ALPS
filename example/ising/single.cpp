@@ -50,25 +50,6 @@ int main(int argc, char *argv[]) {
     sim.save(params["DUMP"] | "checkpoint");
 
     results_type<sim_type>::type results = collect_results(sim);
-  
+    std::cout << results << std::endl;
     save_results(results, params, options.output_file, "/simulation/results");
-
-    // TODO: add a function to print all results in a nice way
-    // std::cout << results << std::endl;
-  
-    std::cout << "#Sweeps:                " << results["Energy"].count() << std::endl;
-    std::cout << "Correlations:           " << results["Correlations"] << std::endl;
-    std::cout << "Energy:                 " << results["Energy"] << std::endl;
-
-    std::cout << "Mean of Energy:         " << results["Energy"].mean<double>() << std::endl;
-    std::cout << "Error of Energy:        " << results["Energy"].error<double>() << std::endl;
-    std::cout << "Mean of Correlations:   " << short_print(results["Correlations"].mean<std::vector<double> >()) << std::endl;
-    std::cout << "Covariance E/M:         " << short_print(results["Energy"].covariance<double>(results["Magnetization"])) << std::endl;
-
-    std::cout << "-2 * Energy / 13:       " << -2. * results["Energy"] / 13. << std::endl;
-    std::cout << "1 / Correlations        " << 1. / results["Correlations"] << std::endl;
-    std::cout << "Energy - Magnetization: " << results["Energy"] - results["Magnetization"] << std::endl;
-
-    std::cout << "Sin(Energy):            " << sin(results["Energy"]) << std::endl;
-    std::cout << "Tanh(Correlations):     " << tanh(results["Correlations"]) << std::endl;
 }

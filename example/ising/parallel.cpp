@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
     boost::mpi::communicator c;
 
     parameters_type<sim_type>::type params;
-    if (!c.rank()) {
+    if (c.rank() == 0) {
         hdf5::archive ar(options.input_file);
         ar["/parameters"] >> params;
     }
@@ -48,27 +48,16 @@ int main(int argc, char *argv[]) {
 
     sim_type sim(params, c);
 
-    if (!c.rank() && options.resume)
+    if (c.rank() == 0 && options.resume)
         sim.load(params["DUMP"] | "checkpoint");
 
     sim.run(boost::bind(&stop_callback, options.time_limit));
 
-    if (!c.rank()) {
+    if (c.rank() == 0) {
         sim.save(params["DUMP"] | "checkpoint");
     
         results_type<sim_type>::type results = collect_results(sim);
-
-        std::cout << "#Sweeps:                " << results["Energy"].count() << std::endl;
-        std::cout << "Energy:                 " << results["Energy"] << std::endl;
-
-        std::cout << "Mean of Energy:         " << results["Energy"].mean<double>() << std::endl;
-        std::cout << "Error of Energy:        " << results["Energy"].error<double>() << std::endl;
-
-        std::cout << "-2 * Energy / 13:       " << -2. * results["Energy"] / 13. << std::endl;
-        std::cout << "Energy - Magnetization: " << results["Energy"] - results["Magnetization"] << std::endl;
-
-        std::cout << "Sin(Energy):            " << sin(results["Energy"]) << std::endl;
-
+        std::cout << results << std::endl;
         save_results(results, params, options.output_file, "/simulation/results");
     }
 }

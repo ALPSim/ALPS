@@ -58,23 +58,8 @@ def main(limit, resume, output):
     del ar
 
     results = ngs.collectResults(sim)
-
     if mpi.rank == 0:
-        print "#Sweeps:                ", results["Energy"].count
-        print "Correlations:           ", results["Correlations"]
-        print "Energy:                 ", results["Energy"]
-
-        print "Mean of Energy:         ", results["Energy"].mean
-        print "Error of Energy:        ", results["Energy"].error
-        print "Mean of Correlations:   ", results["Correlations"].mean
-
-        print "-2 * Energy / 13:        ", -2. * results["Energy"] / 13.
-        print "1 / Correlations        ", 1. / results["Correlations"]
-        print "Energy - Magnetization: ", results["Energy"] - results["Magnetization"]
-
-        print "Sin(Energy):            ", results["Energy"].sin()
-        print "Tanh(Correlations):     ", results["Correlations"].tanh()
-
+        print results
         ngs.saveResults(results, sim.params, ngs.h5ar(output, 'a'), "/simulation/results")
 
 if __name__ == "__main__":
