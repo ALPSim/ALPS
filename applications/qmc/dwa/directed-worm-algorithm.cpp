@@ -325,7 +325,7 @@ void
         #if BOOST_VERSION >= 105000
             component_momenta_lookup.push_back(idx*boost::math::double_constants::pi/lattice().extent()[0]/(num_component_momenta()-1));
         #else
-            component_momenta_lookup.push_back(idx*boost::math::constants::pi/lattice().extent()[0]/(num_component_momenta()-1));
+            component_momenta_lookup.push_back(idx*boost::math::constants::pi<double>()/lattice().extent()[0]/(num_component_momenta()-1));
         #endif
       
 
