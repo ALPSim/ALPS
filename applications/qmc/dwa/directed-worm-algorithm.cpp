@@ -156,11 +156,30 @@ directed_worm_algorithm
     for (int i=0; i<dimension(); ++i)
       lattice_vector_.push_back(*(basis_vectors().first + i) * lattice().extent()[i]);
 
+    // further initiation of worldlines
+    if (parameters.defined("WORLDLINES"))
+      try {
+        alps::hdf5::archive ar(static_cast<std::string>(parameters["WORLDLINES"]));
+        wl.load(ar);
+      }
+      catch(...) {
+        std::cout << "\"" << static_cast<std::string>(parameters["WORLDLINES"]) << "\" is either non-existent or corrupted.\n";
+      }
+
     // other initialization
     initialize_site_states();
     initialize_hamiltonian();
     initialize_lookups();
     initialize_measurements();
+
+    if (parameters.defined("MEASUREMENTS"))
+      try {
+        alps::hdf5::archive ar(static_cast<std::string>(parameters["MEASUREMENTS"]));
+        ar >> alps::make_pvp("/simulation/results", measurements);
+      }
+      catch(...) {
+        std::cout << "\"" << static_cast<std::string>(parameters["MEASUREMENTS"]) << "\" is either non-existent or corrupted.\n";
+      }
 
     // regarding caches
 #ifdef HEATBATH_ALGORITHM
@@ -178,9 +197,9 @@ void
   directed_worm_algorithm
     ::save(alps::hdf5::archive & ar) const
     {
+      ar << alps::make_pvp("/simulation/worldlines/num_sites", num_sites()); 
       ar << alps::make_pvp("/simulation/worldlines", wl);
-      if (measure_local_density_ || measure_local_density2_ || measure_local_magnetization_ || measure_local_magnetization2_ || measure_local_energy_)
-        ar << alps::make_pvp("/simulation/positions", position_lookup);
+      ar << alps::make_pvp("/simulation/positions", position_lookup);
       if (measure_green_function_)
         ar << alps::make_pvp("/simulation/green_coordinates", lattice().distance_labels());
       if (measure_momentum_density_ || measure_tof_image_)
@@ -322,12 +341,7 @@ void
       // component momenta lookup table 
       component_momenta_lookup.reserve(num_component_momenta_);
       for (unsigned int idx=0; idx < num_component_momenta(); ++idx)
-        #if BOOST_VERSION >= 105000
-            component_momenta_lookup.push_back(idx*boost::math::double_constants::pi/lattice().extent()[0]/(num_component_momenta()-1));
-        #else
-            component_momenta_lookup.push_back(idx*boost::math::constants::pi<double>()/lattice().extent()[0]/(num_component_momenta()-1));
-        #endif
-      
+        component_momenta_lookup.push_back(idx*M_PI/lattice().extent()[0]/(num_component_momenta()-1));
 
       // phase and phase lookup table
       if (finite_tof)

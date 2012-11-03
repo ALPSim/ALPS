@@ -30,12 +30,14 @@
 
 #include <iostream>
 #include <utility>
+#include <string>
 #include <vector>
 #include <iterator>
 #include <algorithm>
 #include <functional>
 #include <numeric>
 #include <limits>
+#include <boost/lexical_cast.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <alps/hdf5.hpp>
 
@@ -49,6 +51,8 @@ public:
   kink() {}
   kink(unsigned int siteindicator_, double time_ =0., unsigned short state_ =0) : _siteindicator(siteindicator_), _time(time_), _state(state_)  {}
   kink(std::istream & in) { in  >> _siteindicator >> _time >> _state; }
+
+  std::string representation() const  { return "kink object: site indicator = " + boost::lexical_cast<std::string>(siteindicator()) + " , time = " + boost::lexical_cast<std::string>(time()) + " , state = " + boost::lexical_cast<std::string>(state()); } 
 
   unsigned int   siteindicator() const  {  return _siteindicator;   }
   double         time()          const  {  return _time;   }
@@ -117,6 +121,12 @@ public:
       _worldlines[site].push_back(kink(site));
   }
 
+  worldlines open_worldlines (kink const & kink_) const;
+
+  std::vector<std::vector<unsigned int> >   worldlines_siteindicator() const;
+  std::vector<std::vector<double> >         worldlines_time()          const;
+  std::vector<std::vector<unsigned short> > worldlines_state()         const;
+
   unsigned int  num_sites()                   const  { return _worldlines.size(); }
   unsigned int  num_kinks(unsigned int site_) const  { return _worldlines[site_].size(); }
 
@@ -137,8 +147,13 @@ public:
 
   friend std::ostream &  operator<<(std::ostream & out, worldlines const & obj_);
 
+  std::string representation() const  { std::ostringstream oss; oss << *this; return oss.str(); }
+
   void save(alps::hdf5::archive & ar) const;
   void load(alps::hdf5::archive & ar);
+
+  void save(std::string const & filename) const;
+  void load(std::string const & filename);
 
 private:
   lines _worldlines;
@@ -148,6 +163,60 @@ private:
 // ==================================================
 // worldlines member functions
 // ==================================================
+
+worldlines worldlines::open_worldlines(kink const & kink_) const
+{
+  worldlines new_worldlines;
+  new_worldlines._worldlines = _worldlines;
+  location_type kink_insertion_location = new_worldlines.location(kink_.siteindicator(), kink_.time());
+  kink_insertion_location.first->insert(kink_insertion_location.second, kink_);
+  return new_worldlines;
+}
+
+std::vector<std::vector<unsigned int> > worldlines::worldlines_siteindicator() const
+{
+  std::vector<std::vector<unsigned int> > _vec;
+  _vec.reserve(num_sites());
+  for (unsigned int site_=0; site_<num_sites(); ++site_)
+  {
+    std::vector<unsigned int> _vec_inner;
+    _vec_inner.reserve(num_kinks(site_));
+    for (unsigned int vertex_=0; vertex_<num_kinks(site_); ++vertex_)
+      _vec_inner.push_back(_worldlines[site_][vertex_].siteindicator());
+    _vec.push_back(_vec_inner);
+  }
+  return _vec;
+}
+
+std::vector<std::vector<double> > worldlines::worldlines_time() const
+{
+  std::vector<std::vector<double> > _vec;
+  _vec.reserve(num_sites());
+  for (unsigned int site_=0; site_<num_sites(); ++site_)
+  { 
+    std::vector<double> _vec_inner;
+    _vec_inner.reserve(num_kinks(site_));
+    for (unsigned int vertex_=0; vertex_<num_kinks(site_); ++vertex_)
+      _vec_inner.push_back(_worldlines[site_][vertex_].time());
+    _vec.push_back(_vec_inner);
+  }
+  return _vec;
+}
+
+std::vector<std::vector<unsigned short> > worldlines::worldlines_state() const
+{
+  std::vector<std::vector<unsigned short> > _vec;
+  _vec.reserve(num_sites());
+  for (unsigned int site_=0; site_<num_sites(); ++site_)
+  { 
+    std::vector<unsigned short> _vec_inner;
+    _vec_inner.reserve(num_kinks(site_));
+    for (unsigned int vertex_=0; vertex_<num_kinks(site_); ++vertex_)
+      _vec_inner.push_back(_worldlines[site_][vertex_].state());
+    _vec.push_back(_vec_inner);
+  }
+  return _vec;
+}
 
 std::vector<unsigned short> worldlines::states() const
 {
@@ -202,6 +271,17 @@ void worldlines::load(alps::hdf5::archive & ar)
   ar >> alps::make_pvp("/worldlines/worldlines" , _worldlines);
 }
 
+void worldlines::save(std::string const & filename) const
+{
+  alps::hdf5::archive ar(filename.c_str(), "w");
+  save(ar);
+}
+
+void worldlines::load(std::string const & filename) 
+{
+  alps::hdf5::archive ar(filename.c_str());
+  ar >> alps::make_pvp("/worldlines/worldlines" , _worldlines);
+}
 
 // ==================================================
 // wormpair class
@@ -236,6 +316,9 @@ public:
   unsigned int   wormtail_site()  const { return _wormtail.siteindicator(); }
   double         wormtail_time()  const { return _wormtail.time();  }
   unsigned short wormtail_state() const { return _wormtail.state(); }
+
+  kink wormhead() const  { return _wormhead; }
+  kink wormtail() const  { return _wormtail; }
 
   bool wormhead_is_same_type_as_next() const { return _forward ? ((_creation && (state()+1 == next_state())) || (!_creation && (state() == next_state()+1))) : ((_creation && (state_before() == (_next-1)->state()+1)) || (!_creation && (state_before()+1 == (_next-1)->state()))); }
 
@@ -272,6 +355,8 @@ public:
   static bool increasing (bool forward_, bool creation_)  { return ((creation_ && !forward_) || (!creation_ && forward_)); }
 
   friend std::ostream &  operator<<(std::ostream & out, wormpair const & obj_);
+
+  std::string representation() const  { std::ostringstream oss; oss << *this; return oss.str(); }
 
 private:
   unsigned short _wormpair_state;

@@ -45,7 +45,6 @@
 
 #include <boost/cstdint.hpp>
 #include <boost/lambda/lambda.hpp>
-#include <boost/math/constants/constants.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #include <alps/alea.h>
@@ -78,7 +77,7 @@ private:
 
   // i/o
   void save(alps::hdf5::archive & ar) const;
-  void load(alps::hdf5::archive & ar)  { ar >> alps::make_pvp("/simulation/worldlines", wl); }
+  void load(alps::hdf5::archive & ar)  {  ar >> alps::make_pvp("/simulation/worldlines", wl); }
 
   // regarding simulation backbone (ESSENTIAL)
   void  start();          
