@@ -46,7 +46,6 @@ typedef class local_configuration{
 public:
   local_configuration(const alps::params &p);
   
-  double trace() const;
   double local_weight_change(const segment &seg, int orb, bool antisegment) const;
   int order(int orbital) const{ return segments_[orbital].size(); }
   int n_orbitals() const{ return n_orbitals_; }

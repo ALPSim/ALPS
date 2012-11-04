@@ -95,8 +95,8 @@ double local_configuration::local_weight_change(const segment &seg, int orb, boo
     //std::cout<<clmagenta<<"weight of orbital: "<<orb<<" wrt orbital: "<<i<<" is: "<<std::exp(U_(orb,i)*overlaps[i])<<" for overlap: "<<overlaps[i]<<cblack<<std::endl;
     weight*=std::exp(-sgn*U_(orb,i)*overlaps[i]);
     /*if(zero_order_orbital_occupied_[i]){
-      std::cout<<"weight got an additional factor:"<<std::exp(-sgn*U_(orb,i)*overlaps[i])<<std::endl;
-    }*/
+     std::cout<<"weight got an additional factor:"<<std::exp(-sgn*U_(orb,i)*overlaps[i])<<std::endl;
+     }*/
   }
   //this is the retarded interaction stuff
   if(use_retarded_interaction_){
@@ -169,8 +169,8 @@ double local_configuration::find_next_segment_end_distance(double time, int orbi
 
 void local_configuration::insert_segment(const segment &new_segment, int orbital){
   segments_[orbital].insert(new_segment);
-  times_set_.insert(new_segment.t_start_);
-  times_set_.insert(new_segment.t_end_);
+  if(!times_set_.insert(new_segment.t_start_).second){throw std::logic_error("insert segment start time could not be inserted.");}
+  if(!times_set_.insert(new_segment.t_end_).second){throw std::logic_error("insert segment end time could not be inserted.");}
 }
 void local_configuration::insert_antisegment(const segment &new_antisegment, int orbital){
   //find segment of which this one is a part
@@ -190,8 +190,8 @@ void local_configuration::insert_antisegment(const segment &new_antisegment, int
     segments_[orbital].insert(new_later_segment);
     segments_[orbital].insert(new_earlier_segment);
   }
-  times_set_.insert(new_antisegment.t_start_);
-  times_set_.insert(new_antisegment.t_end_);
+  if(!times_set_.insert(new_antisegment.t_start_).second){throw std::logic_error("insert antisegment start time could not be inserted.");}
+  if(!times_set_.insert(new_antisegment.t_end_).second){throw std::logic_error("insert segment start time could not be inserted.");}
 }
 void local_configuration::remove_antisegment(const segment &new_antisegment, int orbital){
   //find segment of which this one is a part
@@ -212,8 +212,25 @@ void local_configuration::remove_antisegment(const segment &new_antisegment, int
     segments_[orbital].erase(it_earlier);
     segments_[orbital].insert(new_segment);
   }
-  if(!times_set_.erase(new_antisegment.t_start_)) throw std::logic_error("did not find start time to remove!");
-  if(!times_set_.erase(new_antisegment.t_end_)) throw std::logic_error("did not find end time to remove!");
+  if(!times_set_.erase(new_antisegment.t_start_)){
+    std::cerr<<"in local_configuration::remove_antisegment"<<std::endl;
+    std::cerr<<"time to erase was: "<<new_antisegment.t_start_<<std::endl;
+    std::cerr<<"new antisegment to remove was: "<<new_antisegment<<std::endl;
+    std::cout<<*this<<std::endl;
+    throw std::logic_error("did not find start time to remove!");
+  }  if(!times_set_.erase(new_antisegment.t_end_)){
+    std::cerr<<"successfully erased new antisegment at: "<<new_antisegment<<std::endl;
+    std::cerr<<"successfully erased the segment before that. "<<std::endl;
+    std::cerr<<"successfully inserted the segment at: (gone.)"<<std::endl;
+    std::cerr<<"the times are: "<<std::endl;
+    for (std::set<double>::const_iterator it=times_set_.begin(); it!=times_set_.end();++it){ std::cout<<*it<<" ";} std::cerr<<std::endl;
+    std::cerr<<std::endl;
+    std::cerr<<"in local_configuration::remove_antisegment"<<std::endl;
+    std::cerr<<"time to erase was: "<<new_antisegment.t_end_<<std::endl;
+    std::cerr<<"new antisegment to remove was: "<<new_antisegment<<std::endl;
+    std::cout<<*this<<std::endl;
+    throw std::logic_error("did not find end time to remove!");
+  }
 }
 
 segment local_configuration::get_segment(int k, int orbital) const{
@@ -228,8 +245,19 @@ void local_configuration::remove_segment(const segment &new_segment, int orbital
   if(segments_[orbital].erase(new_segment)==0) throw std::logic_error("did not find segment to remove!");
   if(segments_[orbital].size()==0) zero_order_orbital_occupied_[orbital]=false;
   
-  if(!times_set_.erase(new_segment.t_start_)) throw std::logic_error("did not find start time to remove!");
-  if(!times_set_.erase(new_segment.t_end_)) throw std::logic_error("did not find end time to remove!");
+  if(!times_set_.erase(new_segment.t_start_)){
+    std::cerr<<"in local_configuration::remove_segment"<<std::endl;
+    std::cerr<<"time to erase was: "<<new_segment.t_start_<<std::endl;
+    std::cerr<<"new segment to remove was: "<<new_segment<<std::endl;
+    std::cout<<*this<<std::endl;
+    throw std::logic_error("did not find start time to remove!");
+  }  if(!times_set_.erase(new_segment.t_end_)) {
+    std::cerr<<"in local_configuration::remove_segment"<<std::endl;
+    std::cerr<<"time to erase was: "<<new_segment.t_end_<<std::endl;
+    std::cerr<<"new segment to remove was: "<<new_segment<<std::endl;
+    std::cout<<*this<<std::endl;
+    throw std::logic_error("did not find end time to remove!");
+  }
 }
 void local_configuration::check_consistency()const {
   for(int i=0;i<n_orbitals_;++i){
@@ -622,7 +650,7 @@ void local_configuration::measure_sector_statistics(std::vector<double> &sector_
   //  memset(&(sector_statistics[0]), 0, sizeof(double)*sector_statistics.size());
   //std::fill(sector_statistics.begin(),sector_statistics.end(),0);
   int full_line_states=0;
-
+  
   for(int i=0;i<n_orbitals_;++i){
     int index=pow(2,i);
     if(zero_order_orbital_occupied_[0]){

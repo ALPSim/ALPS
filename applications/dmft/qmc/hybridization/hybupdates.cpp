@@ -136,7 +136,7 @@ void hybridization::insert_segment_update(int orbital){
   //draw an end time
   double t_end=t_start+random()*t_next_segment_start;
   if(t_end > beta) t_end-=beta;
-  if(local_config.exists(t_end)){ std::cerr<<"rare event, duplicate: "<<t_end<<std::endl; return;} //time already exists.
+  if(t_start == t_end || local_config.exists(t_end)){ std::cerr<<"rare event, duplicate: "<<t_end<<" "<<t_start<<std::endl; return;} //time already exists.
   
   //compute local weight of the new segment with t_start and t_end
   segment new_segment(t_start, t_end);
@@ -205,7 +205,7 @@ void hybridization::insert_antisegment_update(int orbital){
   //draw an end time
   double t_end=t_start+random()*t_next_segment_end;
   if(t_end > beta) t_end-=beta;
-  if(local_config.exists(t_end)){ std::cerr<<"rare event, duplicate: "<<t_end<<std::endl; return;} //time already exists.
+  if(t_start == t_end || local_config.exists(t_end)){ std::cerr<<"rare event, duplicate: "<<t_end<<" "<<t_start<<std::endl; return;} //time already exists.
   
   //std::cout<<clgreen<<"antisegment insertion update: "<<std::endl<<cblack<<*this<<std::endl;
   //std::cout<<clgreen<<" antisegment start time: (cdagger): "<<t_start<<" end time (c): "<<t_end<<std::endl;
@@ -268,8 +268,20 @@ void hybridization::remove_antisegment_update(int orbital){
   if(std::abs(weight_change)>random()){
     //std::cout<<cred<<"accepting remove antisegment."<<cblack<<std::endl;
     if(weight_change < 0) sign*=-1.;
+    try{
     local_config.remove_antisegment(antisegment, orbital);
     hyb_config.remove_antisegment(antisegment, orbital);
+    }catch(std::exception &e){
+      std::cerr<<cred<<"caught exception in remove antisegment!"<<cblack<<std::endl;
+      std::cout<<" orbital is: "<<orbital<<std::endl;
+      std::cout<<" segment no is: "<<segment_nr<<std::endl;
+      std::cout<<" segment earlier is: "<<segment_earlier<<std::endl;
+      std::cout<<" segment later is: "<<segment_later<<std::endl;
+      std::cout<<" segment forward is: "<<segment_forward<<std::endl;
+      std::cout<<" antisegment is: "<<antisegment<<std::endl;
+      std::cout<<" t next segment end: "<<t_next_segment_end<<std::endl;
+      exit(1);
+    }
     //std::cout<<cred<<"done accepting remove antisegment."<<cblack<<std::endl;
   }
 }
