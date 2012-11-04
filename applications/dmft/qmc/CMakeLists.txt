@@ -62,8 +62,7 @@ ENDIF(ALPS_HAVE_MPI)
   #Interaction Expansion
   set (DMFT_QMC_SOLVERS ${DMFT_QMC_SOLVERS} interaction_expansion_impl)
   add_library (interaction_expansion_impl STATIC ${DMFT_QMC_INTERACTION_EXPANSION_SOURCE})
-  
-  
+
   #Interaction Expansion - separate solver
 IF(ALPS_HAVE_MPI)
   add_library (interaction_expansion2_impl STATIC  ${DMFT_QMC_INTERACTION_EXPANSION2_SOURCE})
@@ -72,6 +71,15 @@ ENDIF(ALPS_HAVE_MPI)
 IF(ALPS_HAVE_MPI)
   #Hybridization Expansion - separate solver
   add_library (hybridization_impl STATIC ${DMFT_QMC_HYBRIDIZATION_SOURCE})
+  #Hybridization Expansion - python module
+  IF(ALPS_BUILD_PYTHON)
+    add_library (cthyb.so SHARED hybridization/hybmain.cpp)
+    SET (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
+    set_target_properties(cthyb.so PROPERTIES PREFIX "")
+    set_target_properties(cthyb.so PROPERTIES SUFFIX "")
+    set_target_properties(cthyb.so PROPERTIES COMPILE_FLAGS "-DBUILD_PYTHON_MODULE")
+    target_link_libraries(cthyb.so alps hybridization_impl ${ALPS_LIBRARIES} ${ALPS_LAPACK_LIBRARY} ${LAPACK_LIBRARY})
+  ENDIF(ALPS_BUILD_PYTHON)
 ENDIF(ALPS_HAVE_MPI)
 
   target_link_libraries(dmft_qmc_impl alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
@@ -100,6 +108,9 @@ ENDIF(ALPS_HAVE_MPI)
 IF(ALPS_HAVE_MPI)
   install(TARGETS hybridization RUNTIME DESTINATION bin COMPONENT applications)
   install(TARGETS interaction RUNTIME DESTINATION bin COMPONENT applications)
+  IF(ALPS_BUILD_PYTHON)
+    install(TARGETS cthyb.so LIBRARY DESTINATION lib/pyalps COMPONENT applications)
+  ENDIF(ALPS_BUILD_PYTHON)
 ENDIF(ALPS_HAVE_MPI)
 
 else(LAPACK_FOUND)

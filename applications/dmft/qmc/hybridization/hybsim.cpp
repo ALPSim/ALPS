@@ -50,7 +50,7 @@ hybridization::hybridization(const alps::params &parms, int crank_)
   //initializing updates parameters
   N_meas = parms["N_MEAS"];                                                        //number of updates per measurement
   N_accu = parms["N_ACCU"]|100;                                                    //number of accumulation steps before piping results into ALPS observables (100 is reasonable)
-  N_hist_orders = parms["N_HISTOGRAM_ORDERS"];                                     //number of orders that are measured for the order histogram
+  N_hist_orders = parms["N_HISTOGRAM_ORDERS"]|50;                                  //number of orders that are measured for the order histogram
 
   //initializing measurement parameters
   MEASURE_nnt = parms["MEASURE_nnt"]| 0;                                           //measure density-density correlation function in imaginary time
@@ -89,7 +89,6 @@ void hybridization::sanity_check(const alps::params &parms){
   if(!parms.defined("N_TAU")) throw std::invalid_argument("please specify the parameter N_TAU");
   if(!parms.defined("BETA")) throw std::invalid_argument("please specify parameter BETA for inverse temperature");
   if(!parms.defined("N_MEAS")) throw std::invalid_argument("please specify parameter N_MEAS for measurement interval");
-  if(!parms.defined("N_HISTOGRAM_ORDERS")) throw std::invalid_argument("please specify parameter N_HISTOGRAM_ORDERS for number of orders to be kept in order histogram");
   if(!parms.defined("THERMALIZATION") ||
      !parms.defined("SWEEPS") ||
      !parms.defined("N_ORBITALS") ) throw std::invalid_argument("please specify parameters THERMALIZATION, SWEEPS, and N_ORBITALS");
