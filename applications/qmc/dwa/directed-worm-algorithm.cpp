@@ -39,7 +39,7 @@ void
       out << "\n\n"
           << "\n/*****************************************************************************"
           << "\n*"
-          << "\n* ALPS Project Applications: Directed Worm Algorithm"
+          << "\n* ALPS Project Applications: Directed Worm Algorithm (using NGS scheduler)"
           << "\n*"
           << "\n* Copyright (C) 2012 by Lode Pollet      <pollet@phys.ethz.ch>,"
           << "\n*                       Ping Nang Ma     <pingnang@phys.ethz.ch>,"
@@ -73,11 +73,10 @@ void
       using alps::numeric::operator<<;
       out << "Parameters\n"
           << "==========\n\n"
-          << parms
+          << params
           << "\n\n";
       out << "Simulation\n"
           << "==========\n\n"
-          << "\t Total thermalization sweeps       : " << _total_thermalization_sweeps   << "\n"
           << "\t Total sweeps                      : " << _total_sweeps                  << "\n"
           << "\t Sweep per measurement             : " << _sweep_per_measurement         << "\n"
           << "\t Sweep counter                     : " << _sweep_counter                 << "\n"
@@ -87,9 +86,9 @@ void
           << "\n\n";
       out << "Lattice\n"
           << "=======\n\n"
-          << "Name              : " << static_cast<std::string>(parms["LATTICE"]) << "\n"
-          << "Dimension         : " << dimension()                                << "\n"
-          << "Total Sites/Bonds : " << num_sites() << "\t/\t" << num_bonds()      << "\n"
+          << "Name              : " << params["LATTICE"]                        << "\n"
+          << "Dimension         : " << dimension()                              << "\n"
+          << "Total Sites/Bonds : " << num_sites() << "\t/\t" << num_bonds()    << "\n"
           << "Periodic          : " << is_periodic_ << "\n"
 #ifdef DEBUGMODE
           << "Graph             : " << "\n"
@@ -102,54 +101,50 @@ void
           << "Charge model : " << is_charge_model_ << "\n"
           << "Spin model   : " << is_spin_model_   << "\n"
           << "Site Basis   : " << model().basis().site_basis().name() << "\n"
-          << "unsigned shorts       : " << diagonal_matrix_element.begin()->second[0] << "\n"
+          << "states       : " << diagonal_matrix_element.begin()->second[0] << "\n"
           << "\n\n";
       out << "Measurements\n"
           << "============\n"
           << "Measure Simulation Speed    : " << measure_simulation_speed_    << "\n"
+          << "Measure Winding Number      : " << measure_winding_number_      << "\n"
           << "Measure Local Energy        : " << measure_local_energy_        << "\n"
           << "Measure Local Density       : " << measure_local_density_       << "\n" 
           << "Measure Local Magnetization : " << measure_local_magnetization_ << "\n"
           << "Measure Green's Function    : " << measure_green_function_      << "\n"
           << "Measure Momentum Density    : " << measure_momentum_density_    << "\n"
           << "Measure TOF Image           : " << measure_tof_image_           << "\n"
-          << "Measure Winding Number      : " << measure_winding_number_      << "\n"
           << "\n\n"; 
     }
 
+
 directed_worm_algorithm
-  ::directed_worm_algorithm
-    ( const alps::ProcessList &  processes
-    , const alps::Parameters  &  parameters
-    , int                        processnode
-    )
-    : QMCRun<>(processes, parameters, processnode)
+  ::directed_worm_algorithm(alps::hdf5::archive & ar)
+    : qmcbase<>(ar) 
     // regarding MC simulation
     , _sweep_counter               (0)
     , _sweep_failure_counter       (0)
     , _propagation_counter         (0)
     , _propagation_failure_counter (0)
-    , _total_thermalization_sweeps (parameters.value_or_default("THERMALIZATION",0))
-    , _total_sweeps                (parameters.value_or_default("TOTAL_SWEEPS",10000000))   
-    , _sweep_per_measurement       (parameters.value_or_default("SKIP",1))
+    , _total_sweeps                (this->params.value_or_default("TOTAL_SWEEPS",10000000))   
+    , _sweep_per_measurement       (this->params.value_or_default("SKIP",1))
     // regarding lattice
     , is_periodic_ (std::find((this->lattice().boundary()).begin(), (this->lattice().boundary()).end(), "open") == (this->lattice().boundary()).end())
-    , num_component_momenta_ (1 + static_cast<int>(parameters.value_or_default("MOMENTUM_EXTENT",10)))
+    , num_component_momenta_ (1 + static_cast<int>(this->params.value_or_default("MOMENTUM_EXTENT",10)))
     // regarding worldline
     , wl (num_sites())
     // regarding experiment
-    , finite_tof (is_periodic_ ? false : (0. != static_cast<double>(parameters.value_or_default("time_of_flight",0.))))
+    , finite_tof (is_periodic_ ? false : (0. != static_cast<double>(this->params.value_or_default("time_of_flight",0.))))
     // regarding measurements
-    , measure_simulation_speed_     (parameters.value_or_default("MEASURE[Simulation Speed]",false))
-    , measure_winding_number_       (is_periodic_ ? static_cast<bool>(parameters.value_or_default("MEASURE[Winding Number]",false)) : false)
-    , measure_local_density_        (this->is_charge_model_ ? static_cast<bool>(parameters.value_or_default("MEASURE[Local Density]",false)) : false)
-    , measure_local_density2_       (this->is_charge_model_ ? static_cast<bool>(parameters.value_or_default("MEASURE[Local Density^2]",false)) : false)
-    , measure_local_magnetization_  (this->is_spin_model_ ? static_cast<bool>(parameters.value_or_default("MEASURE[Local Magnetization]",false)) : false)
-    , measure_local_magnetization2_ (this->is_spin_model_ ? static_cast<bool>(parameters.value_or_default("MEASURE[Local Magnetization^2]",false)) : false)
-    , measure_local_energy_         (parameters.value_or_default("MEASURE[Local Energy]",false))
-    , measure_green_function_       (is_periodic_ ? static_cast<bool>(parameters.value_or_default("MEASURE[Green Function]",false)) : false)
-    , measure_momentum_density_     (parameters.value_or_default("MEASURE[Momentum Density]",false))
-    , measure_tof_image_            (finite_tof ? static_cast<bool>(parameters.value_or_default("MEASURE[TOF Image]",false)) : false) 
+    , measure_simulation_speed_     (this->params.value_or_default("MEASURE[Simulation Speed]",false))
+    , measure_winding_number_       (is_periodic_ ? static_cast<bool>(this->params.value_or_default("MEASURE[Winding Number]",false)) : false)
+    , measure_local_density_        (this->is_charge_model_ ? static_cast<bool>(this->params.value_or_default("MEASURE[Local Density]",false)) : false)
+    , measure_local_density2_       (this->is_charge_model_ ? static_cast<bool>(this->params.value_or_default("MEASURE[Local Density^2]",false)) : false)
+    , measure_local_magnetization_  (this->is_spin_model_ ? static_cast<bool>(this->params.value_or_default("MEASURE[Local Magnetization]",false)) : false)
+    , measure_local_magnetization2_ (this->is_spin_model_ ? static_cast<bool>(this->params.value_or_default("MEASURE[Local Magnetization^2]",false)) : false)
+    , measure_local_energy_         (this->params.value_or_default("MEASURE[Local Energy]",false))
+    , measure_green_function_       (is_periodic_ ? static_cast<bool>(this->params.value_or_default("MEASURE[Green Function]",false)) : false)
+    , measure_momentum_density_     (this->params.value_or_default("MEASURE[Momentum Density]",false))
+    , measure_tof_image_            (finite_tof ? static_cast<bool>(this->params.value_or_default("MEASURE[TOF Image]",false)) : false) 
   {
     // lattice enhancement
     using alps::numeric::operator*;
@@ -157,14 +152,14 @@ directed_worm_algorithm
       lattice_vector_.push_back(*(basis_vectors().first + i) * lattice().extent()[i]);
 
     // further initiation of worldlines
-    if (parameters.defined("WORLDLINES"))
-      try {
-        alps::hdf5::archive ar(static_cast<std::string>(parameters["WORLDLINES"]));
-        wl.load(ar);
-      }
-      catch(...) {
-        std::cout << "\"" << static_cast<std::string>(parameters["WORLDLINES"]) << "\" is either non-existent or corrupted.\n";
-      }
+    try {
+      std::string input_worldlines_file = ar.get_filename().substr(0,ar.get_filename().find_last_of(".")) + ".worldlines.h5";
+      alps::hdf5::archive ar(params.value_or_default<std::string>("WORLDLINES", input_worldlines_file));
+      wl.load(ar);
+    }
+    catch(...) {
+      std::cout << "Either I could not find the file that stores the worldlines object, or the file is corrupted.\n";
+    }
 
     // other initialization
     initialize_site_states();
@@ -172,14 +167,14 @@ directed_worm_algorithm
     initialize_lookups();
     initialize_measurements();
 
-    if (parameters.defined("MEASUREMENTS"))
-      try {
-        alps::hdf5::archive ar(static_cast<std::string>(parameters["MEASUREMENTS"]));
-        ar >> alps::make_pvp("/simulation/results", measurements);
-      }
-      catch(...) {
-        std::cout << "\"" << static_cast<std::string>(parameters["MEASUREMENTS"]) << "\" is either non-existent or corrupted.\n";
-      }
+    try {
+      std::string input_measurements_file = ar.get_filename().substr(0,ar.get_filename().find_last_of(".")) + ".measurements.h5";
+      alps::hdf5::archive ar(params.value_or_default<std::string>("MEASUREMENTS", input_measurements_file));
+      ar >> alps::make_pvp("/simulation/results", measurements);
+    }
+    catch(...) {
+      std::cout << "Either I could not find the file that stores the measurements object, or the file is corrupted.\n";
+    }
 
     // regarding caches
 #ifdef HEATBATH_ALGORITHM
@@ -191,14 +186,36 @@ directed_worm_algorithm
     _neighborlocations_cache.reserve(maximum_num_neighbors);
     _cummulative_weights_cache.reserve(maximum_num_neighbors+1);
 #endif
+
+    // print to screen
+    print_simulation (std::cout);
+#ifdef DEBUGMODE
+    print_hamiltonian(std::cout);
+    print_lookups    (std::cout);
+    print_worldline  (std::cout);
+#endif
+
+    // start timer if needed...
+    if (measure_simulation_speed_)
+      std::time(&_simulation_timer.first);
   }
+
 
 void
   directed_worm_algorithm
     ::save(alps::hdf5::archive & ar) const
     {
+      // Worldlines
       ar << alps::make_pvp("/simulation/worldlines/num_sites", num_sites()); 
       ar << alps::make_pvp("/simulation/worldlines", wl);
+
+      // Parameters
+      ar << alps::make_pvp("/parameters", params);
+
+      // Simulation results
+      ar << alps::make_pvp("/simulation/results", measurements);
+
+      // Other useful quantities
       ar << alps::make_pvp("/simulation/positions", position_lookup);
       if (measure_green_function_)
         ar << alps::make_pvp("/simulation/green_coordinates", lattice().distance_labels());
@@ -206,19 +223,15 @@ void
         ar << alps::make_pvp("/simulation/momenta", component_momenta_lookup);
     }
 
-void
+void 
   directed_worm_algorithm
-    ::start()
-    {
-      print_simulation (std::cout);
-#ifdef DEBUGMODE
-      print_hamiltonian(std::cout);
-      print_lookups    (std::cout);
-      print_worldline  (std::cout);
-#endif
+    ::load(alps::hdf5::archive & ar)  
+    {  
+      // Worldlines
+      ar >> alps::make_pvp("/simulation/worldlines", wl); 
 
-      if (measure_simulation_speed_)
-        std::time(&_simulation_timer.first);
+      // Measurements
+      ar >> alps::make_pvp("/simulation/results", measurements);
     }
 
 void
@@ -346,7 +359,7 @@ void
       // phase and phase lookup table
       if (finite_tof)
       {
-        std::vector<double> inverse_tof = std::vector<double>(dimension(), 1./static_cast<double>(parms["time_of_flight"]));
+        std::vector<double> inverse_tof = std::vector<double>(dimension(), 1./static_cast<double>(params["time_of_flight"]));
         phase_lookup.reserve(num_sites());
         for (unsigned int site=0; site<num_sites(); ++site) 
           phase_lookup.push_back(std::inner_product(inverse_tof.begin(), inverse_tof.end(), (alps::numeric::sq(position(site))).begin(), 0.));
@@ -404,70 +417,70 @@ void
     {
       // regarding measurements
       measurements 
-        << alps::IntTimeSeriesObservable    ("Total Particle Number")      // The entire time series is stored for thermalization indication
-        << alps::IntObservable              ("Total Particle Number^2")
-        << alps::RealObservable             ("Density")
-        << alps::RealObservable             ("Density^2")
-        << alps::RealObservable             ("Hopping Energy")
-        << alps::RealObservable             ("Onsite Energy")
-        << alps::RealObservable             ("Energy")
-        << alps::RealObservable             ("Energy^2")
-        << alps::RealObservable             ("Hopping Energy Density")
-        << alps::RealObservable             ("Onsite Energy Density")
-        << alps::RealObservable             ("Energy Density")
-        << alps::RealObservable             ("Energy Density^2")
+        << alps::ngs::RealObservable   ("Total Particle Number")
+        << alps::ngs::RealObservable   ("Total Particle Number^2")
+        << alps::ngs::RealObservable   ("Density")
+        << alps::ngs::RealObservable   ("Density^2")
+        << alps::ngs::RealObservable   ("Hopping Energy")
+        << alps::ngs::RealObservable   ("Onsite Energy")
+        << alps::ngs::RealObservable   ("Energy")
+        << alps::ngs::RealObservable   ("Energy^2")
+        << alps::ngs::RealObservable   ("Hopping Energy Density")
+        << alps::ngs::RealObservable   ("Onsite Energy Density")
+        << alps::ngs::RealObservable   ("Energy Density")
+        << alps::ngs::RealObservable   ("Energy Density^2")
       ;
 
       if (measure_winding_number_)
-        measurements << alps::RealVectorObservable ("Winding Number^2");
+        measurements << alps::ngs::RealVectorObservable ("Winding Number^2");
 
       if (measure_local_density_)
-        measurements << alps::SimpleRealVectorObservable ("Local Density");
+        measurements << alps::ngs::SimpleRealVectorObservable ("Local Density");
 
       if (measure_local_density2_)
-        measurements << alps::SimpleRealVectorObservable ("Local Density^2");
+        measurements << alps::ngs::SimpleRealVectorObservable ("Local Density^2");
 
       if (measure_local_magnetization_)
-        measurements << alps::SimpleRealVectorObservable  ("Local Magnetization");
+        measurements << alps::ngs::SimpleRealVectorObservable  ("Local Magnetization");
    
       if (measure_local_magnetization2_)
-        measurements << alps::SimpleRealVectorObservable  ("Local Magnetization^2");
+        measurements << alps::ngs::SimpleRealVectorObservable  ("Local Magnetization^2");
 
       // regarding on-fly measurements
       reinitialize_on_fly_measurements();
 
       measurements
-        << alps::RealObservable  ("Green's Function Onsite")
-        << alps::RealObservable  ("Green's Function Neighbors")
-        << alps::RealObservable  ("Zero Momentum Density")
+        << alps::ngs::RealObservable  ("Green's Function Onsite")
+        << alps::ngs::RealObservable  ("Green's Function Neighbors")
+        << alps::ngs::RealObservable  ("Zero Momentum Density")
         ;
 
       if (measure_green_function_)
       {
         green.resize(lattice().num_distances(),0.);
-        measurements << alps::SimpleRealVectorObservable ("Green's Function");
+        measurements << alps::ngs::SimpleRealVectorObservable ("Green's Function");
       }
 
       if (measure_momentum_density_)
       {
         momentum_density.resize(num_component_momenta(),0.);
-        measurements << alps::SimpleRealVectorObservable ("Momentum Density");
+        measurements << alps::ngs::SimpleRealVectorObservable ("Momentum Density");
       }
 
       if (finite_tof)
       {
-        measurements << alps::RealObservable  ("Zero TOF Image");
+        measurements << alps::ngs::RealObservable  ("Zero TOF Image");
 
         if (measure_green_function_)
         {
           green_tof.resize(lattice().num_distances(),0.);
-          measurements << alps::SimpleRealVectorObservable ("TOF Green's Function");
+          measurements << alps::ngs::SimpleRealVectorObservable ("TOF Green's Function");
         }
 
         if (measure_tof_image_)
         {
           momentum_density_tof.resize(num_component_momenta(),0.);
-          measurements << alps::SimpleRealVectorObservable ("TOF Image");
+          measurements << alps::ngs::SimpleRealVectorObservable ("TOF Image");
         }
       }
     }
@@ -511,7 +524,7 @@ std::vector<double>
       {
         alps::Parameters this_parms;
         if(inhomogeneous_sites()) {
-          alps::throw_if_xyz_defined(parms,this_site_type);      // check whether x, y, or z is set
+          alps::throw_if_xyz_defined(this_copy_of_params_is_reserved_for_the_old_scheduler_library_which_is_to_be_depreciated,this_site_type);      // check whether x, y, or z is set
           this_parms << coordinate_as_parameter(this_site_type); // set x, y and z
         }
         boost::multi_array<double,2> this_onsite_matrix =
@@ -535,7 +548,7 @@ inline boost::multi_array<double,4>
     {
       alps::Parameters this_parms;
       if(inhomogeneous_bonds()) {
-        alps::throw_if_xyz_defined(parms,bond);      // check whether x, y, or z is set
+        alps::throw_if_xyz_defined(this_copy_of_params_is_reserved_for_the_old_scheduler_library_which_is_to_be_depreciated,bond);      // check whether x, y, or z is set
         this_parms << coordinate_as_parameter(bond); // set x, y and z
       }
 
@@ -562,13 +575,13 @@ boost::tuple<std::vector<double>, std::vector<double>, std::vector<double>, std:
       this_targetsite_oneup_hamiltonian  .resize(target_num_states);
       this_targetsite_onedown_hamiltonian.resize(target_num_states);
 
-      std::set<std::string> site_operators = model().bond_term(bond_type(bond)).operator_names(parms);
+      std::set<std::string> site_operators = model().bond_term(bond_type(bond)).operator_names(this_copy_of_params_is_reserved_for_the_old_scheduler_library_which_is_to_be_depreciated);
 
       for (std::set<std::string>::iterator site_operator_it = site_operators.begin(); site_operator_it != site_operators.end(); ++site_operator_it)
       {
         alps::Parameters this_parms;
         if(inhomogeneous_bonds()) {
-          alps::throw_if_xyz_defined(parms,bond);      // check whether x, y, or z is set
+          alps::throw_if_xyz_defined(this_copy_of_params_is_reserved_for_the_old_scheduler_library_which_is_to_be_depreciated,bond);      // check whether x, y, or z is set
           this_parms << coordinate_as_parameter(bond); // set x, y and z
         }
         boost::multi_array<double,2> this_sourcesite_operator_matrix 
@@ -615,7 +628,7 @@ double
 
 void
   directed_worm_algorithm
-    ::dostep()
+    ::update()
     {
       ++_sweep_counter;
 #ifdef DEBUGMODE
@@ -657,7 +670,7 @@ void
       } 
 
       const bool checkpoint_sweep = (_sweep_counter % _sweep_per_measurement == 0);
-      const bool _measure = (is_thermalized() && !measure_simulation_speed_);
+      const bool _measure = (!measure_simulation_speed_);
 
       // Step 1B: Check state to see if we can insert wormpair 
       const unsigned short _state = wl.state_before(_location);
@@ -835,8 +848,8 @@ void
                 << " ... E = " << total_energy
                 ;
 
-      measurements["Total Particle Number"]     << total_density;
-      measurements["Total Particle Number^2"]   << total_density * total_density;
+      measurements["Total Particle Number"]     << static_cast<double>(total_density);
+      measurements["Total Particle Number^2"]   << static_cast<double>(total_density * total_density);
       measurements["Density"]                   << static_cast<double>(total_density)/num_sites();
       measurements["Density^2"]                 << static_cast<double>(total_density2)/num_sites();
       measurements["Hopping Energy"]            << total_hopping_energy;
@@ -858,39 +871,39 @@ void
           for (int i=0; i<dimension(); ++i)
             winding_number[i] += net_number * vec[i];
         }
-        measurements["Winding Number^2"]        << alps::numeric::vector2valarray(alps::numeric::sq(winding_number));
+        measurements["Winding Number^2"]         << alps::numeric::sq(std::vector<double>(winding_number.begin(), winding_number.end()));
       }      
 
       if (measure_local_density_)
-        measurements["Local Density"]             << alps::numeric::vector2valarray(wl.states());
+        measurements["Local Density"]            << std::vector<double>(wl.states().begin(), wl.states().end());
 
       if (measure_local_density2_)
-        measurements["Local Density^2"]           << alps::numeric::vector2valarray(alps::numeric::sq(wl.states()));
+        measurements["Local Density^2"]          << alps::numeric::sq(std::vector<double>(wl.states().begin(), wl.states().end()));
 
-      if (measure_local_density_)
-        measurements["Local Density"]             << alps::numeric::vector2valarray(wl.states());
+      if (measure_local_magnetization_)
+        measurements["Local Magnetization"]      << std::vector<double>(wl.states().begin(), wl.states().end());
 
-      if (measure_local_density2_)
-        measurements["Local Density^2"]           << alps::numeric::vector2valarray(alps::numeric::sq(wl.states()));
+      if (measure_local_magnetization2_)
+        measurements["Local Magnetization^2"]    << alps::numeric::sq(std::vector<double>(wl.states().begin(), wl.states().end()));
 
       // regarding on-fly measurements
       measurements["Green's Function Onsite"]    << green_onsite/num_sites();
       measurements["Green's Function Neighbors"] << green_neighbors/num_sites();
-      measurements["Zero Momentum Density"]      << zero_momentum_density/(num_sites()*num_sites());
+      measurements["Zero Momentum Density"]      << zero_momentum_density;
 
       if (measure_green_function_)
-        measurements["Green's Function"]         << alps::numeric::vector2valarray(green/num_sites());
+        measurements["Green's Function"]         << green/num_sites();
       if (measure_momentum_density_)
-        measurements["Momentum Density"]         << alps::numeric::vector2valarray(momentum_density/(num_sites()*num_sites()));
+        measurements["Momentum Density"]         << momentum_density;
 
       if (finite_tof)
       {
-        measurements["Zero TOF Image"]           << zero_momentum_density_tof/(num_sites()*num_sites());
+        measurements["Zero TOF Image"]           << zero_momentum_density_tof;
 
         if (measure_green_function_)
-          measurements["TOF Green's Function"]   << alps::numeric::vector2valarray(green_tof/num_sites());
+          measurements["TOF Green's Function"]   << green_tof/num_sites();
         if (measure_tof_image_)
-          measurements["TOF Image"]              << alps::numeric::vector2valarray(momentum_density_tof/(num_sites()*num_sites()));
+          measurements["TOF Image"]              << momentum_density_tof;
       }
     }
 
@@ -1231,30 +1244,34 @@ void
 #endif
     }
 
-
 // ==================================================
 // main 
 // ==================================================
 
 int main(int argc, char** argv)
 {
-#ifndef BOOST_NO_EXCEPTIONS
-  try 
-  {
-#endif
-   return alps::scheduler::start(argc, argv, alps::scheduler::SimpleMCFactory<directed_worm_algorithm>());
-#ifndef BOOST_NO_EXCEPTIONS
+  // read options from command line
+  alps::mcoptions options(argc, argv);
+
+  // initialize simulation and load the parameters from input file
+  alps::hdf5::archive simulation_input = alps::hdf5::archive(options.input_file);
+  directed_worm_algorithm simulation(simulation_input);
+
+  // try loading worldlines and measurement from the input file
+  try {
+    simulation.load(simulation_input);
+    std::cout << "\nSimulation continues from archived...\n";
   }
-  catch (std::exception& exc) 
-  {
-    std::cerr << exc.what() << "\n";
-    alps::comm_exit(true);
-    return -1;
+  catch(...) {
+    std::cout << "\nSimulation starts new and afresh...\n"; 
   }
-  catch (...) 
-  {
-    std::cerr << "Fatal Error: Unknown Exception!\n";
-    return -2;
-  }
-#endif
+ 
+  // run the simulation
+  simulation.run(boost::bind(&alps::stop_callback, options.time_limit));
+
+  // save worldlines and measurement to output file
+  alps::hdf5::archive simulation_output = alps::hdf5::archive(options.output_file, 'a');
+  simulation.save(simulation_output);
+
+  return 0;
 }

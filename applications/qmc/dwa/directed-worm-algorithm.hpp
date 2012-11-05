@@ -25,8 +25,8 @@
 *
 *****************************************************************************/
 
-#ifndef DIRECTED_WORM_ALGORITHM_HPP
-#define DIRECTED_WORM_ALGORITHM_HPP
+#ifndef DIRECTED_WORM_ALGORITHM_NGS_HPP
+#define DIRECTED_WORM_ALGORITHM_NGS_HPP
 
 
 #include <cassert>
@@ -47,41 +47,38 @@
 #include <boost/lambda/lambda.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#include <alps/alea.h>
 #include <alps/numeric/vector_functions.hpp>
-#include <alps/osiris/comm.h>
+#include <alps/numeric/vector_valarray_conversion.hpp>
 
 #include "worldlines.hpp"
 
-#include "../qmc.h"
+#include "../qmc.ngs.h"
 
 
 class directed_worm_algorithm  
-  : public QMCRun<>     
+  : public qmcbase<>     
 {
 public:
   typedef boost::uint64_t                count_type;
   typedef worldlines::location_type      location_type;
 
-  directed_worm_algorithm
-    ( const alps::ProcessList &  processes
-    , const alps::Parameters  &  parameters
-    , int                        processnode
-    );
+  directed_worm_algorithm(alps::hdf5::archive & ar);
 
   static void print_copyright  (std::ostream & out);
   void        print_simulation (std::ostream & out);
 
-private:
-  /// private member functions 
-
   // i/o
   void save(alps::hdf5::archive & ar) const;
-  void load(alps::hdf5::archive & ar)  {  ar >> alps::make_pvp("/simulation/worldlines", wl); }
+  void load(alps::hdf5::archive & ar);
+
+
+private:
+
+  /// private member functions 
 
   // regarding simulation backbone (ESSENTIAL)
-  void  start();          
-  void  dostep();     
+  void  update();
+  void  measure() {}  // I don't measure every sweep, and I do a checkpoint rather then only measure.      
   void  docheckpoint(bool const & measure_);
 
   // regarding simulation interprocess (ESSENTIAL)
@@ -90,8 +87,7 @@ private:
   void   delete_relink_jump_or_bounce (std::pair<neighbor_iterator, neighbor_iterator> const & neighbors_);
 
   // regarding simulation performance 
-  bool   is_thermalized()  const         {  return _sweep_counter >= _total_thermalization_sweeps;  }
-  double work_done()       const         {  return (is_thermalized() ? (_sweep_counter - _total_thermalization_sweeps)/double(_total_sweeps) : 0.);  }
+  double fraction_completed()          const  {  return static_cast<double>(_sweep_counter)/double(_total_sweeps);  }
   double probability_worm_insertion()  const  {  return (1. - static_cast<double>(_sweep_failure_counter)/_sweep_counter);         }
   double probability_bounce()          const  {  return (static_cast<double>(_propagation_failure_counter)/_propagation_counter);  }
 
@@ -139,7 +135,6 @@ private:
   // regarding measurements
   void initialize_measurements(); 
   void perform_diagonal_measurements();
-  void print_measurements(std::ostream & out);
 
   // regarding on fly measurements
   void reinitialize_on_fly_measurements();
@@ -153,7 +148,6 @@ private:
   count_type  _propagation_counter;
   count_type  _propagation_failure_counter;
 
-  count_type  _total_thermalization_sweeps;
   count_type  _total_sweeps;
   count_type  _sweep_per_measurement;
 
@@ -216,5 +210,4 @@ private:
   std::vector<double>         _cummulative_weights_cache; 
 #endif
 };
-
 #endif
