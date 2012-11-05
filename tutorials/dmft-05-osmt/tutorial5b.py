@@ -49,7 +49,7 @@ for cp in coulombparam:
               'N_MEAS'              : 10000,
               'N_ORDER'             : 50,
               'SEED'                : 0,
-              'SOLVER'              : 'Hybridization',
+              'SOLVER'              : 'hybridization',
               'SYMMETRIZATION'      : 1,
               'SWEEPS'              : 100000000,
               'BETA'                : 30,

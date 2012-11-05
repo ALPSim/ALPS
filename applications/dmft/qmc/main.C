@@ -115,7 +115,6 @@ int main(int argc, char** argv)
         }
         else {
             /*boost::filesystem::path*/ std::string p(parms["SOLVER"]/**/);
-          
           solver_ptr.reset(new ExternalSolver(/*boost::filesystem::absolute(*/p/*)*/));
           selfconsistency_loop(parms, *solver_ptr, transform);
         }
@@ -178,6 +177,7 @@ int main(int argc, char** argv)
           {
             std::string p(parms["SOLVER"]);
             std::cout<<"using external solver: "<<p<<std::endl;
+            if(parms["SOLVER"]=="hybridization") parms["SC_WRITE_DELTA"]=1; //we need the hybridization function for this solver
             solver_ptr.reset(new ExternalSolver(p));
           }
         selfconsistency_loop_omega(parms, *solver_ptr, *transform_ptr);
@@ -190,6 +190,10 @@ int main(int argc, char** argv)
       std::ofstream os(argv[1]);
       os<<parms;
       os.close();
+    }
+    {
+      alps::hdf5::archive os(std::string(argv[1])+".h5", "a");
+      os<<alps::make_pvp("/parameters",parms);
     }
 #ifndef BOOST_NO_EXCEPTIONS
   }

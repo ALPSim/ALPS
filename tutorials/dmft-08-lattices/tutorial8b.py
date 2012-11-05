@@ -56,7 +56,7 @@ for u in [4.]:
                 'SWEEPS' : 100000000,    # max. number of sweeps in a single iteration
                 'THERMALIZATION' : 1000, # number of thermalization sweeps
                 'SEED' : 0,              # random seed
-                'SOLVER' : "Hybridization",   # we take the Hybridization1 impurity solver
+                'SOLVER' : "hybridization",   # we take the Hybridization1 impurity solver
                 'N_MEAS' : 10000,           # number of Monte Carlo steps between measurements
                 'N_ORDER' : 50,             # histogram size
                 'TWODBS' : 1,     # the Hilbert transformation integral runs in k-space, sets square lattice

@@ -188,6 +188,7 @@ void selfconsistency_loop_omega(alps::Parameters& parms, MatsubaraImpuritySolver
   FourierTransformer::generate_transformer(parms, fourier_ptr);    // with H
   double max_diff=0.;	
   int iteration_ctr = 0;
+  parms["initial"]=1; //for correct treatment of H and H_INIT in solver.solve_omega
   do {
     iteration_ctr++;
     std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
@@ -195,7 +196,7 @@ void selfconsistency_loop_omega(alps::Parameters& parms, MatsubaraImpuritySolver
     G0_omega_old = G0_omega;
     G0_tau_old = G0_tau;
     std::cout<<"running solver."<<std::endl<<std::flush;
-    boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega,parms);
+    boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega,parms); //uses H or H_INIT for FT of Delta
     G_tau = hilbert.symmetrize(G_tau, symmetrization);
     G_omega = hilbert.symmetrize(G_omega, symmetrization);
     std::cout<<"running Hilbert transform"<<std::endl<<std::flush;
@@ -232,6 +233,7 @@ void selfconsistency_loop_omega(alps::Parameters& parms, MatsubaraImpuritySolver
       <<max_diff<<"\t(convergency criterion: "<<converged<<")"<<std::endl<<std::flush;
     }
     print_all_green_functions(basename, iteration_ctr, G0_omega_old, G_omega, G0_tau_old, G_tau, beta);
+    parms["initial"]=0;
   }while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);           
   // write G0 (to be read as an input Green function)
   G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());

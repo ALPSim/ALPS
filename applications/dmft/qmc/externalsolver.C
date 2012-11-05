@@ -121,12 +121,14 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
       double N=p["NMATSUBARA"];
       double N_tau=p["N"];
       double U=p["U"];
+      double h = ((bool)p["initial"] && parms.defined("H_INIT") ? static_cast<double>(parms["H_INIT"]) : static_cast<double>(parms.value_or_default("H",0.)));
       FFunctionFourierTransformer Fourier(beta , 0, epssqav , n_orbital, 1);
       matsubara_green_function_t Delta_matsubara(N, 1, n_orbital);
       itime_green_function_t Delta_itime(N_tau+1, 1, n_orbital);
       for (int f = 0; f < n_orbital; ++f) {
+        double hsign = f%2 ? h : -h;
         for (int i = 0; i < N; ++i) {
-          Delta_matsubara(i, f) = -1. / G0_omega(i, f) + (std::complex < double >(mu, (2. * i + 1) * M_PI / beta));
+          Delta_matsubara(i, f) = -1. / G0_omega(i, f) + (std::complex < double >(mu+hsign, (2. * i + 1) * M_PI / beta));
         }
       }
       Fourier.backward_ft(Delta_itime, Delta_matsubara);

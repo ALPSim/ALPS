@@ -47,7 +47,7 @@ parms.append(
           'OMEGA_LOOP'          : 1,
           'SEED'                : 0,
           'SITES'               : 1,
-          'SOLVER'              : 'Hybridization',
+          'SOLVER'              : 'hybridization',
           'SYMMETRIZATION'      : 1,
           'U'                   : 3,
           't'                   : 0.707106781186547,

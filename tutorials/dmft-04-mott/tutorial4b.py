@@ -53,7 +53,7 @@ for u in [4.,5.,6.,8.]:
               'OMEGA_LOOP'              : 1,
               'SEED'                    : 0, 
               'SITES'                   : 1,              
-              'SOLVER'                  : 'Hybridization',
+              'SOLVER'                  : 'hybridization',
               'SYMMETRIZATION'          : 1,
               't'                       : 1,
               'SWEEPS'                  : 100000000,

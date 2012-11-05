@@ -51,7 +51,7 @@ for b in [6.,8.,10.,12.,14.,16.]:
               'OMEGA_LOOP'          : 1,
               'SEED'                : 0,
               'SITES'               : 1,
-              'SOLVER'              : 'Hybridization',
+              'SOLVER'              : 'hybridization',
               'SYMMETRIZATION'      : 0,
               'U'                   : 3,
               't'                   : 0.707106781186547,
