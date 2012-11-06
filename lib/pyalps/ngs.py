@@ -72,112 +72,58 @@ from pyngsapi_c import collectResults, saveResults
 
 from pyngshdf5_c import hdf5_archive_impl
 
+from pyngshdf5_c import register_archive_exception_type
+
+class ArchiveError(Exception): pass
+register_archive_exception_type(0, ArchiveError)
+
+class ArchiveNotFound(ArchiveError, IOError): pass
+register_archive_exception_type(1, ArchiveNotFound)
+
+class ArchiveClosed(ArchiveError, ValueError): pass
+register_archive_exception_type(2, ArchiveClosed)
+
+class InvalidPath(ArchiveError, SyntaxError): pass
+register_archive_exception_type(3, InvalidPath)
+
+class PathNotFound(ArchiveError, LookupError): pass
+register_archive_exception_type(4, PathNotFound)
+
+class WrongType(ArchiveError, TypeError): pass
+register_archive_exception_type(5, WrongType)
+
+del register_archive_exception_type
+
+#TODO: move to hdf5 module
 class archive(hdf5_archive_impl):
     def __init__(self, filename, mode = 'r'):
         hdf5_archive_impl.__init__(self, filename, mode)
 
-    def __str__(self,path="/"):
+    def __enter__(self, *args, **kwargs):
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        self.close()
+        return self
+
+    def xml(self, path="/"):
+        """
+        Returns an XML formatted string of the archive.
+        This function still needs to have attributes implemented.
+        """
+        if self.closed: raise BaseException("I/O operation on closed file") #TODO: make archive_closed / ArchiveIOException("I/O operation on closed file")
         if self.is_group(path):
             ret = ""
             for child in self.list_children(path):
                 ret += "<%s>\n" % child
-                ret += self.__str__(path+("" if path[-1] == "/" else "/" )+child) 
+                ret += self.as_xml(path+("" if path[-1] == "/" else "/" )+child)
                 ret += "\n</%s>" % child
             return ret
         else:
             return "%s" %(str(self[path]))
 
-# TODO: how do we handle the save functions? should we move close/closed to c++?
-#class ArchiveIOException(IOError):
-#    pass
-#
-## TODO: export hdf5archive errors from c++
-#class ArchivePathException(ArchiveIOException):
-#    def __init__(self, msg, path):
-#        super(ArchivePathException,self).__init__(msg)
-#        self.path = path
-#
-## TODO: either do hdf5.archive or renmae it to hdf5Archive
-#class archive:
-#    def __init__(self, filename, mode = "r", *args, **kwargs):
-#        """
-#        Opens an archive in specified mode. If no mode is specified 'r'
-#        is used as default.
-#        """
-#        self._archive = hdf5_archive_impl(filename, mode, *args, **kwargs)
-#
-#        def wrapper(name):
-#            def f(*args, **kwargs):
-#                if self.closed: raise ArchiveIOException("I/O operation on closed file")
-#                return getattr(self._archive, name)(*args, **kwargs)
-#            return f
-#        
-#        excp = [] #["__setitem__", "__getitem__"]
-#        for name in dir(self._archive):
-#            if name.startswith("_") and name not in excp: continue
-#            setattr(self, name, wrapper(name) )
-#
-#    @property
-#    def closed(self):
-#        """
-#        Property to check whether the file is open or closed.
-#        """
-#        return self._archive is None
-#
-#    def __getitem__(self, path):
-#        """
-#        The getter of the archive is a work around for the missing C++
-#        implementation of the exceptions. 
-#        TODO: 
-#        """
-#        try:
-#            return self._archive[path]
-#        except:
-#            raise ArchivePathException("could not read '%s'"%path, path)
-#
-#    def __setitem__(self, path, value):
-#        """
-#        The setter of the archive is a work around for the missing C++
-#        implementation of the exceptions.  
-#        TODO: 
-#        """
-#        try:
-#            self._archive[path] = value
-#        except:
-#            raise ArchivePathException("no write access to '%s'"%path, path)
-#
-#    def close(self):
-#        """
-#        Closes the archive.
-#        """
-#        del self._archive
-#        self._archive = None
-#
-#    def __enter__(self, *args, **kwargs):
-#        return self
-#
-#    def __exit__(self, *args, **kwargs):
-#        self.close()
-#        return self
-#
-#    def xml(self,path="/"):
-#        """
-#        Returns an XML formatted string of the archive.         
-#        This function still needs to have attributes implemented.
-#        """
-#        if self.closed: ArchiveIOException("I/O operation on closed file")
-#        if self._archive.is_group(path):
-#            ret = ""
-#            for child in self._archive.list_children(path):
-#                ret += "<%s>\n" % child
-#                ret += self.as_xml(path+("" if path[-1] == "/" else "/" )+child) 
-#                ret += "\n</%s>" % child
-#            return ret
-#        else:
-#            return "%s" %(str(self._archive[path]))
-
+# TODO: remove this in future
 import warnings
 def h5ar(*args, **kwargs):
     warnings.warn("The object 'h5ar' is deprecated and will be removed. Use 'archive' instead.", DeprecationWarning)
     return archive(*args, **kwargs)
-
