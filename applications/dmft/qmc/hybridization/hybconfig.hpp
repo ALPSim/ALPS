@@ -44,6 +44,8 @@ public:
   double hyb_weight_change_remove(const segment &new_segment, int orbital);
   void remove_segment(const segment &new_segment, int orbital);
   void remove_antisegment(const segment &new_antisegment, int orbital);
+    
+  void dump();
 
   void measure_G(std::vector<std::vector<double> > &G, double sign) const;
   void measure_Gw(std::vector<std::vector<double> > &Gwr,std::vector<std::vector<double> > &Gwi,std::vector<std::vector<double> > &Fwr,std::vector<std::vector<double> > &Fwi, const std::vector<std::map<double,double> > &F_prefactor, double sign) const;

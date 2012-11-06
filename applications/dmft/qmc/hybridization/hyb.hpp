@@ -82,12 +82,14 @@ private:
   void shift_segment_update();
   void insert_remove_segment_update();
   void insert_remove_antisegment_update();
+  void insert_remove_spin_flip_update();
 
   //details of update routines
   void insert_segment_update(int orbital);
   void remove_segment_update(int orbital);
   void insert_antisegment_update(int orbital);
   void remove_antisegment_update(int orbital);
+  void spin_flip_update(int orbital);
 
   //algorithm parameters
   uint64_t sweeps;
@@ -112,6 +114,7 @@ private:
   std::size_t N_w_aux;//number of Matsubara frequency points for the measurment of M(w1,w2)
   std::size_t N_hist_orders;
   std::size_t N_nn;
+  bool spin_flip;
   bool MEASURE_nnt;
   bool MEASURE_nnw;
   bool MEASURE_nn;

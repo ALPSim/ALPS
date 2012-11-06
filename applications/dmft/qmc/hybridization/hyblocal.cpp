@@ -668,7 +668,7 @@ void local_configuration::measure_sector_statistics(std::vector<double> &sector_
   //if there are no segments, the state did not change:
   if(states.empty()){
     sector_statistics[full_line_states]+=1.*sign;
-    cout << "no segments! " << full_line_states << endl;
+//    cout << "no segments! " << full_line_states << endl;
   }
   else{
     //otherwise count intervals

@@ -78,7 +78,7 @@ IF(ALPS_HAVE_MPI)
     set_target_properties(cthyb.so PROPERTIES PREFIX "")
     set_target_properties(cthyb.so PROPERTIES SUFFIX "")
     set_target_properties(cthyb.so PROPERTIES COMPILE_FLAGS "-DBUILD_PYTHON_MODULE")
-    target_link_libraries(cthyb.so alps hybridization_impl ${ALPS_LIBRARIES} ${ALPS_LAPACK_LIBRARY} ${LAPACK_LIBRARY})
+    target_link_libraries(cthyb.so alps hybridization_impl ${ALPS_LIBRARIES} ${ALPS_BLAS_LIBRARY} ${BLAS_LIBRARY} ${ALPS_LAPACK_LIBRARY} ${LAPACK_LIBRARY})
   ENDIF(ALPS_BUILD_PYTHON)
 ENDIF(ALPS_HAVE_MPI)
 

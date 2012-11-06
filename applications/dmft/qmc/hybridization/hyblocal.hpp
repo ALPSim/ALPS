@@ -70,6 +70,7 @@ public:
 //  double get_F_prefactor_debug(int f1,int orbital,double cdagger_times_i) const;
 //  double get_occupation(int f1,double tau_1) const;
   double density(int i, double tau) const;
+  double mu(int orbital) {return mu_[orbital];}
   double interaction_density_integral(int i, double tau) const;
   void state_map_segment_insert(state_map &states, const segment &s, int state) const;
   void measure_sector_statistics(std::vector<double> &sector_statistics, double sign) const;

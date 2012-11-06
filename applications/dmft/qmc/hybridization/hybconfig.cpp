@@ -34,6 +34,11 @@ hybridization_configuration::hybridization_configuration(const alps::params &p):
 {
 }
 
+void hybridization_configuration::dump() {
+    for (int i=0;i<hybmat_.size();i++)
+        std::cout << "Weight for orbital " << i << " : " << hybmat_[i].full_weight() << std::endl;
+}
+
 double hybridization_configuration::hyb_weight_change_insert(const segment &new_segment, int orbital){
   return hybmat_[orbital].hyb_weight_change_insert(new_segment, orbital, Delta); //hand this off to the determinant matrix
 }

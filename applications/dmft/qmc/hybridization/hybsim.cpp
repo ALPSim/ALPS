@@ -53,6 +53,7 @@ hybridization::hybridization(const alps::params &parms, int crank_)
   N_hist_orders = parms["N_HISTOGRAM_ORDERS"]|50;                                  //number of orders that are measured for the order histogram
 
   //initializing measurement parameters
+  spin_flip = parms["spin_flip"]| 0;                                           //measure density-density correlation function in imaginary time
   MEASURE_nnt = parms["MEASURE_nnt"]| 0;                                           //measure density-density correlation function in imaginary time
   MEASURE_nnw = parms["MEASURE_nnw"]| 0;                                           //measure density-density correlation function in frequency
   MEASURE_nn = parms["MEASURE_nn"]|0;                                              //measure density-density correlation function at equal times
