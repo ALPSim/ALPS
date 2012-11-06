@@ -62,7 +62,7 @@ class lattice_mcbase
 {
 public:
   lattice_mcbase(alps::hdf5::archive & ar)
-    : mcbase(parameters_type(ar), parameters_type(ar).value_or_default("SEED", 0))
+    : mcbase(parameters_type(ar), parameters_type(ar)["SEED"] | 0)
     , graph_helper<G>(alps::Parameters(ar))  // ALPS Lattice Library is not yet supported by NGS scheduler
     , this_copy_of_params_is_reserved_for_the_old_scheduler_library_which_is_to_be_depreciated(alps::Parameters(ar)) 
   {}
@@ -178,14 +178,14 @@ qmcbase<G,StateType>::qmcbase(alps::hdf5::archive & ar, bool issymbolic)
     is_charge_model_(false),
     measure_local_density_(false),
     measure_local_magnetization_(false),
-    measure_site_type_density_(this->params.value_or_default("MEASURE[Site Type Density]",false)),
+    measure_site_type_density_(this->params["MEASURE[Site Type Density]"] | false),
     measure_local_compressibility_(false),
     measure_site_compressibility_(false),
-    measure_correlations_(this->params.value_or_default("MEASURE[Correlations]",false)),
-    measure_structure_factor_(this->params.value_or_default("MEASURE[Structure Factor]",false)),
-    measure_green_function_(this->params.value_or_default("MEASURE[Green Function]",false)),
-    measure_bond_type_stiffness_(this->params.value_or_default("MEASURE[Bond Type Stiffness]",false)),
-    measure_CBS_order_(this->params.value_or_default("MEASURE[CBS Order]",false)),
+    measure_correlations_(this->params["MEASURE[Correlations]"] | false),
+    measure_structure_factor_(this->params["MEASURE[Structure Factor]"] | false),
+    measure_green_function_(this->params["MEASURE[Green Function]"] | false),
+    measure_bond_type_stiffness_(this->params["MEASURE[Bond Type Stiffness]"] | false),
+    measure_CBS_order_(this->params["MEASURE[CBS Order]"] | false),
     num_site_types_(alps::maximum_vertex_type(this->graph())+1),
     num_bond_types_(alps::maximum_edge_type(this->graph())+1)
 {

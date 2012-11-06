@@ -125,26 +125,26 @@ directed_worm_algorithm
     , _sweep_failure_counter       (0)
     , _propagation_counter         (0)
     , _propagation_failure_counter (0)
-    , _total_sweeps                (this->params.value_or_default("TOTAL_SWEEPS",10000000))   
-    , _sweep_per_measurement       (this->params.value_or_default("SKIP",1))
+    , _total_sweeps                (this->params["TOTAL_SWEEPS"] | 10000000)
+    , _sweep_per_measurement       (this->params["SKIP"] | 1)
     // regarding lattice
     , is_periodic_ (std::find((this->lattice().boundary()).begin(), (this->lattice().boundary()).end(), "open") == (this->lattice().boundary()).end())
-    , num_component_momenta_ (1 + static_cast<int>(this->params.value_or_default("MOMENTUM_EXTENT",10)))
+    , num_component_momenta_ (1 + static_cast<int>(this->params["MOMENTUM_EXTENT"] | 10))
     // regarding worldline
     , wl (num_sites())
     // regarding experiment
-    , finite_tof (is_periodic_ ? false : (0. != static_cast<double>(this->params.value_or_default("time_of_flight",0.))))
+    , finite_tof (is_periodic_ ? false : (0. != static_cast<double>(this->params["time_of_flight"] | 0.)))
     // regarding measurements
-    , measure_simulation_speed_     (this->params.value_or_default("MEASURE[Simulation Speed]",false))
-    , measure_winding_number_       (is_periodic_ ? static_cast<bool>(this->params.value_or_default("MEASURE[Winding Number]",false)) : false)
-    , measure_local_density_        (this->is_charge_model_ ? static_cast<bool>(this->params.value_or_default("MEASURE[Local Density]",false)) : false)
-    , measure_local_density2_       (this->is_charge_model_ ? static_cast<bool>(this->params.value_or_default("MEASURE[Local Density^2]",false)) : false)
-    , measure_local_magnetization_  (this->is_spin_model_ ? static_cast<bool>(this->params.value_or_default("MEASURE[Local Magnetization]",false)) : false)
-    , measure_local_magnetization2_ (this->is_spin_model_ ? static_cast<bool>(this->params.value_or_default("MEASURE[Local Magnetization^2]",false)) : false)
-    , measure_local_energy_         (this->params.value_or_default("MEASURE[Local Energy]",false))
-    , measure_green_function_       (is_periodic_ ? static_cast<bool>(this->params.value_or_default("MEASURE[Green Function]",false)) : false)
-    , measure_momentum_density_     (this->params.value_or_default("MEASURE[Momentum Density]",false))
-    , measure_tof_image_            (finite_tof ? static_cast<bool>(this->params.value_or_default("MEASURE[TOF Image]",false)) : false) 
+    , measure_simulation_speed_     (this->params["MEASURE[Simulation Speed]"] | false)
+    , measure_winding_number_       (is_periodic_ ? static_cast<bool>(this->params["MEASURE[Winding Number]"] | false) : false)
+    , measure_local_density_        (this->is_charge_model_ ? static_cast<bool>(this->params["MEASURE[Local Density]"] | false) : false)
+    , measure_local_density2_       (this->is_charge_model_ ? static_cast<bool>(this->params["MEASURE[Local Density^2]"] | false) : false)
+    , measure_local_magnetization_  (this->is_spin_model_ ? static_cast<bool>(this->params["MEASURE[Local Magnetization]"] | false) : false)
+    , measure_local_magnetization2_ (this->is_spin_model_ ? static_cast<bool>(this->params["MEASURE[Local Magnetization^2]"] | false) : false)
+    , measure_local_energy_         (this->params["MEASURE[Local Energy]"] | false)
+    , measure_green_function_       (is_periodic_ ? static_cast<bool>(this->params["MEASURE[Green Function]"] | false) : false)
+    , measure_momentum_density_     (this->params["MEASURE[Momentum Density]"] | false)
+    , measure_tof_image_            (finite_tof ? static_cast<bool>(this->params["MEASURE[TOF Image]"] | false) : false)
   {
     // lattice enhancement
     using alps::numeric::operator*;
@@ -154,7 +154,7 @@ directed_worm_algorithm
     // further initiation of worldlines
     try {
       std::string input_worldlines_file = ar.get_filename().substr(0,ar.get_filename().find_last_of(".")) + ".worldlines.h5";
-      alps::hdf5::archive ar(params.value_or_default<std::string>("WORLDLINES", input_worldlines_file));
+      alps::hdf5::archive ar(params["WORLDLINES"] | static_cast<std::string>(input_worldlines_file));
       wl.load(ar);
     }
     catch(...) {
@@ -169,7 +169,7 @@ directed_worm_algorithm
 
     try {
       std::string input_measurements_file = ar.get_filename().substr(0,ar.get_filename().find_last_of(".")) + ".measurements.h5";
-      alps::hdf5::archive ar(params.value_or_default<std::string>("MEASUREMENTS", input_measurements_file));
+      alps::hdf5::archive ar(params["MEASUREMENTS"] | static_cast<std::string>(input_measurements_file));
       ar >> alps::make_pvp("/simulation/results", measurements);
     }
     catch(...) {
