@@ -31,8 +31,9 @@
 
 hybridization::hybridization(const alps::params &parms, int crank_)
   : alps::mcbase(parms, crank_),
+  crank(crank_),
   local_config(parms),
-  hyb_config(parms),crank(crank_)
+  hyb_config(parms)
 {
   sanity_check(parms); //before doing anything, check whether the input parameters make sense
   show_info(parms,crank);
