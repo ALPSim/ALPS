@@ -73,7 +73,7 @@ IF(ALPS_HAVE_MPI)
   add_library (hybridization_impl STATIC ${DMFT_QMC_HYBRIDIZATION_SOURCE})
   #Hybridization Expansion - python module
   IF(ALPS_BUILD_PYTHON)
-    add_library (cthyb.so SHARED hybridization/hybmain.cpp)
+    add_library (cthyb.so SHARED hybridization/hybmain.cpp ${DMFT_QMC_HYBRIDIZATION_SOURCE})
     SET (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
     set_target_properties(cthyb.so PROPERTIES PREFIX "")
     set_target_properties(cthyb.so PROPERTIES SUFFIX "")
