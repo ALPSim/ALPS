@@ -50,6 +50,8 @@ public:
   friend std::ostream &operator<<(std::ostream &os, const hybridization &hyb);
 
 private:
+  std::vector<uint64_t> nacc,nprop;
+    bool VERBOSE;
   int crank;
   //initialize all measurements and measurement vectors (with 0)
   void create_measurements();

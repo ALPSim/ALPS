@@ -39,7 +39,9 @@ hybridization::hybridization(const alps::params &parms, int crank_)
   show_info(parms,crank);
 
   //initializing general simulation constants
-  sweeps=0;                                                                       //Sweeps currently done
+    nacc.resize(6);
+    nprop.resize(6);
+    sweeps=0;                                  //Sweeps currently done
   thermalization_sweeps = parms["THERMALIZATION"];                                //Sweeps to be done for thermalization
   total_sweeps = parms["SWEEPS"];                                                 //Sweeps to be done in total
   n_orbitals = parms["N_ORBITALS"];                                               //number of orbitals
@@ -113,6 +115,7 @@ void hybridization::sanity_check(const alps::params &parms){
     if(! (parms["MEASURE_g2w"]|false || parms["MEASURE_h2w"]|false ) ) throw std::invalid_argument("at least one two-particle quantity is required for computing the vertex, set MEASURE_g2w=1 or MEASURE_h2w=1");
     if((int) parms["N_MATSUBARA"] < ((int)parms["N_w2"]/2 + (int)parms["N_W"] - 1) ) throw std::invalid_argument("for computing the vertex, N_MATSUBARA must be at least N_w2/2+N_W-1");
   }
+    VERBOSE = (parms["VERBOSE"]|false);
 
 return;
 }

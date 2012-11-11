@@ -40,28 +40,27 @@ void hybridization::update(){
     for(std::size_t i=0;i<N_meas;++i){
       double update_type=random();
       if(spin_flip){
-	if(update_type < 0.1){
-	  change_zero_order_state_update();
-	}else if(update_type < 0){
-	  shift_segment_update();
-	}else if(update_type < 0.5){
-	  insert_remove_segment_update();
-	}else if(update_type < 0.9){
-	  insert_remove_antisegment_update();
-	}else{
-	  insert_remove_spin_flip_update();
-	}
-      }
-      else{
-	if(update_type < 0.1){
-	  change_zero_order_state_update();
-	}else if(update_type < 0){
-	  shift_segment_update();
-	}else if(update_type < 0.6){
-	  insert_remove_segment_update();
-	}else{
-	  insert_remove_antisegment_update();
-	}
+	    if(update_type < 0.1){
+	      change_zero_order_state_update();
+	    }else if(update_type < 0){
+	      shift_segment_update();
+	    }else if(update_type < 0.5){
+	      insert_remove_segment_update();
+	    }else if(update_type < 0.9){
+	      insert_remove_antisegment_update();
+	    }else {
+	      insert_remove_spin_flip_update();
+	    }
+      } else {
+  	    if(update_type < 0.1){
+	      change_zero_order_state_update();
+	    }else if(update_type < 0){
+	      shift_segment_update();
+	    }else if(update_type < 0.6){
+	      insert_remove_segment_update();
+	    }else{
+	      insert_remove_antisegment_update();
+	    }
       }
       sweeps++;
 
@@ -91,10 +90,23 @@ void hybridization::update(){
       accu_count++;
     }
   }//N_accu
+    if(VERBOSE && sweeps%10000==0 && crank==0) {
+        int tot_acc=0;
+        for (int i=0;i<nacc.size();i++) tot_acc += nacc[i];
+        std::cout << "|------------- Simulation details after " << sweeps << " sweeps ----------|" << std::endl;
+        std::cout << "  Total acceptance rate = " << ((double)tot_acc)/sweeps << std::endl;
+        std::cout << "  Individual aceptance rate for update " << std::endl;
+        for (int i=0;i<nacc.size();i++) {
+            std::cout << "      type " << i << " = " << ((double)nacc[i])/sweeps;
+            std::cout << " (proposal rate = " << ((double)nprop[i])/sweeps << ")" << std::endl;
+        }
+        std::cout << "|-----------------------------------------------------------------|" << std::endl;
+    }
 }
 
 void hybridization::change_zero_order_state_update(){
   //choose the orbital in which we do the update
+  nprop[0]++;
   int orbital=(int)(random()*n_orbitals);
 
   //changing the zero order state only makes sense if we are at zero order.
@@ -104,6 +116,7 @@ void hybridization::change_zero_order_state_update(){
   if(local_config.zero_order_orbital_occupied(orbital)){
     double local_weight_change=1./local_config.local_weight_change(segment(0,beta), orbital, false);
     if(std::abs(local_weight_change)>random()){
+        nacc[0]++;
       local_config.set_zero_order_orbital_occupied(orbital, false);
       if(local_weight_change<0)
         sign*=-1.;
@@ -114,6 +127,7 @@ void hybridization::change_zero_order_state_update(){
     double local_weight_change=local_config.local_weight_change(segment(0,beta), orbital, false);
     //std::cout<<cmagenta<<"local weight change is: "<<local_weight_change<<cblack<<std::endl;
     if(std::abs(local_weight_change)>random()){
+        nacc[0]++;
       local_config.set_zero_order_orbital_occupied(orbital, true);
       if(local_weight_change<0)
         sign*=-1.;
@@ -142,6 +156,7 @@ void hybridization::insert_remove_spin_flip_update(){
 }
 
 void hybridization::insert_segment_update(int orbital){
+    nprop[1]++;
   //std::cout<<clred<<"starting insertion update."<<cblack<<std::endl;
   if(local_config.order(orbital)==0 && local_config.zero_order_orbital_occupied(orbital)) return; //can't insert segment, orbital is fully occuppied.
   double t_start=random()*beta; //start time of a segment
@@ -176,12 +191,14 @@ void hybridization::insert_segment_update(int orbital){
   std::cout<<clred<<"weight change: "<<weight_change<<" l: "<<local_weight_change<<" h: "<<hybridization_weight_change<<" p: "<<permutation_factor<<cblack<<std::endl;*/
   
   if(std::abs(weight_change)>random()){
+      nacc[1]++;
     if(weight_change < 0) sign*=-1.;
     local_config.insert_segment(new_segment, orbital);
     hyb_config.insert_segment(new_segment, orbital);
   }
 }
 void hybridization::remove_segment_update(int orbital){
+    nprop[2]++;
   //std::cout<<clblue<<"starting removal update."<<cblack<<std::endl;
   int k=local_config.order(orbital);
 
@@ -209,12 +226,14 @@ void hybridization::remove_segment_update(int orbital){
     std::cout<<clblue<<"weight change: "<<weight_change<<" l: "<<local_weight_change<<" h: "<<hybridization_weight_change<<" p: "<<permutation_factor<<cblack<<std::endl;
   }*/
   if(std::abs(weight_change)>random()){
+      nacc[2]++;
     if(weight_change < 0) sign*=-1.;
     local_config.remove_segment(segment_to_remove, orbital);
     hyb_config.remove_segment(segment_to_remove, orbital);
   }
 }
 void hybridization::insert_antisegment_update(int orbital){
+    nprop[3]++;
   if(local_config.order(orbital)==0 && !local_config.zero_order_orbital_occupied(orbital)) return; //can't insert an antisegment, orbital is empty.
   double t_start=random()*beta; //start time of the anti segment
   if(local_config.exists(t_start)){ std::cerr<<"rare event, duplicate: "<<t_start<<std::endl; return;} //time already exists.
@@ -250,6 +269,7 @@ void hybridization::insert_antisegment_update(int orbital){
   //std::cout<<clred<<"weight change: "<<weight_change<<" l: "<<local_weight_change<<" h: "<<hybridization_weight_change<<" p: "<<permutation_factor<<cblack<<std::endl;
   
   if(std::abs(weight_change)>random()){
+      nacc[3]++;
     //std::cout<<cred<<"accepting insert antisegment."<<cblack<<std::endl;
     if(weight_change < 0) sign*=-1.;
     local_config.insert_antisegment(new_antisegment, orbital);
@@ -257,7 +277,9 @@ void hybridization::insert_antisegment_update(int orbital){
     //std::cout<<cred<<"done accepting insert antisegment."<<cblack<<std::endl;
   }
 }
+
 void hybridization::remove_antisegment_update(int orbital){
+    nprop[4]++;
   int k=local_config.order(orbital);
   
   if(k==0) return; //no point, this is an empty orbital
@@ -287,6 +309,7 @@ void hybridization::remove_antisegment_update(int orbital){
   //std::cout<<clblue<<"weight change: "<<weight_change<<" l: "<<local_weight_change<<" h: "<<hybridization_weight_change<<" p: "<<permutation_factor<<cblack<<std::endl;
   
   if(std::abs(weight_change)>random()){
+      nacc[4]++;
     //std::cout<<cred<<"accepting remove antisegment."<<cblack<<std::endl;
     if(weight_change < 0) sign*=-1.;
     local_config.remove_antisegment(antisegment, orbital);
@@ -300,16 +323,17 @@ void hybridization::remove_antisegment_update(int orbital){
       Idea: take remove_segment_update and insert_segment_update and combine them so one segment is removed from on orbital (spin up or down) and inserted on the corresponding other_orbital (spin down or up), if the other_orbital is not filled.
      \********************************************************/
 void hybridization::spin_flip_update(int orbital){
+    nprop[5]++;
   int k=local_config.order(orbital);
 
   if(k==0) return; //no point, this is an empty orbital
 
+    int other_orbital=(int)(random()*n_orbitals);
+    if (orbital == other_orbital) return;
   int segment_nr=(int)(random()*k);
-  
+//    for (int segment_nr=0;segment_nr<k;segment_nr++) {
   segment segment_to_flip=local_config.get_segment(segment_nr, orbital);
 
-  int other_orbital=(int)(random()*n_orbitals);
-  if (orbital == other_orbital) return;
     
   double t_next_segment_start=local_config.find_next_segment_start_distance(segment_to_flip.t_start_,other_orbital);
   double t_next_segment_end=local_config.find_next_segment_end_distance(segment_to_flip.t_start_,other_orbital);
@@ -334,20 +358,21 @@ void hybridization::spin_flip_update(int orbital){
   //compute hybridization weight change
   double hybridization_weight_change=1./hyb_config.hyb_weight_change_remove(segment_to_flip, orbital); // from line 187 - remove_segment_update
   double permutation_factor=local_config.order(orbital)/(beta*local_config.find_next_segment_start_distance(segment_to_flip.t_start_,orbital));
-  double weight_change=local_weight_change*hybridization_weight_change*permutation_factor;
-  if (abs(weight_change)>random()) {
-    if (weight_change<0) sign*=-1;
+  double weight_change_1=local_weight_change*hybridization_weight_change*permutation_factor;
+//  if (abs(weight_change)>random()) {
+    if (weight_change_1<0) sign*=-1;
     local_config.remove_segment(segment_to_flip, orbital);
     hyb_config.remove_segment(segment_to_flip, orbital);
-  } else return; // First part of update not accepted, nothing else to do
+//  } else return; // First part of update not accepted, nothing else to do
 // Now let us try the insertion into other_orbital
   segment new_segment(t_start,t_end);
   hybridization_weight_change=hyb_config.hyb_weight_change_insert(new_segment, other_orbital); // from line 157 - insert_segment_update & changed orbital to other_orbital
   permutation_factor=t_next_segment_start*beta/(local_config.order(other_orbital)+1);
-  weight_change=hybridization_weight_change*permutation_factor;
-  if(std::abs(weight_change)>random()){ //Accepted
+  double weight_change_2=hybridization_weight_change*permutation_factor;
+  if(std::abs(weight_change_1*weight_change_2)>random()){ //Accepted
+      nacc[5]++;
 //    std::cout << "Accepted\n";
-    if(weight_change < 0) sign*=-1.;
+    if(weight_change_2 < 0) sign*=-1.;
     local_config.insert_segment(new_segment, other_orbital);
     hyb_config.insert_segment(new_segment, other_orbital);
   } else { //Not accepted, thus restore old configuration
@@ -357,3 +382,4 @@ void hybridization::spin_flip_update(int orbital){
     hyb_config.insert_segment(new_segment, orbital);
   }
 }
+//}
