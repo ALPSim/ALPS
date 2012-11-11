@@ -20,7 +20,7 @@
 \def \sgn {\mathop {\rm sgn}}
 
 
-\bibliographystyle{apsrev}
+%\bibliographystyle{apsrev} %PRODUCES SPURIOUS EMPTY REFERENCE 1 AND 2
 \begin{document}
 \newcommand{\Emanuel}{\href{mailto:gull@pks.mpg.de}{Emanuel }}
 \title{Documentation -- Hybridization Expansion CT-QMC solver\\ version 3.0b1}
@@ -30,23 +30,23 @@
 \author{Hartmut Hafermann}
 \affiliation{\'{E}cole Polytechnique, CNRS, 91128 Palaiseau Cedex, France}
 \author{Philipp Werner}
-\affiliation{Fribourg}
+\affiliation{Department of Physics, University of Fribourg, 1700 Fribourg, Switzerland}
 \date{\today }
 
 \begin{abstract}
-This is the user documentation for the hybridization expansion solver of the ALPS DMFT code. It documents installation, running, and integration of the hybridization code into the ALPS self-consistencies of the ALPS DMFT code. It is designed to be a useful documentation for users, primarily in the LDA+DMFT community.
+This is the user documentation for the hybridization expansion solver of the ALPS DMFT code. It documents installation, running, and integration of the hybridization code into the ALPS self-consistencies of the ALPS DMFT code and the solver's Python interface. It is designed to be a useful documentation for users, primarily in the LDA+DMFT community.
 \end{abstract}
 
 \maketitle
 
 \section{Introduction}
-Welcome! This is the user documentation for the third version of the ALPS\cite{ALPS20} hybridization expansion\cite{Werner06} CT-QMC\cite{Gull11_review} code, written by Emanuel Gull, in collaboration with Hartmut Hafermann and Philipp Werner, based on an earlier version\cite{ALPS_DMFT} by Philipp Werner, Emanuel Gull, Brigitte Surer, and Matthias Troyer. This user documentation is designed to make the program useful for users, in particular users from the LDA+DMFT field, who want to replace their solvers (IPT, Hirsch Fye, other versions of CT-QMC) with the ALPS hybridization code. A basic understanding of impurity models and, where needed, LDA+DMFT is assumed. Knowledge of the inner workings of CT-QMC is not required, and we strive to make the code accessible to users who are not Monte Carlo experts.
+Welcome! This is the user documentation for the third version of the ALPS\cite{ALPS20} hybridization expansion\cite{Werner06} CT-QMC\cite{Gull11_review} code, written by Emanuel Gull, in collaboration with Hartmut Hafermann and Philipp Werner, based on an earlier version\cite{ALPS_DMFT} by Philipp Werner, Emanuel Gull, Brigitte Surer, and Matthias Troyer. This user documentation is designed to make the program useful for users, in particular users from the LDA+DMFT field, who want to replace their solvers (IPT, Hirsch Fye, other versions of CT-QMC) with the ALPS hybridization code. A basic understanding of impurity models, Monte Carlo simulations and, where needed, LDA+DMFT is assumed. Knowledge of the inner workings of CT-QMC is not required, and we strive to make the code accessible to users who are not Monte Carlo experts.
 
 This documentation, as well as version $3$ of the hybridization expansion code, is open source. Bug reports and bug fixes, problem reports, and suggestion for improvements are most welcome.
 
 \section{Prerequisites}
 \subsection{Downloading}
-The hybridization code is included in the compiled ALPS packages as a binary. Release versions and nightly builds are available from \verb#alps.comp-phys.org#. You can find the binary version at \verb#alps-prefix#\verb#/bin#\verb#/hybridization#.
+The hybridization solver is included in the compiled ALPS packages as a binary. Release versions and nightly builds are available from \verb#alps.comp-phys.org#. You can find the binary version at \verb#alps-prefix#\verb#/bin#\verb#/hybridization#.
 \subsection{Building}
 The hybridization expansion code uses several ALPS libraries\cite{ALPS20} and requires ALPS to build. You will therefore need to obtain the source code for ALPS from \href{http://alps.comp-phys.org}{alps.comp-phys.org}, either by downloading a current nightly build or by requesting a subversion account and downloading the svn version of ALPS. The ALPS home page has \href{http://alps.comp-phys.org/mediawiki/index.php/Download_and_install_ALPS_2}{detailed instructions} on how this works. In case of problems building ALPS, the \href{mailto:comp-phys-alps-users@lists.phys.ethz.ch}{ALPS user mailing list} will help you out. If this does not work, please don't hesitate to  contact \Emanuel.
 
@@ -60,37 +60,45 @@ In $ALPS_ROOT/src/alps/ngs/lib/mcoptions.cpp\
  on 62 in mcoptions
 \end{verbatim}
 
-If you have an MPI environment you can also run the code using, {\it e.g.}, \verb#$MPI_RUN_COMMAND # \verb#-np 3 # \verb#$ALPS_PREFIX/# \verb#bin/#\verb#hybridization3# and you'll see the same output three times. \verb#$MPI_RUN_COMMAND# is platform dependent, common options are \verb#mpirun#, \verb#mpiexec#, \verb#openmpirun#, and so on. Consult your MPI manual on what you need to use.
+If you have an MPI environment you can also run the code using, {\it e.g.},
+
+\verb#$MPI_RUN_COMMAND -np 3 $ALPS_PREFIX/ \#
+\verb#bin/hybridization3#
+
+and you'll see the same output three times. \verb#$MPI_RUN_COMMAND# is platform dependent, common options are \verb#mpirun#, \verb#mpiexec#, \verb#openmpirun#, and so on. Consult your MPI manual on what you need to use.
 
 \section{Running the hybridization code}
 
-The input of the solver consists of a parameter file, the hybridization function $\Delta(\tau)$ and optionally, the retarded interaction function $K(\tau)$.
+The input of the solver consists of a parameter file, the hybridization function $\Delta(\tau)$ and optionally, the retarded interaction function $K(\tau)$ and its first derivative $K'(\tau)$.
 
-\subsection{Specifying a parameter file}
-We start with a simple parameter file to solve a single site impurity problem. A minimal parameter file, \verb#hyb1.param#, could look like this:
+\subsection{Using the standalone executable}
+
+\subsubsection{Specifying a parameter file}
+We start with a simple parameter file to solve a single site impurity problem. A minimal parameter file, call it \verb#hyb1.param#, could look like this:
 \begin{verbatim}
 SWEEPS = 100000000
-MAX_TIME=60
+MAX_TIME = 60
 THERMALIZATION = 1000
-SEED=0
+SEED = 0
 N_MEAS = 50
 N_HISTOGRAM_ORDERS = 50
 N_ORBITALS = 2
 U =  5
 MU = 2.5
-N_MATSUBARA = 512
-DELTA="delta.dat"
-N_TAU=1000
+DELTA = "delta.dat"
+N_TAU = 1000
 BETA = 30
 \end{verbatim}
-This is a parameter file for a single impurity Anderson model (two ``orbitals'', i.e. $N_{\text{orb}}=2$, one for spin ``up'' and one for spin ``down'') with $U=5$, $\mu=2.5$, and $\beta=30$ that reads in the parameters from the file \verb#delta.dat#. The energy units are the ones of \verb#delta.dat#. This simulation runs for sixty seconds.
+This is a parameter file for a single impurity Anderson model (two ``orbitals'', i.e. $N_{\text{orb}}=2$, one for spin ``up'' and one for spin ``down'') with $U=5$, $\mu=2.5$, and $\beta=30$ for which the hybridization function will be read from the file \verb#delta.dat#. The energy units are the ones of \verb#delta.dat#. This simulation runs for sixty seconds.
 
-Using the command \verb#p2h5# this parameter file is converted into a hdf5 file:
+Using the command \verb#p2h5# this parameter file is converted into an hdf5 file:
 \begin{verbatim}
 $ALPS_PREFIX/bin/p2h5 hyb1.h5 < hyb1.param
 \end{verbatim}
 
-We can then run the program using this parameter file (make sure this is in a directory with read/write access):
+\subsubsection{Running the solver}
+
+We can then run the program using this parameter file (make sure this is in a directory with read/write access and the file \verb#delta.dat# is present):
 \begin{verbatim}
 $ALPS_PREFIX/bin/hybridization3 hyb1.h5
 \end{verbatim}
@@ -124,7 +132,74 @@ the hybridization function is:
 process 0 starting simulation
 \end{verbatim}
 
-Running the same simulation under MPI will produce additional lines indicating the process number: \verb#process# \verb#1# \verb#starting# \verb#simulation#. After \verb#MAX_TIME# is up or the number of \verb#SWEEPS# have been done, the code exits.
+Running the same simulation under MPI will produce additional lines indicating the process number: \verb#process# \verb#1# \verb#starting# \verb#simulation# and so on. After \verb#MAX_TIME# is up or the number of \verb#SWEEPS# have been done, the code exits. The results will be written to the file \verb#hyb1.out.h5# in this case. The results can also be written in human-readable format by adding the line
+\begin{verbatim}
+TEXT_OUTPUT = 1
+\end{verbatim}
+to the parameter file.
+
+\subsection{Python interface}
+\label{pythoninterface}
+
+If ALPS is built with Python support (parameter \verb#ALPS_BUILD_PYTHON=ON#), the solver is also built as a Python module. It can directly be called from within a Python script. This provides a flexible framework which allows one to easily set up tasks ranging from calculations for multiple parameters to complex selfconsistency schemes.
+
+Basic usage of the Python interface is illustrated by the following script, which repeats the previous example for the standalone executable:
+\begin{verbatim}
+import pyalps.cthyb as cthyb # solver module
+import pyalps.mpi as mpi     # MPI library
+
+f=open("delta.dat","w")
+for i in range(1001):
+  f.write("%i %f %f\n"%(i,-0.5,-0.5))
+f.close()
+
+parms={
+'SWEEPS'              : 100000000,
+'MAX_TIME'            : 60,
+'THERMALIZATION'      : 1000,
+'SEED'                : 0,
+'N_MEAS'              : 50,
+'N_HISTOGRAM_ORDERS'  : 50,
+'N_ORBITALS'          : 2,
+'U'                   : 5,
+'MU'                  : 2.5,
+'N_MATSUBARA'         : 512,
+'DELTA'               : "delta.dat",
+'N_TAU'               : 1000,
+'BETA'                : 30,
+'TEXT_OUTPUT'         : 1
+}
+
+cthyb.solve(parms)
+\end{verbatim}
+
+The first line imports the solver module. Note that importing the MPI library in the second line is mandatory, even if the code is run on a single process. In the next four lines a simple (constant) hybridization function is written to file.
+The parameters are specified in the form of a Python \verb#dict#.
+Finally the solver is invoked by executing the \verb#solve# method of the Python module. The latter takes the parameter dict as an argument. The hybridization function is read from file. Results are written to the file \verb#results.out.h5#. The name (without suffix) can be altered by specifying the parameter \verb#BASENAME#.
+
+The script is executed as follows:
+\begin{verbatim}
+alpspython scriptname.py
+\end{verbatim}
+or using MPI:
+\begin{verbatim}
+mpirun -np 2 alpspython scriptname.py
+\end{verbatim}
+On some machines it may be necessary to use 
+\begin{verbatim}
+mpirun -np 2 bash alpspython scriptname.py
+\end{verbatim}
+instead.
+Note that on some platforms mpirun has to be replaced by a different command to invoke MPI. See your MPI manual for details. 
+
+More advanced examples on how to use the Python framework can be found in the hybridization tutorials within the \verb#/tutorials# directory inside the ALPS installation directory:
+\begin{verbatim}
+/hybridization-01-kondo
+/hybridization-02-retarded-interaction
+/hybridization-03-spinfreezing
+\end{verbatim}
+
+These tutorials illustrate how to run calculations for multiple parameters within a single script, plotting results, implementing a selfconsistency scheme, using the hdf5 interface, performing calculations with retarded interactions and for multiorbital models as well as performing simple computations with the measured observables.
 
 \section{Detailed input description}
 
@@ -296,6 +371,8 @@ The following optional parameters control the different measurements implemented
 
 \item \verb#K_IN_HDF5#=\{0,1\} forces the retarded interaction to be read from an hdf5 archive. Overrides the filename given in \verb#RET_INT_K#.  The data must be stored in the path \verb#/Ret_int_K#. For the format, consult Sec. \ref{k_ret_int}.
 
+\item \verb#BASENAME#=\{\emph{name}\} changes the name of the output file when the Python module is used. The file will be called \emph{name}.out.h5 .
+
 \end{itemize}
 
 \section{Detailed description of measurements}
@@ -399,10 +476,11 @@ The result of a calculation for such a system at half-filling could look as foll
 \begin{verbatim}
 #state |n_1={0,1} n_2={0,1} ...> n_i={0,1}: \
 orbital i {empty,occupied}
-|00> 18.9302%
-|10> 31.0485%
-|01> 31.0745%
-|11> 18.9467%
+#rel weight (in %)
+0	18.9302	|00>
+1	31.0485	|10>
+2	31.0745	|01>
+3	18.9467	|11>
 \end{verbatim}
 To understand this, recall that in the atomic limit (no hybridization), the energy is given by $Un_{\uparrow}n_{\downarrow}-\mu(n_{\uparrow}+n_{\downarrow})$. Hence, at half filling, where $\mu=U/2$, the energy of the singly occupied states is $-\mu$ and hence they are degenerate. The unoccupied and doubly occupied states are degenerate as well, with energy $0$ and $U-2\mu=0$, respectively. Hence their contributions should be equal (within the Monte Carlo error).
 The singly occupied states are lower in energy and so their contribution is higher.
@@ -449,10 +527,12 @@ Due to the possibly large number of observables (frequencies) that have to be me
 In addition, different methods may have different requirements and for these reasons, it is impossible to provide a one-fits-all implementation. However, the advanced user may regard the function \verb#void hybridization::measure_G2w# in the source file \verb#hybmeasurements.cpp# as an API and modify it according to her needs.
 
 The code may also be used to calculate the vertex function of the impurity model, which is defined as
+\begin{widetext}
 \begin{equation}
 \gamma_{ij}(\nu,\nu',\omega) = \frac{G^{(2)}_{ij}(\nu,\nu',\omega) - \beta[G_{i}(\nu+\omega)G_{j}(\nu')\delta_{\omega,0} - \delta_{ij}G_{i}(\nu+\omega)G(\nu')\delta_{\nu\nu'}]}{G_{i}(\nu+\omega)G_{i}(\nu)G_{j}(\nu')G_{j}(\nu'+\omega)}.
 \label{vertexdef}
 \end{equation}
+\end{widetext}
 We provide the measurement of the correlation function
 \begin{equation}
 H^{a}_{ij}(\tau_{1}\tau_{2}\tau_{3}\tau_{4}) \Let \langle n_{a}(\tau_{1})c_{i}(\tau_{1})c^{\dagger}_{i}(\tau_{2})c_{j}(\tau_{3})c^{\dagger}_{j}(\tau_{4})\rangle,
@@ -467,10 +547,37 @@ With text output enabled. the vertex is written to the file \verb#gammaw.dat#, i
 Note that this vertex function is the full (i.e. reducible) vertex of the impurity model. If the irreducible or even fully irreducible vertex is desired, this has to be obtained by inverting a Bethe-Salpeter equation or from inverse Parquet, respectively.
 
 \section{DMFT -- Specifying a self-consistency}
-To run the impurity solver in a DMFT self-consistency, the output $G(\tau)$ has to be input into a self-consistency condition and a hybridization function $\Delta(\tau)$ has to be produced.\cite{Georges96,Kotliar06} In the most simple case, for a DMFT self-consistency for the Bethe lattice with infinite coordination number (resulting in a semicircular density of states), we obtain $\Delta(\tau)=t^2G(\tau)$.
+To run the impurity solver in a DMFT self-consistency, the output $G(\tau)$ has to be input into a self-consistency condition and a hybridization function $\Delta(\tau)$ has to be produced.\cite{Georges96,Kotliar06} In the simplest case, for a DMFT self-consistency for the Bethe lattice with infinite coordination number (resulting in a semicircular density of states), we obtain $\Delta(\tau)=t^2G(\tau)$.
 Note that in our code, both $\Delta$ and $G(\tau)$ are negative for $\tau>0$.
+In practice, more elaborate self-consistency conditions are almost always needed. 
+Some of them are included in the ALPS DMFT framework, but in general they are user provided.
 
-In practice, more elaborate self-consistency conditions are almost always needed. Some of them are included in the ALPS DMFT framework, but in general they are user provided.
+\subsection{ALPS DMFT framework}
+
+The hybridization solver is used in several ALPS tutorials, which illustrate the use of the solver with the ALPS DMFT framework. This comprises the tutorials in the following directories:
+\begin{verbatim}
+dmft-01-intro
+dmft-02-hybridization
+dmft-04-mott
+dmft-05-osmt
+dmft-06-paramagnet/hyb
+dmft-08-lattices
+\end{verbatim}
+within the \verb#tutorials# subdirectory in the ALPS installation directory.
+
+\subsection{Python interface}
+
+Using alpspython together with the Python interface of the solver (the cthyb Python module) provides a very flexible framework for setting up any desired selfconsistency scheme.
+The selfconsistency is thereby implemented within a Python script which can be executed on a parallel machine using MPI.
+Two examples are given in the ALPS tutorials, i.e in the directories
+\begin{verbatim}
+/hybridization-02-retarded-interaction
+\end{verbatim}
+and
+\begin{verbatim}
+/hybridization-03-spinfreezing
+\end{verbatim}
+For how to run these tutorials, refer to Sec. \ref{pythoninterface}.
 
 \section{Specifying measurements}
 The following variables are measured by default:
@@ -498,8 +605,9 @@ If the legendre measurement is enabled, the following variables are measured in 
 These observables are written into a hdf5 file after the simulation exits. The standard hdf5 tools, \verb#h5ls -r# and \verb#h5dump# or \verb#h5dump -d /simulation/results/Sign/mean/value# will give their values.
 
 \section{Analysis and Post-Processing}
-After the simulation exits, the simulation results have to be read in and evaluated. This is best done using one of the many hdf5 tools. The ALPS DMFT framework provides access from \verb#C++#, but python
-tools (\verb#h5py# and similar) also work. Typically, the Green function, its error, and the densities need to be read in and post-processed.
+After the simulation exits, the simulation results have to be read in and evaluated. This is best done using one of the many hdf5 tools. The ALPS DMFT framework provides access from \verb#C++#, but Python
+tools (\verb#h5py# and similar) also work. The hybridization tutorials show how to use the ALPS Python hdf5 interface. Typically, the Green function, its error, and the densities need to be read in and post-processed.
+
 
 \subsection{Elementary checks: Expansion order and Sign problem}
 Each new run of the impurity solver should start with a check of the expansion order and the error on it. Plot the results of \verb#order_histogram_i# including error bars. Does the statistics  look good? is the expansion order reasonable? If there are degenerate orbitals, is their expansion order the same within error bars?
@@ -519,7 +627,7 @@ g_0/mean/error"].value
 Once you trust your Green functions, Fourier transform to frequency and analyze the self energy (which will be used in the self-consistency equations). The self energies are very sensitive.
 
 \subsection{Fourier transforms and high frequency tails}
-To get smooth and correct behavior you may need to use high frequency Fourier transform tricks (see e.g. Ref.~\onlinecite{Gull11_review}). Further information can be found in the references cited in the review chapter X.I.
+To get smooth and correct behavior you may need to use high frequency Fourier transform tricks (see e.g. the review, Ref.~\onlinecite{Gull11_review}). Further information can be found in the references cited in the review chapter X.I.
 
 \subsection{Running MaxEnt}
 The Maximum entropy method, or MaxEnt, is used to analytically continue imaginary frequency or imaginary time data to the real axis to produce spectral functions that are consistent with the imaginary time data within  statistical errors.\cite{Jarrell96} ALPS provides an implementation of a maximum entropy analytic continuation code. Note that MaxEnt is completely uncontrolled: no reliable error bars for the output exist. In addition, small differences in the input data will cause large differences in the output. Because of this, any conclusion drawn from continued data needs to be backed up by data on the imaginary axis, where error bars are available.
@@ -555,7 +663,7 @@ SIGMA_1 = 0.00199036770537
 SIGMA_511 = 3.42643209543e-07
 }
 \end{verbatim}
-\caption{A simple parameter file \label{fig:pfile}}
+\caption{A simple parameter file for the maxent code.\label{pfile}}
 \end{figure*}
 
 
@@ -573,7 +681,7 @@ The following problems are not feasible at the moment:
 \item Problems with non-diagonal hybridization functions
 \item Problems with general, non density-density interactions
 \end{enumerate}
-It is planned to extend the code to the first two type of impurity problems. The second type of impurity problems may be considered at a later stage.
+It is planned to extend the code to the first two types of impurity problems. The second type of impurity problems may be considered at a later stage.
 
 \section{Literature and Further Information}
 \begin{itemize}
@@ -600,8 +708,6 @@ Our simulations used the ALPS open source hybridization expansion code\cite{Wern
 \section{Acknowledgements}
 
 \appendix
-
-
 
 \bibliography{refs.bib}
 \end{document}
