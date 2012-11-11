@@ -25,15 +25,16 @@
  * DEALINGS IN THE SOFTWARE.
  *
  *****************************************************************************/
-
+#include <iomanip>
 #include"hyb.hpp"
 #include"hyblocal.hpp"
 
 //this is the heard of the Monte Carlo procedure: we have the following updates:
 //1: change the zero order state, swap an empty orbital versus a filled one.
 //2: shift an existing segment start- or end-point
-//3: insert a new segment
+//3: insert or remove a new segment
 //4: insert or remove an anti-segment.
+//5: Perform s segment flip between different orbtials.
 //see our review for details of these updates.
 void hybridization::update(){
   for(std::size_t n=0; n<N_accu; ++n){
@@ -90,17 +91,22 @@ void hybridization::update(){
       accu_count++;
     }
   }//N_accu
-    if(VERBOSE && sweeps%10000==0 && crank==0) {
-        int tot_acc=0;
+    if(VERBOSE && sweeps%100000==0 && crank==0) {
+        int tot_acc=0,cur_prec = std::cout.precision();
         for (int i=0;i<nacc.size();i++) tot_acc += nacc[i];
         std::cout << "|------------- Simulation details after " << sweeps << " sweeps ----------|" << std::endl;
-        std::cout << "  Total acceptance rate = " << ((double)tot_acc)/sweeps << std::endl;
+        std::cout << "  Total acceptance rate = " << std::setprecision(2) << std::fixed;
+        std::cout << (((double)tot_acc)/sweeps)*100 << "%" << std::endl;
         std::cout << "  Individual aceptance rate for update " << std::endl;
         for (int i=0;i<nacc.size();i++) {
-            std::cout << "      type " << i << " = " << ((double)nacc[i])/sweeps;
-            std::cout << " (proposal rate = " << ((double)nprop[i])/sweeps << ")" << std::endl;
+            std::cout << "     " << update_type[i] << " = ";
+            std::cout << std::setprecision(2) << std::fixed << (((double)nacc[i])/sweeps)*100 << "%";
+            std::cout << " (proposal rate = ";
+            std::cout << std::setprecision(2) << std::fixed << (((double)nprop[i])/sweeps)*100 << "%)" << std::endl;
         }
         std::cout << "|-----------------------------------------------------------------|" << std::endl;
+        std::cout.unsetf(std::ios_base::fixed);
+        std::cout.precision(cur_prec);
     }
 }
 

@@ -41,6 +41,12 @@ hybridization::hybridization(const alps::params &parms, int crank_)
   //initializing general simulation constants
     nacc.resize(6);
     nprop.resize(6);
+    update_type.push_back("change zero state   ");
+    update_type.push_back("insert segment      ");
+    update_type.push_back("remove segment      ");
+    update_type.push_back("insert anti-segment ");
+    update_type.push_back("remove anti-segment ");
+    update_type.push_back("swap segment        ");
     sweeps=0;                                  //Sweeps currently done
   thermalization_sweeps = parms["THERMALIZATION"];                                //Sweeps to be done for thermalization
   total_sweeps = parms["SWEEPS"];                                                 //Sweeps to be done in total

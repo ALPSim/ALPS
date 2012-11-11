@@ -51,7 +51,8 @@ public:
 
 private:
   std::vector<uint64_t> nacc,nprop;
-    bool VERBOSE;
+  std::vector<std::string> update_type;
+  bool VERBOSE;
   int crank;
   //initialize all measurements and measurement vectors (with 0)
   void create_measurements();
