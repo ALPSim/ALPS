@@ -54,11 +54,7 @@ int main(int argc, char *argv[]) {
     if (options.resume)
         sim.load(params["DUMP"] | "checkpoint");
 
-    boost::thread worker(
-          static_cast<bool(sim_type::*)(boost::function<bool ()> const &)>(&sim_type::run)
-        , boost::ref(sim)
-        , static_cast<boost::function<bool()> >(boost::bind(&stop_callback, options.time_limit))
-    );
+    sim.run(boost::bind(&stop_callback, options.time_limit));
 
     tcpserver server(params["PORT"] | 2485); // TODO: which port should we take?
     server.add_action("progress", boost::bind(&boost::lexical_cast<std::string, double>, boost::bind(&sim_type::fraction_completed, boost::ref(sim))));

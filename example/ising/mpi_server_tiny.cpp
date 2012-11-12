@@ -63,11 +63,7 @@ int main(int argc, char *argv[]) {
     if (options.resume)
         sim.load((params["DUMP"] | "checkpoint"));
 
-    boost::thread thread(
-          static_cast<bool(sim_type::*)(boost::function<bool ()> const &)>(&sim_type::run)
-        , boost::ref(sim)
-        , static_cast<boost::function<bool()> >(boost::bind(&stop_callback, options.time_limit))
-    );
+    sim.run(boost::bind(&stop_callback, options.time_limit));
 
     if (c.rank() > 0) {
 
