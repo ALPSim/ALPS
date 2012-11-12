@@ -28,7 +28,7 @@
 #include "src/ising.hpp"
 
 // TODO: move to ngs.hpp
-#include <alps/ngs/tcpserver.hpp>
+#include <alps/ngs/scheduler/tcpserver.hpp>
 #include <alps/ngs/scheduler/proto/controlthreadsim.hpp>
 
 #include <boost/bind.hpp>
