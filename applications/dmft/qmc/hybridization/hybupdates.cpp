@@ -63,7 +63,7 @@ void hybridization::update(){
 	      insert_remove_antisegment_update();
 	    }
       }
-      sweeps++;
+      nsweeps = ++sweeps;
 
       //these are cheap measurements that should be done every time.
       if(is_thermalized()){
@@ -94,10 +94,10 @@ void hybridization::update(){
     if(VERBOSE && sweeps%100000==0 && crank==0) {
         int tot_acc=0,cur_prec = std::cout.precision();
         for (int i=0;i<nacc.size();i++) tot_acc += nacc[i];
-        std::cout << "|------------- Simulation details after " << sweeps << " sweeps ----------|" << std::endl;
+        std::cout << std::endl << "|------------ Simulation details after " << sweeps << " sweeps -----------|" << std::endl;
         std::cout << "  Total acceptance rate = " << std::setprecision(2) << std::fixed;
         std::cout << (((double)tot_acc)/sweeps)*100 << "%" << std::endl;
-        std::cout << "  Individual aceptance rate for update " << std::endl;
+        std::cout << "  Individual acceptance rate for update " << std::endl;
         for (int i=0;i<nacc.size();i++) {
             std::cout << "     " << update_type[i] << " = ";
             std::cout << std::setprecision(2) << std::fixed << (((double)nacc[i])/sweeps)*100 << "%";

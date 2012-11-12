@@ -35,6 +35,18 @@
 #include "hyblocal.hpp"
 #include "hybconfig.hpp"
 
+
+#ifdef HYB_SIM_MAIN
+std::vector<uint64_t> nacc,nprop;
+uint64_t nsweeps;
+std::vector<std::string> update_type;
+#else
+extern std::vector<uint64_t> nacc,nprop;
+extern uint64_t nsweeps;
+extern std::vector<std::string> update_type;
+#endif
+
+
 class hybridization:public alps::mcbase
 {
 public:
@@ -42,7 +54,6 @@ public:
   hybridization(const alps::params &parms, int crank);
   void sanity_check(const alps::params &parms); //check whether parameters make sense
   void show_info(const alps::params &parms, int crank);
-
   //Monte Carlo update and measurements functions
   void measure();
   void update();
@@ -50,8 +61,8 @@ public:
   friend std::ostream &operator<<(std::ostream &os, const hybridization &hyb);
 
 private:
-  std::vector<uint64_t> nacc,nprop;
-  std::vector<std::string> update_type;
+//  std::vector<uint64_t> nacc,nprop;
+//  std::vector<std::string> update_type;
   bool VERBOSE;
   int crank;
   //initialize all measurements and measurement vectors (with 0)

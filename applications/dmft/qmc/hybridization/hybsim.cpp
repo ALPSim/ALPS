@@ -26,7 +26,11 @@
  * DEALINGS IN THE SOFTWARE.
  *
  *****************************************************************************/
+#ifndef HYB_SIM_MAIN
+#define HYB_SIM_MAIN
+#endif
 
+#include <iomanip>
 #include"hyb.hpp"
 
 hybridization::hybridization(const alps::params &parms, int crank_)
@@ -90,6 +94,26 @@ hybridization::hybridization(const alps::params &parms, int crank_)
   }
   std::cout<<"process " << crank << " starting simulation"<<std::endl;
 }
+
+/*
+void hybridization::print_statistics(std::ostream &output) {
+    int tot_acc=0,cur_prec = output.precision();
+    for (int i=0;i<nacc.size();i++) tot_acc += nacc[i];
+    output << std::endl << "|------------- Simulation details after " << sweeps << " sweeps -----------|" << std::endl;
+    output << "  Total acceptance rate = " << std::setprecision(2) << std::fixed;
+    output << (((double)tot_acc)/sweeps)*100 << "%" << std::endl;
+    output << "  Individual acceptance rate for update " << std::endl;
+    for (int i=0;i<nacc.size();i++) {
+        output << "     " << update_type[i] << " = ";
+        output << std::setprecision(2) << std::fixed << (((double)nacc[i])/sweeps)*100 << "%";
+        output << " (proposal rate = ";
+        output << std::setprecision(2) << std::fixed << (((double)nprop[i])/sweeps)*100 << "%)" << std::endl;
+    }
+    output << "|-----------------------------------------------------------------|" << std::endl;
+    output.unsetf(std::ios_base::fixed);
+    output.precision(cur_prec);
+}
+*/
 
 void hybridization::sanity_check(const alps::params &parms){
 //check whether the input parameters make sense before computing

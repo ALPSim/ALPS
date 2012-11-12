@@ -52,6 +52,21 @@ void evaluate_basics(const alps::results_type<hybridization>::type &results,
       double order=results[order_name.str()].mean<double>();
       sim_file << "orbital " << i << ": " << order << std::endl;
     }
+    {
+      int tot_acc=0,cur_prec = sim_file.precision();
+      for (int i=0;i<nacc.size();i++) tot_acc += nacc[i];
+      sim_file << std::endl << "|------------ Simulation details after " << nsweeps << " sweeps -----------|" << std::endl;
+      sim_file << "  Total acceptance rate = " << std::setprecision(2) << std::fixed;
+      sim_file << (((double)tot_acc)/nsweeps)*100 << "%" << std::endl;
+      sim_file << "  Individual acceptance rate for update " << std::endl;
+      for (int i=0;i<nacc.size();i++) {
+          sim_file << "     " << update_type[i] << " = ";
+          sim_file << std::setprecision(2) << std::fixed << (((double)nacc[i])/nsweeps)*100 << "%";
+          sim_file << " (proposal rate = ";
+          sim_file << std::setprecision(2) << std::fixed << (((double)nprop[i])/nsweeps)*100 << "%)" << std::endl;
+      }
+      sim_file << "|-----------------------------------------------------------------|" << std::endl;
+    }
     sim_file.close();
     std::ofstream obs_file("observables.dat");//equal-time correlators
     for(std::size_t i=0;i<n_orbitals;++i){//replace Green function endpoints by corresponding densities
