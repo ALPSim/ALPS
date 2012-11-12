@@ -355,6 +355,9 @@ The following optional parameters control the different measurements implemented
 \item \verb#MEASURE_sector_statistics#=\{0,1\} controls the measurement of the sector statistics.
 
 \subsubsection{Optional control parameters}
+
+\item \verb#spin_flip#=\{0,1\} specifies whether to perform spin flip updates. In such an update a segment is moved from one orbital to another, if the latter is empty.
+
 \item \verb#COMPUTE_VERTEX#=\{0,1\} specifies whether the reducible impurity vertex function should be calculated. This parameter requires \verb#MEASURE_g2w# or \verb#MEASURE_h2w# or both be set to $1$.
 
 \item \verb#TEXT_OUTPUT#=\{0,1\} specifies if the simulation results should be written to text-files in human-readable format (in addition to the hdf5 output).
