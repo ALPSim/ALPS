@@ -26,6 +26,8 @@
 # 
 # ****************************************************************************
 
+import matplotlib
+mplversion = tuple(int(i) for i in matplotlib.__version__.split('.'))
 import matplotlib.pyplot as plt
 import numpy as np
 from hlist import flatten
@@ -273,13 +275,13 @@ class MplXYPlot_core:
                 if 'show_frame' in self.plt['legend'] and not self.plt['legend']['show_frame']:
                     showframe = False
                 if len(legend_prop) > 0:
-                    if matplotlib.__version__ > 1.:
+                    if mplversion > (1,0,0):
                         plt.legend(loc=legend_loc,prop=FontProperties(legend_prop), frameon=showframe)
                     else:
                         print 'Warning:', 'frameon option not supported with this matplotlib version (%s)' % matplotlib.__version__
                         plt.legend(loc=legend_loc,prop=FontProperties(legend_prop))
                 else:
-                    if matplotlib.__version__ > 1.:
+                    if mplversion > (1,0,0):
                         plt.legend(loc=legend_loc, frameon=showframe)
                     else:
                         print 'Warning:', 'frameon option not supported with this matplotlib version (%s)' % matplotlib.__version__
