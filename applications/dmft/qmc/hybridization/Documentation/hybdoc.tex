@@ -243,7 +243,7 @@ Note that a retarded interaction causes a static shift of the interaction and ch
 \label{sec:mu}
 In the simplest case, the level energies of all levels are the same, and a parameter \verb#MU# sets them to that value. Note that in this code, there is no shift of the chemical potential $\mu$ to half filling: For a single impurity Anderson model with interaction $U$, half filling is at $\mu=U/2$.
 
-Double counting terms or chrystal field splittings enter the code as orbital-dependent chemical potentials. They can be read in from a file, which is specified as \verb#MU_FILE#. In the file the level energies should be listed consecutively, in the order of the orbitals. For example, a two-orbital case with a small magnetic field $H=0.02$, half filled, for an interaction $U=4$, could be specified like this:
+Double counting terms or crystal field splittings enter the code as orbital-dependent chemical potentials. They can be read in from a file, which is specified as \verb#MU_VECTOR#. In the file the level energies should be listed consecutively, in the order of the orbitals. For example, a two-orbital case with a small magnetic field $H=0.02$, half filled, for an interaction $U=4$, could be specified like this:
 \begin{verbatim}
 1.99 2.01
 \end{verbatim}
@@ -321,7 +321,7 @@ The following parameters are required for any simulation. The code will not work
 \item \verb#N_TAU#=\{\emph{natural number}\} specifies the number $N_{\tau}$ of $\tau$-points on which the Green function is measured, and also indicates the number of $\tau$-points on which the hybridization function and the retarded interaction are specified. The imaginary time at index $n$ is given by $\tau_{n}=n\beta/N_{\tau}$, where $n=0,\ldots,N_{\tau}$, so that the first point (index $n=0$) specifies $G(\tau=0)$, the last point (index $n=N_{\tau}$ specifies $G(\tau=\beta)$. Note that the number of imaginary time points hence is $N_{\tau}+1$.
 \item \verb#N_HISTOGRAM_ORDERS#=\{\emph{natural number}\} is the maximum expansion order to which the order histogram is measured. 
 \item \verb#DELTA#=\{\emph{filename}\} specifies the name of the file which contains the hybridization function input data (in text format).
-\item \verb#MU#=\{\emph{real number}\} is the chemical potential or level energy for model Hamiltonians. On-site level energies can be specified differently (in particular in an orbital dependent way, see section on double counting). Conflicts with \verb#MU_FILE#.
+\item \verb#MU#=\{\emph{real number}\} is the chemical potential or level energy for model Hamiltonians. On-site level energies can be specified differently (in particular in an orbital dependent way, see section on double counting). This parameter is ignored if a file with the chemical potential values is specified using the parameter \verb#MU_VECTOR#.
 \item \verb#U#=\{\emph{real number}\} is the on-site interaction. In this case it is a term $\sum_i n_{i\uparrow}n_{i\downarrow}$. As in the case of the chemical potential, this can be chosen differently, see section on double counting.
 \item \verb#BETA#=\{\emph{real number}\} specifies the inverse temperature $\beta=T^{-1}$.
 \end{itemize}
@@ -356,7 +356,7 @@ The following optional parameters control the different measurements implemented
 
 \subsubsection{Optional control parameters}
 
-\item \verb#spin_flip#=\{0,1\} specifies whether to perform spin flip updates. In such an update a segment is moved from one orbital to another, if the latter is empty.
+\item \verb#SPINFLIP#=\{0,1\} specifies whether to perform spin flip updates. In such an update a segment is moved from one orbital to another, if the latter is empty.
 
 \item \verb#COMPUTE_VERTEX#=\{0,1\} specifies whether the reducible impurity vertex function should be calculated. This parameter requires \verb#MEASURE_g2w# or \verb#MEASURE_h2w# or both be set to $1$.
 
@@ -366,7 +366,11 @@ The following optional parameters control the different measurements implemented
 
 \item \verb#DELTA_IN_HDF5#=\{0,1\} specifies whether the hybridization function to be read from an hdf5 archive. The data must be stored in the path \verb#/Delta#. For details on the file format, see Sec. \ref{hybridization}.
 
-\item\verb#MU_IN_HDF5#=\{0,1\} specifies whether the chemical potential should be read from an hdf5 archive. The data must be stored in the path \verb#/MUvector# as an array of length $N_{\text{orb}}$. See Sec. \ref{mu} for more information.
+\item\verb#MU_VECTOR#=\{filename\} specifies the file name for a text file containing the orbital dependent chemical potentials. The file format is such that the chemical potentials for all orbitals are listed consecutively, separated either by a space or a new line. If this parameter is specified, the parameter \verb#MU# is ignored.
+
+\item\verb#MU_IN_HDF5#=\{0,1\} specifies whether the chemical potential should be read from an hdf5 archive. The data must be stored in the path \verb#/MUvector# as an array of length $N_{\text{orb}}$. See Sec. \ref{sec:mu} for more information.
+
+\item\verb#U_MATRIX#=\{filename\} specifies the file name for a text file containing the interaction matrix. For the file format, refer to Sec. \ref{umatrix}. If this parameter is specified, the parameter \verb#U# is ignored.
 
 \item\verb#UMATRIX_IN_HDF5#=\{0,1\} specifies whether the interaction matrix should be read from an hdf5 archive. The data must be stored in the path \verb#/Umatrix#.For the file format, see Sec. \ref{umatrix}.
 

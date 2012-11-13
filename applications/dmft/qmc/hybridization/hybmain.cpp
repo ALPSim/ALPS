@@ -48,7 +48,7 @@ using namespace boost::python;
 
 void solve(boost::python::dict parms_){
   alps::parameters_type<hybridization>::type parms(parms_);
-  std::string output_file = boost::lexical_cast<std::string>(parms["BASENAME"])+std::string(".out.h5");
+  std::string output_file = boost::lexical_cast<std::string>(parms["BASENAME"]|"results")+std::string(".out.h5");
 #else
 int main(int argc, char** argv){
   //read in command line options

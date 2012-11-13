@@ -590,16 +590,12 @@ void local_configuration::measure_nnw(int i, std::vector<double> &nnw_re, double
   }
 }
 
-using std::cout;
-using std::endl;
-bool debug=false;
 void local_configuration::state_map_segment_insert(state_map &states, const segment &s, int index) const{
   //works also for the case where an operator is inserted exactly at the point of an already present kink
   if(s.t_end_<=s.t_start_) throw(std::string(__PRETTY_FUNCTION__)+" works only segments where the annihilator comes strictly after the creator");
   state_map::iterator next;
   int current_state=0;
-  
-  if(debug) std::cout << "segment: <" << s.t_start_ << " - " << s.t_end_ << ">  index: " << index << endl;
+
   next=states.upper_bound(s.t_start_);
   if(next==states.end()){ //the new creator is the last operator
     if(!states.empty()){ //there is at least one kink before (can be at exactly the same time) -> get it's state
@@ -617,40 +613,29 @@ void local_configuration::state_map_segment_insert(state_map &states, const segm
   }
   //insert creator
   states[s.t_start_]=current_state+index;//+ for creator //this even works if the kink was exactly at time tau
-  
-  if(debug) cout<<"updating the following operators:"<<endl;
+
   for(state_map::iterator it=states.upper_bound(s.t_start_); it!=states.upper_bound(s.t_end_); ++it){//if there is an operator exactly at s.t_end_, it will be updated
-    if(debug) cout<<it->first<<" ";
     it->second+=index;
   }
-  if(debug) cout << endl << endl;
-  
+
   next=states.upper_bound(s.t_end_);
-  if(next==states.end()){ if(debug) cout << "boom2 tau=" << s.t_start_ << endl;}//no operator follows; don't care
-  
+
   if(next!=states.begin()){//can never be states.begin(), we have inserted an operator at an earlier time!
     next--; current_state=next->second;
   }
-  else cout << "never get here" << endl;
   //insert annihilator
   states[s.t_end_]=current_state-index;//- for annihilator
-  
-  if(debug) cout << "state map:" << endl;
-  for(state_map::iterator it=states.begin(); it!=states.end(); ++it){
-    if(debug) cout<<"("<<it->first<<","<<it->second<<") ";
-  }
-  if(debug) cout<<endl;
+
 }
 #include<iomanip>
 void local_configuration::measure_sector_statistics(std::vector<double> &sector_statistics, double sign) const{//complexity: linear in n_orbitals_
   state_map states; //key is time, value is state
   //state map is organized such that an entry with time t and value s means that the impurity
   //is in state s from time t to the time of the next entry (or beta, for the last one).
-  
-  //  memset(&(sector_statistics[0]), 0, sizeof(double)*sector_statistics.size());
+
   //std::fill(sector_statistics.begin(),sector_statistics.end(),0);
   int full_line_states=0;
-  
+
   for(int i=0;i<n_orbitals_;++i){
     int index=pow(2,i);
     if(zero_order_orbital_occupied_[0]){
@@ -673,137 +658,13 @@ void local_configuration::measure_sector_statistics(std::vector<double> &sector_
   else{
     //otherwise count intervals
     double tau=0.; int state=0; int max_state=pow(2,n_orbitals_);
-    if(debug) cout<<"evaluating configuration:"<<endl;
     for(state_map::iterator it=states.begin();it!=states.end();++it){
       sector_statistics[state+full_line_states]+=(it->first-tau)/beta_*sign;
       tau=it->first; state=it->second;
-      
-      if(debug) cout<< tau << " - " << it->first << " diff: " << it->first-tau << " state: " << state << endl;
-      if(state>=max_state || state<0){ cout << "something went horribly wrong! state=" << state << endl; exit(1); }
+      if(state>=max_state || state<0){ std::cout << "something went wrong! state=" << state << std::endl; exit(1); }
     }
     sector_statistics[state+full_line_states]+=(beta_-tau)/beta_*sign;//don't forget the last interval
   }
   double sum=0;
-  
-  for(std::size_t i=0; i<sector_statistics.size(); ++i){ sum+=sector_statistics[i]; if(debug) std::cout << sector_statistics[i] << std::endl; } //check consistency
-  if(1.0-sum>1e-10){ cout << "oh no! " <<std::setprecision(30) <<(1.0-sum)<< endl;}
 }
 
-/*
- //working code:
- using std::cout;
- using std::endl;
- bool debug=false;
- void local_configuration::state_map_segment_insert(state_map &states, const segment &s, int index) const{
- //works also for the case where an operator is inserted exactly at the point of an already present kink
- state_map::iterator next;
- int current_state=0;
- 
- if(debug) std::cout << "segment: <" << s.t_start_ << " - " << s.t_end_ << ">  index: " << index << endl;
- next=states.upper_bound(s.t_start_);
- if(next==states.end()){ cout << "never get here!"  << s.t_start_ << endl; return;} //this only happens if the creator sits exactly at beta; nothing to do in this case
- 
- if(next!=states.begin()){//there is at least one kink before -> get it's state
- next--; current_state=next->second;
- }
- else{ cout << "never get here!" << endl; }
- //insert creator
- states[s.t_start_]=current_state+index;//+ for creator //this even works if the kink was exactly at time tau
- 
- if(debug)   cout<<"updating the following operators:"<<endl;
- for(state_map::iterator it=states.upper_bound(s.t_start_); it!=states.upper_bound(s.t_end_); ++it){
- if(debug) cout<<it->first<<" ";    ; it->second+=index; }//upper bound to make sure
- //everything works fine even if a kink is already present at the annihilator time
- if(debug)   cout << endl << endl;
- 
- next=states.upper_bound(s.t_end_);
- if(next==states.end()){ if(debug)  cout << "boom2 tau=" << s.t_start_ << endl; return;}//this only happens if the annihilator sits exactly at beta; nothing to do in this case
- 
- if(next!=states.begin()){
- next--; current_state=next->second;
- }
- //insert annihilator
- states[s.t_end_]=current_state-index;//- for annihilator
- 
- if(debug)   cout << "state map:" << endl;
- for(state_map::iterator it=states.begin(); it!=states.end(); ++it){
- if(debug) cout<<"("<<it->first<<","<<it->second<<") ";
- }
- if(debug) cout<<endl;
- //update state of all kinks inbetween the two operators
- }
- #include<iomanip>
- void local_configuration::measure_sector_statistics(std::vector<double> &sector_statistics) const{//complexity: linear in n_orbitals_
- //  std::cout << "in " << __PRETTY_FUNCTION__ << std::endl;
- memset(&(sector_statistics[0]), 0, sizeof(double)*sector_statistics.size());
- state_map states; //key is time, value is state
- //state map is organized such that an entry with time t and value s means that the impurity is in state s from time t to the time of the next entry
- //hence setting states[beta]=0 does not change anything
- states[beta_]=0; //makes life easier, not so nice
- states[0.0]=0;
- 
- int full_line_states=0;
- 
- for(int i=0;i<n_orbitals_;++i){
- int index=pow(2,i);
- if(zero_order_orbital_occupied_[0]){
- full_line_states+=index;//keep track of which lines orbitals are fully occupied
- continue; //no segments->we're done for this orbital
- }
- for(segment_container_t::const_iterator it=segments_[i].begin(); it!=segments_[i].end(); ++it){
- if(it->t_end_<it->t_start_){//winding segment
- state_map_segment_insert(states,segment(0.         ,it->t_end_),index);
- state_map_segment_insert(states,segment(it->t_start_,beta_    ),index);
- }
- else state_map_segment_insert(states,*it,index);
- }
- }
- //  if(states.empty()) sector_statistics[full_line_states]=1.; //there are always segments by construction
- //otherwise count intervals
- double tau=0.;
- int state=0;
- int max_state=pow(2,n_orbitals_);
- if(debug) cout<<"evaluating configuration:"<<endl;
- for(state_map::iterator it=states.begin();it!=states.end();++it){
- if(debug) cout<< tau << " - " << it->first << " diff: " << it->first-tau << " state: " << state << endl;
- if(state>=max_state){ cout << "something went horribly wrong! state=" << state << endl; exit(1); }
- sector_statistics[state+full_line_states]+=(it->first-tau)/beta_;
- tau=it->first;
- state=it->second;
- }
- double sum=0;
- 
- for(int i=0; i<sector_statistics.size(); ++i){ sum+=sector_statistics[i]; if(debug) std::cout << sector_statistics[i] << std::endl; }
- if(1.0-sum>1e-10){ cout << "oh no! " <<std::setprecision(30) <<(1.0-sum)<< endl;}
- 
- //  std::cout << "sum=" << sum << std::endl;
- }
- 
- 
- */
-
-
-/*double local_configuration::get_F_prefactor_debug(int f1,int f,double t) const{
- std::cout<<clred<<f<<" "<<t<<" "<<f1<<" "<<0.5*(U_(f1,f)+U_(f,f1))*get_occupation(f1,t)<<cblack<<std::endl;
- return 0.5*(U_(f1,f)+U_(f,f1))*get_occupation(f1,t);
- }
- double local_configuration::get_occupation(int f1,double tau) const{
- if(segments_[f1].size()==0){
- if(zero_order_orbital_occupied_[f1]) return 1.0;
- else return 0.0;
- }
- for(std::set<segment>::const_iterator it=segments_[f1].begin(); it!=segments_[f1].end(); it++){
- if(it->t_end_>it->t_start_){//regular segment
- if(it->t_start_<=tau && tau <= it->t_end_ ){
- return 1.0;
- }
- }//brackets mandatory
- else{//segment winds around the circle
- if(( tau>=0.0 && tau<=it->t_end_) || (tau>=it->t_start_ && tau<=beta_)){
- return 1.0;
- }
- }
- }//end::for
- return 0.0;
- }
- */

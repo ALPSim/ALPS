@@ -34,6 +34,7 @@ interaction_matrix::interaction_matrix(const alps::params &p){
   val_.resize(n_orbitals_*n_orbitals_,0.);
   //if the parameter U_MATRIX is defined: read in the U_MATRIX from file
   if(p.defined("U_MATRIX")){
+    if(p.defined("U")){ std::cout << "Warning::parameter U_MATRIX defined, ignoring parameter U" << std::flush << std::endl; };
     std::string ufilename=p["U_MATRIX"];
     if(p.defined("UMATRIX_IN_HDF5") && p["UMATRIX_IN_HDF5"]){//attempt to read from h5 archive
       alps::hdf5::archive ar(ufilename, alps::hdf5::archive::READ);
