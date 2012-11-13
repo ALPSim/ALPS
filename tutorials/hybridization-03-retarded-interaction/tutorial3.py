@@ -50,12 +50,11 @@
  #
  # mpirun -np 2 bash alpspython tutorial2.py
 
-import sys,shutil
-from numpy import sqrt,cosh,sinh,exp,pi
-
-import pyalps.mpi as mpi     # mpi library
-from pyalps.hdf5 import h5ar # hdf5 interface
-import pyalps.cthyb as cthyb # the solver module
+import shutil
+import pyalps.mpi as mpi                # mpi library
+from pyalps.hdf5 import h5ar            # hdf5 interface
+import pyalps.cthyb as cthyb            # the solver module
+from numpy import sqrt,cosh,sinh,exp,pi #some math
 
 ##################################################################################################################
 #                                                                                                                #
