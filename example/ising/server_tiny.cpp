@@ -60,6 +60,8 @@ int main(int argc, char *argv[]) {
         , static_cast<boost::function<bool()> >(boost::bind(&stop_callback, options.time_limit))
     );
 
+    // TODO: pick a port number and make it overridable vy a command line parameter and not params
+  // params are for simulation parameters, not for infrastructure/running environment setup
     tcpserver server(params["PORT"] | 2485); // TODO: which port should we take?
     server.add_action("progress", boost::bind(&boost::lexical_cast<std::string, double>, boost::bind(&sim_type::fraction_completed, boost::ref(sim))));
     server.add_action("checkpoint", boost::bind(&do_checkpoint, boost::ref(sim), params["DUMP"] | "checkpoint"));
