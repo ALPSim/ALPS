@@ -83,7 +83,6 @@ private:
   void accumulate_G();
   void accumulate_Gw();
   void accumulate_Gl();
-  void accumulate_G2w();
   void accumulate_nn();
   void accumulate_nnt();
   void accumulate_nnw();
@@ -162,15 +161,15 @@ private:
   std::vector<std::vector<double> >Fl;
   std::vector<std::vector<std::complex<double> > >G2w;
   std::vector<std::vector<std::complex<double> > >F2w;
-  std::vector<std::vector<std::vector<double> > >g2wr;
-  std::vector<std::vector<std::vector<double> > >g2wi;
-  std::vector<std::vector<std::vector<double> > >h2wr;
-  std::vector<std::vector<std::vector<double> > >h2wi;
   std::vector<std::vector<double> >n_vectors;
   std::vector<std::vector<std::vector<double> > >nnt;
   std::vector<std::vector<std::vector<double> > >nnw_re;
   std::vector<std::vector<double> >nn;
-  std::vector<double> sector_statistics;
+  std::vector<double>sector_statistics;
+  std::vector<double>g2wr;
+  std::vector<double>g2wi;
+  std::vector<double>h2wr;
+  std::vector<double>h2wi;
 
   uint64_t meas_count;
 

@@ -46,6 +46,15 @@ void hybridization::create_measurements(){//called once in the constructor
   g2wr.resize(n_orbitals); g2wi.resize(n_orbitals);
   h2wr.resize(n_orbitals); h2wi.resize(n_orbitals);
 
+  if(MEASURE_g2w){
+    g2wr.resize(N_w2*N_w2*N_W, 0.);
+    g2wi.resize(N_w2*N_w2*N_W, 0.);
+  }
+  if(MEASURE_h2w){
+    h2wr.resize(N_w2*N_w2*N_W, 0.);
+    h2wi.resize(N_w2*N_w2*N_W, 0.);
+  }
+
   nnt_names.resize(n_orbitals);
   nnw_re_names.resize(n_orbitals);
   nn_names.resize(n_orbitals);
@@ -74,12 +83,6 @@ void hybridization::create_measurements(){//called once in the constructor
     //Legendre coefficients for g and f
     std::stringstream gl_name; gl_name<<"gl_"<<i; gl_names.push_back(gl_name.str());
     std::stringstream fl_name; fl_name<<"fl_"<<i; fl_names.push_back(fl_name.str());
-
-    //g2w and h2w
-    g2wr[i].resize(i+1);
-    g2wi[i].resize(i+1);
-    h2wr[i].resize(i+1);
-    h2wi[i].resize(i+1);
 
     //nnt and nnw
     nnt[i].resize(i+1);
@@ -122,16 +125,12 @@ void hybridization::create_measurements(){//called once in the constructor
       if(MEASURE_g2w){    //the two-particle Green's function is large and error is usually not needed -> declare as simple observable
         std::stringstream g2wr_name; g2wr_name<<"g2w_re_"<<i<<"_"<<j; g2wr_names[i].push_back(g2wr_name.str());
         std::stringstream g2wi_name; g2wi_name<<"g2w_im_"<<i<<"_"<<j; g2wi_names[i].push_back(g2wi_name.str());
-        g2wr[i][j].resize(N_w2*N_w2*N_W, 0.);
-        g2wi[i][j].resize(N_w2*N_w2*N_W, 0.);
         measurements << alps::ngs::SimpleRealVectorObservable(g2wr_name.str());
         measurements << alps::ngs::SimpleRealVectorObservable(g2wi_name.str());
       }
       if(MEASURE_h2w){
         std::stringstream h2wr_name; h2wr_name<<"h2w_re_"<<i<<"_"<<j; h2wr_names[i].push_back(h2wr_name.str());
         std::stringstream h2wi_name; h2wi_name<<"h2w_im_"<<i<<"_"<<j; h2wi_names[i].push_back(h2wi_name.str());
-        h2wr[i][j].resize(N_w2*N_w2*N_W, 0.);
-        h2wi[i][j].resize(N_w2*N_w2*N_W, 0.);
         measurements << alps::ngs::SimpleRealVectorObservable(h2wr_name.str());
         measurements << alps::ngs::SimpleRealVectorObservable(h2wi_name.str());
       }
@@ -176,24 +175,26 @@ void hybridization::measure(){
     local_config.get_F_prefactor(F_prefactor);//compute segment overlaps in local config
 
   measure_Gw(F_prefactor);
+  accumulate_Gw();
+
   measure_Gl(F_prefactor);
+  accumulate_Gl();
+
   measure_sector_statistics();
+  accumulate_sector_statistics();
 
   //measure 2-particle quantities
   measure_nn();
-  measure_nnt();
-  measure_nnw();
-
-  if(MEASURE_g2w  || MEASURE_h2w) measure_G2w(F_prefactor);
-
   accumulate_nn();
-  accumulate_nnt();
-  accumulate_nnw();
-  accumulate_sector_statistics();
 
-  accumulate_Gw();
-  accumulate_Gl();
-  accumulate_G2w();
+  measure_nnt();
+  accumulate_nnt();
+
+  measure_nnw();
+  accumulate_nnw();
+
+  if(MEASURE_g2w  || MEASURE_h2w) measure_G2w(F_prefactor); //accumulated during measurement to save memory
+
 }
 
 void hybridization::measure_order(){
@@ -363,23 +364,35 @@ void hybridization::measure_G2w(std::vector<std::map<double,double> > &F_prefact
               std::complex<double> meas =G2w[i][w1n*N_w_aux+w2n]*G2w[j][w3n*N_w_aux+w4n]; // M12M34
               if(i==j)             meas-=G2w[i][w1n*N_w_aux+w4n]*G2w[i][w3n*N_w_aux+w2n]; //-M14M32
               meas/=beta; meas*=sign;
-              g2wr[i][j][index] += meas.real();
-              g2wi[i][j][index] += meas.imag();
+              g2wr[index] += meas.real();
+              g2wi[index] += meas.imag();
             }
             if(MEASURE_h2w){
               std::complex<double> meas_h =F2w[i][w1n*N_w_aux+w2n]*G2w[j][w3n*N_w_aux+w4n]; // n1M12M34
               if(i==j)             meas_h-=F2w[i][w1n*N_w_aux+w4n]*G2w[i][w3n*N_w_aux+w2n]; //-n1M14M32
               meas_h/=beta; meas_h*=sign;
-              h2wr[i][j][index] += meas_h.real();
-              h2wi[i][j][index] += meas_h.imag();
+              h2wr[index] += meas_h.real();
+              h2wi[index] += meas_h.imag();
             }
           }//Wn
+      if(MEASURE_g2w){
+        measurements[g2wr_names[i][j]]<<g2wr;
+        measurements[g2wi_names[i][j]]<<g2wi;
+        memset(&(g2wr[0]),0, g2wr.size()*sizeof(double));
+        memset(&(g2wi[0]),0, g2wi.size()*sizeof(double));
+      }
+      if(MEASURE_h2w){
+        measurements[h2wr_names[i][j]]<<h2wr;
+        measurements[h2wi_names[i][j]]<<h2wi;
+        memset(&(h2wr[0]),0, h2wr.size()*sizeof(double));
+        memset(&(h2wi[0]),0, h2wi.size()*sizeof(double));
+      }
     }//j
   }//i
 }
 
+/*
 void hybridization::accumulate_G2w(){
-
   for(std::size_t i=0;i<n_orbitals;++i){
     for(std::size_t j=0;j<=i;++j){//we measure only for j<=i since results for ij and ji are exactly the same (no gain through averaging)
       if(MEASURE_g2w){
@@ -397,5 +410,5 @@ void hybridization::accumulate_G2w(){
     }
   }
 }
-
+*/
 
