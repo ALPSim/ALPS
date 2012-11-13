@@ -29,6 +29,11 @@
  # This tutorial is a minimal example illustrating the use of the python interface
  # to hybridization expansion solver.
  #
+ # The hybridization function is chosen such that the impurity model is equivalent
+ # to a correlated site couple to a single bath site with coupling V=1 and energy
+ # epsilon=0 (Delta(tau)=-V**2/2=const.) . It can therefore be compared to the
+ # exact result obtained by exact diagonalization (see subdirectory ED).
+ #
  # Run this script as:
  # alpspython tutorial1.py
  #
@@ -41,7 +46,7 @@
  # mpirun -np 2 bash alpspython tutorial1.py
 
 import pyalps.cthyb as cthyb # the solver module
-import pyalps.mpi as mpi     # MPI library
+import pyalps.mpi as mpi     # MPI library (required)
 
 # write a simple (constant) hybridization function to file
 f=open("delta.dat","w")
@@ -52,18 +57,18 @@ f.close()
 # specify solver parameters
 parms={
 'SWEEPS'              : 100000000,
-'MAX_TIME'            : 10,
+'MAX_TIME'            : 30,
 'THERMALIZATION'      : 1000,
 'SEED'                : 0,
 'N_MEAS'              : 50,
 'N_HISTOGRAM_ORDERS'  : 50,
 'N_ORBITALS'          : 2,
-'U'                   : 5,
-'MU'                  : 2.5,
+'U'                   : 4,
+'MU'                  : 2,
 'DELTA'               : "delta.dat",
 'N_TAU'               : 1000,
-'BETA'                : 30,
-'TEXT_OUTPUT'         : 1
+'BETA'                : 45,
+'TEXT_OUTPUT'         : 1,
 }
 
 # solve the impurity model
