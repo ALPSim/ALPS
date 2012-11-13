@@ -55,7 +55,7 @@ void evaluate_basics(const alps::results_type<hybridization>::type &results,
     {
       int tot_acc=0,cur_prec = sim_file.precision();
       for (int i=0;i<nacc.size();i++) tot_acc += nacc[i];
-      sim_file << std::endl << "|------------ Simulation details after " << nsweeps << " sweeps -----------|" << std::endl;
+      sim_file << std::endl << "|------------- Simulation details after " << nsweeps << " sweeps ------------|" << std::endl;
       sim_file << "  Total acceptance rate = " << std::setprecision(2) << std::fixed;
       sim_file << (((double)tot_acc)/nsweeps)*100 << "%" << std::endl;
       sim_file << "  Individual acceptance rate for update " << std::endl;

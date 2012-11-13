@@ -83,11 +83,11 @@ SEED = 0
 N_MEAS = 50
 N_HISTOGRAM_ORDERS = 50
 N_ORBITALS = 2
-U =  5
-MU = 2.5
+U =  4.0
+MU = 2.0
 DELTA = "delta.dat"
 N_TAU = 1000
-BETA = 30
+BETA = 45
 \end{verbatim}
 This is a parameter file for a single impurity Anderson model (two ``orbitals'', i.e. $N_{\text{orb}}=2$, one for spin ``up'' and one for spin ``down'') with $U=5$, $\mu=2.5$, and $\beta=30$ for which the hybridization function will be read from the file \verb#delta.dat#. The energy units are the ones of \verb#delta.dat#. This simulation runs for sixty seconds.
 
@@ -161,12 +161,11 @@ parms={
 'N_MEAS'              : 50,
 'N_HISTOGRAM_ORDERS'  : 50,
 'N_ORBITALS'          : 2,
-'U'                   : 5,
-'MU'                  : 2.5,
-'N_MATSUBARA'         : 512,
+'U'                   : 4.0,
+'MU'                  : 2.0,
 'DELTA'               : "delta.dat",
 'N_TAU'               : 1000,
-'BETA'                : 30,
+'BETA'                : 45,
 'TEXT_OUTPUT'         : 1
 }
 
@@ -192,11 +191,12 @@ mpirun -np 2 bash alpspython scriptname.py
 instead.
 Note that on some platforms mpirun has to be replaced by a different command to invoke MPI. See your MPI manual for details. 
 
-More advanced examples on how to use the Python framework can be found in the hybridization tutorials within the \verb#/tutorials# directory inside the ALPS installation directory:
+The above example and more advanced examples on how to use the Python framework can be found in the hybridization tutorials within the \verb#/tutorials# directory inside the ALPS installation directory:
 \begin{verbatim}
-/hybridization-01-kondo
-/hybridization-02-retarded-interaction
-/hybridization-03-spinfreezing
+/hybridization-01-python
+/hybridization-02-kondo
+/hybridization-03-retarded-interaction
+/hybridization-04-spinfreezing
 \end{verbatim}
 
 These tutorials illustrate how to run calculations for multiple parameters within a single script, plotting results, implementing a selfconsistency scheme, using the hdf5 interface, performing calculations with retarded interactions and for multiorbital models as well as performing simple computations with the measured observables.

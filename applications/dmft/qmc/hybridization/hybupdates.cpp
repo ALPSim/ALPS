@@ -94,7 +94,7 @@ void hybridization::update(){
     if(VERBOSE && sweeps%100000==0 && crank==0) {
         int tot_acc=0,cur_prec = std::cout.precision();
         for (int i=0;i<nacc.size();i++) tot_acc += nacc[i];
-        std::cout << std::endl << "|------------ Simulation details after " << sweeps << " sweeps -----------|" << std::endl;
+        std::cout << std::endl << "|------------- Simulation details after " << sweeps << " sweeps ------------|" << std::endl;
         std::cout << "  Total acceptance rate = " << std::setprecision(2) << std::fixed;
         std::cout << (((double)tot_acc)/sweeps)*100 << "%" << std::endl;
         std::cout << "  Individual acceptance rate for update " << std::endl;
