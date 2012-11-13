@@ -117,7 +117,6 @@ private:
 
   //updates parameters
   std::size_t N_meas;
-  std::size_t N_accu;
 
   //measurement parameters
   std::size_t N_w;    //number of Matsubara frequency points
@@ -174,7 +173,6 @@ private:
   std::vector<double> sector_statistics;
 
   uint64_t meas_count;
-  uint64_t accu_count;
 
   //local impurity operator configuration
   local_configuration local_config;

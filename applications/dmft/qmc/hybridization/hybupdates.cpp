@@ -29,85 +29,66 @@
 #include"hyb.hpp"
 #include"hyblocal.hpp"
 
-//this is the heard of the Monte Carlo procedure: we have the following updates:
-//1: change the zero order state, swap an empty orbital versus a filled one.
+//this is the heart of the Monte Carlo procedure: we have the following updates:
+//1: change the zero order state, swap an empty orbital versus a filled one
 //2: shift an existing segment start- or end-point
 //3: insert or remove a new segment
-//4: insert or remove an anti-segment.
-//5: Perform s segment flip between different orbtials.
-//see our review for details of these updates.
+//4: insert or remove an anti-segment
+//5: perform a segment flip between different orbtials
+//see our review for details of these updates
 void hybridization::update(){
-  for(std::size_t n=0; n<N_accu; ++n){
-    for(std::size_t i=0;i<N_meas;++i){
-      double update_type=random();
-      if(spin_flip){
-	    if(update_type < 0.1){
-	      change_zero_order_state_update();
-	    }else if(update_type < 0){
-	      shift_segment_update();
-	    }else if(update_type < 0.5){
-	      insert_remove_segment_update();
-	    }else if(update_type < 0.9){
-	      insert_remove_antisegment_update();
-	    }else {
-	      insert_remove_spin_flip_update();
-	    }
-      } else {
-  	    if(update_type < 0.1){
-	      change_zero_order_state_update();
-	    }else if(update_type < 0){
-	      shift_segment_update();
-	    }else if(update_type < 0.6){
-	      insert_remove_segment_update();
-	    }else{
-	      insert_remove_antisegment_update();
-	    }
+  for(std::size_t i=0;i<N_meas;++i){
+    double update_type=random();
+    if(spin_flip){
+      if(update_type < 0.1){
+        change_zero_order_state_update();
+      }else if(update_type < 0){
+        shift_segment_update();
+      }else if(update_type < 0.5){
+        insert_remove_segment_update();
+      }else if(update_type < 0.9){
+        insert_remove_antisegment_update();
+      }else{
+        insert_remove_spin_flip_update();
       }
-      nsweeps = ++sweeps;
+    }else{
+      if(update_type < 0.1){
+        change_zero_order_state_update();
+      }else if(update_type < 0){
+        shift_segment_update();
+      }else if(update_type < 0.6){
+        insert_remove_segment_update();
+      }else{
+        insert_remove_antisegment_update();
+      }
+    }
+    nsweeps = ++sweeps;
 
-      //these are cheap measurements that should be done every time.
-      if(is_thermalized()){
-        measure_order();
-        measure_G();
-        meas_count++;
-      }
-    }//N_meas
+    //these are cheap measurements that should be done every time.
     if(is_thermalized()){
-      std::vector<std::map<double,double> > F_prefactor;
-      if(MEASURE_freq || MEASURE_legendre || MEASURE_g2w || MEASURE_h2w)
-        local_config.get_F_prefactor(F_prefactor);//compute segment overlaps in local config
-
-      measure_Gw(F_prefactor);
-      measure_Gl(F_prefactor);
-      measure_sector_statistics();
-
-      //measure 2-particle quantities
-      measure_nn();
-      measure_nnt();
-      measure_nnw();
-
-      if(MEASURE_g2w  || MEASURE_h2w) measure_G2w(F_prefactor);
-
-      accu_count++;
+      measure_order();
+      measure_G();
+      meas_count++;
     }
-  }//N_accu
-    if(VERBOSE && sweeps%100000==0 && crank==0) {
-        int tot_acc=0,cur_prec = std::cout.precision();
-        for (int i=0;i<nacc.size();i++) tot_acc += nacc[i];
-        std::cout << std::endl << "|------------- Simulation details after " << sweeps << " sweeps ------------|" << std::endl;
-        std::cout << "  Total acceptance rate = " << std::setprecision(2) << std::fixed;
-        std::cout << (((double)tot_acc)/sweeps)*100 << "%" << std::endl;
-        std::cout << "  Individual acceptance rate for update " << std::endl;
-        for (int i=0;i<nacc.size();i++) {
-            std::cout << "     " << update_type[i] << " = ";
-            std::cout << std::setprecision(2) << std::fixed << (((double)nacc[i])/sweeps)*100 << "%";
-            std::cout << " (proposal rate = ";
-            std::cout << std::setprecision(2) << std::fixed << (((double)nprop[i])/sweeps)*100 << "%)" << std::endl;
-        }
-        std::cout << "|-----------------------------------------------------------------|" << std::endl;
-        std::cout.unsetf(std::ios_base::fixed);
-        std::cout.precision(cur_prec);
+  }//N_meas
+
+  if(VERBOSE && sweeps%100000==0 && crank==0) {
+    int tot_acc=0,cur_prec = std::cout.precision();
+    for (int i=0;i<nacc.size();i++) tot_acc += nacc[i];
+    std::cout << std::endl << "|------------- Simulation details after " << sweeps << " sweeps ------------|" << std::endl;
+    std::cout << "  Total acceptance rate = " << std::setprecision(2) << std::fixed;
+    std::cout << (((double)tot_acc)/sweeps)*100 << "%" << std::endl;
+    std::cout << "  Individual acceptance rate for update " << std::endl;
+    for (int i=0;i<nacc.size();i++) {
+      std::cout << "     " << update_type[i] << " = ";
+      std::cout << std::setprecision(2) << std::fixed << (((double)nacc[i])/sweeps)*100 << "%";
+      std::cout << " (proposal rate = ";
+      std::cout << std::setprecision(2) << std::fixed << (((double)nprop[i])/sweeps)*100 << "%)" << std::endl;
     }
+    std::cout << "|-----------------------------------------------------------------|" << std::endl;
+    std::cout.unsetf(std::ios_base::fixed);
+    std::cout.precision(cur_prec);
+  }
 }
 
 void hybridization::change_zero_order_state_update(){

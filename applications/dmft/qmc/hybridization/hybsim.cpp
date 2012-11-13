@@ -52,17 +52,16 @@ hybridization::hybridization(const alps::params &parms, int crank_)
     update_type.push_back("remove anti-segment ");
     update_type.push_back("swap segment        ");
     sweeps=0;                                  //Sweeps currently done
-  thermalization_sweeps = parms["THERMALIZATION"];                                //Sweeps to be done for thermalization
-  total_sweeps = parms["SWEEPS"];                                                 //Sweeps to be done in total
-  n_orbitals = parms["N_ORBITALS"];                                               //number of orbitals
-  sign = 1.;                                                                      //fermionic sign. plus or minus one.
+  thermalization_sweeps = parms["THERMALIZATION"];                                 //Sweeps to be done for thermalization
+  total_sweeps = parms["SWEEPS"];                                                  //Sweeps to be done in total
+  n_orbitals = parms["N_ORBITALS"];                                                //number of orbitals
+  sign = 1.;                                                                       //fermionic sign. plus or minus one.
 
   //initializing physics parameters
   beta = parms["BETA"];                                                            //inverse temperature
 
   //initializing updates parameters
   N_meas = parms["N_MEAS"];                                                        //number of updates per measurement
-  N_accu = parms["N_ACCU"]|100;                                                    //number of accumulation steps before piping results into ALPS observables (100 is reasonable)
   N_hist_orders = parms["N_HISTOGRAM_ORDERS"]|50;                                  //number of orders that are measured for the order histogram
 
   //initializing measurement parameters
@@ -169,7 +168,7 @@ if(!crank){
   if(parms.defined("RET_INT_K")) std::cout << "using retarded interaction" << std::endl;
   if(parms.defined("U_MATRIX")) std::cout << "reading U matrix from file " << parms["U_MATRIX"] << std::endl;
   if(parms.defined("MU_VECTOR")) std::cout << "reading MU vector from file " << parms["MU_VECTOR"] << std::endl;
-  std::cout << "Simulation scheduled to run " << parms["MAX_TIME"] << " seconds" << std::endl;
+  std::cout << "Simulation scheduled to run " << parms["MAX_TIME"] << " seconds" << std::endl << std::endl;
 }
 return;
 }

@@ -139,7 +139,6 @@ void hybridization::create_measurements(){//called once in the constructor
   }
   measurements.reset(true);
   meas_count=0;
-  accu_count=0;
   //initialize measurement vectors
   sgn=0.;
   order_histogram.resize(n_orbitals, std::vector<double> (N_hist_orders, 0.));
@@ -167,12 +166,25 @@ void hybridization::create_measurements(){//called once in the constructor
 
 void hybridization::measure(){
   if(!is_thermalized()) return;
-//here we only pipe everything into the ALPS observables
 
-// measure_order() and measure_G() are cheap and are called in every step
   accumulate_order();
   accumulate_G();
   meas_count=0; //reset
+
+  std::vector<std::map<double,double> > F_prefactor;
+  if(MEASURE_freq || MEASURE_legendre || MEASURE_g2w || MEASURE_h2w)
+    local_config.get_F_prefactor(F_prefactor);//compute segment overlaps in local config
+
+  measure_Gw(F_prefactor);
+  measure_Gl(F_prefactor);
+  measure_sector_statistics();
+
+  //measure 2-particle quantities
+  measure_nn();
+  measure_nnt();
+  measure_nnw();
+
+  if(MEASURE_g2w  || MEASURE_h2w) measure_G2w(F_prefactor);
 
   accumulate_nn();
   accumulate_nnt();
@@ -182,9 +194,8 @@ void hybridization::measure(){
   accumulate_Gw();
   accumulate_Gl();
   accumulate_G2w();
-  accu_count=0; //reset
-
 }
+
 void hybridization::measure_order(){
   //compute the order and store it in the vectors for the histograms
   sgn+=sign;
@@ -233,7 +244,7 @@ void hybridization::measure_sector_statistics(){
 
 void hybridization::accumulate_sector_statistics(){
   if(!MEASURE_sector_statistics) return;
-  measurements["sector_statistics"]<<(sector_statistics/(double)accu_count);
+  measurements["sector_statistics"]<<sector_statistics;
   memset(&(sector_statistics[0]),0, sector_statistics.size()*sizeof(double));
 }
 
@@ -249,7 +260,7 @@ void hybridization::accumulate_nn(){
   if(!MEASURE_nn) return;
   for(std::size_t i=0;i<n_orbitals;++i)
     for(std::size_t j=0;j<i;++j){//i==j would simply yield the density, which we measure separately
-      measurements[nn_names[i][j]]<<(nn[i][j]/(double)accu_count);
+      measurements[nn_names[i][j]]<<nn[i][j];
       nn[i][j]=0;
     }
 }
@@ -272,7 +283,7 @@ void hybridization::accumulate_nnt(){
   if(!MEASURE_nnt) return;
   for(std::size_t i=0;i<n_orbitals;++i){
     for(std::size_t j=0;j<=i;++j){
-      measurements[nnt_names[i][j]]<<(nnt[i][j]/(double)accu_count);
+      measurements[nnt_names[i][j]]<<nnt[i][j];
       memset(&(nnt[i][j][0]),0, nnt[i][j].size()*sizeof(double));
     }
   }
@@ -293,7 +304,7 @@ void hybridization::accumulate_nnw(){
   if(!MEASURE_nnw) return;
   for(std::size_t i=0;i<n_orbitals;++i){
     for(std::size_t j=0;j<=i;++j){
-      measurements[nnw_re_names[i][j]]<<(nnw_re[i][j]/(double)accu_count);
+      measurements[nnw_re_names[i][j]]<<nnw_re[i][j];
       memset(&(nnw_re[i][j][0]),0, nnw_re[i][j].size()*sizeof(double));
     }
   }
@@ -309,10 +320,10 @@ void hybridization::measure_Gw(std::vector<std::map<double,double> > &F_prefacto
 void hybridization::accumulate_Gw(){
   if(!MEASURE_freq) return;
     for(std::size_t i=0;i<n_orbitals;++i){
-      measurements[gwr_names[i]]<<(Gwr[i]/(double)accu_count);
-      measurements[gwi_names[i]]<<(Gwi[i]/(double)accu_count);
-      measurements[fwr_names[i]]<<(Fwr[i]/(double)accu_count);
-      measurements[fwi_names[i]]<<(Fwi[i]/(double)accu_count);
+      measurements[gwr_names[i]]<<Gwr[i];
+      measurements[gwi_names[i]]<<Gwi[i];
+      measurements[fwr_names[i]]<<Fwr[i];
+      measurements[fwi_names[i]]<<Fwi[i];
       memset(&(Gwr[i][0]),0, Gwr[i].size()*sizeof(double));
       memset(&(Gwi[i][0]),0, Gwr[i].size()*sizeof(double));
       memset(&(Fwr[i][0]),0, Gwr[i].size()*sizeof(double));
@@ -329,8 +340,8 @@ void hybridization::measure_Gl(std::vector<std::map<double,double> > &F_prefacto
 void hybridization::accumulate_Gl(){
   if(!MEASURE_legendre) return;
     for(std::size_t i=0;i<n_orbitals;++i){
-      measurements[gl_names[i]]<<(Gl[i]/(double)accu_count);
-      measurements[fl_names[i]]<<(Fl[i]/(double)accu_count);
+      measurements[gl_names[i]]<<Gl[i];
+      measurements[fl_names[i]]<<Fl[i];
       memset(&(Gl[i][0]),0, Gl[i].size()*sizeof(double));
       memset(&(Fl[i][0]),0, Fl[i].size()*sizeof(double));
     }
@@ -372,14 +383,14 @@ void hybridization::accumulate_G2w(){
   for(std::size_t i=0;i<n_orbitals;++i){
     for(std::size_t j=0;j<=i;++j){//we measure only for j<=i since results for ij and ji are exactly the same (no gain through averaging)
       if(MEASURE_g2w){
-        measurements[g2wr_names[i][j]]<<(g2wr[i][j]/(double)accu_count);
-        measurements[g2wi_names[i][j]]<<(g2wi[i][j]/(double)accu_count);
+        measurements[g2wr_names[i][j]]<<g2wr[i][j];
+        measurements[g2wi_names[i][j]]<<g2wi[i][j];
         memset(&(g2wr[i][j][0]),0, g2wr[i][j].size()*sizeof(double));
         memset(&(g2wi[i][j][0]),0, g2wi[i][j].size()*sizeof(double));
       }
       if(MEASURE_h2w){
-        measurements[h2wr_names[i][j]]<<(h2wr[i][j]/(double)accu_count);
-        measurements[h2wi_names[i][j]]<<(h2wi[i][j]/(double)accu_count);
+        measurements[h2wr_names[i][j]]<<h2wr[i][j];
+        measurements[h2wi_names[i][j]]<<h2wi[i][j];
         memset(&(h2wr[i][j][0]),0, h2wr[i][j].size()*sizeof(double));
         memset(&(h2wi[i][j][0]),0, h2wi[i][j].size()*sizeof(double));
       }
