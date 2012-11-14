@@ -10,7 +10,7 @@
 #  $ cmake -DALPS_USE_MACHINE=machine-name
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
-  message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there. You may need to remove CMakeCache.txt. ")
+  message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there. You may need to remove CMakeCache.txt.")
 endif()
 
 if (ALPS_USE_MACHINE)
@@ -115,9 +115,13 @@ if(CMAKE_SIZEOF_VOID_P EQUAL 8 OR CMAKE_GENERATOR MATCHES Win64)
   endif (NOT ALPS_VISTRAILS_32BIT)
 endif(CMAKE_SIZEOF_VOID_P EQUAL 8 OR CMAKE_GENERATOR MATCHES Win64)
 
-#maintenance building options
+# maintenance building options
+# 
+# removed CMakeDetermineSystem since it is already called by
+# the makefile generator, and cmake 2.8.10 tries to cache the
+# configuration in /CMakeSystem.cmake
 
-include (CMakeDetermineSystem)
+#include (CMakeDetermineSystem)
 #include (CMakeDetermineFortranCompiler)
 #message (STATUS "Fortran compiler: ${CMAKE_Fortran_COMPILER}")
 #include (CMakeTestFortranCompiler)
