@@ -105,7 +105,7 @@ void ClusterHelper::setup_tables()
       }
     }
   }
-  /*if(alps::is_master()){
+  if(alps::is_master()){
     std::ofstream clustercoordstream("ClusterCoordinates");
     for (std::size_t m=0; m<cluster_coordinates_.size1(); ++m) {
       clustercoordstream << m << " ";
@@ -113,7 +113,7 @@ void ClusterHelper::setup_tables()
         clustercoordstream << cluster_coordinates_(m,d) << " ";
       clustercoordstream << std::endl;
     }
-  }*/
+  }
   //setup reciprocal basis
   reciprocal_basis_.resize(dimension(), dimension());
   memset(&(reciprocal_basis_(0,0)), 0, sizeof(double)*dimension()*dimension());

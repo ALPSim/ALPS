@@ -71,4 +71,195 @@
     </FINITELATTICE>
     <UNITCELL ref="simple2d"/>
   </LATTICEGRAPH>
+
+<LATTICE name="Betts2D-12A superlattice" dimension="2">
+    <BASIS>
+      <VECTOR>1 3 </VECTOR>
+      <VECTOR>4 0 </VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>0*pi/12 8*pi/12 </VECTOR>
+      <VECTOR>6*pi/12 -2*pi/12 </VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts2D-12A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts2D-12A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple2d"/>
+  </LATTICEGRAPH>
+
+
+  <LATTICE name="Betts2D-16A superlattice" dimension="2">
+    <BASIS>
+      <VECTOR>4 2 </VECTOR>
+      <VECTOR>0 4 </VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/16 0*pi/16 </VECTOR>
+      <VECTOR>-4*pi/16 8*pi/16 </VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts2D-16A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts2D-16A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple2d"/>
+  </LATTICEGRAPH>
+
+
+
+
+
+
+  <LATTICE name="Betts2D-18A superlattice" dimension="2">
+    <BASIS>
+      <VECTOR>3 3 </VECTOR>
+      <VECTOR>-3 3 </VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/18 6*pi/18 </VECTOR>
+      <VECTOR>-6*pi/18 6*pi/18 </VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts2D-18A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts2D-18A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple2d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts2D-20A superlattice" dimension="2">
+    <BASIS>
+      <VECTOR>2 4 </VECTOR>
+      <VECTOR>4 -2 </VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>4*pi/20 8*pi/20 </VECTOR>
+      <VECTOR>8*pi/20 -4*pi/20 </VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts2D-20A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts2D-20A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple2d"/>
+  </LATTICEGRAPH>
+
+
+  <LATTICE name="Betts2D-34A superlattice" dimension="2">
+    <BASIS>
+      <VECTOR>3 5 </VECTOR>
+      <VECTOR>5 -3 </VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/34 10*pi/34 </VECTOR>
+      <VECTOR>10*pi/34 -6*pi/34 </VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts2D-34A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts2D-34A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple2d"/>
+  </LATTICEGRAPH>
+
+
+
+
+  <LATTICE name="Betts2D-72A superlattice" dimension="2">
+    <BASIS>
+      <VECTOR>6 6 </VECTOR>
+      <VECTOR>-6 6 </VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>12*pi/72 12*pi/72 </VECTOR>
+      <VECTOR>-12*pi/72 12*pi/72 </VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts2D-72A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts2D-72A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple2d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts2D-32A superlattice" dimension="2">
+    <BASIS>
+      <VECTOR>4 4 </VECTOR>
+      <VECTOR>-4 4 </VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/32 8*pi/32 </VECTOR>
+      <VECTOR>-8*pi/32 8*pi/32 </VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts2D-32A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts2D-32A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple2d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts2D-50A superlattice" dimension="2">
+    <BASIS>
+      <VECTOR>5 5 </VECTOR>
+      <VECTOR>5 -5 </VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>10*pi/50 10*pi/50 </VECTOR>
+      <VECTOR>-10*pi/50 10*pi/50 </VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts2D-50A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts2D-50A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple2d"/>
+  </LATTICEGRAPH>
+
+
+  
+
+
 </LATTICES>
