@@ -68,6 +68,14 @@ void interaction_matrix::apply_shift(const double shift){
 }
 
 void interaction_matrix::assemble(const double U, const double Uprime, const double J){
+  if(Uprime==U && J==0){
+     for(int i=0;i<n_orbitals_;++i){
+       for(int j=0;j<n_orbitals_;++j){
+         operator()(i,j)=(i==j)?0:U;
+       }
+     }
+   }else{
+  if(n_orbitals_!=2) throw std::logic_error("extend assemble or write interaction matrix to file for odd # orbitals");
   for(int i=0;i<n_orbitals_;i+=2){
     operator()(i  , i  ) = 0; //Pauli
     operator()(i+1, i+1) = 0; //Pauli
@@ -82,6 +90,7 @@ void interaction_matrix::assemble(const double U, const double Uprime, const dou
       operator()(i+1,j  ) = Uprime; //Hubbard repulsion interband opposite spin
     }
   }
+}
 } 
 
 std::ostream &operator<<(std::ostream &os, const interaction_matrix &U){
