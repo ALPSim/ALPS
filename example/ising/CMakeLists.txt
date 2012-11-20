@@ -107,4 +107,6 @@ if (ALPS_BUILD_EXAMPLES)
 
     endif (ALPS_HAVE_PYTHON)
 
+    add_subdirectory(simple)
+
 endif (ALPS_BUILD_EXAMPLES)
