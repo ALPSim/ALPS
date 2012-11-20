@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="ALPS.xsl"?>
+<SIMULATION xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xml.comp-phys.org/2002/10/QMCXML.xsd">
+  <PARAMETERS>
+    <PARAMETER name="L">100</PARAMETER>
+    <PARAMETER name="THERMALIZATION">100</PARAMETER>
+    <PARAMETER name="SWEEPS">10000</PARAMETER>
+    <PARAMETER name="T">2</PARAMETER>
+  </PARAMETERS>
+</SIMULATION>

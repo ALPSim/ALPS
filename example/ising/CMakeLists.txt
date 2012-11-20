@@ -9,7 +9,7 @@ if (ALPS_BUILD_EXAMPLES)
     add_dependencies(alpscontrol alps)
     target_link_libraries(alpscontrol alps)
 
-    foreach (name single controlthread_tiny server_tiny)
+    foreach (name single singlexml controlthread_tiny server_tiny)
     
         add_executable(ngs_ising_${name} ${name}.cpp)
         add_dependencies(ngs_ising_${name} alps)

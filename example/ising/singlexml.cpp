@@ -4,7 +4,7 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2011 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2010 - 2012 by Lukas Gamper <gamperl@gmail.com>                   *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -25,17 +25,32 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_NGS_MADE_DEPRECATED_PARAMETERS_HPP
-#define ALPS_NGS_MADE_DEPRECATED_PARAMETERS_HPP
+#include "src/ising.hpp"
 
-#include <alps/ngs/params.hpp>
+#include <alps/ngs/make_parameters_from_xml.hpp>
 
-#include <alps/parameter.h>
+using namespace alps;
 
-namespace alps {
+typedef ising_sim sim_type;
 
-    Parameters make_deprecated_parameters(params const & arg);
+int main(int argc, char *argv[]) {
 
+    mcoptions options(argc, argv);
+    parameters_type<sim_type>::type params = make_parameters_from_xml(options.input_file);
+    sim_type sim(params);
+
+// TODO: calculate a default based on the input_file name
+// TODO: allow to specify out file name on command line as optional second positional argument
+// TODO: change continuation to specification of checkpoint file and drop DUMP
+  
+    if (options.resume)
+        sim.load(params["DUMP"] | "checkpoint");
+
+    sim.run(boost::bind(&stop_callback, options.time_limit));
+
+    sim.save(params["DUMP"] | "checkpoint");
+
+    results_type<sim_type>::type results = collect_results(sim);
+    std::cout << results << std::endl;
+    save_results(results, params, options.output_file, "/simulation/results");
 }
-
-#endif
