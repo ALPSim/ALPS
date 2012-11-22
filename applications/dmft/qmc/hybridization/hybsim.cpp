@@ -45,7 +45,14 @@ hybridization::hybridization(const alps::params &parms, int crank_)
   //initializing general simulation constants
     nacc.resize(6,0);
     nprop.resize(6,0);
+
     nsweeps=0;
+
+    for (int i=0;i<6;i++) {
+        nacc[i] = 0;
+        nprop[i] = 0;
+    }
+
     update_type.push_back("change zero state   ");
     update_type.push_back("insert segment      ");
     update_type.push_back("remove segment      ");

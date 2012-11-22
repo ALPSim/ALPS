@@ -36,9 +36,10 @@ mu_(p),
 K_(p){
   beta_=p["BETA"];
   n_orbitals_=p["N_ORBITALS"];
+//    std::cerr << "Start ...";
   segments_.resize(n_orbitals_);
   zero_order_orbital_occupied_.resize(n_orbitals_,false);
-  
+//    std::cerr << " done\n";
   use_retarded_interaction_=p.defined("RET_INT_K");
   if(use_retarded_interaction_){
     double Kp0=K_.interpolate_deriv(0.0);//K'(0^+)

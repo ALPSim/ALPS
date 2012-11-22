@@ -46,7 +46,7 @@ void hybridization::update(){
         shift_segment_update();
       }else if(update_type < 0.5){
         insert_remove_segment_update();
-      }else if(update_type < 0.9){
+      }else if(update_type < 0.8){
         insert_remove_antisegment_update();
       }else{
         insert_remove_spin_flip_update();
@@ -317,6 +317,7 @@ void hybridization::spin_flip_update(int orbital){
 
     int other_orbital=(int)(random()*n_orbitals);
     if (orbital == other_orbital) return;
+    if (local_config.zero_order_orbital_occupied(other_orbital)) return;
   int segment_nr=(int)(random()*k);
 //    for (int segment_nr=0;segment_nr<k;segment_nr++) {
   segment segment_to_flip=local_config.get_segment(segment_nr, orbital);
