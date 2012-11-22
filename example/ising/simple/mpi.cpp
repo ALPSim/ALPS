@@ -156,14 +156,14 @@ class ising_sim {
         bool run(
               boost::function<bool ()> const & stop_callback
         ) {
-            bool done = false, stop;
+            bool done = false, stopped;
             do {
                 update();
                 measure();
-                if (schedule.pending() || (stop = stop_callback()))
-                    done = communicate(stop);
+                if (schedule.pending() || (stopped = stop_callback()))
+                    done = communicate(stopped);
             } while(!done);
-            return !stop;
+            return !stopped;
         }
 
         result_names_type result_names() const {

@@ -5,18 +5,22 @@
 
 if (ALPS_BUILD_EXAMPLES)
 
-    add_executable(example_ising_single single)
-    add_dependencies(example_ising_single alps)
-    target_link_libraries(example_ising_single alps)
+    foreach (name single intobs)
+    
+        add_executable(example_ising_${name} ${name}.cpp)
+        add_dependencies(example_ising_${name} alps)
+        target_link_libraries(example_ising_${name} alps)
 
-    add_test(example_ising_single
-        ${CMAKE_COMMAND}
-            -Dcmd=ngs_ising_single
-            -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
-            -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
-            -Dbindir=${PROJECT_BINARY_DIR}/bin
-            -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_test.cmake
-    )
+        add_test(example_ising_${name}
+            ${CMAKE_COMMAND}
+                -Dcmd=example_ising_${name}
+                -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
+                -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
+                -Dbindir=${PROJECT_BINARY_DIR}/bin
+                -P ${CMAKE_CURRENT_SOURCE_DIR}/../tests/run_ngs_ising_test.cmake
+        )
+
+    endforeach(name)
 
     if (MPI_FOUND)
 
@@ -33,7 +37,7 @@ if (ALPS_BUILD_EXAMPLES)
                 -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
                 -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
                 -Dbindir=${PROJECT_BINARY_DIR}/bin
-                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_test.cmake
+                -P ${CMAKE_CURRENT_SOURCE_DIR}/../tests/run_ngs_ising_test.cmake
         )
 
     endif(MPI_FOUND)

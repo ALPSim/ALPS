@@ -30,11 +30,11 @@
 #include <alps/ngs/config.hpp>
 #include <alps/ngs/signal.hpp>
 #include <alps/ngs/params.hpp>
-#include <alps/ngs/mcresults.hpp>
-#include <alps/ngs/mcobservables.hpp>
-#include <alps/ngs/observablewrappers.hpp>
+#include <alps/ngs/mcresult.hpp>
+#include <alps/ngs/mcobservable.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 
+#include <alps/alea/detailedbinning.h>
 #include <alps/random/mersenne_twister.hpp> // TODO: why do we need this?
 
 #include <boost/chrono.hpp>
@@ -50,23 +50,22 @@
 #include <iostream>
 #include <stdexcept>
 
+enum { ENERGY_OBS, MAGNETIZATION_OBS, MAGNETIZATION_2_OBS, MAGNETIZATION_4_OBS, CORRELATIONS_OBS, N_OBS };
+
 class ising_sim {
 
-    #ifdef ALPS_NGS_USE_NEW_ALEA
-        typedef alea::accumulator_set observables_type;
-    #else
-        typedef alps::mcobservables observables_type;
-    #endif
+    typedef std::vector<alps::mcobservable> observables_type;
 
     public:
 
         typedef alps::params parameters_type;
-        typedef alps::mcresults results_type;
-        typedef std::vector<std::string> result_names_type;
+        typedef std::vector<alps::mcresult> results_type;
+        typedef std::vector<std::size_t> result_names_type;
 
         ising_sim(parameters_type const & parameters)
             : params(parameters)
             , random(boost::mt19937((parameters["SEED"] | 42)), boost::uniform_real<>())
+            , measurements(N_OBS)
             , realization("0")
             , clone("0")
             , length(parameters["L"])
@@ -78,13 +77,13 @@ class ising_sim {
         {
             for(int i = 0; i < length; ++i)
                 spins[i] = (random() < 0.5 ? 1 : -1);
-            measurements
-                << alps::ngs::RealObservable("Energy")
-                << alps::ngs::RealObservable("Magnetization")
-                << alps::ngs::RealObservable("Magnetization^2")
-                << alps::ngs::RealObservable("Magnetization^4")
-                << alps::ngs::RealVectorObservable("Correlations")
-            ;
+
+            measurements[ENERGY_OBS] = boost::make_shared<alps::RealObservable>("Energy").get();
+            measurements[MAGNETIZATION_OBS] = boost::make_shared<alps::RealObservable>("Magnetization").get();
+            measurements[MAGNETIZATION_2_OBS] = boost::make_shared<alps::RealObservable>("Magnetization^2").get();
+            measurements[MAGNETIZATION_4_OBS] = boost::make_shared<alps::RealObservable>("Magnetization^4").get();
+            measurements[CORRELATIONS_OBS] = boost::make_shared<alps::RealVectorObservable>("Correlations").get();
+
             alps::ngs::signal::listen();
         }
 
@@ -117,11 +116,11 @@ class ising_sim {
                 std::transform(corr.begin(), corr.end(), corr.begin(), boost::lambda::_1 / double(length));
                 ten /= length;
                 tmag /= length;
-                measurements["Energy"] << ten;
-                measurements["Magnetization"] << tmag;
-                measurements["Magnetization^2"] << tmag * tmag;
-                measurements["Magnetization^4"] << tmag * tmag * tmag * tmag;
-                measurements["Correlations"] << corr;
+                measurements[ENERGY_OBS] << ten;
+                measurements[MAGNETIZATION_OBS] << tmag;
+                measurements[MAGNETIZATION_2_OBS] << tmag * tmag;
+                measurements[MAGNETIZATION_4_OBS] << tmag * tmag * tmag * tmag;
+                measurements[CORRELATIONS_OBS] << corr;
             }
         };
 
@@ -150,9 +149,9 @@ class ising_sim {
 
         // implement a nice keys(m) function
         result_names_type result_names() const {
-            result_names_type names;
-            for(observables_type::const_iterator it = measurements.begin(); it != measurements.end(); ++it)
-                names.push_back(it->first);
+            result_names_type names(N_OBS);
+            for(std::size_t i = 0; i < measurements.size(); ++i)
+                names.push_back(i);
             return names;
         }
 
@@ -165,10 +164,10 @@ class ising_sim {
         }
 
         results_type collect_results(result_names_type const & names) const {
-            results_type partial_results;
+            results_type partial_results(N_OBS);
             for(result_names_type::const_iterator it = names.begin(); it != names.end(); ++it)
                 // TODO: this is ugly make measurements[*it]
-                partial_results.insert(*it, alps::mcresult(measurements[*it]));
+                partial_results[*it] = alps::mcresult(measurements[*it]);
             return partial_results;
         }
 
@@ -325,7 +324,12 @@ int main(int argc, char *argv[]) {
         using alps::collect_results;
         alps::results_type<ising_sim>::type results = collect_results(sim);
 
-        std::cout << results << std::endl;
+        std::cout << "Energy          : " << results[ENERGY_OBS] << std::endl;
+        std::cout << "Magnetization   : " << results[MAGNETIZATION_OBS] << std::endl;
+        std::cout << "Magnetization^2 : " << results[MAGNETIZATION_2_OBS] << std::endl;
+        std::cout << "Magnetization^4 : " << results[MAGNETIZATION_4_OBS] << std::endl;
+        std::cout << "Correlations    : " << results[CORRELATIONS_OBS] << std::endl;
+
         alps::hdf5::archive ar(options.outputfile, "w");
         ar["/parameters"] << parameters;
         ar["/simulation/results"] << results;
