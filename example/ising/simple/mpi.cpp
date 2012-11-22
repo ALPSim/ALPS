@@ -88,7 +88,6 @@ class ising_sim {
                 << alps::ngs::RealObservable("Magnetization^4")
                 << alps::ngs::RealVectorObservable("Correlations")
             ;
-            MPI_Errhandler_set(communicator, MPI_ERRORS_RETURN);
             alps::ngs::signal::listen();
         }
 
@@ -260,7 +259,7 @@ int main(int argc, char *argv[]) {
         ising_sim sim(parameters, c);
 
         // TODO: who should add the suffix to the checkpoint file?
-        std::string checkpoint_file = options.checkpoint_file + "." + boost::lexical_cast<std::string>(c.rank()) + ".h5";
+        std::string checkpoint_file = options.checkpoint_file + ".clone" + boost::lexical_cast<std::string>(c.rank()) + ".h5";
         if (!options.checkpoint_file.empty() && boost::filesystem::exists(checkpoint_file))
             sim.load(checkpoint_file);
 

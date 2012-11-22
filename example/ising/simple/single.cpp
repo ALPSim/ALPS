@@ -126,18 +126,20 @@ class ising_sim {
 
         void save(boost::filesystem::path const & filename) const {
             alps::hdf5::archive ar(filename, "w");
-            ar["/checkpoint"] << *this;
+            ar["/"] << *this;
         }
 
         void load(boost::filesystem::path const & filename) {
             alps::hdf5::archive ar(filename);
-            ar["/checkpoint"] >> *this;
+            ar["/"] >> *this;
         }
 
-        void save(alps::hdf5::archive & ar) const {
+       // make these private but hdf5::arhive is a friend
+       void save(alps::hdf5::archive & ar) const {
             ar["/parameters"] << parameters;
             ar["/simulation/realizations/0/clones/0/results"] << measurements;
-            // TODO: should we save sweeps? or state?
+            // TODO: should we save sweeps? or state? yes! of course!
+            // TODO: realization and clone number
         }
 
         // TODO: do we want to load the parameters?
@@ -145,16 +147,16 @@ class ising_sim {
             ar["/simulation/realizations/0/clones/0/results"] >> measurements;
         }
 
-        bool run(
-              boost::function<bool ()> const & stop_callback
-        ) {
-            do {
+        bool run(boost::function<bool ()> const & stop_callback) {
+          bool stopped=false;
+          do {
                 update();
                 measure();
-            } while(!stop_callback() && fraction_completed() < 1);
-            return !stop_callback();
+            } while(!(stopped=stop_callback()) && fraction_completed() < 1.);
+            return !stopped;
         }
 
+        // implement a nice keys(m) function
         result_names_type result_names() const {
             result_names_type names;
             for(observables_type::const_iterator it = measurements.begin(); it != measurements.end(); ++it)
@@ -179,13 +181,12 @@ class ising_sim {
         }
 
         // TODO: how do we want to call that?
-        double get_random() const { return random(); }
+  //    double get_random() const { return random(); }
 
-        parameters_type & get_parameters() { return parameters; }
+  // rename to parameters()
         parameters_type const & get_parameters() const { return parameters; }
 
-        observables_type & get_measurements() { return measurements; }
-        observables_type const & get_measurements() const { return measurements; }
+  //observables_type const & get_measurements() const { return measurements; }
 
     private:
 
@@ -206,10 +207,18 @@ int main(int argc, char *argv[]) {
     try {
 
         // TODO: improve this! how should we specify the options?
+      // either explicitly parse the options or use Boost.ProgramOptions
+      
+      // usage: [-T timelimit] [-c] input_file [output_file]
         alps::mcoptions options(argc, argv);
 
-        ising_sim sim(options.input_file);
+      alps::parameters parms;
+      // load parms from input file
+      
+      
+        ising_sim sim(parms);
 
+      // use '-c checkpointfile' instead of 'inputfile' for continuing from checkpoint
         if (!options.checkpoint_file.empty() && boost::filesystem::exists(options.checkpoint_file))
             sim.load(options.checkpoint_file);
 
@@ -225,7 +234,8 @@ int main(int argc, char *argv[]) {
             using alps::save_results;
             using alps::collect_results;
             alps::results_type<ising_sim>::type results = collect_results(sim);
-            std::cout << results << std::endl;        
+            std::cout << results << std::endl;
+          // explicitly use an archive: put the function here
             save_results(results, sim.get_parameters(), options.output_file, "/simulation/results");
         }
 
