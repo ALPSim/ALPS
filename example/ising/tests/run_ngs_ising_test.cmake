@@ -7,10 +7,8 @@ find_program(cmd_path ${cmd} ${binarydir} ${bindir})
 
 set(ENV{OMP_NUM_THREADS} 1)
 
-message("${mpiexec} ${mpiexec_numproc_flag} ${procs} ${cmd_path} -T 15 ${sourcedir}/params/param.h5 ${cmd}.result")
-
 execute_process(
-    COMMAND ${mpiexec} ${mpiexec_numproc_flag} ${procs} ${cmd_path} -T 15 ${sourcedir}/params/param.h5 ${cmd}.result
+    COMMAND ${mpiexec} ${mpiexec_numproc_flag} ${procs} ${cmd_path} -T 15 ${sourcedir}/params/param.h5 ${cmd}.result.h5 ${cmd}.checkpoint.h5
     RESULT_VARIABLE not_successful
     OUTPUT_FILE ${cmd}_output
     ERROR_VARIABLE err
@@ -22,7 +20,7 @@ if(not_successful)
 endif(not_successful)
 
 execute_process(
-    COMMAND ${mpiexec} ${mpiexec_numproc_flag} ${procs} ${cmd_path} -T 15 --continue ${sourcedir}/params/param.h5 ${cmd}.result
+    COMMAND ${mpiexec} ${mpiexec_numproc_flag} ${procs} ${cmd_path} -T 15 --continue ${sourcedir}/params/param.h5 ${cmd}.result.h5 ${cmd}.checkpoint.h5
     RESULT_VARIABLE not_successful
     OUTPUT_FILE ${cmd}_output_continue
     ERROR_VARIABLE err

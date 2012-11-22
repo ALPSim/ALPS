@@ -60,10 +60,10 @@ class ising_sim {
             typedef alps::mcobservables observables_type;
         #endif
 
-        ising_sim(boost::filesystem::path const & filename, std::size_t seed_offset = 42)
+        ising_sim(boost::filesystem::path const & filename)
             // TODO: this ist not the best solution - any idea?
             : parameters(alps::make_parameters_from_xml(filename))
-            , random(boost::mt19937((parameters["SEED"] | 42) + seed_offset), boost::uniform_real<>())
+            , random(boost::mt19937((parameters["SEED"] | 42)), boost::uniform_real<>())
             , length(parameters["L"])
             , sweeps(0)
             , thermalization_sweeps(int(parameters["THERMALIZATION"]))
