@@ -27,7 +27,8 @@
 # ****************************************************************************
 
 import matplotlib
-mplversion = tuple(int(i) for i in matplotlib.__version__.split('.'))
+mplversion = tuple(i for i in matplotlib.__version__.split('.'))
+mplversion = (int(mplversion[0]), int(mplversion[1]), mplversion[2])
 import matplotlib.pyplot as plt
 import numpy as np
 from hlist import flatten
