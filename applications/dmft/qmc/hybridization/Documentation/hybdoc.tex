@@ -23,7 +23,7 @@
 %\bibliographystyle{apsrev} %PRODUCES SPURIOUS EMPTY REFERENCE 1 AND 2
 \begin{document}
 \newcommand{\Emanuel}{\href{mailto:gull@pks.mpg.de}{Emanuel }}
-\title{Documentation -- Hybridization Expansion CT-QMC solver\\ version 3.0b1}
+\title{Documentation -- Hybridization Expansion CT-QMC solver\\ version 3.0}
 \author{Emanuel Gull}
 \affiliation{Max Planck Institute for the Physics of Complex Systems, Dresden, Germany}
 \affiliation{Physics Department, University of Michigan, Ann Arbor, MI}
@@ -348,7 +348,7 @@ The following optional parameters control the different measurements implemented
 \item \verb#MEASURE_nnt#=\{0,1\} turns on or off the measurement of the time dependent density-density correlation function. Requires \verb#N_nn#.
 \item \verb#N_nn#=\{\emph{natural number}\} specifies the number of imaginary time points for which the density-density correlation function is measured.
 \item \verb#MEASURE_g2w#=\{0,1\} turns on the measurement of the two-particle Green's function. Requires \verb#N_w2# and \verb#N_W#.
-\item \verb#MEASURE_h2w#=\{0,1\} turns on the measurement of the three-particle correlator $H$ (see Sec.\ref{}). Requires \verb#N_w2# and \verb#N_W#.
+\item \verb#MEASURE_h2w#=\{0,1\} turns on the measurement of the three-particle correlator $H$ (see Sec.\ref{2particle}). Requires \verb#N_w2# and \verb#N_W#.
 \item \verb#N_w2#=\{\emph{natural number}\} specifies the number $\tilde{N}_{\nu}$ of \emph{fermionic} frequencies for the two-particle Green's function or the correlator $H$. These quantities are measured for frequencies with indices $n=-\tilde{N}_{\nu}/2,\ldots,\tilde{N}_{\nu}/2-1$.
 \item \verb#N_W#=\{\emph{natural number}\} specifies the number $N_{\omega}$ of \emph{bosonic} frequencies $\omega_{m}=2\pi m/\beta$ for the two-particle Green's function or the correlator $H$. These quantities are measured for frequencies with indices $m=0,\ldots N_{\omega}-1$.
 \item \verb#MEASURE_nnw#=\{0,1\} turns on the measurement of the susceptibility in frequency. Requires \verb#N_W#.
