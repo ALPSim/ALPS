@@ -130,7 +130,7 @@ IF(ALPS_HAVE_MPI)
     install(TARGETS cthyb.so LIBRARY DESTINATION lib/pyalps COMPONENT applications)
   ENDIF(ALPS_BUILD_PYTHON)
 ENDIF(ALPS_HAVE_MPI)
-
+  INSTALL(FILES hybridization/Documentation/hybdoc.pdf DESTINATION doc)
 else(LAPACK_FOUND)
   message(STATUS "dmft will not be built since the lapack library has not been found")
 endif(LAPACK_FOUND)
