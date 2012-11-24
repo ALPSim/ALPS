@@ -46,6 +46,9 @@ void hybridization::create_measurements(){//called once in the constructor
   g2wr.resize(n_orbitals); g2wi.resize(n_orbitals);
   h2wr.resize(n_orbitals); h2wi.resize(n_orbitals);
 
+  G2w.resize(n_orbitals, std::vector<std::complex<double> >()); //resized conditionally
+  F2w.resize(n_orbitals, std::vector<std::complex<double> >()); //below
+
   if(MEASURE_g2w){
     g2wr.resize(N_w2*N_w2*N_W, 0.);
     g2wi.resize(N_w2*N_w2*N_W, 0.);
@@ -88,6 +91,9 @@ void hybridization::create_measurements(){//called once in the constructor
     nnt[i].resize(i+1);
     nnw_re[i].resize(i+1);
     nn[i].resize(i);
+
+    if(MEASURE_g2w) G2w[i].resize(N_w_aux*N_w_aux);
+    if(MEASURE_h2w) F2w[i].resize(N_w_aux*N_w_aux);
 
     //initialize measurements for observable names
     measurements << vec_obs_t(g_name.str());
@@ -156,8 +162,6 @@ void hybridization::create_measurements(){//called once in the constructor
     Gl.resize(n_orbitals, std::vector<double>(N_l, 0.));
     Fl.resize(n_orbitals, std::vector<double>(N_l, 0.));
   }
-  if(MEASURE_g2w) G2w.resize(n_orbitals, std::vector<std::complex<double> >(N_w_aux*N_w_aux));
-  if(MEASURE_h2w) F2w.resize(n_orbitals, std::vector<std::complex<double> >(N_w_aux*N_w_aux));
   if(MEASURE_nnt) n_vectors.resize(n_orbitals, std::vector<double>(N_nn+1, 0.));
 
 }// create measurements
