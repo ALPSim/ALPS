@@ -639,7 +639,7 @@ void local_configuration::measure_sector_statistics(std::vector<double> &sector_
 
   for(int i=0;i<n_orbitals_;++i){
     int index=pow(2,i);
-    if(zero_order_orbital_occupied_[0]){
+    if(zero_order_orbital_occupied_[i]){
       full_line_states+=index;//keep track of which time lines (orbitals) are fully occupied
       continue; //no segments->we're done for this orbital
     }
