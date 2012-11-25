@@ -340,13 +340,17 @@ void hybridization::spin_flip_update(int orbital){
   //compute local weight change: As we intend to propose a flip, we can
   //safely ignore the intermediate state and directly compare the energies
   //of the two states involved
-  double local_weight_change=std::exp((local_config.mu(other_orbital)-local_config.mu(orbital))*seg_length);
+  // This energy is associated with the present segment. We give it a negative weight
+  // because it is to be removed
+  double de = //-local_config.mu(orbital)*seg_length;
+    -local_config.local_energy(segment_to_flip,orbital);
+//    local_weight_change=std::exp((local_config.mu(other_orbital)-local_config.mu(orbital))*seg_length);
 //   std::cout << "Local_weight:  "<< local_weight_change << std::endl;
   
   //compute hybridization weight change
   double hybridization_weight_change=1./hyb_config.hyb_weight_change_remove(segment_to_flip, orbital); // from line 187 - remove_segment_update
   double permutation_factor=local_config.order(orbital)/(beta*local_config.find_next_segment_start_distance(segment_to_flip.t_start_,orbital));
-  double weight_change_1=local_weight_change*hybridization_weight_change*permutation_factor;
+  double weight_change_1=hybridization_weight_change*permutation_factor;
 //  if (abs(weight_change)>random()) {
     if (weight_change_1<0) sign*=-1;
     local_config.remove_segment(segment_to_flip, orbital);
@@ -354,9 +358,12 @@ void hybridization::spin_flip_update(int orbital){
 //  } else return; // First part of update not accepted, nothing else to do
 // Now let us try the insertion into other_orbital
   segment new_segment(t_start,t_end);
+// This is the energy change (!!) associated with insertion of the new segment
+  de += //local_config.mu(other_orbital)*seg_length;
+    local_config.local_energy(new_segment,other_orbital);
   hybridization_weight_change=hyb_config.hyb_weight_change_insert(new_segment, other_orbital); // from line 157 - insert_segment_update & changed orbital to other_orbital
   permutation_factor=t_next_segment_start*beta/(local_config.order(other_orbital)+1);
-  double weight_change_2=hybridization_weight_change*permutation_factor;
+    double weight_change_2=std::exp(de)*hybridization_weight_change*permutation_factor;
   if(std::abs(weight_change_1*weight_change_2)>random()){ //Accepted
       nacc[5]++;
 //    std::cout << "Accepted\n";

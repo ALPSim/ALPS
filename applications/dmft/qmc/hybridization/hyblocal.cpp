@@ -260,6 +260,55 @@ void local_configuration::remove_segment(const segment &new_segment, int orbital
     throw std::logic_error("did not find end time to remove!");
   }
 }
+//compute the segment overlap and segment length, and return the weight
+//this is an O(k n_orbital) procedure in the expansion order and the number or orbitals.
+double local_configuration::local_energy(const segment &seg, int orb) const{
+    //the chemical potential term: just needs a segment length
+    double length=seg.t_end_-seg.t_start_;
+    if(length<0) length+=beta_; //wraparound segment
+    double energy = mu_[orb]*length;
+    //std::cout<<clmagenta<<"chemical potential weight is: "<<weight<<" mu: "<<mu_[orb]<<" length: "<<length<<cblack<<std::endl;
+    
+    //the interaction term needs the overlap between this orbital and all the other orbitals
+    static std::vector<double> overlaps(n_orbitals_, 0.); for(int i=0;i<n_orbitals_;++i) overlaps[i]=0.;
+    for(int i=0;i<n_orbitals_;++i){
+        if(i==orb) continue;
+        
+        if(zero_order_orbital_occupied_[i]){
+            overlaps[i]=length;
+        }else{
+            //find the first segment with time t_start > seg.t_start
+            for(std::set<segment>::const_iterator it=segments_[i].begin(); it != segments_[i].end();++it){
+                overlaps[i]+=segment_overlap(seg, *it);
+            }
+        }
+        //std::cout<<clmagenta<<"weight of orbital: "<<orb<<" wrt orbital: "<<i<<" is: "<<std::exp(U_(orb,i)*overlaps[i])<<" for overlap: "<<overlaps[i]<<cblack<<std::endl;
+        energy -= U_(orb,i)*overlaps[i];
+        /*if(zero_order_orbital_occupied_[i]){
+         std::cout<<"weight got an additional factor:"<<std::exp(-sgn*U_(orb,i)*overlaps[i])<<std::endl;
+         }*/
+    }
+    //this is the retarded interaction stuff
+    if(use_retarded_interaction_){
+        bool is_removal=false;
+        double retarded_weight=0;
+        if((seg.t_start_==0) && (seg.t_end_==beta_)){ //not really a segment but a full line
+            retarded_weight=0.;
+        }else{
+            for(int i=0;i<n_orbitals_;++i){
+                for(std::set<segment>::const_iterator it=segments_[i].begin(); it != segments_[i].end();++it){
+                    retarded_weight+=K_.interpolate(seg.t_start_-it->t_start_);
+                    retarded_weight-=K_.interpolate(seg.t_start_-it->t_end_);
+                    retarded_weight-=K_.interpolate(seg.t_end_-it->t_start_);
+                    retarded_weight+=K_.interpolate(seg.t_end_-it->t_end_);
+                }
+            }
+            retarded_weight-=K_.interpolate(seg.t_end_-seg.t_start_);
+        }
+        energy += retarded_weight;
+    }
+    return energy;
+}
 void local_configuration::check_consistency()const {
   for(int i=0;i<n_orbitals_;++i){
     if(order(i)<2) continue; //nothing to check if none or only one segment present
