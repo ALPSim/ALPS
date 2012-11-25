@@ -34,18 +34,17 @@
 #include "hybsegment.hpp"
 #include "hyblocal.hpp"
 #include "hybconfig.hpp"
-
+#include <boost/chrono/chrono.hpp>
 
 #ifdef HYB_SIM_MAIN
+uint64_t sweep_count;
 std::vector<uint64_t> nacc,nprop;
-uint64_t nsweeps;
 std::vector<std::string> update_type;
 #else
+extern uint64_t sweep_count;
 extern std::vector<uint64_t> nacc,nprop;
-extern uint64_t nsweeps;
 extern std::vector<std::string> update_type;
 #endif
-
 
 class hybridization:public alps::mcbase
 {
@@ -61,10 +60,11 @@ public:
   friend std::ostream &operator<<(std::ostream &os, const hybridization &hyb);
 
 private:
-//  std::vector<uint64_t> nacc,nprop;
-//  std::vector<std::string> update_type;
   bool VERBOSE;
   int crank;
+  //boost::chrono::steady_clock::time_point lasttime;
+  //boost::chrono::steady_clock::duration delay;
+
   //initialize all measurements and measurement vectors (with 0)
   void create_measurements();
   //measure_* functions perform the actual measurements
@@ -170,8 +170,6 @@ private:
   std::vector<double>g2wi;
   std::vector<double>h2wr;
   std::vector<double>h2wi;
-
-  uint64_t meas_count;
 
   //local impurity operator configuration
   local_configuration local_config;

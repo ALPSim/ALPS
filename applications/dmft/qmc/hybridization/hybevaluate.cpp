@@ -36,13 +36,17 @@ void evaluate_basics(const alps::results_type<hybridization>::type &results,
                      alps::hdf5::archive &solver_output){
 
   std::size_t n_orbitals=parms["N_ORBITALS"];
+  std::size_t N_meas=parms["N_MEAS"];
   double beta=parms["BETA"];
+
+  uint64_t sweeps = results["Sign"].count()+(uint64_t)parms["THERMALIZATION"];
 
   if(parms["TEXT_OUTPUT"]|false){
     std::ofstream sim_file("simulation.dat");
     sim_file << "simulation details:" << std::endl;
     sim_file << "average sign: " << results["Sign"].mean<double>() << std::endl;
-    sim_file << "total (effective) number of sweeps, normalized by N_meas: " << results["Sign"].count()*(double)parms["N_MEAS"] << std::endl;
+    sim_file << "total number of Monte Carlo updates: " << sweeps*(int)parms["N_MEAS"] << std::endl;
+    sim_file << "total number of Monte Carlo measurements: " << results["Sign"].count() << std::endl;
     sim_file << "number thermalization sweeps: " << parms["THERMALIZATION"] << std::endl;
     sim_file << "inverse temperature: " << beta << std::endl;
     sim_file << "perturbation order:" << std::endl;
@@ -54,19 +58,20 @@ void evaluate_basics(const alps::results_type<hybridization>::type &results,
     {
       int tot_acc=0,cur_prec = sim_file.precision();
       for (int i=0;i<nacc.size();i++) tot_acc += nacc[i];
-      sim_file << std::endl << "|------------- Simulation details after " << nsweeps << " sweeps ------------|" << std::endl;
+      sim_file << std::endl << "|------ Simulation details (master only) after " << sweeps << " sweeps ------|" << std::endl;
       sim_file << "  Total acceptance rate = " << std::setprecision(2) << std::fixed;
-      sim_file << (((double)tot_acc)/nsweeps)*100 << "%" << std::endl;
+      sim_file << (((double)tot_acc)/(sweep_count*N_meas))*100 << "%" << std::endl;
       sim_file << "  Individual acceptance rate for update " << std::endl;
       for (int i=0;i<nacc.size();i++) {
           sim_file << "     " << update_type[i] << " = ";
-          sim_file << std::setprecision(2) << std::fixed << (((double)nacc[i])/nsweeps)*100 << "%";
+          sim_file << std::setprecision(2) << std::fixed << (((double)nacc[i])/(sweep_count*N_meas))*100 << "%";
           sim_file << " (proposal rate = ";
-          sim_file << std::setprecision(2) << std::fixed << (((double)nprop[i])/nsweeps)*100 << "%)" << std::endl;
+          sim_file << std::setprecision(2) << std::fixed << (((double)nprop[i])/(sweep_count*N_meas))*100 << "%)" << std::endl;
       }
       sim_file << "|-----------------------------------------------------------------|" << std::endl;
     }
     sim_file.close();
+
     std::ofstream obs_file("observables.dat");//equal-time correlators
     for(std::size_t i=0;i<n_orbitals;++i){//replace Green function endpoints by corresponding densities
       std::stringstream density_name; density_name<<"density_"<<i;

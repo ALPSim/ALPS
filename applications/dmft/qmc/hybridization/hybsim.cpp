@@ -43,23 +43,21 @@ hybridization::hybridization(const alps::params &parms, int crank_)
   show_info(parms,crank);
 
   //initializing general simulation constants
-    nacc.resize(6,0);
-    nprop.resize(6,0);
+  nacc.resize(6,0.);
+  nprop.resize(6,0.);
+  sweep_count=0;
+  //lasttime = boost::chrono::steady_clock::now();
+  //delay = boost::chrono::seconds(parms["OUTPUT_PERIOD"]|600);
 
-    nsweeps=0;
+  update_type.clear();
+  update_type.push_back("change zero state   ");
+  update_type.push_back("insert segment      ");
+  update_type.push_back("remove segment      ");
+  update_type.push_back("insert anti-segment ");
+  update_type.push_back("remove anti-segment ");
+  update_type.push_back("swap segment        ");
 
-    for (int i=0;i<6;i++) {
-        nacc[i] = 0;
-        nprop[i] = 0;
-    }
-
-    update_type.push_back("change zero state   ");
-    update_type.push_back("insert segment      ");
-    update_type.push_back("remove segment      ");
-    update_type.push_back("insert anti-segment ");
-    update_type.push_back("remove anti-segment ");
-    update_type.push_back("swap segment        ");
-    sweeps=0;                                  //Sweeps currently done
+  sweeps=0;                                                                        //Sweeps currently done
   thermalization_sweeps = parms["THERMALIZATION"];                                 //Sweeps to be done for thermalization
   total_sweeps = parms["SWEEPS"];                                                  //Sweeps to be done in total
   n_orbitals = parms["N_ORBITALS"];                                                //number of orbitals
@@ -101,26 +99,6 @@ hybridization::hybridization(const alps::params &parms, int crank_)
   }
   std::cout<<"process " << crank << " starting simulation"<<std::endl;
 }
-
-/*
-void hybridization::print_statistics(std::ostream &output) {
-    int tot_acc=0,cur_prec = output.precision();
-    for (int i=0;i<nacc.size();i++) tot_acc += nacc[i];
-    output << std::endl << "|------------- Simulation details after " << sweeps << " sweeps -----------|" << std::endl;
-    output << "  Total acceptance rate = " << std::setprecision(2) << std::fixed;
-    output << (((double)tot_acc)/sweeps)*100 << "%" << std::endl;
-    output << "  Individual acceptance rate for update " << std::endl;
-    for (int i=0;i<nacc.size();i++) {
-        output << "     " << update_type[i] << " = ";
-        output << std::setprecision(2) << std::fixed << (((double)nacc[i])/sweeps)*100 << "%";
-        output << " (proposal rate = ";
-        output << std::setprecision(2) << std::fixed << (((double)nprop[i])/sweeps)*100 << "%)" << std::endl;
-    }
-    output << "|-----------------------------------------------------------------|" << std::endl;
-    output.unsetf(std::ios_base::fixed);
-    output.precision(cur_prec);
-}
-*/
 
 void hybridization::sanity_check(const alps::params &parms){
 //check whether the input parameters make sense before computing

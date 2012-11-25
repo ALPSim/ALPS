@@ -143,7 +143,7 @@ void hybridization::create_measurements(){//called once in the constructor
     }
   }
   measurements.reset(true);
-  meas_count=0;
+
   //initialize measurement vectors
   sgn=0.;
   order_histogram.resize(n_orbitals, std::vector<double> (N_hist_orders, 0.));
@@ -170,9 +170,11 @@ void hybridization::create_measurements(){//called once in the constructor
 void hybridization::measure(){
   if(!is_thermalized()) return;
 
+  measure_order();
   accumulate_order();
+
+  measure_G();
   accumulate_G();
-  meas_count=0; //reset
 
   std::vector<std::map<double,double> > F_prefactor;
   if(MEASURE_freq || MEASURE_legendre || MEASURE_g2w || MEASURE_h2w)
@@ -199,6 +201,7 @@ void hybridization::measure(){
 
   if(MEASURE_g2w  || MEASURE_h2w) measure_G2w(F_prefactor); //accumulated during measurement to save memory
 
+  sweep_count = sweeps;
 }
 
 void hybridization::measure_order(){
@@ -215,12 +218,12 @@ void hybridization::measure_order(){
 }
 
 void hybridization::accumulate_order(){
-  measurements["order_histogram_total"]<<(order_histogram_total/(double)meas_count);
+  measurements["order_histogram_total"]<<(order_histogram_total);
   memset(&(order_histogram_total[0]), 0, sizeof(double)*order_histogram_total.size());
-  measurements["Sign"]<<(sgn/(double)meas_count); sgn=0.;
+  measurements["Sign"]<<(sgn); sgn=0.;
   for(std::size_t i=0;i<n_orbitals;++i){
-    measurements[order_names[i]]<<(orders[i]/(double)meas_count);
-    measurements[order_histogram_names[i]]<<(order_histogram[i]/(double)meas_count);
+    measurements[order_names[i]]<<(orders[i]);
+    measurements[order_histogram_names[i]]<<(order_histogram[i]);
     orders[i]=0.;
     memset(&(order_histogram[i][0]), 0, sizeof(double)*order_histogram[i].size());
   }
@@ -235,8 +238,8 @@ void hybridization::measure_G(){
 
 void hybridization::accumulate_G(){
   for(std::size_t i=0;i<n_orbitals;++i){
-    measurements[g_names[i]]<<(N_t*G[i]/(beta*beta*meas_count));
-    measurements[density_names[i]]<<(densities[i]/(double)meas_count);
+    measurements[g_names[i]]<<(N_t*G[i]/(beta*beta));
+    measurements[density_names[i]]<<(densities[i]);
     memset(&(G[i][0]), 0, sizeof(double)*G[i].size());
     densities[i]=0;
   }

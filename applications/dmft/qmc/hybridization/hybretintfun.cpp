@@ -53,6 +53,7 @@ void ret_int_fun::interaction_K_function_sanity_check(void){
 for(std::size_t i=0; i<ntime();++i)
   for(std::size_t j=0; j<nflavor();++j)
     if(operator()(i,j) < 0. && j==0) throw std::invalid_argument("Problem with retarded interaction function: RET_INT_K(\\tau) < 0. K should always be positive!");
+if(operator()(0,0)!=0.) throw std::invalid_argument("Problem with retarded interaction function: RET_INT_K(\\tau=0) must be zero.");
 }
 
 //this routine reads in the retarded interaction function, either from a text file or from an hdf5 file (for easy passing of binary data).
