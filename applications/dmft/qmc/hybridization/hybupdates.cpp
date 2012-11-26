@@ -68,7 +68,7 @@ void hybridization::update(){
   //one sweep is composed of N_MEAS Monte Carlo updates and one measurement (the latter only if thermalized)
   sweeps++;
 
-  if(VERBOSE && sweeps%10000==0 && crank==0) {
+  if(VERBOSE && sweeps%output_period==0 && crank==0) {
 //  if(VERBOSE && crank==0 && boost::chrono::steady_clock::now() - lasttime > delay) {
 //    lasttime = boost::chrono::steady_clock::now();
     int tot_acc=0,cur_prec = std::cout.precision();

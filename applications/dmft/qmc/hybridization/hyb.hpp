@@ -62,6 +62,7 @@ public:
 private:
   bool VERBOSE;
   int crank;
+  int output_period;
   //boost::chrono::steady_clock::time_point lasttime;
   //boost::chrono::steady_clock::duration delay;
 

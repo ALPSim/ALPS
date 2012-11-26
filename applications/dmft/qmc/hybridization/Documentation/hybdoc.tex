@@ -23,7 +23,7 @@
 %\bibliographystyle{apsrev} %PRODUCES SPURIOUS EMPTY REFERENCE 1 AND 2
 \begin{document}
 \newcommand{\Emanuel}{\href{mailto:gull@pks.mpg.de}{Emanuel }}
-\title{Documentation -- Hybridization Expansion CT-QMC solver\\ version 3.0}
+\title{Documentation -- Hybridization Expansion CT-QMC solver\\ version 3.0b1}
 \author{Emanuel Gull}
 \affiliation{Max Planck Institute for the Physics of Complex Systems, Dresden, Germany}
 \affiliation{Physics Department, University of Michigan, Ann Arbor, MI}
@@ -312,12 +312,12 @@ The interaction matrix will be read from an hdf5 archive if \verb#UMATRIX_IN_HDF
 The following parameters are required for any simulation. The code will not work unless all of them are provided.
 
 \begin{itemize}
-\item \verb#SWEEPS#=\{\emph{natural number}\}is the total number of Monte Carlo sweeps. The code exits either after it has done at least \verb#SWEEPS# Monte Carlo sweeps or after the maximum time has been reached.
+\item \verb#N_MEAS#=\{\emph{natural number}\} specifies how many updates need to be done between measurements. For e.g. \verb#N_MEAS=50#, $50$ modifications of the Monte Carlo configuration (such as segment insertions and removals) are attempted between measurements.
+\item \verb#SWEEPS#=\{\emph{natural number}\}is the total number of Monte Carlo sweeps. A sweep consists of \verb#N_MEAS# attempted modifications of the Monte Carlo configuration and a single the measurement of the observables. The code exits either after it has done at least \verb#SWEEPS# Monte Carlo sweeps or after the maximum time has been reached.
 \item \verb#MAX_TIME#=\{\emph{natural number}\} is the maximum runtime of the code, in seconds.
 \item \verb#THERMALIZATION#=\{\emph{natural number}\} is the number of thermalization steps. These are steps that are done at the beginning that are needed to reach the equilibrium distribution.
 \item \verb#N_ORBITALS#=\{\emph{natural number}\} is the number of (spin-)orbitals. For the single impurity Anderson model this is two (spin up and spin down), Cerium would have $14$.
 \item \verb#SEED#=\{\emph{natural number}\} is the random number seed. 
-\item \verb#N_MEAS#=\{\emph{natural number}\} specifies how many updates need to be done between measurements. For e.g. \verb#N_MEAS=50#, $50$ segment insertions and removals are attempted between measurements.
 \item \verb#N_TAU#=\{\emph{natural number}\} specifies the number $N_{\tau}$ of $\tau$-points on which the Green function is measured, and also indicates the number of $\tau$-points on which the hybridization function and the retarded interaction are specified. The imaginary time at index $n$ is given by $\tau_{n}=n\beta/N_{\tau}$, where $n=0,\ldots,N_{\tau}$, so that the first point (index $n=0$) specifies $G(\tau=0)$, the last point (index $n=N_{\tau}$ specifies $G(\tau=\beta)$. Note that the number of imaginary time points hence is $N_{\tau}+1$.
 \item \verb#N_HISTOGRAM_ORDERS#=\{\emph{natural number}\} is the maximum expansion order to which the order histogram is measured. 
 \item \verb#DELTA#=\{\emph{filename}\} specifies the name of the file which contains the hybridization function input data (in text format).
@@ -348,7 +348,7 @@ The following optional parameters control the different measurements implemented
 \item \verb#MEASURE_nnt#=\{0,1\} turns on or off the measurement of the time dependent density-density correlation function. Requires \verb#N_nn#.
 \item \verb#N_nn#=\{\emph{natural number}\} specifies the number of imaginary time points for which the density-density correlation function is measured.
 \item \verb#MEASURE_g2w#=\{0,1\} turns on the measurement of the two-particle Green's function. Requires \verb#N_w2# and \verb#N_W#.
-\item \verb#MEASURE_h2w#=\{0,1\} turns on the measurement of the three-particle correlator $H$ (see Sec.\ref{2particle}). Requires \verb#N_w2# and \verb#N_W#.
+\item \verb#MEASURE_h2w#=\{0,1\} turns on the measurement of the three-particle correlator $H$ (see Sec.\ref{}). Requires \verb#N_w2# and \verb#N_W#.
 \item \verb#N_w2#=\{\emph{natural number}\} specifies the number $\tilde{N}_{\nu}$ of \emph{fermionic} frequencies for the two-particle Green's function or the correlator $H$. These quantities are measured for frequencies with indices $n=-\tilde{N}_{\nu}/2,\ldots,\tilde{N}_{\nu}/2-1$.
 \item \verb#N_W#=\{\emph{natural number}\} specifies the number $N_{\omega}$ of \emph{bosonic} frequencies $\omega_{m}=2\pi m/\beta$ for the two-particle Green's function or the correlator $H$. These quantities are measured for frequencies with indices $m=0,\ldots N_{\omega}-1$.
 \item \verb#MEASURE_nnw#=\{0,1\} turns on the measurement of the susceptibility in frequency. Requires \verb#N_W#.
@@ -363,6 +363,8 @@ The following optional parameters control the different measurements implemented
 \item \verb#TEXT_OUTPUT#=\{0,1\} specifies if the simulation results should be written to text-files in human-readable format (in addition to the hdf5 output).
 
 \item \verb#VERBOSE#=\{0,1\} When turned on, some additional information (e.g. which measurements are turned on) is displayed when starting the simulation.
+
+\item \verb#OUTPUT_PERIOD#=\{natural number\} If \verb#VERBOSE=1#, it specifies the number of sweeps after which simulation details of the master thread (acceptance ratios etc.) are printed to \verb#stdout#. The default value is $100\,000$.
 
 \item \verb#DELTA_IN_HDF5#=\{0,1\} specifies whether the hybridization function to be read from an hdf5 archive. The data must be stored in the path \verb#/Delta#. For details on the file format, see Sec. \ref{hybridization}.
 
