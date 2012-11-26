@@ -267,7 +267,7 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
         }
       }
     }
-    density=density/beta+(0.5*n_cluster_sites())/n_cluster_sites()*nflavor; //density such that 'half filling' corresponds to 1
+    density=density/beta/n_cluster_sites()+(0.5*n_cluster_sites())/n_cluster_sites()*nflavor; //density such that 'half filling' corresponds to 1
     if (compute_filling_) {
       std::cout<<"mu: "<<mu<<" filling "<<density<<" it: "<<mu_it<<" converged: "<<converged<<std::endl;
       //compute new chemical potential
@@ -854,8 +854,8 @@ double SimpleDCATransformer::compute_density(const nambu_matsubara_green_functio
     }
   }
   //compute density
-  density_up_part=(density_up_part+n_cluster_sites())/n_cluster_sites(); //density such that 'half filling' corresponds to 1
-  density_dn_hole=(density_dn_hole+n_cluster_sites())/n_cluster_sites(); //density such that 'half filling' corresponds to 1
+  density_up_part=(density_up_part+n_cluster_sites()/2.0)/n_cluster_sites(); //density such that 'half filling' corresponds to 1
+  density_dn_hole=(density_dn_hole+n_cluster_sites()/2.0)/n_cluster_sites(); //density such that 'half filling' corresponds to 1
   density=density_dn_hole+density_up_part;
   //std::cout<<"density total: "<<density<<std::endl;
 

@@ -3,10 +3,27 @@ find_package(ALPS REQUIRED NO_SYSTEM_ENVIRONMENT_PATH)
 include(${ALPS_USE_FILE})
 
 project (DMFT)
+<<<<<<< .mine
+#include_directories("/home/esg/alps_svn/")
+#include_directories("/Users/emanuel/alps_svn/")
+include_directories("/u/jleblanc/New/alps_svn/")
+#include_directories("/opt/local/include")
+#include_directories("/global/homes/g/gull/alps_svn/")
+#include_directories("/u/emg/alps_svn/")
+include_directories("/afs/@cell/common/soft/gsl/1.14/@sys/include")
+include_directories("/afs/@cell/common/soft/intel/impi/4.0.3/intel64/include")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -ipo -xHOST -openmp -O3 -DUSE_MPI -DNDEBUG -DMPICH_IGNORE_CXX_SEEK")
+=======
 include_directories("/home/leblanc/alps_svn/")
+>>>>>>> .r482
 
+<<<<<<< .mine
+link_directories("/opt/local/lib")
+link_directories("/afs/@cell/common/soft/gsl/1.14/@sys/lib")
+=======
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O3 -DUSE_MPI -DNDEBUG -mkl=sequential")
 include_directories("/home/leblanc/software/gsl-1.14/install/include")
+>>>>>>> .r482
 
 link_directories("/home/leblanc/software/gsl-1.14/install/lib/libgsl.so")
 
@@ -33,6 +50,13 @@ auxiliaryfunctions.C externalsolver.C hirschfyesim.C main.C
 ../DMFT-solvers/Rubtsov/rubtsov_fourpoint.cpp
 ../DMFT-solvers/Rubtsov/rubtsov_observables.cpp
 ../DMFT-solvers/Rubtsov/rubtsov_selfenergy.cpp)
+<<<<<<< .mine
+add_executable(energy ../DMFT-solvers/Rubtsov/energy.cpp
+../DMFT-solvers/Rubtsov/obs_auxiliary.cpp clustertransformer.C
+hilberttransformer.C clusterhelper.C fouriertransform.C 2dsimpson.C
+auxiliaryfunctions.C
+)
+=======
 
 add_executable(dmft-rerun 
 2dsimpson.C clusterhelper.C fouriertransform.C selfconsistency.C
@@ -83,13 +107,14 @@ auxiliaryfunctions.C externalsolver.C hirschfyesim.C main.C
 #hilberttransformer.C clusterhelper.C fouriertransform.C 2dsimpson.C
 #auxiliaryfunctions.C
 #)
+>>>>>>> .r482
 #add_executable(kspace_interpolate interpolate.C clusterhelper.C
 #fouriertransform.C auxiliaryfunctions.C
 #clustertransformer.C)
 #target_link_libraries(kspace_interpolate ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})
-#add_executable(sigma_interpolate_sc sigma_interpolate_sc.C
-#auxiliaryfunctions.C clustertransformer.C clusterhelper.C
-#fouriertransform.C)
+add_executable(sigma_interpolate_sc sigma_interpolate_sc.C
+auxiliaryfunctions.C clustertransformer.C clusterhelper.C
+fouriertransform.C)
 
 add_executable(sigma_interpolate sigma_interpolate_normal.C
 auxiliaryfunctions.C clustertransformer.C clusterhelper.C
@@ -102,13 +127,21 @@ add_executable(hdf5_changeval hdf5_changeval.C)
 target_link_libraries(dmft ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} gsl gslcblas pthread)
 target_link_libraries(dmft-rerun ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} gsl gslcblas pthread)
 target_link_libraries(dmft-filling ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} gsl gslcblas pthread)
+<<<<<<< .mine
+target_link_libraries(energy ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
+target_link_libraries(sigma_interpolate ${ALPS_LIBRARIES}
+${LAPACK_LIBRARY} gsl gslcblas pthread)
+target_link_libraries(sigma_interpolate_sc ${ALPS_LIBRARIES}
+${LAPACK_LIBRARY} gsl gslcblas pthread)
+target_link_libraries(kspace_interpolate ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})
+=======
 #target_link_libraries(energy ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
 target_link_libraries(sigma_interpolate ${ALPS_LIBRARIES}
 ${LAPACK_LIBRARY} gsl gslcblas pthread)
 #target_link_libraries(sigma_interpolate_sc ${ALPS_LIBRARIES}
 #${LAPACK_LIBRARY} gsl gslcblas pthread)
 #target_link_libraries(kspace_interpolate ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})
+>>>>>>> .r482
 
 target_link_libraries(bg_parameter ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})
 target_link_libraries(hdf5_changeval ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})
-
