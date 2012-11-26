@@ -87,7 +87,8 @@ MaxEntHelper::vector_type MaxEntHelper::get_spectrum(const vector_type& u) const
 
 
 
-//'left side' is defined as Sigma*Sigma*(V^T*RealSpace(u)*V)*2/ndat
+//'left side' is defined as Sigma*(V^T*RealSpace(u)*V)*Sigma
+//see Bryan's paper near Eq. 11 
 MaxEntHelper::matrix_type MaxEntHelper::left_side(const vector_type& u) const 
 {
   vector_type A = transform_into_real_space(u);

@@ -166,6 +166,7 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
       //double omegan = (2*i+1)*M_PI*T_;
       for (int j=0; j<ntab; ++j) {
         double Omega = freq[j]; 
+        if(Omega ==0) throw std::runtime_error("Bosonic kernel is singular at frequency zero. Please use grid w/o evaluation at zero.");
         K_(i,j) =  -Omega*Omega / (Omegan*Omegan + Omega*Omega);
       }
     }

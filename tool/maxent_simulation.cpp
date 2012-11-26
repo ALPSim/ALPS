@@ -5,6 +5,7 @@
  * Copyright (C) 2010 by Sebastian  Fuchs <fuchs@comp-phys.org>
  *                       Thomas Pruschke <pruschke@comp-phys.org>
  *                       Matthias Troyer <troyer@comp-phys.org>
+ *               2012 by Emanuel Gull <gull@pks.mpg.de>
  *
  * This software is part of the ALPS Applications, published under the ALPS
  * Application License; you can use, redistribute it and/or modify it under
@@ -161,6 +162,18 @@ void MaxEntSimulation::dostep()
       maxspec_anom_str << omega_coord(i) << " " << spectra[max_a][i]*norm*omega_coord(i)*M_PI << std::endl;
     }
   }
+  if(parms["KERNEL"]=="bosonic"){ //for the anomalous function: use A(Omega)=Im chi(Omega)/(pi Omega) (as for anomalous)
+    std::ofstream maxspec_anom_str(boost::filesystem::absolute(name+"maxspec_bose.dat", dir).string().c_str());
+    std::ofstream avspec_anom_str (boost::filesystem::absolute(name+"avspec_bose.dat", dir).string().c_str());
+    for (std::size_t  i=0; i<avspec.size(); ++i){ 
+      //if(omega_coord(i)>=0.)
+      avspec_anom_str << omega_coord(i) << " " << avspec[i]*norm*omega_coord(i)*M_PI<<std::endl;
+    }
+    for (std::size_t i=0; i<spectra[0].size(); ++i){
+      //if(omega_coord(i)>=0.)
+      maxspec_anom_str << omega_coord(i) << " " << spectra[max_a][i]*norm*omega_coord(i)*M_PI << std::endl;
+    }
+  }
   if(parms.defined("SELF")){
     // A quick word about normalization here. Usually we have G(iomega_n) = -1/pi \int_{-\infty}^\infty Im G(omega)/(omega_n - omega).
     // However, we are not interested in Im G but instead in A. In the case of the self-energy we have, analogously,
@@ -211,6 +224,7 @@ MaxEntSimulation::vector_type MaxEntSimulation::levenberg_marquardt(vector_type 
       else if (mu<1e20) {
         mu *= nu;
       }
+      
     } 
     u += delta;
     if (convergence(u, alpha)<=1e-4)

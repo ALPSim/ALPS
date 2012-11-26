@@ -55,8 +55,7 @@ class DefaultModel
 public:
   DefaultModel(const alps::Parameters& p) : 
     omega_max(p["OMEGA_MAX"]), 
-    omega_min((p["KERNEL"] == "bosonic") ? 0. : 
-          static_cast<double>(p.value_or_default("OMEGA_MIN", -omega_max))),
+    omega_min(static_cast<double>(p.value_or_default("OMEGA_MIN", -omega_max))), //we had a 0 here in the bosonic case. That's not a good idea if you're continuing symmetric functions like chi(omega)/omega. Change omega_min to zero manually if you need it.
     blow_up_(p.value_or_default("BLOW_UP", 1.))
   {}
 
@@ -210,10 +209,14 @@ public:
       Def.push_back(D);
     }
     double omega_max = p["OMEGA_MAX"]; 
-    double omega_min = (p["KERNEL"] == "bosonic") ? 0. : 
-         static_cast<double>(p.value_or_default("OMEGA_MIN", -omega_max));
-    if (Omega[0]!=omega_min || Omega[Omega.size()-1]!=omega_max)
+    double omega_min(static_cast<double>(p.value_or_default("OMEGA_MIN", -omega_max))); //we had a 0 here in the bosonic case. That's not a good idea if you're continuing symmetric functions like chi(omega)/omega. Change omega_min to zero manually if you need it.
+    //double omega_min = (p["KERNEL"] == "bosonic") ? 0. : 
+    //     static_cast<double>(p.value_or_default("OMEGA_MIN", -omega_max));
+    if (Omega[0]!=omega_min || Omega[Omega.size()-1]!=omega_max){
+      std::cout<<"Omega[ 0] "<<Omega[0]<<" omega min: "<<omega_min<<std::endl;
+      std::cout<<"Omega[-1] "<<Omega[Omega.size()-1]<<" omega max: "<<omega_max<<std::endl;
       boost::throw_exception(std::invalid_argument("invalid omega range for default model"));
+    }
   }
   
   double operator()(const double omega) {
