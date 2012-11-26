@@ -26,6 +26,10 @@ if (ALPS_BUILD_EXAMPLES)
 
     endforeach(name)
 
+    add_executable(ngs_parapack_ising parapack.cpp)
+    # add_dependencies(ngs_parapack_ising alps)
+    target_link_libraries(ngs_parapack_ising alps)
+
     if (MPI_FOUND)
 
         foreach (name mpi mpi_pscan mpi_controlthread_tiny mpi_server_tiny parallel)
