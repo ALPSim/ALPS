@@ -50,13 +50,13 @@
 #include <iostream>
 #include <stdexcept>
 
-enum { ENERGY_OBS, MAGNETIZATION_OBS, MAGNETIZATION_2_OBS, MAGNETIZATION_4_OBS, CORRELATIONS_OBS, N_OBS };
-
 class ising_sim {
 
     typedef std::vector<alps::mcobservable> observables_type;
 
     public:
+
+        enum { ENERGY_OBS, MAGNETIZATION_OBS, MAGNETIZATION_2_OBS, MAGNETIZATION_4_OBS, CORRELATIONS_OBS, N_OBS };
 
         typedef alps::params parameters_type;
         typedef std::vector<alps::mcresult> results_type;
@@ -324,11 +324,11 @@ int main(int argc, char *argv[]) {
         using alps::collect_results;
         alps::results_type<ising_sim>::type results = collect_results(sim);
 
-        std::cout << "Energy          : " << results[ENERGY_OBS] << std::endl;
-        std::cout << "Magnetization   : " << results[MAGNETIZATION_OBS] << std::endl;
-        std::cout << "Magnetization^2 : " << results[MAGNETIZATION_2_OBS] << std::endl;
-        std::cout << "Magnetization^4 : " << results[MAGNETIZATION_4_OBS] << std::endl;
-        std::cout << "Correlations    : " << results[CORRELATIONS_OBS] << std::endl;
+        std::cout << "Energy          : " << results[ising_sim::ENERGY_OBS] << std::endl;
+        std::cout << "Magnetization   : " << results[ising_sim::MAGNETIZATION_OBS] << std::endl;
+        std::cout << "Magnetization^2 : " << results[ising_sim::MAGNETIZATION_2_OBS] << std::endl;
+        std::cout << "Magnetization^4 : " << results[ising_sim::MAGNETIZATION_4_OBS] << std::endl;
+        std::cout << "Correlations    : " << results[ising_sim::CORRELATIONS_OBS] << std::endl;
 
         alps::hdf5::archive ar(options.outputfile, "w");
         ar["/parameters"] << parameters;

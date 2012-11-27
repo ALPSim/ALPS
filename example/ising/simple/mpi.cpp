@@ -25,31 +25,41 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <alps/ngs.hpp>
+#include <alps/ngs/api.hpp>
 #include <alps/ngs/hdf5.hpp>
 #include <alps/ngs/config.hpp>
 #include <alps/ngs/signal.hpp>
 #include <alps/ngs/params.hpp>
 #include <alps/ngs/boost_mpi.hpp>
-#include <alps/ngs/mcresults.hpp> // TODO: replace by new alea
-#include <alps/ngs/mcobservables.hpp> // TODO: replace by new alea
+#include <alps/ngs/mcresults.hpp>
+#include <alps/ngs/mcobservables.hpp>
+#include <alps/ngs/observablewrappers.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 #include <alps/ngs/scheduler/check_schedule.hpp>
 
-#include <alps/random/mersenne_twister.hpp>
+#include <alps/random/mersenne_twister.hpp> // TODO: why do we need this?
 
+#include <boost/chrono.hpp>
 #include <boost/function.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/lambda/lambda.hpp>
+#include <boost/program_options.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
 
 #include <vector>
 #include <string>
+#include <iostream>
+#include <stdexcept>
 
 class ising_sim {
 
-    typedef enum { NOOP_TAG, CHECKPOINT_TAG, FRACTION_TAG, STOP_TAG } tag_type;
+    #ifdef ALPS_NGS_USE_NEW_ALEA
+        typedef alea::accumulator_set observables_type;
+    #else
+        typedef alps::mcobservables observables_type;
+    #endif
 
     public:
 
@@ -57,21 +67,15 @@ class ising_sim {
         typedef alps::mcresults results_type;
         typedef std::vector<std::string> result_names_type;
 
-        // TODO: use new alea
-        #ifdef ALPS_NGS_USE_NEW_ALEA
-            typedef alea::accumulator_set observables_type;
-        #else
-            typedef alps::mcobservables observables_type;
-        #endif
-
-        ising_sim(parameters_type const & p, boost::mpi::communicator const & c, double t_min = 1, double t_max = 600)
-            : communicator(c)
-            , parameters(p)
-            // TODO: this ist not the best solution - any idea?
-            , random(boost::mt19937((parameters["SEED"] | 42) + c.rank()), boost::uniform_real<>())
+        ising_sim(parameters_type const & parameters, boost::mpi::communicator const & comm, double t_min = 1, double t_max = 600)
+            : communicator(comm)
+            , params(parameters)
+            // TODO: this ist not the nicest solution - any idea?
+            , random(boost::mt19937((parameters["SEED"] | 42) + comm.rank()), boost::uniform_real<>())
             , schedule(t_min, t_max)
-            , binnumber(p["binnumber"] | std::min(128, 2 * c.size()))
-            , fraction(0.)
+            , realization("0")
+            , clone(boost::lexical_cast<std::string>(comm.size()))
+            , binnumber(parameters["BINNUMBER"] | std::min(128, 2 * comm.size()))
             , length(parameters["L"])
             , sweeps(0)
             , thermalization_sweeps(int(parameters["THERMALIZATION"]))
@@ -134,38 +138,26 @@ class ising_sim {
 
         void save(boost::filesystem::path const & filename) const {
             alps::hdf5::archive ar(filename, "w");
-            ar["/checkpoint"] << *this;
+            ar << *this;
         }
 
         void load(boost::filesystem::path const & filename) {
             alps::hdf5::archive ar(filename);
-            ar["/checkpoint"] >> *this;
+            ar >> *this;
         }
 
-        void save(alps::hdf5::archive & ar) const {
-            ar["/parameters"] << parameters;
-            ar["/simulation/realizations/0/clones/0/results"] << measurements;
-            // TODO: should we save sweeps? or state?
-        }
-
-        // TODO: do we want to load the parameters?
-        void load(alps::hdf5::archive & ar) {
-            ar["/simulation/realizations/0/clones/0/results"] >> measurements;
-        }
-
-        bool run(
-              boost::function<bool ()> const & stop_callback
-        ) {
-            bool done = false, stopped;
+        bool run(boost::function<bool ()> const & stop_callback) {
+            bool done = false, stopped = false;
             do {
                 update();
                 measure();
-                if (schedule.pending() || (stopped = stop_callback()))
+                if ((stopped = stop_callback()) || schedule.pending())
                     done = communicate(stopped);
             } while(!done);
             return !stopped;
         }
 
+        // implement a nice keys(m) function
         result_names_type result_names() const {
             result_names_type names;
             for(observables_type::const_iterator it = measurements.begin(); it != measurements.end(); ++it)
@@ -193,25 +185,67 @@ class ising_sim {
             return partial_results;
         }
 
-        // TODO: how do we want to call that?
-        double get_random() const { return random(); }
-
-        parameters_type & get_parameters() { return parameters; }
-        parameters_type const & get_parameters() const { return parameters; }
-
-        observables_type & get_measurements() { return measurements; }
-        observables_type const & get_measurements() const { return measurements; }
+        parameters_type const & parameters() const { return params; }
 
     private:
 
+        friend void alps::hdf5::save<ising_sim>(
+              alps::hdf5::archive &
+            , std::string const &
+            , ising_sim const &
+            , std::vector<std::size_t>
+            , std::vector<std::size_t>
+            , std::vector<std::size_t>
+        );
+
+        void save(alps::hdf5::archive & ar) const {
+            ar["/parameters"] << params;
+            std::string context = ar.get_context();
+            ar.set_context("/simulation/realizations/" + realization + "/clones/" + clone);
+
+            ar["length"] << length; // TODO: where to put the checkpoint informations?
+            ar["sweeps"] << sweeps;
+            ar["thermalization_sweeps"] << thermalization_sweeps;
+            ar["beta"] << beta;
+            ar["spins"] << spins;
+            ar["measurements"] << measurements;
+            // TODO: hwo do we save the state of the random numer generator?
+
+            ar.set_context(context);
+        }
+
+        friend void alps::hdf5::load<ising_sim>(
+              alps::hdf5::archive &
+            , std::string const &
+            , ising_sim &
+            , std::vector<std::size_t>
+            , std::vector<std::size_t>
+        );
+
+        void load(alps::hdf5::archive & ar) {
+            ar["/parameters"] >> params; // TODO: do we want to load the parameters?
+
+            std::string context = ar.get_context();
+            ar.set_context("/simulation/realizations/" + realization + "/clones/" + clone);
+
+            ar["length"] >> length;
+            ar["sweeps"] >> sweeps;
+            ar["thermalization_sweeps"] >> thermalization_sweeps;
+            ar["beta"] >> beta;
+            ar["spins"] >> spins;
+            ar["measurements"] >> measurements;
+
+            ar.set_context(context);
+        }
+
         bool communicate(bool stop) {
-            double local_fraction = stop
+            double local_fraction = (stop
                 ? 1.
                 : (sweeps < thermalization_sweeps
                     ? 0.
                     : (sweeps - thermalization_sweeps) / double(total_sweeps)
                   )
-            ;
+            );
             if (!communicator.rank()) {
                 boost::mpi::reduce(communicator, local_fraction, fraction, std::plus<double>(), 0);
                 boost::mpi::broadcast(communicator, fraction, 0);
@@ -225,13 +259,17 @@ class ising_sim {
 
         boost::mpi::communicator communicator;
 
-        parameters_type parameters;
+        parameters_type params;
         boost::variate_generator<boost::mt19937, boost::uniform_real<> > mutable random;
         observables_type measurements;
+
         alps::check_schedule schedule;
+        double fraction;
+
+        std::string realization;
+        std::string clone;
 
         std::size_t binnumber;
-        double fraction;
 
         int length;
         int sweeps;
@@ -241,45 +279,103 @@ class ising_sim {
         std::vector<int> spins;
 };
 
+struct args {
+    args(int argc, char *argv[]) {
+        boost::program_options::options_description options("Options");
+        options.add_options()
+            ("continue,c", "load simulation from checkpoint")
+            ("timelimit,T", boost::program_options::value<std::size_t>(&timelimit)->default_value(0), "time limit for the simulation")
+            ("inputfile", boost::program_options::value<std::string>(&inputfile), "input file in hdf5 or xml format")
+            ("outputfile", boost::program_options::value<std::string>(&outputfile)->default_value(""), "output file in hdf5 format")
+        ;
+        boost::program_options::positional_options_description positional;
+        positional
+            .add("inputfile", 1)
+            .add("outputfile", 1)
+        ;
+
+        try {
+            boost::program_options::variables_map variables;
+            boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(options).positional(positional).run(), variables);
+            boost::program_options::notify(variables);
+
+            resume = variables.count("continue");
+            checkpointfile = (outputfile.empty()
+                ? inputfile.substr(0, inputfile.find_last_of('.'))
+                : outputfile.substr(0, outputfile.find_last_of('.'))
+            ) +  ".clone0.h5";
+            if (outputfile.empty())
+                outputfile = inputfile.substr(0, inputfile.find_last_of('.')) +  ".out.h5";
+        } catch (...) {
+            std::cerr << "usage: [-T timelimit] [-c] inputfile [outputfile]" << std::endl;
+            std::cerr << options << std::endl;
+            std::abort();
+        }
+    }
+
+    bool resume;
+    std::size_t timelimit;
+    std::string inputfile;
+    std::string outputfile;
+    std::string checkpointfile;
+};
+
+struct stop_callback {
+    stop_callback(std::size_t timelimit)
+        : limit(timelimit)
+        , start(boost::chrono::high_resolution_clock::now())
+    {}
+
+    bool operator()() {
+        return !signals.empty() 
+            || (limit.count() > 0 && boost::chrono::high_resolution_clock::now() > start + limit);
+    }
+
+    boost::chrono::duration<std::size_t> limit;
+    alps::ngs::signal signals;
+    boost::chrono::high_resolution_clock::time_point start;
+};
+
 int main(int argc, char *argv[]) {
 
     try {
-
-        // TODO: improve this! how should we specify the options?
-        alps::mcoptions options(argc, argv);
+        args options(argc, argv);
 
         boost::mpi::environment env(argc, argv);
-        boost::mpi::communicator c;
+        boost::mpi::communicator comm;
 
         alps::parameters_type<ising_sim>::type parameters;
-        if (c.rank() == 0)
-            parameters = alps::make_parameters_from_xml(options.input_file);
-        broadcast(c, parameters);
+        if (comm.rank() == 0) {
+            std::string suffix = options.inputfile.substr(options.inputfile.find_last_of('.'));
+            if (suffix == ".xml")
+                parameters = alps::make_parameters_from_xml(options.inputfile);
+            else if (suffix == ".h5")
+                alps::hdf5::archive(options.inputfile)["/parameters"] >> parameters;
+            else
+                throw std::runtime_error("Unsupported input formant: " + suffix + "!");
+        }
+        broadcast(comm, parameters);
 
-        ising_sim sim(parameters, c);
+        ising_sim sim(parameters, comm);
 
         // TODO: who should add the suffix to the checkpoint file?
-        std::string checkpoint_file = options.checkpoint_file + ".clone" + boost::lexical_cast<std::string>(c.rank()) + ".h5";
-        if (!options.checkpoint_file.empty() && boost::filesystem::exists(checkpoint_file))
-            sim.load(checkpoint_file);
+        std::string checkpointfile = options.checkpointfile + ".clone" + boost::lexical_cast<std::string>(comm.rank()) + ".h5";
+        if (options.resume && boost::filesystem::exists(checkpointfile))
+            sim.load(checkpointfile);
 
-        {
-            using alps::stop_callback;
-            sim.run(boost::bind(&alps::stop_callback, options.time_limit));
-        }
+        sim.run(stop_callback(options.timelimit));
 
-        if (!options.checkpoint_file.empty())
-            sim.save(checkpoint_file);
+        if (options.resume)
+            sim.save(checkpointfile);
 
-        {
-            using alps::save_results;
-            using alps::collect_results;
-            alps::results_type<ising_sim>::type results = collect_results(sim);
+        using alps::collect_results;
+        alps::results_type<ising_sim>::type results = collect_results(sim);
 
-            if (c.rank() == 0) {
-                std::cout << results << std::endl;
-                save_results(results, parameters, options.output_file, "/simulation/results");
-            }
+        if (comm.rank() == 0) {
+            std::cout << results << std::endl;
+            alps::hdf5::archive ar(options.outputfile, "w");
+            ar["/parameters"] << parameters;
+            ar["/simulation/results"] << results;
         }
 
     } catch (std::exception const & e) {
