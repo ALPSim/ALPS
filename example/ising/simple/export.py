@@ -43,7 +43,7 @@ def main(limit, resume, output):
 
     if resume == 't':
         try:
-            sim.load(output[0:output.rfind(".h5")] + "clone0.h5")
+            sim.load(output[0:output.rfind('.h5')] + 'clone0.h5')
         except ArchiveNotFound: pass
 
     if limit == 0:
@@ -53,14 +53,14 @@ def main(limit, resume, output):
         sim.run(lambda: time.time() > start + float(limit))
 
     if resume == 't':
-        ngs.archive(output[0:output.rfind(".h5")] + "clone0.h5", 'w')
+        ngs.archive(output[0:output.rfind('.h5')] + 'clone0.h5', 'w')
 
     results = sim.collectResults() # TODO: how should we do that?
     print results
 
     ar = ngs.archive(output, 'w')
-    ar["/parameters"] = sim.parameters;
-    ar["/simulation/results"] = results;
+    ar['/parameters'] = sim.parameters;
+    ar['/simulation/results'] = results;
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     apply(main, sys.argv[1:])

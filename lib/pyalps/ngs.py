@@ -58,7 +58,11 @@ class ObservablesOperators:
         other.addToObservables(self)
 observables.__bases__ = (ObservablesOperators, MutableMapping, ) + observables.__bases__
 
+from pyngsobservable_c import createRealObservable #remove this with new ALEA!
+from pyngsobservable_c import createRealVectorObservable #remove this with new ALEA!
+
 from pyngsresult_c import result
+from pyngsresult_c import observable2result #remove this with new ALEA!
 
 from pyngsresults_c import results
 results.__bases__ = (MutableMapping, ) + results.__bases__
