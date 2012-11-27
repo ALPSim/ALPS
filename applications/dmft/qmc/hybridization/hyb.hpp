@@ -56,7 +56,8 @@ public:
   //Monte Carlo update and measurements functions
   void measure();
   void update();
-  double fraction_completed() const {return std::max((sweeps-thermalization_sweeps)/(double)total_sweeps,0.);}
+  bool is_thermalized() const { return (sweeps >= thermalization_sweeps); }
+  double fraction_completed() const {return is_thermalized()?(sweeps-thermalization_sweeps)/(double)total_sweeps:0.; }
   friend std::ostream &operator<<(std::ostream &os, const hybridization &hyb);
 
 private:
@@ -88,8 +89,6 @@ private:
   void accumulate_nnt();
   void accumulate_nnw();
   void accumulate_sector_statistics();
-
-  bool is_thermalized() const { return (sweeps >= thermalization_sweeps); }
 
   //Monte Carlo update routines
   void change_zero_order_state_update();
