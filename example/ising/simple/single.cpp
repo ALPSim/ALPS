@@ -140,8 +140,8 @@ class ising_sim {
         }
 
         bool run(boost::function<bool ()> const & stop_callback) {
-          bool stopped = false;
-          do {
+            bool stopped = false;
+            do {
                 update();
                 measure();
             } while(!(stopped = stop_callback()) && fraction_completed() < 1.);
@@ -196,7 +196,12 @@ class ising_sim {
             ar["beta"] << beta;
             ar["spins"] << spins;
             ar["measurements"] << measurements;
-            // TODO: hwo do we save the state of the random numer generator?
+
+            {
+                std::ostringstream os;
+                os << random.engine();
+                ar["engine"] << os.str();
+            }
 
             ar.set_context(context);
         }
@@ -221,6 +226,13 @@ class ising_sim {
             ar["beta"] >> beta;
             ar["spins"] >> spins;
             ar["measurements"] >> measurements;
+
+            {
+                std::string state;
+                ar["engine"] >> state;
+                std::istringstream is(state);
+                is >> random.engine();
+            }
 
             ar.set_context(context);
         }

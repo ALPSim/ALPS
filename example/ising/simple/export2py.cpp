@@ -25,28 +25,34 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#define PY_ARRAY_UNIQUE_SYMBOL isingsim_PyArrayHandle
+
 #include <alps/ngs/api.hpp>
 #include <alps/ngs/hdf5.hpp>
 #include <alps/ngs/config.hpp>
 #include <alps/ngs/signal.hpp>
 #include <alps/ngs/params.hpp>
-#include <alps/ngs/boost_mpi.hpp>
 #include <alps/ngs/mcresults.hpp>
+#include <alps/ngs/boost_python.hpp>
 #include <alps/ngs/mcobservables.hpp>
 #include <alps/ngs/observablewrappers.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
-#include <alps/ngs/scheduler/check_schedule.hpp>
 
+#include <alps/python/make_copy.hpp>
 #include <alps/random/mersenne_twister.hpp> // TODO: why do we need this?
 
+#include <boost/bind.hpp>
 #include <boost/chrono.hpp>
 #include <boost/function.hpp>
-#include <boost/lexical_cast.hpp>
+#include <boost/python/dict.hpp>
 #include <boost/lambda/lambda.hpp>
+#include <boost/python/wrapper.hpp>
 #include <boost/program_options.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/python/overloads.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
+#include <boost/python/return_internal_reference.hpp>
 
 #include <vector>
 #include <string>
@@ -67,15 +73,11 @@ class ising_sim {
         typedef alps::mcresults results_type;
         typedef std::vector<std::string> result_names_type;
 
-        ising_sim(parameters_type const & parameters, boost::mpi::communicator const & comm, double t_min = 1, double t_max = 600)
-            : communicator(comm)
-            , params(parameters)
-            // TODO: this ist not the nicest solution - any idea?
-            , random(boost::mt19937((parameters["SEED"] | 42) + comm.rank()), boost::uniform_real<>())
-            , schedule(t_min, t_max)
+        ising_sim(parameters_type const & parameters)
+            : params(parameters)
+            , random(boost::mt19937((parameters["SEED"] | 42)), boost::uniform_real<>())
             , realization("0")
-            , clone(boost::lexical_cast<std::string>(comm.rank()))
-            , binnumber(parameters["BINNUMBER"] | std::min(128, 2 * comm.size()))
+            , clone("0")
             , length(parameters["L"])
             , sweeps(0)
             , thermalization_sweeps(int(parameters["THERMALIZATION"]))
@@ -133,7 +135,7 @@ class ising_sim {
         };
 
         double fraction_completed() const {
-            return fraction;
+            return (sweeps < thermalization_sweeps ? 0. : ( sweeps - thermalization_sweeps ) / double(total_sweeps));
         }
 
         void save(boost::filesystem::path const & filename) const {
@@ -147,13 +149,11 @@ class ising_sim {
         }
 
         bool run(boost::function<bool ()> const & stop_callback) {
-            bool done = false, stopped = false;
-            do {
+          bool stopped = false;
+          do {
                 update();
                 measure();
-                if ((stopped = stop_callback()) || schedule.pending())
-                    done = communicate(stopped);
-            } while(!done);
+            } while(!(stopped = stop_callback()) && fraction_completed() < 1.);
             return !stopped;
         }
 
@@ -175,13 +175,9 @@ class ising_sim {
 
         results_type collect_results(result_names_type const & names) const {
             results_type partial_results;
-            for(result_names_type::const_iterator it = names.begin(); it != names.end(); ++it) {
-                alps::mcresult result(measurements[*it]);
-                if (result.count())
-                    partial_results.insert(*it, result.reduce(communicator, binnumber));
-                else
-                    partial_results.insert(*it, result);
-            }
+            for(result_names_type::const_iterator it = names.begin(); it != names.end(); ++it)
+                // TODO: this is ugly make measurements[*it]
+                partial_results.insert(*it, alps::mcresult(measurements[*it]));
             return partial_results;
         }
 
@@ -209,7 +205,7 @@ class ising_sim {
             ar["beta"] << beta;
             ar["spins"] << spins;
             ar["measurements"] << measurements;
-            
+
             {
                 std::ostringstream os;
                 os << random.engine();
@@ -250,31 +246,19 @@ class ising_sim {
             ar.set_context(context);
         }
 
-        bool communicate(bool stop) {
-            double local_fraction = (stop
-                ? 1.
-                : (sweeps < thermalization_sweeps
-                    ? 0.
-                    : (sweeps - thermalization_sweeps) / double(total_sweeps)
-                  )
-            );
-            schedule.update(fraction = boost::mpi::all_reduce(communicator, local_fraction, std::plus<double>()));
-            return fraction >= 1.;
-        }
+        friend double py_random(ising_sim &);
+        friend parameters_type py_parameters(ising_sim &);
+        friend observables_type py_measurements(ising_sim &);
 
-        boost::mpi::communicator communicator;
+        friend void py_save(ising_sim const &, alps::hdf5::archive &);
+        friend void py_load(ising_sim &, alps::hdf5::archive &);
 
         parameters_type params;
         boost::variate_generator<boost::mt19937, boost::uniform_real<> > mutable random;
         observables_type measurements;
 
-        alps::check_schedule schedule;
-        double fraction;
-
         std::string realization;
         std::string clone;
-
-        std::size_t binnumber;
 
         int length;
         int sweeps;
@@ -284,108 +268,44 @@ class ising_sim {
         std::vector<int> spins;
 };
 
-struct args {
-    args(int argc, char *argv[], int rank) {
-        boost::program_options::options_description options("Options");
-        options.add_options()
-            ("continue,c", "load simulation from checkpoint")
-            ("timelimit,T", boost::program_options::value<std::size_t>(&timelimit)->default_value(0), "time limit for the simulation")
-            ("inputfile", boost::program_options::value<std::string>(&inputfile), "input file in hdf5 or xml format")
-            ("outputfile", boost::program_options::value<std::string>(&outputfile)->default_value(""), "output file in hdf5 format")
-        ;
-        boost::program_options::positional_options_description positional;
-        positional
-            .add("inputfile", 1)
-            .add("outputfile", 1)
-        ;
+bool py_run_helper(boost::python::object stop_callback) {
+    return boost::python::call<bool>(stop_callback.ptr());
+}
+bool py_run(ising_sim & self, boost::python::object stop_callback) {
+    return self.run(boost::bind(py_run_helper, stop_callback));
+}
 
-        try {
-            boost::program_options::variables_map variables;
-            boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(options).positional(positional).run(), variables);
-            boost::program_options::notify(variables);
+ising_sim::results_type py_collect_results(ising_sim & self, ising_sim::result_names_type const & names = ising_sim::result_names_type()) {
+    return names.size() ? self.collect_results(names) : self.collect_results();
+}
+BOOST_PYTHON_FUNCTION_OVERLOADS(py_collect_results_overloads, py_collect_results, 1, 2)
 
-            resume = variables.count("continue");
-            checkpointfile = (outputfile.empty()
-                ? inputfile.substr(0, inputfile.find_last_of('.'))
-                : outputfile.substr(0, outputfile.find_last_of('.'))
-            ) +  ".clone" + boost::lexical_cast<std::string>(rank) + ".h5";
-            if (outputfile.empty())
-                outputfile = inputfile.substr(0, inputfile.find_last_of('.')) +  ".out.h5";
-        } catch (...) {
-            std::cerr << "usage: [-T timelimit] [-c] inputfile [outputfile]" << std::endl;
-            std::cerr << options << std::endl;
-            std::abort();
-        }
-    }
+double py_random(ising_sim & self) {
+    return self.random();
+}
 
-    bool resume;
-    std::size_t timelimit;
-    std::string inputfile;
-    std::string outputfile;
-    std::string checkpointfile;
-};
+void py_save(ising_sim const & self, alps::hdf5::archive & ar) {
+    self.save(ar);
+}
 
-struct stop_callback {
-    stop_callback(std::size_t timelimit)
-        : limit(timelimit)
-        , start(boost::chrono::high_resolution_clock::now())
-    {}
+void py_load(ising_sim & self, alps::hdf5::archive & ar) {
+    self.load(ar);
+}
 
-    bool operator()() {
-        return !signals.empty() 
-            || (limit.count() > 0 && boost::chrono::high_resolution_clock::now() > start + limit);
-    }
-
-    boost::chrono::duration<std::size_t> limit;
-    alps::ngs::signal signals;
-    boost::chrono::high_resolution_clock::time_point start;
-};
-
-int main(int argc, char *argv[]) {
-
-    try {
-        boost::mpi::environment env(argc, argv);
-        boost::mpi::communicator comm;
-
-        args options(argc, argv, comm.rank());
-        alps::parameters_type<ising_sim>::type parameters;
-        if (comm.rank() == 0) {
-            std::string suffix = options.inputfile.substr(options.inputfile.find_last_of('.'));
-            if (suffix == ".xml")
-                parameters = alps::make_parameters_from_xml(options.inputfile);
-            else if (suffix == ".h5")
-                alps::hdf5::archive(options.inputfile)["/parameters"] >> parameters;
-            else
-                throw std::runtime_error("Unsupported input formant: " + suffix + "!");
-        }
-        broadcast(comm, parameters);
-
-        ising_sim sim(parameters, comm);
-
-        if (options.resume && boost::filesystem::exists(options.checkpointfile))
-            sim.load(options.checkpointfile);
-
-        sim.run(stop_callback(options.timelimit));
-
-        if (options.resume)
-            sim.save(options.checkpointfile);
-
-        using alps::collect_results;
-        alps::results_type<ising_sim>::type results = collect_results(sim);
-
-        if (comm.rank() == 0) {
-            std::cout << results << std::endl;
-            alps::hdf5::archive ar(options.outputfile, "w");
-            ar["/parameters"] << parameters;
-            ar["/simulation/results"] << results;
-        }
-
-    } catch (std::exception const & e) {
-        std::cerr << "Caught exception: " << e.what() << std::endl;
-        return EXIT_FAILURE;
-    } catch (...) {
-        std::cerr << "Caught unknown exception" << std::endl;
-        return EXIT_FAILURE;
-    }
-    return EXIT_SUCCESS;
+// TODO: make this nicer ...
+BOOST_PYTHON_MODULE(exampleising_c) {
+    boost::python::class_<ising_sim>(
+          "sim",
+          boost::python::init<ising_sim::parameters_type const &>()
+    )
+        .add_property("random", &py_random)
+        .add_property("parameters", boost::python::make_function(&ising_sim::parameters, boost::python::return_internal_reference<>()))
+        .def("fraction_completed", &ising_sim::fraction_completed)
+        .def("run", &py_run)
+        .def("resultNames", &ising_sim::result_names)
+        .def("unsavedResultNames", &ising_sim::unsaved_result_names)
+        .def("collectResults", &py_collect_results, py_collect_results_overloads(boost::python::args("names")))
+        .def("save", &py_save)
+        .def("load", &py_load)
+    ;
 }

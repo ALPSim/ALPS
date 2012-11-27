@@ -28,7 +28,7 @@ if (ALPS_BUILD_EXAMPLES)
         add_dependencies(example_ising_mpi alps)
         target_link_libraries(example_ising_mpi alps)
 
-        add_test(ngs_ising_mpi
+        add_test(example_ising_mpi
             ${CMAKE_COMMAND}
                 -Dcmd=ngs_ising_mpi
                 -Dmpiexec=${MPIEXEC}
@@ -41,5 +41,44 @@ if (ALPS_BUILD_EXAMPLES)
         )
 
     endif(MPI_FOUND)
+
+    if (ALPS_HAVE_PYTHON)
+
+        set(ALPS_SHARED_CPPFLAGS ALPS_EXPORTS=1)
+        set(ALPS_STATIC_CPPFLAGS "")
+
+        python_add_module(exampleising_c export2py.cpp)
+
+        if(BUILD_SHARED_LIBS)
+            set_target_properties(exampleising_c PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
+            set_target_properties(exampleising_c PROPERTIES PREFIX "")
+            if(WIN32 AND NOT UNIX)
+                set_target_properties(exampleising_c PROPERTIES SUFFIX ".pyd")
+            endif(WIN32 AND NOT UNIX)
+        endif(BUILD_SHARED_LIBS)
+        target_link_libraries(exampleising_c alps ${LINK_LIBRARIES})
+
+        install(TARGETS exampleising_c
+                COMPONENT python
+                RUNTIME DESTINATION example/ising/simple
+                ARCHIVE DESTINATION example/ising/simple
+                LIBRARY DESTINATION example/ising/simple)
+
+        foreach (name export native)
+
+            add_test(example_ising_python_${name}
+                ${CMAKE_COMMAND}
+                    -Dcmd=${name}
+                    -Dpython_interpreter=${PYTHON_INTERPRETER}
+                    -Dsourcedir=${PROJECT_SOURCE_DIR}
+                    -Dbinarydir=${PROJECT_BINARY_DIR}
+                    -Dbindir=${PROJECT_BINARY_DIR}/bin
+                    -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
+                    -P ${CMAKE_CURRENT_SOURCE_DIR}/../tests/run_ngs_ising_python_test.cmake
+            )
+
+        endforeach (name)
+
+    endif(ALPS_HAVE_PYTHON)
 
 endif (ALPS_BUILD_EXAMPLES)
