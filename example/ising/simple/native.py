@@ -172,8 +172,8 @@ def main(limit, resume, output):
 
     sim = isingSim(ngs.params({
         'L': 100,
-        'THERMALIZATION': 1000,
-        'SWEEPS': 10000,
+        'THERMALIZATION': 100,
+        'SWEEPS': 1000,
         'T': 2
     }))
 
