@@ -17,7 +17,7 @@ if (ALPS_BUILD_EXAMPLES)
                 -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
                 -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
                 -Dbindir=${PROJECT_BINARY_DIR}/bin
-                -P ${CMAKE_CURRENT_SOURCE_DIR}/../tests/run_ngs_ising_test.cmake
+                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_test.cmake
         )
 
     endforeach(name)
@@ -30,14 +30,14 @@ if (ALPS_BUILD_EXAMPLES)
 
         add_test(example_ising_mpi
             ${CMAKE_COMMAND}
-                -Dcmd=ngs_ising_mpi
+                -Dcmd=example_ising_mpi
                 -Dmpiexec=${MPIEXEC}
                 -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
                 -Dprocs=4
                 -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
                 -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
                 -Dbindir=${PROJECT_BINARY_DIR}/bin
-                -P ${CMAKE_CURRENT_SOURCE_DIR}/../tests/run_ngs_ising_test.cmake
+                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_test.cmake
         )
 
     endif(MPI_FOUND)
@@ -74,7 +74,7 @@ if (ALPS_BUILD_EXAMPLES)
                     -Dbinarydir=${PROJECT_BINARY_DIR}
                     -Dbindir=${PROJECT_BINARY_DIR}/bin
                     -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
-                    -P ${CMAKE_CURRENT_SOURCE_DIR}/../tests/run_ngs_ising_python_test.cmake
+                    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_python_test.cmake
             )
 
         endforeach (name)
