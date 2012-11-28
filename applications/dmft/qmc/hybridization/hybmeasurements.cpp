@@ -92,7 +92,7 @@ void hybridization::create_measurements(){//called once in the constructor
     nnw_re[i].resize(i+1);
     nn[i].resize(i);
 
-    if(MEASURE_g2w) G2w[i].resize(N_w_aux*N_w_aux);
+    if(MEASURE_g2w || MEASURE_h2w) G2w[i].resize(N_w_aux*N_w_aux);
     if(MEASURE_h2w) F2w[i].resize(N_w_aux*N_w_aux);
 
     //initialize measurements for observable names

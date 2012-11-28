@@ -113,7 +113,7 @@ void hybmatrix::measure_G2w(std::vector<std::complex<double> > &G2w, std::vector
 
       for(int w1n=0; w1n<N_w_aux; w1n++){
         for(int w2n=0; w2n<N_w_aux; w2n++){
-          if(measure_g2w_){
+          if(measure_g2w_ || measure_h2w_){
             std::complex<double> meas = M_ji*exp1*exp2;
             G2w[w1n*N_w_aux+w2n] += meas;
           }
