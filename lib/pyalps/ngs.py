@@ -74,6 +74,8 @@ class mcbase(mcbase_impl):
 
 from pyngsapi_c import collectResults, saveResults
 
+from pyngsrandom_c import random01
+
 from pyngshdf5_c import hdf5_archive_impl
 
 from pyngshdf5_c import register_archive_exception_type

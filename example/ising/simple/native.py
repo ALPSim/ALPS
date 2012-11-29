@@ -27,14 +27,14 @@
 
 import pyalps.ngs as ngs
 import numpy as np
-import sys, time, traceback
+import sys, time, traceback, getopt
 
 class isingSim:
 
     # TODO: how do we deal with typedefs?
 
     def __init__(self, params):
-        self.random = lambda: 0.4 # TODO: implement: random(boost::mt19937((params['SEED'] | 42)), boost::uniform_real<>())
+        self.random = ngs.random01(params.valueOrDefault('SEED', 42))
         self.parameters = params
         self.measurements = {
             'Energy':  ngs.createRealObservable('Energy'),
@@ -132,13 +132,7 @@ class isingSim:
             ar["beta"] = self.beta
             ar["spins"] = self.spins
             ar["measurements"] = self.measurements
-
-# TODO: implement
-#           {
-#               std::ostringstream os
-#               os << random.engine()
-#               ar["engine"] << os.str()
-#           }
+            ar["engine"] = self.random
 
             ar.set_context(context)
 
@@ -161,14 +155,7 @@ class isingSim:
             self.beta = ar["beta"]
             self.spins = ar["spins"]
             self.measurements = ar["measurements"]
-
-# TODO: implement
-#            {
-#                std::string state
-#                ar["engine"] >> state
-#                std::istringstream is(state)
-#                is >> random.engine()
-#            }
+            self.random.load(ar["engine"])
 
             ar.set_context(context)
 
@@ -176,8 +163,20 @@ class isingSim:
             traceback.print_exc(file=sys.stderr)
             raise
 
-# TODO: implement nice argv parsing ...
-def main(limit, resume, output):
+if __name__ == '__main__':
+
+    try:
+        optlist, positional = getopt.getopt(sys.argv[1:], 'T:c')
+        args = dict(optlist)
+        try:
+            limit = float(args['-T'])
+        except KeyError:
+            limit = 0
+        resume = True if 'c' in args else False
+        outfile = positional[0]
+    except (IndexError, getopt.GetoptError):
+        print 'usage: [-T timelimit] [-c] outputfile'
+        exit()
 
     sim = isingSim(ngs.params({
         'L': 100,
@@ -186,9 +185,9 @@ def main(limit, resume, output):
         'T': 2
     }))
 
-    if resume == 't':
+    if resume:
         try:
-            with ngs.archive(output[0:output.rfind('.h5')] + '.clone0.h5', 'r') as ar:
+            with ngs.archive(outfile[0:outfile.rfind('.h5')] + '.clone0.h5', 'r') as ar:
                 sim.load(ar['/'])
         except ArchiveNotFound: pass
 
@@ -198,17 +197,14 @@ def main(limit, resume, output):
         start = time.time()
         sim.run(lambda: time.time() > start + float(limit))
 
-    if resume == 't':
-        with ngs.archive(output[0:output.rfind('.h5')] + '.clone0.h5', 'w') as ar:
+    if resume:
+        with ngs.archive(outfile[0:outfile.rfind('.h5')] + '.clone0.h5', 'w') as ar:
             ar['/'] = sim
 
     results = sim.collectResults() # TODO: how should we do that?
     for key, value in results.iteritems():
         print "{}: {}".format(key, value)
 
-    with ngs.archive(output, 'w') as ar: # TODO: how sould we name archive? ngs.hdf5.archive?
+    with ngs.archive(outfile, 'w') as ar: # TODO: how sould we name archive? ngs.hdf5.archive?
         ar['/parameters'] = sim.parameters
         ar['/simulation/results'] = results
-
-if __name__ == '__main__':
-    apply(main, sys.argv[1:])

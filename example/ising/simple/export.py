@@ -27,12 +27,24 @@
 
 import pyalps.ngs as ngs
 import numpy as np
-import sys, time
+import sys, time, getopt
 
 import exampleising_c as ising
 
-# TODO: implement nice argv parsing ...
-def main(limit, resume, output):
+if __name__ == '__main__':
+
+    try:
+        optlist, positional = getopt.getopt(sys.argv[1:], 'T:c')
+        args = dict(optlist)
+        try:
+            limit = float(args['-T'])
+        except KeyError:
+            limit = 0
+        resume = True if 'c' in args else False
+        outfile = positional[0]
+    except (IndexError, getopt.GetoptError):
+        print 'usage: [-T timelimit] [-c] outputfile'
+        exit()
 
     sim = ising.sim(ngs.params({
         'L': 100,
@@ -41,9 +53,9 @@ def main(limit, resume, output):
         'T': 2
     }))
 
-    if resume == 't':
+    if resume:
         try:
-            with ngs.archive(output[0:output.rfind('.h5')] + '.clone0.h5', 'r') as ar:
+            with ngs.archive(outfile[0:outfile.rfind('.h5')] + '.clone0.h5', 'r') as ar:
                 sim.load(ar['/'])
         except ArchiveNotFound: pass
 
@@ -53,16 +65,13 @@ def main(limit, resume, output):
         start = time.time()
         sim.run(lambda: time.time() > start + float(limit))
 
-    if resume == 't':
-        with ngs.archive(output[0:output.rfind('.h5')] + '.clone0.h5', 'w') as ar:
+    if resume:
+        with ngs.archive(outfile[0:outfile.rfind('.h5')] + '.clone0.h5', 'w') as ar:
             ar['/'] = sim
 
     results = sim.collectResults() # TODO: how should we do that?
     print results
 
-    with ngs.archive(output, 'w') as ar: # TODO: how sould we name archive? ngs.hdf5.archive?
+    with ngs.archive(outfile, 'w') as ar: # TODO: how sould we name archive? ngs.hdf5.archive?
         ar['/parameters'] = sim.parameters
         ar['/simulation/results'] = results
-
-if __name__ == '__main__':
-    apply(main, sys.argv[1:])
