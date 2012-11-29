@@ -31,7 +31,7 @@ import sys, time
 
 import exampleising_c as ising
 
-#TODO: implement nice argv parsing ...
+# TODO: implement nice argv parsing ...
 def main(limit, resume, output):
 
     sim = ising.sim(ngs.params({
@@ -43,7 +43,8 @@ def main(limit, resume, output):
 
     if resume == 't':
         try:
-            sim.load(output[0:output.rfind('.h5')] + 'clone0.h5')
+            with ngs.archive(output[0:output.rfind('.h5')] + '.clone0.h5', 'r') as ar:
+                sim.load(ar['/'])
         except ArchiveNotFound: pass
 
     if limit == 0:
@@ -53,14 +54,15 @@ def main(limit, resume, output):
         sim.run(lambda: time.time() > start + float(limit))
 
     if resume == 't':
-        ngs.archive(output[0:output.rfind('.h5')] + 'clone0.h5', 'w')
+        with ngs.archive(output[0:output.rfind('.h5')] + '.clone0.h5', 'w') as ar:
+            ar['/'] = sim
 
     results = sim.collectResults() # TODO: how should we do that?
     print results
 
-    ar = ngs.archive(output, 'w')
-    ar['/parameters'] = sim.parameters;
-    ar['/simulation/results'] = results;
+    with ngs.archive(output, 'w') as ar: # TODO: how sould we name archive? ngs.hdf5.archive?
+        ar['/parameters'] = sim.parameters
+        ar['/simulation/results'] = results
 
 if __name__ == '__main__':
     apply(main, sys.argv[1:])

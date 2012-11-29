@@ -27,9 +27,12 @@
 
 import pyalps.ngs as ngs
 import numpy as np
-import sys, time
+import sys, time, traceback
 
 class isingSim:
+
+    # TODO: how do we deal with typedefs?
+
     def __init__(self, params):
         self.random = lambda: 0.4 # TODO: implement: random(boost::mt19937((params['SEED'] | 42)), boost::uniform_real<>())
         self.parameters = params
@@ -41,7 +44,7 @@ class isingSim:
             'Correlations': ngs.createRealVectorObservable('Correlations')
         }
 
-        self.length = int(params['L']);
+        self.length = int(params['L'])
         self.sweeps = 0
         self.thermalization_sweeps = long(params['THERMALIZATION'])
         self.total_sweeps = long(params['SWEEPS'])
@@ -53,7 +56,7 @@ class isingSim:
 
     def update(self):
         for j in range(self.length):
-            i = int(float(self.length) * self.random());
+            i = int(float(self.length) * self.random())
             right = i + 1 if i + 1 < self.length else 0
             left = self.length - 1 if i - 1 < 0 else i - 1
             p = np.exp(2. * self.beta * self.spins[i] * (self.spins[right] + self.spins[left]))
@@ -84,17 +87,13 @@ class isingSim:
     def fraction_completed(self):
         return 0 if self.sweeps < self.thermalization_sweeps else (self.sweeps - self.thermalization_sweeps) / float(self.total_sweeps)
 
-# TODO: implement
-#    void save(boost::filesystem::path const & filename) const {
-#        alps::hdf5::archive ar(filename, "w");
-#        ar << *this;
-#    }
+    def save(self, filename):
+        with ngs.archive(filename, 'w') as ar:
+            ar['/'] = self
 
-# TODO: implement
-#    void load(boost::filesystem::path const & filename) {
-#        alps::hdf5::archive ar(filename);
-#        ar >> *this;
-#    }
+    def load(self, filename):
+        with ngs.archive(filename, 'r') as ar:
+            self = ar['/']
 
     def run(self, stopCallback):
         stopped = False
@@ -108,10 +107,8 @@ class isingSim:
     def result_names(self):
         return self.measurements.keys()
 
-# TODO: implement
-#    result_names_type unsaved_result_names() const {
-#        return result_names_type(); 
-#    }
+    def unsaved_result_names(self):
+        return self.result_names_type(self)
 
     def collectResults(self, names = None):
         if names == None:
@@ -121,53 +118,65 @@ class isingSim:
             partial_results[name] = ngs.observable2result(self.measurements[name])
         return partial_results
 
-# TODO: implement
-#    void save(alps::hdf5::archive & ar) const {
-#        ar["/parameters"] << params;
-#        std::string context = ar.get_context();
-#        ar.set_context("/simulation/realizations/" + realization + "/clones/" + clone);
-#
-#        ar["length"] << length; // TODO: where to put the checkpoint informations?
-#        ar["sweeps"] << sweeps;
-#        ar["thermalization_sweeps"] << thermalization_sweeps;
-#        ar["beta"] << beta;
-#        ar["spins"] << spins;
-#        ar["measurements"] << measurements;
-#
-#        {
-#            std::ostringstream os;
-#            os << random.engine();
-#            ar["engine"] << os.str();
-#        }
-#
-#        ar.set_context(context);
-#    }
+    def save(self, ar):
+    
+        try:
+
+            ar["/parameters"] = self.parameters
+            context = ar.context
+            ar.set_context("/simulation/realizations/" + self.realization + "/clones/" + self.clone)
+
+            ar["length"] = self.length # TODO: where to put the checkpoint informations?
+            ar["sweeps"] = self.sweeps
+            ar["thermalization_sweeps"] = self.thermalization_sweeps
+            ar["beta"] = self.beta
+            ar["spins"] = self.spins
+            ar["measurements"] = self.measurements
 
 # TODO: implement
-#    void load(alps::hdf5::archive & ar) {
-#        ar["/parameters"] >> params; // TODO: do we want to load the parameters?
-#
-#        std::string context = ar.get_context();
-#        ar.set_context("/simulation/realizations/" + realization + "/clones/" + clone);
-#
-#        ar["length"] >> length;
-#        ar["sweeps"] >> sweeps;
-#        ar["thermalization_sweeps"] >> thermalization_sweeps;
-#        ar["beta"] >> beta;
-#        ar["spins"] >> spins;
-#        ar["measurements"] >> measurements;
-#
-#        {
-#            std::string state;
-#            ar["engine"] >> state;
-#            std::istringstream is(state);
-#            is >> random.engine();
-#        }
-#
-#        ar.set_context(context);
-#    }
+#           {
+#               std::ostringstream os
+#               os << random.engine()
+#               ar["engine"] << os.str()
+#           }
 
-#TODO: implement nice argv parsing ...
+            ar.set_context(context)
+
+        except:
+            traceback.print_exc(file=sys.stderr)
+            raise
+
+    def load(self,  ar):
+    
+        try:
+        
+            params.load(ar["/parameters"]) # TODO: do we want to load the parameters?
+
+            context = ar.context
+            ar.set_context("/simulation/realizations/" + self.realization + "/clones/" + self.clone)
+
+            self.length = ar["length"]
+            self.sweeps = ar["sweeps"]
+            self.thermalization_sweeps = ar["thermalization_sweeps"]
+            self.beta = ar["beta"]
+            self.spins = ar["spins"]
+            self.measurements = ar["measurements"]
+
+# TODO: implement
+#            {
+#                std::string state
+#                ar["engine"] >> state
+#                std::istringstream is(state)
+#                is >> random.engine()
+#            }
+
+            ar.set_context(context)
+
+        except:
+            traceback.print_exc(file=sys.stderr)
+            raise
+
+# TODO: implement nice argv parsing ...
 def main(limit, resume, output):
 
     sim = isingSim(ngs.params({
@@ -177,10 +186,11 @@ def main(limit, resume, output):
         'T': 2
     }))
 
-#    if resume == 't':
-#        try:
-#            sim.load(output[0:output.rfind('.h5')] + 'clone0.h5')
-#        except ArchiveNotFound: pass
+    if resume == 't':
+        try:
+            with ngs.archive(output[0:output.rfind('.h5')] + '.clone0.h5', 'r') as ar:
+                sim.load(ar['/'])
+        except ArchiveNotFound: pass
 
     if limit == 0:
         sim.run()
@@ -188,16 +198,17 @@ def main(limit, resume, output):
         start = time.time()
         sim.run(lambda: time.time() > start + float(limit))
 
-#    if resume == 't':
-#        ngs.archive(output[0:output.rfind('.h5')] + 'clone0.h5', 'w')
+    if resume == 't':
+        with ngs.archive(output[0:output.rfind('.h5')] + '.clone0.h5', 'w') as ar:
+            ar['/'] = sim
 
     results = sim.collectResults() # TODO: how should we do that?
     for key, value in results.iteritems():
         print "{}: {}".format(key, value)
 
-    ar = ngs.archive(output, 'w')
-    ar['/parameters'] = sim.parameters;
-    ar['/simulation/results'] = results;
+    with ngs.archive(output, 'w') as ar: # TODO: how sould we name archive? ngs.hdf5.archive?
+        ar['/parameters'] = sim.parameters
+        ar['/simulation/results'] = results
 
 if __name__ == '__main__':
     apply(main, sys.argv[1:])

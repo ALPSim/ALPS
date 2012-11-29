@@ -103,10 +103,14 @@ class archive(hdf5_archive_impl):
     def __init__(self, filename, mode = 'r'):
         hdf5_archive_impl.__init__(self, filename, mode)
 
-    def __enter__(self, *args, **kwargs):
+    @property # TODO: move to c++
+    def closed(self):
+        return not self.is_open
+
+    def __enter__(self, *args, **kwargs): # TODO: move to c++
         return self
 
-    def __exit__(self, *args, **kwargs):
+    def __exit__(self, *args, **kwargs): # TODO: move to c++
         self.close()
         return self
 
@@ -115,7 +119,7 @@ class archive(hdf5_archive_impl):
         Returns an XML formatted string of the archive.
         This function still needs to have attributes implemented.
         """
-        if self.closed: raise BaseException("I/O operation on closed file") #TODO: make archive_closed / ArchiveIOException("I/O operation on closed file")
+        if self.closed: raise ArchiveClosed("I/O operation on closed file")
         if self.is_group(path):
             ret = ""
             for child in self.list_children(path):
