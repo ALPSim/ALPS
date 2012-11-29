@@ -37,6 +37,7 @@ class isingSim:
         self.random = ngs.random01(params.valueOrDefault('SEED', 42))
         self.parameters = params
         self.measurements = {
+            #jan: constructor syntax would be nicer: ngs.RealObservable('X')
             'Energy':  ngs.createRealObservable('Energy'),
             'Magnetization': ngs.createRealObservable('Magnetization'),
             'Magnetization^2': ngs.createRealObservable('Magnetization^2'),

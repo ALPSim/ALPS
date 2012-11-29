@@ -77,7 +77,8 @@ class ising_sim {
         {
             for(int i = 0; i < length; ++i)
                 spins[i] = (random() < 0.5 ? 1 : -1);
-
+            
+            //jan: =8-O
             measurements[ENERGY_OBS] = boost::make_shared<alps::RealObservable>("Energy").get();
             measurements[MAGNETIZATION_OBS] = boost::make_shared<alps::RealObservable>("Magnetization").get();
             measurements[MAGNETIZATION_2_OBS] = boost::make_shared<alps::RealObservable>("Magnetization^2").get();
@@ -321,7 +322,7 @@ int main(int argc, char *argv[]) {
         else if (suffix == ".h5")
             alps::hdf5::archive(options.inputfile)["/parameters"] >> parameters;
         else
-            throw std::runtime_error("Unsupported input formant: " + suffix + "!");
+            throw std::runtime_error("Unsupported input format: " + suffix + "!");
 
         ising_sim sim(parameters);
 

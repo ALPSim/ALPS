@@ -132,7 +132,8 @@ class ising_sim {
                 measurements["Correlations"] << corr;
             }
         };
-
+        
+        //jan: unused, remove?
         double fraction_completed() const {
             return fraction;
         }

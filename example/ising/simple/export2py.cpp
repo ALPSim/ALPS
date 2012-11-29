@@ -298,6 +298,7 @@ BOOST_PYTHON_MODULE(exampleising_c) {
           "sim",
           boost::python::init<ising_sim::parameters_type const &>()
     )
+        //jan: why not restrict exports to necessary things? parameters, results, run, load, save?
         .add_property("random", &py_random)
         .add_property("parameters", boost::python::make_function(&ising_sim::parameters, boost::python::return_internal_reference<>()))
         .def("fraction_completed", &ising_sim::fraction_completed)

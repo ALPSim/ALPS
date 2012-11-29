@@ -25,6 +25,7 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+//jan: can we reduce the number of necessary includes?
 #include <alps/ngs/api.hpp>
 #include <alps/ngs/hdf5.hpp>
 #include <alps/ngs/config.hpp>
@@ -60,7 +61,8 @@ class ising_sim {
     #endif
 
     public:
-
+        
+        //jan: explanation why we need these typedefs?
         typedef alps::params parameters_type;
         typedef alps::mcresults results_type;
         typedef std::vector<std::string> result_names_type;
@@ -125,7 +127,9 @@ class ising_sim {
                 measurements["Correlations"] << corr;
             }
         };
-
+        
+        //jan: do we need this? run() could read
+        //   while( !stopped && sweeps < total_sweeps ) {...}
         double fraction_completed() const {
             return (sweeps < thermalization_sweeps ? 0. : ( sweeps - thermalization_sweeps ) / double(total_sweeps));
         }
@@ -148,6 +152,9 @@ class ising_sim {
             } while(!(stopped = stop_callback()) && fraction_completed() < 1.);
             return !stopped;
         }
+        
+        
+        //jan: do we need all these result functions? Doesn't one simple results() function suffice here?
 
         // implement a nice keys(m) function
         result_names_type result_names() const {
@@ -176,7 +183,8 @@ class ising_sim {
         parameters_type const & parameters() const { return params; }
 
     private:
-
+        
+        //jan: somewhat ugly. Why can't load(archive&) and save(archive&) be public?
         friend void alps::hdf5::save<ising_sim>(
               alps::hdf5::archive &
             , std::string const &
@@ -241,7 +249,8 @@ class ising_sim {
         parameters_type params;
         boost::variate_generator<boost::mt19937, boost::uniform_real<> > mutable random;
         observables_type measurements;
-
+        
+        //jan: do we need these?
         std::string realization;
         std::string clone;
 
@@ -294,6 +303,7 @@ struct args {
     std::string checkpointfile;
 };
 
+//jan: why not use alps::stop_callback?
 struct stop_callback {
     stop_callback(std::size_t timelimit)
         : limit(timelimit)
@@ -323,7 +333,7 @@ int main(int argc, char *argv[]) {
         else if (suffix == ".h5")
             alps::hdf5::archive(options.inputfile)["/parameters"] >> parameters;
         else
-            throw std::runtime_error("Unsupported input formant: " + suffix + "!");
+            throw std::runtime_error("Unsupported input format: " + suffix + "!");
 
         ising_sim sim(parameters);
 
@@ -331,10 +341,12 @@ int main(int argc, char *argv[]) {
             sim.load(options.checkpointfile);
 
         sim.run(stop_callback(options.timelimit));
-
+        
+        //jan: why the if?
         if (options.resume)
             sim.save(options.checkpointfile);
-
+        
+        //jan: why not sim.results()?
         using alps::collect_results;
         alps::results_type<ising_sim>::type results = collect_results(sim);
 
