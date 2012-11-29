@@ -27,21 +27,119 @@
 
 #include <iostream>
 #include <alps/ngs.hpp>
+#include <alps/ngs/numeric/array.hpp>
+#include <alps/ngs/numeric/multi_array.hpp>
 
 using namespace std;
 using namespace alps::alea;
+using namespace alps::ngs::numeric;
 
 int main()
 {
     #ifdef ALPS_NGS_USE_NEW_ALEA
         accumulator_set set;
-        
         set << alps::ngs::RealObservable("Energy");
+        set << alps::ngs::RealVectorObservable("Vel");
+        //~ set << alps::ngs::RealArrayObservable("Vel");
+        //~ set << make_accumulator(name, acc) TODO
+        
         set["Energy"] << 1.;
         set["Energy"] << 2.;
         set["Energy"] << 3.;
+        set["Energy"] << 3.;
+        
+        std::vector<double> v1(3,1);
+        std::vector<double> v2(3,2);
+        std::vector<double> v3(3,3);
+        std::vector<double> v4(3,3);
+        
+        set["Vel"] << v1;
+        set["Vel"] << v2;
+        set["Vel"] << v3;
+        set["Vel"] << v4;
         
         cout << "mean: " << set["Energy"].get<double>().mean() << endl;
+        cout << "mean: " << alps::short_print(set["Vel"].get<std::vector<double> >().mean()) << endl;
+        cout << "error: " << alps::short_print(set["Vel"].get<std::vector<double> >().error()) << endl;
+        
+        alps::mcresult res(set["Energy"]);
+        alps::mcresult res2(set["Vel"]);
+        
+        //~ alps::alea::accumulator<int> accc;
+        //~ alps::alea::detail::accumulator_wrapper wa(accc);
+        //~ alps::mcresult res3(wa);
+        
+        set["Vel"].get<std::vector<double> >();
+        
+        std::cout << res << std::endl;
+        std::cout<< res2 << std::endl;
+        
+        //------------------- test boost::array -------------------
+        
+        boost::array<double, 3> a;
+        
+        for(int i = 0; i < 3; ++i)
+        {
+            a[i] = i;
+        }
+        alps::alea::accumulator<boost::array<double, 3>, features<  tag::fixed_size_binning
+                                , tag::max_num_binning
+                                , tag::log_binning
+                                , tag::autocorrelation
+                                //~ , tag::converged
+                                //~ , tag::tau
+                                , tag::histogram
+                                > > accc;
+        
+        accc << a;                        
+        
+        alps::alea::detail::accumulator_wrapper wa(accc);
+        
+        set << accc;
+        
+        a+=sqrt(a+a-a*a/2);
+        
+        boost::array<double, 3> b = boost::array<double, 3>();
+        for(int i = 0; i < 3; ++i)
+            std::cout << b[i] << std::endl;
+
+        b[0]=1;
+        b[1]=1;
+        b[2]=1;
+        
+        accc << b;
+        
+        for(int i = 0; i < 3; ++i)
+        {
+            //~ std::cout << a[i] << std::endl;
+        }
+        //~ std::cout << alps::short_print(accc.mean()) << std::endl;
+        
+        //------------------- test boost::multi-array -------------------
+        alps::alea::accumulator<boost::multi_array<double, 3>, features<  tag::fixed_size_binning
+                                , tag::max_num_binning
+                                , tag::log_binning
+                                , tag::autocorrelation
+                                //~ , tag::converged
+                                //~ , tag::tau
+                                , tag::histogram
+                                > > accma;
+        
+        boost::multi_array<double, 3> ma(boost::extents[2][2][2]);
+
+        for(uint i = 0; i < 2; ++i)
+        {
+            for(uint j = 0; j < 2; ++j)
+            {
+                for(uint k = 0; k < 2; ++k)
+                {
+                    ma[i][j][k] = i*4+j*2+k;
+                }
+            }
+        }
+        
+        accma << ma;
+        
         
     #else
         std::cout << "ALPS_NGS_USE_NEW_ALEA is OFF" << std::endl;

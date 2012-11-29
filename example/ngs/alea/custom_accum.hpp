@@ -88,7 +88,7 @@ alps::alea::mean_type<alps::alea::value_type<custom_accum>::type>::type mean(con
     return mean_type(std::accumulate(arg.begin(), arg.end(), 0))/arg.size();
 }
 
-//the count op returns the count of the accum
+// the count op returns the count of the accum
 boost::uint64_t count(custom_accum const & arg)
 {
     return arg.size();

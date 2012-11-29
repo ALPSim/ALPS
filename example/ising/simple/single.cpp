@@ -32,6 +32,7 @@
 #include <alps/ngs/params.hpp>
 #include <alps/ngs/mcresults.hpp>
 #include <alps/ngs/mcobservables.hpp>
+#include <alps/ngs/alea/accumulator_set.hpp>
 #include <alps/ngs/observablewrappers.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 
@@ -53,7 +54,7 @@
 class ising_sim {
 
     #ifdef ALPS_NGS_USE_NEW_ALEA
-        typedef alea::accumulator_set observables_type;
+        typedef alps::alea::accumulator_set observables_type;
     #else
         typedef alps::mcobservables observables_type;
     #endif

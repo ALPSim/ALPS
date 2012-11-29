@@ -25,19 +25,69 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <alps/ngs.hpp>
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/operation.hpp>
+#include <alps/ngs/numeric/vector.hpp>
+#include <alps/ngs/numeric/array.hpp>
+#include <alps/ngs/numeric/multi_array.hpp>
+#include <alps/ngs/short_print.hpp>
+//~ #include <alps/ngs.hpp>
 
 #include <iostream>
+#include <vector>
 
 using namespace std;
+//~ using namespace alps::alea;
+using namespace alps::ngs::numeric;
 
 int main()
 {
-   std::vector<double> a(100,4);
-   std::cout << alps::short_print(a) << std::endl;
-   std::vector<double> b(a);
-   //~ a+b;
-   
+    std::vector<double> a(100,4);
+    std::vector<double> a1(100,5);
+    std::vector<double> a3(100,7);
+    std::vector<double> b(100,2);
+    std::cout << "a: " << alps::short_print(a) << std::endl;
+
+    a+=a1;
+    a/3;
+    a/3.0;
+    std::cout << "a: " << alps::short_print(sqrt(a*b)) << std::endl;
+
+
+    //~ accumulator<std::vector<double>, features<tag::mean, tag::fixed_size_binning> > c(bin_size = 1);
+    //~ c << a;
+    //~ std::cout << alps::short_print(c.mean()) << std::endl;
+    //~ c << a1;
+    //~ std::cout << alps::short_print(c.mean()) << std::endl;
+    //~ c << a3;
+    //~ std::cout << alps::short_print(c.mean()) << std::endl;
+    //~ 
+    //~ std::cout << alps::short_print(c.fixed_size_bin().bins()) << std::endl;
+    //~ 
+    //~ 
+    //~ std::cout << c.count() << std::endl;
+  
+    boost::array<double, 3> ba;
+    ba[0] = 3;
+    ba[1] = 1;
+    ba[2] = 2;
+    ba += ba;
+    std::cout << alps::short_print(sqrt(ba + ba)) << std::endl;
+    
+    boost::multi_array<double, 3> ma(boost::extents[3][2][2]);
+    boost::multi_array<double, 3> mb;
+
+    for(uint i = 0; i < 3; ++i)
+    {
+        for(uint j = 0; j < 2; ++j)
+        {
+            for(uint k = 0; k < 2; ++k)
+            {
+                ma[i][j][k] = i*4+j*2+k;
+            }
+        }
+    }
+    
+    mb+= ma;
+    std::cout << alps::short_print(mb) << std::endl;
+    
+    
 }

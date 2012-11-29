@@ -63,6 +63,7 @@ option(ALPS_PACKAGE_LIBRARIES "Install all dependent libraries into package" OFF
 option(ALPS_DOWNLOAD_PACKAGES "Prepare an installer that downloads instead of containing the installation packages" OFF)
 option(ALPS_PATCH_VISTRAILS "Patch VisTrails from VisTrails git repository" OFF)
 option(ALPS_NGS_USE_NEW_ALEA "Use the ALPS ngs-alea instead of just alea" OFF)
+# TODO: just temporary
 option(ALPS_NGS_INCLUDE_NEW_ALEA_TEST_AND_EXAMPLE "Include examples and test of the new ngs-alea" OFF)
 
 mark_as_advanced(ALPS_LLVM_WORKAROUND)
