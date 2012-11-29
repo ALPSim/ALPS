@@ -74,8 +74,7 @@ class ising_sim {
             // TODO: this ist not the nicest solution - any idea?
             , random(boost::mt19937((parameters["SEED"] | 42) + comm.rank()), boost::uniform_real<>())
             , schedule(t_min, t_max)
-            , realization("0")
-            , clone(boost::lexical_cast<std::string>(comm.rank()))
+            , clone(comm.rank())
             , binnumber(parameters["BINNUMBER"] | std::min(128, 2 * comm.size()))
             , length(parameters["L"])
             , sweeps(0)
@@ -153,8 +152,17 @@ class ising_sim {
             do {
                 update();
                 measure();
-                if ((stopped = stop_callback()) || schedule.pending())
-                    done = communicate(stopped);
+                if ((stopped = stop_callback()) || schedule.pending()) {
+                    double local_fraction = (stopped
+                        ? 1.
+                        : (sweeps < thermalization_sweeps
+                            ? 0.
+                            : (sweeps - thermalization_sweeps) / double(total_sweeps)
+                          )
+                    );
+                    schedule.update(fraction = boost::mpi::all_reduce(communicator, local_fraction, std::plus<double>()));
+                    done = fraction >= 1.;
+                }
             } while(!done);
             return !stopped;
         }
@@ -189,28 +197,18 @@ class ising_sim {
 
         parameters_type const & parameters() const { return params; }
 
-    private:
-
-        friend void alps::hdf5::save<ising_sim>(
-              alps::hdf5::archive &
-            , std::string const &
-            , ising_sim const &
-            , std::vector<std::size_t>
-            , std::vector<std::size_t>
-            , std::vector<std::size_t>
-        );
-
         void save(alps::hdf5::archive & ar) const {
             ar["/parameters"] << params;
             std::string context = ar.get_context();
-            ar.set_context("/simulation/realizations/" + realization + "/clones/" + clone);
+            ar.set_context("/simulation/realizations/0/clones/" + boost::lexical_cast<std::string>(clone));
+            ar["measurements"] << measurements;
 
-            ar["length"] << length; // TODO: where to put the checkpoint informations?
+            ar.set_context("checkpoint");
+            ar["length"] << length;
             ar["sweeps"] << sweeps;
             ar["thermalization_sweeps"] << thermalization_sweeps;
             ar["beta"] << beta;
             ar["spins"] << spins;
-            ar["measurements"] << measurements;
             
             {
                 std::ostringstream os;
@@ -221,20 +219,14 @@ class ising_sim {
             ar.set_context(context);
         }
 
-        friend void alps::hdf5::load<ising_sim>(
-              alps::hdf5::archive &
-            , std::string const &
-            , ising_sim &
-            , std::vector<std::size_t>
-            , std::vector<std::size_t>
-        );
-
         void load(alps::hdf5::archive & ar) {
             ar["/parameters"] >> params; // TODO: do we want to load the parameters?
 
             std::string context = ar.get_context();
-            ar.set_context("/simulation/realizations/" + realization + "/clones/" + clone);
+            ar.set_context("/simulation/realizations/0/clones/" + boost::lexical_cast<std::string>(clone));
+            ar["measurements"] >> measurements;
 
+            ar.set_context("checkpoint");
             ar["length"] >> length;
             ar["sweeps"] >> sweeps;
             ar["thermalization_sweeps"] >> thermalization_sweeps;
@@ -252,18 +244,7 @@ class ising_sim {
             ar.set_context(context);
         }
 
-        // TODO: merge with run
-        bool communicate(bool stop) {
-            double local_fraction = (stop
-                ? 1.
-                : (sweeps < thermalization_sweeps
-                    ? 0.
-                    : (sweeps - thermalization_sweeps) / double(total_sweeps)
-                  )
-            );
-            schedule.update(fraction = boost::mpi::all_reduce(communicator, local_fraction, std::plus<double>()));
-            return fraction >= 1.;
-        }
+    private:
 
         boost::mpi::communicator communicator;
 
@@ -274,8 +255,7 @@ class ising_sim {
         alps::check_schedule schedule;
         double fraction;
 
-        std::string realization;
-        std::string clone;
+        int clone;
 
         std::size_t binnumber;
 

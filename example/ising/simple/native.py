@@ -37,12 +37,11 @@ class isingSim:
         self.random = ngs.random01(params.valueOrDefault('SEED', 42))
         self.parameters = params
         self.measurements = {
-            #jan: constructor syntax would be nicer: ngs.RealObservable('X')
-            'Energy':  ngs.createRealObservable('Energy'),
-            'Magnetization': ngs.createRealObservable('Magnetization'),
-            'Magnetization^2': ngs.createRealObservable('Magnetization^2'),
-            'Magnetization^4': ngs.createRealObservable('Magnetization^4'),
-            'Correlations': ngs.createRealVectorObservable('Correlations')
+            'Energy':  ngs.RealObservable('Energy'),
+            'Magnetization': ngs.RealObservable('Magnetization'),
+            'Magnetization^2': ngs.RealObservable('Magnetization^2'),
+            'Magnetization^4': ngs.RealObservable('Magnetization^4'),
+            'Correlations': ngs.RealVectorObservable('Correlations')
         }
 
         self.length = int(params['L'])
@@ -125,14 +124,15 @@ class isingSim:
 
             ar["/parameters"] = self.parameters
             context = ar.context
-            ar.set_context("/simulation/realizations/" + self.realization + "/clones/" + self.clone)
+            ar.set_context("/simulation/realizations/0/clones/0")
+            ar["measurements"] = self.measurements
 
-            ar["length"] = self.length # TODO: where to put the checkpoint informations?
+            ar.set_context("checkpoint")
+            ar["length"] = self.length
             ar["sweeps"] = self.sweeps
             ar["thermalization_sweeps"] = self.thermalization_sweeps
             ar["beta"] = self.beta
             ar["spins"] = self.spins
-            ar["measurements"] = self.measurements
             ar["engine"] = self.random
 
             ar.set_context(context)
@@ -148,14 +148,15 @@ class isingSim:
             params.load(ar["/parameters"]) # TODO: do we want to load the parameters?
 
             context = ar.context
-            ar.set_context("/simulation/realizations/" + self.realization + "/clones/" + self.clone)
+            ar.set_context("/simulation/realizations/0/clones/0")
+            ar["measurements"] = self.measurements
 
+            ar.set_context("checkpoint")
             self.length = ar["length"]
             self.sweeps = ar["sweeps"]
             self.thermalization_sweeps = ar["thermalization_sweeps"]
             self.beta = ar["beta"]
             self.spins = ar["spins"]
-            self.measurements = ar["measurements"]
             self.random.load(ar["engine"])
 
             ar.set_context(context)

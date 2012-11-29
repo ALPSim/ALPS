@@ -70,8 +70,6 @@ class ising_sim {
         ising_sim(parameters_type const & parameters)
             : params(parameters)
             , random(boost::mt19937((parameters["SEED"] | 42)), boost::uniform_real<>())
-            , realization("0")
-            , clone("0")
             , length(parameters["L"])
             , sweeps(0)
             , thermalization_sweeps(int(parameters["THERMALIZATION"]))
@@ -182,29 +180,18 @@ class ising_sim {
 
         parameters_type const & parameters() const { return params; }
 
-    private:
-        
-        //jan: somewhat ugly. Why can't load(archive&) and save(archive&) be public?
-        friend void alps::hdf5::save<ising_sim>(
-              alps::hdf5::archive &
-            , std::string const &
-            , ising_sim const &
-            , std::vector<std::size_t>
-            , std::vector<std::size_t>
-            , std::vector<std::size_t>
-        );
-
         void save(alps::hdf5::archive & ar) const {
             ar["/parameters"] << params;
             std::string context = ar.get_context();
-            ar.set_context("/simulation/realizations/" + realization + "/clones/" + clone);
+            ar.set_context("/simulation/realizations/0/clones/0");
+            ar["measurements"] << measurements;
 
-            ar["length"] << length; // TODO: where to put the checkpoint informations?
+            ar.set_context("checkpoint");
+            ar["length"] << length;
             ar["sweeps"] << sweeps;
             ar["thermalization_sweeps"] << thermalization_sweeps;
             ar["beta"] << beta;
             ar["spins"] << spins;
-            ar["measurements"] << measurements;
 
             {
                 std::ostringstream os;
@@ -215,26 +202,19 @@ class ising_sim {
             ar.set_context(context);
         }
 
-        friend void alps::hdf5::load<ising_sim>(
-              alps::hdf5::archive &
-            , std::string const &
-            , ising_sim &
-            , std::vector<std::size_t>
-            , std::vector<std::size_t>
-        );
-
         void load(alps::hdf5::archive & ar) {
             ar["/parameters"] >> params; // TODO: do we want to load the parameters?
 
             std::string context = ar.get_context();
-            ar.set_context("/simulation/realizations/" + realization + "/clones/" + clone);
+            ar.set_context("/simulation/realizations/0/clones/0");
+            ar["measurements"] >> measurements;
 
+            ar.set_context("checkpoint");
             ar["length"] >> length;
             ar["sweeps"] >> sweeps;
             ar["thermalization_sweeps"] >> thermalization_sweeps;
             ar["beta"] >> beta;
             ar["spins"] >> spins;
-            ar["measurements"] >> measurements;
 
             {
                 std::string state;
@@ -246,14 +226,12 @@ class ising_sim {
             ar.set_context(context);
         }
 
+    private:
+
         parameters_type params;
         boost::variate_generator<boost::mt19937, boost::uniform_real<> > mutable random;
         observables_type measurements;
         
-        //jan: do we need these?
-        std::string realization;
-        std::string clone;
-
         int length;
         int sweeps;
         int thermalization_sweeps;
