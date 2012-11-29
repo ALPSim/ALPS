@@ -9,7 +9,7 @@ if (ALPS_BUILD_EXAMPLES)
     add_dependencies(alpscontrol alps)
     target_link_libraries(alpscontrol alps)
 
-    foreach (name single singlexml controlthread_tiny server_tiny)
+    foreach (name single controlthread_tiny server_tiny)
     
         add_executable(ngs_ising_${name} ${name}.cpp)
         add_dependencies(ngs_ising_${name} alps)
@@ -22,6 +22,23 @@ if (ALPS_BUILD_EXAMPLES)
                 -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
                 -Dbindir=${PROJECT_BINARY_DIR}/bin
                 -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_test.cmake
+        )
+
+    endforeach(name)
+
+    foreach (name singlexml)
+    
+        add_executable(ngs_ising_${name} ${name}.cpp)
+        add_dependencies(ngs_ising_${name} alps)
+        target_link_libraries(ngs_ising_${name} alps)
+
+        add_test(ngs_ising_${name}
+            ${CMAKE_COMMAND}
+                -Dcmd=ngs_ising_${name}
+                -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
+                -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
+                -Dbindir=${PROJECT_BINARY_DIR}/bin
+                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_test_xml.cmake
         )
 
     endforeach(name)
