@@ -78,14 +78,12 @@ class ising_sim {
             for(int i = 0; i < length; ++i)
                 spins[i] = (random() < 0.5 ? 1 : -1);
             
-            //jan: =8-O
+            //TODO: make this nicer!
             measurements[ENERGY_OBS] = boost::make_shared<alps::RealObservable>("Energy").get();
             measurements[MAGNETIZATION_OBS] = boost::make_shared<alps::RealObservable>("Magnetization").get();
             measurements[MAGNETIZATION_2_OBS] = boost::make_shared<alps::RealObservable>("Magnetization^2").get();
             measurements[MAGNETIZATION_4_OBS] = boost::make_shared<alps::RealObservable>("Magnetization^4").get();
             measurements[CORRELATIONS_OBS] = boost::make_shared<alps::RealVectorObservable>("Correlations").get();
-
-            alps::ngs::signal::listen();
         }
 
         void update() {

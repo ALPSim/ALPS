@@ -189,7 +189,7 @@ if __name__ == '__main__':
     if resume:
         try:
             with ngs.archive(outfile[0:outfile.rfind('.h5')] + '.clone0.h5', 'r') as ar:
-                sim.load(ar['/'])
+                sim.load(ar)
         except ArchiveNotFound: pass
 
     if limit == 0:

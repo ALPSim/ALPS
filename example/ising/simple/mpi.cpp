@@ -252,6 +252,7 @@ class ising_sim {
             ar.set_context(context);
         }
 
+        // TODO: merge with run
         bool communicate(bool stop) {
             double local_fraction = (stop
                 ? 1.

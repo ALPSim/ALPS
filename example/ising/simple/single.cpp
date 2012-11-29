@@ -88,7 +88,6 @@ class ising_sim {
                 << alps::ngs::RealObservable("Magnetization^4")
                 << alps::ngs::RealVectorObservable("Correlations")
             ;
-            alps::ngs::signal::listen();
         }
 
         void update() {
@@ -144,6 +143,7 @@ class ising_sim {
             ar >> *this;
         }
 
+        // TODO: why do we need the callback?
         bool run(boost::function<bool ()> const & stop_callback) {
             bool stopped = false;
             do {
@@ -342,9 +342,7 @@ int main(int argc, char *argv[]) {
 
         sim.run(stop_callback(options.timelimit));
         
-        //jan: why the if?
-        if (options.resume)
-            sim.save(options.checkpointfile);
+        sim.save(options.checkpointfile);
         
         //jan: why not sim.results()?
         using alps::collect_results;
