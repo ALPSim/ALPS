@@ -9,12 +9,12 @@ find_package(Doxygen REQUIRED)
 # location of doxygen xml output
 set(DOXYGENDOCS_DIR "${CMAKE_CURRENT_BINARY_DIR}/doxygen")
 
-configure_file(get_gasp.in "${CMAKE_CURRENT_BINARY_DIR}/get_gasp")
-
-add_custom_target(gasp ALL
-    "/bin/bash"
-    "${CMAKE_CURRENT_BINARY_DIR}/get_gasp"
-    COMMENT "Getting Gasp")
+#configure_file(get_gasp.in "${CMAKE_CURRENT_BINARY_DIR}/get_gasp")
+#
+#add_custom_target(gasp ALL
+#    "/bin/bash"
+#    "${CMAKE_CURRENT_BINARY_DIR}/get_gasp"
+#    COMMENT "Getting Gasp")
 
 configure_file(doxygen.conf.in "${CMAKE_CURRENT_BINARY_DIR}/doxygen.conf")
 

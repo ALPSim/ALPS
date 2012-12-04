@@ -1,0 +1,20 @@
+{% set class = objects[0] %}
+{% if class.is_class %}
+<p><strong>Scope: </strong> {{ class.definition }}</p>
+<table style="border: 1px solid #000000;">
+<tr><td><strong>Member</strong></td><td><strong>Description</strong></td></tr>
+{% for o in class.children %}
+{# if o.is_member #}
+{% if public and o.prot=="public" or private and o.prot=="private" %}
+{% if o.briefdescription or all %}
+<tr><td>{{ o|ref }}</td><td>{{ o.briefdescription }}</td></tr>
+{% endif %}
+{% endif %}
+{# endif #}
+{% endfor %}
+</table>
+{% else %}
+<div>WARNING! {{ class }} is not a class, but {{ class.type }}.</div>
+{% endif %}
+<br />
+<br />

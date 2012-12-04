@@ -1,0 +1,16 @@
+{% macro row(name, o, class) -%}
+{% if o.averagecomplexity or o.worstcasecomplexity  %}
+<tr class="{{class}}">
+<td>{{ name }}</td>
+</td>
+<td>{% for c in o.averagecomplexity %}{{ c.complexity  }} {{ c.description  }}{% if not loop.last %}<br />{% endif %}{% endfor %}</td>
+<td>{% for c in o.worstcasecomplexity %}{{ c.complexity  }} {{ c.description  }}{% if not loop.last %}<br />{% endif %}{% endfor %}</td>
+</tr>
+{% endif %}
+{% endmacro %}
+
+{% macro header() -%}
+<tr><td><strong>Member</strong></td>
+<td><strong>Average</strong></td>
+<td><strong>Worst case</strong></td></tr>
+{%- endmacro %}

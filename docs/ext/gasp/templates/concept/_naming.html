@@ -1,0 +1,10 @@
+{% macro format(o) -%}
+{% set repr = simplify_member_representation(o.name, o)%}
+{{ o|ref(repr.name) }}{% if o.argsstring %}{% if repr.has_paranthesis%}({% endif %}
+{% for p in o.parameters %}
+{{ p.declname }}
+{% if not loop.last %},{% endif %}
+{% endfor %}
+{% if repr.has_paranthesis%}){% endif %}
+{% endif %}
+{%- endmacro %}

@@ -1,0 +1,21 @@
+{% macro row(name, o, class) -%}
+{# if o.requirement  #}
+<tr class="{{class}}">
+<td>
+{% if o.concepttitle%}{{ o.concepttitle[0].title }}{% else %}{{ o.briefdescription }}{% endif %}
+</td>
+<td>{{ name }}</td>
+</td>
+<td>{% for c in o.requirement %}<tt>{{ c.requirement  }}</tt> {{ c.description  }}{% if not loop.last %}<br />{% endif %}{% endfor %}</td>
+<td>{{ o.fulltype }}</td>
+</tr>
+{# endif #}
+{% endmacro %}
+
+
+{% macro header() -%}
+<tr><td><strong>Name</strong></td>
+<td><strong>Expression</strong></td>
+<td><strong>Type requirement</strong></td>
+<td><strong>Return type</strong></td></tr>
+{%- endmacro %}

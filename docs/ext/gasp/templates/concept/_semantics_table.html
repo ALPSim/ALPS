@@ -1,0 +1,19 @@
+{% macro row(name, o, class) -%}
+{# if o.requirement  #}
+<tr class="{{class}}">
+<td>{{ name }}</td>
+</td>
+<td>{% for c in o.precondition %}{{ c  }}{% if not loop.last %}<br />{% endif %}{% endfor %}</td>
+<td>{% for c in o.semantics %}{{ c  }}{% if not loop.last %}<br />{% endif %}{% endfor %}</td>
+<td>{% for c in o.postcondition %}{{ c  }}{% if not loop.last %}<br />{% endif %}{% endfor %}</td>
+</tr>
+{# endif #}
+{% endmacro %}
+
+
+{% macro header() -%}
+<tr><td><strong>Expression</strong></td>
+<td><strong>Precondition</strong></td>
+<td><strong>Semantics</strong></td>
+<td><strong>Postcondition</strong></td></tr>
+{%- endmacro %}

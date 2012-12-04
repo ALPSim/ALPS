@@ -1,0 +1,15 @@
+{% macro row(name, desc,  class) -%}
+{# if o.requirement  #}
+<tr class="{{class}}">
+<td>{{ name }}</td>
+<td>{{ desc }}</td>
+</tr>
+{# endif #}
+{% endmacro %}
+
+
+{% macro header() -%}
+<tr><td><strong>Member</strong></td>
+<td><strong>Description</strong></td>
+</tr>
+{%- endmacro %}

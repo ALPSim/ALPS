@@ -1,0 +1,20 @@
+{% set class = objects[0] %}
+{% if class.is_class %}
+
+{% for o in class.children %}
+{# if o.is_member #}
+{% if (public and o.prot=="public") or (private and o.prot=="private") %}
+{% if o.briefdescription or all %}
+{{ o|label }}
+<h3>{{o.name}}</h3>
+<p><strong>Scope: </strong> {{ o.definition }} {{ o.argsstring }}  ({{o.prot}})</p>
+<p><small>Summary:</small>{{ o.briefdescription }}</p>
+<p>{{ o.detaileddescription|link_refs }}</p>
+{% endif %}
+{% endif %}
+{# endif #}
+{% endfor %}
+{% else %}
+<div>WARNING! {{ class }} is not a class, but {{ class.type }}.</div>
+
+{% endif %}

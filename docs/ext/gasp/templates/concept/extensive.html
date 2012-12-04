@@ -1,0 +1,40 @@
+{% set class = objects[0] %}
+<table style="border: 1px solid #000000;">
+<tr><td><strong>Member</strong></td><td><strong>Description</strong></td>
+<td><strong>Pre condition</strong></td>
+<td><strong>Post condition</strong></td></tr>
+{% for obj in objects %}
+{% if obj.is_class %}
+{% for o in obj.children %}
+{# if o.is_member #}
+{% if public and o.prot=="public" or private and o.prot=="private" %}
+{% if o.briefdescription or all %}
+<tr><td>{{ o|ref }}</td><td>{{ o.briefdescription }}
+{% if o.newfeature %}<br />
+<strong>NEW!</strong>{{o.newfeature[0]}}
+{% endif %}
+</td>
+<td>{% if o.precondition %}{{ o.precondition[0] }}{% endif %}</td>
+<td>{% if o.postcondition %}{{ o.postcondition[0] }}{% endif %}</td></tr>
+{% endif %}
+{% endif %}
+{# endif #}
+{% endfor %}
+{% else %}
+
+
+
+{% if obj.is_function %}
+<tr><td>{{ obj|ref }}</td><td>{{ obj.briefdescription }}
+{% if obj.newfeature %}<br />
+<strong>NEW!</strong>{{obj.newfeature[0]}}
+{% endif %}
+</td>
+<td>{% if obj.precondition %}{{ obj.precondition[0] }}{% endif %}</td>
+<td>{% if obj.postcondition %}{{ obj.postcondition[0] }}{% endif %}</td></tr>
+{% endif %}
+{% endif %}
+{% endfor %}
+</table>
+<br />
+<br />
