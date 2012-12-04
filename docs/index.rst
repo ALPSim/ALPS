@@ -15,6 +15,7 @@ Contents:
 
    APIP/introduction
    API/introduction
+   tutorials/index
    license/license
 
 Indices and tables
