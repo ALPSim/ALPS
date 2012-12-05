@@ -316,6 +316,7 @@ void hybridization::spin_flip_update(int orbital){
   if(k==0) return; //no point, this is an empty orbital
   //    if (local_config.zero_order_orbital_occupied(orbital)) return;
   int other_orbital=(int)(random()*n_orbitals);
+  int other_orbital_order=local_config.order(other_orbital);
   if (orbital == other_orbital) return;
   if (local_config.zero_order_orbital_occupied(other_orbital)) return;
   int segment_nr=(int)(random()*k);
@@ -329,13 +330,7 @@ void hybridization::spin_flip_update(int orbital){
   double seg_length = segment_to_flip.t_end_ - segment_to_flip.t_start_;
   if (seg_length<0.0) seg_length += beta;
   
-  /*
-   // check whether other_orbital is already filled where we want to insert the segment; confer with line 214 - insert_anti_segment
-   if ((t_next_segment_start > t_next_segment_end)||
-   (t_next_segment_start<seg_length)||
-   (t_next_segment_end-beta>0)) return;
-   
-   */
+
   //Totally experimential - mistakes here?
   double t_start = segment_to_flip.t_start_,t_end=segment_to_flip.t_end_;
   if(t_end > beta) t_end-=beta;
@@ -345,50 +340,31 @@ void hybridization::spin_flip_update(int orbital){
   //of the two states involved
   // This energy is associated with the present segment. We give it a negative weight
   // because it is to be removed
-  double de = //-local_config.mu(orbital)*seg_length;
-  -local_config.local_energy(segment_to_flip,orbital);
-  //    local_weight_change=std::exp((local_config.mu(other_orbital)-local_config.mu(orbital))*seg_length);
-  //   std::cout << "Local_weight:  "<< local_weight_change << std::endl;
-  double full_weight_orig=full_weight();
-  //compute hybridization weight change
+  double de = -local_config.local_energy(segment_to_flip,orbital);
+  //double full_weight_orig=full_weight();
   double hybridization_weight_change_1=1./hyb_config.hyb_weight_change_remove(segment_to_flip, orbital); // from line 187 - remove_segment_update
-  double permutation_factor=local_config.order(orbital)/(beta*local_config.find_next_segment_start_distance(segment_to_flip.t_start_,orbital));
   double weight_change_1=hybridization_weight_change_1;
-  //std::cout<<clred<<"weight change flip: p1 "<<weight_change_1<<" l: "<<de<<" h: "<<hybridization_weight_change_1<<" p: "<<permutation_factor<<cblack<<std::endl;
-  //std::cout<<clred<<"weight change flip npf: p1 "<<hybridization_weight_change_1<<cblack<<std::endl;
-  //  if (abs(weight_change)>random()) {
   if (weight_change_1<0) sign*=-1;
   local_config.remove_segment(segment_to_flip, orbital);
   hyb_config.remove_segment(segment_to_flip, orbital);
-  double full_weight_removed=full_weight();
-  //std::cout<<clgreen<<"weight change removal: "<<full_weight_removed<<" control: "<<full_weight_orig/std::abs(hybridization_weight_change_1)<<std::endl;
-  //  } else return; // First part of update not accepted, nothing else to do
-  // Now let us try the insertion into other_orbital
+  //double full_weight_removed=full_weight();
   segment new_segment(t_start,t_end);
-  // This is the energy change (!!) associated with insertion of the new segment
-  de += //local_config.mu(other_orbital)*seg_length;
-  local_config.local_energy(new_segment,other_orbital);
-  double hybridization_weight_change_2=hyb_config.hyb_weight_change_insert(new_segment, other_orbital); // from line 157 - insert_segment_update & changed orbital to other_orbital
-  permutation_factor=t_next_segment_start*beta/(local_config.order(other_orbital)+1);
-  double weight_change_2=std::exp(de)*hybridization_weight_change_2;
-  //std::cout<<clred<<"weight change flip: p2 "<<weight_change_2<<" l: "<<de<<" h: "<<hybridization_weight_change_2<<" p: "<<permutation_factor<<cblack<<std::endl;
-  
-  if(std::abs(weight_change_1*weight_change_2)>random()){ //Accepted
+  de += local_config.local_energy(new_segment,other_orbital);
+  double hybridization_weight_change_2=hyb_config.hyb_weight_change_insert(new_segment, other_orbital);   double weight_change_2=std::exp(de)*hybridization_weight_change_2;
+
+  //the permutation factor has the probability of proposing this move (the old order in this orbital) divided by the probability of proposing the reverse move (the new order in the new orbital)
+  double permutation_factor=k/(double)(other_orbital_order+1.);
+
+  if(std::abs(weight_change_1*weight_change_2*permutation_factor)>random()){ //Accepted
     nacc[5]++;
     if(weight_change_2 < 0) sign*=-1.;
     local_config.insert_segment(new_segment, other_orbital);
     hyb_config.insert_segment(new_segment, other_orbital);
-    double full_weight_accepted=full_weight();
-    std::cout<<clgreen<<"weight change accepted: "<<full_weight_accepted<<" control: "<<full_weight_orig/std::abs(weight_change_1*weight_change_2)<<std::endl;
-    double ratio=full_weight_orig/std::abs(weight_change_1*weight_change_2)/full_weight_accepted;
-    if(ratio < 1-1.e-9 || ratio > 1+1.e-9)throw std::logic_error("problem with ratio, it is not one.");
   } else { //Not accepted, thus restore old configuration
     double wc = hyb_config.hyb_weight_change_insert(new_segment,orbital);
     if (wc<0.0) sign *= -1;
     local_config.insert_segment(new_segment, orbital);
     hyb_config.insert_segment(new_segment, orbital);
-    double full_weight_rejected=full_weight();
-    //std::cout<<clblue<<"weight change rejection: "<<full_weight_rejected/full_weight_orig<<std::endl;
   }
 }
 //}
