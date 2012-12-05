@@ -260,6 +260,7 @@ void hybmatrix::rebuild_ordered_hyb_matrix(int orbital, const hybfun &Delta){
   //std::cout<<"on exit rebuild orderd: full weight: "<<full_weight()<<" permutation sign: "<<permutation_sign_<<std::endl;
 }
 double hybmatrix::full_weight() const{
+  //std::cout<<clcyan<<"det: "<<determinant()<<" ps: "<<permutation_sign_<<cblack<<std::endl;
   return determinant()*permutation_sign_;
 }
 void hybmatrix::measure_G(std::vector<double> &G, double sign) const{
