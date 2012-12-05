@@ -59,6 +59,7 @@ public:
   void remove_antisegment(const segment &new_segment, int orbital);
   segment get_segment(int k, int orbital) const;
   bool exists(double t) const{ return times_set_.find(t)==times_set_.end()?false:true;}
+  bool has_overlap(const segment &seg,const int orb);
   void get_segment_densities(std::vector<std::vector<std::vector<double> > > &n_tauprime)const;
   void get_F_prefactor(std::vector<std::map<double,double> > &F_prefactor)const;
   void measure_density(std::vector<double> &densities, double sign) const;

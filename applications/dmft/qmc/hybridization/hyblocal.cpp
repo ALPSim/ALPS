@@ -131,6 +131,22 @@ double local_configuration::local_weight_change(const segment &seg, int orb, boo
   }
   return weight;
 }
+
+bool local_configuration::has_overlap(const segment &seg,const int orb) {
+//  bool overlap = false;
+  if(zero_order_orbital_occupied_[orb]){
+    return true;
+  } else {
+    //find the first segment with time t_start > seg.t_start
+    for(std::set<segment>::const_iterator it=segments_[orb].begin(); it !=
+        segments_[orb].end();++it) {
+      if (segment_overlap(seg, *it)>0.0) return true;
+    }
+  }
+  return false;
+}
+
+
 //this computes the overlap of two segments. It takes care of the wrapping around zero by splitting the segments up.
 double local_configuration::segment_overlap(const segment &seg1, const segment &seg2) const{
   if(seg1.t_start_>seg1.t_end_) return segment_overlap(segment(seg1.t_start_, beta_), seg2)+segment_overlap(segment(0, seg1.t_end_), seg2);

@@ -45,6 +45,10 @@ hyb_config(parms)
   //initializing general simulation constants
   nacc.resize(6,0.);
   nprop.resize(6,0.);
+  for (int i=0;i<6;i++) {
+    nacc[i] = 0.0;
+    nprop[i] = 0.0;
+  }
   sweep_count=0;
   output_period=parms["OUTPUT_PERIOD"]|100000;
   //lasttime = boost::chrono::steady_clock::now();
