@@ -717,4 +717,8 @@ void local_configuration::measure_sector_statistics(std::vector<double> &sector_
   }
   double sum=0;
 }
-
+// return the total weight of the local configuration
+//this is an expensive debug operation
+double local_configuration::full_weight() const{
+  return 1.;
+}

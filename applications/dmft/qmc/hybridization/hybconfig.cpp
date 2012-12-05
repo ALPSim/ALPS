@@ -95,8 +95,13 @@ void hybridization_configuration::measure_Gl(std::vector<std::vector<double> > &
     hybmat_[orbital].measure_Gl(Gl[orbital], Fl[orbital], F_prefactor[orbital], sign);
   }
 }
-
-
+double hybridization_configuration::full_weight() const{
+  double weight=1.;
+  for(std::size_t orbital=0;orbital<hybmat_.size();++orbital){
+    weight*=hybmat_[orbital].full_weight();
+  }
+  return weight;
+}
 std::ostream &operator<<(std::ostream &os, const hybridization_configuration &hyb_config){
   for(std::size_t i=0;i<hyb_config.hybmat_.size();++i){
     os<<cblue<<"------- "<<"orbital: "<<i<<" ------"<<cblack<<std::endl;

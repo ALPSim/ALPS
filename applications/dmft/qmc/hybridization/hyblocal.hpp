@@ -59,7 +59,6 @@ public:
   void remove_antisegment(const segment &new_segment, int orbital);
   segment get_segment(int k, int orbital) const;
   bool exists(double t) const{ return times_set_.find(t)==times_set_.end()?false:true;}
-  void check_consistency() const;
   void get_segment_densities(std::vector<std::vector<std::vector<double> > > &n_tauprime)const;
   void get_F_prefactor(std::vector<std::map<double,double> > &F_prefactor)const;
   void measure_density(std::vector<double> &densities, double sign) const;
@@ -67,14 +66,17 @@ public:
   double measure_nn(int i, int j) const;
   void measure_nnw(int i, std::vector<double> &nnw, double sign) const;
   void get_density_vectors(std::vector<std::vector<double> > &n_vector) const;
-//  double get_F_prefactor_debug(int f1,int orbital,double cdagger_times_i) const;
-//  double get_occupation(int f1,double tau_1) const;
   double density(int i, double tau) const;
   double mu(int orbital) {return mu_[orbital];}
   double interaction_density_integral(int i, double tau) const;
   void state_map_segment_insert(state_map &states, const segment &s, int state) const;
   void measure_sector_statistics(std::vector<double> &sector_statistics, double sign) const;
   friend std::ostream &operator<<(std::ostream &os, const local_configuration &local_conf);
+  
+  //debug functions
+  void check_consistency() const;
+  double full_weight() const;
+
 private:
   //private member functions
   double segment_overlap(const segment &seg1, const segment &seg2) const;

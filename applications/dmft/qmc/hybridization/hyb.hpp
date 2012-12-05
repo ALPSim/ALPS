@@ -103,6 +103,9 @@ private:
   void insert_antisegment_update(int orbital);
   void remove_antisegment_update(int orbital);
   void spin_flip_update(int orbital);
+  
+  //programming and debug functions
+  double full_weight() const;
 
   //algorithm parameters
   uint64_t sweeps;
