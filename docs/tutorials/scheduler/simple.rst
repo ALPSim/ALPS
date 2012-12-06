@@ -37,6 +37,7 @@ synopsis
 Given the concept above, our simulation has the following synopsis:
 
 .. code-block:: c++
+    :linenos:
 
 	class ising_sim {
 	    public:
@@ -85,6 +86,7 @@ constructor
 -----------
 
 .. code-block:: c++
+    :linenos:
 
     ising_sim::ising_sim(parameters_type const & parameters)
         : params(parameters)
@@ -128,6 +130,7 @@ These Functions contains the actual simulation. ``update`` does one montecarlo s
 return the progress of the simulation.
 
 .. code-block:: c++
+    :linenos:
 
 	void ising_sim::update() {
 	    for (int j = 0; j < length; ++j) {
@@ -140,7 +143,7 @@ return the progress of the simulation.
 	            spins[i] = -spins[i];
 	    }
 	};
-
+    
 	void ising_sim::measure() {
 	    sweeps++;
 	    if (sweeps > thermalization_sweeps) {
@@ -165,7 +168,7 @@ return the progress of the simulation.
 	        measurements["Correlations"] << corr;
 	    }
 	};
-        
+    
 	double fraction_completed() const {
 	    return (sweeps < thermalization_sweeps ? 0. : ( sweeps - thermalization_sweeps ) / double(total_sweeps));
 	}
@@ -176,12 +179,13 @@ checkpointing
 To save and load checkpoints we use the HDF5 data formant.
 
 .. code-block:: c++
+    :linenos:
 
     void ising_sim::save(boost::filesystem::path const & filename) const {
         alps::hdf5::archive ar(filename, "w");
         ar << *this;
     }
-
+    
     void ising_sim::load(boost::filesystem::path const & filename) {
         alps::hdf5::archive ar(filename);
         ar >> *this;
@@ -190,24 +194,25 @@ To save and load checkpoints we use the HDF5 data formant.
 Now we need to tell the hdf5 archive where to store our data. Therefor we implement the following hooks:
 
 .. code-block:: c++
+    :linenos:
 
     void ising_sim::save(alps::hdf5::archive & ar) const {
         ar["/parameters"] << params;
-
+        
 		// Set the current path of the archive to /simulation/realizations/0/clones/0
 		// all relative path will be saved according to this path
         std::string context = ar.get_context();
         ar.set_context("/simulation/realizations/0/clones/0");
-
+        
         ar["measurements"] << measurements;
-
+        
         ar.set_context("checkpoint");
         ar["length"] << length;
         ar["sweeps"] << sweeps;
         ar["thermalization_sweeps"] << thermalization_sweeps;
         ar["beta"] << beta;
         ar["spins"] << spins;
-
+        
 		// also save the state of the random number generator to avoid overlapping sequences
         {
             std::ostringstream os;
@@ -218,7 +223,7 @@ Now we need to tell the hdf5 archive where to store our data. Therefor we implem
 		// put the archive back to the original state
         ar.set_context(context);
     }
-
+    
     void ising_sim::load(alps::hdf5::archive & ar) {
         ar["/parameters"] >> params;
 
@@ -249,6 +254,7 @@ other functions requested by the concept
 We need a run function which runs runs until we finished or have ran out of time.
 
 .. code-block:: c++
+    :linenos:
 
     bool ising_sim::run(boost::function<bool ()> const & stop_callback) {
         bool stopped = false;
@@ -262,6 +268,7 @@ We need a run function which runs runs until we finished or have ran out of time
 The ``result_names`` function needs to tell us which results are checkpointed
 
 .. code-block:: c++
+    :linenos:
 
     ising_sim::result_names_type ising_sim::result_names() const {
         result_names_type names;
@@ -273,6 +280,7 @@ The ``result_names`` function needs to tell us which results are checkpointed
 Since wie save all measurements to the checkpoint, we have no unsaved results:
 
 .. code-block:: c++
+    :linenos:
 
     ising_sim::result_names_type ising_sim::unsaved_result_names() const {
         return result_names_type(); 
@@ -281,6 +289,7 @@ Since wie save all measurements to the checkpoint, we have no unsaved results:
 If the simulation has finished we want to be able to further process the results:
 
 .. code-block:: c++
+    :linenos:
 
     ising_sim::results_type ising_sim::collect_results() const {
         return collect_results(result_names());
@@ -296,6 +305,7 @@ the main function
 -----------------
 
 .. code-block:: c++
+    :linenos:
 
 	int main(int argc, char *argv[]) {
 
@@ -339,3 +349,8 @@ the main function
 	    }
 	    return EXIT_SUCCESS;
 	}
+
+write a build script
+--------------------
+
+TBD:

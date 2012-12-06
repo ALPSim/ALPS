@@ -3,11 +3,9 @@ pure python simulation
 
 .. code-block:: python
 
-	import pyalps.ngs as ngs
-	import numpy as np
-	import sys, time, traceback, getopt
+	import sys, traceback
 
-	class isingSim:
+	class ising:
 
 	    # TODO: how do we deal with typedefs?
 
@@ -143,6 +141,26 @@ pure python simulation
 	            traceback.print_exc(file=sys.stderr)
 	            raise
 
+
+The main script
+---------------
+
+To use the class, we need to import the ``pyalps.ngs`` framework ``numpy`` and the exported ising simulation ``exported_ising_c``
+
+.. code-block:: python
+    :linenos:
+
+	import pyalps.ngs as ngs
+	import numpy as np
+	import sys, time, getopt
+
+	import ising_sim as ising
+
+And we can use the same main function as in the exported ising simulation:
+
+.. code-block:: python
+    :linenos:
+
 	if __name__ == '__main__':
 
 	    try:
@@ -158,14 +176,15 @@ pure python simulation
 	        print 'usage: [-T timelimit] [-c] outputfile'
 	        exit()
 
-	    sim = isingSim(ngs.params({
+	    sim = ising.sim(ngs.params({
 	        'L': 100,
-	        'THERMALIZATION': 100,
-	        'SWEEPS': 1000,
+	        'THERMALIZATION': 1000,
+	        'SWEEPS': 10000,
 	        'T': 2
 	    }))
 
-		sim.load(outfile[0:outfile.rfind('.h5')] + '.clone0.h5')
+	    if resume:
+			sim.load(outfile[0:outfile.rfind('.h5')] + '.clone0.h5')
 
 	    if limit == 0:
 	        sim.run()
@@ -176,8 +195,7 @@ pure python simulation
 		sim.save(outfile[0:outfile.rfind('.h5')] + '.clone0.h5')
 
 	    results = sim.collectResults()
-	    for key, value in results.iteritems():
-	        print "{}: {}".format(key, value)
+	    print results
 
 	    with ngs.archive(outfile, 'w') as ar:
 	        ar['/parameters'] = sim.parameters

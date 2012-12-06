@@ -55,14 +55,16 @@ We only want to export the save/load function from the concept:
 	}
 
 
-The CMakeLists.txt file
------------------------
+write a build script
+--------------------
 
 TBD:
 
 
 The Python script
 -----------------
+
+To use the exported class we need to import the ``pyalps.ngs`` framework ``numpy`` and the exported ising simulation ``exported_ising_c``
 
 .. code-block:: python
 
@@ -71,6 +73,11 @@ The Python script
 	import sys, time, getopt
 
 	import exported_ising_c as ising
+
+
+And a main function could look like
+
+.. code-block:: python
 
 	if __name__ == '__main__':
 
