@@ -218,6 +218,7 @@ IF(HAVE_MKL)
     set(MKL_INC_PATHS $ENV{mkl_home}/include ${MKL_PATHS}) 
     find_path(MKL_INCLUDE_DIR mkl.h ${MKL_INC_PATHS})
     include_directories(${MKL_INCLUDE_DIR})
+    set(ALPS_HAVE_MKL 1) # MKL flag set in alps/config.h
   endif(NOT _libraries_work)
 ENDIF(HAVE_MKL)
 
