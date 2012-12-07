@@ -35,7 +35,7 @@
 #include <alps/osiris/dump.h>
 #include <alps/osiris/std/vector.h>
 
-
+#ifndef ALPS_NGS_USE_NEW_ALEA
 
 typedef alps::SignedObservable<alps::SimpleObservable<double,alps::DetailedBinning<double> > > signed_obs_t;
 typedef alps::SignedObservable<alps::RealVectorObservable> signed_vec_obs_t;
@@ -129,3 +129,4 @@ void InteractionExpansion::measure_observables(void)
 }
 
 
+#endif //ALPS_NGS_USE_NEW_ALEA

@@ -13,6 +13,7 @@ IF(ALPS_NGS_INCLUDE_NEW_ALEA_TEST_AND_EXAMPLE)
                     example_custom_accum 
                     example_histogram
                     example_vector_operators
+                    test_alps_multi_array
                     )
         add_executable(${name} ${name}.cpp)
         target_link_libraries(${name} alps)

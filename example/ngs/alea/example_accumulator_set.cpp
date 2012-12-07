@@ -28,7 +28,7 @@
 #include <iostream>
 #include <alps/ngs.hpp>
 #include <alps/ngs/numeric/array.hpp>
-#include <alps/ngs/numeric/multi_array.hpp>
+#include <alps/multi_array.hpp>
 
 using namespace std;
 using namespace alps::alea;
@@ -40,8 +40,7 @@ int main()
         accumulator_set set;
         set << alps::ngs::RealObservable("Energy");
         set << alps::ngs::RealVectorObservable("Vel");
-        //~ set << alps::ngs::RealArrayObservable("Vel");
-        //~ set << make_accumulator(name, acc) TODO
+        set << alps::ngs::SimpleRealObservable("simple");
         
         set["Energy"] << 1.;
         set["Energy"] << 2.;
@@ -95,8 +94,16 @@ int main()
         
         alps::alea::detail::accumulator_wrapper wa(accc);
         
-        set << accc;
+        set << alps::alea::make_accumulator(accc, "bar");
         
+        //------------------- test reset -------------------
+        set["bar"] << a;
+        std::cout << "Mean: " << alps::short_print(set["bar"].get<boost::array<double, 3> >().mean()) << std::endl;
+        set.reset();
+        set["bar"] << a+a;
+        std::cout << "Mean: " << alps::short_print(set["bar"].get<boost::array<double, 3> >().mean()) << std::endl;
+        
+        //------------------- test array ops -------------------
         a+=sqrt(a+a-a*a/2);
         
         boost::array<double, 3> b = boost::array<double, 3>();
@@ -116,7 +123,7 @@ int main()
         //~ std::cout << alps::short_print(accc.mean()) << std::endl;
         
         //------------------- test boost::multi-array -------------------
-        alps::alea::accumulator<boost::multi_array<double, 3>, features<  tag::fixed_size_binning
+        alps::alea::accumulator<alps::multi_array<double, 3>, features<  tag::fixed_size_binning
                                 , tag::max_num_binning
                                 , tag::log_binning
                                 , tag::autocorrelation
@@ -125,7 +132,7 @@ int main()
                                 , tag::histogram
                                 > > accma;
         
-        boost::multi_array<double, 3> ma(boost::extents[2][2][2]);
+        alps::multi_array<double, 3> ma(2,2,2);
 
         for(uint i = 0; i < 2; ++i)
         {
@@ -140,6 +147,7 @@ int main()
         
         accma << ma;
         
+        std::cout << alps::short_print(ma) << std::endl;
         
     #else
         std::cout << "ALPS_NGS_USE_NEW_ALEA is OFF" << std::endl;

@@ -27,9 +27,11 @@
 
 #include <alps/ngs/numeric/vector.hpp>
 #include <alps/ngs/numeric/array.hpp>
-#include <alps/ngs/numeric/multi_array.hpp>
+#include <alps/multi_array.hpp>
 #include <alps/ngs/short_print.hpp>
 //~ #include <alps/ngs.hpp>
+
+#include <boost/integer.hpp>
 
 #include <iostream>
 #include <vector>
@@ -72,14 +74,14 @@ int main()
     ba += ba;
     std::cout << alps::short_print(sqrt(ba + ba)) << std::endl;
     
-    boost::multi_array<double, 3> ma(boost::extents[3][2][2]);
-    boost::multi_array<double, 3> mb;
+    alps::multi_array<double, 3> ma(boost::extents[3][2][2]);
+    alps::multi_array<double, 3> mb;
 
-    for(uint i = 0; i < 3; ++i)
+    for(int i = 0; i < 3; ++i)
     {
-        for(uint j = 0; j < 2; ++j)
+        for(int j = 0; j < 2; ++j)
         {
-            for(uint k = 0; k < 2; ++k)
+            for(int k = 0; k < 2; ++k)
             {
                 ma[i][j][k] = i*4+j*2+k;
             }

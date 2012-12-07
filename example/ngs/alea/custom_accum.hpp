@@ -94,6 +94,11 @@ boost::uint64_t count(custom_accum const & arg)
     return arg.size();
 }
 
+void reset(custom_accum & arg)
+{
+    return arg.clear();
+}
+
 // the two stream ops must also be provided. This one takes in a value of type value_type
 custom_accum & operator<<(custom_accum & acc, int a)
 {
