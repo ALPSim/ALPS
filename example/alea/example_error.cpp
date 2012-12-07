@@ -50,7 +50,7 @@ int main() {
   obs.load(filename, "simulation/results/" + alps::hdf5_name_encode("m"));
 
   // calculate the autocorrelation until it has reached 20% of its start value
-  mctimeseries<double> auto_corr = autocorrelation(obs, _limit = 0.2);
+  mctimeseries<double> auto_corr = alps::alea::autocorrelation(obs, _limit = 0.2);
   
   // fit the autocorrelation exponentially between the values where it is at 80% and at 20% of the value at t = 1
   std::pair<double, double> fit = exponential_autocorrelation_time(auto_corr, _max=0.8, _min=0.2);

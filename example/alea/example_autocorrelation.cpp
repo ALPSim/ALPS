@@ -52,7 +52,7 @@ int main() {
   obs.load(filename, "simulation/results/" + alps::hdf5_name_encode("m"));
 
   // calculate the full autocorrelation (with size - 1 lags)
-  mctimeseries<double> auto_corr = autocorrelation(obs, _distance = (size(obs) - 1));
+  mctimeseries<double> auto_corr = alps::alea::autocorrelation(obs, _distance = (size(obs) - 1));
   
   // fit the autocorrelation exponentially between the values where it is at 80% and at 20% of the value at t = 1
   std::pair<double, double> fit = exponential_autocorrelation_time(auto_corr, _min=.2, _max=.8);
