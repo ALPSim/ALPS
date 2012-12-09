@@ -5,7 +5,16 @@
 
 if (ALPS_BUILD_EXAMPLES)
 
-    foreach (name single intobs)
+
+    set(ALPS_EXAMPLES_NGS_SIMPLE single intobs)
+
+    if(ALPS_NGS_USE_NEW_ALEA)
+    
+    set(ALPS_EXAMPLES_NGS_SIMPLE ${ALPS_EXAMPLES_NGS_SIMPLE} multi_array)
+
+    endif(ALPS_NGS_USE_NEW_ALEA)
+    
+    foreach (name ${ALPS_EXAMPLES_NGS_SIMPLE})
     
         add_executable(example_ising_${name} ${name}.cpp)
         add_dependencies(example_ising_${name} alps)
