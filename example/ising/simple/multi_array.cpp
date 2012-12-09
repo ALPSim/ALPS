@@ -56,7 +56,7 @@ class multi_array_sim {
     public:
         
         typedef alps::params parameters_type;
-        typedef std::map<std::string, std::pair<unsigned long, alps::multi_array<double, 2> > > results_type;
+        typedef std::map<std::string, alps::multi_array<double, 2> > results_type;
         typedef std::vector<std::string> result_names_type;
 
         multi_array_sim(parameters_type const & parameters)
@@ -122,11 +122,8 @@ class multi_array_sim {
 
         results_type collect_results(result_names_type const & names) const {
             results_type partial_results;
-            for(result_names_type::const_iterator it = names.begin(); it != names.end(); ++it) {
-                lps::multi_array<double, 2> sum = measurements[*it].get<alps::multi_array<double, 2> >().mean();
-                sum *= measurements[*it].count();
-                partial_results[*it] = sum;
-            }
+            for(result_names_type::const_iterator it = names.begin(); it != names.end(); ++it)
+                partial_results[*it] = measurements[*it].get<alps::multi_array<double, 2> >().mean();
             return partial_results;
         }
 
