@@ -30,13 +30,17 @@
 #include <alps/ngs/config.hpp>
 #include <alps/ngs/params.hpp>
 #include <alps/ngs/hdf5/map.hpp>
+#include <alps/ngs/boost_mpi.hpp>
+#include <alps/ngs/hdf5/pair.hpp>
 #include <alps/ngs/hdf5/vector.hpp>
 #include <alps/ngs/hdf5/multi_array.hpp>
 #include <alps/ngs/alea/accumulator_set.hpp>
+#include <alps/ngs/scheduler/check_schedule.hpp>
 
 #include <alps/random/mersenne_twister.hpp>
 
 #include <boost/function.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
@@ -50,17 +54,20 @@
 #error "this example only works with the new alea"
 #endif
 
-class multi_array_sim {
+class multi_array_sim_mpi {
 
     public:
         
         typedef alps::params parameters_type;
-        typedef std::map<std::string, alps::multi_array<double, 2> > results_type;
+        typedef std::map<std::string, std::pair<boost::uint64_t, alps::multi_array<double, 2> > > results_type;
         typedef std::vector<std::string> result_names_type;
 
-        multi_array_sim(parameters_type const & parameters)
-            : params(parameters)
-            , random(boost::mt19937((parameters["SEED"] | 42)), boost::uniform_real<>())
+        multi_array_sim_mpi(parameters_type const & parameters, boost::mpi::communicator const & comm, double t_min = 1, double t_max = 600)
+            : communicator(comm)
+            , params(parameters)
+            , random(boost::mt19937((parameters["SEED"] | 42) + comm.rank()), boost::uniform_real<>())
+            , schedule(t_min, t_max)
+            , clone(comm.rank())
             , steps(0)
         {
             using namespace alps::alea;
@@ -79,10 +86,9 @@ class multi_array_sim {
             std::generate(values.data(), values.data() + size * size, random);
             measurements["M"] << values;
         };
-        
+
         double fraction_completed() const {
-            static const double total = 100.;
-            return steps / total;
+            return fraction;
         }
 
         void save(boost::filesystem::path const & filename) const {
@@ -96,11 +102,20 @@ class multi_array_sim {
         }
 
         bool run(boost::function<bool ()> const & stop_callback) {
-            bool stopped = false;
+            bool done = false, stopped = false;
             do {
                 update();
                 measure();
-            } while(!(stopped = stop_callback()) && fraction_completed() < 1.);
+                if ((stopped = stop_callback()) || schedule.pending()) {
+                    static const double total = 100.;
+                    double local_fraction = (stopped
+                        ? 1.
+                        : steps / total
+                    );
+                    schedule.update(fraction = boost::mpi::all_reduce(communicator, local_fraction, std::plus<double>()));
+                    done = fraction >= 1.;
+                }
+            } while(!done);
             return !stopped;
         }
         
@@ -121,8 +136,19 @@ class multi_array_sim {
 
         results_type collect_results(result_names_type const & names) const {
             results_type partial_results;
-            for(result_names_type::const_iterator it = names.begin(); it != names.end(); ++it)
-                partial_results[*it] = measurements[*it].get<alps::multi_array<double, 2> >().mean();
+            for(result_names_type::const_iterator it = names.begin(); it != names.end(); ++it) {
+                alps::multi_array<double, 2> sum = measurements[*it].get<alps::multi_array<double, 2> >().mean();
+                sum *= measurements[*it].count();
+                if (communicator.rank() == 0) {
+                    boost::mpi::reduce(communicator, measurements[*it].count(), partial_results[*it].first, std::plus<boost::uint64_t>(), 0);
+                    partial_results[*it].second = sum;
+                    boost::mpi::reduce(communicator, sum.data(), sum.num_elements(), partial_results[*it].second.data(), std::plus<double>(), 0);
+                    partial_results[*it].second /= partial_results[*it].first;
+                } else {
+                    boost::mpi::reduce(communicator, measurements[*it].count(), std::plus<boost::uint64_t>(), 0);
+                    boost::mpi::reduce(communicator, sum.data(), sum.num_elements(), std::plus<double>(), 0);
+                }
+            }
             return partial_results;
         }
 
@@ -166,11 +192,17 @@ class multi_array_sim {
         }
 
     private:
+    
+        boost::mpi::communicator communicator;
 
         parameters_type params;
         boost::variate_generator<boost::mt19937, boost::uniform_real<> > mutable random;
         alps::alea::accumulator_set measurements;
-    
+
+        alps::check_schedule schedule;
+        double fraction;
+        int clone;
+
         int steps;
 };
 
@@ -181,21 +213,26 @@ bool stop_callback() {
 int main(int argc, char *argv[]) {
 
     try {
-        alps::parameters_type<multi_array_sim>::type parameters;
+        boost::mpi::environment env(argc, argv);
+        boost::mpi::communicator comm;
+
+        alps::parameters_type<multi_array_sim_mpi>::type parameters;
         parameters["SEED"] = 66;
 
-        multi_array_sim sim(parameters);
+        multi_array_sim_mpi sim(parameters, comm);
 
         sim.run(&stop_callback);
         
-        sim.save("checkpoint.h5");
+        sim.save("checkpoint" + boost::lexical_cast<std::string>(comm.rank()) + ".h5");
         
         using alps::collect_results;
-        alps::results_type<multi_array_sim>::type results = collect_results(sim);
+        alps::results_type<multi_array_sim_mpi>::type results = collect_results(sim);
 
-        alps::hdf5::archive ar("result.h5", "w");
-        ar["/parameters"] << parameters;
-        ar["/simulation/results"] << results;
+        if (comm.rank() == 0) {
+            alps::hdf5::archive ar("result.h5", "w");
+            ar["/parameters"] << parameters;
+            ar["/simulation/results"] << results;
+        }
 
     } catch (std::exception const & e) {
         std::cerr << "Caught exception: " << e.what() << std::endl;
