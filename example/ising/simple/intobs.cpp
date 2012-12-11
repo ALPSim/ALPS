@@ -205,7 +205,6 @@ class ising_sim {
             ar["thermalization_sweeps"] >> thermalization_sweeps;
             ar["beta"] >> beta;
             ar["spins"] >> spins;
-            ar["measurements"] >> measurements;
 
             {
                 std::string state;
@@ -310,8 +309,7 @@ int main(int argc, char *argv[]) {
 
         sim.run(stop_callback(options.timelimit));
 
-        if (options.resume)
-            sim.save(options.checkpointfile);
+        sim.save(options.checkpointfile);
 
         using alps::collect_results;
         alps::results_type<ising_sim>::type results = collect_results(sim);

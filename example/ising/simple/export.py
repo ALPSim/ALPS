@@ -60,7 +60,7 @@ if __name__ == '__main__':
         except ArchiveNotFound: pass
 
     if limit == 0:
-        sim.run()
+        sim.run(lambda: False)
     else:
         start = time.time()
         sim.run(lambda: time.time() > start + float(limit))

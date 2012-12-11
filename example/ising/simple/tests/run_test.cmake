@@ -20,7 +20,7 @@ if(not_successful)
 endif(not_successful)
 
 execute_process(
-    COMMAND ${mpiexec} ${mpiexec_numproc_flag} ${procs} ${cmd_path} -T 15 -c ${sourcedir}/../params/param.h5 ${cmd}.result.h5
+    COMMAND ${mpiexec} ${mpiexec_numproc_flag} ${procs} ${cmd_path} -T 15 -c ${cmd}.result.clone0.h5 ${cmd}.result.h5
     RESULT_VARIABLE not_successful
     OUTPUT_FILE ${cmd}_output_continue
     ERROR_VARIABLE err
