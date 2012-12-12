@@ -136,7 +136,6 @@ public:
     ar>>alps::make_pvp(path+"/nf",nf);
     if(nt!=nt_ || ns!=ns_ || nf!=nf_){ std::cerr<<path<<" nt: "<<nt_<<" new: "<<nt<<" ns: "<<ns_<<" "<<ns<<" nf: "<<nf_<<" "<<nf<<" dimensions do not match."<<std::endl; throw std::runtime_error("Green's function read in: dimensions do not match."); }
     std::stringstream subpath; subpath<<path<<"/values/mean";
-    std::cout<<"in read: we should have size: "<<nt_*ns_*ns_*nf_<<std::endl;
     ar>>alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_);
   }
   void write_hdf5_ss(alps::hdf5::archive &ar, const std::string &path) const{
