@@ -362,8 +362,8 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
   G0_omega_real.write("G0_omega_input_realspace");
   itime_green_function_t G0_tau_real = transform_into_real_space(G0_tau);
   G0_tau_real.write("G0_tau_input_realspace");
-  std::ofstream g0_omega_input_hr("g0_omega_input_hr.dat"); g0_omega_input_hr<<std::make_pair(G0_omega_new,beta);
-  std::ofstream g0_omega_input_rs_hr("g0_omega_input_rs_hr.dat"); g0_omega_input_rs_hr<<std::make_pair(G0_omega_real,beta);
+  //std::ofstream g0_omega_input_hr("g0_omega_input_hr.dat"); g0_omega_input_hr<<std::make_pair(G0_omega_new,beta);
+  //std::ofstream g0_omega_input_rs_hr("g0_omega_input_rs_hr.dat"); g0_omega_input_rs_hr<<std::make_pair(G0_omega_real,beta);
   return G0_omega_new;
 }
 
