@@ -94,7 +94,7 @@ int main()
         
         alps::alea::detail::accumulator_wrapper wa(accc);
         
-        set << alps::alea::make_accumulator(accc, "bar");
+        set << alps::alea::make_accumulator("bar", accc);
         
         //------------------- test reset -------------------
         set["bar"] << a;

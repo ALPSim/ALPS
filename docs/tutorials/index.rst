@@ -6,7 +6,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   scheduler/simple
+   scheduler/single
    scheduler/mpi
    scheduler/export2py
    scheduler/python

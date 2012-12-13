@@ -25,16 +25,7 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-//jan: can we reduce the number of necessary includes?
-#include <alps/ngs/api.hpp>
-#include <alps/ngs/hdf5.hpp>
-#include <alps/ngs/config.hpp>
-#include <alps/ngs/signal.hpp>
-#include <alps/ngs/params.hpp>
-#include <alps/ngs/mcresults.hpp>
-#include <alps/ngs/mcobservables.hpp>
-#include <alps/ngs/alea/accumulator_set.hpp>
-#include <alps/ngs/observablewrappers.hpp>
+#include <alps/ngs.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 
 #include <alps/random/mersenne_twister.hpp> // TODO: why do we need this?
