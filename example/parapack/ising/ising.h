@@ -61,6 +61,7 @@ public:
         << alps::SimpleRealObservable("Inverse Temperature")
         << alps::SimpleRealObservable("Number of Sites")
         << alps::RealObservable("Energy")
+        << alps::RealObservable("Energy Density")
         << alps::RealObservable("Energy^2")
         << alps::RealObservable("Magnetization")
         << alps::RealObservable("Magnetization^2")
@@ -88,10 +89,11 @@ public:
     add_constant(obs["Inverse Temperature"], beta_);
     add_constant(obs["Number of Sites"], (double)num_sites());
     obs["Energy"] << energy_;
+    obs["Energy Density"] << energy_ / num_sites();
     obs["Energy^2"] << energy_ * energy_;
-    obs["Magnetization"] << mag;
-    obs["Magnetization^2"] << mag * mag;
-    obs["Magnetization^4"] << mag * mag * mag * mag;
+    obs["Magnetization"] << mag / num_sites();
+    obs["Magnetization^2"] << mag * mag / num_sites() / num_sites();
+    obs["Magnetization^4"] << std::pow(mag * mag / num_sites() / num_sites(), 2.0);
   }
 
   // for exchange Monte Carlo
