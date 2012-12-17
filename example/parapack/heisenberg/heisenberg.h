@@ -148,7 +148,7 @@ public:
   void load(alps::IDump& dp) { dp >> mcs_ >> spins_ >> energy_; }
 
 protected:
-  double update_energy() {
+  void update_energy() {
     bond_iterator itr, itr_end;
     energy_ = 0;
     for (boost::tie(itr, itr_end) = bonds(); itr != itr_end; ++itr)
