@@ -340,7 +340,8 @@ These parameters are explained in Sec. \ref{umatrix}.
 
 The following optional parameters control the different measurements implemented in the solver. For details on those measurements, see Sec. \ref{measurements}.
 \begin{itemize}
-\item \verb#MEASURE_freq#=\{0,1\} activates the Green's function measurement on Matsubara frequencies. Require \verb#N_MATSUBARA#.
+\item \verb#MEASURE_time#=\{0,1\} activates the Green's function measurement in imaginary time. Note: This measurement is turned on by default.
+\item \verb#MEASURE_freq#=\{0,1\} activates the Green's function measurement on Matsubara frequencies. Requires \verb#N_MATSUBARA#.
 \item \verb#N_MATSUBARA#=\{\emph{natural number}\} The number $N_{\nu}$ of (fermionic) Matsubara frequencies $\nu_{n}=(2n+1)\pi/\beta$. The Green's function will be measured for all frequencies with $n=0,\ldots,N_{\nu}-1$.
 \item \verb#MEASURE_legendre#=\{0,1\} activates the measurement of coefficients of Green's function in the Legendre polynomial basis. Requires \verb#N_LEGENDRE# and \verb#N_MATSUBARA#.
 \item \verb#N_LEGENDRE#=\{\emph{natural number}\} specifies the number of Legendre coefficients to be measured. Coefficiencts with indices $l=0,\ldots,N_{l}-1$ will be measured.
@@ -398,7 +399,12 @@ We define the imaginary time Green's function as follows:
 G_{i}(\tau) \Let -\langle T_{\tau}c_{i}(\tau)c_{i}^{\dagger}(0^{+})\rangle
 \label{Gtdef}
 \end{equation}
-The code measures this function by binning it on an equidistant grid on the interval $[0,\beta]$ with the number of bins $N_{\tau}$ specified by the parameter \verb#N_TAU#.
+The code measures this function by binning it on an equidistant grid on the interval $[0,\beta]$ with the number of bins $N_{\tau}$ specified by the parameter \verb#N_TAU#. The corresponding improved estimator
+\begin{equation}
+F_{i}(\tau) \Let -\frac{1}{2}\sum_{j}(U_{ij}+U_{ji})\langle T_{\tau}n_{j}(\tau)c_{i}(\tau)c_{i}^{\dagger}(0^{+})\rangle
+\label{Ftdef}
+\end{equation}
+is measured automatically.
 The bins of width $\beta/N_{\tau}$ are centered around the equidistant grid points at $\tau_{n}=n\beta/N_{\tau}$. Hence $\tau_{0}=0$ and $\tau_{N_{\tau}}=\beta$. Note that because of this choice, the first and the last bin only have half the width of a regular bin.
 As a consequence of the above definition, the density is given by
 $-G(\beta-0^{+})=G_{i}(\tau=0^{-})=-\langle T_{\tau} c_{i}(0^{-})c_{i}^{\dagger}(0^{+})\rangle = +\langle c_{i}^{\dagger}(0^{+}) c_{i}(0^{-})\rangle =\langle c_{i}^{\dagger} c_{i}\rangle = \langle n_{i} \rangle$.

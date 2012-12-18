@@ -119,14 +119,20 @@ void evaluate_gtau(const alps::results_type<hybridization>::type &results,
 
   //Imaginary time Green function
   itime_green_function_t G_tau(N_t+1, n_sites, n_orbitals);
+  itime_green_function_t F_tau(N_t+1, n_sites, n_orbitals);
   for(std::size_t i=0;i<n_orbitals;++i){
     std::stringstream g_name; g_name<<"g_"<<i;
+    std::stringstream f_name; f_name<<"f_"<<i;
     std::vector<double> G=results[g_name.str()].mean<std::vector<double> >();
+    std::vector<double> F=results[f_name.str()].mean<std::vector<double> >();
     for(std::size_t t=0;t<N_t+1;++t){
       G_tau(t,0,0,i)=G[t];
+      F_tau(t,0,0,i)=F[t];
     }
     G_tau(0,0,0,i)*=2.; //first and last bin
     G_tau(N_t,0,0,i)*=2.; //have half the size
+    F_tau(0,0,0,i)*=2.; //first and last bin
+    F_tau(N_t,0,0,i)*=2.; //have half the size
   }
 
   for(std::size_t i=0;i<n_orbitals;++i){//replace Green function endpoints by corresponding densities
@@ -138,6 +144,7 @@ void evaluate_gtau(const alps::results_type<hybridization>::type &results,
 
   //store in hdf5
   G_tau.write_hdf5(solver_output, "/G_tau");
+  F_tau.write_hdf5(solver_output, "/F_tau");
 
   //COVARIANCE
   for(std::size_t i=0; i<n_orbitals; i++){
@@ -165,6 +172,15 @@ void evaluate_gtau(const alps::results_type<hybridization>::type &results,
       G_file<<std::endl;
     }
     G_file.close();
+     std::ofstream F_file("Ft.dat");
+    for(std::size_t t=0;t<=N_t;++t){
+      F_file<<beta*t/N_t;
+      for(std::size_t j=0;j<n_orbitals;++j){
+        F_file<<" "<<F_tau(t,0,0,j);
+      }
+      F_file<<std::endl;
+    }
+    F_file.close();
   }
 }
 

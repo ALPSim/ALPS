@@ -263,7 +263,7 @@ double hybmatrix::full_weight() const{
   //std::cout<<clcyan<<"det: "<<determinant()<<" ps: "<<permutation_sign_<<cblack<<std::endl;
   return determinant()*permutation_sign_;
 }
-void hybmatrix::measure_G(std::vector<double> &G, double sign) const{
+void hybmatrix::measure_G(std::vector<double> &G, std::vector<double> &F, const std::map<double,double> &F_prefactor, double sign) const{
   double N_div_beta=(G.size()-1)/beta_;
   static std::vector<double> cdagger_times(size()); cdagger_times.resize(size());
   static std::vector<double> c_times(size()); c_times.resize(size());
@@ -274,8 +274,9 @@ void hybmatrix::measure_G(std::vector<double> &G, double sign) const{
     cdagger_times[it->second] = it->first;
   }
   //we measure G(tau-tau'):=-<T c(tau) c^dagger(tau')>
-  for (int j = 0; j < size(); j++) {
-    for (int i = 0; i < size(); i++) {
+  for (int i = 0; i < size(); i++) {
+    double f_pref=(F_prefactor.find(c_times[i]))->second;
+    for (int j = 0; j < size(); j++) {
       double argument = c_times[i] - cdagger_times[j];
       double bubble_sign = sign;
       if (argument < 0) {
@@ -283,10 +284,12 @@ void hybmatrix::measure_G(std::vector<double> &G, double sign) const{
         argument += beta_;
       }
       int index = (int) (argument * N_div_beta + 0.5);
-      G[index] -= operator() (j, i) * bubble_sign; //changed this to-; check consistency with ALPS DMFT loop!
+      double g = operator() (j, i) * bubble_sign;
       //NOTE:  - corresponds to -<T c(tau) c^dag(tau')>
+      G[index] -= g; //changed this to-; check consistency with ALPS DMFT loop!
+      F[index] -= g*f_pref;
     }
-  } 
+  }
 }
 void hybmatrix::consistency_check() const{
   for(hyb_map_t::const_iterator it1=c_index_map_.begin(); it1!= c_index_map_.end();++it1){

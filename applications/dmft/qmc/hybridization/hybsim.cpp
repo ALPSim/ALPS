@@ -82,6 +82,7 @@ hyb_config(parms)
   MEASURE_nn = parms["MEASURE_nn"]|0;                                              //measure density-density correlation function at equal times
   MEASURE_g2w = parms["MEASURE_g2w"]|0;                                            //measure two-particle Green function
   MEASURE_h2w = parms["MEASURE_h2w"]|0;                                            //measure higher-order two-particle correlator
+  MEASURE_time = parms["MEASURE_time"]|1;                                          //measure in imaginary time (ON by default)
   MEASURE_freq = parms["MEASURE_freq"]|0;                                          //measure in frequency space
   MEASURE_legendre = parms["MEASURE_legendre"]|0;                                  //measure in legendre polynomials
   MEASURE_sector_statistics = parms["MEASURE_sector_statistics"]|0;                //measure sector statistics

@@ -71,7 +71,7 @@ private:
   void create_measurements();
   //measure_* functions perform the actual measurements
   void measure_order();
-  void measure_G();
+  void measure_G(std::vector<std::map<double,double> > &F_prefactor);
   void measure_Gw(std::vector<std::map<double,double> > &F_prefactor);
   void measure_Gl(std::vector<std::map<double,double> > &F_prefactor);
   void measure_G2w(std::vector<std::map<double,double> > &F_prefactor);
@@ -135,12 +135,14 @@ private:
   bool MEASURE_nn;
   bool MEASURE_g2w;
   bool MEASURE_h2w;
+  bool MEASURE_time;
   bool MEASURE_freq;
   bool MEASURE_legendre;
   bool MEASURE_sector_statistics;
 
   //observable names
   std::vector<std::string> g_names;
+  std::vector<std::string> f_names;
   std::vector<std::string> density_names;
   std::vector<std::string> order_names;
   std::vector<std::string> order_histogram_names;
@@ -155,6 +157,7 @@ private:
   std::vector<double>orders;
   std::vector<double>order_histogram_total;
   std::vector<std::vector<double> >G;
+  std::vector<std::vector<double> >F;
   std::vector<double>densities;
   std::vector<std::vector<double> >Gwr;
   std::vector<std::vector<double> >Gwi;

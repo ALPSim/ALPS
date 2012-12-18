@@ -69,6 +69,8 @@ void hybridization::create_measurements(){//called once in the constructor
   for(std::size_t i=0;i<n_orbitals;++i){
     //g in tau
     std::stringstream g_name; g_name<<"g_"<<i; g_names.push_back(g_name.str());
+    //f in tau
+    std::stringstream f_name; f_name<<"f_"<<i; f_names.push_back(f_name.str());
 
     //density
     std::stringstream density_name; density_name<<"density_"<<i; density_names.push_back(density_name.str());
@@ -97,6 +99,7 @@ void hybridization::create_measurements(){//called once in the constructor
 
     //initialize measurements for observable names
     measurements << vec_obs_t(g_name.str());
+    measurements << vec_obs_t(f_name.str());
     measurements << obs_t(density_name.str());
 
     measurements << vec_obs_t(order_histogram_name.str());
@@ -149,16 +152,20 @@ void hybridization::create_measurements(){//called once in the constructor
   order_histogram.resize(n_orbitals, std::vector<double> (N_hist_orders, 0.));
   orders.resize(n_orbitals, 0.);
   order_histogram_total.resize(N_hist_orders, 0.);
-  G.resize(n_orbitals, std::vector<double>(N_t+1, 0.));
   densities.resize(n_orbitals, 0.);
   sector_statistics.resize(pow(2,n_orbitals), 0.);
+
+  if(MEASURE_time){
+    G.resize(n_orbitals, std::vector<double>(N_t+1, 0.));
+    F.resize(n_orbitals, std::vector<double>(N_t+1, 0.));
+  }
   if(MEASURE_freq){
     Gwr.resize(n_orbitals, std::vector<double>(N_w, 0.));
     Gwi.resize(n_orbitals, std::vector<double>(N_w, 0.));
     Fwr.resize(n_orbitals, std::vector<double>(N_w, 0.));
     Fwi.resize(n_orbitals, std::vector<double>(N_w, 0.));
- }
- if(MEASURE_legendre){
+  }
+  if(MEASURE_legendre){
     Gl.resize(n_orbitals, std::vector<double>(N_l, 0.));
     Fl.resize(n_orbitals, std::vector<double>(N_l, 0.));
   }
@@ -173,12 +180,12 @@ void hybridization::measure(){
   measure_order();
   accumulate_order();
 
-  measure_G();
-  accumulate_G();
-
   std::vector<std::map<double,double> > F_prefactor;
-  if(MEASURE_freq || MEASURE_legendre || MEASURE_g2w || MEASURE_h2w)
+  if(MEASURE_time || MEASURE_freq || MEASURE_legendre || MEASURE_g2w || MEASURE_h2w)
     local_config.get_F_prefactor(F_prefactor);//compute segment overlaps in local config
+
+  measure_G(F_prefactor);
+  accumulate_G();
 
   measure_Gw(F_prefactor);
   accumulate_Gw();
@@ -207,6 +214,7 @@ void hybridization::measure(){
 void hybridization::measure_order(){
   //compute the order and store it in the vectors for the histograms
   sgn+=sign;
+  local_config.measure_density(densities, sign);
   for(std::size_t i=0;i<n_orbitals;++i){
     double order=local_config.order(i);
     orders[i]+=order;
@@ -223,25 +231,28 @@ void hybridization::accumulate_order(){
   measurements["Sign"]<<(sgn); sgn=0.;
   for(std::size_t i=0;i<n_orbitals;++i){
     measurements[order_names[i]]<<(orders[i]);
+    measurements[density_names[i]]<<(densities[i]);
     measurements[order_histogram_names[i]]<<(order_histogram[i]);
     orders[i]=0.;
+    densities[i]=0;
     memset(&(order_histogram[i][0]), 0, sizeof(double)*order_histogram[i].size());
   }
 }
 
 //measure the Green's function
-void hybridization::measure_G(){
-  //delegate the acutal measurement to the hybridization configuration
-  hyb_config.measure_G(G, sign);
-  local_config.measure_density(densities, sign);
+void hybridization::measure_G(std::vector<std::map<double,double> > &F_prefactor){
+  if(!MEASURE_time) return;
+  //delegate the actual measurement to the hybridization configuration
+  hyb_config.measure_G(G, F, F_prefactor, sign);
 }
 
 void hybridization::accumulate_G(){
+  if(!MEASURE_time) return;
   for(std::size_t i=0;i<n_orbitals;++i){
     measurements[g_names[i]]<<(N_t*G[i]/(beta*beta));
-    measurements[density_names[i]]<<(densities[i]);
+    measurements[f_names[i]]<<(N_t*F[i]/(beta*beta));
     memset(&(G[i][0]), 0, sizeof(double)*G[i].size());
-    densities[i]=0;
+    memset(&(F[i][0]), 0, sizeof(double)*F[i].size());
   }
 }
 
