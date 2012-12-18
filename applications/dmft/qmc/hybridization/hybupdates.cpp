@@ -37,6 +37,10 @@
 //5: perform a segment flip between different orbtials
 //see our review for details of these updates
 void hybridization::update(){
+
+  //one sweep is composed of N_MEAS Monte Carlo updates and one measurement (the latter only if thermalized)
+  sweeps++;
+
   for(std::size_t i=0;i<N_meas;++i){
     double update_type=random();
     if(spin_flip){
@@ -62,12 +66,17 @@ void hybridization::update(){
         insert_remove_antisegment_update();
       }
     }
-    
+
+    if(is_thermalized()){
+      measure_order();
+      if(MEASURE_time){
+        local_config.get_F_prefactor(F_prefactor);//compute segment overlaps in local config
+        measure_G(F_prefactor);
+      }
+    }
+
   }//N_meas
-  
-  //one sweep is composed of N_MEAS Monte Carlo updates and one measurement (the latter only if thermalized)
-  sweeps++;
-  
+
   if(VERBOSE && sweeps%output_period==0 && crank==0) {
     //  if(VERBOSE && crank==0 && boost::chrono::steady_clock::now() - lasttime > delay) {
     //    lasttime = boost::chrono::steady_clock::now();

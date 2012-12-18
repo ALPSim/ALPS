@@ -177,6 +177,8 @@ private:
   std::vector<double>h2wr;
   std::vector<double>h2wi;
 
+  std::vector<std::map<double,double> > F_prefactor;
+
   //local impurity operator configuration
   local_configuration local_config;
 

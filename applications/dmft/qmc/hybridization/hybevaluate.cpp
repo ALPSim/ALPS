@@ -47,6 +47,8 @@ void evaluate_basics(const alps::results_type<hybridization>::type &results,
     sim_file << "average sign: " << results["Sign"].mean<double>() << std::endl;
     sim_file << "total number of Monte Carlo updates: " << sweeps*(int)parms["N_MEAS"] << std::endl;
     sim_file << "total number of Monte Carlo measurements: " << results["Sign"].count() << std::endl;
+    if(parms["MEASURE_time"]|true)
+      sim_file << "total number of imaginary time measurements: " << results["Sign"].count()*N_meas << std::endl;
     sim_file << "number thermalization sweeps: " << parms["THERMALIZATION"] << std::endl;
     sim_file << "inverse temperature: " << beta << std::endl;
     sim_file << "perturbation order:" << std::endl;
@@ -108,10 +110,11 @@ void evaluate_basics(const alps::results_type<hybridization>::type &results,
 }
 
 
-void evaluate_gtau(const alps::results_type<hybridization>::type &results,
+void evaluate_time(const alps::results_type<hybridization>::type &results,
                    const alps::parameters_type<hybridization>::type &parms,
                    alps::hdf5::archive &solver_output){
 
+  if(!(parms["MEASURE_time"]|true)) return;
   std::size_t N_t = parms["N_TAU"];
   double beta = parms["BETA"];
   std::size_t n_orbitals = parms["N_ORBITALS"];
