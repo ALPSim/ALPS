@@ -232,7 +232,6 @@ class ising_sim {
             ar["thermalization_sweeps"] >> thermalization_sweeps;
             ar["beta"] >> beta;
             ar["spins"] >> spins;
-            ar["measurements"] >> measurements;
 
             {
                 std::string state;
