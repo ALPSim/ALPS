@@ -49,7 +49,7 @@ public:
       std::string name = std::string("J") + boost::lexical_cast<std::string>(t);
       if (params.defined(name)) coupling_[t] = evaluate(name, params);
     }
-    std::cerr << "coupling constants = " << alps::write_vector(coupling_) << std::endl;
+    // std::cerr << "coupling constants = " << alps::write_vector(coupling_) << std::endl;
     // random initial spins
     for (int s = 0; s < num_sites(); ++s) spins_[s] = (uniform_01() < 0.5 ? 1 : -1);
     update_energy();
