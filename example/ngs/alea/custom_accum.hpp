@@ -57,7 +57,7 @@ typedef myVector custom_accum;
 
 namespace alps
 {
-    namespace alea
+    namespace accumulator
     {
         // with this specialisation the detail::accumulator_wrapper knows, that custom_accum has a mean function
         template<> struct has_mean<custom_accum> 
@@ -78,12 +78,12 @@ namespace alps
 
         // this is the free mean function for the custom_accum (return value via mean trait)
         
-    }//end namespace alea
+    }//end namespace accumulator
 }//end namespace alps
 
-alps::alea::mean_type<alps::alea::value_type<custom_accum>::type>::type mean(const custom_accum & arg)
+alps::accumulator::mean_type<alps::accumulator::value_type<custom_accum>::type>::type mean(const custom_accum & arg)
 {
-    typedef alps::alea::mean_type<alps::alea::value_type<custom_accum>::type>::type mean_type;
+    typedef alps::accumulator::mean_type<alps::accumulator::value_type<custom_accum>::type>::type mean_type;
     
     return mean_type(std::accumulate(arg.begin(), arg.end(), 0))/arg.size();
 }

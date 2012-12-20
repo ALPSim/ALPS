@@ -29,108 +29,151 @@
 #include <alps/ngs.hpp>
 #include <alps/ngs/numeric/array.hpp>
 #include <alps/multi_array.hpp>
+#include <alps/utility/resize.hpp>
 
 using namespace std;
-using namespace alps::alea;
+using namespace alps::accumulator;
 using namespace alps::ngs::numeric;
 
 int main()
 {
     #ifdef ALPS_NGS_USE_NEW_ALEA
+        
+        //=================== test resize_same_as ===================
+        std::cout << "resize_same_as test" << std::endl;
+        //~ typedef alps::multi_array<double, 3> exp_type;
+        //~ exp_type a(2,2,2);
+        //~ typedef std::vector<double> exp_type;        
+        //~ exp_type a(2, 3);
+        typedef boost::array<double, 3> exp_type;
+        exp_type a;
+        
+        exp_type b;
+        
+        alps::resize_same_as(b, a);
+        
+        std::cout << alps::short_print(a) << std::endl;
+        std::cout << alps::short_print(b) << std::endl;
+        
+        //=================== test deep copy ===================
+        std::cout << "deep_copy test" << std::endl;
+        
+        accumulator<double> original;
+        original << 1.;
+        alps::accumulator::detail::accumulator_wrapper copy1(original);
+        original << 1.;
+        copy1 << 3.;
+        accumulator_set copy2;
+        copy2 << make_accumulator("copy", original);
+        original << 1.;
+        copy2["copy"] << 7.;
+        
+        std::cout << mean(original) << std::endl;
+        std::cout << mean(copy1.get<double>()) << std::endl;
+        std::cout << mean(copy2["copy"].get<double>()) << std::endl;
+        
+        //=================== the supported Observables ===================
+        std::cout << "set test" << std::endl;
         accumulator_set set;
         set << alps::ngs::RealObservable("Energy");
         set << alps::ngs::RealVectorObservable("Vel");
         set << alps::ngs::SimpleRealObservable("simple");
+        set << alps::ngs::SimpleRealVectorObservable("simpleV");
         
-        set["Energy"] << 1.;
+        //------------------- stream in values (must be of value_type) -------------------
+        set["Energy"] << 1.; // ... << 1; wouldn't work
         set["Energy"] << 2.;
         set["Energy"] << 3.;
         set["Energy"] << 3.;
         
-        std::vector<double> v1(3,1);
-        std::vector<double> v2(3,2);
-        std::vector<double> v3(3,3);
-        std::vector<double> v4(3,3);
+        set["simple"] << 2.;
+        set["simple"] << 3.;
         
-        set["Vel"] << v1;
-        set["Vel"] << v2;
-        set["Vel"] << v3;
-        set["Vel"] << v4;
+        set["Vel"] << std::vector<double>(3,1);
+        set["Vel"] << std::vector<double>(3,2);
+        set["Vel"] << std::vector<double>(3,3);
+        set["Vel"] << std::vector<double>(3,4);
         
+        set["simpleV"] << std::vector<double>(3,1);
+        set["simpleV"] << std::vector<double>(3,2);
+        
+        //------------------- get some data via the result_type_wrapper -------------------
+        //------------------- manual type-infusion -------------------
         cout << "mean: " << set["Energy"].get<double>().mean() << endl;
         cout << "mean: " << alps::short_print(set["Vel"].get<std::vector<double> >().mean()) << endl;
         cout << "error: " << alps::short_print(set["Vel"].get<std::vector<double> >().error()) << endl;
         
+        //=================== convert to mcresult ===================
+        //------------------- automatic type-infusion (try...catch) -------------------
         alps::mcresult res(set["Energy"]);
-        alps::mcresult res2(set["Vel"]);
+        alps::mcresult res_v(set["Vel"]);
+        alps::mcresult res_s(set["simple"]);
+        alps::mcresult res_s_v(set["simpleV"]);
         
-        //~ alps::alea::accumulator<int> accc;
-        //~ alps::alea::detail::accumulator_wrapper wa(accc);
-        //~ alps::mcresult res3(wa);
+        //------------------- any accumulator can be inserted in the set with make_accumulator -------------------
+        alps::accumulator::accumulator<double, features<tag::mean> > acc;
+        //~ detail::accumulator_wrapper wa0(acc);
+        //~ wa0 << 1.;
         
-        set["Vel"].get<std::vector<double> >();
+        set << make_accumulator("some_wrapper", acc);
         
-        std::cout << res << std::endl;
-        std::cout<< res2 << std::endl;
         
-        //------------------- test boost::array -------------------
+        set["some_wrapper"] << 2.;
+        set["some_wrapper"] << 3.;
+        //------anything in a wrapper can be casted to mcresult (only some value_type work (double, ...)) ---------
+        //~ alps::mcresult res_wrapper(wa0);
+        alps::mcresult res_wrapper(set["some_wrapper"]);
         
-        boost::array<double, 3> a;
+        //------------------- control-print -------------------
+        std::cout << "RealObservable:             " << res << std::endl;
+        std::cout << "RealVectorObservable:       " << res_v << std::endl;
+        std::cout << "SimpleRealObservable:       " << res_s << std::endl;
+        std::cout << "SimpleRealVectorObservable: " << res_s_v << std::endl;
+        std::cout << "Some wrapper:               " << res_wrapper << std::endl;
+        
+        //=================== test boost::array ===================
+        boost::array<double, 3> boost_array;
         
         for(int i = 0; i < 3; ++i)
         {
-            a[i] = i;
+            boost_array[i] = i;
         }
-        alps::alea::accumulator<boost::array<double, 3>, features<  tag::fixed_size_binning
+        alps::accumulator::accumulator<boost::array<double, 3>, features<  tag::fixed_size_binning
                                 , tag::max_num_binning
                                 , tag::log_binning
                                 , tag::autocorrelation
-                                //~ , tag::converged
-                                //~ , tag::tau
                                 , tag::histogram
-                                > > accc;
+                                > > acc_boost_array;
         
-        accc << a;                        
+        acc_boost_array << boost_array;
         
-        alps::alea::detail::accumulator_wrapper wa(accc);
         
-        set << alps::alea::make_accumulator("bar", accc);
+        set << make_accumulator("bar", acc_boost_array);
         
         //------------------- test reset -------------------
-        set["bar"] << a;
+        set["bar"] << boost_array;
         std::cout << "Mean: " << alps::short_print(set["bar"].get<boost::array<double, 3> >().mean()) << std::endl;
         set.reset();
-        set["bar"] << a+a;
+        set["bar"] << boost_array + boost_array;
         std::cout << "Mean: " << alps::short_print(set["bar"].get<boost::array<double, 3> >().mean()) << std::endl;
         
+        
+        //------------------- doesn't work yet -------------------
+        //~ alps::mcresult res4(set["bar"]);
+        //~ std::cout << res4 << std::endl;
+        
         //------------------- test array ops -------------------
-        a+=sqrt(a+a-a*a/2);
+        //------------------- they fulfill the error_type_concept -------------------
+        boost_array += sqrt(boost_array + boost_array - boost_array * boost_array/2);
         
-        boost::array<double, 3> b = boost::array<double, 3>();
-        for(int i = 0; i < 3; ++i)
-            std::cout << b[i] << std::endl;
-
-        b[0]=1;
-        b[1]=1;
-        b[2]=1;
         
-        accc << b;
-        
-        for(int i = 0; i < 3; ++i)
-        {
-            //~ std::cout << a[i] << std::endl;
-        }
-        //~ std::cout << alps::short_print(accc.mean()) << std::endl;
-        
-        //------------------- test boost::multi-array -------------------
-        alps::alea::accumulator<alps::multi_array<double, 3>, features<  tag::fixed_size_binning
+        //=================== test alps::multi-array ===================
+        alps::accumulator::accumulator<alps::multi_array<double, 3>, features<  tag::fixed_size_binning
                                 , tag::max_num_binning
                                 , tag::log_binning
                                 , tag::autocorrelation
-                                //~ , tag::converged
-                                //~ , tag::tau
                                 , tag::histogram
-                                > > accma;
+                                > > acc_alps_ma;
         
         alps::multi_array<double, 3> ma(2,2,2);
 
@@ -145,7 +188,7 @@ int main()
             }
         }
         
-        accma << ma;
+        acc_alps_ma << ma;
         
         std::cout << alps::short_print(ma) << std::endl;
         

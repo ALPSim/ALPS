@@ -50,7 +50,7 @@
 #include <alps/ngs.hpp>
 
 using namespace std;
-using namespace alps::alea;
+using namespace alps::accumulator;
 
 int main()
 {
@@ -108,7 +108,7 @@ int main()
     cout << autocorr(demo).sum()[1] << endl;
     
     cout << converged(demo) << endl;
-    //output:   2 (alps::alea::error_convergence maybe)   //not jet implemented
+    //output:   2 (alps::accumulator::error_convergence maybe)   //not jet implemented
     cout << tau(demo) << endl;
     //output:   42    //not jet implemented
     cout << histogram(demo) << endl;

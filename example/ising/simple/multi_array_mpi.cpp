@@ -70,7 +70,7 @@ class multi_array_sim_mpi {
             , clone(comm.rank())
             , steps(0)
         {
-            using namespace alps::alea;
+            using namespace alps::accumulator;
             measurements << make_accumulator(
                   "M"
                 , detail::accumulator_wrapper(accumulator<alps::multi_array<double, 2>, features<tag::mean> >())
@@ -121,7 +121,7 @@ class multi_array_sim_mpi {
         
         result_names_type result_names() const {
             result_names_type names;
-            for(alps::alea::accumulator_set::const_iterator it = measurements.begin(); it != measurements.end(); ++it)
+            for(alps::accumulator::accumulator_set::const_iterator it = measurements.begin(); it != measurements.end(); ++it)
                 names.push_back(it->first);
             return names;
         }
@@ -197,7 +197,7 @@ class multi_array_sim_mpi {
 
         parameters_type params;
         boost::variate_generator<boost::mt19937, boost::uniform_real<> > mutable random;
-        alps::alea::accumulator_set measurements;
+        alps::accumulator::accumulator_set measurements;
 
         alps::check_schedule schedule;
         double fraction;

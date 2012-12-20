@@ -37,7 +37,7 @@
 #include <vector>
 
 using namespace std;
-//~ using namespace alps::alea;
+//~ using namespace alps::accumulator;
 using namespace alps::ngs::numeric;
 
 int main()

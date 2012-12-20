@@ -25,27 +25,52 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define BOOST_TEST_MODULE alps::ngs::accumulator
+#ifndef ALPS_NGS_NUMERIC_DETAIL_HEADER
+#define ALPS_NGS_NUMERIC_DETAIL_HEADER
 
-#include <alps/ngs.hpp>
+#include <alps/ngs/stacktrace.hpp>
+#include <alps/utility/resize.hpp>
 
-#include <boost/test/included/unit_test.hpp>
+#include <alps/multi_array.hpp>
+#include <vector>
 
-BOOST_AUTO_TEST_CASE(test_mean_in_modular_accum)
+#include <stdexcept>
+
+namespace alps
 {
-    alps::accumulator::accumulator<int, alps::accumulator::features<alps::accumulator::tag::mean> > acci;
-    
-    for(int i = 0; i < 101; ++i)
-        acci << i;
-        
-    BOOST_REQUIRE( alps::accumulator::mean(acci) == 50);
-    
-    
-    alps::accumulator::accumulator<double, alps::accumulator::features<alps::accumulator::tag::mean> > accd;
-    
-    for(double i = 0; i < 1.01; i += .01)
-        accd << i;
-        
-    BOOST_REQUIRE( alps::accumulator::mean(accd) > .49999999999);
-    BOOST_REQUIRE( alps::accumulator::mean(accd) < .50000000001);
-}
+    namespace ngs //merged with alps/numerics/vector_function.hpp
+    {
+        namespace numeric
+        {
+            namespace detail
+            {
+                template<typename T, typename U>
+                void check_size(T & a, U const & b)
+                {
+                    
+                }
+                template<typename T, typename U>
+                void check_size(std::vector<T> & a, std::vector<U> const & b)
+                {
+                    if(a.size() == 0)
+                        alps::resize_same_as(a, b);
+                    else
+                        if(a.size() != b.size())
+                            boost::throw_exception(std::runtime_error("vectors must have the same size!" + ALPS_STACKTRACE));
+                }
+                template<typename T, typename U, std::size_t D>
+                void check_size(alps::multi_array<T, D> & a, alps::multi_array<U, D> const & b)
+                {
+                    //~ if(a.size() == 0)
+                        //~ alps::resize_same_as(a, b);
+                    //~ else
+                        //~ if(a.size() != b.size())
+                            //~ boost::throw_exception(std::runtime_error("vectors must have the same size!" + ALPS_STACKTRACE));
+                }
+                
+            }//end namespace detail
+        }//end namespace numeric
+    }//end namespace ngs
+}//end namespace alps
+
+#endif //ALPS_NGS_NUMERIC_DETAIL_HEADER

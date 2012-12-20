@@ -64,8 +64,6 @@ option(ALPS_DOWNLOAD_PACKAGES "Prepare an installer that downloads instead of co
 option(ALPS_PATCH_VISTRAILS "Patch VisTrails from VisTrails git repository" OFF)
 option(ALPS_NGS_USE_NEW_ALEA "Use the ALPS ngs-alea instead of just alea" OFF)
 option(ALPS_NGS_OPENMPI_ULFM "Userlevel failuer mitigation is available" OFF)
-# TODO: just temporary
-option(ALPS_NGS_INCLUDE_NEW_ALEA_TEST_AND_EXAMPLE "Include examples and test of the new ngs-alea" OFF)
 
 mark_as_advanced(ALPS_LLVM_WORKAROUND)
 mark_as_advanced(BIND_FORTRAN_LOWERCASE)
@@ -74,7 +72,6 @@ mark_as_advanced(ALPS_INSTALL_BOOST_TEST)
 mark_as_advanced(ALPS_PATCH_VISTRAILS)
 mark_as_advanced(ALPS_NGS_USE_NEW_ALEA)
 mark_as_advanced(ALPS_NGS_OPENMPI_ULFM)
-mark_as_advanced(ALPS_NGS_INCLUDE_NEW_ALEA_TEST_AND_EXAMPLE)
 
 option(ALPS_USE_MKL_PARALLEL "Use parallel version of MKL" OFF)
 mark_as_advanced(ALPS_USE_MKL_PARALLEL)

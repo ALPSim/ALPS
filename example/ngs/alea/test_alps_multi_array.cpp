@@ -25,27 +25,40 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define BOOST_TEST_MODULE alps::ngs::accumulator
+#include <alps/ngs/short_print.hpp>
+#include <alps/multi_array.hpp>
 
-#include <alps/ngs.hpp>
+#include <iostream>
+#include <vector>
 
-#include <boost/test/included/unit_test.hpp>
+#include <boost/integer.hpp>
 
-BOOST_AUTO_TEST_CASE(test_mean_in_modular_accum)
+using namespace std;
+
+int main()
 {
-    alps::accumulator::accumulator<int, alps::accumulator::features<alps::accumulator::tag::mean> > acci;
+    alps::multi_array<double, 3> a(4,2,2);
+    alps::multi_array<double, 2> b(4,4);
+    alps::multi_array<double, 3> c(2,2,2);
     
-    for(int i = 0; i < 101; ++i)
-        acci << i;
-        
-    BOOST_REQUIRE( alps::accumulator::mean(acci) == 50);
+    for(int i = 0; i < 4; ++i)
+    {
+        for(int j = 0; j < 2; ++j)
+        {
+            for(int k = 0; k < 2; ++k)
+            {
+                a[i][j][k] = 4*i+2*j+k;
+                c[i%2][j][k] = 4*(i%2)+2*j+k;
+            }
+        }
+    }
     
     
-    alps::accumulator::accumulator<double, alps::accumulator::features<alps::accumulator::tag::mean> > accd;
-    
-    for(double i = 0; i < 1.01; i += .01)
-        accd << i;
-        
-    BOOST_REQUIRE( alps::accumulator::mean(accd) > .49999999999);
-    BOOST_REQUIRE( alps::accumulator::mean(accd) < .50000000001);
+    a+a;
+    std::cout << sqrt(a) << std::endl;
+    std::cout << "--" << std::endl;
+    std::cout << a-c << std::endl;
+    std::cout << "--" << std::endl;
+    c = a;
+    std::cout << alps::sqrt(a) << std::endl;
 }

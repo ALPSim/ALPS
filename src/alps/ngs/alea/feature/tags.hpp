@@ -31,7 +31,7 @@
 
 namespace alps
 {
-    namespace alea
+    namespace accumulator
     {
         // = = = = = = = = = = I M P L E M E N T A T I O N   D E F I N I T I O N = = = = = = = = = =
         namespace tag
@@ -49,6 +49,6 @@ namespace alps
             }
             struct histogram;
         }
-    }//end alea namespace 
+    }//end accumulator namespace 
 }//end alps namespace
 #endif // ALPS_NGS_ALEA_DETAIL_IMPLEMENTATION_FWD_HEADER

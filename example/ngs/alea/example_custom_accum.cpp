@@ -33,7 +33,7 @@
 #include <iostream>
 
 using namespace std;
-using namespace alps::alea;
+using namespace alps::accumulator;
 
 int main()
 {
