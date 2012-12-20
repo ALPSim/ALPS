@@ -140,8 +140,14 @@ public:
     ar<<alps::make_pvp(path+"/nt",nt_);
     ar<<alps::make_pvp(path+"/ns",ns_);
     ar<<alps::make_pvp(path+"/nf",nf_);
-    std::stringstream subpath; subpath<<path<<"/values/mean";
-    ar<<alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_);
+    for (int is=0;is<ns_;is++) {
+      for (int jf=0;jf<nf_;jf++) {
+        std::stringstream subpath; subpath<<path<<"/"<<is<<"/"<<jf<<"/mean/value";
+        ar<<alps::make_pvp(subpath.str(), val_+is*nt_*nf_+jf*nt_,nt_);
+      }
+    }
+//    std::stringstream subpath; subpath<<path<<"/values/mean";
+//    ar<<alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_);
   }
   void read_hdf5(alps::hdf5::archive &ar, const std::string &path) {
     unsigned int nt, ns, nf;
@@ -150,15 +156,21 @@ public:
     ar>>alps::make_pvp(path+"/ns",ns);
     ar>>alps::make_pvp(path+"/nf",nf);
     if(nt!=nt_ || ns!=ns_ || nf!=nf_){ std::cerr<<path<<" nt: "<<nt_<<" new: "<<nt<<" ns: "<<ns_<<" "<<ns<<" nf: "<<nf_<<" "<<nf<<" dimensions do not match."<<std::endl; throw std::runtime_error("Green's function read in: dimensions do not match."); }
-    std::stringstream subpath; subpath<<path<<"/values/mean";
-    ar>>alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_);
+    for (int is=0;is<ns_;is++) {
+      for (int jf=0;jf<nf_;jf++) {
+        std::stringstream subpath; subpath<<path<<"/"<<is<<"/"<<jf<<"/mean/value";
+        ar>>alps::make_pvp(subpath.str(), val_+is*nt_*nf_+jf*nt_,nt_);
+      }
+    }
+//    std::stringstream subpath; subpath<<path<<"/values/mean";
+//    ar>>alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_);
   }
   void write_hdf5_ss(alps::hdf5::archive &ar, const std::string &path) const{
     if(ns_!=1) throw std::runtime_error("single site hdf5 write function called for multisite Green's function");
     ar<<alps::make_pvp(path+"/nt",nt_);
     ar<<alps::make_pvp(path+"/nf",nf_);
     for(unsigned int i=0;i<nf_;++i){
-      std::stringstream subpath; subpath<<path<<"/Green_"<<i<<"/mean/value";
+      std::stringstream subpath; subpath<<path<<"/"<<i<<"/mean/value";
       //currently we're not writing the error.
       //std::stringstream subpath_e; subpath_e<<path<<"/"<<i<<"/"<<j<<"/"<<"/"<<k<<"/values/error";
       ar<<alps::make_pvp(subpath.str(), val_+i*nt_, nt_);

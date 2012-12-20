@@ -146,33 +146,10 @@ void evaluate_time(const alps::results_type<hybridization>::type &results,
   }
 
   //store in hdf5
-//  G_tau.write_hdf5(solver_output, "/G_tau");
-//  F_tau.write_hdf5(solver_output, "/F_tau");
+  G_tau.write_hdf5_ss(solver_output, "/G_tau");
+  F_tau.write_hdf5_ss(solver_output, "/F_tau");
 
-  for(std::size_t i=0; i<n_orbitals; i++){
-     std::stringstream g_name; g_name<<"g_"<<i;
-     std::vector<double> data((N_t+1));
-     for(std::size_t t=0; t<=N_t; t++)
-        data[t]=G_tau(t,0,0,i);
-     std::stringstream data_path;
-     data_path << "/G_tau/"<<i<< "/value/mean";
-     solver_output<<alps::make_pvp(data_path.str(),data);
-     for(std::size_t t=0; t<=N_t; t++)
-        data[t]=F_tau(t,0,0,i);
-     data_path.str("");
-     data_path << "/F_tau/"<<i<< "/value/mean";
-     solver_output<<alps::make_pvp(data_path.str(),data);
-  }
-    
-  solver_output<<alps::make_pvp("/G_tau/nt",N_t);
-  solver_output<<alps::make_pvp("/F_tau/nt",N_t);
-
-  solver_output<<alps::make_pvp("/G_tau/ns",n_sites);
-  solver_output<<alps::make_pvp("/F_tau/ns",n_sites);
-  
-  solver_output<<alps::make_pvp("/G_tau/nf",n_orbitals);
-  solver_output<<alps::make_pvp("/F_tau/nf",n_orbitals);
-    
+   
   //COVARIANCE
   for(std::size_t i=0; i<n_orbitals; i++){
     boost::numeric::ublas::matrix<double> cov(N_t+1, N_t+1);
@@ -184,7 +161,7 @@ void evaluate_time(const alps::results_type<hybridization>::type &results,
         data[t1*(N_t+1)+t2]=cov(t1,t2);
 
     std::stringstream data_path;
-    data_path << "/G_tau/"<<i<< "/value/covariance";
+    data_path << "/G_tau/"<<i<< "/mean/covariance";
 
     solver_output<<alps::make_pvp(data_path.str(), data);
     g_name.str(""); g_name<<"f_"<<i;
@@ -194,7 +171,7 @@ void evaluate_time(const alps::results_type<hybridization>::type &results,
          data[t1*(N_t+1)+t2]=cov(t1,t2);
       
     data_path.str("");
-    data_path << "/F_tau/"<<i<< "/value/covariance";
+    data_path << "/F_tau/"<<i<< "/mean/covariance";
       
     solver_output<<alps::make_pvp(data_path.str(), data);
   }
@@ -255,39 +232,9 @@ void evaluate_freq(const alps::results_type<hybridization>::type &results,
   }
 
   //store in hdf5
-//  G_omega.write_hdf5(solver_output, "/G_omega");
-//  F_omega.write_hdf5(solver_output, "/F_omega");
-//  S_omega.write_hdf5(solver_output, "/S_omega");
-  for(std::size_t i=0; i<n_orbitals; i++){
-      std::vector<std::complex<double> > data(N_w);
-     for(std::size_t w=0; w<N_w; w++)
-        data[w]=G_omega(w,0,0,i);
-     std::stringstream data_path;
-     data_path << "/G_omega/"<<i<< "/value/mean";
-     solver_output<<alps::make_pvp(data_path.str(),data);
-     for(std::size_t w=0; w<N_w; w++)
-        data[w]=F_omega(w,0,0,i);
-      data_path.str("");
-      data_path << "/F_omega/"<<i<< "/value/mean";
-      solver_output<<alps::make_pvp(data_path.str(),data);
-      for(std::size_t w=0; w<N_w; w++)
-          data[w]=S_omega(w,0,0,i);
-      data_path.str("");
-      data_path << "/S_omega/"<<i<< "/value/mean";
-      solver_output<<alps::make_pvp(data_path.str(),data);
-  }
-
-  solver_output<<alps::make_pvp("/G_omega/nw",N_w);
-  solver_output<<alps::make_pvp("/F_omega/nw",N_w);
-  solver_output<<alps::make_pvp("/S_omega/nw",N_w);
-
-  solver_output<<alps::make_pvp("/G_omega/ns",n_sites);
-  solver_output<<alps::make_pvp("/F_omega/ns",n_sites);
-  solver_output<<alps::make_pvp("/S_omega/ns",n_sites);
-
-  solver_output<<alps::make_pvp("/G_omega/nf",n_orbitals);
-  solver_output<<alps::make_pvp("/F_omega/nf",n_orbitals);
-  solver_output<<alps::make_pvp("/S_omega/nf",n_orbitals);
+  G_omega.write_hdf5_ss(solver_output, "/G_omega");
+  F_omega.write_hdf5_ss(solver_output, "/F_omega");
+  S_omega.write_hdf5_ss(solver_output, "/S_omega");
     
   std::ofstream Gw_file("Gw.dat");
   for(std::size_t n=0;n<N_w;++n){
@@ -386,11 +333,11 @@ void evaluate_legendre(const alps::results_type<hybridization>::type &results,
   }//i
 
   //store in hdf5
-  G_l_omega.write_hdf5(solver_output, "/G_l_omega");
-  F_l_omega.write_hdf5(solver_output, "/F_l_omega");
-  S_l_omega.write_hdf5(solver_output, "/S_l_omega");
-  G_l_tau.write_hdf5(solver_output, "/G_l_tau");
-  F_l_tau.write_hdf5(solver_output, "/F_l_tau");
+  G_l_omega.write_hdf5_ss(solver_output, "/G_l_omega");
+  F_l_omega.write_hdf5_ss(solver_output, "/F_l_omega");
+  S_l_omega.write_hdf5_ss(solver_output, "/S_l_omega");
+  G_l_tau.write_hdf5_ss(solver_output, "/G_l_tau");
+  F_l_tau.write_hdf5_ss(solver_output, "/F_l_tau");
 
   if(parms["TEXT_OUTPUT"]|false){
     std::ofstream gc_str("Gl_conv.dat");
