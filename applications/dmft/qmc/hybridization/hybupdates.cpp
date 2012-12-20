@@ -206,7 +206,7 @@ void hybridization::remove_segment_update(int orbital){
   double local_weight_change=1./local_config.local_weight_change(segment_to_remove, orbital, false);
   
   //compute hybridization weight change
-  double hybridization_weight_change=1./hyb_config.hyb_weight_change_remove(segment_to_remove, orbital);
+  double hybridization_weight_change=1.0/hyb_config.hyb_weight_change_remove(segment_to_remove, orbital);
   
   //compute the proposal probability ratio
   double t_next_segment_start=local_config.find_next_segment_start_distance(segment_to_remove.t_start_,orbital);
@@ -223,8 +223,11 @@ void hybridization::remove_segment_update(int orbital){
   if(std::abs(weight_change)>random()){
     nacc[2]++;
     if(weight_change < 0) sign*=-1.;
+//      double fwo = full_weight();
     local_config.remove_segment(segment_to_remove, orbital);
     hyb_config.remove_segment(segment_to_remove, orbital);
+//      double fwa = full_weight();
+//      std::cout << clgreen<<"weight change removal: "<<fwa<<" control: "<<fwo*std::abs(weight_change)<<std::endl;
   }
 }
 void hybridization::insert_antisegment_update(int orbital){
@@ -241,6 +244,7 @@ void hybridization::insert_antisegment_update(int orbital){
   double t_end=t_start+random()*t_next_segment_end;
   if(t_end > beta) t_end-=beta;
   if(local_config.exists(t_end)){ std::cerr<<"rare event, duplicate: "<<t_end<<std::endl; return;} //time already exists.
+  if(t_end==t_start){ std::cerr<<"rare event, zero length segment: "<<t_start<<" "<<t_end<<std::endl; return;} //time already exists.
   
   //std::cout<<clgreen<<"antisegment insertion update: "<<std::endl<<cblack<<*this<<std::endl;
   //std::cout<<clgreen<<" antisegment start time: (cdagger): "<<t_start<<" end time (c): "<<t_end<<std::endl;
