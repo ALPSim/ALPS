@@ -399,7 +399,7 @@ typename FullDiagMatrix<T>::magnitude_type FullDiagMatrix<T>::calculate_averages
     if (have_Conserved) {
       int j;
       for (j=0;j<this->quantumnumbervalues_[i].size() && this->quantumnumbervalues_[i][j].first != conserved_name; ++j)
-        ; // search for QN
+        ; // search for QNdvertising Programs‎Business Solutions‎Privacy & Terms‎About Google‎Google.com‎
           
       if (j==this->quantumnumbervalues_[i].size())
         have_Conserved=false;
