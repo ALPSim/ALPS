@@ -30,7 +30,8 @@
 #include"hyblocal.hpp"
 #include<algorithm>
 
-local_configuration::local_configuration(const alps::params &p):
+local_configuration::local_configuration(const alps::params &p, int crank):
+crank_(crank),
 U_(p),
 mu_(p),
 K_(p){
@@ -186,8 +187,8 @@ double local_configuration::find_next_segment_end_distance(double time, int orbi
 
 void local_configuration::insert_segment(const segment &new_segment, int orbital){
   segments_[orbital].insert(new_segment);
-  if(!times_set_.insert(new_segment.t_start_).second){throw std::logic_error("insert segment start time could not be inserted.");}
-  if(!times_set_.insert(new_segment.t_end_).second){std::cout<<*this<<std::endl; std::cout<<"inserted segment: "<<new_segment<<"into orbital: "<<orbital<<std::endl; throw std::logic_error("insert segment end time could not be inserted.");}
+  if(!times_set_.insert(new_segment.t_start_).second){std::stringstream s; s<<crank_; throw std::logic_error("rank "+s.str()+": insert segment start time could not be inserted.");}
+  if(!times_set_.insert(new_segment.t_end_).second){std::stringstream s; s<<crank_; std::cout<<*this<<std::endl; std::cout<<"inserted segment: "<<new_segment<<"into orbital: "<<orbital<<std::endl; throw std::logic_error("rank "+s.str()+": insert segment end time could not be inserted.");}
 }
 void local_configuration::insert_antisegment(const segment &new_antisegment, int orbital){
   //find segment of which this one is a part
@@ -207,8 +208,8 @@ void local_configuration::insert_antisegment(const segment &new_antisegment, int
     segments_[orbital].insert(new_later_segment);
     segments_[orbital].insert(new_earlier_segment);
   }
-  if(!times_set_.insert(new_antisegment.t_start_).second){throw std::logic_error("insert antisegment start time could not be inserted.");}
-  if(!times_set_.insert(new_antisegment.t_end_).second){throw std::logic_error("insert segment start time could not be inserted.");}
+  if(!times_set_.insert(new_antisegment.t_start_).second){std::stringstream s; s<<crank_; throw std::logic_error("rank "+s.str()+": insert antisegment start time could not be inserted.");}
+  if(!times_set_.insert(new_antisegment.t_end_).second){std::stringstream s; s<<crank_; throw std::logic_error("rank "+s.str()+": insert antisegment start time could not be inserted.");}
 }
 void local_configuration::remove_antisegment(const segment &new_antisegment, int orbital){
   //find segment of which this one is a part

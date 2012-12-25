@@ -44,7 +44,7 @@ typedef std::map<double,int> state_map;
 
 typedef class local_configuration{
 public:
-  local_configuration(const alps::params &p);
+  local_configuration(const alps::params &p, int crank);
   double local_energy(const segment &seg, int orb) const;
   double local_weight_change(const segment &seg, int orb, bool antisegment) const;
   int order(int orbital) const{ return segments_[orbital].size(); }
@@ -83,6 +83,7 @@ private:
   double segment_overlap(const segment &seg1, const segment &seg2) const;
 
   //private variables
+  int crank_;
   interaction_matrix U_;
   chemical_potential mu_;
   ret_int_fun K_;
