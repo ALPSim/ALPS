@@ -25,7 +25,7 @@
  *
  *****************************************************************************/
 
-#include "maxent_parms.hpp"
+#include "maxent.hpp"
 #include <alps/config.h> // needed to set up correct bindings
 #include <boost/numeric/bindings/ublas.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
@@ -39,7 +39,7 @@ ContiParameters::ContiParameters(const alps::Parameters& p) :
 Default_(make_default_model(p, "DEFAULT_MODEL")), 
 T_(p.value_or_default("T", 1./static_cast<double>(p["BETA"]))),
 ndat_(p["NDAT"]), nfreq_(p["NFREQ"]),
-y_(ndat_), K_(),   t_array_(nfreq_+1)
+y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
 {
   if (ndat_<4) 
     boost::throw_exception(std::invalid_argument("NDAT too small"));
@@ -83,10 +83,35 @@ y_(ndat_), K_(),   t_array_(nfreq_+1)
   }
   else 
     boost::throw_exception(std::invalid_argument("No valid frequency grid specified"));
-  for (int i=0; i<ndat(); ++i){ 
-    if(!p.defined("X_"+boost::lexical_cast<std::string>(i))){ throw std::runtime_error("parameter X_i missing!"); }
-    y_(i) = static_cast<double>(p["X_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);
+// We provide a file with data points and error bars, the latter only if.
+// COVARIANCE_MATRIX is not set. The format is
+// index data [error]
+
+  if (p.defined("X_IN_FILE")) {
+      std::ifstream datstream(static_cast<std::string>(p["X_IN_FILE"]).c_str());
+      if (!datstream)
+          boost::throw_exception(std::invalid_argument("could not open data file: "+p["X_IN_FILE"]));
+      while (datstream) {
+          int i;
+          double X_i,dX_i;
+          datstream >> i >> X_i >> dX_i;
+          if (i<ndat()) {
+//              x_(i) = O_i;
+              y_(i) = X_i/static_cast<double>(p["NORM"]);
+              sigma_(i) = dX_i/static_cast<double>(p["NORM"]);
+          }
+      }
+  } else {
+      for (int i=0; i<ndat(); ++i){
+          if(!p.defined("X_"+boost::lexical_cast<std::string>(i))){ throw std::runtime_error("parameter X_i missing!"); }
+          y_(i) = static_cast<double>(p["X_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);          
+          if (!p.defined("COVARIANCE_MATRIX")) 
+              sigma_(i) = static_cast<double>(p["SIGMA_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);
+      }
   }
+//    std::cerr << "initial stuff finished " << static_cast<std::string>(p["X_IN_FILE"]) << " " <<
+//    p.defined("X_IN_FILE") << "\n";
+    
 }
 
 
@@ -96,8 +121,8 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
 {
   using namespace boost::numeric;
   K_.resize(ndat_, ntab);
-  for (int i=0; i<ndat(); ++i) 
-    y_(i) = static_cast<double>(p["X_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);
+//  for (int i=0; i<ndat(); ++i)
+//    y_(i) = static_cast<double>(p["X_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);
   if(p["DATASPACE"]=="time") { 
     if (alps::is_master())
       std::cerr << "assume time space data" << std::endl;
@@ -109,7 +134,7 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
         if (p.defined("TAU_"+boost::lexical_cast<std::string>(i)))
           tau = p["TAU_"+boost::lexical_cast<std::string>(i)]; 
         else 
-          tau = i / (ndat() * T_);
+          tau = i / ((ndat()-1)* T_);
         for (int j=0; j<ntab; ++j) {
           double omega = freq[j]; //Default().omega_of_t(double(j)/(ntab-1));
           K_(i,j) =  -1. / (std::exp(omega*tau) + std::exp(-omega*(1./T_-tau)));
@@ -124,7 +149,7 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
         if (p.defined("TAU_"+boost::lexical_cast<std::string>(i)))
           tau = p["TAU_"+boost::lexical_cast<std::string>(i)]; 
         else 
-          tau = i / (ndat() * T_);
+          tau = i / ((ndat()-1) * T_);
         K_(i,0) = T_;
         for (int j=1; j<ntab; ++j) {
           double omega = freq[j];
@@ -220,7 +245,7 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
   }
   else
     boost::throw_exception(std::invalid_argument("unknown value for parameter DATASPACE"));
-  vector_type sigma(ndat());
+//  vector_type sigma(ndat());
   if (p.defined("COVARIANCE_MATRIX")) {
     matrix_type cov(ndat(), ndat());
     if (alps::is_master())
@@ -243,20 +268,20 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
     if (alps::is_master()) 
       std::cout << "# Eigenvalues of the covariance matrix:\n";
     for (int i=0; i<ndat(); ++i) { 
-      sigma[i] = std::sqrt(var(i));
+        sigma_[i] = std::sqrt(std::abs(var(i)));
       if (alps::is_master())
         std::cout << "# " << var(i) << "\n";
     }
   } 
-  else {
-    for (int i=0; i<ndat(); ++i) 
-      sigma[i] = static_cast<double>(p["SIGMA_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);
-  }
+//  else {
+//    for (int i=0; i<ndat(); ++i)
+//      sigma[i] = static_cast<double>(p["SIGMA_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);
+//  }
   //Look around Eq. D.5 in Sebastian's thesis. We have sigma = sqrt(eigenvalues of covariance matrix) or, in case of a diagonal covariance matrix, we have sigma=SIGMA_X. The then define y := \bar{G}/sigma and K := (1/sigma)\tilde{K}
   for (int i=0; i<ndat(); ++i) {
-    y_[i] /= sigma[i];
+    y_[i] /= sigma_[i];
     for (int j=0; j<ntab; ++j) 
-      K_(i,j) /= sigma[i];
+      K_(i,j) /= sigma_[i];
   }
 
   //this enforces a strict normalization if needed.
@@ -269,6 +294,7 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
     }
     y_[ndat()-1]=1./artificial_norm_enforcement_sigma;
   }
+    std::cerr << "Kernel set up\n";
 }
 
 
@@ -285,6 +311,7 @@ omega_coord_(nfreq()), delta_omega_(nfreq()), ns_(0)
     delta_omega_[i] = Default().omega_of_t(t_array_[i+1]) - Default().omega_of_t(t_array_[i]);
   }
   //compute the kernel K of G = K*A
+//    std::cerr << "Hallo!!!\n";
   setup_kernel(p, nfreq(), omega_coord_);
   
   //perform the SVD decomposition K = U Sigma V^T

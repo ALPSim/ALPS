@@ -40,7 +40,7 @@
 MaxEntSimulation::MaxEntSimulation(const alps::ProcessList& w, const boost::filesystem::path& fn) 
 : alps::scheduler::Task(w,fn)
 , MaxEntHelper(parms)
-, alpha(parms["N_ALPHA"])                                                              //This is the # of \alpha parameters that should be tried.
+, alpha(parms["N_ALPHA"])              //This is the # of \alpha parameters that should be tried.
 , norm(parms.value_or_default("NORM", 1.))                                             //The integral is normalized to NORM (use e.g. for self-energies
 , max_it(parms.value_or_default("MAX_IT", 1000))                                       //The number of iterations done in the root finding procedure
 , name(fn.filename().string(),0,fn.filename().string().size()-6)

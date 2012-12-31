@@ -149,7 +149,24 @@ void evaluate_time(const alps::results_type<hybridization>::type &results,
   G_tau.write_hdf5_ss(solver_output, "/G_tau");
   F_tau.write_hdf5_ss(solver_output, "/F_tau");
 
-   
+  // ERROR
+  for(std::size_t i=0; i<n_orbitals; i++){
+     std::stringstream density_name; density_name<<"density_"<<i;
+     double density_err=results[density_name.str()].error<double>();
+     std::vector<double> err(N_t+1);
+     std::stringstream g_name; g_name<<"g_"<<i;
+     err = results[g_name.str()].error<std::vector<double> >();
+     err[0] = err[N_t] = density_err;
+     std::stringstream data_path;
+     data_path << "/G_tau/"<<i<< "/mean/error";
+     solver_output<<alps::make_pvp(data_path.str(),err);
+     g_name.str(""); g_name<<"f_"<<i;
+     err = results[g_name.str()].error<std::vector<double> >();
+     data_path.str("");
+     data_path << "/F_tau/"<<i<< "/mean/error";
+     solver_output<<alps::make_pvp(data_path.str(),err);
+  }
+    
   //COVARIANCE
   for(std::size_t i=0; i<n_orbitals; i++){
     boost::numeric::ublas::matrix<double> cov(N_t+1, N_t+1);
@@ -235,6 +252,37 @@ void evaluate_freq(const alps::results_type<hybridization>::type &results,
   G_omega.write_hdf5_ss(solver_output, "/G_omega");
   F_omega.write_hdf5_ss(solver_output, "/F_omega");
   S_omega.write_hdf5_ss(solver_output, "/S_omega");
+
+  // ERROR
+  for(std::size_t i=0; i<n_orbitals; i++){
+    std::vector<double> err_g_re(N_w),err_g_im(N_w),err_f_re(N_w),err_f_im(N_w);
+    std::vector<std::complex<double> > err(N_w);
+    std::stringstream g_name; g_name<<"gw_re_"<<i;
+    err_g_re = results[g_name.str()].error<std::vector<double> >();
+    g_name.str("");g_name<<"gw_im_"<<i;
+    err_g_im = results[g_name.str()].error<std::vector<double> >();
+    for (int k=0;k<err.size();k++) err[k] = std::complex<double>(err_g_re[k],err_g_im[k]);
+    std::stringstream data_path;
+    data_path << "/G_omega/"<<i<< "/mean/error";
+    solver_output<<alps::make_pvp(data_path.str(),err);
+    g_name.str(""); g_name<<"fw_re_"<<i;
+    err_f_re = results[g_name.str()].error<std::vector<double> >();
+    g_name.str("");g_name<<"fw_im_"<<i;
+    err_f_im = results[g_name.str()].error<std::vector<double> >();
+    for (int k=0;k<err.size();k++) err[k] = std::complex<double>(err_f_re[k],err_f_im[k]);
+    data_path.str("");
+    data_path << "/F_omega/"<<i<< "/mean/error";
+    solver_output<<alps::make_pvp(data_path.str(),err);
+    data_path.str("");
+    data_path << "/S_omega/"<<i<< "/mean/error";
+    for (int k=0;k<N_w;k++) {
+       double x1 = (std::abs(err_g_re[k]/real(G_omega(k,0,0,i)))+std::abs(err_f_re[k]/real(F_omega(k,0,0,i))))*std::abs(real(S_omega(k,0,0,i))),
+              x2 = (std::abs(err_g_im[k]/imag(G_omega(k,0,0,i)))+std::abs(err_f_im[k]/imag(F_omega(k,0,0,i))))*std::abs(imag(S_omega(k,0,0,i)));
+       err[k] = std::complex<double>(x1,x2);
+    }
+    solver_output<<alps::make_pvp(data_path.str(),err);
+  }
+
     
   std::ofstream Gw_file("Gw.dat");
   for(std::size_t n=0;n<N_w;++n){

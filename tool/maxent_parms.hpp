@@ -34,6 +34,9 @@
 #include <boost/numeric/ublas/io.hpp>
 #include <alps/osiris.h>
 #include <alps/alea.h>
+#include <alps/ngs.hpp>
+#include <alps/ngs/signal.hpp>
+//#include "maxent.hpp"
 #include "default_model.hpp"
 
 
@@ -50,6 +53,8 @@ public:
   
   const DefaultModel& Default() const { return *Default_; }  
   double y(const int i) const { return y_[i]; }
+  double sigma(const int i) const { return sigma_[i]; }
+  double x(const int i) const { return x_[i]; }
   double T() const { return T_; }
   int ndat() const { return ndat_; }
   double K(const int i, const int j) const {
@@ -66,7 +71,7 @@ protected:
 
   void setup_kernel(const alps::Parameters& p, const int ntab, const vector_type& freq);
   const int nfreq_;
-  vector_type y_;
+  vector_type y_,sigma_,x_;
   matrix_type K_;
   vector_type t_array_;
 };
