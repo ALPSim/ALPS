@@ -95,7 +95,7 @@ private:
     template <class IN, class OUT, class GEN>
     void eigenvectors(IN in_eigvals_start, IN in_eigvals_end , OUT eig_vectors, Info<magnitude_type>& inf, GEN gen, int maxiter=0, int maxcount=50);    
 
-    std::vector<magnitude_type> const& t_eigenvectors() { return Tvectors;}
+    std::vector<std::vector<magnitude_type> >  const& t_eigenvectors() { return Tvectors;}
 
     template <class Archive>
     void save(Archive& ar) const
