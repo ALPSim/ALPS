@@ -235,16 +235,21 @@ void evaluate_freq(const alps::results_type<hybridization>::type &results,
     std::stringstream gw_im_name; gw_im_name<<"gw_im_"<<i;
     std::stringstream fw_re_name; fw_re_name<<"fw_re_"<<i;
     std::stringstream fw_im_name; fw_im_name<<"fw_im_"<<i;
+    std::stringstream sw_re_name; sw_re_name<<"sw_re_"<<i;
+    std::stringstream sw_im_name; sw_im_name<<"sw_im_"<<i;
     std::vector<double> Gw_re=results[gw_re_name.str()].mean<std::vector<double> >();
     std::vector<double> Gw_im=results[gw_im_name.str()].mean<std::vector<double> >();
     std::vector<double> Fw_re=results[fw_re_name.str()].mean<std::vector<double> >();
     std::vector<double> Fw_im=results[fw_im_name.str()].mean<std::vector<double> >();
+    std::vector<double> Sw_re=results[sw_re_name.str()].mean<std::vector<double> >();
+    std::vector<double> Sw_im=results[sw_im_name.str()].mean<std::vector<double> >();
     for(std::size_t w=0;w<N_w;++w){
       std::complex<double> G(Gw_re[w],Gw_im[w]);
       std::complex<double> F(Fw_re[w],Fw_im[w]);
+      std::complex<double> S(Sw_re[w],Sw_im[w]);
       G_omega(w,0,0,i)=G;
       F_omega(w,0,0,i)=F;
-      S_omega(w,0,0,i)=F/G;
+      S_omega(w,0,0,i)=S; //F/G;
     }
   }
 

@@ -146,7 +146,7 @@ private:
   std::vector<std::string> density_names;
   std::vector<std::string> order_names;
   std::vector<std::string> order_histogram_names;
-  std::vector<std::string> gwr_names, gwi_names, fwr_names, fwi_names;
+  std::vector<std::string> gwr_names, gwi_names, fwr_names, fwi_names,swr_names,swi_names;
   std::vector<std::string> gl_names, fl_names;
   std::vector<std::vector<std::string> > g2wr_names, g2wi_names, h2wr_names, h2wi_names;
   std::vector<std::vector<std::string> > nnt_names, nnw_re_names, nn_names;

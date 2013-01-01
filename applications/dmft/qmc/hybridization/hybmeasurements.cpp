@@ -84,6 +84,8 @@ void hybridization::create_measurements(){//called once in the constructor
     std::stringstream gwi_name; gwi_name<<"gw_im_"<<i; gwi_names.push_back(gwi_name.str());
     std::stringstream fwr_name; fwr_name<<"fw_re_"<<i; fwr_names.push_back(fwr_name.str());
     std::stringstream fwi_name; fwi_name<<"fw_im_"<<i; fwi_names.push_back(fwi_name.str());
+    std::stringstream swr_name; swr_name<<"sw_re_"<<i; swr_names.push_back(swr_name.str());
+    std::stringstream swi_name; swi_name<<"sw_im_"<<i; swi_names.push_back(swi_name.str());
 
     //Legendre coefficients for g and f
     std::stringstream gl_name; gl_name<<"gl_"<<i; gl_names.push_back(gl_name.str());
@@ -104,12 +106,15 @@ void hybridization::create_measurements(){//called once in the constructor
 
     measurements << vec_obs_t(order_histogram_name.str());
     measurements << obs_t(order_name.str());
+//      std::cerr << "Halllo 0\n";
 
     measurements << vec_obs_t(gwr_name.str());
     measurements << vec_obs_t(gwi_name.str());
     measurements << vec_obs_t(fwr_name.str());
     measurements << vec_obs_t(fwi_name.str());
-
+    measurements << vec_obs_t(swr_name.str());
+    measurements << vec_obs_t(swi_name.str());
+//      std::cerr << "Halllo 1\n";
     measurements << vec_obs_t(gl_name.str());
     measurements << vec_obs_t(fl_name.str());
 
@@ -340,6 +345,17 @@ void hybridization::accumulate_Gw(){
       measurements[gwi_names[i]]<<Gwi[i];
       measurements[fwr_names[i]]<<Fwr[i];
       measurements[fwi_names[i]]<<Fwi[i];
+      std::vector<double> Swr(N_w),Swi(N_w);
+      for (int k=0;k<Gwr[i].size();k++) {
+          std::complex<double> G(Gwr[i][k],Gwi[i][k]),F(Fwr[i][k],Fwi[i][k]),S=0.0;
+          if (std::abs(G) != 0) S = F/G;
+//          else std::cerr << "Problem in S: G = " << G << " at k = "<< k << std::endl;
+         Swr[k] = real(S);
+         Swi[k] = imag(S);
+//          std::cerr << k << " " << real(S) << " " << imag(S) << std::endl;
+      }
+      measurements[swr_names[i]]<<Swr;
+      measurements[swi_names[i]]<<Swi;
       memset(&(Gwr[i][0]),0, Gwr[i].size()*sizeof(double));
       memset(&(Gwi[i][0]),0, Gwr[i].size()*sizeof(double));
       memset(&(Fwr[i][0]),0, Gwr[i].size()*sizeof(double));
