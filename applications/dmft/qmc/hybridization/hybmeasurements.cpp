@@ -169,6 +169,10 @@ void hybridization::create_measurements(){//called once in the constructor
     Gwi.resize(n_orbitals, std::vector<double>(N_w, 0.));
     Fwr.resize(n_orbitals, std::vector<double>(N_w, 0.));
     Fwi.resize(n_orbitals, std::vector<double>(N_w, 0.));
+    Gwr_acc.resize(n_orbitals, std::vector<double>(N_w, 0.));
+    Gwi_acc.resize(n_orbitals, std::vector<double>(N_w, 0.));
+    Fwr_acc.resize(n_orbitals, std::vector<double>(N_w, 0.));
+    Fwi_acc.resize(n_orbitals, std::vector<double>(N_w, 0.));
   }
   if(MEASURE_legendre){
     Gl.resize(n_orbitals, std::vector<double>(N_l, 0.));
@@ -191,6 +195,8 @@ void hybridization::measure(){
 
   measure_Gw(F_prefactor);
   accumulate_Gw();
+    
+  if (sweeps%N_SWEEPS_SIGMA == 0) accumulate_Sw();
 
   measure_Gl(F_prefactor);
   accumulate_Gl();
@@ -345,23 +351,40 @@ void hybridization::accumulate_Gw(){
       measurements[gwi_names[i]]<<Gwi[i];
       measurements[fwr_names[i]]<<Fwr[i];
       measurements[fwi_names[i]]<<Fwi[i];
-      std::vector<double> Swr(N_w),Swi(N_w);
       for (int k=0;k<Gwr[i].size();k++) {
-          std::complex<double> G(Gwr[i][k],Gwi[i][k]),F(Fwr[i][k],Fwi[i][k]),S=0.0;
-          if (std::abs(G) != 0) S = F/G;
-//          else std::cerr << "Problem in S: G = " << G << " at k = "<< k << std::endl;
-         Swr[k] = real(S);
-         Swi[k] = imag(S);
-//          std::cerr << k << " " << real(S) << " " << imag(S) << std::endl;
+        Gwr_acc[i][k] += Gwr[i][k];
+        Gwi_acc[i][k] += Gwi[i][k];
+        Fwr_acc[i][k] += Fwr[i][k];
+        Fwi_acc[i][k] += Fwi[i][k];
       }
-      measurements[swr_names[i]]<<Swr;
-      measurements[swi_names[i]]<<Swi;
       memset(&(Gwr[i][0]),0, Gwr[i].size()*sizeof(double));
       memset(&(Gwi[i][0]),0, Gwr[i].size()*sizeof(double));
       memset(&(Fwr[i][0]),0, Gwr[i].size()*sizeof(double));
       memset(&(Fwi[i][0]),0, Gwr[i].size()*sizeof(double));
     }
 }
+
+void hybridization::accumulate_Sw(){
+    if(!MEASURE_freq) return;
+    for(std::size_t i=0;i<n_orbitals;++i){
+      std::vector<double> Swr(N_w),Swi(N_w);
+      for (int k=0;k<Gwr_acc[i].size();k++) {
+        std::complex<double> G(Gwr_acc[i][k],Gwi_acc[i][k]),
+                             F(Fwr_acc[i][k],Fwi_acc[i][k]),
+                             S = F/G;
+        Swr[k] = real(S);
+        Swi[k] = imag(S);
+      }
+      measurements[swr_names[i]]<<Swr;
+      measurements[swi_names[i]]<<Swi;
+
+      memset(&(Gwr_acc[i][0]),0, Gwr_acc[i].size()*sizeof(double));
+      memset(&(Gwi_acc[i][0]),0, Gwr_acc[i].size()*sizeof(double));
+      memset(&(Fwr_acc[i][0]),0, Gwr_acc[i].size()*sizeof(double));
+      memset(&(Fwi_acc[i][0]),0, Gwr_acc[i].size()*sizeof(double));
+    }
+}
+
 
 void hybridization::measure_Gl(std::vector<std::map<double,double> > &F_prefactor){
   if(!MEASURE_legendre) return;

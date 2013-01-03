@@ -83,9 +83,16 @@ y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
   }
   else 
     boost::throw_exception(std::invalid_argument("No valid frequency grid specified"));
-// We provide a file with data points and error bars, the latter only if.
+// We provide a file with data points and error bars, the latter are used only if
 // COVARIANCE_MATRIX is not set. The format is
-// index data [error]
+//
+// index data error
+//
+// index is ignored, but MUST be an integer
+// If we whish to continue imaginary frequency data, the structure must be:
+// index_re data_re error_re index_im data_im error_im
+//
+// again, index_re and index_im MUSR be integers and are ignored
 
   if (p.defined("X_IN_FILE")) {
       std::ifstream datstream(static_cast<std::string>(p["X_IN_FILE"]).c_str());

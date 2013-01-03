@@ -241,15 +241,18 @@ void evaluate_freq(const alps::results_type<hybridization>::type &results,
     std::vector<double> Gw_im=results[gw_im_name.str()].mean<std::vector<double> >();
     std::vector<double> Fw_re=results[fw_re_name.str()].mean<std::vector<double> >();
     std::vector<double> Fw_im=results[fw_im_name.str()].mean<std::vector<double> >();
+
     std::vector<double> Sw_re=results[sw_re_name.str()].mean<std::vector<double> >();
     std::vector<double> Sw_im=results[sw_im_name.str()].mean<std::vector<double> >();
+
     for(std::size_t w=0;w<N_w;++w){
       std::complex<double> G(Gw_re[w],Gw_im[w]);
       std::complex<double> F(Fw_re[w],Fw_im[w]);
       std::complex<double> S(Sw_re[w],Sw_im[w]);
       G_omega(w,0,0,i)=G;
       F_omega(w,0,0,i)=F;
-      S_omega(w,0,0,i)=S; //F/G;
+      S_omega(w,0,0,i)=S;
+//      S_omega(w,0,0,i)=F/G;
     }
   }
 
@@ -261,31 +264,36 @@ void evaluate_freq(const alps::results_type<hybridization>::type &results,
   // ERROR
   for(std::size_t i=0; i<n_orbitals; i++){
     std::vector<double> err_g_re(N_w),err_g_im(N_w),err_f_re(N_w),err_f_im(N_w);
-    std::vector<std::complex<double> > err(N_w);
+    std::vector<std::complex<double> > err_G(N_w),err_F(N_w),err_S(N_w);
     std::stringstream g_name; g_name<<"gw_re_"<<i;
     err_g_re = results[g_name.str()].error<std::vector<double> >();
     g_name.str("");g_name<<"gw_im_"<<i;
     err_g_im = results[g_name.str()].error<std::vector<double> >();
-    for (int k=0;k<err.size();k++) err[k] = std::complex<double>(err_g_re[k],err_g_im[k]);
+    for (int k=0;k<err_G.size();k++) err_G[k] = std::complex<double>(err_g_re[k],err_g_im[k]);
     std::stringstream data_path;
     data_path << "/G_omega/"<<i<< "/mean/error";
-    solver_output<<alps::make_pvp(data_path.str(),err);
+    solver_output<<alps::make_pvp(data_path.str(),err_G);
     g_name.str(""); g_name<<"fw_re_"<<i;
     err_f_re = results[g_name.str()].error<std::vector<double> >();
     g_name.str("");g_name<<"fw_im_"<<i;
     err_f_im = results[g_name.str()].error<std::vector<double> >();
-    for (int k=0;k<err.size();k++) err[k] = std::complex<double>(err_f_re[k],err_f_im[k]);
+    for (int k=0;k<err_F.size();k++) err_F[k] = std::complex<double>(err_f_re[k],err_f_im[k]);
     data_path.str("");
     data_path << "/F_omega/"<<i<< "/mean/error";
-    solver_output<<alps::make_pvp(data_path.str(),err);
+    solver_output<<alps::make_pvp(data_path.str(),err_F);
+
+    g_name.str(""); g_name<<"sw_re_"<<i;
+    err_f_re = results[g_name.str()].error<std::vector<double> >();
+    g_name.str("");g_name<<"sw_im_"<<i;
+    err_f_im = results[g_name.str()].error<std::vector<double> >();
+    for (int k=0;k<err_S.size();k++) err_S[k] = std::complex<double>(err_f_re[k],err_f_im[k]);
+
     data_path.str("");
     data_path << "/S_omega/"<<i<< "/mean/error";
-    for (int k=0;k<N_w;k++) {
-       double x1 = (std::abs(err_g_re[k]/real(G_omega(k,0,0,i)))+std::abs(err_f_re[k]/real(F_omega(k,0,0,i))))*std::abs(real(S_omega(k,0,0,i))),
-              x2 = (std::abs(err_g_im[k]/imag(G_omega(k,0,0,i)))+std::abs(err_f_im[k]/imag(F_omega(k,0,0,i))))*std::abs(imag(S_omega(k,0,0,i)));
-       err[k] = std::complex<double>(x1,x2);
-    }
-    solver_output<<alps::make_pvp(data_path.str(),err);
+/*    for (int k=0;k<N_w;k++) {
+         err_S[k]= (std::abs(err_G[k]/G_omega(k,0,0,i))+std::abs(err_F[k]/F_omega(k,0,0,i)))*S_omega(k,0,0,i);
+    }*/
+    solver_output<<alps::make_pvp(data_path.str(),err_S);
   }
 
     

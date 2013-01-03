@@ -84,6 +84,7 @@ private:
   void accumulate_order();
   void accumulate_G();
   void accumulate_Gw();
+  void accumulate_Sw();
   void accumulate_Gl();
   void accumulate_nn();
   void accumulate_nnt();
@@ -118,7 +119,7 @@ private:
   double beta;
 
   //updates parameters
-  std::size_t N_meas;
+  std::size_t N_meas,N_SWEEPS_SIGMA;
 
   //measurement parameters
   std::size_t N_w;    //number of Matsubara frequency points
@@ -163,6 +164,8 @@ private:
   std::vector<std::vector<double> >Gwi;
   std::vector<std::vector<double> >Fwr;
   std::vector<std::vector<double> >Fwi;
+  std::vector<std::vector<double> >Gwr_acc,Gwi_acc;
+  std::vector<std::vector<double> >Fwr_acc,Fwi_acc;
   std::vector<std::vector<double> >Gl;
   std::vector<std::vector<double> >Fl;
   std::vector<std::vector<std::complex<double> > >G2w;
