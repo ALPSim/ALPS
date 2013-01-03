@@ -63,7 +63,7 @@ option(ALPS_PACKAGE_LIBRARIES "Install all dependent libraries into package" OFF
 option(ALPS_DOWNLOAD_PACKAGES "Prepare an installer that downloads instead of containing the installation packages" OFF)
 option(ALPS_PATCH_VISTRAILS "Patch VisTrails from VisTrails git repository" OFF)
 option(ALPS_NGS_USE_NEW_ALEA "Use the ALPS ngs-alea instead of just alea" OFF)
-option(ALPS_NGS_OPENMPI_ULFM "Userlevel failuer mitigation is available" OFF)
+option(ALPS_NGS_OPENMPI_ULFM "Userlevel failure mitigation is available" OFF)
 
 mark_as_advanced(ALPS_LLVM_WORKAROUND)
 mark_as_advanced(BIND_FORTRAN_LOWERCASE)
