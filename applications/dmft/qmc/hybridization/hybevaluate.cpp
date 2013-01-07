@@ -284,20 +284,20 @@ void evaluate_freq(const alps::results_type<hybridization>::type &results,
     data_path << "/F_omega/"<<i<< "/mean/error";
     solver_output<<alps::make_pvp(data_path.str(),err_F);
 
-    g_name.str(""); g_name<<"sw_re_"<<i;
-    err_f_re = results[g_name.str()].error<std::vector<double> >();
-    g_name.str("");g_name<<"sw_im_"<<i;
-    err_f_im = results[g_name.str()].error<std::vector<double> >();
-    for (int k=0;k<err_S.size();k++) err_S[k] = std::complex<double>(err_f_re[k],err_f_im[k]);
-
-    data_path.str("");
-    data_path << "/S_omega/"<<i<< "/mean/error";
-    if(!(parms["MEASURE_SELFENERGY"]|false))
+    if(parms["MEASURE_SELFENERGY"]|false) {
+      g_name.str(""); g_name<<"sw_re_"<<i;
+      err_f_re = results[g_name.str()].error<std::vector<double> >();
+      g_name.str("");g_name<<"sw_im_"<<i;
+      err_f_im = results[g_name.str()].error<std::vector<double> >();
+      for (int k=0;k<err_S.size();k++) err_S[k] = std::complex<double>(err_f_re[k],err_f_im[k]);
+    } else
       for (int k=0;k<N_w;k++) {
           err_S[k]= std::sqrt(std::pow(std::abs(err_G[k]/G_omega(k,0,0,i)),2)+
                      std::pow(std::abs(err_F[k]/F_omega(k,0,0,i)),2))*
           S_omega(k,0,0,i);
       }
+    data_path.str("");
+    data_path << "/S_omega/"<<i<< "/mean/error";
     solver_output<<alps::make_pvp(data_path.str(),err_S);
 
     //COVARIANCE
