@@ -77,6 +77,16 @@ y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
     for (int i=1; i<nfreq_+1; ++i) 
       t_array_[i]  = temp[i-1]/temp[temp.size()-1];
   }
+  else if (p["FREQUENCY_GRID"]=="log") {
+//      double om_min = p.value_or_default("OMEGA_MIN",1e-4),om_max=p["OMEGA_MAX"];
+      double t_min = p.value_or_default("LOG_MIN", 1.0e-4),t_max=0.5;
+      double scale=std::log(t_max/t_min)/((float) nfreq_/2);
+      t_array_[nfreq_/2+1] = 0.5;
+      for (int i=0; i<nfreq_/2+1; ++i) {
+        t_array_[nfreq_/2+i+2]  = 0.5+t_min*std::exp(((float) i)*scale);
+        t_array_[nfreq_/2-i]  = 0.5-t_min*std::exp(((float) i)*scale);
+      }
+  }
   else if (p["FREQUENCY_GRID"]=="linear") {
     for (int i=0; i<nfreq_+1; ++i) 
       t_array_[i] = double(i)/(nfreq_);
@@ -92,7 +102,7 @@ y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
 // If we whish to continue imaginary frequency data, the structure must be:
 // index_re data_re error_re index_im data_im error_im
 //
-// again, index_re and index_im MUSR be integers and are ignored
+// again, index_re and index_im MUST be integers and are ignored
 
   if (p.defined("X_IN_FILE")) {
       std::ifstream datstream(static_cast<std::string>(p["X_IN_FILE"]).c_str());
@@ -106,6 +116,7 @@ y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
 //              x_(i) = O_i;
               y_(i) = X_i/static_cast<double>(p["NORM"]);
               sigma_(i) = dX_i/static_cast<double>(p["NORM"]);
+//              std::cerr << i << " " << y_(i) << " " << sigma_(i) << std::endl;
           }
       }
   } else {
@@ -285,10 +296,28 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
 //      sigma[i] = static_cast<double>(p["SIGMA_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);
 //  }
   //Look around Eq. D.5 in Sebastian's thesis. We have sigma = sqrt(eigenvalues of covariance matrix) or, in case of a diagonal covariance matrix, we have sigma=SIGMA_X. The then define y := \bar{G}/sigma and K := (1/sigma)\tilde{K}
-  for (int i=0; i<ndat(); ++i) {
-    y_[i] /= sigma_[i];
-    for (int j=0; j<ntab; ++j) 
-      K_(i,j) /= sigma_[i];
+  if (p["DATASPACE"]=="frequency" && !p.value_or_default("PARTICLE_HOLE_SYMMETRY",true))  {
+    if (alps::is_master())
+          std::cerr << "Kernel for complex data\n";
+    for (int i=0; i<ndat()/2; i+=2) {
+      std::complex<double> y(y_[i],y_[i+1]),s(sigma_[i],sigma_[i+1]);
+      y /= s;
+      y_[i] = y.real();
+      y_[i+1] = y.imag();
+      for (int j=0; j<ntab; ++j) {
+        std::complex<double> K(K_(i,j),K_(i+1,j));
+        K /= s;
+        K_(i,j) = K.real();
+        K_(i+1,j) = K.imag();
+      }
+    }
+  } else {
+    for (int i=0; i<ndat(); i++) {
+      y_[i] /= sigma_[i];
+      for (int j=0; j<ntab; ++j) {
+        K_(i,j) /= sigma_[i];
+      }
+    }
   }
 
   //this enforces a strict normalization if needed.

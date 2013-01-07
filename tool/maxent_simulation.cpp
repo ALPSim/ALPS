@@ -123,9 +123,23 @@ void MaxEntSimulation::dostep()
   const double factor = chi_scale_factor(spectra[max_a], chi_sq[max_a], alpha[max_a]);
   std::cerr << "chi scale factor: " << factor << std::endl;
   
+  alps::hdf5::archive ar(name+"spectra.h5", alps::hdf5::archive::WRITE);
+  ar << alps::make_pvp("/alpha/values",alpha);
+  {
+      vector_type om(spectra[0].size());
+      for (int i=0;i<om.size();i++) om[i] = omega_coord(i);        
+      ar<<alps::make_pvp("/spectrum/omega",om);
+  }
+
+    
   //output 'maximum' spectral function (classical maxent metod)
   for (std::size_t i=0; i<spectra[0].size(); ++i) 
     maxspec_str << omega_coord(i) << " " << spectra[max_a][i]*norm << " " << def[i]*norm << std::endl;
+  {
+    vector_type specmax = spectra[max_a]*norm,specchi = spectra[a_chi]*norm;
+    ar << alps::make_pvp("/spectrum/chi",specchi);
+    ar << alps::make_pvp("/spectrum/maximum",specmax);
+  }
   vector_type prob(lprob.size());
   for (std::size_t a=0; a<prob.size(); ++a) 
     prob[a] = exp(lprob[a]-*max_lprob);
@@ -133,6 +147,7 @@ void MaxEntSimulation::dostep()
   for (std::size_t a=0; a<prob.size()-1; ++a) 
     probnorm += 0.5*(prob[a]+prob[a+1])*(alpha[a]-alpha[a+1]);
   prob /= probnorm;
+  ar << alps::make_pvp("/alpha/probability",prob);
   for (std::size_t a=0; a<prob.size(); ++a) {
     prob_str << alpha[a] << "\t" << prob[a] << "\n";
   }
@@ -148,31 +163,43 @@ void MaxEntSimulation::dostep()
     for (std::size_t a=0; a<prob.size()-1; ++a) 
       avspec[i] += 0.5*(prob[a]*spectra[a][i] +prob[a+1]*spectra[a+1][i])*(alpha[a]-alpha[a+1]);
   }
+  avspec *= norm;
   for (std::size_t  i=0; i<avspec.size(); ++i) 
-    avspec_str << omega_coord(i) << " " << avspec[i]*norm << " " << def[i]*norm << std::endl;
-  if(parms["KERNEL"]=="anomalous"){ //for the anomalous function: use A(omega)=Im Sigma(omega)/(pi omega). 
+    avspec_str << omega_coord(i) << " " << avspec[i] << " " << def[i]*norm << std::endl;
+  ar << alps::make_pvp("/spectrum/average",avspec);
+  if(parms["KERNEL"]=="anomalous"){ //for the anomalous function: use A(omega)=Im Sigma(omega)/(pi omega).
     std::ofstream maxspec_anom_str(boost::filesystem::absolute(name+"maxspec_anom.dat", dir).string().c_str());
     std::ofstream avspec_anom_str (boost::filesystem::absolute(name+"avspec_anom.dat", dir).string().c_str());
+    vector_type spec(avspec.size());
     for (std::size_t  i=0; i<avspec.size(); ++i){ 
       //if(omega_coord(i)>=0.)
+      spec[i] = avspec[i]*norm*omega_coord(i)*M_PI;
       avspec_anom_str << omega_coord(i) << " " << avspec[i]*norm*omega_coord(i)*M_PI<<std::endl;
     }
+    ar << alps::make_pvp("/spectrum/anomalous/average",spec);
     for (std::size_t i=0; i<spectra[0].size(); ++i){
       //if(omega_coord(i)>=0.)
+      spec[i] = spectra[max_a][i]*norm*omega_coord(i)*M_PI;
       maxspec_anom_str << omega_coord(i) << " " << spectra[max_a][i]*norm*omega_coord(i)*M_PI << std::endl;
     }
+    ar << alps::make_pvp("/spectrum/anomalous/maximum",spec);
   }
   if(parms["KERNEL"]=="bosonic"){ //for the anomalous function: use A(Omega)=Im chi(Omega)/(pi Omega) (as for anomalous)
     std::ofstream maxspec_anom_str(boost::filesystem::absolute(name+"maxspec_bose.dat", dir).string().c_str());
     std::ofstream avspec_anom_str (boost::filesystem::absolute(name+"avspec_bose.dat", dir).string().c_str());
-    for (std::size_t  i=0; i<avspec.size(); ++i){ 
+    vector_type spec(avspec.size());
+    for (std::size_t  i=0; i<avspec.size(); ++i){
       //if(omega_coord(i)>=0.)
       avspec_anom_str << omega_coord(i) << " " << avspec[i]*norm*omega_coord(i)*M_PI<<std::endl;
+      spec[i] = avspec[i]*norm*omega_coord(i)*M_PI;
     }
+    ar << alps::make_pvp("/spectrum/bosonic/average",spec);
     for (std::size_t i=0; i<spectra[0].size(); ++i){
       //if(omega_coord(i)>=0.)
+      spec[i] = spectra[max_a][i]*norm*omega_coord(i)*M_PI;
       maxspec_anom_str << omega_coord(i) << " " << spectra[max_a][i]*norm*omega_coord(i)*M_PI << std::endl;
     }
+    ar << alps::make_pvp("/spectrum/bosonic/maximum",spec);
   }
   if(parms.defined("SELF")){
     // A quick word about normalization here. Usually we have G(iomega_n) = -1/pi \int_{-\infty}^\infty Im G(omega)/(omega_n - omega).

@@ -251,8 +251,10 @@ void evaluate_freq(const alps::results_type<hybridization>::type &results,
       std::complex<double> S(Sw_re[w],Sw_im[w]);
       G_omega(w,0,0,i)=G;
       F_omega(w,0,0,i)=F;
-      S_omega(w,0,0,i)=S;
-//      S_omega(w,0,0,i)=F/G;
+      if(!(parms["MEASURE_SELFENERGY"]|false))
+        S_omega(w,0,0,i)=S;
+      else
+        S_omega(w,0,0,i)=F/G;
     }
   }
 
@@ -290,10 +292,32 @@ void evaluate_freq(const alps::results_type<hybridization>::type &results,
 
     data_path.str("");
     data_path << "/S_omega/"<<i<< "/mean/error";
-/*    for (int k=0;k<N_w;k++) {
-         err_S[k]= (std::abs(err_G[k]/G_omega(k,0,0,i))+std::abs(err_F[k]/F_omega(k,0,0,i)))*S_omega(k,0,0,i);
-    }*/
+    if(!(parms["MEASURE_SELFENERGY"]|false))
+      for (int k=0;k<N_w;k++) {
+          err_S[k]= std::sqrt(std::pow(std::abs(err_G[k]/G_omega(k,0,0,i)),2)+
+                     std::pow(std::abs(err_F[k]/F_omega(k,0,0,i)),2))*
+          S_omega(k,0,0,i);
+      }
     solver_output<<alps::make_pvp(data_path.str(),err_S);
+
+    //COVARIANCE
+    if(parms["MEASURE_SELFENERGY"]|false)
+    for(std::size_t i=0; i<n_orbitals; i++){
+        boost::numeric::ublas::matrix<double> cov_re(N_w, N_w),cov_im(N_w, N_w);
+        std::stringstream s_name; s_name<<"sw_re_"<<i;
+        cov_re=results[s_name.str()].covariance<std::vector<double> >(results[s_name.str()]);
+          
+        s_name.str(""); s_name<<"sw_im_"<<i;
+        cov_im=results[s_name.str()].covariance<std::vector<double> >(results[s_name.str()]);
+        std::vector<std::complex<double> > data(N_w*N_w);
+        for(std::size_t w1=0; w1<N_w; w1++)
+            for(std::size_t w2=0; w2<N_w; w2++)
+                data[w1*N_w+w2]=std::complex<double>(cov_re(w1,w2),cov_im(w1,w2));
+        
+        data_path.str("");
+        data_path << "/S_omega/"<<i<< "/mean/covariance";
+        solver_output<<alps::make_pvp(data_path.str(),data);
+    }
   }
 
     
