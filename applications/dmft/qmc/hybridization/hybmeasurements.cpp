@@ -351,12 +351,13 @@ void hybridization::accumulate_Gw(){
       measurements[gwi_names[i]]<<Gwi[i];
       measurements[fwr_names[i]]<<Fwr[i];
       measurements[fwi_names[i]]<<Fwi[i];
-      for (int k=0;k<Gwr[i].size();k++) {
-        Gwr_acc[i][k] += Gwr[i][k];
-        Gwi_acc[i][k] += Gwi[i][k];
-        Fwr_acc[i][k] += Fwr[i][k];
-        Fwi_acc[i][k] += Fwi[i][k];
-      }
+//      if(parms["MEASURE_SELFENERGY"]|false)
+        for (int k=0;k<Gwr[i].size();k++) {
+          Gwr_acc[i][k] += Gwr[i][k];
+          Gwi_acc[i][k] += Gwi[i][k];
+          Fwr_acc[i][k] += Fwr[i][k];
+          Fwi_acc[i][k] += Fwi[i][k];
+        }
       memset(&(Gwr[i][0]),0, Gwr[i].size()*sizeof(double));
       memset(&(Gwi[i][0]),0, Gwr[i].size()*sizeof(double));
       memset(&(Fwr[i][0]),0, Gwr[i].size()*sizeof(double));

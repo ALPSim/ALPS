@@ -241,18 +241,20 @@ void evaluate_freq(const alps::results_type<hybridization>::type &results,
     std::vector<double> Gw_im=results[gw_im_name.str()].mean<std::vector<double> >();
     std::vector<double> Fw_re=results[fw_re_name.str()].mean<std::vector<double> >();
     std::vector<double> Fw_im=results[fw_im_name.str()].mean<std::vector<double> >();
-
-    std::vector<double> Sw_re=results[sw_re_name.str()].mean<std::vector<double> >();
-    std::vector<double> Sw_im=results[sw_im_name.str()].mean<std::vector<double> >();
+    // In case we measure the self-energy ... (VERY experimental!!!!)
+    std::vector<double> Sw_re,Sw_im;
+    if(parms["MEASURE_SELFENERGY"]|false) {
+      Sw_re=results[sw_re_name.str()].mean<std::vector<double> >();
+      Sw_im=results[sw_im_name.str()].mean<std::vector<double> >();
+    }
 
     for(std::size_t w=0;w<N_w;++w){
       std::complex<double> G(Gw_re[w],Gw_im[w]);
       std::complex<double> F(Fw_re[w],Fw_im[w]);
-      std::complex<double> S(Sw_re[w],Sw_im[w]);
       G_omega(w,0,0,i)=G;
       F_omega(w,0,0,i)=F;
-      if(!(parms["MEASURE_SELFENERGY"]|false))
-        S_omega(w,0,0,i)=S;
+      if(parms["MEASURE_SELFENERGY"]|false)
+        S_omega(w,0,0,i)=std::complex<double>(Sw_re[w],Sw_im[w]);
       else
         S_omega(w,0,0,i)=F/G;
     }
@@ -291,10 +293,20 @@ void evaluate_freq(const alps::results_type<hybridization>::type &results,
       err_f_im = results[g_name.str()].error<std::vector<double> >();
       for (int k=0;k<err_S.size();k++) err_S[k] = std::complex<double>(err_f_re[k],err_f_im[k]);
     } else
+// Since we do not know better, use Gaussian error propagation, assuming that
+// the measurments of ReG, ImG, ReF and ImF are statistically independent.
+// We need the derivatives of S w.r.t to ReF, ImF, ReG and ImG. As S is an
+// analytical function of F and G, we can make use of Cauchy-Riemmann equations
+// Finally, the squares of derivative*error are added up.
       for (int k=0;k<N_w;k++) {
-          err_S[k]= std::sqrt(std::pow(std::abs(err_G[k]/G_omega(k,0,0,i)),2)+
-                     std::pow(std::abs(err_F[k]/F_omega(k,0,0,i)),2))*
-          S_omega(k,0,0,i);
+          double denom = std::pow(std::abs(G_omega(k,0,0,i)),2),
+          y1 = real(G_omega(k,0,0,i))/denom,
+          y2 = -imag(G_omega(k,0,0,i))/denom,
+          y3 = (real(S_omega(k,0,0,i))*real(G_omega(k,0,0,i))+imag(S_omega(k,0,0,i))*imag(G_omega(k,0,0,i)))/denom,
+          y4 = (imag(S_omega(k,0,0,i))*real(G_omega(k,0,0,i))-real(S_omega(k,0,0,i))*imag(G_omega(k,0,0,i)))/denom;
+          double err_S_re = std::pow(y1*real(err_F[k]),2)+std::pow(y2*imag(err_F[k]),2)+std::pow(y3*real(err_G[k]),2)+std::pow(y4*imag(err_G[k]),2);
+          double err_S_im = std::pow(y2*real(err_F[k]),2)+std::pow(y1*imag(err_F[k]),2)+std::pow(y4*real(err_G[k]),2)+std::pow(y3*imag(err_G[k]),2);
+          err_S[k]= std::complex<double>(std::sqrt(err_S_re),std::sqrt(err_S_im));
       }
     data_path.str("");
     data_path << "/S_omega/"<<i<< "/mean/error";
