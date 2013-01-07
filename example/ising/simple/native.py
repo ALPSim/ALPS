@@ -37,11 +37,11 @@ class isingSim:
         self.random = ngs.random01(params.valueOrDefault('SEED', 42))
         self.parameters = params
         self.measurements = {
-            'Energy':  ngs.RealObservable('Energy'),
-            'Magnetization': ngs.RealObservable('Magnetization'),
-            'Magnetization^2': ngs.RealObservable('Magnetization^2'),
-            'Magnetization^4': ngs.RealObservable('Magnetization^4'),
-            'Correlations': ngs.RealVectorObservable('Correlations')
+            'Energy':  ngs.createRealObservable('Energy'),
+            'Magnetization': ngs.createRealObservable('Magnetization'),
+            'Magnetization^2': ngs.createRealObservable('Magnetization^2'),
+            'Magnetization^4': ngs.createRealObservable('Magnetization^4'),
+            'Correlations': ngs.createRealVectorObservable('Correlations')
         }
 
         self.length = int(params['L'])

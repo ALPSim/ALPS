@@ -42,24 +42,21 @@ class RealObservable:
     def __init__(self, name, binnum = 0):
         self.name = name
         self.binnum = binnum
-    def addToObservables(self, observables):
+    def addToObservables(self, observables): #rename this with new ALEA
         observables.createRealObservable(self.name, self.binnum)
 
 class RealVectorObservable:
     def __init__(self, name, binnum = 0):
         self.name = name
         self.binnum = binnum
-    def addToObservables(self, observables):
+    def addToObservables(self, observables): #rename this with new ALEA
         observables.createRealVectorObservable(self.name, self.binnum)
 
 from pyngsobservables_c import observables
-class ObservablesOperators:
-    def __lshift__(self, other):
-        other.addToObservables(self)
-observables.__bases__ = (ObservablesOperators, MutableMapping, ) + observables.__bases__
+observables.__bases__ = (MutableMapping, ) + observables.__bases__
 
-from pyngsobservable_c import RealObservable #remove this with new ALEA!
-from pyngsobservable_c import RealVectorObservable #remove this with new ALEA!
+from pyngsobservable_c import createRealObservable #remove this with new ALEA!
+from pyngsobservable_c import createRealVectorObservable #remove this with new ALEA!
 
 from pyngsresult_c import result
 from pyngsresult_c import observable2result #remove this with new ALEA!
