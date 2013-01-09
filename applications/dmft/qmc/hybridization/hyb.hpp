@@ -84,7 +84,6 @@ private:
   void accumulate_order();
   void accumulate_G();
   void accumulate_Gw();
-  void accumulate_Sw();
   void accumulate_Gl();
   void accumulate_nn();
   void accumulate_nnt();
@@ -119,7 +118,7 @@ private:
   double beta;
 
   //updates parameters
-  std::size_t N_meas,N_SWEEPS_SIGMA;
+  std::size_t N_meas;
 
   //measurement parameters
   std::size_t N_w;    //number of Matsubara frequency points
@@ -147,7 +146,7 @@ private:
   std::vector<std::string> density_names;
   std::vector<std::string> order_names;
   std::vector<std::string> order_histogram_names;
-  std::vector<std::string> gwr_names, gwi_names, fwr_names, fwi_names,swr_names,swi_names;
+  std::vector<std::string> gwr_names, gwi_names, fwr_names, fwi_names;
   std::vector<std::string> gl_names, fl_names;
   std::vector<std::vector<std::string> > g2wr_names, g2wi_names, h2wr_names, h2wi_names;
   std::vector<std::vector<std::string> > nnt_names, nnw_re_names, nn_names;
@@ -164,8 +163,6 @@ private:
   std::vector<std::vector<double> >Gwi;
   std::vector<std::vector<double> >Fwr;
   std::vector<std::vector<double> >Fwi;
-  std::vector<std::vector<double> >Gwr_acc,Gwi_acc;
-  std::vector<std::vector<double> >Fwr_acc,Fwi_acc;
   std::vector<std::vector<double> >Gl;
   std::vector<std::vector<double> >Fl;
   std::vector<std::vector<std::complex<double> > >G2w;

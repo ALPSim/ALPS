@@ -74,9 +74,7 @@ hyb_config(parms)
   //initializing updates parameters
   N_meas = parms["N_MEAS"];                                                        //number of updates per measurement
   N_hist_orders = parms["N_HISTOGRAM_ORDERS"]|50;                                  //number of orders that are measured for the order histogram
-    
-  N_SWEEPS_SIGMA = parms["N_SWEEPS_SIGMA"]|1000; // number of measuerments for self energy
-    
+  
   //initializing measurement parameters
   spin_flip = parms["SPINFLIP"]| 0;                                                //whether to perform spin-flip updates
   MEASURE_nnt = parms["MEASURE_nnt"]| 0;                                           //measure density-density correlation function in imaginary time

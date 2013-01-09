@@ -235,28 +235,16 @@ void evaluate_freq(const alps::results_type<hybridization>::type &results,
     std::stringstream gw_im_name; gw_im_name<<"gw_im_"<<i;
     std::stringstream fw_re_name; fw_re_name<<"fw_re_"<<i;
     std::stringstream fw_im_name; fw_im_name<<"fw_im_"<<i;
-    std::stringstream sw_re_name; sw_re_name<<"sw_re_"<<i;
-    std::stringstream sw_im_name; sw_im_name<<"sw_im_"<<i;
     std::vector<double> Gw_re=results[gw_re_name.str()].mean<std::vector<double> >();
     std::vector<double> Gw_im=results[gw_im_name.str()].mean<std::vector<double> >();
     std::vector<double> Fw_re=results[fw_re_name.str()].mean<std::vector<double> >();
     std::vector<double> Fw_im=results[fw_im_name.str()].mean<std::vector<double> >();
-    // In case we measure the self-energy ... (VERY experimental!!!!)
-    std::vector<double> Sw_re,Sw_im;
-    if(parms["MEASURE_SELFENERGY"]|false) {
-      Sw_re=results[sw_re_name.str()].mean<std::vector<double> >();
-      Sw_im=results[sw_im_name.str()].mean<std::vector<double> >();
-    }
-
     for(std::size_t w=0;w<N_w;++w){
       std::complex<double> G(Gw_re[w],Gw_im[w]);
       std::complex<double> F(Fw_re[w],Fw_im[w]);
       G_omega(w,0,0,i)=G;
       F_omega(w,0,0,i)=F;
-      if(parms["MEASURE_SELFENERGY"]|false)
-        S_omega(w,0,0,i)=std::complex<double>(Sw_re[w],Sw_im[w]);
-      else
-        S_omega(w,0,0,i)=F/G;
+      S_omega(w,0,0,i)=F/G;
     }
   }
 
@@ -268,68 +256,31 @@ void evaluate_freq(const alps::results_type<hybridization>::type &results,
   // ERROR
   for(std::size_t i=0; i<n_orbitals; i++){
     std::vector<double> err_g_re(N_w),err_g_im(N_w),err_f_re(N_w),err_f_im(N_w);
-    std::vector<std::complex<double> > err_G(N_w),err_F(N_w),err_S(N_w);
+    std::vector<std::complex<double> > err(N_w);
     std::stringstream g_name; g_name<<"gw_re_"<<i;
     err_g_re = results[g_name.str()].error<std::vector<double> >();
     g_name.str("");g_name<<"gw_im_"<<i;
     err_g_im = results[g_name.str()].error<std::vector<double> >();
-    for (int k=0;k<err_G.size();k++) err_G[k] = std::complex<double>(err_g_re[k],err_g_im[k]);
+    for (int k=0;k<err.size();k++) err[k] = std::complex<double>(err_g_re[k],err_g_im[k]);
     std::stringstream data_path;
     data_path << "/G_omega/"<<i<< "/mean/error";
-    solver_output<<alps::make_pvp(data_path.str(),err_G);
+    solver_output<<alps::make_pvp(data_path.str(),err);
     g_name.str(""); g_name<<"fw_re_"<<i;
     err_f_re = results[g_name.str()].error<std::vector<double> >();
     g_name.str("");g_name<<"fw_im_"<<i;
     err_f_im = results[g_name.str()].error<std::vector<double> >();
-    for (int k=0;k<err_F.size();k++) err_F[k] = std::complex<double>(err_f_re[k],err_f_im[k]);
+    for (int k=0;k<err.size();k++) err[k] = std::complex<double>(err_f_re[k],err_f_im[k]);
     data_path.str("");
     data_path << "/F_omega/"<<i<< "/mean/error";
-    solver_output<<alps::make_pvp(data_path.str(),err_F);
-
-    if(parms["MEASURE_SELFENERGY"]|false) {
-      g_name.str(""); g_name<<"sw_re_"<<i;
-      err_f_re = results[g_name.str()].error<std::vector<double> >();
-      g_name.str("");g_name<<"sw_im_"<<i;
-      err_f_im = results[g_name.str()].error<std::vector<double> >();
-      for (int k=0;k<err_S.size();k++) err_S[k] = std::complex<double>(err_f_re[k],err_f_im[k]);
-    } else
-// Since we do not know better, use Gaussian error propagation, assuming that
-// the measurments of ReG, ImG, ReF and ImF are statistically independent.
-// We need the derivatives of S w.r.t to ReF, ImF, ReG and ImG. As S is an
-// analytical function of F and G, we can make use of Cauchy-Riemmann equations
-// Finally, the squares of derivative*error are added up.
-      for (int k=0;k<N_w;k++) {
-          double denom = std::pow(std::abs(G_omega(k,0,0,i)),2),
-          y1 = real(G_omega(k,0,0,i))/denom,
-          y2 = -imag(G_omega(k,0,0,i))/denom,
-          y3 = (real(S_omega(k,0,0,i))*real(G_omega(k,0,0,i))+imag(S_omega(k,0,0,i))*imag(G_omega(k,0,0,i)))/denom,
-          y4 = (imag(S_omega(k,0,0,i))*real(G_omega(k,0,0,i))-real(S_omega(k,0,0,i))*imag(G_omega(k,0,0,i)))/denom;
-          double err_S_re = std::pow(y1*real(err_F[k]),2)+std::pow(y2*imag(err_F[k]),2)+std::pow(y3*real(err_G[k]),2)+std::pow(y4*imag(err_G[k]),2);
-          double err_S_im = std::pow(y2*real(err_F[k]),2)+std::pow(y1*imag(err_F[k]),2)+std::pow(y4*real(err_G[k]),2)+std::pow(y3*imag(err_G[k]),2);
-          err_S[k]= std::complex<double>(std::sqrt(err_S_re),std::sqrt(err_S_im));
-      }
+    solver_output<<alps::make_pvp(data_path.str(),err);
     data_path.str("");
     data_path << "/S_omega/"<<i<< "/mean/error";
-    solver_output<<alps::make_pvp(data_path.str(),err_S);
-
-    //COVARIANCE
-    if(parms["MEASURE_SELFENERGY"]|false)
-    for(std::size_t i=0; i<n_orbitals; i++){
-        boost::numeric::ublas::matrix<double> cov_re(N_w, N_w),cov_im(N_w, N_w);
-        std::stringstream s_name; s_name<<"sw_re_"<<i;
-        cov_re=results[s_name.str()].covariance<std::vector<double> >(results[s_name.str()]);
-          
-        s_name.str(""); s_name<<"sw_im_"<<i;
-        cov_im=results[s_name.str()].covariance<std::vector<double> >(results[s_name.str()]);
-        std::vector<std::complex<double> > data(N_w*N_w);
-        for(std::size_t w1=0; w1<N_w; w1++)
-            for(std::size_t w2=0; w2<N_w; w2++)
-                data[w1*N_w+w2]=std::complex<double>(cov_re(w1,w2),cov_im(w1,w2));
-        
-        data_path.str("");
-        data_path << "/S_omega/"<<i<< "/mean/covariance";
-        solver_output<<alps::make_pvp(data_path.str(),data);
+    for (int k=0;k<N_w;k++) {
+       double x1 = (std::abs(err_g_re[k]/real(G_omega(k,0,0,i)))+std::abs(err_f_re[k]/real(F_omega(k,0,0,i))))*std::abs(real(S_omega(k,0,0,i))),
+              x2 = (std::abs(err_g_im[k]/imag(G_omega(k,0,0,i)))+std::abs(err_f_im[k]/imag(F_omega(k,0,0,i))))*std::abs(imag(S_omega(k,0,0,i)));
+       err[k] = std::complex<double>(x1,x2);
     }
+    solver_output<<alps::make_pvp(data_path.str(),err);
   }
 
     
