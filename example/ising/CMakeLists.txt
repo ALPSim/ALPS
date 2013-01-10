@@ -49,7 +49,7 @@ if (ALPS_BUILD_EXAMPLES)
 
     if (MPI_FOUND)
 
-        foreach (name mpi mpi_pscan mpi_controlthread_tiny mpi_server_tiny parallel)
+        foreach (name mpi mpi_ulfm mpi_pscan mpi_controlthread_tiny mpi_server_tiny parallel)
         
             add_executable(ngs_ising_${name} ${name}.cpp)
             add_dependencies(ngs_ising_${name} alps)
