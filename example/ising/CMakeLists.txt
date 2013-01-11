@@ -49,7 +49,13 @@ if (ALPS_BUILD_EXAMPLES)
 
     if (MPI_FOUND)
 
-        foreach (name mpi mpi_ulfm mpi_pscan mpi_controlthread_tiny mpi_server_tiny parallel)
+        SET(ALPS_NGS_EXAMPLES_MPI_EXEC mpi mpi_pscan mpi_controlthread_tiny mpi_server_tiny parallel)
+        if (ALPS_NGS_OPENMPI_ULFM)
+            SET(ALPS_NGS_EXAMPLES_MPI_EXEC ${ALPS_NGS_EXAMPLES_MPI_EXEC} mpi_ulfm)
+        endif(ALPS_NGS_OPENMPI_ULFM)
+
+        foreach (name ${ALPS_NGS_EXAMPLES_MPI_EXEC})
+
         
             add_executable(ngs_ising_${name} ${name}.cpp)
             add_dependencies(ngs_ising_${name} alps)
