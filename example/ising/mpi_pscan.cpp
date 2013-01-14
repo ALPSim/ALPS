@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
             + "." + boost::lexical_cast<std::string>(color)
         );
 
-    sim.run(boost::bind(&stop_callback, options.time_limit));
+    sim.run(stop_callback(options.time_limit));
 
     sim.save(
           (params["DUMP"] | "checkpoint")

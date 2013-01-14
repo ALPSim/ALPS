@@ -46,9 +46,9 @@
 class ising_sim {
 
     #ifdef ALPS_NGS_USE_NEW_ALEA
-        typedef alps::accumulator::accumulator_set observables_type;
+        typedef alps::accumulator::accumulator_set observable_collection_type;
     #else
-        typedef alps::mcobservables observables_type;
+        typedef alps::mcobservables observable_collection_type;
     #endif
 
     public:
@@ -148,7 +148,7 @@ class ising_sim {
         // implement a nice keys(m) function
         result_names_type result_names() const {
             result_names_type names;
-            for(observables_type::const_iterator it = measurements.begin(); it != measurements.end(); ++it)
+            for(observable_collection_type::const_iterator it = measurements.begin(); it != measurements.end(); ++it)
                 names.push_back(it->first);
             return names;
         }
@@ -178,10 +178,10 @@ class ising_sim {
             ar["measurements"] << measurements;
 
             ar.set_context("checkpoint");
-            ar["length"] << length;
+            ar["length"] << length; // TODO: remove, are saved in params. load from params
             ar["sweeps"] << sweeps;
-            ar["thermalization_sweeps"] << thermalization_sweeps;
-            ar["beta"] << beta;
+            ar["thermalization_sweeps"] << thermalization_sweeps; // TODO: remove, are saved in params. load from params
+            ar["beta"] << beta; // TODO: remove, are saved in params. load from params
             ar["spins"] << spins;
 
             {
@@ -194,8 +194,8 @@ class ising_sim {
         }
 
         void load(alps::hdf5::archive & ar) {
-            ar["/parameters"] >> params; // TODO: do we want to load the parameters?
-
+            ar["/parameters"] >> params; 
+// TODO: load total_sweeps
             std::string context = ar.get_context();
             ar.set_context("/simulation/realizations/0/clones/0");
             ar["measurements"] >> measurements;
@@ -221,7 +221,7 @@ class ising_sim {
 
         parameters_type params;
         boost::variate_generator<boost::mt19937, boost::uniform_real<> > mutable random;
-        observables_type measurements;
+        observable_collection_type measurements;
         
         int length;
         int sweeps;
@@ -292,10 +292,12 @@ struct stop_callback {
 int main(int argc, char *argv[]) {
 
     try {
+        // options weglassen, von hand commandline args lesen und von hand parsen
         args options(argc, argv);
 
         alps::parameters_type<ising_sim>::type parameters;
 
+        // TODO: make ist simpler, only read a textfile
         std::string suffix = options.inputfile.substr(options.inputfile.find_last_of('.'));
         if (suffix == ".xml")
             parameters = alps::make_parameters_from_xml(options.inputfile);
@@ -324,9 +326,6 @@ int main(int argc, char *argv[]) {
 
     } catch (std::exception const & e) {
         std::cerr << "Caught exception: " << e.what() << std::endl;
-        return EXIT_FAILURE;
-    } catch (...) {
-        std::cerr << "Caught unknown exception" << std::endl;
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;

@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
     if (options.resume)
         sim.load(params["DUMP"] | "checkpoint");
 
-    sim.run(boost::bind(&stop_callback, options.time_limit));
+    sim.run(stop_callback(options.time_limit));
 
     sim.save(params["DUMP"] | "checkpoint");
 

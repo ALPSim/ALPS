@@ -1267,7 +1267,7 @@ int main(int argc, char** argv)
   }
  
   // run the simulation
-  simulation.run(boost::bind(&alps::stop_callback, options.time_limit));
+  simulation.run(alps::stop_callback(options.time_limit));
 
   // save worldlines and measurement to output file
   alps::hdf5::archive simulation_output = alps::hdf5::archive(options.output_file, 'a');

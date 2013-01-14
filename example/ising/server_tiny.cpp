@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
     boost::thread worker(
           static_cast<bool(sim_type::*)(boost::function<bool ()> const &)>(&sim_type::run)
         , boost::ref(sim)
-        , static_cast<boost::function<bool()> >(boost::bind(&stop_callback, options.time_limit))
+        , static_cast<boost::function<bool()> >(stop_callback(options.time_limit))
     );
 
     // TODO: pick a port number and make it overridable vy a command line parameter and not params
