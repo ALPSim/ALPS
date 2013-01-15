@@ -56,7 +56,6 @@ add_executable(bg_parameter bg_parameter.C)
 
 add_executable(hdf5_changeval hdf5_changeval.C)
 
-add_executable(vertexbuilder vertexbuilder.cpp clustertransformer.C clusterhelper.C auxiliaryfunctions.C fouriertransform.C)
 
 target_link_libraries(dmft ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} gsl gslcblas pthread)
 target_link_libraries(energy ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
@@ -68,4 +67,3 @@ ${LAPACK_LIBRARY} gsl gslcblas pthread)
 
 target_link_libraries(bg_parameter ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})
 target_link_libraries(hdf5_changeval ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})
-target_link_libraries(vertexbuilder ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})
