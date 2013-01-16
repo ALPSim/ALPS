@@ -64,11 +64,13 @@ void hybfun::read_hybridization_function(const alps::params &p){
       read_hdf5(ar,"/Delta");
     }
     else{//plain hdf5
-      std::vector<double> tmp(nflavor()*ntime());
-      ar>>alps::make_pvp("/Delta",tmp);
-      for(std::size_t j=0; j<nflavor(); j++)
+      std::vector<double> tmp(ntime());
+      for(std::size_t j=0; j<nflavor(); j++){
+        std::stringstream path; path<<"/Delta_"<<j;
+        ar>>alps::make_pvp(path.str(),tmp);
         for(std::size_t i=0; i<ntime(); i++)
-          operator()(i,j)=tmp[j*ntime()+i];
+          operator()(i,j)=tmp[i];
+      }
       tmp.clear();
     }
   }
