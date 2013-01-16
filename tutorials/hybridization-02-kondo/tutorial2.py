@@ -70,7 +70,7 @@ for i in range(N_T+1):
 
 Uvalues=[0.,2.] # the values of the on-site interaction
 N_TAU = 1000    # number of tau-points; must be large enough for the lowest temperature (set to at least 5*BETA*U)
-runtime = 2     # solver runtime (in seconds)
+runtime = 1     # solver runtime (in seconds)
 
 values=[[] for u in Uvalues]
 errors=[[] for u in Uvalues]
@@ -99,6 +99,7 @@ for un,u in enumerate(Uvalues):
                'BETA'                       : 1/t,                                # inverse temperature
                # measurements
                'MEASURE_nnw'                : 1,                                  # measure the density-density correlation function (local susceptibility) on Matsubara frequencies
+               'MEASURE_time'               : 0,                                  # turn of imaginary-time measurement
                # measurement parameters
                'N_HISTOGRAM_ORDERS'         : 50,                                 # maximum order for the perturbation order histogram
                'N_TAU'                      : N_TAU,                              # number of imaginary time points (tau_0=0, tau_N_TAU=BETA)
@@ -171,7 +172,7 @@ if mpi.rank==0: #allow other nodes to exit
   plt.figure()
   plt.xlabel(r'$T$')
   plt.ylabel(r'$4T\chi_{dd}$')
-  plt.title('hybridization-01: Kondo screening of an impurity\n(using the hybridization expansion impurity solver)')
+  plt.title('hybridization-02: Kondo screening of an impurity\n(using the hybridization expansion impurity solver)')
   for un in range(len(Uvalues)):
     plt.errorbar(Tvalues, values[un], yerr=errors[un], label="U=%.1f"%Uvalues[un])
   plt.xscale('log')

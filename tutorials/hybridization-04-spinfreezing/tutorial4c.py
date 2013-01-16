@@ -67,8 +67,6 @@ for tn in range(parms['N_nn']+1):
           else: s+=nnt[idx2][idx1]*sp1*sp2/4.
   SzSzt.append(s)
 
-print SzSzt
-
 ar['SzSzt']=SzSzt # save to file
 del ar
 
@@ -76,12 +74,11 @@ del ar
 import matplotlib.pyplot as plt
 plt.figure()
 plt.xlabel(r'$\tau$')
-plt.ylabel(r'$\langle S_{z}(\tau)S_z(0)$')
+plt.ylabel(r'$\langle S_{z}(\tau)S_z(0)\rangle$')
 plt.title('hybridization-04c: Spin-spin correlation function of a two-orbital model\n(using the hybridization expansion impurity solver)')
 plt.plot(tau, SzSzt)
 plt.xlim(0,parms['BETA'])
 plt.ylim(0,)
-plt.legend()
 plt.show()
 
 

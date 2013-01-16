@@ -88,13 +88,15 @@ sigma1 = 0.
 for i in range(n_orb): # average over all orbitals i
   for j in range(n_orb):
     sigma0 += u[i][j]*a[j][j]
-print "sigma0=", sigma0/n_orb # print average
+sigma0/=n_orb
+print "sigma0=", sigma0 # print average
 
 for i in range(n_orb): # average over all orbitals i
   for k in range(n_orb):
     for l in range(n_orb):
       sigma1 += u[i][k]*u[i][l]*(a[k][l]-a[k][k]*a[l][l])
-print "sigma1=", sigma1/n_orb # print average
+sigma1/=n_orb
+print "sigma1=", sigma1 # print average
 
 N=0.
 for i in range(n_orb):
@@ -110,15 +112,12 @@ for n in range(parms['N_MATSUBARA']):
   Xvalues.append(Iw.imag)
   Tvalues.append((sigma0+sigma1/Iw).imag) # self-energy tail
 
-Sw=array(zeros(parms['N_TAU']+1))
-Swl=array(zeros(parms['N_TAU']+1))
-
-Sw=ar['/S_omega/values/mean']
-Swl=ar['/S_l_omega/values/mean']
+Sw=array(zeros(parms['N_MATSUBARA']), dtype=complex)
+Swl=array(zeros(parms['N_MATSUBARA']), dtype=complex)
 
 for m in range(parms['N_ORBITALS']):
-  Sw+=ar['S_omega/m/mean/value']/parms['N_ORBITALS']
-  Swl+=ar['S_omega/m/mean/value']/parms['N_ORBITALS']
+  Sw+=ar['S_omega/%i/mean/value'%m]/parms['N_ORBITALS']
+  Swl+=ar['S_l_omega/%i/mean/value'%m]/parms['N_ORBITALS']
 
 del ar # close the archive
 
@@ -128,12 +127,12 @@ plt.figure()
 plt.xlabel(r'$\omega_n$')
 plt.ylabel(r'Im$\Sigma_{ii}(i\omega_n)$')
 plt.title('hybridization-04b: Self-energy of a two-orbital model\n(using the hybridization expansion impurity solver)')
-plt.plot(Xvalues, Sw, label='$\Sigma(i\omega_n)$ (Mats.)')
-plt.plot(Xvalues, Swl, label='$\Sigma(i\omega_n)$ (Leg.)')
+plt.plot(Xvalues, imag(Sw),  label='Im $\Sigma(i\omega_n)$ (Mats.)')
+plt.plot(Xvalues, imag(Swl), label='Im $\Sigma(i\omega_n)$ (Leg.)')
 plt.plot(Xvalues, Tvalues, label="Tail")
 plt.xlim(0,60)
 plt.ylim(-2,0)
-plt.legend()
+plt.legend(loc='lower right')
 plt.show()
 
 
