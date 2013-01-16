@@ -144,10 +144,10 @@ void hybridization::sanity_check(const alps::params &parms){
 
 void hybridization::show_info(const alps::params &parms, int crank){
   if(!(parms["VERBOSE"]|false)) return;
-  
+
   //provide info on what is measured and how long the simulation will run
   if(!crank){
-    std::cout << "measuring gt" << std::endl;
+    if(parms["MEASURE_time"]|true) std::cout << "measuring gt" << std::endl;
     if(parms["MEASURE_freq"]|false) std::cout << "measuring gw" << std::endl << "measuring fw" << std::endl;
     if(parms["MEASURE_legendre"]|false) std::cout << "measuring gl" << std::endl << "measuring fl" << std::endl;
     if(parms["MEASURE_g2w"]|false) std::cout << "measuring g2w" << std::endl;
