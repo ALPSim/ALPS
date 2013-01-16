@@ -32,10 +32,10 @@
  # its documentation.
  #
  # This tutorial requires the results to be produced first by running the
- # tutorial3a script.
+ # tutorial4a.py script.
  #
  # Run this script as:
- # alpspython tutorial3c.py
+ # alpspython tutorial4c.py
 
 from pyalps.ngs import h5ar # hdf5 interface
 from numpy import *
@@ -77,7 +77,7 @@ import matplotlib.pyplot as plt
 plt.figure()
 plt.xlabel(r'$\tau$')
 plt.ylabel(r'$\langle S_{z}(\tau)S_z(0)$')
-plt.title('hybridization-03c: Spin-spin correlation function of a two-orbital model\n(using the hybridization expansion impurity solver)')
+plt.title('hybridization-04c: Spin-spin correlation function of a two-orbital model\n(using the hybridization expansion impurity solver)')
 plt.plot(tau, SzSzt)
 plt.xlim(0,parms['BETA'])
 plt.ylim(0,)

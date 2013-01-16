@@ -48,14 +48,14 @@
  #
  # In case this does not work, try:
  #
- # mpirun -np 2 bash alpspython tutorial2.py
+ # mpirun -np 2 sh alpspython tutorial2.py
 
 import shutil
 import pyalps.mpi as mpi                # mpi library
 from pyalps.hdf5 import h5ar            # hdf5 interface
 import pyalps.cthyb as cthyb            # the solver module
 from numpy import sqrt,cosh,sinh,exp,pi #some math
-
+from numpy import array,zeros,append
 ##################################################################################################################
 #                                                                                                                #
 #                                               P A R A M E T E R S                                              #
@@ -131,7 +131,7 @@ if mpi.rank==0:
   for n in range(parms['N_MATSUBARA']):
     w=(2*n+1)*pi/parms['BETA']
     g.append(2.0/(I*w+mu+I*sqrt(4*parms['t']**2-(I*w+mu)**2))) # noninteracting Green's function on Bethe lattice
-  delta_=[]
+  delta=[]
   for i in range(parms['N_TAU']+1):
     tau=i*parms['BETA']/parms['N_TAU']
     g0tau=0.0;
@@ -140,16 +140,12 @@ if mpi.rank==0:
       g0tau+=((g[n]-1.0/iw)*exp(-iw*tau)).real # Fourier transform with tail subtracted
     g0tau *= 2.0/parms['BETA']
     g0tau += -1.0/2.0 # add back contribution of the tail
-    delta_.append(parms['t']**2*g0tau) # delta=t**2 g
-
-  delta=[]
-  for m in range(parms['N_ORBITALS']): # take the same initial delta for all orbitals
-    for i in range(len(delta_)):
-      delta.append(delta_[i])
+    delta.append(parms['t']**2*g0tau) # delta=t**2 g
 
   # write hybridization function to hdf5 archive (solver input)
   ar=h5ar(parms['DELTA'],'w')
-  ar['/Delta']=delta
+  for m in range(parms['N_ORBITALS']):
+    ar['/Delta_%i'%m]=delta
   del ar
 
   print "generating retarded interaction..."
@@ -181,7 +177,7 @@ if mpi.rank==0:
       tau=i*parms['BETA']/parms['N_TAU']
       f.write("%f %f %f\n"%(tau,k_tau[i],kp_tau[i]))
 
-mpi.world.barrier() # wait until hybridization is written to file
+mpi.world.barrier() # wait until solver input is written to file
 
 ###################################################################################################################
 #                                                                                                                 #
@@ -222,43 +218,37 @@ for it in range(dmft_iterations):
 
     # read Green's function from file
     ar=h5ar(parms['BASENAME']+'.out.h5','r')
-    gt=ar['G_tau/values/mean']
-    #gw=ar['G_omega/values/mean']
-    del ar
     # symmetrize G(tau)
     # in this case all orbitals and spins are degenerate
-    for i in range(parms['N_TAU']+1):
-      g_av=0.0
-      for j in range(parms['N_ORBITALS']):
-        g_av += gt[j*(parms['N_TAU']+1)+i]
-
-      g_av/=parms['N_ORBITALS']
-      for j in range(parms['N_ORBITALS']):
-        gt[j*(parms['N_TAU']+1)+i] = g_av
+    gt=array(zeros(parms['N_TAU']+1))
+    for m in range(parms['N_ORBITALS']):
+      gt+=ar['G_tau/%i/mean/value'%m]
+    gt/=parms['N_ORBITALS']
+    del ar
 
     # Bethe lattice self-consistency: delta(tau)=t**2 g(tau)
     # read delta_old
-    ar=h5ar(parms['DELTA'],'r')
-    delta_old=ar['/Delta']
-    del ar
-    delta_new=[0.0 for i in range(parms['N_ORBITALS']*(parms['N_TAU']+1))]
-    for i in range(len(gt)):
-      delta_new[i]=(1.-parms['mix'])*(parms['t']**2 * gt[i]) + parms['mix']*delta_old[i] # mix old and new delta
+    ar=h5ar(parms['DELTA'],'rw')
+    for m in range(parms['N_ORBITALS']):
+      delta_old=ar['/Delta_%i'%m]
+      delta_new=array(zeros(parms['N_TAU']+1))
+      delta_new=(1.-parms['mix'])*(parms['t']**2 * gt) + parms['mix']*delta_old # mix old and new delta
 
-    # write hybridization to the h5 archive (this is solver input)
-    ar=h5ar(parms['DELTA'],'w')
-    ar['/Delta']=delta_new
+      # write hybridization to the h5 archive (this is solver input)
+      ar['/Delta_%i'%m]=delta_new
     del ar
 
-    # write hybridization function for reference
+    # write input hybridization function for reference
     if(parms['TEXT_OUTPUT']==1):
       f=open('Delta%i.dat'%it,'w')
       for i in range(parms['N_TAU']+1):
         f.write("%f"%(i*parms['BETA']/parms['N_TAU']))
         for m in range(parms['N_ORBITALS']):
-          f.write(" %f"%(delta[j*(parms['N_TAU']+1)+i]))
+          f.write(" %f"%delta_old[i])
         f.write("\n")
       f.close()
+
+  mpi.world.barrier() # wait until solver input is written
 
 # go back and loop
 

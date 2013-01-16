@@ -43,33 +43,38 @@
  #
  # In case this does not work, try:
  #
- # mpirun -np 2 bash alpspython tutorial1.py
+ # mpirun -np 2 sh alpspython tutorial1.py
 
 import pyalps.cthyb as cthyb # the solver module
 import pyalps.mpi as mpi     # MPI library (required)
 
-# write a simple (constant) hybridization function to file
-f=open("delta.dat","w")
-for i in range(1001):
-  f.write("%i %f %f\n"%(i,-0.5,-0.5))
-f.close()
-
 # specify solver parameters
 parms={
 'SWEEPS'              : 100000000,
-'MAX_TIME'            : 30,
+'MAX_TIME'            : 60,
 'THERMALIZATION'      : 1000,
 'SEED'                : 0,
 'N_MEAS'              : 50,
 'N_HISTOGRAM_ORDERS'  : 50,
 'N_ORBITALS'          : 2,
-'U'                   : 4,
-'MU'                  : 2,
+'U'                   : 4.0,
+'MU'                  : 2.0,
 'DELTA'               : "delta.dat",
 'N_TAU'               : 1000,
 'BETA'                : 45,
 'TEXT_OUTPUT'         : 1,
 }
+
+# Write a simple (constant) hybridization function to file.
+# This corresponds to the impurity site with on-site interaction U
+# coupled to a single noninteracting bath site with hybridization
+# V=1 at energy epsilon=0: Delta(tau)=-V^2/2=const.
+
+if mpi.rank==0:
+  f=open("delta.dat","w")
+  for i in range(parms["N_TAU"]+1):
+    f.write("%i %f %f\n"%(i,-0.5,-0.5))
+  f.close()
 
 # solve the impurity model
 cthyb.solve(parms)

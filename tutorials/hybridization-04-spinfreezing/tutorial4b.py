@@ -30,10 +30,10 @@
  # archive, perform some basic computations with them and then plot results.
  #
  # This tutorial requires the results to be produced first by running the
- # tutorial3a script.
+ # tutorial4a.py script.
  #
  # Run this script as:
- # alpspython tutoria3b.py
+ # alpspython tutoria4b.py
 
 from pyalps.ngs import h5ar #hdf5 interface
 from numpy import *
@@ -110,14 +110,15 @@ for n in range(parms['N_MATSUBARA']):
   Xvalues.append(Iw.imag)
   Tvalues.append((sigma0+sigma1/Iw).imag) # self-energy tail
 
+Sw=array(zeros(parms['N_TAU']+1))
+Swl=array(zeros(parms['N_TAU']+1))
+
 Sw=ar['/S_omega/values/mean']
 Swl=ar['/S_l_omega/values/mean']
-Swvalues=[0 for n in range(parms['N_MATSUBARA'])] # self-energy from Matsubare measurement
-Swlvalues=[0 for n in range(parms['N_MATSUBARA'])] # self-energy from Legendre measurement
 
-for i in range(parms['N_ORBITALS']):
-  Swvalues+=Sw[i*parms['N_MATSUBARA']:parms['N_MATSUBARA']*(i+1)].imag/4.0 # average over orbitals
-  Swlvalues+=Swl[i*parms['N_MATSUBARA']:parms['N_MATSUBARA']*(i+1)].imag/4.0
+for m in range(parms['N_ORBITALS']):
+  Sw+=ar['S_omega/m/mean/value']/parms['N_ORBITALS']
+  Swl+=ar['S_omega/m/mean/value']/parms['N_ORBITALS']
 
 del ar # close the archive
 
@@ -126,9 +127,9 @@ import matplotlib.pyplot as plt
 plt.figure()
 plt.xlabel(r'$\omega_n$')
 plt.ylabel(r'Im$\Sigma_{ii}(i\omega_n)$')
-plt.title('hybridization-03b: Self-energy of a two-orbital model\n(using the hybridization expansion impurity solver)')
-plt.plot(Xvalues, Swvalues, label='$\Sigma(i\omega_n)$ (Mats.)')
-plt.plot(Xvalues, Swlvalues, label='$\Sigma(i\omega_n)$ (Leg.)')
+plt.title('hybridization-04b: Self-energy of a two-orbital model\n(using the hybridization expansion impurity solver)')
+plt.plot(Xvalues, Sw, label='$\Sigma(i\omega_n)$ (Mats.)')
+plt.plot(Xvalues, Swl, label='$\Sigma(i\omega_n)$ (Leg.)')
 plt.plot(Xvalues, Tvalues, label="Tail")
 plt.xlim(0,60)
 plt.ylim(-2,0)

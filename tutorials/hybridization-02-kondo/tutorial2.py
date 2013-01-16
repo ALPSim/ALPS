@@ -49,7 +49,7 @@
  #
  # In case this does not work, try:
  #
- # mpirun -np 2 bash alpspython tutorial1.py
+ # mpirun -np 2 sh alpspython tutorial1.py
 
 import pyalps.mpi as mpi          # MPI library
 from pyalps.ngs import h5ar       # hdf5 interface
@@ -122,7 +122,7 @@ for un,u in enumerate(Uvalues):
       for n in range(parms['N_MATSUBARA']):
         w=(2*n+1)*pi/parms['BETA']
         g.append(2.0/(I*w+mu+I*sqrt(4*parms['t']**2-(I*w+mu)**2))) # use GF with semielliptical DOS
-      delta_=[]
+      delta=[]
       for i in range(parms['N_TAU']+1):
         tau=i*parms['BETA']/parms['N_TAU']
         g0tau=0.0;
@@ -131,16 +131,12 @@ for un,u in enumerate(Uvalues):
           g0tau+=((g[n]-1.0/iw)*exp(-iw*tau)).real # Fourier transform with tail subtracted
         g0tau *= 2.0/parms['BETA']
         g0tau += -1.0/2.0 # add back contribution of the tail
-        delta_.append(parms['t']**2*g0tau) # delta=t**2 g
-
-      delta=[]
-      for m in range(parms['N_ORBITALS']):
-        for i in range(len(delta_)):
-          delta.append(delta_[i])
+        delta.append(parms['t']**2*g0tau) # delta=t**2 g
 
       # write hybridization function to hdf5 archive (solver input)
       ar=h5ar(parms['DELTA'],'w')
-      ar['/Delta']=delta
+      for m in range(parms['N_ORBITALS']):
+        ar['/Delta_%i'%m]=delta
       del ar
 
     mpi.world.barrier() # wait until hybridization is written to file
