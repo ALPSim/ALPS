@@ -42,7 +42,7 @@ class ising_sim : public mcbase {
 
     public:
         
-        ising_sim(parameters_type const & parameters);
+        ising_sim(parameters_type const & params);
 
         virtual void update();
         virtual void measure();

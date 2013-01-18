@@ -29,14 +29,14 @@
 
 #include <boost/lambda/lambda.hpp>
 
-ising_sim::ising_sim(parameters_type const & parameters)
-    : params(parameters)
-    , random(boost::mt19937((params["SEED"] | 42)), boost::uniform_real<>())
-    , length(params["L"])
+ising_sim::ising_sim(parameters_type const & params)
+    : parameters(params)
+    , random(boost::mt19937((parameters["SEED"] | 42)), boost::uniform_real<>())
+    , length(parameters["L"])
     , sweeps(0)
-    , thermalization_sweeps(int(params["THERMALIZATION"]))
-    , total_sweeps(int(params["SWEEPS"]))
-    , beta(1. / double(params["T"]))
+    , thermalization_sweeps(int(parameters["THERMALIZATION"]))
+    , total_sweeps(int(parameters["SWEEPS"]))
+    , beta(1. / double(parameters["T"]))
     , spins(length)
 {
     for(int i = 0; i < length; ++i)
@@ -137,7 +137,7 @@ void ising_sim::load(boost::filesystem::path const & filename) {
 void ising_sim::save(alps::hdf5::archive & ar) const {
     std::string context = ar.get_context();
 
-    ar["/parameters"] << params;
+    ar["/parameters"] << parameters;
 
     ar.set_context("/simulation/realizations/0/clones/0");
     ar["measurements"] << measurements;
@@ -158,11 +158,11 @@ void ising_sim::save(alps::hdf5::archive & ar) const {
 void ising_sim::load(alps::hdf5::archive & ar) {
     std::string context = ar.get_context();
 
-    ar["/parameters"] >> params;
-    length = int(params["L"]);
-    thermalization_sweeps = int(params["THERMALIZATION"]);
-    total_sweeps = int(params["SWEEPS"]);
-    beta = 1. / double(params["T"]);
+    ar["/parameters"] >> parameters;
+    length = int(parameters["L"]);
+    thermalization_sweeps = int(parameters["THERMALIZATION"]);
+    total_sweeps = int(parameters["SWEEPS"]);
+    beta = 1. / double(parameters["T"]);
 
     ar.set_context("/simulation/realizations/0/clones/0");
     ar["measurements"] >> measurements;

@@ -74,7 +74,7 @@ class mcbase {
     protected:
 
         parameters_type parameters;
-        boost::variate_generator<boost::mt19937, boost::uniform_real<> > mutable random;
+        alps::random01 mutable random;
         observable_collection_type measurements;
 };
 

@@ -29,7 +29,7 @@
 
 mcbase::mcbase(parameters_type const & params)
     : parameters(params)
-    , random(boost::mt19937((params["SEED"] | 42)), boost::uniform_real<>())
+    , random(params["SEED"] | 42)
 {}
 
 void mcbase::save(boost::filesystem::path const & filename) const {
@@ -76,38 +76,13 @@ mcbase::results_type mcbase::collect_results(result_names_type const & names) co
 }
 
 void mcbase::save(alps::hdf5::archive & ar) const {
-    std::string context = ar.get_context();
-
     ar["/parameters"] << parameters;
-
-    ar.set_context("/simulation/realizations/0/clones/0");
-    ar["measurements"] << measurements;
-
-    ar.set_context("checkpoint");
-    {
-        std::ostringstream os;
-        os << random.engine();
-        ar["engine"] << os.str();
-    }
-
-    ar.set_context(context);
+    ar["/simulation/realizations/0/clones/0/measurements"] << measurements;
+    ar["/simulation/realizations/0/clones/0/checkpoint/engine"] << random;
 }
 
 void mcbase::load(alps::hdf5::archive & ar) {
-    std::string context = ar.get_context();
-
     ar["/parameters"] >> parameters;
-
-    ar.set_context("/simulation/realizations/0/clones/0");
-    ar["measurements"] >> measurements;
-
-    ar.set_context("checkpoint");
-    {
-        std::string state;
-        ar["engine"] >> state;
-        std::istringstream is(state);
-        is >> random.engine();
-    }
-
-    ar.set_context(context);
+    ar["/simulation/realizations/0/clones/0/measurements"] >> measurements;
+    ar["/simulation/realizations/0/clones/0/checkpoint/engine"] >> random;
 }

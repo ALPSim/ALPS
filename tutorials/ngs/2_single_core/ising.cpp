@@ -29,8 +29,8 @@
 
 #include <boost/lambda/lambda.hpp>
 
-ising_sim::ising_sim(parameters_type const & parameters)
-    : mcbase(parameters)
+ising_sim::ising_sim(parameters_type const & params)
+    : mcbase(params)
     , length(params["L"])
     , sweeps(0)
     , thermalization_sweeps(int(params["THERMALIZATION"]))
@@ -103,10 +103,10 @@ void ising_sim::save(alps::hdf5::archive & ar) const {
 void ising_sim::load(alps::hdf5::archive & ar) {
     mcbase::load(ar);
 
-    length = int(params["L"]);
-    thermalization_sweeps = int(params["THERMALIZATION"]);
-    total_sweeps = int(params["SWEEPS"]);
-    beta = 1. / double(params["T"]);
+    length = int(parameters["L"]);
+    thermalization_sweeps = int(parameters["THERMALIZATION"]);
+    total_sweeps = int(parameters["SWEEPS"]);
+    beta = 1. / double(parameters["T"]);
 
     std::string context = ar.get_context();
     ar.set_context("/simulation/realizations/0/clones/0/checkpoint");

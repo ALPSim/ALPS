@@ -52,7 +52,7 @@ class ising_sim {
         typedef alps::mcresults results_type;
         typedef std::vector<std::string> result_names_type;
 
-        ising_sim(parameters_type const & parameters);
+        ising_sim(parameters_type const & params);
 
         void update();
         void measure();
@@ -71,7 +71,7 @@ class ising_sim {
 
     protected:
 
-        parameters_type params;
+        parameters_type parameters;
         boost::variate_generator<boost::mt19937, boost::uniform_real<> > mutable random;
         observable_collection_type measurements;
 

@@ -20,7 +20,7 @@ if (ALPS_HAVE_PYTHON)
   python_add_module(pytools_c ${PYTOOLS_SOURCES})
 
   set(PYALPS_SOURCES pyalea_c pymcdata_c pytools_c pyngsparams_c pyngshdf5_c pyngsbase_c 
-      pyngsobservable_c pyngsobservables_c pyngsresult_c pyngsresults_c pyngsapi_c pyngsrandom_c
+      pyngsobservable_c pyngsobservables_c pyngsresult_c pyngsresults_c pyngsapi_c pyngsrandom01_c
   )
 
   set(PYNGSPARAMS_SOURCES ../../src/alps/ngs/python/params.cpp)
@@ -31,7 +31,7 @@ if (ALPS_HAVE_PYTHON)
   set(PYNGSRESULT_SOURCES ../../src/alps/ngs/python/result.cpp)
   set(PYNGSRESULTS_SOURCES ../../src/alps/ngs/python/results.cpp)
   set(PYNGSAPI_SOURCES ../../src/alps/ngs/python/api.cpp)
-  set(PYNGSRANDOM_SOURCES ../../src/alps/ngs/python/random.cpp)
+  set(PYNGSRANDOM01_SOURCES ../../src/alps/ngs/python/random01.cpp)
 
   python_add_module(pyngsparams_c ${PYNGSPARAMS_SOURCES})
   python_add_module(pyngshdf5_c ${PYNGSHDF5_SOURCES})
@@ -41,7 +41,7 @@ if (ALPS_HAVE_PYTHON)
   python_add_module(pyngsresult_c ${PYNGSRESULT_SOURCES})
   python_add_module(pyngsresults_c ${PYNGSRESULTS_SOURCES})
   python_add_module(pyngsapi_c ${PYNGSAPI_SOURCES})
-  python_add_module(pyngsrandom_c ${PYNGSRANDOM_SOURCES})
+  python_add_module(pyngsrandom01_c ${PYNGSRANDOM01_SOURCES})
 
   FOREACH (name ${PYALPS_SOURCES})
     if(BUILD_SHARED_LIBS)

@@ -56,8 +56,8 @@ class ising_export : public ising_sim {
             return ising_sim::run(boost::bind(&ising_export::run_helper, this, stop_callback));
         }
 
-        double get_random() {
-            return ising_sim::random();
+        alps::random01 & get_random() {
+            return ising_sim::random;
         }
 
         parameters_type & get_parameters() {
@@ -78,14 +78,14 @@ BOOST_PYTHON_MODULE(ising_c) {
           "sim",
           boost::python::init<ising_export::parameters_type const &>()
     )
-        .add_property("random", &ising_export::get_random)
+        .add_property("random", boost::python::make_function(&ising_export::get_random, boost::python::return_internal_reference<>()))
         .add_property("parameters", boost::python::make_function(&ising_export::get_parameters, boost::python::return_internal_reference<>()))
         .def("fraction_completed", &ising_export::fraction_completed)
         .def("run", &ising_export::run)
         .def("resultNames", &ising_export::result_names)
         .def("unsavedResultNames", &ising_export::unsaved_result_names)
         .def("collectResults", &ising_export::collect_results, collect_results_overloads(boost::python::args("names")))
-//        .def("save", &ising_export::save) // TODO: implement
-//        .def("load", &ising_export::load) // TODO: implement
+        .def("save", static_cast<void(ising_export::*)(boost::filesystem::path const &)const>(&ising_export::save))
+        .def("load", static_cast<void(ising_export::*)(boost::filesystem::path const &)>(&ising_export::load))
     ;
 }

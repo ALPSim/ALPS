@@ -40,6 +40,7 @@
 #include <alps/ngs/cast.hpp>
 #include <alps/ngs/sleep.hpp>
 #include <alps/ngs/signal.hpp>
+#include <alps/ngs/random01.hpp>
 #include <alps/ngs/boost_mpi.hpp>
 #include <alps/ngs/short_print.hpp>
 #include <alps/ngs/thread_exceptions.hpp>

@@ -4,7 +4,7 @@
  #                                                                                 #
  # ALPS Libraries                                                                  #
  #                                                                                 #
- # Copyright (C) 2010 - 2012 by Lukas Gamper <gamperl@gmail.com>                   #
+ # Copyright (C) 2010 - 2013 by Lukas Gamper <gamperl@gmail.com>                   #
  #                      2012 by Troels F. Roennow <tfr@nanophysics.dk>             #
  #                                                                                 #
  # This software is part of the ALPS libraries, published under the ALPS           #
@@ -71,7 +71,7 @@ class mcbase(mcbase_impl):
 
 from pyngsapi_c import collectResults, saveResults
 
-from pyngsrandom_c import random01
+from pyngsrandom01_c import random01
 
 from pyngshdf5_c import hdf5_archive_impl
 

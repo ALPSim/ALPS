@@ -5,6 +5,7 @@
  * ALPS Libraries                                                                  *
  *                                                                                 *
  * Copyright (C) 2010 - 2013 by Lukas Gamper <gamperl@gmail.com>                   *
+ *                              Matthias Troyer <troyer@comp-phys.org>             *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -25,57 +26,22 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_NGS_MCBASE_HPP
-#define ALPS_NGS_MCBASE_HPP
+#define PY_ARRAY_UNIQUE_SYMBOL pyngsrandom_PyArrayHandle
 
-#include <alps/ngs.hpp>
+#include <alps/ngs/random01.hpp>
+#include <alps/ngs/boost_python.hpp>
 
-#include <boost/function.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
+#include <alps/python/make_copy.hpp>
 
-#include <vector>
-#include <string>
+BOOST_PYTHON_MODULE(pyngsrandom01_c) {
 
-class mcbase {
-
-    protected:
-
-        #ifdef ALPS_NGS_USE_NEW_ALEA
-            typedef alps::accumulator::accumulator_set observable_collection_type;
-        #else
-            typedef alps::mcobservables observable_collection_type;
-        #endif
-
-    public:
-
-        typedef alps::params parameters_type;
-        typedef alps::mcresults results_type;
-        typedef std::vector<std::string> result_names_type;
-
-        mcbase(parameters_type const & parameters);
-
-        virtual void update() = 0;
-        virtual void measure() = 0;
-        virtual double fraction_completed() const = 0;
-        bool run(boost::function<bool ()> const & stop_callback);
-
-        result_names_type result_names() const;
-        result_names_type unsaved_result_names() const;
-        results_type collect_results() const;
-        results_type collect_results(result_names_type const & names) const;
-
-        void save(boost::filesystem::path const & filename) const;
-        void load(boost::filesystem::path const & filename);
-        virtual void save(alps::hdf5::archive & ar) const = 0;
-        virtual void load(alps::hdf5::archive & ar) = 0;
-
-    protected:
-
-        parameters_type parameters;
-        alps::random01 mutable random;
-        observable_collection_type measurements;
-};
-
-#endif
+    boost::python::class_<alps::random01>(
+        "random01",
+        boost::python::init<boost::python::optional<int> >()
+    )
+        .def("__deepcopy__",  &alps::python::make_copy<alps::random01>)
+        .def("__call__", static_cast<alps::random01::result_type(alps::random01::*)()>(&alps::random01::operator()))
+        .def("save", &alps::random01::save)
+        .def("load", &alps::random01::load)
+    ;
+}
