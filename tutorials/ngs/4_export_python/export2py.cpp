@@ -29,63 +29,8 @@
 
 #include "ising.hpp"
 
-#include <alps/python/make_copy.hpp>
-#include <alps/random/mersenne_twister.hpp> // TODO: why do we need this?
-
-#include <boost/bind.hpp>
-#include <boost/python/return_internal_reference.hpp>
-
-#include <vector>
-#include <string>
-#include <iostream>
-#include <stdexcept>
-
-class ising_export : public ising_sim {
-
-    public:
-
-        ising_export(parameters_type const & parms)
-            : ising_sim(parms)
-        {}
-
-        results_type collect_results(result_names_type const & names = result_names_type()) {
-            return names.size() ? ising_sim::collect_results(names) : ising_sim::collect_results();
-        }
-
-        bool run(boost::python::object stop_callback) {
-            return ising_sim::run(boost::bind(&ising_export::run_helper, this, stop_callback));
-        }
-
-        alps::random01 & get_random() {
-            return ising_sim::random;
-        }
-
-        parameters_type & get_parameters() {
-            return ising_sim::parameters;
-        }
-
-    private:
-
-        bool run_helper(boost::python::object stop_callback) {
-            return boost::python::call<bool>(stop_callback.ptr());
-        }
-};
-
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(collect_results_overloads, collect_results, 0, 1)
+#include <alps/ngs/detail/export_sim_to_python.hpp>
 
 BOOST_PYTHON_MODULE(ising_c) {
-    boost::python::class_<ising_export>(
-          "sim",
-          boost::python::init<ising_export::parameters_type const &>()
-    )
-        .add_property("random", boost::python::make_function(&ising_export::get_random, boost::python::return_internal_reference<>()))
-        .add_property("parameters", boost::python::make_function(&ising_export::get_parameters, boost::python::return_internal_reference<>()))
-        .def("fraction_completed", &ising_export::fraction_completed)
-        .def("run", &ising_export::run)
-        .def("resultNames", &ising_export::result_names)
-        .def("unsavedResultNames", &ising_export::unsaved_result_names)
-        .def("collectResults", &ising_export::collect_results, collect_results_overloads(boost::python::args("names")))
-        .def("save", static_cast<void(ising_export::*)(boost::filesystem::path const &)const>(&ising_export::save))
-        .def("load", static_cast<void(ising_export::*)(boost::filesystem::path const &)>(&ising_export::load))
-    ;
+    ALPS_EXPORT_SIM_TO_PYTHON(sim, ising_sim);
 }

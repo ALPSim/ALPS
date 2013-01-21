@@ -27,6 +27,7 @@
 
 import pyalps.ngs as ngs
 import sys, time, traceback, getopt
+
 import ising
 
 if __name__ == '__main__':

@@ -44,7 +44,7 @@ def main(limit, resume, output):
     }))
 
     if resume == 't':
-        ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump'), 'r')
+        ar = ngs.h5ar(sim.parameters.valueOrDefault('DUMP', 'dump'), 'r')
         sim.load(ar)
         del ar
 
@@ -54,15 +54,15 @@ def main(limit, resume, output):
         start = time.time()
         sim.run(lambda: time.time() > start + int(limit))
 
-    p = sim.params
+    p = sim.parameters
 
-    ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump'), 'w')
+    ar = ngs.h5ar(sim.parameters.valueOrDefault('DUMP', 'dump'), 'w')
     sim.save(ar)
     del ar
 
     results = ngs.collectResults(sim)
     print results
-    ngs.saveResults(results, sim.params, ngs.h5ar(output, 'w'), "/simulation/results")
+    ngs.saveResults(results, sim.parameters, ngs.h5ar(output, 'w'), "/simulation/results")
 
 if __name__ == "__main__":
     apply(main, sys.argv[1:])
