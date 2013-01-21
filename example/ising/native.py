@@ -43,24 +43,24 @@ def main(limit, resume, output):
     }, mpi.world if mpi.size > 1 else None)
 
     if resume == 't':
-        ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump.h5'), 'r')
+        ar = ngs.h5ar(sim.paramters.valueOrDefault('DUMP', 'dump.h5'), 'r')
         sim.load(ar)
         del ar
 
     if limit == 0:
-        sim.run()
+        sim.run(lambda: False)
     else:
         start = time.time()
         sim.run(lambda: time.time() > start + int(limit))
 
-    ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump') + ('.' + str(mpi.rank) if mpi.size > 1 else ''), 'a')
+    ar = ngs.h5ar(sim.paramters.valueOrDefault('DUMP', 'dump') + ('.' + str(mpi.rank) if mpi.size > 1 else ''), 'a')
     sim.save(ar)
     del ar
 
     results = ngs.collectResults(sim)
     if mpi.rank == 0:
         print results
-        ngs.saveResults(results, sim.params, ngs.h5ar(output, 'a'), "/simulation/results")
+        ngs.saveResults(results, sim.paramters, ngs.h5ar(output, 'a'), "/simulation/results")
 
 if __name__ == "__main__":
     apply(main, sys.argv[1:])

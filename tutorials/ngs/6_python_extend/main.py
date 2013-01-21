@@ -4,7 +4,7 @@
  #                                                                                 #
  # ALPS Libraries                                                                  #
  #                                                                                 #
- # Copyright (C) 2010 - 2011 by Lukas Gamper <gamperl@gmail.com>                   #
+ # Copyright (C) 2010 - 2013 by Lukas Gamper <gamperl@gmail.com>                   #
  #                                                                                 #
  # This software is part of the ALPS libraries, published under the ALPS           #
  # Library License; you can use, redistribute it and/or modify it under            #
@@ -26,43 +26,50 @@
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import pyalps.ngs as ngs
-import numpy as np
+import sys, time, traceback, getopt
 import sys, time
 
-#TODO: enable mpi
+import ising
 
-import ngsising_c as ising
+if __name__ == '__main__':
 
-def main(limit, resume, output):
-    #implement nice argv parsing ...
+    try:
+        optlist, positional = getopt.getopt(sys.argv[1:], 'T:c')
+        args = dict(optlist)
+        try:
+            limit = float(args['-T'])
+        except KeyError:
+            limit = 0
+        resume = True if 'c' in args else False
+        outfile = positional[0]
+    except (IndexError, getopt.GetoptError):
+        print 'usage: [-T timelimit] [-c] outputfile'
+        exit()
 
-    sim = ising.sim(ngs.params({
+    sim = ising.sim({
         'L': 100,
-        'THERMALIZATION': 1000,
-        'SWEEPS': 10000,
+        'THERMALIZATION': 100,
+        'SWEEPS': 1000,
         'T': 2
-    }))
+    })
 
-    if resume == 't':
-        ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump'), 'r')
-        sim.load(ar)
-        del ar
+    if resume:
+        try:
+            with ngs.archive(outfile[0:outfile.rfind('.h5')] + '.clone0.h5', 'r') as ar:
+                sim.load(ar)
+        except ArchiveNotFound: pass
 
     if limit == 0:
         sim.run(lambda: False)
     else:
         start = time.time()
-        sim.run(lambda: time.time() > start + int(limit))
+        sim.run(lambda: time.time() > start + float(limit))
 
-    p = sim.params
-
-    ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump'), 'w')
-    sim.save(ar)
-    del ar
+    if resume:
+        with ngs.archive(outfile[0:outfile.rfind('.h5')] + '.clone0.h5', 'w') as ar:
+            ar['/'] = sim
 
     results = ngs.collectResults(sim)
     print results
-    ngs.saveResults(results, sim.params, ngs.h5ar(output, 'w'), "/simulation/results")
-
-if __name__ == "__main__":
-    apply(main, sys.argv[1:])
+    with ngs.archive(outfile, 'w') as ar: # TODO: how sould we name archive? ngs.hdf5.archive?
+        ngs.saveResults(results, sim.paramters, ar, "/simulation/results")

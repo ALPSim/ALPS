@@ -30,9 +30,11 @@
 #include "hyb.hpp"
 #include "hybevaluate.hpp"
 
+#include <alps/ngs/scheduler/mpi_adapter.hpp>
+
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
-typedef alps::mcmpisim<hybridization> sim_type;
+typedef alps::mpi_adapter<hybridization> sim_type;
 
 //stops the simulation if time > end_time or if signals received.
 bool stop_callback(boost::posix_time::ptime const & end_time) {
@@ -69,7 +71,7 @@ int main(int argc, char** argv){
       global_mpi_rank=c.rank();
 
       //initialize simulation (set up hybridization/hamiltonian/etc)
-      alps::mcmpisim<hybridization> s(parms, c);
+      alps::mpi_adapter<hybridization> s(parms, c);
       //run the simulation
       s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds((int)parms["MAX_TIME"])));
       //on the master: collect MC results and store them in file, then

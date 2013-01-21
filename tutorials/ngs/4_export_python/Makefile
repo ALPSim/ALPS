@@ -10,8 +10,8 @@ include $(ALPS_ROOT)/share/alps/include.mk
 
 all: ising_c
 
-ising_c: ising.o mcbase.o export2py.o
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -bundle -o $@.so ising.o mcbase.o export2py.o $(LDFLAGS) $(LIBS)
+ising_c: ising.o export2py.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -bundle -o $@.so ising.o export2py.o $(LDFLAGS) $(LIBS)
 run:
 	PYTHONPATH=$PYTHONPATH:. $(ALPS_ROOT)/bin/alpspython main.py -T 10 result.h5
 clean:

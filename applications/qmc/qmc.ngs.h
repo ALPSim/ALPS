@@ -167,34 +167,34 @@ private:
 template <class G, class StateType>
 qmcbase<G,StateType>::qmcbase(alps::hdf5::archive & ar, bool issymbolic)
   : super_type(ar,issymbolic)
-  , beta(this->params.defined("Beta") ? static_cast<double>(this->params["Beta"])
-      :  (this->params.defined("beta") ? static_cast<double>(this->params["beta"])
-        : (this->params.defined("BETA") ? static_cast<double>(this->params["BETA"])
-           : (this->params.defined("T") ? 1./static_cast<double>(this->params["T"])
-              : (this->params.defined("TEMPERATURE") ? 1./static_cast<double>(this->params["TEMPERATURE"])
-                 : 1./static_cast<double>(this->params["temperature"])))))),
+  , beta(this->parameters.defined("Beta") ? static_cast<double>(this->parameters["Beta"])
+      :  (this->parameters.defined("beta") ? static_cast<double>(this->parameters["beta"])
+        : (this->parameters.defined("BETA") ? static_cast<double>(this->parameters["BETA"])
+           : (this->parameters.defined("T") ? 1./static_cast<double>(this->parameters["T"])
+              : (this->parameters.defined("TEMPERATURE") ? 1./static_cast<double>(this->parameters["TEMPERATURE"])
+                 : 1./static_cast<double>(this->parameters["temperature"])))))),
     is_signed_(this->has_sign_problem()),
     is_spin_model_(false),
     is_charge_model_(false),
     measure_local_density_(false),
     measure_local_magnetization_(false),
-    measure_site_type_density_(this->params["MEASURE[Site Type Density]"] | false),
+    measure_site_type_density_(this->parameters["MEASURE[Site Type Density]"] | false),
     measure_local_compressibility_(false),
     measure_site_compressibility_(false),
-    measure_correlations_(this->params["MEASURE[Correlations]"] | false),
-    measure_structure_factor_(this->params["MEASURE[Structure Factor]"] | false),
-    measure_green_function_(this->params["MEASURE[Green Function]"] | false),
-    measure_bond_type_stiffness_(this->params["MEASURE[Bond Type Stiffness]"] | false),
-    measure_CBS_order_(this->params["MEASURE[CBS Order]"] | false),
+    measure_correlations_(this->parameters["MEASURE[Correlations]"] | false),
+    measure_structure_factor_(this->parameters["MEASURE[Structure Factor]"] | false),
+    measure_green_function_(this->parameters["MEASURE[Green Function]"] | false),
+    measure_bond_type_stiffness_(this->parameters["MEASURE[Bond Type Stiffness]"] | false),
+    measure_CBS_order_(this->parameters["MEASURE[CBS Order]"] | false),
     num_site_types_(alps::maximum_vertex_type(this->graph())+1),
     num_bond_types_(alps::maximum_edge_type(this->graph())+1)
 {
-  if (this->params.defined("INITIAL_SITE"))
-    measurement_origin_=static_cast<int>(this->params["INITIAL_SITE"]);
-  if (this->params.defined("RESTRICT_MEASUREMENTS[N]"))
-    restricted_particle_number.reset(static_cast<int>(this->params["RESTRICT_MEASUREMENTS[N]"]));
-  if (this->params.defined("RESTRICT_MEASUREMENTS[Sz]"))
-    restricted_magnetization.reset(static_cast<int>(this->params["RESTRICT_MEASUREMENTS[Sz]"]));
+  if (this->parameters.defined("INITIAL_SITE"))
+    measurement_origin_=static_cast<int>(this->parameters["INITIAL_SITE"]);
+  if (this->parameters.defined("RESTRICT_MEASUREMENTS[N]"))
+    restricted_particle_number.reset(static_cast<int>(this->parameters["RESTRICT_MEASUREMENTS[N]"]));
+  if (this->parameters.defined("RESTRICT_MEASUREMENTS[Sz]"))
+    restricted_magnetization.reset(static_cast<int>(this->parameters["RESTRICT_MEASUREMENTS[Sz]"]));
     
   if(beta<0)
     boost::throw_exception(

@@ -27,14 +27,14 @@
 
 import pyalps.ngs as ngs
 import numpy as np
-import sys, time, traceback, getopt
+import sys
 
 class sim:
 
     # TODO: how do we deal with typedefs?
     def __init__(self, params):
-        self.random = ngs.random01(params.valueOrDefault('SEED', 42))
-        self.parameters = params
+        self.parameters = ngs.params(params)
+        self.random = ngs.random01(self.parameters.valueOrDefault('SEED', 42))
         self.measurements = {
             'Energy':  ngs.createRealObservable('Energy'),
             'Magnetization': ngs.createRealObservable('Magnetization'),
@@ -43,11 +43,11 @@ class sim:
             'Correlations': ngs.createRealVectorObservable('Correlations')
         }
 
-        self.length = int(params['L'])
+        self.length = int(self.parameters['L'])
         self.sweeps = 0
-        self.thermalization_sweeps = long(params['THERMALIZATION'])
-        self.total_sweeps = long(params['SWEEPS'])
-        self.beta = 1. / float(params['T'])
+        self.thermalization_sweeps = long(self.parameters['THERMALIZATION'])
+        self.total_sweeps = long(self.parameters['SWEEPS'])
+        self.beta = 1. / float(self.parameters['T'])
         self.spins = np.array([(-x if self.random() < 0.5 else x) for x in np.ones(self.length)])
         
         self.realization = '0'
@@ -127,34 +127,33 @@ class sim:
             ar["measurements"] = self.measurements
 
             ar.set_context("checkpoint")
-            ar["length"] = self.length
             ar["sweeps"] = self.sweeps
-            ar["thermalization_sweeps"] = self.thermalization_sweeps
-            ar["beta"] = self.beta
             ar["spins"] = self.spins
             ar["engine"] = self.random
 
-            ar.set_context(context)
+            ar.set_context(context);
 
         except:
             traceback.print_exc(file=sys.stderr)
             raise
 
     def load(self,  ar):
-    
+
         try:
         
-            params.load(ar["/parameters"]) # TODO: do we want to load the parameters?
+            self.parameters.load(ar["/parameters"]) # TODO: do we want to load the parameters?
 
             context = ar.context
             ar.set_context("/simulation/realizations/0/clones/0")
             ar["measurements"] = self.measurements
 
+            self.length = int(parameters["L"]);
+            self.thermalization_sweeps = int(parameters["THERMALIZATION"]);
+            self.total_sweeps = int(parameters["SWEEPS"]);
+            self.beta = 1. / double(parameters["T"]);
+
             ar.set_context("checkpoint")
-            self.length = ar["length"]
             self.sweeps = ar["sweeps"]
-            self.thermalization_sweeps = ar["thermalization_sweeps"]
-            self.beta = ar["beta"]
             self.spins = ar["spins"]
             self.random.load(ar["engine"])
 

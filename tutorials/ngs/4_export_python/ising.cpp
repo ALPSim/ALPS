@@ -29,13 +29,13 @@
 
 #include <boost/lambda/lambda.hpp>
 
-ising_sim::ising_sim(parameters_type const & params)
-    : mcbase(params)
-    , length(params["L"])
+ising_sim::ising_sim(parameters_type const & parms, std::size_t seed_offset)
+    : alps::mcbase(parms, seed_offset)
+    , length(parameters["L"])
     , sweeps(0)
-    , thermalization_sweeps(int(params["THERMALIZATION"]))
-    , total_sweeps(int(params["SWEEPS"]))
-    , beta(1. / double(params["T"]))
+    , thermalization_sweeps(int(parameters["THERMALIZATION"]))
+    , total_sweeps(int(parameters["SWEEPS"]))
+    , beta(1. / double(parameters["T"]))
     , spins(length)
 {
     for(int i = 0; i < length; ++i)

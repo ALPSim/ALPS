@@ -26,7 +26,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "ising.hpp"
-#include "parseargs.hpp"
 
 #include <alps/ngs.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
@@ -41,7 +40,7 @@
 int main(int argc, char *argv[]) {
 
     try {
-        parseargs options(argc, argv);
+        alps::parseargs options(argc, argv);
         std::string checkpoint_file = options.input_file.substr(0, options.input_file.find_last_of('.')) +  ".clone0.h5";
 
         alps::parameters_type<ising_sim>::type parameters;

@@ -44,8 +44,8 @@ class ising_export : public ising_sim {
 
     public:
 
-        ising_export(parameters_type const & params)
-            : ising_sim(params)
+        ising_export(parameters_type const & parms)
+            : ising_sim(parms)
         {}
 
         results_type collect_results(result_names_type const & names = result_names_type()) {

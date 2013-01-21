@@ -25,57 +25,28 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_NGS_MCBASE_HPP
-#define ALPS_NGS_MCBASE_HPP
+#ifndef ALPS_NGS_SCHEDULER_PARSEARGS_HPP
+#define ALPS_NGS_SCHEDULER_PARSEARGS_HPP
 
-#include <alps/ngs.hpp>
+#include <alps/ngs/config.hpp>
 
-#include <boost/function.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-
-#include <vector>
 #include <string>
 
-class mcbase {
+namespace alps {
 
-    protected:
+	struct ALPS_DECL parseargs {
+	    parseargs(int argc, char *argv[]);
 
-        #ifdef ALPS_NGS_USE_NEW_ALEA
-            typedef alps::accumulator::accumulator_set observable_collection_type;
-        #else
-            typedef alps::mcobservables observable_collection_type;
-        #endif
+	    bool resume;
 
-    public:
+	    std::size_t timelimit;
+	    std::size_t tmin;
+	    std::size_t tmax;
 
-        typedef alps::params parameters_type;
-        typedef alps::mcresults results_type;
-        typedef std::vector<std::string> result_names_type;
+	    std::string input_file;
+	    std::string output_file;
+	};
 
-        mcbase(parameters_type const & parameters);
-
-        virtual void update() = 0;
-        virtual void measure() = 0;
-        virtual double fraction_completed() const = 0;
-        bool run(boost::function<bool ()> const & stop_callback);
-
-        result_names_type result_names() const;
-        result_names_type unsaved_result_names() const;
-        results_type collect_results() const;
-        results_type collect_results(result_names_type const & names) const;
-
-        void save(boost::filesystem::path const & filename) const;
-        void load(boost::filesystem::path const & filename);
-        virtual void save(alps::hdf5::archive & ar) const = 0;
-        virtual void load(alps::hdf5::archive & ar) = 0;
-
-    protected:
-
-        parameters_type parameters;
-        alps::random01 mutable random;
-        observable_collection_type measurements;
-};
+}
 
 #endif

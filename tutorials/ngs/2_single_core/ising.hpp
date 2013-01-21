@@ -36,22 +36,20 @@
 #include <vector>
 #include <string>
 
-#include "mcbase.hpp"
-
-class ising_sim : public mcbase {
+class ALPS_DECL ising_sim : public alps::mcbase {
 
     public:
         
-        ising_sim(parameters_type const & params);
+        ising_sim(parameters_type const & parms, std::size_t seed_offset = 0);
 
         virtual void update();
         virtual void measure();
         virtual double fraction_completed() const;
 
-        using mcbase::save;
+        using alps::mcbase::save;
         virtual void save(alps::hdf5::archive & ar) const;
 
-        using mcbase::load;
+        using alps::mcbase::load;
         virtual void load(alps::hdf5::archive & ar);
 
     private:

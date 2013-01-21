@@ -27,7 +27,7 @@
 #include "interaction_expansion.hpp"
 #include "fouriertransform.h"
 
-typedef alps::mcmpisim<HubbardInteractionExpansion> sim_type;
+#include <alps/ngs/scheduler/mpi_adapter.hpp>
 
 bool stop_callback(boost::posix_time::ptime const & end_time) {
   static alps::ngs::signal signal;
@@ -42,7 +42,7 @@ int main(int argc, char** argv)
     boost::mpi::environment env(argc, argv);
     boost::mpi::communicator c;
     alps::parameters_type<HubbardInteractionExpansion>::type parms(alps::hdf5::archive(options.input_file, "r"));
-    alps::mcmpisim<HubbardInteractionExpansion> s(parms, c);
+    alps::mpi_adapter<HubbardInteractionExpansion> s(parms, c);
     if(options.time_limit!=0)
       throw std::invalid_argument("time limit is passed in the parameter file!");
     if(!parms.defined("MAX_TIME")) throw std::runtime_error("parameter MAX_TIME is not defined. How long do you want to run the code for? (in seconds)");

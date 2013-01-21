@@ -38,7 +38,7 @@
 #include <vector>
 #include <string>
 
-class ising_sim {
+class ALPS_DECL ising_sim {
 
     #ifdef ALPS_NGS_USE_NEW_ALEA
         typedef alps::accumulator::accumulator_set observable_collection_type;

@@ -64,10 +64,7 @@ from pyngsresult_c import observable2result #remove this with new ALEA!
 from pyngsresults_c import results
 results.__bases__ = (MutableMapping, ) + results.__bases__
 
-from pyngsbase_c import mcbase_impl
-class mcbase(mcbase_impl):
-    def run(self, callback = lambda: True):
-        mcbase_impl.run(self, callback)
+from pyngsbase_c import mcbase
 
 from pyngsapi_c import collectResults, saveResults
 

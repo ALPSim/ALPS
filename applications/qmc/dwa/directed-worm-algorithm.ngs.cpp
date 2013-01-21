@@ -73,7 +73,7 @@ void
       using alps::numeric::operator<<;
       out << "Parameters\n"
           << "==========\n\n"
-          << params
+          << parameters
           << "\n\n";
       out << "Simulation\n"
           << "==========\n\n"
@@ -86,7 +86,7 @@ void
           << "\n\n";
       out << "Lattice\n"
           << "=======\n\n"
-          << "Name              : " << params["LATTICE"]                        << "\n"
+          << "Name              : " << parameters["LATTICE"]                    << "\n"
           << "Dimension         : " << dimension()                              << "\n"
           << "Total Sites/Bonds : " << num_sites() << "\t/\t" << num_bonds()    << "\n"
           << "Periodic          : " << is_periodic_ << "\n"
@@ -125,26 +125,26 @@ directed_worm_algorithm
     , _sweep_failure_counter       (0)
     , _propagation_counter         (0)
     , _propagation_failure_counter (0)
-    , _total_sweeps                (this->params["TOTAL_SWEEPS"] | 10000000)
-    , _sweep_per_measurement       (this->params["SKIP"] | 1)
+    , _total_sweeps                (this->parameters["TOTAL_SWEEPS"] | 10000000)
+    , _sweep_per_measurement       (this->parameters["SKIP"] | 1)
     // regarding lattice
     , is_periodic_ (std::find((this->lattice().boundary()).begin(), (this->lattice().boundary()).end(), "open") == (this->lattice().boundary()).end())
-    , num_component_momenta_ (1 + static_cast<int>(this->params["MOMENTUM_EXTENT"] | 10))
+    , num_component_momenta_ (1 + static_cast<int>(this->parameters["MOMENTUM_EXTENT"] | 10))
     // regarding worldline
     , wl (num_sites())
     // regarding experiment
-    , finite_tof (is_periodic_ ? false : (0. != static_cast<double>(this->params["time_of_flight"] | 0.)))
+    , finite_tof (is_periodic_ ? false : (0. != static_cast<double>(this->parameters["time_of_flight"] | 0.)))
     // regarding measurements
-    , measure_simulation_speed_     (this->params["MEASURE[Simulation Speed]"] | false)
-    , measure_winding_number_       (is_periodic_ ? static_cast<bool>(this->params["MEASURE[Winding Number]"] | false) : false)
-    , measure_local_density_        (this->is_charge_model_ ? static_cast<bool>(this->params["MEASURE[Local Density]"] | false) : false)
-    , measure_local_density2_       (this->is_charge_model_ ? static_cast<bool>(this->params["MEASURE[Local Density^2]"] | false) : false)
-    , measure_local_magnetization_  (this->is_spin_model_ ? static_cast<bool>(this->params["MEASURE[Local Magnetization]"] | false) : false)
-    , measure_local_magnetization2_ (this->is_spin_model_ ? static_cast<bool>(this->params["MEASURE[Local Magnetization^2]"] | false) : false)
-    , measure_local_energy_         (this->params["MEASURE[Local Energy]"] | false)
-    , measure_green_function_       (is_periodic_ ? static_cast<bool>(this->params["MEASURE[Green Function]"] | false) : false)
-    , measure_momentum_density_     (this->params["MEASURE[Momentum Density]"] | false)
-    , measure_tof_image_            (finite_tof ? static_cast<bool>(this->params["MEASURE[TOF Image]"] | false) : false)
+    , measure_simulation_speed_     (this->parameters["MEASURE[Simulation Speed]"] | false)
+    , measure_winding_number_       (is_periodic_ ? static_cast<bool>(this->parameters["MEASURE[Winding Number]"] | false) : false)
+    , measure_local_density_        (this->is_charge_model_ ? static_cast<bool>(this->parameters["MEASURE[Local Density]"] | false) : false)
+    , measure_local_density2_       (this->is_charge_model_ ? static_cast<bool>(this->parameters["MEASURE[Local Density^2]"] | false) : false)
+    , measure_local_magnetization_  (this->is_spin_model_ ? static_cast<bool>(this->parameters["MEASURE[Local Magnetization]"] | false) : false)
+    , measure_local_magnetization2_ (this->is_spin_model_ ? static_cast<bool>(this->parameters["MEASURE[Local Magnetization^2]"] | false) : false)
+    , measure_local_energy_         (this->parameters["MEASURE[Local Energy]"] | false)
+    , measure_green_function_       (is_periodic_ ? static_cast<bool>(this->parameters["MEASURE[Green Function]"] | false) : false)
+    , measure_momentum_density_     (this->parameters["MEASURE[Momentum Density]"] | false)
+    , measure_tof_image_            (finite_tof ? static_cast<bool>(this->parameters["MEASURE[TOF Image]"] | false) : false)
   {
     // lattice enhancement
     using alps::numeric::operator*;
@@ -154,7 +154,7 @@ directed_worm_algorithm
     // further initiation of worldlines
     try {
       std::string input_worldlines_file = ar.get_filename().substr(0,ar.get_filename().find_last_of(".")) + ".worldlines.h5";
-      alps::hdf5::archive ar(params["WORLDLINES"] | static_cast<std::string>(input_worldlines_file));
+      alps::hdf5::archive ar(parameters["WORLDLINES"] | static_cast<std::string>(input_worldlines_file));
       wl.load(ar);
     }
     catch(...) {
@@ -169,7 +169,7 @@ directed_worm_algorithm
 
     try {
       std::string input_measurements_file = ar.get_filename().substr(0,ar.get_filename().find_last_of(".")) + ".measurements.h5";
-      alps::hdf5::archive ar(params["MEASUREMENTS"] | static_cast<std::string>(input_measurements_file));
+      alps::hdf5::archive ar(parameters["MEASUREMENTS"] | static_cast<std::string>(input_measurements_file));
       ar >> alps::make_pvp("/simulation/results", measurements);
     }
     catch(...) {
@@ -210,7 +210,7 @@ void
       ar << alps::make_pvp("/simulation/worldlines", wl);
 
       // Parameters
-      ar << alps::make_pvp("/parameters", params);
+      ar << alps::make_pvp("/parameters", parameters);
 
       // Simulation results
       ar << alps::make_pvp("/simulation/results", measurements);
@@ -359,7 +359,7 @@ void
       // phase and phase lookup table
       if (finite_tof)
       {
-        std::vector<double> inverse_tof = std::vector<double>(dimension(), 1./static_cast<double>(params["time_of_flight"]));
+        std::vector<double> inverse_tof = std::vector<double>(dimension(), 1./static_cast<double>(parameters["time_of_flight"]));
         phase_lookup.reserve(num_sites());
         for (unsigned int site=0; site<num_sites(); ++site) 
           phase_lookup.push_back(std::inner_product(inverse_tof.begin(), inverse_tof.end(), (alps::numeric::sq(position(site))).begin(), 0.));

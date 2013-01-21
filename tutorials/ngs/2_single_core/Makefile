@@ -10,8 +10,8 @@ include $(ALPS_ROOT)/share/alps/include.mk
 
 all: ising
 
-ising: ising.o mcbase.o parseargs.o main.o
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ ising.o mcbase.o parseargs.o main.o $(LDFLAGS) $(LIBS)
+ising: ising.o main.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ ising.o main.o $(LDFLAGS) $(LIBS)
 run:
 	./ising -T 15 param.txt
 clean:

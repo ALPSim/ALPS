@@ -25,57 +25,46 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_NGS_MCBASE_HPP
-#define ALPS_NGS_MCBASE_HPP
+#include <alps/ngs/scheduler/parseargs.hpp>
 
-#include <alps/ngs.hpp>
+#include <boost/program_options.hpp>
 
-#include <boost/function.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
+#include <sstream>
+#include <iostream>
 
-#include <vector>
-#include <string>
+namespace alps {
 
-class mcbase {
+    parseargs::parseargs(int argc, char *argv[]) {
+        boost::program_options::options_description options("Options");
+        options.add_options()
+            ("continue,c", "load simulation from checkpoint")
+            ("timelimit,T", boost::program_options::value<std::size_t>(&timelimit)->default_value(0), "time limit for the simulation")
+            ("Tmin,i", boost::program_options::value<std::size_t>(&tmin)->default_value(1), "minimum time to check if simulation has finished")
+            ("Tmax,x", boost::program_options::value<std::size_t>(&tmax)->default_value(600), "maximum time to check if simulation has finished")
+            ("inputfile", boost::program_options::value<std::string>(&input_file), "input file in hdf5 or xml format")
+            ("outputfile", boost::program_options::value<std::string>(&output_file)->default_value(""), "output file in hdf5 format")
+        ;
+        boost::program_options::positional_options_description positional;
+        positional
+            .add("inputfile", 1)
+            .add("outputfile", 1)
+        ;
 
-    protected:
+        try {
+            boost::program_options::variables_map variables;
+            boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(options).positional(positional).run(), variables);
+            boost::program_options::notify(variables);
 
-        #ifdef ALPS_NGS_USE_NEW_ALEA
-            typedef alps::accumulator::accumulator_set observable_collection_type;
-        #else
-            typedef alps::mcobservables observable_collection_type;
-        #endif
+            resume = variables.count("continue");
+            if (output_file.empty())
+                output_file = input_file.substr(0, input_file.find_last_of('.')) +  ".out.h5";
+        } catch (...) {
+    		std::stringstream ss;
+            ss << "usage: [-T timelimit] [-i tmin] [-x tmax] [-c] inputfile [outputfile]" << std::endl
+               << options << std::endl;
+            std::cerr << ss.str();
+            std::abort();
+        }
+    }
 
-    public:
-
-        typedef alps::params parameters_type;
-        typedef alps::mcresults results_type;
-        typedef std::vector<std::string> result_names_type;
-
-        mcbase(parameters_type const & parameters);
-
-        virtual void update() = 0;
-        virtual void measure() = 0;
-        virtual double fraction_completed() const = 0;
-        bool run(boost::function<bool ()> const & stop_callback);
-
-        result_names_type result_names() const;
-        result_names_type unsaved_result_names() const;
-        results_type collect_results() const;
-        results_type collect_results(result_names_type const & names) const;
-
-        void save(boost::filesystem::path const & filename) const;
-        void load(boost::filesystem::path const & filename);
-        virtual void save(alps::hdf5::archive & ar) const = 0;
-        virtual void load(alps::hdf5::archive & ar) = 0;
-
-    protected:
-
-        parameters_type parameters;
-        alps::random01 mutable random;
-        observable_collection_type measurements;
-};
-
-#endif
+}

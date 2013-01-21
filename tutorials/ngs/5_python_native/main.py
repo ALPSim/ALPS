@@ -44,12 +44,12 @@ if __name__ == '__main__':
         print 'usage: [-T timelimit] [-c] outputfile'
         exit()
 
-    sim = ising.sim(ngs.params({
+    sim = ising.sim({
         'L': 100,
         'THERMALIZATION': 100,
         'SWEEPS': 1000,
         'T': 2
-    }))
+    })
 
     if resume:
         try:

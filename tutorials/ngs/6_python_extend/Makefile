@@ -8,11 +8,7 @@ ALPS_ROOT = /opt/alps
 
 include $(ALPS_ROOT)/share/alps/include.mk
 
-all: ising
-
-ising: ising.o main.o
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ ising.o main.o $(LDFLAGS) $(LIBS)
 run:
-	$(MPIEXEC) -np 4 ./ising -T 15 -i 1 -x 3 param.txt
+	PYTHONPATH=$PYTHONPATH:. $(ALPS_ROOT)/bin/alpspython main.py -T 10 result.h5
 clean:
-	$(RM) $(RMFLAGS) *.o ising param.clone*.h5 param.out.h5
+	$(RM) $(RMFLAGS) result.h5

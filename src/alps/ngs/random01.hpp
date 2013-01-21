@@ -40,13 +40,13 @@ namespace alps {
             : boost::variate_generator<boost::mt19937, boost::uniform_01<double> >(boost::mt19937(seed), boost::uniform_01<double>())
         {}
 
-        void save(alps::hdf5::archive & ar) const {
+        void save(alps::hdf5::archive & ar) const { // TODO: move this to hdf5 archive!
             std::ostringstream os;
             os << this->engine();
             ar["engine"] << os.str();
         }
 
-        void load(alps::hdf5::archive & ar) {
+        void load(alps::hdf5::archive & ar) { // TODO: move this to hdf5 archive!
             std::string state;
             ar["engine"] >> state;
             std::istringstream is(state);
