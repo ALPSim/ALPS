@@ -27,7 +27,7 @@
 
 #include "maxent.hpp"
 
-
+/*
 
 alps::scheduler::Task* MaxEntFactory::make_task(const alps::ProcessList& w, 
                  const boost::filesystem::path& fn) const
@@ -50,11 +50,37 @@ void MaxEntFactory::print_copyright(std::ostream& out) const
       << "  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).\n\n";
 }
 
+*/
+
+bool stop_callback(boost::posix_time::ptime const & end_time) {
+    static alps::ngs::signal signal;
+    return !signal.empty() || boost::posix_time::second_clock::local_time() > end_time;
+}
 
 
+#ifdef BUILD_PYTHON_MODULE
+//compile it as a python module (requires boost::python library)
+using namespace boost::python;
 
+void run_it(boost::python::dict parms_){
+    alps::parameters_type<MaxEntSimulation>::type parms(parms_);
+    std::string out_file = boost::lexical_cast<std::string>(parms["BASENAME"]|"results")+std::string(".out.h5");
+#else
 int main(int argc, char** argv)
 {
+  alps::mcoptions options(argc, argv);
+    
+  alps::parameters_type<MaxEntSimulation>::type parms(alps::hdf5::archive(options.input_file));
+  
+    std::string out_file(boost::lexical_cast<std::string>(parms["BASENAME"]|options.output_file)+std::string(".out.h5"));
+//    std::cout << out_file << std::endl;
+#endif
+  MaxEntSimulation my_sim(parms,out_file); // creat a simulation
+  my_sim.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds((int)(parms["MAX_TIME"]|60)))); // run the simulation
+#ifdef BUILD_PYTHON_MODULE
+  return;
+#else
+/*
 #ifndef BOOST_NO_EXCEPTIONS
   try {
 #endif
@@ -70,4 +96,15 @@ int main(int argc, char** argv)
     return -2;
   }
 #endif
+*/
+  return 0;
+#endif
 }
+    
+#ifdef BUILD_PYTHON_MODULE
+    BOOST_PYTHON_MODULE(maxent)
+    {
+        def("AnalyticContinuation",run_it);//define python-callable run method
+    };
+#endif
+

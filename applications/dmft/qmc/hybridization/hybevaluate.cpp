@@ -273,14 +273,6 @@ void evaluate_freq(const alps::results_type<hybridization>::type &results,
     data_path.str("");
     data_path << "/F_omega/"<<i<< "/mean/error";
     solver_output<<alps::make_pvp(data_path.str(),err);
-    data_path.str("");
-    data_path << "/S_omega/"<<i<< "/mean/error";
-    for (int k=0;k<N_w;k++) {
-       double x1 = (std::abs(err_g_re[k]/real(G_omega(k,0,0,i)))+std::abs(err_f_re[k]/real(F_omega(k,0,0,i))))*std::abs(real(S_omega(k,0,0,i))),
-              x2 = (std::abs(err_g_im[k]/imag(G_omega(k,0,0,i)))+std::abs(err_f_im[k]/imag(F_omega(k,0,0,i))))*std::abs(imag(S_omega(k,0,0,i)));
-       err[k] = std::complex<double>(x1,x2);
-    }
-    solver_output<<alps::make_pvp(data_path.str(),err);
   }
 
     

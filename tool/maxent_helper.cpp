@@ -35,7 +35,7 @@
 #include <boost/numeric/bindings/upper.hpp>
 #include <boost/numeric/bindings/lower.hpp>
 
-
+/*
 MaxEntHelper::MaxEntHelper(const alps::Parameters& p) : 
 MaxEntParameters(p) , def_(nfreq())
 {
@@ -47,6 +47,20 @@ MaxEntParameters(p) , def_(nfreq())
   out.open("deltaOmega.dat");
   for (int i=0; i<nfreq(); ++i)
     out << i<<" "<<delta_omega(i) << " "<<def_[i]<<std::endl;
+}
+ */
+
+MaxEntHelper::MaxEntHelper(const alps::params& p) :
+MaxEntParameters(p) , def_(nfreq())
+{
+    for (int i=0; i<nfreq(); ++i)
+        def_[i] = MaxEntParameters::Default().D(omega_coord(i)) * delta_omega(i);
+    //std::cout<<"sum of def: "<<sum(def_)<<std::endl;
+    def_ /= sum(def_);
+    std::ofstream out;
+    out.open("deltaOmega.dat");
+    for (int i=0; i<nfreq(); ++i)
+        out << i<<" "<<delta_omega(i) << " "<<def_[i]<<std::endl;
 }
 
 
