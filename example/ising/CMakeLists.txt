@@ -77,7 +77,8 @@ if (ALPS_BUILD_EXAMPLES)
 
     endif(MPI_FOUND)
 
-    if (ALPS_HAVE_PYTHON)
+# TODO: use mcbase_ng and not mcbase_ng
+    if (ALPS_HAVE_PYTHON AND DISABLE_SINCE_MCBASE_NG_IS_NOT_EXPORTED)
 
         set(ALPS_SHARED_CPPFLAGS ALPS_EXPORTS=1)
         set(ALPS_STATIC_CPPFLAGS "")
@@ -132,7 +133,7 @@ if (ALPS_BUILD_EXAMPLES)
 
         endif(MPI_FOUND)
 
-    endif (ALPS_HAVE_PYTHON)
+    endif (ALPS_HAVE_PYTHON AND DISABLE_SINCE_MCBASE_NG_IS_NOT_EXPORTED)
 
     add_subdirectory(simple)
 

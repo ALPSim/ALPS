@@ -30,26 +30,10 @@
 
 #include "ising.hpp"
 
-#include <alps/ngs/boost_python.hpp>
-
-#include <alps/python/make_copy.hpp>
-
-#include <boost/bind.hpp>
-#include <boost/python/dict.hpp>
-#include <boost/python/wrapper.hpp>
-#include <boost/python/return_internal_reference.hpp>
+#include <alps/ngs/detail/export_sim_to_python.hpp>
 
 BOOST_PYTHON_MODULE(ngsising_c) {
-	boost::python::class_<ising_sim, boost::noncopyable, boost::python::bases<alps::mcbase_ng> >(
-	      "sim" ,
-	      boost::python::init<ising_sim::parameters_type const &, boost::python::optional<std::size_t> >()
-	)
-	    .add_property("params", boost::python::make_function(
-	        static_cast<ising_sim::parameters_type &(ising_sim::*)()>(&ising_sim::get_params), boost::python::return_internal_reference<>()
-	     ))
-	    .def("run", static_cast<bool(ising_sim::*)(boost::python::object)>(&ising_sim::run))
-	    .def("random", &ising_sim::get_random)
-	    .def("save", static_cast<void(ising_sim::*)(alps::hdf5::archive &) const>(&ising_sim::save))
-	    .def("load", static_cast<void(ising_sim::*)(alps::hdf5::archive &)>(&ising_sim::load))
-	;
+    ALPS_EXPORT_SIM_TO_PYTHON(sim, ising_sim)
+        .add_property("done", &ising_sim::fraction_completed)
+    ;
 }
