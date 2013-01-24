@@ -126,12 +126,12 @@ ising_sim::results_type ising_sim::collect_results(result_names_type const & nam
 
 void ising_sim::save(boost::filesystem::path const & filename) const {
     alps::hdf5::archive ar(filename, "w");
-    ar << *this;
+    ar["/"] << *this;
 }
 
 void ising_sim::load(boost::filesystem::path const & filename) {
     alps::hdf5::archive ar(filename);
-    ar >> *this;
+    ar["/"] >> *this;
 }
 
 void ising_sim::save(alps::hdf5::archive & ar) const {

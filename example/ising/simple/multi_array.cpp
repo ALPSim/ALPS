@@ -87,12 +87,12 @@ class multi_array_sim {
 
         void save(boost::filesystem::path const & filename) const {
             alps::hdf5::archive ar(filename, "w");
-            ar << *this;
+            ar["/"] << *this;
         }
 
         void load(boost::filesystem::path const & filename) {
             alps::hdf5::archive ar(filename);
-            ar >> *this;
+            ar["/"] >> *this;
         }
 
         bool run(boost::function<bool ()> const & stop_callback) {

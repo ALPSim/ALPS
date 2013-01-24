@@ -228,7 +228,7 @@ inline T abs (const TinyVector<T,N>& x)
 }
 
 template <class T, int N>
-std::ostream operator<<  (std::ostream& os, const TinyVector<T,N>& x)
+std::ostream & operator<<  (std::ostream& os, const TinyVector<T,N>& x)
 {
   os << "(";
   for (int i=0;i<N;++i)

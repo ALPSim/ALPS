@@ -124,12 +124,12 @@ class ising_sim {
 
         void save(boost::filesystem::path const & filename) const {
             alps::hdf5::archive ar(filename, "w");
-            ar << *this;
+            ar["/"] << *this;
         }
 
         void load(boost::filesystem::path const & filename) {
             alps::hdf5::archive ar(filename);
-            ar >> *this;
+            ar["/"] >> *this;
         }
 
         // TODO: why do we need the callback?
