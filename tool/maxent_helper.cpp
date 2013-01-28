@@ -242,5 +242,21 @@ double MaxEntHelper::entropy(const vector_type& A) const
   return S;
 }
 
+MaxEntHelper::vector_type MaxEntHelper::PrincipalValue(const vector_type &w,const vector_type &a) const
+{
+    int N = w.size();
+    vector_type r(N);
+    for (int i=2;i<N-2;i++) {
+      double scr = -a[i]*std::log((w[i]-w[i+1])/(w[i]-w[i-1]));
+      for (int j=0;j<i-2;j++) scr -= 0.5*(a[j]+a[j+1])*std::log((w[i]-w[j+1])/(w[i]-w[j]));
+      for (int j=i+1;j<N-2;j++) scr -= 0.5*(a[j]+a[j+1])*std::log((w[i]-w[j+1])/(w[i]-w[j]));
+      r[i] = scr;
+    }
+    r[0] = w[2]*r[2]/w[0];
+    r[1] = w[2]*r[2]/w[1];
+    r[N-2] = w[N-3]*r[N-3]/w[N-2];
+    r[N-1] = w[N-3]*r[N-3]/w[N-1];
+    return r;
+}
 
 

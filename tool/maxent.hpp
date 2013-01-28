@@ -75,6 +75,7 @@ public :
   vector_type transform_into_singular_space(vector_type A) const;
   vector_type transform_into_real_space(vector_type u) const;
   vector_type get_spectrum(const vector_type& u) const;
+  vector_type PrincipalValue(const vector_type &w,const vector_type &a) const;
   matrix_type left_side(const vector_type& u) const;
   vector_type right_side(const vector_type& u) const;
   double step_length(const vector_type& delta, const vector_type& u) const;
