@@ -1,5 +1,4 @@
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
- #                                                                                 #
  # ALPS Project: Algorithms and Libraries for Physics Simulations                  #
  #                                                                                 #
  # ALPS Libraries                                                                  #
@@ -22,7 +21,6 @@
  # FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,     #
  # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER     #
  # DEALINGS IN THE SOFTWARE.                                                       #
- #                                                                                 #
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import pyalps.ngs as ngs
@@ -147,10 +145,10 @@ class sim:
             ar.set_context("/simulation/realizations/0/clones/0")
             ar["measurements"] = self.measurements
 
-            self.length = int(parameters["L"]);
-            self.thermalization_sweeps = int(parameters["THERMALIZATION"]);
-            self.total_sweeps = int(parameters["SWEEPS"]);
-            self.beta = 1. / double(parameters["T"]);
+            self.length = int(self.parameters["L"]);
+            self.thermalization_sweeps = int(self.parameters["THERMALIZATION"]);
+            self.total_sweeps = int(self.parameters["SWEEPS"]);
+            self.beta = 1. / double(self.parameters["T"]);
 
             ar.set_context("checkpoint")
             self.sweeps = ar["sweeps"]

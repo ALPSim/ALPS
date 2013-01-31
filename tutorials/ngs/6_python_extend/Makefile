@@ -11,4 +11,4 @@ include $(ALPS_ROOT)/share/alps/include.mk
 run:
 	PYTHONPATH=$PYTHONPATH:. $(ALPS_ROOT)/bin/alpspython main.py -T 10 result.h5
 clean:
-	$(RM) $(RMFLAGS) result.h5
+	$(RM) $(RMFLAGS) *.pyc result.clone0.h5 result.h5

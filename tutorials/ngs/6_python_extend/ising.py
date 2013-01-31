@@ -1,10 +1,9 @@
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
- #                                                                                 #
  # ALPS Project: Algorithms and Libraries for Physics Simulations                  #
  #                                                                                 #
  # ALPS Libraries                                                                  #
  #                                                                                 #
- # Copyright (C) 2010 - 2011 by Lukas Gamper <gamperl@gmail.com>                   #
+ # Copyright (C) 2010 - 2013 by Lukas Gamper <gamperl@gmail.com>                   #
  #                                                                                 #
  # This software is part of the ALPS libraries, published under the ALPS           #
  # Library License; you can use, redistribute it and/or modify it under            #
@@ -22,7 +21,6 @@
  # FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,     #
  # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER     #
  # DEALINGS IN THE SOFTWARE.                                                       #
- #                                                                                 #
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import pyalps.ngs as ngs
@@ -82,18 +80,9 @@ class sim(ngs.mcbase):
     def save(self, ar):
     
         try:
-
-            ar["/parameters"] = self.parameters
-            context = ar.context
-            ar.set_context("/simulation/realizations/0/clones/0")
-            ar["measurements"] = self.measurements
-
-            ar.set_context("checkpoint")
-            ar["sweeps"] = self.sweeps
-            ar["spins"] = self.spins
-            ar["engine"] = self.random
-
-            ar.set_context(context);
+            ngs.mcbase.save(self, ar)
+            ar["/simulation/realizations/0/clones/0/checkpoint/sweeps"] = self.sweeps
+            ar["/simulation/realizations/0/clones/0/checkpoint/spins"] = self.spins
 
         except:
             traceback.print_exc(file=sys.stderr)
@@ -102,24 +91,15 @@ class sim(ngs.mcbase):
     def load(self,  ar):
 
         try:
-        
-            self.parameters.load(ar["/parameters"]) # TODO: do we want to load the parameters?
+            ngs.mcbase.load(self, ar)
 
-            context = ar.context
-            ar.set_context("/simulation/realizations/0/clones/0")
-            ar["measurements"] = self.measurements
+            self.length = int(self.parameters["L"]);
+            self.thermalization_sweeps = int(self.parameters["THERMALIZATION"]);
+            self.total_sweeps = int(self.parameters["SWEEPS"]);
+            self.beta = 1. / double(self.parameters["T"]);
 
-            self.length = int(parameters["L"]);
-            self.thermalization_sweeps = int(parameters["THERMALIZATION"]);
-            self.total_sweeps = int(parameters["SWEEPS"]);
-            self.beta = 1. / double(parameters["T"]);
-
-            ar.set_context("checkpoint")
-            self.sweeps = ar["sweeps"]
-            self.spins = ar["spins"]
-            self.random.load(ar["engine"])
-
-            ar.set_context(context)
+            self.sweeps = ar["/simulation/realizations/0/clones/0/sweeps"]
+            self.spins = ar["/simulation/realizations/0/clones/0/spins"]
 
         except:
             traceback.print_exc(file=sys.stderr)

@@ -15,4 +15,4 @@ ising_c: ising.o export2py.o
 run:
 	PYTHONPATH=$PYTHONPATH:. $(ALPS_ROOT)/bin/alpspython main.py -T 10 result.h5
 clean:
-	$(RM) $(RMFLAGS) *.o ising_c.so result.h5
+	$(RM) $(RMFLAGS) *.o *.pyc result.clone0.h5 ising_c.so result.h5

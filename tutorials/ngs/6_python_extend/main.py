@@ -1,5 +1,4 @@
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
- #                                                                                 #
  # ALPS Project: Algorithms and Libraries for Physics Simulations                  #
  #                                                                                 #
  # ALPS Libraries                                                                  #
@@ -22,7 +21,6 @@
  # FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,     #
  # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER     #
  # DEALINGS IN THE SOFTWARE.                                                       #
- #                                                                                 #
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import pyalps.ngs as ngs
@@ -65,9 +63,8 @@ if __name__ == '__main__':
         start = time.time()
         sim.run(lambda: time.time() > start + float(limit))
 
-    if resume:
-        with ngs.archive(outfile[0:outfile.rfind('.h5')] + '.clone0.h5', 'w') as ar:
-            ar['/'] = sim
+    with ngs.archive(outfile[0:outfile.rfind('.h5')] + '.clone0.h5', 'w') as ar:
+        ar['/'] = sim
 
     results = ngs.collectResults(sim)
     print results
