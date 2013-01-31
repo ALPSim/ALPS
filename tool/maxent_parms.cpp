@@ -49,10 +49,14 @@ y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
   if (p_f_grid=="Lorentzian") {
     double cut = p["CUT"]|0.01;
     std::vector<double> temp(nfreq_+1);
-    for (int i=0; i<nfreq_; ++i)
-      temp[i] = tan(M_PI * (double(i)/(nfreq_-1)*(1.-2*cut)+cut - 0.5));
+    for (int i=0; i<nfreq_+1; ++i)
+      temp[i] = tan(M_PI * (double(i)/(nfreq_)*(1.-2*cut)+cut - 0.5));
     for (int i=0; i<nfreq_+1; ++i) 
       t_array_[i] = (temp[i] - temp[0])/(temp[temp.size()-1] - temp[0]);
+    //std::cout<<"debug: Lorentzian grid : "<<std::endl;
+    //for (int i=0; i<nfreq_+1; ++i){
+    //  std::cout<<i<<" "<<t_array_[i]<<std::endl;
+    //}
   }
   else if (p_f_grid=="half Lorentzian") {
     double cut = p["CUT"]|0.01;
@@ -60,7 +64,7 @@ y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
     for (int i=0; i<nfreq_; ++i) 
       temp[i] = tan(M_PI * (double(i+nfreq_)/(2*nfreq_-1)*(1.-2*cut)+cut - 0.5));
     for (int i=0; i<nfreq_+1; ++i) 
-      t_array_[i] = (temp[i] - temp[0])/(temp[temp.size()-1] - temp[0]);
+      t_array_[i] = (temp[i] - temp[0])/(temp[temp.size()-1] - temp[0]);\
   }
   else if (p_f_grid=="quadratic") {
     double s = p["SPREAD"]|4;
@@ -167,6 +171,12 @@ y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
           if (!p.defined("COVARIANCE_MATRIX")) 
               sigma_(i) = static_cast<double>(p["SIGMA_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);
       }
+      //double z=0;
+      //for (int i=0; i<ndat(); ++i){
+      //  z+=y_(i)+sigma_(i);
+      //}
+      //std::cout<<"debug: read values checksum is: "<<z<<std::endl;
+
   }
 //    std::cerr << "initial stuff finished " << static_cast<std::string>(p["X_IN_FILE"]) << " " <<
 //    p.defined("X_IN_FILE") << "\n";
@@ -246,21 +256,30 @@ void ContiParameters::setup_kernel(const alps::params& p, const int ntab, const 
   } 
   else if (p_data == "frequency" && p_kernel == "bosonic" &&
            (p["PARTICLE_HOLE_SYMMETRY"]|false)) {
-    std::cerr << "using particle hole symmetric kernel for bosonic data" << std::endl;
+    //std::cerr << "using particle hole symmetric kernel for bosonic data" << std::endl;
+    //std::cerr<<"ndat is: "<<ndat()<<" ntab: "<<ntab<<std::endl;
+    //std::cerr<<"freqs: "<<freq[0]<<" "<<freq[ntab-1]<<std::endl;
+
     for (int i=0; i<ndat(); ++i) {
       double Omegan = (2*i)*M_PI*T_;
-      //double omegan = (2*i+1)*M_PI*T_;
       for (int j=0; j<ntab; ++j) {
         double Omega = freq[j]; 
         if(Omega ==0) throw std::runtime_error("Bosonic kernel is singular at frequency zero. Please use grid w/o evaluation at zero.");
         K_(i,j) =  -Omega*Omega / (Omegan*Omegan + Omega*Omega);
       }
     }
+    //double z=0;
+    //for (int i=0; i<ndat(); ++i) {
+    //  for (int j=0; j<ntab; ++j) {
+    //    z+=K_(i,j);
+    //  }
+    //}
+    //std::cout<<"debug kernel checksum is: "<<z<<std::endl;
   } 
   else if (p_data == "frequency" && p_kernel == "anomalous" &&
            (p["PARTICLE_HOLE_SYMMETRY"]|false)) {
     std::cerr << "using particle hole symmetric kernel for anomalous fermionic data" << std::endl;
-    for (int i=0; i<ndat()/*-1*/; ++i) {
+    for(int i=0;i<ndat();++i){
       double omegan = (2*i+1)*M_PI*T_;
       for (int j=0; j<ntab; ++j) {
         double omega = freq[j]; 
@@ -390,7 +409,7 @@ omega_coord_(nfreq()), delta_omega_(nfreq()), ns_(0)
   using namespace boost::numeric;
   if (ndat() > nfreq()) 
     boost::throw_exception(std::invalid_argument("NDAT should be smaller than NFREQ"));
-  for (int i=0; i<nfreq(); ++i) {
+/*  for (int i=0; i<nfreq(); ++i) {
     omega_coord_[i] = Default().omega_of_t(t_array_[i]); //(Default().omega_of_t(t_array_[i]) + Default().omega_of_t(t_array_[i+1]))/2.;
     if (i>0 && i<nfreq()-1)
       delta_omega_[i] = (Default().omega_of_t(t_array_[i+1]) - Default().omega_of_t(t_array_[i-1]))/2.0; //    delta_omega_[i] = (Default().omega_of_t(t_array_[MAXIMUM(i+1,nfreq()-1)]) - Default().omega_of_t(t_array_[MAXIMUM(0,i-1)]))/2.0; //Default().omega_of_t(t_array_[i+1]) - Default().omega_of_t(t_array_[i]);
@@ -398,13 +417,19 @@ omega_coord_(nfreq()), delta_omega_(nfreq()), ns_(0)
       delta_omega_[i] = (Default().omega_of_t(t_array_[i+1]) - Default().omega_of_t(t_array_[i]))/2.0; //    delta_omega_[i] = (Default().omega_of_t(t_array_[MAXIMUM(i+1,nfreq()-1)]) - Default().omega_of_t(t_array_[MAXIMUM(0,i-1)]))/2.0; //Default().omega_of_t(t_array_[i+1]) - Default().omega_of_t(t_array_[i]);
     else
       delta_omega_[i] = (Default().omega_of_t(t_array_[i]) - Default().omega_of_t(t_array_[i-1]))/2.0; //    delta_omega_[i] = (Default().omega_of_t(t_array_[MAXIMUM(i+1,nfreq()-1)]) - Default().omega_of_t(t_array_[MAXIMUM(0,i-1)]))/2.0; //Default().omega_of_t(t_array_[i+1]) - Default().omega_of_t(t_array_[i]);
-/*
-      delta_omega_[i] = (Default().omega_of_t(t_array_[MAXIMUM(i+1,nfreq()-1)]) - Default().omega_of_t(t_array_[MAXIMUM(0,i-1)]))/2.0; //    delta_omega_[i] = (Default().omega_of_t(t_array_[MAXIMUM(i+1,nfreq()-1)]) - Default().omega_of_t(t_array_[MAXIMUM(0,i-1)]))/2.0; //Default().omega_of_t(t_array_[i+1]) - Default().omega_of_t(t_array_[i]);
+//
+//      delta_omega_[i] = (Default().omega_of_t(t_array_[MAXIMUM(i+1,nfreq()-1)]) - Default().omega_of_t(t_array_[MAXIMUM(0,i-1)]))/2.0; //    delta_omega_[i] = (Default().omega_of_t(t_array_[MAXIMUM(i+1,nfreq()-1)]) - Default().omega_of_t(t_array_[MAXIMUM(0,i-1)]))/2.0; //Default().omega_of_t(t_array_[i+1]) - Default().omega_of_t(t_array_[i]);
 */
 //      std::cout << i << " " << omega_coord_[i] << " " << delta_omega_[i] << std::endl;
+//  }
+  for (int i=0; i<nfreq(); ++i) {
+    omega_coord_[i] = (Default().omega_of_t(t_array_[i]) + Default().omega_of_t(t_array_[i+1]))/2.;
+    delta_omega_[i] = Default().omega_of_t(t_array_[i+1]) - Default().omega_of_t(t_array_[i]);
   }
-  //compute the kernel K of G = K*A
-//    std::cerr << "Hallo!!!\n";
+  //std::cerr<<"debug: omega and delta: "<<std::endl;
+  //for(int i=0;i<nfreq();++i){
+  //  std::cout<<omega_coord_[i]<<" "<<delta_omega_[i]<<std::endl;
+  //}
   setup_kernel(p, nfreq(), omega_coord_);
   
   //perform the SVD decomposition K = U Sigma V^T
