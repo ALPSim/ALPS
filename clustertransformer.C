@@ -226,6 +226,9 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
   bool damping_mu=false;
   bool computing_mu=true;
   int mu_it=1;
+
+  int current_it = static_cast<int>( (*const_cast<alps::Parameters*>(params_ptr_))["CURRENT_IT"]  );
+
   double n_old;
   double mu_old;
   double mu_new;
@@ -268,12 +271,15 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
       }
     }
     density=density/beta/n_cluster_sites()+(0.5*n_cluster_sites())/n_cluster_sites()*nflavor; //density such that 'half filling' corresponds to 1
-    if (compute_filling_) {
+    if (compute_filling_ && current_it>1) {
       std::cout<<"mu: "<<mu<<" filling "<<density<<" it: "<<mu_it<<" converged: "<<converged<<std::endl;
       //compute new chemical potential
       converged=adjust_chemical_potential(density, mu, damping_mu, computing_mu, mu_it, n_old, n_target_, mu_old, mu_new, mu_orig);
       std::cout<<"converged now: "<<converged<<" true is: "<<true<<" compute filling is: "<<compute_filling_<<std::endl;
     }
+
+	if (current_it==1){converged=true;}
+
   } while(compute_filling_ && (!converged));
   (*const_cast<alps::Parameters*>(params_ptr_))["MU"]=mu; //write the chemical potential back to the parameter file
   for (spin_t flavor=0; flavor<nflavor; ++flavor) {

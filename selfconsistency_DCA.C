@@ -86,6 +86,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
   do {
     iteration_ctr++;
     std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
+	(*const_cast<alps::Parameters*>(&parms))["CURRENT_IT"] = iteration_ctr;
     double mu = static_cast<double>(parms["MU"]);
     G_old_omega = G_omega;
     G0_old_omega = G0_omega;
