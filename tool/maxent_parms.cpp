@@ -115,7 +115,7 @@ y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
 // the following convention:
 // The data are consecutively contained in directory /Data. If we have complex
 // data, we expect the sequence real1 imag1 real2 imag2 ...
-// If we d not provide the covariance matrix, error will be read from directory
+// If we do not provide the covariance matrix, error bars will be read from directory
 // /Error, otherwise the covariance matrix will be read from directory /Covariance
 // as a ndat*ndat field, i.e. it should have been stored according to i*ndat+j
 // As with the data, we adopt the convention that for complex data the sequence
@@ -407,8 +407,8 @@ U_(ndat(), ndat()), Vt_(ndat(), nfreq()), Sigma_(ndat(), ndat()),
 omega_coord_(nfreq()), delta_omega_(nfreq()), ns_(0)
 {
   using namespace boost::numeric;
-  if (ndat() > nfreq()) 
-    boost::throw_exception(std::invalid_argument("NDAT should be smaller than NFREQ"));
+//  if (ndat() > nfreq())
+//    boost::throw_exception(std::invalid_argument("NDAT should be smaller than NFREQ"));
 /*  for (int i=0; i<nfreq(); ++i) {
     omega_coord_[i] = Default().omega_of_t(t_array_[i]); //(Default().omega_of_t(t_array_[i]) + Default().omega_of_t(t_array_[i+1]))/2.;
     if (i>0 && i<nfreq()-1)

@@ -247,9 +247,9 @@ MaxEntHelper::vector_type MaxEntHelper::PrincipalValue(const vector_type &w,cons
     int N = w.size();
     vector_type r(N);
     for (int i=2;i<N-2;i++) {
-      double scr = -a[i]*std::log((w[i]-w[i+1])/(w[i]-w[i-1]));
+      double scr = -a[i]*std::log((w[i+1]-w[i])/(w[i]-w[i-1]));
       for (int j=0;j<i-2;j++) scr -= 0.5*(a[j]+a[j+1])*std::log((w[i]-w[j+1])/(w[i]-w[j]));
-      for (int j=i+1;j<N-2;j++) scr -= 0.5*(a[j]+a[j+1])*std::log((w[i]-w[j+1])/(w[i]-w[j]));
+      for (int j=i+1;j<N-2;j++) scr -= 0.5*(a[j]+a[j+1])*std::log((w[j+1]-w[i])/(w[j]-w[i]));
       r[i] = scr;
     }
     r[0] = w[2]*r[2]/w[0];

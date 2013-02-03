@@ -248,7 +248,7 @@ public:
     if (Omega[0]!=omega_min || Omega[Omega.size()-1]!=omega_max){
       std::cout<<"Omega[ 0] "<<Omega[0]<<" omega min: "<<omega_min<<std::endl;
       std::cout<<"Omega[-1] "<<Omega[Omega.size()-1]<<" omega max: "<<omega_max<<std::endl;
-      boost::throw_exception(std::invalid_argument("invalid omega range for default model"));
+//      boost::throw_exception(std::invalid_argument("invalid omega range for default model"));
     }
   }
   

@@ -137,13 +137,11 @@ void MaxEntSimulation::dostep()
   
   alps::hdf5::archive ar(name+"out.h5", alps::hdf5::archive::WRITE);
   ar << alps::make_pvp("/alpha/values",alpha);
-  {
-      vector_type om(spectra[0].size());
-      for (int i=0;i<om.size();i++) om[i] = omega_coord(i);        
-      ar<<alps::make_pvp("/spectrum/omega",om);
-  }
-
-    
+  
+  vector_type om(spectra[0].size());
+  for (int i=0;i<om.size();i++) om[i] = omega_coord(i);        
+  ar<<alps::make_pvp("/spectrum/omega",om);
+      
   //output 'maximum' spectral function (classical maxent metod)
   if (text_output) for (std::size_t i=0; i<spectra[0].size(); ++i)
     maxspec_str << omega_coord(i) << " " << spectra[max_a][i]*norm << " " << def[i]*norm << std::endl;
