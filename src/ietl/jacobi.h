@@ -218,8 +218,7 @@ namespace ietl
         template <class GEN, class SOLVER, class ITER>
         std::pair<magnitude_type, vector_type> calculate_eigenvalue(const GEN& gen, 
                                                                     SOLVER& solver,
-                                                                    ITER& iter,
-                                                                    std::vector<vector_type> const & ortho_space = std::vector<vector_type>());
+                                                                    ITER& iter);
         
     private:
         void get_extremal_eigenvalue(magnitude_type& theta, std::vector<double>& s, fortran_int_t dim);
@@ -368,13 +367,18 @@ namespace ietl
         
     }
     
+//    template<class Vector>
+//    Vector orthogonalize(Vector input, std::vector<Vector> const & against)
+//    {
+//        
+//    }
+    
     template <class MATRIX, class VS> 
     template <class GEN, class SOLVER, class ITER>
     std::pair<typename jacobi_davidson<MATRIX,VS>::magnitude_type, typename jacobi_davidson<MATRIX,VS>::vector_type> 
     jacobi_davidson<MATRIX, VS>::calculate_eigenvalue(const GEN& gen,
                                                       SOLVER& solver,
-                                                      ITER& iter,
-                                                      std::vector<vector_type> const & ortho_space)
+                                                      ITER& iter)
     {
         vector_type t  = new_vector(vecspace_);
         vector_type u  = new_vector(vecspace_);
@@ -407,9 +411,7 @@ namespace ietl
                     t -= ietl::dot(V[i-1],t) * V[i-1];
             
             // Project out orthogonal subspace
-            for (typename std::vector<vector_type>::const_iterator it = ortho_space.begin();
-                 it != ortho_space.end(); ++it)
-                t -= ietl::dot(*it,t)**it;
+            ietl::project(t,vecspace_);
             
             // v_m = t / |t|_2,  v_m^A = A v_m
             V[iter.iterations()] = t/ietl::two_norm(t);
@@ -435,9 +437,11 @@ namespace ietl
             for (j=1;j<=iter.iterations();++j)
                 uA += VA[j] * s[j];
             
+            ietl::project(uA,vecspace_);
+            
             // r = u^A - \theta u
             r = uA-theta*u;
-            // std::cout << "Iteration " << iter.iterations() << ", resid = " << ietl::two_norm(r) << std::endl;
+//            std::cout << "Iteration " << iter.iterations() << ", resid = " << ietl::two_norm(r) << std::endl;
             
             // if (|r|_2 < \epsilon) stop
             ++iter;
