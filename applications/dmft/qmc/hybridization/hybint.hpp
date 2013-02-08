@@ -55,7 +55,8 @@ private:
   int n_orbitals_;
 };
 
-//this class handles the 'mu' term (chemical potential term). In the most simple case, 'mu' is just a constant for all orbitals. More complicated situations happen, where e.g. there is a double counting which is orbital dependent.
+//This class handles the 'mu' term (chemical potential term). In the simplest case, 'mu' is just a constant for all orbitals.
+//The values can be different through a magnetic or christal field, or due to a double counting which is orbitally dependent.
 class chemical_potential{
 public:
   chemical_potential(const alps::params &p){

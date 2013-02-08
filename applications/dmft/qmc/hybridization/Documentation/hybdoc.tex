@@ -14,7 +14,7 @@
 %\usepackage[none,bottom]{draftcopy}
 %\usepackage{draftcopy}
 %\draftcopyName{Very First Draft Version}{155}
-
+\hypersetup{colorlinks=true,breaklinks,citecolor=blue}
 \newcommand\Let{\mathrel{\mathop:\!\!=}}
 \newcommand{\iom}{{\ensuremath{i\nu}}}                                                                                                                                          
 \def \sgn {\mathop {\rm sgn}}
@@ -40,7 +40,7 @@ This is the user documentation for the hybridization expansion solver of the ALP
 \maketitle
 
 \section{Introduction}
-Welcome! This is the user documentation for the third version of the ALPS\cite{ALPS20} hybridization expansion\cite{Werner06} CT-QMC\cite{Gull11_review} code, written by Emanuel Gull, in collaboration with Hartmut Hafermann and Philipp Werner, based on an earlier version\cite{ALPS_DMFT} by Philipp Werner, Emanuel Gull, Brigitte Surer, and Matthias Troyer. This user documentation is designed to make the program useful for users, in particular users from the LDA+DMFT field, who want to replace their solvers (IPT, Hirsch Fye, other versions of CT-QMC) with the ALPS hybridization code. A basic understanding of impurity models, Monte Carlo simulations and, where needed, LDA+DMFT is assumed. Knowledge of the inner workings of CT-QMC is not required, and we strive to make the code accessible to users who are not Monte Carlo experts.
+Welcome! This is the user documentation for the third version of the ALPS\cite{ALPS20} hybridization expansion\cite{Werner06} CT-QMC\cite{CPC_CTHYB} code, written by Emanuel Gull, in collaboration with Hartmut Hafermann and Philipp Werner, based on an earlier version\cite{ALPS_DMFT} by Philipp Werner, Emanuel Gull, Brigitte Surer, and Matthias Troyer. This user documentation is designed to make the program useful for users, in particular users from the LDA+DMFT field, who want to replace their solvers (IPT, Hirsch Fye, other versions of CT-QMC) with the ALPS hybridization code. A basic understanding of impurity models, Monte Carlo simulations and, where needed, LDA+DMFT is assumed. Knowledge of the inner workings of CT-QMC is not required, and we strive to make the code accessible to users who are not Monte Carlo experts.
 
 This documentation, as well as version $3$ of the hybridization expansion code, is open source. Bug reports and bug fixes, problem reports, and suggestion for improvements are most welcome.
 
@@ -229,8 +229,7 @@ These cases however are easily identified at the level of the Green's function, 
 \label{k_ret_int}
 A retarded interaction occurs in models with phonons, when dynamical screening is considered, or in the context of extended dynamical mean-field theory.
 
-The general algorithm for phonons is given in Ref.~\onlinecite{Werner07holstein}. The formalism for retarded interactions is described in Ref.~\onlinecite{Werner10_frequency}. The function $K(\tau)$, corresponding to the twice-integrated retarded interaction (for details see Ref.~\onlinecite{Werner10_frequency}) connects all pairs of creation and annihilation operators. It is symmetric, $K(-\tau)=K(\tau)=K(\beta-\tau)$, and hence is tabulated as a function $K(\tau)$ on $N_{\tau}+1$ points between $0$ and $\beta$. $K$ is positive and equal for all orbitals.
-For the measurement of the improved estimator, the integrated retarded interaction, or equivalently, the first derivative of $K(\tau)$, i.e. $K'(\tau)$, is required. While in principle $K'(\tau)$ can be obtained from the knowledge of $K(\tau)$, the computation from finite differences on the imaginary time grid is not reliable. Hence the derivative should also be precomputed and be provided in tabulated form.
+The general algorithm for phonons is given in Ref.~\onlinecite{Werner07holstein}. The formalism for retarded interactions is described in Ref.~\onlinecite{Werner10_frequency}. The function $K(\tau)$, corresponding to the twice-integrated retarded interaction (for details see Ref.~\onlinecite{Werner10_frequency}) connects all pairs of creation and annihilation operators. It is symmetric, $K(\beta-\tau)=K(-\tau)=K(\tau)$, and hence is tabulated as a function $K(\tau)$ on $N_{\tau}+1$ points between $0$ and $\beta$. $K$ is positive and equal for all orbitals. We further use the convention that $K(0)=0$. For the measurement of the improved estimator, the integrated retarded interaction, or equivalently, the first derivative of $K(\tau)$, i.e. $K'(\tau)$, is required. While in principle $K'(\tau)$ can be obtained from the knowledge of $K(\tau)$, the computation from finite differences on the imaginary time grid is not reliable. Hence the derivative should also be precomputed and be provided in tabulated form.
 
 Providing the retarded interaction function and its derivative is optional. This feature is enabled by providing a filename through the parameter \verb#RET_INT_K#.
 $K(\tau)$ and $K'(\tau)$ are provided either through a text file, or, if the (optional) parameter \verb#K_IN_HDF5# is set to 1, within an hdf5 archive.
@@ -238,7 +237,11 @@ The file format in both cases is similar as for the hybridization function. The 
 Likewise, the array in the hdf5 file should provide the $N_{\tau}+1$ values of $K$ and $K'$ within the paths \verb#Ret_int_K# for $K(\tau)$ and \verb#Ret_int_Kp# for $K'(\tau)$.
 Note that there is no orbital dependence because the retarded interaction couples to all orbitals equally.
 
-Note that a retarded interaction causes a static shift of the interaction and chemical potential. This shift is given by $-2K'(0^{+})$ and $-K'(0^{+})$, respectively, and is automatically applied using the provided derivative $K'(\tau)$. Hence the static part of the interaction and the chemical potential as provided in the input file through \verb#U# and \verb#MU# or through the corresponding files correspond to the unshifted values.
+In case of a retarded interaction, the Hartree self-energy is given by
+\begin{align}
+\Sigma^{\text{H}}_{i} = - 2K'(0^{+})\sum_{i}\langle n_{i}\rangle +\frac{1}{2}\sum_{j}U_{ij}\langle n_{j}\rangle ,
+\end{align}
+so that in the particle-hole symmetric case the chemical potential to obtain a half-filled system is $-2K'(0^{+})+\sum_{j}U_{ij}/2$ (which is independent of $i$). The chemical potential is shifted internally by the solver, such that an input chemical of $\sum_{j}U_{ij}/2$ corresponds to half-filling. The latter is provided through the input parameters \verb#U# and \verb#MU# or input the corresponding input files.
 
 \subsection{Orbital chemical potential / double counting terms}
 \label{sec:mu}
@@ -449,7 +452,7 @@ This measurement yields comparatively smooth curves, but as the results for diff
 The number of Legendre coefficients required for the accurate representation of a given observable may depend on the quantity under consideration and is difficult to infer from looking at the coefficients themselves. Rather one should analyze the dependence of a given observable on the basis cutoff $N_{l}$. To this end, one can look at the files \verb#Gl_conv.dat# and \verb#Fl_conv.dat# which are written when text output is enabled. In the former, the Green's function at $\tau=0$ and $\tau=\beta/2$ is written as a function of the basis cutoff up to the maximum cutoff $N_{l}$. The latter contains the same for the correlator $F$. To get a feeling for the required cutoff, one should run a simulation at the desired parameters with a large cutoff $N_{l}$ and plot the data in these files.
 For a converged calculation and sufficiently large $N_{l}$, one should see an extended plateau, where the observable does not change as a function of the cutoff. For less coefficients, the expansion is not converged and for a larger number, Monte Carlo noise enters. The basis cutoff is well defined for an $N_{l}$ within the plateau.
 
-Recently, it has been proposed to improve this method by employing the Kernel polynomial method\cite{Huang12}. We do not provide an implementation here. While the method does damp spurious oscillations in the Green's function, it leads to rather larger systematic errors in the moments.
+Recently, it has been proposed to improve this method by employing the Kernel polynomial method\cite{Huang12}. We do not provide an implementation here. While the method does damp spurious oscillations in the Green's function, it leads to rather large systematic errors in the moments.
 
 \subsection{Density}
 
@@ -715,13 +718,13 @@ This code is still in beta stage and problems will appear. To report a problem p
 Citations are important for us -- they mean that we can justify investing time into the development of the hybridization expansion code and other open source projects. A paper should acknowledge the use of the ALPS libraries, the use of the hybridization code, and the original algorithm paper. A citation line could be:
 
 {\it
-Our simulations used an open source implementation\cite{ALPS_DMFT} of the hybridization expansion continuous-time quantum Monte Carlo algorithm\cite{Werner06} and the ALPS\cite{ALPS20} libraries.
+Our simulations used an open source implementation\cite{CPC_CTHYB} of the hybridization expansion continuous-time quantum Monte Carlo algorithm\cite{Werner06} and the ALPS\cite{ALPS20} libraries.
 }
 
 Or, alternatively:
 
 {\it
-Our simulations used the ALPS open source hybridization expansion code\cite{Werner06,ALPS20,ALPS_DMFT}.
+Our simulations used the ALPS open source hybridization expansion code\cite{CPC_CTHYB,Werner06,ALPS20}.
 }
 
 %\section{Acknowledgements}
