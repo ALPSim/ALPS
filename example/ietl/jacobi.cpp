@@ -79,18 +79,6 @@ int main() {
     std::cout << "Jacobi-Davidson says: " << r0.first << std::endl;
     std::cout << "It used " << iter.iterations() << " iterations." << std::endl;
 
-    std::vector<Vector> ortho(1, r0.second);
-    ietl::basic_iteration<double> iter2(200, 1e-8, 1e-8);
-    std::pair<double, Vector> r1 = jd.calculate_eigenvalue(mygen, jcd_gmres, iter2, ortho);
-    std::cout << "It used " << iter2.iterations() << " iterations." << std::endl;
-    std::cout << "Second eigenvalue: " << r1.first << std::endl;
-
-    ortho.push_back(r1.second);
-    ietl::basic_iteration<double> iter3(200, 1e-8, 1e-8); 
-    std::pair<double, Vector> r2 = jd.calculate_eigenvalue(mygen, jcd_gmres, iter3, ortho);
-    std::cout << "It used " << iter3.iterations() << " iterations." << std::endl;
-    std::cout << "Third eigenvalue: " << r2.first << std::endl;
-    
     Vector v2 = new_vector(vec);
     ietl::mult(mat, r0.second, v2);
     std::cout << "Output vector norm: " << ietl::two_norm(r0.second) << std::endl;
