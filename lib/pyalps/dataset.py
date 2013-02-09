@@ -43,11 +43,13 @@ class DataSet(ResultProperties):
               other ways of representing data may be used.
      * props - This is a dictionary of properties describing the dataset.
     """
-    def __init__(self):
+    def __init__(self,x=None,y=None,props=None):
         ResultProperties.__init__(self)
-        
-        self.x = np.array([])
-        self.y = np.array([])
+        if x == None:   self.x = np.array([])
+        else:           self.x = x
+        if y == None:   self.y = np.array([])
+        else:           self.y = y
+        if props != None:   self.props = props
     
     def __repr__(self):
         return "x=%s\ny=%s\nprops=%s" % (self.x, self.y, self.props)
