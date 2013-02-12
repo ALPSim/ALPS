@@ -45,7 +45,7 @@ K_(p){
   if(use_retarded_interaction_){
     double Kp0=K_.interpolate_deriv(0.0);//K'(0^+)
     U_.apply_shift(-2.*Kp0); //apply static shift caused by the retarded interaction
-    mu_.apply_shift(-Kp0);
+    mu_.apply_shift(+Kp0);
   }
   
   extern int global_mpi_rank;
@@ -453,53 +453,17 @@ double local_configuration::density(int i, double tauprime) const{//density on o
 }
 
 
-double local_configuration::interaction_density_integral(int i, double tauprime) const{
-  //compute int_0^beta dt U_ret(tauprime - t) n_i(t)
-  //using the primitive K'(tau) of U(tau)=K''(tau)
-  double integral=0.0;
-  //  if(segments_[i].size()==0 && zero_order_orbital_occupied_[i]) integral=-2.*K_.interpolate_deriv(0.); //check this: this static contribution should already be
-  //accounted for by the renormalization of the static U
-  for(std::set<segment>::const_iterator it=segments_[i].begin(); it!=segments_[i].end();++it){
-    
-    //    if(it->t_end_<it->t_start_){//winding segment; we can do this more elegantly
-    //    contribution from a winding segment is an integral from t_start to t_end, which can be rewritten in terms of a static part
-    //    (already accounted for by the renormalization of U) and an integral from t_end to t_start with opposite sign; this is the
-    //    the same as an integral from t_start to t_end with the sign reversed; hence we need no special treatment of winding segments
-    /*
-     double tau_1 = 0.0-tauprime;
-     double tau_2 = it->t_end_-tauprime;
-     integral+=K_.interpolate_deriv(tau_1)-K_.interpolate_deriv(tau_2);
-     //tau_1>tau_2 for a regular segment
-     //      if(tau_2<0. && tau_1>=0.) integral-=2.*K_.interpolate_deriv(0.);//account for discontinuity in K' @ 0 (0 is 0^+)
-     
-     tau_1 = it->t_start_-tauprime;
-     tau_2 = beta_-tauprime;
-     integral+=K_.interpolate_deriv(tau_1)-K_.interpolate_deriv(tau_2);
-     //tau_1>tau_2 for a regular segment
-     //      if(tau_2<0. && tau_1>=0.) integral-=2.*K_.interpolate_deriv(0.);//account for discontinuity in K' @ 0 (0 is 0^+)
-     */
-    
-    //      double tau_1 = it->t_start_-tauprime;
-    //      double tau_2 = it->t_end_-tauprime;
-    //      integral+=K_.interpolate_deriv(tau_1)-K_.interpolate_deriv(tau_2);
-    //      integral-=2.*K_.interpolate_deriv(0.);//account for discontinuity in K' @ 0 (0 is 0^+)
-    
-    //    }
-    
-    //    else{
-    
-    integral+=K_.interpolate_deriv(it->t_end_-tauprime)-K_.interpolate_deriv(it->t_start_-tauprime);
-    
-    //      same same but different
-    //      double tau_1 = it->t_start_-tauprime;
-    //      double tau_2 = it->t_end_-tauprime;
-    //      integral-=K_.interpolate_deriv(tau_1)-K_.interpolate_deriv(tau_2);
-    
-    //      if(tau_2<0. && tau_1>=0.) integral-=2.*K_.interpolate_deriv(0.); //account for discontinuity in K' @ 0 (0 is 0^+)
-    //    }
+double local_configuration::interaction_density_integral(std::set<segment>::const_iterator &it_i) const{
+  //for orbital i, compute \sum_j int_0^beta dt U_ret(tau - t) n_j(t) using the primitive K'(tau) of U(tau)=K''(tau)
+  double integral=0.0; double sgn;
+  for(int j=0; j<n_orbitals_; ++j){
+    for(std::set<segment>::const_iterator it_j=segments_[j].begin(); it_j!=segments_[j].end();++it_j){
+      integral+= K_.interpolate_deriv(it_j->t_end_ - it_i->t_end_) - K_.interpolate_deriv(it_j->t_start_ - it_i->t_end_);
+    }
   }
-  return integral;
+  return integral-2*K_.interpolate_deriv(0.0); //this is the same segment, same time contribution due to the fact that n and c do not commute in this case
 }
+
 
 //compute the prefactor that will go into the Green's function measurement using Fw
 //NOTE: from the equation of motion, we have the correlation function
@@ -527,16 +491,12 @@ void local_configuration::get_F_prefactor(std::vector<std::map<double,double> > 
   for(int i=0;i<n_orbitals_;++i){
     std::size_t k=0;
     for(std::set<segment>::const_iterator it=segments_[i].begin(); it!=segments_[i].end();++it,++k){
-      //      F_prefactor[i][it->t_start_] = 0;
       F_prefactor[i][it->t_end_] = 0;
       for(int j=0; j<n_orbitals_; ++j){
-        if(use_retarded_interaction_){//also contribute for j==i
-          F_prefactor[i][it->t_end_] += interaction_density_integral(j,it->t_end_);//contribution is independent of i
-        }
-        //        F_prefactor[i][it->t_start_] += 0.5*(U_(i,j)+U_(j,i))*n_tauprime[i][k][j];
         F_prefactor[i][it->t_end_] += 0.5*(U_(i,j)+U_(j,i))*density(j,it->t_end_);
-        //*n_tauprime[i][k][j];
-        //std::cout<<clblue<<i<<" "<<it->t_start_<<" "<<j<<" "<<0.5*(U_(i,j)+U_(j,i))*n_tauprime[i][k][j]<<cblack<<std::endl;
+      }
+      if(use_retarded_interaction_){//also contribute for j==i
+          F_prefactor[i][it->t_end_] += interaction_density_integral(it);
       }
     }
   }

@@ -241,7 +241,8 @@ In case of a retarded interaction, the Hartree self-energy is given by
 \begin{align}
 \Sigma^{\text{H}}_{i} = - 2K'(0^{+})\sum_{i}\langle n_{i}\rangle +\frac{1}{2}\sum_{j}U_{ij}\langle n_{j}\rangle ,
 \end{align}
-so that in the particle-hole symmetric case the chemical potential to obtain a half-filled system is $-2K'(0^{+})+\sum_{j}U_{ij}/2$ (which is independent of $i$). The chemical potential is shifted internally by the solver, such that an input chemical of $\sum_{j}U_{ij}/2$ corresponds to half-filling. The latter is provided through the input parameters \verb#U# and \verb#MU# or input the corresponding input files.
+so that in the particle-hole symmetric case an input chemical potential to $\mu=-2K'(0^{+})+\sum_{j}U_{ij}/2$ (which is independent of $i$) will give a half-filled system. The chemical potential is provided through the input parameters \verb#U# and \verb#MU# or input the corresponding input files.
+The treatment of the retarded interaction requires the static interaction and chemical potential to be shifted by $U_{ij}\to U_{ij}-2K'(0)$ for $i\neq j$ and $\mu\to \mu+K'(0)$, respectively. This is done internally by the solver and does not have to be done by the user. The shifted values will be printed to screen as ``effective'' interaction and chemical potential.
 
 \subsection{Orbital chemical potential / double counting terms}
 \label{sec:mu}

@@ -69,7 +69,7 @@ public:
   void get_density_vectors(std::vector<std::vector<double> > &n_vector) const;
   double density(int i, double tau) const;
   double mu(int orbital) {return mu_[orbital];}
-  double interaction_density_integral(int i, double tau) const;
+  double interaction_density_integral(std::set<segment>::const_iterator &it) const;
   void state_map_segment_insert(state_map &states, const segment &s, int state) const;
   void measure_sector_statistics(std::vector<double> &sector_statistics, double sign) const;
   friend std::ostream &operator<<(std::ostream &os, const local_configuration &local_conf);
