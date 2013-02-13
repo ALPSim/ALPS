@@ -221,13 +221,12 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
       }
     }
   }
-  
   bool converged=compute_filling_?false:true;
   bool damping_mu=false;
   bool computing_mu=true;
   int mu_it=1;
 
-  int current_it = static_cast<int>( (*const_cast<alps::Parameters*>(params_ptr_))["CURRENT_IT"]  );
+  int current_it = static_cast<int>( (*const_cast<alps::Parameters*>(params_ptr_)).value_or_default("CURRENT_IT",0));
 
   double n_old;
   double mu_old;
