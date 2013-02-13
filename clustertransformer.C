@@ -277,7 +277,7 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
       std::cout<<"converged now: "<<converged<<" true is: "<<true<<" compute filling is: "<<compute_filling_<<std::endl;
     }
 
-	if (current_it==1){converged=true;}
+	if (current_it<2){converged=true;}
 
   } while(compute_filling_ && (!converged));
   (*const_cast<alps::Parameters*>(params_ptr_))["MU"]=mu; //write the chemical potential back to the parameter file
