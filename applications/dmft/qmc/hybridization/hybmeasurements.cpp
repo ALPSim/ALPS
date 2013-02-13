@@ -171,6 +171,8 @@ void hybridization::create_measurements(){//called once in the constructor
   }
   if(MEASURE_nnt) n_vectors.resize(n_orbitals, std::vector<double>(N_nn+1, 0.));
 
+  F_prefactor.resize(n_orbitals);
+
 }// create measurements
 
 
@@ -181,7 +183,7 @@ void hybridization::measure(){
 
   accumulate_G();
 
-  if(!MEASURE_time && (MEASURE_freq || MEASURE_legendre || MEASURE_g2w || MEASURE_h2w))//F_prefactor is computed in update() if time measurement is turned on
+  if(!MEASURE_time && (MEASURE_freq || MEASURE_legendre || MEASURE_h2w))//F_prefactor is computed in update() if time measurement is turned on
     local_config.get_F_prefactor(F_prefactor);//compute segment overlaps in local config
 
   measure_Gw(F_prefactor);

@@ -482,17 +482,13 @@ double local_configuration::interaction_density_integral(std::set<segment>::cons
 //n is coupled the creator or annihilator. To save computations and memory, we
 //evaluate F_prefactor for annihilator times only, in favor of the correlator H.
 void local_configuration::get_F_prefactor(std::vector<std::map<double,double> > &F_prefactor)const{
-  //it is F_prefactor[orbital i][segment k in orbital i]
-  //  std::vector<std::vector<std::vector<double> > > n_tauprime;
-  //it is n_tauprime[orbital i][start time of segment k in orbital i][density
-  //at time \tau_k in orbital j]
-  //  get_segment_densities(n_tauprime);
-  F_prefactor.resize(n_orbitals_);
-  for(int i=0;i<n_orbitals_;++i){
+  for(std::size_t i=0; i<n_orbitals_; ++i) F_prefactor[i].clear();
+  //this is F_prefactor[orbital i][segment k in orbital i]
+  for(std::size_t i=0;i<n_orbitals_;++i){
     std::size_t k=0;
     for(std::set<segment>::const_iterator it=segments_[i].begin(); it!=segments_[i].end();++it,++k){
       F_prefactor[i][it->t_end_] = 0;
-      for(int j=0; j<n_orbitals_; ++j){
+      for(std::size_t j=0; j<n_orbitals_; ++j){
         F_prefactor[i][it->t_end_] += 0.5*(U_(i,j)+U_(j,i))*density(j,it->t_end_);
       }
       if(use_retarded_interaction_){//also contribute for j==i

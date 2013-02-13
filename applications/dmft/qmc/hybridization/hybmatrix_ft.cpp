@@ -98,8 +98,9 @@ void hybmatrix::measure_G2w(std::vector<std::complex<double> > &G2w, std::vector
   for(int i=0;i<size();++i){ cdagger_exp_inc[i]=std::exp(std::complex<double>(0, -w_inc*cdagger_times[i])); }
 
   //measures the Fourier transform of G(tau,tau'):=-<T c(tau) c^dagger(tau')>
+  double f_pref=0.0;
   for (int i = 0; i < size(); i++) {
-    double f_pref=(F_prefactor.find(c_times[i]))->second;
+    if(measure_h2w_) f_pref=(F_prefactor.find(c_times[i]))->second;
     std::complex<double> exp1_ini=c_exp_ini[i];
     std::complex<double> exp1_inc=c_exp_inc[i];
     for (int j = 0; j < size(); j++) {

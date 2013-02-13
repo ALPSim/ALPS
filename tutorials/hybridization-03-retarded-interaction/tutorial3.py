@@ -96,7 +96,7 @@ parms = {
 'K_IN_HDF5'                  : 1,                                  #whether to read the retarded interaction from an h5 archive
 # physics parameters
 'U'                          : U,                                  #Hubbard repulsion
-'MU'                         : U/2.,                               #chemical potential (MU=U/2 corresponds to half-filling)
+'MU'                         : U/2.-2*Lambda**2/w0,                #chemical potential (MU=U/2-2K'(0) corresponds to half-filling; here K(0)=Lambda^2/w0)
 'BETA'                       : 50.0,                               #inverse temperature
 # measurements
 'MEASURE_freq'               : 0,                                  #whether to measure single-particle Green's function on Matsubara frequencies
@@ -153,7 +153,7 @@ if mpi.rank==0:
   w0  =parms['w0']
   beta=parms['BETA']
 
-  K  = lambda tau: - (l**2)*(cosh(w0*(beta/2.0-tau))/sinh(w0*beta/2.0) - 1 )/(w0*w0)
+  K  = lambda tau: - (l**2)*(cosh(w0*(beta/2.0-tau))/sinh(w0*beta/2.0) - cosh(w0*beta/2.0)/sinh(w0*beta/2.0) )/(w0*w0)
   Kp = lambda tau: + (l**2)*(sinh(w0*(beta/2.0-tau))/sinh(w0*beta/2.0))/w0
 
   print "U_screened =", parms['U'] - 2*l**2/w0
