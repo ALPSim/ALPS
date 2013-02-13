@@ -4,7 +4,8 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2012 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2010 - 2012 by Lukas Gamper <gamperl@gmail.com>,                  *
+ *                              Synge Todo <wistaria@comp-phys.org>                *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -51,7 +52,7 @@ int main(int argc, char *argv[]) {
     if (c.rank() == 0 && options.resume)
         sim.load(params["DUMP"] | "checkpoint");
 
-    sim.run(stop_callback(options.time_limit));
+    sim.run(stop_callback_mpi(c, options.time_limit));
 
     if (c.rank() == 0) {
         sim.save(params["DUMP"] | "checkpoint");

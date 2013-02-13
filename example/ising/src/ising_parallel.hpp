@@ -4,7 +4,8 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2012 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2010 - 2012 by Lukas Gamper <gamperl@gmail.com>,                  *
+ *                              Synge Todo <wistaria@comp-phys.org>                *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -74,6 +75,7 @@ class ising_parallel_sim : public alps::mcbase_ng {
             , comm(c)
             , length(params["L"])
             , local_length(comm.rank() == 0 ? length - (comm.size() - 1) * (length / comm.size()) : length / comm.size())
+            , sweeps(0)
             , thermalization_sweeps(int(params["THERMALIZATION"]))
             , total_sweeps(int(params["SWEEPS"]))
             , beta(1. / double(params["T"]))
@@ -112,7 +114,7 @@ class ising_parallel_sim : public alps::mcbase_ng {
                     measurements["Magnetization^2"] << mag * mag;
                     measurements["Magnetization^4"] << mag * mag * mag * mag;
                 } else {
-                    boost::mpi::reduce(comm, my_energy, std::plus<double>(), 0);
+                    reduce(comm, my_energy, std::plus<double>(), 0);
                     reduce(comm, my_mag, std::plus<double>(), 0);
                 }
             }
