@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
         if (options.resume)
             sim.load(checkpoint_file);
 
-        sim.run(alps::stop_callback(options.timelimit));
+        sim.run(alps::stop_callback_mpi(comm, options.timelimit));
 
         sim.save(checkpoint_file);
 
