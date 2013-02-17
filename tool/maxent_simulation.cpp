@@ -38,16 +38,16 @@
 
 
 MaxEntSimulation::MaxEntSimulation(const alps::params &parms,const std::string &outfile)
-: alps::mcbase(parms)
-, MaxEntHelper(parms)
+: MaxEntHelper(parms)
+, alps::mcbase(parms)
 , alpha((int)parms["N_ALPHA"])              //This is the # of \alpha parameters that should be tried.
 , norm(parms["NORM"]|1.0)                                             //The integral is normalized to NORM (use e.g. for self-energies
 , max_it(parms["MAX_IT"]|1000)                                       //The number of iterations done in the root finding procedure
 , name(outfile,0,outfile.size()-6)
-, verbose(parms["VERBOSE"]|false)
-, text_output(parms["TEXT_OUTPUT"]|false)
 , Kernel_type(parms["KERNEL"]|"")
 , finished(false)
+, verbose(parms["VERBOSE"]|false)
+, text_output(parms["TEXT_OUTPUT"]|false)
 {
   if(norm != 1.) std::cerr<<"WARNING: Redefinition of parameter NORM: Input (and output) data are assumed to be normalized to NORM."<<std::endl;
   const double alpha_min = parms["ALPHA_MIN"];                                          //Smallest value of \alpha that is tried
