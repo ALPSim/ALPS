@@ -119,6 +119,7 @@ void evaluate_time(const alps::results_type<hybridization>::type &results,
   double beta = parms["BETA"];
   std::size_t n_orbitals = parms["N_ORBITALS"];
   std::size_t n_sites    = 1;
+  bool accurate = parms["ACCURATE_COVARIANCE"]|true;
 
   //Imaginary time Green function
   itime_green_function_t G_tau(N_t+1, n_sites, n_orbitals);
@@ -171,7 +172,10 @@ void evaluate_time(const alps::results_type<hybridization>::type &results,
   for(std::size_t i=0; i<n_orbitals; i++){
     boost::numeric::ublas::matrix<double> cov(N_t+1, N_t+1);
     std::stringstream g_name; g_name<<"g_"<<i;
-    cov=results[g_name.str()].covariance<std::vector<double> >(results[g_name.str()]);
+    if (accurate)
+      cov=results[g_name.str()].accurate_covariance<std::vector<double> >(results[g_name.str()]);
+    else
+      cov=results[g_name.str()].covariance<std::vector<double> >(results[g_name.str()]);
     std::vector<double> data((N_t+1)*(N_t+1));
     for(std::size_t t1=0; t1<=N_t; t1++)
       for(std::size_t t2=0; t2<=N_t; t2++)
@@ -182,7 +186,10 @@ void evaluate_time(const alps::results_type<hybridization>::type &results,
 
     solver_output<<alps::make_pvp(data_path.str(), data);
     g_name.str(""); g_name<<"f_"<<i;
-    cov=results[g_name.str()].covariance<std::vector<double> >(results[g_name.str()]);
+    if (accurate)
+      cov=results[g_name.str()].accurate_covariance<std::vector<double> >(results[g_name.str()]);
+    else
+      cov=results[g_name.str()].covariance<std::vector<double> >(results[g_name.str()]);      
     for(std::size_t t1=0; t1<=N_t; t1++)
       for(std::size_t t2=0; t2<=N_t; t2++)
          data[t1*(N_t+1)+t2]=cov(t1,t2);

@@ -145,7 +145,7 @@ y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
             tmp.resize(ndat()*ndat());
             ar>>alps::make_pvp(path.str(),tmp);
             for(std::size_t i=0; i<ndat(); i++)
-              for(std::size_t j=0; i<ndat(); i++)
+              for(std::size_t j=0; j<ndat(); j++)
                 cov_(i,j) = tmp[i*ndat()+j];
           }
       } else {
@@ -437,10 +437,13 @@ omega_coord_(nfreq()), delta_omega_(nfreq()), ns_(0)
   matrix_type Kt = K_; // gesvd destroys K!
   bindings::lapack::gesvd('S','S',Kt, S, U_, Vt_); 
   std::cout << "# Singular values of the Kernel:\n";
-  const double prec = sqrt(std::numeric_limits<double>::epsilon())*nfreq()*S[0];
-  for (unsigned int s=0; s<S.size(); ++s) 
+    const double prec = std::sqrt(std::numeric_limits<double>::epsilon())*nfreq()*S[0];
+//  std::cout << "# eps = " << sqrt(std::numeric_limits<double>::epsilon()) << std::endl << "# prec = " << prec << std::endl;
+  for (unsigned int s=0; s<S.size(); ++s) {
+//    std::cout << "# " << s << "\t" << S[s] <<"\n";
     ns_ = (S[s] >= prec) ? s : ns_;
-  if (ns() == 0) 
+  }
+  if (ns() == 0)
     boost::throw_exception(std::logic_error("all singular values smaller than the precision"));
   
   //(truncated) U has dimension ndat() * ns_; ndat() is # of input (matsubara frequency/imag time) points

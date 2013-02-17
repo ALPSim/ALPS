@@ -35,26 +35,59 @@ bool stop_callback(boost::posix_time::ptime const & end_time) {
 }
 void compute_greens_functions(const alps::results_type<HubbardInteractionExpansion>::type &results, const alps::parameters_type<HubbardInteractionExpansion>::type& parms, const std::string &output_file);
 
+#ifdef BUILD_PYTHON_MODULE
+//compile it as a python module (requires boost::python library)
+using namespace boost::python;
+
+void solve(boost::python::dict parms_){
+    alps::parameters_type<HubbardInteractionExpansion>::type parms(parms_);
+    std::string output_file = boost::lexical_cast<std::string>(parms["BASENAME"]|"results")+std::string(".out.h5");
+#else
 int main(int argc, char** argv)
 {
   alps::mcoptions options(argc, argv);
   if (options.valid) {
+    std::string output_file = options.output_file;
     boost::mpi::environment env(argc, argv);
-    boost::mpi::communicator c;
-    alps::parameters_type<HubbardInteractionExpansion>::type parms(alps::hdf5::archive(options.input_file, "r"));
-    alps::mpi_adapter<HubbardInteractionExpansion> s(parms, c);
-    if(options.time_limit!=0)
-      throw std::invalid_argument("time limit is passed in the parameter file!");
-    if(!parms.defined("MAX_TIME")) throw std::runtime_error("parameter MAX_TIME is not defined. How long do you want to run the code for? (in seconds)");
-    s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds((int)parms["MAX_TIME"])));
-    if (c.rank()==0){
-      alps::results_type<HubbardInteractionExpansion>::type results = collect_results(s);
-      save_results(results, parms, options.output_file, "/simulation/results");
+    alps::parameters_type<HubbardInteractionExpansion>::type parms(alps::hdf5::archive(options.input_file, alps::hdf5::archive::READ));
+    try {
+      if(options.time_limit!=0)
+        throw std::invalid_argument("time limit is passed in the parameter file!");
+      if(!parms.defined("MAX_TIME")) throw std::runtime_error("parameter MAX_TIME is not defined. How long do you want to run the code for? (in seconds)");
+#endif
+      boost::mpi::communicator c;
+      alps::mpi_adapter<HubbardInteractionExpansion> s(parms, c);
+      s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds((int)parms["MAX_TIME"])));
+      if (c.rank()==0){
+        alps::results_type<HubbardInteractionExpansion>::type results = collect_results(s);
+        save_results(results, parms, output_file, "/simulation/results");
       
-      //compute the output Green's function and Fourier transform it, store in the right path
-      compute_greens_functions(results, parms, options.output_file);
-    } else{
+        //compute the output Green's function and Fourier transform it, store in the right path
+        compute_greens_functions(results, parms, output_file);
+      } else{
       collect_results(s);
+      }
+#ifdef BUILD_PYTHON_MODULE
+      return;
+#else
     }
-  }
+    catch(std::exception& exc){
+        std::cerr<<exc.what()<<std::endl;
+        return -1;
+    }
+    catch(...){
+        std::cerr << "Fatal Error: Unknown Exception!\n";
+        return -2;
+    }
+  }//options.valid
+  return 0;
+#endif
 }
+
+#ifdef BUILD_PYTHON_MODULE
+    BOOST_PYTHON_MODULE(ctint)
+    {
+        def("solve",solve);//define python-callable run method
+    };
+#endif
+    
