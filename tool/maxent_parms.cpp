@@ -438,10 +438,10 @@ omega_coord_(nfreq()), delta_omega_(nfreq()), ns_(0)
   bindings::lapack::gesvd('S','S',Kt, S, U_, Vt_); 
   std::cout << "# Singular values of the Kernel:\n";
     const double prec = std::sqrt(std::numeric_limits<double>::epsilon())*nfreq()*S[0];
-//  std::cout << "# eps = " << sqrt(std::numeric_limits<double>::epsilon()) << std::endl << "# prec = " << prec << std::endl;
+  std::cout << "# eps = " << sqrt(std::numeric_limits<double>::epsilon()) << std::endl << "# prec = " << prec << std::endl;
   for (unsigned int s=0; s<S.size(); ++s) {
-//    std::cout << "# " << s << "\t" << S[s] <<"\n";
-    ns_ = (S[s] >= prec) ? s : ns_;
+    std::cout << "# " << s << "\t" << S[s] <<"\n";
+    ns_ = (S[s] >= prec) ? s+1 : ns_;
   }
   if (ns() == 0)
     boost::throw_exception(std::logic_error("all singular values smaller than the precision"));

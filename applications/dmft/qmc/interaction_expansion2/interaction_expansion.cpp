@@ -45,11 +45,11 @@ std::complex<double> *c_or_cdagger::exp_iomegan_tau_;
 InteractionExpansion::InteractionExpansion(const alps::params &parms, int node)
 : alps::mcbase(parms,node),
 max_order(parms["MAX_ORDER"] | 2048),
-n_flavors(parms["FLAVORS"] | 2),        
+n_flavors(parms["FLAVORS"] | (parms["N_ORBITALS"] | 2)),
 n_site(parms["SITES"] | 1),
-n_matsubara((int)parms["NMATSUBARA"]),
+n_matsubara((int)(parms["NMATSUBARA"]|parms["N_MATSUBARA"])),
 n_matsubara_measurements(parms["NMATSUBARA_MEASUREMENTS"] | (int)n_matsubara),
-n_tau((int)parms["N"]),
+n_tau((int)(parms["N"]|parms["N_TAU"])),
 n_tau_inv(1./n_tau),
 n_self(parms["NSELF"] | (int)(10*n_tau)),
 mc_steps((boost::uint64_t)parms["SWEEPS"]),
@@ -61,7 +61,7 @@ onsite_U((double)parms["U"]),
 alpha((double)parms["ALPHA"]),
 U(alps::make_deprecated_parameters(parms)),                         
 recalc_period(parms["RECALC_PERIOD"] | 5000),
-measurement_period(parms["MEASUREMENT_PERIOD"] | 200),
+measurement_period(parms["MEASUREMENT_PERIOD"] | (parms["N_MEAS"] | 200)),
 convergence_check_period(parms["CONVERGENCE_CHECK_PERIOD"] | (int)recalc_period),
 almost_zero(parms["ALMOSTZERO"] | 1.e-16),
 seed(parms["SEED"] | 0),
@@ -89,7 +89,10 @@ pert_hist(max_order)
   if(!parms.defined("ATOMIC")) {
     {
       alps::hdf5::archive ar(parms["INFILE"], "r");
-      bare_green_matsubara.read_hdf5(ar, "/G0") ;
+      if (n_site == 1)
+        bare_green_matsubara.read_hdf5_ss(ar,"/G0") ;
+      else
+        bare_green_matsubara.read_hdf5(ar,"/G0") ;
     }
     FourierTransformer::generate_transformer(alps::make_deprecated_parameters(parms), fourier_ptr);
     fourier_ptr->backward_ft(bare_green_itime, bare_green_matsubara);
@@ -173,7 +176,7 @@ void InteractionExpansion::initialize_simulation(const alps::params &parms)
 void c_or_cdagger::initialize_simulation(const alps::params &p)
 {
   beta_=p["BETA"];
-  nm_=p["NMATSUBARA_MEASUREMENTS"] | p["NMATSUBARA"];
+  nm_=p["NMATSUBARA_MEASUREMENTS"] | (p["NMATSUBARA"]|p["N_MATSUBARA"]);
   omegan_ = new double[nm_];
   for(unsigned int i=0;i<nm_;++i) {
     omegan_[i]=(2.*i+1.)*M_PI/beta_;

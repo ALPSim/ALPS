@@ -49,11 +49,11 @@ void evaluate_selfenergy_measurement_itime_rs(const alps::results_type<HubbardIn
 void compute_greens_functions(const alps::results_type<HubbardInteractionExpansion>::type &results, const alps::parameters_type<HubbardInteractionExpansion>::type& parms, const std::string &output_file)
 {
   std::cout<<"getting result!"<<std::endl;
-  unsigned int n_matsubara=parms["NMATSUBARA"];
+  unsigned int n_matsubara = parms["NMATSUBARA"]|parms["N_MATSUBARA"];
   unsigned int n_matsubara_measurements=parms["NMATSUBARA_MEASUREMENTS"] | (int)n_matsubara;
-  unsigned int n_tau=parms["N"];
+  unsigned int n_tau=parms["N"]|parms["N_TAU"];
   unsigned int n_self=parms["NSELF"] | (int)(10*n_tau);
-  spin_t n_flavors(parms["FLAVORS"] | 2);
+  spin_t n_flavors(parms["FLAVORS"] | (parms["N_ORBITALS"]| 2));
   unsigned int n_site(parms["SITES"] | 1);
   double beta(parms["BETA"]);
   itime_green_function_t green_itime_measured(n_tau+1, n_site, n_flavors);
@@ -81,7 +81,10 @@ void compute_greens_functions(const alps::results_type<HubbardInteractionExpansi
   std::vector<double> densities(n_flavors);
   {
     alps::hdf5::archive ar(parms["INFILE"], "r");
-    bare_green_matsubara.read_hdf5(ar, "/G0") ;
+    if (n_site == 1)
+      bare_green_matsubara.read_hdf5_ss(ar,"/G0") ;
+    else
+      bare_green_matsubara.read_hdf5(ar,"/G0") ;
   }
   if(measure_in_matsubara) {
     evaluate_selfenergy_measurement_matsubara(results, green_matsubara_measured, 
@@ -112,7 +115,12 @@ void compute_greens_functions(const alps::results_type<HubbardInteractionExpansi
     fourier_ptr->forward_ft(green_itime_measured, green_matsubara_measured);
   {
     alps::hdf5::archive ar(output_file, "a");
-    green_matsubara_measured.write_hdf5(ar, "/G_omega");
-    green_itime_measured.write_hdf5(ar, "/G_tau");
+    if (n_site==1) {
+      green_matsubara_measured.write_hdf5_ss(ar, "/G_omega");
+      green_itime_measured.write_hdf5_ss(ar, "/G_tau");
+    } else {
+      green_matsubara_measured.write_hdf5(ar, "/G_omega");
+      green_itime_measured.write_hdf5(ar, "/G_tau");
+    }
   }
 } 
