@@ -348,11 +348,11 @@ void ContiParameters::setup_kernel(const alps::params& p, const int ntab, const 
     matrix_type cov_trans = ublas::trans(cov_);
     K_ = ublas::prec_prod(cov_trans, K_);
     y_ = ublas::prec_prod(cov_trans, y_);
-    if (alps::is_master()) 
+    if (alps::is_master() && p["VERBOSE"]|false)
       std::cout << "# Eigenvalues of the covariance matrix:\n";
     for (int i=0; i<ndat(); ++i) { 
         sigma_[i] = std::sqrt(std::abs(var(i)))/static_cast<double>(p["NORM"]);
-      if (alps::is_master())
+      if (alps::is_master() && p["VERBOSE"]|false)
         std::cout << "# " << var(i) << "\n";
     }
   } 
@@ -436,11 +436,11 @@ omega_coord_(nfreq()), delta_omega_(nfreq()), ns_(0)
   vector_type S(ndat());
   matrix_type Kt = K_; // gesvd destroys K!
   bindings::lapack::gesvd('S','S',Kt, S, U_, Vt_); 
-  std::cout << "# Singular values of the Kernel:\n";
+  if (p["VERBOSE"]|false) std::cout << "# Singular values of the Kernel:\n";
     const double prec = std::sqrt(std::numeric_limits<double>::epsilon())*nfreq()*S[0];
-  std::cout << "# eps = " << sqrt(std::numeric_limits<double>::epsilon()) << std::endl << "# prec = " << prec << std::endl;
+  if (p["VERBOSE"]|false) std::cout << "# eps = " << sqrt(std::numeric_limits<double>::epsilon()) << std::endl << "# prec = " << prec << std::endl;
   for (unsigned int s=0; s<S.size(); ++s) {
-    std::cout << "# " << s << "\t" << S[s] <<"\n";
+    if (p["VERBOSE"]|false)std::cout << "# " << s << "\t" << S[s] <<"\n";
     ns_ = (S[s] >= prec) ? s+1 : ns_;
   }
   if (ns() == 0)
