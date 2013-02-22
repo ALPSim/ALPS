@@ -229,8 +229,8 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
   int current_it = static_cast<int>( (*const_cast<alps::Parameters*>(params_ptr_)).value_or_default("CURRENT_IT",0));
 
   double n_old;
-  double mu_old;
-  double mu_new;
+  double mu_old=mu;
+  double mu_new=mu;
   double mu_orig=mu;
   std::vector<std::vector<double> >epsilon_kckl(n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
   std::vector<double> weight_kl(n_lattice_momenta());
