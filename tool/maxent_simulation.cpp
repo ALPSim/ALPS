@@ -47,6 +47,7 @@ MaxEntSimulation::MaxEntSimulation(const alps::params &parms,const std::string &
 , Kernel_type(parms["KERNEL"]|"")
 , finished(false)
 , verbose(parms["VERBOSE"]|false)
+, self(parms["SELF"]|false)
 , text_output(parms["TEXT_OUTPUT"]|false)
 {
   if(norm != 1.) std::cerr<<"WARNING: Redefinition of parameter NORM: Input (and output) data are assumed to be normalized to NORM."<<std::endl;
@@ -220,8 +221,9 @@ void MaxEntSimulation::dostep()
     }
     ar << alps::make_pvp("/spectrum/bosonic/maximum",spec);
   }
-/*
-    if(parms.defined("SELF")){
+
+  //don't understand why this was commented out...
+  if(self){
     // A quick word about normalization here. Usually we have G(iomega_n) = -1/pi \int_{-\infty}^\infty Im G(omega)/(omega_n - omega).
     // However, we are not interested in Im G but instead in A. In the case of the self-energy we have, analogously,
     // Sigma(i\omega_n) = -1/pi \int_{-\infty}^\infty Im \Sigma(omega)/(omega_n - omega); and we define A_\Sigma(omega) = -1/pi Sigma(omega). This makes
@@ -238,7 +240,7 @@ void MaxEntSimulation::dostep()
       maxspec_self_str << omega_coord(i) << " " << -spectra[max_a][i]*norm*M_PI << std::endl;
     }
   }
- */
+ 
   finished = true;
 }
 

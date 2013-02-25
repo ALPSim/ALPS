@@ -159,7 +159,7 @@ private:
   const double norm;
   const int max_it;
   std::string name,Kernel_type;
-  bool finished,verbose,text_output;
+  bool finished,verbose,text_output,self;
   boost::filesystem::path dir;
   std::ofstream spex_str;
   std::ofstream chisq_str;
