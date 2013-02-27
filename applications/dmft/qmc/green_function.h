@@ -140,14 +140,18 @@ public:
     ar<<alps::make_pvp(path+"/nt",nt_);
     ar<<alps::make_pvp(path+"/ns",ns_);
     ar<<alps::make_pvp(path+"/nf",nf_);
-    for (int is=0;is<ns_;is++) {
-      for (int jf=0;jf<nf_;jf++) {
-        std::stringstream subpath; subpath<<path<<"/"<<is<<"/"<<jf<<"/mean/value";
-        ar<<alps::make_pvp(subpath.str(), val_+is*nt_*nf_+jf*nt_,nt_);
+    if (ns_==1) {
+      for(unsigned int i=0;i<nf_;++i){
+        std::stringstream subpath; subpath<<path<<"/"<<i<<"/mean/value";
+        ar<<alps::make_pvp(subpath.str(), val_+i*nt_, nt_);
+        //currently we're not writing the error.
+        //std::stringstream subpath_e; subpath_e<<path<<"/"<<i<<"/mean/error";
+        //ar<<alps::make_pvp(subpath_e.str(), err_+i*nt_, nt_);
       }
+    } else {
+      std::stringstream subpath; subpath<<path<<"/values/mean";
+      ar<<alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_); // the nondiagonal components are needed for realspace representation of multisite problems
     }
-//    std::stringstream subpath; subpath<<path<<"/values/mean";
-//    ar<<alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_);
   }
   void read_hdf5(alps::hdf5::archive &ar, const std::string &path) {
     unsigned int nt, ns, nf;
@@ -156,42 +160,20 @@ public:
     ar>>alps::make_pvp(path+"/ns",ns);
     ar>>alps::make_pvp(path+"/nf",nf);
     if(nt!=nt_ || ns!=ns_ || nf!=nf_){ std::cerr<<path<<" nt: "<<nt_<<" new: "<<nt<<" ns: "<<ns_<<" "<<ns<<" nf: "<<nf_<<" "<<nf<<" dimensions do not match."<<std::endl; throw std::runtime_error("Green's function read in: dimensions do not match."); }
-    for (int is=0;is<ns_;is++) {
-      for (int jf=0;jf<nf_;jf++) {
-        std::stringstream subpath; subpath<<path<<"/"<<is<<"/"<<jf<<"/mean/value";
-        ar>>alps::make_pvp(subpath.str(), val_+is*nt_*nf_+jf*nt_,nt_);
+    if (ns==1) {
+      for(unsigned int i=0;i<nf_;++i){
+        std::stringstream subpath; subpath<<path<<"/"<<i<<"/mean/value";
+        ar>>alps::make_pvp(subpath.str(), val_+i*nt_, nt_);
+        //currently we're not writing the error.
+        //std::stringstream subpath_e; subpath_e<<path<<"/"<<i<<"/mean/error";      
+        //ar<<alps::make_pvp(subpath_e.str(), err_+i*nt_, nt_);
       }
-    }
-//    std::stringstream subpath; subpath<<path<<"/values/mean";
-//    ar>>alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_);
-  }
-  void write_hdf5_ss(alps::hdf5::archive &ar, const std::string &path) const{
-    if(ns_!=1) throw std::runtime_error("single site hdf5 write function called for multisite Green's function");
-    ar<<alps::make_pvp(path+"/nt",nt_);
-    ar<<alps::make_pvp(path+"/nf",nf_);
-    for(unsigned int i=0;i<nf_;++i){
-      std::stringstream subpath; subpath<<path<<"/"<<i<<"/mean/value";
-      //currently we're not writing the error.
-      //std::stringstream subpath_e; subpath_e<<path<<"/"<<i<<"/"<<j<<"/"<<"/"<<k<<"/values/error";
-      ar<<alps::make_pvp(subpath.str(), val_+i*nt_, nt_);
-      //ar<<alps::make_pvp(subpath_e.str(), err_, nt_);
+    } else {
+      std::stringstream subpath; subpath<<path<<"/values/mean";
+      ar>>alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_);
     }
   }
-  void read_hdf5_ss(alps::hdf5::archive &ar, const std::string &path) {
-    if(ns_!=1) throw std::runtime_error("single site hdf5 read function called for multisite Green's function");
-    unsigned int nt,nf;
-    ar>>alps::make_pvp(path+"/nt",nt);
-    ar>>alps::make_pvp(path+"/nf",nf);
-    if(nt!=nt_ || nf!=nf_){ std::cerr<<path<<" nt: "<<nt_<<" new: "<<nt<<", nf: "<<nf_<<" new: "<<nf<<" dimensions do not match."<<std::endl; throw std::runtime_error("Green's function read in: dimensions do not match."); }
-    for(unsigned int i=0;i<nf_;++i){
-      std::stringstream subpath; subpath<<path<<"/"<<i<<"/mean/value";
-    //currently we're not writing the error.
-    //std::stringstream subpath_e; subpath_e<<path<<"/"<<i<<"/"<<j<<"/"<<"/"<<k<<"/values/error";
-      ar>>alps::make_pvp(subpath.str(), val_+i*nt_, nt_);
-    //ar<<alps::make_pvp(subpath_e.str(), err_, nt_);
-    }
-  }
-
+  
   std::pair<std::vector<T>,std::vector<T> > to_multiple_vector() const;
   void from_multiple_vector(const std::pair<std::vector<T>,std::vector<T> > &mv);
 #ifdef USE_MPI

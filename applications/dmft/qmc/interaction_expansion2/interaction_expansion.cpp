@@ -89,10 +89,7 @@ pert_hist(max_order)
   if(!parms.defined("ATOMIC")) {
     {
       alps::hdf5::archive ar(parms["INFILE"], "r");
-      if (n_site == 1)
-        bare_green_matsubara.read_hdf5_ss(ar,"/G0") ;
-      else
-        bare_green_matsubara.read_hdf5(ar,"/G0") ;
+      bare_green_matsubara.read_hdf5(ar,"/G0") ;
     }
     FourierTransformer::generate_transformer(alps::make_deprecated_parameters(parms), fourier_ptr);
     fourier_ptr->backward_ft(bare_green_itime, bare_green_matsubara);

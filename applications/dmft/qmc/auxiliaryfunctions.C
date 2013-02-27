@@ -280,17 +280,17 @@ void print_all_green_functions(std::string const &basename, const int iteration_
   alps::hdf5::archive ar(basename+".h5", "a");
   //writeout into hf5 file, using /simulation/iteration/ path
   std::stringstream basepath; basepath<<"/simulation/iteration/"<<iteration_ctr<<"/results/";
-  G_tau.write_hdf5_ss(ar,basepath.str()+"G_tau");
-  G_omega.write_hdf5_ss(ar,basepath.str()+"G_omega");
-  G0_tau.write_hdf5_ss(ar,basepath.str()+"G0_tau");
-  G0_omega.write_hdf5_ss(ar,basepath.str()+"G0_omega");
+  G_tau.write_hdf5(ar,basepath.str()+"G_tau");
+  G_omega.write_hdf5(ar,basepath.str()+"G_omega");
+  G0_tau.write_hdf5(ar,basepath.str()+"G0_tau");
+  G0_omega.write_hdf5(ar,basepath.str()+"G0_omega");
   
   //writeout into hf5 file, using /simulation/results/ path
   std::stringstream basepath2; basepath2<<"/simulation/results/";
-  G_tau.write_hdf5_ss(ar,basepath2.str()+"G_tau");
-  G_omega.write_hdf5_ss(ar,basepath2.str()+"G_omega");
-  G0_tau.write_hdf5_ss(ar,basepath2.str()+"G0_tau");
-  G0_omega.write_hdf5_ss(ar,basepath2.str()+"G0_omega");
+  G_tau.write_hdf5(ar,basepath2.str()+"G_tau");
+  G_omega.write_hdf5(ar,basepath2.str()+"G_omega");
+  G0_tau.write_hdf5(ar,basepath2.str()+"G0_tau");
+  G0_omega.write_hdf5(ar,basepath2.str()+"G0_omega");
 }
 
 
@@ -310,13 +310,13 @@ void print_tau_green_functions(std::string const &basename, const int iteration_
   alps::hdf5::archive ar(basename+".h5", "a");
   //writeout into hf5 file, using /simulation/iteration/ path
   std::stringstream basepath; basepath<<"/simulation/iteration/"<<iteration_ctr<<"/results/";
-  G_tau.write_hdf5_ss(ar,basepath.str()+"G_tau");
-  G0_tau.write_hdf5_ss(ar,basepath.str()+"G0_tau");
+  G_tau.write_hdf5(ar,basepath.str()+"G_tau");
+  G0_tau.write_hdf5(ar,basepath.str()+"G0_tau");
   
   //writeout into hf5 file, using /simulation/results/ path
   std::stringstream basepath2; basepath2<<"/simulation/results/";
-  G_tau.write_hdf5_ss(ar,basepath2.str()+"G_tau");
-  G0_tau.write_hdf5_ss(ar,basepath2.str()+"G0_tau");
+  G_tau.write_hdf5(ar,basepath2.str()+"G_tau");
+  G0_tau.write_hdf5(ar,basepath2.str()+"G0_tau");
 }
 
 void print_dressed_tau_green_functions(std::string const &basename, const int iteration_ctr, const itime_green_function_t &G_tau, const double beta, 
@@ -332,11 +332,11 @@ void print_dressed_tau_green_functions(std::string const &basename, const int it
   alps::hdf5::archive ar(basename+".h5", "a");
   //writeout into hf5 file, using /simulation/iteration/ path
   std::stringstream basepath; basepath<<"/simulation/iteration/"<<iteration_ctr<<"/results/";
-  G_tau.write_hdf5_ss(ar,basepath.str()+"G_tau");
+  G_tau.write_hdf5(ar,basepath.str()+"G_tau");
   
   //writeout into hf5 file, using /simulation/results/ path
   std::stringstream basepath2; basepath2<<"/simulation/results/";
-  G_tau.write_hdf5_ss(ar,basepath2.str()+"G_tau");
+  G_tau.write_hdf5(ar,basepath2.str()+"G_tau");
 }
 
 std::ostream &operator<<(std::ostream &os, const green_function<double> &v){

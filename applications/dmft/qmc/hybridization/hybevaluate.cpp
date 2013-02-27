@@ -147,8 +147,8 @@ void evaluate_time(const alps::results_type<hybridization>::type &results,
   }
 
   //store in hdf5
-  G_tau.write_hdf5_ss(solver_output, "/G_tau");
-  F_tau.write_hdf5_ss(solver_output, "/F_tau");
+  G_tau.write_hdf5(solver_output, "/G_tau");
+  F_tau.write_hdf5(solver_output, "/F_tau");
 
   // ERROR
   for(std::size_t i=0; i<n_orbitals; i++){
@@ -256,9 +256,9 @@ void evaluate_freq(const alps::results_type<hybridization>::type &results,
   }
 
   //store in hdf5
-  G_omega.write_hdf5_ss(solver_output, "/G_omega");
-  F_omega.write_hdf5_ss(solver_output, "/F_omega");
-  S_omega.write_hdf5_ss(solver_output, "/S_omega");
+  G_omega.write_hdf5(solver_output, "/G_omega");
+  F_omega.write_hdf5(solver_output, "/F_omega");
+  S_omega.write_hdf5(solver_output, "/S_omega");
 
   // ERROR
   for(std::size_t i=0; i<n_orbitals; i++){
@@ -380,11 +380,11 @@ void evaluate_legendre(const alps::results_type<hybridization>::type &results,
   }//i
 
   //store in hdf5
-  G_l_omega.write_hdf5_ss(solver_output, "/G_l_omega");
-  F_l_omega.write_hdf5_ss(solver_output, "/F_l_omega");
-  S_l_omega.write_hdf5_ss(solver_output, "/S_l_omega");
-  G_l_tau.write_hdf5_ss(solver_output, "/G_l_tau");
-  F_l_tau.write_hdf5_ss(solver_output, "/F_l_tau");
+  G_l_omega.write_hdf5(solver_output, "/G_l_omega");
+  F_l_omega.write_hdf5(solver_output, "/F_l_omega");
+  S_l_omega.write_hdf5(solver_output, "/S_l_omega");
+  G_l_tau.write_hdf5(solver_output, "/G_l_tau");
+  F_l_tau.write_hdf5(solver_output, "/F_l_tau");
 
   if(parms["TEXT_OUTPUT"]|false){
     std::ofstream gc_str("Gl_conv.dat");

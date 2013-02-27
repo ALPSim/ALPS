@@ -81,10 +81,7 @@ void compute_greens_functions(const alps::results_type<HubbardInteractionExpansi
   std::vector<double> densities(n_flavors);
   {
     alps::hdf5::archive ar(parms["INFILE"], "r");
-    if (n_site == 1)
-      bare_green_matsubara.read_hdf5_ss(ar,"/G0") ;
-    else
-      bare_green_matsubara.read_hdf5(ar,"/G0") ;
+    bare_green_matsubara.read_hdf5(ar,"/G0") ;
   }
   if(measure_in_matsubara) {
     evaluate_selfenergy_measurement_matsubara(results, green_matsubara_measured, 
@@ -115,12 +112,7 @@ void compute_greens_functions(const alps::results_type<HubbardInteractionExpansi
     fourier_ptr->forward_ft(green_itime_measured, green_matsubara_measured);
   {
     alps::hdf5::archive ar(output_file, "a");
-    if (n_site==1) {
-      green_matsubara_measured.write_hdf5_ss(ar, "/G_omega");
-      green_itime_measured.write_hdf5_ss(ar, "/G_tau");
-    } else {
-      green_matsubara_measured.write_hdf5(ar, "/G_omega");
-      green_itime_measured.write_hdf5(ar, "/G_tau");
-    }
+    green_matsubara_measured.write_hdf5(ar, "/G_omega");
+    green_itime_measured.write_hdf5(ar, "/G_tau");
   }
 } 

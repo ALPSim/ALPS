@@ -287,11 +287,11 @@ void evaluate_selfenergy_measurement_matsubara(const alps::results_type<HubbardI
                                                                         std::size_t n_flavors, std::size_t n_matsubara)
 {
   double max_error = 0.;
-  std::cout<<"evaluating self energy measurement."<<std::endl;
+  std::cout<<"evaluating self energy measurement: matsubara, reciprocal space"<<std::endl;
   matsubara_green_function_t Wk(n_matsubara, n_site, n_flavors);
   Wk.clear();
-  matsubara_green_function_t reduced_bare_green_matsubara(n_matsubara, n_site, n_flavors);
-  reduced_bare_green_matsubara.clear();
+  //matsubara_green_function_t reduced_bare_green_matsubara(n_matsubara, n_site, n_flavors);   UNUSED
+  //reduced_bare_green_matsubara.clear();
   for(std::size_t z=0;z<n_flavors;++z){
     for (std::size_t k=0; k<n_site; k++) {                   
       std::stringstream Wk_real_name, Wk_imag_name;
@@ -301,8 +301,8 @@ void evaluate_selfenergy_measurement_matsubara(const alps::results_type<HubbardI
       std::vector<double> mean_imag = results[Wk_imag_name.str().c_str()].mean<std::vector<double> >();
       for(unsigned int w=0;w<n_matsubara;++w)
         Wk(w, k, k, z) = std::complex<double>(mean_real[w], mean_imag[w])/( beta*n_site);
-      for(unsigned int w=0;w<n_matsubara;++w)
-        reduced_bare_green_matsubara(w, k, k, z) = bare_green_matsubara(w, k, k, z);
+      //for(unsigned int w=0;w<n_matsubara;++w)
+      //  reduced_bare_green_matsubara(w, k, k, z) = bare_green_matsubara(w, k, k, z);
       std::vector<double> error_real = results[Wk_real_name.str().c_str()].error<std::vector<double> >();
       std::vector<double> error_imag = results[Wk_imag_name.str().c_str()].error<std::vector<double> >();
       for (unsigned int e=0; e<error_real.size(); ++e) {
