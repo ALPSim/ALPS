@@ -42,7 +42,7 @@ for b in [6.,8.,10.,12.,14.,16.]:
               'H'                   : 0,
               'H_INIT'              : 0.05,
               'MAX_IT'              : 15,
-              'MAX_TIME'            : 5,
+              'MAX_TIME'            : 15,
               'MU'                  : 0,
               'N'                   : 500,
               'NMATSUBARA'          : 500,
@@ -51,7 +51,8 @@ for b in [6.,8.,10.,12.,14.,16.]:
               'OMEGA_LOOP'          : 1,
               'SEED'                : 0,
               'SITES'               : 1,
-              'SOLVER'              : 'hybridization',
+              'SOLVER'              : 'hybridization',  # name of the solver executable, evt. full path needed
+              'SC_WRITE_DELTA'      : 1,
               'SYMMETRIZATION'      : 0,
               'U'                   : 3,
               't'                   : 0.707106781186547,
@@ -78,7 +79,7 @@ for b in [6.,8.,10.,12.,14.,16.]:
 #     input_file = pyalps.writeParameterFile('parm_beta_'+str(p['BETA']),p)
 #     res = pyalps.runDMFT(input_file)
 
-listobs=['Green_0']   # we look at convergence of a single flavor (=0)
+listobs=['0']   # we look at convergence of a single flavor (=0)
     
 ll=pyalps.load.Hdf5Loader()
 for p in parms:
