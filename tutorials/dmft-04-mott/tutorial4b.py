@@ -53,7 +53,8 @@ for u in [4.,5.,6.,8.]:
               'OMEGA_LOOP'              : 1,
               'SEED'                    : 0, 
               'SITES'                   : 1,              
-              'SOLVER'                  : 'hybridization',
+              'SOLVER'                  : 'hybridization',  # name of the solver executable, evt. full path needed
+              'SC_WRITE_DELTA'          : 1,
               'SYMMETRIZATION'          : 1,
               't'                       : 1,
               'SWEEPS'                  : 100000000,
@@ -77,7 +78,7 @@ for u in [4.,5.,6.,8.]:
 #     input_file = pyalps.writeParameterFile('parm_u_'+str(p['U']),p)
 #     res = pyalps.runDMFT(input_file)
 
-listobs=['Green_0']   # we look at convergence of a single flavor (=0)
+listobs=['0']   # we look at convergence of a single flavor (=0)
     
 ll=pyalps.load.Hdf5Loader()
 for p in parms:

@@ -53,7 +53,8 @@ for u in [4.,5.,6.,8.]:
               'OMEGA_LOOP'              : 1,
               'SEED'                    : 0, 
               'SITES'                   : 1,              
-              'SOLVER'                  : 'hybridization',
+              'SOLVER'                  : 'hybridization',  # name of the solver executable, evt. full path needed
+              'SC_WRITE_DELTA'          : 1,
               'SYMMETRIZATION'          : 1,
               't'                       : 1,
               'SWEEPS'                  : 100000000,
@@ -74,7 +75,7 @@ for p in parms:
     input_file = pyalps.writeParameterFile('parm_u_'+str(p['U']),p)
     res = pyalps.runDMFT(input_file)
 
-listobs=['Green_0']   # we look at only one flavor, as they are SYMMETRIZED
+listobs=['0']   # we look at only one flavor, as they are SYMMETRIZED
     
 ll=pyalps.load.Hdf5Loader()
 data = ll.ReadMeasurementFromFile(pyalps.getResultFiles(pattern='parm_u_*h5'), respath='/simulation/results/G_tau', measurements=listobs, verbose=True)
