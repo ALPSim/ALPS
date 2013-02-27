@@ -48,7 +48,8 @@ parms.append(
               'OMEGA_LOOP'          : 1,
               'SEED'                : 0,
               'SITES'               : 1,
-              'SOLVER'              : 'hybridization',
+              'SOLVER'              : 'hybridization',  # name of the solver executable, evt. full path needed
+              'SC_WRITE_DELTA'      : 1,
               'SYMMETRIZATION'      : 0,
               'CONVERGED'           : 0.01,
               'U'                   : 2,

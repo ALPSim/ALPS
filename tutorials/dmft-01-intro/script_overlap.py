@@ -28,7 +28,7 @@
 import pyalps
 
 print "DESCRIPTION: This script gets the observable OVERLAP from the result files in the current directory (recursively)."
-print "WARNING: tested only with Hybridization Solver (1st version)"
+print "WARNING: works only with Hybridization Solver (1st version)"
 print "NOTE: Iteration-resolved observable OVERLAP: is to be found in the text-file 'overlap'"
 print 
 

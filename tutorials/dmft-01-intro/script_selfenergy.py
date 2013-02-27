@@ -34,11 +34,24 @@ import matplotlib.pyplot as plt
 import pyalps.plot
 from math import pi
 
-print "DESCRIPTION: This script shows the iteration-resolved selfenergy from the specifyied result file. The selfenergy is calculated via Dyson equation from the stored G and G0."
+print "DESCRIPTION: This script shows the iteration-resolved selfenergy from the specifyied result file. The selfenergy is calculated via Dyson equation from the stored G and G0. For single site problems only."
 print
 
-print "Enter the name (prefix) of the (single) result file, which is to examine :"
-res_file = raw_input('--> ')
+
+all_result_files = pyalps.getResultFiles()
+if len(all_result_files)>1:
+  print "Choose the (single) result file, which is to be examined: "
+  for i in range(0,len(all_result_files)):
+    print i,':', all_result_files[i]
+  result_files = [all_result_files[eval(raw_input('--> '))]]
+else:
+  print "Result file to be examined: "
+  print all_result_files[0]
+  result_files=all_result_files
+  
+#print "Enter the name (prefix) of the (single) result file, which is to examine :"
+#res_file = raw_input('--> ')
+#result_files = pyalps.getResultFiles(prefix=res_file)
 
 tau_repr = False
 
@@ -59,9 +72,8 @@ def propsort(data,pn):
     '''sort datasets in data using the property named pn as key'''
     data.sort(cmp=lambda x,y:cmp(eval(x[0].props[pn]),eval(y[0].props[pn])))
     
-listobs=['Green_'+str(flavor)]
+listobs=[str(flavor)]  # previous format: "Green_"+str(flavor)
 ll=pyalps.load.Hdf5Loader()
-result_files = pyalps.getResultFiles(prefix=res_file)
 
 data_G = ll.ReadDMFTIterations(result_files, 'G_omega', measurements=listobs, verbose=True)
 data_G0 = ll.ReadDMFTIterations(result_files, 'G0_omega', measurements=listobs, verbose=True)

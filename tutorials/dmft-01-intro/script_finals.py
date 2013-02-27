@@ -53,7 +53,7 @@ answer = raw_input('--> ')
 flavor = 0
 if len(answer)>0:
   flavor = eval(answer)
-listobs=['Green_'+str(flavor)]
+listobs=[str(flavor)]   # previous format: "Green_"+str(flavor)
 
 ll=pyalps.load.Hdf5Loader()
 

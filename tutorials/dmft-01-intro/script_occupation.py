@@ -27,22 +27,21 @@
 
 import pyalps
 
-print "DESCRIPTION: This script prints out the occupation for each flavor, loads results from the current directory (recursively)."
-print "WARNING: tested only for single site."
+print "DESCRIPTION: This script prints out the density for each flavor, for single site problems; the results are loaded from the h5-files in the current directory (recursively)."
 print
 
 result_files = pyalps.getResultFiles()
 
-print "OCCUPATION (in the last iteration) taken directly from the result files :"
-occ = pyalps.loadMeasurements(result_files,['n'])
-for o in occ:
-  if len(o)>0:
-    print "  from file : ",o[0].props['filename']
-    for f in range(0,len(o[0].x)):
-      print '    flavor ',f,' : ',o[0].y[f]
-print
+#print "OCCUPATION (in the last iteration) taken directly from the result files :"
+#occ = pyalps.loadMeasurements(result_files,['n'])
+#for o in occ:
+#  if len(o)>0:
+#    print "  from file : ",o[0].props['filename']
+#    for f in range(0,len(o[0].x)):
+#      print '    flavor ',f,' : ',o[0].y[f]
+#print
       
-print "OCCUPATION (in the last iteration) taken from the Green's function in imaginary time [recall: G(beta) = -n] :"
+print "DENSITY (in the last iteration) obtained from the Green's function in imaginary time as -G(beta^-):"
 ll=pyalps.load.Hdf5Loader()
 for a in result_files:
   res_file = [a]
@@ -52,7 +51,7 @@ for a in result_files:
     #print "  from file : ",a
     listobs=[]
     for f in range(0,flavors):
-      listobs.append('Green_'+str(f))
+      listobs.append(str(f))  # previous format: "Green_"+str(f)
     data_G_tau = ll.ReadMeasurementFromFile(res_file, respath='/simulation/results/G_tau', measurements=listobs, verbose=True)  # [result_files(here only 1)][measurements(here: flavors)]
     for f in range(0,flavors):
       print '    flavor ',f,' : ',-data_G_tau[0][f].y[len(data_G_tau[0][f].x)-1]
