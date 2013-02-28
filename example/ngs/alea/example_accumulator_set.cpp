@@ -97,7 +97,7 @@ int main()
         set["simpleV"] << std::vector<double>(3,1);
         set["simpleV"] << std::vector<double>(3,2);
         
-        //------------------- get some data via the result_type_wrapper -------------------
+        //------------------- get some data via the result_type_accumulator_wrapper -------------------
         //------------------- manual type-infusion -------------------
         cout << "mean: " << set["Energy"].get<double>().mean() << endl;
         cout << "mean: " << alps::short_print(set["Vel"].get<std::vector<double> >().mean()) << endl;

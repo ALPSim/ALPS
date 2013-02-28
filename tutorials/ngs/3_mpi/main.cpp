@@ -64,7 +64,9 @@ int main(int argc, char *argv[]) {
         if (options.resume)
             sim.load(checkpoint_file);
 
-        sim.run(alps::stop_callback_mpi(comm, options.timelimit));
+        // TODO: how do we handle signels in mpi context? do we want to handle these in the callback or in the simulation?
+        // do not use stop_callback_mpi: we do not want an bcast after every sweep!
+        sim.run(alps::stop_callback(comm, options.timelimit));
 
         sim.save(checkpoint_file);
 
