@@ -42,14 +42,15 @@ for cp in coulombparam:
               'H'                   : 0,
               'H_INIT'              : 0.,
               'MAX_IT'              : 15,
-              'MAX_TIME'            : 20,
+              'MAX_TIME'            : 60,
               'MU'                  : 0,
-              'N'                   : 1000,
-              'NMATSUBARA'          : 1000,
+              'N'                   : 500,
+              'NMATSUBARA'          : 500,
               'N_MEAS'              : 10000,
               'N_ORDER'             : 50,
               'SEED'                : 0,
               'SOLVER'              : 'hybridization',
+              'SC_WRITE_DELTA'      : 1,
               'SYMMETRIZATION'      : 1,
               'SWEEPS'              : 100000000,
               'BETA'                : 30,
@@ -76,7 +77,7 @@ for p in parms:
     input_file = pyalps.writeParameterFile('parm_u_'+str(p['U'])+'_j_'+str(p['J']),p)
     res = pyalps.runDMFT(input_file)
 
-listobs = ['Green_0', 'Green_2']   # flavor 0 is SYMMETRIZED with 1, flavor 2 is SYMMETRIZED with 3
+listobs = ['0', '2']   # flavor 0 is SYMMETRIZED with 1, flavor 2 is SYMMETRIZED with 3
     
 ll=pyalps.load.Hdf5Loader()
 data = ll.ReadMeasurementFromFile(pyalps.getResultFiles(pattern='parm_u_*h5'), respath='/simulation/results/G_tau', measurements=listobs, verbose=True)
