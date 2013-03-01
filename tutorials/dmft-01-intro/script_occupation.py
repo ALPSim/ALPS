@@ -47,7 +47,7 @@ for a in result_files:
   res_file = [a]
   obs = pyalps.loadObservableList(res_file)
   if obs[0].count('G_tau')>0:
-    flavors = int(pyalps.loadProperties(['parm_file.h5'])[0]["FLAVORS"])
+    flavors = int(pyalps.loadProperties(res_file)[0]["FLAVORS"])
     #print "  from file : ",a
     listobs=[]
     for f in range(0,flavors):
