@@ -78,7 +78,7 @@ for p in parms:
     input_file = pyalps.writeParameterFile('hybrid_TWODBS_beta_'+str(p['BETA'])+'_U_'+str(p['U']),p)
     res = pyalps.runDMFT(input_file)
 
-listobs=['Green_0']  # we look only at flavor=0
+listobs=['0']  # we look only at flavor=0
     
 ll=pyalps.load.Hdf5Loader()
 data = ll.ReadMeasurementFromFile(pyalps.getResultFiles(pattern='hybrid_TWODBS*h5'), respath='/simulation/results/G_tau', measurements=listobs, verbose=True)
