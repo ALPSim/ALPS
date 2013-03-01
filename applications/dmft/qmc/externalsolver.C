@@ -35,6 +35,7 @@
 #include "externalsolver.h"
 #include "fouriertransform.h"
 #include "2dsimpson.h"
+#include "U_matrix.h"
 #include <cstdlib>
 #include <fstream>
 #ifdef BOOST_MSVC
@@ -50,7 +51,7 @@ void print_green_itime(std::ostream &os, const itime_green_function_t &v, const 
 
 void prepare_parms_for_hybridization(alps::Parameters& p, alps::hdf5::archive& solver_input) {
   double mu=p["MU"];
-  double U=p["U"];
+  U_matrix U(p);
   double h = static_cast<double>(p.value_or_default("H",0.));
   unsigned n_orbital=static_cast<unsigned>(p["FLAVORS"]);
   
@@ -61,12 +62,12 @@ void prepare_parms_for_hybridization(alps::Parameters& p, alps::hdf5::archive& s
   p["DELTA_IN_HDF5"]=1;
   p["DELTA"]=p["INFILE"];
   if (h==0) {
-    p["MU"]=mu+U/2.;
+    p["MU"]=mu+U.mu_shift();
   } else {
     std::vector<double> mu_vector(n_orbital);
     for (int f = 0; f < n_orbital; ++f) {
       double hsign = f%2 ? h : -h;
-      mu_vector[f]=mu+U/2.+hsign;
+      mu_vector[f]=mu+U.mu_shift()+hsign;
     }
     p["MU_VECTOR"]=p["INFILE"];
     p["MU_IN_HDF5"]=1;
