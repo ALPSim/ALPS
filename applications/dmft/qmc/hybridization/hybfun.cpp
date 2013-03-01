@@ -51,7 +51,7 @@ for(std::size_t i=0; i<ntime();++i)
   for(std::size_t j=0; j<nflavor();++j)
     if(operator()(i,j)>0.) {
       std::cerr << "ERROR: Delta(t="<<i<<"; f="<<j<<") = " << operator()(i,j) << "  is positive." << std::endl;
-      std::cerr << "Note: small positive values might be due to noise, in that case try to enhance the MAX_TIME." << std::endl << std::flush
+      std::cerr << "Note: small positive values might be due to noise, in that case try to enhance the MAX_TIME." << std::endl << std::flush;
       throw std::invalid_argument("Problem with hybridization function: Delta(\\tau) > 0. Delta should always be negative!");
     }
 }
