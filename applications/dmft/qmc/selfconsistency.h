@@ -51,7 +51,7 @@
 
 extern void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert);
 
-extern void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, itime_green_function_t& G_tau);
+extern void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert);
 
 
 /// performs a DMFT self-consistency loop until convergence

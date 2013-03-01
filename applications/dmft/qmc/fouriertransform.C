@@ -215,11 +215,11 @@ void FourierTransformer::append_tail(matsubara_green_function_t& G_omega,
 }
 
 void FourierTransformer::generate_transformer(const alps::Parameters &parms,
-                                              boost::shared_ptr<FourierTransformer> &fourier_ptr, bool initial)
+                                              boost::shared_ptr<FourierTransformer> &fourier_ptr)
 {
   int n_flavors = parms.value_or_default("FLAVORS", 2); 
   int n_site = parms.value_or_default("SITES", 1);
-  double h = (initial && parms.defined("H_INIT") ? static_cast<double>(parms["H_INIT"]) : static_cast<double>(parms.value_or_default("H",0.)));
+  double h = static_cast<double>(parms.value_or_default("H",0.));
   if (parms.defined("GENERAL_FOURIER_TRANSFORMER")) {
     std::cout << "using general fourier transformer" << "\n";
     std::vector<double> eps(n_flavors);

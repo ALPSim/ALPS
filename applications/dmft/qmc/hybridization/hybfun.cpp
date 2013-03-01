@@ -49,7 +49,11 @@ green_function<double>(p["N_TAU"]+1, 1, p["N_ORBITALS"])
 void hybfun::hybridization_function_sanity_check(void){
 for(std::size_t i=0; i<ntime();++i)
   for(std::size_t j=0; j<nflavor();++j)
-    if(operator()(i,j)>0.) throw std::invalid_argument("Problem with hybridization function: Delta(\\tau) > 0. Delta should always be negative!");
+    if(operator()(i,j)>0.) {
+      std::cerr << "ERROR: Delta(t="<<i<<"; f="<<j<<") = " << operator()(i,j) << "  is positive." << std::endl;
+      std::cerr << "Note: small positive values might be due to noise, in that case try to enhance the MAX_TIME." << std::endl << std::flush
+      throw std::invalid_argument("Problem with hybridization function: Delta(\\tau) > 0. Delta should always be negative!");
+    }
 }
 
 //this routine reads in the hybridization function, either from a text file or from an hdf5 file (for easy passing of binary data).

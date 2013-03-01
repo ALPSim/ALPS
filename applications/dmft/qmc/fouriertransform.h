@@ -94,7 +94,7 @@ public:
                            const int nfreq_measured) const;
   
   static void generate_transformer(const alps::Parameters &parms,
-                                   boost::shared_ptr<FourierTransformer> &fourier_ptr, bool initial=false);
+                                   boost::shared_ptr<FourierTransformer> &fourier_ptr);
   static void generate_transformer_U(const alps::Parameters &parms,
                                      boost::shared_ptr<FourierTransformer> &fourier_ptr,
                                      const std::vector<double> &densities);
@@ -126,11 +126,12 @@ public:
   : FourierTransformer(beta, n_flavor, 1)
   {
     for(int f=0; f<n_flavor; f++) {
-      int s = f % 2 ? -1 : 1;
-      double mub = mu + s*h;
+      double hsign = f%2 ? h : -h;
+      double mub = mu + hsign;
       c1_[f][0][0] = 1.;
       c2_[f][0][0] = eps[f] - mub;
-      c3_[f][0][0] = epssq[f] - 2*mub*eps[f] + mub*mub;        
+      c3_[f][0][0] = epssq[f] - 2*mub*eps[f] + mub*mub;
+      // Note: the coefficients are the same if h is uniform field as if it is staggered
     }
   }
 };

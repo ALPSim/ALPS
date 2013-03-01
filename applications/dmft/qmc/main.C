@@ -112,8 +112,13 @@ int main(int argc, char** argv)
         }
         else if (parms["SOLVER"]=="Hybridization") {
           throw std::invalid_argument("The internal hybridization solver has been replaced by a standalone hybridzation solver.\nPlease use the \'hybridization\' program");
-        }
-        else {
+        } else if (parms["SOLVER"]=="hybridization" || static_cast<bool>(parms.value_or_default("SC_WRITE_DELTA",false))) {
+          std::string p(parms["SOLVER"]);
+          std::cout<<"using external solver: "<<p<<std::endl;
+          parms["SC_WRITE_DELTA"]=1; //we need the hybridization function for this solver
+          solver_ptr.reset(new ExternalSolver(p));
+          F_selfconsistency_loop(parms, *solver_ptr, transform);
+        } else {
             /*boost::filesystem::path*/ std::string p(parms["SOLVER"]/**/);
           solver_ptr.reset(new ExternalSolver(/*boost::filesystem::absolute(*/p/*)*/));
           selfconsistency_loop(parms, *solver_ptr, transform);
