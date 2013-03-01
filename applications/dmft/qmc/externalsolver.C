@@ -157,21 +157,22 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
       //write Delta(i\omega_n) along with \Delta(\tau)
       
       //find the second moment of the band structure
-      double epssqav ;
+      std::vector<double> epssq_(n_orbital);
       if (parms.defined("DOSFILE") || parms.defined("TWODBS")) {
-        if (!parms.defined("EPSSQAV")) {
-          throw std::logic_error("error: you specify a DOS/TWODBS file, please also specify the second moment of the band structure EPSSQAV!");
-        } else {
-          epssqav = parms["EPSSQAV"];
-        }
-      }else{
-        double t=parms["t"]; //this is the default: semicircular density of states
-        epssqav = t * t; //...and its moment.
+        for (std::size_t f=0; f<n_orbital; ++f)
+          epssq_[f] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)];
+      } else {
+        BetheBandstructure bethe_parm(parms);
+        for (std::size_t f=0; f<n_orbital; ++f)
+          epssq_[f] = bethe_parm.tsq(f);
       }
+      for (std::size_t f=1; f<n_orbital; ++f)
+        if (epssq_[f]!=epssq_[0])
+          throw std::logic_error("ERROR: ExternalSolver::solve_omega : unsupported option : EPSSQ_i are not same for all flavors.");
       double beta=p["BETA"];
       double mu=p["MU"];
       double h = static_cast<double>(parms.value_or_default("H",0.));
-      FFunctionFourierTransformer Fourier(beta , 0, epssqav , n_orbital, 1);
+      FFunctionFourierTransformer Fourier(beta , mu, epssq_[0] , n_orbital, 1);
       matsubara_green_function_t Delta_matsubara(n_matsubara, 1, n_orbital);
       itime_green_function_t Delta_itime(n_tau+1, 1, n_orbital);
       for (int f = 0; f < n_orbital; ++f) {

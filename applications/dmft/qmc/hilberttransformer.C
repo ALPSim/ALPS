@@ -230,7 +230,7 @@ matsubara_green_function_t FSSemicircleHilbertTransformer::operator()(const mats
 
 void FrequencySpaceHilbertTransformer::SetBandstructureParms(alps::Parameters& parms, std::vector<double> eps, std::vector<double> epssq) {
   // set parameters for the FourierTransformer if none of them is set by the user
-  bool is_set = parms.defined("EPSSQAV");
+  bool is_set = false;
   unsigned int n_flavors = parms.value_or_default("FLAVORS", 2);
   for (unsigned int i=0; i < n_flavors; i++) {
     if (parms.defined("EPS_"+boost::lexical_cast<std::string>(i)) || parms.defined("EPSSQ_"+boost::lexical_cast<std::string>(i)))
@@ -238,7 +238,6 @@ void FrequencySpaceHilbertTransformer::SetBandstructureParms(alps::Parameters& p
   }
   if (! is_set) { // if the user did not set it manually
     std::cout << "initialization of a the Hilbert transformer: writing the values for bandstructure-parameters needed in FourierTransformer." << std::endl;
-    parms["EPSSQAV"] = epssq[0];  // good only for single band, is loaded by Hybridization
     for (unsigned int i=0; i < n_flavors; i++) {
       parms["EPS_"+boost::lexical_cast<std::string>(i)] = 0;  // eps[i/2] ?
       parms["EPSSQ_"+boost::lexical_cast<std::string>(i)] = epssq[i/2];
