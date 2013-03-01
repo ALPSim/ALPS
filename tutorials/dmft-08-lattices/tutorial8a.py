@@ -32,31 +32,32 @@ import pyalps.plot
 
 #prepare the input parameters
 parms=[]
-for u in [4.]: 
-  for b in [20.]:
+for u in [6.]: 
+  for b in [8.]:
     parms.append(
             { 
                 'BETA' : b,          # inverse temperature
-                'MU' : 0,            # chemical potential corresponding to half-filling
+                'MU' : 0.0,          # chemical potential corresponding to half-filling
                 'U' : u,             # Hubbard interaction
                 'FLAVORS' : 2,       # corresponds to spin up/down
                 'SITES' : 1,         # number of sites in the impurity
-                'H' : 0,             # there is no magnetic field
-                'H_INIT' : 0.0,      # we do not set any initial field to split spin up/down, might be useful in short runs if you want to look for antiferromagnetic ordering
+                'H' : 0.0,           # there is no magnetic field
+                'H_INIT' : 0.05,     #  we set initial field to split spin up/down in order to trigger AF phase
                 'OMEGA_LOOP' : 1,        # the selfconsistency runs in Matsubara frequencies
                 'ANTIFERROMAGNET' : 1,   # allow Neel order
                 'SYMMETRIZATION' : 0,    # do not enforce paramagnetic solution
-                'NMATSUBARA' : 1000,     # number of Matsubara frequencies
-                'N' : 1000,              # bins in imaginary time
-                'CONVERGED' : 0.01,      # criterion for convergency
-                'MAX_TIME' : 60,         # max. time spent in solver in a single iteration in seconds
+                'NMATSUBARA' : 500,      # number of Matsubara frequencies
+                'N' : 500,               # bins in imaginary time
+                'CONVERGED' : 0.005,     # criterion for convergency
+                'MAX_TIME' : 180,        # max. time spent in solver in a single iteration in seconds
                 'G0OMEGA_INPUT' : "",    # forces to start from the local non-interacting Green's function
                 'MAX_IT' : 20,           # max. number of self-consistency iterations
-                'CHECKPOINT' : "dump_DOS_beta_"+str(b)+'_U_'+str(u),   # prefix for checkpointing
+                'CHECKPOINT' : "dump_DOS_beta"+str(b)+'_U'+str(u),   # prefix for checkpointing
                 'SWEEPS' : 100000000,    # max. number of sweeps in a single iteration
                 'THERMALIZATION' : 1000, # number of thermalization sweeps
                 'SEED' : 0,              # random seed
-                'SOLVER' : "hybridization",   # we take the Hybridization1 impurity solver
+                'SOLVER' : "hybridization",   # we take the hybridization impurity solver
+                'SC_WRITE_DELTA' : 1,         # input for the hybridization impurity solver is the hybridization function Delta, which has to be written by the selfconsistency
                 'N_MEAS' : 10000,             # number of Monte Carlo steps between measurements
                 'N_ORDER' : 50,               # histogram size
                 'DOSFILE' : "DOS/DOS_Square_GRID4000", # specification of the file with density of states
