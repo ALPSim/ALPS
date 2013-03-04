@@ -36,10 +36,10 @@
  * -----------------+-----------------------+----------------------                *
  * mean             | Count                 | mean(x)                              *
  * error            | Count, mean           | error(x)                             *
- * fixed_size_binn  | Count, mean, error    | fixed_size_bin(x)                    *
- * MaxNumBinning    | Count, mean, error    | max_num_bin(x)                       *
- * log_binning      | Count, mean, error    | log_bin(x)                           *
- * autocorrelation  | Count, mean, error    | autocorr(x)                          *
+ * fixed_size_binn  | Count, mean, error    | fixed_size_binning(x)                *
+ * MaxNumBinning    | Count, mean, error    | max_num_binning(x)                   *
+ * log_binning      | Count, mean, error    | log_binning(x)                       *
+ * autocorrelation  | Count, mean, error    | autocorrelation(x)                   *
  * -----------------+-----------------------+----------------------                *
  *                                                                                 *
  * NOTE: the first template parameter MUST be the value_type                       *
@@ -97,15 +97,15 @@ int main()
     //output:   5
     cout << error(demo) << endl;
     //output:   1.41421
-    cout << fixed_size_bin(demo).bins()[0] << endl;
+    cout << fixed_size_binning(demo).bins()[0] << endl;
     //output:   2     //(1+3)/2
-    cout << max_num_bin(demo).bins()[0] << endl;
+    cout << max_num_binning(demo).bins()[0] << endl;
     //output:   2     //(1+3)/2
-    cout << log_bin(demo).bins()[0] << endl;
+    cout << log_binning(demo).bins()[0] << endl;
     //output:   1     //first element
-    cout << autocorr(demo).error(2) << endl;
-    cout << autocorr(demo).bins()[1] << endl;
-    cout << autocorr(demo).sum()[1] << endl;
+    cout << autocorrelation(demo).error(2) << endl;
+    cout << autocorrelation(demo).bins()[1] << endl;
+    cout << autocorrelation(demo).sum()[1] << endl;
     
     cout << converged(demo) << endl;
     //output:   2 (alps::accumulator::error_convergence maybe)   //not jet implemented
@@ -165,25 +165,25 @@ int main()
     //------------------- binnings -------------------    
     
     cout << n.count() << endl;
-    cout << fixed_size_bin(n.get<int>()).bins()[0] << " ";
-    cout << n.get<int>().fixed_size_bin().bins()[1] << " ";
-    cout << n.get<int>().fixed_size_bin().bins()[2] << " ";
-    cout << n.get<int>().fixed_size_bin().bin_size() << endl;
+    cout << fixed_size_binning(n.get<int>()).bins()[0] << " ";
+    cout << n.get<int>().fixed_size_binning().bins()[1] << " ";
+    cout << n.get<int>().fixed_size_binning().bins()[2] << " ";
+    cout << n.get<int>().fixed_size_binning().bin_size() << endl;
     //~ //output: 1 1 1 1
-    cout << n.get<int>().max_num_bin().bins()[0] << " ";
-    cout << n.get<int>().max_num_bin().bins()[1] << " ";
-    cout << n.get<int>().max_num_bin().bins()[2] << " ";
-    cout << n.get<int>().max_num_bin().bins()[3] << endl;
+    cout << n.get<int>().max_num_binning().bins()[0] << " ";
+    cout << n.get<int>().max_num_binning().bins()[1] << " ";
+    cout << n.get<int>().max_num_binning().bins()[2] << " ";
+    cout << n.get<int>().max_num_binning().bins()[3] << endl;
     //~ //output: 1 1 1 1
-    cout << n.get<int>().log_bin().bins()[0] << " ";
-    cout << n.get<int>().log_bin().bins()[1] << " ";
-    cout << n.get<int>().log_bin().bins()[2] << " ";
-    cout << n.get<int>().log_bin().bins()[3] << endl;
+    cout << n.get<int>().log_binning().bins()[0] << " ";
+    cout << n.get<int>().log_binning().bins()[1] << " ";
+    cout << n.get<int>().log_binning().bins()[2] << " ";
+    cout << n.get<int>().log_binning().bins()[3] << endl;
     //~ //output: 1 1 1 1
-    cout << n.get<int>().autocorr() << " ";
-    cout << n.get<int>().autocorr() << " ";
-    cout << n.get<int>().autocorr() << " ";
-    cout << n.get<int>().autocorr() << endl;
+    cout << n.get<int>().autocorrelation() << " ";
+    cout << n.get<int>().autocorrelation() << " ";
+    cout << n.get<int>().autocorrelation() << " ";
+    cout << n.get<int>().autocorrelation() << endl;
     //output: 64 128 256 512
 
     //------------------- doesn't work jet -------------------

@@ -60,8 +60,7 @@ namespace alps
     namespace accumulator
     {
         // with this specialisation the detail::accumulator_wrapper knows, that custom_accum has a mean function
-        template<> struct has_mean<custom_accum> 
-        {
+        template<> struct has_feature<tag::mean, custom_accum> {
             enum{value = true};
         };
 
@@ -70,9 +69,7 @@ namespace alps
         // unless custom_accum has a memberfunction that is called X() const
 
         // the value_type trait must be specialised
-        template<>
-        struct value_type<custom_accum>
-        {
+        template<> struct value_type<custom_accum> {
             typedef int type;
         };
 

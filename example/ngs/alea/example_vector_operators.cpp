@@ -62,7 +62,7 @@ int main()
     //~ c << a3;
     //~ std::cout << alps::short_print(c.mean()) << std::endl;
     //~ 
-    //~ std::cout << alps::short_print(c.fixed_size_bin().bins()) << std::endl;
+    //~ std::cout << alps::short_print(c.fixed_size_binning().bins()) << std::endl;
     //~ 
     //~ 
     //~ std::cout << c.count() << std::endl;
