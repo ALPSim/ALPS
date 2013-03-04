@@ -6,7 +6,7 @@
  *                              Philipp Werner <werner@itp.phys.ethz.ch>,
  *                              Sebastian Fuchs <fuchs@theorie.physik.uni-goettingen.de>
  *                              Matthias Troyer <troyer@comp-phys.org>
- *               2012        by Jakub Imriska <jimriska@phys.ethz.ch>
+ *               2012 - 2013 by Jakub Imriska <jimriska@phys.ethz.ch>
  *
  *
 * This software is part of the ALPS Applications, published under the ALPS
@@ -59,14 +59,15 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
   //bool degenerate = parms.value_or_default("DEGENERATE", false);
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
   std::string basename=parms["BASENAME"];
-  
+  if (parms.defined("H_INIT")) parms["H"]=parms["H_INIT"];
   itime_green_function_t G0_tau = hilbert.initial_G0(parms);
   itime_green_function_t G_tau = G0_tau;
   itime_green_function_t G0_tau_old(G0_tau);
-
   int iteration_ctr=0;
   double max_diff;	
   do {
+    ++iteration_ctr;
+    std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
     double mu = static_cast<double>(parms["MU"]);
     G0_tau_old = G0_tau;
     std::cout<<"running solver"<<std::endl;
@@ -75,16 +76,17 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
     std::cout<<"running Hilbert transform"<<std::endl;
     G_tau = hilbert.symmetrize(G_tau, symmetrization);
     G0_tau= hilbert(G_tau, mu, h, beta);
+    parms["H"]=h;
     std::cout<<"comparing old and new results"<<std::endl;
     max_diff=0;
     for(int f=0; f<flavors;++f){
       for(int i=0; i<N; i++) {
         if (fabs(G0_tau(i,f)-G0_tau_old(i,f)) > max_diff)
-          max_diff = fabs(G0_tau(i,f)-G0_tau_old(i,f));
+          max_diff = std::abs(G0_tau(i,f)-G0_tau_old(i,f));
       }
     }	
-    std::cout<<"maximum difference in G0 is: "<<max_diff<<std::endl;
-    print_tau_green_functions(basename, ++iteration_ctr, G0_tau_old, G_tau, beta);
+    std::cout<<"maximum difference in G0_tau is: "<<max_diff<<std::endl;
+    print_tau_green_functions(basename, iteration_ctr, G0_tau_old, G_tau, beta);
   } while (max_diff > converged  && iteration_ctr < max_it);
   std::cout<<(max_diff > converged ? "NOT " : "")<<"converged!"<<std::endl;
   // write G0 (to be read in as an input for a new simulation)
@@ -166,7 +168,7 @@ void selfconsistency_loop_omega(alps::Parameters& parms, MatsubaraImpuritySolver
   if (parms.defined("H_INIT")) parms["H"]=parms["H_INIT"];
   matsubara_green_function_t G0_omega = hilbert.initial_G0(parms);
   G0_omega = hilbert.symmetrize(G0_omega, symmetrization);
-
+  
   //define multiple vectors
   matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
   matsubara_green_function_t G_omega_old(n_matsubara, n_site, n_orbital);
@@ -174,7 +176,7 @@ void selfconsistency_loop_omega(alps::Parameters& parms, MatsubaraImpuritySolver
   itime_green_function_t G_tau(n_tau +1, n_site, n_orbital);
   itime_green_function_t G0_tau(n_tau+1, n_site, n_orbital);
   itime_green_function_t G0_tau_old(n_tau+1, n_site, n_orbital);
-  
+
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer(parms, fourier_ptr);
   fourier_ptr->backward_ft(G0_tau, G0_omega);

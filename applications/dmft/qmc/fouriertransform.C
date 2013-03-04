@@ -33,7 +33,6 @@
 #include <boost/numeric/bindings/lapack/driver/gesv.hpp>
 
 #include "fouriertransform.h"
-#include "2dsimpson.h"
 #include <valarray>
 #include <boost/numeric/ublas/io.hpp>
 #include <alps/parameter.h>
@@ -220,7 +219,7 @@ void FourierTransformer::generate_transformer(const alps::Parameters &parms,
   int n_flavors = parms.value_or_default("FLAVORS", 2); 
   int n_site = parms.value_or_default("SITES", 1);
   double h = static_cast<double>(parms.value_or_default("H",0.));
-  if (parms.defined("GENERAL_FOURIER_TRANSFORMER")) {
+  /*if (parms.defined("GENERAL_FOURIER_TRANSFORMER"))*/ {
     std::cout << "using general fourier transformer" << "\n";
     std::vector<double> eps(n_flavors);
     std::vector<double> epssq(n_flavors);
@@ -231,20 +230,9 @@ void FourierTransformer::generate_transformer(const alps::Parameters &parms,
     fourier_ptr.reset(new SimpleG0FourierTransformer((double)parms["BETA"], (double)parms["MU"], h,
                                                      n_flavors, eps, epssq));
   } 
-  else if (n_site>1) {
+  /*else if (n_site>1) {
     throw std::logic_error("for cluster fourier transforms please use the cluster version of this framework");
-  }else {
-    std::cout << "using Bethe lattice fourier transformer for G0" << "\n";
-    std::vector<double> eps(n_flavors);
-    std::vector<double> epssq(n_flavors);
-    BetheBandstructure bethe_parms(parms);
-    for (int f=0; f<n_flavors; ++f) {
-      eps[f] = 0.;
-      epssq[f] = bethe_parms.tsq(f);
-    }
-    fourier_ptr.reset(new SimpleG0FourierTransformer((double)parms["BETA"], (double)parms["MU"], h,
-                                                     n_flavors, eps, epssq));
-  }
+  }*/
 }
 
 
@@ -257,7 +245,7 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
   int n_flavors = parms.value_or_default("FLAVORS", 2); 
   int n_site = parms.value_or_default("SITES", 1); 
   double U = parms["U"];
-  if (parms.defined("GENERAL_FOURIER_TRANSFORMER")) {
+  /*if (parms.defined("GENERAL_FOURIER_TRANSFORMER"))*/ {
     std::cout << "using general fourier transformer" << "\n";
     std::vector<std::vector<double> > eps(n_flavors);
     std::vector<std::vector<double> >epssq(n_flavors);
@@ -269,22 +257,8 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
     }
     fourier_ptr.reset(new GFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., U, 
                                               n_flavors, 1, densities, eps, epssq));
-  } 
-  else if (n_site>1) {
+  }
+  /*else if (n_site>1) {
     throw std::logic_error("for cluster versions of the fourier transform please use the cluster framework.");    
-  }
-  else {
-    std::cout << "using Bethe lattice fourier transformer for G" << "\n";
-    std::vector<std::vector<double> > eps(n_flavors);
-    std::vector<std::vector<double> > epssq(n_flavors);
-    BetheBandstructure bethe_parms(parms);
-    for (int f=0; f<n_flavors; ++f) {
-      eps[f].resize(1);
-      epssq[f].resize(1);
-      eps[f][0] = 0.;
-      epssq[f][0] = bethe_parms.tsq(f);
-    }
-    fourier_ptr.reset(new GFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., U, 
-                                              n_flavors, 1, densities, eps, epssq));
-  }
+  }*/
 }

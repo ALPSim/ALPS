@@ -11,7 +11,7 @@ if(LAPACK_FOUND)
        hilberttransformer.C 
        hirschfyesim.C 
        alps_solver.C 
-       2dsimpson.C 
+       bandstructure.C 
        auxiliaryfunctions.C)
   add_library(dmft_qmc_impl STATIC ${DMFT_QMC_SOURCE})
 

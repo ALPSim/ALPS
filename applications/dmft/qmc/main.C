@@ -6,7 +6,7 @@
  *                              Philipp Werner <werner@itp.phys.ethz.ch>,
  *                              Sebastian Fuchs <fuchs@theorie.physik.uni-goettingen.de>
  *                              Matthias Troyer <troyer@comp-phys.org>
- *               2012           Jakub Imriska <jimriska@phys.ethz.ch>
+ *               2012 - 2013 by Jakub Imriska <jimriska@phys.ethz.ch>
  *
  *
  * This software is part of the ALPS Applications, published under the ALPS
@@ -99,7 +99,7 @@ int main(int argc, char** argv)
 
     //perform selfconsistency loop in...
     if(!parms.defined("CLUSTER_LOOP")) {
-      if(!parms.defined("OMEGA_LOOP") || (bool)(parms["OMEGA_LOOP"])==false){
+      if(!parms.value_or_default("OMEGA_LOOP",false)){
         //...imaginary time tau
         SemicircleHilbertTransformer transform(parms);
         boost::shared_ptr<ImpuritySolver> solver_ptr;
@@ -123,44 +123,29 @@ int main(int argc, char** argv)
           solver_ptr.reset(new ExternalSolver(/*boost::filesystem::absolute(*/p/*)*/));
           selfconsistency_loop(parms, *solver_ptr, transform);
         }
-      } 
+      }
       else {
+        //perform self consistency loop in Matsubara frequency omega
+        if (!parms.value_or_default("ANTIFERROMAGNET",false) && !parms.value_or_default("SYMMETRIZATION",false)) { 
+          std::cerr<<"ANTIFERROMAGNET==false  and  SYMMETRIZATION==false? redundant parameters! Set SYMMETRIZATION=1 (true) for a paramagnetic solution."<<std::endl;
+          abort();
+        }
+        if (parms.value_or_default("ANTIFERROMAGNET",false) && parms.value_or_default("SYMMETRIZATION",false)) { 
+          std::cerr<<"ANTIFERROMAGNET==true  and  SYMMETRIZATION==true? redundant parameters! Set SYMMETRIZATION=0 (false) for an antiferromagnetic solution."<<std::endl;
+          abort();
+        }
+          
         alps::scheduler::BasicFactory<InteractionExpansionSim,HalfFillingHubbardInteractionExpansionRun> interaction_expansion_factory_sshf;
         alps::scheduler::BasicFactory<InteractionExpansionSim,HubbardInteractionExpansionRun> interaction_expansion_factory_ss; 
         alps::scheduler::BasicFactory<InteractionExpansionSim,MultiBandDensityHubbardInteractionExpansionRun> interaction_expansion_factory_mbd; 
-        //perform self consistency loop in Matsubara frequency omega
-        FrequencySpaceHilbertTransformer *transform_ptr;
-        if(!parms.defined("DOSFILE") && !parms.defined("TWODBS")){
-          transform_ptr= new FSSemicircleHilbertTransformer(parms);
-          std::cout<<"using Bethe lattice Hilbert transform"<<std::endl;
-        } 
-        else if(parms.defined("TWODBS")) {
-          if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
-            if((bool)(parms["SYMMETRIZATION"])==false){ 
-              std::cerr<<"ANTIFERROMAGNET==false  and  SYMMETRIZATION==false? redundant parameters! Set SYMMETRIZATION=1 (true) for a paramagnetic solution."<<std::endl; abort();
-            }
-            transform_ptr=new TwoDHilbertTransformer(parms);
-          }else{
-            if((bool)(parms["SYMMETRIZATION"])==true){ 
-              std::cerr<<"ANTIFERROMAGNET==true  and  SYMMETRIZATION==true? redundant parameters! Set SYMMETRIZATION=0 (false) for an antiferromagnetic solution."<<std::endl; abort(); 
-            }
-            transform_ptr=new TwoDAFMHilbertTransformer(parms);
-          }
+        
+        boost::shared_ptr<FrequencySpaceHilbertTransformer> transform_ptr;
+        if (parms.value_or_default("SEMICIRCLE_HILBERT",false)) {
+          transform_ptr.reset(new SemicircleFSHilbertTransformer(parms));
+        } else {
+          transform_ptr.reset(new GeneralFSHilbertTransformer(parms));
         }
-        else{
-          std::cout<<"using DOS Hilbert transform"<<std::endl;
-          if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
-            if((bool)(parms["SYMMETRIZATION"])==false){ 
-              std::cerr<<"ANTIFERROMAGNET==false  and  SYMMETRIZATION==false? redundant parameters! Set SYMMETRIZATION=1 (true) for a paramagnetic solution."<<std::endl; abort();
-            }
-            transform_ptr= new FSDOSHilbertTransformer(parms);
-          }else{
-            if((bool)(parms["SYMMETRIZATION"])==true){ 
-              std::cerr<<"ANTIFERROMAGNET==true  and  SYMMETRIZATION==true? redundant parameters! Set SYMMETRIZATION=0 (false) for an antiferromagnetic solution."<<std::endl; abort(); 
-            }
-            transform_ptr= new AFM_FSDOSHilbertTransformer(parms);
-          }
-        }
+        
         boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;  
         if ((parms["SOLVER"]=="Interaction Expansion") && (parms.value_or_default("FLAVORS", "2")=="1")){
           std::cout<<"using single site Hubbard solver for half filling"<<std::endl;
@@ -176,10 +161,9 @@ int main(int argc, char** argv)
         }
         else
           if (parms["SOLVER"]=="Hybridization") {
-          throw std::invalid_argument("The internal hybridization solver has been replaced by a standalone hybridzation solver.\nPlease use the \'hybridization\' program");
-          }
-          else
-          {
+            throw std::invalid_argument("The internal hybridization solver has been replaced by a standalone hybridzation solver.\nPlease use the \'hybridization\' program");
+          } 
+          else {
             std::string p(parms["SOLVER"]);
             std::cout<<"using external solver: "<<p<<std::endl;
             if(parms["SOLVER"]=="hybridization") parms["SC_WRITE_DELTA"]=1; //we need the hybridization function for this solver

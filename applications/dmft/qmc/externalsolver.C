@@ -34,8 +34,8 @@
 /// @sa ExternalSolver
 #include "externalsolver.h"
 #include "fouriertransform.h"
-#include "2dsimpson.h"
 #include "U_matrix.h"
+#include "bandstructure.h"
 #include <cstdlib>
 #include <fstream>
 #ifdef BOOST_MSVC
@@ -103,12 +103,12 @@ ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& 
       //write \Delta(\tau)
       //note: G0 is the full G
       
-      BetheBandstructure bethe_parm(parms);  // to get the second moment(s) of the band structure
+      SemicircleBandstructure bethe_parm(parms);  // to get the second moment(s) of the band structure
       itime_green_function_t Delta_itime(n_tau+1, 1, n_orbital);
       for (int f = 0; f < n_orbital; ++f) {
         int fbar=f%2==0?f+1:f-1;
         for (int i = 0; i <= n_tau; ++i) {
-          Delta_itime(i, f) = bethe_parm.tsq(f) * G0(i, fbar);
+          Delta_itime(i, f) = bethe_parm.second_moment(f) * G0(i, fbar);
         }
       }
       Delta_itime.write_hdf5(solver_input, "/Delta");
@@ -158,14 +158,8 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
       
       //find the second moment of the band structure
       std::vector<double> epssq_(n_orbital);
-      if (parms.defined("DOSFILE") || parms.defined("TWODBS")) {
-        for (std::size_t f=0; f<n_orbital; ++f)
-          epssq_[f] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)];
-      } else {
-        BetheBandstructure bethe_parm(parms);
-        for (std::size_t f=0; f<n_orbital; ++f)
-          epssq_[f] = bethe_parm.tsq(f);
-      }
+      for (std::size_t f=0; f<n_orbital; ++f)
+        epssq_[f] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)];
       for (std::size_t f=1; f<n_orbital; ++f)
         if (epssq_[f]!=epssq_[0])
           throw std::logic_error("ERROR: ExternalSolver::solve_omega : unsupported option : EPSSQ_i are not same for all flavors.");
