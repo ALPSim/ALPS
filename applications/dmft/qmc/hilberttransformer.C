@@ -206,11 +206,11 @@ matsubara_green_function_t GeneralFSHilbertTransformer::operator()(const matsuba
   } else {
     std::cout<<"GeneralFSHilbertTransformer: AFM version; using: mu="<<mu<<", h="<<h<<", beta="<<beta<<std::endl;
     if(G_omega.nflavor()%2!=0){throw std::logic_error("GeneralFSHilbertTransformer::operator(): don't know how to handle odd number of flavors in the AFM case.");}
-    for(frequency_t w=0; w<G_omega.nfreq(); ++w){
-      double wn=(2.*w+1)*M_PI/beta;
-      for(spin_t f=0; f<G_omega.nflavor()/2; f+=2){
+    for(spin_t f=0; f<G_omega.nflavor()/2; f+=2){
+      for(frequency_t w=0; w<G_omega.nfreq(); ++w){
         Sigma(0,2*f)=1./G0_omega(w,2*f)-1./G_omega(w,2*f);
         Sigma(0,2*f+1)=1./G0_omega(w,2*f+1)-1./G_omega(w,2*f+1);
+        double wn=(2.*w+1)*M_PI/beta;
         std::complex<double> zeta_0=std::complex<double>(mu-h,wn)-Sigma(0,2*f);
         std::complex<double> zeta_1=std::complex<double>(mu+h,wn)-Sigma(0,2*f+1);
         
