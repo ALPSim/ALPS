@@ -173,29 +173,31 @@ protected:
 
 class DOS_integrand_0th_moment : public DOS_integrand<double> {
 public:
-  DOS_integrand_0th_moment(const std::vector<double>& dos, double low_e, double bin_size) : DOS_integrand(dos,low_e,bin_size) {}
+  DOS_integrand_0th_moment(const std::vector<double>& dos, double low_e, double bin_size) : DOS_integrand<double>(dos,low_e,bin_size) {}
   double operator()(unsigned i) const { return dos_[i]; }
 };
 class DOS_integrand_1st_moment : public DOS_integrand<double> {
 public:
-  DOS_integrand_1st_moment(const std::vector<double>& dos, double low_e, double bin_size) : DOS_integrand(dos,low_e,bin_size) {}
+  DOS_integrand_1st_moment(const std::vector<double>& dos, double low_e, double bin_size) : DOS_integrand<double>(dos,low_e,bin_size) {}
   double operator()(unsigned i) const { return dos_[i]*(low_e_+i*bin_size_); }
 };
 class DOS_integrand_2nd_moment : public DOS_integrand<double> {
 public:
-  DOS_integrand_2nd_moment(const std::vector<double>& dos, double low_e, double bin_size) : DOS_integrand(dos,low_e,bin_size) {}
+  DOS_integrand_2nd_moment(const std::vector<double>& dos, double low_e, double bin_size) : DOS_integrand<double>(dos,low_e,bin_size) {}
   double operator()(unsigned i) const { return dos_[i]*(low_e_+i*bin_size_)*(low_e_+i*bin_size_); }
 };
 class DOS_HilbertIntegrand_PM : public DOS_integrand<std::complex<double> > {
 public:
-  DOS_HilbertIntegrand_PM(const std::vector<double>& dos, double low_e, double bin_size, std::complex<double> zeta) : DOS_integrand(dos,low_e,bin_size), zeta_(zeta) {}
+  DOS_HilbertIntegrand_PM(const std::vector<double>& dos, double low_e, double bin_size, std::complex<double> zeta)
+    : DOS_integrand<std::complex<double> >(dos,low_e,bin_size), zeta_(zeta) {}
   std::complex<double> operator()(unsigned i) const { return dos_[i]/(zeta_-low_e_-i*bin_size_); }
 private:
   std::complex<double> zeta_;
 };
 class DOS_HilbertIntegrand_AFM : public DOS_integrand<std::complex<double> > {
 public:
-  DOS_HilbertIntegrand_AFM(const std::vector<double>& dos, double low_e, double bin_size, std::complex<double> zeta0_times_zeta1) : DOS_integrand(dos,low_e,bin_size), zeta0_times_zeta1_(zeta0_times_zeta1) {}
+  DOS_HilbertIntegrand_AFM(const std::vector<double>& dos, double low_e, double bin_size, std::complex<double> zeta0_times_zeta1)
+    : DOS_integrand<std::complex<double> >(dos,low_e,bin_size), zeta0_times_zeta1_(zeta0_times_zeta1) {}
   std::complex<double> operator()(unsigned i) const { return dos_[i]/(zeta0_times_zeta1_-(low_e_+i*bin_size_)*(low_e_+i*bin_size_)); }
 private:
   std::complex<double> zeta0_times_zeta1_;
