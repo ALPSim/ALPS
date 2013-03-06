@@ -126,13 +126,12 @@ int main(int argc, char** argv)
       }
       else {
         //perform self consistency loop in Matsubara frequency omega
-        if (!parms.value_or_default("ANTIFERROMAGNET",false) && !parms.value_or_default("SYMMETRIZATION",false)) { 
-          std::cerr<<"ANTIFERROMAGNET==false  and  SYMMETRIZATION==false? redundant parameters! Set SYMMETRIZATION=1 (true) for a paramagnetic solution."<<std::endl;
-          abort();
-        }
         if (parms.value_or_default("ANTIFERROMAGNET",false) && parms.value_or_default("SYMMETRIZATION",false)) { 
-          std::cerr<<"ANTIFERROMAGNET==true  and  SYMMETRIZATION==true? redundant parameters! Set SYMMETRIZATION=0 (false) for an antiferromagnetic solution."<<std::endl;
-          abort();
+          std::cerr<<"ERROR: incompatible parameters: ANTIFERROMAGNET==1 (true)  and  SYMMETRIZATION==1 (true)"<<std::endl
+                   <<"  for simulation in PM phase set: SYMMETRIZATION=1, ANTIFERROMAGNET=0."<<std::endl
+                   <<"  for simulation in FM phase set: SYMMETRIZATION=0, ANTIFERROMAGNET=0."<<std::endl
+                   <<"  for simulation in AFM phase set: SYMMETRIZATION=0, ANTIFERROMAGNET=1."<<std::endl;
+          throw std::logic_error("Incompatible parameters: ANTIFERROMAGNET==1,  SYMMETRIZATION==1.");
         }
           
         alps::scheduler::BasicFactory<InteractionExpansionSim,HalfFillingHubbardInteractionExpansionRun> interaction_expansion_factory_sshf;
