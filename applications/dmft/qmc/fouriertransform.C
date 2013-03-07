@@ -217,22 +217,18 @@ void FourierTransformer::generate_transformer(const alps::Parameters &parms,
                                               boost::shared_ptr<FourierTransformer> &fourier_ptr)
 {
   int n_flavors = parms.value_or_default("FLAVORS", 2); 
-  int n_site = parms.value_or_default("SITES", 1);
+  if (static_cast<int>(parms.value_or_default("SITES", 1))!=1) 
+    throw std::logic_error("ERROR: FourierTransformer::generate_transformer : SITES!=1, for cluster fourier transforms please use the cluster version of this framework");
   double h = static_cast<double>(parms.value_or_default("H",0.));
-  /*if (parms.defined("GENERAL_FOURIER_TRANSFORMER"))*/ {
-    std::cout << "using general fourier transformer" << "\n";
-    std::vector<double> eps(n_flavors);
-    std::vector<double> epssq(n_flavors);
-    for (int f=0; f<n_flavors; ++f) {
-      eps[f] = parms["EPS_"+boost::lexical_cast<std::string>(f)];
-      epssq[f] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)];
-    }
-    fourier_ptr.reset(new SimpleG0FourierTransformer((double)parms["BETA"], (double)parms["MU"], h,
-                                                     n_flavors, eps, epssq));
-  } 
-  /*else if (n_site>1) {
-    throw std::logic_error("for cluster fourier transforms please use the cluster version of this framework");
-  }*/
+  std::cout << "using general fourier transformer" << "\n";
+  std::vector<double> eps(n_flavors);
+  std::vector<double> epssq(n_flavors);
+  for (int f=0; f<n_flavors; ++f) {
+    eps[f] = parms["EPS_"+boost::lexical_cast<std::string>(f)];
+    epssq[f] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)];
+  }
+  fourier_ptr.reset(new SimpleG0FourierTransformer((double)parms["BETA"], (double)parms["MU"], h,
+                                                   n_flavors, eps, epssq));
 }
 
 
@@ -243,22 +239,16 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
                                                 const std::vector<double> &densities)
 {
   int n_flavors = parms.value_or_default("FLAVORS", 2); 
-  int n_site = parms.value_or_default("SITES", 1); 
+  if (static_cast<int>(parms.value_or_default("SITES", 1))!=1) 
+    throw std::logic_error("ERROR: FourierTransformer::generate_transformer_U : SITES!=1, for cluster fourier transforms please use the cluster version of this framework");
   double U = parms["U"];
-  /*if (parms.defined("GENERAL_FOURIER_TRANSFORMER"))*/ {
-    std::cout << "using general fourier transformer" << "\n";
-    std::vector<std::vector<double> > eps(n_flavors);
-    std::vector<std::vector<double> >epssq(n_flavors);
-    for (int f=0; f<n_flavors; ++f) {
-      eps[f].resize(1);      
-      epssq[f].resize(1);
-      eps[f][0] = parms["EPS_"+boost::lexical_cast<std::string>(f)];
-      epssq[f][0] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)]; 
-    }
-    fourier_ptr.reset(new GFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., U, 
-                                              n_flavors, 1, densities, eps, epssq));
+  std::cout << "using general fourier transformer" << "\n";
+  std::vector<std::vector<double> > eps(n_flavors,std::vector<double>(1));
+  std::vector<std::vector<double> >epssq(n_flavors,std::vector<double>(1));
+  for (int f=0; f<n_flavors; ++f) {
+    eps[f][0] = parms["EPS_"+boost::lexical_cast<std::string>(f)];
+    epssq[f][0] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)]; 
   }
-  /*else if (n_site>1) {
-    throw std::logic_error("for cluster versions of the fourier transform please use the cluster framework.");    
-  }*/
+  fourier_ptr.reset(new GFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., U, 
+                                            n_flavors, 1, densities, eps, epssq));
 }

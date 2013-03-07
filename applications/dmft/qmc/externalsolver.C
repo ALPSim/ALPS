@@ -113,7 +113,7 @@ ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& 
         }
       }
       Delta_itime.write_hdf5(solver_input, "/Delta");
-      //std::ofstream Delta_itime_file("Delta_itime.dat"); print_green_itime(Delta_itime_file,Delta_itime, beta, diagonal);
+      std::ofstream Delta_itime_file("Delta_itime.dat"); print_green_itime(Delta_itime_file,Delta_itime, static_cast<double>(p["BETA"]), diagonal);
       
       prepare_parms_for_hybridization(p,solver_input);
     } else {
@@ -157,25 +157,10 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
     if(parms.value_or_default("SC_WRITE_DELTA", false)){
       //write Delta(i\omega_n) along with \Delta(\tau)
       
-      //find the second moment of the band structure
-      std::vector<double> eps_(n_orbital), epssq_(n_orbital);
-      for (std::size_t f=0; f<n_orbital; ++f) {
-        eps_[f] = parms["EPS_"+boost::lexical_cast<std::string>(f)];
-        epssq_[f] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)];
-      }
-      for (std::size_t f=1; f<n_orbital; ++f)
-        if (std::abs(epssq_[f]-epssq_[0])>1e-8)
-          throw std::logic_error("ERROR: ExternalSolver::solve_omega : unsupported option : EPSSQ_i are not same for all flavors.");
-      for (std::size_t f=0; f<n_orbital; ++f)
-        if (std::abs(eps_[f])>1e-8) {
-          std::cerr<<"ERROR: ExternalSolver::solve_omega : EPS_"<<f<<"="<<eps_[f]<<"  is non-zero. This causes divergent hybridization function."<<std::endl
-                   <<"  To overcome the problem, shift the energies for density of states such that the 1st moment is zero. Shift the chemical potential accordingly."<<std::endl;
-          throw std::logic_error("ERROR: ExternalSolver::solve_omega : hybridization function is divergent for EPS_i non-zero.");
-        }
       double beta=p["BETA"];
       double mu=p["MU"];
       double h = static_cast<double>(parms.value_or_default("H",0.));
-      FFunctionFourierTransformer Fourier(beta , mu, epssq_[0] , n_orbital, 1);
+      FFunctionFourierTransformer Fourier(parms);
       matsubara_green_function_t Delta_matsubara(n_matsubara, 1, n_orbital);
       itime_green_function_t Delta_itime(n_tau+1, 1, n_orbital);
       for (int f = 0; f < n_orbital; ++f) {

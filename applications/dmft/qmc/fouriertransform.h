@@ -167,18 +167,25 @@ public:
 class FFunctionFourierTransformer:public FourierTransformer
 {
 public:
-  FFunctionFourierTransformer(double beta, double mu, double epsilonsq_av, int n_flavor, int n_site)
-  :FourierTransformer(beta, n_flavor, n_site){
-    //std::cout<<"FFourier Transformer: beta: "<<beta<<" mu: "<<mu<<"epsilonsq_av: "<<epsilonsq_av<<std::endl;
-    epsilonsq_av_=epsilonsq_av; //this is the integral of the second moment of the dos: \int_-\infty^\infty e^2 rho(e) de. It is t^2 for semicircle...
-    for(int f=0;f<n_flavor;++f){
-      for(int i=0;i<n_site;++i){
-        for(int j=0;j<n_site;++j){
-          c1_[f][i][j]=epsilonsq_av;
-          c2_[f][i][j]=0;//-(2*epsilonsq_av*mu+mu*mu*mu);
-          c3_[f][i][j]=0;
-        }
+  FFunctionFourierTransformer(const alps::Parameters& parms)
+    : FourierTransformer((double)parms["BETA"], parms.value_or_default("FLAVORS", 2), 1),
+      epssq_(static_cast<unsigned>(parms.value_or_default("FLAVORS", 2))){
+    if (static_cast<int>(parms.value_or_default("SITES", 1))!=1) 
+      throw std::logic_error("ERROR: FFunctionFourierTransformer : SITES!=1, for cluster fourier transforms please use the cluster version of this framework");
+    // NOTE: Delta(i omega_n)=F(-i omega_n)
+    //       Delta(i omega_n)= <e> + (<e^2>-<e>^2)/(i omega_n) + ...
+    // thus for <e>!=0 the Delta(tau) is divergent
+    // NOTE2: although the name says FFunctionFT, it has the proper tail for Delta(i omega_n)
+    for(int f=0;f<epssq_.size();++f){
+      if (std::abs(static_cast<double>(parms["EPS_"+boost::lexical_cast<std::string>(f)]))>1e-8) {
+        std::cerr<<"FFunctionFourierTransformer : EPS_"<<f<<"="<<parms["EPS_"+boost::lexical_cast<std::string>(f)]<<"  is non-zero. This causes divergent hybridization function."<<std::endl
+                 <<"  To overcome the problem, shift the energies for density of states such that the 1st moment is zero. Shift the chemical potential accordingly."<<std::endl;
+        throw std::logic_error("ERROR: FFunctionFourierTransformer : hybridization function is divergent due to non-zero EPS_i.");
       }
+      epssq_[f]=static_cast<double>(parms["EPSSQ_"+boost::lexical_cast<std::string>(f)]);
+      c1_[f][0][0]=epssq_[f];
+      c2_[f][0][0]=0;//-(2*epsilonsq_av*mu+mu*mu*mu);
+      c3_[f][0][0]=0;
     }
   }
   
@@ -189,15 +196,15 @@ public:
   
   virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const{
     FourierTransformer::backward_ft(G_tau, G_omega);
-    for(unsigned int j=0;j<G_tau.nflavor();++j){
-      G_tau(G_tau.ntime()-1,j)=-epsilonsq_av_-G_tau(0,j);
+    for(unsigned f=0; f<G_tau.nflavor(); ++f){
+      G_tau(G_tau.ntime()-1,f)=-epssq_[f]-G_tau(0,f);
     }
   }
   
   virtual ~FFunctionFourierTransformer(){}
   
 private:
-  double epsilonsq_av_;
+  std::vector<double> epssq_;
 };
 
 #endif
