@@ -105,10 +105,11 @@ ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& 
       
       SemicircleBandstructure bethe_parm(parms);  // to get the second moment(s) of the band structure
       itime_green_function_t Delta_itime(n_tau+1, 1, n_orbital);
+      bool AFM=parms.value_or_default("ANTIFERROMAGNET",false);
       for (int f = 0; f < n_orbital; ++f) {
-        int fbar=f%2==0?f+1:f-1;
+        int f_=AFM?(f%2==0?f+1:f-1):f;
         for (int i = 0; i <= n_tau; ++i) {
-          Delta_itime(i, f) = bethe_parm.second_moment(f) * G0(i, fbar);
+          Delta_itime(i, f) = bethe_parm.second_moment(f) * G0(i, f_);
         }
       }
       Delta_itime.write_hdf5(solver_input, "/Delta");
@@ -157,12 +158,20 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
       //write Delta(i\omega_n) along with \Delta(\tau)
       
       //find the second moment of the band structure
-      std::vector<double> epssq_(n_orbital);
-      for (std::size_t f=0; f<n_orbital; ++f)
+      std::vector<double> eps_(n_orbital), epssq_(n_orbital);
+      for (std::size_t f=0; f<n_orbital; ++f) {
+        eps_[f] = parms["EPS_"+boost::lexical_cast<std::string>(f)];
         epssq_[f] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)];
+      }
       for (std::size_t f=1; f<n_orbital; ++f)
-        if (epssq_[f]!=epssq_[0])
+        if (std::abs(epssq_[f]-epssq_[0])>1e-8)
           throw std::logic_error("ERROR: ExternalSolver::solve_omega : unsupported option : EPSSQ_i are not same for all flavors.");
+      for (std::size_t f=0; f<n_orbital; ++f)
+        if (std::abs(eps_[f])>1e-8) {
+          std::cerr<<"ERROR: ExternalSolver::solve_omega : EPS_"<<f<<"="<<eps_[f]<<"  is non-zero. This causes divergent hybridization function."<<std::endl
+                   <<"  To overcome the problem, shift the energies for density of states such that the 1st moment is zero. Shift the chemical potential accordingly."<<std::endl;
+          throw std::logic_error("ERROR: ExternalSolver::solve_omega : hybridization function is divergent for EPS_i non-zero.");
+        }
       double beta=p["BETA"];
       double mu=p["MU"];
       double h = static_cast<double>(parms.value_or_default("H",0.));
