@@ -70,6 +70,10 @@ class FloatWithError:
   def __getitem__(self,key):
     return FloatWithError(self.mean[key],self.error[key])
   
+  def __setitem__(self,key,value):
+    self.mean [key] = value.mean
+    self.error[key] = value.error
+
   def __add__(x__,y__):
     if (isinstance(y__,float) | isinstance(y__,int)):
       y__ = FloatWithError(y__)
