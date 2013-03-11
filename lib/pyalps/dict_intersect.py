@@ -25,6 +25,8 @@
 # 
 # ****************************************************************************
 
+import numpy as np
+
 def dict_intersect(dicts):
     """ computes the intersection of a list of dicts
     
@@ -43,7 +45,7 @@ def dict_intersect(dicts):
                 if val0 != idict[key]:
                     take = False
             except:
-                if all(val0 != idict[key]):
+                if np.all(val0 != idict[key]):
                     take = False
         if take:
             ret[key] = dicts[0][key]
