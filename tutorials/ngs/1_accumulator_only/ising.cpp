@@ -119,8 +119,13 @@ ising_sim::results_type ising_sim::collect_results() const {
 ising_sim::results_type ising_sim::collect_results(result_names_type const & names) const {
     results_type partial_results;
     for(result_names_type::const_iterator it = names.begin(); it != names.end(); ++it)
-        // TODO: this is ugly make measurements[*it]
-        partial_results.insert(*it, alps::mcresult(measurements[*it]));
+
+        #ifdef ALPS_NGS_USE_NEW_ALEA
+            partial_results.insert(*it, measurements[*it].result());
+        #else
+            // TODO: this is ugly make measurements[*it]
+            partial_results.insert(*it, alps::mcresult(measurements[*it]));
+        #endif
     return partial_results;
 }
 

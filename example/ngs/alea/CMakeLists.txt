@@ -13,7 +13,7 @@ IF(ALPS_NGS_USE_NEW_ALEA)
                     example_custom_accum 
                     example_histogram
                     example_vector_operators
-                    example_new_input_op
+#                    example_new_input_op
 #                    test_alps_multi_array
                     )
         add_executable(${name} ${name}.cpp)

@@ -47,10 +47,15 @@ class ALPS_DECL ising_sim {
     #endif
 
     public:
-        
+
         typedef alps::params parameters_type;
-        typedef alps::mcresults results_type;
         typedef std::vector<std::string> result_names_type;
+
+        #ifdef ALPS_NGS_USE_NEW_ALEA
+            typedef alps::accumulator::result_set results_type;
+        #else
+            typedef alps::mcresults results_type;
+        #endif
 
         ising_sim(parameters_type const & params);
 
