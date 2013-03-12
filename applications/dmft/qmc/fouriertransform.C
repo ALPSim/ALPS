@@ -224,8 +224,8 @@ void FourierTransformer::generate_transformer(const alps::Parameters &parms,
   std::vector<double> eps(n_flavors);
   std::vector<double> epssq(n_flavors);
   for (int f=0; f<n_flavors; ++f) {
-    eps[f] = parms["EPS_"+boost::lexical_cast<std::string>(f)];
-    epssq[f] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)];
+    eps[f] = parms.value_or_default("EPS_"+boost::lexical_cast<std::string>(f),0.0);
+    epssq[f] = parms.value_or_default("EPSSQ_"+boost::lexical_cast<std::string>(f),1.0);
   }
   fourier_ptr.reset(new SimpleG0FourierTransformer((double)parms["BETA"], (double)parms["MU"], h,
                                                    n_flavors, eps, epssq));
@@ -246,8 +246,8 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
   std::vector<std::vector<double> > eps(n_flavors,std::vector<double>(1));
   std::vector<std::vector<double> >epssq(n_flavors,std::vector<double>(1));
   for (int f=0; f<n_flavors; ++f) {
-    eps[f][0] = parms["EPS_"+boost::lexical_cast<std::string>(f)];
-    epssq[f][0] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)]; 
+    eps[f][0] = parms.value_or_default("EPS_"+boost::lexical_cast<std::string>(f),0.0);
+    epssq[f][0] = parms.value_or_default("EPSSQ_"+boost::lexical_cast<std::string>(f),1.0);
   }
   fourier_ptr.reset(new GFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., U, 
                                             n_flavors, 1, densities, eps, epssq));

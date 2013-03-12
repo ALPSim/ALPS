@@ -177,12 +177,12 @@ public:
     // thus for <e>!=0 the Delta(tau) is divergent
     // NOTE2: although the name says FFunctionFT, it has the proper tail for Delta(i omega_n)
     for(int f=0;f<epssq_.size();++f){
-      if (std::abs(static_cast<double>(parms["EPS_"+boost::lexical_cast<std::string>(f)]))>1e-8) {
+      if (std::abs(static_cast<double>(parms.value_or_default("EPS_"+boost::lexical_cast<std::string>(f),0.0)))>1e-8) {
         std::cerr<<"FFunctionFourierTransformer : EPS_"<<f<<"="<<parms["EPS_"+boost::lexical_cast<std::string>(f)]<<"  is non-zero. This causes divergent hybridization function."<<std::endl
                  <<"  To overcome the problem, shift the energies for density of states such that the 1st moment is zero. Shift the chemical potential accordingly."<<std::endl;
         throw std::logic_error("ERROR: FFunctionFourierTransformer : hybridization function is divergent due to non-zero EPS_i.");
       }
-      epssq_[f]=static_cast<double>(parms["EPSSQ_"+boost::lexical_cast<std::string>(f)]);
+      epssq_[f]=static_cast<double>(parms.value_or_default("EPSSQ_"+boost::lexical_cast<std::string>(f),1.0));
       c1_[f][0][0]=epssq_[f];
       c2_[f][0][0]=0;//-(2*epsilonsq_av*mu+mu*mu*mu);
       c3_[f][0][0]=0;
