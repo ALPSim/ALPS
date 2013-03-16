@@ -651,8 +651,8 @@ DMRGTask<value_type>::build_bond_operator(alps::BondOperator const& bondop, bond
 {
   typedef std::vector<boost::tuple<alps::expression::Term<value_type>,alps::SiteOperator,alps::SiteOperator > > V;
   alps::expression::ParameterEvaluator<value_type> coords(coordinate_as_parameter(b));
-  alps::SiteBasisDescriptor<short> b1 = basis().site_basis(source(b));
-  alps::SiteBasisDescriptor<short> b2 = basis().site_basis(target(b));
+  alps::SiteBasisDescriptor<short> b1 = basis().site_basis(site_type(source(b)));
+  alps::SiteBasisDescriptor<short> b2 = basis().site_basis(site_type(target(b)));
   
   V  ops = bondop.template templated_split<value_type>(b1,b2);
   for (typename V::iterator tit=ops.begin(); tit!=ops.end();++tit) {
