@@ -421,10 +421,14 @@ class Hdf5Loader:
                             obs.load(self.h5fname, respath+'/'+m)
                             obs=np.array([obs])
                             size=1
+                            if obs.count()==0:
+                              obs=None
                         else:
                             obs = pa.MCVectorData()
                             obs.load(self.h5fname, respath+'/'+m)
                             size=len(obs.mean)
+                            if obs.count()==0:
+                                obs=None
                     else:
                         if self.h5f.is_scalar(respath+'/'+m+'/mean/value'):
                             obs = self.h5f.read(respath+'/'+m+'/mean/value')
@@ -434,6 +438,7 @@ class Hdf5Loader:
                             obs = self.h5f.read(respath+'/'+m+'/mean/value')
                             size=len(obs)
                     try:
+                      if obs is not None:
                         d = DataSet()
                         d.y = obs
                         d.x = np.arange(xmin,xmin+xstep*size,xstep)

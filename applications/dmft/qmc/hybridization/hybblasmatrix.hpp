@@ -35,7 +35,7 @@
 //simple matrix that uses BLAS calls for rank one and matrix vector.
 class blas_matrix{
 public:
-  blas_matrix(int size){
+  blas_matrix(fortran_int_t size){
     if(size>0)
       values_=new double[size*size];
     else values_=0;
@@ -59,13 +59,13 @@ public:
       memcpy(values_, M.values_, memory_size_*memory_size_*sizeof(double));
     } else values_=0;
   }
-  inline double &operator()(const unsigned int i, const unsigned int j){return *(values_+(i*memory_size_+j));}
-  inline const double &operator()(const unsigned int i, const unsigned int j) const {return *(values_+(i*memory_size_+j));}
+  inline double &operator()(const fortran_int_t i, const fortran_int_t j){return *(values_+(i*memory_size_+j));}
+  inline const double &operator()(const fortran_int_t i, const fortran_int_t j) const {return *(values_+(i*memory_size_+j));}
   //blas_matrix size
-  inline const int &size()const{return size_;}
-  inline int &size(){return size_;}
-  inline const int &memory_size()const{return memory_size_;}
-  inline int &memory_size(){return memory_size_;}
+  inline const  fortran_int_t &size()const{return size_;}
+  inline fortran_int_t &size(){return size_;}
+  inline const fortran_int_t &memory_size()const{return memory_size_;}
+  inline fortran_int_t &memory_size(){return memory_size_;}
   //blas_matrix size 
   /*inline void add_outer_product(const blas::vector &v1, const blas::vector &v2, double alpha=1.){
     add_outer_product(&v1(0), &v2(0), alpha);
@@ -73,8 +73,8 @@ public:
   inline void add_outer_product(const blas::rsvector &v1, const blas::rsvector &v2, double alpha=1.){
     add_outer_product(&v1(0), &v2(0), alpha);
   }*/
-  inline void add_outer_product(int s, const double *v1, const double *v2, double alpha=1.){
-    int inc=1;
+  inline void add_outer_product(fortran_int_t s, const double *v1, const double *v2, double alpha=1.){
+    fortran_int_t inc=1;
     if(s>1){
       FORTRAN_ID(dger)(&s, &s, &alpha,v2, &inc, v1, &inc, values_, &memory_size_); 
     }else if(1==1){
@@ -84,26 +84,26 @@ public:
   }
   /*inline void insert_row_column_last(blas::vector &row, blas::vector &col, double Mkk){
     resize(size_+1);
-    int one=1;
-    int oldsize=size_-1;
+    fortran_int_t one=1;
+    fortran_int_t oldsize=size_-1;
     dcopy_(&oldsize, &(col(0)), &one, &(values_[oldsize     ]), &memory_size_); //copy in row (careful: col. major)
     dcopy_(&oldsize, &(row(0)), &one, &(values_[oldsize*memory_size_]), &one         );   //copy in column
     operator()(oldsize, oldsize)=Mkk;
   }*/
-  inline void getrow(int k, double *row) const{
-    int one=1;
+  inline void getrow(fortran_int_t k, double *row) const{
+    fortran_int_t one=1;
     dcopy_(&size_, &(values_[k*memory_size_]), &one, row, &one);
   }
-  inline void getcol(int k, double *col) const{
-    int one=1;
+  inline void getcol(fortran_int_t k, double *col) const{
+    fortran_int_t one=1;
     dcopy_(&size_, &(values_[k]), &memory_size_, col, &one);
   }
-  inline void setrow(int k, const double *row){
-    int one=1;
+  inline void setrow(fortran_int_t k, const double *row){
+    fortran_int_t one=1;
     dcopy_(&size_, row, &one, &(values_[k*memory_size_]), &one);
   }
-  inline void setcol(int k, const double *col){
-    int one=1;
+  inline void setcol(fortran_int_t k, const double *col){
+    fortran_int_t one=1;
     dcopy_(&size_, col, &one, &(values_[k]), &memory_size_);
   }
   //delete last column
@@ -111,46 +111,46 @@ public:
     size_--;
   }
   //swap two columns:
-  inline void swap_row_column(int c1, int c2){
+  inline void swap_row_column(fortran_int_t c1, fortran_int_t c2){
     if(c1==c2) return;
     swap_row(c1,c2);
     swap_column(c1,c2);
   }
-  inline void swap_column(int c1, int c2){
+  inline void swap_column(fortran_int_t c1, fortran_int_t c2){
     if(c1==c2) return;
     FORTRAN_ID(dswap)(&size_, &(values_[c1]), &memory_size_, &(values_[c2]), &memory_size_);
   }
-  inline void swap_row(int c1, int c2){
+  inline void swap_row(fortran_int_t c1, fortran_int_t c2){
     if(c1==c2) return;
-    int one=1;
+    fortran_int_t one=1;
     FORTRAN_ID(dswap)(&size_, &(values_[c1*memory_size_]), &one, &(values_[c2*memory_size_]), &one);
   }
   inline void right_multiply(const std::vector<double> &v1, std::vector<double> &v2) const{ //perform v2[i]=M[ij]v1[j]
     //call the BLAS routine for blas_matrix vector multiplication:
     char trans='T';
     double alpha=1., beta=0.;	//no need to multiply a constant or add a vector
-    int inc=1;
+    fortran_int_t inc=1;
     FORTRAN_ID(dgemv)(&trans, &size_, &size_, &alpha, values_, &memory_size_, &(v1[0]), &inc, &beta, &(v2[0]), &inc);
   }
   /*inline void right_multiply(const vector &v1, vector &v2) const{ //perform v2[i]=M[ij]v1[j]
     //call the BLAS routine for blas_matrix vector multiplication:
     char trans='T';
     double alpha=1., beta=0.;	//no need to multiply a constant or add a vector
-    int inc=1;
+    fortran_int_t inc=1;
     FORTRAN_ID(dgemv)(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1.values_, &inc, &beta, v2.values_, &inc);
   }
   inline void right_multiply(const rsvector &v1, rsvector &v2) const{ //perform v2[i]=M[ij]v1[j]
     //call the BLAS routine for blas_matrix vector multiplication:
     char trans='T';
     double alpha=1., beta=0.;	//no need to multiply a constant or add a vector
-    int inc=1;
+    fortran_int_t inc=1;
     FORTRAN_ID(dgemv)(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1.values_, &inc, &beta, v2.values_, &inc);
   }
   inline void left_multiply(const vector &v1, vector &v2) const{ //perform v2[i]=v1[j]M[ji]
     //call the BLAS routine for blas_matrix vector multiplication:
     char trans='N';
     double alpha=1., beta=0.;       //no need to multiply a constant or add a vector
-    int inc=1;
+    fortran_int_t inc=1;
     FORTRAN_ID(dgemv)(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1.values_, &inc, &beta, v2.values_, &inc);
     
   }
@@ -158,13 +158,13 @@ public:
     //call the BLAS routine for blas_matrix vector multiplication:
     char trans='N';
     double alpha=1., beta=0.;       //no need to multiply a constant or add a vector
-    int inc=1;
+    fortran_int_t inc=1;
     FORTRAN_ID(dgemv)(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1.values_, &inc, &beta, v2.values_, &inc);
   }*/
   void set_to_identity()
   {
     clear();
-    for(int i=0;i<size_;++i){
+    for(fortran_int_t i=0;i<size_;++i){
       operator()(i,i)=1.;
     }
   }
@@ -173,13 +173,13 @@ public:
     if(size_==0) return 1;
     if(size_==1) return values_[0];
     if(size_==2) return operator()(0,0)*operator()(1,1)-operator()(0,1)*operator()(1,0);
-    int info=0;
-    std::vector<int> ipiv(size_);
+    fortran_int_t info=0;
+    std::vector<fortran_int_t> ipiv(size_);
     //assert(size_==memory_size_); //otherwise think about plugging ing memory size to lda
     
     std::vector<double> det_blas_matrix(size()*size());
-    for(int i=0;i<size();++i){ for (int j=0;j<size();++j){ det_blas_matrix[i*size()+j]=operator()(i,j);}}
-    std::vector<double> identity(size()*size(), 0.); for(int i=0;i<size();++i){ identity[i*size()+i]=1.; }
+    for(fortran_int_t i=0;i<size();++i){ for (fortran_int_t j=0;j<size();++j){ det_blas_matrix[i*size()+j]=operator()(i,j);}}
+    std::vector<double> identity(size()*size(), 0.); for(fortran_int_t i=0;i<size();++i){ identity[i*size()+i]=1.; }
     //LU factorization
     FORTRAN_ID(dgesv)(&size_, &size_, &(det_blas_matrix[0]), &size_, &(ipiv[0]), &(identity[0]), &size_,&info);
     if(info < 0) {
@@ -194,7 +194,7 @@ public:
     double det=1.;
     //CAREFUL when pivoting: fortran uses array indexing starting
     //from one. But we're in C here -> 'one off' error
-    for(int i=0;i<size_;++i){
+    for(fortran_int_t i=0;i<size_;++i){
       if(ipiv[i]-1!=i){
         det*=-det_blas_matrix[i*size()+i];
       }
@@ -207,11 +207,11 @@ public:
   void clear(){
     memset(values_, 0, memory_size_*memory_size_*sizeof(double));
   }
-  void resize(int size1, int size2){
+  void resize(fortran_int_t size1, fortran_int_t size2){
     if(size1!=size2){std::cerr<<"size1 has to be size2. aborting. "<<std::endl; abort();}
     resize(size1);
   }
-  void resize_nocopy(int new_size){
+  void resize_nocopy(fortran_int_t new_size){
     if(new_size<=memory_size_){
       size_=new_size;
       return;
@@ -222,12 +222,12 @@ public:
     size_=new_size;
     memory_size_=new_size;
   }
-  void resize(int new_size){
+  void resize(fortran_int_t new_size){
     if(new_size==size_) return;
-    if(new_size<(int)(size_)){ //down is easy
-      if((int)new_size < (int)(memory_size_-30) && (int) new_size > 10){
+    if(new_size<(fortran_int_t)(size_)){ //down is easy
+      if((fortran_int_t)new_size < (fortran_int_t)(memory_size_-30) && (fortran_int_t) new_size > 10){
         double *new_values_=new double[new_size*new_size];
-        for(int i=0;i<new_size;++i){
+        for(fortran_int_t i=0;i<new_size;++i){
           memcpy(new_values_+i*new_size, values_+i*memory_size_, sizeof(double)*new_size); //for each row: copy the entire row.
         }
         delete[] values_;       //free memory
@@ -241,7 +241,7 @@ public:
       size_=new_size;
     } else{ //get new memory */
       double *new_values_=new double[new_size*new_size];
-      for(int i=0;i<size_;++i){
+      for(fortran_int_t i=0;i<size_;++i){
         memcpy(new_values_+i*new_size, values_+i*memory_size_, sizeof(double)*size_); //for each row: copy the entire row.
       }
       delete[] values_;       //free memory
@@ -261,7 +261,7 @@ public:
   }
   double max() const{
     double *rowmax=new double[size_];
-    int rowmax_index, max_index, inc=1;
+    fortran_int_t rowmax_index, max_index, inc=1;
     if(size_<1) return 0;
     for(int i=0;i<size_;++i){
       rowmax_index=idamax_(&size_, values_+i*memory_size_,&inc);
@@ -278,21 +278,21 @@ public:
   }
   void invert(){
     std::vector<double> B(size_*size_, 0.);
-    std::vector<int> ipiv(size_,0);
-    int info;
-    for(int i=0;i<size_;++i) B[i*size_+i]=1.;
+    std::vector<fortran_int_t> ipiv(size_,0);
+    fortran_int_t info;
+    for(fortran_int_t i=0;i<size_;++i) B[i*size_+i]=1.;
     FORTRAN_ID(dgesv)(&size_, &size_, values_, &memory_size_, &(ipiv[0]), &(B[0]), &size_, &info);
     if(info){ throw(std::logic_error("in dgesv: info was not zero.")); }
     
-    for(int i=0;i<size_;++i){
-      for(int j=0;j<size_;++j){
+    for(fortran_int_t i=0;i<size_;++i){
+      for(fortran_int_t j=0;j<size_;++j){
         operator()(i,j)=B[i*size_+j];
       }
     }
   }
 private:
-  int size_; //current size of blas_matrix
-  int memory_size_; //current size of blas_matrix
+  fortran_int_t size_; //current size of blas_matrix
+  fortran_int_t memory_size_; //current size of blas_matrix
   double *values_; //where the actual values are stored
 };
 

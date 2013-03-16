@@ -225,20 +225,30 @@ void DMRGTask<value_type>::init()
   else 
     boost::throw_exception(std::runtime_error("Need to specify either 2*SWEEPS different values in STATES, or one MAXSTATES value"));
   
+  // get all quantum numbers
+  std::set<std::string> qns;
+  for (site_iterator it = sites().first ; it != sites().second ; ++it) {
+    std::set<std::string> newqns = quantum_numbers(site_type(*it));
+    qns.insert(newqns.begin(),newqns.end());
+  }
+
+  
   // read quantum numbers and their total values
-  quantumnumber_names.resize(0);
-  conserved_quantumnumber.resize(0);
-  conserved_quantumnumber_value.resize(0);
+  std::copy(qns.begin(),qns.end(),std::back_inserter(quantumnumber_names));
+  conserved_quantumnumber.resize(quantumnumber_names.size(),false);
+  conserved_quantumnumber_value.resize(quantumnumber_names.size());
   if (parms.defined("CONSERVED_QUANTUMNUMBERS")) {
     std::string qn_string = parms["CONSERVED_QUANTUMNUMBERS"];
     tokenizer qn_tokens(qn_string, sep);
-    std::copy(qn_tokens.begin(),qn_tokens.end(),std::back_inserter(quantumnumber_names));
-    conserved_quantumnumber.resize(quantumnumber_names.size(),false);
-    conserved_quantumnumber_value.resize(quantumnumber_names.size());
-    for (int i=0; i<quantumnumber_names.size(); i++) {
-      if (parms.defined(quantumnumber_names[i]+"_total")) {
-        conserved_quantumnumber[i] = true;
-        conserved_quantumnumber_value[i] = alps::evaluate<double>(static_cast<std::string>(parms[quantumnumber_names[i]+"_total"]),parms);
+    std::vector<std::string> conserved_quantumnumber_names;
+    std::copy(qn_tokens.begin(),qn_tokens.end(),std::back_inserter(conserved_quantumnumber_names));
+    for (int i=0; i<conserved_quantumnumber_names.size(); i++) {
+      if (parms.defined(conserved_quantumnumber_names[i]+"_total")) {
+        int j = std::find(quantumnumber_names.begin(),quantumnumber_names.end(),conserved_quantumnumber_names[i])-quantumnumber_names.begin();
+        if (j >= quantumnumber_names.size())
+          boost::throw_exception(std::runtime_error("Quantum number " + conserved_quantumnumber_names[i] + " is not defined in the model" ));
+        conserved_quantumnumber[j] = true;
+        conserved_quantumnumber_value[j] = alps::evaluate<double>(static_cast<std::string>(parms[conserved_quantumnumber_names[i]+"_total"]),parms);
       }
     }
   }
