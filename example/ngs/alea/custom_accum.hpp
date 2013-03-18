@@ -72,6 +72,9 @@ namespace alps
         template<> struct value_type<custom_accum> {
             typedef int type;
         };
+        //~ template<> struct weight_value_type<custom_accum> {
+            //~ typedef int type;
+        //~ };
 
         // this is the free mean function for the custom_accum (return value via mean trait)
         

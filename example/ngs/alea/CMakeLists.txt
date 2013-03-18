@@ -10,11 +10,11 @@ include_directories(${Boost_ROOT_DIR})
 IF(ALPS_NGS_USE_NEW_ALEA)
     FOREACH (name   example_accumulator 
                     example_accumulator_set
-                    example_custom_accum 
+                    #example_custom_accum 
                     example_histogram
                     example_vector_operators
-#                    example_new_input_op
-#                    test_alps_multi_array
+                    example_new_input_op
+                    #test_alps_multi_array
                     )
         add_executable(${name} ${name}.cpp)
         target_link_libraries(${name} alps)

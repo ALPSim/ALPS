@@ -25,40 +25,47 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <alps/ngs/short_print.hpp>
-#include <alps/multi_array.hpp>
-
 #include <iostream>
-#include <vector>
-
-#include <boost/integer.hpp>
+#include <alps/ngs.hpp>
 
 using namespace std;
+using namespace alps::accumulator;
 
 int main()
 {
-    alps::multi_array<double, 3> a(4,2,2);
-    alps::multi_array<double, 2> b(4,4);
-    alps::multi_array<double, 3> c(4,2,2);
     
-    for(int i = 0; i < 4; ++i)
-    {
-        for(int j = 0; j < 2; ++j)
-        {
-            for(int k = 0; k < 2; ++k)
-            {
-                a[i][j][k] = 4*i+2*j+k;
-                c[i][j][k] = 4*(i%2)+2*j+k;
-            }
-        }
-    }
+    //accumulator with all the features so far
+    typedef accumulator<  int
+                        , features<  tag::fixed_size_binning
+                                , tag::max_num_binning
+                                , tag::log_binning
+                                , tag::autocorrelation
+                                >
+                        , double
+                        > accum;
+
+    accum acc;
+    detail::accumulator_wrapper w(acc);
     
     
-    a+a;
-    std::cout << sqrt(a) << std::endl;
-    std::cout << "--" << std::endl;
-    std::cout << a-c << std::endl;
-    std::cout << "--" << std::endl;
-    c = a;
-    std::cout << alps::sqrt(a) << std::endl;
+    acc << 1;
+    acc << 2;
+    acc << 3;
+    cout << acc << endl;
+    
+    acc(4);
+    acc(5);
+    acc(10, 100);
+    acc(10, Weight = 100);
+    acc(1000);
+    
+    w(4);
+    w(5, 1.5);
+    w(10, Weight = double(100.));
+    
+    std::cout << mean(acc) << std::endl;
+    std::cout << mean(w.get<int>()) << std::endl;
+    
+    cout << sizeof(weight_type<accum>::type) << endl;
+    
 }
