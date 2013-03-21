@@ -34,6 +34,7 @@
 #include <alps/ngs/hdf5/multi_array.hpp>
 #include <alps/ngs/alea/accumulator_set.hpp>
 
+#include <alps/multi_array.hpp>
 #include <alps/random/mersenne_twister.hpp>
 
 #include <boost/function.hpp>

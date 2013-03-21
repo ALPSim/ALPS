@@ -25,18 +25,19 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <iostream>
 #include <alps/ngs.hpp>
-#include <alps/ngs/numeric/array.hpp>
 #include <alps/multi_array.hpp>
 #include <alps/utility/resize.hpp>
+#include <alps/ngs/hdf5/array.hpp>
+#include <alps/ngs/numeric/array.hpp>
+
+#include <iostream>
 
 using namespace std;
 using namespace alps::accumulator;
 using namespace alps::ngs::numeric;
 
-int main()
-{
+int main() {
     #ifdef ALPS_NGS_USE_NEW_ALEA
         
         //=================== test resize_same_as ===================
@@ -164,7 +165,7 @@ int main()
         
         //------------------- test array ops -------------------
         //------------------- they fulfill the error_type_concept -------------------
-        boost_array += sqrt(boost_array + boost_array - boost_array * boost_array/2);
+        boost_array += sqrt(boost_array + boost_array - boost_array * boost_array / 2.);
         
         
         //=================== test alps::multi-array ===================

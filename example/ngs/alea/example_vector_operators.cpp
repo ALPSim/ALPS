@@ -49,8 +49,7 @@ int main()
     std::cout << "a: " << alps::short_print(a) << std::endl;
 
     a+=a1;
-    a/3;
-    a/3.0;
+    a/3.;
     std::cout << "a: " << alps::short_print(sqrt(a*b)) << std::endl;
 
 
