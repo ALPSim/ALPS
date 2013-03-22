@@ -37,35 +37,35 @@ using namespace alps::accumulator;
 
 int main()
 {
-    //~ cout << "test custom_accum" << endl;
-    //~ cout << "-----------------" << endl;
-    //~ 
+    cout << "test custom_accum" << endl;
+    cout << "-----------------" << endl;
+    
     custom_accum a;
-    //~ 
-    a << 1;
-    a << 2;
-    a << 3;
-    a << 4;
-    a << 5;
-    //~ 
+    
+    add_value(a, 1);
+    add_value(a, 2);
+    add_value(a, 3);
+    add_value(a, 4);
+    add_value(a, 5);
+    
     count(a);
     mean(a);
-    //~ 
+    
     cout << a << endl;
-    //~ 
+    
     detail::accumulator_wrapper m(a);
     
-    m << 6;
-    m << 7;
-    m << 8;
-    //~ 
-    //~ // get infos via intermediate type m.get<int>(), where int is the value_type of custom_accum
+    m(6);
+    m(7);
+    m(8);
+    
+    // get infos via intermediate type m.get<int>(), where int is the value_type of custom_accum
     m.get<int>().count();
     m.get<int>().mean();
     
     // extract the accumulator (and get count/mean info)
     count(extract<custom_accum>(m));
     mean(m.extract<custom_accum>());
-    //~ 
+    
     cout << m;
 }

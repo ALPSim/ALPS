@@ -72,15 +72,15 @@ namespace alps
         template<> struct value_type<custom_accum> {
             typedef int type;
         };
-        //~ template<> struct weight_value_type<custom_accum> {
-            //~ typedef int type;
-        //~ };
+        template<> struct weight_value_type<custom_accum> {
+            typedef void type;
+        };
 
-        // this is the free mean function for the custom_accum (return value via mean trait)
         
     }//end namespace accumulator
 }//end namespace alps
 
+// this is the free mean function for the custom_accum (return value via mean trait)
 alps::accumulator::mean_type<alps::accumulator::value_type<custom_accum>::type>::type mean(const custom_accum & arg)
 {
     typedef alps::accumulator::mean_type<alps::accumulator::value_type<custom_accum>::type>::type mean_type;
@@ -100,10 +100,9 @@ void reset(custom_accum & arg)
 }
 
 // the two stream ops must also be provided. This one takes in a value of type value_type
-custom_accum & operator<<(custom_accum & acc, int a)
+void add_value(custom_accum & acc, int const & a)
 {
     acc.push_back(a);
-    return acc;
 }
 
 // normal ostream operator

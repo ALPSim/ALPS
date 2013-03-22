@@ -167,7 +167,6 @@ int main() {
         //------------------- they fulfill the error_type_concept -------------------
         boost_array += sqrt(boost_array + boost_array - boost_array * boost_array / 2.);
         
-        
         //=================== test alps::multi-array ===================
         alps::accumulator::accumulator<alps::multi_array<double, 3>, features<  tag::fixed_size_binning
                                 , tag::max_num_binning
@@ -175,23 +174,23 @@ int main() {
                                 , tag::autocorrelation
                                 , tag::histogram
                                 > > acc_alps_ma;
+        //TODO: multiarray not supported yet. See check_size in ngs/numeric/detail.hpp
+        //~ alps::multi_array<double, 3> ma(2,2,2);
+        //~ 
+        //~ for(uint i = 0; i < 2; ++i)
+        //~ {
+            //~ for(uint j = 0; j < 2; ++j)
+            //~ {
+                //~ for(uint k = 0; k < 2; ++k)
+                //~ {
+                    //~ ma[i][j][k] = i*4+j*2+k;
+                //~ }
+            //~ }
+        //~ }
         
-        alps::multi_array<double, 3> ma(2,2,2);
-
-        for(uint i = 0; i < 2; ++i)
-        {
-            for(uint j = 0; j < 2; ++j)
-            {
-                for(uint k = 0; k < 2; ++k)
-                {
-                    ma[i][j][k] = i*4+j*2+k;
-                }
-            }
-        }
+        //~ acc_alps_ma << ma;
         
-        acc_alps_ma << ma;
-        
-        std::cout << alps::short_print(ma) << std::endl;
+        //~ std::cout << alps::short_print(ma) << std::endl;
         
     #else
         std::cout << "ALPS_NGS_USE_NEW_ALEA is OFF" << std::endl;

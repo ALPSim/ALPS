@@ -14,7 +14,7 @@ IF(ALPS_NGS_USE_NEW_ALEA)
                     example_histogram
                     example_vector_operators
                     example_new_input_op
-                    #test_alps_multi_array
+                    test_alps_multi_array
                     )
         add_executable(${name} ${name}.cpp)
         target_link_libraries(${name} alps)
