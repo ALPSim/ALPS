@@ -31,6 +31,20 @@
 using namespace std;
 using namespace alps::accumulator;
 
+template<typename T> 
+struct has_method //checks if T has a method mean
+{
+    //~ static Accum a;
+    template<void(T::*)(int const &, double const &)>
+    struct helper
+    {
+        typedef char type;
+    };
+    template<typename U> static char check(typename helper<&U::operator()>::type);
+    template<typename U> static double check(...);
+    enum { value = (sizeof(char) == sizeof(check<T>(0))) };
+};
+
 int main()
 {
     
@@ -60,6 +74,10 @@ int main()
     acc(1000);
     
     w(4);
+    cout << "vt :" << typeid(value_type<accum>::type).name() << endl;
+    cout << "wvt:" << typeid(weight_value_type<accum>::type).name() << endl;
+    cout << "test()op: " << has_method<accum>::value << endl;
+    cout << "Type acc: " << typeid(accum).name() << endl;
     w(5, 1.5);
     w(10, Weight = double(100.));
     
