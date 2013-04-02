@@ -43,7 +43,7 @@
 void matrix_inversion(blas::general_matrix<std::complex<double> >&A, blas::general_matrix<std::complex<double> >&A_inv);
 void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta, const shape_t shape)
 {
-  os<<std::setprecision(20);
+  os<<std::setprecision(14);
   for(unsigned int i=0;i<v.nfreq();++i){
     os<<(2*i+1)*M_PI/beta<<"\t";
     switch (shape) {
@@ -75,7 +75,7 @@ void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function
 void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function_t &g_bare, 
                                 const matsubara_green_function_t g_dressed, const double beta, const shape_t shape)
 {
-  os<<std::setprecision(20);
+  os<<std::setprecision(14);
   switch (shape) {
     case diagonal:
       for(unsigned int i=0;i<g_bare.nfreq();++i){
@@ -124,7 +124,7 @@ void print_quasiparticle_estimate(std::ostream &os, const matsubara_green_functi
 
 
 void print_real_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta, const shape_t shape){
-  os<<std::setprecision(20);
+  os<<std::setprecision(14);
   for(unsigned int i=0;i<v.nfreq();++i){
     os<<(2*i+1)*M_PI/beta<<"\t";
     switch (shape) {
@@ -158,7 +158,7 @@ void print_real_green_matsubara(std::ostream &os, const matsubara_green_function
 
 
 void print_green_itime(std::ostream &os, const itime_green_function_t &v, const double beta, const shape_t shape){
-  os<<std::setprecision(20);
+  os<<std::setprecision(14);
   for(unsigned int i=0;i<v.ntime();++i){
     os<<beta*i/(v.ntime()-1)<<"\t";
     switch (shape) {
@@ -279,7 +279,7 @@ std::ostream &operator<<(std::ostream &os, const std::pair<green_function<double
   return os;
 }
 std::ostream &operator<<(std::ostream &os, const std::pair<green_function<std::complex<double> >, double> &v_and_beta){
-  os<<std::setprecision(20);
+  os<<std::setprecision(14);
   for(unsigned int o=0;o<v_and_beta.first.ntime();++o){
     os<<(2.*o+1)*M_PI/v_and_beta.second<<"\t";
     for(unsigned int i=0;i<v_and_beta.first.nsite();++i)
@@ -305,7 +305,7 @@ std::ostream &operator<<(std::ostream &os, const std::pair<nambu_green_function<
   return os;
 }
 std::ostream &operator<<(std::ostream &os, const std::pair<nambu_green_function<std::complex<double> >, double> &v_and_beta){
-  os<<std::setprecision(20);
+  os<<std::setprecision(14);
   for(unsigned int o=0;o<v_and_beta.first.ntime();++o){
     os<<(2.*o+1)*M_PI/v_and_beta.second<<"\t";
     if(v_and_beta.first.shape()==diagonal){
@@ -353,7 +353,7 @@ std::istream &operator>>(std::istream &is, green_function<double> &v){
 }*/
 
 std::ostream &operator<<(std::ostream &os, const green_function<std::complex<double> > &v){
-  os<<std::setprecision(20);
+  os<<std::setprecision(14);
   for(unsigned int o=0;o<v.nfreq();++o){
     os<<o<<"\t";
     for(unsigned int i=0;i<v.nsite();++i)
@@ -380,7 +380,7 @@ std::ostream &operator<<(std::ostream &os, const U_matrix &U){
 ///////////////////////////////////THE NAMBU PART/////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
 void print_green_itime(std::ostream &os, const nambu_itime_green_function_t &v, const double beta, const shape_t shape){
-  os<<std::setprecision(20);
+  os<<std::setprecision(14);
   for(unsigned int i=0;i<v.ntime();++i){
     os<<beta*i/(v.ntime()-1)<<" ";
     switch (shape) {
@@ -411,7 +411,7 @@ void print_green_itime(std::ostream &os, const nambu_itime_green_function_t &v, 
 
 void print_imag_green_matsubara(std::ostream &os, const nambu_matsubara_green_function_t &v, const double beta, const shape_t shape)
 {
-  os<<std::setprecision(20);
+  os<<std::setprecision(14);
   for(unsigned int i=0;i<v.nfreq();++i){
     os<<(2*i+1)*M_PI/beta<<" ";
     switch (shape) {
@@ -440,7 +440,7 @@ void print_imag_green_matsubara(std::ostream &os, const nambu_matsubara_green_fu
   }
 }
 void print_real_green_matsubara(std::ostream &os, const nambu_matsubara_green_function_t &v, const double beta, const shape_t shape){
-  os<<std::setprecision(20);
+  os<<std::setprecision(14);
   for(unsigned int i=0;i<v.nfreq();++i){
     os<<(2*i+1)*M_PI/beta<<" ";
     switch (shape) {
@@ -471,7 +471,7 @@ void print_real_green_matsubara(std::ostream &os, const nambu_matsubara_green_fu
 void print_selfenergy_matsubara(std::ostream &os, const nambu_matsubara_green_function_t &g_bare, 
                                 const nambu_matsubara_green_function_t g_dressed, const double beta, const shape_t shape)
 {
-  os<<std::setprecision(20);
+  os<<std::setprecision(14);
   switch (shape) {
     case diagonal:
       for(unsigned int i=0;i<g_bare.nfreq();++i){

@@ -157,6 +157,7 @@ template<typename T> void nambu_green_function<T>::read(const char *filename){
 
 template<typename T> void nambu_green_function<T>::write(const char *filename){
   std::ofstream out_file(filename);
+  out_file<<std::setprecision(14);
   if(!out_file.is_open()){ std::cerr<<"output file "<<filename<<" could not be opened!"<<std::endl; exit(1);}
   for(unsigned int i=0;i<nt_;++i){
     out_file << i << " ";

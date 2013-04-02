@@ -199,6 +199,7 @@ template<typename T> void green_function<T>::read(const char *filename){
 
 template<typename T> void green_function<T>::write(const char *filename) const{
   std::ofstream out_file(filename);
+  out_file<<std::setprecision(14);
   assert(out_file.is_open()); //this is not good enough when people use -DNDEBUG.
   if(!out_file.is_open()){ std::cerr<<"output file "<<filename<<" could not be opened!"<<std::endl; exit(1);}
   for(unsigned int i=0;i<nt_;++i){

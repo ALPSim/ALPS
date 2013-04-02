@@ -32,7 +32,7 @@ int main(int argc, char **argv){
     ("lattice", po::value<std::string>(&latticefilename)->default_value("cluster.xml"), "lattice file cluster.xml")
     ("cluster", po::value<std::string>(&clustername), "cluster geometry")
     ("sites", po::value<int>(&new_cluster_sites), "number of cluster sites for new cluster")
-    ("iteration", po::value<int>(), "iteration")
+    ("iteration", po::value<std::string>(), "iteration, use \"all\" to average all available iterations.")
     ("mult-anomalous", po::value<double>(&mult_anomalous)->default_value(1.), "multiply anomalous self energy by a factor of x")
           ;
   po::variables_map vm;
@@ -80,11 +80,12 @@ int main(int argc, char **argv){
   nambu_itime_green_function_t green0_itime(ntau, nsites_new, 2, diagonal);
   
   if(!vm.count("iteration")) throw std::runtime_error("please specify iteration");
-  int iteration=vm["iteration"].as<int>();
-  std::stringstream selfenergy_name; selfenergy_name<<"selfenergy_"<<iteration;
-  {
+  if(vm["iteration"].as<std::string>()!= std::string("all")){
+    std::stringstream selfenergy_name; 
+    int iteration=vm["iteration"].as<int>();
+    selfenergy_name<<"selfenergy_"<<iteration;
     std::ifstream sigma_file(selfenergy_name.str().c_str());
-    if(!sigma_file.is_open()) throw std::runtime_error("self energy file not open.");
+    if(!sigma_file.is_open()) throw std::logic_error("sigma file not open!");
     double ignored;
     for(int i=0;i<nfreq;++i){
       sigma_file>>ignored; //omega_0 = (2*0+1)*pi/beta, beta=pi/omega_0
@@ -97,6 +98,39 @@ int main(int argc, char **argv){
         selfenergy_orig(i,j,j,1,1)=std::complex<double>(re11,im11);
       }
     }
+  }else{
+    int iteration=1;
+    for(;;++iteration){
+      std::stringstream selfenergy_name; 
+      selfenergy_name<<"selfenergy_"<<iteration;
+      std::ifstream sigma_file(selfenergy_name.str().c_str());
+      if(!sigma_file.is_open()) break;
+      std::cout<<"averaging iteration : "<<iteration<<std::endl;;
+      double ignored;
+      for(int i=0;i<nfreq;++i){
+        sigma_file>>ignored; //omega_0 = (2*0+1)*pi/beta, beta=pi/omega_0
+        for(int j=0;j<nsites_old;++j){
+          double re00,im00,re01,im01,re10,im10,re11,im11;
+          sigma_file>>re00>>im00>>re01>>im01>>re10>>im10>>re11>>im11;
+          selfenergy_orig(i,j,j,0,0)+=std::complex<double>(re00,im00);
+          selfenergy_orig(i,j,j,0,1)+=std::complex<double>(re01,im01);
+          selfenergy_orig(i,j,j,1,0)+=std::complex<double>(re10,im10);
+          selfenergy_orig(i,j,j,1,1)+=std::complex<double>(re11,im11);
+        }
+      }
+    }
+    iteration--;
+    for(int i=0;i<nfreq;++i){
+      for(int j=0;j<nsites_old;++j){
+        selfenergy_orig(i,j,j,0,0)/=iteration;
+        selfenergy_orig(i,j,j,0,1)/=iteration;
+        selfenergy_orig(i,j,j,1,0)/=iteration;
+        selfenergy_orig(i,j,j,1,1)/=iteration;
+      }
+    } 
+    std::cout<<"averaging: "<<iteration<<" iterations."<<std::endl;
+    std::ofstream sigma_orig_av_file("sigma_orig_av.dat");
+    sigma_orig_av_file<<std::make_pair(selfenergy_orig,beta)<<std::endl;
   }
   if(vm.count("cluster")){
     boost::shared_ptr<DCATransformer> clusterhandler_old;
