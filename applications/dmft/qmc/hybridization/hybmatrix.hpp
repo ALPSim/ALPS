@@ -51,6 +51,7 @@ public:
   double full_weight() const;
   void measure_G(std::vector<double> &G, std::vector<double> &F, const std::map<double,double> &F_prefactor, double sign) const;
   void measure_Gw(std::vector<double> &Gwr, std::vector<double> &Gwi,std::vector<double> &Fwr, std::vector<double> &Fwi, const std::map<double,double> &F_prefactor, double sign) const;
+  void measure_Gw_buffer(std::vector<double> &Gwr, std::vector<double> &Gwi,std::vector<double> &Fwr, std::vector<double> &Fwi, const std::map<double,double> &F_prefactor, double sign) const;
   void measure_G2w(std::vector<std::complex<double> > &G2w, std::vector<std::complex<double> >&F2w, int N_w2, int N_w_aux, const std::map<double,double> &F_prefactor) const;
   void measure_Gl(std::vector<double> &Gl, std::vector<double> &Fl, const std::map<double,double> &F_prefactor, double sign) const;
   void consistency_check() const;

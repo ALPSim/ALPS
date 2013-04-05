@@ -75,7 +75,10 @@ void interaction_matrix::assemble(const double U, const double Uprime, const dou
        }
      }
    }else{
-  if(n_orbitals_%2!=0) throw std::logic_error("extend assemble or write interaction matrix to file for odd # orbitals");
+  if(n_orbitals_%2!=0){
+    std::cerr<<"n_orbitals is: "<<n_orbitals_<<std::endl;
+    throw std::logic_error("extend assemble or write interaction matrix to file for odd # orbitals");
+  }
   for(int i=0;i<n_orbitals_;i+=2){
     operator()(i  , i  ) = 0; //Pauli
     operator()(i+1, i+1) = 0; //Pauli

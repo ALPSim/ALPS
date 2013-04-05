@@ -385,11 +385,19 @@ void hybridization::measure_G2w(std::vector<std::map<double,double> > &F_prefact
               g2wi[index] += meas.imag();
             }
             if(MEASURE_h2w){
+              //std::cout<<i<<" "<<j<<" "<<w2n<<" "<<w3n<<" "<<Wn<<" "<<std::endl;
+              //std::cout<<"G: "<<G2w[j][w3n*N_w_aux+w4n]<<" size: "<< G2w[j].size()<<" index: "<<w3n*N_w_aux+w4n<<std::endl;
+              //std::cout<<"F: "<<F2w[i][w1n*N_w_aux+w2n]<<" size: "<< F2w[i].size()<<" index: "<<w1n*N_w_aux+w2n<<std::endl;
+              //std::cout<<"done G and F"<<std::endl;
               std::complex<double> meas_h =F2w[i][w1n*N_w_aux+w2n]*G2w[j][w3n*N_w_aux+w4n]; // n1M12M34
               if(i==j)             meas_h-=F2w[i][w1n*N_w_aux+w4n]*G2w[i][w3n*N_w_aux+w2n]; //-n1M14M32
               meas_h/=beta; meas_h*=sign;
+              if(i >= F2w.size() || j >= G2w.size()) throw std::logic_error("size is too large!");
+              if(w1n*N_w_aux+w2n>= F2w[i].size() || w3n*N_w_aux+w4n>=G2w[j].size()) throw std::logic_error("size 2 is too large");
+              //if(isinf(meas_h.real()) || isinf(meas_h.imag()) || isnan(meas_h.real()) || isnan(meas_h.imag())) throw std::runtime_error("inf or nan in measuring of h");
               h2wr[index] += meas_h.real();
               h2wi[index] += meas_h.imag();
+              //std::cout<<i<<" "<<j<<" "<<w2n<<" "<<w3n<<" "<<Wn<<" done."<<std::endl;
             }
           }//Wn
       if(MEASURE_g2w){
