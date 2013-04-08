@@ -296,6 +296,25 @@ def generateSeed():
     baseseed = ((baseseed << 10) | (baseseed >> 22));
     return baseseed
 
+def writeInputH5Files(filename_,params_list):
+  """ This function writes the H5 input files for ALPS (NGS)
+
+      The parameters are:
+      1. filename_   : the base file name of the H5 files that will be written
+      2. params_list : a list of python dicts containing the simulation parameters
+
+      Ping Nang MA 
+  """
+  input_files_ = [];
+  for index in range(len(params_list)):
+    this_filename_ = filename_ + '.task' + str(index+1) + '.h5';
+    input_files_.append(this_filename_);
+    oar = pyalps.ngs.h5ar(this_filename_,'w');
+    for key in params_list[index].keys():
+      oar['/parameters/' + key] = params_list[index][key]
+    del oar;
+  return input_files_;
+
 def writeInputFiles(fname,parms, baseseed=None):
     """ This function writes the XML input files for ALPS
     
