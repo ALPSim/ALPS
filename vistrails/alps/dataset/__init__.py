@@ -136,6 +136,8 @@ def selfRegister():
     register(RestrictXRange,'DataSet|Tools')
     register(RestrictYRange,'DataSet|Tools')
     register(SortByProps,'DataSet|Tools')
+    register(PickleDataSets,'DataSet|Tools')
+    register(UnpickleDataSets,'DataSet|Tools')
     register(WriteTxt,'DataSet|Tools',abst=True)
     register(CacheErasure,'DataSet|Tools',abst=True)
     register(PrepareDictionary,'Tools')

@@ -36,6 +36,7 @@ import numpy as np
 from scipy import optimize
 import copy
 import string
+import pickle
 
 from dataset_core import *
 from dataset_exceptions import *
@@ -114,6 +115,27 @@ class WriteTxt(Module):
                 if 'filename' in s.props:
                     data = np.array([s.x,s.y]).transpose()
                     np.savetxt(s.props['filename'],data)
+
+class PickleDataSets(Module):
+    my_input_ports = [PortDescriptor('input',DataSets)]
+    my_output_ports = [PortDescriptor('file',basic.File)]
+    
+    def compute(self):
+        sets = self.getInputFromPort('input')
+        f = self.interpreter.filePool.create_file()
+        with open(f.name, 'w') as out:
+            pickle.dump(sets, out)
+        self.setResult('file', f)
+
+class UnpickleDataSets(Module):
+    my_input_ports = [PortDescriptor('file',basic.File)]
+    my_output_ports = [PortDescriptor('output',DataSets)]
+    
+    def compute(self):
+        f = self.getInputFromPort('file')
+        with open(f.name) as ifile:
+            sets = pickle.load(ifile)
+        self.setResult('output', sets)
 
 class CacheErasure(NotCacheable,Module):
     my_input_ports = [PortDescriptor('input',DataSets)]
