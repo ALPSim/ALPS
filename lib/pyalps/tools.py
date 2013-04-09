@@ -87,7 +87,7 @@ def executeCommandLogged(cmdline,logfile):
     log(cmd)
     return subprocess.call(cmd, shell=True, stdout=open(logfile, 'w'), stderr=subprocess.STDOUT)
 
-def runApplication(appname, parmfile, Tmin=None, Tmax=None, writexml=False, MPI=None, mpirun='mpirun'):
+def runApplication(appname, parmfile, T=None, Tmin=None, Tmax=None, writexml=False, MPI=None, mpirun='mpirun'):
     """ run an ALPS application 
     
         This function runs an ALPS application. The parameers are:
@@ -95,6 +95,7 @@ def runApplication(appname, parmfile, Tmin=None, Tmax=None, writexml=False, MPI=
         appname: the name of the application
         parmfile: the name of the main XML input file
         write_xml: optional parameter, to be set to True if all results should be written to the XML files in addition to the HDF5 files
+        T: time limit of MC simulation
         Tmin: optional parameter specifying the minimum time between checks whether a MC simulatio is finished
         Tmax: optional parameter specifying the maximum time between checks whether a MC simulatio is finished
         MPI: optional parameter specifying the number of processes to be used in an MPI simulation. MPI is not used if this parameter is left at ots default value  None.
@@ -109,6 +110,8 @@ def runApplication(appname, parmfile, Tmin=None, Tmax=None, writexml=False, MPI=
         if appname in ['sparsediag','fulldiag','dmrg']:
             cmdline += ['--Nmax','1']
     cmdline += [parmfile]
+    if T:
+      cmdline += ['-T',str(T)]
     if Tmin:
       cmdline += ['--Tmin',str(Tmin)]
     if Tmax:
