@@ -136,6 +136,8 @@ def runNGSApplication(appname, input_files_, T=None):
        cmdline += [input_file];
        if input_file.find('.in.h5') != -1:
          output_file = input_file.replace('.in.h5','.out.h5');
+       elif input_file.find('.out.h5') != -1:
+         output_file = input_file;
        elif input_file.find('.h5') != -1:
          output_file = input_file.replace('.h5','.out.h5');
        else:
@@ -449,6 +451,76 @@ def getResultFiles(dirname='.',pattern=None,prefix=None):
     replicas=recursiveGlob(dirname, prefix+'*replica*h5')
     res += replicas
     return res
+
+def getInputH5Files(base_filename_, tasks=None):
+    """ get all input h5 files in the current directory that are prefixed by base_filename_ being in the task (list)
+
+        Ping Nang MA
+    """
+    if tasks == None:
+      return glob.glob(base_filename_ + '*.in.h5');
+    else:
+      input_files = [];
+      for task in tasks:
+        input_file = base_filename_ + '.task' + str(task) + '.in.h5';
+        if (os.path.isfile(input_file)):
+          input_files.append(input_file);
+      return input_files;
+
+def getOutputH5Files(base_filename_, tasks=None):
+    """ get all output h5 files in the current directory that are prefixed by base_filename_ being in the task (list)
+
+        Ping Nang MA
+    """
+    if tasks == None:
+      return glob.glob(base_filename_ + '*.out.h5');
+    else:
+      output_files = [];
+      for task in tasks:
+        output_file = base_filename_ + '.task' + str(task) + '.out.h5';
+        if (os.path.isfile(output_file)):
+          output_files.append(output_file);
+      return output_files;
+      
+def replacedByInputH5Files(h5_files):
+  h5_infiles = [];
+  for h5_file in h5_files:
+    if h5_file.find('.out.h5') != -1:
+      h5_infile = h5_file.replace('.out.h5', '.in.h5');
+    elif h5_file.find('.in.h5') != -1:
+      h5_infile = h5_file;
+    elif h5_file.find('.h5') != -1:
+      h5_infile = h5_file.replace('.h5', '.in.h5');
+    else:
+      h5_infile = h5_file + '.in.h5';
+    h5_infiles.append(h5_infile);
+  return h5_infiles;
+
+def replacedByOutputH5Files(h5_files):
+  h5_outfiles = [];
+  for h5_file in h5_files:
+    if h5_file.find('.out.h5') != -1:
+      h5_outfile = h5_file; 
+    elif h5_file.find('.in.h5') != -1:
+      h5_outfile = h5_file.replace('.in.h5','.out.h5');
+    elif h5_file.find('.h5') != -1:
+      h5_outfile = h5_file.replace('.h5', '.out.h5');
+    else:
+      h5_outfile = h5_file + '.out.h5';
+    h5_outfiles.append(h5_outfile);
+  return h5_outfiles;
+
+def extractWorldlines(appname, sources=[], targets=[]):
+  if len(sources) != len(targets):
+    return;
+  else:
+    for index in range(len(sources)):
+      cmdline = [appname];
+      cmdline += sources[index];
+      cmdline += targets[index];
+      executeCommand(cmdline);
+    return; 
+
 
 def collectXY(sets,x,y,foreach=[]):
       """ collects specified data from a list of DataSet objects
