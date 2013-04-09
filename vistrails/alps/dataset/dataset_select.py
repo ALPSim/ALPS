@@ -167,7 +167,7 @@ class Select(Module):
             proc_code = urllib.unquote(str(code))
             
             cmd = 'def fn(x,y,props):\n'
-            for line in proc_code.split('\n'):
+            for line in proc_code.splitlines():
                 cmd = cmd + '\t' + line + '\n'
             exec cmd
                 

@@ -292,7 +292,7 @@ class PrepareDictionary(Module):
     
     def compute(self):
         lines = self.getInputFromPort('source')
-        lines = urllib.unquote(str(lines)).split('\n')
+        lines = urllib.unquote(str(lines)).splitlines()
         lines1 = []
         for line in lines:
             if line.startswith('#'):

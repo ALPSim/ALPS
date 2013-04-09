@@ -141,7 +141,7 @@ class DoNonlinearFit(FitPrototype):
         code = self.getInputFromPort('source')
         proc_code = urllib.unquote(str(code))
         cmd = 'def f(self,x,A):\n'
-        for line in proc_code.split('\n'):
+        for line in proc_code.splitlines():
             cmd += '\t' + line + '\n'
         exec cmd
         
