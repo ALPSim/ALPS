@@ -118,37 +118,11 @@ def runApplication(appname, parmfile, T=None, Tmin=None, Tmax=None, writexml=Fal
       cmdline += ['--TMax',str(Tmax)]
     if writexml:
       cmdline += ['--write-xml']
-    return (executeCommand(cmdline),parmfile.replace('.in.xml','.out.xml'))
+    if parmfile.find('.in.xml') != -1:
+      return (executeCommand(cmdline),parmfile.replace('.in.xml','.out.xml'))
+    if parmfile.find('.in.h5') != -1:
+      return executeCommand(cmdline)
 
-def runNGSApplication(appname, input_files_, T=None):
-    """ run an ALPS NGS application
-
-        This function runs an ALPS NGS application. The parameters are
-
-        appname:      name of the application
-        input_files_: list of input filenames
-        T:            time to finish
-
-        only supports serial task
-    """
-    execution = [];
-    for input_file in input_files_:
-       cmdline = [appname]
-       if T != None:
-         cmdline += ['-T',str(T)];  
-       cmdline += [input_file];
-       if input_file.find('.in.h5') != -1:
-         output_file = input_file.replace('.in.h5','.out.h5');
-       elif input_file.find('.out.h5') != -1:
-         output_file = input_file;
-       elif input_file.find('.h5') != -1:
-         output_file = input_file.replace('.h5','.out.h5');
-       else:
-         output_file = input_file + '.out.h5';
-       cmdline += [output_file];
-       execution.append(executeCommand(cmdline));
-    return execution;  
-    
 def runDMFT(infiles):
     """ run the ALPS DMFT application 
     
@@ -513,16 +487,12 @@ def replacedByOutputH5Files(h5_files):
     h5_outfiles.append(h5_outfile);
   return h5_outfiles;
 
-def extractWorldlines(appname, sources=[], targets=[]):
-  if len(sources) != len(targets):
-    return;
-  else:
-    for index in range(len(sources)):
-      cmdline = [appname];
-      cmdline += sources[index];
-      cmdline += targets[index];
-      executeCommand(cmdline);
-    return; 
+def extractWorldlines(appname, source, target):
+  cmdline = [appname];
+  cmdline += source;
+  cmdline += target;
+  executeCommand(cmdline);
+  return; 
 
 
 def collectXY(sets,x,y,foreach=[]):
