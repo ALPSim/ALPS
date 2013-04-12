@@ -550,7 +550,7 @@ void evaluate_sector_statistics(const alps::results_type<hybridization>::type &r
   std::size_t n_orbitals=parms["N_ORBITALS"];
   std::ofstream stat_file("sector_statistics.dat");
   stat_file << "#state |n_1={0,1} n_2={0,1} ...> n_i={0,1}: orbital i {empty,occupied}" << std::endl;
-  stat_file << "#rel weight (in \%)" << std::endl;
+  stat_file << "#rel weight (in %)" << std::endl;
   int n_states=pow(2,n_orbitals);
   std::vector<double> sector_statistics=results["sector_statistics"].mean<std::vector<double> >();
   for(int n=0;n<n_states;++n){
