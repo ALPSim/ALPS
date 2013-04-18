@@ -540,7 +540,7 @@ def collectXY(sets,x,y,foreach=[]):
                   res.x = xvalue
                   res.y = data.y
           
-          order = np.argsort(res.x) #, kind = 'mergesort')
+          order = np.argsort(res.x, kind = 'mergesort')
           res.x = res.x[order]
           res.y = res.y[order]
           res.props['label'] = ''
