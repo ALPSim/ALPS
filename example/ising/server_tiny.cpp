@@ -63,8 +63,8 @@ int main(int argc, char *argv[]) {
     // TODO: pick a port number and make it overridable vy a command line parameter and not params
   // params are for simulation parameters, not for infrastructure/running environment setup
     tcpserver server(params["PORT"] | 2485); // TODO: which port should we take?
-    server.add_action("progress", boost::bind(&boost::lexical_cast<std::string, double>, boost::bind(&sim_type::fraction_completed, boost::ref(sim))));
-    server.add_action("checkpoint", boost::bind(&do_checkpoint, boost::ref(sim), params["DUMP"] | "checkpoint"));
+    server.add_action("progress", boost::bind<std::string>(&boost::lexical_cast<std::string, double>, boost::bind(&sim_type::fraction_completed, boost::ref(sim))));
+    server.add_action("checkpoint", boost::bind<std::string>(&do_checkpoint, boost::ref(sim), params["DUMP"] | "checkpoint"));
 
     boost::posix_time::ptime progress_time = boost::posix_time::second_clock::local_time();
     boost::posix_time::ptime checkpoint_time = boost::posix_time::second_clock::local_time();

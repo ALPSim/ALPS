@@ -34,13 +34,8 @@ using namespace alps::accumulator;
 template<typename T> 
 struct has_method //checks if T has a method mean
 {
-    //~ static Accum a;
-    template<void(T::*)(int const &, double const &)>
-    struct helper
-    {
-        typedef char type;
-    };
-    template<typename U> static char check(typename helper<&U::operator()>::type);
+    template <typename U, void (U::*)(int) > struct helper {};
+    template<typename U> static char check(helper<U, &U::operator()>*);
     template<typename U> static double check(...);
     enum { value = (sizeof(char) == sizeof(check<T>(0))) };
 };
