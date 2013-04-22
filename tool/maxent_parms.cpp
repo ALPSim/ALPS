@@ -123,7 +123,7 @@ y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
 
   if (p.defined("DATA")) {
       std::string fname = p["DATA"]|"";
-      if(p.defined("DATA_IN_HDF5") && p["DATA_IN_HDF5"]) {
+      if(p.defined("DATA_IN_HDF5") && p["DATA_IN_HDF5"]|false) {
           //attempt to read from h5 archive
           alps::hdf5::archive ar(fname, alps::hdf5::archive::READ);
           std::vector<double> tmp(ndat());
@@ -327,11 +327,11 @@ void ContiParameters::setup_kernel(const alps::params& p, const int ntab, const 
     boost::throw_exception(std::invalid_argument("unknown value for parameter DATASPACE"));
 //  vector_type sigma(ndat());
   if (p.defined("COVARIANCE_MATRIX")) {
-    if(!(p.defined("DATA_IN_HDF5") && p["DATA_IN_HDF5"])) {
+    if(!(p.defined("DATA_IN_HDF5") && p["DATA_IN_HDF5"]|false)) {
       cov_.resize(ndat(),ndat());
       if (alps::is_master())
         std::cerr << "Reading covariance matrix\n";
-      std::string fname = p["COVARIANCE_MATRIX"];
+      std::string fname = p["COVARIANCE_MATRIX"]|"";
       std::ifstream covstream(fname.c_str());
       if (!covstream)
         boost::throw_exception(std::invalid_argument("could not open covariance matrix file: "+fname));
