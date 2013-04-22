@@ -122,7 +122,7 @@ y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
 // will be real imag.
 
   if (p.defined("DATA")) {
-      std::string fname = p["DATA"];
+      std::string fname = p["DATA"]|"";
       if(p.defined("DATA_IN_HDF5") && p["DATA_IN_HDF5"]) {
           //attempt to read from h5 archive
           alps::hdf5::archive ar(fname, alps::hdf5::archive::READ);
