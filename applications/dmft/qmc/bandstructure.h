@@ -152,10 +152,10 @@ public:
   std::complex<double> HilbertIntegral_AFM(const std::complex<double>& zeta_A_times_zeta_B, const unsigned flavor) const;
   
 private:
-  static const double kx_min=-M_PI;
-  static const double ky_min=-M_PI;
-  static const double kx_max=M_PI;
-  static const double ky_max=M_PI;
+  static const double kx_min;
+  static const double ky_min;
+  static const double kx_max;
+  static const double ky_max;
   static double k_area() { return (kx_max-kx_min)*(ky_max-ky_min); }
   
   const double t_, tprime_;
@@ -205,10 +205,10 @@ public:
   std::complex<double> HilbertIntegral_AFM(const std::complex<double>& zeta_A_times_zeta_B, const unsigned flavor) const;
   
 private:
-  static const double kx_min=-M_PI;
-  static const double ky_min=-M_PI/2.;
-  static const double kx_max=M_PI;
-  static const double ky_max=M_PI/2.;
+  static const double kx_min;
+  static const double ky_min;
+  static const double kx_max;
+  static const double ky_max;
   static double k_area() { return (kx_max-kx_min)*(ky_max-ky_min); }
   
   const double t_;
