@@ -319,6 +319,17 @@
   <UNITCELL ref="coupled ladders"/>
 </LATTICEGRAPH>
 
+<LATTICEGRAPH name = "open coupled ladders">
+  <FINITELATTICE>
+    <LATTICE ref="square lattice"/>
+    <PARAMETER name="W" default="L"/>
+    <EXTENT dimension="1" size="L"/>
+    <EXTENT dimension="2" size="W"/>
+    <BOUNDARY type="open"/>
+  </FINITELATTICE>
+  <UNITCELL ref="coupled ladders"/>
+</LATTICEGRAPH>
+
 <LATTICEGRAPH name = "triangular lattice">
   <FINITELATTICE>
     <LATTICE ref="triangular lattice"/>
