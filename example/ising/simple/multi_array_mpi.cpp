@@ -34,7 +34,11 @@
 #include <alps/ngs/hdf5/pair.hpp>
 #include <alps/ngs/hdf5/vector.hpp>
 #include <alps/ngs/hdf5/multi_array.hpp>
-#include <alps/ngs/alea/accumulator_set.hpp>
+
+#ifdef ALPS_NGS_USE_NEW_ALEA
+    #include <alps/ngs/alea/accumulator_set.hpp>
+#endif
+
 #include <alps/ngs/scheduler/check_schedule.hpp>
 
 #include <alps/random/mersenne_twister.hpp>

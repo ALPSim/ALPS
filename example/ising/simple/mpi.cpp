@@ -33,7 +33,11 @@
 #include <alps/ngs/boost_mpi.hpp>
 #include <alps/ngs/mcresults.hpp>
 #include <alps/ngs/mcobservables.hpp>
-#include <alps/ngs/alea/accumulator_set.hpp>
+
+#ifdef ALPS_NGS_USE_NEW_ALEA
+    #include <alps/ngs/alea/accumulator_set.hpp>
+#endif
+ 
 #include <alps/ngs/observablewrappers.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 #include <alps/ngs/scheduler/check_schedule.hpp>
