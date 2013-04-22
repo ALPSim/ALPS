@@ -45,7 +45,7 @@ y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
 {
   if (ndat_<4) 
     boost::throw_exception(std::invalid_argument("NDAT too small"));
-    std::string p_f_grid = p["FREQUENCY_GRID"];
+    std::string p_f_grid = p["FREQUENCY_GRID"]|"";
   if (p_f_grid=="Lorentzian") {
     double cut = p["CUT"]|0.01;
     std::vector<double> temp(nfreq_+1);
