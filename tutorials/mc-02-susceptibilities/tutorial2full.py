@@ -43,7 +43,7 @@ susceptibility = pyalps.collectXY(data,x='T',y='Susceptibility',foreach=['MODEL'
 
 # assign labels to the data depending on the properties
 for s in susceptibility:
-  print s.props
+  # print s.props
   if s.props['LATTICE']=='chain lattice':
     s.props['label'] = "chain"
   elif s.props['LATTICE']=='ladder':
