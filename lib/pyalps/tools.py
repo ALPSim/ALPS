@@ -87,7 +87,7 @@ def executeCommandLogged(cmdline,logfile):
     log(cmd)
     return subprocess.call(cmd, shell=True, stdout=open(logfile, 'w'), stderr=subprocess.STDOUT)
 
-def runApplication(appname, parmfile, T=None, Tmin=None, Tmax=None, writexml=False, MPI=None, mpirun='mpirun'):
+def runApplication(appname, parmfiles, T=None, Tmin=None, Tmax=None, writexml=False, MPI=None, mpirun='mpirun'):
     """ run an ALPS application 
     
         This function runs an ALPS application. The parameers are:
@@ -101,27 +101,32 @@ def runApplication(appname, parmfile, T=None, Tmin=None, Tmax=None, writexml=Fal
         MPI: optional parameter specifying the number of processes to be used in an MPI simulation. MPI is not used if this parameter is left at ots default value  None.
         mpirun: optional parameter giving the name of the executable used to laucnh MPI applications. The default is 'mpirun'
     """
-    cmdline = []
-    if MPI != None:
-        cmdline += [mpirun,'-np',str(MPI)]
-    cmdline += [appname]
-    if MPI != None:
-        cmdline += ['--mpi']
-        if appname in ['sparsediag','fulldiag','dmrg']:
-            cmdline += ['--Nmax','1']
-    cmdline += [parmfile]
-    if T:
-      cmdline += ['-T',str(T)]
-    if Tmin:
-      cmdline += ['--Tmin',str(Tmin)]
-    if Tmax:
-      cmdline += ['--TMax',str(Tmax)]
-    if writexml:
-      cmdline += ['--write-xml']
-    if parmfile.find('.in.xml') != -1:
-      return (executeCommand(cmdline),parmfile.replace('.in.xml','.out.xml'))
-    if parmfile.find('.in.h5') != -1:
-      return executeCommand(cmdline)
+    if isinstance(parmfiles, str):
+      parmfiles = [parmfiles];
+
+    for parmfile in parmfiles:
+      cmdline = []
+      if MPI != None:
+          cmdline += [mpirun,'-np',str(MPI)]
+      cmdline += [appname]
+      if MPI != None:
+          cmdline += ['--mpi']
+          if appname in ['sparsediag','fulldiag','dmrg']:
+              cmdline += ['--Nmax','1']
+      cmdline += [parmfile]
+      if T:
+        cmdline += ['-T',str(T)]
+      if Tmin:
+        cmdline += ['--Tmin',str(Tmin)]
+      if Tmax:
+        cmdline += ['--TMax',str(Tmax)]
+      if writexml:
+        cmdline += ['--write-xml']
+      if parmfile.find('.in.xml') != -1:
+        return (executeCommand(cmdline),parmfile.replace('.in.xml','.out.xml'))  # no iteration for xml i/o
+      if parmfile.find('.in.h5') != -1:
+        executeCommand(cmdline);
+   
 
 def runDMFT(infiles):
     """ run the ALPS DMFT application 
@@ -487,10 +492,10 @@ def replacedByOutputH5Files(h5_files):
     h5_outfiles.append(h5_outfile);
   return h5_outfiles;
 
-def extractWorldlines(appname, source, target):
+def extract(appname, source, target):
   cmdline = [appname];
-  cmdline += source;
-  cmdline += target;
+  cmdline += [source];
+  cmdline += [target];
   executeCommand(cmdline);
   return; 
 
