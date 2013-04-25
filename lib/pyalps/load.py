@@ -421,7 +421,7 @@ class Hdf5Loader:
                             obs.load(self.h5fname, respath+'/'+m)
                             obs=np.array([obs])
                             size=1
-                            if obs.count==0:
+                            if obs[0].count==0:
                               obs=None
                         else:
                             obs = pa.MCVectorData()
