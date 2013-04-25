@@ -182,7 +182,7 @@ private:
   wormpair   worm;
 
   // regarding measurements
-  bool measure_simulation_speed_;
+  bool measure_only_simulation_speed_;
   bool measure_winding_number_;
   bool measure_local_density_;
   bool measure_local_density2_;

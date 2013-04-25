@@ -105,14 +105,14 @@ void
           << "\n\n";
       out << "Measurements\n"
           << "============\n"
-          << "Measure Simulation Speed    : " << measure_simulation_speed_    << "\n"
-          << "Measure Winding Number      : " << measure_winding_number_      << "\n"
-          << "Measure Local Energy        : " << measure_local_energy_        << "\n"
-          << "Measure Local Density       : " << measure_local_density_       << "\n" 
-          << "Measure Local Magnetization : " << measure_local_magnetization_ << "\n"
-          << "Measure Green's Function    : " << measure_green_function_      << "\n"
-          << "Measure Momentum Density    : " << measure_momentum_density_    << "\n"
-          << "Measure TOF Image           : " << measure_tof_image_           << "\n"
+          << "Measure                     : " << !measure_only_simulation_speed_ << "\n"
+          << "Measure Winding Number      : " << measure_winding_number_         << "\n"
+          << "Measure Local Energy        : " << measure_local_energy_           << "\n"
+          << "Measure Local Density       : " << measure_local_density_          << "\n" 
+          << "Measure Local Magnetization : " << measure_local_magnetization_    << "\n"
+          << "Measure Green's Function    : " << measure_green_function_         << "\n"
+          << "Measure Momentum Density    : " << measure_momentum_density_       << "\n"
+          << "Measure TOF Image           : " << measure_tof_image_              << "\n"
           << "\n\n"; 
     }
 
@@ -135,46 +135,27 @@ directed_worm_algorithm
     // regarding experiment
     , finite_tof (is_periodic_ ? false : (0. != static_cast<double>(this->parameters["time_of_flight"] | 0.)))
     // regarding measurements
-    , measure_simulation_speed_     (this->parameters["MEASURE[Simulation Speed]"] | false)
-    , measure_winding_number_       (is_periodic_ ? static_cast<bool>(this->parameters["MEASURE[Winding Number]"] | false) : false)
-    , measure_local_density_        (this->is_charge_model_ ? static_cast<bool>(this->parameters["MEASURE[Local Density]"] | false) : false)
-    , measure_local_density2_       (this->is_charge_model_ ? static_cast<bool>(this->parameters["MEASURE[Local Density^2]"] | false) : false)
-    , measure_local_magnetization_  (this->is_spin_model_ ? static_cast<bool>(this->parameters["MEASURE[Local Magnetization]"] | false) : false)
-    , measure_local_magnetization2_ (this->is_spin_model_ ? static_cast<bool>(this->parameters["MEASURE[Local Magnetization^2]"] | false) : false)
-    , measure_local_energy_         (this->parameters["MEASURE[Local Energy]"] | false)
-    , measure_green_function_       (is_periodic_ ? static_cast<bool>(this->parameters["MEASURE[Green Function]"] | false) : false)
-    , measure_momentum_density_     (this->parameters["MEASURE[Momentum Density]"] | false)
-    , measure_tof_image_            (finite_tof ? static_cast<bool>(this->parameters["MEASURE[TOF Image]"] | false) : false)
+    , measure_only_simulation_speed_ (!(this->parameters["MEASURE"] | true))
+    , measure_winding_number_        (is_periodic_ ? static_cast<bool>(this->parameters["MEASURE[Winding Number]"] | false) : false)
+    , measure_local_density_         (this->is_charge_model_ ? static_cast<bool>(this->parameters["MEASURE[Local Density]"] | false) : false)
+    , measure_local_density2_        (this->is_charge_model_ ? static_cast<bool>(this->parameters["MEASURE[Local Density^2]"] | false) : false)
+    , measure_local_magnetization_   (this->is_spin_model_ ? static_cast<bool>(this->parameters["MEASURE[Local Magnetization]"] | false) : false)
+    , measure_local_magnetization2_  (this->is_spin_model_ ? static_cast<bool>(this->parameters["MEASURE[Local Magnetization^2]"] | false) : false)
+    , measure_local_energy_          (this->parameters["MEASURE[Local Energy]"] | false)
+    , measure_green_function_        (is_periodic_ ? static_cast<bool>(this->parameters["MEASURE[Green Function]"] | false) : false)
+    , measure_momentum_density_      (this->parameters["MEASURE[Momentum Density]"] | false)
+    , measure_tof_image_             (finite_tof ? static_cast<bool>(this->parameters["MEASURE[TOF Image]"] | false) : false)
   {
     // lattice enhancement
     using alps::numeric::operator*;
     for (int i=0; i<dimension(); ++i)
       lattice_vector_.push_back(*(basis_vectors().first + i) * lattice().extent()[i]);
 
-    // further initiation of worldlines
-    try {
-      std::string input_worldlines_file = ar.get_filename().substr(0,ar.get_filename().find_last_of(".")) + ".worldlines.h5";
-      alps::hdf5::archive ar(parameters["WORLDLINES"] | static_cast<std::string>(input_worldlines_file));
-      wl.load(ar);
-    }
-    catch(...) {
-      std::cout << "Either I could not find the file that stores the worldlines object, or the file is corrupted.\n";
-    }
-
     // other initialization
     initialize_site_states();
     initialize_hamiltonian();
     initialize_lookups();
     initialize_measurements();
-
-    try {
-      std::string input_measurements_file = ar.get_filename().substr(0,ar.get_filename().find_last_of(".")) + ".measurements.h5";
-      alps::hdf5::archive ar(parameters["MEASUREMENTS"] | static_cast<std::string>(input_measurements_file));
-      ar >> alps::make_pvp("/simulation/results", measurements);
-    }
-    catch(...) {
-      std::cout << "Either I could not find the file that stores the measurements object, or the file is corrupted.\n";
-    }
 
     // regarding caches
 #ifdef HEATBATH_ALGORITHM
@@ -196,7 +177,7 @@ directed_worm_algorithm
 #endif
 
     // start timer if needed...
-    if (measure_simulation_speed_)
+    if (measure_only_simulation_speed_)
       std::time(&_simulation_timer.first);
   }
 
@@ -229,9 +210,11 @@ void
     {  
       // Worldlines
       ar >> alps::make_pvp("/simulation/worldlines", wl); 
+      std::cout << "\n\nWorldlines configuration loaded from input file.\n\n";
 
       // Measurements
       ar >> alps::make_pvp("/simulation/results", measurements);
+      std::cout << "\n\nPrevious measurements loaded from input file.\n\n";
     }
 
 void
@@ -429,6 +412,8 @@ void
         << alps::ngs::RealObservable   ("Onsite Energy Density")
         << alps::ngs::RealObservable   ("Energy Density")
         << alps::ngs::RealObservable   ("Energy Density^2")
+        << alps::ngs::RealObservable   ("Total Vertex Number")
+        << alps::ngs::RealObservable   ("Total Vertex Number^2")
       ;
 
       if (measure_winding_number_)
@@ -670,7 +655,7 @@ void
       } 
 
       const bool checkpoint_sweep = (_sweep_counter % _sweep_per_measurement == 0);
-      const bool _measure = (!measure_simulation_speed_);
+      const bool _measure = (!measure_only_simulation_speed_);
 
       // Step 1B: Check state to see if we can insert wormpair 
       const unsigned short _state = wl.state_before(_location);
@@ -801,7 +786,7 @@ void
       }
 
       // simulation timer
-      if (measure_simulation_speed_)
+      if (measure_only_simulation_speed_)
       {
         std::time(&_simulation_timer.second);
         std::cout << " ... speed = " << std::difftime(_simulation_timer.second, _simulation_timer.first)/_sweep_per_measurement; 
@@ -825,6 +810,8 @@ void
       double total_hopping_energy = 0.;
       double total_energy  = 0.;
       double total_energy2 = 0.;
+      double total_vertex_number  = 0.;
+      double total_vertex_number2 = 0.;
 
       for (unsigned int site=0; site < num_sites(); ++site)
       {
@@ -837,6 +824,8 @@ void
         total_hopping_energy += this_hopping_energy;
         total_energy  += this_energy;
         total_energy2 += this_energy*this_energy;
+        total_vertex_number  -= this_hopping_energy;  // due to beta=1 (intrinsically normalized...)
+        total_vertex_number2 += this_hopping_energy * this_hopping_energy; 
       }
       total_onsite_energy  /= beta;
       total_hopping_energy /= beta;
@@ -860,6 +849,8 @@ void
       measurements["Onsite Energy Density"]     << total_onsite_energy/num_sites();
       measurements["Energy Density"]            << total_energy/num_sites();
       measurements["Energy Density^2"]          << total_energy2/num_sites();
+      measurements["Total Vertex Number"]       << total_vertex_number;
+      measurements["Total Vertex Number^2"]     << total_vertex_number2;
 
       if (measure_winding_number_)
       {
@@ -889,21 +880,21 @@ void
       // regarding on-fly measurements
       measurements["Green's Function Onsite"]    << green_onsite/num_sites();
       measurements["Green's Function Neighbors"] << green_neighbors/num_sites();
-      measurements["Zero Momentum Density"]      << zero_momentum_density;
+      measurements["Zero Momentum Density"]      << zero_momentum_density/num_sites();
 
       if (measure_green_function_)
         measurements["Green's Function"]         << green/num_sites();
       if (measure_momentum_density_)
-        measurements["Momentum Density"]         << momentum_density;
+        measurements["Momentum Density"]         << momentum_density/num_sites();
 
       if (finite_tof)
       {
-        measurements["Zero TOF Image"]           << zero_momentum_density_tof;
+        measurements["Zero TOF Image"]           << zero_momentum_density_tof/num_sites();
 
         if (measure_green_function_)
           measurements["TOF Green's Function"]   << green_tof/num_sites();
         if (measure_tof_image_)
-          measurements["TOF Image"]              << momentum_density_tof;
+          measurements["TOF Image"]              << momentum_density_tof/num_sites();
       }
     }
 
@@ -1260,11 +1251,8 @@ int main(int argc, char** argv)
   // try loading worldlines and measurement from the input file
   try {
     simulation.load(simulation_input);
-    std::cout << "\nSimulation continues from archived...\n";
   }
-  catch(...) {
-    std::cout << "\nSimulation starts new and afresh...\n"; 
-  }
+  catch(...) {}
  
   // run the simulation
   simulation.run(alps::stop_callback(options.time_limit));
