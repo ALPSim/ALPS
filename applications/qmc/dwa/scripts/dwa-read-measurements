@@ -1,0 +1,101 @@
+#!/opt/local/bin/python
+
+import sys
+import numpy
+import pyalps
+import pyalps.hdf5
+import worldlines
+
+if (len(sys.argv) == 1):
+  files = pyalps.getResultFiles(dirname=".", pattern="*.out.h5");
+elif (len(sys.argv) == 2):
+  infiles_directory = sys.argv[1];
+  files = pyalps.getResultFiles(dirname=infiles_directory, pattern="*.out.h5");
+
+### Observable List
+
+observable_list  = pyalps.loadObservableList(files)
+data             = pyalps.loadMeasurements(files);
+
+
+print "\n\n"
+
+### Simulation measurement counts
+for file in files:
+  iar = pyalps.hdf5.iArchive(file);
+  print "Nr. of measurements stored in " + file + " : " +  str(iar.read("/simulation/results")['Density']['count'])
+
+print "\n"
+
+### Common observables
+N  = pyalps.collectXY(data, x='T', y='Total Particle Number')[0].y
+Nr  = pyalps.collectXY(data, x='T', y='Total Vertex Number')[0].y
+Nr2 = pyalps.collectXY(data, x='T', y='Total Vertex Number^2')[0].y
+n  = pyalps.collectXY(data, x='T', y='Density')[0].y
+n2 = pyalps.collectXY(data, x='T', y='Density^2')[0].y
+e  = pyalps.collectXY(data, x='T', y='Energy Density')[0].y
+e2 = pyalps.collectXY(data, x='T', y='Energy Density^2')[0].y
+eh = pyalps.collectXY(data, x='T', y='Hopping Energy Density')[0].y 
+eo = pyalps.collectXY(data, x='T', y='Onsite Energy Density')[0].y  
+g0  = pyalps.collectXY(data, x='T', y="Green's Function Onsite")[0].y 
+g1  = pyalps.collectXY(data, x='T', y="Green's Function Neighbors")[0].y
+nk0 = pyalps.collectXY(data, x='T', y='Zero Momentum Density')[0].y 
+
+print "\nTotal Particle Number"
+print N
+
+print "\nTotal Vertex Number"
+print Nr
+
+print "\nTotal Vertex Number^2"
+print Nr2
+
+print "\nDensity" 
+print n
+print "Density^2"
+print n2
+print "\nEnergy Density"
+print e
+print "Energy Density^2"
+print e2
+
+print "\nHopping Energy"
+print eh
+print "Onsite Energy"
+print eo
+
+print "\nGreen's Function Onsite"
+print g0
+print "Green's Function Neighbor"
+print g1
+
+print "\nZero Momentum Density"
+print nk0 / (N[0].mean);
+
+
+### Other user-defined observables
+
+data_w2 = [quantity for quantity in pyalps.hlist.flatten(data) if quantity.props['observable'] == "Winding Number^2"]
+data_g  = [quantity for quantity in pyalps.hlist.flatten(data) if quantity.props['observable'] == "Green's Function"]
+data_nk = [quantity for quantity in pyalps.hlist.flatten(data) if quantity.props['observable'] == "Momentum Density"];
+
+if (len(data_w2) == 1):
+  w2 = data_w2[0].y;
+  
+  print "\nWinding Number^2"
+  print w2
+
+if (len(data_g) == 1):
+  g = data_g[0].y;
+
+  print "\nGreen's Function"
+  print nk
+
+if (len(data_nk) == 1):
+  nk = data_nk[0].y / (N[0].mean);
+ 
+  print "\nMomentum Density"
+  print nk
+
+
+print "\n\n";

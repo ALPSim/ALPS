@@ -1,0 +1,50 @@
+#!/opt/local/bin/python
+
+import sys
+import numpy
+import scipy
+import pyalps.hdf5
+
+### Define
+thermalization_density_increment_tolerance = 0.01
+
+### Checking for system errors
+if (len(sys.argv) != 2):
+  print "\n";
+  print "Warnung!!! Bitte geben Sie den folgenden Befehl ein."
+  print "  thermalization.py <filename-of-measurements-in-hdf5-format>"
+  print "\n"
+  sys.exit(2)
+
+### Loading
+infile = sys.argv[1];
+iar = pyalps.hdf5.iArchive(infile);
+measurements_n = iar.read("/simulation/results/Total Particle Number");
+
+ts_density     = measurements_n['timeseries']['data']
+mean_density   = ts_density.mean()
+
+### Linear Fitting to get increment
+if (measurements_n['mean']['value'] > 50):
+  ts             = scipy.linspace(0,ts_density.size-1,ts_density.size);
+  ts_ols_density = scipy.polyval(scipy.polyfit(ts,ts_density,1),ts);
+
+  density_increment = (ts_ols_density[-1] - ts_ols_density[0])/mean_density;
+
+  print str(abs(density_increment) < thermalization_density_increment_tolerance) 
+  print "Increment: " + str(density_increment)
+
+else: # If N < 50, thermalization is not really needed. Don't you agree?
+  print str(True)
+
+
+### Plot
+#import matplotlib.pyplot
+
+#matplotlib.pyplot.figure();
+#matplotlib.pyplot.plot(ts_density)
+#matplotlib.pyplot.plot(ts_ols_density)
+#matplotlib.pyplot.show();
+
+
+

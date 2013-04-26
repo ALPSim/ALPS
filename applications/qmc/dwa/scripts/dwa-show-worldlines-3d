@@ -1,0 +1,115 @@
+#!/opt/local/bin/python
+
+import sys
+import numpy
+import pyalps.hdf5
+import matplotlib.pyplot
+from mpl_toolkits.mplot3d import Axes3D
+import worldlines
+
+### Detecting system errors
+if (len(sys.argv) != 3):
+  print "\n";
+  print "Warnung!!! Bitte geben Sie den folgenden Befehl ein."
+  print "  plot-worldlines-3d.py <filename-of-worldlines-in-hdf5-format> <filename-of-positions-in-hdf5-format>"
+  print "\n"
+  sys.exit(2)
+
+### Loading worldlines
+infile1 = sys.argv[1]
+wl = worldlines.worldlines()
+wl.load(infile1);
+
+### Loading positions
+infile2 = sys.argv[2]
+iar = pyalps.hdf5.iArchive(infile2);
+positions = iar.read("/positions");
+
+if (positions[0].size != 2):
+  print "\n"
+  print "Warnung!!! Dimension is not 2"
+  print "\n"
+  sys.exit(1);
+
+### Limits
+xlim = [-2,2]
+ylim = [-2,2]
+
+
+### Preparing
+wl_siteindicator = wl.worldlines_siteindicator();
+wl_time = wl.worldlines_time();
+wl_state = wl.worldlines_state();
+
+#wl_coordinates = [];
+#for idx1 in range(wl.num_sites()):
+#  for idx2 in range(1,wl.num_kinks(idx1)):
+#    wl_coordinates.append([positions[idx1][0], positions[idx1][1], wl_time[idx1][idx2]]);
+#
+#[wl_coordinates_site_x, wl_coordinates_site_y, wl_coordinates_time] = numpy.array(wl_coordinates).transpose()
+
+
+wl_state_segments = [];
+for idx1 in range(wl.num_sites()):
+  x = positions[idx1][0];
+  y = positions[idx1][1];
+  if (x >= xlim[0] and x <= xlim[1] and y >= ylim[0] and y <= ylim[1]):
+    for idx2 in range(wl.num_kinks(idx1)-1):
+      wl_state_segments.append([[x,y,wl_time[idx1][idx2]], [x,y,wl_time[idx1][idx2+1]], wl_state[idx1][idx2]])
+    wl_state_segments.append([[x,y,wl_time[idx1][wl.num_kinks(idx1)-1]], [x,y,1.0], wl_state[idx1][wl.num_kinks(idx1)-1]]);
+
+wl_n_state_segments = [];
+for n in range(21):
+  wl_n_state_segments.append([wl_state_segment[0:2] for wl_state_segment in wl_state_segments if wl_state_segment[2] == n]);  
+
+wl_vertex_segments = [];
+for idx1 in range(wl.num_sites()):
+  x = positions[idx1][0];
+  y = positions[idx1][1];
+  if (x >= xlim[0] and x <= xlim[1] and y >= ylim[0] and y <= ylim[1]):
+    for idx2 in range(1,wl.num_kinks(idx1)):
+      if (wl_siteindicator[idx1][idx2] == idx1):
+        continue;
+      xprime = positions[wl_siteindicator[idx1][idx2]][0];
+      yprime = positions[wl_siteindicator[idx1][idx2]][1];
+      wl_vertex_segments.append([[x,y,wl_time[idx1][idx2]],[xprime,yprime,wl_time[idx1][idx2]]]);
+      
+
+## Plot worldlines
+fig = matplotlib.pyplot.figure(frameon=False);
+ax  = fig.add_subplot(111,projection='3d');
+
+ax.set_xticks([]);
+ax.set_yticks([]);
+ax.set_zticks([0,1]);
+ax.set_xlim3d(xlim[0],xlim[1]);
+ax.set_ylim3d(ylim[0],ylim[1]);
+ax.set_zlim3d(-0.05,1.05);
+
+ax.set_autoscale_on(False)
+
+for wl_n_state_segment in wl_n_state_segments[0]:
+  [segment_x, segment_y, segment_time] = numpy.array(wl_n_state_segment).transpose();  
+  ax.plot(xs=segment_x, ys=segment_y, zs=segment_time, color='k', linestyle='--', linewidth=2);
+
+for wl_n_state_segment in wl_n_state_segments[1]:
+  [segment_x, segment_y, segment_time] = numpy.array(wl_n_state_segment).transpose();
+  ax.plot(xs=segment_x, ys=segment_y, zs=segment_time, color='k', linestyle='-', linewidth=2);
+
+wl_n_state_segment_line_spacing = 0.1;  
+
+for n in range(2,21):
+  for wl_n_state_segment in wl_n_state_segments[n]:
+    [segment_x, segment_y, segment_time] = numpy.array(wl_n_state_segment).transpose();
+    for m in range(n):
+      ax.plot(xs=segment_x, ys=segment_y - (m - (n-1)/2.)*wl_n_state_segment_line_spacing, zs=segment_time, color='k', linestyle='-', linewidth=2);
+
+for wl_vertex_segment in wl_vertex_segments:
+  [segment_x, segment_y, segment_time] = numpy.array(wl_vertex_segment).transpose();
+  ax.plot(xs=segment_x, ys=segment_y, zs=segment_time, color='k', linestyle='-', linewidth=2);
+
+matplotlib.pyplot.show();
+
+### OUTFILE
+#outfile = infile[0:-3] + ".pdf";
+#matplotlib.pyplot.savefig(outfile, transparent=True);

@@ -1,0 +1,25 @@
+#!/opt/local/bin/python
+
+import sys
+import pyalps.hdf5
+
+### Checking for system errors
+if (len(sys.argv) != 2):
+  print "\n";
+  print "Warnung!!! Bitte geben Sie den folgenden Befehl ein."
+  print "  extract-measurements.py <filename-of-measurements-in-hdf5-format>"
+  print "\n"
+  sys.exit(2)
+
+### Loading
+infile = sys.argv[1];
+iar = pyalps.hdf5.iArchive(infile);
+
+measurements = iar.read("/simulation/results");
+
+### Saving
+outfile = infile[0:-7] + ".measurements.h5";
+oar = pyalps.hdf5.oArchive(outfile);
+
+oar.write("/simulation/results", measurements);
+
