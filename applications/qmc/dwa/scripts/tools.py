@@ -24,3 +24,27 @@ def thermalized(h5_outfile, observables, tolerance=0.01, includeLog=False):
 
   return results;
 
+
+def converged(h5_outfile, observables, includeLog=False):
+  if isinstance(observables, str):
+    observables = [observables];
+
+  results = [];
+  for observable in observables:
+    measurements = pyalps.hdf5.iArchive(h5_outfile).read("/simulation/results/" + observable);
+
+    result = (measurements['mean']['error_convergence'] == 0);
+
+    if not includeLog:
+      results.append(result);
+    else:
+      mean  = measurements['mean']['value'];
+      error = measurements['mean']['error'];
+      tau   = measurements['tau']['value'];
+      count = measurements['count'];
+      results.append({'observable': observable, 'converged': result, 'mean': mean, 'error': error, 'tau': tau, 'count': count});
+
+  return results;
+
+
+
