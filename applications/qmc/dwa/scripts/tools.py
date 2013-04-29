@@ -47,4 +47,17 @@ def converged(h5_outfile, observables, includeLog=False):
   return results;
 
 
+def tau(h5_outfile, observables):
+  if isinstance(observables, str):
+    observables = [observables];
+
+  results = [];
+  for observable in observables:
+    measurements = pyalps.hdf5.iArchive(h5_outfile).read("/simulation/results/" + observable);
+    results.append(measurements['tau']['value']);
+
+  return results;
+
+
+
 
