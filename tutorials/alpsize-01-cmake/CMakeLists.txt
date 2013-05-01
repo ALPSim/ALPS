@@ -11,4 +11,5 @@ enable_language(C CXX)
 
 # rule for generating 'hello world' program
 add_executable(hello hello.C)
+target_link_libraries(hello ${ALPS_LIBRARIES})
 add_alps_test(hello)
