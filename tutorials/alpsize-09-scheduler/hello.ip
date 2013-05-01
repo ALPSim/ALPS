@@ -1,0 +1,7 @@
+ALGORITHM = "hello"
+SEED = 0
+{ WORLD = "world" }
+{ WORLD = "alps" }
+{ WORLD = "looper" }
+{ WORLD = "japan" }
+{ WORLD = "wistaria" }

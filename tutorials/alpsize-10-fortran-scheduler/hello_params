@@ -1,0 +1,6 @@
+ALGORITHM = "hello"
+{ WORLD = "world"; X = 3.2; Y = 0; Z=defined }
+{ WORLD = "alps"; X = -3.1; Y = 3*2 }
+{ WORLD = "looper"; X = 0.001; Y = -100 }
+{ WORLD = "japan"; X = 100.0; Y = 2 }
+{ WORLD = "wistaria"; X = 3; Y = 0 }

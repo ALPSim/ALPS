@@ -1,0 +1,7 @@
+ALGORITHM = "wolff"
+SEED = 93812
+LATTICE = "square lattice"
+L = 32
+{ T = 2.2 }
+{ T = 2.4 }
+{ T = 2.6 }

@@ -1,0 +1,50 @@
+[input parameters]
+ALGORITHM = hello;
+SEED = 0;
+WORLD = world;
+DIR_NAME = .;
+BASE_NAME = task1;
+WORKER_SEED = 0;
+DISORDER_SEED = 0;
+hello, world
+[results]
+[input parameters]
+ALGORITHM = hello;
+SEED = 0;
+WORLD = alps;
+DIR_NAME = .;
+BASE_NAME = task2;
+WORKER_SEED = 0;
+DISORDER_SEED = 0;
+hello, alps
+[results]
+[input parameters]
+ALGORITHM = hello;
+SEED = 0;
+WORLD = looper;
+DIR_NAME = .;
+BASE_NAME = task3;
+WORKER_SEED = 0;
+DISORDER_SEED = 0;
+hello, looper
+[results]
+[input parameters]
+ALGORITHM = hello;
+SEED = 0;
+WORLD = japan;
+DIR_NAME = .;
+BASE_NAME = task4;
+WORKER_SEED = 0;
+DISORDER_SEED = 0;
+hello, japan
+[results]
+[input parameters]
+ALGORITHM = hello;
+SEED = 0;
+WORLD = wistaria;
+DIR_NAME = .;
+BASE_NAME = task5;
+WORKER_SEED = 0;
+DISORDER_SEED = 0;
+hello, wistaria
+[results]

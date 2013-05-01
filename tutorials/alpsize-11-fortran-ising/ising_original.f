@@ -1,4 +1,5 @@
-C 宮下精二著「熱・統計力学」(培風館 1993年) p.263
+C Copyright (c) 1993 by Seiji Miyashita
+C (宮下精二著「熱・統計力学」(培風館 1993年) p.263)
 C MONTE CARLO SIMULATION : THERMAL BATH METHOD
 C   2D ISING MODEL (SQUARE LATTICE)
       IMPLICIT REAL*8(A-H,O-Z)

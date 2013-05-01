@@ -1,0 +1,3 @@
+LATTICE = "square lattice"
+L = 32
+T = 2.2
