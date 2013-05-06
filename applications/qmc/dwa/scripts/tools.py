@@ -60,4 +60,46 @@ def tau(h5_outfile, observables):
 
 
 
+def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, break_if=None, loc=None):
+  ### 
+  ### Either recursively run cmd for n times, or until the break_if condition holds true.
+  ###
+  ###  Note:
+  ###    1. cmd              : command to be recursively run (quoted as a python str)
+  ###    2. cmd_lang         : language of cmd, either "command_line" (default), or "python".
+  ###    3. n                : number of recursions 
+  ###    4. break_if         : condition to break recursion loop (quoted as a python str, interpreted as python command)     
+  ###    5. follow_up_script : script to be run after command (""")
+  ###    6. loc              : Python dict of local variables 
+  ###
+
+  if loc != None:
+    locals().update(loc);
+
+  if cmd_lang == 'command_line':
+    pyalps.executeCommand(cmd.split());
+  elif cmd_lang == 'python':
+    eval(cmd);
+  else:
+    print "Error: The options for cmd_lang are 1) 'command_line' (default), or 2) 'python'."
+    return;
+
+  if follow_up_script != None:  
+    eval(follow_up_script);
+
+  if n != None:             # if n exists
+    if isinstance(n, int):  # if n is a python integer
+      if n <= 1:
+        return;
+      else:
+        return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, n=n-1, loc=locals()); 
+
+  elif break_if != None:    # otherwise, if break_if exists
+    if reduce(lambda x,y: x*y, eval(break_if)):
+      return;
+    else:
+      return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, break_if=break_if, loc=locals());
+
+  else:                     # otherwise, recursiveRun only runs once
+    return;
 
