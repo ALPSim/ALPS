@@ -122,9 +122,9 @@ def runApplication(appname, parmfiles, T=None, Tmin=None, Tmax=None, writexml=Fa
         cmdline += ['--TMax',str(Tmax)]
       if writexml:
         cmdline += ['--write-xml']
-      if parmfile.find('.in.xml') != -1:
+      if parmfile.find('.xml') != -1:
         return (executeCommand(cmdline),parmfile.replace('.in.xml','.out.xml'))  # no iteration for xml i/o
-      if parmfile.find('.in.h5') != -1:
+      if parmfile.find('.h5') != -1:
         executeCommand(cmdline);
    
 
@@ -395,6 +395,24 @@ def writeParameterFile(fname,parms):
         f.write(str(key)+' = ' + str(value) + '\n')
     f.close()
     return fname
+
+def input2output(infile):
+    if   infile.find('.in.h5') != -1:
+      outfile = infile.replace('.in.h5', '.out.h5');
+    elif infile.find('.out.h5') != -1:
+      outfile = infile;
+    elif infile.find('.h5') != -1:
+      outfile = infile.replace('.h5', '.out.h5');
+    elif infile.find('.in.xml') != -1:
+      outfile = infile.replace('.in.xml', '.out.xml');
+    elif infile.find('.out.xml') != -1:
+      outfile = infile;
+    elif infile.find('.xml') != -1:
+      outfile = infile.replace('.xml', '.out.xml');
+    else:
+      outfile = infile;
+    return outfile;
+
 
 def recursiveGlob(dirname,pattern):
     ret = glob.glob(os.path.join(dirname, pattern))
