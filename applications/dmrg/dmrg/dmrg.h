@@ -275,14 +275,17 @@ void DMRGTask<value_type>::dostep()
 
 // define quantum numbers first: we need to know which are conserved before we build operators
 
+  qnmask = 0;
   for (int type  = 0 ; type < alps::maximum_vertex_type(graph())+1 ; ++type) {
     // create quantum numbers for this site block
     /*if(conserved_quantumnumber.size() > 0)*/ {
       for (int qn = 0 ; qn < site_basis(type).size(); ++qn) {
         int idx = dmtk::QN::add_qn_index(site_basis(type)[qn].name(),site_basis(type)[qn].fermionic()); 
+        qnmask |= (1 << qn);
       }
     }
   }
+  dmtk::QN::set_qn_mask(qnmask);
 
   dmtk::QN qn;
   qnmask = 0;
@@ -292,7 +295,6 @@ void DMRGTask<value_type>::dostep()
       qnmask |= (1 << (dmtk::QN::get_qn_index(quantumnumber_names[i])));
     }
   }
-  dmtk::QN::set_qn_mask(qnmask);
 
 //  Iterating over sites: create site blocks
   for (site_iterator it = sites().first ; it != sites().second ; ++it) {
