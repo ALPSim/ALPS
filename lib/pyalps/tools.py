@@ -326,6 +326,29 @@ def writeInputH5Files(filename_,params_list):
     del oar;
   return input_files_;
 
+def getParameters(infiles_):
+   """ This function extracts the parameters from the H5 input files for ALPS (NGS)
+
+       1. infiles_ : either a list of filenames, or just one filename, containing NGS parameters object.
+       
+       Will be returned as a list of python dicts (parameters).
+
+       Ping Nang MA
+   """
+   if isinstance(infiles_, str):
+     infiles_ = [infiles_];
+
+   params = [];
+   for infile_ in infiles_:
+     iar = pyalps.ngs.h5ar(infile_);
+     params_dict = {};
+     for key in iar.list_children('/parameters'):
+       params_dict[key] = iar['/parameters/' + key];
+     params.append(params_dict);
+
+   return params;
+
+
 def writeInputFiles(fname,parms, baseseed=None):
     """ This function writes the XML input files for ALPS
     
@@ -444,7 +467,7 @@ def getResultFiles(dirname='.',pattern=None,prefix=None):
       pattern = prefix+'.task*.out.xml'
       res=recursiveGlob(dirname, pattern)
       if len(res)==0:
-        pattern = prefix+'*.h5'
+        pattern = prefix+'*.task*.out.h5'
         res=recursiveGlob(dirname, pattern)
     else:
       res = recursiveGlob(dirname, pattern)
@@ -452,63 +475,22 @@ def getResultFiles(dirname='.',pattern=None,prefix=None):
     res += replicas
     return res
 
-def getInputH5Files(base_filename_, tasks=None):
-    """ get all input h5 files in the current directory that are prefixed by base_filename_ being in the task (list)
+def getMeasurements(outfiles_, observable=None, includeLog=False):
+  measurements = [];
 
-        Ping Nang MA
-    """
-    if tasks == None:
-      return glob.glob(base_filename_ + '*.in.h5');
-    else:
-      input_files = [];
-      for task in tasks:
-        input_file = base_filename_ + '.task' + str(task) + '.in.h5';
-        if (os.path.isfile(input_file)):
-          input_files.append(input_file);
-      return input_files;
+  if isinstance(outfiles_,str):
+    outfiles_ = [outfiles_];
 
-def getOutputH5Files(base_filename_, tasks=None):
-    """ get all output h5 files in the current directory that are prefixed by base_filename_ being in the task (list)
+  for outfile in outfiles_:
+    ar = pyalps.hdf5.h5ar(outfile);
+    if isinstance(observable, str):
+      measurements.append(ar['/simulation/results'][observable])
+    
+    del ar;
 
-        Ping Nang MA
-    """
-    if tasks == None:
-      return glob.glob(base_filename_ + '*.out.h5');
-    else:
-      output_files = [];
-      for task in tasks:
-        output_file = base_filename_ + '.task' + str(task) + '.out.h5';
-        if (os.path.isfile(output_file)):
-          output_files.append(output_file);
-      return output_files;
-      
-def replacedByInputH5Files(h5_files):
-  h5_infiles = [];
-  for h5_file in h5_files:
-    if h5_file.find('.out.h5') != -1:
-      h5_infile = h5_file.replace('.out.h5', '.in.h5');
-    elif h5_file.find('.in.h5') != -1:
-      h5_infile = h5_file;
-    elif h5_file.find('.h5') != -1:
-      h5_infile = h5_file.replace('.h5', '.in.h5');
-    else:
-      h5_infile = h5_file + '.in.h5';
-    h5_infiles.append(h5_infile);
-  return h5_infiles;
+  return measurements;
 
-def replacedByOutputH5Files(h5_files):
-  h5_outfiles = [];
-  for h5_file in h5_files:
-    if h5_file.find('.out.h5') != -1:
-      h5_outfile = h5_file; 
-    elif h5_file.find('.in.h5') != -1:
-      h5_outfile = h5_file.replace('.in.h5','.out.h5');
-    elif h5_file.find('.h5') != -1:
-      h5_outfile = h5_file.replace('.h5', '.out.h5');
-    else:
-      h5_outfile = h5_file + '.out.h5';
-    h5_outfiles.append(h5_outfile);
-  return h5_outfiles;
+
 
 def extract(appname, source, target):
   cmdline = [appname];
