@@ -109,7 +109,7 @@ void
           << "Measure Winding Number      : " << measure_winding_number_         << "\n"
           << "Measure Local Energy        : " << measure_local_energy_           << "\n"
           << "Measure Local Density       : " << measure_local_density_          << "\n" 
-          << "Measure Local Magnetization : " << measure_local_magnetization_    << "\n"
+          << "Measure Local Density^2     : " << measure_local_density2_         << "\n"
           << "Measure Green's Function    : " << measure_green_function_         << "\n"
           << "Measure Momentum Density    : " << measure_momentum_density_       << "\n"
           << "Measure TOF Image           : " << measure_tof_image_              << "\n"
@@ -137,10 +137,8 @@ directed_worm_algorithm
     // regarding measurements
     , measure_only_simulation_speed_ (!(this->parameters["MEASURE"] | true))
     , measure_winding_number_        (is_periodic_ ? static_cast<bool>(this->parameters["MEASURE[Winding Number]"] | false) : false)
-    , measure_local_density_         (this->is_charge_model_ ? static_cast<bool>(this->parameters["MEASURE[Local Density]"] | false) : false)
-    , measure_local_density2_        (this->is_charge_model_ ? static_cast<bool>(this->parameters["MEASURE[Local Density^2]"] | false) : false)
-    , measure_local_magnetization_   (this->is_spin_model_ ? static_cast<bool>(this->parameters["MEASURE[Local Magnetization]"] | false) : false)
-    , measure_local_magnetization2_  (this->is_spin_model_ ? static_cast<bool>(this->parameters["MEASURE[Local Magnetization^2]"] | false) : false)
+    , measure_local_density_         (this->parameters["MEASURE[Local Density]"] | false)
+    , measure_local_density2_        (this->parameters["MEASURE[Local Density^2]"] | false)
     , measure_local_energy_          (this->parameters["MEASURE[Local Energy]"] | false)
     , measure_green_function_        (is_periodic_ ? static_cast<bool>(this->parameters["MEASURE[Green Function]"] | false) : false)
     , measure_momentum_density_      (this->parameters["MEASURE[Momentum Density]"] | false)
@@ -420,16 +418,16 @@ void
         measurements << alps::ngs::RealVectorObservable ("Winding Number^2");
 
       if (measure_local_density_)
+      {
+        _states_cache.resize(wl.num_sites(),0.);
         measurements << alps::ngs::SimpleRealVectorObservable ("Local Density");
+      }
 
       if (measure_local_density2_)
+      {
+        _states2_cache.resize(wl.num_sites(),0.);
         measurements << alps::ngs::SimpleRealVectorObservable ("Local Density^2");
-
-      if (measure_local_magnetization_)
-        measurements << alps::ngs::SimpleRealVectorObservable  ("Local Magnetization");
-   
-      if (measure_local_magnetization2_)
-        measurements << alps::ngs::SimpleRealVectorObservable  ("Local Magnetization^2");
+      }
 
       // regarding on-fly measurements
       reinitialize_on_fly_measurements();
@@ -817,6 +815,12 @@ void
       {
         total_density  += wl.site_state(site);
         total_density2 += wl.site_state(site) * wl.site_state(site);
+
+        if (measure_local_density_)
+          _states_cache[site] = wl.site_state(site);
+        if (measure_local_density2_)
+          _states2_cache[site] = wl.site_state(site) * wl.site_state(site);
+
         const double this_onsite_energy  = onsite_energy(site, wl.site_state(site));
         const double this_hopping_energy = -static_cast<double>(wl.num_kinks(site)-1)/2;
         const double this_energy = this_onsite_energy+this_hopping_energy;
@@ -865,17 +869,11 @@ void
         measurements["Winding Number^2"]         << alps::numeric::sq(std::vector<double>(winding_number.begin(), winding_number.end()));
       }      
 
-      if (measure_local_density_)
-        measurements["Local Density"]            << std::vector<double>(wl.states().begin(), wl.states().end());
+      if (measure_local_density_) 
+        measurements["Local Density"]            << _states_cache;
 
       if (measure_local_density2_)
-        measurements["Local Density^2"]          << alps::numeric::sq(std::vector<double>(wl.states().begin(), wl.states().end()));
-
-      if (measure_local_magnetization_)
-        measurements["Local Magnetization"]      << std::vector<double>(wl.states().begin(), wl.states().end());
-
-      if (measure_local_magnetization2_)
-        measurements["Local Magnetization^2"]    << alps::numeric::sq(std::vector<double>(wl.states().begin(), wl.states().end()));
+        measurements["Local Density^2"]          << _states2_cache;
 
       // regarding on-fly measurements
       measurements["Green's Function Onsite"]    << green_onsite/num_sites();

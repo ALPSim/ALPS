@@ -186,12 +186,13 @@ private:
   bool measure_winding_number_;
   bool measure_local_density_;
   bool measure_local_density2_;
-  bool measure_local_magnetization_;
-  bool measure_local_magnetization2_;
   bool measure_local_energy_;
   bool measure_green_function_;
   bool measure_momentum_density_;
   bool measure_tof_image_;
+
+  std::vector<double>  _states_cache;
+  std::vector<double>  _states2_cache;
 
   // regarding on-fly measurements
   double  green_onsite;

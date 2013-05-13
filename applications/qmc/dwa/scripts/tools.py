@@ -59,8 +59,25 @@ def tau(h5_outfile, observables):
   return results;
 
 
+def write_status(filename, status):
+  ar = pyalps.hdf5.h5ar(filename, 'w');
+  if ar.is_group('/status'):  
+    ar['/status/' + str(len(ar.list_children('/status')))] = status; 
+  else:
+    ar['/status/0'] = status;
 
-def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, break_if=None, loc=None):
+def status(filename, includeLog=False):
+  ar = pyalps.hdf5.h5ar(filename);
+  if not ar.is_group('/status'):
+    return None;
+  else:
+    if not includeLog:
+      return ar['/status/' + str(len(ar.list_children('/status'))-1)];
+    else:
+      return ar['/status'] 
+
+
+def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, break_if=None, write_status=None, loc=None):
   ### 
   ### Either recursively run cmd for n times, or until the break_if condition holds true.
   ###
@@ -87,18 +104,21 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
   if follow_up_script != None:  
     eval(follow_up_script);
 
+  if write_status != None:
+    eval(write_status);
+
   if n != None:             # if n exists
     if isinstance(n, int):  # if n is a python integer
       if n <= 1:
         return;
       else:
-        return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, n=n-1, loc=locals()); 
+        return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, n=n-1, write_status=write_status, loc=locals()); 
 
   elif break_if != None:    # otherwise, if break_if exists
     if reduce(lambda x,y: x*y, eval(break_if)):
       return;
     else:
-      return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, break_if=break_if, loc=locals());
+      return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, break_if=break_if, write_status=write_status, loc=locals());
 
   else:                     # otherwise, recursiveRun only runs once
     return;
