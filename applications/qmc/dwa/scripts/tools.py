@@ -2,7 +2,7 @@ import numpy;
 import scipy;
 import pyalps;
 
-def thermalized(h5_outfile, observables, tolerance=0.01, includeLog=False):
+def thermalized(h5_outfile, observables, tolerance=0.01, simplified=False, includeLog=False):
   if isinstance(observables, str):
     observables = [observables];
 
@@ -22,10 +22,14 @@ def thermalized(h5_outfile, observables, tolerance=0.01, includeLog=False):
     else:
       results.append({'observable': observable, 'percentage_increment' : percentage_increment, 'thermalized': result})
 
-  return results;
+  if includeLog or not simplified:
+    return results;
+  else:
+    return reduce(lambda x,y: x*y, results);
 
 
-def converged(h5_outfile, observables, includeLog=False):
+
+def converged(h5_outfile, observables, simplified=False, includeLog=False):
   if isinstance(observables, str):
     observables = [observables];
 
@@ -44,7 +48,10 @@ def converged(h5_outfile, observables, includeLog=False):
       count = measurements['count'];
       results.append({'observable': observable, 'converged': result, 'mean': mean, 'error': error, 'tau': tau, 'count': count});
 
-  return results;
+  if includeLog or not simplified:
+    return results;
+  else:
+    return reduce(lambda x,y: x*y, results);
 
 
 def tau(h5_outfile, observables):
@@ -77,7 +84,7 @@ def status(filename, includeLog=False):
       return ar['/status'] 
 
 
-def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, break_if=None, write_status=None, loc=None):
+def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, break_if=None, break_elseif=None, write_status=None, loc=None):
   ### 
   ### Either recursively run cmd for n times, or until the break_if condition holds true.
   ###
@@ -85,7 +92,8 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
   ###    1. cmd              : command to be recursively run (quoted as a python str)
   ###    2. cmd_lang         : language of cmd, either "command_line" (default), or "python".
   ###    3. n                : number of recursions 
-  ###    4. break_if         : condition to break recursion loop (quoted as a python str, interpreted as python command)     
+  ###    4. break_if         : condition to break recursion loop (quoted as a python str, interpreted as python command)
+  ###    5. break_elseif     : further condition to break recursion loop (""")     
   ###    5. follow_up_script : script to be run after command (""")
   ###    6. loc              : Python dict of local variables 
   ###
@@ -115,10 +123,17 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
         return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, n=n-1, write_status=write_status, loc=locals()); 
 
   elif break_if != None:    # otherwise, if break_if exists
-    if reduce(lambda x,y: x*y, eval(break_if)):
+    if eval(break_if):
       return;
     else:
-      return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, break_if=break_if, write_status=write_status, loc=locals());
+      if break_elseif != None:   # otherotherwise, if break_elseif exists
+        if eval(break_elseif):
+          return;
+        else:
+          return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, break_if=break_if, break_elseif=break_elseif, write_status=write_status, loc=locals());
+      else:
+        return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, break_if=break_if, write_status=write_status, loc=locals());
+
 
   else:                     # otherwise, recursiveRun only runs once
     return;
