@@ -167,6 +167,14 @@
   <EDGE><SOURCE vertex="1" offset="0 0"/><TARGET vertex="1" offset="-1 1"/></EDGE>
 </UNITCELL>
 
+<UNITCELL name="anisotropic triangular" dimension="2">
+  <VERTEX/>
+  <EDGE type="0"><SOURCE vertex="1" offset="0 0"/><TARGET vertex="1" offset="0 1"/></EDGE>
+  <EDGE type="1"><SOURCE vertex="1" offset="0 0"/><TARGET vertex="1" offset="1 0"/></EDGE>
+  <EDGE type="2"><SOURCE vertex="1" offset="0 0"/><TARGET vertex="1" offset="-1 1"/></EDGE>
+</UNITCELL>
+
+
 <UNITCELL name="anisotropic2d" dimension="2">
   <VERTEX/>
   <EDGE type="0">
@@ -339,6 +347,17 @@
     <BOUNDARY type="periodic"/>
   </FINITELATTICE>
   <UNITCELL ref="triangular"/>
+</LATTICEGRAPH>
+
+<LATTICEGRAPH name = "anisotropic triangular lattice">
+  <FINITELATTICE>
+    <LATTICE ref="triangular lattice"/>
+    <PARAMETER name="W" default="L"/>
+    <EXTENT dimension="1" size="L"/>
+    <EXTENT dimension="2" size="W"/>
+    <BOUNDARY type="periodic"/>
+  </FINITELATTICE>
+  <UNITCELL ref="anisotropic triangular"/>
 </LATTICEGRAPH>
 
 <LATTICEGRAPH name = "frustrated square lattice">
