@@ -27,8 +27,6 @@ def thermalized(h5_outfile, observables, tolerance=0.01, simplified=False, inclu
   else:
     return reduce(lambda x,y: x*y, results);
 
-
-
 def converged(h5_outfile, observables, simplified=False, includeLog=False):
   if isinstance(observables, str):
     observables = [observables];
@@ -53,7 +51,6 @@ def converged(h5_outfile, observables, simplified=False, includeLog=False):
   else:
     return reduce(lambda x,y: x*y, results);
 
-
 def tau(h5_outfile, observables):
   if isinstance(observables, str):
     observables = [observables];
@@ -64,7 +61,6 @@ def tau(h5_outfile, observables):
     results.append(measurements['tau']['value']);
 
   return results;
-
 
 def write_status(filename, status):
   ar = pyalps.hdf5.h5ar(filename, 'w');
@@ -83,8 +79,13 @@ def status(filename, includeLog=False):
     else:
       return ar['/status'] 
 
+def extract_worldlines(infile, outfile):
+  wl = pyalps.dwa.worldlines()
+  wl.load(infile);
+  wl.save(outfile);
+  return;
 
-def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, break_if=None, break_elseif=None, write_status=None, loc=None):
+def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, break_if=None, break_elseif=None, write_status=None, loc=None, batch_submit=False):
   ### 
   ### Either recursively run cmd for n times, or until the break_if condition holds true.
   ###
@@ -97,6 +98,9 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
   ###    5. follow_up_script : script to be run after command (""")
   ###    6. loc              : Python dict of local variables 
   ###
+
+#  if batch_submit:
+#    batch_cmd =
 
   if loc != None:
     locals().update(loc);
@@ -133,7 +137,6 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
           return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, break_if=break_if, break_elseif=break_elseif, write_status=write_status, loc=locals());
       else:
         return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, break_if=break_if, write_status=write_status, loc=locals());
-
 
   else:                     # otherwise, recursiveRun only runs once
     return;
