@@ -326,6 +326,10 @@ def writeInputH5Files(filename_,params_list):
     del oar;
   return input_files_;
 
+def getInputH5Files(prefix='*',pattern='.task*.in.h5'):
+    return glob.glob(prefix+pattern);
+
+
 def getParameters(infiles_):
    """ This function extracts the parameters from the H5 input files for ALPS (NGS)
 
