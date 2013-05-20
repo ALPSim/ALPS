@@ -139,9 +139,6 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
   if batch_submit:
     if not batch_run_now:
       batch_cmd = '';
-      if batch_cmd_prefix != None:
-        batch_cmd += (str(batch_cmd_prefix) + ' ');
-      batch_cmd += 'python<<@@\n';
       batch_cmd +=   'import pyalps;\n';
       batch_cmd +=   'import pyalps.dwa\n';
       batch_cmd +=   'pyalps.dwa.recursiveRun(' + str_quote(cmd);
@@ -162,18 +159,14 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
         batch_cmd += ', batch_cmd_prefix = ' + str_quote(batch_cmd_prefix);
       batch_cmd += ', batch_run_now = True';
       batch_cmd +=   ');\n';
-      batch_cmd += '@@'; 
 
       command = [];
-      command += ['echo'];
+      if batch_cmd_prefix != None:
+        command += batch_cmd_prefix.split();
+      command += "python -c".split();
       command += [batch_cmd];
-      command += ['|'];
-#      if batch_cmd_prefix != None:
-#        command += batch_cmd_prefix.split();
-      command += ['sh'];
 
       return pyalps.executeCommand(command);
-      #return command;
 
   if cmd_lang == 'command_line':
     pyalps.executeCommand(cmd.split());
