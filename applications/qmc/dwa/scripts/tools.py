@@ -107,7 +107,7 @@ def extract_worldlines(infile, outfile):
   wl.save(outfile);
   return;
 
-def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, break_if=None, break_elseif=None, write_status=None, loc=None, batch_submit=False, batch_cmd_prefix=None, batch_run_script='script.py', batch_run_now=False):
+def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, break_if=None, break_elseif=None, write_status=None, loc=None, batch_submit=False, batch_cmd_prefix=None, batch_run_script='script.py', batch_next_run_script=None, batch_run_now=False, batch_noRun=False):
   ### 
   ### Either recursively run cmd for n times, or until the break_if condition holds true.
   ###
@@ -134,7 +134,9 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
     if write_status != None:
       write_status = format_string(write_status, loc);
     batch_run_script = format_string(batch_run_script, loc);
-    return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, n=n, break_if=break_if, break_elseif=break_elseif, write_status=write_status, batch_submit=batch_submit, batch_cmd_prefix=batch_cmd_prefix, batch_run_script=batch_run_script, batch_run_now=batch_run_now);
+    if batch_next_run_script != None:
+      batch_next_run_script = format_string(batch_next_run_script, loc);
+    return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, n=n, break_if=break_if, break_elseif=break_elseif, write_status=write_status, batch_submit=batch_submit, batch_cmd_prefix=batch_cmd_prefix, batch_run_script=batch_run_script, batch_next_run_script=batch_next_run_script, batch_run_now=batch_run_now, batch_noRun=batch_noRun);
 
   # preparing batch run script 
   if batch_submit:
@@ -146,23 +148,28 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
       if cmd_lang != None: 
         batch_cmd += ', cmd_lang = ' + str_quote(cmd_lang);
       if follow_up_script != None:
-        batch_cmd += ', follow_up_script = ' + str_quote(follow_up_script);
+        batch_cmd += ', \n\tfollow_up_script = ' + str_quote(follow_up_script);
       if n != None:
-        batch_cmd += ', n = ' + str(n);
+        batch_cmd += ', \n\tn = ' + str(n);
       if break_if != None:
-        batch_cmd += ', break_if = ' + str_quote(break_if);
+        batch_cmd += ', \n\tbreak_if = ' + str_quote(break_if);
       if break_elseif != None:
-        batch_cmd += ', break_elseif = ' + str_quote(break_elseif);
+        batch_cmd += ', \n\tbreak_elseif = ' + str_quote(break_elseif);
       if write_status != None:
-        batch_cmd += ', write_status = ' + str_quote(write_status);
-      batch_cmd += ', batch_submit = ' + str(batch_submit);
+        batch_cmd += ', \n\twrite_status = ' + str_quote(write_status);
+      batch_cmd += ', \n\tbatch_submit = ' + str(batch_submit);
       if batch_cmd_prefix != None:
-        batch_cmd += ', batch_cmd_prefix = ' + str_quote(batch_cmd_prefix);
-      batch_cmd += ', batch_run_script = ' + str_quote(batch_run_script);
-      batch_cmd += ', batch_run_now = True';
+        batch_cmd += ', \n\tbatch_cmd_prefix = ' + str_quote(batch_cmd_prefix);
+      batch_cmd += ', \n\tbatch_run_script = ' + str_quote(batch_run_script);
+      if batch_next_run_script != None:
+        batch_cmd += ', \n\tbatch_next_run_script = ' + str_quote(batch_next_run_script);
+      batch_cmd += ', \n\tbatch_run_now = True';
       batch_cmd +=   ');\n\n';
 
       pyalps.executeCommand(['echo', batch_cmd, '>', batch_run_script]);
+
+      if batch_noRun:
+        return;
 
       command = [];
       if batch_cmd_prefix != None:
@@ -188,26 +195,71 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
   if n != None:             # if n exists
     if isinstance(n, int):  # if n is a python integer
       if n <= 1:
-        return;
+        if batch_next_run_script != None:
+          command = [];
+          if batch_cmd_prefix != None:
+            command += batch_cmd_prefix.split();
+          command += ['python'];
+          command += [batch_next_run_script];
+          return pyalps.executeCommand(command);
+        else:
+          return;
       else:
-        return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, n=n-1, write_status=write_status, batch_submit=batch_submit, batch_cmd_prefix=batch_cmd_prefix, batch_run_script=batch_run_script, batch_run_now=False); 
+        return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, n=n-1, write_status=write_status, batch_submit=batch_submit, batch_cmd_prefix=batch_cmd_prefix, batch_run_script=batch_run_script, batch_next_run_script=batch_next_run_script, batch_run_now=False); 
 
   elif break_if != None:    # otherwise, if break_if exists
     if eval(break_if):
-      return;
+      if batch_next_run_script != None:
+        command = [];
+        if batch_cmd_prefix != None:
+          command += batch_cmd_prefix.split();
+        command += ['python'];
+        command += [batch_next_run_script];
+        return pyalps.executeCommand(command);
+      else:
+        return;
     else:
       if break_elseif != None:   # otherotherwise, if break_elseif exists
         if eval(break_elseif):
-          return;
+          if batch_next_run_script != None:
+            command = [];
+            if batch_cmd_prefix != None:
+              command += batch_cmd_prefix.split();
+            command += ['python'];
+            command += [batch_next_run_script];
+            return pyalps.executeCommand(command);
+          else:
+            return;
         else:
-          return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, break_if=break_if, break_elseif=break_elseif, write_status=write_status, batch_submit=batch_submit, batch_cmd_prefix=batch_cmd_prefix, batch_run_script=batch_run_script, batch_run_now=False);
+          return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, break_if=break_if, break_elseif=break_elseif, write_status=write_status, batch_submit=batch_submit, batch_cmd_prefix=batch_cmd_prefix, batch_run_script=batch_run_script, batch_next_run_script=batch_next_run_script, batch_run_now=False);
       else:
-        return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, break_if=break_if, write_status=write_status, batch_submit=batch_submit, batch_cmd_prefix=batch_cmd_prefix, batch_run_script=batch_run_script, batch_run_now=False);
+        return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, break_if=break_if, write_status=write_status, batch_submit=batch_submit, batch_cmd_prefix=batch_cmd_prefix, batch_run_script=batch_run_script, batch_next_run_script=batch_next_run_script, batch_run_now=False);
 
   else:                     # otherwise, recursiveRun only runs once
-    return;
+    if batch_next_run_script != None:
+      command = [];
+      if batch_cmd_prefix != None:
+        command += batch_cmd_prefix.split();
+      command += ['python'];
+      command += [batch_next_run_script];
+      return pyalps.executeCommand(command);
+    else:
+      return;
 
 
+def startRunScript(batch_run_script, batch_cmd_prefix=None, loc=None):
+  # Format string 
+  if loc != None:
+    locals().update(loc);
+    batch_run_script = format_string(batch_run_script, loc);
+    return startRunScript(batch_run_script, batch_cmd_prefix=batch_cmd_prefix);
 
+  command = [];
+  if batch_cmd_prefix != None:
+    command += batch_cmd_prefix.split();
+  command += ['python']
+  command += [batch_run_script];
+  
+  return pyalps.executeCommand(command);
 
 
