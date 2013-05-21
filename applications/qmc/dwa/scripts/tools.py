@@ -107,7 +107,7 @@ def extract_worldlines(infile, outfile):
   wl.save(outfile);
   return;
 
-def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, break_if=None, break_elseif=None, write_status=None, loc=None, batch_submit=False, batch_cmd_prefix=None, batch_run_now=False):
+def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, break_if=None, break_elseif=None, write_status=None, loc=None, batch_submit=False, batch_cmd_prefix=None, batch_run_tmpfile='tmp.py', batch_run_now=False):
   ### 
   ### Either recursively run cmd for n times, or until the break_if condition holds true.
   ###
@@ -133,14 +133,14 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
       break_elseif = format_string(break_elseif, loc);
     if write_status != None:
       write_status = format_string(write_status, loc);
-    return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, n=n, break_if=break_if, break_elseif=break_elseif, write_status=write_status, batch_submit=batch_submit, batch_cmd_prefix=batch_cmd_prefix, batch_run_now=batch_run_now);
+    return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, n=n, break_if=break_if, break_elseif=break_elseif, write_status=write_status, batch_submit=batch_submit, batch_cmd_prefix=batch_cmd_prefix, batch_run_tmpfile=batch_run_tmpfile, batch_run_now=batch_run_now);
 
   # preparing batch run script 
   if batch_submit:
     if not batch_run_now:
       batch_cmd = '';
       batch_cmd +=   'import pyalps;\n';
-      batch_cmd +=   'import pyalps.dwa\n';
+      batch_cmd +=   'import pyalps.dwa\n\n';
       batch_cmd +=   'pyalps.dwa.recursiveRun(' + str_quote(cmd);
       if cmd_lang != None: 
         batch_cmd += ', cmd_lang = ' + str_quote(cmd_lang);
@@ -157,15 +157,17 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
       batch_cmd += ', batch_submit = ' + str(batch_submit);
       if batch_cmd_prefix != None:
         batch_cmd += ', batch_cmd_prefix = ' + str_quote(batch_cmd_prefix);
+      batch_cmd += ', batch_run_tmpfile = ' + str_quote(batch_run_tmpfile);
       batch_cmd += ', batch_run_now = True';
-      batch_cmd +=   ');\n';
+      batch_cmd +=   ');\n\n';
+
+      pyalps.executeCommand(['echo', batch_cmd, '>', batch_run_tmpfile]);
 
       command = [];
       if batch_cmd_prefix != None:
         command += batch_cmd_prefix.split();
-      command += "python -c".split();
-      command += [batch_cmd];
-
+      command += ['python'];
+      command += [batch_run_tmpfile];
       return pyalps.executeCommand(command);
 
   if cmd_lang == 'command_line':
