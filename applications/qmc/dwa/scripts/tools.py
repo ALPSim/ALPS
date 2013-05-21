@@ -133,6 +133,7 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
       break_elseif = format_string(break_elseif, loc);
     if write_status != None:
       write_status = format_string(write_status, loc);
+    batch_run_tmpfile = format_string(batch_run_tmpfile, loc);
     return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, n=n, break_if=break_if, break_elseif=break_elseif, write_status=write_status, batch_submit=batch_submit, batch_cmd_prefix=batch_cmd_prefix, batch_run_tmpfile=batch_run_tmpfile, batch_run_now=batch_run_now);
 
   # preparing batch run script 
