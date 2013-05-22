@@ -318,7 +318,7 @@
 
 <LATTICEGRAPH name = "open simple cubic lattice">
   <FINITELATTICE>
-    <LATTICE ref="square lattice"/>
+    <LATTICE ref="simple cubic lattice"/>
     <PARAMETER name="W" default="L"/>
     <PARAMETER name="H" default="W"/>
     <EXTENT dimension="1" size="L"/>
