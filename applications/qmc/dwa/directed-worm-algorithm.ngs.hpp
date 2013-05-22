@@ -101,7 +101,7 @@ private:
   boost::tuple<std::vector<double>, std::vector<double>, std::vector<double>, std::vector<double> > 
                       bond_ladder_hamiltonians(const bond_descriptor & bond);
 
-  inline double onsite_energy (unsigned int site_, unsigned short state_) const  { return onsite_matrix[site_type(site_)][state_]; }     
+  inline double onsite_energy (unsigned int site_, unsigned short state_) const  { return onsite_matrix[inhomogeneous_site_type(site_)][state_]; }     
   double onsite_energy_relative (unsigned int site_, unsigned short state_, bool forward_, bool creation_) const;
   double hopping_energy (bond_descriptor const & bond_, unsigned short targetstate_, bool increasing_) const;
 

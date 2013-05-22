@@ -231,15 +231,16 @@ void
     ::initialize_hamiltonian()
     {
       // setup state_minimum and state_maximum
+      std::cout << "\t\t\ti. State minimum/maximum \t... starting\n";
       for (int i=0; i<maximum_sitetype+1; ++i)
       {
         state_minimum.push_back(boost::math::iround(diagonal_matrix_element.begin()->second[i].front()));
         state_maximum.push_back(boost::math::iround(diagonal_matrix_element.begin()->second[i].back()));
       }
-
-      std::cout << "\t\t\ti. State minimum/maximum \t... done.\n"; 
+      std::cout << "\t\t\t\t... done.\n"; 
 
       // iterate all sites and build onsite matrix 
+      std::cout << "\t\t\ti. Onsite matrix \t... starting\n";
       for (site_iterator it = sites().first; it != sites().second; ++it) {
         unsigned int this_site_type = inhomogeneous_site_type(*it);
         if (this_site_type >= onsite_matrix.size())
@@ -249,10 +250,10 @@ void
           onsite_matrix[this_site_type] = onsite_hamiltonian(this_site_type) * beta;
         }
       }
-
-      std::cout << "\t\t\tii. Onsite matrix \t... done.\n";
+      std::cout << "\t\t\t\t... done.\n";
 
       // iterate all bonds and build site 1-up matrix, site 1-down matrix and bond strength matrix
+      std::cout << "\t\t\tiii. Bond strength matrix \t... starting\n";
       std::vector<double> bond_strength_matrix_temporary;
       for (bond_iterator it = bonds().first; it != bonds().second; ++it) {
         unsigned int this_bond_type       = inhomogeneous_bond_type(*it);
@@ -299,7 +300,7 @@ void
         bond_strength_matrix.push_back(bond_strength_matrix_temporary[this_bond_type]); 
       }
 
-      std::cout << "\t\t\tiii. Bond strength matrix \t... done.\n"; 
+      std::cout << "\t\t\t\t... done.\n"; 
     }
 
 void
