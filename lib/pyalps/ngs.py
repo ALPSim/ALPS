@@ -72,27 +72,27 @@ from pyngsrandom01_c import random01
 
 from pyngshdf5_c import hdf5_archive_impl
 
-from pyngshdf5_c import register_archive_exception_type
-
-class ArchiveError(Exception): pass
-register_archive_exception_type(0, ArchiveError)
-
-class ArchiveNotFound(ArchiveError, IOError): pass
-register_archive_exception_type(1, ArchiveNotFound)
-
-class ArchiveClosed(ArchiveError, ValueError): pass
-register_archive_exception_type(2, ArchiveClosed)
-
-class InvalidPath(ArchiveError, SyntaxError): pass
-register_archive_exception_type(3, InvalidPath)
-
-class PathNotFound(ArchiveError, LookupError): pass
-register_archive_exception_type(4, PathNotFound)
-
-class WrongType(ArchiveError, TypeError): pass
-register_archive_exception_type(5, WrongType)
-
-del register_archive_exception_type
+#from pyngshdf5_c import register_archive_exception_type
+#
+#class ArchiveError(Exception): pass
+#register_archive_exception_type(0, ArchiveError)
+#
+#class ArchiveNotFound(ArchiveError, IOError): pass
+#register_archive_exception_type(1, ArchiveNotFound)
+#
+#class ArchiveClosed(ArchiveError, ValueError): pass
+#register_archive_exception_type(2, ArchiveClosed)
+#
+#class InvalidPath(ArchiveError, SyntaxError): pass
+#register_archive_exception_type(3, InvalidPath)
+#
+#class PathNotFound(ArchiveError, LookupError): pass
+#register_archive_exception_type(4, PathNotFound)
+#
+#class WrongType(ArchiveError, TypeError): pass
+#register_archive_exception_type(5, WrongType)
+#
+#del register_archive_exception_type
 
 #TODO: move to hdf5 module
 class archive(hdf5_archive_impl):
