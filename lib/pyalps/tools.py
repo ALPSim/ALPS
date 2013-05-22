@@ -494,7 +494,18 @@ def getMeasurements(outfiles_, observable=None, includeLog=False):
 
   return measurements;
 
+def sendmail(recipients, sender=None, message='', subject='', attachment=None):
+  message = 'Automatic email message from ALPS.\nDo not reply.\n\n' + str(message);
+  subject = 'Automatic email message from ALPS. ' + str(subject); 
 
+  command = ['echo', message, '|', 'mail', '-s', subject];
+  if sender != None:
+    command += ['-r', sender];
+  if attachment != None:
+    command += ['-a', attachment]; 
+  command += [recipients];
+
+  return pyalps.executeCommand(command);
 
 def extract(appname, source, target):
   cmdline = [appname];
