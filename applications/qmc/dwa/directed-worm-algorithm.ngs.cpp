@@ -150,21 +150,10 @@ directed_worm_algorithm
       lattice_vector_.push_back(*(basis_vectors().first + i) * lattice().extent()[i]);
 
     // other initialization
-    std::cout << "\nInitialization stage 1 (Site states)\t... starting\n";
     initialize_site_states();
-    std::cout << "\t\t... finished.\n";
-
-    std::cout << "\nInitialization stage 2 (Hamiltonian)\t... starting\n";
     initialize_hamiltonian();
-    std::cout << "\t\t... finished.\n";
-
-    std::cout << "\nInitialization stage 3 (Lookups)\t... starting\n";
     initialize_lookups();
-    std::cout << "\t\t... finished.\n";
-
-    std::cout << "\nInitialization stage 4 (Measurements)\t... starting\n";
     initialize_measurements();
-    std::cout << "\t\t... finished.\n";
 
     // regarding caches
 #ifdef HEATBATH_ALGORITHM
@@ -237,29 +226,16 @@ void
         state_maximum.push_back(boost::math::iround(diagonal_matrix_element.begin()->second[i].back()));
       }
 
-      std::cout << "\t\t\ti. State minimum/maximum \t... done.\n";
-
       // iterate all sites and build onsite matrix 
       for (site_iterator it = sites().first; it != sites().second; ++it) {
         unsigned int this_site_type = inhomogeneous_site_type(*it);
-
-//        std::cout << inhomogeneous_sites() << "\t" << inhomogeneous_bonds() << "\n";
-//        std::cout << maximum_sitetype << "\n";
-//        std::cin.get();
-
         if (this_site_type >= onsite_matrix.size())
         { 
           using boost::numeric::operators::operator*;
           onsite_matrix.resize(this_site_type+1);
           onsite_matrix[this_site_type] = onsite_hamiltonian(this_site_type) * beta;
         }
-
-        unsigned int temp_nr = (*it);
-        if (temp_nr % 100 == 0)
-          std::cout << "\t\t" << temp_nr << "\n"; 
       }
-
-      std::cout << "\t\t\tii. Onsite matrix \t... done.\n";
 
       // iterate all bonds and build site 1-up matrix, site 1-down matrix and bond strength matrix
       std::vector<double> bond_strength_matrix_temporary;
@@ -307,9 +283,6 @@ void
 
         bond_strength_matrix.push_back(bond_strength_matrix_temporary[this_bond_type]); 
       }
-   
-      std::cout << "\t\t\tiii. Bond strength matrix \t... done.\n";
-
     }
 
 void
@@ -405,6 +378,8 @@ void
       out << "\n";
 
       out << "\n\n";
+
+      std::cin.get();
     }
 
 void
@@ -528,25 +503,25 @@ std::vector<double>
           this_site_terms.insert(std::make_pair(it->name(), *it));
 
       std::vector<double> this_onsite_hamiltonian;
-//      for (std::map<std::string, alps::SiteTermDescriptor>::iterator it=this_site_terms.begin(); it!=this_site_terms.end(); ++it)
-//      {
+      for (std::map<std::string, alps::SiteTermDescriptor>::iterator it=this_site_terms.begin(); it!=this_site_terms.end(); ++it)
+      {
         alps::Parameters this_parms;
         if(inhomogeneous_sites()) {
           alps::throw_if_xyz_defined(this_copy_of_params_is_reserved_for_the_old_scheduler_library_which_is_to_be_depreciated,this_site_type);      // check whether x, y, or z is set
           this_parms << coordinate_as_parameter(this_site_type); // set x, y and z
         }
         boost::multi_array<double,2> this_onsite_matrix =
-          alps::get_matrix( double(), model().site_term()    //it->second
+          alps::get_matrix( double(), it->second
                           , model().basis().site_basis(this_site_type), this_parms);
         std::vector<double> this_onsite_matrix_diagonal;
         for (unsigned short i=0; i < this_onsite_matrix.shape()[0]; ++i)
           this_onsite_matrix_diagonal.push_back(this_onsite_matrix[i][i]);
-//        using boost::numeric::operators::operator+;
-//        if (this_onsite_hamiltonian.empty())
+        using boost::numeric::operators::operator+;
+        if (this_onsite_hamiltonian.empty())
           this_onsite_hamiltonian = this_onsite_matrix_diagonal;
-//        else
-//          this_onsite_hamiltonian = this_onsite_hamiltonian + this_onsite_matrix_diagonal;
-//      }
+        else
+          this_onsite_hamiltonian = this_onsite_hamiltonian + this_onsite_matrix_diagonal;
+      }
       return this_onsite_hamiltonian;
     }   
 
