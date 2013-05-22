@@ -65,7 +65,10 @@ public:
     : mcbase(parameters_type(ar), parameters_type(ar)["SEED"] | 0)
     , graph_helper<G>(alps::Parameters(ar))  // ALPS Lattice Library is not yet supported by NGS scheduler
     , this_copy_of_params_is_reserved_for_the_old_scheduler_library_which_is_to_be_depreciated(alps::Parameters(ar)) 
-  {}
+  {
+    alps::ngs::signal::listen();
+
+  }
 
 protected:
   // Tamama comments:
@@ -173,7 +176,7 @@ qmcbase<G,StateType>::qmcbase(alps::hdf5::archive & ar, bool issymbolic)
            : (this->parameters.defined("T") ? 1./static_cast<double>(this->parameters["T"])
               : (this->parameters.defined("TEMPERATURE") ? 1./static_cast<double>(this->parameters["TEMPERATURE"])
                  : 1./static_cast<double>(this->parameters["temperature"])))))),
-    is_signed_(this->has_sign_problem()),
+//    is_signed_(this->has_sign_problem()),
     is_spin_model_(false),
     is_charge_model_(false),
     measure_local_density_(false),
