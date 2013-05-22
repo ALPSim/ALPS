@@ -150,10 +150,21 @@ directed_worm_algorithm
       lattice_vector_.push_back(*(basis_vectors().first + i) * lattice().extent()[i]);
 
     // other initialization
-    initialize_site_states();
-    initialize_hamiltonian();
-    initialize_lookups();
-    initialize_measurements();
+    std::cout << "\nInitialization stage 1 (Site states)\t... starting\n"; 
+    initialize_site_states(); 
+    std::cout << "\t\t... finished.\n"; 
+ 
+    std::cout << "\nInitialization stage 2 (Hamiltonian)\t... starting\n"; 
+    initialize_hamiltonian(); 
+    std::cout << "\t\t... finished.\n"; 
+	 
+    std::cout << "\nInitialization stage 3 (Lookups)\t... starting\n"; 
+    initialize_lookups(); 
+    std::cout << "\t\t... finished.\n"; 
+	 
+    std::cout << "\nInitialization stage 4 (Measurements)\t... starting\n"; 
+    initialize_measurements(); 
+    std::cout << "\t\t... finished.\n"; 
 
     // regarding caches
 #ifdef HEATBATH_ALGORITHM
@@ -226,6 +237,8 @@ void
         state_maximum.push_back(boost::math::iround(diagonal_matrix_element.begin()->second[i].back()));
       }
 
+      std::cout << "\t\t\ti. State minimum/maximum \t... done.\n"; 
+
       // iterate all sites and build onsite matrix 
       for (site_iterator it = sites().first; it != sites().second; ++it) {
         unsigned int this_site_type = inhomogeneous_site_type(*it);
@@ -236,6 +249,8 @@ void
           onsite_matrix[this_site_type] = onsite_hamiltonian(this_site_type) * beta;
         }
       }
+
+      std::cout << "\t\t\tii. Onsite matrix \t... done.\n";
 
       // iterate all bonds and build site 1-up matrix, site 1-down matrix and bond strength matrix
       std::vector<double> bond_strength_matrix_temporary;
@@ -283,6 +298,8 @@ void
 
         bond_strength_matrix.push_back(bond_strength_matrix_temporary[this_bond_type]); 
       }
+
+      std::cout << "\t\t\tiii. Bond strength matrix \t... done.\n"; 
     }
 
 void
