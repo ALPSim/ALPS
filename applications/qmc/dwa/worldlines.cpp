@@ -25,8 +25,8 @@
 *
 *****************************************************************************/
 
+#include <alps/ngs/boost_python.hpp>
 #include <boost/bind.hpp>
-#include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <alps/python/numpy_array.hpp>
 
