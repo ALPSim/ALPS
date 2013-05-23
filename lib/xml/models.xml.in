@@ -360,6 +360,7 @@
 
 <HAMILTONIAN name="boson Hubbard">
   <PARAMETER name="mu" default="0"/>
+  <PARAMETER name="K" default="0"/>
   <PARAMETER name="t" default="1"/>
   <PARAMETER name="V" default="0"/>
   <PARAMETER name="t'" default="0"/>
