@@ -49,6 +49,7 @@ from plot_core import read_xml as readAlpsXMLPlot
 from dict_intersect import *
 from natural_sort import natural_sort
 import alea
+import scipy.interpolate
 
 def make_list(infiles):
     if type(infiles) == list:
@@ -569,6 +570,28 @@ def collectXY(sets,x,y,foreach=[]):
           
           foreach_sets[k] = res
       return foreach_sets.values()
+
+def paramsAtFixedY(sets,x,y,fixedY,foreach=[]):
+  XYs = collectXY(sets,x,y,foreach);
+
+  params = [];
+  for XY in XYs:
+    param = XY.props;
+
+    x = XY.x;
+    y = [y.mean for y in XY.y];
+
+    f = scipy.interpolate.interp1d(y,x);
+
+    xnew = f(fixedY);
+
+    param.update({param['xlabel']: float(xnew)});
+
+    del param['xlabel'];
+    del param['ylabel'];
+    params.append(param);
+
+  return params;
 
 def groupSets(groups, for_each = []):
     """ groups a list of DataSet objects into a list of lists
