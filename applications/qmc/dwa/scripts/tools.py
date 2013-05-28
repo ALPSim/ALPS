@@ -107,7 +107,7 @@ def extract_worldlines(infile, outfile):
   wl.save(outfile);
   return;
 
-def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, break_if=None, break_elseif=None, write_status=None, loc=None, batch_submit=False, batch_cmd_prefix=None, batch_run_script='script.py', batch_next_run_script=None, batch_run_now=False, batch_noRun=False):
+def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, break_if=None, break_elseif=None, write_status=None, loc=None, batch_submit=False, batch_cmd_prefix=None, batch_run_script='run.script', batch_next_run_script=None, batch_run_now=False, batch_noRun=False):
   ### 
   ### Either recursively run cmd for n times, or until the break_if condition holds true.
   ###
@@ -142,6 +142,7 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
   if batch_submit:
     if not batch_run_now:
       batch_cmd = '';
+      batch_cmd += 'python <<TAMAMA\n';
       batch_cmd +=   'import pyalps;\n';
       batch_cmd +=   'import pyalps.dwa\n\n';
       batch_cmd +=   'pyalps.dwa.recursiveRun(' + str_quote(cmd);
@@ -165,8 +166,10 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
         batch_cmd += ', \n\tbatch_next_run_script = ' + str_quote(batch_next_run_script);
       batch_cmd += ', \n\tbatch_run_now = True';
       batch_cmd +=   ');\n\n';
+      batch_cmd += 'TAMAMA';
 
       pyalps.executeCommand(['echo', batch_cmd, '>', batch_run_script]);
+      pyalps.executeCommand(['chmod','755',batch_run_script]);
 
       if batch_noRun:
         return;
@@ -174,7 +177,6 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
       command = [];
       if batch_cmd_prefix != None:
         command += batch_cmd_prefix.split();
-      command += ['python'];
       command += [batch_run_script];
       return pyalps.executeCommand(command);
 
@@ -199,7 +201,6 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
           command = [];
           if batch_cmd_prefix != None:
             command += batch_cmd_prefix.split();
-          command += ['python'];
           command += [batch_next_run_script];
           return pyalps.executeCommand(command);
         else:
@@ -213,7 +214,6 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
         command = [];
         if batch_cmd_prefix != None:
           command += batch_cmd_prefix.split();
-        command += ['python'];
         command += [batch_next_run_script];
         return pyalps.executeCommand(command);
       else:
@@ -225,7 +225,6 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
             command = [];
             if batch_cmd_prefix != None:
               command += batch_cmd_prefix.split();
-            command += ['python'];
             command += [batch_next_run_script];
             return pyalps.executeCommand(command);
           else:
@@ -240,7 +239,6 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
       command = [];
       if batch_cmd_prefix != None:
         command += batch_cmd_prefix.split();
-      command += ['python'];
       command += [batch_next_run_script];
       return pyalps.executeCommand(command);
     else:
@@ -257,7 +255,6 @@ def startRunScript(batch_run_script, batch_cmd_prefix=None, loc=None):
   command = [];
   if batch_cmd_prefix != None:
     command += batch_cmd_prefix.split();
-  command += ['python']
   command += [batch_run_script];
   
   return pyalps.executeCommand(command);
