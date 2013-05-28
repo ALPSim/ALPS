@@ -588,6 +588,8 @@ def paramsAtFixedY(sets,x,y,fixedY,foreach=[]):
     param.update({param['xlabel']: float(xnew)});
 
     del param['observable'];
+    del param['hdf5_path'];
+    del param['label'];
     del param['xlabel'];
     del param['ylabel'];
     params.append(param);
