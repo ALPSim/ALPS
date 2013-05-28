@@ -47,6 +47,7 @@
 #include <boost/lambda/lambda.hpp>
 #include <boost/tuple/tuple.hpp>
 
+#include <alps/expression.h>
 #include <alps/numeric/vector_functions.hpp>
 #include <alps/numeric/vector_valarray_conversion.hpp>
 
