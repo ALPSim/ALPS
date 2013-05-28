@@ -587,6 +587,7 @@ def paramsAtFixedY(sets,x,y,fixedY,foreach=[]):
 
     param.update({param['xlabel']: float(xnew)});
 
+    del param['observable'];
     del param['xlabel'];
     del param['ylabel'];
     params.append(param);
