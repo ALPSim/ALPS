@@ -125,7 +125,7 @@ directed_worm_algorithm
     , _sweep_failure_counter       (0)
     , _propagation_counter         (0)
     , _propagation_failure_counter (0)
-    , _total_sweeps                (this->parameters["TOTAL_SWEEPS"] | 10000000)
+    , _total_sweeps                (this->parameters["TOTAL_SWEEPS"] | (this->parameters["SWEEPS"] | 10000000))
     , _sweep_per_measurement       (this->parameters["SKIP"] | 1)
     // regarding lattice
     , is_periodic_ (std::find((this->lattice().boundary()).begin(), (this->lattice().boundary()).end(), "open") == (this->lattice().boundary()).end())
@@ -179,6 +179,7 @@ directed_worm_algorithm
 
     // print to screen
     print_simulation (std::cout);
+    //print_hamiltonian(std::cout);
 #ifdef DEBUGMODE
     print_hamiltonian(std::cout);
     print_lookups    (std::cout);
@@ -348,7 +349,7 @@ void
       std::cout << "\t\t\t\t\t\t\t ... done.\n";
 
       //// Step 2: Initialize onsite matrix 
-      std::cout << "\t\t\t\t\tStep 2: Initialize onsite matrix \t ... starting:\n";
+      std::cout << "\t\t\t\t\tb. Step 2: Initialize onsite matrix \t ... starting:\n";
 
       ////// _bare_values -> onsite_matrix
       for (site_iterator it = sites().first; it != sites().second; ++it) {
@@ -594,6 +595,8 @@ void
       }
 
       std::cout << "\t\t\t\t\t\t\t ... done.\n";
+
+      std::cout << "\t\t\t\t... done.\n";
 
       // iterate all bonds and build site 1-up matrix, site 1-down matrix and bond strength matrix
       std::cout << "\t\t\tiii. Bond strength matrix \t... starting\n";
