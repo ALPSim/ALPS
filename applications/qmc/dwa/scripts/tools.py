@@ -24,6 +24,16 @@ def format_string(string, loc):
 def str_quote(item):
   return ('"' + str(item) + '"');
 
+def cyclic_shift(array, by):
+  # array: numpy.array
+  if not isinstance(array,numpy.ndarray):
+    raise Exception("array must be of type <numpy.ndarray>");
+
+  for i in range(array.ndim):
+    array = numpy.roll(array, by[i], axis=i);
+
+  return array;
+
 def thermalized(h5_outfile, observables, tolerance=0.01, simplified=False, includeLog=False):
   if isinstance(observables, str):
     observables = [observables];
