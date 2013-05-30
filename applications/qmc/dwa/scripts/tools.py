@@ -1,7 +1,10 @@
 import os;
 import numpy;
 import scipy;
+import matplotlib;
+import matplotlib.pyplot;
 import pyalps;
+from pyalps.dwa.worldlines_c import worldlines;
 
 def format_string(string, loc):
   result = []; 
@@ -135,11 +138,103 @@ def status(filename, includeLog=False):
     else:
       return ar['/status'] 
 
-def extract_worldlines(infile, outfile):
-  wl = pyalps.dwa.worldlines()
+def extract_worldlines(infile, outfile=None):
+  wl = worldlines()
   wl.load(infile);
-  wl.save(outfile);
-  return;
+
+  if outfile != None:
+    wl.save(outfile);
+    return;
+  else:
+    return wl;
+
+def show_worldlines(wl=None, fig_outfile=None, reshape=None, at=None, Nmax=20):
+  if wl == None:
+    return;
+
+  [wl_siteindicator, wl_time, wl_state] = [wl.worldlines_siteindicator(), wl.worldlines_time(), wl.worldlines_state()];
+
+  return wl_siteindicator;
+
+  wl_coordinates = [];
+  for idx1 in range(wl.num_sites()):
+    for idx2 in range(1,wl.num_kinks(idx1)):
+      wl_coordinates.append([idx1,wl_time[idx1][idx2]]);
+  [wl_coordinates_site, wl_coordinates_time] = numpy.array(wl_coordinates).transpose();
+
+  wl_state_segments = [];
+  for idx1 in range(wl.num_sites()):
+    for idx2 in range(wl.num_kinks(idx1)-1):
+      wl_state_segments.append([[idx1,wl_time[idx1][idx2]], [idx1,wl_time[idx1][idx2+1]], wl_state[idx1][idx2]])
+    wl_state_segments.append([[idx1,wl_time[idx1][wl.num_kinks(idx1)-1]], [idx1,1.0], wl_state[idx1][wl.num_kinks(idx1)-1]]);
+  
+  wl_n_state_segments = [];
+  for n in range(Nmax+1):
+    wl_n_state_segments.append([wl_state_segment[0:2] for wl_state_segment in wl_state_segments if wl_state_segment[2] == n]);  
+
+  wl_vertex_segments = [];
+  for idx1 in range(wl.num_sites()):
+    for idx2 in range(1,wl.num_kinks(idx1)):
+      if   (wl_siteindicator[idx1][idx2] - idx1 == 1):
+        wl_vertex_segments.append([[idx1,wl_time[idx1][idx2]],[idx1+0.5,wl_time[idx1][idx2]]]);
+      elif (wl_siteindicator[idx1][idx2] - idx1 == -1):
+        wl_vertex_segments.append([[idx1-0.5,wl_time[idx1][idx2]],[idx1,wl_time[idx1][idx2]]]);
+      elif (idx1 == 0):
+        wl_vertex_segments.append([[idx1-0.5,wl_time[idx1][idx2]],[idx1,wl_time[idx1][idx2]]]);
+      else:
+        wl_vertex_segments.append([[idx1-0.5,wl_time[idx1][idx2]],[idx1+0.5,wl_time[idx1][idx2]]]);
+
+  if fig_outfile != None:
+    matplotlib.use('Agg');
+
+  matplotlib.pyplot.figure(frameon=False);
+  matplotlib.pyplot.xticks([]);
+  matplotlib.pyplot.yticks([0,1]);
+  
+
+'''
+def garbage():  
+  ### Plot worldlines
+  
+  if (len(sys.argv) == 2):
+    matplotlib.pyplot.xlim(-0.5,wl.num_sites()+0.5);
+  else:
+    xlim = eval(sys.argv[2]);
+    matplotlib.pyplot.xlim(xlim[0]-0.5,xlim[1]-0.5);
+  
+  matplotlib.pyplot.ylim(-0.05,1.05);
+  
+  # scatter layout
+  #matplotlib.pyplot.scatter(wl_coordinates_site, wl_coordinates_time);
+  
+  for wl_n_state_segment in wl_n_state_segments[0]:
+    [segment_site, segment_time] = numpy.array(wl_n_state_segment).transpose();  
+    matplotlib.pyplot.plot(segment_site, segment_time, '--k', linewidth=2);
+  
+  for wl_n_state_segment in wl_n_state_segments[1]:
+    [segment_site, segment_time] = numpy.array(wl_n_state_segment).transpose();
+    matplotlib.pyplot.plot(segment_site, segment_time, '-k', linewidth=2);
+  
+  wl_n_state_segment_line_spacing = 0.2;  
+  
+  for n in range(2,21):
+    for wl_n_state_segment in wl_n_state_segments[n]:
+      [segment_site, segment_time] = numpy.array(wl_n_state_segment).transpose();
+      for m in range(n):
+        matplotlib.pyplot.plot(segment_site - (m - (n-1)/2.)*wl_n_state_segment_line_spacing, segment_time, '-k', linewidth=2);
+  
+  for wl_vertex_segment in wl_vertex_segments:
+    [segment_site, segment_time] = numpy.array(wl_vertex_segment).transpose();
+    matplotlib.pyplot.plot(segment_site, segment_time, '-k', linewidth=2);
+  
+  matplotlib.pyplot.show();
+  
+  ### OUTFILE
+  #outfile = infile[0:-3] + ".pdf";
+  #matplotlib.pyplot.savefig(outfile, transparent=True);
+'''
+
+
 
 def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, break_if=None, break_elseif=None, write_status=None, loc=None, loc0=None, batch_submit=False, batch_cmd_prefix=None, batch_run_directory=None, batch_run_script='run.script', batch_next_run_script=None, batch_run_now=False, batch_noRun=False):
   ### 
