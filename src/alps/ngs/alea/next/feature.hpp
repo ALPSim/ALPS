@@ -4,7 +4,8 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2013 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2011 - 2013 by Mario Koenz <mkoenz@ethz.ch>                       *
+ *                              Lukas Gamper <gamperl@gmail.com>                   *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -25,65 +26,51 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_TUTORIAL_ISING_HPP
-#define ALPS_TUTORIAL_ISING_HPP
+#ifndef ALPS_NGS_ACCUMULATOR_FEATURE_HPP
+#define ALPS_NGS_ACCUMULATOR_FEATURE_HPP
 
-#include <alps/ngs/hdf5.hpp>
-#include <alps/ngs/hdf5/vector.hpp>
+#include <boost/utility.hpp>
 
-#include <alps/ngs/params.hpp>
-#include <alps/ngs/alea/next/accumulator.hpp>
+namespace alps {
+	namespace accumulator {
 
-#include <boost/function.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/random/mersenne_twister.hpp>
+		template<typename T, typename F> struct has_feature 
+			: public boost::false_type
+		{};
 
-#include <vector>
-#include <string>
+		template<typename T> struct has_result_type {
+	        template<typename U> static char check(typename U::result_type *);
+	        template<typename U> static double check(...);
+			typedef boost::integral_constant<bool, sizeof(char) == sizeof(check<T>(0))> type;
+	    };
 
-class ALPS_DECL ising_sim {
+		template<typename T> struct value_type {
+	    	typedef typename T::value_type type;
+		};
 
-    typedef alps::accumulator::accumulator_set accumulators_type;
+		namespace impl {
 
-    public:
+			template<typename T> struct ResultBase {
+				typedef T value_type;
+			};
 
-        typedef alps::params parameters_type;
-        typedef std::vector<std::string> result_names_type;
-        typedef alps::accumulator::result_set results_type;
+			template<typename T> struct AccumulatorBase {
+				typedef T value_type;
+				typedef ResultBase<T> result_type; 
+			};
 
-        ising_sim(parameters_type const & params);
+			template<typename T, typename F, typename B> struct Accumulator {};
 
-        void update();
-        void measure();
-        double fraction_completed() const;
-        bool run(boost::function<bool ()> const & stop_callback);
+			template<typename T, typename F, typename B> class Result {};
 
-        result_names_type result_names() const;
-        result_names_type unsaved_result_names() const;
-        results_type collect_results() const;
-        results_type collect_results(result_names_type const & names) const;
+			template<typename F, typename B> class BaseWrapper {};
 
-        void save(boost::filesystem::path const & filename) const;
-        void load(boost::filesystem::path const & filename);
-        void save(alps::hdf5::archive & ar) const;
-        void load(alps::hdf5::archive & ar);
+			template<typename T, typename F, typename B> class ResultTypeWrapper {};
 
-    protected:
+			template<typename A, typename F, typename B> class DerivedWrapper {};
 
-        parameters_type parameters;
-        boost::variate_generator<boost::mt19937, boost::uniform_real<> > mutable random;
-        accumulators_type measurements;
+		}
+	}
+}
 
-    private:
-        
-        int length;
-        int sweeps;
-        int thermalization_sweeps;
-        int total_sweeps;
-        double beta;
-        std::vector<int> spins;
-};
-
-#endif
+ #endif

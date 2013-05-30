@@ -42,11 +42,11 @@ ising_sim::ising_sim(parameters_type const & params)
     for(int i = 0; i < length; ++i)
         spins[i] = (random() < 0.5 ? 1 : -1);
     measurements
-        << alps::ngs::RealObservable("Energy")
-        << alps::ngs::RealObservable("Magnetization")
-        << alps::ngs::RealObservable("Magnetization^2")
-        << alps::ngs::RealObservable("Magnetization^4")
-        << alps::ngs::RealVectorObservable("Correlations")
+        << alps::accumulator::RealObservable("Energy")
+        << alps::accumulator::RealObservable("Magnetization")
+        << alps::accumulator::RealObservable("Magnetization^2")
+        << alps::accumulator::RealObservable("Magnetization^4")
+        << alps::accumulator::RealVectorObservable("Correlations")
     ;
 }
 
@@ -103,7 +103,7 @@ bool ising_sim::run(boost::function<bool ()> const & stop_callback) {
 // implement a nice keys(m) function
 ising_sim::result_names_type ising_sim::result_names() const {
     result_names_type names;
-    for(observable_collection_type::const_iterator it = measurements.begin(); it != measurements.end(); ++it)
+    for(accumulators_type::const_iterator it = measurements.begin(); it != measurements.end(); ++it)
         names.push_back(it->first);
     return names;
 }
@@ -119,12 +119,7 @@ ising_sim::results_type ising_sim::collect_results() const {
 ising_sim::results_type ising_sim::collect_results(result_names_type const & names) const {
     results_type partial_results;
     for(result_names_type::const_iterator it = names.begin(); it != names.end(); ++it)
-        #ifdef ALPS_NGS_USE_NEW_ALEA
-            partial_results.insert(*it, measurements[*it].result());
-        #else
-            // TODO: this is ugly make measurements[*it]
-            partial_results.insert(*it, alps::mcresult(measurements[*it]));
-        #endif
+        partial_results.insert(*it, measurements[*it].result());
     return partial_results;
 }
 
