@@ -148,93 +148,94 @@ def extract_worldlines(infile, outfile=None):
   else:
     return wl;
 
-def show_worldlines(wl=None, fig_outfile=None, reshape=None, at=None, Nmax=20):
+def show_worldlines(wl=None, reshape=None, at=None, scatter_plot=False, Nmax=20, linewidth=2, linespace=0.1):
   if wl == None:
     return;
 
-  [wl_siteindicator, wl_time, wl_state] = [wl.worldlines_siteindicator(), wl.worldlines_time(), wl.worldlines_state()];
+  wl_idx = numpy.array(range(wl.num_sites()));
+  [wl_siteindicator, wl_time, wl_state] = [numpy.array(wl.worldlines_siteindicator()), numpy.array(wl.worldlines_time()), numpy.array(wl.worldlines_state())];
 
-  return wl_siteindicator;
+  if reshape != None:
+    wl_idx = wl_idx.reshape(reshape);
+    [wl_siteindicator, wl_time, wl_state] = [wl_siteindicator.reshape(reshape), wl_time.reshape(reshape), wl_state.reshape(reshape)];
+
+    if at == None:
+      raise Exception('We could visualize only "at" some particular dimension.');
+    else:
+      wl_idx = eval('wl_idx'+at);
+      [wl_siteindicator, wl_time, wl_state] = [eval('wl_siteindicator'+at), eval('wl_time'+at), eval('wl_state'+at)]
+      if wl_idx.ndim != 1:
+        raise Exception('We could visualize only "at" one particular dimension.');
 
   wl_coordinates = [];
-  for idx1 in range(wl.num_sites()):
+  for idx in range(wl_idx.size):
+    idx1 = int(wl_idx[idx]);
     for idx2 in range(1,wl.num_kinks(idx1)):
-      wl_coordinates.append([idx1,wl_time[idx1][idx2]]);
+      wl_coordinates.append([idx,wl_time[idx][idx2]]);
   [wl_coordinates_site, wl_coordinates_time] = numpy.array(wl_coordinates).transpose();
 
+  matplotlib.pyplot.figure(frameon=False);
+  matplotlib.pyplot.xticks(range(wl_idx.size), wl_idx);
+  matplotlib.pyplot.yticks([0,1]);
+  matplotlib.pyplot.xlim(-0.5, wl_idx.size-0.5);
+  matplotlib.pyplot.ylim(-0.05,1.05);
+
+  if scatter_plot:
+    matplotlib.pyplot.scatter(wl_coordinates_site, wl_coordinates_time);
+    matplotlib.pyplot.show();
+    return;
+
   wl_state_segments = [];
-  for idx1 in range(wl.num_sites()):
+  for idx in range(wl_idx.size):
+    idx1 = int(wl_idx[idx]);
     for idx2 in range(wl.num_kinks(idx1)-1):
-      wl_state_segments.append([[idx1,wl_time[idx1][idx2]], [idx1,wl_time[idx1][idx2+1]], wl_state[idx1][idx2]])
-    wl_state_segments.append([[idx1,wl_time[idx1][wl.num_kinks(idx1)-1]], [idx1,1.0], wl_state[idx1][wl.num_kinks(idx1)-1]]);
+      wl_state_segments.append([[idx,wl_time[idx][idx2]], [idx,wl_time[idx][idx2+1]], wl_state[idx][idx2]])
+    wl_state_segments.append([[idx,wl_time[idx][wl.num_kinks(idx1)-1]], [idx,1.0], wl_state[idx][wl.num_kinks(idx1)-1]]);
   
   wl_n_state_segments = [];
   for n in range(Nmax+1):
     wl_n_state_segments.append([wl_state_segment[0:2] for wl_state_segment in wl_state_segments if wl_state_segment[2] == n]);  
 
   wl_vertex_segments = [];
-  for idx1 in range(wl.num_sites()):
+  for idx in range(wl_idx.size):
+    idx1 = int(wl_idx[idx]);
     for idx2 in range(1,wl.num_kinks(idx1)):
-      if   (wl_siteindicator[idx1][idx2] - idx1 == 1):
-        wl_vertex_segments.append([[idx1,wl_time[idx1][idx2]],[idx1+0.5,wl_time[idx1][idx2]]]);
-      elif (wl_siteindicator[idx1][idx2] - idx1 == -1):
-        wl_vertex_segments.append([[idx1-0.5,wl_time[idx1][idx2]],[idx1,wl_time[idx1][idx2]]]);
-      elif (idx1 == 0):
-        wl_vertex_segments.append([[idx1-0.5,wl_time[idx1][idx2]],[idx1,wl_time[idx1][idx2]]]);
-      else:
-        wl_vertex_segments.append([[idx1-0.5,wl_time[idx1][idx2]],[idx1+0.5,wl_time[idx1][idx2]]]);
+      idx1_to = wl_siteindicator[idx][idx2];
+      
+      if not bool(numpy.sum(wl_idx[:] == idx1_to)):  ### vertex is pointing to other directions
+        wl_vertex_segments.append([[idx-0.2,wl_time[idx][idx2]],[idx+0.2,wl_time[idx][idx2]]]);
+      else:   
+        if idx1_to > idx1:
+          if idx1_to == wl_idx[idx+1]:
+            wl_vertex_segments.append([[idx,wl_time[idx][idx2]],[idx+0.5,wl_time[idx][idx2]]]);
+          else:
+            wl_vertex_segments.append([[idx-0.5,wl_time[idx][idx2]],[idx,wl_time[idx][idx2]]]);
+        elif idx1_to < idx1:
+          if idx1_to == wl_idx[idx-1]:
+            wl_vertex_segments.append([[idx-0.5,wl_time[idx][idx2]],[idx,wl_time[idx][idx2]]]);
+          else:
+            wl_vertex_segments.append([[idx,wl_time[idx][idx2]],[idx+0.5,wl_time[idx][idx2]]]);
 
-  if fig_outfile != None:
-    matplotlib.use('Agg');
-
-  matplotlib.pyplot.figure(frameon=False);
-  matplotlib.pyplot.xticks([]);
-  matplotlib.pyplot.yticks([0,1]);
-  
-
-'''
-def garbage():  
-  ### Plot worldlines
-  
-  if (len(sys.argv) == 2):
-    matplotlib.pyplot.xlim(-0.5,wl.num_sites()+0.5);
-  else:
-    xlim = eval(sys.argv[2]);
-    matplotlib.pyplot.xlim(xlim[0]-0.5,xlim[1]-0.5);
-  
-  matplotlib.pyplot.ylim(-0.05,1.05);
-  
-  # scatter layout
-  #matplotlib.pyplot.scatter(wl_coordinates_site, wl_coordinates_time);
-  
   for wl_n_state_segment in wl_n_state_segments[0]:
     [segment_site, segment_time] = numpy.array(wl_n_state_segment).transpose();  
-    matplotlib.pyplot.plot(segment_site, segment_time, '--k', linewidth=2);
+    matplotlib.pyplot.plot(segment_site, segment_time, '--k', linewidth=linewidth);
   
   for wl_n_state_segment in wl_n_state_segments[1]:
     [segment_site, segment_time] = numpy.array(wl_n_state_segment).transpose();
-    matplotlib.pyplot.plot(segment_site, segment_time, '-k', linewidth=2);
+    matplotlib.pyplot.plot(segment_site, segment_time, '-k', linewidth=linewidth);
   
-  wl_n_state_segment_line_spacing = 0.2;  
-  
-  for n in range(2,21):
+  for n in range(2,Nmax+1):
     for wl_n_state_segment in wl_n_state_segments[n]:
       [segment_site, segment_time] = numpy.array(wl_n_state_segment).transpose();
       for m in range(n):
-        matplotlib.pyplot.plot(segment_site - (m - (n-1)/2.)*wl_n_state_segment_line_spacing, segment_time, '-k', linewidth=2);
+        matplotlib.pyplot.plot(segment_site - (m - (n-1)/2.)*linespace, segment_time, '-k', linewidth=2);
   
   for wl_vertex_segment in wl_vertex_segments:
     [segment_site, segment_time] = numpy.array(wl_vertex_segment).transpose();
-    matplotlib.pyplot.plot(segment_site, segment_time, '-k', linewidth=2);
+    matplotlib.pyplot.plot(segment_site, segment_time, '-k', linewidth=linewidth);
   
   matplotlib.pyplot.show();
-  
-  ### OUTFILE
-  #outfile = infile[0:-3] + ".pdf";
-  #matplotlib.pyplot.savefig(outfile, transparent=True);
-'''
-
-
+  return;  
 
 def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, break_if=None, break_elseif=None, write_status=None, loc=None, loc0=None, batch_submit=False, batch_cmd_prefix=None, batch_run_directory=None, batch_run_script='run.script', batch_next_run_script=None, batch_run_now=False, batch_noRun=False):
   ### 
@@ -396,5 +397,16 @@ def startRunScript(batch_run_script, batch_cmd_prefix=None, loc=None):
   command += ['./' + batch_run_script];
   
   return pyalps.executeCommand(command);
+
+def tofPhase(time_of_flight, wavelength, mass):
+  amu  = 1.66053;
+  hbar = 1.05457;
+
+  coefficient = ((mass * amu) / (8. * hbar * time_of_flight)) * 1e-8;
+
+  if isinstance(wavelength,float) or isinstance(wavelength, int):
+    return (coefficient * wavelength*wavelength);
+  else:
+    return [(coefficient * component*component) for component in wavelength];
 
 
