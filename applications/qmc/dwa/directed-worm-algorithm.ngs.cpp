@@ -77,12 +77,14 @@ void
           << "\n\n";
       out << "Simulation\n"
           << "==========\n\n"
-          << "\t Total sweeps                      : " << _total_sweeps                  << "\n"
-          << "\t Sweep per measurement             : " << _sweep_per_measurement         << "\n"
-          << "\t Sweep counter                     : " << _sweep_counter                 << "\n"
-          << "\t Sweep failure counter             : " << _sweep_failure_counter         << "\n"
-          << "\t Propagation counter               : " << _propagation_counter           << "\n"
-          << "\t Propagation failure counter       : " << _propagation_failure_counter   << "\n"
+          << "\t Total sweeps                        : " << _total_sweeps                  << "\n"
+          << "\t Sweep per measurement               : " << _sweep_per_measurement         << "\n"
+          << "\t Sweep counter                       : " << _sweep_counter                 << "\n"
+          << "\t Sweep failure counter               : " << _sweep_failure_counter         << "\n"
+          << "\t Propagation counter                 : " << _propagation_counter           << "\n"
+          << "\t Propagation failure counter         : " << _propagation_failure_counter   << "\n"
+          << "\n"
+          << "\t Interested in time-of-flight images : " << finite_tof                     << "\n"
           << "\n\n";
       out << "Lattice\n"
           << "=======\n\n"
@@ -133,7 +135,7 @@ directed_worm_algorithm
     // regarding worldline
     , wl (num_sites())
     // regarding experiment
-    , finite_tof (is_periodic_ ? false : (0. != static_cast<double>(this->parameters["time_of_flight"] | 0.)))
+    , finite_tof (is_periodic_ ? false : (this->parameters.defined("tof_phase")))
     // regarding measurements
     , measure_only_simulation_speed_ (!(this->parameters["MEASURE"] | true))
     , measure_winding_number_        (is_periodic_ ? static_cast<bool>(this->parameters["MEASURE[Winding Number]"] | false) : false)
@@ -179,7 +181,6 @@ directed_worm_algorithm
 
     // print to screen
     print_simulation (std::cout);
-    //print_hamiltonian(std::cout);
 #ifdef DEBUGMODE
     print_hamiltonian(std::cout);
     print_lookups    (std::cout);
@@ -704,7 +705,23 @@ void
       // phase and phase lookup table
       if (finite_tof)
       {
-        std::vector<double> inverse_tof = std::vector<double>(dimension(), 1./static_cast<double>(parameters["time_of_flight"]));
+        std::vector<double> inverse_tof;
+        std::string tof_phase = boost::lexical_cast<std::string>(parameters["tof_phase"]);
+        tof_phase.erase(std::remove(tof_phase.begin(), tof_phase.end(), '['), tof_phase.end());
+        tof_phase.erase(std::remove(tof_phase.begin(), tof_phase.end(), ']'), tof_phase.end());
+        tof_phase.erase(std::remove(tof_phase.begin(), tof_phase.end(), ' '), tof_phase.end());
+
+        if (tof_phase.find_first_of(',') == std::string::npos)
+          inverse_tof = std::vector<double>(dimension(), boost::lexical_cast<double>(tof_phase));
+        else {
+          while(tof_phase.find_first_of(',') != std::string::npos) {
+            inverse_tof.push_back(boost::lexical_cast<double>(std::string(tof_phase, 0, tof_phase.find_first_of(','))));
+            tof_phase.erase(0, tof_phase.find_first_of(',')+1);
+          }
+          inverse_tof.push_back(boost::lexical_cast<double>(tof_phase));
+          inverse_tof.resize(dimension());
+        } 
+          
         phase_lookup.reserve(num_sites());
         for (unsigned int site=0; site<num_sites(); ++site) 
           phase_lookup.push_back(std::inner_product(inverse_tof.begin(), inverse_tof.end(), (alps::numeric::sq(position(site))).begin(), 0.));
@@ -720,13 +737,6 @@ void
       out << "Lookup Tables:\n"
           << "=============\n\n";
 
-      // position lookup table
-      out << "Position Lookup Table:\n"
-          << "----------------------\n\n";
-      for (unsigned int site=0; site<num_sites(); ++site)
-        out << "Site : " << site << " , Site position : " << position(site) << "\n";
-      out << "\n";
-
       // component lookup table
       out << "Component Momenta Lookup Table:\n"
           << "-------------------------------\n\n";
@@ -735,15 +745,15 @@ void
       out << "\n";
 
       // phase lookup table
-      out << "Phase Lookup Table:\n"
+      out << "Position / Phase Lookup Table:\n"
           << "----------------------\n\n";
-      for (unsigned int site=0; site<num_sites(); ++site)
-        out << "Site : " << site << " , Phase : " << phase(site) << "\n";
+      for (unsigned int site=0; site<num_sites(); ++site)  {
+        out << "Site : " << site << " , Site position : " << position(site) << " , Phase : " << phase(site) << "\n";
+        std::cin.get();
+      }
       out << "\n";
 
       out << "\n\n";
-
-      std::cin.get();
     }
 
 void
