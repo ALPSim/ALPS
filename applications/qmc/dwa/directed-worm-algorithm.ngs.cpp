@@ -197,22 +197,32 @@ void
   directed_worm_algorithm
     ::save(alps::hdf5::archive & ar) const
     {
+      std::cout << "\nSaving simulation ... starting ...\n\n";
+
       // Worldlines
-      ar << alps::make_pvp("/simulation/worldlines/num_sites", num_sites()); 
-      ar << alps::make_pvp("/simulation/worldlines", wl);
+      std::cout << "\t\ti. worldlines \t\t ... starting ... \n";
+      //ar << alps::make_pvp("/simulation/worldlines/num_sites", num_sites()); 
+      //ar << alps::make_pvp("/simulation/worldlines", wl);
+      wl.save(ar);
+      std::cout << "\t\t\t\t ... done.\n\n";
 
       // Parameters
+      std::cout << "\t\tii. parameters \t\t ... starting ... \n";
       ar << alps::make_pvp("/parameters", parameters);
+      std::cout << "\t\t\t\t ... done.\n\n";
 
       // Simulation results
+      std::cout << "\t\tiii. measurements \t\t ... starting ... \n";
       ar << alps::make_pvp("/simulation/results", measurements);
+      std::cout << "\t\t\t\t ... done.\n\n";
 
+      std::cout << "\t\t ... done.\n\n";
       // Other useful quantities
-      ar << alps::make_pvp("/simulation/positions", position_lookup);
-      if (measure_green_function_)
-        ar << alps::make_pvp("/simulation/green_coordinates", lattice().distance_labels());
-      if (measure_momentum_density_ || measure_tof_image_)
-        ar << alps::make_pvp("/simulation/momenta", component_momenta_lookup);
+      //ar << alps::make_pvp("/simulation/positions", position_lookup);
+      //if (measure_green_function_)
+      //  ar << alps::make_pvp("/simulation/green_coordinates", lattice().distance_labels());
+      //if (measure_momentum_density_ || measure_tof_image_)
+      //  ar << alps::make_pvp("/simulation/momenta", component_momenta_lookup);
     }
 
 void 
@@ -220,12 +230,20 @@ void
     ::load(alps::hdf5::archive & ar)  
     {  
       // Worldlines
-      ar >> alps::make_pvp("/simulation/worldlines", wl); 
-      std::cout << "\n\nWorldlines configuration loaded from input file.\n\n";
+      if (ar.is_group("/simulation/worldlines")) {
+        wl.load(ar); 
+        std::cout << "\nWorldlines configuration loaded from input file.\n";
+      }
+      else
+        std::cout << "\nNo worldlines configuration found.\n";
 
       // Measurements
-      ar >> alps::make_pvp("/simulation/results", measurements);
-      std::cout << "\n\nPrevious measurements loaded from input file.\n\n";
+      if (ar.is_group("/simulation/results")) {
+        ar >> alps::make_pvp("/simulation/results", measurements);
+        std::cout << "\nPrevious measurements loaded from input file.\n";
+      }
+      else
+        std::cout << "\nNo measurements found.\n";
     }
 
 void
@@ -865,67 +883,6 @@ void
           std::fill(momentum_density_tof.begin(),momentum_density_tof.end(),0.);
       }
     }
-
-std::vector<double> 
-  directed_worm_algorithm
-    ::onsite_hamiltonian( unsigned int this_site_type)
-    {
-      alps::Parameters this_parms;
-      if(inhomogeneous_sites()) {
-        alps::throw_if_xyz_defined(this_copy_of_params_is_reserved_for_the_old_scheduler_library_which_is_to_be_depreciated,this_site_type);      // check whether x, y, or z is set
-        this_parms << coordinate_as_parameter(this_site_type); // set x, y and z
-      }
-
-      std::cout << "\nthis_site_type = " << this_site_type << "\n";
-      std::cout << "\nmodel().site_term(this_site_type):\n" << model().site_term(this_site_type) << "\n";
-      std::cout << "\nmodel().basis().site_basis(this_site_type):\n" << model().basis().site_basis(this_site_type) << "\n";
-      std::cin.get();
-
-
-
-      std::vector<alps::SiteTermDescriptor> all_site_terms = model().site_terms();
-
-      std::map<std::string, alps::SiteTermDescriptor> this_site_terms;
-      for (std::vector<alps::SiteTermDescriptor>::iterator it=all_site_terms.begin(); it!=all_site_terms.end(); ++it)
-        if (it->match_type(site_site_type[this_site_type]))
-//        if (it->match_type(this_site_type))
-          this_site_terms.insert(std::make_pair(it->name(), *it));
-
-//      std::cout << "\nthis_site_type = " << this_site_type << "\n";
-
-      std::vector<double> this_onsite_hamiltonian;
-      for (std::map<std::string, alps::SiteTermDescriptor>::iterator it=this_site_terms.begin(); it!=this_site_terms.end(); ++it)
-      {
-//        std::cout << it->second << "\n";
-//        std::cin.get();
-  
-
-
-
-        alps::Parameters this_parms;
-        if(inhomogeneous_sites()) {
-          alps::throw_if_xyz_defined(this_copy_of_params_is_reserved_for_the_old_scheduler_library_which_is_to_be_depreciated,this_site_type);      // check whether x, y, or z is set
-          this_parms << coordinate_as_parameter(this_site_type); // set x, y and z
-        }
-        boost::multi_array<double,2> this_onsite_matrix =
-          alps::get_matrix( double(), it->second
-                          , model().basis().site_basis(this_site_type), this_parms);
-        std::vector<double> this_onsite_matrix_diagonal;
-        for (unsigned short i=0; i < this_onsite_matrix.shape()[0]; ++i)
-          this_onsite_matrix_diagonal.push_back(this_onsite_matrix[i][i]);
-        using boost::numeric::operators::operator+;
-        if (this_onsite_hamiltonian.empty())
-          this_onsite_hamiltonian = this_onsite_matrix_diagonal;
-        else
-          this_onsite_hamiltonian = this_onsite_hamiltonian + this_onsite_matrix_diagonal;
-      }
- 
-     using alps::numeric::operator<<;
-     std::cout << this_onsite_hamiltonian << "\n"; 
-
-
-     return this_onsite_hamiltonian;
-    }   
 
 inline boost::multi_array<double,4>
   directed_worm_algorithm
@@ -1648,11 +1605,8 @@ int main(int argc, char** argv)
   alps::hdf5::archive simulation_input = alps::hdf5::archive(options.input_file);
   directed_worm_algorithm simulation(simulation_input);
 
-  // try loading worldlines and measurement from the input file
-  try {
-    simulation.load(simulation_input);
-  }
-  catch(...) {}
+  // try loading whatever is there in the input file
+  simulation.load(simulation_input);
  
   // run the simulation
   simulation.run(alps::stop_callback(options.time_limit));

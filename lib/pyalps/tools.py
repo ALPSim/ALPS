@@ -319,7 +319,10 @@ def writeInputH5Files(filename_,params_list):
   """
   input_files_ = [];
   for index in range(len(params_list)):
-    this_filename_ = filename_ + '.task' + str(index+1) + '.in.h5';
+    if filename_.find('.in.h5') != -1:
+      this_filename_ = filename_; 
+    else:
+      this_filename_ = filename_ + '.task' + str(index+1) + '.in.h5';
     input_files_.append(this_filename_);
     oar = pyalps.ngs.h5ar(this_filename_,'w');
     for key in params_list[index].keys():

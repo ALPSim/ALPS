@@ -149,6 +149,9 @@ public:
 
   std::string representation() const  { std::ostringstream oss; oss << *this; return oss.str(); }
 
+  void save_old1(alps::hdf5::archive & ar) const;
+  void load_old1(alps::hdf5::archive & ar);
+
   void save(alps::hdf5::archive & ar) const;
   void load(alps::hdf5::archive & ar);
 
@@ -254,21 +257,82 @@ std::ostream & operator<<(std::ostream & out, worldlines const & obj_)
     return out;
   }
 
-void worldlines::save(alps::hdf5::archive & ar) const
+void worldlines::save_old1(alps::hdf5::archive & ar) const
 {
-  ar << alps::make_pvp("/worldlines/num_sites"  , num_sites())
-     << alps::make_pvp("/worldlines/worldlines" , _worldlines);
+  ar << alps::make_pvp("/simulation/worldlines/num_sites"  , num_sites())
+     << alps::make_pvp("/simulation/worldlines/worldlines" , _worldlines);
 }
 
-void worldlines::load(alps::hdf5::archive & ar)
+void worldlines::load_old1(alps::hdf5::archive & ar)
 {
   unsigned int _archive_num_sites;
-  ar >> alps::make_pvp("/worldlines/num_sites"  , _archive_num_sites); 
+  ar >> alps::make_pvp("/simulation/worldlines/num_sites"  , _archive_num_sites); 
 
   if (num_sites() != _archive_num_sites)
     boost::throw_exception(std::runtime_error("Error in loading worldline object. Reason: wrong data structure."));
 
-  ar >> alps::make_pvp("/worldlines/worldlines" , _worldlines);
+  ar >> alps::make_pvp("/simulation/worldlines/worldlines" , _worldlines);
+}
+
+void worldlines::save(alps::hdf5::archive & ar) const
+{
+  // number of sites
+  ar << alps::make_pvp("/simulation/worldlines/num_sites", num_sites());
+
+  // number of kinks
+  std::vector<unsigned int> _local_num_kinks;
+  _local_num_kinks.reserve(num_sites());
+  for (unsigned int i=0; i<num_sites(); ++i) 
+    _local_num_kinks.push_back(num_kinks(i));
+  unsigned int _num_kinks = std::accumulate(_local_num_kinks.begin(), _local_num_kinks.end(), 0);
+
+  ar << alps::make_pvp("/simulation/worldlines/num_kinks", _num_kinks);
+  ar << alps::make_pvp("/simulation/worldlines/local_num_kinks", _local_num_kinks);
+
+  // siteindicator, time, state
+  std::vector<unsigned int>    _siteindicator;
+  std::vector<double>          _time;
+  std::vector<unsigned short>  _state;
+
+  _siteindicator.reserve(_num_kinks);
+  _time.reserve(_num_kinks);
+  _state.reserve(_num_kinks);
+  for (unsigned int i=0; i<num_sites(); ++i)
+  for (unsigned int j=0; j<num_kinks(i); ++j) 
+  {
+    _siteindicator.push_back(_worldlines[i][j].siteindicator());
+    _time.push_back(_worldlines[i][j].time());
+    _state.push_back(_worldlines[i][j].state());
+  }
+  ar << alps::make_pvp("/simulation/worldlines/siteindicator", _siteindicator);
+  ar << alps::make_pvp("/simulation/worldlines/time", _time);
+  ar << alps::make_pvp("/simulation/worldlines/state", _state);
+}
+
+void worldlines::load(alps::hdf5::archive & ar)
+{
+  _worldlines.clear();
+
+  unsigned int _archive_num_sites;
+  ar >> alps::make_pvp("/simulation/worldlines/num_sites" , _archive_num_sites);
+
+  _worldlines.resize(_archive_num_sites);
+
+  std::vector<unsigned int> _local_num_kinks;
+  ar >> alps::make_pvp("/simulation/worldlines/local_num_kinks" , _local_num_kinks);
+
+  std::vector<unsigned int>    _siteindicator;
+  std::vector<double>          _time;
+  std::vector<unsigned short>  _state;
+  ar >> alps::make_pvp("/simulation/worldlines/siteindicator", _siteindicator);
+  ar >> alps::make_pvp("/simulation/worldlines/time", _time);
+  ar >> alps::make_pvp("/simulation/worldlines/state", _state);
+
+  for (unsigned int i=0, idx=0; i<num_sites(); ++i) {
+    _worldlines[i].reserve(2*_local_num_kinks[i]);
+    for (unsigned int j=0; j<_local_num_kinks[i]; ++j, ++idx) 
+      _worldlines[i].push_back(kink(_siteindicator[idx],_time[idx],_state[idx]));
+  }
 }
 
 void worldlines::save(std::string const & filename) const
@@ -280,7 +344,7 @@ void worldlines::save(std::string const & filename) const
 void worldlines::load(std::string const & filename) 
 {
   alps::hdf5::archive ar(filename.c_str());
-  ar >> alps::make_pvp("/worldlines/worldlines" , _worldlines);
+  load(ar);
 }
 
 // ==================================================

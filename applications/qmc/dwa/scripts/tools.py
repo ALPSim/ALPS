@@ -138,6 +138,12 @@ def status(filename, includeLog=False):
     else:
       return ar['/status'] 
 
+def switchParameter(h5_infile, key, value):
+  ### This is not encouraged, only do this when you know what you are doing.
+  params = pyalps.getParameters(h5_infile);
+  params[0].update({key:value});
+  pyalps.writeInputH5Files(h5_infile,params);
+
 def extract_worldlines(infile, outfile=None):
   wl = worldlines()
   wl.load(infile);
