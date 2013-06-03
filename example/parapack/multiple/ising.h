@@ -116,17 +116,17 @@ public:
     }
 
     // measurements
-    double energy = 0;
+    energy_ = 0;
     double mag = 0;
     for (int i = 0; i < loclen_; ++i) {
-      energy -= coupling_ * (2 * (spins_[i] ^ spins_[i+1]) - 1);
+      energy_ -= coupling_ * (2 * (spins_[i] ^ spins_[i+1]) - 1);
       mag += (2 * spins_[i] - 1);
     }
     if (comm_.rank() == 0) {
-      reduce(comm_, energy, energy, std::plus<double>(), 0);
+      reduce(comm_, energy_, energy_, std::plus<double>(), 0);
       reduce(comm_, mag, mag, std::plus<double>(), 0);
     } else {
-      reduce(comm_, energy, std::plus<double>(), 0);
+      reduce(comm_, energy_, std::plus<double>(), 0);
       reduce(comm_, mag, std::plus<double>(), 0);
     }
 
@@ -134,16 +134,22 @@ public:
       add_constant(obs["Temperature"], 1/beta_);
       add_constant(obs["Inverse Temperature"], beta_);
       add_constant(obs["Number of Sites"], (double)length_);
-      obs["Energy"] << energy;
-      obs["Energy^2"] << energy * energy;
+      obs["Energy"] << energy_;
+      obs["Energy^2"] << energy_ * energy_;
       obs["Magnetization"] << mag;
       obs["Magnetization^2"] << mag * mag;
       obs["Magnetization^4"] << mag * mag * mag * mag;
     }
   }
 
-  void save(alps::ODump& dp) const { dp << mcs_ << spins_; }
-  void load(alps::IDump& dp) { dp >> mcs_ >> spins_; }
+  // for exchange Monte Carlo
+  typedef double weight_parameter_type;
+  void set_beta(double beta) { beta_ = beta; }
+  weight_parameter_type weight_parameter() const { return energy_; }
+  static double log_weight(weight_parameter_type gw, double beta) { return - beta * gw; }
+
+  void save(alps::ODump& dp) const { dp << mcs_ << spins_ << energy_; }
+  void load(alps::IDump& dp) { dp >> mcs_ >> spins_ >> energy_; }
 
 protected:
   void copy2right() {
@@ -176,6 +182,7 @@ private:
   // configuration (need checkpointing)
   alps::mc_steps mcs_;
   tabbed_vector<int> spins_;
+  double energy_;
 };
 
 #endif // PARAPACK_EXAMPLE_MULTIPLE_ISING_H

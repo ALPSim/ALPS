@@ -26,7 +26,9 @@
 *****************************************************************************/
 
 #include "../single/ising.h"
+#include "../multiple/ising.h"
 #include <alps/parapack/exchange.h>
+#include <alps/parapack/exchange_multi.h>
 
 PARAPACK_SET_VERSION("ALPS/parapack example program: exchange Monte Carlo");
 PARAPACK_REGISTER_ALGORITHM(single_ising_worker, "ising");
@@ -36,5 +38,7 @@ PARAPACK_REGISTER_ALGORITHM(alps::parapack::single_exchange_worker<single_ising_
 #ifdef ALPS_HAVE_MPI
 PARAPACK_REGISTER_PARALLEL_WORKER(alps::parapack::parallel_exchange_worker<single_ising_worker>,
                                   "ising exchange");
+PARAPACK_REGISTER_PARALLEL_WORKER(alps::parapack::multiple_parallel_exchange_worker<parallel_ising_worker>,
+                                  "multiple parallel ising exchange");
 #endif
 PARAPACK_REGISTER_EVALUATOR(ising_evaluator, "ising; exchange");
