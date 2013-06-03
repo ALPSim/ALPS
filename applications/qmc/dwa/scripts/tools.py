@@ -243,7 +243,7 @@ def show_worldlines(wl=None, reshape=None, at=None, scatter_plot=False, Nmax=20,
   matplotlib.pyplot.show();
   return;  
 
-def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, break_if=None, break_elseif=None, write_status=None, loc=None, loc0=None, batch_submit=False, batch_cmd_prefix=None, batch_run_directory=None, batch_run_script='run.script', batch_next_run_script=None, batch_run_now=False, batch_noRun=False):
+def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, end_script=None, n=None, break_if=None, break_elseif=None, write_status=None, loc=None, loc0=None, batch_submit=False, batch_cmd_prefix=None, batch_run_directory=None, batch_run_script='run.script', batch_next_run_script=None, batch_run_now=False, batch_noRun=False):
   ### 
   ### Either recursively run cmd for n times, or until the break_if condition holds true.
   ###
@@ -253,8 +253,9 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
   ###    3. n                : number of recursions 
   ###    4. break_if         : condition to break recursion loop (quoted as a python str, interpreted as python command)
   ###    5. break_elseif     : further condition to break recursion loop (""")     
-  ###    5. follow_up_script : script to be run after command (""")
-  ###    6. loc              : Python dict of local variables 
+  ###    6. follow_up_script : script to be run after command (""")
+  ###    7. end_script       : script to be run just before recursive loop ends 
+  ###    8. loc              : Python dict of local variables 
   ###
 
   # set absolute path for current path
@@ -267,6 +268,8 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
     cmd = format_string(cmd, loc);
     if follow_up_script != None:
       follow_up_script = format_string(follow_up_script, loc);
+    if end_script != None:
+      end_script = format_string(end_script, loc);
     if break_if != None:
       break_if = format_string(break_if, loc);
     if break_elseif != None:
@@ -276,7 +279,7 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
     batch_run_script = format_string(batch_run_script, loc);
     if batch_next_run_script != None:
       batch_next_run_script = format_string(batch_next_run_script, loc);
-    return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, n=n, break_if=break_if, break_elseif=break_elseif, write_status=write_status, loc0=loc, batch_submit=batch_submit, batch_cmd_prefix=batch_cmd_prefix, batch_run_directory=batch_run_directory, batch_run_script=batch_run_script, batch_next_run_script=batch_next_run_script, batch_run_now=batch_run_now, batch_noRun=batch_noRun);
+    return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, end_script=end_script, n=n, break_if=break_if, break_elseif=break_elseif, write_status=write_status, loc0=loc, batch_submit=batch_submit, batch_cmd_prefix=batch_cmd_prefix, batch_run_directory=batch_run_directory, batch_run_script=batch_run_script, batch_next_run_script=batch_next_run_script, batch_run_now=batch_run_now, batch_noRun=batch_noRun);
 
   if loc0 != None:
     locals().update(loc0);
@@ -294,6 +297,8 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
         batch_cmd += ', cmd_lang = ' + str_quote(cmd_lang);
       if follow_up_script != None:
         batch_cmd += ', \n\tfollow_up_script = ' + str_quote(follow_up_script);
+      if end_script != None:
+        batch_cmd += ', \n\tend_script = ' + str_quote(end_script);
       if n != None:
         batch_cmd += ', \n\tn = ' + str(n);
       if break_if != None:
@@ -342,6 +347,7 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
   if n != None:             # if n exists
     if isinstance(n, int):  # if n is a python integer
       if n <= 1:
+        eval(end_script);
         if batch_next_run_script != None:
           command = [];
           if batch_cmd_prefix != None:
@@ -351,10 +357,12 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
         else:
           return;
       else:
-        return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, n=n-1, write_status=write_status, loc0=loc0, batch_submit=batch_submit, batch_cmd_prefix=batch_cmd_prefix, batch_run_directory=batch_run_directory, batch_run_script=batch_run_script, batch_next_run_script=batch_next_run_script, batch_run_now=False); 
+        return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, end_script=end_script, n=n-1, write_status=write_status, loc0=loc0, batch_submit=batch_submit, batch_cmd_prefix=batch_cmd_prefix, batch_run_directory=batch_run_directory, batch_run_script=batch_run_script, batch_next_run_script=batch_next_run_script, batch_run_now=False); 
 
   elif break_if != None:    # otherwise, if break_if exists
     if eval(break_if):
+      if end_script != None:
+        eval(end_script);
       if batch_next_run_script != None:
         command = [];
         if batch_cmd_prefix != None:
@@ -366,6 +374,8 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
     else:
       if break_elseif != None:   # otherotherwise, if break_elseif exists
         if eval(break_elseif):
+          if end_script != None:
+            eval(end_script);
           if batch_next_run_script != None:
             command = [];
             if batch_cmd_prefix != None:
@@ -375,11 +385,13 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
           else:
             return;
         else:
-          return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, break_if=break_if, break_elseif=break_elseif, write_status=write_status, loc0=loc0, batch_submit=batch_submit, batch_cmd_prefix=batch_cmd_prefix, batch_run_directory=batch_run_directory, batch_run_script=batch_run_script, batch_next_run_script=batch_next_run_script, batch_run_now=False);
+          return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, end_script=end_script, break_if=break_if, break_elseif=break_elseif, write_status=write_status, loc0=loc0, batch_submit=batch_submit, batch_cmd_prefix=batch_cmd_prefix, batch_run_directory=batch_run_directory, batch_run_script=batch_run_script, batch_next_run_script=batch_next_run_script, batch_run_now=False);
       else:
-        return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, break_if=break_if, write_status=write_status, loc0=loc0, batch_submit=batch_submit, batch_cmd_prefix=batch_cmd_prefix, batch_run_script=batch_run_script, batch_run_directory=batch_run_directory, batch_next_run_script=batch_next_run_script, batch_run_now=False);
+        return recursiveRun(cmd, cmd_lang=cmd_lang, follow_up_script=follow_up_script, end_script=end_script, break_if=break_if, write_status=write_status, loc0=loc0, batch_submit=batch_submit, batch_cmd_prefix=batch_cmd_prefix, batch_run_script=batch_run_script, batch_run_directory=batch_run_directory, batch_next_run_script=batch_next_run_script, batch_run_now=False);
 
   else:                     # otherwise, recursiveRun only runs once
+    if end_script != None:
+      eval(end_script);
     if batch_next_run_script != None:
       command = [];
       if batch_cmd_prefix != None:
@@ -388,7 +400,6 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, n=None, br
       return pyalps.executeCommand(command);
     else:
       return;
-
 
 def startRunScript(batch_run_script, batch_cmd_prefix=None, loc=None):
   # Format string 
@@ -414,5 +425,28 @@ def tofPhase(time_of_flight, wavelength, mass):
     return (coefficient * wavelength*wavelength);
   else:
     return [(coefficient * component*component) for component in wavelength];
+
+def summaryReport(h5_outfile):
+  ar = pyalps.hdf5.h5ar(h5_outfile);
+  L = ar['/simulation/worldlines/num_sites'];
+
+  print('N    : ' + str(ar['/simulation/results/Total Particle Number/mean/value']) + ' +/- ' + str(ar['/simulation/results/Total Particle Number/mean/error']) + ' ; count = ' + str(ar['/simulation/results/Total Particle Number/count']));
+  print('N/L  : ' + str(ar['/simulation/results/Total Particle Number/mean/value']/L));
+  print('\n');
+  print('g0   : ' + str(ar['/simulation/results/Green Function:0/mean/value']) + ' +/- ' + str(ar['/simulation/results/Green Function:0/mean/error']) + ' ; count = ' + str(ar['/simulation/results/Green Function:0/count']));
+  print('\n');
+  print('E    : ' + str(ar['/simulation/results/Energy/mean/value']) + ' +/- ' + str(ar['/simulation/results/Energy/mean/error']) + ' ; count = ' + str(ar['/simulation/results/Energy/count']));
+  print('E/L  : ' + str(ar['/simulation/results/Energy/mean/value']/L));
+  print('Ev   : ' + str(ar['/simulation/results/Energy:Vertex/mean/value']) + ' +/- ' + str(ar['/simulation/results/Energy:Vertex/mean/error']) + ' ; count = ' + str(ar['/simulation/results/Energy:Vertex/count']));
+  print('Ev/L : ' + str(ar['/simulation/results/Energy:Vertex/mean/value']/L));
+  print('Eo   : ' + str(ar['/simulation/results/Energy:Onsite/mean/value']) + ' +/- ' + str(ar['/simulation/results/Energy:Onsite/mean/error']) + ' ; count = ' + str(ar['/simulation/results/Energy:Onsite/count']));
+  print('Eo/L : ' + str(ar['/simulation/results/Energy:Onsite/mean/value']/L));
+  print('\n');
+  print('g1   : ' + str(ar['/simulation/results/Green Function:1/mean/value']) + ' +/- ' + str(ar['/simulation/results/Green Function:1/mean/error']) + ' ; count = ' + str(ar['/simulation/results/Green Function:1/count']));
+  
+
+  
+#  return data;
+
 
 

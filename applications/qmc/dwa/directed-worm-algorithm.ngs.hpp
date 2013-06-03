@@ -80,10 +80,10 @@ private:
   // regarding simulation backbone (ESSENTIAL)
   void  update();
   void  measure() {}  // I don't measure every sweep, and I do a checkpoint rather then only measure.      
-  void  docheckpoint(bool const & measure_);
+  void  docheckpoint();
 
   // regarding simulation interprocess (ESSENTIAL)
-  bool   wormhead_propagates_till_collision_with_wormtail (unsigned short wormpair_state, std::pair<neighbor_iterator, neighbor_iterator> const & neighbors_, bool const & measure_);
+  bool   wormhead_propagates_till_collision_with_wormtail (unsigned short wormpair_state, std::pair<neighbor_iterator, neighbor_iterator> const & neighbors_);
   void   insert_jump_or_bounce        (double onsite_energy_relative_, std::pair<neighbor_iterator, neighbor_iterator> const & neighbors_);
   void   delete_relink_jump_or_bounce (std::pair<neighbor_iterator, neighbor_iterator> const & neighbors_);
 
@@ -123,10 +123,6 @@ private:
   std::vector<double> position(unsigned int site)                   const  { return position_lookup[site]; }
   double              position(unsigned int site, unsigned int dim) const  { return position_lookup[site][dim]; } 
 
-  std::vector<double> component_momenta()                  const  { return component_momenta_lookup; }
-  double              component_momentum(unsigned int idx) const  { return component_momenta_lookup[idx]; }
-  unsigned int        num_component_momenta()              const  { return num_component_momenta_; }
-
   // regarding experiment
   double phase(unsigned int site) const  { return finite_tof ? phase_lookup[site] : 0.; }  
 
@@ -150,7 +146,7 @@ private:
   count_type  _propagation_failure_counter;
 
   count_type  _total_sweeps;
-  count_type  _sweep_per_measurement;
+  count_type  _skip;
 
   std::pair<std::time_t, std::time_t>  _simulation_timer;  
 
@@ -166,13 +162,10 @@ private:
 
   // regarding lookups
   std::vector<std::vector<double> > position_lookup;
-  std::vector<double>               component_momenta_lookup;
   std::vector<double>               phase_lookup;
 
   // regarding lattice
   bool is_periodic_;
-  int  num_component_momenta_;
-
   std::vector<std::vector<double> > lattice_vector_;
 
   // regarding experiment
@@ -183,28 +176,30 @@ private:
   wormpair   worm;
 
   // regarding measurements
-  bool measure_only_simulation_speed_;
+  bool measure_;
+  bool measure_simulation_speed_;
+  bool measure_number2_;
+  bool measure_energy2_;
+  bool measure_density2_;
+  bool measure_energy_density2_;
   bool measure_winding_number_;
+  bool measure_local_num_kinks_;
   bool measure_local_density_;
   bool measure_local_density2_;
-  bool measure_local_energy_;
   bool measure_green_function_;
-  bool measure_momentum_density_;
-  bool measure_tof_image_;
 
+  std::vector<double>  _num_kinks_cache;
   std::vector<double>  _states_cache;
   std::vector<double>  _states2_cache;
 
   // regarding on-fly measurements
-  double  green_onsite;
-  double  green_neighbors;
-  double  zero_momentum_density;
-  double  zero_momentum_density_tof;
+  double  green0;
+  double  green1;
+  double  nk0;
+  double  nk0_tof;
 
   std::vector<double>  green;
   std::vector<double>  green_tof;
-  std::vector<double>  momentum_density;
-  std::vector<double>  momentum_density_tof;
 
   // regarding caches (for optimization purpose)
 #ifdef HEATBATH_ALGORITHM

@@ -77,8 +77,8 @@ void
           << "\n\n";
       out << "Simulation\n"
           << "==========\n\n"
-          << "\t Total sweeps                        : " << _total_sweeps                  << "\n"
-          << "\t Sweep per measurement               : " << _sweep_per_measurement         << "\n"
+          << "\t Sweeps                              : " << _total_sweeps                  << "\n"
+          << "\t Skip (Sweeps per measurement)       : " << _skip                          << "\n"
           << "\t Sweep counter                       : " << _sweep_counter                 << "\n"
           << "\t Sweep failure counter               : " << _sweep_failure_counter         << "\n"
           << "\t Propagation counter                 : " << _propagation_counter           << "\n"
@@ -107,14 +107,17 @@ void
           << "\n\n";
       out << "Measurements\n"
           << "============\n"
-          << "Measure                     : " << !measure_only_simulation_speed_ << "\n"
-          << "Measure Winding Number      : " << measure_winding_number_         << "\n"
-          << "Measure Local Energy        : " << measure_local_energy_           << "\n"
-          << "Measure Local Density       : " << measure_local_density_          << "\n" 
-          << "Measure Local Density^2     : " << measure_local_density2_         << "\n"
-          << "Measure Green's Function    : " << measure_green_function_         << "\n"
-          << "Measure Momentum Density    : " << measure_momentum_density_       << "\n"
-          << "Measure TOF Image           : " << measure_tof_image_              << "\n"
+          << "MEASURE                          : " << measure_                        << "\n"
+          << "MEASURE[Simulation Speed]        : " << measure_simulation_speed_       << "\n"
+          << "MEASURE[Total Particle Number^2] : " << measure_number2_                << "\n"
+          << "MEASURE[Energy^2]                : " << measure_energy2_                << "\n"
+          << "MEASURE[Density^2]               : " << measure_density2_               << "\n"
+          << "MEASURE[Energy Density^2]        : " << measure_energy_density2_        << "\n"
+          << "MEASURE[Winding Number]          : " << measure_winding_number_         << "\n"
+          << "MEASURE[Local Kink:Number]      : " << measure_local_num_kinks_        << "\n"
+          << "MEASURE[Local Density]           : " << measure_local_density_          << "\n" 
+          << "MEASURE[Local Density^2]         : " << measure_local_density2_         << "\n"
+          << "MEASURE[Green Function]          : " << measure_green_function_         << "\n"
           << "\n\n"; 
     }
 
@@ -128,23 +131,25 @@ directed_worm_algorithm
     , _propagation_counter         (0)
     , _propagation_failure_counter (0)
     , _total_sweeps                (this->parameters["TOTAL_SWEEPS"] | (this->parameters["SWEEPS"] | 10000000))
-    , _sweep_per_measurement       (this->parameters["SKIP"] | 1)
+    , _skip                        (this->parameters["SKIP"] | 1)
     // regarding lattice
     , is_periodic_ (std::find((this->lattice().boundary()).begin(), (this->lattice().boundary()).end(), "open") == (this->lattice().boundary()).end())
-    , num_component_momenta_ (1 + static_cast<int>(this->parameters["MOMENTUM_EXTENT"] | 10))
     // regarding worldline
     , wl (num_sites())
     // regarding experiment
     , finite_tof (is_periodic_ ? false : (this->parameters.defined("tof_phase")))
     // regarding measurements
-    , measure_only_simulation_speed_ (!(this->parameters["MEASURE"] | true))
-    , measure_winding_number_        (is_periodic_ ? static_cast<bool>(this->parameters["MEASURE[Winding Number]"] | false) : false)
+    , measure_                       (this->parameters["MEASURE"] | true)
+    , measure_simulation_speed_      (this->parameters["MEASURE[Simulation Speed"] | true)
+    , measure_number2_               (this->parameters["MEASURE[Total Particle Number^2]"] | false)
+    , measure_energy2_               (this->parameters["MEASURE[Energy^2]"] | false)
+    , measure_density2_              (inhomogeneous() ? false : static_cast<bool>(this->parameters["MEASURE[Density^2]"] | false))
+    , measure_energy_density2_       (inhomogeneous() ? false : static_cast<bool>(this->parameters["MEASURE[Energy Density^2]"] | false))
+    , measure_winding_number_        (!is_periodic_  ? false :  static_cast<bool>(this->parameters["MEASURE[Winding Number]"] | false))
+    , measure_local_num_kinks_       (this->parameters["MEASURE[Local Kink: Number]"] | false)
     , measure_local_density_         (this->parameters["MEASURE[Local Density]"] | false)
     , measure_local_density2_        (this->parameters["MEASURE[Local Density^2]"] | false)
-    , measure_local_energy_          (this->parameters["MEASURE[Local Energy]"] | false)
-    , measure_green_function_        (is_periodic_ ? static_cast<bool>(this->parameters["MEASURE[Green Function]"] | false) : false)
-    , measure_momentum_density_      (this->parameters["MEASURE[Momentum Density]"] | false)
-    , measure_tof_image_             (finite_tof ? static_cast<bool>(this->parameters["MEASURE[TOF Image]"] | false) : false)
+    , measure_green_function_        (this->parameters["MEASURE[Green Function]"] | false)
   {
     // lattice enhancement
     using alps::numeric::operator*;
@@ -188,7 +193,7 @@ directed_worm_algorithm
 #endif
 
     // start timer if needed...
-    if (measure_only_simulation_speed_)
+    if (measure_simulation_speed_)
       std::time(&_simulation_timer.first);
   }
 
@@ -216,13 +221,14 @@ void
       ar << alps::make_pvp("/simulation/results", measurements);
       std::cout << "\t\t\t\t ... done.\n\n";
 
-      std::cout << "\t\t ... done.\n\n";
       // Other useful quantities
+      std::cout << "\t\tiv. other useful quantities \t\t ... starting ... \n";
       //ar << alps::make_pvp("/simulation/positions", position_lookup);
       //if (measure_green_function_)
       //  ar << alps::make_pvp("/simulation/green_coordinates", lattice().distance_labels());
-      //if (measure_momentum_density_ || measure_tof_image_)
-      //  ar << alps::make_pvp("/simulation/momenta", component_momenta_lookup);
+      std::cout << "\t\t\t\t ... done.\n\n";
+
+      std::cout << "\t\t ... done.\n\n";
     }
 
 void 
@@ -715,11 +721,6 @@ void
         position_lookup.push_back(_position);
       }
 
-      // component momenta lookup table 
-      component_momenta_lookup.reserve(num_component_momenta_);
-      for (unsigned int idx=0; idx < num_component_momenta(); ++idx)
-        component_momenta_lookup.push_back(idx*M_PI/lattice().extent()[0]/(num_component_momenta()-1));
-
       // phase and phase lookup table
       if (finite_tof)
       {
@@ -755,13 +756,6 @@ void
       out << "Lookup Tables:\n"
           << "=============\n\n";
 
-      // component lookup table
-      out << "Component Momenta Lookup Table:\n"
-          << "-------------------------------\n\n";
-      for (unsigned int idx=0; idx<num_component_momenta(); ++idx)
-        out << "Index : " << idx << " , Component Momentum : " << component_momentum(idx) << "\n";
-      out << "\n";
-
       // phase lookup table
       out << "Position / Phase Lookup Table:\n"
           << "----------------------\n\n";
@@ -791,23 +785,38 @@ void
       // regarding measurements
       measurements 
         << alps::ngs::RealObservable   ("Total Particle Number")
-        << alps::ngs::RealObservable   ("Total Particle Number^2")
-        << alps::ngs::RealObservable   ("Density")
-        << alps::ngs::RealObservable   ("Density^2")
-        << alps::ngs::RealObservable   ("Hopping Energy")
-        << alps::ngs::RealObservable   ("Onsite Energy")
         << alps::ngs::RealObservable   ("Energy")
-        << alps::ngs::RealObservable   ("Energy^2")
-        << alps::ngs::RealObservable   ("Hopping Energy Density")
-        << alps::ngs::RealObservable   ("Onsite Energy Density")
-        << alps::ngs::RealObservable   ("Energy Density")
-        << alps::ngs::RealObservable   ("Energy Density^2")
-        << alps::ngs::RealObservable   ("Total Vertex Number")
-        << alps::ngs::RealObservable   ("Total Vertex Number^2")
+        << alps::ngs::RealObservable   ("Energy:Vertex")
+        << alps::ngs::RealObservable   ("Energy:Onsite")
       ;
+
+      if (!inhomogeneous()) 
+      {
+        measurements 
+          << alps::ngs::RealObservable ("Density")
+          << alps::ngs::RealObservable ("Energy Density")
+          << alps::ngs::RealObservable ("Energy Density:Vertex")
+          << alps::ngs::RealObservable ("Energy Density:Onsite")
+        ;
+      }
+
+      if (measure_number2_)
+        measurements << alps::ngs::RealObservable ("Total Particle Number^2");
+      if (measure_energy2_)
+        measurements << alps::ngs::RealObservable ("Energy^2");
+      if (measure_density2_)
+        measurements << alps::ngs::RealObservable ("Density^2");
+      if (measure_energy_density2_)
+        measurements << alps::ngs::RealObservable ("Energy Density^2");
 
       if (measure_winding_number_)
         measurements << alps::ngs::RealVectorObservable ("Winding Number^2");
+
+      if (measure_local_num_kinks_) 
+      {
+        _num_kinks_cache.resize(wl.num_sites(),0.);
+        measurements << alps::ngs::SimpleRealVectorObservable ("Local Kink:Number");
+      }
 
       if (measure_local_density_)
       {
@@ -825,38 +834,27 @@ void
       reinitialize_on_fly_measurements();
 
       measurements
-        << alps::ngs::RealObservable  ("Green's Function Onsite")
-        << alps::ngs::RealObservable  ("Green's Function Neighbors")
-        << alps::ngs::RealObservable  ("Zero Momentum Density")
+        << alps::ngs::RealObservable  ("Green Function:0")
+        << alps::ngs::RealObservable  ("Green Function:1")
+        << alps::ngs::RealObservable  ("Momentum Distribution:0")
         ;
 
       if (measure_green_function_)
       {
         green.resize(lattice().num_distances(),0.);
-        measurements << alps::ngs::SimpleRealVectorObservable ("Green's Function");
-      }
-
-      if (measure_momentum_density_)
-      {
-        momentum_density.resize(num_component_momenta(),0.);
-        measurements << alps::ngs::SimpleRealVectorObservable ("Momentum Density");
+        measurements << alps::ngs::SimpleRealVectorObservable ("Green Function");
       }
 
       if (finite_tof)
       {
-        measurements << alps::ngs::RealObservable  ("Zero TOF Image");
+        measurements << alps::ngs::RealObservable  ("Momentum Distribution:TOF:0");
 
         if (measure_green_function_)
         {
           green_tof.resize(lattice().num_distances(),0.);
-          measurements << alps::ngs::SimpleRealVectorObservable ("TOF Green's Function");
+          measurements << alps::ngs::SimpleRealVectorObservable ("Green Function:TOF");
         }
 
-        if (measure_tof_image_)
-        {
-          momentum_density_tof.resize(num_component_momenta(),0.);
-          measurements << alps::ngs::SimpleRealVectorObservable ("TOF Image");
-        }
       }
     }
 
@@ -864,23 +862,17 @@ void
   directed_worm_algorithm
     ::reinitialize_on_fly_measurements()
     {
-      green_onsite          = 0.;
-      green_neighbors       = 0.;
-      zero_momentum_density = 0.;
-
+      green0 = 0.;
+      green1 = 0.;
+      nk0    = 0.;
       if (measure_green_function_)
         std::fill(green.begin(),green.end(),0.);
-      if (measure_momentum_density_)
-        std::fill(momentum_density.begin(),momentum_density.end(),0.);
 
       if (finite_tof)
       {
-        zero_momentum_density_tof = 0.;
-
+        nk0_tof = 0.;
         if (measure_green_function_)
           std::fill(green_tof.begin(),green_tof.end(),0.);
-        if (measure_tof_image_)
-          std::fill(momentum_density_tof.begin(),momentum_density_tof.end(),0.);
       }
     }
 
@@ -1011,8 +1003,7 @@ void
         return;  
       } 
 
-      const bool checkpoint_sweep = (_sweep_counter % _sweep_per_measurement == 0);
-      const bool _measure = (!measure_only_simulation_speed_);
+      const bool checkpoint_sweep = (_sweep_counter % _skip == 0);
 
       // Step 1B: Check state to see if we can insert wormpair 
       const unsigned short _state = wl.state_before(_location);
@@ -1022,26 +1013,18 @@ void
          )
       {
         ++_sweep_failure_counter;      // worm insertion is unsuccessful         
-        if (_measure && _state != 0) 
+        if (measure_ && _state != 0) 
         {
-          green_onsite          += _state;
-          zero_momentum_density += _state;
-
+          green0 += _state;
+          nk0    += _state;
           if (measure_green_function_)
             green[0] += _state;
-          if (measure_momentum_density_)
-            for (unsigned int idx=0; idx<num_component_momenta();++idx)
-              momentum_density[idx] += _state;
 
           if (finite_tof)
           {
-            zero_momentum_density_tof += _state;
-
+            nk0_tof += _state;
             if (measure_green_function_)
               green_tof[0] += _state;
-            if (measure_tof_image_)
-              for (unsigned int idx=0; idx<num_component_momenta();++idx)
-                momentum_density_tof[idx] += _state;
           }
         }
 #ifdef DEBUGMODE
@@ -1058,7 +1041,7 @@ void
         }
 #endif
         if (checkpoint_sweep) 
-          docheckpoint(_measure);
+          docheckpoint();
         return;
       }
 
@@ -1081,29 +1064,21 @@ void
 #endif
 
       // Step 2: Wormhead propagates till collision with wormtail
-      while(wormhead_propagates_till_collision_with_wormtail(worm.wormpair_state(), neighbors(worm.wormtail_site()), _measure));      
+      while(wormhead_propagates_till_collision_with_wormtail(worm.wormpair_state(), neighbors(worm.wormtail_site())));      
       const unsigned short termination_state = (worm.forward() ? worm.state_before() : worm.state());
 
-      if (_measure && termination_state != 0)
+      if (measure_ && termination_state != 0)
       {
-        green_onsite          += termination_state;
-        zero_momentum_density += termination_state;
-
+        green0 += termination_state;
+        nk0    += termination_state;
         if (measure_green_function_)
           green[0] += termination_state;
-        if (measure_momentum_density_)
-          for (unsigned int idx=0; idx<num_component_momenta();++idx)
-            momentum_density[idx] += termination_state;
             
         if (finite_tof)
         {
-          zero_momentum_density_tof += termination_state;
-
+          nk0_tof += termination_state;
           if (measure_green_function_)
             green_tof[0] += termination_state;
-          if (measure_tof_image_)
-            for (unsigned int idx=0; idx<num_component_momenta();++idx)
-              momentum_density_tof[idx] += termination_state;
         }
       }
 
@@ -1123,13 +1098,13 @@ void
 #endif
 
       if (checkpoint_sweep) 
-        docheckpoint(_measure);
+        docheckpoint();
       return;
     }
 
 void
   directed_worm_algorithm
-    ::docheckpoint(bool const & measure_)
+    ::docheckpoint()
     {
       std::cout << "Checkpoint Sweep " << _sweep_counter
                 << " ... Probability : " << probability_worm_insertion() << " / " << probability_bounce() 
@@ -1143,10 +1118,10 @@ void
       }
 
       // simulation timer
-      if (measure_only_simulation_speed_)
+      if (measure_simulation_speed_)
       {
         std::time(&_simulation_timer.second);
-        std::cout << " ... speed = " << std::difftime(_simulation_timer.second, _simulation_timer.first)/_sweep_per_measurement; 
+        std::cout << " ... speed = " << std::difftime(_simulation_timer.second, _simulation_timer.first); 
         std::time(&_simulation_timer.first);
       }      
 
@@ -1161,59 +1136,62 @@ void
       using boost::numeric::operators::operator*;
       using boost::numeric::operators::operator/;
 
-      int total_density  = 0;
-      int total_density2 = 0;
-      double total_onsite_energy  = 0.;
-      double total_hopping_energy = 0.;
-      double total_energy  = 0.;
-      double total_energy2 = 0.;
-      double total_vertex_number  = 0.;
-      double total_vertex_number2 = 0.;
+      int    total_particle_number = 0;
+      double total_energy_vertex   = 0.;
+      double total_energy_onsite   = 0.;
+      int    total_density2        = 0;
+      double total_energy2         = 0.;
 
       for (unsigned int site=0; site < num_sites(); ++site)
       {
-        total_density  += wl.site_state(site);
-        total_density2 += wl.site_state(site) * wl.site_state(site);
-
+        total_particle_number += wl.site_state(site);
+        const double this_energy_vertex = -static_cast<double>(wl.num_kinks(site)-1)/2;
+        const double this_energy_onsite = onsite_energy(site, wl.site_state(site));
+        total_energy_vertex   += this_energy_vertex;
+        total_energy_onsite   += this_energy_onsite;
+        if (measure_density2_)
+          total_density2 += wl.site_state(site) * wl.site_state(site);
+        if (measure_energy_density2_)
+          total_energy2  += (total_energy_vertex+total_energy_onsite)*(total_energy_vertex+total_energy_onsite);
+        if (measure_local_num_kinks_)
+          _num_kinks_cache[site] = wl.num_kinks(site);
         if (measure_local_density_)
-          _states_cache[site] = wl.site_state(site);
+          _states_cache[site]    = wl.site_state(site);
         if (measure_local_density2_)
-          _states2_cache[site] = wl.site_state(site) * wl.site_state(site);
-
-        const double this_onsite_energy  = onsite_energy(site, wl.site_state(site));
-        const double this_hopping_energy = -static_cast<double>(wl.num_kinks(site)-1)/2;
-        const double this_energy = this_onsite_energy+this_hopping_energy;
-        total_onsite_energy  += this_onsite_energy;
-        total_hopping_energy += this_hopping_energy;
-        total_energy  += this_energy;
-        total_energy2 += this_energy*this_energy;
-        total_vertex_number  -= this_hopping_energy;  // due to beta=1 (intrinsically normalized...)
-        total_vertex_number2 += this_hopping_energy * this_hopping_energy; 
+          _states2_cache[site]   = wl.site_state(site) * wl.site_state(site);
       }
-      total_onsite_energy  /= beta;
-      total_hopping_energy /= beta;
-      total_energy  /= beta;
-      total_energy2 /= (beta*beta); 
+      total_energy_vertex /= beta;
+      total_energy_onsite /= beta;
+      if (measure_energy_density2_)
+        total_energy2 /= (beta*beta); 
 
       std::cout << " ... Measuring " 
-                << " ... N = " << total_density 
-                << " ... E = " << total_energy
+                << " ... N = " << total_particle_number 
                 ;
+     
+      double total_energy = total_energy_vertex + total_energy_onsite;
 
-      measurements["Total Particle Number"]     << static_cast<double>(total_density);
-      measurements["Total Particle Number^2"]   << static_cast<double>(total_density * total_density);
-      measurements["Density"]                   << static_cast<double>(total_density)/num_sites();
-      measurements["Density^2"]                 << static_cast<double>(total_density2)/num_sites();
-      measurements["Hopping Energy"]            << total_hopping_energy;
-      measurements["Onsite Energy"]             << total_onsite_energy;
+      measurements["Total Particle Number"]     << static_cast<double>(total_particle_number);
       measurements["Energy"]                    << total_energy;
-      measurements["Energy^2"]                  << total_energy * total_energy;
-      measurements["Hopping Energy Density"]    << total_hopping_energy/num_sites();
-      measurements["Onsite Energy Density"]     << total_onsite_energy/num_sites();
-      measurements["Energy Density"]            << total_energy/num_sites();
-      measurements["Energy Density^2"]          << total_energy2/num_sites();
-      measurements["Total Vertex Number"]       << total_vertex_number;
-      measurements["Total Vertex Number^2"]     << total_vertex_number2;
+      measurements["Energy:Vertex"]             << total_energy_vertex;
+      measurements["Energy:Onsite"]             << total_energy_onsite;
+
+      if (!inhomogeneous())
+      {
+        measurements["Density"]                 << static_cast<double>(total_particle_number)/num_sites();
+        measurements["Energy Density"]          << total_energy/num_sites();
+        measurements["Energy Density:Vertex"]   << total_energy_vertex/num_sites();
+        measurements["Energy Density:Onsite"]   << total_energy_onsite/num_sites();
+      }
+
+      if (measure_number2_)
+        measurements["Total Particle Number^2"] << static_cast<double>(total_particle_number * total_particle_number);
+      if (measure_energy2_)
+        measurements["Energy^2"]                << total_energy * total_energy;
+      if (measure_density2_)
+        measurements["Density^2"]               << static_cast<double>(total_density2)/num_sites();
+      if (measure_energy_density2_)
+        measurements["Energy Density^2"]        << total_energy2/num_sites();
 
       if (measure_winding_number_)
       {
@@ -1225,39 +1203,35 @@ void
           for (int i=0; i<dimension(); ++i)
             winding_number[i] += net_number * vec[i];
         }
-        measurements["Winding Number^2"]         << alps::numeric::sq(std::vector<double>(winding_number.begin(), winding_number.end()));
+        measurements["Winding Number^2"] << alps::numeric::sq(std::vector<double>(winding_number.begin(), winding_number.end()));
       }      
 
+      if (measure_local_num_kinks_)
+        measurements["Local Kink:Number"] << _num_kinks_cache;
       if (measure_local_density_) 
-        measurements["Local Density"]            << _states_cache;
-
+        measurements["Local Density"]     << _states_cache;
       if (measure_local_density2_)
-        measurements["Local Density^2"]          << _states2_cache;
+        measurements["Local Density^2"]   << _states2_cache;
 
       // regarding on-fly measurements
-      measurements["Green's Function Onsite"]    << green_onsite/num_sites();
-      measurements["Green's Function Neighbors"] << green_neighbors/num_sites();
-      measurements["Zero Momentum Density"]      << zero_momentum_density/num_sites();
+      measurements["Green Function:0"]        << green0/_skip;
+      measurements["Green Function:1"]        << green1/_skip;
+      measurements["Momentum Distribution:0"] << nk0/_skip;
 
       if (measure_green_function_)
-        measurements["Green's Function"]         << green/num_sites();
-      if (measure_momentum_density_)
-        measurements["Momentum Density"]         << momentum_density/num_sites();
+        measurements["Green's Function"]      << green/_skip;
 
       if (finite_tof)
       {
-        measurements["Zero TOF Image"]           << zero_momentum_density_tof/num_sites();
-
+        measurements["Momentum Distribution:TOF:0"] << nk0_tof/_skip;
         if (measure_green_function_)
-          measurements["TOF Green's Function"]   << green_tof/num_sites();
-        if (measure_tof_image_)
-          measurements["TOF Image"]              << momentum_density_tof/num_sites();
+          measurements["Green Function:TOF"]        << green_tof/_skip;
       }
     }
 
 bool
   directed_worm_algorithm
-    ::wormhead_propagates_till_collision_with_wormtail(unsigned short wormpair_state_, std::pair<neighbor_iterator,neighbor_iterator> const & neighbors_, bool const & measure_)
+    ::wormhead_propagates_till_collision_with_wormtail(unsigned short wormpair_state_, std::pair<neighbor_iterator,neighbor_iterator> const & neighbors_)
     {
       ++_propagation_counter;
 
@@ -1317,40 +1291,22 @@ bool
         using alps::numeric::operator+=;
         using alps::numeric::operator*;
 
-        if (worm.neighbor2wormtail())
-          green_neighbors += wormpair_state_;
-        zero_momentum_density += wormpair_state_;
-
         int green_distance;
         if (measure_green_function_)
           green_distance = lattice().distance(worm.wormtail_site(), worm.site());
 
-        double component_displacement;
-        if (measure_momentum_density_ || measure_tof_image_)   // Achtung!!! Bitte "green_distance" nicht hier benutzen! Das ist SEHR langsam! (Tamama)
-        {
-          component_displacement = position(worm.site(),0) - position(worm.wormtail_site(),0);
-          if (is_periodic_)
-            if (component_displacement < 0)
-              component_displacement += lattice_vector_[0][0];
-        }
-
+        if (worm.neighbor2wormtail())
+          green1 += wormpair_state_;
+        nk0 += wormpair_state_;
         if (measure_green_function_)
           green[green_distance] += wormpair_state_;
-        if (measure_momentum_density_)
-          for (unsigned int idx=0; idx<num_component_momenta(); ++idx)
-            momentum_density[idx] += wormpair_state_*std::cos(component_momentum(idx)*component_displacement);
 
         if (finite_tof)
         {
           const double tof_phase = phase(worm.site())-phase(worm.wormtail_site()); 
-
-          zero_momentum_density_tof += wormpair_state_ * std::cos(tof_phase);
-
+          nk0_tof += wormpair_state_ * std::cos(tof_phase);
           if (measure_green_function_)
             green_tof[green_distance] += wormpair_state_ * std::cos(tof_phase);
-          if (measure_tof_image_)
-            for (unsigned int idx=0; idx<num_component_momenta(); ++idx)
-              momentum_density_tof[idx] += wormpair_state_ * std::cos(component_momentum(idx)*component_displacement + tof_phase);
         }
       }
 
