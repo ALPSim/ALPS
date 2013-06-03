@@ -114,7 +114,7 @@ void
           << "MEASURE[Density^2]               : " << measure_density2_               << "\n"
           << "MEASURE[Energy Density^2]        : " << measure_energy_density2_        << "\n"
           << "MEASURE[Winding Number]          : " << measure_winding_number_         << "\n"
-          << "MEASURE[Local Kink:Number]      : " << measure_local_num_kinks_        << "\n"
+          << "MEASURE[Local Kink:Number]       : " << measure_local_num_kinks_        << "\n"
           << "MEASURE[Local Density]           : " << measure_local_density_          << "\n" 
           << "MEASURE[Local Density^2]         : " << measure_local_density2_         << "\n"
           << "MEASURE[Green Function]          : " << measure_green_function_         << "\n"

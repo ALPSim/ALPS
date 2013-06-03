@@ -123,20 +123,28 @@ def tau(h5_outfile, observables):
 
 def write_status(filename, status):
   ar = pyalps.hdf5.h5ar(filename, 'w');
-  if ar.is_group('/status'):  
-    ar['/status/' + str(len(ar.list_children('/status')))] = status; 
+  if ar.is_group('/simulation/status'):  
+    ar['/simulation/status/' + str(len(ar.list_children('/simulation/status')))] = status; 
   else:
-    ar['/status/0'] = status;
+    ar['/simulation/status/0'] = status;
 
 def status(filename, includeLog=False):
   ar = pyalps.hdf5.h5ar(filename);
-  if not ar.is_group('/status'):
+  if not ar.is_group('/simulation/status'):
     return None;
   else:
     if not includeLog:
-      return ar['/status/' + str(len(ar.list_children('/status'))-1)];
+      return ar['/simulation/status/' + str(len(ar.list_children('/simulation/status'))-1)];
     else:
-      return ar['/status'] 
+      return ar['/simulation/status'] 
+
+def write_benchmark(filename, key):
+  ar = pyalps.hdf5.h5ar(filename, 'w');
+  ar['/simulation/benchmark/' + key] = ar['/simulation/results/' + key + '/mean/value'];
+
+def benchmark(filename, key):
+  ar = pyalps.hdf5.h5ar(filename);
+  return ar['/simulation/benchmark/' + key];
 
 def switchParameter(h5_infile, key, value):
   ### This is not encouraged, only do this when you know what you are doing.
