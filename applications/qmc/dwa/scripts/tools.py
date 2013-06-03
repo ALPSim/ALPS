@@ -146,11 +146,18 @@ def benchmark(filename, key):
   ar = pyalps.hdf5.h5ar(filename);
   return ar['/simulation/benchmark/' + key];
 
-def switchParameter(h5_infile, key, value):
+def switchParameter(h5file, key, value):
   ### This is not encouraged, only do this when you know what you are doing.
-  params = pyalps.getParameters(h5_infile);
-  params[0].update({key:value});
-  pyalps.writeInputH5Files(h5_infile,params);
+  ar = pyalps.hdf5.h5ar(h5file, 'w');
+  ar['/parameters/'+key] = value;
+
+def increase_skip(h5file):
+  ar = pyalps.hdf5.h5ar(h5file, 'w');
+  ar['/parameters/SKIP']   = 10 * ar['/parameters/SKIP'];
+
+def decrease_skip(h5file):
+  ar = pyalps.hdf5.h5ar(h5file, 'w');
+  ar['/parameters/SKIP']   = ar['/parameters/SKIP']/10;
 
 def extract_worldlines(infile, outfile=None):
   wl = worldlines()
@@ -347,7 +354,7 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, end_script
     return;
 
   if follow_up_script != None:  
-    eval(follow_up_script);
+    exec(follow_up_script);
 
   if write_status != None:
     eval(write_status);
