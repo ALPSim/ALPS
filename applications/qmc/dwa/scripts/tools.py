@@ -440,18 +440,19 @@ def summaryReport(h5_outfile):
 
   print('N    : ' + str(ar['/simulation/results/Total Particle Number/mean/value']) + ' +/- ' + str(ar['/simulation/results/Total Particle Number/mean/error']) + ' ; count = ' + str(ar['/simulation/results/Total Particle Number/count']));
   print('N/L  : ' + str(ar['/simulation/results/Total Particle Number/mean/value']/L));
-  print('\n');
+  print('');
   print('g0   : ' + str(ar['/simulation/results/Green Function:0/mean/value']) + ' +/- ' + str(ar['/simulation/results/Green Function:0/mean/error']) + ' ; count = ' + str(ar['/simulation/results/Green Function:0/count']));
-  print('\n');
+  print('');
   print('E    : ' + str(ar['/simulation/results/Energy/mean/value']) + ' +/- ' + str(ar['/simulation/results/Energy/mean/error']) + ' ; count = ' + str(ar['/simulation/results/Energy/count']));
   print('E/L  : ' + str(ar['/simulation/results/Energy/mean/value']/L));
   print('Ev   : ' + str(ar['/simulation/results/Energy:Vertex/mean/value']) + ' +/- ' + str(ar['/simulation/results/Energy:Vertex/mean/error']) + ' ; count = ' + str(ar['/simulation/results/Energy:Vertex/count']));
   print('Ev/L : ' + str(ar['/simulation/results/Energy:Vertex/mean/value']/L));
   print('Eo   : ' + str(ar['/simulation/results/Energy:Onsite/mean/value']) + ' +/- ' + str(ar['/simulation/results/Energy:Onsite/mean/error']) + ' ; count = ' + str(ar['/simulation/results/Energy:Onsite/count']));
   print('Eo/L : ' + str(ar['/simulation/results/Energy:Onsite/mean/value']/L));
-  print('\n');
+  print('');
   print('g1   : ' + str(ar['/simulation/results/Green Function:1/mean/value']) + ' +/- ' + str(ar['/simulation/results/Green Function:1/mean/error']) + ' ; count = ' + str(ar['/simulation/results/Green Function:1/count']));
-  
+  print('');
+  print('E/N  : ' + str(ar['/simulation/results/Energy/mean/value']/ar['/simulation/results/Total Particle Number/mean/value'])); 
 
   
 #  return data;
