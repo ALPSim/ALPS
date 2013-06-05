@@ -123,8 +123,11 @@ public:
       mag += (2 * spins_[i] - 1);
     }
     if (comm_.rank() == 0) {
-      reduce(comm_, energy_, energy_, std::plus<double>(), 0);
-      reduce(comm_, mag, mag, std::plus<double>(), 0);
+      double energy_out, mag_out;
+      reduce(comm_, energy_, energy_out, std::plus<double>(), 0);
+      reduce(comm_, mag, mag_out, std::plus<double>(), 0);
+      energy_ = energy_out;
+      mag = mag_out;
     } else {
       reduce(comm_, energy_, std::plus<double>(), 0);
       reduce(comm_, mag, std::plus<double>(), 0);
