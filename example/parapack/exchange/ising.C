@@ -37,8 +37,8 @@ PARAPACK_REGISTER_ALGORITHM(alps::parapack::single_exchange_worker<single_ising_
                          "ising; exchange");
 #ifdef ALPS_HAVE_MPI
 PARAPACK_REGISTER_PARALLEL_WORKER(alps::parapack::parallel_exchange_worker<single_ising_worker>,
-                                  "ising exchange");
+                                  "ising; exchange");
 PARAPACK_REGISTER_PARALLEL_WORKER(alps::parapack::multiple_parallel_exchange_worker<parallel_ising_worker>,
-                                  "multiple parallel ising exchange");
+                                  "multiple parallel ising; exchange");
 #endif
 PARAPACK_REGISTER_EVALUATOR(ising_evaluator, "ising; exchange");
