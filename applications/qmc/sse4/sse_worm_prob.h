@@ -140,6 +140,12 @@ private:
         for (unsigned vi = 0; vi < nvertices; ++vi) {
             vertex_type const& vertex = model.vertex(vi);
             
+            double w = model.c(vertex.unit_type) - vertex.me;
+            assert(w >= 1e-15);
+            if (w < 1e-15)
+                // zero weight
+                continue;
+            
             for (unsigned en_leg = 0; en_leg < 2 * UNIT_SIZE; ++en_leg)
             for (unsigned en_op = 0; en_op < NOPERATORS; ++en_op)
                 if (!entrances_done[w_index(vi, en_leg, en_op)])

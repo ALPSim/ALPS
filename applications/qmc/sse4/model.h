@@ -78,13 +78,9 @@ public:
         params(params)
     {
         epsilon = params.value_or_default("EPSILON", 0.0);
-        if (epsilon < 0.0)
-            epsilon = 0.0;
-        if (epsilon == 0.0 && model.is_signed()) {
+        if (epsilon <= 0.0 && model.is_signed())
             std::cout << "Warning: Hamiltonian has a sign problem and EPSILON=0; "
                 "make sure that EPSILON is ergodic.\n";
-            epsilon = 0.1;
-        }
         
         _nbstates.resize(lattice.max_site_type() + 1);
         for (unsigned i = 0; i < lattice.nsites(); ++i) {
@@ -331,6 +327,9 @@ private:
         if (epsilon == 0.0 && !have_diagonal)
             throw std::runtime_error("Hamiltonian looks purely off-diagonal. "
                 "Parameter EPSILON has to be non zero for SSE to work.");
+                
+        if (epsilon <= 0.0)
+            epsilon = 1e-6;
         
         std::set<unsigned>::const_iterator sti = site_types.begin();
         for (; sti != site_types.end(); ++sti)

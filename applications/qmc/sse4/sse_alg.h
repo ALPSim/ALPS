@@ -258,7 +258,7 @@ private:
                                     
                 double p = d01_probs[vertex_index];
                 if (p >= (nops - nnonzero)
-                        || p >= (worker.mrandom_real() * (nops - nnonzero))) {
+                        || p > (worker.mrandom_real() * (nops - nnonzero))) {
                     op->vertex_index = vertex_index;
                     op->unit_ref = ui;
                     ++nnonzero;
