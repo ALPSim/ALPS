@@ -30,6 +30,7 @@
 #ifndef GREEN_FUNCTION_H
 #define GREEN_FUNCTION_H
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <stdexcept>
 
