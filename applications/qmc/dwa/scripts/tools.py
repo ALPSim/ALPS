@@ -362,7 +362,8 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, end_script
   if n != None:             # if n exists
     if isinstance(n, int):  # if n is a python integer
       if n <= 1:
-        eval(end_script);
+        if end_script != None:
+          eval(end_script);
         if batch_next_run_script != None:
           command = [];
           if batch_cmd_prefix != None:

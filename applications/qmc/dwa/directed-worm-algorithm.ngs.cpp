@@ -721,6 +721,29 @@ void
         position_lookup.push_back(_position);
       }
 
+      // component coordinate lookup table 
+      std::vector<std::set<int> > component_coordinate_x100_set(dimension());
+      for (unsigned int site=0; site<num_sites(); ++site)
+        for (int i=0; i<dimension(); ++i)
+          component_coordinate_x100_set[i].insert(boost::math::iround(100*coordinate(site)[i]));  
+      component_coordinate_x100_lookup.resize(dimension());
+      for (int i=0; i<dimension(); ++i)
+        component_coordinate_x100_lookup[i] = std::vector<int>(component_coordinate_x100_set[i].begin(), component_coordinate_x100_set[i].end());
+
+      // site lookup table
+      int site_lookup_size = 1;
+      for (int i=0; i<dimension(); ++i)
+        site_lookup_size *= component_coordinate_x100_lookup[i].size();
+      site_lookup.resize(site_lookup_size, -1);
+
+      for (int site=0; site<num_sites(); ++site)
+      {
+        std::vector<int> site_idx(dimension()); 
+        for (unsigned int i=0; i<dimension(); ++i)
+          site_idx[i] = std::distance(component_coordinate_x100_lookup[i].begin(), std::lower_bound(component_coordinate_x100_lookup[i].begin(), component_coordinate_x100_lookup[i].end(), boost::math::iround(100*coordinate(site)[i])));
+        site_lookup[componentIndex2Index(site_idx)] = site;
+      }
+
       // phase and phase lookup table
       if (finite_tof)
       {
@@ -759,12 +782,20 @@ void
       // phase lookup table
       out << "Position / Phase Lookup Table:\n"
           << "----------------------\n\n";
-      for (unsigned int site=0; site<num_sites(); ++site)  {
+      for (unsigned int site=0; site<num_sites(); ++site)  
         out << "Site : " << site << " , Site position : " << position(site) << " , Phase : " << phase(site) << "\n";
-        std::cin.get();
-      }
       out << "\n";
 
+      // component coordinate lookup table
+      out << "Component coordinate (x100) Lookup Table:\n"
+          << "----------------------\n\n";
+      for (unsigned int i=0; i<dimension(); ++i)
+      {
+        out << "dim = " << i << " : ";
+        for (unsigned int j=0; j<component_coordinate_x100_lookup[i].size(); ++j)
+          out << component_coordinate_x100_lookup[i][j] << "  ";
+        out << "\n";
+      }
       out << "\n\n";
     }
 
@@ -841,7 +872,7 @@ void
 
       if (measure_green_function_)
       {
-        green.resize(lattice().num_distances(),0.);
+        green.resize(num_sites(),0.);
         measurements << alps::ngs::SimpleRealVectorObservable ("Green Function");
       }
 
@@ -851,7 +882,7 @@ void
 
         if (measure_green_function_)
         {
-          green_tof.resize(lattice().num_distances(),0.);
+          green_tof.resize(num_sites(),0.);
           measurements << alps::ngs::SimpleRealVectorObservable ("Green Function:TOF");
         }
 
@@ -1219,7 +1250,7 @@ void
       measurements["Momentum Distribution:0"] << nk0/_skip;
 
       if (measure_green_function_)
-        measurements["Green's Function"]      << green/_skip;
+        measurements["Green Function"]      << green/_skip;
 
       if (finite_tof)
       {
@@ -1292,8 +1323,19 @@ bool
         using alps::numeric::operator*;
 
         int green_distance;
-        if (measure_green_function_)
-          green_distance = lattice().distance(worm.wormtail_site(), worm.site());
+        std::vector<int> green_idx(dimension());
+        if (measure_green_function_) {
+          if (is_periodic_)
+            green_distance = lattice().distance(worm.wormtail_site(), worm.site());
+          else { 
+            using boost::numeric::operators::operator-;
+            std::vector<double> green_coordinate = alps::numeric::abs(coordinate(worm.wormtail_site()) - coordinate(worm.site()));
+            // determine green_distance
+            for (unsigned int i=0; i<dimension(); ++i)
+              green_idx[i] = std::distance(component_coordinate_x100_lookup[i].begin(), std::lower_bound(component_coordinate_x100_lookup[i].begin(), component_coordinate_x100_lookup[i].end(), boost::math::iround(100*green_coordinate[i])));
+            green_distance = site_lookup[componentIndex2Index(green_idx)];
+          }
+        }
 
         if (worm.neighbor2wormtail())
           green1 += wormpair_state_;

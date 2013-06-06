@@ -119,6 +119,18 @@ private:
   void initialize_lookups();
   void print_lookups(std::ostream & out) const;
 
+  // CHANGING HERE...
+  int componentIndex2Index(std::vector<int> componentIndex)   
+  {  
+    if (dimension() == 1)
+      return componentIndex[0];
+    else
+      if (dimension() == 2)
+        return (componentIndex[0] * component_coordinate_x100_lookup[1].size() + componentIndex[1]);
+      else
+        return (componentIndex[0] * component_coordinate_x100_lookup[1].size() * component_coordinate_x100_lookup[2].size() + componentIndex[1] * component_coordinate_x100_lookup[2].size() + componentIndex[2]);
+  }
+
   // regarding lattice
   std::vector<double> position(unsigned int site)                   const  { return position_lookup[site]; }
   double              position(unsigned int site, unsigned int dim) const  { return position_lookup[site][dim]; } 
@@ -161,8 +173,10 @@ private:
   std::vector<double> bond_strength_matrix;                      // bond strength matrix - arg: bondtype
 
   // regarding lookups
-  std::vector<std::vector<double> > position_lookup;
-  std::vector<double>               phase_lookup;
+  std::vector<std::vector<double> >  position_lookup;
+  std::vector<std::vector<int> >     component_coordinate_x100_lookup; 
+  std::vector<int>                   site_lookup; 
+  std::vector<double>                phase_lookup;
 
   // regarding lattice
   bool is_periodic_;
