@@ -7,11 +7,8 @@ if(LAPACK_FOUND)
   add_definitions(${LAPACK_DEFINITIONS})
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
   add_executable(dwa directed-worm-algorithm.ngs.cpp)
-  add_executable(dwa-scheduler directed-worm-algorithm.cpp)
   target_link_libraries(dwa alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
-  target_link_libraries(dwa-scheduler alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
   install(TARGETS dwa RUNTIME DESTINATION bin COMPONENT applications)
-  install(TARGETS dwa-scheduler RUNTIME DESTINATION bin COMPONENT applications)
 else(LAPACK_FOUND)
   message(STATUS "dwa will not be built since lapack library has not been found")
 endif(LAPACK_FOUND)
@@ -27,19 +24,6 @@ endif(LAPACK_FOUND)
             RUNTIME DESTINATION bin
             ARCHIVE DESTINATION lib/pyalps/dwa
             LIBRARY DESTINATION lib/pyalps/dwa)
-
-set(DWA_TOOLS 
-scripts/dwa-extract-worldlines
-scripts/dwa-extract-measurements
-scripts/dwa-extract-positions
-scripts/dwa-show-worldlines
-scripts/dwa-show-worldlines-3d 
-scripts/dwa-read-measurements
-scripts/dwa-thermalized
-scripts/dwa-converged
-)
-
-     install(FILES ${DWA_TOOLS} COMPONENT applications DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_WRITE WORLD_EXECUTE)
 
 set(DWA_LIB_TOOLS
 scripts/tools.py
