@@ -120,7 +120,7 @@ private:
   void print_lookups(std::ostream & out) const;
 
   // CHANGING HERE...
-  int componentIndex2Index(std::vector<int> componentIndex)   
+  int componentIndex2Index(std::vector<int> componentIndex) const  
   {  
     if (dimension() == 1)
       return componentIndex[0];

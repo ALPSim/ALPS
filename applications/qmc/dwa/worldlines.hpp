@@ -145,6 +145,8 @@ public:
   unsigned short state_before (location_type const & location_) const  { return (location_.second-1)->state(); }
   unsigned short state        (location_type const & location_) const  { return (location_.second == location_.first->end() ? location_.first->begin()->state() : location_.second->state()); }  
 
+  void output(std::ostream & out, unsigned int i);
+
   friend std::ostream &  operator<<(std::ostream & out, worldlines const & obj_);
 
   std::string representation() const  { std::ostringstream oss; oss << *this; return oss.str(); }
@@ -157,6 +159,8 @@ public:
 
   void save(std::string const & filename) const;
   void load(std::string const & filename);
+
+  bool is_valid(unsigned short Nmax);
 
 private:
   lines _worldlines;
@@ -237,6 +241,12 @@ int worldlines::net_number_of_directed_hops(unsigned int site_, unsigned int par
     if (it->siteindicator() == partnersite_)
       (it->state() > (it-1)->state()) ? ++net_number : --net_number;
   return net_number;
+}
+
+void worldlines::output(std::ostream & out, unsigned int i) 
+{
+  out << "\nSite : " << i << "\n";
+  std::copy(_worldlines[i].begin(), _worldlines[i].end(), std::ostream_iterator<kink>(out,"\n"));
 }
 
 std::ostream & operator<<(std::ostream & out, worldlines const & obj_)
@@ -347,6 +357,105 @@ void worldlines::load(std::string const & filename)
   load(ar);
 }
 
+bool worldlines::is_valid(unsigned short Nmax)  
+{
+  bool valid = true;
+
+  // testing vertex state
+  for (unsigned int i=0; i<_worldlines.size(); ++i)
+  {
+    if (_worldlines[i][0].state() > Nmax)
+      valid = false;
+
+    for (unsigned int j=1; j < _worldlines[i].size(); ++j)
+    {
+      if (_worldlines[i][j].state() > Nmax)
+        valid = false;
+      short this_state_increment = _worldlines[i][j].state() - _worldlines[i][j-1].state();
+      if (!(this_state_increment == 1 || this_state_increment == -1))
+        valid = false;
+    }
+
+    if (!valid) {
+      std::cout << "\nError: testing vertex state fails...\n";
+      std::cout << "site " << i << " : ";
+      for (unsigned int j=0; j < _worldlines[i].size(); ++j)
+        std::cout << _worldlines[i][j].state() << "  ";
+      std::cout << "\n";
+      return false;
+    }
+  } 
+
+  // testing vertex time
+  for (unsigned int i=0; i<_worldlines.size(); ++i)
+  {
+    if (_worldlines[i][0].time() != 0.)
+      valid = false;
+    
+    for (unsigned int j=1; j < _worldlines[i].size(); ++j) {
+      if (_worldlines[i][j].time() < 0. || _worldlines[i][j].time() > 1.)  // time must be bounded within (0.,1.)
+        valid = false;
+      if (_worldlines[i][j].time() <= _worldlines[i][j-1].time())   // time must be increasingly ordered...
+        valid = false;
+    }
+
+    if (!valid) {
+      std::cout << "\nError: testing vertex time fails...\n";
+      std::cout << "site " << i << " : ";
+      for (unsigned int j=0; j < _worldlines[i].size(); ++j)
+        std::cout << _worldlines[i][j].time() << "  ";
+      std::cout << "\n";
+      return false;
+    }
+  } 
+
+  // testing vertex siteindicator
+  for (unsigned int i=0; i<_worldlines.size(); ++i)
+  {
+    for (unsigned int j=0; j < _worldlines[i].size(); ++j)
+      if (_worldlines[i][j].siteindicator() >= _worldlines.size())
+        valid = false;
+
+    if (!valid)  {
+      std::cout << "\nError: testing vertex siteindicator fails...\n";
+      std::cout << "site " << i << " : ";
+      for (unsigned int j=0; j < _worldlines[i].size(); ++j)
+        std::cout << _worldlines[i][j].siteindicator() << "  ";
+      std::cout << "\n";
+      return false;
+    }
+  }
+
+  // testing vertex pairing
+  for (unsigned int i=0; i<_worldlines.size(); ++i)
+  {
+    if (_worldlines[i].size() > 1)
+    {
+      for (unsigned int j=1; j < _worldlines[i].size(); ++j) {
+        kink linkedto(*(location(_worldlines[i][j].siteindicator(), _worldlines[i][j].time()).second)); 
+
+        if (linkedto.time() != _worldlines[i][j].time())
+          valid = false;
+
+        if (linkedto.siteindicator() != i)
+          valid = false;
+      }
+    }
+
+    if (!valid) {
+      std::cout << "\nError: testing vertex paring fails...\n";    
+      std::cout << "site " << i << "\n";
+      for (unsigned int j=1; j < _worldlines[i].size(); ++j) {
+        std::cout << "kink : " << _worldlines[i][j] << " , linkedto : " << *(location(_worldlines[i][j].siteindicator(), _worldlines[i][j].time()).second) << "\n";
+      }
+      return false;
+    }
+  }
+
+  return valid;
+}
+
+
 // ==================================================
 // wormpair class
 // ==================================================
@@ -421,6 +530,8 @@ public:
   friend std::ostream &  operator<<(std::ostream & out, wormpair const & obj_);
 
   std::string representation() const  { std::ostringstream oss; oss << *this; return oss.str(); }
+
+  bool is_valid(unsigned short Nmax);
 
 private:
   unsigned short _wormpair_state;
@@ -580,6 +691,34 @@ std::ostream & operator<<(std::ostream & out, wormpair const & obj_)
       << "\n----------------------------------------------------"
       << "\n";
   return out;
+}
+
+bool wormpair::is_valid(unsigned short Nmax)
+{
+  bool valid = true;
+
+  // check state
+  if (_wormhead.state() > Nmax)
+    valid = false;
+  if ((_location.second-1)->state() > Nmax)
+    valid = false;
+  if (wormhead_touches_end())
+    if (_location.first->begin()->state() > Nmax)
+      valid = false;
+  else
+    if (_location.second->state() > Nmax)
+      valid = false;
+
+  // check time
+  if (_wormhead.time() <= 0. || _wormhead.time() >= 1.)
+    valid = false;
+  if (_wormhead.time() <= (_location.second-1)->time())
+    valid = false;
+  if (!wormhead_touches_end())
+    if (_wormhead.time() >= _location.second->time())
+      valid = false;
+
+  return valid;
 }
 
 #endif

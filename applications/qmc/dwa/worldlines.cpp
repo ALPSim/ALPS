@@ -91,6 +91,8 @@ boost::python::class_<worldlines>("worldlines", boost::python::init<>())
 
   .def("state_before", &worldlines::state_before)
   .def("state",        &worldlines::state)
+
+  .def("is_valid", static_cast<bool (worldlines::*)(unsigned short)>(&worldlines::is_valid))
   ;  
 
 boost::python::class_<wormpair>("wormpair", boost::python::init<>())

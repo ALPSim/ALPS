@@ -239,6 +239,7 @@ void
       if (ar.is_group("/simulation/worldlines")) {
         wl.load(ar); 
         std::cout << "\nWorldlines configuration loaded from input file.\n";
+        std::cout << "\t\t- valid ? " << wl.is_valid(state_maximum[0]) << "\n";
       }
       else
         std::cout << "\nNo worldlines configuration found.\n";
@@ -996,13 +997,29 @@ void
     ::update()
     {
       ++_sweep_counter;
+
 #ifdef DEBUGMODE
-//      if (_sweep_counter >= DEBUGMODE_START_COUNTER && _sweep_counter <= DEBUGMODE_END_COUNTER) 
+      // Step 0: Check whether worldlines configuration is valid? (DEBUG)
+      if (_sweep_counter > 11179463)
+        if (_sweep_counter % 1 == 0)
+          if (wl.is_valid(state_maximum[0]))
+            std::cout << "Worldlines configuration is valid up to the beginning of sweep " << _sweep_counter << "\n";
+          else {
+            std::cout << "Worldlines configuration is NOT valid at sweep " << _sweep_counter << "\n";
+            std::cin.get();
+          }
+#endif
+
+#define DEBUG_SWEEP_COUNTER 11179463
+
+#ifdef DEBUGMODE
+      if (_sweep_counter == DEBUG_SWEEP_COUNTER) 
       {
         std::cout << "\n\nSweep : " << _sweep_counter << "\t(Propagation sweep: " << _propagation_counter << ")"
                   << "\n============"
                   << "\n\n";
-        //std::cin.get();
+
+        std::cin.get();
       }
 #endif
 
@@ -1014,7 +1031,7 @@ void
 
       location_type      _location = wl.location(_site,_time);
 #ifdef DEBUGMODE
-//      if (_sweep_counter >= DEBUGMODE_START_COUNTER && _sweep_counter <= DEBUGMODE_END_COUNTER) 
+      if (_sweep_counter == DEBUG_SWEEP_COUNTER)
       {
         std::cout << "\n\nA random wormpair is generated:"
                   << "\n----------------------------------"
@@ -1059,13 +1076,13 @@ void
           }
         }
 #ifdef DEBUGMODE
-//        if (_sweep_counter >= DEBUGMODE_START_COUNTER && _sweep_counter <= DEBUGMODE_END_COUNTER) 
+        if (_sweep_counter == DEBUG_SWEEP_COUNTER)
         {
           std::cout << "\n\n"
                     << "\nWormpair creation fails!" 
-                    << "\n========================"
-                    << wl
-                    << "\nEnded (Wormpair creation fails!)"
+                    << "\n========================";
+          wl.output(std::cout, _site);
+          std::cout << "\nEnded (Wormpair creation fails!)"
                     << "\n--------------------------------"
                     << "\n\n";
           //std::cin.get();
@@ -1079,13 +1096,13 @@ void
       // Step 1C: Insert wormpair
       worm = wormpair(_location, kink(_site,_time,_state), _forward, _creation);
 #ifdef DEBUGMODE
-//      if (_sweep_counter >= DEBUGMODE_START_COUNTER && _sweep_counter <= DEBUGMODE_END_COUNTER) 
+      if (_sweep_counter == DEBUG_SWEEP_COUNTER)
       {
         std::cout << "\n\n"
                   << "\nWormpair creation!" 
-                  << "\n=================="
-                  << wl
-                  << "\n\n"
+                  << "\n==================";
+        wl.output(std::cout, _site);
+        std::cout << "\n\n"
                   << worm
                   << "\nEnded (Wormpair creation!)"
                   << "\n--------------------------------"
@@ -1115,16 +1132,16 @@ void
 
       worm.wormhead_annihilates_wormtail();
 #ifdef DEBUGMODE
-//      if (_sweep_counter >= DEBUGMODE_START_COUNTER && _sweep_counter <= DEBUGMODE_END_COUNTER) 
+      if (_sweep_counter == DEBUG_SWEEP_COUNTER)
       {
-      std::cout << "\n\n"
-                << "\nWormpair annihilation!"
-                << "\n======================"
-                << wl
-                << "\nEnded (Wormpair annihilation!)"
-                << "\n------------------------------------------------------"
-                << "\n\n";
-      //std::cin.get();
+        std::cout << "\n\n"
+                  << "\nWormpair annihilation!"
+                  << "\n======================";
+        wl.output(std::cout, _site);
+        std::cout << "\nEnded (Wormpair annihilation!)"
+                  << "\n------------------------------------------------------"
+                  << "\n\n";
+        //std::cin.get();
       }
 #endif
 
@@ -1137,6 +1154,12 @@ void
   directed_worm_algorithm
     ::docheckpoint()
     {
+#ifdef DEBUGMODE
+      // check worldlines
+      if (wl.is_valid(state_maximum[0])) 
+        std::cout << " Valid : ";
+#endif 
+
       std::cout << "Checkpoint Sweep " << _sweep_counter
                 << " ... Probability : " << probability_worm_insertion() << " / " << probability_bounce() 
                 ;
@@ -1266,6 +1289,19 @@ bool
     {
       ++_propagation_counter;
 
+#ifdef DEBUGMODE
+      // Step 0: Check extended worldlines configuration
+      if (_sweep_counter == DEBUG_SWEEP_COUNTER)
+      {
+        if (!worm.is_valid(state_maximum[0])) {
+          std::cout << "Extended worldlines configuration is NOT valid at " << _propagation_counter << "\n";
+          std::cin.get();
+        }
+      }
+#endif
+
+#define DEBUG_PROPAGATION_COUNTER 12383395
+
       // Step 1: Wormhead movement
       const double _time2next     = worm.time2next();
       const double _time2wormtail = worm.time2wormtail();
@@ -1273,6 +1309,24 @@ bool
       const double _onsite_energy_relative = onsite_energy_relative(worm.site(), worm.state(), worm.forward(), worm.creation());
 
       double _deltatime = -std::log(1.- random())/_onsite_energy_relative;
+
+#ifdef DEBUGMODE
+      if (_sweep_counter == DEBUG_SWEEP_COUNTER)
+      if (_propagation_counter >= DEBUG_PROPAGATION_COUNTER)
+      {
+        std::cout << "\n\n"
+                  << "\nPropagation step : " << _propagation_counter
+                  << "\n------------------------------------"
+                  << "\nWorm :\n"
+                  << worm
+                  << "\n\n"
+                  << "\nAttempting to move wormhead by a time of " << _deltatime << " ( " << _time2next << " / " << _time2wormtail << " ) "
+                  << "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+                  << "\n\n";
+        std::cin.get();
+      }
+#endif
+
 
       const bool _halted = (_deltatime >= _time2next);
       if (_halted)
@@ -1289,21 +1343,13 @@ bool
       worm.wormhead_moves_to_new_time(_newtime,_winding_over_time);
       
 #ifdef DEBUGMODE
-//      if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER 
-//         && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-//         ) 
+      if (_sweep_counter == DEBUG_SWEEP_COUNTER)
+      if (_propagation_counter >= DEBUG_PROPAGATION_COUNTER)
       {
-        std::cout << "\n\n"
-                  << "\nPropagation step : " << _propagation_counter
-                  << "\n------------------------------------"
-                  << "\nAttempting to move wormhead by a time of " << _deltatime << " ( " << _time2next << " / " << _time2wormtail << " ) "
-                  << "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-                  << "\n\n";
-        //std::cin.get();
         std::cout << "\nWormhead moves to time " << worm.time() << " ( " << (_halted ? "HALTED" : "NOT HALTED") << " ) "
-                  << "\n============================================================================"
-                  << "\n" << wl
-                  << "\n\n"
+                  << "\n============================================================================";
+        wl.output(std::cout, worm.site());
+        std::cout << "\n\n"
                   << "\nWormpair"
                   << "\n--------"
                   << "\n"
@@ -1312,7 +1358,7 @@ bool
                   << "\nEnded (Wormhead movement)!"
                   << "\n--------------------------"
                   << "\n\n";
-        //std::cin.get();
+        std::cin.get();
       }
 #endif
 
@@ -1370,21 +1416,21 @@ bool
         {
           worm.wormhead_crosses_vertex();
 #ifdef DEBUGMODE
-//          if (  _sweep_counter       >= DEBUGMODE_START_COUNTER              && _sweep_counter       <= DEBUGMODE_END_COUNTER
-//             && _propagation_counter >= DEBUGMODE_START_PROPAGATION_COUNTER  && _propagation_counter <= DEBUGMODE_END_PROPAGATION_COUNTER
-//             )
+          if (_sweep_counter == DEBUG_SWEEP_COUNTER)
+          if (_propagation_counter >= DEBUG_PROPAGATION_COUNTER)
           {
             std::cout << "\n\n"
                       << "\nWormhead crosses kink"
                       << "\n============================================================================"
-                      << "\n" << wl
-                      << "\n\n"
+                      << "\n";
+            wl.output(std::cout, worm.site());
+            std::cout << "\n\n"
                       << worm
                       << "\n\n"
                       << "\nEnded (Wormhead crosses kink)!"
                       << "\n--------------------------"
                       << "\n\n";
-            //std::cin.get();
+            std::cin.get();
           }
 #endif
           return true;
@@ -1409,6 +1455,7 @@ void
       const bool _increasing = worm.increasing();
       if (  ( worm.increasing() && _targetstate == state_maximum[site_site_type[target(*it)]])
          || (!worm.increasing() && _targetstate == state_minimum[site_site_type[target(*it)]])
+         || (!wl.location_is_kink_unoccupied(_neighborlocation, worm.time()))
          )  // new configuration is not possible... only bouncing allowed...
       {
         worm.wormhead_turns_around();
@@ -1479,6 +1526,27 @@ void
     {
       location_type _sourcelocation = wl.location(worm.next_partnersite(), worm.next_time());
 
+#ifdef DEBUGMODE
+      if (_sweep_counter == DEBUG_SWEEP_COUNTER)
+      if (_propagation_counter >= DEBUG_PROPAGATION_COUNTER)
+      {
+        std::cout << "\n\nDelete/relink/bounce?"
+                  << "\n======================="
+                  << "\nworm :\n"
+                  << worm << "\n"
+                  << "\nwl(wormsite):"
+                  << "\n-------------";
+        wl.output(std::cout, worm.site());
+        std::cout << "\n-------------";
+        std::cout << "\nwl(sourcesite):"
+                  << "\n-------------";
+        wl.output(std::cout, _sourcelocation.first->begin()->siteindicator());
+        std::cout << "\n-------------";
+        std::cin.get();
+      }
+#endif
+
+
 #ifndef HEATBATH_ALGORITHM
       const std::pair<neighbor_bond_iterator, neighbor_bond_iterator> _neighbor_bonds = neighbor_bonds(worm.next_partnersite());
 
@@ -1489,12 +1557,30 @@ void
           _weight = hopping_energy(*it, (wl.location(target(*it), worm.next_time()).second-1)->state(), !worm.increasing());
           break;
         }
+
+#ifdef DEBUGMODE
+      if (_sweep_counter == DEBUG_SWEEP_COUNTER)
+      if (_propagation_counter >= DEBUG_PROPAGATION_COUNTER)
+      {
+        std::cout << "\nWeight (old) = " << _weight << "\n";
+        std::cin.get();
+      }
+#endif
      
       neighbor_bond_iterator it=_neighbor_bonds.first + random()*num_neighbors(worm.next_partnersite());
 
       if (target(*it) == worm.site())    // delete vertex or bounce
       {
         const double _weight_new = onsite_energy_relative(worm.next_partnersite(),_sourcelocation.second->state(),!worm.forward(),worm.creation());
+
+#ifdef DEBUGMODE
+        if (_sweep_counter == DEBUG_SWEEP_COUNTER)
+        if (_propagation_counter >= DEBUG_PROPAGATION_COUNTER)
+        {
+          std::cout << "\nWeight (new) = " << _weight_new << "\n";
+          std::cin.get();
+        }
+#endif
 
         if (_weight_new >= _weight || random() < (_weight_new/_weight))
         {
@@ -1516,6 +1602,7 @@ void
         const bool _increasing = !worm.increasing();
         if (  ( _increasing && _targetstate == state_maximum[site_site_type[target(*it)]])
            || (!_increasing && _targetstate == state_minimum[site_site_type[target(*it)]])
+           || (!wl.location_is_kink_unoccupied(_neighborlocation, worm.next_time()))
            )
         {
           worm.wormhead_turns_around();
@@ -1526,8 +1613,36 @@ void
         {
           const double _weight_new = hopping_energy(*it, _targetstate, _increasing);
 
+#ifdef DEBUGMODE
+          if (_sweep_counter == DEBUG_SWEEP_COUNTER)
+          if (_propagation_counter >= DEBUG_PROPAGATION_COUNTER)
+          {
+            std::cout << "\nWeight (new) = " << _weight_new << "\n";
+            std::cin.get();
+          }
+#endif
+
           if (_weight_new >= _weight || random() < (_weight_new/_weight))
           {
+#ifdef DEBUGMODE
+            if (_sweep_counter == DEBUG_SWEEP_COUNTER)
+            if (_propagation_counter >= DEBUG_PROPAGATION_COUNTER)
+            {
+              std::cout << "\nwl(wormsite):"
+                        << "\n-------------";
+              wl.output(std::cout, worm.site());
+              std::cout << "\n-------------";
+              std::cout << "\nwl(sourcesite):"
+                        << "\n-------------";
+              wl.output(std::cout, _sourcelocation.first->begin()->siteindicator());
+              std::cout << "\n-------------";
+              std::cout << "\nwl(targetsite):"
+                        << "\n-------------";
+              wl.output(std::cout, _neighborlocation.first->begin()->siteindicator());
+              std::cout << "\n-------------";
+              std::cin.get();
+            }
+#endif DEBUGMODE
             worm.wormhead_relinks_vertex_and_jumps_to_new_site(_sourcelocation, _neighborlocation);
             worm.set_neighbor2wormtail(std::find(neighbors_.first, neighbors_.second, worm.site()) != neighbors_.second);
             return;
