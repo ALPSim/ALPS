@@ -25,8 +25,8 @@
 *
 *****************************************************************************/
 
-#ifndef DIRECTED_WORM_ALGORITHM_NGS_HPP
-#define DIRECTED_WORM_ALGORITHM_NGS_HPP
+#ifndef DWA_HPP
+#define DWA_HPP
 
 
 #include <cassert>
