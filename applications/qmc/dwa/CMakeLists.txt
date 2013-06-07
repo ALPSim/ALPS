@@ -6,7 +6,7 @@
 if(LAPACK_FOUND)
   add_definitions(${LAPACK_DEFINITIONS})
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
-  add_executable(dwa directed-worm-algorithm.ngs.cpp)
+  add_executable(dwa dwa.cpp)
   target_link_libraries(dwa alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
   install(TARGETS dwa RUNTIME DESTINATION bin COMPONENT applications)
 else(LAPACK_FOUND)
