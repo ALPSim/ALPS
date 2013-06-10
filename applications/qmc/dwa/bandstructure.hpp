@@ -1,11 +1,10 @@
-/*****************************************************************************
+/****************************************************************************
 *
-* ALPS Project: Algorithms and Libraries for Physics Simulations
+* ALPS Project Applications: Directed Worm Algorithm  
 *
-* ALPS Applications
-*
-* Copyright (C) 2006-2010 by Ping Nang Ma <pingnang@itp.phys.ethz.ch>,
-*                            Matthias Troyer <troyer@itp.phys.ethz.ch>
+* Copyright (C) 2013 by Lode Pollet      <pollet@phys.ethz.ch>  
+*                       Ping Nang Ma     <pingnang@phys.ethz.ch> 
+*                       Matthias Troyer  <troyer@phys.ethz.ch>    
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -26,839 +25,268 @@
 *
 *****************************************************************************/
 
-/* $Id: band_structure_calculations_BHM.h 3520 2010-03-03 16:55:00Z tamama $ */
+#ifndef BANDSTRUCTURE_HPP
+#define BANDSTRUCTURE_HPP
+
+#include <vector>
+#include <boost/multi_array.hpp>
+#include <alps/numeric/vector_functions.hpp>
+#include <alps/ngs/boost_python.hpp>
+#include <boost/bind.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <alps/python/numpy_array.hpp>
 
 
-/*
- *
- * 1) Code modification      -- mostly done, except the ultimate use of STL library
- * 2) Replacing raw pointers -- not done yet
- *
- */
-
-
-#ifndef ALPS_APPLICATIONS_BAND_STRUCTURE_CALCULATIONS_BHM_H
-#define ALPS_APPLICATIONS_BAND_STRUCTURE_CALCULATIONS_BHM_H
-
-
-#include <iostream>
-#include <iomanip>
-#include <cmath>
-#include <complex>
-#include <fstream>
-#include <sstream>
-
-
-namespace alps {
-namespace applications {
-
-
+// LAPACK Library: dsteqr -- description: diagonalize a real tridiagonal matrix
+//                        -- arguments:   compz, n, d, e, z, ldz, work, info
 extern "C" void dsteqr_(char*,int*,double*,double*,double*,int*,double*,int*); // (compz,n,d,e,z,ldz,work,info) --diagonalize a tridiagonal matrix
 
-template<class S,class T>
-class band_structure_calculations_BHM {
+
+class bandstructure
+{
 public:
-  // _typedefs
-  typedef S site_type;
-  typedef S index_type;
-  typedef T coordinate_type;
-  typedef T parm_type;
-  typedef T obs_type;
+  bandstructure(double V0_, double lambda_, double a_, double m_, unsigned int L_, int Mmax_=10);
+  bandstructure(boost::python::object V0_, boost::python::object lambda_, double a_, double m_, unsigned int L_, int Mmax_=10); 
 
+  std::vector<double> get_t()    {  if(!is_evaluated)  evaluate();  return t;     }
+  double              get_U()    {  if(!is_evaluated)  evaluate();  return U;     }
+  std::vector<double> get_Ut()   {  if(!is_evaluated)  evaluate();  using alps::numeric::operator/; return U/t;  }
+  std::vector<double> get_norm() {  if(!is_evaluated)  evaluate();  return norm;  }
+  std::vector<double> get_q  (unsigned int i)  {  if(!is_evaluated)  evaluate();  return q[i];    }
+  std::vector<double> get_wk2(unsigned int i)  {  if(!is_evaluated)  evaluate();  return wk2[i];  }
+  double              get_wk2_c()  {  if(!is_evaluated)  evaluate();  return wk2_c;  }
+  double              get_wk2_d()  {  if(!is_evaluated)  evaluate();  return wk2_d;  }
 
-  // get functions
-  inline site_type site0()  const   {  return _site0;  }
-
-#ifdef SITE_DEPENDENT_T_U 
-  inline parm_type tx0() const { return _tx_plus[_site0]; }
-  inline parm_type ty0() const { return _ty_plus[_site0]; }
-  inline parm_type tz0() const { return _tz_plus[_site0]; }
-  inline parm_type U0()  const { return _U[_site0]; }
-#else
-  inline parm_type tx0() const { return _tx_raw; }
-  inline parm_type ty0() const { return _ty_raw; }
-  inline parm_type tz0() const { return _tz_raw; }
-  inline parm_type U0()  const { return _U; }
-#endif
-  inline parm_type V0()  const { return _V[_site0]; }
-
-#ifdef SITE_DEPENDENT_T_U
-  inline parm_type tx_plus(site_type index)  const  { return _tx_plus[index];  }
-  inline parm_type tx_minus(site_type index) const  { return _tx_minus[index]; }
-  inline parm_type ty_plus(site_type index)  const  { return _ty_plus[index];  }
-  inline parm_type ty_minus(site_type index) const  { return _ty_minus[index]; }
-  inline parm_type tz_plus(site_type index)  const  { return _tz_plus[index];  }
-  inline parm_type tz_minus(site_type index) const  { return _tz_minus[index]; }
-  inline parm_type U(site_type index)        const  { return _U[index];  }
-#else
-  inline parm_type tx_plus(site_type index)  const  { return _tx_raw;  }
-  inline parm_type tx_minus(site_type index) const  { return _tx_raw; }
-  inline parm_type ty_plus(site_type index)  const  { return _ty_raw;  }
-  inline parm_type ty_minus(site_type index) const  { return _ty_raw; }
-  inline parm_type tz_plus(site_type index)  const  { return _tz_raw;  }
-  inline parm_type tz_minus(site_type index) const  { return _tz_raw; }
-  inline parm_type U(site_type index)        const  { return _U;  }
-#endif
-  inline parm_type V(site_type index)        const  { return _V[index];  }
-
-  inline parm_type xVT()  const { return _xVT; }
-  inline parm_type yVT()  const { return _yVT; }
-  inline parm_type zVT()  const { return _zVT; }
-
-
+  void output(std::ostream & out);
+  std::string representation()   { std::ostringstream oss; output(oss); return oss.str(); }
 
 private:
-  // physical constants
-  double pi;
-  double hbar;
-  double amu;
-  double kB;
-  double a0;
+  void evaluate();
 
-  double pi_sq, twice_pi;
-  double _xEr2nK, _yEr2nK, _zEr2nK;  
+  static const double pi   = 3.141592654;
+  static const double hbar = 1.05457148;  
+  static const double k    = 1.3806503;
+  static const double amu  = 1.66053886;
+  static const double a0   = 0.052917720859;
 
+  bool is_evaluated;
 
-  // variables
-  int _label;     // important upon parallelization
+  std::vector<double>  V0;        // in recoil energies (note that they are different in every direction)
+  std::vector<double>  lambda;    // in nanometer
+  std::vector<double>  Er2nK;
+  unsigned int         L;
+  double               g;         // in nK  
 
-  site_type _Nx, _Nxy, _N;
-  site_type _Nx_minus, _Nx_half;
-  bool _is_Nx_even;
+  std::vector<double>  t;
+  double               U;
 
-  parm_type _xV0, _yV0, _zV0;
-  parm_type _xVT, _yVT, _zVT;
-  parm_type _xlambda, _ylambda, _zlambda;
-  parm_type _xwaist, _ywaist, _zwaist;
-  parm_type _as;
-  parm_type _mass;
-  parm_type g;
+  std::vector<double>  norm;
 
-  site_type _site0;
+  std::vector<std::vector<double> > q;
+  std::vector<std::vector<double> > wk2;  
 
-  double* x_bloch;
-  double* x_wannier;
-  double* x;
+  double wk2_c;
+  double wk2_d;   
 
-  std::complex<obs_type>* bloch;
-  obs_type* global_bloch_real;
-  obs_type* global_bloch_imag;
-  obs_type* wannier;
-
-  obs_type* energy_q;
-
-#ifdef SITE_DEPENDENT_T_U
-  parm_type *_tx_raw, *_ty_raw, *_tz_raw;
-  parm_type *_tx_plus, *_tx_minus, *_ty_plus, *_ty_minus, *_tz_plus, *_tz_minus;
-  parm_type* _U;
-#else
-  parm_type _tx_raw, _ty_raw, _tz_raw;
-  parm_type _U;
-#endif
-  parm_type* _V;
-
-
-public:
-  // destructors
-  ~band_structure_calculations_BHM()
-  {
-		free();
-  }
-
-
-  // constructors
-  band_structure_calculations_BHM() 
-  {
-    pi   = 3.141592654;
-    hbar = 1.05457148;
-    amu  = 1.66053886;
-    kB   = 1.3806503;
-    a0   = 0.052917720859;
-
-    // hardcore lapack initialization
-    vect = 'I'; 
-    n    = MATRIX_SIZE; 
-    ldz  = MATRIX_SIZE;
-
-    // hardcore const number initialization
-    pi_sq    = pi*pi;
-    twice_pi = 2.*pi;
-
-    twice_n_bloch = 2 * n_bloch;
-    half_n_bloch  = n_bloch / 2;
-    h_x    = 1./n_bloch;
-    h_x_sq = h_x * h_x;
-    h_kx   = pi/n_bloch;
-
-    n_wannier      = N_wannier * n_bloch;
-    half_n_wannier = n_wannier / 2;
-  }
-
-  band_structure_calculations_BHM(int label, site_type Nx, parm_type xV0, parm_type yV0, parm_type zV0, parm_type as, parm_type mass, parm_type xlambda, parm_type ylambda, parm_type zlambda, parm_type xwaist, parm_type ywaist, parm_type zwaist, parm_type xVT, parm_type yVT, parm_type zVT) 
-  {
-    pi   = 3.141592654;
-    hbar = 1.05457148;
-    amu  = 1.66053886;
-    kB   = 1.3806503;
-    a0   = 0.052917720859;
-
-    // hardcore lapack initialization
-    vect = 'I';
-    n    = MATRIX_SIZE;
-    ldz  = MATRIX_SIZE;
-
-    // hardcore lapack initialization
-    pi_sq    = pi*pi;
-    twice_pi = 2.*pi;
-  
-    // hardcore const number initialization
-    twice_n_bloch = 2 * n_bloch;
-    half_n_bloch  = n_bloch / 2;
-    h_x    = 1./n_bloch;
-    h_x_sq = h_x * h_x;
-    h_kx   = pi/n_bloch;
-
-    n_wannier      = N_wannier * n_bloch;
-    half_n_wannier = n_wannier / 2;
-
-    init(label,Nx,xV0,yV0,zV0,as,mass,xlambda,ylambda,zlambda,xwaist,ywaist,zwaist,xVT,yVT,zVT);  
-  }
-  
-  // init functions
-  void init(int label, site_type Nx, parm_type xV0, parm_type yV0, parm_type zV0, parm_type as, parm_type mass, parm_type xlambda, parm_type ylambda, parm_type zlambda, parm_type xwaist, parm_type ywaist, parm_type zwaist, parm_type xVT, parm_type yVT, parm_type zVT); 
-
-
-	// free functions
-	void free();
-
-
-  // print functions
-#ifdef PRINT_BLOCH_BSCBHM
-  void print_bloch(int);
-#endif
-#ifdef PRINT_WANNIER_BSCBHM
-  void print_wannier(void);
-#endif
-#ifdef PRINT_BAND_PARAMETERS_BSCBHM
-  void print_band_parameters(void);
-#endif
-
-
-  // other functions
-  inline obs_type evaluate_W()  {  return std::abs(3. * (energy_q[_Nx_minus] - energy_q[0])); }
-  inline site_type site_no(site_type const xindex, site_type const yindex, site_type const zindex)   { return (zindex * _Nxy) + (yindex * _Nx) + xindex; }    // d
-  inline obs_type normalize_by_pi_sq(obs_type const value)    {  return (value / pi_sq);  }
-
-
-private:
-  // binning details for bloch functions and wannier functions
-  static const int n_bloch       = 20;
-  int twice_n_bloch, half_n_bloch;
-  double h_x, h_x_sq, h_kx;
-  static const int N_wannier      = 7;
-  int n_wannier, half_n_wannier;
-  int n_global_bloch, half_n_global_bloch;
-
-
-  // lapack definitions
-  static const int MATRIX_SIZE = 11;
-  char vect;                            // starting from tridiagonal matrix : 'I'
-  int n;                                // matrix size
-  double d[MATRIX_SIZE];                // before: diagonal; after: eigenvalues
-  double e[MATRIX_SIZE-1];              // before: off-diagonal
-  double z[MATRIX_SIZE][MATRIX_SIZE];   // after: eigenvector
-  double work[2*MATRIX_SIZE-2];         // work array -- must be at least 2*n-2
-  int ldz;
-  int info;
-
-
-  // file management
-  std::ofstream outFile;
-  std::ifstream inFile;
-
-  bool load_band_parameters();
-
-
-  // other private member functions
-  void solve_bloch_eigenstate_and_store_into_global_bloch(site_type,parm_type,parm_type);
-  void setup_normalized_wannier();
-  parm_type calculate_t();
-  parm_type calculate_Uraw();
-  inline double calculate_U(double Ux_raw, double Uy_raw, double Uz_raw)     { return (g * Ux_raw * Uy_raw * Uz_raw); }
-
-
-  void perform_calculations();
+  int Mmax;
 };
 
 
-template <class S,class T>
-void band_structure_calculations_BHM<S,T>::init(int label, site_type Nx, parm_type xV0, parm_type yV0, parm_type zV0, parm_type as, parm_type mass, parm_type xlambda, parm_type ylambda, parm_type zlambda, parm_type xwaist, parm_type ywaist, parm_type zwaist, parm_type xVT, parm_type yVT, parm_type zVT)
+// Constructor
+bandstructure::bandstructure(double V0_, double lambda_, double a_, double m_, unsigned int L_, int Mmax_)
+  : is_evaluated (false)
+  , V0     (std::vector<double>(3, V0_))
+  , lambda (std::vector<double>(3, lambda_))
+  , L      (L_)
+  , Mmax   (Mmax_)
 {
-  // variables
-  _label = label;
+  if (a_ == 0. || m_ == 0. || L == 0)   
+    boost::throw_exception(std::runtime_error("Illegal initialization parameters for bandstructure class"));
 
-  _Nx = Nx;  _Nxy = Nx*Nx;  _N = Nx*Nx*Nx;  
-  _Nx_half = Nx/2;  _Nx_minus = Nx-1;
-  _is_Nx_even = (((Nx%2) == 0) ? 1 : 0);    
-  _site0 = site_no(_Nx_half,_Nx_half,_Nx_half);
+  for (int i=0; i<3; ++i) 
+    if (V0[i] == 0. || lambda[i] == 0.)
+      boost::throw_exception(std::runtime_error("Illegal initialization parameters for bandstructure class"));
 
-  _xV0 = xV0;  _yV0 = yV0;  _zV0 = zV0;
+  using boost::numeric::operators::operator*;
+  using alps::numeric::operator/;
+  Er2nK = (2e9 * pi*pi * hbar*hbar) / (m_ * amu * k * lambda * lambda);
 
-  /*
-	_xVT = xVT;  _yVT = yVT;  _zVT = zVT;   // if VT is in Er
-	*/
-  
-  _xVT = ((0.5*pi_sq*mass*amu*xVT*xVT*xlambda*xlambda)/(kB))*(1e-13);   // if VT is in Hz
-  _yVT = ((0.5*pi_sq*mass*amu*yVT*yVT*ylambda*ylambda)/(kB))*(1e-13);
-  _zVT = ((0.5*pi_sq*mass*amu*zVT*zVT*zlambda*zlambda)/(kB))*(1e-13);
+  g = ((32e9 * pi * a0 * hbar*hbar * a_) / (amu * k * m_ * lambda[0]*lambda[1]*lambda[2]));
+
+  t.resize(3,0.);
+  U = g;
+
+  norm.resize(3,0.);
+
+  q  .resize(3);
+  wk2.resize(3);
+
+  wk2_c = 1.;
+  wk2_d = 1.;
+}
+
+bandstructure::bandstructure(boost::python::object V0_, boost::python::object lambda_, double a_, double m_, unsigned int L_, int Mmax_)
+  : is_evaluated (false)
+  , L            (L_)
+  , Mmax         (Mmax_)
+{
+  V0 = alps::python::numpy::convert(V0_);
+  lambda = alps::python::numpy::convert(lambda_);
+
+  if (V0.empty() || lambda.empty() || a_ == 0. || m_ == 0. || L == 0) 
+    boost::throw_exception(std::runtime_error("Illegal initialization parameters for bandstructure class"));
+
+  V0.resize    (3, V0.back());
+  lambda.resize(3, lambda.back());
+
+  for (int i=0; i<3; ++i) 
+    if (V0[i] == 0. || lambda[i] == 0.)
+      boost::throw_exception(std::runtime_error("Illegal initialization parameters for bandstructure class"));
+
+  using boost::numeric::operators::operator*;
+  using alps::numeric::operator/;
+  Er2nK = (2e9 * pi*pi * hbar*hbar) / (m_ * amu * k * lambda * lambda); 
+
+  g = ((32e9 * pi * a0 * hbar*hbar * a_) / (amu * k * m_ * lambda[0]*lambda[1]*lambda[2]));
+
+  t.resize(3,0.);
+  U = g;
+
+  norm.resize(3,0.);
+
+  q  .resize(3);
+  wk2.resize(3);
+
+  wk2_c = 1.;
+  wk2_d = 1.;
+}
+
+
+void bandstructure::output(std::ostream & out)
+{
+  using alps::numeric::operator<<;
+  out << "\nOptical lattice:\n"
+      << "================\n"
+      << "V0    [Er] = " << V0 << "\n"
+      << "lamda [nm] = " << lambda << "\n"
+      << "Er2nK      = " << Er2nK  << "\n"
+      << "L          = " << L << "\n"
+      << "g          = " << g << "\n"
+      ;
+
+  out << "\nBand structure:\n"
+      << "===============\n"
+      << "t [nK] : " << get_t()  << "\n"
+      << "U [nK] : " << get_U()  << "\n"
+      << "U/t    : " << get_Ut() << "\n\n"
+      << "wk2[0 ,0 ,0 ] : " << get_wk2_c()  << "\n"
+      << "wk2[pi,pi,pi] : " << get_wk2_d()  << "\n"
+      ;
+}
+
+
+void bandstructure::evaluate()
+{
+  for (int alpha=0; alpha<3; ++alpha)   // in each dimension: alpha=x,y,z
+  {
+    int size = 2*Mmax+1;
+
+    std::vector<double> k;
+    std::vector<double> energy;
+    boost::multi_array<double, 2> c(boost::extents[L][size]); 
+
+    for (int idx=0; idx<L; ++idx)
+      k.push_back(static_cast<double>(idx)/L);
+
+    // diagonalize for all values of k
+    for (int idx=0; idx<L; ++idx)
+    {
+      std::vector<double> diagonal;
+      for (int m=-Mmax; m<=Mmax; ++m)
+        diagonal.push_back(4*alps::numeric::sq(m + k[idx]) + V0[alpha]/2.);
+      std::vector<double> offdiagonal(2*Mmax, -V0[alpha]/4.);
+
+      char                 type = 'I';
+      int                  info;
+      std::vector<double>  tmp(2*size-2);
+
+      boost::multi_array<double, 2> c_tmp(boost::extents[size][size]);
+
+      dsteqr_(&type, &size, &diagonal[0], &offdiagonal[0], &c_tmp[0][0], &size, &tmp[0], &info);
+
+      energy.push_back(diagonal[0]);
+
+      if (c_tmp[0][Mmax] >= 0.)
+        std::copy(&c_tmp[0][0], &c_tmp[0][size], &c[idx][0]);
+      else
+        std::transform(&c_tmp[0][0], &c_tmp[0][size], &c[idx][0], std::negate<double>());
+    }
+
+    // evaluate t
+    double this_t=0.;
+    for (int idx=0; idx<L; ++idx)
+      this_t += energy[idx] * std::cos(2*pi*k[idx]);
+    this_t /= (L);
+    t[alpha] = -(this_t*Er2nK[alpha]);
+
+    // collapse c as much as possible 
+    std::vector<double> c_tmp(c.shape()[1], 0.);
+    for (int midx=0; midx<c_tmp.size(); ++midx)
+      for (int idx=0; idx<L; ++idx)
+        c_tmp[midx] += c[idx][midx];
+    int M = Mmax;
+    while (c_tmp[Mmax-M] < 1e-3 && c_tmp[Mmax+M] < 1e-3)
+      --M;
+
+    typedef boost::multi_array_types::index_range range;
+    typedef range::index index;
+    c = c[boost::indices[range()][index(Mmax-M) <= range() <= index(Mmax+M)]];
+    Mmax = M;
+
+    // convenient values
+    std::vector<double> m;
+    for (int midx=0; midx<=2*Mmax; ++midx)
+      m.push_back(midx-Mmax);
+
+    boost::multi_array<double,2> k_eff(boost::extents[L][m.size()]);
+    for (int idx=0; idx<L; ++idx)
+    for (int midx=0; midx<m.size(); ++midx)
+      k_eff[idx][midx] = k[idx] + m[midx];
+
+    // calculate wannier, norm and U
+    std::vector<double> this_wannier(1000, 0.);  // x=0, 0.01, 0.02, ..., 10.00
+    for (int i=0; i<1000; ++i) {
+      double x = static_cast<double>(i)/100.;
+      for (int idx=0; idx<L; ++idx)
+      for (int midx=0; midx<m.size(); ++midx)
+        this_wannier[i] += c[idx][midx] * std::cos(2. * pi * k_eff[idx][midx] * x);
+      this_wannier[i] /= L;
+    }
+    std::vector<double> this_wannier2 = alps::numeric::sq(this_wannier);
+    std::vector<double> this_wannier4 = alps::numeric::sq(this_wannier2);
    
-  _xlambda = xlambda;  _ylambda = ylambda;  _zlambda = zlambda;
-  _xwaist = (2000*xwaist)/xlambda;   _ywaist = (2000*ywaist)/ylambda;  _zwaist = (2000*zwaist)/zlambda;
-  _as = as;
-  _mass = mass;
-  g = ((32 * pi * a0 * hbar * hbar * _as) / (amu * kB * mass * xlambda * ylambda * zlambda)) * (1e9);         // in nK
-
-  _xEr2nK = ((2 * pi_sq * hbar * hbar) / (_mass * amu * kB * _xlambda * _xlambda)) * (1e9);
-  _yEr2nK = ((2 * pi_sq * hbar * hbar) / (_mass * amu * kB * _ylambda * _ylambda)) * (1e9);
-  _zEr2nK = ((2 * pi_sq * hbar * hbar) / (_mass * amu * kB * _zlambda * _zlambda)) * (1e9);
-
-
-  // further binning definitions
-  n_global_bloch         = n_bloch * (_Nx_half + 1);
-  half_n_global_bloch    = n_global_bloch / 2;
-
-
-  // allocating memory for arrays  *** further cleanups necessary
-  x                                = new double [_Nx];
-
-  x_bloch                          = new double [n_bloch];
-  bloch                            = new std::complex<obs_type> [n_bloch];
-  global_bloch_real                = new obs_type [n_global_bloch];
-  global_bloch_imag                = new obs_type [n_global_bloch];
-
-  x_wannier                        = new double [n_wannier];
-  wannier                          = new obs_type [half_n_wannier + 1];
-  
-  energy_q                         = new obs_type [_Nx];
-
-#ifdef SITE_DEPENDENT_T_U
-  _tx_raw = new parm_type [_N];
-  _ty_raw = new parm_type [_N];
-  _tz_raw = new parm_type [_N];
-
-  _tx_plus  = new parm_type [_N];
-  _tx_minus = new parm_type [_N];
-  _ty_plus  = new parm_type [_N];
-  _ty_minus = new parm_type [_N];
-  _tz_plus  = new parm_type [_N];
-  _tz_minus = new parm_type [_N];
-  _U        = new parm_type [_N];  
-#endif  
-  _V        = new parm_type [_N];
-
-
-  // initialization of arrays
-  for (int index=0; index < n_bloch; ++index)     {  x_bloch[index]   = (index - half_n_bloch)   * h_x;  }
-  for (int index=0; index < n_wannier; ++index)   {  x_wannier[index] = (index - half_n_wannier) * h_x;  }
-  for (int index=0; index < _Nx; ++index)         {  x[index] = (_is_Nx_even ? ((index - _Nx_half) + 0.5) : (index - _Nx_half));  }
-
-
-  // calculate actual band structure calculations
-  perform_calculations();
-}
-
-
-template <class S,class T>
-void band_structure_calculations_BHM<S,T>::free()
-{
-  delete [] x;
-  delete [] x_bloch;
-  delete [] bloch;
-  delete [] global_bloch_real;
-  delete [] global_bloch_imag;
-  delete [] x_wannier;
-  delete [] wannier;
-
-  delete [] energy_q;
-#ifdef SITE_DEPENDENT_T_U
-  delete [] _tx_raw;
-  delete [] _ty_raw;
-  delete [] _tz_raw;
-  delete [] _tx_plus;
-  delete [] _tx_minus;
-  delete [] _ty_plus;
-  delete [] _ty_minus;
-  delete [] _tz_plus;
-  delete [] _tz_minus;
-  delete [] _U; 
-#endif
-  delete [] _V; 
-}
-
-
-template <class S,class T>
-void band_structure_calculations_BHM<S,T>::solve_bloch_eigenstate_and_store_into_global_bloch(site_type q_no,parm_type q,parm_type V0) {
-
-   // setting vectors
-   parm_type dummy1 = 0.25 * V0 * pi_sq;
-   for (int counter1=0; counter1 < MATRIX_SIZE; ++counter1) {
-      parm_type dummy = ((counter1 - MATRIX_SIZE/2)*twice_pi) + q;
-      d[counter1] = dummy * dummy + 2 * dummy1;
-   }
-   for (int counter1=0; counter1 < MATRIX_SIZE-1; ++counter1) {
-      e[counter1] = -dummy1;
-   }
-
-   dsteqr_(&vect,&n,d,e,*z,&ldz,work,&info);
-
-   // Store unnormalized Bloch function
-   for (int counter1=0; counter1 < n_bloch; ++counter1) {
-      std::complex<double> sum(0,0);
-      for (int counter2=0; counter2 < MATRIX_SIZE; ++counter2) {
-         obs_type dummy_x = (counter1 - half_n_bloch) * h_x;
-         int    dummy_l = counter2 - MATRIX_SIZE/2;
-         sum  +=  (z[0][counter2]) * std::polar(1.,twice_pi*dummy_l*dummy_x);
-      }
-      bloch[counter1] = sum;
-   }
-
-   obs_type chosen_phase_argument = std::arg(bloch[half_n_bloch]);
-   std::complex<obs_type> chosen_phase = std::polar(1.,-chosen_phase_argument);
-   for (int counter4=0 ; counter4 < n_bloch; ++counter4)   bloch[counter4] = chosen_phase * (bloch[counter4]);
-
-   // Normalizing Bloch function (Trapezium rule is sufficient)    // FULLY DEBUGGED!!!
-   obs_type total_sum = 0;
-   for(int counter5=0; counter5 < half_n_bloch; ++counter5) 
-      total_sum += norm(bloch[counter5]);
-   total_sum *= 2;
-   total_sum += norm(bloch[half_n_bloch]);
-   total_sum *= h_x;
-   obs_type sqrt_total_sum = std::sqrt(total_sum);
-   for (int counter5=0; counter5 < n_bloch; ++counter5)   
-      bloch[counter5] /= sqrt_total_sum;  
-
-   // Storing rescaled energy (useful for the calculation of t)
-   energy_q[q_no] = normalize_by_pi_sq(d[0]);
-
-   // Storing into Global Bloch Array
-   int start_counter   = q_no * n_bloch;
-   for(int counter7=0; counter7 < n_bloch; ++counter7)   {
-     int dummy_counter = start_counter + counter7;
-     global_bloch_real[dummy_counter] = bloch[counter7].real();
-     global_bloch_imag[dummy_counter] = bloch[counter7].imag();
-   }
-}
-
-
-template <class S,class T>
-void band_structure_calculations_BHM<S,T>::setup_normalized_wannier(void) {   
-
-   // Determining Unnormalized Wannier Function
-   if (_is_Nx_even) {
-      for (int j=0; j <= half_n_wannier; ++j) {
-         obs_type sum = 0;
-         int bloch_counter = j % n_bloch;
-         sum += ((global_bloch_real[bloch_counter] * std::cos(-pi*x_wannier[j])) - (global_bloch_imag[bloch_counter] * std::sin(-pi*x_wannier[j])));
-         sum += ((global_bloch_real[_Nx_half * n_bloch + bloch_counter]));
-         for (int q_no=1; q_no < _Nx_half; ++q_no) {
-            parm_type q = -pi + ((2*pi / _Nx) * q_no);
-            int dummy_counter = q_no * n_bloch + bloch_counter;
-            sum += 2 * ((global_bloch_real[dummy_counter] * std::cos(q*x_wannier[j])) - (global_bloch_imag[dummy_counter] * std::sin(q*x_wannier[j])));
-         }
-         wannier[j] = sum;
-      }
-   }
-   else {
-      for (int j=0; j <= half_n_wannier; ++j) {
-         obs_type sum = 0;
-         int bloch_counter = j % n_bloch;
-       sum += ((global_bloch_real[_Nx_half * n_bloch + bloch_counter]));
-       for (int q_no=0; q_no < _Nx_half; ++q_no) {
-          parm_type q = -pi + (pi/_Nx) + ((2*pi / _Nx) * q_no);
-          int dummy_counter = q_no * n_bloch + bloch_counter;
-          sum += 2 * ((global_bloch_real[dummy_counter] * std::cos(q*x_wannier[j])) - (global_bloch_imag[dummy_counter] * std::sin(q*x_wannier[j])));
-       }
-       wannier[j] = sum;
-    }
- }
-
- // Normalizing ustd::sing Trapzium integration
- obs_type total_sum = 0;
-
- for(int counter=0; counter < half_n_wannier; ++counter) 
-    total_sum += wannier[counter] * wannier[counter];
- total_sum += 0.5 * wannier[half_n_wannier] * wannier[half_n_wannier]; 
- total_sum *= 2 * h_x;
- obs_type sqrt_total_sum = std::sqrt(total_sum);
-
- for (int counter=0; counter <= half_n_wannier; counter++)
-    wannier[counter] /= sqrt_total_sum;
-}
-
-
-template <class S,class T>
-T band_structure_calculations_BHM<S,T>::calculate_t() {
- if (_is_Nx_even) {
-    parm_type sum=0;
-    for (site_type q_no=1; q_no < _Nx_half; ++q_no) {
-       parm_type q = -pi + ((2 * pi) / _Nx) * q_no;
-       sum += energy_q[q_no] * std::cos(q);
-    }
-    sum *= 2;
-    sum += -energy_q[0];
-    sum += energy_q[_Nx_half];
-
-    return -(sum / _Nx);
- }
- else {
-    parm_type sum=0;
-    for (site_type q_no=0; q_no < _Nx_half; ++q_no) {
-       parm_type q = -pi + (pi / _Nx) + (((2 * pi) / _Nx) * q_no);
-       sum += energy_q[q_no] * std::cos(q);
-    }
-    sum *= 2;
-    sum += energy_q[_Nx_half];
-
-    return -(sum / _Nx);
- }
-}   
-
-
-template <class S,class T>
-T band_structure_calculations_BHM<S,T>::calculate_Uraw(void) {
- parm_type sum=0;
- for (int index=1; index < half_n_wannier; ++index) {
-    sum += std::pow(wannier[index],4);
- }
- sum *= 2;
- sum += std::pow(wannier[0],4);
- sum += std::pow(wannier[half_n_wannier],4);
- return (sum * h_x);
-}
-
-
-#ifdef PRINT_BLOCH_BSCBHM
-template <class S,class T>
-void band_structure_calculations_BHM<S,T>::print_bloch(int q_no) {
- std::ostringstream ss, ss2;
- ss  << _label;  
- ss2 << static_cast<double>(q_no);
- std::string filename1a  = "bloch_re_";
- std::string filename1b  = "bloch_im_";
- std::string filename2(ss.str());
- std::string filename3(ss2.str());
- filename1a  += filename2;  filename1a += "_"; filename1a += filename3; filename1a  += ".o";
- filename1b  += filename2;  filename1b += "_"; filename1b += filename3; filename1b  += ".o";
-
- int start_counter = q_no * n_bloch;
-
- outFile.open(filename1a.c_str(),std::ios::out);
- for (int index = 0; index < n_bloch; ++index) {
-    outFile << x_bloch[index] << "    " << global_bloch_real[start_counter + index] << std::endl;
- }
- outFile.close();
-
- outFile.open(filename1b.c_str(),std::ios::out);
- for (int i = 0; i < n_bloch; i++) {
-    outFile << x_bloch[i] << "    " << global_bloch_imag[start_counter + i] << std::endl;
- }
- outFile.close();
-}
-#endif
-
-
-#ifdef PRINT_WANNIER_BSCBHM
-template <class S,class T>
-void band_structure_calculations_BHM<S,T>::print_wannier(void) {
- std::ostringstream ss;
- ss  << _label;
- std::string filename1  = "wannier_";
- std::string filename2(ss.str());
- filename1  += filename2;
- filename1 += ".o"; 
-
- outFile.open(filename1.c_str(),std::ios::out);
- for (int index = 0; index <= half_n_wannier; ++index) {
-    outFile << x_wannier[index] << "    " << wannier[index] << std::endl;
- }
- for (int index = half_n_wannier+1; index < n_wannier; ++index) {
-    outFile << x_wannier[index] << "    " << wannier[n_wannier-index] << std::endl;
- }
-
- outFile.close();
-}
-#endif
-
-
-#ifdef PRINT_BAND_PARAMETERS_BSCBHM
-template <class S,class T>
-void band_structure_calculations_BHM<S,T>::print_band_parameters() {
-std::ostringstream ss;
-ss << _label;
-std::string label_str(ss.str());
-
-#define IMPLEMENT_FILE_OUTPUT1_BSCBHM(PHYSICAL_QUANTITY,FILENAME,LABEL) \
-std::string LABEL = FILENAME; \
-LABEL += label_str;  LABEL += ".o"; \
-\
-outFile.open(LABEL.c_str(),std::ios::out);  \
-for (site_type index=0; index < _N; ++index)  {  outFile << PHYSICAL_QUANTITY[index] << "\n";  } \
-outFile.close();
- 
-IMPLEMENT_FILE_OUTPUT1_BSCBHM(_tx_plus,"tx+_",filename1a)
-IMPLEMENT_FILE_OUTPUT1_BSCBHM(_ty_plus,"ty+_",filename1b)
-IMPLEMENT_FILE_OUTPUT1_BSCBHM(_tz_plus,"tz+_",filename1c)
-IMPLEMENT_FILE_OUTPUT1_BSCBHM(_tx_minus,"tx-_",filename1d)
-IMPLEMENT_FILE_OUTPUT1_BSCBHM(_ty_minus,"ty-_",filename1e)
-IMPLEMENT_FILE_OUTPUT1_BSCBHM(_tz_minus,"tz-_",filename1f)
-IMPLEMENT_FILE_OUTPUT1_BSCBHM(_U,"U_",filename2)
-IMPLEMENT_FILE_OUTPUT1_BSCBHM(_V,"V_",filename3)
-
-#define IMPLEMENT_FILE_OUTPUT2_BSCBHM(PHYSICAL_QUANTITY,FILENAME,LABEL) \
-std::string LABEL = FILENAME; \
-LABEL += label_str;  LABEL += ".o"; \
-\
-outFile.open(LABEL.c_str(),std::ios::out);  \
-for (site_type index=_Nx_half; index < _Nx; ++index)  {  outFile << x[index] << "\t" << PHYSICAL_QUANTITY << "\n";  } \
-outFile.close();
-
-IMPLEMENT_FILE_OUTPUT2_BSCBHM(U0()/tx0(),"Utx_",filename2a)
-IMPLEMENT_FILE_OUTPUT2_BSCBHM(U0()/ty0(),"Uty_",filename2b)
-IMPLEMENT_FILE_OUTPUT2_BSCBHM(U0()/tz0(),"Utz_",filename2c)
-}
-#endif
-
-
-template <class S,class T>
-bool band_structure_calculations_BHM<S,T>::load_band_parameters(void) {
-#ifdef SITE_DEPENDENT_T_U
-std::ostringstream ss;
-ss << _label;
-std::string label_str(ss.str());
-
-#define IMPLEMENT_FILE_INPUT_BSCBHM(PHYSICAL_QUANTITY,FILENAME,LABEL) \
-std::string LABEL = FILENAME; \
-LABEL += label_str;  LABEL += ".o"; \
-\
-inFile.open(LABEL.c_str(),std::ios::in);  \
-if (!inFile.good())  {  return false;  }  \
-for (site_type index=0; index < _N; ++index)  {  inFile >> PHYSICAL_QUANTITY[index];  } \
-inFile.close();
-
-IMPLEMENT_FILE_INPUT_BSCBHM(_tx_plus,"tx+_",filename1a)
-IMPLEMENT_FILE_INPUT_BSCBHM(_ty_plus,"ty+_",filename1b)
-IMPLEMENT_FILE_INPUT_BSCBHM(_tz_plus,"tz+_",filename1c)
-IMPLEMENT_FILE_INPUT_BSCBHM(_tx_minus,"tx-_",filename1d)
-IMPLEMENT_FILE_INPUT_BSCBHM(_ty_minus,"ty-_",filename1e)
-IMPLEMENT_FILE_INPUT_BSCBHM(_tz_minus,"tz-_",filename1f)
-IMPLEMENT_FILE_INPUT_BSCBHM(_U,"U_",filename2)
-IMPLEMENT_FILE_INPUT_BSCBHM(_V,"V_",filename3)
-
-return true;
-#else
-return false;
-#endif
-}
-
-
-template <class S,class T>
-void band_structure_calculations_BHM<S,T>::perform_calculations() {
-
-#ifndef DEBUGMODE
-  if (!load_band_parameters()) {
-#endif
-
-#ifndef DEBUGMODE
-#ifdef SITE_DEPENDENT_T_U
-  std::cout << "Starting to obtain site- and direction- dependent t_ij and U_i values...\n\n";
-#else
-  std::cout << "Starting to obtain direction- dependent only t and U values...\n\n";
-#endif
-#endif
-#ifdef SITE_DEPENDENT_T_U
-  for (site_type k_no = _Nx_half; k_no < _Nx; ++k_no) {
-    site_type s      = k_no * _Nxy;
-    site_type s_conj = (_Nx_minus - k_no) * _Nxy;
-    coordinate_type z_coord_sq  = x[k_no] * x[k_no];
-
-    std::cout << "Completed : " << ((static_cast<double>(k_no - _Nx_half) * 100)/(_Nx_half)) << " percent..." << std::endl;
-
-    for (site_type j_no = _Nx_half; j_no < _Nx; ++j_no) {
-      site_type q      = j_no * _Nx;
-      site_type q_conj = (_Nx_minus - j_no) * _Nx;
-      coordinate_type y_coord_sq = x[j_no] * x[j_no];
-
-      for (site_type i_no= _Nx_half; i_no < _Nx; ++i_no) {
-        site_type i_no_conj = _Nx_minus - i_no;
-        coordinate_type x_coord_sq = x[i_no] * x[i_no];
-
-        site_type p = s + q + i_no;
-        coordinate_type r_coord_sq = x_coord_sq + y_coord_sq + z_coord_sq;
-
-        parm_type Vx_correction_factor = exp(-2*r_coord_sq/(_xwaist*_xwaist));
-        parm_type Vy_correction_factor = exp(-2*r_coord_sq/(_ywaist*_ywaist));
-        parm_type Vz_correction_factor = exp(-2*r_coord_sq/(_zwaist*_zwaist));
-#else
-  parm_type Vx_correction_factor = 1.;
-  parm_type Vy_correction_factor = 1.;
-  parm_type Vz_correction_factor = 1.;
-#endif
-        parm_type tx, ty, tz, Ux, Uy, Uz, Uon, ep;     // Ux , Uy , Uz are raw U !!!
-
-        if (_is_Nx_even) 
-        {
-          for (site_type i=0; i <= _Nx_half; ++i)     solve_bloch_eigenstate_and_store_into_global_bloch(i, -pi+((2*pi/_Nx)*i),_xV0*Vx_correction_factor);
-          tx = calculate_t() * _xEr2nK;
-          setup_normalized_wannier();
-          Ux = calculate_Uraw();
-
-          for (site_type i=0; i <= _Nx_half; ++i)     solve_bloch_eigenstate_and_store_into_global_bloch(i, -pi+((2*pi/_Nx)*i),_yV0*Vy_correction_factor);
-          ty = calculate_t() * _yEr2nK;
-          setup_normalized_wannier();
-          Uy = calculate_Uraw();
-
-          for (site_type i=0; i <= _Nx_half; ++i)     solve_bloch_eigenstate_and_store_into_global_bloch(i, -pi+((2*pi/_Nx)*i),_zV0*Vz_correction_factor);
-          tz = calculate_t() * _zEr2nK;
-          setup_normalized_wannier();
-          Uz = calculate_Uraw();
-
-          Uon = calculate_U(Ux,Uy,Uz);
-        }
-        else  // _is_Nx_even is false 
-        { 
-          for (site_type i=0; i <= _Nx_half; ++i)     solve_bloch_eigenstate_and_store_into_global_bloch(i, -pi+(pi/_Nx)+((2*pi/_Nx)*i),_xV0*Vx_correction_factor);
-          tx = calculate_t() * _xEr2nK;
-          setup_normalized_wannier();
-          Ux = calculate_Uraw();
-
-          for (site_type i=0; i <= _Nx_half; ++i)     solve_bloch_eigenstate_and_store_into_global_bloch(i, -pi+(pi/_Nx)+((2*pi/_Nx)*i),_yV0*Vy_correction_factor);
-          ty = calculate_t() * _yEr2nK;
-          setup_normalized_wannier();
-          Uy = calculate_Uraw();
-
-          for (site_type i=0; i <= _Nx_half; ++i)     solve_bloch_eigenstate_and_store_into_global_bloch(i, -pi+(pi/_Nx)+((2*pi/_Nx)*i),_zV0*Vz_correction_factor);
-          tz = calculate_t() * _zEr2nK;
-          setup_normalized_wannier();
-          Uz = calculate_Uraw();
-
-          Uon = calculate_U(Ux,Uy,Uz);
-        }
-
-#ifdef SITE_DEPENDENT_T_U
-        ep = _xVT * x_coord_sq + _yVT * y_coord_sq + _zVT * z_coord_sq;
-
-        if ((i_no == (_Nx-1)) || (j_no == (_Nx-1)) || (k_no == (_Nx-1)))  { ep = 1000000000000.; } 
-
-                                            _tx_raw[p] = tx;  _ty_raw[p] = ty;  _tz_raw[p] = tz;  _U[p] = Uon;  _V[p] = ep;
-        p = s + q + i_no_conj;              _tx_raw[p] = tx;  _ty_raw[p] = ty;  _tz_raw[p] = tz;  _U[p] = Uon;  _V[p] = ep;
-        p = s + q_conj + i_no;              _tx_raw[p] = tx;  _ty_raw[p] = ty;  _tz_raw[p] = tz;  _U[p] = Uon;  _V[p] = ep;
-        p = s + q_conj + i_no_conj;         _tx_raw[p] = tx;  _ty_raw[p] = ty;  _tz_raw[p] = tz;  _U[p] = Uon;  _V[p] = ep; 
-        p = s_conj + q + i_no;              _tx_raw[p] = tx;  _ty_raw[p] = ty;  _tz_raw[p] = tz;  _U[p] = Uon;  _V[p] = ep;
-        p = s_conj + q + i_no_conj;         _tx_raw[p] = tx;  _ty_raw[p] = ty;  _tz_raw[p] = tz;  _U[p] = Uon;  _V[p] = ep;
-        p = s_conj + q_conj + i_no;         _tx_raw[p] = tx;  _ty_raw[p] = ty;  _tz_raw[p] = tz;  _U[p] = Uon;  _V[p] = ep;
-        p = s_conj + q_conj + i_no_conj;    _tx_raw[p] = tx;  _ty_raw[p] = ty;  _tz_raw[p] = tz;  _U[p] = Uon;  _V[p] = ep;
-#else
-  _tx_raw = tx;  _ty_raw = ty;  _tz_raw = tz;  _U = Uon; 
-
-  for (site_type k_no = 0; k_no < _Nx; ++k_no) {
-    site_type s      = k_no * _Nxy;
-    coordinate_type z_coord_sq  = x[k_no] * x[k_no];
-    for (site_type j_no = 0; j_no < _Nx; ++j_no) {
-      site_type q      = j_no * _Nx;
-      coordinate_type y_coord_sq = x[j_no] * x[j_no];
-      for (site_type i_no= 0; i_no < _Nx; ++i_no) {
-        coordinate_type x_coord_sq = x[i_no] * x[i_no];
-        site_type p = s + q + i_no;
-        ep = _xVT * x_coord_sq + _yVT * y_coord_sq + _zVT * z_coord_sq;
-        if ((i_no == 0) || (j_no == 0) || (k_no == 0) || (i_no == (_Nx-1)) || (j_no == (_Nx-1)) || (k_no == (_Nx-1)))  { ep = 100000000.; }
-        _V[p]= ep;
-      }
-    }
+    norm[alpha] = 0.01 * (2. * std::accumulate(this_wannier2.begin(), this_wannier2.end(), 0.) - this_wannier2[0] - this_wannier2.back());
+    U *= 0.01 * (2. * std::accumulate(this_wannier4.begin(), this_wannier4.end(), 0.) - this_wannier4[0] - this_wannier4.back());
+
+    // calculate wk2
+    std::map<double, double> wk;
+    for (int idx=0; idx<L; ++idx)
+    for (int midx=0; midx<m.size(); ++midx)
+      wk.insert(std::make_pair<double, double>(k_eff[idx][midx], c[idx][midx]));
+
+    for (std::map<double, double>::iterator it=wk.begin(); it!=wk.end(); ++it) {
+      q  [alpha].push_back(it->first);
+      wk2[alpha].push_back(it->second);
+    } 
+    using boost::numeric::operators::operator/;
+    wk2[alpha] = alps::numeric::sq(wk2[alpha] / std::sqrt(L));
+
+    wk2_c *= alps::numeric::sq(wk[0.]) / L;
+    wk2_d *= alps::numeric::sq(wk[0.5]) / L;
   }
 
-  std::cout << "V0 (x)  = " << _xV0 << "  ;  lambda (z) = " << _xlambda << "  ;  t (x) = " << tx << std::endl;
-  std::cout << "V0 (y)  = " << _yV0 << "  ;  lambda (z) = " << _ylambda << "  ;  t (y) = " << ty << std::endl;
-  std::cout << "V0 (z)  = " << _zV0 << "  ;  lambda (z) = " << _zlambda << "  ;  t (z) = " << tz << std::endl;
-  std::cout << "W       = " << evaluate_W() << std::endl;
-  std::cout << "U       = " << Uon << std::endl;
-  std::cout << "U/t (x) = " << (U0() / tx0()) << std::endl;
-  std::cout << "U/t (y) = " << (U0() / ty0()) << std::endl;
-  std::cout << "U/t (z) = " << (U0() / tz0()) << std::endl;
-  std::cout << std::endl;
-
-#endif
-#ifdef SITE_DEPENDENT_T_U
-      }
-    }
-  }
-#endif
-
-
-#ifndef DEBUGMODE
-  std::cout << "Completed totally!\n";
-#endif
-
-#ifndef DEBUGMODE
-#ifdef SITE_DEPENDENT_T_U
-  for (site_type k_no = 0; k_no < _Nx; ++k_no) {
-    site_type s      = k_no * _Nxy;
-    for (site_type j_no = 0; j_no < _Nx; ++j_no) {
-      site_type q      = j_no * _Nx;
-      for (site_type i_no = 0; i_no < _Nx; ++i_no) {
-        site_type p = s + q + i_no;
-        _tx_plus[p] = (i_no == _Nx_minus) ? 0 : 0.5*(_tx_raw[p] + _tx_raw[p+1]); 
-        _ty_plus[p] = (j_no == _Nx_minus) ? 0 : 0.5*(_ty_raw[p] + _ty_raw[p+_Nx]);
-        _tz_plus[p] = (k_no == _Nx_minus) ? 0 : 0.5*(_tz_raw[p] + _tz_raw[p+_Nxy]); 
-        _tx_minus[p] = (i_no == 0) ? 0 : 0.5*(_tx_raw[p] + _tx_raw[p-1]);
-        _ty_minus[p] = (j_no == 0) ? 0 : 0.5*(_ty_raw[p] + _ty_raw[p-_Nx]);
-        _tz_minus[p] = (k_no == 0) ? 0 : 0.5*(_tz_raw[p] + _tz_raw[p-_Nxy]);
-      }
-    }
-  }
-#endif
-#endif
-
-#ifdef PRINT_BLOCH_BSCBHM
-  for (site_type index=0; index < _Nx; ++index)   print_bloch(index);
-#endif
-#ifdef PRINT_WANNIER_BSCHM
-  print_wannier();
-#endif
-#ifdef PRINT_BAND_PARAMETERS
-  print_band_parameters(); 
-#endif
-
-
-#ifndef DEBUGMODE
-  }
-  else {
-  std::cout << "Obtained BH parameters from file!" << std::endl;
-#ifdef PRINT_BAND_PARAMETERS
-  print_band_parameters();
-#endif
-  }
-#endif
+  is_evaluated = true;
 }
-
-/*
-template<class S,class T>
-const double band_structure_calculations_BHM<S,T>::pi   = 3.141592654;
-
-template<class S,class T>
-const double band_structure_calculations_BHM<S,T>::hbar = 1.05457148;
-
-template<class S,class T>
-const double band_structure_calculations_BHM<S,T>::amu  = 1.66053886;
-
-template<class S,class T>
-const double band_structure_calculations_BHM<S,T>::kB   = 1.3806503;
-
-template<class S,class T>
-const double band_structure_calculations_BHM<S,T>::a0   = 0.052917720859;
-*/
-
-} // ending namespace applications
-} // ending namespace alps
 
 
 #endif

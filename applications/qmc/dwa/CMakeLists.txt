@@ -15,12 +15,16 @@ endif(LAPACK_FOUND)
 
       IF(ALPS_BUILD_PYTHON)
         add_library (worldlines_c.so SHARED worldlines.cpp)
+        add_library (bandstructure_c.so SHARED bandstructure.cpp)
         SET (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
         set_target_properties(worldlines_c.so PROPERTIES PREFIX "")
         set_target_properties(worldlines_c.so PROPERTIES SUFFIX "")
+        set_target_properties(bandstructure_c.so PROPERTIES PREFIX "")
+        set_target_properties(bandstructure_c.so PROPERTIES SUFFIX "")
         target_link_libraries(worldlines_c.so alps ${ALPS_LIBRARIES})
+        target_link_libraries(bandstructure_c.so alps ${ALPS_LIBRARIES}) 
       ENDIF(ALPS_BUILD_PYTHON)
-    install(TARGETS worldlines_c.so COMPONENT python
+    install(TARGETS worldlines_c.so bandstructure_c.so COMPONENT python
             RUNTIME DESTINATION bin
             ARCHIVE DESTINATION lib/pyalps/dwa
             LIBRARY DESTINATION lib/pyalps/dwa)
