@@ -74,11 +74,11 @@
 <SITEBASIS name="fermion">
   <QUANTUMNUMBER name="Nup" min="0" max="1" type="fermionic"/>
   <QUANTUMNUMBER name="Ndown" min="0" max="1" type="fermionic"/>
-  <OPERATOR name="Splus" matrixelement="1/2">
+  <OPERATOR name="Splus" matrixelement="1">
     <CHANGE quantumnumber="Nup" change="1"/>
     <CHANGE quantumnumber="Ndown" change="-1"/>
   </OPERATOR>
-  <OPERATOR name="Sminus" matrixelement="1/2">
+  <OPERATOR name="Sminus" matrixelement="1">
     <CHANGE quantumnumber="Nup" change="-1"/>
     <CHANGE quantumnumber="Ndown" change="+1"/>
   </OPERATOR>
@@ -108,12 +108,12 @@
   <QUANTUMNUMBER name="Ndown" min="0" max="1" type="fermionic"/>
   <QUANTUMNUMBER name="N" min="Nup+Ndown" max="Nup+Ndown"/>
   <QUANTUMNUMBER name="Sz" min="(Nup-Ndown)/2" max = "(Nup-Ndown)/2"/>
-  <OPERATOR name="Splus" matrixelement="1/2">
+  <OPERATOR name="Splus" matrixelement="1">
     <CHANGE quantumnumber="Nup" change="1"/>
     <CHANGE quantumnumber="Ndown" change="-1"/>
     <CHANGE quantumnumber="Sz" change="1"/>
   </OPERATOR>
-  <OPERATOR name="Sminus" matrixelement="1/2">
+  <OPERATOR name="Sminus" matrixelement="1">
     <CHANGE quantumnumber="Nup" change="-1"/>
     <CHANGE quantumnumber="Ndown" change="+1"/>
     <CHANGE quantumnumber="Sz" change="-1"/>
