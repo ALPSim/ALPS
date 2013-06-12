@@ -672,6 +672,27 @@ void
         bond_strength_matrix.push_back(bond_strength_matrix_temporary[this_bond_type]); 
       }
 
+      // modify bond strength matrix if tx/t, ty/t, tz/t exists
+      if (parameters.defined("tx_t") || parameters.defined("ty_t") || parameters.defined("tz_t"))
+      {
+        std::vector<double> t_relative(dimension(), 1.);
+        if (parameters.defined("tx_t"))  t_relative[0] = parameters["tx_t"] | 1.; 
+        if (parameters.defined("ty_t"))  t_relative[1] = parameters["ty_t"] | 1.;
+        if (parameters.defined("tz_t"))  t_relative[2] = parameters["tz_t"] | 1.;
+
+        //using alps::numeric::operator<<;
+        //std::cout << "\nt (relative) : " << t_relative << "\n";
+        //std::cin.get(); 
+     
+        for (bond_iterator it=bonds().first; it!=bonds().second; ++it)
+        {
+          for (int i=0; i<dimension(); ++i)
+            if (bond_vector(*it)[i] != 0.)
+              bond_strength_matrix[index(*it)] *= t_relative[i];
+        }
+      }
+
+
       std::cout << "\t\t\t\t... done.\n"; 
     }
 

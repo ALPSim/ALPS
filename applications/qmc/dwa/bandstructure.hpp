@@ -279,10 +279,10 @@ void bandstructure::evaluate()
       wk2[alpha].push_back(it->second);
     } 
     using boost::numeric::operators::operator/;
-    wk2[alpha] = alps::numeric::sq(wk2[alpha] / std::sqrt(static_cast<double>(L)/(2.*pi)));
+    wk2[alpha] = alps::numeric::sq(wk2[alpha] / std::sqrt(static_cast<double>(L)));
 
-    wk2_c *= alps::numeric::sq(wk[0.]) / (static_cast<double>(L)/(2.*pi));
-    wk2_d *= alps::numeric::sq(wk[0.5]) / (static_cast<double>(L)/(2.*pi));
+    wk2_c *= alps::numeric::sq(wk[0.]) / (static_cast<double>(L));
+    wk2_d *= alps::numeric::sq(wk[0.5]) / (static_cast<double>(L));
   }
 
   is_evaluated = true;
