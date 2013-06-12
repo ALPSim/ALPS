@@ -20,10 +20,13 @@ def parse(fn):
     root = ElementTree.parse(fn).getroot()
     vertices = {}
     vtype = {}
-    
+   
+    dimension = int(root.get('dimension'))
     for vertex in root.findall('VERTEX'):
         vid = int(vertex.get('id'))
         vpos = tuple([float(x) for x in vertex.find('COORDINATE').text.split()])
+        if(len(vpos) != dimension):
+            raise RuntimeError('Dimension of the coordinates does not match the dimension of the lattice.')
         vertices[vid] = vpos
         vtype[vid] = vertex.get('type')
     
@@ -34,12 +37,19 @@ def parse(fn):
         for c in ['source', 'target', 'type']:
             edges[eid][c] = int(edges[eid][c])
     
-    return (vertices,edges,vtype)
+    return (dimension,vertices,edges,vtype)
 
 def showgraph(graph):
-    vertices = graph[0]
-    edges = graph[1]
-    vtypes = graph[2]
+    dimension = graph[0]
+    vertices = graph[1]
+    edges = graph[2]
+    vtypes = graph[3]
+    
+    if(dimension > 2):
+        raise RuntimeError('This function only supports 1 and 2 dimensional lattices.')
+
+    if(len(vertices.values()[0]) == 1):
+        vertices = {k: (v[0],0) for k, v in vertices.items()}
     
     x = [v[0] for v in vertices.values()]
     y = [v[1] for v in vertices.values()]
