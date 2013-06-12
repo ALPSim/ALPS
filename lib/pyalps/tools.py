@@ -580,6 +580,12 @@ def paramsAtFixedY(sets,x,y,fixedY,foreach=[]):
   params = [];
   for XY in XYs:
     param = XY.props;
+    xlabel = param['xlabel'];
+    del param['observable'];
+    del param['hdf5_path'];
+    del param['label'];
+    del param['xlabel'];
+    del param['ylabel'];
 
     x = XY.x;
     y = [y.mean for y in XY.y];
@@ -591,15 +597,9 @@ def paramsAtFixedY(sets,x,y,fixedY,foreach=[]):
     
     for this_fixedY in fixedY:
       xnew = f(this_fixedY);
-      this_param = param;
-      this_param.update({this_param['xlabel']: float(xnew)});
+      param.update({xlabel: float(xnew)});
       
-      del this_param['observable'];
-      del this_param['hdf5_path'];
-      del this_param['label'];
-      del this_param['xlabel'];
-      del this_param['ylabel'];
-      params.append(this_param);
+      params.append(param);
 
   return params;
 
