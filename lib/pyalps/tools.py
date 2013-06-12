@@ -586,16 +586,20 @@ def paramsAtFixedY(sets,x,y,fixedY,foreach=[]):
 
     f = scipy.interpolate.interp1d(y,x);
 
-    xnew = f(fixedY);
-
-    param.update({param['xlabel']: float(xnew)});
-
-    del param['observable'];
-    del param['hdf5_path'];
-    del param['label'];
-    del param['xlabel'];
-    del param['ylabel'];
-    params.append(param);
+    if isinstance(fixedY, int) or isinstance(fixedY, float):
+      fixedY = [fixedY];
+    
+    for this_fixedY in fixedY:
+      xnew = f(this_fixedY);
+      this_param = param;
+      this_param.update({this_param['xlabel']: float(xnew)});
+      
+      del this_param['observable'];
+      del this_param['hdf5_path'];
+      del this_param['label'];
+      del this_param['xlabel'];
+      del this_param['ylabel'];
+      params.append(this_param);
 
   return params;
 
