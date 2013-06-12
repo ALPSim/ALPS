@@ -22,7 +22,7 @@ endif(LAPACK_FOUND)
         set_target_properties(bandstructure_c.so PROPERTIES PREFIX "")
         set_target_properties(bandstructure_c.so PROPERTIES SUFFIX "")
         target_link_libraries(worldlines_c.so alps ${ALPS_LIBRARIES})
-        target_link_libraries(bandstructure_c.so alps ${ALPS_LIBRARIES}) 
+        target_link_libraries(bandstructure_c.so alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY} ${ALPS_LIBRARIES}) 
       ENDIF(ALPS_BUILD_PYTHON)
     install(TARGETS worldlines_c.so bandstructure_c.so COMPONENT python
             RUNTIME DESTINATION bin
