@@ -3,7 +3,7 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-file(WRITE ${cmd}_tmp.sh "PYTHONPATH=\$PYTHONPATH:${binarydir}/lib/pyalps:${binarydir}/src/boost:${sourcedir}/lib:${bindir}:${currentdir}/src ${runexec} ${python_interpreter} ${currentdir}/${cmd}.py 15 f ${cmd}.h5")
+file(WRITE ${cmd}_tmp.sh "PYTHONPATH=${binarydir}/lib/pyalps:${binarydir}/src/boost:${sourcedir}/lib:${bindir}:${currentdir}/src:\$PYTHONPATH ${runexec} ${python_interpreter} ${currentdir}/${cmd}.py 15 f ${cmd}.h5")
 
 execute_process(
     COMMAND sh ${cmd}_tmp.sh
