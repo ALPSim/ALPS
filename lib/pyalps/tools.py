@@ -597,9 +597,9 @@ def paramsAtFixedY(sets,x,y,fixedY,foreach=[]):
     
     for this_fixedY in fixedY:
       xnew = f(this_fixedY);
-      param.update({xlabel: float(xnew)});
-      
-      params.append(param);
+      this_param = copy.deepcopy(param);
+      this_param[xlabel] = float(xnew);
+      params.append(this_param);
 
   return params;
 
