@@ -1,7 +1,21 @@
-#  Copyright Matthias Troyer 2009 - 2010.
+#  Copyright Matthias Troyer and Synge Todo 2009-2013.
 #  Distributed under the Boost Software License, Version 1.0.
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
+
+#
+# Script to setup ALPS_HOME, PATH, LD_LIBRARY_PATH, PYTHONPATH
+#
+
+if(UNIX AND NOT WIN32)
+  configure_file(alpsvars.sh.in ${CMAKE_CURRENT_BINARY_DIR}/alpsvars.sh @ONLY)
+  configure_file(alpsvars.csh.in ${CMAKE_CURRENT_BINARY_DIR}/alpsvars.csh @ONLY)
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/alpsvars.sh ${CMAKE_CURRENT_BINARY_DIR}/alpsvars.csh DESTINATION bin COMPONENT tools)
+endif(UNIX AND NOT WIN32)
+
+#
+#
+#
 
 if (NOT ALPS_BUILD_SOURCE)
   add_subdirectory(alea)
