@@ -184,6 +184,7 @@ private:
 
   // regarding experiment
   bool finite_tof;
+  bool finite_waist;
 
   // regarding worldline
   worldlines wl;

@@ -1,4 +1,5 @@
 import os;
+import math;
 import numpy;
 import scipy;
 import matplotlib;
@@ -442,6 +443,18 @@ def tofPhase(time_of_flight, wavelength, mass):
   else:
     return [(coefficient * component*component) for component in wavelength];
 
+def trappingFrequency(mass, wavelength, VT=None, omega=None):
+  amu = 1.66053;
+  k   = 1.38;
+  
+  coefficient = (2. * mass * amu * math.pi*math.pi / 1.38) * 1e-13;
+  
+  if omega != None:
+    return (coefficient * omega*omega * wavelength*wavelength);
+  if VT != None:
+    return numpy.sqrt(VT / (coefficient * wavelength*wavelength));
+  return;
+
 def summaryReport(h5_outfile):
   ar = pyalps.hdf5.h5ar(h5_outfile);
   L = ar['/simulation/worldlines/num_sites'];
@@ -463,7 +476,6 @@ def summaryReport(h5_outfile):
   print('E/N  : ' + str(ar['/simulation/results/Energy/mean/value']/ar['/simulation/results/Total Particle Number/mean/value'])); 
 
   
-#  return data;
 
 
 

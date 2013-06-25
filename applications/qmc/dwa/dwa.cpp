@@ -85,6 +85,7 @@ void
           << "\t Propagation failure counter         : " << _propagation_failure_counter   << "\n"
           << "\n"
           << "\t Interested in time-of-flight images : " << finite_tof                     << "\n"
+          << "\t Waist correction                    : " << finite_waist                   << "\n"
           << "\n\n";
       out << "Lattice\n"
           << "=======\n\n"
@@ -137,7 +138,8 @@ directed_worm_algorithm
     // regarding worldline
     , wl (num_sites())
     // regarding experiment
-    , finite_tof (is_periodic_ ? false : (this->parameters.defined("tof_phase")))
+    , finite_tof   (is_periodic_ ? false : (this->parameters.defined("tof_phase")))
+    , finite_waist (this->parameters.defined("waist"))
     // regarding measurements
     , measure_                       (this->parameters["MEASURE"] | true)
     , measure_simulation_speed_      (this->parameters["MEASURE[Simulation Speed"] | true)
@@ -741,6 +743,25 @@ void
         for (int i=0; i<dimension(); ++i)
           _position[i] -= static_cast<double>(lattice().extent()[i]-1)/2.;
         position_lookup.push_back(_position);
+      }
+
+      // waist correction
+      if (finite_waist)
+      {
+        double dummy_V0 = static_cast<double>(parameters["V0"]);
+        double dummy_w0 = static_cast<double>(parameters["waist"]);
+        std::vector<double> delta_VT(num_sites(), dummy_V0);
+        for (unsigned int i=0; i<num_sites(); ++i) {
+          double dummy = 2. * std::inner_product(position_lookup[i].begin(), position_lookup[i].end(), position_lookup[i].begin(), 0.) / (dummy_w0*dummy_w0);
+          delta_VT[i] -= dummy_V0 * (dummy + std::exp(-dummy)); 
+          delta_VT[i] *= beta;
+        }
+
+        for (unsigned int i=0; i<num_sites(); ++i) {
+          using boost::numeric::operators::operator+;
+          using boost::numeric::operators::operator*;
+          onsite_matrix[i] = onsite_matrix[i] + delta_VT[i] * (diagonal_matrix_element.begin()->second[site_type(i)]);
+        }
       }
 
       // component coordinate lookup table 
