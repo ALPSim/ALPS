@@ -3,7 +3,6 @@ debian/tmp/usr/bin/dirloop_sse_evaluate usr/bin/
 debian/tmp/usr/bin/dmft usr/bin/
 debian/tmp/usr/bin/dmrg usr/bin/
 debian/tmp/usr/bin/dwa usr/bin/
-debian/tmp/usr/bin/dwa-scheduler usr/bin/
 debian/tmp/usr/bin/fulldiag usr/bin/
 debian/tmp/usr/bin/fulldiag_evaluate usr/bin/
 debian/tmp/usr/bin/hirschfye usr/bin/
