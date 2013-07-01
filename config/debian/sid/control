@@ -91,7 +91,7 @@ Description: The ALPS project - Application binaries
 Package: python-pyalps
 Section: python
 Architecture: any
-Depends: libalps2 (= ${binary:Version}), python2.5, python-numpy,
+Depends: libalps2 (= ${binary:Version}), python2.7, python-numpy,
  python-matplotlib, ${shlibs:Depends},
  ${misc:Depends}
 Description: The ALPS project - python modules
