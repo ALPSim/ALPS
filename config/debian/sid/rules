@@ -10,7 +10,7 @@ include /usr/share/cdbs/1/class/cmake.mk
 DEB_CMAKE_EXTRA_FLAGS = \
     -DALPS_BUILD_APPLICATIONS:BOOL=ON \
     -DALPS_ENABLE_OPENMP:BOOL=ON \
-    -DALPS_BUILD_FORTRAN:BOOL=ON \
+    -DALPS_BUILD_FORTRAN:BOOL=OFF \
     -DCMAKE_Fortran_FLAGS:STRING=-fopenmp
 
 #  Linker flags for reduce binary size
