@@ -1,6 +1,8 @@
-alps (1:20130626~r6962-1) UNRELEASED; urgency=low
+alps (1:20130626~r6962-1) wheezy; urgency=low
 
-  * Non-maintainer upload.
+  * New upstream snapshot (20130626-r6962).
+  * Renamed alps2* as alps*.
+  * Introduced task-alps meta package.
 
  -- Synge Todo <wistaria@comp-phys.org>  Mon, 01 Jul 2013 21:24:31 +0900
 
