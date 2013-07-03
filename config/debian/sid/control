@@ -1,7 +1,7 @@
 Source: alps
 Section: non-free
 Priority: extra
-Maintainer: Ryo IGARASHI <rigarash@issp.u-tokyo.ac.jp> and Synge Todo <wistaria@comp-phys.org>
+Maintainer: Ryo IGARASHI <rigarash@issp.u-tokyo.ac.jp> and Synge Todo <wistaria@issp.u-tokyo.ac.jp>
 Build-Depends: cdbs, debhelper (>= 7.0.50~), cmake,
  libboost-date-time-dev (>= 1.42.0), libboost-filesystem-dev (>=
  1.42.0), libboost-mpi-dev (>= 1.42.0), libboost-program-options-dev

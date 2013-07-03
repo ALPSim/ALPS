@@ -4,7 +4,7 @@ alps (1:20130626~r6962-1) wheezy; urgency=low
   * Renamed alps2* as alps*.
   * Introduced task-alps meta package.
 
- -- Synge Todo <wistaria@comp-phys.org>  Mon, 01 Jul 2013 21:24:31 +0900
+ -- Synge Todo <wistaria@issp.u-tokyo.ac.jp>  Mon, 01 Jul 2013 21:24:31 +0900
 
 alps (2.0.0~rc4-1) unstable; urgency=low
 
