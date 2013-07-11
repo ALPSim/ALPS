@@ -46,10 +46,10 @@ def get_error(f):
 class FloatWithError:
 
 
-  def __init__(self,mean_=0,error_=0,jackbins=[],binsize=0,timeseries=[]):
+  def __init__(self,mean_=0,error_=0,jackknife=[],binsize=0,timeseries=[]):
     self.mean  = mean_
     self.error = error_
-    self.jackbins = list(jackbins)
+    self.jackknife = jackknife
     self.binsize = binsize
     self.timeseries = list(timeseries)
     try:
@@ -68,11 +68,15 @@ class FloatWithError:
     return len(self.mean)
   
   def __getitem__(self,key):
-    return FloatWithError(self.mean[key],self.error[key])
+    try:    j = self.jackknife[:,key]
+    except: j = []
+    return FloatWithError(self.mean[key],self.error[key],j)
   
   def __setitem__(self,key,value):
     self.mean [key] = value.mean
     self.error[key] = value.error
+    try:    self.jackknife[:,key] = value.jackknife
+    except: self.jackknife = []
 
   def __add__(x__,y__):
     if (isinstance(y__,float) | isinstance(y__,int)):
