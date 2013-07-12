@@ -234,7 +234,7 @@ void MaxEntSimulation::dostep()
     std::ofstream maxspec_self_str(boost::filesystem::absolute(name+"maxspec_self.dat", dir).string().c_str());
     std::ofstream avspec_self_str (boost::filesystem::absolute(name+"avspec_self.dat", dir).string().c_str());
     for (std::size_t  i=0; i<avspec.size(); ++i){ 
-      avspec_self_str << omega_coord(i) << " " << -avspec[i]*norm*M_PI<<std::endl;
+      avspec_self_str << omega_coord(i) << " " << -avspec[i]*M_PI<<std::endl;
     }
     for (std::size_t i=0; i<spectra[0].size(); ++i){
       maxspec_self_str << omega_coord(i) << " " << -spectra[max_a][i]*norm*M_PI << std::endl;
@@ -280,6 +280,7 @@ MaxEntSimulation::vector_type MaxEntSimulation::levenberg_marquardt(vector_type 
     if (convergence(u, alpha)<=1e-4)
       break;
   }
+  if (it == max_it) std::cerr<<"WARNING: iteration reached max_it without converging, your minimizer is having problems. Please be careful!"<<std::endl;
   if (verbose) std::cerr <<"Iterations: " << it+1 << "\t";
   std::cerr << "Q = 0.5chi^2-\\alpha*entropy: " << Q1 << "\t";
   if (verbose) std::cerr << "entropy: "<<entropy(transform_into_real_space(u))<<"\talpha*entropy: "<<alpha*entropy(transform_into_real_space(u))<<"\t ";

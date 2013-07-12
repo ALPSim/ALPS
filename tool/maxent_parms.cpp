@@ -157,30 +157,24 @@ y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
             double X_i,dX_i;
             datstream >> i >> X_i >> dX_i;
             if (i<ndat()) {
-//                x_(i) = O_i;
                 y_(i) = X_i/static_cast<double>(p["NORM"]);
                 sigma_(i) = dX_i/static_cast<double>(p["NORM"]);
-//              std::cerr << i << " " << y_(i) << " " << sigma_(i) << std::endl;
             }
         }
       }
   } else {
+      if(!p.defined("NORM")){ throw std::runtime_error("parameter NORM missing!"); }
+      else std::cerr<<"Data normalized to: "<<static_cast<double>(p["NORM"])<<std::endl;
       for (int i=0; i<ndat(); ++i){
           if(!p.defined("X_"+boost::lexical_cast<std::string>(i))){ throw std::runtime_error("parameter X_i missing!"); }
           y_(i) = static_cast<double>(p["X_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);          
-          if (!p.defined("COVARIANCE_MATRIX")) 
+          if (!p.defined("COVARIANCE_MATRIX")){ 
+              if(!p.defined("SIGMA_"+boost::lexical_cast<std::string>(i))) { throw std::runtime_error(std::string("parameter SIGMA_i missing!")+"SIGMA_"+boost::lexical_cast<std::string>(i)); }
               sigma_(i) = static_cast<double>(p["SIGMA_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);
+          }
       }
-      //double z=0;
-      //for (int i=0; i<ndat(); ++i){
-      //  z+=y_(i)+sigma_(i);
-      //}
-      //std::cout<<"debug: read values checksum is: "<<z<<std::endl;
 
   }
-//    std::cerr << "initial stuff finished " << static_cast<std::string>(p["X_IN_FILE"]) << " " <<
-//    p.defined("X_IN_FILE") << "\n";
-    
 }
 
 
@@ -314,6 +308,16 @@ void ContiParameters::setup_kernel(const alps::params& p, const int ntab, const 
         }
       }    
     }
+    else if (p_kernel == "anomalous"){
+      std::cerr<<"Using general anomalous kernel omega / (iomega_n - omega) for, e.g., omega*Delta"<<std::endl;
+      for (int i=0; i<ndat()/2; ++i) {
+        std::complex<double> iomegan(0, (2*i+1)*M_PI*T_);
+        for (int j=1; j<ntab; ++j) {
+          double omega = freq[j];
+          Kc(i,j) =  -omega / (iomegan - omega);
+        }
+      }   
+    }
     else 
       boost::throw_exception(std::invalid_argument("unknown integration kernel"));    
     for (int i=0; i<ndat(); i+=2) {
@@ -356,10 +360,10 @@ void ContiParameters::setup_kernel(const alps::params& p, const int ntab, const 
         std::cout << "# " << var(i) << "\n";
     }
   } 
-//  else {
-//    for (int i=0; i<ndat(); ++i)
-//      sigma[i] = static_cast<double>(p["SIGMA_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);
-//  }
+  //else {
+  //  for (int i=0; i<ndat(); ++i)
+  //    sigma[i] = static_cast<double>(p["SIGMA_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);
+  //}
   //Look around Eq. D.5 in Sebastian's thesis. We have sigma = sqrt(eigenvalues of covariance matrix) or, in case of a diagonal covariance matrix, we have sigma=SIGMA_X. The then define y := \bar{G}/sigma and K := (1/sigma)\tilde{K}
   if (p_data == "hillibilli" && !(p["PARTICLE_HOLE_SYMMETRY"]|true))  {
 //      if (p["DATASPACE"]=="frequency" && !p.value_or_default("PARTICLE_HOLE_SYMMETRY",true))  {

@@ -224,6 +224,7 @@ void MaxEntHelper::print_chi2(const vector_type& A, std::ostream &os) const
 {
   vector_type backcont=prec_prod(K(), A);
   vector_type defaultm=prec_prod(K(), Default());
+  os<<"#first column: index (Matsubara frequency). second column: fitted function. third: input data. fourth: default model."<<std::endl;
   for(int i=0;i<y().size();++i){
     os<<i<<" "<<backcont[i]<<" "<<y()[i]<<" "<<defaultm[i]<<std::endl;
   }
