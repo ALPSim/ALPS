@@ -51,12 +51,14 @@ void FourierTransformer::frequency_to_time_ft(itime_green_function_t &G_tau,
     for (unsigned int s1=0; s1<N_site; ++s1){
       for (unsigned int s2=0; s2<N_site; ++s2) {
         //std::cout<<f<<" "<<s1<<" "<<s2<<" "<<c1_[f][s1][s2]<<" "<<c2_[f][s1][s2]<<" "<<c3_[f][s1][s2]<<std::endl;
-        if(c1_[f][s1][s2]==0 && c2_[f][s1][s2] == 0 && c3_[f][s1][s2]){  //nothing happening in this gf.
+        if((c1_[f][s1][s2]==0) && (c2_[f][s1][s2] == 0) && (c3_[f][s1][s2]==0)){  //nothing happening in this gf.
+          //std::cout<<f<<" "<<s1<<" "<<s2<<" everything zero."<<std::endl;
           for (unsigned int i=0; i<=N_tau; i++) {
             G_tau(i,s1,s2,f)=0.;
           }
         } 
         else {
+          //std::cout<<f<<" "<<s1<<" "<<s2<<" not everything zero."<<std::endl;
           for (unsigned int k=0; k<N_omega; k++) {
             std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
             G_omega_no_model(k,s1,s2,f) -= f_omega(iw, c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2]);
@@ -97,7 +99,7 @@ void FourierTransformer::frequency_to_time_ft(nambu_itime_green_function_t &G_ta
   }
   for (unsigned int s1=0; s1<N_site; ++s1){
     for (unsigned int s2=0; s2<N_site; ++s2) {
-      if(c1_[0][s1][s2]==0 && c2_[0][s1][s2] == 0 && c3_[0][s1][s2]){  //nothing happening in this gf - this fct is completely zero.
+      if((c1_[0][s1][s2]==0) && (c2_[0][s1][s2] == 0) && (c3_[0][s1][s2]== 0)){  //nothing happening in this gf - this fct is completely zero.
         for (unsigned int i=0; i<=N_tau; i++) {
           G_tau(i,s1,s2,0,0)=0.;
           G_tau(i,s1,s2,0,1)=0.;

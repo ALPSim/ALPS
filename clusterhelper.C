@@ -650,7 +650,9 @@ ClusterHelper::vector_type ClusterHelper::map_back_into_brillouin_zone(vector_ty
     }
     v[d] *= M_PI;
   }
-  //std::cout << v[0] << " " << v[1] << "\n";
+  /*for (unsigned int d=0; d<v.size(); ++d) {
+    std::cout << v[d];
+  }std::cout<<std::endl;*/
   return v;
 }
 
