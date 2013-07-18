@@ -55,7 +55,12 @@ void DCATransformer::generate_transformer(const alps::Parameters& parms, boost::
     trans_ptr.reset(new AntiFerroDCATransformer(parms));
   }
   else {
+#ifndef USE_MPI
     std::cout<<"creating simple DCA transformer"<<std::endl;
+#else
+    int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    if(rank==0) std::cout<<"creating simple DCA transformer"<<std::endl;
+#endif
     trans_ptr.reset(new SimpleDCATransformer(parms));
   }
 }
@@ -140,8 +145,12 @@ dispersion_moments_(2, 0.)
   else {
     bandwidth_ = bw;
   }
-  
+#ifndef USE_MPI 
   std::cout << "bandwidth: " << bandwidth_ << "\n";
+#else
+  int rank;   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  if(rank==0) std::cout << "bandwidth: " << bandwidth_ << "\n";
+#endif
 }
 
 
