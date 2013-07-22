@@ -63,7 +63,7 @@ endif (NOT Boost_FOUND AND ALPS_BUILD_DOC)
 
 if (NOT ALPS_BUILD_SOURCE)
 
-  set (TOOLS parameter2xml convert2xml compactrun lattice2xml pevaluate pconfig 
+  set (TOOLS parameter2xml parameter2hdf5 convert2xml compactrun lattice2xml pevaluate pconfig 
              poutput printgraph txt2archive xml2archive)
   foreach(program ${TOOLS})
     add_executable(${program} ${program}.C)
