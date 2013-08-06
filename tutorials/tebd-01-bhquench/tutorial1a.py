@@ -37,8 +37,8 @@ for A in [5.0, 10.0, 15.0, 25.0, 50.0]:
         parms.append({ 
                   'L'                         : 10,
                   'MODEL'                     : 'hardcore boson',
-                  'CONSERVED_QUANTUMNUMBERS'  : 'N',
-                  'N' : 5,
+                  'CONSERVED_QUANTUMNUMBERS'  : 'N_total',
+                  'N_total' : 5,
                   't'                         : 1.0,
                   'V'                         : 10.0,
                   'ITP_CHIS' : [20, 30, 35],

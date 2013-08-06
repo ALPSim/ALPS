@@ -40,7 +40,7 @@ for z in [0.0, 0.3, 0.9, 1.0, 1.1, 1.5]:
               'L'                         : 50,
               'MODEL'                     : 'spin',
               'local_S'                   : 0.5,
-              'CONSERVED_QUANTUMNUMBERS'  : 'Sz',
+              'CONSERVED_QUANTUMNUMBERS'  : 'Sz_total',
               'Jxy'                         : 1,
               'Jz'                         : z,
           'INITIAL_STATE' : 'kink',

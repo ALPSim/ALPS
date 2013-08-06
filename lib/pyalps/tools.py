@@ -782,49 +782,55 @@ def writeTEBDfiles(parmsList, fileName):
         #check for conserved quantum numbers
         if 'CONSERVED_QUANTUMNUMBERS' in parms:
             if str(parms['MODEL'])=='spin':
-                if parms['CONSERVED_QUANTUMNUMBERS']=='Sz':
+                if parms['CONSERVED_QUANTUMNUMBERS']=='Sz_total':
                     systemSettingsString+=", qswitch=.true."
-                    systemSettingsString+=", qType='Sz'"
+                    systemSettingsString+=", qType='Sz_total'"
                 else:
-                    raise Exception("Only Sz may be conserved for spin models!")
+                    raise Exception("Only Sz_total may be conserved for spin models!")
                     systemSettingsString+=", qswitch=.false."
-                    systemSettingsString+=", qType='Sz'"
+                    systemSettingsString+=", qType='Sz_total'"
             else:
-                if parms['CONSERVED_QUANTUMNUMBERS']=='N':
+                if parms['CONSERVED_QUANTUMNUMBERS']=='N_total':
                     systemSettingsString+=", qswitch=.true."
-                    systemSettingsString+=", qType='N'"
+                    systemSettingsString+=", qType='N_total'"
                 else:
-                    raise Exception("Only N may be conserved for particle models!")
+                    raise Exception("Only N_total may be conserved for particle models!")
                     systemSettingsString+=", qswitch=.false."
-                    systemSettingsString+=", qType='N'"
+                    systemSettingsString+=", qType='N_total'"
         else:
             systemSettingsString+=", qswitch=.false."
-            systemSettingsString+=", qType='Sz'"
+            systemSettingsString+=", qType='Sz_total'"
 
         #check for value of conserved quantum number
         #Sz
-        if 'Sz' in parms:
+        if 'Sz_total' in parms:
             if str(parms['MODEL'])=='spin':
                 #Add L*S to this number to convert it to an integer appropriate for TEBD
-                parms['Sz']=float(parms['L'])*float(parms['local_S'])-float(parms['Sz'])
+                parms['Sz_total']=float(parms['L'])*float(parms['local_S'])-float(parms['Sz_total'])
                 #convert to an integer-complain if it doesn't work
-                if int(parms['Sz'])==float(parms['Sz']):
-                    systemSettingsString+=", totQ="+str(int(parms['Sz']))
+                if int(parms['Sz_total'])==float(parms['Sz_total']):
+                    systemSettingsString+=", totQ="+str(int(parms['Sz_total']))
                 else:
-                    raise Exception("Invalid Sz encountered!")
+                    raise Exception("Invalid Sz_total encountered!")
                     systemSettingsString+=", totQ=0"
             else:
-                raise Exception("Sz only conserved for spin models!")
+                raise Exception("Sz_total only conserved for spin models!")
                 systemSettingsString+=", totQ=0"
         #N
-        elif 'N' in parms:
+        elif 'N_total' in parms:
             if str(parms['MODEL'])=='spin':
-                raise Exception("N only conserved for particle models!")
+                raise Exception("N_total only conserved for particle models!")
                 systemSettingsString+=", totQ=0"
             else:
-                systemSettingsString+=", totQ="+str(int(parms['N']))
+                systemSettingsString+=", totQ="+str(int(parms['N_total']))
         else:
-            systemSettingsString+=", totQ=0"
+            if 'INITIAL_STATE' in parms:
+                if parms['INITIAL_STATE']=='kink':
+                    systemSettingsString+=", totQ=0"
+                else:
+                    raise Exception("Value of conserved quantity not specified!  Use N_total for particles or Sz_total for magnetization!")
+            else :
+                raise Exception("Value of conserved quantity not specified!  Use N_total for particles or Sz_total for magnetization!")
 
         #check for openmp threading
         if 'NUM_THREADS' in parms:

@@ -41,7 +41,7 @@ for nsteps in [100, 250, 500, 750, 1000]:
                   'L'                         : 50,
                   'MODEL'                     : 'spin',
                   'local_S'                   : 0.5,
-                  'CONSERVED_QUANTUMNUMBERS'  : 'Sz',
+                  'CONSERVED_QUANTUMNUMBERS'  : 'Sz_total',
                   'Jxy'                         : 1,
                   'INITIAL_STATE' : 'kink',
                   'CHI_LIMIT' : 20,
