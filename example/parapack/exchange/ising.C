@@ -26,9 +26,11 @@
 *****************************************************************************/
 
 #include "../single/ising.h"
-#include "../multiple/ising.h"
 #include <alps/parapack/exchange.h>
+#ifdef ALPS_HAVE_MPI
+#include "../multiple/ising.h"
 #include <alps/parapack/exchange_multi.h>
+#endif
 
 PARAPACK_SET_VERSION("ALPS/parapack example program: exchange Monte Carlo");
 PARAPACK_REGISTER_ALGORITHM(single_ising_worker, "ising");
