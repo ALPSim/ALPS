@@ -1,0 +1,15 @@
+LATTICE="square lattice"
+MODEL="boson Hubbard"
+
+L=20  
+Nmax=20
+
+t=1.
+U=16.
+mu=32.
+
+THERMALIZATION=10000
+SWEEPS=100000 
+SKIP=400
+
+{T=1.0}
