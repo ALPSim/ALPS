@@ -1,2 +1,0 @@
-all:
-	../../../dmft  hirschfye.param
