@@ -376,8 +376,8 @@ def makeGnuplotPlot(data,title=None,xaxis=None,yaxis=None,legend=None, outfile=N
                     output += ' "-" using 1:2:3 w xerrorline  notitle ,' 
                 if xerrors != None and yerrors != None:
                     output += ' "-" using 1:2:3:4 w xyerrorline  notitle ,'
-        output=output[:-1]
-        output+='\n'
+    output=output[:-1]
+    output+='\n'
     
     for q in flatten(data):    
             if xerrors == None and yerrors == None:
