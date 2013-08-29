@@ -65,6 +65,18 @@ if(BUILD_BOOST_FILESYSTEM)
   endforeach(D)
 endif(BUILD_BOOST_FILESYSTEM)
 
+# Boost.Iostreams
+if(BUILD_BOOST_IOSTREAMS)
+  set(DIRECTORY "${Boost_ROOT_DIR}/libs/iostreams/src")
+  set(SOURCES file_descriptor.cpp mapped_file.cpp)
+  foreach(S ${SOURCES})
+    if(EXISTS ${DIRECTORY}/${S})
+      set(BOOST_SOURCES ${BOOST_SOURCES} ${DIRECTORY}/${S})
+    endif(EXISTS ${DIRECTORY}/${S})
+   endforeach(S)
+endif(BUILD_BOOST_IOSTREAMS)
+
+
 # Boost.ProgramOptions
 if(BUILD_BOOST_PROGRAM_OPTIONS)
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/program_options/src")

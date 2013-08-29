@@ -54,7 +54,7 @@ if (NOT Boost_ROOT_DIR)
     set(TIMER timer)
   endif (Boost_FOUND)
   # The final library finding for precompiled Boost.
-  find_package(Boost 1.48.0 COMPONENTS chrono date_time filesystem program_options python regex system serialization thread ${MPI} ${UTF} ${TIMER})
+  find_package(Boost 1.48.0 COMPONENTS chrono date_time filesystem iostreams program_options python regex system serialization thread ${MPI} ${UTF} ${TIMER})
   # Unset local variable
   unset(MPI)
   unset(UTF)
