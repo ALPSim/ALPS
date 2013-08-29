@@ -98,9 +98,10 @@ public:
   
 private:
   
-  void setup_tables();
+  void setup_tables(const alps::Parameters& params);
   void symmetry_analysis(const Matrix<double>::Type& basis, 
                          const Matrix<double>::Type& basis_inv);
+  void ladder_symmetry_analysis();
   std::pair<site_class_set_type, pair_class_set_type> setup_classes(const Matrix<site_t>::Type& symmetry_table) const;
   bool inside_cluster(vector_type v, const Matrix<double>::Type& b) const;
   bool inside_reduced_brillouin_zone(vector_type v) const;
@@ -127,6 +128,8 @@ private:
   site_class_set_type site_class_set_k_space_;
   pair_class_set_type pair_class_set_k_space_;
   Matrix<site_t>::Type symmetry_table_k_space_;
+  Matrix<site_t>::Type symmetry_table_real_space;
+
   unsigned int n_cluster_sites_;
   bool bipartite_;
   const double epsilon_;
@@ -160,7 +163,8 @@ public:
   virtual nambu_matsubara_green_function_t symmetrize(const nambu_matsubara_green_function_t& G, const bool paramagnet) const{ throw std::logic_error("not implemented");};
   ///compute an initial G0.
   virtual       matsubara_green_function_t initial_G0      (const alps::Parameters& parms); 
-  virtual nambu_matsubara_green_function_t initial_G0_nambu(const alps::Parameters& parms); 
+  virtual nambu_matsubara_green_function_t initial_G0_nambu(const alps::Parameters& parms);
+  nambu_matsubara_green_function_t initial_G_nambu(const alps::Parameters& parms);
   
   template<typename T>
   T interpolate(vector_type k, const std::vector<T>& values, const bool antiferromagnet) const {
@@ -312,7 +316,7 @@ public:
   compute_filling_(params.defined("FILLING")),
   n_target_(compute_filling_?(double)(params["FILLING"]):-1)
   {
-    params_ptr_=&params;
+    const alps::Parameters *params_ptr_;
   }
   //self-consistency transform operator
   matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
@@ -641,8 +645,9 @@ green_function<T> DCATransformer::symmetrize_helper(const green_function<T>& G,
     for (spin_t flavor=0; flavor<nflavor; ++flavor) {
       for (frequency_t freq=0; freq<nfreq; ++freq) {
         T av=0;
-        for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++)
+        for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
           av += G(freq, it->first, it->second, flavor);
+        }
         av /= itc->size();
         for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++)
           G_new(freq, it->first, it->second, flavor) = av;
@@ -843,7 +848,7 @@ green_function<T> SimpleDCATransformer::fourpoint_green_function_divide(const gr
 }
 
 
-
+//////////////AntiFerro DCA////////////////////
 
 
 template<typename T, class D>
@@ -1141,7 +1146,8 @@ nambu_green_function<T> DCATransformer::symmetrize_helper(const nambu_green_func
   return G_new;
 }
 
-//The DCA transormer does the Fourier transforms, dispersions, etc that are needed for the DCA.
+
+//The CDMFT transormer does the Fourier transforms, dispersions, etc that are needed for the CDMFT.
 class CDMFTTransformer : public ClusterTransformer
 {
 public:
@@ -1189,6 +1195,7 @@ public:
                                                       double &mu, const double h, const double eta1, const double eta2, const double beta, const bool use_selfenergy)=0;
   
   std::complex<double>* exp_iksite(const int sign) const;
+  
   int* momentum_translation() const;
   virtual std::vector<double> epsav() const=0;
   virtual std::vector<double> epssqav() const=0;
@@ -1201,6 +1208,9 @@ public:
      return 0.;
   }
   
+protected:
+  complex_dense_matrix U_;
+
 private:
   template<typename T>
   green_function<T> symmetrize_helper(const green_function<T>& G, 
@@ -1210,6 +1220,9 @@ private:
   nambu_green_function<T> symmetrize_helper(const nambu_green_function<T>& G, 
                                             const std::pair<std::set<pair_class_type>::const_iterator, 
                                             std::set<pair_class_type>::const_iterator> pair_classes) const;
+  
+
+
   const double t_, t2_, t3_, t4_;
   double bandwidth_;
   const int L_;
@@ -1223,9 +1236,83 @@ green_function<T> CDMFTTransformer::symmetrize_helper(const green_function<T>& G
                                                     const std::pair<std::set<pair_class_type>::const_iterator, 
                                                     std::set<pair_class_type>::const_iterator> pair_classes) const
 {
-  std::cerr<<"warning: CDMFT symmetrization has not been implemented."<<std::endl;
-  return G;
+  unsigned int nflavor=G.nflavor();
+  unsigned int nsite=G.nsite();
+  unsigned int nfreq=G.nfreq();
+  green_function<T> G_new(nfreq, nsite, nflavor);
+  std::set<pair_class_type>::const_iterator itc, itc_end;
+  for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
+    for (spin_t flavor=0; flavor<nflavor; ++flavor) {
+      for (frequency_t freq=0; freq<nfreq; ++freq) {
+        T av=0;
+        for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++)
+          av += G(freq, it->first, it->second, flavor);
+        av /= itc->size();
+        for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++)
+          G_new(freq, it->first, it->second, flavor) = av;
+      }
+    }
+  }
+  return G_new;
 }
+
+
+
+template<typename T>
+nambu_green_function<T> CDMFTTransformer::symmetrize_helper(const nambu_green_function<T>& G,
+                                          const std::pair<std::set<pair_class_type>::const_iterator,
+                                          std::set<pair_class_type>::const_iterator> pair_classes) const
+{
+  unsigned int nsite=G.nsite();
+  unsigned int nfreq=G.nfreq();
+  T av;
+  nambu_green_function<T> G_new(nfreq, nsite, 2, nondiagonal);
+  G_new=G;
+  std::set<pair_class_type>::const_iterator itc, itc_end;
+  for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
+    for (spin_t f=0; f<2; ++f) {
+      for (frequency_t freq=0; freq<nfreq; ++freq) {
+        av=0;
+        for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
+          av += G(freq, it->first, it->second, f,f);
+        }
+        av /= itc->size();
+        for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
+          G_new(freq, it->first, it->second, f,f) = av;
+        }
+      }
+    }
+    std::cout<<std::endl;
+  }
+  
+  //transform the dwave factor of K into realspace
+  dense_matrix dwave(nsite,nsite);dwave.clear();
+  dwave(0,1)=-1;dwave(0,3)=1;dwave(1,0)=-1;dwave(1,2)=1;dwave(2,1)=1;dwave(2,3)=-1;dwave(3,0)=1;dwave(3,2)=-1;
+  for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
+    //std::cout<<"new symmetry: "<<std::endl;
+    for (frequency_t freq=0; freq<nfreq; ++freq) {
+      T av01=0;
+      T av10=0;
+      for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
+        //if(it->first != it-> second) continue;
+        av01+= dwave(it->first,it->second)*G(freq, it->first, it->second, 0,1);
+        av10+= dwave(it->first,it->second)*G(freq, it->first, it->second, 1,0);
+        //if(freq==0){ std::cout<<"symmetrizing spatial GF: "<<it->first<<" "<<it->second<<" dwave: "<<dwave_prefactor[it->first]<<" entry: "<<dwave_prefactor[it->first]*G(freq, it->first, it->second, 0,1)<<" "<<dwave_prefactor[it->first]*G(freq, it->first, it->second, 1,0)<<std::endl;}
+      }
+      av01/= itc->size();
+      av10/= itc->size();
+      //if(freq==0){ std::cout<<"setting average to: "<<av01<<" "<<av10<<std::endl; }
+      for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
+        //if(it->first != it-> second) continue;
+        G_new(freq, it->first, it->second, 0,1) = dwave(it->first,it->second)*av01;
+        G_new(freq, it->first, it->second, 1,0) = dwave(it->first,it->second)*av10;
+      }
+    }
+  }
+  return G_new;
+}
+
+
 //does the CDMFT cluster transform for the paramagnetic phase (no AFM order)
 class FoursiteCDMFTTransformer : public CDMFTTransformer
 {
@@ -1238,16 +1325,17 @@ public:
   epssqav_(n_cluster_sites(),0.),
   L_(params["L"]),
   t_(params["t"]),
-  tprime_(params["t'"])
+  tstar_(params["tstar"])
   {
     params_ptr_=&params;
-    U_.resize(4,4);
+    set_U_(n_cluster_sites(),U_);
+  /*  U_.resize(4,4);
     U_(0,0)=1.; U_(0,1)=1.; U_(0,2)=1.; U_(0,3)=1.;
     U_(1,0)=1.; U_(1,1)=-1.; U_(1,2)=1.; U_(1,3)=-1.;
     U_(2,0)=1.; U_(2,1)=1.; U_(2,2)=-1.; U_(2,3)=-1.;
     U_(3,0)=1.; U_(3,1)=-1.; U_(3,2)=-1.; U_(3,3)=1.;
     U_/=2.;
-    
+   
     /*epsav_[0]=-8*(M_PI*t+2*tprime)/(M_PI*M_PI);
     epsav_[1]= 8*(M_PI*t-2*tprime)/(M_PI*M_PI);
     epsav_[2]=16*tprime/(M_PI*M_PI);
@@ -1328,19 +1416,20 @@ private:
   green_function<T> fourpoint_green_function_divide(const green_function<T>& G1, 
                                                     const T d) const;
   void set_Tij_matrix(double kx, double ky, complex_dense_matrix &H0);
-                                      
+  void set_nambu_Tij_dwave_matrix(double kx, double ky, double eta1,double eta2,double mu, complex_dense_matrix &H0);
+  void set_U_(unsigned int nsite, complex_dense_matrix &U_);
   struct Forward;
   struct Backward;
   
   bool compute_filling_;
   double n_target_;
   const alps::Parameters *params_ptr_;
-  complex_dense_matrix U_;
+  //complex_dense_matrix U_;
   std::vector<double> epsav_;
   std::vector<double> epssqav_;
   const int L_;
   const double t_;
-  const double tprime_;
+  const double tstar_;
 };
 
 template<class T>
