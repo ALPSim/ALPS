@@ -132,6 +132,9 @@ class WriteInputFiles(Module):
          else:
            base_name = os.path.basename(o.name)
 
+         print(base_name);
+
+
          ofile = basic.File()
          ofile.name = os.path.join(dir.name,base_name + '.in.xml')
 
@@ -286,16 +289,25 @@ class GetResultFiles(Module):
                 tasks = self.getInputFromPort('tasks')
             if self.hasInputFromPort('prefix'):
                 prefix = self.getInputFromPort('prefix')
-            result = pyalps.recursiveGlob(dirname, prefix+ '.task' + tasks + '.out.xml')
+            if self.hasInputFromPort('format'):
+                fm = self.getInputFromPort('format')
+                if fm == 'hdf5':
+                    result = pyalps.recursiveGlob(dirname, prefix+ '.task' + tasks + '.out.h5')
+                else:
+                    result = pyalps.recursiveGlob(dirname, prefix+ '.task' + tasks + '.out.xml')
+            else:
+                result = pyalps.recursiveGlob(dirname, prefix+ '.task' + tasks + '.out.xml')
             self.setResult('value', result)
             self.setResult('resultfiles', [ResultFile(x) for x in result])
 
     _input_ports = [('dir',[basic.Directory]), 
         ('prefix',[basic.String]), 
         ('tasks',[basic.String]),
-        ('pattern',[basic.String])]
+        ('pattern',[basic.String]),
+        ('format',[basic.String])]
     _output_ports = [('value',[basic.List]),
         ('resultfiles',[ResultFiles])]
+
 
 class Convert2XML(Module):
     """

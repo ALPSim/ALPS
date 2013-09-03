@@ -50,20 +50,22 @@
 #include <alps/expression.h>
 #include <alps/numeric/vector_functions.hpp>
 #include <alps/numeric/vector_valarray_conversion.hpp>
+#include <alps/ngs.hpp>
 
 #include "worldlines.hpp"
 
-#include "../qmc.ngs.h"
+#include "../qmc.h"
 
 
 class directed_worm_algorithm  
-  : public qmcbase<>     
+  : public QMCRun<>     
 {
 public:
   typedef boost::uint64_t                count_type;
   typedef worldlines::location_type      location_type;
 
-  directed_worm_algorithm(alps::hdf5::archive & ar);
+//  directed_worm_algorithm(alps::hdf5::archive & ar);   // Comment by Tama: I couldn't proceed on without Luka's NGS scheduler being ready.
+  directed_worm_algorithm(const alps::ProcessList& p, const alps::Parameters& parms_, int n);
 
   static void print_copyright  (std::ostream & out);
   void        print_simulation (std::ostream & out);
@@ -78,7 +80,7 @@ private:
   /// private member functions 
 
   // regarding simulation backbone (ESSENTIAL)
-  void  update();
+  void  dostep();
   void  measure() {}  // I don't measure every sweep, and I do a checkpoint rather then only measure.      
   void  docheckpoint();
 
@@ -88,7 +90,8 @@ private:
   void   delete_relink_jump_or_bounce (std::pair<neighbor_iterator, neighbor_iterator> const & neighbors_);
 
   // regarding simulation performance 
-  double fraction_completed()          const  {  return static_cast<double>(_sweep_counter)/double(_total_sweeps);  }
+  bool   is_thermalized()              const  {  return (_sweep_counter > _thermalization_sweeps); }
+  double work_done()                   const  {  return is_thermalized() ? static_cast<double>(_sweep_counter-_thermalization_sweeps)/double(_total_sweeps) : 0.;  }
   double probability_worm_insertion()  const  {  return (1. - static_cast<double>(_sweep_failure_counter)/_sweep_counter);         }
   double probability_bounce()          const  {  return (static_cast<double>(_propagation_failure_counter)/_propagation_counter);  }
 
@@ -157,6 +160,7 @@ private:
   count_type  _propagation_counter;
   count_type  _propagation_failure_counter;
 
+  count_type  _thermalization_sweeps;
   count_type  _total_sweeps;
   count_type  _skip;
 

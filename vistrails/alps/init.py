@@ -47,6 +47,7 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                    'AppLoop': (applications.RunLoop,{}),
                    'AppDirLoopSSE': (applications.RunDirLoopSSE,{}),
                    'AppWorm': (applications.RunWorm,{}),
+                   'AppDWA' : (applications.RunDWA,{}),
                    'AppFullDiag': (applications.RunFullDiag,{}),
                    'AppSparseDiag': (applications.RunSparseDiag,{}),
                    'AppDMRG': (applications.RunDMRG,{}),

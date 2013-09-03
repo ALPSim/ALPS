@@ -26,6 +26,8 @@
 *****************************************************************************/
 
 #include "dwa.hpp"
+#include <alps/scheduler.h>
+#include <alps/osiris/comm.h>
 
 
 // ==================================================
@@ -73,11 +75,12 @@ void
       using alps::numeric::operator<<;
       out << "Parameters\n"
           << "==========\n\n"
-          << parameters
+          << parms
           << "\n\n";
       out << "Simulation\n"
           << "==========\n\n"
           << "\t Sweeps                              : " << _total_sweeps                  << "\n"
+          << "\t Thermalization sweeps               : " << _thermalization_sweeps         << "\n"
           << "\t Skip (Sweeps per measurement)       : " << _skip                          << "\n"
           << "\t Sweep counter                       : " << _sweep_counter                 << "\n"
           << "\t Sweep failure counter               : " << _sweep_failure_counter         << "\n"
@@ -89,7 +92,7 @@ void
           << "\n\n";
       out << "Lattice\n"
           << "=======\n\n"
-          << "Name              : " << parameters["LATTICE"]                    << "\n"
+          << "Name              : " << parms["LATTICE"]                         << "\n"
           << "Dimension         : " << dimension()                              << "\n"
           << "Total Sites/Bonds : " << num_sites() << "\t/\t" << num_bonds()    << "\n"
           << "Periodic          : " << is_periodic_ << "\n"
@@ -124,34 +127,40 @@ void
 
 
 directed_worm_algorithm
-  ::directed_worm_algorithm(alps::hdf5::archive & ar)
-    : qmcbase<>(ar) 
+
+//  ::directed_worm_algorithm(alps::hdf5::archive & ar)    // Luka's NGS scheduler is not ready.
+//    : qmcbase<>(ar)                                      // Luka's NGS scheduler is not ready.
+
+  ::directed_worm_algorithm(const alps::ProcessList& plist_, const alps::Parameters& parms_, int n)
+    : QMCRun<>(plist_, parms_, n)
+
     // regarding MC simulation
     , _sweep_counter               (0)
     , _sweep_failure_counter       (0)
     , _propagation_counter         (0)
     , _propagation_failure_counter (0)
-    , _total_sweeps                (this->parameters["TOTAL_SWEEPS"] | (this->parameters["SWEEPS"] | 10000000))
-    , _skip                        (this->parameters["SKIP"] | 1)
+    , _thermalization_sweeps       (parms_.value_or_default("THERMALIZATION",0))
+    , _total_sweeps                (parms_.value_or_default("SWEEPS",10000000))
+    , _skip                        (parms_.value_or_default("SKIP",1))
     // regarding lattice
     , is_periodic_ (std::find((this->lattice().boundary()).begin(), (this->lattice().boundary()).end(), "open") == (this->lattice().boundary()).end())
     // regarding worldline
     , wl (num_sites())
     // regarding experiment
-    , finite_tof   (is_periodic_ ? false : (this->parameters.defined("tof_phase")))
-    , finite_waist (this->parameters.defined("waist"))
+    , finite_tof   (is_periodic_ ? false : (parms_.defined("tof_phase")))
+    , finite_waist (parms_.defined("waist"))
     // regarding measurements
-    , measure_                       (this->parameters["MEASURE"] | true)
-    , measure_simulation_speed_      (this->parameters["MEASURE[Simulation Speed"] | true)
-    , measure_number2_               (this->parameters["MEASURE[Total Particle Number^2]"] | false)
-    , measure_energy2_               (this->parameters["MEASURE[Energy^2]"] | false)
-    , measure_density2_              (inhomogeneous() ? false : static_cast<bool>(this->parameters["MEASURE[Density^2]"] | false))
-    , measure_energy_density2_       (inhomogeneous() ? false : static_cast<bool>(this->parameters["MEASURE[Energy Density^2]"] | false))
-    , measure_winding_number_        (!is_periodic_  ? false :  static_cast<bool>(this->parameters["MEASURE[Winding Number]"] | false))
-    , measure_local_num_kinks_       (this->parameters["MEASURE[Local Kink: Number]"] | false)
-    , measure_local_density_         (this->parameters["MEASURE[Local Density]"] | false)
-    , measure_local_density2_        (this->parameters["MEASURE[Local Density^2]"] | false)
-    , measure_green_function_        (this->parameters["MEASURE[Green Function]"] | false)
+    , measure_                       (parms_.value_or_default("MEASURE",true))
+    , measure_simulation_speed_      (parms_.value_or_default("MEASURE[Simulation Speed",true))
+    , measure_number2_               (parms_.value_or_default("MEASURE[Total Particle Number^2]",false))
+    , measure_energy2_               (parms_.value_or_default("MEASURE[Energy^2]",false))
+    , measure_density2_              (inhomogeneous() ? false : static_cast<bool>(parms_.value_or_default("MEASURE[Density^2]",false)))
+    , measure_energy_density2_       (inhomogeneous() ? false : static_cast<bool>(parms_.value_or_default("MEASURE[Energy Density^2]",false)))
+    , measure_winding_number_        (!is_periodic_  ? false :  static_cast<bool>(parms_.value_or_default("MEASURE[Winding Number]",false)))
+    , measure_local_num_kinks_       (parms_.value_or_default("MEASURE[Local Kink: Number]",false))
+    , measure_local_density_         (parms_.value_or_default("MEASURE[Local Density]",false))
+    , measure_local_density2_        (parms_.value_or_default("MEASURE[Local Density^2]",false))
+    , measure_green_function_        (parms_.value_or_default("MEASURE[Green Function]",false))
   {
     // lattice enhancement
     using alps::numeric::operator*;
@@ -215,7 +224,7 @@ void
 
       // Parameters
       std::cout << "\t\tii. parameters \t\t ... starting ... \n";
-      ar << alps::make_pvp("/parameters", parameters);
+      ar << alps::make_pvp("/parameters", parms);
       std::cout << "\t\t\t\t ... done.\n\n";
 
       // Simulation results
@@ -232,6 +241,7 @@ void
 
       std::cout << "\t\t ... done.\n\n";
     }
+
 
 void 
   directed_worm_algorithm
@@ -254,6 +264,7 @@ void
       else
         std::cout << "\nNo measurements found.\n";
     }
+
 
 void
   directed_worm_algorithm
@@ -307,7 +318,7 @@ void
           alps::expression::Expression<double> this_x_expression;
           alps::expression::Expression<double> this_y_expression;
           alps::expression::Expression<double> this_z_expression;
-          alps::SiteOperatorEvaluator<short,double> _site_basis_evaluator(_states[m], model().basis().site_basis(), this_copy_of_params_is_reserved_for_the_old_scheduler_library_which_is_to_be_depreciated, _siteterms[i].site());
+          alps::SiteOperatorEvaluator<short,double> _site_basis_evaluator(_states[m], model().basis().site_basis(), parms, _siteterms[i].site());
           this_expression.partial_evaluate(_site_basis_evaluator);   // evaluate all operator terms...
           this_expression.simplify();
           alps::expression::Term<double> this_zeroth_term = this_expression.zeroth_term();
@@ -675,12 +686,12 @@ void
       }
 
       // modify bond strength matrix if tx/t, ty/t, tz/t exists
-      if (parameters.defined("tx_t") || parameters.defined("ty_t") || parameters.defined("tz_t"))
+      if (parms.defined("tx_t") || parms.defined("ty_t") || parms.defined("tz_t"))
       {
         std::vector<double> t_relative(dimension(), 1.);
-        if (parameters.defined("tx_t"))  t_relative[0] = parameters["tx_t"] | 1.; 
-        if (parameters.defined("ty_t"))  t_relative[1] = parameters["ty_t"] | 1.;
-        if (parameters.defined("tz_t"))  t_relative[2] = parameters["tz_t"] | 1.;
+        if (parms.defined("tx_t"))  t_relative[0] = parms.value_or_default("tx_t", 1.); 
+        if (parms.defined("ty_t"))  t_relative[1] = parms.value_or_default("ty_t", 1.);
+        if (parms.defined("tz_t"))  t_relative[2] = parms.value_or_default("tz_t", 1.);
 
         //using alps::numeric::operator<<;
         //std::cout << "\nt (relative) : " << t_relative << "\n";
@@ -748,8 +759,8 @@ void
       // waist correction
       if (finite_waist)
       {
-        double dummy_V0 = static_cast<double>(parameters["V0"]);
-        double dummy_w0 = static_cast<double>(parameters["waist"]);
+        double dummy_V0 = static_cast<double>(parms["V0"]);
+        double dummy_w0 = static_cast<double>(parms["waist"]);
         std::vector<double> delta_VT(num_sites(), dummy_V0);
         for (unsigned int i=0; i<num_sites(); ++i) {
           double dummy = 2. * std::inner_product(position_lookup[i].begin(), position_lookup[i].end(), position_lookup[i].begin(), 0.) / (dummy_w0*dummy_w0);
@@ -791,7 +802,7 @@ void
       if (finite_tof)
       {
         std::vector<double> inverse_tof;
-        std::string tof_phase = boost::lexical_cast<std::string>(parameters["tof_phase"]);
+        std::string tof_phase = boost::lexical_cast<std::string>(parms["tof_phase"]);
         tof_phase.erase(std::remove(tof_phase.begin(), tof_phase.end(), '['), tof_phase.end());
         tof_phase.erase(std::remove(tof_phase.begin(), tof_phase.end(), ']'), tof_phase.end());
         tof_phase.erase(std::remove(tof_phase.begin(), tof_phase.end(), ' '), tof_phase.end());
@@ -858,75 +869,75 @@ void
     {
       // regarding measurements
       measurements 
-        << alps::ngs::RealObservable   ("Total Particle Number")
-        << alps::ngs::RealObservable   ("Energy")
-        << alps::ngs::RealObservable   ("Energy:Vertex")
-        << alps::ngs::RealObservable   ("Energy:Onsite")
+        << alps::RealObservable   ("Total Particle Number")
+        << alps::RealObservable   ("Energy")
+        << alps::RealObservable   ("Energy:Vertex")
+        << alps::RealObservable   ("Energy:Onsite")
       ;
 
       if (!inhomogeneous()) 
       {
         measurements 
-          << alps::ngs::RealObservable ("Density")
-          << alps::ngs::RealObservable ("Energy Density")
-          << alps::ngs::RealObservable ("Energy Density:Vertex")
-          << alps::ngs::RealObservable ("Energy Density:Onsite")
+          << alps::RealObservable ("Density")
+          << alps::RealObservable ("Energy Density")
+          << alps::RealObservable ("Energy Density:Vertex")
+          << alps::RealObservable ("Energy Density:Onsite")
         ;
       }
 
       if (measure_number2_)
-        measurements << alps::ngs::RealObservable ("Total Particle Number^2");
+        measurements << alps::RealObservable ("Total Particle Number^2");
       if (measure_energy2_)
-        measurements << alps::ngs::RealObservable ("Energy^2");
+        measurements << alps::RealObservable ("Energy^2");
       if (measure_density2_)
-        measurements << alps::ngs::RealObservable ("Density^2");
+        measurements << alps::RealObservable ("Density^2");
       if (measure_energy_density2_)
-        measurements << alps::ngs::RealObservable ("Energy Density^2");
+        measurements << alps::RealObservable ("Energy Density^2");
 
       if (measure_winding_number_)
-        measurements << alps::ngs::RealVectorObservable ("Winding Number^2");
+        measurements << alps::RealVectorObservable ("Winding Number^2");
 
       if (measure_local_num_kinks_) 
       {
         _num_kinks_cache.resize(wl.num_sites(),0.);
-        measurements << alps::ngs::SimpleRealVectorObservable ("Local Kink:Number");
+        measurements << alps::SimpleRealVectorObservable ("Local Kink:Number");
       }
 
       if (measure_local_density_)
       {
         _states_cache.resize(wl.num_sites(),0.);
-        measurements << alps::ngs::SimpleRealVectorObservable ("Local Density");
+        measurements << alps::SimpleRealVectorObservable ("Local Density");
       }
 
       if (measure_local_density2_)
       {
         _states2_cache.resize(wl.num_sites(),0.);
-        measurements << alps::ngs::SimpleRealVectorObservable ("Local Density^2");
+        measurements << alps::SimpleRealVectorObservable ("Local Density^2");
       }
 
       // regarding on-fly measurements
       reinitialize_on_fly_measurements();
 
       measurements
-        << alps::ngs::RealObservable  ("Green Function:0")
-        << alps::ngs::RealObservable  ("Green Function:1")
-        << alps::ngs::RealObservable  ("Momentum Distribution:0")
+        << alps::RealObservable  ("Green Function:0")
+        << alps::RealObservable  ("Green Function:1")
+        << alps::RealObservable  ("Momentum Distribution:0")
         ;
 
       if (measure_green_function_)
       {
         green.resize(num_sites(),0.);
-        measurements << alps::ngs::SimpleRealVectorObservable ("Green Function");
+        measurements << alps::SimpleRealVectorObservable ("Green Function");
       }
 
       if (finite_tof)
       {
-        measurements << alps::ngs::RealObservable  ("Momentum Distribution:TOF:0");
+        measurements << alps::RealObservable  ("Momentum Distribution:TOF:0");
 
         if (measure_green_function_)
         {
           green_tof.resize(num_sites(),0.);
-          measurements << alps::ngs::SimpleRealVectorObservable ("Green Function:TOF");
+          measurements << alps::SimpleRealVectorObservable ("Green Function:TOF");
         }
 
       }
@@ -956,7 +967,7 @@ inline boost::multi_array<double,4>
     {
       alps::Parameters this_parms;
       if(inhomogeneous_bonds()) {
-        alps::throw_if_xyz_defined(this_copy_of_params_is_reserved_for_the_old_scheduler_library_which_is_to_be_depreciated,bond);      // check whether x, y, or z is set
+        alps::throw_if_xyz_defined(parms,bond);      // check whether x, y, or z is set
         this_parms << coordinate_as_parameter(bond); // set x, y and z
       }
 
@@ -983,13 +994,13 @@ boost::tuple<std::vector<double>, std::vector<double>, std::vector<double>, std:
       this_targetsite_oneup_hamiltonian  .resize(target_num_states);
       this_targetsite_onedown_hamiltonian.resize(target_num_states);
 
-      std::set<std::string> site_operators = model().bond_term(bond_type(bond)).operator_names(this_copy_of_params_is_reserved_for_the_old_scheduler_library_which_is_to_be_depreciated);
+      std::set<std::string> site_operators = model().bond_term(bond_type(bond)).operator_names(parms);
 
       for (std::set<std::string>::iterator site_operator_it = site_operators.begin(); site_operator_it != site_operators.end(); ++site_operator_it)
       {
         alps::Parameters this_parms;
         if(inhomogeneous_bonds()) {
-          alps::throw_if_xyz_defined(this_copy_of_params_is_reserved_for_the_old_scheduler_library_which_is_to_be_depreciated,bond);      // check whether x, y, or z is set
+          alps::throw_if_xyz_defined(parms,bond);      // check whether x, y, or z is set
           this_parms << coordinate_as_parameter(bond); // set x, y and z
         }
         boost::multi_array<double,2> this_sourcesite_operator_matrix 
@@ -1036,7 +1047,7 @@ double
 
 void
   directed_worm_algorithm
-    ::update()
+    ::dostep()
     {
       ++_sweep_counter;
 
@@ -1093,7 +1104,10 @@ void
         return;  
       } 
 
-      const bool checkpoint_sweep = (_sweep_counter % _skip == 0);
+      if (!is_thermalized() && _sweep_counter % _skip == 0)
+        std::cout << "Thermalizing " << _sweep_counter << " / " << _thermalization_sweeps << "\n";
+                
+      const bool checkpoint_sweep = (is_thermalized() && _sweep_counter % _skip == 0);
 
       // Step 1B: Check state to see if we can insert wormpair 
       const unsigned short _state = wl.state_before(_location);
@@ -1103,7 +1117,7 @@ void
          )
       {
         ++_sweep_failure_counter;      // worm insertion is unsuccessful         
-        if (measure_ && _state != 0) 
+        if (is_thermalized() && measure_ && _state != 0) 
         {
           green0 += _state;
           nk0    += _state;
@@ -1157,7 +1171,7 @@ void
       while(wormhead_propagates_till_collision_with_wormtail(worm.wormpair_state(), neighbors(worm.wormtail_site())));      
       const unsigned short termination_state = (worm.forward() ? worm.state_before() : worm.state());
 
-      if (measure_ && termination_state != 0)
+      if (is_thermalized() && measure_ && termination_state != 0)
       {
         green0 += termination_state;
         nk0    += termination_state;
@@ -1404,7 +1418,7 @@ bool
       }
 #endif
 
-      if (measure_ && (_deltatime > _time2wormtail) && (worm.site() != worm.wormtail_site()))   
+      if (is_thermalized() && measure_ && (_deltatime > _time2wormtail) && (worm.site() != worm.wormtail_site()))   
       {
         using alps::numeric::operator+;
         using alps::numeric::operator+=;
@@ -1684,7 +1698,7 @@ void
               std::cout << "\n-------------";
               std::cin.get();
             }
-#endif DEBUGMODE
+#endif 
             worm.wormhead_relinks_vertex_and_jumps_to_new_site(_sourcelocation, _neighborlocation);
             worm.set_neighbor2wormtail(std::find(neighbors_.first, neighbors_.second, worm.site()) != neighbors_.second);
             return;
@@ -1753,6 +1767,29 @@ void
 
 int main(int argc, char** argv)
 {
+#ifndef BOOST_NO_EXCEPTIONS
+  try {
+#endif
+   return alps::scheduler::start(argc,argv,alps::scheduler::SimpleMCFactory<directed_worm_algorithm>());
+#ifndef BOOST_NO_EXCEPTIONS
+  }
+  catch (std::exception& exc) {
+    std::cerr << exc.what() << "\n";
+      alps::comm_exit(true);
+      return -1;
+    }
+  catch (...) {
+    std::cerr << "Fatal Error: Unknown Exception!\n";
+    return -2;
+  }
+#endif
+}
+
+/*
+ * Luka's NGS scheduler is not ready yet, Tama is forced to revert back to the old scheduler.
+ *
+int main(int argc, char** argv)
+{
   // read options from command line
   alps::mcoptions options(argc, argv);
 
@@ -1772,3 +1809,4 @@ int main(int argc, char** argv)
 
   return 0;
 }
+*/

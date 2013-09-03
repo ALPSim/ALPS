@@ -125,8 +125,12 @@ class RunDirLoopSSE(RunAlpsApplication):
     appname = 'dirloop_sse'
 
 class RunWorm(RunAlpsApplication):
-    """Runs the work quantum Monte Carlo application """
+    """Runs the worm quantum Monte Carlo application """
     appname = 'worm'
+
+class RunDWA(RunAlpsApplication):
+    """Runs dwa quantum Monte Carlo application """
+    appname = 'dwa'
 
 class RunFullDiag(RunAlpsApplication):
     """Runs the fulldiag exact diagonalization application """
@@ -378,6 +382,7 @@ def selfRegister():
   register_application(RunSpinMC)
   register_application(RunLoop)
   register_application(RunWorm)
+  register_application(RunDWA)
   register_application(RunDirLoopSSE)
   register_application(RunFullDiag)
   register_application(RunSparseDiag)

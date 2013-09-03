@@ -453,7 +453,7 @@ def recursiveGlob(dirname,pattern):
             ret += recursiveGlob(d, pattern)
     return ret
 
-def getResultFiles(dirname='.',pattern=None,prefix=None):
+def getResultFiles(dirname='.',pattern=None,prefix=None,format=None):
     """ get all result files matching the given pattern or prefix 
     
         This function returns a list of all ALPS result files matching a given pattern, starting recursively from a given directory.
@@ -472,11 +472,19 @@ def getResultFiles(dirname='.',pattern=None,prefix=None):
       raise Exception("Cannot define both prefix and pattern")
     if prefix == None: prefix = '*'
     if pattern == None:
-      pattern = prefix+'.task*.out.xml'
-      res=recursiveGlob(dirname, pattern)
-      if len(res)==0:
-        pattern = prefix+'*.task*.out.h5'
+      if format == None:
+        pattern = prefix+'.task*.out.xml'
         res=recursiveGlob(dirname, pattern)
+        if len(res)==0:
+          pattern = prefix+'*.task*.out.h5'
+          res=recursiveGlob(dirname, pattern)
+      else:
+        if   format == 'xml':
+          pattern = prefix+'.task*.out.xml'
+          res=recursiveGlob(dirname, pattern)
+        elif format == 'hdf5':
+          pattern = prefix+'.task*.out.h5'
+          res=recursiveGlob(dirname, pattern)
     else:
       res = recursiveGlob(dirname, pattern)
     replicas=recursiveGlob(dirname, prefix+'*replica*h5')
@@ -497,6 +505,32 @@ def getMeasurements(outfiles_, observable=None, includeLog=False):
     del ar;
 
   return measurements;
+
+def steady_state_check(h5_outfile, observables, tolerance=0.01, simplified=False, includeLog=False):
+  if isinstance(observables, str):
+    observables = [observables];
+
+  results = [];
+  for observable in observables:
+    timeseries = pyalps.hdf5.iArchive(h5_outfile).read("/simulation/results/" + observable)['timeseries']['data'];
+    mean = timeseries.mean();
+
+    index = scipy.linspace(0, timeseries.size-1, timeseries.size);
+    timeseries = scipy.polyval(scipy.polyfit(index, timeseries, 1), index);  # timeseries get fitted
+
+    percentage_increment = (timeseries[-1] - timeseries[0])/mean;
+    result = abs(percentage_increment) < tolerance;
+
+    if not includeLog:
+      results.append(result);
+    else:
+      results.append({'observable': observable, 'percentage_increment' : percentage_increment, 'steady_state_equilibrium_reached': result})
+
+  if includeLog or not simplified:
+    return results;
+  else:
+    return reduce(lambda x,y: x*y, results);
+
 
 def sendmail(recipients, sender=None, message='', subject='', attachment=None):
   message = 'Automatic email message from ALPS.\nDo not reply.\n\n' + str(message);
