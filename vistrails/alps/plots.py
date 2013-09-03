@@ -19,7 +19,7 @@ import alpscore
 from packages.pylab.plot import MplPlot, MplPlotConfigurationWidget
 
 try:
-  from packages.pylab.plot imper MplSource
+  from packages.pylab.plot import MplSource
   PlotBase = MplSource
 except:
   PlotBase = MplPlot
