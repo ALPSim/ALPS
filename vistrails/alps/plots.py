@@ -16,7 +16,7 @@ import core.modules.module_registry
 import tempfile
 
 import alpscore
-from packages.pylab.plot import MplPlot, MplPlotConfigurationWidget
+from packages.pylab.plot import MplPlot, MplPlotConfigurationWidget, MplSource
 
 basic = core.modules.basic_modules
 
@@ -144,7 +144,7 @@ class Plot2Mpl(Plot2Anything):
     suffix='py'
     extractapp='plot2mpl'
 
-class AlpsMplPlot(MplPlot):
+class AlpsMplPlot(MplSource):
     _input_ports=[('source', basic.String)]
   
 def initialize(): pass
