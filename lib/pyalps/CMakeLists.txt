@@ -59,13 +59,19 @@ if (ALPS_HAVE_PYTHON)
 
   if(LAPACK_FOUND)
     SET (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
-    set(PYALPS_SOURCES ${PYALPS_SOURCES} pymaxent)
-    python_add_module(pymaxent ${MAXENT_SOURCES})
-    target_link_libraries(pymaxent alps boost  ${BLAS_LIBRARY} ${LAPACK_LIBRARY})
+    python_add_module(dwa_c SHARED ../../applications/qmc/dwa/python/dwa.cpp)
+    set_target_properties(dwa_c PROPERTIES PREFIX "")
+    set_target_properties(dwa_c PROPERTIES SUFFIX "")
+    target_link_libraries(dwa_c alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY} ${ALPS_LIBRARIES}) 
   endif(LAPACK_FOUND)
+ 
 
-
-
+#  if(LAPACK_FOUND)
+#    SET (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
+#    set(PYALPS_SOURCES ${PYALPS_SOURCES} pymaxent)
+#    python_add_module(pymaxent ${MAXENT_SOURCES})
+#    target_link_libraries(pymaxent alps boost  ${BLAS_LIBRARY} ${LAPACK_LIBRARY})
+#  endif(LAPACK_FOUND)
 
   #######################################################################
   # install
@@ -84,5 +90,10 @@ if (ALPS_HAVE_PYTHON)
             ARCHIVE DESTINATION ${PYTHON_EXTENSION_DIR}/pyalps
             LIBRARY DESTINATION ${PYTHON_EXTENSION_DIR}/pyalps)
   endif(NOT ALPS_FOR_VISTRAILS)
+
+  install(TARGETS dwa_c COMPONENT python
+          RUNTIME DESTINATION bin
+          ARCHIVE DESTINATION lib/pyalps/dwa
+          LIBRARY DESTINATION lib/pyalps/dwa)
 
 endif (ALPS_HAVE_PYTHON)
