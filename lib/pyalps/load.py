@@ -80,7 +80,7 @@ def parse_labels(labels):
         if first==None:
           first = v[0]
         else:
-          if first != v[0]:
+          if first != v[0] or len(v) != 2:
             allsame = False
       else:
         allsame = False
