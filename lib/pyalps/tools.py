@@ -491,6 +491,14 @@ def getResultFiles(dirname='.',pattern=None,prefix=None,format=None):
     res += replicas
     return res
 
+def loadTimeSeries(outfile, observable=None):
+  if isinstance(outfile,str):
+    if isinstance(observable,str):
+      outfile = outfile.replace('.xml','.h5');
+
+      ar = pyalps.hdf5.h5ar(outfile);
+      return ar['/simulation/results'][observable]['timeseries']['data']
+
 def getMeasurements(outfiles_, observable=None, includeLog=False):
   measurements = [];
 
@@ -498,7 +506,8 @@ def getMeasurements(outfiles_, observable=None, includeLog=False):
     outfiles_ = [outfiles_];
 
   for outfile in outfiles_:
-    ar = pyalps.hdf5.archive(outfile);
+    outfile = outfile.replace('.xml','.h5');
+    ar = pyalps.hdf5.h5ar(outfile);
     if isinstance(observable, str):
       measurements.append(ar['/simulation/results'][observable])
     
@@ -506,7 +515,7 @@ def getMeasurements(outfiles_, observable=None, includeLog=False):
 
   return measurements;
 
-def steady_state_check(h5_outfile, observables, tolerance=0.01, simplified=False, includeLog=False):
+def checkSteadyState(outfile, observables, confidenceInterval=0.95, simplified=False, includeLog=False):
   if isinstance(observables, str):
     observables = [observables];
 
@@ -519,7 +528,7 @@ def steady_state_check(h5_outfile, observables, tolerance=0.01, simplified=False
     timeseries = scipy.polyval(scipy.polyfit(index, timeseries, 1), index);  # timeseries get fitted
 
     percentage_increment = (timeseries[-1] - timeseries[0])/mean;
-    result = abs(percentage_increment) < tolerance;
+    result = abs(percentage_increment) < 1.- confidenceInterval;
 
     if not includeLog:
       results.append(result);
