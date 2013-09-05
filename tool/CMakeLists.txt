@@ -107,7 +107,7 @@ endif(SQLite_FOUND)
 #
 
   configure_file(config.py.in ${CMAKE_CURRENT_BINARY_DIR}/config.py)
-  if(WIN32 AND NOT UNIX)
+  if(WIN32 AND NOT UNIX AND ALPS_BUILD_PYTHON)
     # in the function add_pi_executable is not present ...
     option(ALPS_HAS_CMAKE_PI_MACROS "Ignore the PI macros if they are not present" ON)
     mark_as_advanced(ALPS_HAS_CMAKE_PI_MACROS)
@@ -121,7 +121,7 @@ endif(SQLite_FOUND)
     install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/lattice-preview DESTINATION bin COMPONENT tools)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/config.py preview.py license.py
       DESTINATION lib/python/alps COMPONENT tools)
-  endif(WIN32 AND NOT UNIX)
+  endif(WIN32 AND NOT UNIX AND ALPS_BUILD_PYTHON)
 
   #
   # Analytical continuation with MaxEnt
@@ -133,16 +133,7 @@ endif(SQLite_FOUND)
     add_executable(maxent maxent.cpp maxent_helper.cpp maxent_simulation.cpp maxent_parms.cpp)
     target_link_libraries(maxent alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
     install(TARGETS maxent RUNTIME DESTINATION bin COMPONENT tools)
-    IF(ALPS_BUILD_PYTHON)
-      add_library (maxent.so SHARED maxent.cpp maxent_helper.cpp maxent_simulation.cpp maxent_parms.cpp)
-      SET (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
-      set_target_properties(maxent.so PROPERTIES PREFIX "")
-      set_target_properties(maxent.so PROPERTIES SUFFIX "")
-      set_target_properties(maxent.so PROPERTIES COMPILE_FLAGS "-DBUILD_PYTHON_MODULE")
-      target_link_libraries(maxent.so alps ${ALPS_LIBRARIES} ${ALPS_BLAS_LIBRARY} ${BLAS_LIBRARY} ${ALPS_LAPACK_LIBRARY} ${LAPACK_LIBRARY})
-      install(TARGETS maxent.so LIBRARY DESTINATION lib/pyalps COMPONENT applications)
-    ENDIF(ALPS_BUILD_PYTHON)
-  endif(LAPACK_FOUND)
+   endif(LAPACK_FOUND)
 
   #
   # alpspython and vispython scripts

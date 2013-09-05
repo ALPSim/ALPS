@@ -334,24 +334,22 @@ endif(ALPS_ENABLE_OPENMP)
 
 # Lapack
 # For parallel MKL, this section should be executed after OpenMP check.
-if (NOT ALPS_FOR_VISTRAILS)
-  if (NOT LAPACK_FOUND)
-    find_package(Lapack)
-  endif (NOT LAPACK_FOUND)
-  if (LAPACK_FOUND)
-    set(ALPS_HAVE_LAPACK 1)
-    set(ALPS_HAVE_BLAS 1)
-  endif(LAPACK_FOUND)
-  if(MSVC)
-    file(COPY ${LAPACK_LIBRARY} ${BLAS_LIBRARY} DESTINATION ${PROJECT_BINARY_DIR}/lib)
-  endif(MSVC)
-  IF(NOT WIN32)
-    IF (REQUIRE_PTHREAD)
-      SET(LAPACK_LIBRARY "${LAPACK_LIBRARY};${PTHREAD_LIBRARY}")
-      SET(LAPACK_LIBRARIES "${LAPACK_LIBRARIES};${PTHREAD_LIBRARY}")
-    ENDIF (REQUIRE_PTHREAD)
-  ENDIF(NOT WIN32)
-endif (NOT ALPS_FOR_VISTRAILS)
+if (NOT LAPACK_FOUND)
+  find_package(Lapack)
+endif (NOT LAPACK_FOUND)
+if (LAPACK_FOUND)
+  set(ALPS_HAVE_LAPACK 1)
+  set(ALPS_HAVE_BLAS 1)
+endif(LAPACK_FOUND)
+if(MSVC)
+  file(COPY ${LAPACK_LIBRARY} ${BLAS_LIBRARY} DESTINATION ${PROJECT_BINARY_DIR}/lib)
+endif(MSVC)
+IF(NOT WIN32)
+  IF (REQUIRE_PTHREAD)
+    SET(LAPACK_LIBRARY "${LAPACK_LIBRARY};${PTHREAD_LIBRARY}")
+    SET(LAPACK_LIBRARIES "${LAPACK_LIBRARIES};${PTHREAD_LIBRARY}")
+  ENDIF (REQUIRE_PTHREAD)
+ENDIF(NOT WIN32)
 if(MAC_VECLIB)
   set(LAPACK_LDFLAGS "-framework vecLib")
 endif(MAC_VECLIB) 
@@ -543,11 +541,11 @@ if(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS AND NOT ALPS_BUILD_SOURCE)
       COMMAND cmake -E make_directory ${PROJECT_BINARY_DIR}/lib
       COMMAND cmake -E copy_if_different ${LAPACK_PATH}/lapack.lib ${PROJECT_BINARY_DIR}/lib
       COMMAND cmake -E copy_if_different ${LAPACK_PATH}/blas.lib ${PROJECT_BINARY_DIR}/lib
-      COMMAND cmake -E copy_if_different ${LAPACK_PATH}/f2c.lib ${PROJECT_BINARY_DIR}/lib
+      #COMMAND cmake -E copy_if_different ${LAPACK_PATH}/f2c.lib ${PROJECT_BINARY_DIR}/lib
     )
     install(FILES ${PROJECT_BINARY_DIR}/lib/lapack.lib ${PROJECT_BINARY_DIR}/lib/blas.lib
-            ${PROJECT_BINARY_DIR}/lib/f2c.lib
             DESTINATION lib COMPONENT dependentlibraries
+#            ${PROJECT_BINARY_DIR}/lib/f2c.lib
     )
   endif(LAPACK_LIBRARIES)
   # SQLite
@@ -580,7 +578,7 @@ if(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS AND NOT ALPS_BUILD_SOURCE)
     install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/msvcr80.dll DESTINATION bin COMPONENT dependentlibraries)
     install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/hdf5dll.dll DESTINATION bin COMPONENT dependentlibraries)
     install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/szlibdll.dll DESTINATION bin COMPONENT dependentlibraries)
-    install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/zlib1.dll DESTINATION bin COMPONENT dependentlibraries)
+    install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/zlib.dll DESTINATION bin COMPONENT dependentlibraries)
   endif (ALPS_USE_VISTRAILS)
 
 endif(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS AND NOT ALPS_BUILD_SOURCE)

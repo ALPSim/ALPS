@@ -231,7 +231,7 @@ public:
 //  TabFunction(const alps::Parameters& p, std::string const& name) //: index(0)
   TabFunction(const alps::params& p, std::string const& name) //: index(0)
   {
-    std::string p_name = p[name];
+    std::string p_name = p[name].cast<std::string>();
     std::ifstream defstream(p_name.c_str());
     if (!defstream)
       boost::throw_exception(std::invalid_argument("could not open default model file: "+p[name]));
