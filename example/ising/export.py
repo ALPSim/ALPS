@@ -25,6 +25,7 @@
  #                                                                                 #
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+import pyalps.hdf5 as hdf5
 import pyalps.ngs as ngs
 import numpy as np
 import sys, time
@@ -44,7 +45,7 @@ def main(limit, resume, output):
     }))
 
     if resume == 't':
-        ar = ngs.h5ar(sim.parameters.valueOrDefault('DUMP', 'dump'), 'r')
+        ar = hdf5.archive(sim.parameters.valueOrDefault('DUMP', 'dump'), 'r')
         sim.load(ar)
         del ar
 
@@ -56,13 +57,13 @@ def main(limit, resume, output):
 
     p = sim.parameters
 
-    ar = ngs.h5ar(sim.parameters.valueOrDefault('DUMP', 'dump'), 'w')
+    ar = hdf5.archive(sim.parameters.valueOrDefault('DUMP', 'dump'), 'w')
     sim.save(ar)
     del ar
 
     results = ngs.collectResults(sim)
     print results
-    ngs.saveResults(results, sim.parameters, ngs.h5ar(output, 'w'), "/simulation/results")
+    ngs.saveResults(results, sim.parameters, hdf5.archive(output, 'w'), "/simulation/results")
 
 if __name__ == "__main__":
     apply(main, sys.argv[1:])

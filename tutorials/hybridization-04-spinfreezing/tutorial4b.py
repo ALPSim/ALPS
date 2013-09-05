@@ -35,7 +35,7 @@
  # Run this script as:
  # alpspython tutoria4b.py
 
-from pyalps.ngs import h5ar #hdf5 interface
+from pyalps.hdf5 import archive #hdf5 interface
 from numpy import *
 
 # function to compute the U matrix from the interaction parameters
@@ -54,7 +54,7 @@ def generate_u_matrix(FLAVORS, U, Up, J):
         udata[(i+1)*FLAVORS+ j   ]=Up # Hubbard repulsion interband opposite spin
   return udata.reshape(FLAVORS,FLAVORS)
 
-ar=h5ar('hyb.param.out.h5','rw') #read the parameters from the output file
+ar=archive('hyb.param.out.h5','rw') #read the parameters from the output file
 parms=ar['/parameters'] # returns a python dict
 
 n_orb = parms['N_ORBITALS']

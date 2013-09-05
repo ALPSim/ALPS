@@ -68,6 +68,7 @@ To use the exported class we need to import the ``pyalps.ngs`` framework ``numpy
 
 .. code-block:: python
 
+	import pyalps.hdf5 as hdf5
 	import pyalps.ngs as ngs
 	import numpy as np
 	import sys, time, getopt
@@ -115,6 +116,6 @@ And a main function could look like
 	    results = sim.collectResults()
 	    print results
 
-	    with ngs.archive(outfile, 'w') as ar:
+	    with hdf5.archive(outfile, 'w') as ar:
 	        ar['/parameters'] = sim.parameters
 	        ar['/simulation/results'] = results

@@ -23,6 +23,7 @@
  # DEALINGS IN THE SOFTWARE.                                                       #
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+import pyalps.hdf5 as hdf5
 import pyalps.ngs as ngs
 import numpy as np
 import sys
@@ -85,11 +86,11 @@ class sim:
         return 0 if self.sweeps < self.thermalization_sweeps else (self.sweeps - self.thermalization_sweeps) / float(self.total_sweeps)
 
     def save(self, filename):
-        with ngs.archive(filename, 'w') as ar:
+        with hdf5.archive(filename, 'w') as ar:
             ar['/'] = self
 
     def load(self, filename):
-        with ngs.archive(filename, 'r') as ar:
+        with hdf5.archive(filename, 'r') as ar:
             self = ar['/']
 
     def run(self, stopCallback):

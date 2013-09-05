@@ -64,11 +64,11 @@ pure python simulation
 	        return 0 if self.sweeps < self.thermalization_sweeps else (self.sweeps - self.thermalization_sweeps) / float(self.total_sweeps)
 
 	    def save(self, filename):
-	        with ngs.archive(filename, 'w') as ar:
+	        with hdf5.archive(filename, 'w') as ar:
 	            ar['/'] = self
 
 	    def load(self, filename):
-	        with ngs.archive(filename, 'r') as ar:
+	        with hdf5.archive(filename, 'r') as ar:
 	            self = ar['/']
 
 	    def run(self, stopCallback):
@@ -197,6 +197,6 @@ And we can use the same main function as in the exported ising simulation:
 	    results = sim.collectResults()
 	    print results
 
-	    with ngs.archive(outfile, 'w') as ar:
+	    with hdf5.archive(outfile, 'w') as ar:
 	        ar['/parameters'] = sim.parameters
 	        ar['/simulation/results'] = results

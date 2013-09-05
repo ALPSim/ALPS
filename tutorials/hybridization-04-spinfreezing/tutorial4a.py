@@ -61,7 +61,7 @@
  # mpirun -np 32 sh alpspython tutorial4a.py
 
 import pyalps.mpi as mpi      # MPI library
-from pyalps.ngs import h5ar   # hdf5 interface
+from pyalps.hdf5 import archive   # hdf5 interface
 import pyalps.cthyb as cthyb  # the solver module
 from numpy import exp,sqrt,pi # some math
 from numpy import array,zeros # numpy arrays
@@ -132,7 +132,7 @@ if mpi.rank==0:
     delta.append(parms['t']**2*g0tau) # delta=t**2 g
 
   # write hybridization function to hdf5 archive (solver input)
-  ar=h5ar(parms['DELTA'],'w')
+  ar=archive(parms['DELTA'],'w')
   for m in range(parms['N_ORBITALS']):
     ar['/Delta_%i'%m]=delta
   del ar
@@ -169,7 +169,7 @@ for it in range(dmft_iterations):
   # self-consistency on the master
   if mpi.rank==0:
     # read Green's function from file
-    ar=h5ar(parms['BASENAME']+'.out.h5','r')
+    ar=archive(parms['BASENAME']+'.out.h5','r')
     # symmetrize G(tau)
     # here all orbitals and spins are degenerate
     gt=array(zeros(parms['N_TAU']+1))
@@ -180,7 +180,7 @@ for it in range(dmft_iterations):
 
     # Bethe lattice self-consistency: delta(tau)=t**2 g(tau)
     # read delta_old
-    ar=h5ar(parms['DELTA'],'rw')
+    ar=archive(parms['DELTA'],'rw')
     for m in range(parms['N_ORBITALS']):
       delta_old=ar['/Delta_%i'%m]
       delta_new=array(zeros(parms['N_TAU']+1))

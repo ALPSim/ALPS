@@ -259,7 +259,7 @@ class LoadTimeEvolution(Module):
                 for f in files:
                     try:
                         #open the file and open the results root group
-                        h5file = h5.iArchive(f)
+                        h5file = h5.archive(f, 'r')
                         #enumerate the subgroups
                         L=h5file.list_children(resroot)
                         #Create an iterator of length the number of subgroups
@@ -282,7 +282,7 @@ class LoadTimeEvolution(Module):
                 for f in files:
                     try:
                         #open the file and open the results root group
-                        h5file = h5.iArchive(f)
+                        h5file = h5.archive(f, 'r')
                         #enumerate the subgroups
                         L=h5file.list_children(resroot)
                         #Create an iterator of length the number of subgroups

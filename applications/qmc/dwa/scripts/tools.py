@@ -46,7 +46,7 @@ def addToObservable(h5_outfile, RealObservable=None, RealVectorObservable=None, 
   if RealObservable != None and RealVectorObservable != None:
     return;
 
-  ar = pyalps.ngs.archive(h5_outfile, 'w');
+  ar = pyalps.hdf5.archive(h5_outfile, 'w');
   measurements = pyalps.ngs.observables();
   measurements.load(ar, '/simulation/results');
   
@@ -68,7 +68,7 @@ def thermalized(h5_outfile, observables, tolerance=0.01, simplified=False, inclu
 
   results = [];
   for observable in observables:
-    timeseries = pyalps.hdf5.iArchive(h5_outfile).read("/simulation/results/" + observable)['timeseries']['data']; 
+    timeseries = pyalps.hdf5.archive(h5_outfile, 'r').read("/simulation/results/" + observable)['timeseries']['data']; 
     mean = timeseries.mean();
 
     index = scipy.linspace(0, timeseries.size-1, timeseries.size);
@@ -93,7 +93,7 @@ def converged(h5_outfile, observables, simplified=False, includeLog=False):
 
   results = [];
   for observable in observables:
-    measurements = pyalps.hdf5.iArchive(h5_outfile).read("/simulation/results/" + observable);
+    measurements = pyalps.hdf5.archive(h5_outfile, 'r').read("/simulation/results/" + observable);
 
     result = (measurements['mean']['error_convergence'] == 0);
 
@@ -117,20 +117,20 @@ def tau(h5_outfile, observables):
 
   results = [];
   for observable in observables:
-    measurements = pyalps.hdf5.iArchive(h5_outfile).read("/simulation/results/" + observable);
+    measurements = pyalps.hdf5.archive(h5_outfile, 'r').read("/simulation/results/" + observable);
     results.append(measurements['tau']['value']);
 
   return results;
 
 def write_status(filename, status):
-  ar = pyalps.hdf5.h5ar(filename, 'w');
+  ar = pyalps.hdf5.archive(filename, 'w');
   if ar.is_group('/simulation/status'):  
     ar['/simulation/status/' + str(len(ar.list_children('/simulation/status')))] = status; 
   else:
     ar['/simulation/status/0'] = status;
 
 def status(filename, includeLog=False):
-  ar = pyalps.hdf5.h5ar(filename);
+  ar = pyalps.hdf5.archive(filename);
   if not ar.is_group('/simulation/status'):
     return None;
   else:
@@ -140,24 +140,24 @@ def status(filename, includeLog=False):
       return ar['/simulation/status'] 
 
 def write_benchmark(filename, key):
-  ar = pyalps.hdf5.h5ar(filename, 'w');
+  ar = pyalps.hdf5.archive(filename, 'w');
   ar['/simulation/benchmark/' + key] = ar['/simulation/results/' + key + '/mean/value'];
 
 def benchmark(filename, key):
-  ar = pyalps.hdf5.h5ar(filename);
+  ar = pyalps.hdf5.archive(filename);
   return ar['/simulation/benchmark/' + key];
 
 def switchParameter(h5file, key, value):
   ### This is not encouraged, only do this when you know what you are doing.
-  ar = pyalps.hdf5.h5ar(h5file, 'w');
+  ar = pyalps.hdf5.archive(h5file, 'w');
   ar['/parameters/'+key] = value;
 
 def increase_skip(h5file):
-  ar = pyalps.hdf5.h5ar(h5file, 'w');
+  ar = pyalps.hdf5.archive(h5file, 'w');
   ar['/parameters/SKIP']   = 10 * ar['/parameters/SKIP'];
 
 def decrease_skip(h5file):
-  ar = pyalps.hdf5.h5ar(h5file, 'w');
+  ar = pyalps.hdf5.archive(h5file, 'w');
   ar['/parameters/SKIP']   = ar['/parameters/SKIP']/10;
 
 def extract_worldlines(infile, outfile=None):
@@ -456,7 +456,7 @@ def trappingFrequency(mass, wavelength, VT=None, omega=None):
   return;
 
 def summaryReport(h5_outfile):
-  ar = pyalps.hdf5.h5ar(h5_outfile);
+  ar = pyalps.hdf5.archive(h5_outfile);
   L = ar['/simulation/worldlines/num_sites'];
 
   print('N    : ' + str(ar['/simulation/results/Total Particle Number/mean/value']) + ' +/- ' + str(ar['/simulation/results/Total Particle Number/mean/error']) + ' ; count = ' + str(ar['/simulation/results/Total Particle Number/count']));

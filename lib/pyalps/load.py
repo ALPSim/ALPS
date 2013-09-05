@@ -130,7 +130,7 @@ class Hdf5Loader:
         resultfiles = []
         for f in fs:
             try:
-                self.h5f = h5.iArchive(f)
+                self.h5f = h5.archive(f, 'r')
                 self.h5fname = f
                 if verbose: log( "Loading from file" + f)
                 rfile = ResultFile(f)
@@ -164,7 +164,7 @@ class Hdf5Loader:
         for f in fs:
             try:
                 fileset=[]
-                self.h5f = h5.iArchive(f)
+                self.h5f = h5.archive(f, 'r')
                 self.h5fname = f
                 if verbose: log("Loading from file " + f)
                 params = self.ReadParameters(proppath)
@@ -215,7 +215,7 @@ class Hdf5Loader:
         for f in fs:
             try:
                 fileset=[]
-                self.h5f = h5.iArchive(f)
+                self.h5f = h5.archive(f, 'r')
                 self.h5fname = f
                 if verbose: log("Loading from file"+ f)
                 params = self.ReadParameters(proppath)
@@ -343,7 +343,7 @@ class Hdf5Loader:
             try:
                 fileset = []
                 if verbose: log( 'loading from file ' +f)
-                self.h5f = h5.iArchive(f)
+                self.h5f = h5.archive(f, 'r')
                 self.h5fname = f
                 if respath == None:
                   respath="/simulation/results"
@@ -395,7 +395,7 @@ class Hdf5Loader:
         for f in fs:
             try:
                 fileset = []
-                self.h5f = h5.iArchive(f)
+                self.h5f = h5.archive(f, 'r')
                 self.h5fname = f
                 if verbose: log("Loading from file" + f)
                 list_ = self.GetObservableList(respath)
@@ -461,7 +461,7 @@ class Hdf5Loader:
         fileset = []
         for f in fs:
             try:
-                self.h5f = h5.iArchive(f)
+                self.h5f = h5.archive(f, 'r')
                 self.h5fname = f
                 if verbose: log("Loading from file "+ f)
                 list_ = self.GetObservableList(respath+'/1/results/'+observable+'/')
@@ -638,7 +638,7 @@ def loadTimeEvolution( flist,globalproppath='/parameters',resroot='/timesteps/',
     for f in flist:
         try:
             #open the file and open the results root group
-            h5file = h5.iArchive(f)
+            h5file = h5.archive(f, 'r')
             #enumerate the subgroups
             L=h5file.list_children(resroot)
             #Create an iterator of length the number of subgroups

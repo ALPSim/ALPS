@@ -52,7 +52,7 @@
 
 import shutil
 import pyalps.mpi as mpi                # mpi library
-from pyalps.hdf5 import h5ar            # hdf5 interface
+from pyalps.hdf5 import archive            # hdf5 interface
 import pyalps.cthyb as cthyb            # the solver module
 from numpy import sqrt,cosh,sinh,exp,pi #some math
 from numpy import array,zeros,append
@@ -143,7 +143,7 @@ if mpi.rank==0:
     delta.append(parms['t']**2*g0tau) # delta=t**2 g
 
   # write hybridization function to hdf5 archive (solver input)
-  ar=h5ar(parms['DELTA'],'w')
+  ar=archive(parms['DELTA'],'w')
   for m in range(parms['N_ORBITALS']):
     ar['/Delta_%i'%m]=delta
   del ar
@@ -166,7 +166,7 @@ if mpi.rank==0:
     kp_tau.append(Kp(tau))
 
   # write retarded interaction function K(tau) and its derivative to file (solver input)
-  ar=h5ar(parms['RET_INT_K'],'w')
+  ar=archive(parms['RET_INT_K'],'w')
   ar['/Ret_int_K']=k_tau
   ar['/Ret_int_Kp']=kp_tau
   del ar
@@ -202,7 +202,7 @@ for it in range(dmft_iterations):
 
   # write parameters for reference (on master only)
   if mpi.rank==0:
-    ar=h5ar(parms['BASENAME']+'.h5','a')
+    ar=archive(parms['BASENAME']+'.h5','a')
     ar['/parameters']=parms
     ar['/parameters%i'%it]=parms # this is a backup for each iteration
     del ar
@@ -217,7 +217,7 @@ for it in range(dmft_iterations):
       shutil.copy("simulation.dat", "simulation%i.dat"%it) # keep some basic information for each iteration
 
     # read Green's function from file
-    ar=h5ar(parms['BASENAME']+'.out.h5','r')
+    ar=archive(parms['BASENAME']+'.out.h5','r')
     # symmetrize G(tau)
     # in this case all orbitals and spins are degenerate
     gt=array(zeros(parms['N_TAU']+1))
@@ -228,7 +228,7 @@ for it in range(dmft_iterations):
 
     # Bethe lattice self-consistency: delta(tau)=t**2 g(tau)
     # read delta_old
-    ar=h5ar(parms['DELTA'],'rw')
+    ar=archive(parms['DELTA'],'rw')
     for m in range(parms['N_ORBITALS']):
       delta_old=ar['/Delta_%i'%m]
       delta_new=array(zeros(parms['N_TAU']+1))

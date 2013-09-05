@@ -51,7 +51,7 @@ write a string to hdf5
 ``
 	std::string str("foobar");
 	alps::hdf5::oarchive ar("data.h5");
-	h5ar << alps::make_pvp("/foo/bar", str);
+	ar << alps::make_pvp("/foo/bar", str);
 ``
 read a string form hdf5
 ``

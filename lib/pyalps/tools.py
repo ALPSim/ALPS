@@ -324,7 +324,7 @@ def writeInputH5Files(filename_,params_list):
     else:
       this_filename_ = filename_ + '.task' + str(index+1) + '.in.h5';
     input_files_.append(this_filename_);
-    oar = pyalps.ngs.h5ar(this_filename_,'w');
+    oar = pyalps.hdf5.archive(this_filename_,'w');
     for key in params_list[index].keys():
       oar['/parameters/' + key] = params_list[index][key]
     del oar;
@@ -348,7 +348,7 @@ def getParameters(infiles_):
 
    params = [];
    for infile_ in infiles_:
-     iar = pyalps.ngs.h5ar(infile_);
+     iar = pyalps.hdf5.archive(infile_);
      params_dict = {};
      for key in iar.list_children('/parameters'):
        params_dict[key] = iar['/parameters/' + key];
@@ -498,7 +498,7 @@ def getMeasurements(outfiles_, observable=None, includeLog=False):
     outfiles_ = [outfiles_];
 
   for outfile in outfiles_:
-    ar = pyalps.hdf5.h5ar(outfile);
+    ar = pyalps.hdf5.archive(outfile);
     if isinstance(observable, str):
       measurements.append(ar['/simulation/results'][observable])
     
@@ -512,7 +512,7 @@ def steady_state_check(h5_outfile, observables, tolerance=0.01, simplified=False
 
   results = [];
   for observable in observables:
-    timeseries = pyalps.hdf5.iArchive(h5_outfile).read("/simulation/results/" + observable)['timeseries']['data'];
+    timeseries = pyalps.hdf5.archive(h5_outfile, 'r').read("/simulation/results/" + observable)['timeseries']['data'];
     mean = timeseries.mean();
 
     index = scipy.linspace(0, timeseries.size-1, timeseries.size);
@@ -704,7 +704,7 @@ def save_parameters(filename, parms):
           filename: the name of the HDF5 file
           parms: the parameter dict
     """
-    f1=h5.oArchive(filename)
+    f1=h5.archive(filename, 'w')
     for key in parms.keys():
         f1.write('/parameters/'+key,parms[key])
 
@@ -1433,7 +1433,7 @@ def saveMeasurements(measurements,outfile,respath='/simulation/results'):
         elif isinstance(m.y,np.ndarray) and isinstance(m.y[0],alea.MCScalarData):
             m.y[0].save(outfile,path)
         elif isinstance(m.y,FloatWithError):
-            h5f = h5.oArchive(fn)
+            h5f = h5.archive(fn, 'w')
             h5f.write(path+'/mean/value',np.array(m.y.mean))
             h5f.write(path+'/mean/error',np.array(m.y.error))
             try:

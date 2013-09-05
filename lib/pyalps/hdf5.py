@@ -26,20 +26,81 @@
 # ****************************************************************************
 
 """ 
-This module contains two classes: iArchive and oArchive, used to read or
-write HDF5 files. His interface is deprecated! use pyalps.ngs.h5ar
+This module contains the archive class, used to read / write hdf5 files
 """
 
-from ngs import *
+from pyngshdf5_c import hdf5_archive_impl
+from pyngshdf5_c import register_archive_exception_type
+
+class ArchiveError(Exception): pass
+register_archive_exception_type(0, ArchiveError)
+
+class ArchiveNotFound(ArchiveError, IOError): pass
+register_archive_exception_type(1, ArchiveNotFound)
+
+class ArchiveClosed(ArchiveError, ValueError): pass
+register_archive_exception_type(2, ArchiveClosed)
+
+class InvalidPath(ArchiveError, SyntaxError): pass
+register_archive_exception_type(3, InvalidPath)
+
+class PathNotFound(ArchiveError, LookupError): pass
+register_archive_exception_type(4, PathNotFound)
+
+class WrongType(ArchiveError, TypeError): pass
+register_archive_exception_type(5, WrongType)
+
+del register_archive_exception_type
+
+#TODO: move to hdf5 module
+class archive(hdf5_archive_impl):
+    def __init__(self, filename, mode = 'r'):
+        hdf5_archive_impl.__init__(self, filename, mode)
+
+    @property # TODO: move to c++
+    def closed(self):
+        return not self.is_open
+
+    def __enter__(self, *args, **kwargs): # TODO: move to c++
+        return self
+
+    def __exit__(self, *args, **kwargs): # TODO: move to c++
+        self.close()
+        return self
+
+    def xml(self, path="/"):
+        """
+        Returns an XML formatted string of the archive.
+        This function still needs to have attributes implemented.
+        """
+        if self.closed: raise ArchiveClosed("I/O operation on closed file")
+        if self.is_group(path):
+            ret = ""
+            for child in self.list_children(path):
+                ret += "<%s>\n" % child
+                ret += self.as_xml(path+("" if path[-1] == "/" else "/" )+child)
+                ret += "\n</%s>" % child
+            return ret
+        else:
+            return "%s" %(str(self[path]))
+
+# TODO: remove this in future
+import warnings
+
+def h5ar(*args, **kwargs):
+    warnings.warn("The object 'h5ar' is deprecated and will be removed. Use 'archive' instead.", DeprecationWarning)
+    return archive(*args, **kwargs)
 
 class iArchive(archive):
     def __init__(self, filename):
+        warnings.warn("The object 'iArchive' is deprecated and will be removed. Use 'archive' instead.", DeprecationWarning)
         archive.__init__(self, str(filename), 'r')
     def read(self, path):
         return archive.__getitem__(self, path)
 
 class oArchive(archive):
     def __init__(self, filename):
+        warnings.warn("The object 'oArchive' is deprecated and will be removed. Use 'archive' instead.", DeprecationWarning)
         archive.__init__(self, str(filename), 'w')
     def read(self, path):
         return archive.__getitem__(self, path)

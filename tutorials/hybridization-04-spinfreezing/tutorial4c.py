@@ -37,10 +37,10 @@
  # Run this script as:
  # alpspython tutorial4c.py
 
-from pyalps.ngs import h5ar # hdf5 interface
+from pyalps.hdf5 import archive # hdf5 interface
 from numpy import *
 
-ar=h5ar('hyb.param.out.h5','rw') # read the parameters from the output file
+ar=archive('hyb.param.out.h5','rw') # read the parameters from the output file
 parms=ar['/parameters'] # returns a python dict
 
 n_orb=parms['N_ORBITALS']

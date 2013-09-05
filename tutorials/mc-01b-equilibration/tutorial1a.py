@@ -53,7 +53,7 @@ pyalps.runApplication('dwa', input_file, Tmin=10, writexml=True)
 files = pyalps.getResultFiles(prefix='parm1a', format='hdf5')
 
 # and then extract, say the timeseries of the Density measurements:
-ar = pyalps.hdf5.h5ar(files[0])
+ar = pyalps.hdf5.archive(files[0])
 density_timeseries = ar['/simulation/results']['Density']['timeseries']['data']
 
 # We can then visualize graphically:

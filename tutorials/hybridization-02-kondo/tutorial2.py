@@ -52,7 +52,7 @@
  # mpirun -np 2 sh alpspython tutorial1.py
 
 import pyalps.mpi as mpi          # MPI library
-from pyalps.ngs import h5ar       # hdf5 interface
+from pyalps.hdf5 import archive       # hdf5 interface
 import pyalps.cthyb as cthyb      # the solver module
 import matplotlib.pyplot as plt   # for plotting results
 from numpy import exp,log,sqrt,pi # some math
@@ -113,7 +113,7 @@ for un,u in enumerate(Uvalues):
   for parms in parameters:
 
     if mpi.rank==0:
-      ar=h5ar(parms['BASENAME']+'.out.h5','a')
+      ar=archive(parms['BASENAME']+'.out.h5','a')
       ar['/parameters']=parms
       del ar
       print "creating initial hybridization..." 
@@ -135,7 +135,7 @@ for un,u in enumerate(Uvalues):
         delta.append(parms['t']**2*g0tau) # delta=t**2 g
 
       # write hybridization function to hdf5 archive (solver input)
-      ar=h5ar(parms['DELTA'],'w')
+      ar=archive(parms['DELTA'],'w')
       for m in range(parms['N_ORBITALS']):
         ar['/Delta_%i'%m]=delta
       del ar
@@ -147,7 +147,7 @@ for un,u in enumerate(Uvalues):
 
     if mpi.rank==0:
       # extract the local spin susceptiblity
-      ar=h5ar(parms['BASENAME']+'.out.h5','w')
+      ar=archive(parms['BASENAME']+'.out.h5','w')
       nn_0_0=ar['simulation/results/nnw_re_0_0/mean/value']
       nn_1_1=ar['simulation/results/nnw_re_1_1/mean/value']
       nn_1_0=ar['simulation/results/nnw_re_1_0/mean/value']
