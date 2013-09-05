@@ -41,7 +41,7 @@ void evaluate_2p(const alps::results_type<hybridization>::type &results, const a
 
 inline std::complex<double> t(int n, int l){//transformation matrix from Legendre to Matsubara basis
   std::complex<double> i_c(0., 1.);
-  return (std::sqrt(2*l+1)/std::sqrt(2*n+1)) * std::exp(i_c*(n+0.5)*M_PI) * std::pow(i_c,l) * boost::math::cyl_bessel_j(l+0.5,(n+0.5)*M_PI);
+  return (std::sqrt(static_cast<double>(2*l+1))/std::sqrt(static_cast<double>(2*n+1))) * std::exp(i_c*(n+0.5)*M_PI) * std::pow(i_c,l) * boost::math::cyl_bessel_j(l+0.5,(n+0.5)*M_PI);
 }
 
 struct jackson{//the Jackson kernel
