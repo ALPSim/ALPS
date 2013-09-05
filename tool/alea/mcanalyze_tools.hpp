@@ -28,7 +28,7 @@
 #ifndef CPP_COMMANDLINE_HPP
 #define CPP_COMMANDLINE_HPP
 
-#include <alps/hdf5.hpp>
+#include <alps/hdf5/archive.hpp>
 #include <alps/utility/encode.hpp>
 #include <alps/numeric/vector_functions.hpp>
 #include <alps/alea/mcdata.hpp>

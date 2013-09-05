@@ -27,7 +27,7 @@
 
 /* $Id: abstract_task.C 3822 2010-01-30 22:02:39Z troyer $ */
 
-#include <alps/hdf5.hpp>
+#include <alps/hdf5/archive.hpp>
 #include <alps/parameter.h>
 
 #include <boost/filesystem.hpp>

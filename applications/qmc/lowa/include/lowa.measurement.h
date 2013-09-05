@@ -42,7 +42,7 @@
 #define ALPS_APPLICATIONS_LOWA_MEASUREMENT_H
 
 #include <alps/config.h>
-#include <alps/hdf5.hpp>
+#include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/pointer.hpp>
 
 namespace alps {

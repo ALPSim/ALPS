@@ -28,7 +28,7 @@
 #include <alps/ngs.hpp>
 #include <alps/multi_array.hpp>
 #include <alps/utility/resize.hpp>
-#include <alps/ngs/hdf5/array.hpp>
+#include <alps/hdf5/array.hpp>
 #include <alps/ngs/numeric/array.hpp>
 
 #include <iostream>

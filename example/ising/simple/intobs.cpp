@@ -26,7 +26,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <alps/ngs/api.hpp>
-#include <alps/ngs/hdf5.hpp>
+#include <alps/hdf5/archive.hpp>
 #include <alps/ngs/config.hpp>
 #include <alps/ngs/signal.hpp>
 #include <alps/ngs/params.hpp>

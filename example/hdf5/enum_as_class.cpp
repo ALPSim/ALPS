@@ -25,8 +25,8 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <alps/hdf5.hpp>
-
+#include <alps/hdf5/archive.hpp>
+ 
 #include <boost/filesystem.hpp>
 
 #include <string>

@@ -26,14 +26,14 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <alps/ngs/api.hpp>
-#include <alps/ngs/hdf5.hpp>
+#include <alps/hdf5/archive.hpp>
 #include <alps/ngs/config.hpp>
 #include <alps/ngs/params.hpp>
-#include <alps/ngs/hdf5/map.hpp>
+#include <alps/hdf5/map.hpp>
 #include <alps/ngs/boost_mpi.hpp>
-#include <alps/ngs/hdf5/pair.hpp>
-#include <alps/ngs/hdf5/vector.hpp>
-#include <alps/ngs/hdf5/multi_array.hpp>
+#include <alps/hdf5/pair.hpp>
+#include <alps/hdf5/vector.hpp>
+#include <alps/hdf5/multi_array.hpp>
 
 #ifdef ALPS_NGS_USE_NEW_ALEA
     #include <alps/ngs/alea/accumulator_set.hpp>
