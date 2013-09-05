@@ -48,14 +48,8 @@ pyalps.runApplication('spinmc', input_file, Tmin=10, writexml=True)
 # We first get the list of all hdf5 result files via:
 files = pyalps.getResultFiles(prefix='parm1a')
 
-<<<<<<< .mine
 # and then extract, say the timeseries of the |Magnetization| measurements:
 ts_M = pyalps.loadTimeSeries(files[0], '|Magnetization|');
-=======
-# and then extract, say the timeseries of the Density measurements:
-ar = pyalps.hdf5.archive(files[0])
-density_timeseries = ar['/simulation/results']['Density']['timeseries']['data']
->>>>>>> .r7019
 
 # We can then visualize graphically:
 import matplotlib.pyplot as plt
@@ -65,10 +59,10 @@ plt.show()
 # ALPS Python provides a convenient tool to check whether a measurement observable(s) has (have) reached steady state equilibrium.
 #
 # Here is one example:
-pyalps.steady_state_check(files[0], 'Density')
+pyalps.checkSteadyState(files[0], '|Magnetization|', confidenceInterval=0.95)
 
 # and another one:
-pyalps.steady_state_check(files[0], ['Density', 'Energy Density'])
+pyalps.checkSteadyState(files[0], ['|Magnetization|', 'Energy'], confidenceInterval=0.95)
 
 # To see the complete log
-pyalps.steady_state_check(files[0], ['Density', 'Energy Density'], includeLog=True)
+pyalps.checkSteadyState(files[0], ['|Magnetization|', 'Energy'], confidenceInterval=0.95, includeLog=True)
