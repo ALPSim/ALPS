@@ -521,13 +521,11 @@ def checkSteadyState(outfile, observables, confidenceInterval=0.95, simplified=F
 
   results = [];
   for observable in observables:
-    ts = pyalps.loadTimeSeries(outfile, observable);
+    timeseries = pyalps.loadTimeSeries(outfile, observable);
     mean = timeseries.mean();
 
     index = scipy.linspace(0, timeseries.size-1, timeseries.size);
-    ts_fit = scipy.polyval(scipy.polyfit(index, timeseries, 1), index);  # timeseries get fitted
-
-
+    timeseries = scipy.polyval(scipy.polyfit(index, timeseries, 1), index);  # timeseries get fitted
 
     percentage_increment = (timeseries[-1] - timeseries[0])/mean;
     result = abs(percentage_increment) < 1.- confidenceInterval;
