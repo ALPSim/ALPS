@@ -31,34 +31,35 @@ import pyalps
 # Set up a python list of parameters (python) dictionaries:
 parms = [{
   'LATTICE'         : "square lattice",          
-  'MODEL'           : "boson Hubbard",
-  'L'               : 20,
-  'Nmax'            : 20,
-  't'               : 1.,
-  'U'               : 16.,
-  'mu'              : 32.,
-  'T'               : 1.,
+  'MODEL'           : "Ising",
+  'L'               : 48,
+  'J'               : 1.,
+  'T'               : 2.269186,
   'THERMALIZATION'  : 10000,
-  'SWEEPS'          : 100000,
-  'SKIP'            : 400
+  'SWEEPS'          : 50000,
 }]
 
 # Write into XML input file:
 input_file = pyalps.writeInputFiles('parm1a',parms)
 
 # and run the application dwa:
-pyalps.runApplication('dwa', input_file, Tmin=10, writexml=True)
+pyalps.runApplication('spinmc', input_file, Tmin=10, writexml=True)
 
 # We first get the list of all hdf5 result files via:
-files = pyalps.getResultFiles(prefix='parm1a', format='hdf5')
+files = pyalps.getResultFiles(prefix='parm1a')
 
+<<<<<<< .mine
+# and then extract, say the timeseries of the |Magnetization| measurements:
+ts_M = pyalps.loadTimeSeries(files[0], '|Magnetization|');
+=======
 # and then extract, say the timeseries of the Density measurements:
 ar = pyalps.hdf5.archive(files[0])
 density_timeseries = ar['/simulation/results']['Density']['timeseries']['data']
+>>>>>>> .r7019
 
 # We can then visualize graphically:
 import matplotlib.pyplot as plt
-plt.plot(density_timeseries)
+plt.plot(ts_M)
 plt.show()
 
 # ALPS Python provides a convenient tool to check whether a measurement observable(s) has (have) reached steady state equilibrium.
