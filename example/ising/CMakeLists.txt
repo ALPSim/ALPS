@@ -3,7 +3,8 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-if (ALPS_BUILD_EXAMPLES)
+# TODO: fix it ...
+if (FALSE AND ALPS_BUILD_EXAMPLES)
 
     add_executable(alpscontrol alpscontrol.cpp)
     add_dependencies(alpscontrol alps)
@@ -137,4 +138,4 @@ if (ALPS_BUILD_EXAMPLES)
 
     add_subdirectory(simple)
 
-endif (ALPS_BUILD_EXAMPLES)
+endif (FALSE AND ALPS_BUILD_EXAMPLES)
