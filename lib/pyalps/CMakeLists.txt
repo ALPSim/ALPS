@@ -15,15 +15,13 @@ if (ALPS_HAVE_PYTHON)
   set(PYALEA_SOURCES ../../src/alps/python/pyalea.cpp )
   set(PYMCDATA_SOURCES ../../src/alps/python/pymcdata.cpp )
   set(PYTOOLS_SOURCES ../../src/alps/python/pytools.cpp)
-  set (MAXENT_SOURCES ../../tool/maxent.cpp ../../tool/maxent_helper.cpp 
-                      ../../tool/maxent_simulation.cpp ../../tool/maxent_parms.cpp)
-  python_add_module(pyalea_c ${PYALEA_SOURCES})
-  python_add_module(pymcdata_c ${PYMCDATA_SOURCES})
-  python_add_module(pytools_c ${PYTOOLS_SOURCES})
 
-  set(PYALPS_SOURCES pyalea_c pymcdata_c pytools_c pyngsparams_c pyngshdf5_c pyngsbase_c 
+  set(PYALPS_SOURCES pyalea_c pymcdata_c pytools_c dwa_c pyngsparams_c pyngshdf5_c pyngsbase_c  
       pyngsobservable_c pyngsobservables_c pyngsresult_c pyngsresults_c pyngsapi_c pyngsrandom01_c
   )
+
+  set (MAXENT_SOURCES ../../tool/maxent.cpp ../../tool/maxent_helper.cpp 
+                      ../../tool/maxent_simulation.cpp ../../tool/maxent_parms.cpp)
 
   set(PYNGSPARAMS_SOURCES ../../src/alps/ngs/python/params.cpp)
   set(PYNGSHDF5_SOURCES ../../src/alps/ngs/python/hdf5.cpp)
@@ -36,6 +34,10 @@ if (ALPS_HAVE_PYTHON)
   set(PYNGSRANDOM01_SOURCES ../../src/alps/ngs/python/random01.cpp)
 
 
+  python_add_module(pyalea_c ${PYALEA_SOURCES})
+  python_add_module(pymcdata_c ${PYMCDATA_SOURCES})
+  python_add_module(pytools_c ${PYTOOLS_SOURCES})
+  python_add_module(dwa_c SHARED ../../applications/qmc/dwa/python/dwa.cpp)
   python_add_module(pyngsparams_c ${PYNGSPARAMS_SOURCES})
   python_add_module(pyngshdf5_c ${PYNGSHDF5_SOURCES})
   python_add_module(pyngsbase_c ${PYNGSBASE_SOURCES})
@@ -59,19 +61,10 @@ if (ALPS_HAVE_PYTHON)
 
   if(LAPACK_FOUND)
     SET (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
-    python_add_module(dwa_c SHARED ../../applications/qmc/dwa/python/dwa.cpp)
-    set_target_properties(dwa_c PROPERTIES PREFIX "")
-    set_target_properties(dwa_c PROPERTIES SUFFIX "")
-    target_link_libraries(dwa_c alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY} ${ALPS_LIBRARIES}) 
+    set(PYALPS_SOURCES ${PYALPS_SOURCES} pymaxent)
+    python_add_module(pymaxent ${MAXENT_SOURCES})
+    target_link_libraries(pymaxent alps boost  ${BLAS_LIBRARY} ${LAPACK_LIBRARY})
   endif(LAPACK_FOUND)
- 
-
-#  if(LAPACK_FOUND)
-#    SET (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
-#    set(PYALPS_SOURCES ${PYALPS_SOURCES} pymaxent)
-#    python_add_module(pymaxent ${MAXENT_SOURCES})
-#    target_link_libraries(pymaxent alps boost  ${BLAS_LIBRARY} ${LAPACK_LIBRARY})
-#  endif(LAPACK_FOUND)
 
   #######################################################################
   # install
