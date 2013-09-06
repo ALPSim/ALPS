@@ -39,3 +39,6 @@ from tools import *
 from pytools import *
 from floatwitherror import FloatWithError
 import fit_wrapper
+
+# For ALPS DWA Application
+from dwa import *

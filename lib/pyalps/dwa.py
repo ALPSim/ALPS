@@ -33,6 +33,8 @@ import matplotlib;
 import matplotlib.pyplot;
 import pyalps;
 from dwa_c import worldlines;
+from dwa_c import bandstructure;
+
 
 def format_string(string, loc):
   result = []; 
