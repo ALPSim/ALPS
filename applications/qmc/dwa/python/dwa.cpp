@@ -32,8 +32,8 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <alps/python/numpy_array.hpp>
 
-#include "worldlines.hpp"
-#include "bandstructure.hpp"
+#include "../worldlines.hpp"
+#include "../bandstructure.hpp"
 
 
 BOOST_PYTHON_MODULE(dwa_c) {

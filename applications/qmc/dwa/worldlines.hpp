@@ -703,11 +703,15 @@ bool wormpair::is_valid(unsigned short Nmax)
   if ((_location.second-1)->state() > Nmax)
     valid = false;
   if (wormhead_touches_end())
+  {
     if (_location.first->begin()->state() > Nmax)
       valid = false;
+  }
   else
+  {
     if (_location.second->state() > Nmax)
       valid = false;
+  }
 
   // check time
   if (_wormhead.time() <= 0. || _wormhead.time() >= 1.)

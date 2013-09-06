@@ -63,11 +63,11 @@ public:
 private:
   void evaluate();
 
-  static const double pi   = 3.141592654;
-  static const double hbar = 1.05457148;  
-  static const double k    = 1.3806503;
-  static const double amu  = 1.66053886;
-  static const double a0   = 0.052917720859;
+  static const double pi; 
+  static const double hbar;
+  static const double k;  
+  static const double amu;
+  static const double a0; 
 
   bool is_evaluated;
 
@@ -90,6 +90,12 @@ private:
 
   int Mmax;
 };
+
+const double bandstructure::pi   = 3.141592654;
+const double bandstructure::hbar = 1.05457148;
+const double bandstructure::k    = 1.3806503;
+const double bandstructure::amu  = 1.66053886;
+const double bandstructure::a0   = 0.052917720859;
 
 
 // Constructor
