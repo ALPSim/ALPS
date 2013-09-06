@@ -47,8 +47,8 @@ MaxEntSimulation::MaxEntSimulation(const alps::params &parms,const std::string &
 , Kernel_type(parms["KERNEL"]|"")
 , finished(false)
 , verbose(parms["VERBOSE"]|false)
-, self(parms["SELF"]|false)
 , text_output(parms["TEXT_OUTPUT"]|false)
+, self(parms["SELF"]|false)
 {
   if(norm != 1.) std::cerr<<"WARNING: Redefinition of parameter NORM: Input (and output) data are assumed to be normalized to NORM."<<std::endl;
   const double alpha_min = parms["ALPHA_MIN"];                                          //Smallest value of \alpha that is tried

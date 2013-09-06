@@ -23,6 +23,9 @@ if (ALPS_HAVE_PYTHON)
   set (MAXENT_SOURCES ../../tool/maxent.cpp ../../tool/maxent_helper.cpp 
                       ../../tool/maxent_simulation.cpp ../../tool/maxent_parms.cpp)
 
+
+
+
   set(PYNGSPARAMS_SOURCES ../../src/alps/ngs/python/params.cpp)
   set(PYNGSHDF5_SOURCES ../../src/alps/ngs/python/hdf5.cpp)
   set(PYNGSBASE_SOURCES ../../src/alps/ngs/python/mcbase.cpp)
@@ -34,10 +37,16 @@ if (ALPS_HAVE_PYTHON)
   set(PYNGSRANDOM01_SOURCES ../../src/alps/ngs/python/random01.cpp)
 
 
+  if(LAPACK_FOUND)
+    set(PYALPS_SOURCES ${PYALPS_SOURCES} pymaxent dwa_c)
+    python_add_module(pymaxent ${MAXENT_SOURCES})
+    python_add_module(dwa_c ../../applications/qmc/dwa/python/dwa.cpp)
+    include_directories(../../applications/qmc/dwa)
+  endif(LAPACK_FOUND)
+
   python_add_module(pyalea_c ${PYALEA_SOURCES})
   python_add_module(pymcdata_c ${PYMCDATA_SOURCES})
   python_add_module(pytools_c ${PYTOOLS_SOURCES})
-  python_add_module(dwa_c SHARED ../../applications/qmc/dwa/python/dwa.cpp)
   python_add_module(pyngsparams_c ${PYNGSPARAMS_SOURCES})
   python_add_module(pyngshdf5_c ${PYNGSHDF5_SOURCES})
   python_add_module(pyngsbase_c ${PYNGSBASE_SOURCES})
@@ -56,15 +65,9 @@ if (ALPS_HAVE_PYTHON)
         set_target_properties(${name} PROPERTIES SUFFIX ".pyd")
       endif(WIN32 AND NOT UNIX)
     endif(BUILD_SHARED_LIBS)
-    target_link_libraries(${name} alps ${LINK_LIBRARIES})
+    target_link_libraries(${name} alps ${LINK_LIBRARIES} ${BLAS_LIBRARY} ${LAPACK_LIBRARY} ${LAPACK_LINKER_FLAGS})
   ENDFOREACH(name)
 
-  if(LAPACK_FOUND)
-    SET (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
-    set(PYALPS_SOURCES ${PYALPS_SOURCES} pymaxent)
-    python_add_module(pymaxent ${MAXENT_SOURCES})
-    target_link_libraries(pymaxent alps boost  ${BLAS_LIBRARY} ${LAPACK_LIBRARY})
-  endif(LAPACK_FOUND)
 
   #######################################################################
   # install
@@ -83,10 +86,5 @@ if (ALPS_HAVE_PYTHON)
             ARCHIVE DESTINATION ${PYTHON_EXTENSION_DIR}/pyalps
             LIBRARY DESTINATION ${PYTHON_EXTENSION_DIR}/pyalps)
   endif(NOT ALPS_FOR_VISTRAILS)
-
-  install(TARGETS dwa_c COMPONENT python
-          RUNTIME DESTINATION bin
-          ARCHIVE DESTINATION lib/pyalps/dwa
-          LIBRARY DESTINATION lib/pyalps/dwa)
 
 endif (ALPS_HAVE_PYTHON)

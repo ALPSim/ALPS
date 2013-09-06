@@ -5,23 +5,16 @@
 
 if (ALPS_BUILD_SOURCE)
   install(FILES CMakeLists.txt qmc.h DESTINATION alps/applications/qmc)
-  install(DIRECTORY checksign looper qwl sse sse4 worms DESTINATION alps/applications/qmc
+  install(DIRECTORY checksign looper qwl sse4 worms dwa DESTINATION alps/applications/qmc
           FILES_MATCHING PATTERN "*"  PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 else (ALPS_BUILD_SOURCE)
 
   add_subdirectory(checksign)
   add_subdirectory(looper)
   add_subdirectory(qwl)
-  add_subdirectory(sse)
+  #add_subdirectory(sse)
   add_subdirectory(sse4)
   add_subdirectory(worms)
+  add_subdirectory(dwa)
 
-  IF (NOT ALPS_PACKAGE_LIBRARIES)
-    IF(EXISTS ${PROJECT_SOURCE_DIR}/applications/qmc/dwa)
-      add_subdirectory(dwa)
-    ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/applications/qmc/dwa)
-#    IF(EXISTS ${PROJECT_SOURCE_DIR}/applications/qmc/sse2)
-#      add_subdirectory(sse2)
-#    ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/applications/qmc/sse2)
-  ENDIF (NOT ALPS_PACKAGE_LIBRARIES)
 endif (ALPS_BUILD_SOURCE)
