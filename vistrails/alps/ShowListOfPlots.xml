@@ -1,4 +1,4 @@
-<vistrail id="" name="" version="1.0.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.vistrails.org/vistrail.xsd">
+<vistrail id="" name="" version="1.0.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.vistrails.org/vistrail.xsd">
   <action date="2010-05-05 11:29:06" id="1" prevId="0" session="0" user="troyer">
     <annotation id="0" key="__description__" value="Copied from pipeline" />
     <add id="0" objectId="0" parentObjId="" parentObjType="" what="module">
@@ -54,7 +54,7 @@
           </connection>
           <connection id="7">
             <port id="13" moduleId="2" moduleName="MplFigure" name="Script" signature="(edu.utah.sci.vistrails.basic:String)" type="destination" />
-            <port id="14" moduleId="4" moduleName="MplXYPlot" name="unused" signature="(edu.utah.sci.vistrails.basic:String)" type="source" />
+            <port id="14" moduleId="4" moduleName="MplXYPlot" name="self" signature="(org.vistrails.vistrails.matplotlib:MplPlot)" type="source" />
           </connection>
           <connection id="8">
             <port id="15" moduleId="4" moduleName="MplXYPlot" name="plot" signature="(org.comp-phys.alps:PreparePlot:DataSet|Plot)" type="destination" />
@@ -357,7 +357,7 @@
           </connection>
           <connection id="7">
             <port id="13" moduleId="2" moduleName="MplFigure" name="Script" signature="(edu.utah.sci.vistrails.basic:String)" type="destination" />
-            <port id="14" moduleId="4" moduleName="MplXYPlot" name="unused" signature="(edu.utah.sci.vistrails.basic:String)" type="source" />
+            <port id="14" moduleId="4" moduleName="MplXYPlot" name="self" signature="(org.vistrails.vistrails.matplotlib:MplPlot)" type="source" />
           </connection>
           <connection id="8">
             <port id="15" moduleId="4" moduleName="MplXYPlot" name="plot" signature="(org.comp-phys.alps:PreparePlot:DataSet|Plot)" type="destination" />
@@ -541,6 +541,549 @@
     <delete id="110" objectId="14" parentObjId="14" parentObjType="module" what="location" />
     <delete id="111" objectId="14" parentObjId="" parentObjType="" what="module" />
   </action>
+  <action date="2013-09-08 11:48:27" id="5" prevId="4" session="4" user="troyer">
+    <annotation id="8" key="__description__" value="Upgrade" />
+    <delete id="112" objectId="72" parentObjId="36" parentObjType="connection" what="port" />
+    <delete id="113" objectId="73" parentObjId="36" parentObjType="connection" what="port" />
+    <delete id="114" objectId="36" parentObjId="" parentObjType="" what="connection" />
+    <delete id="115" objectId="74" parentObjId="37" parentObjType="connection" what="port" />
+    <delete id="116" objectId="75" parentObjId="37" parentObjType="connection" what="port" />
+    <delete id="117" objectId="37" parentObjId="" parentObjType="" what="connection" />
+    <delete id="118" objectId="76" parentObjId="38" parentObjType="connection" what="port" />
+    <delete id="119" objectId="77" parentObjId="38" parentObjType="connection" what="port" />
+    <delete id="120" objectId="38" parentObjId="" parentObjType="" what="connection" />
+    <delete id="121" objectId="78" parentObjId="39" parentObjType="connection" what="port" />
+    <delete id="122" objectId="79" parentObjId="39" parentObjType="connection" what="port" />
+    <delete id="123" objectId="39" parentObjId="" parentObjType="" what="connection" />
+    <delete id="124" objectId="80" parentObjId="40" parentObjType="connection" what="port" />
+    <delete id="125" objectId="81" parentObjId="40" parentObjType="connection" what="port" />
+    <delete id="126" objectId="40" parentObjId="" parentObjType="" what="connection" />
+    <delete id="127" objectId="82" parentObjId="41" parentObjType="connection" what="port" />
+    <delete id="128" objectId="83" parentObjId="41" parentObjType="connection" what="port" />
+    <delete id="129" objectId="41" parentObjId="" parentObjType="" what="connection" />
+    <delete id="130" objectId="84" parentObjId="42" parentObjType="connection" what="port" />
+    <delete id="131" objectId="85" parentObjId="42" parentObjType="connection" what="port" />
+    <delete id="132" objectId="42" parentObjId="" parentObjType="" what="connection" />
+    <delete id="133" objectId="13" parentObjId="13" parentObjType="group" what="location" />
+    <delete id="134" objectId="13" parentObjId="" parentObjType="" what="group" />
+    <delete id="135" objectId="9" parentObjId="4" parentObjType="connection" what="port" />
+    <delete id="136" objectId="8" parentObjId="4" parentObjType="connection" what="port" />
+    <delete id="137" objectId="4" parentObjId="" parentObjType="" what="connection" />
+    <delete id="138" objectId="0" parentObjId="0" parentObjType="module" what="location" />
+    <delete id="139" objectId="1" parentObjId="1" parentObjType="function" what="parameter" />
+    <delete id="140" objectId="1" parentObjId="0" parentObjType="module" what="function" />
+    <delete id="141" objectId="0" parentObjId="0" parentObjType="function" what="parameter" />
+    <delete id="142" objectId="0" parentObjId="0" parentObjType="module" what="function" />
+    <delete id="143" objectId="2" parentObjId="2" parentObjType="function" what="parameter" />
+    <delete id="144" objectId="2" parentObjId="0" parentObjType="module" what="function" />
+    <delete id="145" objectId="0" parentObjId="" parentObjType="" what="module" />
+    <delete id="146" objectId="2" parentObjId="2" parentObjType="module" what="location" />
+    <delete id="147" objectId="3" parentObjId="3" parentObjType="function" what="parameter" />
+    <delete id="148" objectId="3" parentObjId="2" parentObjType="module" what="function" />
+    <delete id="149" objectId="2" parentObjId="" parentObjType="" what="module" />
+    <delete id="150" objectId="3" parentObjId="3" parentObjType="module" what="location" />
+    <delete id="151" objectId="4" parentObjId="4" parentObjType="function" what="parameter" />
+    <delete id="152" objectId="4" parentObjId="3" parentObjType="module" what="function" />
+    <delete id="153" objectId="3" parentObjId="" parentObjType="" what="module" />
+    <delete id="154" objectId="4" parentObjId="4" parentObjType="module" what="location" />
+    <delete id="155" objectId="5" parentObjId="5" parentObjType="function" what="parameter" />
+    <delete id="156" objectId="5" parentObjId="4" parentObjType="module" what="function" />
+    <delete id="157" objectId="4" parentObjId="" parentObjType="" what="module" />
+    <delete id="158" objectId="5" parentObjId="5" parentObjType="module" what="location" />
+    <delete id="159" objectId="6" parentObjId="6" parentObjType="function" what="parameter" />
+    <delete id="160" objectId="6" parentObjId="5" parentObjType="module" what="function" />
+    <delete id="161" objectId="5" parentObjId="" parentObjType="" what="module" />
+    <delete id="162" objectId="6" parentObjId="6" parentObjType="module" what="location" />
+    <delete id="163" objectId="7" parentObjId="7" parentObjType="function" what="parameter" />
+    <delete id="164" objectId="7" parentObjId="6" parentObjType="module" what="function" />
+    <delete id="165" objectId="6" parentObjId="" parentObjType="" what="module" />
+    <delete id="166" objectId="7" parentObjId="7" parentObjType="module" what="location" />
+    <delete id="167" objectId="8" parentObjId="8" parentObjType="function" what="parameter" />
+    <delete id="168" objectId="8" parentObjId="7" parentObjType="module" what="function" />
+    <delete id="169" objectId="7" parentObjId="" parentObjType="" what="module" />
+    <delete id="170" objectId="8" parentObjId="8" parentObjType="module" what="location" />
+    <delete id="171" objectId="9" parentObjId="9" parentObjType="function" what="parameter" />
+    <delete id="172" objectId="9" parentObjId="8" parentObjType="module" what="function" />
+    <delete id="173" objectId="8" parentObjId="" parentObjType="" what="module" />
+    <add id="174" objectId="15" parentObjId="" parentObjType="" what="group">
+      <group cache="1" id="15" name="Group" namespace="" package="org.vistrails.vistrails.basic" version="2.1">
+        <workflow id="" name="untitled" version="" vistrail_id="">
+          <connection id="6">
+            <port id="11" moduleId="3" moduleName="MplXYPlot" name="plot" signature="(org.comp-phys.alps:DataSet|Plot|PreparePlot)" type="destination" />
+            <port id="12" moduleId="4" moduleName="PreparePlot" name="output" signature="(org.comp-phys.alps:DataSet|Plot|PreparePlot)" type="source" />
+          </connection>
+          <connection id="14">
+            <port id="27" moduleId="3" moduleName="MplXYPlot" name="self" signature="(org.vistrails.vistrails.matplotlib:MplPlot)" type="source" />
+            <port id="28" moduleId="14" moduleName="MplFigure" name="addPlot" signature="(org.vistrails.vistrails.matplotlib:MplPlot)" type="destination" />
+          </connection>
+          <connection id="16">
+            <port id="31" moduleId="14" moduleName="MplFigure" name="self" signature="(org.vistrails.vistrails.matplotlib:MplFigure)" type="source" />
+            <port id="32" moduleId="15" moduleName="MplFigureCell" name="figure" signature="(org.vistrails.vistrails.matplotlib:MplFigure)" type="destination" />
+          </connection>
+          <connection id="17">
+            <port id="33" moduleId="16" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+            <port id="34" moduleId="4" moduleName="PreparePlot" name="yaxis" signature="(org.comp-phys.alps:DataSet|Plot|Axis)" type="destination" />
+          </connection>
+          <connection id="18">
+            <port id="35" moduleId="17" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+            <port id="36" moduleId="4" moduleName="PreparePlot" name="legend" signature="(org.comp-phys.alps:DataSet|Plot|Legend)" type="destination" />
+          </connection>
+          <connection id="19">
+            <port id="37" moduleId="18" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+            <port id="38" moduleId="4" moduleName="PreparePlot" name="data" signature="(org.comp-phys.alps:DataSet|DataSets)" type="destination" />
+          </connection>
+          <connection id="21">
+            <port id="41" moduleId="18" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+            <port id="42" moduleId="19" moduleName="OutputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="destination" />
+          </connection>
+          <connection id="22">
+            <port id="43" moduleId="20" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+            <port id="44" moduleId="4" moduleName="PreparePlot" name="title" signature="(org.vistrails.vistrails.basic:String)" type="destination" />
+          </connection>
+          <connection id="24">
+            <port id="47" moduleId="22" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+            <port id="48" moduleId="3" moduleName="MplXYPlot" name="hide_buttons" signature="(org.vistrails.vistrails.basic:Boolean)" type="destination" />
+          </connection>
+          <connection id="25">
+            <port id="49" moduleId="23" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+            <port id="50" moduleId="4" moduleName="PreparePlot" name="xaxis" signature="(org.comp-phys.alps:DataSet|Plot|Axis)" type="destination" />
+          </connection>
+          <connection id="26">
+            <port id="51" moduleId="24" moduleName="CellLocation" name="self" signature="(org.vistrails.vistrails.spreadsheet:CellLocation)" type="source" />
+            <port id="52" moduleId="15" moduleName="MplFigureCell" name="Location" signature="(org.vistrails.vistrails.spreadsheet:CellLocation)" type="destination" />
+          </connection>
+          <connection id="27">
+            <port id="53" moduleId="21" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+            <port id="54" moduleId="24" moduleName="CellLocation" name="SheetReference" signature="(org.vistrails.vistrails.spreadsheet:SheetReference)" type="destination" />
+          </connection>
+          <module cache="1" id="3" name="MplXYPlot" namespace="DataSet|Plot" package="org.comp-phys.alps" version="2.2.0">
+            <location id="3" x="25.16484196" y="53.8594491089" />
+          </module>
+          <module cache="1" id="4" name="PreparePlot" namespace="DataSet|Plot" package="org.comp-phys.alps" version="2.2.0">
+            <location id="4" x="33.09713782" y="147.692926157" />
+            <function id="1" name="title" pos="0">
+              <parameter alias="" id="1" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="" />
+            </function>
+          </module>
+          <module cache="1" id="14" name="MplFigure" namespace="" package="org.vistrails.vistrails.matplotlib" version="1.0.1">
+            <location id="14" x="35.89131966" y="-99.5662399711" />
+          </module>
+          <module cache="1" id="15" name="MplFigureCell" namespace="" package="org.vistrails.vistrails.matplotlib" version="1.0.1">
+            <location id="15" x="11.40342921" y="-227.377217099" />
+          </module>
+          <module cache="1" id="16" name="InputPort" namespace="" package="org.vistrails.vistrails.basic" version="2.1">
+            <location id="16" x="-445.86411641" y="706.500013594" />
+            <function id="12" name="name" pos="0">
+              <parameter alias="" id="12" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:String" val="yaxis" />
+            </function>
+          </module>
+          <module cache="1" id="17" name="InputPort" namespace="" package="org.vistrails.vistrails.basic" version="2.1">
+            <location id="17" x="56.97049091" y="717.98025577" />
+            <function id="13" name="name" pos="0">
+              <parameter alias="" id="13" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:String" val="legend" />
+            </function>
+          </module>
+          <module cache="1" id="18" name="InputPort" namespace="" package="org.vistrails.vistrails.basic" version="2.1">
+            <location id="18" x="144.22033145" y="476.895170066" />
+            <function id="14" name="name" pos="0">
+              <parameter alias="" id="14" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:String" val="data" />
+            </function>
+          </module>
+          <module cache="1" id="19" name="OutputPort" namespace="" package="org.vistrails.vistrails.basic" version="2.1">
+            <location id="19" x="22.52976438" y="-370.346702551" />
+            <function id="15" name="name" pos="0">
+              <parameter alias="" id="15" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:String" val="dummy" />
+            </function>
+          </module>
+          <module cache="1" id="20" name="InputPort" namespace="" package="org.vistrails.vistrails.basic" version="2.1">
+            <location id="20" x="371.52912655" y="729.460497947" />
+            <function id="16" name="name" pos="0">
+              <parameter alias="" id="16" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:String" val="title" />
+            </function>
+          </module>
+          <module cache="1" id="21" name="InputPort" namespace="" package="org.vistrails.vistrails.basic" version="2.1">
+            <location id="21" x="-1854.60425838" y="166.546168467" />
+            <function id="17" name="name" pos="0">
+              <parameter alias="" id="17" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:String" val="SheetReference" />
+            </function>
+          </module>
+          <module cache="1" id="22" name="InputPort" namespace="" package="org.vistrails.vistrails.basic" version="2.1">
+            <location id="22" x="-90.1623286321" y="704.751389617" />
+            <function id="18" name="name" pos="0">
+              <parameter alias="" id="18" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:String" val="hide_buttons" />
+            </function>
+          </module>
+          <module cache="1" id="23" name="InputPort" namespace="" package="org.vistrails.vistrails.basic" version="2.1">
+            <location id="23" x="-298.91701656" y="708.796062029" />
+            <function id="19" name="name" pos="0">
+              <parameter alias="" id="19" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:String" val="xaxis" />
+            </function>
+          </module>
+          <module cache="1" id="24" name="CellLocation" namespace="" package="org.vistrails.vistrails.spreadsheet" version="0.9.2">
+            <location id="24" x="-272.30682448" y="18.8426142899" />
+            <function id="20" name="Column" pos="0">
+              <parameter alias="" id="20" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:Integer" val="" />
+            </function>
+            <function id="21" name="Row" pos="1">
+              <parameter alias="" id="21" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:Integer" val="" />
+            </function>
+          </module>
+        </workflow>
+      </group>
+    </add>
+    <add id="175" objectId="15" parentObjId="15" parentObjType="group" what="location">
+      <location id="15" x="-43.3124733605" y="54.8346437001" />
+    </add>
+    <add id="176" objectId="16" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="16" name="Map" namespace="" package="org.vistrails.vistrails.control_flow" version="0.2.2" />
+    </add>
+    <add id="177" objectId="12" parentObjId="16" parentObjType="module" what="function">
+      <function id="12" name="InputPort" pos="2" />
+    </add>
+    <add id="178" objectId="12" parentObjId="12" parentObjType="function" what="parameter">
+      <parameter alias="" id="12" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:List" val="" />
+    </add>
+    <add id="179" objectId="11" parentObjId="16" parentObjType="module" what="function">
+      <function id="11" name="OutputPort" pos="1" />
+    </add>
+    <add id="180" objectId="11" parentObjId="11" parentObjType="function" what="parameter">
+      <parameter alias="" id="11" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:String" val="dummy" />
+    </add>
+    <add id="181" objectId="10" parentObjId="16" parentObjType="module" what="function">
+      <function id="10" name="InputPort" pos="0" />
+    </add>
+    <add id="182" objectId="10" parentObjId="10" parentObjType="function" what="parameter">
+      <parameter alias="" id="10" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:List" val="['data']" />
+    </add>
+    <add id="183" objectId="16" parentObjId="16" parentObjType="module" what="location">
+      <location id="16" x="43.3124733605" y="-54.8346437001" />
+    </add>
+    <add id="184" objectId="51" parentObjId="" parentObjType="" what="connection">
+      <connection id="51" />
+    </add>
+    <add id="185" objectId="102" parentObjId="51" parentObjType="connection" what="port">
+      <port id="102" moduleId="15" moduleName="Group" name="self" signature="(org.vistrails.vistrails.basic:Group)" type="source" />
+    </add>
+    <add id="186" objectId="103" parentObjId="51" parentObjType="connection" what="port">
+      <port id="103" moduleId="16" moduleName="Map" name="FunctionPort" signature="(org.vistrails.vistrails.basic:Module)" type="destination" />
+    </add>
+    <add id="187" objectId="17" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="17" name="InputPort" namespace="" package="org.vistrails.vistrails.basic" version="2.1" />
+    </add>
+    <add id="188" objectId="13" parentObjId="17" parentObjType="module" what="function">
+      <function id="13" name="name" pos="0" />
+    </add>
+    <add id="189" objectId="13" parentObjId="13" parentObjType="function" what="parameter">
+      <parameter alias="" id="13" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:String" val="title" />
+    </add>
+    <add id="190" objectId="17" parentObjId="17" parentObjType="module" what="location">
+      <location id="17" x="1620.07940902" y="1046.08230803" />
+    </add>
+    <add id="191" objectId="52" parentObjId="" parentObjType="" what="connection">
+      <connection id="52" />
+    </add>
+    <add id="192" objectId="104" parentObjId="52" parentObjType="connection" what="port">
+      <port id="104" moduleId="17" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+    </add>
+    <add id="193" objectId="105" parentObjId="52" parentObjType="connection" what="port">
+      <port id="105" moduleId="15" moduleName="Group" name="title" signature="(org.vistrails.vistrails.basic:String)" type="destination" />
+    </add>
+    <add id="194" objectId="18" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="18" name="InputPort" namespace="" package="org.vistrails.vistrails.basic" version="2.1" />
+    </add>
+    <add id="195" objectId="14" parentObjId="18" parentObjType="module" what="function">
+      <function id="14" name="name" pos="0" />
+    </add>
+    <add id="196" objectId="14" parentObjId="14" parentObjType="function" what="parameter">
+      <parameter alias="" id="14" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:String" val="SheetReference" />
+    </add>
+    <add id="197" objectId="18" parentObjId="18" parentObjType="module" what="location">
+      <location id="18" x="-606.053975913" y="483.167978547" />
+    </add>
+    <add id="198" objectId="53" parentObjId="" parentObjType="" what="connection">
+      <connection id="53" />
+    </add>
+    <add id="199" objectId="106" parentObjId="53" parentObjType="connection" what="port">
+      <port id="106" moduleId="18" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+    </add>
+    <add id="200" objectId="107" parentObjId="53" parentObjType="connection" what="port">
+      <port id="107" moduleId="15" moduleName="Group" name="SheetReference" signature="(org.vistrails.vistrails.spreadsheet:SheetReference)" type="destination" />
+    </add>
+    <add id="201" objectId="19" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="19" name="InputPort" namespace="" package="org.vistrails.vistrails.basic" version="2.1" />
+    </add>
+    <add id="202" objectId="15" parentObjId="19" parentObjType="module" what="function">
+      <function id="15" name="name" pos="0" />
+    </add>
+    <add id="203" objectId="15" parentObjId="15" parentObjType="function" what="parameter">
+      <parameter alias="" id="15" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:String" val="hide_buttons" />
+    </add>
+    <add id="204" objectId="19" parentObjId="19" parentObjType="module" what="location">
+      <location id="19" x="1160.28496229" y="1021.3731997" />
+    </add>
+    <add id="205" objectId="54" parentObjId="" parentObjType="" what="connection">
+      <connection id="54" />
+    </add>
+    <add id="206" objectId="108" parentObjId="54" parentObjType="connection" what="port">
+      <port id="108" moduleId="19" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+    </add>
+    <add id="207" objectId="109" parentObjId="54" parentObjType="connection" what="port">
+      <port id="109" moduleId="15" moduleName="Group" name="hide_buttons" signature="(org.vistrails.vistrails.basic:Boolean)" type="destination" />
+    </add>
+    <add id="208" objectId="20" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="20" name="InputPort" namespace="" package="org.vistrails.vistrails.basic" version="2.1" />
+    </add>
+    <add id="209" objectId="16" parentObjId="20" parentObjType="module" what="function">
+      <function id="16" name="name" pos="0" />
+    </add>
+    <add id="210" objectId="16" parentObjId="16" parentObjType="function" what="parameter">
+      <parameter alias="" id="16" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:String" val="xaxis" />
+    </add>
+    <add id="211" objectId="20" parentObjId="20" parentObjType="module" what="location">
+      <location id="20" x="949.633265911" y="1025.41787211" />
+    </add>
+    <add id="212" objectId="55" parentObjId="" parentObjType="" what="connection">
+      <connection id="55" />
+    </add>
+    <add id="213" objectId="110" parentObjId="55" parentObjType="connection" what="port">
+      <port id="110" moduleId="20" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+    </add>
+    <add id="214" objectId="111" parentObjId="55" parentObjType="connection" what="port">
+      <port id="111" moduleId="15" moduleName="Group" name="xaxis" signature="(org.comp-phys.alps:DataSet|Plot|Axis)" type="destination" />
+    </add>
+    <add id="215" objectId="21" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="21" name="InputPort" namespace="" package="org.vistrails.vistrails.basic" version="2.1" />
+    </add>
+    <add id="216" objectId="17" parentObjId="21" parentObjType="module" what="function">
+      <function id="17" name="name" pos="0" />
+    </add>
+    <add id="217" objectId="17" parentObjId="17" parentObjType="function" what="parameter">
+      <parameter alias="" id="17" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:String" val="InputList" />
+    </add>
+    <add id="218" objectId="21" parentObjId="21" parentObjType="module" what="location">
+      <location id="21" x="77.6893665336" y="85.2843615399" />
+    </add>
+    <add id="219" objectId="56" parentObjId="" parentObjType="" what="connection">
+      <connection id="56" />
+    </add>
+    <add id="220" objectId="112" parentObjId="56" parentObjType="connection" what="port">
+      <port id="112" moduleId="21" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+    </add>
+    <add id="221" objectId="113" parentObjId="56" parentObjType="connection" what="port">
+      <port id="113" moduleId="16" moduleName="Map" name="InputList" signature="(org.vistrails.vistrails.basic:List)" type="destination" />
+    </add>
+    <add id="222" objectId="22" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="22" name="InputPort" namespace="" package="org.vistrails.vistrails.basic" version="2.1" />
+    </add>
+    <add id="223" objectId="18" parentObjId="22" parentObjType="module" what="function">
+      <function id="18" name="name" pos="0" />
+    </add>
+    <add id="224" objectId="18" parentObjId="18" parentObjType="function" what="parameter">
+      <parameter alias="" id="18" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:String" val="legend" />
+    </add>
+    <add id="225" objectId="22" parentObjId="22" parentObjType="module" what="location">
+      <location id="22" x="1305.52077338" y="1034.60206585" />
+    </add>
+    <add id="226" objectId="57" parentObjId="" parentObjType="" what="connection">
+      <connection id="57" />
+    </add>
+    <add id="227" objectId="114" parentObjId="57" parentObjType="connection" what="port">
+      <port id="114" moduleId="22" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+    </add>
+    <add id="228" objectId="115" parentObjId="57" parentObjType="connection" what="port">
+      <port id="115" moduleId="15" moduleName="Group" name="legend" signature="(org.comp-phys.alps:DataSet|Plot|Legend)" type="destination" />
+    </add>
+    <add id="229" objectId="23" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="23" name="InputPort" namespace="" package="org.vistrails.vistrails.basic" version="2.1" />
+    </add>
+    <add id="230" objectId="19" parentObjId="23" parentObjType="module" what="function">
+      <function id="19" name="name" pos="0" />
+    </add>
+    <add id="231" objectId="19" parentObjId="19" parentObjType="function" what="parameter">
+      <parameter alias="" id="19" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:String" val="yaxis" />
+    </add>
+    <add id="232" objectId="23" parentObjId="23" parentObjType="module" what="location">
+      <location id="23" x="802.686166061" y="1023.12182367" />
+    </add>
+    <add id="233" objectId="58" parentObjId="" parentObjType="" what="connection">
+      <connection id="58" />
+    </add>
+    <add id="234" objectId="116" parentObjId="58" parentObjType="connection" what="port">
+      <port id="116" moduleId="23" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+    </add>
+    <add id="235" objectId="117" parentObjId="58" parentObjType="connection" what="port">
+      <port id="117" moduleId="15" moduleName="Group" name="yaxis" signature="(org.comp-phys.alps:DataSet|Plot|Axis)" type="destination" />
+    </add>
+  </action>
+  <action date="2013-09-08 11:48:27" id="6" prevId="5" session="4" user="troyer">
+    <change id="236" newObjId="24" oldObjId="18" parentObjId="18" parentObjType="module" what="location">
+      <location id="24" x="-211.69905951" y="826.528724725" />
+    </change>
+  </action>
+  <action date="2013-09-08 11:48:27" id="7" prevId="6" session="4" user="troyer">
+    <delete id="237" objectId="102" parentObjId="51" parentObjType="connection" what="port" />
+    <delete id="238" objectId="103" parentObjId="51" parentObjType="connection" what="port" />
+    <delete id="239" objectId="51" parentObjId="" parentObjType="" what="connection" />
+    <delete id="240" objectId="104" parentObjId="52" parentObjType="connection" what="port" />
+    <delete id="241" objectId="105" parentObjId="52" parentObjType="connection" what="port" />
+    <delete id="242" objectId="52" parentObjId="" parentObjType="" what="connection" />
+    <delete id="243" objectId="106" parentObjId="53" parentObjType="connection" what="port" />
+    <delete id="244" objectId="107" parentObjId="53" parentObjType="connection" what="port" />
+    <delete id="245" objectId="53" parentObjId="" parentObjType="" what="connection" />
+    <delete id="246" objectId="108" parentObjId="54" parentObjType="connection" what="port" />
+    <delete id="247" objectId="109" parentObjId="54" parentObjType="connection" what="port" />
+    <delete id="248" objectId="54" parentObjId="" parentObjType="" what="connection" />
+    <delete id="249" objectId="110" parentObjId="55" parentObjType="connection" what="port" />
+    <delete id="250" objectId="111" parentObjId="55" parentObjType="connection" what="port" />
+    <delete id="251" objectId="55" parentObjId="" parentObjType="" what="connection" />
+    <delete id="252" objectId="114" parentObjId="57" parentObjType="connection" what="port" />
+    <delete id="253" objectId="115" parentObjId="57" parentObjType="connection" what="port" />
+    <delete id="254" objectId="57" parentObjId="" parentObjType="" what="connection" />
+    <delete id="255" objectId="116" parentObjId="58" parentObjType="connection" what="port" />
+    <delete id="256" objectId="117" parentObjId="58" parentObjType="connection" what="port" />
+    <delete id="257" objectId="58" parentObjId="" parentObjType="" what="connection" />
+    <delete id="258" objectId="15" parentObjId="15" parentObjType="group" what="location" />
+    <delete id="259" objectId="15" parentObjId="" parentObjType="" what="group" />
+    <add id="260" objectId="24" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="24" name="MplXYPlot" namespace="DataSet|Plot" package="org.comp-phys.alps" version="2.2.0" />
+    </add>
+    <add id="261" objectId="25" parentObjId="24" parentObjType="module" what="location">
+      <location id="25" x="-18.1476314005" y="108.694092809" />
+    </add>
+    <add id="262" objectId="25" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="25" name="PreparePlot" namespace="DataSet|Plot" package="org.comp-phys.alps" version="2.2.0" />
+    </add>
+    <add id="263" objectId="20" parentObjId="25" parentObjType="module" what="function">
+      <function id="20" name="title" pos="0" />
+    </add>
+    <add id="264" objectId="20" parentObjId="20" parentObjType="function" what="parameter">
+      <parameter alias="" id="20" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="" />
+    </add>
+    <add id="265" objectId="26" parentObjId="25" parentObjType="module" what="location">
+      <location id="26" x="-10.2153355405" y="202.527569857" />
+    </add>
+    <add id="266" objectId="26" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="26" name="MplFigure" namespace="" package="org.vistrails.vistrails.matplotlib" version="1.0.1" />
+    </add>
+    <add id="267" objectId="27" parentObjId="26" parentObjType="module" what="location">
+      <location id="27" x="-7.4211537005" y="-44.731596271" />
+    </add>
+    <add id="268" objectId="27" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="27" name="MplFigureCell" namespace="" package="org.vistrails.vistrails.matplotlib" version="1.0.1" />
+    </add>
+    <add id="269" objectId="28" parentObjId="27" parentObjType="module" what="location">
+      <location id="28" x="-31.9090441505" y="-172.542573399" />
+    </add>
+    <add id="270" objectId="28" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="28" name="CellLocation" namespace="" package="org.vistrails.vistrails.spreadsheet" version="0.9.2" />
+    </add>
+    <add id="271" objectId="22" parentObjId="28" parentObjType="module" what="function">
+      <function id="22" name="Row" pos="1" />
+    </add>
+    <add id="272" objectId="22" parentObjId="22" parentObjType="function" what="parameter">
+      <parameter alias="" id="22" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:Integer" val="" />
+    </add>
+    <add id="273" objectId="21" parentObjId="28" parentObjType="module" what="function">
+      <function id="21" name="Column" pos="0" />
+    </add>
+    <add id="274" objectId="21" parentObjId="21" parentObjType="function" what="parameter">
+      <parameter alias="" id="21" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:Integer" val="" />
+    </add>
+    <add id="275" objectId="29" parentObjId="28" parentObjType="module" what="location">
+      <location id="29" x="-315.61929784" y="73.67725799" />
+    </add>
+    <add id="276" objectId="59" parentObjId="" parentObjType="" what="connection">
+      <connection id="59" />
+    </add>
+    <add id="277" objectId="119" parentObjId="59" parentObjType="connection" what="port">
+      <port id="119" moduleId="25" moduleName="PreparePlot" name="output" signature="(org.comp-phys.alps:DataSet|Plot|PreparePlot)" type="source" />
+    </add>
+    <add id="278" objectId="118" parentObjId="59" parentObjType="connection" what="port">
+      <port id="118" moduleId="24" moduleName="MplXYPlot" name="plot" signature="(org.comp-phys.alps:DataSet|Plot|PreparePlot)" type="destination" />
+    </add>
+    <add id="279" objectId="60" parentObjId="" parentObjType="" what="connection">
+      <connection id="60" />
+    </add>
+    <add id="280" objectId="121" parentObjId="60" parentObjType="connection" what="port">
+      <port id="121" moduleId="26" moduleName="MplFigure" name="addPlot" signature="(org.vistrails.vistrails.matplotlib:MplPlot)" type="destination" />
+    </add>
+    <add id="281" objectId="120" parentObjId="60" parentObjType="connection" what="port">
+      <port id="120" moduleId="24" moduleName="MplXYPlot" name="self" signature="(org.vistrails.vistrails.matplotlib:MplPlot)" type="source" />
+    </add>
+    <add id="282" objectId="61" parentObjId="" parentObjType="" what="connection">
+      <connection id="61" />
+    </add>
+    <add id="283" objectId="123" parentObjId="61" parentObjType="connection" what="port">
+      <port id="123" moduleId="27" moduleName="MplFigureCell" name="figure" signature="(org.vistrails.vistrails.matplotlib:MplFigure)" type="destination" />
+    </add>
+    <add id="284" objectId="122" parentObjId="61" parentObjType="connection" what="port">
+      <port id="122" moduleId="26" moduleName="MplFigure" name="self" signature="(org.vistrails.vistrails.matplotlib:MplFigure)" type="source" />
+    </add>
+    <add id="285" objectId="62" parentObjId="" parentObjType="" what="connection">
+      <connection id="62" />
+    </add>
+    <add id="286" objectId="125" parentObjId="62" parentObjType="connection" what="port">
+      <port id="125" moduleId="27" moduleName="MplFigureCell" name="Location" signature="(org.vistrails.vistrails.spreadsheet:CellLocation)" type="destination" />
+    </add>
+    <add id="287" objectId="124" parentObjId="62" parentObjType="connection" what="port">
+      <port id="124" moduleId="28" moduleName="CellLocation" name="self" signature="(org.vistrails.vistrails.spreadsheet:CellLocation)" type="source" />
+    </add>
+    <add id="288" objectId="63" parentObjId="" parentObjType="" what="connection">
+      <connection id="63" />
+    </add>
+    <add id="289" objectId="126" parentObjId="63" parentObjType="connection" what="port">
+      <port id="126" moduleId="17" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+    </add>
+    <add id="290" objectId="127" parentObjId="63" parentObjType="connection" what="port">
+      <port id="127" moduleId="25" moduleName="PreparePlot" name="title" signature="(org.vistrails.vistrails.basic:String)" type="destination" />
+    </add>
+    <add id="291" objectId="64" parentObjId="" parentObjType="" what="connection">
+      <connection id="64" />
+    </add>
+    <add id="292" objectId="128" parentObjId="64" parentObjType="connection" what="port">
+      <port id="128" moduleId="18" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+    </add>
+    <add id="293" objectId="129" parentObjId="64" parentObjType="connection" what="port">
+      <port id="129" moduleId="28" moduleName="CellLocation" name="SheetReference" signature="(org.vistrails.vistrails.spreadsheet:SheetReference)" type="destination" />
+    </add>
+    <add id="294" objectId="65" parentObjId="" parentObjType="" what="connection">
+      <connection id="65" />
+    </add>
+    <add id="295" objectId="130" parentObjId="65" parentObjType="connection" what="port">
+      <port id="130" moduleId="19" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+    </add>
+    <add id="296" objectId="131" parentObjId="65" parentObjType="connection" what="port">
+      <port id="131" moduleId="24" moduleName="MplXYPlot" name="hide_buttons" signature="(org.vistrails.vistrails.basic:Boolean)" type="destination" />
+    </add>
+    <add id="297" objectId="66" parentObjId="" parentObjType="" what="connection">
+      <connection id="66" />
+    </add>
+    <add id="298" objectId="132" parentObjId="66" parentObjType="connection" what="port">
+      <port id="132" moduleId="20" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+    </add>
+    <add id="299" objectId="133" parentObjId="66" parentObjType="connection" what="port">
+      <port id="133" moduleId="25" moduleName="PreparePlot" name="xaxis" signature="(org.comp-phys.alps:DataSet|Plot|Axis)" type="destination" />
+    </add>
+    <add id="300" objectId="67" parentObjId="" parentObjType="" what="connection">
+      <connection id="67" />
+    </add>
+    <add id="301" objectId="134" parentObjId="67" parentObjType="connection" what="port">
+      <port id="134" moduleId="22" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+    </add>
+    <add id="302" objectId="135" parentObjId="67" parentObjType="connection" what="port">
+      <port id="135" moduleId="25" moduleName="PreparePlot" name="legend" signature="(org.comp-phys.alps:DataSet|Plot|Legend)" type="destination" />
+    </add>
+    <add id="303" objectId="68" parentObjId="" parentObjType="" what="connection">
+      <connection id="68" />
+    </add>
+    <add id="304" objectId="136" parentObjId="68" parentObjType="connection" what="port">
+      <port id="136" moduleId="23" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+    </add>
+    <add id="305" objectId="137" parentObjId="68" parentObjType="connection" what="port">
+      <port id="137" moduleId="25" moduleName="PreparePlot" name="yaxis" signature="(org.comp-phys.alps:DataSet|Plot|Axis)" type="destination" />
+    </add>
+  </action>
   <annotation id="1" key="__abstraction_uuid__" value="a70285d8-5828-11df-b401-001d4fff5050" />
   <actionAnnotation actionId="1" date="2011-08-24 15:04:23" id="7" key="__upgrade__" user="troyer" value="2" />
+  <actionAnnotation actionId="4" date="2013-09-08 11:48:27" id="9" key="__upgrade__" user="troyer" value="5" />
 </vistrail>

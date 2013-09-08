@@ -266,7 +266,7 @@ class MplXYPlot_core:
                     showlegend = False
             if showlegend:
                 legend_prop = {}
-                if platform.system() != 'Linux' and 'fontsize' in self.plt['legend']:
+                if platform.system() != 'Linux' and platform.system() != 'Windows' and 'fontsize' in self.plt['legend']:
                     legend_prop['size'] = self.plt['legend']['fontsize']
                 if 'location' in self.plt['legend']:
                     legend_loc = self.plt['legend']['location']

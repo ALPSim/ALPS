@@ -65,8 +65,10 @@ using namespace boost::python;
 void run_it(boost::python::dict parms_){
     alps::parameters_type<MaxEntSimulation>::type parms(parms_);
     std::string out_file = boost::lexical_cast<std::string>(parms["BASENAME"]|"results")+std::string(".out.h5");
+
 #else
-int main(int argc, char** argv)
+
+  int main(int argc, char** argv)
 {
   alps::mcoptions options(argc, argv);
     
@@ -102,7 +104,7 @@ int main(int argc, char** argv)
 }
     
 #ifdef BUILD_PYTHON_MODULE
-    BOOST_PYTHON_MODULE(maxent)
+    BOOST_PYTHON_MODULE(maxent_c)
     {
         def("AnalyticContinuation",run_it);//define python-callable run method
     };

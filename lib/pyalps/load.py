@@ -116,7 +116,7 @@ class Hdf5Loader:
         LOP=self.h5f.list_children(proppath)
         for m in LOP:
                 try:
-                    dict[m] = self.h5f.read(proppath+'/'+m)
+                    dict[m] = self.h5f[proppath+'/'+m]
                     try:
                         dict[m] = float(dict[m])
                     except:
@@ -173,7 +173,7 @@ class Hdf5Loader:
                             d = DataSet()
                             d.props['hdf5_path'] = respath 
                             d.props['observable'] = 'spectrum'
-                            d.y = self.h5f.read(respath+'/energies')
+                            d.y = self.h5f[respath+'/energies']
                             d.x = range(len(d.y))
                             d.props.update(params)
                             try:
@@ -191,7 +191,7 @@ class Hdf5Loader:
                             secpath = respath+'/sectors/'+secnum
                             d.props['hdf5_path'] = secpath 
                             d.props['observable'] = 'spectrum'
-                            d.y = self.h5f.read(secpath+'/energies')
+                            d.y = self.h5f[secpath+'/energies']
                             d.x = range(len(d.y))
                             d.props.update(params)
                             try:
@@ -242,15 +242,15 @@ class Hdf5Loader:
                                                 d.props['observable'] = pt.hdf5_name_decode(m)
                                                 d.props['iteration'] = it
                                                 if index == None:
-                                                    d.y = self.h5f.read(itresultspath+'/mean/value')
+                                                    d.y = self.h5f[itresultspath+'/mean/value']
                                                     d.x = np.arange(0,len(d.y))
                                                 else:
                                                     try:
-                                                        d.y = self.h5f.read(itresultspath+'/mean/value')[index]
+                                                        d.y = self.h5f[itresultspath+'/mean/value'][index]
                                                     except:
                                                         pass
                                                 if "labels" in self.h5f.list_children(itresultspath):
-                                                    d.x = self.h5f.read(itresultspath+'/labels') 
+                                                    d.x = self.h5f[itresultspath+'/labels']
                                                 else:
                                                     d.x = np.arange(0,len(d.y))
                                                 d.props.update(params)
@@ -269,15 +269,15 @@ class Hdf5Loader:
                                     d.props['hdf5_path'] = secresultspath 
                                     d.props['observable'] = pt.hdf5_name_decode(m)
                                     if index == None:
-                                        d.y = self.h5f.read(secresultspath+'/mean/value') 
+                                        d.y = self.h5f[secresultspath+'/mean/value']
                                         d.x = np.arange(0,len(d.y))
                                     else:
                                         try:
-                                            d.y = self.h5f.read(secresultspath+'/mean/value')[index]
+                                            d.y = self.h5f[secresultspath+'/mean/value'][index]
                                         except:
                                             pass
                                     if "labels" in self.h5f.list_children(secresultspath):
-                                        d.x = parse_labels(self.h5f.read(secresultspath+'/labels'))
+                                        d.x = parse_labels(self.h5f[secresultspath+'/labels'])
                                     else:
                                         d.x = np.arange(0,len(d.y))
                                     d.props.update(params)
@@ -303,15 +303,15 @@ class Hdf5Loader:
                                     d.props['hdf5_path'] = secresultspath 
                                     d.props['observable'] = pt.hdf5_name_decode(m)
                                     if index == None:
-                                        d.y = self.h5f.read(secresultspath+'/mean/value') 
+                                        d.y = self.h5f[secresultspath+'/mean/value']
                                         d.x = np.arange(0,len(d.y))
                                     else:
                                         try:
-                                            d.y = self.h5f.read(secresultspath+'/mean/value')[index]
+                                            d.y = self.h5f[secresultspath+'/mean/value'][index]
                                         except:
                                             pass
                                     if "labels" in self.h5f.list_children(secresultspath):
-                                        d.x = parse_labels(self.h5f.read(secresultspath+'/labels')) 
+                                        d.x = parse_labels(self.h5f[secresultspath+'/labels'])
                                     else:
                                         d.x = np.arange(0,len(d.y))
                                     d.props.update(params)
@@ -363,9 +363,9 @@ class Hdf5Loader:
                             k = self.h5f.list_children(respath+'/'+m+'/timeseries')
                             if "logbinning" in k and "logbinning2" in k and "logbinning_counts" in k:
                                 if verbose: log("Loading"+ m)
-                                bins = self.h5f.read(respath+'/'+m+'/timeseries/logbinning')[0:-4] 
-                                bins2 = self.h5f.read(respath+'/'+m+'/timeseries/logbinning2')[0:-4] 
-                                counts = self.h5f.read(respath+'/'+m+'/timeseries/logbinning_counts')[0:-4] 
+                                bins = self.h5f[respath+'/'+m+'/timeseries/logbinning'][0:-4]
+                                bins2 = self.h5f[respath+'/'+m+'/timeseries/logbinning2'][0:-4]
+                                counts = self.h5f[respath+'/'+m+'/timeseries/logbinning_counts'][0:-4]
                                 scale = 1
                                 for i in range(len(counts)):
                                     mean = bins[i]/(counts[i]*scale)
@@ -411,9 +411,9 @@ class Hdf5Loader:
                     xmin=0
                     xstep=1
                     if "histogram" in self.h5f.list_children(respath+'/'+m):
-                        obs = self.h5f.read(respath+'/'+m+'/histogram')
-                        xmin = self.h5f.read(respath+'/'+m+'/@min')
-                        xstep = self.h5f.read(respath+'/'+m+'/@stepsize')
+                        obs = self.h5f[respath+'/'+m+'/histogram']
+                        xmin = self.h5f[respath+'/'+m+'/@min']
+                        xstep = self.h5f[respath+'/'+m+'/@stepsize']
                         size = len(obs)
                     elif "error" in self.h5f.list_children(respath+'/'+m+'/mean'): 
                         if self.h5f.is_scalar(respath+'/'+m+'/mean/value'):
@@ -431,11 +431,11 @@ class Hdf5Loader:
                                 obs=None
                     else:
                         if self.h5f.is_scalar(respath+'/'+m+'/mean/value'):
-                            obs = self.h5f.read(respath+'/'+m+'/mean/value')
+                            obs = self.h5f[respath+'/'+m+'/mean/value']
                             obs=np.array([obs])
                             size=1
                         else:
-                            obs = self.h5f.read(respath+'/'+m+'/mean/value')
+                            obs = self.h5f[respath+'/'+m+'/mean/value']
                             size=len(obs)
                     try:
                       if obs is not None:
@@ -484,10 +484,10 @@ class Hdf5Loader:
                             if "mean" in self.h5f.list_children(respath+'/'+path):
                                 if self.h5f.is_scalar(respath+'/'+path+'/mean/value'):
                                     size=1
-                                    obs=self.h5f.read(respath+'/'+path+'/mean/value')
+                                    obs=self.h5f[respath+'/'+path+'/mean/value']
                                     d.y = np.array([obs]) 
                                 else:
-                                    obs=self.h5f.read(respath+'/'+path+'/mean/value')
+                                    obs=self.h5f[respath+'/'+path+'/mean/value']
                                     size=len(obs)
                                     d.y = obs
                                 d.x = np.arange(0,size)

@@ -20,7 +20,7 @@ if (ALPS_HAVE_PYTHON)
       pyngsobservable_c pyngsobservables_c pyngsresult_c pyngsresults_c pyngsapi_c pyngsrandom01_c
   )
 
-  set (MAXENT_SOURCES ../../tool/maxent.cpp ../../tool/maxent_helper.cpp 
+  set (MAXENT_SOURCES ../../tool/maxent.cpp ../../tool/maxent_helper.cpp
                       ../../tool/maxent_simulation.cpp ../../tool/maxent_parms.cpp)
 
 
@@ -38,11 +38,12 @@ if (ALPS_HAVE_PYTHON)
 
 
   if(LAPACK_FOUND)
-    set(PYALPS_SOURCES ${PYALPS_SOURCES} pymaxent dwa_c)
-    python_add_module(pymaxent ${MAXENT_SOURCES})
+    set(PYALPS_SOURCES ${PYALPS_SOURCES} maxent_c dwa_c)
+    python_add_module(maxent_c ${MAXENT_SOURCES})
     python_add_module(dwa_c ../../applications/qmc/dwa/python/dwa.cpp)
     include_directories(../../applications/qmc/dwa)
-  endif(LAPACK_FOUND)
+    set_target_properties(maxent_c PROPERTIES COMPILE_FLAGS "-DBUILD_PYTHON_MODULE") 
+ endif(LAPACK_FOUND)
 
   python_add_module(pyalea_c ${PYALEA_SOURCES})
   python_add_module(pymcdata_c ${PYMCDATA_SOURCES})

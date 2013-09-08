@@ -25,10 +25,12 @@
 # 
 # ****************************************************************************
 
-import core.modules.module_registry
-import core.modules.basic_modules as basic
-from core.modules.vistrails_module import Module, ModuleError, NotCacheable
-from core.modules.python_source_configure import PythonSourceConfigurationWidget
+import vistrails.core.modules.module_registry
+import vistrails.core.modules.basic_modules as basic
+from vistrails.core.modules.vistrails_module import Module, ModuleError, NotCacheable
+from vistrails.core.modules.python_source_configure import PythonSourceConfigurationWidget
+from vistrails.packages.matplotlib.bases import MplPlot
+
 
 import urllib, copy
 import matplotlib.pyplot as plt
@@ -76,14 +78,14 @@ class PreparePlot(Descriptor, Module):
         PortDescriptor('grid',basic.Boolean),
     ]
 
-class MplXYPlot(NotCacheable,Module):
+class MplXYPlot(MplPlot):
     my_input_ports = [
         PortDescriptor('plot',PreparePlot),
         PortDescriptor('hide_buttons',basic.Boolean),
         PortDescriptor('source',basic.String,use_python_source=True)
     ]
-    my_output_ports = [PortDescriptor('unused',basic.String)]
-    
+    my_output_ports = [PortDescriptor('self',MplPlot)]
+  
     def __init__(self):
         Module.__init__(self)        
         self.colors = ['k','b','g','m','c','y']
@@ -172,7 +174,7 @@ class WriteGnuplotFile(Module):
         
         
 
-class Plotter(NotCacheable, Module):
+class Plotter(MplPlot):
     my_input_ports = [
         PortDescriptor('data',DataSets),
         PortDescriptor('title',basic.String,hidden=True),
@@ -182,8 +184,7 @@ class Plotter(NotCacheable, Module):
         PortDescriptor('hide_buttons',basic.Boolean,hidden=True),
         PortDescriptor('source',basic.String,use_python_source=True)
     ]
-    my_output_ports = [PortDescriptor('unused',basic.String)]
-
+    my_output_ports = [PortDescriptor('self',MplPlot)]
     def hifp(self,m):
         return self.hasInputFromPort(m)
     def gifp(self,m):

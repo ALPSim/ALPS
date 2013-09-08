@@ -97,7 +97,7 @@ def thermalized(h5_outfile, observables, tolerance=0.01, simplified=False, inclu
 
   results = [];
   for observable in observables:
-    timeseries = pyalps.hdf5.archive(h5_outfile, 'r').read("/simulation/results/" + observable)['timeseries']['data']; 
+    timeseries = pyalps.hdf5.archive(h5_outfile, 'r')["/simulation/results/" + observable]['timeseries']['data'];
     mean = timeseries.mean();
 
     index = scipy.linspace(0, timeseries.size-1, timeseries.size);
@@ -122,7 +122,7 @@ def converged(h5_outfile, observables, simplified=False, includeLog=False):
 
   results = [];
   for observable in observables:
-    measurements = pyalps.hdf5.archive(h5_outfile, 'r').read("/simulation/results/" + observable);
+    measurements = pyalps.hdf5.archive(h5_outfile, 'r')["/simulation/results/" + observable];
 
     result = (measurements['mean']['error_convergence'] == 0);
 
@@ -146,7 +146,7 @@ def tau(h5_outfile, observables):
 
   results = [];
   for observable in observables:
-    measurements = pyalps.hdf5.archive(h5_outfile, 'r').read("/simulation/results/" + observable);
+    measurements = pyalps.hdf5.archive(h5_outfile, 'r')["/simulation/results/" + observable];
     results.append(measurements['tau']['value']);
 
   return results;

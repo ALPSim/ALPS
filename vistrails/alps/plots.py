@@ -9,22 +9,16 @@
 #
 ##############################################################################
 
-from core.modules.vistrails_module import Module, ModuleError, NotCacheable
-import core.bundles
-import core.modules.basic_modules
-import core.modules.module_registry
+from vistrails.core.modules.vistrails_module import Module, ModuleError, NotCacheable
+import vistrails.core.bundles
+import vistrails.core.modules.basic_modules
+import vistrails.core.modules.module_registry
 import tempfile
 
 import alpscore
-from packages.pylab.plot import MplPlot, MplPlotConfigurationWidget
+from vistrails.packages.matplotlib.bases import MplSource
 
-try:
-  from packages.pylab.plot import MplSource
-  PlotBase = MplSource
-except:
-  PlotBase = MplPlot
-
-basic = core.modules.basic_modules
+basic = vistrails.core.modules.basic_modules
 
 ##############################################################################
 
@@ -150,14 +144,14 @@ class Plot2Mpl(Plot2Anything):
     suffix='py'
     extractapp='plot2mpl'
 
-class AlpsMplPlot(PlotBase):
+class AlpsMplPlot(MplSource):
     _input_ports=[('source', basic.String)]
   
 def initialize(): pass
 
 def selfRegister():
 
-  reg = core.modules.module_registry.get_module_registry()
+  reg = vistrails.core.modules.module_registry.get_module_registry()
 
   reg.add_module(PlotDescription,namespace="Plots",abstract=True)
   reg.add_output_port(PlotDescription, "value", PlotDescription)
