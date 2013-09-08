@@ -162,8 +162,9 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
    new_remap['DataSet|Plot|ShowListOfPlots'] = [(None, '2.0.2', None, {})]
    new_remap['Dataset|Plot|ShowListOfPlots'] = [(None, '2.0.2', 'DataSet|Plot|ShowListOfPlots', {})]
    new_remap['DataSet|Plot|ShowMplPlot'] = [(None, '2.0.2', None, {})]
-   new_remap['Dataset|Plot|ShowMplPlot'] = [(None, '2.1.0', 'DataSet|Plot|ShowMplPlot', {})]
+   new_remap['Dataset|Plot|ShowMplPlot'] = [(None, '2.2.0', 'DataSet|Plot|ShowMplPlot', {})]
    new_remap['MplXYPlotCell'] = [(None, '2.0.2', None, {})]
+   new_remap['Tools|MplXYPlotCell'] = [(None, '2.0.2', None, {})]
    new_remap['DataSet|Plot|MplXYPlot'] = [(None, '2.0.2', None, {})]
    new_remap['Tools|WriteInputFiles'] = [(None, '2.0.2', None, {'dst_port_remap': {'simulationid': 'simulationid'}})]
   

@@ -2,19 +2,19 @@
   <action date="2010-05-02 13:23:16" id="1" prevId="0" session="0" user="troyer">
     <annotation id="0" key="__description__" value="Copied from pipeline" />
     <add id="0" objectId="0" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="0" name="MplFigure" namespace="" package="edu.utah.sci.vistrails.matplotlib" version="0.9.0" />
+      <module cache="1" id="0" name="MplFigure" namespace="" package="edu.utah.sci.vistrails.matplotlib" version="1.0.1" />
     </add>
     <add id="1" objectId="0" parentObjId="0" parentObjType="module" what="location">
       <location id="0" x="3.22643961533" y="1.18940051333" />
     </add>
     <add id="2" objectId="1" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="1" name="MplFigureCell" namespace="" package="edu.utah.sci.vistrails.matplotlib" version="0.9.0" />
+      <module cache="1" id="1" name="MplFigureCell" namespace="" package="edu.utah.sci.vistrails.matplotlib" version="1.0.1" />
     </add>
     <add id="3" objectId="1" parentObjId="1" parentObjType="module" what="location">
       <location id="1" x="4.27359847033" y="-155.804490107" />
     </add>
     <add id="4" objectId="2" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="2" name="MplXYPlot" namespace="DataSet|Plot" package="org.comp-phys.alps" version="2.1.0" />
+      <module cache="1" id="2" name="MplXYPlot" namespace="DataSet|Plot" package="org.comp-phys.alps" version="2.2.0" />
     </add>
     <add id="5" objectId="2" parentObjId="2" parentObjType="module" what="location">
       <location id="2" x="-7.50003808567" y="154.615089593" />
@@ -82,7 +82,7 @@
   </action>
   <action date="2011-08-24 15:14:17" id="2" prevId="1" session="3" user="troyer">
     <add id="26" objectId="5" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="5" name="EvaluateFullDiagVersusH" namespace="Applications" package="org.comp-phys.alps" version="2.1.0" />
+      <module cache="1" id="5" name="EvaluateFullDiagVersusH" namespace="Applications" package="org.comp-phys.alps" version="2.2.0" />
     </add>
     <add id="27" objectId="5" parentObjId="5" parentObjType="module" what="location">
       <location id="5" x="-302.76500916" y="153.379635247" />

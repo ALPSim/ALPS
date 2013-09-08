@@ -69,7 +69,7 @@
               <parameter alias="" id="3" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="Location" />
             </function>
           </module>
-          <module cache="1" id="2101" name="ConvertXML2HTML" namespace="Tools" package="org.comp-phys.alps" version="2.1.0">
+          <module cache="1" id="2101" name="ConvertXML2HTML" namespace="Tools" package="org.comp-phys.alps" version="2.2.0">
             <location id="2872" x="-18.1713475845" y="-43.2756497008" />
           </module>
           <module cache="1" id="2102" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6">
@@ -118,7 +118,7 @@
       <parameter alias="" id="5" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="InputList" />
     </add>
     <add id="22" objectId="4" parentObjId="4" parentObjType="module" what="location">
-      <location id="4" x="221.001221874" y="122.424802785" />
+      <location id="4" x="2.2.001221874" y="122.424802785" />
     </add>
     <add id="23" objectId="0" parentObjId="" parentObjType="" what="connection">
       <connection id="0" />
@@ -206,7 +206,7 @@
               <parameter alias="" id="1" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="Location" />
             </function>
           </module>
-          <module cache="1" id="3" name="ConvertXML2HTML" namespace="Tools" package="org.comp-phys.alps" version="2.1.0">
+          <module cache="1" id="3" name="ConvertXML2HTML" namespace="Tools" package="org.comp-phys.alps" version="2.2.0">
             <location id="3" x="-18.1713475845" y="-43.2756497008" />
           </module>
           <module cache="1" id="4" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6">

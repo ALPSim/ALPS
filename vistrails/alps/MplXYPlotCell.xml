@@ -14,7 +14,7 @@
       <location id="1" x="4.27359847033" y="-155.804490107" />
     </add>
     <add id="4" objectId="2" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="2" name="MplXYPlot" namespace="DataSet|Plot" package="org.comp-phys.alps" version="2.1.0" />
+      <module cache="1" id="2" name="MplXYPlot" namespace="DataSet|Plot" package="org.comp-phys.alps" version="2.2.0" />
     </add>
     <add id="5" objectId="2" parentObjId="2" parentObjType="module" what="location">
       <location id="2" x="-7.50003808567" y="154.615089593" />
@@ -82,7 +82,7 @@
   </action>
   <action date="2011-08-24 15:21:35" id="2" prevId="1" session="3" user="troyer">
     <add id="26" objectId="5" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="5" name="EvaluateFullDiagVersusH" namespace="Applications" package="org.comp-phys.alps" version="2.1.0" />
+      <module cache="1" id="5" name="EvaluateFullDiagVersusH" namespace="Applications" package="org.comp-phys.alps" version="2.2.0" />
     </add>
     <add id="27" objectId="5" parentObjId="5" parentObjType="module" what="location">
       <location id="5" x="-289.628300991" y="162.191848555" />
