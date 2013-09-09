@@ -16,7 +16,7 @@ if (ALPS_HAVE_PYTHON)
   set(PYMCDATA_SOURCES ../../src/alps/python/pymcdata.cpp )
   set(PYTOOLS_SOURCES ../../src/alps/python/pytools.cpp)
 
-  set(PYALPS_SOURCES pyalea_c pymcdata_c pytools_c dwa_c pyngsparams_c pyngshdf5_c pyngsbase_c  
+  set(PYALPS_SOURCES pyalea_c pymcdata_c pytools_c pyngsparams_c pyngshdf5_c pyngsbase_c  
       pyngsobservable_c pyngsobservables_c pyngsresult_c pyngsresults_c pyngsapi_c pyngsrandom01_c
   )
 
