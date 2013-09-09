@@ -109,6 +109,7 @@ int main(int argc, char** argv)
         }
       }
       boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;
+      solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"])));
       selfconsistency_loop_omega(parms, *solver_ptr, *transform_ptr);
     }
     else { //CLUSTER_LOOP
