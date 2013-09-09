@@ -28,6 +28,9 @@
 import numpy as np
 from scipy import optimize
 
+
+__all__ = ['fit', 'Parameter']
+
 class Parameter:    
     def __init__(self, value):
         self.value = value

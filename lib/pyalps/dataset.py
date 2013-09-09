@@ -28,6 +28,8 @@
 import copy
 import numpy as np
 
+__all__ = ['DataSet']
+
 class ResultProperties:
     def __init__(self):
         self.props = {}
