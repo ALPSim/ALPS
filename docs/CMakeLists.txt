@@ -35,6 +35,15 @@ add_custom_target(doxygendocs ALL
     COMMENT "Building Doxygen XML documentation for Sphinx")
 
 
+set(PYALPS_DEPS pyalea_c pymcdata_c pytools_c  pyngsparams_c pyngshdf5_c pyngsbase_c  
+    pyngsobservable_c pyngsobservables_c pyngsresult_c pyngsresults_c pyngsapi_c pyngsrandom01_c
+)
+
+if(LAPACK_FOUND)
+   set(PYALPS_DEPS ${PYALPS_DEPS} maxent_c dwa_c)
+endif(LAPACK_FOUND)
+
+message(STATUS "Sphinx dependencies: ${PYALPS_DEPS}")
 ## Sphinx targets
 add_custom_target(html ALL
     ${SPHINX_EXECUTABLE}
@@ -44,7 +53,7 @@ add_custom_target(html ALL
     "${SPHINX_SOURCE_DIR}"
     "${CMAKE_CURRENT_BINARY_DIR}/html"
     COMMENT "Building HTML documentation with Sphinx")
-add_dependencies(html doxygendocs gasp)
+add_dependencies(html doxygendocs gasp ${PYALPS_DEPS})
 
 add_custom_target(man ALL
     ${SPHINX_EXECUTABLE}
