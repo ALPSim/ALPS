@@ -51,14 +51,6 @@ from natural_sort import natural_sort
 import alea
 import scipy.interpolate
 
-__all__ = [
-                'writeParameterFile', 'writeInputFiles', 'runApplication', 'runDMFT', 'evaluateLoop', 'evaluateSpinMC', 'evaluateQWL', 'evaluateFulldiagVersusT', 'evaluateFulldiagVersusH',
-                'getResultFiles', 'loadMeasurements', 'loadBinningAnalysis', 'loadEigenstateMeasurements', 'loadSpectra', 'loadProperties', 'loadObservableList',
-                'collectXY', 'groupSets', 'select', 'select_by_property', 'mergeDataSets', 'mergeMeasurements', 'select',
-                'SetLabels', 'CycleColors', 'CycleMarkers', 'collectXY',
-           ]
-
-
 def make_list(infiles):
     if type(infiles) == list:
       return infiles

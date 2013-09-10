@@ -28,8 +28,6 @@
 import copy
 import numpy as np
 
-__all__ = ['DataSet']
-
 class ResultProperties:
     def __init__(self):
         self.props = {}
@@ -61,4 +59,5 @@ class ResultFile(ResultProperties):
         ResultProperties.__init__(self)
         if fn != None:
             self.props['filename'] = fn
-        
+
+
