@@ -19,16 +19,6 @@ if (ALPS_FOR_VISTRAILS)
 else(ALPS_FOR_VISTRAILS)
 
 #
-# Script to setup ALPS_HOME, PATH, LD_LIBRARY_PATH, PYTHONPATH
-#
-
-if(UNIX AND NOT WIN32)
-  configure_file(alpsvars.sh.in ${CMAKE_CURRENT_BINARY_DIR}/alpsvars.sh @ONLY)
-  configure_file(alpsvars.csh.in ${CMAKE_CURRENT_BINARY_DIR}/alpsvars.csh @ONLY)
-  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/alpsvars.sh ${CMAKE_CURRENT_BINARY_DIR}/alpsvars.csh DESTINATION bin COMPONENT tools)
-endif(UNIX AND NOT WIN32)
-
-#
 # quickbook
 # 
 
@@ -61,7 +51,18 @@ endif (NOT Boost_FOUND AND ALPS_BUILD_DOC)
 
 if (NOT ALPS_BUILD_SOURCE)
 
-  set (TOOLS parameter2xml parameter2hdf5 convert2xml compactrun lattice2xml pevaluate pconfig 
+  #
+  # Script to setup ALPS_HOME, PATH, LD_LIBRARY_PATH, PYTHONPATH
+  #
+
+  if(UNIX AND NOT WIN32)
+    configure_file(alpsvars.sh.in ${CMAKE_CURRENT_BINARY_DIR}/alpsvars.sh @ONLY)
+    configure_file(alpsvars.csh.in ${CMAKE_CURRENT_BINARY_DIR}/alpsvars.csh @ONLY)
+    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/alpsvars.sh ${CMAKE_CURRENT_BINARY_DIR}/alpsvars.csh DESTINATION bin COMPONENT tools)
+  endif(UNIX AND NOT WIN32)
+
+
+  set (TOOLS parameter2xml parameter2hdf5 convert2xml compactrun lattice2xml pevaluate pconfig
              poutput printgraph txt2archive xml2archive)
   foreach(program ${TOOLS})
     add_executable(${program} ${program}.C)
