@@ -821,12 +821,12 @@ if(ALPS_PATCH_VISTRAILS)
   MESSAGE (STATUS "patching VisTrails from ${VISTRAILS_GIT_DIR}")
   if (APPLE)
     foreach (DIR api core db gui packages tests)
-      install(DIRECTORY ${VISTRAILS_GIT_DIR}/vistrails/${DIR}  COMPONENT vistrails
+      install(DIRECTORY ${VISTRAILS_GIT_DIR}/vistrails  COMPONENT vistrails
               DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}
               PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.pyc" EXCLUDE)
     endforeach(DIR)
-    install(FILES ${VISTRAILS_GIT_DIR}/vistrails/vistrails.py  COMPONENT vistrails
-            DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/../..)
+#    install(FILES ${VISTRAILS_GIT_DIR}/vistrails/vistrails.py  COMPONENT vistrails
+#            DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/../..)
   else(APPLE)
     if (WIN32) 
         install(DIRECTORY ${VISTRAILS_GIT_DIR}/vistrails  COMPONENT vistrails
