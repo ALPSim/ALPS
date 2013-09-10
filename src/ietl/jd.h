@@ -212,7 +212,7 @@ namespace solver {
         vector_type x0_;
         real_type theta_;
         mutable ublas::vector<scalar_type> gamma_;
-        std::vector<int> pivot_;
+        std::vector<fortran_int_t> pivot_;
         matrix_type LU_, M_;
     };
 
@@ -244,7 +244,7 @@ namespace solver {
     void left_prec_solver<SOLV,MATRIX,VS,PREC>::operator() ( real_type theta, vector_type& r, vector_type& t, IT& iter )
     {
         theta_ = theta;
-        const unsigned int m = Q_.size(), m_old = Q_hat_.size();//if K changes =0;
+        const fortran_int_t m = Q_.size(), m_old = Q_hat_.size();//if K changes =0;
         double abs_tol = iter.absolute_tolerance();
         abs_tol *= abs_tol;
 
