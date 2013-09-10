@@ -33,7 +33,8 @@ import subprocess
 import platform
 import sys
 import glob
-import numpy as np
+import math
+import scipy.stats
 import copy
 
 import pyalps.hdf5 as h5
@@ -515,25 +516,30 @@ def getMeasurements(outfiles_, observable=None, includeLog=False):
 
   return measurements;
 
-def checkSteadyState(outfile, observables, confidenceInterval=0.95, simplified=False, includeLog=False):
+def checkSteadyState(outfile, observables, confidenceInterval=0.63, simplified=False, includeLog=False):
   if isinstance(observables, str):
     observables = [observables];
 
   results = [];
   for observable in observables:
-    timeseries = pyalps.loadTimeSeries(outfile, observable);
-    mean = timeseries.mean();
+    ts  = pyalps.loadTimeSeries(outfile, observable);  ### y
+    N   = ts.size;
+    idx = scipy.linspace(1, N, N);                     ### x
 
-    index = scipy.linspace(0, timeseries.size-1, timeseries.size);
-    timeseries = scipy.polyval(scipy.polyfit(index, timeseries, 1), index);  # timeseries get fitted
+    beta1 = scipy.polyfit(idx, ts, 1)[0];              ### slope
+    
+    ts_std    = np.std(ts, ddof=1);                          ### unbiased estimate of standard deviation in y
+    beta1_std = math.sqrt((12.*ts_std*ts_std)/(N * (N*N-1)));   ### unbiased estimate of standard deviation in slope
 
-    percentage_increment = (timeseries[-1] - timeseries[0])/mean;
-    result = abs(percentage_increment) < 1.- confidenceInterval;
+    z  = abs(beta1/beta1_std);
+    z0 = scipy.stats.norm.ppf((1.-confidenceInterval) + 0.5*(confidenceInterval));   
+    
+    result = z < z0;
 
     if not includeLog:
       results.append(result);
     else:
-      results.append({'observable': observable, 'percentage_increment' : percentage_increment, 'steady_state_equilibrium_reached': result})
+      results.append({'observable': observable, 'beta1' : {'value' : beta1, 'std' : beta1_std}, 'confidenceInterval' : confidenceInterval, 'z' : z, 'z0' : z0, 'checkSteadyState': result})
 
   if includeLog or not simplified:
     return results;
