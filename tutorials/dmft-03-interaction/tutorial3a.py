@@ -80,8 +80,7 @@ listobs=[]
 for f in range(0,flavors):
     listobs.append('Green_'+str(f))
     
-ll=pyalps.load.Hdf5Loader()
-data = ll.ReadMeasurementFromFile(pyalps.getResultFiles(pattern='parm_beta_*h5'), respath='/simulation/results/G_tau', measurements=listobs, verbose=True)
+data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm_beta_*h5'), respath='/simulation/results/G_tau', measurements=listobs, verbose=True)
 for d in pyalps.flatten(data):
     d.x = d.x*d.props["BETA"]/float(d.props["N"])
     d.props['label'] = r'$\beta=$'+str(d.props['BETA'])+'; flavor='+str(d.props['observable'][len(d.props['observable'])-1])
