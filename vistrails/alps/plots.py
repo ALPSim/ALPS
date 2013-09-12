@@ -27,7 +27,8 @@ class DisplayGracePlot(NotCacheable, alpscore.SystemCommand):
      def compute(self):
          cmd = ['nohup',alpscore._get_tool_path('xmgrace'), self.getInputFromPort('file').name,'&']
          if alpscore.config.check("xdisplay"):
-           cmd = ['export','DISPLAY='+alpscore.config.xdisplay,';']+cmd
+           if alpscore.config.xdisplay != "":
+             cmd = ['export','DISPLAY='+alpscore.config.xdisplay,';']+cmd
          self.execute(cmd)
      _input_ports = [('file', [basic.File])]
 
