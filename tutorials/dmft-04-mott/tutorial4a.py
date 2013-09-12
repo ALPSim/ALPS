@@ -77,8 +77,7 @@ for p in parms:
 
 listobs=['0']   # we look at only one flavor, as they are SYMMETRIZED
     
-ll=pyalps.load.Hdf5Loader()
-data = ll.ReadMeasurementFromFile(pyalps.getResultFiles(pattern='parm_u_*h5'), respath='/simulation/results/G_tau', measurements=listobs, verbose=True)
+data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm_u_*h5'), respath='/simulation/results/G_tau', measurements=listobs, verbose=True)
 
 for d in pyalps.flatten(data):
     d.x = d.x*d.props["BETA"]/float(d.props["N"])

@@ -55,9 +55,7 @@ if len(answer)>0:
   flavor = eval(answer)
 listobs=[str(flavor)]   # previous format: "Green_"+str(flavor)
 
-ll=pyalps.load.Hdf5Loader()
-
-data_G_tau = ll.ReadMeasurementFromFile(result_files, respath='/simulation/results/G_tau', measurements=listobs, verbose=True)  # [result_files][measurements(here only 1)]
+data_G_tau = pyalps.loadMeasurements(result_files, respath='/simulation/results/G_tau', measurements=listobs, verbose=True)  # [result_files][measurements(here only 1)]
 for d in pyalps.flatten(data_G_tau):
     d.x = d.x*d.props["BETA"]/float(d.props["N"])
     d.props['line']="scatter"
@@ -68,7 +66,7 @@ plt.ylabel(r'$G_{flavor='+str(flavor)+r'}(\tau)$')
 pyalps.plot.plot(data_G_tau)
 plt.legend()
 
-data_G0_tau = ll.ReadMeasurementFromFile(result_files, respath='/simulation/results/G0_tau', measurements=listobs, verbose=True)
+data_G0_tau = pyalps.loadMeasurements(result_files, respath='/simulation/results/G0_tau', measurements=listobs, verbose=True)
 for d in pyalps.flatten(data_G0_tau):
     d.x = d.x*d.props["BETA"]/float(d.props["N"])
     d.props['line']="scatter"
@@ -79,7 +77,7 @@ plt.ylabel(r'$G^0_{flavor='+str(flavor)+r'}(\tau)$')
 pyalps.plot.plot(data_G0_tau)
 plt.legend()
 
-data_G_omega = ll.ReadMeasurementFromFile(result_files, respath='/simulation/results/G_omega', measurements=listobs, verbose=True)
+data_G_omega = pyalps.loadMeasurements(result_files, respath='/simulation/results/G_omega', measurements=listobs, verbose=True)
 data_G_omegareal = []
 for d in pyalps.flatten(data_G_omega):
     r = pyalps.DataSet()
@@ -109,7 +107,7 @@ plt.ylabel(r'$Im G_{flavor='+str(flavor)+r'}(i\omega_n)$')
 pyalps.plot.plot(data_G_omegaimag)
 plt.legend()
 
-data_G0_omega = ll.ReadMeasurementFromFile(result_files, respath='/simulation/results/G0_omega', measurements=listobs, verbose=True)
+data_G0_omega = pyalps.loadMeasurements(result_files, respath='/simulation/results/G0_omega', measurements=listobs, verbose=True)
 data_G0_omegareal = []
 for d in pyalps.flatten(data_G0_omega):
     r = pyalps.DataSet()
