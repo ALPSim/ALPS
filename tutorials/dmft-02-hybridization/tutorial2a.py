@@ -51,37 +51,33 @@ for b in [6.,8.,10.,12.,14.,16.]:
               'OMEGA_LOOP'          : 1,
               'SEED'                : 0,
               'SITES'               : 1,
-              'SOLVER'              : 'hybridization',  # name of the solver executable, evt. full path needed
+              'SOLVER'              : 'hybridization',
               'SC_WRITE_DELTA'      : 1,
               'SYMMETRIZATION'      : 0,
               'U'                   : 3,
               't'                   : 0.707106781186547,
               'SWEEPS'              : 100000000,
               'THERMALIZATION'      : 1000,
-              'BETA'                : b,
-              'CHECKPOINT'          : 'solverdump_beta_'+str(b)
+              'BETA'                : b
             }
         )
 
-# NOTE: in revision of ALPS older than 6238, the MAX_TIME will effectively be 60 seconds.        
-# For more precise calculations we propose to you to:
+# NOTE: in revision of ALPS older than 6238, MAX_TIME will effectively be 60 seconds.        
+# For more precise calculations we propose to:
 #   enhance the MAX_TIME (to 60), 
 #   lower the CONVERGED (to 0.003), 
 #   increase MAX_IT (to 20)
 #   raise N and NMATSUBARA (to 1000)
 # ( the runtime of the script with changed parameters will be roughly 2 hours )
-        
+
 #write the input file and run the simulation
 for p in parms:
     input_file = pyalps.writeParameterFile('parm_beta_'+str(p['BETA']),p)
     res = pyalps.runDMFT(input_file)
 
-flavors=parms[0]['FLAVORS']
-listobs=[]   
-for f in range(0,flavors):
-    listobs.append(str(f))
+listobs=['0','1']
     
-data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm_beta_*h5'), respath='/simulation/results/G_tau', what=listobs, verbose=True)
+data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm_beta_*h5'), respath='/simulation/results/G_tau', what=listobs)
 for d in pyalps.flatten(data):
     d.x = d.x*d.props["BETA"]/float(d.props["N"])
     d.props['label'] = r'$\beta=$'+str(d.props['BETA'])+'; flavor='+str(d.props['observable'][len(d.props['observable'])-1])

@@ -37,7 +37,6 @@ for b in [6.,8.,10.,12.,14.,16.]:
     parms.append(
             {                         
               'ANTIFERROMAGNET'         : 1,
-              'CHECKPOINT'              : 'solverdump_beta_'+str(b),
               'CONVERGED'               : 0.005,
               'FLAVORS'                 : 2,
               'H'                       : 0,
@@ -75,10 +74,9 @@ for p in parms:
     input_file = pyalps.writeParameterFile('parm_beta_'+str(p['BETA']),p)
     res = pyalps.runDMFT(input_file)
 
-flavors=parms[0]['FLAVORS']
-listobs=[]   
-for f in range(0,flavors):
-    listobs.append('Green_'+str(f))
+#TODO: why are the observable names here different than in 2a and 2b?
+
+listobs=['Green_'+str(f) for f in [0,1]]
     
 data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm_beta_*h5'), respath='/simulation/results/G_tau', what=listobs, verbose=True)
 for d in pyalps.flatten(data):

@@ -53,7 +53,7 @@ for u in [4.,5.,6.,8.]:
               'OMEGA_LOOP'              : 1,
               'SEED'                    : 0, 
               'SITES'                   : 1,              
-              'SOLVER'                  : 'hybridization',  # name of the solver executable, evt. full path needed
+              'SOLVER'                  : 'hybridization',
               'SC_WRITE_DELTA'          : 1,
               'SYMMETRIZATION'          : 1,
               't'                       : 1,

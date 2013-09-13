@@ -31,52 +31,15 @@ import matplotlib.pyplot as plt
 import pyalps.plot
 
 
-#prepare the input parameters
-parms=[]
-for b in [6.,8.,10.,12.,14.,16.]: 
-    parms.append(
-            { 
-              'ANTIFERROMAGNET'     : 1,
-              'CONVERGED'           : 0.003,
-              'FLAVORS'             : 2,
-              'H'                   : 0,
-              'MAX_IT'              : 10,
-              'MAX_TIME'            : 60,
-              'MU'                  : 0,
-              'N'                   : 16,
-              'NMATSUBARA'          : 500, 
-              'OMEGA_LOOP'          : 1,
-              'SEED'                : 0, 
-              'SITES'               : 1,
-              'SOLVER'              : 'hirschfye',
-              'SYMMETRIZATION'      : 0,
-              'TOLERANCE'           : 0.001,
-              'U'                   : 3,
-              't'                   : 0.707106781186547,
-              'SWEEPS'              : 1000000,
-              'THERMALIZATION'      : 10000,
-              'BETA'                : b,
-              'G0OMEGA_INPUT'       : 'G0_omega_input_beta_'+str(b),
-              'BASENAME'            : 'parm_beta_'+str(b)
-            }
-        )
+## Please run the tutorial7a.py before this one.
 
-# For more precise simulation we propose to you to:
-#   lower CONVERGED (to 0.0003) and TOLERANCE (to 0.0001)
-
-## Please run the tutorial7a.py before this one or uncomment the following lines.
-## This tutorial relies on the results created there.
-
-# #write the input file and run the simulation
-# for p in parms:
-#     input_file = pyalps.writeParameterFile('parm_beta_'+str(p['BETA']),p)
-#     res = pyalps.runDMFT(input_file)
+# TODO: as in 2b, 3b, 4b and 5b
 
 listobs=['Green_0']   # we look at convergence of a single flavor (=0)
 
 ll=pyalps.load.Hdf5Loader()
-for p in parms:
-    data = ll.ReadDMFTIterations(pyalps.getResultFiles(pattern='parm_beta_'+str(p['BETA'])+'.h5'), measurements=listobs, verbose=True)
+for b in [6.,8.,10.,12.,14.,16.]:
+    data = ll.ReadDMFTIterations(pyalps.getResultFiles(pattern='parm_beta_'+str(b)+'.h5'), measurements=listobs, verbose=True)
     grouped = pyalps.groupSets(pyalps.flatten(data), ['iteration'])
     nd=[]
     for group in grouped:

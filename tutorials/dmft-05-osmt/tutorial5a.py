@@ -33,8 +33,7 @@ import pyalps.plot
 
 #prepare the input parameters
 parms=[]
-coulombparam=[[1.8,0.45],[2.2,0.55],[2.8,0.7]]
-for cp in coulombparam: 
+for cp in [[1.8,0.45],[2.2,0.55],[2.8,0.7]]: 
     parms.append(
             { 
               'CONVERGED'           : 0.001,
@@ -63,13 +62,7 @@ for cp in coulombparam:
         }
         )
 
-# NOTE: this script will not be running if your ALPS repository version is older than 6243
-#       ( In that case, you have to run the program from command line. )
-#       WARNING: in the previous script version the parameters 't0' and 't1' were ignored (they are not supported with OMEGA_LOOP=1);
-#                Thus one has simulated a totally different system!, thus one has simulated a totally different system!
-
-# For more precise calculations we propose to you to:
-#   enhance the MAX_TIME (to 60), 
+# For more precise calculations we propose to enhance the MAX_TIME (to 60), 
 # ( the runtime of the script with changed parameters will be roughly 45 minutes )
 
 #write the input file and run the simulation

@@ -31,62 +31,17 @@ import matplotlib.pyplot as plt
 import pyalps.plot
 
 
-#prepare the input parameters
-parms=[]
-coulombparam=[[1.8,0.45],[2.2,0.55],[2.8,0.7]]
-for cp in coulombparam: 
-    parms.append(
-            { 
-              'CONVERGED'           : 0.001,
-              'FLAVORS'             : 4,
-              'H'                   : 0,
-              'H_INIT'              : 0.,
-              'MAX_IT'              : 15,
-              'MAX_TIME'            : 60,
-              'MU'                  : 0,
-              'N'                   : 500,
-              'NMATSUBARA'          : 500,
-              'N_MEAS'              : 10000,
-              'N_ORDER'             : 50,
-              'SEED'                : 0,
-              'SOLVER'              : 'hybridization',
-              'SC_WRITE_DELTA'      : 1,
-              'SYMMETRIZATION'      : 1,
-              'SWEEPS'              : 100000000,
-              'BETA'                : 30,
-              'THERMALIZATION'      : 10,
-              'U'                   : cp[0],
-              'J'                   : cp[1],
-              't0'                  : 0.5,
-              't1'                  : 1,
-              'CHECKPOINT'          : 'dump'
-        }
-        )
+## Please run the tutorial5a.py before this one
 
-# NOTE: this script will not be running if your ALPS repository version is older than 6243
-#       ( In that case, you have to run the program from command line. )
-#       WARNING: in the previous script version the parameters 't0' and 't1' were ignored (they are not supported with OMEGA_LOOP=1);
-#                Thus one has simulated a totally different system!
-
-# For more precise calculations we propose to you to:
-#   enhance the MAX_TIME (to 60), 
-# ( the runtime of the script with changed parameters will be roughly 45 minutes )
-
-## Please run the tutorial5a.py before this one or uncomment the following lines.
-## This tutorial relies on the results created there.
-
-# #write the input file and run the simulation
-# for p in parms:
-#     input_file = pyalps.writeParameterFile('parm_u_'+str(p['U'])+'_j_'+str(p['J']),p)
-#     res = pyalps.runDMFT(input_file)
+#TODO: same as for 2b, 3b and 4b
 
 listobs_ = ['0', '2']   # flavor 0 is SYMMETRIZED with 1, flavor 2 is SYMMETRIZED with 3
     
 ll=pyalps.load.Hdf5Loader()
 for obs in listobs_:
   listobs = [obs]
-  for p in parms:
-    data = ll.ReadDMFTIterations(pyalps.getResultFiles(pattern='parm_u_'+str(p['U'])+'_j_'+str(p['J'])+'.h5'), measurements=listobs, verbose=True)
+  for u,j in =[(1.8,0.45),(2.2,0.55),(2.8,0.7)]
+    data = ll.ReadDMFTIterations(pyalps.getResultFiles(pattern='parm_u_'+str(u)+'_j_'+str(j)+'.h5'), measurements=listobs, verbose=True)
     grouped = pyalps.groupSets(pyalps.flatten(data), ['iteration'])
     nd=[]
     for group in grouped:

@@ -69,10 +69,8 @@ for p in parms:
     input_file = pyalps.writeParameterFile(p['BASENAME'],p)
     res = pyalps.runDMFT(input_file)
 
-flavors=parms[0]['FLAVORS']
-listobs=[]   
-for f in range(0,flavors):
-    listobs.append('Green_'+str(f))
+# TODO: why a different name for the observable?
+listobs=['Green_'+str(f) for f in [0,1]]
     
 data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm_beta_*h5'), respath='/simulation/results/G_tau', what=listobs, verbose=True)
 for d in pyalps.flatten(data):

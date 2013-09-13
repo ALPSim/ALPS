@@ -30,60 +30,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pyalps.plot
 
-
-#prepare the input parameters
-parms=[]
-for b in [6.,8.,10.,12.,14.,16.]:
-    parms.append(
-            {
-              'ANTIFERROMAGNET'     : 1,
-              'CONVERGED'           : 0.005,
-              'FLAVORS'             : 2,
-              'H'                   : 0,
-              'H_INIT'              : 0.05,
-              'MAX_IT'              : 15,
-              'MAX_TIME'            : 15,
-              'MU'                  : 0,
-              'N'                   : 500,
-              'NMATSUBARA'          : 500,
-              'N_MEAS'              : 10000,
-              'N_ORDER'             : 50,
-              'OMEGA_LOOP'          : 1,
-              'SEED'                : 0,
-              'SITES'               : 1,
-              'SOLVER'              : 'hybridization',  # name of the solver executable, evt. full path needed
-              'SC_WRITE_DELTA'      : 1,
-              'SYMMETRIZATION'      : 0,
-              'U'                   : 3,
-              't'                   : 0.707106781186547,
-              'SWEEPS'              : 100000000,
-              'THERMALIZATION'      : 1000,
-              'BETA'                : b,
-              'CHECKPOINT'          : 'solverdump_beta_'+str(b)
-            }
-        )
-
-# NOTE: in revision of ALPS older than 6238, the MAX_TIME will effectively be 60 seconds.        
-# For more precise calculations we propose to you to:
-#   enhance the MAX_TIME (to 60), 
-#   lower the CONVERGED (to 0.003), 
-#   increase MAX_IT (to 20)
-#   raise N and NMATSUBARA (to 1000)
-# ( the runtime of the script with changed parameters will be roughly 2 hours )
         
-## Please run the tutorial2a.py before this one or uncomment the following lines.
-## This tutorial relies on the results created there.
+## Please run the tutorial2a.py before this one.
 
-# #write the input file and run the simulation
-# for p in parms:
-#     input_file = pyalps.writeParameterFile('parm_beta_'+str(p['BETA']),p)
-#     res = pyalps.runDMFT(input_file)
+# TODO:
+# 1. remove the Hdf5Loader
+# 2. make a loop over files, e.e. getting them with glob first, instead of a loop over beta, since we should not encode parameters in file names
+# 3. remove the groupSets constructor and instead use a pyalps function to group, since groupedSets is an implementation detail
+# 4. the  for group in grouped: loop seems like a kludge. What do you actually want to do?
 
-listobs=['0']   # we look at convergence of a single flavor (=0)
-    
 ll=pyalps.load.Hdf5Loader()
-for p in parms:
-    data = ll.ReadDMFTIterations(pyalps.getResultFiles(pattern='parm_beta_'+str(p['BETA'])+'.h5'), measurements=listobs, verbose=True)
+for b in [6.,8.,10.,12.,14.,16.]:
+    data = ll.ReadDMFTIterations(pyalps.getResultFiles(pattern='parm_beta_'+str(b)+'.h5'), measurements=listobs, verbose=True)
     grouped = pyalps.groupSets(pyalps.flatten(data), ['iteration'])
     nd=[]
     for group in grouped:
