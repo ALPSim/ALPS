@@ -1,0 +1,17 @@
+LATTICE="inhomogeneous simple cubic lattice"
+L=100
+
+MODEL="boson Hubbard"
+Nmax=20
+ 
+t=1.
+U=8.11
+mu="4.05 - (0.0073752*(x-(L-1)/2.)*(x-(L-1)/2.) + 0.0036849*(y-(L-1)/2.)*(y-(L-1)/2.) + 0.0039068155*(z-(L-1)/2.)*(z-(L-1)/2.))"
+
+THERMALIZATION=50000
+SWEEPS=200000
+SKIP=100
+
+MEASURE[Local Density]=1
+
+{ T=1. }
