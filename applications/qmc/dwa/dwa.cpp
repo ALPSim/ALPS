@@ -894,8 +894,11 @@ void
       if (measure_energy_density2_)
         measurements << alps::RealObservable ("Energy Density^2");
 
-      if (measure_winding_number_)
+      if (measure_winding_number_) 
+      {
         measurements << alps::RealVectorObservable ("Winding Number^2");
+        measurements << alps::RealObservable       ("Stiffness");
+      }
 
       if (measure_local_num_kinks_) 
       {
@@ -1314,6 +1317,7 @@ void
             winding_number[i] += net_number * vec[i];
         }
         measurements["Winding Number^2"] << alps::numeric::sq(std::vector<double>(winding_number.begin(), winding_number.end()));
+        measurements["Stiffness"]        << std::inner_product(winding_number.begin(), winding_number.end(), winding_number.begin(), 0.)/(dimension()*beta);
       }      
 
       if (measure_local_num_kinks_)
