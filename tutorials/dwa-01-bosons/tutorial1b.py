@@ -31,13 +31,14 @@
 import pyalps
 
 parms = []
-for t in [0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]:
+for L in [4,6,8]:
+  for t in [0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]:
     parms.append(
         { 
           'LATTICE'                 : "square lattice", 
           'MODEL'                   : "boson Hubbard",
           'T'                       : 0.1,
-          'L'                       : 4 ,
+          'L'                       : L ,
           't'                       : t ,
           'mu'                      : 0.5,
           'U'                       : 1.0 ,
@@ -49,19 +50,25 @@ for t in [0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]:
         }
     )
 
-input_file = pyalps.writeInputFiles('parm1a', parms)
+input_file = pyalps.writeInputFiles('parm1b', parms)
 res = pyalps.runApplication('dwa', input_file, Tmin=5, writexml=True)
 
 
 # Evaluating the simulation and preparing plots using Python
 import matplotlib.pyplot as plt
-import pyalps.pyplot as aplt
+import pyalps.plot as aplt
 
-data = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm1a'),'Stiffness')
-magnetization = pyalps.collectXY(data,x='t',y='Stiffness')
+data = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm1b'),'Stiffness')
+rhos = pyalps.collectXY(data,x='t',y='Stiffness',foreach=['L'])
+
+for rho in rhos:
+  rho.y = rho.y * float(rho.props['L'])
 
 plt.figure()
 aplt.plot(rhos)
 plt.xlabel('Hopping $t/U$')
-plt.ylabel('Superfluid density $\\rho _s$')
+plt.ylabel('$\\rho _sL$')
+plt.legend()
+plt.title('Scaling plot for Bose-Hubbard model')
 plt.show()
+
