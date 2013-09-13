@@ -47,6 +47,14 @@
 #include "alps/utility/temporary_filename.hpp"
 #include "alps/numeric/isnan.hpp"
 #include "alps/numeric/isinf.hpp"
+#include <alps/utility/os.hpp>
+
+ExternalSolver::ExternalSolver(const boost::filesystem::path& executable)
+: exe_(boost::filesystem::absolute(executable,alps::bin_directory()))
+{
+}
+
+
 void print_green_itime(std::ostream &os, const itime_green_function_t &v, const double beta, const shape_t shape);
 
 void prepare_parms_for_hybridization(alps::Parameters& p, alps::hdf5::archive& solver_input) {
