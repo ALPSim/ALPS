@@ -34,34 +34,34 @@ parms = []
 for t in [0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]:
     parms.append(
         { 
-          'LATTICE'        : "square lattice", 
-          'MODEL'          : "boson Hubbard",
-          'T'              : 0.1,
-          'L'              : 4 ,
-          't'              : t ,
-          'mu'             : 0.5,
-          'U'              : 1.0 ,
-          'Nmax'           : 2 ,
-          'THERMALIZATION' : 100000,
-          'SWEEPS'         : 5000000,
-          'SKIP'           : 5000
+          'LATTICE'                 : "square lattice", 
+          'MODEL'                   : "boson Hubbard",
+          'T'                       : 0.1,
+          'L'                       : 4 ,
+          't'                       : t ,
+          'mu'                      : 0.5,
+          'U'                       : 1.0 ,
+          'Nmax'                    : 2 ,
+          'THERMALIZATION'          : 100000,
+          'SWEEPS'                  : 5000000,
+          'SKIP'                    : 5000,
+          'MEASURE[Winding Number]': 1
         }
     )
 
+input_file = pyalps.writeInputFiles('parm1a', parms)
+res = pyalps.runApplication('dwa', input_file, Tmin=5, writexml=True)
 
 
+# Evaluating the simulation and preparing plots using Python
+import matplotlib.pyplot as plt
+import pyalps.pyplot as aplt
 
-#write the input file and run the simulation
-input_file = pyalps.writeInputFiles('parm5a',parms)
-res = pyalps.runApplication('worm',input_file,Tmin=5)
+data = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm1a'),'Stiffness')
+magnetization = pyalps.collectXY(data,x='t',y='Stiffness')
 
-#load the magnetization and collect it as function of field h
-data = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm5a'),'Stiffness')
-rhos = pyalps.collectXY(data,x='t',y='Stiffness')
-
-#make plot
 plt.figure()
-pyalps.plot.plot(rhos)
+aplt.plot(rhos)
 plt.xlabel('Hopping $t/U$')
 plt.ylabel('Superfluid density $\\rho _s$')
 plt.show()
