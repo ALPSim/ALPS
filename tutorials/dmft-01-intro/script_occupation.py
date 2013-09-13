@@ -51,7 +51,7 @@ for a in result_files:
     listobs=[]
     for f in range(0,flavors):
       listobs.append(str(f))  # previous format: "Green_"+str(f)
-    data_G_tau = pyalps.loadMeasurements(res_file, respath='/simulation/results/G_tau', measurements=listobs, verbose=True)  # [result_files(here only 1)][measurements(here: flavors)]
+    data_G_tau = pyalps.loadMeasurements(res_file, respath='/simulation/results/G_tau', what=listobs, verbose=True)  # [result_files(here only 1)][measurements(here: flavors)]
     for f in range(0,flavors):
       print '    flavor ',f,' : ',-data_G_tau[0][f].y[len(data_G_tau[0][f].x)-1]
 

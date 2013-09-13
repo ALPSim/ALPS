@@ -77,7 +77,7 @@ for p in parms:
 
 listobs=['0']  # we look only at flavor=0
     
-data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='hybrid_DOS*h5'), respath='/simulation/results/G_tau', measurements=listobs, verbose=True)
+data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='hybrid_DOS*h5'), respath='/simulation/results/G_tau', what=listobs, verbose=True)
 for d in pyalps.flatten(data):
     d.x = d.x*d.props["BETA"]/float(d.props["N"])
     d.props['label'] = r'$\beta=$'+str(d.props['BETA'])
