@@ -5,6 +5,7 @@
 # 
 # Copyright (C) 2010 by Brigitte Surer <surerb@phys.ethz.ch> 
 #               2012 by Jakub Imriska  <jimriska@phys.ethz.ch>
+#               2013 by Michele Dolfi <dolfim@phys.ethz.ch>
 # 
 # This software is part of the ALPS libraries, published under the ALPS
 # Library License; you can use, redistribute it and/or modify it under
@@ -30,17 +31,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pyalps.plot
 
-        
 ## Please run the tutorial2a.py before this one.
 
-# TODO:
-# 1. remove the Hdf5Loader
 
 listobs=['0']   # we look at convergence of a single flavor (=0) 
 
 ## load all results
-ll=pyalps.load.Hdf5Loader()
-data = ll.ReadDMFTIterations(pyalps.getResultFiles(pattern='parm_beta*.h5'), measurements=listobs, verbose=True)
+data = pyalps.loadDMFTIterations(pyalps.getResultFiles(pattern='parm_beta*.h5'), measurements=listobs, verbose=True)
 
 ## create a figure for each BETA
 grouped = pyalps.groupSets(pyalps.flatten(data), ['BETA'])

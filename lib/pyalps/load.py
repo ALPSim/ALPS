@@ -596,6 +596,29 @@ def loadSpectra(files,verbose=False):
     ll = Hdf5Loader()
     return ll.ReadSpectrumFromFile(files,verbose=verbose)
 
+def loadDMFTIterations(files,observable='G_tau',measurements=None,verbose=False):
+    """ loads ALPS measurements from ALPS HDF5 result files
+    
+        this function loads results of ALPS simulations ALPS HDF5 result files
+        
+        The parameters are:
+        
+        files: a list of ALPS HDF5 result files.
+        observable: an optional argument that is a string specifying the names of the observables which should be loaded
+        measurements: an optional argument that is either a string or list of strings, specifying the names of the measurements which should be loaded
+        verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded
+        
+        The function returns a list of list of list of DataSet objects. 
+        The elements of the outer list each correspond to the file names specified as input.
+        The elements of the next level are different iterations.
+        The elements of the inner list contains a DataSet for each measurement.
+        The y-values of the DataSet objects are the measurements and the x-values optionally the labels (indices) of array-valued measurements
+    """
+    ll = Hdf5Loader()
+    if isinstance(measurements,str):
+      measurements = [measurements]
+    return ll.ReadDMFTIterations(files,observable=observable,measurements=measurements,verbose=verbose)
+
 def loadProperties(files,proppath='/parameters',respath='/simulation/results',verbose=False):
     """ loads properties (parameters) of simulations from ALPS HDF5 result files
     
