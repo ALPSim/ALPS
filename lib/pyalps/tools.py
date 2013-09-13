@@ -271,7 +271,9 @@ def evaluateFulldiagVersusH(infiles, appname='fulldiag_evaluate', DELTA_H=None, 
        
 def inVistrails():
     """ returns True if called from within VisTrails """
-    return in_vistrails
+    #return in_vistrails
+   return (sys.prefix.find('VisTrails') != -1)
+
     
 def xslPath():
     """ return the path to the ALPS.xsl stylesheet """
