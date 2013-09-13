@@ -1316,16 +1316,16 @@ void
           for (int i=0; i<dimension(); ++i)
             winding_number[i] += net_number * vec[i];
         }
-        measurements["Winding Number^2"] << alps::numeric::sq(std::vector<double>(winding_number.begin(), winding_number.end()));
+        measurements["Winding Number^2"] << alps::numeric::vector2valarray(alps::numeric::sq(std::vector<double>(winding_number.begin(), winding_number.end())));
         measurements["Stiffness"]        << std::inner_product(winding_number.begin(), winding_number.end(), winding_number.begin(), 0.)/(dimension()*beta);
       }      
 
       if (measure_local_num_kinks_)
-        measurements["Local Kink:Number"] << _num_kinks_cache;
+        measurements["Local Kink:Number"] << alps::numeric::vector2valarray(_num_kinks_cache);
       if (measure_local_density_) 
-        measurements["Local Density"]     << _states_cache;
+        measurements["Local Density"]     << alps::numeric::vector2valarray(_states_cache);
       if (measure_local_density2_)
-        measurements["Local Density^2"]   << _states2_cache;
+        measurements["Local Density^2"]   << alps::numeric::vector2valarray(_states2_cache);
 
       // regarding on-fly measurements
       measurements["Green Function:0"]        << green0/_skip;
@@ -1333,13 +1333,13 @@ void
       measurements["Momentum Distribution:0"] << nk0/_skip;
 
       if (measure_green_function_)
-        measurements["Green Function"]      << green/_skip;
+        measurements["Green Function"]      << alps::numeric::vector2valarray(green/_skip);
 
       if (finite_tof)
       {
         measurements["Momentum Distribution:TOF:0"] << nk0_tof/_skip;
         if (measure_green_function_)
-          measurements["Green Function:TOF"]        << green_tof/_skip;
+          measurements["Green Function:TOF"]        << alps::numeric::vector2valarray(green_tof/_skip);
       }
     }
 
