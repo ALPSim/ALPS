@@ -35,27 +35,29 @@ import pyalps.plot
 
 # TODO:
 # 1. remove the Hdf5Loader
-# 2. make a loop over files, e.e. getting them with glob first, instead of a loop over beta, since we should not encode parameters in file names
-# 3. remove the groupSets constructor and instead use a pyalps function to group, since groupedSets is an implementation detail
-# 4. the  for group in grouped: loop seems like a kludge. What do you actually want to do?
 
+listobs=['0']   # we look at convergence of a single flavor (=0) 
+
+## load all results
 ll=pyalps.load.Hdf5Loader()
-for b in [6.,8.,10.,12.,14.,16.]:
-    data = ll.ReadDMFTIterations(pyalps.getResultFiles(pattern='parm_beta_'+str(b)+'.h5'), measurements=listobs, verbose=True)
-    grouped = pyalps.groupSets(pyalps.flatten(data), ['iteration'])
-    nd=[]
-    for group in grouped:
-        r = pyalps.DataSet()
-        r.y = np.array(group[0].y)
-        r.x = np.array([e*group[0].props['BETA']/float(group[0].props['N']) for e in group[0].x])
-        r.props = group[0].props
-        r.props['label'] = 'it'+r.props['iteration']
-        nd.append( r )
+data = ll.ReadDMFTIterations(pyalps.getResultFiles(pattern='parm_beta*.h5'), measurements=listobs, verbose=True)
+
+## create a figure for each BETA
+grouped = pyalps.groupSets(pyalps.flatten(data), ['BETA'])
+for sim in grouped:
+    common_props = pyalps.dict_intersect([ d.props for d in sim ])
+    
+    ## rescale x-axis and set label
+    for d in pyalps.flatten(sim):
+        d.x = d.x * d.props['BETA']/float(d.props['N'])
+        d.props['label'] = 'it'+d.props['iteration']
+    
+    ## plot all iterations for this BETA
     plt.figure()
     plt.xlabel(r'$\tau$')
     plt.ylabel(r'$G_{flavor=0}(\tau)$')
-    plt.title('DMFT-02: ' + r'$\beta = %.4s$' %nd[0].props['BETA'])
-    pyalps.plot.plot(nd)
+    plt.title('DMFT-02: ' + r'$\beta = %.4s$' % common_props['BETA'])
+    pyalps.plot.plot(sim)
     plt.legend()
 
-plt.show()    
+plt.show()
