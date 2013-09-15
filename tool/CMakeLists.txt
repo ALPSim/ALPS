@@ -4,10 +4,6 @@
 #          http://www.boost.org/LICENSE_1_0.txt)
 
 
-if (NOT ALPS_BUILD_SOURCE)
-  add_subdirectory(alea)
-endif (NOT ALPS_BUILD_SOURCE)
-
 #
 # basic C++ tools
 # 
@@ -50,6 +46,8 @@ if (NOT Boost_FOUND AND ALPS_BUILD_DOC)
 endif (NOT Boost_FOUND AND ALPS_BUILD_DOC)
 
 if (NOT ALPS_BUILD_SOURCE)
+
+  add_subdirectory(alea)
 
   #
   # Script to setup ALPS_HOME, PATH, LD_LIBRARY_PATH, PYTHONPATH
