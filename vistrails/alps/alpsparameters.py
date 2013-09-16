@@ -48,7 +48,8 @@ class MonteCarloParameters(Parameters):
       THERMALIZATION: the number of sweeps for thermailzation  
     """
     _input_ports = [('SWEEPS',[(basic.String, 'the number of sweeps for measurements')]),
-                    ('THERMALIZATION',[(basic.String, 'the number of sweeps for thermalization')])
+                    ('THERMALIZATION',[(basic.String, 'the number of sweeps for thermalization')]),
+                    ('SKIP',[(basic.String, 'the number of sweeps per measurement performed')])
                     ]
 
 class LoopMonteCarloParameters(MonteCarloParameters): 
