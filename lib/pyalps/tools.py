@@ -481,6 +481,9 @@ def getResultFiles(dirname='.',pattern=None,prefix=None,format=None):
         if len(res)==0:
           pattern = prefix+'*.task*.out.h5'
           res=recursiveGlob(dirname, pattern)
+          if len(res)==0:
+            pattern = prefix+'*h5'
+            res=recursiveGlob(dirname, pattern)
       else:
         if   format == 'xml':
           pattern = prefix+'.task*.out.xml'
@@ -488,6 +491,9 @@ def getResultFiles(dirname='.',pattern=None,prefix=None,format=None):
         elif format == 'hdf5':
           pattern = prefix+'.task*.out.h5'
           res=recursiveGlob(dirname, pattern)
+          if len(res)==0:
+            pattern = prefix+'*h5'
+            res=recursiveGlob(dirname, pattern)
     else:
       res = recursiveGlob(dirname, pattern)
     replicas=recursiveGlob(dirname, prefix+'*replica*h5')
