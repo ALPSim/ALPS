@@ -27,18 +27,14 @@
 
 import pyalps
 
-print "DESCRIPTION: This script gets the observable OVERLAP from the result files in the current directory (recursively)."
-print "WARNING: works only with Hybridization Solver (1st version)"
-print "NOTE: Iteration-resolved observable OVERLAP: is to be found in the text-file 'overlap'"
-print 
+res_files = pyalps.getResultFiles()
+props = pyalps.loadProperties(res_files)
+maxflavors = max([int(p["FLAVORS"]) for p in props])
+listobs=[str(f) for f in range(maxflavors)]
 
-result_files = pyalps.getResultFiles()
-occ = pyalps.loadMeasurements(result_files,['overlap'])
-
-print "OVERLAP measurements (in the last iteration) :"
-for o in occ:
-  if len(o)>0:
-    print "  from file : ",o[0].props['filename']
-    for f in range(0,len(o[0].x)):
-      print '    flavor ',f,' : ',o[0].y[f]
-
+data_G_tau = pyalps.loadMeasurements(res_files, respath='/simulation/results/G_tau', what=listobs, verbose=False)  
+ 
+for i in range(len(data_G_tau)):
+    print "Occupation <n_flavor> in last iteration of simulation",res_files[i],':'
+    for f in range(len(data_G_tau[i])):
+        print '    flavor ',f,' : ',-data_G_tau[i][f].y[-1]

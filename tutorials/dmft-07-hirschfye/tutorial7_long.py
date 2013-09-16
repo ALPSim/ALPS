@@ -33,15 +33,16 @@ import pyalps.plot
 
 #prepare the input parameters
 parms=[]
-for b in [6.,8.,10.,12.,14.,16.]: 
+for b in [6., 8., 10., 12., 14., 16.]:
     parms.append(
             { 
               'ANTIFERROMAGNET'     : 1,
               'CONVERGED'           : 0.003,
               'FLAVORS'             : 2,
               'H'                   : 0,
-              'MAX_IT'              : 10,
-              'MAX_TIME'            : 60,
+              'H_INIT'              : 0.05,
+              'MAX_IT'              : 15,
+              'MAX_TIME'            : 20,
               'MU'                  : 0,
               'N'                   : 16,
               'NMATSUBARA'          : 500, 
@@ -56,21 +57,20 @@ for b in [6.,8.,10.,12.,14.,16.]:
               'SWEEPS'              : 1000000,
               'THERMALIZATION'      : 10000,
               'BETA'                : b,
-              'G0OMEGA_INPUT'       : 'G0_omega_input_beta_'+str(b),
+              'G0OMEGA_INPUT'       : '',
               'BASENAME'            : 'parm_beta_'+str(b)
             }
         )
 
 # For more precise simulation we propose to you to:
-#   lower CONVERGED (to 0.0003) and TOLERANCE (to 0.0001)
+#   lower CONVERGED (to 0.0003) and TOLERANCE (to 0.0001) and increase MAX_TIME
 
 #write the input file and run the simulation
 for p in parms:
     input_file = pyalps.writeParameterFile(p['BASENAME'],p)
     res = pyalps.runDMFT(input_file)
 
-# TODO: why a different name for the observable?
-listobs=['Green_'+str(f) for f in [0,1]]
+listobs=['0', '1']
     
 data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm_beta_*h5'), respath='/simulation/results/G_tau', what=listobs, verbose=True)
 for d in pyalps.flatten(data):

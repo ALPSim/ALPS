@@ -3,8 +3,8 @@
 # 
 # ALPS Libraries
 # 
-# Copyright (C) 2010 by Brigitte Surer <surerb@phys.ethz.ch> 
-#               2012 by Jakub Imriska  <jimriska@phys.ethz.ch>
+# Copyright (C) 2010      by Brigitte Surer <surerb@phys.ethz.ch> 
+#               2012-2013 by Jakub Imriska  <jimriska@phys.ethz.ch>
 # 
 # This software is part of the ALPS libraries, published under the ALPS
 # Library License; you can use, redistribute it and/or modify it under
@@ -34,7 +34,6 @@ import pyalps.plot
 #prepare the input parameters
 parms=[]
 for u in [4.,5.,6.,8.]: 
-  for b in [20.]:
     parms.append(
             { 
               'ANTIFERROMAGNET'         : 0,
@@ -44,11 +43,11 @@ for u in [4.,5.,6.,8.]:
               'H'                       : 0,
               'H_INIT'                  : 0.,
               'MAX_IT'                  : 20,
-              'MAX_TIME'                : 10,
+              'MAX_TIME'                : 600,
               'MU'                      : 0,
               'N'                       : 500,
               'NMATSUBARA'              : 500, 
-              'N_MEAS'                  : 10000,
+              'N_MEAS'                  : 1000,
               'N_ORDER'                 : 50,
               'OMEGA_LOOP'              : 1,
               'SEED'                    : 0, 
@@ -57,16 +56,15 @@ for u in [4.,5.,6.,8.]:
               'SC_WRITE_DELTA'          : 1,
               'SYMMETRIZATION'          : 1,
               't'                       : 1,
-              'SWEEPS'                  : 100000000,
-              'BETA'                    : b,
-              'THERMALIZATION'          : 1000,
+              'SWEEPS'                  : 1500*u,
+              'BETA'                    : 20.0,
+              'THERMALIZATION'          : 500,
               'U'                       : u
             }
         )
-
-# NOTE: in revision of ALPS older than 6238, the MAX_TIME will effectively be 60 seconds.        
+     
 # For more precise calculations change the parameters
-#   MAX_TIME (to 60-180),
+#   enlarge SWEEPS,
 #   CONVERGED (to 0.0002-0.001),
 #   raise N and NMATSUBARA (to 1000)
 

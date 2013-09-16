@@ -3,8 +3,7 @@
 # 
 # ALPS Libraries
 # 
-# Copyright (C) 2012 by Jakub Imriska <jimriska@phys.ethz.ch> 
-#               2010 by Brigitte Surer <surerb@phys.ethz.ch> 
+# Copyright (C) 2012-2013 by Jakub Imriska  <jimriska@phys.ethz.ch>
 # 
 # This software is part of the ALPS libraries, published under the ALPS
 # Library License; you can use, redistribute it and/or modify it under
@@ -49,12 +48,12 @@ for u in [6.]:
                 'NMATSUBARA' : 500,      # number of Matsubara frequencies
                 'N' : 500,               # bins in imaginary time
                 'CONVERGED' : 0.005,     # criterion for convergency
-                'MAX_TIME' : 180,        # max. time spent in solver in a single iteration in seconds
+                'MAX_TIME' : 600,        # max. time spent in solver in a single iteration in seconds
                 'G0OMEGA_INPUT' : "",    # forces to start from the local non-interacting Green's function
                 'MAX_IT' : 20,           # max. number of self-consistency iterations
                 'CHECKPOINT' : "dump_DOS_beta"+str(b)+'_U'+str(u),   # prefix for checkpointing
-                'SWEEPS' : 100000000,    # max. number of sweeps in a single iteration
-                'THERMALIZATION' : 1000, # number of thermalization sweeps
+                'SWEEPS' : 1500,    # max. number of sweeps in a single iteration
+                'THERMALIZATION' : 500, # number of thermalization sweeps
                 'SEED' : 0,              # random seed
                 'SOLVER' : "hybridization",   # we take the hybridization impurity solver
                 'SC_WRITE_DELTA' : 1,         # input for the hybridization impurity solver is the hybridization function Delta, which has to be written by the selfconsistency
@@ -80,7 +79,7 @@ for p in parms:
 
 listobs=['0']  # we look only at flavor=0
     
-data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='hybrid_TWODBS*h5'), respath='/simulation/results/G_tau', measurements=listobs, verbose=True)
+data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='hybrid_TWODBS*h5'), respath='/simulation/results/G_tau', what=listobs, verbose=True)
 for d in pyalps.flatten(data):
     d.x = d.x*d.props["BETA"]/float(d.props["N"])
     d.props['label'] = r'$\beta=$'+str(d.props['BETA'])
@@ -88,7 +87,7 @@ plt.figure()
 
 plt.xlabel(r'$\tau$')
 plt.ylabel(r'$G_{flavor=0}(\tau)$')
-plt.title('Hubbard model on the square lattice')
+plt.title('DMFT-08, TWODBS option: Hubbard model on the square lattice')
 pyalps.plot.plot(data)
 plt.legend()
 plt.show()

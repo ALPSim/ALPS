@@ -3,7 +3,8 @@
 # 
 # ALPS Libraries
 # 
-# Copyright (C) 2012 by Jakub Imriska <jimriska@phys.ethz.ch>
+# Copyright (C) 2010 by Brigitte Surer <surerb@phys.ethz.ch> 
+#               2012 by Jakub Imriska  <jimriska@phys.ethz.ch>
 # 
 # This software is part of the ALPS libraries, published under the ALPS
 # Library License; you can use, redistribute it and/or modify it under
@@ -28,19 +29,25 @@ import pyalps
 import numpy as np
 import matplotlib.pyplot as plt
 import pyalps.plot
+import sys
 
+n_threads=1
+if '-n_threads' in sys.argv:
+  n_threads=int(sys.argv[sys.argv.index('-n_threads')+1])
 
 #prepare the input parameters
 parms=[]
-parms.append(
+for b in [6., 8., 10., 12., 14., 16.]:
+    parms.append(
             {
               'ANTIFERROMAGNET'     : 1,
+              'CONVERGED'           : 0.003,
               'FLAVORS'             : 2,
-              'H'                   : 0.2,
-              'H_INIT'              : 0.2,
-              'MAX_IT'              : 4,
-              'MAX_TIME'            : 45,
-              'MU'                  : -0.5,
+              'H'                   : 0,
+              'H_INIT'              : 0.05,
+              'MAX_IT'              : 18,
+              'MAX_TIME'            : 300,
+              'MU'                  : 0,
               'N'                   : 500,
               'NMATSUBARA'          : 500,
               'N_MEAS'              : 10000,
@@ -48,21 +55,34 @@ parms.append(
               'OMEGA_LOOP'          : 1,
               'SEED'                : 0,
               'SITES'               : 1,
-              'SOLVER'              : 'hybridization',  # name of the solver executable, evt. full path needed
+              'SOLVER'              : 'hybridization',
               'SC_WRITE_DELTA'      : 1,
               'SYMMETRIZATION'      : 0,
-              'CONVERGED'           : 0.01,
-              'U'                   : 2,
-              't'                   : 1,
-              'SWEEPS'              : 100000000,
-              'THERMALIZATION'      : 100,
-              'BETA'                : 8,
-              'CHECKPOINT'          : 'dump',
-              'G0OMEGA_INPUT'       : 'G0_omega_noninteracting'
+              'U'                   : 3,
+              't'                   : 0.707106781186547,
+              'SWEEPS'              : 2500,
+              'THERMALIZATION'      : 1000,
+              'BETA'                : b
             }
         )
-        
+
+
 #write the input file and run the simulation
 for p in parms:
-    input_file = pyalps.writeParameterFile('parm_file',p)
+    input_file = pyalps.writeParameterFile('parm_beta_'+str(p['BETA']),p)
     res = pyalps.runDMFT(input_file)
+
+listobs=['0','1']
+    
+data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm_beta_*h5'), respath='/simulation/results/G_tau', what=listobs)
+for d in pyalps.flatten(data):
+    d.x = d.x*d.props["BETA"]/float(d.props["N"])
+    d.props['label'] = r'$\beta=$'+str(d.props['BETA'])+'; flavor='+str(d.props['observable'][len(d.props['observable'])-1])
+
+plt.figure()
+plt.xlabel(r'$\tau$')
+plt.ylabel(r'$G_{flavor}(\tau)$')
+plt.title('DMFT-02: Neel transition for the Hubbard model on the Bethe lattice\n(using the Hybridization expansion impurity solver)')
+pyalps.plot.plot(data)
+plt.legend()
+plt.show()

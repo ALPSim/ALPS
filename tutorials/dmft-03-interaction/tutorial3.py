@@ -3,8 +3,8 @@
 # 
 # ALPS Libraries
 # 
-# Copyright (C) 2010 by Brigitte Surer <surerb@phys.ethz.ch> 
-#               2012 by Jakub Imriska  <jimriska@phys.ethz.ch>
+# Copyright (C) 2010      by Brigitte Surer <surerb@phys.ethz.ch> 
+#               2012-2013 by Jakub Imriska  <jimriska@phys.ethz.ch>
 # 
 # This software is part of the ALPS libraries, published under the ALPS
 # Library License; you can use, redistribute it and/or modify it under
@@ -33,7 +33,7 @@ import pyalps.plot
 
 #prepare the input parameters
 parms=[]
-for b in [6.,8.,10.,12.,14.,16.]: 
+for b in [6.,12.]: 
     parms.append(
             {                         
               'ANTIFERROMAGNET'         : 1,
@@ -41,8 +41,8 @@ for b in [6.,8.,10.,12.,14.,16.]:
               'FLAVORS'                 : 2,
               'H'                       : 0,
               'H_INIT'                  : 0.05,
-              'MAX_IT'                  : 16,
-              'MAX_TIME'                : 5,
+              'MAX_IT'                  : 10,
+              'MAX_TIME'                : 10,
               'MU'                      : 0,
               'N'                       : 500,
               'NMATSUBARA'              : 500, 
@@ -61,22 +61,13 @@ for b in [6.,8.,10.,12.,14.,16.]:
             }
         )
 
-# NOTE: in revision of ALPS older than 6238, the MAX_TIME will effectively be 60 seconds.
-# Comment: the results will highly probably not be well converged.
-# For more precise calculations we propose to you to:
-#   enhance the MAX_TIME (to 60), 
-#   lower the CONVERGED (to 0.003), 
-#   increase MAX_IT (to 20)
-# ( the runtime of the script with changed parameters will be roughly 2 hours )
 
 #write the input file and run the simulation
 for p in parms:
     input_file = pyalps.writeParameterFile('parm_beta_'+str(p['BETA']),p)
     res = pyalps.runDMFT(input_file)
 
-#TODO: why are the observable names here different than in 2a and 2b?
-
-listobs=['Green_'+str(f) for f in [0,1]]
+listobs=['0', '1']
     
 data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm_beta_*h5'), respath='/simulation/results/G_tau', what=listobs, verbose=True)
 for d in pyalps.flatten(data):

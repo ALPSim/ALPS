@@ -27,17 +27,14 @@
 
 import pyalps
 
-print "DESCRIPTION: This script searches results in the current directory (recursively)."
-print
+res_files = pyalps.getResultFiles()
+props = pyalps.loadProperties(res_files)
+maxflavors = max([int(p["FLAVORS"]) for p in props])
+listobs=[str(f) for f in range(maxflavors)]
 
-result_files = pyalps.getResultFiles()
-
-print "RESULT FILES found:"
-for a in result_files:
-    print "  ",a
-
-print "OBSERVABLES found in the result files:"
-for i in range(0,len(result_files)):
-    print "In the file", result_files[i]," there are stored observables:"
-    res_file = [result_files[i]]
-    print "  ", pyalps.loadObservableList(res_file)
+data_G_tau = pyalps.loadMeasurements(res_files, respath='/simulation/results/G_tau', what=listobs, verbose=False)  
+ 
+for i in range(len(data_G_tau)):
+    print "Occupation <n_flavor> in last iteration of simulation",res_files[i],':'
+    for f in range(len(data_G_tau[i])):
+        print '    flavor ',f,' : ',-data_G_tau[i][f].y[-1]

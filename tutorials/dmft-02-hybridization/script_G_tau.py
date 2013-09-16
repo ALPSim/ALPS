@@ -5,6 +5,7 @@
 # 
 # Copyright (C) 2010      by Brigitte Surer <surerb@phys.ethz.ch> 
 #               2012-2013 by Jakub Imriska  <jimriska@phys.ethz.ch>
+#               2013      by Michele Dolfi  <dolfim@phys.ethz.ch>
 # 
 # This software is part of the ALPS libraries, published under the ALPS
 # Library License; you can use, redistribute it and/or modify it under
@@ -29,33 +30,45 @@ import pyalps
 import numpy as np
 import matplotlib.pyplot as plt
 import pyalps.plot
+import sys
 
+if '-?' in sys.argv or '--?' in sys.argv:
+    print "Script for plotting of the imaginary time Green's function, Green_{flavor=0}(tau)."
+    print "Optional parameters:"
+    print "  -min_it value: to show only iterations>=value"
+    print "  -log_scale: plots -Green_{flavor=0}(tau) on logarithmic scale"
+    sys.exit()
 
-## Please run the tutorial5a.py before this one
+min_it_=-1
+if '-min_it' in sys.argv:
+    min_it_=int(sys.argv[sys.argv.index('-min_it')+1])
 
-listobs = ['0', '2']   # we look at convergence of a single flavor (=0) 
+listobs=['0']   # we look at convergence of a single flavor (=0) 
 
 ## load all results
-data = pyalps.loadDMFTIterations(pyalps.getResultFiles(pattern='parm_u_*.h5'), measurements=listobs, verbose=True)
+data = pyalps.loadDMFTIterations(pyalps.getResultFiles(pattern='parm_*.h5'), measurements=listobs, verbose=True)
 
 ## create a figure for each BETA
-grouped = pyalps.groupSets(pyalps.flatten(data), ['U', 'observable'])
+grouped = pyalps.groupSets(pyalps.flatten(data), ['BETA'])
 for sim in grouped:
     common_props = pyalps.dict_intersect([ d.props for d in sim ])
+    sim_ = [s for s in pyalps.flatten(sim) if int(s.props['iteration'])>=min_it_]
     
     ## rescale x-axis and set label
-    for d in sim:
+    for d in sim_:
         d.x = d.x * d.props['BETA']/float(d.props['N'])
-        d.y *= -1.
+        if '-log_scale' in sys.argv:
+            d.y *= -1.
         d.props['label'] = 'it'+d.props['iteration']
     
     ## plot all iterations for this BETA
     plt.figure()
     plt.xlabel(r'$\tau$')
-    plt.ylabel(r'$G_{flavor=%.4s}(\tau)$' % common_props['observable'])
-    plt.title('DMFT-05: Orbitally Selective Mott Transition on the Bethe lattice: ' + r'$U = %.4s$' % common_props['U'])
-    pyalps.plot.plot(sim)
+    plt.ylabel(r'$G_{flavor=0}(\tau)$')
+    plt.title('Simulation at ' + r'$\beta = %.4s$' % common_props['BETA'])
+    pyalps.plot.plot(sim_)
     plt.legend()
-    plt.yscale("log")
+    if '-log_scale' in sys.argv:
+        plt.yscale("log")
 
 plt.show()
