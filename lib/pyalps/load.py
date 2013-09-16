@@ -456,7 +456,7 @@ class Hdf5Loader:
 
     # Pre: file is a hdf5 file descriptor
     # Post: returns DataSet with all parameters set
-    def ReadDMFTIterations(self,flist,observable='G_tau',measurements=None,proppath='/parameters',respath='/simulation/iteration',verbose=False):
+    def ReadDMFTIterations(self,flist,observable='G_tau',measurements='0',proppath='/parameters',respath='/simulation/iteration',verbose=False):
         fs = self.GetFileNames(flist)
         fileset = []
         for f in fs:
@@ -467,11 +467,7 @@ class Hdf5Loader:
                 list_ = self.GetObservableList(respath+'/1/results/'+observable+'/')
                 #grp = self.h5f.require_group(respath)
                 params = self.ReadParameters(proppath)
-                obslist = []
-                if measurements == None:
-                    obslist = ['Green_0']
-                else:
-                    obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
+                obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
                 iterationset=[]
                 for it in  self.h5f.list_children(respath):
                     obsset=[]
@@ -596,7 +592,7 @@ def loadSpectra(files,verbose=False):
     ll = Hdf5Loader()
     return ll.ReadSpectrumFromFile(files,verbose=verbose)
 
-def loadDMFTIterations(files,observable='G_tau',measurements=None,verbose=False):
+def loadDMFTIterations(files,observable='G_tau',measurements='0',verbose=False):
     """ loads ALPS measurements from ALPS HDF5 result files
     
         this function loads results of ALPS simulations ALPS HDF5 result files
