@@ -3,8 +3,8 @@
 # 
 # ALPS Libraries
 # 
-# Copyright (C) 2010 by Brigitte Surer <surerb@phys.ethz.ch> 
-#               2012 by Jakub Imriska  <jimriska@phys.ethz.ch>
+# Copyright (C) 2010      by Brigitte Surer <surerb@phys.ethz.ch> 
+#               2012-2013 by Jakub Imriska  <jimriska@phys.ethz.ch>
 # 
 # This software is part of the ALPS libraries, published under the ALPS
 # Library License; you can use, redistribute it and/or modify it under
@@ -38,7 +38,7 @@ parms.append(
           'H'                   : 0,
           'H_INIT'              : 0.0,
           'MAX_IT'              : 12,
-          'MAX_TIME'            : 120,
+          'MAX_TIME'            : 600,
           'MU'                  : 0,
           'N'                   : 1000,
           'NMATSUBARA'          : 1000,
@@ -47,13 +47,13 @@ parms.append(
           'OMEGA_LOOP'          : 1,
           'SEED'                : 0,
           'SITES'               : 1,
-          'SOLVER'              : 'hybridization',  # name of the solver executable, evt. full path needed
+          'SOLVER'              : 'hybridization',
           'SC_WRITE_DELTA'      : 1,
           'SYMMETRIZATION'      : 1,
           'U'                   : 3,
           't'                   : 0.707106781186547,
-          'SWEEPS'              : 100000000,
-          'THERMALIZATION'      : 1000,
+          'SWEEPS'              : 2500,
+          'THERMALIZATION'      : 500,
           'BETA'                : 32
         }
     )
