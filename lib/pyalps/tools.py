@@ -524,12 +524,15 @@ def getMeasurements(outfiles_, observable=None, includeLog=False):
 
   return measurements;
 
-def checkSteadyState(outfile, observables, confidenceInterval=0.63, simplified=False, includeLog=False):
-  if isinstance(observables, str):
-    observables = [observables];
+def checkSteadyState(sets=None, outfile=None, observable=None, confidenceInterval=0.63, includeLog=False):
+  if sets != None:
+    results = []
+    for iset in flatten(sets):
+      iset.props['checkSteadyState'] = checkSteadyState(outfile=iset.props['filename'], observable=iset.props['observable'], confidenceInterval=confidenceInterval, includeLog=True);
+      results.append(iset); 
+    return results 
 
-  results = [];
-  for observable in observables:
+  else:
     ts  = pyalps.loadTimeSeries(outfile, observable);  ### y
     N   = ts.size;
     idx = scipy.linspace(1, N, N);                     ### x
@@ -545,15 +548,22 @@ def checkSteadyState(outfile, observables, confidenceInterval=0.63, simplified=F
     result = z < z0;
 
     if not includeLog:
-      results.append(result);
+      return {'value': result};
     else:
-      results.append({'observable': observable, 'beta1' : {'value' : beta1, 'std' : beta1_std}, 'confidenceInterval' : confidenceInterval, 'z' : z, 'z0' : z0, 'checkSteadyState': result})
+      return {'value': result, 'props':{ 'outfile': outfile, 'observable': observable}, 'statistics': {'beta1' : {'value' : beta1, 'std' : beta1_std}, 'confidenceInterval' : confidenceInterval, 'z' : z, 'z0' : z0}};
 
-  if includeLog or not simplified:
-    return results;
-  else:
-    return reduce(lambda x,y: x*y, results);
-
+def checkConvergence(sets):
+  results = []
+  for iset in flatten(sets):
+    ar = pyalps.hdf5.archive(iset.props['filename']) 
+    if ar['/simulation/results']['|Magnetization|']['mean']['error_convergence'] == 0:
+      result = True;
+    else:
+      result = False;
+    del ar;
+    iset.props['checkConvergence'] = result
+    results.append(iset);
+  return results;
 
 def sendmail(recipients, sender=None, message='', subject='', attachment=None):
   message = 'Automatic email message from ALPS.\nDo not reply.\n\n' + str(message);
