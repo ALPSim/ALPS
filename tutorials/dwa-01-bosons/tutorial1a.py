@@ -54,6 +54,7 @@ res = pyalps.runApplication('dwa', input_file, Tmin=5, writexml=True)
 
 
 # Evaluating the simulation and preparing plots using Python
+import pyalps
 import matplotlib.pyplot as plt
 import pyalps.pyplot as aplt
 
