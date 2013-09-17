@@ -65,7 +65,6 @@ for u in [6.]:
                 'EPS_1' : 0,                           # potential shift for the flavor 1
                 'EPSSQ_0' : 4,                         # the second moment of the bandstructure for the flavor 0
                 'EPSSQ_1' : 4,                         # the second moment of the bandstructure for the flavor 1
-                'EPSSQAV' : 4                          # the second moment of the bandstructure (for Hybridization1)
             }
         )
 

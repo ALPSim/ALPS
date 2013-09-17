@@ -69,9 +69,10 @@ data_G_tau = pyalps.loadMeasurements(res_files, respath='/simulation/results/G_t
 
 beta, occupation = [], []
 print "Occupation in the last iteration at flavor=0"
-for i in range(len(data_G_tau)):
+for d in data_G_tau:
     # obtain occupation using relation: <n_{flavor=0}> = -<G_{flavor=0}(tau=beta)>
-    beta_,n_ = float(data_G_tau[i][0].props['BETA']),-data_G_tau[i][0].y[-1]
+    beta_ = float(d[0].props['BETA'])
+    n_ = -d[0].y[-1]
     print "n_0(beta =",beta_,") =",n_
     beta.append(beta_)
     occupation.append(n_)
