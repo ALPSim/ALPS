@@ -30,6 +30,7 @@ import matplotlib
 mplversion = tuple(i for i in matplotlib.__version__.split('.'))
 mplversion = (int(mplversion[0]), int(mplversion[1]), mplversion[2])
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d.axes3d import Axes3D;
 import numpy as np
 from hlist import flatten
 from dataset import DataSet
@@ -138,7 +139,37 @@ def plot(data):
                 plt.errorbar(xmeans,ymeans,yerr=yerrors,xerr=xerrors,label=lab,
                             fmt=line_props,linewidth=linewidth,color=thiscolor, mfc='none', mec=thiscolor)
 
+def plot3D(sets, centeredAtOrigin=False, layer=None):
+  figures =[];
+  for iset in flatten(sets):
+    Z = iset.y;
+    shape = Z.shape
+    if len(shape) < 2 or len(shape) > 3:
+      return;
 
+    x = np.arange(shape[0]);
+    y = np.arange(shape[1]);
+    if centeredAtOrigin:
+      x -= (shape[0]-1)/2.
+      y -= (shape[1]-1)/2.
+
+    X,Y = np.meshgrid(x,y) 
+
+    if len(shape) == 3:
+      if layer == None: # column integrate
+        Z = np.sum(Z, axis=2);
+      elif layer == "center":
+        Z = Z[:,:,shape[2]/2]
+      else:
+        Z = Z[:,:,layer]
+
+    plt.figure(); 
+    fig = plt.figure();
+    ax = fig.add_subplot(1, 1, 1, projection='3d') 
+    surf = ax.plot_surface( X, Y, Z, 
+                            rstride=1, cstride=1, cmap=matplotlib.cm.coolwarm, linewidth=0, antialiased=False)
+    fig.colorbar(surf, shrink=0.5, aspect=10);
+    fig.show();
 
 
 class MplXYPlot_core:

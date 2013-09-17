@@ -424,11 +424,26 @@ class Hdf5Loader:
                             if obs[0].count==0:
                               obs=None
                         else:
-                            obs = pa.MCVectorData()
-                            obs.load(self.h5fname, respath+'/'+m)
-                            size=len(obs.mean)
-                            if obs.count==0:
-                                obs=None
+                            obs=None
+                            if not self.h5f.is_group(respath+'/'+m+'/timeseries'): # check for simple binning
+                                obs = np.array(self.h5f[respath+'/'+m+'/mean/value']);
+                                if params.has_key('L'): # ugly fix... really ugly
+                                  L = int(params['L'])
+                                  if L == obs.size:
+                                    params['origin'] = [(L-1.)/2.];
+                                  if L**2 == obs.size: # dimension 2
+                                    obs = obs.reshape([L,L]);
+                                    params['origin'] = [(L-1.)/2., (L-1.)/2.];
+                                  elif L**3 == obs.size: # dimension 3
+                                    obs = obs.reshape([L,L,L]);
+                                    params['origin'] = [(L-1.)/2., (L-1.)/2., (L-1.)/2.];
+                                size = obs.size
+                            else:
+                                obs = pa.MCVectorData()
+                                obs.load(self.h5fname, respath+'/'+m)
+                                size=len(obs.mean)
+                                if obs.count==0:
+                                    obs=None
                     else:
                         if self.h5f.is_scalar(respath+'/'+m+'/mean/value'):
                             obs = self.h5f[respath+'/'+m+'/mean/value']

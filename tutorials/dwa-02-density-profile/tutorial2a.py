@@ -55,3 +55,11 @@ parms = [
 input_file = pyalps.writeInputFiles('parm2a', parms)
 res = pyalps.runApplication('dwa', input_file)
 
+
+# Evaluating and plotting in Python
+import pyalps
+import pyalps.plot as aplt;
+
+data     = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm2a'), 'Local Density');
+aplt.plot3D(data, centeredAtOrigin=True)
+
