@@ -54,7 +54,7 @@ namespace alps {
 class ImpuritySolver : public ::ImpuritySolver, public ::MatsubaraImpuritySolver
 {
 public:
-  ImpuritySolver(const scheduler::Factory& f, int argc=0, char** argv=0);
+  ImpuritySolver(const scheduler::Factory& f, int argc=0, char** argv=0, bool h5input=false);
   ~ImpuritySolver();
     
   scheduler::AbstractTask* get_task() const 

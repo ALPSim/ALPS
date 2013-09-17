@@ -41,7 +41,7 @@
 
 #define DEFAULT_CHECK_TIME 300
 
-alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc, char** argv)
+alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc, char** argv, bool h5input)
 {
 #ifdef ALPS_HAVE_MPI
 	comm_init(argc,argv, true);
@@ -51,10 +51,15 @@ alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc
 	if(is_master()){
     alps::scheduler::NoJobfileOptions opt(1,argv);
     unsigned int max_time;
-    {
+    if (!h5input){
       alps::Parameters parms;
       std::ifstream is(argv[1]);
       is>>parms;
+      max_time = (unsigned int)(parms.value_or_default("MAX_TIME",DEFAULT_CHECK_TIME));
+    } else {
+      alps::Parameters parms;
+      alps::hdf5::archive ar(argv[1], "r");
+      ar["/parameters"] >> parms;
       max_time = (unsigned int)(parms.value_or_default("MAX_TIME",DEFAULT_CHECK_TIME));
     }
     if (max_time < DEFAULT_CHECK_TIME) { opt.checkpoint_time=max_time; opt.max_check_time=max_time; opt.min_check_time=max_time; }

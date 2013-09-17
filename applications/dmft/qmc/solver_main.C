@@ -100,7 +100,7 @@ int main(int argc, char** argv)
     
     matsubara_green_function_t g0(N, sites, flavors); g0.read_hdf5(ar, "/G0");
     alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;
-    alps::ImpuritySolver solver(factory,argc,argv);
+    alps::ImpuritySolver solver(factory,argc,argv,true);
 		
 		// write g into output file
     solver.solve_omega(g0,parms);
