@@ -2,9 +2,11 @@
 *
 * ALPS Project Applications: Directed Worm Algorithm  
 *
-* Copyright (C) 2013 by Lode Pollet      <pollet@phys.ethz.ch>  
+* ALPS Project Applications: Directed Worm Algorithm  
+*
+* Copyright (C) 2013 by Matthias Troyer  <troyer@phys.ethz.ch> ,
+*                       Lode Pollet      <pollet@phys.ethz.ch> ,
 *                       Ping Nang Ma     <pingnang@phys.ethz.ch> 
-*                       Matthias Troyer  <troyer@phys.ethz.ch>    
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -41,11 +43,11 @@ void
       out << "\n\n"
           << "\n/*****************************************************************************"
           << "\n*"
-          << "\n* ALPS Project Applications: Directed Worm Algorithm (using NGS scheduler)"
+          << "\n* ALPS Project Applications: Directed Worm Algorithm"
           << "\n*"
-          << "\n* Copyright (C) 2012 by Lode Pollet      <pollet@phys.ethz.ch>,"
-          << "\n*                       Ping Nang Ma     <pingnang@phys.ethz.ch>,"
-          << "\n*                       Matthias Troyer  <troyer@phys.ethz.ch>"
+          << "\n* Copyright (C) 2013 by Matthias Troyer  <troyer@phys.ethz.ch> ," 
+          << "\n*                       Lode Pollet      <pollet@phys.ethz.ch> ,"
+          << "\n*                       Ping Nang Ma     <pingnang@phys.ethz.ch>"
           << "\n*"
           << "\n* This software is part of the ALPS libraries, published under the ALPS"
           << "\n* Library License; you can use, redistribute it and/or modify it under"
@@ -227,6 +229,9 @@ void
       ar << alps::make_pvp("/parameters", parms);
       std::cout << "\t\t\t\t ... done.\n\n";
 
+      // Counters
+      ar << alps::make_pvp("/simulation/sweep_counter", _sweep_counter);
+
       // Simulation results
       std::cout << "\t\tiii. measurements \t\t ... starting ... \n";
       ar << alps::make_pvp("/simulation/results", measurements);
@@ -255,6 +260,11 @@ void
       }
       else
         std::cout << "\nNo worldlines configuration found.\n";
+
+      // Counters
+      if (ar.is_group("/simulation/sweep_counter")) {
+        ar >> alps::make_pvp("/simulation/sweep_counter", _sweep_counter);
+      }
 
       // Measurements
       if (ar.is_group("/simulation/results")) {
