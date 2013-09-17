@@ -52,7 +52,7 @@ data_G = pyalps.loadDMFTIterations(pyalps.getResultFiles(pattern='parm_*.h5'), o
 data_G0 = pyalps.loadDMFTIterations(pyalps.getResultFiles(pattern='parm_*.h5'), observable="G0_omega", measurements=listobs, verbose=True)
 
 ## create a figure for each BETA
-grouped_G = pyalps.groupSets(pyalps.flatten(data_G), ['BETA'])
+grouped_G = pyalps.groupSets(pyalps.flatten(data_G), ['BETA','observable'])
 for sim in grouped_G:
     common_props = pyalps.dict_intersect([ d.props for d in sim ])
     sim_ = [s for s in pyalps.flatten(sim) if int(s.props['iteration'])>=min_it_]
@@ -74,7 +74,7 @@ for sim in grouped_G:
     plt.figure()
     plt.xlabel(r'$i\omega_n$')
     if real_part:
-        plt.ylabel(r'$Re\ \Sigma_{flavor=0}(i\omega_n)$')
+        plt.ylabel(r'$Re\ \Sigma_{flavor=%8s}(i\omega_n)$' % common_props['observable'])
     else:
         plt.ylabel(r'$Im\ \Sigma_{flavor=0}(i\omega_n)$')
     plt.title('Simulation at ' + r'$\beta = %.4s$' % common_props['BETA'])

@@ -39,7 +39,7 @@ listobs = ['0']   # we look at convergence of a single flavor (=0)
 data = pyalps.loadDMFTIterations(pyalps.getResultFiles(pattern='parm_u_*.h5'), measurements=listobs, verbose=True)
 
 ## create a figure for each BETA
-grouped = pyalps.groupSets(pyalps.flatten(data), ['U'])
+grouped = pyalps.groupSets(pyalps.flatten(data), ['U','observable'])
 for sim in grouped:
     common_props = pyalps.dict_intersect([ d.props for d in sim ])
     
@@ -52,7 +52,7 @@ for sim in grouped:
     ## plot all iterations for this BETA
     plt.figure()
     plt.xlabel(r'$\tau$')
-    plt.ylabel(r'$G_{flavor=0}(\tau)$')
+    plt.ylabel(r'$-G_{flavor=%8s}(\tau)$' % common_props['observable'])
     plt.title('DMFT-04: ' + r'$U = %.4s$' % common_props['U'])
     pyalps.plot.plot(sim)
     plt.legend()

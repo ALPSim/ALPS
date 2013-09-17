@@ -52,7 +52,7 @@ for sim in grouped:
     ## plot all iterations for this BETA
     plt.figure()
     plt.xlabel(r'$\tau$')
-    plt.ylabel(r'$G_{flavor=%.4s}(\tau)$' % common_props['observable'])
+    plt.ylabel(r'$-G_{flavor=%8s}(\tau)$' % common_props['observable'])
     plt.title('DMFT-05: Orbitally Selective Mott Transition on the Bethe lattice: ' + r'$U = %.4s$' % common_props['U'])
     pyalps.plot.plot(sim)
     plt.legend()

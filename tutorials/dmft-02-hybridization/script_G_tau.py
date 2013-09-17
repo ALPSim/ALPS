@@ -43,13 +43,15 @@ min_it_=-1
 if '-min_it' in sys.argv:
     min_it_=int(sys.argv[sys.argv.index('-min_it')+1])
 
+log_scale = ('-log_scale' in sys.argv)
+
 listobs=['0']   # we look at convergence of a single flavor (=0) 
 
 ## load all results
 data = pyalps.loadDMFTIterations(pyalps.getResultFiles(pattern='parm_*.h5'), measurements=listobs, verbose=True)
 
 ## create a figure for each BETA
-grouped = pyalps.groupSets(pyalps.flatten(data), ['BETA'])
+grouped = pyalps.groupSets(pyalps.flatten(data), ['BETA','observable'])
 for sim in grouped:
     common_props = pyalps.dict_intersect([ d.props for d in sim ])
     sim_ = [s for s in pyalps.flatten(sim) if int(s.props['iteration'])>=min_it_]
@@ -57,18 +59,21 @@ for sim in grouped:
     ## rescale x-axis and set label
     for d in sim_:
         d.x = d.x * d.props['BETA']/float(d.props['N'])
-        if '-log_scale' in sys.argv:
+        if log_scale:
             d.y *= -1.
         d.props['label'] = 'it'+d.props['iteration']
     
     ## plot all iterations for this BETA
     plt.figure()
     plt.xlabel(r'$\tau$')
-    plt.ylabel(r'$G_{flavor=0}(\tau)$')
+    if log_scale:
+        plt.ylabel(r'$-G_{flavor=%8s}(\tau)$'  % common_props['observable'])
+        plt.yscale("log")
+    else:
+        plt.ylabel(r'$G_{flavor=%8s}(\tau)$'  % common_props['observable'])
     plt.title('Simulation at ' + r'$\beta = %.4s$' % common_props['BETA'])
     pyalps.plot.plot(sim_)
     plt.legend()
-    if '-log_scale' in sys.argv:
-        plt.yscale("log")
+        
 
 plt.show()

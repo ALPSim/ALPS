@@ -50,7 +50,7 @@ listobs=['0']   # we look at convergence of a single flavor (=0)
 data = pyalps.loadDMFTIterations(pyalps.getResultFiles(pattern='parm_*.h5'), observable="G_omega", measurements=listobs, verbose=True)
 
 ## create a figure for each BETA
-grouped = pyalps.groupSets(pyalps.flatten(data), ['BETA'])
+grouped = pyalps.groupSets(pyalps.flatten(data), ['BETA','observable'])
 for sim in grouped:
     common_props = pyalps.dict_intersect([ d.props for d in sim ])
     sim_ = [s for s in pyalps.flatten(sim) if int(s.props['iteration'])>=min_it_]
@@ -70,7 +70,7 @@ for sim in grouped:
     plt.figure()
     plt.xlabel(r'$i\omega_n$')
     if real_part:
-        plt.ylabel(r'$Re\ G_{flavor=0}(i\omega_n)$')
+        plt.ylabel(r'$Re\ G_{flavor=%8s}(i\omega_n)$' % common_props['observable'])
     else:
         plt.ylabel(r'$Im\ G_{flavor=0}(i\omega_n)$')
     plt.title('Simulation at ' + r'$\beta = %.4s$' % common_props['BETA'])
