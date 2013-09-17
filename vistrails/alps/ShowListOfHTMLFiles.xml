@@ -51,7 +51,7 @@
       <location id="0" x="-13.6027927119" y="-1.54044393281" />
     </add>
     <add id="2" objectId="1" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="1" name="Map" namespace="" package="org.vistrails.vistrails.control_flow" version="0.2.2" />
+      <module cache="1" id="1" name="Map" namespace="" package="org.vistrails.vistrails.control_flow" version="0.2.3" />
     </add>
     <add id="3" objectId="1" parentObjId="1" parentObjType="module" what="function">
       <function id="1" name="InputPort" pos="1" />
