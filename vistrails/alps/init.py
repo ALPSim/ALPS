@@ -68,6 +68,7 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                    'LatticeParameters': (lattices.Lattice,{}),
                    'square_lattice': (lattices.SquareLattice,{}),
                    'simple_cubic_lattice': (lattices.SimpleCubicLattice,{}),
+                   'inhomogeneous_simple_cubic_lattice': (lattices.InhomogeneousSimpleCubicLattice,{}),
                    'ladder': (lattices.LadderLattice,{}),
                    'open_ladder': (lattices.OpenLadderLattice,{}),
                    'chain_lattice': (lattices.ChainLattice,{}),

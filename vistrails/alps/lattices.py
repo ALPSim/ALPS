@@ -22,6 +22,7 @@ class Lattice(parameters.FixedAndDefaultParameters):
    """ a general lattice. Specify the lattice file in the LATTICE_LIBRARY input and the lattice name in LATTICE. LATTICE_LIBRARY defaults to the default ALPS lattices.xml file. """
    _input_ports = [('LATTICE',[basic.String]),
                    ('LATTICE_LIBRARY',[basic.File])]
+
 class SimpleCubicLattice(Lattice):
   """ automatically generated lattice: simple cubic lattice """
   _input_ports = [
@@ -30,6 +31,16 @@ class SimpleCubicLattice(Lattice):
     ('H',[(basic.String, '')])
   ]
   fixed = {'LATTICE': 'simple cubic lattice'}
+  defaults = {'H': 'W', 'W': 'L'}
+
+class InhomogeneousSimpleCubicLattice(Lattice):
+  """ automatically generated lattice: inhomogeneous simple cubic lattice """
+  _input_ports = [
+    ('L',[(basic.String, '')]),
+    ('W',[(basic.String, '')]),
+    ('H',[(basic.String, '')])
+  ]
+  fixed = {'LATTICE': 'inhomogeneous simple cubic lattice'}
   defaults = {'H': 'W', 'W': 'L'}
 
 class SquareLattice(Lattice):
@@ -180,6 +191,7 @@ def selfRegister():
   reg.add_output_port(Lattice, "value", Lattice)
   
   register_lattice(SimpleCubicLattice)
+  register_lattice(InhomogeneousSimpleCubicLattice)
   register_lattice(SquareLattice)
   register_lattice(OpenSquareLattice)
   register_lattice(CoupledLaddersLattice)
