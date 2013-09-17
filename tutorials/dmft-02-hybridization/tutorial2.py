@@ -47,7 +47,6 @@ for b in [6., 12.]:
               'N'                   : 500,
               'NMATSUBARA'          : 500,
               'N_MEAS'              : 10000,
-              'N_ORDER'             : 50,
               'OMEGA_LOOP'          : 1,
               'SEED'                : 0,
               'SITES'               : 1,
