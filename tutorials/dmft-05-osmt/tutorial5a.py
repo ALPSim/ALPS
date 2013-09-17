@@ -51,7 +51,7 @@ for cp in [[1.8,0.45],[2.2,0.55],[2.8,0.7]]:
               'SOLVER'              : 'hybridization',
               'SC_WRITE_DELTA'      : 1,
               'SYMMETRIZATION'      : 1,
-              'SWEEPS'              : 1000,
+              'SWEEPS'              : 2500,
               'BETA'                : 30,
               'THERMALIZATION'      : 250,
               'U'                   : cp[0],

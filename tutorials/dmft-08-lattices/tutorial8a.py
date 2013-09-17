@@ -52,12 +52,12 @@ for u in [6.]:
                 'G0OMEGA_INPUT' : "",    # forces to start from the local non-interacting Green's function
                 'MAX_IT' : 20,           # max. number of self-consistency iterations
                 'CHECKPOINT' : "dump_DOS_beta"+str(b)+'_U'+str(u),   # prefix for checkpointing
-                'SWEEPS' : 1500,    # max. number of sweeps in a single iteration
+                'SWEEPS' : 10000,    # max. number of sweeps in a single iteration
                 'THERMALIZATION' : 500, # number of thermalization sweeps
                 'SEED' : 0,              # random seed
                 'SOLVER' : "hybridization",   # we take the hybridization impurity solver
                 'SC_WRITE_DELTA' : 1,         # input for the hybridization impurity solver is the hybridization function Delta, which has to be written by the selfconsistency
-                'N_MEAS' : 10000,             # number of Monte Carlo steps between measurements
+                'N_MEAS' : 5000,             # number of Monte Carlo steps between measurements
                 'N_ORDER' : 50,               # histogram size
                 'DOSFILE' : "DOS/DOS_Square_GRID4000", # specification of the file with density of states
                 'GENERAL_FOURIER_TRANSFORMER' : 1,     # Fourier transformer for a general bandstructure
