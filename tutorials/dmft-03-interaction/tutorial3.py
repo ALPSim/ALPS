@@ -33,7 +33,7 @@ import pyalps.plot
 
 #prepare the input parameters
 parms=[]
-for b in [6.,12.]: 
+for b in [6., 12.]: 
     parms.append(
             {                         
               'ANTIFERROMAGNET'         : 1,
@@ -69,7 +69,7 @@ for p in parms:
 
 listobs=['0', '1']
     
-data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm_beta_*h5'), respath='/simulation/results/G_tau', what=listobs, verbose=True)
+data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm_beta_*h5'), respath='/simulation/results/G_tau', what=listobs)
 for d in pyalps.flatten(data):
     d.x = d.x*d.props["BETA"]/float(d.props["N"])
     d.props['label'] = r'$\beta=$'+str(d.props['BETA'])+'; flavor='+str(d.props['observable'][len(d.props['observable'])-1])

@@ -3,8 +3,8 @@
 # 
 # ALPS Libraries
 # 
-# Copyright (C) 2010 by Brigitte Surer <surerb@phys.ethz.ch> 
-#               2012 by Jakub Imriska  <jimriska@phys.ethz.ch>
+# Copyright (C) 2010      by Brigitte Surer <surerb@phys.ethz.ch> 
+#               2012-2013 by Jakub Imriska  <jimriska@phys.ethz.ch>
 # 
 # This software is part of the ALPS libraries, published under the ALPS
 # Library License; you can use, redistribute it and/or modify it under
@@ -29,11 +29,7 @@ import pyalps
 import numpy as np
 import matplotlib.pyplot as plt
 import pyalps.plot
-import sys
 
-n_threads=1
-if '-n_threads' in sys.argv:
-  n_threads=int(sys.argv[sys.argv.index('-n_threads')+1])
 
 #prepare the input parameters
 parms=[]
@@ -72,7 +68,7 @@ for p in parms:
     input_file = pyalps.writeParameterFile('parm_beta_'+str(p['BETA']),p)
     res = pyalps.runDMFT(input_file)
 
-listobs=['0','1']
+listobs=['0', '1']
     
 data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm_beta_*h5'), respath='/simulation/results/G_tau', what=listobs)
 for d in pyalps.flatten(data):

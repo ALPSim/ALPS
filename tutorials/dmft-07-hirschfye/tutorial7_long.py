@@ -3,8 +3,8 @@
 # 
 # ALPS Libraries
 # 
-# Copyright (C) 2010 by Brigitte Surer <surerb@phys.ethz.ch> 
-#               2012 by Jakub Imriska  <jimriska@phys.ethz.ch>
+# Copyright (C) 2010      by Brigitte Surer <surerb@phys.ethz.ch> 
+#               2012-2013 by Jakub Imriska  <jimriska@phys.ethz.ch>
 # 
 # This software is part of the ALPS libraries, published under the ALPS
 # Library License; you can use, redistribute it and/or modify it under
@@ -56,9 +56,7 @@ for b in [6., 8., 10., 12., 14., 16.]:
               't'                   : 0.707106781186547,
               'SWEEPS'              : 1000000,
               'THERMALIZATION'      : 10000,
-              'BETA'                : b,
-              'G0OMEGA_INPUT'       : '',
-              'BASENAME'            : 'parm_beta_'+str(b)
+              'BETA'                : b
             }
         )
 
@@ -67,12 +65,12 @@ for b in [6., 8., 10., 12., 14., 16.]:
 
 #write the input file and run the simulation
 for p in parms:
-    input_file = pyalps.writeParameterFile(p['BASENAME'],p)
+    input_file = pyalps.writeParameterFile('parm_beta_'+str(p['BETA']),p)
     res = pyalps.runDMFT(input_file)
 
 listobs=['0', '1']
     
-data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm_beta_*h5'), respath='/simulation/results/G_tau', what=listobs, verbose=True)
+data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm_beta_*h5'), respath='/simulation/results/G_tau', what=listobs)
 for d in pyalps.flatten(data):
     d.x = d.x*d.props["BETA"]/float(d.props["N"])
     d.props['label'] = r'$\beta=$'+str(d.props['BETA'])+'; flavor='+str(d.props['observable'][len(d.props['observable'])-1])
