@@ -57,6 +57,7 @@ def showgraph(graph):
     for k, v in vertices.items():
         plt.annotate('%s (%s)' % (k, vtypes[k]), v)
     
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
     for edge in edges.values():
         s = edge['source']
         t = edge['target']
@@ -64,4 +65,6 @@ def showgraph(graph):
         p0 = vertices[s]
         p1 = vertices[t]
         
-        plt.plot([p0[0], p1[0]], [p0[1], p1[1]])
+        c = colors[edge['type'] % len(colors)]
+        
+        plt.plot([p0[0], p1[0]], [p0[1], p1[1]], c)
