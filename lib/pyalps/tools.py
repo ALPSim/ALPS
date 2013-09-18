@@ -555,7 +555,7 @@ def checkConvergence(sets):
   results = []
   for iset in flatten(sets):
     ar = pyalps.hdf5.archive(iset.props['filename']) 
-    if ar['/simulation/results']['|Magnetization|']['mean']['error_convergence'] == 0:
+    if ar['/simulation/results'][iset.props['observable']]['mean']['error_convergence'] == 0:
       result = True;
     else:
       result = False;
