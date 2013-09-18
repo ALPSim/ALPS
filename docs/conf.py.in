@@ -32,8 +32,19 @@ import pyalps
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx.ext.doctest', 'sphinx.ext.todo', 'sphinx.ext.pngmath', 'breathe', 'gasp']
-
+# 'sphinx.ext.viewcode', 
+try:
+    import sphinxcontrib.napoleon
+    extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'numpydoc', 'sphinxcontrib.napoleon', 'viewcode_patched', 'sphinx.ext.doctest', 'sphinx.ext.todo', 'sphinx.ext.pngmath', 'breathe', 'gasp']
+except:
+    extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'numpydoc', 'viewcode_patched', 'sphinx.ext.doctest', 'sphinx.ext.todo', 'sphinx.ext.pngmath', 'breathe', 'gasp']
+    print '''
+    Warning: To have good-looking documentation you need the spinxcontrib-napoleon module,
+    you can get it from here: https://pypi.python.org/pypi/sphinxcontrib-napoleon.
+    The easy way to install it is copying the `sphinxcontrib` folder inside the tarball
+    in the ALPS_SOURCE_DIR/docs/ext/ directory.
+    '''
+    
 doxygen_xml=os.path.abspath(os.path.join("@DOXYGENDOCS_DIR@","xml/"))
 
 # Breathe settings

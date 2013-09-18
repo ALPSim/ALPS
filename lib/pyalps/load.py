@@ -522,16 +522,16 @@ def loadBinningAnalysis(files,what=None,verbose=False):
     
         this function loads results of a MC binning analysis from ALPS HDF5 result files
         
-        The parameters are:
+        Parameters:
+            files (list): ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
+            what (list): optional argument that is either a string or list of strings, specifying the names of the observables for which the binning analysis should be loaded
+            verbose (bool): optional argument that if set to True causes more output to be printed as the data is loaded
         
-        files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
-        what: an optional argument that is either a string or list of strings, specifying the names of the observables for which the binning analysis should be loaded
-        verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded
-        
-        The function returns a list of list of DataSet objects. 
-        The elements of the outer list each correspond to the file names specified as input.
-        The elements of the inner list are each for a different observable.
-        The x-values of the DataSet objects are the logarithmic binning level and the y-values the error estimates at that binning level.
+        Returns:
+            a list of list of DataSet objects: loaded binning analysis.
+            The elements of the outer list each correspond to the file names specified as input.
+            The elements of the inner list are each for a different observable.
+            The x-values of the DataSet objects are the logarithmic binning level and the y-values the error estimates at that binning level.
     """
     ll = Hdf5Loader()
     if isinstance(what,str):
@@ -543,16 +543,16 @@ def loadMeasurements(files,what=None,verbose=False,respath='/simulation/results'
     
         this function loads results of ALPS simulations ALPS HDF5 result files
         
-        The parameters are:
+        Parameters:
+            files (list): ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
+            what (list): optional argument that is either a string or list of strings, specifying the names of the observables which should be loaded
+            verbose (bool): optional argument that if set to True causes more output to be printed as the data is loaded
         
-        files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
-        what: an optional argument that is either a string or list of strings, specifying the names of the observables which should be loaded
-        verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded
-        
-        The function returns a list of list of DataSet objects. 
-        The elements of the outer list each correspond to the file names specified as input.
-        The elements of the inner list are each for a different observable.
-        The y-values of the DataSet objects are the measurements and the x-values optionally the labels (indices) of array-valued measurements
+        Returns:
+            a list of list of DataSet objects: loaded measurements.
+            The elements of the outer list each correspond to the file names specified as input.
+            The elements of the inner list are each for a different observable.
+            The y-values of the DataSet objects are the measurements and the x-values optionally the labels (indices) of array-valued measurements
     """
     ll = Hdf5Loader()
     if isinstance(what,str):
@@ -565,17 +565,17 @@ def loadEigenstateMeasurements(files,what=None, verbose=False):
     
         this function loads results of ALPS diagonalization or DMRG simulations from an HDF5 file
         
-        The parameters are:
+        Parameters:
+            files (list): ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
+            what (list): an optional argument that is either a string or list of strings, specifying the names of the observables which should be loaded
+            verbose (bool): an optional argument that if set to True causes more output to be printed as the data is loaded
         
-        files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
-        what: an optional argument that is either a string or list of strings, specifying the names of the observables which should be loaded
-        verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded
-        
-        The function returns a list of list of (lists of) DataSet objects. 
-        The elements of the outer list each correspond to the file names specified as input.
-        The elements of the next level are different quantum number sectors, if any exists
-        The elements of the inner-most list are each for a different observable.
-        The y-values of the DataSet objects is an array of the measurements in all eigenstates calculated in this sector, and the x-values optionally the labels (indices) of array-valued measurements
+        Returns:
+            list of list of (lists of) DataSet objects: loaded measurements.
+            The elements of the outer list each correspond to the file names specified as input
+            The elements of the next level are different quantum number sectors, if any exists
+            The elements of the inner-most list are each for a different observable
+            The y-values of the DataSet objects is an array of the measurements in all eigenstates calculated in this sector, and the x-values optionally the labels (indices) of array-valued measurements
     """
     ll = Hdf5Loader()
     if isinstance(what,str):
@@ -592,17 +592,17 @@ def loadIterationMeasurements(files,what=None,verbose=False):
 def loadSpectra(files,verbose=False):
     """ loads ALPS spectra from ALPS HDF5 result files
     
-        this function loads the spectra calculated in ALPS diagonalization or DMRG simulations from an HDF5 file
+        This function loads the spectra calculated in ALPS diagonalization or DMRG simulations from an HDF5 file.
         
-        The parameters are:
+        Parameters:
+            files (list): ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
+            verbose (bool): optional argument that if set to True causes more output to be printed as the data is loaded.
         
-        files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
-        verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded
-        
-        The function returns a list of (lists of) DataSet objects. 
-        The elements of the outer list each correspond to the file names specified as input.
-        The elements of the next level are different quantum number sectors, if any exists
-        The y-values of the DataSet objects are the energies in that quantum number sector
+        Returns:
+            list of (lists of) DataSet objects: Loaded spectra.
+            The elements of the outer list each correspond to the file names specified as input.
+            The elements of the next level are different quantum number sectors, if any exists.
+            The y-values of the DataSet objects are the energies in that quantum number sector.
     """
     ll = Hdf5Loader()
     return ll.ReadSpectrumFromFile(files,verbose=verbose)
@@ -612,18 +612,18 @@ def loadDMFTIterations(files,observable='G_tau',measurements='0',verbose=False):
     
         this function loads results of ALPS simulations ALPS HDF5 result files
         
-        The parameters are:
+        Parameters:
+            files (list): ALPS HDF5 result files.
+            observable (str): optional argument specifying the name of the observables which should be loaded
+            measurements (list): optional argument that is either a string or list of strings, specifying the names of the measurements which should be loaded
+            verbose (bool): optional argument that if set to True causes more output to be printed as the data is loaded
         
-        files: a list of ALPS HDF5 result files.
-        observable: an optional argument that is a string specifying the names of the observables which should be loaded
-        measurements: an optional argument that is either a string or list of strings, specifying the names of the measurements which should be loaded
-        verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded
-        
-        The function returns a list of list of list of DataSet objects. 
-        The elements of the outer list each correspond to the file names specified as input.
-        The elements of the next level are different iterations.
-        The elements of the inner list contains a DataSet for each measurement.
-        The y-values of the DataSet objects are the measurements and the x-values optionally the labels (indices) of array-valued measurements
+        Returns:
+            list of list of list of DataSet objects: loaded iteration measurements.
+            The elements of the outer list each correspond to the file names specified as input.
+            The elements of the next level are different iterations.
+            The elements of the inner list contains a DataSet for each measurement.
+            The y-values of the DataSet objects are the measurements and the x-values optionally the labels (indices) of array-valued measurements
     """
     ll = Hdf5Loader()
     if isinstance(measurements,str):
@@ -635,12 +635,12 @@ def loadProperties(files,proppath='/parameters',respath='/simulation/results',ve
     
         this function loads the properties (parameters) of ALPS simulations ALPS HDF5 result files
         
-        The parameters are:
+        Parameters:
+            files (list): ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
+            verbose (bool): optional argument that if set to True causes more output to be printed as the data is loaded
         
-        files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
-        verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded
-        
-        The function returns a list of dicts
+        Returns:
+            list of dicts: properties contained in each file.
     """
     ll = Hdf5Loader()
     res = ll.GetProperties(files,proppath,respath,verbose=verbose)
@@ -653,10 +653,10 @@ def loadObservableList(files,proppath='/parameters',respath='/simulation/results
     """ loads lists of existing measurements from ALPS HDF5 result files
     
         The function returns a list of lists, containing the names of measurements that are stored in the result files 
-        The parameters are:
         
-        files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
-        verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded
+        Parameters:
+            files (list): ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
+            verbose (bool): optional argument that if set to True causes more output to be printed as the data is loaded
     """
     ll = Hdf5Loader()
     res = ll.GetProperties(files,proppath,respath,verbose=verbose)

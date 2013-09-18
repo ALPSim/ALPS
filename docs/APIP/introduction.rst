@@ -43,6 +43,7 @@ Loading data
   pyalps.loadBinningAnalysis
   pyalps.loadEigenstateMeasurements
   pyalps.loadSpectra
+  pyalps.loadDMFTIterations
   pyalps.loadProperties
   pyalps.loadObservableList
 
@@ -52,6 +53,7 @@ Loading data
 .. autofunction:: pyalps.loadBinningAnalysis
 .. autofunction:: pyalps.loadEigenstateMeasurements
 .. autofunction:: pyalps.loadSpectra
+.. autofunction:: pyalps.loadDMFTIterations
 .. autofunction:: pyalps.loadProperties
 .. autofunction:: pyalps.loadObservableList
 
@@ -78,6 +80,7 @@ Evaluation
   pyalps.collectXY
 
 .. autoclass:: pyalps.DataSet
+  :members:
 
 
 Tools
