@@ -154,6 +154,7 @@ if __name__ == '__main__':
     plt.xlabel('Inverse Temperature $\\beta$')
     plt.ylabel('Binder Cumulant U4 $g$')
     plt.title('2D Ising model')
+    plt.legend()
     plt.show()
         
 
