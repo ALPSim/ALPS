@@ -182,7 +182,7 @@ private:
 
 int main(int,char**)
 {
-    size_t L = 16;    // Linear lattice size
+    size_t L = 16;      // Linear lattice size
     size_t N = 5000;    // # of simulation steps
 
     std::cout << "# L: " << L << " N: " << N << std::endl;

@@ -1,30 +1,30 @@
 /*****************************************************************************
-*
-* ALPS Project: Algorithms and Libraries for Physics Simulations
-*
-* ALPS Libraries
-*
-* Copyright (C) 2003 by Brigitte Surer
-*                       and Jan Gukelberger
-*
-* This software is part of the ALPS libraries, published under the ALPS
-* Library License; you can use, redistribute it and/or modify it under
-* the terms of the license, either version 1 or (at your option) any later
-* version.
-* 
-* You should have received a copy of the ALPS Library License along with
-* the ALPS Libraries; see the file LICENSE.txt. If not, the license is also
-* available from http://alps.comp-phys.org/.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
-* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
-* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
-* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-* DEALINGS IN THE SOFTWARE.
-*
-*****************************************************************************/
+ *
+ * ALPS Project: Algorithms and Libraries for Physics Simulations
+ *
+ * ALPS Libraries
+ *
+ * Copyright (C) 2003 by Brigitte Surer
+ *                       and Jan Gukelberger
+ *
+ * This software is part of the ALPS libraries, published under the ALPS
+ * Library License; you can use, redistribute it and/or modify it under
+ * the terms of the license, either version 1 or (at your option) any later
+ * version.
+ * 
+ * You should have received a copy of the ALPS Library License along with
+ * the ALPS Libraries; see the file LICENSE.txt. If not, the license is also
+ * available from http://alps.comp-phys.org/.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+ * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+ * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ *****************************************************************************/
 
 #include <alps/scheduler/montecarlo.h>
 #include <alps/alea.h>
@@ -135,15 +135,15 @@ public:
     
     void save(std::string const & filename){
         alps::hdf5::archive ar(filename, "a");
-        ar << alps::make_pvp("/simulation/results/"+energy_.representation(), energy_);
-        ar << alps::make_pvp("/simulation/results/"+magnetization_.representation(), magnetization_);
-        ar << alps::make_pvp("/simulation/results/"+abs_magnetization_.representation(), abs_magnetization_);
-        ar << alps::make_pvp("/simulation/results/"+m2_.representation(), m2_);
-        ar << alps::make_pvp("/simulation/results/"+m4_.representation(), m4_);
-        ar << alps::make_pvp("/parameters/L", L_);
-        ar << alps::make_pvp("/parameters/BETA", beta_);
-        ar << alps::make_pvp("/parameters/SWEEPS", sweeps_);
-        ar << alps::make_pvp("/parameters/THERMALIZATION", thermalization_);
+        ar["/simulation/results/"+energy_.representation()] << energy_;
+        ar["/simulation/results/"+magnetization_.representation()] << magnetization_;
+        ar["/simulation/results/"+abs_magnetization_.representation()] << abs_magnetization_;
+        ar["/simulation/results/"+m2_.representation()] << m2_;
+        ar["/simulation/results/"+m4_.representation()] << m4_;
+        ar["/parameters/L"] << L_;
+        ar["/parameters/BETA"] << beta_;
+        ar["/parameters/SWEEPS"] << sweeps_;
+        ar["/parameters/THERMALIZATION"] << thermalization_;
     }
     
     protected:
