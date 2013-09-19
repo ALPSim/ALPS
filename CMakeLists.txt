@@ -146,7 +146,7 @@ endif(NOT WIN32)
 # set convenient warning flags for clang
 STRING(REGEX MATCH "clang" IS_CLANG "${ALPS_COMPILER_VERSION}")
 if(IS_CLANG)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unknown-pragmas -Wno-unused-function -Wno-overloaded-virtual -Wno-unneeded-internal-declaration -Wno-unused-variable -Wno-return-type-c-linkage")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftemplate-depth-256 -Wall -Wno-unknown-pragmas -Wno-unused-function -Wno-overloaded-virtual -Wno-unneeded-internal-declaration -Wno-unused-variable -Wno-return-type-c-linkage")
 endif(IS_CLANG)
 
 if(NOT CMAKE_BUILD_TYPE)
