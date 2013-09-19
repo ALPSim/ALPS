@@ -63,6 +63,22 @@
   </RECIPROCALBASIS>
 </LATTICE>
 
+<LATTICE name="simple rectangular cubic lattice" dimension="3">
+  <PARAMETER name="a" default="1"/>
+  <PARAMETER name="b" default="a"/>
+  <PARAMETER name="c" default="b"/>
+  <BASIS>
+    <VECTOR>a 0 0</VECTOR>
+    <VECTOR>0 b 0</VECTOR>
+    <VECTOR>0 0 c</VECTOR>
+  </BASIS>
+  <RECIPROCALBASIS>
+    <VECTOR>2*pi/a 0 0</VECTOR>
+    <VECTOR>0 2*pi/b 0</VECTOR>
+    <VECTOR>0 0 2*pi/c</VECTOR>
+  </RECIPROCALBASIS>
+</LATTICE>
+
 <LATTICE name="face-centered cubic lattice" dimension="3">
   <PARAMETER name="a" default="1"/>
   <BASIS>
@@ -174,17 +190,10 @@
   <EDGE type="2"><SOURCE vertex="1" offset="0 0"/><TARGET vertex="1" offset="-1 1"/></EDGE>
 </UNITCELL>
 
-
 <UNITCELL name="anisotropic2d" dimension="2">
   <VERTEX/>
-  <EDGE type="0">
-    <SOURCE vertex="1" offset="0 0"/>
-    <TARGET vertex="1" offset="1 0"/>
-  </EDGE>
-  <EDGE type="1">
-    <SOURCE vertex="1" offset="0 0"/>
-    <TARGET vertex="1" offset="0 1"/>
-  </EDGE>
+  <EDGE type="0"><SOURCE vertex="1" offset="0 0"/><TARGET vertex="1" offset="1 0"/></EDGE>
+  <EDGE type="1"><SOURCE vertex="1" offset="0 0"/><TARGET vertex="1" offset="0 1"/></EDGE>
 </UNITCELL>
 
 <UNITCELL name="nnn2d" dimension="2">
@@ -241,6 +250,12 @@
   <EDGE type="2"><SOURCE vertex="1"/><TARGET vertex="2" offset="0 1"/></EDGE>
 </UNITCELL>
 
+<UNITCELL name="anisotropic3d" dimension="3">
+  <VERTEX/>
+  <EDGE type="0"><SOURCE vertex="1" offset="0 0 0"/><TARGET vertex="1" offset="1 0 0"/></EDGE>
+  <EDGE type="1"><SOURCE vertex="1" offset="0 0 0"/><TARGET vertex="1" offset="0 1 0"/></EDGE>
+  <EDGE type="2"><SOURCE vertex="1" offset="0 0 0"/><TARGET vertex="1" offset="0 0 1"/></EDGE>
+</UNITCELL>
 
 <LATTICEGRAPH name = "square lattice 3x3" vt_skip="true">
   <FINITELATTICE>
@@ -449,6 +464,19 @@
   <UNITCELL ref="anisotropic2d"/>
 </LATTICEGRAPH>
 
+<LATTICEGRAPH name = "anisotropic simple cubic lattice">
+  <FINITELATTICE>
+    <LATTICE ref="simple rectangular cubic lattice"/>
+    <PARAMETER name="W" default="L"/>
+    <PARAMETER name="H" default="W"/>
+    <EXTENT dimension="1" size="L"/>
+    <EXTENT dimension="2" size="W"/>
+    <EXTENT dimension="3" size="H"/>
+    <BOUNDARY type="periodic"/>
+  </FINITELATTICE>
+  <UNITCELL ref="anisotropic3d"/>
+</LATTICEGRAPH>
+
 <LATTICEGRAPH name = "ladder" vt_name="LadderLattice">
   <FINITELATTICE>
     <LATTICE ref="square lattice"/>
@@ -471,6 +499,16 @@
     <BOUNDARY dimension="2" type="open"/>
   </FINITELATTICE>
   <UNITCELL ref="anisotropic2d"/>
+</LATTICEGRAPH>
+
+<LATTICEGRAPH name = "inhomogeneous chain lattice" vt_skip="true">
+  <FINITELATTICE>
+    <LATTICE ref="chain lattice"/>
+    <EXTENT dimension="1" size="L"/>
+    <BOUNDARY type="open"/>
+  </FINITELATTICE>
+  <UNITCELL ref="simple1d"/>
+  <INHOMOGENEOUS><VERTEX/></INHOMOGENEOUS>
 </LATTICEGRAPH>
 
 <LATTICEGRAPH name = "inhomogeneous square lattice" vt_skip="true">
@@ -498,6 +536,33 @@
   <UNITCELL ref="simple3d"/>
   <INHOMOGENEOUS><VERTEX/></INHOMOGENEOUS>
 </LATTICEGRAPH>
+
+<LATTICEGRAPH name = "inhomogeneous anisotropic square lattice" vt_skip="true">
+  <FINITELATTICE>
+    <LATTICE ref="rectangular lattice"/>
+    <PARAMETER name="W" default="L"/>
+    <EXTENT dimension="1" size="L"/>
+    <EXTENT dimension="2" size="W"/>
+    <BOUNDARY type="open"/>
+  </FINITELATTICE>
+  <UNITCELL ref="anisotropic2d"/>
+  <INHOMOGENEOUS><VERTEX/></INHOMOGENEOUS>
+</LATTICEGRAPH>
+
+
+<LATTICEGRAPH name = "inhomogeneous anisotropic simple cubic lattice">
+  <FINITELATTICE>
+    <LATTICE ref="simple rectangular cubic lattice"/>
+    <PARAMETER name="W" default="L"/>
+    <PARAMETER name="H" default="W"/>
+    <EXTENT dimension="1" size="L"/>
+    <EXTENT dimension="2" size="W"/>
+    <EXTENT dimension="3" size="H"/>
+    <BOUNDARY type="open"/>
+  </FINITELATTICE>
+  <UNITCELL ref="anisotropic3d"/>
+</LATTICEGRAPH>
+
 
 <LATTICEGRAPH name = "depleted square lattice" vt_skip="true">
   <FINITELATTICE>
