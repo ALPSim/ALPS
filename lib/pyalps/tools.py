@@ -738,7 +738,7 @@ def save_parameters(filename, parms):
     """
     f1=h5.archive(filename, 'w')
     for key in parms.keys():
-        f1.write('/parameters/'+key,parms[key])
+        f1['/parameters/'+key] = parms[key]
 
 def runTEBD(infileList):
     """ run a TEBD application """
@@ -1466,10 +1466,10 @@ def saveMeasurements(measurements,outfile,respath='/simulation/results'):
             m.y[0].save(outfile,path)
         elif isinstance(m.y,FloatWithError):
             h5f = h5.archive(fn, 'w')
-            h5f.write(path+'/mean/value',np.array(m.y.mean))
-            h5f.write(path+'/mean/error',np.array(m.y.error))
+            h5f[path+'/mean/value'] = np.array(m.y.mean)
+            h5f[path+'/mean/error'] = np.array(m.y.error)
             try:
-                h5f.write(path+'/jackknife',np.array(m.jacks))
+                h5f[path+'/jackknife'] = np.array(m.jacks)
             except AttributeError:
                 pass
 
