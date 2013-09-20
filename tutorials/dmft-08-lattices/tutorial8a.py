@@ -51,7 +51,6 @@ for u in [6.]:
                 'MAX_TIME' : 600,        # max. time spent in solver in a single iteration in seconds
                 'G0OMEGA_INPUT' : "",    # forces to start from the local non-interacting Green's function
                 'MAX_IT' : 20,           # max. number of self-consistency iterations
-                'CHECKPOINT' : "dump_DOS_beta"+str(b)+'_U'+str(u),   # prefix for checkpointing
                 'SWEEPS' : 10000,    # max. number of sweeps in a single iteration
                 'THERMALIZATION' : 500, # number of thermalization sweeps
                 'SEED' : 0,              # random seed

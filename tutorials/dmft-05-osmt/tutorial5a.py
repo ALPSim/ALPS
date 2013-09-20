@@ -33,7 +33,7 @@ import pyalps.plot
 
 #prepare the input parameters
 parms=[]
-for cp in [[1.8,0.45],[2.2,0.55],[2.8,0.7]]: 
+for u,j in [[1.8,0.45],[2.2,0.55],[2.8,0.7]]:
     parms.append(
             { 
               'CONVERGED'           : 0.001,
@@ -54,11 +54,10 @@ for cp in [[1.8,0.45],[2.2,0.55],[2.8,0.7]]:
               'SWEEPS'              : 10000,
               'BETA'                : 30,
               'THERMALIZATION'      : 500,
-              'U'                   : cp[0],
-              'J'                   : cp[1],
+              'U'                   : u,
+              'J'                   : j,
               't0'                  : 0.5,
-              't1'                  : 1,
-              'CHECKPOINT'          : 'dump'
+              't1'                  : 1
         }
         )
 

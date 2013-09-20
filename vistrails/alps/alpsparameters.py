@@ -158,6 +158,7 @@ class DMFTSelfConsistencyParameters(Parameters):
     """ Parameters for the DMFT self-consistency loop """
     _input_ports = [
         ('NMATSUBARA',[basic.String]),
+        ('SC_WRITE_DELTA',[basic.String]),
         ('TOLERANCE',[basic.String]),
         ('CONVERGED',[basic.String]),
         ('OMEGA_LOOP',[basic.String]),

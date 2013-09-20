@@ -37,7 +37,6 @@ for u in [4.,5.,6.,8.]:
     parms.append(
             { 
               'ANTIFERROMAGNET'         : 0,
-              'CHECKPOINT'              : 'solverdump_U_'+str(u),
               'CONVERGED'               : 0.001,
               'FLAVORS'                 : 2,
               'H'                       : 0,
