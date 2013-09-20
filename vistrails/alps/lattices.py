@@ -43,6 +43,26 @@ class InhomogeneousSimpleCubicLattice(Lattice):
   fixed = {'LATTICE': 'inhomogeneous simple cubic lattice'}
   defaults = {'H': 'W', 'W': 'L'}
 
+class AnisotropicSimpleCubicLattice(Lattice):
+  """ automatically generated lattice: anisotropic simple cubic lattice """
+  _input_ports = [
+    ('L',[(basic.String, '')]),
+    ('W',[(basic.String, '')]),
+    ('H',[(basic.String, '')])
+  ]
+  fixed = {'LATTICE': 'anisotropic simple cubic lattice'}
+  defaults = {'H': 'W', 'W': 'L'}
+
+class InhomogeneousAnisotropicSimpleCubicLattice(Lattice):
+  """ automatically generated lattice: inhomogeneous anisotropic simple cubic lattice """
+  _input_ports = [
+    ('L',[(basic.String, '')]),
+    ('W',[(basic.String, '')]),
+    ('H',[(basic.String, '')])
+  ]
+  fixed = {'LATTICE': 'inhomogeneous anisotropic simple cubic lattice'}
+  defaults = {'H': 'W', 'W': 'L'}
+
 class SquareLattice(Lattice):
   """ automatically generated lattice: square lattice """
   _input_ports = [
@@ -102,6 +122,14 @@ class OpenChainLattice(Lattice):
   ]
   fixed = {'LATTICE': 'open chain lattice'}
 
+class InhomogeneousChainLattice(Lattice):
+  """ automatically generated lattice: inhomogeneous chain lattice """
+  _input_ports = [
+    ('L',[(basic.String, '')])
+  ]
+  fixed = {'LATTICE': 'inhomogeneous chain lattice'}
+
+
 class NNNChainLattice(Lattice):
   """ automatically generated lattice: nnn chain lattice """
   _input_ports = [
@@ -137,6 +165,24 @@ class AnisotropicSquareLattice(Lattice):
     ('W',[(basic.String, '')])
   ]
   fixed = {'LATTICE': 'anisotropic square lattice'}
+  defaults = {'W': 'L'}
+
+class InhomogeneousSquareLattice(Lattice):
+  """ automatically generated lattice: inhomogeneous square lattice """
+  _input_ports = [
+    ('L',[(basic.String, '')]),
+    ('W',[(basic.String, '')])
+  ]
+  fixed = {'LATTICE': 'inhomogeneous square lattice'}
+  defaults = {'W': 'L'}
+
+class InhomogeneousAnisotropicSquareLattice(Lattice):
+  """ automatically generated lattice: inhomogeneous anisotropic square lattice """
+  _input_ports = [
+    ('L',[(basic.String, '')]),
+    ('W',[(basic.String, '')])
+  ]
+  fixed = {'LATTICE': 'inhomogeneous anisotropic square lattice'}
   defaults = {'W': 'L'}
 
 class LadderLattice(Lattice):

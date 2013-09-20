@@ -66,15 +66,23 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                    'LatticeModel': (system.LatticeModel,{}),
 
                    'LatticeParameters': (lattices.Lattice,{}),
-                   'square_lattice': (lattices.SquareLattice,{}),
-                   'simple_cubic_lattice': (lattices.SimpleCubicLattice,{}),
-                   'inhomogeneous_simple_cubic_lattice': (lattices.InhomogeneousSimpleCubicLattice,{}),
-                   'ladder': (lattices.LadderLattice,{}),
-                   'open_ladder': (lattices.OpenLadderLattice,{}),
+                   # 1d
                    'chain_lattice': (lattices.ChainLattice,{}),
                    'open_chain_lattice': (lattices.OpenChainLattice,{}),
 #                   'dimerized_chain_lattice': (lattices.DimerizedChainLattice,{}),
-                   
+                   'imhomogeneous_chain_lattice': (lattices.ImhomogeneousChainLattice,{}),
+                   #2d
+                   'square_lattice': (lattices.SquareLattice,{}),
+                   'anisotropic_square_lattice' : (lattices.AnisotropicSquareLattice,{}),
+                   'inhomogeneous_anisotropic_square_lattice' : (lattices.InhomogeneousAnisotropicSquareLattice,{}),
+                   'ladder': (lattices.LadderLattice,{}),
+                   'open_ladder': (lattices.OpenLadderLattice,{}),
+                   #3d
+                   'simple_cubic_lattice': (lattices.SimpleCubicLattice,{}),
+                   'anisotropic_simple_cubic_lattice': (lattices.AnisotropicSimpleCubicLattice,{}),
+                   'inhomogeneous_simple_cubic_lattice': (lattices.InhomogeneousSimpleCubicLattice,{}),
+                   'inhomogeneous_anisotropic_simple_cubic_lattice': (lattices.InhomogeneousAnisotropicSimpleCubicLattice,{}),                   
+
                    'ModelParameters': (models.Model,{}),
                    'ClassicalSpinModel': (models.ClassicalSpinModel,{}),
                    'SpinModel': (models.SpinModel,{}),
