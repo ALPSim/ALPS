@@ -29,12 +29,13 @@
 
 #include "hyb.hpp"
 #include "hybevaluate.hpp"
-
-#include <alps/ngs/scheduler/mpi_adapter.hpp>
-
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-
+#ifdef ALPS_HAVE_MPI
+#include <alps/ngs/scheduler/mpi_adapter.hpp>
 typedef alps::mpi_adapter<hybridization> sim_type;
+#else
+typedef hybridization sim_type;
+#endif
 
 //stops the simulation if time > end_time or if signals received.
 bool stop_callback(boost::posix_time::ptime const & end_time) {
@@ -66,24 +67,33 @@ int main(int argc, char** argv){
         throw std::invalid_argument("time limit is passed in the parameter file!");
       if(!parms.defined("MAX_TIME")) throw std::runtime_error("parameter MAX_TIME is not defined. How long do you want to run the code for? (in seconds)");
 #endif
+
+#ifndef ALPS_HAVE_MPI
+      global_mpi_rank=0;
+      sim_type s(parms,global_mpi_rank);
+#else
       boost::mpi::communicator c;
       c.barrier();
       global_mpi_rank=c.rank();
-
+      sim_type s(parms, c);
+#endif
       //initialize simulation (set up hybridization/hamiltonian/etc)
-      alps::mpi_adapter<hybridization> s(parms, c);
       //run the simulation
       s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds((int)parms["MAX_TIME"])));
       //on the master: collect MC results and store them in file, then
       //postprocess
-      if (c.rank()==0){
+      if (global_mpi_rank==0){
         alps::results_type<hybridization>::type results = collect_results(s);
         save_results(results, parms, output_file, "/simulation/results");
         master_final_tasks(results, parms, output_file);
+#ifdef ALPS_HAVE_MPI
       } else{ //on any slave: send back results to master.
         collect_results(s);
       }
       c.barrier();
+#else
+      }
+#endif
 #ifdef BUILD_PYTHON_MODULE
     return;
 #else

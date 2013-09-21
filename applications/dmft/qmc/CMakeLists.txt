@@ -42,7 +42,6 @@ IF(ALPS_HAVE_MPI)
        interaction_expansion2/model.cpp)
 ENDIF(ALPS_HAVE_MPI)
 
-IF(ALPS_HAVE_MPI)
   set (DMFT_QMC_HYBRIDIZATION_SOURCE
        hybridization/hybsim.cpp
        hybridization/hyblocal.cpp
@@ -55,7 +54,6 @@ IF(ALPS_HAVE_MPI)
        hybridization/hybupdates.cpp
        hybridization/hybevaluate.cpp
        hybridization/hybmeasurements.cpp)
-ENDIF(ALPS_HAVE_MPI)
 
   set (DMFT_QMC_SOLVERS "")
  
@@ -77,7 +75,6 @@ IF(ALPS_HAVE_MPI)
 ENDIF(ALPS_HAVE_MPI)
 
 IF(CMAKE_VERSION VERSION_GREATER "2.8.8")
-    IF(ALPS_HAVE_MPI)
       #Hybridization Expansion - separate solver
       add_library (hybridization_impl_obj OBJECT ${DMFT_QMC_HYBRIDIZATION_SOURCE})
       set_property(TARGET hybridization_impl_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
@@ -91,7 +88,6 @@ IF(CMAKE_VERSION VERSION_GREATER "2.8.8")
         set_target_properties(cthyb.so PROPERTIES COMPILE_FLAGS "-DBUILD_PYTHON_MODULE")
         target_link_libraries(cthyb.so alps ${ALPS_LIBRARIES} ${ALPS_BLAS_LIBRARY} ${BLAS_LIBRARY} ${ALPS_LAPACK_LIBRARY} ${LAPACK_LIBRARY})
       ENDIF(ALPS_BUILD_PYTHON)
-    ENDIF(ALPS_HAVE_MPI)
 ELSE(CMAKE_VERSION VERSION_GREATER "2.8.8")
     IF(ALPS_HAVE_MPI)
       #Hybridization Expansion - separate solver
