@@ -143,7 +143,7 @@ class ising_parallel_sim : public alps::mcbase_ng {
 
         void copy2right() {
             if (comm.size() == 1)
-            	spins[-1] = spins[local_length-1];
+                spins[-1] = spins[local_length-1];
             else {
                 comm.send((comm.rank() + 1) % comm.size(), 0, spins[local_length-1]);
                 comm.recv((comm.rank() + comm.size() - 1) % comm.size(), 0, spins[-1]);

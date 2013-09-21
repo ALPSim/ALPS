@@ -288,7 +288,7 @@ def compareMixed( testfiles, reffiles, tol_factor='auto', whatlist = None ):
                     diff = np.abs( testobs.y[0].mean - refobs.y[0].mean )
                     compare_obs.append( obsdict(tol, diff, testobs.props) )
 
-		        # Array valued observables
+                # Array valued observables
                 else:
                     tol_list = []
                     diff_list = []
@@ -328,7 +328,7 @@ def compareMixed( testfiles, reffiles, tol_factor='auto', whatlist = None ):
 
 def compareEpsilon( testfiles, reffiles, tol_factor='auto', whatlist = None ):
     """ Compare results from diagonalization applications 
-	
+    
     returns True if test succeeded"""
 
     if tol_factor == 'auto':
@@ -456,7 +456,7 @@ def detectDataType( fname ):
     try:
         data = pyalps.loadEigenstateMeasurements( fname )
     except RuntimeError:
-        pass	
+        pass    
     else:
         return compareEpsilon
 
@@ -483,7 +483,7 @@ def checkProperties( testfile, reffile ):
         del tprop['filename']
         del rprop['filename']
 
-    if cmp(tprop, rprop) == 0:	return True
+    if cmp(tprop, rprop) == 0:    return True
     else:   return False
 
 def compareTest( testinputfile, outputs, tmpdir, tstart, compMethod='auto' ):
@@ -572,19 +572,19 @@ def runTest(testinputfile, outputs='auto', compMethod='auto', pyexec='auto'):
     """ Run the test according to testinputfile and compare
         its output against reference files
 
-	inputs are:
-	-----------
-	script: a script to be run
+    inputs are:
+    -----------
+    script: a script to be run
 
-	testinputfile: file containing reference info
+    testinputfile: file containing reference info
 
-	outputs: - default is 'auto' -> assume file names are identical with reference files
-		   list of script outputs
-		 - glob pattern
-		 - explicit list of files ( order has to be the same as in the .testin.xml file )
+    outputs: - default is 'auto' -> assume file names are identical with reference files
+           list of script outputs
+         - glob pattern
+         - explicit list of files ( order has to be the same as in the .testin.xml file )
 
-	compMethod: - default is 'auto' -> try to detect comparison Method
-		      to be used (e.g. Monte Carlo or epsilon precise data)
+    compMethod: - default is 'auto' -> try to detect comparison Method
+              to be used (e.g. Monte Carlo or epsilon precise data)
     """
     tstart = strftime("%Y-%b-%d %H:%M:%S", gmtime())
     testinputfile = os.path.expandvars(testinputfile)
@@ -694,19 +694,19 @@ def writeTestInputFile( script, inputs, refparms, refFileList, what, dirname='.'
 def createTest( script, inputs=None, outputs=None, prefix=None, refdir='./ref' ):
     """ Create reference data, .testin.xml file and execute_test.py
 
-	inputs are:
-	-----------
-	script: computes results to be tested 
+    inputs are:
+    -----------
+    script: computes results to be tested 
 
     inputs: Optional list of input files if the application(s)
             called in 'script' rely on them and the input files are in the
             same directory as 'script'. If you specified
             relative paths to another directory, it won't work.
 
-	outputs or prefix: outputs of script can either be specified with
-			   a complete list of output files or as a prefix 
+    outputs or prefix: outputs of script can either be specified with
+               a complete list of output files or as a prefix 
 
-	creates a script called apptest_name_of_script.py, which can be used to execute the test
+    creates a script called apptest_name_of_script.py, which can be used to execute the test
     """
  
     if outputs is not None and prefix is not None:
@@ -775,8 +775,8 @@ def createTest( script, inputs=None, outputs=None, prefix=None, refdir='./ref' )
 
     # Write .xml test-input file
     refparms = {
-    	"TESTNAME"	            : scriptname,
-    	"TOLERANCE"	            : "auto",
+        "TESTNAME"                : scriptname,
+        "TOLERANCE"                : "auto",
         "WRITE_RESULTS_TO_FILE" : "yes",
         "SAVE_OUT_IF_FAIL"      : "yes"
     }

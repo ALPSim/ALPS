@@ -177,11 +177,9 @@ directed_worm_algorithm
     std::cout << "\nInitialization stage 2 (Hamiltonian)\t... starting\n"; 
     initialize_hamiltonian(); 
     std::cout << "\t\t... finished.\n"; 
-	 
     std::cout << "\nInitialization stage 3 (Lookups)\t... starting\n"; 
     initialize_lookups(); 
     std::cout << "\t\t... finished.\n"; 
-	 
     std::cout << "\nInitialization stage 4 (Measurements)\t... starting\n"; 
     initialize_measurements(); 
     std::cout << "\t\t... finished.\n"; 

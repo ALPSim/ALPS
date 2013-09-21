@@ -128,21 +128,21 @@ public:
   inline void right_multiply(const std::vector<double> &v1, std::vector<double> &v2) const{ //perform v2[i]=M[ij]v1[j]
     //call the BLAS routine for blas_matrix vector multiplication:
     char trans='T';
-    double alpha=1., beta=0.;	//no need to multiply a constant or add a vector
+    double alpha=1., beta=0.;    //no need to multiply a constant or add a vector
     fortran_int_t inc=1;
     FORTRAN_ID(dgemv)(&trans, &size_, &size_, &alpha, values_, &memory_size_, &(v1[0]), &inc, &beta, &(v2[0]), &inc);
   }
   /*inline void right_multiply(const vector &v1, vector &v2) const{ //perform v2[i]=M[ij]v1[j]
     //call the BLAS routine for blas_matrix vector multiplication:
     char trans='T';
-    double alpha=1., beta=0.;	//no need to multiply a constant or add a vector
+    double alpha=1., beta=0.;    //no need to multiply a constant or add a vector
     fortran_int_t inc=1;
     FORTRAN_ID(dgemv)(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1.values_, &inc, &beta, v2.values_, &inc);
   }
   inline void right_multiply(const rsvector &v1, rsvector &v2) const{ //perform v2[i]=M[ij]v1[j]
     //call the BLAS routine for blas_matrix vector multiplication:
     char trans='T';
-    double alpha=1., beta=0.;	//no need to multiply a constant or add a vector
+    double alpha=1., beta=0.;    //no need to multiply a constant or add a vector
     fortran_int_t inc=1;
     FORTRAN_ID(dgemv)(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1.values_, &inc, &beta, v2.values_, &inc);
   }
