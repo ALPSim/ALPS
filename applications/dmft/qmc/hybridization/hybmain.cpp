@@ -58,8 +58,12 @@ int main(int argc, char** argv){
   alps::mcoptions options(argc, argv);
   if (options.valid) {
     std::string output_file = options.output_file;
+
+#ifdef ALPS_HAVE_MPI
     //boot up MPI environment
     boost::mpi::environment env(argc, argv);
+#endif
+
     //create ALPS parameters from hdf5 parameter file
     alps::parameters_type<hybridization>::type parms(alps::hdf5::archive(options.input_file, alps::hdf5::archive::READ));
     try {
