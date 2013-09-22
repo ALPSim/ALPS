@@ -61,10 +61,10 @@ for(std::size_t i=0; i<ntime();++i)
 //the hybridization function is in imaginary time and always positive between zero and \beta.
 void hybfun::read_hybridization_function(const alps::params &p){
   if(!p.defined("DELTA")) throw(std::invalid_argument(std::string("Parameter DELTA missing, filename for hybridization function not specified.")));
-  std::string fname=p["DELTA"];
-  if(p.defined("DELTA_IN_HDF5") && p["DELTA_IN_HDF5"]){//attempt to read from h5 archive
+  std::string fname=p["DELTA"].cast<std::string>();
+  if(p.defined("DELTA_IN_HDF5") && p["DELTA_IN_HDF5"].cast<bool>()){//attempt to read from h5 archive
     alps::hdf5::archive ar(fname, alps::hdf5::archive::READ);
-    if(p.defined("DMFT_FRAMEWORK") && p["DMFT_FRAMEWORK"]){//read in as green_function
+    if(p.defined("DMFT_FRAMEWORK") && p["DMFT_FRAMEWORK"].cast<bool>()){//read in as green_function
       read_hdf5(ar,"/Delta");
     }
     else{//plain hdf5

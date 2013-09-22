@@ -39,7 +39,7 @@
 #include <cstdlib>
 #include <fstream>
 #ifdef BOOST_MSVC
-#include <io.h>
+#include <io.h>exe
 #endif
 #include "boost/tuple/tuple.hpp"
 #include "alps/parser/parser.h"
@@ -244,9 +244,9 @@ void ExternalSolver::call(std::string const& infile, std::string const& outfile)
 {
   
   // call the external solver program
-  std::string command = exe_.string() + " " + infile + " " + outfile;
-  //std::string command = "\""+exe_.string() + "\" " + infile + " " + outfile;
+  std::string command = "\""+exe_.string() + "\" " + infile + " " + outfile; 
   //the line above won't work if the exe string has spaces in it.
+  //we need to use quotes if it has spaces - where does it not work?
   std::cerr << "Calling external solver " << exe_.string() << " as: "<<command<<std::endl;
   int result = std::system(command.c_str());
   if (result)

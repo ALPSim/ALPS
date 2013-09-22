@@ -36,8 +36,8 @@ interaction_matrix::interaction_matrix(const alps::params &p){
   //if the parameter U_MATRIX is defined: read in the U_MATRIX from file
   if(p.defined("U_MATRIX")){
     if(p.defined("U") && !global_mpi_rank){ std::cout << "Warning::parameter U_MATRIX defined, ignoring parameter U" << std::flush << std::endl; };
-    std::string ufilename=p["U_MATRIX"];
-    if(p.defined("UMATRIX_IN_HDF5") && p["UMATRIX_IN_HDF5"]){//attempt to read from h5 archive
+    std::string ufilename=p["U_MATRIX"].cast<std::string>();
+    if(p.defined("UMATRIX_IN_HDF5") && p["UMATRIX_IN_HDF5"].cast<bool>()){//attempt to read from h5 archive
       alps::hdf5::archive ar(ufilename, alps::hdf5::archive::READ);
       ar>>alps::make_pvp("/Umatrix",val_);
     }
