@@ -62,17 +62,9 @@ ostream& operator << (ostream& os, const simple_hist &h)
   return os;
 }
 
-std::ostream & operator<<(std::ostream &os, const resizeable_matrix &M)
+std::ostream & operator<<(std::ostream &os, const inverse_m_matrix &M)
 {
-  os<<"[ \n";
-  for(unsigned int i=0;i<M.size();++i){
-    os<<"[";
-    for(unsigned int j=0;j<M.size();++j){
-      os<<M(i,j)<<" ";
-    }
-    os<<"] \n";
-  }
-  os<<"] "<<std::endl;
+  os << M.matrix() << std::endl;
   
   std::cout<<"creators: ";
   for(unsigned int i=0;i<M.creators().size();++i){

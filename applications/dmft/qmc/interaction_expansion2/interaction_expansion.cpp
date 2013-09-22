@@ -170,7 +170,7 @@ void InteractionExpansion::initialize_simulation(const alps::params &parms)
   sign=1;
   //set the right dimensions:
   for(spin_t flavor=0;flavor<n_flavors;++flavor)
-    M.push_back(resizeable_matrix(10));
+    M.push_back(inverse_m_matrix());
   vertices.clear();
   pert_hist.clear();
   //initialize ALPS observables

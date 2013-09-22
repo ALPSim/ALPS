@@ -77,7 +77,7 @@ double HalfFillingHubbardInteractionExpansion::try_remove(unsigned int vertex_nr
 {
   //get weight
   double lambda_1 = fastupdate_down(vertex_nr, 0, true);  // true means compute_only_weight
-  double pert_order=M[0].size();
+  double pert_order=num_rows(M[0].matrix());
   //return weight
   return  pert_order/(beta*onsite_U*n_site)*lambda_1*lambda_1;
 }
@@ -159,7 +159,7 @@ double HubbardInteractionExpansion::try_remove(unsigned int vertex_nr)
   //get weight
   double lambda0 = fastupdate_down(vertex_nr, 0, true);  // true means compute_only_weight
   double lambda1 = fastupdate_down(vertex_nr, 1, true);  
-  double pert_order=M[0].size();
+  double pert_order=num_rows(M[0].matrix());
   //return weight
   return  -pert_order/(beta*onsite_U*n_site)*lambda0*lambda1;
 }
@@ -289,24 +289,24 @@ void MultiBandDensityHubbardInteractionExpansion::perform_remove(unsigned int ve
   //take care of vertex list
   for(int i=vertices.size()-1;i>=0;--i){
     //this operator pointed to the last row/column of M[flavor1], which has just been moved to vertex_nr.
-    if(vertices[i].flavor1()==flavor1 && vertices[i].c_dagger_1()==M[flavor1].size()){ 
+    if(vertices[i].flavor1()==flavor1 && vertices[i].c_dagger_1()==num_rows(M[flavor1].matrix())){ 
       vertices[i].c_dagger_1()=operator_nr_1;
       vertices[i].c_1()=operator_nr_1;
       break;
     }
-    if(vertices[i].flavor2()==flavor1 && vertices[i].c_dagger_2()==M[flavor1].size()){
+    if(vertices[i].flavor2()==flavor1 && vertices[i].c_dagger_2()==num_rows(M[flavor1].matrix())){
       vertices[i].c_dagger_2()=operator_nr_1;
       vertices[i].c_2()=operator_nr_1;
       break;
     }
   }
   for(int i=vertices.size()-1;i>=0;--i){
-    if(vertices[i].flavor1()==flavor2 && vertices[i].c_dagger_1()==M[flavor2].size()){
+    if(vertices[i].flavor1()==flavor2 && vertices[i].c_dagger_1()==num_rows(M[flavor2].matrix())){
       vertices[i].c_dagger_1()=operator_nr_2;
       vertices[i].c_1()=operator_nr_2;
       break;
     }
-    if(vertices[i].flavor2()==flavor2 && vertices[i].c_dagger_2()==M[flavor2].size()){
+    if(vertices[i].flavor2()==flavor2 && vertices[i].c_dagger_2()==num_rows(M[flavor2].matrix())){
       vertices[i].c_dagger_2()=operator_nr_2;
       vertices[i].c_2()=operator_nr_2;
       break;

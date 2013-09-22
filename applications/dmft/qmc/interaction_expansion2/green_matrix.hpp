@@ -28,6 +28,7 @@
 *****************************************************************************/
 
 #include<fstream>
+#include <boost/numeric/bindings/blas/level1/swap.hpp>
 
 //this keeps track of values for the bare green's function at times
 //tau_A-tau_i, where i is a vertex and A is a measuring point for the imag

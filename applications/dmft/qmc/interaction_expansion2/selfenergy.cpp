@@ -93,16 +93,17 @@ void InteractionExpansion::compute_W_matsubara()
 void InteractionExpansion::measure_Wk(std::vector<std::vector<std::valarray<std::complex<double> > > >& Wk, 
                                          const unsigned int nfreq) 
 {
-  for (unsigned int z=0; z<n_flavors; ++z) {                     
-    for (unsigned int k=0; k<n_site; k++) {                   
-      for(unsigned int p=0;p<M[z].size();++p){         
+  for (unsigned int z=0; z<n_flavors; ++z) {
+    assert( num_rows(M[z].matrix()) == num_cols(M[z].matrix()) );
+    for (unsigned int k=0; k<n_site; k++) {
+      for(unsigned int p=0;p<num_rows(M[z].matrix());++p){
         M[z].creators()[p].compute_exp(n_matsubara, +1);
-        for(unsigned int q=0;q<M[z].size();++q){       
+        for(unsigned int q=0;q<num_cols(M[z].matrix());++q){
           M[z].annihilators()[q].compute_exp(n_matsubara, -1);
           std::complex<double>* Wk_z_k1_k2 = &Wk[z][k][0];
           const std::complex<double>* exparray_creators = M[z].creators()[p].exp_iomegat();
           const std::complex<double>* exparray_annihilators = M[z].annihilators()[q].exp_iomegat();
-          std::complex<double> tmp = M[z](p,q);
+          std::complex<double> tmp = M[z].matrix()(p,q);
 #ifndef SSE
 #pragma ivdep
           for(unsigned int o=0; o<nfreq; ++o){      
@@ -153,18 +154,18 @@ void InteractionExpansion::measure_densities()
   }
   double tau = beta*random();
   for (unsigned int z=0; z<n_flavors; ++z) {                 
-    std::vector<double> g0_tauj(M[z].size());
-    std::vector<double> M_g0_tauj(M[z].size());
-    std::vector<double> g0_taui(M[z].size());
+    alps::numeric::vector<double> g0_tauj(num_rows(M[z].matrix()));
+    alps::numeric::vector<double> M_g0_tauj(num_rows(M[z].matrix()));
+    alps::numeric::vector<double> g0_taui(num_rows(M[z].matrix()));
     for (unsigned int s=0;s<n_site;++s) {             
-      for (unsigned int j=0;j<M[z].size();++j) 
+      for (unsigned int j=0;j<num_rows(M[z].matrix());++j) 
         g0_tauj[j] = green0_spline(M[z].creators()[j].t()-tau, z, M[z].creators()[j].s(), s);
-      for (unsigned int i=0;i<M[z].size();++i) 
+      for (unsigned int i=0;i<num_rows(M[z].matrix());++i) 
         g0_taui[i] = green0_spline(tau-M[z].annihilators()[i].t(),z, s, M[z].annihilators()[i].s());
-      if (M[z].size()>0)
-        M[z].right_multiply(&(g0_tauj[0]), &(M_g0_tauj[0]));
+      if (num_rows(M[z].matrix())>0)
+          gemv(M[z].matrix(),g0_tauj,M_g0_tauj);
       dens[z][s] += green0_spline(0,z,s,s);
-      for (unsigned int j=0;j<M[z].size();++j) 
+      for (unsigned int j=0;j<num_rows(M[z].matrix());++j) 
         dens[z][s] -= g0_taui[j]*M_g0_tauj[j]; 
     }
   }
@@ -221,19 +222,20 @@ void InteractionExpansion::compute_W_itime()
   for(int i=0; i<ntaupoints;++i) 
     tau_2[i]=beta*random();
   for(unsigned int z=0;z<n_flavors;++z){                  //loop over flavor
-    std::vector<double> g0_tauj(M[z].size()*ntaupoints);
-    std::vector<double> M_g0_tauj(M[z].size()*ntaupoints);
-    std::vector<double> g0_taui(M[z].size());
+    assert( num_rows(M[z].matrix()) == num_cols(M[z].matrix()) );
+    alps::numeric::matrix<double> g0_tauj(num_cols(M[z].matrix()),ntaupoints);
+    alps::numeric::matrix<double> M_g0_tauj(num_rows(M[z].matrix()),ntaupoints);
+    alps::numeric::vector<double> g0_taui(num_rows(M[z].matrix()));
     for(unsigned int s2=0;s2<n_site;++s2){             //site loop - second site.
       for(int j=0;j<ntaupoints;++j) { 
-        for(unsigned int i=0;i<M[z].size();++i){ //G0_{s_p s_2}(tau_p - tau_2) where we set t2=0.
-          g0_tauj[i*ntaupoints+j]=green0_spline(M[z].creators()[i].t()-tau_2[j], z, M[z].creators()[i].s(), s2);
+        for(unsigned int i=0;i<num_cols(M[z].matrix());++i){ //G0_{s_p s_2}(tau_p - tau_2) where we set t2=0.
+            g0_tauj(i,j) = green0_spline(M[z].creators()[i].t()-tau_2[j], z, M[z].creators()[i].s(), s2);
         }
       }
-      if (M[z].size()>0)
-        M[z].matrix_right_multiply(&(g0_tauj[0]), &(M_g0_tauj[0]), ntaupoints);
+      if (num_rows(M[z].matrix())>0)
+          gemm(M[z].matrix(), g0_tauj, M_g0_tauj);
       for(int j=0;j<ntaupoints;++j) {
-        for(unsigned int p=0;p<M[z].size();++p){       //operator one
+        for(unsigned int p=0;p<num_rows(M[z].matrix());++p){       //operator one
           double sgn=1;
           double delta_tau=M[z].creators()[p].t()-tau_2[j];
           if(delta_tau<0){ 
@@ -242,15 +244,15 @@ void InteractionExpansion::compute_W_itime()
           }
           int bin=(int)(delta_tau/beta*n_self+0.5);
           site_t site_p=M[z].creators()[p].s();
-          W_z_i_j[z][site_p][s2][bin]+=M_g0_tauj[p*ntaupoints+j]*sgn;
+          W_z_i_j[z][site_p][s2][bin] += M_g0_tauj(p,j)*sgn;
         }
       }
-      for(unsigned int i=0;i<M[z].size();++i){
+      for(unsigned int i=0;i<num_rows(M[z].matrix());++i){
         g0_taui[i]=green0_spline(tau_2[0]-M[z].annihilators()[i].t(),z, s2, M[z].annihilators()[i].s());
       }
       density[z][s2]=green0_spline(0,z,s2,s2);
-      for(unsigned int j=0;j<M[z].size();++j){
-        density[z][s2]-= g0_taui[j]*M_g0_tauj[j*ntaupoints]  ; 
+      for(unsigned int i=0;i<num_rows(M[z].matrix());++i){
+        density[z][s2]-= g0_taui[i]*M_g0_tauj(i,0);
       }
     }
   }

@@ -141,7 +141,8 @@ void InteractionExpansion::measure_observables(void)
     compute_W_itime();
   std::valarray<double> pert_order(n_flavors);
   for(unsigned int i=0;i<n_flavors;++i) { 
-    pert_order[i]=M[i].size(); 
+      assert(num_rows(M[i].matrix()) == num_cols(M[i].matrix()));
+    pert_order[i]=num_rows(M[i].matrix());
   }
   measurements["PertOrder"] << pert_order;
 }

@@ -28,6 +28,7 @@
 
 /* $Id$ */
 
+#include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
 #include <alps/model/hamiltonian_matrix.hpp>

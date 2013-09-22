@@ -88,9 +88,9 @@ void scale(const double alpha, double *v, const fortran_int_t size){
 
 ///Every now and then we have to recreate M from scratch to avoid roundoff
 ///error. This is done by iserting the vertices starting from zero.
-void InteractionExpansion::reset_perturbation_series(void)
+void InteractionExpansion::reset_perturbation_series()
 {
-  std::vector<resizeable_matrix> M2(M); //make a copy of M
+  std::vector<inverse_m_matrix> M2(M); //make a copy of M
   vertex_array vertices_backup;
   for(unsigned int i=0;i<vertices.size();++i){
     vertices_backup.push_back(vertices[i]);
@@ -98,7 +98,7 @@ void InteractionExpansion::reset_perturbation_series(void)
   vertices.clear();
   sign=1;
   for(spin_t z=0;z<n_flavors;++z){
-    M[z].resize(0);
+    resize(M[z].matrix(),0,0);
   }
   green_matsubara = bare_green_matsubara;
   green_itime     = bare_green_itime;
@@ -109,9 +109,9 @@ void InteractionExpansion::reset_perturbation_series(void)
   }
   for(unsigned int z=0;z<M2.size();++z){
     double max_diff=0;
-    for(unsigned int i=0;i<M2[z].size();++i){
-      for(unsigned int j=0;j<M2[z].size();++j){
-        double diff=M[z](i,j)-M2[z](i,j);
+    for(unsigned int j=0;j<num_cols(M2[z].matrix());++j){
+      for(unsigned int i=0;i<num_rows(M2[z].matrix());++i){
+        double diff=M[z].matrix()(i,j)-M2[z].matrix()(i,j);
         if(std::abs(diff)>max_diff) max_diff=std::abs(diff);
       }
     }

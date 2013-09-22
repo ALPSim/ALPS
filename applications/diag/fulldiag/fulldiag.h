@@ -36,9 +36,10 @@
 #include "measurementplots.h"
 
 #include <alps/plot.h>
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/matrix_proxy.hpp>
-#include <boost/numeric/ublas/matrix_sparse.hpp>
+
+#include <alps/numeric/matrix.hpp>
+#include <alps/numeric/matrix/ublas_sparse_functions.hpp>
+
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/bindings/ublas.hpp>
 #include <boost/numeric/bindings/upper.hpp>
@@ -62,10 +63,10 @@ struct pick_real_complex<std::complex<T> >
 };
 
 template <class T>
-class FullDiagMatrix : public DiagMatrix<T,boost::numeric::ublas::matrix<T,boost::numeric::ublas::column_major> >
+class FullDiagMatrix : public DiagMatrix<T,alps::numeric::matrix<T> >
 {
 public:
-  typedef DiagMatrix<T,boost::numeric::ublas::matrix<T,boost::numeric::ublas::column_major> > super_type;
+  typedef DiagMatrix<T,alps::numeric::matrix<T> > super_type;
   typedef T value_type;
   typedef typename super_type::magnitude_type magnitude_type;
   typedef typename super_type::matrix_type matrix_type;
@@ -488,11 +489,10 @@ void FullDiagMatrix<T>::write_xml_body(alps::oxstream& out, const boost::filesys
 template <class T>
 std::vector<T> FullDiagMatrix<T>::calculate(operator_matrix_type const& m) const
 {
-  using namespace boost::numeric::ublas;
   std::vector<value_type> av;
-  for (unsigned i=0;i<this->matrix().size1();++i) {
-    const matrix_column<matrix_type const> v(this->matrix(),i);
-    av.push_back(inner_prod(boost::numeric::ublas::conj(v),prod(m,v)));
+  for (unsigned i=0; i < num_cols(this->matrix()); ++i) {
+    alps::numeric::column_view<matrix_type const> const v(this->matrix(),i);
+    av.push_back(scalar_product(conj(v),m*v));
   }
   return av;
 }
@@ -501,20 +501,20 @@ std::vector<T> FullDiagMatrix<T>::calculate(operator_matrix_type const& m) const
 template <class T>
 void FullDiagMatrix<T>::print_eigenvectors(std::ostream& os) const
 {
-  using namespace boost::numeric::ublas;
-  for (unsigned i=0;i<this->matrix().size1();++i)
-    os << "Eigenvector# " << i << ":\n" << matrix_column<matrix_type const>(this->matrix(),i) << "\n";
+  for (unsigned i=0;i<num_cols(this->matrix());++i)
+    os << "Eigenvector# " << i << ":\n" << alps::numeric::column_view<matrix_type const>(this->matrix(),i) << "\n";
 }
 
 template <class T>
 void FullDiagMatrix<T>::do_subspace()
 {
+  using std::copy;
   this->build();
   if (this->dimension()) {
     mag_vector_type eigenvalues(this->dimension());
     pick_real_complex<T>::heev(this->calc_vectors() ? 'V' : 'N',boost::numeric::bindings::upper(this->matrix()),eigenvalues);
     this->perform_measurements();
-    std::copy(eigenvalues.begin(),eigenvalues.end(),std::back_inserter(this->measurements_.rbegin()->average_values["Energy"]));
+    copy(eigenvalues.begin(),eigenvalues.end(),std::back_inserter(this->measurements_.rbegin()->average_values["Energy"]));
     this->eigenvalues_.push_back(eigenvalues);
   }
 }

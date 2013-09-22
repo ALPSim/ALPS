@@ -41,9 +41,9 @@
 #include "alps_solver.h"
 #include "fouriertransform.h"
 #include "U_matrix.h"
-#include "resizeable_matrix.hpp"
 #include "operator.hpp"
 #include "green_matrix.hpp"
+#include <alps/numeric/matrix.hpp>
 
 
 /*types*/
@@ -174,6 +174,23 @@ private:
 } vertex;
 
 
+class inverse_m_matrix
+{
+public:
+  alps::numeric::matrix<double> &matrix() { return matrix_;}
+  alps::numeric::matrix<double> const &matrix() const { return matrix_;}
+  std::vector<creator> &creators(){ return creators_;}
+  const std::vector<creator> &creators() const{ return creators_;}
+  std::vector<annihilator> &annihilators(){ return annihilators_;}
+  const std::vector<annihilator> &annihilators()const{ return annihilators_;}
+  std::vector<double> &alpha(){ return alpha_;}
+  const std::vector<double> &alpha() const{ return alpha_;}
+private:
+  alps::numeric::matrix<double> matrix_;
+  std::vector<creator> creators_;         //an array of creation operators c_dagger corresponding to the row of the matrix
+  std::vector<annihilator> annihilators_; //an array of to annihilation operators c corresponding to the column of the matrix
+  std::vector<double> alpha_;             //an array of doubles corresponding to the alphas of Rubtsov for the c, cdaggers at the same index.
+};
 
 /*class InteractionExpansionSim: public alps::scheduler::MCSimulation, public alps::MatsubaraImpurityTask
 {
@@ -296,7 +313,7 @@ protected:
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   
   vertex_array vertices;
-  std::vector<resizeable_matrix> M;  // resizeable_matrix.cpp
+  std::vector<inverse_m_matrix> M;
     
   double weight;
   double sign;
