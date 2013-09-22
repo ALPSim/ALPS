@@ -32,7 +32,7 @@ import sys, os, subprocess, glob, platform
 vistrailspath = '/root/gamperl/git/vistrails/vistrails/vistrails.py'
 vtapp = [sys.executable, vistrailspath]
 if platform.system()=='Windows':
-  vtapp = [sys.executable, 'C:\\Program Files\\VisTrails\\vistrails\\vistrails.py']
+  vtapp = [sys.executable, 'C:\\Program Files\\VisTrails\\vistrails\\run.py']
 
 
 if platform.system()=='Darwin':
@@ -45,7 +45,7 @@ vtfiles.sort()
 # Extract workflow tags from vt files
 workflows = []
 for vt in vtfiles:
-    cmd = ['unzip', '-c', vt, 'vistrail']
+    cmd = ['C:\\Program Files\\VisTrails\\unzip.exe', '-c', vt, 'vistrail']
     xmltrail = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
     for line in xmltrail.splitlines():
         if line.find('key="__tag__"') == -1:
