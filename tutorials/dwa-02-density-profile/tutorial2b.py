@@ -33,7 +33,7 @@ import pyalps
 parms = [
   {
     'LATTICE' : 'inhomogeneous simple cubic lattice' ,
-    'L'       : 80 ,
+    'L'       : 60 ,
 
     'MODEL'   : 'boson Hubbard' ,
     'Nmax'    : 20 ,
