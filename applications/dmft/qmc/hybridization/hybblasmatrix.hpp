@@ -30,6 +30,7 @@
 
 #include <boost/numeric/bindings/blas/level1/copy.hpp>
 #include <boost/numeric/bindings/blas/level1/swap.hpp>
+#include <boost/numeric/bindings/blas/level1/iamax.hpp>
 #include <boost/numeric/bindings/blas/level2/ger.hpp>
 #include <boost/numeric/bindings/blas/level2/gemv.hpp>
 #include <boost/numeric/bindings/lapack/driver/gesv.hpp>
@@ -289,10 +290,12 @@ public:
     fortran_int_t rowmax_index, max_index, inc=1;
     if(size_<1) return 0;
     for(int i=0;i<size_;++i){
-      rowmax_index=idamax_(&size_, values_+i*memory_size_,&inc);
+//      rowmax_index=idamax_(&size_, values_+i*memory_size_,&inc);
+      rowmax_index = boost::numeric::bindings::blas::detail::iamax(size_, values_+i*memory_size_, inc);
       rowmax[i]=*(values_+i*memory_size_+rowmax_index-1); //fortran convention: start counting from one
     }
-    max_index=idamax_(&size_, rowmax ,&inc);
+//    max_index=idamax_(&size_, rowmax ,&inc);
+    max_index = boost::numeric::bindings::blas::detail::iamax(size_, rowmax , inc);
     delete [] rowmax;
     return std::abs(rowmax[max_index-1]);
   }
