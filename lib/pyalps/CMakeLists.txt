@@ -23,8 +23,8 @@ if (ALPS_HAVE_PYTHON)
   set (MAXENT_SOURCES ../../tool/maxent.cpp ../../tool/maxent_helper.cpp
                       ../../tool/maxent_simulation.cpp ../../tool/maxent_parms.cpp)
 
-
-
+  set (CTHYB_SOURCES ../../applications/dmft/qmc/hybridization/hybmain.cpp)
+  set (CTINT_SOURCES ../../applications/dmft/qmc/interaction_expansion2/main.cpp)
 
   set(PYNGSPARAMS_SOURCES ../../src/alps/ngs/python/params.cpp)
   set(PYNGSHDF5_SOURCES ../../src/alps/ngs/python/hdf5.cpp)
@@ -38,11 +38,15 @@ if (ALPS_HAVE_PYTHON)
 
 
   if(LAPACK_FOUND)
-    set(PYALPS_SOURCES ${PYALPS_SOURCES} maxent_c dwa_c)
+    set(PYALPS_SOURCES ${PYALPS_SOURCES} maxent_c dwa_c cthyb ctint)
     python_add_module(maxent_c ${MAXENT_SOURCES})
+    python_add_module(cthyb ${CTHYB_SOURCES})
+    python_add_module(ctint ${CTINT_SOURCES})
     python_add_module(dwa_c ../../applications/qmc/dwa/python/dwa.cpp)
     include_directories(../../applications/qmc/dwa)
+    include_directories(../../applications/dmft/qmc)
     set_target_properties(maxent_c PROPERTIES COMPILE_FLAGS "-DBUILD_PYTHON_MODULE") 
+    set_target_properties(cthyb PROPERTIES COMPILE_FLAGS "-DBUILD_PYTHON_MODULE") 
  endif(LAPACK_FOUND)
 
   python_add_module(pyalea_c ${PYALEA_SOURCES})
@@ -67,8 +71,18 @@ if (ALPS_HAVE_PYTHON)
       endif(WIN32 AND NOT UNIX)
     endif(BUILD_SHARED_LIBS)
     target_link_libraries(${name} alps ${LINK_LIBRARIES} ${BLAS_LIBRARY} ${LAPACK_LIBRARY} ${LAPACK_LINKER_FLAGS})
-  ENDFOREACH(name)
 
+    if(${name} MATCHES cthyb)
+      link_directories(${CMAKE_BINARY_DIR}/applications/dmft/qmc)
+      target_link_libraries(${name} hybridization_impl alps ${LINK_LIBRARIES} ${BLAS_LIBRARY} ${LAPACK_LIBRARY} ${LAPACK_LINKER_FLAGS})
+    endif(${name} MATCHES cthyb)
+
+    if(${name} MATCHES ctint)
+      link_directories(${CMAKE_BINARY_DIR}/applications/dmft/qmc)
+      target_link_libraries(${name} interaction2_impl alps ${LINK_LIBRARIES} ${BLAS_LIBRARY} ${LAPACK_LIBRARY} ${LAPACK_LINKER_FLAGS})
+    endif(${name} MATCHES ctint)
+
+  ENDFOREACH(name)
 
   #######################################################################
   # install
