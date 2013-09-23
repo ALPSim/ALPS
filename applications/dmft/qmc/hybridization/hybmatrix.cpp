@@ -28,6 +28,9 @@
  *****************************************************************************/
 
 #include "hybmatrix.hpp"
+#include <boost/numeric/bindings/blas/level2/gemv.hpp>
+#include <boost/numeric/bindings/blas/level2/ger.hpp>
+#include <boost/numeric/bindings/blas/level1/dot.hpp>
 
 //this was changed with update 51!
 //nomenclature: the c        is at the segment end  , so the time for c        is new_segment->t_end_
@@ -64,8 +67,10 @@ double hybmatrix::hyb_weight_change_insert(const segment &new_segment, int orbit
   fortran_int_t s=size();
   if(s>0){
     right_multiply(Q, PinvQ); //dgemv
-    fortran_int_t inc=1;
-    S_tilde_inv-=FORTRAN_ID(ddot)(&s, &(R[0]),&inc,&(PinvQ[0]),&inc);
+//    fortran_int_t inc=1 ;
+//    S_tilde_inv-=FORTRAN_ID(ddot)(&s, &(R[0]),&inc,&(PinvQ[0]),&inc);
+    S_tilde_inv -= boost::numeric::bindings::blas::detail::dot(s, &(R[0]), 1, &(PinvQ[0]), 1);
+
   }
   //a -1 from the anticommutator from the wraparound segment
   if(new_segment.t_end_<new_segment.t_start_){
@@ -89,14 +94,22 @@ void hybmatrix::insert_segment(const segment &new_segment, int orbital){
   
    fortran_int_t sm1=size()-1;
   if(sm1>0){ //this is exactly the content of the loops above, in dger/dgemv blas calls.
-    char trans='T', notrans='N';
+//    char trans='T', notrans='N';
     double alpha=-1./S_tilde_inv, beta=0.;
-    fortran_int_t inc=1;
+//    fortran_int_t inc=1;
     fortran_int_t ms=memory_size();
-    FORTRAN_ID(dgemv)(&  trans, &sm1, &sm1, &alpha, &(operator()(0,0)), &ms, &(Q[0]), &inc, &beta, &(operator()(0,last)), &ms);
-    FORTRAN_ID(dgemv)(&notrans, &sm1, &sm1, &alpha, &(operator()(0,0)), &ms, &(R[0]), &inc, &beta, &(operator()(last,0)), &inc);
+//    FORTRAN_ID(dgemv)(&  trans, &sm1, &sm1, &alpha, &(operator()(0,0)), &ms, &(Q[0]), &inc, &beta, &(operator()(0,last)), &ms);
+//    FORTRAN_ID(dgemv)(&notrans, &sm1, &sm1, &alpha, &(operator()(0,0)), &ms, &(R[0]), &inc, &beta, &(operator()(last,0)), &inc);
+    boost::numeric::bindings::blas::detail::gemv( boost::numeric::bindings::tag::column_major()
+            , boost::numeric::bindings::tag::transpose()
+            , sm1, sm1, alpha, &(operator()(0,0)), ms, &(Q[0]), 1, beta, &(operator()(0,last)), ms);
+    boost::numeric::bindings::blas::detail::gemv( boost::numeric::bindings::tag::column_major()
+            , boost::numeric::bindings::tag::no_transpose()
+            , sm1, sm1, alpha, &(operator()(0,0)), ms, &(R[0]), 1, beta, &(operator()(last,0)), 1);
     alpha=S_tilde_inv;
-    FORTRAN_ID(dger)(&sm1, &sm1, &alpha,&(operator()(last,0)), &inc, &(operator()(0,last)), &ms, &(operator()(0,0)), &ms);
+//    FORTRAN_ID(dger)(&sm1, &sm1, &alpha,&(operator()(last,0)), &inc, &(operator()(0,last)), &ms, &(operator()(0,0)), &ms);
+    boost::numeric::bindings::blas::detail::ger( boost::numeric::bindings::tag::column_major()
+            , sm1, sm1, alpha, &(operator()(last,0)), 1, &(operator()(0,last)), ms, &(operator()(0,0)), ms);
   }
   
   // add the new segment times:
@@ -165,9 +178,11 @@ void hybmatrix::remove_segment(const segment &new_segment, int orbital){
   fortran_int_t sm1=size()-1;
   if(sm1>0){ //this is exactly the content of the loops above, in dger/dgemv blas calls.
     double alpha=-1./operator()(last,last);
-    fortran_int_t inc=1;
+//    fortran_int_t inc=1;
     fortran_int_t ms=memory_size();
-    FORTRAN_ID(dger)(&sm1, &sm1, &alpha,&(operator()(last,0)), &inc, &(operator()(0,last)), &ms, &(operator()(0,0)), &ms);
+//    FORTRAN_ID(dger)(&sm1, &sm1, &alpha,&(operator()(last,0)), &inc, &(operator()(0,last)), &ms, &(operator()(0,0)), &ms);
+    boost::numeric::bindings::blas::detail::ger(boost::numeric::bindings::tag::column_major()
+            , sm1, sm1, alpha, &(operator()(last,0)), 1, &(operator()(0,last)), ms, &(operator()(0,0)), ms);
   }
   
   

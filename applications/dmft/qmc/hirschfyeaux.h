@@ -41,7 +41,7 @@
 
 #include <alps/config.h> // needed to set up correct bindings
 #include <boost/numeric/bindings/ublas.hpp>
-#include <boost/numeric/bindings/blas.hpp>
+#include <boost/numeric/bindings/blas/level2/ger.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
 #include <stack>
@@ -121,9 +121,13 @@ void update_single_spin(RNG & rng, dense_matrix & Green_up, dense_matrix & Green
       uj_up[i]=Green_up  (site, i);
       uj_dn[i]=Green_down(site, i);
     }
-    fortran_int_t one=1;
-    FORTRAN_ID(dger)(&N,&N,&alpha_up,vi_up,&one,uj_up,&one,&(Green_up  (0,0)),&N);
-    FORTRAN_ID(dger)(&N,&N,&alpha_dn,vi_dn,&one,uj_dn,&one,&(Green_down(0,0)),&N);
+//    fortran_int_t one=1;
+//    FORTRAN_ID(dger)(&N,&N,&alpha_up,vi_up,&one,uj_up,&one,&(Green_up  (0,0)),&N);
+//    FORTRAN_ID(dger)(&N,&N,&alpha_dn,vi_dn,&one,uj_dn,&one,&(Green_down(0,0)),&N);
+    boost::numeric::bindings::blas::detail::ger(boost::numeric::bindings::tag::column_major()
+            , N, N, alpha_up, vi_up, 1, uj_up, 1, &(Green_up(0,0)),   N);
+    boost::numeric::bindings::blas::detail::ger(boost::numeric::bindings::tag::column_major()
+            , N, N, alpha_dn, vi_dn, 1, uj_dn, 1, &(Green_down(0,0)), N);
     // update spin
     spins[site] = -spins[site];
     delete[] vi_up;
