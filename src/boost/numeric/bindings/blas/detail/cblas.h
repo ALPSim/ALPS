@@ -31,6 +31,10 @@ extern "C" {
 //
 // Default CBLAS include
 //
+#elif BOOST_NUMERIC_BINDINGS_BLAS_VECLIB
+
+#include <Accelerate/Accelerate.h>
+
 #else
 
 extern "C" {
