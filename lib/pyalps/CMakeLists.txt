@@ -47,6 +47,7 @@ if (ALPS_HAVE_PYTHON)
     include_directories(../../applications/dmft/qmc)
     set_target_properties(maxent_c PROPERTIES COMPILE_FLAGS "-DBUILD_PYTHON_MODULE") 
     set_target_properties(cthyb PROPERTIES COMPILE_FLAGS "-DBUILD_PYTHON_MODULE") 
+    set_target_properties(ctint PROPERTIES COMPILE_FLAGS "-DBUILD_PYTHON_MODULE") 
  endif(LAPACK_FOUND)
 
   python_add_module(pyalea_c ${PYALEA_SOURCES})

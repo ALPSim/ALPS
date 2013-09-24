@@ -69,7 +69,7 @@ IF(ALPS_HAVE_MPI)
     set_property(TARGET hybridization_impl_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
     add_library (hybridization_impl STATIC $<TARGET_OBJECTS:hybridization_impl_obj>)
     #Interaction Expansion - separate solver
-    add_library (interaction2_impl_obj OBJECT ${DMFT_QMC_HYBRIDIZATION_SOURCE})
+    add_library (interaction2_impl_obj OBJECT ${DMFT_QMC_INTERACTION_EXPANSION2_SOURCE})
     set_property(TARGET interaction2_impl_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
     add_library (interaction2_impl STATIC $<TARGET_OBJECTS:interaction2_impl_obj>)
   ELSE(CMAKE_VERSION VERSION_GREATER "2.8.8")
