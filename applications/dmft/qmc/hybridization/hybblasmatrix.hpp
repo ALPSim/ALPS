@@ -27,20 +27,8 @@
  *****************************************************************************/
 #ifndef HYB_BLAS_MATRIX
 #define HYB_BLAS_MATRIX
-
-#include <boost/numeric/bindings/blas/level1/copy.hpp>
-#include <boost/numeric/bindings/blas/level1/swap.hpp>
-#include <boost/numeric/bindings/blas/level1/iamax.hpp>
-#include <boost/numeric/bindings/blas/level2/ger.hpp>
-#include <boost/numeric/bindings/blas/level2/gemv.hpp>
-#include <boost/numeric/bindings/lapack/driver/gesv.hpp>
-
-
-#ifndef BIND_FORTRAN_INTEGER_8
-typedef int fortran_int_t;
-#else
-typedef std::ptrdiff_t fortran_int_t;
-#endif
+#include <boost/numeric/bindings/blas.hpp>
+#include <boost/numeric/bindings/lapack.hpp>
 
 //This is the resizable square matrix class. Whoever adapted the version in ALPS f*ed it up badly: this matrix needs to have a memory size DIFFERENT from the current size, or we'll be asking for memory all the time!
 
@@ -86,10 +74,9 @@ public:
     add_outer_product(&v1(0), &v2(0), alpha);
   }*/
   inline void add_outer_product(fortran_int_t s, const double *v1, const double *v2, double alpha=1.){
-//    fortran_int_t inc=1;
+    fortran_int_t inc=1;
     if(s>1){
-//      FORTRAN_ID(dger)(&s, &s, &alpha,v2, &inc, v1, &inc, values_, &memory_size_);  
-      boost::numeric::bindings::blas::detail::ger(boost::numeric::bindings::tag::column_major(), s, s, alpha, v2, 1, v1, 1, values_, memory_size_);
+      FORTRAN_ID(dger)(&s, &s, &alpha,v2, &inc, v1, &inc, values_, &memory_size_); 
     }else if(1==1){
       values_[0]+=alpha*v1[0]*v2[0];
     }else
@@ -104,24 +91,20 @@ public:
     operator()(oldsize, oldsize)=Mkk;
   }*/
   inline void getrow(fortran_int_t k, double *row) const{
-//    fortran_int_t one=1 ;
-//     dcopy_(&size_, &(values_[k*memory_size_]), &one, row, &one);
-    boost::numeric::bindings::blas::detail::copy(size_, &(values_[k*memory_size_]), 1, row, 1);
+    fortran_int_t one=1;
+    dcopy_(&size_, &(values_[k*memory_size_]), &one, row, &one);
   }
   inline void getcol(fortran_int_t k, double *col) const{
-//    fortran_int_t one=1;
-//    dcopy_(&size_, &(values_[k]), &memory_size_, col, &one);
-    boost::numeric::bindings::blas::detail::copy(size_, &(values_[k]), memory_size_, col, 1);
+    fortran_int_t one=1;
+    dcopy_(&size_, &(values_[k]), &memory_size_, col, &one);
   }
   inline void setrow(fortran_int_t k, const double *row){
-//    fortran_int_t one=1;
-//    dcopy_(&size_, row, &one, &(values_[k*memory_size_]), &one);
-    boost::numeric::bindings::blas::detail::copy(size_, row, 1, &(values_[k*memory_size_]), 1);
+    fortran_int_t one=1;
+    dcopy_(&size_, row, &one, &(values_[k*memory_size_]), &one);
   }
   inline void setcol(fortran_int_t k, const double *col){
-//    fortran_int_t one=1;
-//    dcopy_(&size_, col, &one, &(values_[k]), &memory_size_);
-    boost::numeric::bindings::blas::detail::copy(size_, col, 1, &(values_[k]), memory_size_);
+    fortran_int_t one=1;
+    dcopy_(&size_, col, &one, &(values_[k]), &memory_size_);
   }
   //delete last column
   inline void remove_row_column_last(){
@@ -135,26 +118,19 @@ public:
   }
   inline void swap_column(fortran_int_t c1, fortran_int_t c2){
     if(c1==c2) return;
-//    FORTRAN_ID(dswap)(&size_, &(values_[c1]), &memory_size_, &(values_[c2]), &memory_size_);
-    boost::numeric::bindings::blas::detail::swap(size_, &(values_[c1]), memory_size_, &(values_[c2]), memory_size_);
+    FORTRAN_ID(dswap)(&size_, &(values_[c1]), &memory_size_, &(values_[c2]), &memory_size_);
   }
   inline void swap_row(fortran_int_t c1, fortran_int_t c2){
     if(c1==c2) return;
-//    fortran_int_t one=1;
-//    FORTRAN_ID(dswap)(&size_, &(values_[c1*memory_size_]), &one, &(values_[c2*memory_size_]), &one);
-    boost::numeric::bindings::blas::detail::swap(size_, &(values_[c1*memory_size_]), 1, &(values_[c2*memory_size_]), 1);
+    fortran_int_t one=1;
+    FORTRAN_ID(dswap)(&size_, &(values_[c1*memory_size_]), &one, &(values_[c2*memory_size_]), &one);
   }
   inline void right_multiply(const std::vector<double> &v1, std::vector<double> &v2) const{ //perform v2[i]=M[ij]v1[j]
     //call the BLAS routine for blas_matrix vector multiplication:
-//    char trans='T';
-//    double alpha=1., beta=0.;    //no need to multiply a constant or add a vector
-//    fortran_int_t inc=1;
-//    FORTRAN_ID(dgemv)(&trans, &size_, &size_, &alpha, values_, &memory_size_, &(v1[0]), &inc, &beta, &(v2[0]), &inc);
-    boost::numeric::bindings::blas::detail::gemv(
-              boost::numeric::bindings::tag::column_major()
-            , boost::numeric::bindings::tag::transpose()
-            , size_, size_, 1.0, values_, memory_size_, &(v1[0]), 1, 0.0, &(v2[0]), 1
-    );
+    char trans='T';
+    double alpha=1., beta=0.;    //no need to multiply a constant or add a vector
+    fortran_int_t inc=1;
+    FORTRAN_ID(dgemv)(&trans, &size_, &size_, &alpha, values_, &memory_size_, &(v1[0]), &inc, &beta, &(v2[0]), &inc);
   }
   /*inline void right_multiply(const vector &v1, vector &v2) const{ //perform v2[i]=M[ij]v1[j]
     //call the BLAS routine for blas_matrix vector multiplication:
@@ -205,9 +181,7 @@ public:
     for(fortran_int_t i=0;i<size();++i){ for (fortran_int_t j=0;j<size();++j){ det_blas_matrix[i*size()+j]=operator()(i,j);}}
     std::vector<double> identity(size()*size(), 0.); for(fortran_int_t i=0;i<size();++i){ identity[i*size()+i]=1.; }
     //LU factorization
-//    FORTRAN_ID(dgesv)(&size_, &size_, &(det_blas_matrix[0]), &size_, &(ipiv[0]), &(identity[0]), &size_,&info);
-    info = boost::numeric::bindings::lapack::detail::gesv(boost::numeric::bindings::tag::column_major()
-        , size_, size_, &(det_blas_matrix[0]), size_, &(ipiv[0]), &(identity[0]), size_);
+    FORTRAN_ID(dgesv)(&size_, &size_, &(det_blas_matrix[0]), &size_, &(ipiv[0]), &(identity[0]), &size_,&info);
     if(info < 0) {
       std::cout << "lapack error in solver" << std::endl;
       std::cout << "INFO:" << info << std::endl;
@@ -290,12 +264,10 @@ public:
     fortran_int_t rowmax_index, max_index, inc=1;
     if(size_<1) return 0;
     for(int i=0;i<size_;++i){
-//      rowmax_index=idamax_(&size_, values_+i*memory_size_,&inc);
-      rowmax_index = boost::numeric::bindings::blas::detail::iamax(size_, values_+i*memory_size_, inc);
+      rowmax_index=idamax_(&size_, values_+i*memory_size_,&inc);
       rowmax[i]=*(values_+i*memory_size_+rowmax_index-1); //fortran convention: start counting from one
     }
-//    max_index=idamax_(&size_, rowmax ,&inc);
-    max_index = boost::numeric::bindings::blas::detail::iamax(size_, rowmax , inc);
+    max_index=idamax_(&size_, rowmax ,&inc);
     delete [] rowmax;
     return std::abs(rowmax[max_index-1]);
   }
@@ -307,13 +279,9 @@ public:
   void invert(){
     std::vector<double> B(size_*size_, 0.);
     std::vector<fortran_int_t> ipiv(size_,0);
-    fortran_int_t info = 0;
+    fortran_int_t info;
     for(fortran_int_t i=0;i<size_;++i) B[i*size_+i]=1.;
-//    FORTRAN_ID(dgesv)(&size_, &size_, values_, &memory_size_, &(ipiv[0]), &(B[0]), &size_, &info);
-    info = boost::numeric::bindings::lapack::detail::gesv( boost::numeric::bindings::tag::column_major()
-        , size_, size_, values_, memory_size_, &(ipiv[0]), &(B[0]), size_
-    );
-
+    FORTRAN_ID(dgesv)(&size_, &size_, values_, &memory_size_, &(ipiv[0]), &(B[0]), &size_, &info);
     if(info){ throw(std::logic_error("in dgesv: info was not zero.")); }
     
     for(fortran_int_t i=0;i<size_;++i){

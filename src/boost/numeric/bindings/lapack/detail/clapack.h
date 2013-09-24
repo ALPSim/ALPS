@@ -11,12 +11,6 @@
 #ifndef BOOST_NUMERIC_BINDINGS_LAPACK_DETAIL_CLAPACK_H
 #define BOOST_NUMERIC_BINDINGS_LAPACK_DETAIL_CLAPACK_H
 
-#if BOOST_NUMERIC_BINDINGS_LAPACK_VECLIB
-
-#include <Accelerate/Accelerate.h>
-
-#else
-
 extern "C" {
 #include <clapack.h> 
 }

@@ -68,6 +68,24 @@ void InteractionExpansion::interaction_expansion_step(void)
   weight=metropolis_weight;
 }
 
+
+
+//dot product blas call (level one)
+double inner_prod(const double* v1, const double *v2, const fortran_int_t size){
+  fortran_int_t inc=1;
+  return FORTRAN_ID(ddot)(&size, v1,&inc,v2,&inc); 
+}
+
+
+
+//vector scaling blas call (level one)
+void scale(const double alpha, double *v, const fortran_int_t size){
+  fortran_int_t inc=1;
+  FORTRAN_ID(dscal)(&size, &alpha, v, &inc);
+}
+
+
+
 ///Every now and then we have to recreate M from scratch to avoid roundoff
 ///error. This is done by iserting the vertices starting from zero.
 void InteractionExpansion::reset_perturbation_series()

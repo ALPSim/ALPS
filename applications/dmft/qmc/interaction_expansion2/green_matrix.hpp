@@ -96,9 +96,8 @@ public:
   
   inline void swap_vertices(unsigned int p, unsigned int q)
   {
-//    fortran_int_t inc=1;
-//    FORTRAN_ID(dswap)(&nt_, values_+p*nt_, &inc, values_+q*nt_, &inc);
-      boost::numeric::bindings::blas::detail::swap(nt_, values_+p*nt_, 1, values_+q*nt_, 1);
+    fortran_int_t inc=1;
+    FORTRAN_ID(dswap)(&nt_, values_+p*nt_, &inc, values_+q*nt_, &inc);
   }
   
   inline double* values(){return values_;}
