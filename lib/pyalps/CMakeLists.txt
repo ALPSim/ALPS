@@ -23,8 +23,30 @@ if (ALPS_HAVE_PYTHON)
   set (MAXENT_SOURCES ../../tool/maxent.cpp ../../tool/maxent_helper.cpp
                       ../../tool/maxent_simulation.cpp ../../tool/maxent_parms.cpp)
 
-  set (CTHYB_SOURCES ../../applications/dmft/qmc/hybridization/hybmain.cpp)
-  set (CTINT_SOURCES ../../applications/dmft/qmc/interaction_expansion2/main.cpp)
+  set (CTHYB_SOURCES ../../applications/dmft/qmc/hybridization/hybmain.cpp
+       ../../applications/dmft/qmc/hybridization/hybsim.cpp
+       ../../applications/dmft/qmc/hybridization/hyblocal.cpp
+       ../../applications/dmft/qmc/hybridization/hybint.cpp
+       ../../applications/dmft/qmc/hybridization/hybfun.cpp
+       ../../applications/dmft/qmc/hybridization/hybretintfun.cpp
+       ../../applications/dmft/qmc/hybridization/hybmatrix.cpp
+       ../../applications/dmft/qmc/hybridization/hybmatrix_ft.cpp
+       ../../applications/dmft/qmc/hybridization/hybconfig.cpp
+       ../../applications/dmft/qmc/hybridization/hybupdates.cpp
+       ../../applications/dmft/qmc/hybridization/hybevaluate.cpp
+       ../../applications/dmft/qmc/hybridization/hybmeasurements.cpp)
+  set (CTINT_SOURCES ../../applications/dmft/qmc/interaction_expansion2/main.cpp
+       ../../applications/dmft/qmc/fouriertransform.C
+       ../../applications/dmft/qmc/interaction_expansion2/auxiliary.cpp
+       ../../applications/dmft/qmc/interaction_expansion2/observables.cpp 
+       ../../applications/dmft/qmc/interaction_expansion2/fastupdate.cpp
+       ../../applications/dmft/qmc/interaction_expansion2/selfenergy.cpp 
+       ../../applications/dmft/qmc/interaction_expansion2/solver.cpp 
+       ../../applications/dmft/qmc/interaction_expansion2/io.cpp 
+       ../../applications/dmft/qmc/interaction_expansion2/splines.cpp 
+       ../../applications/dmft/qmc/interaction_expansion2/interaction_expansion.cpp 
+       ../../applications/dmft/qmc/interaction_expansion2/measurements.cpp 
+       ../../applications/dmft/qmc/interaction_expansion2/model.cpp)
 
   set(PYNGSPARAMS_SOURCES ../../src/alps/ngs/python/params.cpp)
   set(PYNGSHDF5_SOURCES ../../src/alps/ngs/python/hdf5.cpp)
@@ -72,17 +94,6 @@ if (ALPS_HAVE_PYTHON)
       endif(WIN32 AND NOT UNIX)
     endif(BUILD_SHARED_LIBS)
     target_link_libraries(${name} alps ${LINK_LIBRARIES} ${BLAS_LIBRARY} ${LAPACK_LIBRARY} ${LAPACK_LINKER_FLAGS})
-
-    if(${name} MATCHES cthyb)
-      link_directories(${CMAKE_BINARY_DIR}/applications/dmft/qmc)
-      target_link_libraries(${name} hybridization_impl alps ${LINK_LIBRARIES} ${BLAS_LIBRARY} ${LAPACK_LIBRARY} ${LAPACK_LINKER_FLAGS})
-    endif(${name} MATCHES cthyb)
-
-    if(${name} MATCHES ctint)
-      link_directories(${CMAKE_BINARY_DIR}/applications/dmft/qmc)
-      target_link_libraries(${name} interaction2_impl alps ${LINK_LIBRARIES} ${BLAS_LIBRARY} ${LAPACK_LIBRARY} ${LAPACK_LINKER_FLAGS})
-    endif(${name} MATCHES ctint)
-
   ENDFOREACH(name)
 
   #######################################################################
