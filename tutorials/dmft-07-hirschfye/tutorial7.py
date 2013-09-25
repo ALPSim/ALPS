@@ -42,7 +42,7 @@ for b in [6., 12.]:
               'H'                   : 0,
               'H_INIT'              : 0.05,
               'MAX_IT'              : 10,
-              'MAX_TIME'            : 10,
+              'MAX_TIME'            : 20,
               'MU'                  : 0,
               'N'                   : 16,
               'NMATSUBARA'          : 500, 
