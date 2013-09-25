@@ -27,7 +27,6 @@ if(LAPACK_FOUND)
        interaction_expansion/measurements.cpp 
       interaction_expansion/model.cpp)
 
-IF(ALPS_HAVE_MPI)
   set (DMFT_QMC_INTERACTION_EXPANSION2_SOURCE
        fouriertransform.C
        interaction_expansion2/auxiliary.cpp
@@ -40,7 +39,6 @@ IF(ALPS_HAVE_MPI)
        interaction_expansion2/interaction_expansion.cpp 
        interaction_expansion2/measurements.cpp 
        interaction_expansion2/model.cpp)
-ENDIF(ALPS_HAVE_MPI)
 
   set (DMFT_QMC_HYBRIDIZATION_SOURCE
        hybridization/hybsim.cpp
@@ -62,7 +60,6 @@ ENDIF(ALPS_HAVE_MPI)
   add_library (interaction_expansion_impl STATIC ${DMFT_QMC_INTERACTION_EXPANSION_SOURCE})
 
   #Interaction Expansion - separate solver
-IF(ALPS_HAVE_MPI)
   IF(CMAKE_VERSION VERSION_GREATER "2.8.8")
     #Hybridization Expansion - separate solver
     add_library (hybridization_impl_obj OBJECT ${DMFT_QMC_HYBRIDIZATION_SOURCE})
@@ -80,7 +77,6 @@ IF(ALPS_HAVE_MPI)
       add_library (interaction2_impl STATIC ${DMFT_QMC_INTERACTION_EXPANSION2_SOURCE})
       set_property(TARGET interaction2_impl PROPERTY COMPILE_FLAGS -fPIC)
   ENDIF(CMAKE_VERSION VERSION_GREATER "2.8.8")
-ENDIF(ALPS_HAVE_MPI)
 
   target_link_libraries(dmft_qmc_impl alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
   add_definitions(${LAPACK_DEFINITIONS} )
@@ -91,25 +87,20 @@ ENDIF(ALPS_HAVE_MPI)
   add_executable(hirschfye solver_main.C hirschfyesim.C)
 
   add_executable(hybridization hybridization/hybmain.cpp)
-IF(ALPS_HAVE_MPI)
   add_executable(interaction interaction_expansion2/main.cpp)
-ENDIF(ALPS_HAVE_MPI)
 
   target_link_libraries(dmft dmft_qmc_impl  ${DMFT_QMC_SOLVERS})
   target_link_libraries(hirschfye dmft_qmc_impl)
 
   target_link_libraries(hybridization dmft_qmc_impl hybridization_impl)
-IF(ALPS_HAVE_MPI)
   target_link_libraries(interaction dmft_qmc_impl interaction2_impl)
-ENDIF(ALPS_HAVE_MPI)
 
   install(TARGETS dmft RUNTIME DESTINATION bin COMPONENT applications)
   install(TARGETS hirschfye  RUNTIME DESTINATION bin COMPONENT applications)
-IF(ALPS_HAVE_MPI)
   install(TARGETS hybridization RUNTIME DESTINATION bin COMPONENT applications)
   install(TARGETS interaction RUNTIME DESTINATION bin COMPONENT applications)
-ENDIF(ALPS_HAVE_MPI)
-  INSTALL(FILES hybridization/Documentation/hybdoc.pdf DESTINATION doc)
+  install(FILES hybridization/Documentation/hybdoc.pdf DESTINATION doc)
+
 else(LAPACK_FOUND)
   message(STATUS "dmft will not be built since the lapack library has not been found")
 endif(LAPACK_FOUND)

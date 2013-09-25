@@ -81,11 +81,10 @@ int main(int argc, char** argv){
       global_mpi_rank=c.rank();
       sim_type s(parms, c);
 #endif
-      //initialize simulation (set up hybridization/hamiltonian/etc)
       //run the simulation
       s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds((int)parms["MAX_TIME"])));
-      //on the master: collect MC results and store them in file, then
-      //postprocess
+
+      //on the master: collect MC results and store them in file, then postprocess
       if (global_mpi_rank==0){
         alps::results_type<hybridization>::type results = collect_results(s);
         save_results(results, parms, output_file, "/simulation/results");
