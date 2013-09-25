@@ -54,7 +54,7 @@ for sim in grouped:
     plt.figure()
     plt.xlabel(r'$\tau$')
     plt.ylabel(r'$G_{flavor=0}(\tau)$')
-    plt.title('Simulation at ' + r'$\beta = %.4s$' % common_props['BETA'])
+    plt.title('Simulation at ' + r'$\beta = {beta}$'.format(beta= common_props['BETA']))
     pyalps.plot.plot(sim)
     plt.legend()
 
@@ -67,25 +67,23 @@ plt.show()
 ## load the final iteration of G_{flavor=0}(tau)
 data_G_tau = pyalps.loadMeasurements(res_files, respath='/simulation/results/G_tau', what=listobs, verbose=False)  
 
-beta, occupation = [], []
 print "Occupation in the last iteration at flavor=0"
-for d in data_G_tau:
+for d in pyalps.flatten(data_G_tau):
     # obtain occupation using relation: <n_{flavor=0}> = -<G_{flavor=0}(tau=beta)>
-    beta_ = float(d[0].props['BETA'])
-    n_ = -d[0].y[-1]
-    print "n_0(beta =",beta_,") =",n_
-    beta.append(beta_)
-    occupation.append(n_)
+    d.y = np.array([-d.y[-1]])
+    print "n_0(beta =",d.props['BETA'],") =",d.y[0]
+    d.x = np.array([0])
+    d.props['observable'] = 'occupation'
 
-d = pyalps.DataSet()
-d.y = occupation
-d.x = beta
-d.props['line']="scatter"
+occupation = pyalps.collectXY(data_G_tau, 'BETA', 'occupation')
+for d in occupation:
+    d.props['line']="scatter"
+
 plt.figure()
+pyalps.plot.plot(occupation)
 plt.xlabel(r'$\beta$')
 plt.ylabel(r'$n_{flavor=0}$')
 plt.title('Occupation versus BETA')
-pyalps.plot.plot(d)
 
 plt.show()
 
@@ -113,7 +111,7 @@ for sim in grouped:
     plt.figure()
     plt.xlabel(r'$i\omega_n$')
     plt.ylabel(r'$Im\ G_{flavor=0}(i\omega_n)$')
-    plt.title('Simulation at ' + r'$\beta = %.4s$' % common_props['BETA'])
+    plt.title('Simulation at ' + r'$\beta = {beta}$'.format(beta=common_props['BETA']))
     pyalps.plot.plot(sim)
     plt.legend()
 
@@ -148,7 +146,7 @@ for sim in grouped_G:
     plt.figure()
     plt.xlabel(r'$i\omega_n$')
     plt.ylabel(r'$Im\ \Sigma_{flavor=0}(i\omega_n)$')
-    plt.title('Simulation at ' + r'$\beta = %.4s$' % common_props['BETA'])
+    plt.title('Simulation at ' + r'$\beta = {beta}$'.format(beta=common_props['BETA']))
     pyalps.plot.plot(sim)
     plt.legend()
 
