@@ -87,7 +87,7 @@ class MplXYPlot(MplPlot):
     my_output_ports = [PortDescriptor('self',MplPlot)]
   
     def __init__(self):
-        Module.__init__(self)        
+        MplPlot.__init__(self)
         self.colors = ['k','b','g','m','c','y']
         self.worker = MplXYPlot_core()
     
@@ -97,6 +97,7 @@ class MplXYPlot(MplPlot):
         return self.getInputFromPort(m)
             
     def compute(self):
+            MplPlot.compute(self)
             if self.hifp('plot'):
                 self.plt = self.gifp('plot')
             else:
