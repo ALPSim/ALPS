@@ -153,7 +153,7 @@ void hybridization::create_measurements(){//called once in the constructor
   orders.resize(n_orbitals, 0.);
   order_histogram_total.resize(N_hist_orders, 0.);
   densities.resize(n_orbitals, 0.);
-  sector_statistics.resize(pow(2,n_orbitals), 0.);
+  sector_statistics.resize(1<<n_orbitals, 0.);
 
   if(MEASURE_time){
     G.resize(n_orbitals, std::vector<double>(N_t+1, 0.));

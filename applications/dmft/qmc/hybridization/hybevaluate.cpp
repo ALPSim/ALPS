@@ -30,6 +30,8 @@
 
 #include"hyb.hpp"
 #include"hybevaluate.hpp"
+#include <alps/config.h>
+#include <boost/cstdint.hpp>
 
 void evaluate_basics(const alps::results_type<hybridization>::type &results,
                      const alps::parameters_type<hybridization>::type &parms,
@@ -39,7 +41,7 @@ void evaluate_basics(const alps::results_type<hybridization>::type &results,
   std::size_t N_meas=parms["N_MEAS"];
   double beta=parms["BETA"];
 
-  uint64_t sweeps = results["Sign"].count()+(uint64_t)parms["THERMALIZATION"];
+  boost::uint64_t sweeps = results["Sign"].count()+(boost::uint64_t)parms["THERMALIZATION"];
 
   if(parms["TEXT_OUTPUT"]|false){
     std::ofstream sim_file("simulation.dat");
@@ -551,7 +553,7 @@ void evaluate_sector_statistics(const alps::results_type<hybridization>::type &r
   std::ofstream stat_file("sector_statistics.dat");
   stat_file << "#state |n_1={0,1} n_2={0,1} ...> n_i={0,1}: orbital i {empty,occupied}" << std::endl;
   stat_file << "#rel weight (in %)" << std::endl;
-  int n_states=pow(2,n_orbitals);
+  int n_states=1<<n_orbitals;
   std::vector<double> sector_statistics=results["sector_statistics"].mean<std::vector<double> >();
   for(int n=0;n<n_states;++n){
     std::stringstream state; state << "|";

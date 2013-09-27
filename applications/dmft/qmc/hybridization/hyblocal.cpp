@@ -660,7 +660,7 @@ void local_configuration::measure_sector_statistics(std::vector<double> &sector_
   int full_line_states=0;
 
   for(int i=0;i<n_orbitals_;++i){
-    int index=pow(2,i);
+    int index=1<<i;
     if(zero_order_orbital_occupied_[i]){
       full_line_states+=index;//keep track of which time lines (orbitals) are fully occupied
       continue; //no segments->we're done for this orbital
@@ -680,7 +680,7 @@ void local_configuration::measure_sector_statistics(std::vector<double> &sector_
   }
   else{
     //otherwise count intervals
-    double tau=0.; int state=0; int max_state=pow(2,n_orbitals_);
+    double tau=0.; int state=0; int max_state=1<<n_orbitals();
     for(state_map::iterator it=states.begin();it!=states.end();++it){
       sector_statistics[state+full_line_states]+=(it->first-tau)/beta_*sign;
       tau=it->first; state=it->second;

@@ -37,8 +37,8 @@
 #include <boost/chrono/chrono.hpp>
 
 #ifdef HYB_SIM_MAIN
-uint64_t sweep_count;
-std::vector<uint64_t> nacc,nprop;
+boost::uint64_t sweep_count;
+std::vector<boost::uint64_t> nacc,nprop;
 std::vector<std::string> update_type;
 #else
 extern boost::uint64_t sweep_count;
