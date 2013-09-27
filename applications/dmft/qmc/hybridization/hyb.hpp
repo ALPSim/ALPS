@@ -41,8 +41,8 @@ uint64_t sweep_count;
 std::vector<uint64_t> nacc,nprop;
 std::vector<std::string> update_type;
 #else
-extern uint64_t sweep_count;
-extern std::vector<uint64_t> nacc,nprop;
+extern boost::uint64_t sweep_count;
+extern std::vector<boost::uint64_t> nacc,nprop;
 extern std::vector<std::string> update_type;
 #endif
 
@@ -108,9 +108,9 @@ private:
   double full_weight() const;
 
   //algorithm parameters
-  uint64_t sweeps;
-  uint64_t thermalization_sweeps;
-  uint64_t total_sweeps;
+  boost::uint64_t sweeps;
+  boost::uint64_t thermalization_sweeps;
+  boost::uint64_t total_sweeps;
   std::size_t n_orbitals;
   double sign;
 

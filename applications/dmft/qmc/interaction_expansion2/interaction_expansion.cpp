@@ -88,7 +88,7 @@ pert_hist(max_order)
   thermalized=therm_steps==0?true:false;
   if(!parms.defined("ATOMIC")) {
     alps::hdf5::archive ar(parms["INFILE"],alps::hdf5::archive::READ);
-    if(parms.defined("DMFT_FRAMEWORK") && parms["DMFT_FRAMEWORK"]){
+    if(parms.defined("DMFT_FRAMEWORK") && parms["DMFT_FRAMEWORK"].cast<bool>()){
       //read in as green_function
       bare_green_matsubara.read_hdf5(ar,"/G0");
       
