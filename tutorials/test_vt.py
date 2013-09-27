@@ -65,8 +65,10 @@ for workflow in workflows:
     fn = os.path.join(os.getcwd(),fn)
     if not os.path.exists(fn):
         print fn,'does not exist!'
-    print fn + ':"' + tag + '" ',
     cmd = vtapp + ['-b', fn+':'+tag]
+    print cmd
+    print fn + ':"' + tag + '" ',
+    logfile.write(str(cmd)+'\n')
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output = process.communicate()
     logfile.write(fn+':'+tag+'\n')
