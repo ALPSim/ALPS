@@ -2,13 +2,13 @@
   <action date="2010-05-02 13:23:16" id="1" prevId="0" session="0" user="troyer">
     <annotation id="0" key="__description__" value="Copied from pipeline" />
     <add id="0" objectId="0" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="0" name="MplFigure" namespace="" package="edu.utah.sci.vistrails.matplotlib" version="1.0.1" />
+      <module cache="1" id="0" name="MplFigure" namespace="" package="edu.utah.sci.vistrails.matplotlib" version="1.0.2" />
     </add>
     <add id="1" objectId="0" parentObjId="0" parentObjType="module" what="location">
       <location id="0" x="3.22643961533" y="1.18940051333" />
     </add>
     <add id="2" objectId="1" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="1" name="MplFigureCell" namespace="" package="edu.utah.sci.vistrails.matplotlib" version="1.0.1" />
+      <module cache="1" id="1" name="MplFigureCell" namespace="" package="edu.utah.sci.vistrails.matplotlib" version="1.0.2" />
     </add>
     <add id="3" objectId="1" parentObjId="1" parentObjType="module" what="location">
       <location id="1" x="4.27359847033" y="-155.804490107" />
@@ -187,7 +187,7 @@
   </action>
   <action date="2013-09-08 10:40:44" id="9" prevId="8" session="4" user="troyer">
     <add id="74" objectId="9" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="9" name="MplFigure" namespace="" package="org.vistrails.vistrails.matplotlib" version="1.0.1" />
+      <module cache="1" id="9" name="MplFigure" namespace="" package="org.vistrails.vistrails.matplotlib" version="1.0.2" />
     </add>
     <add id="75" objectId="9" parentObjId="9" parentObjType="module" what="location">
       <location id="9" x="35.1494997442" y="9.58622720297" />
@@ -202,7 +202,7 @@
   </action>
   <action date="2013-09-08 10:40:49" id="11" prevId="10" session="4" user="troyer">
     <add id="81" objectId="12" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="12" name="MplFigureCell" namespace="" package="org.vistrails.vistrails.matplotlib" version="1.0.1" />
+      <module cache="1" id="12" name="MplFigureCell" namespace="" package="org.vistrails.vistrails.matplotlib" version="1.0.2" />
     </add>
     <add id="82" objectId="12" parentObjId="12" parentObjType="module" what="location">
       <location id="12" x="-25.5632725412" y="-111.040465101" />

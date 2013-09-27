@@ -61,10 +61,10 @@
           <module cache="1" id="15" name="MplXYPlot" namespace="DataSet|Plot" package="org.comp-phys.alps" version="2.2.0">
             <location id="15" x="25.16484196" y="53.8594491089" />
           </module>
-          <module cache="1" id="16" name="MplFigureCell" namespace="" package="org.vistrails.vistrails.matplotlib" version="1.0.1">
+          <module cache="1" id="16" name="MplFigureCell" namespace="" package="org.vistrails.vistrails.matplotlib" version="1.0.2">
             <location id="16" x="11.40342921" y="-227.377217099" />
           </module>
-          <module cache="1" id="17" name="MplFigure" namespace="" package="org.vistrails.vistrails.matplotlib" version="1.0.1">
+          <module cache="1" id="17" name="MplFigure" namespace="" package="org.vistrails.vistrails.matplotlib" version="1.0.2">
             <location id="17" x="35.89131966" y="-99.5662399711" />
           </module>
           <module cache="1" id="18" name="InputPort" namespace="" package="org.vistrails.vistrails.basic" version="2.1">
