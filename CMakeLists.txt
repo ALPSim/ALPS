@@ -732,11 +732,11 @@ else (ALPS_BUILD_SOURCE)
     install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_LIB_DIR} COMPONENT vistrails)
   endif (ALPS_FOR_VISTRAILS)
 
-  # TODO: is ${CMAKE_INSTALL_PREFIX} the correct to be used here? In quick test is giving /Applications/VisTrails, but I would like to get /opt/alps
-  # if (ALPS_FOR_VISTRAILS AND APPLE)
-  #   file(WRITE ${PROJECT_BINARY_DIR}/tool/org.comp-phys.alps "${CMAKE_INSTALL_PREFIX}/bin")
-  #   install(FILES ${PROJECT_BINARY_DIR}/tool/org.comp-phys.alps DESTINATION /etc/paths.d COMPONENT environment)
-  # endif (ALPS_FOR_VISTRAILS AND APPLE)
+  if (APPLE AND NOT ALPS_FOR_VISTRAILS)
+    configure_file(tool/postflight.sh.in ${PROJECT_BINARY_DIR}/tool/postflight.sh)
+    file(WRITE ${PROJECT_BINARY_DIR}/tool/paths "${CMAKE_INSTALL_PREFIX}/bin")
+    install(FILES ${PROJECT_BINARY_DIR}/tool/paths DESTINATION share/alps COMPONENT environment)
+  endif (APPLE AND NOT ALPS_FOR_VISTRAILS)
 
   if(ALPS_PACKAGE_LIBRARIES)
     install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/lib DESTINATION . COMPONENT dependentlibraries)
@@ -968,12 +968,11 @@ if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
  set(CPACK_COMPONENT_EXAMPLES_DEPENDS libraries)
  set(CPACK_COMPONENT_TUTORIALS_DEPENDS python applications libraries tools)
  
- # TODO: enable once prev todo is fixed
- # if (ALPS_FOR_VISTRAILS AND APPLE)
- #  set(CPACK_COMPONENT_ENVIRONMENT_DISPLAY_NAME "ALPS PATH environment")
- #  set(CPACK_COMPONENT_ENVIRONMENT_DESCRIPTION "Set PATH variables to find ALPS applications in the Terminal")
- #  set(CPACK_COMPONENT_ENVIRONMENT_DISABLED ON)
- # endif (ALPS_FOR_VISTRAILS AND APPLE)
+ if (APPLE AND NOT ALPS_FOR_VISTRAILS)
+  set(CPACK_COMPONENT_ENVIRONMENT_DISPLAY_NAME "ALPS PATH environment")
+  set(CPACK_COMPONENT_ENVIRONMENT_DESCRIPTION "Set PATH variables to find ALPS applications in the Terminal")
+  set(CPACK_POSTFLIGHT_SCRIPT ${PROJECT_BINARY_DIR}/tool/postflight.sh)
+ endif (APPLE AND NOT ALPS_FOR_VISTRAILS)
  
 endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
  

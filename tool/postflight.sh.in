@@ -1,0 +1,11 @@
+#!/bin/sh
+#  Copyright Michele Dolfi 2013.
+#  Distributed under the Boost Software License, Version 1.0.
+#    (See accompanying file LICENSE_1_0.txt or copy at
+#     http://www.boost.org/LICENSE_1_0.txt)
+
+ALPS_ROOT="@CMAKE_INSTALL_PREFIX@"
+
+if [ -f $ALPS_ROOT/share/alps/paths ]; then
+    cp $ALPS_ROOT/share/alps/paths /etc/paths.d/org.comp-phys.alps
+fi
