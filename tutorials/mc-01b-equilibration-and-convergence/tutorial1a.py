@@ -42,7 +42,7 @@ parms = [{
 # Write into XML input file:
 input_file = pyalps.writeInputFiles('parm1a',parms)
 
-# and run the application dwa:
+# and run the application spinmc:
 pyalps.runApplication('spinmc', input_file, Tmin=10, writexml=True)
 
 # We first get the list of all hdf5 result files via:
@@ -59,10 +59,12 @@ plt.show()
 # ALPS Python provides a convenient tool to check whether a measurement observable(s) has (have) reached steady state equilibrium.
 #
 # Here is one example:
-pyalps.checkSteadyState(files[0], '|Magnetization|', confidenceInterval=0.95)
+print pyalps.checkSteadyState(outfile=files[0], observable='|Magnetization|', confidenceInterval=0.95)
+print
 
 # and another one:
-pyalps.checkSteadyState(files[0], ['|Magnetization|', 'Energy'], confidenceInterval=0.95)
+observables = pyalps.loadMeasurements(files, ['|Magnetization|', 'Energy'])
+observables = pyalps.checkSteadyState(observables, confidenceInterval=0.95)
+for o in observables:
+    print '{}:\t{}'.format(o.props['observable'], o.props['checkSteadyState'])
 
-# To see the complete log
-pyalps.checkSteadyState(files[0], ['|Magnetization|', 'Energy'], confidenceInterval=0.95, includeLog=True)
