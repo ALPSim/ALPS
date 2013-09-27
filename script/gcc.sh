@@ -4,10 +4,10 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-VERSION=4.6.3
-GMPVERSION=5.0.4
-MPFRVERSION=3.1.0
-MPCVERSION=0.8.2
+VERSION=4.6.4
+GMPVERSION=5.1.2
+MPFRVERSION=3.1.2
+MPCVERSION=1.0.1
 
 PREFIX="$1"
 BUILD_DIR="$2"
@@ -67,12 +67,6 @@ echo "building..." && \
 (cd "$BUILD_DIR/gcc-$VERSION" && make bootstrap) && \
 echo "installing..." && \
 (cd "$BUILD_DIR/gcc-$VERSION" && make install) && \
-echo "cleaning up..." && \
-rm -rf "$BUILD_DIR/gcc-$VERSION" && \
-rm -rf "$BUILD_DIR/gmp-$GMPVERSION" && \
-rm -rf "$BUILD_DIR//mpfr-$MPFRVERSION" && \
-rm -rf "$BUILD_DIR/mpc-$MPCVERSION" && \
-rm -rf "$BUILD_DIR/aux" && \
 
 echo "done" \
 ) 2>&1 | tee -a "$LOG"

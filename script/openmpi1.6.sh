@@ -4,7 +4,7 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-VERSION=1.4.5
+VERSION=1.6.5
 
 PREFIX="$1"
 BUILD_DIR="$2"
@@ -18,7 +18,7 @@ fi
 LOG="$0.log.$$"
 echo "executing $0 $*" | tee "$LOG"
 
-URL="http://www.open-mpi.org/software/ompi/v1.4/downloads/openmpi-$VERSION.tar.gz"
+URL="http://www.open-mpi.org/software/ompi/v1.6/downloads/openmpi-$VERSION.tar.gz"
 SRC="$SRC_DIR/openmpi-$VERSION.tar.gz"
 
 echo "cleaning up..." | tee -a "$LOG"
@@ -40,11 +40,12 @@ else
   (cd "$BUILD_DIR" && "$CURL" "$URL" | tar zxf -) 2>&1 | tee -a "$LOG"
 fi
 
+fdggdfgdf
 ( \
 echo "configuring..." && \
-(cd "$BUILD_DIR/openmpi-$VERSION" && ./configure --prefix="$PREFIX" ) && \
+(cd "$BUILD_DIR/openmpi-$VERSION" && ./configure --prefix="$PREFIX" --enable-f77 --enable-f90 --disable-vt) && \
 echo "building..." && \
-(cd "$BUILD_DIR/openmpi-$VERSION" && VERBOSE=1 make) && \
+(cd "$BUILD_DIR/openmpi-$VERSION" && make) && \
 echo "installing..." && \
 (cd "$BUILD_DIR/openmpi-$VERSION" && make install) && \
 echo "cleaning up..." && \
