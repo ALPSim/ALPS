@@ -29,7 +29,7 @@
 import sys, os, subprocess, glob, platform
 
 
-vistrailspath = '/root/gamperl/git/vistrails/vistrails/vistrails.py'
+vistrailspath = '/root/vistrails/vistrails/run.py'
 vtapp = [sys.executable, vistrailspath]
 zipapp = 'unzip'
 if platform.system()=='Windows':

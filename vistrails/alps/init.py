@@ -61,8 +61,9 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                    'DiagonalizationSimulation': (system.PrepareDiagonalization,{}),
                    'DMRGSimulation': (system.PrepareDMRG,{}),
                    'TEBDSimulation': (system.PrepareTEBD,{}),
-                   'SimulationID': (system.SimulationName,{'dst_port_remap': {'value': 'value'}}),
-                   'SimulationName': (system.SimulationName,{'dst_port_remap': {'value': 'value'}}),
+                   'SimulationID': (system.SimulationName,{'dst_port_remap': {'value': 'value'}, 'src_port_remap': {'value': 'value'}}),
+                   'Applications|SimulationName': (system.SimulationName,{'dst_port_remap': {'value': 'value'},'src_port_remap': {'value': 'value'}}),
+                   'SimulationName': (system.SimulationName,{'dst_port_remap': {'value': 'value'}, 'dst_port_remap': {'value': 'value'}}),
                    'LatticeModel': (system.LatticeModel,{}),
 
                    'LatticeParameters': (lattices.Lattice,{}),
