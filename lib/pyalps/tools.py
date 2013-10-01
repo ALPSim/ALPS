@@ -523,7 +523,7 @@ def getMeasurements(outfiles_, observable=None, includeLog=False):
 
   return measurements;
 
-def checkSteadyState(sets=None, outfile=None, observable=None, confidenceInterval=0.63, includeLog=False):
+def checkSteadyState(sets=None, outfile=None, observable=None, confidenceInterval=0.6827, includeLog=False):
   if sets != None:
     results = []
     for iset in flatten(sets):
