@@ -372,12 +372,14 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
   FourierTransformer::generate_transformer(parms, fourier_ptr);
   fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega_new);
   G0_tau.write("G0_tau_input");
-  matsubara_green_function_t G0_omega_real = transform_into_real_space(G0_omega_new);
-  G0_omega_real.write("G0_omega_input_realspace");
-  itime_green_function_t G0_tau_real = transform_into_real_space(G0_tau);
-  G0_tau_real.write("G0_tau_input_realspace");
-  //std::ofstream g0_omega_input_hr("g0_omega_input_hr.dat"); g0_omega_input_hr<<std::make_pair(G0_omega_new,beta);
-  //std::ofstream g0_omega_input_rs_hr("g0_omega_input_rs_hr.dat"); g0_omega_input_rs_hr<<std::make_pair(G0_omega_real,beta);
+  if(!parms.defined("WRITE_SPARSE")){
+    matsubara_green_function_t G0_omega_real = transform_into_real_space(G0_omega_new);
+    G0_omega_real.write("G0_omega_input_realspace");
+    itime_green_function_t G0_tau_real = transform_into_real_space(G0_tau);
+    G0_tau_real.write("G0_tau_input_realspace");
+    //std::ofstream g0_omega_input_hr("g0_omega_input_hr.dat"); g0_omega_input_hr<<std::make_pair(G0_omega_new,beta);
+    //std::ofstream g0_omega_input_rs_hr("g0_omega_input_rs_hr.dat"); g0_omega_input_rs_hr<<std::make_pair(G0_omega_real,beta);
+  }
   return G0_omega_new;
 }
 
