@@ -290,9 +290,6 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
 	if (current_it<2){converged=true;}
 
   } while(compute_filling_ && (!converged));
-std::cout<<"alive."<<std::endl;
- //(*const_cast<alps::Parameters*>(params_ptr_))["MU"]=mu; //write the chemical potential back to the parameter file
-std::cout<<"now."<<std::endl;
   for (spin_t flavor=0; flavor<nflavor; ++flavor) {
     for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
       for (frequency_t freq=0; freq<nfreq; ++freq) {
@@ -1474,10 +1471,11 @@ void FoursiteCDMFTTransformer::set_Tij_matrix(double kx, double ky, complex_dens
   H0(3,0)=-2.*t_*cosky*exp_iky;
   H0(3,2)=-2.*t_*coskx*exp_ikx;
   //these are the factors of 'tprime'
-  H0(0,2)=-4.*std::exp(std::complex<double>(0, ( kx - ky)))*tprime_*coskx*cosky;
+  throw std::logic_error("go to xi and ask for help.");
+  /*H0(0,2)=-4.*std::exp(std::complex<double>(0, ( kx - ky)))*tprime_*coskx*cosky;
   H0(1,3)=-4.*std::exp(std::complex<double>(0, (-kx - ky)))*tprime_*coskx*cosky;
   H0(0,2)=-4.*std::exp(std::complex<double>(0, (-kx + ky)))*tprime_*coskx*cosky;
-  H0(0,2)=-4.*std::exp(std::complex<double>(0, ( kx + ky)))*tprime_*coskx*cosky;
+  H0(0,2)=-4.*std::exp(std::complex<double>(0, ( kx + ky)))*tprime_*coskx*cosky;*/
 }
 
 void FoursiteCDMFTTransformer::set_U_(unsigned int nsite, complex_dense_matrix &U_){
