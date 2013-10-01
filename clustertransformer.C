@@ -234,8 +234,9 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
   bool damping_mu=false;
   bool computing_mu=true;
   int mu_it=1;
-
+  
   int current_it = static_cast<int>( (*const_cast<alps::Parameters*>(params_ptr_)).value_or_default("CURRENT_IT",0));
+  
 
   double n_old;
   double mu_old=mu;
@@ -289,7 +290,9 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
 	if (current_it<2){converged=true;}
 
   } while(compute_filling_ && (!converged));
-  (*const_cast<alps::Parameters*>(params_ptr_))["MU"]=mu; //write the chemical potential back to the parameter file
+std::cout<<"alive."<<std::endl;
+ //(*const_cast<alps::Parameters*>(params_ptr_))["MU"]=mu; //write the chemical potential back to the parameter file
+std::cout<<"now."<<std::endl;
   for (spin_t flavor=0; flavor<nflavor; ++flavor) {
     for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
       for (frequency_t freq=0; freq<nfreq; ++freq) {
@@ -1476,6 +1479,11 @@ void FoursiteCDMFTTransformer::set_Tij_matrix(double kx, double ky, complex_dens
   H0(0,2)=-4.*std::exp(std::complex<double>(0, (-kx + ky)))*tprime_*coskx*cosky;
   H0(0,2)=-4.*std::exp(std::complex<double>(0, ( kx + ky)))*tprime_*coskx*cosky;
 }
+
+void FoursiteCDMFTTransformer::set_U_(unsigned int nsite, complex_dense_matrix &U_){
+
+}
+
 std::vector<double> FoursiteCDMFTTransformer::epsav() const{
   return epsav_;
 }

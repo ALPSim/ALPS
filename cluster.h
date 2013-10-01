@@ -98,7 +98,8 @@ public:
   
 private:
   
-  void setup_tables(const alps::Parameters& params);
+//  void setup_tables(const alps::Parameters& params);
+  void setup_tables();
   void symmetry_analysis(const Matrix<double>::Type& basis, 
                          const Matrix<double>::Type& basis_inv);
   void ladder_symmetry_analysis();
@@ -316,7 +317,7 @@ public:
   compute_filling_(params.defined("FILLING")),
   n_target_(compute_filling_?(double)(params["FILLING"]):-1)
   {
-    const alps::Parameters *params_ptr_;
+    params_ptr_=&params;
   }
   //self-consistency transform operator
   matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
@@ -1325,6 +1326,7 @@ public:
   epssqav_(n_cluster_sites(),0.),
   L_(params["L"]),
   t_(params["t"]),
+  tprime_(params.value_or_default("tprime",0)),
   tstar_(params["tstar"])
   {
     params_ptr_=&params;
@@ -1429,6 +1431,7 @@ private:
   std::vector<double> epssqav_;
   const int L_;
   const double t_;
+  const double tprime_;
   const double tstar_;
 };
 
