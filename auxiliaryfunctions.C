@@ -41,12 +41,12 @@
 
 
 void matrix_inversion(blas::general_matrix<std::complex<double> >&A, blas::general_matrix<std::complex<double> >&A_inv);
-void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta, const shape_t shape)
+void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta)
 {
   os<<std::setprecision(14);
   for(unsigned int i=0;i<v.nfreq();++i){
     os<<(2*i+1)*M_PI/beta<<"\t";
-    switch (shape) {
+    switch (v.shape()) {
       case diagonal:
         for (unsigned int k=0; k<v.nsite(); ++k) 
           for(unsigned int f=0;f<v.nflavor();++f)
@@ -73,10 +73,10 @@ void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function
 
 
 void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function_t &g_bare, 
-                                const matsubara_green_function_t g_dressed, const double beta, const shape_t shape)
+                                const matsubara_green_function_t g_dressed, const double beta)
 {
   os<<std::setprecision(14);
-  switch (shape) {
+  switch (g_dressed.shape()) {
     case diagonal:
       for(unsigned int i=0;i<g_bare.nfreq();++i){
         os<<(2*i+1)*M_PI/beta<<"\t";
@@ -123,11 +123,11 @@ void print_quasiparticle_estimate(std::ostream &os, const matsubara_green_functi
 
 
 
-void print_real_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta, const shape_t shape){
+void print_real_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta){
   os<<std::setprecision(14);
   for(unsigned int i=0;i<v.nfreq();++i){
     os<<(2*i+1)*M_PI/beta<<"\t";
-    switch (shape) {
+    switch (v.shape()) {
       case diagonal:
         for (unsigned int k=0; k<v.nsite(); ++k) 
           for(unsigned int f=0;f<v.nflavor();++f)
@@ -157,11 +157,11 @@ void print_real_green_matsubara(std::ostream &os, const matsubara_green_function
 
 
 
-void print_green_itime(std::ostream &os, const itime_green_function_t &v, const double beta, const shape_t shape){
+void print_green_itime(std::ostream &os, const itime_green_function_t &v, const double beta){
   os<<std::setprecision(14);
   for(unsigned int i=0;i<v.ntime();++i){
     os<<beta*i/(v.ntime()-1)<<"\t";
-    switch (shape) {
+    switch (v.shape()) {
       case diagonal:
         for (unsigned int k=0; k<v.nsite(); ++k) 
           for(unsigned int f=0;f<v.nflavor();++f)
@@ -186,7 +186,7 @@ void print_green_itime(std::ostream &os, const itime_green_function_t &v, const 
 
 void print_all_green_functions(std::string const &basename, const int iteration_ctr, const matsubara_green_function_t &G0_omega, 
                                const matsubara_green_function_t &G_omega, const itime_green_function_t &G0_tau, 
-                               const itime_green_function_t &G_tau, const double beta, const shape_t shape, 
+                               const itime_green_function_t &G_tau, const double beta, 
                                const std::string suffix)
 {
   std::ostringstream G0omega_name, G0omegareal_name, G0tau_name, Gomega_name, 
@@ -210,16 +210,16 @@ void print_all_green_functions(std::string const &basename, const int iteration_
   std::ofstream G_tau_file_2(Gtau_name_2.str().c_str());
   std::ofstream selfenergy_file(selfenergy_name.str().c_str());
   assert(G0_omega_file.is_open() && G0_tau_file.is_open() && G_omega_file.is_open() && G_tau_file.is_open());
-  print_imag_green_matsubara(G0_omega_file, G0_omega, beta, shape);
-  print_real_green_matsubara(G0_omegareal_file,G0_omega,beta, shape);
-  print_green_itime(G0_tau_file,G0_tau, beta, shape);
-  print_imag_green_matsubara(G_omega_file,G_omega,beta, shape);
-  print_real_green_matsubara(G_omegareal_file,G_omega,beta, shape);
-  print_green_itime(G_tau_file,G_tau,beta, shape);
-  print_imag_green_matsubara(G_omega_file_2,G_omega,beta, shape);
-  print_green_itime(G_tau_file_2,G_tau,beta, shape);
-  print_selfenergy_matsubara(selfenergy_file, G0_omega, G_omega, beta, shape);
-  if (shape==diagonal)
+  print_imag_green_matsubara(G0_omega_file, G0_omega, beta);
+  print_real_green_matsubara(G0_omegareal_file,G0_omega,beta);
+  print_green_itime(G0_tau_file,G0_tau, beta);
+  print_imag_green_matsubara(G_omega_file,G_omega,beta);
+  print_real_green_matsubara(G_omegareal_file,G_omega,beta);
+  print_green_itime(G_tau_file,G_tau,beta);
+  print_imag_green_matsubara(G_omega_file_2,G_omega,beta);
+  print_green_itime(G_tau_file_2,G_tau,beta);
+  print_selfenergy_matsubara(selfenergy_file, G0_omega, G_omega, beta);
+  if (G_omega.shape()==diagonal)
     print_quasiparticle_estimate(std::cout, G_omega, G0_omega, beta);
 
   /*alps::hdf5::oarchive ar(basename+".h5");
@@ -247,22 +247,22 @@ void print_tau_green_functions(const int iteration_ctr, const itime_green_functi
   std::ofstream G0_tau_file(G0tau_name.str().c_str());
   std::ofstream G_tau_file(Gtau_name.str().c_str());
   std::ofstream G_tau_file_2(Gtau_name_2.str().c_str());
-  print_green_itime(G0_tau_file,G0_tau,beta, diagonal);
-  print_green_itime(G_tau_file,G_tau,beta, diagonal);
-  print_green_itime(G_tau_file_2,G_tau,beta, diagonal);
+  print_green_itime(G0_tau_file,G0_tau,beta);
+  print_green_itime(G_tau_file,G_tau,beta);
+  print_green_itime(G_tau_file_2,G_tau,beta);
 }
 
 
 
 void print_dressed_tau_green_functions(const int iteration_ctr, const itime_green_function_t &G_tau, const double beta, 
-                                       const shape_t shape, const std::string suffix){
+                                       const std::string suffix){
   std::ostringstream Gtau_name, Gtau_name_2;
   Gtau_name<<"G_tau"<<suffix<<"_"<<iteration_ctr;//<<"_"<<process_id;
   Gtau_name_2<<"G_tau"<<suffix;//<<"_"<<process_id;
   std::ofstream G_tau_file(Gtau_name.str().c_str());
   std::ofstream G_tau_file_2(Gtau_name_2.str().c_str());
-  print_green_itime(G_tau_file,G_tau,beta,shape);
-  print_green_itime(G_tau_file_2,G_tau,beta,shape);
+  print_green_itime(G_tau_file,G_tau,beta);
+  print_green_itime(G_tau_file_2,G_tau,beta);
 }
 
 std::ostream &operator<<(std::ostream &os, const std::pair<green_function<double>,double> &v_and_beta){
@@ -283,9 +283,14 @@ std::ostream &operator<<(std::ostream &os, const std::pair<green_function<std::c
   for(unsigned int o=0;o<v_and_beta.first.ntime();++o){
     os<<(2.*o+1)*M_PI/v_and_beta.second<<"\t";
     for(unsigned int i=0;i<v_and_beta.first.nsite();++i)
+      if(v_and_beta.first.shape()==nondiagonal){
       for(unsigned int j=0;j<v_and_beta.first.nsite();++j)
         for(unsigned int z1=0;z1<v_and_beta.first.nflavor();++z1)
             os<<v_and_beta.first(o,i,j,z1).real()<<" "<<v_and_beta.first(o,i,j,z1).imag()<<" ";
+      }else{
+        for(unsigned int z1=0;z1<v_and_beta.first.nflavor();++z1)
+            os<<v_and_beta.first(o,i,i,z1).real()<<" "<<v_and_beta.first(o,i,i,z1).imag()<<" ";
+      }
     os<<std::endl;
   }
   return os;
@@ -330,9 +335,14 @@ std::istream &operator>>(std::istream &is, green_function<double> &v){
   for(unsigned int o=0;o<v.nfreq();++o){
     is>>index;
     for(unsigned int i=0;i<v.nsite();++i)
+      if(v.shape()==nondiagonal){
       for(unsigned int j=0;j<v.nsite();++j)
         for(unsigned int z=0;z<v.nflavor();++z)
           is>>v(o,i,j,z);
+      }else{
+        for(unsigned int z=0;z<v.nflavor();++z)
+          is>>v(o,i,i,z);
+      }
   }
   return is;
 }
@@ -357,9 +367,15 @@ std::ostream &operator<<(std::ostream &os, const green_function<std::complex<dou
   for(unsigned int o=0;o<v.nfreq();++o){
     os<<o<<"\t";
     for(unsigned int i=0;i<v.nsite();++i)
+      if(v.shape()==nondiagonal){
       for(unsigned int j=0;j<v.nsite();++j)
         for(unsigned int z=0;z<v.nflavor();++z)
           os<<(v(o,i,j,z).real())<<"\t"<<(v(o,i,j,z).imag())<<"\t";
+      }else{
+        for(unsigned int z=0;z<v.nflavor();++z)
+          os<<(v(o,i,i,z).real())<<"\t"<<(v(o,i,i,z).imag())<<"\t";
+
+      }
     os<<std::endl;    
   }
   return os;

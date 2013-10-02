@@ -2,7 +2,8 @@
  *
  * ALPS DMFT Project
  *
- * Copyright (C) 2007 by Sebastian Fuchs <fuchs@comp-phys.org>
+ * Copyright (C) 2007      by Sebastian Fuchs <fuchs@comp-phys.org>
+ * Copyright (C) 2007-1013 by Emanuel Gull <egull@umich.edu>
  *
  * This software is part of the ALPS Applications, published under the ALPS
  * Application License; you can use, redistribute it and/or modify it under
@@ -97,9 +98,7 @@ public:
   const Matrix<site_t>::Type &symmetry_table_k_space() const{return symmetry_table_k_space_;}
   
 private:
-  
-//  void setup_tables(const alps::Parameters& params);
-  void setup_tables();
+  void setup_tables(const alps::Parameters& params);
   void symmetry_analysis(const Matrix<double>::Type& basis, 
                          const Matrix<double>::Type& basis_inv);
   void ladder_symmetry_analysis();
@@ -117,6 +116,9 @@ private:
   vector_type round(vector_type v) const;
   bool almost_equal(const double d1, const double d2) const { return fabs(d1-d2)<epsilon_; }
   vector_type matrix_vector_mult(const Matrix<double>::Type& M, const vector_type& v) const;
+  void write(const alps::Parameters &parms) const;
+  void read(const alps::Parameters &parms);
+
   
   Matrix<double>::Type cluster_coordinates_;
   Matrix<double>::Type cluster_momenta_;
@@ -129,7 +131,7 @@ private:
   site_class_set_type site_class_set_k_space_;
   pair_class_set_type pair_class_set_k_space_;
   Matrix<site_t>::Type symmetry_table_k_space_;
-  Matrix<site_t>::Type symmetry_table_real_space;
+  Matrix<site_t>::Type symmetry_table_real_space_;
 
   unsigned int n_cluster_sites_;
   bool bipartite_;
@@ -163,7 +165,8 @@ public:
   virtual       matsubara_green_function_t symmetrize(const       matsubara_green_function_t& G, const bool paramagnet) const=0;
   virtual nambu_matsubara_green_function_t symmetrize(const nambu_matsubara_green_function_t& G, const bool paramagnet) const{ throw std::logic_error("not implemented");};
   ///compute an initial G0.
-  virtual       matsubara_green_function_t initial_G0      (const alps::Parameters& parms); 
+  virtual       matsubara_green_function_t initial_G0      (const alps::Parameters& parms, shape_t shape=nondiagonal);
+  
   virtual nambu_matsubara_green_function_t initial_G0_nambu(const alps::Parameters& parms);
   nambu_matsubara_green_function_t initial_G_nambu(const alps::Parameters& parms);
   
@@ -218,6 +221,7 @@ public:
   virtual alps::RealObsevaluator kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies,
                                                 const double beta, const double mu, 
                                                 const bool error_propagation, const bool paramagnet)=0;
+  virtual matsubara_green_function_t initial_G0      (const alps::Parameters& parms, shape_t shape=diagonal);
   //Hilbert transform operator
   virtual matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
                                                 const matsubara_green_function_t &G0_omega, 
@@ -317,6 +321,7 @@ public:
   compute_filling_(params.defined("FILLING")),
   n_target_(compute_filling_?(double)(params["FILLING"]):-1)
   {
+    std::cout<<"just created a simple DCA transformer."<<std::endl;
     params_ptr_=&params;
   }
   //self-consistency transform operator
@@ -371,8 +376,8 @@ public:
   { return transform_coordinates<double, Forward>(G); }
   
   //initial G0
-  matsubara_green_function_t initial_G0      (const alps::Parameters& parms);  
-  nambu_matsubara_green_function_t initial_G0_nambu(const alps::Parameters& parms);  
+  virtual matsubara_green_function_t initial_G0      (const alps::Parameters& parms, shape_t shape=diagonal);
+  virtual nambu_matsubara_green_function_t initial_G0_nambu(const alps::Parameters& parms);
   matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& G_omega_foupoint,
                                                  const matsubara_green_function_t &G_omega, 
                                                  const matsubara_green_function_t &G0_omega, 
@@ -455,7 +460,7 @@ public:
   //{ return transform_coordinates<double, Forward>(G); }
   
   
-  matsubara_green_function_t initial_G0(const alps::Parameters& parms);  
+  virtual matsubara_green_function_t initial_G0(const alps::Parameters& parms, shape_t shape=blockdiagonal);
   matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& /*G_omega_fourpoint*/,
                                                  const matsubara_green_function_t& G_omega, 
                                                  const matsubara_green_function_t& /*G0_omega*/, 
@@ -640,7 +645,7 @@ green_function<T> DCATransformer::symmetrize_helper(const green_function<T>& G,
   unsigned int nflavor=G.nflavor();
   unsigned int nsite=G.nsite();
   unsigned int nfreq=G.nfreq();
-  green_function<T> G_new(nfreq, nsite, nflavor);
+  green_function<T> G_new(nfreq, nsite, nflavor, G.shape());
   std::set<pair_class_type>::const_iterator itc, itc_end;
   for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
     for (spin_t flavor=0; flavor<nflavor; ++flavor) {
@@ -707,7 +712,8 @@ green_function<T> SimpleDCATransformer::transform_coordinates(const green_functi
   unsigned int nsite=G.nsite();
   unsigned int nt=G.ntime();
   assert(nsite==n_cluster_sites());
-  green_function<T> G_new(nt, nsite, nflavor);
+  shape_t new_shape=G.shape()==diagonal?nondiagonal:diagonal;
+  green_function<T> G_new(nt, nsite, nflavor, new_shape);
   G_new.clear();
   for (site_t k=0; k<nsite; ++k) {
     for (site_t i=0; i<nsite; ++i) {
@@ -859,7 +865,7 @@ green_function<T> AntiFerroDCATransformer::transform_coordinates(const green_fun
   unsigned int nsite=G.nsite();
   unsigned int nt=G.ntime();
   assert(nsite==n_cluster_sites());
-  green_function<T> G_new(nt, nsite, nflavor);
+  green_function<T> G_new(nt, nsite, nflavor, blockdiagonal);
   for (spin_t flavor=0; flavor<nflavor; ++flavor) {
     for (site_t i=0; i<nsite; ++i) {
       for (site_t j=0; j<nsite; ++j) {
@@ -1240,7 +1246,7 @@ green_function<T> CDMFTTransformer::symmetrize_helper(const green_function<T>& G
   unsigned int nflavor=G.nflavor();
   unsigned int nsite=G.nsite();
   unsigned int nfreq=G.nfreq();
-  green_function<T> G_new(nfreq, nsite, nflavor);
+  green_function<T> G_new(nfreq, nsite, nflavor, nondiagonal);
   std::set<pair_class_type>::const_iterator itc, itc_end;
   for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
     for (spin_t flavor=0; flavor<nflavor; ++flavor) {
@@ -1384,8 +1390,8 @@ public:
   nambu_itime_green_function_t transform_into_k_space(const nambu_itime_green_function_t& G) const ;
   
   //initial G0
-  matsubara_green_function_t initial_G0      (const alps::Parameters& parms);  
-  nambu_matsubara_green_function_t initial_G0_nambu(const alps::Parameters& parms);  
+  virtual matsubara_green_function_t initial_G0      (const alps::Parameters& parms, shape_t shape=nondiagonal);
+  virtual nambu_matsubara_green_function_t initial_G0_nambu(const alps::Parameters& parms);
   matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& G_omega_foupoint,
                                                  const matsubara_green_function_t &G_omega, 
                                                  const matsubara_green_function_t &G0_omega, 

@@ -104,8 +104,8 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver,  it
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = parms.value_or_default("PARAMAGNET", false);
   //bool degenerate = parms.value_or_default("DEGENERATE", false);
-  matsubara_green_function_t G_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
-  itime_green_function_t G_tau_old(G_tau.ntime(), G_tau.nsite(), G_tau.nflavor());
+  matsubara_green_function_t G_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor(), diagonal);
+  itime_green_function_t G_tau_old(G_tau.ntime(), G_tau.nsite(), G_tau.nflavor(), diagonal);
   int iteration_ctr=0;
   double max_diff;
   do {
@@ -232,10 +232,10 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
   //define multiple vectors
   matsubara_green_function_t G_old_omega(G0_omega);
   matsubara_green_function_t G0_old_omega(G0_omega);
-  itime_green_function_t G_tau(n_tau +1, n_site, n_orbital);
-  itime_green_function_t G0_tau(n_tau+1, n_site, n_orbital);
-  itime_green_function_t G_old_tau(n_tau+1, n_site, n_orbital);
-  itime_green_function_t G0_old_tau(n_tau+1, n_site, n_orbital);
+  itime_green_function_t G_tau(n_tau +1, n_site, n_orbital, diagonal);
+  itime_green_function_t G0_tau(n_tau+1, n_site, n_orbital, diagonal);
+  itime_green_function_t G_old_tau(n_tau+1, n_site, n_orbital, diagonal);
+  itime_green_function_t G0_old_tau(n_tau+1, n_site, n_orbital, diagonal);
   //initialize space for multiple vectors
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer(parms, fourier_ptr);

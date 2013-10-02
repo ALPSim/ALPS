@@ -33,12 +33,12 @@ alps::graph_helper<alps::graph_helper<>::graph_type>(params),
 n_cluster_sites_(boost::lexical_cast<int>(params["SITES"])), epsilon_(1e-9),
 lattice_momenta_file_name_(params.value_or_default("LATTICE_MOMENTA_FILE", "LatticeMomenta"))
 {
-  setup_tables();
+  setup_tables(params);
 }
 
 
 
-void ClusterHelper::setup_tables()
+void ClusterHelper::setup_tables(const alps::Parameters &params)
 {
   //setup basis vectors
   Matrix<double>::Type basis(dimension(), dimension());
@@ -107,12 +107,12 @@ void ClusterHelper::setup_tables()
   }
   if(alps::is_master()){
     /*std::ofstream clustercoordstream("ClusterCoordinates");
-    for (std::size_t m=0; m<cluster_coordinates_.size1(); ++m) {
-      clustercoordstream << m << " ";
-      for (std::size_t d=0; d<cluster_coordinates_.size2(); ++d)
-        clustercoordstream << cluster_coordinates_(m,d) << " ";
-      clustercoordstream << std::endl;
-    }*/
+     for (std::size_t m=0; m<cluster_coordinates_.size1(); ++m) {
+     clustercoordstream << m << " ";
+     for (std::size_t d=0; d<cluster_coordinates_.size2(); ++d)
+     clustercoordstream << cluster_coordinates_(m,d) << " ";
+     clustercoordstream << std::endl;
+     }*/
   }
   //setup reciprocal basis
   reciprocal_basis_.resize(dimension(), dimension());
@@ -277,12 +277,64 @@ void ClusterHelper::setup_tables()
     boost::throw_exception(std::logic_error("parameter SITES does not match cluster definition"));
   if (cluster_momenta_.size1() != n_cluster_sites())
     boost::throw_exception(std::logic_error("setup of cluster momenta table failed"));
+  std::cout<<"running symmetry analysis"<<std::endl;
   symmetry_analysis(basis, basis_inv/*, reciprocal_basis, reciprocal_basis_inv*/);
+  std::cout<<"done running symmetry analysis"<<std::endl;
+#ifndef USE_MPI
+  std::cout<<"storing cluster transformer results"<<std::endl;
+  write(params);
+#else
+  int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  if(rank==0){
+    std::cout<<"storing cluster transformer results"<<std::endl;
+    write(params);
+  }
+#endif
+}
+alps::hdf5::archive & serialize(alps::hdf5::archive & ar, std::string const & p, std::set<ClusterHelper::site_class_type> const &site_class_set_real_space_);
+void ClusterHelper::write(const alps::Parameters &parms) const{
+  ///TODO: this should implement writing the clusterhelper.
+  if(parms.defined("TMPNAME")){
+    std::cout<<"writing cluster info."<<std::endl;
+    //write data to the 'tmpname' file
+    alps::hdf5::archive ar(parms["TMPNAME"]+std::string(".in.h5"), alps::hdf5::archive::WRITE);
+    ar<<alps::make_pvp("/transformer/n_cluster_sites", n_cluster_sites_);
+    ar<<alps::make_pvp("/transformer/bipartite", bipartite_);
+    ar<<alps::make_pvp("/transformer/epsilon", epsilon_);
+    ar<<alps::make_pvp("/transformer/cluster_coordinates", cluster_coordinates_);
+    ar<<alps::make_pvp("/transformer/cluster_momenta", cluster_momenta_);
+    ar<<alps::make_pvp("/transformer/lattice_momenta", lattice_momenta_);
+    ar<<alps::make_pvp("/transformer/reciprocal_basis", reciprocal_basis_);
+    ar<<alps::make_pvp("/transformer/reciprocal_basis_inv", reciprocal_basis_inv_);
+    ar<<alps::make_pvp("/transformer/rbzone_boundaries", rbzone_boundaries_);
+    ar<<alps::make_pvp("/transformer/symmetry_table_k_space", symmetry_table_k_space_);
+    ar<<alps::make_pvp("/transformer/symmetry_table_real_space", symmetry_table_real_space_);
+    
+    //the sets we need to do by hand:
+    //
+    // --> todo: continue here.
+    //
+    //ar<<alps::make_pvp("/transformer/site_class_set_real_space", site_class_set_real_space_);
+  }
 }
 
-
-
-
+void ClusterHelper::read(const alps::Parameters &parms){
+  ///TODO: this should implement writing the clusterhelper.
+  if(parms.defined("TMPNAME")){
+    std::cout<<"reading cluster info."<<std::endl;
+    //write data to the 'tmpname' file
+    alps::hdf5::archive ar(parms["TMPNAME"]+std::string(".in.h5"), alps::hdf5::archive::READ);
+    ar>>alps::make_pvp("/transformer/n_cluster_sites", n_cluster_sites_);
+    ar>>alps::make_pvp("/transformer/bipartite", bipartite_);
+    ar>>alps::make_pvp("/transformer/epsilon", *(const_cast<double*>(&epsilon_)));
+    ar>>alps::make_pvp("/transformer/cluster_coordinates", cluster_coordinates_);
+    ar>>alps::make_pvp("/transformer/cluster_momenta", cluster_momenta_);
+    ar>>alps::make_pvp("/transformer/lattice_momenta", lattice_momenta_);
+    ar>>alps::make_pvp("/transformer/reciprocal_basis", reciprocal_basis_);
+    ar>>alps::make_pvp("/transformer/reciprocal_basis_inv", reciprocal_basis_inv_);
+    ar>>alps::make_pvp("/transformer/rbzone_boundaries", rbzone_boundaries_);
+  }
+}
 
 void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
                                       const Matrix<double>::Type& basis_inv/*,
@@ -291,14 +343,14 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
 {
   //setup point group
   int gr1D[] = { 1, -1 };
-  int gr2D[] = {  1,  0,    0,  1,
-    -1,  0,    0,  1,
-    1,  0,    0, -1,
-    -1,  0,    0, -1,
-    0,  1,    1,  0,
-    0, -1,    1,  0,
-    0,  1,   -1,  0,
-    0, -1,   -1,  0 };
+  int gr2D[] = {  1,  0,  0,  1,
+    -1,  0,  0,  1,
+    1,  0,  0, -1,
+    -1,  0,  0, -1,
+    0,  1,  1,  0,
+    0, -1,  1,  0,
+    0,  1,  -1,  0,
+    0, -1,  -1,  0 };
   int gr3D[] = { 1, 0, 0,  0, 1, 0,  0, 0, 1,
     1, 0, 0,  0, -1, 0,  0, 0, -1,
     -1, 0, 0,  0, 1, 0,  0, 0, -1,
@@ -373,7 +425,7 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
       for (unsigned int j=0; j<dimension(); ++j)
         group[g](j,i) = gr[i+j*dimension()+g*dimension()*dimension()];
   //setup symmetry table in real space
-  Matrix<site_t>::Type symmetry_table_real_space;
+  //Matrix<site_t>::Type symmetry_table_real_space;
   /*if(alps::is_master())
    std::cout << "good symmetries: ";*/
   for (unsigned int g=0; g<group.size(); ++g) {
@@ -404,7 +456,7 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
     if (vertexset.size()==n_cluster_sites() && vertexmap.size()==n_cluster_sites()) {
       /*if(alps::is_master())
        std::cout  << g << " ";*/
-      append_column_no_duplicates(symmetry_table_real_space, vertexmap);
+      append_column_no_duplicates(symmetry_table_real_space_, vertexmap);
     }
   }
   //std::cout << "\n";
@@ -416,7 +468,7 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
    std::cout << std::endl;
    }*/
   //setup equivalence classes of sites and site pairs
-  boost::tie(site_class_set_real_space_, pair_class_set_real_space_) = setup_classes(symmetry_table_real_space);
+  boost::tie(site_class_set_real_space_, pair_class_set_real_space_) = setup_classes(symmetry_table_real_space_);
   //setup symmetry table in k space
   //Matrix<site_t>::Type symmetry_table_k_space_;
   /*if(alps::is_master())
@@ -467,23 +519,23 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
   /*if(alps::is_master())
    std::cout << "\n";*/
   /*std::cout << "symmetry table k space:\n";
-  for (unsigned int i=0; i<symmetry_table_k_space_.size1(); ++i) {
-    for (unsigned int j=0; j<symmetry_table_k_space_.size2(); ++j) {
-      std::cout << symmetry_table_k_space_(i,j) << " ";
-    }
-    std::cout << std::endl;
-  }
-  std::cout << "symmetry table k space (with momenta):\n";
-  for (unsigned int i=0; i<symmetry_table_k_space_.size1(); ++i) {
-    for (unsigned int j=0; j<symmetry_table_k_space_.size2(); ++j) {
-      std::cout << " (";
-      for(std::size_t d=0;d<dimension();++d)
-        std::cout<<cluster_momentum(symmetry_table_k_space_(i,j),d) << " ";
-      std::cout<<")";
-    }
-    std::cout << std::endl;
-  }*/
-
+   for (unsigned int i=0; i<symmetry_table_k_space_.size1(); ++i) {
+   for (unsigned int j=0; j<symmetry_table_k_space_.size2(); ++j) {
+   std::cout << symmetry_table_k_space_(i,j) << " ";
+   }
+   std::cout << std::endl;
+   }
+   std::cout << "symmetry table k space (with momenta):\n";
+   for (unsigned int i=0; i<symmetry_table_k_space_.size1(); ++i) {
+   for (unsigned int j=0; j<symmetry_table_k_space_.size2(); ++j) {
+   std::cout << " (";
+   for(std::size_t d=0;d<dimension();++d)
+   std::cout<<cluster_momentum(symmetry_table_k_space_(i,j),d) << " ";
+   std::cout<<")";
+   }
+   std::cout << std::endl;
+   }*/
+  
   //setup equivalence classes of sites and site pairs
   boost::tie(site_class_set_k_space_, pair_class_set_k_space_) = setup_classes(symmetry_table_k_space_);
 }
@@ -651,8 +703,8 @@ ClusterHelper::vector_type ClusterHelper::map_back_into_brillouin_zone(vector_ty
     v[d] *= M_PI;
   }
   /*for (unsigned int d=0; d<v.size(); ++d) {
-    std::cout << v[d];
-  }std::cout<<std::endl;*/
+   std::cout << v[d];
+   }std::cout<<std::endl;*/
   return v;
 }
 
@@ -695,15 +747,15 @@ unsigned int ClusterHelper::cluster_momentum_approximation(vector_type v) const
       break;
     case 3 :
       T.resize(13,3);
-      T(0,0)  =  2*M_PI; T(0,1)  =       0; T(0,2)  =       0;
-      T(1,0)  =       0; T(1,1)  =  2*M_PI; T(1,2)  =       0;
-      T(2,0)  =       0; T(2,1)  =       0; T(2,2)  =  2*M_PI;
-      T(3,0)  =  2*M_PI; T(3,1)  =  2*M_PI; T(3,2)  =       0;
-      T(4,0)  =  2*M_PI; T(4,1)  =       0; T(4,2)  =  2*M_PI;
-      T(5,0)  =       0; T(5,1)  =  2*M_PI; T(5,2)  =  2*M_PI;
-      T(6,0)  =  2*M_PI; T(6,1)  = -2*M_PI; T(6,2)  =       0;
-      T(7,0)  =  2*M_PI; T(7,1)  =       0; T(7,2)  = -2*M_PI;
-      T(8,0)  =       0; T(8,1)  =  2*M_PI; T(8,2)  = -2*M_PI;
+      T(0,0)  =  2*M_PI; T(0,1)  =  0; T(0,2)  =  0;
+      T(1,0)  =  0; T(1,1)  =  2*M_PI; T(1,2)  =  0;
+      T(2,0)  =  0; T(2,1)  =  0; T(2,2)  =  2*M_PI;
+      T(3,0)  =  2*M_PI; T(3,1)  =  2*M_PI; T(3,2)  =  0;
+      T(4,0)  =  2*M_PI; T(4,1)  =  0; T(4,2)  =  2*M_PI;
+      T(5,0)  =  0; T(5,1)  =  2*M_PI; T(5,2)  =  2*M_PI;
+      T(6,0)  =  2*M_PI; T(6,1)  = -2*M_PI; T(6,2)  =  0;
+      T(7,0)  =  2*M_PI; T(7,1)  =  0; T(7,2)  = -2*M_PI;
+      T(8,0)  =  0; T(8,1)  =  2*M_PI; T(8,2)  = -2*M_PI;
       T(9,0)  =  2*M_PI; T(9,1)  =  2*M_PI; T(9,2)  =  2*M_PI;
       T(10,0) = -2*M_PI; T(10,1) =  2*M_PI; T(10,2) =  2*M_PI;
       T(11,0) =  2*M_PI; T(11,1) = -2*M_PI; T(11,2) =  2*M_PI;

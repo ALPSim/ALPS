@@ -66,12 +66,12 @@ int main(int argc, char **argv){
   if(!vm.count("lattice")) throw std::runtime_error("you need to specify the cluster.xml file as lattice.");
   parms["LATTICE_LIBRARY"]=vm["lattice"].as<std::string>();
   
-  matsubara_green_function_t selfenergy_orig(nfreq, nsites_old, 2);
-  matsubara_green_function_t selfenergy_kspace_interp(nfreq, nsites_new, 2);
-  matsubara_green_function_t selfenergy_new(nfreq_new, nsites_new, 2);
-  matsubara_green_function_t green(nfreq, nsites_new, 2);
-  matsubara_green_function_t green0(nfreq_new, nsites_new, 2);
-  itime_green_function_t green0_itime(ntau, nsites_new, 2);
+  matsubara_green_function_t selfenergy_orig(nfreq, nsites_old, 2, diagonal);
+  matsubara_green_function_t selfenergy_kspace_interp(nfreq, nsites_new, 2, diagonal);
+  matsubara_green_function_t selfenergy_new(nfreq_new, nsites_new, 2, diagonal);
+  matsubara_green_function_t green(nfreq, nsites_new, 2, diagonal);
+  matsubara_green_function_t green0(nfreq_new, nsites_new, 2, diagonal);
+  itime_green_function_t green0_itime(ntau, nsites_new, 2, diagonal);
   
   if(!vm.count("iteration")) throw std::runtime_error("please specify iteration");
   int iteration=vm["iteration"].as<int>();

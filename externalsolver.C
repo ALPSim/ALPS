@@ -78,7 +78,7 @@ ImpuritySolver::result_type ExternalSolver::solve(
   unsigned int N=(unsigned int)p["N"];
   unsigned int sites     =(unsigned int)p.value_or_default("SITES", 1);
   unsigned int flavors   =(unsigned int)p.value_or_default("FLAVORS", 2);
-  itime_green_function_t g(N+1, sites, flavors);
+  itime_green_function_t g(N+1, sites, flavors, G0.shape());
   {
     alps::hdf5::archive ar(outfile, alps::hdf5::archive::READ);
     g.read_hdf5(ar, "/G0");
@@ -104,6 +104,8 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
   p["INFILE"]=infile;
   p["OUTFILE"]=outfile;
   {
+    if(G0_omega.shape()==diagonal) std::cerr<<"G0_omega is diagonal."<<std::endl;
+    else std::cerr<<"G0_omega is not diagonal."<<std::endl;
     alps::hdf5::archive solver_input(infile, alps::hdf5::archive::WRITE);
     solver_input<<alps::make_pvp("/parameters", p);
     G0_omega.write_hdf5(solver_input, "/G0");
@@ -116,8 +118,8 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
   unsigned int n_tau=(unsigned int)p["N"];
   unsigned int n_site     =(unsigned int)p.value_or_default("SITES", 1);
   unsigned int n_orbital  =(unsigned int)p.value_or_default("FLAVORS", 2);
-  matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
-  itime_green_function_t G_tau(n_tau+1, n_site, n_orbital);
+  matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital, G0_omega.shape());
+  itime_green_function_t G_tau(n_tau+1, n_site, n_orbital, G0_omega.shape());
   {
     alps::hdf5::archive ar(outfile, alps::hdf5::archive::READ);
     G_omega.read_hdf5(ar, "/G_omega");

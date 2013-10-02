@@ -102,7 +102,7 @@ public:
     std::cout<<beta;
     std::cout<<h;
     abort();
-    return itime_green_function_t(0,0,0);
+    return itime_green_function_t(0,0,0, diagonal);
   }
 private:
   double bw_; // or band width
@@ -129,7 +129,7 @@ public:
     std::cout<<beta;
     std::cout<<h;
     abort();
-    return itime_green_function_t(0,0,0);
+    return itime_green_function_t(0,0,0, diagonal);
   }
 private:
   std::vector<double> D_; // or band width

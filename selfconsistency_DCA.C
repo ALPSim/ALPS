@@ -75,10 +75,10 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
   int iteration_ctr = 0;
   matsubara_green_function_t G_old_omega(G0_omega);
   matsubara_green_function_t G0_old_omega(G0_omega);
-  itime_green_function_t G_tau(n_tau +1, n_site, n_orbital);
-  itime_green_function_t G0_tau(n_tau+1, n_site, n_orbital);
-  itime_green_function_t G_old_tau(n_tau+1, n_site, n_orbital);
-  itime_green_function_t G0_old_tau(n_tau+1, n_site, n_orbital);
+  itime_green_function_t G_tau(n_tau +1, n_site, n_orbital, diagonal);
+  itime_green_function_t G0_tau(n_tau+1, n_site, n_orbital, diagonal);
+  itime_green_function_t G_old_tau(n_tau+1, n_site, n_orbital, diagonal);
+  itime_green_function_t G0_old_tau(n_tau+1, n_site, n_orbital, diagonal);
   //initialize space for multiple vectors
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer(parms, fourier_ptr);
@@ -136,17 +136,18 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
       std::cout<<"convergence loop: max diff in dressed Green (Matsubara freq): "
       <<max_diff<<"\tconverged: "<<converged<<std::endl;
     }
-    matsubara_green_function_t real_G0_omega = clustertrans.transform_into_real_space(G0_omega);
-    matsubara_green_function_t real_G_omega = clustertrans.transform_into_real_space(G_omega);
-    itime_green_function_t real_G0_tau = clustertrans.transform_into_real_space(G0_tau);
-    itime_green_function_t real_G_tau = clustertrans.transform_into_real_space(G_tau);
     if (parms.value_or_default("ANTIFERROMAGNET", false)) 
-      print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, blockdiagonal);
+      print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
     else
-      print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, diagonal);
-    if(!parms.defined("WRITE_SPARSE"))  
-      print_all_green_functions(basename, iteration_ctr, real_G0_omega, real_G_omega, real_G0_tau, real_G_tau, beta, nondiagonal, "_realspace");
-    if (iteration_ctr == 1) 
+      print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
+    if(!parms.defined("WRITE_SPARSE")){
+      matsubara_green_function_t real_G0_omega = clustertrans.transform_into_real_space(G0_omega);
+      matsubara_green_function_t real_G_omega = clustertrans.transform_into_real_space(G_omega);
+      itime_green_function_t real_G0_tau = clustertrans.transform_into_real_space(G0_tau);
+      itime_green_function_t real_G_tau = clustertrans.transform_into_real_space(G_tau);
+      print_all_green_functions(basename, iteration_ctr, real_G0_omega, real_G_omega, real_G0_tau, real_G_tau, beta, "_realspace");
+    }
+    if (iteration_ctr == 1)
       (*const_cast<alps::Parameters*>(&parms))["H"] = h_old;
   } while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it); 
   // write G0

@@ -35,16 +35,20 @@ bool adjust_chemical_potential(const double &density, double &mu, bool &damping_
 
 
 
-matsubara_green_function_t ClusterTransformer::initial_G0(const alps::Parameters& parms) {
+matsubara_green_function_t ClusterTransformer::initial_G0(const alps::Parameters& parms, shape_t shape) {
   std::cout<<"reading initial G0_omega from: "<<parms["G0OMEGA_INPUT"]<<std::endl;
   int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
   int n_orbital=boost::lexical_cast<int>(parms["FLAVORS"]);
   int n_site=boost::lexical_cast<int>(parms["SITES"]);
-  matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital);
+  matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital, shape);
   G0_omega.read(parms["G0OMEGA_INPUT"].c_str());
   return G0_omega;
 }
 
+matsubara_green_function_t DCATransformer::initial_G0(const alps::Parameters& parms, shape_t shape) {
+  std::cout<<"in DCATransformer: reading initial G0."<<std::endl;
+  return ClusterTransformer::initial_G0(parms, shape);
+}
 
 
 void DCATransformer::generate_transformer(const alps::Parameters& parms, boost::shared_ptr<DCATransformer> &trans_ptr)
@@ -80,7 +84,7 @@ void CDMFTTransformer::generate_transformer(const alps::Parameters& parms, boost
 
 
 DCATransformer::DCATransformer(const alps::Parameters& params) 
-: ClusterTransformer(params), 
+: ClusterTransformer(params),
 t_(params.defined("W") ? 1. : static_cast<double>(params["t"])), 
 t2_(params.value_or_default("t'", params.value_or_default("t2", 0.))),
 t3_(params.value_or_default("t3", 0.)),
@@ -92,6 +96,7 @@ epsav_(n_cluster_sites()),
 epssqav_(n_cluster_sites()),
 dispersion_moments_(2, 0.)
 {
+  std::cout<<"about to generate a DCA transformer."<<std::endl;
   if (params.defined("t") && params.defined("W"))
     boost::throw_exception(std::invalid_argument("both t and W are defined"));
   //calculating dispersion moments, bandwidth and half filling
@@ -151,6 +156,7 @@ dispersion_moments_(2, 0.)
   int rank;   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   if(rank==0) std::cout << "bandwidth: " << bandwidth_ << "\n";
 #endif
+  std::cout<<"done generating a DCA transformer."<<std::endl;
 }
 
 
@@ -212,6 +218,7 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
                                                             matsubara_green_function_t &selfenergy,
                                                             double &mu, const double h, const double beta, const bool use_selfenergy)
 {
+std::cout<<"running operator."<<std::endl;
   if(h!=0) {
     throw std::invalid_argument("don't know how to handle magn. fields (use the AFM transformer for that!), exiting"); 
   }
@@ -298,17 +305,18 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
       }
     }
   }
+std::cout<<"done running operator."<<std::endl;
   return G0_omega_new;
 }
 
 
 
-matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Parameters& parms)
+matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Parameters& parms, shape_t shape)
 {
   if (parms.defined("G0OMEGA_INPUT")){
     std::ifstream in_file(parms["G0OMEGA_INPUT"].c_str());
     if(in_file.good()){
-      return ClusterTransformer::initial_G0(parms);
+      return DCATransformer::initial_G0(parms, shape);
     }
     else
       std::cout<<"WARNING: Input file could not be found, proceeding with free solution."<<std::endl;
@@ -322,7 +330,7 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
   double mu = static_cast<double>(parms["MU"]);
   //double h = static_cast<double>(parms["H"]);
   //bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
-  matsubara_green_function_t G0_omega_new(n_matsubara,n_cluster_sites(),n_flavor);
+  matsubara_green_function_t G0_omega_new(n_matsubara,n_cluster_sites(),n_flavor, diagonal);
   G0_omega_new.clear();
   if (parms.value_or_default("INSULATING", false)) {
     std::cout <<"calculating insulating G0_omega";
@@ -352,8 +360,8 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
     }
   }
   else {
-    matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor);  
-    matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor);
+    matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor, diagonal);
+    matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor, diagonal);
     G0_omega.clear();
     for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
       for (site_t i=0; i<n_cluster_sites(); ++i) {
@@ -366,7 +374,7 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
     //invoke transformation with G_omega==G0_omega (selfenergy=0)
     G0_omega_new = operator()(G_omega, G0_omega, mu, 0, beta);
   }
-  itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor);
+  itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor, diagonal);
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   G0_omega_new.write("G0_omega_input");
   FourierTransformer::generate_transformer(parms, fourier_ptr);
@@ -392,7 +400,11 @@ matsubara_green_function_t SimpleDCATransformer::transform_fourpoint(const matsu
                                                                      const double mu, const double h, 
                                                                      const double beta, const unsigned int n_matsubara) const
 {
-  std::cout << "transforming cluster green function\n";
+    throw std::runtime_error("implemented but deprecated.");
+    
+    return G_omega_fourpoint;
+  }
+/*  std::cout << "transforming cluster green function\n";
   assert(h==0); 
   unsigned int nz = G0_omega.nflavor();
   assert(G0_omega.nsite()==n_cluster_sites());
@@ -473,7 +485,7 @@ matsubara_green_function_t SimpleDCATransformer::transform_fourpoint(const matsu
   G_omega_fourpoint_new = fourpoint_green_function_inverse(G_omega_fourpoint_new, 2*n_matsubara);
   std::cout << "lattice green function calculated\n";
   return G_omega_fourpoint_new;
-}
+}*/
 
 
 
@@ -481,7 +493,13 @@ std::map<double, std::complex<double> >
 SimpleDCATransformer::local_green_function_from_selfenergies(const std::map<double, std::vector<std::complex<double> > >& selfenergies,
                                                              const double mu, const double delta)
 {
-  typedef std::map<double, std::vector<std::complex<double> > > selfenergy_t;
+    boost::throw_exception(std::invalid_argument("implemented but deprecated."));
+    std::map<double, std::complex<double> > dummy;
+    return dummy;
+  }
+
+  
+  /*  typedef std::map<double, std::vector<std::complex<double> > > selfenergy_t;
   std::map<double, std::complex<double> > local_G;
   for (selfenergy_t::const_iterator it=selfenergies.begin(); it!=selfenergies.end(); ++it) {
     for (unsigned int kc=0; kc<n_cluster_sites(); ++kc) { 
@@ -500,7 +518,7 @@ SimpleDCATransformer::local_green_function_from_selfenergies(const std::map<doub
     local_G[it->first] /= n_cluster_cells()*n_cluster_sites();
   }
   return local_G;
-}
+}*/
 
 
 
@@ -508,6 +526,10 @@ alps::RealObsevaluator SimpleDCATransformer::kinetic_energy(const std::vector<st
                                                             const double beta, const double mu, 
                                                             const bool error_propagation, const bool paramagnet)
 {
+  boost::throw_exception(std::invalid_argument("implemented but deprecated"));
+  return alps::RealObsevaluator();
+}
+/*{
   const unsigned int nzone = selfenergies.size();
   const unsigned int nfreq = selfenergies[0][0].size()/2;
   if (error_propagation) {
@@ -632,7 +654,7 @@ alps::RealObsevaluator SimpleDCATransformer::kinetic_energy(const std::vector<st
     alps::RealObsevaluator kin_eval(kin_obs);
     return kin_eval; 
   }
-}
+}*/
 
 
 
@@ -644,7 +666,7 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
   unsigned int nfreq=G0_omega.nfreq();
   assert(G0_omega.nsite()==n_cluster_sites());
   assert(nflavor>1 && nflavor%2 == 0);
-  matsubara_green_function_t G0_omega_new(nfreq,n_cluster_sites(),nflavor);
+  matsubara_green_function_t G0_omega_new(nfreq,n_cluster_sites(),nflavor, blockdiagonal);
   G0_omega_new.clear();
   matsubara_green_function_t G0_omega_inv = green_function_inverse(G0_omega);
   matsubara_green_function_t G_omega_inv = green_function_inverse(G_omega);
@@ -688,10 +710,11 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
 
 
 
-matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Parameters& parms)
+matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Parameters& parms, shape_t shape)
 {
+  if(shape != blockdiagonal) throw std::logic_error("the shape really should be blockdiagonal.");
   if (parms.defined("G0OMEGA_INPUT")) 
-    return ClusterTransformer::initial_G0(parms);
+    return ClusterTransformer::initial_G0(parms, shape);
   else {
     std::cout<<"calculating initial G0_omega"<<std::endl;
     unsigned int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
@@ -700,8 +723,8 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
     double beta = static_cast<double>(parms["BETA"]);
     double mu = static_cast<double>(parms["MU"]);
     double h = static_cast<double>(parms["H"]);
-    matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor);
-    matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor);  
+    matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor, blockdiagonal);
+    matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor, blockdiagonal);
     G0_omega.clear();
     for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
       for (site_t i=0; i<n_cluster_sites(); ++i) {
@@ -717,7 +740,7 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
     FourierTransformer::generate_transformer(parms, fourier_ptr);
     G0_omega_new.write("G0_omega_input");
     transform_into_real_space(G0_omega_new).write("G0_omega_input_realspace");
-    itime_green_function_t G0_tau(n_tau, n_cluster_sites(), n_flavor);
+    itime_green_function_t G0_tau(n_tau, n_cluster_sites(), n_flavor, blockdiagonal);
     fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega_new);
     G0_tau.write("G0_tau_input");
     transform_into_real_space(G0_tau).write("G0_tau_input_realspace");
@@ -1295,12 +1318,13 @@ matsubara_green_function_t FoursiteCDMFTTransformer::operator()(const matsubara_
 
 
 
-matsubara_green_function_t FoursiteCDMFTTransformer::initial_G0(const alps::Parameters& parms)
+matsubara_green_function_t FoursiteCDMFTTransformer::initial_G0(const alps::Parameters& parms, shape_t shape)
 {
+  if(shape != nondiagonal) throw std::logic_error("shape should probably be nondiagonal");
   if (parms.defined("G0OMEGA_INPUT")){
     std::ifstream in_file(parms["G0OMEGA_INPUT"].c_str());
     if(in_file.good()){
-      return ClusterTransformer::initial_G0(parms);
+      return ClusterTransformer::initial_G0(parms, shape);
     }
     else
       std::cout<<"WARNING: Input file could not be found, proceeding with free solution."<<std::endl;
@@ -1314,7 +1338,7 @@ matsubara_green_function_t FoursiteCDMFTTransformer::initial_G0(const alps::Para
   double mu = static_cast<double>(parms["MU"]);
   //double h = static_cast<double>(parms["H"]);
   //bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
-  matsubara_green_function_t G0_omega_new(n_matsubara,n_cluster_sites(),n_flavor);
+  matsubara_green_function_t G0_omega_new(n_matsubara,n_cluster_sites(),n_flavor, nondiagonal);
   G0_omega_new.clear();
   if (parms.value_or_default("INSULATING", false)) {
     std::cout <<"calculating insulating G0_omega";
@@ -1325,8 +1349,8 @@ matsubara_green_function_t FoursiteCDMFTTransformer::initial_G0(const alps::Para
     throw std::runtime_error("isolated g0 in foursite transformer not implemented.");
   }
   else {
-    matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor);  
-    matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor);
+    matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor, nondiagonal);
+    matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor, nondiagonal);
     G0_omega.clear();
     for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
       for (site_t i=0; i<n_cluster_sites(); ++i) {
@@ -1339,7 +1363,7 @@ matsubara_green_function_t FoursiteCDMFTTransformer::initial_G0(const alps::Para
     //invoke transformation with G_omega==G0_omega (selfenergy=0)
     G0_omega_new = operator()(G_omega, G0_omega, mu, 0, beta);
   }
-  itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor);
+  itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor, nondiagonal);
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   G0_omega_new.write("G0_omega_input");
   FourierTransformer::generate_transformer(parms, fourier_ptr);

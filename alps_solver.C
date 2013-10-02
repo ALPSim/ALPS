@@ -114,7 +114,7 @@ itime_green_function_t  alps::ImpuritySolver::solve(
   unsigned int N=(unsigned int)p["N"];
   unsigned int sites     =(unsigned int)p.value_or_default("SITES", 1);
   unsigned int flavors   =(unsigned int)p.value_or_default("FLAVORS", 2);
-  itime_green_function_t g(N+1, sites, flavors);
+  itime_green_function_t g(N+1, sites, flavors, G0.shape());
   {
     alps::hdf5::archive ar(outfile, alps::hdf5::archive::READ);
     g.read_hdf5(ar, "/G0");
@@ -159,8 +159,8 @@ std::pair<matsubara_green_function_t, itime_green_function_t> alps::ImpuritySolv
   unsigned int n_tau=(unsigned int)p["N"];
   unsigned int n_site     =(unsigned int)p.value_or_default("SITES", 1);
   unsigned int n_orbital  =(unsigned int)p.value_or_default("FLAVORS", 2);
-  matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
-  itime_green_function_t G_tau(n_tau+1, n_site, n_orbital);
+  matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital, G0_omega.shape());
+  itime_green_function_t G_tau(n_tau+1, n_site, n_orbital, G0_omega.shape());
   {
     alps::hdf5::archive ar(outfile, alps::hdf5::archive::READ);
     G_omega.read_hdf5(ar, "/G_omega");
