@@ -55,46 +55,56 @@ int main(int argc, char *argv[]) {
         tokenizer input_file_list(options.input_file, boost::char_separator<char>(","));
         for (tokenizer::const_iterator it = input_file_list.begin(); it != input_file_list.end(); ++it)
             input_files.push_back(*it);
+        std::size_t tasks_done = 0;
 
-        std::size_t color = comm_world.rank() * input_files.size() / comm_world.size();
-        boost::mpi::communicator comm_local = comm_world.split(color);
+        while (tasks_done < input_files.size()) {
 
-        // boost::mpi::communicator & comm_local = comm_world;
+            std::size_t color = tasks_done;
+            if (comm_world.size() < input_files.size())
+                color += comm_world.rank();
+            else
+                color += comm_world.rank() * input_files.size() / comm_world.size();
+            tasks_done += comm_world.size();
 
-        std::string checkpoint_file = input_files[color].substr(0, input_files[color].find_last_of('.')) 
-                                    +  ".clone" + boost::lexical_cast<std::string>(comm_local.rank()) + ".h5";
+            std::cout << color << std::endl;
 
-        alps::parameters_type<ising_sim>::type parameters;
-        if (comm_local.rank() > 0);
-        else if (boost::filesystem::extension(input_files[color]) == ".xml")
-            parameters = alps::make_parameters_from_xml(options.input_file);
-        else if (boost::filesystem::extension(input_files[color]) == ".h5")
-            alps::hdf5::archive(input_files[color])["/parameters"] >> parameters;
-        else
-            parameters = alps::parameters_type<ising_sim>::type(input_files[color]);
-        broadcast(comm_local, parameters);
+            boost::mpi::communicator comm_local = comm_world.split(color);
 
-        alps::mpi_adapter<ising_sim> sim(parameters, comm_local, alps::check_schedule(options.tmin, options.tmax));
+            std::string checkpoint_file = input_files[color].substr(0, input_files[color].find_last_of('.')) 
+                                        +  ".clone" + boost::lexical_cast<std::string>(comm_local.rank()) + ".h5";
 
-        if (options.resume)
-            sim.load(checkpoint_file);
+            alps::parameters_type<ising_sim>::type parameters;
+            if (comm_local.rank() > 0);
+            else if (boost::filesystem::extension(input_files[color]) == ".xml")
+                parameters = alps::make_parameters_from_xml(options.input_file);
+            else if (boost::filesystem::extension(input_files[color]) == ".h5")
+                alps::hdf5::archive(input_files[color])["/parameters"] >> parameters;
+            else
+                parameters = alps::parameters_type<ising_sim>::type(input_files[color]);
+            broadcast(comm_local, parameters);
 
-        // TODO: how do we handle signels in mpi context? do we want to handle these in the callback or in the simulation?
-        // do not use stop_callback_mpi: we do not want an bcast after every sweep!
-        sim.run(alps::stop_callback(comm_local, options.timelimit));
+            alps::mpi_adapter<ising_sim> sim(parameters, comm_local, alps::check_schedule(options.tmin, options.tmax));
 
-        sim.save(checkpoint_file);
+            if (options.resume)
+                sim.load(checkpoint_file);
 
-        using alps::collect_results;
-        alps::results_type<ising_sim>::type results = collect_results(sim);
+            // TODO: how do we handle signels in mpi context? do we want to handle these in the callback or in the simulation?
+            // do not use stop_callback_mpi: we do not want an bcast after every sweep!
+            sim.run(alps::stop_callback(comm_local, options.timelimit));
 
-        if (comm_local.rank() == 0) {
-            std::cout << results << std::endl;
-            alps::hdf5::archive ar(options.output_file, "w");
-            ar["/parameters"] << parameters;
-            ar["/simulation/results"] << results;
+            sim.save(checkpoint_file);
+
+            using alps::collect_results;
+            alps::results_type<ising_sim>::type results = collect_results(sim);
+
+            if (comm_local.rank() == 0) {
+                std::cout << results << std::endl;
+                alps::hdf5::archive ar(options.output_file, "w");
+                ar["/parameters"] << parameters;
+                ar["/simulation/results"] << results;
+            }
+
         }
-
     } catch (std::exception const & e) {
         std::cerr << "Caught exception: " << e.what() << std::endl;
         return EXIT_FAILURE;
