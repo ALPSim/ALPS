@@ -396,6 +396,10 @@ bool ClusterHelper::write(const alps::Parameters &parms) const{
 bool ClusterHelper::read(const alps::Parameters &parms){
   ///TODO: this should implement writing the clusterhelper.
   if(parms.defined("TMPNAME")){
+    {
+      std::ifstream in_file(std::string(parms["TMPNAME"]).c_str());
+      if(!in_file.is_open()) return false;
+    }
     alps::hdf5::archive ar(parms["TMPNAME"]+std::string(".in.h5"), alps::hdf5::archive::READ);
     if(!ar.is_data("/transformer/name")) return false;
     std::string name;     ar>>alps::make_pvp("/transformer/name", name);
