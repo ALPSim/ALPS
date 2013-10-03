@@ -397,7 +397,7 @@ bool ClusterHelper::read(const alps::Parameters &parms){
   ///TODO: this should implement writing the clusterhelper.
   if(parms.defined("TMPNAME")){
     {
-      std::ifstream in_file(std::string(parms["TMPNAME"]).c_str());
+      std::ifstream in_file((std::string(parms["TMPNAME"])).c_str());
       if(!in_file.is_open()) return false;
     }
     alps::hdf5::archive ar(parms["TMPNAME"]+std::string(".in.h5"), alps::hdf5::archive::READ);
