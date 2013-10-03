@@ -46,7 +46,6 @@ matsubara_green_function_t ClusterTransformer::initial_G0(const alps::Parameters
 }
 
 matsubara_green_function_t DCATransformer::initial_G0(const alps::Parameters& parms, shape_t shape) {
-  std::cout<<"in DCATransformer: reading initial G0."<<std::endl;
   return ClusterTransformer::initial_G0(parms, shape);
 }
 
@@ -60,10 +59,10 @@ void DCATransformer::generate_transformer(const alps::Parameters& parms, boost::
   }
   else {
 #ifndef USE_MPI
-    std::cout<<"creating simple DCA transformer"<<std::endl;
+    //std::cout<<"creating simple DCA transformer"<<std::endl;
 #else
-    int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    if(rank==0) std::cout<<"creating simple DCA transformer"<<std::endl;
+    //int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    //if(rank==0) std::cout<<"creating simple DCA transformer"<<std::endl;
 #endif
     trans_ptr.reset(new SimpleDCATransformer(parms));
   }
@@ -96,7 +95,6 @@ epsav_(n_cluster_sites()),
 epssqav_(n_cluster_sites()),
 dispersion_moments_(2, 0.)
 {
-  std::cout<<"about to generate a DCA transformer."<<std::endl;
   if (params.defined("t") && params.defined("W"))
     boost::throw_exception(std::invalid_argument("both t and W are defined"));
   //calculating dispersion moments, bandwidth and half filling
@@ -151,12 +149,11 @@ dispersion_moments_(2, 0.)
     bandwidth_ = bw;
   }
 #ifndef USE_MPI 
-  std::cout << "bandwidth: " << bandwidth_ << "\n";
+//  std::cout << "bandwidth: " << bandwidth_ << "\n";
 #else
-  int rank;   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  if(rank==0) std::cout << "bandwidth: " << bandwidth_ << "\n";
+//  int rank;   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//  if(rank==0) std::cout << "bandwidth: " << bandwidth_ << "\n";
 #endif
-  std::cout<<"done generating a DCA transformer."<<std::endl;
 }
 
 
@@ -218,7 +215,6 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
                                                             matsubara_green_function_t &selfenergy,
                                                             double &mu, const double h, const double beta, const bool use_selfenergy)
 {
-std::cout<<"running operator."<<std::endl;
   if(h!=0) {
     throw std::invalid_argument("don't know how to handle magn. fields (use the AFM transformer for that!), exiting"); 
   }

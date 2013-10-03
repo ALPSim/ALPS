@@ -33,7 +33,9 @@ alps::graph_helper<alps::graph_helper<>::graph_type>(params),
 n_cluster_sites_(boost::lexical_cast<int>(params["SITES"])), epsilon_(1e-9),
 lattice_momenta_file_name_(params.value_or_default("LATTICE_MOMENTA_FILE", "LatticeMomenta"))
 {
-  setup_tables(params);
+  //try to read this transformer, otherwise generate it.
+  if(!read(params))
+    setup_tables(params);
 }
 
 
@@ -291,13 +293,85 @@ void ClusterHelper::setup_tables(const alps::Parameters &params)
   }
 #endif
 }
-alps::hdf5::archive & serialize(alps::hdf5::archive & ar, std::string const & p, std::set<ClusterHelper::site_class_type> const &site_class_set_real_space_);
-void ClusterHelper::write(const alps::Parameters &parms) const{
+void ClusterHelper::write_site_class_set(alps::hdf5::archive &ar, const site_class_set_type &set, const std::string &name) const{
+  int z=0;
+  std::stringstream path; path<<"/transformer/"<<name<<"/size";
+  ar<<alps::make_pvp(path.str(),set.size());
+  for(site_class_set_type::const_iterator it=set.begin(); it != set.end();++it){
+    int z1=0;
+    std::stringstream path; path<<"/transformer/"<<name<<"/"<<z<<"/size";
+    ar<<alps::make_pvp(path.str(),it->size());
+    for(site_class_type::const_iterator it1=it->begin(); it1 != it->end();++it1){
+      std::stringstream path; path<<"/transformer/"<<name<<"/"<<z<<"/"<<z1;
+      ar<<alps::make_pvp(path.str(), *it1);
+      z1++;
+    }
+    z++;
+  }
+}
+void ClusterHelper::write_pair_class_set(alps::hdf5::archive &ar, const pair_class_set_type &set, const std::string &name) const{
+  int z=0;
+  std::stringstream path; path<<"/transformer/"<<name<<"/size";
+  ar<<alps::make_pvp(path.str(),set.size());
+  for(pair_class_set_type::const_iterator it=set.begin(); it != set.end();++it){
+    int z1=0;
+    std::stringstream path; path<<"/transformer/"<<name<<"/"<<z<<"/size";
+    ar<<alps::make_pvp(path.str(),it->size());
+    for(pair_class_type::const_iterator it1=it->begin(); it1 != it->end();++it1){
+      std::stringstream path1, path2;
+      path1<<"/transformer/"<<name<<"/"<<z<<"/"<<z1<<"/first";
+      ar<<alps::make_pvp(path1.str(), it1->first);
+      path2<<"/transformer/"<<name<<"/"<<z<<"/"<<z1<<"/second";
+      ar<<alps::make_pvp(path2.str(), it1->second);
+      z1++;
+    }
+    z++;
+  }
+}
+void ClusterHelper::read_site_class_set(alps::hdf5::archive &ar, site_class_set_type &set, const std::string &name){
+  int zmax, z1max;
+  std::stringstream path; path<<"/transformer/"<<name<<"/size";
+  ar>>alps::make_pvp(path.str(),zmax);
+  for(int z=0;z<zmax;++z){
+    std::stringstream path; path<<"/transformer/"<<name<<"/"<<z<<"/size";
+    ar>>alps::make_pvp(path.str(),z1max);
+    std::set<site_t> s;
+    for(int z1=0;z1<z1max;++z1){
+      site_t val;
+      std::stringstream path; path<<"/transformer/"<<name<<"/"<<z<<"/"<<z1;
+      ar>>alps::make_pvp(path.str(), val);
+      s.insert(val);
+    }
+    set.insert(s);
+  }
+}
+void ClusterHelper::read_pair_class_set(alps::hdf5::archive &ar, pair_class_set_type &set, const std::string &name){
+  int zmax, z1max;
+  std::stringstream path; path<<"/transformer/"<<name<<"/size";
+  ar>>alps::make_pvp(path.str(),zmax);
+  for(int z=0;z<zmax;++z){
+    std::stringstream path; path<<"/transformer/"<<name<<"/"<<z<<"/size";
+    ar>>alps::make_pvp(path.str(),z1max);
+    std::set<pair_type> s;
+    for(int z1=0;z1<z1max;++z1){
+      pair_type val;
+      std::stringstream path1; path1<<"/transformer/"<<name<<"/"<<z<<"/"<<z1<<"/first";
+      std::stringstream path2; path2<<"/transformer/"<<name<<"/"<<z<<"/"<<z1<<"/second";
+      ar>>alps::make_pvp(path1.str(), val.first);
+      ar>>alps::make_pvp(path2.str(), val.second);
+      s.insert(val);
+    }
+    set.insert(s);
+  }
+}
+
+bool ClusterHelper::write(const alps::Parameters &parms) const{
   ///TODO: this should implement writing the clusterhelper.
   if(parms.defined("TMPNAME")){
-    std::cout<<"writing cluster info."<<std::endl;
     //write data to the 'tmpname' file
     alps::hdf5::archive ar(parms["TMPNAME"]+std::string(".in.h5"), alps::hdf5::archive::WRITE);
+    if(ar.is_data("/transformer/name")) return false; //already have a transformer there.
+    ar<<alps::make_pvp("/transformer/name", std::string(parms["LATTICE"]));
     ar<<alps::make_pvp("/transformer/n_cluster_sites", n_cluster_sites_);
     ar<<alps::make_pvp("/transformer/bipartite", bipartite_);
     ar<<alps::make_pvp("/transformer/epsilon", epsilon_);
@@ -311,19 +385,22 @@ void ClusterHelper::write(const alps::Parameters &parms) const{
     ar<<alps::make_pvp("/transformer/symmetry_table_real_space", symmetry_table_real_space_);
     
     //the sets we need to do by hand:
-    //
-    // --> todo: continue here.
-    //
-    //ar<<alps::make_pvp("/transformer/site_class_set_real_space", site_class_set_real_space_);
+    //site class set real space
+    write_site_class_set(ar, site_class_set_real_space_, "site_class_set_real_space");
+    write_site_class_set(ar, site_class_set_k_space_, "site_class_set_k_space");
+    write_pair_class_set(ar, pair_class_set_real_space_, "pair_class_set_real_space");
+    write_pair_class_set(ar, pair_class_set_k_space_, "pair_class_set_k_space");
   }
+  return true;
 }
-
-void ClusterHelper::read(const alps::Parameters &parms){
+bool ClusterHelper::read(const alps::Parameters &parms){
   ///TODO: this should implement writing the clusterhelper.
   if(parms.defined("TMPNAME")){
-    std::cout<<"reading cluster info."<<std::endl;
-    //write data to the 'tmpname' file
     alps::hdf5::archive ar(parms["TMPNAME"]+std::string(".in.h5"), alps::hdf5::archive::READ);
+    if(!ar.is_data("/transformer/name")) return false;
+    std::string name;     ar>>alps::make_pvp("/transformer/name", name);
+    if(name!=parms["LATTICE"]) throw std::logic_error("reading cluster transformer with name: "+name+" for cluster: "+std::string(parms["LATTICE"]));
+    //write data to the 'tmpname' file
     ar>>alps::make_pvp("/transformer/n_cluster_sites", n_cluster_sites_);
     ar>>alps::make_pvp("/transformer/bipartite", bipartite_);
     ar>>alps::make_pvp("/transformer/epsilon", *(const_cast<double*>(&epsilon_)));
@@ -333,7 +410,15 @@ void ClusterHelper::read(const alps::Parameters &parms){
     ar>>alps::make_pvp("/transformer/reciprocal_basis", reciprocal_basis_);
     ar>>alps::make_pvp("/transformer/reciprocal_basis_inv", reciprocal_basis_inv_);
     ar>>alps::make_pvp("/transformer/rbzone_boundaries", rbzone_boundaries_);
+    ar>>alps::make_pvp("/transformer/symmetry_table_k_space", symmetry_table_k_space_);
+    ar>>alps::make_pvp("/transformer/symmetry_table_real_space", symmetry_table_real_space_);
+
+    read_site_class_set(ar, site_class_set_real_space_, "site_class_set_real_space");
+    read_site_class_set(ar, site_class_set_k_space_, "site_class_set_k_space");
+    read_pair_class_set(ar, pair_class_set_real_space_, "pair_class_set_real_space");
+    read_pair_class_set(ar, pair_class_set_k_space_, "pair_class_set_k_space");
   }
+  return true; //success
 }
 
 void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
