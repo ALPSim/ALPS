@@ -66,6 +66,9 @@ int main(int argc, char *argv[]) {
 
         // TODO: how do we handle signels in mpi context? do we want to handle these in the callback or in the simulation?
         // do not use stop_callback_mpi: we do not want an bcast after every sweep!
+        //  Additionally this causes a race cond and deadlocks as mpi_adapter::run will always call the stop_callback broadcast
+        //  but only sometimes all_reduce on the fraction. Timers on different procs are not synchronized so they may not agree
+        //  on the mpi call.
         sim.run(alps::stop_callback(comm, options.timelimit));
 
         sim.save(checkpoint_file);
