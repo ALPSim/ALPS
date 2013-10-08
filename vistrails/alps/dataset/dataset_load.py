@@ -195,13 +195,15 @@ class LoadAlpsMeasurements(Module):
 
 class LoadDMFTIterations(Module):
     """Load the data from successive DMFT-Iterations. Description of input ports:
-      @ResultFiles: The hdf5-files.
-      @Measurements: List of observables to load
+      @ResultFiles: The list of hdf5-files.
+      @Observable: Observable to load
+      @Measurements: List of measurements of the observable to load
       @PropertyPath: Hdf5-path to the parameters stored. Default: /parameters
       @ResultPath: Hdf5-path to the observables stored. Default: /simulation/iteration"""
 
     my_input_ports = [
         PortDescriptor('ResultFiles',ResultFiles),
+        PortDescriptor('Observable',basic.String),
         PortDescriptor('Measurements',basic.List),
         PortDescriptor('PropertyPath',basic.String),
         PortDescriptor('ResultPath',basic.String)
@@ -217,13 +219,13 @@ class LoadDMFTIterations(Module):
             loader = Hdf5Loader()
             if self.hasInputFromPort('ResultFiles'):
                 files = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
-            datasets = []
+            if self.hasInputFromPort('Observable'):
+                obs = self.getInputFromPort('Observable')
             if self.hasInputFromPort('Measurements'):
-                datasets = loader.ReadMeasurementFromFile(files,measurements=self.getInputFromPort('Measurements'),proppath=propPath,respath=resPath)
+                datasets = loader.ReadDMFTIterations(files,observable=obs,measurements=self.getInputFromPort('Measurements'),proppath=propPath,respath=resPath)
             else:
-                datasets = loader.ReadMeasurementFromFile(files,measurements=None,proppath=propPath,respath=resPath)
+                datasets = loader.ReadDMFTIterations(files,observable=obs,proppath=propPath,respath=resPath)
             self.setResult('data',datasets)
-
 
 class LoadTimeEvolution(Module):
     """Load the data from successive TEBD-Iterations. Description of input ports:

@@ -94,6 +94,43 @@ class PrepareDataSets(Module):
         else:
             raise EmptyInputPort('source')
 
+class ComputeSelfenergy(Module):
+    """
+    Performs the Dyson equation on lists of G_omega and G0_omega.
+    
+    @G_omega: list of datasets containing G_omega (for possibly many iterations and independent simulations)
+    @G0_omega: list of datasets containing G0_omega (for possibly many iterations and independent simulations)
+    output: list of datasets containing selfenergy in Matsubara represention (complex-valued)
+    """
+    my_input_ports = [
+        PortDescriptor("G_omega",DataSets),
+        PortDescriptor("G0_omega",DataSets)
+    ]
+    my_output_ports = [
+        PortDescriptor("Selfenergy",DataSets)
+    ]
+
+    def compute(self):
+        if self.hasInputFromPort('G_omega') and self.hasInputFromPort('G0_omega'):
+            G = self.getInputFromPort('G_omega')
+            G0 = copy.deepcopy(self.getInputFromPort('G0_omega'))
+            for g0 in flatten(G0):
+                del g0.props['hdf5_path']
+            Sigma = []
+            for g in flatten(G):
+                props = copy.deepcopy(g.props)
+                del props['hdf5_path']
+                g0 = [s for s in flatten(G0) if props==s.props][0]
+                Sigma.append(DataSet())
+                Sigma[-1].x = copy.deepcopy(g.x)
+                # Dyson equation
+                Sigma[-1].y = np.array([1./g0.y[w] - 1./g.y[w] for w in range(len(g.y))])
+                Sigma[-1].props = props
+            print len(Sigma)
+            self.setResult('Selfenergy',Sigma)
+        else:
+            raise EmptyInputPort('G_omega || G0_omega')
+
 class TransformEachDataSet(Module):
     """
     Perform a transformation on all DataSets in the input separately.

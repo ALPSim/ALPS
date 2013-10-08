@@ -107,6 +107,7 @@ def selfRegister():
     register(LoadAlpsSpectra,'DataSet|Load')
     register(LoadBinningAnalysis,'DataSet|Load')
     register(LoadAlpsEigenstateMeasurements,'DataSet|Load')
+    register(LoadDMFTIterations,'DataSet|Load')
 
     register(TransformEachDataSet,'DataSet|Evaluate')
     register(TransformProperties,'DataSet|Evaluate')
@@ -116,6 +117,7 @@ def selfRegister():
     register(TransformN,'DataSet|Evalute',abst=True)
     register(Reduce,'DataSet|Evaluate')
     register(GeneralTransform,'DataSet|Evaluate',abst=True)
+    register(ComputeSelfenergy,'DataSet|Evaluate')
     
     register(Axis,'DataSet|Plot')
     register(Legend,'DataSet|Plot')
