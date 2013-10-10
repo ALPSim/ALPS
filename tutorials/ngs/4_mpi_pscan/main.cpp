@@ -65,7 +65,6 @@ int main(int argc, char *argv[]) {
             else
                 color += comm_world.rank() * input_files.size() / comm_world.size();
             tasks_done += comm_world.size();
-            std::string infile = input_files[color];
 
             std::cout << color << std::endl;
 
@@ -73,6 +72,7 @@ int main(int argc, char *argv[]) {
             if (color >= input_files.size())
                 break;
 
+            std::string infile = input_files[color];
             std::string checkpoint_file = infile.substr(0, infile.find_last_of('.')) 
                                         +  ".clone" + boost::lexical_cast<std::string>(comm_local.rank()) + ".h5";
 
