@@ -65,22 +65,25 @@ int main(int argc, char *argv[]) {
             else
                 color += comm_world.rank() * input_files.size() / comm_world.size();
             tasks_done += comm_world.size();
+            std::string infile = input_files[color];
 
             std::cout << color << std::endl;
 
             boost::mpi::communicator comm_local = comm_world.split(color);
+            if (color >= input_files.size())
+                break;
 
-            std::string checkpoint_file = input_files[color].substr(0, input_files[color].find_last_of('.')) 
+            std::string checkpoint_file = infile.substr(0, infile.find_last_of('.')) 
                                         +  ".clone" + boost::lexical_cast<std::string>(comm_local.rank()) + ".h5";
 
             alps::parameters_type<ising_sim>::type parameters;
             if (comm_local.rank() > 0);
-            else if (boost::filesystem::extension(input_files[color]) == ".xml")
-                parameters = alps::make_parameters_from_xml(options.input_file);
-            else if (boost::filesystem::extension(input_files[color]) == ".h5")
-                alps::hdf5::archive(input_files[color])["/parameters"] >> parameters;
+            else if (boost::filesystem::extension(infile) == ".xml")
+                parameters = alps::make_parameters_from_xml(infile);
+            else if (boost::filesystem::extension(infile) == ".h5")
+                alps::hdf5::archive(infile)["/parameters"] >> parameters;
             else
-                parameters = alps::parameters_type<ising_sim>::type(input_files[color]);
+                parameters = alps::parameters_type<ising_sim>::type(infile);
             broadcast(comm_local, parameters);
 
             alps::mpi_adapter<ising_sim> sim(parameters, comm_local, alps::check_schedule(options.tmin, options.tmax));
@@ -99,7 +102,8 @@ int main(int argc, char *argv[]) {
 
             if (comm_local.rank() == 0) {
                 std::cout << results << std::endl;
-                alps::hdf5::archive ar(options.output_file, "w");
+                std::string output_file = infile.substr(0, infile.find_last_of('.')) + ".out.h5";
+                alps::hdf5::archive ar(output_file, "w");
                 ar["/parameters"] << parameters;
                 ar["/simulation/results"] << results;
             }
