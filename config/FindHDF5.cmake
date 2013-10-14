@@ -385,27 +385,13 @@ else()
 ##############################################################################
                 PATH_SUFFIXES lib Lib )
             select_library_configurations( HDF5_${LIB} )
-            # even though we adjusted the individual library names in
-            # select_library_configurations, we still need to distinguish
-            # between debug and release variants because HDF5_LIBRARIES will
-            # need to specify different lists for debug and optimized builds.
-            # We can't just use the HDF5_${LIB}_LIBRARY variable (which was set
-            # up by the selection macro above) because it may specify debug and
-            # optimized variants for a particular library, but a list of
-            # libraries is allowed to specify debug and optimized only once.
-            list( APPEND HDF5_${LANGUAGE}_LIBRARIES_DEBUG 
-                ${HDF5_${LIB}_LIBRARY_DEBUG} )
-            list( APPEND HDF5_${LANGUAGE}_LIBRARIES_RELEASE 
-                ${HDF5_${LIB}_LIBRARY_RELEASE} )
+            list(APPEND HDF5_${LANGUAGE}_LIBRARIES ${HDF5_${LIB}_LIBRARY})
         endforeach()
         list( APPEND HDF5_LIBRARY_DIRS ${HDF5_${LANGUAGE}_LIBRARY_DIRS} )
         
         # Append the libraries for this language binding to the list of all
         # required libraries.
-        list( APPEND HDF5_LIBRARIES_DEBUG 
-            ${HDF5_${LANGUAGE}_LIBRARIES_DEBUG} )
-        list( APPEND HDF5_LIBRARIES_RELEASE
-            ${HDF5_${LANGUAGE}_LIBRARIES_RELEASE} )
+        list(APPEND HDF5_LIBRARIES ${HDF5_${LANGUAGE}_LIBRARIES})
     endforeach()
 
     # We may have picked up some duplicates in various lists during the above
@@ -414,24 +400,8 @@ else()
     if( HDF5_INCLUDE_DIR )
         list( REMOVE_DUPLICATES HDF5_INCLUDE_DIR )
     endif()
-    if( HDF5_LIBRARIES_DEBUG )
-        list( REMOVE_DUPLICATES HDF5_LIBRARIES_DEBUG )
-    endif()
-    if( HDF5_LIBRARIES_RELEASE )
-        list( REMOVE_DUPLICATES HDF5_LIBRARIES_RELEASE )
-    endif()
     if( HDF5_LIBRARY_DIRS )
         list( REMOVE_DUPLICATES HDF5_LIBRARY_DIRS )
-    endif()
-
-    # Construct the complete list of HDF5 libraries with debug and optimized
-    # variants when the generator supports them.
-    if( CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE )
-        set( HDF5_LIBRARIES
-            debug ${HDF5_LIBRARIES_DEBUG}
-            optimized ${HDF5_LIBRARIES_RELEASE} )
-    else()
-        set( HDF5_LIBRARIES ${HDF5_LIBRARIES_RELEASE} )
     endif()
 
     # If the HDF5 include directory was found, open H5pubconf.h to determine if
