@@ -12,7 +12,7 @@
 if (NOT Boost_ROOT_DIR)
 
   # Old version of CMake (< 2.8.8) do not support for new Boost version
-  set(Boost_ADDITIONAL_VERSIONS "1.56.0" "1.56" "1.55.0" "1.55" "1.54.0" "1.54" "1.53.0" "1.53" "1.52.0" "1.52" "1.51.0" "1.51" "1.50.0" "1.50" "1.49.0" "1.49" "1.48.0" "1.48")
+  set(Boost_ADDITIONAL_VERSIONS "1.56.0" "1.56" "1.55.0" "1.55" "1.54.0" "1.54" "1.53.0" "1.53" "1.52.0" "1.52")
   # Debian and Ubuntu packages are multithreaded by default but not on MacOSX.
   # Explicitly set multithread flag.
   set(Boost_USE_MULTITHREADED ON)
@@ -21,7 +21,7 @@ if (NOT Boost_ROOT_DIR)
   # Debug flag for FindBoost.cmake
   #  set(Boost_DEBUG TRUE)
 
-  message(STATUS "Looking for precompiled Boost libraries (version >= 1.48)")
+  message(STATUS "Looking for precompiled Boost libraries (version >= 1.52)")
 
   # We do not require Boost.MPI, therefore check whether Boost.MPI exists
   # before actual find_package for Boost.
