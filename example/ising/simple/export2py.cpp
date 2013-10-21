@@ -61,11 +61,11 @@
 
 class ising_sim {
 
-    #ifdef ALPS_NGS_USE_NEW_ALEA
-        typedef alps::accumulator::accumulator_set observables_type;
-    #else
+    // #ifdef ALPS_NGS_USE_NEW_ALEA
+    //     typedef alps::accumulator::accumulator_set observables_type;
+    // #else
         typedef alps::mcobservables observables_type;
-    #endif
+    // #endif
 
     public:
 

@@ -12,9 +12,9 @@
 #include <alps/ngs/mcresults.hpp>
 #include <alps/ngs/mcobservables.hpp>
 
-#ifdef ALPS_NGS_USE_NEW_ALEA
-    #include <alps/ngs/alea/accumulator_set.hpp>
-#endif
+// #ifdef ALPS_NGS_USE_NEW_ALEA
+//     #include <alps/ngs/alea/accumulator_set.hpp>
+// #endif
 
 #include <alps/ngs/observablewrappers.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>

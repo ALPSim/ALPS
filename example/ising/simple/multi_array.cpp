@@ -33,9 +33,9 @@
 #include <alps/hdf5/vector.hpp>
 #include <alps/hdf5/multi_array.hpp>
 
-#ifdef ALPS_NGS_USE_NEW_ALEA
-    #include <alps/ngs/alea/accumulator_set.hpp>
-#endif
+// #ifdef ALPS_NGS_USE_NEW_ALEA
+//     #include <alps/ngs/alea/accumulator_set.hpp>
+// #endif
 
 #include <alps/multi_array.hpp>
 #include <alps/random/mersenne_twister.hpp>

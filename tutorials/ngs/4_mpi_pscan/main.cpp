@@ -48,6 +48,7 @@ int main(int argc, char *argv[]) {
         boost::mpi::environment env(argc, argv);
         boost::mpi::communicator comm_world;
 
+        // TODO: accept space sparated input files, not comma
         alps::parseargs options(argc, argv);
 
         std::vector<std::string> input_files;

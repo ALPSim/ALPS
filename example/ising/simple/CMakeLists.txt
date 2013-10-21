@@ -7,9 +7,9 @@ if (ALPS_BUILD_EXAMPLES)
 
 
     set(ALPS_EXAMPLES_NGS_SIMPLE single intobs)
-    if(ALPS_NGS_USE_NEW_ALEA)
-        set(ALPS_EXAMPLES_NGS_SIMPLE ${ALPS_EXAMPLES_NGS_SIMPLE} multi_array)
-    endif(ALPS_NGS_USE_NEW_ALEA)
+#    if(ALPS_NGS_USE_NEW_ALEA)
+#        set(ALPS_EXAMPLES_NGS_SIMPLE ${ALPS_EXAMPLES_NGS_SIMPLE} multi_array)
+#    endif(ALPS_NGS_USE_NEW_ALEA)
 
     foreach (name ${ALPS_EXAMPLES_NGS_SIMPLE})
     
@@ -31,9 +31,9 @@ if (ALPS_BUILD_EXAMPLES)
     if (MPI_FOUND)
     
         set(ALPS_EXAMPLES_NGS_MPI mpi)
-        if(ALPS_NGS_USE_NEW_ALEA)
-            set(ALPS_EXAMPLES_NGS_MPI ${ALPS_EXAMPLES_NGS_MPI} multi_array_mpi)
-        endif(ALPS_NGS_USE_NEW_ALEA)
+#        if(ALPS_NGS_USE_NEW_ALEA)
+#            set(ALPS_EXAMPLES_NGS_MPI ${ALPS_EXAMPLES_NGS_MPI} multi_array_mpi)
+#        endif(ALPS_NGS_USE_NEW_ALEA)
 
         foreach (name ${ALPS_EXAMPLES_NGS_MPI})
 

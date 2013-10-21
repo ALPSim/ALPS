@@ -7,7 +7,7 @@ include_directories(${PROJECT_BINARY_DIR}/src)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${Boost_ROOT_DIR})
 
-IF(ALPS_NGS_USE_NEW_ALEA)
+IF(FALSE AND ALPS_NGS_USE_NEW_ALEA)
     FOREACH (name   example_accumulator 
                     example_accumulator_set
                     #example_custom_accum 
@@ -20,4 +20,4 @@ IF(ALPS_NGS_USE_NEW_ALEA)
         target_link_libraries(${name} alps)
         add_alps_test(${name})
     ENDFOREACH(name)
-ENDIF(ALPS_NGS_USE_NEW_ALEA)
+ENDIF(FALSE AND ALPS_NGS_USE_NEW_ALEA)

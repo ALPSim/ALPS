@@ -35,9 +35,9 @@
 #include <alps/hdf5/vector.hpp>
 #include <alps/hdf5/multi_array.hpp>
 
-#ifdef ALPS_NGS_USE_NEW_ALEA
-    #include <alps/ngs/alea/accumulator_set.hpp>
-#endif
+// #ifdef ALPS_NGS_USE_NEW_ALEA
+//     #include <alps/ngs/alea/accumulator_set.hpp>
+// #endif
 
 #include <alps/ngs/scheduler/check_schedule.hpp>
 
@@ -54,9 +54,9 @@
 #include <iostream>
 #include <stdexcept>
 
-#ifndef ALPS_NGS_USE_NEW_ALEA
-#error "this example only works with the new alea"
-#endif
+// #ifndef ALPS_NGS_USE_NEW_ALEA
+// #error "this example only works with the new alea"
+// #endif
 
 class multi_array_sim_mpi {
 
