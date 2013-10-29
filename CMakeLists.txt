@@ -147,6 +147,8 @@ endif(NOT WIN32)
 STRING(REGEX MATCH "clang" IS_CLANG "${ALPS_COMPILER_VERSION}")
 if(IS_CLANG)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftemplate-depth-256 -Wall -Wno-unknown-pragmas -Wno-unused-function -Wno-overloaded-virtual -Wno-unneeded-internal-declaration -Wno-unused-variable -Wno-return-type-c-linkage")
+    # compilation fails with -stdlib=libc++, which is new default on Mavericks
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
 endif(IS_CLANG)
 
 if(NOT CMAKE_BUILD_TYPE)
