@@ -1,4 +1,5 @@
-#  Copyright Michele Dolfi 20123.
+#  Copyright Michele Dolfi 2012 - 2013
+#            Jan Gukelberger 2012 - 2013
 #  Distributed under the Boost Software License, Version 1.0.
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
@@ -28,5 +29,9 @@ SET(LAPACK_FOUND 1) # with -mkl we have lapack no matter what cmake thinks
 SET(HAVE_MKL 1)
 SET(BLAS_LIBRARY_INIT 1)
 SET(LAPACK_LIBRARY_INIT 1)
-SET(BLAS_LIBRARY "-mkl=sequential")
+IF(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
+    SET(BLAS_LIBRARY "-mkl=parallel")
+ELSE(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
+    SET(BLAS_LIBRARY "-mkl=sequential")
+ENDIF(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL)
 SET(LAPACK_LIBRARY "")
