@@ -112,7 +112,7 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
   mark_as_advanced(PYTHON_INCLUDE_DIRS)
   FIND_PATH(TEST_PYTHON_INCLUDE patchlevel.h PATHS ${PYTHON_INCLUDE_DIRS} NO_DEFAULT_PATH)
   if (NOT TEST_PYTHON_INCLUDE)
-    message (ERROR "The Python herader files have not been found. Please check that you installed the Python headers and not only the interpreter.")
+    message (ERROR "The Python header files have not been found. Please check that you installed the Python headers and not only the interpreter.")
   endif (NOT TEST_PYTHON_INCLUDE)
 
   #
