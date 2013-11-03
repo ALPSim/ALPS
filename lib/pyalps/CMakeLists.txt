@@ -59,7 +59,7 @@ if (ALPS_HAVE_PYTHON)
   set(PYNGSRANDOM01_SOURCES ../../src/alps/ngs/python/random01.cpp)
 
 
-  if(LAPACK_FOUND)
+  if(LAPACK_FOUND AND ALPS_BUILD_APPLICATIONS)
     set(PYALPS_SOURCES ${PYALPS_SOURCES} maxent_c dwa_c cthyb ctint)
     python_add_module(maxent_c ${MAXENT_SOURCES})
     python_add_module(cthyb ${CTHYB_SOURCES})
@@ -70,7 +70,7 @@ if (ALPS_HAVE_PYTHON)
     set_target_properties(maxent_c PROPERTIES COMPILE_FLAGS "-DBUILD_PYTHON_MODULE") 
     set_target_properties(cthyb PROPERTIES COMPILE_FLAGS "-DBUILD_PYTHON_MODULE") 
     set_target_properties(ctint PROPERTIES COMPILE_FLAGS "-DBUILD_PYTHON_MODULE") 
- endif(LAPACK_FOUND)
+ endif(LAPACK_FOUND AND ALPS_BUILD_APPLICATIONS)
 
   python_add_module(pyalea_c ${PYALEA_SOURCES})
   python_add_module(pymcdata_c ${PYMCDATA_SOURCES})
