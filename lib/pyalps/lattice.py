@@ -10,6 +10,8 @@ from xml.etree import ElementTree
 
 import sys
 
+colors = ['black', 'green', 'blue', 'red']
+
 # parse file describing the lattice, and return a tuple of vertices and edges
 # both are returned as dictionaries, with the ID as key
 # and the value:
@@ -65,6 +67,6 @@ def showgraph(graph):
         p0 = vertices[s]
         p1 = vertices[t]
         
-        c = colors[edge['type'] % len(colors)]
-        
-        plt.plot([p0[0], p1[0]], [p0[1], p1[1]], c)
+        c = colors[edge['type'] % len(colors)] if 'type' in edge else None
+        plt.plot([p0[0], p1[0]], [p0[1], p1[1]], color=c)
+
