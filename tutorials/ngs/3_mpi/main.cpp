@@ -50,7 +50,8 @@ int main(int argc, char *argv[]) {
                                     +  ".clone" + boost::lexical_cast<std::string>(comm.rank()) + ".h5";
 
         alps::parameters_type<ising_sim>::type parameters;
-        if (comm.rank() > 0);
+        if (comm.rank() > 0)
+          /* do nothing*/ ;
         else if (boost::filesystem::extension(options.input_file) == ".xml")
             parameters = alps::make_parameters_from_xml(options.input_file);
         else if (boost::filesystem::extension(options.input_file) == ".h5")
@@ -64,11 +65,6 @@ int main(int argc, char *argv[]) {
         if (options.resume)
             sim.load(checkpoint_file);
 
-        // TODO: how do we handle signels in mpi context? do we want to handle these in the callback or in the simulation?
-        // do not use stop_callback_mpi: we do not want an bcast after every sweep!
-        //  Additionally this causes a race cond and deadlocks as mpi_adapter::run will always call the stop_callback broadcast
-        //  but only sometimes all_reduce on the fraction. Timers on different procs are not synchronized so they may not agree
-        //  on the mpi call.
         sim.run(alps::stop_callback(comm, options.timelimit));
 
         sim.save(checkpoint_file);

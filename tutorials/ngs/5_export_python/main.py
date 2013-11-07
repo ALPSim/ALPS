@@ -64,12 +64,13 @@ if __name__ == '__main__':
         start = time.time()
         sim.run(lambda: time.time() > start + float(limit))
 
+# TODO: make this easier to understand
     with hdf5.archive(outfile[0:outfile.rfind('.h5')] + '.clone0.h5', 'w') as ar:
         ar['/'] = sim
 
     results = sim.collectResults() # TODO: how should we do that?
     print results
 
-    with hdf5.archive(outfile, 'w') as ar: # TODO: how sould we name archive? ngs.hdf5.archive?
+    with hdf5.archive(outfile, 'w') as ar:
         ar['/parameters'] = sim.parameters
         ar['/simulation/results'] = results

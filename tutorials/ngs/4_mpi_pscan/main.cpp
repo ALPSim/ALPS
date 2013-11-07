@@ -40,6 +40,11 @@
 #include <iostream>
 #include <stdexcept>
 
+// TODO: think about a nice task q as a separate more advanced tutorial
+
+// TODO: why not out the contents of main into a template function, templated on the simulation type? then people can trivially reuse these codes
+// and we might also put the ones we need for ALPS applications into the library for use in our codes and mention that here
+
 typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
 int main(int argc, char *argv[]) {
@@ -59,7 +64,7 @@ int main(int argc, char *argv[]) {
         std::size_t tasks_done = 0;
 
         while (tasks_done < input_files.size()) {
-
+            // TODO: add comments
             std::size_t color = tasks_done;
             if (comm_world.size() < input_files.size())
                 color += comm_world.rank();
@@ -76,7 +81,7 @@ int main(int argc, char *argv[]) {
             std::string infile = input_files[color];
             std::string checkpoint_file = infile.substr(0, infile.find_last_of('.')) 
                                         +  ".clone" + boost::lexical_cast<std::string>(comm_local.rank()) + ".h5";
-
+          
             alps::parameters_type<ising_sim>::type parameters;
             if (comm_local.rank() > 0);
             else if (boost::filesystem::extension(infile) == ".xml")
@@ -92,8 +97,6 @@ int main(int argc, char *argv[]) {
             if (options.resume)
                 sim.load(checkpoint_file);
 
-            // TODO: how do we handle signels in mpi context? do we want to handle these in the callback or in the simulation?
-            // do not use stop_callback_mpi: we do not want an bcast after every sweep!
             sim.run(alps::stop_callback(comm_local, options.timelimit));
 
             sim.save(checkpoint_file);

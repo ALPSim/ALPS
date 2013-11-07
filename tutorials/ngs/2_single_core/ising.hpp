@@ -47,10 +47,10 @@ class ALPS_DECL ising_sim : public alps::mcbase {
         virtual double fraction_completed() const;
 
         using alps::mcbase::save;
-        virtual void save(alps::hdf5::archive & ar) const;
+        virtual void save(alps::hdf5::archive ar) const;
 
         using alps::mcbase::load;
-        virtual void load(alps::hdf5::archive & ar);
+        virtual void load(alps::hdf5::archive ar);
 
     private:
         

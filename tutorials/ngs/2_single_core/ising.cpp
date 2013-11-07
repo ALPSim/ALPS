@@ -41,19 +41,12 @@ ising_sim::ising_sim(parameters_type const & parms, std::size_t seed_offset)
     for(int i = 0; i < length; ++i)
         spins[i] = (random() < 0.5 ? 1 : -1);
     measurements
-    #ifdef ALPS_NGS_USE_NEW_ALEA
-        << alps::accumulator::RealObservable("Energy")
-        << alps::accumulator::RealObservable("Magnetization")
-        << alps::accumulator::RealObservable("Magnetization^2")
-        << alps::accumulator::RealObservable("Magnetization^4")
-        << alps::accumulator::RealVectorObservable("Correlations")
-    #else
-        << alps::ngs::RealObservable("Energy")
-        << alps::ngs::RealObservable("Magnetization")
-        << alps::ngs::RealObservable("Magnetization^2")
-        << alps::ngs::RealObservable("Magnetization^4")
-        << alps::ngs::RealVectorObservable("Correlations")
-    #endif
+     // #ifdef ALPS_NGS_USE_NEW_ALEA should be done in header
+         << alps::accumulator::RealObservable("Energy")
+         << alps::accumulator::RealObservable("Magnetization")
+         << alps::accumulator::RealObservable("Magnetization^2")
+         << alps::accumulator::RealObservable("Magnetization^4")
+         << alps::accumulator::RealVectorObservable("Correlations")
     ;
 }
 
@@ -98,17 +91,15 @@ double ising_sim::fraction_completed() const {
     return (sweeps < thermalization_sweeps ? 0. : ( sweeps - thermalization_sweeps ) / double(total_sweeps));
 }
 
-void ising_sim::save(alps::hdf5::archive & ar) const {
+void ising_sim::save(alps::hdf5::archive ar) const {
     mcbase::save(ar);
 
-    std::string context = ar.get_context();
     ar.set_context("/simulation/realizations/0/clones/0/checkpoint");
     ar["sweeps"] << sweeps;
     ar["spins"] << spins;
-    ar.set_context(context);
 }
 
-void ising_sim::load(alps::hdf5::archive & ar) {
+void ising_sim::load(alps::hdf5::archive ar) {
     mcbase::load(ar);
 
     length = int(parameters["L"]);
@@ -116,9 +107,7 @@ void ising_sim::load(alps::hdf5::archive & ar) {
     total_sweeps = int(parameters["SWEEPS"]);
     beta = 1. / double(parameters["T"]);
 
-    std::string context = ar.get_context();
     ar.set_context("/simulation/realizations/0/clones/0/checkpoint");
     ar["sweeps"] >> sweeps;
     ar["spins"] >> spins;
-    ar.set_context(context);
 }

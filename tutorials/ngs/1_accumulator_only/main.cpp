@@ -64,15 +64,16 @@ int main(int argc, char *argv[]) {
 
         std::size_t timelimit = boost::lexical_cast<std::size_t>(argv[1]);
         boost::filesystem::path input_file = argv[2];
-        boost::filesystem::path checkpoint_file = std::string(argv[2]).substr(0, std::string(argv[2]).find_last_of('.')) + ".clone0.h5";
-        boost::filesystem::path output_file = std::string(argv[2]).substr(0, std::string(argv[2]).find_last_of('.')) +  ".out.h5";
+        std::string basename = std::string(argv[2]).substr(0, std::string(argv[2]).find_last_of('.'));
+        boost::filesystem::path checkpoint_file = basename + ".clone0.h5";
+        boost::filesystem::path output_file = basename +  ".out.h5";
 
         alps::parameters_type<ising_sim>::type parameters(input_file);
 
         ising_sim sim(parameters);
 
         sim.run(stop_callback(timelimit));
-
+        // TODO: either drop checkpoint file or add support for resuming (in a second example?)
         sim.save(checkpoint_file);
 
         using alps::collect_results;

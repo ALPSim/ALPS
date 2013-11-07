@@ -119,7 +119,7 @@ ising_sim::results_type ising_sim::collect_results() const {
 ising_sim::results_type ising_sim::collect_results(result_names_type const & names) const {
     results_type partial_results;
     for(result_names_type::const_iterator it = names.begin(); it != names.end(); ++it)
-        partial_results.insert(*it, measurements[*it].result());
+        partial_results[*it] = measurements[*it].result());
     return partial_results;
 }
 

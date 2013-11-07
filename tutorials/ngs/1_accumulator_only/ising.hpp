@@ -73,7 +73,7 @@ class ALPS_DECL ising_sim {
     protected:
 
         parameters_type parameters;
-        boost::variate_generator<boost::mt19937, boost::uniform_real<> > mutable random;
+        boost::variate_generator<boost::mt19937, boost::uniform_real<> > random;
         accumulators_type measurements;
 
     private:
