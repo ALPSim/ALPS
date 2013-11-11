@@ -31,6 +31,7 @@
 #define DMFT_QMC_WEAK_COUPLING_H
 
 #include <alps/ngs.hpp>
+#include <alps/mcbase.hpp>
 
 #include <alps/alea.h>
 #include <cmath>

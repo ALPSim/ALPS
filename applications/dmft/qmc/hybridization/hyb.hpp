@@ -29,6 +29,7 @@
 #define HYB_HPP
 
 #include <alps/ngs.hpp>
+#include <alps/mcbase.hpp>
 #include <alps/ngs/signal.hpp>
 #include "green_function.h"
 #include "hybsegment.hpp"

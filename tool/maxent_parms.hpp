@@ -35,6 +35,7 @@
 #include <alps/osiris.h>
 #include <alps/alea.h>
 #include <alps/ngs.hpp>
+#include <alps/mcbase.hpp>
 #include <alps/ngs/signal.hpp>
 //#include "maxent.hpp"
 #include "default_model.hpp"

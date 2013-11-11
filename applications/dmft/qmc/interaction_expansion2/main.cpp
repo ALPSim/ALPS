@@ -28,8 +28,8 @@
 #include "fouriertransform.h"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #ifdef ALPS_HAVE_MPI
-#include <alps/ngs/scheduler/mpi_adapter.hpp>
-typedef alps::mpi_adapter<HubbardInteractionExpansion> sim_type;
+#include <alps/mcmpiadapter.hpp>
+typedef alps::mcmpiadapter<HubbardInteractionExpansion> sim_type;
 #else
 typedef HubbardInteractionExpansion sim_type;
 #endif
