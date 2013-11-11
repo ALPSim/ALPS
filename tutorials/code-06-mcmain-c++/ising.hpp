@@ -25,68 +25,65 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_NGS_MCBASE_HPP
-#define ALPS_NGS_MCBASE_HPP
+#ifndef ALPS_TUTORIAL_ISING_HPP
+#define ALPS_TUTORIAL_ISING_HPP
 
-#include <alps/ngs.hpp>
+#include <alps/hdf5/archive.hpp>
+#include <alps/hdf5/vector.hpp>
+
+#include <alps/ngs/params.hpp>
+#include <alps/ngs/alea/next/accumulator.hpp>
 
 #include <boost/function.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
+#include <boost/random/mersenne_twister.hpp>
 
 #include <vector>
 #include <string>
 
-// move to alps::mcbase root scope
-namespace alps {
+class ALPS_DECL ising_sim {
 
-    class ALPS_DECL mcbase {
+    typedef alps::accumulator::accumulator_set accumulators_type;
 
-        protected:
+    public:
 
-            #ifdef ALPS_NGS_USE_NEW_ALEA
-                typedef alps::accumulator::accumulator_set observable_collection_type;
-            #else
-                typedef alps::mcobservables observable_collection_type;
-            #endif
+        typedef alps::params parameters_type;
+        typedef std::vector<std::string> result_names_type;
+        typedef alps::accumulator::result_set results_type;
 
-        public:
+        ising_sim(parameters_type const & params);
 
-            typedef alps::params parameters_type;
-            typedef std::vector<std::string> result_names_type;
+        void update();
+        void measure();
+        double fraction_completed() const;
+        bool run(boost::function<bool ()> const & stop_callback);
 
-            #ifdef ALPS_NGS_USE_NEW_ALEA
-                typedef alps::accumulator::result_set results_type;
-            #else
-                typedef alps::mcresults results_type;
-            #endif
+        result_names_type result_names() const;
+        result_names_type unsaved_result_names() const;
+        results_type collect_results() const;
+        results_type collect_results(result_names_type const & names) const;
 
-            mcbase(parameters_type const & parms, std::size_t seed_offset = 0);
+        void save(boost::filesystem::path const & filename) const;
+        void load(boost::filesystem::path const & filename);
+        void save(alps::hdf5::archive & ar) const;
+        void load(alps::hdf5::archive & ar);
 
-            virtual void update() = 0;
-            virtual void measure() = 0;
-            virtual double fraction_completed() const = 0;
-            bool run(boost::function<bool ()> const & stop_callback);
+    protected:
 
-            result_names_type result_names() const;
-            result_names_type unsaved_result_names() const;
-            results_type collect_results() const;
-            results_type collect_results(result_names_type const & names) const;
+        parameters_type parameters;
+        boost::variate_generator<boost::mt19937, boost::uniform_real<> > random;
+        accumulators_type measurements;
 
-            void save(boost::filesystem::path const & filename) const;
-            void load(boost::filesystem::path const & filename);
-            virtual void save(alps::hdf5::archive & ar) const;
-            virtual void load(alps::hdf5::archive & ar);
-
-        protected:
-
-            parameters_type parameters;
-            parameters_type & params; // TODO: deprecated, remove!
-            alps::random01 mutable random;
-            observable_collection_type measurements;
-    };
-
-}
+    private:
+        
+        int length;
+        int sweeps;
+        int thermalization_sweeps;
+        int total_sweeps;
+        double beta;
+        std::vector<int> spins;
+};
 
 #endif
