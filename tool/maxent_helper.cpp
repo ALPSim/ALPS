@@ -243,14 +243,16 @@ double MaxEntHelper::entropy(const vector_type& A) const
   return S;
 }
 
+// Generic principal-value integration. Assumes that spectral function does not vary too
+// strongly within [x_{i+1},x_i]
 MaxEntHelper::vector_type MaxEntHelper::PrincipalValue(const vector_type &w,const vector_type &a) const
 {
     int N = w.size();
     vector_type r(N);
     for (int i=2;i<N-2;i++) {
-      double scr = -a[i]*std::log((w[i+1]-w[i])/(w[i]-w[i-1]));
-      for (int j=0;j<i-2;j++) scr -= 0.5*(a[j]+a[j+1])*std::log((w[i]-w[j+1])/(w[i]-w[j]));
-      for (int j=i+1;j<N-2;j++) scr -= 0.5*(a[j]+a[j+1])*std::log((w[j+1]-w[i])/(w[j]-w[i]));
+      double scr = -a[i]*std::log(std::abs((w[i+1]-w[i])/(w[i]-w[i-1])));
+      for (int j=0;j<i-1;j++) scr -= 0.5*(a[j]+a[j+1])*std::log(std::abs((w[i]-w[j+1])/(w[i]-w[j])));
+      for (int j=i+1;j<N-2;j++) scr -= 0.5*(a[j]+a[j+1])*std::log(std::abs((w[j+1]-w[i])/(w[j]-w[i])));
       r[i] = scr;
     }
     r[0] = w[2]*r[2]/w[0];

@@ -76,7 +76,7 @@ void InteractionExpansion::print(std::ostream &os){
   os<<"***********************************************************************************************************"<<std::endl;
   os<<"max order\t"<<max_order<<"\tn_flavors: "
     <<n_flavors<<"\tn_site: "<<n_site
-    <<"\tn_matsubara"<<n_matsubara<<std::endl;
+    <<"\tn_matsubara: "<<n_matsubara<<std::endl;
   os<<"n_tau: "<<n_tau<<"\tmc steps: "<<mc_steps
     <<"\ttherm steps: "<<therm_steps<<std::endl;
   

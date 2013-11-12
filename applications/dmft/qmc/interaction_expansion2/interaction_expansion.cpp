@@ -87,19 +87,23 @@ pert_hist(max_order)
   update_time=0;
   thermalized=therm_steps==0?true:false;
   if(!parms.defined("ATOMIC")) {
-    alps::hdf5::archive ar(parms["INFILE"],alps::hdf5::archive::READ);
+    alps::hdf5::archive ar(parms["INFILE"],"r");
     if(parms.defined("DMFT_FRAMEWORK") && parms["DMFT_FRAMEWORK"].cast<bool>()){
       //read in as green_function
+//      std::cerr << "Reading G0 ...";
       bare_green_matsubara.read_hdf5(ar,"/G0");
+//      std::cerr << " done.\n";
       
     } else { //plain hdf5
       std::vector<std::complex<double> > tmp(n_matsubara);
+//      std::cerr << "Reading G0 ...";
       for(std::size_t j=0; j<n_flavors; j++){
         std::stringstream path; path<<"/G0_"<<j;
         ar>>alps::make_pvp(path.str(),tmp);
         for(std::size_t i=0; i<n_matsubara; i++)
           bare_green_matsubara(i,0,0,j)=tmp[i];
       }
+//      std::cerr << " done.\n";
       tmp.clear();
     }
     

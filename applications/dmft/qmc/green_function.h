@@ -156,9 +156,11 @@ public:
   void read_hdf5(alps::hdf5::archive &ar, const std::string &path) {
     unsigned int nt, ns, nf;
     clear();
+//    std::cerr << "1";
     ar>>alps::make_pvp(path+"/nt",nt);
     ar>>alps::make_pvp(path+"/ns",ns);
     ar>>alps::make_pvp(path+"/nf",nf);
+//    std::cerr << "2";
     if(nt!=nt_ || ns!=ns_ || nf!=nf_){ std::cerr<<path<<" nt: "<<nt_<<" new: "<<nt<<" ns: "<<ns_<<" "<<ns<<" nf: "<<nf_<<" "<<nf<<" dimensions do not match."<<std::endl; throw std::runtime_error("Green's function read in: dimensions do not match."); }
     if (ns==1) {
       for(unsigned int i=0;i<nf_;++i){
@@ -172,6 +174,7 @@ public:
       std::stringstream subpath; subpath<<path<<"/values/mean";
       ar>>alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_);
     }
+//    std::cerr << "3";
   }
   
   std::pair<std::vector<T>,std::vector<T> > to_multiple_vector() const;
