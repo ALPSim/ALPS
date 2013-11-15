@@ -279,16 +279,12 @@ void ClusterHelper::setup_tables(const alps::Parameters &params)
     boost::throw_exception(std::logic_error("parameter SITES does not match cluster definition"));
   if (cluster_momenta_.size1() != n_cluster_sites())
     boost::throw_exception(std::logic_error("setup of cluster momenta table failed"));
-  std::cout<<"running symmetry analysis"<<std::endl;
   symmetry_analysis(basis, basis_inv/*, reciprocal_basis, reciprocal_basis_inv*/);
-  std::cout<<"done running symmetry analysis"<<std::endl;
 #ifndef USE_MPI
-  std::cout<<"storing cluster transformer results"<<std::endl;
   write(params);
 #else
   int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   if(rank==0){
-    std::cout<<"storing cluster transformer results"<<std::endl;
     write(params);
   }
 #endif

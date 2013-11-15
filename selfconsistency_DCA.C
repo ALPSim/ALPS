@@ -11,25 +11,21 @@
  * Application License; you can use, redistribute it and/or modify it under
  * the terms of the license, either version 1 or (at your option) any later
  * version.
- * 
+ *
  * You should have received a copy of the ALPS Application License along with
  * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
  * available from http://alps.comp-phys.org/.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
- * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
- * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
+ * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
+ * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *
  *****************************************************************************/
 
-/* $Id: selfconsistency.C 454 2011-02-01 17:38:49Z gullc $ */
-
-/// @file selfconsistency.C
-/// @brief implements the selfconsistency loop functions
 
 #include "selfconsistency.h"
 #include "green_function.h"
@@ -37,20 +33,9 @@
 #include "types.h"
 #include <sys/types.h> //will this fail on Windows?
 #include <boost/tuple/tuple.hpp> //will this fail on Windows?
-/// @brief Run the self consistency loop for G and G0 mainly in imaginary time. Perform Fourier transformations if needed.
-///
-/// @param parms contains the ALPS parameters needed for the simulation.
-/// @param solver is the impurity solver (e.g. Hirsch Fye) that creates G out of G0.
-/// @param hilbert is the HilbertTransformer that solves the Dyson equation, i.e. generates G0 out of G
-/// @param G0 is the bare Green's function in imaginary time. It has to be provided as an initial guess
-/// @param G is the Green's function, it does not have to be initialized but reasonable values will be returned upon completion of the loop
 
-
-
-
-
-void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySolver& solver, 
-                              DCATransformer& clustertrans) 
+void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySolver& solver,
+                              DCATransformer& clustertrans)
 {
   unsigned int n_tau=boost::lexical_cast<unsigned int>(parms["N"]);
   unsigned int n_matsubara=boost::lexical_cast<unsigned int>(parms["NMATSUBARA"]);
@@ -82,12 +67,12 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
   //initialize space for multiple vectors
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer(parms, fourier_ptr);
-  double max_diff;	
+  double max_diff;
   double mu;
   do {
     iteration_ctr++;
     std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
-	(*const_cast<alps::Parameters*>(&parms))["CURRENT_IT"] = iteration_ctr;
+    (*const_cast<alps::Parameters*>(&parms))["CURRENT_IT"] = iteration_ctr;
     mu = static_cast<double>(parms["MU"]);
     G_old_omega = G_omega;
     G0_old_omega = G0_omega;
@@ -96,7 +81,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega);
     std::cout<<"running solver in omega."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, parms);
-    std::cout<<"applying point group symmetries"<<std::endl<<std::flush;    
+    std::cout<<"applying point group symmetries"<<std::endl<<std::flush;
     G_tau = clustertrans.symmetrize(G_tau, paramagnet);
     G_omega = clustertrans.symmetrize(G_omega, paramagnet);
     G_omega = clustertrans.symmetrize_k_space(G_omega);
@@ -136,10 +121,8 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
       std::cout<<"convergence loop: max diff in dressed Green (Matsubara freq): "
       <<max_diff<<"\tconverged: "<<converged<<std::endl;
     }
-    if (parms.value_or_default("ANTIFERROMAGNET", false)) 
-      print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
-    else
-      print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
+    print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
+    print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
     if(!parms.defined("WRITE_SPARSE")){
       matsubara_green_function_t real_G0_omega = clustertrans.transform_into_real_space(G0_omega);
       matsubara_green_function_t real_G_omega = clustertrans.transform_into_real_space(G_omega);
@@ -149,13 +132,13 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     }
     if (iteration_ctr == 1)
       (*const_cast<alps::Parameters*>(&parms))["H"] = h_old;
-  } while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it); 
+  } while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);
   // write G0
   G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
-} 
+}
 
-void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver& solver, 
-                              DCATransformer& clustertrans) 
+void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver& solver,
+                              DCATransformer& clustertrans)
 {
   unsigned int n_tau=boost::lexical_cast<unsigned int>(parms["N"]);
   unsigned int n_matsubara=boost::lexical_cast<unsigned int>(parms["NMATSUBARA"]);
@@ -185,7 +168,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver
   //initialize space for multiple vectors
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer(parms, fourier_ptr);
-  double max_diff;	
+  double max_diff;
   do {
     iteration_ctr++;
     std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
@@ -212,8 +195,8 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver
     
     std::cout<<"running cluster transform"<<std::endl<<std::flush;
     G0_omega = clustertrans(G_omega, G0_omega, selfenergy, mu, h, eta1, eta2, beta, false);
-
-
+    
+    
     G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
     std::cout<<"comparing old and new result."<<std::endl<<std::flush;
     max_diff=0;
@@ -239,9 +222,9 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver
     nambu_itime_green_function_t real_G0_tau = clustertrans.transform_into_real_space(G0_tau);
     nambu_itime_green_function_t real_G_tau = clustertrans.transform_into_real_space(G_tau);
     print_all_nambu_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, diagonal);
-    if(!parms.defined("WRITE_SPARSE"))  
+    if(!parms.defined("WRITE_SPARSE"))
       print_all_nambu_green_functions(basename, iteration_ctr, real_G0_omega, real_G_omega, real_G0_tau, real_G_tau, beta, nondiagonal, "_realspace");
-  } while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it); 
+  } while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);
   // write G0
   G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
-} 
+}

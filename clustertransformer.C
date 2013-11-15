@@ -301,7 +301,6 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
       }
     }
   }
-std::cout<<"done running operator."<<std::endl;
   return G0_omega_new;
 }
 

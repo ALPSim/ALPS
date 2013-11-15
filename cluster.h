@@ -655,11 +655,14 @@ green_function<T> DCATransformer::symmetrize_helper(const green_function<T>& G,
       for (frequency_t freq=0; freq<nfreq; ++freq) {
         T av=0;
         for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
+          if(G.shape()==diagonal && it->first != it->second) continue;
           av += G(freq, it->first, it->second, flavor);
         }
         av /= itc->size();
-        for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++)
+        for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
+          if(G.shape()==diagonal && it->first != it->second) continue;
           G_new(freq, it->first, it->second, flavor) = av;
+        }
       }
     }
   }
@@ -673,6 +676,7 @@ struct SimpleDCATransformer::Forward {
   static void add(green_function<T>& G_new, const green_function<T>& G,
                   const itime_index_t t, const site_t i, const site_t j, const site_t k, const spin_t flavor,
                   double factor) {
+    if((G_new.shape()!=diagonal) || (G.shape() != nondiagonal)) throw std::logic_error("problem with shape of GF in add!");
     G_new(t, k, k, flavor) += factor * G(t, i, j, flavor);
   }
   template<typename T>
@@ -745,6 +749,7 @@ green_function<T> SimpleDCATransformer::spin_symmetrizer(const green_function<T>
       for(spin_t flavor=0; flavor<G_new.nflavor(); flavor+=2) {
         for (site_t k1=0; k1<n_cluster_sites(); ++k1) {
           for (site_t k2=0; k2<n_cluster_sites(); ++k2) {
+            if((k1 != k2) && (G.shape()==diagonal)) continue;
             for(frequency_t freq=0; freq<G_new.nfreq(); ++freq) {
               G_new(freq, k1, k2, flavor)= 0.5*(G_new(freq, k1, k2, flavor)+G_new(freq, k1, k2, flavor+1));
               G_new(freq, k1, k2, flavor+1)=G_new(freq, k1, k2, flavor);

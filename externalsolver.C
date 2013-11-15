@@ -191,7 +191,8 @@ NambuImpuritySolver::result_type ExternalSolver::solve_nambu(
     for(std::size_t f2=0;f2<n_orbital; ++f2){
       for(std::size_t j=0;j<n_site;++j){
         for(std::size_t k=0;k<n_site;++k){
-          for(std::size_t l=0;l<n_tau+1;++l){ 
+          if(j!=k && (G_tau.shape()==diagonal)) continue;
+          for(std::size_t l=0;l<n_tau+1;++l){
             if(std::isnan(G_tau(l,j,k,f1,f2)) || std::isinf(G_tau(l,j,k,f1,f2))) {
               std::cerr<<"freq: "<<l<<" sites: "<<j<<" "<<k<<" spin: "<<f1<<" "<<f2<<std::endl;
               std::cerr<<G_tau(l,j,k,f1,f2)<<" "<<std::endl;
