@@ -150,7 +150,7 @@ class ClusterTransformer : protected ClusterHelper
 public:
   ClusterTransformer(const alps::Parameters& params) :
   ClusterHelper(params) {
-    std::cerr<<"done building cluster transformer"<<std::endl;
+    //std::cerr<<"done building cluster transformer"<<std::endl;
   }
   virtual ~ClusterTransformer() {} //pro forma virtual destructor.
   
@@ -328,7 +328,7 @@ public:
   n_target_(compute_filling_?(double)(params["FILLING"]):-1),
   params_(params)
   {
-    std::cerr<<"done building simple DCA transformer"<<std::endl;
+    //std::cerr<<"done building simple DCA transformer"<<std::endl;
   }
   //self-consistency transform operator
   matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega,

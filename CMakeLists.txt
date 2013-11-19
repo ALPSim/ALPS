@@ -5,7 +5,7 @@ include(${ALPS_USE_FILE})
 project (DMFT)
 include_directories("$ENV{HOME}/alps_svn/")
 include_directories("$ENV{GSL_DIR}/include")
-#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -ipo -xHOST -openmp -O3 -DUSE_MPI -DNDEBUG -DMPICH_IGNORE_CXX_SEEK")
+SET(CMAKE_CXX_COMPILER "CC")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -O3 -DNDEBUG -DMPICH_IGNORE_CXX_SEEK")
 
 link_directories("/opt/local/lib")

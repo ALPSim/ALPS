@@ -59,7 +59,7 @@ void DCATransformer::generate_transformer(const alps::Parameters& parms, boost::
   }
   else {
 #ifndef USE_MPI
-    std::cout<<"creating simple DCA transformer"<<std::endl;
+    //std::cout<<"creating simple DCA transformer"<<std::endl;
 #else
     //int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     //if(rank==0) std::cout<<"creating simple DCA transformer"<<std::endl;
@@ -95,7 +95,7 @@ epsav_(n_cluster_sites()),
 epssqav_(n_cluster_sites()),
 dispersion_moments_(2, 0.)
 {
-std::cerr<<"entering DCATransformer"<<std::endl;
+//std::cerr<<"entering DCATransformer"<<std::endl;
   if (params.defined("t") && params.defined("W"))
     boost::throw_exception(std::invalid_argument("both t and W are defined"));
   //calculating dispersion moments, bandwidth and half filling
@@ -155,7 +155,7 @@ std::cerr<<"entering DCATransformer"<<std::endl;
   //  int rank;   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   //  if(rank==0) std::cout << "bandwidth: " << bandwidth_ << "\n";
 #endif
-std::cerr<<"exiting DCATransformer"<<std::endl;
+//std::cerr<<"exiting DCATransformer"<<std::endl;
 }
 
 
