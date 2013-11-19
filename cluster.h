@@ -149,7 +149,9 @@ class ClusterTransformer : protected ClusterHelper
 {
 public:
   ClusterTransformer(const alps::Parameters& params) :
-  ClusterHelper(params) {}
+  ClusterHelper(params) {
+    std::cerr<<"done building cluster transformer"<<std::endl;
+  }
   virtual ~ClusterTransformer() {} //pro forma virtual destructor.
   
   ///perform a Hilber transform: given a G and a G0, produce a G0 for the next iteration.
@@ -323,9 +325,10 @@ public:
   SimpleDCATransformer(const alps::Parameters& params) :
   DCATransformer(params),
   compute_filling_(params.defined("FILLING")),
-  n_target_(compute_filling_?(double)(params["FILLING"]):-1)
+  n_target_(compute_filling_?(double)(params["FILLING"]):-1),
+  params_(params)
   {
-    params_ptr_=&params;
+    std::cerr<<"done building simple DCA transformer"<<std::endl;
   }
   //self-consistency transform operator
   matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega,
@@ -423,7 +426,7 @@ private:
   
   bool compute_filling_;
   double n_target_;
-  const alps::Parameters *params_ptr_;
+  const alps::Parameters params_;
 };
 
 
@@ -1341,16 +1344,16 @@ public:
   L_(params["L"]),
   t_(params["t"]),
   tprime_(params.value_or_default("tprime",0)),
-  tstar_(params["tstar"])
+  tstar_(params["tstar"]),
+  params_(params)
   {
-    params_ptr_=&params;
     set_U_(n_cluster_sites(),U_);
     /*  U_.resize(4,4);
      U_(0,0)=1.; U_(0,1)=1.; U_(0,2)=1.; U_(0,3)=1.;
      U_(1,0)=1.; U_(1,1)=-1.; U_(1,2)=1.; U_(1,3)=-1.;
      U_(2,0)=1.; U_(2,1)=1.; U_(2,2)=-1.; U_(2,3)=-1.;
      U_(3,0)=1.; U_(3,1)=-1.; U_(3,2)=-1.; U_(3,3)=1.;
-     U_/=2.;
+     U_/=2.;*/
      
      /*epsav_[0]=-8*(M_PI*t+2*tprime)/(M_PI*M_PI);
      epsav_[1]= 8*(M_PI*t-2*tprime)/(M_PI*M_PI);
@@ -1439,7 +1442,7 @@ private:
   
   bool compute_filling_;
   double n_target_;
-  const alps::Parameters *params_ptr_;
+  const alps::Parameters params_;
   //complex_dense_matrix U_;
   std::vector<double> epsav_;
   std::vector<double> epssqav_;

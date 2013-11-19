@@ -9,17 +9,17 @@
  * Application License; you can use, redistribute it and/or modify it under
  * the terms of the license, either version 1 or (at your option) any later
  * version.
- * 
+ *
  * You should have received a copy of the ALPS Application License along with
  * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
  * available from http://alps.comp-phys.org/.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
- * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
- * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
+ * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
+ * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *
  *****************************************************************************/
@@ -29,8 +29,8 @@
 #include "alps/alea.h"
 #include <boost/numeric/ublas/io.hpp>
 
-bool adjust_chemical_potential(const double &density, double &mu, bool &damping_mu, 
-                               bool &computing_mu, int &mu_it, double &n_old, double &n_target, 
+bool adjust_chemical_potential(const double &density, double &mu, bool &damping_mu,
+                               bool &computing_mu, int &mu_it, double &n_old, double &n_target,
                                double &mu_old, double &mu_new, double &mu_orig);
 
 
@@ -59,7 +59,7 @@ void DCATransformer::generate_transformer(const alps::Parameters& parms, boost::
   }
   else {
 #ifndef USE_MPI
-    //std::cout<<"creating simple DCA transformer"<<std::endl;
+    std::cout<<"creating simple DCA transformer"<<std::endl;
 #else
     //int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     //if(rank==0) std::cout<<"creating simple DCA transformer"<<std::endl;
@@ -82,19 +82,20 @@ void CDMFTTransformer::generate_transformer(const alps::Parameters& parms, boost
 }
 
 
-DCATransformer::DCATransformer(const alps::Parameters& params) 
+DCATransformer::DCATransformer(const alps::Parameters& params)
 : ClusterTransformer(params),
-t_(params.defined("W") ? 1. : static_cast<double>(params["t"])), 
+t_(params.defined("W") ? 1. : static_cast<double>(params["t"])),
 t2_(params.value_or_default("t'", params.value_or_default("t2", 0.))),
 t3_(params.value_or_default("t3", 0.)),
 t4_(params.value_or_default("t4", 0.)),
 bandwidth_(params.value_or_default("W", 0.)),
 bandwidth_scale_factor_(1.),
 half_filling_(0.),
-epsav_(n_cluster_sites()), 
+epsav_(n_cluster_sites()),
 epssqav_(n_cluster_sites()),
 dispersion_moments_(2, 0.)
 {
+std::cerr<<"entering DCATransformer"<<std::endl;
   if (params.defined("t") && params.defined("W"))
     boost::throw_exception(std::invalid_argument("both t and W are defined"));
   //calculating dispersion moments, bandwidth and half filling
@@ -108,8 +109,8 @@ dispersion_moments_(2, 0.)
       double E = epsilon(k);
       epsav_  [kc]+= weight*E;
       epssqav_[kc]+= weight*E*E;
-      energies.push_back(E); 
-    }    
+      energies.push_back(E);
+    }
     epsav_  [kc] /= n_cluster_cells();
     epssqav_[kc] /= n_cluster_cells();
     dispersion_moments_[0] += epsav_[kc];
@@ -117,7 +118,7 @@ dispersion_moments_(2, 0.)
   }
   dispersion_moments_[0] /= n_cluster_sites();
   dispersion_moments_[1] /= n_cluster_sites();
-  //std::cout << "dispersion moments: " << dispersion_moments(0) << " " 
+  //std::cout << "dispersion moments: " << dispersion_moments(0) << " "
   //<< dispersion_moments(1) << std::endl;
   double hf = 0.;
   double bw = 0.;
@@ -129,17 +130,17 @@ dispersion_moments_(2, 0.)
     double min = energies.front();
     double max = energies.back();
     bw = max - min;
-    if (energies.size()%2) 
+    if (energies.size()%2)
       hf = energies[energies.size()/2];
-    else 
+    else
       hf = (energies[energies.size()/2-1] + energies[energies.size()/2])/2. ;
   }
   if (params.value_or_default("SHIFT_TO_HALF_FILLING", false)) {
     half_filling_ = hf;
-    std::cout << "half-filling " << hf << " shifted to zero\n"; 
+    std::cout << "half-filling " << hf << " shifted to zero\n";
   }
-  else{ 
-    ; //std::cout << "half-filling: " << hf << "\n"; 
+  else{
+    ; //std::cout << "half-filling: " << hf << "\n";
   }
   if (params.defined("W")) {
     bandwidth_scale_factor_ = bandwidth_/bw;
@@ -148,12 +149,13 @@ dispersion_moments_(2, 0.)
   else {
     bandwidth_ = bw;
   }
-#ifndef USE_MPI 
-//  std::cout << "bandwidth: " << bandwidth_ << "\n";
+#ifndef USE_MPI
+  //  std::cout << "bandwidth: " << bandwidth_ << "\n";
 #else
-//  int rank;   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-//  if(rank==0) std::cout << "bandwidth: " << bandwidth_ << "\n";
+  //  int rank;   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  //  if(rank==0) std::cout << "bandwidth: " << bandwidth_ << "\n";
 #endif
+std::cerr<<"exiting DCATransformer"<<std::endl;
 }
 
 
@@ -163,7 +165,7 @@ std::complex<double>* DCATransformer::exp_iksite(const int sign) const
   for (site_t k=0; k<n_cluster_sites(); ++k) {
     for (site_t i=0; i<n_cluster_sites(); ++i) {
       double phase = 0.;
-      for (std::size_t d=0; d<dimension(); ++d) 
+      for (std::size_t d=0; d<dimension(); ++d)
         phase += cluster_momentum(k,d)*cluster_coordinate(i,d);
       phase *= sign;
       m[k+n_cluster_sites()*i]=std::complex<double>(cos(phase), sin(phase));
@@ -202,21 +204,21 @@ int* DCATransformer::momentum_translation() const
   return m;
 }
 
-matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_green_function_t &G_omega, 
-                                                            const matsubara_green_function_t &G0_omega, 
+matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_green_function_t &G_omega,
+                                                            const matsubara_green_function_t &G0_omega,
                                                             double &mu, const double h, const double beta)
 {
   matsubara_green_function_t selfenergy(G_omega);
   return this->operator()(G_omega, G0_omega, selfenergy, mu, h, beta, false);
 }
 
-matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_green_function_t &G_omega, 
-                                                            const matsubara_green_function_t &G0_omega, 
+matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_green_function_t &G_omega,
+                                                            const matsubara_green_function_t &G0_omega,
                                                             matsubara_green_function_t &selfenergy,
                                                             double &mu, const double h, const double beta, const bool use_selfenergy)
 {
   if(h!=0) {
-    throw std::invalid_argument("don't know how to handle magn. fields (use the AFM transformer for that!), exiting"); 
+    throw std::invalid_argument("don't know how to handle magn. fields (use the AFM transformer for that!), exiting");
   }
   unsigned int nflavor=G0_omega.nflavor();
   unsigned int nfreq=G0_omega.nfreq();
@@ -238,9 +240,9 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
   bool computing_mu=true;
   int mu_it=1;
   
-  int current_it = static_cast<int>( (*const_cast<alps::Parameters*>(params_ptr_)).value_or_default("CURRENT_IT",0));
+  int current_it = 0; //fix this if needed.
   
-
+  
   double n_old;
   double mu_old=mu;
   double mu_new=mu;
@@ -248,13 +250,13 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
   std::vector<std::vector<double> >epsilon_kckl(n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
   std::vector<double> weight_kl(n_lattice_momenta());
   for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-    for (site_t kl=0; kl<n_lattice_momenta(); ++kl) { 
+    for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
       vector_type k(dimension());
       for (unsigned int d=0; d<dimension(); ++d)
         k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
       epsilon_kckl[kc][kl]=epsilon(k);
     }
-  }for (site_t kl=0; kl<n_lattice_momenta(); ++kl) { 
+  }for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
     weight_kl[kl]= lattice_momentum(kl,dimension());
   }
   do{ //find the right particle density
@@ -263,7 +265,7 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
         for (frequency_t freq=0; freq<nfreq; ++freq) {
           G_omega_lattice(freq, kc, kc, flavor) = 0.;
           std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
-          for (site_t kl=0; kl<n_lattice_momenta(); ++kl) { 
+          for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
             std::complex<double> zeta = iomega_n + mu + (flavor%2 ? -h : h);
             G_omega_lattice(freq, kc, kc, flavor) += weight_kl[kl]/(zeta-epsilon_kckl[kc][kl]-selfenergy(freq, kc, kc, flavor));
           }
@@ -289,14 +291,14 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
       converged=adjust_chemical_potential(density, mu, damping_mu, computing_mu, mu_it, n_old, n_target_, mu_old, mu_new, mu_orig);
       std::cout<<"converged now: "<<converged<<" true is: "<<true<<" compute filling is: "<<compute_filling_<<std::endl;
     }
-
-	if (current_it<2){converged=true;}
-
+    
+    if (current_it<2){converged=true;}
+    
   } while(compute_filling_ && (!converged));
   for (spin_t flavor=0; flavor<nflavor; ++flavor) {
     for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
       for (frequency_t freq=0; freq<nfreq; ++freq) {
-        G0_omega_new(freq, kc, kc, flavor) = 
+        G0_omega_new(freq, kc, kc, flavor) =
         1. / ( 1./G_omega_lattice(freq, kc, kc, flavor) + selfenergy(freq, kc, kc, flavor) );
       }
     }
@@ -346,7 +348,7 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
         const std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
         for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
           vector_type k(dimension());
-          for (unsigned int d=0; d<dimension(); ++d) 
+          for (unsigned int d=0; d<dimension(); ++d)
             k[d] = cluster_momentum(kc,d);
           const std::complex<double> G0 = 1./(iomega_n+mu-epsilon(k));
           G0_omega_new(freq, kc, kc, flavor) = G0;
@@ -365,7 +367,7 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
         }
       }
     }
-    G_omega = G0_omega; 
+    G_omega = G0_omega;
     //invoke transformation with G_omega==G0_omega (selfenergy=0)
     G0_omega_new = operator()(G_omega, G0_omega, mu, 0, beta);
   }
@@ -391,270 +393,270 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
 
 matsubara_green_function_t SimpleDCATransformer::transform_fourpoint(const matsubara_green_function_t& G_omega_fourpoint,
                                                                      const matsubara_green_function_t& G_omega,
-                                                                     const matsubara_green_function_t& G0_omega, 
-                                                                     const double mu, const double h, 
+                                                                     const matsubara_green_function_t& G0_omega,
+                                                                     const double mu, const double h,
                                                                      const double beta, const unsigned int n_matsubara) const
 {
-    throw std::runtime_error("implemented but deprecated.");
-    
-    return G_omega_fourpoint;
-  }
+  throw std::runtime_error("implemented but deprecated.");
+  
+  return G_omega_fourpoint;
+}
 /*  std::cout << "transforming cluster green function\n";
-  assert(h==0); 
-  unsigned int nz = G0_omega.nflavor();
-  assert(G0_omega.nsite()==n_cluster_sites());
-  matsubara_green_function_t G0_omega_fourpoint_inv(4*n_matsubara*n_matsubara, n_cluster_sites(), nz);
-  G0_omega_fourpoint_inv.clear();
-  for(spin_t z=0; z<nz; ++z) {
-    int zbar = z%nz==0 ? z+1 : z-1;
-    for(site_t k=0;k<n_cluster_sites();++k) {
-      int kpq = k%2==0 ? k+1 : k-1;
-      for (std::size_t om=0; om<2*n_matsubara; ++om) {
-        std::complex<double> g_kpq_z;
-        std::complex<double> g_k_zbar;
-        if (om<n_matsubara) {
-          g_kpq_z = G_omega(om,kpq,kpq,z);
-          g_k_zbar = G_omega(om,k,k,zbar);
-        } 
-        else {
-          g_kpq_z = std::conj(G_omega(om-n_matsubara,kpq,kpq,z));
-          g_k_zbar = std::conj(G_omega(om-n_matsubara,k,k,zbar));
-        }   
-        G0_omega_fourpoint_inv(om+2*n_matsubara*om,k,k,z) = 1. / (g_kpq_z*g_k_zbar);
-      } 
-    }
-  }
-  matsubara_green_function_t G_omega_fourpoint_inv = fourpoint_green_function_inverse(G_omega_fourpoint, 2*n_matsubara);
-  matsubara_green_function_t two_particle_vertex(4*n_matsubara*n_matsubara, n_cluster_sites(), nz);
-  two_particle_vertex = fourpoint_green_function_subtract(G0_omega_fourpoint_inv, G_omega_fourpoint_inv);
-  matsubara_green_function_t selfenergy(n_matsubara, n_cluster_sites(), nz);
-  selfenergy.clear();
-  for (spin_t z=0; z<nz; ++z) {
-    for (site_t k=0; k<n_cluster_sites(); ++k) {
-      for (frequency_t om=0; om<n_matsubara; ++om) {
-        selfenergy(om, k, k, z) = 1./G0_omega(om, k, k, z);
-        selfenergy(om, k, k, z) -= 1./G_omega(om, k, k, z);
-      }
-    }
-  }
-  matsubara_green_function_t G_omega_fourpoint_new(4*n_matsubara*n_matsubara, n_cluster_sites(), nz);
-  G_omega_fourpoint_new.clear();
-  for (spin_t z=0; z<nz; ++z) {
-    spin_t zbar = z%nz==0 ? z+1 : z-1;
-    for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-      int kcpq = kc%2==0 ? kc+1 : kc-1;
-      for (std::size_t om=0; om<2*n_matsubara; ++om) {
-        std::complex<double> iomega_n;
-        if(om<n_matsubara) 
-          iomega_n = std::complex<double>(0, (2.*om+1.)*M_PI/beta);
-        else
-          iomega_n = std::complex<double>(0, -(2.*(om-n_matsubara)+1.)*M_PI/beta);
-        for (site_t kl=0; kl<n_lattice_momenta(); ++kl) { 
-          vector_type k(dimension());
-          vector_type k_plus_q(dimension());
-          for (unsigned int d=0; d<dimension(); ++d) { 
-            k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-            k_plus_q[d] = lattice_momentum(kl,d) + cluster_momentum(kcpq,d);
-          }
-          double weight = lattice_momentum(kl, dimension());
-          std::complex<double> s_kcpq_z;
-          std::complex<double> s_kc_zbar;
-          if(om<n_matsubara) {
-            s_kcpq_z = selfenergy(om, kcpq, kcpq, z);
-            s_kc_zbar = selfenergy(om, kc, kc, zbar);
-          }
-          else {
-            s_kcpq_z = std::conj(selfenergy(om-n_matsubara, kcpq, kcpq, z));
-            s_kc_zbar = std::conj(selfenergy(om-n_matsubara, kc, kc, zbar));
-          }
-          G_omega_fourpoint_new(om+2*n_matsubara*om, kc, kc, z) 
-          += weight*(1./(iomega_n+mu-epsilon(k_plus_q)-s_kcpq_z))
-          * (1./(iomega_n+mu-epsilon(k)-s_kc_zbar));
-        }
-        G_omega_fourpoint_new(om+2*n_matsubara*om, kc, kc, z) /= n_cluster_cells();
-        G_omega_fourpoint_new(om+2*n_matsubara*om, kc, kc, z) = 1. / G_omega_fourpoint_new(om+2*n_matsubara*om, kc, kc, z);
-      }
-    }
-  }
-  G_omega_fourpoint_new = fourpoint_green_function_subtract(G_omega_fourpoint_new, two_particle_vertex);
-  G_omega_fourpoint_new = fourpoint_green_function_inverse(G_omega_fourpoint_new, 2*n_matsubara);
-  std::cout << "lattice green function calculated\n";
-  return G_omega_fourpoint_new;
-}*/
+ assert(h==0);
+ unsigned int nz = G0_omega.nflavor();
+ assert(G0_omega.nsite()==n_cluster_sites());
+ matsubara_green_function_t G0_omega_fourpoint_inv(4*n_matsubara*n_matsubara, n_cluster_sites(), nz);
+ G0_omega_fourpoint_inv.clear();
+ for(spin_t z=0; z<nz; ++z) {
+ int zbar = z%nz==0 ? z+1 : z-1;
+ for(site_t k=0;k<n_cluster_sites();++k) {
+ int kpq = k%2==0 ? k+1 : k-1;
+ for (std::size_t om=0; om<2*n_matsubara; ++om) {
+ std::complex<double> g_kpq_z;
+ std::complex<double> g_k_zbar;
+ if (om<n_matsubara) {
+ g_kpq_z = G_omega(om,kpq,kpq,z);
+ g_k_zbar = G_omega(om,k,k,zbar);
+ }
+ else {
+ g_kpq_z = std::conj(G_omega(om-n_matsubara,kpq,kpq,z));
+ g_k_zbar = std::conj(G_omega(om-n_matsubara,k,k,zbar));
+ }
+ G0_omega_fourpoint_inv(om+2*n_matsubara*om,k,k,z) = 1. / (g_kpq_z*g_k_zbar);
+ }
+ }
+ }
+ matsubara_green_function_t G_omega_fourpoint_inv = fourpoint_green_function_inverse(G_omega_fourpoint, 2*n_matsubara);
+ matsubara_green_function_t two_particle_vertex(4*n_matsubara*n_matsubara, n_cluster_sites(), nz);
+ two_particle_vertex = fourpoint_green_function_subtract(G0_omega_fourpoint_inv, G_omega_fourpoint_inv);
+ matsubara_green_function_t selfenergy(n_matsubara, n_cluster_sites(), nz);
+ selfenergy.clear();
+ for (spin_t z=0; z<nz; ++z) {
+ for (site_t k=0; k<n_cluster_sites(); ++k) {
+ for (frequency_t om=0; om<n_matsubara; ++om) {
+ selfenergy(om, k, k, z) = 1./G0_omega(om, k, k, z);
+ selfenergy(om, k, k, z) -= 1./G_omega(om, k, k, z);
+ }
+ }
+ }
+ matsubara_green_function_t G_omega_fourpoint_new(4*n_matsubara*n_matsubara, n_cluster_sites(), nz);
+ G_omega_fourpoint_new.clear();
+ for (spin_t z=0; z<nz; ++z) {
+ spin_t zbar = z%nz==0 ? z+1 : z-1;
+ for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+ int kcpq = kc%2==0 ? kc+1 : kc-1;
+ for (std::size_t om=0; om<2*n_matsubara; ++om) {
+ std::complex<double> iomega_n;
+ if(om<n_matsubara)
+ iomega_n = std::complex<double>(0, (2.*om+1.)*M_PI/beta);
+ else
+ iomega_n = std::complex<double>(0, -(2.*(om-n_matsubara)+1.)*M_PI/beta);
+ for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
+ vector_type k(dimension());
+ vector_type k_plus_q(dimension());
+ for (unsigned int d=0; d<dimension(); ++d) {
+ k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
+ k_plus_q[d] = lattice_momentum(kl,d) + cluster_momentum(kcpq,d);
+ }
+ double weight = lattice_momentum(kl, dimension());
+ std::complex<double> s_kcpq_z;
+ std::complex<double> s_kc_zbar;
+ if(om<n_matsubara) {
+ s_kcpq_z = selfenergy(om, kcpq, kcpq, z);
+ s_kc_zbar = selfenergy(om, kc, kc, zbar);
+ }
+ else {
+ s_kcpq_z = std::conj(selfenergy(om-n_matsubara, kcpq, kcpq, z));
+ s_kc_zbar = std::conj(selfenergy(om-n_matsubara, kc, kc, zbar));
+ }
+ G_omega_fourpoint_new(om+2*n_matsubara*om, kc, kc, z)
+ += weight*(1./(iomega_n+mu-epsilon(k_plus_q)-s_kcpq_z))
+ * (1./(iomega_n+mu-epsilon(k)-s_kc_zbar));
+ }
+ G_omega_fourpoint_new(om+2*n_matsubara*om, kc, kc, z) /= n_cluster_cells();
+ G_omega_fourpoint_new(om+2*n_matsubara*om, kc, kc, z) = 1. / G_omega_fourpoint_new(om+2*n_matsubara*om, kc, kc, z);
+ }
+ }
+ }
+ G_omega_fourpoint_new = fourpoint_green_function_subtract(G_omega_fourpoint_new, two_particle_vertex);
+ G_omega_fourpoint_new = fourpoint_green_function_inverse(G_omega_fourpoint_new, 2*n_matsubara);
+ std::cout << "lattice green function calculated\n";
+ return G_omega_fourpoint_new;
+ }*/
 
 
 
-std::map<double, std::complex<double> > 
+std::map<double, std::complex<double> >
 SimpleDCATransformer::local_green_function_from_selfenergies(const std::map<double, std::vector<std::complex<double> > >& selfenergies,
                                                              const double mu, const double delta)
 {
-    boost::throw_exception(std::invalid_argument("implemented but deprecated."));
-    std::map<double, std::complex<double> > dummy;
-    return dummy;
-  }
-
-  
-  /*  typedef std::map<double, std::vector<std::complex<double> > > selfenergy_t;
-  std::map<double, std::complex<double> > local_G;
-  for (selfenergy_t::const_iterator it=selfenergies.begin(); it!=selfenergies.end(); ++it) {
-    for (unsigned int kc=0; kc<n_cluster_sites(); ++kc) { 
-      for (unsigned int kl=0; kl<n_lattice_momenta(); ++kl) { 
-        vector_type k(dimension());
-        for (unsigned int d=0; d<dimension(); ++d) 
-          k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-        double weight = lattice_momentum(kl, dimension());
-        std::complex<double> idelta(0., delta);
-        if (local_G.find(it->first)==local_G.end()) 
-          local_G[it->first] = weight / (it->first + mu - epsilon(k) - it->second[kc] + idelta);
-        else
-          local_G[it->first] += weight / (it->first + mu - epsilon(k) - it->second[kc] + idelta);
-      }
-    }
-    local_G[it->first] /= n_cluster_cells()*n_cluster_sites();
-  }
-  return local_G;
-}*/
+  boost::throw_exception(std::invalid_argument("implemented but deprecated."));
+  std::map<double, std::complex<double> > dummy;
+  return dummy;
+}
 
 
+/*  typedef std::map<double, std::vector<std::complex<double> > > selfenergy_t;
+ std::map<double, std::complex<double> > local_G;
+ for (selfenergy_t::const_iterator it=selfenergies.begin(); it!=selfenergies.end(); ++it) {
+ for (unsigned int kc=0; kc<n_cluster_sites(); ++kc) {
+ for (unsigned int kl=0; kl<n_lattice_momenta(); ++kl) {
+ vector_type k(dimension());
+ for (unsigned int d=0; d<dimension(); ++d)
+ k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
+ double weight = lattice_momentum(kl, dimension());
+ std::complex<double> idelta(0., delta);
+ if (local_G.find(it->first)==local_G.end())
+ local_G[it->first] = weight / (it->first + mu - epsilon(k) - it->second[kc] + idelta);
+ else
+ local_G[it->first] += weight / (it->first + mu - epsilon(k) - it->second[kc] + idelta);
+ }
+ }
+ local_G[it->first] /= n_cluster_cells()*n_cluster_sites();
+ }
+ return local_G;
+ }*/
 
-alps::RealObsevaluator SimpleDCATransformer::kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies, 
-                                                            const double beta, const double mu, 
+
+
+alps::RealObsevaluator SimpleDCATransformer::kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies,
+                                                            const double beta, const double mu,
                                                             const bool error_propagation, const bool paramagnet)
 {
   boost::throw_exception(std::invalid_argument("implemented but deprecated"));
   return alps::RealObsevaluator();
 }
 /*{
-  const unsigned int nzone = selfenergies.size();
-  const unsigned int nfreq = selfenergies[0][0].size()/2;
-  if (error_propagation) {
-    std::cerr << "calculating the kinetic energy using error propagation\n"
-    << "CAUTION: this may take a while\n";
-    int del_z = paramagnet ? 2 : 1;
-    std::vector<alps::RealObsevaluator> energy_vec(nfreq);
-    std::vector<alps::RealObsevaluator> energy_kc(nfreq);
-    for (unsigned int z=0; z<nzone; z+=del_z) {
-      for (site_class_set_type::const_iterator it_kc=site_classes_k_space().first; 
-           it_kc!=site_classes_k_space().second; ++it_kc) {
-        const int multiplier = it_kc->size();
-        const site_t kc = *((*it_kc).begin());
-        vector_type kc_vec(dimension());
-        for (unsigned int d=0; d<dimension(); ++d) 
-          kc_vec[d] = cluster_momentum(kc,d);
-        for (frequency_t freq=0; freq<nfreq; ++freq) {
-          std::cerr << ".";
-          const double om = (2.*freq+1.)*M_PI/beta;
-          alps::RealObsevaluator obsi = selfenergies[z][kc][2*freq+1];
-          obsi -= om;
-          alps::RealObsevaluator obsi_sq = obsi * obsi;
-          alps::RealObsevaluator mSigma_re = -selfenergies[z][kc][2*freq];
-          mSigma_re += mu;      
-          // kl == 0
-          alps::RealObsevaluator obsr0 = mSigma_re;
-          vector_type k0 = kc_vec;
-          for (unsigned int d=0; d<dimension(); ++d) 
-            k0[d] += lattice_momentum(0,d);
-          const double weight0 = lattice_momentum(0, dimension());
-          const double eps0 = epsilon(k0);
-          obsr0 -= eps0;
-          alps::RealObsevaluator obs0 = obsr0;
-          obs0 *= obsr0;
-          obs0 += obsi_sq;
-          obsr0 /= obs0;
-          obsr0 *= eps0;
-          energy_kc[freq] = weight0*obsr0;
-          for (site_t kl=1; kl<n_lattice_momenta(); ++kl) { 
-            alps::RealObsevaluator obsr = mSigma_re;
-            vector_type k = kc_vec;
-            for (unsigned int d=0; d<dimension(); ++d) 
-              k[d] += lattice_momentum(kl,d);
-            const double weight = lattice_momentum(kl, dimension());
-            const double eps = epsilon(k);
-            obsr -= eps;
-            alps::RealObsevaluator obs = obsr;
-            obs *= obsr;
-            obs += obsi_sq;
-            obsr /= obs;
-            obsr *= eps;
-            energy_kc[freq] += weight*obsr;
-          }
-          energy_kc[freq] *= multiplier;
-          if (it_kc==site_classes_k_space().first && z==0) 
-            energy_vec[freq] = energy_kc[freq];
-          else 
-            energy_vec[freq] += energy_kc[freq];
-        }
-        std::cerr << "\n";
-      }
-    }
-    for (frequency_t freq=0; freq<nfreq; ++freq) 
-      energy_vec[freq] *= (double)del_z/(double)n_cluster_sites()/(double)n_cluster_cells();
-    // frequency sum
-    alps::RealObsevaluator kin = energy_vec[0] 
-    + dispersion_moments(1)*nzone*beta*beta/M_PI/M_PI;
-    for (frequency_t freq=1; freq<nfreq; ++freq) {
-      double om = (2.*freq+1.)*M_PI/beta;
-      kin += energy_vec[freq]  + dispersion_moments(1)*nzone/om/om;
-    }
-    kin *= 2./beta;
-    kin -= 0.25*nzone*dispersion_moments(1)*beta;
-    return kin; 
-  }
-  else {
-    
-    std::ofstream selfout("selftest.dat");
-    for (frequency_t freq=0; freq<nfreq; ++freq) {
-      selfout << freq << " ";
-      for (unsigned int kc=0; kc<n_cluster_sites(); ++kc) {
-        for (unsigned int z=0; z<nzone; ++z) {
-          selfout << selfenergies[z][kc][2*freq].mean() << " " <<  selfenergies[z][kc][2*freq+1].mean() << " ";
-        }
-      }
-      selfout << "\n";
-    }
-    selfout.close();
-    
-    
-    std::vector<std::complex<double> > energy_vec(nfreq, std::complex<double>(0., 0.));
-    for (frequency_t freq=0; freq<nfreq; ++freq) {
-      const std::complex<double> iom(0., (2.*freq+1.)*M_PI/beta);
-      for (unsigned int z=0; z<nzone; ++z) {
-        for (unsigned int kc=0; kc<n_cluster_sites(); ++kc) {
-          const std::complex<double> Sigma(selfenergies[z][kc][2*freq].mean(), selfenergies[z][kc][2*freq+1].mean());
-          for (unsigned int kl=0; kl<n_lattice_momenta(); ++kl) { 
-            vector_type k(dimension());
-            for (unsigned int d=0; d<dimension(); ++d) 
-              k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-            const double weight = lattice_momentum(kl, dimension());
-            const double eps = epsilon(k);
-            energy_vec[freq] += weight*eps / ( iom + mu -eps -Sigma );
-          }
-        }
-      }
-      energy_vec[freq] /= n_cluster_cells()*n_cluster_sites();
-    }
-    std::ofstream estr("etest.dat");
-    double kin = 0.;
-    for (frequency_t freq=0; freq<nfreq; ++freq) {
-      double om = (2.*freq+1.)*M_PI/beta;
-      estr << om << " " << energy_vec[freq].real() << " "  << energy_vec[freq].imag() << "\n";
-      kin += energy_vec[freq].real() + dispersion_moments(1)*nzone/om/om;
-    }
-    estr.close();
-    kin *= 2./beta;
-    kin -= 0.25*nzone*dispersion_moments(1)*beta;
-    alps::SimpleRealObservable kin_obs("kinetic energy");
-    kin_obs.reset(true);
-    kin_obs << kin;
-    alps::RealObsevaluator kin_eval(kin_obs);
-    return kin_eval; 
-  }
-}*/
+ const unsigned int nzone = selfenergies.size();
+ const unsigned int nfreq = selfenergies[0][0].size()/2;
+ if (error_propagation) {
+ std::cerr << "calculating the kinetic energy using error propagation\n"
+ << "CAUTION: this may take a while\n";
+ int del_z = paramagnet ? 2 : 1;
+ std::vector<alps::RealObsevaluator> energy_vec(nfreq);
+ std::vector<alps::RealObsevaluator> energy_kc(nfreq);
+ for (unsigned int z=0; z<nzone; z+=del_z) {
+ for (site_class_set_type::const_iterator it_kc=site_classes_k_space().first;
+ it_kc!=site_classes_k_space().second; ++it_kc) {
+ const int multiplier = it_kc->size();
+ const site_t kc = *((*it_kc).begin());
+ vector_type kc_vec(dimension());
+ for (unsigned int d=0; d<dimension(); ++d)
+ kc_vec[d] = cluster_momentum(kc,d);
+ for (frequency_t freq=0; freq<nfreq; ++freq) {
+ std::cerr << ".";
+ const double om = (2.*freq+1.)*M_PI/beta;
+ alps::RealObsevaluator obsi = selfenergies[z][kc][2*freq+1];
+ obsi -= om;
+ alps::RealObsevaluator obsi_sq = obsi * obsi;
+ alps::RealObsevaluator mSigma_re = -selfenergies[z][kc][2*freq];
+ mSigma_re += mu;
+ // kl == 0
+ alps::RealObsevaluator obsr0 = mSigma_re;
+ vector_type k0 = kc_vec;
+ for (unsigned int d=0; d<dimension(); ++d)
+ k0[d] += lattice_momentum(0,d);
+ const double weight0 = lattice_momentum(0, dimension());
+ const double eps0 = epsilon(k0);
+ obsr0 -= eps0;
+ alps::RealObsevaluator obs0 = obsr0;
+ obs0 *= obsr0;
+ obs0 += obsi_sq;
+ obsr0 /= obs0;
+ obsr0 *= eps0;
+ energy_kc[freq] = weight0*obsr0;
+ for (site_t kl=1; kl<n_lattice_momenta(); ++kl) {
+ alps::RealObsevaluator obsr = mSigma_re;
+ vector_type k = kc_vec;
+ for (unsigned int d=0; d<dimension(); ++d)
+ k[d] += lattice_momentum(kl,d);
+ const double weight = lattice_momentum(kl, dimension());
+ const double eps = epsilon(k);
+ obsr -= eps;
+ alps::RealObsevaluator obs = obsr;
+ obs *= obsr;
+ obs += obsi_sq;
+ obsr /= obs;
+ obsr *= eps;
+ energy_kc[freq] += weight*obsr;
+ }
+ energy_kc[freq] *= multiplier;
+ if (it_kc==site_classes_k_space().first && z==0)
+ energy_vec[freq] = energy_kc[freq];
+ else
+ energy_vec[freq] += energy_kc[freq];
+ }
+ std::cerr << "\n";
+ }
+ }
+ for (frequency_t freq=0; freq<nfreq; ++freq)
+ energy_vec[freq] *= (double)del_z/(double)n_cluster_sites()/(double)n_cluster_cells();
+ // frequency sum
+ alps::RealObsevaluator kin = energy_vec[0]
+ + dispersion_moments(1)*nzone*beta*beta/M_PI/M_PI;
+ for (frequency_t freq=1; freq<nfreq; ++freq) {
+ double om = (2.*freq+1.)*M_PI/beta;
+ kin += energy_vec[freq]  + dispersion_moments(1)*nzone/om/om;
+ }
+ kin *= 2./beta;
+ kin -= 0.25*nzone*dispersion_moments(1)*beta;
+ return kin;
+ }
+ else {
+ 
+ std::ofstream selfout("selftest.dat");
+ for (frequency_t freq=0; freq<nfreq; ++freq) {
+ selfout << freq << " ";
+ for (unsigned int kc=0; kc<n_cluster_sites(); ++kc) {
+ for (unsigned int z=0; z<nzone; ++z) {
+ selfout << selfenergies[z][kc][2*freq].mean() << " " <<  selfenergies[z][kc][2*freq+1].mean() << " ";
+ }
+ }
+ selfout << "\n";
+ }
+ selfout.close();
+ 
+ 
+ std::vector<std::complex<double> > energy_vec(nfreq, std::complex<double>(0., 0.));
+ for (frequency_t freq=0; freq<nfreq; ++freq) {
+ const std::complex<double> iom(0., (2.*freq+1.)*M_PI/beta);
+ for (unsigned int z=0; z<nzone; ++z) {
+ for (unsigned int kc=0; kc<n_cluster_sites(); ++kc) {
+ const std::complex<double> Sigma(selfenergies[z][kc][2*freq].mean(), selfenergies[z][kc][2*freq+1].mean());
+ for (unsigned int kl=0; kl<n_lattice_momenta(); ++kl) {
+ vector_type k(dimension());
+ for (unsigned int d=0; d<dimension(); ++d)
+ k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
+ const double weight = lattice_momentum(kl, dimension());
+ const double eps = epsilon(k);
+ energy_vec[freq] += weight*eps / ( iom + mu -eps -Sigma );
+ }
+ }
+ }
+ energy_vec[freq] /= n_cluster_cells()*n_cluster_sites();
+ }
+ std::ofstream estr("etest.dat");
+ double kin = 0.;
+ for (frequency_t freq=0; freq<nfreq; ++freq) {
+ double om = (2.*freq+1.)*M_PI/beta;
+ estr << om << " " << energy_vec[freq].real() << " "  << energy_vec[freq].imag() << "\n";
+ kin += energy_vec[freq].real() + dispersion_moments(1)*nzone/om/om;
+ }
+ estr.close();
+ kin *= 2./beta;
+ kin -= 0.25*nzone*dispersion_moments(1)*beta;
+ alps::SimpleRealObservable kin_obs("kinetic energy");
+ kin_obs.reset(true);
+ kin_obs << kin;
+ alps::RealObsevaluator kin_eval(kin_obs);
+ return kin_eval;
+ }
+ }*/
 
 
 
-matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_green_function_t &G_omega, 
-                                                               const matsubara_green_function_t &G0_omega, 
+matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_green_function_t &G_omega,
+                                                               const matsubara_green_function_t &G0_omega,
                                                                double &mu, const double h, const double beta)
 {
   unsigned int nflavor=G0_omega.nflavor();
@@ -666,19 +668,19 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
   matsubara_green_function_t G0_omega_inv = green_function_inverse(G0_omega);
   matsubara_green_function_t G_omega_inv = green_function_inverse(G_omega);
   matsubara_green_function_t selfenergy = green_function_subtract(G0_omega_inv, G_omega_inv);
-  for (site_t kl=0; kl<n_cluster_cells(); ++kl) { 
+  for (site_t kl=0; kl<n_cluster_cells(); ++kl) {
     for (int sign=-1; sign<=1; sign+=2) {
       matsubara_green_function_t G_kl(G0_omega);
       for (frequency_t freq=0; freq<nfreq; ++freq) {
         std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
         for (site_t kc=0; kc<n_cluster_sites(); kc+=2) {
           vector_type k0(dimension());
-          for (unsigned int d=0; d<dimension(); ++d) 
+          for (unsigned int d=0; d<dimension(); ++d)
             k0[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc,d);
           vector_type k1(dimension());
-          for (unsigned int d=0; d<dimension(); ++d) 
+          for (unsigned int d=0; d<dimension(); ++d)
             k1[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc+1,d);
-          for (spin_t flavor=0; flavor<nflavor; flavor+=2) { 
+          for (spin_t flavor=0; flavor<nflavor; flavor+=2) {
             G_kl(freq,kc,kc,flavor) = iomega_n+mu-epsilon(k0);
             G_kl(freq,kc,kc,flavor+1) = iomega_n+mu-epsilon(k0);
             G_kl(freq,kc+1,kc+1,flavor) = iomega_n+mu-epsilon(k1);
@@ -708,7 +710,7 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
 matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Parameters& parms, shape_t shape)
 {
   if(shape != blockdiagonal) throw std::logic_error("the shape really should be blockdiagonal.");
-  if (parms.defined("G0OMEGA_INPUT")) 
+  if (parms.defined("G0OMEGA_INPUT"))
     return ClusterTransformer::initial_G0(parms, shape);
   else {
     std::cout<<"calculating initial G0_omega"<<std::endl;
@@ -728,7 +730,7 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
         }
       }
     }
-    G_omega = G0_omega; 
+    G_omega = G0_omega;
     //evoke transformation with G_omega==G0_omega (selfenergy=0)
     matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h, beta);
     boost::shared_ptr<FourierTransformer> fourier_ptr;
@@ -747,8 +749,8 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
 
 
 
-std::map<double, ClusterHelper::Matrix<std::complex<double> >::Type> 
-AntiFerroDCATransformer::local_green_function_from_selfenergies(const std::map<double, 
+std::map<double, ClusterHelper::Matrix<std::complex<double> >::Type>
+AntiFerroDCATransformer::local_green_function_from_selfenergies(const std::map<double,
                                                                 std::vector<ClusterHelper::Matrix<std::complex<double> >::Type> >& /*selfenergies*/,
                                                                 const double /*mu*/, const double /*delta*/)
 {
@@ -759,7 +761,7 @@ AntiFerroDCATransformer::local_green_function_from_selfenergies(const std::map<d
 
 
 alps::RealObsevaluator AntiFerroDCATransformer::kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& /*selfenergies*/,
-                                                               const double /*beta*/, const double /*mu*/, 
+                                                               const double /*beta*/, const double /*mu*/,
                                                                const bool /*error_propagation*/, const bool /*paramagnet*/)
 {
   boost::throw_exception(std::invalid_argument("to be implemented"));
@@ -819,7 +821,7 @@ bool adjust_chemical_potential(const double &n_tot,
       //oops.. that means that we shifted the chemical potential up by too much
       std::cout<<"oops, get negative number of interacting particles!"<<std::endl;
       mu_new = (mu + mu_orig)/2; //this should bring us out of the interval where we have a negative particle number
-    }else if((n_old< n_target && n_tot > n_target) || 
+    }else if((n_old< n_target && n_tot > n_target) ||
              (n_old > n_target && n_tot < n_target)){ //target density is somewhere in the middle
       //bisection
       mu_new = (mu - mu_old)/(n_tot - n_old)*(n_target-n_old) + mu_old;
@@ -851,7 +853,7 @@ void SimpleDCATransformer::construct_green_function(double mu, double beta, doub
       G_omega_lattice_kav(freq, kc, kc, 1,0) = 0.;
       G_omega_lattice_kav(freq, kc, kc, 1,1) = 0.;
       std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
-      for (site_t kl=0; kl<n_lattice_momenta(); ++kl) { 
+      for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
         //double prefactor=1.;//(k[0]==0 && k[1]==0)?1.:0.; //cos kx - cos ky
         double prefactor=dwave_prefactor_kckl[kc][kl];
         //this is the self consistency formula!!!
@@ -892,38 +894,38 @@ double SimpleDCATransformer::compute_density(const nambu_matsubara_green_functio
   density_dn_hole=(density_dn_hole+n_cluster_sites()/2.0)/n_cluster_sites(); //density such that 'half filling' corresponds to 1
   density=density_dn_hole+density_up_part;
   //std::cout<<"density total: "<<density<<std::endl;
-
+  
   return density;
 }
-nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_matsubara_green_function_t &G_omega, 
-                                                                  const nambu_matsubara_green_function_t &G0_omega, 
-                                                                  nambu_matsubara_green_function_t &selfenergy, 
+nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_matsubara_green_function_t &G_omega,
+                                                                  const nambu_matsubara_green_function_t &G0_omega,
+                                                                  nambu_matsubara_green_function_t &selfenergy,
                                                                   double &mu, const double h, const double eta1, const double eta2, const double beta, bool use_selfenergy)
 {
-  if(h!=0 ) { 
-    throw std::invalid_argument("don't know how to handle magn. fields, exiting"); 
+  if(h!=0 ) {
+    throw std::invalid_argument("don't know how to handle magn. fields, exiting");
   }
   if(dimension()!=2 && (eta1 !=0 || eta2 !=0)) throw std::invalid_argument("not clear what to do with dwave symmetry away from dimension 2");
-  unsigned int nflavor=G0_omega.nflavor();
-  unsigned int nfreq=G0_omega.nfreq();
-  nambu_matsubara_green_function_t G0_omega_new(G0_omega);
-  nambu_matsubara_green_function_t G_omega_lattice_kav(G0_omega);
-  
-  std::vector<std::vector<double> >epsilon_kckl        (n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
-  std::vector<std::vector<double> >dwave_prefactor_kckl(n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
-  std::vector<double> weight_kl(n_lattice_momenta());
-  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-    for (site_t kl=0; kl<n_lattice_momenta(); ++kl) { 
-      vector_type k(dimension());
-      for (unsigned int d=0; d<dimension(); ++d)
-        k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-      epsilon_kckl[kc][kl]=epsilon(k);
-      dwave_prefactor_kckl[kc][kl]= cos(k[0]) - cos(k[1]); //cos kx - cos ky
+    unsigned int nflavor=G0_omega.nflavor();
+    unsigned int nfreq=G0_omega.nfreq();
+    nambu_matsubara_green_function_t G0_omega_new(G0_omega);
+    nambu_matsubara_green_function_t G_omega_lattice_kav(G0_omega);
+    
+    std::vector<std::vector<double> >epsilon_kckl        (n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
+    std::vector<std::vector<double> >dwave_prefactor_kckl(n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
+    std::vector<double> weight_kl(n_lattice_momenta());
+    for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+      for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
+        vector_type k(dimension());
+        for (unsigned int d=0; d<dimension(); ++d)
+          k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
+        epsilon_kckl[kc][kl]=epsilon(k);
+        dwave_prefactor_kckl[kc][kl]= cos(k[0]) - cos(k[1]); //cos kx - cos ky
+      }
+    }for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
+      weight_kl[kl]= lattice_momentum(kl,dimension());
     }
-  }for (site_t kl=0; kl<n_lattice_momenta(); ++kl) { 
-    weight_kl[kl]= lattice_momentum(kl,dimension());
-  }
-
+  
   if(!use_selfenergy){ //compute selfenergy out of G and G0 first
     selfenergy=G0_omega;
     //compute the lattice = cluster self energy
@@ -944,6 +946,7 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
     }
   }
   if(compute_filling_){
+    throw std::runtime_error("fix writing back of chemical potential if needed");
     double mu_min=-10.;
     double mu_max=10;
     double mu_upper=mu_max;
@@ -976,7 +979,8 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
     }while(std::abs(density_upper-density_lower)>tol);
     
     std::cout<<"bisection converged for mu: "<<mu<<" "<<density_lower<<" "<<density_upper<<" "<<density_now<<std::endl;
-    (*const_cast<alps::Parameters*>(params_ptr_))["MU"]=mu; //write the chemical potential back to the parameter file
+    //(*const_cast<alps::Parameters*>(params_ptr_))["MU"]=mu; //write the chemical potential back to the parameter file
+    /// \todo fix this if needed
   }else{
     construct_green_function( mu,  beta,  eta1,  eta2, epsilon_kckl, dwave_prefactor_kckl, weight_kl, selfenergy,G_omega_lattice_kav);
   }
@@ -1064,7 +1068,7 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
         std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
         
         vector_type k(dimension());
-        for (unsigned int d=0; d<dimension(); ++d) 
+        for (unsigned int d=0; d<dimension(); ++d)
           k[d] = cluster_momentum(kc,d);
         double dwave_prefactor= cos(k[0]) - cos(k[1]); //cos kx - cos ky
         double prefactor=dwave_prefactor;
@@ -1085,7 +1089,7 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
     }
   }
   else {
-    nambu_matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor, diagonal);  
+    nambu_matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor, diagonal);
     nambu_matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor, diagonal);
     G0_omega.clear();
     for (site_t i=0; i<n_cluster_sites(); ++i) {
@@ -1096,7 +1100,7 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
         G0_omega(freq, i, i, 1,1) = 1.;
       }
     }
-    G_omega = G0_omega; 
+    G_omega = G0_omega;
     //invoke transformation with G_omega==G0_omega (selfenergy=0)
     std::cout<<"invoking free transform in initial."<<std::endl;
     G0_omega_new = operator()(G_omega, G0_omega, selfenergy, mu, h_init, eta1_init, eta2_init, beta, false);
@@ -1115,9 +1119,9 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
   //std::ofstream g0_omega_input_rs_hr("g0_omega_input_rs_hr.dat"); g0_omega_input_rs_hr<<std::make_pair(G0_omega_real,beta);
   return G0_omega_new;
 }
-nambu_matsubara_green_function_t AntiFerroDCATransformer::operator()(const nambu_matsubara_green_function_t &G_omega, 
-                                                                     const nambu_matsubara_green_function_t &G0_omega, 
-                                                                     nambu_matsubara_green_function_t &selfenergy, 
+nambu_matsubara_green_function_t AntiFerroDCATransformer::operator()(const nambu_matsubara_green_function_t &G_omega,
+                                                                     const nambu_matsubara_green_function_t &G0_omega,
+                                                                     nambu_matsubara_green_function_t &selfenergy,
                                                                      double &mu, const double h, const double eta1, const double eta2, const double beta, const bool use_selfenergy){
   throw std::invalid_argument("antiferro & nambu DCA has not yet been implemented!");
 }
@@ -1182,7 +1186,7 @@ nambu_green_function<std::complex<double> > SimpleDCATransformer::spin_symmetriz
 
 //Auxiliary functions
 //invert a matrix
-void dense_matrix_inverse(complex_dense_matrix &M /*input*/, complex_dense_matrix &M_inv/*output*/) 
+void dense_matrix_inverse(complex_dense_matrix &M /*input*/, complex_dense_matrix &M_inv/*output*/)
 {
   M_inv = boost::numeric::ublas::identity_matrix<std::complex<double> >(M.size1());
   boost::numeric::ublas::vector<fortran_int_t> ipivot(M.size1());
@@ -1207,9 +1211,9 @@ template<class T> void matrix_to_gf(int omega, int flavor,  green_function<T> &g
   }
 }
 
-CDMFTTransformer::CDMFTTransformer(const alps::Parameters& params) 
-: ClusterTransformer(params), 
-t_(params.defined("W") ? 1. : static_cast<double>(params["t"])), 
+CDMFTTransformer::CDMFTTransformer(const alps::Parameters& params)
+: ClusterTransformer(params),
+t_(params.defined("W") ? 1. : static_cast<double>(params["t"])),
 t2_(params.value_or_default("t'", params.value_or_default("t2", 0.))),
 t3_(params.value_or_default("t3", 0.)),
 t4_(params.value_or_default("t4", 0.)),
@@ -1224,22 +1228,22 @@ dispersion_moments_(2, 0.)
   //calculating dispersion moments, bandwidth and half filling
   std::cout<<"warning: the CDMFT transformer has NO bandwidths, dispersions, etc implemented.";
 }
-matsubara_green_function_t FoursiteCDMFTTransformer::operator()(const matsubara_green_function_t &G_omega, 
-                                                                const matsubara_green_function_t &G0_omega, 
+matsubara_green_function_t FoursiteCDMFTTransformer::operator()(const matsubara_green_function_t &G_omega,
+                                                                const matsubara_green_function_t &G0_omega,
                                                                 double &mu, const double h, const double beta)
 {
   if(h!=0) { // && G0_omega.nsite()!=1 <-this not understood - looks like a bug to me.
     std::cerr<<"H is: "<<h<<std::endl;
-    throw std::invalid_argument("don't know how to handle magn. fields (use the AFM transformer for that!), exiting"); 
+    throw std::invalid_argument("don't know how to handle magn. fields (use the AFM transformer for that!), exiting");
   }
   unsigned int nflavor=G0_omega.nflavor();
   unsigned int nfreq=G0_omega.nfreq();
   if(G0_omega.nsite()!=n_cluster_sites()) throw std::runtime_error("problem with cluster sites");
-  matsubara_green_function_t selfenergy(G0_omega);
-  matsubara_green_function_t G0_omega_new(G0_omega);
-  matsubara_green_function_t G_omega_lattice(G0_omega);
-  
-  std::cout<<"computing self energy."<<std::endl;
+    matsubara_green_function_t selfenergy(G0_omega);
+    matsubara_green_function_t G0_omega_new(G0_omega);
+    matsubara_green_function_t G_omega_lattice(G0_omega);
+    
+    std::cout<<"computing self energy."<<std::endl;
   //compute the Matsubara self energy
   complex_dense_matrix G0_mat(n_cluster_sites(),n_cluster_sites()), G_mat(n_cluster_sites(),n_cluster_sites()), Sigma_mat(n_cluster_sites(),n_cluster_sites());
   complex_dense_matrix G0_inv_mat(n_cluster_sites(),n_cluster_sites()), G_inv_mat(n_cluster_sites(),n_cluster_sites());
@@ -1284,7 +1288,7 @@ matsubara_green_function_t FoursiteCDMFTTransformer::operator()(const matsubara_
       }
       matrix_to_gf(freq, flavor, G_omega_lattice, G_mat);
     }
-  }     
+  }
   std::cout<<"lattice GF is: "<<std::endl;
   std::ofstream lgf_file("lgf.dat");
   std::cout<<"in real space: "<<std::endl;
@@ -1354,7 +1358,7 @@ matsubara_green_function_t FoursiteCDMFTTransformer::initial_G0(const alps::Para
         }
       }
     }
-    G_omega = G0_omega; 
+    G_omega = G0_omega;
     //invoke transformation with G_omega==G0_omega (selfenergy=0)
     G0_omega_new = operator()(G_omega, G0_omega, mu, 0, beta);
   }
@@ -1378,8 +1382,8 @@ matsubara_green_function_t FoursiteCDMFTTransformer::initial_G0(const alps::Para
 
 matsubara_green_function_t FoursiteCDMFTTransformer::transform_fourpoint(const matsubara_green_function_t& G_omega_fourpoint,
                                                                          const matsubara_green_function_t& G_omega,
-                                                                         const matsubara_green_function_t& G0_omega, 
-                                                                         const double mu, const double h, 
+                                                                         const matsubara_green_function_t& G0_omega,
+                                                                         const double mu, const double h,
                                                                          const double beta, const unsigned int n_matsubara) const
 {
   throw std::runtime_error("transform_fourpoint in foursite transformer not implemented.");
@@ -1389,7 +1393,7 @@ matsubara_green_function_t FoursiteCDMFTTransformer::transform_fourpoint(const m
 
 
 
-std::map<double, std::complex<double> > 
+std::map<double, std::complex<double> >
 FoursiteCDMFTTransformer::local_green_function_from_selfenergies(const std::map<double, std::vector<std::complex<double> > >& selfenergies,
                                                                  const double mu, const double delta)
 {
@@ -1399,8 +1403,8 @@ FoursiteCDMFTTransformer::local_green_function_from_selfenergies(const std::map<
 
 
 
-alps::RealObsevaluator FoursiteCDMFTTransformer::kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies, 
-                                                                const double beta, const double mu, 
+alps::RealObsevaluator FoursiteCDMFTTransformer::kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies,
+                                                                const double beta, const double mu,
                                                                 const bool error_propagation, const bool paramagnet)
 {
   throw std::runtime_error("foursite CDMFT transformer not implemented.");
@@ -1408,9 +1412,9 @@ alps::RealObsevaluator FoursiteCDMFTTransformer::kinetic_energy(const std::vecto
 nambu_matsubara_green_function_t FoursiteCDMFTTransformer::initial_G0_nambu(alps::Parameters const&){
   throw std::runtime_error("initial nambu_matsubara_green_function_t CDMFT transformer not implemented.");
 }
-nambu_matsubara_green_function_t FoursiteCDMFTTransformer::operator()(const nambu_matsubara_green_function_t &G_omega, 
-                                                                      const nambu_matsubara_green_function_t &G0_omega, 
-                                                                      nambu_matsubara_green_function_t &selfenergy, 
+nambu_matsubara_green_function_t FoursiteCDMFTTransformer::operator()(const nambu_matsubara_green_function_t &G_omega,
+                                                                      const nambu_matsubara_green_function_t &G0_omega,
+                                                                      nambu_matsubara_green_function_t &selfenergy,
                                                                       double &mu, const double h, const double eta1, const double eta2, const double beta, const bool use_selfenergy){
   throw std::runtime_error("nambu operator() in CDMFT transformer not implemented.");
 }
@@ -1457,7 +1461,7 @@ itime_green_function_t FoursiteCDMFTTransformer::transform_into_real_space(const
     }
   }
   return G_transformed;
-}  
+}
 itime_green_function_t FoursiteCDMFTTransformer::transform_into_k_space(const itime_green_function_t& G) const{
   return transform_into_real_space(G);
 }
@@ -1494,13 +1498,13 @@ void FoursiteCDMFTTransformer::set_Tij_matrix(double kx, double ky, complex_dens
   //these are the factors of 'tprime'
   throw std::logic_error("go to xi and ask for help.");
   /*H0(0,2)=-4.*std::exp(std::complex<double>(0, ( kx - ky)))*tprime_*coskx*cosky;
-  H0(1,3)=-4.*std::exp(std::complex<double>(0, (-kx - ky)))*tprime_*coskx*cosky;
-  H0(0,2)=-4.*std::exp(std::complex<double>(0, (-kx + ky)))*tprime_*coskx*cosky;
-  H0(0,2)=-4.*std::exp(std::complex<double>(0, ( kx + ky)))*tprime_*coskx*cosky;*/
+   H0(1,3)=-4.*std::exp(std::complex<double>(0, (-kx - ky)))*tprime_*coskx*cosky;
+   H0(0,2)=-4.*std::exp(std::complex<double>(0, (-kx + ky)))*tprime_*coskx*cosky;
+   H0(0,2)=-4.*std::exp(std::complex<double>(0, ( kx + ky)))*tprime_*coskx*cosky;*/
 }
 
 void FoursiteCDMFTTransformer::set_U_(unsigned int nsite, complex_dense_matrix &U_){
-
+  
 }
 
 std::vector<double> FoursiteCDMFTTransformer::epsav() const{

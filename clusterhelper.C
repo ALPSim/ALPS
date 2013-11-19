@@ -33,9 +33,11 @@ alps::graph_helper<alps::graph_helper<>::graph_type>(params),
 n_cluster_sites_(boost::lexical_cast<int>(params["SITES"])), epsilon_(1e-9),
 lattice_momenta_file_name_(params.value_or_default("LATTICE_MOMENTA_FILE", "LatticeMomenta"))
 {
+  std::cerr<<"building cluster helper"<<std::endl;
   //try to read this transformer, otherwise generate it.
   if(!read(params))
     setup_tables(params);
+  std::cerr<<"done building cluster helper"<<std::endl;
 }
 
 
