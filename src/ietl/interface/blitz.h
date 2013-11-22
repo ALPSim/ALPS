@@ -45,7 +45,7 @@ namespace ietl {
   }
 
   template < class Cont, class Gen> 
-    void generate(Cont& c, Gen& gen) {
+    void generate(Cont& c, const Gen& gen) {
     std::generate(c.begin(),c.end(),gen);
   }
 

@@ -39,7 +39,7 @@
 namespace ietl {
     
     template<class T, class Gen> 
-    inline void generate(boost::numeric::ublas::vector<T>& c, Gen& gen) {
+    inline void generate(boost::numeric::ublas::vector<T>& c, const Gen& gen) {
         std::generate(c.begin(),c.end(),gen);
     }  
     

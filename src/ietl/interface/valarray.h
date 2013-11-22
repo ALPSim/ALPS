@@ -79,7 +79,7 @@ namespace ietl {
   }  
 
   template < class T, class Gen> 
-  void generate(std::valarray<T>& c, Gen& gen)
+  void generate(std::valarray<T>& c, const Gen& gen)
   {
     std::generate(get_data(c),get_data(c)+c.size(),gen);
   }

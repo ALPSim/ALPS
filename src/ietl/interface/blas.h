@@ -31,7 +31,7 @@
 #error The BLAS interface is not yet implemented 
 namespace ietl {
   template < class Cont, class Gen> 
-  void generate(Cont& c, Gen& gen) {
+  void generate(Cont& c, const Gen& gen) {
     std::generate(itl::get_data(c),itl::get_data(c)+c.size(),gen);
   }
 

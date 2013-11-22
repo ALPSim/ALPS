@@ -169,7 +169,7 @@ namespace ietl {
  } 
 
   template <class V, class GEN>
-   void generate(ietl::vector_wrapper<V>& src, GEN& gen) {
+   void generate(ietl::vector_wrapper<V>& src, const GEN& gen) {
    ietl::generate(*src.get(),gen);
  }
  
