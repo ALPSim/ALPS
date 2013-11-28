@@ -397,7 +397,7 @@ class Hdf5Loader:
                 fileset = []
                 self.h5f = h5.archive(f, 'r')
                 self.h5fname = f
-                if verbose: log("Loading from file" + f)
+                if verbose: log("Loading from file " + f)
                 list_ = self.GetObservableList(respath)
                 params = self.ReadParameters(proppath)
                 obslist = []

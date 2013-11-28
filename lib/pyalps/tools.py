@@ -1452,7 +1452,7 @@ def mergeMeasurements(measurements):
     merged = [mergeDataSets(v) for v in byname.values()]
     return merged
 
-def mergeMeasurementsFromFiles(files,respath='/simulation/realizations/0/clones/0/results'):
+def mergeMeasurementsFromFiles(files,respath='/simulation/realizations/0/clones/0/measurements'):
     ll = Hdf5Loader()
     meas = ll.ReadMeasurementFromFile(files,respath=respath)
     return mergeMeasurements(meas)
