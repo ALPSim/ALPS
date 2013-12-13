@@ -96,6 +96,7 @@ public:
   pair_class_set_itpair_type pair_classes_k_space() const
   { return pair_class_set_itpair_type(pair_class_set_k_space_.begin(), pair_class_set_k_space_.end()); }
   const Matrix<site_t>::Type &symmetry_table_k_space() const{return symmetry_table_k_space_;}
+  const std::set<pair_class_type> &pair_class_set_k_space() const{return pair_class_set_k_space_;}
   
 private:
   void setup_tables(const alps::Parameters& params);
@@ -206,6 +207,7 @@ public:
   template<typename T> nambu_green_function<T> symmetrize_k_space(const nambu_green_function<T>& G) const
   { return symmetrize_helper(G, pair_classes_k_space()); }
   const Matrix<site_t>::Type &symmetry_table_k_space() const{return ClusterHelper::symmetry_table_k_space();}
+  const std::set<pair_class_type> &pair_class_set_k_space() const{return ClusterHelper::pair_class_set_k_space();}
   
   
   //Real space and k-space transformers for the Green's functions
