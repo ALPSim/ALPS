@@ -254,11 +254,13 @@ matsubara_green_function_t FSSemicircleHilbertTransformer::initial_G0(const alps
   if ( parms.defined("ISOLATING"))
     return FrequencySpaceHilbertTransformer::initial_G0(parms);
   if (parms.defined("G0OMEGA_INPUT")){
-    std::ifstream g0_file("G0OMEGA_INPUT");
+    std::string name=parms["G0OMEGA_INPUT"];
+    std::ifstream g0_file(name.c_str());
     if(g0_file.good())
       return FrequencySpaceHilbertTransformer::initial_G0(parms); //only open that file if it is good.
-    else
-      std::cout<<"failed to open initial G0 file"<<std::endl;
+    else{
+      std::cout<<"failed to open initial G0 file with name: "<<name<<std::endl;
+    }
   }
   {
     std::cout<<"calculating initial G0_omega"<<std::endl;
