@@ -63,7 +63,7 @@ itime_green_function_t HilbertTransformer::initial_G0(const alps::Parameters& pa
     int n_flavor=parms.value_or_default("FLAVORS", 2);
     double beta = static_cast<double>(parms["BETA"]);
     double mu = static_cast<double>(parms["MU"]);
-    double h = static_cast<double>(parms["H"]);
+    double h = static_cast<double>(parms["H_INIT"]);
     matsubara_green_function_t G0_omega(n_matsubara,1, n_flavor, diagonal);
     itime_green_function_t G0_tau(n_time,1, n_flavor, diagonal);
     for(unsigned int i=0; i<G0_omega.nfreq(); i++) {
@@ -132,7 +132,7 @@ itime_green_function_t SemicircleHilbertTransformer::initial_G0(const alps::Para
     int n_flavor=parms.value_or_default("FLAVORS", 2);
     double beta = static_cast<double>(parms["BETA"]);
     double mu = static_cast<double>(parms["MU"]);
-    double h = static_cast<double>(parms["H"]);
+    double h = static_cast<double>(parms["H_INIT"]);
     //if(h!=0) {std::cout<<"we don't yet handle magnetic fields!"<<std::endl; abort(); }
     double tsq=t_*t_;
     matsubara_green_function_t G0_omega(n_matsubara,1,n_flavor, diagonal);
@@ -167,7 +167,7 @@ matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const al
     int n_flavor=parms.value_or_default("FLAVORS", 2);
     double beta = static_cast<double>(parms["BETA"]);
     double mu = static_cast<double>(parms["MU"]);
-    double h = static_cast<double>(parms["H"]);
+    double h = static_cast<double>(parms["H_INIT"]);
     matsubara_green_function_t G0_omega(n_matsubara,1,n_flavor, diagonal);
     for(unsigned int i=0; i<G0_omega.nfreq(); i++) {
       std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
@@ -195,7 +195,7 @@ matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const al
           G0_omega(i,f)=1;
         }
       }
-      double h     =parms.value_or_default("H",0.);
+      double h     =parms.value_or_default("H_INIT",0.);
       double mu    =parms.value_or_default("MU",0.);
       int n_time=boost::lexical_cast<int>(parms["N"]);
       int n_flavor=parms.value_or_default("FLAVORS", 2);
