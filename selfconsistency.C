@@ -51,10 +51,7 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
   int N = static_cast<int>(parms["N"]);
   int flavors = parms.value_or_default("FLAVORS", 2);
   double beta = static_cast<double>(parms["BETA"]);
-  double h_old = static_cast<double>(parms["H"]);
-  double h_init = parms.value_or_default("H_INIT", 0.);
-  double h = h_old + h_init;
-  (*const_cast<alps::Parameters*>(&parms))["H"] = h;
+  double h = static_cast<double>(parms["H"]);
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = parms.value_or_default("PARAMAGNET", false);
   //bool degenerate = parms.value_or_default("DEGENERATE", false);
@@ -83,8 +80,6 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
       }
     }	
     std::cout<<"maximum difference in G0 is: "<<max_diff<<std::endl;
-    if (iteration_ctr == 0) 
-      (*const_cast<alps::Parameters*>(&parms))["H"] = h_old;
     print_tau_green_functions(iteration_ctr++, G0_tau, G_tau, beta);
   } while (max_diff > converged  && iteration_ctr < max_it);
   std::cout<<"converged!"<<std::endl;
@@ -213,10 +208,7 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
   unsigned int n_site=parms.value_or_default("SITES", 1);
   
   double beta = static_cast<double>(parms["BETA"]);
-  double h_old = static_cast<double>(parms["H"]);
-  double h_init = parms.value_or_default("H_INIT", 0.);
-  double h = h_old + h_init;
-  (*const_cast<alps::Parameters*>(&parms))["H"] = h;
+  double h = static_cast<double>(parms["H"]);
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = parms.value_or_default("PARAMAGNET", false);
   //bool degenerate = parms.value_or_default("DEGENERATE", false);
@@ -242,7 +234,7 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
   double max_diff;	
   do {
     iteration_ctr++;
-    std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
+    std::cout<<"starting iteration nr. "<<iteration_ctr<<" H is: "<<h<<std::endl;
     double mu = static_cast<double>(parms["MU"]);
     G_old_omega = G_omega;
     G0_old_omega = G0_omega;
@@ -302,8 +294,6 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
       <<max_diff<<"\tconverged: "<<converged<<std::endl;
     }
     print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
-    if (iteration_ctr == 1) 
-      (*const_cast<alps::Parameters*>(&parms))["H"] = h_old;
   }while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);           
   // write G0 (to be read as an input Green function)
   G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());

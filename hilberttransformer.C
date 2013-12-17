@@ -222,24 +222,16 @@ matsubara_green_function_t FSSemicircleHilbertTransformer::operator()(const mats
                                                                       matsubara_green_function_t &G0_omega_ignored,
                                                                       const double mu, const double h, const double beta)
 {
-  std::cout<<"SCHT: using: mu:"<<mu<<" h: "<<h<<"beta: "<<beta<<" "<<G0_omega_ignored.nfreq()<<std::endl;
+  std::cout<<"SCHT: using: mu:"<<mu<<" h: "<<h<<"beta: "<<beta<<" nomega: "<<G0_omega_ignored.nfreq()<<std::endl;
   double tsq=t_*t_;
   matsubara_green_function_t G0_omega(G_omega);
-  //formula according to review, p. 61, formula 221.
-  if(G_omega.nflavor()==1){ //special case.
-    for(unsigned int i=0; i<G_omega.ntime(); i++) {
+  if((G_omega.nflavor()%2)!=0)
+    throw std::runtime_error("even number of flavors needed for AFM!");
+  for(unsigned int flavor=0;flavor<G_omega.nflavor();flavor+=2){
+    for(unsigned int i=0; i<G_omega.nfreq(); i++) {
       std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-      G0_omega(i,0) =1./(iw + mu - tsq*G_omega(i,0));
-    }
-  }
-  else{
-    assert(G_omega.nflavor()%2==0);
-    for(unsigned int flavor=0;flavor<G_omega.nflavor();flavor+=2){
-      for(unsigned int i=0; i<G_omega.nfreq(); i++) {
-        std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-        G0_omega(i,flavor  ) =1./(iw + mu -h - tsq*G_omega(i,flavor+1));
-        G0_omega(i,flavor+1) =1./(iw + mu +h - tsq*G_omega(i,flavor  ));
-      }
+      G0_omega(i,flavor  ) =1./(iw + mu -h - tsq*G_omega(i,flavor+1));
+      G0_omega(i,flavor+1) =1./(iw + mu +h - tsq*G_omega(i,flavor  ));
     }
   }
   return G0_omega;
@@ -545,4 +537,4 @@ matsubara_green_function_t IgorsHilbertTransformer::initial_G0(const alps::Param
   }
 }
 
-#endif 
+#endif

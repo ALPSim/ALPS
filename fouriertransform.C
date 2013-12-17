@@ -422,7 +422,7 @@ void FourierTransformer::generate_transformer(const alps::Parameters &parms,
     else throw std::logic_error("please figure out how to do fourier transforms in your cluster framwork if it is not DCA (2)");
   }
   else {
-    std::cout << "using Bethe lattice fourier transformer" << "\n";
+    std::cout << "using Bethe lattice fourier transform" << "\n";
     std::vector<double> eps(n_flavors);
     std::vector<double> epssq(n_flavors);
     double t = parms["t"];
@@ -477,7 +477,7 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
     else throw std::logic_error("please figure out how to do fourier transforms in your cluster framwork if it is not DCA (3)");
   }
   else {
-    std::cout << "using Bethe lattice fourier transformer" << "\n";
+    std::cout << "using Bethe lattice fourier transform" << "\n";
     std::vector<std::vector<double> > eps(n_flavors);
     std::vector<std::vector<double> >epssq(n_flavors);
     double t = parms["t"];
@@ -531,7 +531,7 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
     }
     else throw std::logic_error("please figure out how to do fourier transforms in your cluster framwork if it is not DCA (1)");
   } else {
-    std::cout << "using Bethe lattice fourier transformer" << "\n";
+    std::cout << "using AFM Bethe lattice fourier transform" << "\n";
     std::vector<double> eps(n_flavors);
     std::vector<double> epssq(n_flavors);
     double t = parms["t"];
