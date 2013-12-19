@@ -27,76 +27,45 @@
 
 #include "ising.hpp"
 
-#include <alps/ngs.hpp>
+#include <alps/parseargs.hpp>
+#include <alps/ngs/make_parameters_from_xml.hpp>
 
 #include <boost/chrono.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
 
 #include <string>
 #include <iostream>
 #include <stdexcept>
 
-// function object to determine when to stop the simulation
-struct stop_callback {
-    stop_callback(std::size_t timelimit)
-        : limit(timelimit)
-        , start(boost::chrono::high_resolution_clock::now())
-    {}
-
-    // stop the simulation eighter if a signal was sent to the program or if the timlimit was reached
-    bool operator()() {
-        return !signals.empty() 
-            || (limit.count() > 0 && boost::chrono::high_resolution_clock::now() > start + limit);
-    }
-
-    boost::chrono::duration<std::size_t> limit;
-    alps::ngs::signal signals;
-    boost::chrono::high_resolution_clock::time_point start;
-};
-
 int main(int argc, char *argv[]) {
 
-    // this tutorial expect exactly 3 arguments
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " timelimit parameter-file" << std::endl;
-        return EXIT_FAILURE;
-    }
-
     try {
+        alps::parseargs options(argc, argv);
+        std::string checkpoint_file = options.input_file.substr(0, options.input_file.find_last_of('.')) +  ".clone0.h5";
 
-        // extract parameters from argv
-        std::size_t timelimit = boost::lexical_cast<std::size_t>(argv[1]);
-        boost::filesystem::path input_file = argv[2];
-        std::string basename = std::string(argv[2]).substr(0, std::string(argv[2]).find_last_of('.'));
+        alps::parameters_type<ising_sim>::type parameters;
+        // TODO: better check the first few bytes. provide an ALPS function to do so
+        if (boost::filesystem::extension(options.input_file) == ".xml")
+            parameters = alps::make_parameters_from_xml(options.input_file);
+        else if (boost::filesystem::extension(options.input_file) == ".h5")
+            alps::hdf5::archive(options.input_file)["/parameters"] >> parameters;
+        else
+            parameters = alps::parameters_type<ising_sim>::type(options.input_file);
 
-        // create path for ouput and checkpoint files from the paramter file
-        boost::filesystem::path checkpoint_file = basename + ".clone0.h5";
-        boost::filesystem::path output_file = basename +  ".out.h5";
-
-        // parse parameter file
-        alps::parameters_type<ising_sim>::type parameters(input_file);
-
-        // create simulation object
         ising_sim sim(parameters);
 
-        // if checkpoint file exists resume, else start from scratch
-        if (boost::filesystem::exists(checkpoint_file))
+        if (options.resume)
             sim.load(checkpoint_file);
 
-        // run simulation
-        sim.run(stop_callback(timelimit));
+        sim.run(alps::stop_callback(options.timelimit));
 
-        // save checkpoint
         sim.save(checkpoint_file);
 
-        // convert measurements to results
         using alps::collect_results;
         alps::results_type<ising_sim>::type results = collect_results(sim);
 
-        // output results and save results to output_file
         std::cout << results << std::endl;
-        alps::hdf5::archive ar(output_file, "w");
+        alps::hdf5::archive ar(options.output_file, "w");
         ar["/parameters"] << parameters;
         ar["/simulation/results"] << results;
 
