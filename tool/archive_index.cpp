@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2006-2012 by Lukas Gamper <mistral@student.ethz.ch>,
+* Copyright (C) 2006-2013 by Lukas Gamper <mistral@student.ethz.ch>,
 *                            Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
@@ -147,7 +147,7 @@ void Index::exec(fs::path xmlPath) {
           fs::path file_in = complete(fs::path(file_in_str), basedir);
           fs::path file_out = complete(fs::path(file_out_str), basedir);
           std::string simname;
-          alps::parapack::load_tasks(file_in, file_out, basedir, simname, tasks, false, false);
+          alps::parapack::load_tasks(file_in, file_out, basedir, simname, tasks);
           BOOST_FOREACH(alps::task& t, tasks) {
             fs::path f = complete(fs::path(t.file_out_str()), basedir);
             if (fs::exists(f)) {
