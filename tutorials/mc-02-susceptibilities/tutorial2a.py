@@ -53,7 +53,7 @@ pyalps.runApplication('spinmc',input_file,Tmin=5)
 
 
 #load the susceptibility and collect it as function of temperature T
-data = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm2a'),'Susceptibility')
+data = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm2a'))
 susceptibility = pyalps.collectXY(data,x='T',y='Susceptibility')
 
 #make plot
