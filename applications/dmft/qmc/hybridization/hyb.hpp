@@ -35,7 +35,7 @@
 #include "hybsegment.hpp"
 #include "hyblocal.hpp"
 #include "hybconfig.hpp"
-#include <boost/chrono/chrono.hpp>
+#include "boost/chrono/chrono.hpp"
 
 #ifdef HYB_SIM_MAIN
 boost::uint64_t sweep_count;
@@ -58,13 +58,15 @@ public:
   void measure();
   void update();
   bool is_thermalized() const { return (sweeps >= thermalization_sweeps); }
-  double fraction_completed() const {return is_thermalized()?(sweeps-thermalization_sweeps)/(double)total_sweeps:0.; }
+  double fraction_completed() const;
   friend std::ostream &operator<<(std::ostream &os, const hybridization &hyb);
 
 private:
   bool VERBOSE;
   int crank;
   int output_period;
+  clock_t start_time;
+  clock_t end_time;
   //boost::chrono::steady_clock::time_point lasttime;
   //boost::chrono::steady_clock::duration delay;
 

@@ -99,6 +99,11 @@ hyb_config(parms)
     std::cout<<"Usage requires citation of the ALPS CT-HYB paper and the ALPS paper"<<std::endl;
     std::cout<<"Refer to the documentation for more information."<<std::endl;
   }
+  
+  start_time=clock();
+  end_time=start_time+ CLOCKS_PER_SEC*((long)parms["MAX_TIME"]);
+
+  
   std::cout<<"process " << crank << " starting simulation"<<std::endl;
 }
 
@@ -176,4 +181,10 @@ std::ostream &operator<<(std::ostream &os, const hybridization &hyb){
 std::ostream &operator<<(std::ostream &os, const segment &s){
   os<<"( "<<s.t_start_<<" , "<<s.t_end_<<" ) ";
   return os;
+}
+double hybridization::fraction_completed()const{
+  if(!is_thermalized()) return 0.;
+  double work_fraction= (sweeps-thermalization_sweeps)/(double)total_sweeps;
+  double time_fraction= (clock()-start_time)/(double)(end_time-start_time);
+  return std::max(work_fraction, time_fraction);
 }
