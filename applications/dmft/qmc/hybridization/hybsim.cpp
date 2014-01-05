@@ -185,6 +185,6 @@ std::ostream &operator<<(std::ostream &os, const segment &s){
 double hybridization::fraction_completed()const{
   if(!is_thermalized()) return 0.;
   double work_fraction= (sweeps-thermalization_sweeps)/(double)total_sweeps;
-  double time_fraction= (clock()-start_time)/(double)(end_time-start_time);
-  return std::max(work_fraction, time_fraction);
+  //double time_fraction= (clock()-start_time)/(double)(end_time-start_time);
+  return work_fraction;
 }
