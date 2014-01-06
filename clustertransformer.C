@@ -54,7 +54,13 @@ void DCATransformer::generate_transformer(const alps::Parameters& parms, boost::
 {
   bool antiferromagnetic = parms.value_or_default("ANTIFERROMAGNET", false);
   if (antiferromagnetic) {
-    std::cout<<"using antiferromagnetic DCA transformer"<<std::endl;
+#ifndef USE_MPI
+    //std::cout<<"using antiferromagnetic DCA transformer"<<std::endl;
+#else
+    //int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    //if(rank==0)     //std::cout<<"using antiferromagnetic DCA transformer"<<std::endl;
+#endif
+    //std::cout<<"using antiferromagnetic DCA transformer"<<std::endl;
     trans_ptr.reset(new AntiFerroDCATransformer(parms));
   }
   else {
@@ -95,7 +101,7 @@ epsav_(n_cluster_sites()),
 epssqav_(n_cluster_sites()),
 dispersion_moments_(2, 0.)
 {
-//std::cerr<<"entering DCATransformer"<<std::endl;
+  //std::cerr<<"entering DCATransformer"<<std::endl;
   if (params.defined("t") && params.defined("W"))
     boost::throw_exception(std::invalid_argument("both t and W are defined"));
   //calculating dispersion moments, bandwidth and half filling
@@ -155,7 +161,7 @@ dispersion_moments_(2, 0.)
   //  int rank;   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   //  if(rank==0) std::cout << "bandwidth: " << bandwidth_ << "\n";
 #endif
-//std::cerr<<"exiting DCATransformer"<<std::endl;
+  //std::cerr<<"exiting DCATransformer"<<std::endl;
 }
 
 
@@ -654,15 +660,15 @@ alps::RealObsevaluator SimpleDCATransformer::kinetic_energy(const std::vector<st
  }*/
 
 
-
+///hilbert transform operator for the Antiferromagnetic DCA case
 matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_green_function_t &G_omega,
                                                                const matsubara_green_function_t &G0_omega,
                                                                double &mu, const double h, const double beta)
 {
+  //std::cout<<"runnning operator() with AFM"<<std::endl;
   unsigned int nflavor=G0_omega.nflavor();
   unsigned int nfreq=G0_omega.nfreq();
-  assert(G0_omega.nsite()==n_cluster_sites());
-  assert(nflavor>1 && nflavor%2 == 0);
+
   matsubara_green_function_t G0_omega_new(nfreq,n_cluster_sites(),nflavor, blockdiagonal);
   G0_omega_new.clear();
   matsubara_green_function_t G0_omega_inv = green_function_inverse(G0_omega);
@@ -673,13 +679,24 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
       matsubara_green_function_t G_kl(G0_omega);
       for (frequency_t freq=0; freq<nfreq; ++freq) {
         std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
+        //std::cout<<"iomegan is: "<<iomega_n<<" dimension: "<<dimension()<<" cluster sites: "<<n_cluster_sites()<<std::endl;
         for (site_t kc=0; kc<n_cluster_sites(); kc+=2) {
+          //std::cout<<"running loop for kc: "<<kc<<std::endl;
           vector_type k0(dimension());
-          for (unsigned int d=0; d<dimension(); ++d)
+          //std::cout<<"k0 size is: "<<k0.size()<<std::endl;
+          //std::cout<<"number of cluster sites: "<<n_cluster_sites()<<std::endl;
+          //std::cout<<"number of cluster cells: "<<n_cluster_cells()<<std::endl;
+          //std::cout<<"number of lattice momenta : "<<n_lattice_momenta()<<std::endl;
+          for (unsigned int d=0; d<dimension(); ++d){
+            //std::cout<<"lattice momentum is: "<<lattice_momentum(kl,d)<<std::endl;
+            //std::cout<<"cluster momentum is: "<<cluster_momentum(kl,d)<<std::endl;
             k0[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc,d);
+          }
           vector_type k1(dimension());
-          for (unsigned int d=0; d<dimension(); ++d)
+          for (unsigned int d=0; d<dimension(); ++d){
             k1[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc+1,d);
+          }
+          //std::cout<<"running calc for freq: "<<freq<<" sgn: "<<sign<<" kl: "<<kl<<std::endl;
           for (spin_t flavor=0; flavor<nflavor; flavor+=2) {
             G_kl(freq,kc,kc,flavor) = iomega_n+mu-epsilon(k0);
             G_kl(freq,kc,kc,flavor+1) = iomega_n+mu-epsilon(k0);
@@ -710,39 +727,44 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
 matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Parameters& parms, shape_t shape)
 {
   if(shape != blockdiagonal) throw std::logic_error("the shape really should be blockdiagonal.");
-  if (parms.defined("G0OMEGA_INPUT"))
-    return ClusterTransformer::initial_G0(parms, shape);
-  else {
-    std::cout<<"calculating initial G0_omega"<<std::endl;
-    unsigned int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
-    unsigned int n_tau=boost::lexical_cast<int>(parms["N"]);
-    unsigned int n_flavor=parms.value_or_default("FLAVORS", 2);
-    double beta = static_cast<double>(parms["BETA"]);
-    double mu = static_cast<double>(parms["MU"]);
-    double h = static_cast<double>(parms["H"]);
-    matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor, blockdiagonal);
-    matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor, blockdiagonal);
-    G0_omega.clear();
-    for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
-      for (site_t i=0; i<n_cluster_sites(); ++i) {
-        for (frequency_t freq=0; freq<n_matsubara; ++freq) {
-          G0_omega(freq, i, i, flavor) = 1.;
-        }
+  if (parms.defined("G0OMEGA_INPUT")){
+    std::ifstream in_file(parms["G0OMEGA_INPUT"].c_str());
+    if(in_file.good()){
+      return ClusterTransformer::initial_G0(parms, shape);
+    }
+    else
+      std::cout<<"WARNING: Input file could not be found, proceeding with free solution."<<std::endl;
+  }
+  std::cout<<"calculating initial G0_omega"<<std::endl;
+  unsigned int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
+  unsigned int n_tau=boost::lexical_cast<int>(parms["N"]);
+  unsigned int n_flavor=parms.value_or_default("FLAVORS", 2);
+  double beta = static_cast<double>(parms["BETA"]);
+  double mu = static_cast<double>(parms["MU"]);
+  double h = static_cast<double>(parms["H"]);
+  matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor, blockdiagonal);
+  matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor, blockdiagonal);
+  G0_omega.clear();
+  for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
+    for (site_t i=0; i<n_cluster_sites(); ++i) {
+      for (frequency_t freq=0; freq<n_matsubara; ++freq) {
+        G0_omega(freq, i, i, flavor) = 1.;
       }
     }
-    G_omega = G0_omega;
-    //evoke transformation with G_omega==G0_omega (selfenergy=0)
-    matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h, beta);
-    boost::shared_ptr<FourierTransformer> fourier_ptr;
-    FourierTransformer::generate_transformer(parms, fourier_ptr);
-    G0_omega_new.write("G0_omega_input");
-    transform_into_real_space(G0_omega_new).write("G0_omega_input_realspace");
-    itime_green_function_t G0_tau(n_tau, n_cluster_sites(), n_flavor, blockdiagonal);
-    fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega_new);
-    G0_tau.write("G0_tau_input");
-    transform_into_real_space(G0_tau).write("G0_tau_input_realspace");
-    return G0_omega_new;
   }
+  G_omega = G0_omega;
+  //invoke transformation with G_omega==G0_omega (selfenergy=0)
+  matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h, beta);
+  boost::shared_ptr<FourierTransformer> fourier_ptr;
+  FourierTransformer::generate_transformer(parms, fourier_ptr);
+  G0_omega_new.write("G0_omega_input");
+  transform_into_real_space(G0_omega_new).write("G0_omega_input_realspace");
+  itime_green_function_t G0_tau(n_tau, n_cluster_sites(), n_flavor, blockdiagonal);
+  fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega_new);
+  G0_tau.write("G0_tau_input");
+  transform_into_real_space(G0_tau).write("G0_tau_input_realspace");
+  std::cout<<"returning initial G0."<<std::endl;
+  return G0_omega_new;
 }
 
 

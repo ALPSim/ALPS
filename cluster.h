@@ -877,8 +877,9 @@ green_function<T> AntiFerroDCATransformer::transform_coordinates(const green_fun
   unsigned int nflavor=G.nflavor();
   unsigned int nsite=G.nsite();
   unsigned int nt=G.ntime();
-  assert(nsite==n_cluster_sites());
-  green_function<T> G_new(nt, nsite, nflavor, blockdiagonal);
+  if(nsite!=n_cluster_sites()) throw std::logic_error("Problem with cluster sites != n_sites.");
+  shape_t transformed_shape=G.shape()==blockdiagonal?nondiagonal:blockdiagonal;
+  green_function<T> G_new(nt, nsite, nflavor, transformed_shape);
   for (spin_t flavor=0; flavor<nflavor; ++flavor) {
     for (site_t i=0; i<nsite; ++i) {
       for (site_t j=0; j<nsite; ++j) {
@@ -953,6 +954,7 @@ green_function<T> AntiFerroDCATransformer::green_function_inverse(const green_fu
     for (spin_t f=0; f<G.nflavor(); ++f) {
       for (std::size_t k=0; k<G.nsite(); k+=2) {
         T detG = G(t, k, k, f)*G(t, k+1, k+1, f) - G(t, k+1, k, f)*G(t, k, k+1, f);
+        if(std::abs(detG) < 1.e-15) throw std::runtime_error("there's a problem with your determinant in the inverse: it is near singular!");
         G_inv(t, k, k, f) = G(t, k+1, k+1, f)/detG;
         G_inv(t, k+1, k+1, f) = G(t, k, k, f)/detG;
         G_inv(t, k+1, k, f) = -G(t, k+1, k, f)/detG;

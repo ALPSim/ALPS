@@ -52,12 +52,20 @@ void FourierTransformer::frequency_to_time_ft(itime_green_function_t &G_tau,
     for (unsigned int s1=0; s1<N_site; ++s1){
       for (unsigned int s2=0; s2<N_site; ++s2) {
         if(G_omega.shape()==diagonal && (s1 != s2)) continue;
-        if((c1_[f][s1][s2]==0) && (c2_[f][s1][s2] == 0) && (c3_[f][s1][s2]==0)){  //nothing happening in this gf.
-          for (unsigned int i=0; i<=N_tau; i++) {
-            G_tau(i,s1,s2,f)=0.;
+        if(G_omega.shape()==blockdiagonal){
+          bool is_nonzero=false;
+          if(s1==s2) is_nonzero=true;
+          if(s1%2==0 && s2==s1+1) is_nonzero=true;
+          if(s1%2==1 && s2==s1-1) is_nonzero=true;
+          if (!is_nonzero){  //nothing happening in this gf.
+            for (unsigned int i=0; i<=N_tau; i++) {
+              G_tau(i,s1,s2,f)=0.;
+            }
+            continue;
           }
         }
-        else {
+        //this is the standard case: we need to do a FT.
+        {
           for (unsigned int k=0; k<N_omega; k++) {
             std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
             G_omega_no_model(k,s1,s2,f) -= f_omega(iw, c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2]);

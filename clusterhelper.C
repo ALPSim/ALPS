@@ -33,6 +33,7 @@ alps::graph_helper<alps::graph_helper<>::graph_type>(params),
 n_cluster_sites_(boost::lexical_cast<int>(params["SITES"])), epsilon_(1e-9),
 lattice_momenta_file_name_(params.value_or_default("LATTICE_MOMENTA_FILE", "LatticeMomenta"))
 {
+  //std::cout<<"in clusterhelper constructor."<<std::endl;
   //try to read this transformer, otherwise generate it.
   if(!read(params))
     setup_tables(params);
@@ -42,6 +43,7 @@ lattice_momenta_file_name_(params.value_or_default("LATTICE_MOMENTA_FILE", "Latt
 
 void ClusterHelper::setup_tables(const alps::Parameters &params)
 {
+  //std::cout<<"setting up tables of transformer"<<std::endl;
   //setup basis vectors
   Matrix<double>::Type basis(dimension(), dimension());
   memset(&(basis(0,0)), 0, sizeof(double)*dimension()*dimension());
@@ -179,6 +181,8 @@ void ClusterHelper::setup_tables(const alps::Parameters &params)
       }
     }
   }
+
+  //find lattice integration weights (Simpson weights)
   std::vector<double> weights;
   momentum_iterator itm, itm_end;
   boost::tie(itm, itm_end) = momenta();
@@ -223,19 +227,26 @@ void ClusterHelper::setup_tables(const alps::Parameters &params)
       double weight = 1.;
       for (std::size_t d=0; d<dimension(); ++d) {
         double m = (moms[g][d]+0.5)*L;
-        if (almost_equal(m, 0) || almost_equal(m, L))
+        if (almost_equal(m, 0) || almost_equal(m, L)){
+          //boundary gets a third
           weight *= 1./3.;
+        }
+        //rest gets 2/3 and 4/3 of weight according to Simpson
         else if ( (((int)abs(round(m)))%2==0 && ((int)abs(round(L)))%2==0) ||
-                 (((int)abs(round(m)))%2==1 && ((int)abs(round(L)))%2==1) )
+                 (((int)abs(round(m)))%2==1 && ((int)abs(round(L)))%2==1) ){
           weight *= 2./3.;
-        else
+        }
+        else{
           weight *= 4./3.;
+        }
       }
+      //momw has dimension+1 entries: dimension for the actual coordinate, and the last one for the weight
       vector_type momw(dimension()+1);
       vector_type momt = matrix_vector_mult(reciprocal_basis_, moms[g]);
       for (std::size_t d=0; d<dimension(); ++d)
         momw[d] = momt[d];
       momw[dimension()] = weight;
+      //std::cout<<"appending momentum to lattice_momenta_, weight: "<<weight<<std::endl;
       append_column_no_duplicates(lattice_momenta_, momw);
     }
   }
@@ -250,16 +261,16 @@ void ClusterHelper::setup_tables(const alps::Parameters &params)
    latticemomstream.close();
    }*/
   //}
-  /*
-   lattice_momenta_.resize(n_cluster_cells(), dimension());
-   momentum_iterator itm, itm_end;
-   boost::tie(itm, itm_end) = momenta();
-   for (unsigned int m=0; itm!=itm_end; ++itm, ++m) {
-   vector_type mom=momentum(*itm);
-   for (int d=0; d<dimension(); ++d) {
-   lattice_momenta_(m,d) = mom[d];
-   }
-   } */
+  
+  /*lattice_momenta_.resize(n_cluster_cells(), dimension());
+  momentum_iterator itm, itm_end;
+  boost::tie(itm, itm_end) = momenta();
+  for (unsigned int m=0; itm!=itm_end; ++itm, ++m) {
+    vector_type mom=momentum(*itm);
+    for (int d=0; d<dimension(); ++d) {
+      lattice_momenta_(m,d) = mom[d];
+    }
+  }*/
   /* if(alps::is_master()){
    std::ofstream allmomstream("AllMomenta");
    for (int mc=0; mc<cluster_momenta_.size1(); ++mc) {
@@ -386,8 +397,9 @@ bool ClusterHelper::write(const alps::Parameters &parms) const{
     write_site_class_set(ar, site_class_set_k_space_, "site_class_set_k_space");
     write_pair_class_set(ar, pair_class_set_real_space_, "pair_class_set_real_space");
     write_pair_class_set(ar, pair_class_set_k_space_, "pair_class_set_k_space");
+    return true;
   }
-  return true;
+  return false;
 }
 bool ClusterHelper::read(const alps::Parameters &parms){
   ///TODO: this should implement writing the clusterhelper.
@@ -417,8 +429,9 @@ bool ClusterHelper::read(const alps::Parameters &parms){
     read_site_class_set(ar, site_class_set_k_space_, "site_class_set_k_space");
     read_pair_class_set(ar, pair_class_set_real_space_, "pair_class_set_real_space");
     read_pair_class_set(ar, pair_class_set_k_space_, "pair_class_set_k_space");
+    return true; //success
   }
-  return true; //success
+  return false;
 }
 
 void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,

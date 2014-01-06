@@ -52,18 +52,20 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
   double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
   std::string basename=parms["BASENAME"];
+  shape_t gf_shape=paramagnet?diagonal:blockdiagonal;
   
-  
-  matsubara_green_function_t G0_omega=clustertrans.initial_G0(parms);
+  std::cout<<"calc initial G0"<<std::endl;
+  matsubara_green_function_t G0_omega=clustertrans.initial_G0(parms, gf_shape);
   matsubara_green_function_t G_omega=G0_omega;
+  std::cout<<"done calc initial G0"<<std::endl;
   
   int iteration_ctr = 0;
   matsubara_green_function_t G_old_omega(G0_omega);
   matsubara_green_function_t G0_old_omega(G0_omega);
-  itime_green_function_t G_tau(n_tau +1, n_site, n_orbital, diagonal);
-  itime_green_function_t G0_tau(n_tau+1, n_site, n_orbital, diagonal);
-  itime_green_function_t G_old_tau(n_tau+1, n_site, n_orbital, diagonal);
-  itime_green_function_t G0_old_tau(n_tau+1, n_site, n_orbital, diagonal);
+  itime_green_function_t G_tau(n_tau +1, n_site, n_orbital, gf_shape);
+  itime_green_function_t G0_tau(n_tau+1, n_site, n_orbital, gf_shape);
+  itime_green_function_t G_old_tau(n_tau+1, n_site, n_orbital, gf_shape);
+  itime_green_function_t G0_old_tau(n_tau+1, n_site, n_orbital, gf_shape);
   //initialize space for multiple vectors
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer(parms, fourier_ptr);
@@ -150,6 +152,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver
   double eta2 = static_cast<double>(parms["ETA2"]);
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = parms.value_or_default("PARAMAGNET", true);
+  if(!paramagnet) throw std::logic_error("please implement mixed AFM & Nambu!");
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
   std::string basename=parms["BASENAME"];
   
