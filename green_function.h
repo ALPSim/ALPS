@@ -12,17 +12,17 @@
  * Application License; you can use, redistribute it and/or modify it under
  * the terms of the license, either version 1 or (at your option) any later
  * version.
- * 
+ *
  * You should have received a copy of the ALPS Application License along with
  * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
  * available from http://alps.comp-phys.org/.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
- * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
- * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
+ * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
+ * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *
  *****************************************************************************/
@@ -36,7 +36,7 @@
 
 #ifdef USE_MPI
 #include <mpi.h>
-#endif 
+#endif
 
 #include "alps/hdf5.hpp"
 #include "alps/hdf5/pointer.hpp"
@@ -68,15 +68,15 @@ public:
   ///operator= (assignement operator)
   const green_function &operator=(const green_function &g){
     if(!((ns_==g.ns_) && (nf_==g.nf_) && (nt_==g.nt_) && (shape_==g.shape_))){
-        *(const_cast<unsigned int*>(&(nt_)))=g.nt_;
-        *(const_cast<unsigned int*>(&(ns_)))=g.ns_;
-        *(const_cast<unsigned int*>(&(nf_)))=g.nf_;
-        *(const_cast<unsigned int*>(&(ntnsns_)))=g.ntnsns_;
-        *(const_cast<unsigned int*>(&(ntns_)))=g.ntns_;
-        *(const_cast<shape_t*>(&(shape_)))=g.shape_;
-        delete [] val_;
-        val_=(shape_==diagonal?new T[nt_*ns_*nf_]:new T[nt_*ns_*ns_*nf_]);
-      }
+      *(const_cast<unsigned int*>(&(nt_)))=g.nt_;
+      *(const_cast<unsigned int*>(&(ns_)))=g.ns_;
+      *(const_cast<unsigned int*>(&(nf_)))=g.nf_;
+      *(const_cast<unsigned int*>(&(ntnsns_)))=g.ntnsns_;
+      *(const_cast<unsigned int*>(&(ntns_)))=g.ntns_;
+      *(const_cast<shape_t*>(&(shape_)))=g.shape_;
+      delete [] val_;
+      val_=(shape_==diagonal?new T[nt_*ns_*nf_]:new T[nt_*ns_*ns_*nf_]);
+    }
     memcpy(val_, g(), sizeof(T)*nt_*(shape_==diagonal?ns_:ns_*ns_)*nf_);
     return *this;
   }
@@ -180,12 +180,12 @@ template<typename T> void green_function<T>::read(const char *filename){
   for(unsigned int i=0;i<nt_;++i){
     in_file>>ignored; //read first entry, which could be # matsubara frequencies, or tau-point, or N/beta*tau, or...
     for(unsigned int s0=0; s0<ns_; ++s0) {
-      if(shape()==nondiagonal){
-      for(unsigned int s1=0; s1<ns_; ++s1){
-        for(unsigned int f=0; f<nf_; ++f) {
-          in_file>>operator()(i, s0, s1, f)>>std::ws; //read the actual value
+      if(shape()!=diagonal){
+        for(unsigned int s1=0; s1<ns_; ++s1){
+          for(unsigned int f=0; f<nf_; ++f) {
+            in_file>>operator()(i, s0, s1, f)>>std::ws; //read the actual value
+          }
         }
-      }
       }else{
         for(unsigned int f=0; f<nf_; ++f) {
           in_file>>operator()(i, s0, s0, f)>>std::ws; //read the actual value
@@ -203,15 +203,15 @@ template<typename T> void green_function<T>::write(const char *filename) const{
   for(unsigned int i=0;i<nt_;++i){
     out_file << i << " ";
     for(unsigned int s0=0; s0<ns_; ++s0) {
-      if(shape_==nondiagonal){
-      for(unsigned int s1=0; s1<ns_; ++s1){
-        for(unsigned int f=0; f<nf_; ++f) {
-          out_file<<operator()(i, s0, s1, f) << " "; 
+      if(shape_!=diagonal){
+        for(unsigned int s1=0; s1<ns_; ++s1){
+          for(unsigned int f=0; f<nf_; ++f) {
+            out_file<<operator()(i, s0, s1, f) << " ";
+          }
         }
-      }
       }else{
         for(unsigned int f=0; f<nf_; ++f) {
-          out_file<<operator()(i, s0, s0, f) << " "; 
+          out_file<<operator()(i, s0, s0, f) << " ";
         }
       }
     }
@@ -222,12 +222,12 @@ template<typename T> void green_function<T>::write(const char *filename) const{
 
 
 void print_all_green_functions(std::string const &basename, const int iteration_ctr, const matsubara_green_function_t &G0_omega,
-                               const matsubara_green_function_t &G_omega, const itime_green_function_t &G0_tau, 
+                               const matsubara_green_function_t &G_omega, const itime_green_function_t &G0_tau,
                                const itime_green_function_t &G_tau, const double beta,
                                const std::string suffix="");
 void print_real_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta);
 void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta);
-void print_dressed_tau_green_functions(const int iteration_ctr, const itime_green_function_t &G_tau, const double beta, 
+void print_dressed_tau_green_functions(const int iteration_ctr, const itime_green_function_t &G_tau, const double beta,
                                        const std::string suffix="");
 void print_tau_green_functions(const int iteration_ctr, const itime_green_function_t &G0_tau, const itime_green_function_t &G_tau, const double beta);
 

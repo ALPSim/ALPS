@@ -754,7 +754,9 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
   }
   G_omega = G0_omega;
   //invoke transformation with G_omega==G0_omega (selfenergy=0)
+  std::cout<<"the  shape of G0_omega_new is: "<<G0_omega.shape()<<" blockdiag: "<<blockdiagonal<<std::endl;
   matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h, beta);
+  std::cout<<"the new shape of G0_omega_new is: "<<G0_omega_new.shape()<<std::endl;
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer(parms, fourier_ptr);
   G0_omega_new.write("G0_omega_input");

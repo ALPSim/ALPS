@@ -27,8 +27,8 @@
   
 <LATTICE name="Betts2D-2A superlattice" dimension="2">
   <BASIS>
-    <VECTOR>2 0 </VECTOR>
-    <VECTOR>0 1 </VECTOR>
+    <VECTOR>1 0 </VECTOR>
+    <VECTOR>0 2 </VECTOR>
   </BASIS>
   <RECIPROCALBASIS>
     <VECTOR>4*pi/2 0*pi/2 </VECTOR>

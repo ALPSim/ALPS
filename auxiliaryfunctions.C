@@ -200,25 +200,25 @@ void print_real_green_matsubara(std::ostream &os, const matsubara_green_function
 void print_green_itime(std::ostream &os, const itime_green_function_t &v, const double beta){
   os<<std::setprecision(14);
   for(unsigned int i=0;i<v.ntime();++i){
-    os<<beta*i/(v.ntime()-1)<<"\t";
+    os<<beta*i/(v.ntime()-1)<<" ";
     switch (v.shape()) {
       case diagonal:
         for (unsigned int k=0; k<v.nsite(); ++k)
           for(unsigned int f=0;f<v.nflavor();++f)
-            os<<v(i,k,k,f)<<"\t";
+            os<<v(i,k,k,f)<<" ";
         break;
       case blockdiagonal:
         for (unsigned int k=0; k<v.nsite(); k+=2)
           for (unsigned int p1=0; p1<=1; p1++)
             for (unsigned int p2=0; p2<=1; p2++)
               for(unsigned int f=0;f<v.nflavor();++f)
-                os<<v(i,k+p1,k+p2,f)<<"\t";
+                os<<v(i,k+p1,k+p2,f)<<" ";
         break;
       case nondiagonal:
         for (unsigned int s1=0; s1<v.nsite(); ++s1)
           for (unsigned int s2=0; s2<v.nsite(); ++s2)
             for(unsigned int f=0;f<v.nflavor();++f)
-              os<<v(i,s1,s2,f)<<"\t";
+              os<<v(i,s1,s2,f)<<" ";
     }
     os<<std::endl;
   }
