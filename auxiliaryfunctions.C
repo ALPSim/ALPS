@@ -31,17 +31,17 @@
 #include "green_function.h"
 #include "nambu_green_function.h"
 #include "U_matrix.h"
-#include <blas_classes/general_matrix.h>
 #include <fstream>
 #include <sstream>
 #include <math.h>
 #include "alps/numeric/matrix.hpp"
+#include "blas_classes/general_matrix.h"
 
 
 
 
 
-void matrix_inversion(blas::general_matrix<std::complex<double> >&A, blas::general_matrix<std::complex<double> >&A_inv);
+void matrix_inversion(alps::numeric::matrix<std::complex<double> >&A, alps::numeric::matrix<std::complex<double> >&A_inv);
 void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta)
 {
   os<<std::setprecision(14);
@@ -70,6 +70,27 @@ void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function
   }
 }
 
+void matrix_inversion(alps::numeric::matrix<std::complex<double> >&A, alps::numeric::matrix<std::complex<double> >&A_inv){
+  int size=A.num_rows();
+  if(size==0){
+    return;
+  }
+  //build the unit matrix
+  memset(&(A_inv(0,0)), 0, size*size*sizeof(std::complex<double>));
+  for(std::size_t i=0;i<size;++i){
+    A_inv(i,i)=1;
+  }
+  //solve 1=A^{-1}A
+  //destructive in-place solver - will overwrite unit matrix
+  if(size==1){
+    A_inv(0,0)=1./A(0,0);
+  }else{
+    int ipiv[size];
+    int info;
+    lapack::zgesv_(&size, &size, &(A(0,0)),&size, ipiv, &size, &size, &info);
+    if(info!=0) std::cerr<<"dgesv went wrong!!"<<std::endl;
+  }
+}
 
 
 
@@ -106,24 +127,20 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
           G0dn(0,0)=g_bare(i,k,k,1); G0dn(0,1)=g_bare(i,k,q,1); G0dn(1,0)=g_bare(i,q,k,1); G0dn(1,1)=g_bare(i,q,q,1);
           
           //perform inversion
-          std::complex<double> detGup=Gup(0,0)*Gup(1,1)-Gup(1,0)*Gup(0,1);
-          std::complex<double> detG0up=G0up(0,0)*G0up(1,1)-G0up(1,0)*G0up(0,1);
-          std::complex<double> detGdn=Gdn(0,0)*Gdn(1,1)-Gdn(1,0)*Gdn(0,1);
-          std::complex<double> detG0dn=G0dn(0,0)*G0dn(1,1)-G0dn(1,0)*G0dn(0,1);
-          
-          Ginvup(0,0)=1./detGup*Gup(1,1); Ginvup(1,1)=1./detGup*Gup(0,0); Ginvup(0,1)=-1./detGup*Gup(0,1); Ginvup(1,0)=-1./detGup*Gup(1,0);
-          G0invup(0,0)=1./detG0up*G0up(1,1); G0invup(1,1)=1./detG0up*G0up(0,0); G0invup(0,1)=-1./detG0up*G0up(0,1); G0invup(1,0)=-1./detG0up*Gup(1,0);
-          Ginvdn(0,0)=1./detGdn*Gdn(1,1); Ginvdn(1,1)=1./detGdn*Gdn(0,0); Ginvdn(0,1)=-1./detGdn*Gdn(0,1); Ginvdn(1,0)=-1./detGdn*Gdn(1,0);
-          G0invdn(0,0)=1./detG0dn*G0dn(1,1); G0invdn(1,1)=1./detG0dn*G0dn(0,0); G0invdn(0,1)=-1./detG0dn*G0dn(0,1); G0invdn(1,0)=-1./detG0dn*Gdn(1,0);
+          matrix_inversion(Gup, Ginvup);
+          matrix_inversion(G0up, G0invup);
+          matrix_inversion(Gdn, Ginvdn);
+          matrix_inversion(G0dn, G0invdn);
           
           //get sigma
           alps::numeric::matrix<std::complex<double> > Sigmaup(2,2); Sigmaup=G0invup-Ginvup;
           alps::numeric::matrix<std::complex<double> > Sigmadn(2,2); Sigmadn=G0invdn-Ginvdn;
           
-          os<<Sigmaup(0,0).real()<<" "<<Sigmaup(0,0).imag()<<"  "<<Sigmadn(0,0).real()<<" "<<Sigmadn(0,0).imag()<<" ";
-          os<<Sigmaup(0,1).real()<<" "<<Sigmaup(0,1).imag()<<"  "<<Sigmadn(0,1).real()<<" "<<Sigmadn(0,1).imag()<<" ";
-          os<<Sigmaup(1,0).real()<<" "<<Sigmaup(1,0).imag()<<"  "<<Sigmadn(1,0).real()<<" "<<Sigmadn(1,0).imag()<<" ";
-          os<<Sigmaup(1,1).real()<<" "<<Sigmaup(1,1).imag()<<"  "<<Sigmadn(1,1).real()<<" "<<Sigmadn(1,1).imag()<<" ";
+          for(unsigned int i=0;i<2;++i){
+            for(unsigned int j=0;j<2;++j){
+              os<<Sigmaup(i,j).real()<<" "<<Sigmaup(i,j).imag()<<"  "<<Sigmadn(i,j).real()<<" "<<Sigmadn(i,j).imag()<<" ";
+            }
+          }
         }
         os<<std::endl;
       }
@@ -131,9 +148,33 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
     }
     case nondiagonal:
     {
-      std::cerr<<"please use cluster framework for non diag GF"<<std::endl;
+      int nsite=g_dressed.nsite();
+      for(unsigned int w=0;w<g_dressed.nfreq();++w){
+        os<<(2*w+1)*M_PI/beta<<"\t";
+        alps::numeric::matrix<std::complex<double> > Gup(nsite,nsite), G0up(nsite,nsite), Gdn(nsite,nsite), G0dn(nsite,nsite);
+        alps::numeric::matrix<std::complex<double> > Ginvup(nsite,nsite), G0invup(nsite,nsite), Ginvdn(nsite,nsite), G0invdn(nsite,nsite);
+        for(unsigned int i=0;i<(unsigned int) nsite;++i){
+          for(unsigned int j=0;j<(unsigned int) nsite;++j){
+            Gup(i  , j)=g_dressed(w,i,j,0);
+            Gdn(i  , j)=g_dressed(w,i,j,1);
+            G0up(i  , j)=g_bare(w,i,j,0);
+            G0dn(i  , j)=g_bare(w,i,j,1);
+          }
+        }
+        matrix_inversion(Gup, Ginvup);
+        matrix_inversion(G0up, G0invup);
+        matrix_inversion(Gdn, Ginvdn);
+        matrix_inversion(G0dn, G0invdn);
+        alps::numeric::matrix<std::complex<double> > Sigmaup(nsite,nsite); Sigmaup=G0invup-Ginvup;
+        alps::numeric::matrix<std::complex<double> > Sigmadn(nsite,nsite); Sigmadn=G0invdn-Ginvdn;
+        for(unsigned int i=0;i<(unsigned int)nsite;++i){
+          for(unsigned int j=0;j<(unsigned int)nsite;++j){
+            os<<Sigmaup(i,j).real()<<" "<<Sigmaup(i,j).imag()<<"  "<<Sigmadn(i,j).real()<<" "<<Sigmadn(i,j).imag()<<" ";
+          }
+        }
+        os<<std::endl;
+      }
       break;
-      //throw std::invalid_argument("please use cluster framework for full nondiag GF");
     }
   }
 }
@@ -557,10 +598,10 @@ void print_selfenergy_matsubara(std::ostream &os, const nambu_matsubara_green_fu
       int nsite=g_dressed.nsite();
       for(unsigned int w=0;w<g_dressed.nfreq();++w){
         os<<(2*w+1)*M_PI/beta<<"\t";
-        blas::general_matrix<std::complex<double> > G(nsite*2, nsite*2);
-        blas::general_matrix<std::complex<double> > G_inv(nsite*2, nsite*2);
-        blas::general_matrix<std::complex<double> > G0(nsite*2, nsite*2);
-        blas::general_matrix<std::complex<double> > G0_inv(nsite*2, nsite*2);
+        alps::numeric::matrix<std::complex<double> > G(nsite*2, nsite*2);
+        alps::numeric::matrix<std::complex<double> > G_inv(nsite*2, nsite*2);
+        alps::numeric::matrix<std::complex<double> > G0(nsite*2, nsite*2);
+        alps::numeric::matrix<std::complex<double> > G0_inv(nsite*2, nsite*2);
         for(unsigned int i=0;i<(unsigned int) nsite;++i){
           for(unsigned int j=0;j<(unsigned int) nsite;++j){
             G(2*i  , 2*j  )=g_dressed(w,i,j,0,0);
@@ -626,27 +667,5 @@ void print_all_nambu_green_functions(std::string const &basename, const int iter
   print_imag_green_matsubara(G_omega_file_2,G_omega,beta, shape);
   print_green_itime(G_tau_file_2,G_tau,beta, shape);
   print_selfenergy_matsubara(selfenergy_file, G0_omega, G_omega, beta, shape);
-}
-void matrix_inversion(blas::general_matrix<std::complex<double> >&A, blas::general_matrix<std::complex<double> >&A_inv){
-  std::size_t size=A.size1();
-  if(A.size1()==0){
-    return;
-  }
-  //build the unit matrix
-  memset(&(A_inv(0,0)), 0, A_inv.size1()*A_inv.size1()*sizeof(std::complex<double>));
-  for(uint i=0;i<size;++i){
-    A_inv(i,i)=1;
-  }
-  //solve 1=A^{-1}A
-  //destructive in-place solver - will overwrite unit matrix
-  if(A.size1()==1){
-    A_inv(0,0)=1./A(0,0);
-  }else{
-    int size=A.size1();
-    int ipiv[size];
-    int info;
-    lapack::zgesv_(&size, &size, &(A(0,0)),&(A.size1()), ipiv, &(A_inv(0,0)), &(A_inv.size1()), &info);
-    if(info!=0) std::cerr<<"dgesv went wrong!!"<<std::endl;
-  }
 }
 
