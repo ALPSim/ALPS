@@ -669,43 +669,56 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
   unsigned int nflavor=G0_omega.nflavor();
   unsigned int nfreq=G0_omega.nfreq();
 
+  //first: compute the self energy out of G and G0.
   matsubara_green_function_t G0_omega_new(nfreq,n_cluster_sites(),nflavor, blockdiagonal);
   G0_omega_new.clear();
   matsubara_green_function_t G0_omega_inv = green_function_inverse(G0_omega);
   matsubara_green_function_t G_omega_inv = green_function_inverse(G_omega);
   matsubara_green_function_t selfenergy = green_function_subtract(G0_omega_inv, G_omega_inv);
+
+  //buffer the dispersion and the weight – no need to evaluate this for every frequency
+  //first dimension: sign
+  //second dimension: k0 or k1
+  //third dimension: cluster momentum kc
+  //fourth dimension: lattice momentum kl
+  std::vector<std::vector<std::vector<std::vector<double> > > >epsilon_kckl(2, std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(n_cluster_sites(), std::vector<double>(n_lattice_momenta()))));
+  std::vector<double> weight_kl(n_lattice_momenta());
+  for (int s=0; s<2; s++) {
+    int sign=(s==0?-1:1);
+    for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+      for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
+        vector_type k0(dimension()),k1(dimension());
+        for (unsigned int d=0; d<dimension(); ++d){
+          k0[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc  ,d);
+          k1[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc+1,d);
+        }
+        epsilon_kckl[s][0][kc][kl]=epsilon(k0);
+        epsilon_kckl[s][1][kc][kl]=epsilon(k1);
+      }
+    }
+  }
+  //we ignore the weight for now. Reintroduce at a later point.
+  for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
+    weight_kl[kl]= lattice_momentum(kl,dimension());
+  }
+  
+  
   for (site_t kl=0; kl<n_cluster_cells(); ++kl) {
-    for (int sign=-1; sign<=1; sign+=2) {
+    for (int s=0; s<2; s++) {
+      int sign=(s==0?-1:1);
       matsubara_green_function_t G_kl(G0_omega);
       for (frequency_t freq=0; freq<nfreq; ++freq) {
         std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
-        //std::cout<<"iomegan is: "<<iomega_n<<" dimension: "<<dimension()<<" cluster sites: "<<n_cluster_sites()<<std::endl;
         for (site_t kc=0; kc<n_cluster_sites(); kc+=2) {
-          //std::cout<<"running loop for kc: "<<kc<<std::endl;
-          vector_type k0(dimension());
-          //std::cout<<"k0 size is: "<<k0.size()<<std::endl;
-          //std::cout<<"number of cluster sites: "<<n_cluster_sites()<<std::endl;
-          //std::cout<<"number of cluster cells: "<<n_cluster_cells()<<std::endl;
-          //std::cout<<"number of lattice momenta : "<<n_lattice_momenta()<<std::endl;
-          for (unsigned int d=0; d<dimension(); ++d){
-            //std::cout<<"lattice momentum is: "<<lattice_momentum(kl,d)<<std::endl;
-            //std::cout<<"cluster momentum is: "<<cluster_momentum(kl,d)<<std::endl;
-            k0[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc,d);
-          }
-          vector_type k1(dimension());
-          for (unsigned int d=0; d<dimension(); ++d){
-            k1[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc+1,d);
-          }
-          //std::cout<<"running calc for freq: "<<freq<<" sgn: "<<sign<<" kl: "<<kl<<std::endl;
           for (spin_t flavor=0; flavor<nflavor; flavor+=2) {
-            G_kl(freq,kc,kc,flavor) = iomega_n+mu-epsilon(k0);
-            G_kl(freq,kc,kc,flavor+1) = iomega_n+mu-epsilon(k0);
-            G_kl(freq,kc+1,kc+1,flavor) = iomega_n+mu-epsilon(k1);
-            G_kl(freq,kc+1,kc+1,flavor+1) = iomega_n+mu-epsilon(k1);
-            G_kl(freq,kc+1,kc,flavor) = -h/2;
-            G_kl(freq,kc+1,kc,flavor+1) = h/2;
-            G_kl(freq,kc,kc+1,flavor) = -h/2;
-            G_kl(freq,kc,kc+1,flavor+1) = h/2;
+            G_kl(freq,kc  ,kc  ,flavor  ) = iomega_n+mu-epsilon_kckl[s][0][kc][kl];
+            G_kl(freq,kc  ,kc  ,flavor+1) = iomega_n+mu-epsilon_kckl[s][0][kc][kl];
+            G_kl(freq,kc  ,kc+1,flavor  ) = -h/2;
+            G_kl(freq,kc  ,kc+1,flavor+1) = h/2;
+            G_kl(freq,kc+1,kc  ,flavor  ) = -h/2;
+            G_kl(freq,kc+1,kc  ,flavor+1) = h/2;
+            G_kl(freq,kc+1,kc+1,flavor  ) = iomega_n+mu-epsilon_kckl[s][1][kc][kl];
+            G_kl(freq,kc+1,kc+1,flavor+1) = iomega_n+mu-epsilon_kckl[s][1][kc][kl];
           }
         }
       }
