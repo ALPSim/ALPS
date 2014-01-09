@@ -1,0 +1,14 @@
+LATTICE_LIBRARY="my_lattices.xml"
+LATTICE="open chain lattice with special edges 32"
+MODEL="spin"
+local_S0=0.5
+local_S1=1
+CONSERVED_QUANTUMNUMBERS="Sz"
+Sz_total=0
+J=1 
+NUMBER_EIGENVALUES=1 
+SWEEPS=4
+{ MAXSTATES=20 } 
+{ MAXSTATES=40 }
+{ MAXSTATES=60 }
+

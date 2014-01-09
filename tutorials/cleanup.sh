@@ -6,3 +6,4 @@
 
 rm */parm*xml */*clone* */*.xsl */*.run* */*.dat */*.h5* */*out.xml */*in.xml */selfenergy*
 rm parm*xml *clone* *.xsl *.run* *.dat *.h5* *out.xml *in.xml 
+rm -r */*.chkp

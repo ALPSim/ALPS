@@ -1,0 +1,12 @@
+LATTICE="open chain lattice"
+MODEL="spin"
+CONSERVED_QUANTUMNUMBERS="Sz"
+SWEEPS=4
+J=1
+NUMBER_EIGENVALUES=1
+MEASURE_LOCAL[Local magnetization]=Sz
+L=32
+MAXSTATES=40
+{ Sz_total=0 }
+{ Sz_total=1 }
+{ Sz_total=2 }

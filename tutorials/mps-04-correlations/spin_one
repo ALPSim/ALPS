@@ -1,0 +1,19 @@
+LATTICE_LIBRARY="my_lattices.xml"
+LATTICE="open chain lattice with especial edges 32"
+MODEL="spin"
+local_S0=0.5
+local_S1=1
+CONSERVED_QUANTUMNUMBERS="Sz"
+Sz_total=0
+SWEEPS=6
+J=1
+NUMBER_EIGENVALUES=1
+MEASURE_AVERAGE[Magnetization]=Sz
+MEASURE_AVERAGE[Exchange]=exchange
+MEASURE_LOCAL[Local magnetization]=Sz
+MEASURE_CORRELATIONS[Diagonal spin correlations]=Sz
+MEASURE_CORRELATIONS[Offdiagonal spin correlations]="Splus:Sminus"
+{ MAXSTATES=20 }
+{ MAXSTATES=40 }
+{ MAXSTATES=60 }
+
