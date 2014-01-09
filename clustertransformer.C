@@ -681,6 +681,8 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
   //second dimension: k0 or k1
   //third dimension: cluster momentum kc
   //fourth dimension: lattice momentum kl
+  
+  std::cout<<"running precompute."<<std::endl;
   std::vector<std::vector<std::vector<std::vector<double> > > >epsilon_kckl(2, std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(n_cluster_sites(), std::vector<double>(n_lattice_momenta()))));
   std::vector<double> weight_kl(n_lattice_momenta());
   for (int s=0; s<2; s++) {
@@ -702,13 +704,15 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
     weight_kl[kl]= lattice_momentum(kl,dimension());
   }
   
-  
+  std::cout<<"running loop over cells."<<std::endl;
+  std::cout<<"we have a total of: "<<n_cluster_cells()<<" cells and "<<n_cluster_sites()<<" sites."<<std::endl;
   for (site_t kl=0; kl<n_cluster_cells(); ++kl) {
     for (int s=0; s<2; s++) {
       int sign=(s==0?-1:1);
       matsubara_green_function_t G_kl(G0_omega);
       for (frequency_t freq=0; freq<nfreq; ++freq) {
         std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
+        //this is equation 119. But careful: Eq. 119 has a typo from the SC case, it should be iomega+mu-epsilon for both sigmas!
         for (site_t kc=0; kc<n_cluster_sites(); kc+=2) {
           for (spin_t flavor=0; flavor<nflavor; flavor+=2) {
             G_kl(freq,kc  ,kc  ,flavor  ) = iomega_n+mu-epsilon_kckl[s][0][kc][kl];
@@ -727,6 +731,8 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
       G0_omega_new = green_function_add(G0_omega_new, G_kl);
     }
   }
+  std::cout<<"done running loop over cells."<<std::endl;
+
   G0_omega_new = green_function_divide(G0_omega_new, std::complex<double>(2*n_cluster_cells()));
   G0_omega_new = green_function_inverse(G0_omega_new);
   G0_omega_new = green_function_add(G0_omega_new, selfenergy);
@@ -754,7 +760,7 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
   unsigned int n_flavor=parms.value_or_default("FLAVORS", 2);
   double beta = static_cast<double>(parms["BETA"]);
   double mu = static_cast<double>(parms["MU"]);
-  double h = static_cast<double>(parms["H"]);
+  double h = static_cast<double>(parms["H_INIT"]);
   matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor, blockdiagonal);
   matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor, blockdiagonal);
   G0_omega.clear();
@@ -767,9 +773,7 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
   }
   G_omega = G0_omega;
   //invoke transformation with G_omega==G0_omega (selfenergy=0)
-  std::cout<<"the  shape of G0_omega_new is: "<<G0_omega.shape()<<" blockdiag: "<<blockdiagonal<<std::endl;
   matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h, beta);
-  std::cout<<"the new shape of G0_omega_new is: "<<G0_omega_new.shape()<<std::endl;
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer(parms, fourier_ptr);
   G0_omega_new.write("G0_omega_input");
@@ -778,7 +782,6 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
   fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega_new);
   G0_tau.write("G0_tau_input");
   transform_into_real_space(G0_tau).write("G0_tau_input_realspace");
-  std::cout<<"returning initial G0."<<std::endl;
   return G0_omega_new;
 }
 

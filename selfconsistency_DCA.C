@@ -43,10 +43,8 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
   unsigned int n_site=parms.value_or_default("SITES", 1);
   
   double beta = static_cast<double>(parms["BETA"]);
-  double h_old = static_cast<double>(parms["H"]);
+  double h = static_cast<double>(parms["H"]);
   double h_init = parms.value_or_default("H_INIT", 0.);
-  double h = h_old + h_init;
-  (*const_cast<alps::Parameters*>(&parms))["H"] = h;
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = parms.value_or_default("PARAMAGNET", false);
   double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
@@ -54,10 +52,9 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
   std::string basename=parms["BASENAME"];
   shape_t gf_shape=paramagnet?diagonal:blockdiagonal;
   
-  std::cout<<"calc initial G0"<<std::endl;
+  //calculate initial G0
   matsubara_green_function_t G0_omega=clustertrans.initial_G0(parms, gf_shape);
   matsubara_green_function_t G_omega=G0_omega;
-  std::cout<<"done calc initial G0"<<std::endl;
   
   int iteration_ctr = 0;
   matsubara_green_function_t G_old_omega(G0_omega);
@@ -81,14 +78,15 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     G_old_tau = G_tau;
     G0_old_tau = G0_tau;
     fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega);
-    std::cout<<"running solver in omega."<<std::endl<<std::flush;
+    std::cout<<"running solver in frequency space."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, parms);
-    std::cout<<"applying point group symmetries"<<std::endl<<std::flush;
-    G_tau = clustertrans.symmetrize(G_tau, paramagnet);
-    G_omega = clustertrans.symmetrize(G_omega, paramagnet);
-    G_omega = clustertrans.symmetrize_k_space(G_omega);
-    G_tau = clustertrans.symmetrize_k_space(G_tau);
-    
+    if(paramagnet){
+      std::cout<<"applying point group symmetries"<<std::endl<<std::flush;
+      G_tau = clustertrans.symmetrize(G_tau, paramagnet);
+      G_omega = clustertrans.symmetrize(G_omega, paramagnet);
+      G_omega = clustertrans.symmetrize_k_space(G_omega);
+      G_tau = clustertrans.symmetrize_k_space(G_tau);
+    }
     std::cout<<"running cluster transform"<<std::endl<<std::flush;
     G0_omega = clustertrans(G_omega, G0_omega, mu, h, beta);
     //relaxation to speed up /slow down convergence
@@ -123,17 +121,17 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
       std::cout<<"convergence loop: max diff in dressed Green (Matsubara freq): "
       <<max_diff<<"\tconverged: "<<converged<<std::endl;
     }
-    print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
+    std::cout<<"writing Green's functions."<<std::endl;
     print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
     if(!parms.defined("WRITE_SPARSE")){
+      std::cout<<"writing Green's functions in real space"<<std::endl;
       matsubara_green_function_t real_G0_omega = clustertrans.transform_into_real_space(G0_omega);
       matsubara_green_function_t real_G_omega = clustertrans.transform_into_real_space(G_omega);
       itime_green_function_t real_G0_tau = clustertrans.transform_into_real_space(G0_tau);
       itime_green_function_t real_G_tau = clustertrans.transform_into_real_space(G_tau);
       print_all_green_functions(basename, iteration_ctr, real_G0_omega, real_G_omega, real_G0_tau, real_G_tau, beta, "_realspace");
     }
-    if (iteration_ctr == 1)
-      (*const_cast<alps::Parameters*>(&parms))["H"] = h_old;
+    std::cout<<"...continuing."<<std::endl;
   } while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);
   // write G0
   G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());

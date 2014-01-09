@@ -931,6 +931,7 @@ struct AntiFerroDCATransformer::Backward {
 template<class T>
 green_function<T> AntiFerroDCATransformer::spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const
 {
+  //this spin symmetrizer does not do anything.
   green_function<T> G_new(G);
   if (paramagnet)
     boost::throw_exception(std::invalid_argument("AFM and PM? redundant parameters! set paramagnet to false.\n"));

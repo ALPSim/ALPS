@@ -76,19 +76,15 @@ void matrix_inversion(alps::numeric::matrix<std::complex<double> >&A, alps::nume
     return;
   }
   //build the unit matrix
-  memset(&(A_inv(0,0)), 0, size*size*sizeof(std::complex<double>));
-  for(std::size_t i=0;i<size;++i){
-    A_inv(i,i)=1;
-  }
-  //solve 1=A^{-1}A
+  A_inv=alps::numeric::matrix<std::complex<double> >::identity_matrix(size);
   //destructive in-place solver - will overwrite unit matrix
   if(size==1){
     A_inv(0,0)=1./A(0,0);
   }else{
     int ipiv[size];
     int info;
-    lapack::zgesv_(&size, &size, &(A(0,0)),&size, ipiv, &size, &size, &info);
-    if(info!=0) std::cerr<<"dgesv went wrong!!"<<std::endl;
+    lapack::zgesv_(&size, &size, &(A(0,0)),&size, ipiv, &(A_inv(0,0)), &size, &info);
+    if(info!=0) std::cerr<<"gesv went wrong!!"<<std::endl;
   }
 }
 
@@ -110,13 +106,16 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
       break;
     case blockdiagonal:
     {
+      std::cout<<"writing blockdiagonal sigma."<<std::endl;
+      alps::numeric::matrix<std::complex<double> > Gup(2,2), G0up(2,2), Gdn(2,2), G0dn(2,2);
+      alps::numeric::matrix<std::complex<double> > Ginvup(2,2), G0invup(2,2), Ginvdn(2,2), G0invdn(2,2);
+      alps::numeric::matrix<std::complex<double> > Sigmaup(2,2);
+      alps::numeric::matrix<std::complex<double> > Sigmadn(2,2);
       if(g_bare.nflavor()!=2) throw std::logic_error("not understood how to handle blockdiag with >2 flavors.");
       for(unsigned int i=0;i<g_bare.nfreq();++i){
-        os<<(2*i+1)*M_PI/beta<<"\t";
+        os<<(2*i+1)*M_PI/beta<<" ";
         for (unsigned int k=0; k<g_bare.nsite(); k+=2){
           int q=k+1;
-          alps::numeric::matrix<std::complex<double> > Gup(2,2), G0up(2,2), Gdn(2,2), G0dn(2,2);
-          alps::numeric::matrix<std::complex<double> > Ginvup(2,2), G0invup(2,2), Ginvdn(2,2), G0invdn(2,2);
           
           //initialize G
           Gup(0,0)=g_dressed(i,k,k,0); Gup(0,1)=g_dressed(i,k,q,0); Gup(1,0)=g_dressed(i,q,k,0); Gup(1,1)=g_dressed(i,q,q,0);
@@ -133,9 +132,12 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
           matrix_inversion(G0dn, G0invdn);
           
           //get sigma
-          alps::numeric::matrix<std::complex<double> > Sigmaup(2,2); Sigmaup=G0invup-Ginvup;
-          alps::numeric::matrix<std::complex<double> > Sigmadn(2,2); Sigmadn=G0invdn-Ginvdn;
-          
+          for(unsigned int i=0;i<2;++i){
+            for(unsigned int j=0;j<2;++j){
+              Sigmaup(i,j)=G0invup(i,j)-Ginvup(i,j);
+              Sigmadn(i,j)=G0invdn(i,j)-Ginvdn(i,j);
+            }
+          }
           for(unsigned int i=0;i<2;++i){
             for(unsigned int j=0;j<2;++j){
               os<<Sigmaup(i,j).real()<<" "<<Sigmaup(i,j).imag()<<"  "<<Sigmadn(i,j).real()<<" "<<Sigmadn(i,j).imag()<<" ";
@@ -148,13 +150,16 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
     }
     case nondiagonal:
     {
+      std::cout<<"writing nondiagonal Sigma."<<std::endl;
       int nsite=g_dressed.nsite();
+      alps::numeric::matrix<std::complex<double> > Gup(nsite,nsite), G0up(nsite,nsite), Gdn(nsite,nsite), G0dn(nsite,nsite);
+      alps::numeric::matrix<std::complex<double> > Ginvup(nsite,nsite), G0invup(nsite,nsite), Ginvdn(nsite,nsite), G0invdn(nsite,nsite);
+      alps::numeric::matrix<std::complex<double> > Sigmaup(nsite,nsite);
+      alps::numeric::matrix<std::complex<double> > Sigmadn(nsite,nsite);
       for(unsigned int w=0;w<g_dressed.nfreq();++w){
-        os<<(2*w+1)*M_PI/beta<<"\t";
-        alps::numeric::matrix<std::complex<double> > Gup(nsite,nsite), G0up(nsite,nsite), Gdn(nsite,nsite), G0dn(nsite,nsite);
-        alps::numeric::matrix<std::complex<double> > Ginvup(nsite,nsite), G0invup(nsite,nsite), Ginvdn(nsite,nsite), G0invdn(nsite,nsite);
-        for(unsigned int i=0;i<(unsigned int) nsite;++i){
-          for(unsigned int j=0;j<(unsigned int) nsite;++j){
+        os<<(2*w+1)*M_PI/beta<<" ";
+        for(int i=0;i< nsite;++i){
+          for(int j=0;j< nsite;++j){
             Gup(i  , j)=g_dressed(w,i,j,0);
             Gdn(i  , j)=g_dressed(w,i,j,1);
             G0up(i  , j)=g_bare(w,i,j,0);
@@ -165,15 +170,21 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
         matrix_inversion(G0up, G0invup);
         matrix_inversion(Gdn, Ginvdn);
         matrix_inversion(G0dn, G0invdn);
-        alps::numeric::matrix<std::complex<double> > Sigmaup(nsite,nsite); Sigmaup=G0invup-Ginvup;
-        alps::numeric::matrix<std::complex<double> > Sigmadn(nsite,nsite); Sigmadn=G0invdn-Ginvdn;
-        for(unsigned int i=0;i<(unsigned int)nsite;++i){
-          for(unsigned int j=0;j<(unsigned int)nsite;++j){
+
+        for(int i=0;i<nsite;++i){
+          for(int j=0;j<nsite;++j){
+            Sigmaup(i,j)=G0invup(i,j)-Ginvup(i,j);
+            Sigmadn(i,j)=G0invdn(i,j)-Ginvdn(i,j);
+          }
+        }
+        for(int i=0;i<nsite;++i){
+          for(int j=0;j<nsite;++j){
             os<<Sigmaup(i,j).real()<<" "<<Sigmaup(i,j).imag()<<"  "<<Sigmadn(i,j).real()<<" "<<Sigmadn(i,j).imag()<<" ";
           }
         }
         os<<std::endl;
       }
+      std::cout<<"done."<<std::endl;
       break;
     }
   }
@@ -290,7 +301,9 @@ void print_all_green_functions(std::string const &basename, const int iteration_
   std::ofstream G_omega_file_2(Gomega_name_2.str().c_str());
   std::ofstream G_tau_file_2(Gtau_name_2.str().c_str());
   std::ofstream selfenergy_file(selfenergy_name.str().c_str());
-  assert(G0_omega_file.is_open() && G0_tau_file.is_open() && G_omega_file.is_open() && G_tau_file.is_open());
+  
+  std::cout<<"names are: "<<G0omega_name.str()<<" "<<G0omegareal_name.str()<<" "<<G0tau_name.str()<<" "<<Gomega_name.str()<<" "<<Gomegareal_name.str()<<" "<<Gtau_name.str()<<" "<<Gtau_name_2.str()<<" "<<Gomega_name_2.str()<<" "<<selfenergy_name.str()<<std::endl;
+  if(!G0_omega_file.is_open() || !G0_tau_file.is_open() || !G_omega_file.is_open() || !G_tau_file.is_open()) throw std::runtime_error("error opening gf files.");
   print_imag_green_matsubara(G0_omega_file, G0_omega, beta);
   print_real_green_matsubara(G0_omegareal_file,G0_omega,beta);
   print_green_itime(G0_tau_file,G0_tau, beta);
@@ -303,20 +316,6 @@ void print_all_green_functions(std::string const &basename, const int iteration_
   if (G_omega.shape()==diagonal)
     print_quasiparticle_estimate(std::cout, G_omega, G0_omega, beta);
   
-  /*alps::hdf5::oarchive ar(basename+".h5");
-   //writeout into hf5 file, using /simulation/iteration/ path
-   std::stringstream basepath; basepath<<"/simulation/iteration/"<<iteration_ctr<<"/results/";
-   G_tau.write_hdf5(ar,basepath.str()+"G_tau");
-   G_omega.write_hdf5(ar,basepath.str()+"G_omega");
-   G0_tau.write_hdf5(ar,basepath.str()+"G0_tau");
-   G0_omega.write_hdf5(ar,basepath.str()+"G0_omega");
-   
-   //writeout into hf5 file, using /simulation/results/ path
-   std::stringstream basepath2; basepath2<<"/simulation/results/";
-   G_tau.write_hdf5(ar,basepath2.str()+"G_tau");
-   G_omega.write_hdf5(ar,basepath2.str()+"G_omega");
-   G0_tau.write_hdf5(ar,basepath2.str()+"G0_tau");
-   G0_omega.write_hdf5(ar,basepath2.str()+"G0_omega");*/
 }
 
 
