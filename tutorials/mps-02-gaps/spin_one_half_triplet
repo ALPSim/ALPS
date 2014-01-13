@@ -1,0 +1,8 @@
+LATTICE="open chain lattice"
+MODEL="spin"
+CONSERVED_QUANTUMNUMBERS="Sz"
+Sz_total=1
+SWEEPS=4
+J=1
+{L=32, MAXSTATES=40}
+
