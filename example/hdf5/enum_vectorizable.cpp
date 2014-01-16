@@ -43,7 +43,7 @@ namespace alps {
             typedef boost::int_t<sizeof(enum_type) * 8>::exact type;
         };
 
-        template<> struct is_continuous<enum_type> : public boost::false_type {};
+        template<> struct is_continuous<enum_type> : public boost::true_type {};
 
         template<> struct has_complex_elements<enum_type> : public boost::false_type {};
 
@@ -91,7 +91,7 @@ namespace alps {
                 chunk.push_back(1);
                 offset.push_back(0);
             }
-            ar.write(path, get_pointer(value), size, chunk, offset);
+            ar.write(path, (scalar_type<enum_type>::type const *)get_pointer(value), size, chunk, offset);
         }
         
         void load(
@@ -105,7 +105,7 @@ namespace alps {
                 chunk.push_back(1);
                 offset.push_back(0);
             }
-            ar.read(path, get_pointer(value), chunk, offset);
+            ar.read(path, (scalar_type<enum_type>::type *)get_pointer(value), chunk, offset);
         }
 
     }
