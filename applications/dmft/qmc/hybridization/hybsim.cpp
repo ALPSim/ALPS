@@ -104,7 +104,18 @@ hyb_config(parms)
   end_time=start_time+ CLOCKS_PER_SEC*((long)parms["MAX_TIME"]);
 
   
-  std::cout<<"process " << crank << " starting simulation"<<std::endl;
+  //std::cout<<"process " << crank << " starting simulation"<<std::endl;
+  csize=1;
+ //we don't have a nice way of getting the MPI size from ALPS, because we don't know about the communicator at this point.
+ //here is a safe way of getting the pool size into csize.
+#ifdef ALPS_HAVE_MPI
+  int mpi_init;
+  MPI_Initialized(&mpi_init);
+  if(mpi_init){
+     MPI_Comm_size(MPI_COMM_WORLD, &csize);
+  }
+#endif
+  std::cout<<"process " << crank << " of total: "<<csize<<" starting simulation"<<std::endl;
 }
 
 void hybridization::sanity_check(const alps::params &parms){
@@ -185,6 +196,8 @@ std::ostream &operator<<(std::ostream &os, const segment &s){
 double hybridization::fraction_completed()const{
   if(!is_thermalized()) return 0.;
   double work_fraction= (sweeps-thermalization_sweeps)/(double)total_sweeps;
-  //double time_fraction= (clock()-start_time)/(double)(end_time-start_time);
-  return work_fraction;
+  double time_fraction= (clock()-start_time)/(double)(end_time-start_time);
+  //return max of sweeps done and time used. Divide time used by the number of processes in pool (all work done will be added up)
+  return std::max(work_fraction, time_fraction/csize);
+  //return work_fraction;
 }

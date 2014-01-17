@@ -64,6 +64,7 @@ public:
 private:
   bool VERBOSE;
   int crank;
+  int csize;
   int output_period;
   clock_t start_time;
   clock_t end_time;
