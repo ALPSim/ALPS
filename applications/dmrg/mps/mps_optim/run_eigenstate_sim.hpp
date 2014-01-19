@@ -28,6 +28,7 @@
 #define ALPS_MPS_OPTIM_RUN_EIGENSTATE_SIM_HPP
 
 #include "dmrg_sim.hpp"
+#include "dmrg/models/measurements.h"
 
 #include <algorithm>
 #include <iterator>
@@ -85,6 +86,10 @@ void run_eigenstate_sim(BaseParameters parms, bool write_xml)
     /// Get measurements
     typedef typename Model<Matrix, SymmGroup>::measurements_type measurements_type;
     measurements_type measurements = model.measurements();
+    { // overlap measurements
+        measurements_type m = overlap_measurements<Matrix, SymmGroup>(parms, parms["nsweeps"]-1);
+        measurements.insert(measurements.end(), m.begin(), m.end());
+    }
     
     std::string rfile = parms["resultfile"].str();
     {

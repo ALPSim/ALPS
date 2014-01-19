@@ -3,7 +3,7 @@
  * ALPS MPS DMRG Project
  *
  * Copyright (C) 2013 Institute for Theoretical Physics, ETH Zurich
- *               2011-2011 by Michele Dolfi <dolfim@phys.ethz.ch>
+ *               2011-2013 by Michele Dolfi <dolfim@phys.ethz.ch>
  * 
  * This software is part of the ALPS Applications, published under the ALPS
  * Application License; you can use, redistribute it and/or modify it under
@@ -24,23 +24,13 @@
  *
  *****************************************************************************/
 
-#ifndef APP_RUNSIM_H
-#define APP_RUNSIM_H
+#ifndef SIM_MATRIX_TYPES_H
+#define SIM_MATRIX_TYPES_H
+
+#include <complex>
 
 #include "dmrg/block_matrix/detail/alps.hpp"
 typedef alps::numeric::matrix<double> matrix;
 typedef alps::numeric::matrix<std::complex<double> > cmatrix;
-
-#include "dmrg/utils/DmrgParameters.h"
-#include "dmrg/block_matrix/detail/alps.hpp"
-#include "dmrg/block_matrix/symmetry.h"
-
-namespace maquis { namespace dmrg {
-
-    // def. of run functions
-    template <class SymmGroup>
-    void run_sim(DmrgParameters & parms);
-    
-} }
 
 #endif

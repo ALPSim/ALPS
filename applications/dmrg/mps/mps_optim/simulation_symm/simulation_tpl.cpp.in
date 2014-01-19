@@ -3,9 +3,7 @@
  * ALPS MPS DMRG Project
  *
  * Copyright (C) 2013 Institute for Theoretical Physics, ETH Zurich
- *               2013 by Michele Dolfi <dolfim@phys.ethz.ch>
- *               2013 by Bela Bauer <bauerb@phys.ethz.ch>
- *               2013 by Sebastian Keller <sebkelle@phys.ethz.ch>
+ *               2013-2013 by Michele Dolfi <dolfim@phys.ethz.ch>
  * 
  * This software is part of the ALPS Applications, published under the ALPS
  * Application License; you can use, redistribute it and/or modify it under
@@ -26,12 +24,5 @@
  *
  *****************************************************************************/
 
-
-#ifndef DMRG_APP_VERSION
-#define DMRG_APP_VERSION
-
-// DRMG version
-#define DMRG_VERSION 2
-#define DMRG_VERSION_STRING "MAQUIS repo r4119"
-
-#endif
+#include "mps_optim/simulation.ipp"
+template struct simulation<@CMAKE_SYMM_GROUP@>;

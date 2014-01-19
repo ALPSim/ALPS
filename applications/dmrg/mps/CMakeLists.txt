@@ -19,6 +19,13 @@ else(NOT LAPACK_FOUND)
     add_definitions(-DMAQUIS_OPENMP)
   endif(OPENMP_FOUND)
 
+  ## clean binaries created in previous versions so that config dirs can be created
+  if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/mps_optim" AND NOT IS_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/mps_optim")
+    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/mps_optim")
+  endif()
+  if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/mps_evolve" AND NOT IS_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/mps_evolve")
+    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/mps_evolve")
+  endif()
 
   ### FRAMEWORK
   set(FRAMEWORK_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/framework/dmrg)
@@ -29,8 +36,7 @@ else(NOT LAPACK_FOUND)
 
   set(MPS_UTILS_SOURCES ${FRAMEWORK_SOURCE_DIR}/block_matrix/symmetry.cpp
                         ${FRAMEWORK_SOURCE_DIR}/utils/utils.cpp
-                        ${FRAMEWORK_SOURCE_DIR}/utils/time_stopper.cpp
-                        ${FRAMEWORK_SOURCE_DIR}/sim/symm_factory.cpp)
+                        ${FRAMEWORK_SOURCE_DIR}/utils/time_stopper.cpp)
 
   set(MPS_MODELS_SOURCES "${FRAMEWORK_SOURCE_DIR}/models/factory/lattice_factory.cpp")
   get_symm_files(APPEND MPS_MODELS_SOURCES "${FRAMEWORK_SOURCE_DIR}/models/factory/model_factory_{SYMM}.cpp")
@@ -47,14 +53,8 @@ else(NOT LAPACK_FOUND)
   ### APPLICATIONS
   # ${ALPS_BOOST_LIBRARY_NAME} ${HDF5_LIBRARIES} included in `alps`
   set(MYAPP_LIBRARIES mps_pscan mps_models mps_utils alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY} ${HDF5_LIBRARIES})
+  
+  add_subdirectory(mps_optim)
+  add_subdirectory(mps_evolve)
 
-  add_executable(mps_optim mps_optim/main.cpp mps_optim/run_sim.cpp)
-  target_link_libraries(mps_optim ${MYAPP_LIBRARIES})
-
-  add_executable(mps_evolve mps_evolve/main.cpp mps_evolve/run_sim.cpp)
-  target_link_libraries(mps_evolve ${MYAPP_LIBRARIES})
-
-
-  ### INSTALL
-  install(TARGETS mps_optim mps_evolve RUNTIME DESTINATION bin COMPONENT applications)
 endif(NOT LAPACK_FOUND)

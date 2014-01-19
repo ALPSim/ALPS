@@ -41,16 +41,16 @@ namespace measurements {
                 std::string const& ckp_)
         : base(name_)
         , bra_ckp(ckp_)
-        { }
+        { this->cast_to_real = false; }
         
         void evaluate(MPS<Matrix, SymmGroup> const& mps, boost::optional<reduced_mps<Matrix, SymmGroup> const&> rmps = boost::none)
         {
-            maquis::cout << "Measuring overlap with " << bra_ckp << "." << std::endl;
+            maquis::cout << "   overlap with " << bra_ckp << "." << std::endl;
             MPS<Matrix, SymmGroup> bra_mps;
             load(bra_ckp, bra_mps);
             
             if (bra_mps[bra_mps.length()-1].col_dim().sum_of_sizes() == 1)
-                this->result = overlap(bra_mps, mps);
+                this->result = ::overlap(bra_mps, mps);
             else
                 this->vector_results = multi_overlap(bra_mps, mps);
         }
