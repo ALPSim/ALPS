@@ -54,22 +54,9 @@ void DCATransformer::generate_transformer(const alps::Parameters& parms, boost::
 {
   bool antiferromagnetic = parms.value_or_default("ANTIFERROMAGNET", false);
   if (antiferromagnetic) {
-#ifndef USE_MPI
-    //std::cout<<"using antiferromagnetic DCA transformer"<<std::endl;
-#else
-    //int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    //if(rank==0)     //std::cout<<"using antiferromagnetic DCA transformer"<<std::endl;
-#endif
-    //std::cout<<"using antiferromagnetic DCA transformer"<<std::endl;
     trans_ptr.reset(new AntiFerroDCATransformer(parms));
   }
   else {
-#ifndef USE_MPI
-    //std::cout<<"creating simple DCA transformer"<<std::endl;
-#else
-    //int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    //if(rank==0) std::cout<<"creating simple DCA transformer"<<std::endl;
-#endif
     trans_ptr.reset(new SimpleDCATransformer(parms));
   }
 }
@@ -668,8 +655,10 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
   //std::cout<<"runnning operator() with AFM"<<std::endl;
   unsigned int nflavor=G0_omega.nflavor();
   unsigned int nfreq=G0_omega.nfreq();
+  
+  std::cout<<"using a magnetic field of: "<<h<<std::endl;
 
-  //first: compute the self energy out of G and G0.
+  //first: compute the self energy using G and G0.
   matsubara_green_function_t G0_omega_new(nfreq,n_cluster_sites(),nflavor, blockdiagonal);
   G0_omega_new.clear();
   matsubara_green_function_t G0_omega_inv = green_function_inverse(G0_omega);
@@ -683,20 +672,17 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
   //fourth dimension: lattice momentum kl
   
   std::cout<<"running precompute."<<std::endl;
-  std::vector<std::vector<std::vector<std::vector<double> > > >epsilon_kckl(2, std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(n_cluster_sites(), std::vector<double>(n_lattice_momenta()))));
+  std::vector<std::vector<double> >epsilon_kckl(n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
   std::vector<double> weight_kl(n_lattice_momenta());
-  for (int s=0; s<2; s++) {
-    int sign=(s==0?-1:1);
-    for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-      for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
-        vector_type k0(dimension()),k1(dimension());
-        for (unsigned int d=0; d<dimension(); ++d){
-          k0[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc  ,d);
-          k1[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc+1,d);
-        }
-        epsilon_kckl[s][0][kc][kl]=epsilon(k0);
-        epsilon_kckl[s][1][kc][kl]=epsilon(k1);
+  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+    vector_type k0(dimension()); k0[0]=cluster_momentum(kc  ,0); k0[1]=cluster_momentum(kc  ,1);
+    std::cout<<"dispersion at k-point: "<<kc<<" momentum: "<<cluster_momentum(kc, 0)<<" "<<cluster_momentum(kc, 1)<<" is: "<<epsilon(k0)<<std::endl;
+    for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
+      vector_type k(dimension());
+      for (unsigned int d=0; d<dimension(); ++d){
+        k[d] = lattice_momentum(kl,d) + cluster_momentum(kc  ,d);
       }
+      epsilon_kckl[kc][kl]=epsilon(k);
     }
   }
   //we ignore the weight for now. Reintroduce at a later point.
@@ -715,14 +701,14 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
         //this is equation 119. But careful: Eq. 119 has a typo from the SC case, it should be iomega+mu-epsilon for both sigmas!
         for (site_t kc=0; kc<n_cluster_sites(); kc+=2) {
           for (spin_t flavor=0; flavor<nflavor; flavor+=2) {
-            G_kl(freq,kc  ,kc  ,flavor  ) = iomega_n+mu-epsilon_kckl[s][0][kc][kl];
-            G_kl(freq,kc  ,kc  ,flavor+1) = iomega_n+mu-epsilon_kckl[s][0][kc][kl];
+            G_kl(freq,kc  ,kc  ,flavor  ) = iomega_n+mu-epsilon_kckl[kc][kl];
+            G_kl(freq,kc  ,kc  ,flavor+1) = iomega_n+mu-epsilon_kckl[kc][kl];
             G_kl(freq,kc  ,kc+1,flavor  ) = -h/2;
             G_kl(freq,kc  ,kc+1,flavor+1) = h/2;
             G_kl(freq,kc+1,kc  ,flavor  ) = -h/2;
             G_kl(freq,kc+1,kc  ,flavor+1) = h/2;
-            G_kl(freq,kc+1,kc+1,flavor  ) = iomega_n+mu-epsilon_kckl[s][1][kc][kl];
-            G_kl(freq,kc+1,kc+1,flavor+1) = iomega_n+mu-epsilon_kckl[s][1][kc][kl];
+            G_kl(freq,kc+1,kc+1,flavor  ) = iomega_n+mu-epsilon_kckl[kc+1][kl];
+            G_kl(freq,kc+1,kc+1,flavor+1) = iomega_n+mu-epsilon_kckl[kc+1][kl];
           }
         }
       }

@@ -109,15 +109,16 @@ void ClusterHelper::setup_tables(const alps::Parameters &params)
       }
     }
   }
-  if(alps::is_master()){
-    /*std::ofstream clustercoordstream("ClusterCoordinates");
-     for (std::size_t m=0; m<cluster_coordinates_.size1(); ++m) {
-     clustercoordstream << m << " ";
-     for (std::size_t d=0; d<cluster_coordinates_.size2(); ++d)
-     clustercoordstream << cluster_coordinates_(m,d) << " ";
-     clustercoordstream << std::endl;
-     }*/
-  }
+  /*if(alps::is_master()){
+    std::cerr<<"DEBUG: Writing cluster coordinates"<<std::endl;
+    std::ofstream clustercoordstream("ClusterCoordinates");
+    for (std::size_t m=0; m<cluster_coordinates_.size1(); ++m) {
+      clustercoordstream << m << " ";
+      for (std::size_t d=0; d<cluster_coordinates_.size2(); ++d)
+        clustercoordstream << cluster_coordinates_(m,d) << " ";
+      clustercoordstream << std::endl;
+    }
+  }*/
   //setup reciprocal basis
   reciprocal_basis_.resize(dimension(), dimension());
   memset(&(reciprocal_basis_(0,0)), 0, sizeof(double)*dimension()*dimension());
@@ -181,7 +182,7 @@ void ClusterHelper::setup_tables(const alps::Parameters &params)
       }
     }
   }
-
+  
   //find lattice integration weights (Simpson weights)
   std::vector<double> weights;
   momentum_iterator itm, itm_end;
@@ -263,14 +264,14 @@ void ClusterHelper::setup_tables(const alps::Parameters &params)
   //}
   
   /*lattice_momenta_.resize(n_cluster_cells(), dimension());
-  momentum_iterator itm, itm_end;
-  boost::tie(itm, itm_end) = momenta();
-  for (unsigned int m=0; itm!=itm_end; ++itm, ++m) {
-    vector_type mom=momentum(*itm);
-    for (int d=0; d<dimension(); ++d) {
-      lattice_momenta_(m,d) = mom[d];
-    }
-  }*/
+   momentum_iterator itm, itm_end;
+   boost::tie(itm, itm_end) = momenta();
+   for (unsigned int m=0; itm!=itm_end; ++itm, ++m) {
+   vector_type mom=momentum(*itm);
+   for (int d=0; d<dimension(); ++d) {
+   lattice_momenta_(m,d) = mom[d];
+   }
+   }*/
   /* if(alps::is_master()){
    std::ofstream allmomstream("AllMomenta");
    for (int mc=0; mc<cluster_momenta_.size1(); ++mc) {
@@ -424,7 +425,7 @@ bool ClusterHelper::read(const alps::Parameters &parms){
     ar>>alps::make_pvp("/transformer/rbzone_boundaries", rbzone_boundaries_);
     ar>>alps::make_pvp("/transformer/symmetry_table_k_space", symmetry_table_k_space_);
     ar>>alps::make_pvp("/transformer/symmetry_table_real_space", symmetry_table_real_space_);
-
+    
     read_site_class_set(ar, site_class_set_real_space_, "site_class_set_real_space");
     read_site_class_set(ar, site_class_set_k_space_, "site_class_set_k_space");
     read_pair_class_set(ar, pair_class_set_real_space_, "pair_class_set_real_space");

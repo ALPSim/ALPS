@@ -446,7 +446,7 @@ public:
                                               nambu_matsubara_green_function_t &selfenergy,
                                               double &mu, const double h, const double eta1, const double eta2, const double beta, const bool use_selfenergy);
   itime_green_function_t symmetrize(const itime_green_function_t& G, const bool paramagnet) const
-  { return spin_symmetrizer(G, paramagnet); }
+  { throw std::runtime_error("spin symmetrization in AFM not implemented for itime.");}//return spin_symmetrizer(G, paramagnet); }
   matsubara_green_function_t symmetrize(const matsubara_green_function_t& G, const bool paramagnet) const
   { return spin_symmetrizer(G, paramagnet); }
   matsubara_green_function_t transform_into_real_space(const matsubara_green_function_t& G) const
@@ -499,8 +499,7 @@ public:
                                          const double mu, const double delta);
   
 private:
-  template <class T>
-  green_function<T> spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const;
+  matsubara_green_function_t spin_symmetrizer(const matsubara_green_function_t& G, const bool paramagnet) const;
   template<typename T, class D>
   green_function<T> transform_coordinates(const green_function<T>& G) const;
   
@@ -927,16 +926,6 @@ struct AntiFerroDCATransformer::Backward {
 };
 
 
-
-template<class T>
-green_function<T> AntiFerroDCATransformer::spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const
-{
-  //this spin symmetrizer does not do anything.
-  green_function<T> G_new(G);
-  if (paramagnet)
-    boost::throw_exception(std::invalid_argument("AFM and PM? redundant parameters! set paramagnet to false.\n"));
-  return G_new;
-}
 
 
 

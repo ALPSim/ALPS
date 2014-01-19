@@ -34,6 +34,8 @@
 #include <sys/types.h> //will this fail on Windows?
 #include <boost/tuple/tuple.hpp> //will this fail on Windows?
 
+
+
 void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySolver& solver,
                               DCATransformer& clustertrans)
 {
@@ -78,31 +80,26 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     G_old_tau = G_tau;
     G0_old_tau = G0_tau;
     fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega);
-    std::cout<<"running solver in frequency space."<<std::endl<<std::flush;
+    //
+    //std::ofstream g0_before_symm("g0_before_symm.dat"); g0_before_symm<<std::make_pair(G0_omega, beta)<<std::endl;
+    G0_omega = clustertrans.symmetrize(G0_omega, paramagnet);
+    //std::ofstream g0_after_symm("g0_after_symm.dat"); g0_after_symm<<std::make_pair(G0_omega, beta)<<std::endl;
+    
+    //std::cout<<"running solver in frequency space."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, parms);
+    //std::cout<<"applying spin symmetries"<<std::endl<<std::flush;
+    //std::ofstream g_before_symm("g_before_symm.dat"); g_before_symm<<std::make_pair(G_omega, beta)<<std::endl;
+    G_omega = clustertrans.symmetrize(G_omega, paramagnet);
+    //std::ofstream g_after_symm("g_after_symm.dat"); g_after_symm<<std::make_pair(G_omega, beta)<<std::endl;
+    //exit(0);
     if(paramagnet){
       std::cout<<"applying point group symmetries"<<std::endl<<std::flush;
       G_tau = clustertrans.symmetrize(G_tau, paramagnet);
-      G_omega = clustertrans.symmetrize(G_omega, paramagnet);
       G_omega = clustertrans.symmetrize_k_space(G_omega);
       G_tau = clustertrans.symmetrize_k_space(G_tau);
     }
     std::cout<<"running cluster transform"<<std::endl<<std::flush;
     G0_omega = clustertrans(G_omega, G0_omega, mu, h, beta);
-    //relaxation to speed up /slow down convergence
-    if(relax_rate !=1){
-      std::cout<<"using over/underrelaxation with rate: "<<relax_rate<<std::endl;
-      for(unsigned int orbital=0;orbital<n_orbital;++orbital){
-        for(unsigned int site1=0;site1<n_site;++site1){
-          for(unsigned int site2=0;site2<n_site;++site2){
-            for(unsigned int i=0;i<n_matsubara;++i){
-              G0_omega(i, site1, site2, orbital)=relax_rate* G0_omega(i, site1, site2, orbital)+
-              (1-relax_rate)*G0_old_omega(i, site1, site2, orbital);
-            }
-          }
-        }
-      }
-    }
     G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
     std::cout<<"comparing old and new result."<<std::endl<<std::flush;
     max_diff=0;
@@ -229,3 +226,39 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver
   // write G0
   G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
 }
+
+matsubara_green_function_t AntiFerroDCATransformer::spin_symmetrizer(const matsubara_green_function_t& G, const bool paramagnet) const
+{
+  std::cerr<<"in overloaded symmetrizer."<<std::endl;
+  //this spin symmetrizer does not do anything.
+  if (paramagnet){
+    boost::throw_exception(std::invalid_argument("AFM and PM? redundant parameters! set paramagnet to false.\n"));
+  }
+  matsubara_green_function_t G_new(G);
+  return G_new;
+
+/*  for(int n=0;n<G.nfreq();++n){
+    for(int k=0;k<G.nsite();k+=2){
+      int q=k+1;
+      //spin-symmetrize the diagonal components:
+      std::complex<double> GK=(G(n,k,k,0)+G(n,k,k,1))/2.;
+      std::complex<double> GQ=(G(n,q,q,0)+G(n,q,q,1))/2.;
+      std::complex<double> GKpQ=(G(n,k,q,0)-G(n,k,q,1)+G(n,q,k,0)+G(n,q,k,1))/4.;
+      if(n==0){
+        std::cout<<G(n,k,k,0)<<" "<<G(n,k,k,1)<<" "<<G(n,q,q,0)<<" "<<G(n,q,q,1)<<std::endl;
+        std::cout<<G(n,k,q,0)<<" "<<G(n,k,q,1)<<" "<<G(n,q,k,0)<<" "<<G(n,q,k,1)<<std::endl;
+      }
+      G_new(n,k,k,0)=GK;
+      G_new(n,k,k,1)=GK;
+      G_new(n,q,q,0)=GQ;
+      G_new(n,q,q,1)=GQ;
+
+      G_new(n,k,q,0)=GKpQ;
+      G_new(n,k,q,1)=-GKpQ;
+      G_new(n,q,k,0)=-GKpQ;
+      G_new(n,q,k,1)=GKpQ;
+
+    }
+  }*/
+}
+
