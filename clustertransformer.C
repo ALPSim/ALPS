@@ -1541,3 +1541,38 @@ std::vector<double> FoursiteCDMFTTransformer::epssqav() const{
 }
 
 
+matsubara_green_function_t AntiFerroDCATransformer::spin_symmetrizer(const matsubara_green_function_t& G, const bool paramagnet) const
+{
+  std::cerr<<"in overloaded symmetrizer."<<std::endl;
+  //this spin symmetrizer does not do anything.
+  if (paramagnet){
+    boost::throw_exception(std::invalid_argument("AFM and PM? redundant parameters! set paramagnet to false.\n"));
+  }
+  matsubara_green_function_t G_new(G);
+  return G_new;
+  
+  /*  for(int n=0;n<G.nfreq();++n){
+   for(int k=0;k<G.nsite();k+=2){
+   int q=k+1;
+   //spin-symmetrize the diagonal components:
+   std::complex<double> GK=(G(n,k,k,0)+G(n,k,k,1))/2.;
+   std::complex<double> GQ=(G(n,q,q,0)+G(n,q,q,1))/2.;
+   std::complex<double> GKpQ=(G(n,k,q,0)-G(n,k,q,1)+G(n,q,k,0)+G(n,q,k,1))/4.;
+   if(n==0){
+   std::cout<<G(n,k,k,0)<<" "<<G(n,k,k,1)<<" "<<G(n,q,q,0)<<" "<<G(n,q,q,1)<<std::endl;
+   std::cout<<G(n,k,q,0)<<" "<<G(n,k,q,1)<<" "<<G(n,q,k,0)<<" "<<G(n,q,k,1)<<std::endl;
+   }
+   G_new(n,k,k,0)=GK;
+   G_new(n,k,k,1)=GK;
+   G_new(n,q,q,0)=GQ;
+   G_new(n,q,q,1)=GQ;
+   
+   G_new(n,k,q,0)=GKpQ;
+   G_new(n,k,q,1)=-GKpQ;
+   G_new(n,q,k,0)=-GKpQ;
+   G_new(n,q,k,1)=GKpQ;
+   
+   }
+   }*/
+}
+
