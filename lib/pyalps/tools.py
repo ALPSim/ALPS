@@ -599,16 +599,14 @@ def collectXY(sets,x,y,foreach=[]):
       """
       foreach_sets = {}
       for iset in flatten(sets):
-          if iset.props['observable'] != y:
+          if iset.props['observable'] != y and not y in iset.props:
               continue
           
           fe_par_set = tuple((iset.props[m] for m in foreach))
-          
           if fe_par_set in foreach_sets:
               foreach_sets[fe_par_set].append(iset)
           else:
               foreach_sets[fe_par_set] = [iset]
-      
       for k,v in foreach_sets.items():
           common_props = dict_intersect([q.props for q in v])
           res = DataSet()
@@ -620,15 +618,25 @@ def collectXY(sets,x,y,foreach=[]):
           res.props['ylabel'] = y
           
           for data in v:
-              if len(data.y)>1:
-                  res.props['line'] = '.'
-              xvalue = np.array([data.props[x] for i in range(len(data.y))])
-              if len(res.x) > 0 and len(res.y) > 0:
-                  res.x = np.concatenate((res.x, xvalue ))
-                  res.y = np.concatenate((res.y, data.y))
+              if data.props['observable'] == y:
+                  if len(data.y)>1:
+                      res.props['line'] = '.'
+                  xvalue = np.array([data.props[x] for i in range(len(data.y))])
+                  if len(res.x) > 0 and len(res.y) > 0:
+                      res.x = np.concatenate((res.x, xvalue ))
+                      res.y = np.concatenate((res.y, data.y))
+                  else:
+                      res.x = xvalue
+                      res.y = data.y
               else:
-                  res.x = xvalue
-                  res.y = data.y
+                  res.props['line'] = '.'
+                  xvalue = np.array([ data.props[x] ])
+                  if len(res.x) > 0 and len(res.y) > 0:
+                      res.x = np.concatenate((res.x, xvalue ))
+                      res.y = np.concatenate((res.y, np.array([ data.props[y] ])))
+                  else:
+                      res.x = xvalue
+                      res.y = np.array([ data.props[y] ])
           
           order = np.argsort(res.x, kind = 'mergesort')
           res.x = res.x[order]

@@ -214,6 +214,11 @@ class Hdf5Loader:
         #iteration_grp = self.h5f.require_group(respath+'/iteration')
         for it in self.h5f.list_children(current_path+'/iteration'):
             obsset=[]
+            iteration_props = {}
+            if 'parameters' in self.h5f.list_children(current_path+'/iteration/'+it):
+                iteration_props = self.ReadParameters(current_path+'/iteration/'+it+'/parameters')
+            iteration_props['iteration'] = it
+            
             respath = current_path+'/iteration/'+it+'/results'
             list_ = self.GetObservableList(respath)
             if measurements == None:
@@ -227,9 +232,9 @@ class Hdf5Loader:
                             d = DataSet()
                             itresultspath = respath+'/'+m
                             if verbose: log("Loading "+ m)
-                            d.props['hdf5_path'] = itresultspath 
-                            d.props['observable'] = pt.hdf5_name_decode(m)
-                            d.props['iteration'] = it
+                            measurements_props = {}
+                            measurements_props['hdf5_path'] = itresultspath 
+                            measurements_props['observable'] = pt.hdf5_name_decode(m)
                             if index == None:
                                 d.y = self.h5f[itresultspath+'/mean/value']
                                 d.x = np.arange(0,len(d.y))
@@ -243,6 +248,8 @@ class Hdf5Loader:
                             else:
                                 d.x = np.arange(0,len(d.y))
                             d.props.update(params)
+                            d.props.update(iteration_props)
+                            d.props.update(measurements_props)
                         except AttributeError:
                             log( "Could not create DataSet")
                     obsset.append(d)
