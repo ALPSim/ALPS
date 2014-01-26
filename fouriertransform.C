@@ -58,9 +58,9 @@ void FourierTransformer::frequency_to_time_ft(itime_green_function_t &G_tau,
           if(s1%2==0 && s2==s1+1) is_nonzero=true;
           if(s1%2==1 && s2==s1-1) is_nonzero=true;
           if (!is_nonzero){  //nothing happening in this gf.
-            for (unsigned int i=0; i<=N_tau; i++) {
+            /*for (unsigned int i=0; i<=N_tau; i++) {
               G_tau(i,s1,s2,f)=0.;
-            }
+            }*/
             continue;
           }
         }

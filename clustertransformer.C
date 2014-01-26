@@ -701,13 +701,14 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
         //this is equation 119. But careful: Eq. 119 has a typo from the SC case, it should be iomega+mu-epsilon for both sigmas!
         for (site_t kc=0; kc<n_cluster_sites(); kc+=2) {
           for (spin_t flavor=0; flavor<nflavor; flavor+=2) {
-            G_kl(freq,kc  ,kc  ,flavor  ) = iomega_n+mu-epsilon_kckl[kc][kl];
-            G_kl(freq,kc  ,kc  ,flavor+1) = iomega_n+mu-epsilon_kckl[kc][kl];
+            G_kl(freq,kc  ,kc  ,flavor  ) = iomega_n+mu-epsilon_kckl[kc  ][kl];
             G_kl(freq,kc  ,kc+1,flavor  ) = -h/2;
-            G_kl(freq,kc  ,kc+1,flavor+1) = h/2;
             G_kl(freq,kc+1,kc  ,flavor  ) = -h/2;
-            G_kl(freq,kc+1,kc  ,flavor+1) = h/2;
             G_kl(freq,kc+1,kc+1,flavor  ) = iomega_n+mu-epsilon_kckl[kc+1][kl];
+            
+            G_kl(freq,kc  ,kc  ,flavor+1) = iomega_n+mu-epsilon_kckl[kc  ][kl];
+            G_kl(freq,kc  ,kc+1,flavor+1) = h/2;
+            G_kl(freq,kc+1,kc  ,flavor+1) = h/2;
             G_kl(freq,kc+1,kc+1,flavor+1) = iomega_n+mu-epsilon_kckl[kc+1][kl];
           }
         }
