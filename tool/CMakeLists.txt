@@ -27,7 +27,7 @@ if (NOT Boost_FOUND AND ALPS_BUILD_DOC)
                block_grammar.cpp code_snippet.cpp collector.cpp 
                dependency_tracker.cpp
                doc_info_actions.cpp doc_info_grammar.cpp files.cpp
-               grammar.cpp id_generator.cpp id_manager.cpp input_path.cpp 
+               grammar.cpp id_generation.cpp id_manager.cpp id_xml.cpp input_path.cpp 
                main_grammar.cpp 
                markups.cpp phrase_element_grammar.cpp phrase_grammar.cpp 
                post_process.cpp quickbook.cpp state.cpp string_ref.cpp 
