@@ -9,10 +9,10 @@
 #
 ##############################################################################
 
-from core.modules.vistrails_module import Module, ModuleError, NotCacheable
+from vistrails.core.modules.vistrails_module import Module, ModuleError, NotCacheable
 import core.bundles
-import core.modules.basic_modules
-import core.modules.module_registry
+import vistrails.core.modules.basic_modules
+import vistrails.core.modules.module_registry
 import copy
 
 import parameters
@@ -27,7 +27,7 @@ import packages.spreadsheet
 
 from alpsparameters import SystemParameters
 from parameters import Parameters
-basic = core.modules.basic_modules
+basic = vistrails.core.modules.basic_modules
 
 ##############################################################################
 

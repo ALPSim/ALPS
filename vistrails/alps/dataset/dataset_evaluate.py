@@ -25,10 +25,10 @@
 # 
 # ****************************************************************************
 
-import core.modules.module_registry
-import core.modules.basic_modules as basic
-from core.modules.vistrails_module import Module, ModuleError, NotCacheable
-from core.modules.python_source_configure import PythonSourceConfigurationWidget
+import vistrails.core.modules.module_registry
+import vistrails.core.modules.basic_modules as basic
+from vistrails.core.modules.vistrails_module import Module, ModuleError, NotCacheable
+from vistrails.core.modules.python_source_configure import PythonSourceConfigurationWidget
 
 import urllib, copy
 import matplotlib.pyplot as plt

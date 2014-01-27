@@ -10,11 +10,11 @@
 ##############################################################################
 
 from core.configuration import ConfigurationObject
-from core.modules.vistrails_module import Module, ModuleError, NotCacheable
+from vistrails.core.modules.vistrails_module import Module, ModuleError, NotCacheable
 from core.system import list2cmdline
 import core.bundles
-import core.modules.basic_modules
-import core.modules.module_registry
+import vistrails.core.modules.basic_modules
+import vistrails.core.modules.module_registry
 import os
 import os.path
 import platform
@@ -29,7 +29,7 @@ import packages.spreadsheet
 
 import pyalps
 
-basic = core.modules.basic_modules
+basic = vistrails.core.modules.basic_modules
 
 config = ConfigurationObject()
 
@@ -304,7 +304,7 @@ def initialize(): pass
 
 def selfRegister():
 
-    reg = core.modules.module_registry.get_module_registry()
+    reg = vistrails.core.modules.module_registry.get_module_registry()
 
     reg.add_module(SystemCommand,namespace="Tools",abstract=True)
     reg.add_module(SystemCommandLogged,namespace="Tools",abstract=True)

@@ -11,7 +11,7 @@
 
 from core.configuration import ConfigurationObject
 from core.upgradeworkflow import UpgradeWorkflowHandler
-from core.modules.module_registry import get_module_registry
+from vistrails.core.modules.module_registry import get_module_registry
 
 import alpscore
 import parameters

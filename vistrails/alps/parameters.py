@@ -9,20 +9,20 @@
 #
 ##############################################################################
 
-from core.modules.vistrails_module import Module, ModuleError, NotCacheable
+from vistrails.core.modules.vistrails_module import Module, ModuleError, NotCacheable
 import core.bundles
-import core.modules.basic_modules
-import core.modules.module_registry
+import vistrails.core.modules.basic_modules
+import vistrails.core.modules.module_registry
 import copy
 # import packages.controlflow
-basic = core.modules.basic_modules
+basic = vistrails.core.modules.basic_modules
 
 import numpy as np
 
 try:
   from gui.modules.constant_configuration import StandardConstantWidget
 except:
-  from core.modules.constant_configuration import StandardConstantWidget
+  from vistrails.core.modules.constant_configuration import StandardConstantWidget
 
 ##############################################################################
 
@@ -312,7 +312,7 @@ class UpdateParameters(Parameters):
 
 
 def register_parameters(type, ns="Parameters"):
-  reg = core.modules.module_registry.get_module_registry()
+  reg = vistrails.core.modules.module_registry.get_module_registry()
   reg.add_module(type,namespace=ns)
   reg.add_output_port(type, "value", type)
   
@@ -320,7 +320,7 @@ def initialize(): pass
 
 def selfRegister():
 
-  reg = core.modules.module_registry.get_module_registry()
+  reg = vistrails.core.modules.module_registry.get_module_registry()
 
   register_parameters(Parameters)
   reg.add_input_port(Parameters, "parms", Parameters)

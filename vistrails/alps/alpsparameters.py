@@ -9,10 +9,10 @@
 #
 ##############################################################################
 
-from core.modules.vistrails_module import Module, ModuleError, NotCacheable
+from vistrails.core.modules.vistrails_module import Module, ModuleError, NotCacheable
 import core.bundles
-import core.modules.basic_modules as basic
-import core.modules.module_registry
+import vistrails.core.modules.basic_modules as basic
+import vistrails.core.modules.module_registry
 import copy
 
 import parameters
@@ -269,12 +269,12 @@ class StructureFactorMeasurement(CustomMeasurement):
 
 
 def register_parameters(type, ns="Parameters"):
-    reg = core.modules.module_registry.get_module_registry()
+    reg = vistrails.core.modules.module_registry.get_module_registry()
     reg.add_module(type,namespace=ns)
     reg.add_output_port(type, "value", type)
 
 def register_abstract_parameters(type, ns="Parameters"):
-    reg = core.modules.module_registry.get_module_registry()
+    reg = vistrails.core.modules.module_registry.get_module_registry()
     reg.add_module(type,namespace=ns,abstract=True)
     reg.add_output_port(type, "value", type)
   
@@ -282,7 +282,7 @@ def initialize(): pass
 
 def selfRegister():
 
-  reg = core.modules.module_registry.get_module_registry()
+  reg = vistrails.core.modules.module_registry.get_module_registry()
 
   register_parameters(SystemParameters,"Parameters")
 

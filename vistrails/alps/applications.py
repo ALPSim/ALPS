@@ -10,8 +10,8 @@
 ##############################################################################
 
 import core.bundles
-import core.modules.basic_modules
-import core.modules.module_registry
+import vistrails.core.modules.basic_modules
+import vistrails.core.modules.module_registry
 
 import alpscore
 import alpsparameters
@@ -23,12 +23,12 @@ import glob
 import copy
 
 from packages.vtlcreator.init import VtlFileCreator
-from core.modules.vistrails_module import ModuleError
+from vistrails.core.modules.vistrails_module import ModuleError
 from plots import PlotFile
 from pyalps.plot_core import *
 from dataset import DataSets, ResultFiles
 
-basic = core.modules.basic_modules
+basic = vistrails.core.modules.basic_modules
 
 ##############################################################################
 
@@ -352,18 +352,18 @@ class EvaluateQWL(AlpsEvaluate):
 def initialize(): pass
 
 def register_parameters(type, ns="Applications"):
-  reg = core.modules.module_registry.get_module_registry()
+  reg = vistrails.core.modules.module_registry.get_module_registry()
   reg.add_module(type,namespace=ns)
   reg.add_output_port(type, "value", type)
 
 
 def register_application(type):
-  reg = core.modules.module_registry.get_module_registry()
+  reg = vistrails.core.modules.module_registry.get_module_registry()
   reg.add_module(type,namespace="Applications")
   reg.add_input_port(type,'application',[basic.File],False)
 
 def register_evaluation(type):
-  reg = core.modules.module_registry.get_module_registry()
+  reg = vistrails.core.modules.module_registry.get_module_registry()
   reg.add_module(type,namespace="Applications")
   reg.add_output_port(type,'all',[DataSets])
   for (port_name,ylabel) in type.plots:
@@ -373,7 +373,7 @@ def register_evaluation(type):
 
 def selfRegister():
 
-  reg = core.modules.module_registry.get_module_registry()
+  reg = vistrails.core.modules.module_registry.get_module_registry()
   
 #  register_parameters(system.SimulationID)
   

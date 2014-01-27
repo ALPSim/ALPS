@@ -9,14 +9,14 @@
 #
 ##############################################################################
 
-from core.modules.vistrails_module import Module, ModuleError, NotCacheable
+from vistrails.core.modules.vistrails_module import Module, ModuleError, NotCacheable
 import core.bundles
-import core.modules.basic_modules
-import core.modules.module_registry
+import vistrails.core.modules.basic_modules
+import vistrails.core.modules.module_registry
 
 import parameters
 
-basic = core.modules.basic_modules
+basic = vistrails.core.modules.basic_modules
 
 ##############################################################################
 
@@ -128,12 +128,12 @@ class HardcoreBosonModel(Model):
                  }
 
 def register_model(type):
-   reg = core.modules.module_registry.get_module_registry()
+   reg = vistrails.core.modules.module_registry.get_module_registry()
    reg.add_module(type,namespace="Models")
    reg.add_input_port(type,'MODEL_LIBRARY',[basic.File])
 
 def register_parameters(type, ns="Models"):
-   reg = core.modules.module_registry.get_module_registry()
+   reg = vistrails.core.modules.module_registry.get_module_registry()
    reg.add_module(type,namespace=ns)
    reg.add_output_port(type, "value", type)
   
@@ -141,7 +141,7 @@ def initialize(): pass
 
 def selfRegister():
 
-   reg = core.modules.module_registry.get_module_registry()
+   reg = vistrails.core.modules.module_registry.get_module_registry()
   
    register_parameters(Model)
    

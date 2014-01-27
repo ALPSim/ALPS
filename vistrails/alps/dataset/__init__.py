@@ -25,9 +25,9 @@
 # 
 # ****************************************************************************
 
-import core.modules.module_registry
-import core.modules.basic_modules as basic
-from core.modules.vistrails_module import Module, ModuleError, NotCacheable
+import vistrails.core.modules.module_registry
+import vistrails.core.modules.basic_modules as basic
+from vistrails.core.modules.vistrails_module import Module, ModuleError, NotCacheable
 from gui.modules.python_source_configure import PythonSourceConfigurationWidget
 
 import urllib, copy
@@ -47,7 +47,7 @@ from dataset_tools import *
 from dataset_select import *
 
 def register(m,ns,abst=False):
-    reg = core.modules.module_registry.registry
+    reg = vistrails.core.modules.module_registry.registry
     
     ups = False
     for input_port in m.my_input_ports:
@@ -90,7 +90,7 @@ def selfRegister():
 
     # We'll first create a local alias for the module registry so that
     # we can refer to it in a shorter way.
-    reg = core.modules.module_registry.registry
+    reg = vistrails.core.modules.module_registry.registry
 
     register(DataSets,'DataSet',abst=True)
     register(ConcatenateDataSets,'DataSet')
