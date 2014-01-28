@@ -51,8 +51,9 @@ for tau in [20.0]:
         ns = 500
         dt = tau / ns
         p = deepcopy(model)
-        p['init_state'   ] = 'basis_state_generic'
-        p['init_basis_state'] = ','.join(['1']*25 + ['0']*25)
+        p['init_state'      ] = 'local_quantumnumbers'
+        p['initial_local_S' ] = ','.join(['0.5']*50)
+        p['initial_local_Sz'] = ','.join(['-0.5']*25 + ['0.5']*25)
         p['te_order' ] = 'second'
         p['dt'       ] = dt
         p['SWEEPS'   ] = ns

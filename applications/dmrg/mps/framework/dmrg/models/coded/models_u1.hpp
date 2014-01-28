@@ -112,6 +112,12 @@ public:
         
     }
     
+    void update(BaseParameters const& p)
+    {
+        // TODO: update this->terms_ with the new parameters
+        return;
+    }
+    
     Index<U1> const& phys_dim(size_t type) const
     {
         return phys;
@@ -229,6 +235,13 @@ public:
         
     }
     
+    
+    void update(BaseParameters const& p)
+    {
+        // TODO: update this->terms_ with the new parameters
+        throw std::runtime_error("update() not yet implemented for this model.");
+        return;
+    }
     
     Index<U1> const& phys_dim(size_t type) const
     {
@@ -382,6 +395,12 @@ public:
         
     }
     
+    void update(BaseParameters const& p)
+    {
+        // TODO: update this->terms_ with the new parameters
+        throw std::runtime_error("update() not yet implemented for this model.");
+        return;
+    }
     
     Index<U1> const& phys_dim(size_t type) const
     {
@@ -537,6 +556,13 @@ public:
             }
         }
         
+    }
+    
+    void update(BaseParameters const& p)
+    {
+        // TODO: update this->terms_ with the new parameters
+        throw std::runtime_error("update() not yet implemented for this model.");
+        return;
     }
     
     Index<U1> const& phys_dim(size_t type) const

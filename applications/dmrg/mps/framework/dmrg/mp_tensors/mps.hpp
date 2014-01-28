@@ -333,10 +333,14 @@ template<class Matrix, class SymmGroup>
 void save(std::string const& dirname, MPS<Matrix, SymmGroup> const& mps)
 {
     size_t loop_max = mps.length();
-    semi_parallel_for(locale::compact(loop_max), locale k = 0; k < loop_max; ++k){
-        std::string fname = dirname+"/mps"+boost::lexical_cast<std::string>((size_t)k)+".h5";
+    parallel_for(locale::compact(loop_max), locale k = 0; k < loop_max; ++k){
+        const std::string fname = dirname+"/mps"+boost::lexical_cast<std::string>((size_t)k)+".h5.new";
         storage::archive ar(fname, "w");
         ar["/tensor"] << mps[k];
+    }
+    parallel_for(locale::compact(loop_max), locale k = 0; k < loop_max; ++k){
+        const std::string fname = dirname+"/mps"+boost::lexical_cast<std::string>((size_t)k)+".h5";
+        boost::filesystem::rename(fname+".new", fname);
     }
 }
 

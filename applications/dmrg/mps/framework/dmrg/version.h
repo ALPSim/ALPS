@@ -32,6 +32,6 @@
 
 // DRMG version
 #define DMRG_VERSION 2
-#define DMRG_VERSION_STRING "MAQUIS repo r4119"
+#define DMRG_VERSION_STRING "MAQUIS repo r4143"
 
 #endif
