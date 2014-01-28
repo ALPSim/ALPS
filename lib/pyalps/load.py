@@ -244,7 +244,7 @@ class Hdf5Loader:
                                 except:
                                     pass
                             if "labels" in self.h5f.list_children(itresultspath):
-                                d.x = self.h5f[itresultspath+'/labels']
+                                d.x = parse_labels(self.h5f[itresultspath+'/labels'])
                             else:
                                 d.x = np.arange(0,len(d.y))
                             d.props.update(params)
