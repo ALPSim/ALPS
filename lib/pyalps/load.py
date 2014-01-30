@@ -44,7 +44,7 @@ from pyalps.alea import MCVectorData as vwe
 
 in_vistrails=True
 try:
-  import core.modules.basic_modules
+  import vistrails.core.modules.basic_modules
   from core import debug
 except:
   in_vistrails=False
