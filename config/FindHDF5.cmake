@@ -454,12 +454,14 @@ if (HDF5_INCLUDE_DIR)
          MESSAGE(FATAL_ERROR "The HDF5 include found is too old : version is ${HDF5_VERSION} while the minimum is ${HDF5_MINIMAL_VERSION}")
        endif (_str_cmp)
        # check threadsafe
-       string(FIND "${_H5pubconf_content}" "^#define HAVE_THREADSAFE 1" threadsafe_define_)
-       if(${threadsafe_define_} LESS 0)
-         message(WARNING "HDF5 without TRHEADSAFE mode. ALPS will ensure threadsafety by HDF5 running sequentially.")
-       else(${threadsafe_define_} LESS 0)
+       file( STRINGS "${HDF5_INCLUDE_DIR}/H5pubconf.h" 
+             threadsafe_define_
+             REGEX "^#define H5_HAVE_THREADSAFE 1" )
+       if(threadsafe_define_)
          set(HDF5_HAVE_THREADSAFE TRUE)
-       endif(${threadsafe_define_} LESS 0)
+       else(threadsafe_define_)
+         message(WARNING "HDF5 without TRHEADSAFE mode. ALPS will ensure threadsafety by HDF5 running sequentially.")
+       endif(threadsafe_define_)
     endif()
 endif()
 
