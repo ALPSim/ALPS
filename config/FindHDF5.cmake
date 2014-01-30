@@ -438,20 +438,29 @@ find_package_handle_standard_args( HDF5 DEFAULT_MSG
 )
 
 # VERSION CHECK
-# If the HDF5 include directory was found, open H5pubconf.h to check its version 
+# If the HDF5 include directory was found, open H5pubconf.h to check its version and other compile options
 set(HDF5_VERSION 0)
 set(HDF5_MINIMAL_VERSION "1.8")
+set(HDF5_HAVE_THREADSAFE FALSE)
 if (HDF5_INCLUDE_DIR)
     if( EXISTS "${HDF5_INCLUDE_DIR}/H5pubconf.h" )
        file( STRINGS "${HDF5_INCLUDE_DIR}/H5pubconf.h" 
              _H5pubconf_content
              REGEX "H5_PACKAGE_VERSION" )
-    string(REGEX REPLACE ".*#define H5_PACKAGE_VERSION \"([^\"]+)\""  "\\1"  HDF5_VERSION "${_H5pubconf_content}")
+       # check version
+       string(REGEX REPLACE ".*#define H5_PACKAGE_VERSION \"([^\"]+)\""  "\\1"  HDF5_VERSION "${_H5pubconf_content}")
        STRING(COMPARE LESS "${HDF5_VERSION}" "${HDF5_MINIMAL_VERSION}" _str_cmp)
        if (_str_cmp)
-	MESSAGE(FATAL_ERROR "The HDF5 include found is too old : version is ${HDF5_VERSION} while the minimum is ${HDF5_MINIMAL_VERSION}")
+         MESSAGE(FATAL_ERROR "The HDF5 include found is too old : version is ${HDF5_VERSION} while the minimum is ${HDF5_MINIMAL_VERSION}")
        endif (_str_cmp)
-      endif()
+       # check threadsafe
+       string(FIND "${_H5pubconf_content}" "^#define HAVE_THREADSAFE 1" threadsafe_define_)
+       if(${threadsafe_define_} LESS 0)
+         message(WARNING "HDF5 without TRHEADSAFE mode. ALPS will ensure threadsafety by HDF5 running sequentially.")
+       else(${threadsafe_define_} LESS 0)
+         set(HDF5_HAVE_THREADSAFE TRUE)
+       endif(${threadsafe_define_} LESS 0)
+    endif()
 endif()
 
 mark_as_advanced( 
@@ -461,6 +470,7 @@ mark_as_advanced(
     HDF5_DEFINTIONS
     HDF5_LIBRARY_DIRS
     HDF5_C_COMPILER_EXECUTABLE
-    HDF5_CXX_COMPILER_EXECUTABLE )
+    HDF5_CXX_COMPILER_EXECUTABLE
+    HDF5_HAVE_THREADSAFE )
 
   MESSAGE (STATUS "HDF5: ${HDF5_INCLUDE_DIR} ${HDF5_LIBRARIES} ${HDF5_DLLS}")
