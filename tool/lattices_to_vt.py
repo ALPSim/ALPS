@@ -116,12 +116,12 @@ if __name__ == '__main__':
 #
 ##############################################################################
 
-import core.modules.basic_modules
-import core.modules.module_registry
+import vistrails.core.modules.basic_modules
+import vistrails.core.modules.module_registry
 
 import parameters
 
-basic = core.modules.basic_modules
+basic = vistrails.core.modules.basic_modules
 
 ##############################################################################
 
@@ -135,7 +135,7 @@ class Lattice(parameters.FixedAndDefaultParameters):
     
     outfile.write('''
 def register_lattice(type):
-  reg = core.modules.module_registry.get_module_registry()
+  reg = vistrails.core.modules.module_registry.get_module_registry()
   reg.add_module(type,namespace="Lattices")
   reg.add_input_port(type,'LATTICE',[basic.String],True)
 
@@ -143,7 +143,7 @@ def initialize(): pass
 
 def selfRegister():    
 
-  reg = core.modules.module_registry.get_module_registry()
+  reg = vistrails.core.modules.module_registry.get_module_registry()
   
   reg.add_module(Lattice,namespace="Lattices")
   reg.add_output_port(Lattice, "value", Lattice)
