@@ -154,7 +154,7 @@ void hybridization::insert_segment_update(int orbital){
   //std::cout<<clred<<"starting insertion update."<<cblack<<std::endl;
   if(local_config.order(orbital)==0 && local_config.zero_order_orbital_occupied(orbital)) return; //can't insert segment, orbital is fully occuppied.
   double t_start=random()*beta; //start time of a segment
-  if(local_config.exists(t_start)){ std::cerr<<"rare event, duplicate: "<<t_start<<std::endl; return;} //time already exists.
+  if(local_config.exists(t_start)){ /*std::cerr<<"rare event, duplicate: "<<t_start<<std::endl; */ return;} //time already exists.
   double t_next_segment_start=local_config.find_next_segment_start_distance(t_start,orbital);
   double t_next_segment_end=local_config.find_next_segment_end_distance(t_start,orbital);
   //std::cout<<"============================================"<<cblack<<std::endl;
@@ -166,8 +166,8 @@ void hybridization::insert_segment_update(int orbital){
   //draw an end time
   double t_end=t_start+random()*t_next_segment_start;
   if(t_end > beta) t_end-=beta;
-  if(local_config.exists(t_end)){ std::cerr<<"rare event, duplicate: "<<t_end<<std::endl; return;} //time already exists.
-  if(t_end==t_start){ std::cerr<<"rare event, zero length segment: "<<t_start<<" "<<t_end<<std::endl; return;} //time already exists.
+  if(local_config.exists(t_end)){ /*std::cerr<<"rare event, duplicate: "<<t_end<<std::endl; */return;} //time already exists.
+  if(t_end==t_start){ /*std::cerr<<"rare event, zero length segment: "<<t_start<<" "<<t_end<<std::endl; */return;} //time already exists.
   
   //compute local weight of the new segment with t_start and t_end
   segment new_segment(t_start, t_end);
@@ -234,7 +234,7 @@ void hybridization::insert_antisegment_update(int orbital){
   nprop[3]++;
   if(local_config.order(orbital)==0 && !local_config.zero_order_orbital_occupied(orbital)) return; //can't insert an antisegment, orbital is empty.
   double t_start=random()*beta; //start time of the anti segment
-  if(local_config.exists(t_start)){ std::cerr<<"rare event, duplicate: "<<t_start<<std::endl; return;} //time already exists.
+  if(local_config.exists(t_start)){ /*std::cerr<<"rare event, duplicate: "<<t_start<<std::endl; */return;} //time already exists.
   double t_next_segment_start=local_config.find_next_segment_start_distance(t_start,orbital);
   double t_next_segment_end=local_config.find_next_segment_end_distance(t_start,orbital);
   
@@ -243,8 +243,8 @@ void hybridization::insert_antisegment_update(int orbital){
   //draw an end time
   double t_end=t_start+random()*t_next_segment_end;
   if(t_end > beta) t_end-=beta;
-  if(local_config.exists(t_end)){ std::cerr<<"rare event, duplicate: "<<t_end<<std::endl; return;} //time already exists.
-  if(t_end==t_start){ std::cerr<<"rare event, zero length segment: "<<t_start<<" "<<t_end<<std::endl; return;} //time already exists.
+  if(local_config.exists(t_end)){ /*std::cerr<<"rare event, duplicate: "<<t_end<<std::endl; */return;} //time already exists.
+  if(t_end==t_start){ /*std::cerr<<"rare event, zero length segment: "<<t_start<<" "<<t_end<<std::endl; */return;} //time already exists.
   
   //std::cout<<clgreen<<"antisegment insertion update: "<<std::endl<<cblack<<*this<<std::endl;
   //std::cout<<clgreen<<" antisegment start time: (cdagger): "<<t_start<<" end time (c): "<<t_end<<std::endl;
@@ -348,7 +348,7 @@ void hybridization::spin_flip_update(int orbital){
   //Totally experimential - mistakes here?
   double t_start = segment_to_flip.t_start_,t_end=segment_to_flip.t_end_;
   if(t_end > beta) t_end-=beta;
-  if(t_start==t_end) { std::cerr<<"rare (impossible?) event: t_start = t_end."<<std::endl; return; }
+  if(t_start==t_end) { /*std::cerr<<"rare (impossible?) event: t_start = t_end."<<std::endl; */return; }
   
   //compute local weight change: As we intend to propose a flip, we can
   //safely ignore the intermediate state and directly compare the energies
