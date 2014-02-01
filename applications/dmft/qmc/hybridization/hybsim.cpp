@@ -66,6 +66,16 @@ hyb_config(parms)
   
   //initializing physics parameters
   beta = parms["BETA"];                                                            //inverse temperature
+  U_ =
+      parms["U"];
+  MU_ =
+      parms["MU"];
+  
+  if ((parms["USE_FRACTION"]| 0)) {
+    fraction = beta/((U_>MU_)?MU_:U_);
+//    std::cerr << "Using only " << fraction << " of segments" << std::endl;
+  }
+  else fraction = beta;
   
   //initializing updates parameters
   N_meas = parms["N_MEAS"];                                                        //number of updates per measurement

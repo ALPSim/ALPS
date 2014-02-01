@@ -164,10 +164,11 @@ void hybridization::insert_segment_update(int orbital){
   if(t_next_segment_end < t_next_segment_start) return; //we're trying to create a segment on top of another segment. abort.
   
   //draw an end time
-  double t_end=t_start+random()*t_next_segment_start;
+  double t_len = random()*t_next_segment_start;
+  double t_end=t_start+t_len;
   if(t_end > beta) t_end-=beta;
   if(local_config.exists(t_end)){ /*std::cerr<<"rare event, duplicate: "<<t_end<<std::endl; */return;} //time already exists.
-  if(t_end==t_start){ /*std::cerr<<"rare event, zero length segment: "<<t_start<<" "<<t_end<<std::endl; */return;} //time already exists.
+  if(t_end<=t_start){ /*std::cerr<<"rare event, zero length segment: "<<t_start<<" "<<t_end<<std::endl; */return;} //time already exists.
   
   //compute local weight of the new segment with t_start and t_end
   segment new_segment(t_start, t_end);
@@ -241,10 +242,11 @@ void hybridization::insert_antisegment_update(int orbital){
   if(t_next_segment_start < t_next_segment_end) return; //we're trying to create an antisegment where there is no segment abort.
   
   //draw an end time
-  double t_end=t_start+random()*t_next_segment_end;
+  double t_len = random()*t_next_segment_end;
+  double t_end=t_start+t_len; //((t_len<0.1*beta)?t_len:0.1*beta); //random()*t_next_segment_end;
   if(t_end > beta) t_end-=beta;
   if(local_config.exists(t_end)){ /*std::cerr<<"rare event, duplicate: "<<t_end<<std::endl; */return;} //time already exists.
-  if(t_end==t_start){ /*std::cerr<<"rare event, zero length segment: "<<t_start<<" "<<t_end<<std::endl; */return;} //time already exists.
+  if(t_end<=t_start){ /*std::cerr<<"rare event, zero length segment: "<<t_start<<" "<<t_end<<std::endl; */return;} //time already exists.
   
   //std::cout<<clgreen<<"antisegment insertion update: "<<std::endl<<cblack<<*this<<std::endl;
   //std::cout<<clgreen<<" antisegment start time: (cdagger): "<<t_start<<" end time (c): "<<t_end<<std::endl;

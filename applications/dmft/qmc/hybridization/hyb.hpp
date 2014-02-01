@@ -119,11 +119,15 @@ private:
   double sign;
 
   //physics parameters
-  double beta;
+  double beta,U_,MU_;
+  
 
   //updates parameters
   std::size_t N_meas;
-
+  double fraction; // Idea by Philipp: Do not use the long time intervals but allow
+  // only for a certain fraction when inserting segments; supposedly increases
+  // acceptance rate if B*U or B*MU is very large
+  
   //measurement parameters
   std::size_t N_w;    //number of Matsubara frequency points
   std::size_t N_l;    //number of Legendre coefficients
