@@ -166,7 +166,7 @@ void hybridization::insert_segment_update(int orbital){
   //draw an end time
   double t_len = random()*t_next_segment_start;
   double t_end=t_start+t_len;
-  if(t_end > beta) t_end-=beta;
+  if(t_end >= beta) t_end-=beta;
   if(local_config.exists(t_end)){ /*std::cerr<<"rare event, duplicate: "<<t_end<<std::endl; */return;} //time already exists.
   if(t_end<=t_start){ /*std::cerr<<"rare event, zero length segment: "<<t_start<<" "<<t_end<<std::endl; */return;} //time already exists.
   
@@ -244,7 +244,7 @@ void hybridization::insert_antisegment_update(int orbital){
   //draw an end time
   double t_len = random()*t_next_segment_end;
   double t_end=t_start+t_len; //((t_len<0.1*beta)?t_len:0.1*beta); //random()*t_next_segment_end;
-  if(t_end > beta) t_end-=beta;
+  if(t_end >= beta) t_end-=beta;
   if(local_config.exists(t_end)){ /*std::cerr<<"rare event, duplicate: "<<t_end<<std::endl; */return;} //time already exists.
   if(t_end<=t_start){ /*std::cerr<<"rare event, zero length segment: "<<t_start<<" "<<t_end<<std::endl; */return;} //time already exists.
   
@@ -349,7 +349,7 @@ void hybridization::spin_flip_update(int orbital){
 
   //Totally experimential - mistakes here?
   double t_start = segment_to_flip.t_start_,t_end=segment_to_flip.t_end_;
-  if(t_end > beta) t_end-=beta;
+  if(t_end >= beta) t_end-=beta;
   if(t_end<=t_start) { /*std::cerr<<"rare (impossible?) event: t_start = t_end."<<std::endl; */return; }
   
   //compute local weight change: As we intend to propose a flip, we can
