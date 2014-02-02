@@ -59,8 +59,8 @@ void FourierTransformer::frequency_to_time_ft(itime_green_function_t &G_tau,
           if(s1%2==1 && s2==s1-1) is_nonzero=true;
           if (!is_nonzero){  //nothing happening in this gf.
             /*for (unsigned int i=0; i<=N_tau; i++) {
-              G_tau(i,s1,s2,f)=0.;
-            }*/
+             G_tau(i,s1,s2,f)=0.;
+             }*/
             continue;
           }
         }
@@ -384,13 +384,18 @@ void ClusterAntiFerroGFourierTransformer::append_tail(matsubara_green_function_t
   G_omega_tail = AntiFerroDCATransformer::green_function_inverse(G_omega_tail);
   G_omega_tail = AntiFerroDCATransformer::green_function_subtract(G_omega_tail, selfenergy_tail);
   G_omega_tail = AntiFerroDCATransformer::green_function_inverse(G_omega_tail);
-  for (spin_t flavor=0; flavor<G0_omega.nflavor(); ++flavor)
-    for (frequency_t freq=nfreq_measured; freq<G0_omega.nfreq(); ++freq)
-      for (site_t k=0; k<G0_omega.nsite(); k+=2)
-        for (int p1=0; p1<=1; p1++)
-          for (int p2=0; p2<=1; p2++)
+  for (spin_t flavor=0; flavor<G0_omega.nflavor(); ++flavor){
+    for (frequency_t freq=nfreq_measured; freq<G0_omega.nfreq(); ++freq){
+      for (site_t k=0; k<G0_omega.nsite(); k+=2){
+        for (int p1=0; p1<=1; p1++){
+          for (int p2=0; p2<=1; p2++){
             G_omega(freq, k+p1, k+p2, flavor) = G_omega_tail(freq-nfreq_measured, k+p1, k+p2, flavor);
-            }
+          }
+        }
+      }
+    }
+  }
+}
 
 
 

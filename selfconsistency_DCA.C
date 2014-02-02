@@ -82,14 +82,14 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega);
     //
     //std::ofstream g0_before_symm("g0_before_symm.dat"); g0_before_symm<<std::make_pair(G0_omega, beta)<<std::endl;
-    //G0_omega = clustertrans.symmetrize(G0_omega, paramagnet);
+    G0_omega = clustertrans.symmetrize(G0_omega, paramagnet);
     //std::ofstream g0_after_symm("g0_after_symm.dat"); g0_after_symm<<std::make_pair(G0_omega, beta)<<std::endl;
     
     //std::cout<<"running solver in frequency space."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, parms);
     //std::cout<<"applying spin symmetries"<<std::endl<<std::flush;
     //std::ofstream g_before_symm("g_before_symm.dat"); g_before_symm<<std::make_pair(G_omega, beta)<<std::endl;
-    //G_omega = clustertrans.symmetrize(G_omega, paramagnet);
+    G_omega = clustertrans.symmetrize(G_omega, paramagnet);
     //std::ofstream g_after_symm("g_after_symm.dat"); g_after_symm<<std::make_pair(G_omega, beta)<<std::endl;
     //exit(0);
     /*if(paramagnet){

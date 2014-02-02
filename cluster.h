@@ -479,16 +479,11 @@ public:
     return G_omega;
   }
   
-  template<typename T>
-  static green_function<T> green_function_inverse(const green_function<T>& G);
-  template<typename T>
-  static green_function<T> green_function_multiply(const green_function<T>& G1, const green_function<T>& G2);
-  template<typename T>
-  static green_function<T> green_function_add(const green_function<T>& G1, const green_function<T>& G2);
-  template<typename T>
-  static green_function<T> green_function_subtract(const green_function<T>& G1, const green_function<T>& G2);
-  template<typename T>
-  static green_function<T> green_function_divide(const green_function<T>& G1, const T d);
+  static matsubara_green_function_t green_function_inverse(const matsubara_green_function_t& G);
+  static matsubara_green_function_t green_function_multiply(const matsubara_green_function_t& G1, const matsubara_green_function_t& G2);
+  static matsubara_green_function_t green_function_add(const matsubara_green_function_t& G1, const matsubara_green_function_t& G2);
+  static matsubara_green_function_t green_function_subtract(const matsubara_green_function_t& G1, const matsubara_green_function_t& G2);
+  static matsubara_green_function_t green_function_divide(const matsubara_green_function_t& G1, const std::complex<double> d);
   
   alps::RealObsevaluator kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies,
                                         const double beta, const double mu,
@@ -929,116 +924,6 @@ struct AntiFerroDCATransformer::Backward {
 
 
 
-template<typename T>
-green_function<T> AntiFerroDCATransformer::green_function_inverse(const green_function<T>& G)
-{
-  green_function<T> G_inv(G);
-  for (unsigned int t=0; t<G.ntime(); ++t) {
-    for (spin_t f=0; f<G.nflavor(); ++f) {
-      for (std::size_t k=0; k<G.nsite(); k+=2) {
-        T detG = G(t, k, k, f)*G(t, k+1, k+1, f) - G(t, k+1, k, f)*G(t, k, k+1, f);
-        if(std::abs(detG) < 1.e-15) throw std::runtime_error("there's a problem with your determinant in the inverse: it is near singular!");
-        G_inv(t, k, k, f) = G(t, k+1, k+1, f)/detG;
-        G_inv(t, k+1, k+1, f) = G(t, k, k, f)/detG;
-        G_inv(t, k+1, k, f) = -G(t, k+1, k, f)/detG;
-        G_inv(t, k, k+1, f) = -G(t, k, k+1, f)/detG;
-      }
-    }
-  }
-  return G_inv;
-}
-
-
-
-template <typename T>
-green_function<T> AntiFerroDCATransformer::green_function_multiply(const green_function<T>& G1,
-                                                                   const green_function<T>& G2)
-{
-  green_function<T> G(G1);
-  typename Matrix<T>::Type M1(2,2);
-  typename Matrix<T>::Type M2(2,2);
-  typename Matrix<T>::Type M(2,2);
-  for (unsigned int t=0; t<G.ntime(); ++t) {
-    for (spin_t f=0; f<G.nflavor(); ++f) {
-      for (unsigned int k=0; k<G.nsite(); k+=2) {
-        M1(0,0) = G1(t, k  , k  , f);
-        M1(1,0) = G1(t, k+1, k  , f);
-        M1(0,1) = G1(t, k  , k+1, f);
-        M1(1,1) = G1(t, k+1, k+1, f);
-        M2(0,0) = G2(t, k  , k  , f);
-        M2(1,0) = G2(t, k+1, k  , f);
-        M2(0,1) = G2(t, k  , k+1, f);
-        M2(1,1) = G2(t, k+1, k+1, f);
-        M = Matrix<T>::multiply(M1, M2);
-        G(t, k, k, f) = M(0,0);
-        G(t, k+1, k+1, f) = M(1,1);
-        G(t, k+1, k, f) = M(1,0);
-        G(t, k, k+1, f) = M(0,1);
-      }
-    }
-  }
-  return G;
-}
-
-
-
-template <typename T>
-green_function<T> AntiFerroDCATransformer::green_function_add(const green_function<T>& G1,
-                                                              const green_function<T>& G2)
-{
-  green_function<T> G(G1);
-  for (unsigned int t=0; t<G.ntime(); ++t) {
-    for (spin_t f=0; f<G.nflavor(); ++f) {
-      for (unsigned int k=0; k<G.nsite(); k+=2) {
-        G(t, k, k, f) += G2(t, k, k, f);
-        G(t, k+1, k+1, f) += G2(t, k+1, k+1, f);
-        G(t, k+1, k, f) += G2(t, k+1, k, f);
-        G(t, k, k+1, f) += G2(t, k, k+1, f);
-      }
-    }
-  }
-  return G;
-}
-
-
-
-template <typename T>
-green_function<T> AntiFerroDCATransformer::green_function_subtract(const green_function<T>& G1,
-                                                                   const green_function<T>& G2)
-{
-  green_function<T> G(G1);
-  for (unsigned int t=0; t<G.ntime(); ++t) {
-    for (spin_t f=0; f<G.nflavor(); ++f) {
-      for (std::size_t k=0; k<G.nsite(); k+=2) {
-        G(t, k, k, f) -= G2(t, k, k, f);
-        G(t, k+1, k+1, f) -= G2(t, k+1, k+1, f);
-        G(t, k+1, k, f) -= G2(t, k+1, k, f);
-        G(t, k, k+1, f) -= G2(t, k, k+1, f);
-      }
-    }
-  }
-  return G;
-}
-
-
-
-template <typename T>
-green_function<T> AntiFerroDCATransformer::green_function_divide(const green_function<T>& G1,
-                                                                 const T d)
-{
-  green_function<T> G(G1);
-  for (unsigned int t=0; t<G.ntime(); ++t) {
-    for (spin_t f=0; f<G.nflavor(); ++f) {
-      for (unsigned int k=0; k<G.nsite(); k+=2) {
-        G(t, k, k, f) /= d;
-        G(t, k+1, k+1, f) /= d;
-        G(t, k+1, k, f) /= d;
-        G(t, k, k+1, f) /= d;
-      }
-    }
-  }
-  return G;
-}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////FUNCTIONS FOR NAMBU SPACE//////////////////////////////////////////////////////////////////////////////////

@@ -16,7 +16,7 @@ link_directories("$ENV{GSL_DIR}/lib")
 add_executable(dmft 
 2dsimpson.C clusterhelper.C fouriertransform.C selfconsistency.C
 selfconsistency_DCA.C selfconsistency_CDMFT.C
-alps_solver.C clustertransformer.C hilberttransformer.C interpolator.C
+alps_solver.C AFM_transform.C DCA_transform.C hilberttransformer.C interpolator.C
 auxiliaryfunctions.C externalsolver.C main.C)
 
 #add_executable(sigma_interpolate_sc sigma_interpolate_sc.C
