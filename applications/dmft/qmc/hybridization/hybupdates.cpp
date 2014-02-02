@@ -350,7 +350,7 @@ void hybridization::spin_flip_update(int orbital){
   //Totally experimential - mistakes here?
   double t_start = segment_to_flip.t_start_,t_end=segment_to_flip.t_end_;
   if(t_end > beta) t_end-=beta;
-  if(t_start==t_end) { /*std::cerr<<"rare (impossible?) event: t_start = t_end."<<std::endl; */return; }
+  if(t_end<=t_start) { /*std::cerr<<"rare (impossible?) event: t_start = t_end."<<std::endl; */return; }
   
   //compute local weight change: As we intend to propose a flip, we can
   //safely ignore the intermediate state and directly compare the energies
