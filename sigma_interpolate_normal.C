@@ -124,6 +124,7 @@ int main(int argc, char **argv){
     matsubara_freqs_old[i]=(2.*i+1)*M_PI/beta;
     matsubara_freqs_new[i]=(2.*i+1)*M_PI/beta_new;
   }
+  std::cout<<"starting sigma interpolation"<<std::endl;
   //interpolate the self energy
   gsl_interp_accel *acc_real = gsl_interp_accel_alloc ();
   gsl_spline *spline_real = gsl_spline_alloc (gsl_interp_cspline, nfreq);
@@ -157,21 +158,27 @@ int main(int argc, char **argv){
   gsl_interp_accel_free (acc_imag);
   
   //compute the self consistency
+  std::cout<<"starting final selfconsistency"<<std::endl;
   //std::cout<<"new self energy is: "<<std::make_pair(selfenergy_new,beta_new)<<std::endl;
   parms["BETA"]=beta_new;
   parms["MU"]=mu_new;
 
   SimpleDCATransformer clustertrans(parms);
   green0 = clustertrans(green, green0, selfenergy_new, mu_new, h, beta_new, true);  
+  std::cout<<"symmetrizing paramagnet"<<std::endl;
   
   green0 = clustertrans.symmetrize(green0, paramagnet);
+  std::cout<<"symmetrizing kspace"<<std::endl;
   green0 = clustertrans.symmetrize_k_space(green0);
   
+  std::cout<<"generating Fourier transform"<<std::endl;
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer(parms, fourier_ptr);
+  std::cout<<"running Fourier transform"<<std::endl;
   fourier_ptr->frequency_to_time_ft(green0_itime, green0);
   std::ofstream green0_interpolated_tau_file("green0_interpolated_tau.dat");
   
+  std::cout<<"writing results"<<std::endl;
   green0_interpolated_tau_file<<std::make_pair(green0_itime,beta_new)<<std::endl;
   std::stringstream filename_new; filename_new<<"G0_omega_input_beta"<<beta_new<<"_mu"<<mu_new;
   std::stringstream filename_sigma_new; filename_sigma_new<<"sigma_beta"<<beta_new;

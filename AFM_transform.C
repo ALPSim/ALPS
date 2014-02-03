@@ -29,7 +29,7 @@
 #include "alps/alea.h"
 #include <boost/numeric/ublas/io.hpp>
 
-///self-consistency transform operator for the Antiferromagnetic DCA case
+/*///self-consistency transform operator for the Antiferromagnetic DCA case
 matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_green_function_t &G_omega,
                                                                const matsubara_green_function_t &G0_omega,
                                                                double &mu, const double h, const double beta)
@@ -90,8 +90,56 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
   G0_omega_new = green_function_add(G0_omega_new, selfenergy);
   G0_omega_new = green_function_inverse(G0_omega_new);
   return G0_omega_new;
-}
+}*/
 
+matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_green_function_t &G_omega, 
+                                                               const matsubara_green_function_t &G0_omega, 
+                                                               double &mu, const double h, const double beta)
+{
+  unsigned int nflavor=G0_omega.nflavor();
+  unsigned int nfreq=G0_omega.nfreq();
+  assert(G0_omega.nsite()==n_cluster_sites());
+  assert(nflavor>1 && nflavor%2 == 0);
+  matsubara_green_function_t G0_omega_new(nfreq,n_cluster_sites(),nflavor, blockdiagonal);
+  G0_omega_new.clear();
+  matsubara_green_function_t G0_omega_inv = green_function_inverse(G0_omega);
+  matsubara_green_function_t G_omega_inv = green_function_inverse(G_omega);
+  matsubara_green_function_t selfenergy = green_function_subtract(G0_omega_inv, G_omega_inv);
+  for (site_t kl=0; kl<n_cluster_cells(); ++kl) { 
+    for (int sign=-1; sign<=1; sign+=2) {
+      matsubara_green_function_t G_kl(G0_omega);
+      for (frequency_t freq=0; freq<nfreq; ++freq) {
+        std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
+        for (site_t kc=0; kc<n_cluster_sites(); kc+=2) {
+          vector_type k0(dimension());
+          for (unsigned int d=0; d<dimension(); ++d) 
+            k0[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc,d);
+          vector_type k1(dimension());
+          for (unsigned int d=0; d<dimension(); ++d) 
+            k1[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc+1,d);
+          for (spin_t flavor=0; flavor<nflavor; flavor+=2) { 
+            G_kl(freq,kc,kc,flavor) = iomega_n+mu-epsilon(k0);
+            G_kl(freq,kc,kc,flavor+1) = iomega_n+mu-epsilon(k0);
+            G_kl(freq,kc+1,kc+1,flavor) = iomega_n+mu-epsilon(k1);
+            G_kl(freq,kc+1,kc+1,flavor+1) = iomega_n+mu-epsilon(k1);
+            G_kl(freq,kc+1,kc,flavor) = -h/2;
+            G_kl(freq,kc+1,kc,flavor+1) = h/2;
+            G_kl(freq,kc,kc+1,flavor) = -h/2;
+            G_kl(freq,kc,kc+1,flavor+1) = h/2;
+          }
+        }
+      }
+      G_kl = green_function_subtract(G_kl, selfenergy);
+      G_kl = green_function_inverse(G_kl);
+      G0_omega_new = green_function_add(G0_omega_new, G_kl);
+    }
+  }
+  G0_omega_new = green_function_divide(G0_omega_new, std::complex<double>(2*n_cluster_cells()));
+  G0_omega_new = green_function_inverse(G0_omega_new);
+  G0_omega_new = green_function_add(G0_omega_new, selfenergy);
+  G0_omega_new = green_function_inverse(G0_omega_new);
+  return G0_omega_new;
+}
 
 
 

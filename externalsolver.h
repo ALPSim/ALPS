@@ -33,8 +33,9 @@
 /// @file externalsolver.h
 /// @brief declares the external solver
 /// @sa ExternalSolver
-
+#ifdef USE_MPI
     #include <boost/mpi.hpp>
+#endif
 #include "solver.h"
 #include "boost/filesystem/path.hpp"
 #include "boost/filesystem/operations.hpp"
@@ -81,6 +82,7 @@ private:
 	///path to the solver executable
 	boost::filesystem::path exe_;
 };
+#ifdef USE_MPI
 class CallbackSolver: public ExternalSolver
 {
 public:
@@ -93,5 +95,6 @@ private:
     virtual void call(std::string const& infile, std::string const& outfile){ call_fun(infile, outfile, c); }
     boost::mpi::communicator &c;
 };
+#endif //USE_MPI
 
 #endif
