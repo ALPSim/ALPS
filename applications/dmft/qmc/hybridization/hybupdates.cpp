@@ -168,7 +168,7 @@ void hybridization::insert_segment_update(int orbital){
   double t_end=t_start+t_len;
   if(t_end >= beta) t_end-=beta;
   if(local_config.exists(t_end)){ /*std::cerr<<"rare event, duplicate: "<<t_end<<std::endl; */return;} //time already exists.
-  if(t_end<=t_start){ /*std::cerr<<"rare event, zero length segment: "<<t_start<<" "<<t_end<<std::endl; */return;} //time already exists.
+  if(t_end<=t_start || t_end<=0.0){ /*std::cerr<<"rare event, zero length segment: "<<t_start<<" "<<t_end<<std::endl; */return;} //time already exists.
   
   //compute local weight of the new segment with t_start and t_end
   segment new_segment(t_start, t_end);
@@ -246,7 +246,7 @@ void hybridization::insert_antisegment_update(int orbital){
   double t_end=t_start+t_len; //((t_len<0.1*beta)?t_len:0.1*beta); //random()*t_next_segment_end;
   if(t_end >= beta) t_end-=beta;
   if(local_config.exists(t_end)){ /*std::cerr<<"rare event, duplicate: "<<t_end<<std::endl; */return;} //time already exists.
-  if(t_end<=t_start){ /*std::cerr<<"rare event, zero length segment: "<<t_start<<" "<<t_end<<std::endl; */return;} //time already exists.
+  if(t_end<=t_start || t_end<=0.0){ /*std::cerr<<"rare event, zero length segment: "<<t_start<<" "<<t_end<<std::endl; */return;} //time already exists.
   
   //std::cout<<clgreen<<"antisegment insertion update: "<<std::endl<<cblack<<*this<<std::endl;
   //std::cout<<clgreen<<" antisegment start time: (cdagger): "<<t_start<<" end time (c): "<<t_end<<std::endl;
@@ -350,7 +350,7 @@ void hybridization::spin_flip_update(int orbital){
   //Totally experimential - mistakes here?
   double t_start = segment_to_flip.t_start_,t_end=segment_to_flip.t_end_;
   if(t_end >= beta) t_end-=beta;
-  if(t_end<=t_start) { /*std::cerr<<"rare (impossible?) event: t_start = t_end."<<std::endl; */return; }
+  if(t_end<=t_start || t_end<=0.0) { /*std::cerr<<"rare (impossible?) event: t_start = t_end."<<std::endl; */return; }
   
   //compute local weight change: As we intend to propose a flip, we can
   //safely ignore the intermediate state and directly compare the energies
