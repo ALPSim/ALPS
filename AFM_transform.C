@@ -27,9 +27,10 @@
 
 #include "cluster.h"
 #include "alps/alea.h"
+#include "alps/numeric/matrix.hpp"
 #include <boost/numeric/ublas/io.hpp>
 
-/*///self-consistency transform operator for the Antiferromagnetic DCA case
+///self-consistency transform operator for the Antiferromagnetic DCA case
 matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_green_function_t &G_omega,
                                                                const matsubara_green_function_t &G0_omega,
                                                                double &mu, const double h, const double beta)
@@ -62,24 +63,51 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
       epsilon_kckl[kc][kl]=epsilon(k);
     }
   }
-  
+
+  //this here implements an AFM two-site formalism and then rotates to k-space.
+  //k-space rotation matrix
+  alps::numeric::matrix<std::complex<double> > U(2,2); U(0,0)=1.; U(1,0)=1.; U(0,1)=1.; U(1,1)=-1.; U/=sqrt(2.);
+  //some auxiliary matrices
+  alps::numeric::matrix<std::complex<double> > Ginv_2site_up(2,2),Ginv_2site_dn(2,2),Ginv_kq_up(2,2),Ginv_kq_dn(2,2);
+  matsubara_green_function_t G_kl(G0_omega);
   for (site_t kl=0; kl<n_cluster_cells(); ++kl) {
-    matsubara_green_function_t G_kl(G0_omega);
     for (frequency_t freq=0; freq<nfreq; ++freq) {
       std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
-      for (site_t kc=0; kc<n_cluster_sites(); kc+=2) {
-        G_kl(freq,kc  ,kc  ,0) = iomega_n+mu-epsilon_kckl[kc  ][kl];
-        G_kl(freq,kc  ,kc+1,0) = -h/2;
-        G_kl(freq,kc+1,kc  ,0) = -h/2;
-        G_kl(freq,kc+1,kc+1,0) = iomega_n+mu-epsilon_kckl[kc+1][kl];
+      for (site_t kc=0; kc<n_cluster_sites(); kc++) {
+        //std::cout<<"begin "<<kl<<" "<<freq<<" "<<kc<<std::endl;
         
-        G_kl(freq,kc  ,kc  ,1) = iomega_n+mu-epsilon_kckl[kc  ][kl];
-        G_kl(freq,kc  ,kc+1,1) = h/2;
-        G_kl(freq,kc+1,kc  ,1) = h/2;
-        G_kl(freq,kc+1,kc+1,1) = iomega_n+mu-epsilon_kckl[kc+1][kl];
+        Ginv_2site_up(0,0)=iomega_n+mu+h;
+        Ginv_2site_up(0,1)=epsilon_kckl[kc  ][kl];
+        Ginv_2site_up(1,0)=epsilon_kckl[kc  ][kl];
+        Ginv_2site_up(1,1)=iomega_n+mu-h;
+        
+        Ginv_2site_dn(0,0)=iomega_n+mu-h;
+        Ginv_2site_dn(0,1)=epsilon_kckl[kc  ][kl];
+        Ginv_2site_dn(1,0)=epsilon_kckl[kc  ][kl];
+        Ginv_2site_dn(1,1)=iomega_n+mu+h;
+
+        Ginv_kq_up=U*Ginv_2site_up*U;
+        Ginv_kq_dn=U*Ginv_2site_dn*U;
+        
+        //std::cout<<U<<" "<<Ginv_2site_up<<" "<<Ginv_kq_up<<std::endl;
+        
+        //std::cout<<kl<<" "<<kc<<" "<<freq<<Ginv_kq_up<<std::endl;
+        
+        int K=(kc%2==0)?kc:kc-1; int Q=(kc%2==0)?kc+1:kc;
+        //std::cout<<"K: "<<K<<" "<<Q<<" "<<std::endl;
+        G_kl(freq,K,K,0) = Ginv_kq_up(0,0)-selfenergy(freq,K,K,0);
+        G_kl(freq,K,Q,0) = Ginv_kq_up(0,1)-selfenergy(freq,K,Q,0);
+        G_kl(freq,Q,K,0) = Ginv_kq_up(1,0)-selfenergy(freq,Q,K,0);
+        G_kl(freq,Q,Q,0) = Ginv_kq_up(1,1)-selfenergy(freq,Q,Q,0);
+        
+        G_kl(freq,K,K,1) = Ginv_kq_dn(0,0)-selfenergy(freq,K,K,1);
+        G_kl(freq,K,Q,1) = Ginv_kq_dn(0,1)-selfenergy(freq,K,Q,1);
+        G_kl(freq,Q,K,1) = Ginv_kq_dn(1,0)-selfenergy(freq,Q,K,1);
+        G_kl(freq,Q,Q,1) = Ginv_kq_dn(1,1)-selfenergy(freq,Q,Q,1);
+        //std::cout<<"end "<<kl<<" "<<freq<<" "<<kc<<std::endl;
       }
     }
-    G_kl = green_function_subtract(G_kl, selfenergy);
+    //G_kl = green_function_subtract(G_kl, selfenergy);
     G_kl = green_function_inverse(G_kl);
     G0_omega_new = green_function_add(G0_omega_new, G_kl);
   }
@@ -90,9 +118,9 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
   G0_omega_new = green_function_add(G0_omega_new, selfenergy);
   G0_omega_new = green_function_inverse(G0_omega_new);
   return G0_omega_new;
-}*/
+}
 
-matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_green_function_t &G_omega, 
+/*matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_green_function_t &G_omega, 
                                                                const matsubara_green_function_t &G0_omega, 
                                                                double &mu, const double h, const double beta)
 {
@@ -139,7 +167,7 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
   G0_omega_new = green_function_add(G0_omega_new, selfenergy);
   G0_omega_new = green_function_inverse(G0_omega_new);
   return G0_omega_new;
-}
+}*/
 
 
 
@@ -177,6 +205,11 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer(parms, fourier_ptr);
   G0_omega_new.write("G0_omega_input");
+  std::ofstream G0_omega_re_file("G0_omega_input_re.dat");
+  std::ofstream G0_omega_im_file("G0_omega_input_im.dat");
+  print_imag_green_matsubara(G0_omega_im_file, G0_omega_new, beta);
+  print_real_green_matsubara(G0_omega_re_file,G0_omega_new,beta);
+  
   transform_into_real_space(G0_omega_new).write("G0_omega_input_realspace");
   itime_green_function_t G0_tau(n_tau, n_cluster_sites(), n_flavor, blockdiagonal);
   fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega_new);
@@ -222,6 +255,8 @@ matsubara_green_function_t AntiFerroDCATransformer::spin_symmetrizer(const matsu
     boost::throw_exception(std::invalid_argument("AFM and PM? redundant parameters! set paramagnet to false.\n"));
   }
   matsubara_green_function_t G_new(G);
+return G_new;
+///DEBUG
   for(int n=0;n<G.nfreq();++n){
     for(int k=0;k<G.nsite();k+=2){
       int q=k+1;

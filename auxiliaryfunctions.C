@@ -302,7 +302,6 @@ void print_all_green_functions(std::string const &basename, const int iteration_
   std::ofstream G_tau_file_2(Gtau_name_2.str().c_str());
   std::ofstream selfenergy_file(selfenergy_name.str().c_str());
   
-  std::cout<<"names are: "<<G0omega_name.str()<<" "<<G0omegareal_name.str()<<" "<<G0tau_name.str()<<" "<<Gomega_name.str()<<" "<<Gomegareal_name.str()<<" "<<Gtau_name.str()<<" "<<Gtau_name_2.str()<<" "<<Gomega_name_2.str()<<" "<<selfenergy_name.str()<<std::endl;
   if(!G0_omega_file.is_open() || !G0_tau_file.is_open() || !G_omega_file.is_open() || !G_tau_file.is_open()) throw std::runtime_error("error opening gf files.");
   print_imag_green_matsubara(G0_omega_file, G0_omega, beta);
   print_real_green_matsubara(G0_omegareal_file,G0_omega,beta);
