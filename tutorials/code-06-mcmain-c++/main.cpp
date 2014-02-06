@@ -27,7 +27,9 @@
 
 #include "ising.hpp"
 
+#include <alps/ngs/api.hpp>
 #include <alps/parseargs.hpp>
+#include <alps/stop_callback.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 
 #include <boost/chrono.hpp>

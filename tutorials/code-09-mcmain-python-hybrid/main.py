@@ -25,9 +25,10 @@
 
 import pyalps.hdf5 as hdf5
 import pyalps.ngs as ngs
-import sys, time, getopt
+import sys, time, traceback, getopt
+import sys, time
 
-import ising_c as ising
+import ising
 
 if __name__ == '__main__':
 
@@ -44,17 +45,17 @@ if __name__ == '__main__':
         print 'usage: [-T timelimit] [-c] outputfile'
         exit()
 
-    sim = ising.sim(ngs.params({
+    sim = ising.sim({
         'L': 100,
-        'THERMALIZATION': 1000,
-        'SWEEPS': 10000,
+        'THERMALIZATION': 100,
+        'SWEEPS': 1000,
         'T': 2
-    }))
+    })
 
     if resume:
         try:
             with hdf5.archive(outfile[0:outfile.rfind('.h5')] + '.clone0.h5', 'r') as ar:
-                sim.load(ar['/'])
+                sim.load(ar)
         except ArchiveNotFound: pass
 
     if limit == 0:
@@ -66,9 +67,7 @@ if __name__ == '__main__':
     with hdf5.archive(outfile[0:outfile.rfind('.h5')] + '.clone0.h5', 'w') as ar:
         ar['/'] = sim
 
-    results = sim.collectResults() # TODO: how should we do that?
+    results = ngs.collectResults(sim)
     print results
-
-    with hdf5.archive(outfile, 'w') as ar: # TODO: how sould we name archive? ngs.hdf5.archive?
-        ar['/parameters'] = sim.parameters
-        ar['/simulation/results'] = results
+    with hdf5.archive(outfile, 'w') as ar:
+        ngs.saveResults(results, sim.paramters, ar, "/simulation/results")
