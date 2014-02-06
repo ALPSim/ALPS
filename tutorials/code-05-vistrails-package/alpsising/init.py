@@ -9,14 +9,14 @@
 #
 ##############################################################################
 
-from core.modules.vistrails_module import Module
-import core.modules.basic_modules
+from vistrails.core.modules.vistrails_module import Module
+import vistrails.core.modules.basic_modules
 from packages.alps.applications import RunAlpsApplication
 import ising
 import os
 
 from packages.alps.parameters import Parameters 
-basic = core.modules.basic_modules
+basic = vistrails.core.modules.basic_modules
 
 class IsingAlpsSimulation(Module):
     def compute(self): 

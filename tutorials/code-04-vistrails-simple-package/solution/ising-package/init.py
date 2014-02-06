@@ -9,11 +9,11 @@
 #
 ##############################################################################
 
-from core.modules.vistrails_module import Module
-import core.modules.basic_modules
+from vistrails.core.modules.vistrails_module import Module
+import vistrails.core.modules.basic_modules
 import ising
 
-basic = core.modules.basic_modules
+basic = vistrails.core.modules.basic_modules
 
 class IsingSimulation(Module):
     def compute(self): 
