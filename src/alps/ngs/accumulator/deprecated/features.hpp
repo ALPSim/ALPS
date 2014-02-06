@@ -4,7 +4,7 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2013 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2011 - 2012 by Mario Koenz <mkoenz@ethz.ch>                       *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -25,65 +25,23 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_TUTORIAL_ISING_HPP
-#define ALPS_TUTORIAL_ISING_HPP
+#ifndef ALPS_NGS_ALEA_FEATURES_HPP
+#define ALPS_NGS_ALEA_FEATURES_HPP
 
-#include <alps/hdf5/archive.hpp>
-#include <alps/hdf5/vector.hpp>
+#include <alps/ngs/alea/feature/tags.hpp>
+#include <alps/ngs/alea/feature/features.hpp>
+#include <alps/ngs/alea/feature/feature_traits.hpp>
 
-#include <alps/ngs/params.hpp>
-#include <alps/ngs/accumulator/accumulator.hpp>
-
-#include <boost/function.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/random/mersenne_twister.hpp>
-
-#include <vector>
-#include <string>
-
-class ALPS_DECL ising_sim {
-
-    typedef alps::accumulator::accumulator_set accumulators_type;
-
-    public:
-
-        typedef alps::params parameters_type;
-        typedef std::vector<std::string> result_names_type;
-        typedef alps::accumulator::result_set results_type;
-
-        ising_sim(parameters_type const & params);
-
-        void update();
-        void measure();
-        double fraction_completed() const;
-        bool run(boost::function<bool ()> const & stop_callback);
-
-        result_names_type result_names() const;
-        result_names_type unsaved_result_names() const;
-        results_type collect_results() const;
-        results_type collect_results(result_names_type const & names) const;
-
-        void save(boost::filesystem::path const & filename) const;
-        void load(boost::filesystem::path const & filename);
-        void save(alps::hdf5::archive & ar) const;
-        void load(alps::hdf5::archive & ar);
-
-    protected:
-
-        parameters_type parameters;
-        boost::variate_generator<boost::mt19937, boost::uniform_real<> > random;
-        accumulators_type measurements;
-
-    private:
-        
-        int length;
-        int sweeps;
-        int thermalization_sweeps;
-        int total_sweeps;
-        double beta;
-        std::vector<int> spins;
-};
+#include <alps/ngs/alea/feature/tau.hpp>
+#include <alps/ngs/alea/feature/mean.hpp>
+#include <alps/ngs/alea/feature/error.hpp>
+#include <alps/ngs/alea/feature/weight.hpp>
+#include <alps/ngs/alea/feature/converged.hpp>
+#include <alps/ngs/alea/feature/histogram.hpp>
+#include <alps/ngs/alea/feature/value_type.hpp>
+#include <alps/ngs/alea/feature/log_binning.hpp>
+#include <alps/ngs/alea/feature/autocorrelation.hpp>
+#include <alps/ngs/alea/feature/max_num_binning.hpp>
+#include <alps/ngs/alea/feature/fixed_size_binning.hpp>
 
 #endif

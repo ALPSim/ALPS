@@ -4,7 +4,8 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2013 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2011 - 2013 by Mario Koenz <mkoenz@ethz.ch>                       *
+ *                              Lukas Gamper <gamperl@gmail.com>                   *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -25,65 +26,31 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_TUTORIAL_ISING_HPP
-#define ALPS_TUTORIAL_ISING_HPP
-
-#include <alps/hdf5/archive.hpp>
-#include <alps/hdf5/vector.hpp>
-
-#include <alps/ngs/params.hpp>
 #include <alps/ngs/accumulator/accumulator.hpp>
 
-#include <boost/function.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/random/mersenne_twister.hpp>
+namespace alps {
+    namespace accumulator {
 
-#include <vector>
-#include <string>
+        #define EXTERNAL_FUNCTION(FUN)                          \
+            result_wrapper FUN (result_wrapper const & arg) {   \
+                return arg. FUN ();                             \
+            }
+            EXTERNAL_FUNCTION(sin)
+            EXTERNAL_FUNCTION(cos)
+            EXTERNAL_FUNCTION(tan)
+            EXTERNAL_FUNCTION(sinh)
+            EXTERNAL_FUNCTION(cosh)
+            EXTERNAL_FUNCTION(tanh)
+            EXTERNAL_FUNCTION(asin)
+            EXTERNAL_FUNCTION(acos)
+            EXTERNAL_FUNCTION(atan)
+            EXTERNAL_FUNCTION(abs)
+            EXTERNAL_FUNCTION(sqrt)
+            EXTERNAL_FUNCTION(log)
+            EXTERNAL_FUNCTION(sq)
+            EXTERNAL_FUNCTION(cb)
+            EXTERNAL_FUNCTION(cbrt)
 
-class ALPS_DECL ising_sim {
-
-    typedef alps::accumulator::accumulator_set accumulators_type;
-
-    public:
-
-        typedef alps::params parameters_type;
-        typedef std::vector<std::string> result_names_type;
-        typedef alps::accumulator::result_set results_type;
-
-        ising_sim(parameters_type const & params);
-
-        void update();
-        void measure();
-        double fraction_completed() const;
-        bool run(boost::function<bool ()> const & stop_callback);
-
-        result_names_type result_names() const;
-        result_names_type unsaved_result_names() const;
-        results_type collect_results() const;
-        results_type collect_results(result_names_type const & names) const;
-
-        void save(boost::filesystem::path const & filename) const;
-        void load(boost::filesystem::path const & filename);
-        void save(alps::hdf5::archive & ar) const;
-        void load(alps::hdf5::archive & ar);
-
-    protected:
-
-        parameters_type parameters;
-        boost::variate_generator<boost::mt19937, boost::uniform_real<> > random;
-        accumulators_type measurements;
-
-    private:
-        
-        int length;
-        int sweeps;
-        int thermalization_sweeps;
-        int total_sweeps;
-        double beta;
-        std::vector<int> spins;
-};
-
-#endif
+        #undef EXTERNAL_FUNCTION
+    }
+}

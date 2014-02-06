@@ -4,7 +4,7 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2013 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2011 - 2012 by Mario Koenz <mkoenz@ethz.ch>                       *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -25,65 +25,69 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_TUTORIAL_ISING_HPP
-#define ALPS_TUTORIAL_ISING_HPP
+#ifndef ALPS_NGS_ALEA_ACCUMULATOR_SET_HEADER
+#define ALPS_NGS_ALEA_ACCUMULATOR_SET_HEADER
 
 #include <alps/hdf5/archive.hpp>
-#include <alps/hdf5/vector.hpp>
+#include <alps/ngs/alea/accumulator.hpp>
+#include <alps/ngs/alea/wrapper/accumulator_wrapper.hpp>
 
-#include <alps/ngs/params.hpp>
-#include <alps/ngs/accumulator/accumulator.hpp>
-
-#include <boost/function.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/random/mersenne_twister.hpp>
-
-#include <vector>
+#include <map>
 #include <string>
 
-class ALPS_DECL ising_sim {
+namespace alps {
+    namespace accumulator {
 
-    typedef alps::accumulator::accumulator_set accumulators_type;
+        struct make_accumulator {
+            template<typename T>
+            make_accumulator(std::string const name, T const & accum): acc_wrapper(accum), name(name) {}
 
-    public:
+            detail::accumulator_wrapper acc_wrapper;
+            std::string name;
+        };
 
-        typedef alps::params parameters_type;
-        typedef std::vector<std::string> result_names_type;
-        typedef alps::accumulator::result_set results_type;
+        class ALPS_DECL accumulator_set {
 
-        ising_sim(parameters_type const & params);
+            public: 
+                typedef std::map<std::string, boost::shared_ptr<detail::accumulator_wrapper> > map_type;
 
-        void update();
-        void measure();
-        double fraction_completed() const;
-        bool run(boost::function<bool ()> const & stop_callback);
+                typedef map_type::iterator iterator;
+                typedef map_type::const_iterator const_iterator;
 
-        result_names_type result_names() const;
-        result_names_type unsaved_result_names() const;
-        results_type collect_results() const;
-        results_type collect_results(result_names_type const & names) const;
+                detail::accumulator_wrapper & operator[](std::string const & name);
 
-        void save(boost::filesystem::path const & filename) const;
-        void load(boost::filesystem::path const & filename);
-        void save(alps::hdf5::archive & ar) const;
-        void load(alps::hdf5::archive & ar);
+                detail::accumulator_wrapper const & operator[](std::string const & name) const;
 
-    protected:
+                bool has(std::string const & name) const;
 
-        parameters_type parameters;
-        boost::variate_generator<boost::mt19937, boost::uniform_real<> > random;
-        accumulators_type measurements;
+                void insert(std::string const & name, boost::shared_ptr<detail::accumulator_wrapper> ptr);
 
-    private:
-        
-        int length;
-        int sweeps;
-        int thermalization_sweeps;
-        int total_sweeps;
-        double beta;
-        std::vector<int> spins;
-};
+                void save(hdf5::archive & ar) const;
+
+                void load(hdf5::archive & ar);
+
+                void reset(bool equilibrated = false);
+
+                //~ template<typename T, typename Features>
+                accumulator_set & operator<< (make_accumulator const & make_acc) {
+                    insert(make_acc.name, boost::shared_ptr<detail::accumulator_wrapper>(new detail::accumulator_wrapper(make_acc.acc_wrapper)));
+                    return *this;
+                }
+
+                void merge(accumulator_set const &);
+
+                void print(std::ostream & os) const;
+
+                iterator begin();
+                iterator end();
+                const_iterator begin() const;
+                const_iterator end() const;
+                void clear();
+
+            private:
+                map_type storage;
+        };
+    } 
+}
 
 #endif

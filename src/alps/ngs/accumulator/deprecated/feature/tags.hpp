@@ -4,7 +4,7 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2013 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2011 - 2012 by Mario Koenz <mkoenz@ethz.ch>                       *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -25,65 +25,32 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_TUTORIAL_ISING_HPP
-#define ALPS_TUTORIAL_ISING_HPP
+#ifndef ALPS_NGS_ALEA_DETAIL_TAU_HPP
+#define ALPS_NGS_ALEA_DETAIL_TAU_HPP
 
-#include <alps/hdf5/archive.hpp>
-#include <alps/hdf5/vector.hpp>
-
-#include <alps/ngs/params.hpp>
-#include <alps/ngs/accumulator/accumulator.hpp>
-
-#include <boost/function.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/random/mersenne_twister.hpp>
-
-#include <vector>
-#include <string>
-
-class ALPS_DECL ising_sim {
-
-    typedef alps::accumulator::accumulator_set accumulators_type;
-
-    public:
-
-        typedef alps::params parameters_type;
-        typedef std::vector<std::string> result_names_type;
-        typedef alps::accumulator::result_set results_type;
-
-        ising_sim(parameters_type const & params);
-
-        void update();
-        void measure();
-        double fraction_completed() const;
-        bool run(boost::function<bool ()> const & stop_callback);
-
-        result_names_type result_names() const;
-        result_names_type unsaved_result_names() const;
-        results_type collect_results() const;
-        results_type collect_results(result_names_type const & names) const;
-
-        void save(boost::filesystem::path const & filename) const;
-        void load(boost::filesystem::path const & filename);
-        void save(alps::hdf5::archive & ar) const;
-        void load(alps::hdf5::archive & ar);
-
-    protected:
-
-        parameters_type parameters;
-        boost::variate_generator<boost::mt19937, boost::uniform_real<> > random;
-        accumulators_type measurements;
-
-    private:
-        
-        int length;
-        int sweeps;
-        int thermalization_sweeps;
-        int total_sweeps;
-        double beta;
-        std::vector<int> spins;
-};
-
+namespace alps {
+    namespace accumulator {
+        // = = = = = = = = = = I M P L E M E N T A T I O N   D E F I N I T I O N = = = = = = = = = =
+        namespace tag {
+            struct mean;
+            struct error;
+            struct fixed_size_binning;
+            struct max_num_binning;
+            struct log_binning;
+            struct autocorrelation;
+            namespace detail {
+                struct converged;
+                struct tau;
+                struct weight;
+            }
+            struct histogram;
+        }
+        namespace detail
+        {
+            struct no_weight_value_type {}; //has to be full type because of typeid
+            //one cannot use void as wvt-default because of has_method in derived wrapper that checks if
+            //there is an void op(vt, wvt) and void cannot be an argument-type
+        }
+    }
+}
 #endif

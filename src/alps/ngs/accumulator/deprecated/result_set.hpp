@@ -4,7 +4,7 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2013 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2013 by Lukas Gamper <gamperl@gmail.ch>                           *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -25,65 +25,58 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_TUTORIAL_ISING_HPP
-#define ALPS_TUTORIAL_ISING_HPP
+#ifndef ALPS_NGS_ALEA_RESULT_SET_HPP
+#define ALPS_NGS_ALEA_RESULT_SET_HPP
 
 #include <alps/hdf5/archive.hpp>
-#include <alps/hdf5/vector.hpp>
+#include <alps/ngs/alea/wrapper/result_wrapper.hpp>
 
-#include <alps/ngs/params.hpp>
-#include <alps/ngs/accumulator/accumulator.hpp>
-
-#include <boost/function.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/random/mersenne_twister.hpp>
-
-#include <vector>
+#include <map>
 #include <string>
 
-class ALPS_DECL ising_sim {
+namespace alps {
+    namespace accumulator {
 
-    typedef alps::accumulator::accumulator_set accumulators_type;
+        class ALPS_DECL result_set {
 
-    public:
+            public: 
+                typedef std::map<std::string, boost::shared_ptr<detail::result_wrapper> > map_type;
 
-        typedef alps::params parameters_type;
-        typedef std::vector<std::string> result_names_type;
-        typedef alps::accumulator::result_set results_type;
+                typedef map_type::iterator iterator;
+                typedef map_type::const_iterator const_iterator;
 
-        ising_sim(parameters_type const & params);
+                detail::result_wrapper & operator[](std::string const & name);
 
-        void update();
-        void measure();
-        double fraction_completed() const;
-        bool run(boost::function<bool ()> const & stop_callback);
+                detail::result_wrapper const & operator[](std::string const & name) const;
 
-        result_names_type result_names() const;
-        result_names_type unsaved_result_names() const;
-        results_type collect_results() const;
-        results_type collect_results(result_names_type const & names) const;
+                bool has(std::string const & name) const;
 
-        void save(boost::filesystem::path const & filename) const;
-        void load(boost::filesystem::path const & filename);
-        void save(alps::hdf5::archive & ar) const;
-        void load(alps::hdf5::archive & ar);
+                void insert(std::string const & name, boost::shared_ptr<detail::result_wrapper> ptr);
 
-    protected:
+                void save(hdf5::archive & ar) const;
 
-        parameters_type parameters;
-        boost::variate_generator<boost::mt19937, boost::uniform_real<> > random;
-        accumulators_type measurements;
+                void load(hdf5::archive & ar);
 
-    private:
-        
-        int length;
-        int sweeps;
-        int thermalization_sweeps;
-        int total_sweeps;
-        double beta;
-        std::vector<int> spins;
-};
+                void merge(result_set const &);
+
+                void print(std::ostream & os) const;
+
+                iterator begin();
+                iterator end();
+                const_iterator begin() const;
+                const_iterator end() const;
+                void clear();
+
+            private:
+                map_type storage;
+        };
+
+        inline std::ostream & operator<<(std::ostream & out, result_set const & arg) {
+            arg.print(out);
+            return out;
+        }
+
+    }
+}
 
 #endif

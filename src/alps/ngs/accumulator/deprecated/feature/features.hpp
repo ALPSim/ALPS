@@ -4,7 +4,7 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2013 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2011 - 2012 by Mario Koenz <mkoenz@ethz.ch>                       *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -25,65 +25,58 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_TUTORIAL_ISING_HPP
-#define ALPS_TUTORIAL_ISING_HPP
+#ifndef ALPS_NGS_ALEA_FEATURES_FEATURES_HPP
+#define ALPS_NGS_ALEA_FEATURES_FEATURES_HPP
 
-#include <alps/hdf5/archive.hpp>
-#include <alps/hdf5/vector.hpp>
+namespace alps {
+    namespace accumulator  {
 
-#include <alps/ngs/params.hpp>
-#include <alps/ngs/accumulator/accumulator.hpp>
+        template<
+              typename A0  = void
+            , typename A1  = void
+            , typename A2  = void
+            , typename A3  = void
+            , typename A4  = void
+            , typename A5  = void
+            , typename A6  = void
+            , typename A7  = void
+            , typename A8  = void
+            , typename A9  = void
+            , typename A10  = void
+            , typename A11  = void
+            , typename A12  = void
+            , typename A13  = void
+            , typename A14  = void
+            , typename A15  = void
+            , typename A16  = void
+            , typename A17  = void
+            , typename A18  = void
+            , typename A19  = void
+        >
+        struct features {
+            typedef A0 T0;
+            typedef A1 T1;
+            typedef A2 T2;
+            typedef A3 T3;
+            typedef A4 T4;
+            typedef A5 T5;
+            typedef A6 T6;
+            typedef A7 T7;
+            typedef A8 T8;
+            typedef A9 T9;
+            typedef A10 T10;
+            typedef A11 T11;
+            typedef A12 T12;
+            typedef A13 T13;
+            typedef A14 T14;
+            typedef A15 T15;
+            typedef A16 T16;
+            typedef A17 T17;
+            typedef A18 T18;
+            typedef A19 T19;
+        };
 
-#include <boost/function.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/random/mersenne_twister.hpp>
+    }
+}
 
-#include <vector>
-#include <string>
-
-class ALPS_DECL ising_sim {
-
-    typedef alps::accumulator::accumulator_set accumulators_type;
-
-    public:
-
-        typedef alps::params parameters_type;
-        typedef std::vector<std::string> result_names_type;
-        typedef alps::accumulator::result_set results_type;
-
-        ising_sim(parameters_type const & params);
-
-        void update();
-        void measure();
-        double fraction_completed() const;
-        bool run(boost::function<bool ()> const & stop_callback);
-
-        result_names_type result_names() const;
-        result_names_type unsaved_result_names() const;
-        results_type collect_results() const;
-        results_type collect_results(result_names_type const & names) const;
-
-        void save(boost::filesystem::path const & filename) const;
-        void load(boost::filesystem::path const & filename);
-        void save(alps::hdf5::archive & ar) const;
-        void load(alps::hdf5::archive & ar);
-
-    protected:
-
-        parameters_type parameters;
-        boost::variate_generator<boost::mt19937, boost::uniform_real<> > random;
-        accumulators_type measurements;
-
-    private:
-        
-        int length;
-        int sweeps;
-        int thermalization_sweeps;
-        int total_sweeps;
-        double beta;
-        std::vector<int> spins;
-};
-
-#endif
+#endif // ALPS_NGS_ALEA_FEATURES_FEATURES_HPP

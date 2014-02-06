@@ -4,7 +4,7 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2013 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2013 by Lukas Gamper <gamperl@gmail.ch>                           *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -25,65 +25,67 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_TUTORIAL_ISING_HPP
-#define ALPS_TUTORIAL_ISING_HPP
+#ifndef ALPS_NGS_ALEA_RESULT_WRAPPER_HPP
+#define ALPS_NGS_ALEA_RESULT_WRAPPER_HPP
 
-#include <alps/hdf5/archive.hpp>
-#include <alps/hdf5/vector.hpp>
+#include <alps/ngs/stacktrace.hpp>
+#include <alps/ngs/alea/result.hpp>
+#include <alps/ngs/alea/wrapper/base_wrapper.hpp>
+#include <alps/ngs/alea/wrapper/derived_wrapper.hpp>
+#include <alps/ngs/alea/wrapper/result_type_wrapper.hpp>
+ 
+#ifdef ALPS_HAVE_MPI
+    #include <alps/ngs/boost_mpi.hpp>
+#endif
 
-#include <alps/ngs/params.hpp>
-#include <alps/ngs/accumulator/accumulator.hpp>
+#include <boost/cstdint.hpp>
+#include <boost/shared_ptr.hpp>
 
-#include <boost/function.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/random/mersenne_twister.hpp>
+#include <typeinfo> //used in add_value
+#include <stdexcept>
 
-#include <vector>
-#include <string>
+namespace alps{
+    namespace accumulator {
+        namespace detail {
 
-class ALPS_DECL ising_sim {
+            // class that holds the base_result_wrapper pointer
+            class result_wrapper {
+                public:
+                    result_wrapper(boost::shared_ptr<base_result_wrapper> const & arg)
+                        : base_(arg)
+                    {}
 
-    typedef alps::accumulator::accumulator_set accumulators_type;
+                    result_wrapper(result_wrapper const & arg)
+                        : base_(arg.base_->clone())
+                    {}
 
-    public:
+                    template<typename T> result_type_result_wrapper<T> & get() const {
+                        return base_->get<T>();
+                    }
 
-        typedef alps::params parameters_type;
-        typedef std::vector<std::string> result_names_type;
-        typedef alps::accumulator::result_set results_type;
+                    friend std::ostream& operator<<(std::ostream &out, result_wrapper const & wrapper);
 
-        ising_sim(parameters_type const & params);
+                    template <typename T> T & extract() const {
+                        return (dynamic_cast<derived_result_wrapper<T>& >(*base_)).accum_;
+                    }
 
-        void update();
-        void measure();
-        double fraction_completed() const;
-        bool run(boost::function<bool ()> const & stop_callback);
+                    boost::uint64_t count() const {
+                        return base_->count();
+                    }
 
-        result_names_type result_names() const;
-        result_names_type unsaved_result_names() const;
-        results_type collect_results() const;
-        results_type collect_results(result_names_type const & names) const;
+                private:
+                    boost::shared_ptr<base_result_wrapper> base_;
+            };
 
-        void save(boost::filesystem::path const & filename) const;
-        void load(boost::filesystem::path const & filename);
-        void save(alps::hdf5::archive & ar) const;
-        void load(alps::hdf5::archive & ar);
+            inline std::ostream & operator<<(std::ostream & out, result_wrapper const & m) {
+                m.base_->print(out);
+                return out;
+            }
+        }
 
-    protected:
-
-        parameters_type parameters;
-        boost::variate_generator<boost::mt19937, boost::uniform_real<> > random;
-        accumulators_type measurements;
-
-    private:
-        
-        int length;
-        int sweeps;
-        int thermalization_sweeps;
-        int total_sweeps;
-        double beta;
-        std::vector<int> spins;
-};
-
+        template <typename Result> Result & extract(detail::result_wrapper & m) {
+            return m.extract<Result>();
+        }
+    }
+}
 #endif

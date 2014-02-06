@@ -4,7 +4,7 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2013 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2010 - 2011 by Lukas Gamper <gamperl@gmail.com>                   *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -25,65 +25,21 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_TUTORIAL_ISING_HPP
-#define ALPS_TUTORIAL_ISING_HPP
+#ifndef ALPS_NGS_ALEA_ACCUMULATOR_ARGUMENTS_HPP
+#define ALPS_NGS_ALEA_ACCUMULATOR_ARGUMENTS_HPP
 
-#include <alps/hdf5/archive.hpp>
-#include <alps/hdf5/vector.hpp>
+#include <boost/parameter.hpp>
 
-#include <alps/ngs/params.hpp>
-#include <alps/ngs/accumulator/accumulator.hpp>
+// = = = = N A M E D   P A R A M E T E R   D E F I N I T I O N = = = =
 
-#include <boost/function.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/random/mersenne_twister.hpp>
+namespace alps {
+    namespace accumulator  {
 
-#include <vector>
-#include <string>
+        BOOST_PARAMETER_NAME((bin_size, keywords) _bin_size)
+        BOOST_PARAMETER_NAME((bin_num, keywords) _bin_num)
+        BOOST_PARAMETER_NAME((weight_ref, keywords) _weight_ref)
+        BOOST_PARAMETER_NAME((Weight, keywords) _Weight)
 
-class ALPS_DECL ising_sim {
-
-    typedef alps::accumulator::accumulator_set accumulators_type;
-
-    public:
-
-        typedef alps::params parameters_type;
-        typedef std::vector<std::string> result_names_type;
-        typedef alps::accumulator::result_set results_type;
-
-        ising_sim(parameters_type const & params);
-
-        void update();
-        void measure();
-        double fraction_completed() const;
-        bool run(boost::function<bool ()> const & stop_callback);
-
-        result_names_type result_names() const;
-        result_names_type unsaved_result_names() const;
-        results_type collect_results() const;
-        results_type collect_results(result_names_type const & names) const;
-
-        void save(boost::filesystem::path const & filename) const;
-        void load(boost::filesystem::path const & filename);
-        void save(alps::hdf5::archive & ar) const;
-        void load(alps::hdf5::archive & ar);
-
-    protected:
-
-        parameters_type parameters;
-        boost::variate_generator<boost::mt19937, boost::uniform_real<> > random;
-        accumulators_type measurements;
-
-    private:
-        
-        int length;
-        int sweeps;
-        int thermalization_sweeps;
-        int total_sweeps;
-        double beta;
-        std::vector<int> spins;
-};
-
-#endif
+    } // end accumulator namespace
+} // end alps namespace
+#endif // ALPS_NGS_ALEA_ACCUMULATOR_ARGUMENTS_HPP

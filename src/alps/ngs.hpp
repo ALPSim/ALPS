@@ -51,7 +51,7 @@
 // #endif
 
 #ifdef ALPS_NGS_USE_NEW_ALEA
-	#include <alps/ngs/alea/next/accumulator.hpp>
+	#include <alps/ngs/accumulator/accumulator.hpp>
 #endif
 
 // #include <alps/mcbase.hpp>
