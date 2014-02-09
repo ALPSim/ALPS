@@ -100,7 +100,9 @@ namespace measurements {
             } else {
                 typename MPS<Matrix, SymmGroup>::scalar_type nn = dm_trace(mps, this->phys_psi);
                 MPS<Matrix, SymmGroup> super_mpo = mpo_to_smps(mpo, this->phys_psi);
-                this->result = overlap(super_mpo, mps) / nn;
+                // static_cast needed for icpc 12.x
+                typedef typename MPS<Matrix, SymmGroup>::scalar_type (*overlap_func)(MPS<Matrix, SymmGroup> const &, MPS<Matrix, SymmGroup> const &);
+                this->result = static_cast<overlap_func>(&overlap)(super_mpo, mps) / nn;
             }
         }
         
