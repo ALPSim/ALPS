@@ -12,6 +12,7 @@
 find_package(MPI)
 
 if(NOT MPI_FOUND AND APPLE)
+  
   message(STATUS "Forcing MPI compiler to 'openmpicxx':")
   set(MPI_C_COMPILER openmpicc)
   set(MPI_CXX_COMPILER openmpicxx)
@@ -23,4 +24,18 @@ if(NOT MPI_FOUND AND APPLE)
 	    PATH_SUFFIXES bin
 	    DOC "Executable for running MPI programs.")
   endif(MPI_FOUND)
+  
+  if(NOT MPI_FOUND)
+    message(STATUS "Forcing MPI compiler to 'mpicxx-openmpi-mp':")
+    set(MPI_C_COMPILER mpicc-openmpi-mp)
+    set(MPI_CXX_COMPILER mpicxx-openmpi-mp)
+    find_package(MPI)
+    if(MPI_FOUND)
+      find_program(MPIEXEC
+        NAMES "mpiexec-openmpi-mp"
+        # PATHS ${_MPI_PREFIX_PATH}
+        PATH_SUFFIXES bin
+        DOC "Executable for running MPI programs.")
+    endif(MPI_FOUND)
+  endif(NOT MPI_FOUND)
 endif(NOT MPI_FOUND AND APPLE)
