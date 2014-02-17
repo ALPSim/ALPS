@@ -40,6 +40,11 @@ add_executable(bg_parameter bg_parameter.C)
 
 add_executable(hdf5_changeval hdf5_changeval.C)
 
+add_executable(AFM_test AFM_test.C AFM_transform.C DCA_transform.C clusterhelper.C auxiliaryfunctions.C fouriertransform.C)
+
+add_executable(AFM_4site AFM_4site.C AFM_transform.C DCA_transform.C clusterhelper.C auxiliaryfunctions.C fouriertransform.C)
+
+
 target_link_libraries(dmft ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
 #target_link_libraries(energy ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
 target_link_libraries(sigma_interpolate gsl gslcblas ${ALPS_LIBRARIES}
@@ -51,3 +56,6 @@ target_link_libraries(kspace_interpolate ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})
 target_link_libraries(bg_parameter ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})
 target_link_libraries(hdf5_changeval ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})
 
+target_link_libraries(AFM_test ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})
+
+target_link_libraries(AFM_4site ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})

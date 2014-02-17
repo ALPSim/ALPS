@@ -118,16 +118,19 @@ public:
     ar<<alps::make_pvp(path+"/nt",nt_);
     ar<<alps::make_pvp(path+"/ns",ns_);
     ar<<alps::make_pvp(path+"/nf",nf_);
+    ar<<alps::make_pvp(path+"/shape",((int)shape_));
     std::stringstream subpath; subpath<<path<<"/values/mean";
     ar<<alps::make_pvp(subpath.str(), val_, nt_*(shape_==diagonal?ns_:ns_*ns_)*nf_);
   }
   void read_hdf5(alps::hdf5::archive &ar, const std::string &path) {
-    unsigned int nt, ns, nf;
+    unsigned int nt, ns, nf,shape;
     clear();
     ar>>alps::make_pvp(path+"/nt",nt);
     ar>>alps::make_pvp(path+"/ns",ns);
     ar>>alps::make_pvp(path+"/nf",nf);
+    ar>>alps::make_pvp(path+"/shape",shape);
     if(nt!=nt_ || ns!=ns_ || nf!=nf_){ std::cerr<<path<<" nt: "<<nt_<<" new: "<<nt<<" ns: "<<ns_<<" "<<ns<<" nf: "<<nf_<<" "<<nf<<" dimensions do not match."<<std::endl; throw std::runtime_error("Green's function read in: dimensions do not match."); }
+    if(shape!=shape_){ std::cerr<<path<<" shape: "<<shape_<<" new: "<<shape<<" shapes do not match."<<std::endl; throw std::runtime_error("Green's function read in: shapes do not match."); }
     std::stringstream subpath; subpath<<path<<"/values/mean";
     ar>>alps::make_pvp(subpath.str(), val_, nt_*(shape_==diagonal?ns_:ns_*ns_)*nf_);
   }
@@ -179,16 +182,24 @@ template<typename T> void green_function<T>::read(const char *filename){
   double ignored=0;
   for(unsigned int i=0;i<nt_;++i){
     in_file>>ignored; //read first entry, which could be # matsubara frequencies, or tau-point, or N/beta*tau, or...
-    for(unsigned int s0=0; s0<ns_; ++s0) {
-      if(shape()!=diagonal){
+    if(shape()==nondiagonal){
+      for(unsigned int s0=0; s0<ns_; ++s0) {
         for(unsigned int s1=0; s1<ns_; ++s1){
           for(unsigned int f=0; f<nf_; ++f) {
             in_file>>operator()(i, s0, s1, f)>>std::ws; //read the actual value
           }
         }
-      }else{
+      }
+    }else if (shape()==diagonal){
+      for(unsigned int s0=0; s0<ns_; ++s0) {
         for(unsigned int f=0; f<nf_; ++f) {
           in_file>>operator()(i, s0, s0, f)>>std::ws; //read the actual value
+        }
+      }
+    }else if (shape()==blockdiagonal){
+      for(unsigned int s0=0; s0<ns_; s0+=2) {
+        for(unsigned int f=0; f<nf_; ++f) {
+          in_file>>operator()(i, s0, s0, f) >>operator()(i, s0, s0+1, f)>>operator()(i, s0+1, s0, f)>>operator()(i, s0, s0+1, f)>>std::ws;
         }
       }
     }
@@ -202,19 +213,28 @@ template<typename T> void green_function<T>::write(const char *filename) const{
   if(!out_file.is_open()){ std::cerr<<"output file "<<filename<<" could not be opened!"<<std::endl; exit(1);}
   for(unsigned int i=0;i<nt_;++i){
     out_file << i << " ";
-    for(unsigned int s0=0; s0<ns_; ++s0) {
-      if(shape_!=diagonal){
+    if(shape_==nondiagonal){
+      for(unsigned int s0=0; s0<ns_; ++s0) {
         for(unsigned int s1=0; s1<ns_; ++s1){
           for(unsigned int f=0; f<nf_; ++f) {
             out_file<<operator()(i, s0, s1, f) << " ";
           }
         }
-      }else{
+      }
+    }else if(shape_==blockdiagonal){
+      for(unsigned int s0=0; s0<ns_; s0+=2) {
+        for(unsigned int f=0; f<nf_; ++f) {
+          out_file<<operator()(i, s0, s0, f) << " "<<operator()(i, s0, s0+1, f)<<" "<<operator()(i, s0+1, s0, f)<<" "<<operator()(i, s0, s0+1, f)<<" ";
+        }
+      }
+    }
+    else if(shape_==diagonal){
+      for(unsigned int s0=0; s0<ns_; ++s0) {
         for(unsigned int f=0; f<nf_; ++f) {
           out_file<<operator()(i, s0, s0, f) << " ";
         }
       }
-    }
+    }else throw std::logic_error("don't know shape in write.");
     out_file << std::endl;
   }
 }

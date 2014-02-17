@@ -104,8 +104,6 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
   p["INFILE"]=infile;
   p["OUTFILE"]=outfile;
   {
-    if(G0_omega.shape()==diagonal) std::cerr<<"G0_omega is diagonal."<<std::endl;
-    else std::cerr<<"G0_omega is not diagonal."<<std::endl;
     alps::hdf5::archive solver_input(infile, alps::hdf5::archive::WRITE);
     solver_input<<alps::make_pvp("/parameters", p);
     G0_omega.write_hdf5(solver_input, "/G0");

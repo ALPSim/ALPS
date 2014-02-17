@@ -46,7 +46,6 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
   
   double beta = static_cast<double>(parms["BETA"]);
   double h = static_cast<double>(parms["H"]);
-  double h_init = parms.value_or_default("H_INIT", 0.);
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = parms.value_or_default("PARAMAGNET", false);
   double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));

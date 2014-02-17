@@ -47,24 +47,21 @@ void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function
   os<<std::setprecision(14);
   for(unsigned int i=0;i<v.nfreq();++i){
     os<<(2*i+1)*M_PI/beta<<" ";
-    switch (v.shape()) {
-      case diagonal:
-        for (unsigned int k=0; k<v.nsite(); ++k)
-          for(unsigned int f=0;f<v.nflavor();++f)
-            os<<v(i,k,k,f).imag()<<" ";
-        break;
-      case blockdiagonal:
-        for (unsigned int k=0; k<v.nsite(); k+=2)
-          for (unsigned int p1=0; p1<=1; p1++)
-            for (unsigned int p2=0; p2<=1; p2++)
-              for(unsigned int f=0;f<v.nflavor();++f)
-                os<<v(i,k+p1,k+p2,f).imag()<<" ";
-        break;
-      case nondiagonal:
-        for (unsigned int s1=0; s1<v.nsite(); ++s1)
-          for (unsigned int s2=0; s2<v.nsite(); ++s2)
+    if (v.shape()==diagonal) {
+      for (unsigned int k=0; k<v.nsite(); ++k)
+        for(unsigned int f=0;f<v.nflavor();++f)
+          os<<v(i,k,k,f).imag()<<" ";
+    }else if(v.shape()==blockdiagonal){
+      for (unsigned int k=0; k<v.nsite(); k+=2)
+        for (unsigned int p1=0; p1<=1; p1++)
+          for (unsigned int p2=0; p2<=1; p2++)
             for(unsigned int f=0;f<v.nflavor();++f)
-              os<<v(i,s1,s2,f).imag()<<" ";
+              os<<v(i,k+p1,k+p2,f).imag()<<" ";
+    }else if(v.shape()==nondiagonal){
+      for (unsigned int s1=0; s1<v.nsite(); ++s1)
+        for (unsigned int s2=0; s2<v.nsite(); ++s2)
+          for(unsigned int f=0;f<v.nflavor();++f)
+            os<<v(i,s1,s2,f).imag()<<" ";
     }
     os<<std::endl;
   }
@@ -94,19 +91,15 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
                                 const matsubara_green_function_t g_dressed, const double beta)
 {
   os<<std::setprecision(14);
-  switch (g_dressed.shape()) {
-    case diagonal:
-      for(unsigned int i=0;i<g_bare.nfreq();++i){
-        os<<(2*i+1)*M_PI/beta<<"\t";
-        for (unsigned int k=0; k<g_bare.nsite(); ++k)
-          for(unsigned int f=0;f<g_bare.nflavor();++f)
-            os<<(1./g_bare(i,k,k,f) - 1./g_dressed(i,k,k,f)).real()<<"\t"<<(1./g_bare(i,k,k,f) - 1./g_dressed(i,k,k,f)).imag()<<"\t";
-        os<<std::endl;
-      }
-      break;
-    case blockdiagonal:
-    {
-      std::cout<<"writing blockdiagonal sigma."<<std::endl;
+  for(unsigned int i=0;i<g_bare.nfreq();++i){
+    if(g_dressed.shape()==diagonal){
+      os<<(2*i+1)*M_PI/beta<<"\t";
+      for (unsigned int k=0; k<g_bare.nsite(); ++k)
+        for(unsigned int f=0;f<g_bare.nflavor();++f)
+          os<<(1./g_bare(i,k,k,f) - 1./g_dressed(i,k,k,f)).real()<<"\t"<<(1./g_bare(i,k,k,f) - 1./g_dressed(i,k,k,f)).imag()<<"\t";
+      os<<std::endl;
+    }else if(g_dressed.shape()==blockdiagonal){
+      
       alps::numeric::matrix<std::complex<double> > Gup(2,2), G0up(2,2), Gdn(2,2), G0dn(2,2);
       alps::numeric::matrix<std::complex<double> > Ginvup(2,2), G0invup(2,2), Ginvdn(2,2), G0invdn(2,2);
       alps::numeric::matrix<std::complex<double> > Sigmaup(2,2);
@@ -146,11 +139,7 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
         }
         os<<std::endl;
       }
-      break;
-    }
-    case nondiagonal:
-    {
-      std::cout<<"writing nondiagonal Sigma."<<std::endl;
+    }else if(g_dressed.shape()==nondiagonal){
       int nsite=g_dressed.nsite();
       alps::numeric::matrix<std::complex<double> > Gup(nsite,nsite), G0up(nsite,nsite), Gdn(nsite,nsite), G0dn(nsite,nsite);
       alps::numeric::matrix<std::complex<double> > Ginvup(nsite,nsite), G0invup(nsite,nsite), Ginvdn(nsite,nsite), G0invdn(nsite,nsite);
@@ -170,7 +159,7 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
         matrix_inversion(G0up, G0invup);
         matrix_inversion(Gdn, Ginvdn);
         matrix_inversion(G0dn, G0invdn);
-
+        
         for(int i=0;i<nsite;++i){
           for(int j=0;j<nsite;++j){
             Sigmaup(i,j)=G0invup(i,j)-Ginvup(i,j);
@@ -184,8 +173,6 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
         }
         os<<std::endl;
       }
-      std::cout<<"done."<<std::endl;
-      break;
     }
   }
 }
@@ -219,24 +206,21 @@ void print_real_green_matsubara(std::ostream &os, const matsubara_green_function
   os<<std::setprecision(14);
   for(unsigned int i=0;i<v.nfreq();++i){
     os<<(2*i+1)*M_PI/beta<<"\t";
-    switch (v.shape()) {
-      case diagonal:
-        for (unsigned int k=0; k<v.nsite(); ++k)
-          for(unsigned int f=0;f<v.nflavor();++f)
-            os<<v(i,k,k,f).real()<<"\t";
-        break;
-      case blockdiagonal:
-        for (unsigned int k=0; k<v.nsite(); k+=2)
-          for (unsigned int p1=0; p1<=1; p1++)
-            for (unsigned int p2=0; p2<=1; p2++)
-              for(unsigned int f=0;f<v.nflavor();++f)
-                os<<v(i,k+p1,k+p2,f).real()<<"\t";
-        break;
-      case nondiagonal:
-        for (unsigned int s1=0; s1<v.nsite(); ++s1)
-          for (unsigned int s2=0; s2<v.nsite(); ++s2)
+    if(v.shape()==diagonal){
+      for (unsigned int k=0; k<v.nsite(); ++k)
+        for(unsigned int f=0;f<v.nflavor();++f)
+          os<<v(i,k,k,f).real()<<"\t";
+    }else if(v.shape()==blockdiagonal){
+      for (unsigned int k=0; k<v.nsite(); k+=2)
+        for (unsigned int p1=0; p1<=1; p1++)
+          for (unsigned int p2=0; p2<=1; p2++)
             for(unsigned int f=0;f<v.nflavor();++f)
-              os<<v(i,s1,s2,f).real()<<"\t";
+              os<<v(i,k+p1,k+p2,f).real()<<"\t";
+    }else if(v.shape()==nondiagonal){
+      for (unsigned int s1=0; s1<v.nsite(); ++s1)
+        for (unsigned int s2=0; s2<v.nsite(); ++s2)
+          for(unsigned int f=0;f<v.nflavor();++f)
+            os<<v(i,s1,s2,f).real()<<"\t";
     }
     os<<std::endl;
   }
@@ -253,24 +237,21 @@ void print_green_itime(std::ostream &os, const itime_green_function_t &v, const 
   os<<std::setprecision(14);
   for(unsigned int i=0;i<v.ntime();++i){
     os<<beta*i/(v.ntime()-1)<<" ";
-    switch (v.shape()) {
-      case diagonal:
-        for (unsigned int k=0; k<v.nsite(); ++k)
-          for(unsigned int f=0;f<v.nflavor();++f)
-            os<<v(i,k,k,f)<<" ";
-        break;
-      case blockdiagonal:
-        for (unsigned int k=0; k<v.nsite(); k+=2)
-          for (unsigned int p1=0; p1<=1; p1++)
-            for (unsigned int p2=0; p2<=1; p2++)
-              for(unsigned int f=0;f<v.nflavor();++f)
-                os<<v(i,k+p1,k+p2,f)<<" ";
-        break;
-      case nondiagonal:
-        for (unsigned int s1=0; s1<v.nsite(); ++s1)
-          for (unsigned int s2=0; s2<v.nsite(); ++s2)
+    if (v.shape()==diagonal){
+      for (unsigned int k=0; k<v.nsite(); ++k)
+        for(unsigned int f=0;f<v.nflavor();++f)
+          os<<v(i,k,k,f)<<" ";
+    }else if(v.shape()==blockdiagonal){
+      for (unsigned int k=0; k<v.nsite(); k+=2)
+        for (unsigned int p1=0; p1<=1; p1++)
+          for (unsigned int p2=0; p2<=1; p2++)
             for(unsigned int f=0;f<v.nflavor();++f)
-              os<<v(i,s1,s2,f)<<" ";
+              os<<v(i,k+p1,k+p2,f)<<" ";
+    }else if(v.shape()==nondiagonal){
+      for (unsigned int s1=0; s1<v.nsite(); ++s1)
+        for (unsigned int s2=0; s2<v.nsite(); ++s2)
+          for(unsigned int f=0;f<v.nflavor();++f)
+            os<<v(i,s1,s2,f)<<" ";
     }
     os<<std::endl;
   }
@@ -361,15 +342,33 @@ std::ostream &operator<<(std::ostream &os, const std::pair<green_function<std::c
   os<<std::setprecision(14);
   for(unsigned int o=0;o<v_and_beta.first.ntime();++o){
     os<<(2.*o+1)*M_PI/v_and_beta.second<<"\t";
-    for(unsigned int i=0;i<v_and_beta.first.nsite();++i)
-      if(v_and_beta.first.shape()==nondiagonal){
-        for(unsigned int j=0;j<v_and_beta.first.nsite();++j)
-          for(unsigned int z1=0;z1<v_and_beta.first.nflavor();++z1)
+    if(v_and_beta.first.shape()==nondiagonal){
+      for(unsigned int i=0;i<v_and_beta.first.nsite();++i){
+        for(unsigned int j=0;j<v_and_beta.first.nsite();++j){
+          for(unsigned int z1=0;z1<v_and_beta.first.nflavor();++z1){
             os<<v_and_beta.first(o,i,j,z1).real()<<" "<<v_and_beta.first(o,i,j,z1).imag()<<" ";
-      }else{
-        for(unsigned int z1=0;z1<v_and_beta.first.nflavor();++z1)
-          os<<v_and_beta.first(o,i,i,z1).real()<<" "<<v_and_beta.first(o,i,i,z1).imag()<<" ";
+          }
+        }
       }
+    }else if(v_and_beta.first.shape()==blockdiagonal){
+      for (unsigned int k=0; k<v_and_beta.first.nsite(); k+=2){
+        for (unsigned int p1=0; p1<=1; p1++){
+          for (unsigned int p2=0; p2<=1; p2++){
+            for(unsigned int f=0;f<v_and_beta.first.nflavor();++f){
+              os<<v_and_beta.first(o,k+p1  ,k+p2  ,f).real()<<" "<<v_and_beta.first(o,k+p1  ,k+p2  ,f).imag()<<" ";
+            }
+          }
+        }
+      }
+    }else if(v_and_beta.first.shape()==diagonal){
+      for(unsigned int i=0;i<v_and_beta.first.nsite();++i){
+        for(unsigned int z1=0;z1<v_and_beta.first.nflavor();++z1){
+          os<<v_and_beta.first(o,i,i,z1).real()<<" "<<v_and_beta.first(o,i,i,z1).imag()<<" ";
+        }
+      }
+    }else{
+      throw std::logic_error("shape not understood in write.");
+    }
     os<<std::endl;
   }
   return os;
