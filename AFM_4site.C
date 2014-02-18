@@ -31,10 +31,15 @@ int main(int argc, char **argv){
   nfreq=parms["NMATSUBARA"];
   t=parms["t"];
   h=nonint?parms["H_INIT"]:parms["H"];
+
+  boost::shared_ptr<DCATransformer> clusterhandler;
+  DCATransformer::generate_transformer(parms, clusterhandler);
   
   matsubara_green_function_t selfenergy(nfreq,ns, 2, blockdiagonal); selfenergy.clear();
   matsubara_green_function_t g0(nfreq,ns, 2, blockdiagonal); g0.clear();
-  matsubara_green_function_t gloc(nfreq,ns, 2, blockdiagonal); g0.clear();
+  matsubara_green_function_t gloc(nfreq,ns, 2, blockdiagonal); gloc.clear();
+  matsubara_green_function_t g0_rs(nfreq,ns, 2, nondiagonal); g0_rs.clear();
+  matsubara_green_function_t gloc_rs(nfreq,ns, 2, nondiagonal); gloc_rs.clear();
   
   alps::numeric::matrix<std::complex<double> > G0inv_2site_up(2,2),G0inv_2site_dn(2,2),G0inv_kq_up(2,2),G0inv_kq_dn(2,2),Ginv_kq_up(2,2),Ginv_kq_dn(2,2);
   alps::numeric::matrix<std::complex<double> > G_kq_up(2,2),G_kq_dn(2,2),G0_kq_up(2,2),G0_kq_dn(2,2),G_kq_up_tmp(2,2),G_kq_dn_tmp(2,2);
@@ -42,13 +47,16 @@ int main(int argc, char **argv){
   if(!nonint){
     std::cout<<"computing sigma"<<std::endl;
     alps::hdf5::archive ar(input_hdf5, alps::hdf5::archive::READ);
-    g0.read_hdf5(ar, "/G0_omega_ks");
+    g0_rs.read_hdf5(ar, "/G0_omega_rs");
+    //g0.read_hdf5(ar, "/G0_omega_ks");
+    g0=clusterhandler->transform_into_k_space(g0_rs);
     {
       std::stringstream g0_file_name; g0_file_name<<"green0_function_lastit_"<<iteration;
       std::ofstream g0_file(g0_file_name.str().c_str());
       g0_file<<std::make_pair(g0, beta);
     }
-    gloc.read_hdf5(ar, "/G_omega");
+    gloc_rs.read_hdf5(ar, "/G_omega");
+    gloc=clusterhandler->transform_into_k_space(gloc_rs);
     {
       std::stringstream g_file_name; g_file_name<<"green_function_lastit_"<<iteration;
       std::ofstream g_file(g_file_name.str().c_str());
@@ -126,6 +134,8 @@ int main(int argc, char **argv){
   evaluate_AFM_2site(selfenergy, gloc, g0, epsilon_k_kx_ky, N,  beta, mu, h);
   alps::hdf5::archive ar(output_hdf5, alps::hdf5::archive::WRITE);
   parms["INFILE"]=output_hdf5;
+  parms["READWRITE_REAL_SPACE"]=1;
+  g0=clusterhandler->transform_into_real_space(g0);
   ar<<alps::make_pvp("/parameters", parms);
   g0.write_hdf5(ar, "/G0");
   
