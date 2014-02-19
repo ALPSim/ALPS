@@ -12,6 +12,8 @@ void invert_2x2(const alps::numeric::matrix<std::complex<double> > &M, alps::num
 void invert_2x2(const alps::numeric::matrix<std::complex<double> > &M, alps::numeric::matrix<std::complex<double> > &Minv);
 void evaluate_AFM_RBZ(const matsubara_green_function_t &selfenergy, matsubara_green_function_t &gloc, matsubara_green_function_t &g0, const std::vector<std::vector<std::vector<double> > > &epsilon_k_kx_ky, int N, double beta, double mu, double h);
 void evaluate_AFM_2site(const matsubara_green_function_t &selfenergy, matsubara_green_function_t &gloc, matsubara_green_function_t &g0, const std::vector<std::vector<std::vector<double> > > &epsilon_k_kx_ky, int N, double beta, double mu, double h);
+void transform_realspace_kspace(const matsubara_green_function_t &g_in, matsubara_green_function_t &g_out);
+
 int main(int argc, char **argv){
   
   std::string pfilename, input_hdf5, output_hdf5;
@@ -31,13 +33,10 @@ int main(int argc, char **argv){
   nfreq=parms["NMATSUBARA"];
   t=parms["t"];
   h=nonint?parms["H_INIT"]:parms["H"];
-
-  boost::shared_ptr<DCATransformer> clusterhandler;
-  DCATransformer::generate_transformer(parms, clusterhandler);
   
-  matsubara_green_function_t selfenergy(nfreq,ns, 2, blockdiagonal); selfenergy.clear();
-  matsubara_green_function_t g0(nfreq,ns, 2, blockdiagonal); g0.clear();
-  matsubara_green_function_t gloc(nfreq,ns, 2, blockdiagonal); gloc.clear();
+  matsubara_green_function_t selfenergy(nfreq,ns, 2, nondiagonal); selfenergy.clear();
+  matsubara_green_function_t g0(nfreq,ns, 2, nondiagonal); g0.clear();
+  matsubara_green_function_t gloc(nfreq,ns, 2, nondiagonal); gloc.clear();
   matsubara_green_function_t g0_rs(nfreq,ns, 2, nondiagonal); g0_rs.clear();
   matsubara_green_function_t gloc_rs(nfreq,ns, 2, nondiagonal); gloc_rs.clear();
   
@@ -49,14 +48,14 @@ int main(int argc, char **argv){
     alps::hdf5::archive ar(input_hdf5, alps::hdf5::archive::READ);
     g0_rs.read_hdf5(ar, "/G0_omega_rs");
     //g0.read_hdf5(ar, "/G0_omega_ks");
-    g0=clusterhandler->transform_into_k_space(g0_rs);
+    transform_realspace_kspace(g0_rs, g0);
     {
       std::stringstream g0_file_name; g0_file_name<<"green0_function_lastit_"<<iteration;
       std::ofstream g0_file(g0_file_name.str().c_str());
       g0_file<<std::make_pair(g0, beta);
     }
     gloc_rs.read_hdf5(ar, "/G_omega");
-    gloc=clusterhandler->transform_into_k_space(gloc_rs);
+    transform_realspace_kspace(gloc_rs, gloc);
     {
       std::stringstream g_file_name; g_file_name<<"green_function_lastit_"<<iteration;
       std::ofstream g_file(g_file_name.str().c_str());
@@ -135,9 +134,9 @@ int main(int argc, char **argv){
   alps::hdf5::archive ar(output_hdf5, alps::hdf5::archive::WRITE);
   parms["INFILE"]=output_hdf5;
   parms["READWRITE_REAL_SPACE"]=1;
-  g0=clusterhandler->transform_into_real_space(g0);
+  transform_realspace_kspace(g0, g0_rs);
   ar<<alps::make_pvp("/parameters", parms);
-  g0.write_hdf5(ar, "/G0");
+  g0_rs.write_hdf5(ar, "/G0");
   
   {
     std::stringstream g_file_name; g_file_name<<"green_function_"<<iteration;
@@ -147,7 +146,7 @@ int main(int argc, char **argv){
   {
     std::stringstream g0_file_name; g0_file_name<<"green0_function_"<<iteration;
     std::ofstream g0_file(g0_file_name.str().c_str());
-    g0_file<<std::make_pair(g0, beta);
+    g0_file<<std::make_pair(g0_rs, beta);
   }
 }
 
@@ -341,6 +340,31 @@ void evaluate_AFM_2site(const matsubara_green_function_t &selfenergy, matsubara_
       g0(i,k  ,k+1,1)=G0_kq_dn(0,1);
       g0(i,k+1,k  ,1)=G0_kq_dn(1,0);
       g0(i,k+1,k+1,1)=G0_kq_dn(1,1);
+    }
+  }
+}
+void transform_realspace_kspace(const matsubara_green_function_t &g_in, matsubara_green_function_t &g_out){
+  if(g_in.nsite()!=4) throw std::logic_error("this function was specifically coded to deal with ns=4");
+  alps::numeric::matrix<std::complex<double> > U(4,4);
+  U(0,0)= 1.; U(0,1)= 1.; U(0,2)= 1.; U(0,3)= 1.;
+  U(1,0)= 1.; U(1,1)=-1.; U(1,2)= 1.; U(1,3)=-1.;
+  U(2,0)= 1.; U(2,1)= 1.; U(2,2)=-1.; U(2,3)=-1.;
+  U(3,0)= 1.; U(3,1)=-1.; U(3,2)=-1.; U(3,3)= 1.;
+  U*=0.5;
+  
+  g_out.clear();
+  
+  for (int i=0;i<g_in.nfreq();++i){
+    for(int f=0;f<2;++f){
+      for(int p=0;p<4;++p){
+        for(int q=0;q<4;++q){
+          for(int l=0;l<4;++l){
+            for(int m=0;m<4;++m){
+              g_out(i,p,q,f)+=U(p,l)*g_in(i,l,m,f)*U(m,q);
+            }
+          }
+        }
+      }
     }
   }
 }
