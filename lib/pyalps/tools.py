@@ -585,7 +585,7 @@ def extract(appname, source, target):
   return; 
 
 
-def collectXY(sets,x,y,foreach=[]):
+def collectXY(sets,x,y,foreach=[],ignoreProperties=False):
       """ collects specified data from a list of DataSet objects
          
           this function is used to collect data from a list of DataSet objects, to prepare plots or evaluation. The parameters are:
@@ -594,6 +594,7 @@ def collectXY(sets,x,y,foreach=[]):
             x:       the name of the property or measurement to be used as x-value of the collected results 
             y:       the name of the property or measurement to be used as y-value of the collected results 
             foreach: an optional list of properties used for grouping the results. A separate DataSet object is created for each unique set of values of the specified parameers.
+            ignoreProperties: setting ignoreProperties=True prevents collectXY() from collecting properties.
             
           The function returns a list of DataSet objects.
       """
@@ -628,7 +629,7 @@ def collectXY(sets,x,y,foreach=[]):
                   else:
                       res.x = xvalue
                       res.y = data.y
-              else:
+              elif not ignoreProperties:
                   res.props['line'] = '.'
                   xvalue = np.array([ data.props[x] ])
                   if len(res.x) > 0 and len(res.y) > 0:
