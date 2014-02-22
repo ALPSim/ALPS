@@ -51,10 +51,12 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
   double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
   std::string basename=parms["BASENAME"];
+  bool readwrite_real_space=parms.value_or_default("READWRITE_REAL_SPACE", false);
   shape_t gf_shape=paramagnet?diagonal:blockdiagonal;
   
   //calculate initial G0
   matsubara_green_function_t G0_omega=clustertrans.initial_G0(parms, gf_shape);
+  std::cout<<"G0 omega shape is: "<<G0_omega.shape()<<" gf shpae is: "<<gf_shape<<" diagonal is: "<<diagonal<<std::endl;
   matsubara_green_function_t G_omega=G0_omega;
   
   int iteration_ctr = 0;
@@ -85,7 +87,18 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     //std::ofstream g0_after_symm("g0_after_symm.dat"); g0_after_symm<<std::make_pair(G0_omega, beta)<<std::endl;
     
     //std::cout<<"running solver in frequency space."<<std::endl<<std::flush;
-    boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, parms);
+    if(!readwrite_real_space){
+      boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, parms);
+    }else{
+      std::cout<<"transforming g0 to rs"<<std::endl;
+      matsubara_green_function_t G0_omega_rs=clustertrans.transform_into_real_space(G0_omega);
+      std::cout<<"done transforming g0 to rs"<<std::endl;
+      matsubara_green_function_t G_omega_rs(n_matsubara, n_site, n_orbital, nondiagonal);
+      itime_green_function_t G_tau_rs(n_tau+1, n_site, n_orbital, nondiagonal);
+      boost::tie(G_omega_rs, G_tau_rs) = solver.solve_omega(G0_omega_rs, parms);
+      G_omega=clustertrans.transform_into_k_space(G_omega_rs);
+      G_tau=clustertrans.transform_into_k_space(G_tau_rs);
+    }
     //std::cout<<"applying spin symmetries"<<std::endl<<std::flush;
     //std::ofstream g_before_symm("g_before_symm.dat"); g_before_symm<<std::make_pair(G_omega, beta)<<std::endl;
     G_omega = clustertrans.symmetrize(G_omega, paramagnet);

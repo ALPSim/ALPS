@@ -67,16 +67,14 @@ public:
   }
   ///operator= (assignement operator)
   const green_function &operator=(const green_function &g){
-    if(!((ns_==g.ns_) && (nf_==g.nf_) && (nt_==g.nt_) && (shape_==g.shape_))){
-      *(const_cast<unsigned int*>(&(nt_)))=g.nt_;
-      *(const_cast<unsigned int*>(&(ns_)))=g.ns_;
-      *(const_cast<unsigned int*>(&(nf_)))=g.nf_;
-      *(const_cast<unsigned int*>(&(ntnsns_)))=g.ntnsns_;
-      *(const_cast<unsigned int*>(&(ntns_)))=g.ntns_;
-      *(const_cast<shape_t*>(&(shape_)))=g.shape_;
-      delete [] val_;
-      val_=(shape_==diagonal?new T[nt_*ns_*nf_]:new T[nt_*ns_*ns_*nf_]);
-    }
+    if(ns_==!g.ns_)
+      throw std::logic_error("in operator= : number of sites is different.");
+    if(nf_!=g.nf_)
+      throw std::logic_error("in operator= : number of flavors is different.");
+    if(nt_!=g.nt_)
+      throw std::logic_error("in operator= : number of frequencies or times is different.");
+    if(shape_!=g.shape_)
+      throw std::logic_error("in operator= : shape is different.");
     memcpy(val_, g(), sizeof(T)*nt_*(shape_==diagonal?ns_:ns_*ns_)*nf_);
     return *this;
   }

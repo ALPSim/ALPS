@@ -353,13 +353,25 @@ public:
   matsubara_green_function_t symmetrize(const matsubara_green_function_t& G, const bool paramagnet) const
   { return spin_symmetrizer(G, paramagnet); }
   matsubara_green_function_t transform_into_real_space(const matsubara_green_function_t& G) const
-  { return transform_coordinates<std::complex<double>, Backward>(G); }
+  {
+    if(G.shape()!= diagonal) throw std::logic_error("transform of GF to real space: shape incorrect.");
+    return transform_coordinates<std::complex<double>, Backward>(G);
+  }
   matsubara_green_function_t transform_into_k_space(const matsubara_green_function_t& G) const
-  { return transform_coordinates<std::complex<double>, Forward>(G); }
+  {
+    if(G.shape()!= nondiagonal) throw std::logic_error("transform of GF to kspace: shape incorrect.");
+    return transform_coordinates<std::complex<double>, Forward>(G);
+  }
   itime_green_function_t transform_into_real_space(const itime_green_function_t& G) const
-  { return transform_coordinates<double, Backward>(G); }
+  {
+    if(G.shape()!= diagonal) throw std::logic_error("transform of GF to real space: shape incorrect.");
+    return transform_coordinates<double, Backward>(G);
+  }
   itime_green_function_t transform_into_k_space(const itime_green_function_t& G) const
-  { return transform_coordinates<double, Forward>(G); }
+  {
+    if(G.shape()!= nondiagonal) throw std::logic_error("transform of GF to k space: shape incorrect.");
+    return transform_coordinates<double, Forward>(G);
+  }
   
   //spin symmetrization functions in Nambu space
   nambu_itime_green_function_t symmetrize(const nambu_itime_green_function_t& G, const bool paramagnet) const
@@ -450,13 +462,25 @@ public:
   matsubara_green_function_t symmetrize(const matsubara_green_function_t& G, const bool paramagnet) const
   { return spin_symmetrizer(G, paramagnet); }
   matsubara_green_function_t transform_into_real_space(const matsubara_green_function_t& G) const
-  { return transform_coordinates<std::complex<double>, Backward>(G); }
+  {
+    if(G.shape()!= blockdiagonal) throw std::logic_error("transform of GF to real space: shape incorrect.");
+    return transform_coordinates<std::complex<double>, Backward>(G);
+  }
   matsubara_green_function_t transform_into_k_space(const matsubara_green_function_t& G) const
-  { return transform_coordinates<std::complex<double>, Forward>(G); }
+  {
+    if(G.shape()!= nondiagonal) throw std::logic_error("transform of GF to k space: shape incorrect.");
+    return transform_coordinates<std::complex<double>, Forward>(G);
+  }
   itime_green_function_t transform_into_real_space(const itime_green_function_t& G) const
-  { return transform_coordinates<double, Backward>(G); }
+  {
+    if(G.shape()!= blockdiagonal) throw std::logic_error("transform of GF to real space: shape incorrect.");
+    return transform_coordinates<double, Backward>(G);
+  }
   itime_green_function_t transform_into_k_space(const itime_green_function_t& G) const
-  { return transform_coordinates<double, Forward>(G); }
+  {
+    if(G.shape()!= nondiagonal) throw std::logic_error("transform of GF to k space: shape incorrect.");
+    return transform_coordinates<double, Forward>(G);
+  }
   
   nambu_matsubara_green_function_t transform_into_real_space(const nambu_matsubara_green_function_t& G) const {throw std::logic_error("AFM NAMBU not implemented.");}
   //{ return transform_coordinates<std::complex<double>, Backward>(G); }
