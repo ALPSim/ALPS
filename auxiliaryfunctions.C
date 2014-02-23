@@ -105,40 +105,38 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
       alps::numeric::matrix<std::complex<double> > Sigmaup(2,2);
       alps::numeric::matrix<std::complex<double> > Sigmadn(2,2);
       if(g_bare.nflavor()!=2) throw std::logic_error("not understood how to handle blockdiag with >2 flavors.");
-      for(unsigned int i=0;i<g_bare.nfreq();++i){
-        os<<(2*i+1)*M_PI/beta<<" ";
-        for (unsigned int k=0; k<g_bare.nsite(); k+=2){
-          int q=k+1;
-          
-          //initialize G
-          Gup(0,0)=g_dressed(i,k,k,0); Gup(0,1)=g_dressed(i,k,q,0); Gup(1,0)=g_dressed(i,q,k,0); Gup(1,1)=g_dressed(i,q,q,0);
-          Gdn(0,0)=g_dressed(i,k,k,1); Gdn(0,1)=g_dressed(i,k,q,1); Gdn(1,0)=g_dressed(i,q,k,1); Gdn(1,1)=g_dressed(i,q,q,1);
-          
-          //initialize G0
-          G0up(0,0)=g_bare(i,k,k,0); G0up(0,1)=g_bare(i,k,q,0); G0up(1,0)=g_bare(i,q,k,0); G0up(1,1)=g_bare(i,q,q,0);
-          G0dn(0,0)=g_bare(i,k,k,1); G0dn(0,1)=g_bare(i,k,q,1); G0dn(1,0)=g_bare(i,q,k,1); G0dn(1,1)=g_bare(i,q,q,1);
-          
-          //perform inversion
-          matrix_inversion(Gup, Ginvup);
-          matrix_inversion(G0up, G0invup);
-          matrix_inversion(Gdn, Ginvdn);
-          matrix_inversion(G0dn, G0invdn);
-          
-          //get sigma
-          for(unsigned int i=0;i<2;++i){
-            for(unsigned int j=0;j<2;++j){
-              Sigmaup(i,j)=G0invup(i,j)-Ginvup(i,j);
-              Sigmadn(i,j)=G0invdn(i,j)-Ginvdn(i,j);
-            }
-          }
-          for(unsigned int i=0;i<2;++i){
-            for(unsigned int j=0;j<2;++j){
-              os<<Sigmaup(i,j).real()<<" "<<Sigmaup(i,j).imag()<<"  "<<Sigmadn(i,j).real()<<" "<<Sigmadn(i,j).imag()<<" ";
-            }
+      os<<(2*i+1)*M_PI/beta<<" ";
+      for (unsigned int k=0; k<g_bare.nsite(); k+=2){
+        int q=k+1;
+        
+        //initialize G
+        Gup(0,0)=g_dressed(i,k,k,0); Gup(0,1)=g_dressed(i,k,q,0); Gup(1,0)=g_dressed(i,q,k,0); Gup(1,1)=g_dressed(i,q,q,0);
+        Gdn(0,0)=g_dressed(i,k,k,1); Gdn(0,1)=g_dressed(i,k,q,1); Gdn(1,0)=g_dressed(i,q,k,1); Gdn(1,1)=g_dressed(i,q,q,1);
+        
+        //initialize G0
+        G0up(0,0)=g_bare(i,k,k,0); G0up(0,1)=g_bare(i,k,q,0); G0up(1,0)=g_bare(i,q,k,0); G0up(1,1)=g_bare(i,q,q,0);
+        G0dn(0,0)=g_bare(i,k,k,1); G0dn(0,1)=g_bare(i,k,q,1); G0dn(1,0)=g_bare(i,q,k,1); G0dn(1,1)=g_bare(i,q,q,1);
+        
+        //perform inversion
+        matrix_inversion(Gup, Ginvup);
+        matrix_inversion(G0up, G0invup);
+        matrix_inversion(Gdn, Ginvdn);
+        matrix_inversion(G0dn, G0invdn);
+        
+        //get sigma
+        for(unsigned int i=0;i<2;++i){
+          for(unsigned int j=0;j<2;++j){
+            Sigmaup(i,j)=G0invup(i,j)-Ginvup(i,j);
+            Sigmadn(i,j)=G0invdn(i,j)-Ginvdn(i,j);
           }
         }
-        os<<std::endl;
+        for(unsigned int i=0;i<2;++i){
+          for(unsigned int j=0;j<2;++j){
+            os<<Sigmaup(i,j).real()<<" "<<Sigmaup(i,j).imag()<<"  "<<Sigmadn(i,j).real()<<" "<<Sigmadn(i,j).imag()<<" ";
+          }
+        }
       }
+      os<<std::endl;
     }else if(g_dressed.shape()==nondiagonal){
       int nsite=g_dressed.nsite();
       alps::numeric::matrix<std::complex<double> > Gup(nsite,nsite), G0up(nsite,nsite), Gdn(nsite,nsite), G0dn(nsite,nsite);

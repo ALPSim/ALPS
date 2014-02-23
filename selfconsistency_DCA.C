@@ -56,7 +56,6 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
   
   //calculate initial G0
   matsubara_green_function_t G0_omega=clustertrans.initial_G0(parms, gf_shape);
-  std::cout<<"G0 omega shape is: "<<G0_omega.shape()<<" gf shpae is: "<<gf_shape<<" diagonal is: "<<diagonal<<std::endl;
   matsubara_green_function_t G_omega=G0_omega;
   
   int iteration_ctr = 0;
@@ -82,35 +81,21 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     G0_old_tau = G0_tau;
     fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega);
     //
-    //std::ofstream g0_before_symm("g0_before_symm.dat"); g0_before_symm<<std::make_pair(G0_omega, beta)<<std::endl;
     G0_omega = clustertrans.symmetrize(G0_omega, paramagnet);
-    //std::ofstream g0_after_symm("g0_after_symm.dat"); g0_after_symm<<std::make_pair(G0_omega, beta)<<std::endl;
     
     //std::cout<<"running solver in frequency space."<<std::endl<<std::flush;
     if(!readwrite_real_space){
       boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, parms);
     }else{
-      std::cout<<"transforming g0 to rs"<<std::endl;
       matsubara_green_function_t G0_omega_rs=clustertrans.transform_into_real_space(G0_omega);
-      std::cout<<"done transforming g0 to rs"<<std::endl;
       matsubara_green_function_t G_omega_rs(n_matsubara, n_site, n_orbital, nondiagonal);
       itime_green_function_t G_tau_rs(n_tau+1, n_site, n_orbital, nondiagonal);
       boost::tie(G_omega_rs, G_tau_rs) = solver.solve_omega(G0_omega_rs, parms);
       G_omega=clustertrans.transform_into_k_space(G_omega_rs);
       G_tau=clustertrans.transform_into_k_space(G_tau_rs);
     }
-    //std::cout<<"applying spin symmetries"<<std::endl<<std::flush;
-    //std::ofstream g_before_symm("g_before_symm.dat"); g_before_symm<<std::make_pair(G_omega, beta)<<std::endl;
     G_omega = clustertrans.symmetrize(G_omega, paramagnet);
-    //std::ofstream g_after_symm("g_after_symm.dat"); g_after_symm<<std::make_pair(G_omega, beta)<<std::endl;
-    //exit(0);
-    /*if(paramagnet){
-      std::cout<<"applying point group symmetries"<<std::endl<<std::flush;
-      G_tau = clustertrans.symmetrize(G_tau, paramagnet);
-      G_omega = clustertrans.symmetrize_k_space(G_omega);
-      G_tau = clustertrans.symmetrize_k_space(G_tau);
-    }*/
-    std::cout<<"running cluster transform"<<std::endl<<std::flush;
+    if(paramagnet) G_omega = clustertrans.symmetrize_k_space(G_omega);
     G0_omega = clustertrans(G_omega, G0_omega, mu, h, beta);
     G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
     std::cout<<"comparing old and new result."<<std::endl<<std::flush;

@@ -55,6 +55,7 @@ public:
   green_function(unsigned int ntime, unsigned int nsite, unsigned int nflavor, shape_t shape):nt_(ntime), ns_(nsite), nf_(nflavor),
   ntnsns_(ntime*nsite*nsite), ntns_(ntime*nsite), shape_(shape){
     val_=(shape_==diagonal?new T[nt_*ns_*nf_]:new T[nt_*ns_*ns_*nf_]);
+    clear();
   }
   ///destructor
   ~green_function(){
@@ -132,14 +133,13 @@ public:
     std::stringstream subpath; subpath<<path<<"/values/mean";
     ar>>alps::make_pvp(subpath.str(), val_, nt_*(shape_==diagonal?ns_:ns_*ns_)*nf_);
   }
-  void write_hdf5_ss(alps::hdf5::archive &ar, const std::string &path) const{
-    if(ns_!=1) throw std::runtime_error("single site hdf5 write function called for multisite Green's function");
-    ar<<alps::make_pvp(path+"/nt",nt_);
-    ar<<alps::make_pvp(path+"/nf",nf_);
-    for(unsigned int i=0;i<nf_;++i){
-      std::stringstream subpath; subpath<<path<<"/Green_"<<i<<"/values/mean";
-      ar<<alps::make_pvp(subpath.str(), val_, nt_);
+  double diff(const green_function<T> &gf2){
+    double maxdiff=0.;
+    for(int i=0; i<ntnsns_*nf_;++i){
+      double d=std::abs(val_[i]-gf2.val_[i]);
+      maxdiff=d>maxdiff?d:maxdiff;
     }
+    return maxdiff;
   }
 #ifdef USE_MPI
   void broadcast(){

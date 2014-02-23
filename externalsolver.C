@@ -47,6 +47,7 @@
 #include "alps/osiris/comm.h"
 
 #include "externalsolver.h"
+#include "cluster.h"
 
 ImpuritySolver::result_type ExternalSolver::solve(
                                                   const itime_green_function_t& G0
