@@ -28,7 +28,7 @@
 #include "ising.hpp"
 
 #include <alps/ngs.hpp>
-#include <alps/ngs/scheduler/mpi_adapter.hpp>
+#include <alps/mcmpiadapter.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 
 #include <boost/chrono.hpp>
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
             parameters = alps::parameters_type<ising_sim>::type(options.input_file);
         broadcast(comm, parameters);
 
-        alps::mpi_adapter<ising_sim> sim(parameters, comm, alps::check_schedule(options.tmin, options.tmax));
+        alps::mcmpiadapter<ising_sim> sim(parameters, comm, alps::check_schedule(options.tmin, options.tmax));
 
         if (options.resume)
             sim.load(checkpoint_file);

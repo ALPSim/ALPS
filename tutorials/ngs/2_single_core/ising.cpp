@@ -41,7 +41,6 @@ ising_sim::ising_sim(parameters_type const & parms, std::size_t seed_offset)
     for(int i = 0; i < length; ++i)
         spins[i] = (random() < 0.5 ? 1 : -1);
     measurements
-     // #ifdef ALPS_NGS_USE_NEW_ALEA should be done in header
          << alps::accumulator::RealObservable("Energy")
          << alps::accumulator::RealObservable("Magnetization")
          << alps::accumulator::RealObservable("Magnetization^2")

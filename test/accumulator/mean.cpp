@@ -4,7 +4,7 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2013 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2011 - 2013 by Lukas Gamper <gamperl@gmail.com>                   *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -25,65 +25,35 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_TUTORIAL_ISING_HPP
-#define ALPS_TUTORIAL_ISING_HPP
+#include <alps/ngs/config.hpp>
 
-#include <alps/hdf5/archive.hpp>
-#include <alps/hdf5/vector.hpp>
+#ifndef ALPS_NGS_USE_NEW_ALEA
+#error "This test only works with new alea library"
+#endif
 
-#include <alps/ngs/params.hpp>
 #include <alps/ngs/accumulator/accumulator.hpp>
 
-#include <boost/function.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/random/mersenne_twister.hpp>
+#include <cassert>
 
-#include <vector>
-#include <string>
+#include <iostream>
 
-class ALPS_DECL ising_sim {
 
-    typedef alps::accumulator::accumulator_set accumulators_type;
+int main() {
 
-    public:
+	alps::accumulator::accumulator_set measurements;
+	measurements << alps::accumulator::RealObservable("obs1")
+				 << alps::accumulator::RealObservable("obs2");
 
-        typedef alps::params parameters_type;
-        typedef std::vector<std::string> result_names_type;
-        typedef alps::accumulator::result_set results_type;
+	for (int i = 1; i < 1000; ++i) {
+		measurements["obs1"] << 1.;
+		assert(measurements["obs1"].mean<double>() == 1.);
+		measurements["obs2"] << i;
+		assert(measurements["obs2"].mean<double>() == double(i + 1) / 2.);
+	}
 
-        ising_sim(parameters_type const & params);
+	alps::accumulator::result_set results(measurements);
+	assert(results["obs1"].mean<double>() == 1.);
+	assert(results["obs2"].mean<double>() == 500.);
 
-        void update();
-        void measure();
-        double fraction_completed() const;
-        bool run(boost::function<bool ()> const & stop_callback);
-
-        result_names_type result_names() const;
-        result_names_type unsaved_result_names() const;
-        results_type collect_results() const;
-        results_type collect_results(result_names_type const & names) const;
-
-        void save(boost::filesystem::path const & filename) const;
-        void load(boost::filesystem::path const & filename);
-        void save(alps::hdf5::archive & ar) const;
-        void load(alps::hdf5::archive & ar);
-
-    protected:
-
-        parameters_type parameters;
-        boost::variate_generator<boost::mt19937, boost::uniform_real<> > random;
-        accumulators_type measurements;
-
-    private:
-        
-        int length;
-        int sweeps;
-        int thermalization_sweeps;
-        int total_sweeps;
-        double beta;
-        std::vector<int> spins;
-};
-
-#endif
+    return EXIT_SUCCESS;
+}

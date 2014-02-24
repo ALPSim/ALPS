@@ -24,7 +24,7 @@
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import pyalps.hdf5 as hdf5
-import pyalps.ngs as ngs
+import pyalps.ngs as ngs # move mcbase usw to pyalps.montecarlo
 import numpy as np
 import sys
 
