@@ -279,11 +279,12 @@ void local_configuration::remove_segment(const segment &new_segment, int orbital
 }
 //compute the segment overlap and segment length, and return the weight
 //this is an O(k n_orbital) procedure in the expansion order and the number or orbitals.
-double local_configuration::local_energy(const segment &seg, int orb) const{
+double local_configuration::local_energy(const segment &seg, int orb,bool d_mu_only) const{
     //the chemical potential term: just needs a segment length
     double length=seg.t_end_-seg.t_start_;
     if(length<0) length+=beta_; //wraparound segment
     double energy = mu_[orb]*length;
+    if (d_mu_only) return energy;
     //std::cout<<clmagenta<<"chemical potential weight is: "<<weight<<" mu: "<<mu_[orb]<<" length: "<<length<<cblack<<std::endl;
     
     //the interaction term needs the overlap between this orbital and all the other orbitals

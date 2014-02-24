@@ -43,8 +43,8 @@ hyb_config(parms)
   show_info(parms,crank);
   
   //initializing general simulation constants
-  nacc.assign(6,0.);
-  nprop.assign(6,0.);
+  nacc.assign(7,0.);
+  nprop.assign(7,0.);
   sweep_count=0;
   output_period=parms["OUTPUT_PERIOD"]|100000;
   //lasttime = boost::chrono::steady_clock::now();
@@ -57,6 +57,7 @@ hyb_config(parms)
   update_type.push_back("insert anti-segment ");
   update_type.push_back("remove anti-segment ");
   update_type.push_back("swap segment        ");
+  update_type.push_back("global flip         ");
   
   sweeps=0;                                                                        //Sweeps currently done
   thermalization_sweeps = parms["THERMALIZATION"];                                 //Sweeps to be done for thermalization
@@ -71,18 +72,19 @@ hyb_config(parms)
   MU_ =
       parms["MU"];
   
-  if ((parms["USE_FRACTION"]| 0)) {
-    fraction = beta/((U_>MU_)?MU_:U_);
-//    std::cerr << "Using only " << fraction << " of segments" << std::endl;
-  }
-  else fraction = beta;
+//  if ((parms["USE_FRACTION"]| 0)) {
+//    fraction = beta/((U_>MU_)?MU_:U_);
+////    std::cerr << "Using only " << fraction << " of segments" << std::endl;
+//  }
+//  else fraction = beta;
   
   //initializing updates parameters
   N_meas = parms["N_MEAS"];                                                        //number of updates per measurement
   N_hist_orders = parms["N_HISTOGRAM_ORDERS"]|50;                                  //number of orders that are measured for the order histogram
   
   //initializing measurement parameters
-  spin_flip = parms["SPINFLIP"]| 0;                                                //whether to perform spin-flip updates
+  spin_flip = parms["SPINFLIP"]| 0;                                                //whether to perform local spin-flip updates
+  global_flip = parms["GLOBALFLIP"]| 0;                                                //whether to perform global spin-flip updates
   MEASURE_nnt = parms["MEASURE_nnt"]| 0;                                           //measure density-density correlation function in imaginary time
   MEASURE_nnw = parms["MEASURE_nnw"]| 0;                                           //measure density-density correlation function in frequency
   MEASURE_nn = parms["MEASURE_nn"]|0;                                              //measure density-density correlation function at equal times

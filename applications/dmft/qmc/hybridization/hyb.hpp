@@ -96,6 +96,7 @@ private:
 
   //Monte Carlo update routines
   void change_zero_order_state_update();
+  void global_flip_update();
   void shift_segment_update();
   void insert_remove_segment_update();
   void insert_remove_antisegment_update();
@@ -137,7 +138,7 @@ private:
   std::size_t N_w_aux;//number of Matsubara frequency points for the measurment of M(w1,w2)
   std::size_t N_hist_orders;
   std::size_t N_nn;
-  bool spin_flip;
+  bool spin_flip,global_flip;
   bool MEASURE_nnt;
   bool MEASURE_nnw;
   bool MEASURE_nn;

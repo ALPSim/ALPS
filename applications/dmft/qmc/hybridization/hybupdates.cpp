@@ -30,41 +30,35 @@
 #include"hyblocal.hpp"
 
 //this is the heart of the Monte Carlo procedure: we have the following updates:
-//1: change the zero order state, swap an empty orbital versus a filled one
-//2: shift an existing segment start- or end-point
-//3: insert or remove a new segment
-//4: insert or remove an anti-segment
-//5: perform a segment flip between different orbtials
+//1: change the zero order state, swap an empty orbital versus a filled one (8% or 10%)
+//2: shift an existing segment start- or end-point (not implemented)
+//3: insert or remove a new segment (40% or 50%)
+//4: insert or remove an anti-segment (30% or 40%)
+//5: perform a segment flip between different orbtials (20%)
+//6: perform a global exchange of two orbitals (2%)
 //see our review for details of these updates
+
 void hybridization::update(){
 
   //one sweep is composed of N_MEAS Monte Carlo updates and one measurement (the latter only if thermalized)
   sweeps++;
+  
+  double rates[2] = {(spin_flip)?0.5:0.6,(spin_flip)?0.8:1.0};
 
   for(std::size_t i=0;i<N_meas;++i){
     double update_type=random();
-    if(spin_flip){
-      if(update_type < 0.1){
-        change_zero_order_state_update();
-      }else if(update_type < 0){
-        shift_segment_update();
-      }else if(update_type < 0.5){
-        insert_remove_segment_update();
-      }else if(update_type < 0.8){
-        insert_remove_antisegment_update();
-      }else{
-        insert_remove_spin_flip_update();
-      }
-    }else{
-      if(update_type < 0.1){
-        change_zero_order_state_update();
-      }else if(update_type < 0){
-        shift_segment_update();
-      }else if(update_type < 0.6){
-        insert_remove_segment_update();
-      }else{
-        insert_remove_antisegment_update();
-      }
+    if (update_type < 0.02 && global_flip){
+      global_flip_update();
+    } else if (update_type<0.1) {
+      change_zero_order_state_update();
+//    } else if (update_type < 0) {
+//      shift_segment_update();
+    } else if (update_type < rates[0]) {
+      insert_remove_segment_update();
+    } else if (update_type < rates[1]) {
+      insert_remove_antisegment_update();
+    } else {
+      insert_remove_spin_flip_update();
     }
 
     if(is_thermalized()){
@@ -128,6 +122,89 @@ void hybridization::change_zero_order_state_update(){
     }
   }
 }
+
+// Perform a complete swap of segments between two orbitals
+// THIS IS TOTALLY EXPERIMENTAL
+// Not (yet) optimized
+void hybridization::global_flip_update()
+{
+  nprop[6]++;
+  // Pick orbital 1
+  int orbital1=(int)(random()*n_orbitals);
+  // Pick orbital 2 from the rest
+  int orbital2=(int)(random()*(n_orbitals-1));
+  orbital2 = (orbital2<orbital1)?orbital2:1+orbital2;
+  
+  // These are the actual orders for each of the orbitals
+  int k1 = local_config.order(orbital1),k2=local_config.order(orbital2);
+  // At present we do nothing if one is empty (can be relaxed, I think)
+  if (k1==0 || k2==0) return;
+  // We need to store the segments for the swap
+  // This is quite clumsy. However, I did not succeed in generating an
+  // intermediate copy of hyb_config. I tried to implement a copy constructor,
+  // but this clashed in a seg-fault when trying to delete it
+  std::vector<segment> seg1(k1),seg2(k2);
+  // I brutally compute the change in hybridization configuration by simply
+  // deleting successivley all segments from orbital 1 and then inserting the
+  // ones from orbital 2; likewise for orbital 2.
+  // The local weight change I compute from the local energy, taking into account
+  // the mu-part only (this is the meaning of the bool in local_energy call;
+  // should be fine for Coulomb only as the segments do not really change, but
+  // may cause trouble when Hund is present.
+  double total_hyb_weight_change = 1.0,d_e=0.0;
+  for (int k=0;k<k1;k++) {
+    seg1[k] = local_config.get_segment(k,orbital1);
+    d_e -= local_config.local_energy(seg1[k],orbital1,true);
+    total_hyb_weight_change /= hyb_config.hyb_weight_change_remove(seg1[k],orbital1);
+    hyb_config.remove_segment(seg1[k],orbital1);
+  }
+  for (int k=0;k<k2;k++) {
+    seg2[k] = local_config.get_segment(k,orbital2);
+    d_e += local_config.local_energy(seg2[k],orbital1,true);
+    total_hyb_weight_change *= hyb_config.hyb_weight_change_insert(seg2[k],orbital1);
+    hyb_config.insert_segment(seg2[k],orbital1);
+  }
+  for (int k=0;k<k2;k++) {
+    d_e -= local_config.local_energy(seg2[k],orbital2,true);
+    total_hyb_weight_change /= hyb_config.hyb_weight_change_remove(seg2[k],orbital2);
+    hyb_config.remove_segment(seg2[k],orbital2);
+  }
+  for (int k=0;k<k1;k++) {
+    d_e += local_config.local_energy(seg1[k],orbital2,true);
+    total_hyb_weight_change *= hyb_config.hyb_weight_change_insert(seg1[k],orbital2);
+    hyb_config.insert_segment(seg1[k],orbital2);
+  }
+  // This is the total weight change due to the swap. If all orbitals are
+  // equivalent (and the expansion order is the same) this should be one.
+  double weight_change = exp(d_e)*total_hyb_weight_change;
+  // Since the total expansion order does not change, there should be no
+  // permutation factor appearing here
+
+  
+  // MC move
+  if(std::abs(weight_change)>random()){
+    nacc[6]++;
+    if(weight_change < 0) sign*=-1.;
+    // Accepted. Now we have to update the local configuration
+    for (int k=0;k<k1;k++) local_config.remove_segment(seg1[k],orbital1);
+    for (int k=0;k<k2;k++) {
+      local_config.remove_segment(seg2[k],orbital2);
+      local_config.insert_segment(seg2[k],orbital1);
+    }
+    for (int k=0;k<k1;k++) local_config.insert_segment(seg1[k],orbital2);
+  } else {
+    // Rejected. We have to restore the old configuration
+    for (int k=0;k<k1;k++) hyb_config.remove_segment(seg1[k],orbital2);
+    for (int k=0;k<k2;k++) {
+      hyb_config.insert_segment(seg2[k],orbital2);
+      hyb_config.remove_segment(seg2[k],orbital1);
+    }
+    for (int k=0;k<k1;k++) hyb_config.insert_segment(seg1[k],orbital1);
+  }
+// Done.
+}
+
+
 void hybridization::shift_segment_update(){
   ///TODO: implement this update!
 }
@@ -331,7 +408,8 @@ void hybridization::spin_flip_update(int orbital){
   
   if(k==0) return; //no point, this is an empty orbital
   //    if (local_config.zero_order_orbital_occupied(orbital)) return;
-  int other_orbital=(int)(random()*n_orbitals);
+  int other_orbital=(int)(random()*(n_orbitals-1));
+  other_orbital = (other_orbital<orbital)?other_orbital:1+other_orbital;
   int other_orbital_order=local_config.order(other_orbital);
   if (orbital == other_orbital) return;
   if (local_config.zero_order_orbital_occupied(other_orbital)) return;

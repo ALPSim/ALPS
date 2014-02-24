@@ -45,7 +45,7 @@ typedef std::map<double,int> state_map;
 typedef class local_configuration{
 public:
   local_configuration(const alps::params &p, int crank);
-  double local_energy(const segment &seg, int orb) const;
+  double local_energy(const segment &seg, int orb,bool d_mu_only=false) const;
   double local_weight_change(const segment &seg, int orb, bool antisegment) const;
   int order(int orbital) const{ return segments_[orbital].size(); }
   int n_orbitals() const{ return n_orbitals_; }
