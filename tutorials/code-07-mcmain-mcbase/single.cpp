@@ -44,6 +44,7 @@ int main(int argc, char *argv[]) {
         alps::parseargs options(argc, argv);
         std::string checkpoint_file = options.input_file.substr(0, options.input_file.find_last_of('.')) +  ".clone0.h5";
 
+        // TODO: make load_params
         alps::parameters_type<ising_sim>::type parameters;
         // TODO: better check the first few bytes. provide an ALPS function to do so
         if (boost::filesystem::extension(options.input_file) == ".xml")

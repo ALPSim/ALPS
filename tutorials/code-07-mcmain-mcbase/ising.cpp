@@ -75,7 +75,9 @@ void ising_sim::measure() {
             for (int d = 0; d < length; ++d)
                 corr[d] += spins[i] * spins[( i + d ) % length ];
         }
-        std::transform(corr.begin(), corr.end(), corr.begin(), boost::lambda::_1 / double(length));
+        // pull in operator/ for vectors
+        using alps::ngs::numeric::operator/;
+        corr = corr / double(length);
         ten /= length;
         tmag /= length;
         measurements["Energy"] << ten;
@@ -92,12 +94,8 @@ double ising_sim::fraction_completed() const {
 
 void ising_sim::save(alps::hdf5::archive & ar) const {
     mcbase::save(ar);
-
-    std::string context = ar.get_context();
-    ar.set_context("/simulation/realizations/0/clones/0/checkpoint");
-    ar["sweeps"] << sweeps;
-    ar["spins"] << spins;
-    ar.set_context(context);
+    ar["checkpoint/sweeps"] << sweeps;
+    ar["checkpoint/spins"] << spins;
 }
 
 void ising_sim::load(alps::hdf5::archive & ar) {
@@ -108,9 +106,6 @@ void ising_sim::load(alps::hdf5::archive & ar) {
     total_sweeps = int(parameters["SWEEPS"]);
     beta = 1. / double(parameters["T"]);
 
-    std::string context = ar.get_context();
-    ar.set_context("/simulation/realizations/0/clones/0/checkpoint");
-    ar["sweeps"] >> sweeps;
-    ar["spins"] >> spins;
-    ar.set_context(context);
+    ar["checkpoint/sweeps"] >> sweeps;
+    ar["checkpoint/spins"] >> spins;
 }

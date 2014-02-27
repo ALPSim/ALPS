@@ -76,7 +76,9 @@ void ising_sim::measure() {
             for (int d = 0; d < length; ++d)
                 corr[d] += spins[i] * spins[( i + d ) % length ];
         }
-        std::transform(corr.begin(), corr.end(), corr.begin(), boost::lambda::_1 / double(length));
+        // pull in operator/ for vectors
+        using alps::ngs::numeric::operator/;
+        corr = corr / double(length);
         ten /= length;
         tmag /= length;
         measurements["Energy"] << ten;
@@ -125,25 +127,20 @@ ising_sim::results_type ising_sim::collect_results(result_names_type const & nam
 
 void ising_sim::save(boost::filesystem::path const & filename) const {
     alps::hdf5::archive ar(filename, "w");
-    ar["/"] << *this;
+    ar["/simulation/realizations/0/clones/0"] << *this;
 }
 
 void ising_sim::load(boost::filesystem::path const & filename) {
     alps::hdf5::archive ar(filename);
-    ar["/"] >> *this;
+    ar["/simulation/realizations/0/clones/0"] >> *this;
 }
 
 void ising_sim::save(alps::hdf5::archive & ar) const {
-    std::string context = ar.get_context();
-
     ar["/parameters"] << parameters;
 
-    ar.set_context("/simulation/realizations/0/clones/0");
     ar["measurements"] << measurements;
-
-    ar.set_context("checkpoint");
-    ar["sweeps"] << sweeps;
-    ar["spins"] << spins;
+    ar["checkpoint/sweeps"] << sweeps;
+    ar["checkpoint/spins"] << spins;
 
     {
         std::ostringstream os;
@@ -151,24 +148,19 @@ void ising_sim::save(alps::hdf5::archive & ar) const {
         ar["engine"] << os.str();
     }
 
-    ar.set_context(context);
 }
 
 void ising_sim::load(alps::hdf5::archive & ar) {
-    std::string context = ar.get_context();
-
     ar["/parameters"] >> parameters;
     length = int(parameters["L"]);
     thermalization_sweeps = int(parameters["THERMALIZATION"]);
     total_sweeps = int(parameters["SWEEPS"]);
     beta = 1. / double(parameters["T"]);
 
-    ar.set_context("/simulation/realizations/0/clones/0");
     ar["measurements"] >> measurements;
 
-    ar.set_context("checkpoint");
-    ar["sweeps"] >> sweeps;
-    ar["spins"] >> spins;
+    ar["checkpoint/sweeps"] >> sweeps;
+    ar["checkpoint/spins"] >> spins;
 
     {
         std::string state;
@@ -176,6 +168,4 @@ void ising_sim::load(alps::hdf5::archive & ar) {
         std::istringstream is(state);
         is >> random.engine();
     }
-
-    ar.set_context(context);
 }
