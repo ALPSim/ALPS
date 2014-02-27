@@ -145,7 +145,7 @@ void ising_sim::save(alps::hdf5::archive & ar) const {
     {
         std::ostringstream os;
         os << random.engine();
-        ar["engine"] << os.str();
+        ar["checkpoint/engine"] << os.str();
     }
 
 }
@@ -164,7 +164,7 @@ void ising_sim::load(alps::hdf5::archive & ar) {
 
     {
         std::string state;
-        ar["engine"] >> state;
+        ar["checkpoint/engine"] >> state;
         std::istringstream is(state);
         is >> random.engine();
     }

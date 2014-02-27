@@ -81,8 +81,8 @@ class sim(ngs.mcbase):
     
         try:
             ngs.mcbase.save(self, ar)
-            ar["/simulation/realizations/0/clones/0/checkpoint/sweeps"] = self.sweeps
-            ar["/simulation/realizations/0/clones/0/checkpoint/spins"] = self.spins
+            ar["checkpoint/sweeps"] = self.sweeps
+            ar["checkpoint/spins"] = self.spins
 
         except:
             traceback.print_exc(file=sys.stderr)
@@ -98,8 +98,8 @@ class sim(ngs.mcbase):
             self.total_sweeps = int(self.parameters["SWEEPS"]);
             self.beta = 1. / double(self.parameters["T"]);
 
-            self.sweeps = ar["/simulation/realizations/0/clones/0/sweeps"]
-            self.spins = ar["/simulation/realizations/0/clones/0/spins"]
+            self.sweeps = ar["checkpoint/sweeps"]
+            self.spins = ar["checkpoint/spins"]
 
         except:
             traceback.print_exc(file=sys.stderr)

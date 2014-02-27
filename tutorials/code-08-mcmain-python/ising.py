@@ -87,11 +87,11 @@ class sim:
 
     def save(self, filename):
         with hdf5.archive(filename, 'w') as ar:
-            ar['/'] = self
+            ar['/simulation/realizations/0/clones/0'] = self
 
     def load(self, filename):
         with hdf5.archive(filename, 'r') as ar:
-            self = ar['/']
+            self = ar['/simulation/realizations/0/clones/0']
 
     def run(self, stopCallback):
         stopped = False
@@ -121,16 +121,10 @@ class sim:
         try:
 
             ar["/parameters"] = self.parameters
-            context = ar.context
-            ar.set_context("/simulation/realizations/0/clones/0")
             ar["measurements"] = self.measurements
-
-            ar.set_context("checkpoint")
-            ar["sweeps"] = self.sweeps
-            ar["spins"] = self.spins
-            ar["engine"] = self.random
-
-            ar.set_context(context);
+            ar["checkpoint/sweeps"] = self.sweeps
+            ar["checkpoint/spins"] = self.spins
+            ar["checkpoint/engine"] = self.random
 
         except:
             traceback.print_exc(file=sys.stderr)
@@ -142,8 +136,6 @@ class sim:
         
             self.parameters.load(ar["/parameters"]) # TODO: do we want to load the parameters?
 
-            context = ar.context
-            ar.set_context("/simulation/realizations/0/clones/0")
             ar["measurements"] = self.measurements
 
             self.length = int(self.parameters["L"]);
@@ -151,12 +143,9 @@ class sim:
             self.total_sweeps = int(self.parameters["SWEEPS"]);
             self.beta = 1. / double(self.parameters["T"]);
 
-            ar.set_context("checkpoint")
-            self.sweeps = ar["sweeps"]
-            self.spins = ar["spins"]
-            self.random.load(ar["engine"])
-
-            ar.set_context(context)
+            self.sweeps = ar["checkpoint/sweeps"]
+            self.spins = ar["checkpoint/spins"]
+            self.random.load(ar["checkpoint/engine"])
 
         except:
             traceback.print_exc(file=sys.stderr)
