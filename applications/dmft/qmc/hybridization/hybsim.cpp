@@ -81,7 +81,8 @@ hyb_config(parms)
   //initializing updates parameters
   N_meas = parms["N_MEAS"];                                                        //number of updates per measurement
   N_hist_orders = parms["N_HISTOGRAM_ORDERS"]|50;                                  //number of orders that are measured for the order histogram
-  
+  NUM_BINS = parms["NUM_BINS"]|0;
+  //std::cerr << "NUM_BINS = " << NUM_BINS << std::endl;
   //initializing measurement parameters
   spin_flip = parms["SPINFLIP"]| 0;                                                //whether to perform local spin-flip updates
   global_flip = parms["GLOBALFLIP"]| 0;                                                //whether to perform global spin-flip updates

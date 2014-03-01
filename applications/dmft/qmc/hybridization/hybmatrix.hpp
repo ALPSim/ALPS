@@ -41,6 +41,10 @@ typedef std::map<double,std::size_t> hyb_map_t;
 class hybmatrix:public blas_matrix{
 public:
   hybmatrix(const alps::params &p){ determinant_=1.; determinant_old_=1.; permutation_sign_=1.; beta_=p["BETA"]; measure_g2w_=p["MEASURE_g2w"]|0; measure_h2w_=p["MEASURE_h2w"]|0; }
+  hybmatrix(const hybmatrix &rhs) : cdagger_index_map_(rhs.cdagger_index_map_),c_index_map_(rhs.c_index_map_),beta_(rhs.beta_),measure_g2w_(rhs.measure_g2w_),measure_h2w_(rhs.measure_h2w_),S(rhs.S),S_tilde_inv(rhs.S_tilde_inv),S_tilde(rhs.S_tilde),weight_ratio_(rhs.weight_ratio_),permutation_sign_(rhs.permutation_sign_),determinant_(rhs.determinant_),determinant_old_(rhs.determinant_old_),Q(rhs.Q),R(rhs.R),PinvQ(rhs.PinvQ),blas_matrix(rhs) {;}
+  ~hybmatrix() {
+//    std::cerr << "Deleting hybmatrix\n";
+  }
   double hyb_weight_change_insert(const segment &new_segment, int orbital, const hybfun &Delta);
   double hyb_weight_change_remove(const segment &new_segment, int orbital, const hybfun &Delta);
   void insert_segment(const segment &new_segment, int orbital);

@@ -288,7 +288,8 @@ double local_configuration::local_energy(const segment &seg, int orb,bool d_mu_o
     //std::cout<<clmagenta<<"chemical potential weight is: "<<weight<<" mu: "<<mu_[orb]<<" length: "<<length<<cblack<<std::endl;
     
     //the interaction term needs the overlap between this orbital and all the other orbitals
-    static std::vector<double> overlaps(n_orbitals_, 0.); for(int i=0;i<n_orbitals_;++i) overlaps[i]=0.;
+    static std::vector<double> overlaps(n_orbitals_, 0.);
+    for(int i=0;i<n_orbitals_;++i) overlaps[i]=0.;
     for(int i=0;i<n_orbitals_;++i){
         if(i==orb) continue;
         
