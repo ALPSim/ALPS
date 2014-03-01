@@ -220,9 +220,12 @@ void hybridization::global_flip_update()
   int k1 = local_config.order(orbital1),k2=local_config.order(orbital2);
   // At present we do nothing if one is empty (can be relaxed, I think)
   if (k1==0 || k2==0) return;
+  std::vector<int> orbitals(2);
+  orbitals[0] = orbital1;
+  orbitals[1] = orbital2;
   //std::cerr << "On entry:" << std::endl;
   //hyb_config.dump();
-  //std::cerr << "Orbitals picked are " << orbital1 << " and " << orbital2 << std::endl;
+//  std::cerr << "Orbitals picked are " << orbital1 << " and " << orbital2 << std::endl;
   // We need to store the segments for the swap
   // This is quite clumsy. However, I did not succeed in generating an
   // intermediate copy of hyb_config. I tried to implement a copy constructor,
@@ -273,8 +276,8 @@ void hybridization::global_flip_update()
   // Since the total expansion order does not change, there should be no
   // permutation factor appearing here
   //std::cerr << "In between: de = " << d_e << ", total hyb weight change = "<< total_hyb_weight_change << std::endl;
-  hyb_config.rebuild();
-  //hyb_config.dump();
+//  hyb_config.dump();
+  hyb_config.rebuild(orbitals);
 
   // MC move
   if(std::abs(weight_change)>random()){
@@ -299,7 +302,8 @@ void hybridization::global_flip_update()
       hyb_config.insert_segment(seg2[k],orbital2);
       local_config.insert_segment(seg2[k],orbital2);
     }
-    hyb_config.rebuild();
+//    hyb_config.dump();
+    hyb_config.rebuild(orbitals);
   }
   local_config.check_consistency();
   //std::cerr << "On exit:" << std::endl;

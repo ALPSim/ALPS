@@ -44,6 +44,15 @@ void hybridization_configuration::rebuild() {
     hybmat_[i].rebuild_hyb_matrix(i,Delta);
 }
 
+void hybridization_configuration::rebuild(int orbital) {
+  hybmat_[orbital].rebuild_hyb_matrix(orbital,Delta);
+}
+
+void hybridization_configuration::rebuild(std::vector<int> orbital) {
+  for (int i=0;i<orbital.size();i++)
+    hybmat_[orbital[i]].rebuild_hyb_matrix(orbital[i],Delta);
+}
+
 double hybridization_configuration::hyb_weight_change_insert(const segment &new_segment, int orbital){
   return hybmat_[orbital].hyb_weight_change_insert(new_segment, orbital, Delta); //hand this off to the determinant matrix
 }

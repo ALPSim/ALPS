@@ -64,6 +64,8 @@ public:
     
   void dump();
   void rebuild();
+  void rebuild(int orbital);
+  void rebuild(std::vector<int> orbital);
 
   void measure_G(std::vector<std::vector<double> > &G, std::vector<std::vector<double> > &F, const std::vector<std::map<double,double> > &F_prefactor, double sign) const;
   void measure_Gw(std::vector<std::vector<double> > &Gwr,std::vector<std::vector<double> > &Gwi,std::vector<std::vector<double> > &Fwr,std::vector<std::vector<double> > &Fwi, const std::vector<std::map<double,double> > &F_prefactor, double sign) const;
