@@ -136,7 +136,7 @@ void Scheduler::checkpoint_status() const
                 status = "running";
             
             if (tasks[i].status == TaskNotStarted && !boost::filesystem::exists(tasks[i].out))
-                boost::filesystem::copy(tasks[i].in, tasks[i].out);
+                copy(tasks[i].in, tasks[i].out);
             
             out << alps::start_tag("TASK") << alps::attribute("status", status)
                 << alps::start_tag("INPUT")
@@ -170,7 +170,7 @@ void Scheduler::run()
                 tasks[i].status = TaskRunning;
                 std::cout  << "Running task " << i+1 << "." << std::endl;
                 if (!boost::filesystem::exists(tasks[i].out))
-                    boost::filesystem::copy(tasks[i].in, tasks[i].out);
+                    copy(tasks[i].in, tasks[i].out);
 
                 /// Start task
                 run_sim(tasks[i].in, tasks[i].out, time_left);
