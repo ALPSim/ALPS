@@ -14,7 +14,7 @@ if (ALPS_BUILD_SOURCE)
 
   install(DIRECTORY .
           DESTINATION ${destdir}
-          FILES_MATCHING PATTERN "*.py" PATTERN "parm*" PATTERN "*.vt" PATTERN "*.xml" PATTERN "*input*" PATTERN "*parm" PATTERN "*params" PATTERN "*.ip" PATTERN "*.op" PATTERN "*.dat"
+          FILES_MATCHING PATTERN "*.py" PATTERN "*.ipynb" PATTERN "parm*" PATTERN "*.vt" PATTERN "*.xml" PATTERN "*input*" PATTERN "*parm" PATTERN "*params" PATTERN "*.ip" PATTERN "*.op" PATTERN "*.dat"
 	  PATTERN "*.h" PATTERN "*.c" PATTERN "*.cpp" PATTERN "*.C" PATTERN "*.f" PATTERN "*.f90" PATTERN "Makefile" PATTERN "CMakeLists.txt" 
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE 
           PATTERN "*.h5" EXCLUDE  EXCLUDE  PATTERN "parm*xml" EXCLUDE
@@ -22,7 +22,7 @@ if (ALPS_BUILD_SOURCE)
           PATTERN "*.xsl" EXCLUDE PATTERN "*.run*" EXCLUDE)
 else (ALPS_BUILD_SOURCE)
   install(DIRECTORY . DESTINATION tutorials COMPONENT tutorials
-          FILES_MATCHING PATTERN "*.py" PATTERN "parm*" PATTERN "*params" PATTERN "*.ip" PATTERN "*.op" PATTERN "*.dat"
+          FILES_MATCHING PATTERN "*.py" PATTERN "*.ipynb" PATTERN "parm*" PATTERN "*params" PATTERN "*.ip" PATTERN "*.op" PATTERN "*.dat"
           PATTERN "*.parm" PATTERN "*.vt" PATTERN "*.xml" PATTERN "*input*"
 	  PATTERN "*.h" PATTERN "*.c" PATTERN "*.cpp" PATTERN "*.C" PATTERN "*.f" PATTERN "*.f90" PATTERN "Makefile" PATTERN "CMakeLists.txt"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE 
