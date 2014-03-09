@@ -15,10 +15,11 @@ debian/tmp/usr/bin/fleas_direct usr/bin/
 debian/tmp/usr/bin/fleas_independent usr/bin/
 debian/tmp/usr/bin/fleas_simpleminded usr/bin/
 debian/tmp/usr/bin/fleas_uncorrelated usr/bin/
-debian/tmp/usr/bin/lattice-preview usr/bin/
 debian/tmp/usr/bin/lattice2xml usr/bin/
+debian/tmp/usr/bin/lattice-preview usr/bin/
 debian/tmp/usr/bin/maxent usr/bin/
 debian/tmp/usr/bin/p2h5 usr/bin/
+debian/tmp/usr/bin/parameter2hdf5 usr/bin/
 debian/tmp/usr/bin/parameter2xml usr/bin/
 debian/tmp/usr/bin/pconfig usr/bin/
 debian/tmp/usr/bin/pevaluate usr/bin/

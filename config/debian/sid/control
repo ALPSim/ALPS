@@ -1,13 +1,13 @@
 Source: alps
 Section: non-free
 Priority: extra
-Maintainer: Ryo IGARASHI <rigarash@issp.u-tokyo.ac.jp> and Synge Todo <wistaria@issp.u-tokyo.ac.jp>
+Maintainer: Ryo IGARASHI <rigarash@issp.u-tokyo.ac.jp> and Synge Todo <wistaria@phys.s.u-tokyo.ac.jp>
 Build-Depends: cdbs, debhelper (>= 7.0.50~), cmake,
- libboost-date-time-dev (>= 1.42.0), libboost-filesystem-dev (>=
- 1.42.0), libboost-mpi-dev (>= 1.42.0), libboost-program-options-dev
- (>= 1.42.0), libboost-python-dev (>= 1.42.0), libboost-regex-dev (>=
- 1.42.0), libboost-serialization-dev (>= 1.42.0), libboost-system-dev
- (>= 1.42.0), libboost-thread-dev (>= 1.42.0), libhdf5-serial-dev |
+ libboost-date-time-dev (>= 1.47.0), libboost-filesystem-dev (>=
+ 1.47.0), libboost-mpi-dev (>= 1.47.0), libboost-program-options-dev
+ (>= 1.47.0), libboost-python-dev (>= 1.47.0), libboost-regex-dev (>=
+ 1.47.0), libboost-serialization-dev (>= 1.47.0), libboost-system-dev
+ (>= 1.47.0), libboost-thread-dev (>= 1.47.0), libhdf5-serial-dev |
  libhdf5-dev, mpi-default-dev, libsqlite3-dev, python-matplotlib,
  liblapack-dev, gfortran
 Standards-Version: 3.9.1
@@ -16,7 +16,6 @@ Vcs-Svn: https://rigarash@alps.comp-phys.org/svn/alps1/trunk/alps
 Vcs-Browser: https://alps.comp-phys.org/trac/browser
 
 Package: task-alps
-Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, alps-applications, alps-tutorials, libalps, libalps-bin, libalps-dbg, libalps-dev, libboost-numeric-bindings-dev, python-pyalps
 Description: The ALPS project - Libraries, Applications, and Tutorials
@@ -28,7 +27,6 @@ Description: The ALPS project - Libraries, Applications, and Tutorials
  This package installs all the ALPS libraries, applications, and tutorials.
 
 Package: libalps
-Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: The ALPS project - Library
@@ -40,7 +38,6 @@ Description: The ALPS project - Library
  This package contains shared library of ALPS Library.
 
 Package: libalps-dbg
-Section: debug
 Architecture: any
 Depends: libalps (= ${binary:Version}), ${misc:Depends}
 Description: The ALPS project - Library with debugging symbols
@@ -52,7 +49,6 @@ Description: The ALPS project - Library with debugging symbols
  This package contains debugging symbols of ALPS Library.
 
 Package: libalps-dev
-Section: libdevel
 Architecture: any
 Depends: libalps (= ${binary:Version}),
  libboost-numeric-bindings-dev, ${misc:Depends}
@@ -66,7 +62,6 @@ Description: The ALPS project - Development files
  This package contains development files of ALPS Library.
 
 Package: libboost-numeric-bindings-dev
-Section: libdevel
 Architecture: any
 Depends: ${misc:Depends}
 Description: Numeric Bindings Library for Linear Algebra
@@ -74,7 +69,6 @@ Description: Numeric Bindings Library for Linear Algebra
  collections.
 
 Package: libalps-bin
-Section: libdevel
 Architecture: any
 Depends: libalps (= ${binary:Version}), ${shlibs:Depends},
  ${misc:Depends}
@@ -101,7 +95,6 @@ Description: The ALPS project - Application binaries
  This package contains application binary.
 
 Package: python-pyalps
-Section: python
 Architecture: any
 Depends: libalps (= ${binary:Version}), python2.7, python-numpy,
  python-matplotlib, ${shlibs:Depends},
