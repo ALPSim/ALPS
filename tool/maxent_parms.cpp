@@ -350,14 +350,35 @@ void ContiParameters::setup_kernel(const alps::params& p, const int ntab, const 
     vector_type var(ndat());
     bindings::lapack::syev('V', bindings::upper(cov_) , var, bindings::lapack::optimal_workspace());
     matrix_type cov_trans = ublas::trans(cov_);
-    K_ = ublas::prec_prod(cov_trans, K_);
-    y_ = ublas::prec_prod(cov_trans, y_);
+    matrix_type K_loc = ublas::prec_prod(cov_trans, K_);
+    vector_type y_loc = ublas::prec_prod(cov_trans, y_);
     if (alps::is_master() && p["VERBOSE"]|false)
       std::cout << "# Eigenvalues of the covariance matrix:\n";
-    for (int i=0; i<ndat(); ++i) { 
-        sigma_[i] = std::sqrt(std::abs(var(i)))/static_cast<double>(p["NORM"]);
+    // We drop eigenvalues of the covariance matrix which are smaller than 1e-10
+    // as they represent bad data directions (usually there is a steep drop
+    // below that value)
+    int new_ndat_,old_ndat_=ndat();
+    for (new_ndat_ =0;new_ndat_<ndat();new_ndat_++)
+      if (var[new_ndat_]>1e-10) break;
+    // This is the number of good data
+    ndat_ = old_ndat_ - new_ndat_;
+    if (alps::is_master())
+      std::cout << "# Ignoring singular eigenvalues (0-" << new_ndat_-1 << " out of " << old_ndat_ << ")\n";
+    // Now resize kernel and data matrix and fill it with the values for the
+    // good data directions
+    K_.resize(ndat_,ntab);
+    y_.resize(ndat_);
+    sigma_.resize(ndat_);
+    for (int i=0; i<ndat(); i++) {
+      y_(i) = y_loc(new_ndat_+i);
+      for (int j=0; j<ntab; j++) {
+        K_(i,j)=K_loc(new_ndat_+i,j);
+      }
+    }
+    for (int i=0; i<ndat(); ++i) {
+        sigma_[i] = std::sqrt(std::abs(var(new_ndat_+i)))/static_cast<double>(p["NORM"]);
       if (alps::is_master() && p["VERBOSE"]|false)
-        std::cout << "# " << var(i) << "\n";
+        std::cout << "# " << var(new_ndat_+i) << "\n";
     }
   } 
   //else {

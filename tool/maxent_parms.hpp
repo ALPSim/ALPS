@@ -68,7 +68,7 @@ private:
   
   boost::shared_ptr<DefaultModel> Default_;
   const double T_;
-  const int ndat_;
+  int ndat_;
 
 protected:
 
