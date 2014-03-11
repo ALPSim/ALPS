@@ -77,7 +77,7 @@ public:
     fortran_int_t inc=1;
     if(s>1){
       FORTRAN_ID(dger)(&s, &s, &alpha,v2, &inc, v1, &inc, values_, &memory_size_); 
-    }else if(1==1){
+    }else if(s==1){
       values_[0]+=alpha*v1[0]*v2[0];
     }else
       return;
