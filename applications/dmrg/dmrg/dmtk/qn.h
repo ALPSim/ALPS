@@ -31,6 +31,7 @@
 #include "constants.h"
 #include "bits.h"
 #include "meta.h"
+#include <cassert>
 
 namespace dmtk 
 {
@@ -84,6 +85,8 @@ class QN
        }
     }
     half_integer_type & operator[](int i) {
+      assert(i >= 0);
+      assert(i <= 5);
       switch(i){
         case 0:
           return _qn0;
@@ -96,6 +99,7 @@ class QN
         case 4:
           return _qn4;
         case 5:
+        default:
           return _qn5;
        }
     }
