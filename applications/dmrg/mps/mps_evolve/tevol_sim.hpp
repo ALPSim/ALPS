@@ -156,6 +156,7 @@ public:
     }
     
 private:
+    using base::results_archive_path; // The following function is an overload, not the virtual function
     std::string results_archive_path(int sweep) const
     {
         status_type status;
@@ -163,6 +164,7 @@ private:
         return base::results_archive_path(status);
     }
     
+    using base::checkpoint_simulation; // The following function is an overload, not the virtual function
     void checkpoint_simulation(MPS<Matrix, SymmGroup> const& state, int sweep)
     {
         status_type status;
