@@ -146,11 +146,11 @@ directed_worm_algorithm
     , _skip                        (parms_.value_or_default("SKIP",1))
     // regarding lattice
     , is_periodic_ (std::find((this->lattice().boundary()).begin(), (this->lattice().boundary()).end(), "open") == (this->lattice().boundary()).end())
-    // regarding worldline
-    , wl (num_sites())
     // regarding experiment
     , finite_tof   (is_periodic_ ? false : (parms_.defined("tof_phase")))
     , finite_waist (parms_.defined("waist"))
+    // regarding worldline
+    , wl (num_sites())
     // regarding measurements
     , measure_                       (parms_.value_or_default("MEASURE",true))
     , measure_simulation_speed_      (parms_.value_or_default("MEASURE[Simulation Speed",true))
@@ -1520,7 +1520,6 @@ void
       neighbor_bond_iterator it=neighbor_bonds(worm.site()).first + random()*num_neighbors(worm.site());
       location_type _neighborlocation  = wl.location(target(*it), worm.time());
       const unsigned short _targetstate = (_neighborlocation.second-1)->state();
-      const bool _increasing = worm.increasing();
       if (  ( worm.increasing() && _targetstate == state_maximum[site_site_type[target(*it)]])
          || (!worm.increasing() && _targetstate == state_minimum[site_site_type[target(*it)]])
          || (!wl.location_is_kink_unoccupied(_neighborlocation, worm.time()))
