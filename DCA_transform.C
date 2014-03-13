@@ -385,26 +385,12 @@ std::vector<double> DCATransformer::tmatrix() const{
   unsigned int nsite=n_cluster_sites();
   std::vector<double> tij(nsite*nsite, 0.);
   for (site_t i=0; i<nsite; ++i) {
-    std::cout<<"site : "<<i<<" ";
-    for (unsigned int d=0; d<dimension(); ++d){
-      std::cout<<cluster_coordinate(i,d)<<" ";
-    }
-    std::cout<<std::endl;
-  }
-  for (site_t i=0; i<nsite; ++i) {
-    std::cout<<"momentum : "<<i<<" ";
-    for (unsigned int d=0; d<dimension(); ++d){
-      std::cout<<cluster_momentum(i,d)<<" ";
-    }
-    std::cout<<std::endl;
-  }
-  for (site_t i=0; i<nsite; ++i) {
     for (site_t j=0; j<nsite; ++j) {
       for (site_t k=0; k<nsite; ++k) {
         double phase = 0.;
         for (unsigned int d=0; d<dimension(); ++d)
           phase += cluster_momentum(k,d)*(cluster_coordinate(i,d)-cluster_coordinate(j,d));
-        std::cout<<"i j k: "<<i<<" "<<j<<" "<<k<<" "<<" epsav: "<<epsav_[k]<<" phase: "<<phase<<std::endl;
+        //std::cout<<"i j k: "<<i<<" "<<j<<" "<<k<<" "<<" epsav: "<<epsav_[k]<<" phase: "<<phase<<std::endl;
         tij[i*nsite+j]+=epsav_[k]*cos(phase)/double(nsite);
       }
     }
