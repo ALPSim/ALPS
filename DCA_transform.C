@@ -380,7 +380,62 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
   }
   return G0_omega_new;
 }
+//fourier transform epsilon_bar to real space using the same convention as in the real-space FT of the GF
+std::vector<double> DCATransformer::tmatrix() const{
+  unsigned int nsite=n_cluster_sites();
+  std::vector<double> tij(nsite*nsite, 0.);
+  for (site_t i=0; i<nsite; ++i) {
+    std::cout<<"site : "<<i<<" ";
+    for (unsigned int d=0; d<dimension(); ++d){
+      std::cout<<cluster_coordinate(i,d)<<" ";
+    }
+    std::cout<<std::endl;
+  }
+  for (site_t i=0; i<nsite; ++i) {
+    std::cout<<"momentum : "<<i<<" ";
+    for (unsigned int d=0; d<dimension(); ++d){
+      std::cout<<cluster_momentum(i,d)<<" ";
+    }
+    std::cout<<std::endl;
+  }
+  for (site_t i=0; i<nsite; ++i) {
+    for (site_t j=0; j<nsite; ++j) {
+      for (site_t k=0; k<nsite; ++k) {
+        double phase = 0.;
+        for (unsigned int d=0; d<dimension(); ++d)
+          phase += cluster_momentum(k,d)*(cluster_coordinate(i,d)-cluster_coordinate(j,d));
+        std::cout<<"i j k: "<<i<<" "<<j<<" "<<k<<" "<<" epsav: "<<epsav_[k]<<" phase: "<<phase<<std::endl;
+        tij[i*nsite+j]+=epsav_[k]*cos(phase)/double(nsite);
+      }
+    }
+  }
+  return tij;
+  
+}
+//write all the essential information to file: averaged moments etc.
+void DCATransformer::write_hdf5(alps::hdf5::archive &ar, const std::string &p) const{
+  std::cout<<"writing DCA transformer information to: "<<p<<" in file: "<<ar.get_filename()<<std::endl;
+  std::cout<<"using row major format"<<std::endl;
+  std::cout<<" name is: "<<(p+"/epsav")<<std::endl;
+  ar<<alps::make_pvp(p+"/epsav", epsav_);
+  ar<<alps::make_pvp(p+"/epssqav", epssqav_);
+  ar<<alps::make_pvp(p+"/dispersion_moments", dispersion_moments_);
+  ar<<alps::make_pvp(p+"/tmatrix", tmatrix());
+  ClusterTransformer::write_hdf5(ar,p);
+}
+void ClusterTransformer::write_hdf5(alps::hdf5::archive &ar, const std::string &p) const{
+  ClusterHelper::write_hdf5(ar,p);
+}
+void ClusterHelper::write_hdf5(alps::hdf5::archive &ar, const std::string &p) const{
+  std::cout<<"coord matrix: "<<cluster_coordinates_<<std::endl;
 
+  boost::numeric::ublas::matrix<double,boost::numeric::ublas::row_major> cluster_coordinates=cluster_coordinates_;
+  boost::numeric::ublas::matrix<double,boost::numeric::ublas::row_major> cluster_momenta=cluster_momenta_;
+  boost::numeric::ublas::matrix<double,boost::numeric::ublas::row_major> lattice_momenta=lattice_momenta_;
+  ar<<alps::make_pvp(p+"/cluster_coordinates", cluster_coordinates);
+  ar<<alps::make_pvp(p+"/cluster_momenta", cluster_momenta);
+  ar<<alps::make_pvp(p+"/lattice_momenta", lattice_momenta);
+}
 
 
 
@@ -663,7 +718,7 @@ bool adjust_chemical_potential(const double &n_tot,
                                double &mu_old,      //old chemical pot
                                double &mu_new,      //new chemical pot
                                double &mu_orig      //original chemical potential
-                               )
+)
 {
   //static bool damping_mu=false;
   //static bool computing_mu=true;

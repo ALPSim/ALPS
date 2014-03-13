@@ -41,6 +41,7 @@
 #include "types.h"
 #include "green_function.h"
 #include "nambu_green_function.h"
+#include "cluster.h"
 
 
 /// the base class for all impurity solvers taking a Green's function in imaginary time and returning one also in imaginary time.
@@ -88,7 +89,7 @@ public:
     ///          Matsubara frequency
     
   virtual result_type solve_omega(const matsubara_green_function_t& G0_omega,
-				  alps::Parameters parms )=0;
+				  alps::Parameters parms, ClusterTransformer *c_ptr=0)=0;
             
   virtual ~MatsubaraImpuritySolver() {}
 };

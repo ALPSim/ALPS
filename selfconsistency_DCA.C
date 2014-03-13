@@ -85,12 +85,12 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     
     //std::cout<<"running solver in frequency space."<<std::endl<<std::flush;
     if(!readwrite_real_space){
-      boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, parms);
+      boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, parms, &clustertrans);
     }else{
       matsubara_green_function_t G0_omega_rs=clustertrans.transform_into_real_space(G0_omega);
       matsubara_green_function_t G_omega_rs(n_matsubara, n_site, n_orbital, nondiagonal);
       itime_green_function_t G_tau_rs(n_tau+1, n_site, n_orbital, nondiagonal);
-      boost::tie(G_omega_rs, G_tau_rs) = solver.solve_omega(G0_omega_rs, parms);
+      boost::tie(G_omega_rs, G_tau_rs) = solver.solve_omega(G0_omega_rs, parms,&clustertrans);
       G_omega=clustertrans.transform_into_k_space(G_omega_rs);
       G_tau=clustertrans.transform_into_k_space(G_tau_rs);
     }

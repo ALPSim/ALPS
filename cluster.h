@@ -98,6 +98,7 @@ public:
   const Matrix<site_t>::Type &symmetry_table_k_space() const{return symmetry_table_k_space_;}
   const std::set<pair_class_type> &pair_class_set_k_space() const{return pair_class_set_k_space_;}
   
+  virtual void write_hdf5(alps::hdf5::archive &ar, const std::string &p) const;
 private:
   void setup_tables(const alps::Parameters& params);
   void symmetry_analysis(const Matrix<double>::Type& basis,
@@ -184,6 +185,7 @@ public:
   
   unsigned int dimension() const { return ClusterHelper::dimension(); }
   double site_distance(const unsigned int i, const unsigned int j) const { return ClusterHelper::site_distance(i, j); }
+  virtual void write_hdf5(alps::hdf5::archive &ar, const std::string &p) const;
 };
 
 
@@ -246,7 +248,9 @@ public:
   std::vector<double> epssqav() const { return epssqav_; };
   double dispersion_moments(const unsigned int i) const { return dispersion_moments_[i]; }
   double bandwidth() const { return bandwidth_; };
-  
+  std::vector<double> tmatrix() const;
+  virtual void write_hdf5(alps::hdf5::archive &ar, const std::string &p) const;
+
   double epsilon(const vector_type k) const
   {
     double eps = -half_filling_;

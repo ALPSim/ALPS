@@ -89,7 +89,7 @@ ImpuritySolver::result_type ExternalSolver::solve(
 
 MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
                                                                  const matsubara_green_function_t& G0_omega
-                                                                 , alps::Parameters p)
+                                                                 , alps::Parameters p, ClusterTransformer *c_ptr)
 {
   BOOST_ASSERT(alps::is_master());
   std::string infile;
@@ -107,6 +107,11 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
     alps::hdf5::archive solver_input(infile, alps::hdf5::archive::WRITE);
     solver_input<<alps::make_pvp("/parameters", p);
     G0_omega.write_hdf5(solver_input, "/G0");
+    
+    if((bool)(p["WRITE_CLUSTER_INFO"])|false){
+      if(c_ptr==0) throw std::runtime_error("called cluster info function with a solver equal to 0");
+      c_ptr->write_hdf5(solver_input, "/cluster");
+    }
   }
   
   call(infile,outfile);

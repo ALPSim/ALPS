@@ -37,6 +37,7 @@
     #include <boost/mpi.hpp>
 #endif
 #include "solver.h"
+#include "cluster.h"
 #include "boost/filesystem/path.hpp"
 #include "boost/filesystem/operations.hpp"
 
@@ -69,7 +70,7 @@ public:
     
     MatsubaraImpuritySolver::result_type solve_omega(
               const matsubara_green_function_t& G0_omega
-            , alps::Parameters parms );
+            , alps::Parameters parms, ClusterTransformer *c_ptr=0);
     
     NambuImpuritySolver::result_type solve_nambu(
               const nambu_matsubara_green_function_t& G0_omega
