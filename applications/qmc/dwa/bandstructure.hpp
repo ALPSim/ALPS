@@ -278,7 +278,7 @@ void bandstructure::evaluate()
     std::map<double, double> wk;
     for (int idx=0; idx<L; ++idx)
     for (int midx=0; midx<m.size(); ++midx)
-      wk.insert(std::make_pair<double, double>(k_eff[idx][midx], c[idx][midx]));
+      wk.insert(std::make_pair(k_eff[idx][midx], c[idx][midx]));
 
     for (std::map<double, double>::iterator it=wk.begin(); it!=wk.end(); ++it) {
       q  [alpha].push_back(it->first);
