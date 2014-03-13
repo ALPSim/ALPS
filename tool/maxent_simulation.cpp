@@ -165,7 +165,7 @@ void MaxEntSimulation::dostep()
   double postprobdef = 0;
   for (std::size_t a=0; a<lprob.size()-1; ++a) 
     postprobdef += 0.5*(exp(lprob[a])+exp(lprob[a+1]))*(alpha[a]-alpha[a+1]);
-  if (verbose) std::cout << "posterior probability of the default model: " << postprobdef << std::endl;
+  std::cout << "posterior probability of the default model: " << postprobdef << std::endl;
   
   //compute 'average' spectral function (Brian's metod)
   vector_type avspec(spectra[0].size());
