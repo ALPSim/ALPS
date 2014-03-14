@@ -28,7 +28,7 @@
 
 // Borrowed from MTL (Matrix Template Library)
 
-namespace std {
+namespace dmtk {
 
 // dummy conj function for real numbers
 inline double conj(double a) {

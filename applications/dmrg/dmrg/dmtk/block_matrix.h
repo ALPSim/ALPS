@@ -453,7 +453,7 @@ product(const SubMatrix<T> &block1, const SubMatrix<T>& block2,
 
     Matrix<T> aux1(block1.cols(),block1.rows());
     aux1 = conj(block1);
-    matrix_matrix_product('N','N',aux,aux1,subres,std::conj(coefa),std::conj(coefb));
+    matrix_matrix_product('N','N',aux,aux1,subres,conj(coefa),conj(coefb));
 
   }
 }
@@ -475,7 +475,7 @@ product(const SubMatrix<T> &block1, const SubMatrix<T>& block2,
     Matrix<T> mij(block1.rows(),block2.cols());
     matrix_matrix_product('C','C',block2,block1,mij);
     
-    matrix_vector_product('N', mij,subv,subres,std::conj(coefa),coefb);
+    matrix_vector_product('N', mij,subv,subres,conj(coefa),coefb);
   }
 
 }

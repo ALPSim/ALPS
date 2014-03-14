@@ -1646,7 +1646,7 @@ VectorState<T>::density_matrix(int position) const
         T sum = dot_product(ntot,msubi.array(),1,msubj.array(),1);
 
         sub(i,j) += sum;
-        sub(j,i) += std::conj(sum);
+        sub(j,i) += conj(sum);
       }
     }
   }
@@ -2167,7 +2167,7 @@ void new_seed(const VectorState<T>& v, VectorState<T>& res,
             for(int col = col_range.begin(); col <= col_range.end(); col++){
               size_t icol = col - col_range.begin();
  
-              sub_aux(icol) += std::conj(block(icol,irow))*x;
+              sub_aux(icol) += conj(block(icol,irow))*x;
             }
           }
 
@@ -2255,7 +2255,7 @@ void new_seed(const VectorState<T>& v, VectorState<T>& res,
             for(int col = col_range.begin(); col <= col_range.end(); col++){
               size_t icol = col - col_range.begin();
 
-              sub_aux(icol) += std::conj(block(icol,irow))*x;
+              sub_aux(icol) += conj(block(icol,irow))*x;
             }
           }
 

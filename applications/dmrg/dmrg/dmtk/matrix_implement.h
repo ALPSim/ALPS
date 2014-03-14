@@ -579,7 +579,7 @@ class MatrixConj
   public:
     static inline T apply(ConstRef<T,Matrix<T> > m, size_t i, size_t j)
     {
-      return std::conj(m(i, j)); 
+      return conj(m(i, j)); 
     }
     static inline size_t size1(ConstRef<T,Matrix<T> > m) { return m.size1(); }
     static inline size_t size2(ConstRef<T,Matrix<T> > m) { return m.size2(); }

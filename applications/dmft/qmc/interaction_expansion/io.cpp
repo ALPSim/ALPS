@@ -58,8 +58,9 @@ void InteractionExpansionRun::read_bare_green(std::ifstream &G0_omega, std::ifst
     }
   }
   green_itime=bare_green_itime; //starting values for the dressed green's function
-  std::cout<<"G0_omega: "<<G0_omega<<std::endl;
-  std::cout<<"G0_tau: "<<G0_tau<<std::endl;
+  // There is no operator<<(ostream&,ifstream&) in the std
+  // std::cout<<"G0_omega: "<<G0_omega<<std::endl;
+  // std::cout<<"G0_tau: "<<G0_tau<<std::endl;
 }
 
 

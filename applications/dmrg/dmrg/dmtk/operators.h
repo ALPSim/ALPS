@@ -907,7 +907,7 @@ new_operator(BasicOp<T> &new_op, const BasicOp<T>&op,
 //        val = 0;
         for(int l = 0; l < u1.row_range().dim(); l++){
           for(int k = 0; k < u2.row_range().dim(); k++){
-            val += std::conj(u2(i,k))*m(l,k)*u1(j,l);
+            val += conj(u2(i,k))*m(l,k)*u1(j,l);
           }
         }
       }
@@ -1019,7 +1019,7 @@ new_operator(BasicOp<T> &new_op, const BasicOp<T>&op1, const BasicOp<T>&op2,
       
             int rcol = col - subspacei.begin();
             int rrow = row - subspacej.begin();
-            m(rrow,rcol) += T(sign)*std::conj(coef)*std::conj(sub1(i1,j1))*std::conj(sub2(i2,j2));
+            m(rrow,rcol) += T(sign)*conj(coef)*conj(sub1(i1,j1))*conj(sub2(i2,j2));
           }
 
         }
@@ -1049,7 +1049,7 @@ new_operator(BasicOp<T> &new_op, const BasicOp<T>&op1, const BasicOp<T>&op2,
 //        val = 0;
         for(int l = 0; l < u1.row_range().dim(); l++){
           for(int k = 0; k < u2.row_range().dim(); k++){
-            val += std::conj(u2(i,k))*m(l,k)*u1(j,l);
+            val += conj(u2(i,k))*m(l,k)*u1(j,l);
           }
         }
       }
@@ -1121,11 +1121,11 @@ new_operator2(BasicOp<T> &new_op, const BasicOp<T>&op,
               if(position == RIGHT){
                 if(new_basis(k).qn2() == qn+op.dqn && k1 == l1){
                   if(op.fermion()) sign = new_basis(l).qn1().fermion_sign();
-                  val += T(sign)*coef*std::conj(u2(ri,rk))*sub(l2-sub.col_range().begin(),k2-sub.row_range().begin())*u1(rj,rl);
+                  val += T(sign)*coef*conj(u2(ri,rk))*sub(l2-sub.col_range().begin(),k2-sub.row_range().begin())*u1(rj,rl);
                 }
               } else if(position == LEFT) { 
                 if(new_basis(k).qn1() == qn+op.dqn && k2 == l2) 
-                  val += T(sign)*coef*std::conj(u2(ri,rk))*sub(l1-sub.col_range().begin(),k1-sub.row_range().begin())*u1(rj,rl);
+                  val += T(sign)*coef*conj(u2(ri,rk))*sub(l1-sub.col_range().begin(),k1-sub.row_range().begin())*u1(rj,rl);
               }
             }
           }
@@ -1244,7 +1244,7 @@ new_operator2(BasicOp<T> &new_op, const BasicOp<T>&op1, const BasicOp<T>&op2,
 
                 T x1 = sub1(l1-sub1.col_range().begin(), k1-sub1.row_range().begin());
                 T x2 = sub2(l2-sub2.col_range().begin(), k2-sub2.row_range().begin());
-                val += std::conj(u2(ri,rk))*coef*sign*x1*x2*u1(rj,rl);
+                val += conj(u2(ri,rk))*coef*sign*x1*x2*u1(rj,rl);
                 
               }
             }
@@ -1323,7 +1323,7 @@ product(const BasicOp<T> &op,
     dqn(m) -= op.dqn;
 
   char do_hc = (!hc) ? 'N' : 'C';
-  T real_coef = (!hc) ? coef : std::conj(coef);
+  T real_coef = (!hc) ? coef : conj(coef);
 
   vector<const SubMatrix<T> *> auxv;
   typename BasicOp<T>::const_iterator citer;

@@ -110,7 +110,7 @@ class FileList
          std::string aux = std::string(dir);
 #ifndef BOOST_MSVC
          struct stat dir_ptr;
-         if(!stat(aux.c_str(),&dir_ptr) == 0) {
+         if((!stat(aux.c_str(),&dir_ptr)) == 0) {
              std::cerr << "*** ERROR: ALPS DMRG could not open directory for temporary files. Create the directory " + aux + " or choose a different path.\n";
                          boost::throw_exception(std::runtime_error("*** ERROR: ALPS DMRG could not open directory for temporary files. Create the directory " + aux + " or choose a different path."));
          }
