@@ -199,6 +199,14 @@ if(BUILD_BOOST_THREAD)
       set(BOOST_SOURCES ${BOOST_SOURCES} ${DIRECTORY}/${S})
     endif(EXISTS ${DIRECTORY}/${S})
   endforeach(S)
+  # Boost.Thread requires Boost.Atomic on some platforms
+  set(DIRECTORY "${Boost_ROOT_DIR}/libs/atomic/src")
+  set(SOURCES lockpool.cpp)
+  foreach(S ${SOURCES})
+    if(EXISTS ${DIRECTORY}/${S})
+      set(BOOST_SOURCES ${BOOST_SOURCES} ${DIRECTORY}/${S})
+    endif(EXISTS ${DIRECTORY}/${S})
+  endforeach(S)
 endif(BUILD_BOOST_THREAD)
 
 
