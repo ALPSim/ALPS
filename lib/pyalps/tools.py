@@ -649,6 +649,66 @@ def collectXY(sets,x,y,foreach=[],ignoreProperties=False):
           foreach_sets[k] = res
       return foreach_sets.values()
 
+def ResultsToXY(sets,x,y,foreach=[]):
+    """ combines observable x and y to build a list of DataSet with y vs x
+ 
+    this function is used to collect data from a hierarchy of DataSet objects, to prepare plots or evaluation.
+    the inner-most list has to contain one DataSet with props['observable'] = x and one props['observable'] = y,
+    this will be the pair x-y used in the collection.
+
+    The parameters are:
+      sets:    hierarchy of datasets where the inner-most list must contain to pair x-y
+      x:       the name of the observable to be used as x-value of the collected results 
+      y:       the name of the observable to be used as y-value of the collected results 
+      foreach: an optional list of properties used for grouping the results. A separate DataSet object is created for each unique set of values of the specified parameers.
+
+    The function returns a list of DataSet objects.
+    """
+    
+    dd = depth(sets)
+    if dd < 2:
+        raise Exception('The input hierarchy does not provide a unique pair x-y. The input structure has to be a list of lists as minimum. pyalps.groupSets might help you.')
+    
+    hgroups = flatten(sets, fdepth=-1)
+    
+    foreach_sets = {}
+    for gg in hgroups:
+        xset = None
+        yset = None
+        for d in gg:
+            if d.props['observable'] == x:
+                xset = d
+            if d.props['observable'] == y:
+                yset = d
+        if xset is None or yset is None:
+            continue
+        
+        common_props = dict_intersect([d.props for d in gg])
+        fe_par_set = tuple((common_props[m] for m in foreach))
+        
+        if not fe_par_set in foreach_sets:
+            foreach_sets[fe_par_set] = DataSet()
+            foreach_sets[fe_par_set].props = common_props
+            foreach_sets[fe_par_set].props['xlabel'] = x
+            foreach_sets[fe_par_set].props['ylabel'] = y
+        
+        if len(xset.y) == len(yset.y):
+            foreach_sets[fe_par_set].x = np.concatenate((foreach_sets[fe_par_set].x, xset.y))
+            foreach_sets[fe_par_set].y = np.concatenate((foreach_sets[fe_par_set].y, yset.y))
+        elif len(xset.y) == 1:
+            foreach_sets[fe_par_set].x = np.concatenate((foreach_sets[fe_par_set].x, np.array( [xset.y[0]]*len(yset.y) )))
+            foreach_sets[fe_par_set].y = np.concatenate((foreach_sets[fe_par_set].y, yset.y))
+    
+    for k, res in foreach_sets.items():
+        order = np.argsort(res.x, kind = 'mergesort')
+        res.x = res.x[order]
+        res.y = res.y[order]
+        res.props['label'] = ''
+        for p in foreach:
+            res.props['label'] += '%s = %s ' % (p, res.props[p])
+        
+    return foreach_sets.values()
+
 def paramsAtFixedY(sets,x,y,fixedY,foreach=[]):
   XYs = collectXY(sets,x,y,foreach);
 
