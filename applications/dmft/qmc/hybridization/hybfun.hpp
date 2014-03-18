@@ -37,7 +37,7 @@ class hybfun : public green_function<double>{
   public:
     //constructor
   hybfun(const alps::params &p);
-  hybfun(const hybfun &rhs):beta_(rhs.beta_),green_function<double>(rhs) {
+  hybfun(const hybfun &rhs):green_function<double>(rhs),beta_(rhs.beta_) {
 //    operator=(rhs);
 //    for (int nf=0;nf<nflavor();nf++)
 //      for (int nt=0;nt<ntime();nt++)
