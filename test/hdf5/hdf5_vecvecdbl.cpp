@@ -4,8 +4,7 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2011 - 2012 by Mario Koenz <mkoenz@ethz.ch>                       *
- * Copyright (C) 2012 - 2014 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2010 - 2012 by Lukas Gamper <gamperl@gmail.com>                   *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -26,49 +25,34 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_NGS_NUMERIC_DETAIL_HEADER
-#define ALPS_NGS_NUMERIC_DETAIL_HEADER
+#include <alps/hdf5/archive.hpp>
+#include <alps/hdf5/vector.hpp>
+#include <alps/hdf5/complex.hpp>
 
-#include <alps/ngs/stacktrace.hpp>
-#include <alps/utility/resize.hpp>
-
-#include <alps/multi_array.hpp>
-
-#include <boost/array.hpp>
+#include <boost/filesystem.hpp>
 
 #include <vector>
-#include <stdexcept>
+#include <complex>
 
-namespace alps {
-    namespace ngs { //merged with alps/numerics/vector_function.hpp
-        namespace numeric {
-            namespace detail {
+using namespace std;
 
-                template<typename T, typename U>
-                inline void check_size(T & a, U const & b) {}
-
-                template<typename T, typename U>
-                inline void check_size(std::vector<T> & a, std::vector<U> const & b) {
-                    if(a.size() == 0)
-                        alps::resize_same_as(a, b);
-                    else if(a.size() != b.size())
-                        boost::throw_exception(std::runtime_error("vectors must have the same size!" + ALPS_STACKTRACE));
-                }
-
-                template<typename T, typename U, std::size_t N, std::size_t M>
-                inline void check_size(boost::array<T, N> & a, boost::array<U, M> const & b) {
-                    boost::throw_exception(std::runtime_error("boost::array s must have the same size!" + ALPS_STACKTRACE));
-                }
-
-                template<typename T, typename U, std::size_t N>
-                inline void check_size(boost::array<T, N> & a, boost::array<U, N> const & b) {}
-
-                template<typename T, typename U, std::size_t D>
-                inline void check_size(alps::multi_array<T, D> & a, alps::multi_array<U, D> const & b) {}
-                
-            }
-        }
+int main()
+{
+    if (boost::filesystem::exists(boost::filesystem::path("vvdbl.h5")))
+        boost::filesystem::remove(boost::filesystem::path("vvdbl.h5"));
+    {
+        vector<vector<double> > v;
+        for(int i = 0; i < 3; ++i)
+            v.push_back(vector<double>(i+1, 2*i));
+        alps::hdf5::archive ar("vvdbl.h5", "w");
+        ar["/spectrum/sectors/5/results/cdag-c/mean/value"] = v;
+        std::cout << v.size() << std::endl;
     }
+	 {
+        vector<vector<double> > v;
+        alps::hdf5::archive ar("vvdbl.h5", "r");
+        ar["/spectrum/sectors/5/results/cdag-c/mean/value"] >> v;
+        std::cout << v.size() << std::endl;
+    }
+    boost::filesystem::remove(boost::filesystem::path("vvdbl.h5"));
 }
-
-#endif
