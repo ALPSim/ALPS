@@ -108,7 +108,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
     solver_input<<alps::make_pvp("/parameters", p);
     G0_omega.write_hdf5(solver_input, "/G0");
     
-    if((bool)(p["WRITE_CLUSTER_INFO"])|false){
+    if((bool)(p.value_or_default("WRITE_CLUSTER_INFO",false))){
       if(c_ptr==0) throw std::runtime_error("called cluster info function with a solver equal to 0");
       c_ptr->write_hdf5(solver_input, "/cluster");
     }
