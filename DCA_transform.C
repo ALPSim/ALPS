@@ -1078,10 +1078,13 @@ nambu_green_function<std::complex<double> > SimpleDCATransformer::spin_symmetriz
     for (site_t k1=0; k1<n_cluster_sites(); ++k1) {
       for (site_t k2=0; k2<n_cluster_sites(); ++k2) {
         for(frequency_t freq=0; freq<G_new.nfreq(); ++freq) {
-          G_new(freq, k1, k2, 0,0).imag()= 0.5*(G(freq, k1, k2, 0,0).imag()+G_new(freq, k1, k2, 1,1).imag());
-          G_new(freq, k1, k2, 0,0).real()= 0.5*(G(freq, k1, k2, 0,0).real()-G_new(freq, k1, k2, 1,1).real());
-          G_new(freq, k1, k2, 1,1).real()= -G_new(freq, k1, k2, 0,0).real();
-          G_new(freq, k1, k2, 1,1).imag()=  G_new(freq, k1, k2, 0,0).imag();
+          //CLANG really hates individual assignements to real() and imag()
+          G_new(freq, k1, k2, 0,0)=std::complex<double>(0.5*(G(freq, k1, k2, 0,0).real()-G_new(freq, k1, k2, 1,1).real()),0.5*(G(freq, k1, k2, 0,0).imag()+G_new(freq, k1, k2, 1,1).imag()));
+          G_new(freq, k1, k2, 1,1)=std::complex<double>(-G_new(freq, k1, k2, 0,0).real(),G_new(freq, k1, k2, 0,0).imag());
+          //G_new(freq, k1, k2, 0,0).imag()= 0.5*(G(freq, k1, k2, 0,0).imag()+G_new(freq, k1, k2, 1,1).imag());
+          //G_new(freq, k1, k2, 0,0).real()= 0.5*(G(freq, k1, k2, 0,0).real()-G_new(freq, k1, k2, 1,1).real());
+          //G_new(freq, k1, k2, 1,1).real()= -G_new(freq, k1, k2, 0,0).real();
+          //G_new(freq, k1, k2, 1,1).imag()=  G_new(freq, k1, k2, 0,0).imag();
           //symmetrize the  F.
           G_new(freq, k1, k2, 0,1)= (G(freq, k1, k2, 0,1)+std::conj(G(freq, k1, k2, 1,0)))/2.;
           G_new(freq, k1, k2, 1,0)= std::conj(G_new(freq, k1, k2, 0,1));
@@ -1141,8 +1144,8 @@ t3_(params.value_or_default("t3", 0.)),
 t4_(params.value_or_default("t4", 0.)),
 bandwidth_(params.value_or_default("W", 0.)),
 bandwidth_scale_factor_(1.),
-half_filling_(0.),
 L_(params["L"]),
+half_filling_(0.),
 dispersion_moments_(2, 0.)
 {
   if (params.defined("t") && params.defined("W"))

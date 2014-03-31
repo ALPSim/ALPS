@@ -1183,10 +1183,14 @@ nambu_green_function<std::complex<double> > SimpleDCATransformer::spin_symmetriz
     for (site_t k1=0; k1<n_cluster_sites(); ++k1) {
       for (site_t k2=0; k2<n_cluster_sites(); ++k2) {
         for(frequency_t freq=0; freq<G_new.nfreq(); ++freq) {
-          G_new(freq, k1, k2, 0,0).imag()= 0.5*(G(freq, k1, k2, 0,0).imag()+G_new(freq, k1, k2, 1,1).imag());
-          G_new(freq, k1, k2, 0,0).real()= 0.5*(G(freq, k1, k2, 0,0).real()-G_new(freq, k1, k2, 1,1).real());
-          G_new(freq, k1, k2, 1,1).real()= -G_new(freq, k1, k2, 0,0).real();
-          G_new(freq, k1, k2, 1,1).imag()=  G_new(freq, k1, k2, 0,0).imag();
+          G_new(freq, k1, k2, 0,0)=std::complex<double>(0.5*(G(freq, k1, k2, 0,0).real()-G_new(freq, k1, k2, 1,1).real()), 0.5*(G(freq, k1, k2, 0,0).imag()+G_new(freq, k1, k2, 1,1).imag()));
+          G_new(freq, k1, k2, 1,1)=std::complex<double>(-G_new(freq, k1, k2, 0,0).real(),G_new(freq, k1, k2, 0,0).imag());
+          
+          //-->note that CLANG does not like this.
+          //G_new(freq, k1, k2, 0,0).imag()= 0.5*(G(freq, k1, k2, 0,0).imag()+G_new(freq, k1, k2, 1,1).imag());
+          //G_new(freq, k1, k2, 0,0).real()= 0.5*(G(freq, k1, k2, 0,0).real()-G_new(freq, k1, k2, 1,1).real());
+          //G_new(freq, k1, k2, 1,1).real()= -G_new(freq, k1, k2, 0,0).real();
+          //G_new(freq, k1, k2, 1,1).imag()=  G_new(freq, k1, k2, 0,0).imag();
           //symmetrize the  F.
           G_new(freq, k1, k2, 0,1)= (G(freq, k1, k2, 0,1)+std::conj(G(freq, k1, k2, 1,0)))/2.;
           G_new(freq, k1, k2, 1,0)= std::conj(G_new(freq, k1, k2, 0,1));

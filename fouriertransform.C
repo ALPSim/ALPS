@@ -165,7 +165,7 @@ void FourierTransformer::frequency_to_time_ft(nambu_itime_green_function_t &G_ta
 void generate_spline_matrix(dense_matrix & spline_matrix, double dt) {
   
   // spline_matrix has dimension (N+1)x(N+1)
-  int Np1 = spline_matrix.size1();
+  std::size_t Np1 = spline_matrix.size1();
   std::cout<<"spline matrix size is: "<<Np1<<std::endl;
   // A is the matrix whose inverse defines spline_matrix
   //
@@ -202,7 +202,7 @@ void generate_spline_matrix(dense_matrix & spline_matrix, double dt) {
 void evaluate_second_derivatives(double dt/*, double BETA*/, dense_matrix & spline_matrix, std::vector<double> & g, std::vector<double> & second_derivatives, const double c1g, const double c2g, const double c3g) {
   
   // g, rhs and second_derivatives have dimension N+1
-  int Np1 = spline_matrix.size1();
+  std::size_t Np1 = spline_matrix.size1();
   //assert(c1g==1);
   // rhs is the vector containing the data of the curve y = g(tau), which allows to
   // compute the vector of second derivatives y'' at times tau_n by evaluating
@@ -238,9 +238,9 @@ void FourierTransformer::time_to_frequency_ft(const itime_green_function_t & gta
 {
   std::vector<double> v(gtau.ntime());
   std::vector<std::complex<double> > v_omega(gomega.nfreq());
-  int Np1 = v.size();
-  int N = Np1-1;
-  int N_omega = v_omega.size();
+  std::size_t Np1 = v.size();
+  std::size_t N = Np1-1;
+  std::size_t N_omega = v_omega.size();
   double dt = beta_/N;
   
   for(unsigned int f=0;f<gtau.nflavor();++f){
@@ -277,9 +277,9 @@ void FourierTransformer::time_to_frequency_ft(const nambu_itime_green_function_t
 {
   std::vector<double> v(gtau.ntime());
   std::vector<std::complex<double> > v_omega(gomega.nfreq());
-  int Np1 = v.size();
-  int N = Np1-1;
-  int N_omega = v_omega.size();
+  std::size_t Np1 = v.size();
+  std::size_t N = Np1-1;
+  std::size_t N_omega = v_omega.size();
   double dt = beta_/N;
   
   for(unsigned int f1=0;f1<gtau.nflavor();++f1){

@@ -35,6 +35,7 @@
 #include <sstream>
 #include <math.h>
 #include "alps/numeric/matrix.hpp"
+#include "blas_classes/blasheader.h"
 #include "blas_classes/general_matrix.h"
 
 
@@ -68,7 +69,7 @@ void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function
 }
 
 void matrix_inversion(alps::numeric::matrix<std::complex<double> >&A, alps::numeric::matrix<std::complex<double> >&A_inv){
-  int size=A.num_rows();
+  fortran_int_t size=(fortran_int_t)(A.num_rows());
   if(size==0){
     return;
   }
@@ -80,7 +81,11 @@ void matrix_inversion(alps::numeric::matrix<std::complex<double> >&A, alps::nume
   }else{
     int ipiv[size];
     int info;
-    lapack::zgesv_(&size, &size, &(A(0,0)),&size, ipiv, &(A_inv(0,0)), &size, &info);
+#ifdef MY_BLAS_DEFS
+    using namespace lapack;
+#endif
+    //boost::numeric::bindings::lapack::
+    zgesv_(&size, &size, &(A(0,0)),&size, ipiv, &(A_inv(0,0)), &size, &info);
     if(info!=0) std::cerr<<"gesv went wrong!!"<<std::endl;
   }
 }

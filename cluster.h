@@ -79,8 +79,8 @@ public:
   bool bipartite() const { return bipartite_; }
   unsigned int n_cluster_sites() const { return n_cluster_sites_; }
   unsigned int n_cluster_cells() const { return alps::graph_helper<alps::graph_helper<>::graph_type>::volume(); }
-  unsigned int n_lattice_momenta() const { return lattice_momenta_.size1(); }
-  unsigned int dimension() const { return alps::graph_helper<alps::graph_helper<>::graph_type>::dimension(); }
+  unsigned int n_lattice_momenta() const { return (unsigned int)lattice_momenta_.size1(); }
+  unsigned int dimension() const { return (unsigned int) alps::graph_helper<alps::graph_helper<>::graph_type>::dimension(); }
   unsigned int cluster_momentum_approximation(vector_type k) const;
   
   template<typename T>
@@ -428,7 +428,7 @@ private:
   nambu_green_function<std::complex<double> > spin_symmetrizer(const nambu_green_function<std::complex<double> >& G, const bool paramagnet) const;
   nambu_green_function<double> spin_symmetrizer(const nambu_green_function<double>& G, const bool paramagnet) const;
   
-  matsubara_green_function_t fourpoint_green_function_inverse(const matsubara_green_function_t& G, const unsigned int nt) const;
+  matsubara_green_function_t fourpoint_green_function_inverse(const matsubara_green_function_t& G, const std::size_t nt) const;
   template<typename T>
   green_function<T> fourpoint_green_function_add(const green_function<T>& G1,
                                                  const green_function<T>& G2) const;
@@ -791,8 +791,7 @@ green_function<T> SimpleDCATransformer::spin_symmetrizer(const green_function<T>
 
 
 
-inline matsubara_green_function_t SimpleDCATransformer::fourpoint_green_function_inverse(const matsubara_green_function_t& G,
-                                                                                         const unsigned int nf) const
+inline matsubara_green_function_t SimpleDCATransformer::fourpoint_green_function_inverse(const matsubara_green_function_t& G,const std::size_t nf) const
 {
   matsubara_green_function_t G_inv(G);
   for (spin_t f=0; f<G.nflavor(); ++f) {
@@ -806,19 +805,9 @@ inline matsubara_green_function_t SimpleDCATransformer::fourpoint_green_function
         }
       }
     }
-    /*Matrix<std::complex<double> >::Type M_inv(M.size1(), M.size2());
-     for (unsigned int i=0; i<M_inv.size1(); ++i)
-     for (unsigned int j=0; j<M_inv.size2(); ++j)
-     M_inv(i,j) = (i==j);
-     const int n = M.size1();
-     const int nrhs = M.size1();
-     const int lda = M.size1();
-     int ipiv[n];
-     const int ldb = M.size1();
-     int info;
-     zgesv_(&n, &nrhs, (double* )(&M(0,0)), &lda, ipiv, (double* )(&M_inv(0,0)), &ldb, &info);
-     std::cout << "(INFO: " << info << ")\n";*/
+
     Matrix<std::complex<double> >::Type M_inv = Matrix<std::complex<double> >::inverse(M);
+    
     for (std::size_t k1=0; k1<G.nsite(); k1++) {
       for (std::size_t k2=0; k2<G.nsite(); k2++) {
         for (std::size_t t1=0; t1<nf; t1++) {
@@ -1342,7 +1331,6 @@ private:
   
   bool compute_filling_;
   double n_target_;
-  const alps::Parameters params_;
   //complex_dense_matrix U_;
   std::vector<double> epsav_;
   std::vector<double> epssqav_;
@@ -1350,6 +1338,8 @@ private:
   const double t_;
   const double tprime_;
   const double tstar_;
+
+  const alps::Parameters params_;
 };
 
 template<class T>

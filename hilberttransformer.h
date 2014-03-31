@@ -98,14 +98,14 @@ public:
   {
     //to implement
     std::cout<<"Square Lattice Hilbert transformer"<<std::make_pair(G_tau,beta)<<std::endl;
-    std::cout<<mu;
-    std::cout<<beta;
-    std::cout<<h;
-    abort();
-    return itime_green_function_t(0,0,0, diagonal);
+    std::cout<<mu<<std::endl;
+    std::cout<<beta<<std::endl;
+    std::cout<<h<<std::endl;
+    std::cout<<"bw is: "<<bw_<<std::endl;
+    throw std::logic_error("this function has not been implemented.");
   }
 private:
-  double bw_; // or band width
+  double bw_; //bandwidth
 };
 
 
@@ -128,8 +128,7 @@ public:
     std::cout<<mu;
     std::cout<<beta;
     std::cout<<h;
-    abort();
-    return itime_green_function_t(0,0,0, diagonal);
+    throw std::logic_error("this function has not been implemented.");
   }
 private:
   std::vector<double> D_; // or band width

@@ -22,7 +22,7 @@ public:
 	//construction and destruction, assignement and copy constructor
 	///constructor: how many time slices, how many sites, how many flavors
 	nambu_green_function(unsigned int ntime, unsigned int nsite, unsigned int nflavor, shape_t shape):nt_(ntime), ns_(nsite), nf_(nflavor),
-  ntnsns_(ntime*nsite*nsite), ntns_(ntime*nsite), ntnsnsnf_(ntime*nsite*nsite*nflavor), shape_(shape){
+   ntns_(ntime*nsite), ntnsns_(ntime*nsite*nsite), ntnsnsnf_(ntime*nsite*nsite*nflavor), shape_(shape){
 		val_=new T[nt_*ns_*ns_*nf_*nf_];
 	}
 	///destructor
@@ -30,7 +30,7 @@ public:
 		delete [] val_;
 	}
 	///copy constructor
-	nambu_green_function(const nambu_green_function &g):nt_(g.nt_), ns_(g.ns_), nf_(g.nf_), ntnsns_(g.ntnsns_), ntns_(g.ntns_), ntnsnsnf_(g.ntnsnsnf_), shape_(g.shape_){
+	nambu_green_function(const nambu_green_function &g):nt_(g.nt_), ns_(g.ns_), nf_(g.nf_), ntns_(g.ntns_), ntnsns_(g.ntnsns_), ntnsnsnf_(g.ntnsnsnf_), shape_(g.shape_){
 		val_=new T[nt_*ns_*ns_*nf_*nf_];
 		operator=(g);
 	}
@@ -105,9 +105,9 @@ private:
 	const unsigned int nt_; ///imag time points
 	const unsigned int ns_; ///number of sites
 	const unsigned int nf_; ///number of flavors
-	const unsigned int ntnsnsnf_; ///nt*ns*ns*nf
-	const unsigned int ntnsns_; ///nt*ns*ns
 	const unsigned int ntns_; ///nt*ns
+	const unsigned int ntnsns_; ///nt*ns*ns
+	const unsigned int ntnsnsnf_; ///nt*ns*ns*nf
   const shape_t shape_;
 	// the actual values and errors.
   T *val_;

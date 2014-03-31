@@ -402,25 +402,15 @@ matsubara_green_function_t AFM_FSDOSHilbertTransformer::operator()(const matsuba
     }
     I+=integrand(0,dos,epsilon,zeta_A,zeta_B)+integrand(dos.size()-1,dos,epsilon,zeta_A,zeta_B)+4.*integrand(dos.size()-2,dos,epsilon,zeta_A,zeta_B);
     I/=3.;
-    /*for(int i=0;i<dos.size();++i){
-     I+=dos[i]/(zeta_A*zeta_B - epsilon[i]*epsilon[i]);
-     }*/
+
     //compute the new G's:
     G_omega_new(w,0)=zeta_B*I; //formula 97 in review
     G_omega_new(w,1)=zeta_A*I;
     G0_omega_new(w,0)=1./(1./G_omega_new(w,0)+Sigma(w,0));
     G0_omega_new(w,1)=1./(1./G_omega_new(w,1)+Sigma(w,1));
-    //std::cout<<"G0: "<<G0_omega_new(w,0)<<" "<<G0_omega_new(w,1)<<std::endl;
+
   }
-  //std::cout<<std::endl<<std::endl;
-  /*std::cout<<"sigma: "<<std::endl;
-   for(int i=0;i<Sigma.nfreq();++i){
-   std::cout<<(2.*i+1)*M_PI/beta<<" "<<Sigma(i,0).real()<<" "<<Sigma(i,0).imag()<<" "<<Sigma(i,1).real()<<" "<<Sigma(i,1).imag()<<std::endl;
-   }
-   std::cout<<"g0 omega new: "<<std::endl;
-   for(int i=0;i<G0_omega_new.nfreq();++i){
-   std::cout<<(2.*i+1)*M_PI/beta<<" "<<G0_omega_new(i,0).real()<<" "<<G0_omega_new(i,0).imag()<<" "<<G0_omega_new(i,1).real()<<" "<<G0_omega_new(i,1).imag()<<std::endl;
-   }*/
+
   return G0_omega_new;
 }
 
