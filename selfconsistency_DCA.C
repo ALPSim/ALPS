@@ -224,3 +224,16 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver
   G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
 }
 
+void perform_DCA_loop(const alps::Parameters &parms){
+  std::cout<<"running a DCA calculation"<<std::endl;
+  if(parms.value_or_default("NAMBU",false)){
+    boost::shared_ptr<NambuImpuritySolver> solver_ptr;
+    solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"])));
+    selfconsistency_loop_DCA(parms, *solver_ptr, *(DCATransformer*)&*ClusterTransformer::generate_transformer(parms));
+  }else{
+    boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;
+    solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"])));
+    selfconsistency_loop_DCA(parms, *solver_ptr, *(DCATransformer*)&*ClusterTransformer::generate_transformer(parms));
+  }
+}
+

@@ -50,28 +50,28 @@ matsubara_green_function_t DCATransformer::initial_G0(const alps::Parameters& pa
 }
 
 
-void DCATransformer::generate_transformer(const alps::Parameters& parms, boost::shared_ptr<DCATransformer> &trans_ptr)
+boost::shared_ptr<ClusterTransformer> ClusterTransformer::generate_transformer(const alps::Parameters& parms)
 {
+  boost::shared_ptr<ClusterTransformer> trans_ptr;
   bool antiferromagnetic = parms.value_or_default("ANTIFERROMAGNET", false);
-  if (antiferromagnetic) {
-    trans_ptr.reset(new AntiFerroDCATransformer(parms));
+  if(parms["CLUSTER_LOOP"]=="DCA"){
+    if (antiferromagnetic) {
+      trans_ptr.reset(new AntiFerroDCATransformer(parms));
+    }
+    else {
+      trans_ptr.reset(new SimpleDCATransformer(parms));
+    }
+  }else if(parms["CLUSTER_LOOP"]=="CDMFT"){
+    if (antiferromagnetic) {
+      throw std::logic_error("Anti Ferro CDMFT is not implemented.");
+    }
+    else {
+      std::cout<<"using simple CDMFT transformer"<<std::endl;
+      if(static_cast<int>(parms["SITES"])!=4) throw std::runtime_error("only four-site CDMFT is implemented so far.");
+      trans_ptr.reset(new FoursiteCDMFTTransformer(parms));
+    }
   }
-  else {
-    trans_ptr.reset(new SimpleDCATransformer(parms));
-  }
-}
-
-void CDMFTTransformer::generate_transformer(const alps::Parameters& parms, boost::shared_ptr<CDMFTTransformer> &trans_ptr)
-{
-  bool antiferromagnetic = parms.value_or_default("ANTIFERROMAGNET", false);
-  if (antiferromagnetic) {
-    throw std::logic_error("Anti Ferro CDMFT is not implemented.");
-  }
-  else {
-    std::cout<<"using simple CDMFT transformer"<<std::endl;
-    if(static_cast<int>(parms["SITES"])!=4) throw std::runtime_error("only four-site CDMFT is implemented so far.");
-    trans_ptr.reset(new FoursiteCDMFTTransformer(parms));
-  }
+  return trans_ptr;
 }
 
 
@@ -414,7 +414,7 @@ void ClusterTransformer::write_hdf5(alps::hdf5::archive &ar, const std::string &
 }
 void ClusterHelper::write_hdf5(alps::hdf5::archive &ar, const std::string &p) const{
   std::cout<<"coord matrix: "<<cluster_coordinates_<<std::endl;
-
+  
   boost::numeric::ublas::matrix<double,boost::numeric::ublas::row_major> cluster_coordinates=cluster_coordinates_;
   boost::numeric::ublas::matrix<double,boost::numeric::ublas::row_major> cluster_momenta=cluster_momenta_;
   boost::numeric::ublas::matrix<double,boost::numeric::ublas::row_major> lattice_momenta=lattice_momenta_;

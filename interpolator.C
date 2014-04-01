@@ -39,7 +39,7 @@ Interpolator::Interpolator(const alps::Parameters& parms) :
   n_zone(parms["FLAVORS"]),
   n_k(parms.value_or_default("NK", 30))
 {
-  DCATransformer::generate_transformer(parms, transform_ptr);
+  ClusterTransformer::generate_transformer(parms);
 }
 
 
@@ -156,7 +156,7 @@ void Interpolator::bare_dispersion(const unsigned int counter, const unsigned in
     for (unsigned int d=0; d<transform_ptr->dimension(); ++d) 
       out_str << k[d] << "\t" ;
     out_str << (offset+sign*l)/M_PI << "\t" 
-	    << transform_ptr->epsilon(k) << "\n";
+	    << ((DCATransformer*)&*transform_ptr)->epsilon(k) << "\n";
   }
   out_str.close();
 }
@@ -183,7 +183,7 @@ void ParaInterpolator::interpolate_spectrum(const unsigned int counter, const un
     for (std::map<double, std::complex<double> >::const_iterator it=interpolated_selfenergy.begin(); 
 	 it!=interpolated_selfenergy.end(); ++it) {
       std::complex<double> idelta(0., delta);
-      std::complex<double> G = it->first + mu - transform_ptr->epsilon(k) - it->second + idelta;
+      std::complex<double> G = it->first + mu - ((DCATransformer*)&*transform_ptr)->epsilon(k) - it->second + idelta;
       G = 1./G;
       for (unsigned int d=0; d<transform_ptr->dimension(); ++d) 
 	out_str << k[d] << "\t" ;
@@ -225,8 +225,8 @@ void AntiferroInterpolator::interpolate_spectrum(const unsigned int counter, con
 	 it!=interpolated_selfenergy.end(); ++it) {
       matrix_t G = -it->second;
       std::complex<double> idelta(0., delta);
-      G(0,0) += it->first + mu - transform_ptr->epsilon(k1) + idelta;
-      G(1,1) += it->first + mu - transform_ptr->epsilon(k2) + idelta; 
+      G(0,0) += it->first + mu - ((DCATransformer*)&*transform_ptr)->epsilon(k1) + idelta;
+      G(1,1) += it->first + mu - ((DCATransformer*)&*transform_ptr)->epsilon(k2) + idelta;
       G = ClusterHelper::Matrix<std::complex<double> >::inverse(G);
       std::complex<double> Gs = G(0,0) + G(1,1);
       for (unsigned int d=0; d<transform_ptr->dimension(); ++d) 

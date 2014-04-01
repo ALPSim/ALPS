@@ -241,3 +241,17 @@ void selfconsistency_loop_CDMFT(const alps::Parameters& parms, NambuImpuritySolv
   // throw std::logic_error("not yet implemented.");
   std::cout<<"-beta*G_tau(beta/2)="<<-beta*G_tau(n_tau/2,0,0,0,0)<<std::endl;
 }
+
+void perform_CDMFT_loop(const alps::Parameters &parms){
+  std::cout<<"running a CDMFT calculation"<<std::endl;
+  if(parms.value_or_default("NAMBU",false)){
+    boost::shared_ptr<NambuImpuritySolver> solver_ptr;
+    solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"])));
+    selfconsistency_loop_CDMFT(parms, *solver_ptr, *(CDMFTTransformer*)&*ClusterTransformer::generate_transformer(parms));
+  }else{
+    boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;
+    solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"])));
+    selfconsistency_loop_CDMFT(parms, *solver_ptr, *(CDMFTTransformer*)&*ClusterTransformer::generate_transformer(parms));
+  }
+}
+

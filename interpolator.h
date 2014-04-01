@@ -47,7 +47,7 @@ public:
 
 protected:
 
-  boost::shared_ptr<DCATransformer> transform_ptr;
+  boost::shared_ptr<ClusterTransformer> transform_ptr;
   const double mu;
   const double delta;
   const double delta_green;

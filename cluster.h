@@ -154,6 +154,7 @@ public:
   ClusterHelper(params) {
     //std::cerr<<"done building cluster transformer"<<std::endl;
   }
+  static boost::shared_ptr<ClusterTransformer> generate_transformer(const alps::Parameters& parms);
   virtual ~ClusterTransformer() {} //pro forma virtual destructor.
   
   ///perform a Hilber transform: given a G and a G0, produce a G0 for the next iteration.
@@ -176,6 +177,8 @@ public:
   virtual       matsubara_green_function_t initial_G0      (const alps::Parameters& parms, shape_t shape=nondiagonal);
   
   virtual nambu_matsubara_green_function_t initial_G0_nambu(const alps::Parameters& parms);
+  virtual std::vector<double> epsav() const=0;
+  virtual std::vector<double> epssqav() const=0;
   nambu_matsubara_green_function_t initial_G_nambu(const alps::Parameters& parms);
   
   template<typename T>
@@ -186,6 +189,7 @@ public:
   unsigned int dimension() const { return ClusterHelper::dimension(); }
   double site_distance(const unsigned int i, const unsigned int j) const { return ClusterHelper::site_distance(i, j); }
   virtual void write_hdf5(alps::hdf5::archive &ar, const std::string &p) const;
+  double cluster_momentum(const unsigned int i, const unsigned int j) const { return ClusterHelper::cluster_momentum(i,j); }
 };
 
 
@@ -195,7 +199,6 @@ class DCATransformer : public ClusterTransformer
 public:
   DCATransformer(const alps::Parameters& params);
   virtual ~DCATransformer(){} //pro forma virtual destructor
-  static void generate_transformer(const alps::Parameters& parms, boost::shared_ptr<DCATransformer> &trans_ptr);
   
   //symmetrization in real momentum space - for the normal GF
   template<typename T> green_function<T> symmetrize_real_space(const green_function<T>& G) const
@@ -302,7 +305,6 @@ public:
     }
     return eps*bandwidth_scale_factor_;
   }
-  double cluster_momentum(const unsigned int i, const unsigned int j) const { return ClusterHelper::cluster_momentum(i,j); }
   
   
 private:
@@ -1060,7 +1062,6 @@ class CDMFTTransformer : public ClusterTransformer
 public:
   CDMFTTransformer(const alps::Parameters& params);
   virtual ~CDMFTTransformer(){} //pro forma virtual destructor
-  static void generate_transformer(const alps::Parameters& parms, boost::shared_ptr<CDMFTTransformer> &trans_ptr);
   
   //symmetrization in real momentum space - for the normal GF
   template<typename T> green_function<T> symmetrize_real_space(const green_function<T>& G) const
@@ -1104,8 +1105,6 @@ public:
   std::complex<double>* exp_iksite(const int sign) const;
   
   int* momentum_translation() const;
-  virtual std::vector<double> epsav() const=0;
-  virtual std::vector<double> epssqav() const=0;
   double dispersion_moments(const unsigned int i) const { return dispersion_moments_[i]; }
   double bandwidth() const { return bandwidth_; };
   
@@ -1114,7 +1113,9 @@ public:
     throw std::logic_error("CDMFT dispersion not implemented.");
     return 0.;
   }
-  
+  virtual std::vector<double> epsav() const{throw std::logic_error("CDMFT dispersion not implemented.");}
+  virtual std::vector<double> epssqav() const {throw std::logic_error("CDMFT dispersion not implemented.");};
+
 protected:
   complex_dense_matrix U_;
   

@@ -26,7 +26,18 @@
 
 #include "alps/osiris/comm.h"
 #include "cluster.h"
+#include "selfconsistency.h"
 
+void perform_cluster_loop(const alps::Parameters &parms){
+  if (parms["CLUSTER_LOOP"]=="DCA")
+    perform_DCA_loop(parms);
+  else if (parms["CLUSTER_LOOP"]=="CDMFT")
+    perform_CDMFT_loop(parms);
+  else {
+    std::cout<<parms["CLUSTER_LOOP"]<<std::endl;
+    boost::throw_exception(std::logic_error("there is no such cluster method!"));
+  }
+}
 
 ClusterHelper::ClusterHelper(const alps::Parameters& params) :
 alps::graph_helper<alps::graph_helper<>::graph_type>(params),
