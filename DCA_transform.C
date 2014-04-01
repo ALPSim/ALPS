@@ -49,17 +49,17 @@ matsubara_green_function_t DCATransformer::initial_G0(const alps::Parameters& pa
   return ClusterTransformer::initial_G0(parms, shape);
 }
 
-
-boost::shared_ptr<ClusterTransformer> ClusterTransformer::generate_transformer(const alps::Parameters& parms)
+//Don't forget to delete the transformer afterwards!
+ClusterTransformer* ClusterTransformer::generate_transformer(const alps::Parameters& parms)
 {
-  boost::shared_ptr<ClusterTransformer> trans_ptr;
+  ClusterTransformer* trans_ptr;
   bool antiferromagnetic = parms.value_or_default("ANTIFERROMAGNET", false);
   if(parms["CLUSTER_LOOP"]=="DCA"){
     if (antiferromagnetic) {
-      trans_ptr.reset(new AntiFerroDCATransformer(parms));
+      trans_ptr=new AntiFerroDCATransformer(parms);
     }
     else {
-      trans_ptr.reset(new SimpleDCATransformer(parms));
+      trans_ptr=new SimpleDCATransformer(parms);
     }
   }else if(parms["CLUSTER_LOOP"]=="CDMFT"){
     if (antiferromagnetic) {
@@ -68,7 +68,7 @@ boost::shared_ptr<ClusterTransformer> ClusterTransformer::generate_transformer(c
     else {
       std::cout<<"using simple CDMFT transformer"<<std::endl;
       if(static_cast<int>(parms["SITES"])!=4) throw std::runtime_error("only four-site CDMFT is implemented so far.");
-      trans_ptr.reset(new FoursiteCDMFTTransformer(parms));
+      trans_ptr=new FoursiteCDMFTTransformer(parms);
     }
   }
   return trans_ptr;

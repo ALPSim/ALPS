@@ -59,7 +59,7 @@ int main(int argc, char** argv)
     alps::Parameters parms(parm_file);
 
 
-    boost::shared_ptr<ClusterTransformer> clusterhandler=ClusterTransformer::generate_transformer(parms);
+    ClusterTransformer* clusterhandler=ClusterTransformer::generate_transformer(parms);
     
     std::vector<double> values(8,1.);
     std::vector<double> kvec(2); kvec[0]=0.5; kvec[1]=0.5;
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
         std::cout<<kx<<" "<<ky<<" "<<clusterhandler->interpolate(kvec,values, false)<<std::endl;
       }
     }
-
+    delete clusterhandler;
 #ifndef BOOST_NO_EXCEPTIONS
   }
   catch (std::exception& e)

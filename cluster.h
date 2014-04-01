@@ -154,7 +154,7 @@ public:
   ClusterHelper(params) {
     //std::cerr<<"done building cluster transformer"<<std::endl;
   }
-  static boost::shared_ptr<ClusterTransformer> generate_transformer(const alps::Parameters& parms);
+  static ClusterTransformer* generate_transformer(const alps::Parameters& parms);
   virtual ~ClusterTransformer() {} //pro forma virtual destructor.
   
   ///perform a Hilber transform: given a G and a G0, produce a G0 for the next iteration.

@@ -91,13 +91,13 @@ int main(int argc, char **argv){
     }
   }
   if(vm.count("cluster")){
-    boost::shared_ptr<ClusterTransformer> clusterhandler_old=ClusterTransformer::generate_transformer(parms);;
+    ClusterTransformer* clusterhandler_old=ClusterTransformer::generate_transformer(parms);;
     
     
     if(new_cluster_sites==-1) throw std::logic_error("please specify new cluster sites!");
     parms["SITES"]=new_cluster_sites;
     parms["LATTICE"]=clustername;
-    boost::shared_ptr<ClusterTransformer> clusterhandler_new=ClusterTransformer::generate_transformer(parms);
+    ClusterTransformer *clusterhandler_new=ClusterTransformer::generate_transformer(parms);
     std::vector<std::complex<double> > values(nsites_old);
     std::vector<double> kvec(2);
     for(int i=0;i<nfreq;++i){
@@ -113,6 +113,7 @@ int main(int argc, char **argv){
           }
         }
     }
+    delete clusterhandler_old;
   }else{
     selfenergy_kspace_interp=selfenergy_orig;
   }

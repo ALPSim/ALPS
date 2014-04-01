@@ -2,27 +2,9 @@
  *
  * ALPS DMFT Project
  *
- * Copyright (C) 2005-2012 by Emanuel Gull <gullc@comp-phys.org>
- *                            Philipp Werner <werner@comp-phys.org>
- *                            Sebastian Fuchs <fuchs@comp-phys.org>
- *                            Matthias Troyer <troyer@comp-phys.org>
+ * Copyright (C) 2005-2014 by Emanuel Gull <gullc@comp-phys.org>
  *
- * This software is part of the ALPS Applications, published under the ALPS
- * Application License; you can use, redistribute it and/or modify it under
- * the terms of the license, either version 1 or (at your option) any later
- * version.
- *
- * You should have received a copy of the ALPS Application License along with
- * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
- * available from http://alps.comp-phys.org/.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
- * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
- * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
+ * To be used with permission by the authors
  *
  *****************************************************************************/
 
@@ -177,16 +159,10 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver
     //running additional symmetrizations:
     G0_omega = clustertrans.symmetrize_k_space(G0_omega);
     boost::tie(G_omega, G_tau) = solver.solve_nambu(G0_omega, parms);
-    //std::ofstream G_tau_before_symmetrize("G_tau_before_symmetrize.dat"); G_tau_before_symmetrize<<std::make_pair(G_tau,beta);
     G_tau = clustertrans.symmetrize(G_tau, paramagnet);
-    //std::ofstream G_tau_before_symmetrize_kspace("G_tau_before_symmetrize_kspace.dat"); G_tau_before_symmetrize_kspace<<std::make_pair(G_tau,beta);
     G_tau = clustertrans.symmetrize_k_space(G_tau); //<- this would symmetrize away the d-wave behavior!
-    //std::ofstream G_tau_after_symmetrize_kspace("G_tau_after_symmetrize_kspace.dat"); G_tau_after_symmetrize_kspace<<std::make_pair(G_tau,beta);
-    //std::ofstream G_omega_before_symmetrize("G_omega_before_symmetrize.dat"); G_omega_before_symmetrize<<std::make_pair(G_omega,beta);
     G_omega = clustertrans.symmetrize(G_omega, paramagnet);
-    //std::ofstream G_omega_before_symmetrize_kspace("G_omega_before_symmetrize_kspace.dat"); G_omega_before_symmetrize_kspace<<std::make_pair(G_omega,beta);
     G_omega = clustertrans.symmetrize_k_space(G_omega);
-    //std::ofstream G_omega_after_symmetrize_kspace("G_omega_after_symmetrize_kspace.dat"); G_omega_after_symmetrize_kspace<<std::make_pair(G_omega,beta);
     
     std::cout<<"running cluster transform"<<std::endl<<std::flush;
     G0_omega = clustertrans(G_omega, G0_omega, selfenergy, mu, h, eta1, eta2, beta, false);
@@ -226,14 +202,16 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver
 
 void perform_DCA_loop(const alps::Parameters &parms){
   std::cout<<"running a DCA calculation"<<std::endl;
+  ClusterTransformer *transform_ptr=ClusterTransformer::generate_transformer(parms);
   if(parms.value_or_default("NAMBU",false)){
     boost::shared_ptr<NambuImpuritySolver> solver_ptr;
     solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"])));
-    selfconsistency_loop_DCA(parms, *solver_ptr, *(DCATransformer*)&*ClusterTransformer::generate_transformer(parms));
+    selfconsistency_loop_DCA(parms, *solver_ptr, *(DCATransformer*)transform_ptr);
   }else{
     boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;
     solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"])));
-    selfconsistency_loop_DCA(parms, *solver_ptr, *(DCATransformer*)&*ClusterTransformer::generate_transformer(parms));
+    selfconsistency_loop_DCA(parms, *solver_ptr, *(DCATransformer*)transform_ptr);
   }
+  delete transform_ptr;
 }
 
