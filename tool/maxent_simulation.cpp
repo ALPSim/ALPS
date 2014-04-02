@@ -167,18 +167,28 @@ void MaxEntSimulation::dostep()
     postprobdef += 0.5*(exp(lprob[a])+exp(lprob[a+1]))*(alpha[a]-alpha[a+1]);
   std::cout << "posterior probability of the default model: " << postprobdef << std::endl;
   
-  //compute 'average' spectral function (Brian's metod)
+  //compute 'average' spectral function (Brian's method)
   vector_type avspec(spectra[0].size());
   for (std::size_t i=0; i<avspec.size(); ++i) {
     avspec[i] = 0.;
     for (std::size_t a=0; a<prob.size()-1; ++a) 
       avspec[i] += 0.5*(prob[a]*spectra[a][i] +prob[a+1]*spectra[a+1][i])*(alpha[a]-alpha[a+1]);
   }
+  //Estimate the variance for the spectrum
+  vector_type varspec(spectra[0].size());
+  for (std::size_t i=0; i<varspec.size(); ++i) {
+    varspec[i] = 0.;
+    for (std::size_t a=0; a<prob.size()-1; ++a)
+    varspec[i] += 0.5*(prob[a]*(spectra[a][i]-avspec[i])*(spectra[a][i]-avspec[i]) + prob[a+1]*(spectra[a+1][i]-avspec[i])*(spectra[a+1][i]-avspec[i]))*(alpha[a]-alpha[a+1]);
+  }
   avspec *= norm;
+  varspec *= norm*norm;
+  
   if (text_output) for (std::size_t  i=0; i<avspec.size(); ++i)
     avspec_str << omega_coord(i) << " " << avspec[i] << " " << def[i]*norm << std::endl;
   ar << alps::make_pvp("/spectrum/average",avspec);
-    
+  ar << alps::make_pvp("/spectrum/variance",varspec);
+  
   if(Kernel_type=="anomalous"){ //for the anomalous function: use A(omega)=Im Sigma(omega)/(pi omega).
     std::ofstream maxspec_anom_str((name+"maxspec_anom.dat").c_str());
     std::ofstream avspec_anom_str (boost::filesystem::absolute(name+"avspec_anom.dat", dir).string().c_str());

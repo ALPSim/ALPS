@@ -87,7 +87,8 @@ int main(int argc, char** argv){
       //on the master: collect MC results and store them in file, then postprocess
       if (global_mpi_rank==0){
         alps::results_type<hybridization>::type results = collect_results(s);
-        save_results(results, parms, output_file, "/simulation/results");
+        std::string output_path = boost::lexical_cast<std::string>(parms["BASEPATH"]|"")+"/simulation/results";
+        save_results(results, parms, output_file, output_path); //"/simulation/results");
         master_final_tasks(results, parms, output_file);
 #ifdef ALPS_HAVE_MPI
       } else{ //on any slave: send back results to master.

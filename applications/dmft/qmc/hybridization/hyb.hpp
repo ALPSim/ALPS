@@ -126,6 +126,7 @@ private:
   //updates parameters
   std::size_t N_meas;
   std::size_t NUM_BINS; // Number of bins for the measurments
+  std::size_t MEASURE_timeseries; // fixed binning instead of detailed binning
   double fraction; // Idea by Philipp: Do not use the long time intervals but allow
   // only for a certain fraction when inserting segments; supposedly increases
   // acceptance rate if B*U or B*MU is very large

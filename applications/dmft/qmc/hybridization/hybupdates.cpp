@@ -219,7 +219,10 @@ void hybridization::global_flip_update()
   // These are the actual orders for each of the orbitals
   int k1 = local_config.order(orbital1),k2=local_config.order(orbital2);
   // At present we do nothing if one is empty (can be relaxed, I think)
-  if (k1==0 || k2==0) return;
+  if (k1==0 || k2==0) {
+//    std::cerr << "k1 = " << k1 << " and k2 = " << k2 << std::endl;
+    return;
+  }
   std::vector<int> orbitals(2);
   orbitals[0] = orbital1;
   orbitals[1] = orbital2;
@@ -275,7 +278,7 @@ void hybridization::global_flip_update()
   double weight_change = exp(d_e)*total_hyb_weight_change;
   // Since the total expansion order does not change, there should be no
   // permutation factor appearing here
-  //std::cerr << "In between: de = " << d_e << ", total hyb weight change = "<< total_hyb_weight_change << std::endl;
+  // std::cerr << "In between: de = " << d_e << ", total hyb weight change = "<< total_hyb_weight_change << ", MC weight change = " << weight_change << std::endl;
 //  hyb_config.dump();
   hyb_config.rebuild(orbitals);
 

@@ -149,8 +149,8 @@ void evaluate_time(const alps::results_type<hybridization>::type &results,
   }
 
   //store in hdf5
-  G_tau.write_hdf5(solver_output, "/G_tau");
-  F_tau.write_hdf5(solver_output, "/F_tau");
+  G_tau.write_hdf5(solver_output, boost::lexical_cast<std::string>(parms["BASEPATH"]|"")+"/G_tau");
+  F_tau.write_hdf5(solver_output, boost::lexical_cast<std::string>(parms["BASEPATH"]|"")+"/F_tau");
 
   // ERROR
   for(std::size_t i=0; i<n_orbitals; i++){
@@ -161,12 +161,12 @@ void evaluate_time(const alps::results_type<hybridization>::type &results,
      err = results[g_name.str()].error<std::vector<double> >();
      err[0] = err[N_t] = density_err;
      std::stringstream data_path;
-     data_path << "/G_tau/"<<i<< "/mean/error";
+     data_path << boost::lexical_cast<std::string>(parms["BASEPATH"]|"")+"/G_tau/"<<i<< "/mean/error";
      solver_output<<alps::make_pvp(data_path.str(),err);
      g_name.str(""); g_name<<"f_"<<i;
      err = results[g_name.str()].error<std::vector<double> >();
      data_path.str("");
-     data_path << "/F_tau/"<<i<< "/mean/error";
+     data_path << boost::lexical_cast<std::string>(parms["BASEPATH"]|"")+"/F_tau/"<<i<< "/mean/error";
      solver_output<<alps::make_pvp(data_path.str(),err);
   }
     
@@ -184,7 +184,7 @@ void evaluate_time(const alps::results_type<hybridization>::type &results,
         data[t1*(N_t+1)+t2]=cov(t1,t2);
 
     std::stringstream data_path;
-    data_path << "/G_tau/"<<i<< "/mean/covariance";
+    data_path << boost::lexical_cast<std::string>(parms["BASEPATH"]|"")+"/G_tau/"<<i<< "/mean/covariance";
 
     solver_output<<alps::make_pvp(data_path.str(), data);
     g_name.str(""); g_name<<"f_"<<i;
@@ -197,7 +197,7 @@ void evaluate_time(const alps::results_type<hybridization>::type &results,
          data[t1*(N_t+1)+t2]=cov(t1,t2);
       
     data_path.str("");
-    data_path << "/F_tau/"<<i<< "/mean/covariance";
+    data_path << boost::lexical_cast<std::string>(parms["BASEPATH"]|"")+"/F_tau/"<<i<< "/mean/covariance";
       
     solver_output<<alps::make_pvp(data_path.str(), data);
   }
@@ -258,9 +258,9 @@ void evaluate_freq(const alps::results_type<hybridization>::type &results,
   }
 
   //store in hdf5
-  G_omega.write_hdf5(solver_output, "/G_omega");
-  F_omega.write_hdf5(solver_output, "/F_omega");
-  S_omega.write_hdf5(solver_output, "/S_omega");
+  G_omega.write_hdf5(solver_output, boost::lexical_cast<std::string>(parms["BASEPATH"]|"")+"/G_omega");
+  F_omega.write_hdf5(solver_output, boost::lexical_cast<std::string>(parms["BASEPATH"]|"")+"/F_omega");
+  S_omega.write_hdf5(solver_output, boost::lexical_cast<std::string>(parms["BASEPATH"]|"")+"/S_omega");
 
   // ERROR
   for(std::size_t i=0; i<n_orbitals; i++){
@@ -272,7 +272,7 @@ void evaluate_freq(const alps::results_type<hybridization>::type &results,
     err_g_im = results[g_name.str()].error<std::vector<double> >();
     for (int k=0;k<err.size();k++) err[k] = std::complex<double>(err_g_re[k],err_g_im[k]);
     std::stringstream data_path;
-    data_path << "/G_omega/"<<i<< "/mean/error";
+    data_path << boost::lexical_cast<std::string>(parms["BASEPATH"]|"")+"/G_omega/"<<i<< "/mean/error";
     solver_output<<alps::make_pvp(data_path.str(),err);
     g_name.str(""); g_name<<"fw_re_"<<i;
     err_f_re = results[g_name.str()].error<std::vector<double> >();
@@ -280,7 +280,7 @@ void evaluate_freq(const alps::results_type<hybridization>::type &results,
     err_f_im = results[g_name.str()].error<std::vector<double> >();
     for (int k=0;k<err.size();k++) err[k] = std::complex<double>(err_f_re[k],err_f_im[k]);
     data_path.str("");
-    data_path << "/F_omega/"<<i<< "/mean/error";
+    data_path << boost::lexical_cast<std::string>(parms["BASEPATH"]|"")+"/F_omega/"<<i<< "/mean/error";
     solver_output<<alps::make_pvp(data_path.str(),err);
   }
 
@@ -382,11 +382,11 @@ void evaluate_legendre(const alps::results_type<hybridization>::type &results,
   }//i
 
   //store in hdf5
-  G_l_omega.write_hdf5(solver_output, "/G_l_omega");
-  F_l_omega.write_hdf5(solver_output, "/F_l_omega");
-  S_l_omega.write_hdf5(solver_output, "/S_l_omega");
-  G_l_tau.write_hdf5(solver_output, "/G_l_tau");
-  F_l_tau.write_hdf5(solver_output, "/F_l_tau");
+  G_l_omega.write_hdf5(solver_output, boost::lexical_cast<std::string>(parms["BASEPATH"]|"")+"/G_l_omega");
+  F_l_omega.write_hdf5(solver_output, boost::lexical_cast<std::string>(parms["BASEPATH"]|"")+"/F_l_omega");
+  S_l_omega.write_hdf5(solver_output, boost::lexical_cast<std::string>(parms["BASEPATH"]|"")+"/S_l_omega");
+  G_l_tau.write_hdf5(solver_output, boost::lexical_cast<std::string>(parms["BASEPATH"]|"")+"/G_l_tau");
+  F_l_tau.write_hdf5(solver_output, boost::lexical_cast<std::string>(parms["BASEPATH"]|"")+"/F_l_tau");
 
   if(parms["TEXT_OUTPUT"]|false){
     std::ofstream gc_str("Gl_conv.dat");
