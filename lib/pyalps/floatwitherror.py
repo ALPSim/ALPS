@@ -68,14 +68,18 @@ class FloatWithError:
     return len(self.mean)
   
   def __getitem__(self,key):
-    try:    j = self.jackknife[:,key]
+    try:    jkey = (slice(None),)+key
+    except: jkey = (slice(None),key)
+    try:    j = self.jackknife[jkey]
     except: j = []
     return FloatWithError(self.mean[key],self.error[key],j)
   
   def __setitem__(self,key,value):
     self.mean [key] = value.mean
     self.error[key] = value.error
-    try:    self.jackknife[:,key] = value.jackknife
+    try:    jkey = (slice(None),)+key
+    except: jkey = (slice(None),key)
+    try:    self.jackknife[jkey] = value.jackknife
     except: self.jackknife = []
 
   def __add__(x__,y__):
