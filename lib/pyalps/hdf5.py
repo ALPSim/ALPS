@@ -66,7 +66,6 @@ class archive(hdf5_archive_impl):
 
     def __exit__(self, *args, **kwargs): # TODO: move to c++
         self.close()
-        return self
 
     def xml(self, path="/"):
         """
