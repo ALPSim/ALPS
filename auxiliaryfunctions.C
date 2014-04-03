@@ -30,7 +30,6 @@
 #include "types.h"
 #include "green_function.h"
 #include "nambu_green_function.h"
-#include "U_matrix.h"
 #include <fstream>
 #include <sstream>
 #include <math.h>
@@ -461,18 +460,8 @@ std::ostream &operator<<(std::ostream &os, const green_function<std::complex<dou
   }
   return os;
 }
-std::ostream &operator<<(std::ostream &os, const U_matrix &U){
-  os<<"[ ";
-  for(spin_t flavor_i=0;flavor_i<U.nf();++flavor_i){
-    os<<"[ ";
-    for(spin_t flavor_j=0;flavor_j<U.nf();++flavor_j){
-      os<<U(flavor_i,flavor_j)<<"\t";
-    }
-    os<<"] "<<std::endl;
-  }
-  os<<"]"<<std::endl;
-  return os;
-}
+
+
 //////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////THE NAMBU PART/////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
