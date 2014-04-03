@@ -44,78 +44,26 @@
 #include "cluster.h"
 
 
-/// the base class for all impurity solvers taking a Green's function in imaginary time and returning one also in imaginary time.
-class ImpuritySolver {
-public:
-  ImpuritySolver() {}
-  
-  typedef itime_green_function_t result_type;
-  
-  ///  @brief solves the impurity problem
-  ///
-  ///  @param G0 the bare Green's function in imaginary time, 
-  ///            provided as an input
-  ///              
-  ///  @param parms the simulation parameters
-  ///               Note that  mu, U and h are passed as simulation parameters 
-  ///               inside parms.
-  ///  
-  ///  @return the Green's functions for up and down spins as function of 
-  ///          imaginary time 
-    
-  virtual result_type solve( const itime_green_function_t& G0,
-            alps::Parameters parms)=0;
-            
-  virtual ~ImpuritySolver() {}
-};
 
-/// the base class for all impurity solvers taking a Green's function in imaginary 
-/// time and Matsubara frequency and returning one in Matsubara frequency.
-class MatsubaraImpuritySolver{
+/// the base class for all impurity solvers taking a Green's function in Matsubara frequency and returning one in imaginary time and Matsubara frequency.
+class ImpuritySolver{
 public:
-  MatsubaraImpuritySolver() {}
-    
-  typedef std::pair<matsubara_green_function_t,itime_green_function_t> result_type;
-	
-	///  @brief solves the impurity problem taking both G0_tau and G0_omega
+	///  @brief solves the impurity problem
 	///
 	///  @param G0_omega the bare Green's function in Matsubara frequency
-	///  @param G0_tau the bare Green's function in imaginary time
 	///  @param parms the simulation parameters
-	///  
-	///  Note that  mu, U and h are passed as simulation parameters inside parms.
 	/// 
 	///  @return the Green's functions for up and down spins as function of 
     ///          Matsubara frequency
+
+	typedef std::pair<matsubara_green_function_t,itime_green_function_t> matsubara_result_type;
+	typedef std::pair<nambu_matsubara_green_function_t,nambu_itime_green_function_t> nambu_result_type;
     
-  virtual result_type solve_omega(const matsubara_green_function_t& G0_omega,
+  virtual matsubara_result_type solve_matsubara(const matsubara_green_function_t& G0_omega,
 				  alps::Parameters parms, ClusterTransformer *c_ptr=0)=0;
-            
-  virtual ~MatsubaraImpuritySolver() {}
-};
-
-class NambuImpuritySolver{
-public:
-  NambuImpuritySolver() {}
-    
-  typedef std::pair<nambu_matsubara_green_function_t,nambu_itime_green_function_t> result_type;
-	
-	///  @brief solves the impurity problem taking both G0_tau and G0_omega
-	///
-	///  @param G0_omega the bare Green's function in Matsubara frequency
-	///  @param G0_tau the bare Green's function in imaginary time
-	///  @param parms the simulation parameters
-	///  
-	///  Note that  mu, U and h are passed as simulation parameters inside parms.
-	/// 
-	///  @return the Green's functions for up and down spins as function of 
-    ///          Matsubara frequency
-    
-  virtual result_type solve_nambu(const nambu_matsubara_green_function_t& G0_omega,
+  virtual nambu_result_type  solve_nambu(const nambu_matsubara_green_function_t& G0_omega,
 				  alps::Parameters parms )=0;
-            
-  virtual ~NambuImpuritySolver() {}
+  virtual ~ImpuritySolver(){}
 };
-
 
 #endif

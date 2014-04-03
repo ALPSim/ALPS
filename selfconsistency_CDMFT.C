@@ -38,7 +38,7 @@
 #include <sys/types.h> //will this fail on Windows?
 #include <boost/tuple/tuple.hpp> //will this fail on Windows?
 
-void selfconsistency_loop_CDMFT(const alps::Parameters& parms, MatsubaraImpuritySolver& solver,
+void selfconsistency_loop_CDMFT(const alps::Parameters& parms, ImpuritySolver& solver,
                                 CDMFTTransformer& clustertrans)
 {
   unsigned int n_tau=boost::lexical_cast<unsigned int>(parms["N"]);
@@ -82,7 +82,7 @@ void selfconsistency_loop_CDMFT(const alps::Parameters& parms, MatsubaraImpurity
     G0_old_tau = G0_tau;
     fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega);
     std::cout<<"running solver in omega."<<std::endl<<std::flush;
-    boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, parms);
+    boost::tie(G_omega, G_tau) = solver.solve_matsubara(G0_omega, parms);
     std::cout<<"applying point group symmetries"<<std::endl<<std::flush;
     G_tau = clustertrans.symmetrize(G_tau, paramagnet);
     G_omega = clustertrans.symmetrize(G_omega, paramagnet);
@@ -141,7 +141,7 @@ void selfconsistency_loop_CDMFT(const alps::Parameters& parms, MatsubaraImpurity
 }
 
 //Nambu CDMFT
-void selfconsistency_loop_CDMFT(const alps::Parameters& parms, NambuImpuritySolver& solver,
+void selfconsistency_loop_CDMFT_Nambu(const alps::Parameters& parms, ImpuritySolver& solver,
                                 CDMFTTransformer& clustertrans) {
   unsigned int n_tau=boost::lexical_cast<unsigned int>(parms["N"]);
   unsigned int n_matsubara=boost::lexical_cast<unsigned int>(parms["NMATSUBARA"]);
@@ -244,14 +244,14 @@ void selfconsistency_loop_CDMFT(const alps::Parameters& parms, NambuImpuritySolv
 
 void perform_CDMFT_loop(const alps::Parameters &parms){
   std::cout<<"running a CDMFT calculation"<<std::endl;
+  ImpuritySolver* solver_ptr=new ExternalSolver(boost::filesystem::path(parms["SOLVER"]));
+  ClusterTransformer *transform_ptr=ClusterTransformer::generate_transformer(parms);
   if(parms.value_or_default("NAMBU",false)){
-    boost::shared_ptr<NambuImpuritySolver> solver_ptr;
-    solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"])));
-    selfconsistency_loop_CDMFT(parms, *solver_ptr, *(CDMFTTransformer*)&*ClusterTransformer::generate_transformer(parms));
+    selfconsistency_loop_CDMFT(parms, *solver_ptr, *(CDMFTTransformer*)transform_ptr);
   }else{
-    boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;
-    solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"])));
-    selfconsistency_loop_CDMFT(parms, *solver_ptr, *(CDMFTTransformer*)&*ClusterTransformer::generate_transformer(parms));
+    selfconsistency_loop_CDMFT_Nambu(parms, *solver_ptr, *(CDMFTTransformer*)transform_ptr);
   }
+  delete transform_ptr;
+  delete solver_ptr;
 }
 

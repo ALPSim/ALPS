@@ -55,27 +55,21 @@
 
 class ExternalSolver 
  : public ImpuritySolver
- , public MatsubaraImpuritySolver 
- , public NambuImpuritySolver 
 {
 public:
 	/// @param executable the path to the executable
 	ExternalSolver(const boost::filesystem::path& executable) 
     : exe_(executable) {} 
     //: exe_(boost::filesystem::complete(executable)) {}
-	
-	ImpuritySolver::result_type solve(
-              const itime_green_function_t& G0
-            , alps::Parameters parms);
-    
-    MatsubaraImpuritySolver::result_type solve_omega(
+
+	ImpuritySolver::matsubara_result_type solve_matsubara(
               const matsubara_green_function_t& G0_omega
             , alps::Parameters parms, ClusterTransformer *c_ptr=0);
     
-    NambuImpuritySolver::result_type solve_nambu(
+	ImpuritySolver::nambu_result_type solve_nambu(
               const nambu_matsubara_green_function_t& G0_omega
             , alps::Parameters parms );
-            
+    virtual ~ExternalSolver(){}
 private:
     /// call the executable
     virtual void call(std::string const& infile, std::string const& outfile);

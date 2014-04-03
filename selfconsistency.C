@@ -38,7 +38,7 @@
 #include <sys/types.h> //will this fail on Windows?
 #include <boost/tuple/tuple.hpp> //will this fail on Windows?
 
-void selfconsistency_loop_single_site(const alps::Parameters& parms, MatsubaraImpuritySolver& solver,
+void selfconsistency_loop_single_site(const alps::Parameters& parms, ImpuritySolver& solver,
                                 FrequencySpaceHilbertTransformer& hilbert) 
 {
   unsigned int n_tau=boost::lexical_cast<unsigned int>(parms["N"]);
@@ -82,7 +82,7 @@ void selfconsistency_loop_single_site(const alps::Parameters& parms, MatsubaraIm
     fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega);
     //fourier.setmu(mu);
     std::cout<<"running solver."<<std::endl<<std::flush;
-    boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega,parms);
+    boost::tie(G_omega, G_tau) = solver.solve_matsubara(G0_omega,parms);
     G_tau = hilbert.symmetrize(G_tau, paramagnet);
     G_omega = hilbert.symmetrize(G_omega, paramagnet);
     /*if(parms.defined("FILLING")){ //adjust chemical potential
@@ -151,8 +151,8 @@ void perform_single_site_loop(const alps::Parameters &parms){
   else
     transform_ptr=setup_Bethe_hilbert_transform(parms);
   
-  boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;
-  solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"])));
+  ImpuritySolver* solver_ptr=new ExternalSolver(boost::filesystem::path(parms["SOLVER"]));
   selfconsistency_loop_single_site(parms, *solver_ptr, *transform_ptr);
+  delete solver_ptr;
 }
 

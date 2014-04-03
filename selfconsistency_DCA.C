@@ -18,7 +18,7 @@
 
 
 
-void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySolver& solver,
+void selfconsistency_loop_DCA(const alps::Parameters& parms, ImpuritySolver& solver,
                               DCATransformer& clustertrans)
 {
   unsigned int n_tau=boost::lexical_cast<unsigned int>(parms["N"]);
@@ -67,12 +67,12 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     
     //std::cout<<"running solver in frequency space."<<std::endl<<std::flush;
     if(!readwrite_real_space){
-      boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, parms, &clustertrans);
+      boost::tie(G_omega, G_tau) = solver.solve_matsubara(G0_omega, parms, &clustertrans);
     }else{
       matsubara_green_function_t G0_omega_rs=clustertrans.transform_into_real_space(G0_omega);
       matsubara_green_function_t G_omega_rs(n_matsubara, n_site, n_orbital, nondiagonal);
       itime_green_function_t G_tau_rs(n_tau+1, n_site, n_orbital, nondiagonal);
-      boost::tie(G_omega_rs, G_tau_rs) = solver.solve_omega(G0_omega_rs, parms,&clustertrans);
+      boost::tie(G_omega_rs, G_tau_rs) = solver.solve_matsubara(G0_omega_rs, parms,&clustertrans);
       G_omega=clustertrans.transform_into_k_space(G_omega_rs);
       G_tau=clustertrans.transform_into_k_space(G_tau_rs);
     }
@@ -113,7 +113,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
   G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
 }
 
-void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver& solver,
+void selfconsistency_loop_DCA_Nambu(const alps::Parameters& parms, ImpuritySolver& solver,
                               DCATransformer& clustertrans)
 {
   unsigned int n_tau=boost::lexical_cast<unsigned int>(parms["N"]);
@@ -203,15 +203,13 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver
 void perform_DCA_loop(const alps::Parameters &parms){
   std::cout<<"running a DCA calculation"<<std::endl;
   ClusterTransformer *transform_ptr=ClusterTransformer::generate_transformer(parms);
+  ImpuritySolver* solver_ptr=new ExternalSolver(boost::filesystem::path(parms["SOLVER"]));
   if(parms.value_or_default("NAMBU",false)){
-    boost::shared_ptr<NambuImpuritySolver> solver_ptr;
-    solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"])));
     selfconsistency_loop_DCA(parms, *solver_ptr, *(DCATransformer*)transform_ptr);
   }else{
-    boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;
-    solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"])));
-    selfconsistency_loop_DCA(parms, *solver_ptr, *(DCATransformer*)transform_ptr);
+    selfconsistency_loop_DCA_Nambu(parms, *solver_ptr, *(DCATransformer*)transform_ptr);
   }
   delete transform_ptr;
+  delete solver_ptr;
 }
 

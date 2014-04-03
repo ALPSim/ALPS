@@ -48,46 +48,8 @@
 
 #include "externalsolver.h"
 
-ImpuritySolver::result_type ExternalSolver::solve(
-                                                  const itime_green_function_t& G0
-                                                  , alps::Parameters p) 
-{
-  BOOST_ASSERT(alps::is_master());
-  std::string infile;
-  std::string outfile; 
-  if(p.defined("TMPNAME")){
-    infile=p["TMPNAME"]+std::string(".in.h5");
-    outfile=p["TMPNAME"]+std::string(".out.h5");
-  } else{
-    infile= alps::temporary_filename("alps_external_solver_in_");
-    outfile= alps::temporary_filename("alps_external_solver_out_");
-  }
-  p["INFILE"]=infile;
-  p["OUTFILE"]=infile;
-  
-  // write input file
-  {
-    alps::hdf5::archive solver_input(infile, alps::hdf5::archive::WRITE);
-    solver_input<<alps::make_pvp("/parameters",p);
-    G0.write_hdf5(solver_input, "/G0");
-  } 
-  
-  call(infile,outfile);
-  
-  // read the output
-  unsigned int N=(unsigned int)p["N"];
-  unsigned int sites     =(unsigned int)p.value_or_default("SITES", 1);
-  unsigned int flavors   =(unsigned int)p.value_or_default("FLAVORS", 2);
-  itime_green_function_t g(N+1, sites, flavors, G0.shape());
-  {
-    alps::hdf5::archive ar(outfile, alps::hdf5::archive::READ);
-    g.read_hdf5(ar, "/G0");
-  }
-  boost::filesystem::remove(boost::filesystem::system_complete(outfile));
-  return g;
-}
 
-MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
+ImpuritySolver::matsubara_result_type ExternalSolver::solve_omega(
                                                                  const matsubara_green_function_t& G0_omega
                                                                  , alps::Parameters p, ClusterTransformer *c_ptr)
 {
@@ -153,7 +115,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
   return std::make_pair(G_omega, G_tau);
 }
 
-NambuImpuritySolver::result_type ExternalSolver::solve_nambu(
+ImpuritySolver::nambu_result_type ExternalSolver::solve_nambu(
                                                              const nambu_matsubara_green_function_t& G0_omega
                                                              , alps::Parameters p)
 {

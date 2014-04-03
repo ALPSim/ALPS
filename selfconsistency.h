@@ -24,13 +24,13 @@
 #include "green_function.h"
 
 /// performs a DMFT self-conistency loop until convergence
-void selfconsistency_loop_single_site(const alps::Parameters& parms, MatsubaraImpuritySolver& solver,  FrequencySpaceHilbertTransformer& hilbert);
+void selfconsistency_loop_single_site(const alps::Parameters& parms, ImpuritySolver& solver,  FrequencySpaceHilbertTransformer& hilbert);
 
 
-void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySolver& solver, DCATransformer& clustertrans);
-void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver& solver, DCATransformer& clustertrans);
-void selfconsistency_loop_CDMFT(const alps::Parameters& parms, MatsubaraImpuritySolver& solver, CDMFTTransformer& clustertrans);
-void selfconsistency_loop_CDMFT(const alps::Parameters& parms, NambuImpuritySolver& solver, CDMFTTransformer& clustertrans);
+void selfconsistency_loop_DCA(const alps::Parameters& parms, ImpuritySolver& solver, DCATransformer& clustertrans);
+void selfconsistency_loop_DCA_Nambu(const alps::Parameters& parms, ImpuritySolver& solver, DCATransformer& clustertrans);
+void selfconsistency_loop_CDMFT(const alps::Parameters& parms, ImpuritySolver& solver, CDMFTTransformer& clustertrans);
+void selfconsistency_loop_CDMFT_Nambu(const alps::Parameters& parms, ImpuritySolver& solver, CDMFTTransformer& clustertrans);
 
 
 void perform_single_site_loop(const alps::Parameters &parms);
