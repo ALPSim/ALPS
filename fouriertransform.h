@@ -122,17 +122,12 @@ public:
     switch (mom) {
       case 0 :
         return c1_[z][i][j];
-        break;
       case 1 :
         return c2_[z][i][j];
-        break;
       case 2 :
         return c3_[z][i][j];
-        break;
       default :
-        boost::throw_exception(std::invalid_argument("no such coefficient stored in FourierTransformer"));
-        return 0.;
-        break;
+        throw std::invalid_argument("no such coefficient stored in FourierTransformer");
     }
   }
   double SE_moments(const unsigned int z, const unsigned int i, const unsigned int j, 
@@ -141,17 +136,12 @@ public:
     switch (mom) {
       case 0 :
         return Sc0_[z][i][j];
-        break;
       case 1 :
         return Sc1_[z][i][j];
-        break;
       case 2 :
         return Sc2_[z][i][j];
-        break;
       default :
-        boost::throw_exception(std::invalid_argument("no such coefficient stored in FourierTransformer"));
-        return 0.;
-        break;
+        throw std::invalid_argument("no such coefficient stored in FourierTransformer");
     }
   }
   

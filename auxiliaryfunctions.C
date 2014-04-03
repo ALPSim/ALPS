@@ -580,7 +580,7 @@ void print_selfenergy_matsubara(std::ostream &os, const nambu_matsubara_green_fu
       break;
     case blockdiagonal:
     {
-      std::cerr<<"please use cluster framework for block diag sigma"<<std::endl;;
+      throw std::logic_error("please use cluster framework for block diag sigma");
     }
     case nondiagonal:
     {

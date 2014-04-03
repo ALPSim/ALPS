@@ -249,14 +249,6 @@ public:
 };
 
 
-
-inline double disp_2d(double kx, double ky, double t, double tprime)
-{ 
-  return -2.*t*(cos(kx)+cos(ky)) - 4*tprime*cos(kx)*cos(ky);
-}
-
-
-
 class TwoDAFMHilbertTransformer: public FrequencySpaceHilbertTransformer{
 public:
   TwoDAFMHilbertTransformer(const alps::Parameters& params){
