@@ -35,25 +35,15 @@
 
 #include <cstdlib>
 #include <fstream>
-#ifdef BOOST_MSVC
-#include <io.h>
-#endif
 
-#include "boost/tuple/tuple.hpp"
-
-#include "alps/parser/parser.h"
-#include "alps/utility/vectorio.hpp"
 #include "alps/utility/temporary_filename.hpp"
-#include "alps/osiris/comm.h"
-
 #include "externalsolver.h"
 
 
-ImpuritySolver::matsubara_result_type ExternalSolver::solve_omega(
+ImpuritySolver::matsubara_result_type ExternalSolver::solve_matsubara(
                                                                  const matsubara_green_function_t& G0_omega
                                                                  , alps::Parameters p, ClusterTransformer *c_ptr)
 {
-  BOOST_ASSERT(alps::is_master());
   std::string infile;
   std::string outfile;
   if(p.defined("TMPNAME")){
@@ -120,7 +110,6 @@ ImpuritySolver::nambu_result_type ExternalSolver::solve_nambu(
                                                              , alps::Parameters p)
 {
   std::cout<<"solve nambu for external solver!"<<std::endl;
-  BOOST_ASSERT(alps::is_master());
   std::string infile;
   std::string outfile;
   if(p.defined("TMPNAME")){
@@ -188,10 +177,10 @@ void ExternalSolver::call(std::string const& infile, std::string const& outfile)
   std::cerr << "Calling external solver " << exe_.native_file_string() << " as: "<<command<<std::endl;
   int result = std::system(command.c_str());
   if (result)
-    boost::throw_exception(std::runtime_error("System error code " +boost::lexical_cast<std::string>(result) + " encountered when executing command:\n"+command));
+    throw std::runtime_error("System error code " +boost::lexical_cast<std::string>(result) + " encountered when executing command:\n"+command);
   
   boost::filesystem::remove(infile);
   
   if (!boost::filesystem::exists(outfile))
-    boost::throw_exception(std::runtime_error("The external impurity solver failed to write the output file named " + outfile));
+    throw std::runtime_error("The external impurity solver failed to write the output file named " + outfile);
 }
