@@ -42,7 +42,6 @@
 /// @todo the transformations need to be implemented. responsible: Philipp Werner and Hartmut Monien
 
 #include "types.h"
-#include "2dsimpson.h"
 #include "fouriertransform.h"
 
 /// @brief performs a Hilbert transformation
@@ -290,7 +289,7 @@ public:
       return 1./(zeta_A_*zeta_B_-eps*eps);
     }
     private:
-    double twod_square_lattice_dispersion(double kx, double ky){
+    double twod_square_lattice_dispersion(double kx, double ky) const{
      return -2.*t_*(cos(kx)+cos(ky)) -4.*tprime_*cos(kx)*cos(ky);
     }
     double t_;
