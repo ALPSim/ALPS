@@ -233,7 +233,7 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
   bool computing_mu=true;
   int mu_it=1;
   
-  int current_it = 0; //fix this if needed.
+  int current_it = static_cast<int>( (*const_cast<alps::Parameters*>(&params_)).value_or_default("CURRENT_IT",0));
   
   
   double n_old;
