@@ -901,7 +901,8 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
     }while(std::abs(density_upper-density_lower)>tol);
     
     std::cout<<"bisection converged for mu: "<<mu<<" "<<density_lower<<" "<<density_upper<<" "<<density_now<<std::endl;
-    //(*const_cast<alps::Parameters*>(params_ptr_))["MU"]=mu; //write the chemical potential back to the parameter file
+	(*const_cast<alps::Parameters*>(&params_))["MU"]=mu;
+     //write the chemical potential back to the parameter file
     /// \todo fix this if needed
   }else{
     construct_green_function( mu,  beta,  eta1,  eta2, epsilon_kckl, dwave_prefactor_kckl, weight_kl, selfenergy,G_omega_lattice_kav);
