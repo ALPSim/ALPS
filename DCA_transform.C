@@ -278,6 +278,7 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
       }
     }
     density=density/beta/n_cluster_sites()+(0.5*n_cluster_sites())/n_cluster_sites()*nflavor; //density such that 'half filling' corresponds to 1
+
     if (compute_filling_ && current_it>1) {
       std::cout<<"mu: "<<mu<<" filling "<<density<<" it: "<<mu_it<<" converged: "<<converged<<std::endl;
       //compute new chemical potential
@@ -296,6 +297,12 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
       }
     }
   }
+
+	current_it =current_it+1;
+	(*const_cast<alps::Parameters*>(&params_))["CURRENT_IT"]=current_it;
+
+
+
   return G0_omega_new;
 }
 
