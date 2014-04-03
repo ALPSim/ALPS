@@ -64,6 +64,8 @@ int main(int argc, char** argv)
       perform_cluster_loop(parms);
     if(parms.defined("MODIFY_PARAMETER_FILE")){
       std::ofstream os(argv[1]);
+	
+      (*const_cast<alps::Parameters*>(&parms))["CURRENT_IT"]=0;// sloppy fix.  Sets current_it to zero for continuing program later
       os<<parms;
       os.close();
     }

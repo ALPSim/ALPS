@@ -298,10 +298,13 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
     }
   }
 
-	current_it =current_it+1;
+		current_it =current_it+1;
 	(*const_cast<alps::Parameters*>(&params_))["CURRENT_IT"]=current_it;
-
-
+	(*const_cast<alps::Parameters*>(&params_))["MU"]=mu;
+		
+	 std::ofstream os(static_cast<std::string>(params_["BASENAME"]).c_str());
+     	 os<<params_;
+      	 os.close();
 
   return G0_omega_new;
 }
