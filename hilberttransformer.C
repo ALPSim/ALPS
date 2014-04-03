@@ -349,5 +349,65 @@ matsubara_green_function_t TwoDAFMHilbertTransformer::operator()(const matsubara
 }
 
 
+std::complex<double> TwoDAFMHilbertTransformer::twodsimpson(const integrand &f, double ax, double ay, double bx, double by, int N){
+  std::complex<double>       result=0.;
+  double       h=(bx-ax)/(2.*N);
+  double       k=(by-ay)/(2.*N);
 
+  result =  f(ax,ay) + f(ax,by) + f(bx, ay) +f(bx,by) ;
+
+  // values between boundaries
+  for ( int i = 1; i <= N; ++i ) {
+    result += 4.*f(ax,ay+k*(2*i-1));
+  }
+  for ( int i = 1; i <= N-1; ++i ) {
+    result += 2.*f(ax,ay+k*2*i);
+  }
+  for ( int i = 1; i <= N; ++i ) {
+    result += 4.*f(bx,ay+k*(2*i-1));
+  }
+  for ( int i = 1; i <= N-1; ++i ) {
+    result += 2.*f(bx,ay+k*2*i);
+  }
+
+
+  for ( int i = 1; i <= N; ++i ) {
+    result += 4.*f(ax+h*(2*i-1),ay);
+  }
+  for ( int i = 1; i <= N-1; ++i ) {
+    result += 2.*f(ax+h*(2*i),ay);
+  }
+  for ( int i = 1; i <= N; ++i ) {
+    result += 4.*f(ax+h*(2*i-1),by);
+  }
+  for ( int i = 1; i <= N-1; ++i ) {
+    result += 2.*f(ax+h*(2*i),by);
+  }
+
+  //inner part
+  //
+  for(int i=1;i<=N;++i){
+    for(int j=1;j<=N;++j){
+      result+=16.*f(ax+h*(2*i-1), ay+k*(2*j-1));
+    }
+  }
+  for(int i=1;i<N;++i){
+    for(int j=1;j<=N;++j){
+      result+=8.*f(ax+h*(2*i-1), ay+k*(2*j));
+    }
+  }
+  for(int i=1;i<=N;++i){
+    for(int j=1;j<N;++j){
+      result+=8.*f(ax+h*(2*i), ay+k*(2*j-1));
+    }
+  }
+  for(int i=1;i<N;++i){
+    for(int j=1;j<N;++j){
+      result+=4.*f(ax+h*(2*i), ay+k*(2*j));
+    }
+  }
+
+  result *= h*k/9.;
+  return result;
+}
 

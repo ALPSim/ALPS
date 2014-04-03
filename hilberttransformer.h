@@ -271,29 +271,39 @@ public:
   matsubara_green_function_t operator()(const matsubara_green_function_t & G_omega, 
 					matsubara_green_function_t &G0_omega, 
 					const double mu, const double h, const double beta);
-  
+  class integrand{
+    public:
+      virtual std::complex<double>operator()(double kx, double ky) const=0;
+      virtual ~integrand(){};
+  };
+  class afm_integrand:public integrand{ //class for the integrand with an epsilon(k) that uses the t-band structure.
+    public:
+    afm_integrand(double t, double tprime, std::complex<double> zeta_A, std::complex<double> zeta_B){
+      zeta_A_=zeta_A;
+      zeta_B_=zeta_B;
+      t_=t;
+      tprime_=tprime;
+    }
+    std::complex<double> operator()(double kx, double ky) const{
+      double eps=twod_square_lattice_dispersion(kx,ky);
+      //std::cout<<"disp: "<<eps<<" t: "<< t_<<" tprime: "<<tprime_<<" zeta A: "<<zeta_A_<<" zeta B: "<<zeta_B_<<" kx: "<<kx<<" ky "<<ky<<std::endl;
+      return 1./(zeta_A_*zeta_B_-eps*eps);
+    }
+    private:
+    double twod_square_lattice_dispersion(double kx, double ky){
+     return -2.*t_*(cos(kx)+cos(ky)) -4.*tprime_*cos(kx)*cos(ky);
+    }
+    double t_;
+    double tprime_;
+    std::complex<double> zeta_A_;
+    std::complex<double> zeta_B_;
+  };
+
 private:
+  std::complex<double> twodsimpson(const integrand &, double ax, double ay, double bx, double by, int N);
   double t_;
   double tprime_;
   int L_;
 };
-
-
-
-#ifdef IGOR
-
-class IgorsHilbertTransformer : public FrequencySpaceHilbertTransformer {
-public:
-  IgorsHilbertTransformer() {}
-  
-  virtual matsubara_green_function_t operator()(const matsubara_green_function_t& G_omega, 
-						matsubara_green_function_t &G0_omega, 
-						const double mu, const double h, const double beta);
-  matsubara_green_function_t initial_G0(const alps::Parameters& parms);
-  
-};
-
-#endif 
-
 
 #endif /*ALPS_DMFT_HILBERTTRANSFORMER_H*/
