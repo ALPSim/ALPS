@@ -21,7 +21,7 @@ link_directories("/home2/egull/software/gsl-1.9/lib")
 add_executable(dmft 
 clusterhelper.C fouriertransform.C selfconsistency.C
 selfconsistency_DCA.C selfconsistency_CDMFT.C
-alps_solver.C AFM_transform.C DCA_transform.C hilberttransformer.C interpolator.C
+AFM_transform.C DCA_transform.C hilberttransformer.C interpolator.C
 auxiliaryfunctions.C externalsolver.C main.C)
 
 target_link_libraries(dmft ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
