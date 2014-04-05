@@ -30,10 +30,19 @@
 #include "alps/numeric/matrix.hpp"
 #include <boost/numeric/ublas/io.hpp>
 
+matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_green_function_t &G_omega,
+                                                            const matsubara_green_function_t &G0_omega,
+                                                            double &mu, const double h, const double beta)
+{
+  matsubara_green_function_t selfenergy(G_omega);
+  return this->operator()(G_omega, G0_omega, selfenergy, mu, h, beta, false);
+}
+
 ///self-consistency transform operator for the Antiferromagnetic DCA case
 matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_green_function_t &G_omega,
-                                                               const matsubara_green_function_t &G0_omega,
-                                                               double &mu, const double h, const double beta)
+                                                            const matsubara_green_function_t &G0_omega,
+                                                            matsubara_green_function_t &selfenergy,
+                                                            double &mu, const double h, const double beta, const bool use_selfenergy)
 {
   //std::cout<<"runnning operator() with AFM"<<std::endl;
   unsigned int nflavor=G0_omega.nflavor();
@@ -44,10 +53,11 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
   //first: compute the self energy using G and G0.
   matsubara_green_function_t G0_omega_new(nfreq,n_cluster_sites(),nflavor, blockdiagonal);
   G0_omega_new.clear();
-  matsubara_green_function_t G0_omega_inv = green_function_inverse (G0_omega);
-  matsubara_green_function_t G_omega_inv  = green_function_inverse (G_omega );
-  matsubara_green_function_t selfenergy   = green_function_subtract(G0_omega_inv, G_omega_inv);
-  
+  if(!use_selfenergy){ //compute selfenergy out of G and G0 first
+    matsubara_green_function_t G0_omega_inv = green_function_inverse (G0_omega);
+    matsubara_green_function_t G_omega_inv  = green_function_inverse (G_omega );
+    selfenergy   = green_function_subtract(G0_omega_inv, G_omega_inv);
+  }
   //buffer the dispersion and the weight – no need to evaluate this for every frequency
   //first dimension: sign
   //second dimension: k0 or k1

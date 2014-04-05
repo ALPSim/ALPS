@@ -239,6 +239,10 @@ public:
   virtual matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega,
                                                 const matsubara_green_function_t &G0_omega,
                                                 double &mu, const double h, const double beta)=0;
+  virtual matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega,
+                                        const matsubara_green_function_t &G0_omega,
+                                        matsubara_green_function_t &selfenergy,
+                                        double &mu, const double h, const double beta, const bool use_selfenergy)=0;
   //Hilbert transform operator for Nambu GF
   virtual nambu_matsubara_green_function_t operator()(const nambu_matsubara_green_function_t &G_omega,
                                                       const nambu_matsubara_green_function_t &G0_omega,
@@ -456,6 +460,11 @@ class AntiFerroDCATransformer : public DCATransformer
 public:
   AntiFerroDCATransformer(const alps::Parameters& params) : DCATransformer(params) {}
   
+  //self-consistency transform operator
+  matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega,
+                                        const matsubara_green_function_t &G0_omega,
+                                        matsubara_green_function_t &selfenergy,
+                                        double &mu, const double h, const double beta, const bool use_selfenergy);
   matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega,
                                         const matsubara_green_function_t &G0_omega,
                                         double &mu, const double h, const double beta);

@@ -16,6 +16,16 @@
 #include <sys/types.h> //will this fail on Windows?
 #include <boost/tuple/tuple.hpp> //will this fail on Windows?
 
+void perform_cluster_loop(const alps::Parameters &parms){
+  if (parms["CLUSTER_LOOP"]=="DCA")
+    perform_DCA_loop(parms);
+  else if (parms["CLUSTER_LOOP"]=="CDMFT")
+    perform_CDMFT_loop(parms);
+  else {
+    std::cout<<parms["CLUSTER_LOOP"]<<std::endl;
+    boost::throw_exception(std::logic_error("there is no such cluster method!"));
+  }
+}
 
 
 void selfconsistency_loop_DCA(const alps::Parameters& parms, ImpuritySolver& solver,
