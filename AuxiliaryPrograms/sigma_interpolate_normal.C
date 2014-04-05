@@ -18,26 +18,27 @@ int main(int argc, char **argv){
   std::string pfilename;
   std::string latticefilename;
   std::string clustername;
+  std::string selfenergy_filename;
   int new_cluster_sites=-1;
   // Declare the supported options.
   double mult_anomalous;
   po::options_description desc("Allowed options");
   desc.add_options()
-    ("help", "show this help")
-    ("beta", po::value<double>(), "new inverse temperature")
+  ("help", "show this help")
+  ("beta", po::value<double>(), "new inverse temperature")
   ("mu", po::value<double>(), "new chemical potential")
   ("H", po::value<double>(), "new magnetic field")
-    ("n_matsubara", po::value<int>(), "new number of matsubara frequencies")
-    ("pfile", po::value<std::string>(&pfilename)->default_value("ctaux.param"), "parameter file")
-    ("lattice", po::value<std::string>(&latticefilename)->default_value("cluster.xml"), "lattice file cluster.xml")
-    ("cluster", po::value<std::string>(&clustername), "cluster geometry")
-    ("sites", po::value<int>(&new_cluster_sites), "number of cluster sites for new cluster")
-    ("iteration", po::value<int>(), "iteration")
-          ;
+  ("n_matsubara", po::value<int>(), "new number of matsubara frequencies")
+  ("pfile", po::value<std::string>(&pfilename)->default_value("ctaux.param"), "parameter file")
+  ("lattice", po::value<std::string>(&latticefilename)->default_value("cluster.xml"), "lattice file cluster.xml")
+  ("cluster", po::value<std::string>(&clustername), "cluster geometry")
+  ("sites", po::value<int>(&new_cluster_sites), "number of cluster sites for new cluster")
+  ("selfenergy", po::value<std::string>(&selfenergy_filename), "self-energy to be interpolated")
+  ;
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc), vm);
-  po::notify(vm);    
-
+  po::notify(vm);
+  
   if (vm.count("help")) {
     std::cout<<desc;
     return 1;
@@ -66,7 +67,7 @@ int main(int argc, char **argv){
   std::cout<<"new beta: "<<beta_new<<"(old: "<<beta<<")"<<std::endl;
   std::cout<<"new mu: "<<mu_new<<"(old: "<<mu<<")"<<std::endl;
   std::cout<<"new h: "<<h_new<<"(old: "<<h<<")"<<std::endl;
- 
+  
   if(!vm.count("lattice")) throw std::runtime_error("you need to specify the cluster.xml file as lattice.");
   parms["LATTICE_LIBRARY"]=vm["lattice"].as<std::string>();
   
@@ -77,11 +78,10 @@ int main(int argc, char **argv){
   matsubara_green_function_t green0(nfreq_new, nsites_new, 2, diagonal);
   itime_green_function_t green0_itime(ntau, nsites_new, 2, diagonal);
   
-  if(!vm.count("iteration")) throw std::runtime_error("please specify iteration");
-  int iteration=vm["iteration"].as<int>();
-  std::stringstream selfenergy_name; selfenergy_name<<"selfenergy_"<<iteration;
+  //open and read in self-energy
+  if(!vm.count("selfenergy")) throw std::runtime_error("please specify self-energy");
   {
-    std::ifstream sigma_file(selfenergy_name.str().c_str());
+    std::ifstream sigma_file(selfenergy_filename.c_str());
     if(!sigma_file.is_open()) throw std::runtime_error("self energy file not open.");
     double ignored;
     for(int i=0;i<nfreq;++i){
@@ -94,6 +94,8 @@ int main(int argc, char **argv){
       }
     }
   }
+  
+  //interpolate cluster geometry
   if(vm.count("cluster")){
     DCATransformer* clustertransformer_old=(DCATransformer*)ClusterTransformer::generate_transformer(parms);
     
@@ -106,16 +108,16 @@ int main(int argc, char **argv){
     std::vector<double> kvec(2);
     for(int i=0;i<nfreq;++i){
       for(int flavor=0;flavor<2;++flavor){
-          for(int k=0;k<nsites_old;++k){
-            values[k]=selfenergy_orig(i,k,k,flavor);
-          }
-          for(int k=0;k<nsites_new;++k){
-            for (unsigned int d=0; d<2; ++d){
-              kvec[d] = clustertransformer_new->cluster_momentum(k,d);
-            }
-            selfenergy_kspace_interp(i,k,k,flavor)=clustertransformer_old->interpolate(kvec,values, false);
-          }
+        for(int k=0;k<nsites_old;++k){
+          values[k]=selfenergy_orig(i,k,k,flavor);
         }
+        for(int k=0;k<nsites_new;++k){
+          for (unsigned int d=0; d<2; ++d){
+            kvec[d] = clustertransformer_new->cluster_momentum(k,d);
+          }
+          selfenergy_kspace_interp(i,k,k,flavor)=clustertransformer_old->interpolate(kvec,values, false);
+        }
+      }
     }
     delete clustertransformer_old;
     delete clustertransformer_new;
@@ -140,21 +142,21 @@ int main(int argc, char **argv){
   std::vector<double> sigma_imag(nfreq);
   for(int j=0;j<nsites_new;++j){
     for(int flavor=0;flavor<2;++flavor){
-        for(int i=0;i<nfreq;++i){
-          sigma_real[i]=selfenergy_kspace_interp(i,j,j,flavor).real();
-          sigma_imag[i]=selfenergy_kspace_interp(i,j,j,flavor).imag();
+      for(int i=0;i<nfreq;++i){
+        sigma_real[i]=selfenergy_kspace_interp(i,j,j,flavor).real();
+        sigma_imag[i]=selfenergy_kspace_interp(i,j,j,flavor).imag();
+      }
+      gsl_spline_init (spline_real, &(matsubara_freqs_old[0]), &(sigma_real[0]), nfreq);
+      gsl_spline_init (spline_imag, &(matsubara_freqs_old[0]), &(sigma_imag[0]), nfreq);
+      
+      double xi,yi;
+      for (int i=0; i<nfreq_new; ++i){
+        if(i<nfreq){
+          selfenergy_new(i,j,j,flavor) = std::complex<double>(gsl_spline_eval (spline_real, matsubara_freqs_new[i], acc_real), gsl_spline_eval (spline_imag, matsubara_freqs_new[i], acc_imag));
+        }else{
+          selfenergy_new(i,j,j,flavor) = selfenergy_kspace_interp(nfreq-1,j,j,flavor); //TODO: append tail from high freq expansion.
         }
-        gsl_spline_init (spline_real, &(matsubara_freqs_old[0]), &(sigma_real[0]), nfreq);
-        gsl_spline_init (spline_imag, &(matsubara_freqs_old[0]), &(sigma_imag[0]), nfreq);
-        
-        double xi,yi;                     
-        for (int i=0; i<nfreq_new; ++i){
-          if(i<nfreq){
-            selfenergy_new(i,j,j,flavor) = std::complex<double>(gsl_spline_eval (spline_real, matsubara_freqs_new[i], acc_real), gsl_spline_eval (spline_imag, matsubara_freqs_new[i], acc_imag));
-          }else{
-            selfenergy_new(i,j,j,flavor) = selfenergy_kspace_interp(nfreq-1,j,j,flavor); //TODO: append tail from high freq expansion.
-          }
-        }
+      }
     }
   }
   gsl_spline_free (spline_real);
@@ -168,7 +170,7 @@ int main(int argc, char **argv){
   parms["BETA"]=beta_new;
   parms["MU"]=mu_new;
   parms["H"]=h_new;
-
+  
   DCATransformer* clustertransformer_new=(DCATransformer*)ClusterTransformer::generate_transformer(parms);
   green0 = (*clustertransformer_new)(green, green0, selfenergy_new, mu_new, h_new, beta_new, true);
   std::cout<<"symmetrizing paramagnet"<<std::endl;
