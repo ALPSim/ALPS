@@ -25,9 +25,10 @@ int main(int argc, char **argv){
   desc.add_options()
     ("help", "show this help")
     ("beta", po::value<double>(), "new inverse temperature")
-    ("mu", po::value<double>(), "new chemical pot")
+  ("mu", po::value<double>(), "new chemical potential")
+  ("H", po::value<double>(), "new magnetic field")
     ("n_matsubara", po::value<int>(), "new number of matsubara frequencies")
-    ("pfile", po::value<std::string>(&pfilename)->default_value("nambu.param"), "parameter file")
+    ("pfile", po::value<std::string>(&pfilename)->default_value("ctaux.param"), "parameter file")
     ("lattice", po::value<std::string>(&latticefilename)->default_value("cluster.xml"), "lattice file cluster.xml")
     ("cluster", po::value<std::string>(&clustername), "cluster geometry")
     ("sites", po::value<int>(&new_cluster_sites), "number of cluster sites for new cluster")
@@ -45,6 +46,7 @@ int main(int argc, char **argv){
   std::ifstream parm_file(pfilename.c_str());
   if(!parm_file.is_open()) throw std::runtime_error("parm file not open.");
   alps::Parameters parms(parm_file);
+  if(parms["CLUSTER_LOOP"]!="DCA") throw std::invalid_argument("this interpolation assumes DCA");
   double beta=parms["BETA"];
   double mu=parms["MU"];
   double h=parms["H"];
@@ -52,16 +54,18 @@ int main(int argc, char **argv){
   double nsites_new=vm.count("sites")?new_cluster_sites:(int)(parms["SITES"]);
   int nfreq = parms["NMATSUBARA"];
   int ntau= parms["N"];
-  double beta_new,mu_new,eta1_new;
+  double beta_new,mu_new,h_new;
   int nfreq_new;
   if(vm.count("beta")) beta_new=vm["beta"].as<double>(); else beta_new=beta;
   if(vm.count("mu")) mu_new=vm["mu"].as<double>(); else mu_new=mu;
+  if(vm.count("H")) h_new=vm["H"].as<double>(); else h_new=h;
   if(vm.count("n_matsubara")) nfreq_new=vm["n_matsubara"].as<int>(); else nfreq_new=nfreq;
   bool paramagnet=true;
   
   std::cout<<"adjusting parameters: "<<std::endl;
   std::cout<<"new beta: "<<beta_new<<"(old: "<<beta<<")"<<std::endl;
   std::cout<<"new mu: "<<mu_new<<"(old: "<<mu<<")"<<std::endl;
+  std::cout<<"new h: "<<h_new<<"(old: "<<h<<")"<<std::endl;
  
   if(!vm.count("lattice")) throw std::runtime_error("you need to specify the cluster.xml file as lattice.");
   parms["LATTICE_LIBRARY"]=vm["lattice"].as<std::string>();
@@ -91,13 +95,13 @@ int main(int argc, char **argv){
     }
   }
   if(vm.count("cluster")){
-    ClusterTransformer* clusterhandler_old=ClusterTransformer::generate_transformer(parms);;
+    DCATransformer* clustertransformer_old=(DCATransformer*)ClusterTransformer::generate_transformer(parms);
     
     
     if(new_cluster_sites==-1) throw std::logic_error("please specify new cluster sites!");
     parms["SITES"]=new_cluster_sites;
     parms["LATTICE"]=clustername;
-    ClusterTransformer *clusterhandler_new=ClusterTransformer::generate_transformer(parms);
+    DCATransformer *clustertransformer_new=(DCATransformer*)ClusterTransformer::generate_transformer(parms);
     std::vector<std::complex<double> > values(nsites_old);
     std::vector<double> kvec(2);
     for(int i=0;i<nfreq;++i){
@@ -107,13 +111,14 @@ int main(int argc, char **argv){
           }
           for(int k=0;k<nsites_new;++k){
             for (unsigned int d=0; d<2; ++d){
-              kvec[d] = clusterhandler_new->cluster_momentum(k,d);
+              kvec[d] = clustertransformer_new->cluster_momentum(k,d);
             }
-            selfenergy_kspace_interp(i,k,k,flavor)=clusterhandler_old->interpolate(kvec,values, false);
+            selfenergy_kspace_interp(i,k,k,flavor)=clustertransformer_old->interpolate(kvec,values, false);
           }
         }
     }
-    delete clusterhandler_old;
+    delete clustertransformer_old;
+    delete clustertransformer_new;
   }else{
     selfenergy_kspace_interp=selfenergy_orig;
   }
@@ -162,14 +167,15 @@ int main(int argc, char **argv){
   //std::cout<<"new self energy is: "<<std::make_pair(selfenergy_new,beta_new)<<std::endl;
   parms["BETA"]=beta_new;
   parms["MU"]=mu_new;
+  parms["H"]=h_new;
 
-  SimpleDCATransformer clustertrans(parms);
-  green0 = clustertrans(green, green0, selfenergy_new, mu_new, h, beta_new, true);  
+  DCATransformer* clustertransformer_new=(DCATransformer*)ClusterTransformer::generate_transformer(parms);
+  green0 = (*clustertransformer_new)(green, green0, selfenergy_new, mu_new, h_new, beta_new, true);
   std::cout<<"symmetrizing paramagnet"<<std::endl;
   
-  green0 = clustertrans.symmetrize(green0, paramagnet);
+  green0 = clustertransformer_new->symmetrize(green0, paramagnet);
   std::cout<<"symmetrizing kspace"<<std::endl;
-  green0 = clustertrans.symmetrize_k_space(green0);
+  green0 = clustertransformer_new->symmetrize_k_space(green0);
   
   std::cout<<"generating Fourier transform"<<std::endl;
   boost::shared_ptr<FourierTransformer> fourier_ptr;
@@ -185,5 +191,7 @@ int main(int argc, char **argv){
   green0.write(filename_new.str().c_str());
   std::ofstream sigma_file(filename_sigma_new.str().c_str());
   sigma_file<<std::make_pair(selfenergy_new,beta)<<std::endl;
+  
+  delete clustertransformer_new;
 }
 
