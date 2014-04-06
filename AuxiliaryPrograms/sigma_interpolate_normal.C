@@ -154,11 +154,21 @@ int main(int argc, char **argv){
   gsl_spline *spline_real = gsl_spline_alloc (gsl_interp_cspline, nfreq_min);
   gsl_interp_accel *acc_imag = gsl_interp_accel_alloc ();
   gsl_spline *spline_imag = gsl_spline_alloc (gsl_interp_cspline, nfreq_min);
-  
-  std::vector<double> sigma_real(nfreq_min);
-  std::vector<double> sigma_imag(nfreq_min);
+
+  gsl_interp_accel *acc_real_kq = gsl_interp_accel_alloc ();
+  gsl_spline *spline_real_kq = gsl_spline_alloc (gsl_interp_cspline, nfreq_min);
+  gsl_interp_accel *acc_imag_kq = gsl_interp_accel_alloc ();
+  gsl_spline *spline_imag_kq = gsl_spline_alloc (gsl_interp_cspline, nfreq_min);
+
+  gsl_interp_accel *acc_real_qk = gsl_interp_accel_alloc ();
+  gsl_spline *spline_real_qk = gsl_spline_alloc (gsl_interp_cspline, nfreq_min);
+  gsl_interp_accel *acc_imag_qk = gsl_interp_accel_alloc ();
+  gsl_spline *spline_imag_qk = gsl_spline_alloc (gsl_interp_cspline, nfreq_min);
+
   for(int j=0;j<nsites_new;++j){
     for(int flavor=0;flavor<2;++flavor){
+      std::vector<double> sigma_real(nfreq_min);
+      std::vector<double> sigma_imag(nfreq_min);
       for(int i=0;i<nfreq_min;++i){
         sigma_real[i]=selfenergy_kspace_interp(i,j,j,flavor).real();
         sigma_imag[i]=selfenergy_kspace_interp(i,j,j,flavor).imag();
@@ -175,11 +185,50 @@ int main(int argc, char **argv){
       }
     }
   }
+  if(!paramagnet){
+    for(int j=0;j<nsites_new;j+=2){
+      for(int flavor=0;flavor<2;++flavor){
+        std::vector<double> sigma_real_kq(nfreq_min);
+        std::vector<double> sigma_imag_kq(nfreq_min);
+        std::vector<double> sigma_real_qk(nfreq_min);
+        std::vector<double> sigma_imag_qk(nfreq_min);
+        for(int i=0;i<nfreq_min;++i){
+          sigma_real_kq[i]=selfenergy_kspace_interp(i,j,j+1,flavor).real();
+          sigma_imag_kq[i]=selfenergy_kspace_interp(i,j,j+1,flavor).imag();
+          sigma_real_qk[i]=selfenergy_kspace_interp(i,j+1,j,flavor).real();
+          sigma_imag_qk[i]=selfenergy_kspace_interp(i,j+1,j,flavor).imag();
+        }
+        gsl_spline_init (spline_real_kq, &(matsubara_freqs_old[0]), &(sigma_real_kq[0]), nfreq_min);
+        gsl_spline_init (spline_imag_kq, &(matsubara_freqs_old[0]), &(sigma_imag_kq[0]), nfreq_min);
+        gsl_spline_init (spline_real_qk, &(matsubara_freqs_old[0]), &(sigma_real_kq[0]), nfreq_min);
+        gsl_spline_init (spline_imag_qk, &(matsubara_freqs_old[0]), &(sigma_imag_kq[0]), nfreq_min);
+        
+        double xi,yi;
+        for (int i=0; i<nfreq_min; ++i){
+          selfenergy_new(i,j,j+1,flavor) = std::complex<double>(gsl_spline_eval (spline_real_kq, matsubara_freqs_new[i], acc_real), gsl_spline_eval (spline_imag_kq, matsubara_freqs_new[i], acc_imag));
+          selfenergy_new(i,j+1,j,flavor) = std::complex<double>(gsl_spline_eval (spline_real_qk, matsubara_freqs_new[i], acc_real), gsl_spline_eval (spline_imag_qk, matsubara_freqs_new[i], acc_imag));
+        }
+        for(int i=nfreq_min;i<nfreq_new;++i){
+          selfenergy_new(i,j,j+1,flavor) = selfenergy_kspace_interp(nfreq_old-1,j,j+1,flavor); //TODO: append tail from high freq expansion.
+          selfenergy_new(i,j+1,j,flavor) = selfenergy_kspace_interp(nfreq_old-1,j+1,j,flavor); //TODO: append tail from high freq expansion.
+        }
+      }
+    }
+  }
   gsl_spline_free (spline_real);
   gsl_spline_free (spline_imag);
   gsl_interp_accel_free (acc_real);
   gsl_interp_accel_free (acc_imag);
   
+  gsl_spline_free (spline_real_kq);
+  gsl_spline_free (spline_imag_kq);
+  gsl_interp_accel_free (acc_real_kq);
+  gsl_interp_accel_free (acc_imag_kq);
+  gsl_spline_free (spline_real_qk);
+  gsl_spline_free (spline_imag_qk);
+  gsl_interp_accel_free (acc_real_qk);
+  gsl_interp_accel_free (acc_imag_qk);
+
   //compute the self consistency: G0 from the interpolated sigma
   std::cout<<"...running self-consistency..."<<std::endl;
 
