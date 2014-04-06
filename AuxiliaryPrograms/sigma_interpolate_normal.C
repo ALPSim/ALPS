@@ -40,8 +40,8 @@ int main(int argc, char **argv){
     return 1;
   }
   //parse parameters: error check
-  if(!vm.count("pfile_old")) throw std::runtime_error("you need to specify the parameter file.");
-  if(!vm.count("pfile_new")) throw std::runtime_error("you need to specify the parameter file.");
+  if(!vm.count("pfile_old")) throw std::runtime_error("you need to specify the old parameter file.");
+  if(!vm.count("pfile_new")) throw std::runtime_error("you need to specify the new parameter file.");
   if(!vm.count("selfenergy")) throw std::runtime_error("you need to specify the selfenergy.");
   
   //parse parameters: open old parameter file
@@ -86,24 +86,18 @@ int main(int argc, char **argv){
   //open and read in self-energy
   if(!vm.count("selfenergy")) throw std::runtime_error("please specify self-energy");
   {
-    std::ifstream sigma_file(selfenergy_filename.c_str());
-    if(!sigma_file.is_open()) throw std::runtime_error("self energy file not open.");
     double ignored;
-    for(int i=0;i<nfreq_old;++i){
-      sigma_file>>ignored; //omega_0 = (2*0+1)*pi/beta, beta=pi/omega_0
-      for(int j=0;j<nsites_old;++j){
-        double re00,im00,re01,im01,re10,im10,re11,im11;
-        sigma_file>>re00>>im00>>re11>>im11;
-        selfenergy_orig(i,j,j,0)=std::complex<double>(re00,im00);
-        selfenergy_orig(i,j,j,1)=std::complex<double>(re11,im11);
-      }
-    }
+    std::ifstream sigma_file(selfenergy_filename.c_str());
+    sigma_file>>selfenergy_orig;
+    selfenergy_orig.write("selfenergy_orig.dat");
   }
   
   //interpolate cluster geometry in k-space
-  if(std::string(parms_old["CLUSTER"]) != std::string(parms_new["CLUSTER"])){
+  std::cout<<"clusteres: "<<parms_old["CLUSTER"]<<" "<<parms_new["CLUSTER"]<<std::endl;
+  if(std::string(parms_old["CLUSTER"]).compare(std::string(parms_new["CLUSTER"]))!=0){
+    std::cout<<"...interpolating momentum points..."<<std::endl;
     DCATransformer* clustertransformer_old=(DCATransformer*)ClusterTransformer::generate_transformer(parms_old);
-    DCATransformer *clustertransformer_new=(DCATransformer*)ClusterTransformer::generate_transformer(parms_new);
+    DCATransformer* clustertransformer_new=(DCATransformer*)ClusterTransformer::generate_transformer(parms_new);
 
     for(int i=0;i<nfreq_old;++i){
       for(int flavor=0;flavor<2;++flavor){
@@ -143,9 +137,12 @@ int main(int argc, char **argv){
   }else{
     selfenergy_kspace_interp=selfenergy_orig;
   }
+  selfenergy_kspace_interp.write("selfenergy_kspace_interp.dat");
   
   //interpolate for new temperature
+  std::cout<<"...interpolating temperature points..."<<std::endl;
   double nfreq_min=std::min(nfreq_old, nfreq_new);
+  std::cout<<"nfreq min is: "<<nfreq_min<<std::endl;
   std::vector<double> matsubara_freqs_old(nfreq_min);
   std::vector<double> matsubara_freqs_new(nfreq_min);
   for(int i=0;i<nfreq_min;++i){
@@ -184,6 +181,7 @@ int main(int argc, char **argv){
   gsl_interp_accel_free (acc_imag);
   
   //compute the self consistency: G0 from the interpolated sigma
+  std::cout<<"...running self-consistency..."<<std::endl;
 
   DCATransformer* clustertransformer_new=(DCATransformer*)ClusterTransformer::generate_transformer(parms_new);
   green0 = (*clustertransformer_new)(green, green0, selfenergy_new, mu_new, h_new, beta_new, true);
