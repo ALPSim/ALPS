@@ -375,6 +375,42 @@ std::ostream &operator<<(std::ostream &os, const std::pair<green_function<std::c
   }
   return os;
 }
+std::istream &operator>>(std::istream &is, green_function<std::complex<double> > &gf){
+  double ignored;
+  for(unsigned int o=0;o<gf.ntime();++o){
+    is>>ignored>>std::ws;
+    if(gf.shape()==nondiagonal){
+      for(unsigned int i=0;i<gf.nsite();++i){
+        for(unsigned int j=0;j<gf.nsite();++j){
+          for(unsigned int z1=0;z1<gf.nflavor();++z1){
+            is>>gf(o,i,j,z1).real()>>gf(o,i,j,z1).imag();
+          }
+        }
+      }
+    }else if(gf.shape()==blockdiagonal){
+      for (unsigned int k=0; k<gf.nsite(); k+=2){
+        for (unsigned int p1=0; p1<=1; p1++){
+          for (unsigned int p2=0; p2<=1; p2++){
+            for(unsigned int f=0;f<gf.nflavor();++f){
+              is>>gf(o,k+p1  ,k+p2  ,f).real()>>gf(o,k+p1  ,k+p2  ,f).imag();
+            }
+          }
+        }
+      }
+    }else if(gf.shape()==diagonal){
+      for(unsigned int i=0;i<gf.nsite();++i){
+        for(unsigned int z1=0;z1<gf.nflavor();++z1){
+          is>>gf(o,i,i,z1).real()>>gf(o,i,i,z1).imag();
+        }
+      }
+    }else{
+      throw std::logic_error("shape not understood in read.");
+    }
+    is>>std::ws;
+  }
+  return is;
+}
+
 std::ostream &operator<<(std::ostream &os, const std::pair<nambu_green_function<double>, double> &v_and_beta){
   os<<std::setprecision(14);
   double dtau=v_and_beta.second/(v_and_beta.first.ntime()-1);

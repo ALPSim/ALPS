@@ -163,12 +163,11 @@ private:
 };
 typedef green_function<std::complex<double> > matsubara_green_function_t;
 typedef green_function<double> itime_green_function_t;
-///write out imag time Green function
+
 std::ostream &operator<<(std::ostream &os, const std::pair<green_function<double> ,double>&v_and_beta);
 std::ostream &operator<<(std::ostream &os, const std::pair<green_function<std::complex<double> > ,double>&v_and_beta);
-///read in imag time Green function
+
 std::istream &operator>>(std::istream &is, green_function<double> &v);
-///write out Matsubara Green function
 std::istream &operator>>(std::istream &is, green_function<std::complex<double> > &v);
 
 ///compute kinetic energy
