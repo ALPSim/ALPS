@@ -127,7 +127,8 @@ AntiferroInterpolator::AntiferroInterpolator(const alps::Parameters& parms) :
 
 void ParaInterpolator::local_green_function() 
 {
-  for (std::size_t z=0; z<n_zone; ++z) {
+  throw std::logic_error("need to fix the local self-energy!");
+/*  for (std::size_t z=0; z<n_zone; ++z) {
     std::stringstream name;
     name << "greenloc_" << z << ".dat"; 
     std::ofstream green_str(name.str().c_str());
@@ -136,7 +137,7 @@ void ParaInterpolator::local_green_function()
     for (std::map<double, std::complex<double> >::const_iterator it=local_G.begin(); it!=local_G.end(); ++it) 
       green_str << it->first << "\t" << it->second.real() << "\t" << it->second.imag() << "\n";
     green_str.close();
-  }
+  }*/
 }
 
 

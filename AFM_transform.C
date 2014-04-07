@@ -238,29 +238,6 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
 
 
 
-std::map<double, ClusterHelper::Matrix<std::complex<double> >::Type>
-AntiFerroDCATransformer::local_green_function_from_selfenergies(const std::map<double,
-                                                                std::vector<ClusterHelper::Matrix<std::complex<double> >::Type> >& /*selfenergies*/,
-                                                                const double /*mu*/, const double /*delta*/)
-{
-  boost::throw_exception(std::invalid_argument("to be implemented"));
-  std::map<double, ClusterHelper::Matrix<std::complex<double> >::Type> dummy;
-  return dummy;
-}
-
-
-alps::RealObsevaluator AntiFerroDCATransformer::kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& /*selfenergies*/,
-                                                               const double /*beta*/, const double /*mu*/,
-                                                               const bool /*error_propagation*/, const bool /*paramagnet*/)
-{
-  boost::throw_exception(std::invalid_argument("to be implemented"));
-  return alps::RealObsevaluator();
-}
-
-
-
-
-
 ///compute the spin symmetries of the Green's function
 matsubara_green_function_t AntiFerroDCATransformer::spin_symmetrizer(const matsubara_green_function_t& G, const bool paramagnet) const
 {

@@ -32,6 +32,7 @@
 #include "boost/numeric/bindings/lapack/driver/gesv.hpp"
 
 #include "alps/lattice/graph_helper.h"
+#include "alps/numeric/vector_functions.hpp"
 //#include "alps/alea.h"
 
 #include "types.h"
@@ -62,8 +63,7 @@ public:
     }
   };
   
-  typedef alps::graph_helper<alps::graph_helper<>::graph_type>::vector_type vector_type;
-  typedef std::set<site_t> site_class_type;
+  typedef alps::graph_helper<alps::graph_helper<>::graph_type>::vector_type vector_type;  typedef std::set<site_t> site_class_type;
   typedef std::pair<site_t, site_t> pair_type;
   typedef std::set<pair_type> pair_class_type;
   typedef std::set<site_class_type> site_class_set_type;
@@ -226,14 +226,6 @@ public:
   virtual nambu_itime_green_function_t transform_into_real_space(const nambu_itime_green_function_t& G) const=0;
   virtual nambu_itime_green_function_t transform_into_k_space(const nambu_itime_green_function_t& G) const=0;
   
-  virtual matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& G_omega_fourpoint,
-                                                         const matsubara_green_function_t& G_omega,
-                                                         const matsubara_green_function_t& G0_omega,
-                                                         const double mu, const double h, const double beta,
-                                                         const unsigned int n_matsubara) const =0;
-  virtual alps::RealObsevaluator kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies,
-                                                const double beta, const double mu,
-                                                const bool error_propagation, const bool paramagnet)=0;
   virtual matsubara_green_function_t initial_G0      (const alps::Parameters& parms, shape_t shape=diagonal);
   //Hilbert transform operator
   virtual matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega,
@@ -258,7 +250,7 @@ public:
   std::vector<double> tmatrix() const;
   virtual void write_hdf5(alps::hdf5::archive &ar, const std::string &p) const;
 
-  double epsilon(const vector_type k) const
+  double epsilon(const vector_type &k) const
   {
     double eps = -half_filling_;
     for (unsigned int i=0; i<dimension(); ++i)
@@ -309,6 +301,12 @@ public:
     }
     return eps*bandwidth_scale_factor_;
   }
+  //dispersion, evaluated with a phase shift of phi
+  double epsilon_phi(const vector_type &k, const vector_type &phi) const{
+    using namespace alps::numeric;
+    return epsilon(k+phi);
+  }
+
   
   
 private:
@@ -408,17 +406,6 @@ public:
   //initial G0
   virtual matsubara_green_function_t initial_G0      (const alps::Parameters& parms, shape_t shape=diagonal);
   virtual nambu_matsubara_green_function_t initial_G0_nambu(const alps::Parameters& parms);
-  matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& G_omega_foupoint,
-                                                 const matsubara_green_function_t &G_omega,
-                                                 const matsubara_green_function_t &G0_omega,
-                                                 const double mu, const double h, const double beta,
-                                                 const unsigned int n_matsubara) const;
-  alps::RealObsevaluator kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies,
-                                        const double beta, const double mu,
-                                        const bool error_propagation, const bool paramagnet);
-  std::map<double, std::complex<double> > local_green_function_from_selfenergies(const std::map<double,
-                                                                                 std::vector<std::complex<double> > >& selfenergies,
-                                                                                 const double mu, const double delta);
   void construct_green_function(double mu, double beta, double eta1, double eta2, const std::vector<std::vector<double> > &epsilon_kckl, const std::vector<std::vector<double> > &dwave_prefactor_kckl, const std::vector<double> &weight_kl, const nambu_matsubara_green_function_t &selfenergy,nambu_matsubara_green_function_t &G_omega_lattice_kav);
   double compute_density(const nambu_matsubara_green_function_t &G_omega_lattice_kav, double beta);
   
@@ -508,25 +495,12 @@ public:
   
   
   virtual matsubara_green_function_t initial_G0(const alps::Parameters& parms, shape_t shape=blockdiagonal);
-  matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& /*G_omega_fourpoint*/,
-                                                 const matsubara_green_function_t& G_omega,
-                                                 const matsubara_green_function_t& /*G0_omega*/,
-                                                 const double /*mu*/, const double /*h*/, const double /*beta*/,
-                                                 const unsigned int /*n_matsubara*/) const
-  {
-    boost::throw_exception(std::logic_error("transform fourpoint function for antiferromagnetic phases not yet implemented"));
-    return G_omega;
-  }
-  
   static matsubara_green_function_t green_function_inverse(const matsubara_green_function_t& G);
   static matsubara_green_function_t green_function_multiply(const matsubara_green_function_t& G1, const matsubara_green_function_t& G2);
   static matsubara_green_function_t green_function_add(const matsubara_green_function_t& G1, const matsubara_green_function_t& G2);
   static matsubara_green_function_t green_function_subtract(const matsubara_green_function_t& G1, const matsubara_green_function_t& G2);
   static matsubara_green_function_t green_function_divide(const matsubara_green_function_t& G1, const std::complex<double> d);
   
-  alps::RealObsevaluator kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies,
-                                        const double beta, const double mu,
-                                        const bool error_propagation, const bool paramagnet);
   std::map<double, ClusterHelper::Matrix<std::complex<double> >::Type>
   local_green_function_from_selfenergies(const std::map<double,
                                          std::vector<ClusterHelper::Matrix<std::complex<double> >::Type> >& selfenergies,
@@ -1096,11 +1070,6 @@ public:
   virtual nambu_itime_green_function_t transform_into_real_space(const nambu_itime_green_function_t& G) const=0;
   virtual nambu_itime_green_function_t transform_into_k_space(const nambu_itime_green_function_t& G) const=0;
   
-  virtual matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& G_omega_fourpoint,
-                                                         const matsubara_green_function_t& G_omega,
-                                                         const matsubara_green_function_t& G0_omega,
-                                                         const double mu, const double h, const double beta,
-                                                         const unsigned int n_matsubara) const =0;
   //Hilbert transform operator
   virtual matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega,
                                                 const matsubara_green_function_t &G0_omega,
@@ -1302,13 +1271,6 @@ public:
   //initial G0
   virtual matsubara_green_function_t initial_G0      (const alps::Parameters& parms, shape_t shape=nondiagonal);
   virtual nambu_matsubara_green_function_t initial_G0_nambu(const alps::Parameters& parms);
-  matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& G_omega_foupoint,
-                                                 const matsubara_green_function_t &G_omega,
-                                                 const matsubara_green_function_t &G0_omega,
-                                                 const double mu, const double h, const double beta,
-                                                 const unsigned int n_matsubara) const;
-  std::map<double, std::complex<double> > local_green_function_from_selfenergies(const std::map<double, std::vector<std::complex<double> > >&, double, double);
-  alps::RealObsevaluator kinetic_energy(const std::vector<std::vector<std::vector<alps::SimpleObservableEvaluator<double> > > >&, double, double, bool, bool);
   std::vector<double> epsav() const;
   std::vector<double> epssqav() const;
 private:
