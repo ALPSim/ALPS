@@ -214,7 +214,7 @@ void perform_DCA_loop(const alps::Parameters &parms){
   std::cout<<"running a DCA calculation"<<std::endl;
   ClusterTransformer *transform_ptr=ClusterTransformer::generate_transformer(parms);
   ImpuritySolver* solver_ptr=new ExternalSolver(boost::filesystem::path(parms["SOLVER"]));
-  if(parms.value_or_default("NAMBU",false)){
+  if(!parms.value_or_default("NAMBU",false)){
     selfconsistency_loop_DCA(parms, *solver_ptr, *(DCATransformer*)transform_ptr);
   }else{
     selfconsistency_loop_DCA_Nambu(parms, *solver_ptr, *(DCATransformer*)transform_ptr);

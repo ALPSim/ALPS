@@ -306,6 +306,14 @@ public:
     using namespace alps::numeric;
     return epsilon(k+phi);
   }
+  vector_type phase_vector() const{
+    vector_type phi(dimension());
+    for(int i=0;i<dimension();++i){
+      std::stringstream phase_name; phase_name<<"PHASE_"<<i;
+      phi[i]=params_[phase_name.str()];
+    }
+    return phi;
+  }
 
   
   
@@ -325,6 +333,8 @@ private:
   std::vector<double> epsav_;
   std::vector<double> epssqav_;
   std::vector<double> dispersion_moments_;
+protected:
+  const alps::Parameters params_;
 };
 
 
@@ -335,8 +345,7 @@ public:
   SimpleDCATransformer(const alps::Parameters& params) :
   DCATransformer(params),
   compute_filling_(params.defined("FILLING")),
-  n_target_(compute_filling_?(double)(params["FILLING"]):-1),
-  params_(params)
+  n_target_(compute_filling_?(double)(params["FILLING"]):-1)
   {
     //std::cerr<<"done building simple DCA transformer"<<std::endl;
   }
@@ -437,7 +446,6 @@ private:
   
   bool compute_filling_;
   double n_target_;
-  const alps::Parameters params_;
 };
 
 

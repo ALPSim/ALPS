@@ -86,7 +86,8 @@ bandwidth_scale_factor_(1.),
 half_filling_(0.),
 epsav_(n_cluster_sites()),
 epssqav_(n_cluster_sites()),
-dispersion_moments_(2, 0.)
+dispersion_moments_(2, 0.),
+params_(params)
 {
   //std::cerr<<"entering DCATransformer"<<std::endl;
   if (params.defined("t") && params.defined("W"))
@@ -242,14 +243,28 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
   double mu_orig=mu;
   std::vector<std::vector<double> >epsilon_kckl(n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
   std::vector<double> weight_kl(n_lattice_momenta());
-  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-    for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
-      vector_type k(dimension());
-      for (unsigned int d=0; d<dimension(); ++d)
-        k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-      epsilon_kckl[kc][kl]=epsilon(k);
+  if(params_.value_or_default("PHASE",false)){
+    vector_type phi=phase_vector();
+    for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+      for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
+        vector_type k(dimension());
+        for (unsigned int d=0; d<dimension(); ++d)
+          k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
+        epsilon_kckl[kc][kl]=epsilon_phi(k,phi);
+      }
     }
-  }for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
+  }else{
+    for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+      for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
+        vector_type k(dimension());
+        for (unsigned int d=0; d<dimension(); ++d)
+          k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
+        epsilon_kckl[kc][kl]=epsilon(k);
+      }
+    }
+  }
+  
+  for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
     weight_kl[kl]= lattice_momentum(kl,dimension());
   }
   do{ //find the right particle density
