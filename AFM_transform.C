@@ -54,6 +54,7 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
   matsubara_green_function_t G0_omega_new(nfreq,n_cluster_sites(),nflavor, blockdiagonal);
   G0_omega_new.clear();
   if(!use_selfenergy){ //compute selfenergy out of G and G0 first
+    std::cout<<"not using selfenergy"<<std::endl;
     matsubara_green_function_t G0_omega_inv = green_function_inverse (G0_omega);
     matsubara_green_function_t G_omega_inv  = green_function_inverse (G_omega );
     selfenergy   = green_function_subtract(G0_omega_inv, G_omega_inv);

@@ -95,22 +95,24 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
                                 const matsubara_green_function_t g_dressed, const double beta)
 {
   os<<std::setprecision(14);
-  for(unsigned int i=0;i<g_bare.nfreq();++i){
     if(g_dressed.shape()==diagonal){
+     for(unsigned int i=0;i<g_bare.nfreq();++i){
       os<<(2*i+1)*M_PI/beta<<"\t";
       for (unsigned int k=0; k<g_bare.nsite(); ++k)
         for(unsigned int f=0;f<g_bare.nflavor();++f)
           os<<(1./g_bare(i,k,k,f) - 1./g_dressed(i,k,k,f)).real()<<"\t"<<(1./g_bare(i,k,k,f) - 1./g_dressed(i,k,k,f)).imag()<<"\t";
       os<<std::endl;
+     }
     }else if(g_dressed.shape()==blockdiagonal){
       
       alps::numeric::matrix<std::complex<double> > Gup(2,2), G0up(2,2), Gdn(2,2), G0dn(2,2);
       alps::numeric::matrix<std::complex<double> > Ginvup(2,2), G0invup(2,2), Ginvdn(2,2), G0invdn(2,2);
       alps::numeric::matrix<std::complex<double> > Sigmaup(2,2);
       alps::numeric::matrix<std::complex<double> > Sigmadn(2,2);
-      if(g_bare.nflavor()!=2) throw std::logic_error("not understood how to handle blockdiag with >2 flavors.");
-      os<<(2*i+1)*M_PI/beta<<" ";
-      for (unsigned int k=0; k<g_bare.nsite(); k+=2){
+      for(unsigned int i=0;i<g_bare.nfreq();++i){
+       if(g_bare.nflavor()!=2) throw std::logic_error("not understood how to handle blockdiag with >2 flavors.");
+       os<<(2*i+1)*M_PI/beta<<" ";
+       for (unsigned int k=0; k<g_bare.nsite(); k+=2){
         int q=k+1;
         
         //initialize G
@@ -141,6 +143,7 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
         }
       }
       os<<std::endl;
+     }
     }else if(g_dressed.shape()==nondiagonal){
       int nsite=g_dressed.nsite();
       alps::numeric::matrix<std::complex<double> > Gup(nsite,nsite), G0up(nsite,nsite), Gdn(nsite,nsite), G0dn(nsite,nsite);
@@ -176,7 +179,6 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
         os<<std::endl;
       }
     }
-  }
 }
 
 

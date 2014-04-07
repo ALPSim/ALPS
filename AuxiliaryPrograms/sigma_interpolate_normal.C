@@ -68,7 +68,7 @@ int main(int argc, char **argv){
   int nfreq_new=parms_new["NMATSUBARA"];
   double nsites_new=parms_new["SITES"];
   
-  bool paramagnet=parms_new.value_or_default("ANTIFERROMAGNET",false);
+  bool paramagnet=!(parms_new.value_or_default("ANTIFERROMAGNET",false));
   shape_t gf_shape=paramagnet?diagonal:blockdiagonal;
   
   std::cout<<"main parameters: "<<std::endl;
@@ -89,11 +89,10 @@ int main(int argc, char **argv){
     double ignored;
     std::ifstream sigma_file(selfenergy_filename.c_str());
     sigma_file>>selfenergy_orig;
-    selfenergy_orig.write("selfenergy_orig.dat");
+    std::ofstream s_file("sigma_orig.dat"); s_file<<std::make_pair(selfenergy_orig, beta_old);
   }
   
   //interpolate cluster geometry in k-space
-  std::cout<<"clusteres: "<<parms_old["CLUSTER"]<<" "<<parms_new["CLUSTER"]<<std::endl;
   if(std::string(parms_old["CLUSTER"]).compare(std::string(parms_new["CLUSTER"]))!=0){
     std::cout<<"...interpolating momentum points..."<<std::endl;
     DCATransformer* clustertransformer_old=(DCATransformer*)ClusterTransformer::generate_transformer(parms_old);
@@ -136,13 +135,11 @@ int main(int argc, char **argv){
     delete clustertransformer_new;
   }else{
     selfenergy_kspace_interp=selfenergy_orig;
+    std::ofstream s_file("sigma_k_int.dat"); s_file<<std::make_pair(selfenergy_kspace_interp, beta_old);
   }
-  selfenergy_kspace_interp.write("selfenergy_kspace_interp.dat");
   
   //interpolate for new temperature
-  std::cout<<"...interpolating temperature points..."<<std::endl;
   double nfreq_min=std::min(nfreq_old, nfreq_new);
-  std::cout<<"nfreq min is: "<<nfreq_min<<std::endl;
   std::vector<double> matsubara_freqs_old(nfreq_min);
   std::vector<double> matsubara_freqs_new(nfreq_min);
   for(int i=0;i<nfreq_min;++i){
@@ -231,13 +228,20 @@ int main(int argc, char **argv){
 
   //compute the self consistency: G0 from the interpolated sigma
   std::cout<<"...running self-consistency..."<<std::endl;
-
+  {
+    std::ofstream s_file("sigma_in.dat"); s_file<<std::make_pair(selfenergy_new, beta_new);
+    std::ofstream g0_file("green0_in.dat"); g0_file<<std::make_pair(green0, beta_new);
+    std::ofstream g_file("green_in.dat"); g_file<<std::make_pair(green, beta_new);
+  }
   DCATransformer* clustertransformer_new=(DCATransformer*)ClusterTransformer::generate_transformer(parms_new);
   green0 = (*clustertransformer_new)(green, green0, selfenergy_new, mu_new, h_new, beta_new, true);
-  
-  green0 = clustertransformer_new->symmetrize(green0, paramagnet);
-  if(paramagnet)
+  {
+    std::ofstream s_file("sigma_out.dat"); s_file<<std::make_pair(selfenergy_new, beta_new);
+  }
+  if(paramagnet){
+    green0 = clustertransformer_new->symmetrize(green0, paramagnet);
     green0 = clustertransformer_new->symmetrize_k_space(green0);
+  }
   
   std::string filename_new=parms_new["G0OMEGA_INPUT"];
   if(std::ifstream(filename_new.c_str(),std::ifstream::in)){ throw std::runtime_error("input file "+std::string(parms_new["G0OMEGA_INPUT"])+"already exists!"); }

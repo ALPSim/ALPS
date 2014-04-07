@@ -174,7 +174,6 @@ std::istream &operator>>(std::istream &is, green_function<std::complex<double> >
 
 template<typename T> void green_function<T>::read(const char *filename){
   std::ifstream in_file(filename);
-  assert(in_file.is_open()); //this is not good enough when people use -DNDEBUG.
   if(!in_file.is_open()){ throw(std::invalid_argument("input file could not be opened!")); }
   double ignored=0;
   for(unsigned int i=0;i<nt_;++i){
@@ -206,7 +205,6 @@ template<typename T> void green_function<T>::read(const char *filename){
 template<typename T> void green_function<T>::write(const char *filename) const{
   std::ofstream out_file(filename);
   out_file<<std::setprecision(14);
-  assert(out_file.is_open()); //this is not good enough when people use -DNDEBUG.
   if(!out_file.is_open()){ std::cerr<<"output file "<<filename<<" could not be opened!"<<std::endl; exit(1);}
   for(unsigned int i=0;i<nt_;++i){
     out_file << i << " ";
