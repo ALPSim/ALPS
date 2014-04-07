@@ -24,8 +24,7 @@ add_executable(sigma_interpolate_sc sigma_interpolate_sc.C
 ../fouriertransform.C)
 
 add_executable(sigma_interpolate sigma_interpolate_normal.C
-../auxiliaryfunctions.C ../AFM_transform.C ../DCA_transform.C ../clusterhelper.C
-../fouriertransform.C)
+../auxiliaryfunctions.C ../AFM_transform.C ../DCA_transform.C ../clusterhelper.C ../fouriertransform.C)
 
 target_link_libraries(sigma_interpolate gsl ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
 target_link_libraries(sigma_interpolate_sc gsl ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)

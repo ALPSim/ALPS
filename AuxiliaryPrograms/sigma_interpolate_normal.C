@@ -147,6 +147,7 @@ int main(int argc, char **argv){
     matsubara_freqs_new[i]=(2.*i+1)*M_PI/beta_new;
   }
 
+  //build spline handlers
   gsl_interp_accel *acc_real = gsl_interp_accel_alloc ();
   gsl_spline *spline_real = gsl_spline_alloc (gsl_interp_cspline, nfreq_min);
   gsl_interp_accel *acc_imag = gsl_interp_accel_alloc ();
@@ -162,6 +163,7 @@ int main(int argc, char **argv){
   gsl_interp_accel *acc_imag_qk = gsl_interp_accel_alloc ();
   gsl_spline *spline_imag_qk = gsl_spline_alloc (gsl_interp_cspline, nfreq_min);
 
+  
   for(int j=0;j<nsites_new;++j){
     for(int flavor=0;flavor<2;++flavor){
       std::vector<double> sigma_real(nfreq_min);
@@ -175,13 +177,21 @@ int main(int argc, char **argv){
       
       double xi,yi;
       for (int i=0; i<nfreq_min; ++i){
-        selfenergy_new(i,j,j,flavor) = std::complex<double>(gsl_spline_eval (spline_real, matsubara_freqs_new[i], acc_real), gsl_spline_eval (spline_imag, matsubara_freqs_new[i], acc_imag));
+        if(matsubara_freqs_new[i]< matsubara_freqs_old[0]){
+          //linear interpolation near zero
+          selfenergy_new(i,j,j,flavor) = selfenergy_kspace_interp(0,j,j,flavor)/matsubara_freqs_old[0]*matsubara_freqs_new[i];
+        }else{
+          //spline evaluation where both have points
+          selfenergy_new(i,j,j,flavor) = std::complex<double>(gsl_spline_eval (spline_real, matsubara_freqs_new[i], acc_real), gsl_spline_eval (spline_imag, matsubara_freqs_new[i], acc_imag));
+        }
       }
       for(int i=nfreq_min;i<nfreq_new;++i){
-        selfenergy_new(i,j,j,flavor) = selfenergy_kspace_interp(nfreq_old-1,j,j,flavor); //TODO: append tail from high freq expansion.
+        //constant value after interval
+        selfenergy_new(i,j,j,flavor) = selfenergy_kspace_interp(nfreq_old-1,j,j,flavor);
       }
     }
   }
+
   if(!paramagnet){
     for(int j=0;j<nsites_new;j+=2){
       for(int flavor=0;flavor<2;++flavor){
@@ -202,16 +212,26 @@ int main(int argc, char **argv){
         
         double xi,yi;
         for (int i=0; i<nfreq_min; ++i){
-          selfenergy_new(i,j,j+1,flavor) = std::complex<double>(gsl_spline_eval (spline_real_kq, matsubara_freqs_new[i], acc_real), gsl_spline_eval (spline_imag_kq, matsubara_freqs_new[i], acc_imag));
-          selfenergy_new(i,j+1,j,flavor) = std::complex<double>(gsl_spline_eval (spline_real_qk, matsubara_freqs_new[i], acc_real), gsl_spline_eval (spline_imag_qk, matsubara_freqs_new[i], acc_imag));
+          if(matsubara_freqs_new[i]< matsubara_freqs_old[0]){
+            //linear interpolation near zero
+            selfenergy_new(i,j,j+1,flavor) = selfenergy_kspace_interp(0,j,j+1,flavor)/matsubara_freqs_old[0]*matsubara_freqs_new[i];
+            selfenergy_new(i,j+1,j,flavor) = selfenergy_kspace_interp(0,j+1,j,flavor)/matsubara_freqs_old[0]*matsubara_freqs_new[i];
+          }else{
+            //spline evaluation where both have points
+          selfenergy_new(i,j,j+1,flavor) = std::complex<double>(gsl_spline_eval (spline_real_kq, matsubara_freqs_new[i], acc_real_kq), gsl_spline_eval (spline_imag_kq, matsubara_freqs_new[i], acc_imag_kq));
+          selfenergy_new(i,j+1,j,flavor) = std::complex<double>(gsl_spline_eval (spline_real_qk, matsubara_freqs_new[i], acc_real_qk), gsl_spline_eval (spline_imag_qk, matsubara_freqs_new[i], acc_imag_qk));
+          }
         }
         for(int i=nfreq_min;i<nfreq_new;++i){
+          //constant value after interval
           selfenergy_new(i,j,j+1,flavor) = selfenergy_kspace_interp(nfreq_old-1,j,j+1,flavor); //TODO: append tail from high freq expansion.
           selfenergy_new(i,j+1,j,flavor) = selfenergy_kspace_interp(nfreq_old-1,j+1,j,flavor); //TODO: append tail from high freq expansion.
         }
       }
     }
   }
+  
+  //free spline handlers
   gsl_spline_free (spline_real);
   gsl_spline_free (spline_imag);
   gsl_interp_accel_free (acc_real);
@@ -230,8 +250,6 @@ int main(int argc, char **argv){
   std::cout<<"...running self-consistency..."<<std::endl;
   {
     std::ofstream s_file("sigma_in.dat"); s_file<<std::make_pair(selfenergy_new, beta_new);
-    std::ofstream g0_file("green0_in.dat"); g0_file<<std::make_pair(green0, beta_new);
-    std::ofstream g_file("green_in.dat"); g_file<<std::make_pair(green, beta_new);
   }
   DCATransformer* clustertransformer_new=(DCATransformer*)ClusterTransformer::generate_transformer(parms_new);
   green0 = (*clustertransformer_new)(green, green0, selfenergy_new, mu_new, h_new, beta_new, true);
