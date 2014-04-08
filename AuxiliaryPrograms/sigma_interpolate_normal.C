@@ -11,7 +11,10 @@
 #include <gsl/gsl_spline.h>
 #include "cluster.h"
 #include <boost/program_options.hpp>
+#include <alps/numeric/matrix.hpp>
 
+//take a vector and interpolate it using GSL in the middle, add constants to the back, and extrapolate parabolically for the first few frequencies if they are outside of the known interval
+std::vector<double> interpolate_vector(const std::vector<double> &oldxvalues, const std::vector<double> &oldyvalues, const std::vector<double> &newxvalues);
 
 ///This program takes a self-energy from a file, an old parameter file that specifies for which parameters it has been generated, and a new parameter file that has the new parameters.
 ///It then generates a few
@@ -140,112 +143,49 @@ int main(int argc, char **argv){
   
   //interpolate for new temperature
   double nfreq_min=std::min(nfreq_old, nfreq_new);
-  std::vector<double> matsubara_freqs_old(nfreq_min);
-  std::vector<double> matsubara_freqs_new(nfreq_min);
-  for(int i=0;i<nfreq_min;++i){
+  std::vector<double> matsubara_freqs_old(nfreq_old);
+  std::vector<double> matsubara_freqs_new(nfreq_old);
+  for(int i=0;i<nfreq_new;++i){
     matsubara_freqs_old[i]=(2.*i+1)*M_PI/beta_old;
     matsubara_freqs_new[i]=(2.*i+1)*M_PI/beta_new;
   }
 
-  //build spline handlers
-  gsl_interp_accel *acc_real = gsl_interp_accel_alloc ();
-  gsl_spline *spline_real = gsl_spline_alloc (gsl_interp_cspline, nfreq_min);
-  gsl_interp_accel *acc_imag = gsl_interp_accel_alloc ();
-  gsl_spline *spline_imag = gsl_spline_alloc (gsl_interp_cspline, nfreq_min);
-
-  gsl_interp_accel *acc_real_kq = gsl_interp_accel_alloc ();
-  gsl_spline *spline_real_kq = gsl_spline_alloc (gsl_interp_cspline, nfreq_min);
-  gsl_interp_accel *acc_imag_kq = gsl_interp_accel_alloc ();
-  gsl_spline *spline_imag_kq = gsl_spline_alloc (gsl_interp_cspline, nfreq_min);
-
-  gsl_interp_accel *acc_real_qk = gsl_interp_accel_alloc ();
-  gsl_spline *spline_real_qk = gsl_spline_alloc (gsl_interp_cspline, nfreq_min);
-  gsl_interp_accel *acc_imag_qk = gsl_interp_accel_alloc ();
-  gsl_spline *spline_imag_qk = gsl_spline_alloc (gsl_interp_cspline, nfreq_min);
-
-  
   for(int j=0;j<nsites_new;++j){
     for(int flavor=0;flavor<2;++flavor){
-      std::vector<double> sigma_real(nfreq_min);
-      std::vector<double> sigma_imag(nfreq_min);
-      for(int i=0;i<nfreq_min;++i){
+      std::vector<double> sigma_real(nfreq_new);
+      std::vector<double> sigma_imag(nfreq_new);
+      for(int i=0;i<nfreq_new;++i){
         sigma_real[i]=selfenergy_kspace_interp(i,j,j,flavor).real();
         sigma_imag[i]=selfenergy_kspace_interp(i,j,j,flavor).imag();
       }
-      gsl_spline_init (spline_real, &(matsubara_freqs_old[0]), &(sigma_real[0]), nfreq_min);
-      gsl_spline_init (spline_imag, &(matsubara_freqs_old[0]), &(sigma_imag[0]), nfreq_min);
-      
-      double xi,yi;
-      for (int i=0; i<nfreq_min; ++i){
-        if(matsubara_freqs_new[i]< matsubara_freqs_old[0]){
-          //linear interpolation near zero
-          selfenergy_new(i,j,j,flavor) = selfenergy_kspace_interp(0,j,j,flavor)/matsubara_freqs_old[0]*matsubara_freqs_new[i];
-        }else{
-          //spline evaluation where both have points
-          selfenergy_new(i,j,j,flavor) = std::complex<double>(gsl_spline_eval (spline_real, matsubara_freqs_new[i], acc_real), gsl_spline_eval (spline_imag, matsubara_freqs_new[i], acc_imag));
-        }
+      std::vector<double> sigma_real_interp=interpolate_vector(matsubara_freqs_old, sigma_real, matsubara_freqs_new);
+      std::vector<double> sigma_imag_interp=interpolate_vector(matsubara_freqs_old, sigma_imag, matsubara_freqs_new);
+      for (int i=0; i<nfreq_new; ++i){
+        selfenergy_new(i,j,j,flavor) = std::complex<double>(sigma_real_interp[i], sigma_imag_interp[i]);
       }
-      for(int i=nfreq_min;i<nfreq_new;++i){
-        //constant value after interval
-        selfenergy_new(i,j,j,flavor) = selfenergy_kspace_interp(nfreq_old-1,j,j,flavor);
-      }
-    }
-  }
-
-  if(!paramagnet){
-    for(int j=0;j<nsites_new;j+=2){
-      for(int flavor=0;flavor<2;++flavor){
-        std::vector<double> sigma_real_kq(nfreq_min);
-        std::vector<double> sigma_imag_kq(nfreq_min);
-        std::vector<double> sigma_real_qk(nfreq_min);
-        std::vector<double> sigma_imag_qk(nfreq_min);
-        for(int i=0;i<nfreq_min;++i){
+      if(!paramagnet){
+        std::cout<<"doing afm."<<std::endl;
+        std::vector<double> sigma_real_kq(nfreq_old);
+        std::vector<double> sigma_imag_kq(nfreq_old);
+        std::vector<double> sigma_real_qk(nfreq_old);
+        std::vector<double> sigma_imag_qk(nfreq_old);
+        for(int i=0;i<nfreq_new;++i){
           sigma_real_kq[i]=selfenergy_kspace_interp(i,j,j+1,flavor).real();
           sigma_imag_kq[i]=selfenergy_kspace_interp(i,j,j+1,flavor).imag();
           sigma_real_qk[i]=selfenergy_kspace_interp(i,j+1,j,flavor).real();
           sigma_imag_qk[i]=selfenergy_kspace_interp(i,j+1,j,flavor).imag();
         }
-        gsl_spline_init (spline_real_kq, &(matsubara_freqs_old[0]), &(sigma_real_kq[0]), nfreq_min);
-        gsl_spline_init (spline_imag_kq, &(matsubara_freqs_old[0]), &(sigma_imag_kq[0]), nfreq_min);
-        gsl_spline_init (spline_real_qk, &(matsubara_freqs_old[0]), &(sigma_real_kq[0]), nfreq_min);
-        gsl_spline_init (spline_imag_qk, &(matsubara_freqs_old[0]), &(sigma_imag_kq[0]), nfreq_min);
-        
-        double xi,yi;
-        for (int i=0; i<nfreq_min; ++i){
-          if(matsubara_freqs_new[i]< matsubara_freqs_old[0]){
-            //linear interpolation near zero
-            selfenergy_new(i,j,j+1,flavor) = selfenergy_kspace_interp(0,j,j+1,flavor)/matsubara_freqs_old[0]*matsubara_freqs_new[i];
-            selfenergy_new(i,j+1,j,flavor) = selfenergy_kspace_interp(0,j+1,j,flavor)/matsubara_freqs_old[0]*matsubara_freqs_new[i];
-          }else{
-            //spline evaluation where both have points
-          selfenergy_new(i,j,j+1,flavor) = std::complex<double>(gsl_spline_eval (spline_real_kq, matsubara_freqs_new[i], acc_real_kq), gsl_spline_eval (spline_imag_kq, matsubara_freqs_new[i], acc_imag_kq));
-          selfenergy_new(i,j+1,j,flavor) = std::complex<double>(gsl_spline_eval (spline_real_qk, matsubara_freqs_new[i], acc_real_qk), gsl_spline_eval (spline_imag_qk, matsubara_freqs_new[i], acc_imag_qk));
-          }
-        }
-        for(int i=nfreq_min;i<nfreq_new;++i){
-          //constant value after interval
-          selfenergy_new(i,j,j+1,flavor) = selfenergy_kspace_interp(nfreq_old-1,j,j+1,flavor); //TODO: append tail from high freq expansion.
-          selfenergy_new(i,j+1,j,flavor) = selfenergy_kspace_interp(nfreq_old-1,j+1,j,flavor); //TODO: append tail from high freq expansion.
+        std::vector<double> sigma_real_kq_interp=interpolate_vector(matsubara_freqs_old, sigma_real_kq, matsubara_freqs_new);
+        std::vector<double> sigma_imag_kq_interp=interpolate_vector(matsubara_freqs_old, sigma_imag_kq, matsubara_freqs_new);
+        std::vector<double> sigma_real_qk_interp=interpolate_vector(matsubara_freqs_old, sigma_real_qk, matsubara_freqs_new);
+        std::vector<double> sigma_imag_qk_interp=interpolate_vector(matsubara_freqs_old, sigma_imag_qk, matsubara_freqs_new);
+        for (int i=0; i<nfreq_new; ++i){
+          selfenergy_new(i,j,j+1,flavor) = std::complex<double>(sigma_real_kq_interp[i], sigma_imag_kq_interp[i]);
+          selfenergy_new(i,j+1,j,flavor) = std::complex<double>(sigma_real_qk_interp[i], sigma_imag_qk_interp[i]);
         }
       }
     }
   }
-  
-  //free spline handlers
-  gsl_spline_free (spline_real);
-  gsl_spline_free (spline_imag);
-  gsl_interp_accel_free (acc_real);
-  gsl_interp_accel_free (acc_imag);
-  
-  gsl_spline_free (spline_real_kq);
-  gsl_spline_free (spline_imag_kq);
-  gsl_interp_accel_free (acc_real_kq);
-  gsl_interp_accel_free (acc_imag_kq);
-  gsl_spline_free (spline_real_qk);
-  gsl_spline_free (spline_imag_qk);
-  gsl_interp_accel_free (acc_real_qk);
-  gsl_interp_accel_free (acc_imag_qk);
-
   //compute the self consistency: G0 from the interpolated sigma
   std::cout<<"...running self-consistency..."<<std::endl;
   {
@@ -268,3 +208,47 @@ int main(int argc, char **argv){
   delete clustertransformer_new;
 }
 
+std::vector<double> solve_parabola(const std::vector<double> &xvalues, const std::vector<double> &yvalues){
+  int size=3, one=1;
+  alps::numeric::matrix<double> M(size,size);
+  M(0,0)=xvalues[0]*xvalues[0]; M(0,1)=xvalues[0]; M(0,2)=1;
+  M(1,0)=xvalues[1]*xvalues[1]; M(1,1)=xvalues[1]; M(1,2)=1;
+  M(2,0)=xvalues[2]*xvalues[2]; M(2,1)=xvalues[2]; M(2,2)=1;
+  
+  std::vector<double> Z(size);
+  Z[0]=yvalues[0]; Z[1]=yvalues[1]; Z[2]=yvalues[2];
+  
+  std::vector<int> ipiv(size);
+  int info=0;
+
+  dgesv_(&size, &one, &(M(0,0)),&size, &(ipiv[0]), &(Z[0]), &size, &info);
+  if(info) throw std::runtime_error("dgesv info is nonzero.");
+  
+  return Z;
+}
+double evaluate_parabola(const std::vector<double> coefficients, double xvalue){
+  return coefficients[0]*xvalue*xvalue+coefficients[1]*xvalue+coefficients[2];
+}
+std::vector<double> interpolate_vector(const std::vector<double> &oldxvalues, const std::vector<double> &oldyvalues, const std::vector<double> &newxvalues){
+  std::vector<double> newyvalues(newxvalues.size());
+  
+  gsl_interp_accel *acc = gsl_interp_accel_alloc ();
+  gsl_spline *spline = gsl_spline_alloc (gsl_interp_cspline, oldxvalues.size());
+  gsl_spline_init (spline, &(oldxvalues[0]), &(oldyvalues[0]), oldxvalues.size());
+  
+  std::vector<double> parabola_coefficients=solve_parabola(oldxvalues, oldyvalues);
+  for(int i=0;i<newxvalues.size();++i){
+    if(newxvalues[i]<oldxvalues[0]){ //need to do parabolic extrapolation
+      newyvalues[i]=evaluate_parabola(solve_parabola(oldxvalues, oldyvalues), newxvalues[i]);
+    }else if(newxvalues[i]> oldxvalues.back()){
+      newyvalues[i]=oldyvalues.back(); //we take the last value of the interpolated function, typically makes sense for AFM or SC with a real part
+    }else{
+      newyvalues[i]=gsl_spline_eval (spline, newxvalues[i], acc);
+    }
+  }
+  
+  gsl_spline_free (spline);
+  gsl_interp_accel_free (acc);
+  
+  return newyvalues;
+}
