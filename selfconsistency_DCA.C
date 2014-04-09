@@ -44,6 +44,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, ImpuritySolver& sol
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
   std::string basename=parms["BASENAME"];
   bool readwrite_real_space=parms.value_or_default("READWRITE_REAL_SPACE", false);
+  bool phase=parms.value_or_default("PHASE", false);
   shape_t gf_shape=paramagnet?diagonal:blockdiagonal;
   
   //calculate initial G0
@@ -87,7 +88,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, ImpuritySolver& sol
       G_tau=clustertrans.transform_into_k_space(G_tau_rs);
     }
     G_omega = clustertrans.symmetrize(G_omega, paramagnet);
-    if(paramagnet) G_omega = clustertrans.symmetrize_k_space(G_omega);
+    if(paramagnet && !phase ) G_omega = clustertrans.symmetrize_k_space(G_omega);
     G0_omega = clustertrans(G_omega, G0_omega, mu, h, beta);
     G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
     std::cout<<"comparing old and new result."<<std::endl<<std::flush;
