@@ -164,7 +164,6 @@ int main(int argc, char **argv){
         selfenergy_new(i,j,j,flavor) = std::complex<double>(sigma_real_interp[i], sigma_imag_interp[i]);
       }
       if(!paramagnet){
-        std::cout<<"doing afm."<<std::endl;
         std::vector<double> sigma_real_kq(nfreq_old);
         std::vector<double> sigma_imag_kq(nfreq_old);
         std::vector<double> sigma_real_qk(nfreq_old);
