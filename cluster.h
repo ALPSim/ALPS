@@ -187,12 +187,11 @@ public:
   }
   
   unsigned int dimension() const { return ClusterHelper::dimension(); }
-  unsigned int n_lattice_momenta() const { return ClusterHelper::n_lattice_momenta(); }
+  double cluster_momentum(const unsigned int i, const unsigned int j) const { return ClusterHelper::cluster_momentum(i,j); }
   double lattice_momentum(const unsigned int i, const unsigned int j) const { return ClusterHelper::lattice_momentum(i,j); }
-
+  unsigned int n_lattice_momenta() const { return ClusterHelper::n_lattice_momenta(); }
   double site_distance(const unsigned int i, const unsigned int j) const { return ClusterHelper::site_distance(i, j); }
   virtual void write_hdf5(alps::hdf5::archive &ar, const std::string &p) const;
-  double cluster_momentum(const unsigned int i, const unsigned int j) const { return ClusterHelper::cluster_momentum(i,j); }
 };
 
 
