@@ -3,19 +3,14 @@ find_package(ALPS REQUIRED NO_SYSTEM_ENVIRONMENT_PATH)
 include(${ALPS_USE_FILE})
 
 project (DMFT)
-#include_directories("/home/esg/alps_svn/")
-include_directories("/Users/emanuel/alps_svn/")
-include_directories("/Users/egull/alps_svn/")
-include_directories("/home/gull/alps_svn/")
-include_directories("/home2/egull/alps_svn")
-#include_directories("/opt/local/include")
-include_directories("/global/homes/g/gull/alps_svn/")
-include_directories("/home2/egull/software/gsl-1.9/include")
-#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -ffast-math -march=native -O3 -DUSE_MPI -DNDEBUG")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -xHOST -O3 -DNDEBUG -mkl=sequential")
+include_directories("/home/leblanc/alps_svn/")
+#include_directories("$ENV{GSL_DIR}/include")
+#SET(CMAKE_CXX_COMPILER "CC")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -O3 -DNDEBUG -mkl=sequential")
 
-link_directories("/opt/local/lib")
-link_directories("/home2/egull/software/gsl-1.9/lib")
+#link_directories("/opt/local/lib")
+link_directories("/home/leblanc/software/gsl-1.14/install/lib/libgsl.so")
+
 
 
 add_executable(dmft 
