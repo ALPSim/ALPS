@@ -617,7 +617,8 @@ void local_configuration::measure_nnw(int i, std::vector<double> &nnw_re, double
 
 void local_configuration::state_map_segment_insert(state_map &states, const segment &s, int index) const{
   //works also for the case where an operator is inserted exactly at the point of an already present kink
-  if(s.t_end_<=s.t_start_){
+  if(s.t_end_==s.t_start_) return;
+  if(s.t_end_<s.t_start_){
     std::cerr<<"fatal logic error inside state_map_segment_insert." << s.t_start_ << " " << s.t_end_ <<std::endl;
     throw std::runtime_error(std::string(__FUNCTION__)+" works only segments where the annihilator comes strictly after the creator");
   }
@@ -685,7 +686,8 @@ void local_configuration::measure_sector_statistics(std::vector<double> &sector_
   }
   else{
     //otherwise count intervals
-    double tau=0.; int state=0; int max_state=1<<n_orbitals();
+    state_map::iterator it=states.end(); it--; int state=it->second; //state of last operator is equal to initial state (interval winds around)
+    double tau=0.; int max_state=1<<n_orbitals();
     for(state_map::iterator it=states.begin();it!=states.end();++it){
       sector_statistics[state+full_line_states]+=(it->first-tau)/beta_*sign;
       tau=it->first; state=it->second;
@@ -693,7 +695,7 @@ void local_configuration::measure_sector_statistics(std::vector<double> &sector_
     }
     sector_statistics[state+full_line_states]+=(beta_-tau)/beta_*sign;//don't forget the last interval
   }
-  double sum=0;
+
 }
 // return the total weight of the local configuration
 //this is an expensive debug operation
