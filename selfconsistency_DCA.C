@@ -119,6 +119,15 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, ImpuritySolver& sol
       print_all_green_functions(basename, iteration_ctr, real_G0_omega, real_G_omega, real_G0_tau, real_G_tau, beta, "_realspace");
     }
     std::cout<<"...continuing."<<std::endl;
+
+/// TODO, rewriting to parms so that mu_orig=previous mu iteration, allows for damping in filled cases.
+	std::ofstream os(static_cast<std::string>(parms["BASENAME"]).c_str());
+       (*const_cast<alps::Parameters*>(&parms))["MU"]=mu;
+
+        os<<parms;
+        os.close();
+
+
   } while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);
   // write G0
   G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
@@ -206,6 +215,9 @@ void selfconsistency_loop_DCA_Nambu(const alps::Parameters& parms, ImpuritySolve
     print_all_nambu_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, diagonal);
     if(!parms.defined("WRITE_SPARSE"))
       print_all_nambu_green_functions(basename, iteration_ctr, real_G0_omega, real_G_omega, real_G0_tau, real_G_tau, beta, nondiagonal, "_realspace");
+
+    
+
   } while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);
   // write G0
   G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
