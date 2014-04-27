@@ -74,7 +74,7 @@ public:
       throw std::logic_error("in operator= : number of flavors is different.");
     if(nt_!=g.nt_)
       throw std::logic_error("in operator= : number of frequencies or times is different.");
-    if(shape_!=g.shape_)
+    if(shape_!=g.shape_ && ns_>1)
       throw std::logic_error("in operator= : shape is different.");
     memcpy(val_, g(), sizeof(T)*nt_*(shape_==diagonal?ns_:ns_*ns_)*nf_);
     return *this;
