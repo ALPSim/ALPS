@@ -31,12 +31,15 @@
 /// @file selfconsistency.C
 /// @brief implements the selfconsistency loop functions
 
-#include "selfconsistency.h"
-#include "green_function.h"
-#include "fouriertransform.h"
 #include "types.h"
-#include <sys/types.h> //will this fail on Windows?
-#include <boost/tuple/tuple.hpp> //will this fail on Windows?
+#include "green_function.h"
+#include "selfconsistency.h"
+
+#include "fouriertransform.h"
+#include "hilberttransformer.h"
+
+#include "solver.h"
+#include "externalsolver.h"
 
 void selfconsistency_loop_single_site(const alps::Parameters& parms, ImpuritySolver& solver,
                                 FrequencySpaceHilbertTransformer& hilbert) 

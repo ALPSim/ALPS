@@ -16,13 +16,18 @@
 /// @file selfconsistency.h
 /// @brief declares the selfconsistency loop functions
 
-#include "solver.h"
+/*#include "solver.h"
 #include "hilberttransformer.h"
 #include "externalsolver.h"
 #include "cluster.h"
 #include "fouriertransform.h"
-#include "green_function.h"
+#include "green_function.h"*/
 
+namespace alps{ class Parameters;}
+class ImpuritySolver;
+class FrequencySpaceHilbertTransformer;
+class DCATransformer;
+class CDMFTTransformer;
 /// performs a DMFT self-conistency loop until convergence
 void selfconsistency_loop_single_site(const alps::Parameters& parms, ImpuritySolver& solver,  FrequencySpaceHilbertTransformer& hilbert);
 

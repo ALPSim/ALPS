@@ -38,7 +38,10 @@
 
 #include "alps/utility/temporary_filename.hpp"
 #include "externalsolver.h"
+#include "alps/parameter.h"
+#include "cluster.h"
 
+#include <boost/lexical_cast.hpp>
 
 ImpuritySolver::matsubara_result_type ExternalSolver::solve_matsubara(
                                                                  const matsubara_green_function_t& G0_omega

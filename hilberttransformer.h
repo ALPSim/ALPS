@@ -42,8 +42,9 @@
 /// @todo the transformations need to be implemented. responsible: Philipp Werner and Hartmut Monien
 
 #include "types.h"
-#include "fouriertransform.h"
-#include <alps/parameter.h>
+#include "green_function.h"
+#include "nambu_green_function.h"
+#include "alps/parameter.h"
 
 
 /// @brief performs a Hilbert transformation

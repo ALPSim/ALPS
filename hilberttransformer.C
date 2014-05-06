@@ -13,6 +13,7 @@
 
 
 #include "hilberttransformer.h"
+#include "fouriertransform.h"
 #include <functional>
 
 

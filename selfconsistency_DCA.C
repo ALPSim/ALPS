@@ -9,14 +9,16 @@
  *****************************************************************************/
 
 
-#include "selfconsistency.h"
-#include "green_function.h"
-#include "fouriertransform.h"
 #include "types.h"
+#include "green_function.h"
+#include "selfconsistency.h"
+#include "fouriertransform.h"
+#include "externalsolver.h"
 #include <sys/types.h> 
 #include <boost/tuple/tuple.hpp>
 #include <alps/parameter.h>
 
+#include "cluster.h"
 #include "DCA_transformer.hxx"
 #include "SimpleDCA_transformer.hxx"
 #include "AFMDCA_transformer.hxx"

@@ -37,9 +37,10 @@
     #include <boost/mpi.hpp>
 #endif
 #include "solver.h"
-#include "cluster.h"
 #include "boost/filesystem/path.hpp"
 #include "boost/filesystem/operations.hpp"
+
+class ClusterTransformer;
 
 /// @brief An impurity solver calling an external executable to solve the 
 ///        impurity problem
