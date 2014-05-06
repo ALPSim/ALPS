@@ -26,7 +26,6 @@
 
 
 #include "cluster.h"
-#include "alps/alea.h"
 #include "alps/numeric/matrix.hpp"
 #include <boost/numeric/ublas/io.hpp>
 

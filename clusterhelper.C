@@ -24,7 +24,6 @@
  *****************************************************************************/
 
 
-#include "alps/osiris/comm.h"
 #include "cluster.h"
 #include "selfconsistency.h"
 

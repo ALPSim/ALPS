@@ -30,9 +30,6 @@
 
 /// @brief The DMFT main program
 ///
-/// The program takes (at the moment) no command line options and reads the parameters
-/// of the simulation from the standard input. Parameters are read in the short ALPS text format where
-/// each line contains one parameter definition in the format name=value .
 
 void read_parameters_from_file(alps::Parameters &parms, const std::string &filename){
   std::ifstream is(filename.c_str());

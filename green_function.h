@@ -42,8 +42,6 @@
 #include "alps/hdf5/vector.hpp"
 #include "alps/hdf5/pointer.hpp"
 #include "alps/hdf5/complex.hpp"
-//#include "alps/hdf5/pointer.hpp"
-//#include "alps/hdf5/complex.hpp"
 
 #include "types.h"
 
