@@ -31,6 +31,7 @@
 #include <boost/numeric/bindings/ublas.hpp>
 #include <boost/numeric/bindings/lapack/driver/gesv.hpp>
 #include "CDMFT_transformer.hxx"
+#include "fouriertransform.h"
 
 typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 

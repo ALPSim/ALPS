@@ -1,4 +1,6 @@
-
+#include <alps/config.h> // needed to set up correct bindings
+#include <boost/numeric/bindings/ublas.hpp>
+#include <boost/numeric/bindings/lapack/driver/gesv.hpp>
 
 template<typename T>
 inline typename ClusterHelper::Matrix<T>::Type ClusterHelper::Matrix<T>::inverse(typename Matrix<T>::Type M)

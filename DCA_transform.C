@@ -28,6 +28,7 @@
 #include "cluster.h"
 #include "DCA_transformer.hxx"
 #include "SimpleDCA_transformer.hxx"
+#include "fouriertransform.h"
 
 bool adjust_chemical_potential(const double &density, double &mu, bool &damping_mu,
                                bool &computing_mu, int &mu_it, double &n_old, double &n_target,

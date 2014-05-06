@@ -24,7 +24,6 @@
  *****************************************************************************/
 
 
-#include "selfconsistency.h"
 #include "cluster.h"
 #include "clusterhelper.hxx"
 

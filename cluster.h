@@ -28,16 +28,11 @@
 #define ALPS_CLUSTER_H
 
 #include "alps/lattice/graph_helper.h"
-#include "alps/numeric/vector_functions.hpp"
 
 #include "types.h"
 #include "green_function.h"
 #include "nambu_green_function.h"
-#include "hilberttransformer.h"
 
-#include <alps/config.h> // needed to set up correct bindings
-#include <boost/numeric/bindings/ublas.hpp>
-#include <boost/numeric/bindings/lapack/driver/gesv.hpp>
 typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 
 
