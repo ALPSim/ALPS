@@ -34,7 +34,7 @@
 #include <valarray>
 #include <alps/parameter.h>
 
-
+typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 
 ///same as the template function in fouriertransform.h, but not for the
 //multiple vectors. Use green_function_t instead.
@@ -556,50 +556,3 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
                                                              n_flavors, densities, magnetization, eps, epssq));
   }
 }
-
-
-
-
-/*void FittingFourierTransformer::frequency_to_time_ft(itime_green_function_t &G_tau,
- const matsubara_green_function_t &G_omega) const
- {
- //fit c1_ to G_omega
- std::cout << "Fitting Fourier Transformer:" << std::endl;
- for (unsigned int f=0; f<G_omega.nflavor(); ++f) {
- for (unsigned int s=0; s<G_omega.nsite(); ++s) {
- std::complex<double> t1 = 0;
- std::complex<double> t2 = 0;
- for (unsigned int n=G_omega.nfreq()*3/4; n<G_omega.nfreq(); ++n) {
- std::complex<double> iw(0,(2*n+1)*M_PI/beta_);
- t1 += G_omega(n,s,s,f).imag()/iw;
- t2 += 1./(iw*iw);
- }
- std::complex<double> cc = t1/t2;
- c1_[f][s][s] = -cc.imag();
- std::cout << "c1(" << s << "," << s << "," << f << ")= " << c1_[f][s][s] << std::endl;
- }
- }
- FourierTransformer::frequency_to_time_ft(G_tau, G_omega);
- //calculating F(beta)
- unsigned int N_tau = G_tau.ntime()-1;
- unsigned int N_omega = G_omega.nfreq();
- unsigned int N_site = G_omega.nsite();
- matsubara_green_function_t G_omega_no_model(G_omega);
- double beta_minus_eps = beta_ - 1e-8;
- for(unsigned int f=0;f<G_omega.nflavor();++f){
- for (unsigned int s1=0; s1<N_site; ++s1){
- for (unsigned int s2=0; s2<N_site; ++s2) {
- for (unsigned int k=0; k<N_omega; k++) {
- std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
- G_omega_no_model(k,s1,s2,f) -= f_omega(iw, c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2]);
- }
- G_tau(N_tau,s1,s2,f) = f_tau(beta_minus_eps, beta_, c1_[f][s1][s2], c2_[f][s1][s2], c3_[f][s1][s2]);
- for (unsigned int k=0; k<N_omega; k++) {
- double wt((2*k+1)*beta_minus_eps/beta_*M_PI);
- G_tau(N_tau,s1,s2,f) += 2/beta_*(cos(wt)*G_omega_no_model(k,s1,s2,f).real()+
- sin(wt)*G_omega_no_model(k,s1,s2,f).imag());
- }
- }
- }
- }
- }*/

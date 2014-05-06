@@ -57,4 +57,7 @@ struct hifreq_moments{
   std::vector<std::vector<std::vector<double> > >c2;
   std::vector<std::vector<std::vector<double> > >c3;
 };
+
+namespace alps{class Parameters;}
+
 #endif /*TYPES_H_*/

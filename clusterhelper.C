@@ -24,8 +24,9 @@
  *****************************************************************************/
 
 
-#include "cluster.h"
 #include "selfconsistency.h"
+#include "cluster.h"
+#include "clusterhelper.hxx"
 
 
 ClusterHelper::ClusterHelper(const alps::Parameters& params) :
@@ -899,7 +900,6 @@ unsigned int ClusterHelper::identify_vertex(const vector_type& v, const Matrix<d
 }
 
 
-
 unsigned int ClusterHelper::identify_sublattice(const Matrix<double>::Type& coordinate_matrix, const unsigned int i) const
 {
   double sum=0;
@@ -910,4 +910,35 @@ unsigned int ClusterHelper::identify_sublattice(const Matrix<double>::Type& coor
     return (int(round(sum)))%2;
 }
 
+double ClusterHelper::round(const double d) const
+{
+  int rounded = int(d > 0.0 ? d + 0.5 : d - 0.5);
+  if (almost_equal(rounded, d))
+    return rounded;
+  else
+    return d;
+}
+
+
+
+ClusterHelper::vector_type ClusterHelper::round(vector_type v) const
+{
+  for (unsigned int d=0; d<v.size(); ++d)
+    v[d] = round(v[d]);
+  return v;
+}
+
+
+
+ClusterHelper::vector_type ClusterHelper::matrix_vector_mult(const Matrix<double>::Type& M, const vector_type& v) const
+{
+  vector_type vn(v.size());
+  for (unsigned int i=0; i<v.size(); ++i) {
+    vn[i] = 0.;
+    for (unsigned int j=0; j<v.size(); ++j) {
+      vn[i] += M(j,i)*v[j];
+    }
+  }
+  return vn;
+}
 

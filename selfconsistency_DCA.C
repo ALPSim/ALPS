@@ -15,6 +15,11 @@
 #include "types.h"
 #include <sys/types.h> 
 #include <boost/tuple/tuple.hpp>
+#include <alps/parameter.h>
+
+#include "DCA_transformer.hxx"
+#include "SimpleDCA_transformer.hxx"
+#include "AFMDCA_transformer.hxx"
 
 void perform_cluster_loop(const alps::Parameters &parms){
   if (parms["CLUSTER_LOOP"]=="DCA")

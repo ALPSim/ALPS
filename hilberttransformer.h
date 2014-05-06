@@ -43,6 +43,8 @@
 
 #include "types.h"
 #include "fouriertransform.h"
+#include <alps/parameter.h>
+
 
 /// @brief performs a Hilbert transformation
 ///

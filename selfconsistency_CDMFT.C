@@ -35,8 +35,8 @@
 #include "green_function.h"
 #include "fouriertransform.h"
 #include "types.h"
-#include <sys/types.h> //will this fail on Windows?
-#include <boost/tuple/tuple.hpp> //will this fail on Windows?
+
+#include"CDMFT_transformer.hxx"
 
 void selfconsistency_loop_CDMFT(const alps::Parameters& parms, ImpuritySolver& solver,
                                 CDMFTTransformer& clustertrans)

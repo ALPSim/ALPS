@@ -27,7 +27,12 @@
 
 #include "cluster.h"
 #include <boost/numeric/ublas/io.hpp>
+#include <alps/config.h> // needed to set up correct bindings
+#include <boost/numeric/bindings/ublas.hpp>
+#include <boost/numeric/bindings/lapack/driver/gesv.hpp>
+#include "CDMFT_transformer.hxx"
 
+typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 
 /*
  *

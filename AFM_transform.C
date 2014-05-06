@@ -27,7 +27,7 @@
 
 #include "cluster.h"
 #include "alps/numeric/matrix.hpp"
-#include <boost/numeric/ublas/io.hpp>
+#include "AFMDCA_transformer.hxx"
 
 matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_green_function_t &G_omega,
                                                             const matsubara_green_function_t &G0_omega,
