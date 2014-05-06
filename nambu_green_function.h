@@ -5,9 +5,9 @@
 #include <iomanip>
 #include <cstdlib>
 #include <iostream>
-#include "alps/hdf5.hpp"
-#include "alps/hdf5/pointer.hpp"
-#include "alps/hdf5/complex.hpp"
+#include "alps/hdf5/archive.hpp"
+//#include "alps/hdf5/pointer.hpp"
+//#include "alps/hdf5/complex.hpp"
 
 #ifdef USE_MPI
 #include <mpi.h>

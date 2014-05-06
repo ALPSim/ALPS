@@ -36,14 +36,12 @@
 #include <vector>
 #include <utility>
 
-#include "alps/parameter.h"
-
 #include "types.h"
 #include "green_function.h"
 #include "nambu_green_function.h"
-#include "cluster.h"
 
-
+class ClusterTransformer;
+namespace alps { class Parameters; }
 
 /// the base class for all impurity solvers taking a Green's function in Matsubara frequency and returning one in imaginary time and Matsubara frequency.
 class ImpuritySolver{

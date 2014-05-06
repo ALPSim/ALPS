@@ -27,13 +27,8 @@
 #ifndef ALPS_CLUSTER_H
 #define ALPS_CLUSTER_H
 
-#include "boost/numeric/bindings/detail/config/fortran.hpp"
-#include "boost/numeric/bindings/ublas.hpp"
-#include "boost/numeric/bindings/lapack/driver/gesv.hpp"
-
 #include "alps/lattice/graph_helper.h"
 #include "alps/numeric/vector_functions.hpp"
-//#include "alps/alea.h"
 
 #include "types.h"
 #include "green_function.h"

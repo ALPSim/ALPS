@@ -13,8 +13,8 @@
 #include "green_function.h"
 #include "fouriertransform.h"
 #include "types.h"
-#include <sys/types.h> //will this fail on Windows?
-#include <boost/tuple/tuple.hpp> //will this fail on Windows?
+#include <sys/types.h> 
+#include <boost/tuple/tuple.hpp>
 
 void perform_cluster_loop(const alps::Parameters &parms){
   if (parms["CLUSTER_LOOP"]=="DCA")

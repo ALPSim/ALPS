@@ -205,17 +205,6 @@
   
   
   
-  <LATTICE name="Betts2D-18A superlattice" dimension="2">
-    <BASIS>
-      <VECTOR>4 4 </VECTOR>
-      <VECTOR>-4 4 </VECTOR>
-    </BASIS>
-    <RECIPROCALBASIS>
-      <VECTOR>8*pi/32 8*pi/32 </VECTOR>
-      <VECTOR>-8*pi/32 8*pi/32 </VECTOR>
-    </RECIPROCALBASIS>
-  </LATTICE>
-
   <LATTICE name="Betts2D-50A superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 5 </VECTOR>
