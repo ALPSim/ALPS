@@ -159,20 +159,20 @@
  
   
   
-     <LATTICE name="Betts2D-16B superlattice" dimension="2">
+     <LATTICE name="Betts2D-36A superlattice" dimension="2">
      <BASIS>
-       <VECTOR>4 0 </VECTOR>
-       <VECTOR>0 4 </VECTOR>
+       <VECTOR>6 0 </VECTOR>
+       <VECTOR>0 6 </VECTOR>
      </BASIS>
      <RECIPROCALBASIS>
-      <VECTOR>8*pi/16 0*pi/16 </VECTOR>
-      <VECTOR>0*pi/16 8*pi/16 </VECTOR>
+      <VECTOR>12*pi/36 0*pi/36 </VECTOR>
+      <VECTOR>0*pi/36 12*pi/36 </VECTOR>
     </RECIPROCALBASIS>
   </LATTICE>
 
-   <LATTICEGRAPH name = "Betts2D-16B">
+   <LATTICEGRAPH name = "Betts2D-36A">
      <FINITELATTICE>
-       <LATTICE ref="Betts2D-16B superlattice"/>
+       <LATTICE ref="Betts2D-36A superlattice"/>
        <PARAMETER name="L" default="30"/>
        <EXTENT dimension="1" size="L"/>
        <EXTENT dimension="2" size="L"/>
