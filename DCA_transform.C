@@ -29,6 +29,8 @@
 #include "DCA_transformer.hxx"
 #include "SimpleDCA_transformer.hxx"
 #include "fouriertransform.h"
+#include "CDMFT_transform.h"
+#include "alps/numeric/vector_functions.hpp"
 
 bool adjust_chemical_potential(const double &density, double &mu, bool &damping_mu,
                                bool &computing_mu, int &mu_it, double &n_old, double &n_target,
@@ -859,3 +861,7 @@ nambu_green_function<std::complex<double> > SimpleDCATransformer::spin_symmetriz
   return G_new;
 }
 
+double DCATransformer::epsilon_phi(const vector_type &k, const vector_type &phi) const{
+  using namespace alps::numeric;
+  return epsilon(k+phi);
+}

@@ -38,6 +38,7 @@
 #include "externalsolver.h"
 
 #include"cluster.h"
+#include "CDMFT_transform.h"
 #include"CDMFT_transformer.hxx"
 
 void selfconsistency_loop_CDMFT(const alps::Parameters& parms, ImpuritySolver& solver,

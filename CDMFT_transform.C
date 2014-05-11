@@ -25,7 +25,7 @@
  *****************************************************************************/
 
 
-#include "cluster.h"
+#include "CDMFT_transform.h"
 #include <boost/numeric/ublas/io.hpp>
 #include <alps/config.h> // needed to set up correct bindings
 #include <boost/numeric/bindings/ublas.hpp>
