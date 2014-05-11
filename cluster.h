@@ -54,6 +54,8 @@ public:
   typedef std::pair<momenta_vector_iterator,momenta_vector_iterator> momenta_iterator_pair;
 
 
+  abstract_graph(){}
+  virtual ~abstract_graph(){}
   virtual int volume() const=0;
   virtual int dimension() const=0;
   virtual basis_vector_iterator_pair basis_vectors()const =0;
@@ -97,7 +99,7 @@ public:
   //typedef alps::graph_helper<alps::graph_helper<>::graph_type>::offset_type offset_type;
   
   ClusterHelper(const alps::Parameters& params);
-  ~ClusterHelper(){ delete graph_; }
+  virtual ~ClusterHelper(){ delete graph_; }
   
   double cluster_coordinate(const unsigned int i, const unsigned int j) const { return cluster_coordinates_(i,j); }
   double cluster_momentum(const unsigned int i, const unsigned int j) const { return cluster_momenta_(i,j); }

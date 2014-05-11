@@ -5,14 +5,12 @@
 #include <iomanip>
 #include <cstdlib>
 #include <iostream>
-#include "alps/hdf5/archive.hpp"
-//#include "alps/hdf5/pointer.hpp"
-//#include "alps/hdf5/complex.hpp"
 
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
 
+namespace alps{namespace hdf5{class archive; } }
 
 //Matsubara GF: use T=std::complex<double>
 //Imaginary time: use T=double
@@ -73,25 +71,8 @@ public:
   
   void read(const char *filename);
   void write(const char *filename);
-  void write_hdf5(alps::hdf5::archive &ar, const std::string &path) const{
-    ar<<alps::make_pvp(path+"/nt",nt_);
-    ar<<alps::make_pvp(path+"/ns",ns_);
-    ar<<alps::make_pvp(path+"/nf",nf_);
-    std::stringstream subpath; subpath<<path<<"/values/mean";
-    //std::cout<<path<<" nt: "<<nt_<<" new: "<<nt_<<" ns: "<<ns_<<" "<<ns_<<" nf: "<<nf_<<" "<<nf_<<" total size should be: "<<nt_*ns_*ns_*nf_*nf_<<std::endl;
-    ar<<alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_*nf_);
-  }
-  void read_hdf5(alps::hdf5::archive &ar, const std::string &path) {
-    unsigned int nt, ns, nf;
-    clear();
-    ar>>alps::make_pvp(path+"/nt",nt);
-    ar>>alps::make_pvp(path+"/ns",ns);
-    ar>>alps::make_pvp(path+"/nf",nf);
-    if(nt!=nt_ || ns!=ns_ || nf!=nf_){ std::cerr<<path<<" nt: "<<nt_<<" new: "<<nt<<" ns: "<<ns_<<" "<<ns<<" nf: "<<nf_<<" "<<nf<<" dimensions do not match."<<std::endl; throw std::runtime_error("Green's function read in: dimensions do not match."); }
-    //std::cout<<path<<" nt: "<<nt_<<" new: "<<nt<<" ns: "<<ns_<<" "<<ns<<" nf: "<<nf_<<" "<<nf<<" total size should be: "<<nt_*ns_*ns_*nf_*nf_<<std::endl;
-    std::stringstream subpath; subpath<<path<<"/values/mean";
-    ar>>alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_*nf_);
-  }
+  void write_hdf5(alps::hdf5::archive &ar, const std::string &path) const;
+  void read_hdf5(alps::hdf5::archive &ar, const std::string &path);
 #ifdef USE_MPI
     void broadcast(){
       MPI_Bcast( val_, ntnsnsnf_*nf_*sizeof(T)/sizeof(double), MPI_DOUBLE, 0, MPI_COMM_WORLD);

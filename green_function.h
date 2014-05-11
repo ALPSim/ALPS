@@ -38,10 +38,7 @@
 #include <mpi.h>
 #endif
 
-#include "alps/hdf5/archive.hpp"
-#include "alps/hdf5/vector.hpp"
-#include "alps/hdf5/pointer.hpp"
-#include "alps/hdf5/complex.hpp"
+namespace alps{namespace hdf5{class archive; } }
 
 #include "types.h"
 
@@ -114,26 +111,8 @@ public:
   inline const unsigned int &nfreq()const{return nt_;} //nfreq is an alias to ntime - more intuitive use for Matsubara GF
   void read(const char *filename);
   void write(const char *filename) const;
-  void write_hdf5(alps::hdf5::archive &ar, const std::string &path) const{
-    ar<<alps::make_pvp(path+"/nt",nt_);
-    ar<<alps::make_pvp(path+"/ns",ns_);
-    ar<<alps::make_pvp(path+"/nf",nf_);
-    ar<<alps::make_pvp(path+"/shape",((int)shape_));
-    std::stringstream subpath; subpath<<path<<"/values/mean";
-    ar<<alps::make_pvp(subpath.str(), val_, nt_*(shape_==diagonal?ns_:ns_*ns_)*nf_);
-  }
-  void read_hdf5(alps::hdf5::archive &ar, const std::string &path) {
-    unsigned int nt, ns, nf,shape;
-    clear();
-    ar>>alps::make_pvp(path+"/nt",nt);
-    ar>>alps::make_pvp(path+"/ns",ns);
-    ar>>alps::make_pvp(path+"/nf",nf);
-    ar>>alps::make_pvp(path+"/shape",shape);
-    if(nt!=nt_ || ns!=ns_ || nf!=nf_){ std::cerr<<path<<" nt: "<<nt_<<" new: "<<nt<<" ns: "<<ns_<<" "<<ns<<" nf: "<<nf_<<" "<<nf<<" dimensions do not match."<<std::endl; throw std::runtime_error("Green's function read in: dimensions do not match."); }
-    if(shape!=shape_){ std::cerr<<path<<" shape: "<<shape_<<" new: "<<shape<<" shapes do not match."<<std::endl; throw std::runtime_error("Green's function read in: shapes do not match."); }
-    std::stringstream subpath; subpath<<path<<"/values/mean";
-    ar>>alps::make_pvp(subpath.str(), val_, nt_*(shape_==diagonal?ns_:ns_*ns_)*nf_);
-  }
+  void write_hdf5(alps::hdf5::archive &ar, const std::string &path) const;
+  void read_hdf5(alps::hdf5::archive &ar, const std::string &path) ;
   double diff(const green_function<T> &gf2){
     double maxdiff=0.;
     for(int i=0; i<ntnsns_*nf_;++i){

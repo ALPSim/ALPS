@@ -45,7 +45,7 @@
 #include "green_function.h"
 #include "nambu_green_function.h"
 #include "alps/parameter.h"
-
+#include "boost/shared_ptr.hpp"
 
 /// @brief performs a Hilbert transformation
 ///

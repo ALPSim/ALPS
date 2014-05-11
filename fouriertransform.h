@@ -27,7 +27,7 @@
 #ifndef FOURIER_TRANSFORM_H
 #define FOURIER_TRANSFORM_H
 #include <complex>
-
+#include "boost/shared_ptr.hpp"
 #include "types.h" 
 #include "green_function.h" 
 #include "nambu_green_function.h" 

@@ -34,11 +34,14 @@
 #include <sstream>
 #include <math.h>
 #include "alps/numeric/matrix.hpp"
+
+#include "alps/hdf5/archive.hpp"
+#include "alps/hdf5/vector.hpp"
+#include "alps/hdf5/pointer.hpp"
+#include "alps/hdf5/complex.hpp"
+
 #include "blas_classes/blasheader.h"
 #include "blas_classes/general_matrix.h"
-
-
-
 
 
 void matrix_inversion(alps::numeric::matrix<std::complex<double> >&A, alps::numeric::matrix<std::complex<double> >&A_inv);
@@ -696,3 +699,83 @@ void print_all_nambu_green_functions(std::string const &basename, const int iter
   print_selfenergy_matsubara(selfenergy_file, G0_omega, G_omega, beta, shape);
 }
 
+  void green_function<double>::write_hdf5(alps::hdf5::archive &ar, const std::string &path) const{
+    ar<<alps::make_pvp(path+"/nt",nt_);
+    ar<<alps::make_pvp(path+"/ns",ns_);
+    ar<<alps::make_pvp(path+"/nf",nf_);
+    ar<<alps::make_pvp(path+"/shape",((int)shape_));
+    std::stringstream subpath; subpath<<path<<"/values/mean";
+    ar<<alps::make_pvp(subpath.str(), val_, nt_*(shape_==diagonal?ns_:ns_*ns_)*nf_);
+  }
+  void green_function<double>::read_hdf5(alps::hdf5::archive &ar, const std::string &path) {
+    unsigned int nt, ns, nf,shape;
+    clear();
+    ar>>alps::make_pvp(path+"/nt",nt);
+    ar>>alps::make_pvp(path+"/ns",ns);
+    ar>>alps::make_pvp(path+"/nf",nf);
+    ar>>alps::make_pvp(path+"/shape",shape);
+    if(nt!=nt_ || ns!=ns_ || nf!=nf_){ std::cerr<<path<<" nt: "<<nt_<<" new: "<<nt<<" ns: "<<ns_<<" "<<ns<<" nf: "<<nf_<<" "<<nf<<" dimensions do not match."<<std::endl; throw std::runtime_error("Green's function read in: dimensions do not match."); }
+    if(shape!=shape_){ std::cerr<<path<<" shape: "<<shape_<<" new: "<<shape<<" shapes do not match."<<std::endl; throw std::runtime_error("Green's function read in: shapes do not match."); }
+    std::stringstream subpath; subpath<<path<<"/values/mean";
+    ar>>alps::make_pvp(subpath.str(), val_, nt_*(shape_==diagonal?ns_:ns_*ns_)*nf_);
+  }
+
+  void green_function<std::complex<double> >::write_hdf5(alps::hdf5::archive &ar, const std::string &path) const{
+    ar<<alps::make_pvp(path+"/nt",nt_);
+    ar<<alps::make_pvp(path+"/ns",ns_);
+    ar<<alps::make_pvp(path+"/nf",nf_);
+    ar<<alps::make_pvp(path+"/shape",((int)shape_));
+    std::stringstream subpath; subpath<<path<<"/values/mean";
+    ar<<alps::make_pvp(subpath.str(), val_, nt_*(shape_==diagonal?ns_:ns_*ns_)*nf_);
+  }
+  void green_function<std::complex<double> >::read_hdf5(alps::hdf5::archive &ar, const std::string &path) {
+    unsigned int nt, ns, nf,shape;
+    clear();
+    ar>>alps::make_pvp(path+"/nt",nt);
+    ar>>alps::make_pvp(path+"/ns",ns);
+    ar>>alps::make_pvp(path+"/nf",nf);
+    ar>>alps::make_pvp(path+"/shape",shape);
+    if(nt!=nt_ || ns!=ns_ || nf!=nf_){ std::cerr<<path<<" nt: "<<nt_<<" new: "<<nt<<" ns: "<<ns_<<" "<<ns<<" nf: "<<nf_<<" "<<nf<<" dimensions do not match."<<std::endl; throw std::runtime_error("Green's function read in: dimensions do not match."); }
+    if(shape!=shape_){ std::cerr<<path<<" shape: "<<shape_<<" new: "<<shape<<" shapes do not match."<<std::endl; throw std::runtime_error("Green's function read in: shapes do not match."); }
+    std::stringstream subpath; subpath<<path<<"/values/mean";
+    ar>>alps::make_pvp(subpath.str(), val_, nt_*(shape_==diagonal?ns_:ns_*ns_)*nf_);
+  }
+
+  void nambu_green_function<std::complex<double> >::write_hdf5(alps::hdf5::archive &ar, const std::string &path) const{
+    ar<<alps::make_pvp(path+"/nt",nt_);
+    ar<<alps::make_pvp(path+"/ns",ns_);
+    ar<<alps::make_pvp(path+"/nf",nf_);
+    std::stringstream subpath; subpath<<path<<"/values/mean";
+    //std::cout<<path<<" nt: "<<nt_<<" new: "<<nt_<<" ns: "<<ns_<<" "<<ns_<<" nf: "<<nf_<<" "<<nf_<<" total size should be: "<<nt_*ns_*ns_*nf_*nf_<<std::endl;
+    ar<<alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_*nf_);
+  }
+  void nambu_green_function<std::complex<double> >::read_hdf5(alps::hdf5::archive &ar, const std::string &path) {
+    unsigned int nt, ns, nf;
+    clear();
+    ar>>alps::make_pvp(path+"/nt",nt);
+    ar>>alps::make_pvp(path+"/ns",ns);
+    ar>>alps::make_pvp(path+"/nf",nf);
+    if(nt!=nt_ || ns!=ns_ || nf!=nf_){ std::cerr<<path<<" nt: "<<nt_<<" new: "<<nt<<" ns: "<<ns_<<" "<<ns<<" nf: "<<nf_<<" "<<nf<<" dimensions do not match."<<std::endl; throw std::runtime_error("Green's function read in: dimensions do not match."); }
+    //std::cout<<path<<" nt: "<<nt_<<" new: "<<nt<<" ns: "<<ns_<<" "<<ns<<" nf: "<<nf_<<" "<<nf<<" total size should be: "<<nt_*ns_*ns_*nf_*nf_<<std::endl;
+    std::stringstream subpath; subpath<<path<<"/values/mean";
+    ar>>alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_*nf_);
+  }
+  void nambu_green_function<double>::write_hdf5(alps::hdf5::archive &ar, const std::string &path) const{
+    ar<<alps::make_pvp(path+"/nt",nt_);
+    ar<<alps::make_pvp(path+"/ns",ns_);
+    ar<<alps::make_pvp(path+"/nf",nf_);
+    std::stringstream subpath; subpath<<path<<"/values/mean";
+    //std::cout<<path<<" nt: "<<nt_<<" new: "<<nt_<<" ns: "<<ns_<<" "<<ns_<<" nf: "<<nf_<<" "<<nf_<<" total size should be: "<<nt_*ns_*ns_*nf_*nf_<<std::endl;
+    ar<<alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_*nf_);
+  }
+  void nambu_green_function<double>::read_hdf5(alps::hdf5::archive &ar, const std::string &path) {
+    unsigned int nt, ns, nf;
+    clear();
+    ar>>alps::make_pvp(path+"/nt",nt);
+    ar>>alps::make_pvp(path+"/ns",ns);
+    ar>>alps::make_pvp(path+"/nf",nf);
+    if(nt!=nt_ || ns!=ns_ || nf!=nf_){ std::cerr<<path<<" nt: "<<nt_<<" new: "<<nt<<" ns: "<<ns_<<" "<<ns<<" nf: "<<nf_<<" "<<nf<<" dimensions do not match."<<std::endl; throw std::runtime_error("Green's function read in: dimensions do not match."); }
+    //std::cout<<path<<" nt: "<<nt_<<" new: "<<nt<<" ns: "<<ns_<<" "<<ns<<" nf: "<<nf_<<" "<<nf<<" total size should be: "<<nt_*ns_*ns_*nf_*nf_<<std::endl;
+    std::stringstream subpath; subpath<<path<<"/values/mean";
+    ar>>alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_*nf_);
+  }
