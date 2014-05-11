@@ -26,20 +26,200 @@
 
 #include "cluster.h"
 #include "clusterhelper.hxx"
+#include "alps/lattice/graph_helper.h"
 
+
+class dca_graph:public abstract_graph{
+public:
+  //to disentangle things from ALPS we have to hide the cell iterator, offset type, and momentum iterator calls.
+  typedef alps::graph_helper<alps::graph_helper<>::graph_type>::cell_iterator cell_iterator;
+  typedef std::pair<cell_iterator,cell_iterator> cell_iterator_pair;
+  typedef alps::graph_helper<alps::graph_helper<>::graph_type>::cell_descriptor cell_descriptor;
+  typedef alps::graph_helper<alps::graph_helper<>::graph_type>::momentum_iterator momentum_iterator;
+  typedef std::pair<momentum_iterator,momentum_iterator> momentum_iterator_pair;
+
+  dca_graph(const alps::Parameters& params):graph_(params){
+    //set up cell origins and offsets
+    cell_iterator itc, itc_end;
+    for (boost::tie(itc, itc_end) = graph_.cells(); itc != itc_end; ++itc) {
+      cell_origins_.push_back(graph_.origin(*itc));
+      cell_offsets_.push_back(graph_.offset(*itc));
+    }
+    //set up momenta
+    momentum_iterator itm, itm_end;
+    for (boost::tie(itm, itm_end) = graph_.momenta(); itm != itm_end; ++itm) {
+      momenta_.push_back(graph_.momentum(*itm));
+    }
+  }
+  virtual ~dca_graph(){}
+   int volume() const{return graph_.volume();}
+   int dimension() const{return graph_.dimension();}
+   basis_vector_iterator_pair basis_vectors() const {return graph_.basis_vectors(); }
+   basis_vector_iterator_pair reciprocal_basis_vectors() const {return graph_.reciprocal_basis_vectors(); }
+   //cell_iterator_pair cells()const {return graph_.cells();}
+   //vector_type origin(const cell_descriptor &desc) const{return graph_.origin(desc);}
+   //momentum_iterator_pair momenta() const{return graph_.momenta();}
+   //vector_type momentum(const vector_type &mom) const{return graph_.momentum(mom);}
+   //offset_type offset(const cell_descriptor& c) const{return graph_.offset(c);}
+   basis_vector_iterator_pair cell_origins() const{return std::make_pair(cell_origins_.begin(), cell_origins_.end());}
+   offset_iterator_pair cell_offsets() const{return std::make_pair(cell_offsets_.begin(), cell_offsets_.end());}
+   momenta_iterator_pair cell_momenta() const{return std::make_pair(momenta_.begin(), momenta_.end());}
+private:
+  const alps::graph_helper<alps::graph_helper<>::graph_type> graph_;
+  std::vector<std::vector<double> > cell_origins_;
+  offset_vector_type cell_offsets_;
+  momenta_vector_type momenta_;
+};
 
 ClusterHelper::ClusterHelper(const alps::Parameters& params) :
-alps::graph_helper<alps::graph_helper<>::graph_type>(params),
 n_cluster_sites_(boost::lexical_cast<int>(params["SITES"])), epsilon_(1e-9),
 lattice_momenta_file_name_(params.value_or_default("LATTICE_MOMENTA_FILE", "LatticeMomenta"))
 {
+  graph_=new dca_graph(params);
   //std::cout<<"in clusterhelper constructor."<<std::endl;
   //try to read this transformer, otherwise generate it.
   if(!read(params))
     setup_tables(params);
 }
 
+void ClusterHelper::find_non_bipartite_cluster_momenta() {
+  abstract_graph::basis_vector_iterator o_itc, o_itc_end;
+  for(boost::tie(o_itc,o_itc_end)=graph_->cell_origins(); o_itc != o_itc_end; ++o_itc){
+    vector_type o = *o_itc;
+    for (unsigned int i = 0; i < n_cluster_sites(); ++i) {
+      vector_type c = o;
+      for (unsigned int d = 0; d < dimension(); ++d)
+        c[d] += cluster_coordinate(i, d);
+      c = matrix_vector_mult(reciprocal_basis_, c);
+      c = map_back_into_brillouin_zone(c);
+      append_column_no_duplicates(cluster_momenta_, c);
+    }
+  }
+}
 
+void ClusterHelper::find_bipartite_cluster_momenta() {
+  switch (dimension()) {
+  case 1:
+    rbzone_boundaries_.resize(1, 1);
+    rbzone_boundaries_(0, 0) = M_PI / 2;
+    break;
+  case 2:
+    rbzone_boundaries_.resize(2, 2);
+    rbzone_boundaries_(0, 0) = M_PI / 2;
+    rbzone_boundaries_(0, 1) = M_PI / 2;
+    rbzone_boundaries_(1, 0) = -M_PI / 2;
+    rbzone_boundaries_(1, 1) = M_PI / 2;
+    break;
+  case 3:
+    //reduced Brillouin zone is the one of an fcc lattice with a=2
+    rbzone_boundaries_.resize(4, 3);
+    rbzone_boundaries_(0, 0) = M_PI / 2;
+    rbzone_boundaries_(0, 1) = M_PI / 2;
+    rbzone_boundaries_(0, 2) = M_PI / 2;
+    rbzone_boundaries_(1, 0) = -M_PI / 2;
+    rbzone_boundaries_(1, 1) = M_PI / 2;
+    rbzone_boundaries_(1, 2) = M_PI / 2;
+    rbzone_boundaries_(2, 0) = M_PI / 2;
+    rbzone_boundaries_(2, 1) = -M_PI / 2;
+    rbzone_boundaries_(2, 2) = M_PI / 2;
+    rbzone_boundaries_(3, 0) = M_PI / 2;
+    rbzone_boundaries_(3, 1) = M_PI / 2;
+    rbzone_boundaries_(3, 2) = -M_PI / 2;
+    break;
+  }
+  abstract_graph::basis_vector_iterator o_itc, o_itc_end;
+  for(boost::tie(o_itc,o_itc_end)=graph_->cell_origins(); o_itc != o_itc_end; ++o_itc){
+    vector_type o = *o_itc;
+    for (unsigned int i = 0; i < n_cluster_sites(); ++i) {
+      vector_type c = o;
+      for (unsigned int d = 0; d < dimension(); ++d)
+        c[d] += cluster_coordinate(i, d);
+      c = matrix_vector_mult(reciprocal_basis_, c);
+      c = map_back_into_brillouin_zone(c);
+      if (inside_reduced_brillouin_zone(c)) {
+        append_column_no_duplicates(cluster_momenta_, c);
+        for (std::size_t d = 0; d < dimension(); ++d)
+          c[d] += M_PI;
+        c = map_back_into_brillouin_zone(c);
+        append_column_no_duplicates(cluster_momenta_, c);
+      }
+    }
+  }
+}
+
+void ClusterHelper::find_integration_weights() {
+  //find lattice integration weights (Simpson weights)
+  std::vector<double> weights;
+  //abstract_graph::momentum_iterator itm, itm_end;
+  //boost::tie(itm, itm_end) = graph_->momenta();
+  abstract_graph::momenta_vector_iterator itm, itm_end;
+  for(boost::tie(itm, itm_end)=graph_->cell_momenta();itm!=itm_end;++itm){
+  //for (; itm != itm_end; ++itm) {
+    vector_type mom = *itm;
+    vector_type mom_trans = matrix_vector_mult(reciprocal_basis_inv_, mom);
+    std::vector<vector_type> moms;
+    switch (dimension()) {
+    case 1:
+      for (int s1 = -1; s1 <= 1; s1 += 2) {
+        vector_type tmom = mom_trans;
+        tmom[0] = s1 * mom_trans[0];
+        moms.push_back(tmom);
+      }
+      break;
+    case 2:
+      for (int s1 = -1; s1 <= 1; s1 += 2) {
+        for (int s2 = -1; s2 <= 1; s2 += 2) {
+          vector_type tmom = mom_trans;
+          tmom[0] = s1 * mom_trans[0];
+          tmom[1] = s2 * mom_trans[1];
+          moms.push_back(tmom);
+        }
+      }
+      break;
+    case 3:
+      for (int s1 = -1; s1 <= 1; s1 += 2) {
+        for (int s2 = -1; s2 <= 1; s2 += 2) {
+          for (int s3 = -1; s3 <= 1; s3 += 2) {
+            vector_type tmom = mom_trans;
+            tmom[0] = s1 * mom_trans[0];
+            tmom[1] = s2 * mom_trans[1];
+            tmom[2] = s3 * mom_trans[2];
+            moms.push_back(tmom);
+          }
+        }
+      }
+      break;
+    }
+    double L = pow(n_cluster_cells(), 1. / double(dimension()));
+    for (std::size_t g = 0; g < moms.size(); ++g) {
+      double weight = 1.;
+      for (std::size_t d = 0; d < dimension(); ++d) {
+        double m = (moms[g][d] + 0.5) * L;
+        if (almost_equal(m, 0) || almost_equal(m, L)) {
+          //boundary gets a third
+          weight *= 1. / 3.;
+        } else
+        //rest gets 2/3 and 4/3 of weight according to Simpson
+        if ((((int) (abs(round(m)))) % 2 == 0
+            && ((int) (abs(round(L)))) % 2 == 0)
+            || (((int) (abs(round(m)))) % 2 == 1
+                && ((int) (abs(round(L)))) % 2 == 1)) {
+          weight *= 2. / 3.;
+        } else {
+          weight *= 4. / 3.;
+        }
+      }
+      //momw has dimension+1 entries: dimension for the actual coordinate, and the last one for the weight
+      vector_type momw(dimension() + 1);
+      vector_type momt = matrix_vector_mult(reciprocal_basis_, moms[g]);
+      for (std::size_t d = 0; d < dimension(); ++d)
+        momw[d] = momt[d];
+      momw[dimension()] = weight;
+      //std::cout<<"appending momentum to lattice_momenta_, weight: "<<weight<<std::endl;
+      append_column_no_duplicates(lattice_momenta_, momw);
+    }
+  }
+}
 
 void ClusterHelper::setup_tables(const alps::Parameters &params)
 {
@@ -47,8 +227,8 @@ void ClusterHelper::setup_tables(const alps::Parameters &params)
   //setup basis vectors
   Matrix<double>::Type basis(dimension(), dimension());
   memset(&(basis(0,0)), 0, sizeof(double)*dimension()*dimension());
-  basis_vector_iterator itb, itb_end;
-  boost::tie(itb, itb_end) = basis_vectors();
+  abstract_graph::basis_vector_iterator itb, itb_end;
+  boost::tie(itb, itb_end) = graph_->basis_vectors();
   int sum = 0;
   for (unsigned int i=0; itb!=itb_end; ++itb, ++i) {
     int sum_i = 0;
@@ -122,171 +302,23 @@ void ClusterHelper::setup_tables(const alps::Parameters &params)
   //setup reciprocal basis
   reciprocal_basis_.resize(dimension(), dimension());
   memset(&(reciprocal_basis_(0,0)), 0, sizeof(double)*dimension()*dimension());
-  basis_vector_iterator itbr, itbr_end;
-  boost::tie(itbr, itbr_end) = reciprocal_basis_vectors();
+  abstract_graph::basis_vector_iterator itbr, itbr_end;
+  boost::tie(itbr, itbr_end) = graph_->reciprocal_basis_vectors();
   for (unsigned int i=0; itbr!=itbr_end; ++itbr, ++i)
     for (unsigned int d=0; d<dimension(); ++d)
       reciprocal_basis_(i,d) = (*itbr)[d];
   reciprocal_basis_inv_ = Matrix<double>::inverse(reciprocal_basis_);
   //setup cluster momenta
   if (bipartite()) {
-    switch (dimension()) {
-      case 1 :
-        rbzone_boundaries_.resize(1,1);
-        rbzone_boundaries_(0,0) = M_PI/2;
-        break;
-      case 2 :
-        rbzone_boundaries_.resize(2,2);
-        rbzone_boundaries_(0,0) = M_PI/2; rbzone_boundaries_(0,1) = M_PI/2;
-        rbzone_boundaries_(1,0) = -M_PI/2; rbzone_boundaries_(1,1) = M_PI/2;
-        break;
-      case 3 :
-        //reduced Brillouin zone is the one of an fcc lattice with a=2
-        rbzone_boundaries_.resize(4,3);
-        rbzone_boundaries_(0,0) =  M_PI/2; rbzone_boundaries_(0,1) =  M_PI/2; rbzone_boundaries_(0,2) =  M_PI/2;
-        rbzone_boundaries_(1,0) = -M_PI/2; rbzone_boundaries_(1,1) =  M_PI/2; rbzone_boundaries_(1,2) =  M_PI/2;
-        rbzone_boundaries_(2,0) =  M_PI/2; rbzone_boundaries_(2,1) = -M_PI/2; rbzone_boundaries_(2,2) =  M_PI/2;
-        rbzone_boundaries_(3,0) =  M_PI/2; rbzone_boundaries_(3,1) =  M_PI/2; rbzone_boundaries_(3,2) = -M_PI/2;
-        break;
-    }
-    cell_iterator itc, itc_end;
-    for (boost::tie(itc, itc_end) = cells(); itc!=itc_end; ++itc) {
-      vector_type o = origin(*itc);
-      for (unsigned int i=0; i<n_cluster_sites(); ++i) {
-        vector_type c = o;
-        for (unsigned int d=0; d<dimension(); ++d)
-          c[d] += cluster_coordinate(i,d);
-        c = matrix_vector_mult(reciprocal_basis_, c);
-        c = map_back_into_brillouin_zone(c);
-        if (inside_reduced_brillouin_zone(c)) {
-          append_column_no_duplicates(cluster_momenta_, c);
-          for (std::size_t d=0; d<dimension(); ++d)
-            c[d] += M_PI;
-          c = map_back_into_brillouin_zone(c);
-          append_column_no_duplicates(cluster_momenta_, c);
-        }
-      }
-    }
+    find_bipartite_cluster_momenta();
   }
   else {
-    cell_iterator itc, itc_end;
-    for (boost::tie(itc, itc_end) = cells(); itc!=itc_end; ++itc) {
-      vector_type o = origin(*itc);
-      for (unsigned int i=0; i<n_cluster_sites(); ++i) {
-        vector_type c = o;
-        for (unsigned int d=0; d<dimension(); ++d)
-          c[d] += cluster_coordinate(i,d);
-        c = matrix_vector_mult(reciprocal_basis_, c);
-        c = map_back_into_brillouin_zone(c);
-        append_column_no_duplicates(cluster_momenta_, c);
-      }
-    }
+    find_non_bipartite_cluster_momenta();
   }
   
   //find lattice integration weights (Simpson weights)
-  std::vector<double> weights;
-  momentum_iterator itm, itm_end;
-  boost::tie(itm, itm_end) = momenta();
-  for (; itm!=itm_end; ++itm) {
-    vector_type mom=momentum(*itm);
-    vector_type mom_trans = matrix_vector_mult(reciprocal_basis_inv_, mom);
-    std::vector<vector_type> moms;
-    switch (dimension()) {
-      case 1 :
-        for (int s1=-1; s1<=1; s1+=2) {
-          vector_type tmom = mom_trans;
-          tmom[0] = s1*mom_trans[0];
-          moms.push_back(tmom);
-        }
-        break;
-      case 2 :
-        for (int s1=-1; s1<=1; s1+=2) {
-          for (int s2=-1; s2<=1; s2+=2) {
-            vector_type tmom = mom_trans;
-            tmom[0] = s1*mom_trans[0];
-            tmom[1] = s2*mom_trans[1];
-            moms.push_back(tmom);
-          }
-        }
-        break;
-      case 3 :
-        for (int s1=-1; s1<=1; s1+=2) {
-          for (int s2=-1; s2<=1; s2+=2) {
-            for (int s3=-1; s3<=1; s3+=2) {
-              vector_type tmom = mom_trans;
-              tmom[0] = s1*mom_trans[0];
-              tmom[1] = s2*mom_trans[1];
-              tmom[2] = s3*mom_trans[2];
-              moms.push_back(tmom);
-            }
-          }
-        }
-        break;
-    }
-    double L = pow(n_cluster_cells(), 1./double(dimension()));
-    for (std::size_t g=0; g<moms.size(); ++g) {
-      double weight = 1.;
-      for (std::size_t d=0; d<dimension(); ++d) {
-        double m = (moms[g][d]+0.5)*L;
-        if (almost_equal(m, 0) || almost_equal(m, L)){
-          //boundary gets a third
-          weight *= 1./3.;
-        }
-        //rest gets 2/3 and 4/3 of weight according to Simpson
-        else if ( (((int)abs(round(m)))%2==0 && ((int)abs(round(L)))%2==0) ||
-                 (((int)abs(round(m)))%2==1 && ((int)abs(round(L)))%2==1) ){
-          weight *= 2./3.;
-        }
-        else{
-          weight *= 4./3.;
-        }
-      }
-      //momw has dimension+1 entries: dimension for the actual coordinate, and the last one for the weight
-      vector_type momw(dimension()+1);
-      vector_type momt = matrix_vector_mult(reciprocal_basis_, moms[g]);
-      for (std::size_t d=0; d<dimension(); ++d)
-        momw[d] = momt[d];
-      momw[dimension()] = weight;
-      //std::cout<<"appending momentum to lattice_momenta_, weight: "<<weight<<std::endl;
-      append_column_no_duplicates(lattice_momenta_, momw);
-    }
-  }
-  /*if (alps::is_master()) {
-   std::ofstream latticemomstream(lattice_momenta_file_name_.c_str());
-   for (std::size_t m=0; m<lattice_momenta_.size1(); ++m) {
-   latticemomstream << m << " ";
-   for (std::size_t d=0; d<lattice_momenta_.size2(); ++d)
-   latticemomstream << lattice_momenta_(m,d) << " ";
-   latticemomstream << std::endl;
-   }
-   latticemomstream.close();
-   }*/
-  //}
-  
-  /*lattice_momenta_.resize(n_cluster_cells(), dimension());
-   momentum_iterator itm, itm_end;
-   boost::tie(itm, itm_end) = momenta();
-   for (unsigned int m=0; itm!=itm_end; ++itm, ++m) {
-   vector_type mom=momentum(*itm);
-   for (int d=0; d<dimension(); ++d) {
-   lattice_momenta_(m,d) = mom[d];
-   }
-   }*/
-  /* if(alps::is_master()){
-   std::ofstream allmomstream("AllMomenta");
-   for (int mc=0; mc<cluster_momenta_.size1(); ++mc) {
-   for (int ml=0; ml<lattice_momenta_.size1(); ++ml) {
-   vector_type mom(dimension());
-   for (int d=0; d<dimension(); ++d)
-   mom[d] = cluster_momenta_(mc,d)+lattice_momenta_(ml,d);
-   mom = map_back_into_brillouin_zone(mom);
-   allmomstream << mc << " ";
-   for (int d=0; d<cluster_momenta_.size2(); ++d)
-   allmomstream << mom[d] << " ";
-   allmomstream << std::endl;
-   }
-   }
-   }*/
+  find_integration_weights();
+
   if (cluster_coordinates_.size1() != n_cluster_sites())
     boost::throw_exception(std::logic_error("parameter SITES does not match cluster definition"));
   if (cluster_momenta_.size1() != n_cluster_sites())
@@ -532,9 +564,11 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
     std::set<site_t> vertexset;
     for (unsigned int i=0; i<n_cluster_sites(); ++i) {
       bool bad = false;
-      cell_iterator itc, itc_end;
-      for (boost::tie(itc, itc_end) = cells(); itc!=itc_end; ++itc) {
-        vector_type c = origin(*itc);
+      //-> at this point we should separate knowledge of cells from knowledge of the alps graph structure. All we need is an origin, which is a vector type.
+      //we can achieve this by generating a vector of origins and iterating over them.
+      abstract_graph::basis_vector_iterator o_itc, o_itc_end;
+      for(boost::tie(o_itc,o_itc_end)=graph_->cell_origins(); o_itc != o_itc_end; ++o_itc){
+        vector_type c = *o_itc;
         for (unsigned int d=0; d<dimension(); ++d)
           c[d] += cluster_coordinate(i,d);
         c = matrix_vector_mult(group[g], c);
@@ -577,9 +611,9 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
     std::set<site_t> vertexset;
     for (unsigned int i=0; i<n_cluster_sites(); ++i) {
       bool bad = false;
-      cell_iterator itc, itc_end;
-      for (boost::tie(itc, itc_end) = cells(); itc!=itc_end; ++itc) {
-        offset_type o = offset(*itc);
+      abstract_graph::offset_iterator itc_offset, itc_offset_end;
+      for(boost::tie(itc_offset,itc_offset_end)=graph_->cell_offsets(); itc_offset !=itc_offset_end; itc_offset++){
+        abstract_graph::offset_type o = *itc_offset;
         //std::cout << c[0] << " "<< c[1] << " mu ";
         //c = matrix_vector_mult(reciprocal_basis, c);
         //std::cout << o[0] << " "<< o[1] << " cm ";
@@ -829,7 +863,7 @@ ClusterHelper::vector_type ClusterHelper::map_back_into_cluster(vector_type v,
 
 
 
-unsigned int ClusterHelper::cluster_momentum_approximation(vector_type v) const
+int ClusterHelper::cluster_momentum_approximation(vector_type v) const
 {
   Matrix<double>::Type T;
   switch (dimension()) {

@@ -6,7 +6,7 @@ project (DMFT)
 include_directories("$ENV{HOME}/alps_svn/")
 #include_directories("$ENV{GSL_DIR}/include")
 #SET(CMAKE_CXX_COMPILER "CC")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -O3 -DNDEBUG -mkl=sequential")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -O3 -DNDEBUG -framework accelerate")
 
 #link_directories("/opt/local/lib")
 link_directories("/home/leblanc/software/gsl-1.14/install/lib/libgsl.so")

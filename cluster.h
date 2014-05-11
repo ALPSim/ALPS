@@ -27,25 +27,48 @@
 #ifndef ALPS_CLUSTER_H
 #define ALPS_CLUSTER_H
 
-#include "alps/lattice/graph_helper.h"
 
 #include "types.h"
 #include "green_function.h"
 #include "nambu_green_function.h"
 
+#include "alps/parameter.h"
+#include "alps/numeric/vector_functions.hpp"
+#include "boost/numeric/ublas/io.hpp"
 typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 
-
-
 //forward declarations
-namespace alps{
-  template <class T> class SimpleObservableEvaluator;
-  typedef class SimpleObservableEvaluator<double> RealObsevaluator;
-}
+//namespace alps{class cell_iterator;}
+
+class abstract_graph{
+public:
+  typedef std::vector<double> vector_type;
+  typedef std::vector<int> offset_type;
+  typedef std::vector<offset_type> offset_vector_type;
+  typedef std::vector<vector_type>::const_iterator basis_vector_iterator;
+  typedef std::pair<basis_vector_iterator,basis_vector_iterator> basis_vector_iterator_pair;
+  typedef offset_vector_type::const_iterator offset_iterator;
+  typedef std::pair<offset_iterator,offset_iterator> offset_iterator_pair;
+  typedef std::vector<vector_type> momenta_vector_type;
+  typedef momenta_vector_type::const_iterator momenta_vector_iterator;
+  typedef std::pair<momenta_vector_iterator,momenta_vector_iterator> momenta_iterator_pair;
+
+
+  virtual int volume() const=0;
+  virtual int dimension() const=0;
+  virtual basis_vector_iterator_pair basis_vectors()const =0;
+  virtual basis_vector_iterator_pair reciprocal_basis_vectors()const =0;
+
+  virtual basis_vector_iterator_pair cell_origins() const =0;
+  virtual offset_iterator_pair cell_offsets() const=0;
+  virtual momenta_iterator_pair cell_momenta() const=0;
+
+};
+
 typedef boost::numeric::ublas::matrix<std::complex<double>,boost::numeric::ublas::column_major> complex_dense_matrix;
 
 
-class ClusterHelper: private alps::graph_helper<alps::graph_helper<>::graph_type>
+class ClusterHelper 
 {
 public:
   
@@ -60,25 +83,31 @@ public:
     }
   };
   
-  typedef alps::graph_helper<alps::graph_helper<>::graph_type>::vector_type vector_type;  typedef std::set<site_t> site_class_type;
+  typedef std::set<site_t> site_class_type;
   typedef std::pair<site_t, site_t> pair_type;
   typedef std::set<pair_type> pair_class_type;
   typedef std::set<site_class_type> site_class_set_type;
   typedef std::set<pair_class_type> pair_class_set_type;
   typedef std::pair<site_class_set_type::const_iterator, site_class_set_type::const_iterator> site_class_set_itpair_type;
   typedef std::pair<pair_class_set_type::const_iterator, pair_class_set_type::const_iterator> pair_class_set_itpair_type;
+
+  typedef std::vector<double> vector_type;
+  //typedef alps::graph_helper<alps::graph_helper<>::graph_type>::cell_iterator cell_iterator;
+  //typedef alps::graph_helper<alps::graph_helper<>::graph_type>::momentum_iterator momentum_iterator;
+  //typedef alps::graph_helper<alps::graph_helper<>::graph_type>::offset_type offset_type;
   
   ClusterHelper(const alps::Parameters& params);
+  ~ClusterHelper(){ delete graph_; }
   
   double cluster_coordinate(const unsigned int i, const unsigned int j) const { return cluster_coordinates_(i,j); }
   double cluster_momentum(const unsigned int i, const unsigned int j) const { return cluster_momenta_(i,j); }
   double lattice_momentum(const unsigned int i, const unsigned int j) const { return lattice_momenta_(i,j); }
   bool bipartite() const { return bipartite_; }
-  unsigned int n_cluster_sites() const { return n_cluster_sites_; }
-  unsigned int n_cluster_cells() const { return alps::graph_helper<alps::graph_helper<>::graph_type>::volume(); }
-  unsigned int n_lattice_momenta() const { return (unsigned int)lattice_momenta_.size1(); }
-  unsigned int dimension() const { return (unsigned int) alps::graph_helper<alps::graph_helper<>::graph_type>::dimension(); }
-  unsigned int cluster_momentum_approximation(vector_type k) const;
+   int n_cluster_sites() const { return n_cluster_sites_; }
+   int n_cluster_cells() const { return graph_->volume(); }
+   int n_lattice_momenta() const { return lattice_momenta_.size1(); }
+   int dimension() const { return graph_->dimension(); }
+   int cluster_momentum_approximation(vector_type k) const;
   
   template<typename T>
   T interpolate(vector_type k, const std::vector<T>& values, const bool antiferromagnet) const;
@@ -121,8 +150,10 @@ private:
   void write_pair_class_set(alps::hdf5::archive &ar, const pair_class_set_type &set, const std::string &name) const;
   void read_site_class_set(alps::hdf5::archive &ar, site_class_set_type &set, const std::string &name);
   void read_pair_class_set(alps::hdf5::archive &ar, pair_class_set_type &set, const std::string &name);
-  
-  
+  void find_non_bipartite_cluster_momenta();
+  void find_bipartite_cluster_momenta();
+  void find_integration_weights();
+
   Matrix<double>::Type cluster_coordinates_;
   Matrix<double>::Type cluster_momenta_;
   Matrix<double>::Type lattice_momenta_;
@@ -140,6 +171,9 @@ private:
   bool bipartite_;
   const double epsilon_;
   std::string lattice_momenta_file_name_;
+
+private:
+  abstract_graph *graph_;
 };
 
 
