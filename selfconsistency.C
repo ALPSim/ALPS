@@ -41,21 +41,21 @@
 #include "solver.h"
 #include "externalsolver.h"
 
-void selfconsistency_loop_single_site(const alps::Parameters& parms, ImpuritySolver& solver,
+void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver& solver,
                                 FrequencySpaceHilbertTransformer& hilbert) 
 {
-  unsigned int n_tau=boost::lexical_cast<unsigned int>(parms["N"]);
-  unsigned int n_matsubara=boost::lexical_cast<unsigned int>(parms["NMATSUBARA"]);
-  unsigned int n_orbital=parms.value_or_default("FLAVORS", 2);
-  unsigned int n_site=parms.value_or_default("SITES", 1);
+  unsigned int n_tau=parms["N"];
+  unsigned int n_matsubara=parms["NMATSUBARA"];
+  unsigned int n_orbital=parms["FLAVORS"]|2;
+  unsigned int n_site=parms["SITES"]|1;
   
-  double beta = static_cast<double>(parms["BETA"]);
-  double h = static_cast<double>(parms["H"]);
-  double converged = static_cast<double>(parms["CONVERGED"]);
-  bool paramagnet = parms.value_or_default("PARAMAGNET", false);
+  double beta = parms["BETA"];
+  double h = parms["H"];
+  double converged = parms["CONVERGED"];
+  bool paramagnet = parms["PARAMAGNET"]|false;
   //bool degenerate = parms.value_or_default("DEGENERATE", false);
-  double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
-  int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
+  double relax_rate=parms["RELAX_RATE"]|1.;
+  int max_it=parms["MAX_IT"]|1000;
   std::string basename=parms["BASENAME"];
   
   
@@ -77,7 +77,7 @@ void selfconsistency_loop_single_site(const alps::Parameters& parms, ImpuritySol
   do {
     iteration_ctr++;
     std::cout<<"starting iteration nr. "<<iteration_ctr<<" H is: "<<h<<std::endl;
-    double mu = static_cast<double>(parms["MU"]);
+    double mu = parms["MU"];
     G_old_omega = G_omega;
     G0_old_omega = G0_omega;
     G_old_tau = G_tau;
@@ -138,13 +138,13 @@ void selfconsistency_loop_single_site(const alps::Parameters& parms, ImpuritySol
     print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
   }while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);           
   // write G0 (to be read as an input Green function)
-  G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
+  G0_omega.write(std::string(parms["G0OMEGA_output"]|"G0omega_output").c_str());
 }
 
 
 
 //construct the Hilbert transformer and run a single site loop
-void perform_single_site_loop(const alps::Parameters &parms){
+void perform_single_site_loop(const alps::params &parms){
   
   FrequencySpaceHilbertTransformer *transform_ptr;
   if(parms.defined("TWODBS"))
@@ -154,7 +154,8 @@ void perform_single_site_loop(const alps::Parameters &parms){
   else
     transform_ptr=setup_Bethe_hilbert_transform(parms);
   
-  ImpuritySolver* solver_ptr=new ExternalSolver(boost::filesystem::path(parms["SOLVER"]));
+  std::string solver_path=parms["SOLVER"];
+  ImpuritySolver* solver_ptr=new ExternalSolver(boost::filesystem::path(solver_path));
   selfconsistency_loop_single_site(parms, *solver_ptr, *transform_ptr);
   delete solver_ptr;
 }

@@ -27,7 +27,7 @@
 #include "cluster.h"
 #include "clusterhelper.hxx"
 #include "alps/lattice/graph_helper.h"
-
+#include <alps/ngs/make_deprecated_parameters.hpp>
 
 class dca_graph:public abstract_graph{
 public:
@@ -38,7 +38,7 @@ public:
   typedef alps::graph_helper<alps::graph_helper<>::graph_type>::momentum_iterator momentum_iterator;
   typedef std::pair<momentum_iterator,momentum_iterator> momentum_iterator_pair;
 
-  dca_graph(const alps::Parameters& params):graph_(params){
+  dca_graph(const alps::params& params):graph_(alps::make_deprecated_parameters(params)){
     //set up cell origins and offsets
     cell_iterator itc, itc_end;
     for (boost::tie(itc, itc_end) = graph_.cells(); itc != itc_end; ++itc) {
@@ -71,9 +71,9 @@ private:
   momenta_vector_type momenta_;
 };
 
-ClusterHelper::ClusterHelper(const alps::Parameters& params) :
+ClusterHelper::ClusterHelper(const alps::params& params) :
 n_cluster_sites_(boost::lexical_cast<int>(params["SITES"])), epsilon_(1e-9),
-lattice_momenta_file_name_(params.value_or_default("LATTICE_MOMENTA_FILE", "LatticeMomenta"))
+lattice_momenta_file_name_(params["LATTICE_MOMENTA_FILE"]|"LatticeMomenta")
 {
   graph_=new dca_graph(params);
   //std::cout<<"in clusterhelper constructor."<<std::endl;
@@ -221,7 +221,7 @@ void ClusterHelper::find_integration_weights() {
   }
 }
 
-void ClusterHelper::setup_tables(const alps::Parameters &params)
+void ClusterHelper::setup_tables(const alps::params &params)
 {
   //std::cout<<"setting up tables of transformer"<<std::endl;
   //setup basis vectors
@@ -405,13 +405,14 @@ void ClusterHelper::read_pair_class_set(alps::hdf5::archive &ar, pair_class_set_
   }
 }
 
-bool ClusterHelper::write(const alps::Parameters &parms) const{
+bool ClusterHelper::write(const alps::params &parms) const{
   ///TODO: this should implement writing the clusterhelper.
   if(parms.defined("TMPNAME")){
     //write data to the 'tmpname' file
     alps::hdf5::archive ar(parms["TMPNAME"]+std::string(".in.h5"), alps::hdf5::archive::WRITE);
     if(ar.is_data("/transformer/name")) return false; //already have a transformer there.
-    ar<<alps::make_pvp("/transformer/name", std::string(parms["LATTICE"]));
+    std::string latticename=parms["LATTICE"];
+    ar<<alps::make_pvp("/transformer/name", latticename);
     ar<<alps::make_pvp("/transformer/n_cluster_sites", n_cluster_sites_);
     ar<<alps::make_pvp("/transformer/bipartite", bipartite_);
     ar<<alps::make_pvp("/transformer/epsilon", epsilon_);
@@ -434,17 +435,19 @@ bool ClusterHelper::write(const alps::Parameters &parms) const{
   }
   return false;
 }
-bool ClusterHelper::read(const alps::Parameters &parms){
+bool ClusterHelper::read(const alps::params &parms){
   ///TODO: this should implement writing the clusterhelper.
   if(parms.defined("TMPNAME")){
     {
-      std::ifstream in_file((std::string(parms["TMPNAME"])).c_str());
+      std::string tmpname=parms["TMPNAME"];
+      std::ifstream in_file(tmpname.c_str());
       if(!in_file.is_open()) return false;
     }
     alps::hdf5::archive ar(parms["TMPNAME"]+std::string(".in.h5"), alps::hdf5::archive::READ);
     if(!ar.is_data("/transformer/name")) return false;
     std::string name;     ar>>alps::make_pvp("/transformer/name", name);
-    if(name!=parms["LATTICE"]) throw std::logic_error("reading cluster transformer with name: "+name+" for cluster: "+std::string(parms["LATTICE"]));
+    std::string latticename=parms["LATTICE"];
+    if(name!=latticename) throw std::logic_error("reading cluster transformer with name: "+name+" for cluster: "+latticename);
     //write data to the 'tmpname' file
     ar>>alps::make_pvp("/transformer/n_cluster_sites", n_cluster_sites_);
     ar>>alps::make_pvp("/transformer/bipartite", bipartite_);

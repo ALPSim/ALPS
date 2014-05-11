@@ -41,7 +41,7 @@
 #include "nambu_green_function.h"
 
 class ClusterTransformer;
-namespace alps { class Parameters; }
+namespace alps { class params; }
 
 /// the base class for all impurity solvers taking a Green's function in Matsubara frequency and returning one in imaginary time and Matsubara frequency.
 class ImpuritySolver{
@@ -58,9 +58,9 @@ public:
 	typedef std::pair<nambu_matsubara_green_function_t,nambu_itime_green_function_t> nambu_result_type;
     
   virtual matsubara_result_type solve_matsubara(const matsubara_green_function_t& G0_omega,
-				  alps::Parameters parms, ClusterTransformer *c_ptr=0)=0;
+				  alps::params parms, ClusterTransformer *c_ptr=0)=0;
   virtual nambu_result_type  solve_nambu(const nambu_matsubara_green_function_t& G0_omega,
-				  alps::Parameters parms )=0;
+				  alps::params parms )=0;
   virtual ~ImpuritySolver(){}
 };
 

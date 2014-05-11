@@ -10,7 +10,7 @@ typedef boost::numeric::ublas::matrix<std::complex<double>,boost::numeric::ublas
 class CDMFTTransformer : public ClusterTransformer
 {
 public:
-  CDMFTTransformer(const alps::Parameters& params);
+  CDMFTTransformer(const alps::params& params);
   virtual ~CDMFTTransformer(){} //pro forma virtual destructor
   
   //symmetrization in real momentum space - for the normal GF
@@ -91,7 +91,7 @@ private:
 class FoursiteCDMFTTransformer : public CDMFTTransformer
 {
 public:
-  FoursiteCDMFTTransformer(const alps::Parameters& params) :
+  FoursiteCDMFTTransformer(const alps::params& params) :
   CDMFTTransformer(params),
   compute_filling_(params.defined("FILLING")),
   n_target_(compute_filling_?(double)(params["FILLING"]):-1),
@@ -99,7 +99,7 @@ public:
   epssqav_(n_cluster_sites(),0.),
   L_(params["L"]),
   t_(params["t"]),
-  tprime_(params.value_or_default("tprime",0)),
+  tprime_(params["tprime"]|0),
   tstar_(params["tstar"]),
   params_(params)
   {
@@ -157,8 +157,8 @@ public:
   nambu_itime_green_function_t transform_into_k_space(const nambu_itime_green_function_t& G) const ;
   
   //initial G0
-  virtual matsubara_green_function_t initial_G0      (const alps::Parameters& parms, shape_t shape=nondiagonal);
-  virtual nambu_matsubara_green_function_t initial_G0_nambu(const alps::Parameters& parms);
+  virtual matsubara_green_function_t initial_G0      (const alps::params& parms, shape_t shape=nondiagonal);
+  virtual nambu_matsubara_green_function_t initial_G0_nambu(const alps::params& parms);
   std::vector<double> epsav() const;
   std::vector<double> epssqav() const;
 private:
@@ -199,7 +199,7 @@ private:
   const double tprime_;
   const double tstar_;
 
-  const alps::Parameters params_;
+  const alps::params params_;
 };
 
 #endif /*ALPS_CLUSTER_H*/

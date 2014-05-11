@@ -400,11 +400,11 @@ void ClusterAntiFerroGFourierTransformer::append_tail(matsubara_green_function_t
 
 
 
-void FourierTransformer::generate_transformer(const alps::Parameters &parms,
+void FourierTransformer::generate_transformer(const alps::params &parms,
                                               boost::shared_ptr<FourierTransformer> &fourier_ptr)
 {
-  int n_flavors = parms.value_or_default("FLAVORS", 2);
-  int n_site = parms.value_or_default("SITES", 1);
+  int n_flavors = parms["FLAVORS"]|2;
+  int n_site = parms["SITES"]|1;
   if (parms.defined("GENERAL_FOURIER_TRANSFORMER")) {
     std::cout << "using general fourier transformer" << "\n";
     std::vector<double> eps(n_flavors);
@@ -417,14 +417,15 @@ void FourierTransformer::generate_transformer(const alps::Parameters &parms,
                                                      n_flavors, eps, epssq));
   }
   else if (parms.defined("CLUSTER_LOOP")){
-    if(std::string(parms["CLUSTER_LOOP"])==std::string("DCA")){
+    std::string clusterloop=parms["CLUSTER_LOOP"];
+    if(clusterloop==std::string("DCA")){
       ClusterTransformer* clusterhandler=ClusterTransformer::generate_transformer(parms);
       std::vector<std::vector<double> > eps_f(n_flavors, clusterhandler->epsav());
       std::vector<std::vector<double> > epssq_f(n_flavors, clusterhandler->epssqav());
       fourier_ptr.reset(new ClusterG0FourierTransformer((double)parms["BETA"], (double)parms["MU"], (double)parms["H"],
                                                         n_flavors, n_site, eps_f, epssq_f));
       delete clusterhandler;
-    }else if(std::string(parms["CLUSTER_LOOP"])==std::string("CDMFT")){
+    }else if(clusterloop==std::string("CDMFT")){
       std::cout<<"using CDMFT cluster Fourier transformer"<<std::endl;
       std::cout<<"warning: G0 moments are not implemented for CDMFT"<<std::endl;
       std::vector<std::vector<double> > eps_f(n_flavors, std::vector<double>(n_site*n_site,0.00));
@@ -432,7 +433,7 @@ void FourierTransformer::generate_transformer(const alps::Parameters &parms,
       fourier_ptr.reset(new ClusterG0FourierTransformer((double)parms["BETA"], (double)parms["MU"], (double)parms["H"],
                                                         n_flavors, n_site, eps_f, epssq_f));
     }
-    else throw std::logic_error("please figure out how to do fourier transforms in your cluster framwork if it is not DCA (2)");
+    else throw std::logic_error("please figure out how to do fourier transforms in your cluster framework if it is not DCA: "+clusterloop);
   }
   else {
     std::cout << "using Bethe lattice fourier transform" << "\n";
@@ -451,12 +452,12 @@ void FourierTransformer::generate_transformer(const alps::Parameters &parms,
 
 
 
-void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
+void FourierTransformer::generate_transformer_U(const alps::params &parms,
                                                 boost::shared_ptr<FourierTransformer> &fourier_ptr,
                                                 const std::vector<double> &densities)
 {
-  int n_flavors = parms.value_or_default("FLAVORS", 2);
-  int n_site = parms.value_or_default("SITES", 1);
+  int n_flavors = parms["FLAVORS"]|2;
+  int n_site = parms["SITES"]|1;
   double U = parms["U"];
   if (parms.defined("GENERAL_FOURIER_TRANSFORMER")) {
     std::cout << "using general fourier transformer" << "\n";
@@ -472,14 +473,15 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
                                               n_flavors, 1, densities, eps, epssq));
   }
   else if (parms.defined("CLUSTER_LOOP")){
-    if(std::string(parms["CLUSTER_LOOP"])==std::string("DCA")){
+    std::string clusterloop=parms["CLUSTER_LOOP"];
+    if(clusterloop==std::string("DCA")){
       ClusterTransformer* clusterhandler=ClusterTransformer::generate_transformer(parms);
       std::vector<std::vector<double> > eps_f(n_flavors, clusterhandler->epsav());
       std::vector<std::vector<double> > epssq_f(n_flavors, clusterhandler->epssqav());
       fourier_ptr.reset(new GFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., U,
                                                 n_flavors, n_site, densities, eps_f, epssq_f));
       delete clusterhandler;
-    }else if(std::string(parms["CLUSTER_LOOP"])==std::string("CDMFT")){
+    }else if(clusterloop==std::string("CDMFT")){
       std::cout<<"using CDMFT cluster Fourier transformer"<<std::endl;
       std::cout<<"warning: G0 moments are not implemented for CDMFT"<<std::endl;
       std::vector<std::vector<double> > eps_f(n_flavors, std::vector<double>(n_site*n_site,0));
@@ -487,7 +489,7 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
       fourier_ptr.reset(new ClusterG0FourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2, U,
                                                         n_flavors, n_site, eps_f, epssq_f));
     }
-    else throw std::logic_error("please figure out how to do fourier transforms in your cluster framwork if it is not DCA (3)");
+    else throw std::logic_error("please figure out how to do fourier transforms in your cluster framwork if it is not DCA: "+clusterloop);
   }
   else {
     std::cout << "using Bethe lattice fourier transform" << "\n";
@@ -507,12 +509,12 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
 
 
 
-void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
+void FourierTransformer::generate_transformer_U(const alps::params &parms,
                                                 boost::shared_ptr<FourierTransformer> &fourier_ptr,
                                                 const std::vector<double> &densities, const std::vector<double> &magnetization)
 {
-  int n_flavors = parms.value_or_default("FLAVORS", 2);
-  int n_site = parms.value_or_default("SITES", 1);
+  int n_flavors = parms["FLAVORS"]|2;
+  int n_site = parms["SITES"]|1;
   double U = parms["U"];
   if (parms.defined("GENERAL_FOURIER_TRANSFORMER")) {
     std::cout << "using general fourier transformer" << "\n";
@@ -526,7 +528,8 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
                                                              n_flavors, densities, magnetization,  eps, epssq));
   }
   else if (parms.defined("CLUSTER_LOOP")){
-    if(std::string(parms["CLUSTER_LOOP"])==std::string("DCA")){
+    std::string clusterloop=parms["CLUSTER_LOOP"];
+    if(clusterloop==std::string("DCA")){
       std::cout << "using cluster fourier transformer" << "\n";
       ClusterTransformer* clusterhandler=ClusterTransformer::generate_transformer(parms);
       std::vector<std::vector<double> > eps_f(n_flavors, clusterhandler->epsav());
@@ -534,7 +537,7 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
       fourier_ptr.reset(new ClusterAntiFerroGFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., (double)parms["H"], U,
                                                                 n_flavors, n_site, densities, magnetization, eps_f, epssq_f));
       delete clusterhandler;
-    }else if(std::string(parms["CLUSTER_LOOP"])==std::string("CDMFT")){
+    }else if(clusterloop==std::string("CDMFT")){
       std::cout<<"using CDMFT cluster Fourier transformer"<<std::endl;
       std::cout<<"warning: G0 moments are not implemented for CDMFT"<<std::endl;
       std::vector<std::vector<double> > eps_f(n_flavors, std::vector<double>(n_site*n_site,0));

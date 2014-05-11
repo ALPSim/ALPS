@@ -31,6 +31,7 @@
 #include "types.h" 
 #include "green_function.h" 
 #include "nambu_green_function.h" 
+#include "alps/ngs/params.hpp"
 
 
 inline std::complex<double> f_omega(std::complex<double> iw, double c1, double c2, double c3) {
@@ -98,12 +99,12 @@ public:
   virtual void append_tail(matsubara_green_function_t& G_omega, const matsubara_green_function_t& G0_omega,
                            const unsigned int nfreq_measured) const;
   
-  static void generate_transformer(const alps::Parameters &parms,
+  static void generate_transformer(const alps::params &parms,
                                    boost::shared_ptr<FourierTransformer> &fourier_ptr);
-  static void generate_transformer_U(const alps::Parameters &parms,
+  static void generate_transformer_U(const alps::params &parms,
                                      boost::shared_ptr<FourierTransformer> &fourier_ptr,
                                      const std::vector<double> &densities);
-  static void generate_transformer_U(const alps::Parameters &parms,
+  static void generate_transformer_U(const alps::params &parms,
                                      boost::shared_ptr<FourierTransformer> &fourier_ptr,
                                      const std::vector<double> &densities,
                                      const std::vector<double> &magnetization);

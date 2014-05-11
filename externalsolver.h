@@ -65,11 +65,11 @@ public:
 
 	ImpuritySolver::matsubara_result_type solve_matsubara(
               const matsubara_green_function_t& G0_omega
-            , alps::Parameters parms, ClusterTransformer *c_ptr=0);
+            , alps::params parms, ClusterTransformer *c_ptr=0);
     
 	ImpuritySolver::nambu_result_type solve_nambu(
               const nambu_matsubara_green_function_t& G0_omega
-            , alps::Parameters parms );
+            , alps::params parms );
     virtual ~ExternalSolver(){}
 private:
     /// call the executable

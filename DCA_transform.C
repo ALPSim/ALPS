@@ -31,6 +31,8 @@
 #include "fouriertransform.h"
 #include "CDMFT_transform.h"
 #include "alps/numeric/vector_functions.hpp"
+#include "alps/hdf5/vector.hpp"
+#include "alps/hdf5/ublas/matrix.hpp"
 
 bool adjust_chemical_potential(const double &density, double &mu, bool &damping_mu,
                                bool &computing_mu, int &mu_it, double &n_old, double &n_target,
@@ -38,33 +40,35 @@ bool adjust_chemical_potential(const double &density, double &mu, bool &damping_
 
 
 
-matsubara_green_function_t ClusterTransformer::initial_G0(const alps::Parameters& parms, shape_t shape) {
+matsubara_green_function_t ClusterTransformer::initial_G0(const alps::params& parms, shape_t shape) {
   std::cout<<"reading initial G0_omega from: "<<parms["G0OMEGA_INPUT"]<<std::endl;
   int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
   int n_orbital=boost::lexical_cast<int>(parms["FLAVORS"]);
   int n_site=boost::lexical_cast<int>(parms["SITES"]);
   matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital, shape);
-  G0_omega.read(parms["G0OMEGA_INPUT"].c_str());
+  std::string g0path=parms["G0OMEGA_INPUT"];
+  G0_omega.read(g0path.c_str());
   return G0_omega;
 }
 
-matsubara_green_function_t DCATransformer::initial_G0(const alps::Parameters& parms, shape_t shape) {
+matsubara_green_function_t DCATransformer::initial_G0(const alps::params& parms, shape_t shape) {
   return ClusterTransformer::initial_G0(parms, shape);
 }
 
 //Don't forget to delete the transformer afterwards!
-ClusterTransformer* ClusterTransformer::generate_transformer(const alps::Parameters& parms)
+ClusterTransformer* ClusterTransformer::generate_transformer(const alps::params& parms)
 {
   ClusterTransformer* trans_ptr;
-  bool antiferromagnetic = parms.value_or_default("ANTIFERROMAGNET", false);
-  if(parms["CLUSTER_LOOP"]=="DCA"){
+  bool antiferromagnetic = parms["ANTIFERROMAGNET"]|false;
+  std::string cluster_loop=parms["CLUSTER_LOOP"];
+  if(cluster_loop=="DCA"){
     if (antiferromagnetic) {
       trans_ptr=new AntiFerroDCATransformer(parms);
     }
     else {
       trans_ptr=new SimpleDCATransformer(parms);
     }
-  }else if(parms["CLUSTER_LOOP"]=="CDMFT"){
+  }else if(cluster_loop=="CDMFT"){
     if (antiferromagnetic) {
       throw std::logic_error("Anti Ferro CDMFT is not implemented.");
     }
@@ -78,13 +82,13 @@ ClusterTransformer* ClusterTransformer::generate_transformer(const alps::Paramet
 }
 
 
-DCATransformer::DCATransformer(const alps::Parameters& params)
+DCATransformer::DCATransformer(const alps::params& params)
 : ClusterTransformer(params),
 t_(params.defined("W") ? 1. : static_cast<double>(params["t"])),
-t2_(params.value_or_default("t'", params.value_or_default("t2", 0.))),
-t3_(params.value_or_default("t3", 0.)),
-t4_(params.value_or_default("t4", 0.)),
-bandwidth_(params.value_or_default("W", 0.)),
+t2_(params["t'"]|params["t2"]|0.),
+t3_(params["t3"]|0.),
+t4_(params["t4"]|0.),
+bandwidth_(params["W"]|0.),
 bandwidth_scale_factor_(1.),
 half_filling_(0.),
 epsav_(n_cluster_sites()),
@@ -132,7 +136,7 @@ params_(params)
     else
       hf = (energies[energies.size()/2-1] + energies[energies.size()/2])/2. ;
   }
-  if (params.value_or_default("SHIFT_TO_HALF_FILLING", false)) {
+  if (params["SHIFT_TO_HALF_FILLING"]|false) {
     half_filling_ = hf;
     std::cout << "half-filling " << hf << " shifted to zero\n";
   }
@@ -237,7 +241,7 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
   bool computing_mu=true;
   int mu_it=1;
   
-  int current_it = static_cast<int>( (*const_cast<alps::Parameters*>(&params_)).value_or_default("CURRENT_IT",0));
+  int current_it = static_cast<int>( (*const_cast<alps::params*>(&params_))["CURRENT_IT"]|0);
   
   
   double n_old;
@@ -246,7 +250,7 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
   double mu_orig=mu;
   std::vector<std::vector<double> >epsilon_kckl(n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
   std::vector<double> weight_kl(n_lattice_momenta());
-  if(params_.value_or_default("PHASE",false)){
+  if(params_["PHASE"]|false){
     vector_type phi=phase_vector();
     for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
       for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
@@ -318,12 +322,12 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
   }
 
 		current_it =current_it+1;
-	(*const_cast<alps::Parameters*>(&params_))["CURRENT_IT"]=current_it;
-	(*const_cast<alps::Parameters*>(&params_))["MU"]=mu;
+	(*const_cast<alps::params*>(&params_))["CURRENT_IT"]=current_it;
+	(*const_cast<alps::params*>(&params_))["MU"]=mu;
 	
 	std::cout<<"Updating mu in basename file with value "<< mu <<std::endl;
-		
-	 std::ofstream os(static_cast<std::string>(params_["BASENAME"]).c_str());
+		std::string basenamepath=params_["BASENAME"];
+	 std::ofstream os(basenamepath.c_str());
      	 os<<params_;
       	 os.close();
 
@@ -332,10 +336,11 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
 
 
 
-matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Parameters& parms, shape_t shape)
+matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::params& parms, shape_t shape)
 {
   if (parms.defined("G0OMEGA_INPUT")){
-    std::ifstream in_file(parms["G0OMEGA_INPUT"].c_str());
+    std::string g0path=parms["G0OMEGA_INPUT"];
+    std::ifstream in_file(g0path.c_str());
     if(in_file.good()){
       return DCATransformer::initial_G0(parms, shape);
     }
@@ -346,14 +351,14 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
   std::cout<<"calculating initial G0_omega"<<std::endl;
   unsigned int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
   unsigned int n_tau=boost::lexical_cast<int>(parms["N"]);
-  unsigned int n_flavor=parms.value_or_default("FLAVORS", 2);
+  unsigned int n_flavor=parms["FLAVORS"]|2;
   double beta = static_cast<double>(parms["BETA"]);
   double mu = static_cast<double>(parms["MU"]);
   //double h = static_cast<double>(parms["H"]);
   //bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
   matsubara_green_function_t G0_omega_new(n_matsubara,n_cluster_sites(),n_flavor, diagonal);
   G0_omega_new.clear();
-  if (parms.value_or_default("INSULATING", false)) {
+  if (parms["INSULATING"]|false) {
     std::cout <<"calculating insulating G0_omega";
     for (frequency_t freq=0; freq<n_matsubara; ++freq) {
       const std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
@@ -365,7 +370,7 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
       }
     }
   }
-  else if (parms.value_or_default("ISOLATED", false)) {
+  else if (parms["ISOLATED"]|false) {
     std::cout << "calculating G0_omega for isolated cluster"<<std::endl;
     for (frequency_t freq=0; freq<n_matsubara; ++freq) {
       for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
@@ -662,7 +667,7 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
     }while(std::abs(density_upper-density_lower)>tol);
     
     std::cout<<"bisection converged for mu: "<<mu<<" "<<density_lower<<" "<<density_upper<<" "<<density_now<<std::endl;
-	(*const_cast<alps::Parameters*>(&params_))["MU"]=mu;
+	(*const_cast<alps::params*>(&params_))["MU"]=mu;
      //write the chemical potential back to the parameter file
     /// \todo fix this if needed
   }else{
@@ -691,7 +696,7 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
   return G0_omega_new;
 }
 
-nambu_matsubara_green_function_t ClusterTransformer::initial_G0_nambu(const alps::Parameters& parms) {
+nambu_matsubara_green_function_t ClusterTransformer::initial_G0_nambu(const alps::params& parms) {
   std::cout<<"reading initial (NAMBU) G0_omega from: "<<parms["G0OMEGA_INPUT"]<<std::endl;
   int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
   int n_orbital=boost::lexical_cast<int>(parms["FLAVORS"]);
@@ -699,14 +704,16 @@ nambu_matsubara_green_function_t ClusterTransformer::initial_G0_nambu(const alps
   double beta =boost::lexical_cast<double>(parms["BETA"]);
   if(n_orbital!=2) throw std::invalid_argument("dunno how to handle nambu in >2 orbitals!");
   nambu_matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital, diagonal);
-  G0_omega.read(parms["G0OMEGA_INPUT"].c_str());
+  std::string g0path=parms["G0OMEGA_INPUT"];
+  G0_omega.read(g0path.c_str());
   return G0_omega;
 }
 
-nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const alps::Parameters& parms)
+nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const alps::params& parms)
 {
   if (parms.defined("G0OMEGA_INPUT")){
-    std::ifstream in_file(parms["G0OMEGA_INPUT"].c_str());
+    std::string g0path=parms["G0OMEGA_INPUT"];
+    std::ifstream in_file(g0path.c_str());
     if(in_file.good()){
       return ClusterTransformer::initial_G0_nambu(parms);
     }
@@ -717,7 +724,7 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
   std::cout<<"calculating initial G0_omega"<<std::endl;
   unsigned int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
   unsigned int n_tau=boost::lexical_cast<int>(parms["N"]);
-  unsigned int n_flavor=parms.value_or_default("FLAVORS", 2);
+  unsigned int n_flavor=parms["FLAVORS"]|2;
   double beta = static_cast<double>(parms["BETA"]);
   double mu = static_cast<double>(parms["MU"]);
   
@@ -742,7 +749,7 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
         }
       }
     }
-  }else if (parms.value_or_default("ISOLATED", false)){
+  }else if (parms["ISOLATED"]|false){
     for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
       for (frequency_t freq=0; freq<n_matsubara; ++freq) {
         G0_omega_new(freq, kc, kc, 0,0) = 0.;

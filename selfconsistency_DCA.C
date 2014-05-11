@@ -23,35 +23,37 @@
 #include "SimpleDCA_transformer.hxx"
 #include "AFMDCA_transformer.hxx"
 
-void perform_cluster_loop(const alps::Parameters &parms){
-  if (parms["CLUSTER_LOOP"]=="DCA")
+void perform_cluster_loop(const alps::params &parms){
+  std::string cluster_loop=parms["CLUSTER_LOOP"];
+  std::cout<<"cluster loop is: "<<cluster_loop<<std::endl;
+  if (cluster_loop=="DCA")
     perform_DCA_loop(parms);
-  else if (parms["CLUSTER_LOOP"]=="CDMFT")
+  else if (cluster_loop=="CDMFT")
     perform_CDMFT_loop(parms);
   else {
-    std::cout<<parms["CLUSTER_LOOP"]<<std::endl;
+    std::cout<<cluster_loop<<std::endl;
     boost::throw_exception(std::logic_error("there is no such cluster method!"));
   }
 }
 
 
-void selfconsistency_loop_DCA(const alps::Parameters& parms, ImpuritySolver& solver,
+void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
                               DCATransformer& clustertrans)
 {
-  unsigned int n_tau=boost::lexical_cast<unsigned int>(parms["N"]);
-  unsigned int n_matsubara=boost::lexical_cast<unsigned int>(parms["NMATSUBARA"]);
-  unsigned int n_orbital=parms.value_or_default("FLAVORS", 2);
-  unsigned int n_site=parms.value_or_default("SITES", 1);
+  unsigned int n_tau=parms["N"];
+  unsigned int n_matsubara=parms["NMATSUBARA"];
+  unsigned int n_orbital=parms["FLAVORS"]|2;
+  unsigned int n_site=parms["SITES"]|1;
   
-  double beta = static_cast<double>(parms["BETA"]);
-  double h = static_cast<double>(parms["H"]);
-  double converged = static_cast<double>(parms["CONVERGED"]);
-  bool paramagnet = parms.value_or_default("PARAMAGNET", false);
-  double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
-  int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
+  double beta = parms["BETA"];
+  double h = parms["H"];
+  double converged = parms["CONVERGED"];
+  bool paramagnet = parms["PARAMAGNET"]|false;
+  double relax_rate=parms["RELAX_RATE"]|1.;
+  int max_it=parms["MAX_IT"]|1000;
   std::string basename=parms["BASENAME"];
-  bool readwrite_real_space=parms.value_or_default("READWRITE_REAL_SPACE", false);
-  bool phase=parms.value_or_default("PHASE", false);
+  bool readwrite_real_space=parms["READWRITE_REAL_SPACE"]|false;
+  bool phase=parms["PHASE"]|false;
   shape_t gf_shape=paramagnet?diagonal:blockdiagonal;
   
   //calculate initial G0
@@ -73,8 +75,8 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, ImpuritySolver& sol
   do {
     iteration_ctr++;
     std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
-    (*const_cast<alps::Parameters*>(&parms))["CURRENT_IT"] = iteration_ctr;
-    mu = static_cast<double>(parms["MU"]);
+    (*const_cast<alps::params*>(&parms))["CURRENT_IT"] = iteration_ctr;
+    mu = parms["MU"];
     G_old_omega = G_omega;
     G0_old_omega = G0_omega;
     G_old_tau = G_tau;
@@ -97,7 +99,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, ImpuritySolver& sol
     G_omega = clustertrans.symmetrize(G_omega, paramagnet);
     if(paramagnet && !phase ) G_omega = clustertrans.symmetrize_k_space(G_omega);
     G0_omega = clustertrans(G_omega, G0_omega, mu, h, beta);
-    G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
+    G0_omega.write(std::string(parms["G0OMEGA_output"]|"G0omega_output").c_str());
     std::cout<<"comparing old and new result."<<std::endl<<std::flush;
     max_diff=0;
     if(iteration_ctr>1){
@@ -128,8 +130,9 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, ImpuritySolver& sol
     std::cout<<"...continuing."<<std::endl;
 
 /// TODO, rewriting to parms so that mu_orig=previous mu iteration, allows for damping in filled cases.
-	std::ofstream os(static_cast<std::string>(parms["BASENAME"]).c_str());
-       (*const_cast<alps::Parameters*>(&parms))["MU"]=mu;
+    std::string basename_str=parms["BASENAME"];
+	std::ofstream os(basename_str.c_str());
+       (*const_cast<alps::params*>(&parms))["MU"]=mu;
 
         os<<parms;
         os.close();
@@ -137,24 +140,25 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, ImpuritySolver& sol
 
   } while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);
   // write G0
-  G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
+  std::string G0_output_string=parms["G0OMEGA_output"]|"G0omega_output";
+  G0_omega.write(G0_output_string.c_str());
 }
 
-void selfconsistency_loop_DCA_Nambu(const alps::Parameters& parms, ImpuritySolver& solver,
+void selfconsistency_loop_DCA_Nambu(const alps::params& parms, ImpuritySolver& solver,
                               DCATransformer& clustertrans)
 {
-  unsigned int n_tau=boost::lexical_cast<unsigned int>(parms["N"]);
-  unsigned int n_matsubara=boost::lexical_cast<unsigned int>(parms["NMATSUBARA"]);
-  unsigned int n_site=parms.value_or_default("SITES", 1);
+  unsigned int n_tau=parms["N"];
+  unsigned int n_matsubara=parms["NMATSUBARA"];
+  unsigned int n_site=parms["SITES"]|1;
   
-  double beta = static_cast<double>(parms["BETA"]);
-  double h    = static_cast<double>(parms["H"]);
-  double eta1 = static_cast<double>(parms["ETA1"]);
-  double eta2 = static_cast<double>(parms["ETA2"]);
-  double converged = static_cast<double>(parms["CONVERGED"]);
-  bool paramagnet = parms.value_or_default("PARAMAGNET", true);
+  double beta = parms["BETA"];
+  double h    = parms["H"];
+  double eta1 = parms["ETA1"];
+  double eta2 = parms["ETA2"];
+  double converged = parms["CONVERGED"];
+  bool paramagnet = parms["PARAMAGNET"]|true;
   if(!paramagnet) throw std::logic_error("please implement mixed AFM & Nambu!");
-  int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
+  int max_it=parms["MAX_IT"]|1000;
   std::string basename=parms["BASENAME"];
   
   
@@ -176,7 +180,7 @@ void selfconsistency_loop_DCA_Nambu(const alps::Parameters& parms, ImpuritySolve
   do {
     iteration_ctr++;
     std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
-    double mu = static_cast<double>(parms["MU"]);
+    double mu = parms["MU"];
     G_old_omega = G_omega;
     G0_old_omega = G0_omega;
     G_old_tau = G_tau;
@@ -195,7 +199,7 @@ void selfconsistency_loop_DCA_Nambu(const alps::Parameters& parms, ImpuritySolve
     G0_omega = clustertrans(G_omega, G0_omega, selfenergy, mu, h, eta1, eta2, beta, false);
     
     
-    G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
+    G0_omega.write(std::string(parms["G0OMEGA_output"]|"G0omega_output").c_str());
     std::cout<<"comparing old and new result."<<std::endl<<std::flush;
     max_diff=0;
     if(iteration_ctr>1){
@@ -227,14 +231,15 @@ void selfconsistency_loop_DCA_Nambu(const alps::Parameters& parms, ImpuritySolve
 
   } while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);
   // write G0
-  G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
+  G0_omega.write(std::string(parms["G0OMEGA_output"]|"G0omega_output").c_str());
 }
 
-void perform_DCA_loop(const alps::Parameters &parms){
+void perform_DCA_loop(const alps::params &parms){
   std::cout<<"running a DCA calculation"<<std::endl;
   ClusterTransformer *transform_ptr=ClusterTransformer::generate_transformer(parms);
-  ImpuritySolver* solver_ptr=new ExternalSolver(boost::filesystem::path(parms["SOLVER"]));
-  if(!parms.value_or_default("NAMBU",false)){
+  std::string solver_path=parms["SOLVER"];
+  ImpuritySolver* solver_ptr=new ExternalSolver(boost::filesystem::path(solver_path));
+  if(!(parms["NAMBU"]|false)){
     selfconsistency_loop_DCA(parms, *solver_ptr, *(DCATransformer*)transform_ptr);
   }else{
     selfconsistency_loop_DCA_Nambu(parms, *solver_ptr, *(DCATransformer*)transform_ptr);

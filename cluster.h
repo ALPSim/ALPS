@@ -32,12 +32,10 @@
 #include "green_function.h"
 #include "nambu_green_function.h"
 
-#include "alps/parameter.h"
+#include "alps/ngs/params.hpp"
+#include "boost/numeric/ublas/matrix.hpp"
 
-
-//forward declarations
-//namespace alps{class cell_iterator;}
-
+//this class is here for the sole purpose of hiding the implementation, which uses the ALPS lattice class.
 class abstract_graph{
 public:
   typedef std::vector<double> vector_type;
@@ -51,7 +49,6 @@ public:
   typedef momenta_vector_type::const_iterator momenta_vector_iterator;
   typedef std::pair<momenta_vector_iterator,momenta_vector_iterator> momenta_iterator_pair;
 
-
   abstract_graph(){}
   virtual ~abstract_graph(){}
   virtual int volume() const=0;
@@ -62,7 +59,6 @@ public:
   virtual basis_vector_iterator_pair cell_origins() const =0;
   virtual offset_iterator_pair cell_offsets() const=0;
   virtual momenta_iterator_pair cell_momenta() const=0;
-
 };
 
 
@@ -91,11 +87,8 @@ public:
   typedef std::pair<pair_class_set_type::const_iterator, pair_class_set_type::const_iterator> pair_class_set_itpair_type;
 
   typedef std::vector<double> vector_type;
-  //typedef alps::graph_helper<alps::graph_helper<>::graph_type>::cell_iterator cell_iterator;
-  //typedef alps::graph_helper<alps::graph_helper<>::graph_type>::momentum_iterator momentum_iterator;
-  //typedef alps::graph_helper<alps::graph_helper<>::graph_type>::offset_type offset_type;
   
-  ClusterHelper(const alps::Parameters& params);
+  ClusterHelper(const alps::params& params);
   virtual ~ClusterHelper(){ delete graph_; }
   
   double cluster_coordinate(const unsigned int i, const unsigned int j) const { return cluster_coordinates_(i,j); }
@@ -125,7 +118,7 @@ public:
   
   virtual void write_hdf5(alps::hdf5::archive &ar, const std::string &p) const;
 private:
-  void setup_tables(const alps::Parameters& params);
+  void setup_tables(const alps::params& params);
   void symmetry_analysis(const Matrix<double>::Type& basis,
                          const Matrix<double>::Type& basis_inv);
   void ladder_symmetry_analysis();
@@ -143,8 +136,8 @@ private:
   vector_type round(vector_type v) const;
   bool almost_equal(const double d1, const double d2) const { return fabs(d1-d2)<epsilon_; }
   vector_type matrix_vector_mult(const Matrix<double>::Type& M, const vector_type& v) const;
-  bool write(const alps::Parameters &parms) const;
-  bool read(const alps::Parameters &parms);
+  bool write(const alps::params &parms) const;
+  bool read(const alps::params &parms);
   void write_site_class_set(alps::hdf5::archive &ar, const site_class_set_type &set, const std::string &name) const;
   void write_pair_class_set(alps::hdf5::archive &ar, const pair_class_set_type &set, const std::string &name) const;
   void read_site_class_set(alps::hdf5::archive &ar, site_class_set_type &set, const std::string &name);
@@ -180,11 +173,11 @@ private:
 class ClusterTransformer : protected ClusterHelper
 {
 public:
-  ClusterTransformer(const alps::Parameters& params) :
+  ClusterTransformer(const alps::params& params) :
   ClusterHelper(params) {
     //std::cerr<<"done building cluster transformer"<<std::endl;
   }
-  static ClusterTransformer* generate_transformer(const alps::Parameters& parms);
+  static ClusterTransformer* generate_transformer(const alps::params& parms);
   virtual ~ClusterTransformer() {} //pro forma virtual destructor.
   
   ///perform a Hilber transform: given a G and a G0, produce a G0 for the next iteration.
@@ -204,12 +197,12 @@ public:
   virtual       matsubara_green_function_t symmetrize(const       matsubara_green_function_t& G, const bool paramagnet) const=0;
   virtual nambu_matsubara_green_function_t symmetrize(const nambu_matsubara_green_function_t& G, const bool paramagnet) const{ throw std::logic_error("not implemented");};
   ///compute an initial G0.
-  virtual       matsubara_green_function_t initial_G0      (const alps::Parameters& parms, shape_t shape=nondiagonal);
+  virtual       matsubara_green_function_t initial_G0      (const alps::params& parms, shape_t shape=nondiagonal);
   
-  virtual nambu_matsubara_green_function_t initial_G0_nambu(const alps::Parameters& parms);
+  virtual nambu_matsubara_green_function_t initial_G0_nambu(const alps::params& parms);
   virtual std::vector<double> epsav() const=0;
   virtual std::vector<double> epssqav() const=0;
-  nambu_matsubara_green_function_t initial_G_nambu(const alps::Parameters& parms);
+  nambu_matsubara_green_function_t initial_G_nambu(const alps::params& parms);
   
   template<typename T>
   T interpolate(vector_type k, const std::vector<T>& values, const bool antiferromagnet) const {
@@ -229,7 +222,7 @@ public:
 class DCATransformer : public ClusterTransformer
 {
 public:
-  DCATransformer(const alps::Parameters& params);
+  DCATransformer(const alps::params& params);
   virtual ~DCATransformer(){} //pro forma virtual destructor
   
   //symmetrization in real momentum space - for the normal GF
@@ -258,7 +251,7 @@ public:
   virtual nambu_itime_green_function_t transform_into_real_space(const nambu_itime_green_function_t& G) const=0;
   virtual nambu_itime_green_function_t transform_into_k_space(const nambu_itime_green_function_t& G) const=0;
   
-  virtual matsubara_green_function_t initial_G0      (const alps::Parameters& parms, shape_t shape=diagonal);
+  virtual matsubara_green_function_t initial_G0      (const alps::params& parms, shape_t shape=diagonal);
   //Hilbert transform operator
   virtual matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega,
                                                 const matsubara_green_function_t &G0_omega,
@@ -343,9 +336,6 @@ public:
     }
     return phi;
   }
-
-  
-  
 private:
   template<typename T>
   green_function<T> symmetrize_helper(const green_function<T>& G,
@@ -363,7 +353,7 @@ private:
   std::vector<double> epssqav_;
   std::vector<double> dispersion_moments_;
 protected:
-  const alps::Parameters params_;
+  const alps::params params_;
 };
 
 
@@ -371,7 +361,7 @@ protected:
 class SimpleDCATransformer : public DCATransformer
 {
 public:
-  SimpleDCATransformer(const alps::Parameters& params) :
+  SimpleDCATransformer(const alps::params& params) :
   DCATransformer(params),
   compute_filling_(params.defined("FILLING")),
   n_target_(compute_filling_?(double)(params["FILLING"]):-1)
@@ -442,8 +432,8 @@ public:
   { return transform_coordinates<double, Forward>(G); }
   
   //initial G0
-  virtual matsubara_green_function_t initial_G0      (const alps::Parameters& parms, shape_t shape=diagonal);
-  virtual nambu_matsubara_green_function_t initial_G0_nambu(const alps::Parameters& parms);
+  virtual matsubara_green_function_t initial_G0      (const alps::params& parms, shape_t shape=diagonal);
+  virtual nambu_matsubara_green_function_t initial_G0_nambu(const alps::params& parms);
   void construct_green_function(double mu, double beta, double eta1, double eta2, const std::vector<std::vector<double> > &epsilon_kckl, const std::vector<std::vector<double> > &dwave_prefactor_kckl, const std::vector<double> &weight_kl, const nambu_matsubara_green_function_t &selfenergy,nambu_matsubara_green_function_t &G_omega_lattice_kav);
   double compute_density(const nambu_matsubara_green_function_t &G_omega_lattice_kav, double beta);
   
@@ -482,7 +472,7 @@ private:
 class AntiFerroDCATransformer : public DCATransformer
 {
 public:
-  AntiFerroDCATransformer(const alps::Parameters& params) : DCATransformer(params) {}
+  AntiFerroDCATransformer(const alps::params& params) : DCATransformer(params) {}
   
   //self-consistency transform operator
   matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega,
@@ -531,7 +521,7 @@ public:
   //{ return transform_coordinates<double, Forward>(G); }
   
   
-  virtual matsubara_green_function_t initial_G0(const alps::Parameters& parms, shape_t shape=blockdiagonal);
+  virtual matsubara_green_function_t initial_G0(const alps::params& parms, shape_t shape=blockdiagonal);
   static matsubara_green_function_t green_function_inverse(const matsubara_green_function_t& G);
   static matsubara_green_function_t green_function_multiply(const matsubara_green_function_t& G1, const matsubara_green_function_t& G2);
   static matsubara_green_function_t green_function_add(const matsubara_green_function_t& G1, const matsubara_green_function_t& G2);
@@ -552,59 +542,5 @@ private:
   struct Backward;
   
 };
-
-
-
-
-//implementation (see also clusterhelper.C, clustertransformer.C)
-
-
-
-
-
-
-
-
-
-
-
-//////////////AntiFerro DCA////////////////////
-
-
-
-
-
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////FUNCTIONS FOR NAMBU SPACE//////////////////////////////////////////////////////////////////////////////////
-
-
-/*  unsigned int nflavor=G.nflavor();
- unsigned int nsite=G.nsite();
- unsigned int nt=G.ntime();
- assert(nsite==n_cluster_sites());
- green_function<T> G_new(nt, nsite, nflavor);
- G_new.clear();
- for (site_t k=0; k<nsite; ++k) {
- for (site_t i=0; i<nsite; ++i) {
- for (site_t j=0; j<nsite; ++j) {
- double phase = 0.;
- for (unsigned int d=0; d<dimension(); ++d)
- phase += cluster_momentum(k,d)*(cluster_coordinate(i,d)-cluster_coordinate(j,d));
- for (itime_index_t t=0; t<nt; ++t) {
- for (spin_t flavor=0; flavor<nflavor; ++flavor) {
- D::add(G_new, G, t, i, j, k, flavor, cos(phase)/double(nsite));
- }
- }
- }
- }
- }
- return G_new;
- */
-
-
-
-
 
 #endif /*ALPS_CLUSTER_H*/

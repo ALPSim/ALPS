@@ -45,7 +45,7 @@
 
 ImpuritySolver::matsubara_result_type ExternalSolver::solve_matsubara(
                                                                  const matsubara_green_function_t& G0_omega
-                                                                 , alps::Parameters p, ClusterTransformer *c_ptr)
+                                                                 , alps::params p, ClusterTransformer *c_ptr)
 {
   std::string infile;
   std::string outfile;
@@ -63,8 +63,8 @@ ImpuritySolver::matsubara_result_type ExternalSolver::solve_matsubara(
     solver_input<<alps::make_pvp("/parameters", p);
     G0_omega.write_hdf5(solver_input, "/G0");
     
-    if((bool)(p.value_or_default("WRITE_CLUSTER_INFO",false))){
-      if(c_ptr==0) throw std::runtime_error("called cluster info function with a solver equal to 0");
+    if((bool)(p["WRITE_CLUSTER_INFO"]|false)){
+      if(c_ptr==0) throw std::runtime_error("called cluster info function with a cluster ptr equal to 0");
       c_ptr->write_hdf5(solver_input, "/cluster");
     }
   }
@@ -72,13 +72,14 @@ ImpuritySolver::matsubara_result_type ExternalSolver::solve_matsubara(
   call(infile,outfile);
   
   
-  unsigned int n_matsubara=(unsigned int)p["NMATSUBARA"];
-  unsigned int n_tau=(unsigned int)p["N"];
-  unsigned int n_site     =(unsigned int)p.value_or_default("SITES", 1);
-  unsigned int n_orbital  =(unsigned int)p.value_or_default("FLAVORS", 2);
+  unsigned int n_matsubara=p["NMATSUBARA"];
+  unsigned int n_tau=p["N"];
+  unsigned int n_site     =p["SITES"]|1;
+  unsigned int n_orbital  =p["FLAVORS"]|2;
   matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital, G0_omega.shape());
   itime_green_function_t G_tau(n_tau+1, n_site, n_orbital, G0_omega.shape());
   {
+    std::cout<<"reading outfile: "<<outfile<<std::endl;
     alps::hdf5::archive ar(outfile, alps::hdf5::archive::READ);
     G_omega.read_hdf5(ar, "/G_omega");
     G_tau.read_hdf5(ar, "/G_tau");
@@ -110,7 +111,7 @@ ImpuritySolver::matsubara_result_type ExternalSolver::solve_matsubara(
 
 ImpuritySolver::nambu_result_type ExternalSolver::solve_nambu(
                                                              const nambu_matsubara_green_function_t& G0_omega
-                                                             , alps::Parameters p)
+                                                             , alps::params p)
 {
   std::cout<<"solve nambu for external solver!"<<std::endl;
   std::string infile;
@@ -134,8 +135,8 @@ ImpuritySolver::nambu_result_type ExternalSolver::solve_nambu(
   
   unsigned int n_matsubara=(unsigned int)p["NMATSUBARA"];
   unsigned int n_tau=(unsigned int)p["N"];
-  unsigned int n_site     =(unsigned int)p.value_or_default("SITES", 1);
-  unsigned int n_orbital  =(unsigned int)p.value_or_default("FLAVORS", 2);
+  unsigned int n_site     =(unsigned int)(p["SITES"]|1);
+  unsigned int n_orbital  =(unsigned int)(p["FLAVORS"]|2);
   nambu_matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital, nondiagonal);
   nambu_itime_green_function_t G_tau(n_tau+1, n_site, n_orbital, nondiagonal);
   {

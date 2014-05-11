@@ -72,13 +72,13 @@ template<class T> void matrix_to_gf(int omega, int flavor,  green_function<T> &g
   }
 }
 
-CDMFTTransformer::CDMFTTransformer(const alps::Parameters& params)
+CDMFTTransformer::CDMFTTransformer(const alps::params& params)
 : ClusterTransformer(params),
-t_(params.defined("W") ? 1. : static_cast<double>(params["t"])),
-t2_(params.value_or_default("t'", params.value_or_default("t2", 0.))),
-t3_(params.value_or_default("t3", 0.)),
-t4_(params.value_or_default("t4", 0.)),
-bandwidth_(params.value_or_default("W", 0.)),
+t_(params.defined("W") ? 1. : params["t"]),
+t2_(params["t'"]|0.),
+t3_(params["t3"]|0.),
+t4_(params["t4"]|0.),
+bandwidth_(params["W"]|0.),
 bandwidth_scale_factor_(1.),
 L_(params["L"]),
 half_filling_(0.),
@@ -86,6 +86,9 @@ dispersion_moments_(2, 0.)
 {
   if (params.defined("t") && params.defined("W"))
     boost::throw_exception(std::invalid_argument("both t and W are defined"));
+  if (params.defined("W"))
+    boost::throw_exception(std::invalid_argument("W is defined, check that it works."));
+
   //calculating dispersion moments, bandwidth and half filling
   std::cout<<"warning: the CDMFT transformer has NO bandwidths, dispersions, etc implemented.";
 }
@@ -178,11 +181,12 @@ matsubara_green_function_t FoursiteCDMFTTransformer::operator()(const matsubara_
 
 
 
-matsubara_green_function_t FoursiteCDMFTTransformer::initial_G0(const alps::Parameters& parms, shape_t shape)
+matsubara_green_function_t FoursiteCDMFTTransformer::initial_G0(const alps::params& parms, shape_t shape)
 {
   if(shape != nondiagonal) throw std::logic_error("shape should probably be nondiagonal");
   if (parms.defined("G0OMEGA_INPUT")){
-    std::ifstream in_file(parms["G0OMEGA_INPUT"].c_str());
+    std::string g0path=parms["G0OMEGA_INPUT"];
+    std::ifstream in_file(g0path.c_str());
     if(in_file.good()){
       return ClusterTransformer::initial_G0(parms, shape);
     }
@@ -191,20 +195,18 @@ matsubara_green_function_t FoursiteCDMFTTransformer::initial_G0(const alps::Para
   }
   //proceed with computation of new G0 if we can't find input G0
   std::cout<<"calculating initial G0_omega"<<std::endl;
-  unsigned int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
-  unsigned int n_tau=boost::lexical_cast<int>(parms["N"]);
-  unsigned int n_flavor=parms.value_or_default("FLAVORS", 2);
-  double beta = static_cast<double>(parms["BETA"]);
-  double mu = static_cast<double>(parms["MU"]);
-  //double h = static_cast<double>(parms["H"]);
-  //bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
+  unsigned int n_matsubara=parms["NMATSUBARA"];
+  unsigned int n_tau=parms["N"];
+  unsigned int n_flavor=parms["FLAVORS"]|2;
+  double beta = parms["BETA"];
+  double mu =parms["MU"];
   matsubara_green_function_t G0_omega_new(n_matsubara,n_cluster_sites(),n_flavor, nondiagonal);
   G0_omega_new.clear();
-  if (parms.value_or_default("INSULATING", false)) {
+  if (parms["INSULATING"]|false) {
     std::cout <<"calculating insulating G0_omega";
     throw std::runtime_error("insulating g0 in foursite transformer not implemented.");
   }
-  else if (parms.value_or_default("ISOLATED", false)) {
+  else if (parms["ISOLATED"]|false) {
     std::cout << "calculating G0_omega for isolated cluster"<<std::endl;
     throw std::runtime_error("isolated g0 in foursite transformer not implemented.");
   }
@@ -239,7 +241,7 @@ matsubara_green_function_t FoursiteCDMFTTransformer::initial_G0(const alps::Para
 }
 
 
-nambu_matsubara_green_function_t FoursiteCDMFTTransformer::initial_G0_nambu(alps::Parameters const&){
+nambu_matsubara_green_function_t FoursiteCDMFTTransformer::initial_G0_nambu(alps::params const&){
   throw std::runtime_error("initial nambu_matsubara_green_function_t CDMFT transformer not implemented.");
 }
 nambu_matsubara_green_function_t FoursiteCDMFTTransformer::operator()(const nambu_matsubara_green_function_t &G_omega,

@@ -187,11 +187,12 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
 
 
 
-matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Parameters& parms, shape_t shape)
+matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::params& parms, shape_t shape)
 {
   if(shape != blockdiagonal) throw std::logic_error("the shape really should be blockdiagonal.");
   if (parms.defined("G0OMEGA_INPUT")){
-    std::ifstream in_file(parms["G0OMEGA_INPUT"].c_str());
+    std::string g0path=parms["G0OMEGA_INPUT"];
+    std::ifstream in_file(g0path.c_str());
     if(in_file.good()){
       return ClusterTransformer::initial_G0(parms, shape);
     }
@@ -201,7 +202,7 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
   std::cout<<"calculating initial G0_omega"<<std::endl;
   unsigned int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
   unsigned int n_tau=boost::lexical_cast<int>(parms["N"]);
-  unsigned int n_flavor=parms.value_or_default("FLAVORS", 2);
+  unsigned int n_flavor=parms["FLAVORS"]|2;
   double beta = static_cast<double>(parms["BETA"]);
   double mu = static_cast<double>(parms["MU"]);
   double h = static_cast<double>(parms["H_INIT"]);

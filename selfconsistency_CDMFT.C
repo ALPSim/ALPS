@@ -41,23 +41,23 @@
 #include "CDMFT_transform.h"
 #include"CDMFT_transformer.hxx"
 
-void selfconsistency_loop_CDMFT(const alps::Parameters& parms, ImpuritySolver& solver,
+void selfconsistency_loop_CDMFT(const alps::params& parms, ImpuritySolver& solver,
                                 CDMFTTransformer& clustertrans)
 {
-  unsigned int n_tau=boost::lexical_cast<unsigned int>(parms["N"]);
-  unsigned int n_matsubara=boost::lexical_cast<unsigned int>(parms["NMATSUBARA"]);
-  unsigned int n_orbital=parms.value_or_default("FLAVORS", 2);
-  unsigned int n_site=parms.value_or_default("SITES", 1);
+  unsigned int n_tau=parms["N"];
+  unsigned int n_matsubara=parms["NMATSUBARA"];
+  unsigned int n_orbital=parms["FLAVORS"]|2;
+  unsigned int n_site=parms["SITES"]| 1;
   
-  double beta = static_cast<double>(parms["BETA"]);
-  double h_old = static_cast<double>(parms["H"]);
-  double h_init = parms.value_or_default("H_INIT", 0.);
+  double beta = parms["BETA"];
+  double h_old = parms["H"];
+  double h_init = parms["H_INIT"]|0.;
   double h = h_old + h_init;
-  (*const_cast<alps::Parameters*>(&parms))["H"] = h;
-  double converged = static_cast<double>(parms["CONVERGED"]);
-  bool paramagnet = parms.value_or_default("PARAMAGNET", false);
-  double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
-  int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
+  (*const_cast<alps::params*>(&parms))["H"] = h;
+  double converged = parms["CONVERGED"];
+  bool paramagnet = parms["PARAMAGNET"]|false;
+  double relax_rate=parms["RELAX_RATE"]|1.;
+  int max_it=parms["MAX_IT"]|1000;
   std::string basename=parms["BASENAME"];
   
   
@@ -78,7 +78,7 @@ void selfconsistency_loop_CDMFT(const alps::Parameters& parms, ImpuritySolver& s
   do {
     iteration_ctr++;
     std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
-    double mu = static_cast<double>(parms["MU"]);
+    double mu = parms["MU"];
     G_old_omega = G_omega;
     G0_old_omega = G0_omega;
     G_old_tau = G_tau;
@@ -108,7 +108,7 @@ void selfconsistency_loop_CDMFT(const alps::Parameters& parms, ImpuritySolver& s
         }
       }
     }
-    G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
+    G0_omega.write(std::string(parms["G0OMEGA_output"]|"G0omega_output").c_str());
     std::cout<<"comparing old and new result."<<std::endl<<std::flush;
     max_diff=0;
     if(iteration_ctr>1){
@@ -130,33 +130,33 @@ void selfconsistency_loop_CDMFT(const alps::Parameters& parms, ImpuritySolver& s
     matsubara_green_function_t real_G_omega = clustertrans.transform_into_real_space(G_omega);
     itime_green_function_t real_G0_tau = clustertrans.transform_into_real_space(G0_tau);
     itime_green_function_t real_G_tau = clustertrans.transform_into_real_space(G_tau);
-    if (parms.value_or_default("ANTIFERROMAGNET", false))
+    if (parms["ANTIFERROMAGNET"]|false)
       print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
     else
       print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
     if(!parms.defined("WRITE_SPARSE"))
       print_all_green_functions(basename, iteration_ctr, real_G0_omega, real_G_omega, real_G0_tau, real_G_tau, beta, "_realspace");
     if (iteration_ctr == 1)
-      (*const_cast<alps::Parameters*>(&parms))["H"] = h_old;
+      (*const_cast<alps::params*>(&parms))["H"] = h_old;
   } while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);
   // write G0
-  G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
+  G0_omega.write(std::string(parms["G0OMEGA_output"]|"G0omega_output").c_str());
 }
 
 //Nambu CDMFT
-void selfconsistency_loop_CDMFT_Nambu(const alps::Parameters& parms, ImpuritySolver& solver,
+void selfconsistency_loop_CDMFT_Nambu(const alps::params& parms, ImpuritySolver& solver,
                                 CDMFTTransformer& clustertrans) {
-  unsigned int n_tau=boost::lexical_cast<unsigned int>(parms["N"]);
-  unsigned int n_matsubara=boost::lexical_cast<unsigned int>(parms["NMATSUBARA"]);
-  unsigned int n_site=parms.value_or_default("SITES", 1);
+  unsigned int n_tau=parms["N"];
+  unsigned int n_matsubara=parms["NMATSUBARA"];
+  unsigned int n_site=parms["SITES"]|1;
   
-  double beta = static_cast<double>(parms["BETA"]);
-  double h    = static_cast<double>(parms["H"]);
-  double eta1 = static_cast<double>(parms["ETA1"]);
-  double eta2 = static_cast<double>(parms["ETA2"]);
-  double converged = static_cast<double>(parms["CONVERGED"]);
-  bool paramagnet = parms.value_or_default("PARAMAGNET", true);
-  int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
+  double beta = parms["BETA"];
+  double h    = parms["H"];
+  double eta1 = parms["ETA1"];
+  double eta2 = parms["ETA2"];
+  double converged = parms["CONVERGED"];
+  bool paramagnet = parms["PARAMAGNET"]|true;
+  int max_it=parms["MAX_IT"]|1000;
   std::string basename=parms["BASENAME"];
   
   //initial G0, isolated and insulating not implemented, only has free solution
@@ -180,7 +180,7 @@ void selfconsistency_loop_CDMFT_Nambu(const alps::Parameters& parms, ImpuritySol
   do {
     iteration_ctr++;
     std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
-    double mu = static_cast<double>(parms["MU"]);
+    double mu = parms["MU"];
     
     fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega);
     
@@ -245,11 +245,12 @@ void selfconsistency_loop_CDMFT_Nambu(const alps::Parameters& parms, ImpuritySol
   std::cout<<"-beta*G_tau(beta/2)="<<-beta*G_tau(n_tau/2,0,0,0,0)<<std::endl;
 }
 
-void perform_CDMFT_loop(const alps::Parameters &parms){
+void perform_CDMFT_loop(const alps::params &parms){
   std::cout<<"running a CDMFT calculation"<<std::endl;
-  ImpuritySolver* solver_ptr=new ExternalSolver(boost::filesystem::path(parms["SOLVER"]));
+  std::string solver_path=parms["SOLVER"];
+  ImpuritySolver* solver_ptr=new ExternalSolver(boost::filesystem::path(solver_path));
   ClusterTransformer *transform_ptr=ClusterTransformer::generate_transformer(parms);
-  if(parms.value_or_default("NAMBU",false)){
+  if(parms["NAMBU"]|false){
     selfconsistency_loop_CDMFT(parms, *solver_ptr, *(CDMFTTransformer*)transform_ptr);
   }else{
     selfconsistency_loop_CDMFT_Nambu(parms, *solver_ptr, *(CDMFTTransformer*)transform_ptr);

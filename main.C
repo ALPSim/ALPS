@@ -31,12 +31,14 @@
 /// @brief The DMFT main program
 ///
 
-void read_parameters_from_file(alps::Parameters &parms, const std::string &filename){
-  std::ifstream is(filename.c_str());
-  if(!is.is_open()){std::cerr<<"parameter file: "<<filename<<" is not open! exiting!"<<std::endl; exit(1); }
-  is>>parms;
-  is.close();
+alps::params read_parameters_from_file(const std::string &filename){
+  {
+    std::ifstream is(filename.c_str());
+    if(!is.is_open()){std::cerr<<"parameter file: "<<filename<<" is not open! exiting!"<<std::endl; exit(1); }
+  }
+  alps::params parms(filename);
   parms["BASENAME"]=std::string(filename);
+  return parms;
 }
 
 
@@ -51,18 +53,16 @@ int main(int argc, char** argv)
     }
     std::cout << "ALPS DMFT self-consistency condition.\n\n";
     alps::print_copyright(std::cout);
-    alps::Parameters parms;
-    read_parameters_from_file(parms, argv[1]);
-    
+    alps::params parms=read_parameters_from_file(argv[1]);
     //perform selfconsistency loop for single site or cluster...
-    if(!parms.defined("CLUSTER_LOOP"))
+    if(!parms.defined("CLUSTER_LOOP")){
       perform_single_site_loop(parms);
-    else
+    }else
       perform_cluster_loop(parms);
     if(parms.defined("MODIFY_PARAMETER_FILE")){
       std::ofstream os(argv[1]);
 	
-      (*const_cast<alps::Parameters*>(&parms))["CURRENT_IT"]=0;// sloppy fix.  Sets current_it to zero for continuing program later
+      parms["CURRENT_IT"]=0;// sloppy fix.  Sets current_it to zero for continuing program later
       os<<parms;
       os.close();
     }

@@ -44,7 +44,7 @@
 #include "types.h"
 #include "green_function.h"
 #include "nambu_green_function.h"
-#include "alps/parameter.h"
+#include "alps/ngs/params.hpp"
 #include "boost/shared_ptr.hpp"
 
 /// @brief performs a Hilbert transformation
@@ -63,7 +63,7 @@ public:
   virtual itime_green_function_t operator()(const itime_green_function_t& G_tau, 
                                             double mu, double h, double beta)=0; 
     itime_green_function_t symmetrize(const itime_green_function_t& G_tau, const bool paramagnet) const;
-  virtual itime_green_function_t initial_G0(const alps::Parameters& parms);
+  virtual itime_green_function_t initial_G0(const alps::params& parms);
   virtual ~HilbertTransformer() {}
 };
 
@@ -81,7 +81,7 @@ public:
   ///and performs the actual Hilbert transformation.
   itime_green_function_t operator()(const itime_green_function_t& G_tau, 
                                     double mu, double h, double beta);
-  itime_green_function_t initial_G0(const alps::Parameters& parms);
+  itime_green_function_t initial_G0(const alps::params& parms);
   
 private:
   double t_; 
@@ -160,7 +160,7 @@ public:
                                                 matsubara_green_function_t &G0_omega, 
                                                 const double mu, const double h, 
                                                 const double beta)=0;
-  virtual matsubara_green_function_t initial_G0(const alps::Parameters& parms);
+  virtual matsubara_green_function_t initial_G0(const alps::params& parms);
   virtual ~FrequencySpaceHilbertTransformer() {}
   template <class T>
   green_function<T> symmetrize(const green_function<T>& G, const bool paramagnet) const
@@ -192,7 +192,7 @@ public:
   virtual matsubara_green_function_t operator()(const matsubara_green_function_t& G_omega, 
                                                 matsubara_green_function_t &G0_omega_ignored, 
                                                 const double mu, const double h, const double beta);
-  matsubara_green_function_t initial_G0(const alps::Parameters& parms);
+  matsubara_green_function_t initial_G0(const alps::params& parms);
   
 private:
   double t_; 
@@ -203,7 +203,7 @@ private:
 class FSHamiltonianHilbertTransformer: public FrequencySpaceHilbertTransformer{
 public:
   /// the constructor reads in the LDA Hamiltonian from a file
-  FSHamiltonianHilbertTransformer(const alps::Parameters& params);
+  FSHamiltonianHilbertTransformer(const alps::params& params);
   /// take G_iomegan as the input and construct G0_iomegan out of it. Do this
   /// via summation in k-space. The k-points are defined in the Hamiltonian.
   virtual matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
@@ -216,7 +216,7 @@ public:
 class FSDOSHilbertTransformer: public FrequencySpaceHilbertTransformer{
 public:
   /// the constructor reads in the DOS from a file
-  FSDOSHilbertTransformer(const alps::Parameters& params);
+  FSDOSHilbertTransformer(const alps::params& params);
   /// take G_iomegan as the input and construct G0_iomegan out of it. Do this
   /// using integration over D(epsilon).
   /// We perform the HT G <- \int \frac{D(e)}{A - e} de
@@ -243,7 +243,7 @@ inline std::complex<double> integrand(int n, const std::vector<double> &dos, con
 //this can do Antiferromagnetism according to Georges et. al.
 class AFM_FSDOSHilbertTransformer: public FSDOSHilbertTransformer{
 public:
-  AFM_FSDOSHilbertTransformer(const alps::Parameters &parms)
+  AFM_FSDOSHilbertTransformer(const alps::params &parms)
     :FSDOSHilbertTransformer(parms){}
   virtual ~AFM_FSDOSHilbertTransformer(){}
   virtual matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega,
@@ -254,10 +254,10 @@ public:
 
 class TwoDAFMHilbertTransformer: public FrequencySpaceHilbertTransformer{
 public:
-  TwoDAFMHilbertTransformer(const alps::Parameters& params){
+  TwoDAFMHilbertTransformer(const alps::params& params){
     t_=params["t"];
-    tprime_=params.value_or_default("tprime",0);
-    L_=params.value_or_default("L",200);
+    tprime_=params["tprime"]|0;
+    L_=params["L"]|200;
     if(L_%2 !=0) throw std::runtime_error("please choose L to be even for Simpson integration for fast convergence!!");
   }
 

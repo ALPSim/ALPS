@@ -17,24 +17,24 @@
 #include <functional>
 
 
-FrequencySpaceHilbertTransformer *setup_Bethe_hilbert_transform(const alps::Parameters &parms){
+FrequencySpaceHilbertTransformer *setup_Bethe_hilbert_transform(const alps::params &parms){
   std::cout<<"using Bethe lattice Hilbert transform"<<std::endl;
-  return new FSSemicircleHilbertTransformer(boost::lexical_cast<double>(parms["t"]));
+  return new FSSemicircleHilbertTransformer((double)(parms["t"]));
 }
-FrequencySpaceHilbertTransformer *setup_DOS_hilbert_transform(const alps::Parameters &parms){
+FrequencySpaceHilbertTransformer *setup_DOS_hilbert_transform(const alps::params &parms){
   FrequencySpaceHilbertTransformer *transform_ptr;
   std::cout<<"using DOS Hilbert transform"<<std::endl;
-  if(parms.value_or_default("ANTIFERROMAGNET",false)){
+  if(parms["ANTIFERROMAGNET"]|false){
     transform_ptr= new FSDOSHilbertTransformer(parms);
   }else{
     transform_ptr= new AFM_FSDOSHilbertTransformer(parms);
   }
   return transform_ptr;
 }
-FrequencySpaceHilbertTransformer *setup_2D_hilbert_transform(const alps::Parameters &parms){
+FrequencySpaceHilbertTransformer *setup_2D_hilbert_transform(const alps::params &parms){
   FrequencySpaceHilbertTransformer *transform_ptr;
-  if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
-    if((bool)(parms.value_or_default("PARAMAGNET",true))==false){
+  if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms["ANTIFERROMAGNET"]|false)==false)){
+    if((bool)(parms["PARAMAGNET"]|true)==false){
       std::cerr<<"AFM and PM? redundant parameters! set paramagnet to false."<<std::endl; abort();
     }
     std::cerr<<"implement PM DOS integration!!"<<std::endl;
@@ -51,21 +51,21 @@ FrequencySpaceHilbertTransformer *setup_2D_hilbert_transform(const alps::Paramet
 
 
 
-matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const alps::Parameters& parms)
+matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const alps::params& parms)
 {
   //std::cout<<"General Hilbert: G0"<<std::endl;
   std::cout<<"reading initial G0_omega"<<std::endl;
-  int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
-  int n_orbital=parms.value_or_default("FLAVORS", 2);
+  int n_matsubara=parms["NMATSUBARA"];
+  int n_orbital=parms["FLAVORS"]|2;
   matsubara_green_function_t G0_omega(n_matsubara, 1, n_orbital, diagonal);
   if (parms.defined("ISOLATING")) {
     std::cout<<"calculating initial G0_omega"<<std::endl;
-    int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
-    int n_time=boost::lexical_cast<int>(parms["N"]);
-    int n_flavor=parms.value_or_default("FLAVORS", 2);
-    double beta = static_cast<double>(parms["BETA"]);
-    double mu = static_cast<double>(parms["MU"]);
-    double h = static_cast<double>(parms["H_INIT"]);
+    int n_matsubara=parms["NMATSUBARA"];
+    int n_time=parms["N"];
+    int n_flavor=parms["FLAVORS"]|2;
+    double beta = parms["BETA"];
+    double mu = parms["MU"];
+    double h = parms["H_INIT"];
     matsubara_green_function_t G0_omega(n_matsubara,1,n_flavor, diagonal);
     for(unsigned int i=0; i<G0_omega.nfreq(); i++) {
       std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
@@ -83,7 +83,8 @@ matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const al
     return G0_omega;
   }
   else {
-    std::ifstream check(parms["G0OMEGA_INPUT"].c_str());
+    std::string g0path=parms["G0OMEGA_INPUT"];
+    std::ifstream check(g0path.c_str());
     if(!check.is_open()){
       std::cout<<"could not open inital G0 file "<<parms["G0OMEGA_INPUT"]<<" proceeding with free solution. "<<std::endl;
       matsubara_green_function_t G_omega(n_matsubara, 1, n_orbital, diagonal);
@@ -93,11 +94,11 @@ matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const al
           G0_omega(i,f)=1;
         }
       }
-      double h     =parms.value_or_default("H_INIT",0.);
-      double mu    =parms.value_or_default("MU",0.);
-      int n_time=boost::lexical_cast<int>(parms["N"]);
-      int n_flavor=parms.value_or_default("FLAVORS", 2);
-      double beta  =parms.value_or_default("BETA",0.);
+      double h     =parms["H_INIT"]|0.;
+      double mu    =parms["MU"]|0.;
+      int n_time=parms["N"];
+      int n_flavor=parms["FLAVORS"]|2;
+      double beta  =parms["BETA"]|0.;
       G0_omega=this->operator()(G_omega, G0_omega, mu, h, beta);
       G0_omega.write("G0_omega_input");
       boost::shared_ptr<FourierTransformer> fourier_ptr;
@@ -107,8 +108,10 @@ matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const al
       G0_tau.write("G0_tau_input");
       
     }
-    else
-      G0_omega.read(parms["G0OMEGA_INPUT"].c_str());
+    else{
+      std::string g0path=parms["G0OMEGA_INPUT"];
+      G0_omega.read(g0path.c_str());
+    }
   }
   return G0_omega;
 }
@@ -138,7 +141,7 @@ matsubara_green_function_t FSSemicircleHilbertTransformer::operator()(const mats
 
 
 
-matsubara_green_function_t FSSemicircleHilbertTransformer::initial_G0(const alps::Parameters& parms)
+matsubara_green_function_t FSSemicircleHilbertTransformer::initial_G0(const alps::params& parms)
 {
   //std::cout<<"Semicirc Hilbert: initial G0"<<std::endl;
   if ( parms.defined("ISOLATING"))
@@ -154,12 +157,12 @@ matsubara_green_function_t FSSemicircleHilbertTransformer::initial_G0(const alps
   }
   {
     std::cout<<"calculating initial G0_omega"<<std::endl;
-    int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
-    int n_time=boost::lexical_cast<int>(parms["N"]);
-    int n_flavor=parms.value_or_default("FLAVORS", 2);
-    double beta = static_cast<double>(parms["BETA"]);
-    double mu = static_cast<double>(parms["MU"]);
-    double h = static_cast<double>(parms["H"]);
+    int n_matsubara=parms["NMATSUBARA"];
+    int n_time=parms["N"];
+    int n_flavor=parms["FLAVORS"]|2;
+    double beta = parms["BETA"];
+    double mu = parms["MU"];
+    double h = parms["H"];
     double tsq=t_*t_;
     matsubara_green_function_t G0_omega(n_matsubara,1,n_flavor, diagonal);
     for(unsigned int i=0; i<G0_omega.nfreq(); i++) {
@@ -186,10 +189,10 @@ matsubara_green_function_t FSSemicircleHilbertTransformer::initial_G0(const alps
 
 
 
-FSDOSHilbertTransformer::FSDOSHilbertTransformer(const alps::Parameters& params)
+FSDOSHilbertTransformer::FSDOSHilbertTransformer(const alps::params& params)
 {
-  assert(params.defined("DOSFILE"));
-  std::ifstream dos_file(params["DOSFILE"].c_str());
+  std::string dosfilename=params["DOSFILE"];
+  std::ifstream dos_file(dosfilename.c_str());
   assert(dos_file.is_open());
   double eps, d;
   std::cout<<"using density of states: "<<std::endl;
