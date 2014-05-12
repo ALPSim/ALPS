@@ -699,7 +699,7 @@ void print_all_nambu_green_functions(std::string const &basename, const int iter
   print_selfenergy_matsubara(selfenergy_file, G0_omega, G_omega, beta, shape);
 }
 
-  void green_function<double>::write_hdf5(alps::hdf5::archive &ar, const std::string &path) const{
+template<>  void green_function<double>::write_hdf5(alps::hdf5::archive &ar, const std::string &path) const{
     ar<<alps::make_pvp(path+"/nt",nt_);
     ar<<alps::make_pvp(path+"/ns",ns_);
     ar<<alps::make_pvp(path+"/nf",nf_);
@@ -707,7 +707,7 @@ void print_all_nambu_green_functions(std::string const &basename, const int iter
     std::stringstream subpath; subpath<<path<<"/values/mean";
     ar<<alps::make_pvp(subpath.str(), val_, nt_*(shape_==diagonal?ns_:ns_*ns_)*nf_);
   }
-  void green_function<double>::read_hdf5(alps::hdf5::archive &ar, const std::string &path) {
+template<>  void green_function<double>::read_hdf5(alps::hdf5::archive &ar, const std::string &path) {
     unsigned int nt, ns, nf,shape;
     clear();
     ar>>alps::make_pvp(path+"/nt",nt);
@@ -720,7 +720,7 @@ void print_all_nambu_green_functions(std::string const &basename, const int iter
     ar>>alps::make_pvp(subpath.str(), val_, nt_*(shape_==diagonal?ns_:ns_*ns_)*nf_);
   }
 
-  void green_function<std::complex<double> >::write_hdf5(alps::hdf5::archive &ar, const std::string &path) const{
+template<>  void green_function<std::complex<double> >::write_hdf5(alps::hdf5::archive &ar, const std::string &path) const{
     ar<<alps::make_pvp(path+"/nt",nt_);
     ar<<alps::make_pvp(path+"/ns",ns_);
     ar<<alps::make_pvp(path+"/nf",nf_);
@@ -728,7 +728,7 @@ void print_all_nambu_green_functions(std::string const &basename, const int iter
     std::stringstream subpath; subpath<<path<<"/values/mean";
     ar<<alps::make_pvp(subpath.str(), val_, nt_*(shape_==diagonal?ns_:ns_*ns_)*nf_);
   }
-  void green_function<std::complex<double> >::read_hdf5(alps::hdf5::archive &ar, const std::string &path) {
+template<>  void green_function<std::complex<double> >::read_hdf5(alps::hdf5::archive &ar, const std::string &path) {
     unsigned int nt, ns, nf,shape;
     clear();
     ar>>alps::make_pvp(path+"/nt",nt);
@@ -741,7 +741,7 @@ void print_all_nambu_green_functions(std::string const &basename, const int iter
     ar>>alps::make_pvp(subpath.str(), val_, nt_*(shape_==diagonal?ns_:ns_*ns_)*nf_);
   }
 
-  void nambu_green_function<std::complex<double> >::write_hdf5(alps::hdf5::archive &ar, const std::string &path) const{
+template<>  void nambu_green_function<std::complex<double> >::write_hdf5(alps::hdf5::archive &ar, const std::string &path) const{
     ar<<alps::make_pvp(path+"/nt",nt_);
     ar<<alps::make_pvp(path+"/ns",ns_);
     ar<<alps::make_pvp(path+"/nf",nf_);
@@ -749,7 +749,7 @@ void print_all_nambu_green_functions(std::string const &basename, const int iter
     //std::cout<<path<<" nt: "<<nt_<<" new: "<<nt_<<" ns: "<<ns_<<" "<<ns_<<" nf: "<<nf_<<" "<<nf_<<" total size should be: "<<nt_*ns_*ns_*nf_*nf_<<std::endl;
     ar<<alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_*nf_);
   }
-  void nambu_green_function<std::complex<double> >::read_hdf5(alps::hdf5::archive &ar, const std::string &path) {
+template<>  void nambu_green_function<std::complex<double> >::read_hdf5(alps::hdf5::archive &ar, const std::string &path) {
     unsigned int nt, ns, nf;
     clear();
     ar>>alps::make_pvp(path+"/nt",nt);
@@ -760,7 +760,7 @@ void print_all_nambu_green_functions(std::string const &basename, const int iter
     std::stringstream subpath; subpath<<path<<"/values/mean";
     ar>>alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_*nf_);
   }
-  void nambu_green_function<double>::write_hdf5(alps::hdf5::archive &ar, const std::string &path) const{
+template<>  void nambu_green_function<double>::write_hdf5(alps::hdf5::archive &ar, const std::string &path) const{
     ar<<alps::make_pvp(path+"/nt",nt_);
     ar<<alps::make_pvp(path+"/ns",ns_);
     ar<<alps::make_pvp(path+"/nf",nf_);
@@ -768,7 +768,7 @@ void print_all_nambu_green_functions(std::string const &basename, const int iter
     //std::cout<<path<<" nt: "<<nt_<<" new: "<<nt_<<" ns: "<<ns_<<" "<<ns_<<" nf: "<<nf_<<" "<<nf_<<" total size should be: "<<nt_*ns_*ns_*nf_*nf_<<std::endl;
     ar<<alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_*nf_);
   }
-  void nambu_green_function<double>::read_hdf5(alps::hdf5::archive &ar, const std::string &path) {
+  template<> void nambu_green_function<double>::read_hdf5(alps::hdf5::archive &ar, const std::string &path) {
     unsigned int nt, ns, nf;
     clear();
     ar>>alps::make_pvp(path+"/nt",nt);
