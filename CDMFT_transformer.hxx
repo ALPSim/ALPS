@@ -80,7 +80,7 @@ nambu_green_function<T> CDMFTTransformer::symmetrize_helper(const nambu_green_fu
 }
 
 template<class T>
-green_function<T> FoursiteCDMFTTransformer::spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const
+green_function<T> LadderCDMFTTransformer::spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const
 {
   green_function<T> G_new(G);
   if (paramagnet) {

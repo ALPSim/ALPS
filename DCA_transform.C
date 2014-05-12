@@ -75,7 +75,7 @@ ClusterTransformer* ClusterTransformer::generate_transformer(const alps::params&
     else {
       std::cout<<"using simple CDMFT transformer"<<std::endl;
       if(static_cast<int>(parms["SITES"])!=4) throw std::runtime_error("only four-site CDMFT is implemented so far.");
-      trans_ptr=new FoursiteCDMFTTransformer(parms);
+      trans_ptr=new LadderCDMFTTransformer(parms);
     }
   }
   return trans_ptr;

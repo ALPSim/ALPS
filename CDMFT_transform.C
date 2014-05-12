@@ -92,7 +92,7 @@ dispersion_moments_(2, 0.)
   //calculating dispersion moments, bandwidth and half filling
   std::cout<<"warning: the CDMFT transformer has NO bandwidths, dispersions, etc implemented.";
 }
-matsubara_green_function_t FoursiteCDMFTTransformer::operator()(const matsubara_green_function_t &G_omega,
+matsubara_green_function_t LadderCDMFTTransformer::operator()(const matsubara_green_function_t &G_omega,
                                                                 const matsubara_green_function_t &G0_omega,
                                                                 double &mu, const double h, const double beta)
 {
@@ -181,7 +181,7 @@ matsubara_green_function_t FoursiteCDMFTTransformer::operator()(const matsubara_
 
 
 
-matsubara_green_function_t FoursiteCDMFTTransformer::initial_G0(const alps::params& parms, shape_t shape)
+matsubara_green_function_t LadderCDMFTTransformer::initial_G0(const alps::params& parms, shape_t shape)
 {
   if(shape != nondiagonal) throw std::logic_error("shape should probably be nondiagonal");
   if (parms.defined("G0OMEGA_INPUT")){
@@ -241,22 +241,22 @@ matsubara_green_function_t FoursiteCDMFTTransformer::initial_G0(const alps::para
 }
 
 
-nambu_matsubara_green_function_t FoursiteCDMFTTransformer::initial_G0_nambu(alps::params const&){
+nambu_matsubara_green_function_t LadderCDMFTTransformer::initial_G0_nambu(alps::params const&){
   throw std::runtime_error("initial nambu_matsubara_green_function_t CDMFT transformer not implemented.");
 }
-nambu_matsubara_green_function_t FoursiteCDMFTTransformer::operator()(const nambu_matsubara_green_function_t &G_omega,
+nambu_matsubara_green_function_t LadderCDMFTTransformer::operator()(const nambu_matsubara_green_function_t &G_omega,
                                                                       const nambu_matsubara_green_function_t &G0_omega,
                                                                       nambu_matsubara_green_function_t &selfenergy,
                                                                       double &mu, const double h, const double eta1, const double eta2, const double beta, const bool use_selfenergy){
   throw std::runtime_error("nambu operator() in CDMFT transformer not implemented.");
 }
-/*nambu_green_function<double> FoursiteCDMFTTransformer::transform_into_k_space(nambu_green_function<double> const& gf) const{
+/*nambu_green_function<double> LadderCDMFTTransformer::transform_into_k_space(nambu_green_function<double> const& gf) const{
  throw std::runtime_error("transform_into_k_space CDMFT transformer not implemented.");
  }
- nambu_green_function<std::complex<double> > FoursiteCDMFTTransformer::transform_into_k_space(nambu_green_function<std::complex<double> > const& gf) const{
+ nambu_green_function<std::complex<double> > LadderCDMFTTransformer::transform_into_k_space(nambu_green_function<std::complex<double> > const& gf) const{
  throw std::runtime_error("transform_into_k_space CDMFT transformer not implemented.");
  }*/
-matsubara_green_function_t FoursiteCDMFTTransformer::transform_into_real_space(const matsubara_green_function_t& G) const{
+matsubara_green_function_t LadderCDMFTTransformer::transform_into_real_space(const matsubara_green_function_t& G) const{
   spin_t nflavor=G.nflavor();
   frequency_t nfreq=G.nfreq();
   matsubara_green_function_t G_transformed(G);
@@ -273,10 +273,10 @@ matsubara_green_function_t FoursiteCDMFTTransformer::transform_into_real_space(c
   }
   return G_transformed;
 }
-matsubara_green_function_t FoursiteCDMFTTransformer::transform_into_k_space(const matsubara_green_function_t& G) const{
+matsubara_green_function_t LadderCDMFTTransformer::transform_into_k_space(const matsubara_green_function_t& G) const{
   return transform_into_real_space(G); //this is a special foursite case.
 }
-itime_green_function_t FoursiteCDMFTTransformer::transform_into_real_space(const itime_green_function_t& G) const{
+itime_green_function_t LadderCDMFTTransformer::transform_into_real_space(const itime_green_function_t& G) const{
   spin_t nflavor=G.nflavor();
   itime_index_t ntime=G.ntime();
   itime_green_function_t G_transformed(G);
@@ -294,22 +294,22 @@ itime_green_function_t FoursiteCDMFTTransformer::transform_into_real_space(const
   }
   return G_transformed;
 }
-itime_green_function_t FoursiteCDMFTTransformer::transform_into_k_space(const itime_green_function_t& G) const{
+itime_green_function_t LadderCDMFTTransformer::transform_into_k_space(const itime_green_function_t& G) const{
   return transform_into_real_space(G);
 }
-nambu_matsubara_green_function_t FoursiteCDMFTTransformer::transform_into_real_space(const nambu_matsubara_green_function_t& G) const{
+nambu_matsubara_green_function_t LadderCDMFTTransformer::transform_into_real_space(const nambu_matsubara_green_function_t& G) const{
   throw std::runtime_error("this has not yet been implemented.");
 }
-nambu_matsubara_green_function_t FoursiteCDMFTTransformer::transform_into_k_space(const nambu_matsubara_green_function_t& G) const{
+nambu_matsubara_green_function_t LadderCDMFTTransformer::transform_into_k_space(const nambu_matsubara_green_function_t& G) const{
   throw std::runtime_error("this has not yet been implemented.");
 }
-nambu_itime_green_function_t FoursiteCDMFTTransformer::transform_into_real_space(const nambu_itime_green_function_t& G) const{
+nambu_itime_green_function_t LadderCDMFTTransformer::transform_into_real_space(const nambu_itime_green_function_t& G) const{
   throw std::runtime_error("this has not yet been implemented.");
 }
-nambu_itime_green_function_t FoursiteCDMFTTransformer::transform_into_k_space(const nambu_itime_green_function_t& G) const{
+nambu_itime_green_function_t LadderCDMFTTransformer::transform_into_k_space(const nambu_itime_green_function_t& G) const{
   throw std::runtime_error("this has not yet been implemented.");
 }
-void FoursiteCDMFTTransformer::set_Tij_matrix(double kx, double ky, complex_dense_matrix &H0){
+void LadderCDMFTTransformer::set_Tij_matrix(double kx, double ky, complex_dense_matrix &H0){
   H0(0,0)=0;  H0(1,1)=0; H0(2,2)=0; H0(3,3)=0;
   double coskx=cos(kx);
   double cosky=cos(ky);
@@ -335,13 +335,13 @@ void FoursiteCDMFTTransformer::set_Tij_matrix(double kx, double ky, complex_dens
    H0(0,2)=-4.*std::exp(std::complex<double>(0, ( kx + ky)))*tprime_*coskx*cosky;*/
 }
 
-void FoursiteCDMFTTransformer::set_U_(unsigned int nsite, complex_dense_matrix &U_){
+void LadderCDMFTTransformer::set_U_(unsigned int nsite, complex_dense_matrix &U_){
   
 }
 
-std::vector<double> FoursiteCDMFTTransformer::epsav() const{
+std::vector<double> LadderCDMFTTransformer::epsav() const{
   return epsav_;
 }
-std::vector<double> FoursiteCDMFTTransformer::epssqav() const{
+std::vector<double> LadderCDMFTTransformer::epssqav() const{
   return epssqav_;
 }

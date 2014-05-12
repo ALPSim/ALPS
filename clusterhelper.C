@@ -29,7 +29,7 @@
 #include "alps/lattice/graph_helper.h"
 #include <alps/ngs/make_deprecated_parameters.hpp>
 
-class dca_graph:public abstract_graph{
+class alps_graph:public abstract_graph{
 public:
   //to disentangle things from ALPS we have to hide the cell iterator, offset type, and momentum iterator calls.
   typedef alps::graph_helper<alps::graph_helper<>::graph_type>::cell_iterator cell_iterator;
@@ -38,7 +38,7 @@ public:
   typedef alps::graph_helper<alps::graph_helper<>::graph_type>::momentum_iterator momentum_iterator;
   typedef std::pair<momentum_iterator,momentum_iterator> momentum_iterator_pair;
 
-  dca_graph(const alps::params& params):graph_(alps::make_deprecated_parameters(params)){
+  alps_graph(const alps::params& params):graph_(alps::make_deprecated_parameters(params)){
     //set up cell origins and offsets
     cell_iterator itc, itc_end;
     for (boost::tie(itc, itc_end) = graph_.cells(); itc != itc_end; ++itc) {
@@ -51,16 +51,11 @@ public:
       momenta_.push_back(graph_.momentum(*itm));
     }
   }
-  virtual ~dca_graph(){}
+  virtual ~alps_graph(){}
    int volume() const{return graph_.volume();}
    int dimension() const{return graph_.dimension();}
    basis_vector_iterator_pair basis_vectors() const {return graph_.basis_vectors(); }
    basis_vector_iterator_pair reciprocal_basis_vectors() const {return graph_.reciprocal_basis_vectors(); }
-   //cell_iterator_pair cells()const {return graph_.cells();}
-   //vector_type origin(const cell_descriptor &desc) const{return graph_.origin(desc);}
-   //momentum_iterator_pair momenta() const{return graph_.momenta();}
-   //vector_type momentum(const vector_type &mom) const{return graph_.momentum(mom);}
-   //offset_type offset(const cell_descriptor& c) const{return graph_.offset(c);}
    basis_vector_iterator_pair cell_origins() const{return std::make_pair(cell_origins_.begin(), cell_origins_.end());}
    offset_iterator_pair cell_offsets() const{return std::make_pair(cell_offsets_.begin(), cell_offsets_.end());}
    momenta_iterator_pair cell_momenta() const{return std::make_pair(momenta_.begin(), momenta_.end());}
@@ -75,7 +70,7 @@ ClusterHelper::ClusterHelper(const alps::params& params) :
 n_cluster_sites_(boost::lexical_cast<int>(params["SITES"])), epsilon_(1e-9),
 lattice_momenta_file_name_(params["LATTICE_MOMENTA_FILE"]|"LatticeMomenta")
 {
-  graph_=new dca_graph(params);
+  graph_=new alps_graph(params);
   //std::cout<<"in clusterhelper constructor."<<std::endl;
   //try to read this transformer, otherwise generate it.
   if(!read(params))

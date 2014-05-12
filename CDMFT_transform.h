@@ -88,10 +88,10 @@ private:
 
 
 //does the CDMFT cluster transform for the paramagnetic phase (no AFM order)
-class FoursiteCDMFTTransformer : public CDMFTTransformer
+class LadderCDMFTTransformer : public CDMFTTransformer
 {
 public:
-  FoursiteCDMFTTransformer(const alps::params& params) :
+  LadderCDMFTTransformer(const alps::params& params) :
   CDMFTTransformer(params),
   compute_filling_(params.defined("FILLING")),
   n_target_(compute_filling_?(double)(params["FILLING"]):-1),
