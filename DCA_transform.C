@@ -372,14 +372,17 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::params& 
   }
   else if (parms["ISOLATED"]|false) {
     std::cout << "calculating G0_omega for isolated cluster"<<std::endl;
+    bool phase=parms["PHASE"]|false;
     for (frequency_t freq=0; freq<n_matsubara; ++freq) {
       for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
         const std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
         for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
           vector_type k(dimension());
+          vector_type phi(dimension(),0.);
+          if(phase) phi=phase_vector();
           for (unsigned int d=0; d<dimension(); ++d)
             k[d] = cluster_momentum(kc,d);
-          const std::complex<double> G0 = 1./(iomega_n+mu-epsilon(k));
+          const std::complex<double> G0 = 1./(iomega_n+mu-epsilon_phi(k,phi));
           G0_omega_new(freq, kc, kc, flavor) = G0;
         }
       }
@@ -397,7 +400,6 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::params& 
       }
     }
     G_omega = G0_omega;
-    //invoke transformation with G_omega==G0_omega (selfenergy=0)
     G0_omega_new = operator()(G_omega, G0_omega, mu, 0, beta);
   }
   itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor, diagonal);
