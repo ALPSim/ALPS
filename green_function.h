@@ -33,6 +33,7 @@
 #include <iomanip>
 #include <fstream>
 #include <stdexcept>
+#include <cstdlib>
 
 #ifdef USE_MPI
 #include <mpi.h>
