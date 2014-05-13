@@ -382,9 +382,9 @@ class Hdf5Loader:
                             k = self.h5f.list_children(respath+'/'+m+'/timeseries')
                             if "logbinning" in k and "logbinning2" in k and "logbinning_counts" in k:
                                 if verbose: log("Loading"+ m)
-                                bins = self.h5f[respath+'/'+m+'/timeseries/logbinning'][0:-4]
-                                bins2 = self.h5f[respath+'/'+m+'/timeseries/logbinning2'][0:-4]
-                                counts = self.h5f[respath+'/'+m+'/timeseries/logbinning_counts'][0:-4]
+                                bins = self.h5f[respath+'/'+m+'/timeseries/logbinning'][0:-7]
+                                bins2 = self.h5f[respath+'/'+m+'/timeseries/logbinning2'][0:-7]
+                                counts = self.h5f[respath+'/'+m+'/timeseries/logbinning_counts'][0:-7]
                                 scale = 1
                                 for i in range(len(counts)):
                                     mean = bins[i]/(counts[i]*scale)
