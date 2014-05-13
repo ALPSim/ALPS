@@ -91,7 +91,7 @@ double expval(MPS<Matrix, SymmGroup> const & mps, MPO<Matrix, SymmGroup> const &
     
     Boundary<Matrix, SymmGroup> left = mps.left_boundary();
     
-    semi_parallel_for (locale::compact(L), locale i = 0; i < L; ++i) {
+    semi_parallel_for (/*locale::compact(L)*/, std::size_t i = 0; i < L; ++i) {
         if (verbose)
             maquis::cout << "expval site " << (size_t)i << std::endl;
         left = contraction::overlap_mpo_left_step(mps[i], mps[i], left, mpo[i]);
@@ -143,7 +143,7 @@ typename MPS<Matrix, SymmGroup>::scalar_type overlap(MPS<Matrix, SymmGroup> cons
     block_matrix<Matrix, SymmGroup> left;
     left.insert_block(Matrix(1, 1, 1), SymmGroup::IdentityCharge, SymmGroup::IdentityCharge);
     
-    semi_parallel_for (locale::compact(L), locale i = 0; i < L; ++i) {
+    semi_parallel_for (/*locale::compact(L)*/, std::size_t i = 0; i < L; ++i) {
         left = contraction::overlap_left_step(mps1[i], mps2[i], left);
     }
     
@@ -246,7 +246,7 @@ typename MPS<Matrix, SymmGroup>::scalar_type dm_trace(MPS<Matrix, SymmGroup> con
     charge I = SymmGroup::IdentityCharge;
     size_t L = mps.length();
     
-    Index<SymmGroup> phys_rho = phys_psi * adjoin(phys_psi);
+    Index<SymmGroup> phys_rho = ::operator*(phys_psi, adjoin(phys_psi));
     ProductBasis<SymmGroup> pb(phys_psi, phys_psi, boost::lambda::bind(static_cast<charge(*)(charge, charge)>(SymmGroup::fuse),
                                                                        boost::lambda::_1, -boost::lambda::_2));
     

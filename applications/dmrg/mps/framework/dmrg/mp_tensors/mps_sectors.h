@@ -75,7 +75,7 @@ inline std::vector<Index<SymmGroup> > allowed_sectors(std::vector<int> const& si
     
     typename SymmGroup::charge cmaxi=maximum_total_charge, cmini=minimum_total_charge;
     for (int i = 1; i < L+1; ++i) {
-        left_allowed[i] = phys_dims[site_type[i-1]] * left_allowed[i-1];
+        left_allowed[i] = ::operator*(phys_dims[site_type[i-1]], left_allowed[i-1]);
         typename Index<SymmGroup>::iterator it = left_allowed[i].begin();
         while ( it != left_allowed[i].end() )
         {
@@ -94,7 +94,7 @@ inline std::vector<Index<SymmGroup> > allowed_sectors(std::vector<int> const& si
     
     cmaxi=maximum_total_charge; cmini=minimum_total_charge;
     for (int i = L-1; i >= 0; --i) {
-        right_allowed[i] = adjoin(phys_dims[site_type[i]]) * right_allowed[i+1];
+        right_allowed[i] = ::operator*(adjoin(phys_dims[site_type[i]]), right_allowed[i+1]);
         
         typename Index<SymmGroup>::iterator it = right_allowed[i].begin();
         while ( it != right_allowed[i].end() )

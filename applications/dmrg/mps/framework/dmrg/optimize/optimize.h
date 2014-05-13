@@ -116,7 +116,7 @@ public:
             throw std::runtime_error("Parameter \"ortho_states\" is not set\n");
 
         ortho_mps.resize(northo);
-        std::string files_ = parms_["ortho_states"];
+        std::string files_ = parms_["ortho_states"].str();
         std::vector<std::string> files;
         boost::split(files, files_, boost::is_any_of(", "));
         for (int n = 0; n < northo; ++n) {

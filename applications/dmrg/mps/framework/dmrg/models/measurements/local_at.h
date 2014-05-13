@@ -104,7 +104,7 @@ namespace measurements {
                     MPS<Matrix, SymmGroup> super_mpo = mpo_to_smps(mpo, this->phys_psi);
                     // static_cast needed for icpc 12.x
                     typedef typename MPS<Matrix, SymmGroup>::scalar_type (*overlap_func)(MPS<Matrix, SymmGroup> const &, MPS<Matrix, SymmGroup> const &);
-                    typename MPS<Matrix, SymmGroup>::scalar_type val = static_cast<overlap_func>(&overlap)(super_mpo, mps);
+                    typename MPS<Matrix, SymmGroup>::scalar_type val = ::overlap(super_mpo, mps);
                     this->vector_results.push_back(val/nn);
                 }
             }

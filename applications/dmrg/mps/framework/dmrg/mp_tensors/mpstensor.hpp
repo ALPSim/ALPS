@@ -51,13 +51,13 @@ MPSTensor<Matrix, SymmGroup>::MPSTensor(Index<SymmGroup> const & sd,
 , cur_storage(LeftPaired)
 , cur_normalization(Unorm)
 {
-    Index<SymmGroup> lb = sd*ld, rb = rd;
+    Index<SymmGroup> lb = ::operator*(sd,ld), rb = rd;
     common_subset(lb, rb);
     
     // remove blocks from the right index that may not be allowed by the left index
     right_i = rb;
     // remove blocks from the left index that may not be allowed by the right index
-    Index<SymmGroup> possible_rp = adjoin(phys_i)*right_i, ltemp = ld;
+    Index<SymmGroup> possible_rp = ::operator*(adjoin(phys_i),right_i), ltemp = ld;
     common_subset(ltemp, possible_rp);
     left_i = ltemp;
     
@@ -372,7 +372,7 @@ MPSTensor<Matrix, SymmGroup>::scalar_overlap(MPSTensor<Matrix, SymmGroup> const 
     common_subset(i1, i2);
     std::vector<scalar_type> vt; vt.reserve(i1.size());
 
-    semi_parallel_for (locale::compact(i1.size()), locale b = 0; b < i1.size(); ++b) {
+    semi_parallel_for (/*locale::compact(i1.size())*/, std::size_t b = 0; b < i1.size(); ++b) {
         typename SymmGroup::charge c = i1[b].first;
         assert( data().has_block(c,c) && rhs.data().has_block(c,c) );
         vt.push_back(overlap(data()(c,c), rhs.data()(c,c)));

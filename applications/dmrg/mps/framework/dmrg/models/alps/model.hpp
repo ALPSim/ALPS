@@ -77,7 +77,7 @@ public:
     
     typedef typename base::term_descriptor value_term;
     typedef typename alps::expression::Term<value_type> expression_type;
-    typedef term_descriptor<expression_type> expression_term;
+    typedef ::term_descriptor<expression_type> expression_term;
     typedef typename base::terms_type terms_type;
     typedef typename base::op_t op_t;
     typedef typename base::measurements_type measurements_type;

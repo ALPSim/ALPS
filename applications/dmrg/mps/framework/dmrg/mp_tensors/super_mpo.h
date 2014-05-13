@@ -68,7 +68,7 @@ MPS<Matrix, SymmGroup> mpo_to_smps(MPO<Matrix, SymmGroup> const& mpo, Index<Symm
     boost::function<charge (charge, charge)> phys_fuse = boost::lambda::bind(static_cast<charge(*)(charge, charge)>(SymmGroup::fuse),
                                                                              boost::lambda::_1, -boost::lambda::_2);
     
-    Index<SymmGroup> phys2_i = phys_i*adjoin(phys_i);
+    Index<SymmGroup> phys2_i = ::operator*(phys_i,adjoin(phys_i));
     ProductBasis<SymmGroup> phys_prod(phys_i, phys_i, phys_fuse);
     Index<SymmGroup> left_i, right_i;
     left_i.insert( std::make_pair(SymmGroup::IdentityCharge, 1) );

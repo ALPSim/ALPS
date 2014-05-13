@@ -128,7 +128,7 @@ namespace generate_mpo
             
             using boost::bind;
             typename Model<Matrix, SymmGroup>::terms_type const& terms = model.hamiltonian_terms();
-            std::for_each(terms.begin(), terms.end(), bind(&TaggedMPOMaker<Matrix,SymmGroup>::add_term, this, _1));
+            std::for_each(terms.begin(), terms.end(), boost::bind(&TaggedMPOMaker<Matrix,SymmGroup>::add_term, this, _1));
         }
         
         void add_term(term_descriptor term)

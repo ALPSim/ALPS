@@ -29,8 +29,9 @@
 #include <cmath>
 #include <vector>
 
+#define BOOST_TEST_SOURCE
 #define BOOST_TEST_MODULE random_choice
-#ifndef BOOST_TEST_DYN_LINK
+#ifndef ALPS_LINK_BOOST_TEST
 #include <boost/test/included/unit_test.hpp>
 #else
 #include <boost/test/unit_test.hpp>

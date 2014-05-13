@@ -277,7 +277,7 @@ struct contraction {
         }
 
         Index<SymmGroup> physical_i = mps.site_dim(), left_i = *in_low, right_i = mps.col_dim(),
-                                      out_left_i = physical_i * left_i;
+                                      out_left_i = ::operator*(physical_i , left_i);
         ProductBasis<SymmGroup> out_left_pb(physical_i, left_i);
         ProductBasis<SymmGroup> in_right_pb(physical_i, right_i,
                                 boost::lambda::bind(static_cast<charge(*)(charge, charge)>(SymmGroup::fuse),
@@ -317,7 +317,7 @@ struct contraction {
         }
         
         Index<SymmGroup> physical_i = mps.site_dim(), left_i = mps.row_dim(), right_i = *in_low,
-                         out_right_i = adjoin(physical_i) * right_i;
+                         out_right_i = ::operator*(adjoin(physical_i) , right_i);
 
         ProductBasis<SymmGroup> in_left_pb(physical_i, left_i);
         ProductBasis<SymmGroup> out_right_pb(physical_i, right_i,
@@ -351,14 +351,14 @@ struct contraction {
             ket_cpy.make_right_paired();
             std::size_t loop_max = left.aux_dim();
 
-            parallel_for(locale::scatter(mpo.placement_l), locale b = 0; b < loop_max; ++b) {
+            parallel_for(/*locale::scatter(mpo.placement_l)*/, std::size_t b = 0; b < loop_max; ++b) {
                 gemm_trim_left(transpose(left[b]), ket_cpy.data(), t[b]);
             }
         }
 
         Index<SymmGroup> const & left_i = bra_tensor.row_dim();
         Index<SymmGroup> const & right_i = ket_tensor.col_dim();
-        Index<SymmGroup> out_left_i = ket_tensor.site_dim() * left_i;
+        Index<SymmGroup> out_left_i = ::operator*(ket_tensor.site_dim() , left_i);
         ProductBasis<SymmGroup> out_left_pb(ket_tensor.site_dim(), left_i);
         ProductBasis<SymmGroup> in_right_pb(ket_tensor.site_dim(), right_i,
                                 boost::lambda::bind(static_cast<charge(*)(charge, charge)>(SymmGroup::fuse),
@@ -372,7 +372,7 @@ struct contraction {
 
         bra_tensor.make_left_paired();
         block_matrix<Matrix, SymmGroup> bra_conj = conjugate(bra_tensor.data());
-        parallel_for(locale::scatter(mpo.placement_r), locale b2 = 0; b2 < loop_max; ++b2) {
+        parallel_for(/*locale::scatter(mpo.placement_r)*/, std::size_t b2 = 0; b2 < loop_max; ++b2) {
             block_matrix<Matrix, SymmGroup> tmp;
             tmp = lbtm_kernel(b2, left, t, mpo, ket_tensor.site_dim(), right_i, out_left_i, in_right_pb, out_left_pb);
             gemm(transpose(tmp), bra_conj, ret[b2]);
@@ -397,14 +397,14 @@ struct contraction {
             ket_cpy.make_left_paired();
             std::size_t loop_max = right.aux_dim();
 
-            parallel_for(locale::scatter(mpo.placement_r), locale b = 0; b < loop_max; ++b){
+            parallel_for(/*locale::scatter(mpo.placement_r)*/, std::size_t b = 0; b < loop_max; ++b){
                 gemm_trim_right(ket_cpy.data(), right[b], t[b]);
             }
         }
 
         Index<SymmGroup> const & left_i = ket_tensor.row_dim();
         Index<SymmGroup> const & right_i = bra_tensor.col_dim();
-        Index<SymmGroup> out_right_i = adjoin(ket_tensor.site_dim()) * right_i;
+        Index<SymmGroup> out_right_i = ::operator*(adjoin(ket_tensor.site_dim()), right_i);
         ProductBasis<SymmGroup> in_left_pb(ket_tensor.site_dim(), left_i);
         ProductBasis<SymmGroup> out_right_pb(ket_tensor.site_dim(), right_i,
                                              boost::lambda::bind(static_cast<charge(*)(charge, charge)>(SymmGroup::fuse),
@@ -417,7 +417,7 @@ struct contraction {
 
         bra_tensor.make_right_paired();
         block_matrix<Matrix, SymmGroup> bra_conj = conjugate(bra_tensor.data());
-        parallel_for(locale::scatter(mpo.placement_l), locale b1 = 0; b1 < loop_max; ++b1) {
+        parallel_for(/*locale::scatter(mpo.placement_l)*/, std::size_t b1 = 0; b1 < loop_max; ++b1) {
             block_matrix<Matrix, SymmGroup> tmp;
             tmp = rbtm_kernel(b1, right, t, mpo, ket_tensor.site_dim(), left_i, right_i, out_right_i, in_left_pb, out_right_pb);
             gemm(tmp, transpose(bra_conj), ret[b1]);
@@ -442,14 +442,14 @@ struct contraction {
         std::vector<block_matrix<Matrix, SymmGroup> > t(left.aux_dim());
         std::size_t loop_max = left.aux_dim();
 
-        parallel_for(locale::scatter(mpo.placement_l), locale b = 0; b < loop_max; ++b) {
+        parallel_for(/*locale::scatter(mpo.placement_l)*/, std::size_t b = 0; b < loop_max; ++b) {
             gemm_trim_left(transpose(left[b]), ket_tensor.data(), t[b]);
         }
 
         Index<SymmGroup> const & physical_i = ket_tensor.site_dim(),
                                & left_i = ket_tensor.row_dim(),
                                & right_i = ket_tensor.col_dim(),
-                                 out_left_i = physical_i * left_i;
+                                 out_left_i = ::operator*(physical_i ,left_i);
         ProductBasis<SymmGroup> out_left_pb(physical_i, left_i);
         ProductBasis<SymmGroup> in_right_pb(physical_i, right_i,
                                 boost::lambda::bind(static_cast<charge(*)(charge, charge)>(SymmGroup::fuse),
@@ -457,7 +457,7 @@ struct contraction {
         
         loop_max = mpo.col_dim();
                     
-        parallel_for(locale::scatter(mpo.placement_r), locale b2 = 0; b2 < loop_max; ++b2) {
+        parallel_for(/*locale::scatter(mpo.placement_r)*/, std::size_t b2 = 0; b2 < loop_max; ++b2) {
 
             block_matrix<Matrix, SymmGroup> contr_column = lbtm_kernel(b2, left, t, mpo, physical_i,
                                                                        right_i, out_left_i, in_right_pb, out_left_pb);
