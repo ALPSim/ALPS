@@ -143,7 +143,7 @@ void svd(block_matrix<Matrix, SymmGroup> const & M,
     S = block_matrix<DiagMatrix, SymmGroup>(m, m);
     std::size_t loop_max = M.n_blocks();
     
-    parallel_for(locale::compact(loop_max), locale k = 0; k < loop_max; ++k)
+    parallel_for(/*removed...*/, std::size_t k = 0; k < loop_max; ++k)
         svd(M[k], U[k], V[k], S[k]);
 }
 
@@ -157,7 +157,7 @@ void heev(block_matrix<Matrix, SymmGroup> const & M,
     evals = block_matrix<DiagMatrix, SymmGroup>(M.left_basis(), M.right_basis());
     std::size_t loop_max = M.n_blocks();
 
-    parallel_for(locale::compact(loop_max), locale k = 0; k < loop_max; ++k)
+    parallel_for(/*removed...*/, std::size_t k = 0; k < loop_max; ++k)
         heev(M[k], evecs[k], evals[k]);
 }
 
@@ -393,7 +393,7 @@ void qr(block_matrix<Matrix, SymmGroup> const& M,
     R = block_matrix<Matrix, SymmGroup>(k,n);
     std::size_t loop_max = M.n_blocks();
     
-    parallel_for(locale::compact(loop_max), locale k = 0; k < loop_max; ++k)
+    parallel_for(/*removed...*/, std::size_t k = 0; k < loop_max; ++k)
         qr(M[k], Q[k], R[k]);
     
     assert(Q.right_basis() == R.left_basis());
@@ -415,7 +415,7 @@ void lq(block_matrix<Matrix, SymmGroup> const& M,
     Q = block_matrix<Matrix, SymmGroup>(k,n);
     std::size_t loop_max = M.n_blocks();
     
-    parallel_for(locale::compact(loop_max), locale k = 0; k < loop_max; ++k)
+    parallel_for(/*removed...*/, std::size_t k = 0; k < loop_max; ++k)
         lq(M[k], L[k], Q[k]);
     
     assert(Q.left_basis() == L.right_basis());

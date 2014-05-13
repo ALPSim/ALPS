@@ -124,7 +124,7 @@ typename MPS<Matrix, SymmGroup>::scalar_type norm(MPS<Matrix, SymmGroup> const &
     block_matrix<Matrix, SymmGroup> left;
     left.insert_block(Matrix(1, 1, 1), SymmGroup::IdentityCharge, SymmGroup::IdentityCharge);
     
-    semi_parallel_for (locale::compact(L), locale i = 0; i < L; ++i) {
+    semi_parallel_for (/*removed...*/, std::size_t i = 0; i < L; ++i) {
         MPSTensor<Matrix, SymmGroup> cpy = mps[i];
         left = contraction::overlap_left_step(mps[i], cpy, left); // serial
     }

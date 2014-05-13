@@ -321,7 +321,7 @@ void load(std::string const& dirname, MPS<Matrix, SymmGroup> & mps)
     /// load tensors
     MPS<Matrix, SymmGroup> tmp(L);
     size_t loop_max = tmp.length();
-    semi_parallel_for(locale::compact(loop_max), locale k = 0; k < loop_max; ++k){
+    semi_parallel_for(/*removed...*/, std::size_t k = 0; k < loop_max; ++k){
         std::string fname = dirname+"/mps"+boost::lexical_cast<std::string>((size_t)k)+".h5";
         storage::archive ar(fname);
         ar["/tensor"] >> tmp[k];
@@ -333,12 +333,12 @@ template<class Matrix, class SymmGroup>
 void save(std::string const& dirname, MPS<Matrix, SymmGroup> const& mps)
 {
     size_t loop_max = mps.length();
-    parallel_for(locale::compact(loop_max), locale k = 0; k < loop_max; ++k){
+    parallel_for(/*removed...*/, std::size_t k = 0; k < loop_max; ++k){
         const std::string fname = dirname+"/mps"+boost::lexical_cast<std::string>((size_t)k)+".h5.new";
         storage::archive ar(fname, "w");
         ar["/tensor"] << mps[k];
     }
-    parallel_for(locale::compact(loop_max), locale k = 0; k < loop_max; ++k){
+    parallel_for(/*removed...*/, std::size_t k = 0; k < loop_max; ++k){
         const std::string fname = dirname+"/mps"+boost::lexical_cast<std::string>((size_t)k)+".h5";
         boost::filesystem::rename(fname+".new", fname);
     }

@@ -272,7 +272,7 @@ struct contraction {
         std::vector<block_matrix<Matrix, SymmGroup> > t(left.aux_dim());
         size_t loop_max = left.aux_dim();
 
-        parallel_for(locale::scatter(mpo.placement_l), locale b = 0; b < loop_max; ++b){
+        parallel_for(/*removed...*/, std::size_t b = 0; b < loop_max; ++b){
             gemm_trim_left(transpose(left[b]), mps.data(), t[b]);
         }
 
@@ -288,7 +288,7 @@ struct contraction {
 
         loop_max = mpo.col_dim();
 
-        parallel_for(locale::scatter(mpo.placement_r), locale b2 = 0; b2 < loop_max; ++b2) {
+        parallel_for(l/*removed...*/, std::size_t b2 = 0; b2 < loop_max; ++b2) {
             ret[b2] = lbtm_kernel(b2, left, t, mpo, physical_i, right_i, out_left_i, in_right_pb, out_left_pb);
         }
 
@@ -312,7 +312,7 @@ struct contraction {
         std::vector<block_matrix<Matrix, SymmGroup> > t(right.aux_dim());
         size_t loop_max = right.aux_dim();
 
-        parallel_for(locale::scatter(mpo.placement_r), locale b = 0; b < loop_max; ++b){
+        parallel_for(/*removed...*/, std::size_t b = 0; b < loop_max; ++b){
             gemm_trim_right(mps.data(), right[b], t[b]);
         }
         
@@ -328,7 +328,7 @@ struct contraction {
         
         loop_max = mpo.row_dim();
 
-        parallel_for(locale::scatter(mpo.placement_l), locale b1 = 0; b1 < loop_max; ++b1) {
+        parallel_for(l/*removed...*/, std::size_t b1 = 0; b1 < loop_max; ++b1) {
             ret[b1] = rbtm_kernel(b1, right, t, mpo, physical_i, left_i, right_i, out_right_i, in_left_pb, out_right_pb);
         }
 
