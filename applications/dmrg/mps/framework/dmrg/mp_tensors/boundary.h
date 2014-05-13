@@ -97,7 +97,7 @@ public:
     void load(Archive & ar){
         std::vector<std::string> children = ar.list_children("data");
         data_.resize(children.size());
-        semi_parallel_for(locale::compact(children.size()),locale i=0; i<children.size(); ++i){
+        semi_parallel_for(/*removed...*/, std::size_t i=0; i<children.size(); ++i){
              ar["data/"+children[i]] >> data_[alps::cast<std::size_t>(children[i])];
         }
     }
