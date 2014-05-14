@@ -65,16 +65,11 @@ struct SiteProblem
     double ortho_shift;
 };
 
-#ifdef HAVE_GETTIMEOFDAY
 #define BEGIN_TIMING(name) \
-gettimeofday(&now, NULL);
+now = boost::chrono::high_resolution_clock::now();
 #define END_TIMING(name) \
-gettimeofday(&then, NULL); \
-maquis::cout << "Time elapsed in " << name << ": " << then.tv_sec-now.tv_sec + 1e-6 * (then.tv_usec-now.tv_usec) << std::endl;
-#else
-#define BEGIN_TIMING(name)
-#define END_TIMING(name)
-#endif
+then = boost::chrono::high_resolution_clock::now(); \
+maquis::cout << "Time elapsed in " << name << ": " << boost::chrono::duration<double>(then-now).count() << std::endl;
 
 inline double log_interpolate(double y0, double y1, int N, int i)
 {
