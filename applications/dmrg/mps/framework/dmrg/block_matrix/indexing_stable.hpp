@@ -222,8 +222,8 @@ public:
     
     std::size_t sum_of_sizes() const
     {
-        return std::accumulate(data_.begin(), data_.end(), 0,
-                               boost::lambda::_1 + boost::lambda::bind(index_detail::get_second<SymmGroup>, boost::lambda::_2));
+		//boost::function<std::size_t (std::size_t,std::size_t)> pred = boost::lambda::_1 + boost::lambda::bind(index_detail::get_second<SymmGroup>, boost::lambda::_2);
+        return std::accumulate(data_.begin(), data_.end(), 0, boost::lambda::ret<std::size_t>(boost::lambda::_1 + boost::lambda::bind(index_detail::get_second<SymmGroup>, boost::lambda::_2)));
     }
 
     // This is mostly forwarding of the std::vector
