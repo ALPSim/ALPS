@@ -37,7 +37,7 @@
 
 #include "dmrg/utils/BaseParameters.h"
 
-#ifndef WIN32
+#if not defined(WIN32) && not defined(WIN64)
 #include <sys/time.h>
 #define HAVE_GETTIMEOFDAY
 #endif

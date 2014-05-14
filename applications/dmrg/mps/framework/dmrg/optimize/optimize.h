@@ -29,7 +29,7 @@
 #define OPTIMIZE_H
 
 #include <boost/random.hpp>
-#ifndef WIN32
+#if not defined(WIN32) && not defined(WIN64)
 #include <sys/time.h>
 #define HAVE_GETTIMEOFDAY
 #endif

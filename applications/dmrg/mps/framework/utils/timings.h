@@ -70,7 +70,7 @@ private:
 };
 #endif
         
-#ifndef WIN32
+#if not defined(WIN32) && not defined(WIN64)
 #include <sys/time.h>
 #else
         
