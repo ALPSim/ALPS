@@ -43,12 +43,11 @@ namespace numeric {
         {
             // One could do also a dispatch on row vs. column major, but since we don't have row major right now, let's leave it like that.
             typedef typename Matrix1::size_type             size_type;
-            typedef typename Matrix1::col_element_iterator  col_element_iterator;
-            typedef typename Matrix1::value_type            value_type;
             assert(num_rows(lhs) == num_rows(rhs));
             assert(num_cols(lhs) == num_cols(rhs));
 #if defined(__clang_major__) && __clang_major__ < 3 || (__clang_major__ == 3 && __clang_minor__ == 0)
 // Workaround for a compiler bug in clang 3.0 (and maybe earlier versions)
+            typedef typename Matrix1::value_type            value_type;
             for(size_type j=0; j < num_cols(lhs); ++j)
             {
                 for(size_type i=0; i < num_rows(lhs); ++i)
@@ -58,6 +57,7 @@ namespace numeric {
                 }
             }
 #else //defined(__clang_major__) && __clang_major__ < 3 || (__clang_major__ == 3 && __clang_minor__ == 0)
+            typedef typename Matrix1::col_element_iterator  col_element_iterator;
             for(size_type j=0; j < num_cols(lhs); ++j)
             {
                 std::pair<col_element_iterator,col_element_iterator> range(col(lhs,j));
@@ -70,7 +70,6 @@ namespace numeric {
         void multiplies_assign_impl(Matrix& lhs, T2 const& t, tag::matrix, tag::scalar)
         {
             typedef typename Matrix::size_type              size_type;
-            typedef typename Matrix::value_type             value_type;
             typedef typename Matrix::col_element_iterator   col_element_iterator;
             // Do the operation column by column
             for(size_type j=0; j < num_cols(lhs); ++j)
