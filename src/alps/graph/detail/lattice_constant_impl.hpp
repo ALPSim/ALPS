@@ -412,7 +412,6 @@ namespace alps {
                 , ExitOnMatch exit_on_match
             ) {
                 typedef typename boost::graph_traits<Subgraph>::vertex_descriptor SubgraphVertex;
-                typedef typename boost::graph_traits<Graph>::vertex_descriptor GraphVertex;
 
                 if (out_degree(s, S) > out_degree(g, G))
                     return;

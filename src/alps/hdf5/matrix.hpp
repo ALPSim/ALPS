@@ -161,7 +161,6 @@ namespace detail {
         using std::copy;
         using std::fill_n;
         using alps::cast;
-        typedef typename alps::numeric::matrix<T,MemoryBlock>::const_col_element_iterator col_iterator;
         if (is_continuous<T>::value && m.empty())
             ar.write(path, static_cast<typename scalar_type<alps::numeric::matrix<T, MemoryBlock> >::type const *>(NULL), std::vector<std::size_t>());
         else if (is_continuous<T>::value) {

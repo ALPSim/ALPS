@@ -46,8 +46,6 @@ namespace alps {
             , Lattice const & L
             , typename alps::lattice_traits<Lattice>::cell_descriptor c
         ) {
-            typedef typename alps::lattice_traits<Lattice>::size_type cell_index_type;
-
             // Get the possible translation in the lattice
             std::vector<std::vector<boost::uint_t<8>::fast> > distance_to_boarder(dimension(L), std::vector<boost::uint_t<8>::fast>(num_vertices(G), num_vertices(G)));
             detail::build_translation_table(G, L, distance_to_boarder);
