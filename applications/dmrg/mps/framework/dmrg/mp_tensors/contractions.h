@@ -277,7 +277,7 @@ struct contraction {
         }
 
         Index<SymmGroup> physical_i = mps.site_dim(), left_i = *in_low, right_i = mps.col_dim(),
-                                      out_left_i = ::operator*(physical_i , left_i);
+                                      out_left_i = physical_i * left_i;
         ProductBasis<SymmGroup> out_left_pb(physical_i, left_i);
         ProductBasis<SymmGroup> in_right_pb(physical_i, right_i,
                                 boost::lambda::bind(static_cast<charge(*)(charge, charge)>(SymmGroup::fuse),
@@ -317,7 +317,7 @@ struct contraction {
         }
         
         Index<SymmGroup> physical_i = mps.site_dim(), left_i = mps.row_dim(), right_i = *in_low,
-                         out_right_i = ::operator*(adjoin(physical_i) , right_i);
+                         out_right_i = adjoin(physical_i) * right_i;
 
         ProductBasis<SymmGroup> in_left_pb(physical_i, left_i);
         ProductBasis<SymmGroup> out_right_pb(physical_i, right_i,
@@ -358,7 +358,7 @@ struct contraction {
 
         Index<SymmGroup> const & left_i = bra_tensor.row_dim();
         Index<SymmGroup> const & right_i = ket_tensor.col_dim();
-        Index<SymmGroup> out_left_i = ::operator*(ket_tensor.site_dim() , left_i);
+        Index<SymmGroup> out_left_i = ket_tensor.site_dim() * left_i;
         ProductBasis<SymmGroup> out_left_pb(ket_tensor.site_dim(), left_i);
         ProductBasis<SymmGroup> in_right_pb(ket_tensor.site_dim(), right_i,
                                 boost::lambda::bind(static_cast<charge(*)(charge, charge)>(SymmGroup::fuse),
@@ -404,7 +404,7 @@ struct contraction {
 
         Index<SymmGroup> const & left_i = ket_tensor.row_dim();
         Index<SymmGroup> const & right_i = bra_tensor.col_dim();
-        Index<SymmGroup> out_right_i = ::operator*(adjoin(ket_tensor.site_dim()), right_i);
+        Index<SymmGroup> out_right_i = adjoin(ket_tensor.site_dim()) * right_i;
         ProductBasis<SymmGroup> in_left_pb(ket_tensor.site_dim(), left_i);
         ProductBasis<SymmGroup> out_right_pb(ket_tensor.site_dim(), right_i,
                                              boost::lambda::bind(static_cast<charge(*)(charge, charge)>(SymmGroup::fuse),
@@ -449,7 +449,7 @@ struct contraction {
         Index<SymmGroup> const & physical_i = ket_tensor.site_dim(),
                                & left_i = ket_tensor.row_dim(),
                                & right_i = ket_tensor.col_dim(),
-                                 out_left_i = ::operator*(physical_i ,left_i);
+                                 out_left_i = physical_i * left_i;
         ProductBasis<SymmGroup> out_left_pb(physical_i, left_i);
         ProductBasis<SymmGroup> in_right_pb(physical_i, right_i,
                                 boost::lambda::bind(static_cast<charge(*)(charge, charge)>(SymmGroup::fuse),

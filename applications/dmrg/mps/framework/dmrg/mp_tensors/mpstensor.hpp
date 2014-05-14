@@ -51,13 +51,13 @@ MPSTensor<Matrix, SymmGroup>::MPSTensor(Index<SymmGroup> const & sd,
 , cur_storage(LeftPaired)
 , cur_normalization(Unorm)
 {
-    Index<SymmGroup> lb = ::operator*(sd,ld), rb = rd;
+    Index<SymmGroup> lb = sd*ld, rb = rd;
     common_subset(lb, rb);
     
     // remove blocks from the right index that may not be allowed by the left index
     right_i = rb;
     // remove blocks from the left index that may not be allowed by the right index
-    Index<SymmGroup> possible_rp = ::operator*(adjoin(phys_i),right_i), ltemp = ld;
+    Index<SymmGroup> possible_rp = adjoin(phys_i)*right_i, ltemp = ld;
     common_subset(ltemp, possible_rp);
     left_i = ltemp;
     

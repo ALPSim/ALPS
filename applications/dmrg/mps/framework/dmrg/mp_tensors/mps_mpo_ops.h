@@ -246,7 +246,7 @@ typename MPS<Matrix, SymmGroup>::scalar_type dm_trace(MPS<Matrix, SymmGroup> con
     charge I = SymmGroup::IdentityCharge;
     size_t L = mps.length();
     
-    Index<SymmGroup> phys_rho = ::operator*(phys_psi, adjoin(phys_psi));
+    Index<SymmGroup> phys_rho = phys_psi * adjoin(phys_psi);
     ProductBasis<SymmGroup> pb(phys_psi, phys_psi, boost::lambda::bind(static_cast<charge(*)(charge, charge)>(SymmGroup::fuse),
                                                                        boost::lambda::_1, -boost::lambda::_2));
     
