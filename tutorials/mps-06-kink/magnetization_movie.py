@@ -9,7 +9,7 @@ from subprocess import check_call
 
 
 basename = 'sim_a'
-data = pyalps.loadMPSIterations(pyalps.getResultFiles(prefix=basename), what=['Local Magnetization'])
+data = pyalps.loadIterationMeasurements(pyalps.getResultFiles(prefix=basename), what=['Local Magnetization'])
 
 dirname = tempfile.mkdtemp()
 print '..temp dir:', dirname

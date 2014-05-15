@@ -273,7 +273,7 @@ class Hdf5Loader:
                     else:
                         obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
                     if loadIterations==True:
-                        if "iteration" in self.h5f.list_children(respath):
+                        if "iteration" in self.h5f.list_children(respath+'/results'):
                             fileset.append(self.GetIterations(respath+'/results', params, measurements, index, verbose))
                     else:        
                         for m in obslist:

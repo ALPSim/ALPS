@@ -91,7 +91,7 @@ res = pyalps.runApplication('mps_evolve', input_file)
 
 
 ## simulation results
-data = pyalps.loadMPSIterations(pyalps.getResultFiles(prefix=basename+'.dynamic'), what=['Overlap'])
+data = pyalps.loadIterationMeasurements(pyalps.getResultFiles(prefix=basename+'.dynamic'), what=['Overlap'])
 
 
 LE = pyalps.collectXY(data, x='iter_t', y='Overlap', foreach=['tau'])

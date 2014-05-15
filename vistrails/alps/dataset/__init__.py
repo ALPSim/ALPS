@@ -107,6 +107,7 @@ def selfRegister():
     register(LoadAlpsSpectra,'DataSet|Load')
     register(LoadBinningAnalysis,'DataSet|Load')
     register(LoadAlpsEigenstateMeasurements,'DataSet|Load')
+    register(LoadAlpsIterationMeasurements,'DataSet|Load')
     register(LoadDMFTIterations,'DataSet|Load')
 
     register(TransformEachDataSet,'DataSet|Evaluate')

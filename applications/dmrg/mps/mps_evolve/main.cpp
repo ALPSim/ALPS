@@ -34,7 +34,7 @@
 int main(int argc, char ** argv)
 {
     try {
-        std::cout << "ALPS/MPS Time Evolution version DMRG_VERSION (2013-2014)\n"
+        std::cout << "ALPS/MPS Time Evolution version "DMRG_VERSION_STRING" (2013-2014)\n"
         << "  Density Matrix Renormalization Group algorithm\n"
         << "  available from http://alps.comp-phys.org/\n"
         << "  copyright (c) 2013 Institute for Theoretical Physics, ETH Zurich\n"

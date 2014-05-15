@@ -56,7 +56,7 @@ for s in data[0]:
     print s.props['observable'], ' : ', s.y[0]
 
 # load and plot iteration history
-iterations = pyalps.loadMPSIterations(pyalps.getResultFiles(prefix='parm_spin_one'),
+iterations = pyalps.loadIterationMeasurements(pyalps.getResultFiles(prefix='parm_spin_one'),
                                       what=['Energy','TruncatedWeight'])
 energy_iteration     = pyalps.collectXY(pyalps.flatten(iterations), 'iteration', 'Energy')
 for d in energy_iteration:

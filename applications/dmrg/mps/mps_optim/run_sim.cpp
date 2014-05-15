@@ -49,8 +49,8 @@ void run_sim(const boost::filesystem::path& infile, const boost::filesystem::pat
     }
     
     /// Match parameters of ALPS DMRG
-    parms.set("chkpfile",   outfile.stem().string() + ".chkp");
-    parms.set("resultfile", outfile.stem().string() + ".h5");
+    parms.set("chkpfile",   (outfile.parent_path() / outfile.stem()).string() + ".chkp");
+    parms.set("resultfile", (outfile.parent_path() / outfile.stem()).string() + ".h5");
     parms.set("run_seconds", time_limit);
     if (parms.defined("SWEEPS"))           parms.set("nsweeps", int(parms["SWEEPS"]));
     if (parms.defined("TRUNCATION_ERROR")) parms.set("truncation_final", parms["TRUNCATION_ERROR"]);

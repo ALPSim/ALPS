@@ -58,7 +58,7 @@ void Scheduler::parse_job_file(const boost::filesystem::path& filename)
     tag = alps::parse_tag(infile);
     if (tag.name == "OUTPUT") {
         if(tag.attributes["file"] != "")
-            outfilepath = boost::filesystem::absolute(boost::filesystem::path(tag.attributes["file"]), filename.branch_path());
+            outfilepath = boost::filesystem::absolute(boost::filesystem::path(tag.attributes["file"]), filename.parent_path());
         else
             boost::throw_exception(std::runtime_error("missing 'file' attribute in <OUTPUT> element in jobfile"));
         tag = alps::parse_tag(infile);
@@ -99,7 +99,8 @@ void Scheduler::parse_job_file(const boost::filesystem::path& filename)
         }
         if (task.out.empty())
             task.out = task.in;
-        task.in = boost::filesystem::absolute(task.in, filename.branch_path());
+        task.in  = boost::filesystem::absolute(task.in, filename.parent_path());
+        task.out = boost::filesystem::absolute(task.out, filename.parent_path());
         if (tag.name != "/TASK")
             boost::throw_exception(std::runtime_error("missing </TASK> tag in jobfile"));
         tag = alps::parse_tag(infile);
@@ -114,7 +115,7 @@ void Scheduler::checkpoint_status() const
 {
     bool make_backup = boost::filesystem::exists(outfilepath);
     boost::filesystem::path filename = outfilepath;
-    boost::filesystem::path dir = outfilepath.branch_path();
+    boost::filesystem::path dir = outfilepath.parent_path();
     if (make_backup)
         filename = dir / (filename.filename().string() + ".bak");
     { // scope for out

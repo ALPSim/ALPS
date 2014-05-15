@@ -366,6 +366,7 @@ class LoadAlpsSpectra(Module):
 class LoadAlpsEigenstateMeasurements(Module):
     """Load the observables of an ED or DMRG-simulation from hdf5 files. Description of input ports:
       @ResultFiles: The hdf5-files.
+      @Measurements: List of observables to load
       @PropertyPath: Hdf5-path to the parameters stored. Default: /parameters
       @SpectrumPath: Hdf5-path to the spectrum stored. Default: /spectrum"""
 
@@ -397,6 +398,38 @@ class LoadAlpsEigenstateMeasurements(Module):
         else:
             datasets = loader.ReadDiagDataFromFile(files,propPath,resPath)
             
+        self.setResult('data',datasets)
+
+class LoadAlpsIterationMeasurements(Module):
+    """Load the data from successive MPS-Iterations. Description of input ports:
+      @ResultFiles: The hdf5-files.
+      @Measurements: List of observables to load
+      @PropertyPath: Hdf5-path to the parameters stored. Default: /parameters
+      @SpectrumPath: Hdf5-path to the spectrum stored. Default: /spectrum"""
+
+    my_input_ports = [
+        PortDescriptor('ResultFiles',ResultFiles),
+        PortDescriptor('PropertyPath',basic.String),
+        PortDescriptor('SpectrumPath',basic.String),
+        PortDescriptor('Measurements',basic.List)
+    ]
+    
+    my_output_ports = [
+        PortDescriptor('data',DataSets)
+    ]    
+    
+    def compute(self):
+        propPath= self.getInputFromPort('PropertyPath') if self.hasInputFromPort('PropertyPath') else "/parameters"
+        resPath= self.getInputFromPort('SpectrumPath') if self.hasInputFromPort('SpectrumPath') else "/spectrum"
+        loader = Hdf5Loader()
+        if self.hasInputFromPort('ResultFiles'):
+            files = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
+        what = None
+        if self.hasInputFromPort('Measurements'):
+            what = self.getInputFromPort('Measurements')
+        
+        datasets = loader.ReadDiagDataFromFile(files,proppath=propPath,respath=resPath,
+                                               measurements=what,loadIterations=True)
         self.setResult('data',datasets)
 
 class GroupDataSets(Module):

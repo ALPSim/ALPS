@@ -72,7 +72,7 @@ res = pyalps.runApplication('mps_evolve', input_file)
 
 
 ## simulation results
-data = pyalps.loadMPSIterations(pyalps.getResultFiles(prefix=basename), what=['Local Magnetization'])
+data = pyalps.loadIterationMeasurements(pyalps.getResultFiles(prefix=basename), what=['Local Magnetization'])
 
 numeric_magnetization = []
 for d in pyalps.flatten(data):
