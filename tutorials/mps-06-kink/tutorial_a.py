@@ -55,8 +55,8 @@ for tau in [20.0]:
         p['initial_local_S' ] = ','.join(['0.5']*50)
         p['initial_local_Sz'] = ','.join(['-0.5']*25 + ['0.5']*25)
         p['te_order' ] = 'second'
-        p['dt'       ] = dt
-        p['SWEEPS'   ] = ns
+        p['DT'       ] = dt
+        p['TIMESTEPS'] = ns
         p['tau'      ] = tau # not used in the simulation, but useful in the evaluation below
         p['always_measure'] = 'Local Magnetization'
         p['chkp_each'     ] = ns
@@ -84,7 +84,7 @@ for d in pyalps.flatten(data):
         q.props['loc'] = loc
         numeric_magnetization.append(q)
 
-mag_vs_time = pyalps.collectXY(numeric_magnetization, x='iter_t', y='Local Magnetization', foreach=['loc'])
+mag_vs_time = pyalps.collectXY(numeric_magnetization, x='Time', y='Local Magnetization', foreach=['loc'])
 for d in mag_vs_time:
     d.x = (d.x + 1.) * d.props['dt'] # convert time index to real time
     d.props['label'] = 'Numerical at n='+str(d.props['loc'])

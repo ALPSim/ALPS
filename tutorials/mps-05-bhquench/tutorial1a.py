@@ -71,16 +71,16 @@ for A in [5.0, 10.0, 15.0, 25.0, 50.0]:
         p = deepcopy(model)
         p['initfile'] = initstate
         p['te_order' ] = 'second'
-        p['dt'       ] = dt
-        p['SWEEPS'   ] = ns
-        p['V[t]'     ] = list_to_string(V)
+        p['DT'       ] = dt
+        p['TIMESTEPS'] = ns
+        p['V[Time]'  ] = list_to_string(V)
         p['tau'      ] = A # not used in the simulation, but useful in the evaluation below
         p['MEASURE_OVERLAP[Overlap]'] = initstate
         p['always_measure'] = 'Overlap'
         p['chkp_each'     ] = ns
         p['measure_each'  ] = 10
         p['update_each'   ] = 1
-	p['COMPLEX'       ] = 1
+        p['COMPLEX'       ] = 1
         
         parms.append(p)
 
@@ -94,7 +94,7 @@ res = pyalps.runApplication('mps_evolve', input_file)
 data = pyalps.loadIterationMeasurements(pyalps.getResultFiles(prefix=basename+'.dynamic'), what=['Overlap'])
 
 
-LE = pyalps.collectXY(data, x='iter_t', y='Overlap', foreach=['tau'])
+LE = pyalps.collectXY(data, x='Time', y='Overlap', foreach=['tau'])
 for d in pyalps.flatten(LE):
     d.x =  (d.x + 1.) * d.props['dt'] # convert time index to real time
     d.y = abs(d.y)**2 # Loschmidt Echo defined as the module squared of the overlap
@@ -108,8 +108,8 @@ plt.title('Loschmidt Echo vs. Time')
 plt.legend(loc='lower right')
 
 
-## Read V[t] from props
-Ufig = pyalps.collectXY(data, x='iter_t', y='V', foreach=['tau'])
+## Read V[Time] from props
+Ufig = pyalps.collectXY(data, x='Time', y='V', foreach=['tau'])
 for d in pyalps.flatten(Ufig):
     d.x =  (d.x + 1.) * d.props['dt'] # convert time index to real time
     d.props['label']=r'$\tau={0}$'.format( d.props['tau'] )
