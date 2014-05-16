@@ -67,10 +67,8 @@ hyb_config(parms)
   
   //initializing physics parameters
   beta = parms["BETA"];                                                            //inverse temperature
-  U_ =
-      parms["U"];
-  MU_ =
-      parms["MU"];
+//  U_ = parms["U"];
+//  MU_ = parms["MU"];
   
 //  if ((parms["USE_FRACTION"]| 0)) {
 //    fraction = beta/((U_>MU_)?MU_:U_);

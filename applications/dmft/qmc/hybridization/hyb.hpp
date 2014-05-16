@@ -120,7 +120,8 @@ private:
   double sign;
 
   //physics parameters
-  double beta,U_,MU_;
+  double beta;
+//  double U_,MU_;
   
 
   //updates parameters
