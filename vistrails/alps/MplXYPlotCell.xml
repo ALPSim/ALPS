@@ -264,6 +264,67 @@
       <port id="23" moduleId="8" moduleName="MplXYPlot" name="plot" signature="(org.comp-phys.alps:DataSet|Plot|PreparePlot)" type="destination" />
     </add>
   </action>
+  <action date="2014-05-16 08:53:25" id="18" prevId="17" session="5" user="dolfim">
+    <annotation id="4" key="__description__" value="Upgrade" />
+    <delete id="101" objectId="18" parentObjId="9" parentObjType="connection" what="port" />
+    <delete id="102" objectId="19" parentObjId="9" parentObjType="connection" what="port" />
+    <delete id="103" objectId="9" parentObjId="" parentObjType="" what="connection" />
+    <delete id="104" objectId="20" parentObjId="10" parentObjType="connection" what="port" />
+    <delete id="105" objectId="21" parentObjId="10" parentObjType="connection" what="port" />
+    <delete id="106" objectId="10" parentObjId="" parentObjType="" what="connection" />
+    <delete id="107" objectId="11" parentObjId="11" parentObjType="module" what="location" />
+    <delete id="108" objectId="11" parentObjId="" parentObjType="" what="module" />
+    <delete id="109" objectId="12" parentObjId="6" parentObjType="connection" what="port" />
+    <delete id="110" objectId="13" parentObjId="6" parentObjType="connection" what="port" />
+    <delete id="111" objectId="6" parentObjId="" parentObjType="" what="connection" />
+    <delete id="112" objectId="12" parentObjId="9" parentObjType="module" what="location" />
+    <delete id="113" objectId="9" parentObjId="" parentObjType="" what="module" />
+    <add id="114" objectId="12" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="12" name="MplFigureCell" namespace="" package="org.vistrails.vistrails.matplotlib" version="1.0.1" />
+    </add>
+    <add id="115" objectId="13" parentObjId="12" parentObjType="module" what="location">
+      <location id="13" x="-53.2916073824" y="-91.9087141812" />
+    </add>
+    <add id="116" objectId="13" parentObjId="" parentObjType="" what="connection">
+      <connection id="13" />
+    </add>
+    <add id="117" objectId="26" parentObjId="13" parentObjType="connection" what="port">
+      <port id="26" moduleId="7" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+    </add>
+    <add id="118" objectId="27" parentObjId="13" parentObjType="connection" what="port">
+      <port id="27" moduleId="12" moduleName="MplFigureCell" name="Location" signature="(org.vistrails.vistrails.spreadsheet:CellLocation)" type="destination" />
+    </add>
+    <add id="119" objectId="13" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="13" name="MplFigure" namespace="" package="org.vistrails.vistrails.matplotlib" version="1.0.1" />
+    </add>
+    <add id="120" objectId="14" parentObjId="13" parentObjType="module" what="location">
+      <location id="14" x="-13.9021584476" y="16.9915269915" />
+    </add>
+    <add id="121" objectId="14" parentObjId="" parentObjType="" what="connection">
+      <connection id="14" />
+    </add>
+    <add id="122" objectId="28" parentObjId="14" parentObjType="connection" what="port">
+      <port id="28" moduleId="13" moduleName="MplFigure" name="self" signature="(org.vistrails.vistrails.matplotlib:MplFigure)" type="source" />
+    </add>
+    <add id="123" objectId="29" parentObjId="14" parentObjType="connection" what="port">
+      <port id="29" moduleId="12" moduleName="MplFigureCell" name="figure" signature="(org.vistrails.vistrails.matplotlib:MplFigure)" type="destination" />
+    </add>
+    <add id="124" objectId="15" parentObjId="" parentObjType="" what="connection">
+      <connection id="15" />
+    </add>
+    <add id="125" objectId="30" parentObjId="15" parentObjType="connection" what="port">
+      <port id="30" moduleId="8" moduleName="MplXYPlot" name="self" signature="(org.vistrails.vistrails.matplotlib:MplPlot)" type="source" />
+    </add>
+    <add id="126" objectId="31" parentObjId="15" parentObjType="connection" what="port">
+      <port id="31" moduleId="13" moduleName="MplFigure" name="addPlot" signature="(org.vistrails.vistrails.matplotlib:MplPlot)" type="destination" />
+    </add>
+  </action>
+  <action date="2014-05-16 08:54:56" id="19" prevId="18" session="5" user="dolfim">
+    <change id="127" newObjId="15" oldObjId="6" parentObjId="6" parentObjType="module" what="location">
+      <location id="15" x="-210.18695573" y="316.99978306" />
+    </change>
+  </action>
   <annotation id="1" key="__abstraction_uuid__" value="c1720ce0-3456-11df-8e93-002500a2cd74" />
   <actionAnnotation actionId="3" date="2013-09-08 10:37:11" id="3" key="__upgrade__" user="troyer" value="4" />
+  <actionAnnotation actionId="17" date="2014-05-16 08:53:25" id="5" key="__upgrade__" user="dolfim" value="18" />
 </vistrail>
