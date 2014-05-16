@@ -147,6 +147,14 @@ class RunDMRG(RunAlpsApplication):
     appname = 'dmrg'
     options = ['--Nmax', '1']
 
+class RunMPSOptim(RunAlpsApplication):
+    """Runs the MPS optimization application """
+    appname = 'mps_optim'
+
+class RunMPSEvolve(RunAlpsApplication):
+    """Runs the MPS time evolution application """
+    appname = 'mps_evolve'
+
 class RunQWL(RunAlpsApplication):
     """Runs the qwl quantum Monte Carlo application """
     appname = 'qwl'
@@ -387,6 +395,8 @@ def selfRegister():
   register_application(RunFullDiag)
   register_application(RunSparseDiag)
   register_application(RunDMRG)
+  register_application(RunMPSOptim)
+  register_application(RunMPSEvolve)
   register_application(RunQWL)
   register_application(RunDMFT)
   register_application(RunTEBD)

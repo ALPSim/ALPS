@@ -53,7 +53,7 @@ for D in [20,40,60]:
 
 #write the input file and run the simulation
 input_file = pyalps.writeInputFiles('parm_spin_one_half',parms)
-# res = pyalps.runApplication('mps_optim',input_file,writexml=True)
+res = pyalps.runApplication('mps_optim',input_file,writexml=True)
 
 #load all measurements for all states
 data = pyalps.loadEigenstateMeasurements(pyalps.getResultFiles(prefix='parm_spin_one_half'))
