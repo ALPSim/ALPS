@@ -176,6 +176,21 @@ void OperatorDescriptor<I>::write_xml(oxstream& os) const
 } // namespace alps
 
 #ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
+
+template <class I>
+inline alps::oxstream& operator<<(alps::oxstream& out, const alps::OperatorDescriptor<I>& q)
+{
+  q.write_xml(out);
+  return out;
+}
+
+template <class I>
+inline std::ostream& operator<<(std::ostream& out, const alps::OperatorDescriptor<I>& q)
+{
+  alps::oxstream xml(out);
+  xml << q;
+  return out;
+}
 namespace alps {
 #endif
 

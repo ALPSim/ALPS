@@ -311,7 +311,7 @@
       <port id="14" moduleId="0" moduleName="Group" name="hide_buttons" signature="(org.vistrails.vistrails.basic:Boolean)" type="destination" />
     </add>
   </action>
-  <action date="2014-05-16 08:56:08" id="2" prevId="1" session="1" user="dolfim">
+  <action date="2014-05-16 16:02:42" id="2" prevId="1" session="1" user="troyer">
     <annotation id="3" key="__description__" value="Upgrade" />
     <delete id="62" objectId="1" parentObjId="0" parentObjType="connection" what="port" />
     <delete id="63" objectId="0" parentObjId="0" parentObjType="connection" what="port" />
@@ -376,16 +376,16 @@
             <port id="24" moduleId="13" moduleName="CellLocation" name="SheetReference" signature="(org.vistrails.vistrails.spreadsheet:SheetReference)" type="destination" />
           </connection>
           <connection id="14">
-            <port id="27" moduleId="13" moduleName="CellLocation" name="self" signature="(org.vistrails.vistrails.spreadsheet:CellLocation)" type="source" />
-            <port id="28" moduleId="14" moduleName="MplFigureCell" name="Location" signature="(org.vistrails.vistrails.spreadsheet:CellLocation)" type="destination" />
+            <port id="27" moduleId="2" moduleName="MplXYPlot" name="self" signature="(org.vistrails.vistrails.matplotlib:MplPlot)" type="source" />
+            <port id="28" moduleId="14" moduleName="MplFigure" name="addPlot" signature="(org.vistrails.vistrails.matplotlib:MplPlot)" type="destination" />
           </connection>
           <connection id="15">
-            <port id="29" moduleId="15" moduleName="MplFigure" name="self" signature="(org.vistrails.vistrails.matplotlib:MplFigure)" type="source" />
-            <port id="30" moduleId="14" moduleName="MplFigureCell" name="figure" signature="(org.vistrails.vistrails.matplotlib:MplFigure)" type="destination" />
+            <port id="29" moduleId="13" moduleName="CellLocation" name="self" signature="(org.vistrails.vistrails.spreadsheet:CellLocation)" type="source" />
+            <port id="30" moduleId="15" moduleName="MplFigureCell" name="Location" signature="(org.vistrails.vistrails.spreadsheet:CellLocation)" type="destination" />
           </connection>
           <connection id="16">
-            <port id="31" moduleId="2" moduleName="MplXYPlot" name="self" signature="(org.vistrails.vistrails.matplotlib:MplPlot)" type="source" />
-            <port id="32" moduleId="15" moduleName="MplFigure" name="addPlot" signature="(org.vistrails.vistrails.matplotlib:MplPlot)" type="destination" />
+            <port id="31" moduleId="14" moduleName="MplFigure" name="self" signature="(org.vistrails.vistrails.matplotlib:MplFigure)" type="source" />
+            <port id="32" moduleId="15" moduleName="MplFigureCell" name="figure" signature="(org.vistrails.vistrails.matplotlib:MplFigure)" type="destination" />
           </connection>
           <module cache="1" id="1" name="PreparePlot" namespace="DataSet|Plot" package="org.comp-phys.alps" version="2.2.0">
             <location id="1" x="33.09713782" y="147.692926157" />
@@ -453,11 +453,11 @@
               <parameter alias="" id="11" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:Integer" val="" />
             </function>
           </module>
-          <module cache="1" id="14" name="MplFigureCell" namespace="" package="org.vistrails.vistrails.matplotlib" version="1.0.1">
-            <location id="14" x="11.40342921" y="-227.377217099" />
+          <module cache="1" id="14" name="MplFigure" namespace="" package="org.vistrails.vistrails.matplotlib" version="1.0.1">
+            <location id="14" x="35.89131966" y="-99.5662399711" />
           </module>
-          <module cache="1" id="15" name="MplFigure" namespace="" package="org.vistrails.vistrails.matplotlib" version="1.0.1">
-            <location id="15" x="35.89131966" y="-99.5662399711" />
+          <module cache="1" id="15" name="MplFigureCell" namespace="" package="org.vistrails.vistrails.matplotlib" version="1.0.1">
+            <location id="15" x="11.40342921" y="-227.377217099" />
           </module>
         </workflow>
       </group>
@@ -529,12 +529,12 @@
       <port id="29" moduleId="9" moduleName="Group" name="hide_buttons" signature="(org.vistrails.vistrails.basic:Boolean)" type="destination" />
     </add>
   </action>
-  <action date="2014-05-16 08:56:15" id="3" prevId="2" session="1" user="dolfim">
+  <action date="2014-05-16 16:02:47" id="3" prevId="2" session="1" user="troyer">
     <change id="108" newObjId="10" oldObjId="4" parentObjId="4" parentObjType="module" what="location">
-      <location id="10" x="-408.662004647" y="640.23078142" />
+      <location id="10" x="-750.740725956" y="714.931961584" />
     </change>
   </action>
   <annotation id="1" key="__abstraction_origin_uuid__" value="20623bf5-19ea-11e3-923c-20c9d044a3eb" />
   <annotation id="2" key="__abstraction_uuid__" value="20623bf5-19ea-11e3-923c-20c9d044a3eb" />
-  <actionAnnotation actionId="1" date="2014-05-16 08:56:08" id="4" key="__upgrade__" user="dolfim" value="2" />
+  <actionAnnotation actionId="1" date="2014-05-16 16:02:42" id="4" key="__upgrade__" user="troyer" value="2" />
 </vistrail>
