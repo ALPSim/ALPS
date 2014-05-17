@@ -37,15 +37,14 @@ typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major
 //multiple vectors. Use green_function_t instead.
 void FourierTransformer::frequency_to_time_ft(itime_green_function_t &G_tau,
                                               const matsubara_green_function_t &G_omega) const {
-  assert(G_tau.nflavor()==G_omega.nflavor() && G_tau.nsite()==G_omega.nsite());
+  if(G_tau.nflavor()!=G_omega.nflavor() || G_tau.nsite()!=G_omega.nsite()) throw std::logic_error("FT dimensions don't match.");
   unsigned int N_tau = G_tau.ntime()-1;
   unsigned int N_omega = G_omega.nfreq();
   unsigned int N_site = G_omega.nsite();
   matsubara_green_function_t G_omega_no_model(G_omega);
-  matsubara_green_function_t test(G_omega);
+
   double dt = beta_/N_tau;
   for(unsigned int f=0;f<G_omega.nflavor();++f){
-    
     for (unsigned int s1=0; s1<N_site; ++s1){
       for (unsigned int s2=0; s2<N_site; ++s2) {
         if(G_omega.shape()==diagonal && (s1 != s2)) continue;
@@ -54,10 +53,7 @@ void FourierTransformer::frequency_to_time_ft(itime_green_function_t &G_tau,
           if(s1==s2) is_nonzero=true;
           if(s1%2==0 && s2==s1+1) is_nonzero=true;
           if(s1%2==1 && s2==s1-1) is_nonzero=true;
-          if (!is_nonzero){  //nothing happening in this gf.
-            /*for (unsigned int i=0; i<=N_tau; i++) {
-             G_tau(i,s1,s2,f)=0.;
-             }*/
+          if (!is_nonzero){
             continue;
           }
         }
