@@ -161,7 +161,10 @@ void selfconsistency_loop_CDMFT_Nambu(const alps::params& parms, ImpuritySolver&
   
   //initial G0, isolated and insulating not implemented, only has free solution
   nambu_matsubara_green_function_t G0_omega=clustertrans.initial_G0_nambu(parms);
-  
+  G0_omega.write("G0_omega_input_r");
+  nambu_matsubara_green_function_t G0_omega_kspace=clustertrans.transform_into_k_space(G0_omega);
+  G0_omega_kspace.write("G0_omega_input_k");
+
   nambu_matsubara_green_function_t G_omega=G0_omega;
   
   int iteration_ctr = 0;
@@ -191,26 +194,28 @@ void selfconsistency_loop_CDMFT_Nambu(const alps::params& parms, ImpuritySolver&
     std::cout<<"running NAMBU solver in omega."<<std::endl<<std::flush;
   
     //running additional symmetrizations:
-   // G0_omega = clustertrans.symmetrize_real_space(G0_omega);
+    G0_omega = clustertrans.symmetrize_real_space(G0_omega);
+    G0_omega = clustertrans.symmetrize(G0_omega,paramagnet);
     //running impurity solver
     
-    boost::tie(G_omega, G_tau) = solver.solve_nambu(G0_omega, parms);
+//    boost::tie(G_omega, G_tau) = solver.solve_nambu(G0_omega, parms);
 
     //std::ofstream G_tau_before_symmetrize("G_tau_before_symmetrize.dat"); G_tau_before_symmetrize<<std::make_pair(G_tau,beta);
     std::cout<<"CDMFTTransformer:symmetrize"<<std::endl;
    // G_tau = clustertrans.symmetrize(G_tau, paramagnet);
     //std::ofstream G_tau_before_symmetrize_kspace("G_tau_before_symmetrize_kspace.dat"); G_tau_before_symmetrize_kspace<<std::make_pair(G_tau,beta);
-    G_tau = clustertrans.symmetrize_real_space(G_tau); //<- this would symmetrize away the d-wave behavior!
+//    G_tau = clustertrans.symmetrize_real_space(G_tau); //<- this would symmetrize away the d-wave behavior!
     //std::ofstream G_tau_after_symmetrize_kspace("G_tau_after_symmetrize_kspace.dat"); G_tau_after_symmetrize_kspace<<std::make_pair(G_tau,beta);
     //std::ofstream G_omega_before_symmetrize("G_omega_before_symmetrize.dat"); G_omega_before_symmetrize<<std::make_pair(G_omega,beta);
-   // G_omega = clustertrans.symmetrize(G_omega, paramagnet);
+   
     //std::ofstream G_omega_before_symmetrize_kspace("G_omega_before_symmetrize_kspace.dat"); G_omega_before_symmetrize_kspace<<std::make_pair(G_omega,beta);
     G_omega = clustertrans.symmetrize_real_space(G_omega);
+    G_omega = clustertrans.symmetrize(G_omega, paramagnet);
     //std::ofstream G_omega_after_symmetrize_kspace("G_omega_after_symmetrize_kspace.dat"); G_omega_after_symmetrize_kspace<<std::make_pair(G_omega,beta);
     fourier_ptr->frequency_to_time_ft(G_tau, G_omega);
     std::cout<<"running cluster transform"<<std::endl<<std::flush;
     //Getting G0 from G-->the selfconsistency loop
-    G0_omega = clustertrans(G_omega, G0_omega, selfenergy, mu, h, eta1, eta2, beta, false);
+//    G0_omega = clustertrans(G_omega, G0_omega, selfenergy, mu, h, eta1, eta2, beta, false);
 
     std::cout<<"comparing old and new result."<<std::endl<<std::flush;
     max_diff=0;
@@ -243,6 +248,7 @@ void selfconsistency_loop_CDMFT_Nambu(const alps::params& parms, ImpuritySolver&
   } while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);
   // throw std::logic_error("not yet implemented.");
   std::cout<<"-beta*G_tau(beta/2)="<<-beta*G_tau(n_tau/2,0,0,0,0)<<std::endl;
+  //std::cout<<"F_pi_0(tau=0+)="<<k_G_tau(0,3,3,0,1)<<std::endl;
 }
 
 void perform_CDMFT_loop(const alps::params &parms){
@@ -250,10 +256,10 @@ void perform_CDMFT_loop(const alps::params &parms){
   std::string solver_path=parms["SOLVER"];
   ImpuritySolver* solver_ptr=new ExternalSolver(boost::filesystem::path(solver_path));
   ClusterTransformer *transform_ptr=ClusterTransformer::generate_transformer(parms);
-  if(parms["NAMBU"]|false){
-    selfconsistency_loop_CDMFT(parms, *solver_ptr, *(CDMFTTransformer*)transform_ptr);
-  }else{
+  if(parms["NAMBU"]){
     selfconsistency_loop_CDMFT_Nambu(parms, *solver_ptr, *(CDMFTTransformer*)transform_ptr);
+  }else{
+    selfconsistency_loop_CDMFT(parms, *solver_ptr, *(CDMFTTransformer*)transform_ptr);
   }
   delete transform_ptr;
   delete solver_ptr;

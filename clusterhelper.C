@@ -68,7 +68,8 @@ private:
 
 ClusterHelper::ClusterHelper(const alps::params& params) :
 n_cluster_sites_(boost::lexical_cast<int>(params["SITES"])), epsilon_(1e-9),
-lattice_momenta_file_name_(params["LATTICE_MOMENTA_FILE"]|"LatticeMomenta")
+lattice_momenta_file_name_(params["LATTICE_MOMENTA_FILE"]|"LatticeMomenta"),
+paramagnet_(params["PARAMAGNET"])
 {
   graph_=new alps_graph(params);
   //std::cout<<"in clusterhelper constructor."<<std::endl;
@@ -590,11 +591,20 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
       append_column_no_duplicates(symmetry_table_real_space_, vertexmap);
     }
   }
-  //std::cout << "\n";
-  /*std::cout << "symmetry table in real space:\n";
-   for (unsigned int i=0; i<symmetry_table_real_space.size1(); ++i) {
-   for (unsigned int j=0; j<symmetry_table_real_space.size2(); ++j) {
-   std::cout << symmetry_table_real_space(i,j) << " ";
+  //This part is for foursite only, needs generalization
+  {
+    std::map<site_t, site_t> vertexmap;
+    
+    vertexmap[0]=2;vertexmap[1]=1;vertexmap[2]=0;vertexmap[3]=3;
+    append_column_no_duplicates(symmetry_table_real_space_, vertexmap);
+    vertexmap[0]=2;vertexmap[1]=3;vertexmap[2]=0;vertexmap[3]=1;
+    append_column_no_duplicates(symmetry_table_real_space_, vertexmap);
+  }
+ // std::cout << "\n";
+ /* std::cout << "symmetry table in real space:\n";
+   for (unsigned int i=0; i<symmetry_table_real_space_.size1(); ++i) {
+   for (unsigned int j=0; j<symmetry_table_real_space_.size2(); ++j) {
+   std::cout << symmetry_table_real_space_(i,j) << " ";
    }
    std::cout << std::endl;
    }*/
@@ -713,9 +723,8 @@ ClusterHelper::setup_classes(const Matrix<site_t>::Type& symmetry_table) const
           bool intersec = false;
           for (pair_class_type::const_iterator it_j1=it_i1->begin();
                it_j1!=it_i1->end(); ++it_j1) {
-            for (pair_class_type::const_iterator it_j2=it_i2->begin();
-                 it_j2!=it_i2->end(); ++it_j2) {
-              if (*it_j1==*it_j2 || (it_j1->first==it_j2->second && it_j1->second==it_j2->first)) {
+            for (pair_class_type::const_iterator it_j2=it_i2->begin();it_j2!=it_i2->end(); ++it_j2) {
+               if (*it_j1==*it_j2 || (it_j1->first==it_j2->second && it_j1->second==it_j2->first&&paramagnet_)) {
                 intersec = true;
                 reducible = true;
                 break;

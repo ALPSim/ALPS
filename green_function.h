@@ -34,7 +34,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <cstdlib>
-
+#include <string.h>
 #ifdef USE_MPI
 #include <mpi.h>
 #endif

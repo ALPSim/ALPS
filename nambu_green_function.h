@@ -5,7 +5,6 @@
 #include <iomanip>
 #include <cstdlib>
 #include <iostream>
-
 #ifdef USE_MPI
 #include <mpi.h>
 #endif

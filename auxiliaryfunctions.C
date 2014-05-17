@@ -86,7 +86,7 @@ void matrix_inversion(alps::numeric::matrix<std::complex<double> >&A, alps::nume
 #ifdef MY_BLAS_DEFS
     using namespace lapack;
 #endif
-    //boost::numeric::bindings::lapack::
+   //boost::numeric::bindings::lapack::
     zgesv_(&size, &size, &(A(0,0)),&size, ipiv, &(A_inv(0,0)), &size, &info);
     if(info!=0) std::cerr<<"gesv went wrong!!"<<std::endl;
   }

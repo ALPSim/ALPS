@@ -160,6 +160,7 @@ private:
   Matrix<site_t>::Type symmetry_table_real_space_;
   
   unsigned int n_cluster_sites_;
+  bool paramagnet_;
   bool bipartite_;
   const double epsilon_;
   std::string lattice_momenta_file_name_;
@@ -204,6 +205,19 @@ public:
   virtual std::vector<double> epssqav() const=0;
   nambu_matsubara_green_function_t initial_G_nambu(const alps::params& parms);
   
+  //Real space and k-space transformers for the Green's functions
+  virtual matsubara_green_function_t transform_into_real_space(const matsubara_green_function_t& G) const=0;
+  virtual matsubara_green_function_t transform_into_k_space(const matsubara_green_function_t& G) const=0;
+  virtual itime_green_function_t transform_into_real_space(const itime_green_function_t& G) const=0;
+  virtual itime_green_function_t transform_into_k_space(const itime_green_function_t& G) const=0;
+  //Real space and k-space transformers for the Nambu Green's function
+  virtual nambu_matsubara_green_function_t transform_into_real_space(const nambu_matsubara_green_function_t& G) const=0;
+  virtual nambu_matsubara_green_function_t transform_into_k_space(const nambu_matsubara_green_function_t& G) const=0;
+  virtual nambu_itime_green_function_t transform_into_real_space(const nambu_itime_green_function_t& G) const=0;
+  virtual nambu_itime_green_function_t transform_into_k_space(const nambu_itime_green_function_t& G) const=0;
+
+  std::complex<double>* exp_iksite(const int sign) const;
+
   template<typename T>
   T interpolate(vector_type k, const std::vector<T>& values, const bool antiferromagnet) const {
     return ClusterHelper::interpolate(k, values, antiferromagnet);
@@ -266,7 +280,6 @@ public:
                                                       nambu_matsubara_green_function_t &selfenergy,
                                                       double &mu, const double h, const double eta1, const double eta2, const double beta, const bool use_selfenergy)=0;
   
-  std::complex<double>* exp_iksite(const int sign) const;
   int* momentum_translation() const;
   std::vector<double> epsav() const { return epsav_; };
   std::vector<double> epssqav() const { return epssqav_; };

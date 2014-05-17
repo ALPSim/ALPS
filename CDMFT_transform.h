@@ -47,8 +47,6 @@ public:
                                                       nambu_matsubara_green_function_t &selfenergy,
                                                       double &mu, const double h, const double eta1, const double eta2, const double beta, const bool use_selfenergy)=0;
   
-  std::complex<double>* exp_iksite(const int sign) const;
-  
   int* momentum_translation() const;
   double dispersion_moments(const unsigned int i) const { return dispersion_moments_[i]; }
   double bandwidth() const { return bandwidth_; };
@@ -104,12 +102,13 @@ public:
   params_(params)
   {
     set_U_(n_cluster_sites(),U_);
-    /*  U_.resize(4,4);
-     U_(0,0)=1.; U_(0,1)=1.; U_(0,2)=1.; U_(0,3)=1.;
-     U_(1,0)=1.; U_(1,1)=-1.; U_(1,2)=1.; U_(1,3)=-1.;
-     U_(2,0)=1.; U_(2,1)=1.; U_(2,2)=-1.; U_(2,3)=-1.;
-     U_(3,0)=1.; U_(3,1)=-1.; U_(3,2)=-1.; U_(3,3)=1.;
-     U_/=2.;*/
+
+    /*U_.resize(4,4);
+    U_(0,0)=1.; U_(0,1)=1.; U_(0,2)=1.; U_(0,3)=1.;
+    U_(1,0)=1.; U_(1,1)=-1.; U_(1,2)=1.; U_(1,3)=-1.;
+    U_(2,0)=1.; U_(2,1)=1.; U_(2,2)=-1.; U_(2,3)=-1.;
+    U_(3,0)=1.; U_(3,1)=-1.; U_(3,2)=-1.; U_(3,3)=1.;
+    U_/=2.;*/
      
      /*epsav_[0]=-8*(M_PI*t+2*tprime)/(M_PI*M_PI);
      epsav_[1]= 8*(M_PI*t-2*tprime)/(M_PI*M_PI);
@@ -170,8 +169,8 @@ private:
   green_function<T> spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const;
   
   //in nambu case: <double> very different from <complex<double> > -> no template
-  nambu_green_function<std::complex<double> > spin_symmetrizer(const nambu_green_function<std::complex<double> >& G, const bool paramagnet) const{ throw std::runtime_error("not implemented.");}
-  nambu_green_function<double> spin_symmetrizer(const nambu_green_function<double>& G, const bool paramagnet) const{ throw std::runtime_error("not implemented.");}
+  nambu_green_function<std::complex<double> > spin_symmetrizer(const nambu_green_function<std::complex<double> >& G, const bool paramagnet) const;
+  nambu_green_function<double> spin_symmetrizer(const nambu_green_function<double>& G, const bool paramagnet)const {std::cout<<"not implemented for obsevaluators. "<<std::endl;}
   
   matsubara_green_function_t fourpoint_green_function_inverse(const matsubara_green_function_t& G, const unsigned int nt) const;
   template<typename T>
@@ -184,6 +183,7 @@ private:
   green_function<T> fourpoint_green_function_divide(const green_function<T>& G1,
                                                     const T d) const;
   void set_Tij_matrix(double kx, double ky, complex_dense_matrix &H0);
+  void set_nambu_Tij_dwave_matrix(double kx, double ky, double eta1,double eta2,double mu, double h,complex_dense_matrix &H0);
   void set_nambu_Tij_dwave_matrix(double kx, double ky, double eta1,double eta2,double mu, complex_dense_matrix &H0);
   void set_U_(unsigned int nsite, complex_dense_matrix &U_);
   struct Forward;

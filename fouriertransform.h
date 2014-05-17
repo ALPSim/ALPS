@@ -203,6 +203,13 @@ public:
         }
       }
     }
+   /* for(int f=0;f<n_flavor;f++){
+      for(int i=0;i<n_site;i++){
+        for(int j=0;j<n_site;j++){
+          std::cout<<f<<i<<j<<" "<<c1_[f][i][j]<<" "<<c2_[f][i][j]<<" "<<c3_[f][i][j]<<std::endl;
+        }
+      }
+    }*/
   }
 };
 
@@ -329,7 +336,7 @@ public:
   }
   
   virtual void append_tail(matsubara_green_function_t& G_omega, const matsubara_green_function_t& G0_omega,
-                           const unsigned int nfreq_measured) const;
+                           const unsigned int nfreq_measured) const{ throw std::logic_error("this is not implemented.");}
   
 };
 

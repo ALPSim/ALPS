@@ -69,14 +69,9 @@ ClusterTransformer* ClusterTransformer::generate_transformer(const alps::params&
       trans_ptr=new SimpleDCATransformer(parms);
     }
   }else if(cluster_loop=="CDMFT"){
-    if (antiferromagnetic) {
-      throw std::logic_error("Anti Ferro CDMFT is not implemented.");
-    }
-    else {
-      std::cout<<"using simple CDMFT transformer"<<std::endl;
+      std::cout<<"using CDMFT transformer"<<std::endl;
       if(static_cast<int>(parms["SITES"])!=4) throw std::runtime_error("only four-site CDMFT is implemented so far.");
       trans_ptr=new LadderCDMFTTransformer(parms);
-    }
   }
   return trans_ptr;
 }
@@ -160,7 +155,7 @@ params_(params)
 }
 
 
-std::complex<double>* DCATransformer::exp_iksite(const int sign) const
+std::complex<double>* ClusterTransformer::exp_iksite(const int sign) const
 {
   std::complex<double> *m = new std::complex<double>[n_cluster_sites()*n_cluster_sites()];
   for (site_t k=0; k<n_cluster_sites(); ++k) {

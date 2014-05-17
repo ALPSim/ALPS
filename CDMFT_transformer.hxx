@@ -46,6 +46,9 @@ nambu_green_function<T> CDMFTTransformer::symmetrize_helper(const nambu_green_fu
         av /= itc->size();
         for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
           G_new(freq, it->first, it->second, f,f) = av;
+          if(freq==0&&f==0){
+            std::cout<<it->first<<it->second<<" ";
+          }
         }
       }
     }
@@ -79,24 +82,4 @@ nambu_green_function<T> CDMFTTransformer::symmetrize_helper(const nambu_green_fu
   return G_new;
 }
 
-template<class T>
-green_function<T> LadderCDMFTTransformer::spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const
-{
-  green_function<T> G_new(G);
-  if (paramagnet) {
-    if(G_new.nflavor()>1 && G_new.nflavor()%2==0) {
-      for(spin_t flavor=0; flavor<G_new.nflavor(); flavor+=2) {
-        for (site_t k1=0; k1<n_cluster_sites(); ++k1) {
-          for (site_t k2=0; k2<n_cluster_sites(); ++k2) {
-            for(frequency_t freq=0; freq<G_new.nfreq(); ++freq) {
-              G_new(freq, k1, k2, flavor)= 0.5*(G_new(freq, k1, k2, flavor)+G_new(freq, k1, k2, flavor+1));
-              G_new(freq, k1, k2, flavor+1)=G_new(freq, k1, k2, flavor);
-            }
-          }
-        }
-      }
-    }
-  }
-  return G_new;
-}
 
