@@ -24,8 +24,8 @@ for d in data:
     d.props['color'] = 'b'
 
 counter = 0
-for d in sorted(data, key = lambda d: d.props['iter_t']):
-    sw = d.props['iter_t']
+for d in sorted(data, key = lambda d: d.props['Time']):
+    sw = d.props['Time']
     t = d.props['dt'] * (sw+1)
     print '..plot iteration', int(sw)
     # print group

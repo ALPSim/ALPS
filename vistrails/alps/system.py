@@ -109,6 +109,20 @@ class PrepareTEBD(parameters.Parameters):
                      ('conserved', [alpsparameters.ConservedQuantumNumbers])]
     _output_ports=[('value', [SystemParameters])]
 
+class PrepareMPS(parameters.Parameters):
+    """ a module collecting the typical input parameters for a MPS simulation """
+    def compute(self):
+        res = parameters.ParametersData({})
+        for port_name in self.inputPorts:
+           res=self.updateFromPort(port_name,res)
+        self.setOutput(res)
+    _input_ports = [('system', [alpsparameters.SystemParameters]),
+                     ('mpsparms', [alpsparameters.MPSParameters]),
+                     ('conserved', [alpsparameters.ConservedQuantumNumbers]),
+                     ('measurements',[alpsparameters.CustomMeasurements]),
+                     ('initialstate',[alpsparameters.MPSInitialState])]
+    _output_ports=[('value', [Parameters])]
+
 def initialize(): pass
 
 

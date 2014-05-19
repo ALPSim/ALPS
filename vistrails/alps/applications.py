@@ -417,3 +417,4 @@ def selfRegister():
   reg.add_module(system.PrepareDMRG,namespace="Applications")
   reg.add_module(system.PrepareDMFT,namespace="Applications")
   reg.add_module(system.PrepareTEBD,namespace="Applications")
+  reg.add_module(system.PrepareMPS,namespace="Applications")

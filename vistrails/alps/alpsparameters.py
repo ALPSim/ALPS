@@ -213,6 +213,43 @@ class TEBDParameters(Parameters):
                     ('INITIAL_STATE',[basic.String])
                     ]
 
+class MPSParameters(Parameters): 
+    """ parameters for MPS simulations """
+
+class MPSOptimParameters(Parameters): 
+    """ 
+    A module to set the parameters for a MPS optimization simulation
+    """
+    _input_ports = [('SWEEPS',[(basic.String, 'the number of sweeps')]),
+                    ('STATES',[(basic.String, 'the number of states in each sweep')]),
+                    ('MAXSTATES',[(basic.String, 'the maximum number of states')]),
+                    ('NUMBER_EIGENVALUES',[(basic.String, 'the number of eigenvalues to compute')])
+                    ]
+
+class MPSEvolveParameters(MPSParameters): 
+    """ 
+    A module to set the parameters for a MPS time evolution simulation:
+      DT : the length of a timesteps
+      TIMESTEPS : the number of timesteps
+      IMG_TIMESTEPS : the number of initial imaginary time steps
+      MAXSTATES : the maximum bond dimension
+      always_measure : comma-separeted list of measurement to compute during time evolution
+      measure_each : number of timesteps to skip between measurements
+      chkp_each : number of timesteps to skip between checkpoints
+      update_each : number of timesteps to skip between changes in the parameters
+      COMPLEX : use complex numbers
+    """
+    _input_ports = [('DT',[basic.String]),
+                    ('TIMESTEPS',[basic.String]),
+                    ('IMG_TIMESTEPS',[basic.String]),
+                    ('MAXSTATES',[basic.String]),
+                    ('always_measure',[basic.String]),
+                    ('measure_each',[basic.String]),
+                    ('chkp_each',[basic.String]),
+                    ('update_each',[basic.String]),
+                    ('COMPLEX', [basic.String], {'defaults': str(['1'])}),
+                    ]
+
 
 class Temperature(Parameters):
     """ A module to set the temperature. Either T or beta=1/T can be defined but not both. """
@@ -267,6 +304,25 @@ class StructureFactorMeasurement(CustomMeasurement):
     prefix = 'STRUCTURE_FACTOR'
 
 
+class MPSInitialState(parameters.FixedAndDefaultParameters): 
+   """ Initial state for MPS simulations """
+
+class RandomInitialState(MPSInitialState):
+    """ fill all quantum number sectors with random numbers """
+    fixed = {'init_state': 'default'}
+
+class InitialStateFromFile(MPSInitialState):
+    """ fill all quantum number sectors with random numbers """
+    _input_ports = [('initfile',[(basic.File, 'the initial state')])]
+    fixed = {'init_state': 'default'}
+    
+class InitialProductState(MPSInitialState):
+    """ use a product state as initial state
+        Define parameters initial_local_QN='a1,a2,a3,...' for each
+        quantum number QN needed for the definition of the model.
+    """
+    fixed = {'init_state': 'local_quantumnumbers'}
+
 
 def register_parameters(type, ns="Parameters"):
     reg = vistrails.core.modules.module_registry.get_module_registry()
@@ -290,6 +346,9 @@ def selfRegister():
   register_parameters(MonteCarloParameters)
   register_parameters(DMRGParameters)
   register_parameters(TEBDParameters)
+  register_abstract_parameters(MPSParameters)
+  reg.add_module(MPSOptimParameters,namespace="Parameters")
+  reg.add_module(MPSEvolveParameters,namespace="Parameters")
   reg.add_module(LoopMonteCarloParameters,namespace="Parameters")
   reg.add_module(ClassicalMonteCarloParameters,namespace="Parameters")
   reg.add_module(QWLMonteCarloParameters,namespace="Parameters")
@@ -304,6 +363,11 @@ def selfRegister():
   reg.add_module(AverageMeasurement,namespace="Parameters")
   reg.add_module(CorrelationsMeasurement,namespace="Parameters")
   reg.add_module(StructureFactorMeasurement,namespace="Parameters")
+  
+  register_abstract_parameters(MPSInitialState)
+  reg.add_module(RandomInitialState,namespace="Parameters")
+  reg.add_module(InitialStateFromFile,namespace="Parameters")
+  reg.add_module(InitialProductState,namespace="Parameters")
   
   register_parameters(DMFTMonteCarloSolverParameters)
   register_parameters(DMFTModelParameters)

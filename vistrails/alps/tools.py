@@ -308,6 +308,28 @@ class GetResultFiles(Module):
     _output_ports = [('value',[basic.List]),
         ('resultfiles',[ResultFiles])]
 
+class GetCheckpointFiles(Module):
+     """ 
+     This module gets all ALPS checkpoint files of MPS simulations in a given directory.
+     The tasks, and prefix inputs take regular expressions limiting the task numbers and prefix of the simulation. They default to '*', meaning all.
+     
+     """
+     def compute(self):
+         tasks = '*'
+         prefix = '*'
+         d = self.getInputFromPort('dir')
+         dirname = d.name
+         if (self.hasInputFromPort('tasks')):
+           tasks = str(self.getInputFromPort('tasks'))
+         if (self.hasInputFromPort('prefix')):
+           prefix = str(self.getInputFromPort('prefix'))+'*'
+         files = glob.glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.chkp'))
+         self.setResult('value',files)
+     _input_ports = [('dir',[basic.Directory]), 
+                     ('prefix',[basic.String]), 
+                     ('tasks',[basic.String])]
+     _output_ports = [('value',[basic.List])]
+
 
 class Convert2XML(Module):
     """
@@ -496,6 +518,7 @@ def selfRegister():
   reg.add_module(Glob,namespace="Tools",abstract=True)
   reg.add_module(GetCloneFiles,namespace="Tools")
   reg.add_module(GetResultFiles,namespace="Tools")
+  reg.add_module(GetCheckpointFiles,namespace="Tools")
   
   reg.add_module(Convert2XML,namespace="Tools")
   reg.add_module(Convert2Text,namespace="Tools",abstract=True)
