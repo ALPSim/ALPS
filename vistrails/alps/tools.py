@@ -247,9 +247,9 @@ class GetCloneFiles(Module):
          if (self.hasInputFromPort('tasks')):
            tasks = str(self.getInputFromPort('tasks'))
          if (self.hasInputFromPort('runs')):
-           tasks = str(self.getInputFromPort('runs'))
+           runs = str(self.getInputFromPort('runs'))
          if (self.hasInputFromPort('prefix')):
-           tasks = str(self.getInputFromPort('prefix'))+'*'
+           prefix = str(self.getInputFromPort('prefix'))+'*'
          files = glob.glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.run' +runs))
 # remove HDF5 files from the list
          res = []
