@@ -216,7 +216,7 @@ class TEBDParameters(Parameters):
 class MPSParameters(Parameters): 
     """ parameters for MPS simulations """
 
-class MPSOptimParameters(Parameters): 
+class MPSOptimParameters(MPSParameters): 
     """ 
     A module to set the parameters for a MPS optimization simulation
     """
@@ -239,6 +239,8 @@ class MPSEvolveParameters(MPSParameters):
       update_each : number of timesteps to skip between changes in the parameters
       COMPLEX : use complex numbers
     """
+    def compute(self):
+        self.setOutput(self.readInputs(ParametersData({'COMPLEX':'1'})))
     _input_ports = [('DT',[basic.String]),
                     ('TIMESTEPS',[basic.String]),
                     ('IMG_TIMESTEPS',[basic.String]),
@@ -247,7 +249,7 @@ class MPSEvolveParameters(MPSParameters):
                     ('measure_each',[basic.String]),
                     ('chkp_each',[basic.String]),
                     ('update_each',[basic.String]),
-                    ('COMPLEX', [basic.String], {'defaults': str(['1'])}),
+                    # ('COMPLEX', [basic.String], {'defaults': str(['1'])}),
                     ]
 
 
@@ -302,6 +304,19 @@ class StructureFactorMeasurement(CustomMeasurement):
     The defintion of a structure factor measurement. If the correlation is symmetric, e.g. density-density, then just one operator name ahs to be given as in "n". On the other hand, for non-summetric measurements like S^+_i S^-_j the two operators need to be separated by a colon as in "Splus:Sminus". The operator names used in the defintiion needs to be defined as a site or bond operator in the model.
     """
     prefix = 'STRUCTURE_FACTOR'
+
+class OverlapMeasurement(basic.Module):
+    """
+    The defintion of an overlap measurement <bra | ket>, where |ket> is the current state in the simulation, and |bra> is a reference state.
+      name: the name of the measurement.
+      chkpfile: the checkpoint file containing the |bra> state.
+    """
+    def compute(self):
+        key = 'MEASURE_OVERLAP['+str(self.getInputFromPort('name'))+']'
+        self.setResult('value',{key : self.getInputFromPort('chkpfile').name})
+    _input_ports = [('name',[basic.String]),
+                    ('chkpfile',[basic.File])]
+    _output_ports=[('value', [CustomMeasurements])]
 
 
 class MPSInitialState(parameters.FixedAndDefaultParameters): 
@@ -363,6 +378,7 @@ def selfRegister():
   reg.add_module(AverageMeasurement,namespace="Parameters")
   reg.add_module(CorrelationsMeasurement,namespace="Parameters")
   reg.add_module(StructureFactorMeasurement,namespace="Parameters")
+  reg.add_module(OverlapMeasurement,namespace="Parameters")
   
   register_abstract_parameters(MPSInitialState)
   reg.add_module(RandomInitialState,namespace="Parameters")

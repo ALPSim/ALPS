@@ -120,7 +120,7 @@ class HardcoreBosonModel(Model):
                     "V''"   : '0',
                     't0'    : 't',
                     't1'    : "t'",
-                    'V0'    : '0',
+                    'V0'    : 'V',
                     'V1'    : "V'",
                     'mu#'   : 'mu',
                     't#'    : '0',

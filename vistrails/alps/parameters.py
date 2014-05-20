@@ -310,6 +310,88 @@ class UpdateParameters(Parameters):
    _input_ports = [('parms',[Parameters]),
                    ('updated',[Parameters])]
 
+class QuenchParameter(Module):
+    """ A module to define a time evolution of a parameter, according to the quench:
+        g(t) = g(t_i) + ((t-t_i) / t_f)^p * (g(t_f) - g(t_i))
+        with t = t_i + n*dt, and t_f = t_i + num_steps*dt.
+        The exponent p defaults to 1.
+    """
+    def quench(self, g_i, g_f, num_steps, p):
+        num_value = g_i + ((np.arange(num_steps, dtype=float)+1)/num_steps)**p * (g_f - g_i)
+        value = ','.join( [str(n) for n in num_value] )
+        return value
+    
+    def loadParmList(self, port_name):
+        value = self.getInputFromPort(port_name)
+        if not isinstance(value,ParameterValueList):
+            value = [value]
+        return value
+        
+    def compute(self):
+        name = self.getInputFromPort('name')
+        initials  = self.loadParmList('initial')
+        finals    = self.loadParmList('final')
+        num_steps = self.loadParmList('num_steps')
+        exponents = ['1']
+        if self.hasInputFromPort('exponent'):
+            exponents = self.loadParmList('exponent')
+        
+        params_list = []
+        for g_i in initials:
+            for g_f in finals:
+                for ns in num_steps:
+                    for p in exponents:
+                        params_list.append( {name+'[Time]': self.quench(float(g_i), float(g_f), int(ns), float(p))} )
+        
+        if len(params_list) == 1:
+            self.setResult('value', params_list[0])
+        else:
+            self.setResult('value', params_list)
+    _input_ports = [('name',[basic.String]),
+                    ('initial',[basic.String]),
+                    ('final',[basic.String]),
+                    ('num_steps',[basic.String]),
+                    ('exponent',[basic.String])]
+    _output_ports=[('value', [Parameters])]
+
+class ConcatenateParameterQuenches(Module):
+    """
+      This module concatenates different segments of a parameter quench into a longer one.
+    """
+    def compute(self):
+        quench_names = [ 'quench'+str(i) for i in [1,2,3,4] ]
+        quenches = []
+        for port_name in quench_names:
+            if self.hasInputFromPort(port_name):
+                tmp = self.getInputFromPort(port_name)
+                if not isinstance(tmp, list):
+                    tmp = [tmp]
+                quenches.append(tmp)
+        
+        ## TODO: nice error in case len(quenches) == 0
+        
+        res = copy.deepcopy(quenches[0])
+        for q in quenches[1:]:
+            newlist = []
+            for v1 in res:
+                for v2 in q:
+                    
+                    d = copy.deepcopy(v1)
+                    for k,v in d.items():
+                        if '[Time]' in k:
+                            d[k] = v+','+v2[k]
+                    newlist.append(d)
+            res = newlist
+        self.setResult('value', res)
+    _input_ports = [('quench1', [Parameters]),
+                    ('quench2', [Parameters]),
+                    ('quench3', [Parameters]),
+                    ('quench4', [Parameters]),
+                    ]
+    _output_ports=[('value', [Parameters])]
+
+
+
 
 def register_parameters(type, ns="Parameters"):
   reg = vistrails.core.modules.module_registry.get_module_registry()
@@ -333,3 +415,7 @@ def selfRegister():
   reg.add_module(IterateValue,namespace="Parameters")
   reg.add_module(UpdateParameters,namespace="Parameters")
   reg.add_module(IterateParameterInRange,namespace="Parameters")
+  
+  reg.add_module(QuenchParameter,namespace="Parameters")
+  reg.add_module(ConcatenateParameterQuenches,namespace="Parameters")
+
