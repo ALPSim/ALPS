@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2006-2013 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 2006-2014 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -222,8 +222,6 @@ inline void fill_walker1977(WVEC const& weights,
   }
 }
 
-} // end namespace detail
-
 //
 // double-based Walker algorithm
 //
@@ -438,10 +436,12 @@ private:
   std::vector<RealType> accum_;
 };
 
+} // end namespace detail
+
 template<typename RNG>
-class random_choice : public random_choice_walker<typename RNG::result_type, unsigned int, double> {
+class random_choice : public detail::random_choice_walker<typename RNG::result_type, unsigned int, double> {
 private:
-  typedef random_choice_walker<typename RNG::result_type, unsigned int, double> base_type;
+  typedef detail::random_choice_walker<typename RNG::result_type, unsigned int, double> base_type;
 public:
   random_choice() : base_type() {}
   template<class CONT>
@@ -449,9 +449,9 @@ public:
 };
 
 template<>
-class random_choice<double> : public random_choice_walker<double, unsigned int, double> {
+class random_choice<double> : public detail::random_choice_walker<double, unsigned int, double> {
 private:
-  typedef random_choice_walker<double, unsigned int, double> base_type;
+  typedef detail::random_choice_walker<double, unsigned int, double> base_type;
 public:
   random_choice() : base_type() {}
   template<class CONT>
@@ -459,9 +459,9 @@ public:
 };
 
 template<>
-class random_choice<unsigned int> : public random_choice_walker<unsigned int, unsigned int, double> {
+class random_choice<unsigned int> : public detail::random_choice_walker<unsigned int, unsigned int, double> {
 private:
-  typedef random_choice_walker<unsigned int, unsigned int, double> base_type;
+  typedef detail::random_choice_walker<unsigned int, unsigned int, double> base_type;
 public:
   random_choice() : base_type() {}
   template<class CONT>
