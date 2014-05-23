@@ -237,7 +237,9 @@ public:
 
   random_choice_walker() {}
   template<class CONT>
-  random_choice_walker(const CONT& weights) { detail::fill_ft2009(weights, table_); }
+  random_choice_walker(const CONT& weights) { init(weights); }
+  template<class CONT>
+  void init(const CONT& weights) { detail::fill_ft2009(weights, table_); }
 
   template<class Engine>
   result_type operator()(Engine& eng) const {
@@ -273,7 +275,9 @@ public:
 
   random_choice_walker() {}
   template<class CONT>
-  random_choice_walker(const CONT& weights) {
+  random_choice_walker(const CONT& weights) { init(weights); }
+  template<class CONT>
+  void init(const CONT& weights) {
     detail::fill_ft2009(weights, table_);
     bits_ = 31 - int(std::log(table_.size() - 0.5) / std::log(2.0));
   }
@@ -312,7 +316,6 @@ public:
   random_choice_bsearch() : accum_(0) {}
   template<class CONT>
   random_choice_bsearch(CONT const& weights) { init(weights); }
-
   template<class CONT>
   void init(CONT const& weights) {
 #ifndef BOOST_NO_LIMITS_COMPILE_TIME_CONSTANTS
@@ -400,7 +403,6 @@ public:
   random_choice_lsearch() : accum_(0) {}
   template<class CONT>
   random_choice_lsearch(CONT const& weights) { init(weights); }
-
   template<class CONT>
   void init(CONT const& weights) {
 #ifndef BOOST_NO_LIMITS_COMPILE_TIME_CONSTANTS
