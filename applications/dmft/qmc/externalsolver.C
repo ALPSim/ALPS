@@ -193,22 +193,17 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
   
   matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
   itime_green_function_t G_tau(n_tau+1, n_site, n_orbital);
-  if(!parms.value_or_default("SC_WRITE_DELTA", false) || parms.value_or_default("MEASURE_freq", false)){
-    //per default: read in G(omega) and G(tau). In hyb code: read in G(omega)
-    //if it is measured.
-    alps::hdf5::archive ar(outfile, "r");
+  alps::hdf5::archive ar(outfile, "r");
+  if (ar.is_group("G_omega")) {    
     G_omega.read_hdf5(ar, "/G_omega");
     G_tau.read_hdf5(ar, "/G_tau");
-  }
-  else //... else FT G_tau into G_omega
-  {
-    alps::hdf5::archive ar(outfile, "r");
+  } else { // Fourier: G_tau -> G_omega
     G_tau.read_hdf5(ar, "/G_tau");
     boost::shared_ptr < FourierTransformer > fourier_ptr;
     std::cout<<"converting ALPS parameters"<<std::endl;
     std::vector<double>n(n_orbital,0.);
     for(unsigned int u=0;u<n_orbital;u++){
-      n[(int)u]=G_tau(n_tau,0,0,u);
+      n[u]=-G_tau(n_tau,0,0,u);  // convention used in the selfconsistency: G(tau=beta^-,orbital)=-density(orbital); same on the output of hybridization solver
     }
     FourierTransformer::generate_transformer_U(parms, fourier_ptr, n); //still takes old alps parameter class.
     fourier_ptr->forward_ft(G_tau,G_omega);
