@@ -31,8 +31,8 @@ import pyalps.plot
 
 #prepare the input parameters
 parms=[]
-for u in [6.]: 
-  for b in [8.]:
+for u in [3.]: 
+  for b in [6.]:
     parms.append(
             { 
                 'BETA' : b,          # inverse temperature
@@ -48,22 +48,22 @@ for u in [6.]:
                 'NMATSUBARA' : 500,      # number of Matsubara frequencies
                 'N' : 500,               # bins in imaginary time
                 'CONVERGED' : 0.005,     # criterion for convergency
-                'MAX_TIME' : 600,        # max. time spent in solver in a single iteration in seconds
+                'MAX_TIME' : 60,         # max. time spent in solver in a single iteration in seconds
                 'G0OMEGA_INPUT' : "",    # forces to start from the local non-interacting Green's function
-                'MAX_IT' : 20,           # max. number of self-consistency iterations
+                'MAX_IT' : 10,           # max. number of self-consistency iterations
                 'SWEEPS' : 10000,    # max. number of sweeps in a single iteration
                 'THERMALIZATION' : 500, # number of thermalization sweeps
                 'SEED' : 0,              # random seed
                 'SOLVER' : "hybridization",   # we take the hybridization impurity solver
                 'SC_WRITE_DELTA' : 1,         # input for the hybridization impurity solver is the hybridization function Delta, which has to be written by the selfconsistency
-                'N_MEAS' : 5000,             # number of Monte Carlo steps between measurements
+                'N_MEAS' : 5000,              # number of Monte Carlo steps between measurements
                 'N_ORDER' : 50,               # histogram size
                 'DOSFILE' : "DOS/DOS_Square_GRID4000", # specification of the file with density of states
-                'GENERAL_FOURIER_TRANSFORMER' : 1,     # Fourier transformer for a general bandstructure
-                'EPS_0' : 0,                           # potential shift for the flavor 0
-                'EPS_1' : 0,                           # potential shift for the flavor 1
-                'EPSSQ_0' : 4,                         # the second moment of the bandstructure for the flavor 0
-                'EPSSQ_1' : 4,                         # the second moment of the bandstructure for the flavor 1
+                'GENERAL_FOURIER_TRANSFORMER' : 1,  # Fourier transformer for a general bandstructure
+                'EPS_0' : 0,                        # potential shift for the flavor 0
+                'EPS_1' : 0,                        # potential shift for the flavor 1
+                'EPSSQ_0' : 4,                      # the second moment of the bandstructure for the flavor 0
+                'EPSSQ_1' : 4,                      # the second moment of the bandstructure for the flavor 1
             }
         )
 

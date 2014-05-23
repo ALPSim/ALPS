@@ -31,8 +31,8 @@ import pyalps.plot
 
 #prepare the input parameters
 parms=[]
-for u in [6.]: 
-  for b in [8.]:
+for u in [3.]: 
+  for b in [6.]:
     parms.append(
             { 
                 'BETA' : b,          # inverse temperature
@@ -48,15 +48,16 @@ for u in [6.]:
                 'NMATSUBARA' : 500,      # number of Matsubara frequencies
                 'N' : 500,               # bins in imaginary time
                 'CONVERGED' : 0.005,     # criterion for convergency
-                'MAX_TIME' : 600,        # max. time spent in solver in a single iteration in seconds
+                'MAX_TIME' : 60,         # max. time spent in solver in a single iteration in seconds
                 'G0OMEGA_INPUT' : "",    # forces to start from the local non-interacting Green's function
+                'MAX_IT' : 10,           # max. number of self-consistency iterations
                 'SWEEPS' : 10000,    # max. number of sweeps in a single iteration
                 'THERMALIZATION' : 500, # number of thermalization sweeps
                 'SEED' : 0,              # random seed
                 'SOLVER' : "hybridization",   # we take the hybridization impurity solver
                 'SC_WRITE_DELTA' : 1,         # input for the hybridization impurity solver is the hybridization function Delta, which has to be written by the selfconsistency
-                'N_MEAS' : 5000,           # number of Monte Carlo steps between measurements
-                'N_ORDER' : 50,             # histogram size
+                'N_MEAS' : 5000,              # number of Monte Carlo steps between measurements
+                'N_ORDER' : 50,               # histogram size
                 'TWODBS' : 1,     # the Hilbert transformation integral runs in k-space, sets square lattice
                 't' : 1,          # the nearest-neighbor hopping
                 'tprime' : 0,     # the second nearest-neighbor hopping
