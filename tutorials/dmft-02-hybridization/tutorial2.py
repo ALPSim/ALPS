@@ -37,15 +37,15 @@ for b in [6., 12.]:
     parms.append(
             {
               'ANTIFERROMAGNET'     : 1,
-              'CONVERGED'           : 0.005,
+              'CONVERGED'           : 0.003,
               'FLAVORS'             : 2,
               'H'                   : 0,
-              'H_INIT'              : 0.05,
-              'MAX_IT'              : 10,
+              'H_INIT'              : 0.03*b/8.,
+              'MAX_IT'              : 6,
               'MAX_TIME'            : 300,
               'MU'                  : 0,
-              'N'                   : 500,
-              'NMATSUBARA'          : 500,
+              'N'                   : 250,
+              'NMATSUBARA'          : 250,
               'N_MEAS'              : 10000,
               'OMEGA_LOOP'          : 1,
               'SEED'                : 0,
@@ -55,7 +55,7 @@ for b in [6., 12.]:
               'SYMMETRIZATION'      : 0,
               'U'                   : 3,
               't'                   : 0.707106781186547,
-              'SWEEPS'              : 2500,
+              'SWEEPS'              : int(10000*b/16.),
               'THERMALIZATION'      : 1000,
               'BETA'                : b
             }
