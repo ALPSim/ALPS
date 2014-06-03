@@ -4,7 +4,7 @@
 #          http://www.boost.org/LICENSE_1_0.txt)
 
 ## Change ALPS_ROOT if you have installed ALPS in another location
-ALPS_ROOT = /opt/alps
+ALPS_ROOT?= /opt/alps
 
 include $(ALPS_ROOT)/share/alps/include.mk
 
