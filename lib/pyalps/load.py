@@ -536,7 +536,7 @@ class Hdf5Loader:
                 log( traceback.format_exc())
         return fileset
         
-def loadBinningAnalysis(files,what=None,verbose=False):
+def loadBinningAnalysis(files,what=None,verbose=False,respath='/simulation/results'):
     """ loads MC binning analysis from ALPS HDF5 result files
     
         this function loads results of a MC binning analysis from ALPS HDF5 result files
