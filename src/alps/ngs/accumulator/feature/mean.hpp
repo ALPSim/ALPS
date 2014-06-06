@@ -312,13 +312,9 @@ namespace alps {
                     #undef NUMERIC_FUNCTION_OPERATOR
             };
 
-            template<typename B> class BaseWrapper<mean_tag, B> : public B {
+            template<typename T, typename B> class BaseWrapper<T, mean_tag, B> : public B {
                 public:
                     virtual bool has_mean() const = 0;
-            };
-
-            template<typename T, typename B> class ResultTypeWrapper<T, mean_tag, B> : public B {
-                public:
                     virtual typename mean_type<B>::type mean() const = 0;
             };
 

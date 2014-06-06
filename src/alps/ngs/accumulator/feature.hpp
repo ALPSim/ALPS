@@ -193,9 +193,7 @@ namespace alps {
 
             template<typename T, typename F, typename B> class Result {};
 
-            template<typename F, typename B> class BaseWrapper {};
-
-            template<typename T, typename F, typename B> class ResultTypeWrapper {};
+            template<typename T, typename F, typename B> class BaseWrapper {};
 
             template<typename A, typename F, typename B> class DerivedWrapper {};
 

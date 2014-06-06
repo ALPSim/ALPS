@@ -179,7 +179,6 @@ namespace alps {
                         return sqrt(var_i / (N_i - one));
                     }
 
-                    // TODO: remove since 
                     typename autocorrelation_type<B>::type const autocorrelation() const {
                         using alps::ngs::numeric::operator*;
                         using alps::ngs::numeric::operator-;
@@ -270,7 +269,10 @@ namespace alps {
 
                     void reset() {
                         B::reset();
-                        // TODO: implement!
+                        m_ac_sum = std::vector<T>();
+                        m_ac_sum2 = std::vector<T>();
+                        m_ac_partial = std::vector<T>();
+                        m_ac_count = std::vector<typename count_type<B>::type>();
                     }
 
 #ifdef ALPS_HAVE_MPI
@@ -381,18 +383,15 @@ namespace alps {
                     }
 
                     // TODO: add functions and operators
+                    // TODO: add error analysis
 
                 private:
                     typename mean_type<B>::type m_ac_autocorrelation;
             };
 
-            template<typename B> class BaseWrapper<binning_analysis_tag, B> : public B {
+            template<typename T, typename B> class BaseWrapper<T, binning_analysis_tag, B> : public B {
                 public:
                     virtual bool has_autocorrelation() const = 0;
-            };
-
-            template<typename T, typename B> class ResultTypeWrapper<T, binning_analysis_tag, B> : public B {
-                public:
                     virtual typename autocorrelation_type<B>::type autocorrelation() const = 0;
             };
 

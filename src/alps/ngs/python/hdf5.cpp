@@ -133,7 +133,6 @@ BOOST_PYTHON_MODULE(pyngshdf5_c) {
         alps::detail::std_vector_string_to_python
     >();
 
-
     boost::python::register_exception_translator<alps::hdf5::archive_error>(&alps::detail::translate_archive_error);
     boost::python::register_exception_translator<alps::hdf5::archive_not_found>(&alps::detail::translate_archive_not_found);
     boost::python::register_exception_translator<alps::hdf5::archive_closed>(&alps::detail::translate_archive_closed);

@@ -268,7 +268,10 @@ namespace alps {
 
                     void reset() {
                         B::reset();
-                        // TODO: implement!
+                        m_mn_elements_in_bin = typename B::count_type();
+                        m_mn_elements_in_partial = typename B::count_type();
+                        m_mn_partial = T();
+                        m_mn_bins = std::vector<typename mean_type<B>::type>();
                     }
 
 #ifdef ALPS_HAVE_MPI
@@ -656,13 +659,9 @@ namespace alps {
                     #undef NUMERIC_FUNCTION_OPERATOR
             };
 
-            template<typename B> class BaseWrapper<max_num_binning_tag, B> : public B {
+            template<typename T, typename B> class BaseWrapper<T, max_num_binning_tag, B> : public B {
                 public:
                     virtual bool has_max_num_binning() const = 0;
-            };
-
-            template<typename T, typename B> class ResultTypeWrapper<T, max_num_binning_tag, B> : public B {
-                public:
                     virtual typename max_num_binning_type<B>::type max_num_binning() const = 0;
                     virtual void transform(boost::function<typename value_type<B>::type(typename value_type<B>::type)>) = 0;
             };

@@ -250,13 +250,11 @@ namespace alps {
                     count_type m_count;
             };
 
-            template<typename B> class BaseWrapper<count_tag, B> : public B {
+            template<typename T, typename B> class BaseWrapper<T, count_tag, B> : public B {
                 public:
                     virtual bool has_count() const = 0;
                     virtual boost::uint64_t count() const = 0;
             };
-
-            template<typename T, typename B> class ResultTypeWrapper<T, count_tag, B> : public B {};
 
             template<typename T, typename B> class DerivedWrapper<T, count_tag, B> : public B {
                 public:

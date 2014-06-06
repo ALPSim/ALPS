@@ -65,7 +65,7 @@ namespace alps {
                         : B(args), m_owner(true), m_weight(new ::alps::accumulator::derived_accumulator_wrapper<W>(W()))
                     {}
 
-                    base_wrapper const * weight() const {
+                    base_wrapper<T> const * weight() const {
                         // TODO: make library for scalar type
                         return m_weight.get();
                     }
@@ -78,7 +78,7 @@ namespace alps {
                     void operator()(T const & val, typename value_type<weight_type>::type const & weight) {
                         // TODO: how do we make sure, weight is updated only once?
                         B::operator()(val);
-                        (m_weight->extract<W>())(weight);
+                        (m_weight->template extract<W>())(weight);
                     }
 
                     template<typename S> void print(S & os) const {
@@ -139,7 +139,7 @@ namespace alps {
 
                 private:
                     bool m_owner;
-                    boost::shared_ptr< ::alps::accumulator::base_wrapper> m_weight;
+                    boost::shared_ptr< ::alps::accumulator::base_wrapper<typename value_type<weight_type>::type> > m_weight;
             };
 
             template<typename T, typename W, typename B> class Result<T, weight_holder_tag<W>, B> : public B {
@@ -160,7 +160,7 @@ namespace alps {
                         , m_weight(acc.weight()->result())
                     {}
 
-                    base_wrapper const * weight() const {
+                    base_wrapper<typename value_type<weight_type>::type> const * weight() const {
                         return m_weight.get();
                     }
 
@@ -193,7 +193,7 @@ namespace alps {
 
                 protected:
                     bool m_owner;
-                    boost::shared_ptr< ::alps::accumulator::base_wrapper> m_weight;
+                    boost::shared_ptr< ::alps::accumulator::base_wrapper<typename value_type<weight_type>::type> > m_weight;
             };
 
         }

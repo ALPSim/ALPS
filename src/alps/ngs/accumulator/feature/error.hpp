@@ -371,13 +371,9 @@ namespace alps {
                     }
             };
 
-            template<typename B> class BaseWrapper<error_tag, B> : public B {
+            template<typename T, typename B> class BaseWrapper<T, error_tag, B> : public B {
                 public:
                     virtual bool has_error() const = 0;
-            };
-
-            template<typename T, typename B> class ResultTypeWrapper<T, error_tag, B> : public B {
-                public:
                     virtual typename error_type<B>::type error() const = 0;
             };
 
