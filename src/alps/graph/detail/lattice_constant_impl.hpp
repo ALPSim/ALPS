@@ -504,7 +504,7 @@ namespace alps {
                 assert(num_vertices(G) > 0);
 
                 // make sure, that a distance in one direction fits in a boost::uint8_t
-                assert(num_vertices(G) < 256 * 256);
+                assert(std::size_t(num_vertices(G)) < 256 * 256);
 
                 // If the lattice has more than 2 dimensions improve lattice_constant_insert
                 assert(distance_to_boarder.size() < 3);
