@@ -652,8 +652,9 @@ ALPSModel<Matrix, SymmGroup>::measurements () const
                     tokenizer int_tokens(raw, int_sep);
                     
                     std::vector<std::size_t> pos;
-                    std::transform(int_tokens.begin(), int_tokens.end(), std::back_inserter(pos),
-                                   static_cast<std::size_t (*)(std::string const&)>(boost::lexical_cast<std::size_t, std::string>));
+                    BOOST_FOREACH(std::string t, int_tokens) {
+                      pos.push_back(boost::lexical_cast<std::size_t, std::string>(t));
+                    }
                     positions.push_back(pos);
                 }
                 if (f_ops % 2 != 0)
@@ -730,8 +731,9 @@ ALPSModel<Matrix, SymmGroup>::measurements () const
                 if (value_split.size() > 1) {
                     boost::char_separator<char> pos_sep(", ");
                     tokenizer pos_tokens(value_split[1], pos_sep);
-                    std::transform(pos_tokens.begin(), pos_tokens.end(), std::back_inserter(positions),
-                                   static_cast<std::size_t (*)(std::string const&)>(boost::lexical_cast<std::size_t, std::string>));
+                    BOOST_FOREACH(std::string t, pos_tokens) {
+                      positions.push_back(boost::lexical_cast<std::size_t, std::string>(t));
+                    }
                 }
                 
                 meas.push_back( new measurements::correlations<Matrix, SymmGroup>(name, raw_lattice, identitities, fillings, operators,

@@ -73,8 +73,9 @@ namespace parameters {
                 typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
                 boost::char_separator<char> sep(",");
                 tokenizer tokens(raw, sep);
-                std::transform(tokens.begin(), tokens.end(), std::back_inserter(ret),
-                               static_cast<T (*)(std::string const&)>(boost::lexical_cast<T, std::string>));
+                BOOST_FOREACH(std::string t, tokens) {
+                  ret.push_back(boost::lexical_cast<T, std::string>(t));
+                }
                 return ret;
             }
         };

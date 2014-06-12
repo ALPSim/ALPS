@@ -237,7 +237,9 @@ std::vector<unsigned short> worldlines::states() const
 int worldlines::net_number_of_directed_hops(unsigned int site_, unsigned int partnersite_) const
 {
   int net_number = 0;
-  for (line::const_iterator it = ++(_worldlines[site_].begin()); it != _worldlines[site_].end(); ++it)
+  line::const_iterator it = _worldlines[site_].begin();
+  ++it;
+  for (; it != _worldlines[site_].end(); ++it)
     if (it->siteindicator() == partnersite_)
       (it->state() > (it-1)->state()) ? ++net_number : --net_number;
   return net_number;
@@ -597,7 +599,8 @@ inline void wormpair::wormhead_inserts_vertex_and_jumps_to_new_site(location_typ
     const kink _vertex(site(), time(), _targetnewstate);
     _wormhead = kink(_source.siteindicator(), time()+std::numeric_limits<double>::epsilon(), _targetstate);
     _location = targetlocation_;
-    _location.second = ++(_location.first->insert(_location.second, _vertex));
+    _location.second = _location.first->insert(_location.second, _vertex);
+    ++_location.second;
   }
   else
   {
@@ -644,7 +647,8 @@ inline void wormpair::wormhead_relinks_vertex_and_jumps_to_new_site(location_typ
     const kink _vertex(sourcelocation_.first->begin()->siteindicator(), sourcelocation_.second->time(), _targetnewstate);
     _wormhead = kink(sourcelocation_.second->siteindicator(), sourcelocation_.second->time()+std::numeric_limits<double>::epsilon(), _targetstate);
     _location = targetlocation_;
-    _location.second = ++(_location.first->insert(_location.second, _vertex));
+    _location.second = _location.first->insert(_location.second, _vertex);
+    ++_location.second;
   }
   else
   {
