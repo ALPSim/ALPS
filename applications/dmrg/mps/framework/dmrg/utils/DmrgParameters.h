@@ -82,7 +82,6 @@ private:
         add_option("run_seconds", "", value(0));
         add_option("storagedir", "", value(""));
         add_option("use_compressed", "", value(0));
-        add_option("calc_h2", "", value(0));
         add_option("seed", "", value(42));
         add_option("always_measure", "comma separated list of measurements", value(""));
         add_option("measure_each", "", value(1)); 
@@ -116,6 +115,7 @@ private:
         add_option("n_ortho_states", "", value(0));
         add_option("ortho_states", "comma separated list of filenames", "");
         
+        add_option("ENABLE_MEASURE[EnergyVariance]", "", value(0));
         add_option("ENABLE_MEASURE[Entropy]", "", value(false));
         add_option("ENABLE_MEASURE[Renyi2]", "", value(false));
     }

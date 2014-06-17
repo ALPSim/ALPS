@@ -135,7 +135,7 @@ void run_eigenstate_sim(BaseParameters parms, bool write_xml)
             if (spectra != NULL)      save_val_at_index(ar, "/spectrum/results/Entanglement Spectra/mean/value", *spectra, eig);
         }
 
-        if (parms["calc_h2"] > 0) {
+        if (parms["ENABLE_MEASURE[EnergyVariance]"]) {
             MPO<Matrix, SymmGroup> mpo2 = square_mpo(mpo);
             mpo2.compress(1e-12);
             
