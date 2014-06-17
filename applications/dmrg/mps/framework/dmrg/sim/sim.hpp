@@ -148,7 +148,7 @@ std::string sim<Matrix, SymmGroup>::results_archive_path(status_type const& stat
 {
     std::ostringstream oss;
     oss.str("");
-#if defined(__xlC__)
+#if defined(__xlC__) || defined(__FCC_VERSION)
     typename status_type::const_iterator match = status.find("sweep");
     oss << "/spectrum/iteration/" << match->second;
 #else
