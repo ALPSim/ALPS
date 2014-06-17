@@ -56,5 +56,6 @@ else(NOT LAPACK_FOUND)
   
   add_subdirectory(mps_optim)
   add_subdirectory(mps_evolve)
+  add_subdirectory(mps_overlap)
 
 endif(NOT LAPACK_FOUND)
