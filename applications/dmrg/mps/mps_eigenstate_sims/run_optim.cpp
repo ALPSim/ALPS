@@ -29,7 +29,7 @@
 
 #include "libpscan/run_sim.hpp"
 
-#include "mps_optim/simulation.hpp"
+#include "mps_eigenstate_sims/simulation.hpp"
 #include "dmrg/sim/symmetry_factory.h"
 
 
@@ -77,5 +77,5 @@ void run_sim(const boost::filesystem::path& infile, const boost::filesystem::pat
     
     /// Start simulation
     simulation_traits::shared_ptr sim = dmrg::symmetry_factory<simulation_traits>(parms);
-    sim->run(parms, write_xml);
+    sim->run(parms, write_xml, optim_and_measure);
 }

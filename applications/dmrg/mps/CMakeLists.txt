@@ -54,7 +54,7 @@ else(NOT LAPACK_FOUND)
   # ${ALPS_BOOST_LIBRARY_NAME} ${HDF5_LIBRARIES} included in `alps`
   set(MYAPP_LIBRARIES mps_pscan mps_models mps_utils alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY} ${HDF5_LIBRARIES})
   
-  add_subdirectory(mps_optim)
+  add_subdirectory(mps_eigenstate_sims)
   add_subdirectory(mps_evolve)
   add_subdirectory(mps_overlap)
 
