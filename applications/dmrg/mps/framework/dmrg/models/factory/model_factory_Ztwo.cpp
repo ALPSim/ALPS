@@ -25,6 +25,7 @@
  *****************************************************************************/
 
 #include "model_factory_symm.h"
+#include "dmrg/models/coded/factory_Ztwo.hpp"
 
 typedef Ztwo grp;
 
