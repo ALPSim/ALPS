@@ -53,5 +53,5 @@ Ztwo::charge state_to_charge<Ztwo>(alps::site_state<short> const & state, alps::
         if (match != all_conserved_qn.end())
             tmp = detail::to_integer( get_quantumnumber(state, it->name(), b) );
     }
-    return (tmp % 2 == 0 ? Ztwo::Plus : Ztwo::Minus);
+    return (tmp % 4 == 0 ? Ztwo::Plus : Ztwo::Minus);
 }
