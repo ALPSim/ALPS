@@ -127,7 +127,7 @@ endif(CMAKE_SIZEOF_VOID_P EQUAL 8 OR CMAKE_GENERATOR MATCHES Win64)
 #include (CMakeTestFortranCompiler)
 cmake_minimum_required(VERSION 2.8.0 FATAL_ERROR)
 if(NOT CMAKE_VERSION VERSION_LESS 3.0.0)
-  cmake_policy(SET CMP0042 NEW)
+  cmake_policy(SET CMP0042 OLD)
 endif(NOT CMAKE_VERSION VERSION_LESS 3.0.0)
 
 if(ALPS_BUILD_FORTRAN)
@@ -535,8 +535,11 @@ set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 ######################################################################
 # RPATH setting
 ######################################################################
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) 
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 if(APPLE)
-  set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+  # set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
 else(APPLE)
   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
   set(CMAKE_SKIP_BUILD_RPATH FALSE)
