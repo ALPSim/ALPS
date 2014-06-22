@@ -3,6 +3,10 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-add_subdirectory(mps)
+option(ALPS_BUILD_MPS "Build and install MPS application" ON)
+
+if(ALPS_BUILD_MPS)
+  add_subdirectory(mps)
+endif(ALPS_BUILD_MPS)
 add_subdirectory(dmrg)
 add_subdirectory(tebd)
