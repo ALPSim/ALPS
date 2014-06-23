@@ -535,20 +535,15 @@ set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 ######################################################################
 # RPATH setting
 ######################################################################
-if(APPLE)
-  if(NOT CMAKE_VERSION VERSION_LESS 3.0.0)
-    set(CMAKE_SKIP_BUILD_RPATH FALSE)
-    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-  else(NOT CMAKE_VERSION VERSION_LESS 3.0.0)
-    set(fCMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
-  endif(NOT CMAKE_VERSION VERSION_LESS 3.0.0)
-else(APPLE)
+if(APPLE AND (CMAKE_VERSION VERSION_LESS 2.8.12))
+  set(fCMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+else(APPLE AND (CMAKE_VERSION VERSION_LESS 2.8.12))
   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
   set(CMAKE_SKIP_BUILD_RPATH FALSE)
   set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
   set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-endif(APPLE)
+  set(CMAKE_MACOSX_RPATH 1)
+endif(APPLE AND (CMAKE_VERSION VERSION_LESS 2.8.12))
 
 ######################################################################
 # install dependent libraries under Windows, from applications
