@@ -58,7 +58,7 @@ for tau in [20.0]:
         p['DT'       ] = dt
         p['TIMESTEPS'] = ns
         p['tau'      ] = tau # not used in the simulation, but useful in the evaluation below
-        p['always_measure'] = 'Local Magnetization'
+        p['ALWAYS_MEASURE'] = 'Local Magnetization'
         p['chkp_each'     ] = ns
         p['measure_each'  ] = 5
         p['COMPLEX'       ] = 1

@@ -59,7 +59,7 @@ for nsteps in [100, 250, 500, 750, 1000]:
     p['DT'       ] = dt
     p['TIMESTEPS'] = nsteps
     p['tau'      ] = tau # not used in the simulation, but useful in the evaluation below
-    p['always_measure'] = 'Local Magnetization'
+    p['ALWAYS_MEASURE'] = 'Local Magnetization'
     p['chkp_each'     ] = nsteps
     p['measure_each'  ] = 2
     p['MAXSTATES'     ] = 20

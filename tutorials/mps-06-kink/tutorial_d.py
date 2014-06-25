@@ -60,7 +60,7 @@ for z in [0.0, 0.3, 0.9, 1.0, 1.1, 1.5]:
     p['TIMESTEPS'] = nsteps
     p['tau'      ] = tau # not used in the simulation, but useful in the evaluation below
     p['Jz'       ] = z
-    p['always_measure'] = 'Local Magnetization'
+    p['ALWAYS_MEASURE'] = 'Local Magnetization'
     p['chkp_each'     ] = nsteps
     p['measure_each'  ] = 5
     p['COMPLEX'       ] = 1

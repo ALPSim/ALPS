@@ -76,7 +76,7 @@ for A in [5.0, 10.0, 15.0, 25.0, 50.0]:
         p['V[Time]'  ] = list_to_string(V)
         p['tau'      ] = A # not used in the simulation, but useful in the evaluation below
         p['MEASURE_OVERLAP[Overlap]'] = initstate
-        p['always_measure'] = 'Overlap'
+        p['ALWAYS_MEASURE'] = 'Overlap'
         p['chkp_each'     ] = ns
         p['measure_each'  ] = 10
         p['update_each'   ] = 1
