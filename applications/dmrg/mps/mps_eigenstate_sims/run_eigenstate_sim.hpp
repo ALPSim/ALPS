@@ -123,11 +123,11 @@ void run_eigenstate_sim(BaseParameters parms, bool write_xml, run_type rt)
             std::vector< std::vector<double> > * spectra;
             spectra = parms["entanglement_spectra"] ? new std::vector< std::vector<double> >() : NULL;
             std::vector<double> entropies, renyi2;
-            if (parms["ENABLE_MEASURE[Entropy]"]) {
+            if (parms["MEASURE[Entropy]"]) {
                 std::cout << "Calculating vN entropy." << std::endl;
                 entropies = calculate_bond_entropies(mps);
             }
-            if (parms["ENABLE_MEASURE[Renyi2]"]) {
+            if (parms["MEASURE[Renyi2]"]) {
                 std::cout << "Calculating n=2 Renyi entropy." << std::endl;
                 renyi2 = calculate_bond_renyi_entropies(mps, 2, spectra);
             }
@@ -142,7 +142,7 @@ void run_eigenstate_sim(BaseParameters parms, bool write_xml, run_type rt)
                 if (spectra != NULL)      save_val_at_index(ar, "/spectrum/results/Entanglement Spectra/mean/value", *spectra, eig);
             }
 
-            if (parms["ENABLE_MEASURE[EnergyVariance]"]) {
+            if (parms["MEASURE[EnergyVariance]"]) {
                 MPO<Matrix, SymmGroup> mpo2 = square_mpo(mpo);
                 mpo2.compress(1e-12);
             

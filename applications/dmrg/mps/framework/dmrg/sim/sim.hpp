@@ -167,11 +167,11 @@ void sim<Matrix, SymmGroup>::measure(std::string archive_path, measurements_type
     std::vector< std::vector<double> > * spectra;
     spectra = parms["entanglement_spectra"] ? new std::vector< std::vector<double> >() : NULL;
     std::vector<double> entropies, renyi2;
-    if (parms["ENABLE_MEASURE[Entropy]"]) {
+    if (parms["MEASURE[Entropy]"]) {
         maquis::cout << "Calculating vN entropy." << std::endl;
         entropies = calculate_bond_entropies(mps);
     }
-    if (parms["ENABLE_MEASURE[Renyi2]"]) {
+    if (parms["MEASURE[Renyi2]"]) {
         maquis::cout << "Calculating n=2 Renyi entropy." << std::endl;
         renyi2 = calculate_bond_renyi_entropies(mps, 2, spectra);
     }

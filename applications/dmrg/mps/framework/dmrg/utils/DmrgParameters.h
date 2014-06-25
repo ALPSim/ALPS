@@ -115,9 +115,9 @@ private:
         add_option("n_ortho_states", "", value(0));
         add_option("ortho_states", "comma separated list of filenames", "");
         
-        add_option("ENABLE_MEASURE[EnergyVariance]", "", value(0));
-        add_option("ENABLE_MEASURE[Entropy]", "", value(false));
-        add_option("ENABLE_MEASURE[Renyi2]", "", value(false));
+        add_option("MEASURE[EnergyVariance]", "", value(0));
+        add_option("MEASURE[Entropy]", "", value(false));
+        add_option("MEASURE[Renyi2]", "", value(false));
     }
     
 };
@@ -214,11 +214,11 @@ private:
         add_option("MEASURE_CONTINUUM[Local density]", "", value(true));
         add_option("MEASURE_CONTINUUM[Onebody density matrix]", "", value(false));
 
-        add_option("ENABLE_MEASURE[Density]", "", value(false));
-        add_option("ENABLE_MEASURE[Local density]", "", value(false));
-        add_option("ENABLE_MEASURE[Local density^2]", "", value(false));
-        add_option("ENABLE_MEASURE[Onebody density matrix]", "", value(false));
-        add_option("ENABLE_MEASURE[Density correlation]", "", value(false));
+        add_option("MEASURE[Density]", "", value(false));
+        add_option("MEASURE[Local density]", "", value(false));
+        add_option("MEASURE[Local density^2]", "", value(false));
+        add_option("MEASURE[Onebody density matrix]", "", value(false));
+        add_option("MEASURE[Density correlation]", "", value(false));
 
         add_option("RUN_FINITE_T", "", value(false));
    }
