@@ -54,7 +54,6 @@ template <class GRAPH>
 inline void write_graph_xml(oxstream& out, const GRAPH& g, const std::string& n="")
 {
   typedef GRAPH graph_type;
-  typedef const GRAPH const_graph_type;
   typedef typename boost::graph_traits<graph_type>::vertex_iterator vertex_iterator;
   typedef typename boost::graph_traits<graph_type>::edge_iterator edge_iterator;
 
