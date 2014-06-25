@@ -405,9 +405,6 @@ private:
                 SiteOperator op1 = boost::get<1>(*bond_terms.begin());
                 SiteOperator op2 = boost::get<2>(*bond_terms.begin());
                 
-                maquis::cout << "op1: \n" << op1 << std::endl;
-                maquis::cout << "op2: \n" << op2 << std::endl;
-                
                 opnames.push_back(simplify_name(op1));
                 opnames.push_back(simplify_name(op2));
                 op_types |= 1<<1; // flag that at least one bond term is in the list
@@ -423,8 +420,6 @@ private:
         /// get matrices for the operators
         for (std::vector<std::string>::const_iterator it2 = opnames.begin(); it2 != opnames.end(); ++it2)
         {
-            maquis::cout << *it2 << std::endl;
-            
             enum {uknown, bosonic, fermionic} kind = uknown;
             std::vector<op_t> tops(ntypes);
             for (int type=0; type<ntypes; ++type) {
