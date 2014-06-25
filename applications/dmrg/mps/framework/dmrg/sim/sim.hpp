@@ -115,8 +115,8 @@ sim<Matrix, SymmGroup>::iteration_measurements(int sweep)
     mymeas << overlap_measurements<Matrix, SymmGroup>(parms, sweep);
     
     measurements_type sweep_measurements;
-    if (!parms["always_measure"].empty())
-        sweep_measurements = meas_sublist(mymeas, parms["always_measure"]);
+    if (!parms["ALWAYS_MEASURE"].empty())
+        sweep_measurements = meas_sublist(mymeas, parms["ALWAYS_MEASURE"]);
     
     return sweep_measurements;
 }

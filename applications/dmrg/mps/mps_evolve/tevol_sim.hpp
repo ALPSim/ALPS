@@ -133,7 +133,7 @@ public:
                 
                 /// measure observables specified in 'always_measure'
                 measurements_type always_measure = this->iteration_measurements(sweep); // todo: make measure() using const&
-                if (!parms["always_measure"].empty())
+                if (!parms["ALWAYS_MEASURE"].empty())
                     this->measure(this->results_archive_path(sweep) + "/results/", always_measure);
 
                 /// write iteration results

@@ -83,7 +83,7 @@ private:
         add_option("storagedir", "", value(""));
         add_option("use_compressed", "", value(0));
         add_option("seed", "", value(42));
-        add_option("always_measure", "comma separated list of measurements", value(""));
+        add_option("ALWAYS_MEASURE", "comma separated list of measurements", value(""));
         add_option("measure_each", "", value(1)); 
         add_option("chkp_each", "", value(1)); 
         add_option("update_each", "", value(-1));
