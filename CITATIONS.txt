@@ -81,6 +81,11 @@ citation requirement but acknowledgment of the ALPS project is encouraged.
    P. Werner, A. Comanac, L. de’ Medici, et al., Phys. Rev. Lett., 97, 076405 (2006).
    H. Hafermann, P. Werner, E. Gull, Computer Physics Communications 184, 1280 (2013).
 
+* When the Matrix Product States applications mps_optim, mps_evolve, mps_meas or mps_overlap are used:
+ -cite the publcations:
+  B. Bauer et al., J. Stat. Mech. (2011) P05001.
+  M. Dolfi et al., in preparation
+
 Since some of the references are to preprints we would like to ask you 
 to check the ALPS web page http://alps.comp-phys.org/ for updates.
 
