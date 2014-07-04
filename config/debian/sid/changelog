@@ -1,3 +1,9 @@
+alps (1:20140623~r7482-1) wheezy; urgency=low
+
+  * New upstream snapshot (20140623-r7482).
+
+ -- Synge Todo <wistaria@phys.s.u-tokyo.ac.jp>  Fri, 04 Jul 2014 09:18:02 +0900
+
 alps (1:20140309~r7370-1) wheezy; urgency=low
 
   * New upstream snapshot (20140309-r7370).
