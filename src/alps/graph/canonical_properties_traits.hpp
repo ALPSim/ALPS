@@ -62,6 +62,11 @@ namespace detail {
         template<typename A> graph_label_color_vector(std::vector<Value,A> const& v) : std::vector<Value>(v) {}
     };
 
+    template <typename T>
+    void swap(graph_label_color_vector<T>& v1, graph_label_color_vector<T>& v2) {
+        swap(static_cast<std::vector<T>&>(v1), static_cast<std::vector<T>&>(v2));
+    }
+
     // ostream operator for color list
     template<typename Stream, typename Value> Stream & operator<< (Stream & os, graph_label_color_vector<Value> const & vec) {
         os << "(";
@@ -146,6 +151,8 @@ template<typename Graph> struct graph_label {
 
 template<typename Graph> struct color_partition : detail::color_partition_helper<Graph, has_property<alps::edge_type_t,Graph>::edge_property> {
 };
+
+struct no_color_symmetry {};
 
 template<typename Graph> struct canonical_properties_type {
     typedef boost::tuple<

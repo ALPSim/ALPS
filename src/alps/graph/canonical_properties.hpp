@@ -946,6 +946,14 @@ namespace alps {
             return detail::canonical_properties_impl(G, pi, label_creator);
         }
 
+        
+        // Function overload for the previous function to ease generic programming.
+        template<typename Graph>
+        typename canonical_properties_type<Graph>::type
+        canonical_properties(Graph const & G, no_color_symmetry) {
+            return canonical_properties(G);
+        }
+
         // McKay’s canonical isomorph function Cm(G) is deﬁned to be
         // Cm(G) = max{ Gpi: (pi, nu) is a leaf of T(G) }
         // Input: graph G, symmetry breaking vertex v
