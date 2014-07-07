@@ -82,7 +82,7 @@ namespace numeric {
 
       friend void swap(vector& x,vector& y)
       {
-          std::swap(x, y);
+          swap(static_cast<MemoryBlock&>(x), static_cast<MemoryBlock&>(y));
       }
 
       inline T &operator()(const std::size_t i)
