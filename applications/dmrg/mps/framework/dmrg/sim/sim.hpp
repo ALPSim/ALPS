@@ -164,8 +164,13 @@ void sim<Matrix, SymmGroup>::measure(std::string archive_path, measurements_type
     std::for_each(meas.begin(), meas.end(), measure_and_save<Matrix, SymmGroup>(rfile, archive_path, mps));
     
     // TODO: move into special measurement
-    std::vector< std::vector<double> > * spectra;
-    spectra = parms["entanglement_spectra"] ? new std::vector< std::vector<double> >() : NULL;
+    std::vector<int> * measure_es_where = NULL;
+    entanglement_spectrum_type * spectra = NULL;
+    if (!parms["entanglement_spectra"].empty()) {
+        spectra = new entanglement_spectrum_type();
+        measure_es_where = new std::vector<int>();
+        *measure_es_where = parms.template get<std::vector<int> >("entanglement_spectra");
+    }
     std::vector<double> entropies, renyi2;
     if (parms["MEASURE[Entropy]"]) {
         maquis::cout << "Calculating vN entropy." << std::endl;
@@ -173,7 +178,7 @@ void sim<Matrix, SymmGroup>::measure(std::string archive_path, measurements_type
     }
     if (parms["MEASURE[Renyi2]"]) {
         maquis::cout << "Calculating n=2 Renyi entropy." << std::endl;
-        renyi2 = calculate_bond_renyi_entropies(mps, 2, spectra);
+        renyi2 = calculate_bond_renyi_entropies(mps, 2, measure_es_where, spectra);
     }
 
     {

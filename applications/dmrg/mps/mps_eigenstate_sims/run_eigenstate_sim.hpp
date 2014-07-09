@@ -120,8 +120,13 @@ void run_eigenstate_sim(BaseParameters parms, bool write_xml, run_type rt)
             maquis::cout << "Measurements." << std::endl;
             std::for_each(measurements.begin(), measurements.end(), measure_and_save<Matrix, SymmGroup>(rfile, "/spectrum/results/", mps, eig));
         
-            std::vector< std::vector<double> > * spectra;
-            spectra = parms["entanglement_spectra"] ? new std::vector< std::vector<double> >() : NULL;
+            std::vector<int> * measure_es_where = NULL;
+            entanglement_spectrum_type * spectra = NULL;
+            if (!parms["entanglement_spectra"].empty()) {
+                spectra = new entanglement_spectrum_type();
+                measure_es_where = new std::vector<int>();
+                *measure_es_where = parms.template get<std::vector<int> >("entanglement_spectra");
+            }
             std::vector<double> entropies, renyi2;
             if (parms["MEASURE[Entropy]"]) {
                 std::cout << "Calculating vN entropy." << std::endl;
@@ -129,7 +134,7 @@ void run_eigenstate_sim(BaseParameters parms, bool write_xml, run_type rt)
             }
             if (parms["MEASURE[Renyi2]"]) {
                 std::cout << "Calculating n=2 Renyi entropy." << std::endl;
-                renyi2 = calculate_bond_renyi_entropies(mps, 2, spectra);
+                renyi2 = calculate_bond_renyi_entropies(mps, 2, measure_es_where, spectra);
             }
         
             double energy = maquis::real(expval(mps, mpo));
