@@ -30,14 +30,15 @@
 #define ALPS_NGS_ACCUMULATOR_ACCUMULATOR_HPP
 
 #ifndef ALPS_ACCUMULATOR_VALUE_TYPES
-    #define ALPS_ACCUMULATOR_VALUE_TYPES double, std::vector<double>
+    #define ALPS_ACCUMULATOR_VALUE_TYPES double, std::vector<double>, alps::multi_array<double, 2>, alps::multi_array<double, 3>
 #endif
 
 #include <alps/ngs/accumulator/wrappers.hpp>
-#include <alps/ngs/accumulator/feature/weight_impl.hpp>
+#include <alps/ngs/accumulator/feature/weight_holder.hpp>
 
 #include <alps/hdf5/archive.hpp>
 
+#include <boost/mpl/if.hpp>
 #include <boost/mpl/list.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/mpl/vector.hpp>
@@ -65,6 +66,12 @@ namespace alps {
                   boost::mpl::vector<ALPS_ACCUMULATOR_VALUE_TYPES>
                 , detail::add_base_wrapper_pointer<boost::mpl::_1> 
             >::type>::type variant_type;
+
+            template<typename T, typename A> struct is_valid_argument : public boost::mpl::if_<
+                  typename boost::is_scalar<A>::type
+                , typename boost::is_convertible<T, A>::type
+                , typename boost::is_same<T, A>::type
+            > {};
         }
 
         // TODO: merge with accumulator_wrapper, at least make common base ...
@@ -177,12 +184,12 @@ namespace alps {
                 private:                                                                                            \
                     template<typename T> struct PROPERTY ## _visitor: public boost::static_visitor<> {              \
                         template<typename X> void apply(typename boost::enable_if<                                  \
-                            typename boost::is_convertible<typename TYPE <X>::type, T>::type, X const &             \
+                            typename detail::is_valid_argument<typename TYPE <X>::type, T>::type, X const &         \
                         >::type arg) const {                                                                        \
                             value = arg. PROPERTY ();                                                               \
                         }                                                                                           \
                         template<typename X> void apply(typename boost::disable_if<                                 \
-                            typename boost::is_convertible<typename TYPE <X>::type, T>::type, X const &             \
+                            typename detail::is_valid_argument<typename TYPE <X>::type, T>::type, X const &         \
                         >::type arg) const {                                                                        \
                             throw std::logic_error(std::string("cannot convert: ")                                  \
                                 + typeid(typename TYPE <X>::type).name() + " to "                                   \
@@ -244,12 +251,12 @@ namespace alps {
                 template<typename T> struct transform_1_visitor: public boost::static_visitor<> {
                     transform_1_visitor(boost::function<T(T)> f) : op(f) {}
                     template<typename X> void apply(typename boost::enable_if<
-                        typename boost::is_convertible<T, typename value_type<X>::type>::type, X &
+                        typename detail::is_valid_argument<T, typename value_type<X>::type>::type, X &
                     >::type arg) const {
                         arg.transform(op);
                     }
                     template<typename X> void apply(typename boost::disable_if<
-                        typename boost::is_convertible<T, typename value_type<X>::type>::type, X &
+                        typename detail::is_valid_argument<T, typename value_type<X>::type>::type, X &
                     >::type arg) const {
                         throw std::logic_error(std::string("cannot convert: ") + typeid(T).name() + " to " + typeid(typename value_type<X>::type).name() + ALPS_STACKTRACE);
                     }
@@ -433,12 +440,12 @@ namespace alps {
                 template<typename T> struct call_1_visitor: public boost::static_visitor<> {
                     call_1_visitor(T const & v) : value(v) {}
                     template<typename X> void apply(typename boost::enable_if<
-                        typename boost::is_convertible<T, typename value_type<X>::type>::type, X &
+                        typename detail::is_valid_argument<T, typename value_type<X>::type>::type, X &
                     >::type arg) const {
                         arg(value); 
                     }
                     template<typename X> void apply(typename boost::disable_if<
-                        typename boost::is_convertible<T, typename value_type<X>::type>::type, X &
+                        typename detail::is_valid_argument<T, typename value_type<X>::type>::type, X &
                     >::type arg) const {
                         throw std::logic_error(std::string("cannot convert: ") + typeid(T).name() + " to " + typeid(typename value_type<X>::type).name() + ALPS_STACKTRACE);
                     }
@@ -455,9 +462,31 @@ namespace alps {
                     (*this)(value);
                     return (*this);
                 }
-                // template<typename T, typename W> void operator()(T const & value, W const & weight) {
-                //     (*m_base)(&value, typeid(T), &weight, typeid(W));
-                // }
+
+            // operator(T, W)
+            private:
+                template<typename T, typename W> struct call_2_visitor: public boost::static_visitor<> {
+                    call_2_visitor(T const & v, W const & w) : value(v), weight(w) {}
+                    template<typename X> void apply(typename boost::enable_if<
+                        typename detail::is_valid_argument<T, typename value_type<X>::type>::type, X &
+                    >::type arg) const {
+                        arg(value, weight);
+                    }
+                    template<typename X> void apply(typename boost::disable_if<
+                        typename detail::is_valid_argument<T, typename value_type<X>::type>::type, X &
+                    >::type arg) const {
+                        throw std::logic_error(std::string("cannot convert: ") + typeid(T).name() + " to " + typeid(typename value_type<X>::type).name() + ALPS_STACKTRACE);
+                    }
+                    template<typename X> void operator()(X & arg) const {
+                        apply<typename X::element_type>(*arg);
+                    }
+                    T const & value;
+                    detail::weight_variant_type weight;
+                };
+            public:
+                template<typename T, typename W> void operator()(T const & value, W const & weight) {
+                    boost::apply_visitor(call_2_visitor<T, W>(value, weight), m_variant);
+                }
 
             // operator=
             private:
@@ -521,12 +550,12 @@ namespace alps {
                 private:                                                                                            \
                     template<typename T> struct PROPERTY ## _visitor: public boost::static_visitor<> {              \
                         template<typename X> void apply(typename boost::enable_if<                                  \
-                            typename boost::is_convertible<typename TYPE <X>::type, T>::type, X const &             \
+                            typename detail::is_valid_argument<typename TYPE <X>::type, T>::type, X const &         \
                         >::type arg) const {                                                                        \
                             value = arg. PROPERTY ();                                                               \
                         }                                                                                           \
                         template<typename X> void apply(typename boost::disable_if<                                 \
-                            typename boost::is_convertible<typename TYPE <X>::type, T>::type, X const &             \
+                            typename detail::is_valid_argument<typename TYPE <X>::type, T>::type, X const &         \
                         >::type arg) const {                                                                        \
                             throw std::logic_error(std::string("cannot convert: ")                                  \
                                 + typeid(typename TYPE <X>::type).name() + " to "                                   \
@@ -873,34 +902,34 @@ namespace alps {
         typedef detail::PredefinedObservable<detail::observable_type<double> > RealObservable;
         typedef detail::PredefinedObservable<detail::observable_type<std::vector<double> > > RealVectorObservable;
 
-        // typedef detail::PredefinedObservable<detail::signed_observable_type<double> > SignedRealObservable;
-        // typedef detail::PredefinedObservable<detail::signed_observable_type<std::vector<double> > > SignedRealVectorObservable;
+        typedef detail::PredefinedObservable<detail::signed_observable_type<double> > SignedRealObservable;
+        typedef detail::PredefinedObservable<detail::signed_observable_type<std::vector<double> > > SignedRealVectorObservable;
 
-        // typedef detail::PredefinedObservable<detail::signed_simple_observable_type<double> > SignedSimpleRealObservable;
-        // typedef detail::PredefinedObservable<detail::signed_simple_observable_type<std::vector<double> > > SignedSimpleRealVectorObservable;
+        typedef detail::PredefinedObservable<detail::signed_simple_observable_type<double> > SignedSimpleRealObservable;
+        typedef detail::PredefinedObservable<detail::signed_simple_observable_type<std::vector<double> > > SignedSimpleRealVectorObservable;
 
         // TODO implement: RealTimeSeriesObservable
 
         namespace detail {
 
             inline void register_predefined_serializable_type() {
-                // accumulator_set::register_serializable_type<SimpleRealObservable::accumulator_type>(true);
-                // accumulator_set::register_serializable_type<SimpleRealVectorObservable::accumulator_type>(true);
-                // accumulator_set::register_serializable_type<RealObservable::accumulator_type>(true);
-                // accumulator_set::register_serializable_type<RealVectorObservable::accumulator_type>(true);
-                // accumulator_set::register_serializable_type<SignedRealObservable::accumulator_type>(true);
-                // accumulator_set::register_serializable_type<SignedRealVectorObservable::accumulator_type>(true);
-                // accumulator_set::register_serializable_type<SignedSimpleRealObservable::accumulator_type>(true);
-                // accumulator_set::register_serializable_type<SignedSimpleRealVectorObservable::accumulator_type>(true);
+                accumulator_set::register_serializable_type<SimpleRealObservable::accumulator_type>(true);
+                accumulator_set::register_serializable_type<SimpleRealVectorObservable::accumulator_type>(true);
+                accumulator_set::register_serializable_type<RealObservable::accumulator_type>(true);
+                accumulator_set::register_serializable_type<RealVectorObservable::accumulator_type>(true);
+                accumulator_set::register_serializable_type<SignedRealObservable::accumulator_type>(true);
+                accumulator_set::register_serializable_type<SignedRealVectorObservable::accumulator_type>(true);
+                accumulator_set::register_serializable_type<SignedSimpleRealObservable::accumulator_type>(true);
+                accumulator_set::register_serializable_type<SignedSimpleRealVectorObservable::accumulator_type>(true);
 
-                // result_set::register_serializable_type<SimpleRealObservable::result_type>(true);
-                // result_set::register_serializable_type<SimpleRealVectorObservable::result_type>(true);
-                // result_set::register_serializable_type<RealObservable::result_type>(true);
-                // result_set::register_serializable_type<RealVectorObservable::result_type>(true);
-                // result_set::register_serializable_type<SignedRealObservable::result_type>(true);
-                // result_set::register_serializable_type<SignedRealVectorObservable::result_type>(true);
-                // result_set::register_serializable_type<SignedSimpleRealObservable::result_type>(true);
-                // result_set::register_serializable_type<SignedSimpleRealVectorObservable::result_type>(true);
+                result_set::register_serializable_type<SimpleRealObservable::result_type>(true);
+                result_set::register_serializable_type<SimpleRealVectorObservable::result_type>(true);
+                result_set::register_serializable_type<RealObservable::result_type>(true);
+                result_set::register_serializable_type<RealVectorObservable::result_type>(true);
+                result_set::register_serializable_type<SignedRealObservable::result_type>(true);
+                result_set::register_serializable_type<SignedRealVectorObservable::result_type>(true);
+                result_set::register_serializable_type<SignedSimpleRealObservable::result_type>(true);
+                result_set::register_serializable_type<SignedSimpleRealVectorObservable::result_type>(true);
             }
         }
     }

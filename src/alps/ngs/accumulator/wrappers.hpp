@@ -38,6 +38,9 @@
 
 #include <alps/hdf5/archive.hpp>
 
+#include <boost/mpl/vector.hpp>
+#include <boost/variant/variant.hpp>
+
 #include <typeinfo>
 #include <stdexcept>
 
@@ -50,6 +53,10 @@ namespace alps {
             template<typename T> struct value_wrapper {
                 typedef T value_type;
             };
+
+            typedef boost::make_variant_over<
+                boost::mpl::vector<ALPS_ACCUMULATOR_VALUE_TYPES>
+            >::type weight_variant_type;
         }
 
         template<typename T> class base_wrapper : public 
@@ -68,7 +75,7 @@ namespace alps {
                 virtual ~base_wrapper() {}
 
                 virtual void operator()(value_type const & value) = 0;
-                virtual void operator()(value_type value, void const * weight) = 0;
+                virtual void operator()(value_type value, detail::weight_variant_type) = 0;
 
                 virtual void save(hdf5::archive & ar) const = 0;
                 virtual void load(hdf5::archive & ar) = 0;
@@ -176,7 +183,7 @@ namespace alps {
                 }
 
                 // TODO: implement ... how do we do this?
-                void operator()(value_type value, void const * weight) {
+                void operator()(value_type value, detail::weight_variant_type) {
                     // return call_impl<A>(value, weight);
                 }
 

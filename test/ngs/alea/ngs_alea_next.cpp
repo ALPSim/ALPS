@@ -38,8 +38,6 @@
 #	include <boost/test/unit_test.hpp>
 #endif
 
-#ifdef DO_NOT_COMPILE
-
 BOOST_AUTO_TEST_CASE(ngs_alea_next) {
 	using namespace alps::accumulator;
 
@@ -99,7 +97,7 @@ BOOST_AUTO_TEST_CASE(ngs_alea_next) {
 	accumulators["mean"](16.f);
 
     BOOST_REQUIRE(count(accumulators["mean"]) == 5);
-    BOOST_REQUIRE(mean(accumulators["mean"].get<double>()) == 6.2);
+    BOOST_REQUIRE(accumulators["mean"].mean<double>() == 6.2);
 
     accumulators << SimpleRealObservable("error");
 
@@ -110,8 +108,8 @@ BOOST_AUTO_TEST_CASE(ngs_alea_next) {
 	accumulators["error"](1.f);
 
     BOOST_REQUIRE(count(accumulators["error"]) == 5);
-    BOOST_REQUIRE(mean(accumulators["error"].get<double>()) == 2);
-    BOOST_REQUIRE(error(accumulators["error"].get<double>()) == 1);
+    BOOST_REQUIRE(accumulators["error"].mean<double>() == 2);
+    BOOST_REQUIRE(accumulators["error"].error<double>() == 1);
 
 	accumulators.insert("count", boost::shared_ptr<accumulator_wrapper>(new accumulator_wrapper(impl::Accumulator<double, count_tag, impl::AccumulatorBase<double> >())));
 	for (int i = 0; i < 10; ++i)
@@ -131,11 +129,11 @@ BOOST_AUTO_TEST_CASE(ngs_alea_next) {
 	accumulators["weighted"](8., 1.);
 	accumulators["weighted"](16., 1.);
 
-    BOOST_REQUIRE(count(accumulators["weighted"]) == 5);
-    BOOST_REQUIRE(mean(accumulators["weighted"].get<double>()) == 6.2);
+    // BOOST_REQUIRE(count(accumulators["weighted"]) == 5);
+    // BOOST_REQUIRE(accumulators["weighted"].mean<double>() == 6.2);
 
-    BOOST_REQUIRE(count(*weight(accumulators["weighted"].get<double>())) == 5);
-    BOOST_REQUIRE(mean(weight(accumulators["weighted"].get<double>())->get<double>()) == 1);
+    // BOOST_REQUIRE(count(*weight(accumulators["weighted"].get<double>())) == 5);
+	// BOOST_REQUIRE(weight(accumulators["weighted"].get<double>())->mean<double>() == 1); 
 
 	accumulators.insert("vector", boost::shared_ptr<accumulator_wrapper>(
 		new accumulator_wrapper(impl::Accumulator<std::vector<double>, mean_tag, impl::Accumulator<std::vector<double>, count_tag, impl::AccumulatorBase<std::vector<double> > > >())
@@ -151,31 +149,32 @@ BOOST_AUTO_TEST_CASE(ngs_alea_next) {
     std::vector<double> vector_mean(3, 6.2);
     BOOST_REQUIRE(std::equal(vector_mean.begin(), vector_mean.end(), mean(accumulators["vector"].get<std::vector<double> >()).begin()));
 
-	accumulators.insert("int", boost::shared_ptr<accumulator_wrapper>(
-		new accumulator_wrapper(impl::Accumulator<int, mean_tag, impl::Accumulator<int, count_tag, impl::AccumulatorBase<int > > >())
-	));
-	accumulators["int"](1);
+	// TODO: implement!
+	// accumulators.insert("int", boost::shared_ptr<accumulator_wrapper>(
+	// 	new accumulator_wrapper(impl::Accumulator<int, mean_tag, impl::Accumulator<int, count_tag, impl::AccumulatorBase<int > > >())
+	// ));
+	// accumulators["int"](1);
 
-    BOOST_REQUIRE(count(accumulators["int"]) == 1);
-    BOOST_REQUIRE(mean(accumulators["int"].get<int>()) == 1);
+ //    BOOST_REQUIRE(count(accumulators["int"]) == 1);
+ //    BOOST_REQUIRE(mean(accumulators["int"].get<int>()) == 1);
 
-	accumulators.insert("vecint", boost::shared_ptr<accumulator_wrapper>(
-		new accumulator_wrapper(impl::Accumulator<std::vector<int>, mean_tag, impl::Accumulator<std::vector<int>, count_tag, impl::AccumulatorBase<std::vector<int> > > >())
-	));
-	accumulators["vecint"](std::vector<int>(3, 1));
+	// accumulators.insert("vecint", boost::shared_ptr<accumulator_wrapper>(
+	// 	new accumulator_wrapper(impl::Accumulator<std::vector<int>, mean_tag, impl::Accumulator<std::vector<int>, count_tag, impl::AccumulatorBase<std::vector<int> > > >())
+	// ));
+	// accumulators["vecint"](std::vector<int>(3, 1));
 
-    BOOST_REQUIRE(count(accumulators["vecint"]) == 1);
-    std::vector<int> vecint_mean(3, 1);
-    BOOST_REQUIRE(std::equal(vecint_mean.begin(), vecint_mean.end(), mean(accumulators["vecint"].get<std::vector<int> >()).begin()));
+ //    BOOST_REQUIRE(count(accumulators["vecint"]) == 1);
+ //    std::vector<int> vecint_mean(3, 1);
+ //    BOOST_REQUIRE(std::equal(vecint_mean.begin(), vecint_mean.end(), mean(accumulators["vecint"].get<std::vector<int> >()).begin()));
 
-	accumulators.insert("array", boost::shared_ptr<accumulator_wrapper>(
-		new accumulator_wrapper(impl::Accumulator<boost::array<double, 3>, mean_tag, impl::Accumulator<boost::array<double, 3>, count_tag, impl::AccumulatorBase<boost::array<double, 3> > > >())
-	));
-	boost::array<double, 3> array_val = { {1., 2., 3.} };
-	accumulators["array"](array_val);
+	// accumulators.insert("array", boost::shared_ptr<accumulator_wrapper>(
+	// 	new accumulator_wrapper(impl::Accumulator<boost::array<double, 3>, mean_tag, impl::Accumulator<boost::array<double, 3>, count_tag, impl::AccumulatorBase<boost::array<double, 3> > > >())
+	// ));
+	// boost::array<double, 3> array_val = { {1., 2., 3.} };
+	// accumulators["array"](array_val);
 
-    BOOST_REQUIRE(count(accumulators["array"]) == 1);
-    BOOST_REQUIRE(std::equal(array_val.begin(), array_val.end(), mean(accumulators["array"].get<boost::array<double, 3> >()).begin()));
+ //    BOOST_REQUIRE(count(accumulators["array"]) == 1);
+ //    BOOST_REQUIRE(std::equal(array_val.begin(), array_val.end(), mean(accumulators["array"].get<boost::array<double, 3> >()).begin()));
 
 	accumulators.insert("multi_array", boost::shared_ptr<accumulator_wrapper>(
 		new accumulator_wrapper(impl::Accumulator<alps::multi_array<double, 3>, mean_tag, impl::Accumulator<alps::multi_array<double, 3>, count_tag, impl::AccumulatorBase<alps::multi_array<double, 3> > > >())
@@ -445,5 +444,3 @@ BOOST_AUTO_TEST_CASE(ngs_alea_next) {
 - implement jacknife for results
 */
 }
-
-#endif

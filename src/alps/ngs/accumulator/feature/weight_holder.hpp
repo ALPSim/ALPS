@@ -26,8 +26,8 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_NGS_ACCUMULATOR_WEIGHT_IMPL_HPP
-#define ALPS_NGS_ACCUMULATOR_WEIGHT_IMPL_HPP
+#ifndef ALPS_NGS_ACCUMULATOR_WEIGHT_HOLDER_HPP
+#define ALPS_NGS_ACCUMULATOR_WEIGHT_HOLDER_HPP
 
 #include <alps/ngs/accumulator/wrappers.hpp>
 #include <alps/ngs/accumulator/feature/weight.hpp>

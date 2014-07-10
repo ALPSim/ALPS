@@ -36,7 +36,6 @@
 #include <vector>
 #include <string>
 
-// move to alps::mcbase root scope
 namespace alps {
 
     class ALPS_DECL mcbase {
