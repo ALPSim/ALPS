@@ -75,7 +75,7 @@ namespace alps {
                 virtual ~base_wrapper() {}
 
                 virtual void operator()(value_type const & value) = 0;
-                virtual void operator()(value_type value, detail::weight_variant_type) = 0;
+                virtual void operator()(value_type const & value, detail::weight_variant_type const & weight) = 0;
 
                 virtual void save(hdf5::archive & ar) const = 0;
                 virtual void load(hdf5::archive & ar) = 0;
@@ -182,9 +182,19 @@ namespace alps {
                     this->m_data(value);
                 }
 
-                // TODO: implement ... how do we do this?
-                void operator()(value_type value, detail::weight_variant_type) {
-                    // return call_impl<A>(value, weight);
+            private:
+                template<typename Q>
+                struct call_2_visitor: public boost::static_visitor<> {
+                    call_2_visitor(A & d, value_type const & v) : data(d), value(v) {}
+                    template<typename X> void operator()(X const & arg) const {
+                        data(value, arg);
+                    }
+                    A & data;
+                    value_type const & value;
+                };
+            public:
+                void operator()(value_type const & value, detail::weight_variant_type const & weight) {
+                    boost::apply_visitor(call_2_visitor<A>(this->m_data, value), weight);
                 }
 
                 void save(hdf5::archive & ar) const { 
@@ -217,22 +227,6 @@ namespace alps {
                     this->m_data.collective_merge(comm, root);
                 }
 #endif
-            private:
-
-                // template<typename T> typename boost::enable_if<typename has_feature<T, weight_tag>::type>::type call_impl(
-                //     void const * value, std::type_info const & value_info, void const * weight, std::type_info const & weight_info
-                // ) {
-                //     if (!equal(value_info, typeid(typename value_type<T>::type)))
-                //         throw std::runtime_error("wrong value type added in accumulator_wrapper::add_value" + ALPS_STACKTRACE);
-                //     if (!equal(weight_info, typeid(typename value_type<typename weight_type<T>::type>::type)))
-                //         throw std::runtime_error("wrong weight type added in accumulator_wrapper::add_value" + ALPS_STACKTRACE);
-                //     add_value(this->m_data, *static_cast<typename value_type<T>::type const *>(value), *static_cast<typename value_type<typename weight_type<T>::type>::type const *>(weight));
-                // }
-                // template<typename T> typename boost::disable_if<typename has_feature<T, weight_tag>::type>::type call_impl(
-                //     void const * value, std::type_info const & value_info, void const * weight, std::type_info const & weight_info
-                // ) {
-                //     throw std::runtime_error(std::string("The type ") + typeid(T).name() + " has no weight" + ALPS_STACKTRACE);
-                // }
         };
 
         template<typename A> class derived_result_wrapper : public derived_wrapper<A> {

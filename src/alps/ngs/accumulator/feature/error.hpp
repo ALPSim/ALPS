@@ -112,6 +112,7 @@ namespace alps {
                         return sqrt((m_sum2 / cnt - B::mean() * B::mean()) / (cnt - 1));
                     }
 
+                    using B::operator();
                     void operator()(T const & val) {
                         using alps::ngs::numeric::operator*;
                         using alps::ngs::numeric::operator+=;

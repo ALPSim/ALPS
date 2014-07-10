@@ -129,11 +129,11 @@ BOOST_AUTO_TEST_CASE(ngs_alea_next) {
 	accumulators["weighted"](8., 1.);
 	accumulators["weighted"](16., 1.);
 
-    // BOOST_REQUIRE(count(accumulators["weighted"]) == 5);
-    // BOOST_REQUIRE(accumulators["weighted"].mean<double>() == 6.2);
+    BOOST_REQUIRE(count(accumulators["weighted"]) == 5);
+    BOOST_REQUIRE(accumulators["weighted"].mean<double>() == 6.2);
 
-    // BOOST_REQUIRE(count(*weight(accumulators["weighted"].get<double>())) == 5);
-	// BOOST_REQUIRE(weight(accumulators["weighted"].get<double>())->mean<double>() == 1); 
+ //    BOOST_REQUIRE(count(*weight(accumulators["weighted"].get<double>())) == 5);
+	// BOOST_REQUIRE(weight(accumulators["weighted"].get<double>())->mean<double>() == 1);
 
 	accumulators.insert("vector", boost::shared_ptr<accumulator_wrapper>(
 		new accumulator_wrapper(impl::Accumulator<std::vector<double>, mean_tag, impl::Accumulator<std::vector<double>, count_tag, impl::AccumulatorBase<std::vector<double> > > >())

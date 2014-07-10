@@ -193,6 +193,7 @@ namespace alps {
                         throw std::runtime_error("Transform can only be applied to a result" + ALPS_STACKTRACE);
                     }
 
+                    using B::operator();
                     void operator()(T const & val) {
                         using alps::ngs::numeric::operator+=;
                         using alps::ngs::numeric::operator+;

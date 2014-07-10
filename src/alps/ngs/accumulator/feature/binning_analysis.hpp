@@ -206,6 +206,7 @@ namespace alps {
                         return (err * err * fac / var_0 - one) / two;
                     }
 
+                    using B::operator();
                     void operator()(T const & val) {
                         using alps::ngs::numeric::operator+=;
                         using alps::ngs::numeric::operator*;

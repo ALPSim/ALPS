@@ -98,7 +98,11 @@ namespace alps {
                         return m_count;
                     }
 
-                    void operator()(T const & val) {
+                    void operator()(T const &) {
+                        throw std::runtime_error("No values can be added to a result" + ALPS_STACKTRACE);
+                    }
+
+                    template<typename W> void operator()(T const &, W) {
                         throw std::runtime_error("No values can be added to a result" + ALPS_STACKTRACE);
                     }
 
@@ -200,8 +204,11 @@ namespace alps {
                         return m_count;
                     }
 
-                    void operator()(T const & val) {
+                    void operator()(T const &) {
                         ++m_count;
+                    }
+                    template<typename W> void operator()(T const &, W) {
+                        throw std::runtime_error("Observable has no binary call operator" + ALPS_STACKTRACE);
                     }
 
                     template<typename S> void print(S & os) const {

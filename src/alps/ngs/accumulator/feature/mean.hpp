@@ -107,6 +107,7 @@ namespace alps {
                         return mean_type(m_sum) / cnt;
                     }
 
+                    using B::operator();
                     void operator()(T const & val) {
                         using alps::ngs::numeric::operator+=;
                         using alps::ngs::numeric::detail::check_size;
