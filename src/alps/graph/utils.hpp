@@ -95,7 +95,7 @@ std::vector<typename boost::property_map<Graph,PropertyTag>::type::value_type> g
 template <typename Graph>
 void remap_edge_types(Graph& g, std::vector<unsigned int> const& map)
 {
-    BOOST_STATIC_ASSERT((boost::is_same<alps::type_type,unsigned int>::value));
+    BOOST_STATIC_ASSERT(( boost::is_same< typename boost::property_map<Graph, edge_type_t>::type::value_type, unsigned int>::value ));
     assert( get_color_list(alps::edge_type_t(),g).size() == map.size() );
     typename boost::graph_traits<Graph>::edge_iterator it, end;
     for(boost::tie(it,end) = edges(g); it != end; ++it)
