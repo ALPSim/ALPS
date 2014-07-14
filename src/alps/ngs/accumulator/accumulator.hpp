@@ -275,6 +275,27 @@ namespace alps {
                     return transform(boost::function<T(T)>(op));
                 }
 
+            // unary plus
+            public:
+                result_wrapper operator+ () const {
+                    return result_wrapper(*this);
+                }
+
+            // unary minus
+            private:
+                struct unary_add_visitor: public boost::static_visitor<> {
+                    template<typename X> void operator()(X & arg) const {
+                        arg->negate();
+                    }
+                };
+            public:
+                result_wrapper operator- () const {
+                    result_wrapper clone(*this);
+                    unary_add_visitor visitor;
+                    boost::apply_visitor(visitor, clone.m_variant);
+                    return clone;
+                }
+
             // operators
             #define ALPS_ACCUMULATOR_OPERATOR_PROXY(OPNAME, AUGOPNAME, AUGOP, FUN)                                  \
                 private:                                                                                            \
@@ -313,17 +334,17 @@ namespace alps {
                         boost::apply_visitor(visitor, m_variant);                                                   \
                         return *this;                                                                               \
                     }                                                                                               \
-                    result_wrapper & AUGOPNAME (double const & arg) {                                               \
+                    result_wrapper & AUGOPNAME (double arg) {                                                       \
                         FUN ## _double_visitor visitor(arg);                                                        \
                         boost::apply_visitor(visitor, m_variant);                                                   \
                         return *this;                                                                               \
                     }                                                                                               \
-                    result_wrapper OPNAME (result_wrapper const & arg) {                                            \
+                    result_wrapper OPNAME (result_wrapper const & arg) const {                                      \
                         result_wrapper clone(*this);                                                                \
                         clone AUGOP arg;                                                                            \
                         return clone;                                                                               \
                     }                                                                                               \
-                    result_wrapper OPNAME (double const & arg) {                                                    \
+                    result_wrapper OPNAME (double arg) const {                                                      \
                         result_wrapper clone(*this);                                                                \
                         clone AUGOP arg;                                                                            \
                         return clone;                                                                               \
@@ -380,6 +401,18 @@ namespace alps {
 
                 detail::variant_type m_variant;
         };
+        inline result_wrapper operator+(double arg1, result_wrapper const & arg2) {
+            return arg2 + arg1;
+        }
+        inline result_wrapper operator-(double arg1, result_wrapper const & arg2) {
+            return -arg2 + arg1;
+        }
+        inline result_wrapper operator*(double arg1, result_wrapper const & arg2) {
+            return arg2 * arg1;
+        }
+        inline result_wrapper operator/(double arg1, result_wrapper const & arg2) {
+            return arg2.inverse() * arg1;
+        }
 
         inline std::ostream & operator<<(std::ostream & os, const result_wrapper & arg) {
             arg.print(os);

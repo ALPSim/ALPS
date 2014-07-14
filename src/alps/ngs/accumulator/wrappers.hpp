@@ -107,6 +107,7 @@ namespace alps {
                 virtual void operator*=(double) = 0;
                 virtual void operator/=(double) = 0;
 
+                virtual void negate() = 0;
                 virtual void inverse() = 0;
 
                 virtual void sin() = 0;
@@ -256,6 +257,9 @@ namespace alps {
                 OPERATOR_PROXY(operator/=, /=)
                 #undef OPERATOR_PROXY
 
+                void negate() {
+                    this->m_data.negate();
+                }
                 void inverse() {
                     this->m_data.inverse();
                 }
@@ -326,8 +330,11 @@ namespace alps {
                     throw std::runtime_error("The operator /= is not implemented for accumulators, only for results" + ALPS_STACKTRACE);
                 }
 
+                void negate() {
+                    throw std::runtime_error("The function negate is not implemented for accumulators, only for results" + ALPS_STACKTRACE);
+                }
                 void inverse() {
-                    throw std::runtime_error("The inverse is not implemented for accumulators, only for results" + ALPS_STACKTRACE);
+                    throw std::runtime_error("The function inverse is not implemented for accumulators, only for results" + ALPS_STACKTRACE);
                 }
 
                 #define FUNCTION_PROXY(FUN)                                                                                                           \

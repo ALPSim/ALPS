@@ -235,6 +235,11 @@ namespace alps {
                     template<typename U> void operator-=(U const & arg) { augsub(arg); }
                     template<typename U> void operator*=(U const & arg) { augmul(arg); }
                     template<typename U> void operator/=(U const & arg) { augdiv(arg); }
+                    void negate() {
+                        using alps::ngs::numeric::operator-;
+                        m_mean = -m_mean;
+                        B::negate();
+                    }                    
                     void inverse() {
                         using alps::ngs::numeric::operator/;
                         // TODO: make library for scalar type

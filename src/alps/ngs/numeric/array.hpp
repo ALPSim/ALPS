@@ -78,7 +78,7 @@ namespace alps {
             };
 
             //------------------- unary operator - -------------------
-            template<typename T, typename U, std::size_t N>
+            template<typename T, std::size_t N>
             boost::array<T, N> operator - (boost::array<T, N> lhs) {
                 std::transform(lhs.begin(), lhs.end(), lhs.begin(), std::negate<T>());
                 return lhs;

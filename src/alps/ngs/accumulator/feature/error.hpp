@@ -238,6 +238,11 @@ namespace alps {
                     template<typename U> void operator-=(U const & arg) { augaddsub(arg); B::operator-=(arg); }
                     template<typename U> void operator*=(U const & arg) { augmul(arg); }
                     template<typename U> void operator/=(U const & arg) { augdiv(arg); }
+                    void negate() {
+                        using alps::ngs::numeric::operator-;
+                        m_error = -m_error;
+                        B::negate();
+                    }
                     void inverse() {
                         using alps::ngs::numeric::operator*;
                         using alps::ngs::numeric::operator/;
