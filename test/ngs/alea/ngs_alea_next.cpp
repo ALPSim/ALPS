@@ -135,9 +135,8 @@ BOOST_AUTO_TEST_CASE(ngs_alea_next) {
 	BOOST_REQUIRE(count(accumulators["weighted"]) == 5);
 	BOOST_REQUIRE(accumulators["weighted"].mean<double>() == 6.2);
 
-	// TODO: implement
-	// BOOST_REQUIRE(count(*weight(accumulators["weighted"].get<double>())) == 5);
-	// BOOST_REQUIRE(mean(*weight(accumulators["weighted"].get<double>())->get<double>()) == 1);
+	BOOST_REQUIRE(count(*weight(accumulators["weighted"].get<double>())) == 5);
+	BOOST_REQUIRE(mean(*weight(accumulators["weighted"].get<double>())) == 1);
 
 	accumulators.insert("vector", boost::shared_ptr<accumulator_wrapper>(
 		new accumulator_wrapper(impl::Accumulator<std::vector<double>, mean_tag, impl::Accumulator<std::vector<double>, count_tag, impl::AccumulatorBase<std::vector<double> > > >())
@@ -475,10 +474,5 @@ BOOST_AUTO_TEST_CASE(ngs_alea_next) {
 		BOOST_REQUIRE(max_num_binning(accumulators["obs2"].get<double>()).bins().size() == 4);
 	}
 
-/* TODO:
-- implement operators for two results correctly
-- implement operators with scalars
-- implement boost::ArgPack for external weight
-- implement jacknife for results
-*/
+	// implement boost::ArgPack for external weight
 }
