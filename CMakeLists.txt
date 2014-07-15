@@ -7,17 +7,12 @@ include(UseGtest)
 
 project (DMFT)
 include_directories("$ENV{HOME}/alps_svn/")
-include_directories("$ENV{GSL_DIR}/include")
-include_directories("$ENV{GSL_ROOT}/include")
+include_directories("/usr/include/gsl")
 #SET(CMAKE_CXX_COMPILER "CC")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -O3 -DNDEBUG -DMPICH_IGNORE_CXX_SEEK")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -march=native -O3")
 
 link_directories("/opt/local/lib")
-link_directories("$ENV{GSL_DIR}/lib")
-link_directories("$ENV{GSL_ROOT}/lib")
-
-add_subdirectory(${gtest_ROOT})
-include_directories(${gtest_INCLUDE_DIR})
+link_directories("/usr/lib")
 
 add_executable(dmft 
 clusterhelper.C fouriertransform.C fourier_generator.C selfconsistency.C

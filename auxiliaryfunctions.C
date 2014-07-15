@@ -335,6 +335,13 @@ void print_dressed_tau_green_functions(const int iteration_ctr, const itime_gree
 std::ostream &operator<<(std::ostream &os, const std::pair<green_function<double>,double> &v_and_beta){
   os<<std::setprecision(14);
   double dtau=v_and_beta.second/(v_and_beta.first.ntime()-1);
+  os<<"#tau\t";
+  for(unsigned int i=0;i<v_and_beta.first.nsite();++i)
+    for(unsigned int j=0;j<v_and_beta.first.nsite();++j)
+      for(unsigned int z=0;z<v_and_beta.first.nflavor();++z)
+        os<<"i"<<i<<"j"<<j<<"f"<<z<<"\t";
+  os<<std::endl;
+
   for(unsigned int o=0;o<v_and_beta.first.ntime();++o){
     os<<o*dtau<<"\t";
     for(unsigned int i=0;i<v_and_beta.first.nsite();++i)
