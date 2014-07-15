@@ -52,7 +52,7 @@ public:
   //construction and destruction, assignement and copy constructor
   ///constructor: how many time slices, how many sites, how many flavors
   green_function(unsigned int ntime, unsigned int nsite, unsigned int nflavor, shape_t shape):nt_(ntime), ns_(nsite), nf_(nflavor),
-  ntnsns_(ntime*nsite*nsite), ntns_(ntime*nsite), shape_(shape){
+  ntnsns_(ntime*nsite*nsite), ntns_(ntime*nsite), shape_(shape), header_("") {
     val_=(shape_==diagonal?new T[nt_*ns_*nf_]:new T[nt_*ns_*ns_*nf_]);
     clear();
   }
@@ -122,6 +122,9 @@ public:
     }
     return maxdiff;
   }
+  const std::string get_header()const{return header_;}
+  void set_header(std::string header){header_=header.insert(0,"#");}
+
 #ifdef USE_MPI
   void broadcast(){
     if(shape_==nondiagonal || shape_==blockdiagonal)
@@ -138,6 +141,7 @@ private:
   const unsigned int nf_; ///number of flavors
   const unsigned int ntnsns_; ///nt*ns*ns
   const unsigned int ntns_; ///nt*ns
+  std::string header_;
   // the actual values and errors.
   T *val_;
   const shape_t shape_;
