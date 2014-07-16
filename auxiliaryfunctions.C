@@ -344,7 +344,7 @@ void print_dressed_tau_green_functions(const int iteration_ctr, const itime_gree
 std::ostream &operator<<(std::ostream &os, const std::pair<green_function<double>,double> &v_and_beta){
   os<<std::setprecision(14);
   double dtau=v_and_beta.second/(v_and_beta.first.ntime()-1);
-  if(!v_and_beta.first.get_header().empty()){
+  if(!(v_and_beta.first.get_header().empty())){
 	  os<<v_and_beta.first.get_header()<<std::endl;
   }
 
@@ -360,7 +360,7 @@ std::ostream &operator<<(std::ostream &os, const std::pair<green_function<double
 }
 std::ostream &operator<<(std::ostream &os, const std::pair<green_function<std::complex<double> >, double> &v_and_beta){
   os<<std::setprecision(14);
-  if(!v_and_beta.first.get_header().empty()){
+  if(!(v_and_beta.first.get_header().empty())){
 	  os<<v_and_beta.first.get_header()<<std::endl;
   }
   for(unsigned int o=0;o<v_and_beta.first.ntime();++o){

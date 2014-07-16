@@ -61,7 +61,7 @@ public:
     delete [] val_;
   }
   ///copy constructor
-  green_function(const green_function &g):nt_(g.nt_), ns_(g.ns_), nf_(g.nf_), ntnsns_(g.ntnsns_), ntns_(g.ntns_), shape_(g.shape_){
+  green_function(const green_function &g):nt_(g.nt_), ns_(g.ns_), nf_(g.nf_), ntnsns_(g.ntnsns_), ntns_(g.ntns_), shape_(g.shape_), header_(g.header_){
     val_=(shape_==diagonal?new T[nt_*ns_*nf_]:new T[nt_*ns_*ns_*nf_]);
     operator=(g);
   }

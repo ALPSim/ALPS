@@ -241,25 +241,25 @@ std::string DCATransformer::generate_header_kspace(const matsubara_green_functio
 		  }
 
 	}else if(gf_shape==nondiagonal){
-	  for (unsigned int s1=0; s1<G.nsite(); ++s1)
-		for (unsigned int s2=0; s2<G.nsite(); ++s2)
-		  for(unsigned int f=0;f<G.nflavor();++f){
-			  std::ostringstream temp;
-			  temp.precision(3);
-			  temp << "(";
-			  for(unsigned int d=0; d<dim-1; ++d){
-				  temp<<cluster_momentum(s1,d)<<",";
-			  }
-			  temp<<cluster_momentum(s1,dim-1)<<")";
-			  temp << "(";
-			  for(unsigned int d=0; d<dim-1; ++d){
-				  temp<<cluster_momentum(s2,d)<<",";
-			  }
-			  temp<<cluster_momentum(s2,dim-1)<<")";
-			  for(unsigned int f=0;f<G.nflavor();++f){
-				  header.append(temp.str()+"f"+boost::lexical_cast<std::string>(f)+"\t");
-			  }
-		  }
+		for (unsigned int s1=0; s1<G.nsite(); ++s1)
+			for (unsigned int s2=0; s2<G.nsite(); ++s2){
+
+				std::ostringstream temp;
+				temp.precision(3);
+				temp << "(";
+				for(unsigned int d=0; d<dim-1; ++d){
+					temp<<cluster_momentum(s1,d)<<",";
+				}
+				temp<<cluster_momentum(s1,dim-1)<<")";
+				temp << "(";
+				for(unsigned int d=0; d<dim-1; ++d){
+					temp<<cluster_momentum(s2,d)<<",";
+				}
+				temp<<cluster_momentum(s2,dim-1)<<")";
+				for(unsigned int f=0;f<G.nflavor();++f){
+					header.append(temp.str()+"f"+boost::lexical_cast<std::string>(f)+"\t");
+				}
+			}
 	}
 
 	return header;
@@ -306,25 +306,25 @@ std::string DCATransformer::generate_header_realspace(const matsubara_green_func
 		  }
 
 	}else if(gf_shape==nondiagonal){
-	  for (unsigned int s1=0; s1<G.nsite(); ++s1)
-		for (unsigned int s2=0; s2<G.nsite(); ++s2)
-		  for(unsigned int f=0;f<G.nflavor();++f){
-			  std::ostringstream temp;
-			  temp.precision(3);
-			  temp << "(";
-			  for(unsigned int d=0; d<dim-1; ++d){
-				  temp<<cluster_coordinate(s1,d)<<",";
-			  }
-			  temp<<cluster_coordinate(s1,dim-1)<<")";
-			  temp << "(";
-			  for(unsigned int d=0; d<dim-1; ++d){
-				  temp<<cluster_coordinate(s2,d)<<",";
-			  }
-			  temp<<cluster_coordinate(s2,dim-1)<<")";
-			  for(unsigned int f=0;f<G.nflavor();++f){
-				  header.append(temp.str()+"f"+boost::lexical_cast<std::string>(f)+"\t");
-			  }
-		  }
+		for (unsigned int s1=0; s1<G.nsite(); ++s1)
+			for (unsigned int s2=0; s2<G.nsite(); ++s2){
+
+				std::ostringstream temp;
+				temp.precision(3);
+				temp << "(";
+				for(unsigned int d=0; d<dim-1; ++d){
+					temp<<cluster_coordinate(s1,d)<<",";
+				}
+				temp<<cluster_coordinate(s1,dim-1)<<")";
+				temp << "(";
+				for(unsigned int d=0; d<dim-1; ++d){
+					temp<<cluster_coordinate(s2,d)<<",";
+				}
+				temp<<cluster_coordinate(s2,dim-1)<<")";
+				for(unsigned int f=0;f<G.nflavor();++f){
+					header.append(temp.str()+"f"+boost::lexical_cast<std::string>(f)+"\t");
+				}
+			}
 	}
 
 	return header;
@@ -332,7 +332,7 @@ std::string DCATransformer::generate_header_realspace(const matsubara_green_func
 
 std::string DCATransformer::generate_header_kspace(const itime_green_function_t & G) const
 {
-	std::string header="Tau\t\t";
+	std::string header="Tau\t";
 	int dim = this->dimension();
 	shape_t gf_shape = G.shape();
 
@@ -372,31 +372,30 @@ std::string DCATransformer::generate_header_kspace(const itime_green_function_t 
 
 	}else if(gf_shape==nondiagonal){
 	  for (unsigned int s1=0; s1<G.nsite(); ++s1)
-		for (unsigned int s2=0; s2<G.nsite(); ++s2)
-		  for(unsigned int f=0;f<G.nflavor();++f){
-			  std::ostringstream temp;
-			  temp.precision(3);
-			  temp << "(";
-			  for(unsigned int d=0; d<dim-1; ++d){
-				  temp<<cluster_momentum(s1,d)<<",";
-			  }
-			  temp<<cluster_momentum(s1,dim-1)<<")";
-			  temp << "(";
-			  for(unsigned int d=0; d<dim-1; ++d){
-				  temp<<cluster_momentum(s2,d)<<",";
-			  }
-			  temp<<cluster_momentum(s2,dim-1)<<")";
-			  for(unsigned int f=0;f<G.nflavor();++f){
-				  header.append(temp.str()+"f"+boost::lexical_cast<std::string>(f)+"\t");
-			  }
-		  }
+		for (unsigned int s2=0; s2<G.nsite(); ++s2){
+			std::ostringstream temp;
+			temp.precision(3);
+			temp << "(";
+			for(unsigned int d=0; d<dim-1; ++d){
+				temp<<cluster_momentum(s1,d)<<",";
+			}
+			temp<<cluster_momentum(s1,dim-1)<<")";
+			temp << "(";
+			for(unsigned int d=0; d<dim-1; ++d){
+				temp<<cluster_momentum(s2,d)<<",";
+			}
+			temp<<cluster_momentum(s2,dim-1)<<")";
+			for(unsigned int f=0;f<G.nflavor();++f){
+				header.append(temp.str()+"f"+boost::lexical_cast<std::string>(f)+"\t");
+			}
+		}
 	}
 
 	return header;
 }
 
 std::string DCATransformer::generate_header_realspace(const itime_green_function_t & G) const{
-	std::string header="Tau\t\t";
+	std::string header="Tau\t";
 	int dim = this->dimension();
 	shape_t gf_shape = G.shape();
 
@@ -436,24 +435,23 @@ std::string DCATransformer::generate_header_realspace(const itime_green_function
 
 	}else if(gf_shape==nondiagonal){
 	  for (unsigned int s1=0; s1<G.nsite(); ++s1)
-		for (unsigned int s2=0; s2<G.nsite(); ++s2)
-		  for(unsigned int f=0;f<G.nflavor();++f){
-			  std::ostringstream temp;
-			  temp.precision(3);
-			  temp << "(";
-			  for(unsigned int d=0; d<dim-1; ++d){
-				  temp<<cluster_coordinate(s1,d)<<",";
-			  }
-			  temp<<cluster_coordinate(s1,dim-1)<<")";
-			  temp << "(";
-			  for(unsigned int d=0; d<dim-1; ++d){
-				  temp<<cluster_coordinate(s2,d)<<",";
-			  }
-			  temp<<cluster_coordinate(s2,dim-1)<<")";
-			  for(unsigned int f=0;f<G.nflavor();++f){
-				  header.append(temp.str()+"f"+boost::lexical_cast<std::string>(f)+"\t");
-			  }
+		for (unsigned int s2=0; s2<G.nsite(); ++s2){
+		  std::ostringstream temp;
+		  temp.precision(3);
+		  temp << "(";
+		  for(unsigned int d=0; d<dim-1; ++d){
+			  temp<<cluster_coordinate(s1,d)<<",";
 		  }
+		  temp<<cluster_coordinate(s1,dim-1)<<")";
+		  temp << "(";
+		  for(unsigned int d=0; d<dim-1; ++d){
+			  temp<<cluster_coordinate(s2,d)<<",";
+		  }
+		  temp<<cluster_coordinate(s2,dim-1)<<")";
+		  for(unsigned int f=0;f<G.nflavor();++f){
+			  header.append(temp.str()+"f"+boost::lexical_cast<std::string>(f)+"\t");
+		  }
+		}
 	}
 
 	return header;
