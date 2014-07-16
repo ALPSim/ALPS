@@ -48,6 +48,9 @@ void matrix_inversion(alps::numeric::matrix<std::complex<double> >&A, alps::nume
 void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta)
 {
   os<<std::setprecision(14);
+  if(!v.get_header().empty()){
+	  os<<v.get_header()<<std::endl;
+  }
   for(unsigned int i=0;i<v.nfreq();++i){
     os<<(2*i+1)*M_PI/beta<<" ";
     if (v.shape()==diagonal) {
@@ -211,6 +214,9 @@ void print_quasiparticle_estimate(std::ostream &os, const matsubara_green_functi
 
 void print_real_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta){
   os<<std::setprecision(14);
+  if(!v.get_header().empty()){
+	  os<<v.get_header()<<std::endl;
+  }
   for(unsigned int i=0;i<v.nfreq();++i){
     os<<(2*i+1)*M_PI/beta<<"\t";
     if(v.shape()==diagonal){

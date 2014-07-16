@@ -200,6 +200,94 @@ int* DCATransformer::momentum_translation() const
   return m;
 }
 
+std::string DCATransformer::generate_header_kspace(const matsubara_green_function_t & G) const
+{
+	std::string header="Freq\t";
+	int dimension = dimension();
+	shape_t gf_shape = G.shape();
+
+	if (gf_shape==diagonal) {
+	  for(unsigned int k=0; k<G.nsite(); ++k){
+		  std::ostringstream temp;
+		  temp.precision(3);
+		  temp << "(";
+		  for(unsigned int d=0; d<dimension-1; ++d){
+			  temp<<cluster_momentum(k,d)<<",";
+		  }
+		  temp<<cluster_momentum(k,dimension-1)<<")";
+		  for(unsigned int f=0;f<G.nflavor();++f){
+			  header.append(temp.str()+"f"+boost::lexical_cast<std::string>(f)+"\t");
+		  }
+	  }
+	}else if(gf_shape==blockdiagonal){
+	  for (unsigned int k=0; k<G.nsite(); k+=2)
+		for (unsigned int p1=0; p1<=1; p1++)
+		  for (unsigned int p2=0; p2<=1; p2++){
+			  std::ostringstream temp;
+			  temp.precision(3);
+			  temp << "(";
+			  for(unsigned int d=0; d<dimension-1; ++d){
+				  temp<<cluster_momentum(k+p1,d)<<",";
+			  }
+			  temp<<cluster_momentum(k+p1,dimension-1)<<")";
+			  temp << "(";
+			  for(unsigned int d=0; d<dimension-1; ++d){
+				  temp<<cluster_momentum(k+p2,d)<<",";
+			  }
+			  temp<<cluster_momentum(k+p2,dimension-1)<<")";
+			  for(unsigned int f=0;f<G.nflavor();++f){
+				  header.append(temp.str()+"f"+boost::lexical_cast<std::string>(f)+"\t");
+			  }
+		  }
+
+	}else if(gf_shape==nondiagonal){
+	  for (unsigned int s1=0; s1<G.nsite(); ++s1)
+		for (unsigned int s2=0; s2<G.nsite(); ++s2)
+		  for(unsigned int f=0;f<G.nflavor();++f){
+			  std::ostringstream temp;
+			  temp.precision(3);
+			  temp << "(";
+			  for(unsigned int d=0; d<dimension-1; ++d){
+				  temp<<cluster_momentum(s1,d)<<",";
+			  }
+			  temp<<cluster_momentum(s1,dimension-1)<<")";
+			  temp << "(";
+			  for(unsigned int d=0; d<dimension-1; ++d){
+				  temp<<cluster_momentum(s2,d)<<",";
+			  }
+			  temp<<cluster_momentum(s2,dimension-1)<<")";
+			  for(unsigned int f=0;f<G.nflavor();++f){
+				  header.append(temp.str()+"f"+boost::lexical_cast<std::string>(f)+"\t");
+			  }
+		  }
+	}
+
+	return header;
+}
+
+std::string DCATransformer::generate_header_realspace(const matsubara_green_function_t & G) const
+{
+	std::string header="";
+
+
+	return header;
+}
+
+std::string DCATransformer::generate_header_kspace(const itime_green_function_t & G) const
+{
+	std::string header="";
+
+
+	return header;
+}
+
+std::string DCATransformer::generate_header_realspace(const itime_green_function_t & G) const{
+	std::string header="";
+
+
+	return header;
+}
+
 matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_green_function_t &G_omega,
                                                             const matsubara_green_function_t &G0_omega,
                                                             double &mu, const double h, const double beta)

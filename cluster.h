@@ -288,6 +288,12 @@ public:
   std::vector<double> tmatrix() const;
   virtual void write_hdf5(alps::hdf5::archive &ar, const std::string &p) const;
 
+  //Generate a header string that can be printed at the beginning of a Greens function file to label the columns
+  std::string generate_header_kspace(const matsubara_green_function_t & G) const;
+  std::string generate_header_realspace(const matsubara_green_function_t & G) const;
+  std::string generate_header_kspace(const itime_green_function_t & G) const;
+  std::string generate_header_realspace(const itime_green_function_t & G) const;
+
   double epsilon(const vector_type &k) const
   {
     double eps = -half_filling_;
