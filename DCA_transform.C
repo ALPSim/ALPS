@@ -203,7 +203,7 @@ int* DCATransformer::momentum_translation() const
 std::string DCATransformer::generate_header_kspace(const matsubara_green_function_t & G) const
 {
 	std::string header="Freq\t";
-	int dimension = dimension();
+	int dim = this->dimension();
 	shape_t gf_shape = G.shape();
 
 	if (gf_shape==diagonal) {
@@ -211,10 +211,10 @@ std::string DCATransformer::generate_header_kspace(const matsubara_green_functio
 		  std::ostringstream temp;
 		  temp.precision(3);
 		  temp << "(";
-		  for(unsigned int d=0; d<dimension-1; ++d){
+		  for(unsigned int d=0; d<dim-1; ++d){
 			  temp<<cluster_momentum(k,d)<<",";
 		  }
-		  temp<<cluster_momentum(k,dimension-1)<<")";
+		  temp<<cluster_momentum(k,dim-1)<<")";
 		  for(unsigned int f=0;f<G.nflavor();++f){
 			  header.append(temp.str()+"f"+boost::lexical_cast<std::string>(f)+"\t");
 		  }
@@ -226,15 +226,15 @@ std::string DCATransformer::generate_header_kspace(const matsubara_green_functio
 			  std::ostringstream temp;
 			  temp.precision(3);
 			  temp << "(";
-			  for(unsigned int d=0; d<dimension-1; ++d){
+			  for(unsigned int d=0; d<dim-1; ++d){
 				  temp<<cluster_momentum(k+p1,d)<<",";
 			  }
-			  temp<<cluster_momentum(k+p1,dimension-1)<<")";
+			  temp<<cluster_momentum(k+p1,dim-1)<<")";
 			  temp << "(";
-			  for(unsigned int d=0; d<dimension-1; ++d){
+			  for(unsigned int d=0; d<dim-1; ++d){
 				  temp<<cluster_momentum(k+p2,d)<<",";
 			  }
-			  temp<<cluster_momentum(k+p2,dimension-1)<<")";
+			  temp<<cluster_momentum(k+p2,dim-1)<<")";
 			  for(unsigned int f=0;f<G.nflavor();++f){
 				  header.append(temp.str()+"f"+boost::lexical_cast<std::string>(f)+"\t");
 			  }
@@ -247,15 +247,15 @@ std::string DCATransformer::generate_header_kspace(const matsubara_green_functio
 			  std::ostringstream temp;
 			  temp.precision(3);
 			  temp << "(";
-			  for(unsigned int d=0; d<dimension-1; ++d){
+			  for(unsigned int d=0; d<dim-1; ++d){
 				  temp<<cluster_momentum(s1,d)<<",";
 			  }
-			  temp<<cluster_momentum(s1,dimension-1)<<")";
+			  temp<<cluster_momentum(s1,dim-1)<<")";
 			  temp << "(";
-			  for(unsigned int d=0; d<dimension-1; ++d){
+			  for(unsigned int d=0; d<dim-1; ++d){
 				  temp<<cluster_momentum(s2,d)<<",";
 			  }
-			  temp<<cluster_momentum(s2,dimension-1)<<")";
+			  temp<<cluster_momentum(s2,dim-1)<<")";
 			  for(unsigned int f=0;f<G.nflavor();++f){
 				  header.append(temp.str()+"f"+boost::lexical_cast<std::string>(f)+"\t");
 			  }
