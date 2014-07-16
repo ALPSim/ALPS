@@ -202,7 +202,7 @@ int* DCATransformer::momentum_translation() const
 
 std::string DCATransformer::generate_header_kspace(const matsubara_green_function_t & G) const
 {
-	std::string header="Freq\t";
+	std::string header="Freq\t\t";
 	int dim = this->dimension();
 	shape_t gf_shape = G.shape();
 
@@ -267,7 +267,7 @@ std::string DCATransformer::generate_header_kspace(const matsubara_green_functio
 
 std::string DCATransformer::generate_header_realspace(const matsubara_green_function_t & G) const
 {
-	std::string header="Freq\t";
+	std::string header="Freq\t\t";
 	int dim = this->dimension();
 	shape_t gf_shape = G.shape();
 
@@ -332,7 +332,7 @@ std::string DCATransformer::generate_header_realspace(const matsubara_green_func
 
 std::string DCATransformer::generate_header_kspace(const itime_green_function_t & G) const
 {
-	std::string header="Tau\t";
+	std::string header="Tau\t\t";
 	int dim = this->dimension();
 	shape_t gf_shape = G.shape();
 
@@ -396,7 +396,7 @@ std::string DCATransformer::generate_header_kspace(const itime_green_function_t 
 }
 
 std::string DCATransformer::generate_header_realspace(const itime_green_function_t & G) const{
-	std::string header="Tau\t";
+	std::string header="Tau\t\t";
 	int dim = this->dimension();
 	shape_t gf_shape = G.shape();
 

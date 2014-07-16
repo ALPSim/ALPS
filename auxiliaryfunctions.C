@@ -248,6 +248,9 @@ void print_real_green_matsubara(std::ostream &os, const matsubara_green_function
 
 void print_green_itime(std::ostream &os, const itime_green_function_t &v, const double beta){
   os<<std::setprecision(14);
+  if(!v.get_header().empty()){
+	  os<<v.get_header()<<std::endl;
+  }
   for(unsigned int i=0;i<v.ntime();++i){
     os<<beta*i/(v.ntime()-1)<<" ";
     if (v.shape()==diagonal){
@@ -341,12 +344,9 @@ void print_dressed_tau_green_functions(const int iteration_ctr, const itime_gree
 std::ostream &operator<<(std::ostream &os, const std::pair<green_function<double>,double> &v_and_beta){
   os<<std::setprecision(14);
   double dtau=v_and_beta.second/(v_and_beta.first.ntime()-1);
-  os<<"#tau\t";
-  for(unsigned int i=0;i<v_and_beta.first.nsite();++i)
-    for(unsigned int j=0;j<v_and_beta.first.nsite();++j)
-      for(unsigned int z=0;z<v_and_beta.first.nflavor();++z)
-        os<<"i"<<i<<"j"<<j<<"f"<<z<<"\t";
-  os<<std::endl;
+  if(!v_and_beta.first.get_header().empty()){
+	  os<<v_and_beta.first.get_header()<<std::endl;
+  }
 
   for(unsigned int o=0;o<v_and_beta.first.ntime();++o){
     os<<o*dtau<<"\t";
@@ -360,6 +360,9 @@ std::ostream &operator<<(std::ostream &os, const std::pair<green_function<double
 }
 std::ostream &operator<<(std::ostream &os, const std::pair<green_function<std::complex<double> >, double> &v_and_beta){
   os<<std::setprecision(14);
+  if(!v_and_beta.first.get_header().empty()){
+	  os<<v_and_beta.first.get_header()<<std::endl;
+  }
   for(unsigned int o=0;o<v_and_beta.first.ntime();++o){
     os<<(2.*o+1)*M_PI/v_and_beta.second<<"\t";
     if(v_and_beta.first.shape()==nondiagonal){
