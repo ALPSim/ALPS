@@ -34,7 +34,7 @@
 #include <alps/ngs/mcobservables.hpp>
 
 #ifdef ALPS_NGS_USE_NEW_ALEA
-    #include <alps/ngs/accumulator/accumulator.hpp>
+    #include <alps/ngs/accumulator.hpp>
 #endif
 
 #include <boost/filesystem/path.hpp>

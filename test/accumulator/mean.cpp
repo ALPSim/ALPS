@@ -33,7 +33,7 @@
 
 #define BOOST_TEST_MODULE alps::ngs::accumulator
 
-#include <alps/ngs/accumulator/accumulator.hpp>
+#include <alps/ngs/accumulator.hpp>
 
 #ifndef ALPS_LINK_BOOST_TEST
 #	include <boost/test/included/unit_test.hpp>

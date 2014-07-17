@@ -24,67 +24,64 @@
  * DEALINGS IN THE SOFTWARE.                                                       *
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#include <alps/ngs/alea/accumulator_set.hpp>
+#include <alps/ngs/alea/result_set.hpp>
+
+XXX
 
 namespace alps {
     namespace accumulator {
 
-        detail::accumulator_wrapper & accumulator_set::operator[](std::string const & name) {
+        detail::result_wrapper & result_set::operator[](std::string const & name) {
             if (!has(name))
                 throw std::out_of_range("No observable found with the name: " + name + ALPS_STACKTRACE);
             return *(storage.find(name)->second);
         }
 
-        detail::accumulator_wrapper const & accumulator_set::operator[](std::string const & name) const {
+        detail::result_wrapper const & result_set::operator[](std::string const & name) const {
             if (!has(name))
                 throw std::out_of_range("No observable found with the name: " + name + ALPS_STACKTRACE);
             return *(storage.find(name)->second);
         }
 
-        bool accumulator_set::has(std::string const & name) const{
+        bool result_set::has(std::string const & name) const {
             return storage.find(name) != storage.end();
         }
-        
-        void accumulator_set::insert(std::string const & name, boost::shared_ptr<alps::accumulator::detail::accumulator_wrapper> ptr){
+
+        void result_set::insert(std::string const & name, boost::shared_ptr<detail::result_wrapper> ptr) {
             if (has(name))
-                throw std::out_of_range("There exists alrady an accumulator with the name: " + name + ALPS_STACKTRACE);
+                throw std::out_of_range("There exists alrady a result with the name: " + name + ALPS_STACKTRACE);
             storage.insert(make_pair(name, ptr));
         }
 
-        void accumulator_set::save(hdf5::archive & ar) const {
-            for(const_iterator it = begin(); it != end(); ++it)
-                ar[it->first] = *(it->second);
+        void result_set::save(hdf5::archive & ar) const {}
+
+        void result_set::load(hdf5::archive & ar) {}
+
+        void result_set::merge(result_set const &) {}
+
+        void result_set::print(std::ostream & os) const {
+            for (const_iterator it = begin(); it != end(); ++it)
+                os << it->first << ": " << *(it->second);
         }
 
-        void accumulator_set::load(hdf5::archive & ar) {}
-
-        void accumulator_set::merge(accumulator_set const &) {}
-
-        void accumulator_set::print(std::ostream & os) const {}
-
-        void accumulator_set::reset(bool equilibrated) {
-            for(iterator it = begin(); it != end(); ++it)
-                it->second->reset();
-        }
-        
-        //~ map operations
-        accumulator_set::iterator accumulator_set::begin() {
+        // map operations
+        result_set::iterator result_set::begin() {
             return storage.begin();
         }
 
-        accumulator_set::iterator accumulator_set::end() {
+        result_set::iterator result_set::end() {
             return storage.end();
         }
 
-        accumulator_set::const_iterator accumulator_set::begin() const {
+        result_set::const_iterator result_set::begin() const {
             return storage.begin();
         }
-        
-        accumulator_set::const_iterator accumulator_set::end() const {
+
+        result_set::const_iterator result_set::end() const {
             return storage.end();
         }
-        
-        void accumulator_set::clear() {
+
+        void result_set::clear() {
             storage.clear(); //should be ok b/c shared_ptr
         }
     }

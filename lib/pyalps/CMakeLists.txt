@@ -20,6 +20,10 @@ if (ALPS_HAVE_PYTHON)
       pyngsobservable_c pyngsobservables_c pyngsresult_c pyngsresults_c pyngsapi_c pyngsrandom01_c
   )
 
+  if(ALPS_NGS_USE_NEW_ALEA)
+    list(APPEND PYALPS_SOURCES pyngsaccumulator_c)
+  endif(ALPS_NGS_USE_NEW_ALEA)
+
   set (MAXENT_SOURCES ../../tool/maxent.cpp ../../tool/maxent_helper.cpp
                       ../../tool/maxent_simulation.cpp ../../tool/maxent_parms.cpp)
 
@@ -57,7 +61,7 @@ if (ALPS_HAVE_PYTHON)
   set(PYNGSRESULTS_SOURCES ../../src/alps/ngs/python/results.cpp)
   set(PYNGSAPI_SOURCES ../../src/alps/ngs/python/api.cpp)
   set(PYNGSRANDOM01_SOURCES ../../src/alps/ngs/python/random01.cpp)
-
+  set(PYNGSACCUMULATOR_SOURCES ../../src/alps/ngs/python/accumulator.cpp)
 
   if(LAPACK_FOUND AND ALPS_BUILD_APPLICATIONS)
     set(PYALPS_SOURCES ${PYALPS_SOURCES} maxent_c dwa_c cthyb ctint)
@@ -84,6 +88,10 @@ if (ALPS_HAVE_PYTHON)
   python_add_module(pyngsresults_c ${PYNGSRESULTS_SOURCES})
   python_add_module(pyngsapi_c ${PYNGSAPI_SOURCES})
   python_add_module(pyngsrandom01_c ${PYNGSRANDOM01_SOURCES})
+
+  if(ALPS_NGS_USE_NEW_ALEA)
+    python_add_module(pyngsaccumulator_c ${PYNGSACCUMULATOR_SOURCES})
+  endif(ALPS_NGS_USE_NEW_ALEA)
 
   FOREACH (name ${PYALPS_SOURCES})
     if(BUILD_SHARED_LIBS)

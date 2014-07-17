@@ -26,7 +26,7 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <alps/ngs/accumulator/accumulator.hpp>
+#include <alps/ngs/accumulator.hpp>
 
 namespace alps {
     namespace accumulator {

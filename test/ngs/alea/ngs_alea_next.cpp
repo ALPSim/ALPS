@@ -32,8 +32,8 @@
  	, alps::multi_array<double, 2>, alps::multi_array<double, 3>
 
 #include <alps/hdf5/array.hpp>
+#include <alps/ngs/accumulator.hpp>
 #include <alps/hdf5/multi_array.hpp>
-#include <alps/ngs/accumulator/accumulator.hpp>
 
 #ifndef ALPS_LINK_BOOST_TEST
 #	include <boost/test/included/unit_test.hpp>

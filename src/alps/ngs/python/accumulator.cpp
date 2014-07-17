@@ -4,7 +4,7 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2011 - 2013 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2010 - 2011 by Lukas Gamper <gamperl@gmail.com>                   *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -25,36 +25,59 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <alps/ngs/config.hpp>
-
-#ifndef ALPS_NGS_USE_NEW_ALEA
-#error "This test only works with new alea library"
-#endif
-
-#define BOOST_TEST_MODULE alps::ngs::accumulator
 
 #include <alps/ngs/accumulator.hpp>
+#include <alps/ngs/boost_python.hpp>
 
-#ifndef ALPS_LINK_BOOST_TEST
-#	include <boost/test/included/unit_test.hpp>
-#else
-#	include <boost/test/unit_test.hpp>
-#endif
+#include <boost/optional.hpp>
+#include <boost/python/object.hpp>
 
-BOOST_AUTO_TEST_CASE(count_feature) {
+#include <string>
+#include <sstream>
 
-	alps::accumulator::accumulator_set measurements;
-	measurements << alps::accumulator::RealObservable("scalar")
-				 << alps::accumulator::RealVectorObservable("vector");
+namespace alps {
+	namespace accumulator {
+		namespace python {
 
-	for (int i = 1; i < 1001; ++i) {
-		measurements["scalar"] << i;
-		BOOST_REQUIRE(count(measurements["scalar"]) == i);
-		measurements["vector"] << std::vector<double>(10, i);
-		BOOST_REQUIRE(count(measurements["vector"]) == i);
+			class object_wrapper {
+				public:
+
+					object_wrapper(boost::python::object arg)
+						: obj(arg)
+					{}
+
+					boost::python::object operator+(boost::python::object arg) {
+						return boost::python::call_method<boost::python::object>(obj.get().ptr(), "__add__", arg);
+					}
+
+				private:
+					boost::optional<boost::python::object> obj;
+			};
+
+	        typedef impl::Accumulator<python::object_wrapper, count_tag, impl::AccumulatorBase<python::object_wrapper> > count_accumulator;
+
+			void magic_call(count_accumulator & self, boost::python::object arg) {
+				self(object_wrapper(arg));
+			}
+
+			std::string magic_str(count_accumulator & self) {
+				std::stringstream ss;
+				self.print(ss);
+				return ss.str();
+			}
+
+		}
 	}
+}
 
-	alps::accumulator::result_set results(measurements);
-	BOOST_REQUIRE(count(results["scalar"]) == 1000);
-	BOOST_REQUIRE(count(results["vector"]) == 1000);
+BOOST_PYTHON_MODULE(pyngsaccumulator_c) {
+
+    boost::python::class_<alps::accumulator::python::count_accumulator>(
+        "accumulator",
+		boost::python::init<>()
+    )
+        .def("__call__", &alps::accumulator::python::magic_call)
+        .def("__str__", &alps::accumulator::python::magic_str)
+    ;
+
 }

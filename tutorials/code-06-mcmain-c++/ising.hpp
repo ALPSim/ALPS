@@ -32,7 +32,7 @@
 #include <alps/hdf5/vector.hpp>
 
 #include <alps/ngs/params.hpp>
-#include <alps/ngs/accumulator/accumulator.hpp>
+#include <alps/ngs/accumulator.hpp>
 
 #include <boost/function.hpp>
 #include <boost/filesystem/path.hpp>
