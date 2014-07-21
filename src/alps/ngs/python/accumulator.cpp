@@ -26,11 +26,12 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
+#include <alps/hdf5/archive.hpp>
 #include <alps/ngs/accumulator.hpp>
 #include <alps/ngs/boost_python.hpp>
 
+#include <boost/python.hpp>
 #include <boost/optional.hpp>
-#include <boost/python/object.hpp>
 
 #include <string>
 #include <sstream>
@@ -56,15 +57,45 @@ namespace alps {
 
 	        typedef impl::Accumulator<python::object_wrapper, count_tag, impl::AccumulatorBase<python::object_wrapper> > count_accumulator;
 
-			void magic_call(count_accumulator & self, boost::python::object arg) {
-				self(object_wrapper(arg));
+			void magic_call(count_accumulator & self, boost::python::object arg) { self(object_wrapper(arg)); }
+
+			template<typename T> std::string magic_str(T & self) { 
+				std::stringstream ss; 
+				self.print(ss); 
+				return ss.str(); 
 			}
 
-			std::string magic_str(count_accumulator & self) {
-				std::stringstream ss;
-				self.print(ss);
-				return ss.str();
-			}
+			count_accumulator::result_type result(count_accumulator & self) { return count_accumulator::result_type(self); }
+
+			count_accumulator::result_type add_result(count_accumulator::result_type self, count_accumulator::result_type const & arg) { self += arg; return self; }
+			count_accumulator::result_type add_double(count_accumulator::result_type self, double arg) { self += arg; return self; }
+
+			count_accumulator::result_type sub_result(count_accumulator::result_type self, count_accumulator::result_type const & arg) { self -= arg; return self; }
+			count_accumulator::result_type sub_double(count_accumulator::result_type self, double arg) { self -= arg; return self; }
+			count_accumulator::result_type rsub_double(count_accumulator::result_type self, double arg) { self.negate(); self += arg; return self; }
+
+			count_accumulator::result_type mul_result(count_accumulator::result_type self, count_accumulator::result_type const & arg) { self *= arg; return self; }
+			count_accumulator::result_type mul_double(count_accumulator::result_type self, double arg) { self *= arg; return self; }
+
+			count_accumulator::result_type div_result(count_accumulator::result_type self, count_accumulator::result_type const & arg) { self /= arg; return self; }
+			count_accumulator::result_type div_double(count_accumulator::result_type self, double arg) { self /= arg; return self; }
+			count_accumulator::result_type rdiv_double(count_accumulator::result_type self, double arg) { self.inverse(); self *= arg; return self; }
+
+			count_accumulator sin(count_accumulator::result_type self) { self.sin(); return self; }
+			count_accumulator cos(count_accumulator::result_type self) { self.cos(); return self; }
+			count_accumulator tan(count_accumulator::result_type self) { self.tan(); return self; }
+			count_accumulator sinh(count_accumulator::result_type self) { self.sinh(); return self; }
+			count_accumulator cosh(count_accumulator::result_type self) { self.cosh(); return self; }
+			count_accumulator tanh(count_accumulator::result_type self) { self.tanh(); return self; }
+			count_accumulator asin(count_accumulator::result_type self) { self.asin(); return self; }
+			count_accumulator acos(count_accumulator::result_type self) { self.acos(); return self; }
+			count_accumulator atan(count_accumulator::result_type self) { self.atan(); return self; }
+			count_accumulator abs(count_accumulator::result_type self) { self.abs(); return self; }
+			count_accumulator sqrt(count_accumulator::result_type self) { self.sqrt(); return self; }
+			count_accumulator log(count_accumulator::result_type self) { self.log(); return self; }
+			count_accumulator sq(count_accumulator::result_type self) { self.sq(); return self; }
+			count_accumulator cb(count_accumulator::result_type self) { self.cb(); return self; }
+			count_accumulator cbrt(count_accumulator::result_type self) { self.cbrt(); return self; }
 
 		}
 	}
@@ -72,12 +103,74 @@ namespace alps {
 
 BOOST_PYTHON_MODULE(pyngsaccumulator_c) {
 
-    boost::python::class_<alps::accumulator::python::count_accumulator>(
-        "accumulator",
-		boost::python::init<>()
+	using namespace boost::python;
+
+	typedef alps::accumulator::python::count_accumulator count_accumulator;
+    class_<count_accumulator>(
+        "count_accumulator",
+		init<>()
     )
         .def("__call__", &alps::accumulator::python::magic_call)
-        .def("__str__", &alps::accumulator::python::magic_str)
+        .def("__str__", &alps::accumulator::python::magic_str<count_accumulator>)
+
+        .def("save", &count_accumulator::save)
+        .def("load", &count_accumulator::load)
+
+        .def("reset", &count_accumulator::reset)
+
+        .def("result", &alps::accumulator::python::result)
     ;
 
+    typedef count_accumulator::result_type count_result_type; 
+    class_<count_result_type>(
+        "count_result",
+		init<>()
+    )
+        .def("__str__", &alps::accumulator::python::magic_str<count_result_type>)
+
+        .def("save", &count_result_type::save)
+        .def("load", &count_result_type::load)
+
+        .def("reset", &count_result_type::reset)
+
+        .def(self += count_result_type())
+        .def(self += double())
+        .def("__add__", &alps::accumulator::python::add_result)
+        .def("__add__", &alps::accumulator::python::add_double)
+        .def("__radd__", &alps::accumulator::python::add_double)
+
+        .def(self -= count_result_type())
+        .def(self -= double())
+        .def("__sub__", &alps::accumulator::python::sub_result)
+        .def("__sub__", &alps::accumulator::python::sub_double)
+        .def("__rsub__", &alps::accumulator::python::rsub_double)
+
+        .def(self *= count_result_type())
+        .def(self *= double())
+        .def("__mul__", &alps::accumulator::python::mul_result)
+        .def("__mul__", &alps::accumulator::python::mul_double)
+        .def("__rmul__", &alps::accumulator::python::mul_double)
+
+        .def(self /= count_result_type())
+        .def(self /= double())
+        .def("__div__", &alps::accumulator::python::div_result)
+        .def("__div__", &alps::accumulator::python::div_double)
+        .def("__rdiv__", &alps::accumulator::python::rdiv_double)
+
+        .def("sin", &alps::accumulator::python::sin)
+        .def("cos", &alps::accumulator::python::cos)
+        .def("tan", &alps::accumulator::python::tan)
+        .def("sinh", &alps::accumulator::python::sinh)
+        .def("cosh", &alps::accumulator::python::cosh)
+        .def("tanh", &alps::accumulator::python::tanh)
+        .def("asin", &alps::accumulator::python::asin)
+        .def("acos", &alps::accumulator::python::acos)
+        .def("atan", &alps::accumulator::python::atan)
+        .def("abs", &alps::accumulator::python::abs)
+        .def("sqrt", &alps::accumulator::python::sqrt)
+        .def("log", &alps::accumulator::python::log)
+        .def("sq", &alps::accumulator::python::sq)
+        .def("cb", &alps::accumulator::python::cb)
+        .def("cbrt", &alps::accumulator::python::cbrt)
+    ;
 }
