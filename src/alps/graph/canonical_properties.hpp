@@ -62,15 +62,6 @@ namespace alps {
     namespace graph {
         namespace detail {
 
-            // Checks if the Graph g has a Vertex labeled v
-            template <typename Graph>
-            bool graph_has_vertex(Graph const& g, typename boost::graph_traits<Graph>::vertex_descriptor v)
-            {
-                typename boost::graph_traits<Graph>::vertex_iterator vb,ve;
-                boost::tie(vb,ve) = vertices(g);
-                return (std::find(vb,ve,v) != ve);
-            }
-
             // Input: pi = (V1, V2, ..., Vr)
             // Output: I = {(ni, j) : ni element of Vj
             template<typename Graph> void partition_indeces(
@@ -713,6 +704,16 @@ namespace alps {
                             get<end-2>(l) = get_part<edge_label>(internal_label);
                             swap(get<end-1>(l), colors);
                         }
+
+                        color_map_type get_color_mapping()
+                        {
+                            color_map_type map(color_map_cached_);
+                            // Fill up the color map (if not all colors were used.)
+                            for(typename color_partition_type::const_iterator it = color_partition_.begin(); it != color_partition_.end(); ++it)
+                                map.insert(std::make_pair(it->first,it->first));
+                            return map;
+                        }
+
                       private:
                         color_partition_type                    color_partition_;
                         mutable std::vector<edge_descriptor>    edge_list_;
@@ -916,13 +917,11 @@ namespace alps {
             return detail::canonical_properties_impl(G, pi, label_creator);
         }
 
-        // McKay’s canonical isomorph function Cm(G) is deﬁned to be
-        // Cm(G) = max{ Gpi: (pi, nu) is a leaf of T(G) }
-        // Input: graph G
-        // Output: canonical ordering, canonical label Gpi and orbit of G
+        // Same as below, but also returns the map mapping the colors of the input graph to
+        // its canonical representative with respect to the edge color symmetries.
         template<typename Graph>
         typename canonical_properties_type<Graph>::type
-        canonical_properties(Graph const & G, typename color_partition<Graph>::type const& c) {
+        canonical_properties(Graph const & G, typename color_partition<Graph>::type const& c, boost::container::flat_map<alps::type_type, alps::type_type> & color_mapping ) {
             // The McKay Algorithm works for simple graphs only!
             // (Note: Edges connected to the same vertex on both sides might work,
             // but were not considered in the papers and not tested here.)
@@ -943,10 +942,23 @@ namespace alps {
             detail::label::graph_label_creator<Graph, vertex_policy, detail::label::edge_coloring_with_symmetries_policy> label_creator(G);
             label_creator.set_color_partition(c);
             // create canonical properties
-            return detail::canonical_properties_impl(G, pi, label_creator);
+            typename canonical_properties_type<Graph>::type r(detail::canonical_properties_impl(G, pi, label_creator));
+            color_mapping = label_creator.get_color_mapping();
+            return r;
         }
 
-        
+        // McKay’s canonical isomorph function Cm(G) is deﬁned to be
+        // Cm(G) = max{ Gpi: (pi, nu) is a leaf of T(G) }
+        // Input: graph G
+        // Output: canonical ordering, canonical label Gpi and orbit of G
+        template<typename Graph>
+        typename canonical_properties_type<Graph>::type
+        canonical_properties(Graph const & G, typename color_partition<Graph>::type const& c) {
+            boost::container::flat_map<alps::type_type, alps::type_type> color_mapping;
+            return canonical_properties(G,c,color_mapping);
+        }
+
+
         // Function overload for the previous function to ease generic programming.
         template<typename Graph>
         typename canonical_properties_type<Graph>::type
@@ -965,7 +977,7 @@ namespace alps {
             // (Note: Edges connected to the same vertex on both sides might work,
             // but were not considered in the papers and not tested here.)
             assert( detail::assert_helpers::is_simple_graph(G) );
-            assert( detail::graph_has_vertex(G,v));
+            assert( detail::assert_helpers::graph_has_vertex(G,v));
             typename partition_type<Graph>::type pi;
             // pi = (V1, V2, ..., Vr), Vi = (n1, n2, ..., nk), ni element of G
             // uncolored graphs: pi is a unit partition (pi has only one part)

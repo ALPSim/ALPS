@@ -92,6 +92,19 @@ bool is_simple_graph(Graph const& g)
          && (adjacent_find(edge_list.begin(),edge_list.end()) == edge_list.end()); // no more than one edge between two vertices
 }
 
+/**
+  * Checks the Graph g has a Vertex labeled v
+  * \parm g The graph to be checked
+  * \parm v The vertex descriptor
+  */
+template <typename Graph>
+bool graph_has_vertex(Graph const& g, typename boost::graph_traits<Graph>::vertex_descriptor v)
+{
+    typename boost::graph_traits<Graph>::vertex_iterator vb,ve;
+    boost::tie(vb,ve) = vertices(g);
+    return (std::find(vb,ve,v) != ve);
+}
+
 } // end namespace assert_helpers
 } // end namespace detail
 } // end namespace graph
