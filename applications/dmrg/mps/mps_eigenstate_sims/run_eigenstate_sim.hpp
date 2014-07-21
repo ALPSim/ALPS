@@ -122,7 +122,7 @@ void run_eigenstate_sim(BaseParameters parms, bool write_xml, run_type rt)
         
             std::vector<int> * measure_es_where = NULL;
             entanglement_spectrum_type * spectra = NULL;
-            if (!parms["entanglement_spectra"].empty()) {
+            if (parms["entanglement_spectra"]) {
                 spectra = new entanglement_spectrum_type();
                 measure_es_where = new std::vector<int>();
                 *measure_es_where = parms.template get<std::vector<int> >("entanglement_spectra");
