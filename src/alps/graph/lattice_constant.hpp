@@ -46,10 +46,6 @@ namespace alps {
             , Lattice const & L
             , typename alps::lattice_traits<Lattice>::cell_descriptor c
         ) {
-            // Get the possible translation in the lattice
-            std::vector<std::vector<boost::uint_t<8>::fast> > distance_to_boarder(dimension(L), std::vector<boost::uint_t<8>::fast>(num_vertices(G), num_vertices(G)));
-            detail::build_translation_table(G, L, distance_to_boarder);
-
             typename partition_type<Subgraph>::type subgraph_orbit = boost::get<2>(canonical_properties(S));
 
             typename alps::lattice_traits<Lattice>::size_type const cell_id = index(c, L);
@@ -58,10 +54,12 @@ namespace alps {
             for(unsigned v = 0; v < unit_cell_size; ++v)
                 V.push_back(cell_id * unit_cell_size + v);
 
-            boost::false_type no_argument;
             detail::vertex_equal_simple<Subgraph> vertex_equal;
             detail::edge_equal_simple<Subgraph>   edge_equal;
-            return detail::lattice_constant_impl(S, G, V, distance_to_boarder, subgraph_orbit, unit_cell_size, no_argument, boost::false_type(), vertex_equal, edge_equal, boost::false_type());
+            boost::false_type no_argument;
+            detail::lattice_constant_inserter<Subgraph, boost::false_type>    register_embedding(S, G, L, subgraph_orbit, no_argument);
+            detail::lattice_constant_impl(S, G, V, subgraph_orbit, vertex_equal, edge_equal, register_embedding);
+            return register_embedding.get_count();
         }
 
         template<typename Subgraph, typename Graph, typename Lattice> std::size_t lattice_constant(
@@ -74,9 +72,6 @@ namespace alps {
             , typename partition_type<Subgraph>::type const & subgraph_orbit
         ) {
             assert(get<alps::graph::partition>(canonical_properties(S,b)) == subgraph_orbit);
-            // Get the possible translation in the lattice
-            std::vector<std::vector<boost::uint_t<8>::fast> > distance_to_boarder(dimension(L), std::vector<boost::uint_t<8>::fast>(num_vertices(G), num_vertices(G)));
-            detail::build_translation_table(G, L, distance_to_boarder);
 
             typename alps::lattice_traits<Lattice>::size_type const cell_id = index(c, L);
             std::size_t unit_cell_size = num_vertices(alps::graph::graph(unit_cell(L)));
@@ -86,7 +81,9 @@ namespace alps {
 
             detail::vertex_equal_simple<Subgraph> vertex_equal;
             detail::edge_equal_simple<Subgraph>   edge_equal;
-            return detail::lattice_constant_impl(S, G, V, distance_to_boarder, subgraph_orbit, unit_cell_size, lw, b, vertex_equal, edge_equal, boost::false_type());
+            detail::lattice_constant_inserter<Subgraph, alps::numeric::matrix<unsigned int> >    register_embedding(S, G, L, subgraph_orbit, lw, b);
+            detail::lattice_constant_impl(S, G, V, subgraph_orbit, vertex_equal, edge_equal, register_embedding);
+            return register_embedding.get_count();
         }
     }
 }

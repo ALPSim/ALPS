@@ -46,15 +46,41 @@ namespace alps {
             , typename boost::graph_traits<Graph>::vertex_descriptor v
             , typename partition_type<Subgraph>::type const & subgraph_orbit
         ) {
+            assert( detail::assert_helpers::graph_has_vertex(G,v) );
             assert(get<alps::graph::partition>(canonical_properties(S)) == subgraph_orbit);
             std::vector<std::vector<boost::uint_t<8>::fast> > distance_to_boarder;
 
             detail::vertex_equal_simple<Subgraph>   vertex_equal;
             detail::edge_equal_simple<Subgraph>     edge_equal;
+            detail::throw_on_embedding_found        throw_on_found_embedding;
             try {
                 std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> V(1, v);
                 boost::false_type no_argument;
-                detail::lattice_constant_impl(S, G, V, distance_to_boarder, subgraph_orbit, 1, no_argument, boost::false_type(), vertex_equal, edge_equal, boost::true_type());
+                detail::lattice_constant_impl(S, G, V, subgraph_orbit, vertex_equal, edge_equal, throw_on_found_embedding);
+                return false;
+            } catch (detail::embedding_found e) {
+                return true;
+            }
+        }
+        template<typename Subgraph, typename Graph> bool is_embeddable(
+              Subgraph const & S
+            , Graph const & G
+            , typename boost::graph_traits<Graph>::vertex_descriptor v
+            , typename partition_type<Subgraph>::type const & subgraph_orbit
+            , typename color_partition<Subgraph>::type const & color_partition
+        ) {
+            assert( false || "FIXME" );
+            assert( detail::assert_helpers::graph_has_vertex(G,v) );
+            assert(get<alps::graph::partition>(canonical_properties(S)) == subgraph_orbit);
+            std::vector<std::vector<boost::uint_t<8>::fast> > distance_to_boarder;
+
+            detail::vertex_equal_simple<Subgraph>               vertex_equal;
+            detail::edge_equal_with_color_symmetries<Subgraph>  edge_equal(color_partition);
+            detail::throw_on_embedding_found                    throw_on_found_embedding;
+            try {
+                std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> V(1, v);
+                boost::false_type no_argument;
+                detail::lattice_constant_impl(S, G, V, subgraph_orbit, vertex_equal, edge_equal, throw_on_found_embedding);
                 return false;
             } catch (detail::embedding_found e) {
                 return true;
@@ -71,6 +97,7 @@ namespace alps {
 
             detail::vertex_equal_simple<Subgraph>   vertex_equal;
             detail::edge_equal_simple<Subgraph>     edge_equal;
+            detail::throw_on_embedding_found                    throw_on_found_embedding;
             try {
                 typename boost::graph_traits<Graph>::vertex_iterator vt, ve;
                 boost::false_type no_argument;
@@ -78,7 +105,7 @@ namespace alps {
                 for (boost::tie(vt, ve) = vertices(G); vt != ve; ++vt) {
                     V.clear();
                     V.push_back(*vt);
-                    detail::lattice_constant_impl(S, G, V, distance_to_boarder, subgraph_orbit, 1, no_argument, boost::false_type(), vertex_equal, edge_equal, boost::true_type());
+                    detail::lattice_constant_impl(S, G, V, subgraph_orbit, vertex_equal, edge_equal, throw_on_found_embedding);
                 }
                 return false;
             } catch (detail::embedding_found e) {
@@ -100,6 +127,7 @@ namespace alps {
 
             detail::vertex_equal_simple<Subgraph>               vertex_equal;
             detail::edge_equal_with_color_symmetries<Subgraph>  edge_equal(color_partition);
+            detail::throw_on_embedding_found                    throw_on_found_embedding;
             try {
                 typename boost::graph_traits<Graph>::vertex_iterator vt, ve;
                 boost::false_type no_argument;
@@ -108,7 +136,7 @@ namespace alps {
                     edge_equal.reset();
                     V.clear();
                     V.push_back(*vt);
-                    detail::lattice_constant_impl(S, G, V, distance_to_boarder, subgraph_orbit, 1, no_argument, boost::false_type(), vertex_equal, edge_equal, boost::true_type());
+                    detail::lattice_constant_impl(S, G, V, subgraph_orbit, vertex_equal, edge_equal, throw_on_found_embedding);
                 }
                 return false;
             } catch (detail::embedding_found e) {
