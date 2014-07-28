@@ -36,7 +36,7 @@ namespace alps {
 
         namespace detail {
 
-            bool is_vectorizable<boost::python::list>::apply(boost::python::list const & value) {
+            template<typename T> bool is_vectorizable_generic(T const & value) {
                 static char const * scalar_types[] = { "int", "long", "float", "complex", "str"
                     , "numpy.str", "numpy.bool", "numpy.int8", "numpy.int16", "numpy.int32", "numpy.int64", "numpy.uint8"
                     , "numpy.uint16", "numpy.uint32", "numpy.uint64", "numpy.float32", "numpy.float64", "numpy.complex64", "numpy.complex128" };
@@ -53,6 +53,10 @@ namespace alps {
                         if (!is_vectorizable<boost::python::list>::apply(boost::python::extract<boost::python::list>(value[0])()))
                             return false;
                         first_extent = get_extent(boost::python::extract<boost::python::list>(value[0])());
+                    } else if (first_dtype == "tuple") {
+                        if (!is_vectorizable<boost::python::tuple>::apply(boost::python::extract<boost::python::tuple>(value[0])()))
+                            return false;
+                        first_extent = get_extent(boost::python::extract<boost::python::tuple>(value[0])());
                     } else if (first_dtype == "numpy.ndarray")
                         first_extent = get_extent(boost::python::extract<boost::python::numeric::array>(value[0])());
                     for(boost::python::ssize_t i = 0; i < size; ++i) {
@@ -61,6 +65,12 @@ namespace alps {
                             if (!is_vectorizable<boost::python::list>::apply(boost::python::extract<boost::python::list>(value[i])()))
                                 return false;
                             std::vector<std::size_t> extent = get_extent(boost::python::extract<boost::python::list>(value[i])());
+                            if (first_extent.size() != extent.size() || !std::equal(first_extent.begin(), first_extent.end(), extent.begin()))
+                                return false;
+                        } else if (dtype == "tuple") {
+                            if (!is_vectorizable<boost::python::tuple>::apply(boost::python::extract<boost::python::tuple>(value[i])()))
+                                return false;
+                            std::vector<std::size_t> extent = get_extent(boost::python::extract<boost::python::tuple>(value[i])());
                             if (first_extent.size() != extent.size() || !std::equal(first_extent.begin(), first_extent.end(), extent.begin()))
                                 return false;
                         } else if (dtype == "numpy.ndarray") {
@@ -73,8 +83,14 @@ namespace alps {
                     return true;
                 }
             }
+            bool is_vectorizable<boost::python::list>::apply(boost::python::list const & value) {
+                return is_vectorizable_generic<boost::python::list>(value);
+            }
+            bool is_vectorizable<boost::python::tuple>::apply(boost::python::tuple const & value) {
+                return is_vectorizable_generic<boost::python::tuple>(value);
+            }
 
-            std::vector<std::size_t> get_extent<boost::python::list>::apply(boost::python::list const & value) {
+            template<typename T> std::vector<std::size_t> get_extent_generic(T const & value) {
                 using boost::python::len;
                 using alps::hdf5::get_extent;
                 using alps::hdf5::is_vectorizable;
@@ -85,20 +101,29 @@ namespace alps {
                 if (first_dtype == "list") {
                     std::vector<std::size_t> first_extent(get_extent(boost::python::extract<boost::python::list>(value[0])()));
                     copy(first_extent.begin(), first_extent.end(), back_inserter(extent));
+                } else if (first_dtype == "tuple") {
+                    std::vector<std::size_t> first_extent(get_extent(boost::python::extract<boost::python::tuple>(value[0])()));
+                    copy(first_extent.begin(), first_extent.end(), back_inserter(extent));
                 } else if (first_dtype == "numpy.ndarray") {
                     std::vector<std::size_t> first_extent = get_extent(boost::python::extract<boost::python::numeric::array>(value[0])());
                     copy(first_extent.begin(), first_extent.end(), back_inserter(extent));
                 }
                 return extent;
             }
+            std::vector<std::size_t> get_extent<boost::python::list>::apply(boost::python::list const & value) {
+                return get_extent_generic<boost::python::list>(value);
+            }
+            std::vector<std::size_t> get_extent<boost::python::tuple>::apply(boost::python::tuple const & value) {
+                return get_extent_generic<boost::python::tuple>(value);
+            }
 
             void set_extent<boost::python::list>::apply(boost::python::list & value, std::vector<std::size_t> const & extent) {}
         }
 
-        void save(
+        template<typename T> void save_generic(
               archive & ar
             , std::string const & path
-            , boost::python::list const & value
+            , T const & value
             , std::vector<std::size_t> size
             , std::vector<std::size_t> chunk
             , std::vector<std::size_t> offset
@@ -124,6 +149,28 @@ namespace alps {
                     save(ar, path + "/" + cast<std::string>(i), boost::python::object(value[i]));
             }
         }
+
+        void save(
+              archive & ar
+            , std::string const & path
+            , boost::python::list const & value
+            , std::vector<std::size_t> size
+            , std::vector<std::size_t> chunk
+            , std::vector<std::size_t> offset
+        ) {
+            save_generic<boost::python::list>(ar, path, value, size, chunk, offset);
+        }
+
+        void save(
+              archive & ar
+            , std::string const & path
+            , boost::python::tuple const & value
+            , std::vector<std::size_t> size
+            , std::vector<std::size_t> chunk
+            , std::vector<std::size_t> offset
+        ) {
+            save_generic<boost::python::tuple>(ar, path, value, size, chunk, offset);
+        }        
 
         void load(
               archive & ar
