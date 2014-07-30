@@ -534,7 +534,67 @@
       <location id="10" x="-750.740725956" y="714.931961584" />
     </change>
   </action>
+  <action date="2014-07-30 21:09:14" id="4" prevId="3" session="2" user="michele">
+    <annotation id="5" key="__description__" value="Upgrade" />
+    <delete id="109" objectId="16" parentObjId="8" parentObjType="connection" what="port" />
+    <delete id="110" objectId="17" parentObjId="8" parentObjType="connection" what="port" />
+    <delete id="111" objectId="8" parentObjId="" parentObjType="" what="connection" />
+    <delete id="112" objectId="3" parentObjId="1" parentObjType="connection" what="port" />
+    <delete id="113" objectId="2" parentObjId="1" parentObjType="connection" what="port" />
+    <delete id="114" objectId="1" parentObjId="" parentObjType="" what="connection" />
+    <delete id="115" objectId="1" parentObjId="1" parentObjType="module" what="location" />
+    <delete id="116" objectId="0" parentObjId="0" parentObjType="function" what="parameter" />
+    <delete id="117" objectId="0" parentObjId="1" parentObjType="module" what="function" />
+    <delete id="118" objectId="1" parentObjId="1" parentObjType="function" what="parameter" />
+    <delete id="119" objectId="1" parentObjId="1" parentObjType="module" what="function" />
+    <delete id="120" objectId="2" parentObjId="2" parentObjType="function" what="parameter" />
+    <delete id="121" objectId="2" parentObjId="1" parentObjType="module" what="function" />
+    <delete id="122" objectId="1" parentObjId="" parentObjType="" what="module" />
+    <add id="123" objectId="10" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="10" name="Map" namespace="" package="org.vistrails.vistrails.control_flow" version="0.2.4" />
+    </add>
+    <add id="124" objectId="12" parentObjId="10" parentObjType="module" what="function">
+      <function id="12" name="InputPort" pos="2" />
+    </add>
+    <add id="125" objectId="12" parentObjId="12" parentObjType="function" what="parameter">
+      <parameter alias="" id="12" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:List" val="" />
+    </add>
+    <add id="126" objectId="11" parentObjId="10" parentObjType="module" what="function">
+      <function id="11" name="OutputPort" pos="1" />
+    </add>
+    <add id="127" objectId="11" parentObjId="11" parentObjType="function" what="parameter">
+      <parameter alias="" id="11" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:String" val="dummy" />
+    </add>
+    <add id="128" objectId="10" parentObjId="10" parentObjType="module" what="function">
+      <function id="10" name="InputPort" pos="0" />
+    </add>
+    <add id="129" objectId="10" parentObjId="10" parentObjType="function" what="parameter">
+      <parameter alias="" id="10" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:List" val="['data']" />
+    </add>
+    <add id="130" objectId="11" parentObjId="10" parentObjType="module" what="location">
+      <location id="11" x="-97.0677202292" y="-93.2329092453" />
+    </add>
+    <add id="131" objectId="15" parentObjId="" parentObjType="" what="connection">
+      <connection id="15" />
+    </add>
+    <add id="132" objectId="30" parentObjId="15" parentObjType="connection" what="port">
+      <port id="30" moduleId="2" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+    </add>
+    <add id="133" objectId="31" parentObjId="15" parentObjType="connection" what="port">
+      <port id="31" moduleId="10" moduleName="Map" name="InputList" signature="(org.vistrails.vistrails.basic:List)" type="destination" />
+    </add>
+    <add id="134" objectId="16" parentObjId="" parentObjType="" what="connection">
+      <connection id="16" />
+    </add>
+    <add id="135" objectId="32" parentObjId="16" parentObjType="connection" what="port">
+      <port id="32" moduleId="9" moduleName="Group" name="self" signature="(org.vistrails.vistrails.basic:Group)" type="source" />
+    </add>
+    <add id="136" objectId="33" parentObjId="16" parentObjType="connection" what="port">
+      <port id="33" moduleId="10" moduleName="Map" name="FunctionPort" signature="(org.vistrails.vistrails.basic:Module)" type="destination" />
+    </add>
+  </action>
   <annotation id="1" key="__abstraction_origin_uuid__" value="20623bf5-19ea-11e3-923c-20c9d044a3eb" />
   <annotation id="2" key="__abstraction_uuid__" value="20623bf5-19ea-11e3-923c-20c9d044a3eb" />
   <actionAnnotation actionId="1" date="2014-05-16 16:02:42" id="4" key="__upgrade__" user="troyer" value="2" />
+  <actionAnnotation actionId="3" date="2014-07-30 21:09:14" id="6" key="__upgrade__" user="michele" value="4" />
 </vistrail>
