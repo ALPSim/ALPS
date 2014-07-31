@@ -104,6 +104,7 @@ namespace alps {
 
                         // TODO: make library for scalar type
                         typename alps::hdf5::scalar_type<mean_type>::type cnt = B::count();
+                        
                         return mean_type(m_sum) / cnt;
                     }
 

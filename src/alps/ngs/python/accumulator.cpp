@@ -54,20 +54,26 @@ namespace alps {
 						os << boost::python::call_method<std::string>(obj.ptr(), "__str__");
 					}
 
-					#define ALPS_ACCUMULATOR_PYTHON_OPERATOR(cxxiop, pyipo, cxxop, pyop)							\
-						object_wrapper & cxxiop (object_wrapper arg) {												\
-							boost::python::call_method<boost::python::object>(obj.ptr(), pyipo , arg.obj);			\
+					#define ALPS_ACCUMULATOR_PYTHON_OPERATOR(cxxiop, cxxop, iop, op)								\
+						object_wrapper & cxxiop (object_wrapper const arg) {										\
+							if (obj == boost::python::object())														\
+								obj = arg.obj;																		\
+							else																					\
+								obj iop arg.obj; 																	\
 							return *this;																			\
 						}																							\
-						boost::python::object cxxop (object_wrapper arg) {											\
-							return boost::python::call_method<boost::python::object>(obj.ptr(), pyop, arg.obj);		\
+						boost::python::object cxxop (object_wrapper const arg) const {								\
+							return obj op arg.obj;																	\
 						}
-
-					ALPS_ACCUMULATOR_PYTHON_OPERATOR(operator+=, "__iadd__", operator+, "__add__")
-					ALPS_ACCUMULATOR_PYTHON_OPERATOR(operator-=, "__isub__", operator-, "__sub__")
-					ALPS_ACCUMULATOR_PYTHON_OPERATOR(operator*=, "__imul__", operator*, "__mul__")
-					ALPS_ACCUMULATOR_PYTHON_OPERATOR(operator/=, "__idiv__", operator/, "__div__")
+					ALPS_ACCUMULATOR_PYTHON_OPERATOR(operator+=, operator+, +=, +)
+					ALPS_ACCUMULATOR_PYTHON_OPERATOR(operator-=, operator-, -=, -)
+					ALPS_ACCUMULATOR_PYTHON_OPERATOR(operator*=, operator*, *=, *)
+					ALPS_ACCUMULATOR_PYTHON_OPERATOR(operator/=, operator/, /=, /)
 					#undef ALPS_ACCUMULATOR_PYTHON_OPERATOR
+
+					object_wrapper operator- () {
+						return boost::python::call_method<boost::python::object>(obj.ptr(), "__neg__");
+					}
 
 				private:
 					boost::python::object obj;
@@ -86,7 +92,31 @@ namespace alps {
 				return ss.str(); 
 			}
 
+			#define ALPS_ACCUMULATOR_PYTHON_FUNCTION(name)															\
+			object_wrapper name (object_wrapper const & arg) {														\
+				boost::python::object np = boost::python::import("numpy");											\
+				return boost::python::call_method<boost::python::object>(np.ptr(), #name, arg.get());				\
+			}
+			ALPS_ACCUMULATOR_PYTHON_FUNCTION(sin)
+			ALPS_ACCUMULATOR_PYTHON_FUNCTION(cos)
+			ALPS_ACCUMULATOR_PYTHON_FUNCTION(tan)
+			ALPS_ACCUMULATOR_PYTHON_FUNCTION(sinh)
+			ALPS_ACCUMULATOR_PYTHON_FUNCTION(cosh)
+			ALPS_ACCUMULATOR_PYTHON_FUNCTION(tanh)
+			// ALPS_ACCUMULATOR_PYTHON_FUNCTION(asin)
+			// ALPS_ACCUMULATOR_PYTHON_FUNCTION(acos)
+			// ALPS_ACCUMULATOR_PYTHON_FUNCTION(atan)
+			ALPS_ACCUMULATOR_PYTHON_FUNCTION(abs)
+			ALPS_ACCUMULATOR_PYTHON_FUNCTION(sqrt)
+			ALPS_ACCUMULATOR_PYTHON_FUNCTION(log)
+			// ALPS_ACCUMULATOR_PYTHON_FUNCTION(sq)
+			// ALPS_ACCUMULATOR_PYTHON_FUNCTION(cb)
+			// ALPS_ACCUMULATOR_PYTHON_FUNCTION(cbrt)
+			#undef ALPS_ACCUMULATOR_PYTHON_FUNCTION
+
 			template<typename T> typename T::result_type result(T & self) { return typename T::result_type(self); }
+
+			template<typename T> typename T::result_type neg_result(typename T::result_type self) { self.negate(); return self; }
 
 			template<typename T> typename T::result_type add_result(typename T::result_type self, typename T::result_type const & arg) { self += arg; return self; }
 			template<typename T> typename T::result_type add_double(typename T::result_type self, double arg) { self += arg; return self; }
@@ -102,21 +132,21 @@ namespace alps {
 			template<typename T> typename T::result_type div_double(typename T::result_type self, double arg) { self /= arg; return self; }
 			template<typename T> typename T::result_type rdiv_double(typename T::result_type self, double arg) { self.inverse(); self *= arg; return self; }
 
-			template<typename T> T sin(typename T::result_type self) { self.sin(); return self; }
-			template<typename T> T cos(typename T::result_type self) { self.cos(); return self; }
-			template<typename T> T tan(typename T::result_type self) { self.tan(); return self; }
-			template<typename T> T sinh(typename T::result_type self) { self.sinh(); return self; }
-			template<typename T> T cosh(typename T::result_type self) { self.cosh(); return self; }
-			template<typename T> T tanh(typename T::result_type self) { self.tanh(); return self; }
-			template<typename T> T asin(typename T::result_type self) { self.asin(); return self; }
-			template<typename T> T acos(typename T::result_type self) { self.acos(); return self; }
-			template<typename T> T atan(typename T::result_type self) { self.atan(); return self; }
-			template<typename T> T abs(typename T::result_type self) { self.abs(); return self; }
-			template<typename T> T sqrt(typename T::result_type self) { self.sqrt(); return self; }
-			template<typename T> T log(typename T::result_type self) { self.log(); return self; }
-			template<typename T> T sq(typename T::result_type self) { self.sq(); return self; }
-			template<typename T> T cb(typename T::result_type self) { self.cb(); return self; }
-			template<typename T> T cbrt(typename T::result_type self) { self.cbrt(); return self; }
+			template<typename T> typename T::result_type sin(typename T::result_type self) { self.sin(); return self; }
+			template<typename T> typename T::result_type cos(typename T::result_type self) { self.cos(); return self; }
+			template<typename T> typename T::result_type tan(typename T::result_type self) { self.tan(); return self; }
+			template<typename T> typename T::result_type sinh(typename T::result_type self) { self.sinh(); return self; }
+			template<typename T> typename T::result_type cosh(typename T::result_type self) { self.cosh(); return self; }
+			template<typename T> typename T::result_type tanh(typename T::result_type self) { self.tanh(); return self; }
+			template<typename T> typename T::result_type asin(typename T::result_type self) { self.asin(); return self; }
+			template<typename T> typename T::result_type acos(typename T::result_type self) { self.acos(); return self; }
+			template<typename T> typename T::result_type atan(typename T::result_type self) { self.atan(); return self; }
+			template<typename T> typename T::result_type abs(typename T::result_type self) { self.abs(); return self; }
+			template<typename T> typename T::result_type sqrt(typename T::result_type self) { self.sqrt(); return self; }
+			template<typename T> typename T::result_type log(typename T::result_type self) { self.log(); return self; }
+			// template<typename T> typename T::result_type sq(typename T::result_type self) { self.sq(); return self; }
+			// template<typename T> typename T::result_type cb(typename T::result_type self) { self.cb(); return self; }
+			// template<typename T> typename T::result_type cbrt(typename T::result_type self) { self.cbrt(); return self; }
 
 		}
 	}
@@ -183,22 +213,23 @@ BOOST_PYTHON_MODULE(pyngsaccumulator_c) {
         .def("reset", & accumulator_type ::reset)
 
 	#define ALPS_RESULT_COMMON(accumulator_type)										\
-		.def(self += count_result_type())												\
+		.def(self += accumulator_type ::result_type())									\
         .def(self += double())															\
+        .def("__neg__", &alps::accumulator::python::neg_result< accumulator_type >)		\
         .def("__add__", &alps::accumulator::python::add_result< accumulator_type >)		\
         .def("__add__", &alps::accumulator::python::add_double< accumulator_type >)		\
         .def("__radd__", &alps::accumulator::python::add_double< accumulator_type >)	\
-        .def(self -= count_result_type())												\
+        .def(self -= accumulator_type ::result_type())									\
         .def(self -= double())															\
         .def("__sub__", &alps::accumulator::python::sub_result< accumulator_type >)		\
         .def("__sub__", &alps::accumulator::python::sub_double< accumulator_type >)		\
         .def("__rsub__", &alps::accumulator::python::rsub_double< accumulator_type >)	\
-        .def(self *= count_result_type())												\
+        .def(self *= accumulator_type ::result_type())									\
         .def(self *= double())															\
         .def("__mul__", &alps::accumulator::python::mul_result< accumulator_type >)		\
         .def("__mul__", &alps::accumulator::python::mul_double< accumulator_type >)		\
         .def("__rmul__", &alps::accumulator::python::mul_double< accumulator_type >)	\
-        .def(self /= count_result_type())												\
+        .def(self /= accumulator_type ::result_type())									\
         .def(self /= double())															\
         .def("__div__", &alps::accumulator::python::div_result< accumulator_type >)		\
         .def("__div__", &alps::accumulator::python::div_double< accumulator_type >)		\
@@ -209,23 +240,20 @@ BOOST_PYTHON_MODULE(pyngsaccumulator_c) {
         .def("sinh", &alps::accumulator::python::sinh< accumulator_type >)				\
         .def("cosh", &alps::accumulator::python::cosh< accumulator_type >)				\
         .def("tanh", &alps::accumulator::python::tanh< accumulator_type >)				\
-        .def("asin", &alps::accumulator::python::asin< accumulator_type >)				\
+        /*.def("asin", &alps::accumulator::python::asin< accumulator_type >)				\
         .def("acos", &alps::accumulator::python::acos< accumulator_type >)				\
-        .def("atan", &alps::accumulator::python::atan< accumulator_type >)				\
+        .def("atan", &alps::accumulator::python::atan< accumulator_type >)*/				\
         .def("abs", &alps::accumulator::python::abs< accumulator_type >)				\
         .def("sqrt", &alps::accumulator::python::sqrt< accumulator_type >)				\
         .def("log", &alps::accumulator::python::log< accumulator_type >)				\
-        .def("sq", &alps::accumulator::python::sq< accumulator_type >)					\
+        /*.def("sq", &alps::accumulator::python::sq< accumulator_type >)					\
         .def("cb", &alps::accumulator::python::cb< accumulator_type >)					\
-        .def("cbrt", &alps::accumulator::python::cbrt< accumulator_type >)
+        .def("cbrt", &alps::accumulator::python::cbrt< accumulator_type >)*/
 
 	typedef alps::accumulator::python::object_wrapper python_object;
 
 	typedef Accumulator<python_object, alps::accumulator::count_tag, AccumulatorBase<python_object> > count_accumulator;
-    class_<count_accumulator>(
-        "count_accumulator",
-		init<>()
-    )
+    class_<count_accumulator>("count_accumulator", init<>())
         .def("__call__", &alps::accumulator::python::magic_call<count_accumulator>)
     	ALPS_ACCUMULATOR_COMMON(count_accumulator)
         .def("result", &alps::accumulator::python::result<count_accumulator>)
@@ -234,10 +262,7 @@ BOOST_PYTHON_MODULE(pyngsaccumulator_c) {
     ;
 
     typedef count_accumulator::result_type count_result_type; 
-    class_<count_result_type>(
-        "count_result",
-		init<>()
-    )
+    class_<count_result_type>("count_result", init<>())
     	ALPS_ACCUMULATOR_COMMON(count_result_type)
 
         .def("count", &count_accumulator::count)
@@ -246,28 +271,44 @@ BOOST_PYTHON_MODULE(pyngsaccumulator_c) {
     ;
 
 	typedef Accumulator<python_object, alps::accumulator::mean_tag, count_accumulator> mean_accumulator;
-    class_<mean_accumulator>(
-        "mean_accumulator",
-		init<>()
-    )
+    class_<mean_accumulator>("mean_accumulator", init<>())
         .def("__call__", &alps::accumulator::python::magic_call<mean_accumulator>)
     	ALPS_ACCUMULATOR_COMMON(mean_accumulator)
         .def("result", &alps::accumulator::python::result<mean_accumulator>)
 
         .def("count", &mean_accumulator::count)
-        .def("mean", &mean_accumulator::count) // TODO: make function
+        .def("mean", &mean_accumulator::mean)
     ;
 
     typedef mean_accumulator::result_type mean_result_type; 
-    class_<mean_result_type>(
-        "mean_result",
-		init<>()
-    )
+    class_<mean_result_type>("mean_result", init<>())
     	ALPS_ACCUMULATOR_COMMON(mean_result_type)
 
         .def("count", &mean_accumulator::count)
-        .def("mean", &mean_accumulator::count) // TODO: make function
+        .def("mean", &mean_accumulator::mean)
 
-        // ALPS_RESULT_COMMON(mean_accumulator) // TODO: implement
-    ;    
+        ALPS_RESULT_COMMON(mean_accumulator)
+    ;
+
+	typedef Accumulator<python_object, alps::accumulator::error_tag, mean_accumulator> error_accumulator;
+    class_<error_accumulator>("error_accumulator", init<>())
+        .def("__call__", &alps::accumulator::python::magic_call<error_accumulator>)
+        // ALPS_ACCUMULATOR_COMMON(error_accumulator)
+        // .def("result", &alps::accumulator::python::result<error_accumulator>)
+
+        .def("count", &error_accumulator::count)
+        .def("mean", &error_accumulator::mean)
+        // .def("error", &error_accumulator::error)
+    ;
+
+    // typedef error_accumulator::result_type error_result_type; 
+    // class_<error_result_type>("error_result", init<>())
+    // 	ALPS_ACCUMULATOR_COMMON(error_result_type)
+
+        .def("count", &error_accumulator::count)
+        .def("mean", &error_accumulator::mean)
+    //     .def("error", &error_accumulator::error)
+
+    //     ALPS_RESULT_COMMON(error_accumulator)
+    // ;
 }
