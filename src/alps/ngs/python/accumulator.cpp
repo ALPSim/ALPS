@@ -47,6 +47,9 @@ namespace alps {
 					object_wrapper(boost::python::object arg): obj(arg) {}
 					object_wrapper(boost::uint64_t arg): obj(arg) {}
 
+					operator boost::python::object() { return obj; }
+					operator const boost::python::object() const { return obj; }
+
 					boost::python::object & get() { return obj; }
 					boost::python::object const &get() const { return obj; }
 
@@ -54,7 +57,7 @@ namespace alps {
 						os << boost::python::call_method<std::string>(obj.ptr(), "__str__");
 					}
 
-					#define ALPS_ACCUMULATOR_PYTHON_OPERATOR(cxxiop, cxxop, iop, op)								\
+					#define ALPS_ACCUMULATOR_PYTHON_MEMBER_OPERATOR(cxxiop, cxxop, iop, op)							\
 						object_wrapper & cxxiop (object_wrapper const arg) {										\
 							if (obj == boost::python::object())														\
 								obj = arg.obj;																		\
@@ -62,14 +65,17 @@ namespace alps {
 								obj iop arg.obj; 																	\
 							return *this;																			\
 						}																							\
-						boost::python::object cxxop (object_wrapper const arg) const {								\
+						object_wrapper cxxop (object_wrapper const arg) const {										\
 							return obj op arg.obj;																	\
+						}																							\
+						object_wrapper cxxop (double arg) const {													\
+							return obj op boost::python::object(arg);												\
 						}
-					ALPS_ACCUMULATOR_PYTHON_OPERATOR(operator+=, operator+, +=, +)
-					ALPS_ACCUMULATOR_PYTHON_OPERATOR(operator-=, operator-, -=, -)
-					ALPS_ACCUMULATOR_PYTHON_OPERATOR(operator*=, operator*, *=, *)
-					ALPS_ACCUMULATOR_PYTHON_OPERATOR(operator/=, operator/, /=, /)
-					#undef ALPS_ACCUMULATOR_PYTHON_OPERATOR
+					ALPS_ACCUMULATOR_PYTHON_MEMBER_OPERATOR(operator+=, operator+, +=, +)
+					ALPS_ACCUMULATOR_PYTHON_MEMBER_OPERATOR(operator-=, operator-, -=, -)
+					ALPS_ACCUMULATOR_PYTHON_MEMBER_OPERATOR(operator*=, operator*, *=, *)
+					ALPS_ACCUMULATOR_PYTHON_MEMBER_OPERATOR(operator/=, operator/, /=, /)
+					#undef ALPS_ACCUMULATOR_PYTHON_MEMBER_OPERATOR
 
 					object_wrapper operator- () {
 						return boost::python::call_method<boost::python::object>(obj.ptr(), "__neg__");
@@ -84,6 +90,16 @@ namespace alps {
 				return os;
 			}
 
+			#define ALPS_ACCUMULATOR_FREE_MEMBER_OPERATOR(cxxop, op)												\
+				inline object_wrapper cxxop (double arg1, object_wrapper const & arg2) {							\
+					return boost::python::object(arg1) op arg2.get();												\
+				}
+			ALPS_ACCUMULATOR_FREE_MEMBER_OPERATOR(operator+, +)
+			ALPS_ACCUMULATOR_FREE_MEMBER_OPERATOR(operator-, -)
+			ALPS_ACCUMULATOR_FREE_MEMBER_OPERATOR(operator*, *)
+			ALPS_ACCUMULATOR_FREE_MEMBER_OPERATOR(operator/, /)
+			#undef ALPS_ACCUMULATOR_FREE_MEMBER_OPERATOR
+
 			template<typename T> void magic_call(T & self, boost::python::object arg) { self(object_wrapper(arg)); }
 
 			template<typename T> std::string magic_str(T & self) { 
@@ -93,10 +109,10 @@ namespace alps {
 			}
 
 			#define ALPS_ACCUMULATOR_PYTHON_FUNCTION(name)															\
-			object_wrapper name (object_wrapper const & arg) {														\
-				boost::python::object np = boost::python::import("numpy");											\
-				return boost::python::call_method<boost::python::object>(np.ptr(), #name, arg.get());				\
-			}
+				object_wrapper name (object_wrapper const & arg) {													\
+					boost::python::object np = boost::python::import("numpy");										\
+					return boost::python::call_method<boost::python::object>(np.ptr(), #name, arg.get());			\
+				}
 			ALPS_ACCUMULATOR_PYTHON_FUNCTION(sin)
 			ALPS_ACCUMULATOR_PYTHON_FUNCTION(cos)
 			ALPS_ACCUMULATOR_PYTHON_FUNCTION(tan)
@@ -240,13 +256,13 @@ BOOST_PYTHON_MODULE(pyngsaccumulator_c) {
         .def("sinh", &alps::accumulator::python::sinh< accumulator_type >)				\
         .def("cosh", &alps::accumulator::python::cosh< accumulator_type >)				\
         .def("tanh", &alps::accumulator::python::tanh< accumulator_type >)				\
-        /*.def("asin", &alps::accumulator::python::asin< accumulator_type >)				\
+        /*.def("asin", &alps::accumulator::python::asin< accumulator_type >)			\
         .def("acos", &alps::accumulator::python::acos< accumulator_type >)				\
-        .def("atan", &alps::accumulator::python::atan< accumulator_type >)*/				\
+        .def("atan", &alps::accumulator::python::atan< accumulator_type >)*/			\
         .def("abs", &alps::accumulator::python::abs< accumulator_type >)				\
         .def("sqrt", &alps::accumulator::python::sqrt< accumulator_type >)				\
         .def("log", &alps::accumulator::python::log< accumulator_type >)				\
-        /*.def("sq", &alps::accumulator::python::sq< accumulator_type >)					\
+        /*.def("sq", &alps::accumulator::python::sq< accumulator_type >)				\
         .def("cb", &alps::accumulator::python::cb< accumulator_type >)					\
         .def("cbrt", &alps::accumulator::python::cbrt< accumulator_type >)*/
 
@@ -293,22 +309,22 @@ BOOST_PYTHON_MODULE(pyngsaccumulator_c) {
 	typedef Accumulator<python_object, alps::accumulator::error_tag, mean_accumulator> error_accumulator;
     class_<error_accumulator>("error_accumulator", init<>())
         .def("__call__", &alps::accumulator::python::magic_call<error_accumulator>)
-        // ALPS_ACCUMULATOR_COMMON(error_accumulator)
-        // .def("result", &alps::accumulator::python::result<error_accumulator>)
+        ALPS_ACCUMULATOR_COMMON(error_accumulator)
+        .def("result", &alps::accumulator::python::result<error_accumulator>)
 
         .def("count", &error_accumulator::count)
         .def("mean", &error_accumulator::mean)
-        // .def("error", &error_accumulator::error)
+        .def("error", &error_accumulator::error)
     ;
 
-    // typedef error_accumulator::result_type error_result_type; 
-    // class_<error_result_type>("error_result", init<>())
-    // 	ALPS_ACCUMULATOR_COMMON(error_result_type)
+    typedef error_accumulator::result_type error_result_type; 
+    class_<error_result_type>("error_result", init<>())
+    	ALPS_ACCUMULATOR_COMMON(error_result_type)
 
         .def("count", &error_accumulator::count)
         .def("mean", &error_accumulator::mean)
-    //     .def("error", &error_accumulator::error)
+        .def("error", &error_accumulator::error)
 
-    //     ALPS_RESULT_COMMON(error_accumulator)
-    // ;
+        ALPS_RESULT_COMMON(error_accumulator)
+    ;
 }
