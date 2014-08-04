@@ -257,28 +257,39 @@ BOOST_PYTHON_MODULE(pyngsaccumulator_c) {
         .def("load", & accumulator_type ::load)											\
         .def("reset", & accumulator_type ::reset)
 
-	#define ALPS_RESULT_COMMON(accumulator_type)										\
+	#define ALPS_RESULT_COMMON_OPERATORS(accumulator_type)								\
 		.def(self += accumulator_type ::result_type())									\
+        .def(self += int())																\
+        .def(self += long())															\
         .def(self += double())															\
         .def("__neg__", &alps::accumulator::python::neg_result< accumulator_type >)		\
         .def("__add__", &alps::accumulator::python::add_result< accumulator_type >)		\
         .def("__add__", &alps::accumulator::python::add_double< accumulator_type >)		\
         .def("__radd__", &alps::accumulator::python::add_double< accumulator_type >)	\
         .def(self -= accumulator_type ::result_type())									\
+        .def(self -= int())																\
+        .def(self -= long())															\
         .def(self -= double())															\
         .def("__sub__", &alps::accumulator::python::sub_result< accumulator_type >)		\
         .def("__sub__", &alps::accumulator::python::sub_double< accumulator_type >)		\
         .def("__rsub__", &alps::accumulator::python::rsub_double< accumulator_type >)	\
         .def(self *= accumulator_type ::result_type())									\
+        .def(self *= int())																\
+        .def(self *= long())															\
         .def(self *= double())															\
         .def("__mul__", &alps::accumulator::python::mul_result< accumulator_type >)		\
         .def("__mul__", &alps::accumulator::python::mul_double< accumulator_type >)		\
         .def("__rmul__", &alps::accumulator::python::mul_double< accumulator_type >)	\
         .def(self /= accumulator_type ::result_type())									\
+        .def(self /= int())																\
+        .def(self /= long())															\
         .def(self /= double())															\
         .def("__div__", &alps::accumulator::python::div_result< accumulator_type >)		\
         .def("__div__", &alps::accumulator::python::div_double< accumulator_type >)		\
-        .def("__rdiv__", &alps::accumulator::python::rdiv_double< accumulator_type >)	\
+        .def("__rdiv__", &alps::accumulator::python::rdiv_double< accumulator_type >)
+
+	#define ALPS_RESULT_COMMON(accumulator_type)										\
+		ALPS_RESULT_COMMON_OPERATORS(accumulator_type)									\
         .def("sin", &alps::accumulator::python::sin< accumulator_type >)				\
         .def("cos", &alps::accumulator::python::cos< accumulator_type >)				\
         .def("tan", &alps::accumulator::python::tan< accumulator_type >)				\
@@ -368,7 +379,7 @@ BOOST_PYTHON_MODULE(pyngsaccumulator_c) {
         .def("error", &binning_analysis_accumulator_type::error)
     ;
 
-    typedef binning_analysis_accumulator_type::result_type binning_analysis_result_type; 
+    typedef binning_analysis_accumulator_type::result_type binning_analysis_result_type;
     class_<binning_analysis_result_type>("binning_analysis_result", init<>())
     	ALPS_ACCUMULATOR_COMMON(binning_analysis_result_type)
 
@@ -377,19 +388,27 @@ BOOST_PYTHON_MODULE(pyngsaccumulator_c) {
         .def("error", &binning_analysis_accumulator_type::error)
 
         ALPS_RESULT_COMMON(binning_analysis_accumulator_type)
-    ;    
+    ;
 
+	typedef Accumulator<python_object, alps::accumulator::max_num_binning_tag, error_accumulator_type> max_num_binning_accumulator_type;
+    class_<max_num_binning_accumulator_type>("max_num_binning_accumulator", init<>())
+        .def("__call__", &alps::accumulator::python::magic_call<max_num_binning_accumulator_type>)
+        ALPS_ACCUMULATOR_COMMON(max_num_binning_accumulator_type)
+        .def("result", &alps::accumulator::python::result<max_num_binning_accumulator_type>)
 
-            // template<typename T> struct observable_type
-            //     : public impl::Accumulator<T, max_num_binning_tag, impl::Accumulator<T, binning_analysis_tag, simple_observable_type<T> > >
-            // {
-            //     typedef typename impl::Accumulator<T, max_num_binning_tag, impl::Accumulator<T, binning_analysis_tag, typename simple_observable_type<T>::accumuator_type> > accumuator_type;
-            //     typedef typename impl::Result<T, max_num_binning_tag, impl::Result<T, binning_analysis_tag, typename simple_observable_type<T>::result_type> > result_type;
-            //     observable_type(): base_type() {}
-            //     template<typename A> observable_type(A const & arg): base_type(arg) {}
-            //     private:
-            //         typedef impl::Accumulator<T, max_num_binning_tag, impl::Accumulator<T, binning_analysis_tag, simple_observable_type<T> > > base_type;
-            // };
+        .def("count", &max_num_binning_accumulator_type::count)
+        .def("mean", &max_num_binning_accumulator_type::mean)
+        .def("error", &max_num_binning_accumulator_type::error)
+    ;
 
+    typedef max_num_binning_accumulator_type::result_type max_num_binning_result_type;
+    class_<max_num_binning_result_type>("max_num_binning_result", init<>())
+    	ALPS_ACCUMULATOR_COMMON(max_num_binning_result_type)
 
+        .def("count", &max_num_binning_accumulator_type::count)
+        .def("mean", &max_num_binning_accumulator_type::mean)
+        .def("error", &max_num_binning_accumulator_type::error)
+
+        ALPS_RESULT_COMMON_OPERATORS(max_num_binning_accumulator_type)
+    ;
 }
