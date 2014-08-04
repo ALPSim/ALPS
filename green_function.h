@@ -141,11 +141,11 @@ private:
   const unsigned int nf_; ///number of flavors
   const unsigned int ntnsns_; ///nt*ns*ns
   const unsigned int ntns_; ///nt*ns
-  //Header string for Greens function files, labels the columns of the file with momentum or coordinates
-  std::string header_;
   // the actual values and errors.
   T *val_;
   const shape_t shape_;
+  //Header string for Greens function files, labels the columns of the file with momentum or coordinates
+  std::string header_;
 };
 typedef green_function<std::complex<double> > matsubara_green_function_t;
 typedef green_function<double> itime_green_function_t;
