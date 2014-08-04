@@ -351,7 +351,7 @@ namespace alps {
 
                     template<typename A> Result(A const & acc)
                         : B(acc)
-                        , m_ac_autocorrelation(autocorrelation_impl(acc))
+                        , m_ac_autocorrelation(detail::autocorrelation_impl(acc))
                     {}
 
                     autocorrelation_type const autocorrelation() const {
