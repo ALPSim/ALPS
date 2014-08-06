@@ -67,9 +67,10 @@ private:
 };
 
 ClusterHelper::ClusterHelper(const alps::params& params) :
-n_cluster_sites_(boost::lexical_cast<int>(params["SITES"])), epsilon_(1e-9),
-lattice_momenta_file_name_(params["LATTICE_MOMENTA_FILE"]|"LatticeMomenta"),
-paramagnet_(params["PARAMAGNET"])
+n_cluster_sites_(boost::lexical_cast<int>(params["SITES"])),
+paramagnet_(params["PARAMAGNET"]),
+epsilon_(1e-9),
+lattice_momenta_file_name_(params["LATTICE_MOMENTA_FILE"]|"LatticeMomenta")
 {
   graph_=new alps_graph(params);
   //std::cout<<"in clusterhelper constructor."<<std::endl;

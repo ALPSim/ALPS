@@ -47,19 +47,19 @@ ImpuritySolver::matsubara_result_type ExternalSolver::solve_matsubara(
                                                                  const matsubara_green_function_t& G0_omega
                                                                  , alps::params p, ClusterTransformer *c_ptr)
 {
-  std::string infile;
-  std::string outfile;
+  std::stringstream infile_str;
+  std::stringstream outfile_str;
   if(p.defined("TMPNAME")){
-    infile=p["TMPNAME"]+std::string(".in.h5");
-    outfile=p["TMPNAME"]+std::string(".out.h5");
+    infile_str<<p["TMPNAME"]<<".in.h5";
+    outfile_str<<p["TMPNAME"]<<".out.h5";
   } else{
-    infile= alps::temporary_filename("alps_external_solver_in_");
-    outfile= alps::temporary_filename("alps_external_solver_out_");
+    infile_str<<alps::temporary_filename("alps_external_solver_in_");
+    outfile_str<<alps::temporary_filename("alps_external_solver_out_");
   }
-  p["INFILE"]=infile;
-  p["OUTFILE"]=outfile;
+  p["INFILE"]=infile_str.str();
+  p["OUTFILE"]=outfile_str.str();
   {
-    alps::hdf5::archive solver_input(infile, alps::hdf5::archive::WRITE);
+    alps::hdf5::archive solver_input(infile_str.str(), alps::hdf5::archive::WRITE);
     solver_input<<alps::make_pvp("/parameters", p);
     G0_omega.write_hdf5(solver_input, "/G0");
     
@@ -69,7 +69,7 @@ ImpuritySolver::matsubara_result_type ExternalSolver::solve_matsubara(
     }
   }
   
-  call(infile,outfile);
+  call(infile_str.str(),outfile_str.str());
   
   
   unsigned int n_matsubara=p["NMATSUBARA"];
@@ -79,8 +79,8 @@ ImpuritySolver::matsubara_result_type ExternalSolver::solve_matsubara(
   matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital, G0_omega.shape());
   itime_green_function_t G_tau(n_tau+1, n_site, n_orbital, G0_omega.shape());
   {
-    std::cout<<"reading outfile: "<<outfile<<std::endl;
-    alps::hdf5::archive ar(outfile, alps::hdf5::archive::READ);
+    std::cout<<"reading outfile: "<<outfile_str.str()<<std::endl;
+    alps::hdf5::archive ar(outfile_str.str(), alps::hdf5::archive::READ);
     G_omega.read_hdf5(ar, "/G_omega");
     G_tau.read_hdf5(ar, "/G_tau");
   }
@@ -105,7 +105,7 @@ ImpuritySolver::matsubara_result_type ExternalSolver::solve_matsubara(
       }
     }
   }
-  boost::filesystem::remove(boost::filesystem::system_complete(outfile));
+  boost::filesystem::remove(boost::filesystem::system_complete(outfile_str.str()));
   return std::make_pair(G_omega, G_tau);
 }
 

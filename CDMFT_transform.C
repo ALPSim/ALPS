@@ -127,8 +127,8 @@ t2_(params["t'"]|0.),
 t3_(params["t3"]|0.),
 t4_(params["t4"]|0.),
 bandwidth_(params["W"]|0.),
-bandwidth_scale_factor_(1.),
 L_(params["L"]),
+bandwidth_scale_factor_(1.),
 half_filling_(0.),
 dispersion_moments_(2, 0.)
 {
