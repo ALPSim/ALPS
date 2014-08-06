@@ -170,7 +170,7 @@ private:
   
   //in nambu case: <double> very different from <complex<double> > -> no template
   nambu_green_function<std::complex<double> > spin_symmetrizer(const nambu_green_function<std::complex<double> >& G, const bool paramagnet) const;
-  nambu_green_function<double> spin_symmetrizer(const nambu_green_function<double>& G, const bool paramagnet)const {std::cout<<"not implemented for obsevaluators. "<<std::endl;}
+  nambu_green_function<double> spin_symmetrizer(const nambu_green_function<double>& G, const bool paramagnet)const {throw std::logic_error("not implemented for obsevaluators. ");}
   
   matsubara_green_function_t fourpoint_green_function_inverse(const matsubara_green_function_t& G, const unsigned int nt) const;
   template<typename T>

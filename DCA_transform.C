@@ -72,7 +72,8 @@ ClusterTransformer* ClusterTransformer::generate_transformer(const alps::params&
       std::cout<<"using CDMFT transformer"<<std::endl;
       if(static_cast<int>(parms["SITES"])!=4) throw std::runtime_error("only four-site CDMFT is implemented so far.");
       trans_ptr=new LadderCDMFTTransformer(parms);
-  }
+  }else
+    throw std::logic_error("transformer pointer could not be initalized: unknown cluster loop.");
   return trans_ptr;
 }
 
