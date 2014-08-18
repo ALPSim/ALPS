@@ -108,22 +108,46 @@ endif(BUILD_BOOST_REGEX)
 # Boost.Serialization
 if(BUILD_BOOST_SERIALIZATION)
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/serialization/src")
-  set(SOURCES archive_exception.cpp basic_archive.cpp
-      basic_iarchive.cpp basic_iserializer.cpp basic_oarchive.cpp
-      basic_oserializer.cpp basic_pointer_iserializer.cpp
-      basic_pointer_oserializer.cpp basic_serializer_map.cpp
-      basic_text_iprimitive.cpp basic_text_oprimitive.cpp
-      basic_text_wiprimitive.cpp basic_text_woprimitive.cpp
-      basic_xml_archive.cpp binary_iarchive.cpp binary_oarchive.cpp
-      binary_wiarchive.cpp binary_woarchive.cpp codecvt_null.cpp
-      extended_type_info.cpp extended_type_info_no_rtti.cpp
-      extended_type_info_typeid.cpp polymorphic_iarchive.cpp
-      polymorphic_oarchive.cpp shared_ptr_helper.cpp stl_port.cpp
-      text_iarchive.cpp text_oarchive.cpp text_wiarchive.cpp
-      text_woarchive.cpp utf8_codecvt_facet.cpp void_cast.cpp
-      xml_archive_exception.cpp xml_grammar.cpp xml_iarchive.cpp
-      xml_oarchive.cpp xml_wgrammar.cpp xml_wiarchive.cpp
-      xml_woarchive.cpp)
+  if(Boost_MAJOR_VERSION LESS 1 OR Boost_MINOR_VERSION LESS 56)
+    set(SOURCES archive_exception.cpp basic_archive.cpp
+        basic_iarchive.cpp basic_iserializer.cpp basic_oarchive.cpp
+        basic_oserializer.cpp basic_pointer_iserializer.cpp
+        basic_pointer_oserializer.cpp basic_serializer_map.cpp
+        basic_text_iprimitive.cpp basic_text_oprimitive.cpp
+        basic_text_wiprimitive.cpp basic_text_woprimitive.cpp
+        basic_xml_archive.cpp binary_iarchive.cpp binary_oarchive.cpp
+        binary_wiarchive.cpp binary_woarchive.cpp codecvt_null.cpp
+        extended_type_info.cpp extended_type_info_no_rtti.cpp
+        extended_type_info_typeid.cpp polymorphic_iarchive.cpp
+        polymorphic_oarchive.cpp shared_ptr_helper.cpp stl_port.cpp
+        text_iarchive.cpp text_oarchive.cpp text_wiarchive.cpp
+        text_woarchive.cpp utf8_codecvt_facet.cpp void_cast.cpp
+        xml_archive_exception.cpp xml_grammar.cpp xml_iarchive.cpp
+        xml_oarchive.cpp xml_wgrammar.cpp xml_wiarchive.cpp
+        xml_woarchive.cpp)
+  else()
+    set(SOURCES basic_archive.cpp basic_iarchive.cpp basic_iserializer.cpp 
+    basic_oarchive.cpp basic_oserializer.cpp basic_pointer_iserializer.cpp 
+    basic_pointer_oserializer.cpp basic_serializer_map.cpp 
+    basic_text_iprimitive.cpp basic_text_oprimitive.cpp basic_xml_archive.cpp 
+    binary_iarchive.cpp binary_oarchive.cpp extended_type_info.cpp 
+    extended_type_info_typeid.cpp extended_type_info_no_rtti.cpp 
+    polymorphic_iarchive.cpp polymorphic_oarchive.cpp stl_port.cpp 
+    text_iarchive.cpp text_oarchive.cpp void_cast.cpp archive_exception.cpp 
+    xml_grammar.cpp xml_iarchive.cpp xml_oarchive.cpp xml_archive_exception.cpp
+# somehow wchar creates duplicate symbols
+#     basic_text_wiprimitive.cpp
+#     basic_text_woprimitive.cpp
+#     text_wiarchive.cpp
+#     text_woarchive.cpp
+#     utf8_codecvt_facet.cpp
+#     xml_wgrammar.cpp
+#     xml_wiarchive.cpp
+#     xml_woarchive.cpp
+#     codecvt_null.cpp
+    )
+  endif()
+
   foreach(S ${SOURCES})
     if(EXISTS ${DIRECTORY}/${S})
       set(BOOST_SOURCES ${BOOST_SOURCES} ${DIRECTORY}/${S})
