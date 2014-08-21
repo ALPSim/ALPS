@@ -1,0 +1,112 @@
+//! \dir framework/dmrg/block_matrix                                        \brief block matrix class (matrices with quantum numbers)
+//! \file framework/dmrg/block_matrix/block_matrix.h                        \brief declaration of block_matrix class
+//! \file framework/dmrg/block_matrix/block_matrix.hpp                      \brief definition of block_matrix class
+//! \file framework/dmrg/block_matrix/block_matrix_algorithms.h             \brief algorithms for block_matrix (gemm, svd, etc.)
+//! \file framework/dmrg/block_matrix/indexing.h                            \brief include one of the Index class definitions
+//! \file framework/dmrg/block_matrix/indexing_sorted.hpp                   \brief definition of Index class (not used)
+//! \file framework/dmrg/block_matrix/indexing_stable.hpp                   \brief definition of Index class
+//! \file framework/dmrg/block_matrix/indexing_unsorted.hpp                 \brief definition of Index class (not used)
+//! \dir framework/dmrg/block_matrix/symmetry                               \brief definition of symemtries (to be used as SymmGroup template argument)
+//! \file framework/dmrg/block_matrix/symmetry.cpp                          \brief definitions of symbols needed for SymmGroup
+//! \file framework/dmrg/block_matrix/symmetry.h                            \brief include all symmetry definitions
+
+
+//! \dir framework/dmrg/evolve                                              \brief time evolution routines
+//! \file framework/dmrg/evolve/te_utils.hpp                                \brief utilities for the preparation of time evolution operators
+//! \file framework/dmrg/evolve/tevol_mpo_sim.h                             \brief MPO-Evolver
+//! \file framework/dmrg/evolve/tevol_nn_sim.h                              \brief nearest-neighbors Evolver
+
+
+//! \dir framework/dmrg/models                                              \brief Model and Lattice definition
+//! \dir framework/dmrg/models/alps                                         \brief implementation of Model and Lattice based in the ALPS libraries
+//! \dir framework/dmrg/models/coded                                        \brief implementation of Model and Lattice for special models
+//! \dir framework/dmrg/models/factory                                      \brief definition of factory to parse the model parameters
+//! \dir framework/dmrg/models/generate_mpo                                 \brief generate an MPO object from the model description
+//! \file framework/dmrg/models/generate_mpo.hpp                            \brief include all MPO generator
+//! \file framework/dmrg/models/lattice.h                                   \brief definition of Lattice base class
+//! \file framework/dmrg/models/meas_prepare.hpp                            \brief functions to prepare MPO objects needed in measurements
+//! \file framework/dmrg/models/measurement.h                               \brief definition of Measurement base class
+//! \dir framework/dmrg/models/measurements                                 \brief implementation of different kind of measurements
+//! \file framework/dmrg/models/measurements.h                              \brief include all Measurements
+//! \file framework/dmrg/models/model.h                                     \brief definition of Model base class
+//! \file framework/dmrg/models/op_handler.h                                \brief declaration of OPTable, TagHandler and KronHandler
+//! \file framework/dmrg/models/op_handler.hpp                              \brief definition of OPTable, TagHandler and KronHandler
+//! \file framework/dmrg/models/tag_detail.h                                \brief implementation of tags to indentify operator matrices
+//! \file framework/dmrg/models/term_descriptor.h                           \brief definition term_descriptor, the description of terms in the Hamiltonian
+
+
+//! \dir framework/dmrg/mp_tensors                                          \brief implementation of MPS and MPO classes
+//! \file framework/dmrg/mp_tensors/basis_sector_iterators.h                \brief iterators through all allowed sectors in the system
+//! \file framework/dmrg/mp_tensors/boundary.h                              \brief definition of Boundary object
+//! \file framework/dmrg/mp_tensors/coherent_init.h                         \brief create a coherent MPS
+//! \file framework/dmrg/mp_tensors/compression.h                           \brief functions to compress the MPS
+//! \file framework/dmrg/mp_tensors/contractions.h                          \brief functions to contract tensor network states
+//! \file framework/dmrg/mp_tensors/dm_op_kron.h                            \brief krom() product for density matrix MPS
+//! \file framework/dmrg/mp_tensors/identity_mps.h                          \brief create idensity MPS
+//! \file framework/dmrg/mp_tensors/joins.hpp                               \brief functions for joining two MPS : |psi1> + |psi2>
+//! \file framework/dmrg/mp_tensors/mpo.h                                   \brief definition of MPO class (vector of MPOTensor)
+//! \file framework/dmrg/mp_tensors/mpo_contractor_ss.h                     \brief iterative contraction of MPS * MPO tensor network
+//! \file framework/dmrg/mp_tensors/mpo_manip.h                             \brief functions to manipulate MPOs
+//! \file framework/dmrg/mp_tensors/mpo_ops.h                               \brief utility functions for the MPO
+//! \file framework/dmrg/mp_tensors/mpotensor.h                             \brief declaration of MPOTensor object
+//! \file framework/dmrg/mp_tensors/mpotensor.hpp                           \brief definition of MPOTensor object
+//! \file framework/dmrg/mp_tensors/mpotensor_manip.h                       \brief functions to manipulate MPOTensors
+//! \file framework/dmrg/mp_tensors/mps.h                                   \brief declaration of the MPS class (vector of MPSTensor)
+//! \file framework/dmrg/mp_tensors/mps.hpp                                 \brief definition of the MPS object 
+//! \file framework/dmrg/mp_tensors/mps_initializers.h                      \brief functions to initialize the MPS
+//! \file framework/dmrg/mp_tensors/mps_mpo_ops.h                           \brief functions to operate on MPS and MPO (compute expectation values, etc.)
+//! \file framework/dmrg/mp_tensors/mps_sectors.h                           \brief initialize all allowed quantum number sectors in the MPS
+//! \file framework/dmrg/mp_tensors/mpstensor.h                             \brief declaration of the MPSTensor class
+//! \file framework/dmrg/mp_tensors/mpstensor.hpp                           \brief definition of the MPSTensor class
+//! \file framework/dmrg/mp_tensors/reshapes.h                              \brief functions to reshape the representation of data in MPSTensor
+//! \file framework/dmrg/mp_tensors/state_mps.h                             \brief convert a basis state into MPS
+//! \file framework/dmrg/mp_tensors/ts_ops.h                                \brief functions to operate on TwoSiteTensor
+//! \file framework/dmrg/mp_tensors/ts_reshape.h                            \brief functions to reshape the representation of data in TwoSiteTensor
+//! \file framework/dmrg/mp_tensors/twositetensor.h                         \brief declaration of the TwoSiteTensor class
+//! \file framework/dmrg/mp_tensors/twositetensor.hpp                       \brief definition of the TwoSiteTensor class
+
+
+//! \dir framework/dmrg/optimize                                            \brief routines for energy minimization
+//! \file framework/dmrg/optimize/ietl_jacobi_davidson.h                    \brief call IETL Jacobi-Davidson solver
+//! \file framework/dmrg/optimize/ietl_lanczos_solver.h                     \brief call IETL Lanczos solver
+//! \file framework/dmrg/optimize/optimize.h                                \brief optimization base class
+//! \file framework/dmrg/optimize/ss_optimize.hpp                           \brief optimization class for single-site algorithm
+//! \file framework/dmrg/optimize/ts_optimize.hpp                           \brief optimization class for two-site algorithm
+
+
+//! \dir framework/dmrg/sim                                                 \brief simulation base class
+//! \file framework/dmrg/sim/matrix_types.h                                 \brief definition of matrix types used for compiling the spezialized functions
+//! \file framework/dmrg/sim/sim.h                                          \brief declaration of simulation class
+//! \file framework/dmrg/sim/sim.hpp                                        \brief definition of simulation class
+//! \file framework/dmrg/sim/symmetry_factory.h                             \brief symmetry factory: runtime dispatch for SymmGroup template argument
+
+
+//! \dir framework/dmrg/utils                                               \brief utilities (disk storage, parsing of input parameters, etc.)
+
+//! \file libpscan/options.cpp                                              \brief program options parser for parameter scans scheduler
+//! \file libpscan/options.hpp                                              \brief program options parser for parameter scans scheduler
+//! \file libpscan/run_sim.hpp                                              \brief run one parameter set
+//! \file libpscan/scheduler.cpp                                            \brief parameter scans scheduler
+//! \file libpscan/scheduler.hpp                                            \brief parameter scans scheduler
+
+//! \file mps_eigenstate_sims/CMakeLists.txt
+//! \file mps_eigenstate_sims/dmrg_sim.hpp                                  \brief simulation class for ground state optimization
+//! \file mps_eigenstate_sims/mps_meas.cpp                                  \brief main function of mps_meas
+//! \file mps_eigenstate_sims/mps_optim.cpp                                 \brief main function of mps_optim
+//! \file mps_eigenstate_sims/run_eigenstate_sim.hpp                        \brief compute requested eigenstates and perform measurements
+//! \file mps_eigenstate_sims/run_measure.cpp                               \brief implementation of libpscan/run_sim.hpp for mps_meas
+//! \file mps_eigenstate_sims/run_optim.cpp                                 \brief implementation of libpscan/run_sim.hpp for mps_optim
+//! \file mps_eigenstate_sims/simulation.hpp                                \brief wrapper of `eigenstate_sim` for symmetry factory
+//! \file mps_eigenstate_sims/simulation.ipp                                \brief wrapper of `eigenstate_sim` for symmetry factory
+//! \file mps_eigenstate_sims/simulation_symm/simulation_tpl.cpp.in         \brief template specialization of `simulation`, specialized for each available symmetry group
+
+//! \file mps_evolve/CMakeLists.txt
+//! \file mps_evolve/main.cpp                                               \brief main function of mps_evolve
+//! \file mps_evolve/run_sim.cpp                                            \brief implementation of libpscan/run_sim.hpp for mps_evolve
+//! \file mps_evolve/simulation.hpp                                         \brief wrapper of `tevol_sim` for symmetry factory
+//! \file mps_evolve/simulation.ipp                                         \brief wrapper of `tevol_sim` for symmetry factory
+//! \file mps_evolve/simulation_symm/simulation_tpl.cpp.in                  \brief template specialization of `simulation`
+//! \file mps_evolve/tevol_sim.hpp                                          \brief simulation class for time evolution simulation
+
+//! \file mps_overlap/main.cpp                                              \brief main function of mps_overlap
+
