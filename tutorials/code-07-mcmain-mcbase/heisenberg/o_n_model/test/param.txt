@@ -1,0 +1,6 @@
+LATTICE_LIBRARY="/opt/alps/lib/xml/lattices.xml"
+LATTICE="simple cubic lattice"
+L=10
+THERMALIZATION=1000
+SWEEPS=100000
+T=2
