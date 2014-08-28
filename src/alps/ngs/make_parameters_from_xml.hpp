@@ -25,8 +25,8 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_NGS_MADE_DEPRECATED_PARAMETERS_HPP
-#define ALPS_NGS_MADE_DEPRECATED_PARAMETERS_HPP
+#ifndef ALPS_NGS_MAKE_PARAMETERS_FROM_XML_HPP
+#define ALPS_NGS_MAKE_PARAMETERS_FROM_XML_HPP
 
 #include <alps/ngs/params.hpp>
 
