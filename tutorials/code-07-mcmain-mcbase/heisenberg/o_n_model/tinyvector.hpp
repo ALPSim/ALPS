@@ -14,9 +14,9 @@
 #include <iostream>
 
 template <int N>
-class spintype {
+class tinyvector {
     public:
-        inline const double & operator[](int i) const { return _data[i]; };
+        inline const double operator[](int i) const { return _data[i]; };
         inline double & operator[](int i) { return _data[i]; };
         void initialize(double init) {
             for(int i = 0; i < N; ++i)
@@ -33,72 +33,72 @@ class spintype {
 };
 
 template <int N>
-const spintype<N> & operator+=(spintype<N> &left, const spintype<N> &right) {
+inline const tinyvector<N> & operator+=(tinyvector<N> &left, const tinyvector<N> &right) {
     for(int i = 0; i < N; ++i)
         left[i] += right[i];
     return left;
 }
 
 template <int N>
-const spintype<N> & operator-=(spintype<N> &left, const spintype<N> &right) {
+inline const tinyvector<N> & operator-=(tinyvector<N> &left, const tinyvector<N> &right) {
     for(int i = 0; i < N; ++i)
         left[i] -= right[i];
     return left;
 }
 
 template <int N>
-const spintype<N> & operator*=(spintype<N> &left, double right) {
+inline const tinyvector<N> & operator*=(tinyvector<N> &left, double right) {
     for(int i = 0; i < N; ++i)
         left[i] *= right;
     return left;
 }
 
 template <int N>
-const spintype<N> & operator/=(spintype<N> &left, double right) {
+inline const tinyvector<N> & operator/=(tinyvector<N> &left, double right) {
     for(int i = 0; i < N; ++i)
         left[i] /= right;
     return left;
 }
 
 template <int N>
-const spintype<N> operator+(const spintype<N> &left, const spintype<N> &right) {
-    spintype<N> result(left);
+inline const tinyvector<N> operator+(const tinyvector<N> &left, const tinyvector<N> &right) {
+    tinyvector<N> result(left);
     return result += right;
 }
 
 template <int N>
-const spintype<N> operator-(const spintype<N> &left, const spintype<N> &right) {
-    spintype<N> result(left);
+inline const tinyvector<N> operator-(const tinyvector<N> &left, const tinyvector<N> &right) {
+    tinyvector<N> result(left);
     return result -= right;
 }
 
 template <int N>
-const spintype<N> operator-(const spintype<N> &spin) {
-    spintype<N> result;
+inline const tinyvector<N> operator-(const tinyvector<N> &spin) {
+    tinyvector<N> result;
     for(int i = 0; i < N; ++i)
         result[i] = - spin[i];
     return result;
 }
 
 template <int N>
-const spintype<N> operator*(const spintype<N> &left, double right) {
-    spintype<N> result(left);
+inline const tinyvector<N> operator*(const tinyvector<N> &left, double right) {
+    tinyvector<N> result(left);
     return result *= right;
 }
 
 template <int N>
-const spintype<N> operator*(double left, const spintype<N> &right) {
+inline const tinyvector<N> operator*(double left, const tinyvector<N> &right) {
     return right * left;
 }
 
 template <int N>
-const spintype<N> operator/(const spintype<N> &left, double right) {
-    spintype<N> result(left);
+inline const tinyvector<N> operator/(const tinyvector<N> &left, double right) {
+    tinyvector<N> result(left);
     return result /= right;
 }
 
 template <int N>
-double dot(const spintype<N> &left, const spintype<N> &right) {
+double dot(const tinyvector<N> &left, const tinyvector<N> &right) {
     double result = 0.;
     for(int i = 0; i < N; ++i)
         result += left[i] * right[i];
@@ -106,12 +106,12 @@ double dot(const spintype<N> &left, const spintype<N> &right) {
 }
 
 template <int N>
-double abs(const spintype<N> &spin) {
+double abs(const tinyvector<N> &spin) {
    return std::sqrt(dot(spin, spin));
 }
 
 template <int N>
-std::ostream& operator<<(std::ostream& os, const spintype<N>& spin)
+std::ostream& operator<<(std::ostream& os, const tinyvector<N>& spin)
 {
     os << "[ ";
     for(int i = 0; i < N; ++i)
@@ -121,7 +121,7 @@ std::ostream& operator<<(std::ostream& os, const spintype<N>& spin)
 }
 
 template <int N>
-const std::vector<double> vector_from_spintype(const spintype<N> &spin) {
+inline const std::vector<double> vector_from_tinyvector(const tinyvector<N> &spin) {
     std::vector<double> result;
     for(int i = 0; i < N; ++i)
         result.push_back(spin[i]);
@@ -129,8 +129,8 @@ const std::vector<double> vector_from_spintype(const spintype<N> &spin) {
 }
 
 template <int N>
-const spintype<N> spin_from_vector(const std::vector<double> &vec) {
-    spintype<N> result;
+inline const tinyvector<N> spin_from_vector(const std::vector<double> &vec) {
+    tinyvector<N> result;
     for(int i = 0; i < N; ++i)
         result[i] = vec[i];
     return result;

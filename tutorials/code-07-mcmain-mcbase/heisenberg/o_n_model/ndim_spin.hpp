@@ -5,7 +5,7 @@
 #ifndef HEISENBERG_HPP
 #define HEISENBERG_HPP
 
-#include "spintype.hpp"
+#include "tinyvector.hpp"
 
 #include <alps/mcbase.hpp>
 #include <alps/ngs/numeric.hpp>
@@ -29,7 +29,7 @@ template <int N>
 class ALPS_DECL ndim_spin_sim : public alps::mcbase {
 
     public:
-        typedef spintype<N> spintype;
+        typedef tinyvector<N> spintype;
         ndim_spin_sim(parameters_type const & parms, std::size_t seed_offset = 0);
 
         virtual void update();
@@ -130,13 +130,13 @@ void ndim_spin_sim<N>::measure() {
         using alps::ngs::numeric::operator/;
         ten /= lattice.num_sites();
         tmag /= lattice.num_sites();
-        double tmag_sq_avg = tmag_sq / lattice.num_sites();
+        double tmag_sq_avg = tmag_sq / (lattice.num_sites() * lattice.num_sites());
         double tmag_avg_sq = dot(tmag, tmag);
         measurements["Energy"] << ten;
-        measurements["Magnetization"] << vector_from_spintype(tmag);
+        measurements["Magnetization"] << vector_from_tinyvector(tmag);
         measurements["Magnetization^2"] << dot(tmag, tmag);
         measurements["Magnetization^4"] << dot(tmag, tmag) * dot(tmag, tmag);
-        measurements["Magnetic Susceptibility"] << beta * (tmag_sq_avg - tmag_avg_sq * lattice.num_sites());
+        measurements["Magnetic Susceptibility"] << beta * (tmag_sq_avg - tmag_avg_sq);
     }
 }
 
