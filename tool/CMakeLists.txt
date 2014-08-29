@@ -26,10 +26,10 @@ if (NOT Boost_FOUND AND ALPS_BUILD_DOC)
     set (FILES actions.cpp actions_class.cpp block_element_grammar.cpp
                block_grammar.cpp code_snippet.cpp collector.cpp 
                dependency_tracker.cpp
-               doc_info_actions.cpp doc_info_grammar.cpp files.cpp
-               grammar.cpp id_generation.cpp id_manager.cpp id_xml.cpp input_path.cpp 
-               main_grammar.cpp 
-               markups.cpp phrase_element_grammar.cpp phrase_grammar.cpp 
+               doc_info_actions.cpp doc_info_grammar.cpp document_state.cpp files.cpp
+               glob.cpp grammar.cpp id_generation.cpp id_manager.cpp id_xml.cpp input_path.cpp 
+               include_paths.cpp main_grammar.cpp 
+               markups.cpp native_text.cpp phrase_element_grammar.cpp phrase_grammar.cpp 
                post_process.cpp quickbook.cpp state.cpp string_ref.cpp 
                syntax_highlight.cpp template_stack.cpp utils.cpp values.cpp)
     foreach(S ${FILES})
