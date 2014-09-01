@@ -184,6 +184,26 @@ BOOST_AUTO_TEST_CASE(ngs_alea_compare) {
 			BOOST_REQUIRE_SMALL((add_scalar_new.mean<double>() - add_scalar_old.mean()) / add_scalar_old.mean(), 1e-3);
 			BOOST_REQUIRE_SMALL((add_scalar_new.error<double>() - add_scalar_old.error()) / add_scalar_old.error(), 1e-3);
 		}
+
+		{
+			alps::hdf5::archive ar("test.h5", "w");
+			result_set results(accumulators);
+			ar["/results"] << results;
+			ar["/accumulators"] << accumulators;
+		}
+
+		{
+			alps::hdf5::archive ar("test.h5", "r");
+			result_set results2;
+			accumulator_set accumulators2;
+			ar["/results"] >> results2;
+			ar["/accumulators"] >> accumulators2;
+
+			BOOST_REQUIRE(count(accumulators2["Scalar"]) == 1000001);
+			BOOST_REQUIRE_SMALL((results["Scalar"].mean<double>() - results2["Scalar"].mean<double>()) / results["Scalar"].mean<double>(), 1e-3);
+			BOOST_REQUIRE_SMALL((results["Scalar"].error<double>() - results2["Scalar"].error<double>()) / results["Scalar"].error<double>(), 1e-3);
+		}
+
 	}
 
 }

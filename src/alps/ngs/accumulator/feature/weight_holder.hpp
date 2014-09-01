@@ -99,13 +99,11 @@ namespace alps {
                         m_weight->print(os);
                     }
 
-                    // TODO: implement!
                     void save(hdf5::archive & ar) const {
                         B::save(ar);
                         ar["weight/value"] = *weight();
                     }
 
-                    // TODO: implement!
                     void load(hdf5::archive & ar) { // TODO: make archive const
                         B::load(ar);
                         ar["weight/value"] >> *m_weight;

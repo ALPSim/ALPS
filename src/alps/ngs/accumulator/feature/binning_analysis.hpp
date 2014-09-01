@@ -41,6 +41,9 @@
 
 #include <alps/alea/convergence.hpp>
 #include <alps/numeric/set_negative_0.hpp>
+// TODO: make nicer way to use this
+#include <alps/type_traits/slice.hpp>
+#include <alps/type_traits/change_value_type.hpp>
 
 #include <boost/mpl/if.hpp>
 #include <boost/utility.hpp>
@@ -59,6 +62,10 @@ namespace alps {
         template<typename T> struct autocorrelation_type
             : public boost::mpl::if_<boost::is_integral<typename value_type<T>::type>, double, typename value_type<T>::type>
         {};
+
+        template<typename T> struct convergence_type {
+            typedef typename change_value_type<typename value_type<T>::type, int>::type type;
+        };
 
         template<typename T> struct has_feature<T, binning_analysis_tag> {
             template<typename R, typename C> static char helper(R(C::*)() const);
@@ -120,34 +127,32 @@ namespace alps {
                         , m_ac_count()
                     {}                    
 
-                    error_convergence converged_errors() const {
-                        error_convergence conv = MAYBE_CONVERGED;
-                        // TODO: implement!
-                        // typename alps::accumulator::mean_type<B>::type err = error();
-                        // resize_same_as(conv,err);
-                        // const unsigned int range = 4;
-                        // typename slice_index<convergence_type>::type it;
-                        // if (binning_depth()<range) {
-                        //     for (it= slices(conv).first; it!= slices(conv).second; ++it)
-                        //         slice_value(conv,it) = MAYBE_CONVERGED;
-                        // }
-                        // else {
-                        //     for (it= slices(conv).first; it!= slices(conv).second; ++it)
-                        //         slice_value(conv,it) = CONVERGED;
+                    typename alps::accumulator::convergence_type<B>::type converged_errors() const {
+                        typedef typename alps::hdf5::scalar_type<typename convergence_type<T>::type>::type convergence_scalar_type;
 
-                        //     for (unsigned int i=binning_depth()-range;i<binning_depth()-1;++i) {
-                        //         result_type this_err(error(i));
-                        //         for (it= slices(conv).first; it!= slices(conv).second; ++it)
-                        //             if (std::abs(slice_value(this_err,it)) >= std::abs(slice_value(err,it)))
-                        //                 slice_value(conv,it)=CONVERGED;
-                        //             else if (std::abs(slice_value(this_err,it)) < 0.824 * std::abs(slice_value(err,it)))
-                        //                 slice_value(conv,it)=NOT_CONVERGED;
-                        //             else if (std::abs(slice_value(this_err,it)) <0.9* std::abs(slice_value(err,it))  &&
-                        //                 slice_value(conv,it)!=NOT_CONVERGED)
-                        //             slice_value(conv,it)=MAYBE_CONVERGED;
-                        //     }
-                        // }
-                        // return conv;
+                        typename alps::accumulator::convergence_type<B>::type conv;
+                        typename alps::accumulator::error_type<B>::type err = error();
+                        check_size(conv, err);
+                        const unsigned int range = 4;
+                        const unsigned int depth = (m_ac_sum2.size() < 8 ? 1 : m_ac_sum2.size() - 7);
+                        if (depth < range)
+                            conv = 0 * conv + (convergence_scalar_type)MAYBE_CONVERGED;
+                        else {
+                            conv = 0 * conv + (convergence_scalar_type)CONVERGED;
+                            // TODO: how to we iterate over the datatype?
+                            for (unsigned int i = depth - range; i < depth - 1; ++i) {
+                                typename slice_index<typename alps::accumulator::convergence_type<B>::type>::type it;
+                                result_type this_err(error(i));
+                                for (it = slices(conv).first; it != slices(conv).second; ++it)
+                                    if (std::abs(slice_value(this_err, it)) >= std::abs(slice_value(err,it)))
+                                        slice_value(conv,it) = CONVERGED;
+                                    else if (std::abs(slice_value(this_err, it)) < 0.824 * std::abs(slice_value(err,it)))
+                                        slice_value(conv,it) = NOT_CONVERGED;
+                                    else if (std::abs(slice_value(this_err, it)) < 0.9 * std::abs(slice_value(err,it)) && slice_value(conv, it) != NOT_CONVERGED)
+                                        slice_value(conv,it) = MAYBE_CONVERGED;
+                            }
+                        }
+                        return conv;
                     }
 
                     typename alps::accumulator::error_type<B>::type const error(std::size_t bin_level = std::numeric_limits<std::size_t>::max()) const {
@@ -163,7 +168,7 @@ namespace alps {
                         typedef typename alps::accumulator::error_type<B>::type error_type;
                         typedef typename alps::hdf5::scalar_type<error_type>::type error_scalar_type;
 
-                        // TODO: if not enoght bins are available, return infinity
+                        // if not enoght bins are available, return infinity
                         if (m_ac_sum2.size() < 2)
                             return alps::ngs::numeric::inf<error_type>();
 
@@ -189,7 +194,7 @@ namespace alps {
                         // TODO: make library for scalar type
                         typedef typename alps::hdf5::scalar_type<mean_type>::type mean_scalar_type;
 
-                        // TODO: if not enoght bins are available, return infinity
+                        // if not enoght bins are available, return infinity
                         if (m_ac_sum2.size() < 2)
                             return alps::ngs::numeric::inf<mean_type>();
 
