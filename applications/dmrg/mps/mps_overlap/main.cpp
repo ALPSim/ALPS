@@ -68,7 +68,8 @@ int main(int argc, char ** argv)
                   << "  copyright (c) 2010-2011 by Bela Bauer\n"
                   << "  copyright (c) 2011-2013 by Michele Dolfi\n"
                   << "  for details see the publication: \n"
-                  << "  M. Dolfi et al, in preparation\n"
+                  << "  M. Dolfi et al., Computer Physics Communications (2014).\n"
+                  << "                   doi: 10.1016/j.cpc.2014.08.019\n"
                   << std::endl;
         alps::print_copyright(std::cout);
         
