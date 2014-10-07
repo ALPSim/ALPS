@@ -167,7 +167,7 @@ protected:
 private:
   std::string rng_name() const { return parms.value_or_default("RNG","mt19937");}
   TaskInfo info;
-  int halted,started;
+  int started;
   std::string file_name1, file_name2;
 };
 
