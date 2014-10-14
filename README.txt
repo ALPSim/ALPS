@@ -84,6 +84,11 @@ citation requirement but acknowledgment of the ALPS project is encouraged.
    E. Gull, P. Werner, S. Fuchs, B. Surer, T. Pruschke, and M. Troyer,
    Computer Physics Communications 182, 1078 (2011). 
 
+* When the Matrix Product States applications mps_optim, mps_evolve, mps_meas or mps_overlap are used: 
+ -cite the publcations: 
+  B. Bauer et al., J. Stat. Mech. (2011) P05001. 
+  M. Dolfi, B. Bauer, S. Keller, et al., Computer Physics Communications 185, 3430 (2014).
+
   Copyright ALPS collaboration 2002 - 2010
   Distributed under the Boost Software License, Version 1.0.
       (See accompanying file LICENSE_1_0.txt or copy at
