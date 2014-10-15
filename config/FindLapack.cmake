@@ -296,22 +296,37 @@ ENDIF(HAVE_MKL)
 
 IF(NOT LAPACK_LIBRARY_INIT)
   IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    SET(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -framework vecLib")
-    SET(LAPACK_LIBRARY_INIT 1)
-    SET(MAC_VECLIB 1 CACHE BOOL "use Mac Framework")
-    SET(LAPACK_LIBRARY "")
-    MESSAGE(STATUS "Using Framework on Darwin.")
-
-    ## check goto library: does not work so well
-    #FIND_LIBRARY(BLAS_LIBRARY NAMES goto
-    #    PATHS 
-    #    $ENV{GOTOBLAS_HOME}
-    #    /usr/lib
-    #    /usr/local/lib
-    #    /sw/lib
-    #    )
-    SET(BLAS_LIBRARY "")
-    SET(BLAS_LIBRARY_INIT 1)
+    
+    set(BLAS_LAPACK_MAC_FRAMEWORK "")
+    # Checking if veclib works CMAKE_REQUIRED_FLAGS
+    set(CMAKE_REQUIRED_LIBRARIES "-framework vecLib")
+    check_function_exists("sgemm" _framework_veclib_works)
+    set(CMAKE_REQUIRED_LIBRARIES)
+    if(_framework_veclib_works)
+      set(BLAS_LAPACK_MAC_FRAMEWORK "vecLib")
+    endif(_framework_veclib_works)
+    
+    if(NOT BLAS_LAPACK_MAC_FRAMEWORK)
+      set(CMAKE_REQUIRED_LIBRARIES "-framework Accelerate")
+      check_function_exists("sgemm" _framework_accelerate_work)
+      set(CMAKE_REQUIRED_LIBRARIES)
+      if(_framework_accelerate_work)
+        set(BLAS_LAPACK_MAC_FRAMEWORK "Accelerate")
+      endif(_framework_accelerate_work)
+    endif(NOT BLAS_LAPACK_MAC_FRAMEWORK)
+    
+    if(BLAS_LAPACK_MAC_FRAMEWORK)
+      SET(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -framework ${BLAS_LAPACK_MAC_FRAMEWORK}")
+      SET(MAC_VECLIB 1 CACHE BOOL "use Mac Framework")
+      SET(LAPACK_LIBRARY_INIT 1)
+      SET(BLAS_LIBRARY_INIT 1)
+      SET(BLAS_LIBRARY "")
+      SET(LAPACK_LIBRARY "")
+      MESSAGE(STATUS "Using Framework '${BLAS_LAPACK_MAC_FRAMEWORK}' on Darwin.")
+    else()
+      MESSAGE(STATUS "Both VecLib and Accelerate failed.")
+    endif(BLAS_LAPACK_MAC_FRAMEWORK)
+    
   ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 ENDIF(NOT LAPACK_LIBRARY_INIT)
 
