@@ -48,13 +48,17 @@ class ALPS_DECL ndim_spin_sim : public alps::mcbase {
     private:
         
         int length;
+        int lattice_dim;
         int sweeps;
         int thermalization_sweeps;
         int total_sweeps;
+        double max_distance;
         double beta;
-        alps::uniform_on_sphere_n<N, double, std::vector<double> > random_spin_gen;
+        alps::uniform_on_sphere_n<N, double, spintype > random_spin_gen;
         alps::graph_helper<> lattice;
         std::vector<spintype> spins;
+        std::vector< std::vector< double > > distance_map;
+        std::vector<int> distance_count;
 };
 
 /* implementation */
@@ -73,9 +77,30 @@ ndim_spin_sim<N>::ndim_spin_sim(parameters_type const & parms, std::size_t seed_
 {
     /* initialize spins */
     alps::graph_helper<>::site_iterator site_it, site_end;
-    for(boost::tie(site_it, site_end) = lattice.sites(); site_it != site_end; ++site_it)
-    {
+    for(boost::tie(site_it, site_end) = lattice.sites(); site_it != site_end; ++site_it) {
         spins[*site_it] = random_spin();
+    }
+    using alps::ngs::numeric::operator-;
+    std::vector<double> vec;
+    for (int i = 0; i < lattice.num_sites(); ++i) {
+        std::vector<double> row(lattice.num_sites());
+        for (int j = 0; j < lattice.num_sites(); ++j) {
+            vec = lattice.coordinate(j) - lattice.coordinate(i);
+            double distance = 0;
+            for (int k = 0; k < vec.size(); ++k) {
+                distance += vec[k] * vec[k];
+            }
+            row[j] = std::sqrt(distance);
+        }
+        distance_map.push_back(row);
+    }
+    lattice_dim = vec.size();
+    max_distance = std::sqrt(length * length * lattice_dim);
+    std::vector<int> distance_count(int(max_distance), 0);
+    for (int i = 0; i < lattice.num_sites(); ++i) {
+        for (int j = i; j < lattice.num_sites(); ++j) {
+            distance_count[int(distance_map[i][j])] += 1;
+        }
     }
     measurements
         << alps::accumulator::RealObservable("Energy")
@@ -83,6 +108,7 @@ ndim_spin_sim<N>::ndim_spin_sim(parameters_type const & parms, std::size_t seed_
         << alps::accumulator::RealObservable("Magnetization^2")
         << alps::accumulator::RealObservable("Magnetization^4")
         << alps::accumulator::RealObservable("Magnetic Susceptibility")
+        << alps::accumulator::RealVectorObservable("Correlations")
     ;
 }
 
@@ -118,9 +144,15 @@ void ndim_spin_sim<N>::measure() {
         tmag.initialize(0);
         double tmag_sq = 0; // for susceptibility
         double ten = 0;
+        std::vector<double> corr(int(max_distance), 0);
+        using alps::ngs::numeric::operator-;
         for (int i = 0; i < lattice.num_sites(); ++i) {
             tmag += spins[i];
             tmag_sq += dot(tmag, tmag);
+            for (int j = i; j < lattice.num_sites(); ++j) {
+                double distance = distance_map[i][j];
+                corr[int(distance)] += dot(spins[i], spins[j]);
+            }
         }
         alps::graph_helper<>::bond_iterator bond_it, bond_end;
         for(boost::tie(bond_it, bond_end) = lattice.bonds(); bond_it != bond_end; ++bond_it) {
@@ -128,6 +160,8 @@ void ndim_spin_sim<N>::measure() {
         }
         // pull in operator/ for vectors
         using alps::ngs::numeric::operator/;
+        corr = corr / double(lattice.num_sites());
+        //~ corr = corr / distance_count;
         ten /= lattice.num_sites();
         tmag /= lattice.num_sites();
         double tmag_sq_avg = tmag_sq / (lattice.num_sites() * lattice.num_sites());
@@ -137,6 +171,7 @@ void ndim_spin_sim<N>::measure() {
         measurements["Magnetization^2"] << dot(tmag, tmag);
         measurements["Magnetization^4"] << dot(tmag, tmag) * dot(tmag, tmag);
         measurements["Magnetic Susceptibility"] << beta * (tmag_sq_avg - tmag_avg_sq);
+        measurements["Correlations"] << corr;
     }
 }
 
@@ -167,7 +202,7 @@ void ndim_spin_sim<N>::load(alps::hdf5::archive & ar) {
 
 template <int N>
 const typename ndim_spin_sim<N>::spintype ndim_spin_sim<N>::random_spin() {
-    return spin_from_vector<N>(random_spin_gen(random.engine()));
+    return random_spin_gen(random.engine());
 }
 
 template <int N>

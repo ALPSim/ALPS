@@ -16,8 +16,32 @@
 template <int N>
 class tinyvector {
     public:
+        typedef typename boost::array<double, N> data_type;
+        typedef typename data_type::value_type value_type;
+        typedef typename data_type::iterator iterator;
+        typedef typename data_type::const_iterator const_iterator;
+
+        tinyvector() : _data() {}
+        tinyvector(int dim) : _data() { assert(dim = N); }
+        tinyvector(const std::vector<double> &vec) {
+            for(int i = 0; i < N; ++i)
+                _data[i] = vec[i];
+        }
+
+        const value_type * data() const { return _data.data(); }
+        value_type * data() { return _data.c_array(); }
+
+        const value_type & front() const { return _data.front(); }
+        value_type & front() { return _data.front(); }
+
+        const iterator begin() const { return _data.begin(); }
+        iterator begin() { return _data.begin(); }
+        const iterator end() const { return _data.end(); }
+        iterator end() { return _data.end(); }
+
         inline const double operator[](int i) const { return _data[i]; };
         inline double & operator[](int i) { return _data[i]; };
+
         void initialize(double init) {
             for(int i = 0; i < N; ++i)
                 _data[i] = init;
@@ -29,7 +53,7 @@ class tinyvector {
             ar >> alps::make_pvp("data", _data);
         }
     private:
-        boost::array<double, N> _data;
+        boost::array<double, N> _data __attribute__((aligned(16 * sizeof(double))));
 };
 
 template <int N>
