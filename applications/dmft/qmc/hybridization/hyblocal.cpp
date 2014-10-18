@@ -617,9 +617,8 @@ void local_configuration::measure_nnw(int i, std::vector<double> &nnw_re, double
 
 void local_configuration::state_map_segment_insert(state_map &states, const segment &s, int index) const{
   //works also for the case where an operator is inserted exactly at the point of an already present kink
-  if(s.t_end_==s.t_start_) return;
-  if(s.t_end_<s.t_start_){
-    std::cerr<<"fatal logic error inside state_map_segment_insert." << s.t_start_ << " " << s.t_end_ <<std::endl;
+  if(s.t_end_<=s.t_start_){
+    std::cerr<<"logic error inside state_map_segment_insert." << s.t_start_ << " " << s.t_end_ <<std::endl;
     throw std::runtime_error(std::string(__FUNCTION__)+" works only segments where the annihilator comes strictly after the creator");
   }
   state_map::iterator next;
