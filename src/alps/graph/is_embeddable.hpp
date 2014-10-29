@@ -55,7 +55,6 @@ namespace alps {
             detail::throw_on_embedding_found        throw_on_found_embedding;
             try {
                 std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> V(1, v);
-                boost::false_type no_argument;
                 detail::lattice_constant_impl(S, G, V, subgraph_orbit, vertex_equal, edge_equal, throw_on_found_embedding);
                 return false;
             } catch (detail::embedding_found e) {
@@ -79,7 +78,6 @@ namespace alps {
             detail::throw_on_embedding_found                    throw_on_found_embedding;
             try {
                 std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> V(1, v);
-                boost::false_type no_argument;
                 detail::lattice_constant_impl(S, G, V, subgraph_orbit, vertex_equal, edge_equal, throw_on_found_embedding);
                 return false;
             } catch (detail::embedding_found e) {
@@ -100,7 +98,6 @@ namespace alps {
             detail::throw_on_embedding_found                    throw_on_found_embedding;
             try {
                 typename boost::graph_traits<Graph>::vertex_iterator vt, ve;
-                boost::false_type no_argument;
                 std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> V;
                 for (boost::tie(vt, ve) = vertices(G); vt != ve; ++vt) {
                     V.clear();
@@ -130,7 +127,6 @@ namespace alps {
             detail::throw_on_embedding_found                    throw_on_found_embedding;
             try {
                 typename boost::graph_traits<Graph>::vertex_iterator vt, ve;
-                boost::false_type no_argument;
                 std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> V;
                 for (boost::tie(vt, ve) = vertices(G); vt != ve; ++vt) {
                     edge_equal.reset();
