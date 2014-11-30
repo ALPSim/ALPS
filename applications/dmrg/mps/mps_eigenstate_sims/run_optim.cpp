@@ -61,7 +61,7 @@ void run_sim(const boost::filesystem::path& infile, const boost::filesystem::pat
         std::stringstream ss;
         
         int init_bond = 20;
-        double step = (int(parms["MAXSTATES"]) - init_bond) / (parms["nsweeps"]-1);
+        double step = (double(parms["MAXSTATES"]) - init_bond) / (parms["nsweeps"]-1);
         
         ss << init_bond;
         for (int sweep = 1; sweep < parms["nsweeps"]; ++sweep) {
