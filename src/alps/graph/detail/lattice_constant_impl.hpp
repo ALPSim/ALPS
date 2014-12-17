@@ -418,7 +418,7 @@ namespace alps {
                 , std::deque<std::pair<
                       typename boost::graph_traits<Subgraph>::vertex_descriptor
                     , typename boost::graph_traits<Graph>::vertex_descriptor
-                  > > stack
+                  > > const& stack
                 , boost::dynamic_bitset<> placed
                 , boost::dynamic_bitset<> & visited
                 , std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> & pinning
@@ -428,10 +428,14 @@ namespace alps {
             ) {
                 typedef typename boost::graph_traits<Subgraph>::vertex_descriptor SubgraphVertex;
 
+                // Check if the vertex mapping s->g is valid by checking if...
+                // ... the degrees are compatible
                 if (out_degree(s, S) > out_degree(g, G))
                     return;
+                // ... the vertex types are equal (with respect to symmetries maybe)
                 if (!vertex_equal(s, g, S, G))
                     return;
+                // ... the existing edges from s are compatible with those of g.
                 typename boost::graph_traits<Subgraph>::adjacency_iterator s_ai, s_ae;
                 for (boost::tie(s_ai, s_ae) = adjacent_vertices(s, S); s_ai != s_ae; ++s_ai)
                     if (pinning[*s_ai] != num_vertices(G)) {
@@ -441,18 +445,28 @@ namespace alps {
                         if (!is_e || !edge_equal( edge(s, *s_ai, S).first , e, S, G) )
                             return;
                     }
+
+                // s->g seems legit => pin s->g.
                 visited[g] = true;
                 pinning[s] = g;
+                // If not all vertices are mapped yet
                 if (visited.count() < num_vertices(S)) {
+                    // queue mapping adjecent vertices of s
+                    std::deque<std::pair<
+                          typename boost::graph_traits<Subgraph>::vertex_descriptor
+                        , typename boost::graph_traits<Graph>::vertex_descriptor
+                    > > local_stack(stack);
                     typename boost::graph_traits<Graph>::adjacency_iterator g_ai, g_ae;
                     for (boost::tie(s_ai, s_ae) = adjacent_vertices(s, S); s_ai != s_ae; ++s_ai)
                         if (!placed[*s_ai]) {
                             placed[*s_ai] = true;
-                            stack.push_back(std::make_pair(*s_ai, g));
+                            local_stack.push_back(std::make_pair(*s_ai, g));
                         }
-                    SubgraphVertex t = stack[0].first;
-                    boost::tie(g_ai, g_ae) = adjacent_vertices(stack[0].second, G);
-                    stack.pop_front();
+                    // take the first entry of the queue
+                    // and check if entry.s can be mapped to adjacent vertices of entry.g
+                    SubgraphVertex t = local_stack[0].first;
+                    boost::tie(g_ai, g_ae) = adjacent_vertices(local_stack[0].second, G);
+                    local_stack.pop_front();
                     for (; g_ai != g_ae; ++g_ai)
                         if (!visited[*g_ai])
                             detail::lattice_constant_walker(
@@ -460,7 +474,7 @@ namespace alps {
                                 , *g_ai
                                 , S
                                 , G
-                                , stack
+                                , local_stack
                                 , placed
                                 , visited
                                 , pinning
