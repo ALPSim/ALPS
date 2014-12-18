@@ -418,8 +418,8 @@ namespace alps {
                 , std::deque<std::pair<
                       typename boost::graph_traits<Subgraph>::vertex_descriptor
                     , typename boost::graph_traits<Graph>::vertex_descriptor
-                  > > const& stack
-                , boost::dynamic_bitset<> placed
+                  > > const& queue
+                , boost::dynamic_bitset<> queued_or_placed
                 , boost::dynamic_bitset<> & visited
                 , std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> & pinning
                 , VertexEqual & vertex_equal
@@ -455,18 +455,18 @@ namespace alps {
                     std::deque<std::pair<
                           typename boost::graph_traits<Subgraph>::vertex_descriptor
                         , typename boost::graph_traits<Graph>::vertex_descriptor
-                    > > local_stack(stack);
+                    > > local_queue(queue);
                     typename boost::graph_traits<Graph>::adjacency_iterator g_ai, g_ae;
                     for (boost::tie(s_ai, s_ae) = adjacent_vertices(s, S); s_ai != s_ae; ++s_ai)
-                        if (!placed[*s_ai]) {
-                            placed[*s_ai] = true;
-                            local_stack.push_back(std::make_pair(*s_ai, g));
+                        if (!queued_or_placed[*s_ai]) {
+                            queued_or_placed[*s_ai] = true;
+                            local_queue.push_back(std::make_pair(*s_ai, g));
                         }
                     // take the first entry of the queue
                     // and check if entry.s can be mapped to adjacent vertices of entry.g
-                    SubgraphVertex t = local_stack[0].first;
-                    boost::tie(g_ai, g_ae) = adjacent_vertices(local_stack[0].second, G);
-                    local_stack.pop_front();
+                    SubgraphVertex t = local_queue[0].first;
+                    boost::tie(g_ai, g_ae) = adjacent_vertices(local_queue[0].second, G);
+                    local_queue.pop_front();
                     for (; g_ai != g_ae; ++g_ai)
                         if (!visited[*g_ai])
                             detail::lattice_constant_walker(
@@ -474,8 +474,8 @@ namespace alps {
                                 , *g_ai
                                 , S
                                 , G
-                                , local_stack
-                                , placed
+                                , local_queue
+                                , queued_or_placed
                                 , visited
                                 , pinning
                                 , vertex_equal
@@ -517,21 +517,21 @@ namespace alps {
                         if (out_degree(jt->front(), S) <= out_degree(*it, G)) {
                             // TODO: shouldn't out_degree be just degree?
                             // TODO: use dynamicbitset
-                            boost::dynamic_bitset<> placed(num_vertices(S));
+                            boost::dynamic_bitset<> queued_or_placed(num_vertices(S));
                             boost::dynamic_bitset<> visited(num_vertices(G));
                             std::deque<std::pair<
                                   typename boost::graph_traits<Subgraph>::vertex_descriptor
                                 , typename boost::graph_traits<Graph>::vertex_descriptor
-                            > > stack;
+                            > > queue;
                             std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> pinning(num_vertices(S), num_vertices(G));
-                            placed[jt->front()] = true;
+                            queued_or_placed[jt->front()] = true;
                             lattice_constant_walker(
                                   jt->front()
                                 , *it
                                 , S
                                 , G
-                                , stack
-                                , placed
+                                , queue
+                                , queued_or_placed
                                 , visited
                                 , pinning
                                 , vertex_equal
