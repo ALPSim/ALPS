@@ -25,6 +25,9 @@
 #include <vector>
 #include <string>
 
+/**
+ * The simulation class derives from mcbase.
+ */
 template <int N>
 class ALPS_DECL ndim_spin_sim : public alps::mcbase {
 
@@ -36,29 +39,26 @@ class ALPS_DECL ndim_spin_sim : public alps::mcbase {
         virtual void measure();
         virtual double fraction_completed() const;
 
-        const spintype random_spin_accept_reject();
-        const spintype random_spin();
-
         using alps::mcbase::save;
         virtual void save(alps::hdf5::archive & ar) const;
 
         using alps::mcbase::load;
         virtual void load(alps::hdf5::archive & ar);
 
+        // convenience function to get a random spin (uniformly distancesributed direction)
+        const spintype random_spin();
+
     private:
         
-        int length;
-        int lattice_dim;
+        alps::graph_helper<> lattice;
+        int num_sites;
+        std::vector<spintype> spins;
         int sweeps;
         int thermalization_sweeps;
         int total_sweeps;
-        double max_distance;
         double beta;
         alps::uniform_on_sphere_n<N, double, spintype > random_spin_gen;
-        alps::graph_helper<> lattice;
-        std::vector<spintype> spins;
-        std::vector< std::vector< double > > distance_map;
-        std::vector<int> distance_count;
+        std::vector<double> distances;
 };
 
 /* implementation */
@@ -66,68 +66,61 @@ class ALPS_DECL ndim_spin_sim : public alps::mcbase {
 template<int N>
 ndim_spin_sim<N>::ndim_spin_sim(parameters_type const & parms, std::size_t seed_offset)
     : alps::mcbase(parms, seed_offset)
-    , length(parameters["L"])
+    , lattice(alps::make_deprecated_parameters(parms))
+    , num_sites(lattice.num_sites())
+    , spins(num_sites)
     , sweeps(0)
     , thermalization_sweeps(int(parameters["THERMALIZATION"]))
     , total_sweeps(int(parameters["SWEEPS"]))
     , beta(1. / double(parameters["T"]))
     , random_spin_gen()
-    , lattice(alps::make_deprecated_parameters(parms))
-    , spins(lattice.num_sites())
 {
-    /* initialize spins */
-    alps::graph_helper<>::site_iterator site_it, site_end;
-    for(boost::tie(site_it, site_end) = lattice.sites(); site_it != site_end; ++site_it) {
-        spins[*site_it] = random_spin();
+    // initialize spins with random values
+    for(int i = 0; i < num_sites; ++i) {
+        spins[i] = random_spin();
     }
-    using alps::ngs::numeric::operator-;
-    std::vector<double> vec;
-    for (int i = 0; i < lattice.num_sites(); ++i) {
-        std::vector<double> row(lattice.num_sites());
-        for (int j = 0; j < lattice.num_sites(); ++j) {
-            vec = lattice.coordinate(j) - lattice.coordinate(i);
-            double distance = 0;
-            for (int k = 0; k < vec.size(); ++k) {
-                distance += vec[k] * vec[k];
-            }
-            row[j] = std::sqrt(distance);
-        }
-        distance_map.push_back(row);
-    }
-    lattice_dim = vec.size();
-    max_distance = std::sqrt(length * length * lattice_dim);
-    std::vector<int> distance_count(int(max_distance), 0);
-    for (int i = 0; i < lattice.num_sites(); ++i) {
-        for (int j = i; j < lattice.num_sites(); ++j) {
-            distance_count[int(distance_map[i][j])] += 1;
-        }
-    }
+
     measurements
         << alps::accumulator::RealObservable("Energy")
         << alps::accumulator::RealVectorObservable("Magnetization")
         << alps::accumulator::RealObservable("Magnetization^2")
         << alps::accumulator::RealObservable("Magnetization^4")
-        << alps::accumulator::RealObservable("Magnetic Susceptibility")
         << alps::accumulator::RealVectorObservable("Correlations")
+        << alps::accumulator::RealVectorObservable("Distances")
     ;
+
+    using alps::ngs::numeric::operator-;
+    std::vector<double> ref = lattice.coordinate(0);
+    std::vector<double> a;
+    for (int i = 0; i < num_sites; ++i) {
+        double d = 0;
+        a = lattice.coordinate(i) - ref;
+        for (int j = 0; j < a.size(); ++j) {
+            d += a[j] * a[j];
+        }
+        distances.push_back(std::sqrt(d));
+    }
+    measurements["Distances"] << distances;
 }
 
-//TODO make 3d
 template<int N>
 void ndim_spin_sim<N>::update() {
-    for (int j = 0; j < lattice.num_sites(); ++j) {
+    for (int j = 0; j < num_sites; ++j) {
         using std::exp;
-        int i = int(double(lattice.num_sites()) * random());
-        /* get a random site */
+        int i = int(double(num_sites) * random());
+
+        // get a random site
         alps::graph_helper<>::site_descriptor site_i = lattice.site(i);
-        /* sum all neighbors */
+
+        // sum over all it's neighbors for delta_H later
         typename ndim_spin_sim<N>::spintype nn_sum;
         nn_sum.initialize(0);
         alps::graph_helper<>::neighbor_iterator nn_it, nn_end;
         for(boost::tie(nn_it, nn_end) = lattice.neighbors(site_i); nn_it != nn_end; ++nn_it) {
             nn_sum += spins[*nn_it];
         }
-        /* generate a new random spin for update and accept or not */
+
+        // generate a new random spin and decide if we keep it
         typename ndim_spin_sim<N>::spintype new_spin = random_spin();
         double delta_H = dot(new_spin - spins[i], nn_sum);
         double p = exp( -beta * delta_H );
@@ -140,38 +133,32 @@ template <int N>
 void ndim_spin_sim<N>::measure() {
     sweeps++;
     if (sweeps > thermalization_sweeps) {
-        typename ndim_spin_sim<N>::spintype tmag;
-        tmag.initialize(0);
-        double tmag_sq = 0; // for susceptibility
-        double ten = 0;
-        std::vector<double> corr(int(max_distance), 0);
-        using alps::ngs::numeric::operator-;
-        for (int i = 0; i < lattice.num_sites(); ++i) {
-            tmag += spins[i];
-            tmag_sq += dot(tmag, tmag);
-            for (int j = i; j < lattice.num_sites(); ++j) {
-                double distance = distance_map[i][j];
-                corr[int(distance)] += dot(spins[i], spins[j]);
-            }
+        typename ndim_spin_sim<N>::spintype magnetization;
+        magnetization.initialize(0);
+        double energy = 0;
+        std::vector<double> correlations(num_sites, 0);
+        // To measure magnetization, magnetic susceptibility and correlationselations we sum over all sites.
+        for (int i = 0; i < num_sites; ++i) {
+            magnetization += spins[i];
+            correlations[i] = dot(spins[0], spins[i]);
         }
+        // To measure the Energy we sum only over neighbored sites (bonds in terms of the lattice).
         alps::graph_helper<>::bond_iterator bond_it, bond_end;
         for(boost::tie(bond_it, bond_end) = lattice.bonds(); bond_it != bond_end; ++bond_it) {
-            ten += - dot(spins[lattice.source(*bond_it)], spins[lattice.target(*bond_it)]);
+            energy += - dot(spins[lattice.source(*bond_it)], spins[lattice.target(*bond_it)]);
         }
         // pull in operator/ for vectors
         using alps::ngs::numeric::operator/;
-        corr = corr / double(lattice.num_sites());
-        //~ corr = corr / distance_count;
-        ten /= lattice.num_sites();
-        tmag /= lattice.num_sites();
-        double tmag_sq_avg = tmag_sq / (lattice.num_sites() * lattice.num_sites());
-        double tmag_avg_sq = dot(tmag, tmag);
-        measurements["Energy"] << ten;
-        measurements["Magnetization"] << vector_from_tinyvector(tmag);
-        measurements["Magnetization^2"] << dot(tmag, tmag);
-        measurements["Magnetization^4"] << dot(tmag, tmag) * dot(tmag, tmag);
-        measurements["Magnetic Susceptibility"] << beta * (tmag_sq_avg - tmag_avg_sq);
-        measurements["Correlations"] << corr;
+        energy /= num_sites;                // $\frac{1}{V} \sum_{\text{i,j nn}}{\sigma_i \sigma_j}$
+        magnetization /= num_sites;         // $\frac{1}{V} \sum_{i}{\sigma_i}$
+        double magnetization2 = dot(magnetization, magnetization);
+
+        // store the measurements
+        measurements["Energy"] << energy;
+        measurements["Magnetization"] << vector_from_tinyvector(magnetization);
+        measurements["Magnetization^2"] << magnetization2;
+        measurements["Magnetization^4"] << magnetization2 * magnetization2;
+        measurements["Correlations"] << correlations;
     }
 }
 
@@ -190,12 +177,6 @@ void ndim_spin_sim<N>::save(alps::hdf5::archive & ar) const {
 template <int N>
 void ndim_spin_sim<N>::load(alps::hdf5::archive & ar) {
     mcbase::load(ar);
-
-    length = int(parameters["L"]);
-    thermalization_sweeps = int(parameters["THERMALIZATION"]);
-    total_sweeps = int(parameters["SWEEPS"]);
-    beta = 1. / double(parameters["T"]);
-
     ar["checkpoint/sweeps"] >> sweeps;
     ar["checkpoint/spins"] >> spins;
 }
@@ -203,28 +184,6 @@ void ndim_spin_sim<N>::load(alps::hdf5::archive & ar) {
 template <int N>
 const typename ndim_spin_sim<N>::spintype ndim_spin_sim<N>::random_spin() {
     return random_spin_gen(random.engine());
-}
-
-template <int N>
-const typename ndim_spin_sim<N>::spintype ndim_spin_sim<N>::random_spin_accept_reject() {
-    double r = 0;
-    typename ndim_spin_sim<N>::spintype spin;
-    /* get a random vector from uniformly distributed numbers in [-1,1) */
-    do 
-    {
-        for(int i = 0; i < 3; ++i)
-        {
-            spin[i] = 2. * random() - 1.;
-        }
-        r = abs(spin);
-    }
-    while(r >= 1 || r == 0); /* reject and replace if not in unit sphere */
-    /* normalize to get a point on the 3d unit sphere with uniformly distributed angles*/
-    for(int i = 0; i < 3; ++i)
-    {
-        spin[i] /= r;
-    } 
-    return spin;
 }
 
 #endif 
