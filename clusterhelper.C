@@ -77,6 +77,24 @@ lattice_momenta_file_name_(params["LATTICE_MOMENTA_FILE"]|"LatticeMomenta")
   //try to read this transformer, otherwise generate it.
   if(!read(params))
     setup_tables(params);
+
+  //Find the periodicity in each direction
+  //Set Nxyz
+  	Nxyz.clear();
+  	Nxyz.resize(dimension(),0.);
+  	for(int k=0; k<dimension(); k++){
+  		int n=0;
+  		bool done=false;
+  		while(!done){
+  			n+=1;
+  			for(int d=0; d<dimension(); d++){
+  				if(n*reciprocal_basis_(k,d) > 2*M_PI){
+  					done = true;
+  				}
+  			}
+  		}
+  		Nxyz[k] = n-1;
+  	}
 }
 
 void ClusterHelper::find_non_bipartite_cluster_momenta() {

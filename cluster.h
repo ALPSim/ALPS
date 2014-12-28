@@ -95,6 +95,7 @@ public:
   double cluster_momentum(const unsigned int i, const unsigned int j) const { return cluster_momenta_(i,j); }
   double lattice_momentum(const unsigned int i, const unsigned int j) const { return lattice_momenta_(i,j); }
   double reciprocal_basis_vector(const unsigned int i, const unsigned int j) const { return reciprocal_basis_(i,j); }
+  int periodicity(const unsigned int i) const { return Nxyz[i]; }
   bool bipartite() const { return bipartite_; }
    int n_cluster_sites() const { return n_cluster_sites_; }
    int n_cluster_cells() const { return graph_->volume(); }
@@ -159,6 +160,7 @@ private:
   pair_class_set_type pair_class_set_k_space_;
   Matrix<site_t>::Type symmetry_table_k_space_;
   Matrix<site_t>::Type symmetry_table_real_space_;
+  std::vector<int> Nxyz;	//Number of jumps required to come back to the same cluster site in each direction (periodicity)
   
   unsigned int n_cluster_sites_;
   bool paramagnet_;
@@ -228,6 +230,7 @@ public:
   double cluster_momentum(const unsigned int i, const unsigned int j) const { return ClusterHelper::cluster_momentum(i,j); }
   double lattice_momentum(const unsigned int i, const unsigned int j) const { return ClusterHelper::lattice_momentum(i,j); }
   double reciprocal_basis_vector(const unsigned int i, const unsigned int j) const { return ClusterHelper::reciprocal_basis_vector(i,j); }
+  int periodicity(const unsigned int dim) const { return ClusterHelper::periodicity(dim); }
   unsigned int n_lattice_momenta() const { return ClusterHelper::n_lattice_momenta(); }
   double site_distance(const unsigned int i, const unsigned int j) const { return ClusterHelper::site_distance(i, j); }
   virtual void write_hdf5(alps::hdf5::archive &ar, const std::string &p) const;
@@ -353,7 +356,7 @@ public:
     vector_type phi(dimension());
     for(int i=0;i<dimension();++i){
       std::stringstream phase_name; phase_name<<"PHASE_"<<i;
-      phi[i]=params_[phase_name.str()];
+      phi[i]=params_[phase_name.str()]/periodicity(i);
     }
     return phi;
   }
