@@ -8,11 +8,13 @@ include(UseGtest)
 project (DMFT)
 include_directories("$ENV{HOME}/alps_svn/")
 include_directories("/usr/include/gsl")
+include_directories("${CMAKE_SOURCE_DIR}/gtest/include")
 #SET(CMAKE_CXX_COMPILER "CC")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -march=native -O3")
 
 link_directories("/opt/local/lib")
 link_directories("/usr/lib")
+link_directories("${CMAKE_SOURCE_DIR}/gtest")
 
 add_executable(dmft 
 clusterhelper.C fouriertransform.C fourier_generator.C selfconsistency.C

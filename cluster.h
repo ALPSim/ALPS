@@ -94,6 +94,7 @@ public:
   double cluster_coordinate(const unsigned int i, const unsigned int j) const { return cluster_coordinates_(i,j); }
   double cluster_momentum(const unsigned int i, const unsigned int j) const { return cluster_momenta_(i,j); }
   double lattice_momentum(const unsigned int i, const unsigned int j) const { return lattice_momenta_(i,j); }
+  double reciprocal_basis_vector(const unsigned int i, const unsigned int j) const { return reciprocal_basis_(i,j); }
   bool bipartite() const { return bipartite_; }
    int n_cluster_sites() const { return n_cluster_sites_; }
    int n_cluster_cells() const { return graph_->volume(); }
@@ -226,6 +227,7 @@ public:
   unsigned int dimension() const { return ClusterHelper::dimension(); }
   double cluster_momentum(const unsigned int i, const unsigned int j) const { return ClusterHelper::cluster_momentum(i,j); }
   double lattice_momentum(const unsigned int i, const unsigned int j) const { return ClusterHelper::lattice_momentum(i,j); }
+  double reciprocal_basis_vector(const unsigned int i, const unsigned int j) const { return ClusterHelper::reciprocal_basis_vector(i,j); }
   unsigned int n_lattice_momenta() const { return ClusterHelper::n_lattice_momenta(); }
   double site_distance(const unsigned int i, const unsigned int j) const { return ClusterHelper::site_distance(i, j); }
   virtual void write_hdf5(alps::hdf5::archive &ar, const std::string &p) const;
@@ -371,6 +373,7 @@ private:
   std::vector<double> epsav_;
   std::vector<double> epssqav_;
   std::vector<double> dispersion_moments_;
+
 protected:
   const alps::params params_;
 };
