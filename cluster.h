@@ -356,7 +356,8 @@ public:
     vector_type phi(dimension());
     for(int i=0;i<dimension();++i){
       std::stringstream phase_name; phase_name<<"PHASE_"<<i;
-      phi[i]=params_[phase_name.str()]/periodicity(i);
+      phi[i]=params_[phase_name.str()];
+      phi[i] = phi[i]/periodicity(i);
     }
     return phi;
   }
