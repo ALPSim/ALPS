@@ -101,12 +101,18 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
                                 const matsubara_green_function_t g_dressed, const double beta)
 {
   os<<std::setprecision(14);
+  bool causal = true;
     if(g_dressed.shape()==diagonal){
      for(unsigned int i=0;i<g_bare.nfreq();++i){
       os<<(2*i+1)*M_PI/beta<<"\t";
-      for (unsigned int k=0; k<g_bare.nsite(); ++k)
-        for(unsigned int f=0;f<g_bare.nflavor();++f)
+      for (unsigned int k=0; k<g_bare.nsite(); ++k){
+        for(unsigned int f=0;f<g_bare.nflavor();++f){
           os<<(1./g_bare(i,k,k,f) - 1./g_dressed(i,k,k,f)).real()<<"\t"<<(1./g_bare(i,k,k,f) - 1./g_dressed(i,k,k,f)).imag()<<"\t";
+          if( i < g_bare.nfreq()/2. && (1./g_bare(i,k,k,f) - 1./g_dressed(i,k,k,f)).imag() > 0){
+        	  causal = false;
+          }
+        }
+      }
       os<<std::endl;
      }
     }else if(g_dressed.shape()==blockdiagonal){
@@ -184,6 +190,10 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
         }
         os<<std::endl;
       }
+    }
+
+    if(!causal){
+    	throw std::runtime_error("Imaginary part of self energy is positive! (not causal)");
     }
 }
 
