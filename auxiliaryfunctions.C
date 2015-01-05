@@ -193,7 +193,7 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
     }
 
     if(!causal){
-    	std::cout<<"Elements of the imaginary part of the self-energy are positive!"<<std::endl;
+    	std::cout<<"Warning! Elements of the imaginary part of the self-energy are positive!"<<std::endl;
     }
 }
 
