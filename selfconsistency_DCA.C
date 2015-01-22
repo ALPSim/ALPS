@@ -70,7 +70,7 @@ void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
   //initialize space for multiple vectors
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer(parms, fourier_ptr);
-  double max_diff;
+  double max_diff,norm2_diff;
   double mu;
   do {
     iteration_ctr++;
@@ -102,12 +102,14 @@ void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
     G0_omega.write(std::string(parms["G0OMEGA_output"]|"G0omega_output").c_str());
     std::cout<<"comparing old and new result."<<std::endl<<std::flush;
     max_diff=0;
+    norm2_diff=0;
     if(iteration_ctr>1){
       //comparison for the dressed Green's function in Matsubara freq.
       for(unsigned int w=0; w<n_matsubara; w++) {
         for(unsigned int i1=0; i1<n_site; i1++) {
           for(unsigned int i2=0; i2<n_site; i2++) {
             for(unsigned int o=0; o<n_orbital; o++) {
+              norm2_diff += std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o))*std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o));
               if (std::abs(G_omega(w,i1, i2, o)-G_old_omega(w, i1, i2, o)) > max_diff)
                 max_diff = std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o));
             }
@@ -116,6 +118,7 @@ void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
       }
       std::cout<<"convergence loop: max diff in dressed Green (Matsubara freq): "
       <<max_diff<<"\tconverged: "<<converged<<std::endl;
+      std::cout<<"norm2_diff = "<<std::sqrt(norm2_diff)<<std::endl;
     }
     std::cout<<"writing Green's functions."<<std::endl;
     G0_omega.set_header(clustertrans.generate_header_kspace(G0_omega));
