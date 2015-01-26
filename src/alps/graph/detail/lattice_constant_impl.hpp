@@ -454,7 +454,7 @@ namespace alps {
                 if (visited.count() < num_vertices(S)) {
                     // queue mapping adjecent vertices of s
                     std::deque< std::pair<subgraph_vertex_descriptor, graph_vertex_descriptor> > local_queue(queue);
-                    boost::dynamic_bitset<> local_queued_or_placed(queued_or_placed)
+                    boost::dynamic_bitset<> local_queued_or_placed(queued_or_placed);
 
                     typename boost::graph_traits<Graph>::adjacency_iterator g_ai, g_ae;
                     for (boost::tie(s_ai, s_ae) = adjacent_vertices(s, S); s_ai != s_ae; ++s_ai)
