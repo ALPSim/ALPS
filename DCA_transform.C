@@ -561,6 +561,9 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
 
       std::cout<<"converged now: "<<converged<<" true is: "<<true<<" compute filling is: "<<compute_filling_<<std::endl;
     }
+    else{
+    	std::cout<<"Total density = "<<density<<std::endl;
+    }
     
     if (current_it<2){converged=true;}
     
