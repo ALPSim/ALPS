@@ -6,11 +6,13 @@
 #include<cmath>
 #include<cstdlib>
 #include"nambu_green_function.h"
-#include<alps/parameter.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
 #include "cluster.h"
+#include "fouriertransform.h"
 #include <boost/program_options.hpp>
+#include "../clusterhelper.hxx"
+#include "../DCA_transformer.hxx"
 
 
 int main(int argc, char **argv){
@@ -44,9 +46,7 @@ int main(int argc, char **argv){
     return 1;
   }
   if(!vm.count("pfile")) throw std::runtime_error("you need to specify the parameter file as pfile.");
-  std::ifstream parm_file(pfilename.c_str());
-  if(!parm_file.is_open()) throw std::runtime_error("parm file not open.");
-  alps::Parameters parms(parm_file);
+  alps::params parms(pfilename);
   double beta=parms["BETA"];
   double mu=parms["MU"];
   double h=parms["H"];

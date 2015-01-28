@@ -6,12 +6,14 @@
 #include<cmath>
 #include<cstdlib>
 #include"nambu_green_function.h"
-#include<alps/parameter.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
 #include "cluster.h"
 #include <boost/program_options.hpp>
 #include <alps/numeric/matrix.hpp>
+#include "boost/numeric/bindings/lapack/driver/gesv.hpp"
+#include "../clusterhelper.hxx"
+#include "../DCA_transformer.hxx"
 
 //take a vector and interpolate it using GSL in the middle, add constants to the back, and extrapolate parabolically for the first few frequencies if they are outside of the known interval
 std::vector<double> interpolate_vector(const std::vector<double> &oldxvalues, const std::vector<double> &oldyvalues, const std::vector<double> &newxvalues);
@@ -48,17 +50,14 @@ int main(int argc, char **argv){
   if(!vm.count("selfenergy")) throw std::runtime_error("you need to specify the selfenergy.");
   
   //parse parameters: open old parameter file
-  std::ifstream parm_file_old(pfilename_old.c_str());
-  if(!parm_file_old.is_open()) throw std::runtime_error("old parm file not open.");
-  alps::Parameters parms_old(parm_file_old);
+  alps::params parms_old(pfilename_old);
   
   //parse parameters: open new parameter file
-  std::ifstream parm_file_new(pfilename_new.c_str());
-  if(!parm_file_new.is_open()) throw std::runtime_error("new parm file not open.");
-  alps::Parameters parms_new(parm_file_new);
+  alps::params parms_new(pfilename_new);
   
   //general error check
-  if(parms_old["CLUSTER_LOOP"]!="DCA") throw std::invalid_argument("this interpolation assumes DCA");
+  std::string cl=parms_old["CLUSTER_LOOP"];
+  if(cl!=std::string("DCA")) throw std::invalid_argument("this interpolation assumes DCA");
   double beta_old=parms_old["BETA"];
   double mu_old=parms_old["MU"];
   double h_old=parms_old["H"];
@@ -71,7 +70,7 @@ int main(int argc, char **argv){
   int nfreq_new=parms_new["NMATSUBARA"];
   double nsites_new=parms_new["SITES"];
   
-  bool paramagnet=!(parms_new.value_or_default("ANTIFERROMAGNET",false));
+  bool paramagnet=!(parms_new["ANTIFERROMAGNET"]|false);
   shape_t gf_shape=paramagnet?diagonal:blockdiagonal;
   
   std::cout<<"main parameters: "<<std::endl;
@@ -96,7 +95,9 @@ int main(int argc, char **argv){
   }
   
   //interpolate cluster geometry in k-space
-  if(std::string(parms_old["CLUSTER"]).compare(std::string(parms_new["CLUSTER"]))!=0){
+  std::string cluster_name_new=parms_new["CLUSTER"];
+  std::string cluster_name_old=parms_old["CLUSTER"];
+  if(cluster_name_new != cluster_name_old){
     std::cout<<"...interpolating momentum points..."<<std::endl;
     DCATransformer* clustertransformer_old=(DCATransformer*)ClusterTransformer::generate_transformer(parms_old);
     DCATransformer* clustertransformer_new=(DCATransformer*)ClusterTransformer::generate_transformer(parms_new);
@@ -201,7 +202,7 @@ int main(int argc, char **argv){
   }
   
   std::string filename_new=parms_new["G0OMEGA_INPUT"];
-  if(std::ifstream(filename_new.c_str(),std::ifstream::in)){ throw std::runtime_error("input file "+std::string(parms_new["G0OMEGA_INPUT"])+"already exists!"); }
+  if(std::ifstream(filename_new.c_str(),std::ifstream::in)){ throw std::runtime_error("input file "+filename_new+"already exists!"); }
   green0.write(filename_new.c_str());
   
   delete clustertransformer_new;

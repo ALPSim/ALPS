@@ -34,6 +34,8 @@
 
 #include "alps/ngs/params.hpp"
 #include "boost/numeric/ublas/matrix.hpp"
+#include "boost/tuple/tuple.hpp"
+#include <set>
 
 //this class is here for the sole purpose of hiding the implementation, which uses the ALPS lattice class.
 class abstract_graph{
