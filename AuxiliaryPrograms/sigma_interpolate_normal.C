@@ -95,8 +95,8 @@ int main(int argc, char **argv){
   }
   
   //interpolate cluster geometry in k-space
-  std::string cluster_name_new=parms_new["CLUSTER"];
-  std::string cluster_name_old=parms_old["CLUSTER"];
+  std::string cluster_name_new=parms_new["LATTICE"];
+  std::string cluster_name_old=parms_old["LATTICE"];
   if(cluster_name_new != cluster_name_old){
     std::cout<<"...interpolating momentum points..."<<std::endl;
     DCATransformer* clustertransformer_old=(DCATransformer*)ClusterTransformer::generate_transformer(parms_old);
