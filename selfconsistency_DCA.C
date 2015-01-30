@@ -135,13 +135,14 @@ void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
     std::cout<<"...continuing."<<std::endl;
 
 /// TODO, rewriting to parms so that mu_orig=previous mu iteration, allows for damping in filled cases.
-    std::string basename_str=parms["BASENAME"];
+    if(parms.defined("MODIFY_PARAMETER_FILE")){
+        std::string basename_str=parms["BASENAME"];
 	std::ofstream os(basename_str.c_str());
        (*const_cast<alps::params*>(&parms))["MU"]=mu;
 
         os<<parms;
         os.close();
-
+    }
 
   } while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);
   // write G0
