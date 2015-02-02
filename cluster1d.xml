@@ -185,6 +185,25 @@
     <UNITCELL ref="simple1d"/>
   </LATTICEGRAPH>
 
+  <!-- 1d 12-site cluster and superlattice -->
+  <LATTICE name="Chain1D_10 superlattice" dimension="1">
+    <BASIS>
+      <VECTOR>12 </VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>2*pi/12</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Chain1D_12">
+    <FINITELATTICE>
+      <LATTICE ref="Chain1D_12 superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple1d"/>
+  </LATTICEGRAPH>
 
  
 </LATTICES>
