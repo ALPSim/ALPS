@@ -186,7 +186,7 @@
   </LATTICEGRAPH>
 
   <!-- 1d 12-site cluster and superlattice -->
-  <LATTICE name="Chain1D_10 superlattice" dimension="1">
+  <LATTICE name="Chain1D_12 superlattice" dimension="1">
     <BASIS>
       <VECTOR>12 </VECTOR>
     </BASIS>
