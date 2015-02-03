@@ -125,10 +125,13 @@ void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
       <<max_diff<<"\tconverged: "<<converged<<std::endl;
       std::cout<<"norm2_diff = "<<std::sqrt(norm2_diff)<<std::endl;
     }
-    std::cout<<"writing Green's functions."<<std::endl;
-    G0_omega.set_header(clustertrans.generate_header_kspace(G0_omega));
-    G_omega.set_header(clustertrans.generate_header_kspace(G_omega));
-    print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
+	std::cout << "writing Green's functions." << std::endl;
+
+	if (parms["PRINTHEADERS"] | false) {
+		G0_omega.set_header(clustertrans.generate_header_kspace(G0_omega));
+		G_omega.set_header(clustertrans.generate_header_kspace(G_omega));
+	}
+	print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
     if(!parms.defined("WRITE_SPARSE")){
       std::cout<<"writing Green's functions in real space"<<std::endl;
       matsubara_green_function_t real_G0_omega = clustertrans.transform_into_real_space(G0_omega);
