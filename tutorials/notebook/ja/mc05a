@@ -1,0 +1,25 @@
+  LATTICE="square lattice";
+  L=4;
+
+  MODEL="boson Hubbard";
+  NONLOCAL=0;
+  U    = 1.0;
+  mu   = 0.5;
+  Nmax = 2;
+
+  T = 0.1;
+
+  SWEEPS=500000;
+  THERMALIZATION=10000;
+
+  { t=0.01; }
+  { t=0.02; }
+  { t=0.03; }
+  { t=0.04; }
+  { t=0.05; }
+  { t=0.06; }
+  { t=0.07; }
+  { t=0.08; }
+  { t=0.09; }
+  { t=0.1; }
+

@@ -1,0 +1,40 @@
+<!--
+   Copyright (c) 2003-2010 Matthias Troyer (troyer@ethz.ch)
+   
+   Distributed under the Boost Software License, Version 1.0.
+   (See accompanying file LICENSE_1_0.txt or copy at
+   http://www.boost.org/LICENSE_1_0.txt)
+  -->
+
+<LATTICES>
+<GRAPH name="V15" vertices="15">
+  <VERTEX id="3" type="1"><COORDINATE>1 2 3 4 5 6 7 8 9 10 11 12 13 14 15</COORDINATE></VERTEX>
+  <EDGE type="0" source="1" target="2"/>
+  <EDGE type="0" source="2" target="3"/>
+  <EDGE type="0" source="3" target="4"/>
+  <EDGE type="0" source="4" target="5"/>
+  <EDGE type="0" source="5" target="6"/>
+  <EDGE type="0" source="6" target="1"/>
+  <EDGE type="0" source="7" target="8"/>
+  <EDGE type="0" source="8" target="9"/>
+  <EDGE type="0" source="9" target="7"/>
+  <EDGE type="0" source="10" target="11"/>
+  <EDGE type="0" source="11" target="12"/>
+  <EDGE type="0" source="12" target="13"/>
+  <EDGE type="0" source="13" target="14"/>
+  <EDGE type="0" source="14" target="15"/>
+  <EDGE type="0" source="15" target="10"/>
+  <EDGE type="1" source="1" target="7"/>
+  <EDGE type="1" source="2" target="7"/>
+  <EDGE type="1" source="3" target="8"/>
+  <EDGE type="1" source="4" target="8"/>
+  <EDGE type="1" source="5" target="9"/>
+  <EDGE type="1" source="6" target="9"/>
+  <EDGE type="1" source="10" target="7"/>
+  <EDGE type="1" source="11" target="7"/>
+  <EDGE type="1" source="14" target="8"/>
+  <EDGE type="1" source="15" target="8"/>
+  <EDGE type="1" source="12" target="9"/>
+  <EDGE type="1" source="13" target="9"/>
+</GRAPH>
+</LATTICES>

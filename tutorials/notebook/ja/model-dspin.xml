@@ -1,0 +1,46 @@
+<MODELS>
+<SITEBASIS name="spin">
+  <PARAMETER name="local_spin" default="local_S"/>
+  <PARAMETER name="local_S" default="1/2"/>
+  <QUANTUMNUMBER name="S" min="local_spin" max="local_spin"/>
+  <QUANTUMNUMBER name="Sz" min="-S" max="S"/>
+  <OPERATOR name="Splus" matrixelement="sqrt(S*(S+1)-Sz*(Sz+1))">
+    <CHANGE quantumnumber="Sz" change="1"/>
+  </OPERATOR>
+  <OPERATOR name="Sminus" matrixelement="sqrt(S*(S+1)-Sz*(Sz-1))">
+    <CHANGE quantumnumber="Sz" change="-1"/>
+  </OPERATOR>
+  <OPERATOR name="Sz" matrixelement="Sz"/>
+</SITEBASIS>
+
+<BASIS name="spin">
+  <SITEBASIS ref="spin">
+    <PARAMETER name="local_spin" value="local_S#"/>
+    <PARAMETER name="local_S#" value="1/2"/>
+  </SITEBASIS>
+  <CONSTRAINT quantumnumber="Sz" value="Sz_total"/>
+</BASIS>
+
+<HAMILTONIAN name="dimerized spin">
+  <PARAMETER name="J" default="1"/>
+  <PARAMETER name="h" default="0"/>
+  <BASIS ref="spin"/>
+  <SITETERM site="i">
+  <PARAMETER name="h#" default="h"/>
+     -h#*Sz(i)
+  </SITETERM>
+  <BONDTERM source="i" target="j">
+  <PARAMETER name="J#" default="J"/>
+     J#*Sz(i)*Sz(j)+J#/2*(Splus(i)*Sminus(j)+Sminus(i)*Splus(j))
+  </BONDTERM>
+</HAMILTONIAN>
+
+</MODELS>
+<!--
+   Copyright (c) 2003-2010 Matthias Troyer (troyer@ethz.ch)
+   
+   Distributed under the Boost Software License, Version 1.0.
+   (See accompanying file LICENSE_1_0.txt or copy at
+   http://www.boost.org/LICENSE_1_0.txt)
+  -->
+

@@ -1,0 +1,9 @@
+LATTICE="chain lattice"
+MODEL="spin"
+local_S=1
+J       = 1
+T_MIN   = 0.1
+T_MAX   = 10.0
+DELTA_T = 0.1
+CONSERVED_QUANTUMNUMBERS="Sz"
+{L = 8}

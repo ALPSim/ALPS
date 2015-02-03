@@ -1,0 +1,10 @@
+LATTICE="ladder"
+MODEL="spin"
+local_S=1/2
+J0       = 1
+J1	= 1
+T_MIN   = 0.05
+T_MAX   = 5.0
+DELTA_T = 0.05
+CONSERVED_QUANTUMNUMBERS="Sz"
+{L = 6}

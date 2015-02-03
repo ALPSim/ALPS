@@ -1,0 +1,14 @@
+MODEL="spin";
+LATTICE="square lattice";
+REPRESENTATION="SSE";
+MEASURE[Correlations]=true;
+MEASURE[Structure Factor]=true;
+MEASURE[Green Function]=true;
+THERMALIZATION=10000;
+SWEEPS=500000;
+J= 1;
+L=4;
+W=4;
+T=0.3;
+{h=0.1;}
+

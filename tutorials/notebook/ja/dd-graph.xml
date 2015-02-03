@@ -1,0 +1,25 @@
+<!--
+   Copyright (c) 2003-2010 Matthias Troyer (troyer@ethz.ch)
+    
+   Distributed under the Boost Software License, Version 1.0.
+   (See accompanying file LICENSE_1_0.txt or copy at
+   http://www.boost.org/LICENSE_1_0.txt)
+  -->
+
+<LATTICES>
+
+<GRAPH name="double dimer" vertices="4">
+  <VERTEX id="1" type="0"></VERTEX>
+  <VERTEX id="2" type="0"></VERTEX>
+  <VERTEX id="3" type="1"></VERTEX>
+  <VERTEX id="4" type="1"></VERTEX>
+  <EDGE type="0" source="1" target="2"/>
+  <EDGE type="0" source="3" target="4"/>
+  <EDGE type="1" source="1" target="3"/>
+  <EDGE type="1" source="1" target="4"/>
+  <EDGE type="1" source="2" target="3"/>
+  <EDGE type="1" source="2" target="4"/>
+</GRAPH>
+
+
+</LATTICES>

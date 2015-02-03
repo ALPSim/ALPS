@@ -1,0 +1,15 @@
+MODEL="spin";
+LATTICE="chain lattice";
+CONSERVED_QUANTUMNUMBERS="Sz";
+local_S=1;
+J=1;
+Sz_total=0
+{L=4}
+{L=6}
+{L=8}
+{L=10}
+Sz_total=1
+{L=4}
+{L=6}
+{L=8}
+{L=10}

@@ -1,0 +1,10 @@
+LATTICE="V15"
+MODEL="spin"
+LATTICE_LIBRARY="v15-graph.xml"
+local_S=1/2
+J       = 1
+T_MIN   = 0.05
+T_MAX   = 5.0
+DELTA_T = 0.05
+CONSERVED_QUANTUMNUMBERS="Sz"
+{T = 0.5}
