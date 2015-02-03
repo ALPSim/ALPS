@@ -59,6 +59,11 @@ void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
   //calculate initial G0
   matsubara_green_function_t G0_omega=clustertrans.initial_G0(parms, gf_shape);
   matsubara_green_function_t G_omega=G0_omega;
+
+  //Print a file that lists the momenta involved in the calculation
+  //They appear in the same order as the columns of the various output files
+  std::string momenta_filename= "momenta";
+  clustertrans.print_momenta(momenta_filename.c_str(), G_omega);
   
   int iteration_ctr = 0;
   matsubara_green_function_t G_old_omega(G0_omega);

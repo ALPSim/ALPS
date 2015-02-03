@@ -300,6 +300,7 @@ public:
   std::string generate_header_realspace(const matsubara_green_function_t & G) const;
   std::string generate_header_kspace(const itime_green_function_t & G) const;
   std::string generate_header_realspace(const itime_green_function_t & G) const;
+  void print_momenta(const char *filename, const matsubara_green_function_t & G) const;
 
   double epsilon(const vector_type &k) const
   {

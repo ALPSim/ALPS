@@ -201,6 +201,52 @@ int* DCATransformer::momentum_translation() const
   return m;
 }
 
+void DCATransformer::print_momenta(const char * filename, const matsubara_green_function_t & G) const{
+	std::ofstream momenta_file;
+	momenta_file.open(filename);
+	momenta_file<<std::setprecision(14);
+
+	int dim = this->dimension();
+	shape_t gf_shape = G.shape();
+
+	if (gf_shape == diagonal) {
+		for (unsigned int k = 0; k < G.nsite(); ++k) {
+			for (unsigned int d = 0; d < dim; ++d) {
+				momenta_file << cluster_momentum(k, d) << "\t";
+			}
+			momenta_file << "\n";
+		}
+	} else if (gf_shape == blockdiagonal) {
+		for (unsigned int k = 0; k < G.nsite(); k += 2)
+			for (unsigned int p1 = 0; p1 <= 1; p1++)
+				for (unsigned int p2 = 0; p2 <= 1; p2++) {
+					for (unsigned int d = 0; d < dim; ++d) {
+						momenta_file << cluster_momentum(k + p1, d) << "\t";
+					}
+					momenta_file << "\n";
+					for (unsigned int d = 0; d < dim; ++d) {
+						momenta_file << cluster_momentum(k + p2, d) << "\t";
+					}
+					momenta_file << "\n";
+				}
+
+	} else if (gf_shape == nondiagonal) {
+		for (unsigned int s1 = 0; s1 < G.nsite(); ++s1)
+			for (unsigned int s2 = 0; s2 < G.nsite(); ++s2) {
+				for (unsigned int d = 0; d < dim; ++d) {
+					momenta_file << cluster_momentum(s1, d) << "\t";
+				}
+				momenta_file << "\n";
+				for (unsigned int d = 0; d < dim; ++d) {
+					momenta_file << cluster_momentum(s2, d) << "\t";
+				}
+				momenta_file <<"\n";
+			}
+	}
+
+	momenta_file.close();
+}
+
 std::string DCATransformer::generate_header_kspace(const matsubara_green_function_t & G) const
 {
 	std::string header="Freq\t\t";
