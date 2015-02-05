@@ -4,3 +4,9 @@ true
 false
 is_embeddable_with_color_symmetries_test2()
 false
+is_embeddable_with_color_symmetries_test3()
+false
+true
+is_embeddable_with_color_symmetries_test4()
+false
+true

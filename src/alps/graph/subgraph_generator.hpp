@@ -124,7 +124,7 @@ namespace detail {
         typedef typename base_type::iterator                        iterator;
 
         subgraph_generator_impl(supergraph_type const& g, typename graph_traits<supergraph_type>::vertex_descriptor pin)
-            : base_type(g,pin)
+            : base_type(g,pin), max_degree_(0)
         {
             analyze_supergraph(g);
         }
@@ -228,7 +228,7 @@ namespace detail {
         typedef boost::tuple<unsigned int, edge_color_list_type> supergraph_info_type;
 
         subgraph_generator_impl(supergraph_type const& g, typename graph_traits<supergraph_type>::vertex_descriptor pin)
-            : base_type(g,pin)
+            : base_type(g,pin), max_degree_(0)
         {
             analyze_supergraph(g);
         }
@@ -409,7 +409,7 @@ namespace policies {
         inline bool try_to_embedd_in_supergraph(SubGraph const& sg, Graph const& g, typename boost::graph_traits<Graph>::vertex_descriptor pin, typename partition_type<SubGraph>::type const& sg_prop)
         {
             using alps::graph::is_embeddable;
-            return is_embeddable(sg,g,pin,get<alps::graph::partition>(canonical_properties(sg)));
+            return is_embeddable(sg,g,pin,sg_prop,c_);
         }
 
         /**

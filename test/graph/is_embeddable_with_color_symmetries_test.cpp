@@ -165,9 +165,116 @@ void is_embeddable_with_color_symmetries_test2()
     std::cout << std::boolalpha << is_embeddable(h,g,get<alps::graph::partition>(hp),color_symmetry) << std::endl;
 }
 
+void is_embeddable_with_color_symmetries_test3()
+{
+    std::cout << "is_embeddable_with_color_symmetries_test3()" << std::endl;
+    using alps::graph::canonical_properties;
+    using alps::graph::is_embeddable;
+
+    alps::graph::color_partition<graph_type>::type color_symmetry;
+    color_symmetry[0] = 0;
+    color_symmetry[1] = 0;
+
+    std::ifstream in("../../lib/xml/lattices.xml");
+    alps::Parameters parm;
+    parm["LATTICE"] = "anisotropic triangular lattice";
+    parm["L"]       = 2*5+1;
+    alps::graph_helper<> alps_lattice(in,parm);
+    alps::coordinate_graph_type g = alps_lattice.graph();
+    std::vector<unsigned int> edge_map(3);
+    edge_map[0] = 0;
+    edge_map[1] = 0;
+    edge_map[2] = 1;
+    alps::graph::remap_edge_types(g, edge_map);
+
+    // h:
+    //     3
+    //     |    +++ c0
+    //     0    --- c1
+    //    / +
+    //   2+++1    
+    graph_type h(4);
+    {
+        edge_color_map_type edge_color = get(alps::edge_type_t(),h);
+        edge_descriptor e;
+        e = add_edge(0, 1, h).first;
+        edge_color[e] = 1;
+        e = add_edge(0, 2, h).first;
+        edge_color[e] = 0;
+        e = add_edge(0, 3, h).first;
+        edge_color[e] = 0;
+        e = add_edge(1, 2, h).first;
+        edge_color[e] = 1;
+    }
+    canonical_properties_type hp = canonical_properties(h,color_symmetry);
+    std::cout << std::boolalpha << is_embeddable(h,g,((2*5*2*5+1)/2),get<alps::graph::partition>(hp)) << std::endl;
+    std::cout << std::boolalpha << is_embeddable(h,g,((2*5*2*5+1)/2),get<alps::graph::partition>(hp),color_symmetry) << std::endl;
+}
+
+void is_embeddable_with_color_symmetries_test4()
+{
+    std::cout << "is_embeddable_with_color_symmetries_test4()" << std::endl;
+    using alps::graph::canonical_properties;
+    using alps::graph::is_embeddable;
+
+    alps::graph::color_partition<graph_type>::type color_symmetry;
+    color_symmetry[0] = 0;
+    color_symmetry[1] = 0;
+
+    // g:
+    //     2        +++ c0
+    //    / \       --- c1
+    //   O+++1+++4 
+    //    \ /
+    //     3
+    graph_type g(5);
+    {
+        edge_color_map_type edge_color = get(alps::edge_type_t(),g);
+        edge_descriptor e;
+        e = add_edge(0, 1, g).first;
+        edge_color[e] = 0;
+        e = add_edge(0, 2, g).first;
+        edge_color[e] = 1;
+        e = add_edge(0, 3, g).first;
+        edge_color[e] = 1;
+        e = add_edge(1, 2, g).first;
+        edge_color[e] = 1;
+        e = add_edge(1, 3, g).first;
+        edge_color[e] = 1;
+        e = add_edge(1, 4, g).first;
+        edge_color[e] = 0;
+    }
+    canonical_properties_type gp = canonical_properties(g,color_symmetry);
+
+    // h:
+    //     3
+    //     |    +++ c0
+    //     0    --- c1
+    //    / +
+    //   2+++1    
+    graph_type h(4);
+    {
+        edge_color_map_type edge_color = get(alps::edge_type_t(),h);
+        edge_descriptor e;
+        e = add_edge(0, 1, h).first;
+        edge_color[e] = 0;
+        e = add_edge(0, 2, h).first;
+        edge_color[e] = 1;
+        e = add_edge(0, 3, h).first;
+        edge_color[e] = 1;
+        e = add_edge(1, 2, h).first;
+        edge_color[e] = 0;
+    }
+    canonical_properties_type hp = canonical_properties(h,color_symmetry);
+    std::cout << std::boolalpha << is_embeddable(h,g,1,get<alps::graph::partition>(hp)) << std::endl;
+    std::cout << std::boolalpha << is_embeddable(h,g,1,get<alps::graph::partition>(hp),color_symmetry) << std::endl;
+}
+
 int main()
 {
     is_embeddable_with_color_symmetries_test();
     is_embeddable_with_color_symmetries_test2();
+    is_embeddable_with_color_symmetries_test3();
+    is_embeddable_with_color_symmetries_test4();
     return 0;
 }

@@ -31,142 +31,58 @@
 
 static unsigned int const test_graph_size = 6;
 
-template <typename Graph>
-unsigned int generate_graphs_with_edge_color_symmetry(unsigned int order)
-{
-    std::ifstream in("../../lib/xml/lattices.xml");
-    alps::Parameters parm;
-    parm["LATTICE"] = "anisotropic triangular lattice";
-    parm["L"]       = 2*order+1;
-    alps::graph_helper<> alps_lattice(in,parm);
 
-    typedef alps::coordinate_graph_type lattice_graph_type;
-    lattice_graph_type& lattice_graph = alps_lattice.graph();
 
-    typedef alps::graph::subgraph_generator<Graph,lattice_graph_type,alps::graph::policies::edge_color_symmetries<Graph> > graph_gen_type;
-    graph_gen_type graph_gen(lattice_graph, 2*order*order);
-
-    typename alps::graph::color_partition<Graph>::type color_sym_group;
-    color_sym_group[0] = 0;
-    color_sym_group[1] = 0;
-    color_sym_group[2] = 0;
-    graph_gen.set_color_partition(color_sym_group);
-
-    typename graph_gen_type::iterator it,end;
-
-    boost::tie(it,end) = graph_gen.generate_up_to_n_edges(order);
-    return std::distance(it,end);
-}
-
-template <typename Graph>
-unsigned int generate_graphs_without_symmetry(unsigned int order)
+template <typename Graph, typename LatticeGraph>
+std::map<typename alps::graph::graph_label<Graph>::type,Graph> generate_graphs_with_edge_color_symmetry_g(Graph const&, LatticeGraph const& lattice_graph, typename alps::graph::color_partition<Graph>::type const& edge_color_symmetries, unsigned int order)
 {
     using alps::graph::canonical_properties;
-    std::ifstream in("../../lib/xml/lattices.xml");
-    alps::Parameters parm;
-    parm["LATTICE"] = "anisotropic triangular lattice";
-    parm["L"]       = 2*order+1;
-    alps::graph_helper<> alps_lattice(in,parm);
-
-    typedef alps::coordinate_graph_type lattice_graph_type;
-    lattice_graph_type& lattice_graph = alps_lattice.graph();
-
-    typedef alps::graph::subgraph_generator<Graph,lattice_graph_type> graph_gen_type;
-    typename graph_gen_type::iterator it,end;
-    graph_gen_type graph_gen(lattice_graph, 2*order*order);
-    boost::tie(it,end) = graph_gen.generate_up_to_n_edges(order);
-
-
-    // Identify symmetric graphs
-    typename alps::graph::color_partition<Graph>::type color_sym_group;
-    color_sym_group[0] = 0;
-    color_sym_group[1] = 0;
-    color_sym_group[2] = 0;
-
-    std::set<std::pair<std::size_t,typename alps::graph::graph_label<Graph>::type> > non_symmetric_graphs;
-    for( ;it != end; ++it)
-        non_symmetric_graphs.insert(std::make_pair(num_vertices(it->first),get<alps::graph::label>(canonical_properties(it->first,color_sym_group))));
-    return non_symmetric_graphs.size();
-}
-
-template <typename Graph>
-std::map<typename alps::graph::graph_label<Graph>::type,Graph> generate_graphs_with_edge_color_symmetry_g(unsigned int order)
-{
-    std::ifstream in("../../lib/xml/lattices.xml");
-    alps::Parameters parm;
-    parm["LATTICE"] = "anisotropic triangular lattice";
-    parm["L"]       = 2*order+1;
-    alps::graph_helper<> alps_lattice(in,parm);
-
-    typedef alps::coordinate_graph_type lattice_graph_type;
-    lattice_graph_type& lattice_graph = alps_lattice.graph();
-
-    typedef alps::graph::subgraph_generator<Graph,lattice_graph_type,alps::graph::policies::edge_color_symmetries<Graph> > graph_gen_type;
+    typedef alps::graph::subgraph_generator<Graph,LatticeGraph,alps::graph::policies::edge_color_symmetries<Graph> > graph_gen_type;
     graph_gen_type graph_gen(lattice_graph, 2*order*order);
 
-    typename alps::graph::color_partition<Graph>::type color_sym_group;
-    color_sym_group[0] = 0;
-    color_sym_group[1] = 0;
-    color_sym_group[2] = 0;
-    graph_gen.set_color_partition(color_sym_group);
+    graph_gen.set_color_partition(edge_color_symmetries);
 
     typename graph_gen_type::iterator it,end;
 
     boost::tie(it,end) = graph_gen.generate_up_to_n_edges(order);
-//    return std::distance(it,end);
     std::map<typename alps::graph::graph_label<Graph>::type,Graph> ret;
     for(; it != end; ++it)
         ret.insert(std::make_pair(get<alps::graph::label>(it->second),it->first));
     return ret;
 }
-template <typename Graph>
-std::map<typename alps::graph::graph_label<Graph>::type,Graph> generate_graphs_without_symmetry_g(unsigned int order)
+
+template <typename Graph, typename LatticeGraph>
+std::map<typename alps::graph::graph_label<Graph>::type,Graph> generate_graphs_without_edge_color_symmetry_g(Graph const&, LatticeGraph const& lattice_graph, typename alps::graph::color_partition<Graph>::type const& edge_color_symmetries, unsigned int order)
 {
     using alps::graph::canonical_properties;
-    std::ifstream in("../../lib/xml/lattices.xml");
-    alps::Parameters parm;
-    parm["LATTICE"] = "anisotropic triangular lattice";
-    parm["L"]       = 2*order+1;
-    alps::graph_helper<> alps_lattice(in,parm);
-
-    typedef alps::coordinate_graph_type lattice_graph_type;
-    lattice_graph_type& lattice_graph = alps_lattice.graph();
-
-    typedef alps::graph::subgraph_generator<Graph,lattice_graph_type> graph_gen_type;
+    typedef alps::graph::subgraph_generator<Graph,LatticeGraph> graph_gen_type;
     typename graph_gen_type::iterator it,end;
     graph_gen_type graph_gen(lattice_graph, 2*order*order);
     boost::tie(it,end) = graph_gen.generate_up_to_n_edges(order);
 
 
     // Identify symmetric graphs
-    typename alps::graph::color_partition<Graph>::type color_sym_group;
-    color_sym_group[0] = 0;
-    color_sym_group[1] = 0;
-    color_sym_group[2] = 0;
-
     std::map<typename alps::graph::graph_label<Graph>::type,Graph> non_symmetric_graphs;
     for( ;it != end; ++it)
-        non_symmetric_graphs.insert(std::make_pair(get<alps::graph::label>(canonical_properties(it->first,color_sym_group)),it->first));
+        non_symmetric_graphs.insert( std::make_pair(get<alps::graph::label>( canonical_properties( it->first, edge_color_symmetries) ), it->first) );
     return non_symmetric_graphs;
 }
 
-int main()
+template <typename Graph, typename LatticeGraph>
+bool test_lattice(LatticeGraph const& lattice_graph, typename alps::graph::color_partition<Graph>::type const& edge_color_symmetries, unsigned int order)
 {
-    typedef boost::adjacency_list<boost::vecS, boost::vecS,boost::undirectedS, boost::no_property, boost::property<alps::edge_type_t,alps::type_type> > graph_type;
-//    unsigned int n_wo_sym = generate_graphs_without_symmetry<graph_type>(test_graph_size);
-//    unsigned int n_w_sym = generate_graphs_with_edge_color_symmetry<graph_type>(test_graph_size);
-    typedef alps::graph::graph_label<graph_type>::type label;
-    std::map<label,graph_type> g_wo_sym = generate_graphs_without_symmetry_g<graph_type>(test_graph_size);
-    std::map<label,graph_type> g_w_sym = generate_graphs_with_edge_color_symmetry_g<graph_type>(test_graph_size);
+    typedef Graph graph_type;
+    typedef typename alps::graph::graph_label<graph_type>::type label;
+    std::map<label,graph_type> g_wo_sym = generate_graphs_without_edge_color_symmetry_g(graph_type(), lattice_graph, edge_color_symmetries, order);
+    std::map<label,graph_type> g_w_sym = generate_graphs_with_edge_color_symmetry_g(graph_type(), lattice_graph, edge_color_symmetries, order);
     unsigned int n_wo_sym = g_wo_sym.size();
     unsigned int n_w_sym  = g_w_sym.size();
 
     std::cout <<"w/o_sym:" << n_wo_sym << std::endl;
     std::cout <<"  w_sym:" << n_w_sym << std::endl;
-
     std::vector<label> r1;
     std::vector<label> r2;
-    std::map<label,graph_type>::iterator it(g_wo_sym.begin()), end(g_wo_sym.end());
+    typename std::map<label,graph_type>::iterator it(g_wo_sym.begin()), end(g_wo_sym.end());
     for(; it != end; ++it)
         r1.push_back(it->first);
     it = g_w_sym.begin(), end = g_w_sym.end();
@@ -189,5 +105,59 @@ int main()
             std::cout<< "w_sym:"<< g << std::endl;
         }
     }
-    return n_wo_sym == n_w_sym ? 0 : 1;
+    return difference.empty();
+}
+
+bool test_lattices(unsigned int order)
+{
+    typedef boost::adjacency_list<boost::vecS, boost::vecS,boost::undirectedS, boost::no_property, boost::property<alps::edge_type_t,alps::type_type> > graph_type;
+    typedef alps::coordinate_graph_type lattice_graph_type;
+    bool ok = true;
+    {
+        std::cout << "----------------------------------------------" << std::endl;
+        std::cout << "anisotropic tirangular lattice - 3 couplings: " << std::endl;
+        std::cout << "----------------------------------------------" << std::endl;
+        std::ifstream in("../../lib/xml/lattices.xml");
+        alps::Parameters parm;
+        parm["LATTICE"] = "anisotropic triangular lattice";
+        parm["L"]       = 2*order+1;
+        alps::graph_helper<> alps_lattice(in,parm);
+        lattice_graph_type& lattice_graph = alps_lattice.graph();
+
+        alps::graph::color_partition<graph_type>::type color_sym_group;
+        color_sym_group[0] = 0;
+        color_sym_group[1] = 0;
+        color_sym_group[2] = 0;
+
+        ok = ok && test_lattice<graph_type>(lattice_graph, color_sym_group, order);
+    }
+
+    {
+        std::cout << "----------------------------------------------" << std::endl;
+        std::cout << "anisotropic tirangular lattice - 2 couplings: " << std::endl;
+        std::cout << "----------------------------------------------" << std::endl;
+        std::ifstream in("../../lib/xml/lattices.xml");
+        alps::Parameters parm;
+        parm["LATTICE"] = "anisotropic triangular lattice";
+        parm["L"]       = 2*order+1;
+        alps::graph_helper<> alps_lattice(in,parm);
+        lattice_graph_type& lattice_graph = alps_lattice.graph();
+        std::vector<unsigned int> edge_map(3);
+        edge_map[0] = 0;
+        edge_map[1] = 0;
+        edge_map[2] = 1;
+        alps::graph::remap_edge_types(lattice_graph, edge_map);
+        alps::graph::color_partition<graph_type>::type color_sym_group;
+        color_sym_group[0] = 0;
+        color_sym_group[1] = 0;
+
+        ok = ok && test_lattice<graph_type>(lattice_graph, color_sym_group, order);
+    }
+    return ok;
+}
+
+int main()
+{
+    bool ok = test_lattices(test_graph_size);
+    return ok ? 0 : 1;
 }

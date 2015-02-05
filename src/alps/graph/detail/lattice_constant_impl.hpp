@@ -325,53 +325,6 @@ namespace alps {
             };
 
             template <typename Subgraph>
-            struct edge_equal_with_color_symmetries
-            {
-                typedef typename boost::property_map<Subgraph,alps::edge_type_t>::type::value_type color_type;
-                typedef typename color_partition<Subgraph>::type                                color_partition_type;
-                typedef std::vector<color_type>                                                 color_map_type;
-
-                static color_type const invalid = boost::integer_traits<color_type>::const_max;
-
-                edge_equal_with_color_symmetries(color_partition_type const& color_partition)
-                : color_partition_(color_partition), color_map_(color_partition_.size(),color_type(invalid))
-                {
-                    BOOST_STATIC_ASSERT(( has_property<alps::edge_type_t,Subgraph>::edge_property ));
-                }
-
-                void reset()
-                {
-                    color_map_.clear();
-                    color_map_.resize(color_partition_.size(),invalid);
-                }
-
-
-                template <typename Graph>
-                bool operator()(
-                      typename boost::graph_traits<Subgraph>::edge_descriptor const & s_e
-                    , typename boost::graph_traits<Graph>::edge_descriptor const & g_e
-                    , Subgraph const & S
-                    , Graph const & G
-                ) {
-                    color_type const sec = get(alps::edge_type_t(), S)[s_e];
-                    color_type const gec = get(alps::edge_type_t(), G)[g_e];
-                    assert(sec < color_map_.size());
-
-                    if(color_map_[sec] == invalid && color_partition_[sec] == color_partition_[gec])
-                    {
-                        // Try to add a mapping from color sec to color gec to the color_map_ while keeping the mapping unique.
-                        // (i.e. no two colors sec0,sec1 can be mapped to the same color gec)
-                        if(std::find(color_map_.begin(),color_map_.end(), gec) == color_map_.end())
-                            color_map_[sec] = gec;
-                    }
-                    return color_map_[sec] == gec;
-                }
-            private:
-                color_partition_type    color_partition_;
-                color_map_type          color_map_;
-            };
-
-            template <typename Subgraph>
             struct vertex_equal_simple
             {
               private:
