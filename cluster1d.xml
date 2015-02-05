@@ -205,5 +205,49 @@
     <UNITCELL ref="simple1d"/>
   </LATTICEGRAPH>
 
+
+  <!-- 1d 14-site cluster and superlattice -->
+  <LATTICE name="Chain1D_14 superlattice" dimension="1">
+    <BASIS>
+      <VECTOR>14 </VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>2*pi/14</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Chain1D_14">
+    <FINITELATTICE>
+      <LATTICE ref="Chain1D_14 superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple1d"/>
+  </LATTICEGRAPH>
+
+  <!-- 1d 16-site cluster and superlattice -->
+  <LATTICE name="Chain1D_16 superlattice" dimension="1">
+    <BASIS>
+      <VECTOR>16 </VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>2*pi/16</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Chain1D_16">
+    <FINITELATTICE>
+      <LATTICE ref="Chain1D_16 superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple1d"/>
+  </LATTICEGRAPH>
+
+
+
+
  
 </LATTICES>
