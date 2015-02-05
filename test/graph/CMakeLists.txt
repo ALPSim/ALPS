@@ -13,6 +13,7 @@ mark_as_advanced(ALPS_BUILD_GRAPH_TESTS)
 IF (ALPS_BUILD_GRAPH_TESTS)
 
     FOREACH (name
+            utils_test
             iso_simple
             canonical_label_test
             canonical_label_random_graphs_test

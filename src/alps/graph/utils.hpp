@@ -31,9 +31,11 @@
 
 #include <alps/lattice/graphproperties.h>
 #include <alps/lattice/propertymap.h>
+#include <alps/graph/canonical_properties_traits.hpp>
 #include <boost/static_assert.hpp>
 #include <cassert>
 #include <algorithm>
+#include <vector>
 
 namespace alps {
 namespace graph {
@@ -53,6 +55,23 @@ namespace detail {
     {
         typedef typename boost::graph_traits<Graph>::edge_iterator iterator;
         static std::pair<iterator,iterator> range(Graph const& g) { return edges(g); }
+    };
+
+    struct less_first
+    {
+        template <typename T>
+        bool operator() (T const& a, T const& b)
+        {
+            return a.first < b.first;
+        }
+    };
+    struct less_second
+    {
+        template <typename T>
+        bool operator() (T const& a, T const& b)
+        {
+            return a.second < b.second;
+        }
     };
 }
 
@@ -96,13 +115,62 @@ template <typename Graph>
 void remap_edge_types(Graph& g, std::vector<unsigned int> const& map)
 {
     BOOST_STATIC_ASSERT(( boost::is_same< typename boost::property_map<Graph, edge_type_t>::type::value_type, unsigned int>::value ));
-    assert( get_color_list(alps::edge_type_t(),g).size() == map.size() );
+    assert( get_color_list(alps::edge_type_t(),g).size() <= map.size() );
     typename boost::graph_traits<Graph>::edge_iterator it, end;
     for(boost::tie(it,end) = edges(g); it != end; ++it)
     {
         unsigned int type = get(alps::edge_type_t(),g,*it);
         put(alps::edge_type_t(),g,*it,map[type]);
     }
+}
+
+/**
+  * Constructs all color maps which map to colors that are equivalent under the symmetry given by the color_partition
+  * \parm The graph type, to deduce the color partition type
+  * \parm color_partition the color partition defining the symmetries between the colors.
+  * \return a vector of color mappings (which is a vector itself)
+  */
+template <typename Graph>
+std::vector< std::vector<typename boost::property_map<Graph,alps::edge_type_t>::type::value_type> >
+get_all_color_mappings_from_color_partition(Graph const&, typename color_partition<Graph>::type const& color_partition)
+{
+    using std::sort;
+    using std::next_permutation;
+    using std::max_element;
+    typedef typename boost::property_map<Graph,alps::edge_type_t>::type::value_type color_type;
+    unsigned int const end_c_id  = max_element(color_partition.begin(),color_partition.end(), detail::less_first())->first + 1;
+    unsigned int const end_cg_id = max_element(color_partition.begin(),color_partition.end(), detail::less_second())->second + 1;
+
+    std::vector< std::vector<color_type> > result( 1, std::vector<color_type>() );
+    std::vector< std::vector<color_type> > colors_per_partition(end_cg_id, std::vector<color_type>());
+    for(color_type c=0; c < end_c_id; ++c)
+    {
+        result[0].push_back(c);
+        colors_per_partition[color_partition.find(c)->second].push_back(c);
+    }
+
+    typename std::vector< std::vector<color_type> >::iterator cg_it(colors_per_partition.begin()), cg_end(colors_per_partition.end());
+    std::vector<color_type> permutations;
+    for(; cg_it != cg_end; ++cg_it)
+    {
+        permutations.clear();
+        permutations.insert(permutations.end(), cg_it->begin(), cg_it->end());
+        sort(permutations.begin(), permutations.end());
+        std::size_t const old_result_size = result.size();
+        // We skip the first permutation, because that's the identity.
+        while (next_permutation(permutations.begin(),permutations.end()))
+        {
+            result.reserve(result.size() + old_result_size);
+            typename std::vector< std::vector<color_type> >::iterator rit(result.begin()), rend(result.begin() + old_result_size);
+            for(; rit != rend; ++rit)
+            {
+                result.push_back(*rit);
+                for(std::size_t i=0; i < permutations.size(); ++i)
+                    result.back()[(*cg_it)[i]] = permutations[i];
+            }
+        }
+    }
+    return result;
 }
 
 } // end namespace graph
