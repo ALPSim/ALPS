@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html>
+ <head>
+
+  <title> How To Write an O(n) Simulation </title>
+
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="Generator" content="Vim 7.4 (Vi IMproved editor; http://www.vim.org/)"/>
+  <meta name="Author" content="Rico Häuselmann"/>
+  <meta name="Copyright" content="Copyright (C) November 06, 2014 "/>
+  <link rev="made" href="mailto:"/>
+  <link type="text/css" href="pygments.css" rel="stylesheet"></link>
+
+  <style type="text/css">
+   <!--
+   body {background: #FFFFFF; color: #000000;}
+   .content {margin-left: auto; margin-right: auto; max-width: 1024px;}
+   a:link {color: #0000EE;}
+   a:visited {color: #990066;}
+   a:hover, a:active, a:focus {color: #FF0000;}
+   -->
+  </style>
+
+ </head>
+ <body bgcolor="#FFFFFF" text="#000000" link="#0000EE" alink="#FF0000" vlink="#990066">
+     <div class="content">
+
+     <h1>HowTo: O(n) Spin Simulation</h1>
+<p>This document describes how to use the ALPS C++ Libraries to simulate a classical O(n) spin model using local updates.
+It also aims to show how to:</p>
+<ul>
+<li>make use of alps::mcbase to develop a monte carlo simulation</li>
+<li>use it's <code>update()</code> to implement your own model</li>
+<li>add observables to the model</li>
+<li>use the <code>measurements()</code> method to calculate and store measurements</li>
+<li>run a simulation developed using the described techniques</li>
+</ul>
+<p>It is meant as a starting point to write your own spin simulations using ALPS in C++. 
+The inline code examples are shortened for readability and may or may not compile.
+Refer to the source files for a runnable version.</p>
+<h3>Running a Simulation</h3>
+<p>First let's consider the basic structure of the main function needed to run our finished simulation in the end.
+This program reads parameters from a text input file with the structure <code>parameter=value</code>.</p>
+<div class="codehilite"><pre><span class="cm">/* my_mc_main.cpp */</span>
+
+<span class="p">#</span><span class="k">include</span> <span class="s">&quot;my_mc_sim.hpp&quot;</span>
+<span class="p">#</span><span class="k">include</span> <span class="o">&lt;</span><span class="n">alps</span><span class="o">/</span><span class="n">parseargs</span><span class="p">.</span><span class="n">hpp</span><span class="o">&gt;</span>
+<span class="p">#</span><span class="k">include</span> <span class="o">&lt;</span><span class="n">alps</span><span class="o">/</span><span class="n">stop_callback</span><span class="p">.</span><span class="n">hpp</span><span class="o">&gt;</span>
+
+<span class="k">int</span> <span class="n">main</span><span class="p">(</span><span class="k">int</span> <span class="n">argc</span><span class="p">,</span> <span class="n">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+    <span class="c1">// get commandline options and parameters</span>
+    <span class="n">alps</span><span class="o">::</span><span class="n">parseargs</span> <span class="n">options</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">);</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="n">alps</span><span class="o">::</span><span class="n">parameters_type</span><span class="o">&lt;</span> <span class="n">sim_type</span> <span class="o">&gt;::</span><span class="k">type</span><span class="p">(</span><span class="n">options</span><span class="p">.</span><span class="n">input_file</span><span class="p">);</span>
+
+    <span class="c1">// create and run the simulation</span>
+<span class="hll">    <span class="n">my_mc_sim</span> <span class="n">sim</span><span class="p">(</span><span class="n">parameters</span><span class="p">);</span>
+</span><span class="hll">    <span class="n">sim</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">alps</span><span class="o">::</span><span class="n">stop_callback</span><span class="p">(</span><span class="n">options</span><span class="p">.</span><span class="n">timelimit</span><span class="p">));</span>
+</span>
+    <span class="c1">// save the results in a hdf5 archive</span>
+    <span class="n">alps</span><span class="o">::</span><span class="n">hdf5</span><span class="o">::</span><span class="n">archive</span> <span class="n">ar</span><span class="p">(</span><span class="n">options</span><span class="p">.</span><span class="n">output_file</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">);</span>
+    <span class="n">ar</span><span class="p">[</span><span class="s">&quot;/parameters&quot;</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">parameters</span><span class="p">;</span>
+    <span class="n">ar</span><span class="p">[</span><span class="s">&quot;/simulation/results&quot;</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">results</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="no">EXIT_SUCCESS</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>It is not very big and the actual running of the simulation is all handled in the two highlighted lines.
+With just a few lines of code it can be made to take input files of different formats and to pick up from where it left if it was interrupted previously.</p>
+<h2>A Basic MC Simulation</h2>
+<h3>Simulation class</h3>
+<p>The simulation will be a derivate of alps::mcbase which already implements all the common tasks of Monte Carlo simulations.</p>
+<ul>
+<li>it can easily be initialized from a parameter file</li>
+<li>it automatically calls the user implemented update step to do system sweeps</li>
+<li>for every sweep it performs user implemented measurements</li>
+<li>it handles storing results and parameters to files.</li>
+<li>it can write out an intermediate state from which the simulation can be continued later</li>
+<li>it prints out progress information.</li>
+</ul>
+<p>The functions specific to a certain model are exposed as pure virtual functions and must be implemented when writing a simulation.
+Take a look at an empty definition of a simulation class which you might use as a template if you want to develop a simulation from scratch.</p>
+<div class="codehilite"><pre><span class="cm">/* my_mc_sim.hpp */</span>
+
+<span class="p">#</span><span class="k">include</span> <span class="o">&lt;</span><span class="n">alps</span><span class="o">/</span><span class="n">mcbase</span><span class="p">.</span><span class="n">hpp</span><span class="o">&gt;</span>
+<span class="p">#</span><span class="k">include</span> <span class="o">&lt;</span><span class="n">alps</span><span class="o">/</span><span class="n">hdf5</span><span class="o">/</span><span class="n">archive</span><span class="p">.</span><span class="n">hpp</span><span class="o">&gt;</span>
+
+<span class="k">class</span> <span class="no">ALPS_DECL</span> <span class="n">my_mc_sim</span> <span class="o">:</span> <span class="n">public</span> <span class="n">alps</span><span class="o">::</span><span class="n">mcbase</span> <span class="p">{</span>
+
+<span class="nl">public:</span>
+    <span class="n">my_mc_sim</span><span class="p">(</span><span class="n">parameters_type</span> <span class="k">const</span> <span class="o">&amp;</span> <span class="n">parms</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">size_t</span> <span class="n">seed_offset</span> <span class="o">=</span> <span class="mh">0</span><span class="p">);</span>
+
+<span class="hll">    <span class="k">virtual</span> <span class="k">void</span> <span class="n">update</span><span class="p">();</span> <span class="c1">// this will execute the MC update</span>
+</span>    <span class="k">virtual</span> <span class="k">void</span> <span class="n">measure</span><span class="p">();</span> <span class="c1">// this will perform measurements</span>
+<span class="hll">    <span class="k">virtual</span> <span class="n">double</span> <span class="n">fraction_completed</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span> <span class="c1">// this is used for progress output</span>
+</span>
+    <span class="n">using</span> <span class="n">alps</span><span class="o">::</span><span class="n">mcbase</span><span class="o">::</span><span class="n">save</span><span class="p">;</span>
+    <span class="k">virtual</span> <span class="k">void</span> <span class="n">save</span><span class="p">(</span><span class="n">alps</span><span class="o">::</span><span class="n">hdf5</span><span class="o">::</span><span class="n">archive</span> <span class="o">&amp;</span> <span class="n">ar</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span> <span class="c1">// save intermediate state</span>
+
+    <span class="n">using</span> <span class="n">alps</span><span class="o">::</span><span class="n">mcbase</span><span class="o">::</span><span class="n">load</span><span class="p">;</span>
+    <span class="k">virtual</span> <span class="k">void</span> <span class="n">load</span><span class="p">(</span><span class="n">alps</span><span class="o">::</span><span class="n">hdf5</span><span class="o">::</span><span class="n">archive</span> <span class="o">&amp;</span> <span class="n">ar</span><span class="p">);</span> <span class="c1">// load intermediate state to run from there.</span>
+
+<span class="nl">private:</span>
+    <span class="c1">// internal data</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>The highlighted functions <code>update()</code> and <code>measure()</code> define the behaviour of the model and they are called by mcbase's <code>run()</code> method each simulation step.</p>
+<p>The <code>save</code> and <code>load</code> functions can be used to store and load intermediate state of the run, allowing interrupted simulations to take up from where they left.
+To enable that functionality those functions have to be extended with any data members that contribute to the state of the simulation.
+An example in a spin simulation would be the data structure that holds the system's spins.</p>
+<p>the <code>fraction_completed</code> method should return a floating point number between 0.0 and 1.0 according to how far the simulation has progressed.</p>
+<p>In addition to those methods the base class has a number of data members to make our life easier.</p>
+<h2>Implementing the Model</h2>
+<p>The model used in this example is the O(N) model, a generalization of the Ising Model to spins of N dimensions.
+Special cases include the XY (N = 2) and Heisenberg (N = 3) models.
+The generalization is achieved in this example by templating the simulation class on the dimension N.</p>
+<p>Take a look at the class definition.</p>
+<div class="codehilite"><pre><span class="cp">#include &quot;tinyvector.hpp&quot;</span>
+<span class="n">template</span> <span class="o">&lt;</span> <span class="kt">int</span> <span class="n">N</span> <span class="o">&gt;</span>
+<span class="n">class</span> <span class="n">ALPS_DECL</span> <span class="n">ndim_spin_sim</span> <span class="o">:</span> <span class="n">public</span> <span class="n">alps</span><span class="o">::</span><span class="n">mcbase</span> <span class="p">{</span>
+    <span class="nl">public:</span>
+        <span class="k">typedef</span> <span class="n">tinyvector</span><span class="o">&lt;</span> <span class="kt">double</span><span class="p">,</span> <span class="n">N</span> <span class="o">&gt;</span> <span class="n">spintype</span><span class="p">;</span>
+
+        <span class="n">ndim_spin_sim</span><span class="p">(</span><span class="n">parameters_type</span> <span class="k">const</span> <span class="o">&amp;</span> <span class="n">parms</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">seed_offset</span> <span class="o">=</span> <span class="mi">0</span><span class="p">);</span>
+        <span class="n">virtual</span> <span class="kt">void</span> <span class="nf">update</span><span class="p">();</span>
+        <span class="n">virtual</span> <span class="kt">void</span> <span class="nf">measure</span><span class="p">();</span>
+        <span class="n">virtual</span> <span class="kt">double</span> <span class="n">fraction_completed</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+        <span class="n">using</span> <span class="n">alps</span><span class="o">::</span><span class="n">mcbase</span><span class="o">::</span><span class="n">save</span><span class="p">;</span>
+        <span class="n">virtual</span> <span class="kt">void</span> <span class="n">save</span><span class="p">(</span><span class="n">alps</span><span class="o">::</span><span class="n">hdf5</span><span class="o">::</span><span class="n">archive</span> <span class="o">&amp;</span> <span class="n">ar</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+        <span class="n">using</span> <span class="n">alps</span><span class="o">::</span><span class="n">mcbase</span><span class="o">::</span><span class="n">load</span><span class="p">;</span>
+        <span class="n">virtual</span> <span class="kt">void</span> <span class="nf">load</span><span class="p">(</span><span class="n">alps</span><span class="o">::</span><span class="n">hdf5</span><span class="o">::</span><span class="n">archive</span> <span class="o">&amp;</span> <span class="n">ar</span><span class="p">);</span>
+
+        <span class="k">const</span> <span class="n">spintype</span> <span class="nf">random_spin</span><span class="p">();</span> <span class="c1">// convenience funtion</span>
+
+    <span class="nl">private:</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span> <span class="n">spintype</span> <span class="o">&gt;</span> <span class="n">spins</span><span class="p">;</span>
+        <span class="n">alps</span><span class="o">::</span><span class="n">graph_helper</span><span class="o">&lt;&gt;</span> <span class="n">lattice</span><span class="p">;</span>
+
+        <span class="n">alps</span><span class="o">::</span><span class="n">uniform_on_sphere_n</span><span class="o">&lt;</span> <span class="n">N</span><span class="p">,</span> <span class="kt">double</span><span class="p">,</span> <span class="n">spintype</span> <span class="o">&gt;</span> <span class="n">random_spin_gen</span><span class="p">;</span>
+
+        <span class="kt">int</span> <span class="n">sweeps</span><span class="p">,</span> <span class="n">thermalization_sweeps</span><span class="p">,</span> <span class="n">total_sweeps</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">num_sites</span><span class="p">;</span>
+        <span class="kt">double</span> <span class="n">beta</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>The class template <code>tinyvector</code> (provided in the code) is a wrapper around boost::array with appropriate operators.
+The class now contains a vector named <code>spins</code> of tinyvectors as a representation of the system's spins.</p>
+<p>Next it needs a datastructure to hold the topology of the system, the <code>lattice</code>. 
+ALPS provides the Lattice classes for this purpose we access the lattices via the <code>graph_helper</code> class template.
+The kind of Lattice to be used as well as it's size can now all be specified in a parameter file.
+(Refer to the documentations for alps::lattice and boost::graph for more detail.)</p>
+<p>For the update step we will pick a random spin potential new direction vector for it.
+Those directions have to be uniformly distributed across the unit sphere. 
+That's where <code>alps::uniform_on_sphere_n</code> comes in, as well as <code>random_spin()</code>.
+The same function is also used to create a random starting configuration.</p>
+<p>The <code>sweeps</code> variable will be used as a counter and will tell us together with <code>thermalization_sweeps</code> and <code>total_sweeps</code>, which we'll read in as parameters.</p>
+<p>The last two variables can easily be calculated from parameters but are kept around because they're used often.</p>
+<h3>The constructor</h3>
+<p>Next we need to make sure we are initializing everything properly, the place to do that is the constructor.
+The constructor itself takes the same arguments as the constructor of mcbase, one of which has type <code>parameters_type</code>. 
+The base class is the first member to be initialized, so that it's member <code>parameters</code> can then be used to initialize our data members.
+An exception to this is the <code>lattice</code> which needs a different type of parameter object for which there is an adaptor function in <code>alps::make_deprecated_parameters</code>.</p>
+<div class="codehilite"><pre><span class="n">template</span><span class="o">&lt;</span> <span class="kt">int</span> <span class="n">N</span> <span class="o">&gt;</span>
+<span class="n">ndim_spin_sim</span><span class="o">&lt;</span> <span class="n">N</span> <span class="o">&gt;::</span><span class="n">ndim_spin_sim</span><span class="p">(</span><span class="n">parameters_type</span> <span class="k">const</span> <span class="o">&amp;</span> <span class="n">parms</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">seed_offset</span><span class="p">)</span>
+    <span class="o">:</span> <span class="n">alps</span><span class="o">::</span><span class="n">mcbase</span><span class="p">(</span><span class="n">parms</span><span class="p">,</span> <span class="n">seed_offset</span><span class="p">)</span>
+    <span class="p">,</span> <span class="n">lattice</span><span class="p">(</span><span class="n">alps</span><span class="o">::</span><span class="n">make_deprecated_parameters</span><span class="p">(</span><span class="n">parms</span><span class="p">))</span>
+    <span class="p">,</span> <span class="n">num_sites</span><span class="p">(</span><span class="n">lattice</span><span class="p">.</span><span class="n">num_sites</span><span class="p">())</span>
+    <span class="p">,</span> <span class="n">spins</span><span class="p">(</span><span class="n">num_sites</span><span class="p">())</span>
+    <span class="p">,</span> <span class="n">random_spin_gen</span><span class="p">()</span>
+    <span class="p">,</span> <span class="n">sweeps</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="p">,</span> <span class="n">thermalization_sweeps</span><span class="p">(</span><span class="kt">int</span><span class="p">(</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;THERMALIZATION&quot;</span><span class="p">]))</span>
+    <span class="p">,</span> <span class="n">total_sweeps</span><span class="p">(</span><span class="kt">int</span><span class="p">(</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;SWEEPS&quot;</span><span class="p">]))</span>
+    <span class="p">,</span> <span class="n">beta</span><span class="p">(</span><span class="mf">1.</span> <span class="o">/</span> <span class="kt">double</span><span class="p">(</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;T&quot;</span><span class="p">]))</span>
+<span class="p">{</span>
+    <span class="c1">//! initialize spins with random values</span>
+    <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">num_sites</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">spins</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">random_spin</span><span class="p">();</span>
+    <span class="p">}</span>
+</pre></div>
+
+
+<p>Now there's another member of the base class that makes life easy for us.
+It keeps a map of <code>Observables</code> to which we can just add all the quantities we want to measure.
+In this case we are going for Magnetic susceptibility and Correlations, so we need a timed average of the magnetization as well as it's square.</p>
+<div class="codehilite"><pre>    <span class="n">measurements</span>
+        <span class="o">&lt;&lt;</span> <span class="n">alps</span><span class="o">::</span><span class="n">accumulator</span><span class="o">::</span><span class="n">RealObservable</span><span class="p">(</span><span class="s">&quot;Energy&quot;</span><span class="p">)</span>
+        <span class="o">&lt;&lt;</span> <span class="n">alps</span><span class="o">::</span><span class="n">accumulator</span><span class="o">::</span><span class="n">RealVectorObservable</span><span class="p">(</span><span class="s">&quot;Magnetization&quot;</span><span class="p">)</span>
+        <span class="o">&lt;&lt;</span> <span class="n">alps</span><span class="o">::</span><span class="n">accumulator</span><span class="o">::</span><span class="n">RealObservable</span><span class="p">(</span><span class="s">&quot;Magnetization^2&quot;</span><span class="p">)</span>
+        <span class="o">&lt;&lt;</span> <span class="n">alps</span><span class="o">::</span><span class="n">accumulator</span><span class="o">::</span><span class="n">RealObservable</span><span class="p">(</span><span class="s">&quot;Magnetization^4&quot;</span><span class="p">)</span>
+        <span class="o">&lt;&lt;</span> <span class="n">alps</span><span class="o">::</span><span class="n">accumulator</span><span class="o">::</span><span class="n">RealVectorObservable</span><span class="p">(</span><span class="s">&quot;Correlations&quot;</span><span class="p">)</span>
+    <span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<h3>The update() function</h3>
+<p>This method contains the monte carlo step of the model, in this case a single spin update.</p>
+<div class="codehilite"><pre><span class="n">template</span><span class="o">&lt;</span> <span class="kt">int</span> <span class="n">N</span> <span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">ndim_spin_sim</span><span class="o">&lt;</span> <span class="n">N</span> <span class="o">&gt;::</span><span class="n">update</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">num_sites</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// get a random site</span>
+        <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="kt">int</span><span class="p">(</span><span class="kt">double</span><span class="p">(</span><span class="n">num_sites</span><span class="p">)</span> <span class="o">*</span> <span class="n">random</span><span class="p">());</span>
+        <span class="n">site_descriptor</span> <span class="n">site_i</span> <span class="o">=</span> <span class="n">lattice</span><span class="p">.</span><span class="n">site</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+
+        <span class="c1">// sum of neighbors</span>
+        <span class="n">spintype</span> <span class="n">nn_sum</span><span class="p">;</span>
+        <span class="n">nn_sum</span><span class="p">.</span><span class="n">initialize</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+        <span class="n">neighbor_iterator</span> <span class="n">nn_it</span><span class="p">,</span> <span class="n">nn_end</span><span class="p">;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">boost</span><span class="o">::</span><span class="n">tie</span><span class="p">(</span><span class="n">nn_it</span><span class="p">,</span> <span class="n">nn_end</span><span class="p">)</span> <span class="o">=</span> <span class="n">lattice</span><span class="p">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">site_i</span><span class="p">);</span> <span class="n">nn_it</span> <span class="o">!=</span> <span class="n">nn_end</span><span class="p">;</span> <span class="o">++</span><span class="n">nn_it</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">nn_sum</span> <span class="o">+=</span> <span class="n">spins</span><span class="p">[</span><span class="o">*</span><span class="n">nn_it</span><span class="p">];</span>
+        <span class="p">}</span>
+
+        <span class="c1">// single spin update, accept if delta_H &lt; 0 or with probability p</span>
+        <span class="n">spintype</span> <span class="n">new_spin</span> <span class="o">=</span> <span class="n">random_spin</span><span class="p">();</span>
+        <span class="kt">double</span> <span class="n">delta_H</span> <span class="o">=</span> <span class="n">dot</span><span class="p">(</span><span class="n">new_spin</span> <span class="o">-</span> <span class="n">spins</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">nn_sum</span><span class="p">);</span>
+        <span class="kt">double</span> <span class="n">p</span> <span class="o">=</span> <span class="n">exp</span><span class="p">(</span> <span class="o">-</span><span class="n">beta</span> <span class="o">*</span> <span class="n">delta_H</span> <span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span> <span class="n">p</span> <span class="o">&gt;=</span> <span class="mf">1.</span> <span class="o">||</span> <span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">p</span> <span class="p">)</span>
+            <span class="n">spins</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_spin</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>In order to obtain the Energy difference between the current and the new configuration we need to sum over the neighbors of the chosen spin site.
+Fortunately the lattice class has special neighbor iterators for this.</p>
+<h3>The measure() function</h3>
+<p>In this example we target quantities will be energy, magnetic susceptibility and the spin pair correlation function.
+In order to keep simulation time as low possible we record only measurements necessary to calculate our target quantities in a later analysis step.</p>
+<p>We record the magnetization as well as it's squared value because magnetic susceptibility can be defined as chi = V / T * ( &lt; m^2 &gt; - &lt; m &gt;^2 ), 
+where V is the volume, T is the temperature, m stands for magnetization and &lt; . &gt; stands for averaging with respect to time.</p>
+<p>It's good to know also that ALPS not only keeps a time series for every quantity we measure but will also save the average and error over time.</p>
+<div class="codehilite"><pre><span class="n">template</span> <span class="o">&lt;</span> <span class="kt">int</span> <span class="n">N</span> <span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">ndim_spin_sim</span><span class="o">&lt;</span> <span class="n">N</span> <span class="o">&gt;::</span><span class="n">measure</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">sweeps</span><span class="o">++</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">sweeps</span> <span class="o">&gt;</span> <span class="n">thermalization_sweeps</span><span class="p">)</span> <span class="p">{</span>
+</pre></div>
+
+
+<p>Because we don't want to record measurements during thermalization we keep a sweep counter and check if thermalization is finished.</p>
+<div class="codehilite"><pre>        <span class="n">spintype</span> <span class="n">magnetization</span><span class="p">;</span>
+        <span class="n">magnetization</span><span class="p">.</span><span class="n">initialize</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+        <span class="kt">double</span> <span class="n">energy</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span> <span class="kt">double</span> <span class="o">&gt;</span> <span class="n">corr</span><span class="p">(</span><span class="n">num_sites</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</pre></div>
+
+
+<p>We initialize the variables we use to calculate our measurements.
+Then we go on to calculating our quantities.</p>
+<div class="codehilite"><pre>        <span class="c1">// To measure magnetization and correlations we sum over all sites.</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">lattice</span><span class="p">.</span><span class="n">num_sites</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">magnetization</span> <span class="o">+=</span> <span class="n">spins</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+            <span class="n">corr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dot</span><span class="p">(</span><span class="n">spins</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">spins</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+        <span class="p">}</span>
+
+        <span class="c1">// To measure the Energy we sum only over neighbored sites (bonds in terms of the lattice).</span>
+        <span class="n">alps</span><span class="o">::</span><span class="n">graph_helper</span><span class="o">&lt;&gt;::</span><span class="n">bond_iterator</span> <span class="n">bond_it</span><span class="p">,</span> <span class="n">bond_end</span><span class="p">;</span>
+        <span class="k">for</span><span class="p">(</span><span class="n">boost</span><span class="o">::</span><span class="n">tie</span><span class="p">(</span><span class="n">bond_it</span><span class="p">,</span> <span class="n">bond_end</span><span class="p">)</span> <span class="o">=</span> <span class="n">lattice</span><span class="p">.</span><span class="n">bonds</span><span class="p">();</span> <span class="n">bond_it</span> <span class="o">!=</span> <span class="n">bond_end</span><span class="p">;</span> <span class="o">++</span><span class="n">bond_it</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">energy</span> <span class="o">+=</span> <span class="o">-</span> <span class="n">dot</span><span class="p">(</span><span class="n">spins</span><span class="p">[</span><span class="n">lattice</span><span class="p">.</span><span class="n">source</span><span class="p">(</span><span class="o">*</span><span class="n">bond_it</span><span class="p">)],</span> <span class="n">spins</span><span class="p">[</span><span class="n">lattice</span><span class="p">.</span><span class="n">target</span><span class="p">(</span><span class="o">*</span><span class="n">bond_it</span><span class="p">)]);</span>
+        <span class="p">}</span>
+
+        <span class="c1">// pull in operator/ for vectors</span>
+        <span class="n">using</span> <span class="n">alps</span><span class="o">::</span><span class="n">ngs</span><span class="o">::</span><span class="n">numeric</span><span class="o">::</span><span class="n">operator</span><span class="o">/</span><span class="p">;</span>
+        <span class="n">energy</span> <span class="o">/=</span> <span class="n">lattice</span><span class="p">.</span><span class="n">num_sites</span><span class="p">();</span> <span class="c1">//! $\frac{1}{V} \sum_{\text{i,j nn}}{\sigma_i \sigma_j}$</span>
+        <span class="n">magnetization</span> <span class="o">/=</span> <span class="n">lattice</span><span class="p">.</span><span class="n">num_sites</span><span class="p">();</span> <span class="c1">//! $\frac{1}{V} \sum_{i}{\sigma_i}$</span>
+        <span class="kt">double</span> <span class="n">magnetization2</span> <span class="o">=</span> <span class="n">dot</span><span class="p">(</span><span class="n">magnetization</span><span class="p">,</span> <span class="n">magnetization</span><span class="p">);</span>
+</pre></div>
+
+
+<p>The last step is to store our quantities.
+Our base class provides the <code>measurements</code> data member for this purpose.</p>
+<div class="codehilite"><pre>        <span class="n">measurements</span><span class="p">[</span><span class="s">&quot;Energy&quot;</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">energy</span><span class="p">;</span>
+        <span class="n">measurements</span><span class="p">[</span><span class="s">&quot;Magnetization&quot;</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">vector_from_tinyvector</span><span class="p">(</span><span class="n">magnetization</span><span class="p">);</span>
+        <span class="n">measurements</span><span class="p">[</span><span class="s">&quot;Magnetization^2&quot;</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">magnetization2</span><span class="p">;</span>
+        <span class="n">measurements</span><span class="p">[</span><span class="s">&quot;Magnetization^4&quot;</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">magnetization2</span> <span class="o">*</span> <span class="n">magnetization2</span><span class="p">;</span>
+        <span class="n">measurements</span><span class="p">[</span><span class="s">&quot;Correlations&quot;</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">corr</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<h3>save and load</h3>
+<p>For the save &amp; load functionality it is important that we extend the corresponding functions with the state information we added.</p>
+<div class="codehilite"><pre><span class="nx">template</span> <span class="o">&lt;</span><span class="nx">int</span> <span class="nb">N</span><span class="o">&gt;</span>
+<span class="bp">void</span> <span class="nx">ndim_spin_sim</span><span class="o">&lt;</span><span class="nb">N</span><span class="o">&gt;</span><span class="p">::</span><span class="nl">save</span><span class="p">(</span><span class="nx">alps</span><span class="p">::</span><span class="nl">hdf5</span><span class="p">::</span><span class="nl">archive</span> <span class="o">&amp;</span> <span class="nx">ar</span><span class="p">)</span> <span class="nx">const</span> <span class="p">{</span>
+    <span class="nx">mcbase</span><span class="p">::</span><span class="nl">save</span><span class="p">(</span><span class="nx">ar</span><span class="p">);</span>
+    <span class="nx">ar</span><span class="err">[</span><span class="s2">&quot;checkpoint/sweeps&quot;</span><span class="cp">]</span> <span class="err">&lt;</span><span class="nt">&lt; sweeps</span><span class="err">;</span>
+    <span class="na">ar</span><span class="cp">[</span><span class="s2">&quot;checkpoint/spins&quot;</span><span class="cp">]</span> <span class="err">&lt;&lt;</span> <span class="na">spins</span><span class="err">;</span>
+<span class="err">}</span>
+
+<span class="na">template</span> <span class="err">&lt;</span><span class="na">int</span> <span class="na">N</span><span class="nt">&gt;</span>
+void ndim_spin_sim<span class="nt">&lt;N&gt;</span>::load(alps::hdf5::archive <span class="err">&amp;</span> ar) {
+    mcbase::load(ar);
+    ar<span class="cp">[</span><span class="s2">&quot;checkpoint/sweeps&quot;</span><span class="cp">]</span> &gt;&gt; sweeps;
+    ar<span class="cp">[</span><span class="s2">&quot;checkpoint/spins&quot;</span><span class="cp">]</span> &gt;&gt; spins;
+}
+</pre></div>
+
+
+<h3>progress information</h3>
+<p>The <code>fraction_completed</code> method is easy to implement, here we choose to not count thermalization sweeps as progress.</p>
+<div class="codehilite"><pre><span class="nx">template</span> <span class="o">&lt;</span><span class="nx">int</span> <span class="nb">N</span><span class="o">&gt;</span>
+<span class="nx">double</span> <span class="nx">ndim_spin_sim</span><span class="o">&lt;</span><span class="nb">N</span><span class="o">&gt;</span><span class="p">::</span><span class="nl">fraction_completed</span><span class="p">()</span> <span class="nx">const</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nx">sweeps</span> <span class="o">&lt;</span> <span class="nx">thermalization_sweeps</span> <span class="o">?</span> <span class="mi">0</span><span class="nx">.</span> <span class="p">:</span> <span class="p">(</span> <span class="nx">sweeps</span> <span class="o">-</span> <span class="nx">thermalization_sweeps</span> <span class="p">)</span> <span class="o">/</span> <span class="nx">double</span><span class="p">(</span><span class="nx">total_sweeps</span><span class="p">));</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<h2>running an example experiment</h2>
+<p>All the steps involved in running an experiment are covered in greater detail in the ALPS documentation.
+There is different workflows available, the one shown here is python based because ALPS also provides some handy python modules.</p>
+<p>The basic process behind running our experiment is now</p>
+<ol>
+<li>create a set of parameter files with different values for T</li>
+<li>run our simulation for each of those</li>
+<li>collect, analyze and plot the results.</li>
+</ol>
+<h3>using python with ALPS</h3>
+<p>The first task is easily achieved by running the ALPS programm <code>parameter2xml</code> on a parameter file like the following.</p>
+<div class="codehilite"><pre><span class="n">LATTICE_LIBRARY</span><span class="o">=</span><span class="s">&quot;/opt/alps/lib/xml/lattices.xml&quot;</span>
+<span class="n">LATTICE</span><span class="o">=</span><span class="s">&quot;simple cubic lattice&quot;</span>
+<span class="n">L</span><span class="o">=</span><span class="mi">10</span>
+<span class="n">THERMALIZATION</span><span class="o">=</span><span class="mi">1000</span>
+<span class="n">SWEEPS</span><span class="o">=</span><span class="mi">100000</span>
+<span class="p">{</span><span class="n">T</span><span class="o">=</span><span class="mf">1.0</span><span class="p">;}</span>
+<span class="p">{</span><span class="n">T</span><span class="o">=</span><span class="mf">1.1</span><span class="p">;}</span>
+<span class="p">{</span><span class="n">T</span><span class="o">=</span><span class="mf">1.2</span><span class="p">;}</span>
+<span class="p">...</span>
+</pre></div>
+
+
+<p>this can also be done from python as follows (assuming <code>parameter2xml</code> is in your <code>PATH</code>)</p>
+<div class="codehilite"><pre><span class="kn">import</span> <span class="nn">subprocess32</span> <span class="kn">as</span> <span class="nn">sp</span>
+<span class="n">sp</span><span class="o">.</span><span class="n">call</span><span class="p">([</span><span class="s">&#39;parameter2xml&#39;</span><span class="p">,</span> <span class="o">&lt;</span><span class="nb">input</span> <span class="nb">file</span> <span class="n">name</span><span class="o">&gt;</span><span class="p">])</span>
+</pre></div>
+
+
+<p>The second step is also quite easy to do from standard python</p>
+<div class="codehilite"><pre><span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">input_files</span><span class="p">:</span>
+    <span class="n">run_out</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">check_output</span><span class="p">([</span><span class="n">args</span><span class="o">.</span><span class="n">program</span><span class="p">,</span> <span class="n">run_infile</span><span class="p">])</span>
+    <span class="k">print</span> <span class="n">run_out</span>
+</pre></div>
+
+
+<p>Both of the above snippets are taken from the <code>run</code> function in the provided source file <code>experiment.py</code>.
+The last step is very much up to the experimentator and the experiment to be performed.
+As examples i will just show the two functions in <code>experiment.py</code> which read in data from the simulation results
+and return ready-to-plot data.</p>
+<p>Again, all the functions that come with the <code>pyplot</code> module are described in the official ALPS documentation.</p>
+<div class="codehilite"><pre><span class="k">def</span> <span class="nf">get_chi</span><span class="p">(</span><span class="n">result_files</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;collect information and perform calculations for the magnetic susceptibility plot.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">T</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;T&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pyalps</span><span class="o">.</span><span class="n">loadProperties</span><span class="p">(</span><span class="n">result_files</span><span class="p">)])</span>
+    <span class="n">V</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;L&#39;</span><span class="p">]</span><span class="o">**</span><span class="mi">3</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pyalps</span><span class="o">.</span><span class="n">loadProperties</span><span class="p">(</span><span class="n">result_files</span><span class="p">)])</span>
+    <span class="n">mag</span>  <span class="o">=</span> <span class="n">get_vector_data</span><span class="p">(</span><span class="n">result_files</span><span class="p">,</span> <span class="n">what</span><span class="o">=</span><span class="s">&#39;Magnetization&#39;</span><span class="p">)</span>
+    <span class="n">mm</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">pyalps</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">sq</span><span class="p">)(</span><span class="n">mag</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">m2</span>   <span class="o">=</span> <span class="n">get_scalar_data</span><span class="p">(</span><span class="n">result_files</span><span class="p">,</span> <span class="n">what</span><span class="o">=</span><span class="s">&#39;Magnetization^2&#39;</span><span class="p">)</span>
+
+    <span class="n">beta</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="n">T</span>
+    <span class="n">chi</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">V</span> <span class="o">*</span> <span class="p">(</span><span class="n">m2</span> <span class="o">-</span> <span class="n">mm</span><span class="p">)</span>
+
+    <span class="n">chi_dt</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="s">&#39;f8&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;chi&#39;</span><span class="p">,</span> <span class="s">&#39;object&#39;</span><span class="p">)]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">chi</span><span class="p">),</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">chi_dt</span><span class="p">)</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s">&#39;T&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+
+
+<div class="codehilite"><pre><span class="k">def</span> <span class="nf">get_corr</span><span class="p">(</span><span class="n">result_files</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;collect information and perform calculations for the correlation function plot.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">T</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;T&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pyalps</span><span class="o">.</span><span class="n">loadProperties</span><span class="p">(</span><span class="n">result_files</span><span class="p">)])</span>
+    <span class="n">corr</span> <span class="o">=</span> <span class="n">get_vector_data</span><span class="p">(</span><span class="n">result_files</span><span class="p">,</span> <span class="n">what</span> <span class="o">=</span> <span class="s">&#39;Correlations&#39;</span><span class="p">)</span>
+    <span class="n">dist</span> <span class="o">=</span> <span class="n">get_vector_mean</span><span class="p">(</span><span class="n">result_files</span><span class="p">,</span> <span class="n">what</span> <span class="o">=</span> <span class="s">&#39;Distances&#39;</span><span class="p">)</span>
+    <span class="n">dist_corr_dt</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;dist&#39;</span><span class="p">,</span> <span class="s">&#39;f8&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;corr&#39;</span><span class="p">,</span> <span class="s">&#39;O&#39;</span><span class="p">)]</span>
+
+    <span class="n">cbins</span> <span class="o">=</span> <span class="p">[{</span><span class="n">i</span><span class="p">:[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">j</span><span class="p">)}</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">dist</span><span class="p">]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">result_files</span><span class="p">))]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">result_files</span><span class="p">)):</span>                                      <span class="c"># for each result file</span>
+        <span class="n">corr_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">dist</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">corr</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">dist_corr_dt</span><span class="p">)</span>   <span class="c"># group distance and correlation together</span>
+        <span class="k">for</span> <span class="n">cj</span> <span class="ow">in</span> <span class="n">corr_data</span><span class="p">:</span>
+            <span class="n">cbins</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">cj</span><span class="p">[</span><span class="s">&#39;dist&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cj</span><span class="p">[</span><span class="s">&#39;corr&#39;</span><span class="p">])</span>                         <span class="c"># group all correlations belongning to the same distance</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">cbins</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="n">cbins</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cbins</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cbins</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]))</span> <span class="p">)</span> <span class="c"># take the mean for every distance</span>
+
+        <span class="c"># group distance, mean correlation into a numpy array </span>
+        <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">d</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="n">cbins</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()],</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">dist_corr_dt</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s">&#39;dist&#39;</span><span class="p">)</span>                                        <span class="c"># sort in order of ascending distance</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">T</span>
+</pre></div>
+
+
+<p>And finally an example on how to find the result files used as parameters for the above functions (taken from the <code>analyze</code> function).</p>
+<div class="codehilite"><pre><span class="n">runs</span> <span class="o">=</span> <span class="n">pyalps</span><span class="o">.</span><span class="n">getResultFiles</span><span class="p">(</span><span class="n">prefix</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">infile</span><span class="p">)</span>
+<span class="n">chi_data</span> <span class="o">=</span> <span class="n">get_chi</span><span class="p">(</span><span class="n">runs</span><span class="p">)</span>
+</pre></div>
+
+
+<h3>Results</h3>
+<p><img src="plot_chi.png" alt="magnetic susceptibility plot" width=45%/>
+<img src="plot_corr.png" alt="correlation function plot" width=45%/></p>
+<h2>API Headers for reference</h2>
+<p>The following ALPS Headers were used:</p>
+<ul>
+<li><code>alps/mcbase.hpp</code></li>
+<li><code>alps/ngs/numeric.hpp</code></li>
+<li><code>alps/ngs/make_deprecated_parameters.hpp</code></li>
+<li><code>alps/random/uniform_on_sphere_n.hpp</code></li>
+<li><code>alps/lattice.h</code></li>
+<li><code>alps/hdf5/archive.hpp</code></li>
+<li><code>alps/hdf5/vector.hpp</code></li>
+<li><code>alps/hdf5/array.hpp</code></li>
+</ul>
+
+     </div>
+ </body>
+</html>
