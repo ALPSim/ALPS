@@ -37,7 +37,7 @@ class commandline_interface(object):
 def run_exp(args):
     '''create individual input files and run our simulation on them.
     '''
-    sp.call(['parameter2xml', args.infile])         # create an xml input file for each run
+    sp.check_output(['parameter2xml', args.infile])         # create an xml input file for each run
     runs = [f for f in os.listdir(os.getcwd()) if re.match('{}.task\d*.in.xml'.format(args.infile), f)]
     if args.j:                                      # in case the -j option is specified we want to use parallel
         prog_call = ['parallel', '-j', args.j, args.program, ':::']

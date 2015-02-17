@@ -5,7 +5,7 @@
 #ifndef HEISENBERG_HPP
 #define HEISENBERG_HPP
 
-#include "tinyvector.hpp"
+#include "tinyvector/tinyvector.hpp"
 
 #include <alps/mcbase.hpp>
 #include <alps/ngs/numeric.hpp>
@@ -32,7 +32,7 @@ template <int N>
 class ALPS_DECL ndim_spin_sim : public alps::mcbase {
 
     public:
-        typedef tinyvector<N> spintype;
+        typedef tinyvector<double, N, INTRIN_OPT> spintype;
         ndim_spin_sim(parameters_type const & parms, std::size_t seed_offset = 0);
 
         virtual void update();
@@ -155,7 +155,7 @@ void ndim_spin_sim<N>::measure() {
 
         // store the measurements
         measurements["Energy"] << energy;
-        measurements["Magnetization"] << vector_from_tinyvector(magnetization);
+        measurements["Magnetization"] << spintype::vector(magnetization);
         measurements["Magnetization^2"] << magnetization2;
         measurements["Magnetization^4"] << magnetization2 * magnetization2;
         measurements["Correlations"] << correlations;
