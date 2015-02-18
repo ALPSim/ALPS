@@ -56,10 +56,10 @@ res = pyalps.runApplication('dwa', input_file, Tmin=5, writexml=True)
 # Evaluating the simulation and preparing plots using Python
 import pyalps
 import matplotlib.pyplot as plt
-import pyalps.pyplot as aplt
+import pyalps.plot as aplt
 
 data = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm1a'),'Stiffness')
-magnetization = pyalps.collectXY(data,x='t',y='Stiffness')
+rhos = pyalps.collectXY(data,x='t',y='Stiffness')
 
 plt.figure()
 aplt.plot(rhos)
