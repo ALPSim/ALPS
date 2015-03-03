@@ -65,7 +65,7 @@ namespace detail {
         bool is_unknown(typename canonical_properties_type<subgraph_type>::type const& p) {
             typename graph_label<subgraph_type>::type const& label(boost::get<alps::graph::label>(p));
             // Try to insert the label and return true if it wasn't there yet
-            return labels_.insert(make_tuple(boost::get<0>(label).size(),label)).second;
+            return labels_.insert(boost::make_tuple(boost::get<0>(label).size(),label)).second;
         }
 
         /*

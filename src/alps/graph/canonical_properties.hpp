@@ -917,11 +917,15 @@ namespace alps {
             return detail::canonical_properties_impl(G, pi, label_creator);
         }
 
-        // Same as below, but also returns the map mapping the colors of the input graph to
+        // McKay’s canonical isomorph function Cm(G) is deﬁned to be
+        // Cm(G) = max{ Gpi: (pi, nu) is a leaf of T(G) }
+        // Input: graph G
+        // Output: canonical ordering, canonical label Gpi and orbit of G
+        // Optionally outputs the map mapping (color_mapping) the colors of the input graph to
         // its canonical representative with respect to the edge color symmetries.
         template<typename Graph>
         typename canonical_properties_type<Graph>::type
-        canonical_properties(Graph const & G, typename color_partition<Graph>::type const& c, boost::container::flat_map<alps::type_type, alps::type_type> & color_mapping ) {
+        canonical_properties(Graph const & G, typename color_partition<Graph>::type const& c, boost::container::flat_map<alps::type_type, alps::type_type> * const color_mapping = NULL) {
             // The McKay Algorithm works for simple graphs only!
             // (Note: Edges connected to the same vertex on both sides might work,
             // but were not considered in the papers and not tested here.)
@@ -943,21 +947,10 @@ namespace alps {
             label_creator.set_color_partition(c);
             // create canonical properties
             typename canonical_properties_type<Graph>::type r(detail::canonical_properties_impl(G, pi, label_creator));
-            color_mapping = label_creator.get_color_mapping();
+            if(color_mapping != NULL)
+                *color_mapping = label_creator.get_color_mapping();
             return r;
         }
-
-        // McKay’s canonical isomorph function Cm(G) is deﬁned to be
-        // Cm(G) = max{ Gpi: (pi, nu) is a leaf of T(G) }
-        // Input: graph G
-        // Output: canonical ordering, canonical label Gpi and orbit of G
-        template<typename Graph>
-        typename canonical_properties_type<Graph>::type
-        canonical_properties(Graph const & G, typename color_partition<Graph>::type const& c) {
-            boost::container::flat_map<alps::type_type, alps::type_type> color_mapping;
-            return canonical_properties(G,c,color_mapping);
-        }
-
 
         // Function overload for the previous function to ease generic programming.
         template<typename Graph>
