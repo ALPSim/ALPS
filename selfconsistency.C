@@ -40,7 +40,7 @@
 
 #include "solver.h"
 #include "externalsolver.h"
-
+#include <boost/tuple/tuple.hpp>
 void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver& solver,
                                 FrequencySpaceHilbertTransformer& hilbert) 
 {

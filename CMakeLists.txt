@@ -24,4 +24,4 @@ auxiliaryfunctions.C externalsolver.C main.C)
 
 add_executable(runTests test.cpp fouriertransform.C)
 target_link_libraries(dmft ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
-target_link_libraries(runTests ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread gtest)
+target_link_libraries(runTests ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread gtest gtest_main)
