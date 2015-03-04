@@ -22,6 +22,7 @@ selfconsistency_DCA.C selfconsistency_CDMFT.C
 AFM_transform.C DCA_transform.C CDMFT_transform.C hilberttransformer.C 
 auxiliaryfunctions.C externalsolver.C main.C)
 
-add_executable(runTests test.cpp fouriertransform.C)
+include_directories("${CMAKE_SOURCE_DIR}/gtest")
+add_executable(runTests test.cpp fouriertransform.C gtest/src/gtest-all.cc)
 target_link_libraries(dmft ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
-target_link_libraries(runTests ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread gtest gtest_main)
+target_link_libraries(runTests ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
