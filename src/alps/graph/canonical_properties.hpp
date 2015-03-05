@@ -707,9 +707,29 @@ namespace alps {
 
                         color_map_type get_color_mapping()
                         {
-                            color_map_type map(color_map_cached_);
-                            // Fill up the color map (if not all colors were used.)
-                            for(typename color_partition_type::const_iterator it = color_partition_.begin(); it != color_partition_.end(); ++it)
+                            color_map_type map;
+                            // Fill up the color map (if not all colors were used.) by inserting the used permutations
+                            for(typename color_map_type::const_iterator it = color_map_cached_.begin(), end = color_map_cached_.end(); it != end; ++it)
+                            {
+                                color_type perm_begin = it->first;
+                                color_type c1 = perm_begin;
+                                color_type c2 = it->second;
+                                while(map.insert(std::make_pair(c1,c2)).second)
+                                {
+                                    c1 = c2;
+                                    typename color_map_type::const_iterator next = color_map_cached_.find(c2);
+                                    if(next == end)
+                                    {
+                                        c2 = perm_begin;
+                                        map.insert(std::make_pair(c1,c2));
+                                        break;
+                                    }
+                                    else
+                                        c2 = next->second;
+                                }
+                            }
+                            // and add the remaining colors as identity
+                            for(typename color_partition_type::const_iterator it = color_partition_.begin(), end = color_partition_.end(); it != end; ++it)
                                 map.insert(std::make_pair(it->first,it->first));
                             return map;
                         }
