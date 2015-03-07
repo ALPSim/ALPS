@@ -177,8 +177,8 @@ void ExternalSolver::call(std::string const& infile, std::string const& outfile)
 {
   
   // call the external solver program
-  std::string command = exe_.native_file_string() + " " + infile + " " + outfile;
-  std::cerr << "Calling external solver " << exe_.native_file_string() << " as: "<<command<<std::endl;
+  std::string command = launch_command_ + " " + infile + " " + outfile;
+  std::cerr << "Calling external solver as: " <<  command<<std::endl;
   int result = std::system(command.c_str());
   if (result)
     throw std::runtime_error("System error code " +boost::lexical_cast<std::string>(result) + " encountered when executing command:\n"+command);
