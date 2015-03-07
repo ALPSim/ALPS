@@ -254,7 +254,8 @@ void selfconsistency_loop_CDMFT_Nambu(const alps::params& parms, ImpuritySolver&
 void perform_CDMFT_loop(const alps::params &parms){
   std::cout<<"running a CDMFT calculation"<<std::endl;
   std::string solver_path=parms["SOLVER"];
-  ImpuritySolver* solver_ptr=new ExternalSolver(boost::filesystem::path(solver_path));
+  //also do launcher here.
+  ImpuritySolver* solver_ptr=new ExternalSolver(solver_path);
   ClusterTransformer *transform_ptr=ClusterTransformer::generate_transformer(parms);
   if(parms["NAMBU"]){
     selfconsistency_loop_CDMFT_Nambu(parms, *solver_ptr, *(CDMFTTransformer*)transform_ptr);
