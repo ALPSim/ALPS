@@ -37,3 +37,12 @@ colored_edges_with_color_symmetry_test4()
 falsefalsefalse
 true
 false
+colored_edges_with_color_symmetry_test5()
+(0101001000 001110 (0 1))
+(0101001000 011100 (0 1))
+(0101001000 010101 (0 1))
+0->0 1->1 
+(0101001000 010101 (0 1))
+0->1 1->0 
+false
+true

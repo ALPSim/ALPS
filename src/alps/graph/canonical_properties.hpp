@@ -587,9 +587,11 @@ namespace alps {
 
                         void canonicalize_colors(
                               color_map_type & color_map
-                            , std::vector<edge_descriptor> & edge_list
+                            , std::vector<edge_descriptor> const& edge_list
                             , graph_type const& G
                         ) const {
+                            assert(( !color_partition_.empty() ));
+                            assert(( assert_helpers::color_partitions_are_complete(color_partition_, G) ));
                             for(typename std::vector<edge_descriptor>::const_iterator jt = edge_list.begin(); jt != edge_list.end(); ++jt) {
                                 typename color_map_type::iterator it = color_map.find(get(alps::edge_type_t(),G)[*jt]);
                                 if(it == color_map.end()) {
@@ -645,8 +647,6 @@ namespace alps {
                         // TODO: only add one edge from orbit to orbit not all edges
                         template <typename InternalLabel>
                         void update_graph_label(InternalLabel & l, typename partition_type<graph_type>::type const & pi, graph_type const & G) const {
-                            assert(( assert_helpers::edge_list_matches_graph(edge_list_, G) ));
-                            assert(( !color_partition_.empty() ));
                             assert(( assert_helpers::color_partitions_are_complete(color_partition_, G) ));
                             // The edge_label considers the symmetry,
                             // the hidden_edge_label ignores the symmetry to distinguish different realizations.
@@ -666,7 +666,7 @@ namespace alps {
                         }
 
                         template <typename FinalLabel, typename InternalLabel>
-                        void finalize_graph_label(FinalLabel & l, InternalLabel const & internal_label, typename partition_type<graph_type>::type const & pi, graph_type const & G) const {
+                        void finalize_graph_label(FinalLabel & l, InternalLabel const & internal_label, typename partition_type<graph_type>::type const & pi, graph_type const & G) {
                             using boost::get;
                             static std::size_t const end = boost::tuples::length<FinalLabel>::value;
                             graph_label_color_vector<color_type> colors;
@@ -675,12 +675,19 @@ namespace alps {
                                 colors.push_back(it->first);
                             get<end-2>(l) = get_part<edge_label>(internal_label);
                             swap(get<end-1>(l), colors);
+
+                            // Update the color map to the final partition for get_color_mapping.
+                            assert(( assert_helpers::edge_list_matches_graph(edge_list_, G) ));
+                            std::sort(edge_list_.begin(), edge_list_.end(), apply_label_edge_comp<graph_type>(pi, G));
+                            color_map_cached_.clear();
+                            canonicalize_colors(color_map_cached_, edge_list_, G);
                         }
 
-                        color_map_type get_color_mapping()
+                        color_map_type get_color_mapping() const
                         {
-                            color_map_type map;
+                            // This function is only allowed to be called after finalize_graph_label.
                             // Fill up the color map (if not all colors were used.) by inserting the used permutations
+                            color_map_type map;
                             for(typename color_map_type::const_iterator it = color_map_cached_.begin(), end = color_map_cached_.end(); it != end; ++it)
                             {
                                 color_type perm_begin = it->first;
@@ -747,7 +754,7 @@ namespace alps {
                           internal_label_type const & il
                         , typename partition_type<graph_type>::type const & pi
                         , graph_type const & G
-                    ) const {
+                    ) {
                         final_label_type fl;
                         get<0>(fl) = get_part<plain_label>(il);
                         vertex_label_policy::finalize_graph_label(fl,il,pi,G);
@@ -787,7 +794,7 @@ namespace alps {
             // Output: canonical ordering, canonical label and orbit of G
             template<typename Graph, typename LabelCreator>
             typename canonical_properties_type<Graph>::type
-            canonical_properties_impl(Graph const & G, typename partition_type<Graph>::type const& pi, LabelCreator const& label_creator) {
+            canonical_properties_impl(Graph const & G, typename partition_type<Graph>::type const& pi, LabelCreator & label_creator) {
                 using boost::get;
                 using boost::make_tuple;
                 typename partition_type<Graph>::type orbit, canonical_partition, first_partition;
