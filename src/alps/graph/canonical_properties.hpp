@@ -311,6 +311,41 @@ namespace alps {
                         pi[std::find(color_set.begin(), color_set.end(), get(alps::vertex_type_t(), G)[*it]) - color_set.begin()].push_back(*it);
             }
 
+            // Sort edges acoring to the given partition
+            template <typename Graph>
+            struct apply_label_edge_comp {
+                typedef Graph graph_type;
+                typedef typename boost::graph_traits<graph_type>::edge_descriptor edge_descriptor;
+                // Input: pi = (V1, V2, ..., Vr)
+                apply_label_edge_comp (typename partition_type<graph_type>::type const & pi, graph_type const & g)
+                    : G(g)
+                {
+                    ordering.reserve(num_vertices(g));
+                    for (typename partition_type<graph_type>::type::const_iterator it = pi.begin(); it != pi.end(); ++it)
+                        for (typename partition_type<graph_type>::type::value_type::const_iterator jt = it->begin(); jt != it->end(); ++jt)
+                            ordering.push_back(*jt);
+                }
+
+                // Comparison operator
+                bool operator() (
+                      edge_descriptor const & i
+                    , edge_descriptor const & j
+                ) const {
+                    std::size_t const Ai = std::find(ordering.begin(), ordering.end(), source(i, G)) - ordering.begin();
+                    std::size_t const Bi = std::find(ordering.begin(), ordering.end(), target(i, G)) - ordering.begin();
+                    std::size_t const Aj = std::find(ordering.begin(), ordering.end(), source(j, G)) - ordering.begin();
+                    std::size_t const Bj = std::find(ordering.begin(), ordering.end(), target(j, G)) - ordering.begin();
+                    return (std::min)(Ai, Bi) == (std::min)(Aj, Bj)
+                        ? (std::max)(Ai, Bi) < (std::max)(Aj, Bj)
+                        : (std::min)(Ai, Bi) < (std::min)(Aj, Bj)
+                    ;
+                }
+
+              private:
+                graph_type const & G;
+                std::vector<typename boost::graph_traits<graph_type>::vertex_descriptor> ordering;
+            };
+
             namespace label {
                 struct plain_label  : public graph_label_matrix_type { };
                 struct vertex_label : public graph_label_matrix_type { };
@@ -496,38 +531,6 @@ namespace alps {
                       private:
                         typedef typename boost::graph_traits<graph_type>::edge_descriptor                    edge_descriptor;
 
-                        // Sort edges acoring to the given partition
-                        struct apply_label_edge_comp {
-                            // Input: pi = (V1, V2, ..., Vr)
-                            apply_label_edge_comp (typename partition_type<graph_type>::type const & pi, graph_type const & g)
-                                : G(g)
-                            {
-                                ordering.reserve(num_vertices(g));
-                                for (typename partition_type<graph_type>::type::const_iterator it = pi.begin(); it != pi.end(); ++it)
-                                    for (typename partition_type<graph_type>::type::value_type::const_iterator jt = it->begin(); jt != it->end(); ++jt)
-                                        ordering.push_back(*jt);
-                            }
-
-                            // Comparison operator
-                            bool operator() (
-                                  edge_descriptor const & i
-                                , edge_descriptor const & j
-                            ) {
-                                std::size_t Ai, Bi, Aj, Bj;
-                                Ai = std::find(ordering.begin(), ordering.end(), source(i, G)) - ordering.begin();
-                                Bi = std::find(ordering.begin(), ordering.end(), target(i, G)) - ordering.begin();
-                                Aj = std::find(ordering.begin(), ordering.end(), source(j, G)) - ordering.begin();
-                                Bj = std::find(ordering.begin(), ordering.end(), target(j, G)) - ordering.begin();
-                                return std::min(Ai, Bi) == std::min(Aj, Bj)
-                                    ? std::max(Ai, Bi) < std::max(Aj, Bj)
-                                    : std::min(Ai, Bi) < std::min(Aj, Bj)
-                                ;
-                            }
-
-                            graph_type const & G;
-                            std::vector<typename boost::graph_traits<graph_type>::vertex_descriptor> ordering;
-                        };
-
                       public:
                         impl(graph_type const& G)
                         : colors_(get_color_list(alps::edge_type_t(),G))
@@ -547,7 +550,7 @@ namespace alps {
                         void update_graph_label(InternalLabel & l, typename partition_type<graph_type>::type const & pi, graph_type const & G) const {
                             assert(( assert_helpers::edge_list_matches_graph(edge_list_,G) ));
                             assert(( colors_ == get_color_list(alps::edge_type_t(),G) ));
-                            std::sort(edge_list_.begin(), edge_list_.end(), apply_label_edge_comp(pi, G));
+                            std::sort(edge_list_.begin(), edge_list_.end(), apply_label_edge_comp<graph_type>(pi, G));
                             // TODO: just make one row per orbit, not per vertex
                             get_part<edge_label>(l).clear();
                             get_part<edge_label>(l).resize(num_edges(G) * colors_.size());
@@ -581,37 +584,6 @@ namespace alps {
                         typedef typename color_partition<graph_type>::type                color_partition_type;
                         typedef typename boost::graph_traits<graph_type>::edge_descriptor edge_descriptor;
                         typedef boost::container::flat_map<color_type,color_type>         color_map_type;
-                        // Sort edges acoring to the given partition
-                        struct apply_label_edge_comp {
-                            // Input: pi = (V1, V2, ..., Vr)
-                            apply_label_edge_comp (typename partition_type<graph_type>::type const & pi, graph_type const & g)
-                                : G(g)
-                            {
-                                ordering.reserve(num_vertices(g));
-                                for (typename partition_type<graph_type>::type::const_iterator it = pi.begin(); it != pi.end(); ++it)
-                                    for (typename partition_type<graph_type>::type::value_type::const_iterator jt = it->begin(); jt != it->end(); ++jt)
-                                        ordering.push_back(*jt);
-                            }
-
-                            // Comparison operator
-                            bool operator() (
-                                  edge_descriptor const & i
-                                , edge_descriptor const & j
-                            ) {
-                                std::size_t Ai, Bi, Aj, Bj;
-                                Ai = std::find(ordering.begin(), ordering.end(), source(i, G)) - ordering.begin();
-                                Bi = std::find(ordering.begin(), ordering.end(), target(i, G)) - ordering.begin();
-                                Aj = std::find(ordering.begin(), ordering.end(), source(j, G)) - ordering.begin();
-                                Bj = std::find(ordering.begin(), ordering.end(), target(j, G)) - ordering.begin();
-                                return std::min(Ai, Bi) == std::min(Aj, Bj)
-                                    ? std::max(Ai, Bi) < std::max(Aj, Bj)
-                                    : std::min(Ai, Bi) < std::min(Aj, Bj)
-                                ;
-                            }
-
-                            graph_type const & G;
-                            std::vector<typename boost::graph_traits<graph_type>::vertex_descriptor> ordering;
-                        };
 
                         void canonicalize_colors(
                               color_map_type & color_map
@@ -678,7 +650,7 @@ namespace alps {
                             assert(( assert_helpers::color_partitions_are_complete(color_partition_, G) ));
                             // The edge_label considers the symmetry,
                             // the hidden_edge_label ignores the symmetry to distinguish different realizations.
-                            std::sort(edge_list_.begin(), edge_list_.end(), apply_label_edge_comp(pi, G));
+                            std::sort(edge_list_.begin(), edge_list_.end(), apply_label_edge_comp<graph_type>(pi, G));
 
                             color_map_cached_.clear();
                             canonicalize_colors(color_map_cached_, edge_list_, G);

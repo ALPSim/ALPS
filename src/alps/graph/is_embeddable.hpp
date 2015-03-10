@@ -25,6 +25,8 @@
  * DEALINGS IN THE SOFTWARE.                                                       *
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#ifndef ALPS_GRAPH_IS_EMBEDDABLE_HPP
+#define ALPS_GRAPH_IS_EMBEDDABLE_HPP
 
 #ifdef USE_LATTICE_CONSTANT_2D
 #include <alps/graph/lattice_constant_2d.hpp>
@@ -32,10 +34,8 @@
 #define ALPS_GRAPH_IS_EMBEDDABLE_HPP
 #endif // USE_LATTICE_CONSTANT_2D
 
-#ifndef ALPS_GRAPH_IS_EMBEDDABLE_HPP
-#define ALPS_GRAPH_IS_EMBEDDABLE_HPP
-
 #include <alps/graph/detail/lattice_constant_impl.hpp>
+#include <alps/graph/utils.hpp>
 
 namespace alps {
     namespace graph {
