@@ -378,7 +378,7 @@ BMatrix<double>::diagonalize(Vector<double>& ev)
   ev.resize(this->dim()); // eigenvalues
 
   iterator iter;
-  for(iter = begin(); iter != end(); iter++){
+  for(iter = ::std::list<SubMatrix<double> >::begin(); iter != ::std::list<SubMatrix<double> >::end(); iter++){
 
 #ifdef WITH_LAPACK
 
@@ -409,7 +409,7 @@ BMatrix<complex<double> >::diagonalize(Vector<double>& ev)
   ev.resize(this->dim()); // eigenvalues
 
   iterator iter;
-  for(iter = begin(); iter != end(); iter++){
+  for(iter = ::std::list<SubMatrix<complex<double> > >::begin(); iter != ::std::list<SubMatrix<complex<double> > >::end(); iter++){
 
     Matrix<complex<double> > &b = *iter;
 

@@ -35,6 +35,26 @@ namespace parameters {
     
     namespace conversion
     {
+        
+        // (M. Pikulski): special treatment is needed for lexical_cast<alps::Parameters::value_type, std::string>,
+        // deduce_target_char_type (boost) evaluates to wchar_t, which breaks lexical_cast.
+        // Problem encountered with Intel Composer 2013.
+        template<class T, class CastType>
+        std::vector<T> get_vector_impl_(std::string const& val)
+        {
+            std::string raw = val;
+            boost::trim_if(raw, boost::is_any_of("\"'"));
+            std::vector<T> ret;
+            
+            typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+            boost::char_separator<char> sep(",");
+            tokenizer tokens(raw, sep);
+            BOOST_FOREACH(std::string t, tokens) {
+              ret.push_back(boost::lexical_cast<CastType, std::string>(t));
+            }
+            return ret;
+        }
+        
         // this can be specialized to provide conversion for types that cannot be read
         // with the boost::any_cast, or whatever program options uses for the as<>
         // method
@@ -66,17 +86,16 @@ namespace parameters {
         {
             std::vector<T> operator()(std::string const & val)
             {
-                std::string raw = val;
-                boost::trim_if(raw, boost::is_any_of("\"'"));
-                std::vector<T> ret;
-            
-                typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-                boost::char_separator<char> sep(",");
-                tokenizer tokens(raw, sep);
-                BOOST_FOREACH(std::string t, tokens) {
-                  ret.push_back(boost::lexical_cast<T, std::string>(t));
-                }
-                return ret;
+                return get_vector_impl_<T, T>(val);
+            }
+        };
+
+        template<> struct get_<std::vector<alps::Parameters::value_type> >
+        {
+            typedef alps::Parameters::value_type T;
+            std::vector<T> operator()(std::string const & val)
+            {
+                return get_vector_impl_<T, std::string>(val); // Hack by M. Pikulski
             }
         };
     }
