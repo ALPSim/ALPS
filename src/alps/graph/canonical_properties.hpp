@@ -31,6 +31,17 @@
  *                                                                                 *
  * original paper: http://cs.anu.edu.au/~bdm/nauty/pgi.pdf                         *
  * the algorithm : http://www.math.unl.edu/~shartke2/math/papers/canonical.pdf     *
+ *                                                                                 *
+ * Be careful when looking at the examples of the algorithm paper.                 *
+ * There seems to be at least one mistake. The problem starts on page 6, where the *
+ * second table should read                                                        *
+ *                                                                                 *
+ *      \pi                 B            V_i    V_j                                *
+ *      (1|379|2468|5)   {(3,1), (3,2)} (2468)  (1)                                *
+ *      (1|379|68|24|5)  {(2,3),(2,4)}  (379)   (68)                               *
+ *      (1|37|9|68|24|5) \emptyset                                                 *
+ *                                                                                 *
+ * This results in a search tree different from Figure 2 (compare first branch).   *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #ifndef ALPS_GRAPH_CANONICAL_PROPERTIES_HPP
 #define ALPS_GRAPH_CANONICAL_PROPERTIES_HPP
@@ -802,7 +813,7 @@ namespace alps {
                 // A map assigning each vertex to an orbit
                 std::map<typename boost::graph_traits<Graph>::vertex_descriptor, std::size_t> Io;
                 // The orbit starts with a discrete partition (a partition with only trivial parts)
-                // orbit = (W1, W2, ..., Wr), Wi = (m1, m2, ..., mk), mi element of G
+                // orbit = (W1, W2, ..., Wr), Wi = (mi), mi element of G
                 orbit.reserve(num_vertices(G));
                 typename boost::graph_traits<Graph>::vertex_iterator vi, ve;
                 for (boost::tie(vi, ve) = vertices(G); vi != ve; ++vi)
