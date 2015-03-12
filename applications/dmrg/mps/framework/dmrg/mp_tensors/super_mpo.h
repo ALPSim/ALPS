@@ -31,7 +31,18 @@
 #include "dmrg/mp_tensors/mpo.h"
 #include "dmrg/block_matrix/grouped_symmetry.h"
 
-#include <boost/function.hpp>
+
+namespace detail {
+    /// This functor is needed because boost::function<> f = boost::lambda::bind()
+    /// fails with Boost 1.57.0 and Clang compilers.
+    template <class SymmGroup>
+    struct phys_fuse_functor {
+        typedef typename SymmGroup::charge charge;
+        charge operator()(charge a, charge b) {
+            return SymmGroup::fuse(a, -b);
+        }
+    };
+}
 
 /*
  * Building Super MPS from an MPO object
@@ -65,8 +76,7 @@ MPS<Matrix, SymmGroup> mpo_to_smps(MPO<Matrix, SymmGroup> const& mpo, Index<Symm
     
     MPS<Matrix, SymmGroup> mps(mpo.size());
     
-    boost::function<charge (charge, charge)> phys_fuse = boost::lambda::bind(static_cast<charge(*)(charge, charge)>(SymmGroup::fuse),
-                                                                             boost::lambda::_1, -boost::lambda::_2);
+    detail::phys_fuse_functor<SymmGroup> phys_fuse;
     
     Index<SymmGroup> phys2_i = phys_i*adjoin(phys_i);
     ProductBasis<SymmGroup> phys_prod(phys_i, phys_i, phys_fuse);
