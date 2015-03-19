@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <vector>
 #include <boost/algorithm/minmax.hpp>
+#include <boost/algorithm/cxx11/is_sorted.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
 #include <boost/graph/graph_traits.hpp>
@@ -103,6 +104,50 @@ bool graph_has_vertex(Graph const& g, typename boost::graph_traits<Graph>::verte
     typename boost::graph_traits<Graph>::vertex_iterator vb,ve;
     boost::tie(vb,ve) = vertices(g);
     return (std::find(vb,ve,v) != ve);
+}
+
+/**
+  * Checks if a partition has a valid structure
+  * \parm p The partition to be checked
+  * \parm g the graph the partition belongs to
+  */
+template <typename Graph>
+bool partition_has_valid_structure(typename alps::graph::partition_type<Graph>::type const& p, Graph const& g)
+{
+    using std::sort;
+    using std::equal;
+    using boost::algorithm::is_sorted;
+    bool ok = true;
+    // Check if each part is sorted
+    for(typename alps::graph::partition_type<Graph>::type::const_iterator it = p.begin(), end = p.end(); it != end; ++it)
+        ok = ok && is_sorted(it->begin(), it->end());
+    typename boost::graph_traits<Graph>::vertex_iterator vit,vend;
+    boost::tie(vit,vend) = vertices(g);
+
+    // Check if all vertices are present
+    std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> vg(vit,vend);
+    std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> vp;
+    for(typename alps::graph::partition_type<Graph>::type::const_iterator it = p.begin(), end = p.end(); it != end; ++it)
+        vp.insert(vp.end(), it->begin(), it->end());
+    sort(vg.begin(), vg.end());
+    sort(vp.begin(), vp.end());
+    ok = ok && (vg.size() == vp.size());
+    ok = ok && equal(vg.begin(), vg.end(), vp.begin());
+    return ok;
+}
+
+/**
+  * Checks if a partition is a discrete (i.e. has only trivial parts)
+  * \parm p The partition to be checked
+  * \parm g the graph the partition belongs to
+  */
+template <typename Graph>
+bool is_discrete_partition(typename alps::graph::partition_type<Graph>::type const& p, Graph const& g)
+{
+    bool ok = partition_has_valid_structure(p,g);
+    for(typename alps::graph::partition_type<Graph>::type::const_iterator it = p.begin(), end = p.end(); it != end; ++it)
+        ok = ok && (it->size() == 1);
+    return ok;
 }
 
 } // end namespace assert_helpers

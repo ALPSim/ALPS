@@ -25,9 +25,14 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <alps/lattice.h> // for cout << graph
+#include "generate_random_graph.hpp"
 #include <alps/graph/canonical_properties.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <iostream>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/algorithm/cxx11/is_sorted.hpp>
+
 
 using alps::graph::canonical_properties;
 
@@ -157,8 +162,126 @@ void orbit_test3()
     dump_partition(std::cout, get<alps::graph::partition>(gp_with_sym));
     std::cout << std::endl;
 }
+
+void orbit_test4()
+{
+    {
+        //     2
+        //     |
+        // 4---0+++3
+        //     |
+        //     1
+
+        graph_type g(4);
+        edge_color_map_type edge_color = get(alps::edge_type_t(),g);
+        edge_descriptor e;
+        e = add_edge(0, 1, g).first;
+        edge_color[e] = 0;
+        e = add_edge(0, 2, g).first;
+        edge_color[e] = 0;
+        e = add_edge(0, 3, g).first;
+        edge_color[e] = 1;
+        e = add_edge(0, 4, g).first;
+        edge_color[e] = 0;
+
+        alps::graph::canonical_properties_type<graph_type>::type gp(canonical_properties(g));
+        dump_partition(std::cout, get<alps::graph::partition>(gp));
+        std::cout << std::endl;
+    }
+
+    {
+        //     2
+        //     |
+        // 4+++0+++3
+        //     |
+        //     1
+        graph_type g(4);
+        edge_color_map_type edge_color = get(alps::edge_type_t(),g);
+        edge_descriptor e;
+        e = add_edge(0, 1, g).first;
+        edge_color[e] = 0;
+        e = add_edge(0, 2, g).first;
+        edge_color[e] = 0;
+        e = add_edge(0, 3, g).first;
+        edge_color[e] = 1;
+        e = add_edge(0, 4, g).first;
+        edge_color[e] = 1;
+
+        alps::graph::canonical_properties_type<graph_type>::type gp(canonical_properties(g));
+        dump_partition(std::cout, get<alps::graph::partition>(gp));
+        std::cout << std::endl;
+    }
+}
+
+void orbit_test5()
+{
+    //
+    //  7---0---6---2       // c0 ---
+    //  +           +       // c1 +++
+    //  1---5---3---4
+    //
+    {
+        graph_type g(8);
+        edge_color_map_type edge_color = get(alps::edge_type_t(),g);
+        edge_descriptor e;
+        e = add_edge(0, 7, g).first;
+        edge_color[e] = 0;
+        e = add_edge(0, 6, g).first;
+        edge_color[e] = 0;
+        e = add_edge(2, 6, g).first;
+        edge_color[e] = 0;
+        e = add_edge(2, 4, g).first;
+        edge_color[e] = 1;
+        e = add_edge(3, 4, g).first;
+        edge_color[e] = 0;
+        e = add_edge(3, 5, g).first;
+        edge_color[e] = 0;
+        e = add_edge(1, 5, g).first;
+        edge_color[e] = 0;
+        e = add_edge(1, 7, g).first;
+        edge_color[e] = 1;
+
+        alps::graph::canonical_properties_type<graph_type>::type gp(canonical_properties(g));
+        dump_partition(std::cout, get<alps::graph::partition>(gp));
+        std::cout << std::endl;
+    }
+
+    //
+    //  7---0---6---2       // c0 ---
+    //  +           +       // c1 +++
+    //  1---5---3---4
+    //
+    {
+        graph_type g(8);
+        edge_color_map_type edge_color = get(alps::edge_type_t(),g);
+        edge_descriptor e;
+        e = add_edge(0, 7, g).first;
+        edge_color[e] = 1;
+        e = add_edge(0, 6, g).first;
+        edge_color[e] = 1;
+        e = add_edge(2, 6, g).first;
+        edge_color[e] = 1;
+        e = add_edge(2, 4, g).first;
+        edge_color[e] = 0;
+        e = add_edge(3, 4, g).first;
+        edge_color[e] = 1;
+        e = add_edge(3, 5, g).first;
+        edge_color[e] = 1;
+        e = add_edge(1, 5, g).first;
+        edge_color[e] = 1;
+        e = add_edge(1, 7, g).first;
+        edge_color[e] = 0;
+
+        alps::graph::canonical_properties_type<graph_type>::type gp(canonical_properties(g));
+        dump_partition(std::cout, get<alps::graph::partition>(gp));
+        std::cout << std::endl;
+    }
+}
 int main() {
     orbit_test1();
     orbit_test2();
     orbit_test3();
+    orbit_test4();
+    orbit_test5();
+    return 0;
 }
