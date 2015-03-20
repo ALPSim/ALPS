@@ -222,7 +222,7 @@ calculate_bond_renyi_entropies(MPS<Matrix, SymmGroup> & mps, double n,
                 std::string c_str = oss_c.str();
                 for (std::size_t l = 0; l < s.left_basis()[k].second; ++l) {
                     labels.push_back( c_str );
-                    values.push_back( s[k](l,l) );
+                    values.push_back( s[k](l,l)*s[k](l,l) ); /// Entanglement spectrum is the square of the singular values
                 }
             }
             spectra->push_back(std::make_pair(labels, values));
