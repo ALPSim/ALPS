@@ -64,6 +64,10 @@ MPS<Matrix, SymmGroup>::MPS(size_t L, mps_initializer<Matrix, SymmGroup> & init)
 {
     init(*this);
     
+    /// if there are no blocks the code will crash.
+    if (L > 0 && (*this)[L-1].data().n_blocks() == 0)
+        throw std::runtime_error("MPS does not contain any valid quantum number block.\nMaybe a problem in your parameters?");
+    
     // MD: this is actually important
     //     it turned out, this is also quite dangerous: if a block is 1x2,
     //     normalize_left will resize it to 1x1
