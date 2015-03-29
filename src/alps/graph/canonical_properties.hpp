@@ -703,8 +703,7 @@ namespace alps {
                             color_map_type map;
                             for(typename color_map_type::const_iterator it = color_map_cached_.begin(), end = color_map_cached_.end(); it != end; ++it)
                             {
-                                color_type perm_begin = it->first;
-                                color_type c1 = perm_begin;
+                                color_type c1 = it->first;
                                 color_type c2 = it->second;
                                 while(map.insert(std::make_pair(c1,c2)).second)
                                 {
@@ -712,7 +711,10 @@ namespace alps {
                                     typename color_map_type::const_iterator next = color_map_cached_.find(c2);
                                     if(next == end)
                                     {
-                                        c2 = perm_begin;
+                                        // The color is unmapped, find the beginning of the permutation cycle which ends here and close it
+                                        typename color_map_type::const_iterator pr;
+                                        while( ( pr = std::find_if(color_map_cached_.begin(), color_map_cached_.end(), detail::equal_second<alps::type_type>(c2)) ) != color_map_cached_.end() )
+                                            c2 = pr->first;
                                         map.insert(std::make_pair(c1,c2));
                                         break;
                                     }

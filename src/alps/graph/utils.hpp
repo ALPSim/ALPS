@@ -73,6 +73,24 @@ namespace detail {
             return a.second < b.second;
         }
     };
+
+    template <typename T2>
+    struct equal_second
+    {
+        equal_second(T2 const& t)
+        : v_(t)
+        {
+        }
+
+        template <typename T1>
+        bool operator() (std::pair<T1,T2> const& a) const
+        {
+            return a.second == v_;
+        }
+
+      private:
+        T2 v_;
+    };
 }
 
 /**
