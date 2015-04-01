@@ -372,6 +372,29 @@ namespace alps {
             };
 
             template <typename Subgraph>
+            struct edge_equal_mapped_colors
+            {
+              public:
+                edge_equal_mapped_colors(std::vector<alps::type_type> const& map)
+                : map_(map)
+                {
+                }
+
+                template <typename Graph>
+                bool operator()(
+                  typename boost::graph_traits<Subgraph>::edge_descriptor const & s_e
+                , typename boost::graph_traits<Graph>::edge_descriptor const & g_e
+                , Subgraph const & S
+                , Graph const & G
+                ) const {
+                    assert( get(alps::edge_type_t(), S, s_e) < map_.size() );
+                    return map_[get(alps::edge_type_t(), S, s_e)] == get(alps::edge_type_t(), G, g_e);
+                }
+              private:
+                std::vector<alps::type_type> const& map_;
+            };
+
+            template <typename Subgraph>
             struct vertex_equal_simple
             {
               private:

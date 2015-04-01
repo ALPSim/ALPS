@@ -75,16 +75,14 @@ namespace alps {
             std::vector<std::vector<boost::uint_t<8>::fast> > distance_to_boarder;
 
             detail::vertex_equal_simple<Subgraph>   vertex_equal;
-            detail::edge_equal_simple<Subgraph>     edge_equal;
             detail::throw_on_embedding_found        throw_on_found_embedding;
             std::vector< std::vector<alps::type_type> > color_mappings = get_all_color_mappings_from_color_partition(S, color_partition);
             for(std::vector< std::vector<alps::type_type> >::iterator it = color_mappings.begin(); it != color_mappings.end(); ++it)
             { 
-                Subgraph S_cp(S);
-                remap_edge_types(S_cp, *it); 
                 try {
                     std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> V(1, v);
-                    detail::lattice_constant_impl(S_cp, G, V, subgraph_orbit, vertex_equal, edge_equal, throw_on_found_embedding);
+                    detail::edge_equal_mapped_colors<Subgraph> edge_equal(*it);
+                    detail::lattice_constant_impl(S, G, V, subgraph_orbit, vertex_equal, edge_equal, throw_on_found_embedding);
                 } catch (detail::embedding_found e) {
                     return true;
                 }
@@ -130,7 +128,6 @@ namespace alps {
             std::vector<std::vector<boost::uint_t<8>::fast> > distance_to_boarder;
 
             detail::vertex_equal_simple<Subgraph>               vertex_equal;
-            detail::edge_equal_simple<Subgraph>     edge_equal;
             detail::throw_on_embedding_found                    throw_on_found_embedding;
 
             std::vector< std::vector<alps::type_type> > color_mappings = get_all_color_mappings_from_color_partition(S, color_partition);
@@ -143,9 +140,8 @@ namespace alps {
                     V.push_back(*vt);
                     for(std::vector< std::vector<alps::type_type> >::iterator it = color_mappings.begin(); it != color_mappings.end(); ++it)
                     { 
-                        Subgraph S_cp(S);
-                        remap_edge_types(S_cp, *it); 
-                        detail::lattice_constant_impl(S_cp, G, V, subgraph_orbit, vertex_equal, edge_equal, throw_on_found_embedding);
+                        detail::edge_equal_mapped_colors<Subgraph> edge_equal(*it);
+                        detail::lattice_constant_impl(S, G, V, subgraph_orbit, vertex_equal, edge_equal, throw_on_found_embedding);
                     }
                 }
             } catch (detail::embedding_found e) {
