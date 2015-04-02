@@ -879,8 +879,15 @@ template <class T> SimpleObservableData<T> & SimpleObservableData<T>::operator<<
         std::copy(tmp.values2_.begin(), tmp.values2_.end(),
                   std::back_inserter(values2_));
       }
-      if (max_bin_number_ && max_bin_number_ < bin_number())
-        set_bin_number(max_bin_number_);
+      if (max_bin_number_ && max_bin_number_ < bin_number()) {
+        if (run.count() >= 4 * binsize_) {
+          set_bin_number(max_bin_number_);
+        } else {
+          // stop increasing bin_size, otherwise bin_size will exceed the measurement count of each run
+          // and the measurements in the following clons will not be merged - 2015-04-02 Synge
+          max_bin_number_ = 0;
+        }
+      }
     }
   }
   return *this;
