@@ -147,7 +147,7 @@
       <port id="6" moduleId="1" moduleName="Map" name="FunctionPort" signature="(org.vistrails.vistrails.basic:Module)" type="destination" />
     </add>
   </action>
-  <action date="2014-07-30 21:13:26" id="2" prevId="1" session="1" user="michele">
+  <action date="2015-04-02 17:32:42" id="2" prevId="1" session="1" user="troyer">
     <annotation id="3" key="__description__" value="Upgrade" />
     <delete id="34" objectId="1" parentObjId="0" parentObjType="connection" what="port" />
     <delete id="35" objectId="0" parentObjId="0" parentObjType="connection" what="port" />
@@ -198,7 +198,12 @@
       <port id="11" moduleId="5" moduleName="Map" name="FunctionPort" signature="(org.vistrails.vistrails.basic:Module)" type="destination" />
     </add>
   </action>
+  <action date="2015-04-02 17:32:47" id="3" prevId="2" session="1" user="troyer">
+    <change id="58" newObjId="6" oldObjId="4" parentObjId="4" parentObjType="module" what="location">
+      <location id="6" x="-448.53084691" y="808.11287569" />
+    </change>
+  </action>
   <annotation id="1" key="__abstraction_origin_uuid__" value="5a4d2bc7-1990-11e3-bd93-20c9d044a3eb" />
   <annotation id="2" key="__abstraction_uuid__" value="5a4d2bc7-1990-11e3-bd93-20c9d044a3eb" />
-  <actionAnnotation actionId="1" date="2014-07-30 21:13:26" id="4" key="__upgrade__" user="michele" value="2" />
+  <actionAnnotation actionId="1" date="2015-04-02 17:32:42" id="4" key="__upgrade__" user="troyer" value="2" />
 </vistrail>

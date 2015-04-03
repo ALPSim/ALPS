@@ -208,6 +208,11 @@
       <port id="11" moduleId="5" moduleName="Map" name="FunctionPort" signature="(org.vistrails.vistrails.basic:Module)" type="destination" />
     </add>
   </action>
+  <action date="2015-04-02 17:30:54" id="3" prevId="2" session="2" user="troyer">
+    <change id="59" newObjId="6" oldObjId="2" parentObjId="2" parentObjType="module" what="location">
+      <location id="6" x="-132.820372344" y="220.888504825" />
+    </change>
+  </action>
   <annotation id="2" key="__abstraction_origin_uuid__" value="16df5dae-19ed-11e3-a6cf-20c9d044a3eb" />
   <annotation id="3" key="__abstraction_uuid__" value="16df5dae-19ed-11e3-a6cf-20c9d044a3eb" />
   <actionAnnotation actionId="1" date="2014-07-30 21:13:50" id="5" key="__upgrade__" user="michele" value="2" />
