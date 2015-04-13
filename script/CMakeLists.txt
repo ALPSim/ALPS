@@ -6,8 +6,8 @@
 
 set(ALPS_INSPECT_SOURCES end_check.cpp license_check.cpp path_name_check.cpp 
           inspect.cpp tab_check.cpp)
-set(INSPECT_SOURCES link_check.cpp crlf_check.cpp  unnamed_namespace_check.cpp 
-          ascii_check.cpp copyright_check.cpp minmax_check.cpp apple_macro_check.cpp
+set(INSPECT_SOURCES deprecated_macro_check.cpp link_check.cpp crlf_check.cpp  unnamed_namespace_check.cpp
+          ascii_check.cpp copyright_check.cpp minmax_check.cpp apple_macro_check.cpp 
           assert_macro_check.cpp)
 set(DIRECTORY "${Boost_ROOT_DIR}/tools/inspect")
 include_directories(${DIRECTORY})

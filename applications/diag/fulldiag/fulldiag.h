@@ -492,7 +492,8 @@ std::vector<T> FullDiagMatrix<T>::calculate(operator_matrix_type const& m) const
   std::vector<value_type> av;
   for (unsigned i=0; i < num_cols(this->matrix()); ++i) {
     alps::numeric::column_view<matrix_type const> const v(this->matrix(),i);
-    av.push_back(scalar_product(conj(v),m*v));
+    //av.push_back(scalar_product(conj(v),m*v)); // scalar_product uses conj_mult [M. Pikulski]
+    av.push_back(scalar_product(v,m*v));
   }
   return av;
 }

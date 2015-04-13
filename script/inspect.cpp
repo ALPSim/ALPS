@@ -1,4 +1,4 @@
-//  inspect program  ---------------------------------------------------------//
+//  inspect program  -------------------------------------------------------------------//
 
 //  Copyright Beman Dawes 2002.
 //  Copyright Rene Rivera 2004-2006.
@@ -15,6 +15,11 @@
 
 //  See http://www.boost.org/tools/inspect/ for more information.
 
+const char* boost_no_inspect = "boost-" "no-inspect";
+
+//  Directories with a file name of the boost_no_inspect value are not inspected.
+//  Files that contain the boost_no_inspect value are not inspected.
+
 
 #include <vector>
 #include <list>
@@ -25,6 +30,15 @@
 #include "boost/lexical_cast.hpp"
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/fstream.hpp"
+
+#include <stdio.h>  // for popen, pclose
+#if defined(_MSC_VER)
+# define POPEN _popen
+# define PCLOSE _pclose
+#else
+# define POPEN popen
+# define PCLOSE pclose
+#endif
 
 #include "time_string.hpp"
 
@@ -41,12 +55,19 @@
 #include "ascii_check.hpp"
 #include "apple_macro_check.hpp"
 #include "assert_macro_check.hpp"
+#include "deprecated_macro_check.hpp"
 #include "minmax_check.hpp"
 #include "unnamed_namespace_check.hpp"
 
-#include "cvs_iterator.hpp"
+//#include "cvs_iterator.hpp"
 
+#if !defined(INSPECT_USE_BOOST_TEST)
+#define INSPECT_USE_BOOST_TEST 0
+#endif
+
+#if INSPECT_USE_BOOST_TEST
 #include "boost/test/included/prg_exec_monitor.hpp"
+#endif
 
 namespace fs = boost::filesystem;
 
@@ -54,6 +75,8 @@ using namespace boost::inspect;
 
 namespace
 {
+  fs::path search_root = fs::initial_path();
+  
   class inspector_element
   {
     typedef boost::shared_ptr< boost::inspect::inspector > inspector_ptr;
@@ -109,33 +132,89 @@ namespace
   typedef std::vector< lib_error_count > lib_error_count_vector;
   lib_error_count_vector libs;
 
-//  get info (as a string) if inspect_root is svn working copy  --------------//
+//  run subversion to get revisions info  ------------------------------------//
+//
+// implemented as function object that can be passed to boost::execution_monitor
+// in order to swallow any errors from 'svn info'.
 
-  void extract_info( fs::ifstream & entries_file, string & rev, string & repos )
-    {
-      std::getline( entries_file, rev );
-      std::getline( entries_file, rev );
-      std::getline( entries_file, rev );
-      std::getline( entries_file, rev );    // revision number as a string
-      std::getline( entries_file, repos );  // repository as a string
+  struct svn_check
+  {
+    explicit svn_check(const fs::path & inspect_root) :
+      inspect_root(inspect_root), fp(0) {}
+
+    int operator()() {
+      string rev("unknown");
+      string repos("unknown");
+      string command("cd ");
+      command += inspect_root.string() + " && svn info";
+
+      fp = (POPEN(command.c_str(), "r"));
+      if (fp)
+      {
+        static const int line_max = 128;
+        char line[line_max];
+        while (fgets(line, line_max, fp) != NULL)
+        {
+          string ln(line);
+          string::size_type pos;
+          if ((pos = ln.find("Revision: ")) != string::npos)
+            rev = ln.substr(pos + 10);
+          else if ((pos = ln.find("URL: ")) != string::npos)
+            repos = ln.substr(pos + 5);
+        }
+      }
+
+      result = repos + " at revision " + rev;
+      return 0;
     }
+
+    ~svn_check() { if (fp) PCLOSE(fp); }
+
+    const fs::path & inspect_root;
+    std::string result;
+    FILE* fp;
+  private:
+    svn_check(svn_check const&);
+    svn_check const& operator=(svn_check const&);
+  };
+
+  // Small helper class because svn_check can't be passed by copy.
+  template <typename F, typename R>
+  struct nullary_function_ref
+  {
+    explicit nullary_function_ref(F& f) : f(f) {}
+    R operator()() const { return f(); }
+    F& f;
+  };
+
+//  get info (as a string) if inspect_root is svn working copy  --------------//
 
   string info( const fs::path & inspect_root )
   {
-    string rev( "?" );
-    string repos( "unknown" );
-    fs::path entries( inspect_root / ".svn" / "entries" );
-    fs::ifstream entries_file( entries );
-    if ( entries_file )
-      extract_info( entries_file, rev, repos );
-    else
-    {
-      entries = inspect_root / ".." / "svn_info" / ".svn" / "entries";
-      fs::ifstream entries_file( entries );
-      if ( entries_file )
-        extract_info( entries_file, rev, repos );
+    svn_check check(inspect_root);
+
+#if !INSPECT_USE_BOOST_TEST
+    check();
+#else
+
+    try {
+      boost::execution_monitor e;
+      e.execute(nullary_function_ref<svn_check, int>(check));
     }
-    return repos + " at revision " + rev;
+    catch(boost::execution_exception const& e) {
+      if (e.code() == boost::execution_exception::system_error) {
+        // There was an error running 'svn info' - it probably
+        // wasn't run in a subversion repo.
+        return string("unknown");
+      }
+      else {
+        throw;
+      }
+    }
+
+#endif
+
+    return check.result;
   }
 
 //  visit_predicate (determines which directories are visited)  --------------//
@@ -144,31 +223,22 @@ namespace
 
   bool visit_predicate( const path & pth )
   {
-    string local( boost::inspect::relative_to( pth, fs::initial_path() ) );
-    string leaf( pth.filename().string() );
+    string local( boost::inspect::relative_to( pth, search_root_path() ) );
+    string leaf( pth.leaf().string() );
+    if (leaf[0] == '.')  // ignore hidden by convention directories such as
+      return false;      //  .htaccess, .git, .svn, .bzr, .DS_Store, etc.
+     
     return
-      // so we can inspect a checkout
+      // so we can inspect a CVS checkout
       leaf != "CVS"
       // don't look at binaries
       && leaf != "bin"
       && leaf != "bin.v2"
-      // this really out of our hands
-      && leaf != "jam_src"
-      && local.find("tools/jam/src") != 0
-      && local.find("tools/build/v2/engine") != 0
-      // too many issues with generated HTML files
-      && leaf != "status"
       // no point in checking doxygen xml output
       && local.find("doc/xml") != 0
-      // ignore some web files
-      && leaf != ".htaccess"
-      // ignore svn files:
-      && leaf != ".svn"
-      // ignore other version control files
-      && leaf != ".git"
-      && leaf != ".bzr"
-      // ignore OS X directory info files:
-      && leaf != ".DS_Store"
+      && local.find("doc\\xml") != 0
+      // ignore if tag file present
+      && !boost::filesystem::exists(pth / boost_no_inspect)
       ;
   }
 
@@ -203,7 +273,7 @@ namespace
   bool find_signature( const path & file_path,
     const boost::inspect::string_set & signatures )
   {
-    string name( file_path.filename().string() );
+    string name( file_path.leaf().string() );
     if ( signatures.find( name ) == signatures.end() )
     {
       string::size_type pos( name.rfind( '.' ) );
@@ -256,7 +326,6 @@ namespace
 
     for ( DirectoryIterator itr( dir_path ); itr != end_itr; ++itr )
     {
-
       if ( fs::is_directory( *itr ) )
       {
         if ( visit_predicate( *itr ) )
@@ -266,14 +335,14 @@ namespace
           visit_all<DirectoryIterator>( cur_lib, *itr, insps );
         }
       }
-      else
+      else if (itr->path().leaf().string()[0] != '.') // ignore if hidden
       {
         ++file_count;
         string content;
         load_content( *itr, content );
-        check( lib.empty()
-                ? library_from_content( content ) : lib
-               , *itr, content, insps );
+        if (content.find(boost_no_inspect) == string::npos)
+          check( lib.empty() ? library_from_content( content ) : lib,
+                 *itr, content, insps );
       }
     }
   }
@@ -296,7 +365,7 @@ namespace
 
   void display_summary_helper( const string & current_library, int err_count )
   {
-    if (display_text == display_format)
+    if (display_format == display_text)
     {
         std::cout << "  " << current_library << " (" << err_count << ")\n";
     }
@@ -315,7 +384,7 @@ namespace
 
   void display_summary()
   {
-    if (display_text == display_format)
+    if (display_format == display_text)
     {
       std::cout << "Summary:\n";
     }
@@ -342,20 +411,44 @@ namespace
     }
     display_summary_helper( current_library, err_count );
 
-    if (display_text == display_format)
+    if (display_format == display_text)
       std::cout << "\n";
     else
       std::cout << "</blockquote>\n"; 
   }
 
+//  html_encode  -------------------------------------------------------------//
+
+  std::string html_encode(std::string const& text)
+  {
+    std::string result;
+    
+    for(std::string::const_iterator it = text.begin(),
+        end = text.end(); it != end; ++it)
+    {
+      switch(*it) {
+      case '<':
+        result += "&lt;";
+        break;
+      case '>':
+        result += "&gt;";
+        break;
+      case '&':
+        result += "&amp;";
+        break;
+      default:
+        result += *it;
+      }      
+    }
+    
+    return result;
+  }
 
 //  display_details  ---------------------------------------------------------//
 
   void display_details()
   {
-    // gps - review this
-
-    if (display_text == display_format)
+    if (display_format == display_text)
     {
       // display error messages with group indication
       error_msg current;
@@ -386,7 +479,7 @@ namespace
             {
               std::cout << "\n  " << this_rel_path.branch_path().string() << '/';
             }
-            std::cout << "\n    " << this_rel_path.filename() << ':';
+            std::cout << "\n    " << this_rel_path.leaf() << ':';
           }
         }
         if ( current.library != itr->library
@@ -442,8 +535,8 @@ namespace
 
           // print the message
           if (itr->line_number)
-            std::cout << sep << "(line " << itr->line_number << ") " << itr->msg;
-          else std::cout << sep << itr->msg;
+            std::cout << sep << "(line " << itr->line_number << ") " << html_encode(itr->msg);
+          else std::cout << sep << html_encode(itr->msg);
 
           first_sep = false;
         }
@@ -494,7 +587,9 @@ namespace
 
   void display_worst_offenders()
   {
-    if (display_text == display_format)
+    if (display_mode == display_brief)
+      return;
+    if (display_format == display_text)
     {
       std::cout << "Worst Offenders:\n";
     }
@@ -514,7 +609,7 @@ namespace
                 || itr->error_count == last_error_count);
           ++itr, ++display_count )
     {
-      if (display_text == display_format)
+      if (display_format == display_text)
       {
         std::cout << itr->library << " " << itr->error_count << "\n";
       }
@@ -530,7 +625,7 @@ namespace
       last_error_count = itr->error_count;
     }
 
-    if (display_text == display_format)
+    if (display_format == display_text)
       std::cout << "\n";
     else
       std::cout << "</blockquote>\n"; 
@@ -550,6 +645,7 @@ namespace
          "  -ascii\n"
          "  -apple_macro\n"
          "  -assert_macro\n"
+         "  -deprecated_macro\n"
          "  -minmax\n"
          "  -unnamed\n"
          " default is all checks on; otherwise options specify desired checks"
@@ -588,6 +684,12 @@ namespace boost
       return display_format ? "\n" : "<br>\n";
     }
 
+//  search_root_path  --------------------------------------------------------//
+
+    path search_root_path()
+    {
+      return search_root;
+    }
 
 //  register_signature  ------------------------------------------------------//
 
@@ -605,7 +707,7 @@ namespace boost
       ++error_count;
       error_msg err_msg;
       err_msg.library = library_name;
-      err_msg.rel_path = relative_to( full_path, fs::initial_path() );
+      err_msg.rel_path = relative_to( full_path, search_root_path() );
       err_msg.msg = msg;
       err_msg.line_number = line_number;
       msgs.push_back( err_msg );
@@ -676,8 +778,8 @@ namespace boost
     // may return an empty string [gps]
     string impute_library( const path & full_dir_path )
     {
-      path relative( relative_to( full_dir_path, fs::initial_path() ) );
-      if ( relative.empty() ) return "alps-root";
+      path relative( relative_to( full_dir_path, search_root_path() ) );
+      if ( relative.empty() ) return "boost-root";
       string first( (*relative.begin()).string() );
       string second =  // borland 5.61 requires op=
         ++relative.begin() == relative.end()
@@ -695,7 +797,11 @@ namespace boost
 
 //  cpp_main()  --------------------------------------------------------------//
 
+#if !INSPECT_USE_BOOST_TEST
+int main( int argc_param, char * argv_param[] )
+#else
 int cpp_main( int argc_param, char * argv_param[] )
+#endif
 {
   // <hack> for the moment, let's be on the safe side
   // and ensure we don't modify anything being pointed to;
@@ -706,7 +812,9 @@ int cpp_main( int argc_param, char * argv_param[] )
   if ( argc > 1 && (std::strcmp( argv[1], "-help" ) == 0
     || std::strcmp( argv[1], "--help" ) == 0 ) )
   {
-    std::clog << "Usage: inspect [-cvs] [-text] [-brief] [options...]\n\n"
+    //std::clog << "Usage: inspect [search-root] [-cvs] [-text] [-brief] [options...]\n\n"
+    std::clog << "Usage: inspect [search-root] [-text] [-brief] [options...]\n\n"
+      " search-root default is the current directory (i.e. '.')\n\n"
       " Options:\n"
       << options() << '\n';
     return 0;
@@ -716,21 +824,28 @@ int cpp_main( int argc_param, char * argv_param[] )
   bool copyright_ck = true;
   bool crlf_ck = true;
   bool end_ck = true;
-  bool link_ck = false;
-  bool path_name_ck = false;
+  bool link_ck = true;
+  bool path_name_ck = true;
   bool tab_ck = true;
   bool ascii_ck = true;
-  bool apple_ok = true;
-  bool assert_ok = false;
-  bool minmax_ck = false;
+  bool apple_ck = true;
+  bool assert_ck = true;
+  bool deprecated_ck = true;
+  bool minmax_ck = true;
   bool unnamed_ck = true;
-  bool cvs = false;
+  //bool cvs = false;
 
-  if ( argc > 1 && std::strcmp( argv[1], "-cvs" ) == 0 )
+  if ( argc > 1 && *argv[1] != '-' )
   {
-    cvs = true;
+    search_root = fs::canonical(fs::absolute(argv[1], fs::initial_path()));
     --argc; ++argv;
   }
+
+  //if ( argc > 1 && std::strcmp( argv[1], "-cvs" ) == 0 )
+  //{
+  //  cvs = true;
+  //  --argc; ++argv;
+  //}
 
   if ( argc > 1 && std::strcmp( argv[1], "-text" ) == 0 )
   {
@@ -754,8 +869,9 @@ int cpp_main( int argc_param, char * argv_param[] )
     path_name_ck = false;
     tab_ck = false;
     ascii_ck = false;
-    apple_ok = false;
-    assert_ok = false;
+    apple_ck = false;
+    assert_ck = false;
+    deprecated_ck = false;
     minmax_ck = false;
     unnamed_ck = false;
   }
@@ -780,9 +896,11 @@ int cpp_main( int argc_param, char * argv_param[] )
     else if ( std::strcmp( argv[1], "-ascii" ) == 0 )
       ascii_ck = true;
     else if ( std::strcmp( argv[1], "-apple_macro" ) == 0 )
-      apple_ok = true;
+      apple_ck = true;
     else if ( std::strcmp( argv[1], "-assert_macro" ) == 0 )
-      assert_ok = true;
+      assert_ck = true;
+    else if ( std::strcmp( argv[1], "-deprecated_macro" ) == 0 )
+      deprecated_ck = true;
     else if ( std::strcmp( argv[1], "-minmax" ) == 0 )
         minmax_ck = true;
     else if ( std::strcmp( argv[1], "-unnamed" ) == 0 )
@@ -800,8 +918,6 @@ int cpp_main( int argc_param, char * argv_param[] )
   }
 
   string inspector_keys;
-  fs::initial_path();
-  
 
   { // begin reporting block
 
@@ -826,22 +942,24 @@ int cpp_main( int argc_param, char * argv_param[] )
       inspectors.push_back( inspector_element( new boost::inspect::tab_check ) );
   if ( ascii_ck )
       inspectors.push_back( inspector_element( new boost::inspect::ascii_check ) );
-  if ( apple_ok )
+  if ( apple_ck )
       inspectors.push_back( inspector_element( new boost::inspect::apple_macro_check ) );
-  if ( assert_ok )
+  if ( assert_ck )
       inspectors.push_back( inspector_element( new boost::inspect::assert_macro_check ) );
+  if ( deprecated_ck )
+      inspectors.push_back( inspector_element( new boost::inspect::deprecated_macro_check ) );
   if ( minmax_ck )
       inspectors.push_back( inspector_element( new boost::inspect::minmax_check ) );
   if ( unnamed_ck )
       inspectors.push_back( inspector_element( new boost::inspect::unnamed_namespace_check ) );
 
-  // perform the actual inspection, using the requested type of iteration
-  if ( cvs )
-    visit_all<hack::cvs_iterator>( "alps-root",
-      fs::initial_path(), inspectors );
-  else
-    visit_all<fs::directory_iterator>( "alps-root",
-      fs::initial_path(), inspectors );
+  //// perform the actual inspection, using the requested type of iteration
+  //if ( cvs )
+  //  visit_all<hack::cvs_iterator>( search_root.leaf().string(),
+  //    search_root, inspectors );
+  //else
+    visit_all<fs::directory_iterator>( search_root.leaf().string(),
+      search_root, inspectors );
 
   // close
   for ( inspector_list::iterator itr = inspectors.begin();
@@ -853,16 +971,12 @@ int cpp_main( int argc_param, char * argv_param[] )
   string run_date ( "n/a" );
   boost::time_string( run_date );
 
-  if (display_text == display_format)
+  if (display_format == display_text)
   {
     std::cout
       <<
-        "ALPS Inspection Report\n"
+        "Boost Inspection Report\n"
         "Run Date: " << run_date  << "\n"
-        "\n"
-        "An inspection program <http://www.boost.org/tools/inspect/index.html>\n"
-        "checks each file in the current ALPS sources for various problems,\n"
-        "generating an HTML page as output.\n"
         "\n"
       ;
 
@@ -890,8 +1004,10 @@ int cpp_main( int argc_param, char * argv_param[] )
       // we should not use a table, of course [gps]
       "<table>\n"
       "<tr>\n"
+      "<td><img src=\"http://www.boost.org/boost.png\" alt=\"Boost logo\" />"
+      "</td>\n"
       "<td>\n"
-      "<h1>ALPS Inspection Report</h1>\n"
+      "<h1>Boost Inspection Report</h1>\n"
       "<b>Run Date:</b> " << run_date  << "\n"
       //"&nbsp;&nbsp;/ " << validator_link( "validate me" ) << " /\n"
       "</td>\n"
@@ -903,7 +1019,7 @@ int cpp_main( int argc_param, char * argv_param[] )
       ;
     std::cout
       << "<p>The files checked were from "
-      << info( fs::initial_path() )
+      << info( search_root_path() )
       << ".</p>\n";
 
 
@@ -925,14 +1041,14 @@ int cpp_main( int argc_param, char * argv_param[] )
         ;
   }
 
-  if (display_text == display_format)
+  if (display_format == display_text)
      std::cout << "\nProblem counts:\n";
   else
     std::cout << "\n<h2>Problem counts</h2>\n<blockquote><p>\n" ;
 
   } // end of block: starts reporting
 
-  if (display_text == display_format)
+  if (display_format == display_text)
     std::cout << "\n" ;
   else
     std::cout << "</blockquote>\n";
@@ -942,25 +1058,29 @@ int cpp_main( int argc_param, char * argv_param[] )
   worst_offenders_count();
   std::stable_sort( libs.begin(), libs.end() );
 
-  if ( !libs.empty() )
+  if ( !libs.empty() && display_mode != display_brief)
     display_worst_offenders();
 
   if ( !msgs.empty() )
   {
     display_summary();
 
-    if (display_text == display_format)
+    if (display_format == display_text)
     {
       std::cout << "Details:\n" << inspector_keys;
-    }
+      std::cout << "\nDirectories with a file named \"" << boost_no_inspect << "\" will not be inspected.\n"
+                   "Files containing \"" << boost_no_inspect << "\" will not be inspected.\n";
+   }
     else
     {
       std::cout << "<h2>Details</h2>\n" << inspector_keys;
+      std::cout << "\n<p>Directories with a file named \"" << boost_no_inspect << "\" will not be inspected.<br>\n"
+                   "Files containing \"" << boost_no_inspect << "\" will not be inspected.</p>\n";
     }
     display_details();
   }
 
-  if (display_text == display_format)
+  if (display_format == display_text)
   {
     std::cout << "\n\n" ;
   }
@@ -971,5 +1091,5 @@ int cpp_main( int argc_param, char * argv_param[] )
       "</html>\n";
   }
 
-  return 0;
+  return error_count ? 1 : 0;
 }
