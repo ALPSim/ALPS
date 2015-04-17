@@ -119,7 +119,7 @@ if(BUILD_BOOST_SERIALIZATION)
       extended_type_info.cpp extended_type_info_no_rtti.cpp
       extended_type_info_typeid.cpp polymorphic_iarchive.cpp
       polymorphic_oarchive.cpp
-# shared_ptr_helper.cpp
+      shared_ptr_helper.cpp
       stl_port.cpp
       text_iarchive.cpp text_oarchive.cpp text_wiarchive.cpp
       text_woarchive.cpp utf8_codecvt_facet.cpp void_cast.cpp
