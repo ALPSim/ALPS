@@ -113,19 +113,30 @@ if(BUILD_BOOST_SERIALIZATION)
       basic_oserializer.cpp basic_pointer_iserializer.cpp
       basic_pointer_oserializer.cpp basic_serializer_map.cpp
       basic_text_iprimitive.cpp basic_text_oprimitive.cpp
-      basic_text_wiprimitive.cpp basic_text_woprimitive.cpp
       basic_xml_archive.cpp binary_iarchive.cpp binary_oarchive.cpp
-      binary_wiarchive.cpp binary_woarchive.cpp codecvt_null.cpp
+      codecvt_null.cpp
       extended_type_info.cpp extended_type_info_no_rtti.cpp
       extended_type_info_typeid.cpp polymorphic_iarchive.cpp
       polymorphic_oarchive.cpp
-      shared_ptr_helper.cpp
       stl_port.cpp
-      text_iarchive.cpp text_oarchive.cpp text_wiarchive.cpp
-      text_woarchive.cpp utf8_codecvt_facet.cpp void_cast.cpp
+      text_iarchive.cpp text_oarchive.cpp
+      utf8_codecvt_facet.cpp void_cast.cpp
       xml_archive_exception.cpp xml_grammar.cpp xml_iarchive.cpp
-      xml_oarchive.cpp xml_wgrammar.cpp xml_wiarchive.cpp
-      xml_woarchive.cpp)
+      xml_oarchive.cpp
+      )
+  if(NOT (Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION EQUAL 56) )
+      # Bug in boost 1.56 causes duplicate symbols when including basic_text_wiprimitive
+      set(SOURCES ${SOURCES}
+          basic_text_wiprimitive.cpp basic_text_woprimitive.cpp
+          binary_wiarchive.cpp binary_woarchive.cpp
+          text_wiarchive.cpp text_woarchive.cpp
+          xml_wgrammar.cpp xml_wiarchive.cpp xml_woarchive.cpp)
+  endif(NOT (Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION EQUAL 56) )
+  if(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION LESS 56)
+      set(SOURCES ${SOURCES}
+          shared_ptr_helper.cpp)
+  endif(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION LESS 56)
+  
   foreach(S ${SOURCES})
     if(EXISTS ${DIRECTORY}/${S})
       set(BOOST_SOURCES ${BOOST_SOURCES} ${DIRECTORY}/${S})
