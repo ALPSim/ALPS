@@ -206,7 +206,7 @@ class ALPS_DECL Depletion : public DepletionDescriptor
 {
 public:
   Depletion(DepletionDescriptor const& depl, std::size_t num_sites);
-  bool exists(std::size_t site) const { return mapping[site];}
+  bool exists(std::size_t site) const { return static_cast<bool>(mapping[site]);}
   std::size_t mapped_site(std::size_t site) const { return mapping[site].get();}
   std::size_t num_sites() { return num;}
 private:
