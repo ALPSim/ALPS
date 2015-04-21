@@ -49,4 +49,4 @@ true
 colored_edges_with_color_symmetry_test6()
 (010100 0110 (0 2))
 (010100 001001 (0 1 2))
-0->1 1->2 2->0 
+0->0 1->2 2->1 

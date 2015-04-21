@@ -4,7 +4,7 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2014 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2010 - 2015 by Lukas Gamper <gamperl@gmail.com>                   *
  *                              Andreas Hehn <hehn@phys.ethz.ch>                   *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
@@ -753,6 +753,9 @@ namespace alps {
                     graph_label_creator(graph_type const& g)
                     : vertex_label_policy(g), edge_label_policy(g)
                     {
+#ifndef NDEBUG
+                        locked_ = false;
+#endif //NDEBUG
                     }
 
                     void update_graph_label(
@@ -760,23 +763,40 @@ namespace alps {
                         , typename partition_type<graph_type>::type const & pi
                         , graph_type const & G
                     ) const {
+                        assert( !locked_ && "No calls allowed after fix_final_graph_label");
                         update_plain_label(l,pi,G);
                         vertex_label_policy::update_graph_label(l,pi,G);
                         edge_label_policy::update_graph_label(l,pi,G);
                     }
 
-                    final_label_type get_final_graph_label(
+                    final_label_type get_final_graph_label_candidate(
                           internal_label_type const & il
                         , typename partition_type<graph_type>::type const & pi
                         , graph_type const & G
                     ) {
+                        assert( !locked_ && "No calls allowed after fix_final_graph_label");
                         final_label_type fl;
                         get<0>(fl) = get_part<plain_label>(il);
                         vertex_label_policy::finalize_graph_label(fl,il,pi,G);
                         edge_label_policy::finalize_graph_label(fl,il,pi,G);
                         return fl;
                     }
+
+                    // This function should be called to get the VERY FINAL label 
+                    final_label_type fix_final_graph_label(
+                          internal_label_type const & il
+                        , typename partition_type<graph_type>::type const & pi
+                        , graph_type const & G
+                    ) {
+                        final_label_type fl(get_final_graph_label_candidate(il, pi, G));
+#ifndef NDEBUG
+                        locked_ = true;
+#endif //NDEBUG
+                        return fl;
+                    }
                   private:
+                    graph_label_creator();
+
                     // The not colored graph label is a triangular bit matrix
                     // Input: pi = (V1, V2, ..., Vr)
                     // Output: comparable graph label for uncolored graphs l(pi)
@@ -799,8 +819,83 @@ namespace alps {
                                 if (I[*ai] <= it->second)
                                     get_part<plain_label>(l).set(I[*ai] * pi.size() - (I[*ai] - 1) * I[*ai] / 2 + it->second - I[*ai]);
                     }
+#ifndef NDEBUG
+                    bool locked_;
+#endif //NDEBUG
                 };
             } // end namespace label
+
+            template <typename Graph, typename LabelCreator>
+            void build_ordering_and_label_from_best_label_candidate(
+                  typename canonical_properties_type<Graph>::type * result
+                , std::map<
+                      typename LabelCreator::internal_label_type
+                    , typename partition_type<Graph>::type
+                  > const& candidate_labels
+                , Graph const& G 
+                , LabelCreator & label_creator
+            ) {
+                if(result == NULL)
+                    return;
+                assert(!candidate_labels.empty());
+                 
+                typedef typename std::map<typename LabelCreator::internal_label_type, typename partition_type<Graph>::type>::const_iterator candidate_iterator;
+                candidate_iterator best = candidate_labels.begin();
+                get<alps::graph::ordering>(*result).reserve(best->second.size());
+                for (typename partition_type<Graph>::type::const_iterator it = best->second.begin(); it != best->second.end(); ++it)
+                    get<alps::graph::ordering>(*result).push_back(it->front());
+                get<alps::graph::label>(*result) = label_creator.fix_final_graph_label(best->first, best->second, G);
+            }
+
+            template <typename Graph>
+            void build_ordering_and_label_from_best_label_candidate(
+                  typename canonical_properties_type<Graph>::type * result
+                , std::map<
+                      typename label::graph_label_creator<Graph, label::no_coloring_policy, label::edge_coloring_with_symmetries_policy>::internal_label_type
+                    , typename partition_type<Graph>::type
+                  > const& candidate_labels
+                , Graph const& G 
+                , label::graph_label_creator<Graph, label::no_coloring_policy, label::edge_coloring_with_symmetries_policy> & label_creator
+            ) {
+                if(result == NULL)
+                    return;
+                assert(!candidate_labels.empty());
+
+                typedef label::graph_label_creator<Graph, label::no_coloring_policy, label::edge_coloring_with_symmetries_policy> label_creator_type;
+                typedef typename std::map<typename label_creator_type::internal_label_type, typename partition_type<Graph>::type>::const_iterator candidate_iterator;
+
+                candidate_iterator best = candidate_labels.begin();
+
+                // Best label (considering the edge color symmetry) and best ordering candidates.
+                typename label_creator_type::final_label_type const best_label_with_sym = label_creator.get_final_graph_label_candidate(best->first, best->second, G);
+                get<alps::graph::ordering>(*result).reserve(best->second.size());
+                for (typename partition_type<Graph>::type::const_iterator jt = best->second.begin(); jt != best->second.end(); ++jt)
+                    get<alps::graph::ordering>(*result).push_back(jt->front());
+
+                // Find the best internal label (breaking the symmetry).
+                // The best label is the label which creates the smallest ordering (under lexicographical comparison).
+                // For some reason this seems to return a unique representative for all graphs.
+                // I have not found a proof for this yet. -> Use with caution.
+                std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> ordering;
+                ordering.reserve(get<alps::graph::ordering>(*result).size());
+                candidate_iterator it = candidate_labels.begin();
+                ++it;
+                while(it != candidate_labels.end())
+                {
+                    if( best_label_with_sym != label_creator.get_final_graph_label_candidate(it->first, it->second, G) )
+                        break;
+                    ordering.clear();
+                    for (typename partition_type<Graph>::type::const_iterator jt = it->second.begin(); jt != it->second.end(); ++jt)
+                        ordering.push_back(jt->front());
+                    if(ordering < get<alps::graph::ordering>(*result))
+                    {
+                        best = it;
+                        swap(get<alps::graph::ordering>(*result), ordering);
+                    }
+                    ++it;
+                }
+                get<alps::graph::label>(*result) = label_creator.fix_final_graph_label(best->first, best->second, G);
+            }
         } // end namespace detail
 
         namespace detail {
@@ -882,17 +977,10 @@ namespace alps {
                         found_labels.insert( it, std::make_pair(current_label,get<0>(T.back())) );
                 }
 
-                typename found_labels_map_type::const_iterator best = found_labels.begin();
-                std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> canonical_ordering;
-                canonical_ordering.reserve(best->second.size());
-                for (typename partition_type<Graph>::type::const_iterator it = best->second.begin(); it != best->second.end(); ++it)
-                    canonical_ordering.push_back((*it)[0]);
-
-                return boost::make_tuple(
-                      canonical_ordering
-                    , label_creator.get_final_graph_label(best->first,best->second,G)
-                    , orbit
-                );
+                typename canonical_properties_type<Graph>::type result;
+                detail::build_ordering_and_label_from_best_label_candidate(&result, found_labels, G, label_creator);
+                swap(get<alps::graph::partition>(result), orbit);
+                return result;
             }
         }
 
