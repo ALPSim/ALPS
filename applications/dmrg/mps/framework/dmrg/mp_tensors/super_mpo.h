@@ -76,7 +76,7 @@ MPS<Matrix, SymmGroup> mpo_to_smps(MPO<Matrix, SymmGroup> const& mpo, Index<Symm
     
     MPS<Matrix, SymmGroup> mps(mpo.size());
     
-    detail::phys_fuse_functor<SymmGroup> phys_fuse;
+    ::detail::phys_fuse_functor<SymmGroup> phys_fuse;
     
     Index<SymmGroup> phys2_i = phys_i*adjoin(phys_i);
     ProductBasis<SymmGroup> phys_prod(phys_i, phys_i, phys_fuse);

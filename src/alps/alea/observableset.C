@@ -33,6 +33,7 @@
 #include <alps/utility/encode.hpp>
 #include <alps/multi_array.hpp>
 #include <boost/lexical_cast.hpp>
+#include <set>
 
 namespace alps {
 
