@@ -543,11 +543,11 @@ void plus_minus_assign_impl(matrix<T1,MemoryBlock1>& lhs, matrix<T2,MemoryBlock2
     // One could do also a dispatch on row vs. column major, but since we don't have row major right now, let's leave it like that.
     typedef typename matrix<T1,MemoryBlock1>::size_type             size_type;
     typedef typename matrix<T1,MemoryBlock1>::col_element_iterator  col_element_iterator;
-    typedef typename matrix<T1,MemoryBlock1>::value_type            value_type;
     assert(num_rows(lhs) == num_rows(rhs));
     assert(num_cols(lhs) == num_cols(rhs));
 #if defined(__clang_major__) && __clang_major__ < 3 || (__clang_major__ == 3 && __clang_minor__ == 0)
 // Workaround for a compiler bug in clang 3.0 (and maybe earlier versions)
+    typedef typename matrix<T1,MemoryBlock1>::value_type            value_type;
     for(size_type j=0; j < num_cols(lhs); ++j)
     {
         for(size_type i=0; i < num_rows(lhs); ++i)
@@ -596,7 +596,6 @@ template <typename T, typename MemoryBlock, typename T2>
 void multiplies_assign_impl(matrix<T,MemoryBlock>& lhs, T2 const& t, tag::matrix, tag::scalar)
 {
     typedef typename matrix<T,MemoryBlock>::size_type              size_type;
-    typedef typename matrix<T,MemoryBlock>::value_type             value_type;
     typedef typename matrix<T,MemoryBlock>::col_element_iterator   col_element_iterator;
     if(!(lhs.is_shrinkable()) )
     {

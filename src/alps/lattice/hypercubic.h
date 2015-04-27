@@ -135,7 +135,6 @@ public:
 
     const cell_iterator& operator++() {
       typedef typename coordinate_traits<offset_type>::iterator offset_iterator;
-      typedef typename coordinate_traits<offset_type>::const_iterator const_offset_iterator;
       offset_iterator offit, offend;
       boost::tie(offit,offend)=coordinates(offset_);
       int d=0;
