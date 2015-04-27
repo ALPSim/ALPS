@@ -336,7 +336,7 @@ namespace alps {
                 }
 
                 inline bool has_variance() const {
-                    return variance_opt_;
+                    return static_cast<bool>(variance_opt_);
                 }
 
                 inline result_type const & variance() const {
@@ -347,7 +347,7 @@ namespace alps {
                 };
 
                 inline bool has_tau() const {
-                    return tau_opt_;
+                    return static_cast<bool>(tau_opt_);
                 }
 
                 inline time_type const & tau() const {
