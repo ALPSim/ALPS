@@ -404,7 +404,48 @@
       <location id="23" x="-221.738986521" y="331.461459286" />
     </change>
   </action>
+  <action date="2015-04-30 21:46:31" id="19" prevId="18" session="7" user="troyer">
+    <annotation id="9" key="__description__" value="Upgrade" />
+    <delete id="169" objectId="38" parentObjId="19" parentObjType="connection" what="port" />
+    <delete id="170" objectId="39" parentObjId="19" parentObjType="connection" what="port" />
+    <delete id="171" objectId="19" parentObjId="" parentObjType="" what="connection" />
+    <delete id="172" objectId="40" parentObjId="20" parentObjType="connection" what="port" />
+    <delete id="173" objectId="41" parentObjId="20" parentObjType="connection" what="port" />
+    <delete id="174" objectId="20" parentObjId="" parentObjType="" what="connection" />
+    <delete id="175" objectId="8" parentObjId="8" parentObjType="module" what="location" />
+    <delete id="176" objectId="8" parentObjId="" parentObjType="" what="module" />
+    <add id="177" objectId="19" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="19" name="MplXYPlot" namespace="DataSet|Plot" package="org.comp-phys.alps" version="2.2.1" />
+    </add>
+    <add id="178" objectId="24" parentObjId="19" parentObjType="module" what="location">
+      <location id="24" x="-162.167010184" y="159.770453383" />
+    </add>
+    <add id="179" objectId="22" parentObjId="" parentObjType="" what="connection">
+      <connection id="22" />
+    </add>
+    <add id="180" objectId="44" parentObjId="22" parentObjType="connection" what="port">
+      <port id="44" moduleId="19" moduleName="MplXYPlot" name="value" signature="(org.comp-phys.alps:MplCustomPlot)" type="source" />
+    </add>
+    <add id="181" objectId="45" parentObjId="22" parentObjType="connection" what="port">
+      <port id="45" moduleId="16" moduleName="MplFigure" name="addPlot" signature="(org.vistrails.vistrails.matplotlib:MplPlot)" type="destination" />
+    </add>
+    <add id="182" objectId="23" parentObjId="" parentObjType="" what="connection">
+      <connection id="23" />
+    </add>
+    <add id="183" objectId="46" parentObjId="23" parentObjType="connection" what="port">
+      <port id="46" moduleId="17" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+    </add>
+    <add id="184" objectId="47" parentObjId="23" parentObjType="connection" what="port">
+      <port id="47" moduleId="19" moduleName="MplXYPlot" name="plot" signature="(org.comp-phys.alps:DataSet|Plot|PreparePlot)" type="destination" />
+    </add>
+  </action>
+  <action date="2015-04-30 21:46:31" id="20" prevId="19" session="7" user="troyer">
+    <change id="185" newObjId="26" oldObjId="24" parentObjId="19" parentObjType="module" what="location">
+      <location id="26" x="-137.429089247" y="159.770453383" />
+    </change>
+  </action>
   <annotation id="1" key="__abstraction_uuid__" value="1a6d060e-55dd-11df-a1e2-002500a2cd74" />
   <actionAnnotation actionId="3" date="2013-09-08 10:40:25" id="3" key="__upgrade__" user="troyer" value="4" />
   <actionAnnotation actionId="15" date="2015-04-25 19:50:32" id="8" key="__upgrade__" user="troyer" value="17" />
+  <actionAnnotation actionId="18" date="2015-04-30 21:46:31" id="11" key="__upgrade__" user="troyer" value="19" />
 </vistrail>

@@ -387,8 +387,103 @@
       <location id="15" x="-236.342292438" y="426.268216338" />
     </change>
   </action>
+  <action date="2015-04-30 21:46:25" id="6" prevId="5" session="4" user="troyer">
+    <annotation id="12" key="__description__" value="Upgrade" />
+    <delete id="119" objectId="16" parentObjId="8" parentObjType="connection" what="port" />
+    <delete id="120" objectId="17" parentObjId="8" parentObjType="connection" what="port" />
+    <delete id="121" objectId="8" parentObjId="" parentObjType="" what="connection" />
+    <delete id="122" objectId="12" parentObjId="6" parentObjType="connection" what="port" />
+    <delete id="123" objectId="13" parentObjId="6" parentObjType="connection" what="port" />
+    <delete id="124" objectId="6" parentObjId="" parentObjType="" what="connection" />
+    <delete id="125" objectId="7" parentObjId="6" parentObjType="group" what="location" />
+    <delete id="126" objectId="6" parentObjId="6" parentObjType="group" what="annotation" />
+    <delete id="127" objectId="6" parentObjId="" parentObjType="" what="group" />
+    <add id="128" objectId="10" parentObjId="" parentObjType="" what="group">
+      <group cache="1" id="10" name="Group" namespace="" package="org.vistrails.vistrails.basic" version="2.1.1">
+        <workflow id="" name="untitled" version="" vistrail_id="">
+          <connection id="3">
+            <port id="5" moduleId="4" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+            <port id="6" moduleId="3" moduleName="File" name="name" signature="(org.vistrails.vistrails.basic:String)" type="destination" />
+          </connection>
+          <connection id="4">
+            <port id="7" moduleId="3" moduleName="File" name="value_as_string" signature="(org.vistrails.vistrails.basic:String)" type="source" />
+            <port id="8" moduleId="5" moduleName="OutputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="destination" />
+          </connection>
+          <connection id="5">
+            <port id="9" moduleId="6" moduleName="InputPort" name="InternalPipe" signature="(org.vistrails.vistrails.basic:Variant)" type="source" />
+            <port id="10" moduleId="2" moduleName="RichTextCell" name="Location" signature="(org.vistrails.vistrails.spreadsheet:CellLocation)" type="destination" />
+          </connection>
+          <connection id="6">
+            <port id="11" moduleId="7" moduleName="ConvertXML2HTML" name="output_file" signature="(org.vistrails.vistrails.basic:File)" type="source" />
+            <port id="12" moduleId="2" moduleName="RichTextCell" name="File" signature="(org.vistrails.vistrails.basic:File)" type="destination" />
+          </connection>
+          <connection id="7">
+            <port id="13" moduleId="3" moduleName="File" name="value" signature="(org.vistrails.vistrails.basic:File)" type="source" />
+            <port id="14" moduleId="7" moduleName="ConvertXML2HTML" name="input_file" signature="(org.vistrails.vistrails.basic:File)" type="destination" />
+          </connection>
+          <module cache="1" id="2" name="RichTextCell" namespace="" package="org.vistrails.vistrails.spreadsheet" version="0.9.4">
+            <location id="2" x="8.65697381113" y="-140.770322814" />
+          </module>
+          <module cache="1" id="3" name="File" namespace="" package="org.vistrails.vistrails.basic" version="2.1.1">
+            <location id="3" x="33.549230776" y="40.1134111317" />
+          </module>
+          <module cache="1" id="4" name="InputPort" namespace="" package="org.vistrails.vistrails.basic" version="2.1.1">
+            <location id="4" x="60.6541328043" y="134.703987597" />
+            <function id="1" name="name" pos="0">
+              <parameter alias="" id="1" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:String" val="filename" />
+            </function>
+          </module>
+          <module cache="1" id="5" name="OutputPort" namespace="" package="org.vistrails.vistrails.basic" version="2.1.1">
+            <location id="5" x="159.669999398" y="-130.813420028" />
+            <function id="2" name="name" pos="0">
+              <parameter alias="" id="2" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:String" val="value" />
+            </function>
+          </module>
+          <module cache="1" id="6" name="InputPort" namespace="" package="org.vistrails.vistrails.basic" version="2.1.1">
+            <location id="6" x="-244.358989205" y="140.041993813" />
+            <function id="3" name="name" pos="0">
+              <parameter alias="" id="3" name="&lt;no description&gt;" pos="0" type="org.vistrails.vistrails.basic:String" val="Location" />
+            </function>
+          </module>
+          <module cache="1" id="7" name="ConvertXML2HTML" namespace="Tools" package="org.comp-phys.alps" version="2.2.1">
+            <location id="7" x="-18.1713475845" y="-43.2756497008" />
+          </module>
+        </workflow>
+      </group>
+    </add>
+    <add id="129" objectId="11" parentObjId="10" parentObjType="group" what="annotation">
+      <annotation id="11" key="__desc__" value="ShowAsHTML" />
+    </add>
+    <add id="130" objectId="16" parentObjId="10" parentObjType="group" what="location">
+      <location id="16" x="-64.5220777887" y="-15.0666202806" />
+    </add>
+    <add id="131" objectId="12" parentObjId="" parentObjType="" what="connection">
+      <connection id="12" />
+    </add>
+    <add id="132" objectId="24" parentObjId="12" parentObjType="connection" what="port">
+      <port id="24" moduleId="10" moduleName="Group" name="self" signature="(org.vistrails.vistrails.basic:Group)" type="source" />
+    </add>
+    <add id="133" objectId="25" parentObjId="12" parentObjType="connection" what="port">
+      <port id="25" moduleId="5" moduleName="Map" name="FunctionPort" signature="(org.vistrails.vistrails.basic:Module)" type="destination" />
+    </add>
+    <add id="134" objectId="13" parentObjId="" parentObjType="" what="connection">
+      <connection id="13" />
+    </add>
+    <add id="135" objectId="26" parentObjId="13" parentObjType="connection" what="port">
+      <port id="26" moduleId="7" moduleName="CellLocation" name="value" signature="(org.vistrails.vistrails.spreadsheet:CellLocation)" type="source" />
+    </add>
+    <add id="136" objectId="27" parentObjId="13" parentObjType="connection" what="port">
+      <port id="27" moduleId="10" moduleName="Group" name="Location" signature="(org.vistrails.vistrails.spreadsheet:CellLocation)" type="destination" />
+    </add>
+  </action>
+  <action date="2015-04-30 21:46:25" id="7" prevId="6" session="4" user="troyer">
+    <change id="137" newObjId="18" oldObjId="8" parentObjId="7" parentObjType="module" what="location">
+      <location id="18" x="-94.7310904384" y="221.817511701" />
+    </change>
+  </action>
   <annotation id="2" key="__abstraction_origin_uuid__" value="16df5dae-19ed-11e3-a6cf-20c9d044a3eb" />
   <annotation id="3" key="__abstraction_uuid__" value="16df5dae-19ed-11e3-a6cf-20c9d044a3eb" />
   <actionAnnotation actionId="1" date="2014-07-30 21:13:50" id="5" key="__upgrade__" user="michele" value="2" />
   <actionAnnotation actionId="3" date="2015-04-25 19:50:26" id="10" key="__upgrade__" user="troyer" value="4" />
+  <actionAnnotation actionId="5" date="2015-04-30 21:46:25" id="15" key="__upgrade__" user="troyer" value="6" />
 </vistrail>

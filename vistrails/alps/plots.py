@@ -10,7 +10,6 @@
 ##############################################################################
 
 from vistrails.core.modules.vistrails_module import Module, ModuleError, NotCacheable
-import vistrails.core.bundles
 import vistrails.core.modules.basic_modules
 import vistrails.core.modules.module_registry
 import tempfile
@@ -36,7 +35,7 @@ class DisplayGnuplot(NotCacheable, alpscore.SystemCommand):
     """ opens a gnuplot plotfile using  the gnuplot command. The path to gnuplot and other tools can be set in the ALPS package preferences """
     def compute(self):
         lines = [x.strip() for x in open(self.getInputFromPort('file').name).readlines()]
-        lines = []
+        lines2 = []
         if alpscore.config.check("gnuplot_term"):
           lines2 = ['set terminal '+alpscore.config.gnuplot_term]
         for line in lines:

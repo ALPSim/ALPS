@@ -28,7 +28,7 @@
 import vistrails.core.modules.module_registry
 import vistrails.core.modules.basic_modules as basic
 from vistrails.core.modules.vistrails_module import Module, ModuleError, NotCacheable
-from gui.modules.python_source_configure import PythonSourceConfigurationWidget
+from vistrails.gui.modules.python_source_configure import PythonSourceConfigurationWidget
 
 import urllib, copy
 import numpy as np
@@ -91,6 +91,8 @@ def selfRegister():
     # We'll first create a local alias for the module registry so that
     # we can refer to it in a shorter way.
     reg = vistrails.core.modules.module_registry.registry
+
+    reg.add_module(MplCustomPlot, abstract=True)
 
     register(DataSets,'DataSet',abst=True)
     register(ConcatenateDataSets,'DataSet')

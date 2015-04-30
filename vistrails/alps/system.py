@@ -10,7 +10,6 @@
 ##############################################################################
 
 from vistrails.core.modules.vistrails_module import Module, ModuleError, NotCacheable
-import core.bundles
 import vistrails.core.modules.basic_modules
 import vistrails.core.modules.module_registry
 import copy
@@ -21,9 +20,9 @@ import lattices
 import models
 
 from PyQt4 import QtCore, QtGui
-from packages.spreadsheet.basic_widgets import SpreadsheetCell
-from packages.spreadsheet.spreadsheet_cell import QCellWidget
-import packages.spreadsheet
+from vistrails.packages.spreadsheet.basic_widgets import SpreadsheetCell
+from vistrails.packages.spreadsheet.spreadsheet_cell import QCellWidget
+import vistrails.packages.spreadsheet
 
 from alpsparameters import SystemParameters
 from parameters import Parameters

@@ -11,19 +11,19 @@
 ##############################################################################
 
 from vistrails.core.modules.vistrails_module import Module, ModuleError, NotCacheable
-from core.configuration import ConfigurationObject
-import core.bundles
+from vistrails.core.configuration import ConfigurationObject
 import vistrails.core.modules.basic_modules
 import vistrails.core.modules.module_registry
 try:
-  from packages.HTTP.init import HTTPFile
+  from vistrails.packages.HTTP.init import HTTPFile
 except:
-  from packages.URL.init import DownloadFile
+  from vistrails.packages.URL.init import DownloadFile
   HTTPFile = DownloadFile
 import os
 import os.path
 import tempfile
 import copy
+import fnmatch
 import glob
 import zipfile
 import datetime
@@ -227,10 +227,17 @@ class Parameter2XML(alpscore.SystemCommandLogged):
                      ('output_dir', [basic.Directory]),
                      ('log_file',[basic.File])]
 
+# http://stackoverflow.com/a/2186639/720077
+def recursive_glob(treeroot, pattern):
+  results = []
+  for base, dirs, files in os.walk(treeroot):
+    goodfiles = fnmatch.filter(files, pattern)
+    results.extend(os.path.join(base, f) for f in goodfiles)
+  return results
 
 class Glob(Module):
     def expand(self,name):
-        l = recursive_glob(name)
+        l = recursive_glob('.', name)
         self.setResult('value',l)
     def compute(self):
       self.expand(self.getInputFromPort('input_file').name)
@@ -358,7 +365,7 @@ class ConvertXML2HTML(alpscore.SystemCommand):
         output_file = self.interpreter.filePool.create_file(suffix='.html')
         if platform.system() == 'Windows':
           cmdlist = ['msxsl.exe',input_file] + self.style + ['-o', output_file.name]
-        if platform.system() != 'Windows':
+        else:
           cmdlist = [alpscore._get_path('xslttransform')] + self.style + [input_file, '>' , output_file.name]
         self.execute(cmdlist)
         if platform.system() == 'Windows': # need to convert to UTF-8

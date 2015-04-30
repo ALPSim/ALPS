@@ -9,8 +9,8 @@
 #
 ##############################################################################
 
-from core.configuration import ConfigurationObject
-from core.upgradeworkflow import UpgradeWorkflowHandler
+from vistrails.core.configuration import ConfigurationObject
+from vistrails.core.upgradeworkflow import UpgradeWorkflowHandler
 from vistrails.core.modules.module_registry import get_module_registry
 
 import alpscore
@@ -30,13 +30,14 @@ import dataset
 ##############################################################################
 
 _subworkflows = [('MplXYPlotCell.xml', {'namespace': 'Tools'}),
-                 ('ShowListOfPlots.xml', {'namespace': 'DataSet|Plot'}),
-                 ('ShowMplPlot.xml', {'namespace': 'DataSet|Plot'}),
-                 ('ShowListOfXMLFiles.xml', {'namespace': 'Tools'}),
+                  ('ShowListOfPlots.xml', {'namespace': 'DataSet|Plot'}),
+                  ('ShowMplPlot.xml', {'namespace': 'DataSet|Plot'}),
+                  ('ShowListOfXMLFiles.xml', {'namespace': 'Tools'}),
                  ('ShowListOfHTMLFiles.xml', {'namespace': 'Tools'})
                  ]
 
 def handle_module_upgrade_request(controller, module_id, pipeline):
+   print "upgrading %s" % pipeline.modules[module_id].name
    reg = get_module_registry()
 
    # format is {<old module name>: (<new_module_klass>, <remap_dictionary>}}
@@ -119,8 +120,8 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                    'Convert2Grace': (dataset.WriteGraceFile,{}),
                    'DisplayXMGRPlot': (plots.DisplayGracePlot,{}),
                    'GraceXYPlot': (dataset.WriteGraceFile,{}),
-                   'MplXYPlot': (dataset.MplXYPlot,{'dst_port_remap': {'plot': 'plot'}, 'src_port_remap' :  {'unused': 'self'}}),
-                   'DataSet|Plot|MplXYPlot': (dataset.MplXYPlot,{'dst_port_remap': {'plot': 'plot'}, 'src_port_remap' :  {'unused': 'self'}}),
+                   'MplXYPlot': (dataset.MplXYPlot,{'dst_port_remap': {'plot': 'plot'}, 'src_port_remap' :  {'unused': 'value', 'self': 'value'}}),
+                   'DataSet|Plot|MplXYPlot': (dataset.MplXYPlot,{'dst_port_remap': {'plot': 'plot'}, 'src_port_remap' :  {'unused': 'value', 'self': 'value'}}),
                    'Select': (dataset.Select,{}),
                    'And': (dataset.And,{}),
                    'Or': (dataset.Or,{}),
@@ -152,27 +153,27 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
 
 
 # remaps for move of List in VT
-   new_remap = {'DataSet|Fit|DoNonlinearFit': [(None, '2.2.0', None, {'dst_port_remap': {'parameters': 'parameters'}})], 'Tools|GetResultFiles': [(None, '2.2.0', None, {'src_port_remap': {'value': 'value'}})], 'Plots|ExtractText': [(None, '2.2.0', None, {'dst_port_remap': {'data': 'data'}})], 'DataSet|Hierarchy|GroupDataSets': [(None, '2.2.0', None, {'dst_port_remap': {'for-each': 'for-each'}})], 'DataSet|Plot|SetLabels': [(None, '2.2.0', None, {'dst_port_remap': {'label_props': 'label_props'}})], 'DataSet|Load|LoadTimeEvolution': [(None, '2.2.0', None, {'dst_port_remap': {'Measurements': 'Measurements'}})], 'DataSet|Load|LoadDataSetsFromTextFile': [(None, '2.2.0', None, {'dst_port_remap': {'y-columns': 'y-columns'}})], 'Tools|ShowListOfXMLFiles': [(None, '2.2.0', None, {'dst_port_remap': {'InputList': 'InputList'}})], 'Plots|ExtractAnything': [(None, '2.2.0', None, {'dst_port_remap': {'data': 'data'}})], 'Tools|GetCloneFiles': [(None, '2.2.0', None, {'src_port_remap': {'value': 'value'}})], 'Plots|ExtractMpl': [(None, '2.2.0', None, {'dst_port_remap': {'data': 'data'}})], 'Tools|Convert2XML': [(None, '2.2.0', None, {'src_port_remap': {'value': 'value'}, 'dst_port_remap': {'input_file': 'input_file'}})], 'Tools|ConcatenatePathList': [(None, '2.2.0', None, {'src_port_remap': {'files': 'files', 'paths': 'paths', 'directories': 'directories'}, 'dst_port_remap': {'leafs': 'leafs'}})], 'Parameters|IterateValue': [(None, '2.2.0', None, {'dst_port_remap': {'value_list': 'value_list'}})], 'DataSet|Load|LoadAlpsEigenstateMeasurements': [(None, '2.2.0', None, {'dst_port_remap': {'Measurements': 'Measurements'}})], 'DataSet|DataSets': [(None, '2.2.0', None, {'src_port_remap': {'value': 'value'}, 'dst_port_remap': {'tail': 'tail', 'value': 'value'}})], 'Tools|DisplayInBrowser': [(None, '2.2.0', None, {'dst_port_remap': {'files': 'files'}})], 'DataSet|Plot|CycleMarkers': [(None, '2.2.0', None, {'dst_port_remap': {'for-each': 'for-each', 'markers': 'markers'}})], 'DataSet|Load|LoadAlpsMeasurements': [(None, '2.2.0', None, {'dst_port_remap': {'Measurements': 'Measurements'}})], 'Plots|ExtractXMGR': [(None, '2.2.0', None, {'dst_port_remap': {'data': 'data'}})], 'DataSet|Plot|CycleColors': [(None, '2.2.0', None, {'dst_port_remap': {'for-each': 'for-each', 'colors': 'colors'}})], 'Tools|Glob': [(None, '2.2.0', None, {'src_port_remap': {'value': 'value'}})], 'Tools|ConvertXML2HTML': [(None, '2.2.0', None, {'src_port_remap': {'output_files': 'output_files'}, 'dst_port_remap': {'input_files': 'input_files'}})], 'Parameters|IterateParameter': [(None, '2.2.0', None, {'dst_port_remap': {'value_list': 'value_list'}})], 'DataSet|Load|CollectDataSets': [(None, '2.2.0', None, {'dst_port_remap': {'for-each': 'for-each'}})], 'DataSet|ResultFiles': [(None, '2.2.0', None, {'src_port_remap': {'value': 'value', 'filenames': 'filenames'}, 'dst_port_remap': {'tail': 'tail', 'value': 'value', 'filenames': 'filenames'}})], 'Dataset|Plot|ShowListOfPlots': [(None, '2.2.0', None, {'dst_port_remap': {'InputList': 'InputList'}})], 'DataSet|Load|LoadBinningAnalysis': [(None, '2.2.0', None, {'dst_port_remap': {'Measurements': 'Measurements'}})], 'Tools|PickFileFromList': [(None, '2.2.0', None, {'dst_port_remap': {'files': 'files'}})], 'Tools|ShowListOfHTMLFiles': [(None, '2.2.0', None, {'dst_port_remap': {'InputList': 'InputList'}})]}
+   new_remap = {'DataSet|Fit|DoNonlinearFit': [(None, '2.2.1', None, {'dst_port_remap': {'parameters': 'parameters'}})], 'Tools|GetResultFiles': [(None, '2.2.1', None, {'src_port_remap': {'value': 'value'}})], 'Plots|ExtractText': [(None, '2.2.1', None, {'dst_port_remap': {'data': 'data'}})], 'DataSet|Hierarchy|GroupDataSets': [(None, '2.2.1', None, {'dst_port_remap': {'for-each': 'for-each'}})], 'DataSet|Plot|SetLabels': [(None, '2.2.1', None, {'dst_port_remap': {'label_props': 'label_props'}})], 'DataSet|Load|LoadTimeEvolution': [(None, '2.2.1', None, {'dst_port_remap': {'Measurements': 'Measurements'}})], 'DataSet|Load|LoadDataSetsFromTextFile': [(None, '2.2.1', None, {'dst_port_remap': {'y-columns': 'y-columns'}})], 'Tools|ShowListOfXMLFiles': [(None, '2.2.1', None, {'dst_port_remap': {'InputList': 'InputList'}})], 'Plots|ExtractAnything': [(None, '2.2.1', None, {'dst_port_remap': {'data': 'data'}})], 'Tools|GetCloneFiles': [(None, '2.2.1', None, {'src_port_remap': {'value': 'value'}})], 'Plots|ExtractMpl': [(None, '2.2.1', None, {'dst_port_remap': {'data': 'data'}})], 'Tools|Convert2XML': [(None, '2.2.1', None, {'src_port_remap': {'value': 'value'}, 'dst_port_remap': {'input_file': 'input_file'}})], 'Tools|ConcatenatePathList': [(None, '2.2.1', None, {'src_port_remap': {'files': 'files', 'paths': 'paths', 'directories': 'directories'}, 'dst_port_remap': {'leafs': 'leafs'}})], 'Parameters|IterateValue': [(None, '2.2.1', None, {'dst_port_remap': {'value_list': 'value_list'}})], 'DataSet|Load|LoadAlpsEigenstateMeasurements': [(None, '2.2.1', None, {'dst_port_remap': {'Measurements': 'Measurements'}})], 'DataSet|DataSets': [(None, '2.2.1', None, {'src_port_remap': {'value': 'value'}, 'dst_port_remap': {'tail': 'tail', 'value': 'value'}})], 'Tools|DisplayInBrowser': [(None, '2.2.1', None, {'dst_port_remap': {'files': 'files'}})], 'DataSet|Plot|CycleMarkers': [(None, '2.2.1', None, {'dst_port_remap': {'for-each': 'for-each', 'markers': 'markers'}})], 'DataSet|Load|LoadAlpsMeasurements': [(None, '2.2.1', None, {'dst_port_remap': {'Measurements': 'Measurements'}})], 'Plots|ExtractXMGR': [(None, '2.2.1', None, {'dst_port_remap': {'data': 'data'}})], 'DataSet|Plot|CycleColors': [(None, '2.2.1', None, {'dst_port_remap': {'for-each': 'for-each', 'colors': 'colors'}})], 'Tools|Glob': [(None, '2.2.1', None, {'src_port_remap': {'value': 'value'}})], 'Tools|ConvertXML2HTML': [(None, '2.2.1', None, {'src_port_remap': {'output_files': 'output_files'}, 'dst_port_remap': {'input_files': 'input_files'}})], 'Parameters|IterateParameter': [(None, '2.2.1', None, {'dst_port_remap': {'value_list': 'value_list'}})], 'DataSet|Load|CollectDataSets': [(None, '2.2.1', None, {'dst_port_remap': {'for-each': 'for-each'}})], 'DataSet|ResultFiles': [(None, '2.2.1', None, {'src_port_remap': {'value': 'value', 'filenames': 'filenames'}, 'dst_port_remap': {'tail': 'tail', 'value': 'value', 'filenames': 'filenames'}})], 'Dataset|Plot|ShowListOfPlots': [(None, '2.2.1', None, {'dst_port_remap': {'InputList': 'InputList'}})], 'DataSet|Load|LoadBinningAnalysis': [(None, '2.2.1', None, {'dst_port_remap': {'Measurements': 'Measurements'}})], 'Tools|PickFileFromList': [(None, '2.2.1', None, {'dst_port_remap': {'files': 'files'}})], 'Tools|ShowListOfHTMLFiles': [(None, '2.2.1', None, {'dst_port_remap': {'InputList': 'InputList'}})]}
 
    for name, (new_module, d) in module_remap.iteritems():
-      new_remap[name] = [(None, '2.2.0', new_module, d)]
+      new_remap[name] = [(None, '2.2.1', new_module, d)]
 
    # [(<start_version>, <end_version>, <new_module (None=same module, new version)>, <remap_dict>)]
-   new_remap['ShowListOfHTMLFiles'] = [(None, '2.2.0', None, {})]
-   new_remap['Tools|ShowListOfXMLFiles'] = [(None, '2.2.0', None, {})]
-   new_remap['ShowListOfPlots'] = [(None, '2.2.0', None, {})]
-   new_remap['DataSet|Plot|ShowListOfPlots'] = [(None, '2.2.0', None, {})]
-   new_remap['Dataset|Plot|ShowListOfPlots'] = [(None, '2.2.0', 'DataSet|Plot|ShowListOfPlots', {})]
-   new_remap['DataSet|Plot|ShowMplPlot'] = [(None, '2.2.0', None, {})]
-   new_remap['Dataset|Plot|ShowMplPlot'] = [(None, '2.2.0', 'DataSet|Plot|ShowMplPlot', {})]
-   new_remap['MplXYPlotCell'] = [(None, '2.2.0', None, {})]
-   new_remap['Tools|MplXYPlotCell'] = [(None, '2.2.0', None, {})]
-   new_remap['DataSet|Plot|MplXYPlot'] = [(None, '2.2.0', None, {})]
-   new_remap['Tools|WriteInputFiles'] = [(None, '2.2.0', None, {'dst_port_remap': {'simulationid': 'simulationid'}})]
-   new_remap['SimulationName'] = [(None, '2.2.0', None, {'dst_port_remap': {'value': 'value'},'src_port_remap': {'value': 'value'}})]
-   new_remap['Applications|SimulationName'] = [(None, '2.2.0', None, {'dst_port_remap': {'value': 'value'},'src_port_remap': {'value': 'value'}})]
-   new_remap['MplXYPlot'] = [(None,'2.2.0',dataset.MplXYPlot,{'dst_port_remap': {'plot': 'plot'}, 'src_port_remap' :  {'unused': 'self'}})]
-   new_remap['DataSet|Plot|MplXYPlot'] = [(None,'2.2.0',dataset.MplXYPlot,{'dst_port_remap': {'plot': 'plot'}, 'src_port_remap' :  {'unused': 'self'}})]
+   new_remap['ShowListOfHTMLFiles'] = [(None, '2.2.1', None, {})]
+   new_remap['Tools|ShowListOfXMLFiles'] = [(None, '2.2.1', None, {})]
+   new_remap['ShowListOfPlots'] = [(None, '2.2.1', None, {})]
+   new_remap['DataSet|Plot|ShowListOfPlots'] = [(None, '2.2.1', None, {})]
+   new_remap['Dataset|Plot|ShowListOfPlots'] = [(None, '2.2.1', 'DataSet|Plot|ShowListOfPlots', {})]
+   new_remap['DataSet|Plot|ShowMplPlot'] = [(None, '2.2.1', None, {})]
+   new_remap['Dataset|Plot|ShowMplPlot'] = [(None, '2.2.1', 'DataSet|Plot|ShowMplPlot', {})]
+   new_remap['MplXYPlotCell'] = [(None, '2.2.1', None, {})]
+   new_remap['Tools|MplXYPlotCell'] = [(None, '2.2.1', None, {})]
+   new_remap['DataSet|Plot|MplXYPlot'] = [(None, '2.2.1', None, {})]
+   new_remap['Tools|WriteInputFiles'] = [(None, '2.2.1', None, {'dst_port_remap': {'simulationid': 'simulationid'}})]
+   new_remap['SimulationName'] = [(None, '2.2.1', None, {'dst_port_remap': {'value': 'value'},'src_port_remap': {'value': 'value'}})]
+   new_remap['Applications|SimulationName'] = [(None, '2.2.1', None, {'dst_port_remap': {'value': 'value'},'src_port_remap': {'value': 'value'}})]
+   new_remap['MplXYPlot'] = [(None,'2.2.1',dataset.MplXYPlot,{'dst_port_remap': {'plot': 'plot'}, 'src_port_remap' :  {'unused': 'value', 'self': 'value'}})]
+   new_remap['DataSet|Plot|MplXYPlot'] = [(None,'2.2.1',dataset.MplXYPlot,{'dst_port_remap': {'plot': 'plot'}, 'src_port_remap' :  {'unused': 'value', 'self': 'value'}})]
 
 
 
