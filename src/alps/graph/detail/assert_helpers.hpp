@@ -116,11 +116,10 @@ bool partition_has_valid_structure(typename alps::graph::partition_type<Graph>::
 {
     using std::sort;
     using std::equal;
-    using boost::algorithm::is_sorted;
     bool ok = true;
     // Check if each part is sorted
     for(typename alps::graph::partition_type<Graph>::type::const_iterator it = p.begin(), end = p.end(); it != end; ++it)
-        ok = ok && is_sorted(it->begin(), it->end());
+        ok = ok && boost::algorithm::is_sorted(it->begin(), it->end());
     typename boost::graph_traits<Graph>::vertex_iterator vit,vend;
     boost::tie(vit,vend) = vertices(g);
 
