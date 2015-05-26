@@ -533,8 +533,8 @@ namespace numeric {
 namespace impl {
 namespace detail {
     template <typename Op> struct get_sign;
-    template <typename T>  struct get_sign<std::plus<T> >  { static int const value = 1; };
-    template <typename T>  struct get_sign<std::minus<T> > { static int const value = -1; };
+    template <>  struct get_sign<plus_assign_operator>  { static int const value = 1; };
+    template <>  struct get_sign<minus_assign_operator> { static int const value = -1; };
 } // end namespace detail 
 
 template <typename T1, typename MemoryBlock1, typename T2, typename MemoryBlock2, typename Operation>
@@ -551,23 +551,26 @@ void plus_minus_assign_impl(matrix<T1,MemoryBlock1>& lhs, matrix<T2,MemoryBlock2
     for(size_type j=0; j < num_cols(lhs); ++j)
     {
         for(size_type i=0; i < num_rows(lhs); ++i)
-        {
-            value_type const tmp = op(lhs(i,j),rhs(i,j));
-            lhs(i,j) = tmp;
-        }
+            op(lhs(i,j),rhs(i,j));
     }
 #else //defined(__clang_major__) && __clang_major__ < 3 || (__clang_major__ == 3 && __clang_minor__ == 0)
     if(!(lhs.is_shrinkable() || rhs.is_shrinkable()) )
     {
-        std::transform(lhs.col(0).first,lhs.col(lhs.num_cols()-1).second,rhs.col(0).first,lhs.col(0).first, op);
+        col_element_iterator       lhs_it(lhs.col(0).first);
+        col_element_iterator const lhs_end(lhs.col(lhs.num_cols()-1).second);
+        typename matrix<T2,MemoryBlock2>::const_col_element_iterator rhs_it(rhs.col(0).first);
+        for(; lhs_it != lhs_end; ++lhs_it, ++rhs_it)
+            op(*lhs_it, *rhs_it);
     }
     else
     {
         // Do the operation column by column
         for(size_type j=0; j < num_cols(lhs); ++j)
         {
-            std::pair<col_element_iterator,col_element_iterator> range(col(lhs,j));
-            std::transform( range.first, range.second, col(rhs,j).first, range.first, op);
+            std::pair<col_element_iterator,col_element_iterator>         range(col(lhs,j));
+            typename matrix<T2,MemoryBlock2>::const_col_element_iterator rhs_it(col(rhs,j).first);
+            for(; range.first != range.second; ++range.first, ++rhs_it)
+                op(*range.first, *rhs_it);
         }
     }
 #endif //defined(__clang_major__) && __clang_major__ < 3 || (__clang_major__ == 3 && __clang_minor__ == 0)

@@ -38,6 +38,24 @@ namespace alps {
 namespace numeric {
 
     namespace impl {
+        struct plus_assign_operator
+        {
+            template <typename T1, typename T2>
+            void operator()(T1 & t1, T2 const& t2) const
+            {
+                t1 += t2;
+            }
+        };
+
+        struct minus_assign_operator
+        {
+            template <typename T1, typename T2>
+            void operator()(T1 & t1, T2 const& t2) const
+            {
+                t1 -= t2;
+            }
+        };
+
         template <typename Matrix1, typename Matrix2, typename Operation>
         void plus_minus_assign_impl(Matrix1& lhs, Matrix2 const& rhs, Operation op, tag::matrix, tag::matrix)
         {
@@ -51,17 +69,16 @@ namespace numeric {
             for(size_type j=0; j < num_cols(lhs); ++j)
             {
                 for(size_type i=0; i < num_rows(lhs); ++i)
-                {
-                    value_type const tmp = op(lhs(i,j),rhs(i,j));
-                    lhs(i,j) = tmp;
-                }
+                    op(lhs(i,j),rhs(i,j));
             }
 #else //defined(__clang_major__) && __clang_major__ < 3 || (__clang_major__ == 3 && __clang_minor__ == 0)
             typedef typename Matrix1::col_element_iterator  col_element_iterator;
             for(size_type j=0; j < num_cols(lhs); ++j)
             {
                 std::pair<col_element_iterator,col_element_iterator> range(col(lhs,j));
-                std::transform( range.first, range.second, col(rhs,j).first, range.first, op);
+                typename Matrix2::const_col_element_iterator rhs_it(col(rhs,j).first);
+                for(; range.first != range.second; ++range.first, ++rhs_it)
+                    op(*range.first, *rhs_it);
             }
 #endif //defined(__clang_major__) && __clang_major__ < 3 || (__clang_major__ == 3 && __clang_minor__ == 0)
         }
@@ -86,14 +103,26 @@ namespace numeric {
     void plus_assign(Matrix1& lhs, Matrix2 const& rhs, tag::matrix tag1, tag::matrix tag2)
     {
         using impl::plus_minus_assign_impl;
-        plus_minus_assign_impl(lhs,rhs,std::plus<typename Matrix1::value_type>(),tag1,tag2);
+        plus_minus_assign_impl(
+              lhs
+            , rhs
+            , impl::plus_assign_operator()
+            , tag1
+            , tag2
+        );
     }
 
     template <typename Matrix1, typename Matrix2>
     void minus_assign(Matrix1& lhs, Matrix2 const& rhs, tag::matrix tag1, tag::matrix tag2)
     {
         using impl::plus_minus_assign_impl;
-        plus_minus_assign_impl(lhs,rhs,std::minus<typename Matrix1::value_type>(),tag1,tag2);
+        plus_minus_assign_impl(
+              lhs
+            , rhs
+            , impl::minus_assign_operator()
+            , tag1
+            , tag2
+        );
     }
 
     template <typename Matrix, typename T2>
