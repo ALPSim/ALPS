@@ -35,6 +35,7 @@
 #include <alps/numeric/vector_functions.hpp>
 #include <alps/graph/canonical_properties.hpp>
 #include <alps/numeric/matrix.hpp>
+#include <alps/graph/detail/shared_queue.hpp>
 
 #include <boost/array.hpp>
 #include <boost/unordered_set.hpp>
@@ -42,7 +43,6 @@
 #include <boost/integer_traits.hpp>
 #include <boost/algorithm/minmax.hpp>
 
-#include <deque>
 #include <vector>
 #include <cstring>
 #include <algorithm>
@@ -438,11 +438,10 @@ namespace alps {
                 , typename boost::graph_traits<Graph>::vertex_descriptor const & g
                 , Subgraph const & S
                 , Graph const & G
-                , std::deque<std::pair<
+                , shared_queue_view<
                       typename boost::graph_traits<Subgraph>::vertex_descriptor
                     , typename boost::graph_traits<Graph>::vertex_descriptor
-                  > > const& queue
-                , boost::dynamic_bitset<> const& queued_or_placed
+                  > const& queue
                 , boost::dynamic_bitset<> & visited
                 , std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> & pinning
                 , VertexEqual & vertex_equal
@@ -476,19 +475,20 @@ namespace alps {
                 // If not all vertices are mapped yet
                 if (visited.count() < num_vertices(S)) {
                     // queue mapping adjecent vertices of s
-                    std::deque< std::pair<subgraph_vertex_descriptor, graph_vertex_descriptor> > local_queue(queue);
-                    boost::dynamic_bitset<> local_queued_or_placed(queued_or_placed);
+                    shared_queue_view<
+                          typename boost::graph_traits<Subgraph>::vertex_descriptor
+                        , typename boost::graph_traits<Graph>::vertex_descriptor
+                    > local_queue(queue);
 
                     typename boost::graph_traits<Graph>::adjacency_iterator g_ai, g_ae;
                     for (boost::tie(s_ai, s_ae) = adjacent_vertices(s, S); s_ai != s_ae; ++s_ai)
-                        if (!local_queued_or_placed[*s_ai]) {
-                            local_queued_or_placed[*s_ai] = true;
+                        if ( !local_queue.was_queued(*s_ai) ) {
                             local_queue.push_back(std::make_pair(*s_ai, g));
                         }
                     // take the first entry of the queue
                     // and check if entry.s can be mapped to adjacent vertices of entry.g
-                    subgraph_vertex_descriptor t = local_queue[0].first;
-                    boost::tie(g_ai, g_ae) = adjacent_vertices(local_queue[0].second, G);
+                    subgraph_vertex_descriptor t = local_queue.front().first;
+                    boost::tie(g_ai, g_ae) = adjacent_vertices(local_queue.front().second, G);
                     local_queue.pop_front();
                     for (; g_ai != g_ae; ++g_ai)
                         if (!visited[*g_ai])
@@ -498,7 +498,6 @@ namespace alps {
                                 , S
                                 , G
                                 , local_queue
-                                , local_queued_or_placed
                                 , visited
                                 , pinning
                                 , vertex_equal
@@ -535,26 +534,34 @@ namespace alps {
                 // make sure, that a distance in one direction fits in a boost::uint8_t
                 assert(std::size_t(num_vertices(G)) < 256 * 256);
 
+                boost::dynamic_bitset<> visited; // (num_vertices(G));
+                shared_queue_data<
+                      typename boost::graph_traits<Subgraph>::vertex_descriptor
+                    , typename boost::graph_traits<Graph>::vertex_descriptor
+                > queue(num_vertices(S));
+                std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> pinning;    // (num_vertices(S), num_vertices(G));
                 for (typename std::vector<typename boost::graph_traits<Graph>::vertex_descriptor>::const_iterator it = V.begin(); it != V.end(); ++it)
                     for (typename partition_type<Subgraph>::type::const_iterator jt = subgraph_orbit.begin(); jt != subgraph_orbit.end(); ++jt)
                         if (out_degree(jt->front(), S) <= out_degree(*it, G)) {
-                            // TODO: shouldn't out_degree be just degree?
-                            // TODO: use dynamicbitset
-                            boost::dynamic_bitset<> queued_or_placed(num_vertices(S));
-                            boost::dynamic_bitset<> visited(num_vertices(G));
-                            std::deque<std::pair<
+                            
+                            // Reset all data
+                            queue.reset();
+                            visited.clear();
+                            visited.resize(num_vertices(G));
+                            pinning.clear();
+                            pinning.resize(num_vertices(S), num_vertices(G));
+
+                            queue.mark_queued(jt->front());
+                            shared_queue_view<
                                   typename boost::graph_traits<Subgraph>::vertex_descriptor
                                 , typename boost::graph_traits<Graph>::vertex_descriptor
-                            > > queue;
-                            std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> pinning(num_vertices(S), num_vertices(G));
-                            queued_or_placed[jt->front()] = true;
+                            > queue_view(queue);
                             lattice_constant_walker(
                                   jt->front()
                                 , *it
                                 , S
                                 , G
-                                , queue
-                                , queued_or_placed
+                                , queue_view
                                 , visited
                                 , pinning
                                 , vertex_equal
