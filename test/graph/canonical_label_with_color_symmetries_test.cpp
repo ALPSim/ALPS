@@ -80,10 +80,8 @@ bool colored_edges_with_color_symmetry_test1() {
 
 
     alps::graph::color_partition<graph_type>::type color_symmetry;
-    // makepair(color,color_partition)
-    color_symmetry.insert(std::make_pair(0,0));
-    color_symmetry.insert(std::make_pair(1,0));
-
+    color_symmetry[0] = 0;
+    color_symmetry[1] = 0;
 
     label_type lg(get<1>(canonical_properties(g)));
     label_type lh(get<1>(canonical_properties(h)));
@@ -183,10 +181,9 @@ bool colored_edges_with_color_symmetry_test2() {
     // color   grp0  grp1
     // colors (0,2)  (1)
     alps::graph::color_partition<graph_type>::type color_symmetry;
-    // makepair(color,color_partition)
-    color_symmetry.insert(std::make_pair(0,0));
-    color_symmetry.insert(std::make_pair(1,1));
-    color_symmetry.insert(std::make_pair(2,0));
+    color_symmetry[0] = 0;
+    color_symmetry[1] = 1;
+    color_symmetry[2] = 0;
 
     label_type lg(get<1>(canonical_properties(g)));
     label_type lh(get<1>(canonical_properties(h)));
@@ -247,9 +244,8 @@ bool colored_edges_with_color_symmetry_test3() {
     }
 
     alps::graph::color_partition<graph_type>::type color_symmetry;
-    // makepair(color,color_partition)
-    color_symmetry.insert(std::make_pair(0,0));
-    color_symmetry.insert(std::make_pair(1,0));
+    color_symmetry[0] = 0;
+    color_symmetry[1] = 0;
 
     label_type lg(get<1>(canonical_properties(g)));
     label_type lh(get<1>(canonical_properties(h)));
@@ -328,10 +324,9 @@ void colored_edges_with_color_symmetry_test4() {
     // color   grp0
     // colors (0,1,2)
     alps::graph::color_partition<graph_type>::type color_symmetry;
-    // makepair(color,color_partition)
-    color_symmetry.insert(std::make_pair(0,0));
-    color_symmetry.insert(std::make_pair(1,0));
-    color_symmetry.insert(std::make_pair(2,0));
+    color_symmetry[0] = 0;
+    color_symmetry[1] = 0;
+    color_symmetry[2] = 0;
 
     label_type lg(get<1>(canonical_properties(g)));
     label_type lh(get<1>(canonical_properties(h)));
@@ -405,9 +400,8 @@ void colored_edges_with_color_symmetry_test5() {
     // color   grp0
     // colors (0,1)
     alps::graph::color_partition<graph_type>::type color_symmetry;
-    // make_pair(color,color_partition)
-    color_symmetry.insert(std::make_pair(0,0));
-    color_symmetry.insert(std::make_pair(1,0));
+    color_symmetry[0] = 0;
+    color_symmetry[1] = 0;
 
     label_type lg(get<1>(canonical_properties(g)));
     label_type lh(get<1>(canonical_properties(h)));
@@ -461,10 +455,9 @@ void colored_edges_with_color_symmetry_test6() {
     // color   grp0
     // colors (0,1,2)
     alps::graph::color_partition<graph_type>::type color_symmetry;
-    // make_pair(color,color_partition)
-    color_symmetry.insert(std::make_pair(0,0));
-    color_symmetry.insert(std::make_pair(1,0));
-    color_symmetry.insert(std::make_pair(2,0));
+    color_symmetry[0] = 0; 
+    color_symmetry[1] = 0;
+    color_symmetry[2] = 0;
 
     label_type lg(get<1>(canonical_properties(g)));
 
