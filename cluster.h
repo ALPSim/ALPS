@@ -364,6 +364,17 @@ public:
     }
     return phi;
   }
+/*
+//dispersion, evaluated with flavor dependent t_
+  double epsilon_flavor(const vector_type &k, unsigned int flavor) const
+  {
+    double eps = -half_filling_;
+    for (unsigned int i=0; i<dimension(); ++i)
+      eps -= 2*t_flavor_[flavor]*cos(k[i]);
+  return eps*bandwidth_scale_factor_;
+  }
+*/
+
 private:
   template<typename T>
   green_function<T> symmetrize_helper(const green_function<T>& G,
@@ -374,6 +385,7 @@ private:
                                             const std::pair<std::set<pair_class_type>::const_iterator,
                                             std::set<pair_class_type>::const_iterator> pair_classes) const;
   const double t_, t2_, t3_, t4_;
+  const double t_flavor_;
   double bandwidth_;
   double bandwidth_scale_factor_;
   double half_filling_;
