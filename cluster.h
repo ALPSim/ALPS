@@ -364,16 +364,24 @@ public:
     }
     return phi;
   }
-/*
+
 //dispersion, evaluated with flavor dependent t_
   double epsilon_flavor(const vector_type &k, unsigned int flavor) const
   {
     double eps = -half_filling_;
+
+  if (flavor == 0){
     for (unsigned int i=0; i<dimension(); ++i)
-      eps -= 2*t_flavor_[flavor]*cos(k[i]);
+      eps -= 2*t_*cos(k[i]);
+  }
+  if (flavor == 1){
+    for (unsigned int i=0; i<dimension(); ++i)
+      eps -= 2*t_*t_flavor_*cos(k[i]);
+  }
+
   return eps*bandwidth_scale_factor_;
   }
-*/
+
 
 private:
   template<typename T>
