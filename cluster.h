@@ -483,7 +483,7 @@ public:
   //initial G0
   virtual matsubara_green_function_t initial_G0      (const alps::params& parms, shape_t shape=diagonal);
   virtual nambu_matsubara_green_function_t initial_G0_nambu(const alps::params& parms);
-  void construct_green_function(double mu, double beta, double eta1, double eta2, const std::vector<std::vector<double> > &epsilon_kckl, const std::vector<std::vector<double> > &dwave_prefactor_kckl, const std::vector<double> &weight_kl, const nambu_matsubara_green_function_t &selfenergy,nambu_matsubara_green_function_t &G_omega_lattice_kav);
+  void construct_green_function(double mu, double beta, double eta1, double eta2, const std::vector<std::vector<std::vector<double> > > &epsilon_kckl, const std::vector<std::vector<double> > &dwave_prefactor_kckl, const std::vector<double> &weight_kl, const nambu_matsubara_green_function_t &selfenergy,nambu_matsubara_green_function_t &G_omega_lattice_kav);
   double compute_density(const nambu_matsubara_green_function_t &G_omega_lattice_kav, double beta);
   
 private:

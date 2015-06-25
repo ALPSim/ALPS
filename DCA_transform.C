@@ -548,7 +548,8 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
   double mu_old=mu;
   double mu_new=mu;
   double mu_orig=mu;
-  std::vector<std::vector<double> >epsilon_kckl(n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
+// vector<vector<vector<string>>> vec1(DIM1, vector<vector<string>>(DIM2, vector<string>(DIM3)));
+  std::vector<std::vector<std::vector<double> > > epsilon_kckl(n_cluster_sites(), std::vector<std::vector<double> >(n_lattice_momenta(), std::vector<double>(nflavor)) );
   std::vector<double> weight_kl(n_lattice_momenta());
   if(params_["PHASE"]|false){
     vector_type phi=phase_vector();
@@ -557,7 +558,9 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
         vector_type k(dimension());
         for (unsigned int d=0; d<dimension(); ++d)
           k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-        epsilon_kckl[kc][kl]=epsilon_phi(k,phi);
+	for (unsigned int flavor=0; flavor<nflavor; ++flavor){
+        epsilon_kckl[kc][kl][flavor]=epsilon_phi(k,phi);
+	}
       }
     }
   }else{
@@ -566,7 +569,10 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
         vector_type k(dimension());
         for (unsigned int d=0; d<dimension(); ++d)
           k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-        epsilon_kckl[kc][kl]=epsilon(k);
+	for (unsigned int flavor=0; flavor<nflavor; ++flavor){
+        epsilon_kckl[kc][kl][flavor]=epsilon_flavor(k,flavor);
+	}
+
       }
     }
   }
@@ -582,7 +588,7 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
           std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
           for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
             std::complex<double> zeta = iomega_n + mu + (flavor%2 ? -h : h);
-            G_omega_lattice(freq, kc, kc, flavor) += weight_kl[kl]/(zeta-epsilon_kckl[kc][kl]-selfenergy(freq, kc, kc, flavor));
+            G_omega_lattice(freq, kc, kc, flavor) += weight_kl[kl]/(zeta-epsilon_kckl[kc][kl][flavor]-selfenergy(freq, kc, kc, flavor));
           }
           G_omega_lattice(freq, kc, kc, flavor) /= n_cluster_cells();
         }
@@ -835,7 +841,7 @@ bool adjust_chemical_potential(const double &n_tot,
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////FUNCTIONS FOR NAMBU SPACE//////////////////////////////////////////////////////////////////////////////////
-void SimpleDCATransformer::construct_green_function(double mu, double beta, double eta1, double eta2, const std::vector<std::vector<double> > &epsilon_kckl, const std::vector<std::vector<double> > &dwave_prefactor_kckl, const std::vector<double> &weight_kl, const nambu_matsubara_green_function_t &selfenergy,nambu_matsubara_green_function_t &G_omega_lattice_kav){
+void SimpleDCATransformer::construct_green_function(double mu, double beta, double eta1, double eta2, const std::vector<std::vector<std::vector<double> > > &epsilon_kckl, const std::vector<std::vector<double> > &dwave_prefactor_kckl, const std::vector<double> &weight_kl, const nambu_matsubara_green_function_t &selfenergy,nambu_matsubara_green_function_t &G_omega_lattice_kav){
   
   unsigned int nflavor=G_omega_lattice_kav.nflavor();
   unsigned int nfreq=G_omega_lattice_kav.nfreq();
@@ -852,10 +858,10 @@ void SimpleDCATransformer::construct_green_function(double mu, double beta, doub
         //this is the self consistency formula!!!
         //note the pairing field eta + i eta2 on the 0,1 component, eta - i eta2 on the 1,0 component.
         std::complex<double> G_omega_latt_inv[4]=
-        {iomega_n + mu -epsilon_kckl[kc][kl]-selfenergy(freq, kc, kc, 0,0),
+        {iomega_n + mu -epsilon_kckl[kc][kl][0]-selfenergy(freq, kc, kc, 0,0),
           -selfenergy(freq, kc, kc, 0,1) - prefactor*std::complex<double>( eta1, eta2),
           -selfenergy(freq, kc, kc, 1,0) - prefactor*std::complex<double>( eta1,-eta2),
-          iomega_n - mu +epsilon_kckl[kc][kl]-selfenergy(freq, kc, kc, 1,1)};
+          iomega_n - mu +epsilon_kckl[kc][kl][1]-selfenergy(freq, kc, kc, 1,1)};
         
         std::complex<double> G0omega_latt_inv_det=G_omega_latt_inv[0]*G_omega_latt_inv[3]-G_omega_latt_inv[1]*G_omega_latt_inv[2];
         G_omega_lattice_kav(freq, kc, kc, 0,0) += weight_kl[kl]*G_omega_latt_inv[3]/G0omega_latt_inv_det;
@@ -904,7 +910,9 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
     nambu_matsubara_green_function_t G0_omega_new(G0_omega);
     nambu_matsubara_green_function_t G_omega_lattice_kav(G0_omega);
     
-    std::vector<std::vector<double> >epsilon_kckl        (n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
+    std::vector<std::vector<std::vector<double> > > epsilon_kckl(n_cluster_sites(), std::vector<std::vector<double> >(n_lattice_momenta(), std::vector<double>(nflavor)) );
+// old kckl definition
+   // std::vector<std::vector<double> >epsilon_kckl        (n_cluster_sites(), std::vector<double>(n_lattice_momenta()), nflavor);
     std::vector<std::vector<double> >dwave_prefactor_kckl(n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
     std::vector<double> weight_kl(n_lattice_momenta());
     for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
@@ -912,7 +920,10 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
         vector_type k(dimension());
         for (unsigned int d=0; d<dimension(); ++d)
           k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-        epsilon_kckl[kc][kl]=epsilon(k);
+        for (unsigned int flavor=0; flavor<nflavor; ++flavor){
+        epsilon_kckl[kc][kl][flavor]=epsilon_flavor(k,flavor);
+	}
+
         dwave_prefactor_kckl[kc][kl]= cos(k[0]) - cos(k[1]); //cos kx - cos ky
       }
     }for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
