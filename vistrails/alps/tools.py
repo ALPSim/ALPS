@@ -368,13 +368,6 @@ class ConvertXML2HTML(alpscore.SystemCommand):
         else:
           cmdlist = [alpscore._get_path('xslttransform')] + self.style + [input_file, '>' , output_file.name]
         self.execute(cmdlist)
-        if platform.system() == 'Windows': # need to convert to UTF-8
-          fin = codecs.open(output_file.name,"r","utf-16")
-          u = fin.read()
-          fin.close()
-          fout = file(output_file.name,"w")
-          fout.write(u.encode("utf-8"))
-          fout.close()
         return output_file
 
     def compute(self):
