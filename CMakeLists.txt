@@ -29,3 +29,4 @@ target_link_libraries(dmft ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
 target_link_libraries(runTests ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
 
 install(TARGETS dmft RUNTIME DESTINATION "bin/")
+install(FILES cluster1d.xml cluster3D.xml cluster.xml DESTINATION "share/")
