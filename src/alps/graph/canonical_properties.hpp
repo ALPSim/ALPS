@@ -1075,7 +1075,11 @@ namespace alps {
             // pi = (V1, V2, ..., Vr), Vi = (n1, n2, ..., nk), ni element of G
             // uncolored graphs: pi is a unit partition (pi has only one part)
             // vertex colored graphs: pi has for each color one part
-            detail::initial_partition(G, pi, v, boost::mpl::bool_<has_property<alps::vertex_type_t, Graph>::vertex_property>());
+            if(num_vertices(G) == 1)
+                detail::initial_partition(G, pi, boost::mpl::bool_<has_property<alps::vertex_type_t, Graph>::vertex_property>());
+                // symmetry breaking vertex is the only vertex -> there is only a single partition
+            else
+                detail::initial_partition(G, pi, v, boost::mpl::bool_<has_property<alps::vertex_type_t, Graph>::vertex_property>());
             typedef typename boost::mpl::if_c<
                   has_property<alps::vertex_type_t, Graph>::vertex_property
                 , detail::label::simple_vertex_coloring_policy
