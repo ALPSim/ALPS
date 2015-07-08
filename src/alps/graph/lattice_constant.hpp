@@ -56,8 +56,7 @@ namespace alps {
 
             detail::vertex_equal_simple<Subgraph> vertex_equal;
             detail::edge_equal_simple<Subgraph>   edge_equal;
-            boost::false_type no_argument;
-            detail::lattice_constant_inserter<Subgraph, boost::false_type>    register_embedding(S, G, L, subgraph_orbit, no_argument);
+            detail::count_translational_invariant_embeddings<Subgraph>  register_embedding(S, G, L, subgraph_orbit);
             detail::lattice_constant_impl(S, G, V, subgraph_orbit, vertex_equal, edge_equal, register_embedding);
             return register_embedding.get_count();
         }
@@ -79,13 +78,12 @@ namespace alps {
 
             detail::vertex_equal_simple<Subgraph> vertex_equal;
             detail::edge_equal_mapped_colors<Subgraph> edge_equal(edge_color_mapping);
-            boost::false_type no_argument;
-            detail::lattice_constant_inserter<Subgraph, boost::false_type>    register_embedding(S, G, L, subgraph_orbit, no_argument);
+            detail::count_translational_invariant_embeddings<Subgraph>  register_embedding(S, G, L, subgraph_orbit);
             detail::lattice_constant_impl(S, G, V, subgraph_orbit, vertex_equal, edge_equal, register_embedding);
             return register_embedding.get_count();
         }
 
-        template<typename Subgraph, typename Graph, typename Lattice> std::size_t lattice_constant(
+        template<typename Subgraph, typename Graph, typename Lattice> void lattice_constant(
               alps::numeric::matrix<unsigned int> & lw
             , Subgraph const & S
             , Graph const & G
@@ -104,11 +102,10 @@ namespace alps {
 
             detail::vertex_equal_simple<Subgraph> vertex_equal;
             detail::edge_equal_simple<Subgraph>   edge_equal;
-            detail::lattice_constant_inserter<Subgraph, alps::numeric::matrix<unsigned int> >    register_embedding(S, G, L, subgraph_orbit, lw, b);
-            detail::lattice_constant_impl(S, G, V, subgraph_orbit, vertex_equal, edge_equal, register_embedding);
-            return register_embedding.get_count();
+            detail::count_how_subgraphs_are_embedded<Subgraph> register_embedding(S, G, L, subgraph_orbit, lw, b);
+            detail::lattice_constant_impl_geometric(S, G, V, subgraph_orbit, vertex_equal, edge_equal, register_embedding, b);
         }
-        template<typename Subgraph, typename Graph, typename Lattice> std::size_t lattice_constant(
+        template<typename Subgraph, typename Graph, typename Lattice> void lattice_constant(
               alps::numeric::matrix<unsigned int> & lw
             , Subgraph const & S
             , Graph const & G
@@ -128,9 +125,8 @@ namespace alps {
 
             detail::vertex_equal_simple<Subgraph> vertex_equal;
             detail::edge_equal_mapped_colors<Subgraph> edge_equal(edge_color_mapping);
-            detail::lattice_constant_inserter<Subgraph, alps::numeric::matrix<unsigned int> >    register_embedding(S, G, L, subgraph_orbit, lw, b);
-            detail::lattice_constant_impl(S, G, V, subgraph_orbit, vertex_equal, edge_equal, register_embedding);
-            return register_embedding.get_count();
+            detail::count_how_subgraphs_are_embedded<Subgraph> register_embedding(S, G, L, subgraph_orbit, lw, b);
+            detail::lattice_constant_impl_geometric(S, G, V, subgraph_orbit, vertex_equal, edge_equal, register_embedding, b);
         }
     }
 }

@@ -4,7 +4,7 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2013 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2010 - 2015 by Lukas Gamper <gamperl@gmail.com>                   *
  *                              Andreas Hehn <hehn@phys.ethz.ch>                   *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
@@ -36,6 +36,8 @@
 #include <alps/graph/canonical_properties.hpp>
 #include <alps/numeric/matrix.hpp>
 #include <alps/graph/detail/shared_queue.hpp>
+#include <alps/graph/detail/helper_functions.hpp>
+#include <alps/graph/detail/assert_helpers.hpp>
 
 #include <boost/array.hpp>
 #include <boost/unordered_set.hpp>
@@ -48,21 +50,28 @@
 #include <algorithm>
 #include <stdexcept>
 
-#if !defined(USE_COMPRESSED_EMBEDDING) && !defined(USE_COMPRESSED_EMBEDDING2) && !defined(USE_GENERIC_EMBEDDING)
-    #define USE_GENERIC_EMBEDDING
-#endif
-
 namespace alps {
     namespace graph {
 
         namespace detail {
 
+            template <typename Graph>
+            std::size_t num_label_bits(Graph const& g)
+            {
+                std::size_t const nv = num_vertices(g);
+                std::size_t bits = 0;
+                while ((0x01u << ++bits) < nv);
+                return bits;
+            }
+
             struct embedding_generic_type {
+                // TODO This works, but could be improved using pimpl with C++11 shared_ptr + make_shared
+                // (boost::shared_ptr would imply an additional indirection)
 
                 embedding_generic_type(std::size_t vertices_size, std::size_t edges_size)
                     : hash(0)
                     , counter(new boost::uint8_t(1))
-                    , vertices(new std::vector<std::vector<boost::uint16_t> >(vertices_size))
+                    , vertices(new std::vector<boost::uint16_t>(vertices_size))
                     , edges(new std::vector<boost::uint64_t>((edges_size >> 6) + ((edges_size & 0x3F) == 0 ? 0 : 1)))
                 {}
 
@@ -93,27 +102,66 @@ namespace alps {
 
                 std::size_t hash;
                 boost::uint8_t * counter;
-                std::vector<std::vector<boost::uint16_t> > * vertices;
+                std::vector<boost::uint16_t> * vertices;
                 std::vector<boost::uint64_t> * edges;
 
                 private:
                     embedding_generic_type() {}
             };
 
-            static inline std::size_t hash_vertex_part(embedding_generic_type const& embedding)
-            {
-                std::size_t hash = 0;
-                for (std::vector<std::vector<boost::uint16_t> >::iterator it = embedding.vertices->begin(); it != embedding.vertices->end(); ++it) {
-                    using boost::hash_combine;
-                    std::sort(it->begin(), it->end());
-                    for (std::vector<boost::uint16_t>::const_iterator jt = it->begin(); jt != it->end(); ++jt)
-                        hash_combine(hash, *jt);
-                }
-                return hash;
+            inline std::size_t hash_value(embedding_generic_type const & value) {
+                return value.hash;
             }
 
-            std::size_t hash_value(embedding_generic_type const & value) {
-                return value.hash;
+            inline void update_vertex_part(embedding_generic_type & embedding, std::vector<std::size_t> & index_of_subgraph_vertex, std::vector< boost::tuple<boost::uint16_t, boost::uint16_t, unsigned int> > const& embedding_data)
+            {
+                index_of_subgraph_vertex.clear();
+                index_of_subgraph_vertex.resize(embedding_data.size());
+                enum { orbit_number = 0 , compressed_embedding_data = 1 , subgraph_vertex = 2 };
+                for( std::vector< boost::tuple<boost::uint16_t, boost::uint16_t, unsigned int> >::const_iterator it = embedding_data.begin() ; it != embedding_data.end(); ++it)
+                {
+                    std::size_t const pos = it - embedding_data.begin();
+                    assert( get<subgraph_vertex>(*it) < index_of_subgraph_vertex.size() );
+                    index_of_subgraph_vertex[ get<subgraph_vertex>(*it) ] = pos;
+                    (*embedding.vertices)[pos]                            = get<compressed_embedding_data>(*it);
+                }
+            }
+
+            template <typename SubGraph>
+            void update_edge_part(embedding_generic_type & embedding_generic, std::vector<std::size_t> const& index_of_subgraph_vertex, SubGraph const& S)
+            {
+                typename boost::graph_traits<SubGraph>::edge_iterator s_ei, s_ee;
+                for( boost::tie(s_ei, s_ee) = edges(S); s_ei != s_ee; ++s_ei) {
+                    std::size_t v1, v2;
+                    boost::tie(v1,v2) = boost::minmax(index_of_subgraph_vertex[source(*s_ei, S)], index_of_subgraph_vertex[target(*s_ei, S)]);
+                    std::size_t index = v1 * num_vertices(S) - (v1 - 1) * v1 / 2 + v2 - v1;
+                    (*embedding_generic.edges)[index >> 6] |= 0x01 << (index & 0x3F);
+                }
+
+                using boost::hash_combine;
+                for (std::vector<boost::uint64_t>::const_iterator it = embedding_generic.edges->begin(); it != embedding_generic.edges->end(); ++it)
+                    hash_combine(embedding_generic.hash, *it);
+            }
+
+            inline void update_hash(embedding_generic_type& embedding)
+            {
+                using boost::hash_combine;
+                embedding.hash = 0;
+                for( std::vector<boost::uint16_t>::const_iterator it = embedding.vertices->begin(); it != embedding.vertices->end(); ++it)
+                    hash_combine(embedding.hash, *it);
+                for( std::vector<boost::uint64_t>::const_iterator it = embedding.edges->begin(); it != embedding.edges->end(); ++it)
+                    hash_combine(embedding.hash, *it);
+            }
+
+            template <typename Subgraph>
+            embedding_generic_type convert_to_embedding_generic(std::vector< boost::tuple< boost::uint16_t, boost::uint16_t, unsigned int> > const& embedding_data, Subgraph const& S)
+            {
+                embedding_generic_type embedding_generic(num_vertices(S), num_vertices(S) * (num_vertices(S) + 1) / 2);
+                std::vector<std::size_t> index_of_subgraph_vertex_in_embedding_generic;
+                update_vertex_part(embedding_generic, index_of_subgraph_vertex_in_embedding_generic, embedding_data);
+                update_edge_part(embedding_generic, index_of_subgraph_vertex_in_embedding_generic, S);
+                update_hash(embedding_generic);
+                return embedding_generic;
             }
 
             template <typename Graph, typename Lattice> std::vector<std::vector<boost::uint_t<8>::fast> > build_translation_table(
@@ -153,65 +201,25 @@ namespace alps {
                 return distance_to_boarder;
             }
 
-            template<typename GeometricInfo, typename Graph, typename Subgraph, typename BreakingVertex> typename boost::disable_if<
-                boost::is_same<GeometricInfo, boost::false_type>
-            >::type lattice_constant_geometry(
-                  GeometricInfo & geometric_info
-                , Subgraph const & S
-                , Graph const & G
-                , std::vector<std::size_t> const & I
-                , std::vector<std::vector<boost::uint_t<8>::fast> > const & distance_to_boarder
-                , std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const & pinning
-                , typename partition_type<Subgraph>::type const & subgraph_orbit
-                , BreakingVertex const & breaking_vertex
-                , bool inserted
-            ) {
-                if (inserted)
-                    for (typename std::vector<typename boost::graph_traits<Graph>::vertex_descriptor>::const_iterator it = pinning.begin(); it != pinning.end(); ++it) {
-                        bool is_valid = true;
-                        for(std::size_t d = 0; is_valid && d < distance_to_boarder.size(); ++d)
-                            is_valid = distance_to_boarder[d][pinning[breaking_vertex]] <= distance_to_boarder[d][*it];
-                        if (is_valid)
-                            geometric_info(*it - pinning[breaking_vertex],I[it - pinning.begin()])++;
-                    }
-            }
 
-            template<typename GeometricInfo, typename Graph, typename Subgraph, typename BreakingVertex> typename boost::enable_if<
-                boost::is_same<GeometricInfo, boost::false_type>
-            >::type lattice_constant_geometry(
-                  GeometricInfo &
-                , Subgraph const & S
-                , Graph const &
-                , std::vector<std::size_t> const &
-                , std::vector<std::vector<boost::uint_t<8>::fast> > const &
-                , std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const &
-                , typename partition_type<Subgraph>::type const &
-                , BreakingVertex const &
-                , bool
-            ) {}
-
-            struct embedding_found {};
-
-
-            template <typename SubGraph, typename GeometricInfo>
-            class lattice_constant_inserter
+            template <typename SubGraph>
+            class count_translational_invariant_embeddings
             {
                 typedef SubGraph subgraph_type;
               public:
 
                 template <typename Graph, typename Lattice>
-                lattice_constant_inserter(subgraph_type const& S, Graph const& G, Lattice const& L, typename partition_type<subgraph_type>::type const & subgraph_orbit, GeometricInfo& geometric_info, typename boost::graph_traits<subgraph_type>::vertex_descriptor breaking_vertex = 0)
-                : subgraph_orbit_(subgraph_orbit), orbit_of_(num_vertices(S)), distance_to_boarder_(build_translation_table(G,L)), matches_(), unit_cell_size_(num_vertices(alps::graph::graph(unit_cell(L)))), geometric_info_(geometric_info), breaking_vertex_(breaking_vertex)
+                count_translational_invariant_embeddings(subgraph_type const& S, Graph const& G, Lattice const& L, typename partition_type<subgraph_type>::type const & subgraph_orbit)
+                : orbit_of_( build_vertex_to_partition_index_map(subgraph_orbit,S) )
+                , distance_to_boarder_( build_translation_table(G,L) )
+                , matches_()
+                , unit_cell_size_( num_vertices(alps::graph::graph(unit_cell(L))) )
                 {
-                    assert(( boost::is_same<GeometricInfo, boost::false_type>::value ? (get<alps::graph::partition>(canonical_properties(S)) == subgraph_orbit_) : (get<alps::graph::partition>(canonical_properties(S,breaking_vertex_)) == subgraph_orbit_) ));
+                    assert(( get<alps::graph::partition>(canonical_properties(S)) == subgraph_orbit ));
+                    assert(( assert_helpers::partition_has_valid_structure(subgraph_orbit, S) ));
                     // If the lattice has more than 2 dimensions improve this class
+                    // It might work out of the box. Please check.
                     assert(distance_to_boarder_.size() < 3);
-
-                    // Map vertex index -> orbit index
-                    for (typename partition_type<subgraph_type>::type::const_iterator it = subgraph_orbit_.begin(); it != subgraph_orbit_.end(); ++it)
-                        for (typename partition_type<subgraph_type>::type::value_type::const_iterator jt = it->begin(); jt != it->end(); ++jt)
-                            orbit_of_[*jt] = it - subgraph_orbit_.begin();
-
                 }
 
                 template <typename Graph>
@@ -220,55 +228,26 @@ namespace alps {
                     , Graph const& G
                     , std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const & pinning
                 ) {
-                    assert(( boost::is_same<GeometricInfo, boost::false_type>::value ? (get<alps::graph::partition>(canonical_properties(S)) == subgraph_orbit_) : (get<alps::graph::partition>(canonical_properties(S,breaking_vertex_)) == subgraph_orbit_) ));
-                    assert(( assert_helpers::partition_has_valid_structure(subgraph_orbit_, S) ));
-                    embedding_generic_type embedding_generic(subgraph_orbit_.size(), num_vertices(S) * (num_vertices(S) + 1) / 2);
+                    assert(( assert_helpers::orbit_of_is_valid(orbit_of_, get<alps::graph::partition>(canonical_properties(S,breaking_vertex_)), S) ));
 
-                    // Reserve space in the embedding_generic.vertices vector
-                    for (std::vector<std::vector<boost::uint16_t> >::iterator it = embedding_generic.vertices->begin(); it != embedding_generic.vertices->end(); ++it)
-                        it->reserve(subgraph_orbit_[it - embedding_generic.vertices->begin()].size());
-
+                    enum { orbit_number = 0 , compressed_embedding_data = 1 , subgraph_vertex = 2 };
+                    std::vector< boost::tuple<boost::uint16_t, boost::uint16_t, unsigned int> > embedding_data;
+                        
                     // How many bits do we need to store the maximal distance in a subgraph
                     // This is the same number of bits as we need for a unique vertex label of the subgraph
                     std::size_t const bits_per_dim = num_label_bits(S);
 
-                    // Consider translational invariance and get a unique embedding representative (lattice_pinning)
-                    // Each element contains the full embedding information for a subgraph vertex (i.e. index within unit cell, "canonical" position in all dimensions)
-                    std::vector<boost::uint16_t> lattice_pinning(pinning.size());
+                    // Consider translational invariance and get a unique embedding representative
+                    // embedding_compressed contains the full embedding information for a subgraph vertex (i.e. index within unit cell, "canonical" position in all dimensions)
                     for (typename std::vector<typename boost::graph_traits<Graph>::vertex_descriptor>::const_iterator it = pinning.begin(); it != pinning.end(); ++it) {
-                        std::size_t const subgraph_vertex = it - pinning.begin();
-                        lattice_pinning[subgraph_vertex] = calc_compressed_transinv_embedding(bits_per_dim, *it, pinning, G);
-
-                        (*embedding_generic.vertices)[orbit_of_[subgraph_vertex]].push_back(lattice_pinning[subgraph_vertex]);
+                        unsigned int    const subgraph_vertex      = it - pinning.begin();
+                        boost::uint16_t const embedding_compressed = calc_compressed_transinv_embedding(bits_per_dim, *it, pinning, G);
+                        embedding_data.push_back( boost::make_tuple( static_cast<boost::uint16_t>(orbit_of_[subgraph_vertex]), embedding_compressed, subgraph_vertex) );
                     }
 
-                    embedding_generic.hash = hash_vertex_part(embedding_generic);
+                    sort(embedding_data.begin(), embedding_data.end());
 
-                    // store in lattice_pinning the position of the vertex information within the embedding_generic.vertices structure 
-                    for (std::vector<boost::uint16_t>::iterator it = lattice_pinning.begin(); it != lattice_pinning.end(); ++it) {
-                        std::size_t const subgraph_vertex = it - lattice_pinning.begin();
-                        std::vector<boost::uint16_t>::iterator jt = (*embedding_generic.vertices)[orbit_of_[subgraph_vertex]].begin();
-                        while(*jt != *it)
-                            ++jt;
-                        *it = jt - (*embedding_generic.vertices)[orbit_of_[subgraph_vertex]].begin();
-                        for (std::size_t i = 0; i < orbit_of_[subgraph_vertex]; ++i)
-                            *it += (*embedding_generic.vertices)[i].size();
-                    }
-
-                    typename boost::graph_traits<subgraph_type>::edge_iterator s_ei, s_ee;
-                    for (boost::tie(s_ei, s_ee) = edges(S); s_ei != s_ee; ++s_ei) {
-                        std::size_t v1, v2;
-                        boost::tie(v1,v2) = boost::minmax(lattice_pinning[source(*s_ei, S)], lattice_pinning[target(*s_ei, S)]);
-                        std::size_t index = v1 * num_vertices(S) - (v1 - 1) * v1 / 2 + v2 - v1;
-                        (*embedding_generic.edges)[index >> 6] |= 0x01 << (index & 0x3F);
-                    }
-
-                    using boost::hash_combine;
-                    for (std::vector<boost::uint64_t>::const_iterator it = embedding_generic.edges->begin(); it != embedding_generic.edges->end(); ++it)
-                        hash_combine(embedding_generic.hash, *it);
-
-                    bool const inserted = matches_.insert(embedding_generic).second;
-                    lattice_constant_geometry(geometric_info_, S, G, orbit_of_, distance_to_boarder_, pinning, subgraph_orbit_, breaking_vertex_, inserted);
+                    matches_.insert( convert_to_embedding_generic(embedding_data,S) );
                 }
 
                 std::size_t get_count() const
@@ -276,14 +255,6 @@ namespace alps {
                     return matches_.size();
                 }
               private:
-
-                static std::size_t num_label_bits(subgraph_type const& s)
-                {
-                    std::size_t const nv = num_vertices(s);
-                    std::size_t bits = 0;
-                    while ((0x01u << ++bits) < nv);
-                    return bits;
-                }
 
                 /// Gets the (minimal) distance to boarder in each dimension of an embedding/pinning
                 template <typename Graph>
@@ -297,9 +268,13 @@ namespace alps {
                 }
 
                 template <typename Graph>
-                boost::uint16_t calc_compressed_transinv_embedding(std::size_t const bits_per_dim, typename boost::graph_traits<Graph>::vertex_descriptor v_id, std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const& pinning, Graph const& G)
-                {
-                    assert((0x01u << ((distance_to_boarder_.size()+1) * bits_per_dim)) < boost::integer_traits<boost::uint16_t>::const_max);
+                boost::uint16_t calc_compressed_transinv_embedding(
+                      std::size_t const bits_per_dim
+                    , typename boost::graph_traits<Graph>::vertex_descriptor v_id
+                    , std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const& pinning
+                    , Graph const& G
+                ) const {
+                    assert((0x01u << ((distance_to_boarder_.size()+1) * bits_per_dim)) < boost::integer_traits<boost::uint16_t>::const_max && "boost::uint16_t is not large enough to store full embedding data.");
                     std::vector<boost::uint_t<8>::fast> const distance( get_distance_to_boarder(pinning, G) );
                     // data =  bitfield looking like: unit_cell_vtx_idx|d[0]|d[1]|...
                     boost::uint16_t data = v_id % unit_cell_size_;
@@ -314,14 +289,110 @@ namespace alps {
                     return data;
                 }
 
-                typename partition_type<subgraph_type>::type const&             subgraph_orbit_;
+                std::vector<std::size_t>                                orbit_of_;
+                std::vector<std::vector<boost::uint_t<8>::fast> > const distance_to_boarder_;
+                boost::unordered_set<embedding_generic_type>            matches_;
+                std::size_t const                                       unit_cell_size_;
+            };
+
+            template <typename SubGraph>
+            class count_how_subgraphs_are_embedded
+            {
+                typedef SubGraph subgraph_type;
+              public:
+
+                template <typename Graph, typename Lattice>
+                count_how_subgraphs_are_embedded(
+                      subgraph_type const& S
+                    , Graph const& G
+                    , Lattice const& L
+                    , typename partition_type<subgraph_type>::type const & subgraph_orbit
+                    , alps::numeric::matrix<unsigned int> & orbit_mapping_matrix
+                    , typename boost::graph_traits<subgraph_type>::vertex_descriptor breaking_vertex
+                )
+                : orbit_of_( build_vertex_to_partition_index_map(subgraph_orbit,S) )
+                , distance_to_boarder_( build_translation_table(G,L) )
+                , matches_()
+                , unit_cell_size_( num_vertices(alps::graph::graph(unit_cell(L))) )
+                , orbit_mapping_matrix_(orbit_mapping_matrix)
+                , breaking_vertex_(breaking_vertex)
+                {
+                    assert(( get<alps::graph::partition>(canonical_properties(S,breaking_vertex_)) == subgraph_orbit ));
+                    assert(( assert_helpers::partition_has_valid_structure(subgraph_orbit, S) ));
+                    // If the lattice has more than 2 dimensions improve this class
+                    // It might work out of the box. Please check.
+                    assert(distance_to_boarder_.size() < 3);
+                }
+
+                template <typename Graph>
+                void operator()(
+                      subgraph_type const& S
+                    , Graph const& G
+                    , std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const & pinning
+                ) {
+                    assert(( assert_helpers::orbit_of_is_valid(orbit_of_, get<alps::graph::partition>(canonical_properties(S,breaking_vertex_)), S) ));
+
+                    enum { orbit_number = 0 , compressed_embedding_data = 1 , subgraph_vertex = 2 };
+                    std::vector< boost::tuple<boost::uint16_t, boost::uint16_t, unsigned int> > embedding_data;
+
+                    // How many bits do we need to store the maximal distance to the boundary of the lattice (in hops)
+                    // This is the same number of bits as we need for a unique vertex label of the graph
+                    std::size_t const bits_per_dim = num_label_bits(G);
+
+                    // Build lattice_pinning data.
+                    // embedding_compressed contains the full embedding information for a subgraph vertex (i.e. index within unit cell, position in all dimensions)
+                    for (typename std::vector<typename boost::graph_traits<Graph>::vertex_descriptor>::const_iterator it = pinning.begin(); it != pinning.end(); ++it) {
+                        unsigned int    const subgraph_vertex      = it - pinning.begin();
+                        boost::uint16_t const embedding_compressed = calc_compressed_embedding(bits_per_dim, *it, pinning, G);
+                        embedding_data.push_back( boost::make_tuple( static_cast<boost::uint16_t>(orbit_of_[subgraph_vertex]), embedding_compressed, subgraph_vertex) );
+                    }
+
+                    sort(embedding_data.begin(), embedding_data.end());
+
+                    bool const inserted = matches_.insert( convert_to_embedding_generic(embedding_data,S) ).second;
+                    if (inserted)
+                        add_pinning_to_orbit_mapping_matrix(pinning, G);
+                }
+
+              private:
+
+                template <typename Graph>
+                void add_pinning_to_orbit_mapping_matrix(std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const& pinning, Graph const& ) const
+                {
+                    for (typename std::vector<typename boost::graph_traits<Graph>::vertex_descriptor>::const_iterator it = pinning.begin(); it != pinning.end(); ++it)
+                        orbit_mapping_matrix_(*it, orbit_of_[it - pinning.begin()])++;
+                }
+
+                template <typename Graph>
+                boost::uint16_t calc_compressed_embedding(
+                      std::size_t const bits_per_dim
+                    , typename boost::graph_traits<Graph>::vertex_descriptor v_id
+                    , std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const& pinning
+                    , Graph const& G
+                ) const {
+                    assert((0x01u << ((distance_to_boarder_.size()+1) * bits_per_dim)) < boost::integer_traits<boost::uint16_t>::const_max && "boost::uint16_t is not large enough to store full embedding data.");
+                    // data =  bitfield looking like: unit_cell_vtx_idx|d[0]|d[1]|...
+                    boost::uint16_t data = v_id % unit_cell_size_;
+                    for(std::size_t d = 0; d < distance_to_boarder_.size(); ++d)
+                    {
+                        data <<= bits_per_dim;
+                        boost::uint_t<8>::fast const dist = distance_to_boarder_[d][v_id];
+                        assert( dist < (0x01u << bits_per_dim) );
+                        data += dist;
+                    }
+                    return data;
+                }
+
+
                 std::vector<std::size_t>                                        orbit_of_;
                 std::vector<std::vector<boost::uint_t<8>::fast> > const         distance_to_boarder_;
                 boost::unordered_set<embedding_generic_type>                    matches_;
                 std::size_t const                                               unit_cell_size_;
-                GeometricInfo&                                                  geometric_info_;
-                typename boost::graph_traits<subgraph_type>::vertex_descriptor const  breaking_vertex_; // ONLY USED WITH GeometricInfo
+                alps::numeric::matrix<unsigned int> &                           orbit_mapping_matrix_;
+                typename boost::graph_traits<subgraph_type>::vertex_descriptor const  breaking_vertex_;
             };
+
+            struct embedding_found {};
 
             struct throw_on_embedding_found
             {
@@ -558,6 +629,68 @@ namespace alps {
                             > queue_view(queue);
                             lattice_constant_walker(
                                   jt->front()
+                                , *it
+                                , S
+                                , G
+                                , queue_view
+                                , visited
+                                , pinning
+                                , vertex_equal
+                                , edge_equal
+                                , embedding_found_policy
+                            );
+                            break;
+                        }
+            }
+
+            // Input: Subgraph, Graph, vertices of G contained in mapping of S on G
+            // Output: lattice_constant of S in G containing v
+            template<typename Subgraph, typename Graph, typename VertexEqual, typename EdgeEqual, typename EmbeddingFoundPolicy> void lattice_constant_impl_geometric(
+                  Subgraph const & S
+                , Graph const & G
+                , std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const & V
+                , typename partition_type<Subgraph>::type const & subgraph_orbit
+                , VertexEqual & vertex_equal
+                , EdgeEqual & edge_equal
+                , EmbeddingFoundPolicy& embedding_found_policy
+                , typename boost::graph_traits<Subgraph>::vertex_descriptor breaking_vertex
+            ) {
+                // Assume the vertex desciptor is an unsigned integer type (since we want to use it as an index for a vector)
+                BOOST_STATIC_ASSERT((boost::is_unsigned<typename alps::graph_traits<Subgraph>::vertex_descriptor>::value));
+                assert(num_vertices(S) > 0);
+                // if larger, extend the space
+                assert(num_vertices(S) < 21);
+                assert(num_edges(S) < 21);
+
+                BOOST_STATIC_ASSERT((boost::is_unsigned<typename alps::graph_traits<Graph>::vertex_descriptor>::value));
+                assert(num_vertices(G) > 0);
+
+                // make sure, that a distance in one direction fits in a boost::uint8_t
+                assert(std::size_t(num_vertices(G)) < 256 * 256);
+
+                boost::dynamic_bitset<> visited; // (num_vertices(G));
+                shared_queue_data<
+                      typename boost::graph_traits<Subgraph>::vertex_descriptor
+                    , typename boost::graph_traits<Graph>::vertex_descriptor
+                > queue(num_vertices(S));
+                std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> pinning;    // (num_vertices(S), num_vertices(G));
+                for (typename std::vector<typename boost::graph_traits<Graph>::vertex_descriptor>::const_iterator it = V.begin(); it != V.end(); ++it)
+                        if (out_degree(breaking_vertex, S) <= out_degree(*it, G)) {
+                            
+                            // Reset all data
+                            queue.reset();
+                            visited.clear();
+                            visited.resize(num_vertices(G));
+                            pinning.clear();
+                            pinning.resize(num_vertices(S), num_vertices(G));
+
+                            queue.mark_queued(breaking_vertex);
+                            shared_queue_view<
+                                  typename boost::graph_traits<Subgraph>::vertex_descriptor
+                                , typename boost::graph_traits<Graph>::vertex_descriptor
+                            > queue_view(queue);
+                            lattice_constant_walker(
+                                  breaking_vertex
                                 , *it
                                 , S
                                 , G

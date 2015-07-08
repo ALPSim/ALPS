@@ -149,6 +149,22 @@ bool is_discrete_partition(typename alps::graph::partition_type<Graph>::type con
     return ok;
 }
 
+template <typename Graph>
+bool orbit_of_is_valid(std::vector<std::size_t> const& orbit_of, typename alps::graph::partition_type<Graph>::type const& orbit, Graph const& g)
+{
+    typename boost::graph_traits<Graph>::vertex_iterator vit, vend;
+    if( orbit_of.size() != num_vertices(g) )
+        return false;
+    for(boost::tie(vit,vend) = vertices(g); vit != vend; ++vit)
+    {
+        if(*vit >= orbit_of.size())
+            return false;
+        if( std::find(orbit[orbit_of[*vit]].begin(), orbit[orbit_of[*vit]].end()) == orbit[orbit_of[*vit]].end() )
+            return false;
+    }
+    return true;
+}
+
 } // end namespace assert_helpers
 } // end namespace detail
 } // end namespace graph

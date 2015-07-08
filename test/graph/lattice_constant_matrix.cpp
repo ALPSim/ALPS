@@ -33,19 +33,6 @@
 
 #include <iostream>
 
-//// Write a partition to cout
-//template<typename Stream> Stream & operator<< (Stream & os, alps::graph::partition_type<boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> >::type const & pi) {
-//    typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> graph_type;
-//    os << "(";
-//    for (alps::graph::partition_type<graph_type>::type::const_iterator it = pi.begin(); it != pi.end(); ++it) {
-//        os << "(";
-//        for (alps::graph::partition_type<graph_type>::type::value_type::const_iterator jt = it->begin(); jt != it->end(); ++jt)
-//            os << (jt == it->begin() ? "" : " ") << *jt;
-//        os << ")";
-//    }
-//    os << ")";
-//    return os;
-//}
 int main() {
     using boost::get;
     using boost::put;
@@ -99,10 +86,11 @@ int main() {
         input_type in(canonical_properties(g,breaking_vertex), breaking_vertex, part_contrib);
 
         output_type out(init);
-        // TODO check
-        out[0]  += 2*2*2;  // (0,0)
-        out[1]  += 1*3;    // (1,0)
-        out[40] += 1*3;    // (0,1)
+        out[820] += 2*2*2;  // (0,0)
+        out[821] += 1*3;    // (1,0)
+        out[819] += 1*3;    // (-1,0)
+        out[860] += 1*3;    // (0,1)
+        out[780] += 1*3;    // (0,-1)
 
         test_graphs.push_back(boost::make_tuple(g,in,out));
     }
@@ -128,9 +116,11 @@ int main() {
             input_type in(canonical_properties(g,breaking_vertex), breaking_vertex, part_contrib);
 
             output_type out(init);
-            out[0] += 4*2;  // (0,0)
-            out[1] += 3*3;  // (1,0)
-            out[40] += 3*3; // (0,1)
+            out[820] += 4*2;  // (0,0)
+            out[821] += 3*3;  // (1,0)
+            out[819] += 3*3;  // (-1,0)
+            out[860] += 3*3;  // (0,1)
+            out[780] += 3*3;  // (0,-1)
 
             test_graphs.push_back(boost::make_tuple(g,in,out));
         }
@@ -144,12 +134,21 @@ int main() {
             input_type in(canonical_properties(g,breaking_vertex), breaking_vertex, part_contrib);
 
             output_type out(init);
-            out[0]  += 12 * part_contrib[1];  // (0,0)
-            out[1]  += 3  * part_contrib[0];  // (1,0)
-            out[40] += 3  * part_contrib[0];  // (0,1)
-            out[41] += 4*11; // (1,1)
-            out[2]  += 2*11; // (2,0)
-            out[80] += 2*11; // (0,2)
+            out[820]  += 12 * part_contrib[1];  // ( 0, 0)
+            out[821]  += 3  * part_contrib[0];  // ( 1, 0)
+            out[860]  += 3  * part_contrib[0];  // ( 0, 1)
+            out[819]  += 3  * part_contrib[0];  // (-1, 0)
+            out[780]  += 3  * part_contrib[0];  // ( 0,-1)
+
+            out[861] += 4*11; // ( 1, 1)
+            out[859] += 4*11; // (-1, 1)
+            out[781] += 4*11; // ( 1,-1)
+            out[779] += 4*11; // (-1,-1)
+
+            out[822] += 2*11; // ( 2, 0)
+            out[818] += 2*11; // (-2, 0)
+            out[900] += 2*11; // ( 0, 2)
+            out[740] += 2*11; // ( 0,-2)
 
             test_graphs.push_back(boost::make_tuple(g,in,out));
         }
