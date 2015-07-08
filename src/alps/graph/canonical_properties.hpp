@@ -971,7 +971,7 @@ namespace alps {
                     label_creator.update_graph_label(current_label, get<0>(T.back()), G);
                     // If we found the same label before, we found an automorphism -> coarse orbit
                     typename found_labels_map_type::iterator it = found_labels.lower_bound(current_label);
-                    if(it->first == current_label)
+                    if(it != found_labels.end() && it->first == current_label)
                         detail::coarse_orbit(orbit, Io, it->second, get<0>(T.back()), G); 
                     else
                         found_labels.insert( it, std::make_pair(current_label,get<0>(T.back())) );
