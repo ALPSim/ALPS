@@ -89,8 +89,11 @@ public:
     void project(MPSTensor<Matrix, SymmGroup> & t) const
     {
         for (typename std::vector<MPSTensor<Matrix, SymmGroup> >::const_iterator it = ortho_vecs.begin();
-             it != ortho_vecs.end(); ++it)
-            t -= ietl::dot(*it,t)/ietl::dot(*it,*it)**it;
+             it != ortho_vecs.end(); ++it) {
+            typename MPSTensor<Matrix, SymmGroup>::scalar_type norm = ietl::dot(*it,*it);
+            if (norm != 0.)
+                t -= ietl::dot(*it,t)/norm**it;
+        }
     }
     
 private:
