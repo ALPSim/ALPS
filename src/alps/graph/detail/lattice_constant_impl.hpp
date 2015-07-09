@@ -228,7 +228,7 @@ namespace alps {
                     , Graph const& G
                     , std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const & pinning
                 ) {
-                    assert(( assert_helpers::orbit_of_is_valid(orbit_of_, get<alps::graph::partition>(canonical_properties(S,breaking_vertex_)), S) ));
+                    assert(( assert_helpers::orbit_of_is_valid(orbit_of_, get<alps::graph::partition>(canonical_properties(S)), S) ));
 
                     enum { orbit_number = 0 , compressed_embedding_data = 1 , subgraph_vertex = 2 };
                     std::vector< boost::tuple<boost::uint16_t, boost::uint16_t, unsigned int> > embedding_data;
