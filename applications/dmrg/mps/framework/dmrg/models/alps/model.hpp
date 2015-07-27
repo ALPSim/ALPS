@@ -160,6 +160,10 @@ public:
             int p = lattice.vertex_index(*it);
             int type = lattice.site_type(*it);
             
+            if (lattice.inhomogeneous_sites())
+                alps::throw_if_xyz_defined(parms,*it); // check whether x, y, or z is set
+            alps::expression::ParameterEvaluator<value_type> coords(lattice.coordinate_as_parameter(p));
+            
             if (site_terms[type].size() == 0) {
                 typedef std::vector<boost::tuple<alps::expression::Term<value_type>,alps::SiteOperator> > V;
                 V  ops = model.site_term(type).template templated_split<value_type>();
@@ -170,6 +174,9 @@ public:
                     if (match == operators.end())
                         match = register_operator(op, type, parms);
                     // site_terms[type].push_back( std::make_pair(boost::get<0>(ops[n]).value(), match->second)  );
+                    
+                    if (lattice.inhomogeneous_sites())
+                        boost::get<0>(ops[n]).partial_evaluate(coords);
                     
                     expression_term term;
                     term.coeff = boost::get<0>(ops[n]);
