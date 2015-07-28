@@ -51,6 +51,15 @@ namespace detail {
     }
 }
 
+template <class I>
+bool safe_is_fermionic(alps::SiteBasisDescriptor<I> const& b, alps::SiteOperator const& op)
+{
+    using boost::bind;
+    std::set<std::string> operator_names = op.operator_names();
+    return std::count_if(operator_names.begin(), operator_names.end(), boost::bind(&alps::SiteBasisDescriptor<I>::is_fermionic, b, _1)) % 2;
+}
+
+
 template <class Matrix, class SymmGroup>
 class ALPSModel : public model_impl<Matrix, SymmGroup>
 {
@@ -337,8 +346,10 @@ private:
     
     bool fermionic (alps::SiteBasisDescriptor<I> const& b1, SiteOperator const& op1,
                     alps::SiteBasisDescriptor<I> const& b2, SiteOperator const& op2) const
-    {
-        return b1.is_fermionic(simplify_name(op1)) && b2.is_fermionic(simplify_name(op2));
+    {  
+        bool is_ferm1 = safe_is_fermionic(b1, op1);
+        bool is_ferm2 = safe_is_fermionic(b2, op2);
+        return is_ferm1 || is_ferm2;
     }
     
     inline op_t convert_matrix (const alps_matrix& m, int type) const
@@ -375,7 +386,7 @@ private:
     {
         alps::SiteBasisDescriptor<I> const& b = basis_descriptors[type];
         alps_matrix m = alps::get_matrix(value_type(), op, b, p, true);
-        tag_detail::operator_kind kind = b.is_fermionic(simplify_name(op)) ? tag_detail::fermionic : tag_detail::bosonic;
+        tag_detail::operator_kind kind = safe_is_fermionic(b, op) ? tag_detail::fermionic : tag_detail::bosonic;
         tag_type mytag = tag_handler->register_op(convert_matrix(m, type), kind);
         
         opmap_const_iterator match;
@@ -433,7 +444,7 @@ private:
                 alps::SiteBasisDescriptor<I> const& b = basis_descriptors[type];
                 if (b.has_operator(*it2)) {
                     SiteOperator op = make_site_term(*it2, parms);
-                    bool is_ferm = b.is_fermionic(simplify_name(op));
+                    bool is_ferm = safe_is_fermionic(b, op);
                     if (kind == uknown)
                         kind = is_ferm ? fermionic : bosonic;
                     else if ((is_ferm && kind==bosonic) || (!is_ferm && kind==fermionic))
@@ -622,7 +633,7 @@ ALPSModel<Matrix, SymmGroup>::measurements () const
                                 
                                 unsigned ii = std::distance(ops.begin(), tit);
                                 {
-                                    operators[ii][0].second = b1.is_fermionic(simplify_name(op1));
+                                    operators[ii][0].second = safe_is_fermionic(b1, op1);
                                     op_t & m = operators[ii][0].first[type1];
                                     if (operators[ii][0].second)
                                         gemm(fillings[type1], this->get_operator(simplify_name(op1), type1), m); // Note inverse notation because of notation in operator.
@@ -631,7 +642,7 @@ ALPSModel<Matrix, SymmGroup>::measurements () const
                                     m = boost::get<0>(*tit).value() * m;
                                 }
                                 {
-                                    operators[ii][1].second = b2.is_fermionic(simplify_name(op2));
+                                    operators[ii][1].second = safe_is_fermionic(b2, op2);
                                     op_t & m = operators[ii][1].first[type2];
                                     m = this->get_operator(simplify_name(op2), type2);
                                 }
@@ -652,7 +663,7 @@ ALPSModel<Matrix, SymmGroup>::measurements () const
                         alps::SiteBasisDescriptor<I> const& b = basis_descriptors[type];
                         if (b.has_operator(it->value())) {
                             SiteOperator op = make_site_term(it->value(), parms);
-                            if (b.is_fermionic(simplify_name(op)))
+                            if (safe_is_fermionic(b, op))
                                 throw std::runtime_error("Cannot measure local fermionic operators.");
                             
                             tops[type] = this->get_operator(it->value(), type);
