@@ -229,6 +229,6 @@ private:
 #endif
 
   // regarding DWA development
-  int alps_dwa_development_model_parsing_mode;
+  int alps_dwa_development_821_mode;
 };
 #endif

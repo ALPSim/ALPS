@@ -164,7 +164,7 @@ directed_worm_algorithm
     , measure_local_density2_        (parms_.value_or_default("MEASURE[Local Density^2]",false))
     , measure_green_function_        (parms_.value_or_default("MEASURE[Green Function]",false))
     // regarding development
-    , alps_dwa_development_model_parsing_mode  (parms_.value_or_default("DEVELOPMENT[MODEL PARSING]", -1))
+    , alps_dwa_development_821_mode (parms_.value_or_default("DEVELOPMENT[821]", -1))
   {
     // lattice enhancement
     using alps::numeric::operator*;
@@ -322,11 +322,11 @@ void
       // iterate all sites and build onsite matrix 
       std::cout << "\t\t\ti. Onsite matrix \t... starting\n";
 
-      if (alps_dwa_development_model_parsing_mode == 0)
+      if (alps_dwa_development_821_mode == 0)
       {
         initialize_onsite_hamiltonian();
       }
-      else if (alps_dwa_development_model_parsing_mode == -1)
+      else if (alps_dwa_development_821_mode == -1)
       {
         //// tamama's fast evaluate scheme (else evaluating x, y, z for say 100^3 lattice will take forever)
         //// Step 1: partial evaluate everything up to x,y,z terms
@@ -680,7 +680,7 @@ void
           onsite_matrix[i] = onsite_matrix[i] * beta;
         }
 
-      }  // ending if (alps_dwa_development_model_parsing_mode == -1)
+      }  // ending if (alps_dwa_development_821_mode == -1)
 
       std::cout << "\t\t\t\t\t\t\t ... done.\n";
 
