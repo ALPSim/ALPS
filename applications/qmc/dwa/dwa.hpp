@@ -96,6 +96,8 @@ private:
   double probability_bounce()          const  {  return (static_cast<double>(_propagation_failure_counter)/_propagation_counter);  }
 
   // regarding model
+  void initialize_onsite_hamiltonian();   // called from initialize_hamiltonian within
+  void initialize_bond_hamiltonian();     // called from initialize_hamiltonian within
   void initialize_hamiltonian();
   void print_hamiltonian(std::ostream & out);
 
@@ -225,5 +227,8 @@ private:
   std::vector<location_type>  _neighborlocations_cache;
   std::vector<double>         _cummulative_weights_cache; 
 #endif
+
+  // regarding DWA development
+  int alps_dwa_development_model_parsing_mode;
 };
 #endif
