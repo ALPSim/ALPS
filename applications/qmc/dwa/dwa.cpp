@@ -164,7 +164,7 @@ directed_worm_algorithm
     , measure_local_density2_        (parms_.value_or_default("MEASURE[Local Density^2]",false))
     , measure_green_function_        (parms_.value_or_default("MEASURE[Green Function]",false))
     // regarding development
-    , alps_dwa_development_821_mode (parms_.value_or_default("DEVELOPMENT[821]", -1))
+    , alps_dwa_development_821_mode (parms_.value_or_default("DEVELOPMENT[821]", 0))
   {
     // lattice enhancement
     using alps::numeric::operator*;
