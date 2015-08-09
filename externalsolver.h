@@ -37,15 +37,13 @@
     #include <boost/mpi.hpp>
 #endif
 #include "solver.h"
-#include "boost/filesystem/path.hpp"
-#include "boost/filesystem/operations.hpp"
 
 class ClusterTransformer;
 
 /// @brief An impurity solver calling an external executable to solve the 
 ///        impurity problem
 /// 
-/// The ExternalSolver receives the path to an executable in the constructor. 
+/// The ExternalSolver receives the launch command for an executable in the constructor. 
 /// This executable will be called to solve the impurity problem. The executable
 /// should take two arguments: the name of an input file and the name of an 
 /// output file. Both files have to conform to the XML schema for impurity 
@@ -59,9 +57,8 @@ class ExternalSolver
 {
 public:
 	/// @param executable the path to the executable
-	ExternalSolver(const boost::filesystem::path& executable) 
-    : exe_(executable) {} 
-    //: exe_(boost::filesystem::complete(executable)) {}
+	ExternalSolver(const std::string & launch_command) 
+    : launch_command_(launch_command) {} 
 
 	ImpuritySolver::matsubara_result_type solve_matsubara(
               const matsubara_green_function_t& G0_omega
@@ -75,8 +72,8 @@ private:
     /// call the executable
     virtual void call(std::string const& infile, std::string const& outfile);
       
-	///path to the solver executable
-	boost::filesystem::path exe_;
+	///command to launch the solver executable
+	std::string launch_command_;
 };
 #ifdef USE_MPI
 class CallbackSolver: public ExternalSolver

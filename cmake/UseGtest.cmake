@@ -23,6 +23,6 @@
 
 message(STATUS "gtest is in ${gtest_ROOT}")
 
-set (gtest_INCLUDE_DIR ${gtest_ROOT}/include)
+set (gtest_INCLUDE_DIR ${gtest_ROOT}/include ${gtest_ROOT})
 mark_as_advanced(gtest_ROOT)
 mark_as_advanced(gtest_INCLUDE_DIR)

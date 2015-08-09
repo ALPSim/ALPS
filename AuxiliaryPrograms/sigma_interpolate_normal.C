@@ -48,13 +48,13 @@ int main(int argc, char **argv){
   if(!vm.count("pfile_old")) throw std::runtime_error("you need to specify the old parameter file.");
   if(!vm.count("pfile_new")) throw std::runtime_error("you need to specify the new parameter file.");
   if(!vm.count("selfenergy")) throw std::runtime_error("you need to specify the selfenergy.");
-  
+ 
   //parse parameters: open old parameter file
   alps::params parms_old(pfilename_old);
   
   //parse parameters: open new parameter file
   alps::params parms_new(pfilename_new);
-  
+
   //general error check
   std::string cl=parms_old["CLUSTER_LOOP"];
   if(cl!=std::string("DCA")) throw std::invalid_argument("this interpolation assumes DCA");

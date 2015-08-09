@@ -6903,6 +6903,30 @@
     <UNITCELL ref="simple2d"/>
   </LATTICEGRAPH>
 
+<LATTICE name="Betts2D-98A superlattice" dimension="2">
+    <BASIS>
+      <VECTOR>7 7 </VECTOR>
+      <VECTOR>7 -7 </VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>14*pi/98 14*pi/98 </VECTOR>
+      <VECTOR>14*pi/98 -14*pi/98 </VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+  
+  <LATTICEGRAPH name = "Betts2D-98A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts2D-98A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple2d"/>
+  </LATTICEGRAPH>
+
+
+
 
  <LATTICE name="Kent2D-50B superlattice" dimension="2">
     <BASIS>

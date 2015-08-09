@@ -154,8 +154,9 @@ void perform_single_site_loop(const alps::params &parms){
   else
     transform_ptr=setup_Bethe_hilbert_transform(parms);
   
+  std::string launcher_path=parms["LAUNCHER"]|"";
   std::string solver_path=parms["SOLVER"];
-  ImpuritySolver* solver_ptr=new ExternalSolver(boost::filesystem::path(solver_path));
+  ImpuritySolver* solver_ptr=new ExternalSolver(launcher_path+" "+solver_path);
   selfconsistency_loop_single_site(parms, *solver_ptr, *transform_ptr);
   delete solver_ptr;
 }
