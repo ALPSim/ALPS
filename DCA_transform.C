@@ -520,7 +520,7 @@ void SimpleDCATransformer::compute_sigma_from_G0_and_G(const matsubara_green_fun
   }
 }
 void SimpleDCATransformer::compute_integration_weight_and_dispersion(bool use_phase, std::vector<std::vector<double> > &epsilon_kckl, std::vector<double> &weight_kl)const{
-  vector_type phi=phase_vector();
+  vector_type phi=use_phase?phase_vector():vector_type();
   for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
     for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
       vector_type k(dimension());
