@@ -40,6 +40,7 @@
 #include "externalsolver.h"
 #include "alps/parameter.h"
 #include "cluster.h"
+#include "fouriertransform.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -66,6 +67,36 @@ ImpuritySolver::matsubara_result_type ExternalSolver::solve_matsubara(
     if((bool)(p["WRITE_CLUSTER_INFO"]|false)){
       if(c_ptr==0) throw std::runtime_error("called cluster info function with a cluster ptr equal to 0");
       c_ptr->write_hdf5(solver_input, "/cluster");
+    }
+    ///dump all possible G-s into the solver hdf5
+    if((bool)(p["WRITE_TIME_AND_REALSPACE"]|false)){
+      if(p["CLUSTER_LOOP"]|""!=std::string("DCA") || G0_omega.shape() !=diagonal) throw std::runtime_error("the WRITE_TIME_AND_REALSPACE has been specifically implemented for DCA.");
+      int ntau=p["N"];
+      int nfreq=p["NMATSUBARA"];
+      int n_flavor=2;
+      int n_sites=p["SITES"];
+      itime_green_function_t green0_itime_sc_k      (ntau+1,n_sites,n_flavor, diagonal);
+      itime_green_function_t green0_itime_sc_rs     (ntau+1,n_sites,n_flavor, nondiagonal);
+      itime_green_function_t green0                 (ntau+1,n_sites,n_flavor, nondiagonal);
+      matsubara_green_function_t green0_matsubara_rs(nfreq ,n_sites,n_flavor, nondiagonal);
+
+      boost::shared_ptr<FourierTransformer> fourier_ptr;
+      FourierTransformer::generate_transformer(p, fourier_ptr);
+      green0_matsubara_rs= c_ptr->transform_into_real_space(G0_omega);
+      fourier_ptr->frequency_to_time_ft(green0_itime_sc_k, G0_omega);
+      green0_itime_sc_rs = c_ptr->transform_into_real_space(green0_itime_sc_k);
+      for (unsigned f=0; f<green0.nflavor(); f++){
+        for (unsigned s1=0; s1<green0.nsite(); s1++){
+          for (unsigned s2=0; s2<green0.nsite(); s2++){
+            for (unsigned w=0; w<green0.nfreq(); w++) {
+              green0(w,s1,s2,f) = -green0_itime_sc_rs(w,s1,s2,f);
+            }
+          }
+        }
+      }
+      green0_matsubara_rs.write_hdf5(solver_input, "/G0_rs");
+      green0.write_hdf5(solver_input, "/G0_tau_rs");
+      green0_itime_sc_k.write_hdf5(solver_input, "/G0_tau_ks");
     }
   }
   
