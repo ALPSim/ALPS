@@ -47,6 +47,11 @@ class strided_iterator : public boost::iterator_facade<
     public:
         typedef T value_type;
 
+        strided_iterator()
+        : ptr(0), stride(0)
+        {
+        }
+
         strided_iterator(value_type* ptr, typename Matrix::difference_type stride)
             : ptr(ptr), stride(stride)
         {
@@ -70,7 +75,10 @@ class strided_iterator : public boost::iterator_facade<
         template <typename,typename> friend class strided_iterator;
 
         value_type& dereference() const
-        { return *ptr; }
+        {
+            assert(ptr != 0);
+            return *ptr;
+        }
 
         template <typename Matrix2,typename U>
         bool equal(strided_iterator<Matrix2,U> const& y) const
@@ -97,6 +105,7 @@ class strided_iterator : public boost::iterator_facade<
         template <typename U>
         typename Matrix::difference_type distance_to(strided_iterator<Matrix,U> const& z) const
         {
+            assert( stride != 0 );
             assert( (z.ptr - ptr) % stride == 0 );
             return (z.ptr - ptr)/stride;
         }
