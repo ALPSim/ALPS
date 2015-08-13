@@ -57,5 +57,6 @@ else(NOT LAPACK_FOUND)
   add_subdirectory(mps_eigenstate_sims)
   add_subdirectory(mps_evolve)
   add_subdirectory(mps_overlap)
+  add_subdirectory(examples)
 
 endif(NOT LAPACK_FOUND)
