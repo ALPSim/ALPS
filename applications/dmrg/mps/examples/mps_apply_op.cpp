@@ -71,6 +71,8 @@ void run(std::string const& chkp, std::string const& bname)
     parms.set("LATTICE", "open chain lattice");
     parms.set("L",       10                  );
     parms.set("MODEL",   "spin"              );
+    parms.set("CONSERVED_QUANTUMNUMBERS", "Sz");
+    parms.set("Sz_total", 0);
     
     // Build lattice and model
     Lattice lattice(parms);
@@ -84,7 +86,7 @@ void run(std::string const& chkp, std::string const& bname)
         operator_type op = model.get_operator(op_name, lattice.get_prop<int>("type", p));
         
         MPS<Matrix, grp> mps_out = mps;
-        mps.apply(op, p);
+        mps_out.apply(op, p);
         
         const std::string oname = boost::str(boost::format("%s.%s_%d.mps") % bname % op_name % p);
         boost::filesystem::create_directory(oname);
