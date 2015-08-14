@@ -520,7 +520,6 @@ namespace alps {
                 , EmbeddingFoundPolicy& register_embedding
             ) {
                 typedef typename boost::graph_traits<Subgraph>::vertex_descriptor subgraph_vertex_descriptor;
-                typedef typename boost::graph_traits<Graph>::vertex_descriptor       graph_vertex_descriptor;
 
                 // Check if the vertex mapping s->g is valid by checking if...
                 // ... the degrees are compatible
