@@ -11,7 +11,7 @@ typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major
 
 TEST(Fouriertransform, nambuCDMFT){
 
-  int n_matsubara=1024;
+/*  int n_matsubara=1024;
   int n_flavor=2;
   int n_site=4;
   double beta =10;
@@ -58,7 +58,7 @@ TEST(Fouriertransform, nambuCDMFT){
       }
       EXPECT_LT(abs(G_tau(n_matsubara/2,s1,s2,0,0)-G_0(s1,s2)),error);
     }
-  }
+  }*/
 
 }
 

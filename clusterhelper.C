@@ -23,48 +23,10 @@
  *
  *****************************************************************************/
 
-
+#include "alpsgraph.h"
 #include "cluster.h"
 #include "clusterhelper.hxx"
-#include "alps/lattice/graph_helper.h"
-#include <alps/ngs/make_deprecated_parameters.hpp>
 
-class alps_graph:public abstract_graph{
-public:
-  //to disentangle things from ALPS we have to hide the cell iterator, offset type, and momentum iterator calls.
-  typedef alps::graph_helper<alps::graph_helper<>::graph_type>::cell_iterator cell_iterator;
-  typedef std::pair<cell_iterator,cell_iterator> cell_iterator_pair;
-  typedef alps::graph_helper<alps::graph_helper<>::graph_type>::cell_descriptor cell_descriptor;
-  typedef alps::graph_helper<alps::graph_helper<>::graph_type>::momentum_iterator momentum_iterator;
-  typedef std::pair<momentum_iterator,momentum_iterator> momentum_iterator_pair;
-
-  alps_graph(const alps::params& params):graph_(alps::make_deprecated_parameters(params)){
-    //set up cell origins and offsets
-    cell_iterator itc, itc_end;
-    for (boost::tie(itc, itc_end) = graph_.cells(); itc != itc_end; ++itc) {
-      cell_origins_.push_back(graph_.origin(*itc));
-      cell_offsets_.push_back(graph_.offset(*itc));
-    }
-    //set up momenta
-    momentum_iterator itm, itm_end;
-    for (boost::tie(itm, itm_end) = graph_.momenta(); itm != itm_end; ++itm) {
-      momenta_.push_back(graph_.momentum(*itm));
-    }
-  }
-  virtual ~alps_graph(){}
-   int volume() const{return graph_.volume();}
-   int dimension() const{return graph_.dimension();}
-   basis_vector_iterator_pair basis_vectors() const {return graph_.basis_vectors(); }
-   basis_vector_iterator_pair reciprocal_basis_vectors() const {return graph_.reciprocal_basis_vectors(); }
-   basis_vector_iterator_pair cell_origins() const{return std::make_pair(cell_origins_.begin(), cell_origins_.end());}
-   offset_iterator_pair cell_offsets() const{return std::make_pair(cell_offsets_.begin(), cell_offsets_.end());}
-   momenta_iterator_pair cell_momenta() const{return std::make_pair(momenta_.begin(), momenta_.end());}
-private:
-  const alps::graph_helper<alps::graph_helper<>::graph_type> graph_;
-  std::vector<std::vector<double> > cell_origins_;
-  offset_vector_type cell_offsets_;
-  momenta_vector_type momenta_;
-};
 
 ClusterHelper::ClusterHelper(const alps::params& params) :
 n_cluster_sites_(boost::lexical_cast<int>(params["SITES"])),
@@ -215,10 +177,10 @@ void ClusterHelper::find_integration_weights() {
           weight *= 1. / 3.;
         } else
         //rest gets 2/3 and 4/3 of weight according to Simpson
-        if ((((int) (abs(round(m)))) % 2 == 0
-            && ((int) (abs(round(L)))) % 2 == 0)
-            || (((int) (abs(round(m)))) % 2 == 1
-                && ((int) (abs(round(L)))) % 2 == 1)) {
+          if ((((int) (std::abs(round(m)))) % 2 == 0
+               && ((int) (std::abs(round(L)))) % 2 == 0)
+              || (((int) (std::abs(round(m)))) % 2 == 1
+                  && ((int) (std::abs(round(L)))) % 2 == 1)) {
           weight *= 2. / 3.;
         } else {
           weight *= 4. / 3.;

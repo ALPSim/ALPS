@@ -36,6 +36,9 @@ public:
   typedef alps::graph_helper<alps::graph_helper<>::graph_type>::cell_descriptor cell_descriptor;
   typedef alps::graph_helper<alps::graph_helper<>::graph_type>::momentum_iterator momentum_iterator;
   typedef std::pair<momentum_iterator,momentum_iterator> momentum_iterator_pair;
+  typedef std::vector<std::vector<double> > basis_vector;
+  typedef basis_vector::const_iterator basis_vector_iterator;
+  typedef std::pair<basis_vector_iterator,basis_vector_iterator> basis_vector_iterator_pair;
 
   alps_graph(const alps::params& params):graph_(alps::make_deprecated_parameters(params)){
     //set up cell origins and offsets
@@ -49,14 +52,26 @@ public:
     for (boost::tie(itm, itm_end) = graph_.momenta(); itm != itm_end; ++itm) {
       momenta_.push_back(graph_.momentum(*itm));
     }
+    //buffer volume and dimension
     volume_=graph_.volume();
     dimension_=graph_.dimension();
+    
+    //buffer the basis vectors
+    basis_vector_iterator_pair BVIP=graph_.basis_vectors();
+    for(basis_vector_iterator it=BVIP.first; it!=BVIP.second;++it){
+      basis_.push_back(*it);
+    }
+    basis_vector_iterator_pair RVIP=graph_.reciprocal_basis_vectors();
+    for(basis_vector_iterator it=RVIP.first; it!=RVIP.second;++it){
+      reciprocal_vectors_.push_back(*it);
+    }
+
   }
   virtual ~alps_graph(){}
-   int volume() const{return  volume_;}
+   int volume() const{return volume_;}
    int dimension() const{return dimension_;}
-   basis_vector_iterator_pair basis_vectors() const {return graph_.basis_vectors(); }
-   basis_vector_iterator_pair reciprocal_basis_vectors() const {return graph_.reciprocal_basis_vectors(); }
+   basis_vector_iterator_pair basis_vectors() const {return std::make_pair(basis_.begin(), basis_.end()); }
+   basis_vector_iterator_pair reciprocal_basis_vectors() const {return std::make_pair(reciprocal_vectors_.begin(), reciprocal_vectors_.end()); }
    basis_vector_iterator_pair cell_origins() const{return std::make_pair(cell_origins_.begin(), cell_origins_.end());}
    offset_iterator_pair cell_offsets() const{return std::make_pair(cell_offsets_.begin(), cell_offsets_.end());}
    momenta_iterator_pair cell_momenta() const{return std::make_pair(momenta_.begin(), momenta_.end());}
@@ -64,6 +79,8 @@ private:
   int volume_;
   int dimension_;
   const alps::graph_helper<alps::graph_helper<>::graph_type> graph_;
+  std::vector<std::vector<double> > basis_;
+  std::vector<std::vector<double> > reciprocal_vectors_;
   std::vector<std::vector<double> > cell_origins_;
   offset_vector_type cell_offsets_;
   momenta_vector_type momenta_;
