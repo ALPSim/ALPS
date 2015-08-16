@@ -2,6 +2,7 @@
  *
  * ALPS DMFT Project
  *
+ * Copyright (C) 2015 by Emanuel Gull <egull@umich.edu>
  * Copyright (C) 2007 by Sebastian Fuchs <fuchs@comp-phys.org>
  *
  * This software is part of the ALPS Applications, published under the ALPS
@@ -39,7 +40,7 @@ public:
   typedef std::vector<std::vector<double> > basis_vector;
   typedef basis_vector::const_iterator basis_vector_iterator;
   typedef std::pair<basis_vector_iterator,basis_vector_iterator> basis_vector_iterator_pair;
-
+  
   alps_graph(const alps::params& params){
     const alps::graph_helper<alps::graph_helper<>::graph_type> graph(alps::make_deprecated_parameters(params));
     //set up cell origins and offsets
@@ -56,6 +57,7 @@ public:
     //buffer volume and dimension
     volume_=graph.volume();
     dimension_=graph.dimension();
+    if(graph.dimension()>3) throw std::invalid_argument("we only deal with graphs of dimension 1, 2, or 3");
     
     //buffer the basis vectors
     basis_vector_iterator_pair BVIP=graph.basis_vectors();
@@ -66,17 +68,29 @@ public:
     for(basis_vector_iterator it=RVIP.first; it!=RVIP.second;++it){
       reciprocal_vectors_.push_back(*it);
     }
+    //compute the unit cell volume
+    compute_unit_cell_volume();
   }
   virtual ~alps_graph(){}
-   int volume() const{return volume_;}
-   int dimension() const{return dimension_;}
-   basis_vector_iterator_pair basis_vectors() const {return std::make_pair(basis_.begin(), basis_.end()); }
-   basis_vector_iterator_pair reciprocal_basis_vectors() const {return std::make_pair(reciprocal_vectors_.begin(), reciprocal_vectors_.end()); }
-   basis_vector_iterator_pair cell_origins() const{return std::make_pair(cell_origins_.begin(), cell_origins_.end());}
-   offset_iterator_pair cell_offsets() const{return std::make_pair(cell_offsets_.begin(), cell_offsets_.end());}
-   momenta_iterator_pair cell_momenta() const{return std::make_pair(momenta_.begin(), momenta_.end());}
+  int volume() const{return volume_;}
+  int dimension() const{return dimension_;}
+  int unit_cell_volume(){ return unit_cell_volume_;}
+  basis_vector_iterator_pair basis_vectors() const {return std::make_pair(basis_.begin(), basis_.end()); }
+  basis_vector_iterator_pair reciprocal_basis_vectors() const {return std::make_pair(reciprocal_vectors_.begin(), reciprocal_vectors_.end()); }
+  basis_vector_iterator_pair cell_origins() const{return std::make_pair(cell_origins_.begin(), cell_origins_.end());}
+  offset_iterator_pair cell_offsets() const{return std::make_pair(cell_offsets_.begin(), cell_offsets_.end());}
+  momenta_iterator_pair cell_momenta() const{return std::make_pair(momenta_.begin(), momenta_.end());}
+  void compute_unit_cell_volume(){
+    if(dimension_==1){ unit_cell_volume_=basis_[0][0]; }
+    else if(dimension_==2){
+      unit_cell_volume_=std::abs(basis_[0][0]*basis_[1][1]-basis_[0][1]*basis_[1][0]);
+    }else if(dimension_==3){
+      unit_cell_volume_=std::abs(basis_[2][0]*(basis_[0][1]*basis_[1][2]-basis_[1][1]*basis_[0][2])+basis_[2][1]*(basis_[0][2]*basis_[1][0]-basis_[0][0]*basis_[1][2])+basis_[2][2]*(basis_[0][0]*basis_[1][1]-basis_[0][1]*basis_[1][0]));
+    }
+  }
 private:
   int volume_;
+  int unit_cell_volume_;
   int dimension_;
   std::vector<std::vector<double> > basis_;
   std::vector<std::vector<double> > reciprocal_vectors_;
