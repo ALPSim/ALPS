@@ -40,32 +40,32 @@ public:
   typedef basis_vector::const_iterator basis_vector_iterator;
   typedef std::pair<basis_vector_iterator,basis_vector_iterator> basis_vector_iterator_pair;
 
-  alps_graph(const alps::params& params):graph_(alps::make_deprecated_parameters(params)){
+  alps_graph(const alps::params& params){
+    const alps::graph_helper<alps::graph_helper<>::graph_type> graph(alps::make_deprecated_parameters(params));
     //set up cell origins and offsets
     cell_iterator itc, itc_end;
-    for (boost::tie(itc, itc_end) = graph_.cells(); itc != itc_end; ++itc) {
-      cell_origins_.push_back(graph_.origin(*itc));
-      cell_offsets_.push_back(graph_.offset(*itc));
+    for (boost::tie(itc, itc_end) = graph.cells(); itc != itc_end; ++itc) {
+      cell_origins_.push_back(graph.origin(*itc));
+      cell_offsets_.push_back(graph.offset(*itc));
     }
     //set up momenta
     momentum_iterator itm, itm_end;
-    for (boost::tie(itm, itm_end) = graph_.momenta(); itm != itm_end; ++itm) {
-      momenta_.push_back(graph_.momentum(*itm));
+    for (boost::tie(itm, itm_end) = graph.momenta(); itm != itm_end; ++itm) {
+      momenta_.push_back(graph.momentum(*itm));
     }
     //buffer volume and dimension
-    volume_=graph_.volume();
-    dimension_=graph_.dimension();
+    volume_=graph.volume();
+    dimension_=graph.dimension();
     
     //buffer the basis vectors
-    basis_vector_iterator_pair BVIP=graph_.basis_vectors();
+    basis_vector_iterator_pair BVIP=graph.basis_vectors();
     for(basis_vector_iterator it=BVIP.first; it!=BVIP.second;++it){
       basis_.push_back(*it);
     }
-    basis_vector_iterator_pair RVIP=graph_.reciprocal_basis_vectors();
+    basis_vector_iterator_pair RVIP=graph.reciprocal_basis_vectors();
     for(basis_vector_iterator it=RVIP.first; it!=RVIP.second;++it){
       reciprocal_vectors_.push_back(*it);
     }
-
   }
   virtual ~alps_graph(){}
    int volume() const{return volume_;}
@@ -78,7 +78,6 @@ public:
 private:
   int volume_;
   int dimension_;
-  const alps::graph_helper<alps::graph_helper<>::graph_type> graph_;
   std::vector<std::vector<double> > basis_;
   std::vector<std::vector<double> > reciprocal_vectors_;
   std::vector<std::vector<double> > cell_origins_;
