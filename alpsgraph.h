@@ -70,11 +70,26 @@ public:
     }
     //compute the unit cell volume
     compute_unit_cell_volume();
+    
   }
   virtual ~alps_graph(){}
   int volume() const{return volume_;}
   int dimension() const{return dimension_;}
   int unit_cell_volume(){ return unit_cell_volume_;}
+  //if the reciprocal basis is correct, this test will validate that each vector is orthogonal to all other basis vectors
+  double validate_orghogonality(){
+    double deviation_from_orthogonality=0.;
+    for(int i=0;i<basis_.size();++i){
+      for(int j=0;j<reciprocal_vectors_.size();++j){
+        double inner_product=0.;
+        for(int k=0;k<dimension();++k){
+          inner_product+=basis_[i][k]*reciprocal_vectors_[j][k];
+        }
+        deviation_from_orthogonality+=inner_product-2.*M_PI*(i==j);
+      }
+    }
+    return deviation_from_orthogonality;
+  }
   basis_vector_iterator_pair basis_vectors() const {return std::make_pair(basis_.begin(), basis_.end()); }
   basis_vector_iterator_pair reciprocal_basis_vectors() const {return std::make_pair(reciprocal_vectors_.begin(), reciprocal_vectors_.end()); }
   basis_vector_iterator_pair cell_origins() const{return std::make_pair(cell_origins_.begin(), cell_origins_.end());}
