@@ -205,7 +205,7 @@ void ClusterHelper::setup_tables(const alps::params &params)
   Matrix<double>::Type basis(dimension(), dimension());
   memset(&(basis(0,0)), 0, sizeof(double)*dimension()*dimension());
   abstract_graph::basis_vector_iterator itb, itb_end;
-  boost::tie(itb, itb_end) = graph_->basis_vectors();
+  boost::tie(itb, itb_end) = graph_->basis_vector_iterators();
   int sum = 0;
   for (unsigned int i=0; itb!=itb_end; ++itb, ++i) {
     int sum_i = 0;
@@ -280,7 +280,7 @@ void ClusterHelper::setup_tables(const alps::params &params)
   reciprocal_basis_.resize(dimension(), dimension());
   memset(&(reciprocal_basis_(0,0)), 0, sizeof(double)*dimension()*dimension());
   abstract_graph::basis_vector_iterator itbr, itbr_end;
-  boost::tie(itbr, itbr_end) = graph_->reciprocal_basis_vectors();
+  boost::tie(itbr, itbr_end) = graph_->reciprocal_basis_vector_iterators();
   for (unsigned int i=0; itbr!=itbr_end; ++itbr, ++i)
     for (unsigned int d=0; d<dimension(); ++d)
       reciprocal_basis_(i,d) = (*itbr)[d];

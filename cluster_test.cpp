@@ -18,7 +18,7 @@ TEST(ALPSGraphTest, BasisVectors){
   p["L"] = "40";
   alps_graph G(p);
   
-  alps_graph::basis_vector_iterator_pair BVIP=G.basis_vectors();
+  alps_graph::basis_vector_iterator_pair BVIP=G.basis_vector_iterators();
   
   alps_graph::basis_vector basis(G.dimension(), std::vector<double>(2, 0.));
   basis[0][0]=2.;   basis[1][1]=2.;
@@ -39,7 +39,7 @@ TEST(ALPSGraphTest, ReciprocalVectors){
   int size=4;
   alps_graph G(p);
   
-  alps_graph::basis_vector_iterator_pair RVIP=G.reciprocal_basis_vectors();
+  alps_graph::basis_vector_iterator_pair RVIP=G.reciprocal_basis_vector_iterators();
   
   alps_graph::basis_vector basis           (G.dimension(), std::vector<double>(2, 0.));
   alps_graph::basis_vector reciprocal_basis(G.dimension(), std::vector<double>(2, 0.));
@@ -108,6 +108,23 @@ TEST_P(ClusterTest, TwoDClusterCreation){
   EXPECT_EQ(std::pow((double)L_,G_->dimension()), G_->volume());
   EXPECT_EQ(unit_cell_volume_extracted_, G_->unit_cell_volume());
   EXPECT_NEAR(0., G_->validate_orghogonality(), 1.e-8);
+
+  //test the reciprocal vectors, computed from Ashcroft Mermin and by ALPS
+  std::vector<std::vector<double> > reciprocal_from_basis=G_->compute_reciprocal_from_basis(G_->basis_vectors());
+  std::vector<std::vector<double> > reciprocal_from_alps=G_->reciprocal_basis_vectors();
+
+  for(int i=0;i<reciprocal_from_basis.size();++i){
+    for(int j=0;j<reciprocal_from_basis.size();++j){
+      EXPECT_NEAR(reciprocal_from_alps[i][j],reciprocal_from_basis[i][j], 1.e-8);
+    }
+  }
+  
+  std::vector<std::vector<double> > reciprocal_from_reciprocal_from_alps=G_->compute_reciprocal_from_basis(reciprocal_from_alps);
+  for(int i=0;i<reciprocal_from_basis.size();++i){
+    for(int j=0;j<reciprocal_from_basis.size();++j){
+      EXPECT_NEAR(G_->basis_vectors()[i][j],reciprocal_from_reciprocal_from_alps[i][j], 1.e-8);
+    }
+  }
 }
 INSTANTIATE_TEST_CASE_P(ClusterCreation2D1 , ClusterTest,::testing::Values(TWODCLUSTERS1));
 INSTANTIATE_TEST_CASE_P(ClusterCreation2D2 , ClusterTest,::testing::Values(TWODCLUSTERS2));

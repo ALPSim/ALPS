@@ -55,8 +55,8 @@ public:
   virtual ~abstract_graph(){}
   virtual int volume() const=0;
   virtual int dimension() const=0;
-  virtual basis_vector_iterator_pair basis_vectors()const =0;
-  virtual basis_vector_iterator_pair reciprocal_basis_vectors()const =0;
+  virtual basis_vector_iterator_pair basis_vector_iterators()const =0;
+  virtual basis_vector_iterator_pair reciprocal_basis_vector_iterators()const =0;
 
   virtual basis_vector_iterator_pair cell_origins() const =0;
   virtual offset_iterator_pair cell_offsets() const=0;

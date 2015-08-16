@@ -27,6 +27,7 @@
 #pragma once
 #include "cluster.h"
 #include "alps/lattice/graph_helper.h"
+#include "alps/numeric/vector_functions.hpp"
 #include <alps/ngs/make_deprecated_parameters.hpp>
 
 class alps_graph:public abstract_graph{
@@ -70,7 +71,6 @@ public:
     }
     //compute the unit cell volume
     compute_unit_cell_volume();
-    
   }
   virtual ~alps_graph(){}
   int volume() const{return volume_;}
@@ -90,8 +90,10 @@ public:
     }
     return deviation_from_orthogonality;
   }
-  basis_vector_iterator_pair basis_vectors() const {return std::make_pair(basis_.begin(), basis_.end()); }
-  basis_vector_iterator_pair reciprocal_basis_vectors() const {return std::make_pair(reciprocal_vectors_.begin(), reciprocal_vectors_.end()); }
+  basis_vector_iterator_pair basis_vector_iterators() const {return std::make_pair(basis_.begin(), basis_.end()); }
+  const basis_vector &basis_vectors() const {return basis_; }
+  const basis_vector &reciprocal_basis_vectors() const {return reciprocal_vectors_; }
+  basis_vector_iterator_pair reciprocal_basis_vector_iterators() const {return std::make_pair(reciprocal_vectors_.begin(), reciprocal_vectors_.end()); }
   basis_vector_iterator_pair cell_origins() const{return std::make_pair(cell_origins_.begin(), cell_origins_.end());}
   offset_iterator_pair cell_offsets() const{return std::make_pair(cell_offsets_.begin(), cell_offsets_.end());}
   momenta_iterator_pair cell_momenta() const{return std::make_pair(momenta_.begin(), momenta_.end());}
@@ -100,10 +102,46 @@ public:
     else if(dimension_==2){
       unit_cell_volume_=std::abs(basis_[0][0]*basis_[1][1]-basis_[0][1]*basis_[1][0]);
     }else if(dimension_==3){
-      unit_cell_volume_=std::abs(basis_[2][0]*(basis_[0][1]*basis_[1][2]-basis_[1][1]*basis_[0][2])+basis_[2][1]*(basis_[0][2]*basis_[1][0]-basis_[0][0]*basis_[1][2])+basis_[2][2]*(basis_[0][0]*basis_[1][1]-basis_[0][1]*basis_[1][0]));
+      std::vector<double> c=cross(basis_[0], basis_[1]);
+      unit_cell_volume_=std::abs(basis_[2][0]*c[0]+basis_[2][1]*c[1]+basis_[2][2]*c[2]);
     }
   }
+  std::vector<std::vector<double> > compute_reciprocal_from_basis(const std::vector<std::vector<double> > &basis){
+    std::vector<std::vector<double> > basis_in_3d(3, std::vector<double>(3, 0.));
+    std::vector<std::vector<double> > reciprocal_basis_in_3d(3, std::vector<double>(3, 0.));
+    std::vector<std::vector<double> > reciprocal_basis(dimension(), std::vector<double>(dimension(), 0.));
+   
+    for(int i=0;i<dimension();++i){
+      for(int j=0;j<dimension();++j){
+        basis_in_3d[i][j]=basis[i][j];
+      }
+    }for(int i=dimension();i<3;++i){
+      basis_in_3d[i][i]=1.;
+    }
+    std::vector<double> c0=cross(basis_in_3d[1], basis_in_3d[2]);
+    std::vector<double> c1=cross(basis_in_3d[2], basis_in_3d[0]);
+    std::vector<double> c2=cross(basis_in_3d[0], basis_in_3d[1]);
+    double numerator=c0[0]*basis_in_3d[0][0]+c0[1]*basis_in_3d[0][1]+c0[2]*basis_in_3d[0][2];
+    using alps::numeric::operator*;
+    reciprocal_basis_in_3d[0]=2*M_PI/numerator*c0;
+    reciprocal_basis_in_3d[1]=2*M_PI/numerator*c1;
+    reciprocal_basis_in_3d[2]=2*M_PI/numerator*c2;
+
+    for(int i=0;i<dimension();++i){
+      for(int j=0;j<dimension();++j){
+        reciprocal_basis[i][j]=reciprocal_basis_in_3d[i][j];
+      }
+    }
+    return reciprocal_basis;
+  }
 private:
+  std::vector<double> cross(const std::vector<double> &v1, const std::vector<double> &v2){
+    std::vector<double> c(3, 0.);
+    c[0]=v1[1]*v2[2]-v1[2]*v2[1];
+    c[1]=v1[2]*v2[0]-v1[0]*v2[2];
+    c[2]=v1[0]*v2[1]-v1[1]*v2[0];
+    return c;
+  }
   int volume_;
   int unit_cell_volume_;
   int dimension_;
