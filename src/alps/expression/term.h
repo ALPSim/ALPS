@@ -71,6 +71,11 @@ public:
     return *this;
   }
 
+  friend Term operator*(const Factor<T>& v, Term<T> t)
+  {
+      t.terms_.insert(t.terms_.begin(), v);
+      return t;
+  }
 
   const Term& operator*=(const std::string& s)
   {

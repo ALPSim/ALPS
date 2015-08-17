@@ -151,12 +151,12 @@ template <class I, class T>
 expression::Expression<T> BondOperatorSplitter<I,T>::partial_evaluate_function(const std::string& name, const expression::Expression<T>& arg, bool isarg) const
 {
   if (arg==sites_.second) {
-    site_ops_.second *= expression::Function<T>(name,arg);
+    site_ops_.second = expression::Function<T>(name,arg) * site_ops_.second;
     expression::Expression<T> e(second_site_fermionic_ && basis2_.is_fermionic(name) ? -1. : 1.);
     return e;
   }
   else  if (arg==sites_.first) {
-    site_ops_.first *= expression::Function<T>(name,arg);
+    site_ops_.first = expression::Function<T>(name,arg) * site_ops_.first;
     if (basis1_.is_fermionic(name))
         second_site_fermionic_ = !second_site_fermionic_;
     return expression::Expression<T>(1.);
