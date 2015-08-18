@@ -155,6 +155,18 @@ TEST_P(ClusterTest, TwoDClusterCreation){
   }
   EXPECT_EQ(it2,cell_offsets_from_alps.second);
 
+  //test the momenta as computed by ALPS and by hand
+  std::vector<std::vector<double> > momenta_by_hand=G_->compute_momenta_by_hand(L_);
+  alps_graph::momenta_iterator_pair momenta_from_alps=G_->cell_momenta();
+  std::vector<std::vector<double> >::const_iterator it3=momenta_from_alps.first;
+  for(int i=0;i<momenta_by_hand.size();++i){
+    for(int k=0;k<G_->dimension();++k){
+      EXPECT_NEAR((*it3)[k],momenta_by_hand[i][k], 1.e-8);
+    }
+    it3++;
+  }
+  EXPECT_EQ(it3,momenta_from_alps.second);
+
 }
 INSTANTIATE_TEST_CASE_P(ClusterCreation2D1 , ClusterTest,::testing::Values(TWODCLUSTERS1));
 INSTANTIATE_TEST_CASE_P(ClusterCreation2D2 , ClusterTest,::testing::Values(TWODCLUSTERS2));

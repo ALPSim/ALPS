@@ -172,6 +172,42 @@ public:
     }
     return std::make_pair(cell_origins, cell_offsets);
   }
+  std::vector<std::vector<double> > compute_momenta_by_hand(int L)const{
+    std::vector<std::vector<double> > momenta;
+    std::vector<double> momentum(dimension(), 0.);
+    if(dimension()==3){
+      for(int i=0;i<L;++i){
+        for(int j=0;j<L;++j){
+          for(int k=0;k<L;++k){
+            int offset_x=i>L/2?i-L:i;
+            int offset_y=j>L/2?j-L:j;
+            int offset_z=k>L/2?k-L:k;
+            momentum[0]=reciprocal_vectors_[0][0]*offset_x/(double)L+reciprocal_vectors_[1][0]*offset_y/(double)L+reciprocal_vectors_[2][0]*offset_z/(double)L;
+            momentum[1]=reciprocal_vectors_[0][1]*offset_x/(double)L+reciprocal_vectors_[1][1]*offset_y/(double)L+reciprocal_vectors_[2][1]*offset_z/(double)L;
+            momentum[2]=reciprocal_vectors_[0][2]*offset_x/(double)L+reciprocal_vectors_[1][2]*offset_y/(double)L+reciprocal_vectors_[2][2]*offset_z/(double)L;
+            momenta.push_back(momentum);
+          }
+        }
+      }
+    }else if(dimension()==2){
+      for(int i=0;i<L;++i){
+        for(int j=0;j<L;++j){
+          int offset_x=i>L/2?i-L:i;
+          int offset_y=j>L/2?j-L:j;
+          momentum[0]=reciprocal_vectors_[0][0]*offset_x/(double)L+reciprocal_vectors_[1][0]*offset_y/(double)L;
+          momentum[1]=reciprocal_vectors_[0][1]*offset_x/(double)L+reciprocal_vectors_[1][1]*offset_y/(double)L;
+          momenta.push_back(momentum);
+        }
+      }
+    }else if(dimension()==1){
+      for(int i=0;i<L;++i){
+        int offset_x=i>L/2?i-L:i;
+        momentum[0]=reciprocal_vectors_[0][0]*offset_x/(double)L;
+        momenta.push_back(momentum);
+      }
+    }
+    return momenta;
+  }
 private:
   std::vector<double> cross(const std::vector<double> &v1, const std::vector<double> &v2){
     std::vector<double> c(3, 0.);
