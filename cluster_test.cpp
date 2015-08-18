@@ -82,7 +82,7 @@ class ClusterTest : public ::testing::TestWithParam<const char*> {
  protected:
   virtual void SetUp() {
     alps::params p;
-    L_=2;
+    L_=20;
     p["LATTICE_LIBRARY"] = "./cluster.xml";
     p["LATTICE"] = GetParam();
     p["L"] = L_;
@@ -125,6 +125,36 @@ TEST_P(ClusterTest, TwoDClusterCreation){
       EXPECT_NEAR(G_->basis_vectors()[i][j],reciprocal_from_reciprocal_from_alps[i][j], 1.e-8);
     }
   }
+  //test the cell origins as computed by ALPS and by hand
+  std::pair<std::vector<std::vector<double> >,std::vector<std::vector<double> > > cell_origins_and_offsets=G_->cell_origins_and_offsets_by_hand(L_);
+  std::vector<std::vector<double> > cell_origins=cell_origins_and_offsets.first;
+  std::vector<std::vector<double> > cell_offsets=cell_origins_and_offsets.second;
+
+  alps_graph::basis_vector_iterator_pair cell_origins_from_alps=G_->cell_origins();
+  std::pair<std::vector<std::vector<int> >::const_iterator,std::vector<std::vector<int> >::const_iterator>  cell_offsets_from_alps=G_->cell_offsets();
+
+  EXPECT_EQ(pow((double)L_, G_->dimension()), cell_origins.size());
+  EXPECT_EQ(pow((double)L_, G_->dimension()), cell_offsets.size());
+
+  alps_graph::basis_vector_iterator it=cell_origins_from_alps.first;
+  for(int i=0;i<cell_origins.size();++i){
+    for(int k=0;k<G_->dimension();++k){
+      EXPECT_NEAR((*it)[k],cell_origins[i][k], 1.e-8);
+    }
+    it++;
+  }
+  EXPECT_EQ(it,cell_origins_from_alps.second);
+  
+  //test the cell offsets as computed by ALPS and by hand
+  std::vector<std::vector<int> >::const_iterator it2=cell_offsets_from_alps.first;
+  for(int i=0;i<cell_offsets.size();++i){
+    for(int k=0;k<G_->dimension();++k){
+      EXPECT_NEAR((*it2)[k],cell_offsets[i][k], 1.e-8);
+    }
+    it2++;
+  }
+  EXPECT_EQ(it2,cell_offsets_from_alps.second);
+
 }
 INSTANTIATE_TEST_CASE_P(ClusterCreation2D1 , ClusterTest,::testing::Values(TWODCLUSTERS1));
 INSTANTIATE_TEST_CASE_P(ClusterCreation2D2 , ClusterTest,::testing::Values(TWODCLUSTERS2));

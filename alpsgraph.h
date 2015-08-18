@@ -134,6 +134,44 @@ public:
     }
     return reciprocal_basis;
   }
+  std::pair<std::vector<std::vector<double> >,std::vector<std::vector<double> > > cell_origins_and_offsets_by_hand(int L){
+    std::vector<std::vector<double> > cell_origins;
+    std::vector<std::vector<double> > cell_offsets;
+    std::vector<double> cell_origin(dimension(), 0.);
+    std::vector<double> cell_offset(dimension(), 0.);
+    if(dimension()==3){
+      for(int i=0;i<L;++i){
+        for(int j=0;j<L;++j){
+          for(int k=0;k<L;++k){
+            cell_origin[0] =i*basis_[0][0]+j*basis_[1][0]+k*basis_[2][0];
+            cell_origin[1] =i*basis_[0][1]+j*basis_[1][1]+k*basis_[2][1];
+            cell_origin[2] =i*basis_[0][2]+j*basis_[1][2]+k*basis_[2][2];
+            cell_offset[0] =i; cell_offset[1] =j; cell_offset[2] =k;
+            cell_origins.push_back(cell_origin);
+            cell_offsets.push_back(cell_offset);
+          }
+        }
+      }
+    }else if(dimension()==2){
+      for(int i=0;i<L;++i){
+        for(int j=0;j<L;++j){
+          cell_origin[0] =i*basis_[0][0]+j*basis_[1][0];
+          cell_origin[1] =i*basis_[0][1]+j*basis_[1][1];
+          cell_offset[0] =i; cell_offset[1] =j;
+          cell_origins.push_back(cell_origin);
+          cell_offsets.push_back(cell_offset);
+        }
+      }
+    }else if(dimension()==1){
+      for(int i=0;i<L;++i){
+        cell_origin[0] =i*basis_[0][0];
+        cell_offset[0] =i;
+        cell_origins.push_back(cell_origin);
+        cell_offsets.push_back(cell_offset);
+      }
+    }
+    return std::make_pair(cell_origins, cell_offsets);
+  }
 private:
   std::vector<double> cross(const std::vector<double> &v1, const std::vector<double> &v2){
     std::vector<double> c(3, 0.);
@@ -148,6 +186,6 @@ private:
   std::vector<std::vector<double> > basis_;
   std::vector<std::vector<double> > reciprocal_vectors_;
   std::vector<std::vector<double> > cell_origins_;
-  offset_vector_type cell_offsets_;
+  std::vector<std::vector<int> >    cell_offsets_;
   momenta_vector_type momenta_;
 };
