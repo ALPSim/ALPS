@@ -28,7 +28,7 @@
 #include "clusterhelper.hxx"
 #include "alps/hdf5/ublas/vector.hpp"
 #include "alps/hdf5/ublas/matrix.hpp"
-
+#include "boost/lexical_cast.hpp"
 
 ClusterHelper::ClusterHelper(const alps::params& params) :
 n_cluster_sites_(boost::lexical_cast<int>(params["SITES"])),
