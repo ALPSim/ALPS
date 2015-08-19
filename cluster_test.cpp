@@ -3,37 +3,17 @@
 #include "alps/ngs/params.hpp"
 
 TEST(ALPSGraphTest, FakeXMLParser){
-  alps_graph G("Fuchs3D-1000B", "cluster.xml", 20);
+  dca_graph G("Fuchs3D-1000B", "cluster.xml", 20);
 }
 TEST(ALPSGraphTest, ALPSGraphCreation){
   alps::params p;
   p["LATTICE_LIBRARY"] = "./cluster.xml";
   p["LATTICE"] = "Betts2D-4A";
   p["L"] = "40";
-  alps_graph G(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
+  dca_graph G(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
 
   EXPECT_EQ(40*40, G.volume());
   EXPECT_EQ(2, G.dimension());
-}
-TEST(ALPSGraphTest, BasisVectors){
-  alps::params p;
-  p["LATTICE_LIBRARY"] = "./cluster.xml";
-  p["LATTICE"] = "Betts2D-4A";
-  p["L"] = "40";
-  alps_graph G(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
-  
-  alps_graph::basis_vector_iterator_pair BVIP=G.basis_vector_iterators();
-  
-  alps_graph::basis_vector basis(G.dimension(), std::vector<double>(2, 0.));
-  basis[0][0]=2.;   basis[1][1]=2.;
-  
-  std::vector<std::vector<double> >::const_iterator my_it=basis.begin();
-  for(std::vector<std::vector<double> >::const_iterator it=BVIP.first; it!=BVIP.second;++it){
-    for(int i=0;i<G.dimension();++i){
-      EXPECT_EQ((*my_it)[i], (*it)[i]);
-    }
-    ++my_it;
-  }
 }
 TEST(ALPSGraphTest, ReciprocalVectors){
   alps::params p;
@@ -41,12 +21,10 @@ TEST(ALPSGraphTest, ReciprocalVectors){
   p["LATTICE"] = "Betts2D-4A";
   p["L"] = "40";
   int size=4;
-  alps_graph G(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
+  dca_graph G(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
   
-  alps_graph::basis_vector_iterator_pair RVIP=G.reciprocal_basis_vector_iterators();
-  
-  alps_graph::basis_vector basis           (G.dimension(), std::vector<double>(2, 0.));
-  alps_graph::basis_vector reciprocal_basis(G.dimension(), std::vector<double>(2, 0.));
+  dca_graph::basis_vector basis           (G.dimension(), std::vector<double>(2, 0.));
+  dca_graph::basis_vector reciprocal_basis(G.dimension(), std::vector<double>(2, 0.));
   basis[0][0]=2.;   basis[1][1]=2.;
   
   for(int i=0;i<G.dimension();++i){
@@ -55,12 +33,10 @@ TEST(ALPSGraphTest, ReciprocalVectors){
     }
   }
 
-  alps_graph::basis_vector_iterator my_it=reciprocal_basis.begin();
-  for(alps_graph::basis_vector_iterator it=RVIP.first; it!=RVIP.second;++it){
-    for(int i=0;i<G.dimension();++i){
-      EXPECT_EQ((*my_it)[i], (*it)[i]);
+  for(int k=0; k<G.reciprocal_basis_vectors().size();++k){
+    for(int i=0;i<G.dimension();++i) {
+      EXPECT_EQ(reciprocal_basis[k][i], G.reciprocal_basis_vectors()[k][i]);
     }
-    ++my_it;
   }
 }
 
@@ -90,7 +66,7 @@ class ClusterTest : public ::testing::TestWithParam<const char*> {
     p["LATTICE_LIBRARY"] = "./cluster.xml";
     p["LATTICE"] = GetParam();
     p["L"] = L_;
-    G_=new alps_graph(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
+    G_=new dca_graph(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
     extract_unit_cell_volume_from_name(GetParam());
   }
   void extract_unit_cell_volume_from_name(const char* name){
@@ -105,7 +81,7 @@ class ClusterTest : public ::testing::TestWithParam<const char*> {
   virtual void TearDown() { delete G_;}
   int unit_cell_volume_extracted_;
   int L_;
-  alps_graph *G_;
+  dca_graph *G_;
 };
 
 TEST_P(ClusterTest, TwoDClusterCreation){
@@ -134,42 +110,29 @@ TEST_P(ClusterTest, TwoDClusterCreation){
   std::vector<std::vector<double> > cell_origins=cell_origins_and_offsets.first;
   std::vector<std::vector<int   > > cell_offsets=cell_origins_and_offsets.second;
 
-  alps_graph::basis_vector_iterator_pair cell_origins_from_alps=G_->cell_origins();
-  std::pair<std::vector<std::vector<int> >::const_iterator,std::vector<std::vector<int> >::const_iterator>  cell_offsets_from_alps=G_->cell_offsets();
-
   EXPECT_EQ(pow((double)L_, G_->dimension()), cell_origins.size());
   EXPECT_EQ(pow((double)L_, G_->dimension()), cell_offsets.size());
 
-  alps_graph::basis_vector_iterator it=cell_origins_from_alps.first;
   for(int i=0;i<cell_origins.size();++i){
     for(int k=0;k<G_->dimension();++k){
-      EXPECT_NEAR((*it)[k],cell_origins[i][k], 1.e-8);
+      EXPECT_NEAR(G_->cell_origins()[i][k],cell_origins[i][k], 1.e-8);
     }
-    it++;
   }
-  EXPECT_EQ(it,cell_origins_from_alps.second);
   
   //test the cell offsets as computed by ALPS and by hand
-  std::vector<std::vector<int> >::const_iterator it2=cell_offsets_from_alps.first;
   for(int i=0;i<cell_offsets.size();++i){
     for(int k=0;k<G_->dimension();++k){
-      EXPECT_NEAR((*it2)[k],cell_offsets[i][k], 1.e-8);
+      EXPECT_NEAR(G_->cell_offsets()[i][k],cell_offsets[i][k], 1.e-8);
     }
-    it2++;
   }
-  EXPECT_EQ(it2,cell_offsets_from_alps.second);
 
   //test the momenta as computed by ALPS and by hand
   std::vector<std::vector<double> > momenta_by_hand=G_->compute_momenta_by_hand(L_);
-  alps_graph::basis_vector_iterator_pair momenta_from_alps=G_->cell_momenta();
-  std::vector<std::vector<double> >::const_iterator it3=momenta_from_alps.first;
   for(int i=0;i<momenta_by_hand.size();++i){
     for(int k=0;k<G_->dimension();++k){
-      EXPECT_NEAR((*it3)[k],momenta_by_hand[i][k], 1.e-8);
+      EXPECT_NEAR(G_->cell_momenta()[i][k],momenta_by_hand[i][k], 1.e-8);
     }
-    it3++;
   }
-  EXPECT_EQ(it3,momenta_from_alps.second);
 
 }
 INSTANTIATE_TEST_CASE_P(ClusterCreation2D1 , ClusterTest,::testing::Values(TWODCLUSTERS1));
@@ -197,13 +160,13 @@ protected:
     p["LATTICE_LIBRARY"] = "./cluster.xml";
     p["LATTICE"] = GetParam();
     p["L"] = L_;
-    G1_=new alps_graph(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
-    G2_=new alps_graph(GetParam(), "./cluster.xml", L_);
+    G1_=new dca_graph(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
+    G2_=new dca_graph(GetParam(), "./cluster.xml", L_);
   }
   virtual void TearDown() { delete G1_; delete G2_;}
   int L_;
-  alps_graph *G1_;
-  alps_graph *G2_;
+  dca_graph *G1_;
+  dca_graph *G2_;
 };
 TEST_P(ClusterNoALPSTest, EqualityToALPSTest){
   EXPECT_TRUE(G1_->operator==(*G2_));

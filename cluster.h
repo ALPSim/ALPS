@@ -146,7 +146,7 @@ private:
   std::string lattice_momenta_file_name_;
 
 private:
-  alps_graph *graph_;
+  dca_graph *graph_;
 };
 
 

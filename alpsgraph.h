@@ -13,7 +13,7 @@
 #include<fstream>
 #include<stdexcept>
 
-class alps_graph{
+class dca_graph {
 public:
   //to disentangle things from ALPS we have to hide the cell iterator, offset type, and momentum iterator calls.
   typedef std::vector<std::vector<double> > basis_vector;
@@ -25,31 +25,27 @@ public:
   typedef std::pair<offset_vector_iterator,offset_vector_iterator> offset_vector_iterator_pair;
 
   ///Constructor using a name for the cluster, an xml path, and a lattice extent L.
-  alps_graph(const std::string &cluster_name, const std::string &cluster_library, int L){
+  dca_graph(const std::string &cluster_name, const std::string &cluster_library, int L){
     build(lookup_basis_from_name(cluster_name, cluster_library), L);
   }
   ///Destructor. Do nothing
-  virtual ~alps_graph(){}
+  virtual ~dca_graph(){}
   ///return the volume of the lattice. this is L, L*L, or L*L*L, depending on the dimension.
   int volume() const{return volume_;}
   ///dimension. Should be 1, 2, or 3.
   int dimension() const{return dimension_;}
   ///volume of the unit cell (aka the 'cluster size', i.e. 8 for an 8-site cluster)
   int unit_cell_volume(){ return unit_cell_volume_;}
-  ///returns iterators to the beginning and end of the basis vectors. TODO: remove this.
-  basis_vector_iterator_pair basis_vector_iterators() const {return std::make_pair(basis_.begin(), basis_.end()); }
   ///const reference to the basis vectors
-  const basis_vector &basis_vectors() const {return basis_; }
+  const basis_vector &basis_vectors() const {return basis_vectors_; }
   ///const reference to the basis vectors in reciprocal space
-  const basis_vector &reciprocal_basis_vectors() const {return reciprocal_vectors_; }
-  ///returns iterators to the beginning and end of the reciprocal basis vectors. TODO: remove this.
-  basis_vector_iterator_pair reciprocal_basis_vector_iterators() const {return std::make_pair(reciprocal_vectors_.begin(), reciprocal_vectors_.end()); }
-  ///returns iterators to the beginning and end of the cell origin vectors. TODO: remove this.
-  basis_vector_iterator_pair cell_origins() const{return std::make_pair(cell_origins_.begin(), cell_origins_.end());}
-  ///returns iterators to the beginning and end of the cell offset vectors. TODO: remove this.
-  offset_vector_iterator_pair cell_offsets() const{return std::make_pair(cell_offsets_.begin(), cell_offsets_.end());}
+  const basis_vector &reciprocal_basis_vectors() const {return reciprocal_basis_vectors_; }
+  ///returns iterators to the beginning and end of the cell origin vectors.
+  const basis_vector &cell_origins() const{return cell_origins_;}
+  ///returns iterators to the beginning and end of the cell offset vectors.
+  const offset_vector &cell_offsets() const{return cell_offsets_;}
   ///returns iterators to the beginning and end of the cell momenta vectors. TODO: remove this.
-  basis_vector_iterator_pair cell_momenta() const{return std::make_pair(momenta_.begin(), momenta_.end());}
+  const basis_vector &cell_momenta() const{return momenta_;}
   ///compute and set the unit cell volume ('8' for an 8-site cluster)
   void compute_unit_cell_volume();
   ///given a basis, compute its reciprocal basis. This works for d=1, 2, and 3.
@@ -59,7 +55,7 @@ public:
   ///compute all possible momenta explicitly (rahter than via ALPS)
   std::vector<std::vector<double> > compute_momenta_by_hand(int L)const;
   ///comparison operator, mainly used for tests.
-  bool operator==(const alps_graph &g) const;
+  bool operator==(const dca_graph &g) const;
   ///if the reciprocal basis is correct, this test will validate that each vector is orthogonal to all other basis vectors
   double validate_orthogonality() const;
 private:
@@ -82,13 +78,13 @@ private:
   ///dimension, is 1, 2, or 3.
   int dimension_;
   ///a vector of basis vectors
-  std::vector<std::vector<double> > basis_;
+  std::vector<std::vector<double> > basis_vectors_;
   ///a vector of reciprocal basic vectors in the Brillouin zone
-  std::vector<std::vector<double> > reciprocal_vectors_;
+  std::vector<std::vector<double> > reciprocal_basis_vectors_;
   ///a vector of locations of the origin of translated unit cells
   std::vector<std::vector<double> > cell_origins_;
   ///a vector of translation vectors of the translated unit cells
   std::vector<std::vector<int   > > cell_offsets_;
-  ///points in the brillouin zone. Shift them by reciprocal vectors to tile the Brillouin zone
+  ///points in the brillouin zone of the cluster, which is smaller than the BZ of the lattice (-pi to pi) but tiles it when shifted by reciprocal basis vectors
   std::vector<std::vector<double> > momenta_;
 };

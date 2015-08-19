@@ -12,7 +12,7 @@
 #include<cmath>
 #include "alpsgraph.h"
 
-std::vector<std::vector<double> > alps_graph::lookup_basis_from_name(const std::string &cluster_name, const std::string &cluster_library) const{
+std::vector<std::vector<double> > dca_graph::lookup_basis_from_name(const std::string &cluster_name, const std::string &cluster_library) const{
   std::vector<std::vector<double> > basis;
   //for now we use the ALPS xml file and write a poor man's parser.
   std::string line;
@@ -46,13 +46,13 @@ std::vector<std::vector<double> > alps_graph::lookup_basis_from_name(const std::
   }
   throw std::logic_error("cluster"+cluster_name+" not found in library: "+cluster_library);
 }
-double alps_graph::validate_orthogonality() const{
+double dca_graph::validate_orthogonality() const{
   double deviation_from_orthogonality=0.;
-  for(int i=0;i<basis_.size();++i){
-    for(int j=0;j<reciprocal_vectors_.size();++j){
+  for(int i=0;i< basis_vectors_.size();++i){
+    for(int j=0;j< reciprocal_basis_vectors_.size();++j){
       double inner_product=0.;
       for(int k=0;k<dimension();++k){
-        inner_product+=basis_[i][k]*reciprocal_vectors_[j][k];
+        inner_product+= basis_vectors_[i][k]* reciprocal_basis_vectors_[j][k];
       }
       deviation_from_orthogonality+=inner_product-2.*M_PI*(i==j);
     }
@@ -60,16 +60,16 @@ double alps_graph::validate_orthogonality() const{
   return deviation_from_orthogonality;
 }
 
-void alps_graph::compute_unit_cell_volume(){
-  if(dimension_==1){ unit_cell_volume_=basis_[0][0]; }
+void dca_graph::compute_unit_cell_volume(){
+  if(dimension_==1){ unit_cell_volume_= basis_vectors_[0][0]; }
   else if(dimension_==2){
-    unit_cell_volume_=std::abs(basis_[0][0]*basis_[1][1]-basis_[0][1]*basis_[1][0]);
+    unit_cell_volume_=std::abs(basis_vectors_[0][0]* basis_vectors_[1][1]- basis_vectors_[0][1]* basis_vectors_[1][0]);
   }else if(dimension_==3){
-    std::vector<double> c=cross(basis_[0], basis_[1]);
-    unit_cell_volume_=std::abs(basis_[2][0]*c[0]+basis_[2][1]*c[1]+basis_[2][2]*c[2]);
+    std::vector<double> c=cross(basis_vectors_[0], basis_vectors_[1]);
+    unit_cell_volume_=std::abs(basis_vectors_[2][0]*c[0]+ basis_vectors_[2][1]*c[1]+ basis_vectors_[2][2]*c[2]);
   }
 }
-std::vector<std::vector<double> > alps_graph::compute_reciprocal_from_basis(const std::vector<std::vector<double> > &basis) const{
+std::vector<std::vector<double> > dca_graph::compute_reciprocal_from_basis(const std::vector<std::vector<double> > &basis) const{
   std::vector<std::vector<double> > basis_in_3d(3, std::vector<double>(3, 0.));
   std::vector<std::vector<double> > reciprocal_basis_in_3d(3, std::vector<double>(3, 0.));
   std::vector<std::vector<double> > reciprocal_basis(dimension(), std::vector<double>(dimension(), 0.));
@@ -104,20 +104,20 @@ std::vector<std::vector<double> > alps_graph::compute_reciprocal_from_basis(cons
   return reciprocal_basis;
 }
 
-bool alps_graph::operator==(const alps_graph &g) const{
+bool dca_graph::operator==(const dca_graph &g) const{
   if(volume_!= g.volume_) return false;
   if(unit_cell_volume_!= g.unit_cell_volume_) return false;
   if(dimension_!= g.dimension_) return false;
   
-  for(int i=0;i<basis_.size();++i){
+  for(int i=0;i< basis_vectors_.size();++i){
     for(int j=0;j<dimension_;++j){
-      if(std::abs(basis_[i][j]-g.basis_[i][j])>1.e-8) return false;
+      if(std::abs(basis_vectors_[i][j]-g.basis_vectors_[i][j])>1.e-8) return false;
     }
   }
   
-  for(int i=0;i<reciprocal_vectors_.size();++i){
+  for(int i=0;i< reciprocal_basis_vectors_.size();++i){
     for(int j=0;j<dimension_;++j){
-      if(std::abs(reciprocal_vectors_[i][j]-g.reciprocal_vectors_[i][j])>1.e-8) return false;
+      if(std::abs(reciprocal_basis_vectors_[i][j]-g.reciprocal_basis_vectors_[i][j])>1.e-8) return false;
     }
   }
   for(int i=0;i<cell_origins_.size();++i){
@@ -133,20 +133,20 @@ bool alps_graph::operator==(const alps_graph &g) const{
   return true;
 }
 
-void alps_graph::build(const std::vector<std::vector<double> > basis, int L){
-  basis_=basis;
+void dca_graph::build(const std::vector<std::vector<double> > basis, int L){
+  basis_vectors_ =basis;
   dimension_=basis.size(); if(dimension_>3 || dimension_<1) throw std::invalid_argument("clusters work for dimensions 1, 2, and 3.");
   volume_=dimension_==1?L:dimension_==2?L*L:L*L*L;
   compute_unit_cell_volume();
   
-  reciprocal_vectors_=compute_reciprocal_from_basis(basis);
+  reciprocal_basis_vectors_ =compute_reciprocal_from_basis(basis);
   std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > origins_and_offsets=cell_origins_and_offsets_by_hand(L);
   cell_origins_=origins_and_offsets.first;
   cell_offsets_=origins_and_offsets.second;
   momenta_=compute_momenta_by_hand(L);
 }
 
-std::vector<std::vector<double> > alps_graph::compute_momenta_by_hand(int L)const{
+std::vector<std::vector<double> > dca_graph::compute_momenta_by_hand(int L)const{
   std::vector<std::vector<double> > momenta;
   std::vector<double> momentum(dimension(), 0.);
   if(dimension()==3){
@@ -156,9 +156,15 @@ std::vector<std::vector<double> > alps_graph::compute_momenta_by_hand(int L)cons
           int offset_x=i>L/2?i-L:i;
           int offset_y=j>L/2?j-L:j;
           int offset_z=k>L/2?k-L:k;
-          momentum[0]=reciprocal_vectors_[0][0]*offset_x/(double)L+reciprocal_vectors_[1][0]*offset_y/(double)L+reciprocal_vectors_[2][0]*offset_z/(double)L;
-          momentum[1]=reciprocal_vectors_[0][1]*offset_x/(double)L+reciprocal_vectors_[1][1]*offset_y/(double)L+reciprocal_vectors_[2][1]*offset_z/(double)L;
-          momentum[2]=reciprocal_vectors_[0][2]*offset_x/(double)L+reciprocal_vectors_[1][2]*offset_y/(double)L+reciprocal_vectors_[2][2]*offset_z/(double)L;
+          momentum[0]=
+                  reciprocal_basis_vectors_[0][0]*offset_x/(double)L+ reciprocal_basis_vectors_[1][0]*offset_y/(double)L+
+                  reciprocal_basis_vectors_[2][0]*offset_z/(double)L;
+          momentum[1]=
+                  reciprocal_basis_vectors_[0][1]*offset_x/(double)L+ reciprocal_basis_vectors_[1][1]*offset_y/(double)L+
+                  reciprocal_basis_vectors_[2][1]*offset_z/(double)L;
+          momentum[2]=
+                  reciprocal_basis_vectors_[0][2]*offset_x/(double)L+ reciprocal_basis_vectors_[1][2]*offset_y/(double)L+
+                  reciprocal_basis_vectors_[2][2]*offset_z/(double)L;
           momenta.push_back(momentum);
         }
       }
@@ -168,21 +174,23 @@ std::vector<std::vector<double> > alps_graph::compute_momenta_by_hand(int L)cons
       for(int j=0;j<L;++j){
         int offset_x=i>L/2?i-L:i;
         int offset_y=j>L/2?j-L:j;
-        momentum[0]=reciprocal_vectors_[0][0]*offset_x/(double)L+reciprocal_vectors_[1][0]*offset_y/(double)L;
-        momentum[1]=reciprocal_vectors_[0][1]*offset_x/(double)L+reciprocal_vectors_[1][1]*offset_y/(double)L;
+        momentum[0]=
+                reciprocal_basis_vectors_[0][0]*offset_x/(double)L+ reciprocal_basis_vectors_[1][0]*offset_y/(double)L;
+        momentum[1]=
+                reciprocal_basis_vectors_[0][1]*offset_x/(double)L+ reciprocal_basis_vectors_[1][1]*offset_y/(double)L;
         momenta.push_back(momentum);
       }
     }
   }else if(dimension()==1){
     for(int i=0;i<L;++i){
       int offset_x=i>L/2?i-L:i;
-      momentum[0]=reciprocal_vectors_[0][0]*offset_x/(double)L;
+      momentum[0]= reciprocal_basis_vectors_[0][0]*offset_x/(double)L;
       momenta.push_back(momentum);
     }
   }
   return momenta;
 }
-std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > alps_graph::cell_origins_and_offsets_by_hand(int L){
+std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > dca_graph::cell_origins_and_offsets_by_hand(int L){
   std::vector<std::vector<double> > cell_origins;
   std::vector<std::vector<int   > > cell_offsets;
   std::vector<double> cell_origin(dimension(), 0.);
@@ -191,9 +199,9 @@ std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > alp
     for(int i=0;i<L;++i){
       for(int j=0;j<L;++j){
         for(int k=0;k<L;++k){
-          cell_origin[0] =i*basis_[0][0]+j*basis_[1][0]+k*basis_[2][0];
-          cell_origin[1] =i*basis_[0][1]+j*basis_[1][1]+k*basis_[2][1];
-          cell_origin[2] =i*basis_[0][2]+j*basis_[1][2]+k*basis_[2][2];
+          cell_origin[0] =i* basis_vectors_[0][0]+j* basis_vectors_[1][0]+k* basis_vectors_[2][0];
+          cell_origin[1] =i* basis_vectors_[0][1]+j* basis_vectors_[1][1]+k* basis_vectors_[2][1];
+          cell_origin[2] =i* basis_vectors_[0][2]+j* basis_vectors_[1][2]+k* basis_vectors_[2][2];
           cell_offset[0] =i; cell_offset[1] =j; cell_offset[2] =k;
           cell_origins.push_back(cell_origin);
           cell_offsets.push_back(cell_offset);
@@ -203,8 +211,8 @@ std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > alp
   }else if(dimension()==2){
     for(int i=0;i<L;++i){
       for(int j=0;j<L;++j){
-        cell_origin[0] =i*basis_[0][0]+j*basis_[1][0];
-        cell_origin[1] =i*basis_[0][1]+j*basis_[1][1];
+        cell_origin[0] =i* basis_vectors_[0][0]+j* basis_vectors_[1][0];
+        cell_origin[1] =i* basis_vectors_[0][1]+j* basis_vectors_[1][1];
         cell_offset[0] =i; cell_offset[1] =j;
         cell_origins.push_back(cell_origin);
         cell_offsets.push_back(cell_offset);
@@ -212,7 +220,7 @@ std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > alp
     }
   }else if(dimension()==1){
     for(int i=0;i<L;++i){
-      cell_origin[0] =i*basis_[0][0];
+      cell_origin[0] =i* basis_vectors_[0][0];
       cell_offset[0] =i;
       cell_origins.push_back(cell_origin);
       cell_offsets.push_back(cell_offset);

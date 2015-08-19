@@ -40,7 +40,7 @@ lattice_momenta_file_name_(params["LATTICE_MOMENTA_FILE"]|"LatticeMomenta")
   std::string cluster_name=params["LATTICE"];
   std::string library_name=params["LATTICE_LIBRARY"];
   
-  graph_=new alps_graph(cluster_name, library_name, L);
+  graph_=new dca_graph(cluster_name, library_name, L);
   //std::cout<<"in clusterhelper constructor."<<std::endl;
   //try to read this transformer, otherwise generate it.
   if(!read(params))
@@ -66,9 +66,8 @@ lattice_momenta_file_name_(params["LATTICE_MOMENTA_FILE"]|"LatticeMomenta")
 }
 
 void ClusterHelper::find_non_bipartite_cluster_momenta() {
-  alps_graph::basis_vector_iterator o_itc, o_itc_end;
-  for(boost::tie(o_itc,o_itc_end)=graph_->cell_origins(); o_itc != o_itc_end; ++o_itc){
-    vector_type o = *o_itc;
+  for(int orig=0; orig<graph_->cell_origins().size(); ++orig){
+    vector_type o = graph_->cell_origins()[orig];
     for (unsigned int i = 0; i < n_cluster_sites(); ++i) {
       vector_type c = o;
       for (unsigned int d = 0; d < dimension(); ++d)
@@ -110,9 +109,8 @@ void ClusterHelper::find_bipartite_cluster_momenta() {
     rbzone_boundaries_(3, 2) = -M_PI / 2;
     break;
   }
-  alps_graph::basis_vector_iterator o_itc, o_itc_end;
-  for(boost::tie(o_itc,o_itc_end)=graph_->cell_origins(); o_itc != o_itc_end; ++o_itc){
-    vector_type o = *o_itc;
+  for(int orig=0; orig<graph_->cell_origins().size(); ++orig){
+    vector_type o = graph_->cell_origins()[orig];
     for (unsigned int i = 0; i < n_cluster_sites(); ++i) {
       vector_type c = o;
       for (unsigned int d = 0; d < dimension(); ++d)
@@ -133,12 +131,9 @@ void ClusterHelper::find_bipartite_cluster_momenta() {
 void ClusterHelper::find_integration_weights() {
   //find lattice integration weights (Simpson weights)
   std::vector<double> weights;
-  //abstract_graph::momentum_iterator itm, itm_end;
-  //boost::tie(itm, itm_end) = graph_->momenta();
-  alps_graph::basis_vector_iterator itm, itm_end;
-  for(boost::tie(itm, itm_end)=graph_->cell_momenta();itm!=itm_end;++itm){
+  for(int i=0;i<graph_->cell_momenta().size();++i){
   //for (; itm != itm_end; ++itm) {
-    vector_type mom = *itm;
+    vector_type mom = graph_->cell_momenta()[i];
     vector_type mom_trans = matrix_vector_mult(reciprocal_basis_inv_, mom);
     std::vector<vector_type> moms;
     switch (dimension()) {
@@ -210,13 +205,13 @@ void ClusterHelper::setup_tables(const alps::params &params)
   //setup basis vectors
   Matrix<double>::Type basis(dimension(), dimension());
   memset(&(basis(0,0)), 0, sizeof(double)*dimension()*dimension());
-  alps_graph::basis_vector_iterator itb, itb_end;
-  boost::tie(itb, itb_end) = graph_->basis_vector_iterators();
+  //dca_graph::basis_vector_iterator itb, itb_end;
+  //boost::tie(itb, itb_end) = graph_->basis_vector_iterators();
   int sum = 0;
-  for (unsigned int i=0; itb!=itb_end; ++itb, ++i) {
+  for (unsigned int i=0; i<graph_->basis_vectors().size(); ++i) {
     int sum_i = 0;
     for (unsigned int d=0; d<dimension(); ++d) {
-      basis(i,d) = (*itb)[d];
+      basis(i,d) = graph_->basis_vectors()[i][d];
       sum_i += int(round(basis(i,d)));
     }
     sum += sum_i>=0 ? sum_i%2 : (-sum_i)%2;
@@ -285,11 +280,9 @@ void ClusterHelper::setup_tables(const alps::params &params)
   //setup reciprocal basis
   reciprocal_basis_.resize(dimension(), dimension());
   memset(&(reciprocal_basis_(0,0)), 0, sizeof(double)*dimension()*dimension());
-  alps_graph::basis_vector_iterator itbr, itbr_end;
-  boost::tie(itbr, itbr_end) = graph_->reciprocal_basis_vector_iterators();
-  for (unsigned int i=0; itbr!=itbr_end; ++itbr, ++i)
+  for (unsigned int i=0; i<graph_->reciprocal_basis_vectors().size();++i)
     for (unsigned int d=0; d<dimension(); ++d)
-      reciprocal_basis_(i,d) = (*itbr)[d];
+      reciprocal_basis_(i,d) = graph_->reciprocal_basis_vectors()[i][d];
   reciprocal_basis_inv_ = Matrix<double>::inverse(reciprocal_basis_);
   //setup cluster momenta
   if (bipartite()) {
@@ -552,9 +545,8 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
       bool bad = false;
       //-> at this point we should separate knowledge of cells from knowledge of the alps graph structure. All we need is an origin, which is a vector type.
       //we can achieve this by generating a vector of origins and iterating over them.
-      alps_graph::basis_vector_iterator o_itc, o_itc_end;
-      for(boost::tie(o_itc,o_itc_end)=graph_->cell_origins(); o_itc != o_itc_end; ++o_itc){
-        vector_type c = *o_itc;
+      for(int orig=0;orig<graph_->cell_origins().size(); ++orig){
+        vector_type c = graph_->cell_origins()[orig];
         for (unsigned int d=0; d<dimension(); ++d)
           c[d] += cluster_coordinate(i,d);
         c = matrix_vector_mult(group[g], c);
@@ -606,9 +598,8 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
     std::set<site_t> vertexset;
     for (unsigned int i=0; i<n_cluster_sites(); ++i) {
       bool bad = false;
-      alps_graph::offset_vector_iterator itc_offset, itc_offset_end;
-      for(boost::tie(itc_offset,itc_offset_end)=graph_->cell_offsets(); itc_offset !=itc_offset_end; itc_offset++){
-        std::vector<int> o = *itc_offset;
+      for(int off=0;off<graph_->cell_offsets().size();++off){
+        std::vector<int> o = graph_->cell_offsets()[off];
         //std::cout << c[0] << " "<< c[1] << " mu ";
         //c = matrix_vector_mult(reciprocal_basis, c);
         //std::cout << o[0] << " "<< o[1] << " cm ";
