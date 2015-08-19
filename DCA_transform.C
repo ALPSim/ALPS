@@ -991,7 +991,6 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
     throw std::invalid_argument("don't know how to handle magn. fields, exiting");
   }
   if(dimension()!=2 && (eta1 !=0 || eta2 !=0)) throw std::invalid_argument("not clear what to do with dwave symmetry away from dimension 2");
-<<<<<<< HEAD
     unsigned int nflavor=G0_omega.nflavor();
     unsigned int nfreq=G0_omega.nfreq();
     nambu_matsubara_green_function_t G0_omega_new(G0_omega);
@@ -1015,23 +1014,6 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
       }
     }for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
       weight_kl[kl]= lattice_momentum(kl,dimension());
-=======
-  unsigned int nflavor=G0_omega.nflavor();
-  unsigned int nfreq=G0_omega.nfreq();
-  nambu_matsubara_green_function_t G0_omega_new(G0_omega);
-  nambu_matsubara_green_function_t G_omega_lattice_kav(G0_omega);
-
-  std::vector<std::vector<double> >epsilon_kckl        (n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
-  std::vector<std::vector<double> >dwave_prefactor_kckl(n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
-  std::vector<double> weight_kl(n_lattice_momenta());
-  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-    for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
-      vector_type k(dimension());
-      for (unsigned int d=0; d<dimension(); ++d)
-        k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-      epsilon_kckl[kc][kl]=epsilon(k);
-      dwave_prefactor_kckl[kc][kl]= cos(k[0]) - cos(k[1]); //cos kx - cos ky
->>>>>>> master
     }
   }for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
     weight_kl[kl]= lattice_momentum(kl,dimension());
