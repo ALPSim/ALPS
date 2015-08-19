@@ -129,9 +129,9 @@ TEST_P(ClusterTest, TwoDClusterCreation){
     }
   }
   //test the cell origins as computed by ALPS and by hand
-  std::pair<std::vector<std::vector<double> >,std::vector<std::vector<double> > > cell_origins_and_offsets=G_->cell_origins_and_offsets_by_hand(L_);
+  std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > cell_origins_and_offsets=G_->cell_origins_and_offsets_by_hand(L_);
   std::vector<std::vector<double> > cell_origins=cell_origins_and_offsets.first;
-  std::vector<std::vector<double> > cell_offsets=cell_origins_and_offsets.second;
+  std::vector<std::vector<int   > > cell_offsets=cell_origins_and_offsets.second;
 
   alps_graph::basis_vector_iterator_pair cell_origins_from_alps=G_->cell_origins();
   std::pair<std::vector<std::vector<int> >::const_iterator,std::vector<std::vector<int> >::const_iterator>  cell_offsets_from_alps=G_->cell_offsets();
@@ -188,3 +188,38 @@ INSTANTIATE_TEST_CASE_P(ClusterCreation3D11, ClusterTest,::testing::Values(THREE
 INSTANTIATE_TEST_CASE_P(ClusterCreation3D12, ClusterTest,::testing::Values(THREEDCLUSTERS12));
 INSTANTIATE_TEST_CASE_P(ClusterCreation3D13, ClusterTest,::testing::Values(THREEDCLUSTERS13));
 
+class ClusterNoALPSTest : public ::testing::TestWithParam<const char*> {
+protected:
+  virtual void SetUp() {
+    alps::params p;
+    L_=20;
+    p["LATTICE_LIBRARY"] = "./cluster.xml";
+    p["LATTICE"] = GetParam();
+    p["L"] = L_;
+    G1_=new alps_graph(p);
+    G2_=new alps_graph(GetParam(), "./cluster.xml", L_);
+  }
+  virtual void TearDown() { delete G1_; delete G2_;}
+  int L_;
+  alps_graph *G1_;
+  alps_graph *G2_;
+};
+TEST_P(ClusterNoALPSTest, EqualityToALPSTest){
+  EXPECT_TRUE(G1_->operator==(*G2_));
+}
+INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest2D1 , ClusterNoALPSTest,::testing::Values(TWODCLUSTERS1));
+INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest2D2 , ClusterNoALPSTest,::testing::Values(TWODCLUSTERS2));
+INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest2D3 , ClusterNoALPSTest,::testing::Values(TWODCLUSTERS3));
+INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest3D1 , ClusterNoALPSTest,::testing::Values(THREEDCLUSTERS1));
+INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest3D2 , ClusterNoALPSTest,::testing::Values(THREEDCLUSTERS2));
+INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest3D3 , ClusterNoALPSTest,::testing::Values(THREEDCLUSTERS3));
+INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest3D4 , ClusterNoALPSTest,::testing::Values(THREEDCLUSTERS4));
+INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest3D5 , ClusterNoALPSTest,::testing::Values(THREEDCLUSTERS5));
+INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest3D6 , ClusterNoALPSTest,::testing::Values(THREEDCLUSTERS6));
+INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest3D7 , ClusterNoALPSTest,::testing::Values(THREEDCLUSTERS7));
+INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest3D8 , ClusterNoALPSTest,::testing::Values(THREEDCLUSTERS8));
+INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest3D9 , ClusterNoALPSTest,::testing::Values(THREEDCLUSTERS9));
+INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest3D10, ClusterNoALPSTest,::testing::Values(THREEDCLUSTERS10));
+INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest3D11, ClusterNoALPSTest,::testing::Values(THREEDCLUSTERS11));
+INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest3D12, ClusterNoALPSTest,::testing::Values(THREEDCLUSTERS12));
+INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest3D13, ClusterNoALPSTest,::testing::Values(THREEDCLUSTERS13));

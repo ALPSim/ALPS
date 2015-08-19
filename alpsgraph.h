@@ -3,24 +3,7 @@
  * ALPS DMFT Project
  *
  * Copyright (C) 2015 by Emanuel Gull <egull@umich.edu>
- * Copyright (C) 2007 by Sebastian Fuchs <fuchs@comp-phys.org>
  *
- * This software is part of the ALPS Applications, published under the ALPS
- * Application License; you can use, redistribute it and/or modify it under
- * the terms of the license, either version 1 or (at your option) any later
- * version.
- *
- * You should have received a copy of the ALPS Application License along with
- * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
- * available from http://alps.comp-phys.org/.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
- * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
- * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
  *
  *****************************************************************************/
 
@@ -73,20 +56,18 @@ public:
     compute_unit_cell_volume();
   }
   alps_graph(const std::string &cluster_name, const std::string &cluster_library, int L){
-    alps_graph(lookup_basis_from_name(cluster_name, cluster_library), L);
+    build(lookup_basis_from_name(cluster_name, cluster_library), L);
   }
-  alps_graph(const std::vector<std::vector<double> > &basis, int L){
+  void build(const std::vector<std::vector<double> > basis, int L){
     basis_=basis;
     dimension_=basis.size(); if(dimension_>3 || dimension_<1) throw std::invalid_argument("clusters work for dimensions 1, 2, and 3.");
     volume_=dimension_==1?L:dimension_==2?L*L:L*L*L;
-    std::cout<<"computing unit cell volume."<<std::endl;
     compute_unit_cell_volume();
-    std::cout<<"computing reciprocal basis."<<std::endl;
 
     reciprocal_vectors_=compute_reciprocal_from_basis(basis);
-    std::pair<std::vector<std::vector<double> >,std::vector<std::vector<double> > > origins_and_offsets=cell_origins_and_offsets_by_hand(L);
+    std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > origins_and_offsets=cell_origins_and_offsets_by_hand(L);
     cell_origins_=origins_and_offsets.first;
-    //cell_offsets_=origins_and_offsets.second
+    cell_offsets_=origins_and_offsets.second;
     momenta_=compute_momenta_by_hand(L);
   }
   std::vector<std::vector<double> > lookup_basis_from_name(const std::string &cluster_name, const std::string &cluster_library) const{
@@ -185,11 +166,11 @@ public:
     }
     return reciprocal_basis;
   }
-  std::pair<std::vector<std::vector<double> >,std::vector<std::vector<double> > > cell_origins_and_offsets_by_hand(int L){
+  std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > cell_origins_and_offsets_by_hand(int L){
     std::vector<std::vector<double> > cell_origins;
-    std::vector<std::vector<double> > cell_offsets;
+    std::vector<std::vector<int   > > cell_offsets;
     std::vector<double> cell_origin(dimension(), 0.);
-    std::vector<double> cell_offset(dimension(), 0.);
+    std::vector<int   > cell_offset(dimension(), 0.);
     if(dimension()==3){
       for(int i=0;i<L;++i){
         for(int j=0;j<L;++j){
@@ -259,6 +240,34 @@ public:
     }
     return momenta;
   }
+  bool operator==(const alps_graph &g) const{
+    if(volume_!= g.volume_) return false;
+    if(unit_cell_volume_!= g.unit_cell_volume_) return false;
+    if(dimension_!= g.dimension_) return false;
+
+    for(int i=0;i<basis_.size();++i){
+      for(int j=0;j<dimension_;++j){
+        if(std::abs(basis_[i][j]-g.basis_[i][j])>1.e-8) return false;
+      }
+    }
+
+    for(int i=0;i<reciprocal_vectors_.size();++i){
+      for(int j=0;j<dimension_;++j){
+        if(std::abs(reciprocal_vectors_[i][j]-g.reciprocal_vectors_[i][j])>1.e-8) return false;
+      }
+    }
+    for(int i=0;i<cell_origins_.size();++i){
+      for(int j=0;j<dimension_;++j){
+        if(std::abs(cell_origins_[i][j]-g.cell_origins_[i][j])>1.e-8) return false;
+      }
+    }
+    for(int i=0;i<cell_offsets_.size();++i){
+      for(int j=0;j<dimension_;++j){
+        if(std::abs(cell_offsets_[i][j]-g.cell_offsets_[i][j])>1.e-8) return false;
+      }
+    }
+    return true;
+  }
 private:
   std::vector<double> cross(const std::vector<double> &v1, const std::vector<double> &v2){
     std::vector<double> c(3, 0.);
@@ -273,6 +282,6 @@ private:
   std::vector<std::vector<double> > basis_;
   std::vector<std::vector<double> > reciprocal_vectors_;
   std::vector<std::vector<double> > cell_origins_;
-  std::vector<std::vector<int> >    cell_offsets_;
+  std::vector<std::vector<int   > >    cell_offsets_;
   momenta_vector_type momenta_;
 };
