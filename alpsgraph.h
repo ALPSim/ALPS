@@ -8,8 +8,12 @@
  *****************************************************************************/
 
 #pragma once
-#include "cluster.h"
-class alps_graph:public abstract_graph{
+#include<vector>
+#include<string>
+#include<fstream>
+#include<stdexcept>
+
+class alps_graph{
 public:
   //to disentangle things from ALPS we have to hide the cell iterator, offset type, and momentum iterator calls.
   typedef std::vector<std::vector<double> > basis_vector;

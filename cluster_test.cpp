@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "alpsgraph.h"
+#include "alps/ngs/params.hpp"
 
 TEST(ALPSGraphTest, FakeXMLParser){
   alps_graph G("Fuchs3D-1000B", "cluster.xml", 20);
@@ -160,7 +161,7 @@ TEST_P(ClusterTest, TwoDClusterCreation){
 
   //test the momenta as computed by ALPS and by hand
   std::vector<std::vector<double> > momenta_by_hand=G_->compute_momenta_by_hand(L_);
-  alps_graph::momenta_iterator_pair momenta_from_alps=G_->cell_momenta();
+  alps_graph::basis_vector_iterator_pair momenta_from_alps=G_->cell_momenta();
   std::vector<std::vector<double> >::const_iterator it3=momenta_from_alps.first;
   for(int i=0;i<momenta_by_hand.size();++i){
     for(int k=0;k<G_->dimension();++k){

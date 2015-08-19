@@ -8,6 +8,8 @@
  *****************************************************************************/
 
 
+#include<sstream>
+#include<cmath>
 #include "alpsgraph.h"
 
 std::vector<std::vector<double> > alps_graph::lookup_basis_from_name(const std::string &cluster_name, const std::string &cluster_library) const{

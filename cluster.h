@@ -37,32 +37,7 @@
 #include "boost/tuple/tuple.hpp"
 #include <set>
 
-//this class is here for the sole purpose of hiding the implementation, which uses the ALPS lattice class.
-class abstract_graph{
-public:
-  typedef std::vector<double> vector_type;
-  typedef std::vector<int> offset_type;
-  typedef std::vector<offset_type> offset_vector_type;
-  typedef std::vector<vector_type>::const_iterator basis_vector_iterator;
-  typedef std::pair<basis_vector_iterator,basis_vector_iterator> basis_vector_iterator_pair;
-  typedef offset_vector_type::const_iterator offset_iterator;
-  typedef std::pair<offset_iterator,offset_iterator> offset_iterator_pair;
-  typedef std::vector<vector_type> momenta_vector_type;
-  typedef momenta_vector_type::const_iterator momenta_vector_iterator;
-  typedef std::pair<momenta_vector_iterator,momenta_vector_iterator> momenta_iterator_pair;
-
-  abstract_graph(){}
-  virtual ~abstract_graph(){}
-  virtual int volume() const=0;
-  virtual int dimension() const=0;
-  virtual basis_vector_iterator_pair basis_vector_iterators()const =0;
-  virtual basis_vector_iterator_pair reciprocal_basis_vector_iterators()const =0;
-
-  virtual basis_vector_iterator_pair cell_origins() const =0;
-  virtual offset_iterator_pair cell_offsets() const=0;
-  virtual momenta_iterator_pair cell_momenta() const=0;
-};
-
+#include"alpsgraph.h"
 
 
 class ClusterHelper 
@@ -171,7 +146,7 @@ private:
   std::string lattice_momenta_file_name_;
 
 private:
-  abstract_graph *graph_;
+  alps_graph *graph_;
 };
 
 
