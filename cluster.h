@@ -55,8 +55,8 @@ public:
   virtual ~abstract_graph(){}
   virtual int volume() const=0;
   virtual int dimension() const=0;
-  virtual basis_vector_iterator_pair basis_vectors()const =0;
-  virtual basis_vector_iterator_pair reciprocal_basis_vectors()const =0;
+  virtual basis_vector_iterator_pair basis_vector_iterators()const =0;
+  virtual basis_vector_iterator_pair reciprocal_basis_vector_iterators()const =0;
 
   virtual basis_vector_iterator_pair cell_origins() const =0;
   virtual offset_iterator_pair cell_offsets() const=0;
@@ -415,7 +415,7 @@ public:
   compute_filling_(params.defined("FILLING")),
   n_target_(compute_filling_?(double)(params["FILLING"]):-1)
   {
-    //std::cerr<<"done building simple DCA transformer"<<std::endl;
+
   }
   //self-consistency transform operator
   matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega,
@@ -499,6 +499,14 @@ private:
   nambu_green_function<double> spin_symmetrizer(const nambu_green_function<double>& G, const bool paramagnet) const;
   
   matsubara_green_function_t fourpoint_green_function_inverse(const matsubara_green_function_t& G, const std::size_t nt) const;
+  void compute_sigma_from_G0_and_G(
+      const matsubara_green_function_t& G0_omega,
+      const matsubara_green_function_t& G_omega,
+      matsubara_green_function_t& selfenergy) const;
+  void compute_integration_weight_and_dispersion(bool use_phase, std::vector<std::vector<double> > &epsilon_kckl, std::vector<double> &weight_kl) const;
+  void compute_lattice_green_function(matsubara_green_function_t &G_omega_lattice, const matsubara_green_function_t &selfenergy, const double &mu, const double &beta, const double &h, std::vector<std::vector<double> > &epsilon_kckl, std::vector<double> &weight_kl) const;
+  double compute_density(const matsubara_green_function_t &G_omega_lattice, const double &beta);
+  void update_parameter_file(int current_it, double& mu);
   template<typename T>
   green_function<T> fourpoint_green_function_add(const green_function<T>& G1,
                                                  const green_function<T>& G2) const;
@@ -512,7 +520,9 @@ private:
   struct Forward;
   struct Backward;
   
+  ///should we tune the chemical potential to get the right density (compute_filling_=true) or should we work at constant mu?
   bool compute_filling_;
+  ///target density. If compute_filling_ is true, we try to change mu to adjust to this.
   double n_target_;
 };
 
