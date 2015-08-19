@@ -110,7 +110,7 @@ class ClusterTest : public ::testing::TestWithParam<const char*> {
 TEST_P(ClusterTest, TwoDClusterCreation){
   EXPECT_EQ(std::pow((double)L_,G_->dimension()), G_->volume());
   EXPECT_EQ(unit_cell_volume_extracted_, G_->unit_cell_volume());
-  EXPECT_NEAR(0., G_->validate_orghogonality(), 1.e-8);
+  EXPECT_NEAR(0., G_->validate_orthogonality(), 1.e-8);
 
   //test the reciprocal vectors, computed from Ashcroft Mermin and by ALPS
   std::vector<std::vector<double> > reciprocal_from_basis=G_->compute_reciprocal_from_basis(G_->basis_vectors());
