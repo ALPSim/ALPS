@@ -520,15 +520,17 @@ void SimpleDCATransformer::compute_sigma_from_G0_and_G(const matsubara_green_fun
     }
   }
 }
-void SimpleDCATransformer::compute_integration_weight_and_dispersion(bool use_phase, std::vector<std::vector<double> > &epsilon_kckl, std::vector<double> &weight_kl)const{
+void SimpleDCATransformer::compute_integration_weight_and_dispersion(bool use_phase,std::vector<std::vector<std::vector<double> > > &epsilon_kckl, std::vector<double> &weight_kl, unsigned int nflavor )const{
   vector_type phi=use_phase?phase_vector():vector_type();
   for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
     for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
       vector_type k(dimension());
       for (unsigned int d=0; d<dimension(); ++d)
         k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-      epsilon_kckl[kc][kl]=use_phase?epsilon_phi(k,phi):epsilon(k);
-    }
+for (unsigned int flavor=0; flavor<nflavor; ++flavor){
+        epsilon_kckl[kc][kl][flavor]=use_phase?epsilon_phi(k,phi):epsilon_flavor(k,flavor);
+	}
+     }
   }
 
 
@@ -536,7 +538,7 @@ void SimpleDCATransformer::compute_integration_weight_and_dispersion(bool use_ph
     weight_kl[kl]= lattice_momentum(kl,dimension());
   }
 }
-void SimpleDCATransformer::compute_lattice_green_function(matsubara_green_function_t &G_omega_lattice, const matsubara_green_function_t &selfenergy, const double &mu, const double &beta, const double &h, std::vector<std::vector<double> > &epsilon_kckl, std::vector<double> &weight_kl) const{
+void SimpleDCATransformer::compute_lattice_green_function(matsubara_green_function_t &G_omega_lattice, const matsubara_green_function_t &selfenergy, const double &mu, const double &beta, const double &h, std::vector<std::vector<std::vector<double> > > &epsilon_kckl, std::vector<double> &weight_kl) const{
   unsigned int nflavor=selfenergy.nflavor();
   unsigned int nfreq=selfenergy.nfreq();
   for (spin_t flavor=0; flavor<nflavor; ++flavor) {
@@ -546,7 +548,7 @@ void SimpleDCATransformer::compute_lattice_green_function(matsubara_green_functi
         std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
         for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
           std::complex<double> zeta = iomega_n + mu + (flavor%2 ? -h : h);
-          G_omega_lattice(freq, kc, kc, flavor) += weight_kl[kl]/(zeta-epsilon_kckl[kc][kl]-selfenergy(freq, kc, kc, flavor));
+          G_omega_lattice(freq, kc, kc, flavor) += weight_kl[kl]/(zeta-epsilon_kckl[kc][kl][flavor]-selfenergy(freq, kc, kc, flavor));
         }
         G_omega_lattice(freq, kc, kc, flavor) /= n_cluster_cells();
       }
@@ -602,84 +604,17 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
   bool damping_mu=false;
   bool computing_mu=true;
   int mu_it=1;
-<<<<<<< HEAD
-  
-  int current_it = static_cast<int>( (*const_cast<alps::params*>(&params_))["CURRENT_IT"]|0);
-  
-  
-  double n_old;
-  double mu_old=mu;
-  double mu_new=mu;
-  double mu_orig=mu;
-// vector<vector<vector<string>>> vec1(DIM1, vector<vector<string>>(DIM2, vector<string>(DIM3)));
-  std::vector<std::vector<std::vector<double> > > epsilon_kckl(n_cluster_sites(), std::vector<std::vector<double> >(n_lattice_momenta(), std::vector<double>(nflavor)) );
-  std::vector<double> weight_kl(n_lattice_momenta());
-  if(params_["PHASE"]|false){
-    vector_type phi=phase_vector();
-    for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-      for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
-        vector_type k(dimension());
-        for (unsigned int d=0; d<dimension(); ++d)
-          k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-	for (unsigned int flavor=0; flavor<nflavor; ++flavor){
-        epsilon_kckl[kc][kl][flavor]=epsilon_phi(k,phi);
-	}
-      }
-    }
-  }else{
-    for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-      for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
-        vector_type k(dimension());
-        for (unsigned int d=0; d<dimension(); ++d)
-          k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-	for (unsigned int flavor=0; flavor<nflavor; ++flavor){
-        epsilon_kckl[kc][kl][flavor]=epsilon_flavor(k,flavor);
-	}
 
-      }
-    }
-  }
-  
-  for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
-    weight_kl[kl]= lattice_momentum(kl,dimension());
-  }
-  do{ //find the right particle density
-    for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-      for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-        for (frequency_t freq=0; freq<nfreq; ++freq) {
-          G_omega_lattice(freq, kc, kc, flavor) = 0.;
-          std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
-          for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
-            std::complex<double> zeta = iomega_n + mu + (flavor%2 ? -h : h);
-            G_omega_lattice(freq, kc, kc, flavor) += weight_kl[kl]/(zeta-epsilon_kckl[kc][kl][flavor]-selfenergy(freq, kc, kc, flavor));
-          }
-          G_omega_lattice(freq, kc, kc, flavor) /= n_cluster_cells();
-        }
-      }
-    }
-    std::cerr << "done" << std::endl;
-    //compute density
-    double density=0;
-    for(spin_t flavor=0;flavor<nflavor;++flavor){
-      for(site_t kc=0;kc<n_cluster_sites();++kc){
-        for(frequency_t freq=0;freq<nfreq;++freq){
-          //we could make this more accurate by using hi freq moments
-          density+=2.*G_omega_lattice(freq,kc,kc,flavor).real();
-        }
-      }
-    }
-    density=density/beta/n_cluster_sites()+(0.5*n_cluster_sites())/n_cluster_sites()*nflavor; //density such that 'half filling' corresponds to 1
-=======
 
   int current_it = params_["CURRENT_IT"]|0;
   bool use_phase = params_["PHASE"]|false;
 
-  std::vector<std::vector<double> >epsilon_kckl(n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
+ // std::vector<std::vector<double> >epsilon_kckl(n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
+
+ std::vector<std::vector<std::vector<double> > > epsilon_kckl(n_cluster_sites(), std::vector<std::vector<double> >(n_lattice_momenta(), std::vector<double>(nflavor)) );
   std::vector<double> weight_kl(n_lattice_momenta());
->>>>>>> master
 
-
-  compute_integration_weight_and_dispersion(use_phase, epsilon_kckl, weight_kl);
+  compute_integration_weight_and_dispersion(use_phase, epsilon_kckl, weight_kl, nflavor);
 
   if(!compute_filling_ || current_it < 2)
     compute_lattice_green_function(G_omega_lattice, selfenergy, mu, beta, h, epsilon_kckl, weight_kl);
@@ -977,29 +912,25 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
     throw std::invalid_argument("don't know how to handle magn. fields, exiting");
   }
   if(dimension()!=2 && (eta1 !=0 || eta2 !=0)) throw std::invalid_argument("not clear what to do with dwave symmetry away from dimension 2");
-    unsigned int nflavor=G0_omega.nflavor();
-    unsigned int nfreq=G0_omega.nfreq();
-    nambu_matsubara_green_function_t G0_omega_new(G0_omega);
-    nambu_matsubara_green_function_t G_omega_lattice_kav(G0_omega);
-    
-    std::vector<std::vector<std::vector<double> > > epsilon_kckl(n_cluster_sites(), std::vector<std::vector<double> >(n_lattice_momenta(), std::vector<double>(nflavor)) );
-// old kckl definition
-   // std::vector<std::vector<double> >epsilon_kckl        (n_cluster_sites(), std::vector<double>(n_lattice_momenta()), nflavor);
-    std::vector<std::vector<double> >dwave_prefactor_kckl(n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
-    std::vector<double> weight_kl(n_lattice_momenta());
-    for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-      for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
-        vector_type k(dimension());
-        for (unsigned int d=0; d<dimension(); ++d)
-          k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-        for (unsigned int flavor=0; flavor<nflavor; ++flavor){
+  unsigned int nflavor=G0_omega.nflavor();
+  unsigned int nfreq=G0_omega.nfreq();
+  nambu_matsubara_green_function_t G0_omega_new(G0_omega);
+  nambu_matsubara_green_function_t G_omega_lattice_kav(G0_omega);
+
+  //std::vector<std::vector<double> >epsilon_kckl        (n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
+
+  std::vector<std::vector<std::vector<double> > > epsilon_kckl(n_cluster_sites(), std::vector<std::vector<double> >(n_lattice_momenta(), std::vector<double>(nflavor)) );
+  std::vector<std::vector<double> >dwave_prefactor_kckl(n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
+  std::vector<double> weight_kl(n_lattice_momenta());
+  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+    for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
+      vector_type k(dimension());
+      for (unsigned int d=0; d<dimension(); ++d)
+        k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
+     for (unsigned int flavor=0; flavor<nflavor; ++flavor){
         epsilon_kckl[kc][kl][flavor]=epsilon_flavor(k,flavor);
 	}
-
-        dwave_prefactor_kckl[kc][kl]= cos(k[0]) - cos(k[1]); //cos kx - cos ky
-      }
-    }for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
-      weight_kl[kl]= lattice_momentum(kl,dimension());
+      dwave_prefactor_kckl[kc][kl]= cos(k[0]) - cos(k[1]); //cos kx - cos ky
     }
   }for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
     weight_kl[kl]= lattice_momentum(kl,dimension());

@@ -503,8 +503,8 @@ private:
       const matsubara_green_function_t& G0_omega,
       const matsubara_green_function_t& G_omega,
       matsubara_green_function_t& selfenergy) const;
-  void compute_integration_weight_and_dispersion(bool use_phase, std::vector<std::vector<double> > &epsilon_kckl, std::vector<double> &weight_kl) const;
-  void compute_lattice_green_function(matsubara_green_function_t &G_omega_lattice, const matsubara_green_function_t &selfenergy, const double &mu, const double &beta, const double &h, std::vector<std::vector<double> > &epsilon_kckl, std::vector<double> &weight_kl) const;
+  void compute_integration_weight_and_dispersion(bool use_phase,std::vector<std::vector<std::vector<double> > > &epsilon_kckl, std::vector<double> &weight_kl, unsigned int nflavor) const;
+  void compute_lattice_green_function(matsubara_green_function_t &G_omega_lattice, const matsubara_green_function_t &selfenergy, const double &mu, const double &beta, const double &h, std::vector<std::vector<std::vector<double> > > &epsilon_kckl, std::vector<double> &weight_kl) const;
   double compute_density(const matsubara_green_function_t &G_omega_lattice, const double &beta);
   void update_parameter_file(int current_it, double& mu);
   template<typename T>
