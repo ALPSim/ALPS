@@ -1,6 +1,9 @@
 #include "gtest/gtest.h"
 #include "alpsgraph.h"
 
+TEST(ALPSGraphTest, FakeXMLParser){
+  alps_graph G("Fuchs3D-1000B", "cluster.xml", 20);
+}
 TEST(ALPSGraphTest, ALPSGraphCreation){
   alps::params p;
   p["LATTICE_LIBRARY"] = "./cluster.xml";
@@ -184,3 +187,4 @@ INSTANTIATE_TEST_CASE_P(ClusterCreation3D10, ClusterTest,::testing::Values(THREE
 INSTANTIATE_TEST_CASE_P(ClusterCreation3D11, ClusterTest,::testing::Values(THREEDCLUSTERS11));
 INSTANTIATE_TEST_CASE_P(ClusterCreation3D12, ClusterTest,::testing::Values(THREEDCLUSTERS12));
 INSTANTIATE_TEST_CASE_P(ClusterCreation3D13, ClusterTest,::testing::Values(THREEDCLUSTERS13));
+

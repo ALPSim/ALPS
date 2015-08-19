@@ -72,6 +72,57 @@ public:
     //compute the unit cell volume
     compute_unit_cell_volume();
   }
+  alps_graph(const std::string &cluster_name, const std::string &cluster_library, int L){
+    alps_graph(lookup_basis_from_name(cluster_name, cluster_library), L);
+  }
+  alps_graph(const std::vector<std::vector<double> > &basis, int L){
+    basis_=basis;
+    dimension_=basis.size(); if(dimension_>3 || dimension_<1) throw std::invalid_argument("clusters work for dimensions 1, 2, and 3.");
+    volume_=dimension_==1?L:dimension_==2?L*L:L*L*L;
+    std::cout<<"computing unit cell volume."<<std::endl;
+    compute_unit_cell_volume();
+    std::cout<<"computing reciprocal basis."<<std::endl;
+
+    reciprocal_vectors_=compute_reciprocal_from_basis(basis);
+    std::pair<std::vector<std::vector<double> >,std::vector<std::vector<double> > > origins_and_offsets=cell_origins_and_offsets_by_hand(L);
+    cell_origins_=origins_and_offsets.first;
+    //cell_offsets_=origins_and_offsets.second
+    momenta_=compute_momenta_by_hand(L);
+  }
+  std::vector<std::vector<double> > lookup_basis_from_name(const std::string &cluster_name, const std::string &cluster_library) const{
+    std::vector<std::vector<double> > basis;
+    //for now we use the ALPS xml file and write a poor man's parser.
+    std::string line;
+    std::string superlattice_string=cluster_name+" superlattice";
+    std::ifstream xml_file(cluster_library.c_str());
+    int dimension;
+    if(!xml_file.good()) throw std::runtime_error("cluster library: "+cluster_library+" could not be opened.");
+    while(getline(xml_file, line)) {
+      if (line.find(superlattice_string, 0) != std::string::npos) {
+        //on the same line we expect 'dimension'
+        if     (line.find("dimension=\"1\"")!=std::string::npos) dimension=1;
+        else if(line.find("dimension=\"2\"")!=std::string::npos) dimension=2;
+        else if(line.find("dimension=\"3\"")!=std::string::npos) dimension=3;
+        else throw std::runtime_error("problem finding dimensionality.");
+        getline(xml_file, line); //this should be 'basis'
+        for(int i=0;i<dimension;++i){
+          getline(xml_file, line); //this should be the first vector
+          int svecpos=line.find("<VECTOR>"); if(svecpos==std::string::npos) throw std::runtime_error("could not find <VECTOR> entry in xml line: "+line);
+          int evecpos=line.find("</VECTOR>");if(evecpos==std::string::npos) throw std::runtime_error("could not find </VECTOR> entry in xml line: "+line);
+          std::stringstream sstr(line.substr(svecpos+8, evecpos-svecpos-8));
+          std::vector<double> basis_vector;
+          for(int j=0;j<dimension;++j){
+            int basis_element;
+            sstr>>basis_element;
+            basis_vector.push_back(basis_element);
+          }
+          basis.push_back(basis_vector);
+        }
+        return basis;
+      }
+    }
+    throw std::logic_error("cluster"+cluster_name+" not found in library: "+cluster_library);
+  }
   virtual ~alps_graph(){}
   int volume() const{return volume_;}
   int dimension() const{return dimension_;}
@@ -110,7 +161,7 @@ public:
     std::vector<std::vector<double> > basis_in_3d(3, std::vector<double>(3, 0.));
     std::vector<std::vector<double> > reciprocal_basis_in_3d(3, std::vector<double>(3, 0.));
     std::vector<std::vector<double> > reciprocal_basis(dimension(), std::vector<double>(dimension(), 0.));
-   
+    
     for(int i=0;i<dimension();++i){
       for(int j=0;j<dimension();++j){
         basis_in_3d[i][j]=basis[i][j];
@@ -126,7 +177,7 @@ public:
     reciprocal_basis_in_3d[0]=2*M_PI/numerator*c0;
     reciprocal_basis_in_3d[1]=2*M_PI/numerator*c1;
     reciprocal_basis_in_3d[2]=2*M_PI/numerator*c2;
-
+    
     for(int i=0;i<dimension();++i){
       for(int j=0;j<dimension();++j){
         reciprocal_basis[i][j]=reciprocal_basis_in_3d[i][j];
