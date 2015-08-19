@@ -8,24 +8,18 @@
  *****************************************************************************/
 
 #pragma once
-#include "alps/lattice/graph_helper.h"
-#include "alps/numeric/vector_functions.hpp"
-#include <alps/ngs/make_deprecated_parameters.hpp>
 #include "cluster.h"
 class alps_graph:public abstract_graph{
 public:
   //to disentangle things from ALPS we have to hide the cell iterator, offset type, and momentum iterator calls.
-  typedef alps::graph_helper<alps::graph_helper<>::graph_type>::cell_iterator cell_iterator;
-  typedef std::pair<cell_iterator,cell_iterator> cell_iterator_pair;
-  typedef alps::graph_helper<alps::graph_helper<>::graph_type>::cell_descriptor cell_descriptor;
-  typedef alps::graph_helper<alps::graph_helper<>::graph_type>::momentum_iterator momentum_iterator;
-  typedef std::pair<momentum_iterator,momentum_iterator> momentum_iterator_pair;
   typedef std::vector<std::vector<double> > basis_vector;
   typedef basis_vector::const_iterator basis_vector_iterator;
   typedef std::pair<basis_vector_iterator,basis_vector_iterator> basis_vector_iterator_pair;
   
-  ///constructor using the (deprecated old) ALPS parameters
-  alps_graph(const alps::params& params);
+  typedef std::vector<std::vector<int> > offset_vector;
+  typedef offset_vector::const_iterator offset_vector_iterator;
+  typedef std::pair<offset_vector_iterator,offset_vector_iterator> offset_vector_iterator_pair;
+
   ///Constructor using a name for the cluster, an xml path, and a lattice extent L.
   alps_graph(const std::string &cluster_name, const std::string &cluster_library, int L){
     build(lookup_basis_from_name(cluster_name, cluster_library), L);
@@ -49,9 +43,9 @@ public:
   ///returns iterators to the beginning and end of the cell origin vectors. TODO: remove this.
   basis_vector_iterator_pair cell_origins() const{return std::make_pair(cell_origins_.begin(), cell_origins_.end());}
   ///returns iterators to the beginning and end of the cell offset vectors. TODO: remove this.
-  offset_iterator_pair cell_offsets() const{return std::make_pair(cell_offsets_.begin(), cell_offsets_.end());}
+  offset_vector_iterator_pair cell_offsets() const{return std::make_pair(cell_offsets_.begin(), cell_offsets_.end());}
   ///returns iterators to the beginning and end of the cell momenta vectors. TODO: remove this.
-  momenta_iterator_pair cell_momenta() const{return std::make_pair(momenta_.begin(), momenta_.end());}
+  basis_vector_iterator_pair cell_momenta() const{return std::make_pair(momenta_.begin(), momenta_.end());}
   ///compute and set the unit cell volume ('8' for an 8-site cluster)
   void compute_unit_cell_volume();
   ///given a basis, compute its reciprocal basis. This works for d=1, 2, and 3.
@@ -90,7 +84,7 @@ private:
   ///a vector of locations of the origin of translated unit cells
   std::vector<std::vector<double> > cell_origins_;
   ///a vector of translation vectors of the translated unit cells
-  std::vector<std::vector<int   > >    cell_offsets_;
+  std::vector<std::vector<int   > > cell_offsets_;
   ///points in the brillouin zone. Shift them by reciprocal vectors to tile the Brillouin zone
-  momenta_vector_type momenta_;
+  std::vector<std::vector<double> > momenta_;
 };

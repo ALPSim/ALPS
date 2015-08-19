@@ -10,40 +10,6 @@
 
 #include "alpsgraph.h"
 
-alps_graph::alps_graph(const alps::params& params){
-  const alps::graph_helper<alps::graph_helper<>::graph_type> graph(alps::make_deprecated_parameters(params));
-  //set up cell origins and offsets
-  cell_iterator itc, itc_end;
-  for (boost::tie(itc, itc_end) = graph.cells(); itc != itc_end; ++itc) {
-    cell_origins_.push_back(graph.origin(*itc));
-    cell_offsets_.push_back(graph.offset(*itc));
-  }
-  //set up momenta
-  momentum_iterator itm, itm_end;
-  for (boost::tie(itm, itm_end) = graph.momenta(); itm != itm_end; ++itm) {
-    momenta_.push_back(graph.momentum(*itm));
-  }
-  //buffer volume and dimension
-  volume_=graph.volume();
-  dimension_=graph.dimension();
-  if(graph.dimension()>3) throw std::invalid_argument("we only deal with graphs of dimension 1, 2, or 3");
-  
-  //buffer the basis vectors
-  basis_vector_iterator_pair BVIP=graph.basis_vectors();
-  for(basis_vector_iterator it=BVIP.first; it!=BVIP.second;++it){
-    basis_.push_back(*it);
-  }
-  basis_vector_iterator_pair RVIP=graph.reciprocal_basis_vectors();
-  for(basis_vector_iterator it=RVIP.first; it!=RVIP.second;++it){
-    reciprocal_vectors_.push_back(*it);
-  }
-  //compute the unit cell volume
-  compute_unit_cell_volume();
-  
-  //sanity check that our vectors are orthogonal:
-  if(validate_orthogonality()>1.e-8) throw std::runtime_error("problem with orthogonality");
-}
-
 std::vector<std::vector<double> > alps_graph::lookup_basis_from_name(const std::string &cluster_name, const std::string &cluster_library) const{
   std::vector<std::vector<double> > basis;
   //for now we use the ALPS xml file and write a poor man's parser.
@@ -117,10 +83,16 @@ std::vector<std::vector<double> > alps_graph::compute_reciprocal_from_basis(cons
   std::vector<double> c1=cross(basis_in_3d[2], basis_in_3d[0]);
   std::vector<double> c2=cross(basis_in_3d[0], basis_in_3d[1]);
   double numerator=c0[0]*basis_in_3d[0][0]+c0[1]*basis_in_3d[0][1]+c0[2]*basis_in_3d[0][2];
-  using alps::numeric::operator*;
-  reciprocal_basis_in_3d[0]=2*M_PI/numerator*c0;
-  reciprocal_basis_in_3d[1]=2*M_PI/numerator*c1;
-  reciprocal_basis_in_3d[2]=2*M_PI/numerator*c2;
+
+  reciprocal_basis_in_3d[0][0]=2*M_PI/numerator*c0[0];
+  reciprocal_basis_in_3d[0][1]=2*M_PI/numerator*c0[1];
+  reciprocal_basis_in_3d[0][2]=2*M_PI/numerator*c0[2];
+  reciprocal_basis_in_3d[1][0]=2*M_PI/numerator*c1[0];
+  reciprocal_basis_in_3d[1][1]=2*M_PI/numerator*c1[1];
+  reciprocal_basis_in_3d[1][2]=2*M_PI/numerator*c1[2];
+  reciprocal_basis_in_3d[2][0]=2*M_PI/numerator*c2[0];
+  reciprocal_basis_in_3d[2][1]=2*M_PI/numerator*c2[1];
+  reciprocal_basis_in_3d[2][2]=2*M_PI/numerator*c2[2];
   
   for(int i=0;i<dimension();++i){
     for(int j=0;j<dimension();++j){

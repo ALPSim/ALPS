@@ -9,7 +9,7 @@ TEST(ALPSGraphTest, ALPSGraphCreation){
   p["LATTICE_LIBRARY"] = "./cluster.xml";
   p["LATTICE"] = "Betts2D-4A";
   p["L"] = "40";
-  alps_graph G(p);
+  alps_graph G(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
 
   EXPECT_EQ(40*40, G.volume());
   EXPECT_EQ(2, G.dimension());
@@ -19,7 +19,7 @@ TEST(ALPSGraphTest, BasisVectors){
   p["LATTICE_LIBRARY"] = "./cluster.xml";
   p["LATTICE"] = "Betts2D-4A";
   p["L"] = "40";
-  alps_graph G(p);
+  alps_graph G(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
   
   alps_graph::basis_vector_iterator_pair BVIP=G.basis_vector_iterators();
   
@@ -40,7 +40,7 @@ TEST(ALPSGraphTest, ReciprocalVectors){
   p["LATTICE"] = "Betts2D-4A";
   p["L"] = "40";
   int size=4;
-  alps_graph G(p);
+  alps_graph G(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
   
   alps_graph::basis_vector_iterator_pair RVIP=G.reciprocal_basis_vector_iterators();
   
@@ -89,7 +89,7 @@ class ClusterTest : public ::testing::TestWithParam<const char*> {
     p["LATTICE_LIBRARY"] = "./cluster.xml";
     p["LATTICE"] = GetParam();
     p["L"] = L_;
-    G_=new alps_graph(p);
+    G_=new alps_graph(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
     extract_unit_cell_volume_from_name(GetParam());
   }
   void extract_unit_cell_volume_from_name(const char* name){
@@ -196,7 +196,7 @@ protected:
     p["LATTICE_LIBRARY"] = "./cluster.xml";
     p["LATTICE"] = GetParam();
     p["L"] = L_;
-    G1_=new alps_graph(p);
+    G1_=new alps_graph(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
     G2_=new alps_graph(GetParam(), "./cluster.xml", L_);
   }
   virtual void TearDown() { delete G1_; delete G2_;}

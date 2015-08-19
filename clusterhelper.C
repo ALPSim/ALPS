@@ -26,6 +26,8 @@
 #include "alpsgraph.h"
 #include "cluster.h"
 #include "clusterhelper.hxx"
+#include "alps/hdf5/ublas/vector.hpp"
+#include "alps/hdf5/ublas/matrix.hpp"
 
 
 ClusterHelper::ClusterHelper(const alps::params& params) :
@@ -34,7 +36,11 @@ paramagnet_(params["PARAMAGNET"]),
 epsilon_(1e-9),
 lattice_momenta_file_name_(params["LATTICE_MOMENTA_FILE"]|"LatticeMomenta")
 {
-  graph_=new alps_graph(params);
+  int L=params["L"];
+  std::string cluster_name=params["LATTICE"];
+  std::string library_name=params["LATTICE_LIBRARY"];
+  
+  graph_=new alps_graph(cluster_name, library_name, L);
   //std::cout<<"in clusterhelper constructor."<<std::endl;
   //try to read this transformer, otherwise generate it.
   if(!read(params))
