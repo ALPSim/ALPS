@@ -80,7 +80,6 @@ ClusterTransformer* ClusterTransformer::generate_transformer(const alps::params&
 
 DCATransformer::DCATransformer(const alps::params& params)
 : ClusterTransformer(params),
-<<<<<<< HEAD
 t_(params.defined("W") ? 1. : static_cast<double>(params["t"])),
 t2_(params["t'"]|params["t2"]|0.),
 t3_(params["t3"]|0.),
@@ -93,19 +92,6 @@ epsav_(n_cluster_sites()),
 epssqav_(n_cluster_sites()),
 dispersion_moments_(2, 0.),
 params_(params)
-=======
-  t_(params.defined("W") ? 1. : static_cast<double>(params["t"])),
-  t2_(params["t'"]|params["t2"]|0.),
-  t3_(params["t3"]|0.),
-  t4_(params["t4"]|0.),
-  bandwidth_(params["W"]|0.),
-  bandwidth_scale_factor_(1.),
-  half_filling_(0.),
-  epsav_(n_cluster_sites()),
-  epssqav_(n_cluster_sites()),
-  dispersion_moments_(2, 0.),
-  params_(params)
->>>>>>> master
 {
   if (params.defined("t") && params.defined("W"))
     boost::throw_exception(std::invalid_argument("both t and W are defined"));
