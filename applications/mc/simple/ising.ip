@@ -1,0 +1,14 @@
+LATTICE_LIBRARY = "../../lib/xml/lattices.xml";
+LATTICE = "chain lattice";
+L = 16;
+
+SEED = 2873
+
+SWEEPS = 4096;
+THERMALIZATION = SWEEPS/8;
+
+ALGORITHM = "ising"
+
+{ T = 2; }
+{ T = 1.8; }
+{ T = 1.6; }

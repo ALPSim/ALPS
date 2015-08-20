@@ -7,6 +7,8 @@
 # applications
 ######################################################################
 
+enable_testing()
+
 if (ALPS_BUILD_SOURCE)
   install(FILES CMakeLists.txt DESTINATION alps/applications)
   install(DIRECTORY mc diag dmft dmrg DESTINATION alps/applications

@@ -1,0 +1,189 @@
+[input parameters]
+LATTICE_LIBRARY = ../../lib/xml/lattices.xml;
+LATTICE = "chain lattice";
+L = 16;
+SEED = 2873;
+SWEEPS = 4096;
+THERMALIZATION = SWEEPS/8;
+ALGORITHM = ising;
+T = 2;
+DIR_NAME = .;
+BASE_NAME = task1;
+CLONE_ID = 1;
+WORKER_SEED = 2873;
+DISORDER_SEED = 2873;
+Warning: unknown evaluator: "ising".  The only evaluator "default" will be used instead.
+[results]
+Binder Ratio of Magnetization: 0.395042 +/- 0.00725
+Energy: -7.35156 +/- 0.0693; tau = 0.301
+    bin #1   : 4096     entries: error = 0.0547737
+    bin #2   : 2048     entries: error = 0.0604012
+    bin #3   : 1024     entries: error = 0.0635487
+    bin #4   : 512      entries: error = 0.0646785
+    bin #5   : 256      entries: error = 0.0650729
+    bin #6   : 128      entries: error = 0.0693159
+Energy Density: -0.459473 +/- 0.00433; tau = 0.301
+    bin #1   : 4096     entries: error = 0.00342336
+    bin #2   : 2048     entries: error = 0.00377507
+    bin #3   : 1024     entries: error = 0.00397179
+    bin #4   : 512      entries: error = 0.0040424
+    bin #5   : 256      entries: error = 0.00406706
+    bin #6   : 128      entries: error = 0.00433224
+Energy^2: 66.3281 +/- 0.967; tau = 0.25
+    bin #1   : 4096     entries: error = 0.789461
+    bin #2   : 2048     entries: error = 0.867228
+    bin #3   : 1024     entries: error = 0.905059
+    bin #4   : 512      entries: error = 0.912493
+    bin #5   : 256      entries: error = 0.904217
+    bin #6   : 128      entries: error = 0.966638
+Inverse Temperature: 0.5 +/- 0
+Magnetization: 0.00598145 +/- 0.0124; tau = 1.44 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 4096     entries: error = 0.00628168
+    bin #2   : 2048     entries: error = 0.00790767
+    bin #3   : 1024     entries: error = 0.00950184
+    bin #4   : 512      entries: error = 0.0107911
+    bin #5   : 256      entries: error = 0.0118811
+    bin #6   : 128      entries: error = 0.0123769
+Magnetization^2: 0.161583 +/- 0.00401; tau = 0.323
+    bin #1   : 4096     entries: error = 0.0031238
+    bin #2   : 2048     entries: error = 0.00357738
+    bin #3   : 1024     entries: error = 0.00384609
+    bin #4   : 512      entries: error = 0.00403001
+    bin #5   : 256      entries: error = 0.00396295
+    bin #6   : 128      entries: error = 0.00400787
+Magnetization^4: 0.0660588 +/- 0.00287; tau = 0.266
+    bin #1   : 4096     entries: error = 0.00232
+    bin #2   : 2048     entries: error = 0.00262065
+    bin #3   : 1024     entries: error = 0.00277614
+    bin #4   : 512      entries: error = 0.00290782
+    bin #5   : 256      entries: error = 0.00289896
+    bin #6   : 128      entries: error = 0.00287155
+Number of Sites: 16 +/- 0
+Specific Heat: 0.191992 +/- 0.00475
+Temperature: 2 +/- 0
+[input parameters]
+LATTICE_LIBRARY = ../../lib/xml/lattices.xml;
+LATTICE = "chain lattice";
+L = 16;
+SEED = 2873;
+SWEEPS = 4096;
+THERMALIZATION = SWEEPS/8;
+ALGORITHM = ising;
+T = 1.8;
+DIR_NAME = .;
+BASE_NAME = task2;
+CLONE_ID = 1;
+WORKER_SEED = 2873;
+DISORDER_SEED = 2873;
+Warning: unknown evaluator: "ising".  The only evaluator "default" will be used instead.
+[results]
+Binder Ratio of Magnetization: 0.418038 +/- 0.00659
+Energy: -8.04199 +/- 0.0728; tau = 0.378
+    bin #1   : 4096     entries: error = 0.0549493
+    bin #2   : 2048     entries: error = 0.0618946
+    bin #3   : 1024     entries: error = 0.0662395
+    bin #4   : 512      entries: error = 0.0682905
+    bin #5   : 256      entries: error = 0.0671873
+    bin #6   : 128      entries: error = 0.0728002
+Energy Density: -0.502625 +/- 0.00455; tau = 0.378
+    bin #1   : 4096     entries: error = 0.00343433
+    bin #2   : 2048     entries: error = 0.00386842
+    bin #3   : 1024     entries: error = 0.00413997
+    bin #4   : 512      entries: error = 0.00426816
+    bin #5   : 256      entries: error = 0.00419921
+    bin #6   : 128      entries: error = 0.00455001
+Energy^2: 77.0352 +/- 1.12; tau = 0.355
+    bin #1   : 4096     entries: error = 0.859108
+    bin #2   : 2048     entries: error = 0.968866
+    bin #3   : 1024     entries: error = 1.04514
+    bin #4   : 512      entries: error = 1.07864
+    bin #5   : 256      entries: error = 1.06369
+    bin #6   : 128      entries: error = 1.12343
+Inverse Temperature: 0.555556 +/- 0
+Magnetization: 0.0078125 +/- 0.0147; tau = 1.79 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 4096     entries: error = 0.00685435
+    bin #2   : 2048     entries: error = 0.00887069
+    bin #3   : 1024     entries: error = 0.0111176
+    bin #4   : 512      entries: error = 0.0132911
+    bin #5   : 256      entries: error = 0.0139688
+    bin #6   : 128      entries: error = 0.0146787
+Magnetization^2: 0.192406 +/- 0.00502; tau = 0.502
+    bin #1   : 4096     entries: error = 0.0035468
+    bin #2   : 2048     entries: error = 0.00419434
+    bin #3   : 1024     entries: error = 0.00474685
+    bin #4   : 512      entries: error = 0.0052307
+    bin #5   : 256      entries: error = 0.00530872
+    bin #6   : 128      entries: error = 0.00502081
+Magnetization^4: 0.0885216 +/- 0.00385; tau = 0.401
+    bin #1   : 4096     entries: error = 0.00287144
+    bin #2   : 2048     entries: error = 0.00334945
+    bin #3   : 1024     entries: error = 0.0037337
+    bin #4   : 512      entries: error = 0.00404125
+    bin #5   : 256      entries: error = 0.00407222
+    bin #6   : 128      entries: error = 0.0038547
+Number of Sites: 16 +/- 0
+Specific Heat: 0.238557 +/- 0.00526
+Temperature: 1.8 +/- 0
+[input parameters]
+LATTICE_LIBRARY = ../../lib/xml/lattices.xml;
+LATTICE = "chain lattice";
+L = 16;
+SEED = 2873;
+SWEEPS = 4096;
+THERMALIZATION = SWEEPS/8;
+ALGORITHM = ising;
+T = 1.6;
+DIR_NAME = .;
+BASE_NAME = task3;
+CLONE_ID = 1;
+WORKER_SEED = 2873;
+DISORDER_SEED = 2873;
+Warning: unknown evaluator: "ising".  The only evaluator "default" will be used instead.
+[results]
+Binder Ratio of Magnetization: 0.426107 +/- 0.00758 WARNING: ERRORS NOT CONVERGED!!!
+Energy: -8.83203 +/- 0.0762; tau = 0.551 WARNING: check error convergence
+    bin #1   : 4096     entries: error = 0.052555
+    bin #2   : 2048     entries: error = 0.0598841
+    bin #3   : 1024     entries: error = 0.0658485
+    bin #4   : 512      entries: error = 0.0712819
+    bin #5   : 256      entries: error = 0.0705976
+    bin #6   : 128      entries: error = 0.0761964
+Energy Density: -0.552002 +/- 0.00476; tau = 0.551 WARNING: check error convergence
+    bin #1   : 4096     entries: error = 0.00328468
+    bin #2   : 2048     entries: error = 0.00374276
+    bin #3   : 1024     entries: error = 0.00411553
+    bin #4   : 512      entries: error = 0.00445512
+    bin #5   : 256      entries: error = 0.00441235
+    bin #6   : 128      entries: error = 0.00476227
+Energy^2: 89.3125 +/- 1.4; tau = 0.672 WARNING: check error convergence
+    bin #1   : 4096     entries: error = 0.914256
+    bin #2   : 2048     entries: error = 1.05183
+    bin #3   : 1024     entries: error = 1.16433
+    bin #4   : 512      entries: error = 1.26741
+    bin #5   : 256      entries: error = 1.27719
+    bin #6   : 128      entries: error = 1.39945
+Inverse Temperature: 0.625 +/- 0
+Magnetization: -0.00784302 +/- 0.0186; tau = 2.65 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 4096     entries: error = 0.00741305
+    bin #2   : 2048     entries: error = 0.00976475
+    bin #3   : 1024     entries: error = 0.0124356
+    bin #4   : 512      entries: error = 0.0150435
+    bin #5   : 256      entries: error = 0.0171201
+    bin #6   : 128      entries: error = 0.0185922
+Magnetization^2: 0.22504 +/- 0.00714; tau = 1.03 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 4096     entries: error = 0.00407991
+    bin #2   : 2048     entries: error = 0.00502441
+    bin #3   : 1024     entries: error = 0.00583667
+    bin #4   : 512      entries: error = 0.006557
+    bin #5   : 256      entries: error = 0.00669031
+    bin #6   : 128      entries: error = 0.00714306
+Magnetization^4: 0.11879 +/- 0.00618; tau = 1.01 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 4096     entries: error = 0.00356289
+    bin #2   : 2048     entries: error = 0.00436019
+    bin #3   : 1024     entries: error = 0.00499388
+    bin #4   : 512      entries: error = 0.00558673
+    bin #5   : 256      entries: error = 0.00574444
+    bin #6   : 128      entries: error = 0.00618403
+Number of Sites: 16 +/- 0
+Specific Heat: 0.276209 +/- 0.00679 WARNING: check error convergence
+Temperature: 1.6 +/- 0
