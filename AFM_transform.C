@@ -66,7 +66,7 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
   std::vector<std::vector<double> >epsilon_kckl(n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
   for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
     for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
-      vector_type k(dimension());
+      std::vector<double> k(dimension());
       for (unsigned int d=0; d<dimension(); ++d){
         k[d] = lattice_momentum(kl,d) + cluster_momentum(kc  ,d);
       }
@@ -88,7 +88,7 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
     for (frequency_t freq=0; freq<nfreq; ++freq) {
       std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
       for (site_t kc=0; kc<n_cluster_sites(); kc++) {
-        vector_type k(dimension());
+        std::vector<double> k(dimension());
         for (unsigned int d=0; d<dimension(); ++d){
           k[d] = lattice_momentum(kl,d) + cluster_momentum(kc  ,d);
         }
@@ -155,10 +155,10 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
  for (frequency_t freq=0; freq<nfreq; ++freq) {
  std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
  for (site_t kc=0; kc<n_cluster_sites(); kc+=2) {
- vector_type k0(dimension());
+ std::vector<double> k0(dimension());
  for (unsigned int d=0; d<dimension(); ++d)
  k0[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc,d);
- vector_type k1(dimension());
+ std::vector<double> k1(dimension());
  for (unsigned int d=0; d<dimension(); ++d)
  k1[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc+1,d);
  for (spin_t flavor=0; flavor<nflavor; flavor+=2) {

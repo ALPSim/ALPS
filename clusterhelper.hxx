@@ -19,10 +19,10 @@ inline typename ClusterHelper::Matrix<T>::Type ClusterHelper::Matrix<T>::inverse
 
 
 template<typename T>
-inline T ClusterHelper::interpolate(vector_type k, const std::vector<T>& values, const bool antiferromagnet) const
+inline T ClusterHelper::interpolate(std::vector<double> k, const std::vector<T>& values, const bool antiferromagnet) const
 {
   k = round(matrix_vector_mult(reciprocal_basis_inv_, k));
-  std::vector<vector_type> neighbor;
+  std::vector<std::vector<double> > neighbor;
   std::vector<unsigned int> neighbor_index;
   switch (dimension()) {
     case 1:
@@ -67,7 +67,7 @@ inline T ClusterHelper::interpolate(vector_type k, const std::vector<T>& values,
       break;
   }
   for (std::size_t i=0; i<neighbor.size(); ++i) {
-    vector_type nv = matrix_vector_mult(reciprocal_basis_, neighbor[i]);
+    std::vector<double> nv = matrix_vector_mult(reciprocal_basis_, neighbor[i]);
     nv = map_back_into_brillouin_zone(nv);
     if (antiferromagnet) {
       if (!inside_reduced_brillouin_zone(nv)) {

@@ -12,7 +12,7 @@
 #include<cmath>
 #include "alpsgraph.h"
 
-std::vector<std::vector<double> > dca_graph::lookup_basis_from_name(const std::string &cluster_name, const std::string &cluster_library) const{
+std::vector<std::vector<double> > alps_graph::lookup_basis_from_name(const std::string &cluster_name, const std::string &cluster_library) const{
   std::vector<std::vector<double> > basis;
   //for now we use the ALPS xml file and write a poor man's parser.
   std::string line;
@@ -46,7 +46,7 @@ std::vector<std::vector<double> > dca_graph::lookup_basis_from_name(const std::s
   }
   throw std::logic_error("cluster"+cluster_name+" not found in library: "+cluster_library);
 }
-double dca_graph::validate_orthogonality() const{
+double alps_graph::validate_orthogonality() const{
   double deviation_from_orthogonality=0.;
   for(int i=0;i< basis_vectors_.size();++i){
     for(int j=0;j< reciprocal_basis_vectors_.size();++j){
@@ -60,7 +60,7 @@ double dca_graph::validate_orthogonality() const{
   return deviation_from_orthogonality;
 }
 
-void dca_graph::compute_unit_cell_volume(){
+void alps_graph::compute_unit_cell_volume(){
   if(dimension_==1){ unit_cell_volume_= basis_vectors_[0][0]; }
   else if(dimension_==2){
     unit_cell_volume_=std::abs(basis_vectors_[0][0]* basis_vectors_[1][1]- basis_vectors_[0][1]* basis_vectors_[1][0]);
@@ -69,7 +69,7 @@ void dca_graph::compute_unit_cell_volume(){
     unit_cell_volume_=std::abs(basis_vectors_[2][0]*c[0]+ basis_vectors_[2][1]*c[1]+ basis_vectors_[2][2]*c[2]);
   }
 }
-std::vector<std::vector<double> > dca_graph::compute_reciprocal_from_basis(const std::vector<std::vector<double> > &basis) const{
+std::vector<std::vector<double> > alps_graph::compute_reciprocal_from_basis(const std::vector<std::vector<double> > &basis) const{
   std::vector<std::vector<double> > basis_in_3d(3, std::vector<double>(3, 0.));
   std::vector<std::vector<double> > reciprocal_basis_in_3d(3, std::vector<double>(3, 0.));
   std::vector<std::vector<double> > reciprocal_basis(dimension(), std::vector<double>(dimension(), 0.));
@@ -104,7 +104,7 @@ std::vector<std::vector<double> > dca_graph::compute_reciprocal_from_basis(const
   return reciprocal_basis;
 }
 
-bool dca_graph::operator==(const dca_graph &g) const{
+bool alps_graph::operator==(const alps_graph &g) const{
   if(volume_!= g.volume_) return false;
   if(unit_cell_volume_!= g.unit_cell_volume_) return false;
   if(dimension_!= g.dimension_) return false;
@@ -133,20 +133,20 @@ bool dca_graph::operator==(const dca_graph &g) const{
   return true;
 }
 
-void dca_graph::build(const std::vector<std::vector<double> > basis, int L){
+void alps_graph::build(const std::vector<std::vector<double> > basis, int L){
   basis_vectors_ =basis;
   dimension_=basis.size(); if(dimension_>3 || dimension_<1) throw std::invalid_argument("clusters work for dimensions 1, 2, and 3.");
   volume_=dimension_==1?L:dimension_==2?L*L:L*L*L;
   compute_unit_cell_volume();
   
   reciprocal_basis_vectors_ =compute_reciprocal_from_basis(basis);
-  std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > origins_and_offsets=cell_origins_and_offsets_by_hand(L);
+  std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > origins_and_offsets=compute_cell_origins_and_offsets(L);
   cell_origins_=origins_and_offsets.first;
   cell_offsets_=origins_and_offsets.second;
-  momenta_=compute_momenta_by_hand(L);
+  momenta_=compute_momenta(L);
 }
 
-std::vector<std::vector<double> > dca_graph::compute_momenta_by_hand(int L)const{
+std::vector<std::vector<double> > alps_graph::compute_momenta(int L)const{
   std::vector<std::vector<double> > momenta;
   std::vector<double> momentum(dimension(), 0.);
   if(dimension()==3){
@@ -190,7 +190,7 @@ std::vector<std::vector<double> > dca_graph::compute_momenta_by_hand(int L)const
   }
   return momenta;
 }
-std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > dca_graph::cell_origins_and_offsets_by_hand(int L){
+std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > alps_graph::compute_cell_origins_and_offsets(int L){
   std::vector<std::vector<double> > cell_origins;
   std::vector<std::vector<int   > > cell_offsets;
   std::vector<double> cell_origin(dimension(), 0.);

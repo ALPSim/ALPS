@@ -99,7 +99,7 @@ params_(params)
   std::vector<double> energies;
   for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
     for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
-      vector_type k(dimension());
+      std::vector<double> k(dimension());
       for (unsigned int d=0; d<dimension(); ++d)
         k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
       double weight = lattice_momentum(kl, dimension());
@@ -521,10 +521,10 @@ void SimpleDCATransformer::compute_sigma_from_G0_and_G(const matsubara_green_fun
   }
 }
 void SimpleDCATransformer::compute_integration_weight_and_dispersion(bool use_phase,std::vector<std::vector<std::vector<double> > > &epsilon_kckl, std::vector<double> &weight_kl, unsigned int nflavor )const{
-  vector_type phi=use_phase?phase_vector():vector_type();
+  std::vector<double> phi=use_phase?phase_vector():std::vector<double>();
   for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
     for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
-      vector_type k(dimension());
+      std::vector<double> k(dimension());
       for (unsigned int d=0; d<dimension(); ++d)
         k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
 for (unsigned int flavor=0; flavor<nflavor; ++flavor){
@@ -696,8 +696,8 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::params& 
       for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
         const std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
         for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-          vector_type k(dimension());
-          vector_type phi(dimension(),0.);
+          std::vector<double> k(dimension());
+          std::vector<double> phi(dimension(),0.);
           if(phase) phi=phase_vector();
           for (unsigned int d=0; d<dimension(); ++d)
             k[d] = cluster_momentum(kc,d);
@@ -924,7 +924,7 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
   std::vector<double> weight_kl(n_lattice_momenta());
   for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
     for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
-      vector_type k(dimension());
+      std::vector<double> k(dimension());
       for (unsigned int d=0; d<dimension(); ++d)
         k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
      for (unsigned int flavor=0; flavor<nflavor; ++flavor){
@@ -1080,7 +1080,7 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
         G0_omega_new(freq, kc, kc, 1,1) = 0.;
         std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
 
-        vector_type k(dimension());
+        std::vector<double> k(dimension());
         for (unsigned int d=0; d<dimension(); ++d)
           k[d] = cluster_momentum(kc,d);
         double dwave_prefactor= cos(k[0]) - cos(k[1]); //cos kx - cos ky
@@ -1190,7 +1190,7 @@ nambu_green_function<std::complex<double> > SimpleDCATransformer::spin_symmetriz
   return G_new;
 }
 
-double DCATransformer::epsilon_phi(const vector_type &k, const vector_type &phi) const{
+double DCATransformer::epsilon_phi(const std::vector<double> &k, const std::vector<double> &phi) const{
   using namespace alps::numeric;
   return epsilon(k+phi);
 }

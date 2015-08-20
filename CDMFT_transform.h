@@ -51,7 +51,7 @@ public:
   double dispersion_moments(const unsigned int i) const { return dispersion_moments_[i]; }
   double bandwidth() const { return bandwidth_; };
   
-  double epsilon(const vector_type k) const
+  double epsilon(const std::vector<double> k) const
   {
     throw std::logic_error("CDMFT dispersion not implemented.");
     return 0.;

@@ -3,14 +3,14 @@
 #include "alps/ngs/params.hpp"
 
 TEST(ALPSGraphTest, FakeXMLParser){
-  dca_graph G("Fuchs3D-1000B", "cluster.xml", 20);
+  alps_graph G("Fuchs3D-1000B", "cluster.xml", 20);
 }
 TEST(ALPSGraphTest, ALPSGraphCreation){
   alps::params p;
   p["LATTICE_LIBRARY"] = "./cluster.xml";
   p["LATTICE"] = "Betts2D-4A";
   p["L"] = "40";
-  dca_graph G(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
+  alps_graph G(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
 
   EXPECT_EQ(40*40, G.volume());
   EXPECT_EQ(2, G.dimension());
@@ -21,10 +21,10 @@ TEST(ALPSGraphTest, ReciprocalVectors){
   p["LATTICE"] = "Betts2D-4A";
   p["L"] = "40";
   int size=4;
-  dca_graph G(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
+  alps_graph G(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
   
-  dca_graph::basis_vector basis           (G.dimension(), std::vector<double>(2, 0.));
-  dca_graph::basis_vector reciprocal_basis(G.dimension(), std::vector<double>(2, 0.));
+  alps_graph::basis_vector basis           (G.dimension(), std::vector<double>(2, 0.));
+  alps_graph::basis_vector reciprocal_basis(G.dimension(), std::vector<double>(2, 0.));
   basis[0][0]=2.;   basis[1][1]=2.;
   
   for(int i=0;i<G.dimension();++i){
@@ -66,7 +66,7 @@ class ClusterTest : public ::testing::TestWithParam<const char*> {
     p["LATTICE_LIBRARY"] = "./cluster.xml";
     p["LATTICE"] = GetParam();
     p["L"] = L_;
-    G_=new dca_graph(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
+    G_=new alps_graph(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
     extract_unit_cell_volume_from_name(GetParam());
   }
   void extract_unit_cell_volume_from_name(const char* name){
@@ -81,7 +81,7 @@ class ClusterTest : public ::testing::TestWithParam<const char*> {
   virtual void TearDown() { delete G_;}
   int unit_cell_volume_extracted_;
   int L_;
-  dca_graph *G_;
+  alps_graph *G_;
 };
 
 TEST_P(ClusterTest, TwoDClusterCreation){
@@ -106,7 +106,7 @@ TEST_P(ClusterTest, TwoDClusterCreation){
     }
   }
   //test the cell origins as computed by ALPS and by hand
-  std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > cell_origins_and_offsets=G_->cell_origins_and_offsets_by_hand(L_);
+  std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > cell_origins_and_offsets=G_->compute_cell_origins_and_offsets(L_);
   std::vector<std::vector<double> > cell_origins=cell_origins_and_offsets.first;
   std::vector<std::vector<int   > > cell_offsets=cell_origins_and_offsets.second;
 
@@ -127,7 +127,7 @@ TEST_P(ClusterTest, TwoDClusterCreation){
   }
 
   //test the momenta as computed by ALPS and by hand
-  std::vector<std::vector<double> > momenta_by_hand=G_->compute_momenta_by_hand(L_);
+  std::vector<std::vector<double> > momenta_by_hand=G_->compute_momenta(L_);
   for(int i=0;i<momenta_by_hand.size();++i){
     for(int k=0;k<G_->dimension();++k){
       EXPECT_NEAR(G_->cell_momenta()[i][k],momenta_by_hand[i][k], 1.e-8);
@@ -160,13 +160,13 @@ protected:
     p["LATTICE_LIBRARY"] = "./cluster.xml";
     p["LATTICE"] = GetParam();
     p["L"] = L_;
-    G1_=new dca_graph(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
-    G2_=new dca_graph(GetParam(), "./cluster.xml", L_);
+    G1_=new alps_graph(p["LATTICE"],p["LATTICE_LIBRARY"],p["L"]);
+    G2_=new alps_graph(GetParam(), "./cluster.xml", L_);
   }
   virtual void TearDown() { delete G1_; delete G2_;}
   int L_;
-  dca_graph *G1_;
-  dca_graph *G2_;
+  alps_graph *G1_;
+  alps_graph *G2_;
 };
 TEST_P(ClusterNoALPSTest, EqualityToALPSTest){
   EXPECT_TRUE(G1_->operator==(*G2_));

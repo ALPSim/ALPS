@@ -24,8 +24,7 @@
  *
  *****************************************************************************/
 
-#ifndef ALPS_CLUSTER_H
-#define ALPS_CLUSTER_H
+#pragma once
 
 
 #include "types.h"
@@ -37,117 +36,9 @@
 #include "boost/tuple/tuple.hpp"
 #include <set>
 
-#include"alpsgraph.h"
+#include "alpsgraph.h"
 
-
-class ClusterHelper 
-{
-public:
-  
-  template <typename T> struct Matrix
-  {
-    typedef boost::numeric::ublas::matrix<T, boost::numeric::ublas::column_major> Type;
-    
-    static Type inverse(Type M);
-    
-    static Type multiply(Type M1, Type M2) {
-      return boost::numeric::ublas::prec_prod(M1, M2);
-    }
-  };
-  
-  typedef std::set<site_t> site_class_type;
-  typedef std::pair<site_t, site_t> pair_type;
-  typedef std::set<pair_type> pair_class_type;
-  typedef std::set<site_class_type> site_class_set_type;
-  typedef std::set<pair_class_type> pair_class_set_type;
-  typedef std::pair<site_class_set_type::const_iterator, site_class_set_type::const_iterator> site_class_set_itpair_type;
-  typedef std::pair<pair_class_set_type::const_iterator, pair_class_set_type::const_iterator> pair_class_set_itpair_type;
-
-  typedef std::vector<double> vector_type;
-  
-  ClusterHelper(const alps::params& params);
-  virtual ~ClusterHelper(){ delete graph_; }
-  
-  double cluster_coordinate(const unsigned int i, const unsigned int j) const { return cluster_coordinates_(i,j); }
-  double cluster_momentum(const unsigned int i, const unsigned int j) const { return cluster_momenta_(i,j); }
-  double lattice_momentum(const unsigned int i, const unsigned int j) const { return lattice_momenta_(i,j); }
-  double reciprocal_basis_vector(const unsigned int i, const unsigned int j) const { return reciprocal_basis_(i,j); }
-  int periodicity(const unsigned int i) const { return Nxyz[i]; }
-  bool bipartite() const { return bipartite_; }
-   int n_cluster_sites() const { return n_cluster_sites_; }
-   int n_cluster_cells() const { return graph_->volume(); }
-   int n_lattice_momenta() const { return lattice_momenta_.size1(); }
-   int dimension() const { return graph_->dimension(); }
-   int cluster_momentum_approximation(vector_type k) const;
-  
-  template<typename T>
-  T interpolate(vector_type k, const std::vector<T>& values, const bool antiferromagnet) const;
-  double site_distance(const unsigned int i, const unsigned int j) const;
-  
-  site_class_set_itpair_type site_classes_real_space() const
-  { return site_class_set_itpair_type (site_class_set_real_space_.begin(), site_class_set_real_space_.end()); }
-  pair_class_set_itpair_type pair_classes_real_space() const
-  { return pair_class_set_itpair_type(pair_class_set_real_space_.begin(), pair_class_set_real_space_.end()); }
-  site_class_set_itpair_type site_classes_k_space() const
-  { return site_class_set_itpair_type(site_class_set_k_space_.begin(), site_class_set_k_space_.end()); }
-  pair_class_set_itpair_type pair_classes_k_space() const
-  { return pair_class_set_itpair_type(pair_class_set_k_space_.begin(), pair_class_set_k_space_.end()); }
-  const Matrix<site_t>::Type &symmetry_table_k_space() const{return symmetry_table_k_space_;}
-  const std::set<pair_class_type> &pair_class_set_k_space() const{return pair_class_set_k_space_;}
-  
-  virtual void write_hdf5(alps::hdf5::archive &ar, const std::string &p) const;
-private:
-  void setup_tables(const alps::params& params);
-  void symmetry_analysis(const Matrix<double>::Type& basis,
-                         const Matrix<double>::Type& basis_inv);
-  void ladder_symmetry_analysis();
-  std::pair<site_class_set_type, pair_class_set_type> setup_classes(const Matrix<site_t>::Type& symmetry_table) const;
-  bool inside_cluster(vector_type v, const Matrix<double>::Type& b) const;
-  bool inside_reduced_brillouin_zone(vector_type v) const;
-  bool append_column_no_duplicates(Matrix<double>::Type& m, const vector_type& v) const;
-  bool append_column_no_duplicates(Matrix<site_t>::Type& m, std::map<site_t, site_t>& smap) const;
-  vector_type map_back_into_brillouin_zone(vector_type v) const;
-  vector_type map_back_into_cluster(vector_type v,
-                                    const Matrix<double>::Type& B_inv, const Matrix<double>::Type& B) const;
-  unsigned int identify_vertex(const vector_type& v, const Matrix<double>::Type& coordinate_matrix) const;
-  unsigned int identify_sublattice(const Matrix<double>::Type& coordinate_matrix, const unsigned int i) const;
-  double round(const double d) const;
-  vector_type round(vector_type v) const;
-  bool almost_equal(const double d1, const double d2) const { return fabs(d1-d2)<epsilon_; }
-  vector_type matrix_vector_mult(const Matrix<double>::Type& M, const vector_type& v) const;
-  bool write(const alps::params &parms) const;
-  bool read(const alps::params &parms);
-  void write_site_class_set(alps::hdf5::archive &ar, const site_class_set_type &set, const std::string &name) const;
-  void write_pair_class_set(alps::hdf5::archive &ar, const pair_class_set_type &set, const std::string &name) const;
-  void read_site_class_set(alps::hdf5::archive &ar, site_class_set_type &set, const std::string &name);
-  void read_pair_class_set(alps::hdf5::archive &ar, pair_class_set_type &set, const std::string &name);
-  void find_non_bipartite_cluster_momenta();
-  void find_bipartite_cluster_momenta();
-  void find_integration_weights();
-
-  Matrix<double>::Type cluster_coordinates_;
-  Matrix<double>::Type cluster_momenta_;
-  Matrix<double>::Type lattice_momenta_;
-  Matrix<double>::Type reciprocal_basis_;
-  Matrix<double>::Type reciprocal_basis_inv_;
-  Matrix<double>::Type rbzone_boundaries_;
-  site_class_set_type site_class_set_real_space_;
-  pair_class_set_type pair_class_set_real_space_;
-  site_class_set_type site_class_set_k_space_;
-  pair_class_set_type pair_class_set_k_space_;
-  Matrix<site_t>::Type symmetry_table_k_space_;
-  Matrix<site_t>::Type symmetry_table_real_space_;
-  std::vector<int> Nxyz;	//Number of jumps required to come back to the same cluster site in each direction (periodicity)
-  
-  unsigned int n_cluster_sites_;
-  bool paramagnet_;
-  bool bipartite_;
-  const double epsilon_;
-  std::string lattice_momenta_file_name_;
-
-private:
-  dca_graph *graph_;
-};
+#include "clusterhelper.h"
 
 
 //The Cluster transormer presents a framework for operator(), which does the Hilbert transform..
@@ -195,11 +86,11 @@ public:
   virtual nambu_matsubara_green_function_t transform_into_k_space(const nambu_matsubara_green_function_t& G) const=0;
   virtual nambu_itime_green_function_t transform_into_real_space(const nambu_itime_green_function_t& G) const=0;
   virtual nambu_itime_green_function_t transform_into_k_space(const nambu_itime_green_function_t& G) const=0;
-
+  
   std::complex<double>* exp_iksite(const int sign) const;
-
+  
   template<typename T>
-  T interpolate(vector_type k, const std::vector<T>& values, const bool antiferromagnet) const {
+  T interpolate(std::vector<double> k, const std::vector<T>& values, const bool antiferromagnet) const {
     return ClusterHelper::interpolate(k, values, antiferromagnet);
   }
   
@@ -253,9 +144,9 @@ public:
                                                 const matsubara_green_function_t &G0_omega,
                                                 double &mu, const double h, const double beta)=0;
   virtual matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega,
-                                        const matsubara_green_function_t &G0_omega,
-                                        matsubara_green_function_t &selfenergy,
-                                        double &mu, const double h, const double beta, const bool use_selfenergy)=0;
+                                                const matsubara_green_function_t &G0_omega,
+                                                matsubara_green_function_t &selfenergy,
+                                                double &mu, const double h, const double beta, const bool use_selfenergy)=0;
   //Hilbert transform operator for Nambu GF
   virtual nambu_matsubara_green_function_t operator()(const nambu_matsubara_green_function_t &G_omega,
                                                       const nambu_matsubara_green_function_t &G0_omega,
@@ -269,15 +160,15 @@ public:
   double bandwidth() const { return bandwidth_; };
   std::vector<double> tmatrix() const;
   virtual void write_hdf5(alps::hdf5::archive &ar, const std::string &p) const;
-
+  
   //Generate a header string that can be printed at the beginning of a Greens function file to label the columns
   std::string generate_header_kspace(const matsubara_green_function_t & G) const;
   std::string generate_header_realspace(const matsubara_green_function_t & G) const;
   std::string generate_header_kspace(const itime_green_function_t & G) const;
   std::string generate_header_realspace(const itime_green_function_t & G) const;
   void print_momenta(const char *filename, const matsubara_green_function_t & G) const;
-
-  double epsilon(const vector_type &k) const
+  
+  double epsilon(const std::vector<double> &k) const
   {
     double eps = -half_filling_;
     for (unsigned int i=0; i<dimension(); ++i)
@@ -329,9 +220,9 @@ public:
     return eps*bandwidth_scale_factor_;
   }
   //dispersion, evaluated with a phase shift of phi
-  double epsilon_phi(const vector_type &k, const vector_type &phi) const;
-  vector_type phase_vector() const{
-    vector_type phi(dimension());
+  double epsilon_phi(const std::vector<double> &k, const std::vector<double> &phi) const;
+  std::vector<double> phase_vector() const{
+    std::vector<double> phi(dimension());
     for(int i=0;i<dimension();++i){
       std::stringstream phase_name; phase_name<<"PHASE_"<<i;
       phi[i]=params_[phase_name.str()];
@@ -339,25 +230,25 @@ public:
     }
     return phi;
   }
-
-//dispersion, evaluated with flavor dependent t_
-  double epsilon_flavor(const vector_type &k, unsigned int flavor) const
+  
+  //dispersion, evaluated with flavor dependent t_
+  double epsilon_flavor(const std::vector<double> &k, unsigned int flavor) const
   {
     double eps = -half_filling_;
-
-  if (flavor == 0){
-    for (unsigned int i=0; i<dimension(); ++i)
-      eps -= 2*t_*cos(k[i]);
+    
+    if (flavor == 0){
+      for (unsigned int i=0; i<dimension(); ++i)
+        eps -= 2*t_*cos(k[i]);
+    }
+    if (flavor == 1){
+      for (unsigned int i=0; i<dimension(); ++i)
+        eps -= 2*t_*t_flavor_*cos(k[i]);
+    }
+    
+    return eps*bandwidth_scale_factor_;
   }
-  if (flavor == 1){
-    for (unsigned int i=0; i<dimension(); ++i)
-      eps -= 2*t_*t_flavor_*cos(k[i]);
-  }
-
-  return eps*bandwidth_scale_factor_;
-  }
-
-
+  
+  
 private:
   template<typename T>
   green_function<T> symmetrize_helper(const green_function<T>& G,
@@ -375,7 +266,7 @@ private:
   std::vector<double> epsav_;
   std::vector<double> epssqav_;
   std::vector<double> dispersion_moments_;
-
+  
 protected:
   const alps::params params_;
 };
@@ -390,7 +281,7 @@ public:
   compute_filling_(params.defined("FILLING")),
   n_target_(compute_filling_?(double)(params["FILLING"]):-1)
   {
-
+    
   }
   //self-consistency transform operator
   matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega,
@@ -475,9 +366,9 @@ private:
   
   matsubara_green_function_t fourpoint_green_function_inverse(const matsubara_green_function_t& G, const std::size_t nt) const;
   void compute_sigma_from_G0_and_G(
-      const matsubara_green_function_t& G0_omega,
-      const matsubara_green_function_t& G_omega,
-      matsubara_green_function_t& selfenergy) const;
+                                   const matsubara_green_function_t& G0_omega,
+                                   const matsubara_green_function_t& G_omega,
+                                   matsubara_green_function_t& selfenergy) const;
   void compute_integration_weight_and_dispersion(bool use_phase,std::vector<std::vector<std::vector<double> > > &epsilon_kckl, std::vector<double> &weight_kl, unsigned int nflavor) const;
   void compute_lattice_green_function(matsubara_green_function_t &G_omega_lattice, const matsubara_green_function_t &selfenergy, const double &mu, const double &beta, const double &h, std::vector<std::vector<std::vector<double> > > &epsilon_kckl, std::vector<double> &weight_kl) const;
   double compute_density(const matsubara_green_function_t &G_omega_lattice, const double &beta);
@@ -577,4 +468,3 @@ private:
   
 };
 
-#endif /*ALPS_CLUSTER_H*/

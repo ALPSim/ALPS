@@ -13,7 +13,7 @@
 #include<fstream>
 #include<stdexcept>
 
-class dca_graph {
+class alps_graph {
 public:
   //to disentangle things from ALPS we have to hide the cell iterator, offset type, and momentum iterator calls.
   typedef std::vector<std::vector<double> > basis_vector;
@@ -25,17 +25,15 @@ public:
   typedef std::pair<offset_vector_iterator,offset_vector_iterator> offset_vector_iterator_pair;
 
   ///Constructor using a name for the cluster, an xml path, and a lattice extent L.
-  dca_graph(const std::string &cluster_name, const std::string &cluster_library, int L){
+  alps_graph(const std::string &cluster_name, const std::string &cluster_library, int L){
     build(lookup_basis_from_name(cluster_name, cluster_library), L);
   }
-  ///Destructor. Do nothing
-  virtual ~dca_graph(){}
   ///return the volume of the lattice. this is L, L*L, or L*L*L, depending on the dimension.
   int volume() const{return volume_;}
   ///dimension. Should be 1, 2, or 3.
   int dimension() const{return dimension_;}
   ///volume of the unit cell (aka the 'cluster size', i.e. 8 for an 8-site cluster)
-  int unit_cell_volume(){ return unit_cell_volume_;}
+  int unit_cell_volume() const { return unit_cell_volume_;}
   ///const reference to the basis vectors
   const basis_vector &basis_vectors() const {return basis_vectors_; }
   ///const reference to the basis vectors in reciprocal space
@@ -51,11 +49,11 @@ public:
   ///given a basis, compute its reciprocal basis. This works for d=1, 2, and 3.
   std::vector<std::vector<double> > compute_reciprocal_from_basis(const std::vector<std::vector<double> > &basis) const;
   ///compute the cell origins (i.e. the (x,y,z) positions of the translated unit cells and their translation offsets
-  std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > cell_origins_and_offsets_by_hand(int L);
+  std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > compute_cell_origins_and_offsets(int L);
   ///compute all possible momenta explicitly (rahter than via ALPS)
-  std::vector<std::vector<double> > compute_momenta_by_hand(int L)const;
+  std::vector<std::vector<double> > compute_momenta(int L)const;
   ///comparison operator, mainly used for tests.
-  bool operator==(const dca_graph &g) const;
+  bool operator==(const alps_graph &g) const;
   ///if the reciprocal basis is correct, this test will validate that each vector is orthogonal to all other basis vectors
   double validate_orthogonality() const;
 private:
