@@ -379,6 +379,7 @@ int run_sequential(int argc, char **argv) {
     boost::timer tm;
     if (!p.defined("DIR_NAME")) p["DIR_NAME"] = ".";
     if (!p.defined("BASE_NAME")) p["BASE_NAME"] = "task" + boost::lexical_cast<std::string>(i+1);
+    if (!p.defined("CLONE_ID")) p["CLONE_ID"] = 1;
     if (!p.defined("SEED")) p["SEED"] = static_cast<unsigned int>(time(0));
     p["WORKER_SEED"] = p["SEED"];
     p["DISORDER_SEED"] = p["SEED"];
