@@ -10,10 +10,11 @@
 
 #include "alpsgraph.h"
 #include "cluster.h"
-#include "clusterhelper.hxx"
 #include "alps/hdf5/ublas/vector.hpp"
 #include "alps/hdf5/ublas/matrix.hpp"
 #include "boost/lexical_cast.hpp"
+#include "boost/numeric/bindings/ublas.hpp"
+#include "boost/numeric/bindings/lapack/driver/gesv.hpp"
 
 ClusterHelper::ClusterHelper(const alps::params& params) :
 alps_graph(params["LATTICE"],params["LATTICE_LIBRARY"],params["L"]),
@@ -177,6 +178,19 @@ void ClusterHelper::find_integration_weights() {
       append_column_no_duplicates(lattice_momenta_, momw);
     }
   }
+}
+
+template<typename T>
+inline typename ClusterHelper::Matrix<T>::Type ClusterHelper::Matrix<T>::inverse(typename Matrix<T>::Type M)
+{
+  typename ClusterHelper::Matrix<T>::Type M_inv(M.size1(), M.size2());
+  for (unsigned int i=0; i<M.size1(); ++i)
+    for (unsigned int j=0; j<M.size2(); ++j)
+      M_inv(i,j) = (T)(i==j);
+  boost::numeric::ublas::vector<fortran_int_t> ipivot(M.size1());
+  memset(&(ipivot(0)), 0, sizeof(int)*M.size1());
+  boost::numeric::bindings::lapack::gesv(M,ipivot, M_inv);
+  return M_inv;
 }
 
 void ClusterHelper::setup_tables(const alps::params &params)
