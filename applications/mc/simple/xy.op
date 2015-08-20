@@ -1,5 +1,5 @@
 [input parameters]
-LATTICE_LIBRARY = ../../lib/xml/lattices.xml;
+LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
 L = 16;
 SEED = 2873;
@@ -77,7 +77,7 @@ Number of Sites: 16 +/- 0
 Specific Heat: 0.116464 +/- 0.00309
 Temperature: 2 +/- 0
 [input parameters]
-LATTICE_LIBRARY = ../../lib/xml/lattices.xml;
+LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
 L = 16;
 SEED = 2873;
@@ -155,7 +155,7 @@ Number of Sites: 16 +/- 0
 Specific Heat: 0.141491 +/- 0.00363
 Temperature: 1.8 +/- 0
 [input parameters]
-LATTICE_LIBRARY = ../../lib/xml/lattices.xml;
+LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
 L = 16;
 SEED = 2873;

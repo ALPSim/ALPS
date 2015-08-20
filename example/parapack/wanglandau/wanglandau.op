@@ -11,6 +11,7 @@ FINAL_UPDATE_FACTOR = 1.01;
 CHECK_INTERVAL = 1024;
 DIR_NAME = .;
 BASE_NAME = task1;
+CLONE_ID = 1;
 WORKER_SEED = 3;
 DISORDER_SEED = 3;
 stage 0: 1024: flatness check PASSED (mean = 2628.92, Hmin = 2575, ratio = 0.979489)
@@ -340,6 +341,7 @@ ALGORITHM = "wanglandau measure";
 SWEEPS = 8192;
 DIR_NAME = .;
 BASE_NAME = task2;
+CLONE_ID = 1;
 WORKER_SEED = 3;
 DISORDER_SEED = 3;
 [results]
@@ -656,6 +658,7 @@ T_MAX = 4.0;
 T_STEP = 0.1;
 DIR_NAME = .;
 BASE_NAME = task3;
+CLONE_ID = 1;
 WORKER_SEED = 3;
 DISORDER_SEED = 3;
 [results]

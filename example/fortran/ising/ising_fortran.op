@@ -7,6 +7,7 @@ INT = 1000;
 L = 10;
 DIR_NAME = .;
 BASE_NAME = task1;
+CLONE_ID = 1;
 WORKER_SEED = 1234;
 DISORDER_SEED = 1234;
 [results]
@@ -27,6 +28,7 @@ INT = 1100;
 L = 20;
 DIR_NAME = .;
 BASE_NAME = task2;
+CLONE_ID = 1;
 WORKER_SEED = 1234;
 DISORDER_SEED = 1234;
 [results]
@@ -47,6 +49,7 @@ INT = 1200;
 L = 30;
 DIR_NAME = .;
 BASE_NAME = task3;
+CLONE_ID = 1;
 WORKER_SEED = 1234;
 DISORDER_SEED = 1234;
 [results]
@@ -67,6 +70,7 @@ INT = 1300;
 L = 40;
 DIR_NAME = .;
 BASE_NAME = task4;
+CLONE_ID = 1;
 WORKER_SEED = 1234;
 DISORDER_SEED = 1234;
 [results]

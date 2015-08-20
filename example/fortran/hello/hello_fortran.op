@@ -7,6 +7,7 @@ Y = 0;
 Z = defined;
 DIR_NAME = .;
 BASE_NAME = task1;
+CLONE_ID = 1;
 WORKER_SEED = 1234;
 DISORDER_SEED = 1234;
 [results]
@@ -18,6 +19,7 @@ X = -3.1;
 Y = 3*2;
 DIR_NAME = .;
 BASE_NAME = task2;
+CLONE_ID = 1;
 WORKER_SEED = 1234;
 DISORDER_SEED = 1234;
 [results]
@@ -29,6 +31,7 @@ X = 0.001;
 Y = -100;
 DIR_NAME = .;
 BASE_NAME = task3;
+CLONE_ID = 1;
 WORKER_SEED = 1234;
 DISORDER_SEED = 1234;
 [results]
@@ -40,6 +43,7 @@ X = 100.0;
 Y = 2;
 DIR_NAME = .;
 BASE_NAME = task4;
+CLONE_ID = 1;
 WORKER_SEED = 1234;
 DISORDER_SEED = 1234;
 [results]
@@ -51,6 +55,7 @@ X = 3;
 Y = 0;
 DIR_NAME = .;
 BASE_NAME = task5;
+CLONE_ID = 1;
 WORKER_SEED = 1234;
 DISORDER_SEED = 1234;
 [results]

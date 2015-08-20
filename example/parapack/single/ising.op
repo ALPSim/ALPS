@@ -9,6 +9,7 @@ ALGORITHM = ising;
 T = 2;
 DIR_NAME = .;
 BASE_NAME = task1;
+CLONE_ID = 1;
 WORKER_SEED = 2873;
 DISORDER_SEED = 2873;
 [results]
@@ -63,6 +64,7 @@ ALGORITHM = ising;
 T = 1.8;
 DIR_NAME = .;
 BASE_NAME = task2;
+CLONE_ID = 1;
 WORKER_SEED = 2873;
 DISORDER_SEED = 2873;
 [results]
@@ -117,6 +119,7 @@ ALGORITHM = ising;
 T = 1.6;
 DIR_NAME = .;
 BASE_NAME = task3;
+CLONE_ID = 1;
 WORKER_SEED = 2873;
 DISORDER_SEED = 2873;
 [results]
@@ -173,6 +176,7 @@ INITIAL_TEMPERATURE = 2;
 DIFF_TEMPERATURE = -0.2;
 DIR_NAME = .;
 BASE_NAME = task4;
+CLONE_ID = 1;
 WORKER_SEED = 2873;
 DISORDER_SEED = 2873;
 TEMPSCAN: number of temperatures = 3
