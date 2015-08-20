@@ -223,7 +223,7 @@ IF(HAVE_MKL)
     message(STATUS "Found intel/mkl library")
     set(LAPACK_LIBRARY_INIT 1)
     set(BLAS_LIBRARY_INIT 1)
-    set(MKL_INC_PATHS $ENV{mkl_home}/include ${MKL_PATHS}) 
+    set(MKL_INC_PATHS $ENV{MKLROOT}/include $ENV{mkl_home}/include ${MKL_PATHS}) 
     find_path(MKL_INCLUDE_DIR mkl.h ${MKL_INC_PATHS})
     include_directories(${MKL_INCLUDE_DIR})
     set(ALPS_HAVE_MKL 1) # MKL flag set in alps/config.h
@@ -475,7 +475,7 @@ ENDIF(USE_SCALAPACK)
 # Finalize (setting some variables).
 ###################################################
 
-message(STATUS "LAPACK DEBUG::LAPACK_LIBRARY = ${LAPACK_LIBRARY}")
+# message(STATUS "LAPACK DEBUG::LAPACK_LIBRARY = ${LAPACK_LIBRARY}")
 
 if(BLAS_LIBRARY)
   SET(BLAS_LIBRARIES ${BLAS_LIBRARY})
