@@ -13,7 +13,7 @@
 #include "clusterhelper.hxx"
 #include "alps/hdf5/ublas/vector.hpp"
 #include "alps/hdf5/ublas/matrix.hpp"
-
+#include "boost/lexical_cast.hpp"
 
 ClusterHelper::ClusterHelper(const alps::params& params) :
 alps_graph(params["LATTICE"],params["LATTICE_LIBRARY"],params["L"]),
