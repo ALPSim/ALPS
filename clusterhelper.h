@@ -96,7 +96,7 @@ private:
   unsigned int identify_sublattice(const Matrix<double>::Type& coordinate_matrix, const unsigned int i) const;
   double round(const double d) const;
   std::vector<double> round(std::vector<double> v) const;
-  bool almost_equal(const double d1, const double d2) const { return fabs(d1-d2)<epsilon_; }
+  bool almost_equal(const double d1, const double d2) const { return std::abs(d1-d2)<epsilon_; }
   std::vector<double> matrix_vector_mult(const Matrix<double>::Type& M, const std::vector<double>& v) const;
   void write_site_class_set(alps::hdf5::archive &ar, const site_class_set_type &set, const std::string &name,const std::string &location="/transformer") const;
   void write_pair_class_set(alps::hdf5::archive &ar, const pair_class_set_type &set, const std::string &name,const std::string &location="/transformer") const;
@@ -105,7 +105,17 @@ private:
   void find_non_bipartite_cluster_momenta();
   void find_bipartite_cluster_momenta();
   void find_integration_weights();
+  ///Go through the cluster in each direction and find how many hops it takes to get to the same place
   void find_periodicity();
+  ///detect if the cluster is bipartite or not
+  void detect_if_bipartite();
+  ///compute the cluter coordinates and store them in the 'cluster_coordinates' matrix.
+  void extract_and_arrange_cluster_coordinates();
+  ///transcribe the basis form alps_graph and invert it
+  void compute_inverse_basis();
+  ///transcribe reciprocal basis form alps_graph and invert it
+  void compute_inverse_reciprocal_basis();
+
 
   Matrix<double>::Type cluster_coordinates_;
   Matrix<double>::Type cluster_momenta_;
@@ -113,6 +123,8 @@ private:
   Matrix<double>::Type reciprocal_basis_;
   Matrix<double>::Type reciprocal_basis_inv_;
   Matrix<double>::Type rbzone_boundaries_;
+  Matrix<double>::Type basis_;
+  Matrix<double>::Type basis_inv_;
   site_class_set_type site_class_set_real_space_;
   pair_class_set_type pair_class_set_real_space_;
   site_class_set_type site_class_set_k_space_;

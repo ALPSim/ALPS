@@ -198,33 +198,43 @@ inline typename ClusterHelper::Matrix<T>::Type ClusterHelper::Matrix<T>::inverse
   return M_inv;
 }
 
-void ClusterHelper::setup_tables(const alps::params &params)
-{
-  //std::cout<<"setting up tables of transformer"<<std::endl;
-  //setup basis vectors
-  Matrix<double>::Type basis(dimension(), dimension());
-  memset(&(basis(0,0)), 0, sizeof(double)*dimension()*dimension());
-  //dca_graph::basis_vector_iterator itb, itb_end;
-  //boost::tie(itb, itb_end) = basis_vector_iterators();
+void ClusterHelper::detect_if_bipartite() {
   int sum = 0;
-  for (unsigned int i=0; i<basis_vectors().size(); ++i) {
+  for (unsigned int i = 0; i < basis_vectors().size(); ++i) {
     int sum_i = 0;
-    for (unsigned int d=0; d<dimension(); ++d) {
-      basis(i,d) = basis_vectors()[i][d];
-      sum_i += int(round(basis(i,d)));
+    for (unsigned int d = 0; d < dimension(); ++d) {
+      sum_i += int(round(basis_vectors()[i][d]));
     }
-    sum += sum_i>=0 ? sum_i%2 : (-sum_i)%2;
+    sum += sum_i >= 0 ? sum_i % 2 : (-sum_i) % 2;
   }
-  bipartite_ = (sum==0);
-  Matrix<double>::Type basis_inv = Matrix<double>::inverse(basis);
-  //setup cluster coordinates
+  bipartite_ = (sum == 0);
+}
+void ClusterHelper::compute_inverse_basis(){
+  basis_.resize(dimension(), dimension());
+  for (unsigned int i=0; i<basis_vectors().size(); ++i) {
+    for (unsigned int d=0; d<dimension(); ++d) {
+      basis_(i,d) = basis_vectors()[i][d];
+    }
+  }
+  basis_inv_ = Matrix<double>::inverse(basis_);
+}
+void ClusterHelper::compute_inverse_reciprocal_basis(){
+  reciprocal_basis_.resize(dimension(), dimension());
+  for (unsigned int i=0; i<reciprocal_basis_vectors().size();++i){
+    for (unsigned int d=0; d<dimension(); ++d){
+      reciprocal_basis_(i,d) = reciprocal_basis_vectors()[i][d];
+    }
+  }
+  reciprocal_basis_inv_ = Matrix<double>::inverse(reciprocal_basis_);
+}
+void ClusterHelper::extract_and_arrange_cluster_coordinates(){
   int maxc=n_cluster_sites();
   std::vector<double> c(dimension());
   switch(dimension()) {
     case 1 :
       for (int i=-maxc; i<=maxc; ++i) {
         c[0] = i;
-        if (inside_cluster(c, basis_inv))
+        if (inside_cluster(c, basis_inv_))
           append_column_no_duplicates(cluster_coordinates_, c);
       }
       break;
@@ -232,7 +242,7 @@ void ClusterHelper::setup_tables(const alps::params &params)
       for (int i=-maxc; i<=maxc; ++i) {
         for (int j=-maxc; j<=maxc; ++j) {
           c[0] = i; c[1] = j;
-          if (inside_cluster(c, basis_inv))
+          if (inside_cluster(c, basis_inv_))
             append_column_no_duplicates(cluster_coordinates_, c);
         }
       }
@@ -242,7 +252,7 @@ void ClusterHelper::setup_tables(const alps::params &params)
         for (int j=-maxc; j<=maxc; ++j) {
           for (int k=-maxc; k<=maxc; ++k) {
             c[0] = i; c[1] = j; c[2]=k;
-            if (inside_cluster(c, basis_inv)) {
+            if (inside_cluster(c, basis_inv_)) {
               append_column_no_duplicates(cluster_coordinates_, c);
             }
           }
@@ -252,8 +262,6 @@ void ClusterHelper::setup_tables(const alps::params &params)
   }
   //arrange vertices for bipartite lattices
   if (bipartite()) {
-    /*if(alps::is_master())
-     std::cout << "cluster is bipartite\n";*/
     for (std::size_t i=0; i<cluster_coordinates_.size1(); ++i) {
       if (identify_sublattice(cluster_coordinates_, i)!=i%2) {
         std::size_t j = i;
@@ -266,23 +274,17 @@ void ClusterHelper::setup_tables(const alps::params &params)
       }
     }
   }
-  /*if(alps::is_master()){
-    std::cerr<<"DEBUG: Writing cluster coordinates"<<std::endl;
-    std::ofstream clustercoordstream("ClusterCoordinates");
-    for (std::size_t m=0; m<cluster_coordinates_.size1(); ++m) {
-      clustercoordstream << m << " ";
-      for (std::size_t d=0; d<cluster_coordinates_.size2(); ++d)
-        clustercoordstream << cluster_coordinates_(m,d) << " ";
-      clustercoordstream << std::endl;
-    }
-  }*/
-  //setup reciprocal basis
-  reciprocal_basis_.resize(dimension(), dimension());
-  memset(&(reciprocal_basis_(0,0)), 0, sizeof(double)*dimension()*dimension());
-  for (unsigned int i=0; i<reciprocal_basis_vectors().size();++i)
-    for (unsigned int d=0; d<dimension(); ++d)
-      reciprocal_basis_(i,d) = reciprocal_basis_vectors()[i][d];
-  reciprocal_basis_inv_ = Matrix<double>::inverse(reciprocal_basis_);
+}
+void ClusterHelper::setup_tables(const alps::params &params)
+{
+  detect_if_bipartite();
+
+  compute_inverse_basis();
+
+  extract_and_arrange_cluster_coordinates();
+
+  compute_inverse_reciprocal_basis();
+
   //setup cluster momenta
   if (bipartite()) {
     find_bipartite_cluster_momenta();
@@ -298,7 +300,7 @@ void ClusterHelper::setup_tables(const alps::params &params)
     boost::throw_exception(std::logic_error("parameter SITES does not match cluster definition"));
   if (cluster_momenta_.size1() != n_cluster_sites())
     boost::throw_exception(std::logic_error("setup of cluster momenta table failed"));
-  symmetry_analysis(basis, basis_inv/*, reciprocal_basis, reciprocal_basis_inv*/);
+  symmetry_analysis(basis_, basis_inv_);
 #ifndef USE_MPI
   write(params);
 #else
