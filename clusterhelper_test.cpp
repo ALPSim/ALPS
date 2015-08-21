@@ -53,6 +53,20 @@ TEST_P(ClusterHelperTest, TwoDClusterReadWrite){
   
   EXPECT_EQ(*CH_, CH2);
 }
+TEST_P(ClusterHelperTest, TwoDClusterVsStoredALPS){
+  alps::params p2;
+  p2["LATTICE"]=GetParam();
+  p2["TMPNAME"]="cluster_dump.bup.h5";
+  p2["LATTICE_LIBRARY"] = "./cluster.xml";
+  p2["SITES"]=extract_unit_cell_volume_from_name(GetParam());
+  p2["L"] = L_;
+  p2["PARAMAGNET"]=1;
+  ClusterHelper CH2(p2);
+  CH2.read(p2, GetParam());
+
+  EXPECT_EQ(*CH_, CH2);
+}
+
 INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest2D1 , ClusterHelperTest,::testing::Values(TWODCLUSTERS1));
 INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest2D2 , ClusterHelperTest,::testing::Values(TWODCLUSTERS2));
 INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest2D3 , ClusterHelperTest,::testing::Values(TWODCLUSTERS3));
@@ -69,3 +83,30 @@ INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest3D10, ClusterHelperTest,::testing::Valu
 INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest3D11, ClusterHelperTest,::testing::Values(THREEDCLUSTERS11));
 INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest3D12, ClusterHelperTest,::testing::Values(THREEDCLUSTERS12));
 INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest3D13, ClusterHelperTest,::testing::Values(THREEDCLUSTERS13));*/
+
+TEST(ClusterHelper, Periodicity8Site){
+  alps::params p;
+  p["LATTICE"]="Betts2D-8A";
+  p["LATTICE_LIBRARY"] = "./cluster.xml";
+  p["SITES"]=8;
+  p["L"] = 20;
+  p["PARAMAGNET"]=1;
+
+  ClusterHelper CH(p);
+
+  EXPECT_EQ(CH.periodicity(0), 4);
+  EXPECT_EQ(CH.periodicity(1), 4);
+}
+TEST(ClusterHelper, Periodicity4Site){
+  alps::params p;
+  p["LATTICE"]="Betts2D-4A";
+  p["LATTICE_LIBRARY"] = "./cluster.xml";
+  p["SITES"]=4;
+  p["L"] = 20;
+  p["PARAMAGNET"]=1;
+
+  ClusterHelper CH(p);
+
+  EXPECT_EQ(CH.periodicity(0), 2);
+  EXPECT_EQ(CH.periodicity(1), 2);
+}

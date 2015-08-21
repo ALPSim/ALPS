@@ -16,34 +16,39 @@
 #include "boost/numeric/bindings/ublas.hpp"
 #include "boost/numeric/bindings/lapack/driver/gesv.hpp"
 
+
 ClusterHelper::ClusterHelper(const alps::params& params) :
 alps_graph(params["LATTICE"],params["LATTICE_LIBRARY"],params["L"]),
 paramagnet_(params["PARAMAGNET"]),
 epsilon_(1e-9)
 {
-
+  //check that the numer of sites is consistent between the 'SITES' parameter and what we get from the cluster.
   if (int(params["SITES"]) != alps_graph::unit_cell_volume()) throw std::runtime_error("the graph"+params["LATTICE"]+" unit cell volume is not :"+params["SITES"]);
   //try to read this transformer, otherwise generate it.
   if(!read(params))
     setup_tables(params);
 
   //Find the periodicity in each direction
-  //Set Nxyz
-  	Nxyz.clear();
-  	Nxyz.resize(dimension(),0.);
-  	for(int k=0; k<dimension(); k++){
-  		int n=0;
-  		bool done=false;
-  		while(!done){
-  			n+=1;
-  			for(int d=0; d<dimension(); d++){
-  				if(n*reciprocal_basis_(k,d) > 2*M_PI){
-  					done = true;
-  				}
-  			}
-  		}
-  		Nxyz[k] = n-1;
-  	}
+  find_periodicity();
+}
+
+//Find the periodicity (i.e. the number of hops until we're back on the same site) in each direction
+void ClusterHelper::find_periodicity() {
+  periodicity_.clear();
+  periodicity_.resize(dimension(), 0.);
+  for (int k = 0; k < dimension(); k++) {
+    int n = 0;
+    bool done = false;
+    while (!done) {
+      n += 1;
+      for (int d = 0; d < dimension(); d++) {
+        if (n * reciprocal_basis_(k, d) > 2 * M_PI) {
+          done = true;
+        }
+      }
+    }
+    periodicity_[k] = n - 1;
+  }
 }
 
 void ClusterHelper::find_non_bipartite_cluster_momenta() {
@@ -969,18 +974,11 @@ bool ClusterHelper::operator==(const ClusterHelper &CH) const{
   //compare int matrices
   if(Matrix<int>::norm_1(symmetry_table_k_space_ - CH.symmetry_table_k_space_) > epsilon_) return false;
   if(Matrix<int>::norm_1(symmetry_table_real_space_ - CH.symmetry_table_real_space_) > epsilon_) return false;
-  return true;
-  /*Matrix<double>::Type cluster_momenta_;
-  Matrix<double>::Type lattice_momenta_;
-  Matrix<double>::Type reciprocal_basis_;
-  Matrix<double>::Type reciprocal_basis_inv_;
-  Matrix<double>::Type rbzone_boundaries_;
-  site_class_set_type site_class_set_real_space_;
-  pair_class_set_type pair_class_set_real_space_;
-  site_class_set_type site_class_set_k_space_;
-  pair_class_set_type pair_class_set_k_space_;
-  Matrix<int>::Type symmetry_table_k_space_;
-  Matrix<int>::Type symmetry_table_real_space_;
-  std::vector<int> Nxyz;	//Number of jumps required to come back to the same cluster site in each direction (periodicity)*/
   
+  for(int i=0;i<periodicity_.size();++i){
+    if(periodicity_[i]!=CH.periodicity_[i]) return false;
+  }
+  
+  return true;
+
 }

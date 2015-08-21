@@ -50,7 +50,8 @@ public:
   double cluster_momentum(const unsigned int i, const unsigned int j) const { return cluster_momenta_(i,j); }
   double lattice_momentum(const unsigned int i, const unsigned int j) const { return lattice_momenta_(i,j); }
   double reciprocal_basis_vector(const unsigned int i, const unsigned int j) const { return reciprocal_basis_(i,j); }
-  int periodicity(const unsigned int i) const { return Nxyz[i]; }
+  ///getter function for periodicity (number of hops in each direction until we're back on the same site)
+  int periodicity(const unsigned int i) const { return periodicity_[i]; }
   bool bipartite() const { return bipartite_; }
   int n_cluster_sites() const { return alps_graph::unit_cell_volume(); }
   int n_cluster_cells() const { return alps_graph::volume(); }
@@ -104,7 +105,8 @@ private:
   void find_non_bipartite_cluster_momenta();
   void find_bipartite_cluster_momenta();
   void find_integration_weights();
-  
+  void find_periodicity();
+
   Matrix<double>::Type cluster_coordinates_;
   Matrix<double>::Type cluster_momenta_;
   Matrix<double>::Type lattice_momenta_;
@@ -117,8 +119,9 @@ private:
   pair_class_set_type pair_class_set_k_space_;
   Matrix<int>::Type symmetry_table_k_space_;
   Matrix<int>::Type symmetry_table_real_space_;
-  std::vector<int> Nxyz;	//Number of jumps required to come back to the same cluster site in each direction (periodicity)
-  
+  ///number of hops in each direction until we're back at the same place
+  std::vector<int> periodicity_;
+
   bool paramagnet_;
   bool bipartite_;
   const double epsilon_;
