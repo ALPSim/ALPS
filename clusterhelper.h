@@ -12,6 +12,7 @@
 
 #include "alps/ngs/params.hpp"
 #include "boost/numeric/ublas/matrix.hpp"
+#include "boost/numeric/ublas/io.hpp"
 #include "boost/tuple/tuple.hpp"
 #include <set>
 
@@ -31,10 +32,11 @@ public:
     static Type multiply(Type M1, Type M2) {
       return boost::numeric::ublas::prec_prod(M1, M2);
     }
+    static double norm_1(const Type &M){ return boost::numeric::ublas::norm_1(M);}
   };
   
-  typedef std::set<site_t> site_class_type;
-  typedef std::pair<site_t, site_t> pair_type;
+  typedef std::set<int> site_class_type;
+  typedef std::pair<int, int> pair_type;
   typedef std::set<pair_type> pair_class_type;
   typedef std::set<site_class_type> site_class_set_type;
   typedef std::set<pair_class_type> pair_class_set_type;
@@ -42,6 +44,7 @@ public:
   typedef std::pair<pair_class_set_type::const_iterator, pair_class_set_type::const_iterator> pair_class_set_itpair_type;
   
   ClusterHelper(const alps::params& params);
+  virtual ~ClusterHelper(){}
   
   double cluster_coordinate(const unsigned int i, const unsigned int j) const { return cluster_coordinates_(i,j); }
   double cluster_momentum(const unsigned int i, const unsigned int j) const { return cluster_momenta_(i,j); }
@@ -67,20 +70,24 @@ public:
   { return site_class_set_itpair_type(site_class_set_k_space_.begin(), site_class_set_k_space_.end()); }
   pair_class_set_itpair_type pair_classes_k_space() const
   { return pair_class_set_itpair_type(pair_class_set_k_space_.begin(), pair_class_set_k_space_.end()); }
-  const Matrix<site_t>::Type &symmetry_table_k_space() const{return symmetry_table_k_space_;}
+  const Matrix<int>::Type &symmetry_table_k_space() const{return symmetry_table_k_space_;}
   const std::set<pair_class_type> &pair_class_set_k_space() const{return pair_class_set_k_space_;}
   
   virtual void write_hdf5(alps::hdf5::archive &ar, const std::string &p) const;
+  bool write(const alps::params &parms, const std::string &location="/transformer") const;
+  bool read(const alps::params &parms, const std::string &location="/transformer");
+  
+  bool operator==(const ClusterHelper &CH) const;
 private:
   void setup_tables(const alps::params& params);
   void symmetry_analysis(const Matrix<double>::Type& basis,
                          const Matrix<double>::Type& basis_inv);
   void ladder_symmetry_analysis();
-  std::pair<site_class_set_type, pair_class_set_type> setup_classes(const Matrix<site_t>::Type& symmetry_table) const;
+  std::pair<site_class_set_type, pair_class_set_type> setup_classes(const Matrix<int>::Type& symmetry_table) const;
   bool inside_cluster(std::vector<double> v, const Matrix<double>::Type& b) const;
   bool inside_reduced_brillouin_zone(std::vector<double> v) const;
   bool append_column_no_duplicates(Matrix<double>::Type& m, const std::vector<double>& v) const;
-  bool append_column_no_duplicates(Matrix<site_t>::Type& m, std::map<site_t, site_t>& smap) const;
+  bool append_column_no_duplicates(Matrix<int>::Type& m, std::map<int, int>& smap) const;
   std::vector<double> map_back_into_brillouin_zone(std::vector<double> v) const;
   std::vector<double> map_back_into_cluster(std::vector<double> v,
                                     const Matrix<double>::Type& B_inv, const Matrix<double>::Type& B) const;
@@ -90,12 +97,10 @@ private:
   std::vector<double> round(std::vector<double> v) const;
   bool almost_equal(const double d1, const double d2) const { return fabs(d1-d2)<epsilon_; }
   std::vector<double> matrix_vector_mult(const Matrix<double>::Type& M, const std::vector<double>& v) const;
-  bool write(const alps::params &parms) const;
-  bool read(const alps::params &parms);
-  void write_site_class_set(alps::hdf5::archive &ar, const site_class_set_type &set, const std::string &name) const;
-  void write_pair_class_set(alps::hdf5::archive &ar, const pair_class_set_type &set, const std::string &name) const;
-  void read_site_class_set(alps::hdf5::archive &ar, site_class_set_type &set, const std::string &name);
-  void read_pair_class_set(alps::hdf5::archive &ar, pair_class_set_type &set, const std::string &name);
+  void write_site_class_set(alps::hdf5::archive &ar, const site_class_set_type &set, const std::string &name,const std::string &location="/transformer") const;
+  void write_pair_class_set(alps::hdf5::archive &ar, const pair_class_set_type &set, const std::string &name,const std::string &location="/transformer") const;
+  void read_site_class_set(alps::hdf5::archive &ar, site_class_set_type &set, const std::string &name,const std::string &location="/transformer");
+  void read_pair_class_set(alps::hdf5::archive &ar, pair_class_set_type &set, const std::string &name,const std::string &location="/transformer");
   void find_non_bipartite_cluster_momenta();
   void find_bipartite_cluster_momenta();
   void find_integration_weights();
@@ -110,8 +115,8 @@ private:
   pair_class_set_type pair_class_set_real_space_;
   site_class_set_type site_class_set_k_space_;
   pair_class_set_type pair_class_set_k_space_;
-  Matrix<site_t>::Type symmetry_table_k_space_;
-  Matrix<site_t>::Type symmetry_table_real_space_;
+  Matrix<int>::Type symmetry_table_k_space_;
+  Matrix<int>::Type symmetry_table_real_space_;
   std::vector<int> Nxyz;	//Number of jumps required to come back to the same cluster site in each direction (periodicity)
   
   bool paramagnet_;

@@ -28,7 +28,10 @@ auxiliaryfunctions.C externalsolver.C main.C)
 
 
 # include_directories("${CMAKE_SOURCE_DIR}/gtest")
-add_executable(runTests cluster_test.cpp alpsgraph.cpp test.cpp fouriertransform.C ${gtest_ROOT}/src/gtest-all.cc)
+add_executable(runTests clusterhelper_test.cpp cluster_test.cpp alpsgraph.cpp test.cpp fouriertransform.C clusterhelper.C ${gtest_ROOT}/src/gtest-all.cc
+AFM_transform.C DCA_transform.C CDMFT_transform.C hilberttransformer.C
+auxiliaryfunctions.C externalsolver.C
+fourier_generator.C selfconsistency.C)
 target_link_libraries(dmft ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
 target_link_libraries(runTests ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
 

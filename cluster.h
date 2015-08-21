@@ -123,7 +123,7 @@ public:
   { return symmetrize_helper(G, pair_classes_real_space()); }
   template<typename T> nambu_green_function<T> symmetrize_k_space(const nambu_green_function<T>& G) const
   { return symmetrize_helper(G, pair_classes_k_space()); }
-  const Matrix<site_t>::Type &symmetry_table_k_space() const{return ClusterHelper::symmetry_table_k_space();}
+  const Matrix<int>::Type &symmetry_table_k_space() const{return ClusterHelper::symmetry_table_k_space();}
   const std::set<pair_class_type> &pair_class_set_k_space() const{return ClusterHelper::pair_class_set_k_space();}
   
   
