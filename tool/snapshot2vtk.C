@@ -25,8 +25,9 @@
 *
 *****************************************************************************/
 
-// ALPS snapshot format (xdr):
+// ALPS snapshot format (in xdr format):
 //
+//   magic_number(=MCDump_snapshot)
 //   lattice_dimension(int)  state_dimension(int)  number_of_sites(int)
 //   coordinate_of_site1(vector of double)  state_of_site1(vector of double)
 //   coordinate_of_site2(vector of double)  state_of_site2(vector of double)
@@ -34,6 +35,7 @@
 //   ...
 
 #include <alps/osiris.h>
+#include <alps/scheduler/types.h>
 #include <alps/utility/vectorio.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -55,13 +57,13 @@ int main(int argc, char **argv) {
   }
 
   for (int i = 1; i < argc; ++i) {
-    std::string basename = regex_replace(std::string(argv[i]), boost::regex("\\.xdr$"), "");
-    boost::filesystem::path xdrfile =
-      complete(boost::filesystem::path(basename + ".xdr")).normalize();
+    std::string basename = regex_replace(std::string(argv[i]), boost::regex("\\.snap$"), "");
+    boost::filesystem::path snapfile =
+      complete(boost::filesystem::path(basename + ".snap")).normalize();
     boost::filesystem::path vtkfile =
       complete(boost::filesystem::path(basename + ".vtk")).normalize();
-    if (!exists(xdrfile)) {
-      std::cerr << "Warning: " << xdrfile << " not found. Skipped.\n";
+    if (!exists(snapfile)) {
+      std::cerr << "Warning: " << snapfile << " not found. Skipped.\n";
       continue;
     }
     if (exists(vtkfile)) {
@@ -69,9 +71,15 @@ int main(int argc, char **argv) {
       continue;
     }
       
-    alps::IXDRFileDump xdr(xdrfile);
+    alps::IXDRFileDump snap(snapfile);
+    int magic;
+    snap >> magic;
+    if (magic != alps::scheduler::MCDump_snapshot) {
+      std::cerr << "Invalid snapshot file\n";
+      std::exit(127);
+    }
     int dim_lattice, dim_state, num_sites;
-    xdr >> dim_lattice >> dim_state >> num_sites;
+    snap >> dim_lattice >> dim_state >> num_sites;
     if (dim_lattice > 3) {
       std::cerr << "Warning: lattice dimension is too large (>3). Skipped\n";
       continue;
@@ -85,7 +93,7 @@ int main(int argc, char **argv) {
     std::vector<double> coord;
     std::vector<double> state;
     for (int s = 0; s < num_sites; ++s) {
-      xdr >> coord >> state;
+      snap >> coord >> state;
       coord.resize(3, 0.0);
       state.resize(3, 0.0);
       coords.push_back(coord);

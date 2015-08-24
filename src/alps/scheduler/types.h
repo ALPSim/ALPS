@@ -53,6 +53,9 @@ enum MCDumpType {
     MCDump_run_master              =5,
     MCDump_run_slave               =6,
 
+    // for snapshot
+    MCDump_snapshot                =7,
+
     // dump version numbers
 #ifdef ALPS_ONLY_HDF5
     MCDump_worker_version          =400

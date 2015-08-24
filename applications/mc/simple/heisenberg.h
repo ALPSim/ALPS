@@ -89,7 +89,7 @@ public:
   heisenberg_worker(alps::Parameters const& params) : super_type(params), mcs_(params),
     spins_(num_sites()) {
     beta_ = (params.defined("T") ? 1 / evaluate("T", params) : 0);
-    field_ = (params.defined("H") ? 1 / evaluate("H", params) : 0);
+    field_ = (params.defined("H") ? evaluate("H", params) : 0);
     // table of coupling constants
     int num_types = 0;
     bond_iterator itr, itr_end;
@@ -109,7 +109,7 @@ public:
     snapshot_interval_ =
       (params.defined("SNAPSHOT_INTERVAL") ? evaluate("SNAPSHOT_INTERVAL", params) : 0);
     snapshot_basename_ = params["BASE_NAME"] + ".clone" +
-      alps::id2string(static_cast<int>(params["CLONE_ID"])) + ".snapshot";
+      alps::id2string(static_cast<int>(params["CLONE_ID"]));
   }
   virtual ~heisenberg_worker() {}
 
@@ -120,11 +120,11 @@ public:
         << alps::RealObservable("Energy")
         << alps::RealObservable("Energy Density")
         << alps::RealObservable("Energy^2")
-        << alps::RealObservable("Magnetization^2")
-        << alps::RealObservable("Magnetization^4")
-        << alps::RealObservable("Magnetization Z")
-        << alps::RealObservable("Magnetization Z^2")
-        << alps::RealObservable("Magnetization Z^4");
+        << alps::RealObservable("Magnetization Density^2")
+        << alps::RealObservable("Magnetization Density^4")
+        << alps::RealObservable("Magnetization Density Z")
+        << alps::RealObservable("Magnetization Density Z^2")
+        << alps::RealObservable("Magnetization Density Z^4");
   }
 
   bool is_thermalized() const { return mcs_.is_thermalized(); }
@@ -151,16 +151,20 @@ public:
     obs["Energy"] << energy_;
     obs["Energy Density"] << energy_ / num_sites();
     obs["Energy^2"] << energy_ * energy_;
-    obs["Magnetization^2"] << mag * mag / num_sites() / num_sites();
-    obs["Magnetization^4"] << std::pow(mag * mag / num_sites() / num_sites(), 2.0);
-    obs["Magnetization Z"] << mag[2] / num_sites();
-    obs["Magnetization Z^2"] << mag[2] * mag[2] / num_sites() / num_sites();
-    obs["Magnetization Z^4"] << std::pow(mag[2] * mag[2] / num_sites() / num_sites(), 2.0);
+    obs["Magnetization Density^2"] << mag * mag / num_sites() / num_sites();
+    obs["Magnetization Density^4"] << std::pow(mag * mag / num_sites() / num_sites(), 2.0);
+    obs["Magnetization Density Z"] << mag[2] / num_sites();
+    obs["Magnetization Density Z^2"] << mag[2] * mag[2] / num_sites() / num_sites();
+    obs["Magnetization Density Z^4"] << std::pow(mag[2] * mag[2] / num_sites() / num_sites(), 2.0);
 
     if (snapshot_interval_ > 0 && mcs_() % snapshot_interval_ == 0) {
-      std::string xdrfile = snapshot_basename_ + boost::lexical_cast<std::string>(mcs_()) + ".xdr";
+      std::string xdrfile = snapshot_basename_ + "." + boost::lexical_cast<std::string>(mcs_()) +
+        ".snap";
       alps::OXDRFileDump dp(xdrfile);
-      dp << static_cast<int>(dimension()) << static_cast<int>(3) << static_cast<int>(num_sites());
+      dp << static_cast<int>(alps::scheduler::MCDump_snapshot); // magic number
+      dp << static_cast<int>(dimension())  // lattice dimension
+         << static_cast<int>(3)            // spin dimension
+         << static_cast<int>(num_sites());
       for (int s = 0; s < num_sites(); ++s) dp << coordinate(s) << spins_[s];
     }
   }

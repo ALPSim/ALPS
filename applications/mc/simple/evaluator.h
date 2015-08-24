@@ -48,27 +48,27 @@ public:
         obs.addObservable(c);
       }
     }
-    if (obs.has("Magnetization^2") && obs.has("Magnetization^4")) {
-      alps::RealObsevaluator m2 = obs["Magnetization^2"];
-      alps::RealObsevaluator m4 = obs["Magnetization^4"];
+    if (obs.has("Magnetization Density^2") && obs.has("Magnetization Density^4")) {
+      alps::RealObsevaluator m2 = obs["Magnetization Density^2"];
+      alps::RealObsevaluator m4 = obs["Magnetization Density^4"];
       if (m2.count() && m4.count()) {
         alps::RealObsevaluator binder("Binder Ratio of Magnetization");
         binder = m2 * m2 / m4;
         obs.addObservable(binder);
       }
     }
-    if (obs.has("Magnetization Z^2") && obs.has("Magnetization Z^4")) {
-      alps::RealObsevaluator m2 = obs["Magnetization Z^2"];
-      alps::RealObsevaluator m4 = obs["Magnetization Z^4"];
+    if (obs.has("Magnetization Density Z^2") && obs.has("Magnetization Density Z^4")) {
+      alps::RealObsevaluator m2 = obs["Magnetization Density Z^2"];
+      alps::RealObsevaluator m4 = obs["Magnetization Density Z^4"];
       if (m2.count() && m4.count()) {
         alps::RealObsevaluator binder("Binder Ratio of Magnetization Z");
         binder = m2 * m2 / m4;
         obs.addObservable(binder);
       }
     }
-    if (obs.has("Magnetization X^2") && obs.has("Magnetization X^4")) {
-      alps::RealObsevaluator m2 = obs["Magnetization X^2"];
-      alps::RealObsevaluator m4 = obs["Magnetization X^4"];
+    if (obs.has("Magnetization Density X^2") && obs.has("Magnetization Density X^4")) {
+      alps::RealObsevaluator m2 = obs["Magnetization Density X^2"];
+      alps::RealObsevaluator m4 = obs["Magnetization Density X^4"];
       if (m2.count() && m4.count()) {
         alps::RealObsevaluator binder("Binder Ratio of Magnetization X");
         binder = m2 * m2 / m4;

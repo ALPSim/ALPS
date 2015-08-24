@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2002-2010 by Matthias Troyer <troyer@comp-phys.org>,
+* Copyright (C) 2002-2015 by Matthias Troyer <troyer@comp-phys.org>,
 *                            Simon Trebst <trebst@comp-phys.org>,
 *                            Synge Todo <wistaria@comp-phys.org>
 *
@@ -26,8 +26,6 @@
 * DEALINGS IN THE SOFTWARE.
 *
 *****************************************************************************/
-
-/* $Id$ */
 
 #include <alps/xml.h>
 #include <alps/parser/xslt_path.h>
@@ -198,7 +196,12 @@ try {
 
   if (inname.size() >= 2 && inname.substr(0, 2) == "./") inname.erase(0, 2);
   if (outbase.size() >= 2 && outbase.substr(0, 2) == "./") outbase.erase(0, 2);
-
+  if (outbase.size() >= 2 && outbase.substr(outbase.size()-1, outbase.size()) == "/")
+    outbase.erase(outbase.size()-1, outbase.size());
+  if (outbase.size() == 0 || outbase == ".")
+    outbase = boost::filesystem::path(inname).leaf().native_file_string();
+  if (boost::filesystem::is_directory(outbase))
+    outbase += '/' + boost::filesystem::path(inname).leaf().native_file_string();
   if (!force && boost::filesystem::exists(outbase + ".out.xml")) {
     std::cerr << "Output files (" + outbase + ".out.xml, etc) exist.  "
               << "Please use '-f' option to force replacing input XML files.\n"
