@@ -38,7 +38,8 @@ std::map<typename alps::graph::graph_label<Graph>::type,Graph> generate_graphs_w
 {
     using alps::graph::canonical_properties;
     typedef alps::graph::subgraph_generator<Graph,LatticeGraph,alps::graph::policies::edge_color_symmetries<Graph> > graph_gen_type;
-    graph_gen_type graph_gen(lattice_graph, 2*order*order);
+    std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> pin(1, 2*order*order);
+    graph_gen_type graph_gen(lattice_graph, pin);
 
     graph_gen.set_color_partition(edge_color_symmetries);
 
@@ -57,7 +58,8 @@ std::map<typename alps::graph::graph_label<Graph>::type,Graph> generate_graphs_w
     using alps::graph::canonical_properties;
     typedef alps::graph::subgraph_generator<Graph,LatticeGraph> graph_gen_type;
     typename graph_gen_type::iterator it,end;
-    graph_gen_type graph_gen(lattice_graph, 2*order*order);
+    std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> pin(1, 2*order*order);
+    graph_gen_type graph_gen(lattice_graph, pin);
     boost::tie(it,end) = graph_gen.generate_up_to_n_edges(order);
 
 

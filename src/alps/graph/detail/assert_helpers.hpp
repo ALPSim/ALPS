@@ -106,6 +106,16 @@ bool graph_has_vertex(Graph const& g, typename boost::graph_traits<Graph>::verte
     return (std::find(vb,ve,v) != ve);
 }
 
+template <typename Graph>
+bool graph_has_vertices(Graph const& g, std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const& v)
+{
+    typedef typename boost::graph_traits<Graph>::vertex_descriptor vertex_descriptor;
+    bool ok = true;
+    for(typename std::vector<vertex_descriptor>::const_iterator it = v.begin(); it != v.end(); ++it)
+        ok = ok && graph_has_vertex(g, *it);
+    return ok;
+}
+
 /**
   * Checks if a partition has a valid structure
   * \parm p The partition to be checked

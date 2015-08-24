@@ -42,6 +42,7 @@ void subgraph_generator_with_color_symmetries_test(unsigned int order)
 
     typedef alps::coordinate_graph_type lattice_graph_type;
     lattice_graph_type& lattice_graph = alps_lattice.graph();
+    std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> pin(1, 2*order*order);
 
     typedef alps::graph::subgraph_generator<Graph,lattice_graph_type,alps::graph::policies::edge_color_symmetries<Graph> > graph_gen_type;
 
@@ -49,7 +50,7 @@ void subgraph_generator_with_color_symmetries_test(unsigned int order)
     color_sym_group[0] = 0;
     color_sym_group[1] = 0;
     color_sym_group[2] = 0;
-    std::vector<std::pair<Graph, typename alps::graph::canonical_properties_type<Graph>::type> > v = alps::graph::generate_subgraphs(Graph(), lattice_graph, 2*order*order, order, color_sym_group);
+    std::vector<std::pair<Graph, typename alps::graph::canonical_properties_type<Graph>::type> > v = alps::graph::generate_subgraphs(Graph(), lattice_graph, pin, order, color_sym_group);
     std::cout << v.size() << std::endl;
 }
 

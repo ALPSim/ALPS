@@ -43,10 +43,10 @@ namespace alps {
         template<typename Subgraph, typename Graph> bool is_embeddable(
               Subgraph const & S
             , Graph const & G
-            , typename boost::graph_traits<Graph>::vertex_descriptor v
+            , std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const& V
             , typename partition_type<Subgraph>::type const & subgraph_orbit
         ) {
-            assert( detail::assert_helpers::graph_has_vertex(G,v) );
+            assert( detail::assert_helpers::graph_has_vertices(G,V) );
             assert(get<alps::graph::partition>(canonical_properties(S)) == subgraph_orbit);
             std::vector<std::vector<boost::uint_t<8>::fast> > distance_to_boarder;
 
@@ -54,7 +54,6 @@ namespace alps {
             detail::edge_equal_simple<Subgraph>     edge_equal;
             detail::throw_on_embedding_found        throw_on_found_embedding;
             try {
-                std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> V(1, v);
                 detail::lattice_constant_impl(S, G, V, subgraph_orbit, vertex_equal, edge_equal, throw_on_found_embedding);
                 return false;
             } catch (detail::embedding_found e) {
@@ -65,12 +64,12 @@ namespace alps {
         template<typename Subgraph, typename Graph> bool is_embeddable(
               Subgraph const & S
             , Graph const & G
-            , typename boost::graph_traits<Graph>::vertex_descriptor v
+            , std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const& V
             , typename partition_type<Subgraph>::type const & subgraph_orbit
             , typename color_partition<Subgraph>::type const & color_partition
         ) {
             assert( false || "FIXME" );
-            assert( detail::assert_helpers::graph_has_vertex(G,v) );
+            assert( detail::assert_helpers::graph_has_vertices(G,V) );
             assert(get<alps::graph::partition>(canonical_properties(S)) == subgraph_orbit);
             std::vector<std::vector<boost::uint_t<8>::fast> > distance_to_boarder;
 
@@ -80,7 +79,6 @@ namespace alps {
             for(std::vector< std::vector<alps::type_type> >::iterator it = color_mappings.begin(); it != color_mappings.end(); ++it)
             { 
                 try {
-                    std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> V(1, v);
                     detail::edge_equal_mapped_colors<Subgraph> edge_equal(*it);
                     detail::lattice_constant_impl(S, G, V, subgraph_orbit, vertex_equal, edge_equal, throw_on_found_embedding);
                 } catch (detail::embedding_found e) {

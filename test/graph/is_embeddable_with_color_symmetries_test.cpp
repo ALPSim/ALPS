@@ -33,6 +33,7 @@
 
 typedef boost::property<alps::edge_type_t,unsigned int> edge_props;
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, boost::no_property, edge_props> graph_type;
+typedef boost::graph_traits<graph_type>::vertex_descriptor vertex_descriptor;
 typedef boost::graph_traits<graph_type>::edge_descriptor edge_descriptor;
 typedef boost::graph_traits<graph_type>::edge_iterator edge_iterator;
 typedef boost::property_map<graph_type,alps::edge_type_t>::type edge_color_map_type;
@@ -207,8 +208,9 @@ void is_embeddable_with_color_symmetries_test3()
         edge_color[e] = 1;
     }
     canonical_properties_type hp = canonical_properties(h,color_symmetry);
-    std::cout << std::boolalpha << is_embeddable(h,g,((2*5*2*5+1)/2),get<alps::graph::partition>(hp)) << std::endl;
-    std::cout << std::boolalpha << is_embeddable(h,g,((2*5*2*5+1)/2),get<alps::graph::partition>(hp),color_symmetry) << std::endl;
+    std::vector<vertex_descriptor> pin(1, (2*5*2*5+1)/2);
+    std::cout << std::boolalpha << is_embeddable(h, g, pin, get<alps::graph::partition>(hp)) << std::endl;
+    std::cout << std::boolalpha << is_embeddable(h, g, pin, get<alps::graph::partition>(hp), color_symmetry) << std::endl;
 }
 
 void is_embeddable_with_color_symmetries_test4()
@@ -266,8 +268,9 @@ void is_embeddable_with_color_symmetries_test4()
         edge_color[e] = 0;
     }
     canonical_properties_type hp = canonical_properties(h,color_symmetry);
-    std::cout << std::boolalpha << is_embeddable(h,g,1,get<alps::graph::partition>(hp)) << std::endl;
-    std::cout << std::boolalpha << is_embeddable(h,g,1,get<alps::graph::partition>(hp),color_symmetry) << std::endl;
+    std::vector<vertex_descriptor> pin(1, 1);
+    std::cout << std::boolalpha << is_embeddable(h,g,pin,get<alps::graph::partition>(hp)) << std::endl;
+    std::cout << std::boolalpha << is_embeddable(h,g,pin,get<alps::graph::partition>(hp),color_symmetry) << std::endl;
 }
 
 int main()

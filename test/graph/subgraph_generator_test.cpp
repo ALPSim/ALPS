@@ -30,6 +30,7 @@
 
 #include <alps/graph/subgraph_generator.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <vector>
 #include <iostream>
 
 
@@ -50,7 +51,8 @@ void subgraph_generator_test(unsigned int order_ )
 
 
     typedef alps::graph::subgraph_generator<Graph,lattice_graph_type> graph_gen_type;
-    graph_gen_type graph_gen(lattice_graph,2*order_*order_);
+    std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> pin(1, 2*order_*order_);
+    graph_gen_type graph_gen(lattice_graph, pin);
 
     typename graph_gen_type::iterator it,end;
     boost::tie(it,end) = graph_gen.generate_up_to_n_edges(order_);

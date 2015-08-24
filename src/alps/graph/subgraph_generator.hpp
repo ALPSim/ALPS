@@ -49,8 +49,8 @@ namespace detail {
         typedef std::pair<subgraph_type,typename canonical_properties_type<subgraph_type>::type> subgraph_properties_pair_type;
         typedef typename std::vector<subgraph_properties_pair_type>::iterator iterator;
 
-        subgraph_generator_impl_base(supergraph_type const& supergraph, typename graph_traits<supergraph_type>::vertex_descriptor pin)
-            : supergraph_(supergraph), graphs_(), pin_(pin), non_embeddable_graphs_(), labels_()
+        subgraph_generator_impl_base(supergraph_type const& supergraph, std::vector<typename graph_traits<supergraph_type>::vertex_descriptor> const& possible_pins)
+            : supergraph_(supergraph), graphs_(), possible_pins_(possible_pins), non_embeddable_graphs_(), labels_()
         {
         }
 
@@ -90,7 +90,7 @@ namespace detail {
                 if(this->try_to_embedd(it->first,g,it->second))
                     return false;
             }
-            bool result = this->try_to_embedd_in_supergraph(g,supergraph_,pin_,boost::get<alps::graph::partition>(prop));
+            bool result = this->try_to_embedd_in_supergraph(g,supergraph_,possible_pins_,boost::get<alps::graph::partition>(prop));
             if(!result) // && num_edges(g) < 9)
                 non_embeddable_graphs_.push_back(std::make_pair(g,get<alps::graph::partition>(prop)));
             return result;
@@ -100,8 +100,8 @@ namespace detail {
         supergraph_type const supergraph_;
         /// The list of subgraphs that were found
         std::vector<subgraph_properties_pair_type> graphs_;
-        /// A list of vertices of the supergraph which have to be found in an embeddable subgraph
-        typename graph_traits<SuperGraph>::vertex_descriptor pin_;
+        /// A list of vertices of the supergraph, one of which has to be found in an embeddable subgraph
+        std::vector<typename graph_traits<SuperGraph>::vertex_descriptor> possible_pins_;
         /// A list of small non-embeddable graphs for quick embedding checks of larger graphs
         std::vector<std::pair<subgraph_type, typename partition_type<subgraph_type>::type> > non_embeddable_graphs_;
         /// a list of canonical graph labels of graphs that were seen
@@ -123,8 +123,8 @@ namespace detail {
         typedef typename base_type::subgraph_properties_pair_type   subgraph_properties_pair_type;
         typedef typename base_type::iterator                        iterator;
 
-        subgraph_generator_impl(supergraph_type const& g, typename graph_traits<supergraph_type>::vertex_descriptor pin)
-            : base_type(g,pin), max_degree_(0)
+        subgraph_generator_impl(supergraph_type const& g, std::vector<typename graph_traits<supergraph_type>::vertex_descriptor> const& possible_pins)
+            : base_type(g,possible_pins), max_degree_(0)
         {
             analyze_supergraph(g);
         }
@@ -227,8 +227,8 @@ namespace detail {
         typedef std::vector<typename has_property<alps::edge_type_t,supergraph_type>::edge_property_type> edge_color_list_type;
         typedef boost::tuple<unsigned int, edge_color_list_type> supergraph_info_type;
 
-        subgraph_generator_impl(supergraph_type const& g, typename graph_traits<supergraph_type>::vertex_descriptor pin)
-            : base_type(g,pin), max_degree_(0)
+        subgraph_generator_impl(supergraph_type const& g, std::vector<typename graph_traits<supergraph_type>::vertex_descriptor> const& possible_pins)
+            : base_type(g,possible_pins), max_degree_(0)
         {
             analyze_supergraph(g);
         }
@@ -364,10 +364,10 @@ namespace policies {
             return is_embeddable(sg,g,sg_prop);
         }
         template <typename Graph>
-        inline bool try_to_embedd_in_supergraph(SubGraph const& sg, Graph const& g, typename boost::graph_traits<Graph>::vertex_descriptor pin, typename partition_type<SubGraph>::type const& sg_prop)
+        inline bool try_to_embedd_in_supergraph(SubGraph const& sg, Graph const& g, std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const& possible_pins, typename partition_type<SubGraph>::type const& sg_prop)
         {
             using alps::graph::is_embeddable;
-            return is_embeddable(sg,g,pin,sg_prop);
+            return is_embeddable(sg, g, possible_pins, sg_prop);
         }
     };
 
@@ -406,10 +406,10 @@ namespace policies {
         }
 
         template <typename Graph>
-        inline bool try_to_embedd_in_supergraph(SubGraph const& sg, Graph const& g, typename boost::graph_traits<Graph>::vertex_descriptor pin, typename partition_type<SubGraph>::type const& sg_prop)
+        inline bool try_to_embedd_in_supergraph(SubGraph const& sg, Graph const& g, std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const& possible_pins, typename partition_type<SubGraph>::type const& sg_prop)
         {
             using alps::graph::is_embeddable;
-            return is_embeddable(sg,g,pin,sg_prop,c_);
+            return is_embeddable(sg, g, possible_pins, sg_prop, c_);
         }
 
         /**
@@ -448,10 +448,10 @@ class subgraph_generator
     /**
       * Constructor
       * \param supergraph the supergraph for which the graphs will be generated.
-      * \param pins is a list of vertices of the supergraph. A subgraph is only embeddable if the subgraph can be embedded in such a way that all those vertices have corresponding vertices in the subgraph.
+      * \param possible_pins is a list of vertices of the supergraph. A subgraph is only embeddable if the subgraph can be embedded in such a way that at least one of those vertices has a corresponding vertex in the subgraph.
      */
-    subgraph_generator(supergraph_type const& supergraph, typename graph_traits<supergraph_type>::vertex_descriptor pin)
-        : base_type(supergraph,pin)
+    subgraph_generator(supergraph_type const& supergraph, std::vector<typename graph_traits<supergraph_type>::vertex_descriptor> const& possible_pins)
+        : base_type(supergraph,possible_pins)
     {
         // We assume undirected graphs
         BOOST_STATIC_ASSERT(( boost::is_same<typename graph_traits<subgraph_type>::directed_category, boost::undirected_tag>::value ));
@@ -541,22 +541,22 @@ class subgraph_generator
 };
 
 template <typename SubGraph, typename SuperGraph>
-std::vector<std::pair<SubGraph, typename canonical_properties_type<SubGraph>::type> > generate_subgraphs(SubGraph const&, SuperGraph const& supergraph, typename boost::graph_traits<SuperGraph>::vertex_descriptor pin, unsigned int n)
+std::vector<std::pair<SubGraph, typename canonical_properties_type<SubGraph>::type> > generate_subgraphs(SubGraph const&, SuperGraph const& supergraph, std::vector<typename boost::graph_traits<SuperGraph>::vertex_descriptor> const& possible_pins, unsigned int n)
 {
     typedef std::vector<std::pair<SubGraph, typename canonical_properties_type<SubGraph>::type> > subgraph_list_type;
     typedef typename subgraph_list_type::iterator iterator;
-    subgraph_generator<SubGraph, SuperGraph> sg(supergraph,pin);
+    subgraph_generator<SubGraph, SuperGraph> sg(supergraph, possible_pins);
     iterator it, end;
     boost::tie(it,end) = sg.generate_up_to_n_edges(n);
     return subgraph_list_type(it,end);
 }
 
 template <typename SubGraph, typename SuperGraph>
-std::vector<std::pair<SubGraph, typename canonical_properties_type<SubGraph>::type> > generate_subgraphs(SubGraph const&, SuperGraph const& supergraph, typename boost::graph_traits<SuperGraph>::vertex_descriptor pin, unsigned int n, typename color_partition<SubGraph>::type const& color_partitions)
+std::vector<std::pair<SubGraph, typename canonical_properties_type<SubGraph>::type> > generate_subgraphs(SubGraph const&, SuperGraph const& supergraph, std::vector<typename boost::graph_traits<SuperGraph>::vertex_descriptor> const& possible_pins, unsigned int n, typename color_partition<SubGraph>::type const& color_partitions)
 {
     typedef std::vector<std::pair<SubGraph, typename canonical_properties_type<SubGraph>::type> > subgraph_list_type;
     typedef typename subgraph_list_type::iterator iterator;
-    subgraph_generator<SubGraph, SuperGraph, policies::edge_color_symmetries<SubGraph> > sg(supergraph,pin);
+    subgraph_generator<SubGraph, SuperGraph, policies::edge_color_symmetries<SubGraph> > sg(supergraph, possible_pins);
     sg.set_color_partition(color_partitions);
     iterator it, end;
     boost::tie(it,end) = sg.generate_up_to_n_edges(n);
