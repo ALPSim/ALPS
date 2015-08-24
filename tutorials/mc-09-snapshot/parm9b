@@ -1,0 +1,12 @@
+LATTICE="square lattice"
+J=1
+ALGORITHM="ising"
+
+SWEEPS=16384
+THERMALIZATOIN=0
+SNAPSHOT_INTERVAL=16384
+
+L = 128
+{ T = 3.0 }
+{ T = 2.3 }
+{ T = 2.0 }

@@ -1,0 +1,12 @@
+LATTICE="triangular lattice"
+J=-1
+ALGORITHM="heisenberg"
+
+SWEEPS=16384
+THERMALIZATOIN=0
+SNAPSHOT_INTERVAL=16384
+
+L = 48
+T = 0.01
+{ H = 0 }
+{ H = 5 }
