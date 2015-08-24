@@ -36,6 +36,7 @@
 #define ALPS_GRAPH_LATTICE_CONSTANT_HPP
 
 #include <alps/graph/detail/lattice_constant_impl.hpp>
+#include <alps/graph/vertices_of_cell.hpp>
 
 namespace alps {
     namespace graph {
@@ -48,11 +49,7 @@ namespace alps {
         ) {
             typename partition_type<Subgraph>::type subgraph_orbit = boost::get<2>(canonical_properties(S));
 
-            typename alps::lattice_traits<Lattice>::size_type const cell_id = index(c, L);
-            std::size_t unit_cell_size = num_vertices(alps::graph::graph(unit_cell(L)));
-            std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> V;
-            for(unsigned v = 0; v < unit_cell_size; ++v)
-                V.push_back(cell_id * unit_cell_size + v);
+            std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> V(vertices_of_cell(c, L));
 
             detail::vertex_equal_simple<Subgraph> vertex_equal;
             detail::edge_equal_simple<Subgraph>   edge_equal;
@@ -70,11 +67,7 @@ namespace alps {
         ) {
             typename partition_type<Subgraph>::type subgraph_orbit = boost::get<2>(canonical_properties(S));
 
-            typename alps::lattice_traits<Lattice>::size_type const cell_id = index(c, L);
-            std::size_t unit_cell_size = num_vertices(alps::graph::graph(unit_cell(L)));
-            std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> V;
-            for(unsigned v = 0; v < unit_cell_size; ++v)
-                V.push_back(cell_id * unit_cell_size + v);
+            std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> V(vertices_of_cell(c, L));
 
             detail::vertex_equal_simple<Subgraph> vertex_equal;
             detail::edge_equal_mapped_colors<Subgraph> edge_equal(edge_color_mapping);
@@ -94,11 +87,7 @@ namespace alps {
         ) {
             assert(get<alps::graph::partition>(canonical_properties(S,b)) == subgraph_orbit);
 
-            typename alps::lattice_traits<Lattice>::size_type const cell_id = index(c, L);
-            std::size_t unit_cell_size = num_vertices(alps::graph::graph(unit_cell(L)));
-            std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> V;
-            for(unsigned v = 0; v < unit_cell_size; ++v)
-                V.push_back(cell_id * unit_cell_size + v);
+            std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> V(vertices_of_cell(c, L));
 
             detail::vertex_equal_simple<Subgraph> vertex_equal;
             detail::edge_equal_simple<Subgraph>   edge_equal;
@@ -117,11 +106,7 @@ namespace alps {
         ) {
             assert(get<alps::graph::partition>(canonical_properties(S,b)) == subgraph_orbit);
 
-            typename alps::lattice_traits<Lattice>::size_type const cell_id = index(c, L);
-            std::size_t unit_cell_size = num_vertices(alps::graph::graph(unit_cell(L)));
-            std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> V;
-            for(unsigned v = 0; v < unit_cell_size; ++v)
-                V.push_back(cell_id * unit_cell_size + v);
+            std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> V(vertices_of_cell(c, L));
 
             detail::vertex_equal_simple<Subgraph> vertex_equal;
             detail::edge_equal_mapped_colors<Subgraph> edge_equal(edge_color_mapping);
