@@ -49,7 +49,8 @@ void run_sim(const boost::filesystem::path& infile, const boost::filesystem::pat
     }
     
     /// Match parameters of ALPS DMRG
-    parms.set("chkpfile",   (outfile.parent_path() / outfile.stem()).string() + ".chkp");
+    if (!parms.defined("chkpfile"))
+        parms.set("chkpfile",   (outfile.parent_path() / outfile.stem()).string() + ".chkp");
     parms.set("resultfile", (outfile.parent_path() / outfile.stem()).string() + ".h5");
     parms.set("run_seconds", time_limit);
     
