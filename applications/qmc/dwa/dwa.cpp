@@ -151,6 +151,9 @@ directed_worm_algorithm
     , finite_waist (parms_.defined("waist"))
     // regarding worldline
     , wl (num_sites())
+    // regarding restrictions
+    , restrict_measurements_total_particle_number_   (parms_.defined("RESTRICT_MEASUREMENTS[N]")) 
+    , measure_total_particle_number_at_              (parms_.defined("RESTRICT_MEASUREMENTS[N]") ? static_cast<int>(parms_.value_or_default("RESTRICT_MEASUREMENTS[N]",-1)) : -1) 
     // regarding measurements
     , measure_                       (parms_.value_or_default("MEASURE",true))
     , measure_simulation_speed_      (parms_.value_or_default("MEASURE[Simulation Speed",true))
@@ -1325,6 +1328,10 @@ void
       if (measure_energy_density2_)
         total_energy2 /= (beta*beta); 
 
+      if (restrict_measurements_total_particle_number_ && total_particle_number != measure_total_particle_number_at_)
+        return;
+
+
       std::cout << " ... Measuring " 
                 << " ... N = " << total_particle_number 
                 ;
@@ -1373,6 +1380,9 @@ void
         measurements["Local Density"]     << alps::numeric::vector2valarray(_states_cache);
       if (measure_local_density2_)
         measurements["Local Density^2"]   << alps::numeric::vector2valarray(_states2_cache);
+
+      if (restrict_measurements_total_particle_number_)
+        return;
 
       // regarding on-fly measurements
       measurements["Green Function:0"]        << green0/_skip;

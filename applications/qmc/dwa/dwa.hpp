@@ -196,6 +196,11 @@ private:
   worldlines wl;
   wormpair   worm;
 
+  // regarding restrictions
+  bool restrict_measurements_total_particle_number_;
+
+  int measure_total_particle_number_at_;
+
   // regarding measurements
   bool measure_;
   bool measure_simulation_speed_;
