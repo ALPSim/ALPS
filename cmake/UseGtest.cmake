@@ -16,7 +16,7 @@
         else()
             message(STATUS "Trying to fetch gtest via subversion")
             find_package(Subversion)
-            execute_process(COMMAND "${Subversion_SVN_EXECUTABLE}" "checkout" "http://googletest.googlecode.com/svn/trunk/" "gtest" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+            execute_process(COMMAND "${Subversion_SVN_EXECUTABLE}" "checkout" "https://github.com/google/googletest/tags/release-1.7.0" "gtest" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
             set (gtest_ROOT "${CMAKE_BINARY_DIR}/gtest")
         endif()
     endif()
