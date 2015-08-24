@@ -471,15 +471,17 @@ public:
     void operator()(MPS<Matrix, SymmGroup> & mps)
     {
         if (state.size() == 0) {
-            assert(basis_index.size() == mps.length());
-            state.resize(mps.length());
+            state.resize(basis_index.size());
             maquis::cout << "state: ";
-            for (int i=0; i<mps.length(); ++i) {
+            for (int i=0; i<basis_index.size(); ++i) {
                 state[i] = phys_dims[site_type[i]].element(basis_index[i]);
                 maquis::cout << boost::get<0>(state[i]) << ":" << boost::get<1>(state[i])<< " ";
             }
             maquis::cout << "\n";
         }
+        
+        if (mps.length() != state.size())
+            throw std::runtime_error("Size of the initial state does not match the MPS size.");
         
         mps = state_mps<Matrix>(state, phys_dims, site_type);
         if (mps[mps.length()-1].col_dim()[0].first != right_end)

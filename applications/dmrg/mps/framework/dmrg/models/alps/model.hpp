@@ -548,6 +548,8 @@ typename ALPSModel<Matrix, SymmGroup>::initializer_ptr ALPSModel<Matrix, SymmGro
             if (!p_.defined(pname))
                 throw std::runtime_error(pname + " required for local_quantumnumbers initial state.");
             initial_local_charges[*it] = p_[pname].as<std::vector<double> >();
+            if (initial_local_charges[*it].size() != lat.size())
+                throw std::runtime_error(pname + " does not match the lattice size.");
         }
         
         std::vector<boost::tuple<charge, size_t> > state(lat.size());
