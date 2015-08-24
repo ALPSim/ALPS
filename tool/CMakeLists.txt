@@ -61,7 +61,7 @@ if (NOT ALPS_BUILD_SOURCE)
 
 
   set (TOOLS parameter2xml parameter2hdf5 convert2xml compactrun lattice2xml pevaluate pconfig
-             poutput printgraph txt2archive xml2archive snapshot2vtk)
+             poutput printgraph txt2archive xml2archive snap2vtk)
   foreach(program ${TOOLS})
     add_executable(${program} ${program}.C)
     target_link_libraries(${program} alps)
