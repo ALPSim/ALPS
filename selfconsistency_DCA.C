@@ -54,7 +54,10 @@ void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
   std::string basename=parms["BASENAME"];
   bool readwrite_real_space=parms["READWRITE_REAL_SPACE"]|false;
   bool phase=parms["PHASE"]|false;
-  shape_t gf_shape=paramagnet?diagonal:blockdiagonal;
+  bool antiferromagnetic = parms["ANTIFERROMAGNET"]|false;
+
+//  shape_t gf_shape=paramagnet?diagonal:blockdiagonal;
+  shape_t gf_shape=antiferromagnetic?blockdiagonal:diagonal;
 
   std::cout<<"Green's function shape is "<< gf_shape<<std::endl;
 

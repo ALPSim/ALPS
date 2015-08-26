@@ -46,8 +46,8 @@ matsubara_green_function_t ClusterTransformer::initial_G0(const alps::params& pa
   int n_orbital=boost::lexical_cast<int>(parms["FLAVORS"]);
   int n_site=boost::lexical_cast<int>(parms["SITES"]);
 // TODO: This needs to be checked.  Is it always ok to assume that the G0 is diagonal?
-//  matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital, shape);
-  matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital, diagonal);
+  matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital, shape);
+//  matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital, diagonal);
   std::string g0path=parms["G0OMEGA_INPUT"];
   G0_omega.read(g0path.c_str());
   return G0_omega;
@@ -710,8 +710,8 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::params& 
     }
   }
   else {
-    matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor, diagonal);
-    matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor, diagonal);
+    matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor,  diagonal);
+    matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor,  diagonal);
     G0_omega.clear();
     for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
       for (site_t i=0; i<n_cluster_sites(); ++i) {
@@ -723,7 +723,7 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::params& 
     G_omega = G0_omega;
     G0_omega_new = operator()(G_omega, G0_omega, mu, 0, beta);
   }
-  itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor, diagonal);
+  itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor,  diagonal);
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   G0_omega_new.write("G0_omega_input");
   FourierTransformer::generate_transformer(parms, fourier_ptr);
