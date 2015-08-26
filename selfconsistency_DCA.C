@@ -56,7 +56,9 @@ void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
   bool phase=parms["PHASE"]|false;
   shape_t gf_shape=paramagnet?diagonal:blockdiagonal;
 
-  if (parms.defined("t_flavor")){ gf_shape=diagonal;}
+  std::cout<<"Green's function shape is "<< gf_shape<<std::endl;
+
+//  if (parms.defined("t_flavor")){ gf_shape=diagonal;}
   
   //calculate initial G0
   matsubara_green_function_t G0_omega=clustertrans.initial_G0(parms, gf_shape);

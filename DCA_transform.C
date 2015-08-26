@@ -45,7 +45,9 @@ matsubara_green_function_t ClusterTransformer::initial_G0(const alps::params& pa
   int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
   int n_orbital=boost::lexical_cast<int>(parms["FLAVORS"]);
   int n_site=boost::lexical_cast<int>(parms["SITES"]);
-  matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital, shape);
+// TODO: This needs to be checked.  Is it always ok to assume that the G0 is diagonal?
+//  matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital, shape);
+  matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital, diagonal);
   std::string g0path=parms["G0OMEGA_INPUT"];
   G0_omega.read(g0path.c_str());
   return G0_omega;
