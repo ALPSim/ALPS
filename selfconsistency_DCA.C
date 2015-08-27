@@ -54,9 +54,14 @@ void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
   std::string basename=parms["BASENAME"];
   bool readwrite_real_space=parms["READWRITE_REAL_SPACE"]|false;
   bool phase=parms["PHASE"]|false;
-  shape_t gf_shape=paramagnet?diagonal:blockdiagonal;
+  bool antiferromagnetic = parms["ANTIFERROMAGNET"]|false;
 
-  if (parms.defined("t_flavor")){ gf_shape=diagonal;}
+//  shape_t gf_shape=paramagnet?diagonal:blockdiagonal;
+  shape_t gf_shape=antiferromagnetic?blockdiagonal:diagonal;
+
+  std::cout<<"Green's function shape is "<< gf_shape<<std::endl;
+
+//  if (parms.defined("t_flavor")){ gf_shape=diagonal;}
   
   //calculate initial G0
   matsubara_green_function_t G0_omega=clustertrans.initial_G0(parms, gf_shape);
