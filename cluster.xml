@@ -1822,7 +1822,27 @@
     <UNITCELL ref="simple2d"/>
   </LATTICEGRAPH>
 
+<LATTICE name="Betts2D-144A superlattice" dimension="2">
+    <BASIS>
+      <VECTOR>12 0 </VECTOR>
+      <VECTOR>0 12 </VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>2*pi/12 0*pi/12 </VECTOR>
+      <VECTOR>0*pi/12 2*pi/12 </VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
 
+  <LATTICEGRAPH name = "Betts2D-144A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts2D-144A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple2d"/>
+  </LATTICEGRAPH>
 
 <LATTICE name="Betts2D-200A superlattice" dimension="2">
     <BASIS>
