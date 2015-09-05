@@ -156,8 +156,9 @@ std::complex<double>* ClusterTransformer::exp_iksite(const int sign) const
   for (site_t k=0; k<n_cluster_sites(); ++k) {
     for (site_t i=0; i<n_cluster_sites(); ++i) {
       double phase = 0.;
-      for (std::size_t d=0; d<dimension(); ++d)
+      for (std::size_t d=0; d<dimension(); ++d){
         phase += cluster_momentum(k,d)*cluster_coordinate(i,d);
+      }
       phase *= sign;
       m[k+n_cluster_sites()*i]=std::complex<double>(cos(phase), sin(phase));
     }
