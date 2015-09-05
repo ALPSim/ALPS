@@ -36,13 +36,17 @@
 #include <cstdlib>
 #include <fstream>
 
-#include "alps/utility/temporary_filename.hpp"
-#include "externalsolver.h"
-#include "alps/parameter.h"
-#include "cluster.h"
-#include "fouriertransform.h"
-
 #include <boost/lexical_cast.hpp>
+
+#include "alps/utility/temporary_filename.hpp"
+#include "alps/parameter.h"
+
+#include "fourier_transform.h"
+
+#include "cluster.h"
+
+#include "externalsolver.h"
+
 
 ImpuritySolver::matsubara_result_type ExternalSolver::solve_matsubara(
                                                                  const matsubara_green_function_t& G0_omega

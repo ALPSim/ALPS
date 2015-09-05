@@ -15,20 +15,24 @@
  *
  *****************************************************************************/
 
-
-#include "types.h"
-#include "green_function.h"
-#include "selfconsistency.h"
-#include "fouriertransform.h"
-#include "externalsolver.h"
 #include <sys/types.h>
-#include <boost/tuple/tuple.hpp>
-#include <alps/parameter.h>
+
+#include "boost/tuple/tuple.hpp"
+
+#include "alps/parameter.h"
+
+#include "green_function.h"
+
+#include "fourier_transform.h"
 
 #include "cluster.h"
-#include "DCA_transformer.hxx"
-#include "SimpleDCA_transformer.hxx"
-#include "AFMDCA_transformer.hxx"
+#include "DCA_transform.hxx"
+#include "SimpleDCA_transform.hxx"
+#include "AFMDCA_transform.hxx"
+
+#include "types.h"
+#include "selfconsistency.h"
+#include "externalsolver.h"
 
 
 void selfconsistency_loop_DCAPlus(const alps::params& parms, ImpuritySolver& solver,
@@ -156,7 +160,7 @@ void perform_DCAPlus_loop(const alps::params &parms){
   std::cout<<"running a DCA calculation"<<std::endl;
   ClusterTransformer *transform_ptr=ClusterTransformer::generate_transformer(parms);
   std::string solver_path=parms["SOLVER"];
-  ImpuritySolver* solver_ptr=new ExternalSolver(boost::filesystem::path(solver_path));
+  ImpuritySolver* solver_ptr=new ExternalSolver(solver_path);
   if(!(parms["NAMBU"]|false)){
     selfconsistency_loop_DCA(parms, *solver_ptr, *(DCATransformer*)transform_ptr);
   }else{

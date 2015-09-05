@@ -16,8 +16,10 @@ include_directories(${GREENS_INCLUDE_DIR})
 include_directories(${FOURIER_INCLUDE_DIR})
 
 add_library (cluster
+cluster_fourier_generator.cpp
 CDMFT_transform.cpp          cluster_helper.cpp           
 DCA_transform.cpp            
+AFM_transform.cpp            
 alpsgraph.cpp 
 )
 

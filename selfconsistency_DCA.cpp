@@ -8,20 +8,25 @@
  *
  *****************************************************************************/
 
-
-#include "types.h"
-#include "green_function.h"
-#include "selfconsistency.h"
-#include "fouriertransform.h"
-#include "externalsolver.h"
 #include <sys/types.h> 
+
 #include <boost/tuple/tuple.hpp>
+
 #include <alps/parameter.h>
 
+#include "green_function.h"
+
+#include "fourier_transform.h"
+
 #include "cluster.h"
-#include "DCA_transformer.hxx"
-#include "SimpleDCA_transformer.hxx"
-#include "AFMDCA_transformer.hxx"
+#include "DCA_transform.hxx"
+#include "SimpleDCA_transform.hxx"
+#include "AFMDCA_transform.hxx"
+
+#include "types.h"
+#include "selfconsistency.h"
+#include "externalsolver.h"
+
 
 void perform_cluster_loop(const alps::params &parms){
   std::string cluster_loop=parms["CLUSTER_LOOP"];

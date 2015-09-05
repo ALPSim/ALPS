@@ -1,34 +1,14 @@
 /*****************************************************************************
  *
- * ALPS DMFT Project
- *
- * Copyright (C) 2007-2010 by Emanuel Gull <gull@phys.columbia.edu>
- * Copyright (C) 2007-2008 by Sebastian Fuchs <fuchs@comp-phys.org>
- *
- * This software is part of the ALPS Applications, published under the ALPS
- * Application License; you can use, redistribute it and/or modify it under
- * the terms of the license, either version 1 or (at your option) any later
- * version.
- *
- * You should have received a copy of the ALPS Application License along with
- * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
- * available from http://alps.comp-phys.org/.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
- * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
- * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
+ * Copyright (C) 2007-2015 by Emanuel Gull <egull@umich.edu>
  *
  *****************************************************************************/
 
+#include "alps/numeric/matrix.hpp"
 
 #include "cluster.h"
-#include "alps/numeric/matrix.hpp"
-#include "AFMDCA_transformer.hxx"
-#include "fouriertransform.h"
+#include "AFMDCA_transform.hxx"
+#include "fourier_transform.h"
 
 matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_green_function_t &G_omega,
                                                             const matsubara_green_function_t &G0_omega,
@@ -64,8 +44,8 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
   //third dimension: cluster momentum kc
   //fourth dimension: lattice momentum kl
   std::vector<std::vector<double> >epsilon_kckl(n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
-  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-    for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
+  for (int kc=0; kc<n_cluster_sites(); ++kc) {
+    for (int kl=0; kl<n_lattice_momenta(); ++kl) {
       std::vector<double> k(dimension());
       for (unsigned int d=0; d<dimension(); ++d){
         k[d] = lattice_momentum(kl,d) + cluster_momentum(kc  ,d);
@@ -74,7 +54,7 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
     }
   }
   std::vector<double> weight_kl(n_lattice_momenta());
-  for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
+  for (int kl=0; kl<n_lattice_momenta(); ++kl) {
     weight_kl[kl]= lattice_momentum(kl,dimension());
   }
   
@@ -84,10 +64,10 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
   //some auxiliary matrices
   alps::numeric::matrix<std::complex<double> > Ginv_2site_up(2,2),Ginv_2site_dn(2,2),Ginv_kq_up(2,2),Ginv_kq_dn(2,2);
   matsubara_green_function_t G_kl(G0_omega);
-  for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
-    for (frequency_t freq=0; freq<nfreq; ++freq) {
+  for (int kl=0; kl<n_lattice_momenta(); ++kl) {
+    for (int freq=0; freq<nfreq; ++freq) {
       std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
-      for (site_t kc=0; kc<n_cluster_sites(); kc++) {
+      for (int kc=0; kc<n_cluster_sites(); kc++) {
         std::vector<double> k(dimension());
         for (unsigned int d=0; d<dimension(); ++d){
           k[d] = lattice_momentum(kl,d) + cluster_momentum(kc  ,d);
@@ -149,19 +129,19 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
  matsubara_green_function_t G0_omega_inv = green_function_inverse(G0_omega);
  matsubara_green_function_t G_omega_inv = green_function_inverse(G_omega);
  matsubara_green_function_t selfenergy = green_function_subtract(G0_omega_inv, G_omega_inv);
- for (site_t kl=0; kl<n_cluster_cells(); ++kl) {
+ for (int kl=0; kl<n_cluster_cells(); ++kl) {
  for (int sign=-1; sign<=1; sign+=2) {
  matsubara_green_function_t G_kl(G0_omega);
- for (frequency_t freq=0; freq<nfreq; ++freq) {
+ for (int freq=0; freq<nfreq; ++freq) {
  std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
- for (site_t kc=0; kc<n_cluster_sites(); kc+=2) {
+ for (int kc=0; kc<n_cluster_sites(); kc+=2) {
  std::vector<double> k0(dimension());
  for (unsigned int d=0; d<dimension(); ++d)
  k0[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc,d);
  std::vector<double> k1(dimension());
  for (unsigned int d=0; d<dimension(); ++d)
  k1[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc+1,d);
- for (spin_t flavor=0; flavor<nflavor; flavor+=2) {
+ for (int flavor=0; flavor<nflavor; flavor+=2) {
  G_kl(freq,kc,kc,flavor) = iomega_n+mu-epsilon(k0);
  G_kl(freq,kc,kc,flavor+1) = iomega_n+mu-epsilon(k0);
  G_kl(freq,kc+1,kc+1,flavor) = iomega_n+mu-epsilon(k1);
@@ -209,9 +189,9 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::param
   matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor, blockdiagonal);
   matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor, blockdiagonal);
   G0_omega.clear();
-  for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
-    for (site_t i=0; i<n_cluster_sites(); ++i) {
-      for (frequency_t freq=0; freq<n_matsubara; ++freq) {
+  for (int flavor=0; flavor<n_flavor; ++flavor) {
+    for (int i=0; i<n_cluster_sites(); ++i) {
+      for (int freq=0; freq<n_matsubara; ++freq) {
         G0_omega(freq, i, i, flavor) = 1.;
       }
     }
@@ -220,7 +200,7 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::param
   //invoke transformation with G_omega==G0_omega (selfenergy=0)
   matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h, beta);
   boost::shared_ptr<FourierTransformer> fourier_ptr;
-  FourierTransformer::generate_transformer(parms, fourier_ptr);
+  FourierTransformer::generate_cluster_transformer(parms, fourier_ptr);
   G0_omega_new.write("G0_omega_input");
   std::ofstream G0_omega_re_file("G0_omega_input_re.dat");
   std::ofstream G0_omega_im_file("G0_omega_input_im.dat");
@@ -282,7 +262,7 @@ matsubara_green_function_t AntiFerroDCATransformer::green_function_inverse(const
 {
   matsubara_green_function_t G_inv(G);
   for (unsigned int t=0; t<G.ntime(); ++t) {
-    for (spin_t f=0; f<G.nflavor(); ++f) {
+    for (int f=0; f<G.nflavor(); ++f) {
       for (std::size_t k=0; k<G.nsite(); k+=2) {
         std::complex<double> detG = G(t, k, k, f)*G(t, k+1, k+1, f) - G(t, k+1, k, f)*G(t, k, k+1, f);
         if(std::abs(detG) < 1.e-15) throw std::runtime_error("there's a problem with your determinant in the inverse: it is near singular!");
@@ -302,7 +282,7 @@ matsubara_green_function_t AntiFerroDCATransformer::green_function_add(const mat
 {
   matsubara_green_function_t G(G1);
   for (unsigned int t=0; t<G.ntime(); ++t) {
-    for (spin_t f=0; f<G.nflavor(); ++f) {
+    for (int f=0; f<G.nflavor(); ++f) {
       for (unsigned int k=0; k<G.nsite(); k+=2) {
         G(t, k  , k  , f) += G2(t, k  , k  , f);
         G(t, k  , k+1, f) += G2(t, k  , k+1, f);
@@ -321,7 +301,7 @@ matsubara_green_function_t AntiFerroDCATransformer::green_function_subtract(cons
 {
   green_function<std::complex<double> > G(G1);
   for (unsigned int t=0; t<G.ntime(); ++t) {
-    for (spin_t f=0; f<G.nflavor(); ++f) {
+    for (int f=0; f<G.nflavor(); ++f) {
       for (std::size_t k=0; k<G.nsite(); k+=2) {
         G(t, k  , k  , f) -= G2(t, k  , k  , f);
         G(t, k  , k+1, f) -= G2(t, k  , k+1, f);
@@ -340,7 +320,7 @@ matsubara_green_function_t AntiFerroDCATransformer::green_function_divide(const 
 {
   green_function<std::complex<double> > G(G1);
   for (unsigned int t=0; t<G.ntime(); ++t) {
-    for (spin_t f=0; f<G.nflavor(); ++f) {
+    for (int f=0; f<G.nflavor(); ++f) {
       for (unsigned int k=0; k<G.nsite(); k+=2) {
         G(t, k, k, f) /= d;
         G(t, k+1, k+1, f) /= d;

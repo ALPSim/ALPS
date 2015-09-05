@@ -31,16 +31,18 @@
 /// @file selfconsistency.C
 /// @brief implements the selfconsistency loop functions
 
-#include "types.h"
+#include <boost/tuple/tuple.hpp>
+
 #include "green_function.h"
-#include "selfconsistency.h"
 
-#include "fouriertransform.h"
-#include "hilberttransformer.h"
+#include "fourier_transform.h"
 
+#include "types.h"
 #include "solver.h"
 #include "externalsolver.h"
-#include <boost/tuple/tuple.hpp>
+#include "selfconsistency.h"
+#include "hilbert_transform.h"
+
 void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver& solver,
                                 FrequencySpaceHilbertTransformer& hilbert) 
 {

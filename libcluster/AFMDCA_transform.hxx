@@ -10,16 +10,16 @@ green_function<T> AntiFerroDCATransformer::transform_coordinates(const green_fun
   shape_t transformed_shape=G.shape()==blockdiagonal?nondiagonal:blockdiagonal;
   green_function<T> G_new(nt, nsite, nflavor, transformed_shape);
   G_new.clear();
-  for (site_t k=0; k<nsite; k+=2) {
-    for (site_t q1=0; q1<=1; ++q1) {
-      for (site_t q2=0; q2<=1; ++q2) {
-        for (site_t i=0; i<nsite; ++i) {
-          for (site_t j=0; j<nsite; ++j) {
+  for (int k=0; k<nsite; k+=2) {
+    for (int q1=0; q1<=1; ++q1) {
+      for (int q2=0; q2<=1; ++q2) {
+        for (int i=0; i<nsite; ++i) {
+          for (int j=0; j<nsite; ++j) {
             double phase = 0.;
             for (unsigned int d=0; d<dimension(); ++d){
               phase += cluster_momentum(k+q1,d)*cluster_coordinate(i,d)-cluster_momentum(k+q2,d)*cluster_coordinate(j,d);
-            }for (itime_index_t t=0; t<nt; ++t) {
-              for (spin_t flavor=0; flavor<nflavor; ++flavor) {
+            }for (int t=0; t<nt; ++t) {
+              for (int flavor=0; flavor<nflavor; ++flavor) {
                 D::add(G_new, G, t, i, j, k+q1, k+q2, flavor, cos(phase)/double(nsite));
               }
             }
@@ -35,7 +35,7 @@ green_function<T> AntiFerroDCATransformer::transform_coordinates(const green_fun
 struct AntiFerroDCATransformer::Forward {
   template<typename T>
   static void add(green_function<T>& G_new, const green_function<T>& G,
-                  const itime_index_t t, const site_t i, const site_t j, const site_t k1, const site_t k2, const spin_t flavor,
+                  const int t, const int i, const int j, const int k1, const int k2, const int flavor,
                   double factor)
   {
     G_new(t, k1, k2, flavor) += factor * G(t, i, j, flavor);
@@ -47,7 +47,7 @@ struct AntiFerroDCATransformer::Forward {
 struct AntiFerroDCATransformer::Backward {
   template<typename T>
   static void add(green_function<T>& G_new, const green_function<T>& G,
-                  const itime_index_t t, const site_t i, const site_t j, const site_t k1, const site_t k2, const spin_t flavor,
+                  const int t, const int i, const int j, const int k1, const int k2, const int flavor,
                   double factor)
   {
     G_new(t, i, j, flavor) += factor * G(t, k1, k2, flavor);

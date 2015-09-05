@@ -1,51 +1,18 @@
 /*****************************************************************************
 *
-* ALPS DMFT Project
-*
-* Copyright (C) 2005-2007 by Philipp Werner <werner@comp-phys.org>,
-*                         Matthias Troyer <troyer@comp-phys.org>,
-*                         Emanuel Gull <gullc@comp-phys.org>,
-*                         Sebastian Fuchs <fuchs@comp-phys.org>
-*
-* This software is part of the ALPS Applications, published under the ALPS
-* Application License; you can use, redistribute it and/or modify it under
-* the terms of the license, either version 1 or (at your option) any later
-* version.
-* 
-* You should have received a copy of the ALPS Application License along with
-* the ALPS Applications; see the file LICENSE.txt. If not, the license is also
-* available from http://alps.comp-phys.org/.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
-* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
-* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
-* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-* DEALINGS IN THE SOFTWARE.
+* Copyright (C) 2005-2015 Emanuel Gull <egull@umich.edu>
 *
 *****************************************************************************/
 
-/* $Id$ */
+#pragma once
+#include "boost/shared_ptr.hpp"
 
-#ifndef ALPS_DMFT_HILBERTTRANSFORMER_H
-#define ALPS_DMFT_HILBERTTRANSFORMER_H
+#include "alps/ngs/params.hpp"
 
-
-/// @file hilberttransformer.h
-/// @brief Hilbert transformations
-///
-/// declares the abstract base class and concrete realizations for the Hilbert transformations
-/// @sa HilbertTransformer, SemicircleHilbertTransformer, SquarelatticeHilbertTransformer, 
-///     GeneralHilbertTransformer, DCATransformer
-///
-/// @todo the transformations need to be implemented. responsible: Philipp Werner and Hartmut Monien
-
-#include "types.h"
 #include "green_function.h"
 #include "nambu_green_function.h"
-#include "alps/ngs/params.hpp"
-#include "boost/shared_ptr.hpp"
+
+#include "types.h"
 
 /// @brief performs a Hilbert transformation
 ///
@@ -168,8 +135,8 @@ public:
     green_function<T> G_new(G);
     if (paramagnet) {
       assert(G_new.nflavor()%2==0);
-      for(spin_t flavor=0;flavor<G_new.nflavor(); flavor+=2){
-        for(itime_index_t tau=0;tau<G_new.ntime();++tau){
+      for(int flavor=0;flavor<G_new.nflavor(); flavor+=2){
+        for(int tau=0;tau<G_new.ntime();++tau){
           G_new(tau, flavor  )=0.5*(G_new(tau, flavor)+G_new(tau, flavor+1));
           G_new(tau, flavor+1)=G_new(tau, flavor);
         }
@@ -299,5 +266,3 @@ private:
   double tprime_;
   int L_;
 };
-
-#endif /*ALPS_DMFT_HILBERTTRANSFORMER_H*/

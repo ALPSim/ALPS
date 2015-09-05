@@ -708,7 +708,7 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::params& 
   itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor,  diagonal);
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   G0_omega_new.write("G0_omega_input");
-  FourierTransformer::generate_transformer(parms, fourier_ptr);
+  FourierTransformer::generate_cluster_transformer(parms, fourier_ptr);
   fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega_new);
   G0_tau.write("G0_tau_input");
   if(!parms.defined("WRITE_SPARSE")){
@@ -1105,7 +1105,7 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
   nambu_itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor, diagonal);
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   G0_omega_new.write("G0_omega_input");
-  FourierTransformer::generate_transformer(parms, fourier_ptr);
+  FourierTransformer::generate_cluster_transformer(parms, fourier_ptr);
   fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega_new);
   G0_tau.write("G0_tau_input");
   //nambu_matsubara_green_function_t G0_omega_real = transform_into_real_space(G0_omega_new);

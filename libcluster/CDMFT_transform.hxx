@@ -9,8 +9,8 @@ green_function<T> CDMFTTransformer::symmetrize_helper(const green_function<T>& G
   green_function<T> G_new(nfreq, nsite, nflavor, nondiagonal);
   std::set<pair_class_type>::const_iterator itc, itc_end;
   for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
-    for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-      for (frequency_t freq=0; freq<nfreq; ++freq) {
+    for (int flavor=0; flavor<nflavor; ++flavor) {
+      for (int freq=0; freq<nfreq; ++freq) {
         T av=0;
         for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++)
           av += G(freq, it->first, it->second, flavor);
@@ -37,8 +37,8 @@ nambu_green_function<T> CDMFTTransformer::symmetrize_helper(const nambu_green_fu
   G_new=G;
   std::set<pair_class_type>::const_iterator itc, itc_end;
   for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
-    for (spin_t f=0; f<2; ++f) {
-      for (frequency_t freq=0; freq<nfreq; ++freq) {
+    for (int f=0; f<2; ++f) {
+      for (int freq=0; freq<nfreq; ++freq) {
         av=0;
         for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
           av += G(freq, it->first, it->second, f,f);
@@ -60,7 +60,7 @@ nambu_green_function<T> CDMFTTransformer::symmetrize_helper(const nambu_green_fu
   dwave(0,1)=-1;dwave(0,3)=1;dwave(1,0)=-1;dwave(1,2)=1;dwave(2,1)=1;dwave(2,3)=-1;dwave(3,0)=1;dwave(3,2)=-1;
   for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
     //std::cout<<"new symmetry: "<<std::endl;
-    for (frequency_t freq=0; freq<nfreq; ++freq) {
+    for (int freq=0; freq<nfreq; ++freq) {
       T av01=0;
       T av10=0;
       for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){

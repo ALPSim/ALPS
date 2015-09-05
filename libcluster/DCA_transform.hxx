@@ -9,8 +9,8 @@ green_function<T> DCATransformer::symmetrize_helper(const green_function<T>& G,
   green_function<T> G_new(nfreq, nsite, nflavor, G.shape());
   std::set<pair_class_type>::const_iterator itc, itc_end;
   for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
-    for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-      for (frequency_t freq=0; freq<nfreq; ++freq) {
+    for (int flavor=0; flavor<nflavor; ++flavor) {
+      for (int freq=0; freq<nfreq; ++freq) {
         T av=0;
         for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
           if(G.shape()==diagonal && it->first != it->second) continue;
@@ -42,9 +42,9 @@ nambu_green_function<T> DCATransformer::symmetrize_helper(const nambu_green_func
   std::set<pair_class_type>::const_iterator itc, itc_end;
   //std::cout<<"doing spatial symmetries: "<<std::endl;
   for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
-    for (spin_t f=0; f<2; ++f) {
+    for (int f=0; f<2; ++f) {
       //std::cout<<"new symmetry: "<<std::endl;
-      for (frequency_t freq=0; freq<nfreq; ++freq) {
+      for (int freq=0; freq<nfreq; ++freq) {
         T av=0;
         for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
           //if(freq==0){ std::cout<<"symmetrizing spatial GF: "<<it->first<<" "<<it->second<<" entry: "<<G(freq, it->first, it->second, f,f)<<std::endl;}
@@ -67,7 +67,7 @@ nambu_green_function<T> DCATransformer::symmetrize_helper(const nambu_green_func
   }
   for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
     //std::cout<<"new symmetry: "<<std::endl;
-    for (frequency_t freq=0; freq<nfreq; ++freq) {
+    for (int freq=0; freq<nfreq; ++freq) {
       T av01=0;
       T av10=0;
       for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){

@@ -2,19 +2,13 @@
  *
  * ALPS DMFT Project
  *
- * Copyright (C) 2005-2014 by Emanuel Gull <gullc@comp-phys.org>
- *
- * To be used with permission by the authors
+ * Copyright (C) 2005-2015 by Emanuel Gull <egull@umich.edu>
  *
  *****************************************************************************/
 
-/* $Id: hilberttransformer.C 338 2009-01-20 01:22:05Z fuchs $ */
-
-
-
-#include "hilberttransformer.h"
-#include "fouriertransform.h"
-#include <functional>
+//#include <functional>
+#include "hilbert_transform.h"
+#include "fourier_transform.h"
 
 
 FrequencySpaceHilbertTransformer *setup_Bethe_hilbert_transform(const alps::params &parms){
@@ -69,7 +63,7 @@ matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const al
     matsubara_green_function_t G0_omega(n_matsubara,1,n_flavor, diagonal);
     for(unsigned int i=0; i<G0_omega.nfreq(); i++) {
       std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-      for(spin_t flavor=0;flavor<G0_omega.nflavor(); flavor++) {
+      for(int flavor=0;flavor<G0_omega.nflavor(); flavor++) {
         std::complex<double> zeta = iw+mu+(flavor%2 ? -h : h);
         G0_omega(i, flavor) = 1./zeta;
       }
@@ -167,7 +161,7 @@ matsubara_green_function_t FSSemicircleHilbertTransformer::initial_G0(const alps
     matsubara_green_function_t G0_omega(n_matsubara,1,n_flavor, diagonal);
     for(unsigned int i=0; i<G0_omega.nfreq(); i++) {
       std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-      for(spin_t flavor=0;flavor<G0_omega.nflavor(); flavor++) {
+      for(int flavor=0;flavor<G0_omega.nflavor(); flavor++) {
         std::complex<double> zeta = iw+mu+(flavor%2 ? -h : h);
         std::complex<double> tmp = sqrt(zeta*zeta-4*tsq);
         tmp *= tmp.imag()<0 ? -1 : 1;
@@ -242,9 +236,9 @@ matsubara_green_function_t FSDOSHilbertTransformer::operator()(const matsubara_g
   matsubara_green_function_t G_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor(), diagonal);
   matsubara_green_function_t G0_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor(), diagonal);
   matsubara_green_function_t sigma(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor(), diagonal);
-  for(spin_t f=0;f<G_omega.nflavor();++f){
+  for(int f=0;f<G_omega.nflavor();++f){
     //std::cout<<"check of G0omega: "<<f<<" "<<G0_omega(0,f)<<" "<<G_omega(0,f);
-    for(frequency_t w=0;w<G_omega.nfreq();++w){
+    for(int w=0;w<G_omega.nfreq();++w){
       std::complex<double> g=0;
       sigma(w,f)= 1./G0_omega(w,f)-1./G_omega(w,f);
       std::complex<double> A=std::complex<double>(0, (2*w+1)*M_PI/beta) + mu -sigma(w, f);
@@ -263,8 +257,8 @@ matsubara_green_function_t FSDOSHilbertTransformer::operator()(const matsubara_g
     //std::cout<<"G omega new is: "<<G_omega_new(0,f)<<std::endl;
   }
   if(G_omega.nflavor() !=2){std::cout<<"don't know how to handle != 2 flavors."<<std::endl; abort();}
-  for(spin_t f=0;f<G_omega.nflavor();++f){
-    for(frequency_t w=0;w<G_omega.nfreq();++w){
+  for(int f=0;f<G_omega.nflavor();++f){
+    for(int w=0;w<G_omega.nfreq();++w){
       G0_omega_new(w,f)=1./(sigma(w,f)+1./G_omega_new(w,f));
     }
   }
@@ -286,9 +280,9 @@ matsubara_green_function_t AFM_FSDOSHilbertTransformer::operator()(const matsuba
   matsubara_green_function_t G_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor(), diagonal);
   matsubara_green_function_t G0_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor(), diagonal);
   //compute self energy
-  for(frequency_t w=0;w<G_omega.nfreq();++w){
+  for(int w=0;w<G_omega.nfreq();++w){
     double wn=(2.*w+1)*M_PI/beta;
-    for(spin_t f=0;f<G_omega.nflavor();++f){
+    for(int f=0;f<G_omega.nflavor();++f){
       Sigma(w,f)=1./G0_omega(w,f)-1./G_omega(w,f);
     }
     //std::cout<<"sigma: "<<Sigma(w,0)<<" "<<Sigma(w,1)<<std::endl;

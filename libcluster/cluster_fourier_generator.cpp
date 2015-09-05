@@ -6,7 +6,7 @@
 
 #include "boost/lexical_cast.hpp"
 
-#include "fourier_transform.h"
+#include "cluster_fourier_transform.h"
 #include "cluster.h"
 
 void FourierTransformer::generate_cluster_transformer(const alps::params &parms,
@@ -75,6 +75,9 @@ void FourierTransformer::generate_cluster_transformer_U(const alps::params &parm
                                                 boost::shared_ptr<FourierTransformer> &fourier_ptr,
                                                 const std::vector<double> &densities, const std::vector<double> &magnetization)
 {
+  int n_flavors = parms["FLAVORS"]|2;
+  int n_site = parms["SITES"]|1;
+  double U = parms["U"];
   if (parms.defined("CLUSTER_LOOP")){
     std::string clusterloop=parms["CLUSTER_LOOP"];
     if(clusterloop==std::string("DCA")){
