@@ -1,34 +1,10 @@
 /*****************************************************************************
  *
- * ALPS DMFT Project
- *
- * Copyright (C) 2005 - 2009 by Emanuel Gull <gull@phys.columbia.edu>
- *                              Philipp Werner <werner@itp.phys.ethz.ch>,
- *                              Matthias Troyer <troyer@comp-phys.org>
- *                              Sebastian Fuchs <fuchs@theorie.physik.uni-goettingen.de>
- *
- *
- * This software is part of the ALPS Applications, published under the ALPS
- * Application License; you can use, redistribute it and/or modify it under
- * the terms of the license, either version 1 or (at your option) any later
- * version.
- *
- * You should have received a copy of the ALPS Application License along with
- * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
- * available from http://alps.comp-phys.org/.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
- * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
- * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
+ * Copyright (C) 2005 - 2015 by Emanuel Gull <egull@umich.edu>
  *
  *****************************************************************************/
 
-#ifndef GREEN_FUNCTION_H
-#define GREEN_FUNCTION_H
+#pragma once
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -39,9 +15,10 @@
 #include <mpi.h>
 #endif
 
+#include "green_common.h"
+
 namespace alps{namespace hdf5{class archive; } }
 
-#include "types.h"
 
 
 //Matsubara GF: use T=std::complex<double>
@@ -233,5 +210,3 @@ void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function
 void print_dressed_tau_green_functions(const int iteration_ctr, const itime_green_function_t &G_tau, const double beta,
                                        const std::string suffix="");
 void print_tau_green_functions(const int iteration_ctr, const itime_green_function_t &G0_tau, const itime_green_function_t &G_tau, const double beta);
-
-#endif

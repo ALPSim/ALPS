@@ -1,6 +1,4 @@
-#ifndef nambu_green_function_H
-#define nambu_green_function_H
-#include "types.h"
+#pragma once
 #include <fstream>
 #include <iomanip>
 #include <cstdlib>
@@ -8,6 +6,8 @@
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
+
+#include "green_common.h"
 
 namespace alps{namespace hdf5{class archive; } }
 
@@ -170,4 +170,3 @@ void print_all_nambu_green_functions(std::string const &basename, const int iter
                                      const std::string suffix="");
 void print_real_green_matsubara(std::ostream &os, const nambu_matsubara_green_function_t &v, const double beta, const shape_t shape=diagonal);
 void print_imag_green_matsubara(std::ostream &os, const nambu_matsubara_green_function_t &v, const double beta, const shape_t shape=diagonal);
-#endif

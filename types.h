@@ -37,8 +37,6 @@
 
 ///enum for spin up and spin down
 enum  {up=0, down=1} ;
-///enum for green's function shape
-enum shape_t {diagonal, blockdiagonal, nondiagonal};
 
 ///addressing type for site indices (cluster)
 typedef unsigned int site_t;
