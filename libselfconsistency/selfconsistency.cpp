@@ -37,7 +37,6 @@
 
 #include "fourier_transform.h"
 
-#include "types.h"
 #include "solver.h"
 #include "externalsolver.h"
 #include "selfconsistency.h"

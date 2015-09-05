@@ -12,7 +12,6 @@
 #include "green_function.h"
 #include "nambu_green_function.h"
 
-#include "types.h"
 
 /// @brief performs a Hilbert transformation
 ///
