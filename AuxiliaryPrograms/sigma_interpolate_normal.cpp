@@ -5,15 +5,18 @@
 #include<complex>
 #include<cmath>
 #include<cstdlib>
+
+#include "boost/program_options.hpp"
+#include "boost/numeric/bindings/lapack/driver/gesv.hpp"
+
+#include <alps/numeric/matrix.hpp>
+
 #include"nambu_green_function.h"
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
+
 #include "cluster.h"
-#include <boost/program_options.hpp>
-#include <alps/numeric/matrix.hpp>
-#include "boost/numeric/bindings/lapack/driver/gesv.hpp"
-#include "../clusterhelper.hxx"
-#include "../DCA_transformer.hxx"
 
 //take a vector and interpolate it using GSL in the middle, add constants to the back, and extrapolate parabolically for the first few frequencies if they are outside of the known interval
 std::vector<double> interpolate_vector(const std::vector<double> &oldxvalues, const std::vector<double> &oldyvalues, const std::vector<double> &newxvalues);

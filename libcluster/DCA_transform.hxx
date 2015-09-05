@@ -32,8 +32,6 @@ nambu_green_function<T> DCATransformer::symmetrize_helper(const nambu_green_func
                                                           const std::pair<std::set<pair_class_type>::const_iterator,
                                                           std::set<pair_class_type>::const_iterator> pair_classes) const
 {
-  //  std::cout<<"ignoring symmetrization."<<std::endl;
-  //  return G;
   
   unsigned int nsite=G.nsite();
   unsigned int nfreq=G.nfreq();

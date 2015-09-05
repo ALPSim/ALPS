@@ -5,15 +5,17 @@
 #include<complex>
 #include<cmath>
 #include<cstdlib>
-#include"nambu_green_function.h"
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
-#include "cluster.h"
-#include "fouriertransform.h"
-#include <boost/program_options.hpp>
-#include "../clusterhelper.hxx"
-#include "../DCA_transformer.hxx"
 
+#include <boost/program_options.hpp>
+
+#include"nambu_green_function.h"
+
+#include "fourier_transform.h"
+
+#include "cluster.h"
 
 int main(int argc, char **argv){
   namespace po = boost::program_options;
