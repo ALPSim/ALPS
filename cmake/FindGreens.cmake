@@ -3,12 +3,14 @@ include(FindPackageHandleStandardArgs)
 SET(INCLUDE_SEARCH_PATHS
  $ENV{LIBGREENS_DIR}
  ${LIBGREENS_DIR}
+ ${DMFT_DIR}/libgreens
  ${CMAKE_SOURCE_DIR}/libgreens
  ${CMAKE_SOURCE_DIR}/../libgreens
  )
 SET(LIBRARY_SEARCH_PATHS
  $ENV{LIBGREENS_DIR}
  ${LIBGREENS_DIR}
+ ${DMFT_DIR}/libgreens
  ${CMAKE_SOURCE_DIR}/libgreens
  ${CMAKE_SOURCE_DIR}/../libgreens
  )

@@ -36,7 +36,6 @@
 #include <vector>
 #include <utility>
 
-#include "types.h"
 #include "green_function.h"
 #include "nambu_green_function.h"
 

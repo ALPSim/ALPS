@@ -3,12 +3,14 @@ include(FindPackageHandleStandardArgs)
 SET(INCLUDE_SEARCH_PATHS
  $ENV{LIBCLUSTER_DIR}
  ${LIBCLUSTER_DIR}
+ ${DMFT_DIR}/libcluster
  ${CMAKE_SOURCE_DIR}/libcluster
  ${CMAKE_SOURCE_DIR}/../libcluster
  )
 SET(LIBRARY_SEARCH_PATHS
  $ENV{LIBCLUSTER_DIR}
  ${LIBCLUSTER_DIR}
+ ${DMFT_DIR}/libcluster
  ${CMAKE_SOURCE_DIR}/libcluster
  ${CMAKE_SOURCE_DIR}/../libcluster
  )

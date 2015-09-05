@@ -3,12 +3,14 @@ include(FindPackageHandleStandardArgs)
 SET(INCLUDE_SEARCH_PATHS
  $ENV{LIBFOURIER_DIR}
  ${LIBFOURIER_DIR}
+ ${DMFT_DIR}/libfourier
  ${CMAKE_SOURCE_DIR}/libfourier
  ${CMAKE_SOURCE_DIR}/../libfourier
  )
 SET(LIBRARY_SEARCH_PATHS
  $ENV{LIBFOURIER_DIR}
  ${LIBFOURIER_DIR}
+ ${DMFT_DIR}/libfourier
  ${CMAKE_SOURCE_DIR}/libfourier
  ${CMAKE_SOURCE_DIR}/../libfourier
  )
