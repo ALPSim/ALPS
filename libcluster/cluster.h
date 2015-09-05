@@ -26,18 +26,17 @@
 
 #pragma once
 
+#include <set>
 
-#include "types.h"
+#include "boost/numeric/ublas/matrix.hpp"
+#include "boost/tuple/tuple.hpp"
+
+#include "alps/ngs/params.hpp"
+
 #include "green_function.h"
 #include "nambu_green_function.h"
 
-#include "alps/ngs/params.hpp"
-#include "boost/numeric/ublas/matrix.hpp"
-#include "boost/tuple/tuple.hpp"
-#include <set>
-
 #include "alpsgraph.h"
-
 #include "clusterhelper.h"
 
 

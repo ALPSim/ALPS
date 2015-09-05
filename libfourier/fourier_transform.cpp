@@ -2,34 +2,16 @@
  *
  * ALPS DMFT Project
  *
- * Copyright (C) 2005 by Philipp Werner <werner@comp-phys.org>,
- *                       Matthias Troyer <troyer@comp-phys.org>
- *                       Emanuel Gull <gullc@comp-phys.org>
- *
- * This software is part of the ALPS Applications, published under the ALPS
- * Application License; you can use, redistribute it and/or modify it under
- * the terms of the license, either version 1 or (at your option) any later
- * version.
- *
- * You should have received a copy of the ALPS Application License along with
- * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
- * available from http://alps.comp-phys.org/.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
- * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
- * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
+ * Copyright (C) 2005 - 2015 Emanuel Gull <egull@umich.edu>
  *
  *****************************************************************************/
-/*fouriertransform.C*/
-#include <alps/config.h> // needed to set up correct bindings
-#include <boost/numeric/bindings/ublas.hpp>
-#include <boost/numeric/bindings/lapack/driver/gesv.hpp>
 
-#include "fouriertransform.h"
+#include "alps/config.h" // needed to set up correct bindings
+
+#include "boost/numeric/bindings/ublas.hpp"
+#include "boost/numeric/bindings/lapack/driver/gesv.hpp"
+
+#include "fourier_transform.h"
 
 typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 
@@ -333,13 +315,13 @@ void FourierTransformer::append_tail(matsubara_green_function_t& G_omega,
                                      const matsubara_green_function_t& G0_omega,
                                      const unsigned int nfreq_measured) const
 {
-  for (spin_t flavor=0; flavor<G0_omega.nflavor(); ++flavor) {
-    for (site_t k=0; k<G0_omega.nsite(); ++k) {
+  for (int flavor=0; flavor<G0_omega.nflavor(); ++flavor) {
+    for (int k=0; k<G0_omega.nsite(); ++k) {
       std::cout << "append tail to self-energy with coefficients: "
       << " " << Sc0_[flavor][k][k]
       << " " << Sc1_[flavor][k][k]
       << " " << Sc2_[flavor][k][k] << std::endl;
-      for (frequency_t freq=nfreq_measured; freq<G0_omega.nfreq(); ++freq) {
+      for (int freq=nfreq_measured; freq<G0_omega.nfreq(); ++freq) {
         std::complex<double> iw(0,(2*freq+1)*M_PI/beta_);
         std::complex<double> Sigma = Sc0_[flavor][k][k] + Sc1_[flavor][k][k]/iw + Sc2_[flavor][k][k]/(iw*iw);
         G_omega(freq, k, k, flavor) = 1./(1./G0_omega(freq, k, k, flavor) - Sigma);
@@ -357,10 +339,10 @@ void ClusterAntiFerroGFourierTransformer::append_tail(matsubara_green_function_t
   matsubara_green_function_t selfenergy_tail(G0_omega.nfreq()-nfreq_measured, G0_omega.nsite(), G0_omega.nflavor(), G_omega.shape());
   selfenergy_tail.clear();
   matsubara_green_function_t G_omega_tail(selfenergy_tail);
-  for (spin_t flavor=0; flavor<G0_omega.nflavor(); ++flavor) {
-    for (frequency_t freq=nfreq_measured; freq<G0_omega.nfreq(); ++freq) {
+  for (int flavor=0; flavor<G0_omega.nflavor(); ++flavor) {
+    for (int freq=nfreq_measured; freq<G0_omega.nfreq(); ++freq) {
       std::complex<double> iw(0,(2*freq+1)*M_PI/beta_);
-      for (site_t k=0; k<G0_omega.nsite(); k+=2) {
+      for (int k=0; k<G0_omega.nsite(); k+=2) {
         for (int p1=0; p1<=1; p1++) {
           for (int p2=0; p2<=1; p2++) {
             selfenergy_tail(freq-nfreq_measured, k+p1, k+p2, flavor) =
@@ -374,9 +356,9 @@ void ClusterAntiFerroGFourierTransformer::append_tail(matsubara_green_function_t
   matsubara_green_function_t selfenergy_measured(nfreq_measured, G0_omega.nsite(), G0_omega.nflavor(), G_omega.shape());
   matsubara_green_function_t G_omega_measured(nfreq_measured, G0_omega.nsite(), G0_omega.nflavor(), G_omega.shape());
   selfenergy_measured.clear();
-  for (spin_t flavor=0; flavor<G0_omega.nflavor(); ++flavor) {
-    for (frequency_t freq=0; freq<nfreq_measured; ++freq) {
-      for (site_t k=0; k<G0_omega.nsite(); k+=2) {
+  for (int flavor=0; flavor<G0_omega.nflavor(); ++flavor) {
+    for (int freq=0; freq<nfreq_measured; ++freq) {
+      for (int k=0; k<G0_omega.nsite(); k+=2) {
         for (int p1=0; p1<=1; p1++) {
           for (int p2=0; p2<=1; p2++) {
             selfenergy_measured(freq, k+p1, k+p2, flavor) = G0_omega(freq, k+p1, k+p2, flavor);
@@ -393,9 +375,9 @@ void ClusterAntiFerroGFourierTransformer::append_tail(matsubara_green_function_t
   G_omega_tail = AntiFerroDCATransformer::green_function_inverse(G_omega_tail);
   G_omega_tail = AntiFerroDCATransformer::green_function_subtract(G_omega_tail, selfenergy_tail);
   G_omega_tail = AntiFerroDCATransformer::green_function_inverse(G_omega_tail);
-  for (spin_t flavor=0; flavor<G0_omega.nflavor(); ++flavor){
-    for (frequency_t freq=nfreq_measured; freq<G0_omega.nfreq(); ++freq){
-      for (site_t k=0; k<G0_omega.nsite(); k+=2){
+  for (int flavor=0; flavor<G0_omega.nflavor(); ++flavor){
+    for (int freq=nfreq_measured; freq<G0_omega.nfreq(); ++freq){
+      for (int k=0; k<G0_omega.nsite(); k+=2){
         for (int p1=0; p1<=1; p1++){
           for (int p2=0; p2<=1; p2++){
             G_omega(freq, k+p1, k+p2, flavor) = G_omega_tail(freq-nfreq_measured, k+p1, k+p2, flavor);

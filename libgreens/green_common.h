@@ -5,6 +5,7 @@
 *****************************************************************************/
 
 #pragma once
+#include "alps/numeric/matrix.hpp"
 
 ///enum for green's function shape
 enum shape_t {diagonal, blockdiagonal, nondiagonal};
