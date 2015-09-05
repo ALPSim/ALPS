@@ -1,38 +1,19 @@
 /*****************************************************************************
  *
- * ALPS DMFT Project
- *
- * Copyright (C) 2007-2010 by Emanuel Gull <gull@phys.columbia.edu>
- * Copyright (C) 2007-2008 by Sebastian Fuchs <fuchs@comp-phys.org>
- *
- * This software is part of the ALPS Applications, published under the ALPS
- * Application License; you can use, redistribute it and/or modify it under
- * the terms of the license, either version 1 or (at your option) any later
- * version.
- *
- * You should have received a copy of the ALPS Application License along with
- * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
- * available from http://alps.comp-phys.org/.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
- * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
- * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
+ * Copyright (C) 2007-2015 by Emanuel Gull <egull@umich.edu>
  *
  *****************************************************************************/
 
-
-#include "cluster.h"
-#include "DCA_transformer.hxx"
-#include "SimpleDCA_transformer.hxx"
-#include "fouriertransform.h"
-#include "CDMFT_transform.h"
 #include "alps/numeric/vector_functions.hpp"
 #include "alps/hdf5/vector.hpp"
 #include "alps/hdf5/ublas/matrix.hpp"
+
+#include "cluster.h"
+#include "cluster_fourier_transform.h"
+
+#include "DCA_transform.hxx"
+#include "SimpleDCA_transform.hxx"
+#include "CDMFT_transform.h"
 
 bool adjust_chemical_potential(const double &density, double &mu, bool &damping_mu,
     bool &computing_mu, int &mu_it, double &n_old, double &n_target,
@@ -99,8 +80,8 @@ params_(params)
     boost::throw_exception(std::invalid_argument("both t and W are defined"));
   //calculating dispersion moments, bandwidth and half filling
   std::vector<double> energies;
-  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-    for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
+  for (int kc=0; kc<n_cluster_sites(); ++kc) {
+    for (int kl=0; kl<n_lattice_momenta(); ++kl) {
       std::vector<double> k(dimension());
       for (unsigned int d=0; d<dimension(); ++d)
         k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
@@ -153,8 +134,8 @@ params_(params)
 std::complex<double>* ClusterTransformer::exp_iksite(const int sign) const
 {
   std::complex<double> *m = new std::complex<double>[n_cluster_sites()*n_cluster_sites()];
-  for (site_t k=0; k<n_cluster_sites(); ++k) {
-    for (site_t i=0; i<n_cluster_sites(); ++i) {
+  for (int k=0; k<n_cluster_sites(); ++k) {
+    for (int i=0; i<n_cluster_sites(); ++i) {
       double phase = 0.;
       for (std::size_t d=0; d<dimension(); ++d){
         phase += cluster_momentum(k,d)*cluster_coordinate(i,d);
@@ -171,13 +152,13 @@ int* DCATransformer::momentum_translation() const
   int *m = new int[n_cluster_sites()*n_cluster_sites()*n_cluster_sites()];
   std::valarray<double> phase(dimension());
   int res=-1;
-  for(site_t i=0; i<n_cluster_sites();++i){
-    for(site_t j=0;j<n_cluster_sites();++j){
-      for(site_t k=0;k<n_cluster_sites();++k){
+  for(int i=0; i<n_cluster_sites();++i){
+    for(int j=0;j<n_cluster_sites();++j){
+      for(int k=0;k<n_cluster_sites();++k){
         for(std::size_t d=0;d<dimension();++d){
           phase[d]=cluster_momentum(i,d)-cluster_momentum(j,d)+cluster_momentum(k,d);
         }
-        for(site_t p=0;p<n_cluster_sites();++p){
+        for(int p=0;p<n_cluster_sites();++p){
           for(std::size_t d=0;d<dimension();++d){
             double tmp=(phase[d]-cluster_momentum(p,d))/(2.*M_PI);
             if(tmp==(int)tmp)
@@ -514,9 +495,9 @@ void SimpleDCATransformer::compute_sigma_from_G0_and_G(const matsubara_green_fun
   unsigned int nflavor=G0_omega.nflavor();
   unsigned int nfreq=G0_omega.nfreq();
 
-  for (spin_t flavor = 0; flavor < nflavor; ++flavor) {
-    for (site_t kc = 0; kc < n_cluster_sites(); ++kc) {
-      for (frequency_t freq = 0; freq < nfreq; ++freq) {
+  for (int flavor = 0; flavor < nflavor; ++flavor) {
+    for (int kc = 0; kc < n_cluster_sites(); ++kc) {
+      for (int freq = 0; freq < nfreq; ++freq) {
         selfenergy(freq, kc, kc, flavor) = 1. / G0_omega(freq, kc, kc, flavor);
         selfenergy(freq, kc, kc, flavor) -= 1. / G_omega(freq, kc, kc, flavor);
       }
@@ -525,8 +506,8 @@ void SimpleDCATransformer::compute_sigma_from_G0_and_G(const matsubara_green_fun
 }
 void SimpleDCATransformer::compute_integration_weight_and_dispersion(bool use_phase,std::vector<std::vector<std::vector<double> > > &epsilon_kckl, std::vector<double> &weight_kl, unsigned int nflavor )const{
   std::vector<double> phi=use_phase?phase_vector():std::vector<double>();
-  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-    for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
+  for (int kc=0; kc<n_cluster_sites(); ++kc) {
+    for (int kl=0; kl<n_lattice_momenta(); ++kl) {
       std::vector<double> k(dimension());
       for (unsigned int d=0; d<dimension(); ++d)
         k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
@@ -537,19 +518,19 @@ for (unsigned int flavor=0; flavor<nflavor; ++flavor){
   }
 
 
-  for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
+  for (int kl=0; kl<n_lattice_momenta(); ++kl) {
     weight_kl[kl]= lattice_momentum(kl,dimension());
   }
 }
 void SimpleDCATransformer::compute_lattice_green_function(matsubara_green_function_t &G_omega_lattice, const matsubara_green_function_t &selfenergy, const double &mu, const double &beta, const double &h, std::vector<std::vector<std::vector<double> > > &epsilon_kckl, std::vector<double> &weight_kl) const{
   unsigned int nflavor=selfenergy.nflavor();
   unsigned int nfreq=selfenergy.nfreq();
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-    for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-      for (frequency_t freq=0; freq<nfreq; ++freq) {
+  for (int flavor=0; flavor<nflavor; ++flavor) {
+    for (int kc=0; kc<n_cluster_sites(); ++kc) {
+      for (int freq=0; freq<nfreq; ++freq) {
         G_omega_lattice(freq, kc, kc, flavor) = 0.;
         std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
-        for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
+        for (int kl=0; kl<n_lattice_momenta(); ++kl) {
           std::complex<double> zeta = iomega_n + mu + (flavor%2 ? -h : h);
           G_omega_lattice(freq, kc, kc, flavor) += weight_kl[kl]/(zeta-epsilon_kckl[kc][kl][flavor]-selfenergy(freq, kc, kc, flavor));
         }
@@ -564,9 +545,9 @@ double SimpleDCATransformer::compute_density(const matsubara_green_function_t &G
   unsigned int nflavor=G_omega_lattice.nflavor();
   unsigned int nfreq=G_omega_lattice.nfreq();
   double density=0;
-  for(spin_t flavor=0;flavor<nflavor;++flavor){
-    for(site_t kc=0;kc<n_cluster_sites();++kc){
-      for(frequency_t freq=0;freq<nfreq;++freq){
+  for(int flavor=0;flavor<nflavor;++flavor){
+    for(int kc=0;kc<n_cluster_sites();++kc){
+      for(int freq=0;freq<nfreq;++freq){
         //we need to make this more accurate by using hi freq moments
         density+=2.*G_omega_lattice(freq,kc,kc,flavor).real();
       }
@@ -643,9 +624,9 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
     } while(!converged);
     update_parameter_file(current_it, mu);
   }
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-    for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-      for (frequency_t freq=0; freq<nfreq; ++freq) {
+  for (int flavor=0; flavor<nflavor; ++flavor) {
+    for (int kc=0; kc<n_cluster_sites(); ++kc) {
+      for (int freq=0; freq<nfreq; ++freq) {
         G0_omega_new(freq, kc, kc, flavor) =
             1. / ( 1./G_omega_lattice(freq, kc, kc, flavor) + selfenergy(freq, kc, kc, flavor) );
       }
@@ -682,11 +663,11 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::params& 
   G0_omega_new.clear();
   if (parms["INSULATING"]|false) {
     std::cout <<"calculating insulating G0_omega";
-    for (frequency_t freq=0; freq<n_matsubara; ++freq) {
+    for (int freq=0; freq<n_matsubara; ++freq) {
       const std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
       const std::complex<double> G0 = 1./(iomega_n+mu-dispersion_moments(0));
-      for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
-        for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+      for (int flavor=0; flavor<n_flavor; ++flavor) {
+        for (int kc=0; kc<n_cluster_sites(); ++kc) {
           G0_omega_new(freq, kc, kc, flavor) = G0;
         }
       }
@@ -695,10 +676,10 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::params& 
   else if (parms["ISOLATED"]|false) {
     std::cout << "calculating G0_omega for isolated cluster"<<std::endl;
     bool phase=parms["PHASE"]|false;
-    for (frequency_t freq=0; freq<n_matsubara; ++freq) {
-      for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
+    for (int freq=0; freq<n_matsubara; ++freq) {
+      for (int flavor=0; flavor<n_flavor; ++flavor) {
         const std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
-        for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+        for (int kc=0; kc<n_cluster_sites(); ++kc) {
           std::vector<double> k(dimension());
           std::vector<double> phi(dimension(),0.);
           if(phase) phi=phase_vector();
@@ -714,9 +695,9 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::params& 
     matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor,  diagonal);
     matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor,  diagonal);
     G0_omega.clear();
-    for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
-      for (site_t i=0; i<n_cluster_sites(); ++i) {
-        for (frequency_t freq=0; freq<n_matsubara; ++freq) {
+    for (int flavor=0; flavor<n_flavor; ++flavor) {
+      for (int i=0; i<n_cluster_sites(); ++i) {
+        for (int freq=0; freq<n_matsubara; ++freq) {
           G0_omega(freq, i, i, flavor) = 1.;
         }
       }
@@ -742,9 +723,9 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::params& 
 std::vector<double> DCATransformer::tmatrix() const{
   unsigned int nsite=n_cluster_sites();
   std::vector<double> tij(nsite*nsite, 0.);
-  for (site_t i=0; i<nsite; ++i) {
-    for (site_t j=0; j<nsite; ++j) {
-      for (site_t k=0; k<nsite; ++k) {
+  for (int i=0; i<nsite; ++i) {
+    for (int j=0; j<nsite; ++j) {
+      for (int k=0; k<nsite; ++k) {
         double phase = 0.;
         for (unsigned int d=0; d<dimension(); ++d)
           phase += cluster_momentum(k,d)*(cluster_coordinate(i,d)-cluster_coordinate(j,d));
@@ -857,14 +838,14 @@ void SimpleDCATransformer::construct_green_function(double mu, double beta, doub
   
   unsigned int nflavor=G_omega_lattice_kav.nflavor();
   unsigned int nfreq=G_omega_lattice_kav.nfreq();
-  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-    for (frequency_t freq=0; freq<nfreq; ++freq) {
+  for (int kc=0; kc<n_cluster_sites(); ++kc) {
+    for (int freq=0; freq<nfreq; ++freq) {
       G_omega_lattice_kav(freq, kc, kc, 0,0) = 0.;
       G_omega_lattice_kav(freq, kc, kc, 0,1) = 0.;
       G_omega_lattice_kav(freq, kc, kc, 1,0) = 0.;
       G_omega_lattice_kav(freq, kc, kc, 1,1) = 0.;
       std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
-      for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
+      for (int kl=0; kl<n_lattice_momenta(); ++kl) {
         //double prefactor=1.;//(k[0]==0 && k[1]==0)?1.:0.; //cos kx - cos ky
         double prefactor=dwave_prefactor_kckl[kc][kl];
         //this is the self consistency formula!!!
@@ -892,8 +873,8 @@ double SimpleDCATransformer::compute_density(const nambu_matsubara_green_functio
   double density_up_part=0;
   double density_dn_hole=0;
   //std::cout<<"density part and hole: "<<density_up_part<<" "<<density_dn_hole<<" "<<std::endl;
-  for(site_t kc=0;kc<n_cluster_sites();++kc){
-    for(frequency_t freq=0;freq<G_omega_lattice_kav.nfreq();++freq){
+  for(int kc=0;kc<n_cluster_sites();++kc){
+    for(int freq=0;freq<G_omega_lattice_kav.nfreq();++freq){
       //we could make this more accurate by using hi freq moments
       density_up_part+=2./beta*G_omega_lattice_kav(freq,kc,kc,0,0).real(); //particles
       density_dn_hole-=2./beta*G_omega_lattice_kav(freq,kc,kc,1,1).real(); //holes
@@ -925,8 +906,8 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
   std::vector<std::vector<std::vector<double> > > epsilon_kckl(n_cluster_sites(), std::vector<std::vector<double> >(n_lattice_momenta(), std::vector<double>(nflavor)) );
   std::vector<std::vector<double> >dwave_prefactor_kckl(n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
   std::vector<double> weight_kl(n_lattice_momenta());
-  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-    for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
+  for (int kc=0; kc<n_cluster_sites(); ++kc) {
+    for (int kl=0; kl<n_lattice_momenta(); ++kl) {
       std::vector<double> k(dimension());
       for (unsigned int d=0; d<dimension(); ++d)
         k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
@@ -935,15 +916,15 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
 	}
       dwave_prefactor_kckl[kc][kl]= cos(k[0]) - cos(k[1]); //cos kx - cos ky
     }
-  }for (site_t kl=0; kl<n_lattice_momenta(); ++kl) {
+  }for (int kl=0; kl<n_lattice_momenta(); ++kl) {
     weight_kl[kl]= lattice_momentum(kl,dimension());
   }
 
   if(!use_selfenergy){ //compute selfenergy out of G and G0 first
     selfenergy=G0_omega;
     //compute the lattice = cluster self energy
-    for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-      for (frequency_t freq=0; freq<nfreq; ++freq) {
+    for (int kc=0; kc<n_cluster_sites(); ++kc) {
+      for (int freq=0; freq<nfreq; ++freq) {
         std::complex<double> g0_block[4]={G0_omega(freq, kc, kc, 0,0),G0_omega(freq, kc, kc, 0,1),G0_omega(freq, kc, kc, 1,0),G0_omega(freq, kc, kc, 1,1)};
         std::complex<double>  g_block[4]={ G_omega(freq, kc, kc, 0,0), G_omega(freq, kc, kc, 0,1), G_omega(freq, kc, kc, 1,0), G_omega(freq, kc, kc, 1,1)};
         std::complex<double>      det_g0=g0_block[0]*g0_block[3]-g0_block[1]*g0_block[2];
@@ -1003,8 +984,8 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
 
 
   //compute the bath Green's function G0
-  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-    for (frequency_t freq=0; freq<nfreq; ++freq) {
+  for (int kc=0; kc<n_cluster_sites(); ++kc) {
+    for (int freq=0; freq<nfreq; ++freq) {
       std::complex<double> glatt_block[4]={ G_omega_lattice_kav(freq, kc, kc, 0,0), G_omega_lattice_kav(freq, kc, kc, 0,1), G_omega_lattice_kav(freq, kc, kc, 1,0), G_omega_lattice_kav(freq, kc, kc, 1,1)};
       std::complex<double> det_glatt     = glatt_block[0]* glatt_block[3]- glatt_block[1]* glatt_block[2];
       std::complex<double> glatt_inv[4]  ={glatt_block[3]/det_glatt,-glatt_block[1]/det_glatt,-glatt_block[2]/det_glatt,glatt_block[0]/det_glatt};
@@ -1062,11 +1043,11 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
   G0_omega_new.clear();
   if (parms.defined("INSULATING")) {
     std::cout <<"calculating insulating G0_omega starting solution";
-    for (frequency_t freq=0; freq<n_matsubara; ++freq) {
+    for (int freq=0; freq<n_matsubara; ++freq) {
       const std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
       const std::complex<double> G0 = 1./(iomega_n+mu-dispersion_moments(0));
-      for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
-        for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+      for (int flavor=0; flavor<n_flavor; ++flavor) {
+        for (int kc=0; kc<n_cluster_sites(); ++kc) {
           G0_omega_new(freq, kc, kc, 0,0) = G0;
           G0_omega_new(freq, kc, kc, 1,1) = G0;
           G0_omega_new(freq, kc, kc, 0,1) = 0.;
@@ -1075,8 +1056,8 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
       }
     }
   }else if (parms["ISOLATED"]|false){
-    for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-      for (frequency_t freq=0; freq<n_matsubara; ++freq) {
+    for (int kc=0; kc<n_cluster_sites(); ++kc) {
+      for (int freq=0; freq<n_matsubara; ++freq) {
         G0_omega_new(freq, kc, kc, 0,0) = 0.;
         G0_omega_new(freq, kc, kc, 0,1) = 0.;
         G0_omega_new(freq, kc, kc, 1,0) = 0.;
@@ -1108,8 +1089,8 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
     nambu_matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor, diagonal);
     nambu_matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor, diagonal);
     G0_omega.clear();
-    for (site_t i=0; i<n_cluster_sites(); ++i) {
-      for (frequency_t freq=0; freq<n_matsubara; ++freq) {
+    for (int i=0; i<n_cluster_sites(); ++i) {
+      for (int freq=0; freq<n_matsubara; ++freq) {
         G0_omega(freq, i, i, 0,0) = 1.;
         G0_omega(freq, i, i, 0,1) = 0.;
         G0_omega(freq, i, i, 1,0) = 0.;
@@ -1145,10 +1126,10 @@ nambu_green_function<double> SimpleDCATransformer::spin_symmetrizer(const nambu_
 {
   nambu_green_function<double> G_new(G);
   if (paramagnet) {
-    for (site_t k1=0; k1<n_cluster_sites(); ++k1) {
-      for (site_t k2=0; k2<n_cluster_sites(); ++k2) {
-        for(itime_index_t n=0; n<G_new.nfreq(); ++n) {
-          itime_index_t other_n=G_new.nfreq()-1-n;
+    for (int k1=0; k1<n_cluster_sites(); ++k1) {
+      for (int k2=0; k2<n_cluster_sites(); ++k2) {
+        for(int n=0; n<G_new.nfreq(); ++n) {
+          int other_n=G_new.nfreq()-1-n;
           G_new(n, k1, k2, 0,0)= 0.5*(G(n, k1, k2, 0,0)+G(other_n, k1, k2, 1,1));
           G_new(other_n, k1, k2, 1,1)= G_new(n, k1, k2, 0,0);
           G_new(n, k1, k2, 0,1)= 0.5*(G(n, k1, k2, 0,1)-G(other_n, k1, k2, 1,0));
@@ -1169,9 +1150,9 @@ nambu_green_function<std::complex<double> > SimpleDCATransformer::spin_symmetriz
   //std::ofstream nambu_before_file("beforespin.dat");
   //nambu_before_file<<std::make_pair(G, 10.)<<std::endl;;
   if (paramagnet) {
-    for (site_t k1=0; k1<n_cluster_sites(); ++k1) {
-      for (site_t k2=0; k2<n_cluster_sites(); ++k2) {
-        for(frequency_t freq=0; freq<G_new.nfreq(); ++freq) {
+    for (int k1=0; k1<n_cluster_sites(); ++k1) {
+      for (int k2=0; k2<n_cluster_sites(); ++k2) {
+        for(int freq=0; freq<G_new.nfreq(); ++freq) {
           //CLANG really hates individual assignements to real() and imag()
           G_new(freq, k1, k2, 0,0)=std::complex<double>(0.5*(G(freq, k1, k2, 0,0).real()-G_new(freq, k1, k2, 1,1).real()),0.5*(G(freq, k1, k2, 0,0).imag()+G_new(freq, k1, k2, 1,1).imag()));
           G_new(freq, k1, k2, 1,1)=std::complex<double>(-G_new(freq, k1, k2, 0,0).real(),G_new(freq, k1, k2, 0,0).imag());

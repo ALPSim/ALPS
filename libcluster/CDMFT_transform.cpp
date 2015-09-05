@@ -1,39 +1,21 @@
 /*****************************************************************************
  *
- * ALPS DMFT Project
- *
- * Copyright (C) 2007-2010 by Emanuel Gull <gull@phys.columbia.edu>
- * Copyright (C) 2007-2008 by Sebastian Fuchs <fuchs@comp-phys.org>
- *
- * This software is part of the ALPS Applications, published under the ALPS
- * Application License; you can use, redistribute it and/or modify it under
- * the terms of the license, either version 1 or (at your option) any later
- * version.
- *
- * You should have received a copy of the ALPS Application License along with
- * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
- * available from http://alps.comp-phys.org/.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
- * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
- * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
+ * Copyright (C) 2007-2015 by Emanuel Gull <egull@umich.edu>
  *
  *****************************************************************************/
 
+#include "alps/config.h" // needed to set up correct bindings
+#include "boost/numeric/ublas/io.hpp"
+#include "boost/numeric/bindings/ublas.hpp"
+#include "boost/numeric/bindings/lapack/driver/gesv.hpp"
+#include "boost/numeric/ublas/matrix.hpp"
+#include "boost/numeric/ublas/lu.hpp"
+
+#include "cluster_fourier_transform.h"
 
 #include "CDMFT_transform.h"
-#include <boost/numeric/ublas/io.hpp>
-#include <alps/config.h> // needed to set up correct bindings
-#include <boost/numeric/bindings/ublas.hpp>
-#include <boost/numeric/bindings/lapack/driver/gesv.hpp>
-#include "CDMFT_transformer.hxx"
-#include "fouriertransform.h"
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/lu.hpp>
+#include "CDMFT_transform.hxx"
+
 typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 
 /*
@@ -161,8 +143,8 @@ matsubara_green_function_t LadderCDMFTTransformer::operator()(const matsubara_gr
   //compute the Matsubara self energy
   complex_dense_matrix G0_mat(n_cluster_sites(),n_cluster_sites()), G_mat(n_cluster_sites(),n_cluster_sites()), Sigma_mat(n_cluster_sites(),n_cluster_sites());
   complex_dense_matrix G0_inv_mat(n_cluster_sites(),n_cluster_sites()), G_inv_mat(n_cluster_sites(),n_cluster_sites());
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-    for (frequency_t omega=0; omega<nfreq; ++omega) {
+  for (int flavor=0; flavor<nflavor; ++flavor) {
+    for (int omega=0; omega<nfreq; ++omega) {
       gf_to_matrix(omega, flavor, G0_omega, G0_mat);
       gf_to_matrix(omega, flavor, G_omega, G_mat);
       dense_matrix_inverse(G0_mat, G0_inv_mat);
@@ -176,8 +158,8 @@ matsubara_green_function_t LadderCDMFTTransformer::operator()(const matsubara_gr
   selfenergy = transform_into_real_space(selfenergy); //the integration is done in real space
   
   //the k-summation
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-    for (frequency_t freq=0; freq<nfreq; ++freq) {
+  for (int flavor=0; flavor<nflavor; ++flavor) {
+    for (int freq=0; freq<nfreq; ++freq) {
       std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
       complex_dense_matrix diag=boost::numeric::ublas::identity_matrix<std::complex<double> >(n_cluster_sites())*(iomega_n+mu);
       complex_dense_matrix H0(n_cluster_sites(), n_cluster_sites());
@@ -213,8 +195,8 @@ matsubara_green_function_t LadderCDMFTTransformer::operator()(const matsubara_gr
   lgfks_file<<std::make_pair(G_omega_lattice,beta)<<std::endl;
   
   std::cout<<"computing G0 from sigma"<<std::endl;
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-    for (frequency_t omega=0; omega<nfreq; ++omega) {
+  for (int flavor=0; flavor<nflavor; ++flavor) {
+    for (int omega=0; omega<nfreq; ++omega) {
       gf_to_matrix(omega, flavor, selfenergy, Sigma_mat);
       gf_to_matrix(omega, flavor, G_omega_lattice, G_mat);
       dense_matrix_inverse(G_mat, G_inv_mat);
@@ -264,9 +246,9 @@ matsubara_green_function_t LadderCDMFTTransformer::initial_G0(const alps::params
     matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor, nondiagonal);
     matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor, nondiagonal);
     G0_omega.clear();
-    for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
-      for (site_t i=0; i<n_cluster_sites(); ++i) {
-        for (frequency_t freq=0; freq<n_matsubara; ++freq) {
+    for (int flavor=0; flavor<n_flavor; ++flavor) {
+      for (int i=0; i<n_cluster_sites(); ++i) {
+        for (int freq=0; freq<n_matsubara; ++freq) {
           G0_omega(freq, i, i, flavor) = 1.;
         }
       }
@@ -278,7 +260,7 @@ matsubara_green_function_t LadderCDMFTTransformer::initial_G0(const alps::params
   itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor, nondiagonal);
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   G0_omega_new.write("G0_omega_input");
-  FourierTransformer::generate_transformer(params, fourier_ptr);
+  FourierTransformer::generate_cluster_transformer(params, fourier_ptr);
   fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega_new);
   G0_tau.write("G0_tau_input");
   matsubara_green_function_t G0_omega_real = transform_into_real_space(G0_omega_new);
@@ -317,11 +299,11 @@ nambu_matsubara_green_function_t LadderCDMFTTransformer::initial_G0_nambu(const 
   G0_omega_new.clear();
   if (params.defined("INSULATING")) {
     std::cout <<"calculating insulating G0_omega starting solution";
-    for (frequency_t freq=0; freq<n_matsubara; ++freq) {
+    for (int freq=0; freq<n_matsubara; ++freq) {
       const std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
       const std::complex<double> G0 = 1./(iomega_n+mu);//-dispersion_moments(0));// for four site dispersion_moments(0)=0;
-      for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
-        for (site_t s=0; s<n_cluster_sites(); ++s) {
+      for (int flavor=0; flavor<n_flavor; ++flavor) {
+        for (int s=0; s<n_cluster_sites(); ++s) {
           G0_omega_new(freq, s, s, 0,0) = G0;
           G0_omega_new(freq, s, s, 1,1) = G0;
           G0_omega_new(freq, s, s, 0,1) = 0.;
@@ -337,8 +319,8 @@ nambu_matsubara_green_function_t LadderCDMFTTransformer::initial_G0_nambu(const 
     nambu_matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor, nondiagonal);
     nambu_matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor, nondiagonal);
     G0_omega.clear();
-    for (site_t i=0; i<n_cluster_sites(); ++i) {
-      for (frequency_t freq=0; freq<n_matsubara; ++freq) {
+    for (int i=0; i<n_cluster_sites(); ++i) {
+      for (int freq=0; freq<n_matsubara; ++freq) {
         G0_omega(freq, i, i, 0,0) = 1.;
         G0_omega(freq, i, i, 0,1) = 0.;
         G0_omega(freq, i, i, 1,0) = 0.;
@@ -357,7 +339,7 @@ nambu_matsubara_green_function_t LadderCDMFTTransformer::initial_G0_nambu(const 
   nambu_itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor, nondiagonal);
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   G0_omega_new.write("G0_omega_input");
-  FourierTransformer::generate_transformer(params, fourier_ptr);
+  FourierTransformer::generate_cluster_transformer(params, fourier_ptr);
   fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega_new);
   std::cout<<"write G0_tau_input"<<std::endl;
   G0_tau.write("G0_tau_input");
@@ -385,7 +367,7 @@ nambu_matsubara_green_function_t LadderCDMFTTransformer::operator()(const nambu_
   complex_dense_matrix G0_mat(n_cluster_sites()*2,n_cluster_sites()*2), G_mat(n_cluster_sites()*2,n_cluster_sites()*2), Sigma_mat(n_cluster_sites()*2,n_cluster_sites()*2);
   complex_dense_matrix G0_inv_mat(n_cluster_sites()*2,n_cluster_sites()*2), G_inv_mat(n_cluster_sites()*2,n_cluster_sites()*2);
   complex_dense_matrix G_mat2(n_cluster_sites()*2,n_cluster_sites()*2),G_inv_mat2(n_cluster_sites()*2,n_cluster_sites()*2);
-  for (frequency_t omega=0; omega<nfreq; ++omega) {
+  for (int omega=0; omega<nfreq; ++omega) {
     gf_to_matrix(omega, G0_omega, G0_mat);
     gf_to_matrix(omega, G_omega, G_mat);
     InvertMatrix(G0_mat, G0_inv_mat);
@@ -400,7 +382,7 @@ nambu_matsubara_green_function_t LadderCDMFTTransformer::operator()(const nambu_
   
   //the k-summation
   
-  for (frequency_t freq=0; freq<nfreq; ++freq) {
+  for (int freq=0; freq<nfreq; ++freq) {
     std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
     complex_dense_matrix diag=boost::numeric::ublas::identity_matrix<std::complex<double> >(n_cluster_sites()*2)*(iomega_n);
     complex_dense_matrix H0(n_cluster_sites()*2, n_cluster_sites()*2);
@@ -412,7 +394,7 @@ nambu_matsubara_green_function_t LadderCDMFTTransformer::operator()(const nambu_
     tmp  =boost::numeric::ublas::zero_matrix<std::complex<double> >(n_cluster_sites()*2,n_cluster_sites()*2);
     gf_to_matrix(freq, selfenergy, Sigma_mat);
     
-    for(site_t kl=0;kl<n_lattice_momenta();kl++){
+    for(int kl=0;kl<n_lattice_momenta();kl++){
       double kx=lattice_momentum(kl,0);
       double ky=lattice_momentum(kl,1);
       set_nambu_Tij_dwave_matrix(kx,ky,eta1,eta2,mu,h,H0);
@@ -436,7 +418,7 @@ nambu_matsubara_green_function_t LadderCDMFTTransformer::operator()(const nambu_
   lgfks_file<<std::make_pair(G_omega_lattice,beta)<<std::endl;
   
   std::cout<<"computing G0 from sigma"<<std::endl;
-  for (frequency_t omega=0; omega<nfreq; ++omega) {
+  for (int omega=0; omega<nfreq; ++omega) {
     gf_to_matrix(omega, selfenergy, Sigma_mat);
     gf_to_matrix(omega, G_omega_lattice, G_mat);
     InvertMatrix(G_mat, G_inv_mat);
@@ -468,15 +450,15 @@ nambu_matsubara_green_function_t LadderCDMFTTransformer::operator()(const nambu_
  throw std::runtime_error("transform_into_k_space CDMFT transformer not implemented.");
  }*/
 matsubara_green_function_t LadderCDMFTTransformer::transform_into_real_space(const matsubara_green_function_t& G) const{
-  spin_t nflavor=G.nflavor();
-  frequency_t nfreq=G.nfreq();
+  int nflavor=G.nflavor();
+  int nfreq=G.nfreq();
   matsubara_green_function_t G_transformed(G);
   complex_dense_matrix U=U_;
   complex_dense_matrix tmp=U_;
   complex_dense_matrix U_t=boost::numeric::ublas::herm(U_);
   complex_dense_matrix G_mat(n_cluster_sites(),n_cluster_sites()), G_mat_new(n_cluster_sites(),n_cluster_sites());
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-    for (frequency_t omega=0; omega<nfreq; ++omega) {
+  for (int flavor=0; flavor<nflavor; ++flavor) {
+    for (int omega=0; omega<nfreq; ++omega) {
       gf_to_matrix(omega, flavor, G, G_mat);
       tmp=boost::numeric::ublas::prod(G_mat,U_t);
       G_mat_new=boost::numeric::ublas::prod(U,tmp);
@@ -487,15 +469,15 @@ matsubara_green_function_t LadderCDMFTTransformer::transform_into_real_space(con
 }
 
 matsubara_green_function_t LadderCDMFTTransformer::transform_into_k_space(const matsubara_green_function_t& G) const{
-  spin_t nflavor=G.nflavor();
-  frequency_t nfreq=G.nfreq();
+  int nflavor=G.nflavor();
+  int nfreq=G.nfreq();
   matsubara_green_function_t G_transformed(G);
   complex_dense_matrix U=U_;
   complex_dense_matrix tmp=U_;
   complex_dense_matrix U_t=boost::numeric::ublas::herm(U_);
   complex_dense_matrix G_mat(n_cluster_sites(),n_cluster_sites()), G_mat_new(n_cluster_sites(),n_cluster_sites());
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-    for (frequency_t omega=0; omega<nfreq; ++omega) {
+  for (int flavor=0; flavor<nflavor; ++flavor) {
+    for (int omega=0; omega<nfreq; ++omega) {
       gf_to_matrix(omega, flavor, G, G_mat);
       tmp=boost::numeric::ublas::prod(G_mat,U);
       G_mat_new=boost::numeric::ublas::prod(U_t,tmp);
@@ -506,16 +488,16 @@ matsubara_green_function_t LadderCDMFTTransformer::transform_into_k_space(const 
 }
 
 itime_green_function_t LadderCDMFTTransformer::transform_into_real_space(const itime_green_function_t& G) const{
-  spin_t nflavor=G.nflavor();
-  itime_index_t ntime=G.ntime();
+  int nflavor=G.nflavor();
+  int ntime=G.ntime();
   itime_green_function_t G_transformed(G);
   dense_matrix U(U_.size1(), U_.size1());
   for(unsigned int i=0;i<U_.size1();++i){ for (unsigned int j=0;j<U_.size1();++j){ U(i,j)=U_(i,j).real();} }
   dense_matrix tmp=U;
   dense_matrix Ut=boost::numeric::ublas::herm(U);
   dense_matrix G_mat(n_cluster_sites(),n_cluster_sites()), G_mat_new(n_cluster_sites(),n_cluster_sites());
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-    for (itime_index_t tau=0; tau<ntime; ++tau) {
+  for (int flavor=0; flavor<nflavor; ++flavor) {
+    for (int tau=0; tau<ntime; ++tau) {
       gf_to_matrix(tau, flavor, G, G_mat);
       tmp=boost::numeric::ublas::prod(G_mat,Ut);
       G_mat_new=boost::numeric::ublas::prod(U,tmp);
@@ -525,16 +507,16 @@ itime_green_function_t LadderCDMFTTransformer::transform_into_real_space(const i
   return G_transformed;
 }
 itime_green_function_t LadderCDMFTTransformer::transform_into_k_space(const itime_green_function_t& G) const{
-  spin_t nflavor=G.nflavor();
-  itime_index_t ntime=G.ntime();
+  int nflavor=G.nflavor();
+  int ntime=G.ntime();
   itime_green_function_t G_transformed(G);
   dense_matrix U(U_.size1(), U_.size1());
   for(unsigned int i=0;i<U_.size1();++i){ for (unsigned int j=0;j<U_.size1();++j){ U(i,j)=U_(i,j).real();} }
   dense_matrix tmp=U;
   dense_matrix Ut=boost::numeric::ublas::herm(U);
   dense_matrix G_mat(n_cluster_sites(),n_cluster_sites()), G_mat_new(n_cluster_sites(),n_cluster_sites());
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-    for (itime_index_t tau=0; tau<ntime; ++tau) {
+  for (int flavor=0; flavor<nflavor; ++flavor) {
+    for (int tau=0; tau<ntime; ++tau) {
       gf_to_matrix(tau, flavor, G, G_mat);
       tmp=boost::numeric::ublas::prod(G_mat,U);
       G_mat_new=boost::numeric::ublas::prod(Ut,tmp);
@@ -544,8 +526,8 @@ itime_green_function_t LadderCDMFTTransformer::transform_into_k_space(const itim
   return G_transformed;
 }
 nambu_matsubara_green_function_t LadderCDMFTTransformer::transform_into_real_space(const nambu_matsubara_green_function_t& G) const{
-  //spin_t nflavor=G.nflavor();
-  frequency_t nfreq=G.nfreq();
+  //int nflavor=G.nflavor();
+  int nfreq=G.nfreq();
   nambu_matsubara_green_function_t G_transformed(G);
   complex_dense_matrix U(n_cluster_sites()*2,n_cluster_sites()*2), tmp(n_cluster_sites()*2,n_cluster_sites()*2);
   U.clear();tmp.clear();
@@ -557,7 +539,7 @@ nambu_matsubara_green_function_t LadderCDMFTTransformer::transform_into_real_spa
   }
   complex_dense_matrix U_t=boost::numeric::ublas::herm(U);
   complex_dense_matrix G_mat(n_cluster_sites()*2,n_cluster_sites()*2), G_mat_new(n_cluster_sites()*2,n_cluster_sites()*2);
-  for (frequency_t omega=0; omega<nfreq; ++omega) {
+  for (int omega=0; omega<nfreq; ++omega) {
     gf_to_matrix(omega, G, G_mat);
     tmp=boost::numeric::ublas::prod(G_mat,U_t);
     G_mat_new=boost::numeric::ublas::prod(U,tmp);
@@ -568,8 +550,8 @@ nambu_matsubara_green_function_t LadderCDMFTTransformer::transform_into_real_spa
   //  throw std::runtime_error("this has not yet been implemented.");
 }
 nambu_matsubara_green_function_t LadderCDMFTTransformer::transform_into_k_space(const nambu_matsubara_green_function_t& G) const{
-  //spin_t nflavor=G.nflavor();
-  frequency_t nfreq=G.nfreq();
+  //int nflavor=G.nflavor();
+  int nfreq=G.nfreq();
   nambu_matsubara_green_function_t G_transformed(G);
   complex_dense_matrix U(n_cluster_sites()*2,n_cluster_sites()*2), tmp(n_cluster_sites()*2,n_cluster_sites()*2);
   U.clear();tmp.clear();
@@ -580,7 +562,7 @@ nambu_matsubara_green_function_t LadderCDMFTTransformer::transform_into_k_space(
   }
   complex_dense_matrix U_t=boost::numeric::ublas::herm(U);
   complex_dense_matrix G_mat(n_cluster_sites()*2,n_cluster_sites()*2), G_mat_new(n_cluster_sites()*2,n_cluster_sites()*2);
-  for (frequency_t omega=0; omega<nfreq; ++omega) {
+  for (int omega=0; omega<nfreq; ++omega) {
     gf_to_matrix(omega, G, G_mat);
     tmp=boost::numeric::ublas::prod(G_mat,U);
     G_mat_new=boost::numeric::ublas::prod(U_t,tmp);
@@ -590,8 +572,8 @@ nambu_matsubara_green_function_t LadderCDMFTTransformer::transform_into_k_space(
   //throw std::runtime_error("this has not yet been implemented.");
 }
 nambu_itime_green_function_t LadderCDMFTTransformer::transform_into_real_space(const nambu_itime_green_function_t& G) const{
-  //spin_t nflavor=G.nflavor();
-  itime_index_t ntime=G.ntime();
+  //int nflavor=G.nflavor();
+  int ntime=G.ntime();
   nambu_itime_green_function_t G_transformed(G);
   dense_matrix U(n_cluster_sites()*2,n_cluster_sites()*2), tmp(n_cluster_sites()*2,n_cluster_sites()*2);
   U.clear();tmp.clear();
@@ -603,7 +585,7 @@ nambu_itime_green_function_t LadderCDMFTTransformer::transform_into_real_space(c
   }
   dense_matrix U_t=boost::numeric::ublas::herm(U);
   dense_matrix G_mat(n_cluster_sites()*2,n_cluster_sites()*2), G_mat_new(n_cluster_sites()*2,n_cluster_sites()*2);
-  for (itime_index_t tau=0; tau<ntime; ++tau) {
+  for (int tau=0; tau<ntime; ++tau) {
     gf_to_matrix(tau, G, G_mat);
     tmp=boost::numeric::ublas::prod(G_mat,U_t);
     G_mat_new=boost::numeric::ublas::prod(U,tmp);
@@ -614,8 +596,8 @@ nambu_itime_green_function_t LadderCDMFTTransformer::transform_into_real_space(c
   //  throw std::runtime_error("this has not yet been implemented.");
 }
 nambu_itime_green_function_t LadderCDMFTTransformer::transform_into_k_space(const nambu_itime_green_function_t& G) const{
-  //spin_t nflavor=G.nflavor();
-  itime_index_t ntime=G.ntime();
+  //int nflavor=G.nflavor();
+  int ntime=G.ntime();
   nambu_itime_green_function_t G_transformed(G);
   dense_matrix U(n_cluster_sites()*2,n_cluster_sites()*2), tmp(n_cluster_sites()*2,n_cluster_sites()*2);
   U.clear();tmp.clear();
@@ -627,7 +609,7 @@ nambu_itime_green_function_t LadderCDMFTTransformer::transform_into_k_space(cons
   }
   dense_matrix U_t=boost::numeric::ublas::herm(U);
   dense_matrix G_mat(n_cluster_sites()*2,n_cluster_sites()*2), G_mat_new(n_cluster_sites()*2,n_cluster_sites()*2);
-  for (itime_index_t tau=0; tau<ntime; ++tau) {
+  for (int tau=0; tau<ntime; ++tau) {
     gf_to_matrix(tau, G, G_mat);
     tmp=boost::numeric::ublas::prod(G_mat,U);
     G_mat_new=boost::numeric::ublas::prod(U_t,tmp);
@@ -856,10 +838,10 @@ green_function<T> LadderCDMFTTransformer::spin_symmetrizer(const green_function<
   green_function<T> G_new(G);
   if (paramagnet) {
     if(G_new.nflavor()>1 && G_new.nflavor()%2==0) {
-      for(spin_t flavor=0; flavor<G_new.nflavor(); flavor+=2) {
-        for (site_t k1=0; k1<n_cluster_sites(); ++k1) {
-          for (site_t k2=0; k2<n_cluster_sites(); ++k2) {
-            for(frequency_t freq=0; freq<G_new.nfreq(); ++freq) {
+      for(int flavor=0; flavor<G_new.nflavor(); flavor+=2) {
+        for (int k1=0; k1<n_cluster_sites(); ++k1) {
+          for (int k2=0; k2<n_cluster_sites(); ++k2) {
+            for(int freq=0; freq<G_new.nfreq(); ++freq) {
               G_new(freq, k1, k2, flavor)= 0.5*(G_new(freq, k1, k2, flavor)+G_new(freq, k1, k2, flavor+1));
               G_new(freq, k1, k2, flavor+1)=G_new(freq, k1, k2, flavor);
             }
@@ -876,9 +858,9 @@ nambu_green_function<std::complex<double> > LadderCDMFTTransformer::spin_symmetr
   //std::ofstream nambu_before_file("beforespin.dat");
   //nambu_before_file<<std::make_pair(G, 10.)<<std::endl;;
   if (paramagnet) {
-    for (site_t k1=0; k1<n_cluster_sites(); ++k1) {
-      for (site_t k2=0; k2<n_cluster_sites(); ++k2) {
-        for(frequency_t freq=0; freq<G_new.nfreq(); ++freq) {
+    for (int k1=0; k1<n_cluster_sites(); ++k1) {
+      for (int k2=0; k2<n_cluster_sites(); ++k2) {
+        for(int freq=0; freq<G_new.nfreq(); ++freq) {
           G_new(freq, k1, k2, 0,0).imag()= 0.5*(G(freq, k1, k2, 0,0).imag()+G_new(freq, k1, k2, 1,1).imag());
           G_new(freq, k1, k2, 0,0).real()= 0.5*(G(freq, k1, k2, 0,0).real()-G_new(freq, k1, k2, 1,1).real());
           G_new(freq, k1, k2, 1,1).real()= -G_new(freq, k1, k2, 0,0).real();
@@ -893,8 +875,8 @@ nambu_green_function<std::complex<double> > LadderCDMFTTransformer::spin_symmetr
     }
   }
   else{
-    for (site_t k1=0; k1<n_cluster_sites(); ++k1) {
-      for (site_t k2=0; k2<n_cluster_sites(); ++k2) {
+    for (int k1=0; k1<n_cluster_sites(); ++k1) {
+      for (int k2=0; k2<n_cluster_sites(); ++k2) {
         int k1_p,k2_p;
         
         if(abs(k1-k2)%2!=0){//one is spin-up, the other is spin-dn
@@ -907,7 +889,7 @@ nambu_green_function<std::complex<double> > LadderCDMFTTransformer::spin_symmetr
           }
         }
         
-        for(frequency_t freq=0; freq<G_new.nfreq(); ++freq) {
+        for(int freq=0; freq<G_new.nfreq(); ++freq) {
           G_new(freq, k1, k2, 0,0).imag()= 0.5*(G(freq, k1, k2, 0,0).imag()+G_new(freq, k1_p, k2_p, 1,1).imag());
           G_new(freq, k1, k2, 0,0).real()= 0.5*(G(freq, k1, k2, 0,0).real()-G_new(freq, k1_p, k2_p, 1,1).real());
           G_new(freq, k1, k2, 1,1).imag()= 0.5*(G(freq, k1, k2, 1,1).imag()+G_new(freq, k1_p, k2_p, 0,0).imag());

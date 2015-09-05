@@ -1,45 +1,16 @@
 /*****************************************************************************
  *
- * ALPS DMFT Project
- *
- * Copyright (C) 2005-2008 by Philipp Werner <werner@comp-phys.org>,
- *                            Emanuel Gull <gullc@comp-phys.org>
- *                            Sebastian Fuchs <fuchs@comp-phys.org>
- *                            Matthias Troyer <troyer@comp-phys.org>
- *
- * This software is part of the ALPS Applications, published under the ALPS
- * Application License; you can use, redistribute it and/or modify it under
- * the terms of the license, either version 1 or (at your option) any later
- * version.
- *
- * You should have received a copy of the ALPS Application License along with
- * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
- * available from http://alps.comp-phys.org/.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
- * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
- * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
+ * Copyright (C) 2005-2015 Emanuel Gull <egull@umich.edu>
  *
  *****************************************************************************/
 
-/* $Id: selfconsistency.C 454 2011-02-01 17:38:49Z gullc $ */
-
-/// @file selfconsistency.C
-/// @brief implements the selfconsistency loop functions
-
-#include "selfconsistency.h"
 #include "green_function.h"
-#include "fouriertransform.h"
-#include "types.h"
-#include "externalsolver.h"
 
-#include"cluster.h"
+#include "cluster.h"
+#include "cluster_fourier_transform.h"
+
 #include "CDMFT_transform.h"
-#include"CDMFT_transformer.hxx"
+#include "CDMFT_transform.hxx"
 
 void selfconsistency_loop_CDMFT(const alps::params& parms, ImpuritySolver& solver,
                                 CDMFTTransformer& clustertrans)

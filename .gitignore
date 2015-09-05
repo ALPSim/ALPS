@@ -5,3 +5,11 @@ dmft
 Makefile
 gtest
 runTests
+test
+.idea/
+AuxiliaryPrograms/energy
+.cproject
+.settings
+Debug
+*.a
+*.h5

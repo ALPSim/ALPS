@@ -1,28 +1,10 @@
 /*****************************************************************************
  *
- * ALPS DMFT Project
- *
- * Copyright (C) 2005-2014 by Emanuel Gull <gullc@comp-phys.org>
- *
- * To be used with permission by the authors
+ * Copyright (C) 2005-2015 by Emanuel Gull <egull@umich.edu>
  *
  *****************************************************************************/
 
-/* $Id$ */
-
-#ifndef ALPS_DMFT_SELFCONSISTENCY_H
-#define ALPS_DMFT_SELFCONSISTENCY_H
-
-/// @file selfconsistency.h
-/// @brief declares the selfconsistency loop functions
-
-/*#include "solver.h"
-#include "hilberttransformer.h"
-#include "externalsolver.h"
-#include "cluster.h"
-#include "fouriertransform.h"
-#include "green_function.h"*/
-
+#pragma once
 namespace alps{ class params;}
 class ImpuritySolver;
 class FrequencySpaceHilbertTransformer;
@@ -47,6 +29,3 @@ void perform_cluster_loop(const alps::params &parms);
 FrequencySpaceHilbertTransformer *setup_DOS_hilbert_transform(const alps::params &parms);
 FrequencySpaceHilbertTransformer *setup_2D_hilbert_transform(const alps::params &parms);
 FrequencySpaceHilbertTransformer *setup_Bethe_hilbert_transform(const alps::params &parms);
-
-#endif
-
