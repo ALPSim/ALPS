@@ -108,6 +108,10 @@ public:
 class DCATransformer : public ClusterTransformer
 {
 public:
+  typedef std::pair<int, int> pair_type;
+  typedef std::set<pair_type> pair_class_type;
+  typedef std::set<pair_class_type> pair_class_set_type;
+
   DCATransformer(const alps::params& params);
   virtual ~DCATransformer(){} //pro forma virtual destructor
   
@@ -123,7 +127,7 @@ public:
   template<typename T> nambu_green_function<T> symmetrize_k_space(const nambu_green_function<T>& G) const
   { return symmetrize_helper(G, pair_classes_k_space()); }
   const Matrix<int>::Type &symmetry_table_k_space() const{return ClusterHelper::symmetry_table_k_space();}
-  const std::set<pair_class_type> &pair_class_set_k_space() const{return ClusterHelper::pair_class_set_k_space();}
+  const pair_class_set_type &pair_class_set_k_space() const{return ClusterHelper::pair_class_set_k_space();}
   
   
   //Real space and k-space transformers for the Green's functions

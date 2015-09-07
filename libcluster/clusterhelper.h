@@ -72,7 +72,7 @@ public:
   pair_class_set_itpair_type pair_classes_k_space() const
   { return pair_class_set_itpair_type(pair_class_set_k_space_.begin(), pair_class_set_k_space_.end()); }
   const Matrix<int>::Type &symmetry_table_k_space() const{return symmetry_table_k_space_;}
-  const std::set<pair_class_type> &pair_class_set_k_space() const{return pair_class_set_k_space_;}
+  const pair_class_set_type &pair_class_set_k_space() const{return pair_class_set_k_space_;}
   
   virtual void write_hdf5(alps::hdf5::archive &ar, const std::string &p) const;
   bool write(const alps::params &parms, const std::string &location="/transformer") const;
