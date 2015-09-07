@@ -73,11 +73,6 @@ public:
   //NAMBU forward and backward transformer
   virtual void time_to_frequency_ft(const nambu_itime_green_function_t &G_tau, nambu_matsubara_green_function_t &G_omega) const;
   virtual void frequency_to_time_ft(nambu_itime_green_function_t &G_tau, const nambu_matsubara_green_function_t &G_omega) const;
-  /*  virtual void frequency_to_time_ft(green_function<alps::RealObsevaluator> &G_tau, 
-   const green_function<alps::RealObsevaluator> &G_omega_real,
-   const green_function<alps::RealObsevaluator> &G_omega_imag) const;*/
-  virtual void append_tail(matsubara_green_function_t& G_omega, const matsubara_green_function_t& G0_omega,
-                           const unsigned int nfreq_measured) const;
   
   static void generate_transformer(const alps::params &parms,
                                    boost::shared_ptr<FourierTransformer> &fourier_ptr);
