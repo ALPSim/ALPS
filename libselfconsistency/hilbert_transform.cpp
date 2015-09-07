@@ -6,7 +6,6 @@
  *
  *****************************************************************************/
 
-//#include <functional>
 #include "hilbert_transform.h"
 #include "fourier_transform.h"
 
