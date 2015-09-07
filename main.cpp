@@ -14,22 +14,13 @@
 /// @brief main program of the DMFT program
 #include <iostream>
 #include <fstream>
-#include <cassert>
-#include <stdio.h>
 
-#include <alps/parameter.h>
+#include <alps/ngs/params.hpp>
 #include <alps/utility/copyright.hpp>
 
 #include "selfconsistency.h"
-#include "externalsolver.h"
-#include "hilbert_transform.h"
-#include "cluster.h"
-
-
-
 
 /// @brief The DMFT main program
-///
 
 alps::params read_parameters_from_file(const std::string &filename){
   {
