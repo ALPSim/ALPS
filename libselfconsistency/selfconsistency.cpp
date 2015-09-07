@@ -1,37 +1,8 @@
 /*****************************************************************************
  *
- * ALPS DMFT Project
- *
- * Copyright (C) 2005-2008 by Philipp Werner <werner@comp-phys.org>,
- *                            Emanuel Gull <gullc@comp-phys.org>
- *                            Sebastian Fuchs <fuchs@comp-phys.org>
- *                            Matthias Troyer <troyer@comp-phys.org>
- *
- * This software is part of the ALPS Applications, published under the ALPS
- * Application License; you can use, redistribute it and/or modify it under
- * the terms of the license, either version 1 or (at your option) any later
- * version.
- * 
- * You should have received a copy of the ALPS Application License along with
- * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
- * available from http://alps.comp-phys.org/.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
- * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
- * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
- * DEALINGS IN THE SOFTWARE.
+ * Copyright (C) 2005-2015 Emanuel Gull <egull@umich.edu>
  *
  *****************************************************************************/
-
-/* $Id$ */
-
-/// @file selfconsistency.C
-/// @brief implements the selfconsistency loop functions
-
-#include <boost/tuple/tuple.hpp>
 
 #include "green_function.h"
 
@@ -54,7 +25,6 @@ void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver&
   double h = parms["H"];
   double converged = parms["CONVERGED"];
   bool paramagnet = parms["PARAMAGNET"]|false;
-  //bool degenerate = parms.value_or_default("DEGENERATE", false);
   double relax_rate=parms["RELAX_RATE"]|1.;
   int max_it=parms["MAX_IT"]|1000;
   std::string basename=parms["BASENAME"];
@@ -89,20 +59,7 @@ void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver&
     boost::tie(G_omega, G_tau) = solver.solve_matsubara(G0_omega,parms);
     G_tau = hilbert.symmetrize(G_tau, paramagnet);
     G_omega = hilbert.symmetrize(G_omega, paramagnet);
-    /*if(parms.defined("FILLING")){ //adjust chemical potential
-     bool converged=false;
-     matsubara_green_function_t G_lattice_omega(G_omega);
-     do{
-     //standard hilbert trafo
-     matsubara_green_function_t G0_omega_new= hilbert(G_omega, G0_omega, mu, h, beta);
-     //re-obtain lattice Green's function from it
-     
-     //compute density
-     double total_density=compute_density(G_omega);
-     //adjust chemical potential
-     converged=adjust_chemical_potential(parms, total_density, mu);
-     }while(!converged);
-     }*/
+
     std::cout<<"running Hilbert transform"<<std::endl<<std::flush;
     G0_omega = hilbert(G_omega, G0_omega, mu, h, beta);
     //relaxation to speed up /slow down convergence
