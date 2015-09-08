@@ -45,11 +45,11 @@ class DataSet(ResultProperties):
     """
     def __init__(self,x=None,y=None,props=None):
         ResultProperties.__init__(self)
-        if x == None:   self.x = np.array([])
+        if x is None:   self.x = np.array([])
         else:           self.x = x
-        if y == None:   self.y = np.array([])
+        if y is None:   self.y = np.array([])
         else:           self.y = y
-        if props != None:   self.props = props
+        if props is not None:   self.props = props
     
     def __repr__(self):
         return "x=%s\ny=%s\nprops=%s" % (self.x, self.y, self.props)
@@ -57,7 +57,7 @@ class DataSet(ResultProperties):
 class ResultFile(ResultProperties):
     def __init__(self,fn=None):
         ResultProperties.__init__(self)
-        if fn != None:
+        if fn is not None:
             self.props['filename'] = fn
 
 
