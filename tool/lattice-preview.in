@@ -15,16 +15,19 @@ if test -f "$DIR/config.py"; then
   PYTHONPATH=$SCRIPTDIR:$BUILDDIR:$PHTHONPATH
   export PYTHONPATH
 else
-  SCRIPTDIR="@PYTHON_SCRIPTDIR@/alps"
+  if test -f "@PYTHON_SCRIPTDIR@/alps/preview.py"; then
+    SCRIPTDIR="@PYTHON_SCRIPTDIR@/alps"
+  else 
+    DIRS=$(@PYTHON_INTERPRETER@ -c 'import sys;print " ".join(sys.path)')
+    for d in $DIRS; do
+      if test -f "$d/alps/preview.py"; then
+        SCRIPTDIR="$d/alps"
+        break
+      fi
+    done
+  fi 
   PYTHONPATH=$SCRIPTDIR:$PHTHONPATH
   export PYTHONPATH
 fi
 
-if test `uname -s 2> /dev/null` = Darwin && test `(uname -r | cut -s -d. -f1) 2> /dev/null` = 10; then
-  # for Mac OS X Snow Leopard
-  VERSIONER_PYTHON_PREFER_32_BIT=yes
-  export VERSIONER_PYTHON_PREFER_32_BIT
-  arch -i386 @PYTHON_INTERPRETER@ "$SCRIPTDIR/preview.py" "$@" < /dev/null &
-else
-  @PYTHON_INTERPRETER@ "$SCRIPTDIR/preview.py" "$@" < /dev/null &
-fi
+@PYTHON_INTERPRETER@ "$SCRIPTDIR/preview.py" "$@" < /dev/null &
