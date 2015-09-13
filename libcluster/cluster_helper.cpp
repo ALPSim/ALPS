@@ -27,7 +27,7 @@ epsilon_(1e-9)
   //try to read this transformer, otherwise generate it.
   if(!read(params))
     setup_tables(params);
-
+  
   //Find the periodicity in each direction
   find_periodicity();
 }
@@ -67,33 +67,33 @@ void ClusterHelper::find_non_bipartite_cluster_momenta() {
 
 void ClusterHelper::find_bipartite_cluster_momenta() {
   switch (dimension()) {
-  case 1:
-    rbzone_boundaries_.resize(1, 1);
-    rbzone_boundaries_(0, 0) = M_PI / 2;
-    break;
-  case 2:
-    rbzone_boundaries_.resize(2, 2);
-    rbzone_boundaries_(0, 0) = M_PI / 2;
-    rbzone_boundaries_(0, 1) = M_PI / 2;
-    rbzone_boundaries_(1, 0) = -M_PI / 2;
-    rbzone_boundaries_(1, 1) = M_PI / 2;
-    break;
-  case 3:
-    //reduced Brillouin zone is the one of an fcc lattice with a=2
-    rbzone_boundaries_.resize(4, 3);
-    rbzone_boundaries_(0, 0) = M_PI / 2;
-    rbzone_boundaries_(0, 1) = M_PI / 2;
-    rbzone_boundaries_(0, 2) = M_PI / 2;
-    rbzone_boundaries_(1, 0) = -M_PI / 2;
-    rbzone_boundaries_(1, 1) = M_PI / 2;
-    rbzone_boundaries_(1, 2) = M_PI / 2;
-    rbzone_boundaries_(2, 0) = M_PI / 2;
-    rbzone_boundaries_(2, 1) = -M_PI / 2;
-    rbzone_boundaries_(2, 2) = M_PI / 2;
-    rbzone_boundaries_(3, 0) = M_PI / 2;
-    rbzone_boundaries_(3, 1) = M_PI / 2;
-    rbzone_boundaries_(3, 2) = -M_PI / 2;
-    break;
+    case 1:
+      rbzone_boundaries_.resize(1, 1);
+      rbzone_boundaries_(0, 0) = M_PI / 2;
+      break;
+    case 2:
+      rbzone_boundaries_.resize(2, 2);
+      rbzone_boundaries_(0, 0) = M_PI / 2;
+      rbzone_boundaries_(0, 1) = M_PI / 2;
+      rbzone_boundaries_(1, 0) = -M_PI / 2;
+      rbzone_boundaries_(1, 1) = M_PI / 2;
+      break;
+    case 3:
+      //reduced Brillouin zone is the one of an fcc lattice with a=2
+      rbzone_boundaries_.resize(4, 3);
+      rbzone_boundaries_(0, 0) = M_PI / 2;
+      rbzone_boundaries_(0, 1) = M_PI / 2;
+      rbzone_boundaries_(0, 2) = M_PI / 2;
+      rbzone_boundaries_(1, 0) = -M_PI / 2;
+      rbzone_boundaries_(1, 1) = M_PI / 2;
+      rbzone_boundaries_(1, 2) = M_PI / 2;
+      rbzone_boundaries_(2, 0) = M_PI / 2;
+      rbzone_boundaries_(2, 1) = -M_PI / 2;
+      rbzone_boundaries_(2, 2) = M_PI / 2;
+      rbzone_boundaries_(3, 0) = M_PI / 2;
+      rbzone_boundaries_(3, 1) = M_PI / 2;
+      rbzone_boundaries_(3, 2) = -M_PI / 2;
+      break;
   }
   for(int orig=0; orig<cell_origins().size(); ++orig){
     std::vector<double> o = cell_origins()[orig];
@@ -118,41 +118,41 @@ void ClusterHelper::find_integration_weights() {
   //find lattice integration weights (Simpson weights)
   std::vector<double> weights;
   for(int i=0;i<cell_momenta().size();++i){
-  //for (; itm != itm_end; ++itm) {
+    //for (; itm != itm_end; ++itm) {
     std::vector<double> mom = cell_momenta()[i];
     std::vector<double> mom_trans = matrix_vector_mult(reciprocal_basis_inv_, mom);
     std::vector<std::vector<double> > moms;
     switch (dimension()) {
-    case 1:
-      for (int s1 = -1; s1 <= 1; s1 += 2) {
-        std::vector<double> tmom = mom_trans;
-        tmom[0] = s1 * mom_trans[0];
-        moms.push_back(tmom);
-      }
-      break;
-    case 2:
-      for (int s1 = -1; s1 <= 1; s1 += 2) {
-        for (int s2 = -1; s2 <= 1; s2 += 2) {
+      case 1:
+        for (int s1 = -1; s1 <= 1; s1 += 2) {
           std::vector<double> tmom = mom_trans;
           tmom[0] = s1 * mom_trans[0];
-          tmom[1] = s2 * mom_trans[1];
           moms.push_back(tmom);
         }
-      }
-      break;
-    case 3:
-      for (int s1 = -1; s1 <= 1; s1 += 2) {
-        for (int s2 = -1; s2 <= 1; s2 += 2) {
-          for (int s3 = -1; s3 <= 1; s3 += 2) {
+        break;
+      case 2:
+        for (int s1 = -1; s1 <= 1; s1 += 2) {
+          for (int s2 = -1; s2 <= 1; s2 += 2) {
             std::vector<double> tmom = mom_trans;
             tmom[0] = s1 * mom_trans[0];
             tmom[1] = s2 * mom_trans[1];
-            tmom[2] = s3 * mom_trans[2];
             moms.push_back(tmom);
           }
         }
-      }
-      break;
+        break;
+      case 3:
+        for (int s1 = -1; s1 <= 1; s1 += 2) {
+          for (int s2 = -1; s2 <= 1; s2 += 2) {
+            for (int s3 = -1; s3 <= 1; s3 += 2) {
+              std::vector<double> tmom = mom_trans;
+              tmom[0] = s1 * mom_trans[0];
+              tmom[1] = s2 * mom_trans[1];
+              tmom[2] = s3 * mom_trans[2];
+              moms.push_back(tmom);
+            }
+          }
+        }
+        break;
     }
     double L = pow(n_cluster_cells(), 1. / double(dimension()));
     for (std::size_t g = 0; g < moms.size(); ++g) {
@@ -163,15 +163,15 @@ void ClusterHelper::find_integration_weights() {
           //boundary gets a third
           weight *= 1. / 3.;
         } else
-        //rest gets 2/3 and 4/3 of weight according to Simpson
+          //rest gets 2/3 and 4/3 of weight according to Simpson
           if ((((int) (std::abs(round(m)))) % 2 == 0
                && ((int) (std::abs(round(L)))) % 2 == 0)
               || (((int) (std::abs(round(m)))) % 2 == 1
                   && ((int) (std::abs(round(L)))) % 2 == 1)) {
-          weight *= 2. / 3.;
-        } else {
-          weight *= 4. / 3.;
-        }
+                weight *= 2. / 3.;
+              } else {
+                weight *= 4. / 3.;
+              }
       }
       //momw has dimension+1 entries: dimension for the actual coordinate, and the last one for the weight
       std::vector<double> momw(dimension() + 1);
@@ -278,13 +278,13 @@ void ClusterHelper::extract_and_arrange_cluster_coordinates(){
 void ClusterHelper::setup_tables(const alps::params &params)
 {
   detect_if_bipartite();
-
+  
   compute_inverse_basis();
-
+  
   extract_and_arrange_cluster_coordinates();
-
+  
   compute_inverse_reciprocal_basis();
-
+  
   //setup cluster momenta
   if (bipartite()) {
     find_bipartite_cluster_momenta();
@@ -295,7 +295,7 @@ void ClusterHelper::setup_tables(const alps::params &params)
   
   //find lattice integration weights (Simpson weights)
   find_integration_weights();
-
+  
   if (cluster_coordinates_.size1() != n_cluster_sites())
     boost::throw_exception(std::logic_error("parameter SITES does not match cluster definition"));
   if (cluster_momenta_.size1() != n_cluster_sites())
@@ -678,7 +678,7 @@ ClusterHelper::setup_classes(const Matrix<int>::Type& symmetry_table) const
           for (pair_class_type::const_iterator it_j1=it_i1->begin();
                it_j1!=it_i1->end(); ++it_j1) {
             for (pair_class_type::const_iterator it_j2=it_i2->begin();it_j2!=it_i2->end(); ++it_j2) {
-               if (*it_j1==*it_j2 || (it_j1->first==it_j2->second && it_j1->second==it_j2->first&&paramagnet_)) {
+              if (*it_j1==*it_j2 || (it_j1->first==it_j2->second && it_j1->second==it_j2->first&&paramagnet_)) {
                 intersec = true;
                 reducible = true;
                 break;
@@ -723,7 +723,7 @@ bool ClusterHelper::inside_cluster(std::vector<double> v, const Matrix<double>::
   bool inside = true;
   for (unsigned int d=0; d<v.size(); ++d)
     inside &= v[d]<1 && v[d]>=0;
-    return inside;
+  return inside;
 }
 
 
@@ -760,7 +760,7 @@ bool ClusterHelper::append_column_no_duplicates(Matrix<double>::Type& m, const s
   m.resize(m.size1()+1, v.size(), true);
   for (unsigned int d=0; d<m.size2(); ++d)
     m(m.size1()-1,d) = v[d];
-    return true;
+  return true;
 }
 
 
@@ -778,7 +778,7 @@ bool ClusterHelper::append_column_no_duplicates(Matrix<int>::Type& m,
   m.resize(m.size1()+1, smap.size(), true);
   for (unsigned int d=0; d<m.size2(); ++d)
     m(m.size1()-1,d) = smap[d];
-    return true;
+  return true;
 }
 
 
@@ -805,8 +805,8 @@ std::vector<double> ClusterHelper::map_back_into_brillouin_zone(std::vector<doub
 
 
 std::vector<double> ClusterHelper::map_back_into_cluster(std::vector<double> v,
-                                                                const Matrix<double>::Type& B_inv,
-                                                                const Matrix<double>::Type& B) const
+                                                         const Matrix<double>::Type& B_inv,
+                                                         const Matrix<double>::Type& B) const
 {
   v = matrix_vector_mult(B_inv, v);
   for (unsigned int d=0; d<v.size(); ++d) {
@@ -899,9 +899,9 @@ unsigned int ClusterHelper::identify_sublattice(const Matrix<double>::Type& coor
   double sum=0;
   for (std::size_t d=0; d<coordinate_matrix.size2(); ++d)
     sum += coordinate_matrix(i,d);
-    sum = round(sum);
-    sum *= sum<0 ? -1 : 1;
-    return (int(round(sum)))%2;
+  sum = round(sum);
+  sum *= sum<0 ? -1 : 1;
+  return (int(round(sum)))%2;
 }
 
 double ClusterHelper::round(const double d) const
@@ -948,7 +948,7 @@ bool ClusterHelper::operator==(const ClusterHelper &CH) const{
   if(Matrix<double>::norm_1(reciprocal_basis_ - CH.reciprocal_basis_) > epsilon_) return false;
   if(Matrix<double>::norm_1(reciprocal_basis_inv_ - CH.reciprocal_basis_inv_) > epsilon_) return false;
   if(Matrix<double>::norm_1(rbzone_boundaries_ - CH.rbzone_boundaries_) > epsilon_) return false;
-
+  
   //compare int matrices
   if(Matrix<int>::norm_1(symmetry_table_k_space_ - CH.symmetry_table_k_space_) > epsilon_) return false;
   if(Matrix<int>::norm_1(symmetry_table_real_space_ - CH.symmetry_table_real_space_) > epsilon_) return false;
@@ -958,5 +958,5 @@ bool ClusterHelper::operator==(const ClusterHelper &CH) const{
   }
   
   return true;
-
+  
 }
