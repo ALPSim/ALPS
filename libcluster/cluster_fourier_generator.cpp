@@ -7,7 +7,7 @@
 #include "boost/lexical_cast.hpp"
 
 #include "cluster_fourier_transform.h"
-#include "cluster.h"
+#include "cluster_transform.h"
 
 void FourierTransformer::generate_cluster_transformer(const alps::params &parms,
                                               boost::shared_ptr<FourierTransformer> &fourier_ptr)

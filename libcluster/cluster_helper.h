@@ -16,7 +16,7 @@
 #include "boost/tuple/tuple.hpp"
 #include <set>
 
-#include "alpsgraph.h"
+#include "cluster_graph.h"
 
 
 class ClusterHelper : private alps_graph

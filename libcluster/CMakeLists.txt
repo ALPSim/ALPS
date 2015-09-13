@@ -19,8 +19,8 @@ add_library (cluster
 cluster_fourier_generator.cpp
 CDMFT_transform.cpp          cluster_helper.cpp           
 DCA_transform.cpp            
-AFM_transform.cpp            
-alpsgraph.cpp 
+AFM_DCA_transform.cpp            
+cluster_graph.cpp 
 )
 
 target_link_libraries(cluster ${FOURIER_LIBRARIES} ${GREENS_LIBRARIES})

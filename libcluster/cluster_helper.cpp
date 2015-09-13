@@ -8,8 +8,8 @@
  *
  *****************************************************************************/
 
-#include "alpsgraph.h"
-#include "cluster.h"
+#include "cluster_graph.h"
+#include "cluster_helper.h"
 #include "alps/hdf5/ublas/vector.hpp"
 #include "alps/hdf5/ublas/matrix.hpp"
 #include "boost/lexical_cast.hpp"

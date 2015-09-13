@@ -7,7 +7,7 @@
 #include "alps/numeric/matrix.hpp"
 
 #include "cluster.h"
-#include "AFMDCA_transform.hxx"
+#include "AFM_DCA_transform.hxx"
 #include "fourier_transform.h"
 
 matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_green_function_t &G_omega,
