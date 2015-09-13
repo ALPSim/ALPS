@@ -21,7 +21,7 @@
 #include "cluster.h"
 #include "DCA_transform.hxx"
 #include "SimpleDCA_transform.hxx"
-#include "AFMDCA_transform.hxx"
+#include "AFM_DCA_transform.hxx"
 
 #include "selfconsistency.h"
 #include "externalsolver.h"

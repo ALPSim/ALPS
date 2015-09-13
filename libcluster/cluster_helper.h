@@ -81,9 +81,11 @@ public:
   bool operator==(const ClusterHelper &CH) const;
 private:
   void setup_tables(const alps::params& params);
+  ///create a table of point group symmetries in 1d, 2d, or 3d.
+  std::vector<Matrix<double>::Type > setup_point_groups() const;
   void symmetry_analysis(const Matrix<double>::Type& basis,
                          const Matrix<double>::Type& basis_inv);
-  void ladder_symmetry_analysis();
+//  void ladder_symmetry_analysis();
   std::pair<site_class_set_type, pair_class_set_type> setup_classes(const Matrix<int>::Type& symmetry_table) const;
   bool inside_cluster(std::vector<double> v, const Matrix<double>::Type& b) const;
   bool inside_reduced_brillouin_zone(std::vector<double> v) const;

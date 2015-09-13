@@ -446,12 +446,8 @@ bool ClusterHelper::read(const alps::params &parms,const std::string &location){
   return false;
 }
 
-void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
-                                      const Matrix<double>::Type& basis_inv/*,
-                                                                            const Matrix<double>::Type& reciprocal_basis,
-                                                                            const Matrix<double>::Type& reciprocal_basis_inv */)
-{
-  //setup point group
+std::vector<ClusterHelper::Matrix<double>::Type > ClusterHelper::setup_point_groups() const{
+  //setup point group. This function has the 1d, 2d, and 3d simple cubic point groups hard coded.
   const int gr1D[] = { 1, -1 };
   const int gr2D[] = {  1,  0,  0,  1,
     -1,  0,  0,  1,
@@ -529,27 +525,29 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
       gr = gr1D;
       grsize = 0;
   }
-  std::vector<Matrix<double>::Type > group(grsize, Matrix<double>::Type(dimension(), dimension()));
+  std::vector<Matrix<double>::Type > groups(grsize, Matrix<double>::Type(dimension(), dimension()));
   for (unsigned int g=0; g<grsize; ++g)
     for (unsigned int i=0; i<dimension(); ++i)
       for (unsigned int j=0; j<dimension(); ++j)
-        group[g](j,i) = gr[i+j*dimension()+g*dimension()*dimension()];
+        groups[g](j,i) = gr[i+j*dimension()+g*dimension()*dimension()];
+  return groups;
+}
+void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
+                                      const Matrix<double>::Type& basis_inv)
+{
+  //generate a table of all the point groups in this dimension
+  std::vector<Matrix<double>::Type > groups=setup_point_groups();
   //setup symmetry table in real space
-  //Matrix<int>::Type symmetry_table_real_space;
-  /*if(alps::is_master())
-   std::cout << "good symmetries: ";*/
-  for (unsigned int g=0; g<group.size(); ++g) {
+  for (unsigned int g=0; g<groups.size(); ++g) {
     std::map<int, int> vertexmap;
     std::set<int> vertexset;
     for (unsigned int i=0; i<n_cluster_sites(); ++i) {
       bool bad = false;
-      //-> at this point we should separate knowledge of cells from knowledge of the alps graph structure. All we need is an origin, which is a vector type.
-      //we can achieve this by generating a vector of origins and iterating over them.
       for(int orig=0;orig<cell_origins().size(); ++orig){
         std::vector<double> c = cell_origins()[orig];
         for (unsigned int d=0; d<dimension(); ++d)
           c[d] += cluster_coordinate(i,d);
-        c = matrix_vector_mult(group[g], c);
+        c = matrix_vector_mult(groups[g], c);
         c = map_back_into_cluster(c, basis_inv, basis);
         unsigned int i_mapped = identify_vertex(c, cluster_coordinates_);
         if (!vertexmap.insert(std::pair<int,int>(i, i_mapped)).second) {
@@ -571,7 +569,7 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
   //setup equivalence classes of sites and site pairs
   boost::tie(site_class_set_real_space_, pair_class_set_real_space_) = setup_classes(symmetry_table_real_space_);
   //setup symmetry table in k space
-  for (unsigned int g=0; g<group.size(); ++g) {
+  for (unsigned int g=0; g<groups.size(); ++g) {
     std::map<int, int> vertexmap;
     std::set<int> vertexset;
     for (unsigned int i=0; i<n_cluster_sites(); ++i) {
@@ -585,7 +583,7 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
         for (unsigned int d=0; d<dimension(); ++d)
           c[d] = 2*M_PI*o[d]+cluster_momentum(i,d);
         //std::cout << c[0] << " "<< c[1] << " g ";
-        c = matrix_vector_mult(group[g], c);
+        c = matrix_vector_mult(groups[g], c);
         //std::cout << c[0] << " " << c[1] << " ma ";
         c = map_back_into_brillouin_zone(c);
         //std::cout << c[0] << " " << c[1] << " : ";
