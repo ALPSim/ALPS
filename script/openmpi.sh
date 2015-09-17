@@ -4,7 +4,7 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-VERSION=1.4.5
+VERSION=1.10.0
 
 PREFIX="$1"
 BUILD_DIR="$2"
@@ -18,7 +18,7 @@ fi
 LOG="$0.log.$$"
 echo "executing $0 $*" | tee "$LOG"
 
-URL="http://www.open-mpi.org/software/ompi/v1.4/downloads/openmpi-$VERSION.tar.gz"
+URL="http://www.open-mpi.org/software/ompi/v1.10/downloads/openmpi-$VERSION.tar.gz"
 SRC="$SRC_DIR/openmpi-$VERSION.tar.gz"
 
 echo "cleaning up..." | tee -a "$LOG"

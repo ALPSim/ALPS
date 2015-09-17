@@ -1,10 +1,10 @@
 #!/bin/sh
-#  Copyright Synge Todo 2009 - 2010.
+#  Copyright Synge Todo 2009 - 2011.
 #  Distributed under the Boost Software License, Version 1.0.
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-VERSION=1.8.15-patch1
+VERSION=3.3.1
 
 PREFIX="$1"
 BUILD_DIR="$2"
@@ -18,12 +18,12 @@ fi
 LOG="$0.log.$$"
 echo "executing $0 $*" | tee "$LOG"
 
-URL="http://ftp.hdfgroup.org/ftp/HDF5/releases/hdf5-$VERSION/src/hdf5-$VERSION.tar.gz"
-SRC="$SRC_DIR/hdf5-$VERSION.tar.gz"
+URL="http://www.cmake.org/files/v3.3/cmake-$VERSION.tar.gz"
+SRC="$SRC_DIR/cmake-$VERSION.tar.gz"
 
 echo "cleaning up..." | tee -a "$LOG"
 if test -d "$BUILD_DIR"; then
-  rm -rf "$BUILD_DIR/hdf5-$VERSION"
+  rm -rf "$BUILD_DIR/cmake-$VERSION"
 else
   mkdir -p "$BUILD_DIR"
 fi
@@ -42,22 +42,13 @@ fi
 
 ( \
 echo "configuring..." && \
-(cd "$BUILD_DIR/hdf5-$VERSION" && ./configure --prefix="$PREFIX") && \
+(cd "$BUILD_DIR/cmake-$VERSION" && ./bootstrap --prefix="$PREFIX") && \
 echo "building..." && \
-(cd "$BUILD_DIR/hdf5-$VERSION" && make) && \
+(cd "$BUILD_DIR/cmake-$VERSION" && make) && \
 echo "installing..." && \
-(cd "$BUILD_DIR/hdf5-$VERSION" && make install) && \
+(cd "$BUILD_DIR/cmake-$VERSION" && make install) && \
 echo "cleaning up..." && \
-(cd "$BUILD_DIR/hdf5-$VERSION" && make distclean) && \
-echo "configuring with Fortran..." && \
-(cd "$BUILD_DIR/hdf5-$VERSION" && ./configure --prefix="$PREFIX" --enable-fortran) && \
-echo "building with Fortran..." && \
-(cd "$BUILD_DIR/hdf5-$VERSION" && make) && \
-echo "installing with Fortran..." && \
-(cd "$BUILD_DIR/hdf5-$VERSION" && make install) && \
-echo "cleaning up..." && \
-rm -rf "$BUILD_DIR/hdf5-$VERSION" && \
-
+rm -rf "$BUILD_DIR/cmake-$VERSION" && \
 echo "done" \
 ) 2>&1 | tee -a "$LOG"
 

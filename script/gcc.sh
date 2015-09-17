@@ -4,10 +4,10 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-VERSION=4.6.4
-GMPVERSION=5.1.2
-MPFRVERSION=3.1.2
-MPCVERSION=1.0.1
+VERSION=4.9.3
+GMPVERSION=5.1.3
+MPFRVERSION=3.1.3
+MPCVERSION=1.0.3
 
 PREFIX="$1"
 BUILD_DIR="$2"

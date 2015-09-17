@@ -17,6 +17,7 @@ cp /opt/alps/lib/libmca_common_sm* deplibs/lib
 cp /opt/alps/lib/libopen-* deplibs/lib
 cp /opt/alps/lib/libgfortran* deplibs/lib
 cp /opt/alps/lib/libgcc* deplibs/lib
+cp /opt/alps/lib/libstdc+* deplibs/lib
 cp /opt/alps/lib/libquadmath* deplibs/lib
 cp /opt/alps/lib/libgomp* deplibs/lib
 cp -r /opt/alps/lib/openmpi deplibs/lib
@@ -26,6 +27,7 @@ install_name_tool -id /opt/alps/lib/libsz.2.dylib deplibs/lib/libsz.2.0.0.dylib
 install_name_tool -id /opt/alps/lib/libz.1.dylib deplibs/lib/libz.dylib
 install_name_tool -id /opt/alps/lib/libz.1.dylib deplibs/lib/libz.1.dylib
 install_name_tool -id /opt/alps/lib/libz.1.dylib deplibs/lib/libz.1.2.*.dylib
+install_name_tool -id /opt/alps/lib/libzmq.5.dylib deplibs/lib/libzmq.5.dylib
 #install_name_tool -change /opt/local/lib/libsz.2.dylib /opt/alps/lib/libsz.2.dylib deplibs/lib/libhdf5.dylib
 #install_name_tool -change /opt/local/lib/libsz.2.dylib /opt/alps/lib/libsz.2.dylib deplibs/lib/libhdf5.*.dylib
 #install_name_tool -change /opt/local/lib/libsz.2.dylib /opt/alps/lib/libsz.2.dylib deplibs/lib/libhdf5_hl.dylib
