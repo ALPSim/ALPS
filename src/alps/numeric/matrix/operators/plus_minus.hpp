@@ -53,14 +53,16 @@ template <typename T1, typename T2, typename Tag1, typename Tag2>
 typename plus_minus_return_type_helper<T1,T2>::type do_plus(T1 const& t1, T2 const& t2, Tag1, Tag2)
 {
     typename plus_minus_return_type_helper<T1,T2>::type r(t1);
-    return r += t2;
+    r += t2;
+    return r;
 }
 
 template <typename T1, typename T2, typename Tag1, typename Tag2>
 typename plus_minus_return_type_helper<T1,T2>::type do_minus(T1 const& t1, T2 const& t2, Tag1, Tag2)
 {
     typename plus_minus_return_type_helper<T1,T2>::type r(t1);
-    return r -= t2;
+    r -= t2;
+    return r;
 }
 
 
