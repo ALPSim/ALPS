@@ -78,8 +78,8 @@ class tinyvector {
         data_type _data __attribute__((aligned( 16 * sizeof(T) )));
 };
 
-template <class T, int N>
-inline const tinyvector<T, N, NO_OPT> & operator+=(tinyvector<T, N, NO_OPT> &left, const tinyvector<T, N, NO_OPT> &right) {
+template <class T, int N, class Opt>
+inline const tinyvector<T, N, Opt> & operator+=(tinyvector<T, N, Opt> &left, const tinyvector<T, N, Opt> &right) {
     for(int i = 0; i < N; ++i)
         left[i] += right[i];
     return left;
@@ -158,15 +158,22 @@ inline const tinyvector<T, N, Opt> operator/(const tinyvector<T, N, Opt> &left, 
 }
 
 template <class T, int N, class Opt>
-double dot(const tinyvector<T, N, Opt> &left, const tinyvector<T, N, Opt> &right) {
+inline double sum(const tinyvector<T, N, Opt> &spin) {
     double result = 0.;
     for(int i = 0; i < N; ++i)
-        result += left[i] * right[i];
+        result += spin[i];
     return result;
 }
 
 template <class T, int N, class Opt>
-double abs(const tinyvector<T, N, Opt> &spin) {
+inline double dot(const tinyvector<T, N, Opt> &left, const tinyvector<T, N, Opt> &right) {
+    double result = 0.;
+    result = sum(left * left);
+    return result;
+}
+
+template <class T, int N, class Opt>
+inline double abs(const tinyvector<T, N, Opt> &spin) {
    return std::sqrt(dot(spin, spin));
 }
 
