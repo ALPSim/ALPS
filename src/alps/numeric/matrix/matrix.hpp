@@ -63,8 +63,18 @@ namespace alps {
     /** A matrix template class
       *
       * The matrix class is a matrix which can take any type T
+      * The matrix elements are stored in column major order
       * @param T the type of the elements to be stored in the matrix
       * @param MemoryBlock the underlying (continous) Memory structure
+      * 
+      * Concept requirements on the MemoryBlock:
+      *   it is CopyConstructible, DefaultConstructible, and swappable
+      *   it provides constructor taking size
+      *   it provides constructor taking size and initial value of the elements
+      *   it provides member size()
+      *   it provides const and non-const operator[]
+      *   it provides const and non-const iterators begin(), and end()
+      *   it is serializable
       */
     template <typename T, typename MemoryBlock = std::vector<T> >
     class matrix {
@@ -150,8 +160,8 @@ namespace alps {
 
         /**
           * Access the element in row i, column j
-          * @param i 0<= i <= num_rows()
-          * @param j 0<= j <= num_cols()
+          * @param i 0<= i < num_rows()
+          * @param j 0<= j < num_cols()
           * @return A mutable reference to the matrix element at position (i,j).
           */
         inline value_type& operator()(const size_type i, const size_type j);
@@ -196,7 +206,7 @@ namespace alps {
 
         /**
           * Checks if a matrix is empty
-          * @return true if the matrix is a 0x0 matrix, false otherwise.
+          * @return true if the matrix is a 0xN or Nx0 matrix, false otherwise.
           */
         inline bool empty() const;
 
@@ -211,12 +221,12 @@ namespace alps {
         inline size_type num_cols() const;
 
         /**
-          * @return The stride for moving to the next element along a row
+          * @return The stride for moving to the next element along a column (increasing 1st index by 1). Since the matrix is stored in column major order, it returns 1.
           */
         inline difference_type stride1() const;
 
         /**
-          * @return The stride for moving to the next element along a column
+          * @return The stride for moving to the next element along a row (increasing 2nd index by 1)
           */
         inline difference_type stride2() const;
 

@@ -145,17 +145,13 @@ namespace numeric {
         v*=c;
 #ifdef VECLIB
         vecLib::vvexp(&result[0], &v[0], &s);
-#else
-#ifdef ACML
+#elif ACML
         acml::vrda_exp(s, &v[0], &result[0]);
-#else
-#ifdef MKL
+#elif MKL
         mkl::vdExp(s,  &v[0], &result[0]);
 #else
         using std::exp;
         std::transform(v.begin(), v.end(), result.begin(), static_cast<double(*)(double)> (&exp));
-#endif
-#endif
 #endif
         return result;
     }
