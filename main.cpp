@@ -16,7 +16,6 @@
 #include <fstream>
 
 #include <alps/params.hpp>
-#include <alps/utility/copyright.hpp>
 
 #include "selfconsistency.h"
 
@@ -42,14 +41,18 @@ int main(int argc, char** argv)
       std::cerr<<"mpi-run mpi_options program_name -- parameter_file"<<std::endl;
       exit(1);
     }
-    std::cout << "ALPS DMFT self-consistency condition.\n\n";
-    alps::print_copyright(std::cout);
+    std::cout << "#################################################"<<std::endl;
+    std::cout << "### ALPS Dynamical Mean Field Framework.      ###"<<std::endl;
+    std::cout << "### Copyright Emanuel Gull, 2005 - 2015       ###"<<std::endl;
+    std::cout << "### To be used with permission by the authors ###"<<std::endl;
+    std::cout << "#################################################"<<std::endl;
     alps::params parms=read_parameters_from_file(argv[1]);
     //perform selfconsistency loop for single site or cluster...
     if(!parms.defined("CLUSTER_LOOP")){
       perform_single_site_loop(parms);
-    }else
-      perform_cluster_loop(parms);
+    }else{
+//      perform_cluster_loop(parms);
+    }
     if(parms.defined("MODIFY_PARAMETER_FILE")){
       std::ofstream os(argv[1]);
 	
