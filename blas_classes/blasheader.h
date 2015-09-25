@@ -4,7 +4,7 @@
 
 
 #include<complex>
-#ifndef MY_BLAS_DEFS
+#ifdef NO_MY_BLAS_DEFS
 #include<boost/numeric/bindings/blas.hpp>
 #include<boost/numeric/bindings/lapack.hpp>
 #include<boost/numeric/bindings/lapack/driver/gesv.hpp>
