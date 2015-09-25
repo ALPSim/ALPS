@@ -8,10 +8,7 @@
 
 #include "boost/shared_ptr.hpp"
 
-#include "alps/ngs/params.hpp"
-
-#include "green_function.h" 
-#include "nambu_green_function.h" 
+#include "alps/gf/gf.hpp" 
 
 
 inline std::complex<double> f_omega(std::complex<double> iw, double c1, double c2, double c3) {

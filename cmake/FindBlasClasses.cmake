@@ -5,6 +5,7 @@ SET(INCLUDE_SEARCH_PATHS
  ${BLAS_CLASSES_DIR}
  ${DMFT_DIR}/blas_classes
  ${CMAKE_SOURCE_DIR}
+ ${CMAKE_SOURCE_DIR}/blas_classes
  ${CMAKE_SOURCE_DIR}/..
  )
 

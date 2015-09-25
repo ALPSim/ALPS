@@ -6,11 +6,6 @@
  *
  *****************************************************************************/
 
-#include "alps/config.h" // needed to set up correct bindings
-
-#include "boost/numeric/bindings/ublas.hpp"
-#include "boost/numeric/bindings/lapack/driver/gesv.hpp"
-
 #include "fourier_transform.h"
 
 typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
@@ -183,9 +178,14 @@ void generate_spline_matrix(dense_matrix & spline_matrix, double dt) {
   
   // solve A*spline_matrix=I
   // gesv solves A*X=B, input for B is I, output (=solution X) is spline_matrix
-  spline_matrix = boost::numeric::ublas::identity_matrix<double>(Np1);
+  /*spline_matrix = boost::numeric::ublas::identity_matrix<double>(Np1);
   boost::numeric::ublas::vector<fortran_int_t> ipivot(A.size1());
   boost::numeric::bindings::lapack::gesv(A, ipivot,spline_matrix);
+  this really is not the right way to solve a spline equation system.. rework this at a later time*/
+  std::vector<int> ipivot(Np1);
+  int info;
+  lapack::dgesv_(&Np1, &Np1, &(A(0,0)),&(Np1), &(ipiv[0]), &(splin_metrix(0,0)), &Np1, &info);
+  if(info!=0) std::cerr<<"dgesv went wrong!!"<<std::endl;
 }
 
 

@@ -15,7 +15,7 @@
 #include <iostream>
 #include <fstream>
 
-#include <alps/ngs/params.hpp>
+#include <alps/params.hpp>
 #include <alps/utility/copyright.hpp>
 
 #include "selfconsistency.h"
