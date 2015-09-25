@@ -29,8 +29,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Resources:                                                                      *
  *                                                                                 *
- * original paper: http://cs.anu.edu.au/~bdm/nauty/pgi.pdf                         *
- * the algorithm : http://www.math.unl.edu/~shartke2/math/papers/canonical.pdf     *
+ * original paper: B. D. McKay, Congressus Numerantium , 45–87 (1981)              *
+ *                 http://cs.anu.edu.au/~bdm/nauty/pgi.pdf                         *
+ * the algorithm : S. G. Hartke and A. J. Radcliffe, in Communicating mathematics  *
+ *                 Contemp. Math., Vol. 479 (2009), pp. 99–111                     *
+ *                 http://www.math.unl.edu/~shartke2/math/papers/canonical.pdf     *
  *                                                                                 *
  * Be careful when looking at the examples of the algorithm paper.                 *
  * There seems to be at least one mistake. The problem starts on page 6, where the *
