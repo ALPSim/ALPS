@@ -8,15 +8,16 @@
 #include "alps/params.hpp"
 #include "alps/gf/tail.hpp"
 #include "impurity_solver.h"
+#include "hilbert_transform.h"
 
 typedef alps::gf::omega_sigma_gf_with_tail single_site_matsubara_gf;
 typedef alps::gf::itime_sigma_gf_with_tail single_site_itime_gf;
 
-class FrequencySpaceHilbertTransformer;
 class DCATransformer;
 class CDMFTTransformer;
 /// performs a DMFT self-conistency loop until convergence
 void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver& solver,  FrequencySpaceHilbertTransformer& hilbert);
+void define_selfconsistency_parameters(alps::params &p);
 
 
 void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver, DCATransformer& clustertrans);

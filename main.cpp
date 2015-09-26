@@ -21,13 +21,15 @@
 
 /// @brief The DMFT main program
 
-alps::params read_parameters_from_file(const std::string &filename){
-  {
-    std::ifstream is(filename.c_str());
-    if(!is.is_open()){std::cerr<<"parameter file: "<<filename<<" is not open! exiting!"<<std::endl; exit(1); }
+alps::params read_parameters_from_file(int argc, const char ** argv){
+  alps::params parms(argc, argv);
+  define_selfconsistency_parameters(parms);
+  ImpuritySolver::define_parameters(parms);
+  FrequencySpaceHilbertTransformer::define_parameters(parms);
+
+  if (parms.help_requested(std::cout)) {
+    exit(0);
   }
-  alps::params parms(filename);
-  parms["BASENAME"]=std::string(filename);
   return parms;
 }
 
@@ -46,7 +48,7 @@ int main(int argc, char** argv)
     std::cout << "### Copyright Emanuel Gull, 2005 - 2015       ###"<<std::endl;
     std::cout << "### To be used with permission by the authors ###"<<std::endl;
     std::cout << "#################################################"<<std::endl;
-    alps::params parms=read_parameters_from_file(argv[1]);
+    alps::params parms=read_parameters_from_file(argc, (const char **)argv);
     //perform selfconsistency loop for single site or cluster...
     if(!parms.defined("CLUSTER_LOOP")){
       perform_single_site_loop(parms);

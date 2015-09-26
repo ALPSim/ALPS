@@ -23,6 +23,7 @@ void define_selfconsistency_parameters(alps::params &p){
   p.define<double>("RELAX_RATE", 1., "Convergence acceleration (or deceleration) parameter. Choose 1 if unsure.");
   p.define<bool>("AFM_SELFCONSISTENCY", false, "Use the AFM self-consistency condition.");
   p.define<bool>("SPIN_SYMMETRIZATION", true, "symmetrize 'up' and 'down' spins after each solver call.");
+  p.define<std::string>("SOLVER", "Path to the Solver.");
 }
 void run_convergence_acceleration(single_site_matsubara_gf &G_new, const single_site_matsubara_gf &G_old, double relax_rate){
   if(relax_rate !=1){
@@ -146,9 +147,9 @@ void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver&
 void perform_single_site_loop(const alps::params &parms){
 
   FrequencySpaceHilbertTransformer *transform_ptr; //super ugly
-  if(parms.defined("TWODBS"))
+  if(parms.exists("TWODBS"))
     transform_ptr=setup_2D_hilbert_transform(parms);
-  else if (parms.defined("DOSFILE"))
+  else if (parms.exists("DOSFILE"))
     transform_ptr=setup_DOS_hilbert_transform(parms);
   else
     transform_ptr=setup_Bethe_hilbert_transform(parms);

@@ -14,11 +14,13 @@
 void FrequencySpaceHilbertTransformer::define_parameters(alps::params &p){
   p.define<double>("t", "Hopping element for semi circular & square lattice density of states ");
   p.define<double>("tprime", "Next-nearest Hopping element for square lattice density of states ");
+  p.define<double>("MU", "Chemical Potential");
   p.define<int>("L", 200, "Number of Brillouin zone points for square lattice integration ");
-  p.define<double>("G0_OMEGA_INPUT", "Input filename for input G0");
+  p.define<std::string>("G0_OMEGA_INPUT", "Input filename for input G0");
   p.define<bool>("ATOMIC", false, "Generate atomic G0 to start from");
   p.define<double>("H_INIT", 0, "Initial (staggered) magnetic field");
   p.define<std::string>("DOSFILE", "File contaning table of Density of States");
+  p.define<std::string>("TWODBS", "Use Hilbert transform for two-dimensional band structure");
 
 }
 FrequencySpaceHilbertTransformer::FrequencySpaceHilbertTransformer(const alps::params &p):
@@ -27,7 +29,7 @@ FrequencySpaceHilbertTransformer::FrequencySpaceHilbertTransformer(const alps::p
         beta_(p["BETA"]),
         mu_(p["MU"]),
         h_init_(p["H_INIT"]),
-        input_filename_(p["G0_omega_input"].as<std::string>()),
+        input_filename_(p["G0_OMEGA_INPUT"].as<std::string>()),
         atomic_initial_G0_(p["ATOMIC"]){
 }
 FrequencySpaceHilbertTransformer *setup_Bethe_hilbert_transform(const alps::params &parms){
@@ -57,8 +59,10 @@ FrequencySpaceHilbertTransformer *setup_2D_hilbert_transform(const alps::params 
   return transform_ptr;
 }
 bool FrequencySpaceHilbertTransformer::read_initial_G0(single_site_matsubara_gf &G0_omega){
+  {
+    std::ifstream in_file(input_filename_); if(!in_file.good()) return false;
+  }
   alps::hdf5::archive G0_input_file(input_filename_, alps::hdf5::archive::READ);
-  if(!G0_input_file.is_open()) return false;
   std::cout<<"reading initial G0_omega"<<std::endl;
   G0_omega.load(G0_input_file, "/G0");
   return true;
