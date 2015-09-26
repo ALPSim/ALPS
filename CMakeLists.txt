@@ -15,8 +15,7 @@ find_package(Selfconsistency REQUIRED)
 include(UseGtest)
 
 include_directories(${BLAS_CLASSES_INCLUDE_DIR})
-#include_directories(${GREENS_INCLUDE_DIR})
-#include_directories(${FOURIER_INCLUDE_DIR})
+include_directories(${GFTOOLS_INCLUDE_DIR})
 include_directories(${CLUSTER_INCLUDE_DIR})
 include_directories(${SOLVER_INCLUDE_DIR})
 include_directories(${SELFCONSISTENCY_INCLUDE_DIR})
@@ -25,9 +24,10 @@ add_executable(dmft
 main.cpp
 )
 
-target_link_libraries(dmft ${SELFCONSISTENCY_LIBRARIES} ${CLUSTER_LIBRARIES} #${FOURIER_LIBRARIES} 
+target_link_libraries(dmft ${SELFCONSISTENCY_LIBRARIES} 
 #${GREENS_LIBRARIES} 
-${CLUSTER_LIBRARIES} ${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES})
+#${CLUSTER_LIBRARIES} 
+${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES} ${GFTOOLS_LIBRARIES})
 
 install(TARGETS dmft RUNTIME DESTINATION "bin/")
 install(FILES cluster1d.xml cluster3d.xml cluster.xml DESTINATION "share/")

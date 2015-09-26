@@ -5,8 +5,13 @@
  *****************************************************************************/
 
 #pragma once
-namespace alps{ class params;}
-class ImpuritySolver;
+#include "alps/params.hpp"
+#include "alps/gf/tail.hpp"
+#include "impurity_solver.h"
+
+typedef alps::gf::omega_sigma_gf_with_tail single_site_matsubara_gf;
+typedef alps::gf::itime_sigma_gf_with_tail single_site_itime_gf;
+
 class FrequencySpaceHilbertTransformer;
 class DCATransformer;
 class CDMFTTransformer;

@@ -6,16 +6,18 @@
 
 #pragma once
 #include <cstdlib>
+#include <string>
 #include "alps/utilities/temporary_filename.hpp"
+#include "alps/params.hpp"
 
 class ImpuritySolver
 {
 public:
   ImpuritySolver(const std::string & launch_command, const alps::params &p) :
     launch_command_(launch_command),
-    params_(p),
     infile_str_(p["INFILE"].as<std::string>()),
-    outfile__str_(p["INFILE"]){}
+    outfile_str_(p["INFILE"].as<std::string>()),
+    params_(p){}
 
   static void define_parameters(alps::params &p){
     p.define<std::string>("INFILE", alps::temporary_filename("alps_external_solver_")+".in.h5","Filename for temporary file");
@@ -27,17 +29,15 @@ public:
   }
   template<typename MGF, typename IGF> void solve(const MGF& G0_omega, MGF &G_omega, IGF &G_tau){
     {
-      alps::hdf5::archive solver_input(infile, alps::hdf5::archive::WRITE);
+      alps::hdf5::archive solver_input(infile_str_, alps::hdf5::archive::WRITE);
       solver_input<<alps::make_pvp("/parameters", params_);
-      solver_input<<alps::make_pvp("/G0",G0_omega);
+      G0_omega.save(solver_input,"/G0");
     }
     call_solver();
-
-
     {
       alps::hdf5::archive ar(outfile_str_, alps::hdf5::archive::READ);
-      ar>>alps::make_pvp(G_omega, "/G_omega");
-      ar>>alps::make_pvp(G_tau  , "/G_tau");
+      G_omega.load(ar, "/G_omega");
+      G_tau  .load(ar, "/G_tau");
       validate_nan_inf(G_omega);
       validate_nan_inf(G_tau);
     }
@@ -48,17 +48,11 @@ public:
 private:
   template<typename GF> void validate_nan_inf(const GF &G){
     //this is a safety check for impurity solvers.
-    for(typename GF::container_type::const_iterator it=G.data().begin(); it!=G.data().end();++it){
-      if(std::isnan(*it) || std::isinf(*it) ){
-        std::cerr<<G<<std::endl;
-        throw std::runtime_error("Green's function obtained from solver contains nan or inf.");
-      }
-    }
+    for(const typename GF::value_type *it=G.data().data(); it !=G.data().data()+G.data().num_elements(); it++)
+      if(std::isnan(std::abs(*it)) || std::isinf(std::abs(*it))) throw std::runtime_error("encountered nan or inf in GF");
   }
   /// call the executable
   void call_solver(){
-
-    // call the external solver program
     std::string command = launch_command_ + " " + infile_str_ + " " + outfile_str_;
     std::cerr << "Calling external solver as: " <<  command<<std::endl;
     int result = std::system(command.c_str());
@@ -68,7 +62,6 @@ private:
     if (!boost::filesystem::exists(outfile_str_))
       throw std::runtime_error("The external impurity solver failed to write the output file named " + outfile_str_);
   }
-
 
   ///command to launch the solver executable
   const std::string launch_command_;
