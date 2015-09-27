@@ -85,10 +85,10 @@ void compute_selfenergy(const single_site_matsubara_gf &G0_omega,
 
 void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver& solver, FrequencySpaceHilbertTransformer& hilbert)
 {
-  unsigned int n_tau=parms["N"];
-  unsigned int n_matsubara=parms["NMATSUBARA"];
-  unsigned int n_orbital=parms["FLAVORS"];
-  unsigned int n_site=parms["SITES"];
+  int n_tau=parms["N"];
+  int n_matsubara=parms["NMATSUBARA"];
+  int n_orbital=parms["FLAVORS"];
+  int n_site=parms["SITES"];
 
   double beta = parms["BETA"];
   double h = parms["H"];

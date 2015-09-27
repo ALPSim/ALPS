@@ -64,17 +64,12 @@ bool FrequencySpaceHilbertTransformer::read_initial_G0(single_site_matsubara_gf 
   }
   alps::hdf5::archive G0_input_file(input_filename_, alps::hdf5::archive::READ);
   std::cout<<"reading initial G0_omega"<<std::endl;
-  G0_omega.load(G0_input_file, "/G0");
+  G0_omega.load(G0_input_file, "/G0_omega");
   return true;
 }
 void FrequencySpaceHilbertTransformer::write_initial_G0(const single_site_matsubara_gf &G0_omega){
   alps::hdf5::archive G0_omega_file(input_filename_, alps::hdf5::archive::WRITE);
-  G0_omega.save(G0_omega_file, "/G0");
-  /*boost::shared_ptr<FourierTransformer> fourier_ptr;
-  FourierTransformer::generate_transformer(parms, fourier_ptr);
-  itime_green_function_t G0_tau(n_time,1, n_flavor, diagonal);
-  fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega);
-  G0_tau.write("G0_tau_input");*/
+  G0_omega.save(G0_omega_file, "/G0_omega");
 }
 single_site_matsubara_gf FrequencySpaceHilbertTransformer::initial_G0(){
   single_site_matsubara_gf G0_omega(alps::gf::omega_sigma_gf(alps::gf::matsubara_positive_mesh(beta_,n_matsubara_),alps::gf::index_mesh(n_orbital_)));
@@ -116,7 +111,7 @@ single_site_matsubara_gf FSSemicircleHilbertTransformer::operator()(const single
   single_site_matsubara_gf G0_omega(G_omega);
   for(alps::gf::matsubara_index i(0); i<G0_omega.mesh1().extent(); ++i) {
     std::complex<double> iw(0.,(2*i()+1)*M_PI/beta);
-    for(alps::gf::index flavor(0);flavor<G0_omega.mesh2().extent(); ++flavor) {
+    for(alps::gf::index flavor(0);flavor<G0_omega.mesh2().extent(); flavor+=2) {
       G0_omega(i,flavor  ) =1./(iw + mu -h - tsq*G_omega(i,flavor+1));
       G0_omega(i,flavor+1) =1./(iw + mu +h - tsq*G_omega(i,flavor  ));
     }
