@@ -34,9 +34,11 @@ public:
       }
     }
   }
-private:
+protected:
   bool read_initial_G0(single_site_matsubara_gf &G0_omega);
   void write_initial_G0(const single_site_matsubara_gf &G0_omega);
+  void set_c1_unity(single_site_matsubara_gf &G0_omega);
+  void set_c2_muh(single_site_matsubara_gf &G0_omega);
 
   //number of Matsubara frequencies
   const int n_matsubara_;
@@ -61,22 +63,13 @@ public:
   virtual single_site_matsubara_gf operator()(const single_site_matsubara_gf& G_omega,
       single_site_matsubara_gf &G0_omega_ignored,
       const double mu, const double h, const double beta);
+  single_site_matsubara_gf initial_G0();
+
 private:
   double t_; 
 };
 
 
-
-/*class FSHamiltonianHilbertTransformer: public FrequencySpaceHilbertTransformer{
-public:
-  /// the constructor reads in the LDA Hamiltonian from a file
-  FSHamiltonianHilbertTransformer(const alps::params& params);
-  /// take G_iomegan as the input and construct G0_iomegan out of it. Do this
-  /// via summation in k-space. The k-points are defined in the Hamiltonian.
-  virtual single_site_matsubara_gf operator()(const single_site_matsubara_gf &G_omega,
-      single_site_matsubara_gf &G0_omega,
-      const double mu, const double h, const double beta);
-};*/
 
 
 

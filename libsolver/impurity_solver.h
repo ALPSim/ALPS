@@ -9,6 +9,7 @@
 #include <string>
 #include "alps/utilities/temporary_filename.hpp"
 #include "alps/params.hpp"
+#include "alps/gf/fourier.hpp"
 
 class ImpuritySolver
 {
@@ -32,6 +33,10 @@ public:
       alps::hdf5::archive solver_input(infile_str_, alps::hdf5::archive::WRITE);
       solver_input<<alps::make_pvp("/parameters", params_);
       G0_omega.save(solver_input,"/G0");
+      //also create an imaginary time version of G0
+      IGF G0_tau(G_tau);
+      alps::gf::fourier_frequency_to_time(G0_omega, G0_tau);
+      G0_tau.save(solver_input,"/G0_tau");
     }
     call_solver();
     {

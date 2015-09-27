@@ -24,13 +24,13 @@ void FrequencySpaceHilbertTransformer::define_parameters(alps::params &p){
 
 }
 FrequencySpaceHilbertTransformer::FrequencySpaceHilbertTransformer(const alps::params &p):
-        n_matsubara_(p["NMATSUBARA"]),
-        n_orbital_(p["FLAVORS"]),
-        beta_(p["BETA"]),
-        mu_(p["MU"]),
-        h_init_(p["H_INIT"]),
-        input_filename_(p["G0_OMEGA_INPUT"].as<std::string>()),
-        atomic_initial_G0_(p["ATOMIC"]){
+            n_matsubara_(p["NMATSUBARA"]),
+            n_orbital_(p["FLAVORS"]),
+            beta_(p["BETA"]),
+            mu_(p["MU"]),
+            h_init_(p["H_INIT"]),
+            input_filename_(p["G0_OMEGA_INPUT"].as<std::string>()),
+            atomic_initial_G0_(p["ATOMIC"]){
 }
 FrequencySpaceHilbertTransformer *setup_Bethe_hilbert_transform(const alps::params &parms){
   std::cout<<"using Bethe lattice Hilbert transform"<<std::endl;
@@ -71,6 +71,23 @@ void FrequencySpaceHilbertTransformer::write_initial_G0(const single_site_matsub
   alps::hdf5::archive G0_omega_file(input_filename_, alps::hdf5::archive::WRITE);
   G0_omega.save(G0_omega_file, "/G0_omega");
 }
+void FrequencySpaceHilbertTransformer::set_c1_unity(single_site_matsubara_gf &G0_omega){
+  typedef alps::gf::one_index_gf<double, alps::gf::index_mesh> density_matrix_type;
+  density_matrix_type unity=density_matrix_type(alps::gf::index_mesh(2));
+  unity.initialize();
+  unity(alps::gf::index(0))=1;
+  unity(alps::gf::index(1))=1;
+  G0_omega.set_tail(1,unity);
+}
+void FrequencySpaceHilbertTransformer::set_c2_muh(single_site_matsubara_gf &G0_omega){
+  typedef alps::gf::one_index_gf<double, alps::gf::index_mesh> density_matrix_type;
+  density_matrix_type muh=density_matrix_type(alps::gf::index_mesh(2));
+  muh.initialize();
+  muh(alps::gf::index(0))=-(mu_-h_init_);
+  muh(alps::gf::index(1))=-(mu_+h_init_);
+  G0_omega.set_tail(2,muh);
+}
+
 single_site_matsubara_gf FrequencySpaceHilbertTransformer::initial_G0(){
   single_site_matsubara_gf G0_omega(alps::gf::omega_sigma_gf(alps::gf::matsubara_positive_mesh(beta_,n_matsubara_),alps::gf::index_mesh(n_orbital_)));
   if(read_initial_G0(G0_omega)==true){
@@ -85,6 +102,8 @@ single_site_matsubara_gf FrequencySpaceHilbertTransformer::initial_G0(){
         G0_omega(i, flavor) = 1./zeta;
       }
     }
+    set_c1_unity(G0_omega);
+    set_c2_muh(G0_omega);
     write_initial_G0(G0_omega);
     return G0_omega;
   }
@@ -98,17 +117,44 @@ single_site_matsubara_gf FrequencySpaceHilbertTransformer::initial_G0(){
       }
     }
     G0_omega=this->operator()(G_omega, G0_omega, mu_, h_init_, beta_);
+    set_c1_unity(G0_omega);
+    set_c2_muh(G0_omega);
     write_initial_G0(G0_omega);
   }
   return G0_omega;
 }
-
+single_site_matsubara_gf FSSemicircleHilbertTransformer::initial_G0()
+{
+  single_site_matsubara_gf G0_omega(alps::gf::omega_sigma_gf(alps::gf::matsubara_positive_mesh(beta_,n_matsubara_),alps::gf::index_mesh(n_orbital_)));
+  if(read_initial_G0(G0_omega)==true){
+    return G0_omega;
+  }
+  if (atomic_initial_G0_) {
+    return FrequencySpaceHilbertTransformer::initial_G0();
+  }
+  std::cout<<"calculating initial G0_omega for semicircular DOS"<<std::endl;
+  double tsq=t_*t_;
+  for(alps::gf::matsubara_index i(0); i<G0_omega.mesh1().extent(); ++i) {
+    std::complex<double> iw(0.,(2*i()+1)*M_PI/beta_);
+    for(alps::gf::index flavor(0);flavor<G0_omega.mesh2().extent(); ++flavor) {
+      std::complex<double> zeta = iw+mu_+(flavor()%2 ? -h_init_ : h_init_);
+      std::complex<double> tmp = sqrt(zeta*zeta-4*tsq);
+      tmp *= tmp.imag()<0 ? -1 : 1;
+      G0_omega(i, flavor) = (zeta - tmp)/(2*tsq);
+    }
+  }
+  set_c1_unity(G0_omega);
+  set_c2_muh(G0_omega);
+  write_initial_G0(G0_omega);
+  return G0_omega;
+}
 single_site_matsubara_gf FSSemicircleHilbertTransformer::operator()(const single_site_matsubara_gf& G_omega,
     single_site_matsubara_gf &G0_omega_ignored,
     const double mu, const double h, const double beta)
 {
   double tsq=t_*t_;
   single_site_matsubara_gf G0_omega(G_omega);
+  std::cout<<"creating a semicircular G with h: "<<h<<" mu: "<<mu<<" t: "<<t_<<" beta: "<<beta<<std::endl;
   for(alps::gf::matsubara_index i(0); i<G0_omega.mesh1().extent(); ++i) {
     std::complex<double> iw(0.,(2*i()+1)*M_PI/beta);
     for(alps::gf::index flavor(0);flavor<G0_omega.mesh2().extent(); flavor+=2) {
