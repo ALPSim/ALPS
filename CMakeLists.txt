@@ -6,6 +6,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 find_package(ALPS REQUIRED NO_SYSTEM_ENVIRONMENT_PATH)
 find_package(LAPACK REQUIRED)
 find_package(BlasClasses REQUIRED)
+
 find_package(Greens REQUIRED)
 find_package(Fourier REQUIRED)
 find_package(Cluster REQUIRED)
@@ -29,4 +30,4 @@ main.cpp
 target_link_libraries(dmft ${SELFCONSISTENCY_LIBRARIES} ${SOLVER_LIBRARIES} ${CLUSTER_LIBRARIES} ${FOURIER_LIBRARIES} ${GREENS_LIBRARIES} ${CLUSTER_LIBRARIES} ${ALPS_LIBRARIES} ${LAPACK_LIBRARIES})
 
 install(TARGETS dmft RUNTIME DESTINATION "bin/")
-install(FILES cluster1d.xml cluster3d.xml cluster.xml DESTINATION "share/")
+install(FILES libcluster/cluster1d.xml libcluster/cluster3d.xml libcluster/cluster.xml DESTINATION "share/")
