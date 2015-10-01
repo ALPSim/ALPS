@@ -83,8 +83,8 @@ void FrequencySpaceHilbertTransformer::set_c2_muh(single_site_matsubara_gf &G0_o
   typedef alps::gf::one_index_gf<double, alps::gf::index_mesh> density_matrix_type;
   density_matrix_type muh=density_matrix_type(alps::gf::index_mesh(2));
   muh.initialize();
-  muh(alps::gf::index(0))=-(mu_-h_init_);
-  muh(alps::gf::index(1))=-(mu_+h_init_);
+  muh(alps::gf::index(0))=(mu_-h_init_);
+  muh(alps::gf::index(1))=(mu_+h_init_);
   G0_omega.set_tail(2,muh);
 }
 
