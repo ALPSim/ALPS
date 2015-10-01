@@ -44,7 +44,7 @@
 #include "fourier_transform.h"
 
 #include "cluster.h"
-
+#include "cluster_fourier_transform.h"
 #include "externalsolver.h"
 
 
@@ -85,7 +85,7 @@ ImpuritySolver::matsubara_result_type ExternalSolver::solve_matsubara(
       matsubara_green_function_t green0_matsubara_rs(nfreq ,n_sites,n_flavor, nondiagonal);
 
       boost::shared_ptr<FourierTransformer> fourier_ptr;
-      FourierTransformer::generate_transformer(p, fourier_ptr);
+      FourierTransformer::generate_cluster_transformer(p, fourier_ptr);
       green0_matsubara_rs= c_ptr->transform_into_real_space(G0_omega);
       fourier_ptr->frequency_to_time_ft(green0_itime_sc_k, G0_omega);
       green0_itime_sc_rs = c_ptr->transform_into_real_space(green0_itime_sc_k);

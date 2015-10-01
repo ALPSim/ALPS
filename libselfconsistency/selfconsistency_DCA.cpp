@@ -85,7 +85,7 @@ void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
   itime_green_function_t G0_old_tau(n_tau+1, n_site, n_orbital, gf_shape);
   //initialize space for multiple vectors
   boost::shared_ptr<FourierTransformer> fourier_ptr;
-  FourierTransformer::generate_transformer(parms, fourier_ptr);
+  FourierTransformer::generate_cluster_transformer(parms, fourier_ptr);
   double max_diff,norm2_diff;
   double mu;
   do {
@@ -200,7 +200,7 @@ void selfconsistency_loop_DCA_Nambu(const alps::params& parms, ImpuritySolver& s
   nambu_itime_green_function_t G0_old_tau(n_tau+1, n_site, 2, diagonal);
   //initialize space for multiple vectors
   boost::shared_ptr<FourierTransformer> fourier_ptr;
-  FourierTransformer::generate_transformer(parms, fourier_ptr);
+  FourierTransformer::generate_cluster_transformer(parms, fourier_ptr);
   double max_diff;
   do {
     iteration_ctr++;
