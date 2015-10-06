@@ -28,6 +28,7 @@
 #ifndef ALPS_NGS_DETAIL_EXTRACT_FROM_PYOBJECT_HPP
 #define ALPS_NGS_DETAIL_EXTRACT_FROM_PYOBJECT_HPP
 
+#include <alps/config.hpp>
 #if defined(ALPS_HAVE_PYTHON)
 
     #include <alps/ngs/cast.hpp>
