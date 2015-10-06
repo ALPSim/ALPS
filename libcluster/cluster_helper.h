@@ -10,11 +10,15 @@
 
 #pragma once
 
-#include "alps/ngs/params.hpp"
-#include "boost/numeric/ublas/matrix.hpp"
-#include "boost/numeric/ublas/io.hpp"
-#include "boost/tuple/tuple.hpp"
 #include <set>
+#include "boost/tuple/tuple.hpp"
+
+#include "alps/params.hpp"
+#include "alps/hdf5/pointer.hpp"
+
+#include "blasheader.h"
+#include "general_matrix.h"
+#include "dump.h"
 
 #include "cluster_graph.h"
 
@@ -25,15 +29,16 @@ public:
   
   template <typename T> struct Matrix
   {
-    typedef boost::numeric::ublas::matrix<T, boost::numeric::ublas::column_major> Type;
+    typedef blas::general_matrix<T> Type;
     
-    static Type inverse(Type M);
+    static Type inverse(Type M){return M.invert();}
     
     static Type multiply(Type M1, Type M2) {
-      return boost::numeric::ublas::prec_prod(M1, M2);
+      return M1*M2;
     }
-    static double norm_1(const Type &M){ return boost::numeric::ublas::norm_1(M);}
+    static double norm_1(const Type &M){ return M.max();}
   };
+  static void define_parameters(alps::params &p);
   
   typedef std::set<int> site_class_type;
   typedef std::pair<int, int> pair_type;
@@ -75,8 +80,8 @@ public:
   const pair_class_set_type &pair_class_set_k_space() const{return pair_class_set_k_space_;}
   
   virtual void write_hdf5(alps::hdf5::archive &ar, const std::string &p) const;
-  bool write(const alps::params &parms, const std::string &location="/transformer") const;
-  bool read(const alps::params &parms, const std::string &location="/transformer");
+  bool write() const;
+  bool read();
   
   bool operator==(const ClusterHelper &CH) const;
 private:
@@ -139,7 +144,8 @@ private:
   bool paramagnet_;
   bool bipartite_;
   const double epsilon_;
-
+  const std::string hdf5_dump_name_;
+  const std::string cluster_name_;
 };
 
 

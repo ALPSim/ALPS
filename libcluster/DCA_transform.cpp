@@ -6,10 +6,9 @@
 
 #include "alps/numeric/vector_functions.hpp"
 #include "alps/hdf5/vector.hpp"
-#include "alps/hdf5/ublas/matrix.hpp"
 
 #include "cluster.h"
-#include "cluster_fourier_transform.h"
+//#include "cluster_fourier_transform.h"
 
 #include "DCA_transform.hxx"
 #include "SimpleDCA_transform.hxx"
@@ -750,17 +749,6 @@ void DCATransformer::write_hdf5(alps::hdf5::archive &ar, const std::string &p) c
 }
 void ClusterTransformer::write_hdf5(alps::hdf5::archive &ar, const std::string &p) const{
   ClusterHelper::write_hdf5(ar,p);
-}
-void ClusterHelper::write_hdf5(alps::hdf5::archive &ar, const std::string &p) const{
-  //-> include this one: #include <boost/numeric/ublas/io.hpp>
-  //std::cout<<"coord matrix: "<<cluster_coordinates_<<std::endl;
-
-  boost::numeric::ublas::matrix<double,boost::numeric::ublas::row_major> cluster_coordinates=cluster_coordinates_;
-  boost::numeric::ublas::matrix<double,boost::numeric::ublas::row_major> cluster_momenta=cluster_momenta_;
-  boost::numeric::ublas::matrix<double,boost::numeric::ublas::row_major> lattice_momenta=lattice_momenta_;
-  ar<<alps::make_pvp(p+"/cluster_coordinates", cluster_coordinates);
-  ar<<alps::make_pvp(p+"/cluster_momenta", cluster_momenta);
-  ar<<alps::make_pvp(p+"/lattice_momenta", lattice_momenta);
 }
 
 bool adjust_chemical_potential(const double &n_tot,
