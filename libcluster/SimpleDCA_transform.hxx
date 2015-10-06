@@ -1,41 +1,3 @@
-struct SimpleDCATransformer::Forward {
-  template<typename T>
-  static void add(green_function<T>& G_new, const green_function<T>& G,
-                  const int t, const int i, const int j, const int k, const int flavor,
-                  double factor) {
-    if((G_new.shape()!=diagonal) || (G.shape() != nondiagonal)) throw std::logic_error("problem with shape of GF in add!");
-    G_new(t, k, k, flavor) += factor * G(t, i, j, flavor);
-  }
-  template<typename T>
-  static void add(nambu_green_function<T>& G_new, const nambu_green_function<T>& G,
-                  const int t, const int i, const int j, const int k,
-                  double factor) {
-    G_new(t, k, k, 0,0) += factor * G(t, i, j, 0,0);
-    G_new(t, k, k, 0,1) += factor * G(t, i, j, 0,1);
-    G_new(t, k, k, 1,0) += factor * G(t, i, j, 1,0);
-    G_new(t, k, k, 1,1) += factor * G(t, i, j, 1,1);
-  }
-};
-
-
-
-struct SimpleDCATransformer::Backward {
-  template<typename T>
-  static void add(green_function<T>& G_new, const green_function<T>& G,
-                  const int t, const int i, const int j, const int k, const int flavor,
-                  double factor) {
-    G_new(t, i, j, flavor) += factor * G(t, k, k, flavor);
-  }
-  template<typename T>
-  static void add(nambu_green_function<T>& G_new, const nambu_green_function<T>& G,
-                  const int t, const int i, const int j, const int k,
-                  double factor) {
-    G_new(t, i, j, 0, 0) += factor * G(t, k, k, 0, 0);
-    G_new(t, i, j, 0, 1) += factor * G(t, k, k, 0, 1);
-    G_new(t, i, j, 1, 0) += factor * G(t, k, k, 1, 0);
-    G_new(t, i, j, 1, 1) += factor * G(t, k, k, 1, 1);
-  }
-};
 
 
 
@@ -122,61 +84,6 @@ inline matsubara_green_function_t SimpleDCATransformer::fourpoint_green_function
 }
 
 
-
-template <typename T>
-green_function<T> SimpleDCATransformer::fourpoint_green_function_add(const green_function<T>& G1,
-                                                                     const green_function<T>& G2) const
-{
-  green_function<T> G(G1);
-  for (int t=0; t<G.ntime(); ++t) {
-    for (int f=0; f<G.nflavor(); ++f) {
-      for (int k1=0; k1<G.nsite(); k1++) {
-        for (int k2=0; k2<G.nsite(); k2++) {
-          G(t, k1, k2, f) += G2(t, k1, k2, f);
-        }
-      }
-    }
-  }
-  return G;
-}
-
-
-
-template <typename T>
-green_function<T> SimpleDCATransformer::fourpoint_green_function_subtract(const green_function<T>& G1,
-                                                                          const green_function<T>& G2) const
-{
-  green_function<T> G(G1);
-  for (int t=0; t<G.ntime(); ++t) {
-    for (int f=0; f<G.nflavor(); ++f) {
-      for (std::size_t k1=0; k1<G.nsite(); k1++) {
-        for (std::size_t k2=0; k2<G.nsite(); k2++) {
-          G(t, k1, k2, f) -= G2(t, k1, k2, f);
-        }
-      }
-    }
-  }
-  return G;
-}
-
-
-
-template <typename T>
-green_function<T> SimpleDCATransformer::fourpoint_green_function_divide(const green_function<T>& G1,
-                                                                        const T d) const
-{
-  green_function<T> G(G1);
-  for (int t=0; t<G.ntime(); ++t) {
-    for (int f=0; f<G.nflavor(); ++f) {
-      for (int k1=0; k1<G.nsite(); k1++) {
-        for (int k2=0; k2<G.nsite(); k2++) {
-          G(t, k1, k2, f) /= d;
-        }
-      }
-    }
-  }
-  return G;
-}
 
 template<typename T, class D>
 nambu_green_function<T> SimpleDCATransformer::transform_coordinates(const nambu_green_function<T>& G) const

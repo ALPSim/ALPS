@@ -26,9 +26,6 @@
 
 #pragma once
 
-#include "green_function.h"
-#include "nambu_green_function.h"
-
 #include "cluster_graph.h"
 #include "cluster_helper.h"
 #include "cluster_transform.h"

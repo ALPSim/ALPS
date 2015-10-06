@@ -34,13 +34,14 @@ typedef alps::gf::omega_k_sigma_gf_with_tail cluster_matsubara_kspace_gf;
 typedef alps::gf::itime_k_sigma_gf_with_tail cluster_itime_kspace_gf;
 typedef alps::gf::omega_r1_r2_sigma_gf_with_tail cluster_matsubara_realspace_gf;
 typedef alps::gf::itime_r1_r2_sigma_gf_with_tail cluster_itime_realspace_gf;
+
 typedef alps::gf::omega_k_sigma1_sigma2_gf_with_tail cluster_nambu_matsubara_kspace_gf;
 typedef alps::gf::itime_k_sigma1_sigma2_gf_with_tail cluster_nambu_itime_kspace_gf;
 typedef alps::gf::omega_r1_r2_sigma1_sigma2_gf_with_tail cluster_nambu_matsubara_realspace_gf;
 typedef alps::gf::itime_r1_r2_sigma1_sigma2_gf_with_tail cluster_nambu_itime_realspace_gf;
 
 //The Cluster transformer presents a framework for operator(), which does the Hilbert transform..
-class NormalStateClusterTransformer : protected ClusterHelper
+class NormalStateClusterTransformer : public ClusterHelper
 {
 public:
   ///Constructor: a cluster transformer has no internal components, everything is delegated to the ClusterHelper
@@ -53,22 +54,26 @@ public:
                                                       const cluster_matsubara_kspace_gf &G0_omega,
                                                       double &mu, const double h,
                                                       const double beta){ throw std::logic_error("a normal-state k-space transform is not implemented for this transformer");}
-  ///perform symmetrizaton
-  virtual cluster_itime_kspace_gf symmetrize(const cluster_itime_kspace_gf& G) const{ throw std::logic_error("not implemented");};
-  ///perform symmetrizaton in matsubara frequencies time
-  virtual cluster_matsubara_kspace_gf symmetrize(const  cluster_matsubara_kspace_gf& G) const{ throw std::logic_error("not implemented");};
+  ///perform spin symmetrization of imaginary time k-space cluster Green's function
+  void spin_symmetrize(cluster_itime_kspace_gf& G) const;
+  ///perform spin symmetrization of matsubara k-space Green's function
+  void spin_symmetrize(cluster_matsubara_kspace_gf& G) const;
+  ///perform spin symmetrization of imaginary time k-space cluster Green's function
+  void spin_symmetrize(cluster_itime_realspace_gf& G) const;
+  ///perform spin symmetrization of matsubara k-space Green's function
+  void spin_symmetrize(cluster_matsubara_realspace_gf& G) const;
   ///compute an initial G0.
   virtual cluster_matsubara_kspace_gf initial_G0 (const alps::params& parms);
 
   //->probably promote to super class
-  virtual std::vector<double> epsav() const=0;
-  virtual std::vector<double> epssqav() const=0;
+  virtual std::vector<double> epsav() const{ throw std::logic_error("not implemented");};
+  virtual std::vector<double> epssqav() const{ throw std::logic_error("not implemented");};
 
   //Real space and k-space transformers for the Green's functions
-  virtual cluster_matsubara_realspace_gf transform_into_real_space(const cluster_matsubara_kspace_gf& G) const=0;
-  virtual cluster_matsubara_kspace_gf transform_into_k_space(const cluster_matsubara_realspace_gf& G) const=0;
-  virtual cluster_itime_realspace_gf transform_into_real_space(const cluster_itime_kspace_gf& G) const=0;
-  virtual cluster_itime_kspace_gf transform_into_k_space(const cluster_itime_realspace_gf& G) const=0;
+  cluster_matsubara_realspace_gf transform_into_real_space(const cluster_matsubara_kspace_gf& G) const;
+  cluster_matsubara_kspace_gf transform_into_k_space(const cluster_matsubara_realspace_gf& G) const;
+  cluster_itime_realspace_gf transform_into_real_space(const cluster_itime_kspace_gf& G) const;
+  cluster_itime_kspace_gf transform_into_k_space(const cluster_itime_realspace_gf& G) const;
 
   alps::gf::momentum_index_mesh momentum_mesh() const;
 };
