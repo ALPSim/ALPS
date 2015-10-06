@@ -29,54 +29,76 @@
 #include "cluster_graph.h"
 #include "cluster_helper.h"
 
+#include "alps/gf/tail.hpp"
+typedef alps::gf::omega_k_sigma_gf_with_tail cluster_matsubara_kspace_gf;
+typedef alps::gf::itime_k_sigma_gf_with_tail cluster_itime_kspace_gf;
+typedef alps::gf::omega_r1_r2_sigma_gf_with_tail cluster_matsubara_realspace_gf;
+typedef alps::gf::itime_r1_r2_sigma_gf_with_tail cluster_itime_realspace_gf;
+typedef alps::gf::omega_k_sigma1_sigma2_gf_with_tail cluster_nambu_matsubara_kspace_gf;
+typedef alps::gf::itime_k_sigma1_sigma2_gf_with_tail cluster_nambu_itime_kspace_gf;
+typedef alps::gf::omega_r1_r2_sigma1_sigma2_gf_with_tail cluster_nambu_matsubara_realspace_gf;
+typedef alps::gf::itime_r1_r2_sigma1_sigma2_gf_with_tail cluster_nambu_itime_realspace_gf;
 
-//The Cluster transormer presents a framework for operator(), which does the Hilbert transform..
-class ClusterTransformer : protected ClusterHelper
+//The Cluster transformer presents a framework for operator(), which does the Hilbert transform..
+class NormalStateClusterTransformer : protected ClusterHelper
 {
 public:
-  ClusterTransformer(const alps::params& params) :
-  ClusterHelper(params) {
-    //std::cerr<<"done building cluster transformer"<<std::endl;
-  }
-  static ClusterTransformer* generate_transformer(const alps::params& parms);
-  virtual ~ClusterTransformer() {} //pro forma virtual destructor.
+  ///Constructor: a cluster transformer has no internal components, everything is delegated to the ClusterHelper
+  NormalStateClusterTransformer(const alps::params& params) : ClusterHelper(params) {  }
+  ///virtual destructor
+  virtual ~NormalStateClusterTransformer() {}
   
-  ///perform a Hilber transform: given a G and a G0, produce a G0 for the next iteration.
-  virtual       matsubara_green_function_t operator()(const matsubara_green_function_t & G_omega,
-                                                      const matsubara_green_function_t &G0_omega,
+  ///perform the self-consistency transform: given a G and a G0, produce a G0 for the next iteration.
+  virtual       cluster_matsubara_kspace_gf operator()(const cluster_matsubara_kspace_gf & G_omega,
+                                                      const cluster_matsubara_kspace_gf &G0_omega,
                                                       double &mu, const double h,
-                                                      const double beta)=0;
-  virtual nambu_matsubara_green_function_t operator()(const nambu_matsubara_green_function_t & G_omega,
-                                                      const nambu_matsubara_green_function_t &G0_omega,
-                                                      nambu_matsubara_green_function_t &selfenergy,
-                                                      double &mu, const double h, const double eta1, const double eta2,
-                                                      const double beta, const bool use_selfenergy)=0;
-  ///perform symmetrizaton in imaginary time
-  virtual       itime_green_function_t symmetrize(const       itime_green_function_t& G, const bool paramagnet) const=0;
-  virtual nambu_itime_green_function_t symmetrize(const nambu_itime_green_function_t& G, const bool paramagnet) const{ throw std::logic_error("not implemented");}
+                                                      const double beta){ throw std::logic_error("a normal-state k-space transform is not implemented for this transformer");}
+  ///perform symmetrizaton
+  virtual cluster_itime_kspace_gf symmetrize(const cluster_itime_kspace_gf& G) const{ throw std::logic_error("not implemented");};
   ///perform symmetrizaton in matsubara frequencies time
-  virtual       matsubara_green_function_t symmetrize(const       matsubara_green_function_t& G, const bool paramagnet) const=0;
-  virtual nambu_matsubara_green_function_t symmetrize(const nambu_matsubara_green_function_t& G, const bool paramagnet) const{ throw std::logic_error("not implemented");};
+  virtual cluster_matsubara_kspace_gf symmetrize(const  cluster_matsubara_kspace_gf& G) const{ throw std::logic_error("not implemented");};
   ///compute an initial G0.
-  virtual       matsubara_green_function_t initial_G0      (const alps::params& parms, shape_t shape=nondiagonal);
-  
-  virtual nambu_matsubara_green_function_t initial_G0_nambu(const alps::params& parms);
+  virtual cluster_matsubara_kspace_gf initial_G0 (const alps::params& parms);
+
+  //->probably promote to super class
   virtual std::vector<double> epsav() const=0;
   virtual std::vector<double> epssqav() const=0;
-  nambu_matsubara_green_function_t initial_G_nambu(const alps::params& parms);
-  
+
   //Real space and k-space transformers for the Green's functions
-  virtual matsubara_green_function_t transform_into_real_space(const matsubara_green_function_t& G) const=0;
-  virtual matsubara_green_function_t transform_into_k_space(const matsubara_green_function_t& G) const=0;
-  virtual itime_green_function_t transform_into_real_space(const itime_green_function_t& G) const=0;
-  virtual itime_green_function_t transform_into_k_space(const itime_green_function_t& G) const=0;
-  //Real space and k-space transformers for the Nambu Green's function
-  virtual nambu_matsubara_green_function_t transform_into_real_space(const nambu_matsubara_green_function_t& G) const=0;
-  virtual nambu_matsubara_green_function_t transform_into_k_space(const nambu_matsubara_green_function_t& G) const=0;
-  virtual nambu_itime_green_function_t transform_into_real_space(const nambu_itime_green_function_t& G) const=0;
-  virtual nambu_itime_green_function_t transform_into_k_space(const nambu_itime_green_function_t& G) const=0;
+  virtual cluster_matsubara_realspace_gf transform_into_real_space(const cluster_matsubara_kspace_gf& G) const=0;
+  virtual cluster_matsubara_kspace_gf transform_into_k_space(const cluster_matsubara_realspace_gf& G) const=0;
+  virtual cluster_itime_realspace_gf transform_into_real_space(const cluster_itime_kspace_gf& G) const=0;
+  virtual cluster_itime_kspace_gf transform_into_k_space(const cluster_itime_realspace_gf& G) const=0;
+
+  alps::gf::momentum_index_mesh momentum_mesh() const;
+};
+
+class NambuClusterTransformer : protected ClusterHelper{
+  ///Constructor: a cluster transformer has no internal components, everything is delegated to the ClusterHelper
+  NambuClusterTransformer(const alps::params& params) : ClusterHelper(params) {  }
+  ///virtual destructor
+  virtual ~NambuClusterTransformer() {}///perform the self-consistency transform. In need of a bit of refactoring; this is not nice.
+  virtual cluster_nambu_matsubara_kspace_gf operator()(const cluster_nambu_matsubara_kspace_gf & G_omega,
+                                                      const cluster_nambu_matsubara_kspace_gf &G0_omega,
+                                                      cluster_nambu_matsubara_kspace_gf &selfenergy,
+                                                      double &mu, const double h, const double eta1, const double eta2,
+                                                      const double beta, const bool use_selfenergy){ throw std::logic_error("a nambu k-space transform is not implemented for this transformer");}
+  virtual cluster_nambu_itime_kspace_gf symmetrize(const cluster_nambu_itime_kspace_gf& G) const{ throw std::logic_error("not implemented");}
+  virtual cluster_nambu_matsubara_kspace_gf symmetrize(const cluster_nambu_matsubara_kspace_gf& G) const{ throw std::logic_error("not implemented");}
   
-  std::complex<double>* exp_iksite(const int sign) const;
+  virtual cluster_nambu_matsubara_kspace_gf initial_G0_nambu(const alps::params& parms);
+
+  cluster_nambu_matsubara_kspace_gf initial_G_nambu(const alps::params& parms);
+
+  //Real space and k-space transformers for the Nambu Green's function
+  virtual cluster_nambu_matsubara_realspace_gf transform_into_real_space(const cluster_nambu_matsubara_kspace_gf& G) const{ throw std::logic_error("not implemented");};
+  virtual cluster_nambu_matsubara_kspace_gf transform_into_k_space(const cluster_nambu_matsubara_realspace_gf& G) const{ throw std::logic_error("not implemented");};
+  virtual cluster_nambu_itime_realspace_gf transform_into_real_space(const cluster_nambu_itime_kspace_gf& G) const{ throw std::logic_error("not implemented");};
+  virtual cluster_nambu_itime_kspace_gf transform_into_k_space(const cluster_nambu_itime_realspace_gf& G) const{ throw std::logic_error("not implemented");};
+};
+
+  
+ /* std::complex<double>* exp_iksite(const int sign) const;
   
   template<typename T>
   T interpolate(std::vector<double> k, const std::vector<T>& values, const bool antiferromagnet) const {
@@ -91,7 +113,7 @@ public:
   unsigned int n_lattice_momenta() const { return ClusterHelper::n_lattice_momenta(); }
   double site_distance(const unsigned int i, const unsigned int j) const { return ClusterHelper::site_distance(i, j); }
   virtual void write_hdf5(alps::hdf5::archive &ar, const std::string &p) const;
-};
+};*/
 
 
 

@@ -20,44 +20,11 @@ bool adjust_chemical_potential(const double &density, double &mu, bool &damping_
 
 
 
-matsubara_green_function_t ClusterTransformer::initial_G0(const alps::params& parms, shape_t shape) {
-  std::cout<<"reading initial G0_omega from: "<<parms["G0OMEGA_INPUT"]<<std::endl;
-  int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
-  int n_orbital=boost::lexical_cast<int>(parms["FLAVORS"]);
-  int n_site=boost::lexical_cast<int>(parms["SITES"]);
-// TODO: This needs to be checked.  Is it always ok to assume that the G0 is diagonal?
-  matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital, shape);
-//  matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital, diagonal);
-  std::string g0path=parms["G0OMEGA_INPUT"];
-  G0_omega.read(g0path.c_str());
-  return G0_omega;
-}
 
 matsubara_green_function_t DCATransformer::initial_G0(const alps::params& parms, shape_t shape) {
   return ClusterTransformer::initial_G0(parms, shape);
 }
 
-//Don't forget to delete the transformer afterwards!
-ClusterTransformer* ClusterTransformer::generate_transformer(const alps::params& parms)
-{
-  ClusterTransformer* trans_ptr;
-  bool antiferromagnetic = parms["ANTIFERROMAGNET"]|false;
-  std::string cluster_loop=parms["CLUSTER_LOOP"];
-  if(cluster_loop=="DCA"){
-    if (antiferromagnetic) {
-      trans_ptr=new AntiFerroDCATransformer(parms);
-    }
-    else {
-      trans_ptr=new SimpleDCATransformer(parms);
-    }
-  }else if(cluster_loop=="CDMFT"){
-    std::cout<<"using CDMFT transformer"<<std::endl;
-    if(static_cast<int>(parms["SITES"])!=4) throw std::runtime_error("only four-site CDMFT is implemented so far.");
-    trans_ptr=new LadderCDMFTTransformer(parms);
-  }else
-    throw std::logic_error("transformer pointer could not be initalized: unknown cluster loop.");
-  return trans_ptr;
-}
 
 
 DCATransformer::DCATransformer(const alps::params& params)
@@ -747,11 +714,8 @@ void DCATransformer::write_hdf5(alps::hdf5::archive &ar, const std::string &p) c
   ar<<alps::make_pvp(p+"/tmatrix", tmatrix());
   ClusterTransformer::write_hdf5(ar,p);
 }
-void ClusterTransformer::write_hdf5(alps::hdf5::archive &ar, const std::string &p) const{
-  ClusterHelper::write_hdf5(ar,p);
-}
 
-bool adjust_chemical_potential(const double &n_tot,
+inline bool adjust_chemical_potential(const double &n_tot,
     double &mu,          //chemical potential, will be adjusted
     bool &damping_mu,    //do we use dampening?
     bool &computing_mu,  //are we computing the chemical potential?
@@ -990,18 +954,6 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
   return G0_omega_new;
 }
 
-nambu_matsubara_green_function_t ClusterTransformer::initial_G0_nambu(const alps::params& parms) {
-  std::cout<<"reading initial (NAMBU) G0_omega from: "<<parms["G0OMEGA_INPUT"]<<std::endl;
-  int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
-  int n_orbital=boost::lexical_cast<int>(parms["FLAVORS"]);
-  int n_site=boost::lexical_cast<int>(parms["SITES"]);
-  double beta =boost::lexical_cast<double>(parms["BETA"]);
-  if(n_orbital!=2) throw std::invalid_argument("dunno how to handle nambu in >2 orbitals!");
-  nambu_matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital, diagonal);
-  std::string g0path=parms["G0OMEGA_INPUT"];
-  G0_omega.read(g0path.c_str());
-  return G0_omega;
-}
 
 nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const alps::params& parms)
 {

@@ -7,17 +7,20 @@ find_package(ALPSCore REQUIRED COMPONENTS hdf5 accumulators mc params)
 find_package(BlasClasses REQUIRED)
 find_package(BLAS REQUIRED)
 find_package(LAPACK REQUIRED)
+find_package(GFTools REQUIRED)
 
 include_directories(${BLAS_CLASSES_INCLUDE_DIR})
+include_directories(${GFTOOLS_INCLUDE_DIR})
 
 add_library (cluster
 cluster_helper.cpp           
 cluster_graph.cpp 
+cluster_transform.cpp 
 #DCA_transform.cpp            
 #AFM_DCA_transform.cpp            
 )
 
-target_link_libraries(cluster ${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES})
+target_link_libraries(cluster  ${GFTOOLS_LIBRARIES} ${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES})
 
 include(EnableGtests)
 UseGtest()
