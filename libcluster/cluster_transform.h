@@ -45,15 +45,17 @@ class NormalStateClusterTransformer : public ClusterHelper
 {
 public:
   ///Constructor: a cluster transformer has no internal components, everything is delegated to the ClusterHelper
-  NormalStateClusterTransformer(const alps::params& params) : ClusterHelper(params) {  }
+  NormalStateClusterTransformer(const alps::params& params);
   ///virtual destructor
   virtual ~NormalStateClusterTransformer() {}
   
-  ///perform the self-consistency transform: given a G and a G0, produce a G0 for the next iteration.
-  virtual       cluster_matsubara_kspace_gf operator()(const cluster_matsubara_kspace_gf & G_omega,
-                                                      const cluster_matsubara_kspace_gf &G0_omega,
-                                                      double &mu, const double h,
-                                                      const double beta){ throw std::logic_error("a normal-state k-space transform is not implemented for this transformer");}
+  ///Use Dyson to get the self-energy
+  void dyson_get_self_energy(cluster_matsubara_kspace_gf &sigma, const cluster_matsubara_kspace_gf &G, const cluster_matsubara_kspace_gf &G0) const;
+  ///Use Dyson to get the G0
+  void dyson_get_green0(cluster_matsubara_kspace_gf &G0, const cluster_matsubara_kspace_gf &sigma, const cluster_matsubara_kspace_gf &G) const;
+  ///perform the k-sum to get G
+  void matsubara_k_sum(cluster_matsubara_kspace_gf &G, const cluster_matsubara_kspace_gf &sigma) const;
+
   ///perform spin symmetrization of imaginary time k-space cluster Green's function
   void spin_symmetrize(cluster_itime_kspace_gf& G) const;
   ///perform spin symmetrization of matsubara k-space Green's function
@@ -73,13 +75,12 @@ public:
   template<class GF> void symmetrize_real_space(GF& G) const{return symmetrize_helper_real_space(G,pair_classes_real_space());}
   template<class GF> void symmetrize_k_space(GF& G) const{return symmetrize_helper_k_space(G,pair_classes_k_space());};
 
-
   ///compute an initial G0.
   virtual cluster_matsubara_kspace_gf initial_G0 (const alps::params& parms);
 
-  //->probably promote to super class
-  virtual std::vector<double> epsav() const{ throw std::logic_error("not implemented");};
-  virtual std::vector<double> epssqav() const{ throw std::logic_error("not implemented");};
+  std::vector<double> epsav() const { return epsav_; };
+  std::vector<double> epssqav() const { return epssqav_; };
+  double dispersion_moments(const unsigned int i) const { return dispersion_moments_[i]; }
 
   //Real space and k-space transformers for the Green's functions
   cluster_matsubara_realspace_gf transform_into_real_space(const cluster_matsubara_kspace_gf& G) const;
@@ -90,6 +91,37 @@ public:
   alps::gf::momentum_index_mesh momentum_mesh() const;
   alps::gf::real_space_index_mesh real_space_mesh() const;
 
+
+private:
+  ///get epsilon(k) and the simpson integration weights on the BZ
+  void compute_integration_weight_and_dispersion();
+  ///initialize the vector phi with phases
+  void setup_phase_vector(const alps::params &p);
+
+  ///dispersion relation for t and t' in 1, 2, and 3 d.
+  double epsilon(const std::vector<double> &k) const;
+  ///mass imbalance spin-dependent dispersion
+  double epsilon_flavor(const std::vector<double> &k, unsigned int flavor) const;
+  ///dispersion relation for a system with an additional phase
+  double epsilon_phi(const std::vector<double> &k, const std::vector<double> &phi) const;
+  ///compute the center of gravity of the bands etc (used for high frequency analysis)
+  void compute_dispersion_weights();
+
+  double mu_;
+  double h_;
+  double half_filling_;
+  ///t is the basic energy unit of the hopping. t2 is the tprime. t_flavor is only used for mass imbalance
+  double t_, t2_,t_flavor_;
+  int n_flavors_;
+  bool use_phase_;
+  bool use_imbalance_;
+  boost::multi_array<double,3> epsilon_kckl_;
+  std::vector<double> weight_kl_;
+  std::vector<double> phi_;
+
+  std::vector<double> epsav_;
+  std::vector<double> epssqav_;
+  std::vector<double> dispersion_moments_;
 };
 
 class NambuClusterTransformer : protected ClusterHelper{

@@ -171,7 +171,6 @@ TEST_F(ClusterTransformTest, FourSiteKSpaceSymmetry){
       EXPECT_NEAR(0,std::abs(G_t(om,alps::gf::momentum_index(3),f)-G_t(om,alps::gf::momentum_index(2),f)), 1.e-10);
     }
   }
-
 }
 TEST_F(ClusterTransformTest, FourSiteRealSpaceSymmetry){
   cluster_matsubara_realspace_gf G_w(alps::gf::omega_r1_r2_sigma_gf(alps::gf::matsubara_positive_mesh(beta_,n_freq_), CT_->real_space_mesh(),CT_->real_space_mesh(), alps::gf::index_mesh(n_flavors_)));
@@ -194,5 +193,4 @@ TEST_F(ClusterTransformTest, FourSiteRealSpaceSymmetry){
       EXPECT_NEAR(0,std::abs(G_t(om,alps::gf::real_space_index(0),alps::gf::real_space_index(1),f)-G_t(om,alps::gf::real_space_index(1),alps::gf::real_space_index(0),f)), 1.e-10);
     }
   }
-
 }

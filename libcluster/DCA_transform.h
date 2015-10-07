@@ -95,85 +95,8 @@ public:
   std::string generate_header_realspace(const itime_green_function_t & G) const;
   void print_momenta(const char *filename, const matsubara_green_function_t & G) const;
   
-  double epsilon(const std::vector<double> &k) const
-  {
-    double eps = -half_filling_;
-    for (unsigned int i=0; i<dimension(); ++i)
-      eps -= 2*t_*cos(k[i]);
-    if (t2_!=0.) {
-      switch(dimension()) {
-        case 1 :
-          eps -= 2*t2_*cos(k[0]*2.);
-          break;
-        case 2 :
-          eps -= 4*t2_*cos(k[0])*cos(k[1]);
-          break;
-        case 3 :
-          eps -= 4*t2_*cos(k[0])*cos(k[1]);
-          eps -= 4*t2_*cos(k[1])*cos(k[2]);
-          eps -= 4*t2_*cos(k[0])*cos(k[2]);
-          break;
-      }
-    }
-    if(t3_!=0.) {
-      switch(dimension()) {
-        case 1 :
-          eps -= 2*t3_*cos(k[0]*3.);
-          break;
-        case 2 :
-          break;
-        case 3 :
-          eps -= 2*t3_*cos(k[0]+k[1]+k[2]);
-          eps -= 2*t3_*cos(k[0]-k[1]+k[2]);
-          eps -= 2*t3_*cos(k[0]+k[1]-k[2]);
-          eps -= 2*t3_*cos(k[0]-k[1]-k[2]);
-          break;
-      }
-    }
-    if (t4_!=0.) {
-      switch(dimension()) {
-        case 1 :
-          eps -= 2*t4_*cos(k[0]*4.);
-          break;
-        case 2 :
-          break;
-        case 3 :
-          eps -= 2*t4_*cos(k[0]*2.);
-          eps -= 2*t4_*cos(k[1]*2.);
-          eps -= 2*t4_*cos(k[2]*2.);
-          break;
-      }
-    }
-    return eps*bandwidth_scale_factor_;
-  }
   //dispersion, evaluated with a phase shift of phi
-  double epsilon_phi(const std::vector<double> &k, const std::vector<double> &phi) const;
-  std::vector<double> phase_vector() const{
-    std::vector<double> phi(dimension());
-    for(int i=0;i<dimension();++i){
-      std::stringstream phase_name; phase_name<<"PHASE_"<<i;
-      phi[i]=params_[phase_name.str()];
-      phi[i] = phi[i]/periodicity(i);
-    }
-    return phi;
-  }
-  
-  //dispersion, evaluated with flavor dependent t_
-  double epsilon_flavor(const std::vector<double> &k, unsigned int flavor) const
-  {
-    double eps = -half_filling_;
-    
-    if (flavor == 0){
-      for (unsigned int i=0; i<dimension(); ++i)
-        eps -= 2*t_*cos(k[i]);
-    }
-    if (flavor == 1){
-      for (unsigned int i=0; i<dimension(); ++i)
-        eps -= 2*t_*t_flavor_*cos(k[i]);
-    }
-    
-    return eps*bandwidth_scale_factor_;
-  }
+
   
   
 private:

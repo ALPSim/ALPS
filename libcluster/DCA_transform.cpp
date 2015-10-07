@@ -470,24 +470,6 @@ void SimpleDCATransformer::compute_sigma_from_G0_and_G(const matsubara_green_fun
     }
   }
 }
-void SimpleDCATransformer::compute_integration_weight_and_dispersion(bool use_phase,std::vector<std::vector<std::vector<double> > > &epsilon_kckl, std::vector<double> &weight_kl, unsigned int nflavor )const{
-  std::vector<double> phi=use_phase?phase_vector():std::vector<double>();
-  for (int kc=0; kc<n_cluster_sites(); ++kc) {
-    for (int kl=0; kl<n_lattice_momenta(); ++kl) {
-      std::vector<double> k(dimension());
-      for (unsigned int d=0; d<dimension(); ++d)
-        k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-for (unsigned int flavor=0; flavor<nflavor; ++flavor){
-        epsilon_kckl[kc][kl][flavor]=use_phase?epsilon_phi(k,phi):epsilon_flavor(k,flavor);
-	}
-     }
-  }
-
-
-  for (int kl=0; kl<n_lattice_momenta(); ++kl) {
-    weight_kl[kl]= lattice_momentum(kl,dimension());
-  }
-}
 void SimpleDCATransformer::compute_lattice_green_function(matsubara_green_function_t &G_omega_lattice, const matsubara_green_function_t &selfenergy, const double &mu, const double &beta, const double &h, std::vector<std::vector<std::vector<double> > > &epsilon_kckl, std::vector<double> &weight_kl) const{
   unsigned int nflavor=selfenergy.nflavor();
   unsigned int nfreq=selfenergy.nfreq();
