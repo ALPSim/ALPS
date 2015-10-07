@@ -1,9 +1,10 @@
 #include "gtest/gtest.h"
 #include "cluster_transform.h"
 #include "alps/params.hpp"
+#include<iostream>
 
 class ClusterTransformTest : public ::testing::Test{
- protected:
+protected:
   virtual void SetUp() {
     alps::params p;
     L_=20;
@@ -14,14 +15,67 @@ class ClusterTransformTest : public ::testing::Test{
     p["L"] = L_;
     p["AFM_SELFCONSISTENCY"]=false; //note that we need to know at this point if we're paramagnetic or not. Not sure this is the right place for it.
     CT_=new NormalStateClusterTransformer(p);
+
+    n_freq_=400;
+    n_tau_=10;
+    n_flavors_=2;
+    n_sites_=4;
+    beta_=40;
+    srand48(0);
+
   }
 
   virtual void TearDown() { delete CT_;}
+  void initialize_to_random(cluster_matsubara_kspace_gf &G) const{
+    for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
+      for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); ++k) {
+        for (alps::gf::index flavor(0); flavor<G.mesh3().extent(); ++flavor) {
+          G(w,k,flavor)=std::complex<double>(drand48(),drand48());
+        }
+      }
+    }
+  }
+  void initialize_to_random(cluster_itime_kspace_gf &G) const{
+    for (alps::gf::itime_index w(0); w<G.mesh1().extent(); ++w) {
+      for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); ++k) {
+        for (alps::gf::index flavor(0); flavor<G.mesh3().extent(); ++flavor) {
+          G(w,k,flavor)=drand48();
+        }
+      }
+    }
+  }
+  void initialize_to_random(cluster_matsubara_realspace_gf &G) const{
+    for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
+      for (alps::gf::real_space_index r1(0); r1<G.mesh2().extent(); ++r1) {
+        for (alps::gf::real_space_index r2(0); r2<G.mesh3().extent(); ++r2) {
+          for (alps::gf::index flavor(0); flavor<G.mesh4().extent(); ++flavor) {
+            G(w,r1,r2,flavor)=std::complex<double>(drand48(),drand48());
+          }
+        }
+      }
+    }
+  }
+  void initialize_to_random(cluster_itime_realspace_gf &G) const{
+    for (alps::gf::itime_index w(0); w<G.mesh1().extent(); ++w) {
+      for (alps::gf::real_space_index r1(0); r1<G.mesh2().extent(); ++r1) {
+        for (alps::gf::real_space_index r2(0); r2<G.mesh3().extent(); ++r2) {
+          for (alps::gf::index flavor(0); flavor<G.mesh4().extent(); ++flavor) {
+            G(w,r1,r2,flavor)=drand48();
+          }
+        }
+      }
+    }
+  }
   int L_;
   NormalStateClusterTransformer *CT_;
+  int n_freq_;
+  int n_flavors_;
+  int n_sites_;
+  int n_tau_;
+  double beta_;
 };
 
-TEST_F(ClusterTransformTest, MeshMakesSense){
+TEST_F(ClusterTransformTest, MomentumMeshMakesSense){
   alps::gf::momentum_index_mesh mmesh=CT_->momentum_mesh();
   alps::gf::momentum_index_mesh::container_type four_site_mesh(boost::extents[4][2]);
   four_site_mesh[0][0]=0.; four_site_mesh[0][1]=0.;
@@ -35,4 +89,37 @@ TEST_F(ClusterTransformTest, MeshMakesSense){
     }
   }
 }
+TEST_F(ClusterTransformTest, RealSpaceMeshMakesSense){
+  alps::gf::real_space_index_mesh rmesh=CT_->real_space_mesh();
+  alps::gf::real_space_index_mesh::container_type four_site_mesh(boost::extents[4][2]);
+  four_site_mesh[0][0]=0.; four_site_mesh[0][1]=0.;
+  four_site_mesh[1][0]=0.; four_site_mesh[1][1]=1.;
+  four_site_mesh[2][0]=1.; four_site_mesh[2][1]=1.;
+  four_site_mesh[3][0]=1.; four_site_mesh[3][1]=0.;
 
+  for(int i=0;i<CT_->n_cluster_sites();++i){
+    for(int j=0;j<CT_->dimension(); ++j){
+      EXPECT_NEAR(four_site_mesh[i][j], rmesh.points()[i][j], 1.e-10);
+    }
+  }
+}
+TEST_F(ClusterTransformTest, FourierToKAndBack){
+  cluster_matsubara_kspace_gf G_ks(alps::gf::omega_k_sigma_gf(alps::gf::matsubara_positive_mesh(beta_,n_freq_), CT_->momentum_mesh(), alps::gf::index_mesh(n_flavors_)));
+  initialize_to_random(G_ks);
+  cluster_matsubara_realspace_gf G_rs=CT_->transform_into_real_space(G_ks);
+  cluster_matsubara_kspace_gf G_ks2=CT_->transform_into_k_space(G_rs);
+  cluster_matsubara_realspace_gf G_rs2=CT_->transform_into_real_space(G_ks2);
+
+  EXPECT_NEAR((G_rs-G_rs2).norm(), 0., 1.e-10);
+  EXPECT_NEAR((G_ks-G_ks2).norm(), 0., 1.e-10);
+}
+TEST_F(ClusterTransformTest, FourierToKAndBackItime){
+  cluster_itime_kspace_gf G_ks(alps::gf::itime_k_sigma_gf(alps::gf::itime_mesh(beta_,n_tau_), CT_->momentum_mesh(), alps::gf::index_mesh(n_flavors_)));
+  initialize_to_random(G_ks);
+  cluster_itime_realspace_gf G_rs=CT_->transform_into_real_space(G_ks);
+  cluster_itime_kspace_gf G_ks2=CT_->transform_into_k_space(G_rs);
+  cluster_itime_realspace_gf G_rs2=CT_->transform_into_real_space(G_ks2);
+
+  EXPECT_NEAR((G_rs-G_rs2).norm(), 0., 1.e-10);
+  EXPECT_NEAR((G_ks-G_ks2).norm(), 0., 1.e-10);
+}

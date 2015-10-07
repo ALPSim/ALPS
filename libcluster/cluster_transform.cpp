@@ -97,11 +97,15 @@ void NormalStateClusterTransformer::spin_symmetrize(cluster_matsubara_realspace_
   }
 }
 struct Forward {
-  template<class GF_RS, class GF_KS> static void add(GF_RS & G_new, const GF_KS& G,
-      const int t, const int i, const int j, const int k, const int flavor,
+  template<class GF_RS, class GF_KS> static void add(GF_KS & G_new, const GF_RS& G,
+      const int i, const int j, const int k,
       double factor) {
-    G_new(GF_KS::mesh1_type::index_type(t), alps::gf::momentum_index(k), alps::gf::index(flavor)) +=
-        factor * G(GF_RS::mesh1_type::index_type(t), alps::gf::real_space_index(i), alps::gf::real_space_index(j), alps::gf::index(flavor));
+    for (typename GF_KS::mesh1_type::index_type t(0); t<G.mesh1().extent(); ++t) {
+      for (alps::gf::index flavor(0); flavor<G.mesh4().extent(); ++flavor) {
+        G_new(t, alps::gf::momentum_index(k), flavor) +=
+            factor * G(t, alps::gf::real_space_index(i), alps::gf::real_space_index(j), flavor);
+      }
+    }
   }
   template<class GF_RS, class GF_KS>
   static void add(GF_RS& G_new, const GF_KS& G,
@@ -120,10 +124,14 @@ struct Forward {
 
 struct Backward {
   template<class GF_RS, class GF_KS> static void add(GF_RS & G_new, const GF_KS& G,
-      const int t, const int i, const int j, const int k, const int flavor,
+      const int i, const int j, const int k,
       double factor) {
-    G_new(GF_RS::mesh1_type::index_type(t), alps::gf::real_space_index(i), alps::gf::real_space_index(j), alps::gf::index(flavor)) +=
-        factor * G(GF_RS::mesh1_type::index_type(t), alps::gf::momentum_index(k), alps::gf::index(flavor));
+    for (typename GF_RS::mesh1_type::index_type t(0); t<G.mesh1().extent(); ++t) {
+      for (alps::gf::index flavor(0); flavor<G.mesh3().extent(); ++flavor) {
+        G_new(t, alps::gf::real_space_index(i), alps::gf::real_space_index(j), flavor) +=
+            factor * G(t, alps::gf::momentum_index(k), flavor);
+      }
+    }
   }
   template<class GF_RS, class GF_KS>
   static void add(GF_RS& G_new, const GF_KS& G,
@@ -139,23 +147,19 @@ struct Backward {
 };
 
 cluster_matsubara_realspace_gf NormalStateClusterTransformer::transform_into_real_space(const cluster_matsubara_kspace_gf& G) const{
-    cluster_matsubara_realspace_gf G_new(alps::gf::omega_r1_r2_sigma_gf(G.mesh1(), real_space_mesh(), real_space_mesh(), G.mesh3()));
-    G_new.initialize();
-    for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); ++k) {
-      for (alps::gf::real_space_index i(0); i<G_new.mesh2().extent(); ++i) {
-        for (alps::gf::real_space_index j(0); j<G_new.mesh3().extent(); ++j) {
-          double phase = 0.;
-          for (unsigned int d=0; d<dimension(); ++d)
-            phase += cluster_momentum(k(),d)*(cluster_coordinate(i(),d)-cluster_coordinate(j(),d));
-          for (alps::gf::matsubara_index t(0); t<G.mesh1().extent(); ++t) {
-            for (alps::gf::index flavor(0); flavor<G.mesh3().extent(); ++flavor) {
-              Backward::add(G_new, G, t(), i(), j(), k(), flavor(), cos(phase)/double(G.mesh2().extent()));
-            }
-          }
-        }
+  cluster_matsubara_realspace_gf G_new(alps::gf::omega_r1_r2_sigma_gf(G.mesh1(), real_space_mesh(), real_space_mesh(), G.mesh3()));
+  G_new.initialize();
+  for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); ++k) {
+    for (alps::gf::real_space_index i(0); i<G_new.mesh2().extent(); ++i) {
+      for (alps::gf::real_space_index j(0); j<G_new.mesh3().extent(); ++j) {
+        double phase = 0.;
+        for (unsigned int d=0; d<dimension(); ++d)
+          phase += cluster_momentum(k(),d)*(cluster_coordinate(i(),d)-cluster_coordinate(j(),d));
+        Backward::add(G_new, G, i(), j(), k(), cos(phase)/double(G.mesh2().extent()));
       }
     }
-    return G_new;
+  }
+  return G_new;
 }
 cluster_itime_realspace_gf NormalStateClusterTransformer::transform_into_real_space(const cluster_itime_kspace_gf& G) const{
   cluster_itime_realspace_gf G_new(alps::gf::itime_r1_r2_sigma_gf(G.mesh1(), real_space_mesh(), real_space_mesh(), G.mesh3()));
@@ -166,11 +170,7 @@ cluster_itime_realspace_gf NormalStateClusterTransformer::transform_into_real_sp
         double phase = 0.;
         for (int d=0; d<dimension(); ++d)
           phase += cluster_momentum(k(),d)*(cluster_coordinate(i(),d)-cluster_coordinate(j(),d));
-        for (alps::gf::itime_index t(0); t<G.mesh1().extent(); ++t) {
-          for (alps::gf::index flavor(0); flavor<G.mesh3().extent(); ++flavor) {
-            Backward::add(G_new, G, t(), i(), j(), k(), flavor(), cos(phase)/double(G.mesh2().extent()));
-          }
-        }
+        Backward::add(G_new, G, i(), j(), k(), cos(phase)/double(G.mesh2().extent()));
       }
     }
   }
@@ -185,11 +185,7 @@ cluster_matsubara_kspace_gf NormalStateClusterTransformer::transform_into_k_spac
         double phase = 0.;
         for (int d=0; d<dimension(); ++d)
           phase += cluster_momentum(k(),d)*(cluster_coordinate(i(),d)-cluster_coordinate(j(),d));
-        for (alps::gf::itime_index t(0); t<G.mesh1().extent(); ++t) {
-          for (alps::gf::index flavor(0); flavor<G_new.mesh3().extent(); ++flavor) {
-            Forward::add(G_new, G, t(), i(), j(), k(), flavor(), cos(phase)/double(G.mesh2().extent()));
-          }
-        }
+        Forward::add(G_new, G, i(), j(), k(),  cos(phase)/double(G.mesh2().extent()));
       }
     }
   }
@@ -204,11 +200,7 @@ cluster_itime_kspace_gf NormalStateClusterTransformer::transform_into_k_space(co
         double phase = 0.;
         for (int d=0; d<dimension(); ++d)
           phase += cluster_momentum(k(),d)*(cluster_coordinate(i(),d)-cluster_coordinate(j(),d));
-        for (alps::gf::itime_index t(0); t<G.mesh1().extent(); ++t) {
-          for (alps::gf::index flavor(0); flavor<G_new.mesh3().extent(); ++flavor) {
-            Forward::add(G_new, G, t(), i(), j(), k(), flavor(), cos(phase)/double(G.mesh2().extent()));
-          }
-        }
+        Forward::add(G_new, G, i(), j(), k(), cos(phase)/double(G.mesh2().extent()));
       }
     }
   }
