@@ -160,4 +160,25 @@ template<class GF,class TAIL> void NormalStateClusterTransformer::symmetrize_hel
     }
   }
 }
+template<class GF,class TAIL> void NormalStateClusterTransformer::symmetrize_helper_real_space(alps::gf::four_index_gf_with_tail<GF,TAIL> &G,
+                                                    const std::pair<std::set<pair_class_type>::const_iterator,
+                                                    std::set<pair_class_type>::const_iterator> pair_classes) const
+{
+  std::set<pair_class_type>::const_iterator itc, itc_end;
+  for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
+    for (typename GF::mesh1_type::index_type freq(0); freq<G.mesh1().extent(); ++freq) {
+      for (typename GF::mesh4_type::index_type flavor(0); flavor<G.mesh4().extent(); ++flavor) {
+        typename GF::value_type av=0;
+        for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
+          av += G(freq, typename GF::mesh2_type::index_type(it->first),  typename GF::mesh3_type::index_type(it->second), flavor);
+        }
+        av /= itc->size();
+        for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
+          G(freq, typename GF::mesh2_type::index_type(it->first), typename GF::mesh3_type::index_type(it->second), flavor) = av;
+        }
+      }
+    }
+  }
+}
+
 
