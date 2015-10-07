@@ -39,6 +39,16 @@ alps::gf::momentum_index_mesh NormalStateClusterTransformer::momentum_mesh() con
   }
   return alps::gf::momentum_index_mesh(points);
 }
+alps::gf::real_space_index_mesh NormalStateClusterTransformer::real_space_mesh() const{
+  alps::gf::real_space_index_mesh::container_type points(boost::extents[n_cluster_sites()][dimension()]);
+  for(int i=0;i<n_cluster_sites();++i){
+    for(int j=0;j<dimension();++j){
+      points[i][j]=cluster_coordinate(i,j);
+    }
+  }
+  return alps::gf::real_space_index_mesh(points);
+}
+
 void NormalStateClusterTransformer::spin_symmetrize(cluster_itime_kspace_gf& gf) const{
   if(gf.mesh3().extent()!=2) throw std::runtime_error("mesh should only have two flavors.");
   for (alps::gf::itime_index om=alps::gf::itime_index(0); om<gf.mesh1().extent(); ++om) {
@@ -129,11 +139,82 @@ struct Backward {
 };
 
 cluster_matsubara_realspace_gf NormalStateClusterTransformer::transform_into_real_space(const cluster_matsubara_kspace_gf& G) const{
-  throw std::logic_error("not implemented");
+    cluster_matsubara_realspace_gf G_new(alps::gf::omega_r1_r2_sigma_gf(G.mesh1(), real_space_mesh(), real_space_mesh(), G.mesh3()));
+    G_new.initialize();
+    for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); ++k) {
+      for (alps::gf::real_space_index i(0); i<G_new.mesh2().extent(); ++i) {
+        for (alps::gf::real_space_index j(0); j<G_new.mesh3().extent(); ++j) {
+          double phase = 0.;
+          for (unsigned int d=0; d<dimension(); ++d)
+            phase += cluster_momentum(k(),d)*(cluster_coordinate(i(),d)-cluster_coordinate(j(),d));
+          for (alps::gf::matsubara_index t(0); t<G.mesh1().extent(); ++t) {
+            for (alps::gf::index flavor(0); flavor<G.mesh3().extent(); ++flavor) {
+              Backward::add(G_new, G, t(), i(), j(), k(), flavor(), cos(phase)/double(G.mesh2().extent()));
+            }
+          }
+        }
+      }
+    }
+    return G_new;
 }
-cluster_matsubara_kspace_gf NormalStateClusterTransformer::transform_into_k_space(const cluster_matsubara_realspace_gf& G) const{ throw std::logic_error("not implemented");};
-cluster_itime_realspace_gf NormalStateClusterTransformer::transform_into_real_space(const cluster_itime_kspace_gf& G) const{ throw std::logic_error("not implemented");};
-cluster_itime_kspace_gf NormalStateClusterTransformer::transform_into_k_space(const cluster_itime_realspace_gf& G) const{ throw std::logic_error("not implemented");};
+cluster_itime_realspace_gf NormalStateClusterTransformer::transform_into_real_space(const cluster_itime_kspace_gf& G) const{
+  cluster_itime_realspace_gf G_new(alps::gf::itime_r1_r2_sigma_gf(G.mesh1(), real_space_mesh(), real_space_mesh(), G.mesh3()));
+  G_new.initialize();
+  for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); ++k) {
+    for (alps::gf::real_space_index i(0); i<G_new.mesh2().extent(); ++i) {
+      for (alps::gf::real_space_index j(0); j<G_new.mesh3().extent(); ++j) {
+        double phase = 0.;
+        for (int d=0; d<dimension(); ++d)
+          phase += cluster_momentum(k(),d)*(cluster_coordinate(i(),d)-cluster_coordinate(j(),d));
+        for (alps::gf::itime_index t(0); t<G.mesh1().extent(); ++t) {
+          for (alps::gf::index flavor(0); flavor<G.mesh3().extent(); ++flavor) {
+            Backward::add(G_new, G, t(), i(), j(), k(), flavor(), cos(phase)/double(G.mesh2().extent()));
+          }
+        }
+      }
+    }
+  }
+  return G_new;
+}
+cluster_matsubara_kspace_gf NormalStateClusterTransformer::transform_into_k_space(const cluster_matsubara_realspace_gf& G) const{
+  cluster_matsubara_kspace_gf G_new(alps::gf::omega_k_sigma_gf(G.mesh1(), momentum_mesh(),G.mesh4()));
+  G_new.initialize();
+  for (alps::gf::momentum_index k(0); k<G_new.mesh2().extent(); ++k) {
+    for (alps::gf::real_space_index i(0); i<G.mesh2().extent(); ++i) {
+      for (alps::gf::real_space_index j(0); j<G.mesh3().extent(); ++j) {
+        double phase = 0.;
+        for (int d=0; d<dimension(); ++d)
+          phase += cluster_momentum(k(),d)*(cluster_coordinate(i(),d)-cluster_coordinate(j(),d));
+        for (alps::gf::itime_index t(0); t<G.mesh1().extent(); ++t) {
+          for (alps::gf::index flavor(0); flavor<G_new.mesh3().extent(); ++flavor) {
+            Forward::add(G_new, G, t(), i(), j(), k(), flavor(), cos(phase)/double(G.mesh2().extent()));
+          }
+        }
+      }
+    }
+  }
+  return G_new;
+}
+cluster_itime_kspace_gf NormalStateClusterTransformer::transform_into_k_space(const cluster_itime_realspace_gf& G) const{
+  cluster_itime_kspace_gf G_new(alps::gf::itime_k_sigma_gf(G.mesh1(), momentum_mesh(), G.mesh4()));
+  G_new.initialize();
+  for (alps::gf::momentum_index k(0); k<G_new.mesh2().extent(); ++k) {
+    for (alps::gf::real_space_index i(0); i<G.mesh2().extent(); ++i) {
+      for (alps::gf::real_space_index j(0); j<G.mesh3().extent(); ++j) {
+        double phase = 0.;
+        for (int d=0; d<dimension(); ++d)
+          phase += cluster_momentum(k(),d)*(cluster_coordinate(i(),d)-cluster_coordinate(j(),d));
+        for (alps::gf::itime_index t(0); t<G.mesh1().extent(); ++t) {
+          for (alps::gf::index flavor(0); flavor<G_new.mesh3().extent(); ++flavor) {
+            Forward::add(G_new, G, t(), i(), j(), k(), flavor(), cos(phase)/double(G.mesh2().extent()));
+          }
+        }
+      }
+    }
+  }
+  return G_new;
+}
+
 
 /*cluster_nambu_matsubara_kspace_gf NambuClusterTransformer::initial_G0_nambu(const alps::params& parms) {
   std::cout<<"reading initial (NAMBU) G0_omega from: "<<parms["G0_OMEGA_INPUT"]<<std::endl;

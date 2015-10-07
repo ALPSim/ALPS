@@ -76,6 +76,8 @@ public:
   cluster_itime_kspace_gf transform_into_k_space(const cluster_itime_realspace_gf& G) const;
 
   alps::gf::momentum_index_mesh momentum_mesh() const;
+  alps::gf::real_space_index_mesh real_space_mesh() const;
+
 };
 
 class NambuClusterTransformer : protected ClusterHelper{
@@ -100,6 +102,9 @@ class NambuClusterTransformer : protected ClusterHelper{
   virtual cluster_nambu_matsubara_kspace_gf transform_into_k_space(const cluster_nambu_matsubara_realspace_gf& G) const{ throw std::logic_error("not implemented");};
   virtual cluster_nambu_itime_realspace_gf transform_into_real_space(const cluster_nambu_itime_kspace_gf& G) const{ throw std::logic_error("not implemented");};
   virtual cluster_nambu_itime_kspace_gf transform_into_k_space(const cluster_nambu_itime_realspace_gf& G) const{ throw std::logic_error("not implemented");};
+//  template<typename T, class D>
+//  nambu_green_function<T> transform_coordinates(const nambu_green_function<T>& G) const;
+
 };
 
   

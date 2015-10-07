@@ -113,9 +113,6 @@ public:
   
 private:
   template<typename T, class D>
-  green_function<T> transform_coordinates(const       green_function<T>& G) const;
-  template<typename T, class D>
-  nambu_green_function<T> transform_coordinates(const nambu_green_function<T>& G) const;
   template <class T>
   green_function<T> spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const;
   
