@@ -1,31 +1,3 @@
-template<typename T>
-green_function<T> DCATransformer::symmetrize_helper(const green_function<T>& G,
-                                                    const std::pair<std::set<pair_class_type>::const_iterator,
-                                                    std::set<pair_class_type>::const_iterator> pair_classes) const
-{
-  unsigned int nflavor=G.nflavor();
-  unsigned int nsite=G.nsite();
-  unsigned int nfreq=G.nfreq();
-  green_function<T> G_new(nfreq, nsite, nflavor, G.shape());
-  std::set<pair_class_type>::const_iterator itc, itc_end;
-  for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
-    for (int flavor=0; flavor<nflavor; ++flavor) {
-      for (int freq=0; freq<nfreq; ++freq) {
-        T av=0;
-        for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
-          if(G.shape()==diagonal && it->first != it->second) continue;
-          av += G(freq, it->first, it->second, flavor);
-        }
-        av /= itc->size();
-        for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
-          if(G.shape()==diagonal && it->first != it->second) continue;
-          G_new(freq, it->first, it->second, flavor) = av;
-        }
-      }
-    }
-  }
-  return G_new;
-}
 
 template<typename T>
 nambu_green_function<T> DCATransformer::symmetrize_helper(const nambu_green_function<T>& G,

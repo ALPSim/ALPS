@@ -62,6 +62,18 @@ public:
   void spin_symmetrize(cluster_itime_realspace_gf& G) const;
   ///perform spin symmetrization of matsubara k-space Green's function
   void spin_symmetrize(cluster_matsubara_realspace_gf& G) const;
+
+  //symmetrization in real momentum space - for the normal GF
+  template<class GF,class TAIL> void symmetrize_helper_k_space(alps::gf::three_index_gf_with_tail<GF,TAIL> &G,
+                                                        const std::pair<std::set<pair_class_type>::const_iterator,
+                                                        std::set<pair_class_type>::const_iterator> pair_classes) const;
+  template<class GF, class TAIL> void symmetrize_helper_real_space(alps::gf::four_index_gf_with_tail<GF,TAIL> &G,
+                                                        const std::pair<std::set<pair_class_type>::const_iterator,
+                                                        std::set<pair_class_type>::const_iterator> pair_classes) const;
+  template<class GF> void symmetrize_real_space(GF& G) const{return symmetrize_helper_real_space(G,pair_classes_real_space());}
+  template<class GF> void symmetrize_k_space(GF& G) const{return symmetrize_helper_k_space(G,pair_classes_k_space());};
+
+
   ///compute an initial G0.
   virtual cluster_matsubara_kspace_gf initial_G0 (const alps::params& parms);
 
@@ -126,4 +138,26 @@ class NambuClusterTransformer : protected ClusterHelper{
 };*/
 
 
+template<class GF,class TAIL> void NormalStateClusterTransformer::symmetrize_helper_k_space(alps::gf::three_index_gf_with_tail<GF,TAIL> &G,
+                                                    const std::pair<std::set<pair_class_type>::const_iterator,
+                                                    std::set<pair_class_type>::const_iterator> pair_classes) const
+{
+  std::set<pair_class_type>::const_iterator itc, itc_end;
+  for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
+    for (typename GF::mesh1_type::index_type freq(0); freq<G.mesh1().extent(); ++freq) {
+      for (typename GF::mesh3_type::index_type flavor(0); flavor<G.mesh3().extent(); ++flavor) {
+        typename GF::value_type av=0;
+        for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
+          if(it->first != it->second) continue;
+          av += G(freq, typename GF::mesh2_type::index_type(it->first), flavor);
+        }
+        av /= itc->size();
+        for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
+          if(it->first != it->second) continue;
+          G(freq, typename GF::mesh2_type::index_type(it->first), flavor) = av;
+        }
+      }
+    }
+  }
+}
 

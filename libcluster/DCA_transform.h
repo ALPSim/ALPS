@@ -44,11 +44,6 @@ public:
   DCATransformer(const alps::params& params);
   virtual ~DCATransformer(){} //pro forma virtual destructor
   
-  //symmetrization in real momentum space - for the normal GF
-  template<typename T> green_function<T> symmetrize_real_space(const green_function<T>& G) const
-  { return symmetrize_helper(G, pair_classes_real_space()); }
-  template<typename T> green_function<T> symmetrize_k_space(const green_function<T>& G) const
-  { return symmetrize_helper(G, pair_classes_k_space()); }
   
   //symmetrization in real and momentum space - for the NAMBU GF
   template<typename T> nambu_green_function<T> symmetrize_real_space(const nambu_green_function<T>& G) const

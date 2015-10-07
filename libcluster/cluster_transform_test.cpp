@@ -123,3 +123,48 @@ TEST_F(ClusterTransformTest, FourierToKAndBackItime){
   EXPECT_NEAR((G_rs-G_rs2).norm(), 0., 1.e-10);
   EXPECT_NEAR((G_ks-G_ks2).norm(), 0., 1.e-10);
 }
+TEST_F(ClusterTransformTest, SpinSymmetrySymmetrizes){
+  cluster_matsubara_kspace_gf G_w(alps::gf::omega_k_sigma_gf(alps::gf::matsubara_positive_mesh(beta_,n_freq_), CT_->momentum_mesh(), alps::gf::index_mesh(n_flavors_)));
+  cluster_matsubara_kspace_gf G_w_bup(G_w);
+  cluster_itime_kspace_gf G_t(alps::gf::itime_k_sigma_gf(alps::gf::itime_mesh(beta_,n_tau_), CT_->momentum_mesh(), alps::gf::index_mesh(n_flavors_)));
+  cluster_itime_kspace_gf G_t_bup(G_t);
+
+  CT_->spin_symmetrize(G_w);
+  CT_->spin_symmetrize(G_t);
+  for (alps::gf::matsubara_index om=alps::gf::matsubara_index(0); om<G_w.mesh1().extent(); ++om) {
+    for (alps::gf::momentum_index k=alps::gf::momentum_index(0); k<G_w.mesh2().extent(); ++k) {
+      EXPECT_NEAR(G_w(om,k,alps::gf::index(0)).real(),0.5*(G_w_bup(om,k,alps::gf::index(0))+G_w_bup(om,k,alps::gf::index(1))).real(), 1.e-10);
+      EXPECT_NEAR(G_w(om,k,alps::gf::index(0)).imag(),0.5*(G_w_bup(om,k,alps::gf::index(0))+G_w_bup(om,k,alps::gf::index(1))).imag(), 1.e-10);
+    }
+  }
+
+  for (alps::gf::itime_index om=alps::gf::itime_index(0); om<G_t.mesh1().extent(); ++om) {
+    for (alps::gf::momentum_index k=alps::gf::momentum_index(0); k<G_w.mesh2().extent(); ++k) {
+      EXPECT_NEAR(G_t(om,k,alps::gf::index(0)),0.5*(G_t_bup(om,k,alps::gf::index(0))+G_t_bup(om,k,alps::gf::index(1))), 1.e-10);
+    }
+  }
+
+}
+
+TEST_F(ClusterTransformTest, FourSiteKspaceSymmetry){
+  cluster_matsubara_kspace_gf G_w(alps::gf::omega_k_sigma_gf(alps::gf::matsubara_positive_mesh(beta_,n_freq_), CT_->momentum_mesh(), alps::gf::index_mesh(n_flavors_)));
+  cluster_matsubara_kspace_gf G_w_bup(G_w);
+  cluster_itime_kspace_gf G_t(alps::gf::itime_k_sigma_gf(alps::gf::itime_mesh(beta_,n_tau_), CT_->momentum_mesh(), alps::gf::index_mesh(n_flavors_)));
+  cluster_itime_kspace_gf G_t_bup(G_t);
+
+  CT_->symmetrize_k_space(G_w);
+  CT_->symmetrize_k_space(G_t);
+  EXPECT_NEAR((G_w+G_w-G_w_bup-G_w_bup).norm(), 0., 1.e-10);
+  EXPECT_NEAR((G_t+G_t-G_t_bup-G_t_bup).norm(), 0., 1.e-10);
+  for (alps::gf::matsubara_index om=alps::gf::matsubara_index(0); om<G_w.mesh1().extent(); ++om) {
+    for (alps::gf::index f=alps::gf::index(0); f<G_w.mesh3().extent(); ++f) {
+      EXPECT_NEAR(0,std::abs(G_w(om,alps::gf::momentum_index(1),f)-G_w(om,alps::gf::momentum_index(2),f)), 1.e-10);
+    }
+  }
+  for (alps::gf::itime_index om=alps::gf::itime_index(0); om<G_t.mesh1().extent(); ++om) {
+    for (alps::gf::index f=alps::gf::index(0); f<G_t.mesh3().extent(); ++f) {
+      EXPECT_NEAR(0,std::abs(G_t(om,alps::gf::momentum_index(1),f)-G_t(om,alps::gf::momentum_index(2),f)), 1.e-10);
+    }
+  }
+
+}
