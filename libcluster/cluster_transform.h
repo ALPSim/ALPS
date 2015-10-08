@@ -91,6 +91,9 @@ public:
   alps::gf::momentum_index_mesh momentum_mesh() const;
   alps::gf::real_space_index_mesh real_space_mesh() const;
 
+  ///perform the DCA self-consistency cycle
+  cluster_matsubara_kspace_gf operator()(const cluster_matsubara_kspace_gf &G_omega,
+      const cluster_matsubara_kspace_gf &G0_omega);
 
 private:
   ///get epsilon(k) and the simpson integration weights on the BZ
