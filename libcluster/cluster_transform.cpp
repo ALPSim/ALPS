@@ -345,22 +345,3 @@ double NormalStateClusterTransformer::epsilon_phi(const std::vector<double> &k, 
   return epsilon(k+phi);
 }
 
-cluster_matsubara_kspace_gf NormalStateClusterTransformer::operator()(const cluster_matsubara_kspace_gf &G_omega,
-    const cluster_matsubara_kspace_gf &G0_omega)
-{
-  if(h_!=0) {
-    throw std::invalid_argument("don't know how to handle magn. fields (use the AFM transformer for that!), exiting");
-  }
-
-  cluster_matsubara_kspace_gf G0_omega_new(G0_omega);
-  cluster_matsubara_kspace_gf G_omega_ksum(G0_omega);
-  cluster_matsubara_kspace_gf self_energy(G0_omega);
-
-  dyson_get_self_energy(self_energy, G_omega, G0_omega);
-
-
-  matsubara_k_sum(G_omega_ksum, self_energy);
-  dyson_get_green0(G0_omega_new, self_energy, G_omega_ksum);
-
-  return G0_omega_new;
-}

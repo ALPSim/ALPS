@@ -122,7 +122,7 @@ void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver&
     alps::gf::fourier_frequency_to_time(G0_omega,G0_tau);
     //fourier.setmu(mu);
     std::cout<<"running solver."<<std::endl<<std::flush;
-    solver.solve(G0_omega,G_omega, G_tau);
+    solver.solve(G0_omega,G0_tau, G_omega, G_tau);
     if(spin_symmetrize){
       hilbert.spin_symmetrize(G_tau);
       hilbert.spin_symmetrize(G_omega);
