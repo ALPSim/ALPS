@@ -79,35 +79,38 @@ void throw_if_xyz_defined(const Parameters& p, const G& graph)
       "x, y or z is predefined as parameter and used as coordinate"));
 }
 
+
 template <class G>
 Parameters coordinate_as_parameter(const G& graph,
-  const typename boost::graph_traits<G>::edge_descriptor& edge)
+  const typename boost::graph_traits<G>::vertex_descriptor& source,
+  const typename boost::graph_traits<G>::vertex_descriptor& target)
 {
   Parameters parms;
   unsigned int dim = detail::graph_dimension_helper<
     has_property<dimension_t, G>::graph_property>::dimension(graph);
   switch (dim) {
   case 3 :
-    parms["z"] = 0.5 * (boost::get(coordinate_t(), graph,
-                                   boost::source(edge, graph))[2] +
-                        boost::get(coordinate_t(), graph,
-                                   boost::target(edge, graph))[2]);
+    parms["z"] = 0.5 * (boost::get(coordinate_t(), graph, source)[2] +
+                        boost::get(coordinate_t(), graph, target)[2]);
     // continue
   case 2 :
-    parms["y"] = 0.5 * (boost::get(coordinate_t(), graph,
-                                   boost::source(edge, graph))[1] +
-                        boost::get(coordinate_t(), graph,
-                                   boost::target(edge, graph))[1]);
+    parms["y"] = 0.5 * (boost::get(coordinate_t(), graph, source)[1] +
+                        boost::get(coordinate_t(), graph, target)[1]);
     // continue
   case 1 :
-    parms["x"] = 0.5 * (boost::get(coordinate_t(), graph,
-                                   boost::source(edge, graph))[0] +
-                        boost::get(coordinate_t(), graph,
-                                   boost::target(edge, graph))[0]);
+    parms["x"] = 0.5 * (boost::get(coordinate_t(), graph, source)[0] +
+                        boost::get(coordinate_t(), graph, target)[0]);
   default :
     break;
   }
   return parms;
+}
+
+template <class G>
+Parameters coordinate_as_parameter(const G& graph,
+  const typename boost::graph_traits<G>::edge_descriptor& edge)
+{
+  return coordinate_as_parameter(graph, boost::source(edge, graph), boost::target(edge, graph));
 }
 
 template <class G>
