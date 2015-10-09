@@ -171,7 +171,7 @@ public:
             
             if (lattice.inhomogeneous_sites())
                 alps::throw_if_xyz_defined(parms,*it); // check whether x, y, or z is set
-            alps::expression::ParameterEvaluator<value_type> coords(lattice.coordinate_as_parameter(p));
+            alps::expression::ParameterEvaluator<value_type> coords(coordinate_as_parameter(lattice.graph(), *it));
             
             if (site_terms[type].size() == 0) {
                 typedef std::vector<boost::tuple<alps::expression::Term<value_type>,alps::SiteOperator> > V;
@@ -233,6 +233,9 @@ public:
             alps::SiteBasisDescriptor<I> const& b1 = basis_descriptors[type_s];
             alps::SiteBasisDescriptor<I> const& b2 = basis_descriptors[type_t];
             
+            if (lattice.inhomogeneous_bonds())
+                alps::throw_if_xyz_defined(parms, lattice.graph()); // check whether x, y, or z is set
+            alps::expression::ParameterEvaluator<value_type> coords(coordinate_as_parameter(lattice.graph(), *it));
             
             V  ops = bondop.template templated_split<value_type>(b1,b2);
             for (typename V::iterator tit=ops.begin(); tit!=ops.end();++tit) {
@@ -247,6 +250,9 @@ public:
                     match2 = register_operator(op2, type_t, parms);
                 
                 bool with_sign = fermionic(b1, op1, b2, op2);
+                
+                if (lattice.inhomogeneous_bonds())
+                    boost::get<0>(*tit).partial_evaluate(coords);
                 
                 expression_term term;
                 term.coeff = boost::get<0>(*tit);
@@ -484,13 +490,31 @@ private:
         alps::Parameters parms_with_defaults(parms);
         parms_with_defaults.copy_undefined(model.model().default_parameters());
         
-        typedef typename boost::container::flat_map<expression_type, value_type>::iterator coeff_iterator;
-        for(coeff_iterator it = expression_coeff.begin(); it != expression_coeff.end(); ++it)
-            it->second = alps::evaluate<value_type>(it->first, parms_with_defaults);
+        // typedef typename boost::container::flat_map<expression_type, value_type>::iterator coeff_iterator;
+        // for(coeff_iterator it = expression_coeff.begin(); it != expression_coeff.end(); ++it)
+        //     it->second = alps::partial_evaluate<value_type>(it->first, parms_with_defaults);
         
         typedef typename std::vector<expression_term>::const_iterator terms_iterator;
         for(terms_iterator it = expression_terms.begin(); it != expression_terms.end(); ++it) {
-            value_type const& val = expression_coeff[it->coeff];
+            
+            value_type val = 0.;
+            if (lattice.inhomogeneous_sites() && it->size() == 1) {
+                alps::Parameters p(parms_with_defaults);
+                alps::throw_if_xyz_defined(p, lattice.graph()); // check whether x, y, or z is set
+                p << coordinate_as_parameter(lattice.graph(), lattice.site(it->position(0)));
+                
+                val = alps::evaluate<value_type>(it->coeff, p);
+            } else if(lattice.inhomogeneous_bonds() && it->size() == 2) {
+                alps::Parameters p(parms_with_defaults);
+                alps::throw_if_xyz_defined(p, lattice.graph()); // check whether x, y, or z is set
+                p << coordinate_as_parameter(lattice.graph(), lattice.site(it->position(0)), lattice.site(it->position(1)));
+                
+                val = alps::evaluate<value_type>(it->coeff, p);
+            } else {
+                val = alps::evaluate<value_type>(it->coeff, parms_with_defaults);
+            }
+            
+            // value_type const& val = expression_coeff[it->coeff];
             if ( alps::numeric::is_nonzero(val) ) {
                 value_term term;
                 term.is_fermionic = it->is_fermionic;
