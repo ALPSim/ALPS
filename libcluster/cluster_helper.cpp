@@ -12,21 +12,22 @@
 #include "cluster_helper.h"
 
 void ClusterHelper::define_parameters(alps::params &p){
-  p.define<std::string>("LATTICE", "name of the cluster");
-  p.define<std::string>("LATTICE_LIBRARY", "name of the xml cluster definition file");
-  p.define<std::string>("LATTICE_DUMP", "cluster.h5", "name of the cluster transformer hdf5 dump file");
-  p.define<bool>("AFM_SELFCONSISTENCY", false, "Use the AFM self-consistency condition.");
-  p.define<int>("SITES",  "number of cluster sites");
+  p.define<std::string>("dca.LATTICE", "name of the cluster");
+  p.define<std::string>("dca.LATTICE_LIBRARY", "name of the xml cluster definition file");
+  p.define<std::string>("dca.LATTICE_DUMP", "cluster.h5", "name of the cluster transformer hdf5 dump file");
+  p.define<bool>("dca.AFM_SELFCONSISTENCY", false, "Use the AFM self-consistency condition.");
+  p.define<int>("dca.SITES",  "number of cluster sites");
+  p.define<int>("dca.L", "linear discretization of cluster k-point integration");
 }
 ClusterHelper::ClusterHelper(const alps::params& params) :
-alps_graph(params["LATTICE"],params["LATTICE_LIBRARY"],params["L"]),
-paramagnet_(!params["AFM_SELFCONSISTENCY"]),
+alps_graph(params["dca.LATTICE"],params["dca.LATTICE_LIBRARY"],params["dca.L"]),
+paramagnet_(!params["dca.AFM_SELFCONSISTENCY"]),
 epsilon_(1e-9),
-hdf5_dump_name_(params["LATTICE_DUMP"].as<std::string>()),
-cluster_name_(params["LATTICE"].as<std::string>())
+hdf5_dump_name_(params["dca.LATTICE_DUMP"].as<std::string>()),
+cluster_name_(params["dca.LATTICE"].as<std::string>())
 {
   //check that the numer of sites is consistent between the 'SITES' parameter and what we get from the cluster.
-  if (int(params["SITES"]) != alps_graph::unit_cell_volume()) throw std::runtime_error(std::string("the graph")+params["LATTICE"].as<std::string>()+" unit cell volume is not :"+params["SITES"].as<std::string>());
+  if (int(params["dca.SITES"]) != alps_graph::unit_cell_volume()) throw std::runtime_error(std::string("the graph")+params["LATTICE"].as<std::string>()+" unit cell volume is not :"+params["SITES"].as<std::string>());
   //generate the symmetry tables for this transformer.
   if(!read())
     setup_tables(params);

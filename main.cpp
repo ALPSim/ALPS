@@ -20,12 +20,16 @@
 #include "selfconsistency.h"
 
 /// @brief The DMFT main program
+void define_parameters(alps::params &p){
+  p.define<std::string>("SC_LOOP", "switch between single_site, DCA, and CDMFT");
+}
 
 alps::params read_parameters_from_file(int argc, const char ** argv){
   alps::params parms(argc, argv);
   define_selfconsistency_parameters(parms);
-  ImpuritySolver::define_parameters(parms);
-  FrequencySpaceHilbertTransformer::define_parameters(parms);
+  define_solver_parameters(parms);
+  define_dca_parameters(parms);
+  define_parameters(parms);
 
   if (parms.help_requested(std::cout)) {
     exit(0);
@@ -48,20 +52,15 @@ int main(int argc, char** argv)
     std::cout << "### Copyright Emanuel Gull, 2005 - 2015       ###"<<std::endl;
     std::cout << "### To be used with permission by the authors ###"<<std::endl;
     std::cout << "#################################################"<<std::endl;
+
     alps::params parms=read_parameters_from_file(argc, (const char **)argv);
-    //perform selfconsistency loop for single site or cluster...
-    if(!parms.defined("CLUSTER_LOOP")){
+
+    if(parms["SC_LOOP"].as<std::string>()=="SINGLE_SITE"){
       perform_single_site_loop(parms);
-    }else{
-//      perform_cluster_loop(parms);
-    }
-    if(parms.defined("MODIFY_PARAMETER_FILE")){
-      std::ofstream os(argv[1]);
-	
-      parms["CURRENT_IT"]=0;// sloppy fix.  Sets current_it to zero for continuing program later
-      os<<parms;
-      os.close();
-    }
+    }else if(parms["SC_LOOP"].as<std::string>()=="DCA"){
+      perform_cluster_loop(parms);
+    }else
+      throw std::invalid_argument("self-consistency loop: "+parms["SC_LOOP"].as<std::string>()+"unknown");
   }
   catch (std::exception& exc) {
     std::cerr<<exc.what()<<std::endl;

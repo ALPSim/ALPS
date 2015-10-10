@@ -12,18 +12,20 @@
 #include "alps/gf/fourier.hpp"
 
 void define_selfconsistency_parameters(alps::params &p){
-  p.define<int>("N", "Number of imaginary time discretization points");
-  p.define<int>("NMATSUBARA", "Number of matsubara frequency discretization points");
-  p.define<int>("FLAVORS", 2, "Number of spins or (diagonal) orbitals");
-  p.define<int>("SITES", 1, "Number of sites. Choose only !=1 if you are doing a cluster calculation");
-  p.define<double>("BETA", "Inverse temperature");
-  p.define<double>("H", "Staggered (antiferromagnetic) field");
-  p.define<double>("SELFCONSISTENCY_CONVERGENCE", 1.e-10, "Difference in Green's function at which the iteration is converged");
-  p.define<int>("MAX_IT", 1000, "Maximum number of DMFT iterations");
-  p.define<double>("RELAX_RATE", 1., "Convergence acceleration (or deceleration) parameter. Choose 1 if unsure.");
-  p.define<bool>("AFM_SELFCONSISTENCY", false, "Use the AFM self-consistency condition.");
-  p.define<bool>("SPIN_SYMMETRIZATION", true, "symmetrize 'up' and 'down' spins after each solver call.");
-  p.define<std::string>("SOLVER", "Path to the Solver.");
+
+  FrequencySpaceHilbertTransformer::define_parameters(p);
+
+  p.define<int>("impurity.N", "Number of imaginary time discretization points");
+  p.define<int>("impurity.NMATSUBARA", "Number of matsubara frequency discretization points");
+  p.define<int>("impurity.FLAVORS", 2, "Number of spins or (diagonal) orbitals");
+  p.define<double>("impurity.BETA", "Inverse temperature");
+  p.define<double>("impurity.H", "Staggered (antiferromagnetic) field");
+
+  p.define<double>("sc.SELFCONSISTENCY_CONVERGENCE", 1.e-10, "Difference in Green's function at which the iteration is converged");
+  p.define<int>("sc.MAX_IT", 1000, "Maximum number of DMFT iterations");
+  p.define<double>("sc.RELAX_RATE", 1., "Convergence acceleration (or deceleration) parameter. Choose 1 if unsure.");
+  p.define<bool>("sc.AFM_SELFCONSISTENCY", false, "Use the AFM self-consistency condition.");
+  p.define<bool>("sc.SPIN_SYMMETRIZATION", true, "symmetrize 'up' and 'down' spins after each solver call.");
 }
 void run_convergence_acceleration(single_site_matsubara_gf &G_new, const single_site_matsubara_gf &G_old, double relax_rate){
   if(relax_rate !=1){
@@ -88,7 +90,6 @@ void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver&
   int n_tau=parms["N"];
   int n_matsubara=parms["NMATSUBARA"];
   int n_orbital=parms["FLAVORS"];
-  int n_site=parms["SITES"];
 
   double beta = parms["BETA"];
   double h = parms["H"];
@@ -154,7 +155,7 @@ void perform_single_site_loop(const alps::params &parms){
   else
     transform_ptr=setup_Bethe_hilbert_transform(parms);
 
-  std::string solver_path=parms["SOLVER"];
+  std::string solver_path=parms["solver.SOLVER"];
   ImpuritySolver solver(solver_path,parms);
   selfconsistency_loop_single_site(parms, solver, *transform_ptr);
   delete transform_ptr;

@@ -12,6 +12,8 @@ find_package(GFTools REQUIRED)
 include_directories(${BLAS_CLASSES_INCLUDE_DIR})
 include_directories(${GFTOOLS_INCLUDE_DIR})
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+
 add_library (cluster
 cluster_helper.cpp           
 cluster_graph.cpp 

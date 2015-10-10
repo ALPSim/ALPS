@@ -29,6 +29,7 @@ void selfconsistency_loop_CDMFT_Nambu(const alps::params& parms, ImpuritySolver&
 void perform_single_site_loop(const alps::params &parms);
 
 void perform_DCA_loop(const alps::params &parms);
+void define_dca_parameters(alps::params &parms);
 void perform_CDMFT_loop(const alps::params &parms);
 void perform_cluster_loop(const alps::params &parms);
 

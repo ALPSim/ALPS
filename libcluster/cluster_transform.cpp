@@ -13,12 +13,31 @@
 
 #include "cluster_transform.h"
 
+void define_dca_parameters(alps::params &p){
+  ClusterHelper::define_parameters(p);
+  p.define<double>("dca.t_flavor", 0, "Hopping for mass imbalance for second orbital");
+  p.define<double>("dca.t", "nearest-neighbor hopping parameter and general unit");
+  p.define<double>("dca.tprime", 0, "next-nearest neighbor hopping parameter");
+  p.define<double>("dca.H_INIT", 0, "Initial (staggered) magnetic field");
+  p.define<double>("dca.H", 0, "magnetic field");
+  p.define<double>("dca.MU", "Chemical Potential");
+  p.define<double>("dca.BETA", "Inverse temperature");
+  p.define<bool>("dca.IMBALANCE", false, "set to true for mass imbalance simulation");
+  p.define<bool>("dca.PHASE", false, "set to true for simulation with phase");
+  p.define<double>("dca.PHASE_0", 0, "Phase in direction 0 ");
+  p.define<double>("dca.PHASE_1", 0, "Phase in direction 1 ");
+  p.define<double>("dca.PHASE_2", 0, "Phase in direction 2 ");
+  p.define<int>("dca.NMATSUBARA", "Number fo Matsubara frequencies");
+  p.define<int>("dca.N", "Number of imaginary time points");
+  p.define<int>("dca.FLAVORS", "Number of orbitals (usually 2)");
+  p.define<std::string>("dca.G0_OMEGA_INPUT", "Location of the input G0 file");
+}
 cluster_matsubara_kspace_gf NormalStateClusterTransformer::initial_G0(const alps::params& parms) {
-  std::cout<<"reading initial G0_omega from: "<<parms["G0_OMEGA_INPUT"].as<std::string>()<<std::endl;
-  int nfreq=parms["NMATSUBARA"];
-  int n_orbital=parms["FLAVORS"];
-  int n_site=parms["SITES"];
-  double beta=parms["BETA"];
+  std::cout<<"reading initial G0_omega from: "<<parms["dca.G0_OMEGA_INPUT"].as<std::string>()<<std::endl;
+  int nfreq=parms["dca.NMATSUBARA"];
+  int n_orbital=parms["dca.FLAVORS"];
+  int n_site=parms["dca.SITES"];
+  double beta=parms["dca.BETA"];
 
   cluster_matsubara_kspace_gf G0_omega(alps::gf::omega_k_sigma_gf(
       alps::gf::matsubara_positive_mesh(beta,nfreq),
@@ -26,7 +45,7 @@ cluster_matsubara_kspace_gf NormalStateClusterTransformer::initial_G0(const alps
       alps::gf::index_mesh(n_orbital))
   );
 
-  alps::hdf5::archive ar(parms["G0_OMEGA_INPUT"].as<std::string>());
+  alps::hdf5::archive ar(parms["dca.G0_OMEGA_INPUT"].as<std::string>());
   G0_omega.load(ar, "/G0");
   return G0_omega;
 }
@@ -244,15 +263,15 @@ void NormalStateClusterTransformer::matsubara_k_sum(cluster_matsubara_kspace_gf 
   }
 }
 NormalStateClusterTransformer::NormalStateClusterTransformer(const alps::params& params) : ClusterHelper(params),
-    mu_(params["MU"]),
-    h_(params["H"]),
+    mu_(params["dca.MU"]),
+    h_(params["dca.H"]),
     half_filling_(0.),
-    t_(params["t"]),
-    t2_(params["t'"]),
-    t_flavor_(params["t_flavor"]),
-    n_flavors_(params["FLAVORS"]),
-    use_phase_(params["PHASE"]),
-    use_imbalance_(params["IMBALANCE"]),
+    t_(params["dca.t"]),
+    t2_(params["dca.tprime"]),
+    t_flavor_(params["dca.t_flavor"]),
+    n_flavors_(params["dca.FLAVORS"]),
+    use_phase_(params["dca.PHASE"]),
+    use_imbalance_(params["dca.IMBALANCE"]),
     epsilon_kckl_(boost::extents[n_cluster_sites()][n_lattice_momenta()][n_flavors_]),
     weight_kl_(n_lattice_momenta()){
   compute_integration_weight_and_dispersion();
@@ -275,6 +294,9 @@ void NormalStateClusterTransformer::compute_integration_weight_and_dispersion(){
   }
 }
 void NormalStateClusterTransformer::compute_dispersion_weights(){
+  epsav_             .resize(n_cluster_sites());
+  epssqav_           .resize(n_cluster_sites());
+  dispersion_moments_.resize(2);
   for (int kc=0; kc<n_cluster_sites(); ++kc) {
     for (int kl=0; kl<n_lattice_momenta(); ++kl) {
       std::vector<double> k(dimension());

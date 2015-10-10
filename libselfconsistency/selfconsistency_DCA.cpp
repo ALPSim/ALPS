@@ -60,11 +60,12 @@ bool converged(const cluster_matsubara_kspace_gf &G_omega, const cluster_matsuba
 void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
     NormalStateClusterTransformer& clustertrans)
 {
-  int n_tau=parms["N"];
-  int n_orbital=parms["FLAVORS"];
-  int max_it = parms["MAX_IT"];
-  double beta=parms["BETA"];
-  double convergence_tolerance=parms["SELFCONSISTENCY_CONVERGENCE"];
+  int n_tau=parms["dca.N"];
+  int n_orbital=parms["dca.FLAVORS"];
+  double beta=parms["dca.BETA"];
+  
+  int max_it = parms["sc.MAX_IT"];
+  double convergence_tolerance=parms["sc.SELFCONSISTENCY_CONVERGENCE"];
 
   //calculate initial G0
   cluster_matsubara_kspace_gf G0_omega=clustertrans.initial_G0(parms);
@@ -102,8 +103,8 @@ void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
 }
 
 void perform_cluster_loop(const alps::params &parms){
-  std::string cluster_loop=parms["CLUSTER_LOOP"];
-  std::string solver_path=parms["SOLVER"];
+  std::string cluster_loop=parms["SC_LOOP"];
+  std::string solver_path=parms["solver.SOLVER"];
   std::cout<<"cluster loop is: "<<cluster_loop<<std::endl;
   if (cluster_loop=="DCA"){
     std::cout<<"running a DCA calculation"<<std::endl;

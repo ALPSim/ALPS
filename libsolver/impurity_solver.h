@@ -11,18 +11,19 @@
 #include "alps/params.hpp"
 #include "alps/gf/fourier.hpp"
 
+
 class ImpuritySolver
 {
 public:
   ImpuritySolver(const std::string & launch_command, const alps::params &p) :
     launch_command_(launch_command),
-    infile_str_(p["INFILE"].as<std::string>()),
-    outfile_str_(p["INFILE"].as<std::string>()),
+    infile_str_(p["solver.INFILE"].as<std::string>()),
+    outfile_str_(p["solver.INFILE"].as<std::string>()),
     params_(p){}
 
   static void define_parameters(alps::params &p){
-    p.define<std::string>("INFILE", alps::temporary_filename("alps_external_solver_")+".in.h5","Filename for temporary file");
-    p.define<std::string>("OUTFILE", alps::temporary_filename("alps_external_solver_")+".out.h5","Filename for temporary file");
+    p.define<std::string>("solver.INFILE", alps::temporary_filename("alps_external_solver_")+".in.h5","Filename for temporary file");
+    p.define<std::string>("solver.OUTFILE", alps::temporary_filename("alps_external_solver_")+".out.h5","Filename for temporary file");
   }
   template<typename CTF> void write_cluster_info(const CTF& clustertransformer){
     alps::hdf5::archive solver_input(infile_str_, alps::hdf5::archive::WRITE);
@@ -72,3 +73,8 @@ private:
   const std::string outfile_str_;
   const alps::params params_;
 };
+
+inline void define_solver_parameters(alps::params &p){ 
+  p.define<std::string>("solver.SOLVER", "path to the solver executable");
+  ImpuritySolver::define_parameters(p);
+}
