@@ -9,6 +9,7 @@
 
 #include "alps/numeric/vector_functions.hpp"
 #include "alps/hdf5/vector.hpp"
+#include "alps/gf/fourier.hpp"
 #include "alps/params.hpp"
 
 #include "cluster_transform.h"
@@ -31,24 +32,98 @@ void define_dca_parameters(alps::params &p){
   p.define<int>("dca.N", "Number of imaginary time points");
   p.define<int>("dca.FLAVORS", "Number of orbitals (usually 2)");
   p.define<std::string>("dca.G0_OMEGA_INPUT", "Location of the input G0 file");
+  p.define<std::string>("dca.INITIAL_G0", "FREE", "choose ISOLATED or FREE for initial G0s");
 }
-cluster_matsubara_kspace_gf NormalStateClusterTransformer::initial_G0(const alps::params& parms) {
-  std::cout<<"reading initial G0_omega from: "<<parms["dca.G0_OMEGA_INPUT"].as<std::string>()<<std::endl;
-  int nfreq=parms["dca.NMATSUBARA"];
-  int n_orbital=parms["dca.FLAVORS"];
-  int n_site=parms["dca.SITES"];
-  double beta=parms["dca.BETA"];
+NormalStateClusterTransformer::NormalStateClusterTransformer(const alps::params& params) : ClusterHelper(params),
+    mu_(params["dca.MU"]),
+    h_(params["dca.H"]),
+    half_filling_(0.),
+    t_(params["dca.t"]),
+    t2_(params["dca.tprime"]),
+    t_flavor_(params["dca.t_flavor"]),
+    n_flavors_(params["dca.FLAVORS"]),
+    use_phase_(params["dca.PHASE"]),
+    use_imbalance_(params["dca.IMBALANCE"]),
+    epsilon_kckl_(boost::extents[n_cluster_sites()][n_lattice_momenta()][n_flavors_]),
+    weight_kl_(n_lattice_momenta()),
+    nfreq_(params["dca.NMATSUBARA"]),
+    beta_(params["dca.BETA"]),
+    g0_input_path_(params["dca.G0_OMEGA_INPUT"].as<std::string>()),
+    initial_g0_(params["dca.INITIAL_G0"].as<std::string>())
+{
+  compute_integration_weight_and_dispersion();
+  compute_dispersion_weights();
+  if(use_phase_) setup_phase_vector(params);
+}
+
+bool NormalStateClusterTransformer::read_initial_G0(cluster_matsubara_kspace_gf &G0_omega) const{
+  std::cout<<"reading initial G0_omega from: "<<g0_input_path_<<std::endl;
+  {
+    std::ifstream in_file(g0_input_path_);
+    if(!in_file.good())
+      std::cout<<"WARNING: Input file could not be found, computing initial solution."<<std::endl;
+    return false;
+  }
+
+  alps::hdf5::archive ar(g0_input_path_);
+  G0_omega.load(ar, "/G0");
+  return true;
+}
+void NormalStateClusterTransformer::compute_isolated_cluster_G0(cluster_matsubara_kspace_gf &G0_omega) const{
+  std::cout << "calculating G0_omega for isolated cluster"<<std::endl;
+  std::vector<double> k(dimension());
+  for (alps::gf::matsubara_index freq(0); freq<nfreq_; ++freq) {
+    const std::complex<double> iomega_n(0, G0_omega.mesh1().points()[freq()]);
+    for (alps::gf::momentum_index kc(0); kc<n_cluster_sites(); ++kc) {
+      for (unsigned int d=0; d<dimension(); ++d)
+        k[d] = cluster_momentum(kc(),d);
+      const std::complex<double> G0 = use_phase_?1./(iomega_n+mu_-epsilon_phi(k,phi_)):1./(iomega_n+mu_-epsilon(k));
+      for (alps::gf::index flavor(0); flavor<n_flavors_; ++flavor) {
+        G0_omega(freq, kc, flavor) = G0;
+      }
+    }
+  }
+}
+void NormalStateClusterTransformer::compute_noninteracting_G0(cluster_matsubara_kspace_gf &G0_omega) const{
+  cluster_matsubara_kspace_gf zero_selfenergy(G0_omega);
+  zero_selfenergy.initialize();
+  matsubara_k_sum(G0_omega, zero_selfenergy);
+}
+cluster_matsubara_kspace_gf NormalStateClusterTransformer::initial_G0()const{
 
   cluster_matsubara_kspace_gf G0_omega(alps::gf::omega_k_sigma_gf(
-      alps::gf::matsubara_positive_mesh(beta,nfreq),
+      alps::gf::matsubara_positive_mesh(beta_,nfreq_),
       momentum_mesh(),
-      alps::gf::index_mesh(n_orbital))
+      alps::gf::index_mesh(n_flavors_))
   );
 
-  alps::hdf5::archive ar(parms["dca.G0_OMEGA_INPUT"].as<std::string>());
-  G0_omega.load(ar, "/G0");
+  if(read_initial_G0(G0_omega)) return G0_omega;
+
+  if(initial_g0_=="FREE")
+    compute_noninteracting_G0(G0_omega);
+  else if (initial_g0_=="ISOLATED")
+    compute_isolated_cluster_G0(G0_omega);
+  else
+    throw std::invalid_argument("choose FREE or ISOLATED as initial G0 parameters or provide an input hdf5 file");
+
+  {
+    alps::hdf5::archive ar(g0_input_path_, alps::hdf5::archive::WRITE);
+    G0_omega.save(ar, "/G0");
+
+    std::ofstream G0_omega_input_file("G0_omega_input.dat"); G0_omega_input_file<<G0_omega;
+  }
+  {
+    cluster_itime_kspace_gf G0_tau(alps::gf::itime_k_sigma_gf(
+        alps::gf::itime_mesh(beta_,nfreq_),
+        momentum_mesh(),
+        alps::gf::index_mesh(n_flavors_))
+    );
+    alps::gf::fourier_frequency_to_time(G0_omega, G0_tau);
+    std::ofstream G0_tau_input_file("G0_tau_input.dat"); G0_tau_input_file<<G0_tau;
+  }
   return G0_omega;
 }
+
 alps::gf::momentum_index_mesh NormalStateClusterTransformer::momentum_mesh() const{
   alps::gf::momentum_index_mesh::container_type points(boost::extents[n_cluster_sites()][dimension()]);
   for(int i=0;i<n_cluster_sites();++i){
@@ -262,21 +337,6 @@ void NormalStateClusterTransformer::matsubara_k_sum(cluster_matsubara_kspace_gf 
     }
   }
 }
-NormalStateClusterTransformer::NormalStateClusterTransformer(const alps::params& params) : ClusterHelper(params),
-    mu_(params["dca.MU"]),
-    h_(params["dca.H"]),
-    half_filling_(0.),
-    t_(params["dca.t"]),
-    t2_(params["dca.tprime"]),
-    t_flavor_(params["dca.t_flavor"]),
-    n_flavors_(params["dca.FLAVORS"]),
-    use_phase_(params["dca.PHASE"]),
-    use_imbalance_(params["dca.IMBALANCE"]),
-    epsilon_kckl_(boost::extents[n_cluster_sites()][n_lattice_momenta()][n_flavors_]),
-    weight_kl_(n_lattice_momenta()){
-  compute_integration_weight_and_dispersion();
-  compute_dispersion_weights();
-}
 
 void NormalStateClusterTransformer::compute_integration_weight_and_dispersion(){
   std::vector<double> k(dimension());
@@ -323,17 +383,17 @@ double NormalStateClusterTransformer::epsilon(const std::vector<double> &k) cons
     eps -= 2*t_*cos(k[i]);
   if (t2_!=0.) {
     switch(dimension()) {
-      case 1 :
-        eps -= 2*t2_*cos(k[0]*2.);
-        break;
-      case 2 :
-        eps -= 4*t2_*cos(k[0])*cos(k[1]);
-        break;
-      case 3 :
-        eps -= 4*t2_*cos(k[0])*cos(k[1]);
-        eps -= 4*t2_*cos(k[1])*cos(k[2]);
-        eps -= 4*t2_*cos(k[0])*cos(k[2]);
-        break;
+    case 1 :
+      eps -= 2*t2_*cos(k[0]*2.);
+      break;
+    case 2 :
+      eps -= 4*t2_*cos(k[0])*cos(k[1]);
+      break;
+    case 3 :
+      eps -= 4*t2_*cos(k[0])*cos(k[1]);
+      eps -= 4*t2_*cos(k[1])*cos(k[2]);
+      eps -= 4*t2_*cos(k[0])*cos(k[2]);
+      break;
     }
   }
   return eps;
@@ -341,7 +401,7 @@ double NormalStateClusterTransformer::epsilon(const std::vector<double> &k) cons
 void NormalStateClusterTransformer::setup_phase_vector(const alps::params &p){
   phi_.resize(dimension());
   for(int i=0;i<dimension();++i){
-    std::stringstream phase_name; phase_name<<"PHASE_"<<i;
+    std::stringstream phase_name; phase_name<<"dca.PHASE_"<<i;
     phi_[i]=p[phase_name.str()];
     phi_[i] = phi_[i]/periodicity(i);
   }

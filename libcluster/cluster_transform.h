@@ -77,8 +77,14 @@ public:
   template<class GF> void symmetrize_real_space(GF& G) const{return symmetrize_helper_real_space(G,pair_classes_real_space());}
   template<class GF> void symmetrize_k_space(GF& G) const{return symmetrize_helper_k_space(G,pair_classes_k_space());};
 
-  ///compute an initial G0.
-  virtual cluster_matsubara_kspace_gf initial_G0 (const alps::params& parms);
+  ///obtain an initial G0.
+  cluster_matsubara_kspace_gf initial_G0 () const;
+  ///read G0 from file
+  bool read_initial_G0 (cluster_matsubara_kspace_gf &G0_omega) const;
+  ///compute G0 from an atomic solution
+  void compute_isolated_cluster_G0(cluster_matsubara_kspace_gf &G0_omega) const;
+  ///compute G0 from a noninteracting solution
+  void compute_noninteracting_G0(cluster_matsubara_kspace_gf &G0_omega) const;
 
   std::vector<double> epsav() const { return epsav_; };
   std::vector<double> epssqav() const { return epssqav_; };
@@ -95,7 +101,7 @@ public:
 
   ///perform the DCA self-consistency cycle
   cluster_matsubara_kspace_gf operator()(const cluster_matsubara_kspace_gf &G_omega,
-      const cluster_matsubara_kspace_gf &G0_omega);
+      const cluster_matsubara_kspace_gf &G0_omega) const;
 
 private:
   ///get epsilon(k) and the simpson integration weights on the BZ
@@ -117,9 +123,13 @@ private:
   double half_filling_;
   ///t is the basic energy unit of the hopping. t2 is the tprime. t_flavor is only used for mass imbalance
   double t_, t2_,t_flavor_;
+  double beta_;
   int n_flavors_;
+  int nfreq_;
   bool use_phase_;
   bool use_imbalance_;
+  std::string g0_input_path_;
+  std::string initial_g0_;
   boost::multi_array<double,3> epsilon_kckl_;
   std::vector<double> weight_kl_;
   std::vector<double> phi_;

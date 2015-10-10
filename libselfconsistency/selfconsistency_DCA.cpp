@@ -68,7 +68,7 @@ void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
   double convergence_tolerance=parms["sc.SELFCONSISTENCY_CONVERGENCE"];
 
   //calculate initial G0
-  cluster_matsubara_kspace_gf G0_omega=clustertrans.initial_G0(parms);
+  cluster_matsubara_kspace_gf G0_omega=clustertrans.initial_G0();
 
   //define all needed matsubara and imaginary time Green's functions
   cluster_matsubara_kspace_gf G_omega=G0_omega;
