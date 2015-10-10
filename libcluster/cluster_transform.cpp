@@ -83,11 +83,13 @@ void NormalStateClusterTransformer::compute_isolated_cluster_G0(cluster_matsubar
       }
     }
   }
+  attach_bare_tail(G0_omega);
 }
 void NormalStateClusterTransformer::compute_noninteracting_G0(cluster_matsubara_kspace_gf &G0_omega) const{
   cluster_matsubara_kspace_gf zero_selfenergy(G0_omega);
   zero_selfenergy.initialize();
   matsubara_k_sum(G0_omega, zero_selfenergy);
+  attach_bare_tail(G0_omega);
 }
 cluster_matsubara_kspace_gf NormalStateClusterTransformer::initial_G0()const{
 
@@ -122,6 +124,24 @@ cluster_matsubara_kspace_gf NormalStateClusterTransformer::initial_G0()const{
     std::ofstream G0_tau_input_file("G0_tau_input.dat"); G0_tau_input_file<<G0_tau;
   }
   return G0_omega;
+}
+void NormalStateClusterTransformer::attach_bare_tail(cluster_matsubara_kspace_gf &G0) const{
+  //new ClusterG0FourierTransformer((double)parms["BETA"], (double)parms["MU"], (double)parms["H"],
+//  n_flavors, n_site, eps_f, epssq_f));
+  alps::gf::k_sigma_gf c1(G0.mesh2(), G0.mesh3());
+  alps::gf::k_sigma_gf c2(G0.mesh2(), G0.mesh3());
+  alps::gf::k_sigma_gf c3(G0.mesh2(), G0.mesh3());
+
+  for(alps::gf::index f(0); f<n_flavors_; f++) {
+    for(alps::gf::momentum_index k(0); k<n_cluster_sites(); ++k) {
+      c1(k,f) = 1.;
+      c2(k,f) = epsav_[k()] - mu_;
+      c3(k,f) = epssqav_[k()] - 2*mu_*epsav_[k()] + mu_*mu_;
+    }
+  }
+  G0.set_tail(1,c1);
+  G0.set_tail(2,c2);
+  G0.set_tail(3,c3);
 }
 
 alps::gf::momentum_index_mesh NormalStateClusterTransformer::momentum_mesh() const{

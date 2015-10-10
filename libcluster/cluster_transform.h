@@ -90,6 +90,8 @@ public:
   std::vector<double> epssqav() const { return epssqav_; };
   double dispersion_moments(const unsigned int i) const { return dispersion_moments_[i]; }
 
+  void attach_bare_tail(cluster_matsubara_kspace_gf &G0) const;
+
   //Real space and k-space transformers for the Green's functions
   cluster_matsubara_realspace_gf transform_into_real_space(const cluster_matsubara_kspace_gf& G) const;
   cluster_matsubara_kspace_gf transform_into_k_space(const cluster_matsubara_realspace_gf& G) const;
