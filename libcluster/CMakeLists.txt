@@ -18,8 +18,6 @@ add_library (cluster
 cluster_helper.cpp           
 cluster_graph.cpp 
 cluster_transform.cpp 
-#DCA_transform.cpp            
-#AFM_DCA_transform.cpp            
 )
 
 target_link_libraries(cluster  ${GFTOOLS_LIBRARIES} ${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES})
