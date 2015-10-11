@@ -143,6 +143,29 @@ void NormalStateClusterTransformer::attach_bare_tail(cluster_matsubara_kspace_gf
   G0.set_tail(2,c2);
   G0.set_tail(3,c3);
 }
+void NormalStateClusterTransformer::attach_interacting_tail(cluster_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const{
+  //fourier_ptr.reset(new ClusterAntiFerroGFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., (double)parms["H"], U,
+  //                                                          n_flavors, n_site, densities, magnetization, eps_f, epssq_f));
+  //c1_[f][i][i] = 1.;
+  //c2_[f][i][i] = eps[f][i] - mu + U*density[fbar];
+  //c3_[f][i][i] = epssq[f][i] - 2.*mu*eps[f][i] + mu*mu + h*h/4
+  //+ 2.*U*density[fbar]*(eps[f][i]-mu) + U*U*density[fbar] + U*s*h*magnetization[fbar];
+  alps::gf::k_sigma_gf c1(G.mesh2(), G.mesh3());
+  alps::gf::k_sigma_gf c2(G.mesh2(), G.mesh3());
+  alps::gf::k_sigma_gf c3(G.mesh2(), G.mesh3());
+  double density=(densities[0]+densities[1])/2.;
+
+  for(alps::gf::index f(0); f<n_flavors_; f++) {
+    for(alps::gf::momentum_index k(0); k<n_cluster_sites(); ++k) {
+      c1(k,f) = 1.;
+      c2(k,f) = epsav_[k()] - mu_+ U*density;
+      c3(k,f) = epssqav_[k()] - 2*mu_*epsav_[k()] + mu_*mu_+ 2.*U*density*(epsav_[k()]-mu_) + U*U*density;
+    }
+  }
+  G.set_tail(1,c1);
+  G.set_tail(2,c2);
+  G.set_tail(3,c3);
+}
 
 alps::gf::momentum_index_mesh NormalStateClusterTransformer::momentum_mesh() const{
   alps::gf::momentum_index_mesh::container_type points(boost::extents[n_cluster_sites()][dimension()]);

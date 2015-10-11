@@ -91,6 +91,7 @@ public:
   double dispersion_moments(const unsigned int i) const { return dispersion_moments_[i]; }
 
   void attach_bare_tail(cluster_matsubara_kspace_gf &G0) const;
+  void attach_interacting_tail(cluster_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const;
 
   //Real space and k-space transformers for the Green's functions
   cluster_matsubara_realspace_gf transform_into_real_space(const cluster_matsubara_kspace_gf& G) const;
