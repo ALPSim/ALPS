@@ -40,12 +40,12 @@ typedef alps::gf::itime_k_sigma1_sigma2_gf_with_tail cluster_nambu_itime_kspace_
 typedef alps::gf::omega_r1_r2_sigma1_sigma2_gf_with_tail cluster_nambu_matsubara_realspace_gf;
 typedef alps::gf::itime_r1_r2_sigma1_sigma2_gf_with_tail cluster_nambu_itime_realspace_gf;
 
+void define_dca_parameters(alps::params &p);
+
 //The Cluster transformer presents a framework for operator(), which does the Hilbert transform..
 class NormalStateClusterTransformer : public ClusterHelper
 {
 public:
-  ///define parameters used here
-  static void define_parameters(alps::params &p);
   ///Constructor: a cluster transformer has no internal components, everything is delegated to the ClusterHelper
   NormalStateClusterTransformer(const alps::params& params);
   ///virtual destructor

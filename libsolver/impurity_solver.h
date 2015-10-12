@@ -15,15 +15,16 @@
 class ImpuritySolver
 {
 public:
-  ImpuritySolver(const std::string & launch_command, const alps::params &p) :
+  ImpuritySolver(const std::string & launch_command, const std::string &param_file_name, const alps::params &p) :
     launch_command_(launch_command),
-    infile_str_(p["solver.INFILE"].as<std::string>()),
-    outfile_str_(p["solver.INFILE"].as<std::string>()),
+    param_file_name_(param_file_name),
+    infile_str_(p["solver.INFILE_H5GF"].as<std::string>()),
+    outfile_str_(p["solver.OUTFILE_H5GF"].as<std::string>()),
     params_(p){}
 
   static void define_parameters(alps::params &p){
-    p.define<std::string>("solver.INFILE", alps::temporary_filename("alps_external_solver_")+".in.h5","Filename for temporary file");
-    p.define<std::string>("solver.OUTFILE", alps::temporary_filename("alps_external_solver_")+".out.h5","Filename for temporary file");
+    p.define<std::string>("solver.INFILE_H5GF", "alps_solver_in.h5gf","Filename for temporary file");
+    p.define<std::string>("solver.OUTFILE_H5GF", "alps_solver_out.h5gf","Filename for temporary file");
   }
   template<typename CTF> void write_cluster_info(const CTF& clustertransformer){
     alps::hdf5::archive solver_input(infile_str_, alps::hdf5::archive::WRITE);
@@ -57,7 +58,7 @@ private:
   }
   /// call the executable
   void call_solver(){
-    std::string command = launch_command_ + " " + infile_str_ + " " + outfile_str_;
+    std::string command = launch_command_ + " " + param_file_name_;
     std::cerr << "Calling external solver as: " <<  command<<std::endl;
     int result = std::system(command.c_str());
     if (result)
@@ -69,6 +70,7 @@ private:
 
   ///command to launch the solver executable
   const std::string launch_command_;
+  const std::string param_file_name_;
   const std::string infile_str_;
   const std::string outfile_str_;
   const alps::params params_;

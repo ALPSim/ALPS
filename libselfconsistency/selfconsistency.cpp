@@ -15,11 +15,11 @@ void define_selfconsistency_parameters(alps::params &p){
 
   FrequencySpaceHilbertTransformer::define_parameters(p);
 
-  p.define<int>("impurity.N", "Number of imaginary time discretization points");
-  p.define<int>("impurity.NMATSUBARA", "Number of matsubara frequency discretization points");
-  p.define<int>("impurity.FLAVORS", 2, "Number of spins or (diagonal) orbitals");
-  p.define<double>("impurity.BETA", "Inverse temperature");
-  p.define<double>("impurity.H", "Staggered (antiferromagnetic) field");
+  p.define<int>("N", "Number of imaginary time discretization points");
+  p.define<int>("NMATSUBARA", "Number of matsubara frequency discretization points");
+  p.define<int>("FLAVORS", 2, "Number of spins or (diagonal) orbitals");
+  p.define<double>("BETA", "Inverse temperature");
+  p.define<double>("H", "Staggered (antiferromagnetic) field");
 
   p.define<double>("sc.SELFCONSISTENCY_CONVERGENCE", 1.e-10, "Difference in Green's function at which the iteration is converged");
   p.define<int>("sc.MAX_IT", 1000, "Maximum number of DMFT iterations");
@@ -145,7 +145,7 @@ void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver&
 
 
 //construct the Hilbert transformer and run a single site loop
-void perform_single_site_loop(const alps::params &parms){
+void perform_single_site_loop(const std::string &param_file_name, const alps::params &parms){
 
   FrequencySpaceHilbertTransformer *transform_ptr; //super ugly
   if(parms.exists("TWODBS"))
@@ -156,7 +156,7 @@ void perform_single_site_loop(const alps::params &parms){
     transform_ptr=setup_Bethe_hilbert_transform(parms);
 
   std::string solver_path=parms["solver.SOLVER"];
-  ImpuritySolver solver(solver_path,parms);
+  ImpuritySolver solver(solver_path,param_file_name, parms);
   selfconsistency_loop_single_site(parms, solver, *transform_ptr);
   delete transform_ptr;
 }

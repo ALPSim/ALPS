@@ -16,38 +16,38 @@
 
 void define_dca_parameters(alps::params &p){
   ClusterHelper::define_parameters(p);
-  p.define<double>("dca.t_flavor", 0, "Hopping for mass imbalance for second orbital");
-  p.define<double>("dca.t", "nearest-neighbor hopping parameter and general unit");
-  p.define<double>("dca.tprime", 0, "next-nearest neighbor hopping parameter");
-  p.define<double>("dca.H_INIT", 0, "Initial (staggered) magnetic field");
-  p.define<double>("dca.H", 0, "magnetic field");
-  p.define<double>("dca.MU", "Chemical Potential");
-  p.define<double>("dca.BETA", "Inverse temperature");
+  p.define<double>("t_flavor", 0, "Hopping for mass imbalance for second orbital");
+  //p.define<double>("t", "nearest-neighbor hopping parameter and general unit");
+  //p.define<double>("tprime", 0, "next-nearest neighbor hopping parameter");
+  //p.define<double>("H_INIT", 0, "Initial (staggered) magnetic field");
+  //p.define<double>("H", 0, "magnetic field");
+  //p.define<double>("MU", "Chemical Potential");
+  //p.define<double>("BETA", "Inverse temperature");
   p.define<bool>("dca.IMBALANCE", false, "set to true for mass imbalance simulation");
   p.define<bool>("dca.PHASE", false, "set to true for simulation with phase");
   p.define<double>("dca.PHASE_0", 0, "Phase in direction 0 ");
   p.define<double>("dca.PHASE_1", 0, "Phase in direction 1 ");
   p.define<double>("dca.PHASE_2", 0, "Phase in direction 2 ");
-  p.define<int>("dca.NMATSUBARA", "Number fo Matsubara frequencies");
-  p.define<int>("dca.N", "Number of imaginary time points");
-  p.define<int>("dca.FLAVORS", "Number of orbitals (usually 2)");
+  //p.define<int>("NMATSUBARA", "Number fo Matsubara frequencies");
+  //p.define<int>("N", "Number of imaginary time points");
+  //p.define<int>("FLAVORS", "Number of orbitals (usually 2)");
   p.define<std::string>("dca.G0_OMEGA_INPUT", "Location of the input G0 file");
   p.define<std::string>("dca.INITIAL_G0", "FREE", "choose ISOLATED or FREE for initial G0s");
 }
 NormalStateClusterTransformer::NormalStateClusterTransformer(const alps::params& params) : ClusterHelper(params),
-    mu_(params["dca.MU"]),
-    h_(params["dca.H"]),
+    mu_(params["MU"]),
+    h_(0),
     half_filling_(0.),
-    t_(params["dca.t"]),
-    t2_(params["dca.tprime"]),
-    t_flavor_(params["dca.t_flavor"]),
-    n_flavors_(params["dca.FLAVORS"]),
+    t_(params["t"]),
+    t2_(params["tprime"]),
+    t_flavor_(params["t_flavor"]),
+    n_flavors_(params["FLAVORS"]),
     use_phase_(params["dca.PHASE"]),
     use_imbalance_(params["dca.IMBALANCE"]),
     epsilon_kckl_(boost::extents[n_cluster_sites()][n_lattice_momenta()][n_flavors_]),
     weight_kl_(n_lattice_momenta()),
-    nfreq_(params["dca.NMATSUBARA"]),
-    beta_(params["dca.BETA"]),
+    nfreq_(params["NMATSUBARA"]),
+    beta_(params["BETA"]),
     g0_input_path_(params["dca.G0_OMEGA_INPUT"].as<std::string>()),
     initial_g0_(params["dca.INITIAL_G0"].as<std::string>())
 {
@@ -126,8 +126,6 @@ cluster_matsubara_kspace_gf NormalStateClusterTransformer::initial_G0()const{
   return G0_omega;
 }
 void NormalStateClusterTransformer::attach_bare_tail(cluster_matsubara_kspace_gf &G0) const{
-  //new ClusterG0FourierTransformer((double)parms["BETA"], (double)parms["MU"], (double)parms["H"],
-//  n_flavors, n_site, eps_f, epssq_f));
   alps::gf::k_sigma_gf c1(G0.mesh2(), G0.mesh3());
   alps::gf::k_sigma_gf c2(G0.mesh2(), G0.mesh3());
   alps::gf::k_sigma_gf c3(G0.mesh2(), G0.mesh3());
@@ -144,12 +142,6 @@ void NormalStateClusterTransformer::attach_bare_tail(cluster_matsubara_kspace_gf
   G0.set_tail(3,c3);
 }
 void NormalStateClusterTransformer::attach_interacting_tail(cluster_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const{
-  //fourier_ptr.reset(new ClusterAntiFerroGFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., (double)parms["H"], U,
-  //                                                          n_flavors, n_site, densities, magnetization, eps_f, epssq_f));
-  //c1_[f][i][i] = 1.;
-  //c2_[f][i][i] = eps[f][i] - mu + U*density[fbar];
-  //c3_[f][i][i] = epssq[f][i] - 2.*mu*eps[f][i] + mu*mu + h*h/4
-  //+ 2.*U*density[fbar]*(eps[f][i]-mu) + U*U*density[fbar] + U*s*h*magnetization[fbar];
   alps::gf::k_sigma_gf c1(G.mesh2(), G.mesh3());
   alps::gf::k_sigma_gf c2(G.mesh2(), G.mesh3());
   alps::gf::k_sigma_gf c3(G.mesh2(), G.mesh3());

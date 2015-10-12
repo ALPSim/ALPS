@@ -23,6 +23,7 @@
 void define_parameters(alps::params &p){
   p.define<std::string>("SC_LOOP", "switch between single_site, DCA, and CDMFT");
 }
+void define_dca_parameters(alps::params &p);
 
 alps::params read_parameters_from_file(int argc, const char ** argv){
   alps::params parms(argc, argv);
@@ -54,11 +55,12 @@ int main(int argc, char** argv)
     std::cout << "#################################################"<<std::endl;
 
     alps::params parms=read_parameters_from_file(argc, (const char **)argv);
+    std::string param_file_name(argv[1]);
 
     if(parms["SC_LOOP"].as<std::string>()=="SINGLE_SITE"){
-      perform_single_site_loop(parms);
+      perform_single_site_loop(param_file_name, parms);
     }else if(parms["SC_LOOP"].as<std::string>()=="DCA"){
-      perform_cluster_loop(parms);
+      perform_cluster_loop(param_file_name, parms);
     }else
       throw std::invalid_argument("self-consistency loop: "+parms["SC_LOOP"].as<std::string>()+"unknown");
   }

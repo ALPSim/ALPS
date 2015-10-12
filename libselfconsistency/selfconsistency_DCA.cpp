@@ -60,9 +60,9 @@ bool converged(const cluster_matsubara_kspace_gf &G_omega, const cluster_matsuba
 void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
     NormalStateClusterTransformer& clustertrans)
 {
-  int n_tau=parms["dca.N"];
-  int n_orbital=parms["dca.FLAVORS"];
-  double beta=parms["dca.BETA"];
+  int n_tau=parms["N"];
+  int n_orbital=parms["FLAVORS"];
+  double beta=parms["BETA"];
   
   int max_it = parms["sc.MAX_IT"];
   double convergence_tolerance=parms["sc.SELFCONSISTENCY_CONVERGENCE"];
@@ -102,14 +102,14 @@ void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
   }
 }
 
-void perform_cluster_loop(const alps::params &parms){
+void perform_cluster_loop(const std::string &param_file_name, const alps::params &parms){
   std::string cluster_loop=parms["SC_LOOP"];
   std::string solver_path=parms["solver.SOLVER"];
   std::cout<<"cluster loop is: "<<cluster_loop<<std::endl;
   if (cluster_loop=="DCA"){
     std::cout<<"running a DCA calculation"<<std::endl;
     NormalStateClusterTransformer T(parms);
-    ImpuritySolver solver(solver_path,parms);
+    ImpuritySolver solver(solver_path,param_file_name, parms);
     selfconsistency_loop_DCA(parms, solver, T);
   }else {
     boost::throw_exception(std::logic_error("there is no such cluster method: "+cluster_loop));

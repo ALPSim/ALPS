@@ -26,12 +26,9 @@ void selfconsistency_loop_CDMFT(const alps::params& parms, ImpuritySolver& solve
 void selfconsistency_loop_CDMFT_Nambu(const alps::params& parms, ImpuritySolver& solver, CDMFTTransformer& clustertrans);
 
 
-void perform_single_site_loop(const alps::params &parms);
+void perform_single_site_loop(const std::string &param_file_name, const alps::params &parms);
 
-void perform_DCA_loop(const alps::params &parms);
-void define_dca_parameters(alps::params &parms);
-void perform_CDMFT_loop(const alps::params &parms);
-void perform_cluster_loop(const alps::params &parms);
+void perform_cluster_loop(const std::string &param_file_name, const alps::params &parms);
 
 FrequencySpaceHilbertTransformer *setup_DOS_hilbert_transform(const alps::params &parms);
 FrequencySpaceHilbertTransformer *setup_2D_hilbert_transform(const alps::params &parms);

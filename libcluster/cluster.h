@@ -29,3 +29,5 @@
 #include "cluster_graph.h"
 #include "cluster_helper.h"
 #include "cluster_transform.h"
+
+void define_dca_parameters(alps::params &p);
