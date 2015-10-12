@@ -199,6 +199,8 @@ namespace alps {
                 std::size_t i = get<1>(T.back());
                 // u = nj, nj is j-th element of Vi
                 std::size_t j = get<2>(T.back());
+                assert( i < tau.size() );
+                assert( j < tau[i].size() );
                 // Let pi be an equitable ordered partition of [n] with a nontrivial
                 // part Vi, and let u be an element of Vi. The splitting of pi by u, 
                 // denoted by pi ⊥ u, is the equitable reﬁnement R(pi) of the ordered partition 
@@ -675,7 +677,7 @@ namespace alps {
                             for (typename std::vector<edge_descriptor>::const_iterator jt = edge_list_.begin(); jt != edge_list_.end(); ++jt)
                             {
                                 get_part<edge_label>(l).set((color_partition_.find(color_map_cached_[get(alps::edge_type_t(), G)[*jt]]) - color_partition_.begin()) * num_edges(G) + (jt - edge_list_.begin()));
-                                get_part<hidden_edge_label>(l).set((color_partition_.find(           get(alps::edge_type_t(), G)[*jt])  - color_partition_.begin()) * num_edges(G) + (jt - edge_list_.begin()));
+                                get_part<hidden_edge_label>(l).set((color_partition_.find(           get(alps::edge_type_t(), G)[*jt] ) - color_partition_.begin()) * num_edges(G) + (jt - edge_list_.begin()));
                             }
                         }
 
@@ -799,7 +801,7 @@ namespace alps {
                     graph_label_creator();
 
                     // The not colored graph label is a triangular bit matrix
-                    // Input: pi = (V1, V2, ..., Vr)
+                    // Input: pi = discrete partition (v1, v2, ..., vr)
                     // Output: comparable graph label for uncolored graphs l(pi)
                     void update_plain_label(
                               internal_label_type & l
@@ -945,20 +947,29 @@ namespace alps {
                     // In this line the last node (T.back()) is always a leaf.
                     while(T.size() > 1) {
                         // if ++j (node) < size of Vi (parent node)
+                        // ( the j=0 case is handled by terminal_node(...) )
                         if ( (++get<2>(T.back())) < get<0>(*(T.rbegin() + 1))[get<1>(T.back())].size()) {
-                            // Prune the search tree: if we have already visited a branch starting at
-                            // an element (=first j-1 elements) in the 
-                            // same part of the orbit, skip the current element
-                            typename partition_type<Graph>::type::value_type const & part = get<0>(*(T.rbegin() + 1))[get<1>(T.back())];
-                            std::size_t const j_orbit = Io[part[get<2>(T.back())]];
-                            bool visited = false;
-                            for (
-                                typename partition_type<Graph>::type::value_type::const_iterator it = part.begin();
-                                it != part.begin() + get<2>(T.back());
-                                ++it
-                            )
-                                visited = visited || (Io[*it] == j_orbit);
-                            if (!visited)
+//
+// Automorphism based search tree pruning deactivated for now.
+// It does not work with colored edges as it is.
+// The problem is equitable_refinement(), which only considers the total degree to other partitions,
+// and does not distinguish edge color information. Therefore an ancestor node in the search tree
+// is not fixed by a found automorphism.
+//
+//                            // Prune the search tree using discovered automorphisms:
+//                            // if we have already visited a branch starting at
+//                            // an element (=first j-1 elements) in the 
+//                            // same part of the orbit, skip the current element
+//                            typename partition_type<Graph>::type::value_type const & part = get<0>(*(T.rbegin() + 1))[get<1>(T.back())];
+//                            std::size_t const j_orbit = Io[part[get<2>(T.back())]];
+//                            bool visited = false;
+//                            for (
+//                                typename partition_type<Graph>::type::value_type::const_iterator it = part.begin();
+//                                it != part.begin() + get<2>(T.back());
+//                                ++it
+//                            )
+//                                visited = visited || (Io[*it] == j_orbit);
+//                            if (!visited)
                                 break;
                         } else
                             T.pop_back();

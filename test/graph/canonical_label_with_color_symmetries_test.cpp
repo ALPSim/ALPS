@@ -35,6 +35,15 @@ typedef boost::graph_traits<graph_type>::edge_descriptor edge_descriptor;
 typedef boost::graph_traits<graph_type>::edge_iterator edge_iterator;
 typedef boost::property_map<graph_type,alps::edge_type_t>::type edge_color_map_type;
 
+
+template <typename Map>
+void print_colormap(Map const& m)
+{
+    for(typename Map::const_iterator it(m.begin()), end(m.end()); it != end; ++it)
+        std::cout << it->first << "->" << it->second << " ";
+    std::cout << std::endl;
+}
+
 bool colored_edges_with_color_symmetry_test1() {
     std::cout << "colored_edges_with_color_symmetry_test1()" << std::endl;
     typedef alps::graph::graph_label<graph_type>::type label_type;
@@ -414,13 +423,9 @@ void colored_edges_with_color_symmetry_test5() {
     std::cout << lg << std::endl;
     std::cout << lh << std::endl;
     std::cout << lg_with_sym << std::endl;
-    for(color_map_type::iterator it(lg_colormap.begin()), end(lg_colormap.end()); it != end; ++it)
-        std::cout << it->first << "->" << it->second << " ";
-    std::cout << std::endl;
+    print_colormap(lg_colormap);
     std::cout << lh_with_sym << std::endl;
-    for(color_map_type::iterator it(lh_colormap.begin()), end(lh_colormap.end()); it != end; ++it)
-        std::cout << it->first << "->" << it->second << " ";
-    std::cout << std::endl;
+    print_colormap(lh_colormap);
 
     // False statements
     std::cout << std::boolalpha
@@ -466,9 +471,64 @@ void colored_edges_with_color_symmetry_test6() {
 
     std::cout << lg << std::endl;
     std::cout << lg_with_sym << std::endl;
-    for(color_map_type::iterator it(lg_colormap.begin()), end(lg_colormap.end()); it != end; ++it)
-        std::cout << it->first << "->" << it->second << " ";
-    std::cout << std::endl;
+    print_colormap(lg_colormap);
+}
+
+void colored_edges_with_color_symmetry_test7() {
+    std::cout << "colored_edges_with_color_symmetry_test7()" << std::endl;
+    typedef alps::graph::graph_label<graph_type>::type label_type;
+    typedef boost::container::flat_map<alps::type_type, alps::type_type> color_map_type;
+    using alps::graph::canonical_properties;
+    graph_type g(8);
+    {
+        edge_descriptor e;
+        edge_color_map_type edge_color = get(alps::edge_type_t(),g);
+        e = add_edge(0, 1, g).first; edge_color[e] = 1;
+        e = add_edge(2, 1, g).first; edge_color[e] = 1;
+        e = add_edge(3, 1, g).first; edge_color[e] = 0;
+        e = add_edge(4, 0, g).first; edge_color[e] = 0;
+        e = add_edge(2, 0, g).first; edge_color[e] = 0;
+        e = add_edge(5, 3, g).first; edge_color[e] = 0;
+        e = add_edge(2, 3, g).first; edge_color[e] = 1;
+        e = add_edge(6, 0, g).first; edge_color[e] = 1;
+        e = add_edge(7, 3, g).first; edge_color[e] = 1;
+    }
+    graph_type h(8);
+    {
+        edge_descriptor e;
+        edge_color_map_type edge_color = get(alps::edge_type_t(), h);
+        e = add_edge(4, 7, h).first; edge_color[e] = 1;
+        e = add_edge(4, 5, h).first; edge_color[e] = 1;
+        e = add_edge(4, 6, h).first; edge_color[e] = 0;
+        e = add_edge(0, 7, h).first; edge_color[e] = 0;
+        e = add_edge(5, 7, h).first; edge_color[e] = 0;
+        e = add_edge(3, 6, h).first; edge_color[e] = 0;
+        e = add_edge(5, 6, h).first; edge_color[e] = 1;
+        e = add_edge(1, 7, h).first; edge_color[e] = 1;
+        e = add_edge(2, 6, h).first; edge_color[e] = 1;
+    }
+
+    alps::graph::color_partition<graph_type>::type color_symmetry;
+    color_symmetry[0] = 0; 
+    color_symmetry[1] = 0;
+
+    color_map_type lg_colormap;
+    label_type lg(get<1>(canonical_properties(g)));
+    label_type lg_with_sym(get<1>(canonical_properties(g, color_symmetry, &lg_colormap)));
+
+    color_map_type lh_colormap;
+    label_type lh(get<1>(canonical_properties(h)));
+    label_type lh_with_sym(get<1>(canonical_properties(h, color_symmetry, &lh_colormap)));
+    // True statements
+    std::cout << std::boolalpha
+        << (lg == lh)
+        << (lg_with_sym == lh_with_sym) << std::endl;
+    std::cout << lg << std::endl;
+    std::cout << lg_with_sym << std::endl;
+    print_colormap(lg_colormap);
+    std::cout << lh << std::endl;
+    std::cout << lh_with_sym << std::endl;
+    print_colormap(lh_colormap);
 }
 
 int main() {
@@ -478,5 +538,6 @@ int main() {
     colored_edges_with_color_symmetry_test4();
     colored_edges_with_color_symmetry_test5();
     colored_edges_with_color_symmetry_test6();
+    colored_edges_with_color_symmetry_test7();
     return 0;
 }
