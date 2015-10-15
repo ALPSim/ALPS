@@ -233,7 +233,7 @@ class smatrix{
           blas::smatrix identity(*this);
           identity.set_to_identity();
           //LU factorization
-          sgesv_(&size_, &size_, det_matrix.values_, &memory_size_, ipiv, identity.values_, &memory_size_,&info);
+          lapack::sgesv_(&size_, &size_, det_matrix.values_, &memory_size_, ipiv, identity.values_, &memory_size_,&info);
           if(info < 0) {
               std::cout << "LAPACK ERROR IN APPLY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
               std::cout << "INFO:" << info << std::endl;
@@ -370,10 +370,10 @@ class smatrix{
           float rowmax[size_];
           int rowmax_index, max_index, inc=1;
           for(int i=0;i<size_;++i){
-            rowmax_index=isamax_(&size_, values_+i*memory_size_,&inc);
+            rowmax_index=blas::isamax_(&size_, values_+i*memory_size_,&inc);
             rowmax[i]=*(values_+i*memory_size_+rowmax_index-1); //fortran convention: start counting from one
           }
-          max_index=isamax_(&size_, rowmax ,&inc);
+          max_index=blas::isamax_(&size_, rowmax ,&inc);
           return std::abs(rowmax[max_index-1]);
         }
 	void swap(smatrix &M2){
@@ -391,10 +391,10 @@ class smatrix{
           char jobs='V';
           char uplo='L';
           //get optimal size for work
-          ssyev_(&jobs, &uplo, &size_, eigenvectors.values_, &size_, &(eigenvalues(0)),&work_size, &lwork, &info);
+          lapack::ssyev_(&jobs, &uplo, &size_, eigenvectors.values_, &size_, &(eigenvalues(0)),&work_size, &lwork, &info);
           lwork=(int)work_size;
           float work[lwork];
-          ssyev_(&jobs, &uplo, &size_, eigenvectors.values_, &size_, &eigenvalues(0),work, &lwork, &info); 
+          lapack::ssyev_(&jobs, &uplo, &size_, eigenvectors.values_, &size_, &eigenvalues(0),work, &lwork, &info); 
           /*matrix eigenvectors_trans(eigenvectors);
           eigenvectors_trans.transpose();
           std::cout<<*this<<std::endl;

@@ -14,7 +14,7 @@ find_package(GFTools REQUIRED)
 
 include(UseGtest)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -xHost -fast -march=native -ffast-math -DNDEBUG -DBOOST_DISABLE_ASSERTS")
 
 include_directories(${BLAS_CLASSES_INCLUDE_DIR})
 include_directories(${GFTOOLS_INCLUDE_DIR})
