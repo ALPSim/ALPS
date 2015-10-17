@@ -50,6 +50,25 @@
     <UNITCELL ref="simple2d"/>
   </LATTICEGRAPH>
   
+  <LATTICE name="dimer 1d superlattice" dimension="1">
+    <BASIS>
+      <VECTOR>2 </VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>2*pi/2 0*pi/2 </VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "dimer 1d">
+    <FINITELATTICE>
+      <LATTICE ref="dimer 1d superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple1d"/>
+  </LATTICEGRAPH>
+
   <LATTICE name="dimer superlattice" dimension="2">
     <BASIS>
       <VECTOR>2 0 </VECTOR>
