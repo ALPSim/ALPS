@@ -393,15 +393,14 @@ namespace blas{
       }
     }
     double max() const{
-      double *rowmax=new double[size_];
+      std::vector<double> rowmax(size_, 0.);
       int rowmax_index, max_index, inc=1;
       if(size_<1) return 0;
       for(int i=0;i<size_;++i){
         rowmax_index=idamax_(&size_, values_+i*memory_size_,&inc);
         rowmax[i]=*(values_+i*memory_size_+rowmax_index-1); //fortran convention: start counting from one
       }
-      max_index=idamax_(&size_, rowmax ,&inc);
-      delete [] rowmax;
+      max_index=idamax_(&size_, &(rowmax[0]) ,&inc);
       return std::abs(rowmax[max_index-1]);
     }
     void swap(matrix &M2){
