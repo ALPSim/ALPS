@@ -37,12 +37,12 @@ void simulation<SymmGroup>::run(DmrgParameters & parms, bool write_xml)
     /// Check which matrix to use and which time evolution
     boost::scoped_ptr<abstract_sim> sim;
     if (!parms.defined("COMPLEX") || static_cast<int>(parms["COMPLEX"])==1) {
-        if (parms["te_type"] == "nn")
+        if (parms["te_type"] == "nn" || parms["te_type"] == "nn")
             sim.reset(new tevol_sim<cmatrix, SymmGroup, nearest_neighbors_evolver<cmatrix, SymmGroup> >(parms, write_xml));
         else if (parms["te_type"] == "mpo")
             sim.reset(new tevol_sim<cmatrix, SymmGroup, mpo_evolver<cmatrix, SymmGroup> >(parms, write_xml));
     } else {
-        if (parms["te_type"] == "nn")
+        if (parms["te_type"] == "nn" || parms["te_type"] == "nearest neighbors")
             sim.reset(new tevol_sim<matrix, SymmGroup, nearest_neighbors_evolver<matrix, SymmGroup> >(parms, write_xml));
         else if (parms["te_type"] == "mpo")
             sim.reset(new tevol_sim<matrix, SymmGroup, mpo_evolver<matrix, SymmGroup> >(parms, write_xml));
