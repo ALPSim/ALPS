@@ -73,7 +73,7 @@ Our codes are capable of efficiently move this temporary memory to disk. This op
 | `IMG_TIMESTEPS` | 0                 | Number of imaginary time sweeps to perform before the proceeding with the real time evolution |
 | `TIMESTEPS`     |                   | Total number of sweeps |
 | `te_order`      | fourth            | Order of the trotter decomposition. Possible values: `second', `fourth'. |
-| `te_type`       | nearest neighbors | Type of time evolution algorithm. Possible values: `nearest neighbors', `mpo'. |
+| `te_type`       | nn                | Type of time evolution algorithm. Possible values: `nn' (for nearest neighbors), `mpo'. |
 | `chkp_each`     | 1                 | A checkpoint is created every `chkp_each` time steps. |
 | `measure_each`  | 1                 | Measurements are performed every `measure_each` time steps. |
 | `update_each`   | -1                | Update the Hamiltonian parameters every `update_each` time steps. Used while quenching Hamiltonian parameters. A negative value will never change the Hamiltonian. |
