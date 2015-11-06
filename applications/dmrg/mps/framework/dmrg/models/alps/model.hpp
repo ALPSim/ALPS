@@ -448,13 +448,19 @@ private:
             std::vector<op_t> tops(ntypes);
             for (int type=0; type<ntypes; ++type) {
                 alps::SiteBasisDescriptor<I> const& b = basis_descriptors[type];
+                SiteOperator op;
                 if (b.has_operator(*it2)) {
-                    SiteOperator op = make_site_term(*it2, parms);
+                    op = make_site_term(*it2, parms);
+                } else if (model.has_site_operator(*it2)) {
+                    op = model.get_site_operator(*it2);
+                }
+                if (op.term() != "") {
                     bool is_ferm = safe_is_fermionic(b, op);
                     if (kind == uknown)
                         kind = is_ferm ? fermionic : bosonic;
                     else if ((is_ferm && kind==bosonic) || (!is_ferm && kind==fermionic))
                         throw std::runtime_error("Model is inconsitent. On some site the operator " + *it2 + "fermionic, on others is bosonic.");
+                    
                     tops[type] = this->get_operator(*it2, type);
                 }
             }
@@ -685,6 +691,7 @@ ALPSModel<Matrix, SymmGroup>::measurements () const
                         meas.push_back( new measurements::local<Matrix, SymmGroup>(obsname, raw_lattice, identitities, fillings, operators) );
                 } else {
                     std::vector<op_t> tops(ntypes);
+                    bool measurement_not_found = true;
                     for (int type=0; type<ntypes; ++type) {
                         alps::SiteBasisDescriptor<I> const& b = basis_descriptors[type];
                         if (b.has_operator(it->value())) {
@@ -693,8 +700,20 @@ ALPSModel<Matrix, SymmGroup>::measurements () const
                                 throw std::runtime_error("Cannot measure local fermionic operators.");
                             
                             tops[type] = this->get_operator(it->value(), type);
+                            measurement_not_found = false;
+                        } else if (model.has_site_operator(it->value())) {
+                            SiteOperator op = model.get_site_operator(it->value());
+                            
+                            if (safe_is_fermionic(b, op))
+                                throw std::runtime_error("Cannot measure local fermionic operators.");
+                            
+                            tops[type] = this->get_operator(it->value(), type);
+                            measurement_not_found = false;
                         }
                     }
+                    if (measurement_not_found)
+                        throw std::runtime_error("Operator "+it->value()+" not found.");
+                    
                     if (meas_found == is_average)
                         meas.push_back( new measurements::average<Matrix, SymmGroup>(obsname, raw_lattice, identitities, fillings, tops) );
                     else
