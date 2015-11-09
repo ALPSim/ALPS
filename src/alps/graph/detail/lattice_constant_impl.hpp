@@ -657,7 +657,7 @@ namespace alps {
             template<typename Subgraph, typename Graph, typename VertexEqual, typename EdgeEqual, typename EmbeddingFoundPolicy> void lattice_constant_impl_geometric(
                   Subgraph const & S
                 , Graph const & G
-                , std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const & V
+                , typename boost::graph_traits<Graph>::vertex_descriptor const & lattice_pin
                 , typename partition_type<Subgraph>::type const & subgraph_orbit
                 , VertexEqual & vertex_equal
                 , EdgeEqual & edge_equal
@@ -683,35 +683,32 @@ namespace alps {
                     , typename boost::graph_traits<Graph>::vertex_descriptor
                 > queue(num_vertices(S));
                 std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> pinning;    // (num_vertices(S), num_vertices(G));
-                for (typename std::vector<typename boost::graph_traits<Graph>::vertex_descriptor>::const_iterator it = V.begin(); it != V.end(); ++it)
-                        if (out_degree(breaking_vertex, S) <= out_degree(*it, G)) {
-                            
-                            // Reset all data
-                            queue.reset();
-                            visited.clear();
-                            visited.resize(num_vertices(G));
-                            pinning.clear();
-                            pinning.resize(num_vertices(S), num_vertices(G));
+                if (out_degree(breaking_vertex, S) <= out_degree(lattice_pin, G)) {
+                    // Reset all data
+                    queue.reset();
+                    visited.clear();
+                    visited.resize(num_vertices(G));
+                    pinning.clear();
+                    pinning.resize(num_vertices(S), num_vertices(G));
 
-                            queue.mark_queued(breaking_vertex);
-                            shared_queue_view<
-                                  typename boost::graph_traits<Subgraph>::vertex_descriptor
-                                , typename boost::graph_traits<Graph>::vertex_descriptor
-                            > queue_view(queue);
-                            lattice_constant_walker(
-                                  breaking_vertex
-                                , *it
-                                , S
-                                , G
-                                , queue_view
-                                , visited
-                                , pinning
-                                , vertex_equal
-                                , edge_equal
-                                , embedding_found_policy
-                            );
-                            break;
-                        }
+                    queue.mark_queued(breaking_vertex);
+                    shared_queue_view<
+                          typename boost::graph_traits<Subgraph>::vertex_descriptor
+                        , typename boost::graph_traits<Graph>::vertex_descriptor
+                    > queue_view(queue);
+                    lattice_constant_walker(
+                          breaking_vertex
+                        , lattice_pin
+                        , S
+                        , G
+                        , queue_view
+                        , visited
+                        , pinning
+                        , vertex_equal
+                        , edge_equal
+                        , embedding_found_policy
+                    );
+                }
             }
 
         } // end namespace detail
