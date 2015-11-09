@@ -50,7 +50,7 @@ int main() {
     std::ifstream in("../../lib/xml/lattices.xml");
     parm["LATTICE"] = "square lattice";
     parm["L"] = side_length;
-    alps::graph_helper<>::vertex_descriptor center_vertex = side_length * side_length / 2 + side_length / 2 - 1;
+    alps::graph_helper<>::vertex_descriptor center_vertex = side_length * side_length / 2 + side_length / 2;
 
     alps::graph_helper<> lattice(in,parm);
     
