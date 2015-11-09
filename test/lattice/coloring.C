@@ -54,7 +54,7 @@ int main() {
       std::cout << "LATTICE = " << p["LATTICE"] << std::endl;
       std::cout << "  number of colors = " << nc << std::endl;
       std::cout << "  site colors =";
-      for (int s = 0; s < lattice.num_sites(); ++s) std::cout << ' ' << color[s];
+      for (unsigned int s = 0; s < lattice.num_sites(); ++s) std::cout << ' ' << color[s];
       std::cout << std::endl;
     }
 
