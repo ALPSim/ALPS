@@ -86,6 +86,13 @@ public:
   ///compute G0 from a noninteracting solution
   void compute_noninteracting_G0(cluster_matsubara_kspace_gf &G0_omega) const;
 
+  ///dispersion relation for t and t' in 1, 2, and 3 d.
+  double epsilon(const std::vector<double> &k) const;
+  ///mass imbalance spin-dependent dispersion
+  double epsilon_flavor(const std::vector<double> &k, unsigned int flavor) const;
+  ///dispersion relation for a system with an additional phase
+  double epsilon_phi(const std::vector<double> &k, const std::vector<double> &phi) const;
+
   std::vector<double> epsav() const { return epsav_; };
   std::vector<double> epssqav() const { return epssqav_; };
   double dispersion_moments(const unsigned int i) const { return dispersion_moments_[i]; }
@@ -112,12 +119,6 @@ private:
   ///initialize the vector phi with phases
   void setup_phase_vector(const alps::params &p);
 
-  ///dispersion relation for t and t' in 1, 2, and 3 d.
-  double epsilon(const std::vector<double> &k) const;
-  ///mass imbalance spin-dependent dispersion
-  double epsilon_flavor(const std::vector<double> &k, unsigned int flavor) const;
-  ///dispersion relation for a system with an additional phase
-  double epsilon_phi(const std::vector<double> &k, const std::vector<double> &phi) const;
   ///compute the center of gravity of the bands etc (used for high frequency analysis)
   void compute_dispersion_weights();
 
