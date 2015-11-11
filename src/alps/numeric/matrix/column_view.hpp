@@ -78,13 +78,15 @@ class column_view {
 
     inline reference operator[](size_type i)
     {
-        assert( i <  std::distance(col_.first,col_.second) );
+        assert( std::distance(col_.first,col_.second) >= 0 );
+        assert( i <  static_cast<size_type>(std::distance(col_.first,col_.second)) );
         return *(col_.first + i);
     }
 
     inline const_reference operator[](size_type i) const
     {
-        assert( i <  std::distance(col_.first,col_.second) );
+        assert( std::distance(col_.first,col_.second) >= 0 );
+        assert( i <  static_cast<size_type>(std::distance(col_.first,col_.second)) );
         return *(col_.first + i);
     }
 
