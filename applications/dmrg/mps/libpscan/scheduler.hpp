@@ -54,6 +54,7 @@ private:
     boost::filesystem::path infilepath;
     
     time_stopper stop_callback;
+    bool write_xml;
     std::vector<TaskDescriptor> tasks;
 };
 

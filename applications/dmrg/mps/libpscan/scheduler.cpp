@@ -38,6 +38,7 @@
 
 Scheduler::Scheduler(const Options& opt)
 : stop_callback(opt.time_limit)
+, write_xml(opt.write_xml)
 {
     outfilepath = opt.jobfilename;
     infilepath = opt.jobfilename;
@@ -174,7 +175,7 @@ void Scheduler::run()
                     copy(tasks[i].in, tasks[i].out);
 
                 /// Start task
-                run_sim(tasks[i].in, tasks[i].out, time_left);
+                run_sim(tasks[i].in, tasks[i].out, write_xml, time_left);
                 tasks[i].status = TaskFinished;
             }
             else
