@@ -144,7 +144,7 @@ bool test_lattices(unsigned int order)
         parm["L"]       = 2*order+1;
         alps::graph_helper<> alps_lattice(in,parm);
         lattice_graph_type& lattice_graph = alps_lattice.graph();
-        std::vector<unsigned int> edge_map(3);
+        std::map<unsigned int, unsigned int> edge_map;
         edge_map[0] = 0;
         edge_map[1] = 0;
         edge_map[2] = 1;

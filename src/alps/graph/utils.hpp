@@ -36,6 +36,7 @@
 #include <cassert>
 #include <algorithm>
 #include <vector>
+#include <map>
 
 namespace alps {
 namespace graph {
@@ -122,23 +123,44 @@ std::vector<typename boost::property_map<Graph,PropertyTag>::type::value_type> g
 }
 
 
+/**
+  * Checks if the color map has an entry for each edge color present in graph g.
+  * \param g Graph this map will be applied to.
+  * \param map A map that maps an edge type/color (unsigned int) of the graph to a new edge type/color (unsigned int).
+  */
+template <typename Graph>
+bool color_map_covers_all_colors(Graph const& g, std::map<unsigned int, unsigned int> const& map)
+{
+    typedef typename boost::property_map<Graph, edge_type_t>::type::value_type edge_type;
+    BOOST_STATIC_ASSERT(( boost::is_same< edge_type, unsigned int>::value ));
+    std::vector<edge_type> colorlist = get_color_list(alps::edge_type_t(),g); 
+    for(typename std::vector<edge_type>::const_iterator it=colorlist.begin(); it != colorlist.end(); ++it)
+    {
+        if(map.count(*it) == 0)
+            return false;
+    }
+    return true;
+}
 
 /**
   * Remaps the edge types of graph g according to the specified map.
   * This function modifies the edge properties of the grap.
   * \param g Graph to modify.
-  * \param map A vector that maps an edge type (unsigned int) of the graph to a new edge type (unsigned int).
+  * \param map A map that maps an edge type (unsigned int) of the graph to a new edge type (unsigned int).
   */
 template <typename Graph>
-void remap_edge_types(Graph& g, std::vector<unsigned int> const& map)
+void remap_edge_types(Graph& g, std::map<unsigned int, unsigned int> const& map)
 {
-    BOOST_STATIC_ASSERT(( boost::is_same< typename boost::property_map<Graph, edge_type_t>::type::value_type, unsigned int>::value ));
-    assert( get_color_list(alps::edge_type_t(),g).size() <= map.size() );
+    typedef typename boost::property_map<Graph, edge_type_t>::type::value_type edge_type;
+    BOOST_STATIC_ASSERT(( boost::is_same< edge_type, unsigned int>::value ));
+    if(!color_map_covers_all_colors(g, map))
+        throw std::runtime_error("Map does not cover all colors present in the graph.");
     typename boost::graph_traits<Graph>::edge_iterator it, end;
     for(boost::tie(it,end) = edges(g); it != end; ++it)
     {
         unsigned int type = get(alps::edge_type_t(),g,*it);
-        put(alps::edge_type_t(),g,*it,map[type]);
+        unsigned int mappedtype = map.find(type)->second; // fine after color_map_covers_all_colors
+        put(alps::edge_type_t(),g,*it,mappedtype);
     }
 }
 

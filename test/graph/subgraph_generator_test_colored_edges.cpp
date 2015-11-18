@@ -48,7 +48,7 @@ void subgraph_generator_test(unsigned int order_ )
 
     typedef alps::coordinate_graph_type lattice_graph_type;
     lattice_graph_type& lattice_graph = alps_lattice.graph();
-    std::vector<unsigned int> edge_type_map(3,0);
+    std::map<unsigned int, unsigned int> edge_type_map;
     edge_type_map[0] = 0;
     edge_type_map[1] = 1;
     edge_type_map[2] = 0;

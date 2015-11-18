@@ -182,7 +182,7 @@ void is_embeddable_with_color_symmetries_test3()
     parm["L"]       = 2*5+1;
     alps::graph_helper<> alps_lattice(in,parm);
     alps::coordinate_graph_type g = alps_lattice.graph();
-    std::vector<unsigned int> edge_map(3);
+    std::map<unsigned int, unsigned int> edge_map;
     edge_map[0] = 0;
     edge_map[1] = 0;
     edge_map[2] = 1;
