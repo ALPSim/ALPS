@@ -697,6 +697,31 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( matrix_vector_multiply_test, T, test_types)
     }
 }
 
+BOOST_AUTO_TEST_CASE_TEMPLATE( gemv_test, T, test_types)
+{
+    alps::numeric::matrix<T> a(20,30);
+    alps::numeric::vector<T> v(30);
+    alps::numeric::vector<T> r(20);
+    fill_matrix_with_numbers(a);
+    fill_range_with_numbers(v.begin(),v.end(),T(0));
+    fill_range_with_numbers(r.begin(),r.end(),T(0));
+    alps::numeric::matrix<T> a_(a);
+    alps::numeric::vector<T> v_(v);
+
+    gemv(a,v,r);
+
+    BOOST_CHECK_EQUAL(r.size(),num_rows(a));
+    BOOST_CHECK_EQUAL(a,a_);
+    BOOST_CHECK_EQUAL(v,v_);
+    for(unsigned int i=0; i<num_rows(a); ++i)
+    {
+        T row_result(0);
+        for(unsigned int j=0; j<num_cols(a); ++j)
+            row_result += a(i,j)*v(j);
+        BOOST_CHECK_EQUAL(r(i),row_result);
+    }
+}
+
 BOOST_AUTO_TEST_CASE_TEMPLATE( matrix_vector_multiply_mixed_types_test, TPair, test_type_pairs)
 {
     // -alps::numeric::matrix<T> * std::vector<int>
@@ -732,6 +757,30 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( matrix_matrix_multiply_test, T, test_types)
     fill_matrix_with_numbers(b);
 
     matrix<T> c = a * b;
+
+    BOOST_CHECK_EQUAL(num_rows(c), num_rows(a));
+    BOOST_CHECK_EQUAL(num_cols(c), num_cols(b));
+
+    for(unsigned int i=0; i<num_rows(c); ++i)
+        for(unsigned int j=0; j<num_cols(c); ++j)
+        {
+            T result(0);
+            for(unsigned int k=0; k< num_cols(a); ++k)
+                result += a(i,k) * b(k,j);
+            BOOST_CHECK_EQUAL(c(i,j),result);
+        }
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE( gemm_test, T, test_types)
+{
+    matrix<T> a(20,30);
+    matrix<T> b(30,50);
+    matrix<T> c(20,50);
+    fill_matrix_with_numbers(a);
+    fill_matrix_with_numbers(b);
+    fill_matrix_with_numbers(c);
+
+    gemm(a,b,c);
 
     BOOST_CHECK_EQUAL(num_rows(c), num_rows(a));
     BOOST_CHECK_EQUAL(num_cols(c), num_cols(b));

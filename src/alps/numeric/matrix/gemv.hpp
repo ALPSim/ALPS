@@ -30,6 +30,7 @@
 #include <alps/numeric/matrix/detail/debug_output.hpp>
 #include <alps/numeric/matrix/is_blas_dispatchable.hpp>
 #include <boost/numeric/bindings/blas/level2/gemv.hpp>
+#include <algorithm>
 #include <cassert>
 
 namespace alps {
@@ -39,7 +40,9 @@ template <typename Matrix, typename Vector, typename Vector2>
 void gemv(Matrix const& m, Vector const& x, Vector2& y, boost::mpl::false_)
 {
     typedef typename Matrix::size_type size_type;
+    using std::fill;
     assert(num_cols(m) > 0);
+    fill(y.begin(), y.end(), typename Vector2::value_type(0));
     for(size_type j=0; j < num_cols(m); ++j)
     for(size_type i=0; i < num_rows(m); ++i)
         y[i] += m(i,j) * x[j];
