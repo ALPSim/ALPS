@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( size_test, T, test_types )
 {
     matrix<T> c(15,5);
     column_view<matrix<T> > cv(c,3);
-    BOOST_CHECK_EQUAL(cv.size(),15);
+    BOOST_CHECK_EQUAL(cv.size(),15u);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE( const_element_access, T, test_types )

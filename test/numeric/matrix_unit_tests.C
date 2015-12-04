@@ -32,19 +32,19 @@ using alps::numeric::matrix;
 BOOST_AUTO_TEST_CASE_TEMPLATE( constructors_test, T, test_types )
 {
     matrix<T> a;
-    BOOST_CHECK_EQUAL(num_rows(a), 0 );
-    BOOST_CHECK_EQUAL(num_cols(a), 0 );
+    BOOST_CHECK_EQUAL(num_rows(a), 0u );
+    BOOST_CHECK_EQUAL(num_cols(a), 0u );
 
     matrix<T> b(10,10);
-    BOOST_CHECK_EQUAL(num_rows(b), 10 );
-    BOOST_CHECK_EQUAL(num_cols(b), 10 );
+    BOOST_CHECK_EQUAL(num_rows(b), 10u );
+    BOOST_CHECK_EQUAL(num_cols(b), 10u );
     for(unsigned int i=0; i<10; ++i)
         for(unsigned int j=0; j<10; ++j)
             BOOST_CHECK_EQUAL(b(i,j), T());
 
     matrix<T> c(15,5,5);
-    BOOST_CHECK_EQUAL(num_rows(c), 15 );
-    BOOST_CHECK_EQUAL(num_cols(c), 5 );
+    BOOST_CHECK_EQUAL(num_rows(c), 15u );
+    BOOST_CHECK_EQUAL(num_cols(c), 5u );
     for(unsigned int i=0; i<15; ++i)
         for(unsigned int j=0; j<5; ++j)
             BOOST_CHECK_EQUAL(c(i,j), T(5));
@@ -147,8 +147,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( diagonal_iterator_test, T, test_types )
         unsigned int k = 0;
         std::pair<diagonal_iterator,diagonal_iterator> r_a = diagonal(a);
         std::pair<const_diagonal_iterator,const_diagonal_iterator> r_b = diagonal(b);
-        BOOST_CHECK_EQUAL(distance(r_a.first,r_a.second), (std::min)(num_rows(a),num_cols(a)));
-        BOOST_CHECK_EQUAL(distance(r_b.first,r_b.second),(std::min)(num_rows(a),num_cols(a)));
+        BOOST_CHECK_EQUAL(distance(r_a.first,r_a.second), static_cast<std::ptrdiff_t>((std::min)(num_rows(a),num_cols(a))));
+        BOOST_CHECK_EQUAL(distance(r_b.first,r_b.second), static_cast<std::ptrdiff_t>((std::min)(num_rows(a),num_cols(a))));
         while(r_a.first != r_a.second) {
             BOOST_CHECK_EQUAL(a(k,k), *r_a.first);
             BOOST_CHECK_EQUAL(a(k,k), *r_b.first);
@@ -187,8 +187,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( resize_test, T, test_types )
 
     // Check primitive enlargement
     resize(a,10,5);
-    BOOST_CHECK_EQUAL(num_rows(a),10);
-    BOOST_CHECK_EQUAL(num_cols(a),5);
+    BOOST_CHECK_EQUAL(num_rows(a),10u);
+    BOOST_CHECK_EQUAL(num_cols(a),5u);
     fill_matrix_with_numbers(a);
     matrix<T> b(a);
 
