@@ -205,6 +205,15 @@ namespace numeric {
     }
 
     template <typename T, typename MemoryBlock>
+    void matrix<T, MemoryBlock>::resize_values_not_retained(size_type rows, size_type cols)
+    {
+        // Do we need more space? Reserve more space if needed!
+        automatic_reserve(rows,cols);
+        this->size1_=rows;
+        this->size2_=cols;
+    }
+
+    template <typename T, typename MemoryBlock>
     void matrix<T, MemoryBlock>::reserve(size_type rows, size_type cols)
     {
         assert( (this->reserved_size1_ == 0 && this->values_.size() == 0 ) || this->values_.size() % this->reserved_size1_ == 0 );

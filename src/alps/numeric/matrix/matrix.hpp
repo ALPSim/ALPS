@@ -249,6 +249,8 @@ namespace alps {
           */
         void resize(size_type rows, size_type cols, T const & init_value = T());
 
+        void resize_values_not_retained(size_type rows, size_type cols);
+
         /**
           * Reserves memory for anticipated enlargements of the matrix
           * @param rows For how many rows should memory be reserved, value is ignored if it's smaller than the current number of rows
