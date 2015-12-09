@@ -59,7 +59,7 @@ NormalStateClusterTransformer::NormalStateClusterTransformer(const alps::params&
 bool NormalStateClusterTransformer::read_initial_G0(cluster_matsubara_kspace_gf &G0_omega) const{
   std::cout<<"reading initial G0_omega from: "<<g0_input_path_<<std::endl;
   {
-    std::ifstream in_file(g0_input_path_);
+    std::ifstream in_file(g0_input_path_.c_str());
     if(!in_file.good())
       std::cout<<"WARNING: Input file could not be found, computing initial solution."<<std::endl;
     return false;

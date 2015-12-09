@@ -60,7 +60,7 @@ FrequencySpaceHilbertTransformer *setup_2D_hilbert_transform(const alps::params 
 }
 bool FrequencySpaceHilbertTransformer::read_initial_G0(single_site_matsubara_gf &G0_omega){
   {
-    std::ifstream in_file(input_filename_); if(!in_file.good()) return false;
+    std::ifstream in_file(input_filename_.c_str()); if(!in_file.good()) return false;
   }
   alps::hdf5::archive G0_input_file(input_filename_, alps::hdf5::archive::READ);
   std::cout<<"reading initial G0_omega"<<std::endl;
