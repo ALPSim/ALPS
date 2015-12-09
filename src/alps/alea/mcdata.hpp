@@ -523,7 +523,7 @@ namespace alps {
                         ;
                     }
                     else
-                        variance_opt_ = boost::none_t();
+                        variance_opt_ = boost::none;
                     if (ar.is_data("tau/value")) {
                         tau_opt_.reset(time_type());
                         ar
@@ -588,11 +588,11 @@ namespace alps {
                             if(variance_opt_ && rhs.variance_opt_)
                                 *variance_opt_ = (*variance_opt_ * double(count_) + double(rhs.count_) * *rhs.variance_opt_) / double(count_ + rhs.count_);
                             else
-                                variance_opt_ = boost::none_t();
+                                variance_opt_ = boost::none;
                             if(tau_opt_ && rhs.tau_opt_)
                                 *tau_opt_ = (*tau_opt_ * double(count_) + double(rhs.count_) * *rhs.tau_opt_) / double(count_ + rhs.count_);
                             else
-                                tau_opt_ = boost::none_t();
+                                tau_opt_ = boost::none;
                             count_ += rhs.count();
                             if (binsize_ <= rhs.bin_size()) {
                                 if (binsize_ < rhs.bin_size())
@@ -709,7 +709,7 @@ namespace alps {
                     using std::abs;
                     using alps::numeric::abs;
                     using boost::numeric::operators::operator*;
-                    transform_linear(boost::lambda::bind(alps::numeric::multiplies<T, X, T>(), boost::lambda::_1, rhs), abs(error_ * rhs), variance_opt_ ? boost::optional<result_type>(*variance_opt_ * rhs * rhs) : boost::none_t());
+                    transform_linear(boost::lambda::bind(alps::numeric::multiplies<T, X, T>(), boost::lambda::_1, rhs), abs(error_ * rhs), variance_opt_ ? boost::optional<result_type>(*variance_opt_ * rhs * rhs) : boost::none);
                     return *this;
                 }
 
@@ -718,7 +718,7 @@ namespace alps {
                     using alps::numeric::abs;
                     using boost::numeric::operators::operator/;
                     using boost::numeric::operators::operator*;
-                    transform_linear(boost::lambda::bind(alps::numeric::divides<T, X, T>(), boost::lambda::_1, rhs), abs(error_ / rhs), variance_opt_ ? boost::optional<result_type>(*variance_opt_ / ( rhs * rhs )) : boost::none_t());
+                    transform_linear(boost::lambda::bind(alps::numeric::divides<T, X, T>(), boost::lambda::_1, rhs), abs(error_ / rhs), variance_opt_ ? boost::optional<result_type>(*variance_opt_ / ( rhs * rhs )) : boost::none);
                     return (*this);
                 }
 
@@ -748,7 +748,7 @@ namespace alps {
                     std::transform(jack_.begin(), jack_.end(), jack_.begin(), boost::lambda::bind(alps::numeric::divides<T, X, T>(), x, boost::lambda::_1));
                 }
 
-                template <typename OP> void transform_linear(OP op, value_type const & error, boost::optional<result_type> variance_opt = boost::none_t()) {
+                template <typename OP> void transform_linear(OP op, value_type const & error, boost::optional<result_type> variance_opt = boost::none) {
                     if (count() == 0)
                         boost::throw_exception(std::runtime_error("the observable needs measurements"));
                     mean_ = op(mean_);
@@ -759,7 +759,7 @@ namespace alps {
                         std::transform(jack_.begin(), jack_.end(), jack_.begin(), op);
                 }
 
-                template <typename OP> void transform(OP op, value_type const & error, boost::optional<result_type> variance_opt = boost::none_t()) {
+                template <typename OP> void transform(OP op, value_type const & error, boost::optional<result_type> variance_opt = boost::none) {
                     if (count() == 0)
                         boost::throw_exception(std::runtime_error("the observable needs measurements"));
                     data_is_analyzed_ = false;
@@ -769,13 +769,13 @@ namespace alps {
                     error_ = error;
                     variance_opt_ = variance_opt_;
                     if (!variance_opt_)
-                        tau_opt_ = boost::none_t();
+                        tau_opt_ = boost::none;
                     std::transform(values_.begin(), values_.end(), values_.begin(), op);
                     if (jacknife_bins_valid_)
                        std::transform(jack_.begin(), jack_.end(), jack_.begin(), op);
                 }
 
-                template <typename X, typename OP> void transform(mcdata<X> const & rhs, OP op, value_type const & error, boost::optional<result_type> variance_opt = boost::none_t()) {
+                template <typename X, typename OP> void transform(mcdata<X> const & rhs, OP op, value_type const & error, boost::optional<result_type> variance_opt = boost::none) {
                     if (count() == 0 || rhs.count() == 0)
                         boost::throw_exception(std::runtime_error("both observables need measurements"));
                     fill_jack();
@@ -788,7 +788,7 @@ namespace alps {
                     error_ = error;
                     variance_opt_ = variance_opt_;
                     if (!variance_opt_)
-                        tau_opt_ = boost::none_t();
+                        tau_opt_ = boost::none;
                     std::transform(values_.begin(), values_.end(), rhs.values_.begin(), values_.begin(), op);
                     if (rhs.jacknife_bins_valid_ && jacknife_bins_valid_)
                         std::transform(jack_.begin(), jack_.end(), rhs.jack_.begin(), jack_.begin(), op);
@@ -909,8 +909,8 @@ namespace alps {
                                 error_ = error_ + (jack_[i+1] - unbiased_mean_) * (jack_[i+1] - unbiased_mean_);
                             error_ = sqrt(error_ / count_type(bin_number()) *  count_type(bin_number() - 1));
                         }
-                        // variance_opt_ = boost::none_t();
-                        // tau_opt_ = boost::none_t();
+                        // variance_opt_ = boost::none;
+                        // tau_opt_ = boost::none;
                     }
                     data_is_analyzed_ = true;
                 }
