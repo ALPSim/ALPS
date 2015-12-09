@@ -31,4 +31,4 @@ target_link_libraries(dmft selfconsistency cluster
 ${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES} ${GFTOOLS_LIBRARIES} ${MPI_CXX_LIBRARIES})
 
 install(TARGETS dmft RUNTIME DESTINATION "bin/")
-install(FILES cluster1d.xml cluster3d.xml cluster.xml DESTINATION "share/")
+install(FILES libcluster/cluster1d.xml libcluster/cluster3d.xml libcluster/cluster.xml DESTINATION "share/")
