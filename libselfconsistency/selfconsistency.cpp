@@ -78,11 +78,13 @@ void compute_selfenergy(const single_site_matsubara_gf &G0_omega,
     const single_site_matsubara_gf &G_omega,
     single_site_matsubara_gf &selfenergy){
 
+
   for(alps::gf::matsubara_index i(0);i<G0_omega.mesh1().extent();++i){
     for(alps::gf::index s(0);s<G0_omega.mesh2().extent();++s){
-      selfenergy(i,s)=1./G0_omega(i,s)+1./G_omega(i,s);
+      selfenergy(i,s)=1./G0_omega(i,s)-1./G_omega(i,s);
     }
   }
+  std::cout<<"computing selfenergy frmo G0: "<<G0_omega(alps::gf::matsubara_index(0), alps::gf::index(0))<<" and G: "<<G_omega(alps::gf::matsubara_index(0), alps::gf::index(0))<<" to obtain "<<selfenergy(alps::gf::matsubara_index(0), alps::gf::index(0))<<std::endl;
 }
 
 void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver& solver, FrequencySpaceHilbertTransformer& hilbert)
@@ -93,10 +95,10 @@ void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver&
 
   double beta = parms["BETA"];
   double h = parms["H"];
-  bool spin_symmetrize = parms["SPIN_SYMMETRIZATION"];
-  double relax_rate=parms["RELAX_RATE"];
-  int max_it=parms["MAX_IT"];
-  double convergence_tolerance=parms["SELFCONSISTENCY_CONVERGENCE"];
+  bool spin_symmetrize = parms["sc.SPIN_SYMMETRIZATION"];
+  double relax_rate=parms["sc.RELAX_RATE"];
+  int max_it=parms["sc.MAX_IT"];
+  double convergence_tolerance=parms["sc.SELFCONSISTENCY_CONVERGENCE"];
 
 
   single_site_matsubara_gf G0_omega = hilbert.initial_G0();
@@ -114,7 +116,7 @@ void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver&
 
   do {
     iteration_ctr++;
-    std::cout<<"starting iteration nr. "<<iteration_ctr<<" H is: "<<h<<std::endl;
+    std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
     double mu = parms["MU"];
     G_old_omega = G_omega;
     G0_old_omega = G0_omega;
@@ -129,15 +131,12 @@ void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver&
       hilbert.spin_symmetrize(G_omega);
     }
 
-    std::cout<<"computing self-energy"<<std::endl;
-    compute_selfenergy(selfenergy, G_omega, G0_omega);
+    compute_selfenergy(G0_omega, G_omega, selfenergy);
 
-    std::cout<<"running Hilbert transform"<<std::endl<<std::flush;
     G0_omega = hilbert(G_omega, G0_omega, mu, h, beta);
 
     //relaxation to speed up /slow down convergence
     run_convergence_acceleration(G0_omega, G0_old_omega, relax_rate);
-    std::cout<<"comparing old and new result."<<std::endl<<std::flush;
     print_all_green_functions(iteration_ctr, G0_omega, G_omega, selfenergy, G0_tau, G_tau, beta);
   }while (iteration_ctr < max_it && !converged(G_omega,G_old_omega,convergence_tolerance));
 }
