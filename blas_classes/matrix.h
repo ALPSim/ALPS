@@ -176,6 +176,15 @@ namespace blas{
       dswap_(&size_, &(values_[c1]), &memory_size_, &(values_[c2]), &memory_size_);
       dswap_(&size_, &(values_[c1*memory_size_]), &one, &(values_[c2*memory_size_]), &one);
     }
+    inline void swap_column(int c1, int c2){
+      if(c1==c2) return;
+      blas::dswap_(&size_, &(values_[c1]), &memory_size_, &(values_[c2]), &memory_size_);
+    }
+    inline void swap_row(int c1, int c2){
+      if(c1==c2) return;
+      int one=1;
+      blas::dswap_(&size_, &(values_[c1*memory_size_]), &one, &(values_[c2*memory_size_]), &one);
+    }
     template<class mat> matrix convert_from(const mat &M){ //convert dense or sparse matrices (or any other with  (i,j) and size1() to blas matrix.
       assert(M.size1()==M.size2());
       resize_nocopy(M.size1());
@@ -192,6 +201,13 @@ namespace blas{
       double alpha=1., beta=0.;	//no need to multiply a constant or add a vector
       int inc=1;
       blas::dgemv_(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1.values_, &inc, &beta, v2.values_, &inc);
+    }
+    inline void right_multiply(const std::vector<double> &v1, std::vector<double> &v2) const{ //perform v2[i]=M[ij]v1[j]
+      //call the BLAS routine for matrix vector multiplication:
+      char trans='T';
+      double alpha=1., beta=0.; //no need to multiply a constant or add a vector
+      int inc=1;
+      blas::dgemv_(&trans, &size_, &size_, &alpha, values_, &memory_size_, &(v1[0]), &inc, &beta, &(v2[0]), &inc);
     }
     inline void right_multiply(const rsvector &v1, rsvector &v2) const{ //perform v2[i]=M[ij]v1[j]
       //call the BLAS routine for matrix vector multiplication:
@@ -407,6 +423,20 @@ namespace blas{
       std::swap(size_, M2.size_);
       std::swap(memory_size_, M2.memory_size_);
       std::swap(values_, M2.values_); //just exchange pointers
+    }
+    void invert(){
+      std::vector<double> B(size_*size_, 0.);
+      std::vector<int> ipiv(size_,0);
+      int info;
+      for(int i=0;i<size_;++i) B[i*size_+i]=1.;
+      lapack::dgesv_(&size_, &size_, values_, &memory_size_, &(ipiv[0]), &(B[0]), &size_, &info);
+      if(info){ throw(std::logic_error("in dgesv: info was not zero.")); }
+
+      for(int i=0;i<size_;++i){
+        for(int j=0;j<size_;++j){
+          operator()(i,j)=B[i*size_+j];
+        }
+      }
     }
     void eigenvalues_eigenvectors_symmetric( vector &eigenvalues, matrix &eigenvectors) const{
       //perform dsyev call (LAPACK)
