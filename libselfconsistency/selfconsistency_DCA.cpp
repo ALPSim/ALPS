@@ -57,6 +57,11 @@ bool converged(const cluster_matsubara_kspace_gf &G_omega, const cluster_matsuba
   return ((G_omega-G_omega_old).norm() > max_diff)?false:true;
 }
 
+void write_new_G0omega(const cluster_matsubara_kspace_gf &G0_omega, const std::string &path){
+  alps::hdf5::archive ar(path, alps::hdf5::archive::WRITE);
+  G0_omega.save(ar, "/G0");
+}
+
 void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
     NormalStateClusterTransformer& clustertrans)
 {
@@ -66,6 +71,7 @@ void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
   
   int max_it = parms["sc.MAX_IT"];
   double convergence_tolerance=parms["sc.SELFCONSISTENCY_CONVERGENCE"];
+  std::string g0_input_path=parms["dca.G0_OMEGA_INPUT"].as<std::string>();
 
   //calculate initial G0
   cluster_matsubara_kspace_gf G0_omega=clustertrans.initial_G0();
@@ -99,6 +105,7 @@ void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
 
     G_omega_old=G_omega;
     G0_omega=G0_omega_new;
+    write_new_G0omega(G0_omega_new, g0_input_path);
   }
 }
 
