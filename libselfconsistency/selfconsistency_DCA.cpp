@@ -86,6 +86,7 @@ void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
 
 
   //This is the basic DCA self-consistency loop
+std::ofstream max_diff_file("max_diff.dat");
   for(int iteration_ctr=0;iteration_ctr < max_it; ++iteration_ctr) {
     std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
 std::cout<<"the first element of G omega is: "<<G_omega(alps::gf::matsubara_index(0), alps::gf::momentum_index(0), alps::gf::index(0))<<std::endl;
