@@ -32,6 +32,7 @@ void define_dca_parameters(alps::params &p){
   //p.define<int>("N", "Number of imaginary time points");
   //p.define<int>("FLAVORS", "Number of orbitals (usually 2)");
   p.define<std::string>("dca.G0_OMEGA_INPUT", "Location of the input G0 file");
+  p.define<std::string>("dca.G0_OMEGA_OUTPUT", "Location of the output G0 file for continuing iterations");
   p.define<std::string>("dca.INITIAL_G0", "FREE", "choose ISOLATED or FREE for initial G0s");
 }
 NormalStateClusterTransformer::NormalStateClusterTransformer(const alps::params& params) : ClusterHelper(params),
