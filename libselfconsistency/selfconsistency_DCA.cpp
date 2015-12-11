@@ -53,10 +53,8 @@ void print_all_green_functions(int iteration_ctr,
   selfenergy_file<<selfenergy;
 }
 bool converged(const cluster_matsubara_kspace_gf &G_omega, const cluster_matsubara_kspace_gf &G_omega_old, double tolerance){
-  double max_diff=0;
-  return ((G_omega-G_omega_old).norm() > max_diff)?false:true;
-}
-
+  return ((G_omega-G_omega_old).norm() > tolerance)?false:true;
+  }
 void write_new_G0omega(const cluster_matsubara_kspace_gf &G0_omega, const std::string &path){
   alps::hdf5::archive ar(path, alps::hdf5::archive::WRITE);
   G0_omega.save(ar, "/G0");
@@ -90,6 +88,8 @@ void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
   //This is the basic DCA self-consistency loop
   for(int iteration_ctr=0;iteration_ctr < max_it; ++iteration_ctr) {
     std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
+std::cout<<"the first element of G omega is: "<<G_omega(alps::gf::matsubara_index(0), alps::gf::momentum_index(0), alps::gf::index(0))<<std::endl;
+    std::cout<<"the first element of G tau   is: "<<G_tau  (alps::gf::itime_index(0), alps::gf::momentum_index(0), alps::gf::index(0))<<std::endl;   
     alps::gf::fourier_frequency_to_time(G0_omega, G0_tau);
     solver.solve(G0_omega, G0_tau, G_omega, G_tau);
 
@@ -101,11 +101,15 @@ void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
 
 
     print_all_green_functions(iteration_ctr, G0_omega, G_omega, self_energy, G0_tau, G_tau, beta);
+    std::cout<<"max_diff_in GF== "<<(G_omega-G_omega_old).norm()<<std::endl;
+    max_diff_file<<iteration_ctr<<" "<<(G_omega-G_omega_old).norm()<<std::endl;
     if (converged(G_omega, G_omega_old,  convergence_tolerance)) break;
 
     G_omega_old=G_omega;
     G0_omega=G0_omega_new;
     write_new_G0omega(G0_omega_new, g0_output_path);
+
+
   }
 }
 
