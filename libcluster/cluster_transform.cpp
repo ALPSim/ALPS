@@ -58,12 +58,13 @@ NormalStateClusterTransformer::NormalStateClusterTransformer(const alps::params&
 }
 
 bool NormalStateClusterTransformer::read_initial_G0(cluster_matsubara_kspace_gf &G0_omega) const{
-  std::cout<<"reading initial G0_omega from: "<<g0_input_path_<<std::endl;
+  std::cout<<"check1 :reading initial G0_omega from: "<<g0_input_path_<<std::endl;
   {
     std::ifstream in_file(g0_input_path_.c_str());
-    if(!in_file.good())
+    if(!in_file.good()){
       std::cout<<"WARNING: Input file could not be found, computing initial solution."<<std::endl;
-    return false;
+      return false;
+    }
   }
 
   alps::hdf5::archive ar(g0_input_path_);
@@ -71,7 +72,7 @@ bool NormalStateClusterTransformer::read_initial_G0(cluster_matsubara_kspace_gf 
   return true;
 }
 void NormalStateClusterTransformer::compute_isolated_cluster_G0(cluster_matsubara_kspace_gf &G0_omega) const{
-  std::cout << "calculating G0_omega for isolated cluster"<<std::endl;
+  std::cout << "check2: calculating G0_omega for isolated cluster"<<std::endl;
   std::vector<double> k(dimension());
   for (alps::gf::matsubara_index freq(0); freq<nfreq_; ++freq) {
     const std::complex<double> iomega_n(0, G0_omega.mesh1().points()[freq()]);
