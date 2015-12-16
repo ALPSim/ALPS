@@ -8,6 +8,12 @@
  *
  *****************************************************************************/
 
+#include <alps/config.hpp> // to know if we have MPI
+
+#ifdef ALPS_HAVE_MPI
+#include <mpi.h>
+#endif
+
 #include "cluster_graph.h"
 #include "cluster_helper.h"
 
@@ -294,7 +300,7 @@ void ClusterHelper::setup_tables(const alps::params &params)
   if (cluster_momenta_.size1() != n_cluster_sites())
     boost::throw_exception(std::logic_error("setup of cluster momenta table failed"));
   symmetry_analysis(basis_, basis_inv_);
-#ifndef USE_MPI
+#ifndef ALPS_HAVE_MPI
   write();
 #else
   int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
