@@ -5,7 +5,6 @@ project (green)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../cmake)
 
 find_package(ALPSCore REQUIRED COMPONENTS hdf5 accumulators mc params)
-# find_package(MPI REQUIRED) # already in ALPSCore
 find_package(BlasClasses REQUIRED)
 find_package(BLAS REQUIRED)
 find_package(LAPACK REQUIRED)
@@ -14,7 +13,6 @@ find_package(GFTools REQUIRED)
 include_directories(${BLAS_CLASSES_INCLUDE_DIR})
 include_directories(${GFTools_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-# include_directories(${MPI_CXX_INCLUDE_PATH})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 

@@ -303,10 +303,13 @@ void ClusterHelper::setup_tables(const alps::params &params)
 #ifndef ALPS_HAVE_MPI
   write();
 #else
+  int mpi_init; MPI_Initialized(&mpi_init);
+  if(mpi_init){
   int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   if(rank==0){
     write();
   }
+  }else{write();}
 #endif
 }
 void ClusterHelper::write_site_class_set(alps::hdf5::archive &ar, const site_class_set_type &set, const std::string &name, const std::string &location) const{
