@@ -3,25 +3,24 @@ project (AuxiliaryPrograms)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../cmake)
 
-find_package(ALPS REQUIRED NO_SYSTEM_ENVIRONMENT_PATH)
-include(${ALPS_USE_FILE})
-
-find_package(ALPS REQUIRED NO_SYSTEM_ENVIRONMENT_PATH)
+find_package(ALPSCore REQUIRED NO_SYSTEM_ENVIRONMENT_PATH)
 find_package(LAPACK REQUIRED)
 find_package(BlasClasses REQUIRED)
-find_package(Greens REQUIRED)
-find_package(Fourier REQUIRED)
-find_package(Cluster REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(GFTools REQUIRED)
 find_package(GSL REQUIRED)
+find_package(Cluster REQUIRED)
+find_package(MPI REQUIRED)
 
 include_directories(${BLAS_CLASSES_INCLUDE_DIR})
-include_directories(${GREENS_INCLUDE_DIR})
 include_directories(${FOURIER_INCLUDE_DIR})
 include_directories(${CLUSTER_INCLUDE_DIR})
+include_directories(${EIGEN3_INCLUDE_DIR})
+include_directories(${GFTools_INCLUDE_DIR})
+include_directories(${MPI_CXX_INCLUDE_PATH})
 
-add_executable(sigma_interpolate_sc sigma_interpolate_sc.cpp )
-
+#add_executable(sigma_interpolate_sc sigma_interpolate_sc.cpp )
+#
 add_executable(sigma_interpolate_normal sigma_interpolate_normal.cpp )
 
-target_link_libraries(sigma_interpolate_normal ${GREENS_LIBRARIES} ${FOURIER_LIBRARIES} ${CLUSTER_LIBRARIES} ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} ${GSL_LIBRARIES})
-target_link_libraries(sigma_interpolate_sc  ${GREENS_LIBRARIES} ${FOURIER_LIBRARIES} ${CLUSTER_LIBRARIES} ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} ${GSL_LIBRARIES})
+target_link_libraries(sigma_interpolate_normal ${GFTools_LIBRARIES} ${FOURIER_LIBRARIES} ${CLUSTER_LIBRARIES} ${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES} ${GSL_LIBRARIES})
