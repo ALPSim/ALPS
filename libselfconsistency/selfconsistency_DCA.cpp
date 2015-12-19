@@ -27,7 +27,7 @@ void print_all_green_functions(int iteration_ctr,
     const cluster_itime_kspace_gf &G_tau, double beta){
 
   std::ostringstream G0omega_name, G0tau_name, Gomega_name,
-  Gtau_name, Gtau_name_2, Gomega_name_2, selfenergy_name;
+  Gtau_name, Gtau_name_2, Gomega_name_2, selfenergy_name, selfenergy_name2;
   G0omega_name<<"G0_omega"<<"_"<<iteration_ctr;
   G0tau_name<<"G0_tau"<<"_"<<iteration_ctr;
   Gomega_name<<"G_omega"<<"_"<<iteration_ctr;
@@ -35,6 +35,7 @@ void print_all_green_functions(int iteration_ctr,
   Gomega_name_2<<"G_omega";
   Gtau_name_2<<"G_tau";
   selfenergy_name<<"selfenergy"<<"_"<<iteration_ctr;
+  selfenergy_name2<<"selfenergy"<<"_"<<iteration_ctr<<".h5";
 
   std::ofstream G0_omega_file(G0omega_name.str().c_str());
   std::ofstream G0_tau_file(G0tau_name.str().c_str());
@@ -51,6 +52,9 @@ void print_all_green_functions(int iteration_ctr,
   G_omega_file_2<<G_omega;
   G_tau_file_2<<G_tau;
   selfenergy_file<<selfenergy;
+
+  alps::hdf5::archive ars(selfenergy_name2.str(), alps::hdf5::archive::WRITE);
+  selfenergy.save(ars, "/Sigma");
 }
 bool converged(const cluster_matsubara_kspace_gf &G_omega, const cluster_matsubara_kspace_gf &G_omega_old, double tolerance){
   return ((G_omega-G_omega_old).norm() > tolerance)?false:true;

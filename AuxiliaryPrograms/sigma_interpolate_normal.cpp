@@ -26,7 +26,9 @@ void define_parameters_commandline(alps::params &p){
   p.define<std::string>("g0", "hdf5 path to the G0 obtained with the interpolated self-energy");
 }
 void define_dca_parameters(alps::params &p);
+void define_selfconsistency_parameters(alps::params &p);
 void define_parameters_pfile(alps::params &p){
+  define_selfconsistency_parameters(p);
   define_dca_parameters(p);
 }
 
@@ -47,14 +49,14 @@ int main(int argc, char **argv){
   double beta_old=parms_old["BETA"];
   double mu_old=parms_old["MU"];
   double h_old=parms_old["H"];
-  double nsites_old=parms_old["SITES"];
+  double nsites_old=parms_old["dca.SITES"];
   int nfreq_old = parms_new["NMATSUBARA"];
   
   double beta_new=parms_new["BETA"];
   double mu_new=parms_new["MU"];
   double h_new=parms_new["H"];
   int nfreq_new=parms_new["NMATSUBARA"];
-  double nsites_new=parms_new["SITES"];
+  double nsites_new=parms_new["dca.SITES"];
   
   std::cout<<"main parameters: "<<std::endl;
   std::cout<<"new beta: "<<beta_new<<"(old: "<<beta_old<<")"<<std::endl;
@@ -80,11 +82,12 @@ int main(int argc, char **argv){
   }
   
   //interpolate cluster geometry in k-space
-  std::string cluster_name_new=parms_new["LATTICE"];
-  std::string cluster_name_old=parms_old["LATTICE"];
+  std::string cluster_name_new=parms_new["dca.LATTICE"];
+  std::string cluster_name_old=parms_old["dca.LATTICE"];
   if(cluster_name_new != cluster_name_old){
     throw std::invalid_argument("you are trying to interpolate different clusters. Please reimplement using gftools");
   }
+  selfenergy_kspace_interp=selfenergy_orig;
   
   //interpolate for new temperature
   double nfreq_max=std::max(nfreq_old, nfreq_new);
@@ -102,11 +105,14 @@ int main(int argc, char **argv){
       for(alps::gf::matsubara_index i(0);i<nfreq_new;++i){
         sigma_real[i()]=selfenergy_kspace_interp(i,j,flavor).real();
         sigma_imag[i()]=selfenergy_kspace_interp(i,j,flavor).imag();
+        std::cout<<"setting from: "<<std::complex<double>(sigma_real[i()], sigma_imag[i()])<<std::endl;
       }
+      std::cout<<"interpolating vector of size: "<<sigma_real.size()<<std::endl;
       std::vector<double> sigma_real_interp=interpolate_vector(matsubara_freqs_old, sigma_real, matsubara_freqs_new);
       std::vector<double> sigma_imag_interp=interpolate_vector(matsubara_freqs_old, sigma_imag, matsubara_freqs_new);
       for (alps::gf::matsubara_index i(0); i<nfreq_new; ++i){
         selfenergy_new(i,j,flavor) = std::complex<double>(sigma_real_interp[i()], sigma_imag_interp[i()]);
+        std::cout<<"setting to: "<<std::complex<double>(sigma_real_interp[i()], sigma_imag_interp[i()])<<std::endl;
       }
     }
   }
@@ -120,7 +126,7 @@ int main(int argc, char **argv){
  
   { 
     std::string filename_new=p["g0"];
-    alps::hdf5::archive ar(filename_new);
+    alps::hdf5::archive ar(filename_new, alps::hdf5::archive::WRITE);
     green0_new    .save(ar, "/G0");
     green_new     .save(ar, "/G");
     selfenergy_new.save(ar, "/Sigma");

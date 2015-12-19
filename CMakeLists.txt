@@ -11,7 +11,7 @@ add_subdirectory(libcluster)
 add_subdirectory(libselfconsistency)
 
 find_package(LAPACK REQUIRED)
-# find_package(MPI REQUIRED)
+find_package(MPI REQUIRED)
 find_package(GFTools REQUIRED)
 
 include(UseGtest)
@@ -24,7 +24,7 @@ endif()
 
 include_directories(${BLAS_CLASSES_INCLUDE_DIR})
 include_directories(${GFTools_INCLUDE_DIR})
-# include_directories(${MPI_CXX_INCLUDE_PATH})
+include_directories(${MPI_CXX_INCLUDE_PATH})
 include_directories("libcluster")
 include_directories("libsolver")
 include_directories("libselfconsistency")

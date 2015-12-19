@@ -9,10 +9,12 @@ find_package(BlasClasses REQUIRED)
 find_package(BLAS REQUIRED)
 find_package(LAPACK REQUIRED)
 find_package(GFTools REQUIRED)
+find_package(MPI REQUIRED)
 
 include_directories(${BLAS_CLASSES_INCLUDE_DIR})
 include_directories(${GFTools_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${MPI_CXX_INCLUDE_PATH})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 
@@ -22,7 +24,7 @@ cluster_graph.cpp
 cluster_transform.cpp 
 )
 
-target_link_libraries(cluster  ${GFTools_LIBRARIES} ${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES} #${MPI_CXX_LIBRARIES}
+target_link_libraries(cluster  ${GFTools_LIBRARIES} ${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES} ${MPI_CXX_LIBRARIES}
 )
 
 include(EnableGtests)
