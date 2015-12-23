@@ -283,12 +283,12 @@ if (NOT Boost_FOUND)
     if(BUILD_BOOST_TEST AND NOT ALPS_FOR_VISTRAILS)
       set(DIRECTORY "${Boost_ROOT_DIR}/libs/test/src")
       
-      set(SOURCES compiler_log_formatter.cpp debug.cpp 
+      set(SOURCES compiler_log_formatter.cpp debug.cpp decorator.cpp
           execution_monitor.cpp framework.cpp 
           interaction_based.cpp logged_expectations.cpp plain_report_formatter.cpp
           progress_monitor.cpp results_collector.cpp results_reporter.cpp
-          test_tools.cpp unit_test_log.cpp unit_test_main.cpp
-          unit_test_monitor.cpp unit_test_parameters.cpp unit_test_suite.cpp
+          test_tools.cpp test_tree.cpp unit_test_log.cpp unit_test_main.cpp
+          unit_test_monitor.cpp unit_test_parameters.cpp unit_test_suite.cpp #(unit_test_suite.cpp renamed to test_tree.cpp in 2011)
           xml_log_formatter.cpp xml_report_formatter.cpp
       )
       set (TEST_EXEC_MON_SOURCES "")
