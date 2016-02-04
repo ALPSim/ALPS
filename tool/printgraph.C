@@ -31,6 +31,7 @@
 #include <alps/lattice.h>
 #include <iostream>
 #include <fstream>
+#include <boost/algorithm/string.hpp>
 
 #ifdef BOOST_NO_ARGUMENT_DEPENDENT_LOOKUP
 using namespace alps;
@@ -49,8 +50,13 @@ int main(int argc, char ** argv)
          break;
        case 2:
          {
-           std::ifstream parmfile(argv[1]);
-           parmfile >> parameters;
+           std::string fn(argv[1]);
+           std::ifstream parmfile(fn.c_str());
+
+           if(boost::algorithm::iends_with(fn, ".xml"))
+             parameters.extract_from_xml(parmfile);
+           else
+             parmfile >> parameters;
          }
          break;
        default:
