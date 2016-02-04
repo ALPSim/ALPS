@@ -414,9 +414,10 @@ private:
         /// get list of all local operators
         for (tokenizer::iterator it=corr_tokens.begin(); it != corr_tokens.end(); it++)
         {
-            if (model.has_bond_operator(*it)) {
+            std::string name = boost::trim_copy(*it);
+            if (model.has_bond_operator(name)) {
                 /// extract all site operators in the bond term
-                BondOperator bondop = model.get_bond_operator(*it);
+                BondOperator bondop = model.get_bond_operator(name);
                 
                 typedef std::vector<boost::tuple<alps::expression::Term<value_type>,alps::SiteOperator,alps::SiteOperator > > V;
                 
@@ -433,7 +434,7 @@ private:
                 opnames.push_back(simplify_name(op2));
                 op_types |= 1<<1; // flag that at least one bond term is in the list
             } else {
-                opnames.push_back(*it);
+                opnames.push_back(name);
                 op_types |= 1<<0; // flag that at least one site term is in the list
             }
         }
