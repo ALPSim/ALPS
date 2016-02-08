@@ -12,170 +12,133 @@
 
 #include <boost/tuple/tuple.hpp>
 
-#include <alps/parameter.h>
+#include <alps/params.hpp>
+#include <alps/gf/fourier.hpp>
 
-#include "green_function.h"
-
-#include "fourier_transform.h"
-
-#include "cluster.h"
-#include "DCA_transform.hxx"
-#include "SimpleDCA_transform.hxx"
-#include "AFM_DCA_transform.hxx"
-
-#include "selfconsistency.h"
-#include "externalsolver.h"
+#include"cluster_transform.h"
+#include"impurity_solver.h"
 
 
-void perform_cluster_loop(const alps::params &parms){
-  std::string cluster_loop=parms["CLUSTER_LOOP"];
+void print_all_green_functions(int iteration_ctr,
+    const cluster_matsubara_kspace_gf &G0_omega,
+    const cluster_matsubara_kspace_gf &G_omega,
+    const cluster_matsubara_kspace_gf &selfenergy,
+    const cluster_itime_kspace_gf &G0_tau,
+    const cluster_itime_kspace_gf &G_tau, double beta){
+
+  std::ostringstream G0omega_name, G0tau_name, Gomega_name,
+  Gtau_name, Gtau_name_2, Gomega_name_2, selfenergy_name, selfenergy_name2;
+  G0omega_name<<"G0_omega"<<"_"<<iteration_ctr;
+  G0tau_name<<"G0_tau"<<"_"<<iteration_ctr;
+  Gomega_name<<"G_omega"<<"_"<<iteration_ctr;
+  Gtau_name<<"G_tau"<<"_"<<iteration_ctr;
+  Gomega_name_2<<"G_omega";
+  Gtau_name_2<<"G_tau";
+  selfenergy_name<<"selfenergy"<<"_"<<iteration_ctr;
+  selfenergy_name2<<"selfenergy"<<"_"<<iteration_ctr<<".h5";
+
+  std::ofstream G0_omega_file(G0omega_name.str().c_str());
+  std::ofstream G0_tau_file(G0tau_name.str().c_str());
+  std::ofstream G_omega_file(Gomega_name.str().c_str());
+  std::ofstream G_tau_file(Gtau_name.str().c_str());
+  std::ofstream G_omega_file_2(Gomega_name_2.str().c_str());
+  std::ofstream G_tau_file_2(Gtau_name_2.str().c_str());
+  std::ofstream selfenergy_file(selfenergy_name.str().c_str());
+
+  G0_omega_file<<G0_omega;
+  G0_tau_file<<G0_tau;
+  G_omega_file<<G_omega;
+  G_tau_file<<G_tau;
+  G_omega_file_2<<G_omega;
+  G_tau_file_2<<G_tau;
+  selfenergy_file<<selfenergy;
+
+  alps::hdf5::archive ars(selfenergy_name2.str(), alps::hdf5::archive::WRITE);
+  selfenergy.save(ars, "/Sigma");
+}
+bool converged(const cluster_matsubara_kspace_gf &G_omega, const cluster_matsubara_kspace_gf &G_omega_old, double tolerance){
+  return ((G_omega-G_omega_old).norm() > tolerance)?false:true;
+  }
+void write_new_G0omega(const cluster_matsubara_kspace_gf &G0_omega, const std::string &path){
+  alps::hdf5::archive ar(path, alps::hdf5::archive::WRITE);
+  G0_omega.save(ar, "/G0");
+}
+
+void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
+    NormalStateClusterTransformer& clustertrans)
+{
+  int n_tau=parms["N"];
+  int n_orbital=parms["FLAVORS"];
+  double beta=parms["BETA"];
+  
+  int max_it = parms["sc.MAX_IT"];
+  double convergence_tolerance=parms["sc.SELFCONSISTENCY_CONVERGENCE"];
+  std::string g0_output_path=parms["dca.G0_OMEGA_OUTPUT"].as<std::string>();
+
+  //calculate initial G0
+  cluster_matsubara_kspace_gf G0_omega=clustertrans.initial_G0();
+
+  //define all needed matsubara and imaginary time Green's functions
+  cluster_matsubara_kspace_gf G_omega=G0_omega;
+  cluster_matsubara_kspace_gf G_omega_old=G0_omega;
+  cluster_matsubara_kspace_gf G_omega_ksum=G0_omega;
+  cluster_matsubara_kspace_gf G0_omega_new=G0_omega;
+  cluster_matsubara_kspace_gf self_energy=G0_omega;
+
+  cluster_itime_kspace_gf G_tau(alps::gf::itime_k_sigma_gf(alps::gf::itime_mesh(beta,n_tau),clustertrans.momentum_mesh(), alps::gf::index_mesh(n_orbital)));
+  cluster_itime_kspace_gf G0_tau(alps::gf::itime_k_sigma_gf(alps::gf::itime_mesh(beta,n_tau),clustertrans.momentum_mesh(), alps::gf::index_mesh(n_orbital)));
+
+  //This is the basic DCA self-consistency loop
+std::ofstream max_diff_file("max_diff.dat");
+  for(int iteration_ctr=0;iteration_ctr < max_it; ++iteration_ctr) {
+    std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
+std::cout<<"the first element of G omega is: "<<G_omega(alps::gf::matsubara_index(0), alps::gf::momentum_index(0), alps::gf::index(0))<<std::endl;
+    std::cout<<"the first element of G tau   is: "<<G_tau  (alps::gf::itime_index(0), alps::gf::momentum_index(0), alps::gf::index(0))<<std::endl;   
+    alps::gf::fourier_frequency_to_time(G0_omega, G0_tau);
+    solver.solve(G0_omega, G0_tau, G_omega, G_tau);
+
+    clustertrans.spin_symmetrize(G_omega);
+    clustertrans.symmetrize_k_space(G_omega);
+    clustertrans.dyson_get_self_energy(self_energy, G_omega, G0_omega);
+    clustertrans.matsubara_k_sum(G_omega_ksum, self_energy);
+    clustertrans.dyson_get_green0(G0_omega_new, self_energy, G_omega_ksum);
+
+
+    print_all_green_functions(iteration_ctr, G0_omega, G_omega, self_energy, G0_tau, G_tau, beta);
+    std::cout<<"max_diff_in GF== "<<(G_omega-G_omega_old).norm()<<std::endl;
+    max_diff_file<<iteration_ctr<<" "<<(G_omega-G_omega_old).norm()<<std::endl;
+    if (converged(G_omega, G_omega_old,  convergence_tolerance)) break;
+
+    G_omega_old=G_omega;
+    G0_omega=G0_omega_new;
+    write_new_G0omega(G0_omega_new, g0_output_path);
+
+
+  }
+}
+
+void perform_cluster_loop(const std::string &param_file_name, const alps::params &parms){
+  std::string cluster_loop=parms["SC_LOOP"];
+  std::string solver_path=parms["solver.SOLVER"];
   std::cout<<"cluster loop is: "<<cluster_loop<<std::endl;
-  if (cluster_loop=="DCA")
-    perform_DCA_loop(parms);
-  else if (cluster_loop=="CDMFT")
-    perform_CDMFT_loop(parms);
-  else {
-    std::cout<<cluster_loop<<std::endl;
-    boost::throw_exception(std::logic_error("there is no such cluster method!"));
+  if (cluster_loop=="DCA"){
+    std::cout<<"running a DCA calculation"<<std::endl;
+    NormalStateClusterTransformer T(parms);
+    ImpuritySolver solver(solver_path,param_file_name, parms);
+    selfconsistency_loop_DCA(parms, solver, T);
+  }else {
+    boost::throw_exception(std::logic_error("there is no such cluster method: "+cluster_loop));
   }
 }
 
 
-void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver,
-                              DCATransformer& clustertrans)
-{
-  unsigned int n_tau=parms["N"];
-  unsigned int n_matsubara=parms["NMATSUBARA"];
-  unsigned int n_orbital=parms["FLAVORS"]|2;
-  unsigned int n_site=parms["SITES"]|1;
-  
-  double beta = parms["BETA"];
-  double h = parms["H"];
-  double converged = parms["CONVERGED"];
-  bool paramagnet = parms["PARAMAGNET"]|false;
-  double relax_rate=parms["RELAX_RATE"]|1.;
-  int max_it=parms["MAX_IT"]|1000;
-  std::string basename=parms["BASENAME"];
-  bool readwrite_real_space=parms["READWRITE_REAL_SPACE"]|false;
-  bool phase=parms["PHASE"]|false;
-  bool antiferromagnetic = parms["ANTIFERROMAGNET"]|false;
-
-//  shape_t gf_shape=paramagnet?diagonal:blockdiagonal;
-  shape_t gf_shape=antiferromagnetic?blockdiagonal:diagonal;
-
-  std::cout<<"Green's function shape is "<< gf_shape<<std::endl;
-
-//  if (parms.defined("t_flavor")){ gf_shape=diagonal;}
-  
-  //calculate initial G0
-  matsubara_green_function_t G0_omega=clustertrans.initial_G0(parms, gf_shape);
-  matsubara_green_function_t G_omega=G0_omega;
-
-  //Print a file that lists the momenta involved in the calculation
-  //They appear in the same order as the columns of the various output files
-  std::string momenta_filename= "momenta";
-  clustertrans.print_momenta(momenta_filename.c_str(), G_omega);
-  
-  int iteration_ctr = 0;
-  matsubara_green_function_t G_old_omega(G0_omega);
-  matsubara_green_function_t G0_old_omega(G0_omega);
-  itime_green_function_t G_tau(n_tau +1, n_site, n_orbital, gf_shape);
-  itime_green_function_t G0_tau(n_tau+1, n_site, n_orbital, gf_shape);
-  itime_green_function_t G_old_tau(n_tau+1, n_site, n_orbital, gf_shape);
-  itime_green_function_t G0_old_tau(n_tau+1, n_site, n_orbital, gf_shape);
-  //initialize space for multiple vectors
-  boost::shared_ptr<FourierTransformer> fourier_ptr;
-  FourierTransformer::generate_cluster_transformer(parms, fourier_ptr);
-  double max_diff,norm2_diff;
-  double mu;
-  do {
-    iteration_ctr++;
-    std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
-    (*const_cast<alps::params*>(&parms))["CURRENT_IT"] = iteration_ctr;
-    mu = parms["MU"];
-    G_old_omega = G_omega;
-    G0_old_omega = G0_omega;
-    G_old_tau = G_tau;
-    G0_old_tau = G0_tau;
-    fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega);
-    //
-    G0_omega = clustertrans.symmetrize(G0_omega, paramagnet);
-    
-    //std::cout<<"running solver in frequency space."<<std::endl<<std::flush;
-    if(!readwrite_real_space){
-      boost::tie(G_omega, G_tau) = solver.solve_matsubara(G0_omega, parms, &clustertrans);
-    }else{
-      matsubara_green_function_t G0_omega_rs=clustertrans.transform_into_real_space(G0_omega);
-      matsubara_green_function_t G_omega_rs(n_matsubara, n_site, n_orbital, nondiagonal);
-      itime_green_function_t G_tau_rs(n_tau+1, n_site, n_orbital, nondiagonal);
-      boost::tie(G_omega_rs, G_tau_rs) = solver.solve_matsubara(G0_omega_rs, parms,&clustertrans);
-      G_omega=clustertrans.transform_into_k_space(G_omega_rs);
-      G_tau=clustertrans.transform_into_k_space(G_tau_rs);
-    }
-    G_omega = clustertrans.symmetrize(G_omega, paramagnet);
-    if(paramagnet && !phase ) G_omega = clustertrans.symmetrize_k_space(G_omega);
-    G0_omega = clustertrans(G_omega, G0_omega, mu, h, beta);
-    G0_omega.write(std::string(parms["G0OMEGA_output"]|"G0omega_output").c_str());
-    std::cout<<"comparing old and new result."<<std::endl<<std::flush;
-    max_diff=0;
-    norm2_diff=0;
-    if(iteration_ctr>1){
-      //comparison for the dressed Green's function in Matsubara freq.
-      for(unsigned int w=0; w<n_matsubara; w++) {
-        for(unsigned int i1=0; i1<n_site; i1++) {
-          for(unsigned int i2=0; i2<n_site; i2++) {
-            for(unsigned int o=0; o<n_orbital; o++) {
-              norm2_diff += std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o))*std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o));
-              if (std::abs(G_omega(w,i1, i2, o)-G_old_omega(w, i1, i2, o)) > max_diff)
-                max_diff = std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o));
-            }
-          }
-        }
-      }
-      std::cout<<"convergence loop: max diff in dressed Green (Matsubara freq): "
-      <<max_diff<<"\tconverged: "<<converged<<std::endl;
-      std::cout<<"norm2_diff = "<<std::sqrt(norm2_diff)<<std::endl;
-    }
-	std::cout << "writing Green's functions." << std::endl;
-
-	if (parms["PRINTHEADERS"] | false) {
-		G0_omega.set_header(clustertrans.generate_header_kspace(G0_omega));
-		G_omega.set_header(clustertrans.generate_header_kspace(G_omega));
-	}
-	print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
-    if(!parms.defined("WRITE_SPARSE")){
-      std::cout<<"writing Green's functions in real space"<<std::endl;
-      matsubara_green_function_t real_G0_omega = clustertrans.transform_into_real_space(G0_omega);
-      matsubara_green_function_t real_G_omega = clustertrans.transform_into_real_space(G_omega);
-      itime_green_function_t real_G0_tau = clustertrans.transform_into_real_space(G0_tau);
-      itime_green_function_t real_G_tau = clustertrans.transform_into_real_space(G_tau);
-      print_all_green_functions(basename, iteration_ctr, real_G0_omega, real_G_omega, real_G0_tau, real_G_tau, beta, "_realspace");
-    }
-    std::cout<<"...continuing."<<std::endl;
-
-/// TODO, rewriting to parms so that mu_orig=previous mu iteration, allows for damping in filled cases.
-    if(parms.defined("MODIFY_PARAMETER_FILE")){
-        std::string basename_str=parms["BASENAME"];
-	std::ofstream os(basename_str.c_str());
-       (*const_cast<alps::params*>(&parms))["MU"]=mu;
-
-        os<<parms;
-        os.close();
-    }
-
-  } while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);
-  // write G0
-  std::string G0_output_string=parms["G0OMEGA_output"]|"G0omega_output";
-  G0_omega.write(G0_output_string.c_str());
-}
-
-void selfconsistency_loop_DCA_Nambu(const alps::params& parms, ImpuritySolver& solver,
+/*void selfconsistency_loop_DCA_Nambu(const alps::params& parms, ImpuritySolver& solver,
                               DCATransformer& clustertrans)
 {
   unsigned int n_tau=parms["N"];
   unsigned int n_matsubara=parms["NMATSUBARA"];
   unsigned int n_site=parms["SITES"]|1;
-  
+
   double beta = parms["BETA"];
   double h    = parms["H"];
   double eta1 = parms["ETA1"];
@@ -185,11 +148,11 @@ void selfconsistency_loop_DCA_Nambu(const alps::params& parms, ImpuritySolver& s
   if(!paramagnet) throw std::logic_error("please implement mixed AFM & Nambu!");
   int max_it=parms["MAX_IT"]|1000;
   std::string basename=parms["BASENAME"];
-  
-  
+
+
   nambu_matsubara_green_function_t G0_omega=clustertrans.initial_G0_nambu(parms);
   nambu_matsubara_green_function_t G_omega=G0_omega;
-  
+
   int iteration_ctr = 0;
   nambu_matsubara_green_function_t G_old_omega(G0_omega);
   nambu_matsubara_green_function_t G0_old_omega(G0_omega);
@@ -219,11 +182,11 @@ void selfconsistency_loop_DCA_Nambu(const alps::params& parms, ImpuritySolver& s
     G_tau = clustertrans.symmetrize_k_space(G_tau); //<- this would symmetrize away the d-wave behavior!
     G_omega = clustertrans.symmetrize(G_omega, paramagnet);
     G_omega = clustertrans.symmetrize_k_space(G_omega);
-    
+
     std::cout<<"running cluster transform"<<std::endl<<std::flush;
     G0_omega = clustertrans(G_omega, G0_omega, selfenergy, mu, h, eta1, eta2, beta, false);
-    
-    
+
+
     G0_omega.write(std::string(parms["G0OMEGA_output"]|"G0omega_output").c_str());
     std::cout<<"comparing old and new result."<<std::endl<<std::flush;
     max_diff=0;
@@ -252,25 +215,11 @@ void selfconsistency_loop_DCA_Nambu(const alps::params& parms, ImpuritySolver& s
     if(!parms.defined("WRITE_SPARSE"))
       print_all_nambu_green_functions(basename, iteration_ctr, real_G0_omega, real_G_omega, real_G0_tau, real_G_tau, beta, nondiagonal, "_realspace");
 
-    
+
 
   } while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);
   // write G0
   G0_omega.write(std::string(parms["G0OMEGA_output"]|"G0omega_output").c_str());
 }
-
-void perform_DCA_loop(const alps::params &parms){
-  std::cout<<"running a DCA calculation"<<std::endl;
-  ClusterTransformer *transform_ptr=ClusterTransformer::generate_transformer(parms);
-  std::string solver_path=parms["SOLVER"];
-  std::string launcher_path=parms["LAUNCHER"]|std::string("");
-  ImpuritySolver* solver_ptr=new ExternalSolver(launcher_path+" "+solver_path);
-  if(!(parms["NAMBU"]|false)){
-    selfconsistency_loop_DCA(parms, *solver_ptr, *(DCATransformer*)transform_ptr);
-  }else{
-    selfconsistency_loop_DCA_Nambu(parms, *solver_ptr, *(DCATransformer*)transform_ptr);
-  }
-  delete transform_ptr;
-  delete solver_ptr;
-}
+ */
 

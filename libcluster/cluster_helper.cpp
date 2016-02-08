@@ -8,24 +8,34 @@
  *
  *****************************************************************************/
 
+#include <alps/config.hpp> // to know if we have MPI
+
+#ifdef ALPS_HAVE_MPI
+#include <mpi.h>
+#endif
+
 #include "cluster_graph.h"
 #include "cluster_helper.h"
-#include "alps/hdf5/ublas/vector.hpp"
-#include "alps/hdf5/ublas/matrix.hpp"
-#include "boost/lexical_cast.hpp"
-#include "boost/numeric/bindings/ublas.hpp"
-#include "boost/numeric/bindings/lapack/driver/gesv.hpp"
 
-
+void ClusterHelper::define_parameters(alps::params &p){
+  p.define<std::string>("dca.LATTICE", "name of the cluster");
+  p.define<std::string>("dca.LATTICE_LIBRARY", "name of the xml cluster definition file");
+  p.define<std::string>("dca.LATTICE_DUMP", "cluster.h5", "name of the cluster transformer hdf5 dump file");
+  p.define<bool>("dca.AFM_SELFCONSISTENCY", false, "Use the AFM self-consistency condition.");
+  p.define<int>("dca.SITES",  "number of cluster sites");
+  p.define<int>("dca.L", "linear discretization of cluster k-point integration");
+}
 ClusterHelper::ClusterHelper(const alps::params& params) :
-alps_graph(params["LATTICE"],params["LATTICE_LIBRARY"],params["L"]),
-paramagnet_(params["PARAMAGNET"]),
-epsilon_(1e-9)
+alps_graph(params["dca.LATTICE"],params["dca.LATTICE_LIBRARY"],params["dca.L"]),
+paramagnet_(!params["dca.AFM_SELFCONSISTENCY"]),
+epsilon_(1e-9),
+hdf5_dump_name_(params["dca.LATTICE_DUMP"].as<std::string>()),
+cluster_name_(params["dca.LATTICE"].as<std::string>())
 {
   //check that the numer of sites is consistent between the 'SITES' parameter and what we get from the cluster.
-  if (int(params["SITES"]) != alps_graph::unit_cell_volume()) throw std::runtime_error("the graph"+params["LATTICE"]+" unit cell volume is not :"+params["SITES"]);
-  //try to read this transformer, otherwise generate it.
-  if(!read(params))
+  if (int(params["dca.SITES"]) != alps_graph::unit_cell_volume()) throw std::runtime_error(std::string("the graph")+params["LATTICE"].as<std::string>()+" unit cell volume is not :"+params["SITES"].as<std::string>());
+  //generate the symmetry tables for this transformer.
+  if(!read())
     setup_tables(params);
   
   //Find the periodicity in each direction
@@ -185,19 +195,6 @@ void ClusterHelper::find_integration_weights() {
   }
 }
 
-template<typename T>
-inline typename ClusterHelper::Matrix<T>::Type ClusterHelper::Matrix<T>::inverse(typename Matrix<T>::Type M)
-{
-  typename ClusterHelper::Matrix<T>::Type M_inv(M.size1(), M.size2());
-  for (unsigned int i=0; i<M.size1(); ++i)
-    for (unsigned int j=0; j<M.size2(); ++j)
-      M_inv(i,j) = (T)(i==j);
-  boost::numeric::ublas::vector<fortran_int_t> ipivot(M.size1());
-  memset(&(ipivot(0)), 0, sizeof(int)*M.size1());
-  boost::numeric::bindings::lapack::gesv(M,ipivot, M_inv);
-  return M_inv;
-}
-
 void ClusterHelper::detect_if_bipartite() {
   int sum = 0;
   for (unsigned int i = 0; i < basis_vectors().size(); ++i) {
@@ -260,6 +257,7 @@ void ClusterHelper::extract_and_arrange_cluster_coordinates(){
       }
       break;
   }
+
   //arrange vertices for bipartite lattices
   if (bipartite()) {
     for (std::size_t i=0; i<cluster_coordinates_.size1(); ++i) {
@@ -274,6 +272,7 @@ void ClusterHelper::extract_and_arrange_cluster_coordinates(){
       }
     }
   }
+
 }
 void ClusterHelper::setup_tables(const alps::params &params)
 {
@@ -301,13 +300,16 @@ void ClusterHelper::setup_tables(const alps::params &params)
   if (cluster_momenta_.size1() != n_cluster_sites())
     boost::throw_exception(std::logic_error("setup of cluster momenta table failed"));
   symmetry_analysis(basis_, basis_inv_);
-#ifndef USE_MPI
-  write(params);
+#ifndef ALPS_HAVE_MPI
+  write();
 #else
+  int mpi_init; MPI_Initialized(&mpi_init);
+  if(mpi_init){
   int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   if(rank==0){
-    write(params);
+    write();
   }
+  }else{write();}
 #endif
 }
 void ClusterHelper::write_site_class_set(alps::hdf5::archive &ar, const site_class_set_type &set, const std::string &name, const std::string &location) const{
@@ -382,68 +384,58 @@ void ClusterHelper::read_pair_class_set(alps::hdf5::archive &ar, pair_class_set_
   }
 }
 
-bool ClusterHelper::write(const alps::params &parms, const std::string &location) const{
-  if(parms.defined("TMPNAME")){
-    //write data to the 'tmpname' file
-    std::string filename=parms["TMPNAME"]; filename+=".in.h5";
-    alps::hdf5::archive ar(filename, alps::hdf5::archive::WRITE);
-    if(ar.is_data("/"+location+"/name")) return false; //already have a transformer there.
-    std::cout<<"file name: "<<filename<<" location: "<<"/"+location+"/name"<<std::endl;
-    std::string latticename=parms["LATTICE"];
-    ar<<alps::make_pvp("/"+location+"/name", latticename);
-    ar<<alps::make_pvp("/"+location+"/bipartite", bipartite_);
-    ar<<alps::make_pvp("/"+location+"/epsilon", epsilon_);
-    ar<<alps::make_pvp("/"+location+"/cluster_coordinates", cluster_coordinates_);
-    ar<<alps::make_pvp("/"+location+"/cluster_momenta", cluster_momenta_);
-    ar<<alps::make_pvp("/"+location+"/lattice_momenta", lattice_momenta_);
-    ar<<alps::make_pvp("/"+location+"/reciprocal_basis", reciprocal_basis_);
-    ar<<alps::make_pvp("/"+location+"/reciprocal_basis_inv", reciprocal_basis_inv_);
-    ar<<alps::make_pvp("/"+location+"/rbzone_boundaries", rbzone_boundaries_);
-    ar<<alps::make_pvp("/"+location+"/symmetry_table_k_space", symmetry_table_k_space_);
-    ar<<alps::make_pvp("/"+location+"/symmetry_table_real_space", symmetry_table_real_space_);
+bool ClusterHelper::write() const{
+  std::cout<<"entering write for name: "<<hdf5_dump_name_<<" cluster name: "<<cluster_name_<<std::endl;
+    alps::hdf5::archive ar(hdf5_dump_name_, alps::hdf5::archive::WRITE);
+    if(ar.is_data("/"+cluster_name_+"/name")) return false; //already have a transformer there.
+    ar<<alps::make_pvp("/"+cluster_name_+"/name", cluster_name_);
+    ar<<alps::make_pvp("/"+cluster_name_+"/bipartite", bipartite_);
+    ar<<alps::make_pvp("/"+cluster_name_+"/epsilon", epsilon_);
+    ar<<alps::make_pvp("/"+cluster_name_+"/cluster_coordinates", cluster_coordinates_);
+    ar<<alps::make_pvp("/"+cluster_name_+"/cluster_momenta", cluster_momenta_);
+    ar<<alps::make_pvp("/"+cluster_name_+"/lattice_momenta", lattice_momenta_);
+    ar<<alps::make_pvp("/"+cluster_name_+"/reciprocal_basis", reciprocal_basis_);
+    ar<<alps::make_pvp("/"+cluster_name_+"/reciprocal_basis_inv", reciprocal_basis_inv_);
+    ar<<alps::make_pvp("/"+cluster_name_+"/rbzone_boundaries", rbzone_boundaries_);
+    ar<<alps::make_pvp("/"+cluster_name_+"/symmetry_table_k_space", symmetry_table_k_space_);
+    ar<<alps::make_pvp("/"+cluster_name_+"/symmetry_table_real_space", symmetry_table_real_space_);
     
     //the sets we need to do by hand:
     //site class set real space
-    write_site_class_set(ar, site_class_set_real_space_, "site_class_set_real_space", location);
-    write_site_class_set(ar, site_class_set_k_space_, "site_class_set_k_space", location);
-    write_pair_class_set(ar, pair_class_set_real_space_, "pair_class_set_real_space", location);
-    write_pair_class_set(ar, pair_class_set_k_space_, "pair_class_set_k_space", location);
+    write_site_class_set(ar, site_class_set_real_space_, "site_class_set_real_space", cluster_name_);
+    write_site_class_set(ar, site_class_set_k_space_, "site_class_set_k_space", cluster_name_);
+    write_pair_class_set(ar, pair_class_set_real_space_, "pair_class_set_real_space", cluster_name_);
+    write_pair_class_set(ar, pair_class_set_k_space_, "pair_class_set_k_space", cluster_name_);
+    std::cout<<"exiting write for name: "<<hdf5_dump_name_<<" cluster name: "<<cluster_name_<<std::endl;
     return true;
-  }
-  return false;
 }
-bool ClusterHelper::read(const alps::params &parms,const std::string &location){
-  ///TODO: this should implement writing the clusterhelper.
-  if(parms.defined("TMPNAME")){
+bool ClusterHelper::read(){
+    //test if we can read the file
     {
-      std::string tmpname=parms["TMPNAME"];
-      std::ifstream in_file(tmpname.c_str());
+      std::ifstream in_file(hdf5_dump_name_.c_str());
       if(!in_file.is_open()) return false;
     }
-    alps::hdf5::archive ar(parms["TMPNAME"]+std::string(".in.h5"), alps::hdf5::archive::READ);
-    if(!ar.is_data("/"+location+"/name")) return false;
-    std::string name;     ar>>alps::make_pvp("/"+location+"/name", name);
-    std::string latticename=parms["LATTICE"];
-    if(name!=latticename) throw std::logic_error("reading cluster transformer with name: "+name+" for cluster: "+latticename);
+    alps::hdf5::archive ar(hdf5_dump_name_, alps::hdf5::archive::READ);
+    if(!ar.is_data("/"+cluster_name_+"/name")) return false;
+    std::string name;     ar>>alps::make_pvp("/"+cluster_name_+"/name", name);
+    if(name!=cluster_name_) throw std::logic_error("reading cluster transformer with name: "+name+" for cluster: "+cluster_name_);
     //write data to the 'tmpname' file
-    ar>>alps::make_pvp("/"+location+"/bipartite", bipartite_);
-    ar>>alps::make_pvp("/"+location+"/epsilon", *(const_cast<double*>(&epsilon_)));
-    ar>>alps::make_pvp("/"+location+"/cluster_coordinates", cluster_coordinates_);
-    ar>>alps::make_pvp("/"+location+"/cluster_momenta", cluster_momenta_);
-    ar>>alps::make_pvp("/"+location+"/lattice_momenta", lattice_momenta_);
-    ar>>alps::make_pvp("/"+location+"/reciprocal_basis", reciprocal_basis_);
-    ar>>alps::make_pvp("/"+location+"/reciprocal_basis_inv", reciprocal_basis_inv_);
-    ar>>alps::make_pvp("/"+location+"/rbzone_boundaries", rbzone_boundaries_);
-    ar>>alps::make_pvp("/"+location+"/symmetry_table_k_space", symmetry_table_k_space_);
-    ar>>alps::make_pvp("/"+location+"/symmetry_table_real_space", symmetry_table_real_space_);
+    ar>>alps::make_pvp("/"+cluster_name_+"/bipartite", bipartite_);
+    ar>>alps::make_pvp("/"+cluster_name_+"/epsilon", *(const_cast<double*>(&epsilon_)));
+    ar>>alps::make_pvp("/"+cluster_name_+"/cluster_coordinates", cluster_coordinates_);
+    ar>>alps::make_pvp("/"+cluster_name_+"/cluster_momenta", cluster_momenta_);
+    ar>>alps::make_pvp("/"+cluster_name_+"/lattice_momenta", lattice_momenta_);
+    ar>>alps::make_pvp("/"+cluster_name_+"/reciprocal_basis", reciprocal_basis_);
+    ar>>alps::make_pvp("/"+cluster_name_+"/reciprocal_basis_inv", reciprocal_basis_inv_);
+    ar>>alps::make_pvp("/"+cluster_name_+"/rbzone_boundaries", rbzone_boundaries_);
+    ar>>alps::make_pvp("/"+cluster_name_+"/symmetry_table_k_space", symmetry_table_k_space_);
+    ar>>alps::make_pvp("/"+cluster_name_+"/symmetry_table_real_space", symmetry_table_real_space_);
     
-    read_site_class_set(ar, site_class_set_real_space_, "site_class_set_real_space",location);
-    read_site_class_set(ar, site_class_set_k_space_, "site_class_set_k_space",location);
-    read_pair_class_set(ar, pair_class_set_real_space_, "pair_class_set_real_space",location);
-    read_pair_class_set(ar, pair_class_set_k_space_, "pair_class_set_k_space",location);
+    read_site_class_set(ar, site_class_set_real_space_, "site_class_set_real_space",cluster_name_);
+    read_site_class_set(ar, site_class_set_k_space_, "site_class_set_k_space",cluster_name_);
+    read_pair_class_set(ar, pair_class_set_real_space_, "pair_class_set_real_space",cluster_name_);
+    read_pair_class_set(ar, pair_class_set_k_space_, "pair_class_set_k_space",cluster_name_);
     return true; //success
-  }
-  return false;
 }
 
 std::vector<ClusterHelper::Matrix<double>::Type > ClusterHelper::setup_point_groups() const{
@@ -757,7 +749,7 @@ bool ClusterHelper::append_column_no_duplicates(Matrix<double>::Type& m, const s
     if (equal)
       return false;
   }
-  m.resize(m.size1()+1, v.size(), true);
+  m.resize_preserve_values(m.size1()+1, v.size());
   for (unsigned int d=0; d<m.size2(); ++d)
     m(m.size1()-1,d) = v[d];
   return true;
@@ -775,7 +767,7 @@ bool ClusterHelper::append_column_no_duplicates(Matrix<int>::Type& m,
     if (equal)
       return false;
   }
-  m.resize(m.size1()+1, smap.size(), true);
+  m.resize_preserve_values(m.size1()+1, smap.size());
   for (unsigned int d=0; d<m.size2(); ++d)
     m(m.size1()-1,d) = smap[d];
   return true;
@@ -802,6 +794,11 @@ std::vector<double> ClusterHelper::map_back_into_brillouin_zone(std::vector<doub
   return v;
 }
 
+void ClusterHelper::write_hdf5(alps::hdf5::archive &ar, const std::string &p) const{
+  ar<<alps::make_pvp(p+"/cluster_coordinates", cluster_coordinates_);
+  ar<<alps::make_pvp(p+"/cluster_momenta", cluster_momenta_);
+  ar<<alps::make_pvp(p+"/lattice_momenta", lattice_momenta_);
+}
 
 
 std::vector<double> ClusterHelper::map_back_into_cluster(std::vector<double> v,

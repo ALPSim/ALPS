@@ -13,3 +13,10 @@ AuxiliaryPrograms/energy
 Debug
 *.a
 *.h5
+AuxiliaryPrograms/sigma_interpolate_normal
+alex_test/
+dmft.dSYM/
+libcluster/CTestTestfile.cmake
+libcluster/Testing/
+libcluster/cluster_helper_test.dSYM/
+libcluster/cluster_transform_test

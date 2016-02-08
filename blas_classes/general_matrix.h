@@ -194,6 +194,37 @@ namespace blas{
         total_memory_size_=0;
       }
     }
+    inline void resize_preserve_values(int size1, int size2){
+      if(size1_==size1 && size2_==size2) return;
+      int old_size1=size1_;
+      int old_size2=size2_;
+      size1_=size1;
+      size2_=size2;
+      if(size1_*size2_>0){
+        if(size1_*size2_>total_memory_size_){
+          T* old_values=values_;
+          int old_memory_size=total_memory_size_;
+          values_=new T[(size1)*(size2)];
+          total_memory_size_=(size1)*(size2);
+          clear();
+          //copy data
+          for(int i=0;i<old_size1;++i){
+            for(int j=0;j<old_size2;++j){
+              values_[i*size2+j]=old_values[i*old_size2+j];
+            }
+          }
+          delete[] old_values;
+        }else{
+          throw std::logic_error("this function should grow the matrix, not shrink it.");
+        }
+      }
+      else{
+        delete[] values_;
+        values_=0;
+        total_memory_size_=0;
+      }
+    }
+
     //Mres=this*M2
     inline void matrix_right_multiply(const general_matrix<T> &M2,  general_matrix<T> &Mres, T beta=0) const{ //check template specialization!
       //call the BLAS routine for matrix matrix multiplication:
@@ -408,14 +439,18 @@ namespace blas{
     general_matrix &invert(){
       throw(std::logic_error(std::string("you linked the general case for invert. Please use the specializations.")));
     }
-#ifdef ALPS_NGS_HDF5_HPP
     void save(alps::hdf5::archive &ar)const{
       ar << alps::make_pvp("size1", size1());
       ar << alps::make_pvp("size2", size2());
-      ar << alps::make_pvp("values", &(operator()(0,0)), size1()*size2());
+      ar << alps::make_pvp("values", values_, size1_*size2_);
     }
-    
-#endif //ALPS_NGS_HDF5_HPP
+    void load(alps::hdf5::archive &ar){
+      ar >> alps::make_pvp("size1", size1_);
+      ar >> alps::make_pvp("size2", size2_);
+      delete[] values_; total_memory_size_=size1_*size2_; values_=new T[total_memory_size_];
+      ar >> alps::make_pvp("values", values_, size1_*size2_);
+    }
+
 
 	private:
     int size1_; //current size of matrix
@@ -562,7 +597,7 @@ namespace blas{
       int *ipiv=new int[size1_];
       int info;
       B.set_to_identity();
-#ifdef MY_BLAS_DEFS
+#ifndef NO_MY_BLAS_DEFS
       using namespace lapack;
 #endif
       zgesv_(&size1_, &size1_, values_, &size1_, ipiv, &(B(0,0)), &size1_, &info);
@@ -577,7 +612,7 @@ namespace blas{
       int *ipiv=new int[size1_];
       int info;
       B.set_to_identity();
-#ifdef MY_BLAS_DEFS
+#ifndef NO_MY_BLAS_DEFS
       using namespace lapack;
 #endif
       dgesv_(&size1_, &size1_, values_, &size1_, ipiv, &(B(0,0)), &size1_, &info);

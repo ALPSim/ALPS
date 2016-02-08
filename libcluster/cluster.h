@@ -26,12 +26,8 @@
 
 #pragma once
 
-#include "green_function.h"
-#include "nambu_green_function.h"
-
 #include "cluster_graph.h"
 #include "cluster_helper.h"
 #include "cluster_transform.h"
-#include "DCA_transform.h"
-#include "simple_DCA_transform.h"
-#include "AFM_DCA_transform.h"
+
+void define_dca_parameters(alps::params &p);
