@@ -35,7 +35,6 @@ main.cpp
 
 target_link_libraries(dmft selfconsistency cluster
 ${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES} ${GFTools_LIBRARIES} 
-#${MPI_CXX_LIBRARIES}
 )
 
 install(TARGETS dmft RUNTIME DESTINATION "bin/")

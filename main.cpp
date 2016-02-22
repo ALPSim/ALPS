@@ -50,7 +50,7 @@ int main(int argc, char** argv)
     }
     std::cout << "#################################################"<<std::endl;
     std::cout << "### ALPS Dynamical Mean Field Framework.      ###"<<std::endl;
-    std::cout << "### Copyright Emanuel Gull, 2005 - 2015       ###"<<std::endl;
+    std::cout << "### Copyright Emanuel Gull, 2005 - 2016       ###"<<std::endl;
     std::cout << "### To be used with permission by the authors ###"<<std::endl;
     std::cout << "#################################################"<<std::endl;
 

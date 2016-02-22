@@ -37,6 +37,7 @@ public:
   ///mesh points for the real-space mesh of a DCA cluster transformer
   alps::gf::real_space_index_mesh real_space_mesh() const;
 
+  template<typename GFW, typename GFT> void initial_G0(GFW &G0_omega, GFT &G0_tau) const;
 
 protected:
   ///dispersion relation for t and t' in 1, 2, and 3 d.
@@ -59,6 +60,13 @@ protected:
 
   ///reading input file
   template<typename GF> bool read_initial_G0(GF &G0_omega) const;
+
+  ///compute G0 from an atomic solution
+  virtual void compute_isolated_cluster_G0(cluster_nambu_matsubara_kspace_gf &G0_omega) const{ throw std::logic_error("this should be called in a subclass");}
+  virtual void compute_isolated_cluster_G0(cluster_matsubara_kspace_gf &G0_omega) const{ throw std::logic_error("this should be called in a subclass");}
+  ///compute G0 from a noninteracting solution
+  virtual void compute_noninteracting_G0(cluster_nambu_matsubara_kspace_gf &G0_omega) const{ throw std::logic_error("this should be called in a subclass");};
+  virtual void compute_noninteracting_G0(cluster_matsubara_kspace_gf &G0_omega) const{ throw std::logic_error("this should be called in a subclass");};
 
 
   double mu_;
@@ -107,8 +115,6 @@ public:
   ///perform spin symmetrization of matsubara k-space Green's function
   void spin_symmetrize(cluster_matsubara_realspace_gf& G) const;
 
-  ///obtain an initial G0.
-  cluster_matsubara_kspace_gf initial_G0 () const;
   ///read G0 from file
   bool read_initial_G0 (cluster_matsubara_kspace_gf &G0_omega) const;
   ///compute G0 from an atomic solution
@@ -138,10 +144,10 @@ private:
                                                         std::set<pair_class_type>::const_iterator> pair_classes) const;
 public:
   template<class GF> void symmetrize_real_space(GF& G) const{return symmetrize_helper_real_space(G,pair_classes_real_space());}
-  template<class GF> void symmetrize_k_space(GF& G) const{return symmetrize_helper_k_space(G,pair_classes_k_space());};
+  template<class GF> void symmetrize_k_space(GF& G) const{return symmetrize_helper_k_space(G,pair_classes_k_space());}
 };
 
-class NambuClusterTransformer : protected ClusterTransformer{
+class NambuClusterTransformer : public ClusterTransformer{
   ///Constructor: a cluster transformer has no internal components, everything is delegated to the ClusterHelper
 public:
   NambuClusterTransformer(const alps::params& params);
@@ -155,6 +161,9 @@ public:
   cluster_nambu_itime_kspace_gf symmetrize(const cluster_nambu_itime_kspace_gf& G) const{ throw std::logic_error("not implemented");}
   cluster_nambu_matsubara_kspace_gf symmetrize(const cluster_nambu_matsubara_kspace_gf& G) const{ throw std::logic_error("not implemented");}
   
+  ///perform spin symmetrization of matsubara k-space Green's function
+  void spin_symmetrize(cluster_nambu_matsubara_kspace_gf& G) const;
+
   ///read G0 from file
   bool read_initial_G0 (cluster_nambu_matsubara_kspace_gf &G0_omega) const;
   ///compute G0 from an atomic solution
@@ -177,6 +186,8 @@ public:
 
   void attach_bare_tail(cluster_nambu_matsubara_kspace_gf &G0) const;
   void attach_interacting_tail(cluster_nambu_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const;
+  void symmetrize_dwave_kspace(cluster_nambu_matsubara_kspace_gf &G) const;
+  void symmetrize_k_space(cluster_nambu_matsubara_kspace_gf &G) const{return symmetrize_dwave_kspace(G);}
 
 private:
   ///superconducting bias field eta1, initial value
@@ -235,5 +246,4 @@ template<class GF,class TAIL> void NormalStateClusterTransformer::symmetrize_hel
     }
   }
 }
-
 
