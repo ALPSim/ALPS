@@ -17,25 +17,20 @@
 void define_dca_parameters(alps::params &p){
   ClusterHelper::define_parameters(p);
   p.define<double>("t_flavor", 0, "Hopping for mass imbalance for second orbital");
-  //p.define<double>("t", "nearest-neighbor hopping parameter and general unit");
-  //p.define<double>("tprime", 0, "next-nearest neighbor hopping parameter");
-  //p.define<double>("H_INIT", 0, "Initial (staggered) magnetic field");
-  //p.define<double>("H", 0, "magnetic field");
-  //p.define<double>("MU", "Chemical Potential");
-  //p.define<double>("BETA", "Inverse temperature");
   p.define<bool>("dca.IMBALANCE", false, "set to true for mass imbalance simulation");
   p.define<bool>("dca.PHASE", false, "set to true for simulation with phase");
   p.define<double>("dca.PHASE_0", 0, "Phase in direction 0 ");
   p.define<double>("dca.PHASE_1", 0, "Phase in direction 1 ");
   p.define<double>("dca.PHASE_2", 0, "Phase in direction 2 ");
-  //p.define<int>("NMATSUBARA", "Number fo Matsubara frequencies");
-  //p.define<int>("N", "Number of imaginary time points");
-  //p.define<int>("FLAVORS", "Number of orbitals (usually 2)");
+  p.define<double>("dca.ETA1_INIT", 0, "d-wave initial bias field eta1");
+  p.define<double>("dca.ETA2_INIT", 0, "d-wave initial bias field eta2");
+  p.define<double>("dca.ETA1", 0, "d-wave bias field eta1");
+  p.define<double>("dca.ETA2", 0, "d-wave bias field eta2");
   p.define<std::string>("dca.G0_OMEGA_INPUT", "Location of the input G0 file");
   p.define<std::string>("dca.G0_OMEGA_OUTPUT", "Location of the output G0 file for continuing iterations");
   p.define<std::string>("dca.INITIAL_G0", "FREE", "choose ISOLATED or FREE for initial G0s");
 }
-NormalStateClusterTransformer::NormalStateClusterTransformer(const alps::params& params) : ClusterHelper(params),
+ClusterTransformer::ClusterTransformer(const alps::params& params) : ClusterHelper(params),
     mu_(params["MU"]),
     h_(0),
     half_filling_(0.),
@@ -56,8 +51,16 @@ NormalStateClusterTransformer::NormalStateClusterTransformer(const alps::params&
   compute_dispersion_weights();
   if(use_phase_) setup_phase_vector(params);
 }
+NambuClusterTransformer::NambuClusterTransformer(const alps::params& params):ClusterTransformer(params),
+    eta1_init_(params["dca.ETA1_INIT"]),
+    eta2_init_(params["dca.ETA2_INIT"]),
+    eta1_(params["dca.ETA1"]),
+    eta2_(params["dca.ETA2"])
+{
+  if(dimension()!=2) throw std::logic_error("careful. self consistency has d=2 symmetry factors built in! do you know what you're doing?");
+}
 
-bool NormalStateClusterTransformer::read_initial_G0(cluster_matsubara_kspace_gf &G0_omega) const{
+template<typename GF> bool ClusterTransformer::read_initial_G0(GF &G0_omega) const{
   std::cout<<"check1 :reading initial G0_omega from: "<<g0_input_path_<<std::endl;
   {
     std::ifstream in_file(g0_input_path_.c_str());
@@ -71,8 +74,14 @@ bool NormalStateClusterTransformer::read_initial_G0(cluster_matsubara_kspace_gf 
   G0_omega.load(ar, "/G0");
   return true;
 }
+bool NormalStateClusterTransformer::read_initial_G0(cluster_matsubara_kspace_gf &G0_omega) const{
+  return ClusterTransformer::read_initial_G0(G0_omega);
+}
+bool NambuClusterTransformer::read_initial_G0(cluster_nambu_matsubara_kspace_gf &G0_omega) const{
+  return ClusterTransformer::read_initial_G0(G0_omega);
+}
+
 void NormalStateClusterTransformer::compute_isolated_cluster_G0(cluster_matsubara_kspace_gf &G0_omega) const{
-  std::cout << "check2: calculating G0_omega for isolated cluster"<<std::endl;
   std::vector<double> k(dimension());
   for (alps::gf::matsubara_index freq(0); freq<nfreq_; ++freq) {
     const std::complex<double> iomega_n(0, G0_omega.mesh1().points()[freq()]);
@@ -87,8 +96,41 @@ void NormalStateClusterTransformer::compute_isolated_cluster_G0(cluster_matsubar
   }
   attach_bare_tail(G0_omega);
 }
+void NambuClusterTransformer::compute_isolated_cluster_G0(cluster_nambu_matsubara_kspace_gf &G0_omega) const{
+  std::vector<double> k(dimension());
+
+  for (alps::gf::momentum_index kc(0); kc<n_cluster_sites(); ++kc) {
+    for (alps::gf::matsubara_index freq(0); freq<nfreq_; ++freq) {
+      std::complex<double> iomega_n(0, G0_omega.mesh1().points()[freq()]);
+
+      for (unsigned int d=0; d<dimension(); ++d)
+        k[d] = cluster_momentum(kc(),d);
+      double dwave_prefactor= cos(k[0]) - cos(k[1]); //cos kx - cos ky
+      double prefactor=dwave_prefactor;
+
+      //note the pairing field eta + i eta2 on the 0,1 component, eta - i eta2 on the 1,0 component.
+      std::complex<double> G0_omega_latt_inv[4]=
+      {iomega_n + mu_ -epsilon(k),
+          - prefactor*std::complex<double>( eta1_init_, eta2_init_),
+          - prefactor*std::complex<double>( eta1_init_,-eta2_init_),
+          iomega_n - mu_ +epsilon(k)};
+      std::complex<double> G0omega_latt_inv_det=G0_omega_latt_inv[0]*G0_omega_latt_inv[3]-G0_omega_latt_inv[1]*G0_omega_latt_inv[2];
+      G0_omega(freq, kc, alps::gf::index(0),alps::gf::index(0)) =  G0_omega_latt_inv[3]/G0omega_latt_inv_det;
+      G0_omega(freq, kc, alps::gf::index(0),alps::gf::index(1)) =- G0_omega_latt_inv[1]/G0omega_latt_inv_det;
+      G0_omega(freq, kc, alps::gf::index(1),alps::gf::index(0)) =- G0_omega_latt_inv[2]/G0omega_latt_inv_det;
+      G0_omega(freq, kc, alps::gf::index(1),alps::gf::index(1)) =  G0_omega_latt_inv[0]/G0omega_latt_inv_det;
+    }
+  }
+  attach_bare_tail(G0_omega);
+}
 void NormalStateClusterTransformer::compute_noninteracting_G0(cluster_matsubara_kspace_gf &G0_omega) const{
   cluster_matsubara_kspace_gf zero_selfenergy(G0_omega);
+  zero_selfenergy.initialize();
+  matsubara_k_sum(G0_omega, zero_selfenergy);
+  attach_bare_tail(G0_omega);
+}
+void NambuClusterTransformer::compute_noninteracting_G0(cluster_nambu_matsubara_kspace_gf &G0_omega) const{
+  cluster_nambu_matsubara_kspace_gf zero_selfenergy(G0_omega);
   zero_selfenergy.initialize();
   matsubara_k_sum(G0_omega, zero_selfenergy);
   attach_bare_tail(G0_omega);
@@ -161,7 +203,7 @@ void NormalStateClusterTransformer::attach_interacting_tail(cluster_matsubara_ks
   G.set_tail(3,c3);
 }
 
-alps::gf::momentum_index_mesh NormalStateClusterTransformer::momentum_mesh() const{
+alps::gf::momentum_index_mesh ClusterTransformer::momentum_mesh() const{
   alps::gf::momentum_index_mesh::container_type points(boost::extents[n_cluster_sites()][dimension()]);
   for(int i=0;i<n_cluster_sites();++i){
     for(int j=0;j<dimension();++j){
@@ -170,7 +212,7 @@ alps::gf::momentum_index_mesh NormalStateClusterTransformer::momentum_mesh() con
   }
   return alps::gf::momentum_index_mesh(points);
 }
-alps::gf::real_space_index_mesh NormalStateClusterTransformer::real_space_mesh() const{
+alps::gf::real_space_index_mesh ClusterTransformer::real_space_mesh() const{
   alps::gf::real_space_index_mesh::container_type points(boost::extents[n_cluster_sites()][dimension()]);
   for(int i=0;i<n_cluster_sites();++i){
     for(int j=0;j<dimension();++j){
@@ -358,7 +400,7 @@ void NormalStateClusterTransformer::dyson_get_green0(cluster_matsubara_kspace_gf
     }
   }
 }
-///Use Dyson to get the G0
+///Compute the DMFT/DCA k-summation
 void NormalStateClusterTransformer::matsubara_k_sum(cluster_matsubara_kspace_gf &G, const cluster_matsubara_kspace_gf &sigma) const{
   for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
     for (alps::gf::momentum_index kc(0); kc<G.mesh2().extent(); ++kc) {
@@ -374,8 +416,42 @@ void NormalStateClusterTransformer::matsubara_k_sum(cluster_matsubara_kspace_gf 
     }
   }
 }
+///Compute the DMFT/DCA k-summation
+void NambuClusterTransformer::matsubara_k_sum(cluster_nambu_matsubara_kspace_gf &G, const cluster_nambu_matsubara_kspace_gf &sigma) const{
+  alps::gf::index up(0);
+  alps::gf::index dn(1);
+  for (alps::gf::momentum_index kc(0); kc<G.mesh2().extent(); ++kc) {
+    for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
+      G(w, kc, up,up) = 0.;
+      G(w, kc, up,dn) = 0.;
+      G(w, kc, dn,up) = 0.;
+      G(w, kc, dn,dn) = 0.;
+      std::complex<double> iomega_n(0, (2.*w()+1.)*M_PI/beta_);
+      for (int kl=0; kl<n_lattice_momenta(); ++kl) {
+        double prefactor=dwave_prefactor_kckl_[kc()][kl];
+        //this is the self consistency formula!!!
+        //note the pairing field eta + i eta2 on the 0,1 component, eta - i eta2 on the 1,0 component.
+        std::complex<double> G_omega_latt_inv[4]=
+        {iomega_n + mu_ -epsilon_kckl_[kc()][kl][0]-sigma(w, kc, up,up),
+            -sigma(w, kc, up,dn) - prefactor*std::complex<double>( eta1_, eta2_),
+            -sigma(w, kc, dn,up) - prefactor*std::complex<double>( eta1_,-eta2_),
+            iomega_n - mu_ +epsilon_kckl_[kc()][kl][0]-sigma(w, kc, dn,dn)};
 
-void NormalStateClusterTransformer::compute_integration_weight_and_dispersion(){
+        std::complex<double> G0omega_latt_inv_det=G_omega_latt_inv[0]*G_omega_latt_inv[3]-G_omega_latt_inv[1]*G_omega_latt_inv[2];
+        G(w, kc, up,up) += weight_kl_[kl]*G_omega_latt_inv[3]/G0omega_latt_inv_det;
+        G(w, kc, up,dn) -= weight_kl_[kl]*G_omega_latt_inv[1]/G0omega_latt_inv_det;
+        G(w, kc, dn,up) -= weight_kl_[kl]*G_omega_latt_inv[2]/G0omega_latt_inv_det;
+        G(w, kc, dn,dn) += weight_kl_[kl]*G_omega_latt_inv[0]/G0omega_latt_inv_det;
+      }
+      G(w, kc, up,up) /= n_cluster_cells();
+      G(w, kc, up,dn) /= n_cluster_cells();
+      G(w, kc, dn,up) /= n_cluster_cells();
+      G(w, kc, dn,dn) /= n_cluster_cells();
+    }
+  }
+}
+
+void ClusterTransformer::compute_integration_weight_and_dispersion(){
   std::vector<double> k(dimension());
   for (int kc=0; kc<n_cluster_sites(); ++kc) {
     for (int kl=0; kl<n_lattice_momenta(); ++kl) {
@@ -390,7 +466,7 @@ void NormalStateClusterTransformer::compute_integration_weight_and_dispersion(){
     weight_kl_[kl]= lattice_momentum(kl,dimension());
   }
 }
-void NormalStateClusterTransformer::compute_dispersion_weights(){
+void ClusterTransformer::compute_dispersion_weights(){
   epsav_             .resize(n_cluster_sites());
   epssqav_           .resize(n_cluster_sites());
   dispersion_moments_.resize(2);
@@ -413,7 +489,7 @@ void NormalStateClusterTransformer::compute_dispersion_weights(){
   dispersion_moments_[1] /= n_cluster_sites();
 }
 
-double NormalStateClusterTransformer::epsilon(const std::vector<double> &k) const
+double ClusterTransformer::epsilon(const std::vector<double> &k) const
 {
   double eps = -half_filling_;
   for (unsigned int i=0; i<dimension(); ++i)
@@ -435,7 +511,7 @@ double NormalStateClusterTransformer::epsilon(const std::vector<double> &k) cons
   }
   return eps;
 }
-void NormalStateClusterTransformer::setup_phase_vector(const alps::params &p){
+void ClusterTransformer::setup_phase_vector(const alps::params &p){
   phi_.resize(dimension());
   for(int i=0;i<dimension();++i){
     std::stringstream phase_name; phase_name<<"dca.PHASE_"<<i;
@@ -445,7 +521,7 @@ void NormalStateClusterTransformer::setup_phase_vector(const alps::params &p){
 }
 
 //dispersion, evaluated with flavor dependent t_
-double NormalStateClusterTransformer::epsilon_flavor(const std::vector<double> &k, unsigned int flavor) const
+double ClusterTransformer::epsilon_flavor(const std::vector<double> &k, unsigned int flavor) const
 {
   double eps = -half_filling_;
 
@@ -459,8 +535,47 @@ double NormalStateClusterTransformer::epsilon_flavor(const std::vector<double> &
   }
   return eps;
 }
-double NormalStateClusterTransformer::epsilon_phi(const std::vector<double> &k, const std::vector<double> &phi) const{
+double ClusterTransformer::epsilon_phi(const std::vector<double> &k, const std::vector<double> &phi) const{
   using namespace alps::numeric;
   return epsilon(k+phi);
+}
+///merge this with normal state one?
+void NambuClusterTransformer::attach_bare_tail(cluster_nambu_matsubara_kspace_gf &G0) const{
+  alps::gf::k_sigma1_sigma2_gf c1(G0.mesh2(), G0.mesh3(), G0.mesh4());
+  alps::gf::k_sigma1_sigma2_gf c2(G0.mesh2(), G0.mesh3(), G0.mesh4());
+  alps::gf::k_sigma1_sigma2_gf c3(G0.mesh2(), G0.mesh3(), G0.mesh4());
+
+  for(alps::gf::index f1(0); f1<n_flavors_; f1++) {
+    for(alps::gf::index f2(0); f2<n_flavors_; f2++) {
+      for(alps::gf::momentum_index k(0); k<n_cluster_sites(); ++k) {
+        c1(k,f1,f2) = f1()==f2()?1.:0.;
+        c2(k,f1,f2) = (f1()==0 && f2()==0)? epsav_[k()] - mu_: (f1()==1 && f2()==1)? -(epsav_[k()] - mu_):0.;
+        c3(k,f1,f2) = 0.;
+      }
+    }
+  }
+  G0.set_tail(1,c1);
+  G0.set_tail(2,c2);
+  G0.set_tail(3,c3);
+}
+///merge this with normal state one?
+void NambuClusterTransformer::attach_interacting_tail(cluster_nambu_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const{
+  alps::gf::k_sigma1_sigma2_gf c1(G.mesh2(), G.mesh3(), G.mesh4());
+  alps::gf::k_sigma1_sigma2_gf c2(G.mesh2(), G.mesh3(), G.mesh4());
+  alps::gf::k_sigma1_sigma2_gf c3(G.mesh2(), G.mesh3(), G.mesh4());
+  double density=(densities[0]+densities[1])/2.;
+
+  for(alps::gf::index f1(0); f1<n_flavors_; f1++) {
+    for(alps::gf::index f2(0); f2<n_flavors_; f2++) {
+      for(alps::gf::momentum_index k(0); k<n_cluster_sites(); ++k) {
+        c1(k,f1,f2) = f1()==f2()?1.:0.;
+        c2(k,f1,f2) = (f1()==0 && f2()==0)? epsav_[k()] - mu_+ U*density: (f1()==1 && f2()==1)? -(epsav_[k()] - mu_ + U*density):0.;
+        c3(k,f1,f2) = 0.;
+      }
+    }
+  }
+  G.set_tail(1,c1);
+  G.set_tail(2,c2);
+  G.set_tail(3,c3);
 }
 
