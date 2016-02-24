@@ -88,23 +88,31 @@ template<class SOLV, class TRANS, class GFW, class GFT> void selfconsistency_loo
     alps::gf::fourier_frequency_to_time(G0_omega, G0_tau);
     solver.solve(G0_omega, G0_tau, G_omega, G_tau);
 
+std::cout<<"back from solve"<<std::endl;
     clustertrans.spin_symmetrize(G_omega);
+std::cout<<"doing spin symmetrize"<<std::endl;
     clustertrans.symmetrize_k_space(G_omega);
+std::cout<<"doing dyson self energy"<<std::endl;
     clustertrans.dyson_get_self_energy(self_energy, G_omega, G0_omega);
+std::cout<<"doing matsubara k sum"<<std::endl;
     clustertrans.matsubara_k_sum(G_omega_ksum, self_energy);
+std::cout<<"doing dyson green0"<<std::endl;
     clustertrans.dyson_get_green0(G0_omega_new, self_energy, G_omega_ksum);
 
     print_all_green_functions(iteration_ctr, G0_omega, G_omega, self_energy, G0_tau, G_tau, beta);
     if (converged(G_omega, G_omega_old,  convergence_tolerance)) break;
+std::cout<<"done printing"<<std::endl;
 
     G_omega_old=G_omega;
     G0_omega=G0_omega_new;
+std::cout<<"now writing"<<std::endl;
     write_new_G0omega(G0_omega_new, g0_output_path);
+std::cout<<"moving on to next it"<<std::endl;
   }
 }
 void perform_cluster_loop(const std::string &param_file_name, const alps::params &parms){
   std::string cluster_loop=parms["SC_LOOP"];
-  bool nambu=parms["dca.NAMBU"];
+  bool nambu=parms["sc.NAMBU"];
   std::string solver_path=parms["solver.SOLVER"];
   int n_tau=parms["N"];
   int n_matsubara=parms["NMATSUBARA"];

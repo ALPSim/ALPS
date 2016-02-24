@@ -179,9 +179,9 @@ public:
   void matsubara_k_sum(cluster_nambu_matsubara_kspace_gf &G, const cluster_nambu_matsubara_kspace_gf &sigma) const;
 
   //Real space and k-space transformers for the Nambu Green's function
-  virtual cluster_nambu_matsubara_realspace_gf transform_into_real_space(const cluster_nambu_matsubara_kspace_gf& G) const{ throw std::logic_error("not implemented");}
+  virtual cluster_nambu_matsubara_realspace_gf transform_into_real_space(const cluster_nambu_matsubara_kspace_gf& G) const;
   virtual cluster_nambu_matsubara_kspace_gf transform_into_k_space(const cluster_nambu_matsubara_realspace_gf& G) const{ throw std::logic_error("not implemented");}
-  virtual cluster_nambu_itime_realspace_gf transform_into_real_space(const cluster_nambu_itime_kspace_gf& G) const{ throw std::logic_error("not implemented");}
+  virtual cluster_nambu_itime_realspace_gf transform_into_real_space(const cluster_nambu_itime_kspace_gf& G) const;
   virtual cluster_nambu_itime_kspace_gf transform_into_k_space(const cluster_nambu_itime_realspace_gf& G) const{ throw std::logic_error("not implemented");}
 
   void attach_bare_tail(cluster_nambu_matsubara_kspace_gf &G0) const;

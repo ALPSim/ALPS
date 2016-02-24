@@ -19,7 +19,7 @@ void define_dca_parameters(alps::params &p){
   p.define<double>("t_flavor", 0, "Hopping for mass imbalance for second orbital");
   p.define<bool>("dca.IMBALANCE", false, "set to true for mass imbalance simulation");
   p.define<bool>("dca.PHASE", false, "set to true for simulation with phase");
-  p.define<bool>("dca.NAMBU", false, "set to true to simulate in nambu space.");
+  p.define<bool>("sc.NAMBU", false, "set to true to simulate in nambu space.");
   p.define<double>("dca.PHASE_0", 0, "Phase in direction 0 ");
   p.define<double>("dca.PHASE_1", 0, "Phase in direction 1 ");
   p.define<double>("dca.PHASE_2", 0, "Phase in direction 2 ");
@@ -56,9 +56,19 @@ NambuClusterTransformer::NambuClusterTransformer(const alps::params& params):Clu
     eta1_init_(params["dca.ETA1_INIT"]),
     eta2_init_(params["dca.ETA2_INIT"]),
     eta1_(params["dca.ETA1"]),
-    eta2_(params["dca.ETA2"])
+    eta2_(params["dca.ETA2"]),
+    dwave_prefactor_kckl_(boost::extents[n_cluster_sites()][n_lattice_momenta()])
 {
   if(dimension()!=2) throw std::logic_error("careful. self consistency has d=2 symmetry factors built in! do you know what you're doing?");
+
+  for (int kc=0; kc<n_cluster_sites(); ++kc) {
+    for (int kl=0; kl<n_lattice_momenta(); ++kl) {
+      std::vector<double> k(dimension());
+      for (unsigned int d=0; d<dimension(); ++d)
+        k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
+      dwave_prefactor_kckl_[kc][kl]= cos(k[0]) - cos(k[1]); //cos kx - cos ky
+    }
+  }
 }
 
 template<typename GF> bool ClusterTransformer::read_initial_G0(GF &G0_omega) const{
@@ -300,32 +310,7 @@ struct Forward {
   }
 };
 
-
-
-struct Backward {
-  template<class GF_RS, class GF_KS> static void add(GF_RS & G_new, const GF_KS& G,
-      const int i, const int j, const int k,
-      double factor) {
-    for (typename GF_RS::mesh1_type::index_type t(0); t<G.mesh1().extent(); ++t) {
-      for (alps::gf::index flavor(0); flavor<G.mesh3().extent(); ++flavor) {
-        G_new(t, alps::gf::real_space_index(i), alps::gf::real_space_index(j), flavor) +=
-            factor * G(t, alps::gf::momentum_index(k), flavor);
-      }
-    }
-  }
-  template<class GF_RS, class GF_KS>
-  static void add(GF_RS& G_new, const GF_KS& G,
-      const int t, const int i, const int j, const int k,
-      double factor) {
-    for(alps::gf::index s1(0); s1<2;++s1){
-      for(alps::gf::index s2(0); s2<2;++s2){
-        G_new(GF_RS::mesh1_type::index_type(t), alps::gf::real_space_index(i), alps::gf::real_space_index(j), s1,s2) +=
-            factor * G(GF_RS::mesh1_type::index_type(t), alps::gf::momentum_index(k), s1, s2);
-      }
-    }
-  }
-};
-
+///TODO: we could merge at least two of these, potentially four of these into one k-space FT
 cluster_matsubara_realspace_gf NormalStateClusterTransformer::transform_into_real_space(const cluster_matsubara_kspace_gf& G) const{
   cluster_matsubara_realspace_gf G_new(alps::gf::omega_r1_r2_sigma_gf(G.mesh1(), real_space_mesh(), real_space_mesh(), G.mesh3()));
   G_new.initialize();
@@ -335,7 +320,32 @@ cluster_matsubara_realspace_gf NormalStateClusterTransformer::transform_into_rea
         double phase = 0.;
         for (unsigned int d=0; d<dimension(); ++d)
           phase += cluster_momentum(k(),d)*(cluster_coordinate(i(),d)-cluster_coordinate(j(),d));
-        Backward::add(G_new, G, i(), j(), k(), cos(phase)/double(G.mesh2().extent()));
+        for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
+          for (alps::gf::index flavor(0); flavor<G.mesh3().extent(); ++flavor) {
+            G_new(w, i, j, flavor) += (cos(phase)/(double)(G.mesh2().extent()))* G(w, k, flavor);
+          }
+        }
+      }
+    }
+  }
+  return G_new;
+}
+cluster_nambu_matsubara_realspace_gf NambuClusterTransformer::transform_into_real_space(const cluster_nambu_matsubara_kspace_gf& G) const{
+  cluster_nambu_matsubara_realspace_gf G_new(alps::gf::omega_r1_r2_sigma1_sigma2_gf(G.mesh1(), real_space_mesh(), real_space_mesh(), G.mesh3(), G.mesh4()));
+  G_new.initialize();
+  for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); ++k) {
+    for (alps::gf::real_space_index i(0); i<G_new.mesh2().extent(); ++i) {
+      for (alps::gf::real_space_index j(0); j<G_new.mesh3().extent(); ++j) {
+        double phase = 0.;
+        for (unsigned int d=0; d<dimension(); ++d)
+          phase += cluster_momentum(k(),d)*(cluster_coordinate(i(),d)-cluster_coordinate(j(),d));
+        for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
+        for (alps::gf::index flavor1(0); flavor1<G.mesh3().extent(); ++flavor1) {
+          for (alps::gf::index flavor2(0); flavor2<G.mesh3().extent(); ++flavor2) {
+            G_new(w, i, j, flavor1, flavor2) += (cos(phase)/(double)(G.mesh2().extent()))* G(w, k, flavor1, flavor2);
+          }
+        }
+        }
       }
     }
   }
@@ -350,7 +360,32 @@ cluster_itime_realspace_gf NormalStateClusterTransformer::transform_into_real_sp
         double phase = 0.;
         for (int d=0; d<dimension(); ++d)
           phase += cluster_momentum(k(),d)*(cluster_coordinate(i(),d)-cluster_coordinate(j(),d));
-        Backward::add(G_new, G, i(), j(), k(), cos(phase)/double(G.mesh2().extent()));
+        for (alps::gf::itime_index t(0); t<G.mesh1().extent(); ++t) {
+        for (alps::gf::index flavor(0); flavor<G.mesh3().extent(); ++flavor) {
+          G_new(t, i, j, flavor) += (cos(phase)/(double)(G.mesh2().extent()))* G(t, k, flavor);
+        }
+        }
+      }
+    }
+  }
+  return G_new;
+}
+cluster_nambu_itime_realspace_gf NambuClusterTransformer::transform_into_real_space(const cluster_nambu_itime_kspace_gf& G) const{
+  cluster_nambu_itime_realspace_gf G_new(alps::gf::itime_r1_r2_sigma1_sigma2_gf(G.mesh1(), real_space_mesh(), real_space_mesh(), G.mesh3(), G.mesh4()));
+  G_new.initialize();
+  for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); ++k) {
+    for (alps::gf::real_space_index i(0); i<G_new.mesh2().extent(); ++i) {
+      for (alps::gf::real_space_index j(0); j<G_new.mesh3().extent(); ++j) {
+        double phase = 0.;
+        for (int d=0; d<dimension(); ++d)
+          phase += cluster_momentum(k(),d)*(cluster_coordinate(i(),d)-cluster_coordinate(j(),d));
+        for (alps::gf::itime_index t(0); t<G.mesh1().extent(); ++t) {
+        for (alps::gf::index flavor1(0); flavor1<G.mesh3().extent(); ++flavor1) {
+          for (alps::gf::index flavor2(0); flavor2<G.mesh3().extent(); ++flavor2) {
+            G_new(t, i, j, flavor1, flavor2) += (cos(phase)/(double)(G.mesh2().extent()))* G(t, k, flavor1, flavor2);
+          }
+        }
+        }
       }
     }
   }
