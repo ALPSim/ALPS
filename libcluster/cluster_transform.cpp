@@ -72,7 +72,7 @@ NambuClusterTransformer::NambuClusterTransformer(const alps::params& params):Clu
 }
 
 template<typename GF> bool ClusterTransformer::read_initial_G0(GF &G0_omega) const{
-  std::cout<<"check1 :reading initial G0_omega from: "<<g0_input_path_<<std::endl;
+  std::cout<<"Reading initial G0_omega from: "<<g0_input_path_<<std::endl;
   {
     std::ifstream in_file(g0_input_path_.c_str());
     if(!in_file.good()){
@@ -435,7 +435,7 @@ void NormalStateClusterTransformer::dyson_get_self_energy(cluster_matsubara_kspa
 ///Use Dyson to get the self-energy in Nambu space
 void NambuClusterTransformer::dyson_get_self_energy(cluster_nambu_matsubara_kspace_gf &sigma, const cluster_nambu_matsubara_kspace_gf &G, const cluster_nambu_matsubara_kspace_gf &G0) const{
   const alps::gf::index up(0);
-  const alps::gf::index dn(0);
+  const alps::gf::index dn(1);
   for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
     for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); ++k) {
       std::complex<double> g0_block[4]={G0(w, k, up,up),G0(w, k, up,dn),G0(w, k, dn,up),G0(w, k, dn,dn)};
@@ -464,7 +464,7 @@ void NormalStateClusterTransformer::dyson_get_green0(cluster_matsubara_kspace_gf
 ///Use Dyson to get the G0 in Nambu space
 void NambuClusterTransformer::dyson_get_green0(cluster_nambu_matsubara_kspace_gf &G0, const cluster_nambu_matsubara_kspace_gf &sigma, const cluster_nambu_matsubara_kspace_gf &G) const{
   const alps::gf::index up(0);
-  const alps::gf::index dn(0);
+  const alps::gf::index dn(1);
   for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
     for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); ++k) {
       std::complex<double> glatt_block[4]={ G(w, k, up,up), G(w, k, up, dn), G(w, k, dn, up), G(w, k, dn, dn)};
@@ -673,8 +673,10 @@ void NambuClusterTransformer::symmetrize_dwave_kspace(cluster_nambu_matsubara_ks
           av += G(w, alps::gf::momentum_index(it->first), f,f);
         }
         av /= itc->size();
-        for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++)
+        for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
+          if(it->first != it-> second) continue;
           G(w, alps::gf::momentum_index(it->first), f, f) = av;
+        }
       }
     }
   }
