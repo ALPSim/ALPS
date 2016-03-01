@@ -141,8 +141,7 @@ private:
             vertex_type const& vertex = model.vertex(vi);
             
             double w = model.c(vertex.unit_type) - vertex.me;
-            assert(w >= 1e-15);
-            if (w < 1e-15)
+            if (vertex.diagonal && w < 1e-15)
                 // zero weight
                 continue;
             
