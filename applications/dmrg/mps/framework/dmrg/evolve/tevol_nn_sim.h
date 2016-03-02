@@ -62,11 +62,14 @@ struct trotter_gate {
     }
 };
 
-enum tevol_order_tag {order_unknown, second_order, fourth_order};
+enum tevol_order_tag {order_unknown, first_order, second_order, fourth_order};
 inline std::ostream& operator<< (std::ostream& os, tevol_order_tag o)
 {
     switch (o)
     {
+        case first_order:
+            os << "First order Trotter decomposition";
+            break;
         case second_order:
             os << "Second order Trotter decomposition";
             break;
@@ -103,6 +106,24 @@ public:
         
         /// alpha coeffiecients and set sequence of Uterms according to trotter order
         switch (trotter_order){
+            case first_order:
+            {
+                gates_coeff.push_back(std::make_pair(0,1.));         // 0-term
+                gates_coeff.push_back(std::make_pair(1,1.));         // 1-term
+                
+                Useq.push_back(0); // odd
+                Useq.push_back(1); // even
+                
+                if ((*parms)["te_optim"])
+                {
+                    Useq_bmeas = Useq;
+                    Useq_double = Useq;
+                    Useq_ameas = Useq;
+                }
+                
+                maquis::cout << "Sequence initialized with " << Useq.size() << " terms." << std::endl;
+                break;		
+            }
 			case second_order:
             {
 				gates_coeff.push_back(std::make_pair(0,0.5));         // 0-term
@@ -262,7 +283,9 @@ public:
 private:
     tevol_order_tag parse_trotter_order (std::string const & trotter_param)
     {
-        if (trotter_param == "second")
+        if (trotter_param == "first")
+            return first_order;
+        else if (trotter_param == "second")
             return second_order;
         else if (trotter_param == "fourth")
             return fourth_order;

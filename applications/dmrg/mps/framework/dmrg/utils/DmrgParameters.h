@@ -93,7 +93,7 @@ private:
         add_option("expm_method", "algorithm used for exp(-i H dt): heev (default), geev", value("heev"));
         add_option("te_type", "time evolution algorithm: nn (default), mpo", value("nn"));
         add_option("te_optim", "optimized nn time evolution", value(true));
-		add_option("te_order", "trotter decomposition: second, fourth (default)", value("fourth"));
+		add_option("te_order", "trotter decomposition: first, second, fourth (default)", value("fourth"));
         add_option("dt", "time step in time eovlution", value(1e-3));
         add_option("nsweeps_img", "number of imaginary time steps", value(0));
         
