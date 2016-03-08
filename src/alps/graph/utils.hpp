@@ -133,7 +133,7 @@ bool color_map_covers_all_colors(Graph const& g, std::map<unsigned int, unsigned
 {
     typedef typename boost::property_map<Graph, edge_type_t>::type::value_type edge_type;
     BOOST_STATIC_ASSERT(( boost::is_same< edge_type, unsigned int>::value ));
-    std::vector<edge_type> colorlist = get_color_list(alps::edge_type_t(),g); 
+    std::vector<edge_type> colorlist = get_color_list(alps::edge_type_t(),g);
     for(typename std::vector<edge_type>::const_iterator it=colorlist.begin(); it != colorlist.end(); ++it)
     {
         if(map.count(*it) == 0)

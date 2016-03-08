@@ -49,13 +49,14 @@
 #include <cstring>
 #include <algorithm>
 #include <stdexcept>
+#include <limits>
 
 namespace alps {
     namespace graph {
 
         namespace detail {
 
-            inline std::size_t num_bits_required_for(std::size_t number)
+            inline unsigned int num_bits_required_for(std::size_t number)
             {
                 std::size_t bits = 0;
                 while ((0x01u << ++bits) < number);
@@ -63,7 +64,7 @@ namespace alps {
             }
 
             template <typename Graph>
-            std::size_t num_label_bits(Graph const& g)
+            unsigned int num_label_bits(Graph const& g)
             {
                 return num_bits_required_for(num_vertices(g));
             }
@@ -174,7 +175,9 @@ namespace alps {
                 return embedding_generic;
             }
 
-            template <typename Graph, typename Lattice> std::vector<std::vector<boost::uint_t<8>::fast> > build_translation_table(
+            // Returns a table with the distances of the lattice graph vertices to the (periodic) boundary of the lattice in units of unit cell shifts:
+            // distance of vertex v along dimension d: distance[d][vertexid]
+            template <typename Graph, typename Lattice> std::vector<std::vector<boost::uint_t<8>::fast> > build_distance_table(
                   Graph const & graph
                 , Lattice const & lattice
             ) {
@@ -182,29 +185,36 @@ namespace alps {
                 typedef typename alps::lattice_traits<Lattice>::offset_type offset_type;
                 typedef typename alps::lattice_traits<Lattice>::size_type cell_index_type;
 
-                std::vector<std::vector<boost::uint_t<8>::fast> > distance_to_boarder(dimension(lattice), std::vector<boost::uint_t<8>::fast>(num_vertices(graph), num_vertices(graph)));
-                std::vector<std::vector<unsigned> > translations(dimension(lattice), std::vector<unsigned>(num_vertices(graph), num_vertices(graph)));
+                unsigned const invalid = num_vertices(graph);
+                std::vector<std::vector<boost::uint_t<8>::fast> > distance_to_boarder(dimension(lattice), std::vector<boost::uint_t<8>::fast>(num_vertices(graph),0));
                 unsigned vtcs_per_ucell = num_vertices(alps::graph::graph(unit_cell(lattice)));
                 for(std::size_t d = 0; d < dimension(lattice); ++d) {
+                    std::vector<unsigned> translated_vertex_along_d(num_vertices(graph), invalid);
                     for(std::pair<cell_iterator,cell_iterator> c = cells(lattice); c.first != c.second; ++c.first) {
+                        const cell_index_type cellidx = index(*c.first,lattice);
                         offset_type ofst = offset(*c.first,lattice);
                         offset_type move(dimension(lattice));
                         move[d] = -1;
                         std::pair<bool,bool> on_lattice_pbc_crossing = shift(ofst,move,lattice);
+                        // first = shifted ofst is on lattice (i.e. ofst is valid)
+                        // second = (converted to bool) true if boundary was crossed, false otherwise
                         if(on_lattice_pbc_crossing.first && !on_lattice_pbc_crossing.second) {
-                            const cell_index_type cellidx = index(*c.first,lattice);
+                            // if no boundary was crossed,
+                            // save the mapping 'vertex' -> 'translated vertex' in translated_vertex_along_d
                             const cell_index_type neighboridx = index(cell(ofst, lattice), lattice);
                             for(unsigned v = 0; v < vtcs_per_ucell; ++v)
-                                translations[d][cellidx * vtcs_per_ucell + v] = neighboridx * vtcs_per_ucell + v;
+                                translated_vertex_along_d[cellidx * vtcs_per_ucell + v] = neighboridx * vtcs_per_ucell + v;
                         }
                     }
-                    for (std::vector<unsigned>::const_iterator it = translations[d].begin(); it != translations[d].end(); ++it) {
-                        if (*it != num_vertices(graph))
+                    for (std::vector<unsigned>::const_iterator it = translated_vertex_along_d.begin(); it != translated_vertex_along_d.end(); ++it) {
+                        if (*it != invalid)
                         {
                             unsigned int v = *it;
-                            distance_to_boarder[d][v] = 0;
-                            while ((v = translations[d][v]) != num_vertices(graph))
+                            while ((v = translated_vertex_along_d[v]) != invalid)
+                            {
+                                assert( distance_to_boarder[d][*it] < std::numeric_limits<boost::uint_t<8>::fast>::max() && "Overflow in distance_to_boarder!");
                                 ++distance_to_boarder[d][*it];
+                            }
                         }
                     }
                 }
@@ -221,7 +231,7 @@ namespace alps {
                 template <typename Graph, typename Lattice>
                 count_translational_invariant_embeddings(subgraph_type const& S, Graph const& G, Lattice const& L, typename partition_type<subgraph_type>::type const & subgraph_orbit)
                 : orbit_of_( build_vertex_to_partition_index_map(subgraph_orbit,S) )
-                , distance_to_boarder_( build_translation_table(G,L) )
+                , distance_to_boarder_( build_distance_table(G,L) )
                 , matches_()
                 , unit_cell_size_( num_vertices(alps::graph::graph(unit_cell(L))) )
                 {
@@ -229,7 +239,7 @@ namespace alps {
                     assert(( assert_helpers::partition_has_valid_structure(subgraph_orbit, S) ));
                     // If the lattice has more than 2 dimensions improve this class
                     // It might work out of the box. Please check.
-                    assert(distance_to_boarder_.size() < 3);
+//                    assert(distance_to_boarder_.size() < 3);
                 }
 
                 template <typename Graph>
@@ -242,10 +252,10 @@ namespace alps {
 
                     enum { orbit_number = 0 , compressed_embedding_data = 1 , subgraph_vertex = 2 };
                     std::vector< boost::tuple<boost::uint16_t, boost::uint16_t, unsigned int> > embedding_data;
-                        
+
                     // How many bits do we need to store the maximal distance in a subgraph
                     // This is the same number of bits as we need for a unique vertex label of the subgraph
-                    std::size_t const bits_per_dim = num_label_bits(S);
+                    unsigned int const bits_per_dim = num_label_bits(S);
 
                     // Consider translational invariance and get a unique embedding representative
                     // embedding_compressed contains the full embedding information for a subgraph vertex (i.e. index within unit cell, "canonical" position in all dimensions)
@@ -270,7 +280,7 @@ namespace alps {
                 template <typename Graph>
                 std::vector<boost::uint_t<8>::fast> get_distance_to_boarder(std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const& pinning, Graph const& G) const
                 {
-                    std::vector<boost::uint_t<8>::fast> distance(distance_to_boarder_.size(), num_vertices(G));
+                    std::vector<boost::uint_t<8>::fast> distance(distance_to_boarder_.size(), std::numeric_limits<boost::uint_t<8>::fast>::max());
                     for (typename std::vector<typename boost::graph_traits<Graph>::vertex_descriptor>::const_iterator it = pinning.begin(); it != pinning.end(); ++it)
                         for(std::size_t d = 0; d < distance_to_boarder_.size(); ++d)
                             distance[d] = (std::min)(distance[d], distance_to_boarder_[d][*it]);
@@ -279,7 +289,7 @@ namespace alps {
 
                 template <typename Graph>
                 boost::uint16_t calc_compressed_transinv_embedding(
-                      std::size_t const bits_per_dim
+                      unsigned int const bits_per_dim
                     , typename boost::graph_traits<Graph>::vertex_descriptor v_id
                     , std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const& pinning
                     , Graph const& G
@@ -321,7 +331,7 @@ namespace alps {
                     , typename boost::graph_traits<subgraph_type>::vertex_descriptor breaking_vertex
                 )
                 : orbit_of_( build_vertex_to_partition_index_map(subgraph_orbit,S) )
-                , distance_to_boarder_( build_translation_table(G,L) )
+                , distance_to_boarder_( build_distance_table(G,L) )
                 , matches_()
                 , unit_cell_size_( num_vertices(alps::graph::graph(unit_cell(L))) )
                 , orbit_mapping_matrix_(orbit_mapping_matrix)
@@ -347,7 +357,7 @@ namespace alps {
 
                     // How many bits do we need to store the maximal distance to the boundary of the lattice (in hops)
                     // This is the same number of bits as we need for a unique vertex label of the graph
-                    std::size_t const bits_per_dim = num_label_bits(G);
+                    unsigned int const bits_per_dim = num_label_bits(G);
 
                     // Build lattice_pinning data.
                     // embedding_compressed contains the full embedding information for a subgraph vertex (i.e. index within unit cell, position in all dimensions)
@@ -375,7 +385,7 @@ namespace alps {
 
                 template <typename Graph>
                 boost::uint32_t calc_compressed_embedding(
-                      std::size_t const bits_per_dim
+                      unsigned int const bits_per_dim
                     , typename boost::graph_traits<Graph>::vertex_descriptor v_id
                     , std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const& pinning
                     , Graph const& G
