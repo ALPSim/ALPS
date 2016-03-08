@@ -237,9 +237,6 @@ namespace alps {
                 {
                     assert(( get<alps::graph::partition>(canonical_properties(S)) == subgraph_orbit ));
                     assert(( assert_helpers::partition_has_valid_structure(subgraph_orbit, S) ));
-                    // If the lattice has more than 2 dimensions improve this class
-                    // It might work out of the box. Please check.
-//                    assert(distance_to_boarder_.size() < 3);
                 }
 
                 template <typename Graph>
