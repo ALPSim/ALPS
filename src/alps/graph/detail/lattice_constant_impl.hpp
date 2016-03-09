@@ -237,7 +237,7 @@ namespace alps {
                 {
                     assert(( get<alps::graph::partition>(canonical_properties(S)) == subgraph_orbit ));
                     assert(( assert_helpers::partition_has_valid_structure(subgraph_orbit, S) ));
-                    if( !((0x01ull << distance_to_boarder_.size() * num_label_bits(S) + num_bits_required_for(unit_cell_size_)) < static_cast<unsigned long long>(boost::integer_traits<boost::uint16_t>::const_max)) )
+                    if( !( (0x01ull << (distance_to_boarder_.size() * num_label_bits(S) + num_bits_required_for(unit_cell_size_))) < static_cast<unsigned long long>(boost::integer_traits<boost::uint16_t>::const_max) ) )
                         throw std::runtime_error("Subgraph, lattice dimension or unit cell is too large. uint16_t is not large enough to store full embedding data.");
                 }
 
@@ -338,7 +338,7 @@ namespace alps {
                 {
                     assert(( get<alps::graph::partition>(canonical_properties(S,breaking_vertex_)) == subgraph_orbit ));
                     assert(( assert_helpers::partition_has_valid_structure(subgraph_orbit, S) ));
-                    if( !((0x01ull << distance_to_boarder_.size() * num_label_bits(G) + num_bits_required_for(unit_cell_size_)) < static_cast<unsigned long long>(boost::integer_traits<boost::uint32_t>::const_max)) )
+                    if( !( (0x01ull << (distance_to_boarder_.size() * num_label_bits(G) + num_bits_required_for(unit_cell_size_))) < static_cast<unsigned long long>(boost::integer_traits<boost::uint32_t>::const_max) ) )
                         throw std::runtime_error("Lattice graph, lattice dimension or unit cell is too large. uint32_t is not large enough to store full embedding data.");
                 }
 
