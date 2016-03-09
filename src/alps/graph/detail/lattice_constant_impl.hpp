@@ -237,6 +237,8 @@ namespace alps {
                 {
                     assert(( get<alps::graph::partition>(canonical_properties(S)) == subgraph_orbit ));
                     assert(( assert_helpers::partition_has_valid_structure(subgraph_orbit, S) ));
+                    if( !((0x01ull << distance_to_boarder_.size() * num_label_bits(S) + num_bits_required_for(unit_cell_size_)) < static_cast<unsigned long long>(boost::integer_traits<boost::uint16_t>::const_max)) )
+                        throw std::runtime_error("Subgraph, lattice dimension or unit cell is too large. uint16_t is not large enough to store full embedding data.");
                 }
 
                 template <typename Graph>
@@ -336,9 +338,8 @@ namespace alps {
                 {
                     assert(( get<alps::graph::partition>(canonical_properties(S,breaking_vertex_)) == subgraph_orbit ));
                     assert(( assert_helpers::partition_has_valid_structure(subgraph_orbit, S) ));
-                    // If the lattice has more than 2 dimensions improve this class
-                    // It might work out of the box. Please check.
-                    assert(distance_to_boarder_.size() < 3);
+                    if( !((0x01ull << distance_to_boarder_.size() * num_label_bits(G) + num_bits_required_for(unit_cell_size_)) < static_cast<unsigned long long>(boost::integer_traits<boost::uint32_t>::const_max)) )
+                        throw std::runtime_error("Lattice graph, lattice dimension or unit cell is too large. uint32_t is not large enough to store full embedding data.");
                 }
 
                 template <typename Graph>
@@ -387,7 +388,7 @@ namespace alps {
                     , std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const& pinning
                     , Graph const& G
                 ) const {
-                    assert((0x01u << (distance_to_boarder_.size() * bits_per_dim + num_bits_required_for(unit_cell_size_))) < boost::integer_traits<boost::uint32_t>::const_max && "boost::uint16_t is not large enough to store full embedding data.");
+                    assert((0x01u << (distance_to_boarder_.size() * bits_per_dim + num_bits_required_for(unit_cell_size_))) < boost::integer_traits<boost::uint32_t>::const_max && "boost::uint32_t is not large enough to store full embedding data.");
                     // data =  bitfield looking like: unit_cell_vtx_idx|d[0]|d[1]|...
                     boost::uint32_t data = v_id % unit_cell_size_;
                     for(std::size_t d = 0; d < distance_to_boarder_.size(); ++d)
