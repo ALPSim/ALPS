@@ -131,7 +131,7 @@ The *constructor* has the following syntax:
  jd(const MATRIX& A, VS& vspace, size_t verbose = 0)
 ``
 
-*  `A` is a matrix fullfilling the [link ietl.matreq requirements].
+*  `A` is an hermitian matrix fullfilling the [link ietl.matreq requirements].
 *  `VS` is a [classref ietl::vectorspace vectorspace].
 *  `verbose` is *optional*,
    * `0`, for errors only
