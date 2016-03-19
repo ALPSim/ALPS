@@ -21,7 +21,7 @@
 
 /// @brief The DMFT main program
 void define_parameters(alps::params &p){
-  p.define<std::string>("SC_LOOP", "switch between single_site, DCA, and CDMFT");
+  p.define<std::string>("SC_LOOP", "switch between SINGLE_SITE, DCA, and CDMFT");
 }
 void define_dca_parameters(alps::params &p);
 
