@@ -461,14 +461,14 @@ class PreviewLatticeWindow(wx.Frame):
         self.VertexColors = [
             [0.8,0.3,0.3], #dark red
             [0.4,0.6,0.5], #dark green 2
-            [0.7,0.5,0.2]  #orange 2
+            [0.8,0.6,0.3]  #orange 2
             ]
         for i in range(3, self.lattice.maxVertexType+1):
             self.VertexColors.append([random.random(),random.random(),random.random()])
         self.EdgeColors = [
             [0.4,0.6,0.5], #dark green 2
             [0.8,0.3,0.5], #dark red
-            [1.0,0.4,0.2]  #orange 2
+            [1.0,0.6,0.3]  #orange 2
             ]
         for i in range(3, self.lattice.maxEdgeType+1):
             self.EdgeColors.append([random.random(),random.random(),random.random()])
