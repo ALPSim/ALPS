@@ -254,7 +254,7 @@ class LatticeParameterWindow(wx.Frame):
         self.sizer.Add(wx.StaticLine(self), 0, wx.EXPAND|wx.TOP|wx.BOTTOM, 5)
 
         self.sizer.Add(wx.StaticText(self, -1, "Parameters:"), 0, wx.EXPAND|wx.ALL, 5)
-        self.fgs = wx.FlexGridSizer(3, 2, 5, 5)
+        self.fgs = wx.FlexGridSizer(0, 2, 5, 5)
         self.sizer.Add(self.fgs, 1, wx.EXPAND|wx.ALL, 15)
 
         btn_cancel = wx.Button(self, -1, "Cancel")
