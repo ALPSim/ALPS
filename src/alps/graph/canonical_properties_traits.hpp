@@ -76,6 +76,23 @@ namespace detail {
         return os;
     }
 
+    // istream operator for color list
+    template<typename Stream, typename Value> Stream & operator>> (Stream & is, graph_label_color_vector<Value> & vec) {
+        typename Stream::char_type c = 0;
+        is >> c;
+        if (!is || c != '(')
+            throw std::invalid_argument("could not read color list (start not found)");
+        for (Value v; is >> v; )
+            vec.push_back(v);
+        if (!is.bad() && !is.eof())
+        {
+            is.clear();
+            if (is >> c && c == ')')
+                return is;
+        }
+        throw std::invalid_argument("could not read color list (end not found)");
+    }
+
     // no coloring
     template<typename Graph, bool, bool> struct graph_label_helper {
         typedef boost::tuple<
