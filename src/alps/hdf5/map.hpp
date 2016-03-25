@@ -59,7 +59,7 @@ namespace alps {
         ) {
             std::vector<std::string> children = ar.list_children(path);
             for (typename std::vector<std::string>::const_iterator it = children.begin(); it != children.end(); ++it)
-                load(ar, path + "/" +  *it, value[ar.decode_segment(cast<K>(*it))]);
+                load(ar, path + "/" +  *it, value[cast<K>(ar.decode_segment(*it))]);
         }
     }
 }
