@@ -48,12 +48,12 @@ struct contraction {
         
         assert(ket_tensor.phys_i == bra_tensor.phys_i);
         
-        bra_tensor.make_left_paired();
         
         block_matrix<OtherMatrix, SymmGroup> t1;
         block_matrix<Matrix, SymmGroup> t3;
         ket_tensor.make_right_paired();
         gemm(left, ket_tensor.data(), t1);
+        bra_tensor.make_left_paired();
         
         reshape_right_to_left_new(ket_tensor.site_dim(), bra_tensor.row_dim(), ket_tensor.col_dim(),
                                   t1, t3);
@@ -78,12 +78,12 @@ struct contraction {
         
         assert(ket_tensor.phys_i == bra_tensor.phys_i);
         
-        bra_tensor.make_right_paired();
         ket_tensor.make_left_paired();
         
         block_matrix<OtherMatrix, SymmGroup> t1;
         block_matrix<Matrix, SymmGroup> t3;
         gemm(ket_tensor.data(), transpose(right), t1);
+        bra_tensor.make_right_paired();
         reshape_left_to_right_new(ket_tensor.site_dim(), ket_tensor.row_dim(), bra_tensor.col_dim(), t1, t3);
         gemm(conjugate(bra_tensor.data()), transpose(t3), t1);
 
