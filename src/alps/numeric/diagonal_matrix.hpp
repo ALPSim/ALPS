@@ -146,7 +146,7 @@ namespace alps {
         diagonal_matrix<T>& operator /= (T2 const& t)
         {
             using std::for_each;
-            for_each(data_.begin(), data_.end(), boost::lambda::_1 *= t);
+            for_each(data_.begin(), data_.end(), boost::lambda::_1 /= t);
             return *this;
         }
 
