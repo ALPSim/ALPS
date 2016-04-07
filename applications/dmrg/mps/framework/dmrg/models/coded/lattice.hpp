@@ -47,12 +47,19 @@ public:
     : L(parms["L"])
     , a(parms["a"])
     , pbc(pbc_)
-    { }
+    , site_types_(parms["site_types"].as<std::vector<unsigned> >())
+    {
+        if (site_types_.size() == 0)
+            site_types_.resize(L, 0);
+        if (site_types_.size() != L)
+            throw std::runtime_error("Param `site_types` does not match lattice size L.");
+    }
 
     ChainLattice (int L_, bool pbc_=false, double a_=1.)
     : L(L_)
     , a(a_)
     , pbc(pbc_)
+    , site_types_(L, 0)
     { }
     
     std::vector<pos_t> forward(pos_t i) const
@@ -85,7 +92,7 @@ public:
         else if (property == "label" && pos.size() == 2)
             return boost::any( bond_label(pos[0], pos[1]) );
         else if (property == "type" && pos.size() == 1)
-            return boost::any( 0 );
+            return boost::any( site_types_[pos[0]] );
         else if (property == "type" && pos.size() == 2)
             return boost::any( 0 );
         else if (property == "x" && pos.size() == 1)
@@ -113,7 +120,7 @@ public:
     
     int maximum_vertex_type() const
     {
-        return 0;
+        return *std::max_element(site_types_.begin(), site_types_.end());
     }
 
 private:
@@ -134,6 +141,7 @@ private:
     int L;
     double a;
     bool pbc;
+    std::vector<unsigned> site_types_;
     
 };
 

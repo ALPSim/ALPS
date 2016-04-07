@@ -150,6 +150,7 @@ private:
         
         add_option("L", "");
         add_option("W", "");
+        add_option("site_types", "", value(""));
         
         add_option("Jxy", "");
         add_option("Jx", "");
