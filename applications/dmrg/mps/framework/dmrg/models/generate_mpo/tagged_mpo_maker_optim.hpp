@@ -82,6 +82,21 @@ namespace generate_mpo
                 return (pos_op == lhs.pos_op) ? offset < lhs.offset : pos_op < lhs.pos_op;
             }
         };
+        template <typename pos_t, typename tag_type, typename index_type>
+        std::ostream & operator<< (std::ostream & os, prempo_key<pos_t,tag_type,index_type> const& kk)
+        {
+            if (kk.kind == prempo_key<pos_t,tag_type,index_type>::trivial_left) {
+                os << "triv_left";
+            } else if (kk.kind == prempo_key<pos_t,tag_type,index_type>::trivial_right) {
+                os << "triv_right";
+            } else {
+                for (unsigned i=0; i<kk.pos_op.size(); ++i) {
+                    os << kk.pos_op[i].first << "{" << kk.pos_op[i].second << "}";
+                    if (i != kk.pos_op.size()-1) os << "--";
+                 }
+            }
+            return os;
+        }
     }
     
     template <typename T, typename U>
