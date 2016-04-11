@@ -272,8 +272,12 @@ block_matrix<Matrix, SymmGroup> const & block_matrix<Matrix, SymmGroup>::operato
 template<class Matrix, class SymmGroup>
 typename block_matrix<Matrix, SymmGroup>::scalar_type block_matrix<Matrix, SymmGroup>::trace() const
 {
-    std::vector<scalar_type> vt; vt.reserve(data_.size());
-    std::transform(data_.begin(), data_.end(), back_inserter(vt), utils::functor_trace());
+    std::vector<scalar_type> vt(data_.size());
+    for (size_t k=0; k<n_blocks(); ++k) {
+        /// keep only diagonal blocks
+        if (rows_[k].first == cols_[k].first)
+            vt[k] = utils::functor_trace()(data_[k]);
+    }
     return maquis::accumulate(vt.begin(), vt.end(), scalar_type(0.));
 }
 
