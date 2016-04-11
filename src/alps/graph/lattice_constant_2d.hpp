@@ -578,14 +578,11 @@ namespace alps {
             , Graph const & G
             , Lattice const & L
             , typename boost::graph_traits<Graph>::vertex_descriptor v
-        ) {            
-            typedef typename alps::graph_helper<Graph>::lattice_type lattice_type;
-            typedef typename alps::lattice_traits<lattice_type>::unit_cell_type::graph_type unit_cell_graph_type;
-
+        ) {
             // Get the possible translation in the lattice
             std::vector<std::vector<std::size_t> > distance_to_boarder(dimension(L), std::vector<std::size_t>(num_vertices(G), num_vertices(G)));
             detail::build_translation_table(G, L, distance_to_boarder);
-            
+
             typename partition_type<Subgraph>::type subgraph_orbit = boost::get<2>(canonical_properties(S));
 
             return detail::lattice_constant_impl(S, G, v, distance_to_boarder, subgraph_orbit, boost::mpl::false_());

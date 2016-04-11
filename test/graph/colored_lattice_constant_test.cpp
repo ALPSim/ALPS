@@ -42,8 +42,6 @@ int main() {
     typedef boost::property<alps::edge_type_t,alps::type_type> edge_props;
 
     typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS,boost::no_property,edge_props> graph_type;
-    typedef alps::graph_helper<>::vertex_iterator vertex_iterator;
-    typedef alps::graph_helper<>::edge_iterator edge_iterator;
 
     alps::Parameters parm;
     unsigned int side_length = 40;

@@ -41,8 +41,6 @@ int main() {
 
     typedef unsigned int lc_type;
     typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> graph_type;
-    typedef alps::graph_helper<>::vertex_iterator vertex_iterator;
-    typedef alps::graph_helper<>::edge_iterator edge_iterator;
 
     alps::Parameters parm;
     unsigned int side_length = 40;

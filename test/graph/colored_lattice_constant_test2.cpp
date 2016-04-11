@@ -48,7 +48,6 @@ int main() {
     typedef unsigned int lc_type;
     typedef boost::property<alps::edge_type_t,alps::type_type> edge_props;
     typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS,boost::no_property,edge_props> graph_type;
-    typedef alps::graph_helper<>::edge_iterator edge_iterator;
     typedef boost::graph_traits<graph_type>::edge_descriptor  edge_descriptor;
     typedef boost::property_map<graph_type,alps::edge_type_t>::type edge_color_map_type;
 
