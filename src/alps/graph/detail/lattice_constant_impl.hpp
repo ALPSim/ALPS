@@ -532,6 +532,7 @@ namespace alps {
                     , typename boost::graph_traits<Graph>::vertex_descriptor
                   > const& queue
                 , boost::dynamic_bitset<> & visited
+                , unsigned int visited_cnt
                 , std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> & pinning
                 , VertexEqual & vertex_equal
                 , EdgeEqual & edge_equal
@@ -558,10 +559,12 @@ namespace alps {
                     }
 
                 // s->g seems legit => pin s->g.
-                visited[g] = true;
                 pinning[s] = g;
+                visited.set(g);
+                ++visited_cnt;
+                assert(visited_cnt == visited.count()); // visited.count is called frequently and is rather slow -> cached
                 // If not all vertices are mapped yet
-                if (visited.count() < num_vertices(S)) {
+                if (visited_cnt < num_vertices(S)) {
                     // queue mapping adjecent vertices of s
                     shared_queue_view<
                           typename boost::graph_traits<Subgraph>::vertex_descriptor
@@ -587,6 +590,7 @@ namespace alps {
                                 , G
                                 , local_queue
                                 , visited
+                                , visited_cnt
                                 , pinning
                                 , vertex_equal
                                 , edge_equal
@@ -651,6 +655,7 @@ namespace alps {
                                 , G
                                 , queue_view
                                 , visited
+                                , 0
                                 , pinning
                                 , vertex_equal
                                 , edge_equal
@@ -711,6 +716,7 @@ namespace alps {
                         , G
                         , queue_view
                         , visited
+                        , 0
                         , pinning
                         , vertex_equal
                         , edge_equal
