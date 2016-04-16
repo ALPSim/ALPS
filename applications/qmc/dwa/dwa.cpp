@@ -4,9 +4,10 @@
 *
 * ALPS Project Applications: Directed Worm Algorithm  
 *
-* Copyright (C) 2013 by Matthias Troyer  <troyer@phys.ethz.ch> ,
+* Copyright (C) 2013 - 2016 
+*                   by  Matthias Troyer  <troyer@phys.ethz.ch> ,
 *                       Lode Pollet      <pollet@phys.ethz.ch> ,
-*                       Ping Nang Ma     <pingnang@phys.ethz.ch> 
+*                       Ping Nang Ma     <tamama@yotcopi.com> 
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -166,8 +167,6 @@ directed_worm_algorithm
     , measure_local_density_         (parms_.value_or_default("MEASURE[Local Density]",false))
     , measure_local_density2_        (parms_.value_or_default("MEASURE[Local Density^2]",false))
     , measure_green_function_        (parms_.value_or_default("MEASURE[Green Function]",false))
-    // regarding development
-    , alps_dwa_development_821_mode (parms_.value_or_default("DEVELOPMENT[821]", 0))
   {
     // lattice enhancement
     using alps::numeric::operator*;
@@ -279,420 +278,84 @@ void
     }
 
 
-// Tama Ma is here...
-void
-directed_worm_algorithm
-::initialize_onsite_hamiltonian()
+void directed_worm_algorithm::initialize_onsite_hamiltonian() 
 {
-  for (site_iterator it = sites().first; it != sites().second; ++it) {
-    unsigned this_site_type = site_type(*it);
-    unsigned this_inhomogeneous_site_type = inhomogeneous_site_type(*it);
-    if (this_inhomogeneous_site_type >= onsite_matrix.size()) 
+    for (site_iterator it = sites().first; it != sites().second; ++it) 
     {
-      alps::Parameters parms2(parms);
-      if (inhomogeneous_sites()) {
-        throw_if_xyz_defined(parms,*it);   // check whether x, y, or z is set
-        parms2 << coordinate_as_parameter(*it); // set x, y and z
-      }
+        unsigned this_site_type = site_type(*it);
+        unsigned this_inhomogeneous_site_type = inhomogeneous_site_type(*it);
+        if (this_inhomogeneous_site_type >= onsite_matrix.size()) 
+        {
+            alps::Parameters parms2(parms);
+            if (inhomogeneous_sites()) 
+            {
+                throw_if_xyz_defined(parms,*it);   // check whether x, y, or z is set
+                parms2 << coordinate_as_parameter(*it); // set x, y and z
+            }
 
-      boost::multi_array<double,2> this_site_matrix =
-        alps::get_matrix(double(), model().site_term(this_site_type),
-             model().basis().site_basis(this_site_type), parms2); 
+            boost::multi_array<double,2> this_site_matrix = alps::get_matrix(double(), 
+                                                                model().site_term(this_site_type),
+                                                                model().basis().site_basis(this_site_type), 
+                                                                parms2); 
 
-      std::vector<double> this_site_matrix_diagonal(this_site_matrix.shape()[0]);
-      for (unsigned idx=0; idx < this_site_matrix_diagonal.size(); ++idx)
-         this_site_matrix_diagonal[idx] = this_site_matrix[idx][idx] * beta;
+            // Note : Think "this_site_matrix[i][i]" of "< i | this_site_operator | i >"
 
-      onsite_matrix.push_back(this_site_matrix_diagonal);  // Note: It HAS BEEN multiplied by beta here... 
+            std::vector<double> this_site_matrix_diagonal(this_site_matrix.shape()[0]);
+            for (unsigned idx=0; idx < this_site_matrix_diagonal.size(); ++idx)
+                this_site_matrix_diagonal[idx] = this_site_matrix[idx][idx] * beta;
+
+            onsite_matrix.push_back(this_site_matrix_diagonal);  // Note: It HAS BEEN multiplied by beta here... 
+        }
     }
-  }
+}
+void directed_worm_algorithm::initialize_onbond_hamiltonian()
+{
+    for (bond_iterator it = bonds().first; it != bonds().second; ++it)
+    {
+        unsigned this_bond_type = bond_type(*it);
+        if (this_bond_type >= onbond_matrix.size())
+        {
+            boost::multi_array<double,4> this_bond_matrix = alps::get_matrix(double(), 
+                                                                model().bond_term(bond_type(*it)),
+                                                                model().basis().site_basis(site_type(source(*it))),
+                                                                model().basis().site_basis(site_type(target(*it))),
+                                                                parms);
+
+            // Note : Think "this_bond_matrix[i][j][i][j]" of "< i , j | this_bond_operator | i , j >" 
+
+            std::vector<std::vector<double> > this_bond_matrix_diagonal(this_bond_matrix.shape()[0], std::vector<double>(this_bond_matrix.shape()[1])); 
+            for (unsigned idx0=0; idx0 < this_bond_matrix.shape()[0]; ++idx0)
+            for (unsigned idx1=0; idx1 < this_bond_matrix.shape()[1]; ++idx1)
+                this_bond_matrix_diagonal[idx0][idx1] = this_bond_matrix[idx0][idx1][idx0][idx1] * beta;
+
+            onbond_matrix.push_back(this_bond_matrix_diagonal); // Note: It HAS BEEN multiplied by beta here...
+        } 
+    }   
 }
 
-
-void
-  directed_worm_algorithm
-    ::initialize_hamiltonian()
+void directed_worm_algorithm::initialize_hamiltonian()
+{
+    // setup state_minimum and state_maximum
+    std::cout << "[ directed_worm_algorithm::initialize_hamiltonian ] Initializing state_minimum / state_maximum ...\n";
+    for (int i=0; i<maximum_sitetype+1; ++i)
     {
-      // setup state_minimum and state_maximum
-      std::cout << "\t\t\ti. State minimum/maximum \t... starting\n";
-      for (int i=0; i<maximum_sitetype+1; ++i)
-      {
         state_minimum.push_back(boost::math::iround(diagonal_matrix_element.begin()->second[i].front()));
         state_maximum.push_back(boost::math::iround(diagonal_matrix_element.begin()->second[i].back()));
-      }
-      std::cout << "\t\t\t\t... done.\n"; 
+    }
 
-      // iterate all sites and build onsite matrix 
-      std::cout << "\t\t\ti. Onsite matrix \t... starting\n";
+    // iterate all sites and build onsite matrix 
+    std::cout << "[ directed_worm_algorithm::initialize_hamiltonian ] Initializing onsite hamiltonian ...\n";
+    initialize_onsite_hamiltonian();
 
-      if (alps_dwa_development_821_mode == 0)
-      {
-        initialize_onsite_hamiltonian();
-      }
-      else if (alps_dwa_development_821_mode == -1)
-      {
-        //// tamama's fast evaluate scheme (else evaluating x, y, z for say 100^3 lattice will take forever)
-        //// Step 1: partial evaluate everything up to x,y,z terms
-        std::cout << "\t\t\t\t\ta. Step 1: partial evaluate everything up to x,y,z terms \t... starting\n";
-        std::vector<alps::SiteTermDescriptor> _siteterms = model().site_terms();
-  
-        std::vector<std::vector<double> > _bare_values;
-        std::vector<std::vector<alps::expression::Expression<double> > > _bare_x_expressions;
-        std::vector<std::vector<alps::expression::Expression<double> > > _bare_y_expressions;
-        std::vector<std::vector<alps::expression::Expression<double> > > _bare_z_expressions;
-        std::vector<std::vector<alps::expression::Expression<double> > > _bare_expressions;  // leftover
-        bool _can_evaluate_individual_bare_expressions = true;
-        bool _can_evaluate_bare_expressions = true;
-        for (unsigned int i=0; i < maximum_sitetype+1; ++i) {
-          alps::expression::Expression<double> _bare_expression(_siteterms[i].term());
-          _bare_expression.flatten();
-          _bare_expression.simplify();
-  
-          //std::cout << "\nsite_type = " << i << "\n";
-          //std::cout << "\n_bare_expression.output(std::cout):\n";
-          //_bare_expression.output(std::cout);
-          //std::cout << "\n";
-          //std::cin.get(); 
-  
-          _bare_values.push_back(std::vector<double>());
-          _bare_x_expressions.push_back(std::vector<alps::expression::Expression<double> >());
-          _bare_y_expressions.push_back(std::vector<alps::expression::Expression<double> >());
-          _bare_z_expressions.push_back(std::vector<alps::expression::Expression<double> >());
-          _bare_expressions.push_back(std::vector<alps::expression::Expression<double> >());
-  
-          alps::site_basis<short> _states(model().basis().site_basis());
-          _bare_expressions.reserve(_states.size());
-          _bare_values.reserve(_states.size());
-          for (unsigned int m=0; m<_states.size(); ++m) {
-            alps::expression::Expression<double> this_expression(_bare_expression);
-            alps::expression::Expression<double> this_x_expression;
-            alps::expression::Expression<double> this_y_expression;
-            alps::expression::Expression<double> this_z_expression;
-            alps::SiteOperatorEvaluator<short,double> _site_basis_evaluator(_states[m], model().basis().site_basis(), parms, _siteterms[i].site());
-            this_expression.partial_evaluate(_site_basis_evaluator);   // evaluate all operator terms...
-            this_expression.simplify();
-            alps::expression::Term<double> this_zeroth_term = this_expression.zeroth_term();
-            if (this_zeroth_term.can_evaluate())
-            {
-              _bare_values[i].push_back(this_zeroth_term.value());
-              this_expression -= this_zeroth_term;
-              this_expression.simplify();   // contains x,y,z terms only
-            }
-            else
-              _bare_values[i].push_back(0.);
-  
-            if (!this_expression.can_evaluate())
-              _can_evaluate_individual_bare_expressions = false;
-  
-            this_x_expression = this_expression.expression_dependent_only_on("x");
-            _bare_x_expressions[i].push_back(this_x_expression);
-            this_expression -= this_x_expression;
-            this_expression.simplify();
-  
-            this_y_expression = this_expression.expression_dependent_only_on("y");
-            _bare_y_expressions[i].push_back(this_y_expression);
-            this_expression -= this_y_expression;
-            this_expression.simplify();
-  
-            this_z_expression = this_expression.expression_dependent_only_on("z");
-            _bare_z_expressions[i].push_back(this_z_expression);
-            this_expression -= this_z_expression;
-            this_expression.simplify();
-  
-            if (!this_expression.can_evaluate())
-              _can_evaluate_bare_expressions = false;
-  
-            _bare_expressions[i].push_back(this_expression);
-  
-            //std::cout << "\nsite_type = " << i << "\tstate = " << m << "\n";
-            //std::cout << "\nthis_expression.output(std::cout):\n";
-            //this_expression.output(std::cout);
-            //std::cout << "\n";
-            //std::cin.get(); 
-          }        
-        }
-  
-        //std::cout << "\n";
-        //for (unsigned int i=0; i<_bare_values.size(); ++i) {
-        //  using alps::numeric::operator<<;
-        //  std::cout << "_bare_values[" << i << "] : " << _bare_values[i] << "\n";
-        //}
-        //std::cin.get();
-  
-        //std::cout << "\n";
-        //for (unsigned int i=0; i<_bare_expressions.size(); ++i) {
-        //for (unsigned int m=0; m<_bare_expressions[i].size(); ++m) {
-        //  std::cout << "_bare_expressions[" << i << "][" << m << "] : ";
-        //  std::cout << "[x] : ";
-        //  _bare_x_expressions[i][m].output(std::cout);
-        //  std::cout << ", [y] : ";
-        //  _bare_y_expressions[i][m].output(std::cout);
-        //  std::cout << ", [z] : ";
-        //  _bare_z_expressions[i][m].output(std::cout);
-        //  std::cout << ", [others]: ";
-        //  _bare_expressions[i][m].output(std::cout);
-        //  std::cout << "\n";
-        //}
-        //}
-        //std::cin.get();
-        std::cout << "\t\t\t\t\t\t\t ... done.\n";
-  
-        //// Step 2: Initialize onsite matrix 
-        std::cout << "\t\t\t\t\tb. Step 2: Initialize onsite matrix \t ... starting:\n";
-  
-        ////// _bare_values -> onsite_matrix
-        for (site_iterator it = sites().first; it != sites().second; ++it) {
-          unsigned int this_site_type = inhomogeneous_site_type(*it);
-          if (this_site_type >= onsite_matrix.size()) 
-            onsite_matrix.push_back(_bare_values[site_type(*it)]);  // Note: It has not been yet multiplied by beta here... 
-        }
-        //std::cout << "\n";
-        //for (unsigned int i=0; i<onsite_matrix.size(); ++i) {
-        //  using alps::numeric::operator<<;
-        //  std::cout << "onsite_matrix[" << i << "] : " << onsite_matrix[i] << "\n";
-        //}
-        //std::cin.get();
-  
-        ////// _bare_???_expressions, ... -> onsite_matrix
-        if (!_can_evaluate_individual_bare_expressions && inhomogeneous_sites())  // it only makes sense that x,y,z are for inhomogeneous lattice...
-        {
-          if (dimension() >= 1)   // _bare_x_expression -> onsite_matrix
-          {
-            std::map<double, unsigned int> coordinate_type;
-            for (site_iterator it = sites().first; it != sites().second; ++it) 
-              coordinate_type.insert(std::make_pair(coordinate(*it)[0],coordinate_type.size()));
-            
-            std::vector<std::vector<std::vector<double> > > _bare_directional_values;     // dim1: coordinate_type, dim2: site_type, dim3: state
-            _bare_directional_values.resize(coordinate_type.size());
-            for (std::map<double, unsigned int>::iterator mit = coordinate_type.begin(); mit != coordinate_type.end(); ++mit) {
-            for (unsigned int i=0; i<_bare_x_expressions.size(); ++i) {
-            _bare_directional_values[mit->second].push_back(std::vector<double>());
-            _bare_directional_values[mit->second][i].reserve(_bare_x_expressions[i].size());
-            for (unsigned int m=0; m<_bare_x_expressions[i].size(); ++m) {
-               alps::expression::Expression<double> this_expression = _bare_x_expressions[i][m];
-               alps::Parameters this_parms;
-               this_parms["x"] = boost::lexical_cast<std::string>(mit->first);
-               alps::expression::ParameterEvaluator<double> this_evaluator(this_parms);
-               this_expression.partial_evaluate(this_evaluator);
-               this_expression.simplify();
-               _bare_directional_values[mit->second][i].push_back(this_expression.value());
-            }
-            }
-            }
-            //for (std::map<double, unsigned int>::iterator mit = coordinate_type.begin(); mit != coordinate_type.end(); ++mit) {
-            //for (unsigned int i=0; i<_bare_x_expressions.size(); ++i) {
-            //for (unsigned int m=0; m<_bare_x_expressions[i].size(); ++m) {
-            //  std::cout << "x : " << mit->first << " , _bare_x_expressions[" << i << "][" << m << "] : ";
-            //  _bare_x_expressions[i][m].output(std::cout);
-            //  std::cout << " , _bare_directional_value : " << _bare_directional_values[mit->second][i][m] << "\n";
-            //}
-            //}
-            //std::cin.get();
-            //}
-            //std::cin.get();
-  
-            std::vector<std::vector<double> > onsite_matrix_plus;
-            for (site_iterator it = sites().first; it != sites().second; ++it)
-            {
-              unsigned int this_site_type = inhomogeneous_site_type(*it);
-              if (this_site_type >= onsite_matrix_plus.size())  
-                onsite_matrix_plus.push_back(_bare_directional_values[coordinate_type[coordinate(*it)[0]]][site_type(*it)]);
-            }
-            //for (unsigned int i=0; i<onsite_matrix.size(); ++i) {
-            //  using alps::numeric::operator<<;
-            //  std::cout << "onsite_matrix     [" << i << "] : " << onsite_matrix[i] << "\n";
-            //  std::cout << "onsite_matrix_plus[" << i << "] : " << onsite_matrix_plus[i] << "\n";
-            //}
-            //std::cin.get();
-  
-            for (unsigned int i=0; i<onsite_matrix.size(); ++i) {
-              using boost::numeric::operators::operator+;
-              onsite_matrix[i] = onsite_matrix[i] + onsite_matrix_plus[i];
-            }
-            //for (unsigned int i=0; i<onsite_matrix.size(); ++i) {
-            //  using alps::numeric::operator<<;
-            //  std::cout << "onsite_matrix     [" << i << "] : " << onsite_matrix[i] << "\n";
-            //}
-            //std::cin.get();
-          }
-  
-          if (dimension() >= 2)   // _bare_y_expression -> onsite_matrix
-          {
-            std::map<double, unsigned int> coordinate_type;
-            for (site_iterator it = sites().first; it != sites().second; ++it) 
-              coordinate_type.insert(std::make_pair(coordinate(*it)[1],coordinate_type.size()));
-            
-            std::vector<std::vector<std::vector<double> > > _bare_directional_values;     // dim1: coordinate_type, dim2: site_type, dim3: state
-            _bare_directional_values.resize(coordinate_type.size());
-            for (std::map<double, unsigned int>::iterator mit = coordinate_type.begin(); mit != coordinate_type.end(); ++mit) {
-            for (unsigned int i=0; i<_bare_y_expressions.size(); ++i) {
-            _bare_directional_values[mit->second].push_back(std::vector<double>());
-            _bare_directional_values[mit->second][i].reserve(_bare_y_expressions[i].size());
-            for (unsigned int m=0; m<_bare_y_expressions[i].size(); ++m) {
-               alps::expression::Expression<double> this_expression = _bare_y_expressions[i][m];
-               alps::Parameters this_parms;
-               this_parms["y"] = boost::lexical_cast<std::string>(mit->first);
-               alps::expression::ParameterEvaluator<double> this_evaluator(this_parms);
-               this_expression.partial_evaluate(this_evaluator);
-               this_expression.simplify();
-               _bare_directional_values[mit->second][i].push_back(this_expression.value());
-            }
-            }
-            }
-            //for (std::map<double, unsigned int>::iterator mit = coordinate_type.begin(); mit != coordinate_type.end(); ++mit) {
-            //for (unsigned int i=0; i<_bare_y_expressions.size(); ++i) {
-            //for (unsigned int m=0; m<_bare_y_expressions[i].size(); ++m) {
-            //  std::cout << "y : " << mit->first << " , _bare_y_expressions[" << i << "][" << m << "] : ";
-            //  _bare_y_expressions[i][m].output(std::cout);
-            //  std::cout << " , _bare_directional_value : " << _bare_directional_values[mit->second][i][m] << "\n";
-            //}
-            //}
-            //std::cin.get();
-            //}
-            //std::cin.get();
-  
-            std::vector<std::vector<double> > onsite_matrix_plus;
-            for (site_iterator it = sites().first; it != sites().second; ++it)
-            {
-              unsigned int this_site_type = inhomogeneous_site_type(*it);
-              if (this_site_type >= onsite_matrix_plus.size())  
-                onsite_matrix_plus.push_back(_bare_directional_values[coordinate_type[coordinate(*it)[1]]][site_type(*it)]);
-            }
-            //for (unsigned int i=0; i<onsite_matrix.size(); ++i) {
-            //  using alps::numeric::operator<<;
-            //  std::cout << "onsite_matrix     [" << i << "] : " << onsite_matrix[i] << "\n";
-            //  std::cout << "onsite_matrix_plus[" << i << "] : " << onsite_matrix_plus[i] << "\n";
-            //}
-            //std::cin.get();
-  
-            for (unsigned int i=0; i<onsite_matrix.size(); ++i) {
-              using boost::numeric::operators::operator+;
-              onsite_matrix[i] = onsite_matrix[i] + onsite_matrix_plus[i];
-            }
-            //for (unsigned int i=0; i<onsite_matrix.size(); ++i) {
-            //  using alps::numeric::operator<<;
-            //  std::cout << "onsite_matrix     [" << i << "] : " << onsite_matrix[i] << "\n";
-            //}
-            //std::cin.get();
-          }
-  
-          if (dimension() >= 3)   // _bare_z_expression -> onsite_matrix
-          {
-            std::map<double, unsigned int> coordinate_type;
-            for (site_iterator it = sites().first; it != sites().second; ++it) 
-              coordinate_type.insert(std::make_pair(coordinate(*it)[2],coordinate_type.size()));
-            
-            std::vector<std::vector<std::vector<double> > > _bare_directional_values;     // dim1: coordinate_type, dim2: site_type, dim3: state
-            _bare_directional_values.resize(coordinate_type.size());
-            for (std::map<double, unsigned int>::iterator mit = coordinate_type.begin(); mit != coordinate_type.end(); ++mit) {
-            for (unsigned int i=0; i<_bare_z_expressions.size(); ++i) {
-            _bare_directional_values[mit->second].push_back(std::vector<double>());
-            _bare_directional_values[mit->second][i].reserve(_bare_z_expressions[i].size());
-            for (unsigned int m=0; m<_bare_z_expressions[i].size(); ++m) {
-               alps::expression::Expression<double> this_expression = _bare_z_expressions[i][m];
-               alps::Parameters this_parms;
-               this_parms["z"] = boost::lexical_cast<std::string>(mit->first);
-               alps::expression::ParameterEvaluator<double> this_evaluator(this_parms);
-               this_expression.partial_evaluate(this_evaluator);
-               this_expression.simplify();
-               _bare_directional_values[mit->second][i].push_back(this_expression.value());
-            }
-            }
-            }
-            //for (std::map<double, unsigned int>::iterator mit = coordinate_type.begin(); mit != coordinate_type.end(); ++mit) {
-            //for (unsigned int i=0; i<_bare_z_expressions.size(); ++i) {
-            //for (unsigned int m=0; m<_bare_z_expressions[i].size(); ++m) {
-            //  std::cout << "z : " << mit->first << " , _bare_z_expressions[" << i << "][" << m << "] : ";
-            //  _bare_z_expressions[i][m].output(std::cout);
-            //  std::cout << " , _bare_directional_value : " << _bare_directional_values[mit->second][i][m] << "\n";
-            //}
-            //}
-            //std::cin.get();
-            //}
-            //std::cin.get();
-  
-            std::vector<std::vector<double> > onsite_matrix_plus;
-            for (site_iterator it = sites().first; it != sites().second; ++it)
-            {
-              unsigned int this_site_type = inhomogeneous_site_type(*it);
-              if (this_site_type >= onsite_matrix_plus.size())  
-                onsite_matrix_plus.push_back(_bare_directional_values[coordinate_type[coordinate(*it)[2]]][site_type(*it)]);
-            }
-            //for (unsigned int i=0; i<onsite_matrix.size(); ++i) {
-            //  using alps::numeric::operator<<;
-            //  std::cout << "onsite_matrix     [" << i << "] : " << onsite_matrix[i] << "\n";
-            //  std::cout << "onsite_matrix_plus[" << i << "] : " << onsite_matrix_plus[i] << "\n";
-            //}
-            //std::cin.get();
-  
-            for (unsigned int i=0; i<onsite_matrix.size(); ++i) {
-              using boost::numeric::operators::operator+;
-              onsite_matrix[i] = onsite_matrix[i] + onsite_matrix_plus[i];
-            }
-            //for (unsigned int i=0; i<onsite_matrix.size(); ++i) {
-            //  using alps::numeric::operator<<;
-            //  std::cout << "onsite_matrix     [" << i << "] : " << onsite_matrix[i] << "\n";
-            //}
-            //std::cin.get();
-          }
-  
-          if (!_can_evaluate_bare_expressions)  // other expressions that consists of mixed x,y,z terms... 
-          {
-            std::vector<std::vector<double> > onsite_matrix_plus;
-            for (site_iterator it = sites().first; it != sites().second; ++it)
-            {    
-              unsigned int this_site_type = inhomogeneous_site_type(*it);
-              if (this_site_type >= onsite_matrix_plus.size())  
-              {
-                alps::Parameters this_parms;              
-                this_parms << coordinate_as_parameter(this_site_type); // set x, y and z
-  
-                std::vector<double> this_values_plus;
-                for (unsigned int m=0; m<_bare_expressions[site_type(*it)].size(); ++m) {
-                  alps::expression::Expression<double> this_expression = _bare_expressions[site_type(*it)][m];
-                  alps::expression::ParameterEvaluator<double> this_evaluator(this_parms);
-                  this_expression.partial_evaluate(this_evaluator);
-                  this_expression.simplify();
-                  this_values_plus.push_back(this_expression.value()); 
-                }
-  
-                onsite_matrix_plus.push_back(this_values_plus);
-              }
-            }    
-            //for (unsigned int i=0; i<onsite_matrix.size(); ++i) {
-            //  using alps::numeric::operator<<;
-            //  std::cout << "onsite_matrix     [" << i << "] : " << onsite_matrix[i] << "\n";
-            //  std::cout << "onsite_matrix_plus[" << i << "] : " << onsite_matrix_plus[i] << "\n";
-            //}
-            //std::cin.get();
-  
-            for (unsigned int i=0; i<onsite_matrix.size(); ++i) {
-              using boost::numeric::operators::operator+;
-              onsite_matrix[i] = onsite_matrix[i] + onsite_matrix_plus[i];
-            }
-            //for (unsigned int i=0; i<onsite_matrix.size(); ++i) {
-            //  using alps::numeric::operator<<;
-            //  std::cout << "onsite_matrix     [" << i << "] : " << onsite_matrix[i] << "\n";
-            //}
-            //std::cin.get();
-          }
-        }
-  
-        for (unsigned int i=0; i<onsite_matrix.size(); ++i) {
-          using boost::numeric::operators::operator*;
-          onsite_matrix[i] = onsite_matrix[i] * beta;
-        }
+    // iterate all bonds and build bond matrix
+    std::cout << "[ directed_worm_algorithm::initialize_hamiltonian ] Initializing onbond hamiltonian ...\n";
+    initialize_onbond_hamiltonian(); 
 
-      }  // ending if (alps_dwa_development_821_mode == -1)
-
-      std::cout << "\t\t\t\t\t\t\t ... done.\n";
-
-      std::cout << "\t\t\t\t... done.\n";
-
-      // iterate all bonds and build site 1-up matrix, site 1-down matrix and bond strength matrix
-      std::cout << "\t\t\tiii. Bond strength matrix \t... starting\n";
-      std::vector<double> bond_strength_matrix_temporary;
-      for (bond_iterator it = bonds().first; it != bonds().second; ++it) {
+    // iterate all bonds and build site 1-up matrix, site 1-down matrix and bond strength matrix
+    std::cout << "\t\t\tiii. Bond strength matrix \t... starting\n";
+    std::vector<double> bond_strength_matrix_temporary;
+    for (bond_iterator it = bonds().first; it != bonds().second; ++it) 
+    {
         unsigned int this_bond_type       = inhomogeneous_bond_type(*it);
         unsigned int this_sourcesite_type = site_site_type[source(*it)];
         unsigned int this_targetsite_type = site_site_type[target(*it)];
@@ -745,15 +408,11 @@ void
         if (parms.defined("ty_t"))  t_relative[1] = parms.value_or_default("ty_t", 1.);
         if (parms.defined("tz_t"))  t_relative[2] = parms.value_or_default("tz_t", 1.);
 
-        //using alps::numeric::operator<<;
-        //std::cout << "\nt (relative) : " << t_relative << "\n";
-        //std::cin.get(); 
-     
         for (bond_iterator it=bonds().first; it!=bonds().second; ++it)
         {
-          for (int i=0; i<dimension(); ++i)
-            if (bond_vector(*it)[i] != 0.)
-              bond_strength_matrix[index(*it)] *= t_relative[i];
+            for (int i=0; i<dimension(); ++i)
+                if (bond_vector(*it)[i] != 0.)
+                    bond_strength_matrix[index(*it)] *= t_relative[i];
         }
       }
       std::cout << "\t\t\t\t... done.\n"; 
