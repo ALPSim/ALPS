@@ -106,11 +106,12 @@ void
           << "\n\n";
       out << "Model\n"
           << "=====\n\n"
-          << "Name         : " << model().name()   << "\n"
-          << "Charge model : " << is_charge_model_ << "\n"
-          << "Spin model   : " << is_spin_model_   << "\n"
-          << "Site Basis   : " << model().basis().site_basis().name() << "\n"
-          << "states       : " << diagonal_matrix_element.begin()->second[0] << "\n"
+          << "Name            : " << model().name()   << "\n"
+          << "Charge model    : " << is_charge_model_ << "\n"
+          << "Spin model      : " << is_spin_model_   << "\n"
+          << "Site Basis      : " << model().basis().site_basis().name() << "\n"
+          << "states          : " << diagonal_matrix_element.begin()->second[0] << "\n"
+          << "Diagonal onsite : " << is_diagonal_onsite_ << "\n"
           << "\n\n";
       out << "Measurements\n"
           << "============\n"
@@ -147,6 +148,8 @@ directed_worm_algorithm
     , _skip                        (parms_.value_or_default("SKIP",1))
     // regarding lattice
     , is_periodic_ (std::find((this->lattice().boundary()).begin(), (this->lattice().boundary()).end(), "open") == (this->lattice().boundary()).end())
+    // regarding model
+    , is_diagonal_onsite_          (static_cast<double>(parms_.value_or_default("V",0.)) < 1e-6 ? true : false)
     // regarding experiment
     , finite_tof   (is_periodic_ ? false : (parms_.defined("tof_phase")))
     , finite_waist (parms_.defined("waist"))
@@ -189,15 +192,16 @@ directed_worm_algorithm
     std::cout << "\t\t... finished.\n"; 
 
     // regarding caches
-#ifdef HEATBATH_ALGORITHM
     unsigned int maximum_num_neighbors=0;
     for (site_iterator it=sites().first; it!=sites().second; ++it)
-      if (num_neighbors(*it) > maximum_num_neighbors)
-        maximum_num_neighbors = num_neighbors(*it);
-    
+        if (num_neighbors(*it) > maximum_num_neighbors)
+            maximum_num_neighbors = num_neighbors(*it);
+#ifdef HEATBATH_ALGORITHM
     _neighborlocations_cache.reserve(maximum_num_neighbors);
     _cummulative_weights_cache.reserve(maximum_num_neighbors+1);
 #endif
+    _neighborbonds_cache.reserve(maximum_num_neighbors);
+    _neighborstates_cache.reserve(maximum_num_neighbors);
 
     // print to screen
     print_simulation (std::cout);
@@ -348,8 +352,11 @@ void directed_worm_algorithm::initialize_hamiltonian()
     initialize_onsite_hamiltonian();
 
     // iterate all bonds and build bond matrix
-    std::cout << "[ directed_worm_algorithm::initialize_hamiltonian ] Initializing onbond hamiltonian ...\n";
-    initialize_onbond_hamiltonian(); 
+    if (!is_diagonal_onsite_)
+    {
+        std::cout << "[ directed_worm_algorithm::initialize_hamiltonian ] Initializing onbond hamiltonian ...\n";
+        initialize_onbond_hamiltonian(); 
+    }
 
     // iterate all bonds and build site 1-up matrix, site 1-down matrix and bond strength matrix
     std::cout << "\t\t\tiii. Bond strength matrix \t... starting\n";
@@ -737,25 +744,61 @@ boost::tuple<std::vector<double>, std::vector<double>, std::vector<double>, std:
                                       );
     }
 
-double
-  directed_worm_algorithm
-    ::onsite_energy_relative (unsigned int site_, unsigned short state_, bool forward_, bool creation_) const 
+
+void directed_worm_algorithm::reset_diagonal_cache(unsigned site_, double time_)
+{
+    _neighborbonds_cache.clear();
+    _neighborstates_cache.clear();
+
+    for (neighbor_bond_iterator it = neighbor_bonds(site_).first; it != neighbor_bonds(site_).second; ++it)
     {
-      const double energy_offset = 0.1;  
+        _neighborbonds_cache.push_back(*it);        
 
-      const double _onsite_energy        = onsite_energy(site_, state_);
-      const double _onsite_energy_before = onsite_energy(site_, creation_ ? state_-1 : state_+1);
+        unsigned short _targetstate;
+        if (target(*it) != worm.site())
+        {
+            location_type _neighborlocation = wl.location(target(*it), time_);
+            _targetstate = (_neighborlocation.second-1)->state();        
+        }
+        else
+            _targetstate = worm.forward() ? worm.state_before() : worm.state();
 
-      return (forward_ ? _onsite_energy_before  - std::min(_onsite_energy_before, _onsite_energy) + energy_offset
-                       : _onsite_energy         - std::min(_onsite_energy_before, _onsite_energy) + energy_offset); 
+        _neighborstates_cache.push_back(_targetstate);
+    }
+}
+
+double directed_worm_algorithm::diagonal_energy_relative(unsigned int site_, unsigned short state_, bool forward_, bool creation_) const 
+{
+    const double energy_offset = 0.1;  
+
+    const double _onsite_energy        = onsite_energy(site_, state_);
+    const double _onsite_energy_before = onsite_energy(site_, creation_ ? state_-1 : state_+1);
+
+    return (forward_ ? _onsite_energy_before  - std::min(_onsite_energy_before, _onsite_energy) + energy_offset
+                     : _onsite_energy         - std::min(_onsite_energy_before, _onsite_energy) + energy_offset); 
+}
+
+double directed_worm_algorithm::diagonal_energy_relative(unsigned int site_, unsigned short state_, std::vector<bond_descriptor> const & bonds_, std::vector<unsigned short> const & targetstates_, bool forward_, bool creation_) const
+{
+    const double energy_offset = 0.1;
+
+    double _diagonal_energy        = onsite_energy(site_, state_);
+    double _diagonal_energy_before = onsite_energy(site_, creation_ ? state_-1 : state_+1);
+
+    for (unsigned idx=0; idx < bonds_.size(); ++idx)
+    {
+        _diagonal_energy        += onbond_energy(bonds_[idx], state_, targetstates_[idx]);
+        _diagonal_energy_before += onbond_energy(bonds_[idx], creation_ ? state_-1 : state_+1, targetstates_[idx]);
     }
 
-double
-  directed_worm_algorithm
-    ::hopping_energy (bond_descriptor const & bond_, unsigned short targetstate_, bool increasing_) const 
-    {  
-      return (increasing_ ? (bond_strength_matrix[index(bond_)] * site_oneup_matrix[site_site_type[target(bond_)]][targetstate_] * site_onedown_matrix[site_site_type[target(bond_)]][targetstate_+1]) : (bond_strength_matrix[index(bond_)] * site_onedown_matrix[site_site_type[target(bond_)]][targetstate_] * site_oneup_matrix[site_site_type[target(bond_)]][targetstate_-1]));
-    }
+    return (forward_ ? _diagonal_energy_before - std::min(_diagonal_energy_before, _diagonal_energy) + energy_offset
+                     : _diagonal_energy        - std::min(_diagonal_energy_before, _diagonal_energy) + energy_offset);
+}
+
+double directed_worm_algorithm::hopping_energy (bond_descriptor const & bond_, unsigned short targetstate_, bool increasing_) const 
+{  
+    return (increasing_ ? (bond_strength_matrix[index(bond_)] * site_oneup_matrix[site_site_type[target(bond_)]][targetstate_] * site_onedown_matrix[site_site_type[target(bond_)]][targetstate_+1]) : (bond_strength_matrix[index(bond_)] * site_onedown_matrix[site_site_type[target(bond_)]][targetstate_] * site_oneup_matrix[site_site_type[target(bond_)]][targetstate_-1]));
+}
 
 void
   directed_worm_algorithm
@@ -1060,36 +1103,42 @@ void
     }
 
 bool
-  directed_worm_algorithm
-    ::wormhead_propagates_till_collision_with_wormtail(unsigned short wormpair_state_, std::pair<neighbor_iterator,neighbor_iterator> const & neighbors_)
-    {
-      ++_propagation_counter;
+directed_worm_algorithm
+::wormhead_propagates_till_collision_with_wormtail(unsigned short wormpair_state_, std::pair<neighbor_iterator,neighbor_iterator> const & neighbors_)
+{
+    ++_propagation_counter;
 
 #ifdef DEBUGMODE
-      // Step 0: Check extended worldlines configuration
-      if (_sweep_counter == DEBUG_SWEEP_COUNTER)
-      {
-        if (!worm.is_valid(state_maximum[0])) {
-          std::cout << "Extended worldlines configuration is NOT valid at " << _propagation_counter << "\n";
-          std::cin.get();
+    // Step 0: Check extended worldlines configuration
+    if (_sweep_counter == DEBUG_SWEEP_COUNTER)
+    {
+        if (!worm.is_valid(state_maximum[0])) 
+        {
+            std::cout << "Extended worldlines configuration is NOT valid at " << _propagation_counter << "\n";
+            std::cin.get();
         }
-      }
+    }
 #endif
 
 #define DEBUG_PROPAGATION_COUNTER 12383395
 
-      // Step 1: Wormhead movement
-      const double _time2next     = worm.time2next();
-      const double _time2wormtail = worm.time2wormtail();
+    // Step 1: Wormhead movement
+    const double _time2next     = worm.time2next();
+    const double _time2wormtail = worm.time2wormtail();
 
-      const double _onsite_energy_relative = onsite_energy_relative(worm.site(), worm.state(), worm.forward(), worm.creation());
+    if (!is_diagonal_onsite_)
+        reset_diagonal_cache(worm.site(), worm.time());     
 
-      double _deltatime = -std::log(1.- random())/_onsite_energy_relative;
+    const double _diagonal_energy_relative = is_diagonal_onsite_ 
+                                                ? diagonal_energy_relative(worm.site(), worm.state(), worm.forward(), worm.creation())
+                                                : diagonal_energy_relative(worm.site(), worm.state(), _neighborbonds_cache, _neighborstates_cache, worm.forward(), worm.creation());
+
+    double _deltatime = -std::log(1.- random())/_diagonal_energy_relative;
 
 #ifdef DEBUGMODE
-      if (_sweep_counter == DEBUG_SWEEP_COUNTER)
-      if (_propagation_counter >= DEBUG_PROPAGATION_COUNTER)
-      {
+    if (_sweep_counter == DEBUG_SWEEP_COUNTER)
+    if (_propagation_counter >= DEBUG_PROPAGATION_COUNTER)
+    {
         std::cout << "\n\n"
                   << "\nPropagation step : " << _propagation_counter
                   << "\n------------------------------------"
@@ -1100,28 +1149,28 @@ bool
                   << "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
                   << "\n\n";
         std::cin.get();
-      }
+    }
 #endif
 
 
-      const bool _halted = (_deltatime >= _time2next);
-      if (_halted)
+    const bool _halted = (_deltatime >= _time2next);
+    if (_halted)
         _deltatime = _time2next;
 
-      double _newtime = worm.forward() ? worm.time() + _deltatime : worm.time() - _deltatime;
-      bool   _winding_over_time = (_newtime < 0. || _newtime >= 1.);
+    double _newtime = worm.forward() ? worm.time() + _deltatime : worm.time() - _deltatime;
+    bool   _winding_over_time = (_newtime < 0. || _newtime >= 1.);
 
-      if      (!_halted && _winding_over_time)
+    if (!_halted && _winding_over_time)
         _newtime = wormpair::modone(_newtime);
-      else if (_halted)
+    else if (_halted)
         _newtime = worm.forward() ? worm.next_time()-std::numeric_limits<double>::epsilon() : worm.next_time()+std::numeric_limits<double>::epsilon();
 
-      worm.wormhead_moves_to_new_time(_newtime,_winding_over_time);
+    worm.wormhead_moves_to_new_time(_newtime,_winding_over_time);
       
 #ifdef DEBUGMODE
-      if (_sweep_counter == DEBUG_SWEEP_COUNTER)
-      if (_propagation_counter >= DEBUG_PROPAGATION_COUNTER)
-      {
+    if (_sweep_counter == DEBUG_SWEEP_COUNTER)
+    if (_propagation_counter >= DEBUG_PROPAGATION_COUNTER)
+    {
         std::cout << "\nWormhead moves to time " << worm.time() << " ( " << (_halted ? "HALTED" : "NOT HALTED") << " ) "
                   << "\n============================================================================";
         wl.output(std::cout, worm.site());
@@ -1135,11 +1184,11 @@ bool
                   << "\n--------------------------"
                   << "\n\n";
         std::cin.get();
-      }
+    }
 #endif
 
-      if (is_thermalized() && measure_ && (_deltatime > _time2wormtail) && (worm.site() != worm.wormtail_site()))   
-      {
+    if (is_thermalized() && measure_ && (_deltatime > _time2wormtail) && (worm.site() != worm.wormtail_site()))   
+    {
         using alps::numeric::operator+;
         using alps::numeric::operator+=;
         using alps::numeric::operator*;
@@ -1172,17 +1221,17 @@ bool
           if (measure_green_function_)
             green_tof[green_distance] += wormpair_state_ * std::cos(tof_phase);
         }
-      }
+    }
 
-      if (!_halted)
-      {
+    if (!_halted)
+    {
         // Step 2A: Wormhead either inserts vertex or rebounces
-        insert_jump_or_bounce(_onsite_energy_relative,neighbors_); 
+        insert_jump_or_bounce(_diagonal_energy_relative,neighbors_); 
         return true;
-      }
+    }
 
-      else
-      {
+    else
+    {
         // Step 2B: Wormhead touches wormtail (offdiagonal process ends)
         if (worm.wormhead_reaches_wormtail())
            return false;
@@ -1222,7 +1271,7 @@ bool
 
 void
   directed_worm_algorithm
-    ::insert_jump_or_bounce (double const onsite_energy_relative_, std::pair<neighbor_iterator,neighbor_iterator> const & neighbors_)
+    ::insert_jump_or_bounce (double const diagonal_energy_relative_, std::pair<neighbor_iterator,neighbor_iterator> const & neighbors_)
     {
 #ifndef HEATBATH_ALGORITHM
       neighbor_bond_iterator it=neighbor_bonds(worm.site()).first + random()*num_neighbors(worm.site());
@@ -1240,7 +1289,7 @@ void
       else
       {
         const double _weight_new = hopping_energy(*it, _targetstate, worm.increasing());
-        if (_weight_new >= onsite_energy_relative_ || random() < (_weight_new/onsite_energy_relative_))  // insert vertex
+        if (_weight_new >= diagonal_energy_relative_ || random() < (_weight_new/diagonal_energy_relative_))  // insert vertex
         {
           worm.wormhead_inserts_vertex_and_jumps_to_new_site(_neighborlocation);
           worm.set_neighbor2wormtail(std::find(neighbors_.first, neighbors_.second, worm.site()) != neighbors_.second);
@@ -1277,7 +1326,7 @@ void
         }
       }
    
-      _total_weight += onsite_energy_relative_;
+      _total_weight += diagonal_energy_relative_;
       _cummulative_weights_cache.push_back(_total_weight);
 
       const int which_neighbor = std::distance(_cummulative_weights_cache.begin(), std::lower_bound(_cummulative_weights_cache.begin(),_cummulative_weights_cache.end(), random()*_total_weight));
@@ -1346,7 +1395,12 @@ void
 
       if (target(*it) == worm.site())    // delete vertex or bounce
       {
-        const double _weight_new = onsite_energy_relative(worm.next_partnersite(),_sourcelocation.second->state(),!worm.forward(),worm.creation());
+        if (!is_diagonal_onsite_)
+            reset_diagonal_cache(worm.next_partnersite(), worm.next_time());
+
+        const double _weight_new = is_diagonal_onsite_ 
+                                        ? diagonal_energy_relative(worm.next_partnersite(),_sourcelocation.second->state(),!worm.forward(),worm.creation())
+                                        : diagonal_energy_relative(worm.next_partnersite(),_sourcelocation.second->state(), _neighborbonds_cache, _neighborstates_cache, !worm.forward(),worm.creation());
 
 #ifdef DEBUGMODE
         if (_sweep_counter == DEBUG_SWEEP_COUNTER)
@@ -1432,12 +1486,12 @@ void
       }
 
 #else
-      _neighborlocations_cache.clear();
-      _cummulative_weights_cache.clear();
+    _neighborlocations_cache.clear();
+    _cummulative_weights_cache.clear();
 
-      double _total_weight = 0.;
-      for (neighbor_bond_iterator _neighborbondit=neighbor_bonds(worm.next_partnersite()).first; _neighborbondit!=neighbor_bonds(worm.next_partnersite()).second; ++_neighborbondit)
-      {
+    double _total_weight = 0.;
+    for (neighbor_bond_iterator _neighborbondit=neighbor_bonds(worm.next_partnersite()).first; _neighborbondit!=neighbor_bonds(worm.next_partnersite()).second; ++_neighborbondit)
+    {
         location_type _neighborlocation  = wl.location(target(*_neighborbondit), worm.next_time());
 
         _neighborlocations_cache.push_back(_neighborlocation);
@@ -1447,38 +1501,45 @@ void
         if (  ( _increasing && _targetstate == state_maximum[site_site_type[target(*_neighborbondit)]])
            || (!_increasing && _targetstate == state_minimum[site_site_type[target(*_neighborbondit)]])
            )
-           _cummulative_weights_cache.push_back(_total_weight);
+            _cummulative_weights_cache.push_back(_total_weight);
         else
         {
-           _total_weight += hopping_energy(*_neighborbondit, _targetstate, _increasing);
-           _cummulative_weights_cache.push_back(_total_weight);
+            _total_weight += hopping_energy(*_neighborbondit, _targetstate, _increasing);
+            _cummulative_weights_cache.push_back(_total_weight);
         }
-      }
+    }
 
-      _total_weight += onsite_energy_relative(worm.next_partnersite(),_sourcelocation.second->state(),!worm.forward(),worm.creation());
-      _cummulative_weights_cache.push_back(_total_weight);
+    if (!is_diagonal_onsite_)
+        reset_diagonal_cache(worm.next_partnersite(), worm.next_time());
 
-      const int which_neighbor = std::distance(_cummulative_weights_cache.begin(), std::lower_bound(_cummulative_weights_cache.begin(),_cummulative_weights_cache.end(), random()*_total_weight));
+    if (is_diagonal_onsite_)
+        _total_weight += diagonal_energy_relative(worm.next_partnersite(),_sourcelocation.second->state(),!worm.forward(),worm.creation());
+    else
+        _total_weight += diagonal_energy_relative(worm.next_partnersite(),_sourcelocation.second->state(), _neighborbonds_cache, _neighborstates_cache, !worm.forward(),worm.creation());
 
-      if (which_neighbor == _neighborlocations_cache.size())
-      {
+    _cummulative_weights_cache.push_back(_total_weight);
+
+    const int which_neighbor = std::distance(_cummulative_weights_cache.begin(), std::lower_bound(_cummulative_weights_cache.begin(),_cummulative_weights_cache.end(), random()*_total_weight));
+
+    if (which_neighbor == _neighborlocations_cache.size())
+    {
         worm.wormhead_deletes_vertex_and_jumps_to_new_site(_sourcelocation);
         worm.set_neighbor2wormtail(std::find(neighbors_.first, neighbors_.second, worm.site()) != neighbors_.second);
         return;
-      }
+    }
 
-      if (_neighborlocations_cache[which_neighbor].first->begin()->siteindicator() == worm.site())
-      {
+    if (_neighborlocations_cache[which_neighbor].first->begin()->siteindicator() == worm.site())
+    {
         worm.wormhead_turns_around();
         ++_propagation_failure_counter;
         return;
-      }
-
-      worm.wormhead_relinks_vertex_and_jumps_to_new_site(_sourcelocation, _neighborlocations_cache[which_neighbor]);  
-      worm.set_neighbor2wormtail(std::find(neighbors_.first, neighbors_.second, worm.site()) != neighbors_.second);
-      return;
-#endif
     }
+
+    worm.wormhead_relinks_vertex_and_jumps_to_new_site(_sourcelocation, _neighborlocations_cache[which_neighbor]);  
+    worm.set_neighbor2wormtail(std::find(neighbors_.first, neighbors_.second, worm.site()) != neighbors_.second);
+    return;
+#endif
+}
 
 // ==================================================
 // main 

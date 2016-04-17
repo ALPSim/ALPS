@@ -84,7 +84,7 @@ private:
 
     // regarding simulation interprocess (ESSENTIAL)
     bool   wormhead_propagates_till_collision_with_wormtail (unsigned short wormpair_state, std::pair<neighbor_iterator, neighbor_iterator> const & neighbors_);
-    void   insert_jump_or_bounce        (double onsite_energy_relative_, std::pair<neighbor_iterator, neighbor_iterator> const & neighbors_);
+    void   insert_jump_or_bounce        (double diagonal_energy_relative_, std::pair<neighbor_iterator, neighbor_iterator> const & neighbors_);
     void   delete_relink_jump_or_bounce (std::pair<neighbor_iterator, neighbor_iterator> const & neighbors_);
 
     // regarding simulation performance 
@@ -97,6 +97,7 @@ private:
     void initialize_onsite_hamiltonian();   // called from initialize_hamiltonian within
     void initialize_onbond_hamiltonian();     // called from initialize_hamiltonian within
     void initialize_hamiltonian();
+    void reset_diagonal_cache(unsigned site_, double time_);
     void print_hamiltonian(std::ostream & out);
 
 //    std::vector<double> onsite_hamiltonian(unsigned int site_type);
@@ -107,7 +108,10 @@ private:
 
     inline double onsite_energy (unsigned int site_, unsigned short state_) const  { return onsite_matrix[inhomogeneous_site_type(site_)][state_]; }     
     inline double onbond_energy (bond_descriptor const & bond_, unsigned short state0_, unsigned short state1_) const { return onbond_matrix[bond_type(bond_)][state0_][state1_]; }
-    double onsite_energy_relative (unsigned int site_, unsigned short state_, bool forward_, bool creation_) const;
+    double diagonal_energy_relative (unsigned int site_, unsigned short state_, bool forward_, bool creation_) const;
+    double diagonal_energy_relative (unsigned int site_, unsigned short state_, std::vector<bond_descriptor> const & bonds_, std::vector<unsigned short> const & targetstates_, bool forward_, bool creation_) const;
+
+
     double hopping_energy (bond_descriptor const & bond_, unsigned short targetstate_, bool increasing_) const;
 
     std::vector<double> onsite_energies (std::vector<unsigned short> const & states_) const
@@ -167,6 +171,8 @@ private:
     std::pair<std::time_t, std::time_t>  _simulation_timer;  
 
     // regarding model
+    bool is_diagonal_onsite_;
+
     std::vector<unsigned short> state_minimum;         // arg: site site type
     std::vector<unsigned short> state_maximum;         // arg: site site type
 
@@ -231,5 +237,7 @@ private:
     std::vector<location_type>  _neighborlocations_cache;
     std::vector<double>         _cummulative_weights_cache; 
 #endif
+    std::vector<bond_descriptor>  _neighborbonds_cache;
+    std::vector<unsigned short>   _neighborstates_cache;
 };
 #endif

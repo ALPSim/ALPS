@@ -2,9 +2,10 @@
 *
 * ALPS Project Applications: Directed Worm Algorithm 
 *
-* Copyright (C) 2013 by Matthias Troyer  <troyer@phys.ethz.ch> ,
+* Copyright (C) 2013 - 2016 
+*                   by  Matthias Troyer  <troyer@phys.ethz.ch> ,
 *                       Lode Pollet      <pollet@phys.ethz.ch> ,
-*                       Ping Nang Ma     <pingnang@phys.ethz.ch> 
+*                       Ping Nang Ma     <tamama@phys.ethz.ch> 
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
