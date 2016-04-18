@@ -85,6 +85,7 @@ namespace generate_mpo
         template <typename pos_t, typename tag_type, typename index_type>
         std::ostream & operator<< (std::ostream & os, prempo_key<pos_t,tag_type,index_type> const& kk)
         {
+            os << "<";
             if (kk.kind == prempo_key<pos_t,tag_type,index_type>::trivial_left) {
                 os << "triv_left";
             } else if (kk.kind == prempo_key<pos_t,tag_type,index_type>::trivial_right) {
@@ -95,6 +96,7 @@ namespace generate_mpo
                     if (i != kk.pos_op.size()-1) os << "--";
                  }
             }
+            os << ">-" << kk.offset;
             return os;
         }
     }
