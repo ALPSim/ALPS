@@ -449,10 +449,9 @@ if (HDF5_INCLUDE_DIR)
              REGEX "H5_PACKAGE_VERSION" )
        # check version
        string(REGEX REPLACE ".*#define H5_PACKAGE_VERSION \"([^\"]+)\""  "\\1"  HDF5_VERSION "${_H5pubconf_content}")
-       STRING(COMPARE LESS "${HDF5_VERSION}" "${HDF5_MINIMAL_VERSION}" _str_cmp)
-       if (_str_cmp)
+       if (${HDF5_VERSION} VERSION_LESS ${HDF5_MINIMAL_VERSION})
          MESSAGE(FATAL_ERROR "The HDF5 include found is too old : version is ${HDF5_VERSION} while the minimum is ${HDF5_MINIMAL_VERSION}")
-       endif (_str_cmp)
+       endif ()
        # check threadsafe
        file( STRINGS "${HDF5_INCLUDE_DIR}/H5pubconf.h" 
              threadsafe_define_
