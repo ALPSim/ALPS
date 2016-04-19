@@ -4,7 +4,6 @@ project (solver)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../cmake)
 
 #find_package(ALPSCore REQUIRED COMPONENTS hdf5 params)
-#find_package(GFTools REQUIRED)
 
 
 #add_library(solver external_solver.cpp)

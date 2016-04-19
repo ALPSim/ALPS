@@ -5,14 +5,13 @@ project (DMFT)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH true)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
-find_package(ALPSCore REQUIRED COMPONENTS hdf5 accumulators mc params)
+find_package(ALPSCore REQUIRED COMPONENTS hdf5 accumulators mc params gf)
 
 add_subdirectory(libcluster)
 add_subdirectory(libselfconsistency)
 
 find_package(LAPACK REQUIRED)
 find_package(MPI REQUIRED)
-find_package(GFTools REQUIRED)
 
 include(UseGtest)
 
@@ -23,7 +22,6 @@ if (CMAKE_CXX_COMPILER_ID MATCHES Intel)
 endif()
 
 include_directories(${BLAS_CLASSES_INCLUDE_DIR})
-include_directories(${GFTools_INCLUDE_DIR})
 include_directories(${MPI_CXX_INCLUDE_PATH})
 include_directories("libcluster")
 include_directories("libsolver")
@@ -34,7 +32,7 @@ main.cpp
 )
 
 target_link_libraries(dmft selfconsistency cluster
-${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES} ${GFTools_LIBRARIES} 
+${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES} 
 )
 
 install(TARGETS dmft RUNTIME DESTINATION "bin/")
