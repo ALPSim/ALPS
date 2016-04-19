@@ -62,6 +62,7 @@ class directed_worm_algorithm : public QMCRun<>
 {
 public:
     typedef boost::uint64_t                count_type;
+    typedef worldlines::line               line;
     typedef worldlines::location_type      location_type;
 
     //directed_worm_algorithm(alps::hdf5::archive & ar);   // Comment by Tama: I couldn't proceed on without Luka's NGS scheduler being ready.
@@ -140,8 +141,8 @@ private:
     }
 
     // regarding lattice
-    std::vector<double> position(unsigned int site)                   const  { return position_lookup[site]; }
-    double              position(unsigned int site, unsigned int dim) const  { return position_lookup[site][dim]; } 
+    std::vector<double>   position(unsigned int site)                   const  { return position_lookup[site]; }
+    double                position(unsigned int site, unsigned int dim) const  { return position_lookup[site][dim]; } 
 
     // regarding experiment
     double phase(unsigned int site) const  { return finite_tof ? phase_lookup[site] : 0.; }  
@@ -238,6 +239,9 @@ private:
     std::vector<double>         _cummulative_weights_cache; 
 #endif
     std::vector<bond_descriptor>  _neighborbonds_cache;
+    std::vector<unsigned>         _neighborsites_cache;
     std::vector<unsigned short>   _neighborstates_cache;
+    std::vector<double>           _neighbortimes_cache;
+    std::vector<double>           _neighbortaus_cache;
 };
 #endif

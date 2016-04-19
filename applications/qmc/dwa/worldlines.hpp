@@ -147,6 +147,7 @@ public:
   unsigned short state        (location_type const & location_) const  { return (location_.second == location_.first->end() ? location_.first->begin()->state() : location_.second->state()); }  
 
   void output(std::ostream & out, unsigned int i);
+  void output(std::ostream & out, unsigned idx, std::vector<unsigned> const & neighboring_idxs);
 
   friend std::ostream &  operator<<(std::ostream & out, worldlines const & obj_);
 
@@ -250,6 +251,17 @@ void worldlines::output(std::ostream & out, unsigned int i)
 {
   out << "\nSite : " << i << "\n";
   std::copy(_worldlines[i].begin(), _worldlines[i].end(), std::ostream_iterator<kink>(out,"\n"));
+}
+
+void worldlines::output(std::ostream & out, unsigned idx, std::vector<unsigned> const & neighboring_idxs)
+{
+    out << "\nSite : " << idx << "\n";
+    std::copy(_worldlines[idx].begin(), _worldlines[idx].end(), std::ostream_iterator<kink>(out,"\n"));
+    for (std::vector<unsigned>::const_iterator it=neighboring_idxs.begin(); it != neighboring_idxs.end(); ++it)
+    {
+        out << "\nNeighboring site : " << *it << "\n";
+        std::copy(_worldlines[*it].begin(), _worldlines[*it].end(), std::ostream_iterator<kink>(out,"\n"));
+    }
 }
 
 std::ostream & operator<<(std::ostream & out, worldlines const & obj_)
@@ -510,6 +522,7 @@ public:
 
   double time2wormtail() const  { return (_forward ? wormpair::modone(wormtail_time() - time()) : wormpair::modone(time() - wormtail_time())); }
   double time2next()     const  { return (_forward ? wormpair::modone(next_time() - time()) : wormpair::modone(time() - next_time())); }
+  double time2until(double time_) const  { return (_forward ? wormpair::modone(time_ - time()) : wormpair::modone(time() - time_)); }
 
   inline void wormhead_turns_around()  { _forward = !_forward; _next = nextlineiterator(); }
   inline void wormhead_moves_to_new_time(double time_, bool winding_over_time_=false);

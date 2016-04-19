@@ -201,7 +201,10 @@ directed_worm_algorithm
     _cummulative_weights_cache.reserve(maximum_num_neighbors+1);
 #endif
     _neighborbonds_cache.reserve(maximum_num_neighbors);
+    _neighborsites_cache.reserve(maximum_num_neighbors);
     _neighborstates_cache.reserve(maximum_num_neighbors);
+    _neighbortimes_cache.reserve(maximum_num_neighbors);
+    _neighbortaus_cache.reserve(maximum_num_neighbors);
 
     // print to screen
     print_simulation (std::cout);
@@ -748,22 +751,57 @@ boost::tuple<std::vector<double>, std::vector<double>, std::vector<double>, std:
 void directed_worm_algorithm::reset_diagonal_cache(unsigned site_, double time_)
 {
     _neighborbonds_cache.clear();
+    _neighborsites_cache.clear();
     _neighborstates_cache.clear();
+    _neighbortimes_cache.clear();
+    _neighbortaus_cache.clear();    // attack here...
 
     for (neighbor_bond_iterator it = neighbor_bonds(site_).first; it != neighbor_bonds(site_).second; ++it)
     {
-        _neighborbonds_cache.push_back(*it);        
+        _neighborbonds_cache.push_back(*it);       
+        _neighborsites_cache.push_back(target(*it)); 
 
         unsigned short _targetstate;
+        double _time;
+        double _tau;
         if (target(*it) != worm.site())
         {
             location_type _neighborlocation = wl.location(target(*it), time_);
-            _targetstate = (_neighborlocation.second-1)->state();        
+            _targetstate = (_neighborlocation.second-1)->state();    // definitely right!
+            if (_neighborlocation.first->size() == 1)    // if there is no physical kink
+            {
+                _time = -1.;
+                _tau  = 1000.;
+            }
+            else                                        // otherwise there is physical kink
+            {
+                if (!worm.forward())                    // attack 1    
+                {
+                    line::iterator lit = _neighborlocation.second-1;
+                    if (lit == _neighborlocation.first->begin())
+                        lit = _neighborlocation.first->end()-1;
+                    _time = lit->time();   
+                }
+                else
+                {
+                    line::iterator lit = _neighborlocation.second;
+                    if (lit == _neighborlocation.first->end())
+                        lit = _neighborlocation.first->begin()+1;
+                    _time = lit->time();
+                }
+                _tau = worm.time2until(_time);
+            }
         }
         else
+        {
             _targetstate = worm.forward() ? worm.state_before() : worm.state();
+            _time = -1;     // invalid
+            _tau  = 1000.;
+        }
 
         _neighborstates_cache.push_back(_targetstate);
+        _neighbortimes_cache.push_back(_time);
+        _neighbortaus_cache.push_back(_tau);
     }
 }
 
@@ -806,19 +844,7 @@ void
     {
       ++_sweep_counter;
 
-#ifdef DEBUGMODE
-      // Step 0: Check whether worldlines configuration is valid? (DEBUG)
-      if (_sweep_counter > 11179463)
-        if (_sweep_counter % 1 == 0)
-          if (wl.is_valid(state_maximum[0]))
-            std::cout << "Worldlines configuration is valid up to the beginning of sweep " << _sweep_counter << "\n";
-          else {
-            std::cout << "Worldlines configuration is NOT valid at sweep " << _sweep_counter << "\n";
-            std::cin.get();
-          }
-#endif
-
-#define DEBUG_SWEEP_COUNTER 11179463
+#define DEBUG_SWEEP_COUNTER 1
 
 #ifdef DEBUGMODE
       if (_sweep_counter == DEBUG_SWEEP_COUNTER) 
@@ -1114,13 +1140,13 @@ directed_worm_algorithm
     {
         if (!worm.is_valid(state_maximum[0])) 
         {
-            std::cout << "Extended worldlines configuration is NOT valid at " << _propagation_counter << "\n";
+            std::cout << "Extended worldlines configuration is NOT valid at sweep counter " << _sweep_counter << " and propagation_counter " << _propagation_counter << "\n";
             std::cin.get();
         }
     }
 #endif
 
-#define DEBUG_PROPAGATION_COUNTER 12383395
+#define DEBUG_PROPAGATION_COUNTER 1
 
     // Step 1: Wormhead movement
     const double _time2next     = worm.time2next();
@@ -1140,9 +1166,14 @@ directed_worm_algorithm
     if (_propagation_counter >= DEBUG_PROPAGATION_COUNTER)
     {
         std::cout << "\n\n"
-                  << "\nPropagation step : " << _propagation_counter
-                  << "\n------------------------------------"
-                  << "\nWorm :\n"
+                  << "\nPropagation step : " << _propagation_counter  << "  , Sweep : " << _sweep_counter
+                  << "\n------------------------------------";
+        std::cout << "\nWorldlines :\n";
+        if (is_diagonal_onsite_)
+            wl.output(std::cout, worm.site());
+        else
+            wl.output(std::cout, worm.site(), _neighborsites_cache);
+        std::cout << "\nWorm :\n"
                   << worm
                   << "\n\n"
                   << "\nAttempting to move wormhead by a time of " << _deltatime << " ( " << _time2next << " / " << _time2wormtail << " ) "
@@ -1152,16 +1183,65 @@ directed_worm_algorithm
     }
 #endif
 
-
     const bool _halted = (_deltatime >= _time2next);
     if (_halted)
         _deltatime = _time2next;
 
+    bool _interrupted = false;   
+    double _interrupted_time = -1.;
+    if (!is_diagonal_onsite_)
+    {
+#ifdef DEBUGMODE
+        if (_sweep_counter == DEBUG_SWEEP_COUNTER)
+        if (_propagation_counter >= DEBUG_PROPAGATION_COUNTER)
+        {
+            std::cout << "\n\n"
+                      << "\nPropagation step : " << _propagation_counter << "  , Sweep : " << _sweep_counter
+                      << "\n------------------------------------";
+            std::cout << "\nNeighbor information :";
+            std::cout << "\nSites :  ";
+            std::copy(_neighborsites_cache.begin(), _neighborsites_cache.end(), std::ostream_iterator<unsigned>(std::cout, "  "));
+            std::cout << "\nStates :  ";
+            std::copy(_neighborstates_cache.begin(), _neighborstates_cache.end(), std::ostream_iterator<unsigned short>(std::cout, "  "));
+            std::cout << "\nTimes :  ";
+            std::copy(_neighbortimes_cache.begin(), _neighbortimes_cache.end(), std::ostream_iterator<double>(std::cout, "    "));
+            std::cout << "\nTaus :  ";
+            std::copy(_neighbortaus_cache.begin(), _neighbortaus_cache.end(), std::ostream_iterator<double>(std::cout, "    "));
+        }
+#endif
+
+        const std::size_t which = std::distance(_neighbortaus_cache.begin(), std::min_element(_neighbortaus_cache.begin(), _neighbortaus_cache.end()));
+        const double _time2neighbor = _neighbortaus_cache[which];
+
+        if (_time2neighbor < _deltatime)
+        {
+            _deltatime = _time2neighbor;
+            _interrupted = true;
+            _interrupted_time = _neighbortimes_cache[which];
+        }
+
+#ifdef DEBUGMODE
+        if (_sweep_counter == DEBUG_SWEEP_COUNTER)
+        if (_propagation_counter >= DEBUG_PROPAGATION_COUNTER)
+        {
+            std::cout << "\nInterrupted tau  : " << _time2neighbor
+                      << "\nInterrupted time : " << _interrupted_time
+                      << "\nInterrupted ? " << _interrupted
+                      << "\nDeltatime   : " << _deltatime
+                      << "\n";
+            std::cin.get();
+        }
+#endif
+    }
+
     double _newtime = worm.forward() ? worm.time() + _deltatime : worm.time() - _deltatime;
     bool   _winding_over_time = (_newtime < 0. || _newtime >= 1.);
 
-    if (!_halted && _winding_over_time)
+
+    if ((!_halted && _winding_over_time)) 
         _newtime = wormpair::modone(_newtime);
+    else if (_interrupted)
+        _newtime = worm.forward() ? _interrupted_time+std::numeric_limits<double>::epsilon() : _interrupted_time-std::numeric_limits<double>::epsilon(); 
     else if (_halted)
         _newtime = worm.forward() ? worm.next_time()-std::numeric_limits<double>::epsilon() : worm.next_time()+std::numeric_limits<double>::epsilon();
 
@@ -1171,7 +1251,7 @@ directed_worm_algorithm
     if (_sweep_counter == DEBUG_SWEEP_COUNTER)
     if (_propagation_counter >= DEBUG_PROPAGATION_COUNTER)
     {
-        std::cout << "\nWormhead moves to time " << worm.time() << " ( " << (_halted ? "HALTED" : "NOT HALTED") << " ) "
+        std::cout << "\nWormhead moves to time " << worm.time() << " ( " << (_halted ? "HALTED" : "NOT HALTED") << " / " << (_interrupted ? "INTERRUPTED" : "NOT INTERRUPTED") << " ) "
                   << "\n============================================================================";
         wl.output(std::cout, worm.site());
         std::cout << "\n\n"
@@ -1222,6 +1302,9 @@ directed_worm_algorithm
             green_tof[green_distance] += wormpair_state_ * std::cos(tof_phase);
         }
     }
+
+    if (_interrupted)
+        return true;
 
     if (!_halted)
     {
