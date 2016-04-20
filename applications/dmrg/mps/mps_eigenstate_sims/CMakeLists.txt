@@ -13,4 +13,4 @@ add_executable(mps_meas mps_meas.cpp run_measure.cpp)
 target_link_libraries(mps_meas mps_eigenstate_run ${MYAPP_LIBRARIES})
 
 
-install(TARGETS mps_optim mps_meas RUNTIME DESTINATION bin COMPONENT applications)
+install(TARGETS mps_optim mps_meas EXPORT ALPSMPS-targets RUNTIME DESTINATION bin COMPONENT applications)

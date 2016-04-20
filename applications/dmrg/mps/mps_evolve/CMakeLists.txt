@@ -6,4 +6,4 @@ get_symm_files(APPEND MPS_EVOLVE_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/simulation
 add_executable(mps_evolve ${MPS_EVOLVE_SOURCES})
 target_link_libraries(mps_evolve ${MYAPP_LIBRARIES})
 
-install(TARGETS mps_evolve RUNTIME DESTINATION bin COMPONENT applications)
+install(TARGETS mps_evolve EXPORT ALPSMPS-targets RUNTIME DESTINATION bin COMPONENT applications)
