@@ -78,7 +78,6 @@ else(NOT LAPACK_FOUND)
   add_subdirectory(mps_evolve)
   add_subdirectory(mps_overlap)
   add_subdirectory(examples)
-  add_subdirectory(imps)
   
   
   if(ALPS_INSTALL_MPS_FRAMEWORK)
