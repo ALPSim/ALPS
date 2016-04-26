@@ -149,7 +149,7 @@ directed_worm_algorithm
     // regarding lattice
     , is_periodic_ (std::find((this->lattice().boundary()).begin(), (this->lattice().boundary()).end(), "open") == (this->lattice().boundary()).end())
     // regarding model
-    , is_diagonal_onsite_          (static_cast<double>(parms_.value_or_default("V",0.)) < 1e-6 ? true : false)
+    , is_diagonal_onsite_          (std::abs(static_cast<double>(parms_.value_or_default("V",0.))) < 1e-6 ? true : false)
     // regarding experiment
     , finite_tof   (is_periodic_ ? false : (parms_.defined("tof_phase")))
     , finite_waist (parms_.defined("waist"))
@@ -1036,8 +1036,10 @@ void
       for (unsigned int site=0; site < num_sites(); ++site)
       {
         total_particle_number += wl.site_state(site);
-        const double this_energy_vertex = -static_cast<double>(wl.num_kinks(site)-1)/2;
-        const double this_energy_onsite = onsite_energy(site, wl.site_state(site));
+        double this_energy_vertex = -static_cast<double>(wl.num_kinks(site)-1)/2;
+        double this_energy_onsite = onsite_energy(site, wl.site_state(site));
+        for (neighbor_bond_iterator it=neighbor_bonds(site).first; it != neighbor_bonds(site).second; ++it)
+            this_energy_onsite += onbond_energy(*it, wl.site_state(site), wl.site_state(target(*it)))/2.; 
         total_energy_vertex   += this_energy_vertex;
         total_energy_onsite   += this_energy_onsite;
         if (measure_density2_)
