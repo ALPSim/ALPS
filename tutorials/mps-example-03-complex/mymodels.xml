@@ -1,0 +1,105 @@
+<!--
+   Copyright (c) 2003-2010 Matthias Troyer (troyer@ethz.ch)
+   Copyright (c) 2016-2016 Michele Dolfi (dolfim@phys.ethz.ch)
+    
+   Distributed under the Boost Software License, Version 1.0.
+   (See accompanying file LICENSE_1_0.txt or copy at
+   http://www.boost.org/LICENSE_1_0.txt)
+  -->
+
+<MODELS>
+  <SITEBASIS name="fermion">
+  <QUANTUMNUMBER name="Nup" min="0" max="1" type="fermionic"/>
+  <QUANTUMNUMBER name="Ndown" min="0" max="1" type="fermionic"/>
+  <OPERATOR name="Splus" matrixelement="1">
+    <CHANGE quantumnumber="Ndown" change="-1"/>
+    <CHANGE quantumnumber="Nup" change="1"/>
+  </OPERATOR>
+  <OPERATOR name="Sminus" matrixelement="1">
+    <CHANGE quantumnumber="Nup" change="-1"/>
+    <CHANGE quantumnumber="Ndown" change="+1"/>
+  </OPERATOR>
+  <OPERATOR name="Sz" matrixelement="(Nup-Ndown)/2"/>
+  <OPERATOR name="Nup" matrixelement="Nup"/>
+  <OPERATOR name="Ndown" matrixelement="Ndown"/>
+  <OPERATOR name="c_down" matrixelement="1">
+    <CHANGE quantumnumber="Ndown" change="-1"/>
+  </OPERATOR>
+  <OPERATOR name="cdag_down" matrixelement="1">
+    <CHANGE quantumnumber="Ndown" change="1"/>
+  </OPERATOR>
+  <OPERATOR name="c_up" matrixelement="1">
+    <CHANGE quantumnumber="Nup" change="-1"/>
+  </OPERATOR>
+  <OPERATOR name="cdag_up" matrixelement="1">
+    <CHANGE quantumnumber="Nup" change="1"/>
+  </OPERATOR>
+  <OPERATOR name="n" matrixelement="Nup+Ndown"/>
+  <OPERATOR name="n_up" matrixelement="Nup"/>
+  <OPERATOR name="n_down" matrixelement="Ndown"/>
+  <OPERATOR name="double_occupancy" matrixelement="Nup*Ndown"/>
+</SITEBASIS>
+
+<BASIS name="fermion">
+  <SITEBASIS ref="fermion"/>
+  <CONSTRAINT quantumnumber="Nup" value="Nup_total"/>
+  <CONSTRAINT quantumnumber="Ndown" value="Ndown_total"/>
+</BASIS>
+
+
+<SITEOPERATOR name="Sx" site="x">
+  1/2*(Splus(x)+Sminus(x))
+</SITEOPERATOR>
+
+<SITEOPERATOR name="double_occupancy" site="x">
+  n(x)*(n(x)-1)/2
+</SITEOPERATOR>
+
+<BONDOPERATOR name="exchange" source="x" target="y">
+  Sz(x)*Sz(y)+1/2*(Splus(x)*Sminus(y)+Sminus(x)*Splus(y))
+</BONDOPERATOR>
+
+<BONDOPERATOR name="exchange_xy" source="x" target="y">
+  1/2*(Splus(x)*Sminus(y)+Sminus(x)*Splus(y))
+</BONDOPERATOR>
+
+<BONDOPERATOR name="biquadratic" source="i" target="j">
+  (exchange_xy(i,j)+Sz(i)*Sz(j))*(exchange_xy(i,j)+Sz(i)*Sz(j))
+</BONDOPERATOR>
+
+<GLOBALOPERATOR name="spin_exchange_energy">
+  <BONDTERM type="0" source="i" target="j">
+    Jz*Sz(i)*Sz(j)+Jxy/2*exchange_xy(i,j)
+  </BONDTERM>
+  <BONDTERM type="1" source="i" target="j">
+    Jz'*Sz(i)*Sz(j)+Jxy'/2*exchange_xy(i,j)
+  </BONDTERM>
+</GLOBALOPERATOR>
+
+<HAMILTONIAN name="fermion Hubbard">
+  <PARAMETER name="mu" default="0"/>
+  <PARAMETER name="t" default="1"/>
+  <PARAMETER name="V" default="0"/>
+  <PARAMETER name="t'" default="0"/>
+  <PARAMETER name="V'" default="0"/>
+  <PARAMETER name="U" default="0"/>
+  <PARAMETER name="t0" default="t"/>
+  <PARAMETER name="t1" default="t'"/>
+  <PARAMETER name="V0" default="V"/>
+  <PARAMETER name="V1" default="V'"/>
+  <BASIS ref="fermion"/>
+  <SITETERM site="i">
+    <PARAMETER name="mu#" default="mu"/>
+    <PARAMETER name="U#" default="U"/>
+    -mu#*n(i)+U#*n_up(i)*n_down(i)
+  </SITETERM> 
+  <BONDTERM source="i" target="j">
+    <PARAMETER name="t#" default="0"/>
+    <PARAMETER name="ct#" default="t#"/>
+    <PARAMETER name="V#" default="0"/>
+    -t#*(cdag_up(i)*c_up(j)+cdag_down(i)*c_down(j)) - ct#*(cdag_up(j)*c_up(i)+cdag_down(j)*c_down(i))  + V#*n(i)*n(j)
+  </BONDTERM>
+</HAMILTONIAN>
+
+
+</MODELS>
