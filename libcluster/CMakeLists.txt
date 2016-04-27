@@ -25,6 +25,15 @@ cluster_transform.cpp
 target_link_libraries(cluster ${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES} ${MPI_CXX_LIBRARIES}
 )
 
+install(TARGETS cluster 
+   ARCHIVE DESTINATION "lib/"
+   LIBRARY DESTINATION "lib/"
+   COMPONENT library)
+
+FILE(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+INSTALL(FILES ${files} DESTINATION include)
+install(FILES cluster1d.xml cluster3d.xml cluster.xml DESTINATION "share/")
+
 include(EnableGtests)
 UseGtest()
 enable_testing()

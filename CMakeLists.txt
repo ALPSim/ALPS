@@ -36,4 +36,5 @@ ${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES}
 )
 
 install(TARGETS dmft RUNTIME DESTINATION "bin/")
-install(FILES libcluster/cluster1d.xml libcluster/cluster3d.xml libcluster/cluster.xml DESTINATION "share/")
+FILE(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/blas_classes/*.h")
+install(FILES ${files} DESTINATION "include/")

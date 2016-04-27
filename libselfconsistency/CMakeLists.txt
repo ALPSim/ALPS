@@ -37,3 +37,11 @@ selfconsistency_DCA.cpp
 target_link_libraries(selfconsistency ${ALPSCore_LIBRARIES} ${CLUSTER_LIBRARIES}
  ${MPI_CXX_LIBRARIES}
 )
+
+install(TARGETS selfconsistency
+   ARCHIVE DESTINATION "lib/"
+   LIBRARY DESTINATION "lib/"
+   COMPONENT library)
+
+FILE(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+INSTALL(FILES ${files} DESTINATION include)
