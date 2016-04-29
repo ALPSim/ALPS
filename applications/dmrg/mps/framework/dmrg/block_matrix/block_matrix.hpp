@@ -416,7 +416,7 @@ void block_matrix<Matrix, SymmGroup>::load(Archive & ar)
     data_.clear();
     if (alps::is_complex<typename Matrix::value_type>() && !ar.is_complex("data_"))
     {
-        typedef typename alps::numeric::matrix<typename alps::numeric::real_type<typename Matrix::value_type>::type> LoadMatrix;
+        typedef typename alps::numeric::real_type<Matrix>::type LoadMatrix;
         std::vector<LoadMatrix> tmp;
         ar["data_"] >> tmp;
         for(typename std::vector<LoadMatrix>::const_iterator it = tmp.begin(); it != tmp.end(); ++it)
