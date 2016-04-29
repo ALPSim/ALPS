@@ -410,4 +410,19 @@ namespace alps {
     } // namespace numeric
 } // namespace alps
 
+
+//
+// Trait specializations
+//
+namespace alps {
+    namespace numeric {
+        
+        template <typename T>
+        struct real_type<diagonal_matrix<T> >
+        {
+            typedef diagonal_matrix<typename real_type<T>::type> type;
+        };
+    } // namespace numeric
+} // namespace alps
+
 #endif //ALPS_DIAGONAL_MATRIX_HPP
