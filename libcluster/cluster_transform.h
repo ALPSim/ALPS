@@ -39,13 +39,15 @@ public:
 
   template<typename GFW, typename GFT> void initial_G0(GFW &G0_omega, GFT &G0_tau) const;
 
-protected:
   ///dispersion relation for t and t' in 1, 2, and 3 d.
   double epsilon(const std::vector<double> &k) const;
   ///mass imbalance spin-dependent dispersion
   double epsilon_flavor(const std::vector<double> &k, unsigned int flavor) const;
   ///dispersion relation for a system with an additional phase
   double epsilon_phi(const std::vector<double> &k, const std::vector<double> &phi) const;
+
+protected:
+
 
   std::vector<double> epsav() const { return epsav_; };
   std::vector<double> epssqav() const { return epssqav_; };
