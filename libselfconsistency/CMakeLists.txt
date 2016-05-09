@@ -22,8 +22,10 @@ if (NOT TARGET solver)
 find_package(Solver REQUIRED)
 endif()
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -g -DNDEBUG -DBOOST_DISABLE_ASSERTS")
+
 include_directories(${BLAS_CLASSES_INCLUDE_DIR})
- include_directories(${MPI_CXX_INCLUDE_PATH})
+include_directories(${MPI_CXX_INCLUDE_PATH})
 include_directories(${CLUSTER_INCLUDE_DIR})
 include_directories(${SOLVER_INCLUDE_DIR})
 

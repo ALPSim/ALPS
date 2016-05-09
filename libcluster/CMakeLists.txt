@@ -14,7 +14,7 @@ include_directories(${BLAS_CLASSES_INCLUDE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${MPI_CXX_INCLUDE_PATH})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -g -DNDEBUG -DBOOST_DISABLE_ASSERTS")
 
 add_library (cluster
 cluster_helper.cpp           
