@@ -68,28 +68,28 @@ public:
         }
     }
     
-    std::vector<pos_t> forward(pos_t p) const
+    virtual std::vector<pos_t> forward(pos_t p) const
     {
         return forward_[p];
     }
-    std::vector<pos_t> all(pos_t p) const
+    virtual std::vector<pos_t> all(pos_t p) const
     {
         std::vector<pos_t> ret = forward_[p];
         std::copy(backward_[p].begin(), backward_[p].end(), std::back_inserter(ret));
         return ret; 
     }
     
-    pos_t size() const
+    virtual pos_t size() const
     {
         return graph.num_sites();
     }
     
-    int maximum_vertex_type() const
+    virtual int maximum_vertex_type() const
     {
         return alps::maximum_vertex_type(graph.graph());
     }
     
-    boost::any get_prop_(std::string const & property, std::vector<pos_t> const & pos) const
+    virtual boost::any get_prop_(std::string const & property, std::vector<pos_t> const & pos) const
     {
         if (property == "label" && pos.size() == 1)
             return boost::any( alps::site_label(graph.graph(), graph.site(pos[0])) );
@@ -111,16 +111,16 @@ public:
         }
     }
 
-    const graph_type& alps_graph() const
+    virtual const graph_type& alps_graph() const
     {
         return graph;
     }
     
-private:
+protected:
     alps::Parameters parms;
     graph_type graph;
-    std::vector<std::vector<pos_t> > forward_;
-    std::vector<std::vector<pos_t> > backward_;
+    mutable std::vector<std::vector<pos_t> > forward_;
+    mutable std::vector<std::vector<pos_t> > backward_;
     // TODO: find better solution instead of this (operator[] is non-const)
     mutable std::map<pos_t, std::map<pos_t, pos_t> > bond_index_map;
 };
