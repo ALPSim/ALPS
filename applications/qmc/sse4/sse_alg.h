@@ -339,6 +339,7 @@ private:
             
             start_vertex = op_indices[worker.mrandom_int(nnonzero)];
             start_leg = worker.mrandom_int(2 * UNIT_SIZE);
+            start_level = 0; // unused
 
             Operator& start_op = opstring[start_vertex];
             lat_unit_type const& lat_unit = lat_units[start_op.unit_ref];
