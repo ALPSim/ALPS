@@ -1459,7 +1459,7 @@ void
 #ifndef HEATBATH_ALGORITHM
       const std::pair<neighbor_bond_iterator, neighbor_bond_iterator> _neighbor_bonds = neighbor_bonds(worm.next_partnersite());
 
-      double _weight;
+      double _weight = 0;
       for (neighbor_bond_iterator it=_neighbor_bonds.first; it!=_neighbor_bonds.second; ++it)
         if (target(*it) == worm.site())
         {
