@@ -613,8 +613,10 @@ bool QMCRun<G,StateType>::do_common_measurements(double sign, const std::vector<
     for (typename super_type:: momentum_iterator mit=this->momenta().first; mit != this->momenta().second; ++mit) {
       std::complex<double> vala, valb;
       for (typename super_type::site_iterator sit=this->sites().first; sit!=this->sites().second;++sit) {
-        vala += local_a[*sit]*mit.phase(alps::scheduler::LatticeModelMCRun<G>::coordinate(*sit));
-        valb += local_b[*sit]*mit.phase(alps::scheduler::LatticeModelMCRun<G>::coordinate(*sit));
+        double phase = alps::numeric::scalar_product(this->momentum(*mit), alps::scheduler::LatticeModelMCRun<G>::coordinate(*sit));
+        std::complex<double> cphase(std::cos(phase), std::sin(phase));
+        vala += local_a[*sit] * cphase;
+        valb += local_b[*sit] * cphase;
       }
       str.push_back(std::real(std::conj(vala)*valb));
     }
@@ -628,9 +630,11 @@ bool QMCRun<G,StateType>::do_common_measurements(double sign, const std::vector<
     std::vector<double> str;
     for (typename super_type:: momentum_iterator mit=this->momenta().first; mit != this->momenta().second; ++mit) {
       std::complex<double> val;
-      for (typename super_type::site_iterator sit=this->sites().first; sit!=this->sites().second;++sit)
-        val += local[*sit]*mit.phase(alps::scheduler::LatticeModelMCRun<G>::coordinate(*sit));
-      str.push_back(std::abs(val)*std::abs(val));
+      for (typename super_type::site_iterator sit=this->sites().first; sit!=this->sites().second;++sit) {
+        double phase = alps::numeric::scalar_product(this->momentum(*mit), alps::scheduler::LatticeModelMCRun<G>::coordinate(*sit));
+        val += local[*sit] * std::complex<double>(std::cos(phase), std::sin(phase));
+      }
+      str.push_back(std::norm(val));
     }
     std::valarray<double> strv(str.size());
     for (int i=0;i<str.size();++i)

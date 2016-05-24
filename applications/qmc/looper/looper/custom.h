@@ -230,8 +230,10 @@ struct custom_measurement {
             BOOST_FOREACH(typename virtual_site_descriptor<lattice_t>::type const& vs,
               sites(lat, rs))
               st += (1 - spins[vs]);
-            v0 += boost::get<1>(elms)[t][st] * mit.phase(coordinate(rs));
-            v1 += boost::get<2>(elms)[t][st] * mit.phase(coordinate(rs));
+            double phase = alps::numeric::scalar_product(momentum(*mit,lat), coordinate(rs));
+            std::complex<double> cphase(std::cos(phase), std::sin(phase));
+            v0 += boost::get<1>(elms)[t][st] * cphase;
+            v1 += boost::get<2>(elms)[t][st] * cphase;
           }
           sfac[k] = std::real(std::conj(v0) * v1);
         }

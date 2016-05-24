@@ -273,7 +273,10 @@ struct correlation {
              ++mit, ++k) {
           std::complex<double> val;
           BOOST_FOREACH(typename virtual_site_descriptor<lattice_t>::type s, sites(lat.vg()))
-            val += (0.5-spins[s])  * mit.phase(coordinate[real_site[s]]);
+          {
+            double phase = alps::numeric::scalar_product(momentum(*mit,lat), coordinate[real_site[s]]);
+            val += (0.5-spins[s]) * std::complex<double>(std::cos(phase), std::sin(phase));
+          }
           sfac[k] = sign * power2(val) / lat.volume();
         }
         m["Spin Structure Factor"] << sfac;

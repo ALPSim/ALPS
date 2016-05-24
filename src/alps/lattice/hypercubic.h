@@ -368,11 +368,6 @@ public:
     momentum_iterator(cell_iterator it=cell_iterator()) : cell_iterator(it), valid_(false) {}
     const vector_type& operator*() const { set_k(); return k_; }
     const vector_type* operator->() const { set_k(); return &k_; }
-    std::complex<double> phase(const vector_type& pos) const {
-      set_k();
-      double phase=numeric::scalar_product(k_,pos);
-      return std::complex<double>(std::cos(phase),std::sin(phase));
-    }
     const momentum_iterator& operator++() { 
       valid_=false; 
       cell_iterator::operator++(); 

@@ -487,6 +487,12 @@ momenta(lattice_helper<RG> const& lat) {
   return lat.graph_helper().momenta();
 }
 
+template<typename RG>
+typename lattice_helper<RG>::graph_helper_type::vector_type
+momentum(typename lattice_helper<RG>::graph_helper_type::vector_type const& m, lattice_helper<RG> const& lat) {
+    return lat.graph_helper().momentum(m);
+}
+
 } // end namespace looper
 
 namespace looper {

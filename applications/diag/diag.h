@@ -306,9 +306,14 @@ void DiagMatrix<T,M>::perform_measurements()
           if (av.size() < corrs[*sit1][*sit2].size())
             av.resize(corrs[*sit1][*sit2].size());
           for (unsigned i=0;i<corrs[*sit1][*sit2].size();++i)
+          {
+            double phase1 = alps::numeric::scalar_product(this->momentum(*mit), alps::scheduler::DiagTask<T>::coordinate(*sit1));
+            double phase2 = alps::numeric::scalar_product(this->momentum(*mit), alps::scheduler::DiagTask<T>::coordinate(*sit2));
             av[i] += std::real(corrs[*sit1][*sit2][i]
-                      *std::conj(mit.phase(alps::scheduler::DiagTask<T>::coordinate(*sit1)))
-                      *mit.phase(alps::scheduler::DiagTask<T>::coordinate(*sit2)))/static_cast<double>(this->num_sites());
+                      * std::conj( std::complex<double>(std::cos(phase1), std::sin(phase1)) )
+                      * std::complex<double>(std::cos(phase2), std::sin(phase2))
+                     ) / static_cast<double>(this->num_sites());
+          }
         }
         if (meas.structurefactor_values[ex.first].size() < av.size())
           meas.structurefactor_values[ex.first].resize(av.size());

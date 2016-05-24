@@ -539,7 +539,11 @@ public:
 
   std::vector<std::string> momenta_labels(int precision = 0) const
   {
-      return l_.momenta_labels(precision);
+    std::vector<std::string> labels;
+    momentum_iterator it, end;
+    for (boost::tie(it,end) = momenta(); it != end; ++it)
+      labels.push_back(alps::coordinate_to_string(this->momentum(*it), precision));
+    return labels;
   }
 
   std::vector<std::string> distance_labels(int precision = 0) const
