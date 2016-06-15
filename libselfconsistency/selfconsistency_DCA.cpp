@@ -45,13 +45,13 @@ template<class GFW, class GFT> void print_all_green_functions(int iteration_ctr,
   std::ofstream G_tau_file_2(Gtau_name_2.str().c_str());
   std::ofstream selfenergy_file(selfenergy_name.str().c_str());
 
-  G0_omega_file<<G0_omega;
-  G0_tau_file<<G0_tau;
-  G_omega_file<<G_omega;
-  G_tau_file<<G_tau;
-  G_omega_file_2<<G_omega;
-  G_tau_file_2<<G_tau;
-  selfenergy_file<<selfenergy;
+  G0_omega_file<<setprecision(14)<<G0_omega;
+  G0_tau_file<<setprecision(14)<<G0_tau;
+  G_omega_file<<setprecision(14)<<G_omega;
+  G_tau_file<<setprecision(14)<<G_tau;
+  G_omega_file_2<<setprecision(14)<<G_omega;
+  G_tau_file_2<<setprecision(14)<<G_tau;
+  selfenergy_file<<setprecision(14)<<selfenergy;
 
   alps::hdf5::archive ars(selfenergy_name2.str(), alps::hdf5::archive::WRITE);
   selfenergy.save(ars, "/Sigma");
