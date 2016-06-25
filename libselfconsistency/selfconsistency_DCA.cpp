@@ -22,12 +22,13 @@
 template<class GFW, class GFT> void print_all_green_functions(int iteration_ctr,
     const GFW &G0_omega,
     const GFW &G_omega,
-    const GFW &selfenergy,
+    const GFW &selfenergy,  //the self-energy computed with the old G0
+    const GFW &selfenergy2, //the self-energy computed with the new G0
     const GFT &G0_tau,
     const GFT &G_tau, double beta){
 
   std::ostringstream G0omega_name, G0tau_name, Gomega_name,
-  Gtau_name, Gtau_name_2, Gomega_name_2, selfenergy_name, selfenergy_name2;
+  Gtau_name, Gtau_name_2, Gomega_name_2, selfenergy_name, selfenergy_name_newG0, selfenergy_name2;
   G0omega_name<<"G0_omega"<<"_"<<iteration_ctr;
   G0tau_name<<"G0_tau"<<"_"<<iteration_ctr;
   Gomega_name<<"G_omega"<<"_"<<iteration_ctr;
@@ -35,6 +36,7 @@ template<class GFW, class GFT> void print_all_green_functions(int iteration_ctr,
   Gomega_name_2<<"G_omega";
   Gtau_name_2<<"G_tau";
   selfenergy_name<<"selfenergy"<<"_"<<iteration_ctr;
+  selfenergy_name_newG0<<"selfenergy_newG0"<<"_"<<iteration_ctr;
   selfenergy_name2<<"selfenergy"<<"_"<<iteration_ctr<<".h5";
 
   std::ofstream G0_omega_file(G0omega_name.str().c_str());
@@ -44,6 +46,7 @@ template<class GFW, class GFT> void print_all_green_functions(int iteration_ctr,
   std::ofstream G_omega_file_2(Gomega_name_2.str().c_str());
   std::ofstream G_tau_file_2(Gtau_name_2.str().c_str());
   std::ofstream selfenergy_file(selfenergy_name.str().c_str());
+  std::ofstream selfenergy_file_newG0(selfenergy_name_newG0.str().c_str());
 
   G0_omega_file<<G0_omega;
   G0_tau_file<<G0_tau;
@@ -52,6 +55,7 @@ template<class GFW, class GFT> void print_all_green_functions(int iteration_ctr,
   G_omega_file_2<<G_omega;
   G_tau_file_2<<G_tau;
   selfenergy_file<<selfenergy;
+  selfenergy_file_newG0<<selfenergy2;
 
   alps::hdf5::archive ars(selfenergy_name2.str(), alps::hdf5::archive::WRITE);
   selfenergy.save(ars, "/Sigma");
@@ -78,6 +82,7 @@ template<class SOLV, class TRANS, class GFW, class GFT> void selfconsistency_loo
   GFW G_omega_ksum=G0_omega;
   GFW G0_omega_new=G0_omega;
   GFW self_energy=G0_omega;
+  GFW self_energy2=G0_omega;
 
   GFT G_tau(G0_tau);
 
@@ -93,8 +98,9 @@ template<class SOLV, class TRANS, class GFW, class GFT> void selfconsistency_loo
     clustertrans.dyson_get_self_energy(self_energy, G_omega, G0_omega);
     clustertrans.matsubara_k_sum(G_omega_ksum, self_energy);
     clustertrans.dyson_get_green0(G0_omega_new, self_energy, G_omega_ksum);
+    clustertrans.dyson_get_self_energy(self_energy2, G_omega, G0_omega);
 
-    print_all_green_functions(iteration_ctr, G0_omega, G_omega, self_energy, G0_tau, G_tau, beta);
+    print_all_green_functions(iteration_ctr, G0_omega, G_omega, self_energy, self_energy2, G0_tau, G_tau, beta);
     if (converged(G_omega, G_omega_old,  convergence_tolerance)) break;
 
     G_omega_old=G_omega;
