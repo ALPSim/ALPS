@@ -108,7 +108,7 @@ protected:
   double epssq_av_;
 };
 
-/// A Hilbert transform for a two-dimensional band structure
+/// A Hilbert transform for a two-dimensional band structure. Can do both PM and AFM solutions
 class TwoDAFMHilbertTransformer: public FrequencySpaceHilbertTransformer{
 public:
   ///constructor: set up the 2d AFM integration
@@ -116,7 +116,7 @@ public:
   ///function to extract the average of the dispersion, needed for the high frequency terms
   double epsilon_av(int i) const{(void) i; return 0.;}
   ///function to extract the average of the square of the dispersion, needed for the high frequency terms
-  double epsilonsq_av(int i) const{(void) i; return 16*M_PI*M_PI*(t_*t_+tprime_*tprime_);}
+  double epsilonsq_av(int i) const{(void) i; return 4*(t_*t_+tprime_*tprime_);}
   ///operator() implements abstract virtual operator() of base class HilbertTransformer and performs the actual Hilbert transform.
   virtual single_site_matsubara_gf operator()(const single_site_matsubara_gf & G_omega, single_site_matsubara_gf &G0_omega);
 
@@ -155,4 +155,6 @@ private:
   const double t_;
   const double tprime_;
   const int L_;
+  bool paramagnet_;
+
 };

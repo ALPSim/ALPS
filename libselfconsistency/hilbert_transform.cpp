@@ -38,7 +38,7 @@ FrequencySpaceHilbertTransformer *setup_Bethe_hilbert_transform(const alps::para
 FrequencySpaceHilbertTransformer *setup_DOS_hilbert_transform(const alps::params &parms){
   FrequencySpaceHilbertTransformer *transform_ptr;
   std::cout<<"using DOS Hilbert transform"<<std::endl;
-  if(parms["AFM_SELFCONSISTENCY"]){
+  if(parms["sc.AFM_SELFCONSISTENCY"]){
     transform_ptr= new FSDOSHilbertTransformer(parms);
   }else{
     throw std::invalid_argument("put back the AFM DOS transformer, we have it in git.");
@@ -47,14 +47,8 @@ FrequencySpaceHilbertTransformer *setup_DOS_hilbert_transform(const alps::params
 }
 FrequencySpaceHilbertTransformer *setup_2D_hilbert_transform(const alps::params &parms){
   FrequencySpaceHilbertTransformer *transform_ptr;
-  if(parms["ANTIFERROMAGNET"]==false){
-    throw std::runtime_error("implement PM DOS integration!!");
-  }else{
-    if(parms["SPIN_SYMMETRIZATION"]==true){
-      throw std::invalid_argument("ANTIFERROMAGNET and SPIN_SYMMETRIZATION? That doesn't make sense!");
-    }
-    transform_ptr=new TwoDAFMHilbertTransformer(parms);
-  }
+  if(parms["sc.SPIN_SYMMETRIZATION"] && parms["sc.AFM_SELFCONSISTENCY"]) throw std::invalid_argument("sc.AFM_SELFCONSISTENCY and sc.SPIN_SYMMETRIZATION? That doesn't make sense!");
+  transform_ptr=new TwoDAFMHilbertTransformer(parms);
   return transform_ptr;
 }
 bool FrequencySpaceHilbertTransformer::read_initial_G0(single_site_matsubara_gf &G0_omega){
@@ -152,8 +146,9 @@ single_site_matsubara_gf FSSemicircleHilbertTransformer::initial_G0()
 }
 single_site_matsubara_gf FSSemicircleHilbertTransformer::operator()(const single_site_matsubara_gf& G_omega,single_site_matsubara_gf &G0_omega_ignored)
 {
+  std::cout<<"Single Site / Bethe Lattice Semi Circular Hilbert transform"<<std::endl;
   double tsq=t_*t_;
-  single_site_matsubara_gf G0_omega(G_omega);
+  single_site_matsubara_gf G0_omega(G0_omega_ignored);
   for(alps::gf::matsubara_index i(0); i<G0_omega.mesh1().extent(); ++i) {
     std::complex<double> iw(0.,(2*i()+1)*M_PI/beta_);
     for(alps::gf::index flavor(0);flavor<G0_omega.mesh2().extent(); flavor++) {
@@ -240,9 +235,10 @@ single_site_matsubara_gf TwoDAFMHilbertTransformer::operator()(const single_site
   //compute sigma
   single_site_matsubara_gf sigma(G_omega);
   single_site_matsubara_gf G(G_omega);
+  if(paramagnet_){ spin_symmetrize(G0_omega); spin_symmetrize(G);}
   for(alps::gf::matsubara_index i(0); i<G0_omega.mesh1().extent(); ++i) {
-    sigma(i,alps::gf::index(0))=1./G0_omega(i,alps::gf::index(0))-1./G_omega(i,alps::gf::index(0));
-    sigma(i,alps::gf::index(1))=1./G0_omega(i,alps::gf::index(1))-1./G_omega(i,alps::gf::index(1));
+    sigma(i,alps::gf::index(0))=1./G0_omega(i,alps::gf::index(0))-1./G(i,alps::gf::index(0));
+    sigma(i,alps::gf::index(1))=1./G0_omega(i,alps::gf::index(1))-1./G(i,alps::gf::index(1));
   }
   //perform integration over bz
   for(alps::gf::matsubara_index i(0); i<G0_omega.mesh1().extent(); ++i) {
@@ -262,6 +258,7 @@ single_site_matsubara_gf TwoDAFMHilbertTransformer::operator()(const single_site
     G0_omega(i,alps::gf::index(0))=1./(sigma(i,alps::gf::index(0))+1./G(i,alps::gf::index(0)));
     G0_omega(i,alps::gf::index(1))=1./(sigma(i,alps::gf::index(1))+1./G(i,alps::gf::index(1)));
   }
+  if(paramagnet_){ spin_symmetrize(G0_omega);}
   return G0_omega;
 }
 
@@ -331,6 +328,7 @@ std::complex<double> TwoDAFMHilbertTransformer::twodsimpson(const integrand &f, 
 TwoDAFMHilbertTransformer::TwoDAFMHilbertTransformer(const alps::params& params):FrequencySpaceHilbertTransformer(params),
 t_(params["t"]),
 tprime_(params["tprime"]),
-L_(params["L"]){
+L_(params["L"]),
+paramagnet_(params["sc.SPIN_SYMMETRIZATION"]){
   if(L_%2 !=0) throw std::runtime_error("please choose L to be even for Simpson integration for fast convergence!!");
 }

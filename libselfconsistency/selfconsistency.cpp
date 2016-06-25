@@ -146,9 +146,9 @@ void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver&
 void perform_single_site_loop(const std::string &param_file_name, const alps::params &parms){
 
   FrequencySpaceHilbertTransformer *transform_ptr; //super ugly
-  if(parms.exists("TWODBS"))
+  if(parms.exists("sc.TWODBS"))
     transform_ptr=setup_2D_hilbert_transform(parms);
-  else if (parms.exists("DOSFILE"))
+  else if (parms.exists("sc.DOSFILE"))
     transform_ptr=setup_DOS_hilbert_transform(parms);
   else
     transform_ptr=setup_Bethe_hilbert_transform(parms);
