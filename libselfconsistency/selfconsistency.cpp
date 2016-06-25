@@ -5,6 +5,7 @@
  *****************************************************************************/
 
 #include <fstream>
+#include <iomanip>
 #include "impurity_solver.h"
 #include "selfconsistency.h"
 #include "hilbert_transform.h"
@@ -66,13 +67,13 @@ void print_all_green_functions(int iteration_ctr,
   std::ofstream G_tau_file_2(Gtau_name_2.str().c_str());
   std::ofstream selfenergy_file(selfenergy_name.str().c_str());
 
-  G0_omega_file<<G0_omega;
-  G0_tau_file<<G0_tau;
-  G_omega_file<<G_omega;
-  G_tau_file<<G_tau;
-  G_omega_file_2<<G_omega;
-  G_tau_file_2<<G_tau;
-  selfenergy_file<<selfenergy;
+  G0_omega_file<<std::setprecision(14)<<G0_omega;
+  G0_tau_file<<std::setprecision(14)<<G0_tau;
+  G_omega_file<<std::setprecision(14)<<G_omega;
+  G_tau_file<<std::setprecision(14)<<G_tau;
+  G_omega_file_2<<std::setprecision(14)<<G_omega;
+  G_tau_file_2<<std::setprecision(14)<<G_tau;
+  selfenergy_file<<std::setprecision(14)<<selfenergy;
 }
 void compute_selfenergy(const single_site_matsubara_gf &G0_omega,
     const single_site_matsubara_gf &G_omega,
@@ -84,7 +85,7 @@ void compute_selfenergy(const single_site_matsubara_gf &G0_omega,
       selfenergy(i,s)=1./G0_omega(i,s)-1./G_omega(i,s);
     }
   }
-  std::cout<<"computing selfenergy frmo G0: "<<G0_omega(alps::gf::matsubara_index(0), alps::gf::index(0))<<" and G: "<<G_omega(alps::gf::matsubara_index(0), alps::gf::index(0))<<" to obtain "<<selfenergy(alps::gf::matsubara_index(0), alps::gf::index(0))<<std::endl;
+  std::cout<<"computing selfenergy from G0: "<<G0_omega(alps::gf::matsubara_index(0), alps::gf::index(0))<<" and G: "<<G_omega(alps::gf::matsubara_index(0), alps::gf::index(0))<<" to obtain "<<selfenergy(alps::gf::matsubara_index(0), alps::gf::index(0))<<std::endl;
 }
 
 void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver& solver, FrequencySpaceHilbertTransformer& hilbert)

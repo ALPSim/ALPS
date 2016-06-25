@@ -19,8 +19,8 @@ void FrequencySpaceHilbertTransformer::define_parameters(alps::params &p){
   p.define<std::string>("G0_OMEGA_INPUT", "Input filename for input G0");
   p.define<bool>("ATOMIC", false, "Generate atomic G0 to start from");
   p.define<double>("H_INIT", 0, "Initial (staggered) magnetic field");
-  p.define<std::string>("DOSFILE", "File contaning table of Density of States");
-  p.define<std::string>("TWODBS", "Use Hilbert transform for two-dimensional band structure");
+  p.define<std::string>("sc.DOSFILE", "File containing table of Density of States");
+  p.define<std::string>("sc.TWODBS", "Use Hilbert transform for two-dimensional band structure");
 
 }
 FrequencySpaceHilbertTransformer::FrequencySpaceHilbertTransformer(const alps::params &p):
