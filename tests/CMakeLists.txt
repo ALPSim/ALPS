@@ -1,0 +1,10 @@
+include_directories(${DMFT_SOURCE_DIR}/libcluster)
+include_directories(${BLAS_CLASSES_INCLUDE_DIR})
+
+include(EnableGtests)
+UseGtest()
+enable_testing()
+include_directories(${GTEST_INCLUDE_DIR})
+list(APPEND LINK_ALL cluster ${GTEST_LIBRARY} ${GTEST_MAINLIB})
+add_gtest(cluster_helper_test)
+add_gtest(cluster_transform_test)

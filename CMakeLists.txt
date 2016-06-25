@@ -9,12 +9,10 @@ find_package(ALPSCore REQUIRED COMPONENTS hdf5 accumulators mc params gf)
 
 add_subdirectory(libcluster)
 add_subdirectory(libselfconsistency)
+add_subdirectory(tests)
+
 
 find_package(LAPACK REQUIRED)
-find_package(MPI REQUIRED)
-
-include(UseGtest)
-
 # FIXME: make this compiler-dependent
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -ffast-math -DNDEBUG -DBOOST_DISABLE_ASSERTS")
 if (CMAKE_CXX_COMPILER_ID MATCHES Intel)
@@ -26,10 +24,14 @@ include_directories(${MPI_CXX_INCLUDE_PATH})
 include_directories("libcluster")
 include_directories("libsolver")
 include_directories("libselfconsistency")
+include_directories("tests")
 
 add_executable(dmft
 main.cpp
 )
+
+add_test(NAME cluster_helper COMMAND cluster_helper_test)
+add_test(NAME cluster_transform COMMAND cluster_transform_test)
 
 target_link_libraries(dmft selfconsistency cluster
 ${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES} 
@@ -38,3 +40,5 @@ ${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES}
 install(TARGETS dmft RUNTIME DESTINATION "bin/")
 FILE(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/blas_classes/*.h")
 install(FILES ${files} DESTINATION "include/")
+
+
