@@ -118,13 +118,11 @@ void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver&
   do {
     iteration_ctr++;
     std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
-    double mu = parms["MU"];
     G_old_omega = G_omega;
     G0_old_omega = G0_omega;
     G_old_tau = G_tau;
     G0_old_tau = G0_tau;
     alps::gf::fourier_frequency_to_time(G0_omega,G0_tau);
-    //fourier.setmu(mu);
     std::cout<<"running solver."<<std::endl<<std::flush;
     solver.solve(G0_omega,G0_tau, G_omega, G_tau);
     if(spin_symmetrize){
@@ -134,7 +132,7 @@ void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver&
 
     compute_selfenergy(G0_omega, G_omega, selfenergy);
 
-    G0_omega = hilbert(G_omega, G0_omega, mu, h, beta);
+    G0_omega = hilbert(G_omega, G0_omega);
 
     //relaxation to speed up /slow down convergence
     run_convergence_acceleration(G0_omega, G0_old_omega, relax_rate);
