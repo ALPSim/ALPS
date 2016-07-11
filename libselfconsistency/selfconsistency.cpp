@@ -27,6 +27,7 @@ void define_selfconsistency_parameters(alps::params &p){
   p.define<double>("sc.RELAX_RATE", 1., "Convergence acceleration (or deceleration) parameter. Choose 1 if unsure.");
   p.define<bool>("sc.AFM_SELFCONSISTENCY", false, "Use the AFM self-consistency condition.");
   p.define<bool>("sc.SPIN_SYMMETRIZATION", true, "symmetrize 'up' and 'down' spins after each solver call.");
+  p.define<std::string>("G0_OMEGA_OUTPUT", "Output filename for G0");
 }
 void run_convergence_acceleration(single_site_matsubara_gf &G_new, const single_site_matsubara_gf &G_old, double relax_rate){
   if(relax_rate !=1){
@@ -41,6 +42,10 @@ void run_convergence_acceleration(single_site_matsubara_gf &G_new, const single_
 bool converged(const single_site_matsubara_gf &G_omega, const single_site_matsubara_gf &G_omega_old, double tolerance){
   double max_diff=0;
   return ((G_omega-G_omega_old).norm() > max_diff)?false:true;
+}
+template<class GFW> void write_new_G0omega(const GFW &G0_omega, const std::string &path){
+  alps::hdf5::archive ar(path, alps::hdf5::archive::WRITE);
+  G0_omega.save(ar, "/G0");
 }
 void print_all_green_functions(int iteration_ctr,
     const single_site_matsubara_gf &G0_omega,
@@ -100,6 +105,7 @@ void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver&
   double relax_rate=parms["sc.RELAX_RATE"];
   int max_it=parms["sc.MAX_IT"];
   double convergence_tolerance=parms["sc.SELFCONSISTENCY_CONVERGENCE"];
+  std::string g0_output_path = parms["G0_OMEGA_OUTPUT"];
 
 
   single_site_matsubara_gf G0_omega = hilbert.initial_G0();
@@ -136,6 +142,7 @@ void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver&
 
     //relaxation to speed up /slow down convergence
     run_convergence_acceleration(G0_omega, G0_old_omega, relax_rate);
+    write_new_G0omega(G0_omega, g0_output_path);
     print_all_green_functions(iteration_ctr, G0_omega, G_omega, selfenergy, G0_tau, G_tau, beta);
   }while (iteration_ctr < max_it && !converged(G_omega,G_old_omega,convergence_tolerance));
 }
