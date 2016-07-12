@@ -44,8 +44,7 @@ int main(int argc, char** argv)
 {
   try {
     if(argc <2){
-      std::cerr<<"use: program_name parameter_file. Under MPI to pass argument to nodes use"<<std::endl;
-      std::cerr<<"mpirun mpi_options program_name -- parameter_file"<<std::endl;
+      std::cerr<<"use: program_name parameter_file."<<std::endl;
       exit(1);
     }
     std::cout << "#################################################"<<std::endl;
