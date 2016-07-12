@@ -28,7 +28,7 @@ template<class GFW, class GFT> void print_all_green_functions(int iteration_ctr,
     const GFT &G_tau, double beta){
 
   std::ostringstream G0omega_name, G0tau_name, Gomega_name,
-  Gtau_name, Gtau_name_2, Gomega_name_2, selfenergy_name, selfenergy_name_newG0, selfenergy_name2;
+  Gtau_name, Gtau_name_2, Gomega_name_2, selfenergy_name, selfenergy_name_newG0, Greens_h5_name;
   G0omega_name<<"G0_omega"<<"_"<<iteration_ctr;
   G0tau_name<<"G0_tau"<<"_"<<iteration_ctr;
   Gomega_name<<"G_omega"<<"_"<<iteration_ctr;
@@ -37,7 +37,6 @@ template<class GFW, class GFT> void print_all_green_functions(int iteration_ctr,
   Gtau_name_2<<"G_tau";
   selfenergy_name<<"selfenergy"<<"_"<<iteration_ctr;
   selfenergy_name_newG0<<"selfenergy_newG0"<<"_"<<iteration_ctr;
-  selfenergy_name2<<"selfenergy"<<"_"<<iteration_ctr<<".h5";
 
   std::ofstream G0_omega_file(G0omega_name.str().c_str());
   std::ofstream G0_tau_file(G0tau_name.str().c_str());
@@ -57,8 +56,12 @@ template<class GFW, class GFT> void print_all_green_functions(int iteration_ctr,
   selfenergy_file<<std::setprecision(14)<<selfenergy;  
   selfenergy_file_newG0<<std::setprecision(14)<<selfenergy2;
 
-  alps::hdf5::archive ars(selfenergy_name2.str(), alps::hdf5::archive::WRITE);
-  selfenergy.save(ars, "/Sigma");
+  Greens_h5_name << "Greens_" <<iteration_ctr<<".h5";
+  alps::hdf5::archive ar(Greens_h5_name.str().c_str(), alps::hdf5::archive::WRITE);
+  G_omega.save(ar, "/G_komega");
+  G0_omega.save(ar, "/G0_komega");
+  selfenergy.save(ar, "/Sigma_komega");
+  ar.close();
 }
 template<class GFW> bool converged(const GFW &G_omega, const GFW &G_omega_old, double tolerance){
   return ((G_omega-G_omega_old).norm() > tolerance)?false:true;
