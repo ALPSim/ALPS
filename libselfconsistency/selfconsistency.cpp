@@ -45,7 +45,7 @@ bool converged(const single_site_matsubara_gf &G_omega, const single_site_matsub
 }
 template<class GFW> void write_new_G0omega(const GFW &G0_omega, const std::string &path){
   alps::hdf5::archive ar(path, alps::hdf5::archive::WRITE);
-  G0_omega.save(ar, "/G0");
+  G0_omega.save(ar, "/G0_omega");
 }
 void print_all_green_functions(int iteration_ctr,
     const single_site_matsubara_gf &G0_omega,
