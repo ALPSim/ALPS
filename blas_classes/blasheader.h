@@ -4,7 +4,7 @@
 
 
 #include<complex>
-#ifndef MY_BLAS_DEFS
+#ifdef NO_MY_BLAS_DEFS
 #include<boost/numeric/bindings/blas.hpp>
 #include<boost/numeric/bindings/lapack.hpp>
 #include<boost/numeric/bindings/lapack/driver/gesv.hpp>
@@ -66,6 +66,7 @@ extern "C" void zscal_(const int *size, const void *alpha, void *v, const int *i
 namespace lapack{
 extern "C" void ssyev_(const char *jobs, const char *uplo, const int *size, float *matrix, const int *lda, float *eigenvalues, float *work, const int *lwork, int *info);
 extern "C" void dsyev_(const char *jobs, const char *uplo, const int *size, double *matrix, const int *lda, double *eigenvalues, double *work, const int *lwork, int *info);
+extern "C" void zgeev_( char* jobvl, char* jobvr, int* n, std::complex<double> * a, int* lda, std::complex<double>* w, std::complex<double>* vl, int* ldvl, std::complex<double>* vr, int* ldvr, std::complex<double>* work, int* lwork, double* rwork, int* info );
 extern "C" void sgesv_(const int *N, const int *NRHS, float *A, const int *LDA, int *IPIV, float *B, const int *LDB, int *INFO);
 extern "C" void dgesv_(const int *N, const int *NRHS, double *A, const int *LDA, int *IPIV, double *B, const int *LDB, int *INFO);
 //extern "C" void zgesv_(const int *N, const int *NRHS, std::complex<double> *A, const int *LDA, int *IPIV, std::complex<double> *B, const int *LDB, int *INFO);

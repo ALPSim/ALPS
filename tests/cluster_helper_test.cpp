@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
-#include "clusterhelper.h"
-#include "alps/ngs/params.hpp"
+#include "cluster_helper.h"
+#include "alps/params.hpp"
 
 #define TWODCLUSTERS1 "Betts2D-1A","Betts2D-4A","Betts2D-8A","Betts2D-8C","Betts2D-9A","Betts2D-9B","Betts2D-10A","Betts2D-10B","Betts2D-11A","Betts2D-12A","Betts2D-12B","Betts2D-12D","Betts2D-13A","Betts2D-14A","Betts2D-14B","Betts2D-15A","Betts2D-15B","Betts2D-16A","Betts2D-16B","Betts2D-16C","Betts2D-16D","Betts2D-16E","Betts2D-17A","Betts2D-17B","Betts2D-18A","Betts2D-18B","Betts2D-18C","Betts2D-18D","Betts2D-19A"
 #define TWODCLUSTERS2 "Betts2D-19B","Betts2D-20A","Betts2D-20B","Betts2D-20C","Betts2D-20E"
@@ -16,10 +16,11 @@ class ClusterHelperTest : public ::testing::TestWithParam<const char*> {
     alps::params p;
     L_=20;
     p["LATTICE_LIBRARY"] = "./cluster.xml";
+    p["LATTICE_DUMP"] = "./cluster.h5";
     p["LATTICE"] = GetParam();
     p["SITES"]=extract_unit_cell_volume_from_name(GetParam());
     p["L"] = L_;
-    p["PARAMAGNET"]=1; //note that we need to know at this point if we're paramagnetic or not. Not sure this is the right place for it.
+    p["AFM_SELFCONSISTENCY"]=false; //note that we need to know at this point if we're paramagnetic or not. Not sure this is the right place for it.
     CH_=new ClusterHelper(p);
   }
   int extract_unit_cell_volume_from_name(const char* name){
@@ -42,14 +43,17 @@ TEST_P(ClusterHelperTest, TwoDClusterReadWrite){
   alps::params p2;
   p2["LATTICE"]=GetParam();
   p2["TMPNAME"]="cluster_dump.h5";
-  CH_->write(p2, GetParam());
+  //CH_->write(p2, GetParam());
+  CH_->write();
   
   p2["LATTICE_LIBRARY"] = "./cluster.xml";
+  p2["LATTICE_DUMP"] = "./cluster.h5";
   p2["SITES"]=extract_unit_cell_volume_from_name(GetParam());
   p2["L"] = L_;
-  p2["PARAMAGNET"]=1;
+  p2["AFM_SELFCONSISTENCY"]=false;
   ClusterHelper CH2(p2);
-  CH2.read(p2, GetParam());
+  //CH2.read(p2, GetParam());
+  CH2.read();
   
   EXPECT_EQ(*CH_, CH2);
 }
@@ -58,11 +62,13 @@ TEST_P(ClusterHelperTest, TwoDClusterVsStoredALPS){
   p2["LATTICE"]=GetParam();
   p2["TMPNAME"]="cluster_dump.bup.h5";
   p2["LATTICE_LIBRARY"] = "./cluster.xml";
+  p2["LATTICE_DUMP"] = "./cluster.h5";
   p2["SITES"]=extract_unit_cell_volume_from_name(GetParam());
   p2["L"] = L_;
-  p2["PARAMAGNET"]=1;
+  p2["AFM_SELFCONSISTENCY"]=false;
   ClusterHelper CH2(p2);
-  CH2.read(p2, GetParam());
+  CH2.read();
+  //CH2.read(p2, GetParam());
 
   EXPECT_EQ(*CH_, CH2);
 }
@@ -88,9 +94,10 @@ TEST(ClusterHelper, Periodicity8Site){
   alps::params p;
   p["LATTICE"]="Betts2D-8A";
   p["LATTICE_LIBRARY"] = "./cluster.xml";
+  p["LATTICE_DUMP"] = "./cluster.h5";
   p["SITES"]=8;
   p["L"] = 20;
-  p["PARAMAGNET"]=1;
+  p["AFM_SELFCONSISTENCY"]=false;
 
   ClusterHelper CH(p);
 
@@ -101,9 +108,10 @@ TEST(ClusterHelper, Periodicity4Site){
   alps::params p;
   p["LATTICE"]="Betts2D-4A";
   p["LATTICE_LIBRARY"] = "./cluster.xml";
+  p["LATTICE_DUMP"] = "./cluster.h5";
   p["SITES"]=4;
   p["L"] = 20;
-  p["PARAMAGNET"]=1;
+  p["AFM_SELFCONSISTENCY"]=false;
 
   ClusterHelper CH(p);
 

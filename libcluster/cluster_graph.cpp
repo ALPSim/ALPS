@@ -127,7 +127,7 @@ bool alps_graph::operator==(const alps_graph &g) const{
   }
   for(int i=0;i<cell_offsets_.size();++i){
     for(int j=0;j<dimension_;++j){
-      if(std::abs(cell_offsets_[i][j]-g.cell_offsets_[i][j])>1.e-8) return false;
+      if(std::abs((double)cell_offsets_[i][j]-g.cell_offsets_[i][j])>1.e-8) return false;
     }
   }
   return true;

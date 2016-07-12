@@ -1,243 +1,134 @@
 /*****************************************************************************
-*
-* Copyright (C) 2005-2015 Emanuel Gull <egull@umich.edu>
-*
-*****************************************************************************/
+ *
+ * Copyright (C) 2005-2015 Emanuel Gull <egull@umich.edu>
+ *
+ *****************************************************************************/
 
 #pragma once
-#include "boost/shared_ptr.hpp"
-
-#include "alps/ngs/params.hpp"
-
-#include "green_function.h"
-#include "nambu_green_function.h"
+#include "alps/params.hpp"
+#include "alps/gf/tail.hpp"
+typedef alps::gf::omega_sigma_gf_with_tail single_site_matsubara_gf;
+typedef alps::gf::itime_sigma_gf_with_tail single_site_itime_gf;
 
 
-/// @brief performs a Hilbert transformation
-///
-/// The HilbertTransformer performs a Hilbert transformation for the self energy and density of states
-class HilbertTransformer
-{
-public:
-  /// the function call operator performs a Hilbert transformation of the self energy 
-  /// and chemical potential given as parameters. The density of states is constant for
-  /// each object and usually specified in the constructor of a derived class
-  ///
-  /// @param G_tau the Greens function as a function of imaginary time tau 
-  /// @param mu the chemical potential, h the magnetic field, beta the inverse temperature
-  /// @return the result of the Hilbert transform (G0_tau)
-  virtual itime_green_function_t operator()(const itime_green_function_t& G_tau, 
-                                            double mu, double h, double beta)=0; 
-    itime_green_function_t symmetrize(const itime_green_function_t& G_tau, const bool paramagnet) const;
-  virtual itime_green_function_t initial_G0(const alps::params& parms);
-  virtual ~HilbertTransformer() {}
-};
-
-
-
-/// A Hilbert transformation for a semcircle density of states
-/// It receives G(\tau) as input and returns G0(\tau)
-class SemicircleHilbertTransformer : public HilbertTransformer 
-{
-public:
-  /// the constructor accepts the bandwidth
-  SemicircleHilbertTransformer(double t) : t_(t) {}
-
-  ///operator() implements abstract virtual operator() of base class HilbertTransformer 
-  ///and performs the actual Hilbert transformation.
-  itime_green_function_t operator()(const itime_green_function_t& G_tau, 
-                                    double mu, double h, double beta);
-  itime_green_function_t initial_G0(const alps::params& parms);
-  
-private:
-  double t_; 
-};
-
-
-
-/// A Hilbert transformation for a square lattice density of states
-/// @todo the transformation need to be implemented. responsible: Philipp Werner and Hartmut Monien
-class SquarelatticeHilbertTransformer : public HilbertTransformer {
-public:
-  /// the constructor accepts the bandwidth
-  SquarelatticeHilbertTransformer(double bandwidth) : bw_(bandwidth) {}
-  virtual itime_green_function_t operator()(const itime_green_function_t& G_tau, 
-					    double mu, double h, double beta)
-  {
-    //to implement
-    std::cout<<"Square Lattice Hilbert transformer"<<std::make_pair(G_tau,beta)<<std::endl;
-    std::cout<<mu<<std::endl;
-    std::cout<<beta<<std::endl;
-    std::cout<<h<<std::endl;
-    std::cout<<"bw is: "<<bw_<<std::endl;
-    throw std::logic_error("this function has not been implemented.");
-  }
-private:
-  double bw_; //bandwidth
-};
-
-
-
-/// A Hilbert transformation for a general density of states, specified in the constructor
-/// @todo the transformation need to be implemented. responsible: Philipp Werner
-class GeneralHilbertTransformer : public HilbertTransformer {
-public:
-  /// the constructor accepts the desity of states
-  /// @param D the density of states. 
-  ///          Note that issues such as units are still undecided and might require further 
-  ///          additions to the interface
-  GeneralHilbertTransformer(const std::vector<double> & D) : D_(D) {}
-  virtual itime_green_function_t operator()(const itime_green_function_t& G_tau, 
-					    double mu, double h, double beta)
-  {
-    //to implement
-    //std::cout<<Sigma;
-    std::cout<<std::make_pair(G_tau,beta)<<std::endl;
-    std::cout<<mu;
-    std::cout<<beta;
-    std::cout<<h;
-    throw std::logic_error("this function has not been implemented.");
-  }
-private:
-  std::vector<double> D_; // or band width
-};
-
-
-
-// definition of Hilbert transformers living in Fourier (Matsubara) space
-
-
-
-/// @brief performs a Hilbert transformation
-///
-/// The FrequencySpaceHilbertTransformer performs a Hilbert transformation for the self energy and density of states.
-/// Arguments are expected to be in Matsubara Frequencies.
-/// See FrequencySpaceHilbertTransformer for a class that takes its arguments in imaginary time space.
+///Matsubara space Hilbert transforms
 class FrequencySpaceHilbertTransformer{
 public:
-  /// the function call operator performs a Hilbert transformation of the self energy 
-  /// and chemical potential given as parameters. The density of states is constant for
-  /// each object and usually specified in the constructor of a derived class
-  ///
-  /// @param G_omega the Greens function as a function of Matsubara Frequency omega 
-  /// @param mu the chemical potential, h the magnetic field, beta the inverse temperature
-  /// @return the result of the Hilbert transform: the bare Green's function G0 in Matsubara frequencies
-  virtual matsubara_green_function_t operator()(const matsubara_green_function_t & G_omega, 
-                                                matsubara_green_function_t &G0_omega, 
-                                                const double mu, const double h, 
-                                                const double beta)=0;
-  virtual matsubara_green_function_t initial_G0(const alps::params& parms);
+  ///define the parameters that this class uses
+  static void define_parameters(alps::params &p);
+  ///initialize a single site Hilbert transformer from a parameter file
+  FrequencySpaceHilbertTransformer(const alps::params &p);
+  ///run the Hilbert transform
+  virtual single_site_matsubara_gf operator()(const single_site_matsubara_gf & G_omega, single_site_matsubara_gf &G0_omega)=0;
+  ///Create an initial Green's function for starting a simulation
+  virtual single_site_matsubara_gf initial_G0();
+  ///virtual destructor
   virtual ~FrequencySpaceHilbertTransformer() {}
-  template <class T>
-  green_function<T> symmetrize(const green_function<T>& G, const bool paramagnet) const
+  ///function to extract the average of the dispersion, needed for the high frequency terms
+  virtual double epsilon_av(int orbital) const=0;
+  ///function to extract the average of the square of the dispersion, needed for the high frequency terms
+  virtual double epsilonsq_av(int orbital) const=0;
+
+  ///symmetrization function for performing a spin symmetrization
+  template<class T, class MESH1> void spin_symmetrize(alps::gf::two_index_gf<T, MESH1, alps::gf::index_mesh> &GF) const
   {
-    green_function<T> G_new(G);
-    if (paramagnet) {
-      assert(G_new.nflavor()%2==0);
-      for(int flavor=0;flavor<G_new.nflavor(); flavor+=2){
-        for(int tau=0;tau<G_new.ntime();++tau){
-          G_new(tau, flavor  )=0.5*(G_new(tau, flavor)+G_new(tau, flavor+1));
-          G_new(tau, flavor+1)=G_new(tau, flavor);
-        }
+    if(GF.mesh2().extent()%2!=0) throw std::invalid_argument("for spin symmetrization you have to have an even number of orbitals.");
+    for(typename MESH1::index_type i(0); i<GF.mesh1().extent();++i){
+      for(alps::gf::index_mesh::index_type flavor(0);flavor<GF.mesh2().extent(); flavor+=2){
+        T symmetrized_value=0.5*(GF(i,flavor)+GF(i,flavor+1));
+        GF(i,flavor  )=symmetrized_value;
+        GF(i,flavor+1)=symmetrized_value;
       }
     }
-    return G_new;
   }
+protected:
+  ///read an input G0 file
+  bool read_initial_G0(single_site_matsubara_gf &G0_omega);
+  ///write a newly generated input G0 file so that it can be used as an input next time.
+  void write_initial_G0(const single_site_matsubara_gf &G0_omega);
+  ///set the three highfrequency tails
+  void set_tails(single_site_matsubara_gf &G0_omega) const{ set_c1_unity(G0_omega); set_c2(G0_omega); set_c3(G0_omega);}
+  ///For Green's functions, the c1 high frequency term is 1
+  void set_c1_unity(single_site_matsubara_gf &G0_omega) const;
+  ///For Green's functions, the c2 high frequency term is mu - epsilon +/- h
+  void set_c2(single_site_matsubara_gf &G0_omega) const;
+  ///For Green's functions, the c2 high frequency term is (mu +/- h)^2 -2 (mu +/- h) *epsilon + epsilon^2
+  void set_c3(single_site_matsubara_gf &G0_omega) const;
+
+  //number of Matsubara frequencies
+  const int n_matsubara_;
+  const int n_orbital_;
+  const double beta_;
+  const double mu_;
+  const std::string input_filename_;
+  const bool atomic_initial_G0_;
 };
 
 
 
-/// A Hilbert transformation for a semcircle density of states
-/// It receives the dressed Green's function G(\omega) as input and returns tha bare GF G0(\omega)
+/// A Hilbert transform for a semcircle density of states
 class FSSemicircleHilbertTransformer : public FrequencySpaceHilbertTransformer {
 public:
   /// the constructor accepts the bandwidth
-  FSSemicircleHilbertTransformer(double t) : t_(t) {}
-  ///operator() implements abstract virtual operator() of base class HilbertTransformer 
-  ///and performs the actual Hilbert transformation.
-  virtual matsubara_green_function_t operator()(const matsubara_green_function_t& G_omega, 
-                                                matsubara_green_function_t &G0_omega_ignored, 
-                                                const double mu, const double h, const double beta);
-  matsubara_green_function_t initial_G0(const alps::params& parms);
-  
+  FSSemicircleHilbertTransformer(const alps::params &p) : FrequencySpaceHilbertTransformer(p),t_(p["t"]) {}
+  ///function to extract the average of the dispersion, needed for the high frequency terms
+  double epsilon_av(int orbital) const{(void) orbital; return 0.;}
+  ///function to extract the average of the square of the dispersion, needed for the high frequency terms
+  double epsilonsq_av(int orbital) const{(void) orbital; return t_*t_;}
+  ///operator() implements abstract virtual operator() of base class HilbertTransformer and performs the actual Hilbert transform.
+  virtual single_site_matsubara_gf operator()(const single_site_matsubara_gf & G_omega, single_site_matsubara_gf &G0_omega);
+  ///Create an initial Green's function for starting a simulation
+  single_site_matsubara_gf initial_G0();
+
 private:
   double t_; 
 };
 
-
-
-class FSHamiltonianHilbertTransformer: public FrequencySpaceHilbertTransformer{
-public:
-  /// the constructor reads in the LDA Hamiltonian from a file
-  FSHamiltonianHilbertTransformer(const alps::params& params);
-  /// take G_iomegan as the input and construct G0_iomegan out of it. Do this
-  /// via summation in k-space. The k-points are defined in the Hamiltonian.
-  virtual matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
-                                                matsubara_green_function_t &G0_omega, 
-                                                const double mu, const double h, const double beta);
-};
-
-
-
+/// A Hilbert transform for a general density of states
 class FSDOSHilbertTransformer: public FrequencySpaceHilbertTransformer{
 public:
   /// the constructor reads in the DOS from a file
   FSDOSHilbertTransformer(const alps::params& params);
-  /// take G_iomegan as the input and construct G0_iomegan out of it. Do this
-  /// using integration over D(epsilon).
-  /// We perform the HT G <- \int \frac{D(e)}{A - e} de
-  virtual matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
-                                                matsubara_green_function_t &G0_omega, 
-                                                const double mu, const double h, const double beta);
-  
+  ///function to extract the average of the dispersion, needed for the high frequency terms
+  double epsilon_av(int i) const{(void) i; return eps_av_;}
+  ///function to extract the average of the square of the dispersion, needed for the high frequency terms
+  double epsilonsq_av(int i) const{(void) i; return epssq_av_;}
+  ///operator() implements abstract virtual operator() of base class HilbertTransformer and performs the actual Hilbert transform.
+  virtual single_site_matsubara_gf operator()(const single_site_matsubara_gf & G_omega, single_site_matsubara_gf &G0_omega);
+
 protected:
-  std::vector<double> epsilon;
-  std::vector<double> dos;
+  ///make sure that the DOS is normalized to 1.
+  void normalize_dos();
+  ///find <epsilon> and <epsilon^2> via integration over the BZ.
+  void compute_moments();
+
+  std::vector<double> epsilon_;
+  std::vector<double> dos_;
+  double eps_av_;
+  double epssq_av_;
 };
 
-
-
-inline std::complex<double> integrand(int n, const std::vector<double> &dos, const std::vector<double> &epsilon, 
-				      const std::complex<double> &zeta_A,
-				      const std::complex<double> &zeta_B)
-{ 
-  return dos[n]/(zeta_A*zeta_B - epsilon[n]*epsilon[n]); 
-}
-
-
-
-//this can do Antiferromagnetism according to Georges et. al.
-class AFM_FSDOSHilbertTransformer: public FSDOSHilbertTransformer{
-public:
-  AFM_FSDOSHilbertTransformer(const alps::params &parms)
-    :FSDOSHilbertTransformer(parms){}
-  virtual ~AFM_FSDOSHilbertTransformer(){}
-  virtual matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega,
-						matsubara_green_function_t &G0_omega, 
-						const double mu, const double h, const double beta);
-};
-
-
+/// A Hilbert transform for a two-dimensional band structure. Can do both PM and AFM solutions
 class TwoDAFMHilbertTransformer: public FrequencySpaceHilbertTransformer{
 public:
-  TwoDAFMHilbertTransformer(const alps::params& params){
-    t_=params["t"];
-    tprime_=params["tprime"]|0;
-    L_=params["L"]|200;
-    if(L_%2 !=0) throw std::runtime_error("please choose L to be even for Simpson integration for fast convergence!!");
-  }
+  ///constructor: set up the 2d AFM integration
+  TwoDAFMHilbertTransformer(const alps::params& params);
+  ///function to extract the average of the dispersion, needed for the high frequency terms
+  double epsilon_av(int i) const{(void) i; return 0.;}
+  ///function to extract the average of the square of the dispersion, needed for the high frequency terms
+  double epsilonsq_av(int i) const{(void) i; return 4*(t_*t_+tprime_*tprime_);}
+  ///operator() implements abstract virtual operator() of base class HilbertTransformer and performs the actual Hilbert transform.
+  virtual single_site_matsubara_gf operator()(const single_site_matsubara_gf & G_omega, single_site_matsubara_gf &G0_omega);
 
-  
-  matsubara_green_function_t operator()(const matsubara_green_function_t & G_omega, 
-					matsubara_green_function_t &G0_omega, 
-					const double mu, const double h, const double beta);
+  ///class for doing integration in 2d
   class integrand{
-    public:
-      virtual std::complex<double>operator()(double kx, double ky) const=0;
-      virtual ~integrand(){};
+  public:
+    virtual std::complex<double>operator()(double kx, double ky) const=0;
+    virtual ~integrand(){};
   };
+  ///class implementing the integral that needs to be done: see equation 97 in the Georges review. We have the 2d dispersion hard coded here.
   class afm_integrand:public integrand{ //class for the integrand with an epsilon(k) that uses the t-band structure.
-    public:
+  public:
     afm_integrand(double t, double tprime, std::complex<double> zeta_A, std::complex<double> zeta_B){
       zeta_A_=zeta_A;
       zeta_B_=zeta_B;
@@ -249,9 +140,9 @@ public:
       //std::cout<<"disp: "<<eps<<" t: "<< t_<<" tprime: "<<tprime_<<" zeta A: "<<zeta_A_<<" zeta B: "<<zeta_B_<<" kx: "<<kx<<" ky "<<ky<<std::endl;
       return 1./(zeta_A_*zeta_B_-eps*eps);
     }
-    private:
+  private:
     double twod_square_lattice_dispersion(double kx, double ky) const{
-     return -2.*t_*(cos(kx)+cos(ky)) -4.*tprime_*cos(kx)*cos(ky);
+      return -2.*t_*(cos(kx)+cos(ky)) -4.*tprime_*cos(kx)*cos(ky);
     }
     double t_;
     double tprime_;
@@ -261,7 +152,9 @@ public:
 
 private:
   std::complex<double> twodsimpson(const integrand &, double ax, double ay, double bx, double by, int N);
-  double t_;
-  double tprime_;
-  int L_;
+  const double t_;
+  const double tprime_;
+  const int L_;
+  bool paramagnet_;
+
 };

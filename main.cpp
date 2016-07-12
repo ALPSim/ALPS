@@ -15,20 +15,26 @@
 #include <iostream>
 #include <fstream>
 
-#include <alps/ngs/params.hpp>
-#include <alps/utility/copyright.hpp>
+#include <alps/params.hpp>
 
 #include "selfconsistency.h"
 
 /// @brief The DMFT main program
+void define_parameters(alps::params &p){
+  p.define<std::string>("SC_LOOP", "switch between SINGLE_SITE, DCA, and CDMFT");
+}
+void define_dca_parameters(alps::params &p);
 
-alps::params read_parameters_from_file(const std::string &filename){
-  {
-    std::ifstream is(filename.c_str());
-    if(!is.is_open()){std::cerr<<"parameter file: "<<filename<<" is not open! exiting!"<<std::endl; exit(1); }
+alps::params read_parameters_from_file(int argc, const char ** argv){
+  alps::params parms(argc, argv);
+  define_selfconsistency_parameters(parms);
+  define_solver_parameters(parms);
+  define_dca_parameters(parms);
+  define_parameters(parms);
+
+  if (parms.help_requested(std::cout)) {
+    exit(0);
   }
-  alps::params parms(filename);
-  parms["BASENAME"]=std::string(filename);
   return parms;
 }
 
@@ -39,24 +45,24 @@ int main(int argc, char** argv)
   try {
     if(argc <2){
       std::cerr<<"use: program_name parameter_file. Under MPI to pass argument to nodes use"<<std::endl;
-      std::cerr<<"mpi-run mpi_options program_name -- parameter_file"<<std::endl;
+      std::cerr<<"mpirun mpi_options program_name -- parameter_file"<<std::endl;
       exit(1);
     }
-    std::cout << "ALPS DMFT self-consistency condition.\n\n";
-    alps::print_copyright(std::cout);
-    alps::params parms=read_parameters_from_file(argv[1]);
-    //perform selfconsistency loop for single site or cluster...
-    if(!parms.defined("CLUSTER_LOOP")){
-      perform_single_site_loop(parms);
+    std::cout << "#################################################"<<std::endl;
+    std::cout << "### ALPS Dynamical Mean Field Framework.      ###"<<std::endl;
+    std::cout << "### Copyright Emanuel Gull, 2005 - 2016       ###"<<std::endl;
+    std::cout << "### To be used with permission by the authors ###"<<std::endl;
+    std::cout << "#################################################"<<std::endl;
+
+    alps::params parms=read_parameters_from_file(argc, (const char **)argv);
+    std::string param_file_name(argv[1]);
+
+    if(parms["SC_LOOP"].as<std::string>()=="SINGLE_SITE"){
+      perform_single_site_loop(param_file_name, parms);
+    }else if(parms["SC_LOOP"].as<std::string>()=="DCA"){
+      perform_cluster_loop(param_file_name, parms);
     }else
-      perform_cluster_loop(parms);
-    if(parms.defined("MODIFY_PARAMETER_FILE")){
-      std::ofstream os(argv[1]);
-	
-      parms["CURRENT_IT"]=0;// sloppy fix.  Sets current_it to zero for continuing program later
-      os<<parms;
-      os.close();
-    }
+      throw std::invalid_argument("self-consistency loop: "+parms["SC_LOOP"].as<std::string>()+"unknown");
   }
   catch (std::exception& exc) {
     std::cerr<<exc.what()<<std::endl;

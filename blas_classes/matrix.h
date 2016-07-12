@@ -94,7 +94,7 @@ namespace blas{
     inline void add_outer_product(const double *v1, const double *v2, double alpha=1.){
       int inc=1;
       if(size_>1){
-        dger_(&size_, &size_, &alpha,v2, &inc, v1, &inc, values_, &memory_size_);
+        blas::dger_(&size_, &size_, &alpha,v2, &inc, v1, &inc, values_, &memory_size_);
       }else if(size_==1){
         values_[0]+=alpha*v1[0]*v2[0];
       }else
@@ -113,25 +113,25 @@ namespace blas{
       resize(size_+1);
       int one=1;
       int oldsize=size_-1;
-      dcopy_(&oldsize, &(col(0)), &one, &(values_[oldsize   ]), &memory_size_); //copy in row (careful: col. major)
-      dcopy_(&oldsize, &(row(0)), &one, &(values_[oldsize*memory_size_]), &one   );   //copy in column
+      blas::dcopy_(&oldsize, &(col(0)), &one, &(values_[oldsize   ]), &memory_size_); //copy in row (careful: col. major)
+      blas::dcopy_(&oldsize, &(row(0)), &one, &(values_[oldsize*memory_size_]), &one   );   //copy in column
       operator()(oldsize, oldsize)=Mkk;
     }
     inline void getrow(int k, double *row) const{
       int one=1;
-      dcopy_(&size_, &(values_[k*memory_size_]), &one, row, &one);
+      blas::dcopy_(&size_, &(values_[k*memory_size_]), &one, row, &one);
     }
     inline void getcol(int k, double *col) const{
       int one=1;
-      dcopy_(&size_, &(values_[k]), &memory_size_, col, &one);
+      blas::dcopy_(&size_, &(values_[k]), &memory_size_, col, &one);
     }
     inline void setrow(int k, const double *row){
       int one=1;
-      dcopy_(&size_, row, &one, &(values_[k*memory_size_]), &one);
+      blas::dcopy_(&size_, row, &one, &(values_[k*memory_size_]), &one);
     }
     inline void setcol(int k, const double *col){
       int one=1;
-      dcopy_(&size_, col, &one, &(values_[k]), &memory_size_);
+      blas::dcopy_(&size_, col, &one, &(values_[k]), &memory_size_);
     }
     inline void insert_row_column(blas::vector &row, blas::vector &col, double Mkk, int k){
       resize(size_+1);
@@ -176,6 +176,15 @@ namespace blas{
       dswap_(&size_, &(values_[c1]), &memory_size_, &(values_[c2]), &memory_size_);
       dswap_(&size_, &(values_[c1*memory_size_]), &one, &(values_[c2*memory_size_]), &one);
     }
+    inline void swap_column(int c1, int c2){
+      if(c1==c2) return;
+      blas::dswap_(&size_, &(values_[c1]), &memory_size_, &(values_[c2]), &memory_size_);
+    }
+    inline void swap_row(int c1, int c2){
+      if(c1==c2) return;
+      int one=1;
+      blas::dswap_(&size_, &(values_[c1*memory_size_]), &one, &(values_[c2*memory_size_]), &one);
+    }
     template<class mat> matrix convert_from(const mat &M){ //convert dense or sparse matrices (or any other with  (i,j) and size1() to blas matrix.
       assert(M.size1()==M.size2());
       resize_nocopy(M.size1());
@@ -191,21 +200,28 @@ namespace blas{
       char trans='T';
       double alpha=1., beta=0.;	//no need to multiply a constant or add a vector
       int inc=1;
-      dgemv_(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1.values_, &inc, &beta, v2.values_, &inc);
+      blas::dgemv_(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1.values_, &inc, &beta, v2.values_, &inc);
+    }
+    inline void right_multiply(const std::vector<double> &v1, std::vector<double> &v2) const{ //perform v2[i]=M[ij]v1[j]
+      //call the BLAS routine for matrix vector multiplication:
+      char trans='T';
+      double alpha=1., beta=0.; //no need to multiply a constant or add a vector
+      int inc=1;
+      blas::dgemv_(&trans, &size_, &size_, &alpha, values_, &memory_size_, &(v1[0]), &inc, &beta, &(v2[0]), &inc);
     }
     inline void right_multiply(const rsvector &v1, rsvector &v2) const{ //perform v2[i]=M[ij]v1[j]
       //call the BLAS routine for matrix vector multiplication:
       char trans='T';
       double alpha=1., beta=0.;	//no need to multiply a constant or add a vector
       int inc=1;
-      dgemv_(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1.values_, &inc, &beta, v2.values_, &inc);
+      blas::dgemv_(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1.values_, &inc, &beta, v2.values_, &inc);
     }
     inline void left_multiply(const vector &v1, vector &v2) const{ //perform v2[i]=v1[j]M[ji]
       //call the BLAS routine for matrix vector multiplication:
       char trans='N';
       double alpha=1., beta=0.;   //no need to multiply a constant or add a vector
       int inc=1;
-      dgemv_(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1.values_, &inc, &beta, v2.values_, &inc);
+      blas::dgemv_(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1.values_, &inc, &beta, v2.values_, &inc);
       
     }
     inline void left_multiply(const rsvector &v1, rsvector &v2) const{ //perform v2[i]=v1[j]M[ji]
@@ -213,7 +229,7 @@ namespace blas{
       char trans='N';
       double alpha=1., beta=0.;   //no need to multiply a constant or add a vector
       int inc=1;
-      dgemv_(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1.values_, &inc, &beta, v2.values_, &inc);
+      blas::dgemv_(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1.values_, &inc, &beta, v2.values_, &inc);
       
     }
     //Mres=this*M2
@@ -223,7 +239,7 @@ namespace blas{
       double zero_double=0.;
       char notrans='N';
       Mres.clear(); //to satisfy valgrind on hreidar / acml
-      dgemm_(&notrans, &notrans, &size_, &size_, &size_, &one_double, M2.values_, &memory_size_, values_, &memory_size_, &zero_double, Mres.values_, &Mres.memory_size_);
+      blas::dgemm_(&notrans, &notrans, &size_, &size_, &size_, &one_double, M2.values_, &memory_size_, values_, &memory_size_, &zero_double, Mres.values_, &Mres.memory_size_);
     }
     inline void matrix_right_multiply(const blas::general_matrix<double> &M2,  blas::general_matrix<double>&Mres, const double beta=0.) const{
       //call the BLAS routine for matrix matrix multiplication:
@@ -231,7 +247,7 @@ namespace blas{
       double zero_double=0.;
       char notrans='N';
       int M2_size2=M2.size2();
-      dgemm_(&notrans, &notrans, &M2_size2, &size_, &size_,
+      blas::dgemm_(&notrans, &notrans, &M2_size2, &size_, &size_,
              &one_double, &(M2(0,0)), &(M2.size2()), values_,
              &memory_size_, &beta, &(Mres(0,0)), &(Mres.size2()));
     }
@@ -253,7 +269,7 @@ namespace blas{
       blas::matrix identity(*this);
       identity.set_to_identity();
       //LU factorization
-      dgesv_(&size_, &size_, det_matrix.values_, &memory_size_, ipiv, identity.values_, &memory_size_,&info);
+      lapack::dgesv_(&size_, &size_, det_matrix.values_, &memory_size_, ipiv, identity.values_, &memory_size_,&info);
       if(info < 0) {
         std::cout << "LAPACK ERROR IN APPLY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
         std::cout << "INFO:" << info << std::endl;
@@ -393,21 +409,34 @@ namespace blas{
       }
     }
     double max() const{
-      double *rowmax=new double[size_];
+      std::vector<double> rowmax(size_, 0.);
       int rowmax_index, max_index, inc=1;
       if(size_<1) return 0;
       for(int i=0;i<size_;++i){
         rowmax_index=idamax_(&size_, values_+i*memory_size_,&inc);
         rowmax[i]=*(values_+i*memory_size_+rowmax_index-1); //fortran convention: start counting from one
       }
-      max_index=idamax_(&size_, rowmax ,&inc);
-      delete [] rowmax;
+      max_index=idamax_(&size_, &(rowmax[0]) ,&inc);
       return std::abs(rowmax[max_index-1]);
     }
     void swap(matrix &M2){
       std::swap(size_, M2.size_);
       std::swap(memory_size_, M2.memory_size_);
       std::swap(values_, M2.values_); //just exchange pointers
+    }
+    void invert(){
+      std::vector<double> B(size_*size_, 0.);
+      std::vector<int> ipiv(size_,0);
+      int info;
+      for(int i=0;i<size_;++i) B[i*size_+i]=1.;
+      lapack::dgesv_(&size_, &size_, values_, &memory_size_, &(ipiv[0]), &(B[0]), &size_, &info);
+      if(info){ throw(std::logic_error("in dgesv: info was not zero.")); }
+
+      for(int i=0;i<size_;++i){
+        for(int j=0;j<size_;++j){
+          operator()(i,j)=B[i*size_+j];
+        }
+      }
     }
     void eigenvalues_eigenvectors_symmetric( vector &eigenvalues, matrix &eigenvectors) const{
       //perform dsyev call (LAPACK)
@@ -419,10 +448,10 @@ namespace blas{
       char jobs='V';
       char uplo='L';
       //get optimal size for work
-      dsyev_(&jobs, &uplo, &size_, eigenvectors.values_, &size_, &(eigenvalues(0)),&work_size, &lwork, &info);
+      lapack::dsyev_(&jobs, &uplo, &size_, eigenvectors.values_, &size_, &(eigenvalues(0)),&work_size, &lwork, &info);
       lwork=(int)work_size;
       double *work=new double[lwork];
-      dsyev_(&jobs, &uplo, &size_, eigenvectors.values_, &size_, &eigenvalues(0),work, &lwork, &info);
+      lapack::dsyev_(&jobs, &uplo, &size_, eigenvectors.values_, &size_, &eigenvalues(0),work, &lwork, &info);
       /*matrix eigenvectors_trans(eigenvectors);
        eigenvectors_trans.transpose();
        std::cout<<*this<<std::endl;

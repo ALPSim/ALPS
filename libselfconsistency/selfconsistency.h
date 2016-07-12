@@ -5,13 +5,19 @@
  *****************************************************************************/
 
 #pragma once
-namespace alps{ class params;}
-class ImpuritySolver;
-class FrequencySpaceHilbertTransformer;
+#include "alps/params.hpp"
+#include "alps/gf/tail.hpp"
+#include "impurity_solver.h"
+#include "hilbert_transform.h"
+
+typedef alps::gf::omega_sigma_gf_with_tail single_site_matsubara_gf;
+typedef alps::gf::itime_sigma_gf_with_tail single_site_itime_gf;
+
 class DCATransformer;
 class CDMFTTransformer;
 /// performs a DMFT self-conistency loop until convergence
 void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver& solver,  FrequencySpaceHilbertTransformer& hilbert);
+void define_selfconsistency_parameters(alps::params &p);
 
 
 void selfconsistency_loop_DCA(const alps::params& parms, ImpuritySolver& solver, DCATransformer& clustertrans);
@@ -20,11 +26,9 @@ void selfconsistency_loop_CDMFT(const alps::params& parms, ImpuritySolver& solve
 void selfconsistency_loop_CDMFT_Nambu(const alps::params& parms, ImpuritySolver& solver, CDMFTTransformer& clustertrans);
 
 
-void perform_single_site_loop(const alps::params &parms);
+void perform_single_site_loop(const std::string &param_file_name, const alps::params &parms);
 
-void perform_DCA_loop(const alps::params &parms);
-void perform_CDMFT_loop(const alps::params &parms);
-void perform_cluster_loop(const alps::params &parms);
+void perform_cluster_loop(const std::string &param_file_name, const alps::params &parms);
 
 FrequencySpaceHilbertTransformer *setup_DOS_hilbert_transform(const alps::params &parms);
 FrequencySpaceHilbertTransformer *setup_2D_hilbert_transform(const alps::params &parms);
