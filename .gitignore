@@ -8,8 +8,11 @@ runTests
 test
 .idea/
 AuxiliaryPrograms/energy
+.project
 .cproject
 .settings
 Debug
+tests/testsfourier
+tests/time_freq_fourier_test
 *.a
 *.h5
