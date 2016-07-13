@@ -33,7 +33,10 @@ hdf5_dump_name_(params["dca.LATTICE_DUMP"].as<std::string>()),
 cluster_name_(params["dca.LATTICE"].as<std::string>())
 {
   //check that the numer of sites is consistent between the 'SITES' parameter and what we get from the cluster.
-  if (int(params["dca.SITES"]) != alps_graph::unit_cell_volume()) throw std::runtime_error(std::string("the graph")+params["LATTICE"].as<std::string>()+" unit cell volume is not :"+params["SITES"].as<std::string>());
+  if (int(params["dca.SITES"]) != alps_graph::unit_cell_volume()){
+   std::stringstream error_message; error_message<<"the graph: "<<params["dca.LATTICE"].as<std::string>()<<" unit cell volume is not :"<<params["dca.SITES"].as<int>();
+   throw std::runtime_error(error_message.str());
+  }
   //generate the symmetry tables for this transformer.
   if(!read())
     setup_tables(params);
