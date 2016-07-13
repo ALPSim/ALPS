@@ -51,5 +51,9 @@ protected:
   double beta_;
 };
 TEST_F(NormalStateTransformTest, MakeANormalStateTransformer){
-
+ ; //just run Setup/TearDown
+}
+TEST_F(NormalStateTransformTest, ReadNonexistentInputFile){
+  cluster_matsubara_kspace_gf G0_init(omega_k_sigma_gf_with_tail(alps::gf::matsubara_positive_mesh(beta_, n_freq_), CT_->momentum_mesh(), alps::gf::index_mesh(2)));
+ EXPECT_EQ(CT_->read_initial_G0(G0_init), false);
 }
