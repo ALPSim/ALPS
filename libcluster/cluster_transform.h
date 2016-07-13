@@ -97,7 +97,7 @@ protected:
 class NormalStateClusterTransformer: public ClusterTransformer{
 public:
   ///Constructor: a cluster transformer has no internal components, everything is delegated to the ClusterHelper
-  NormalStateClusterTransformer(const alps::params& params): ClusterTransformer(params){};
+  NormalStateClusterTransformer(const alps::params& params): ClusterTransformer(params){}
   ///virtual destructor
   virtual ~NormalStateClusterTransformer() {}
   
@@ -147,6 +147,14 @@ private:
 public:
   template<class GF> void symmetrize_real_space(GF& G) const{return symmetrize_helper_real_space(G,pair_classes_real_space());}
   template<class GF> void symmetrize_k_space(GF& G) const{return symmetrize_helper_k_space(G,pair_classes_k_space());}
+};
+
+class DoubleUnitCellClusterTransformer: public ClusterTransformer{
+public:
+  ///Constructor: a cluster transformer has no internal components, everything is delegated to the ClusterHelper
+  DoubleUnitCellClusterTransformer(const alps::params& params): ClusterTransformer(params){}
+  ///virtual destructor
+  virtual ~DoubleUnitCellClusterTransformer() {}
 };
 
 class NambuClusterTransformer : public ClusterTransformer{
