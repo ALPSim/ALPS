@@ -8,12 +8,25 @@ protected:
   virtual void SetUp() {
     alps::params p;
     L_=20;
-    p["LATTICE_LIBRARY"] = "./cluster.xml";
-    p["LATTICE_DUMP"] = "./cluster.h5";
-    p["LATTICE"] = "Betts2D-4A";
-    p["SITES"]=4;
-    p["L"] = L_;
-    p["AFM_SELFCONSISTENCY"]=false; //note that we need to know at this point if we're paramagnetic or not. Not sure this is the right place for it.
+    p["dca.LATTICE_LIBRARY"] = "../libcluster/cluster.xml";
+    p["dca.LATTICE_DUMP"] = "./cluster.h5";
+    p["dca.LATTICE"] = "Betts2D-4A";
+    p["dca.SITES"]=4;
+    p["dca.L"] = L_;
+    p["MU"] = 0.;
+    p["t"] = 1.;
+    p["tprime"] = 0.;
+    p["t_flavor"] = 0.;
+    p["BETA"] = 7.;
+    p["FLAVORS"] = 2;
+    p["NMATSUBARA"] = 1024;
+    p["N"] = 1024;
+    p["dca.AFM_SELFCONSISTENCY"]=false; //note that we need to know at this point if we're paramagnetic or not. Not sure this is the right place for it.
+    p["dca.PHASE"]=false;
+    p["dca.IMBALANCE"]=false;
+    p["dca.G0_OMEGA_INPUT"]="/tmp/none";
+    p["dca.G0_OMEGA_OUTPUT"]="/tmp/none";
+    p["dca.INITIAL_G0"]="FREE";
     CT_=new NormalStateClusterTransformer(p);
 
     n_freq_=20;
