@@ -35,7 +35,6 @@ void define_dca_parameters(alps::params &p){
 }
 ClusterTransformer::ClusterTransformer(const alps::params& params) : ClusterHelper(params),
     mu_(params["MU"]),
-    h_(0),
     half_filling_(0.),
     t_(params["t"]),
     t2_(params["tprime"]),
@@ -171,6 +170,12 @@ void NormalStateClusterTransformer::compute_noninteracting_G0(cluster_matsubara_
   zero_selfenergy.initialize();
   matsubara_k_sum(G0_omega, zero_selfenergy);
   attach_bare_tail(G0_omega);
+}
+void DoubleCellClusterTransformer::compute_noninteracting_G0(double_cell_matsubara_kspace_gf &G0_omega) const{
+  double_cell_matsubara_kspace_gf zero_selfenergy(G0_omega);
+  zero_selfenergy.initialize();
+  matsubara_k_sum(G0_omega, zero_selfenergy);
+  attach_bare_tail(G0_omega, h_init_);
 }
 void NambuClusterTransformer::compute_noninteracting_G0(cluster_nambu_matsubara_kspace_gf &G0_omega) const{
   cluster_nambu_matsubara_kspace_gf zero_selfenergy(G0_omega);
@@ -591,7 +596,7 @@ void NormalStateClusterTransformer::matsubara_k_sum(cluster_matsubara_kspace_gf 
         G(w,  kc, f) = 0.;
         std::complex<double> iomega_n(0, G.mesh1().points()[w()]);
         for (int kl=0; kl<n_lattice_momenta(); ++kl) {
-          std::complex<double> zeta = iomega_n + mu_ + (f()%2 ? -h_ : h_);
+          std::complex<double> zeta = iomega_n + mu_;
           G(w, kc,f) += weight_kl_[kl]/(zeta-epsilon_kckl_[kc()][kl][f()]-sigma(w, kc,  f));
         }
         G(w, kc, f) /= n_cluster_cells();
@@ -599,6 +604,35 @@ void NormalStateClusterTransformer::matsubara_k_sum(cluster_matsubara_kspace_gf 
     }
   }
 }
+///Compute the DMFT/DCA k-summation in the double unit cell case
+void DoubleCellClusterTransformer::matsubara_k_sum(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma) const{
+  two_by_two Ginv(0,0,0,0);
+  for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
+    for (alps::gf::momentum_index kc(0); kc<G.mesh2().extent(); kc+=2) {
+      for (alps::gf::index spin(0); spin<G.mesh3().extent(); ++spin) {
+        double spin_factor=spin()==0?1.:-1.;
+        G(w, kc  ,alps::gf::index(0), spin)=0.;
+        G(w, kc  ,alps::gf::index(1), spin)=0.;
+        G(w, kc+1,alps::gf::index(0), spin)=0.;
+        G(w, kc+1,alps::gf::index(1), spin)=0.;
+        std::complex<double> iomega_n(0, G.mesh1().points()[w()]);
+        for (int kl=0; kl<n_lattice_momenta(); ++kl) {
+          double prefactor=weight_kl_[kl]/n_cluster_cells();
+          Ginv(0,0)= iomega_n + (mu_ -epsilon_kckl_[kc()][kl][spin()])-sigma(w, kc, alps::gf::index(0), spin);
+          Ginv(0,1)= -spin_factor*h_/2.-sigma(w, kc, alps::gf::index(1), spin);
+          Ginv(0,1)= -spin_factor*h_/2.-sigma(w, kc+1, alps::gf::index(0), spin);
+          Ginv(1,1)= iomega_n - (mu_ -epsilon_kckl_[kc()][kl][spin()])-sigma(w, kc+1, alps::gf::index(1), spin);
+          Ginv.invert();
+          G(w, kc  ,alps::gf::index(0), spin) += prefactor*Ginv(0,0);
+          G(w, kc  ,alps::gf::index(1), spin) += prefactor*Ginv(0,1);
+          G(w, kc+1,alps::gf::index(0), spin) += prefactor*Ginv(1,0);
+          G(w, kc+1,alps::gf::index(1), spin) += prefactor*Ginv(1,1);
+        }
+      }
+    }
+  }
+}
+
 ///Compute the DMFT/DCA k-summation
 void NambuClusterTransformer::matsubara_k_sum(cluster_nambu_matsubara_kspace_gf &G, const cluster_nambu_matsubara_kspace_gf &sigma) const{
   alps::gf::index up(0);

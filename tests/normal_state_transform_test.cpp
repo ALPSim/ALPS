@@ -74,3 +74,23 @@ TEST_F(NormalStateTransformTest, ComputeIsolatedClusterSolution){
     }
   }
 }
+/*
+ * not clear why this does not work, and if it is by design or not.
+ * TEST_F(NormalStateTransformTest, IsolatedIsFreeForL1){
+  cluster_matsubara_kspace_gf G0_init(alps::gf::omega_k_sigma_gf(alps::gf::matsubara_positive_mesh(beta_, n_freq_), CT_->momentum_mesh(), alps::gf::index_mesh(2)));
+  CT_->compute_isolated_cluster_G0(G0_init);
+  alps::params p2; set_standard_parameters(p2);
+  p2["L"]=1;
+  NormalStateClusterTransformer CTL1(p2);
+  cluster_matsubara_kspace_gf G0_init_freeL1(alps::gf::omega_k_sigma_gf(alps::gf::matsubara_positive_mesh(beta_, n_freq_), CT_->momentum_mesh(), alps::gf::index_mesh(2)));
+  CTL1.compute_noninteracting_G0(G0_init_freeL1);
+
+  for(int k=0;k<n_sites_;++k){
+    for(int i=0;i<n_freq_;++i){
+      for(int spin=0;spin<2;++spin){
+        EXPECT_NEAR(G0_init_freeL1(alps::gf::matsubara_index(i), alps::gf::momentum_index(k), alps::gf::index(spin)).real(), G0_init(alps::gf::matsubara_index(i), alps::gf::momentum_index(k), alps::gf::index(spin)).real(), 1.e-10);
+        EXPECT_NEAR(G0_init_freeL1(alps::gf::matsubara_index(i), alps::gf::momentum_index(k), alps::gf::index(spin)).imag(), G0_init(alps::gf::matsubara_index(i), alps::gf::momentum_index(k), alps::gf::index(spin)).imag(), 1.e-10);
+      }
+    }
+  }
+}*/

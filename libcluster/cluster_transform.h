@@ -74,9 +74,8 @@ protected:
   virtual void compute_noninteracting_G0(cluster_nambu_matsubara_kspace_gf &G0_omega) const{ throw std::logic_error("this should be called in a subclass");};
   virtual void compute_noninteracting_G0(cluster_matsubara_kspace_gf &G0_omega) const{ throw std::logic_error("this should be called in a subclass");};
 
-
+  ///chemical potential
   double mu_;
-  double h_;
   double half_filling_;
   ///t is the basic energy unit of the hopping. t2 is the tprime. t_flavor is only used for mass imbalance
   double t_, t2_,t_flavor_;
@@ -167,6 +166,11 @@ public:
 
   ///compute G0 from an atomic solution
   void compute_isolated_cluster_G0(double_cell_matsubara_kspace_gf &G0_omega) const;
+  ///compute G0 from a noninteracting solution
+  void compute_noninteracting_G0(double_cell_matsubara_kspace_gf &G0_omega) const;
+
+  ///the k-sum
+  void matsubara_k_sum(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma) const;
 private:
   ///attach a tail to the noninteracting GF
   void attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h) const;
