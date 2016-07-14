@@ -21,6 +21,10 @@ typedef alps::gf::itime_k_sigma1_sigma2_gf_with_tail cluster_nambu_itime_kspace_
 typedef alps::gf::omega_r1_r2_sigma1_sigma2_gf_with_tail cluster_nambu_matsubara_realspace_gf;
 typedef alps::gf::itime_r1_r2_sigma1_sigma2_gf_with_tail cluster_nambu_itime_realspace_gf;
 
+typedef alps::gf::omega_k_sigma1_sigma2_gf_with_tail double_cell_matsubara_kspace_gf;
+typedef alps::gf::itime_k_sigma1_sigma2_gf_with_tail double_cell_itime_kspace_gf;
+
+
 void define_dca_parameters(alps::params &p);
 
 //The Cluster transformer presents a framework for operator(), which does the Hilbert transform..
@@ -149,12 +153,29 @@ public:
   template<class GF> void symmetrize_k_space(GF& G) const{return symmetrize_helper_k_space(G,pair_classes_k_space());}
 };
 
-class DoubleUnitCellClusterTransformer: public ClusterTransformer{
+class DoubleCellClusterTransformer: public ClusterTransformer{
 public:
   ///Constructor: a cluster transformer has no internal components, everything is delegated to the ClusterHelper
-  DoubleUnitCellClusterTransformer(const alps::params& params): ClusterTransformer(params){}
+  DoubleCellClusterTransformer(const alps::params& params): ClusterTransformer(params),h_init_(params["dca.H_INIT"]), h_(params["dca.H"]){
+    if(use_phase_) throw std::invalid_argument("use phase should not be used in the double unit cell framework.");
+  }
   ///virtual destructor
-  virtual ~DoubleUnitCellClusterTransformer() {}
+  virtual ~DoubleCellClusterTransformer() {}
+
+  ///read G0 from file
+  bool read_initial_G0 (double_cell_matsubara_kspace_gf &G0_omega) const;
+
+  ///compute G0 from an atomic solution
+  void compute_isolated_cluster_G0(double_cell_matsubara_kspace_gf &G0_omega) const;
+private:
+  ///attach a tail to the noninteracting GF
+  void attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h) const;
+
+  ///initial magnetic field value
+  const double h_init_;
+  ///magnetic field
+  const double h_;
+
 };
 
 class NambuClusterTransformer : public ClusterTransformer{
@@ -257,3 +278,23 @@ template<class GF,class TAIL> void NormalStateClusterTransformer::symmetrize_hel
   }
 }
 
+///lightweight class for operating 2x2 matrices
+class two_by_two{
+public:
+  ///construct with four values
+  two_by_two(std::complex<double> v11,std::complex<double> v12, std::complex<double> v21, std::complex<double> v22){ val[0]=v11; val[1]=v12; val[2]=v21; val[3]=v22;}
+  ///access value
+  const std::complex<double> &operator()(int p,int q) const{ return val[2*p+q];}
+  std::complex<double> &operator()(int p,int q) { return val[2*p+q];}
+  ///invert the entire matrix
+  void invert(){
+    std::complex<double> det_inv=1./(val[0]*val[3]-val[2]*val[1]);
+    std::complex<double> tmp=val[0];
+    val[0]=val[3]*det_inv;
+    val[3]=tmp*det_inv;
+    val[1]=-val[1]*det_inv;
+    val[2]=-val[2]*det_inv;
+  }
+private:
+  std::complex<double> val[4];
+};
