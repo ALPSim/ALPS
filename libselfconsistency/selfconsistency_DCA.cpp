@@ -2,22 +2,19 @@
  *
  * ALPS DMFT Project
  *
- * Copyright (C) 2005-2014 by Emanuel Gull <gullc@comp-phys.org>
+ * Copyright (C) 2005-2016 by Emanuel Gull <egull@umich.edu>
  *
  * To be used with permission by the authors
  *
  *****************************************************************************/
 
-#include <sys/types.h> 
-
-#include <boost/tuple/tuple.hpp>
-
-#include <alps/params.hpp>
-#include <alps/gf/fourier.hpp>
-
-#include"cluster_transform.h"
-#include"impurity_solver.h"
 #include <iomanip>
+
+#include "alps/params.hpp"
+#include "alps/gf/fourier.hpp"
+
+#include "cluster_transform.h"
+#include "impurity_solver.h"
 
 template<class GFW, class GFT> void print_all_green_functions(int iteration_ctr,
     const GFW &G0_omega,

@@ -30,8 +30,7 @@ add_executable(dmft
 main.cpp
 )
 
-add_test(NAME cluster_helper COMMAND cluster_helper_test)
-add_test(NAME cluster_transform COMMAND cluster_transform_test)
+enable_testing()
 
 target_link_libraries(dmft selfconsistency cluster
 ${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES} 

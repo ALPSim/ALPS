@@ -55,7 +55,7 @@ void print_all_green_functions(int iteration_ctr,
     const single_site_itime_gf &G_tau, double beta){
 
   std::ostringstream G0omega_name, G0tau_name, Gomega_name,
-  Gtau_name, Gtau_name_2, Gomega_name_2, selfenergy_name;
+  Gtau_name, Gtau_name_2, Gomega_name_2, selfenergy_name, Greens_h5_name;
   G0omega_name<<"G0_omega"<<"_"<<iteration_ctr;
   G0tau_name<<"G0_tau"<<"_"<<iteration_ctr;
   Gomega_name<<"G_omega"<<"_"<<iteration_ctr;
@@ -79,6 +79,13 @@ void print_all_green_functions(int iteration_ctr,
   G_omega_file_2<<std::setprecision(14)<<G_omega;
   G_tau_file_2<<std::setprecision(14)<<G_tau;
   selfenergy_file<<std::setprecision(14)<<selfenergy;
+
+  Greens_h5_name << "Greens_" <<iteration_ctr<<".h5";
+  alps::hdf5::archive ar(Greens_h5_name.str().c_str(), alps::hdf5::archive::WRITE);
+  G_omega.save(ar, "/G_omega");
+  G0_omega.save(ar, "/G0_omega");
+  selfenergy.save(ar, "/Sigma_omega");
+  ar.close();
 }
 void compute_selfenergy(const single_site_matsubara_gf &G0_omega,
     const single_site_matsubara_gf &G_omega,

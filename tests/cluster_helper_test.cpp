@@ -9,18 +9,35 @@
 #define THREEDCLUSTERS1 "Kent3D-8A","Kent3D-8B","Kent3D-8C"
 
 //,"Kent3D-10A","Kent3D-10B","Kent3D-12A","Kent3D-12B","Kent3D-14A","Kent3D-14B","Kent3D-16C","Kent3D-16D","Kent3D-18A","Kent3D-18B","Kent3D-20A","Kent3D-20B","Kent3D-22A","Kent3D-22B","Kent3D-24C","Kent3D-24D","Kent3D-26A","Kent3D-26B","Kent3D-28C","Kent3D-28D","Kent3D-30A","Kent3D-30B","Kent3D-32C","Kent3D-32D","Kent3D-34A","Kent3D-34B","Kent3D-36A","Kent3D-36B","Kent3D-38A","Kent3D-38B","Kent3D-40A","Kent3D-40B","Kent3D-42A","Kent3D-42B","Kent3D-44A","Kent3D-44B","Kent3D-46A"
+  void set_other_parameters(alps::params &p){
+    p["dca.LATTICE_LIBRARY"] = "../../libcluster/cluster.xml";
+    p["dca.LATTICE_DUMP"] = "./cluster.h5";
+    p["MU"] = 0.;
+    p["t"] = 1.;
+    p["tprime"] = 0.;
+    p["t_flavor"] = 0.;
+    p["BETA"] = 7.;
+    p["FLAVORS"] = 2;
+    p["NMATSUBARA"] = 1024;
+    p["N"] = 1024;
+    p["dca.AFM_SELFCONSISTENCY"]=false; //note that we need to know at this point if we're paramagnetic or not. Not sure this is the right place for it.
+    p["dca.PHASE"]=false;
+    p["dca.IMBALANCE"]=false;
+    p["dca.G0_OMEGA_INPUT"]="/tmp/none";
+    p["dca.G0_OMEGA_OUTPUT"]="/tmp/none";
+    p["dca.INITIAL_G0"]="FREE";
+  }
 
 class ClusterHelperTest : public ::testing::TestWithParam<const char*> {
  protected:
   virtual void SetUp() {
     alps::params p;
     L_=20;
-    p["LATTICE_LIBRARY"] = "./cluster.xml";
-    p["LATTICE_DUMP"] = "./cluster.h5";
-    p["LATTICE"] = GetParam();
-    p["SITES"]=extract_unit_cell_volume_from_name(GetParam());
-    p["L"] = L_;
-    p["AFM_SELFCONSISTENCY"]=false; //note that we need to know at this point if we're paramagnetic or not. Not sure this is the right place for it.
+    p["dca.LATTICE"] = GetParam();
+    p["dca.L"] = L_;
+    p["dca.SITES"]=extract_unit_cell_volume_from_name(GetParam());
+    p["dca.L"] = L_;
+    set_other_parameters(p);
     CH_=new ClusterHelper(p);
   }
   int extract_unit_cell_volume_from_name(const char* name){
@@ -41,31 +58,27 @@ class ClusterHelperTest : public ::testing::TestWithParam<const char*> {
 
 TEST_P(ClusterHelperTest, TwoDClusterReadWrite){
   alps::params p2;
-  p2["LATTICE"]=GetParam();
+  std::cout<<"entering getparam"<<std::endl;
+  p2["dca.LATTICE"]=GetParam();
+  std::cout<<"set p2 dca lattice to: "<<p2["dca.LATTICE"].as<std::string>()<<std::endl;
   p2["TMPNAME"]="cluster_dump.h5";
-  //CH_->write(p2, GetParam());
+  set_other_parameters(p2);
   CH_->write();
   
-  p2["LATTICE_LIBRARY"] = "./cluster.xml";
-  p2["LATTICE_DUMP"] = "./cluster.h5";
-  p2["SITES"]=extract_unit_cell_volume_from_name(GetParam());
-  p2["L"] = L_;
-  p2["AFM_SELFCONSISTENCY"]=false;
+  p2["dca.SITES"]=extract_unit_cell_volume_from_name(GetParam());
+  p2["dca.L"] = L_;
   ClusterHelper CH2(p2);
-  //CH2.read(p2, GetParam());
   CH2.read();
   
   EXPECT_EQ(*CH_, CH2);
 }
 TEST_P(ClusterHelperTest, TwoDClusterVsStoredALPS){
   alps::params p2;
-  p2["LATTICE"]=GetParam();
-  p2["TMPNAME"]="cluster_dump.bup.h5";
-  p2["LATTICE_LIBRARY"] = "./cluster.xml";
-  p2["LATTICE_DUMP"] = "./cluster.h5";
-  p2["SITES"]=extract_unit_cell_volume_from_name(GetParam());
-  p2["L"] = L_;
-  p2["AFM_SELFCONSISTENCY"]=false;
+  p2["dca.LATTICE"]=GetParam();
+  p2["dca.TMPNAME"]="cluster_dump.bup.h5";
+  p2["dca.SITES"]=extract_unit_cell_volume_from_name(GetParam());
+  p2["dca.L"] = L_;
+  set_other_parameters(p2);
   ClusterHelper CH2(p2);
   CH2.read();
   //CH2.read(p2, GetParam());
@@ -92,12 +105,11 @@ INSTANTIATE_TEST_CASE_P(ClusterNoALPSTest3D13, ClusterHelperTest,::testing::Valu
 
 TEST(ClusterHelper, Periodicity8Site){
   alps::params p;
-  p["LATTICE"]="Betts2D-8A";
-  p["LATTICE_LIBRARY"] = "./cluster.xml";
-  p["LATTICE_DUMP"] = "./cluster.h5";
-  p["SITES"]=8;
-  p["L"] = 20;
-  p["AFM_SELFCONSISTENCY"]=false;
+  p["dca.LATTICE"]="Betts2D-8A";
+  p["dca.SITES"]=8;
+  p["dca.L"] = 20;
+  set_other_parameters(p);
+
 
   ClusterHelper CH(p);
 
@@ -106,13 +118,11 @@ TEST(ClusterHelper, Periodicity8Site){
 }
 TEST(ClusterHelper, Periodicity4Site){
   alps::params p;
-  p["LATTICE"]="Betts2D-4A";
-  p["LATTICE_LIBRARY"] = "./cluster.xml";
-  p["LATTICE_DUMP"] = "./cluster.h5";
-  p["SITES"]=4;
-  p["L"] = 20;
-  p["AFM_SELFCONSISTENCY"]=false;
-
+  p["dca.LATTICE"]="Betts2D-4A";
+  p["dca.SITES"]=4;
+  p["dca.L"] = 20;
+  p["dca.AFM_SELFCONSISTENCY"]=false;
+  set_other_parameters(p);
   ClusterHelper CH(p);
 
   EXPECT_EQ(CH.periodicity(0), 2);
