@@ -431,6 +431,31 @@ void NormalStateClusterTransformer::dyson_get_self_energy(cluster_matsubara_kspa
       }
     }
   }
+
+  //Set high frequency tails for self energy
+  alps::gf::k_sigma_gf s0(G.mesh2(), G.mesh3());
+  alps::gf::k_sigma_gf s1(G.mesh2(), G.mesh3());
+
+  //Get the G tail coeffs
+  alps::gf::k_sigma_gf c2(G.mesh2(), G.mesh3());
+  alps::gf::k_sigma_gf c3(G.mesh2(), G.mesh3());
+  c2 = G.tail(2);
+  c3 = G.tail(3);
+
+  //Get the G0 tail coeffs
+  alps::gf::k_sigma_gf c02(G.mesh2(), G.mesh3());
+  alps::gf::k_sigma_gf c03(G.mesh2(), G.mesh3());
+  c02 = G0.tail(2);
+  c03 = G0.tail(3);
+
+  for(alps::gf::index f(0); f<n_flavors_; f++) {
+    for(alps::gf::momentum_index k(0); k<n_cluster_sites(); ++k) {
+      s0(k,f) = c2(k,f) - c02(k,f);
+      s1(k,f) = c3(k,f) - c03(k,f) + c02(k,f)*c02(k,f) - c2(k,f)*c2(k,f);
+    }
+  }
+  sigma.set_tail(0,s0);
+  sigma.set_tail(1,s1);
 }
 ///Use Dyson to get the self-energy in Nambu space
 void NambuClusterTransformer::dyson_get_self_energy(cluster_nambu_matsubara_kspace_gf &sigma, const cluster_nambu_matsubara_kspace_gf &G, const cluster_nambu_matsubara_kspace_gf &G0) const{
