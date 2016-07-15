@@ -170,7 +170,7 @@ public:
   void compute_noninteracting_G0(double_cell_matsubara_kspace_gf &G0_omega) const;
 
   ///the k-sum
-  void matsubara_k_sum(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma) const;
+  void matsubara_k_sum(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma, double h) const;
 private:
   ///attach a tail to the noninteracting GF
   void attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h) const;

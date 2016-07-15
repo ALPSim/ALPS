@@ -178,7 +178,7 @@ void NormalStateClusterTransformer::compute_noninteracting_G0(cluster_matsubara_
 void DoubleCellClusterTransformer::compute_noninteracting_G0(double_cell_matsubara_kspace_gf &G0_omega) const{
   double_cell_matsubara_kspace_gf zero_selfenergy(G0_omega);
   zero_selfenergy.initialize();
-  matsubara_k_sum(G0_omega, zero_selfenergy);
+  matsubara_k_sum(G0_omega, zero_selfenergy, h_init_);
   attach_bare_tail(G0_omega, h_init_);
 }
 void NambuClusterTransformer::compute_noninteracting_G0(cluster_nambu_matsubara_kspace_gf &G0_omega) const{
@@ -609,7 +609,7 @@ void NormalStateClusterTransformer::matsubara_k_sum(cluster_matsubara_kspace_gf 
   }
 }
 ///Compute the DMFT/DCA k-summation in the double unit cell case
-void DoubleCellClusterTransformer::matsubara_k_sum(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma) const{
+void DoubleCellClusterTransformer::matsubara_k_sum(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma, double h) const{
   two_by_two Ginv(0,0,0,0);
   for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
     for (alps::gf::momentum_index kc(0); kc<G.mesh2().extent(); kc+=2) {
@@ -623,8 +623,8 @@ void DoubleCellClusterTransformer::matsubara_k_sum(double_cell_matsubara_kspace_
         for (int kl=0; kl<n_lattice_momenta(); ++kl) {
           double prefactor=weight_kl_[kl]/n_cluster_cells();
           Ginv(0,0)= iomega_n + (mu_ -epsilon_kckl_[kc()  ][kl][spin()])-sigma(w, kc, alps::gf::index(0), spin);
-          Ginv(0,1)= -spin_factor*h_/2.                                 -sigma(w, kc, alps::gf::index(1), spin);
-          Ginv(0,1)= -spin_factor*h_/2.                                 -sigma(w, kc+1, alps::gf::index(0), spin);
+          Ginv(0,1)= -spin_factor*h/2.                                 -sigma(w, kc, alps::gf::index(1), spin);
+          Ginv(1,0)= -spin_factor*h/2.                                 -sigma(w, kc+1, alps::gf::index(0), spin);
           Ginv(1,1)= iomega_n + (mu_ -epsilon_kckl_[kc()+1][kl][spin()])-sigma(w, kc+1, alps::gf::index(1), spin);
           Ginv.invert();
           G(w, kc  ,alps::gf::index(0), spin) += prefactor*Ginv(0,0);
