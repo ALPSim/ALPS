@@ -67,7 +67,9 @@ TEST_F(DoubleUnitCellTransformTest, ComputeIsolatedClusterSolution){
   CT_->compute_isolated_cluster_G0(G0_init);
   for(int k=0;k<n_sites_;k+=2){
     std::vector<double> momentum(CT_->dimension());
-    for(int z=0;z<momentum.size();++z) momentum[z]=CT_->momentum_mesh().points()[k][z];
+    std::vector<double> momentum_plus_pi(CT_->dimension());
+    for(int z=0;z<momentum        .size();++z) momentum        [z]=CT_->momentum_mesh().points()[k  ][z];
+    for(int z=0;z<momentum_plus_pi.size();++z) momentum_plus_pi[z]=CT_->momentum_mesh().points()[k+1][z];
     for(int i=0;i<n_freq_;++i){
       for(int spin=0;spin<2;++spin){
         double spin_factor=spin==0?1.:-1.;
@@ -75,7 +77,7 @@ TEST_F(DoubleUnitCellTransformTest, ComputeIsolatedClusterSolution){
         two_by_two G(std::complex<double>(mu_-CT_->epsilon(momentum),(2*i+1)*M_PI/beta_),
             spin_factor*h_init_/2.,
             spin_factor*h_init_/2.,
-            std::complex<double>(-(mu_-CT_->epsilon(momentum)),(2*i+1)*M_PI/beta_));
+            std::complex<double>(mu_-CT_->epsilon(momentum_plus_pi),(2*i+1)*M_PI/beta_));
         G.invert();
         EXPECT_NEAR(G(0,0).real(), G0_init(alps::gf::matsubara_index(i), alps::gf::momentum_index(k), alps::gf::index(0), alps::gf::index(spin)).real(), 1.e-10);
         EXPECT_NEAR(G(0,1).real(), G0_init(alps::gf::matsubara_index(i), alps::gf::momentum_index(k), alps::gf::index(1), alps::gf::index(spin)).real(), 1.e-10);
@@ -101,14 +103,14 @@ TEST(TwoByTwo, AccessAndInversion){
 TEST_F(DoubleUnitCellTransformTest, ComputeNonintClusterSolution){
   alps::params p;
   set_common_parameters(p);
-  p["H_INIT"]=0;
+  p["dca.H_INIT"]=0;
   DoubleCellClusterTransformer CT1(p);
   NormalStateClusterTransformer CT2(p);
 
-  double_cell_matsubara_kspace_gf G0_init(alps::gf::omega_k_sigma1_sigma2_gf(alps::gf::matsubara_positive_mesh(beta_, n_freq_), CT_->momentum_mesh(), alps::gf::index_mesh(2), alps::gf::index_mesh(2)));
+  double_cell_matsubara_kspace_gf G0_init(alps::gf::omega_k_sigma1_sigma2_gf(alps::gf::matsubara_positive_mesh(beta_, n_freq_), CT1.momentum_mesh(), alps::gf::index_mesh(2), alps::gf::index_mesh(2)));
   CT1.compute_isolated_cluster_G0(G0_init);
 
-  cluster_matsubara_kspace_gf G0_init2(alps::gf::omega_k_sigma_gf(alps::gf::matsubara_positive_mesh(beta_, n_freq_), CT_->momentum_mesh(), alps::gf::index_mesh(2)));
+  cluster_matsubara_kspace_gf G0_init2(alps::gf::omega_k_sigma_gf(alps::gf::matsubara_positive_mesh(beta_, n_freq_), CT1.momentum_mesh(), alps::gf::index_mesh(2)));
   CT2.compute_isolated_cluster_G0(G0_init2);
 
   for(int k=0;k<n_sites_;k+=2){

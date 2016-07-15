@@ -113,19 +113,23 @@ void NormalStateClusterTransformer::compute_isolated_cluster_G0(cluster_matsubar
   attach_bare_tail(G0_omega);
 }
 void DoubleCellClusterTransformer::compute_isolated_cluster_G0(double_cell_matsubara_kspace_gf &G0_omega) const{
-  std::vector<double> k(dimension());
+  std::cout<<"operating with h: "<<h_<<" h_init: "<<h_init_<<std::endl;
+  std::vector<double> k  (dimension());
+  std::vector<double> kpq(dimension());
   for (alps::gf::matsubara_index freq(0); freq<nfreq_; ++freq) {
     const std::complex<double> iomega_n(0, G0_omega.mesh1().points()[freq()]);
     for (alps::gf::momentum_index kc(0); kc<n_cluster_sites(); kc+=2) {
-      for (unsigned int d=0; d<dimension(); ++d)
-        k[d] = cluster_momentum(kc(),d);
+      for (unsigned int d=0; d<dimension(); ++d){
+        k[d]   = cluster_momentum(kc(),d);
+        kpq[d] = cluster_momentum(kc()+1,d);
+      }
       for (alps::gf::index spin(0); spin<n_flavors_; ++spin) {
         double spin_factor=spin()==0?1.:-1.;
         //this implements Eq. 119
-        two_by_two G0(std::complex<double>(mu_-epsilon(k),(2*freq()+1)*M_PI/beta_),
+        two_by_two G0(std::complex<double>(mu_-epsilon(k  ),(2*freq()+1)*M_PI/beta_),
             spin_factor*h_init_/2.,
             spin_factor*h_init_/2.,
-            std::complex<double>(-(mu_-epsilon(k)),(2*freq()+1)*M_PI/beta_));
+                      std::complex<double>(mu_-epsilon(kpq),(2*freq()+1)*M_PI/beta_));
         G0.invert();
 
         G0_omega(freq, kc  , alps::gf::index(0), spin) = G0(0,0);
@@ -618,10 +622,10 @@ void DoubleCellClusterTransformer::matsubara_k_sum(double_cell_matsubara_kspace_
         std::complex<double> iomega_n(0, G.mesh1().points()[w()]);
         for (int kl=0; kl<n_lattice_momenta(); ++kl) {
           double prefactor=weight_kl_[kl]/n_cluster_cells();
-          Ginv(0,0)= iomega_n + (mu_ -epsilon_kckl_[kc()][kl][spin()])-sigma(w, kc, alps::gf::index(0), spin);
-          Ginv(0,1)= -spin_factor*h_/2.-sigma(w, kc, alps::gf::index(1), spin);
-          Ginv(0,1)= -spin_factor*h_/2.-sigma(w, kc+1, alps::gf::index(0), spin);
-          Ginv(1,1)= iomega_n - (mu_ -epsilon_kckl_[kc()][kl][spin()])-sigma(w, kc+1, alps::gf::index(1), spin);
+          Ginv(0,0)= iomega_n + (mu_ -epsilon_kckl_[kc()  ][kl][spin()])-sigma(w, kc, alps::gf::index(0), spin);
+          Ginv(0,1)= -spin_factor*h_/2.                                 -sigma(w, kc, alps::gf::index(1), spin);
+          Ginv(0,1)= -spin_factor*h_/2.                                 -sigma(w, kc+1, alps::gf::index(0), spin);
+          Ginv(1,1)= iomega_n + (mu_ -epsilon_kckl_[kc()+1][kl][spin()])-sigma(w, kc+1, alps::gf::index(1), spin);
           Ginv.invert();
           G(w, kc  ,alps::gf::index(0), spin) += prefactor*Ginv(0,0);
           G(w, kc  ,alps::gf::index(1), spin) += prefactor*Ginv(0,1);
