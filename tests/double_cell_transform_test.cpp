@@ -14,6 +14,8 @@ protected:
     n_flavors_=2;
     h_init_=0.2;
     h_=0.1;
+    mu_stag_init_=0.;
+    mu_stag_=0.;
 
     alps::params p;
     set_common_parameters(p);
@@ -42,6 +44,8 @@ protected:
     p["dca.INITIAL_G0"]="FREE";
     p["dca.H_INIT"]=h_init_;
     p["dca.H"]=h_;
+    p["dca.MU_STAG_INIT"]=mu_stag_init_;
+    p["dca.MU_STAG"]=mu_stag_;
   }
   int L_;
   DoubleCellClusterTransformer *CT_;
@@ -53,6 +57,8 @@ protected:
   double mu_;
   double h_init_;
   double h_;
+  double mu_stag_init_;
+  double mu_stag_;
 
 };
 TEST_F(DoubleUnitCellTransformTest, MakeADoubleUnitCellTransformer){
