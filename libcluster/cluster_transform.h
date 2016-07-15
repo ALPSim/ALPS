@@ -155,7 +155,9 @@ public:
 class DoubleCellClusterTransformer: public ClusterTransformer{
 public:
   ///Constructor: a cluster transformer has no internal components, everything is delegated to the ClusterHelper
-  DoubleCellClusterTransformer(const alps::params& params): ClusterTransformer(params),h_init_(params["dca.H_INIT"]), h_(params["dca.H"]){
+  DoubleCellClusterTransformer(const alps::params& params):
+    ClusterTransformer(params),h_init_(params["dca.H_INIT"]), h_(params["dca.H"]),
+    mu_stag_init_(params["dca.MU_STAG_INIT"]), mu_stag_(params["dca.MU_STAG"]){
     if(use_phase_) throw std::invalid_argument("use phase should not be used in the double unit cell framework.");
   }
   ///virtual destructor
@@ -170,15 +172,19 @@ public:
   void compute_noninteracting_G0(double_cell_matsubara_kspace_gf &G0_omega) const;
 
   ///the k-sum
-  void matsubara_k_sum(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma, double h) const;
+  void matsubara_k_sum(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma, double h, double mu_stag) const;
 private:
   ///attach a tail to the noninteracting GF
-  void attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h) const;
+  void attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h, double mu_stag) const;
 
   ///initial magnetic field value
   const double h_init_;
   ///magnetic field
   const double h_;
+  ///initial staggered chem pot value
+  const double mu_stag_init_;
+  ///staggered chem pot value
+  const double mu_stag_;
 
 };
 
