@@ -55,6 +55,7 @@ public:
   double cluster_momentum(int i, int j) const { return cluster_momenta_(i,j); }
   double lattice_momentum( int i,  int j) const { return lattice_momenta_(i,j); }
   double reciprocal_basis_vector(const unsigned int i, const unsigned int j) const { return reciprocal_basis_(i,j); }
+  double basis_vector(const unsigned int i, const unsigned int j) const { return basis_(i,j); }
   ///getter function for periodicity (number of hops in each direction until we're back on the same site)
   int periodicity(const unsigned int i) const { return periodicity_[i]; }
   bool bipartite() const { return bipartite_; }

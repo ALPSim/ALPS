@@ -127,7 +127,9 @@ public:
   ///compute G0 from a noninteracting solution
   void compute_noninteracting_G0(cluster_matsubara_kspace_gf &G0_omega) const;
 
+  ///attach the DCA cluster high frequency behavior for the non-interacting GF
   void attach_bare_tail(cluster_matsubara_kspace_gf &G0) const;
+  ///attach the DCA cluster high frequency behavior for the interacting GF
   void attach_interacting_tail(cluster_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const;
 
   //Real space and k-space transformers for the Green's functions
@@ -140,7 +142,7 @@ public:
   cluster_matsubara_kspace_gf operator()(const cluster_matsubara_kspace_gf &G_omega, const cluster_matsubara_kspace_gf &G0_omega) const;
 
 private:
-  //symmetrization in real momentum space - for the normal GF
+  //symmetrization in momentum space - for the normal state GF
   template<class GF,class TAIL> void symmetrize_helper_k_space(alps::gf::three_index_gf_with_tail<GF,TAIL> &G,
                                                         const std::pair<std::set<pair_class_type>::const_iterator,
                                                         std::set<pair_class_type>::const_iterator> pair_classes) const;

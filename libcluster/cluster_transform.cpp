@@ -127,10 +127,10 @@ void DoubleCellClusterTransformer::compute_isolated_cluster_G0(double_cell_matsu
       for (alps::gf::index spin(0); spin<n_flavors_; ++spin) {
         double spin_factor=spin()==0?1.:-1.;
         //this implements Eq. 119
-        two_by_two G0(std::complex<double>(mu_+mu_stag_init_-epsilon(k  ),(2*freq()+1)*M_PI/beta_),
+        two_by_two G0(std::complex<double>(mu_+mu_stag_init_/2.-epsilon(k  ),(2*freq()+1)*M_PI/beta_),
             spin_factor*h_init_/2.,
             spin_factor*h_init_/2.,
-                      std::complex<double>(mu_-mu_stag_init_-epsilon(kpq),(2*freq()+1)*M_PI/beta_));
+                      std::complex<double>(mu_-mu_stag_init_/2.-epsilon(kpq),(2*freq()+1)*M_PI/beta_));
         G0.invert();
 
         G0_omega(freq, kc  , alps::gf::index(0), spin) = G0(0,0);
