@@ -100,7 +100,7 @@ TEST(TwoByTwo, AccessAndInversion){
   EXPECT_NEAR(G(1,0).real(), 1.5, 1.e-10);
   EXPECT_NEAR(G(1,1).real(), -0.5, 1.e-10);
 }
-TEST_F(DoubleUnitCellTransformTest, ComputeNonintClusterSolution){
+TEST_F(DoubleUnitCellTransformTest, CompareIsolatedClusterSolutionToNormalStateForH0){
   alps::params p;
   set_common_parameters(p);
   p["dca.H_INIT"]=0;
@@ -125,6 +125,30 @@ TEST_F(DoubleUnitCellTransformTest, ComputeNonintClusterSolution){
       }
     }
   }
+}
+TEST_F(DoubleUnitCellTransformTest, CompareNonintClusterSolutionToNormalStateForH0){
+  alps::params p;
+  set_common_parameters(p);
+  p["dca.H_INIT"]=0;
+  DoubleCellClusterTransformer CT1(p);
+  NormalStateClusterTransformer CT2(p);
 
+  double_cell_matsubara_kspace_gf G0_init(alps::gf::omega_k_sigma1_sigma2_gf(alps::gf::matsubara_positive_mesh(beta_, n_freq_), CT1.momentum_mesh(), alps::gf::index_mesh(2), alps::gf::index_mesh(2)));
+  CT1.compute_noninteracting_G0(G0_init);
 
+  cluster_matsubara_kspace_gf G0_init2(alps::gf::omega_k_sigma_gf(alps::gf::matsubara_positive_mesh(beta_, n_freq_), CT1.momentum_mesh(), alps::gf::index_mesh(2)));
+  CT2.compute_noninteracting_G0(G0_init2);
+
+  for(int k=0;k<n_sites_;k+=2){
+    for(int i=0;i<n_freq_;++i){
+      for(int spin=0;spin<2;++spin){
+        EXPECT_NEAR(G0_init2(alps::gf::matsubara_index(i), alps::gf::momentum_index(k), alps::gf::index(spin)).real(), G0_init(alps::gf::matsubara_index(i), alps::gf::momentum_index(k), alps::gf::index(0), alps::gf::index(spin)).real(), 1.e-10);
+        EXPECT_NEAR(G0_init2(alps::gf::matsubara_index(i), alps::gf::momentum_index(k), alps::gf::index(spin)).imag(), G0_init(alps::gf::matsubara_index(i), alps::gf::momentum_index(k), alps::gf::index(0), alps::gf::index(spin)).imag(), 1.e-10);
+        EXPECT_NEAR(G0_init2(alps::gf::matsubara_index(i), alps::gf::momentum_index(k+1), alps::gf::index(spin)).real(), G0_init(alps::gf::matsubara_index(i), alps::gf::momentum_index(k+1), alps::gf::index(1), alps::gf::index(spin)).real(), 1.e-10);
+        EXPECT_NEAR(G0_init2(alps::gf::matsubara_index(i), alps::gf::momentum_index(k+1), alps::gf::index(spin)).imag(), G0_init(alps::gf::matsubara_index(i), alps::gf::momentum_index(k+1), alps::gf::index(1), alps::gf::index(spin)).imag(), 1.e-10);
+        EXPECT_NEAR(0., G0_init(alps::gf::matsubara_index(i), alps::gf::momentum_index(k), alps::gf::index(1), alps::gf::index(spin)).real(), 1.e-10);
+        EXPECT_NEAR(0., G0_init(alps::gf::matsubara_index(i), alps::gf::momentum_index(k+1), alps::gf::index(0), alps::gf::index(spin)).real(), 1.e-10);
+      }
+    }
+  }
 }
