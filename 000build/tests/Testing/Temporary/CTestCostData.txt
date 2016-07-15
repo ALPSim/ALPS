@@ -1,6 +1,0 @@
-cluster_helper_test 2 40.8291
-cluster_transform_test 1 0.1344
-double_cell_transform_test 0 0
-normal_state_transform_test 2 0.0627484
----
-double_cell_transform_test
