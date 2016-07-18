@@ -750,6 +750,21 @@ double ClusterTransformer::epsilon_flavor(const std::vector<double> &k, unsigned
     for (unsigned int i=0; i<dimension(); ++i)
       eps -= 2*t_*t_flavor_*cos(k[i]);
   }
+if (t2_!=0.) {
+    switch(dimension()) {
+    case 1 :
+      eps -= 2*t2_*cos(k[0]*2.);
+      break;
+    case 2 :
+      eps -= 4*t2_*cos(k[0])*cos(k[1]);
+      break;
+    case 3 :
+      eps -= 4*t2_*cos(k[0])*cos(k[1]);
+      eps -= 4*t2_*cos(k[1])*cos(k[2]);
+      eps -= 4*t2_*cos(k[0])*cos(k[2]);
+      break;
+    }
+  }
   return eps;
 }
 double ClusterTransformer::epsilon_phi(const std::vector<double> &k, const std::vector<double> &phi) const{
