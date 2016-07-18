@@ -127,7 +127,9 @@ public:
   ///compute G0 from a noninteracting solution
   void compute_noninteracting_G0(cluster_matsubara_kspace_gf &G0_omega) const;
 
+  ///attach the DCA cluster high frequency behavior for the non-interacting GF
   void attach_bare_tail(cluster_matsubara_kspace_gf &G0) const;
+  ///attach the DCA cluster high frequency behavior for the interacting GF
   void attach_interacting_tail(cluster_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const;
 
   //Real space and k-space transformers for the Green's functions
@@ -140,7 +142,7 @@ public:
   cluster_matsubara_kspace_gf operator()(const cluster_matsubara_kspace_gf &G_omega, const cluster_matsubara_kspace_gf &G0_omega) const;
 
 private:
-  //symmetrization in real momentum space - for the normal GF
+  //symmetrization in momentum space - for the normal state GF
   template<class GF,class TAIL> void symmetrize_helper_k_space(alps::gf::three_index_gf_with_tail<GF,TAIL> &G,
                                                         const std::pair<std::set<pair_class_type>::const_iterator,
                                                         std::set<pair_class_type>::const_iterator> pair_classes) const;
@@ -155,7 +157,9 @@ public:
 class DoubleCellClusterTransformer: public ClusterTransformer{
 public:
   ///Constructor: a cluster transformer has no internal components, everything is delegated to the ClusterHelper
-  DoubleCellClusterTransformer(const alps::params& params): ClusterTransformer(params),h_init_(params["dca.H_INIT"]), h_(params["dca.H"]){
+  DoubleCellClusterTransformer(const alps::params& params):
+    ClusterTransformer(params),h_init_(params["dca.H_INIT"]), h_(params["dca.H"]),
+    mu_stag_init_(params["dca.MU_STAG_INIT"]), mu_stag_(params["dca.MU_STAG"]){
     if(use_phase_) throw std::invalid_argument("use phase should not be used in the double unit cell framework.");
   }
   ///virtual destructor
@@ -170,15 +174,19 @@ public:
   void compute_noninteracting_G0(double_cell_matsubara_kspace_gf &G0_omega) const;
 
   ///the k-sum
-  void matsubara_k_sum(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma) const;
+  void matsubara_k_sum(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma, double h, double mu_stag) const;
 private:
   ///attach a tail to the noninteracting GF
-  void attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h) const;
+  void attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h, double mu_stag) const;
 
   ///initial magnetic field value
   const double h_init_;
   ///magnetic field
   const double h_;
+  ///initial staggered chem pot value
+  const double mu_stag_init_;
+  ///staggered chem pot value
+  const double mu_stag_;
 
 };
 
