@@ -1,0 +1,136 @@
+Start testing: Jul 15 12:49 EDT
+----------------------------------------------------------
+1/4 Testing: cluster_helper_test
+1/4 Test: cluster_helper_test
+Command: "/Users/hterlets/Desktop/work/DMFT/000build/tests/cluster_helper_test"
+Directory: /Users/hterlets/Desktop/work/DMFT/000build/tests
+"cluster_helper_test" start time: Jul 15 12:49 EDT
+Output:
+----------------------------------------------------------
+Running main() from gtest_main.cc
+[==========] Running 124 tests from 5 test cases.
+[----------] Global test environment set-up.
+[----------] 2 tests from ClusterHelper
+[ RUN      ] ClusterHelper.Periodicity8Site
+unknown file: Failure
+C++ exception with description "cluster library: ../libcluster/cluster.xml could not be opened." thrown in the test body.
+[  FAILED  ] ClusterHelper.Periodicity8Site (0 ms)
+[ RUN      ] ClusterHelper.Periodicity4Site
+unknown file: Failure
+C++ exception with description "cluster library: ../libcluster/cluster.xml could not be opened." thrown in the test body.
+[  FAILED  ] ClusterHelper.Periodicity4Site (0 ms)
+[----------] 2 tests from ClusterHelper (0 ms total)
+
+[----------] 58 tests from ClusterNoALPSTest2D1/ClusterHelperTest
+[ RUN      ] ClusterNoALPSTest2D1/ClusterHelperTest.TwoDClusterReadWrite/0
+unknown file: Failure
+C++ exception with description "cluster library: ../libcluster/cluster.xml could not be opened." thrown in SetUp().
+<end of output>
+Test time =   0.38 sec
+----------------------------------------------------------
+Test Failed.
+"cluster_helper_test" end time: Jul 15 12:49 EDT
+"cluster_helper_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/4 Testing: cluster_transform_test
+2/4 Test: cluster_transform_test
+Command: "/Users/hterlets/Desktop/work/DMFT/000build/tests/cluster_transform_test"
+Directory: /Users/hterlets/Desktop/work/DMFT/000build/tests
+"cluster_transform_test" start time: Jul 15 12:49 EDT
+Output:
+----------------------------------------------------------
+Running main() from gtest_main.cc
+[==========] Running 7 tests from 1 test case.
+[----------] Global test environment set-up.
+[----------] 7 tests from ClusterTransformTest
+[ RUN      ] ClusterTransformTest.MomentumMeshMakesSense
+unknown file: Failure
+C++ exception with description "cluster library: ../libcluster/cluster.xml could not be opened." thrown in SetUp().
+[  FAILED  ] ClusterTransformTest.MomentumMeshMakesSense (0 ms)
+[ RUN      ] ClusterTransformTest.RealSpaceMeshMakesSense
+unknown file: Failure
+C++ exception with description "cluster library: ../libcluster/cluster.xml could not be opened." thrown in SetUp().
+<end of output>
+Test time =   0.30 sec
+----------------------------------------------------------
+Test Failed.
+"cluster_transform_test" end time: Jul 15 12:49 EDT
+"cluster_transform_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/4 Testing: double_cell_transform_test
+3/4 Test: double_cell_transform_test
+Command: "/Users/hterlets/Desktop/work/DMFT/000build/tests/double_cell_transform_test"
+Directory: /Users/hterlets/Desktop/work/DMFT/000build/tests
+"double_cell_transform_test" start time: Jul 15 12:49 EDT
+Output:
+----------------------------------------------------------
+Running main() from gtest_main.cc
+[==========] Running 5 tests from 2 test cases.
+[----------] Global test environment set-up.
+[----------] 4 tests from DoubleUnitCellTransformTest
+[ RUN      ] DoubleUnitCellTransformTest.MakeADoubleUnitCellTransformer
+unknown file: Failure
+C++ exception with description "cluster library: ../libcluster/cluster.xml could not be opened." thrown in SetUp().
+[  FAILED  ] DoubleUnitCellTransformTest.MakeADoubleUnitCellTransformer (1 ms)
+[ RUN      ] DoubleUnitCellTransformTest.ReadNonexistentInputFile
+unknown file: Failure
+C++ exception with description "cluster library: ../libcluster/cluster.xml could not be opened." thrown in SetUp().
+[  FAILED  ] DoubleUnitCellTransformTest.ReadNonexistentInputFile (0 ms)
+[ RUN      ] DoubleUnitCellTransformTest.ComputeIsolatedClusterSolution
+unknown file: Failure
+C++ exception with description "cluster library: ../libcluster/cluster.xml could not be opened." thrown in SetUp().
+[  FAILED  ] DoubleUnitCellTransformTest.ComputeIsolatedClusterSolution (0 ms)
+[ RUN      ] DoubleUnitCellTransformTest.ComputeNonintClusterSolution
+unknown file: Failure
+C++ exception with description "cluster library: ../libcluster/cluster.xml could not be opened." thrown in SetUp().
+[  FAILED  ] DoubleUnitCellTransformTest.ComputeNonintClusterSolution (0 ms)
+[----------] 4 tests from DoubleUnitCellTransformTest (1 ms total)
+
+[----------] 1 test from TwoByTwo
+[ RUN      ] TwoByTwo.AccessAndInversion
+[       OK ] TwoByTwo.AccessAndInversion (0 ms)
+[----------] 1 test from TwoByTwo (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 5 tests from 2 test cases ran. (1 ms total)
+[  PASSED  ] 1 test.
+[  FAILED  ] 4 tests, listed below:
+[  FAILED  ] DoubleUnitCellTransformTest.MakeADoubleUnitCellTransformer
+[  FAILED  ] DoubleUnitCellTransformTest.ReadNonexistentInputFile
+[  FAILED  ] DoubleUnitCellTransformTest.ComputeIsolatedClusterSolution
+[  FAILED  ] DoubleUnitCellTransformTest.ComputeNonintClusterSolution
+
+ 4 FAILED TESTS
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Failed.
+"double_cell_transform_test" end time: Jul 15 12:49 EDT
+"double_cell_transform_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/4 Testing: normal_state_transform_test
+4/4 Test: normal_state_transform_test
+Command: "/Users/hterlets/Desktop/work/DMFT/000build/tests/normal_state_transform_test"
+Directory: /Users/hterlets/Desktop/work/DMFT/000build/tests
+"normal_state_transform_test" start time: Jul 15 12:49 EDT
+Output:
+----------------------------------------------------------
+Running main() from gtest_main.cc
+[==========] Running 3 tests from 1 test case.
+[----------] Global test environment set-up.
+[----------] 3 tests from NormalStateTransformTest
+[ RUN      ] NormalStateTransformTest.MakeANormalStateTransformer
+unknown file: Failure
+C++ exception with description "cluster library: ../libcluster/cluster.xml could not be opened." thrown in SetUp().
+<end of output>
+Test time =   0.30 sec
+----------------------------------------------------------
+Test Failed.
+"normal_state_transform_test" end time: Jul 15 12:49 EDT
+"normal_state_transform_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Jul 15 12:49 EDT
