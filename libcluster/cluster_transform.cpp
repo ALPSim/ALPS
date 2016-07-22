@@ -113,6 +113,22 @@ void NormalStateClusterTransformer::compute_isolated_cluster_G0(cluster_matsubar
     }
   }
   attach_bare_tail(G0_omega);
+  //print epsk
+  std::ofstream epsk_file("epsk.dat");
+  for (alps::gf::momentum_index kc(0); kc<n_cluster_sites(); ++kc) {
+    for (unsigned int d=0; d<dimension(); ++d)
+      k[d] = cluster_momentum(kc(),d);
+    if (dimension()==2)
+    {
+      std::cout<<cluster_momentum(kc(),0)<<" "<<cluster_momentum(kc(),dimension()-1)<<" "<<epsilon(k)<<std::endl;
+      epsk_file<<cluster_momentum(kc(),0)<<" "<<cluster_momentum(kc(),dimension()-1)<<" "<<epsilon(k)<<std::endl;
+    }
+    // change
+    if (dimension()==1) {
+     epsk_file<<k[0]<<" "<<epsilon(k)<<std::endl;
+    }
+
+  }
 }
 void DoubleCellClusterTransformer::compute_isolated_cluster_G0(double_cell_matsubara_kspace_gf &G0_omega) const{
   std::vector<double> k  (dimension());
