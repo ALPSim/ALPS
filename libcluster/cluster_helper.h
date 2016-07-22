@@ -54,8 +54,10 @@ public:
   double cluster_coordinate(int i, int j) const { return cluster_coordinates_(i,j); }
   double cluster_momentum(int i, int j) const { return cluster_momenta_(i,j); }
   double lattice_momentum( int i,  int j) const { return lattice_momenta_(i,j); }
+  ///this gives access to the basis in momentum space
   double reciprocal_basis_vector(const unsigned int i, const unsigned int j) const { return reciprocal_basis_(i,j); }
-  double basis_vector(const unsigned int i, const unsigned int j) const { return basis_(i,j); }
+  ///this gives access to the basis in real space
+  double basis_vector(const unsigned int i, const unsigned int j) const { return basis_vectors()[i][j]; }
   ///getter function for periodicity (number of hops in each direction until we're back on the same site)
   int periodicity(const unsigned int i) const { return periodicity_[i]; }
   bool bipartite() const { return bipartite_; }
