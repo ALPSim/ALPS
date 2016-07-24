@@ -550,6 +550,28 @@ void NormalStateClusterTransformer::dyson_get_self_energy(cluster_matsubara_kspa
   sigma.set_tail(0,s0);
   sigma.set_tail(1,s1);
 }
+///Use Dyson to get the self-energy in AFM/CO double unit cell space
+void DoubleCellClusterTransformer::dyson_get_self_energy(double_cell_matsubara_kspace_gf &sigma, const double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &G0) const{
+  alps::gf::index Zero(0);
+  alps::gf::index Q(1);
+  for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
+    for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); k+=2) {
+      for (alps::gf::index spin(0); spin<G.mesh3().extent(); spin++) {
+        std::complex<double> g0_block[4]={G0(w, k, Zero,spin),G0(w, k, Q,spin),G0(w, k+1, Zero,spin),G0(w, k+1, Q,spin)};
+        std::complex<double>  g_block[4]={ G(w, k, Zero,spin), G(w, k, Q,spin), G(w, k+1, Zero,spin), G(w, k+1, Q,spin)};
+        std::complex<double>      det_g0=g0_block[0]*g0_block[3]-g0_block[1]*g0_block[2];
+        std::complex<double>      det_g = g_block[0]* g_block[3]- g_block[1]* g_block[2];
+
+        sigma(w,k  ,Zero,spin)= g0_block[3]/det_g0 - g_block[3]/det_g;
+        sigma(w,k  ,Q   ,spin)=-g0_block[1]/det_g0 + g_block[1]/det_g;
+        sigma(w,k+1,Zero,spin)=-g0_block[2]/det_g0 + g_block[2]/det_g;
+        sigma(w,k+1,Q   ,spin)= g0_block[0]/det_g0 - g_block[0]/det_g;
+      }
+    }
+  }
+  //HANNA todo: set the high frequency tails here
+}
+
 ///Use Dyson to get the self-energy in Nambu space
 void NambuClusterTransformer::dyson_get_self_energy(cluster_nambu_matsubara_kspace_gf &sigma, const cluster_nambu_matsubara_kspace_gf &G, const cluster_nambu_matsubara_kspace_gf &G0) const{
   const alps::gf::index up(0);
@@ -589,6 +611,28 @@ void NormalStateClusterTransformer::dyson_get_green0(cluster_matsubara_kspace_gf
   G0.set_tail(1, tail_1);
   G0.set_tail(2, tail_2);
 }
+///Use Dyson to get the G0 in AFM / CO space
+void DoubleCellClusterTransformer::dyson_get_green0(double_cell_matsubara_kspace_gf &G0, const double_cell_matsubara_kspace_gf &sigma, const double_cell_matsubara_kspace_gf &G) const{
+  alps::gf::index Zero(0);
+  alps::gf::index Q(1);
+  for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
+    for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); ++k) {
+      for (alps::gf::index spin(0); spin<G.mesh3().extent(); spin++) {
+        std::complex<double> glatt_block[4]={ G(w, k, Zero,spin), G(w, k, Q, spin), G(w, k+1, Zero, spin), G(w, k+1, Q, spin)};
+        std::complex<double> det_glatt     = glatt_block[0]* glatt_block[3]- glatt_block[1]* glatt_block[2];
+        std::complex<double> glatt_inv[4]  ={glatt_block[3]/det_glatt,-glatt_block[1]/det_glatt,-glatt_block[2]/det_glatt,glatt_block[0]/det_glatt};
+        std::complex<double> g0_inv[4]     ={glatt_inv[0]+sigma(w,k,Zero,spin), glatt_inv[1]+sigma(w,k,Q,spin),glatt_inv[2]+sigma(w,k+1,Zero,spin),glatt_inv[3]+sigma(w,k+1,Q,spin)};
+        std::complex<double> det_g0inv     =g0_inv[0]*g0_inv[3]-g0_inv[1]*g0_inv[2];
+
+        G0(w,k  ,Zero,spin) = g0_inv[3]/det_g0inv;
+        G0(w,k  ,Q   ,spin) =-g0_inv[1]/det_g0inv;
+        G0(w,k+1,Zero,spin) =-g0_inv[2]/det_g0inv;
+        G0(w,k+1,Q   ,spin) = g0_inv[0]/det_g0inv;
+      }
+    }
+  }
+}
+
 ///Use Dyson to get the G0 in Nambu space
 void NambuClusterTransformer::dyson_get_green0(cluster_nambu_matsubara_kspace_gf &G0, const cluster_nambu_matsubara_kspace_gf &sigma, const cluster_nambu_matsubara_kspace_gf &G) const{
   const alps::gf::index up(0);
@@ -886,3 +930,18 @@ void NambuClusterTransformer::symmetrize_dwave_kspace(cluster_nambu_matsubara_ks
 //create some instances for libcluster:
 template void ClusterTransformer::initial_G0(cluster_nambu_matsubara_kspace_gf &G0_omega, cluster_nambu_itime_kspace_gf &G0_tau)const;
 template void ClusterTransformer::initial_G0(cluster_matsubara_kspace_gf &G0_omega, cluster_itime_kspace_gf &G0_tau)const;
+
+void DoubleCellClusterTransformer::symmetrize_afm_kspace(double_cell_matsubara_kspace_gf &G) const{
+  throw std::logic_error("Hanna please implement the afm k-space symmetrization here");
+}
+void DoubleCellClusterTransformer::symmetrize_co_kspace(double_cell_matsubara_kspace_gf &G) const{
+  throw std::logic_error("Hanna please implement the charge order k-space symmetrization here");
+}
+void DoubleCellClusterTransformer::spin_symmetrize(double_cell_matsubara_kspace_gf &G) const{
+  throw std::logic_error("Hanna please implement the spin symmetrization here");
+  if (afm_symmetry_){
+    ;
+  }else if(charge_order_symmetry_){
+    ;
+  }else throw std::logic_error("neither AFM nor CO: how to symmetrize?");
+}

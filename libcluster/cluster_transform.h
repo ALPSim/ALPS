@@ -51,8 +51,6 @@ public:
   double epsilon_phi(const std::vector<double> &k, const std::vector<double> &phi) const;
 
 protected:
-
-
   std::vector<double> epsav() const { return epsav_; };
   std::vector<double> epssqav() const { return epssqav_; };
   double dispersion_moments(const unsigned int i) const { return dispersion_moments_[i]; }
@@ -159,8 +157,10 @@ public:
   ///Constructor: a cluster transformer has no internal components, everything is delegated to the ClusterHelper
   DoubleCellClusterTransformer(const alps::params& params):
     ClusterTransformer(params),h_init_(params["dca.H_INIT"]), h_(params["dca.H"]),
-    mu_stag_init_(params["dca.MU_STAG_INIT"]), mu_stag_(params["dca.MU_STAG"]){
+    mu_stag_init_(params["dca.MU_STAG_INIT"]), mu_stag_(params["dca.MU_STAG"]), afm_symmetry_(params["dca.AFM_SELFCONSISTENCY"]), charge_order_symmetry_(params["dca.CO_SELFCONSISTENCY"]){
     if(use_phase_) throw std::invalid_argument("use phase should not be used in the double unit cell framework.");
+    if(afm_symmetry_ && mu_stag_!=0) throw std::invalid_argument("do not use staggered mu in AFM Self-consistency");
+    if(charge_order_symmetry_ && h_!=0) throw std::invalid_argument("do not use magnetic field in CO Self-consistency");
   }
   ///virtual destructor
   virtual ~DoubleCellClusterTransformer() {}
@@ -173,11 +173,29 @@ public:
   ///compute G0 from a noninteracting solution
   void compute_noninteracting_G0(double_cell_matsubara_kspace_gf &G0_omega) const;
 
+  ///Use Dyson to get the self-energy
+  void dyson_get_self_energy(double_cell_matsubara_kspace_gf &sigma, const double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &G0) const;
+  ///Use Dyson to get the G0
+  void dyson_get_green0(double_cell_matsubara_kspace_gf &G0, const double_cell_matsubara_kspace_gf &sigma, const double_cell_matsubara_kspace_gf &G) const;
   ///the k-sum
   void matsubara_k_sum(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma, double h, double mu_stag) const;
+  ///the k-sum: short version, reroutes via long version by using h_ and mu_stag_
+  void matsubara_k_sum(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma) const{
+    matsubara_k_sum(G, sigma, h_, mu_stag_);
+  }
+
+  ///perform spin symmetrization of matsubara k-space Green's function
+  void spin_symmetrize(double_cell_matsubara_kspace_gf& G) const;
+  ///perform k-space symmetrization
+  void symmetrize_k_space(double_cell_matsubara_kspace_gf& G) const{if (afm_symmetry_) symmetrize_afm_kspace(G); else if(charge_order_symmetry_) symmetrize_co_kspace(G); else throw std::logic_error("neither AFM nor CO: how to symmetrize?");}
+
 private:
   ///attach a tail to the noninteracting GF
   void attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h, double mu_stag) const;
+  ///perform the AFM symmetrization
+  void symmetrize_afm_kspace(double_cell_matsubara_kspace_gf &G) const;
+  ///perform the CO symmetrization
+  void symmetrize_co_kspace(double_cell_matsubara_kspace_gf &G) const;
 
   ///initial magnetic field value
   const double h_init_;
@@ -187,6 +205,10 @@ private:
   const double mu_stag_init_;
   ///staggered chem pot value
   const double mu_stag_;
+  ///are we doing charge order symmetry?
+  const bool charge_order_symmetry_;
+  ///are we doing AFM symmertry?
+  const bool afm_symmetry_;
 
 };
 

@@ -111,29 +111,42 @@ template<class SOLV, class TRANS, class GFW, class GFT> void selfconsistency_loo
 void perform_cluster_loop(const std::string &param_file_name, const alps::params &parms){
   std::string cluster_loop=parms["SC_LOOP"];
   bool nambu=parms["sc.NAMBU"];
+  bool afm_doublecell_framework=parms["dca.AFM_SELFCONSISTENCY"];
+  bool co_doublecell_framework=parms["dca.CO_SELFCONSISTENCY"];
   std::string solver_path=parms["solver.SOLVER"];
   int n_tau=parms["N"];
   int n_matsubara=parms["NMATSUBARA"];
   int n_orbital=parms["FLAVORS"];
   double beta=parms["BETA"];
 
-  std::cout<<"cluster loop is: "<<cluster_loop<<std::endl;
-  if (!nambu && cluster_loop=="DCA"){
+  if(cluster_loop!="DCA")
+    throw std::runtime_error("only DCA is defined at the moment as a cluster loop. set SC_LOOP to DCA.");
+  //this dispatches the NAMBU (paramagnetic, superconducting) cluster framework
+  if(nambu){
+      std::cout<<"running a DCA calculation allowing for superconducting order"<<std::endl;
+      NambuClusterTransformer T(parms);
+      ImpuritySolver solver(solver_path,param_file_name, parms);
+      cluster_nambu_matsubara_kspace_gf G0_omega(alps::gf::omega_k_sigma1_sigma2_gf(alps::gf::matsubara_positive_mesh(beta,n_matsubara),T.momentum_mesh(), alps::gf::index_mesh(n_orbital),alps::gf::index_mesh(n_orbital)));
+      cluster_nambu_itime_kspace_gf     G0_tau(alps::gf::itime_k_sigma1_sigma2_gf  (alps::gf::itime_mesh(beta,n_tau),T.momentum_mesh(), alps::gf::index_mesh(n_orbital),alps::gf::index_mesh(n_orbital)));
+      selfconsistency_loop_DCA(parms, solver, T, G0_omega,G0_tau);
+  }
+  //this dispatches the normal state (paramagnetic) cluster framework
+  else if((!afm_doublecell_framework) && (!afm_doublecell_framework)){
     std::cout<<"running a DCA calculation in the normal state"<<std::endl;
     NormalStateClusterTransformer T(parms);
     ImpuritySolver solver(solver_path,param_file_name, parms);
     cluster_matsubara_kspace_gf G0_omega(alps::gf::omega_k_sigma_gf(alps::gf::matsubara_positive_mesh(beta,n_matsubara),T.momentum_mesh(), alps::gf::index_mesh(n_orbital)));
     cluster_itime_kspace_gf G0_tau(alps::gf::itime_k_sigma_gf(alps::gf::itime_mesh(beta,n_tau),T.momentum_mesh(), alps::gf::index_mesh(n_orbital)));
     selfconsistency_loop_DCA(parms, solver, T,G0_omega,G0_tau);
-  }else if(cluster_loop=="DCA"){
-    std::cout<<"running a DCA calculation allowing for superconducting order"<<std::endl;
-    NambuClusterTransformer T(parms);
+  }
+  //this dispatches the afm or charge ordered cluster framework
+  else{
+    std::cout<<"running a DCA calculation in the double unit cell framework"<<std::endl;
+    DoubleCellClusterTransformer T(parms);
     ImpuritySolver solver(solver_path,param_file_name, parms);
-    cluster_nambu_matsubara_kspace_gf G0_omega(alps::gf::omega_k_sigma1_sigma2_gf(alps::gf::matsubara_positive_mesh(beta,n_matsubara),T.momentum_mesh(), alps::gf::index_mesh(n_orbital),alps::gf::index_mesh(n_orbital)));
-    cluster_nambu_itime_kspace_gf     G0_tau(alps::gf::itime_k_sigma1_sigma2_gf  (alps::gf::itime_mesh(beta,n_tau),T.momentum_mesh(), alps::gf::index_mesh(n_orbital),alps::gf::index_mesh(n_orbital)));
-    selfconsistency_loop_DCA(parms, solver, T, G0_omega,G0_tau);
-  }else{
-    boost::throw_exception(std::logic_error("there is no such cluster method: "+cluster_loop));
+    double_cell_matsubara_kspace_gf G0_omega(alps::gf::omega_k_sigma1_sigma2_gf(alps::gf::matsubara_positive_mesh(beta,n_matsubara),T.momentum_mesh(), alps::gf::index_mesh(n_orbital), alps::gf::index_mesh(n_orbital)));
+    double_cell_itime_kspace_gf G0_tau(alps::gf::itime_k_sigma1_sigma2_gf(alps::gf::itime_mesh(beta,n_tau),T.momentum_mesh(), alps::gf::index_mesh(n_orbital), alps::gf::index_mesh(n_orbital)));
+    selfconsistency_loop_DCA(parms, solver, T,G0_omega,G0_tau);
   }
 }
 

@@ -21,7 +21,8 @@ void ClusterHelper::define_parameters(alps::params &p){
   p.define<std::string>("dca.LATTICE", "name of the cluster");
   p.define<std::string>("dca.LATTICE_LIBRARY", "name of the xml cluster definition file");
   p.define<std::string>("dca.LATTICE_DUMP", "cluster.h5", "name of the cluster transformer hdf5 dump file");
-  p.define<bool>("dca.AFM_SELFCONSISTENCY", false, "Use the AFM self-consistency condition.");
+  p.define<bool>("dca.AFM_SELFCONSISTENCY", false, "Use the AFM double unit cell framework");
+  p.define<bool>("dca.CO_SELFCONSISTENCY", false, "Use the charge order double unit cell framework.");
   p.define<int>("dca.SITES",  "number of cluster sites");
   p.define<int>("dca.L", "linear discretization of cluster k-point integration");
 }
