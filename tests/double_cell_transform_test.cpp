@@ -37,6 +37,7 @@ protected:
     p["NMATSUBARA"] = n_freq_;
     p["N"] = n_tau_;
     p["dca.AFM_SELFCONSISTENCY"]=true;
+    p["dca.CO_SELFCONSISTENCY"]=false;
     p["dca.PHASE"]=false;
     p["dca.IMBALANCE"]=false;
     p["dca.G0_OMEGA_INPUT"]="/tmp/none";
@@ -106,6 +107,29 @@ TEST(TwoByTwo, AccessAndInversion){
   EXPECT_NEAR(G(1,0).real(), 1.5, 1.e-10);
   EXPECT_NEAR(G(1,1).real(), -0.5, 1.e-10);
 }
+TEST(TwoByTwo, Multiply){
+  two_by_two G(1,2,3,4);
+  two_by_two F(5,6,7,8);
+  two_by_two H=G*F;
+  EXPECT_NEAR(H(0,0).real(), 19, 1.e-10);
+  EXPECT_NEAR(H(0,1).real(), 22, 1.e-10);
+  EXPECT_NEAR(H(1,0).real(), 43, 1.e-10);
+  EXPECT_NEAR(H(1,1).real(), 50, 1.e-10);
+  two_by_two Z=G-H;
+  EXPECT_NEAR(Z(0,0).real(), -18, 1.e-10);
+  EXPECT_NEAR(Z(0,1).real(), -20, 1.e-10);
+  EXPECT_NEAR(Z(1,0).real(), -40, 1.e-10);
+  EXPECT_NEAR(Z(1,1).real(), -46, 1.e-10);
+}
+TEST(TwoByTwo, Scale){
+  two_by_two G(1,2,3,4);
+  two_by_two H=G*1.2;
+  EXPECT_NEAR(H(0,0).real(), 1.2, 1.e-10);
+  EXPECT_NEAR(H(0,1).real(), 2.4, 1.e-10);
+  EXPECT_NEAR(H(1,0).real(), 3.6, 1.e-10);
+  EXPECT_NEAR(H(1,1).real(), 4.8, 1.e-10);
+}
+
 TEST_F(DoubleUnitCellTransformTest, CompareIsolatedClusterSolutionToNormalStateForH0){
   alps::params p;
   set_common_parameters(p);
