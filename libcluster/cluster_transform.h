@@ -54,6 +54,7 @@ public:
   virtual void attach_bare_tail(cluster_matsubara_kspace_gf &G0) const {throw std::logic_error("this should be implemented in an inherited class");}
   ///attach the DCA cluster high frequency behavior for the interacting GF
   virtual void attach_interacting_tail(cluster_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const {throw std::logic_error("this should be implemented in an inherited class");}
+  virtual void attach_interacting_tail(double_cell_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const {throw std::logic_error("this should be implemented in an inherited class");}
   ///take a Green's function in k-space and transform it to real space
   virtual cluster_itime_realspace_gf transform_into_real_space(const cluster_itime_kspace_gf& G) const {throw std::logic_error("this should be implemented in an inherited class");}
   ///take a double cell Green's function in k-space and transform it to real space
@@ -204,6 +205,8 @@ public:
 private:
   ///attach a tail to the noninteracting GF
   void attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h, double mu_stag) const;
+  ///attach a tail to the interacting GF
+  void attach_interacting_tail(double_cell_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const;
   ///perform the AFM symmetrization
   void symmetrize_afm_kspace(double_cell_matsubara_kspace_gf &G) const;
   ///perform the CO symmetrization
