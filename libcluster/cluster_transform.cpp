@@ -29,8 +29,8 @@ void define_dca_parameters(alps::params &p){
   p.define<double>("dca.ETA2", 0, "d-wave bias field eta2");
   p.define<double>("dca.H_INIT", 0, "initial staggered magnetic field");
   p.define<double>("dca.H", 0, "staggered magnetic field");
-  p.define<double>("dca.MUSTAG_INIT", 0, "initial staggered chemical potential (for charge order)");
-  p.define<double>("dca.MUSTAG", 0, "staggered chemical potential (for charge order)");
+  p.define<double>("dca.MU_STAG_INIT", 0, "initial staggered chemical potential (for charge order)");
+  p.define<double>("dca.MU_STAG", 0, "staggered chemical potential (for charge order)");
   p.define<std::string>("dca.G0_OMEGA_INPUT", "Location of the input G0 file");
   p.define<std::string>("dca.G0_OMEGA_OUTPUT", "Location of the output G0 file for continuing iterations");
   p.define<std::string>("dca.INITIAL_G0", "FREE", "choose ISOLATED or FREE for initial G0s");
@@ -423,7 +423,7 @@ cluster_matsubara_realspace_gf NormalStateClusterTransformer::transform_into_rea
   }
   return G_new;
 }
-cluster_nambu_matsubara_realspace_gf NambuClusterTransformer::transform_into_real_space(const cluster_nambu_matsubara_kspace_gf& G) const{
+cluster_nambu_matsubara_realspace_gf NambuClusterTransformer::nambu_transform_into_real_space(const cluster_nambu_matsubara_kspace_gf& G) const{
   cluster_nambu_matsubara_realspace_gf G_new(alps::gf::omega_r1_r2_sigma1_sigma2_gf(G.mesh1(), real_space_mesh(), real_space_mesh(), G.mesh3(), G.mesh4()));
   G_new.initialize();
   for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); ++k) {
@@ -463,7 +463,7 @@ cluster_itime_realspace_gf NormalStateClusterTransformer::transform_into_real_sp
   }
   return G_new;
 }
-cluster_nambu_itime_realspace_gf NambuClusterTransformer::transform_into_real_space(const cluster_nambu_itime_kspace_gf& G) const{
+cluster_nambu_itime_realspace_gf NambuClusterTransformer::nambu_transform_into_real_space(const cluster_nambu_itime_kspace_gf& G) const{
   cluster_nambu_itime_realspace_gf G_new(alps::gf::itime_r1_r2_sigma1_sigma2_gf(G.mesh1(), real_space_mesh(), real_space_mesh(), G.mesh3(), G.mesh4()));
   G_new.initialize();
   for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); ++k) {
@@ -945,3 +945,7 @@ void DoubleCellClusterTransformer::spin_symmetrize(double_cell_matsubara_kspace_
     ;
   }else throw std::logic_error("neither AFM nor CO: how to symmetrize?");
 }
+cluster_itime_realspace_gf DoubleCellClusterTransformer::transform_into_real_space(const double_cell_itime_kspace_gf& G) const{
+  throw std::logic_error("Hanna please implement the k-space to real space Fourier transform here.");
+}
+

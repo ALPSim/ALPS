@@ -50,6 +50,15 @@ public:
   ///dispersion relation for a system with an additional phase
   double epsilon_phi(const std::vector<double> &k, const std::vector<double> &phi) const;
 
+  ///attach the DCA cluster high frequency behavior for the non-interacting GF
+  virtual void attach_bare_tail(cluster_matsubara_kspace_gf &G0) const {throw std::logic_error("this should be implemented in an inherited class");}
+  ///attach the DCA cluster high frequency behavior for the interacting GF
+  virtual void attach_interacting_tail(cluster_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const {throw std::logic_error("this should be implemented in an inherited class");}
+  ///take a Green's function in k-space and transform it to real space
+  virtual cluster_itime_realspace_gf transform_into_real_space(const cluster_itime_kspace_gf& G) const {throw std::logic_error("this should be implemented in an inherited class");}
+  ///take a double cell Green's function in k-space and transform it to real space
+  virtual cluster_itime_realspace_gf transform_into_real_space(const double_cell_itime_kspace_gf& G) const {throw std::logic_error("this should be implemented in an inherited class");}
+
 protected:
   std::vector<double> epsav() const { return epsav_; };
   std::vector<double> epssqav() const { return epssqav_; };
@@ -189,6 +198,9 @@ public:
   ///perform k-space symmetrization
   void symmetrize_k_space(double_cell_matsubara_kspace_gf& G) const{if (afm_symmetry_) symmetrize_afm_kspace(G); else if(charge_order_symmetry_) symmetrize_co_kspace(G); else throw std::logic_error("neither AFM nor CO: how to symmetrize?");}
 
+  ///take a cluster Green's function and transform it from k-space into real space
+  cluster_itime_realspace_gf transform_into_real_space(const double_cell_itime_kspace_gf& G) const;
+
 private:
   ///attach a tail to the noninteracting GF
   void attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h, double mu_stag) const;
@@ -244,10 +256,10 @@ public:
   void matsubara_k_sum(cluster_nambu_matsubara_kspace_gf &G, const cluster_nambu_matsubara_kspace_gf &sigma) const;
 
   //Real space and k-space transformers for the Nambu Green's function
-  virtual cluster_nambu_matsubara_realspace_gf transform_into_real_space(const cluster_nambu_matsubara_kspace_gf& G) const;
-  virtual cluster_nambu_matsubara_kspace_gf transform_into_k_space(const cluster_nambu_matsubara_realspace_gf& G) const{ throw std::logic_error("not implemented");}
-  virtual cluster_nambu_itime_realspace_gf transform_into_real_space(const cluster_nambu_itime_kspace_gf& G) const;
-  virtual cluster_nambu_itime_kspace_gf transform_into_k_space(const cluster_nambu_itime_realspace_gf& G) const{ throw std::logic_error("not implemented");}
+  virtual cluster_nambu_matsubara_realspace_gf nambu_transform_into_real_space(const cluster_nambu_matsubara_kspace_gf& G) const;
+  virtual cluster_nambu_matsubara_kspace_gf nambu_transform_into_k_space(const cluster_nambu_matsubara_realspace_gf& G) const{ throw std::logic_error("not implemented");}
+  virtual cluster_nambu_itime_realspace_gf nambu_transform_into_real_space(const cluster_nambu_itime_kspace_gf& G) const;
+  virtual cluster_nambu_itime_kspace_gf nambu_transform_into_k_space(const cluster_nambu_itime_realspace_gf& G) const{ throw std::logic_error("not implemented");}
 
   void attach_bare_tail(cluster_nambu_matsubara_kspace_gf &G0) const;
   void attach_interacting_tail(cluster_nambu_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const;
@@ -329,6 +341,16 @@ public:
     val[1]=-val[1]*det_inv;
     val[2]=-val[2]*det_inv;
   }
+  two_by_two operator*(const two_by_two &rhs) const{
+    return two_by_two(val[0]*rhs.val[0]+val[1]*rhs.val[2], val[0]*rhs.val[1]+val[1]*rhs.val[3], val[2]*rhs.val[0]+val[3]*rhs.val[2], val[2]*rhs.val[1]+val[3]*rhs.val[3]);
+  }
+  two_by_two operator-(const two_by_two &rhs) const{
+    return two_by_two(val[0]-rhs.val[0],val[1]-rhs.val[1], val[2]-rhs.val[2],val[3]-rhs.val[3]);
+  }
+  two_by_two operator*(const std::complex<double> &v) const{
+    return two_by_two(val[0]*v,val[1]*v, val[2]*v,val[3]*v);
+  }
+
 private:
   std::complex<double> val[4];
 };
