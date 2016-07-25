@@ -258,19 +258,19 @@ void DoubleCellClusterTransformer::attach_bare_tail(double_cell_matsubara_kspace
       c2(k  ,alps::gf::index(0), spin) = epsav_[k()] - (mu_+mu_stag-spin_factor*h/2.);
       c2(k+1,alps::gf::index(1), spin) = epsav_[k()] - (mu_-mu_stag+spin_factor*h/2.);
 
-      c3(k  ,alps::gf::index(0), spin) = epssqav_[k()] - 2*(mu_+mu_stag-spin_factor*h/2.)*epsav_[k()] + (mu_+mu_stag-spin_factor*h/2.)*(mu_+mu_stag-spin_factor*h/2.);
-      c3(k+1,alps::gf::index(1), spin) = epssqav_[k()] - 2*(mu_-mu_stag+spin_factor*h/2.)*epsav_[k()] + (mu_-mu_stag+spin_factor*h/2.)*(mu_-mu_stag+spin_factor*h/2.);
+      //c3(k  ,alps::gf::index(0), spin) = epssqav_[k()] - 2*(mu_+mu_stag-spin_factor*h/2.)*epsav_[k()] + (mu_+mu_stag-spin_factor*h/2.)*(mu_+mu_stag-spin_factor*h/2.);
+      //c3(k+1,alps::gf::index(1), spin) = epssqav_[k()] - 2*(mu_-mu_stag+spin_factor*h/2.)*epsav_[k()] + (mu_-mu_stag+spin_factor*h/2.)*(mu_-mu_stag+spin_factor*h/2.);
 
       //the off-diagonal elements
+      c1(k  ,alps::gf::index(1), spin) = 0;
       c1(k+1,alps::gf::index(0), spin) = 0;
-      c1(k  ,alps::gf::index(0), spin) = 0;
 
       //not sure about the c2 and c3 coefficients. Derive them, then add them.
-      c2(k+1,alps::gf::index(0), spin) = -spin_factor*h/2.;
-      c2(k  ,alps::gf::index(1), spin) =  spin_factor*h/2;
+      //c2(k+1,alps::gf::index(0), spin) = -spin_factor*h/2.;
+      //c2(k  ,alps::gf::index(1), spin) =  spin_factor*h/2;
 
-      c3(k+1,alps::gf::index(0), spin) = 0.;
-      c3(k  ,alps::gf::index(1), spin) = 0.;
+      //c3(k+1,alps::gf::index(0), spin) = 0.;
+      //c3(k  ,alps::gf::index(1), spin) = 0.;
     }
   }
   G0.set_tail(1,c1);
