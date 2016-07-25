@@ -946,6 +946,27 @@ void DoubleCellClusterTransformer::spin_symmetrize(double_cell_matsubara_kspace_
   }else throw std::logic_error("neither AFM nor CO: how to symmetrize?");
 }
 cluster_itime_realspace_gf DoubleCellClusterTransformer::transform_into_real_space(const double_cell_itime_kspace_gf& G) const{
-  throw std::logic_error("Hanna please implement the k-space to real space Fourier transform here.");
+  cluster_itime_realspace_gf G_rs(alps::gf::itime_r1_r2_sigma_gf(G.mesh1(),real_space_mesh(), real_space_mesh(), G.mesh4()));
+  G_rs.initialize();
+  for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); k+=2) {
+    for (int q1=0; q1<2; ++q1) {
+      for (int q2=0; q2<2; ++q2) {
+        for (alps::gf::real_space_index i(0); i<G_rs.mesh2().extent(); ++i) {
+          for (alps::gf::real_space_index j(0); j<G_rs.mesh3().extent(); ++j) {
+            double phase = 0.;
+            for (unsigned int d=0; d<dimension(); ++d){
+              phase += cluster_momentum(k()+q1,d)*cluster_coordinate(i(),d)-cluster_momentum(k()+q2,d)*cluster_coordinate(j(),d);
+            }
+            for (alps::gf::itime_index t(0); t<G.mesh1().extent(); ++t) {
+              for (alps::gf::index spin(0); spin<G.mesh4().extent(); ++spin) {
+                G_rs(t,i,j,spin)+=G(t, k+q1, alps::gf::index(q2), spin)*(cos(phase)/double(G_rs.mesh2().extent()));
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return G_rs;
 }
 
