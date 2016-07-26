@@ -296,7 +296,6 @@ void NormalStateClusterTransformer::attach_interacting_tail(cluster_matsubara_ks
   G.set_tail(3,c3);
 }
 void DoubleCellClusterTransformer::attach_interacting_tail(double_cell_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const{
-std::cout<<"attaching interacting double cell tail"<<std::endl;
   alps::gf::k_sigma1_sigma2_gf c1(G.mesh2(), G.mesh3(), G.mesh4());
   alps::gf::k_sigma1_sigma2_gf c2(G.mesh2(), G.mesh3(), G.mesh4());
   alps::gf::k_sigma1_sigma2_gf c3(G.mesh2(), G.mesh3(), G.mesh4());
@@ -304,7 +303,7 @@ std::cout<<"attaching interacting double cell tail"<<std::endl;
   double density=(densities[0]+densities[1])/2.;
 
   for(alps::gf::index spin(0); spin<n_flavors_; spin++) {
-    for(alps::gf::momentum_index k(0); k<n_cluster_sites(); ++k) {
+    for(alps::gf::momentum_index k(0); k<n_cluster_sites(); k+=2) {
       int spin_factor = spin()==0 ? 1 : -1;
       c1(k  ,alps::gf::index(0), spin) = 1.;
       c1(k+1,alps::gf::index(1), spin) = 1.;
@@ -317,11 +316,9 @@ std::cout<<"attaching interacting double cell tail"<<std::endl;
       c1(k+1,alps::gf::index(0), spin) = 0;
     }
   }
-  std::cout<<"assign"<<std::endl;
   G.set_tail(1,c1);
   G.set_tail(2,c2);
   G.set_tail(3,c3);
-  std::cout<<"done assign"<<std::endl;
 }
 
 alps::gf::momentum_index_mesh ClusterTransformer::momentum_mesh() const{
