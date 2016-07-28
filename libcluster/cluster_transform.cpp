@@ -247,35 +247,22 @@ void DoubleCellClusterTransformer::attach_bare_tail(double_cell_matsubara_kspace
   alps::gf::k_sigma1_sigma2_gf c1(G0.mesh2(), G0.mesh3(), G0.mesh4());
   alps::gf::k_sigma1_sigma2_gf c2(G0.mesh2(), G0.mesh3(), G0.mesh4());
   alps::gf::k_sigma1_sigma2_gf c3(G0.mesh2(), G0.mesh3(), G0.mesh4());
+ c1.initialize(); c2.initialize(); c3.initialize();
 
   for(alps::gf::index spin(0); spin<2; ++spin) {
     for(alps::gf::momentum_index k(0); k<n_cluster_sites(); k+=2) {
-      //the diagonal elements
+      //the elements of the 1/iomega_n term
       int spin_factor = spin()==0 ? 1 : -1;
       c1(k  ,alps::gf::index(0), spin) = 1.;
+      c1(k  ,alps::gf::index(1), spin) = 0.;
+      c1(k+1,alps::gf::index(0), spin) = 0.;
       c1(k+1,alps::gf::index(1), spin) = 1.;
 
      //diagonal elements
-      c2(k  ,alps::gf::index(0), spin) = epsav_[k()] - mu_;
+      c2(k  ,alps::gf::index(0), spin) = epsav_[k()  ] - mu_;
+      c2(k  ,alps::gf::index(1), spin) =-mu_stag-spin_factor*h/2.;
+      c2(k+1,alps::gf::index(0), spin) =-mu_stag-spin_factor*h/2.;
       c2(k+1,alps::gf::index(1), spin) = epsav_[k()+1] - mu_;
-
-      //c3(k  ,alps::gf::index(0), spin) = epssqav_[k()] - 2*(mu_+mu_stag-spin_factor*h/2.)*epsav_[k()] + (mu_+mu_stag-spin_factor*h/2.)*(mu_+mu_stag-spin_factor*h/2.);
-      //c3(k+1,alps::gf::index(1), spin) = epssqav_[k()] - 2*(mu_-mu_stag+spin_factor*h/2.)*epsav_[k()] + (mu_-mu_stag+spin_factor*h/2.)*(mu_-mu_stag+spin_factor*h/2.);
-
-      //the off-diagonal elements
-      c1(k  ,alps::gf::index(1), spin) = 0;
-      c1(k+1,alps::gf::index(0), spin) = 0;
-      
-      c2(k,alps::gf::index(1), spin)=-mu_stag-spin_factor*h/2.;
-      c2(k+1,alps::gf::index(0), spin)=-mu_stag-spin_factor*h/2.;   
-
-
-      //not sure about the c2 and c3 coefficients. Derive them, then add them.
-      //c2(k+1,alps::gf::index(0), spin) = -spin_factor*h/2.;
-      //c2(k  ,alps::gf::index(1), spin) =  spin_factor*h/2;
-
-      //c3(k+1,alps::gf::index(0), spin) = 0.;
-      //c3(k  ,alps::gf::index(1), spin) = 0.;
     }
   }
   G0.set_tail(1,c1);
@@ -287,6 +274,7 @@ void NormalStateClusterTransformer::attach_interacting_tail(cluster_matsubara_ks
   alps::gf::k_sigma_gf c1(G.mesh2(), G.mesh3());
   alps::gf::k_sigma_gf c2(G.mesh2(), G.mesh3());
   alps::gf::k_sigma_gf c3(G.mesh2(), G.mesh3());
+  c1.initialize(); c2.initialize(); c3.initialize();
   double density=(densities[0]+densities[1])/2.;
 
   for(alps::gf::index f(0); f<n_flavors_; f++) {
@@ -304,6 +292,7 @@ void DoubleCellClusterTransformer::attach_interacting_tail(double_cell_matsubara
   alps::gf::k_sigma1_sigma2_gf c1(G.mesh2(), G.mesh3(), G.mesh4());
   alps::gf::k_sigma1_sigma2_gf c2(G.mesh2(), G.mesh3(), G.mesh4());
   alps::gf::k_sigma1_sigma2_gf c3(G.mesh2(), G.mesh3(), G.mesh4());
+  c1.initialize(); c2.initialize(); c3.initialize();
   //careful here: in the AFM case it is the spin of the other flavor that enters the hifreq tail
   double density=(densities[0]+densities[1])/2.;
 
@@ -650,7 +639,7 @@ void DoubleCellClusterTransformer::dyson_get_green0(double_cell_matsubara_kspace
   alps::gf::index Zero(0);
   alps::gf::index Q(1);
   for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
-    for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); ++k) {
+    for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); k+=2) {
       for (alps::gf::index spin(0); spin<G.mesh3().extent(); spin++) {
         std::complex<double> glatt_block[4]={ G(w, k, Zero,spin), G(w, k, Q, spin), G(w, k+1, Zero, spin), G(w, k+1, Q, spin)};
         std::complex<double> det_glatt     = glatt_block[0]* glatt_block[3]- glatt_block[1]* glatt_block[2];
@@ -719,9 +708,9 @@ void DoubleCellClusterTransformer::matsubara_k_sum(double_cell_matsubara_kspace_
         std::complex<double> iomega_n(0, G.mesh1().points()[w()]);
         for (int kl=0; kl<n_lattice_momenta(); ++kl) {
           double prefactor=weight_kl_[kl]/n_cluster_cells();
-          Ginv(0,0)= iomega_n + (mu_ -epsilon_kckl_[kc()  ][kl][spin()])-sigma(w, kc, alps::gf::index(0), spin);
-          Ginv(0,1)= -spin_factor*h/2.- mu_stag  -sigma(w, kc, alps::gf::index(1), spin);
-          Ginv(1,0)= -spin_factor*h/2. -mu_stag   -sigma(w, kc+1, alps::gf::index(0), spin);
+          Ginv(0,0)= iomega_n + (mu_ -epsilon_kckl_[kc()  ][kl][spin()])-sigma(w, kc  , alps::gf::index(0), spin);
+          Ginv(0,1)= -spin_factor*h/2.- mu_stag                         -sigma(w, kc  , alps::gf::index(1), spin);
+          Ginv(1,0)= -spin_factor*h/2. -mu_stag                         -sigma(w, kc+1, alps::gf::index(0), spin);
           Ginv(1,1)= iomega_n + (mu_ -epsilon_kckl_[kc()+1][kl][spin()])-sigma(w, kc+1, alps::gf::index(1), spin);
           Ginv.invert();
           G(w, kc  ,alps::gf::index(0), spin) += prefactor*Ginv(0,0);
