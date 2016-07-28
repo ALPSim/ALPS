@@ -143,10 +143,10 @@ void DoubleCellClusterTransformer::compute_isolated_cluster_G0(double_cell_matsu
       for (alps::gf::index spin(0); spin<n_flavors_; ++spin) {
         double spin_factor=spin()==0?1.:-1.;
         //this implements Eq. 119
-        two_by_two G0(std::complex<double>(mu_+mu_stag_init_/2.-epsilon(k  ),(2*freq()+1)*M_PI/beta_),
-            spin_factor*h_init_/2.,
-            spin_factor*h_init_/2.,
-                      std::complex<double>(mu_-mu_stag_init_/2.-epsilon(kpq),(2*freq()+1)*M_PI/beta_));
+        two_by_two G0(std::complex<double>(mu_-epsilon(k  ),(2*freq()+1)*M_PI/beta_),
+            spin_factor*h_init_/2.-mu_stag_init_,
+            spin_factor*h_init_/2-mu_stag_init_,
+                      std::complex<double>(mu_-epsilon(kpq),(2*freq()+1)*M_PI/beta_));
         G0.invert();
 
         G0_omega(freq, kc  , alps::gf::index(0), spin) = G0(0,0);
@@ -957,15 +957,13 @@ template void ClusterTransformer::initial_G0(cluster_nambu_matsubara_kspace_gf &
 template void ClusterTransformer::initial_G0(cluster_matsubara_kspace_gf &G0_omega, cluster_itime_kspace_gf &G0_tau)const;
 
 void DoubleCellClusterTransformer::symmetrize_afm_kspace(double_cell_matsubara_kspace_gf &G) const{
-//  throw std::logic_error("Hanna please implement the afm k-space symmetrization here");
+//  throw std::logic_error("Emanuel please implement the afm k-space symmetrization here");
 }
 void DoubleCellClusterTransformer::symmetrize_co_kspace(double_cell_matsubara_kspace_gf &G) const{
-//  throw std::logic_error("Hanna please implement the charge order k-space symmetrization here");
+//  throw std::logic_error("Emanuel please implement the charge order k-space symmetrization here");
 }
 void DoubleCellClusterTransformer::spin_symmetrize(double_cell_matsubara_kspace_gf &G) const{
-  //throw std::logic_error("Hanna please implement the spin symmetrization here");
   if (afm_symmetry_){
-  //std::cout<<"CHECKKKKK"<<std::endl;
   for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
      for (alps::gf::momentum_index kc(0); kc<G.mesh2().extent(); kc+=2) {
           //DD component
@@ -975,18 +973,18 @@ void DoubleCellClusterTransformer::spin_symmetrize(double_cell_matsubara_kspace_
      
          //OD component
           std::complex<double> GKQ=(G(w, kc  ,alps::gf::index(1), alps::gf::index(0))-G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
-                                  +std::conj(G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0)))-std::conj(G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))))/4.;
-          // if (w ==0 ){
-          //std::cout<<"DD"<<G(w, kc  ,alps::gf::index(0), alps::gf::index(0))
-          //               <<G(w, kc  ,alps::gf::index(0), alps::gf::index(1))
-          //               <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0)))
-          //               <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1)))<<std::endl;
+                                  +G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))-G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1)))/4.;
+           if (w ==0 ){
+            std::cout<<"DD"<< G(w, kc  ,alps::gf::index(0), alps::gf::index(0))
+                           << G(w, kc  ,alps::gf::index(0), alps::gf::index(1))
+                           <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0)))
+                           <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1)))<<std::endl;
 
-          // std::cout<<"OD"<<G(w, kc  ,alps::gf::index(1), alps::gf::index(0))<<-G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
-          //          <<std::conj(G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0)))
-          //          <<-std::conj(G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1)))<<std::endl;
-          //
-          // }
+            std::cout<<"OD"<< G(w, kc  ,alps::gf::index(1), alps::gf::index(0))
+                           <<-G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
+                           << G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))
+                           <<-G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))<<std::endl;
+           }
 
           G(w, kc  ,alps::gf::index(0), alps::gf::index(0))=GK;
           G(w, kc  ,alps::gf::index(0), alps::gf::index(1))=GK;
@@ -1002,6 +1000,43 @@ void DoubleCellClusterTransformer::spin_symmetrize(double_cell_matsubara_kspace_
     }
    ;
   }else if(charge_order_symmetry_){
+
+    for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
+     for (alps::gf::momentum_index kc(0); kc<G.mesh2().extent(); kc+=2) {
+          //DD component
+          std::complex<double> GK=(G(w, kc  ,alps::gf::index(0), alps::gf::index(0))+G(w, kc  ,alps::gf::index(0), alps::gf::index(1))
+                                  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0)))
+                                  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1))))/4.;
+     
+         //OD component
+          std::complex<double> GKQ=(G(w, kc  ,alps::gf::index(1), alps::gf::index(0))+G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
+                                  +G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))+G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1)))/4.;
+           if (w ==0 ){
+            std::cout<<"DD"<<G(w, kc  ,alps::gf::index(0), alps::gf::index(0))
+                           << G(w, kc  ,alps::gf::index(0), alps::gf::index(1))
+                           <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0)))
+                           <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1)))<<std::endl;
+
+            std::cout<<"OD"<< G(w, kc  ,alps::gf::index(1), alps::gf::index(0))
+                           << -G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
+                           << G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))
+                           << G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))<<std::endl;
+          
+           }
+
+          G(w, kc  ,alps::gf::index(0), alps::gf::index(0))=GK;
+          G(w, kc  ,alps::gf::index(0), alps::gf::index(1))=GK;
+          G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0))=-std::conj(GK);
+          G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1))=-std::conj(GK);
+
+          G(w, kc  ,alps::gf::index(1), alps::gf::index(0))=GKQ;
+          G(w, kc  ,alps::gf::index(1), alps::gf::index(1))=GKQ;
+          G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))=GKQ;
+          G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))=GKQ;
+  
+     }
+    }
+
    ;
   }else throw std::logic_error("neither AFM nor CO: how to symmetrize?");
 }
