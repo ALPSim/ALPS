@@ -1018,7 +1018,7 @@ void DoubleCellClusterTransformer::spin_symmetrize(double_cell_matsubara_kspace_
                            <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1)))<<std::endl;
 
             std::cout<<"OD"<< G(w, kc  ,alps::gf::index(1), alps::gf::index(0))
-                           << -G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
+                           << G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
                            << G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))
                            << G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))<<std::endl;
           
