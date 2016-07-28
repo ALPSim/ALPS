@@ -27,9 +27,9 @@ void define_dca_parameters(alps::params &p){
   p.define<double>("dca.ETA2_INIT", 0, "d-wave initial bias field eta2");
   p.define<double>("dca.ETA1", 0, "d-wave bias field eta1");
   p.define<double>("dca.ETA2", 0, "d-wave bias field eta2");
-  p.define<double>("dca.H_INIT", 0, "initial staggered magnetic field");
+  p.define<double>("dca.H_INIT", 0, "initial staggered magnetic field. Will be turned off after 1st iteration");
   p.define<double>("dca.H", 0, "staggered magnetic field");
-  p.define<double>("dca.MU_STAG_INIT", 0, "initial staggered chemical potential (for charge order)");
+  p.define<double>("dca.MU_STAG_INIT", 0, "initial staggered chemical potential (for charge order). Will be turned off after 1st iteration");
   p.define<double>("dca.MU_STAG", 0, "staggered chemical potential (for charge order)");
   p.define<std::string>("dca.G0_OMEGA_INPUT", "Location of the input G0 file");
   p.define<std::string>("dca.G0_OMEGA_OUTPUT", "Location of the output G0 file for continuing iterations");
@@ -656,6 +656,7 @@ void DoubleCellClusterTransformer::dyson_get_green0(double_cell_matsubara_kspace
       }
     }
   }
+  attach_bare_tail(G0, h_, mu_stag_);
 }
 
 ///Use Dyson to get the G0 in Nambu space
@@ -676,6 +677,7 @@ void NambuClusterTransformer::dyson_get_green0(cluster_nambu_matsubara_kspace_gf
       G0(w,k,dn,dn) = g0_inv[0]/det_g0inv;
     }
   }
+  attach_bare_tail(G0);
 }
 
 ///Compute the DMFT/DCA k-summation

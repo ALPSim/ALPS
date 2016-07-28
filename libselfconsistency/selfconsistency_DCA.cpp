@@ -131,7 +131,7 @@ void perform_cluster_loop(const std::string &param_file_name, const alps::params
       selfconsistency_loop_DCA(parms, solver, T, G0_omega,G0_tau);
   }
   //this dispatches the normal state (paramagnetic) cluster framework
-  else if((!afm_doublecell_framework) && (!afm_doublecell_framework)){
+  else if((!co_doublecell_framework) && (!afm_doublecell_framework)){
     std::cout<<"running a DCA calculation in the normal state"<<std::endl;
     NormalStateClusterTransformer T(parms);
     ImpuritySolver solver(solver_path,param_file_name, parms);
