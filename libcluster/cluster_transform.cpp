@@ -144,8 +144,8 @@ void DoubleCellClusterTransformer::compute_isolated_cluster_G0(double_cell_matsu
         double spin_factor=spin()==0?1.:-1.;
         //this implements Eq. 119
         two_by_two G0(std::complex<double>(mu_-epsilon(k  ),(2*freq()+1)*M_PI/beta_),
-            spin_factor*h_init_/2.-mu_stag_init_,
-            spin_factor*h_init_/2.-mu_stag_init_,
+            spin_factor*h_init_/2.+mu_stag_init_,
+            spin_factor*h_init_/2.+mu_stag_init_,
             std::complex<double>(mu_-epsilon(kpq),(2*freq()+1)*M_PI/beta_));
         G0.invert();
 
@@ -253,15 +253,18 @@ void DoubleCellClusterTransformer::attach_bare_tail(double_cell_matsubara_kspace
     for(alps::gf::momentum_index k(0); k<n_cluster_sites(); k+=2) {
       //the elements of the 1/iomega_n term
       int spin_factor = spin()==0 ? 1 : -1;
+  
       c1(k  ,alps::gf::index(0), spin) = 1.;
       c1(k  ,alps::gf::index(1), spin) = 0.;
+
       c1(k+1,alps::gf::index(0), spin) = 0.;
       c1(k+1,alps::gf::index(1), spin) = 1.;
 
-     //diagonal elements
+     
       c2(k  ,alps::gf::index(0), spin) = epsav_[k()  ] - mu_;
-      c2(k  ,alps::gf::index(1), spin) =-mu_stag+spin_factor*h/2.;
-      c2(k+1,alps::gf::index(0), spin) =-mu_stag+spin_factor*h/2.;
+      c2(k  ,alps::gf::index(1), spin) =mu_stag+spin_factor*h/2.;
+
+      c2(k+1,alps::gf::index(0), spin) =mu_stag+spin_factor*h/2.;
       c2(k+1,alps::gf::index(1), spin) = epsav_[k()+1] - mu_;
     }
   }
@@ -307,11 +310,12 @@ void DoubleCellClusterTransformer::attach_interacting_tail(double_cell_matsubara
 
       //the off-diagonal elements
       c1(k  ,alps::gf::index(1), spin) = 0;
-      c1(k+1,alps::gf::index(0), spin) = 0;
-
-       
-      //c2(k,alps::gf::index(1), spin)=-mu_stag+spin_factor*h/2.;
-      //c2(k+1,alps::gf::index(0), spin)=-mu_stag+spin_factor*h/2.;   
+      c1(k+1,alps::gf::index(0), spin) = 0; 
+      c2(k,alps::gf::index(1), spin)=0.; 
+      c2(k+1,alps::gf::index(0), spin)=0.;
+      // off-diagonal are set to zero for now
+     //c2(k,alps::gf::index(1), spin)=mu_stag+spin_factor*h/2.;
+     //c2(k+1,alps::gf::index(0), spin)=mu_stag+spin_factor*h/2.;   
     }
   }
   G.set_tail(1,c1);
@@ -709,8 +713,8 @@ void DoubleCellClusterTransformer::matsubara_k_sum(double_cell_matsubara_kspace_
         for (int kl=0; kl<n_lattice_momenta(); ++kl) {
           double prefactor=weight_kl_[kl]/n_cluster_cells();
           Ginv(0,0)= iomega_n + (mu_ -epsilon_kckl_[kc()  ][kl][spin()])-sigma(w, kc  , alps::gf::index(0), spin);
-          Ginv(0,1)= spin_factor*h/2.- mu_stag                         -sigma(w, kc  , alps::gf::index(1), spin);
-          Ginv(1,0)= spin_factor*h/2. -mu_stag                         -sigma(w, kc+1, alps::gf::index(0), spin);
+          Ginv(0,1)= spin_factor*h/2.+ mu_stag                         -sigma(w, kc  , alps::gf::index(1), spin);
+          Ginv(1,0)= spin_factor*h/2. +mu_stag                         -sigma(w, kc+1, alps::gf::index(0), spin);
           Ginv(1,1)= iomega_n + (mu_ -epsilon_kckl_[kc()+1][kl][spin()])-sigma(w, kc+1, alps::gf::index(1), spin);
           Ginv.invert();
           G(w, kc  ,alps::gf::index(0), spin) += prefactor*Ginv(0,0);
