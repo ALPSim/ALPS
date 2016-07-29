@@ -91,6 +91,7 @@ template<class SOLV, class TRANS, class GFW, class GFT> void selfconsistency_loo
    std::ofstream Gw0_file("Gw0-vs-it.dat");
   //This is the basic DCA self-consistency loop
   for(int iteration_ctr=0;iteration_ctr < max_it; ++iteration_ctr) {
+    std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
     alps::gf::fourier_frequency_to_time(G0_omega, G0_tau);
     solver.solve(G0_omega, G0_tau, G_omega, G_tau);
 
@@ -102,6 +103,8 @@ template<class SOLV, class TRANS, class GFW, class GFT> void selfconsistency_loo
     clustertrans.dyson_get_self_energy(self_energy2, G_omega, G0_omega);
 
     print_all_green_functions(iteration_ctr, G0_omega, G_omega, self_energy, self_energy2, G0_tau, G_tau, beta);
+    //std::cout<<iteration_ctr<<" "<<imag(G_omega(alps::gf::matsubara_index(0),alps::gf::momentum_index(0),alps::gf::index(0),alps::gf::index(0)))<<std::endl;
+         
 
     if (converged(G_omega, G_omega_old,  convergence_tolerance)) break;
 
