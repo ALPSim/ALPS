@@ -968,6 +968,9 @@ void DoubleCellClusterTransformer::symmetrize_co_kspace(double_cell_matsubara_ks
 }
 void DoubleCellClusterTransformer::spin_symmetrize(double_cell_matsubara_kspace_gf &G) const{
   if (afm_symmetry_){
+  //std::ios_base::app
+  std::ofstream test_file("test",std::ios_base::app);
+  test_file<<" "<< real(G(alps::gf::matsubara_index (0), alps::gf::momentum_index (0)+2  ,alps::gf::index(1), alps::gf::index(0)))<<std::endl;
   for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
      for (alps::gf::momentum_index kc(0); kc<G.mesh2().extent(); kc+=2) {
           //DD component
@@ -977,7 +980,7 @@ void DoubleCellClusterTransformer::spin_symmetrize(double_cell_matsubara_kspace_
      
          //OD component
           std::complex<double> GKQ=(G(w, kc  ,alps::gf::index(1), alps::gf::index(0))-G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
-                                  +G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))-G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1)))/4.;
+                                  +G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))-G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1)))/4.;       
            if (w ==0 ){
             std::cout<<"DD"<< G(w, kc  ,alps::gf::index(0), alps::gf::index(0))
                            << G(w, kc  ,alps::gf::index(0), alps::gf::index(1))
