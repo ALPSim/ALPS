@@ -215,10 +215,10 @@
   </UNITCELL>
   <UNITCELL name="honeycomb" dimension="2" vertices="2">
     <VERTEX id="1" type="0" coordinate="0 0"/>
-    <VERTEX id="2" type="0" coordinate="-0.288665771484375 0.5773468017578125"/>
-    <EDGE type="0" vector="-0.288665771484375 0.5773468017578125"><SOURCE vertex="1" offset="0 0"/><TARGET vertex="2" offset="0 0"/></EDGE>
-    <EDGE type="2" vector="0.711334228515625 -0.4226531982421875"><SOURCE vertex="1" offset="0 0"/><TARGET vertex="2" offset="1 -1"/></EDGE>
-    <EDGE type="1" vector="0.288665771484375 0.4226531982421875"><SOURCE vertex="2" offset="0 0"/><TARGET vertex="1" offset="0 1"/></EDGE>
+    <VERTEX id="2" type="0" coordinate="-0.33333333333333331483 0.66666666666666662966"/>
+    <EDGE type="0" vector="-0.33333333333333331483 0.66666666666666662966"><SOURCE vertex="1" offset="0 0"/><TARGET vertex="2" offset="0 0"/></EDGE>
+    <EDGE type="2" vector="0.66666666666666674068 -0.33333333333333337034"><SOURCE vertex="1" offset="0 0"/><TARGET vertex="2" offset="1 -1"/></EDGE>
+    <EDGE type="1" vector="0.33333333333333331483 0.33333333333333337034"><SOURCE vertex="2" offset="0 0"/><TARGET vertex="1" offset="0 1"/></EDGE>
   </UNITCELL>
   <UNITCELL name="isolated" dimension="1" vertices="1">
     <VERTEX id="1" type="0"/>
