@@ -256,8 +256,11 @@ public:
   ///Use Dyson to get the G0
   void dyson_get_green0(cluster_nambu_matsubara_kspace_gf &G0, const cluster_nambu_matsubara_kspace_gf &sigma, const cluster_nambu_matsubara_kspace_gf &G) const;
   ///perform the k-sum to get G
-  void matsubara_k_sum(cluster_nambu_matsubara_kspace_gf &G, const cluster_nambu_matsubara_kspace_gf &sigma) const;
-
+  void matsubara_k_sum(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma, double eta1, double eta2) const;
+  ///the k-sum: short version, reroutes via long version by using h_ and mu_stag_
+  void matsubara_k_sum(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma) const{
+    matsubara_k_sum(G, sigma, eta1_, eta2_);
+  }
   //Real space and k-space transformers for the Nambu Green's function
   virtual cluster_nambu_matsubara_realspace_gf nambu_transform_into_real_space(const cluster_nambu_matsubara_kspace_gf& G) const;
   virtual cluster_nambu_matsubara_kspace_gf nambu_transform_into_k_space(const cluster_nambu_matsubara_realspace_gf& G) const{ throw std::logic_error("not implemented");}

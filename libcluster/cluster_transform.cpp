@@ -201,7 +201,7 @@ void DoubleCellClusterTransformer::compute_noninteracting_G0(double_cell_matsuba
 void NambuClusterTransformer::compute_noninteracting_G0(cluster_nambu_matsubara_kspace_gf &G0_omega) const{
   cluster_nambu_matsubara_kspace_gf zero_selfenergy(G0_omega);
   zero_selfenergy.initialize();
-  matsubara_k_sum(G0_omega, zero_selfenergy);
+  matsubara_k_sum(G0_omega, zero_selfenergy,eta1_init_,eta2_init_);
   attach_bare_tail(G0_omega);
 }
 
@@ -732,7 +732,7 @@ void DoubleCellClusterTransformer::matsubara_k_sum(double_cell_matsubara_kspace_
 }
 
 ///Compute the DMFT/DCA k-summation
-void NambuClusterTransformer::matsubara_k_sum(cluster_nambu_matsubara_kspace_gf &G, const cluster_nambu_matsubara_kspace_gf &sigma) const{
+void NambuClusterTransformer::matsubara_k_sum(cluster_nambu_matsubara_kspace_gf &G, const cluster_nambu_matsubara_kspace_gf &sigma,double eta1,double eta2) const{
   alps::gf::index up(0);
   alps::gf::index dn(1);
   for (alps::gf::momentum_index kc(0); kc<G.mesh2().extent(); ++kc) {
@@ -748,10 +748,9 @@ void NambuClusterTransformer::matsubara_k_sum(cluster_nambu_matsubara_kspace_gf 
         //note the pairing field eta + i eta2 on the 0,1 component, eta - i eta2 on the 1,0 component.
         std::complex<double> G_omega_latt_inv[4]=
         {iomega_n + mu_ -epsilon_kckl_[kc()][kl][0]-sigma(w, kc, up,up),
-            -sigma(w, kc, up,dn) - prefactor*std::complex<double>( eta1_, eta2_),
-            -sigma(w, kc, dn,up) - prefactor*std::complex<double>( eta1_,-eta2_),
-            iomega_n - mu_ +epsilon_kckl_[kc()][kl][0]-sigma(w, kc, dn,dn)};
-
+          -sigma(w, kc, up,dn) - prefactor*std::complex<double>( eta1, eta2),
+          -sigma(w, kc, dn,up) - prefactor*std::complex<double>( eta1,-eta2),
+          iomega_n - mu_ +epsilon_kckl_[kc()][kl][0]-sigma(w, kc, dn,dn)};
         std::complex<double> G0omega_latt_inv_det=G_omega_latt_inv[0]*G_omega_latt_inv[3]-G_omega_latt_inv[1]*G_omega_latt_inv[2];
         G(w, kc, up,up) += weight_kl_[kl]*G_omega_latt_inv[3]/G0omega_latt_inv_det;
         G(w, kc, up,dn) -= weight_kl_[kl]*G_omega_latt_inv[1]/G0omega_latt_inv_det;
