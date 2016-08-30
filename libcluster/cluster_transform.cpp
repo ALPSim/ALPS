@@ -86,18 +86,15 @@ template<typename GF> bool ClusterTransformer::read_initial_G0(GF &G0_omega) con
 
   alps::hdf5::archive ar(g0_input_path_);
   G0_omega.load(ar, "/G0");
+  if(G0_omega.max_tail_order()==2){
+    //rationale: some version of the code did not set the 3rd coefficient. But we need it for the FT. So make sure that all input files can be used.
+    std::cout<<"setting third order tail (currently unset) to zero"<<std::endl;
+    typename GF::tail_type c3(G0_omega.tail(2));
+    c3.initialize();
+    G0_omega.set_tail(3, c3);
+  }
   return true;
 }
-bool NormalStateClusterTransformer::read_initial_G0(cluster_matsubara_kspace_gf &G0_omega) const{
-  return ClusterTransformer::read_initial_G0(G0_omega);
-}
-bool NambuClusterTransformer::read_initial_G0(cluster_nambu_matsubara_kspace_gf &G0_omega) const{
-  return ClusterTransformer::read_initial_G0(G0_omega);
-}
-bool DoubleCellClusterTransformer::read_initial_G0(double_cell_matsubara_kspace_gf &G0_omega) const{
-  return ClusterTransformer::read_initial_G0(G0_omega);
-}
-
 
 void NormalStateClusterTransformer::compute_isolated_cluster_G0(cluster_matsubara_kspace_gf &G0_omega) const{
   std::vector<double> k(dimension());

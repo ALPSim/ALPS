@@ -59,6 +59,8 @@ public:
   virtual cluster_itime_realspace_gf transform_into_real_space(const cluster_itime_kspace_gf& G) const {throw std::logic_error("this should be implemented in an inherited class");}
   ///take a double cell Green's function in k-space and transform it to real space
   virtual cluster_itime_realspace_gf transform_into_real_space(const double_cell_itime_kspace_gf& G) const {throw std::logic_error("this should be implemented in an inherited class");}
+  ///reading input file
+  template<typename GF> bool read_initial_G0(GF &G0_omega) const;
 
 protected:
   std::vector<double> epsav() const { return epsav_; };
@@ -72,8 +74,6 @@ protected:
   ///compute the center of gravity of the bands etc (used for high frequency analysis)
   void compute_dispersion_weights();
 
-  ///reading input file
-  template<typename GF> bool read_initial_G0(GF &G0_omega) const;
 
   ///compute G0 from an atomic solution
   virtual void compute_isolated_cluster_G0(cluster_nambu_matsubara_kspace_gf &G0_omega) const{ throw std::logic_error("this should be called in a subclass");}
@@ -128,8 +128,6 @@ public:
   ///perform spin symmetrization of matsubara k-space Green's function
   void spin_symmetrize(cluster_matsubara_realspace_gf& G) const;
 
-  ///read G0 from file
-  bool read_initial_G0 (cluster_matsubara_kspace_gf &G0_omega) const;
   ///compute G0 from an atomic solution
   void compute_isolated_cluster_G0(cluster_matsubara_kspace_gf &G0_omega) const;
   ///compute G0 from a noninteracting solution
@@ -175,8 +173,6 @@ public:
   ///virtual destructor
   virtual ~DoubleCellClusterTransformer() {}
 
-  ///read G0 from file
-  bool read_initial_G0 (double_cell_matsubara_kspace_gf &G0_omega) const;
 
   ///compute G0 from an atomic solution
   void compute_isolated_cluster_G0(double_cell_matsubara_kspace_gf &G0_omega) const;
@@ -244,8 +240,6 @@ public:
   ///perform spin symmetrization of matsubara k-space Green's function
   void spin_symmetrize(cluster_nambu_matsubara_kspace_gf& G) const;
 
-  ///read G0 from file
-  bool read_initial_G0 (cluster_nambu_matsubara_kspace_gf &G0_omega) const;
   ///compute G0 from an atomic solution
   void compute_isolated_cluster_G0(cluster_nambu_matsubara_kspace_gf &G0_omega) const;
   ///compute G0 from a noninteracting solution
