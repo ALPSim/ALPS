@@ -237,10 +237,10 @@ endif(ALPS_BUILD_SOURCE)
 ######################################################################
 # Version information
 ######################################################################
-set(ALPS_YEAR 2013)
+set(ALPS_YEAR 2016)
 set(ALPS_VERSION_MAJOR 2)
-set(ALPS_VERSION_MINOR 2)
-set(ALPS_VERSION_PATCH b4)
+set(ALPS_VERSION_MINOR 3)
+set(ALPS_VERSION_PATCH b1)
 set(ALPS_VERSION_BUILD "")
 
 IF(NOT ALPS_VERSION_BUILD AND EXISTS ${PROJECT_SOURCE_DIR}/.svn) 
