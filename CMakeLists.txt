@@ -64,7 +64,7 @@ option(ALPS_DOWNLOAD_PACKAGES "Prepare an installer that downloads instead of co
 option(ALPS_PATCH_VISTRAILS "Patch VisTrails from VisTrails git repository" OFF)
 option(ALPS_NGS_USE_NEW_ALEA "Use the ALPS ngs-alea instead of just alea" OFF)
 option(ALPS_NGS_OPENMPI_ULFM "Userlevel failure mitigation is available" OFF)
-option(ALPS_INSTALL_MPS_FRAMEWORK "Install headers and libs for the MPS framework" OFF)
+option(ALPS_INSTALL_MPS_FRAMEWORK "Install headers and libs for the MPS framework" ON)
 
 mark_as_advanced(BIND_FORTRAN_LOWERCASE)
 mark_as_advanced(ALPS_BUILD_TUTORIALS_PACKAGE)
