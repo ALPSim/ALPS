@@ -127,6 +127,12 @@ public:
             }
             throw e;
         }
+        
+        /// special case nsweeps=0 : just dump the initial state
+        if (parms["nsweeps"] == 0) {
+            maquis::cout << "No sweeps executed, just dumping the initial state." << std::endl;
+            checkpoint_simulation(mps, -1, -1);
+        }
     }
     
     ~dmrg_sim()
