@@ -64,6 +64,8 @@ Our codes are capable of efficiently move this temporary memory to disk. This op
 |`ietl_jcd_toll`      | 1e-8     | Convergence tolerance of the Jacobi-Davidson solver                                                            |
 |`ietl_jcd_gmres`     | 0        | Convergence tolerance of the Jacobi-Davidson solver                                                            |
 |`ietl_jcd_maxiter`   | 8        | Maximum number of iterations in the Jacobi-Davidson solver                                                     |
+|`rel_en_thresh`      | 1e-8     | Relative energy threshold to stop simulation                                                                   |
+|`rel_en_thresh_at`   | none     | Position where to measure the relative energy threshold (none, half, end)                                      |
 
 ## Time evolution parameters ##
 
