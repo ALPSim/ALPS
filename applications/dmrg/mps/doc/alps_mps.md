@@ -11,6 +11,8 @@ For the first tutorial:
 ### Parameters
 In the [Parameters section](@ref parameters) one can find a detailed description of the simulation parameters for all the ALPS %MPS tools.
 
+### Guides
+* [Simulation files](@ref simulation_files)
 
 ## File list
 A short description of the source files is available in the [File list section](files.html).
