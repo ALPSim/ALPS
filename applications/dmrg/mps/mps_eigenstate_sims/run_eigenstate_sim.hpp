@@ -115,6 +115,10 @@ void run_eigenstate_sim(BaseParameters parms, bool write_xml, run_type rt)
     
         for (int eig=0; eig<neigen; ++eig) {
             MPS<Matrix, SymmGroup> mps;
+            if (!boost::filesystem::exists(checkpoints[eig])) {
+                std::cerr << "No checkpoint file found for EIGENSTATES=" << eig << ". Measurements will not be performed." << std::endl;
+                continue;
+            }
             load(checkpoints[eig], mps);
         
             maquis::cout << "Measurements." << std::endl;
