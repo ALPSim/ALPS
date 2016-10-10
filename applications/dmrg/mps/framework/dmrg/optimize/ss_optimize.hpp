@@ -43,14 +43,14 @@ public:
     using base::right_;
     using base::parms;
     using base::iteration_results_;
-    using base::stop_callback;
+    using base::stop_callbacks;
 
     ss_optimize(MPS<Matrix, SymmGroup> & mps_,
                 MPO<Matrix, SymmGroup> const & mpo_,
                 BaseParameters & parms_,
-                boost::function<bool ()> stop_callback_,
+                boost::ptr_vector<dmrg::stop_callback_base> stop_callbacks_,
                 int initial_site_ = 0)
-    : base(mps_, mpo_, parms_, stop_callback_, to_site(mps_.length(), initial_site_))
+    : base(mps_, mpo_, parms_, stop_callbacks_, to_site(mps_.length(), initial_site_))
     , initial_site((initial_site_ < 0) ? 0 : initial_site_)
     { }
     
@@ -230,8 +230,11 @@ public:
             double elapsed = boost::chrono::duration<double>(sweep_then - sweep_now).count();
             maquis::cout << "Sweep has been running for " << elapsed << " seconds." << std::endl;
             
-            if (stop_callback())
-                throw dmrg::time_limit(sweep, _site+1);
+            /// check for stopping conditions
+            for (unsigned i=0; i<stop_callbacks.size(); ++i) {
+                if (stop_callbacks[i](site, res.first))
+                    stop_callbacks[i].throw_exception(sweep, _site+1);
+            }
         }
         initial_site = -1;
     }

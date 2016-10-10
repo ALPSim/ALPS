@@ -74,6 +74,9 @@ private:
         add_option("nmainsweeps", "", 0);
         add_option("ngrowsweeps", "", 0);
         
+        add_option("rel_en_thresh_at", "Position where to measure the relative energy threshold (none, half, end)", value("none"));
+        add_option("rel_en_thresh", "Relative energy threshold to stop simulation", value(1e-8));
+        
         add_option("resultfile", "");
         add_option("chkpfile", "");
         add_option("initfile", "", value(""));

@@ -34,6 +34,8 @@
 #include <boost/shared_ptr.hpp>
 
 #include "dmrg/sim/sim.h"
+#include "dmrg/utils/simulation_terminated_exception.h"
+#include "dmrg/utils/stop_callbacks.h"
 #include "dmrg/optimize/optimize.h"
 #include <alps/parser/xmlstream.h>
 
@@ -70,15 +72,20 @@ public:
         if (parms["use_compressed"])
             mpoc.compress(1e-12);
         
+        /// Stop callbacks
+        boost::ptr_vector<dmrg::stop_callback_base> stop_callbacks;
+        stop_callbacks.push_back(new dmrg::rel_energy_callback(mps.length(), parms["rel_en_thresh"], parms["rel_en_thresh_at"]));
+        stop_callbacks.push_back(new dmrg::time_limit_callback(stop_callback));
+        
         /// Optimizer initialization
         boost::shared_ptr<opt_base_t> optimizer;
         if (init_sweep < parms["nsweeps"]) {
             if (parms["optimization"] == "singlesite")
                 optimizer.reset( new ss_optimize<Matrix, SymmGroup, storage::disk>
-                                                (mps, mpoc, parms, stop_callback, init_site) );
+                                                (mps, mpoc, parms, stop_callbacks, init_site) );
             else if(parms["optimization"] == "twosite")
                 optimizer.reset( new ts_optimize<Matrix, SymmGroup, storage::disk>
-                                                (mps, mpoc, parms, stop_callback, init_site) );
+                                                (mps, mpoc, parms, stop_callbacks, init_site) );
             else
                 throw std::runtime_error("Don't know this optimizer");
         }
@@ -115,7 +122,7 @@ public:
                 
                 if (stopped) break;
             }
-        } catch (dmrg::time_limit const& e) {
+        } catch (dmrg::simulation_terminated const& e) {
             maquis::cout << e.what() << " checkpointing partial result." << std::endl;
             checkpoint_simulation(mps, e.sweep(), e.site());
             

@@ -44,7 +44,7 @@
 #include "dmrg/utils/BaseParameters.h"
 #include "dmrg/utils/results_collector.h"
 #include "dmrg/utils/storage.h"
-#include "dmrg/utils/time_limit_exception.h"
+#include "dmrg/utils/stop_callbacks.h"
 #include "dmrg/utils/placement.h"
 
 template<class Matrix, class SymmGroup>
@@ -90,12 +90,12 @@ public:
     optimizer_base(MPS<Matrix, SymmGroup> & mps_,
                    MPO<Matrix, SymmGroup> const & mpo_,
                    BaseParameters & parms_,
-                   boost::function<bool ()> stop_callback_,
+                   boost::ptr_vector<dmrg::stop_callback_base> stop_callbacks_,
                    int site=0)
     : mps(mps_)
     , mpo(mpo_)
     , parms(parms_)
-    , stop_callback(stop_callback_)
+    , stop_callbacks(stop_callbacks_)
     {
         std::size_t L = mps.length();
         
@@ -230,7 +230,7 @@ protected:
     MPO<Matrix, SymmGroup> const& mpo;
     
     BaseParameters & parms;
-    boost::function<bool ()> stop_callback;
+    boost::ptr_vector<dmrg::stop_callback_base> stop_callbacks;
 
     std::vector<Boundary<typename storage::constrained<Matrix>::type, SymmGroup> > left_, right_;
     
