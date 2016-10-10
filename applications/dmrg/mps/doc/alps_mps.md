@@ -13,6 +13,7 @@ In the [Parameters section](@ref parameters) one can find a detailed description
 
 ### Guides
 * [Simulation files](@ref simulation_files)
+* [How to stop a simulation](@ref stop_simulation)
 
 ## File list
 A short description of the source files is available in the [File list section](files.html).
