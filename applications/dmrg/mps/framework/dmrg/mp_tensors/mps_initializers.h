@@ -132,6 +132,39 @@ struct qr_mps_init : public mps_initializer<Matrix, SymmGroup>
 };
 
 template<class Matrix, class SymmGroup>
+struct qr_symm_mps_init : public mps_initializer<Matrix, SymmGroup>
+{
+    // TODO: make it work also with symmetries. (reflection of state is more tricky, but some draft is already in hp2c repo)
+    qr_symm_mps_init(BaseParameters & parms,
+                     std::vector<Index<SymmGroup> > const& phys_dims,
+                     typename SymmGroup::charge right_end,
+                     std::vector<int> const& site_type)
+    : di(parms, phys_dims, right_end, site_type)
+    { }
+    
+    void operator()(MPS<Matrix, SymmGroup> & mps)
+    {
+        std::size_t L = mps.length();
+        di.init_sectors(mps, di.init_bond_dimension, false, 1.);
+        for(std::size_t i = 0; i < (L+1)/2; ++i) {
+            /// 1. fill with normal distributed random numbers
+            mps[i].data().generate(static_cast<dmrg_random::value_type(*)()>(&dmrg_random::normal));
+            /// 2. QR of data
+            mps[i].normalize_left(QR);
+            mps[L-1-i].replace_right_paired(transpose(mps[i].data()));
+            
+        }
+#ifndef NDEBUG
+        maquis::cout << "init norm: " << norm(mps) << std::endl;
+        maquis::cout << mps.description() << std::endl;
+#endif
+    }
+    
+    default_mps_init<Matrix, SymmGroup> di;
+};
+
+
+template<class Matrix, class SymmGroup>
 struct thin_mps_init : public mps_initializer<Matrix, SymmGroup>
 {
     thin_mps_init(BaseParameters & parms,

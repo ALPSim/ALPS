@@ -63,6 +63,9 @@ model_impl<Matrix,SymmGroup>::initializer(Lattice const& lat, BaseParameters & p
     else if (parms["init_state"] == "orthogonal")
         return initializer_ptr(new qr_mps_init<Matrix, SymmGroup>(parms, site_bases, initc, site_types));
 
+    else if (parms["init_state"] == "ortho_symm")
+        return initializer_ptr(new qr_symm_mps_init<Matrix, SymmGroup>(parms, site_bases, initc, site_types));
+    
     else if (parms["init_state"] == "thin")
         return initializer_ptr(new thin_mps_init<Matrix, SymmGroup>(parms, site_bases, initc, site_types));
     
