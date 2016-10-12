@@ -41,6 +41,7 @@
 
 #include "dmrg/mp_tensors/mps.h"
 #include "dmrg/mp_tensors/mps_mpo_ops.h"
+#include "dmrg/mp_tensors/mps_reflect.h"
 
 template<class Matrix, class SymmGroup>
 struct default_mps_init : public mps_initializer<Matrix, SymmGroup>
@@ -134,7 +135,6 @@ struct qr_mps_init : public mps_initializer<Matrix, SymmGroup>
 template<class Matrix, class SymmGroup>
 struct qr_symm_mps_init : public mps_initializer<Matrix, SymmGroup>
 {
-    // TODO: make it work also with symmetries. (reflection of state is more tricky, but some draft is already in hp2c repo)
     qr_symm_mps_init(BaseParameters & parms,
                      std::vector<Index<SymmGroup> > const& phys_dims,
                      typename SymmGroup::charge right_end,
@@ -146,13 +146,15 @@ struct qr_symm_mps_init : public mps_initializer<Matrix, SymmGroup>
     {
         std::size_t L = mps.length();
         di.init_sectors(mps, di.init_bond_dimension, false, 1.);
-        for(std::size_t i = 0; i < (L+1)/2; ++i) {
+        for(std::size_t i = 0; i < L; ++i) {
             /// 1. fill with normal distributed random numbers
             mps[i].data().generate(static_cast<dmrg_random::value_type(*)()>(&dmrg_random::normal));
             /// 2. QR of data
             mps[i].normalize_left(QR);
-            mps[L-1-i].replace_right_paired(transpose(mps[i].data()));
-            
+        }
+        MPS<Matrix, SymmGroup> mps_reflected = reflect(mps);
+        for(std::size_t i = L/2; i < L; ++i) {
+            swap(mps[i], mps_reflected[i]);
         }
 #ifndef NDEBUG
         maquis::cout << "init norm: " << norm(mps) << std::endl;
