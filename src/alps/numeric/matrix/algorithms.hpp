@@ -177,8 +177,8 @@ namespace alps {
             return true;
         }
 
-        template <typename T>
-        typename real_type<T>::type norm_square(const matrix<T>& M){
+        template <typename T, class memoryblock>
+        typename real_type<T>::type norm_square(const matrix<T, memoryblock>& M){
             using alps::numeric::real;
             typename real_type<T>::type ret(0);
             for (std::size_t c = 0; c < num_cols(M); ++c)
@@ -187,9 +187,9 @@ namespace alps {
             return ret;
         }
 
-        template <typename T>
-        typename matrix<T>::value_type overlap(const matrix<T> & M1, const matrix<T> & M2){
-            typename matrix<T>::value_type ret(0);
+        template <typename T, class memoryblock>
+        typename matrix<T>::value_type overlap(const matrix<T, memoryblock> & M1, const matrix<T, memoryblock> & M2){
+            typename matrix<T, memoryblock>::value_type ret(0);
             for (std::size_t c = 0; c < num_cols(M1); ++c)
                 for (std::size_t r = 0; r < num_rows(M1); ++r)
                     ret += conj(M1(r,c)) * M2(r,c);
