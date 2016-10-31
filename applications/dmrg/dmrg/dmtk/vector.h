@@ -102,9 +102,9 @@ class Vector:public std::vector<T>
 
 //  Operators 
 
-    T operator()(size_t i) const; 
+    T const& operator()(size_t i) const; 
     T& operator()(size_t i);
-    T operator[](size_t i) const; // () and [] are equivalent; 
+    T const& operator[](size_t i) const; // () and [] are equivalent; no they were not... now they are.
     T& operator[](size_t i);
 
     Vector& operator=(const Vector<T>&);
@@ -204,7 +204,7 @@ class Vector:public std::vector<T>
 #include "vector_implement.h"
 
 template<class T>
-inline T
+inline T const&
 Vector<T>::operator()(size_t i) const 
 {
   return vector::operator[](i);
@@ -218,7 +218,7 @@ Vector<T>::operator()(size_t i)
 };
 
 template<class T>
-inline T
+inline T const&
 Vector<T>::operator[](size_t i) const 
 {
   return vector::operator[](i);
