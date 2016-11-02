@@ -136,7 +136,11 @@ if(BUILD_BOOST_SERIALIZATION)
       set(SOURCES ${SOURCES}
           shared_ptr_helper.cpp)
   endif(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION LESS 56)
-  
+  if(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION GREATER 60)
+      set(SOURCES ${SOURCES}
+          singleton.cpp 
+         )
+  endif(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION GREATER 60)
   foreach(S ${SOURCES})
     if(EXISTS ${DIRECTORY}/${S})
       set(BOOST_SOURCES ${BOOST_SOURCES} ${DIRECTORY}/${S})
