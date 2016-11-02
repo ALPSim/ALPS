@@ -71,57 +71,22 @@ namespace alps {
 
             template <typename VertexDataType>
             struct embedding_generic_type {
-                // TODO This works, but could be improved using C++11 shared_ptr + make_shared
-                // (boost::shared_ptr would imply an additional indirection)
-                // or replaced entirely when used with move-aware containers
-                struct embedding_generic_data_type
-                {
-                    embedding_generic_data_type(std::size_t vertices_size, std::size_t edges_impl_size)
-                        : vertices(vertices_size), edges(edges_impl_size), ref_counter(1)
-                    {
-                    }
-                    std::vector<VertexDataType>  vertices;
-                    std::vector<boost::uint64_t> edges;
-                    boost::uint8_t ref_counter;
-                };
-
-                embedding_generic_type(std::size_t vertices_size, std::size_t edges_size)
-                    : data(new embedding_generic_data_type(vertices_size, (edges_size >> 6) + ((edges_size & 0x3F) == 0 ? 0 : 1)))
-                {
-                    BOOST_STATIC_ASSERT(( boost::is_same<VertexDataType,boost::uint16_t>::value || boost::is_same<VertexDataType,boost::uint32_t>::value || boost::is_same<VertexDataType, boost::uint64_t>::value));
-                }
-
-                embedding_generic_type(embedding_generic_type const & rhs)
-                    : data(rhs.data)
-                {
-                    assert(data->ref_counter < boost::integer_traits<boost::uint8_t>::const_max - 1);
-                    ++data->ref_counter;
-                }
-
-                ~embedding_generic_type() {
-                    if (!--data->ref_counter)
-                        delete data;
-                }
-
-                bool operator == (embedding_generic_type const & rhs) const {
-                        return data->edges == rhs.data->edges
-                        && data->vertices == rhs.data->vertices
-                    ;
-                }
-
-                embedding_generic_data_type * data;
-
-                private:
-                    embedding_generic_type() {}
+                std::vector<VertexDataType>  vertices;
+                std::vector<boost::uint64_t> edges;
             };
+
+            template <typename VertexDataType>
+            bool operator == (embedding_generic_type<VertexDataType> const& lhs, embedding_generic_type<VertexDataType> const & rhs) {
+                    return lhs.edges == rhs.edges && lhs.vertices == rhs.vertices;
+            }
 
             template <typename VertexDataType>
             std::size_t hash_value(embedding_generic_type<VertexDataType> const & embedding) {
                 using boost::hash_combine;
                 std::size_t hash = 0;
-                for( typename std::vector<VertexDataType>::const_iterator it = embedding.data->vertices.begin(); it != embedding.data->vertices.end(); ++it)
+                for( typename std::vector<VertexDataType>::const_iterator it = embedding.vertices.begin(); it != embedding.vertices.end(); ++it)
                     hash_combine(hash, *it);
-                for( std::vector<boost::uint64_t>::const_iterator it = embedding.data->edges.begin(); it != embedding.data->edges.end(); ++it)
+                for( std::vector<boost::uint64_t>::const_iterator it = embedding.edges.begin(); it != embedding.edges.end(); ++it)
                     hash_combine(hash, *it);
                 return hash;
             }
@@ -129,6 +94,7 @@ namespace alps {
             template <typename VertexDataType>
             void update_vertex_part(embedding_generic_type<VertexDataType> & embedding, std::vector<std::size_t> & index_of_subgraph_vertex, std::vector< boost::tuple<boost::uint16_t, VertexDataType, unsigned int> > const& embedding_data)
             {
+                BOOST_STATIC_ASSERT(( boost::is_same<VertexDataType,boost::uint16_t>::value || boost::is_same<VertexDataType,boost::uint32_t>::value || boost::is_same<VertexDataType, boost::uint64_t>::value));
                 index_of_subgraph_vertex.clear();
                 index_of_subgraph_vertex.resize(embedding_data.size());
                 enum { orbit_number = 0 , compressed_embedding_data = 1 , subgraph_vertex = 2 };
@@ -137,7 +103,7 @@ namespace alps {
                     std::size_t const pos = it - embedding_data.begin();
                     assert( get<subgraph_vertex>(*it) < index_of_subgraph_vertex.size() );
                     index_of_subgraph_vertex[ get<subgraph_vertex>(*it) ] = pos;
-                    embedding.data->vertices[pos]                         = get<compressed_embedding_data>(*it);
+                    embedding.vertices[pos]                               = get<compressed_embedding_data>(*it);
                 }
             }
 
@@ -149,7 +115,7 @@ namespace alps {
                     std::size_t v1, v2;
                     boost::tie(v1,v2) = boost::minmax(index_of_subgraph_vertex[source(*s_ei, S)], index_of_subgraph_vertex[target(*s_ei, S)]);
                     std::size_t index = v1 * num_vertices(S) - (v1 - 1) * v1 / 2 + v2 - v1;
-                    embedding_generic.data->edges[index >> 6] |= 0x01 << (index & 0x3F);
+                    embedding_generic.edges[index >> 6] |= 0x01 << (index & 0x3F);
                 }
             }
 
@@ -157,7 +123,11 @@ namespace alps {
             template <typename VertexDataType, typename Subgraph>
             embedding_generic_type<VertexDataType> convert_to_embedding_generic(std::vector< boost::tuple< boost::uint16_t, VertexDataType, unsigned int> > const& embedding_data, Subgraph const& S)
             {
-                embedding_generic_type<VertexDataType> embedding_generic(num_vertices(S), num_vertices(S) * (num_vertices(S) + 1) / 2);
+                embedding_generic_type<VertexDataType> embedding_generic;
+                embedding_generic.vertices.resize(num_vertices(S));
+                std::size_t const edges_size = num_vertices(S) * (num_vertices(S) + 1) / 2;
+                embedding_generic.edges.resize((edges_size >> 6) + ((edges_size & 0x3F) == 0 ? 0 : 1));
+
                 std::vector<std::size_t> index_of_subgraph_vertex_in_embedding_generic;
                 update_vertex_part(embedding_generic, index_of_subgraph_vertex_in_embedding_generic, embedding_data);
                 update_edge_part(embedding_generic, index_of_subgraph_vertex_in_embedding_generic, S);
