@@ -25,7 +25,8 @@ IF (ALPS_BUILD_GRAPH_TESTS)
             subgraph_generator_test_colored_edges2
             subgraph_generator_test_colored_edges_with_sym
             subgraph_generator_test_colored_edges_with_sym2
-            lattice_constant_test
+            lattice_constant_square_test
+            lattice_constant_tri_test
             lattice_constant_matrix
             colored_lattice_constant_test
             colored_lattice_constant_test2
