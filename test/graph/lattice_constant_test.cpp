@@ -215,14 +215,14 @@ int main() {
                   it->first
                 , lattice.graph()
                 , lattice.lattice()
-                , side_length * side_length / 2 + side_length / 2 - 1
+                , alps::cell(std::vector<int>(2,side_length/2),lattice.lattice())
             );
             if (lc != it->second) {
                 std::cerr<<"ERROR: lattice constant does not match!"<<std::endl;
                 std::cerr<<"Calculated: "<<lc<<"\tReference: "<<it->second<<std::endl<<std::endl;
                 success = -1;
             } else
-                std::cerr<<"SUCCES: "<<it->second<<std::endl;
+                std::cerr<<"SUCCESS: "<<it->second<<std::endl;
         }
     }
     return success;

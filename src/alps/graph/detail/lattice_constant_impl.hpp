@@ -280,9 +280,13 @@ namespace alps {
                 std::vector<boost::uint_t<8>::fast> get_distance_to_boarder(std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const& pinning, Graph const& G) const
                 {
                     std::vector<boost::uint_t<8>::fast> distance(distance_to_boarder_.size(), std::numeric_limits<boost::uint_t<8>::fast>::max());
-                    for (typename std::vector<typename boost::graph_traits<Graph>::vertex_descriptor>::const_iterator it = pinning.begin(); it != pinning.end(); ++it)
-                        for(std::size_t d = 0; d < distance_to_boarder_.size(); ++d)
-                            distance[d] = (std::min)(distance[d], distance_to_boarder_[d][*it]);
+                    for(std::size_t d = 0; d < distance_to_boarder_.size(); ++d)
+                    {
+                        boost::uint_t<8>::fast dist = std::numeric_limits<boost::uint_t<8>::fast>::max();
+                        for (typename std::vector<typename boost::graph_traits<Graph>::vertex_descriptor>::const_iterator it = pinning.begin(); it != pinning.end(); ++it)
+                            dist = (std::min)(dist, distance_to_boarder_[d][*it]);
+                        distance[d] = dist;
+                    }
                     return distance;
                 }
 
