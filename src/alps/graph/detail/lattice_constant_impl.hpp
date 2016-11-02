@@ -86,15 +86,13 @@ namespace alps {
                 };
 
                 embedding_generic_type(std::size_t vertices_size, std::size_t edges_size)
-                    : hash(0)
-                    , data(new embedding_generic_data_type(vertices_size, (edges_size >> 6) + ((edges_size & 0x3F) == 0 ? 0 : 1)))
+                    : data(new embedding_generic_data_type(vertices_size, (edges_size >> 6) + ((edges_size & 0x3F) == 0 ? 0 : 1)))
                 {
                     BOOST_STATIC_ASSERT(( boost::is_same<VertexDataType,boost::uint16_t>::value || boost::is_same<VertexDataType,boost::uint32_t>::value || boost::is_same<VertexDataType, boost::uint64_t>::value));
                 }
 
                 embedding_generic_type(embedding_generic_type const & rhs)
-                    : hash(rhs.hash)
-                    , data(rhs.data)
+                    : data(rhs.data)
                 {
                     assert(data->ref_counter < boost::integer_traits<boost::uint8_t>::const_max - 1);
                     ++data->ref_counter;
@@ -106,13 +104,11 @@ namespace alps {
                 }
 
                 bool operator == (embedding_generic_type const & rhs) const {
-                    return hash == rhs.hash
-                        && data->edges == rhs.data->edges
+                        return data->edges == rhs.data->edges
                         && data->vertices == rhs.data->vertices
                     ;
                 }
 
-                std::size_t hash;
                 embedding_generic_data_type * data;
 
                 private:
@@ -120,8 +116,14 @@ namespace alps {
             };
 
             template <typename VertexDataType>
-            std::size_t hash_value(embedding_generic_type<VertexDataType> const & value) {
-                return value.hash;
+            std::size_t hash_value(embedding_generic_type<VertexDataType> const & embedding) {
+                using boost::hash_combine;
+                std::size_t hash = 0;
+                for( typename std::vector<VertexDataType>::const_iterator it = embedding.data->vertices.begin(); it != embedding.data->vertices.end(); ++it)
+                    hash_combine(hash, *it);
+                for( std::vector<boost::uint64_t>::const_iterator it = embedding.data->edges.begin(); it != embedding.data->edges.end(); ++it)
+                    hash_combine(hash, *it);
+                return hash;
             }
 
             template <typename VertexDataType>
@@ -151,16 +153,6 @@ namespace alps {
                 }
             }
 
-            template <typename VertexDataType>
-            void update_hash(embedding_generic_type<VertexDataType> & embedding)
-            {
-                using boost::hash_combine;
-                embedding.hash = 0;
-                for( typename std::vector<VertexDataType>::const_iterator it = embedding.data->vertices.begin(); it != embedding.data->vertices.end(); ++it)
-                    hash_combine(embedding.hash, *it);
-                for( std::vector<boost::uint64_t>::const_iterator it = embedding.data->edges.begin(); it != embedding.data->edges.end(); ++it)
-                    hash_combine(embedding.hash, *it);
-            }
 
             template <typename VertexDataType, typename Subgraph>
             embedding_generic_type<VertexDataType> convert_to_embedding_generic(std::vector< boost::tuple< boost::uint16_t, VertexDataType, unsigned int> > const& embedding_data, Subgraph const& S)
@@ -169,7 +161,6 @@ namespace alps {
                 std::vector<std::size_t> index_of_subgraph_vertex_in_embedding_generic;
                 update_vertex_part(embedding_generic, index_of_subgraph_vertex_in_embedding_generic, embedding_data);
                 update_edge_part(embedding_generic, index_of_subgraph_vertex_in_embedding_generic, S);
-                update_hash(embedding_generic);
                 return embedding_generic;
             }
 
