@@ -43,7 +43,7 @@ namespace alps { namespace numeric {
 #if defined(BOOST_MSVC)
   template <class T>
   bool isnan(T x) { return _isnan(x);}
-#elif defined(__INTEL_COMPILER) || defined(_CRAYC) || defined(__FCC_VERSION)
+#elif (defined(__INTEL_COMPILER) && __cplusplus <= 199711L) || defined(_CRAYC) || defined(__FCC_VERSION)
   using ::isnan;
 #else
   using std::isnan;
