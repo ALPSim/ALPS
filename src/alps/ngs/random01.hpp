@@ -26,6 +26,9 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#ifndef ALPS_NGS_RANDOM01_HPP
+#define ALPS_NGS_RANDOM01_HPP
+
 #include <alps/hdf5/archive.hpp>
 
 #include <boost/random.hpp>
@@ -55,3 +58,5 @@ namespace alps {
     };
 
 }
+
+#endif 
