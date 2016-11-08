@@ -293,7 +293,7 @@ namespace alps {
                     assert(( assert_helpers::orbit_of_is_valid(orbit_of_, get<alps::graph::partition>(canonical_properties(S)), S) ));
 
                     enum { orbit_number = 0 , compressed_embedding_data = 1 , subgraph_vertex = 2 };
-                    std::vector< boost::tuple<boost::uint16_t, boost::uint16_t, unsigned int> > embedding_data;
+                    embedding_data_buffer_.clear();
 
                     // How many bits do we need to store the maximal distance in a subgraph
                     // This is the same number of bits as we need for a unique vertex label of the subgraph
@@ -304,12 +304,12 @@ namespace alps {
                     for (typename std::vector<typename boost::graph_traits<Graph>::vertex_descriptor>::const_iterator it = pinning.begin(); it != pinning.end(); ++it) {
                         unsigned int    const subgraph_vertex      = it - pinning.begin();
                         boost::uint16_t const embedding_compressed = calc_compressed_transinv_embedding(bits_per_dim, *it, pinning, G);
-                        embedding_data.push_back( boost::make_tuple( static_cast<boost::uint16_t>(orbit_of_[subgraph_vertex]), embedding_compressed, subgraph_vertex) );
+                        embedding_data_buffer_.push_back( boost::make_tuple( static_cast<boost::uint16_t>(orbit_of_[subgraph_vertex]), embedding_compressed, subgraph_vertex) );
                     }
 
-                    sort(embedding_data.begin(), embedding_data.end());
+                    sort(embedding_data_buffer_.begin(), embedding_data_buffer_.end());
 
-                    matches_.insert(embedding_data,S);
+                    matches_.insert(embedding_data_buffer_,S);
                 }
 
                 std::size_t get_count() const
@@ -320,9 +320,9 @@ namespace alps {
 
                 /// Gets the (minimal) distance to boarder in each dimension of an embedding/pinning
                 template <typename Graph>
-                std::vector<boost::uint_t<8>::fast> get_distance_to_boarder(std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const& pinning, Graph const& G) const
+                void get_distance_to_boarder(std::vector<boost::uint_t<8>::fast> & distance, std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const& pinning, Graph const& G) const
                 {
-                    std::vector<boost::uint_t<8>::fast> distance(distance_to_boarder_.size(), std::numeric_limits<boost::uint_t<8>::fast>::max());
+                    distance.resize(distance_to_boarder_.size(), std::numeric_limits<boost::uint_t<8>::fast>::max());
                     for(std::size_t d = 0; d < distance_to_boarder_.size(); ++d)
                     {
                         boost::uint_t<8>::fast dist = std::numeric_limits<boost::uint_t<8>::fast>::max();
@@ -330,7 +330,6 @@ namespace alps {
                             dist = (std::min)(dist, distance_to_boarder_[d][*it]);
                         distance[d] = dist;
                     }
-                    return distance;
                 }
 
                 template <typename Graph>
@@ -341,14 +340,14 @@ namespace alps {
                     , Graph const& G
                 ) const {
                     assert((0x01u << (distance_to_boarder_.size() * bits_per_dim + num_bits_required_for(unit_cell_size_))) < boost::integer_traits<boost::uint16_t>::const_max && "boost::uint16_t is not large enough to store full embedding data.");
-                    std::vector<boost::uint_t<8>::fast> const distance( get_distance_to_boarder(pinning, G) );
+                    get_distance_to_boarder(distance_buffer_, pinning, G);
                     // data =  bitfield looking like: unit_cell_vtx_idx|d[0]|d[1]|...
                     boost::uint16_t data = v_id % unit_cell_size_;
                     for(std::size_t d = 0; d < distance_to_boarder_.size(); ++d)
                     {
                         data <<= bits_per_dim;
-                        assert( distance_to_boarder_[d][v_id] >= distance[d] );
-                        boost::uint_t<8>::fast const dist = distance_to_boarder_[d][v_id] - distance[d];
+                        assert( distance_to_boarder_[d][v_id] >= distance_buffer_[d] );
+                        boost::uint_t<8>::fast const dist = distance_to_boarder_[d][v_id] - distance_buffer_[d];
                         assert( dist < (0x01u << bits_per_dim) );
                         data += dist;
                     }
@@ -357,7 +356,9 @@ namespace alps {
 
                 std::vector<std::size_t>                                        orbit_of_;
                 std::vector<std::vector<boost::uint_t<8>::fast> > const         distance_to_boarder_;
+                std::vector< boost::tuple<boost::uint16_t, boost::uint16_t, unsigned int> > embedding_data_buffer_;
                 embeddings_set<boost::uint16_t>                                 matches_;
+                mutable std::vector<boost::uint_t<8>::fast>                     distance_buffer_;
                 std::size_t const                                               unit_cell_size_;
             };
 
@@ -398,7 +399,7 @@ namespace alps {
                     assert(( assert_helpers::orbit_of_is_valid(orbit_of_, get<alps::graph::partition>(canonical_properties(S,breaking_vertex_)), S) ));
 
                     enum { orbit_number = 0 , compressed_embedding_data = 1 , subgraph_vertex = 2 };
-                    std::vector< boost::tuple<boost::uint16_t, boost::uint64_t, unsigned int> > embedding_data; // TODO: this calls for bad alignment...
+                    embedding_data_buffer_.clear();
 
                     // How many bits do we need to store the maximal distance to the boundary of the lattice (in hops)
                     // This is the same number of bits as we need for a unique vertex label of the graph
@@ -409,12 +410,12 @@ namespace alps {
                     for (typename std::vector<typename boost::graph_traits<Graph>::vertex_descriptor>::const_iterator it = pinning.begin(); it != pinning.end(); ++it) {
                         unsigned int    const subgraph_vertex      = it - pinning.begin();
                         boost::uint64_t const embedding_compressed = calc_compressed_embedding(bits_per_dim, *it, pinning, G);
-                        embedding_data.push_back( boost::make_tuple( static_cast<boost::uint16_t>(orbit_of_[subgraph_vertex]), embedding_compressed, subgraph_vertex) );
+                        embedding_data_buffer_.push_back( boost::make_tuple( static_cast<boost::uint16_t>(orbit_of_[subgraph_vertex]), embedding_compressed, subgraph_vertex) );
                     }
 
-                    sort(embedding_data.begin(), embedding_data.end());
+                    sort(embedding_data_buffer_.begin(), embedding_data_buffer_.end());
 
-                    bool const inserted = matches_.insert(embedding_data, S);
+                    bool const inserted = matches_.insert(embedding_data_buffer_, S);
                     if (inserted)
                         add_pinning_to_orbit_mapping_matrix(pinning, G);
                 }
@@ -425,7 +426,7 @@ namespace alps {
                 void add_pinning_to_orbit_mapping_matrix(std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const& pinning, Graph const& ) const
                 {
                     for (typename std::vector<typename boost::graph_traits<Graph>::vertex_descriptor>::const_iterator it = pinning.begin(); it != pinning.end(); ++it)
-                        orbit_mapping_matrix_(*it, orbit_of_[it - pinning.begin()])++;
+                        ++orbit_mapping_matrix_(*it, orbit_of_[it - pinning.begin()]);
                 }
 
                 template <typename Graph>
@@ -451,6 +452,7 @@ namespace alps {
 
                 std::vector<std::size_t>                                        orbit_of_;
                 std::vector<std::vector<boost::uint_t<8>::fast> > const         distance_to_boarder_;
+                std::vector< boost::tuple<boost::uint16_t, boost::uint64_t, unsigned int> > embedding_data_buffer_; // TODO: this calls for bad alignment...
                 embeddings_set<boost::uint64_t>                                 matches_;
                 std::size_t const                                               unit_cell_size_;
                 alps::numeric::matrix<unsigned int> &                           orbit_mapping_matrix_;
