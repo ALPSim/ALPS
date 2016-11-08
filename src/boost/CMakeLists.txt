@@ -54,7 +54,7 @@ if(BUILD_BOOST_FILESYSTEM)
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/filesystem")
   set(SOURCES
     codecvt_error_category.cpp operations.cpp path.cpp path_traits.cpp
-    portability.cpp unique_path.cpp utf8_codecvt_facet.cpp 
+    portability.cpp unique_path.cpp utf8_codecvt_facet.cpp
     windows_file_codecvt.cpp v2_operations.cpp v2_path.cpp v2_portability.cpp)
   foreach (D ${DIRECTORY}/src ${DIRECTORY}/v2/src ${DIRECTORY}/v3/src)
     foreach(S ${SOURCES})
@@ -138,7 +138,7 @@ if(BUILD_BOOST_SERIALIZATION)
   endif(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION LESS 56)
   if(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION GREATER 60)
       set(SOURCES ${SOURCES}
-          singleton.cpp 
+          singleton.cpp
          )
   endif(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION GREATER 60)
   foreach(S ${SOURCES})
@@ -146,6 +146,7 @@ if(BUILD_BOOST_SERIALIZATION)
       set(BOOST_SOURCES ${BOOST_SOURCES} ${DIRECTORY}/${S})
     endif(EXISTS ${DIRECTORY}/${S})
   endforeach(S)
+  add_definitions(-DBOOST_SERIALIZATION_DYN_LINK=1)
 endif(BUILD_BOOST_SERIALIZATION)
 
 # Boost.Python
@@ -186,9 +187,9 @@ if(BUILD_BOOST_MPI)
   set(BOOST_LINK_LIBS ${BOOST_LINK_LIBS} ${MPI_LIBRARIES})
   #ENDIF(NOT WIN32)
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/mpi/src")
-  set(SOURCES broadcast.cpp communicator.cpp computation_tree.cpp 
+  set(SOURCES broadcast.cpp communicator.cpp computation_tree.cpp
       content_oarchive.cpp environment.cpp exception.cpp graph_communicator.cpp
-      group.cpp intercommunicator.cpp mpi_datatype_cache.cpp 
+      group.cpp intercommunicator.cpp mpi_datatype_cache.cpp
       mpi_datatype_oarchive.cpp packed_iarchive.cpp packed_oarchive.cpp
       packed_skeleton_iarchive.cpp packed_skeleton_oarchive.cpp
       point_to_point.cpp request.cpp text_skeleton_oarchive.cpp timer.cpp
@@ -230,7 +231,7 @@ endif(BUILD_BOOST_THREAD)
 # Boost.MPI Python bindings
 if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE AND Boost_ROOT_DIR)
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/mpi/src/python")
-  set(SOURCES collectives.cpp py_communicator.cpp datatypes.cpp 
+  set(SOURCES collectives.cpp py_communicator.cpp datatypes.cpp
       documentation.cpp py_environment.cpp py_nonblocking.cpp py_exception.cpp
       py_request.cpp skeleton_and_content.cpp status.cpp py_timer.cpp serialize.cpp
   )
@@ -255,13 +256,13 @@ if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE AND Boost_R
     set_target_properties(mpi_c PROPERTIES PREFIX "")
     target_link_libraries(mpi_c ${ALPS_BOOST_LIBRARY_NAME} ${BOOST_LINK_LIBS})
 
-    if(ALPS_INSTALL_VISTRAILS_PACKAGES) 
+    if(ALPS_INSTALL_VISTRAILS_PACKAGES)
         install(TARGETS mpi_c COMPONENT vistrails
                 RUNTIME DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}
                 ARCHIVE DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}
                 LIBRARY DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR})
-    endif(ALPS_INSTALL_VISTRAILS_PACKAGES) 
-                
+    endif(ALPS_INSTALL_VISTRAILS_PACKAGES)
+
     if(NOT ALPS_FOR_VISTRAILS)
       install(TARGETS mpi_c COMPONENT python
               RUNTIME DESTINATION bin
@@ -269,7 +270,7 @@ if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE AND Boost_R
               LIBRARY DESTINATION lib/pyalps)
     endif(NOT ALPS_FOR_VISTRAILS)
   endif(BOOST_MPI_PYTHON_SOURCES)
-  
+
 endif (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE AND Boost_ROOT_DIR)
 
 
@@ -286,9 +287,9 @@ if (NOT Boost_FOUND)
     # Boost.Test
     if(BUILD_BOOST_TEST AND NOT ALPS_FOR_VISTRAILS)
       set(DIRECTORY "${Boost_ROOT_DIR}/libs/test/src")
-      
+
       set(SOURCES compiler_log_formatter.cpp debug.cpp decorator.cpp
-          execution_monitor.cpp framework.cpp 
+          execution_monitor.cpp framework.cpp
           interaction_based.cpp logged_expectations.cpp plain_report_formatter.cpp
           progress_monitor.cpp results_collector.cpp results_reporter.cpp
           test_tools.cpp test_tree.cpp unit_test_log.cpp unit_test_main.cpp
@@ -321,7 +322,7 @@ if (NOT Boost_FOUND)
       add_library(boost_unit_test_framework ${UTF_SOURCES})
       add_library(boost_test_exec_monitor ${TEST_EXEC_MON_SOURCES})
       add_library(boost_prg_exec_monitor ${PRG_EXEC_MON_SOURCES})
-      
+
       if(BUILD_SHARED_LIBS)
         set_target_properties(boost_unit_test_framework PROPERTIES COMPILE_DEFINITIONS BOOST_TEST_DYN_LINK=1)
         set_target_properties(boost_test_exec_monitor PROPERTIES COMPILE_DEFINITIONS BOOST_TEST_DYN_LINK=1)
@@ -330,6 +331,19 @@ if (NOT Boost_FOUND)
 
     endif(BUILD_BOOST_TEST AND NOT ALPS_FOR_VISTRAILS)
 
+    # Patch required
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Intel" AND ((Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION EQUAL 61) OR (Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION EQUAL 62)))
+      find_program(PATCH_EXECUTABLE patch)
+      if(PATCH_EXECUTABLE)
+        execute_process(COMMAND ${PATCH_EXECUTABLE} -d ${Boost_ROOT_DIR} --dry-run --silent -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/serialization_intel.patch RESULT_VARIABLE PATCH_APPLIED OUTPUT_QUIET ERROR_QUIET)
+      else()
+        set(PATCH_EXECUTABLE patch)
+        set(PATCH_APPLIED FALSE)
+      endif(PATCH_EXECUTABLE)
+      if(NOT PATCH_APPLIED)
+        message(WARNING "\nThe Boost version you are trying to use has a bug when used with the Intel compiler. Please apply the following patch to fix it:\n${PATCH_EXECUTABLE} -d ${Boost_ROOT_DIR} -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/serialization_intel.patch \n")
+      endif(NOT PATCH_APPLIED)
+    endif()
 
   if(WIN32)
     list(APPEND defs "BOOST_ATOMIC_SOURCE=1")

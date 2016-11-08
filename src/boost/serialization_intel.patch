@@ -1,0 +1,134 @@
+This patch is needed for using Boost 1.61.0 and 1.62.0 with the Intel compiler.
+Apply it to your Boost sources as
+$ patch /path/to/boost/sources -p0 -i serialization_inte.patch
+
+Patch adapted from commit c90e97eb1ed5e6f9ea3b1d3b5a825a9d2ef284b3 on
+https://github.com/boostorg/serialization.
+Patch adapted by Michele Dolfi <dolfim@phys.ethz.ch>
+Original patch by Robert Ramey <ramey@rrsd.com>
+
+
+diff --git a/boost/archive/detail/iserializer.hpp b/boost/archive/detail/iserializer.hpp
+index 6bec499..d7420dd 100644
+--- a/boost/archive/detail/iserializer.hpp
++++ b/boost/archive/detail/iserializer.hpp
+@@ -588,7 +588,14 @@ struct load_array_type {
+                     boost::archive::archive_exception::array_size_too_short
+                 )
+             );
+-        ar >> serialization::make_array(static_cast<value_type*>(&t[0]),count);
++        // explict template arguments to pass intel C++ compiler
++        ar >> serialization::make_array<
++            value_type,
++            boost::serialization::collection_size_type
++        >(
++            static_cast<value_type *>(&t[0]),
++            count
++        );
+     }
+ };
+
+diff --git a/boost/archive/detail/oserializer.hpp b/boost/archive/detail/oserializer.hpp
+index 0f2e733..f5a9af8 100644
+--- a/boost/archive/detail/oserializer.hpp
++++ b/boost/archive/detail/oserializer.hpp
+@@ -501,7 +501,14 @@ struct save_array_type
+         );
+         boost::serialization::collection_size_type count(c);
+         ar << BOOST_SERIALIZATION_NVP(count);
+-        ar << serialization::make_array(static_cast<value_type const*>(&t[0]),count);
++        // explict template arguments to pass intel C++ compiler
++        ar << serialization::make_array<
++            const value_type,
++            boost::serialization::collection_size_type
++        >(
++            static_cast<const value_type *>(&t[0]),
++            count
++        );
+     }
+ };
+
+diff --git a/boost/serialization/array.hpp b/boost/serialization/array.hpp
+index 2cd023a..54d492d 100644
+--- a/boost/serialization/array.hpp
++++ b/boost/serialization/array.hpp
+@@ -44,8 +44,8 @@ class array_wrapper :
+     // note: I would like to make the copy constructor private but this breaks
+     // make_array.  So I try to make make_array a friend - but that doesn't
+     // build.  Need a C++ guru to explain this!
+-    template<class S>
+-    friend const boost::serialization::array_wrapper<T> make_array( T* t, S s);
++    // template<class S>
++    // friend const boost::serialization::array_wrapper<T> make_array(T* t, S s);
+
+     array_wrapper(const array_wrapper & rhs) :
+         m_t(rhs.m_t),
+@@ -117,7 +117,7 @@ class array_wrapper :
+
+ template<class T, class S>
+ inline
+-const array_wrapper< T > make_array( T* t, S s){
++const array_wrapper< T > make_array(T* t, S s){
+     const array_wrapper< T > a(t, s);
+     return a;
+ }
+diff --git a/boost/serialization/valarray.hpp b/boost/serialization/valarray.hpp
+index efe102f..b546510 100644
+--- a/boost/serialization/valarray.hpp
++++ b/boost/serialization/valarray.hpp
+@@ -43,7 +43,11 @@ void save( Archive & ar, const STD::valarray<U> &t, const unsigned int /*file_ve
+     const collection_size_type count(t.size());
+     ar << BOOST_SERIALIZATION_NVP(count);
+     if (t.size())
+-        ar << make_array(detail::get_data(t), t.size());
++        // explict template arguments to pass intel C++ compiler
++        ar << serialization::make_array<const U, collection_size_type>(
++            static_cast<const U *>(&t[0]),
++            count
++        );
+ }
+
+ template<class Archive, class U>
+@@ -53,7 +57,11 @@ void load( Archive & ar, STD::valarray<U> &t,  const unsigned int /*file_version
+     ar >> BOOST_SERIALIZATION_NVP(count);
+     t.resize(count);
+     if (t.size())
+-        ar >> make_array(detail::get_data(t), t.size());
++        // explict template arguments to pass intel C++ compiler
++        ar >> serialization::make_array<U, collection_size_type>(
++            static_cast<U *>(&t[0]),
++            count
++        );
+ }
+
+ // split non-intrusive serialization function member into separate
+diff --git a/boost/serialization/vector.hpp b/boost/serialization/vector.hpp
+index a173754..48eeadd 100644
+--- a/boost/serialization/vector.hpp
++++ b/boost/serialization/vector.hpp
+@@ -103,7 +103,11 @@ inline void save(
+     const collection_size_type count(t.size());
+     ar << BOOST_SERIALIZATION_NVP(count);
+     if (!t.empty())
+-        ar << boost::serialization::make_array(detail::get_data(t),t.size());
++        // explict template arguments to pass intel C++ compiler
++        ar << serialization::make_array<const U, collection_size_type>(
++            static_cast<const U *>(&t[0]),
++            count
++        );
+ }
+
+ template<class Archive, class U, class Allocator>
+@@ -121,7 +125,11 @@ inline void load(
+         ar >> BOOST_SERIALIZATION_NVP(item_version);
+     }
+     if (!t.empty())
+-        ar >> boost::serialization::make_array(detail::get_data(t),t.size());
++        // explict template arguments to pass intel C++ compiler
++        ar >> serialization::make_array<U, collection_size_type>(
++            static_cast<U *>(&t[0]),
++            count
++        );
+   }
+
+ // dispatch to either default or optimized versions
