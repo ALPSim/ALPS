@@ -4,17 +4,17 @@
 #          http://www.boost.org/LICENSE_1_0.txt)
 
 #
-#  Python settings : 
+#  Python settings :
 #
-#  This module checks that : 
+#  This module checks that :
 #  - the python interpreter is working and version >= 2.6
 #  - it has modules : distutils, numpy, tables, scipy
-# 
+#
 #  This module defines the variables
 #  - PYTHON_INTERPRETER : name of the python interpreter
 #  - PYTHON_INCLUDE_DIRS : include for compilation
 #  - PYTHON_NUMPY_INCLUDE_DIR : include for compilation with numpy
-#  - PYTHON_LIBRARY : link flags 
+#  - PYTHON_LIBRARY : link flags
 #  - PYTHON_SITE_PKG : path to the standard packages of the python interpreter
 #  - PYTHON_EXTRA_LIBS :  libraries which must be linked in when embedding
 #  - PYTHON_LINK_FOR_SHARED :  linking flags needed when building a shared lib for external modules
@@ -74,14 +74,14 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
   #
   FUNCTION ( EXEC_PYTHON_SCRIPT the_script output_var_name)
     IF ("${PYTHON_INTERPRETER}" MATCHES ".*ipython.*")
-      EXECUTE_PROCESS(COMMAND ${PYTHON_INTERPRETER} "--c=${the_script}" 
+      EXECUTE_PROCESS(COMMAND ${PYTHON_INTERPRETER} "--c=${the_script}"
         OUTPUT_VARIABLE res RESULT_VARIABLE returncode OUTPUT_STRIP_TRAILING_WHITESPACE)
     ELSE ("${PYTHON_INTERPRETER}" MATCHES ".*ipython.*")
-      EXECUTE_PROCESS(COMMAND ${PYTHON_INTERPRETER} -c "${the_script}" 
+      EXECUTE_PROCESS(COMMAND ${PYTHON_INTERPRETER} -c "${the_script}"
         OUTPUT_VARIABLE res RESULT_VARIABLE returncode OUTPUT_STRIP_TRAILING_WHITESPACE)
     ENDIF ("${PYTHON_INTERPRETER}" MATCHES ".*ipython.*")
     IF (NOT returncode EQUAL 0)
-      MESSAGE(FATAL_ERROR "The script : ${the_script} \n did not run properly in the Python interpreter. Check your python installation.") 
+      MESSAGE(FATAL_ERROR "The script : ${the_script} \n did not run properly in the Python interpreter. Check your python installation.")
     ENDIF (NOT returncode EQUAL 0)
     SET( ${output_var_name} ${res} PARENT_SCOPE)
   ENDFUNCTION (EXEC_PYTHON_SCRIPT)
@@ -89,7 +89,7 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
   #
   # Check the interpreter and its version
   #
-  EXEC_PYTHON_SCRIPT ("import sys, string; print sys.version.split()[0]" PYTHON_VERSION)
+  EXEC_PYTHON_SCRIPT ("import sys, string; print(sys.version.split()[0])" PYTHON_VERSION)
   STRING(COMPARE GREATER ${PYTHON_MINIMAL_VERSION} ${PYTHON_VERSION} PYTHON_VERSION_NOT_OK)
   IF (PYTHON_VERSION_NOT_OK)
     MESSAGE(WARNING "Python intepreter version is ${PYTHON_VERSION} . It should be >= ${PYTHON_MINIMAL_VERSION}")
@@ -107,7 +107,7 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
   #
   # Check for Python include path
   #
-  EXEC_PYTHON_SCRIPT ("import distutils ; from distutils.sysconfig import * ; print distutils.sysconfig.get_python_inc()"  PYTHON_INCLUDE_DIRS )
+  EXEC_PYTHON_SCRIPT ("import distutils ; from distutils.sysconfig import * ; print(distutils.sysconfig.get_python_inc())"  PYTHON_INCLUDE_DIRS )
   message(STATUS "PYTHON_INCLUDE_DIRS =  ${PYTHON_INCLUDE_DIRS}" )
   mark_as_advanced(PYTHON_INCLUDE_DIRS)
   FIND_PATH(TEST_PYTHON_INCLUDE patchlevel.h PATHS ${PYTHON_INCLUDE_DIRS} NO_DEFAULT_PATH)
@@ -118,14 +118,14 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
   #
   # include files for numpy
   #
-  EXEC_PYTHON_SCRIPT ("import numpy;print numpy.get_include()" PYTHON_NUMPY_INCLUDE_DIR)
+  EXEC_PYTHON_SCRIPT ("import numpy;print(numpy.get_include())" PYTHON_NUMPY_INCLUDE_DIR)
   MESSAGE(STATUS "PYTHON_NUMPY_INCLUDE_DIR = ${PYTHON_NUMPY_INCLUDE_DIR}" )
   mark_as_advanced(PYTHON_NUMPY_INCLUDE_DIR)
 
   #
   # Check for site packages
   #
-  EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import * ;print get_python_lib(0,0)"
+  EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import * ;print(get_python_lib(0,0))"
               PYTHON_SITE_PKG)
   MESSAGE(STATUS "PYTHON_SITE_PKG = ${PYTHON_SITE_PKG}" )
   mark_as_advanced(PYTHON_SITE_PKG)
@@ -134,9 +134,9 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
       #
       # Check for Python library path
       #
-      #EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import * ;print string.join(get_config_vars('VERSION'))"  PYTHON_VERSION_MAJOR_MINOR)         
-      EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import *; print '%s/config' % get_python_lib(0,1)" PYTHON_LIBRARY_BASE_PATH)
-      EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import *; print 'libpython%s' % string.join(get_config_vars('VERSION'))" PYTHON_LIBRARY_BASE_FILE)
+      #EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import * ;print string.join(get_config_vars('VERSION'))"  PYTHON_VERSION_MAJOR_MINOR)
+      EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import *; print(' '.join(get_config_vars('LIBPL')))" PYTHON_LIBRARY_BASE_PATH)
+      EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import *; print('libpython{}'.format(' '.join(get_config_vars('VERSION'))))" PYTHON_LIBRARY_BASE_FILE)
       IF(BUILD_SHARED_LIBS)
         FIND_FILE(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}.so" PATHS ${PYTHON_LIBRARY_BASE_PATH})
         IF(NOT PYTHON_LIBRARY)
@@ -160,7 +160,7 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
       #
       # libraries which must be linked in when embedding
       #
-      EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import * ;print (str(get_config_var('LOCALMODLIBS')) + ' ' + str(get_config_var('LIBS'))).strip().replace('  ', ' ').replace(' -', ';-').replace(' /', ';/')"
+      EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import * ;print( (str(get_config_var('LOCALMODLIBS')) + ' ' + str(get_config_var('LIBS'))).strip().replace('  ', ' ').replace(' -', ';-').replace(' /', ';/'))"
                   PYTHON_EXTRA_LIBS)
       MESSAGE(STATUS "PYTHON_EXTRA_LIBS =${PYTHON_EXTRA_LIBS}" )
       mark_as_advanced(PYTHON_EXTRA_LIBS)
@@ -169,7 +169,7 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
       # linking flags needed when embedding (building a shared lib)
       # To BE RETESTED
       #
-      EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import *;print get_config_var('LINKFORSHARED')"
+      EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import *;print(get_config_var('LINKFORSHARED'))"
                   PYTHON_LINK_FOR_SHARED)
       MESSAGE(STATUS "PYTHON_LINK_FOR_SHARED =  ${PYTHON_LINK_FOR_SHARED}" )
       mark_as_advanced(PYTHON_LINK_FOR_SHARED)
@@ -222,5 +222,3 @@ FUNCTION(PYTHON_ADD_MODULE _NAME )
 
   ENDIF(PYTHON_ENABLE_MODULE_${_NAME})
 ENDFUNCTION(PYTHON_ADD_MODULE)
-
-

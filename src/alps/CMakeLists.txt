@@ -16,7 +16,7 @@ set(ALPS_SOURCES
     utility/encode.cpp utility/copyright.cpp utility/os.cpp utility/temporary_filename.cpp
     utility/vmusage.cpp
     # alea
-    alea/nan.C alea/observable.C alea/observablefactory.C alea/observableset.C 
+    alea/nan.C alea/observable.C alea/observablefactory.C alea/observableset.C
     # expression
     expression/evaluator.C
     # lattice
@@ -63,7 +63,7 @@ set(ALPS_SOURCES
   if (ALPS_NGS_OPENMPI_ULFM)
     set(ALPS_SOURCES ${ALPS_SOURCES} ngs/lib/ulfm.cpp)
   endif (ALPS_NGS_OPENMPI_ULFM)
-  
+
   # new alea
   if (ALPS_NGS_USE_NEW_ALEA)
 #    set(ALPS_SOURCES ${ALPS_SOURCES} ngs/lib/alea/accumulator_set.cpp ngs/lib/alea/result_set.cpp)
@@ -71,7 +71,7 @@ set(ALPS_SOURCES
   endif (ALPS_NGS_USE_NEW_ALEA)
 
 if (NOT ALPS_FOR_VISTRAILS)
-  set(ALPS_SOURCES ${ALPS_SOURCES} 
+  set(ALPS_SOURCES ${ALPS_SOURCES}
       # parapack
       parapack/clone.C parapack/clone_info.C parapack/filelock.C parapack/logger.C
       parapack/job.C parapack/mc_worker.C parapack/measurement.C parapack/process_impl.C
@@ -90,7 +90,7 @@ if (Boost_FOUND)
   # link to ${Boost_LIBRARIES} when precompiled Boost libraries found
   set(ALPS_LINK_LIBS ${Boost_LIBRARIES} ${HDF5_LIBRARIES}) # ${SZIP_LIBRARIES} ${ZLIB_LIBRARIES})
   if(PYTHONLIBS_FOUND)
-    set(ALPS_LINK_LIBS ${ALPS_LINK_LIBS} ${PYTHON_LIBRARY} ${PYTHON_EXTRA_LIBS})
+    set(ALPS_LINK_LIBS ${ALPS_LINK_LIBS} ${PYTHON_LIBRARY})
   endif(PYTHONLIBS_FOUND)
   if(MPI_FOUND)
     set(ALPS_LINK_LIBS ${ALPS_LINK_LIBS} ${MPI_LIBRARIES} ${MPI_EXTRA_LIBRARY})

@@ -31,14 +31,14 @@
 
 #include <alps/python/numpy_array.hpp>
 
-namespace alps { 
+namespace alps {
     namespace python {
         namespace numpy {
 
             void import() {
                 static bool inited = false;
                 if (!inited) {
-                    import_array();  
+                    import_array1((void)0);  
                     boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
                     inited = true;
                 }
@@ -56,9 +56,9 @@ namespace alps {
              }
              return s;
              }
-             
+
              */
-          
+
             void convert(boost::python::object const & source, std::vector<double> & target) {
                 import();
                 target.resize(PyArray_Size(source.ptr()));

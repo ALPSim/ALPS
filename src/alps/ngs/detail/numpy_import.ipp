@@ -39,7 +39,7 @@ namespace alps {
         void import_numpy() {
             static bool inited = false;
             if (!inited) {
-                import_array();  
+                import_array1((void)0)
                 boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
                 inited = true;
             }
