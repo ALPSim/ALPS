@@ -31,7 +31,7 @@
 
 #include "dmrg/utils/storage.h"
 #include "dmrg/evolve/te_utils.hpp"
-#include "dmrg/mp_tensors/mpo_contractor_ss.h"
+#include "dmrg/mp_tensors/mpo_contractor.h"
 #include "dmrg/utils/results_collector.h"
 
 // ******   SIMULATION CLASS   ******
@@ -88,12 +88,14 @@ private:
         for (int which = 0; which < Uterms.size(); ++which)
         {
             int maxiter = 6; double tol = 1e-6;
-            mpo_contractor_ss<Matrix, SymmGroup, storage::nop> evolution(*mps, Uterms[which], (*parms));
+            mpo_contractor<Matrix, SymmGroup, storage::nop> evolution(*mps, Uterms[which], (*parms));
             for (int k = 0; k < maxiter; ++k) {
                 std::pair<double,double> eps = evolution.sweep(sweep);
                 double rel_error = std::abs( (eps.first-eps.second) / eps.second );
                 if (rel_error < tol)
                     break;
+                if (k == maxiter-1)
+                    std::cerr << "Accuracy of variational compression reached only " << rel_error << " (maxiter="<< maxiter << ", tol=" << tol << ")" << std::endl;
             }
             evolution.finalize();
             *mps = evolution.get_current_mps();

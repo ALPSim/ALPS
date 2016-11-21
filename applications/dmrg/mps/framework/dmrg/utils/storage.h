@@ -75,6 +75,7 @@ namespace storage {
         template<class T> static void fetch(T& o){}
         template<class T> static void evict(T& o){}
         template<class T> static void drop(T& o){}
+        template<class T> static void pin(T& o){}
         static void sync(){}
     };
 

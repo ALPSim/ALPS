@@ -100,6 +100,8 @@ private:
         add_option("dt", "time step in time eovlution", value(1e-3));
         add_option("nsweeps_img", "number of imaginary time steps", value(0));
         
+        add_option("mpo_compression", "mpo compression used by mpo time evolution: singlesite or twosite", value("twosite"));
+        
         add_option("ngrainings", "", value(0));
         add_option("finegrain_optim", "", value(false));
         
