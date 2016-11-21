@@ -1,0 +1,322 @@
+====================================
+ nterms=2, order=first
+====================================
+
+Sequence initialized with 2 terms.
+## TERMS:
+ 0 : x=0, alpha=1
+ 1 : x=1, alpha=1
+## SIMPLE SEQUENCE:
+  0
+  1
+## INITIAL SEQUENCE:
+  0
+  1
+## DOUBLE SEQUENCE:
+  0
+  1
+## FINAL SEQUENCE:
+  0
+  1
+====================================
+ nterms=2, order=second
+====================================
+
+Sequence initialized with 3 terms.
+## TERMS:
+ 0 : x=0, alpha=0.5
+ 1 : x=1, alpha=1
+ 2 : x=0, alpha=1
+## SIMPLE SEQUENCE:
+  0
+  1
+  0
+## INITIAL SEQUENCE:
+  0
+  1
+  2
+## DOUBLE SEQUENCE:
+  1
+  2
+## FINAL SEQUENCE:
+  1
+  0
+====================================
+ nterms=2, order=fourth
+====================================
+
+Sequence initialized with 15 terms.
+## TERMS:
+ 0 : x=0, alpha=0.207245
+ 1 : x=1, alpha=0.41449
+ 2 : x=0, alpha=-0.328979
+ 3 : x=1, alpha=-0.657958
+ 4 : x=0, alpha=0.41449
+ 5 : x=0, alpha=-0.121734
+## SIMPLE SEQUENCE:
+  0
+  1
+  0
+  0
+  1
+  0
+  2
+  3
+  2
+  0
+  1
+  0
+  0
+  1
+  0
+## INITIAL SEQUENCE:
+  0
+  1
+  4
+  1
+  5
+  3
+  5
+  1
+  4
+  1
+  4
+## DOUBLE SEQUENCE:
+  1
+  4
+  1
+  5
+  3
+  5
+  1
+  4
+  1
+  4
+## FINAL SEQUENCE:
+  1
+  4
+  1
+  5
+  3
+  5
+  1
+  4
+  1
+  0
+====================================
+ nterms=4, order=first
+====================================
+
+Sequence initialized with 4 terms.
+## TERMS:
+ 0 : x=0, alpha=1
+ 1 : x=1, alpha=1
+ 2 : x=2, alpha=1
+ 3 : x=3, alpha=1
+## SIMPLE SEQUENCE:
+  0
+  1
+  2
+  3
+## INITIAL SEQUENCE:
+  0
+  1
+  2
+  3
+## DOUBLE SEQUENCE:
+  0
+  1
+  2
+  3
+## FINAL SEQUENCE:
+  0
+  1
+  2
+  3
+====================================
+ nterms=4, order=second
+====================================
+
+Sequence initialized with 7 terms.
+## TERMS:
+ 0 : x=0, alpha=0.5
+ 1 : x=1, alpha=0.5
+ 2 : x=2, alpha=0.5
+ 3 : x=3, alpha=1
+ 4 : x=0, alpha=1
+## SIMPLE SEQUENCE:
+  0
+  1
+  2
+  3
+  2
+  1
+  0
+## INITIAL SEQUENCE:
+  0
+  1
+  2
+  3
+  2
+  1
+  4
+## DOUBLE SEQUENCE:
+  1
+  2
+  3
+  2
+  1
+  4
+## FINAL SEQUENCE:
+  1
+  2
+  3
+  2
+  1
+  0
+====================================
+ nterms=4, order=fourth
+====================================
+
+Sequence initialized with 35 terms.
+## TERMS:
+ 0 : x=0, alpha=0.207245
+ 1 : x=1, alpha=0.207245
+ 2 : x=2, alpha=0.207245
+ 3 : x=3, alpha=0.41449
+ 4 : x=0, alpha=-0.328979
+ 5 : x=1, alpha=-0.328979
+ 6 : x=2, alpha=-0.328979
+ 7 : x=3, alpha=-0.657958
+ 8 : x=0, alpha=0.41449
+ 9 : x=0, alpha=-0.121734
+## SIMPLE SEQUENCE:
+  0
+  1
+  2
+  3
+  2
+  1
+  0
+  0
+  1
+  2
+  3
+  2
+  1
+  0
+  4
+  5
+  6
+  7
+  6
+  5
+  4
+  0
+  1
+  2
+  3
+  2
+  1
+  0
+  0
+  1
+  2
+  3
+  2
+  1
+  0
+## INITIAL SEQUENCE:
+  0
+  1
+  2
+  3
+  2
+  1
+  8
+  1
+  2
+  3
+  2
+  1
+  9
+  5
+  6
+  7
+  6
+  5
+  9
+  1
+  2
+  3
+  2
+  1
+  8
+  1
+  2
+  3
+  2
+  1
+  8
+## DOUBLE SEQUENCE:
+  1
+  2
+  3
+  2
+  1
+  8
+  1
+  2
+  3
+  2
+  1
+  9
+  5
+  6
+  7
+  6
+  5
+  9
+  1
+  2
+  3
+  2
+  1
+  8
+  1
+  2
+  3
+  2
+  1
+  8
+## FINAL SEQUENCE:
+  1
+  2
+  3
+  2
+  1
+  8
+  1
+  2
+  3
+  2
+  1
+  9
+  5
+  6
+  7
+  6
+  5
+  9
+  1
+  2
+  3
+  2
+  1
+  8
+  1
+  2
+  3
+  2
+  1
+  0

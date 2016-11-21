@@ -32,6 +32,7 @@
 #include <iostream>
 
 #include "dmrg/evolve/te_utils.hpp"
+#include "dmrg/evolve/trotter_decomposer.h"
 #include "dmrg/utils/results_collector.h"
 
 
@@ -62,30 +63,12 @@ struct trotter_gate {
     }
 };
 
-enum tevol_order_tag {order_unknown, first_order, second_order, fourth_order};
-inline std::ostream& operator<< (std::ostream& os, tevol_order_tag o)
-{
-    switch (o)
-    {
-        case first_order:
-            os << "First order Trotter decomposition";
-            break;
-        case second_order:
-            os << "Second order Trotter decomposition";
-            break;
-        case fourth_order:
-            os << "Fourth order Trotter decomposition";
-            break;
-        default:
-            os << "uknown Trotter decomposition";
-    }
-    return os;
-}
 
 
 // ******   SIMULATION CLASS   ******
 template <class Matrix, class SymmGroup>
 class nearest_neighbors_evolver {
+    typedef trotter_decomposer::steps_iterator steps_iterator;
 public:
     nearest_neighbors_evolver(DmrgParameters * parms_, MPS<Matrix, SymmGroup> * mps_,
                               Lattice const& lattice_, Model<Matrix, SymmGroup> const& model_,
@@ -95,137 +78,13 @@ public:
     , lattice(lattice_) // shallow copy
     , model(model_) // shallow copy
     , L(lattice.size())
-    , trotter_order(parse_trotter_order((*parms)["te_order"]))
+    , trotter_decomposition(2,  // NN time evolution has only two types of operators
+                            (*parms)["te_order"],
+                            (*parms)["te_optim"])
     , block_terms(hamil_to_blocks(lattice, model))
     {
         maquis::cout << "Using nearest-neighbors time evolution." << std::endl;
-        maquis::cout << "Using " << trotter_order << std::endl;
-        maquis::cout << "Time evolution optimization is "
-                     << (((*parms)["te_optim"]) ? "enabled" : "disabled")
-                     << std::endl;
-        
-        /// alpha coeffiecients and set sequence of Uterms according to trotter order
-        switch (trotter_order){
-            case first_order:
-            {
-                gates_coeff.push_back(std::make_pair(0,1.));         // 0-term
-                gates_coeff.push_back(std::make_pair(1,1.));         // 1-term
-                
-                Useq.push_back(0); // odd
-                Useq.push_back(1); // even
-                
-                if ((*parms)["te_optim"])
-                {
-                    Useq_bmeas = Useq;
-                    Useq_double = Useq;
-                    Useq_ameas = Useq;
-                }
-                
-                maquis::cout << "Sequence initialized with " << Useq.size() << " terms." << std::endl;
-                break;		
-            }
-			case second_order:
-            {
-				gates_coeff.push_back(std::make_pair(0,0.5));         // 0-term
-				gates_coeff.push_back(std::make_pair(1,1.));          // 1-term
-                
-                Useq.push_back(0); // odd
-				Useq.push_back(1); // even
-				Useq.push_back(0); // odd
-
-                if ((*parms)["te_optim"])
-                {
-                    gates_coeff.push_back(std::make_pair(0,1.));     // 2-term
-
-                    Useq_bmeas.push_back(0); // odd
-                    Useq_bmeas.push_back(1); // even
-                    Useq_bmeas.push_back(2); // odd
-
-                    Useq_double.push_back(1); // even
-                    Useq_double.push_back(2); // odd
-                    
-                    Useq_ameas.push_back(1); // even
-                    Useq_ameas.push_back(0); // odd
-                }
-                
-                maquis::cout << "Sequence initialized with " << Useq.size() << " terms." << std::endl;
-				break;		
-            }
-            case fourth_order:
-			{
-                double alpha_1=1./(4.0-pow(4.0,0.33333));
-				double alpha_3=1.-4.0*alpha_1;
-				
-				gates_coeff.push_back(std::make_pair(0,alpha_1*0.5)); // 0-term
-				gates_coeff.push_back(std::make_pair(1,alpha_1));     // 1-term
-				gates_coeff.push_back(std::make_pair(0,alpha_3*0.5)); // 2-term
-				gates_coeff.push_back(std::make_pair(1,alpha_3));     // 3-term
-                
-				Useq.push_back(0); // odd
-				Useq.push_back(1); // even
-				Useq.push_back(0); // odd
-				Useq.push_back(0); // odd
-				Useq.push_back(1); // even
-				Useq.push_back(0); // odd
-				Useq.push_back(2); // odd
-				Useq.push_back(3); // even
-				Useq.push_back(2); // odd
-				Useq.push_back(0); // odd
-				Useq.push_back(1); // even
-				Useq.push_back(0); // odd
-				Useq.push_back(0); // odd
-				Useq.push_back(1); // even
-				Useq.push_back(0); // odd
-				
-                if ((*parms)["te_optim"])
-                {
-                    gates_coeff.push_back(std::make_pair(0,alpha_1));                 // 4-term
-                    gates_coeff.push_back(std::make_pair(0,alpha_3*0.5+alpha_1*0.5)); // 5-term
-                    
-                    Useq_bmeas.push_back(0); // odd
-                    Useq_bmeas.push_back(1); // even
-                    Useq_bmeas.push_back(4); // odd
-                    Useq_bmeas.push_back(1); // even
-                    Useq_bmeas.push_back(5); // odd
-                    Useq_bmeas.push_back(3); // even
-                    Useq_bmeas.push_back(5); // odd
-                    Useq_bmeas.push_back(1); // even
-                    Useq_bmeas.push_back(4); // odd
-                    Useq_bmeas.push_back(1); // even
-                    Useq_bmeas.push_back(4); // odd
-                    
-                    Useq_double.push_back(1); // even
-                    Useq_double.push_back(4); // odd
-                    Useq_double.push_back(1); // even
-                    Useq_double.push_back(5); // odd
-                    Useq_double.push_back(3); // even
-                    Useq_double.push_back(5); // odd
-                    Useq_double.push_back(1); // even
-                    Useq_double.push_back(4); // odd
-                    Useq_double.push_back(1); // even
-                    Useq_double.push_back(4); // odd
-                    
-                    Useq_ameas.push_back(1); // even
-                    Useq_ameas.push_back(4); // odd
-                    Useq_ameas.push_back(1); // even
-                    Useq_ameas.push_back(5); // odd
-                    Useq_ameas.push_back(3); // even
-                    Useq_ameas.push_back(5); // odd
-                    Useq_ameas.push_back(1); // even
-                    Useq_ameas.push_back(4); // odd
-                    Useq_ameas.push_back(1); // even
-                    Useq_ameas.push_back(0); // odd
-                }
-                maquis::cout << "Sequence initialized with " << Useq.size() << " terms." << std::endl;
-
-				break;
-            }
-            default:
-            {
-                throw std::runtime_error("uknown Trotter decomposition");
-                break;
-            }
-		}
+        maquis::cout << "Using " << trotter_decomposition.description() << std::endl;
         
         /// compute the time evolution gates
         prepare_te_terms(init_sweep);
@@ -242,17 +101,17 @@ public:
             I = maquis::traits::imag_identity<typename Matrix::value_type>::value;
         typename Matrix::value_type alpha = -I * dt;
         
-        Uterms.resize(gates_coeff.size(), trotter_gate<Matrix, SymmGroup>(L));
-        for (size_t i=0; i<gates_coeff.size(); ++i) {
+        Uterms.resize(trotter_decomposition.size(), trotter_gate<Matrix, SymmGroup>(L));
+        for (size_t i=0; i<trotter_decomposition.size(); ++i) {
             Uterms[i].clear();
-            Uterms[i].pfirst = gates_coeff[i].first;
-            for (size_t p=gates_coeff[i].first; p<L-1; p+=2){
+            Uterms[i].pfirst = trotter_decomposition.trotter_term(i).first;
+            for (size_t p=trotter_decomposition.trotter_term(i).first; p<L-1; p+=2){
                 int type1 = lattice.get_prop<int>("type", p);
                 int type2 = lattice.get_prop<int>("type", p+1);
                 if ((*parms)["expm_method"] == "heev")
-                    Uterms[i].add_term(p, op_exp_hermitian(model.phys_dim(type1)*model.phys_dim(type2), block_terms[p], gates_coeff[i].second*alpha));
+                    Uterms[i].add_term(p, op_exp_hermitian(model.phys_dim(type1)*model.phys_dim(type2), block_terms[p], trotter_decomposition.trotter_term(i).second*alpha));
                 else
-                    Uterms[i].add_term(p, op_exp(model.phys_dim(type1)*model.phys_dim(type2), block_terms[p], gates_coeff[i].second*alpha));
+                    Uterms[i].add_term(p, op_exp(model.phys_dim(type1)*model.phys_dim(type2), block_terms[p], trotter_decomposition.trotter_term(i).second*alpha));
             }
         }
     }
@@ -261,18 +120,8 @@ public:
     {
         iteration_results_.clear();
         
-        if (nsteps < 2 || !static_cast<bool>((*parms)["te_optim"])) {
-            // nsteps sweeps
-            for (unsigned i=0; i < nsteps; ++i) evolve_time_step(Useq);
-        
-        } else {
-            // one sweep
-            evolve_time_step(Useq_bmeas);
-            // nsteps - 2 sweeps
-            for (unsigned i=1; i < nsteps-1; ++i) evolve_time_step(Useq_double);
-            // one sweep
-            evolve_time_step(Useq_ameas);
-        }
+        for (steps_iterator it=trotter_decomposition.steps_begin(nsteps); it != steps_iterator(); ++it)
+            evolve_time_step(*it);
     }
     
     results_collector const& iteration_results() const
@@ -281,19 +130,6 @@ public:
     }
     
 private:
-    tevol_order_tag parse_trotter_order (std::string const & trotter_param)
-    {
-        if (trotter_param == "first")
-            return first_order;
-        else if (trotter_param == "second")
-            return second_order;
-        else if (trotter_param == "fourth")
-            return fourth_order;
-        else {
-            throw std::runtime_error("Don't know this Trotter decomposition");
-            return order_unknown;
-        }
-    }
 
     void evolve_time_step(std::vector<std::size_t> const & gates_i)
     {
@@ -402,12 +238,9 @@ private:
     
     results_collector iteration_results_;
     
-	tevol_order_tag trotter_order;
+    trotter_decomposer trotter_decomposition;
     std::vector<block_matrix<Matrix, SymmGroup> > block_terms;
-    std::vector<std::pair<std::size_t,double> > gates_coeff;
     std::vector<trotter_gate<Matrix, SymmGroup> > Uterms;
-    std::vector<std::size_t> Useq; // trivial sequence
-    std::vector<std::size_t> Useq_double, Useq_bmeas, Useq_ameas; // sequence with two sweeps; meas before; meas after
 };
 
 #endif
