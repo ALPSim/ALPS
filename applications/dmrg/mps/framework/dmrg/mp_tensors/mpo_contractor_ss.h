@@ -45,7 +45,7 @@ class mpo_contractor_ss : public mpo_contractor_base<Matrix, SymmGroup, Storage>
     using base::parms;
 
 public:
-    mpo_contractor_ss(MPS<Matrix, SymmGroup> & mps_,
+    mpo_contractor_ss(MPS<Matrix, SymmGroup> const & mps_,
                       MPO<Matrix, SymmGroup> const & mpo_,
                       BaseParameters & parms_)
     : base(mps_, mpo_, parms_)

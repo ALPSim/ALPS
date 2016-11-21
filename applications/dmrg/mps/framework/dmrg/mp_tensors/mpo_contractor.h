@@ -35,7 +35,7 @@ template<class Matrix, class SymmGroup, class Storage>
 class mpo_contractor
 {
 public:
-    mpo_contractor(MPS<Matrix, SymmGroup> & mps,
+    mpo_contractor(MPS<Matrix, SymmGroup> const & mps,
                    MPO<Matrix, SymmGroup> const & mpo,
                    BaseParameters & parms)
     {

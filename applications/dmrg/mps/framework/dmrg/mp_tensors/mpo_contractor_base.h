@@ -38,20 +38,15 @@ template<class Matrix, class SymmGroup, class Storage>
 class mpo_contractor_base
 {
 public:
-    mpo_contractor_base(MPS<Matrix, SymmGroup> & mps_,
+    mpo_contractor_base(MPS<Matrix, SymmGroup> const & mps_,
                         MPO<Matrix, SymmGroup> const & mpo_,
                         BaseParameters & parms_)
-    : mps_raw_(mps_)
-    , mps(mps_)
+    : mps(mps_)
     , mpsp(mps_)
     , mpo(mpo_)
     , parms(parms_)
     {
-//        mps_raw_.canonize(0);
-        // mpsp.canonize(0) not needed??
         init_left_right(mpo, 0);
-        
-        mpsp = mps;
     }
     
     virtual std::pair<double,double> sweep(int sweep) =0;
@@ -142,7 +137,6 @@ protected:
         return Mmax;
     }
     
-    MPS<Matrix, SymmGroup> & mps_raw_;
     MPS<Matrix, SymmGroup> const& mps;
     MPS<Matrix, SymmGroup> mpsp;
     MPO<Matrix, SymmGroup> const& mpo;
