@@ -31,6 +31,7 @@
 
 #include "dmrg/utils/storage.h"
 #include "dmrg/evolve/te_utils.hpp"
+#include "dmrg/evolve/trotter_decomposer.h"
 #include "dmrg/mp_tensors/mpo_contractor.h"
 #include "dmrg/utils/results_collector.h"
 
@@ -38,6 +39,8 @@
 template <class Matrix, class SymmGroup>
 class mpo_evolver {
     typedef term_descriptor<typename Matrix::value_type> term_t;
+    typedef trotter_decomposer::steps_iterator steps_iterator;
+    typedef trotter_decomposer::sequence_type sequence_type;
 public:
     mpo_evolver(DmrgParameters * parms_, MPS<Matrix, SymmGroup> * mps_,
                 Lattice const& lattice_, Model<Matrix, SymmGroup> const& model_,
@@ -47,11 +50,15 @@ public:
     , lattice(lattice_) // shallow copy
     , model(model_) // shallow copy
     , hamils(separate_hamil_terms(model.hamiltonian_terms()))
+    , decomp(hamils.size(),
+             (*parms)["te_order"],
+             (*parms)["te_optim"])
     {
         maquis::cout << "Using MPO time evolution." << std::endl;
         
         maquis::cout << "Found " << hamils.size() << " non overlapping Hamiltonians." << std::endl;
-        
+        maquis::cout << "Using " << decomp.description() << std::endl;
+
         /// compute the time evolution gates
         prepare_te_terms(init_sweep);
     }
@@ -66,15 +73,16 @@ public:
             I = maquis::traits::imag_identity<typename Matrix::value_type>::value;
         typename Matrix::value_type alpha = -I*dt;
         
-        Uterms.resize(hamils.size());
-        for (int i=0; i<hamils.size(); ++i)
-            Uterms[i] = make_exp_mpo(lattice, model, hamils[i], alpha);
+        Uterms.resize(decomp.size());
+        for (int i=0; i<decomp.size(); ++i)
+            Uterms[i] = make_exp_mpo(lattice, model, hamils[decomp.trotter_term(i).first], decomp.trotter_term(i).second*alpha);
     }
     
     void operator()(unsigned sweep, unsigned nsteps)
     {
         iteration_results_.clear();
-        for (unsigned i=0; i < nsteps; ++i) evolve_time_step(sweep+i);
+        for (steps_iterator it=decomp.steps_begin(nsteps); it != steps_iterator(); ++it)
+            evolve_time_step(sweep+it.index(), *it);
     }
     
     results_collector const& iteration_results() const
@@ -83,10 +91,11 @@ public:
     }
     
 private:
-    void evolve_time_step(unsigned sweep)
+    void evolve_time_step(unsigned sweep, sequence_type const & terms_sequence)
     {
-        for (int which = 0; which < Uterms.size(); ++which)
-        {
+        for (int i=0; i<terms_sequence.size(); ++i) {
+            int which = terms_sequence[i];
+            
             int maxiter = 6; double tol = 1e-6;
             mpo_contractor<Matrix, SymmGroup, storage::nop> evolution(*mps, Uterms[which], (*parms));
             for (int k = 0; k < maxiter; ++k) {
@@ -112,6 +121,7 @@ private:
     results_collector iteration_results_;
     
     std::vector<std::vector<term_t> > hamils;
+    trotter_decomposer decomp;
     std::vector<MPO<Matrix, SymmGroup> > Uterms;
 };
 

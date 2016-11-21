@@ -78,13 +78,13 @@ public:
     , lattice(lattice_) // shallow copy
     , model(model_) // shallow copy
     , L(lattice.size())
-    , trotter_decomposition(2,  // NN time evolution has only two types of operators
-                            (*parms)["te_order"],
-                            (*parms)["te_optim"])
+    , decomp(2,  // NN time evolution has only two types of operators
+             (*parms)["te_order"],
+             (*parms)["te_optim"])
     , block_terms(hamil_to_blocks(lattice, model))
     {
         maquis::cout << "Using nearest-neighbors time evolution." << std::endl;
-        maquis::cout << "Using " << trotter_decomposition.description() << std::endl;
+        maquis::cout << "Using " << decomp.description() << std::endl;
         
         /// compute the time evolution gates
         prepare_te_terms(init_sweep);
@@ -101,17 +101,17 @@ public:
             I = maquis::traits::imag_identity<typename Matrix::value_type>::value;
         typename Matrix::value_type alpha = -I * dt;
         
-        Uterms.resize(trotter_decomposition.size(), trotter_gate<Matrix, SymmGroup>(L));
-        for (size_t i=0; i<trotter_decomposition.size(); ++i) {
+        Uterms.resize(decomp.size(), trotter_gate<Matrix, SymmGroup>(L));
+        for (size_t i=0; i<decomp.size(); ++i) {
             Uterms[i].clear();
-            Uterms[i].pfirst = trotter_decomposition.trotter_term(i).first;
-            for (size_t p=trotter_decomposition.trotter_term(i).first; p<L-1; p+=2){
+            Uterms[i].pfirst = decomp.trotter_term(i).first;
+            for (size_t p=decomp.trotter_term(i).first; p<L-1; p+=2){
                 int type1 = lattice.get_prop<int>("type", p);
                 int type2 = lattice.get_prop<int>("type", p+1);
                 if ((*parms)["expm_method"] == "heev")
-                    Uterms[i].add_term(p, op_exp_hermitian(model.phys_dim(type1)*model.phys_dim(type2), block_terms[p], trotter_decomposition.trotter_term(i).second*alpha));
+                    Uterms[i].add_term(p, op_exp_hermitian(model.phys_dim(type1)*model.phys_dim(type2), block_terms[p], decomp.trotter_term(i).second*alpha));
                 else
-                    Uterms[i].add_term(p, op_exp(model.phys_dim(type1)*model.phys_dim(type2), block_terms[p], trotter_decomposition.trotter_term(i).second*alpha));
+                    Uterms[i].add_term(p, op_exp(model.phys_dim(type1)*model.phys_dim(type2), block_terms[p], decomp.trotter_term(i).second*alpha));
             }
         }
     }
@@ -120,7 +120,7 @@ public:
     {
         iteration_results_.clear();
         
-        for (steps_iterator it=trotter_decomposition.steps_begin(nsteps); it != steps_iterator(); ++it)
+        for (steps_iterator it=decomp.steps_begin(nsteps); it != steps_iterator(); ++it)
             evolve_time_step(*it);
     }
     
@@ -238,7 +238,7 @@ private:
     
     results_collector iteration_results_;
     
-    trotter_decomposer trotter_decomposition;
+    trotter_decomposer decomp;
     std::vector<block_matrix<Matrix, SymmGroup> > block_terms;
     std::vector<trotter_gate<Matrix, SymmGroup> > Uterms;
 };

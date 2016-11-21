@@ -142,12 +142,13 @@ private:
 /// Sequences iterator
 class trotter_steps_iterator {
 public:
+    typedef std::size_t size_type;
     typedef trotter_decomposer::sequence_type value_type;
     typedef value_type const& reference_type;
     
     trotter_steps_iterator() : end_(true) {}
     
-    trotter_steps_iterator(trotter_decomposer const& decomp, std::size_t nsteps)
+    trotter_steps_iterator(trotter_decomposer const& decomp, size_type nsteps)
     : end_(false)
     , i_(0)
     , decomp_(&decomp)
@@ -182,11 +183,16 @@ public:
         }
     }
     
+    inline size_type index() const
+    {
+        return i_;
+    }
+    
 private:
     bool end_;
-    std::size_t i_;
+    size_type i_;
     const trotter_decomposer * decomp_;
-    std::size_t nsteps_;
+    size_type nsteps_;
 };
 
 
