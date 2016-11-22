@@ -1,3 +1,6 @@
+add_executable(trotter_decomp trotter_decomp.cpp)
+target_link_libraries(trotter_decomp ${MYAPP_LIBRARIES})
+add_alps_test(trotter_decomp)
 
 add_executable(unpack_measurement_terms unpack_measurement_terms.cpp)
 target_link_libraries(unpack_measurement_terms ${MYAPP_LIBRARIES})
