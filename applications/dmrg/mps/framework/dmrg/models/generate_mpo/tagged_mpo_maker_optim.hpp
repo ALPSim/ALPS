@@ -232,7 +232,23 @@ namespace generate_mpo
             // TODO implement plus operation
             op_t current_op = tag_handler->get_op(term.operator_tag(0));
             current_op *= term.coeff;
-            site_terms[term.position(0)] += current_op;
+            if (current_op.left_basis() == current_op.right_basis()) {
+                /// If it is a diagonal operator we can sum it with the others
+                site_terms[term.position(0)] += current_op;
+            } else {
+                /// ..otherwise we make a bond term which multiplies with an identity matrix
+                term_descriptor term_2sites(term);
+                if (term.position(0) < length-1) {
+                    pos_t p = term.position(0)+1;
+                    term_2sites.push_back(typename term_descriptor::value_type(p, model.identity_matrix_tag(lat.get_prop<int>("type",p))));
+                } else if (term.position(0) != 0) {
+                    // make term (p-1, id) * (p, op)
+                    pos_t p = term.position(0)-1;
+                    term_2sites.insert(term_2sites.begin(),
+                                       typename term_descriptor::value_type(p, model.identity_matrix_tag(lat.get_prop<int>("type",p))));
+                }
+                add_2term(term_2sites);
+            }
         }
         
         void add_2term(term_descriptor const& term)

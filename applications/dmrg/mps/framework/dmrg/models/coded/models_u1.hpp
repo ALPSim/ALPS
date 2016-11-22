@@ -31,7 +31,6 @@
 #include <sstream>
 
 #include "dmrg/models/model.h"
-#include "dmrg/models/measurements.h"
 #include "dmrg/utils/BaseParameters.h"
 
 /* ****************** HEISENBERG */
@@ -47,7 +46,7 @@ class Heisenberg : public model_impl<Matrix, U1>
     typedef typename base::term_descriptor term_descriptor;
     typedef typename base::terms_type terms_type;
     typedef typename base::op_t op_t;
-    typedef typename base::measurements_type measurements_type;
+    typedef typename base::measurement_term_desc_type measurement_term_desc_type;
 
 public:   
     Heisenberg (const Lattice& lat, double Jxy, double Jz)
@@ -135,9 +134,15 @@ public:
         return static_cast<int>(parms["u1_total_charge"]);
     }
 
-    measurements_type measurements () const
+    bool has_operator(std::string const & name, size_t type) const
     {
-        return measurements_type();
+        if (name == "splus")
+            return true;
+        else if (name == "sminus")
+            return true;
+        else if (name == "sz")
+            return true;
+        return false;
     }
 
     tag_type get_operator_tag(std::string const & name, size_t type) const
@@ -152,7 +157,13 @@ public:
             throw std::runtime_error("Operator not valid for this model.");
         return 0;
     }
-    
+
+    std::vector<measurement_term_desc_type> unpack_measurement_terms(std::string const & name) const
+    {
+        throw std::runtime_error("Function unpack_measurement_terms not implemented for this model class.");
+        return std::vector<measurement_term_desc_type>();
+    }
+
     table_ptr operators_table() const
     {
         return tag_handler;
@@ -178,7 +189,7 @@ class HCB : public model_impl<Matrix, U1>
     typedef typename base::term_descriptor term_descriptor;
     typedef typename base::terms_type terms_type;
     typedef typename base::op_t op_t;
-    typedef typename base::measurements_type measurements_type;
+    typedef typename base::measurement_term_desc_type measurement_term_desc_type;
     
 public:   
     HCB (const Lattice& lat, double t=1)
@@ -260,11 +271,17 @@ public:
         return static_cast<int>(parms["u1_total_charge"]);
     }
     
-    measurements_type measurements () const
+    bool has_operator(std::string const & name, size_t type) const
     {
-        return measurements_type();
+        if (name == "n")
+            return true;
+        else if (name == "bdag")
+            return true;
+        else if (name == "b")
+            return true;
+        return false;
     }
-    
+
     tag_type get_operator_tag(std::string const & name, size_t type) const
     {
         if (name == "n")
@@ -277,7 +294,13 @@ public:
             throw std::runtime_error("Operator not valid for this model.");
         return 0;
     }
-    
+
+    std::vector<measurement_term_desc_type> unpack_measurement_terms(std::string const & name) const
+    {
+        throw std::runtime_error("Function unpack_measurement_terms not implemented for this model class.");
+        return std::vector<measurement_term_desc_type>();
+    }
+
     table_ptr operators_table() const
     {
         return tag_handler;
@@ -304,7 +327,7 @@ class BoseHubbard : public model_impl<Matrix, U1>
     typedef typename base::term_descriptor term_descriptor;
     typedef typename base::terms_type terms_type;
     typedef typename base::op_t op_t;
-    typedef typename base::measurements_type measurements_type;
+    typedef typename base::measurement_term_desc_type measurement_term_desc_type;
     
     typedef typename Matrix::value_type value_type;
 public:
@@ -419,6 +442,21 @@ public:
         return static_cast<int>(parms["u1_total_charge"]);
     }
     
+    bool has_operator(std::string const & name, size_t type) const
+    {
+        if (name == "n")
+            return true;
+        else if (name == "bdag")
+            return true;
+        else if (name == "b")
+            return true;
+        else if (name == "id")
+            return true;
+        else if (name == "fill")
+            return true;
+        return false;
+    }
+
     tag_type get_operator_tag(std::string const & name, size_t type) const
     {
         if (name == "n")
@@ -435,48 +473,54 @@ public:
             throw std::runtime_error("Operator not valid for this model.");
         return 0;
     }
-    
+
+    std::vector<measurement_term_desc_type> unpack_measurement_terms(std::string const & name) const
+    {
+        throw std::runtime_error("Function unpack_measurement_terms not implemented for this model class.");
+        return std::vector<measurement_term_desc_type>();
+    }
+
     table_ptr operators_table() const
     {
         return tag_handler;
     }
     
-    measurements_type measurements () const
-    {
-        typedef std::vector<block_matrix<Matrix, U1> > op_vec;
-        typedef std::vector<std::pair<op_vec, bool> > bond_element;
-        
-        measurements_type meas;
-        
-        if (model["MEASURE[Density]"]) {
-            std::string name = "Density";
-            meas.push_back( new measurements::average<Matrix, U1>(name, lat,
-                                                      op_vec(1,this->identity_matrix(0)),
-                                                      op_vec(1,this->filling_matrix(0)),
-                                                      op_vec(1,tag_handler->get_op(count))) );
-        }
-        
-        if (model["MEASURE[Local density]"]) {
-            std::string name = "Local density";
-            meas.push_back( new measurements::local<Matrix, U1>(name, lat,
-                                                    op_vec(1,this->identity_matrix(0)),
-                                                    op_vec(1,this->filling_matrix(0)),
-                                                    op_vec(1,tag_handler->get_op(count))) );
-        }
-        
-        if (model["MEASURE[Onebody density matrix]"]) {
-            std::string name = "Onebody density matrix";
-            bond_element ops;
-            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(create)), false) );
-            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(destroy)), false) );
-            meas.push_back( new measurements::correlations<Matrix, U1>(name, lat,
-                                                           op_vec(1,this->identity_matrix(0)),
-                                                           op_vec(1,this->filling_matrix(0)),
-                                                           ops, true, false) );
-        }
-        
-        return meas;
-    }
+//    measurements_type measurements () const
+//    {
+//        typedef std::vector<block_matrix<Matrix, U1> > op_vec;
+//        typedef std::vector<std::pair<op_vec, bool> > bond_element;
+//        
+//        measurements_type meas;
+//        
+//        if (model["MEASURE[Density]"]) {
+//            std::string name = "Density";
+//            meas.push_back( new measurements::average<Matrix, U1>(name, lat,
+//                                                      op_vec(1,this->identity_matrix(0)),
+//                                                      op_vec(1,this->filling_matrix(0)),
+//                                                      op_vec(1,tag_handler->get_op(count))) );
+//        }
+//        
+//        if (model["MEASURE[Local density]"]) {
+//            std::string name = "Local density";
+//            meas.push_back( new measurements::local<Matrix, U1>(name, lat,
+//                                                    op_vec(1,this->identity_matrix(0)),
+//                                                    op_vec(1,this->filling_matrix(0)),
+//                                                    op_vec(1,tag_handler->get_op(count))) );
+//        }
+//        
+//        if (model["MEASURE[Onebody density matrix]"]) {
+//            std::string name = "Onebody density matrix";
+//            bond_element ops;
+//            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(create)), false) );
+//            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(destroy)), false) );
+//            meas.push_back( new measurements::correlations<Matrix, U1>(name, lat,
+//                                                           op_vec(1,this->identity_matrix(0)),
+//                                                           op_vec(1,this->filling_matrix(0)),
+//                                                           ops, true, false) );
+//        }
+//        
+//        return meas;
+//    }
     
 private:
     const Lattice & lat;
@@ -500,7 +544,7 @@ class FreeFermions : public model_impl<Matrix, U1>
     typedef typename base::term_descriptor term_descriptor;
     typedef typename base::terms_type terms_type;
     typedef typename base::op_t op_t;
-    typedef typename base::measurements_type measurements_type;
+    typedef typename base::measurement_term_desc_type measurement_term_desc_type;
     
 public:
     FreeFermions (const Lattice& lat, double t=1)
@@ -582,6 +626,17 @@ public:
         return static_cast<int>(parms["u1_total_charge"]);
     }
     
+    bool has_operator(std::string const & name, size_t type) const
+    {
+        if (name == "n")
+            return true;
+        else if (name == "cdag")
+            return true;
+        else if (name == "c")
+            return true;
+        return false;
+    }
+
     tag_type get_operator_tag(std::string const & name, size_t type) const
     {
         if (name == "n")
@@ -595,44 +650,50 @@ public:
         return 0;
     }
     
+    std::vector<measurement_term_desc_type> unpack_measurement_terms(std::string const & name) const
+    {
+        throw std::runtime_error("Function unpack_measurement_terms not implemented for this model class.");
+        return std::vector<measurement_term_desc_type>();
+    }
+
     table_ptr operators_table() const
     {
         return tag_handler;
     }
     
-    measurements_type measurements () const
-    {
-        typedef std::vector<block_matrix<Matrix, U1> > op_vec;
-        typedef std::vector<std::pair<op_vec, bool> > bond_element;
-        
-        measurements_type meas;
-        {
-            meas.push_back( new measurements::local<Matrix, U1>("Density", lattice,
-                                                    op_vec(1,this->identity_matrix(0)),
-                                                    op_vec(1,this->filling_matrix(0)),
-                                                    op_vec(1,tag_handler->get_op(dens))) );
-        }
-        {
-            bond_element ops;
-            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(dens)), false) );
-            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(dens)), false) );
-            meas.push_back( new measurements::correlations<Matrix, U1>("DensityCorrelation", lattice,
-                                                           op_vec(1,this->identity_matrix(0)),
-                                                           op_vec(1,this->filling_matrix(0)),
-                                                           ops, true, false) );
-        }
-        {
-            bond_element ops;
-            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(create)), true) );
-            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(destroy)), true) );
-            meas.push_back( new measurements::correlations<Matrix, U1>("OneBodyDM", lattice,
-                                                           op_vec(1,this->identity_matrix(0)),
-                                                           op_vec(1,this->filling_matrix(0)),
-                                                           ops, true, false) );
-        }
-        return meas;
-    }
-    
+//    measurements_type measurements () const
+//    {
+//        typedef std::vector<block_matrix<Matrix, U1> > op_vec;
+//        typedef std::vector<std::pair<op_vec, bool> > bond_element;
+//        
+//        measurements_type meas;
+//        {
+//            meas.push_back( new measurements::local<Matrix, U1>("Density", lattice,
+//                                                    op_vec(1,this->identity_matrix(0)),
+//                                                    op_vec(1,this->filling_matrix(0)),
+//                                                    op_vec(1,tag_handler->get_op(dens))) );
+//        }
+//        {
+//            bond_element ops;
+//            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(dens)), false) );
+//            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(dens)), false) );
+//            meas.push_back( new measurements::correlations<Matrix, U1>("DensityCorrelation", lattice,
+//                                                           op_vec(1,this->identity_matrix(0)),
+//                                                           op_vec(1,this->filling_matrix(0)),
+//                                                           ops, true, false) );
+//        }
+//        {
+//            bond_element ops;
+//            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(create)), true) );
+//            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(destroy)), true) );
+//            meas.push_back( new measurements::correlations<Matrix, U1>("OneBodyDM", lattice,
+//                                                           op_vec(1,this->identity_matrix(0)),
+//                                                           op_vec(1,this->filling_matrix(0)),
+//                                                           ops, true, false) );
+//        }
+//        return meas;
+//    }
+//    
 private:
     Lattice lattice;
     Index<U1> phys;

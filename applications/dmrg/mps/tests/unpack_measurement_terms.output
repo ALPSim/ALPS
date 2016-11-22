@@ -1,0 +1,84 @@
+n_up:
+[
+  coeff=1, op_names=[[n_up]]
+]
+
+Splus:
+[
+  coeff=1, op_names=[[Splus]]
+]
+
+fermion_hop:
+[
+  coeff=1, op_names=[[cdag_down], [c_down]],
+  coeff=-1, op_names=[[c_down], [cdag_down]],
+  coeff=1, op_names=[[cdag_up], [c_up]],
+  coeff=-1, op_names=[[c_up], [cdag_up]]
+]
+
+double_occupancy:
+[
+  coeff=1, op_names=[[double_occupancy]]
+]
+
+exchange_xy:
+[
+  coeff=0.5, op_names=[[Sminus], [Splus]],
+  coeff=0.5, op_names=[[Splus], [Sminus]]
+]
+
+Sx:
+[
+  coeff=0.5, op_names=[[Sminus]],
+  coeff=0.5, op_names=[[Splus]]
+]
+
+biquadratic:
+[
+  coeff=0.25, op_names=[[Sminus,Sminus], [Splus,Splus]],
+  coeff=0.25, op_names=[[Sminus,Splus], [Splus,Sminus]],
+  coeff=0.5, op_names=[[Sminus,Sz], [Splus,Sz]],
+  coeff=0.25, op_names=[[Splus,Sminus], [Sminus,Splus]],
+  coeff=0.25, op_names=[[Splus,Splus], [Sminus,Sminus]],
+  coeff=0.5, op_names=[[Splus,Sz], [Sminus,Sz]],
+  coeff=0.5, op_names=[[Sz,Sminus], [Sz,Splus]],
+  coeff=0.5, op_names=[[Sz,Splus], [Sz,Sminus]],
+  coeff=1, op_names=[[Sz,Sz], [Sz,Sz]]
+]
+
+n_up:
+[
+  coeff=1, op_names=[[n_up]]
+]
+
+Splus:
+[
+  coeff=1, op_names=[[Splus]]
+]
+
+fermion_hop:
+[
+  coeff=1, op_names=[[cdag_down], [c_down]],
+  coeff=-1, op_names=[[c_down], [cdag_down]],
+  coeff=1, op_names=[[cdag_up], [c_up]],
+  coeff=-1, op_names=[[c_up], [cdag_up]]
+]
+
+double_occupancy:
+[
+  coeff=-0.5, op_names=[[n]],
+  coeff=0.5, op_names=[[n,n]]
+]
+
+exchange_xy:
+[
+  coeff=0.5, op_names=[[Sminus], [Splus]],
+  coeff=0.5, op_names=[[Splus], [Sminus]]
+]
+
+Sx:
+[
+  coeff=0.5, op_names=[[Sminus]],
+  coeff=0.5, op_names=[[Splus]]
+]
+

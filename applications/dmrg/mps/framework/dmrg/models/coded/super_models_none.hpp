@@ -302,7 +302,7 @@ class SuperBoseHubbardNone : public model_impl<Matrix, TrivialGroup>
     typedef typename base::term_descriptor term_descriptor;
     typedef typename base::terms_type terms_type;
     typedef typename base::op_t op_t;
-    typedef typename base::measurements_type measurements_type;
+    typedef typename base::measurement_term_desc_type measurement_term_desc_type;
     
     typedef typename base::size_t size_t;
     typedef typename Matrix::value_type value_type;
@@ -604,65 +604,70 @@ public:
         return TrivialGroup::IdentityCharge;
     }
     
-    measurements_type measurements() const
+//    measurements_type measurements() const
+//    {
+//        TrivialGroup::charge C = TrivialGroup::IdentityCharge;
+//        
+//        op_t ident_psi = identity_matrix<Matrix>(phys_psi);
+//        op_t count_psi, create_psi, destroy_psi;
+//        count_psi.insert_block(mcount, C, C);
+//        create_psi.insert_block(transpose(mcreate), C, C);
+//        destroy_psi.insert_block(transpose(mdestroy), C, C);
+//        
+//        typedef std::vector<block_matrix<Matrix, TrivialGroup> > op_vec;
+//        typedef std::vector<std::pair<op_vec, bool> > bond_element;
+//        
+//        measurements_type meas;
+//
+//        if (model["MEASURE[Density]"]) {
+//            meas.push_back( new measurements::average<Matrix, TrivialGroup>("Density", lattice,
+//                                                                            op_vec(1,ident_psi), op_vec(1,ident_psi),
+//                                                                            op_vec(1,count_psi)) );
+//            meas[meas.size()-1].set_super_meas(phys_psi);
+//        }
+//        
+//        if (model["MEASURE[Local density]"]) {
+//            meas.push_back( new measurements::local<Matrix, TrivialGroup>("Local density", lattice,
+//                                                                          op_vec(1,ident_psi), op_vec(1,ident_psi),
+//                                                                          op_vec(1,count_psi)) );
+//            meas[meas.size()-1].set_super_meas(phys_psi);
+//        }
+//        
+//        if (model["MEASURE[Local density^2]"]) {
+//            op_t count2_psi;
+//            gemm(count_psi, count_psi, count2_psi);
+//            meas.push_back( new measurements::local<Matrix, TrivialGroup>("Local density^2", lattice,
+//                                                                          op_vec(1,ident_psi), op_vec(1,ident_psi),
+//                                                                          op_vec(1,count2_psi)) );
+//            meas[meas.size()-1].set_super_meas(phys_psi);
+//        }
+//        
+//        if (model["MEASURE[Onebody density matrix]"]) {
+//            bond_element ops;
+//            ops.push_back( std::make_pair(op_vec(1,create_psi), false) );
+//            ops.push_back( std::make_pair(op_vec(1,destroy_psi), false) );
+//            meas.push_back( new measurements::correlations<Matrix, TrivialGroup>("Onebody density matrix", lattice,
+//                                                                                 op_vec(1,ident_psi), op_vec(1,ident_psi),
+//                                                                                 ops, true, false) );
+//            meas[meas.size()-1].set_super_meas(phys_psi);
+//        }
+//        
+//        if (model["MEASURE[Density correlation]"]) {
+//            bond_element ops;
+//            ops.push_back( std::make_pair(op_vec(1,count_psi), false) );
+//            ops.push_back( std::make_pair(op_vec(1,count_psi), false) );
+//            meas.push_back( new measurements::correlations<Matrix, TrivialGroup>("Density correlation", lattice,
+//                                                                                 op_vec(1,ident_psi), op_vec(1,ident_psi),
+//                                                                                 ops, true, false) );
+//            meas[meas.size()-1].set_super_meas(phys_psi);
+//        }
+//        
+//        return meas;
+//    }
+    
+    bool has_operator(std::string const & name, size_t type) const
     {
-        TrivialGroup::charge C = TrivialGroup::IdentityCharge;
-        
-        op_t ident_psi = identity_matrix<Matrix>(phys_psi);
-        op_t count_psi, create_psi, destroy_psi;
-        count_psi.insert_block(mcount, C, C);
-        create_psi.insert_block(transpose(mcreate), C, C);
-        destroy_psi.insert_block(transpose(mdestroy), C, C);
-        
-        typedef std::vector<block_matrix<Matrix, TrivialGroup> > op_vec;
-        typedef std::vector<std::pair<op_vec, bool> > bond_element;
-        
-        measurements_type meas;
-
-        if (model["MEASURE[Density]"]) {
-            meas.push_back( new measurements::average<Matrix, TrivialGroup>("Density", lattice,
-                                                                            op_vec(1,ident_psi), op_vec(1,ident_psi),
-                                                                            op_vec(1,count_psi)) );
-            meas[meas.size()-1].set_super_meas(phys_psi);
-        }
-        
-        if (model["MEASURE[Local density]"]) {
-            meas.push_back( new measurements::local<Matrix, TrivialGroup>("Local density", lattice,
-                                                                          op_vec(1,ident_psi), op_vec(1,ident_psi),
-                                                                          op_vec(1,count_psi)) );
-            meas[meas.size()-1].set_super_meas(phys_psi);
-        }
-        
-        if (model["MEASURE[Local density^2]"]) {
-            op_t count2_psi;
-            gemm(count_psi, count_psi, count2_psi);
-            meas.push_back( new measurements::local<Matrix, TrivialGroup>("Local density^2", lattice,
-                                                                          op_vec(1,ident_psi), op_vec(1,ident_psi),
-                                                                          op_vec(1,count2_psi)) );
-            meas[meas.size()-1].set_super_meas(phys_psi);
-        }
-        
-        if (model["MEASURE[Onebody density matrix]"]) {
-            bond_element ops;
-            ops.push_back( std::make_pair(op_vec(1,create_psi), false) );
-            ops.push_back( std::make_pair(op_vec(1,destroy_psi), false) );
-            meas.push_back( new measurements::correlations<Matrix, TrivialGroup>("Onebody density matrix", lattice,
-                                                                                 op_vec(1,ident_psi), op_vec(1,ident_psi),
-                                                                                 ops, true, false) );
-            meas[meas.size()-1].set_super_meas(phys_psi);
-        }
-        
-        if (model["MEASURE[Density correlation]"]) {
-            bond_element ops;
-            ops.push_back( std::make_pair(op_vec(1,count_psi), false) );
-            ops.push_back( std::make_pair(op_vec(1,count_psi), false) );
-            meas.push_back( new measurements::correlations<Matrix, TrivialGroup>("Density correlation", lattice,
-                                                                                 op_vec(1,ident_psi), op_vec(1,ident_psi),
-                                                                                 ops, true, false) );
-            meas[meas.size()-1].set_super_meas(phys_psi);
-        }
-        
-        return meas;
+        return false;
     }
     
     tag_type get_operator_tag(std::string const & name, size_t type) const
@@ -670,7 +675,13 @@ public:
         throw std::runtime_error("Operator not defined for this model.");
         return 0;
     }
-    
+
+    std::vector<measurement_term_desc_type> unpack_measurement_terms(std::string const & name) const
+    {
+        throw std::runtime_error("Function unpack_measurement_terms not implemented for this model class.");
+        return std::vector<measurement_term_desc_type>();
+    }
+
     table_ptr operators_table() const
     {
         return tag_handler;

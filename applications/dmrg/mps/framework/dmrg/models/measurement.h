@@ -62,6 +62,7 @@ public:
     void save(Archive &) const;
     void write_xml(alps::oxstream &) const;
     virtual void print(std::ostream& os) const;
+    virtual void print_verbose(std::ostream& os) const;
     
     std::string const& name() const { return name_; }
     int& eigenstate_index() { return eigenstate; }
@@ -148,6 +149,27 @@ void measurement<Matrix, SymmGroup>::write_xml(alps::oxstream & out) const
     }
 }
 
+template<class Matrix, class SymmGroup>
+void measurement<Matrix, SymmGroup>::print_verbose(std::ostream & os) const
+{
+    print(os); /// name
+    if (labels.size() > 0) {
+        os << " = \n";
+        for (int i=0; i<labels.size(); ++i) {
+            os << "  " << labels[i] << " : ";
+            
+            if (cast_to_real) {
+                os << maquis::real(vector_results[i]);
+            } else {
+                os << vector_results[i];
+            }
+            os << std::endl;
+            
+        }
+    } else {
+        os << " = " << ((cast_to_real) ?  maquis::real(result) : result) << std::endl;
+    }
+}
 
 template<class Matrix, class SymmGroup>
 void measurement<Matrix, SymmGroup>::set_super_meas(Index<SymmGroup> const& phys_psi_)

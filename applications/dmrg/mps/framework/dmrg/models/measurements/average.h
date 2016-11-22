@@ -34,7 +34,7 @@
 #include "dmrg/mp_tensors/super_mpo.h"
 
 namespace measurements {
-    
+
     template <class Matrix, class SymmGroup>
     class average : public measurement<Matrix, SymmGroup> {
         typedef  measurement<Matrix, SymmGroup> base;
@@ -42,28 +42,7 @@ namespace measurements {
         typedef std::vector<block_matrix<Matrix, SymmGroup> > op_vec;
         typedef std::vector<std::pair<op_vec, bool> > bond_element;
     public:
-        
-        /// Site term
-        average(std::string const& name_,
-                const Lattice & lattice,
-                op_vec const & identities, op_vec const & fillings,
-                op_vec const& ops)
-        : base(name_)
-        {
-            generator mpom(lattice, identities, fillings);
-            
-            for (std::size_t p = 0; p < lattice.size(); ++p)
-            {
-                generate_mpo::Operator_Term<Matrix, SymmGroup> term;
-                term.operators.push_back( std::make_pair(p, ops[lattice.get_prop<int>("type", p)]) );
-                mpom.add_term(term);
-            }
-            mpo = mpom.create_mpo();
 
-            this->cast_to_real = is_hermitian_meas(ops);
-        }
-        
-        /// Bond term
         average(std::string const& name_,
                 const Lattice & lattice,
                 op_vec const & identities, op_vec const & fillings,
@@ -71,24 +50,44 @@ namespace measurements {
         : base(name_)
         {
             generator mpom(lattice, identities, fillings);
-            
+
             for (std::size_t i = 0; i < ops.size(); ++i) {
                 for (std::size_t p = 0; p < lattice.size(); ++p) {
+                    int type1 = lattice.get_prop<int>("type", p);
+
                     generate_mpo::Operator_Term<Matrix, SymmGroup> term;
-                    term.operators.push_back( std::make_pair(p, ops[i][0].first[lattice.get_prop<int>("type", p)]) );
-                    term.with_sign = ops[i][0].second;
-                    std::vector<Lattice::pos_t> neighs = lattice.forward(p);
-                    for (typename std::vector<Lattice::pos_t>::const_iterator hopto = neighs.begin();
-                         hopto != neighs.end(); ++hopto)
-                    {
-                        generate_mpo::Operator_Term<Matrix, SymmGroup> term2(term);
-                        term2.operators.push_back( std::make_pair(*hopto, ops[i][1].first[lattice.get_prop<int>("type", p)]) );
-                        mpom.add_term(term2);
+                    term.operators.push_back( std::make_pair(p, ops[i][0].first[type1]) );
+                    if (ops[i].size() == 1) { // site term
+                        term.with_sign = false;
+                        mpom.add_term(term);
+
+                    } else {
+                        term.with_sign = ops[i][0].second;
+                        std::vector<Lattice::pos_t> neighs = lattice.forward(p);
+                        for (typename std::vector<Lattice::pos_t>::const_iterator hopto = neighs.begin();
+                             hopto != neighs.end(); ++hopto)
+                        {
+                            int type2 = lattice.get_prop<int>("type", *hopto);
+
+                            generate_mpo::Operator_Term<Matrix, SymmGroup> term2(term);
+                            term2.operators.push_back( std::make_pair(*hopto, ops[i][1].first[type2]) );
+
+                            block_matrix<Matrix, SymmGroup> m;
+                            if (ops[i][0].second && p <= *hopto) {
+                                gemm(fillings[type1], term2.operators[0].second, m); // Note inverse notation because of notation in operator.
+                                swap(term2.operators[0].second, m);
+                            } else if (ops[i][0].second) {
+                                gemm(fillings[type2], term2.operators[1].second, m); // Note inverse notation because of notation in operator.
+                                swap(term2.operators[0].second, m);
+                            }
+
+                            mpom.add_term(term2);
+                        }
                     }
                 }
             }
             mpo = mpom.create_mpo();
-            
+
             /// TODO: this doesn't really work
             this->cast_to_real = all_true(ops.begin(), ops.end(), static_cast<bool (*)(bond_element const&)>(&is_hermitian_meas));
         }
@@ -109,17 +108,17 @@ namespace measurements {
 #endif
             }
         }
-        
+
     protected:
         measurement<Matrix, SymmGroup>* do_clone() const
         {
             return new average(*this);
         }
-        
+
     private:
         MPO<Matrix, SymmGroup> mpo;
     };
-    
+
 }
 
 #endif

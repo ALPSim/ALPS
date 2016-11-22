@@ -46,7 +46,7 @@ class BoseHubbardNone : public model_impl<Matrix, TrivialGroup>
     typedef typename base::term_descriptor term_descriptor;
     typedef typename base::terms_type terms_type;
     typedef typename base::op_t op_t;
-    typedef typename base::measurements_type measurements_type;
+    typedef typename base::measurement_term_desc_type measurement_term_desc_type;
     
     typedef typename base::size_t size_t;
     typedef typename Matrix::value_type value_type;
@@ -167,40 +167,57 @@ public:
     }
     
     
-   measurements_type measurements() const
+//   measurements_type measurements() const
+//    {
+//        typedef std::vector<block_matrix<Matrix, TrivialGroup> > op_vec;
+//        typedef std::vector<std::pair<op_vec, bool> > bond_element;
+//        
+//        measurements_type meas;
+//        
+//        if (model["MEASURE[Density]"]) {
+//            meas.push_back( new measurements::average<Matrix, TrivialGroup>("Density", lattice,
+//                                                                  op_vec(1,this->identity_matrix(0)),
+//                                                                  op_vec(1,this->filling_matrix(0)),
+//                                                                  op_vec(1,tag_handler->get_op(count))) );
+//        }
+//        
+//        if (model["MEASURE[Local density]"]) {
+//            meas.push_back( new measurements::local<Matrix, TrivialGroup>("Local density", lattice,
+//                                                                op_vec(1,this->identity_matrix(0)),
+//                                                                op_vec(1,this->filling_matrix(0)),
+//                                                                op_vec(1,tag_handler->get_op(count))) );
+//        }
+//        
+//        if (model["MEASURE[Onebody density matrix]"]) {
+//            bond_element ops;
+//            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(create)), false) );
+//            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(destroy)), false) );
+//            meas.push_back( new measurements::correlations<Matrix, TrivialGroup>("Onebody density matrix", lattice,
+//                                                                                 op_vec(1,this->identity_matrix(0)),
+//                                                                                 op_vec(1,this->filling_matrix(0)),
+//                                                                                 ops, true, false) );
+//        }
+//        
+//        return meas;
+//    }
+
+    std::vector<measurement_term_desc_type> unpack_measurement_terms(std::string const & name) const
     {
-        typedef std::vector<block_matrix<Matrix, TrivialGroup> > op_vec;
-        typedef std::vector<std::pair<op_vec, bool> > bond_element;
-        
-        measurements_type meas;
-        
-        if (model["MEASURE[Density]"]) {
-            meas.push_back( new measurements::average<Matrix, TrivialGroup>("Density", lattice,
-                                                                  op_vec(1,this->identity_matrix(0)),
-                                                                  op_vec(1,this->filling_matrix(0)),
-                                                                  op_vec(1,tag_handler->get_op(count))) );
-        }
-        
-        if (model["MEASURE[Local density]"]) {
-            meas.push_back( new measurements::local<Matrix, TrivialGroup>("Local density", lattice,
-                                                                op_vec(1,this->identity_matrix(0)),
-                                                                op_vec(1,this->filling_matrix(0)),
-                                                                op_vec(1,tag_handler->get_op(count))) );
-        }
-        
-        if (model["MEASURE[Onebody density matrix]"]) {
-            bond_element ops;
-            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(create)), false) );
-            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(destroy)), false) );
-            meas.push_back( new measurements::correlations<Matrix, TrivialGroup>("Onebody density matrix", lattice,
-                                                                                 op_vec(1,this->identity_matrix(0)),
-                                                                                 op_vec(1,this->filling_matrix(0)),
-                                                                                 ops, true, false) );
-        }
-        
-        return meas;
+        throw std::runtime_error("Function unpack_measurement_terms not implemented for this model class.");
+        return std::vector<measurement_term_desc_type>();
     }
     
+    bool has_operator(std::string const & name, size_t type) const
+    {
+        if (name == "n")
+            return true;
+        else if (name == "bdag")
+            return true;
+        else if (name == "b")
+            return true;
+        return false;
+    }
+
     tag_type get_operator_tag(std::string const & name, size_t type) const
     {
         if (name == "n")

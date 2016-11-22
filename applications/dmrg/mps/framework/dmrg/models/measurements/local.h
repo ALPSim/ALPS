@@ -50,24 +50,10 @@ namespace measurements {
         , lattice(lat)
         , identities(identities_)
         , fillings(fillings_)
-        , is_bond(true)
+        , is_bond(terms.size() > 0 && terms[0].size() > 1)
         , mpo_terms(terms)
         {
             this->cast_to_real = all_true(mpo_terms.begin(), mpo_terms.end(), static_cast<bool (*)(bond_element const&)>(&is_hermitian_meas));
-        }
-
-        local(std::string const& name_, const Lattice & lat,
-              op_vec const & identities_, op_vec const & fillings_,
-              op_vec const& op)
-        : base(name_)
-        , lattice(lat)
-        , identities(identities_)
-        , fillings(fillings_)
-        , is_bond(false)
-        , site_term(op)
-        , mpo_terms(std::vector<bond_element>(1, bond_element(1, std::make_pair(op, false)) ))
-        {
-            this->cast_to_real = is_hermitian_meas(site_term);
         }
 
         void evaluate(MPS<Matrix, SymmGroup> const& mps, boost::optional<reduced_mps<Matrix, SymmGroup> const&> rmps = boost::none)
@@ -87,13 +73,15 @@ namespace measurements {
                 subcharge type = lattice.get_prop<subcharge>("type", p);
                 typename Matrix::value_type res = 0.;
                 bool evaluated = false;
-                if (site_term[type].n_blocks() > 0) {
-                    MPOTensor<Matrix, SymmGroup> temp;
-                    temp.set(0, 0, site_term[type]);
-                    
-                    MPSTensor<Matrix, SymmGroup> vec2 = contraction::site_hamil2(mps[p], rmps.get().left(p), rmps.get().right(p), temp);
-                    res += mps[p].scalar_overlap(vec2);
-                    evaluated = true;
+                for (std::size_t i=0; i<mpo_terms.size(); ++i) {
+                    if (mpo_terms[i][0].first[type].n_blocks() > 0) {
+                        MPOTensor<Matrix, SymmGroup> temp;
+                        temp.set(0, 0, mpo_terms[i][0].first[type]);
+                        
+                        MPSTensor<Matrix, SymmGroup> vec2 = contraction::site_hamil2(mps[p], rmps.get().left(p), rmps.get().right(p), temp);
+                        res += mps[p].scalar_overlap(vec2);
+                        evaluated = true;
+                    }
                 }
                 if (evaluated) {
                     this->vector_results.push_back(res);
@@ -110,43 +98,28 @@ namespace measurements {
         
         void evaluate_with_mpo(MPS<Matrix, SymmGroup> const& mps)
         {
-            typedef typename SymmGroup::subcharge subcharge;
-            typedef std::map<std::string, typename Matrix::value_type> result_type;
-            result_type res;
             
             typename MPS<Matrix, SymmGroup>::scalar_type nn;
             if (this->is_super_meas)
                 nn = dm_trace(mps, this->phys_psi);
             
-            /// collect results from all mpo terms
-            for (typename std::vector<bond_element>::const_iterator it = mpo_terms.begin(); it != mpo_terms.end(); ++it) {
-                typedef std::map<std::string, MPO<Matrix, SymmGroup> > mpo_map;
-                mpo_map mpos = meas_prepare::local(lattice, identities, fillings, *it);
-                
-                /// measure the value at each site / bond
-                for (typename mpo_map::const_iterator mit = mpos.begin(); mit != mpos.end(); ++mit) {
-                    typename result_type::iterator match = res.find(mit->first);
-                    if (match == res.end())
-                        boost::tie(match, boost::tuples::ignore) = res.insert( std::make_pair(mit->first, 0.) );
+            typedef std::vector<std::pair<std::string, MPO<Matrix,SymmGroup> > > local_mpo_list_t;
+            local_mpo_list_t mpos = meas_prepare::local(lattice, identities, fillings, mpo_terms);
+            for (typename local_mpo_list_t::const_iterator it = mpos.begin(); it != mpos.end(); ++it) {
+                if (!this->is_super_meas) {
+                    typename Matrix::value_type val = expval(mps, it->second);
+                    this->vector_results.push_back((this->cast_to_real) ? maquis::real(val) : val);
+                    this->labels.push_back(it->first);
+                } else {
+                    MPS<Matrix, SymmGroup> super_mpo = mpo_to_smps(it->second, this->phys_psi);
+                    // static_cast needed for icpc 12.x
+                    typedef typename MPS<Matrix, SymmGroup>::scalar_type (*overlap_func)(MPS<Matrix, SymmGroup> const &, MPS<Matrix, SymmGroup> const &);
+                    typename MPS<Matrix, SymmGroup>::scalar_type val = static_cast<overlap_func>(::overlap)(super_mpo, mps);
+                    val = val/nn;
                     
-                    if (!this->is_super_meas) {
-                        match->second += (this->cast_to_real) ? maquis::real(expval(mps, mit->second)) : expval(mps, mit->second);
-                    } else {
-                        MPS<Matrix, SymmGroup> super_mpo = mpo_to_smps(mit->second, this->phys_psi);
-                        // static_cast needed for icpc 12.x
-                        typedef typename MPS<Matrix, SymmGroup>::scalar_type (*overlap_func)(MPS<Matrix, SymmGroup> const &, MPS<Matrix, SymmGroup> const &);
-                        typename MPS<Matrix, SymmGroup>::scalar_type val = ::overlap(super_mpo, mps);
-                        match->second += val/nn;
-                    }
+                    this->vector_results.push_back((this->cast_to_real) ? maquis::real(val) : val);
+                    this->labels.push_back(it->first);
                 }
-            }
-            
-            /// copy results to base
-            this->vector_results.reserve(this->vector_results.size() + res.size());
-            this->labels.reserve(this->labels.size() + res.size());
-            for (typename result_type::const_iterator it = res.begin(); it != res.end(); ++it) {
-                this->labels.push_back(it->first);
-                this->vector_results.push_back(it->second);
             }
         }
         
@@ -154,7 +127,6 @@ namespace measurements {
         Lattice lattice;
         op_vec identities, fillings;
         bool is_bond;
-        op_vec site_term;
         std::vector<bond_element> mpo_terms;
     };
     

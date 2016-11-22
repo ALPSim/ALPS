@@ -31,7 +31,6 @@
 #include <sstream>
 
 #include "dmrg/models/model.h"
-#include "dmrg/models/measurements.h"
 #include "dmrg/utils/BaseParameters.h"
 
 /* ****************** FERMI HUBBARD */
@@ -48,7 +47,7 @@ public:
     typedef typename base::term_descriptor term_descriptor;
     typedef typename base::terms_type terms_type;
     typedef typename base::op_t op_t;
-    typedef typename base::measurements_type measurements_type;
+    typedef typename base::measurement_term_desc_type measurement_term_desc_type;
 
     typedef typename Matrix::value_type value_type;
     
@@ -202,59 +201,65 @@ public:
         return phys;
     }
     
-    measurements_type measurements () const
+//    measurements_type measurements () const
+//    {
+//        typedef std::vector<block_matrix<Matrix, TwoU1> > op_vec;
+//        typedef std::vector<std::pair<op_vec, bool> > bond_element;
+//        
+//        measurements_type meas;
+//
+//        if (parms["MEASURE[Density]"]) {
+//            meas.push_back( new measurements::average<Matrix, TwoU1>("Density up", lat,
+//                                                                op_vec(1,this->identity_matrix(0)),
+//                                                                op_vec(1,this->filling_matrix(0)),
+//                                                                op_vec(1,tag_handler->get_op(count_up))) );
+//        }
+//        if (parms["MEASURE[Density]"]) {
+//            meas.push_back( new measurements::average<Matrix, TwoU1>("Density down", lat,
+//                                                                op_vec(1,this->identity_matrix(0)),
+//                                                                op_vec(1,this->filling_matrix(0)),
+//                                                                op_vec(1,tag_handler->get_op(count_down))) );
+//        }
+//        
+//        if (parms["MEASURE[Local density]"]) {
+//            meas.push_back( new measurements::local<Matrix, TwoU1>("Local density up", lat,
+//                                                                op_vec(1,this->identity_matrix(0)),
+//                                                                op_vec(1,this->filling_matrix(0)),
+//                                                                op_vec(1,tag_handler->get_op(count_up))) );
+//        }
+//        if (parms["MEASURE[Local density]"]) {
+//            meas.push_back( new measurements::local<Matrix, TwoU1>("Local density down", lat,
+//                                                                op_vec(1,this->identity_matrix(0)),
+//                                                                op_vec(1,this->filling_matrix(0)),
+//                                                                op_vec(1,tag_handler->get_op(count_down))) );
+//        }
+//        
+//        if (parms["MEASURE[Onebody density matrix]"]) {
+//            bond_element ops;
+//            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(create_up)), true) );
+//            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(destroy_up)), true) );
+//            meas.push_back( new measurements::correlations<Matrix, TwoU1>("Onebody density matrix up", lat,
+//                                                                       op_vec(1,this->identity_matrix(0)),
+//                                                                       op_vec(1,this->filling_matrix(0)),
+//                                                                       ops, false, false) );
+//        }
+//        if (parms["MEASURE[Onebody density matrix]"]) {
+//            bond_element ops;
+//            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(create_down)), true) );
+//            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(destroy_down)), true) );
+//            meas.push_back( new measurements::correlations<Matrix, TwoU1>("Onebody density matrix down", lat,
+//                                                                       op_vec(1,this->identity_matrix(0)),
+//                                                                       op_vec(1,this->filling_matrix(0)),
+//                                                                       ops, false, false) );
+//        }
+//        
+//        return meas;
+//    }
+    
+    std::vector<measurement_term_desc_type> unpack_measurement_terms(std::string const & name) const
     {
-        typedef std::vector<block_matrix<Matrix, TwoU1> > op_vec;
-        typedef std::vector<std::pair<op_vec, bool> > bond_element;
-        
-        measurements_type meas;
-
-        if (parms["MEASURE[Density]"]) {
-            meas.push_back( new measurements::average<Matrix, TwoU1>("Density up", lat,
-                                                                op_vec(1,this->identity_matrix(0)),
-                                                                op_vec(1,this->filling_matrix(0)),
-                                                                op_vec(1,tag_handler->get_op(count_up))) );
-        }
-        if (parms["MEASURE[Density]"]) {
-            meas.push_back( new measurements::average<Matrix, TwoU1>("Density down", lat,
-                                                                op_vec(1,this->identity_matrix(0)),
-                                                                op_vec(1,this->filling_matrix(0)),
-                                                                op_vec(1,tag_handler->get_op(count_down))) );
-        }
-        
-        if (parms["MEASURE[Local density]"]) {
-            meas.push_back( new measurements::local<Matrix, TwoU1>("Local density up", lat,
-                                                                op_vec(1,this->identity_matrix(0)),
-                                                                op_vec(1,this->filling_matrix(0)),
-                                                                op_vec(1,tag_handler->get_op(count_up))) );
-        }
-        if (parms["MEASURE[Local density]"]) {
-            meas.push_back( new measurements::local<Matrix, TwoU1>("Local density down", lat,
-                                                                op_vec(1,this->identity_matrix(0)),
-                                                                op_vec(1,this->filling_matrix(0)),
-                                                                op_vec(1,tag_handler->get_op(count_down))) );
-        }
-        
-        if (parms["MEASURE[Onebody density matrix]"]) {
-            bond_element ops;
-            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(create_up)), true) );
-            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(destroy_up)), true) );
-            meas.push_back( new measurements::correlations<Matrix, TwoU1>("Onebody density matrix up", lat,
-                                                                       op_vec(1,this->identity_matrix(0)),
-                                                                       op_vec(1,this->filling_matrix(0)),
-                                                                       ops, false, false) );
-        }
-        if (parms["MEASURE[Onebody density matrix]"]) {
-            bond_element ops;
-            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(create_down)), true) );
-            ops.push_back( std::make_pair(op_vec(1,tag_handler->get_op(destroy_down)), true) );
-            meas.push_back( new measurements::correlations<Matrix, TwoU1>("Onebody density matrix down", lat,
-                                                                       op_vec(1,this->identity_matrix(0)),
-                                                                       op_vec(1,this->filling_matrix(0)),
-                                                                       ops, false, false) );
-        }
-        
-        return meas;
+        throw std::runtime_error("Function unpack_measurement_terms not implemented for this model class.");
+        return std::vector<measurement_term_desc_type>();
     }
 
     tag_type identity_matrix_tag(size_t type) const
@@ -273,6 +278,25 @@ public:
         return ret;
     }
 
+    bool has_operator(std::string const & name, size_t type) const
+    {
+        if (name == "create_up")
+            return true;
+        else if (name == "create_down")
+            return true;
+        else if (name == "destroy_up")
+            return true;
+        else if (name == "destroy_down")
+            return true;
+        else if (name == "count_up")
+            return true;
+        else if (name == "count_down")
+            return true;
+        else if (name == "doubly_occ")
+            return true;
+        return false;
+    }
+    
     tag_type get_operator_tag(std::string const & name, size_t type) const
     {
         if (name == "create_up")

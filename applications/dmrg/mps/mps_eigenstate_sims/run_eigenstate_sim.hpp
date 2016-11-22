@@ -91,8 +91,8 @@ void run_eigenstate_sim(BaseParameters parms, bool write_xml, run_type rt)
         MPO<Matrix, SymmGroup> mpo = make_mpo(lattice, model, parms);
 
         /// Get measurements
-        typedef typename Model<Matrix, SymmGroup>::measurements_type measurements_type;
-        measurements_type measurements = model.measurements();
+        typedef boost::ptr_vector<measurement<Matrix, SymmGroup> > measurements_type;
+        measurements_type measurements = measurements::parse_and_create(lattice, model, parms);
         { // overlap measurements
             measurements_type m = (parms.defined("nsweeps")) ?  overlap_measurements<Matrix, SymmGroup>(parms, parms["nsweeps"]-1) : overlap_measurements<Matrix, SymmGroup>(parms);
             measurements.insert(measurements.end(), m.begin(), m.end());

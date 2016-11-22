@@ -90,6 +90,9 @@ namespace generate_mpo
             size_t minp = *min_element(positions.begin(), positions.end());
             size_t maxp = *max_element(positions.begin(), positions.end());
             
+            if (std::adjacent_find(positions.begin(), positions.end()) != positions.end())
+                throw std::runtime_error("(internal error) Sites cannot be repeated in hamiltonian terms.");
+            
             size_t use_b = maximum++;
             
             vector<bool> done(length, false);
@@ -102,8 +105,30 @@ namespace generate_mpo
                 if (minp != maxp) { // bond term
                     prempo[it->first].push_back(boost::make_tuple(first_use_b, second_use_b, it->second));
                     used_dims[it->first].insert(use_b);
-                } else // site term
-                    site_terms[it->first] += it->second;
+                } else { // site term
+                    if (it->second.left_basis() == it->second.right_basis()) {
+                        // use site term compression for diagonal operators
+                        site_terms[it->first] += it->second;
+                    } else {
+                        if (it->first < length-1) {
+                            // make term (p, op) * (p+1, id)
+                            maxp += 1;
+                            prempo[it->first].push_back(boost::make_tuple(0, use_b, it->second));
+                            used_dims[it->first].insert(use_b);
+                            prempo[maxp].push_back(boost::make_tuple(use_b, 1, identities[lat.get_prop<int>("type",maxp)]));
+                            used_dims[maxp].insert(use_b);
+                            done[maxp] = true;
+                        } else if (it->first != 0) {
+                            // make term (p-1, id) * (p, op)
+                            minp -= 1;
+                            prempo[minp].push_back(boost::make_tuple(0, use_b, identities[lat.get_prop<int>("type",minp)]));
+                            used_dims[minp].insert(use_b);
+                            done[minp] = true;
+                            prempo[it->first].push_back(boost::make_tuple(use_b, 1, it->second));
+                            used_dims[it->first].insert(use_b);
+                        }
+                    }
+                }
                 done[it->first] = true;
             }
             

@@ -35,7 +35,8 @@
 // init MACROS
 #define impl_model_factory(MATRIX, SYMMGROUP)                                           \
 template boost::shared_ptr<model_impl<MATRIX, SYMMGROUP> >                              \
-model_factory<MATRIX,SYMMGROUP>(Lattice const&, BaseParameters &);
+model_factory<MATRIX,SYMMGROUP>(Lattice const&, BaseParameters &);                      
+
 
 // Implementation
 template <class Matrix, class SymmGroup>

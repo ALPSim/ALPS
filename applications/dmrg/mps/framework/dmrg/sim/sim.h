@@ -74,7 +74,7 @@ public:
     virtual void run() =0;
     
 protected:
-    typedef typename Model<Matrix, SymmGroup>::measurements_type measurements_type;
+    typedef boost::ptr_vector<measurement<Matrix, SymmGroup> > measurements_type;
     typedef std::map<std::string, int> status_type;
     
     virtual std::string results_archive_path(status_type const&) const;

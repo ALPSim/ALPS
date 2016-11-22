@@ -29,7 +29,7 @@
 
 #include "dmrg/utils/BaseParameters.h"
 #include "dmrg/models/term_descriptor.h"
-#include "dmrg/models/measurement.h"
+#include "dmrg/models/measurement_term_desc.hpp"
 
 #include "dmrg/models/lattice.h"
 #include "dmrg/models/op_handler.h"
@@ -39,8 +39,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-/// forward declaration
-template<class Matrix, class SymmGroup> class Measurements;
 
 /// base type for all models
 template <class Matrix, class SymmGroup>
@@ -55,7 +53,8 @@ public:
     typedef ::term_descriptor<typename Matrix::value_type> term_descriptor;
     typedef typename std::vector<term_descriptor> terms_type;
     typedef block_matrix<Matrix, SymmGroup> op_t;
-    typedef boost::ptr_vector<measurement<Matrix, SymmGroup> > measurements_type;
+    typedef MeasurementTermDescriptor<typename Matrix::value_type> measurement_term_desc_type;
+    typedef typename measurement_term_desc_type::op_prod_type op_prod_type;
     
     typedef std::size_t size_t;
     
@@ -72,11 +71,27 @@ public:
     virtual typename SymmGroup::charge total_quantum_numbers(BaseParameters & parms) const=0;
 
     virtual terms_type const& hamiltonian_terms() const { return terms_; }
-    virtual measurements_type measurements() const=0;
     
+    virtual bool has_operator(std::string const & name, size_t type) const=0;
     virtual op_t const& get_operator(std::string const & name, size_t type) const { return operators_table()->get_op( get_operator_tag(name, type) ); }
     virtual tag_type get_operator_tag(std::string const & name, size_t type) const=0;
-    
+
+    virtual bool has_operator(op_prod_type const & name, size_t type) const
+    {
+        if (name.size() != 1)
+            throw std::runtime_error("Default fallback on has_operator(name, type) is only valid for trivial op_prod names.");
+        return has_operator(name[0], type);
+    }
+    virtual op_t const& get_operator(op_prod_type const & name, size_t type) const { return operators_table()->get_op( get_operator_tag(name, type) ); }
+    virtual tag_type get_operator_tag(op_prod_type const & name, size_t type) const
+    {
+        if (name.size() != 1)
+            throw std::runtime_error("Default fallback on get_operator_tag(name, type) is only valid for trivial op_prod names.");
+        return get_operator_tag(name[0], type);
+    }
+
+    virtual std::vector<measurement_term_desc_type> unpack_measurement_terms(std::string const & name) const=0;
+
     virtual table_ptr operators_table() const=0;
     
     virtual initializer_ptr initializer(Lattice const& lat, BaseParameters & parms) const;
@@ -106,7 +121,8 @@ public:
     typedef typename impl_type::term_descriptor term_descriptor;
     typedef typename impl_type::terms_type terms_type;
     typedef typename impl_type::op_t op_t;
-    typedef typename impl_type::measurements_type measurements_type;
+    typedef typename impl_type::measurement_term_desc_type measurement_term_desc_type;
+    typedef typename impl_type::op_prod_type op_prod_type;
     
     typedef typename impl_type::size_t size_t;
     
@@ -129,10 +145,16 @@ public:
     typename SymmGroup::charge total_quantum_numbers(BaseParameters & parms) const { return impl_->total_quantum_numbers(parms); }
     
     terms_type const& hamiltonian_terms() const { return impl_->hamiltonian_terms(); }
-    measurements_type measurements() const { return impl_->measurements(); }
     
+    bool has_operator(std::string const & name, size_t type) const { return impl_->has_operator(name, type); }
     op_t const& get_operator(std::string const & name, size_t type=0) const { return impl_->get_operator(name, type); }
     tag_type get_operator_tag(std::string const & name, size_t type=0) const { return impl_->get_operator_tag(name, type); }
+
+    bool has_operator(op_prod_type const & name, size_t type) const { return impl_->has_operator(name, type); }
+    op_t const& get_operator(op_prod_type const & name, size_t type=0) const { return impl_->get_operator(name, type); }
+    tag_type get_operator_tag(op_prod_type const & name, size_t type=0) const { return impl_->get_operator_tag(name, type); }
+
+    std::vector<measurement_term_desc_type> unpack_measurement_terms(std::string const & name) const { return impl_->unpack_measurement_terms(name); }
     
     table_ptr operators_table() const { return impl_->operators_table(); }
     

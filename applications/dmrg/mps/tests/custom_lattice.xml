@@ -1,0 +1,39 @@
+<!--
+   Copyright (c) 2003-2010 Matthias Troyer (troyer@ethz.ch)
+
+   Distributed under the Boost Software License, Version 1.0.
+   (See accompanying file LICENSE_1_0.txt or copy at
+   http://www.boost.org/LICENSE_1_0.txt)
+  -->
+
+<LATTICES>
+
+<LATTICE name="chain lattice" dimension="1">
+  <PARAMETER name="a" default="1"/>
+  <BASIS><VECTOR>a</VECTOR></BASIS>
+  <RECIPROCALBASIS><VECTOR>2*pi/a</VECTOR></RECIPROCALBASIS>
+</LATTICE>
+
+<UNITCELL name="kondo1d" dimension="1">
+  <VERTEX type="0"><COORDINATE>0</COORDINATE></VERTEX>
+  <VERTEX type="1"><COORDINATE>0.5</COORDINATE></VERTEX>
+  <EDGE type="0"><SOURCE vertex="1" offset="0"/><TARGET vertex="1" offset="1"/></EDGE>
+  <EDGE type="1"><SOURCE vertex="1" offset="0"/><TARGET vertex="2" offset="0"/></EDGE>
+</UNITCELL>
+
+<UNITCELL name="complex1d" dimension="1">
+  <VERTEX/>
+  <EDGE type="0"><SOURCE vertex="1" offset="0"/><TARGET vertex="1" offset="1"/></EDGE>
+  <EDGE type="1"><SOURCE vertex="1" offset="0"/><TARGET vertex="1" offset="2"/></EDGE>
+</UNITCELL>
+
+<LATTICEGRAPH name = "open Kondo lattice">
+  <FINITELATTICE>
+    <LATTICE ref="chain lattice"/>
+    <EXTENT dimension="1" size ="L"/>
+    <BOUNDARY type="open"/>
+  </FINITELATTICE>
+  <UNITCELL ref="kondo1d"/>
+</LATTICEGRAPH>
+
+</LATTICES>
