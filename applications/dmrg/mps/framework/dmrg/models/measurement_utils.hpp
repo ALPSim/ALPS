@@ -47,7 +47,7 @@ struct MeasurementSpecs {
 };
 
 
-std::vector<MeasurementSpecs> parse_measurements(BaseParameters const& parms)
+inline std::vector<MeasurementSpecs> parse_measurements(BaseParameters const& parms)
 {
     
     std::vector<MeasurementSpecs> meas_specs;
