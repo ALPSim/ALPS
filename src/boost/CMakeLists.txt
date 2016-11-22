@@ -151,7 +151,7 @@ endif(BUILD_BOOST_SERIALIZATION)
 
 # Boost.Python
 if(BUILD_BOOST_PYTHON)
-  set(BOOST_LINK_LIBS ${BOOST_LINK_LIBS} ${PYTHON_LIBRARY})
+  set(BOOST_LINK_LIBS ${BOOST_LINK_LIBS} ${PYTHON_LIBRARY} ${PYTHON_EXTRA_LIBS})
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/python/src")
   set(SOURCES dict.cpp errors.cpp exec.cpp import.cpp list.cpp long.cpp
       module.cpp numeric.cpp object_operators.cpp object_protocol.cpp slice.cpp
