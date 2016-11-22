@@ -1,5 +1,5 @@
 #include "dmrg/utils/DmrgParameters.h"
-#include "dmrg/models/measurement_utils.hpp"
+#include "dmrg/models/measurement_parser.hpp"
 
 using namespace std;
 

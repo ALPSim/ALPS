@@ -24,8 +24,8 @@
  *
  *****************************************************************************/
 
-#ifndef MEASUREMENT_UTILS_HPP
-#define MEASUREMENT_UTILS_HPP
+#ifndef MODELS_MEASUREMENT_PARSER_HPP
+#define MODELS_MEASUREMENT_PARSER_HPP
 
 #include "dmrg/utils/BaseParameters.h"
 

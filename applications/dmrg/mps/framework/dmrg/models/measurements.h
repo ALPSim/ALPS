@@ -37,7 +37,7 @@
 
 #include "dmrg/models/model.h"
 #include "dmrg/models/lattice.h"
-#include "dmrg/models/measurement_utils.hpp"
+#include "dmrg/models/measurement_parser.hpp"
 
 #undef tolower
 #undef toupper
