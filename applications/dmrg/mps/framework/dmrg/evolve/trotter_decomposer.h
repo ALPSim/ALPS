@@ -50,7 +50,7 @@ public:
     typedef std::pair<std::size_t, double> term_type;
     typedef trotter_steps_iterator steps_iterator;
 
-    trotter_decomposer(size_type, std::string const&, bool);
+    inline trotter_decomposer(size_type, std::string const&, bool);
     
     bool is_optimized() const
     {
@@ -84,7 +84,7 @@ public:
         return Useq_final;
     }
     
-    steps_iterator steps_begin(size_type nsteps) const;
+    inline steps_iterator steps_begin(size_type nsteps) const;
     
     std::string description() const
     {
