@@ -230,6 +230,14 @@ IF(HAVE_MKL)
     find_path(MKL_INCLUDE_DIR mkl.h ${MKL_INC_PATHS})
     include_directories(${MKL_INCLUDE_DIR})
     set(ALPS_HAVE_MKL 1) # MKL flag set in alps/config.h
+    if(APPLE)
+      list(APPEND LAPACK_LDFLAGS "-Wl,-rpath,${mkl_home}/lib")
+      if(OPENMP_FOUND AND ALPS_USE_MKL_PARALLEL AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
+        # Add path to libomp5
+        list(APPEND LAPACK_LDFLAGS "-Wl,-rpath,${mkl_home}/..compiler/lib")
+      endif()
+      message(STATUS "MKL on Mac: forcing Rpath to libdir")
+    endif(APPLE)
   endif(NOT _libraries_work)
 ENDIF(HAVE_MKL)
 
