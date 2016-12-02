@@ -69,17 +69,18 @@ Our codes are capable of efficiently move this temporary memory to disk. This op
 
 ## Time evolution parameters ##
 
-| Parameter       | Default           | Description |
-| ---------       | :-------:         | ----------- |
-| `DT`            |                   | Time step |
-| `IMG_TIMESTEPS` | 0                 | Number of imaginary time sweeps to perform before the proceeding with the real time evolution |
-| `TIMESTEPS`     |                   | Total number of sweeps |
-| `te_order`      | fourth            | Order of the trotter decomposition. Possible values: `second', `fourth'. |
-| `te_type`       | nn                | Type of time evolution algorithm. Possible values: `nn' (for nearest neighbors), `mpo'. |
-| `chkp_each`     | 1                 | A checkpoint is created every `chkp_each` time steps. |
-| `measure_each`  | 1                 | Measurements are performed every `measure_each` time steps. |
-| `update_each`   | -1                | Update the Hamiltonian parameters every `update_each` time steps. Used while quenching Hamiltonian parameters. A negative value will never change the Hamiltonian. |
-| `P[Time]`       |                   | Values assigned to the parameter `P` at each time step |
+| Parameter         | Default           | Description |
+| ---------         | :-------:         | ----------- |
+| `DT`              |                   | Time step |
+| `IMG_TIMESTEPS`   | 0                 | Number of imaginary time sweeps to perform before the proceeding with the real time evolution |
+| `TIMESTEPS`       |                   | Total number of sweeps |
+| `te_order`        | fourth            | Order of the trotter decomposition. Possible values: `second', `fourth'. |
+| `te_type`         | nn                | Type of time evolution algorithm. Possible values: `nn' (for nearest neighbors), `mpo'. |
+| `mpo_compression` | twosite           | MPO compression used by mpo time evolution: singlesite or twosite |
+| `chkp_each`       | 1                 | A checkpoint is created every `chkp_each` time steps. |
+| `measure_each`    | 1                 | Measurements are performed every `measure_each` time steps. |
+| `update_each`     | -1                | Update the Hamiltonian parameters every `update_each` time steps. Used while quenching Hamiltonian parameters. A negative value will never change the Hamiltonian. |
+| `P[Time]`         |                   | Values assigned to the parameter `P` at each time step |
 
 
 [alps-web]: http://alps.comp-phys.org
