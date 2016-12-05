@@ -296,6 +296,10 @@ if (NOT Boost_FOUND)
           unit_test_monitor.cpp unit_test_parameters.cpp unit_test_suite.cpp #(unit_test_suite.cpp renamed to test_tree.cpp in 2011)
           xml_log_formatter.cpp xml_report_formatter.cpp
       )
+      if(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION GREATER 61)
+          set(SOURCES ${SOURCES} junit_log_formatter.cpp)
+      endif(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION GREATER 61)
+
       set (TEST_EXEC_MON_SOURCES "")
       foreach(S ${SOURCES})
         if(EXISTS ${DIRECTORY}/${S})
