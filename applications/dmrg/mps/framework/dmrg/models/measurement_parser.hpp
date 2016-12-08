@@ -58,16 +58,16 @@ inline std::vector<MeasurementSpecs> parse_measurements(BaseParameters const& pa
     {
         std::string param_name = it_p->key();
         
-        if( param_name.find("MEASURE") == std::string::npos )
+        if( param_name.find("MEASURE_") == std::string::npos )
             continue;
         
         boost::smatch what;
-        boost::regex_search(param_name, what, measurement_expr);
-        
-        std::string measurement_type( what.str(1) );
-        std::string measurement_name( what.str(2) );
-        
-        meas_specs.push_back( MeasurementSpecs( measurement_type , measurement_name , it_p->value() ) );
+        if (boost::regex_search(param_name, what, measurement_expr)) {
+            std::string measurement_type( what.str(1) );
+            std::string measurement_name( what.str(2) );
+            
+            meas_specs.push_back( MeasurementSpecs( measurement_type , measurement_name , it_p->value() ) );
+        }
     }
     
     return meas_specs;

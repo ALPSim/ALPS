@@ -9,6 +9,7 @@ int main()
 DmrgParameters parms;
 
 parms.set("MEASURE_LOCAL[ XHOYX]" , "exchange" );
+parms.set("ALWAYS_MEASURE" , "local at,XHOYX" );
 parms.set("MEASURE_AVERAGE [dfhdgh]" , "fermion_hop" );
 parms.set(" MEASURE_LOCAL_AT [ local at ] " , "Sz:Sz|(3,1),(1,2)" );
 
