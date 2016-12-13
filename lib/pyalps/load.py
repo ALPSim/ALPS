@@ -297,10 +297,10 @@ class Hdf5Loader:
                                     else:
                                         d.x = np.arange(0,len(d.y))
                                     d.props.update(params)
-
+                                    
+                                    fileset.append(d)
                                 except AttributeError:
                                     log("Could not create DataSet")
-                            fileset.append(d)
                 if loadIterations==True:
                     if "iteration" in self.h5f.list_children(respath):
                         fileset.append(self.GetIterations(respath, params, measurements, index, verbose))
