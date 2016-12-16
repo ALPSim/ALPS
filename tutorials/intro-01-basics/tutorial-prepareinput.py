@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -45,6 +46,6 @@ for t in [1.5,2,2.5]:
 
 #write the input file
 input_file = pyalps.writeInputFiles('parm1',parms)
-print "The job input file is prepared in", input_file
+print("The job input file is prepared in", input_file)
 
 

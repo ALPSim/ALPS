@@ -36,13 +36,13 @@
 #include <alps/hdf5/complex.hpp>
 
 #include <alps/ngs/boost_python.hpp>
+#include <alps/python/numpy_array.hpp>
 
 #include <boost/scoped_ptr.hpp>
 
 #include <boost/python/list.hpp>
 #include <boost/python/dict.hpp>
 #include <boost/python/object.hpp>
-#include <boost/python/numeric.hpp>
 
 #include <string>
 #include <iterator>
@@ -137,24 +137,24 @@ namespace alps {
 
         namespace detail {
 
-            template<> struct is_vectorizable<boost::python::numeric::array> {
-                static bool apply(boost::python::numeric::array const & value);
+            template<> struct is_vectorizable<alps::python::numpy::array> {
+                static bool apply(alps::python::numpy::array const & value);
             };
 
-            template<>  struct get_extent<boost::python::numeric::array> {
-                static std::vector<std::size_t> apply(boost::python::numeric::array const & value);
+            template<>  struct get_extent<alps::python::numpy::array> {
+                static std::vector<std::size_t> apply(alps::python::numpy::array const & value);
             };
 
-            template<>  struct set_extent<boost::python::numeric::array> {
+            template<>  struct set_extent<alps::python::numpy::array> {
                 // To set the extent of a numpy array, we need the type, extent is set in load
-                static void apply(boost::python::numeric::array & value, std::vector<std::size_t> const & extent);
+                static void apply(alps::python::numpy::array & value, std::vector<std::size_t> const & extent);
             };
         }
 
         ALPS_DECL void save(
               archive & ar
             , std::string const & path
-            , boost::python::numeric::array const & value
+            , alps::python::numpy::array const & value
             , std::vector<std::size_t> size = std::vector<std::size_t>()
             , std::vector<std::size_t> chunk = std::vector<std::size_t>()
             , std::vector<std::size_t> offset = std::vector<std::size_t>()
@@ -163,7 +163,7 @@ namespace alps {
         ALPS_DECL void load(
               archive & ar
             , std::string const & path
-            , boost::python::numeric::array & value
+            , alps::python::numpy::array & value
             , std::vector<std::size_t> chunk = std::vector<std::size_t>()
             , std::vector<std::size_t> offset = std::vector<std::size_t>()
         );

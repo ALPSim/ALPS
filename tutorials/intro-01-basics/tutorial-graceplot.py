@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -51,11 +52,11 @@ pyalps.runApplication('spinmc',input_file,Tmin=5,writexml=True)
 
 #get the list of result files
 result_files = pyalps.getResultFiles(prefix='parm1')
-print "Loading results from the files: ", result_files
+print("Loading results from the files: ", result_files)
 
 #print the observables stored in those files:
-print "The files contain the following mesurements:",
-print pyalps.loadObservableList(result_files)
+print("The files contain the following mesurements:", end=' ')
+print(pyalps.loadObservableList(result_files))
 
 #load a selection of measurements:
 data = pyalps.loadMeasurements(result_files,['|Magnetization|','Magnetization^2'])
@@ -64,14 +65,14 @@ data = pyalps.loadMeasurements(result_files,['|Magnetization|','Magnetization^2'
 plotdata = pyalps.collectXY(data,'T','|Magnetization|')
 
 # convert the data to grace file for plotting using xmgrace
-print "The results in grace format are:"
-print pyalps.plot.makeGracePlot(plotdata)
+print("The results in grace format are:")
+print(pyalps.plot.makeGracePlot(plotdata))
 
-print "Saving into file parm1.gr"
+print("Saving into file parm1.gr")
 f = open ('parm1.gr','w')
 f.write(pyalps.plot.makeGracePlot(plotdata))
 f.close()
 
-print "Trying to launch xmgrace"
+print("Trying to launch xmgrace")
 process = subprocess.Popen(['xmgrace','parm1.gr'])
 

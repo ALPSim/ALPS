@@ -56,10 +56,12 @@ namespace alps {
             boost::python::extract<boost::python::dict> dict(arg);
             if (!dict.check())
                 throw std::invalid_argument("parameters can only be created from a dict" + ALPS_STACKTRACE);
-            const boost::python::object kit = dict().iterkeys();
-            const boost::python::object vit = dict().itervalues();
-            for (std::size_t i = 0; i < boost::python::len(dict()); ++i)
-                setter(boost::python::call_method<std::string>(kit.attr("next")().ptr(), "__str__"), vit.attr("next")());
+            const boost::python::list keys = dict().keys();
+            for (std::size_t i = 0; i < boost::python::len(keys); ++i) {
+                boost::python::object pyk = keys[i];
+                std::string k = boost::python::call_method<std::string>(pyk.ptr(), "__str__");
+                setter(k, dict().get(pyk));
+            }
         }
 
         // TODO: merge with params::params(boost::filesystem::path const & path);
@@ -143,7 +145,7 @@ namespace alps {
             boost::mpi::broadcast(comm, *this, root);
         }
     #endif
-    
+
     void params::setter(std::string const & key, detail::paramvalue const & value) {
         if (!defined(key))
             keys.push_back(key);
@@ -153,11 +155,11 @@ namespace alps {
     detail::paramvalue params::getter(std::string const & key) {
         return values[key];
     }
-    
+
 
     std::ostream & operator<<(std::ostream & os, params const & v) {
         for (params::const_iterator it = v.begin(); it != v.end(); ++it)
             os << it->first << " = " << it->second << std::endl;
         return os;
-    }    
+    }
 }

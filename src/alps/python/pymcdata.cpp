@@ -37,7 +37,7 @@
 
 #include <boost/python.hpp>
 
-namespace alps { 
+namespace alps {
     namespace alea {
 
         template <typename T>
@@ -126,7 +126,7 @@ namespace alps {
             template <class T> typename alps::alea::mcdata<T>::result_type wrap_ ## member_name(alps::alea::mcdata<T> const & value) {                            \
                 return value. member_name ();                                                                                                                     \
             }                                                                                                                                                     \
-            template <class T> boost::python::numeric::array wrap_ ## member_name(alps::alea::mcdata<T> const & value) {                                          \
+            template <class T> alps::python::numpy::array wrap_ ## member_name(alps::alea::mcdata<T> const & value) {                                          \
                 return alps::python::numpy::convert(value. member_name ());                                                                                       \
             }
 
@@ -141,12 +141,31 @@ namespace alps {
         template <typename T> boost::python::str print_mcdata(alps::alea::mcdata<T> const & self) {
             return boost::python::str(boost::python::str(self.mean()) + " +/- " + boost::python::str(self.error()));
         }
+        template <typename T> boost::python::str format_mcdata(alps::alea::mcdata<T> const & self, boost::python::str const & format_spec) {
+            #if PY_VERSION_HEX >= 0x03000000
+            boost::python::object builtin = boost::python::import("builtins");
+            #else
+            boost::python::object builtin = boost::python::import("__builtin__");
+            #endif
+            boost::python::object globals(builtin.attr("__dict__"));
+            boost::python::object format_func = globals["format"];
+            // return boost::python::str(boost::python::call<boost::python::str>(format_func.ptr(), self.mean(), format_spec));
+            return boost::python::str(boost::python::str(boost::python::call<boost::python::str>(format_func.ptr(), self.mean(), format_spec)) + " +/- " + boost::python::str(boost::python::call<boost::python::str>(format_func.ptr(), self.error(), format_spec)));
+            // return boost::python::str(boost::python::format(self.mean(), format_spec) + " +/- " + boost::python::format(self.error(), format_spec));
+        }
 
         template <typename T> boost::python::str print_mcdata(alps::alea::mcdata<std::vector<T> > const & self) {
             boost::python::str str;
             for (typename alps::alea::mcdata<std::vector<T> >::const_iterator it = self.begin(); it != self.end(); ++it)
                 str += print_mcdata(*it) + (it + 1 != self.end() ? "\n" : "");
             return str;
+        }
+
+        template <typename T> boost::python::str format_mcdata(alps::alea::mcdata<std::vector<T> > const & self, boost::python::str const & format_spec) {
+          boost::python::str str;
+          for (typename alps::alea::mcdata<std::vector<T> >::const_iterator it = self.begin(); it != self.end(); ++it)
+              str += format_mcdata(*it, format_spec) + (it + 1 != self.end() ? "\n" : "");
+          return str;
         }
 
     }
@@ -204,10 +223,11 @@ BOOST_PYTHON_MODULE(pymcdata_c) {
         .add_property("error", static_cast<double(*)(mcdata<double> const &)>(&alps::python::wrap_error),error_docstring)
         .add_property("tau", static_cast<double(*)(mcdata<double> const &)>(&alps::python::wrap_tau),tau_docstring)
         .add_property("variance", static_cast<double(*)(mcdata<double> const &)>(&alps::python::wrap_variance),variance_docstring)
-        .add_property("bins", static_cast<numeric::array(*)(mcdata<double> const &)>(&alps::python::wrap_bins),bins_docstring)
-        .add_property("jackknife", static_cast<numeric::array(*)(mcdata<double> const &)>(&alps::python::wrap_jackknife),jackknife_docstring)
+        .add_property("bins", static_cast<alps::python::numpy::array(*)(mcdata<double> const &)>(&alps::python::wrap_bins),bins_docstring)
+        .add_property("jackknife", static_cast<alps::python::numpy::array(*)(mcdata<double> const &)>(&alps::python::wrap_jackknife),jackknife_docstring)
         .add_property("count", &mcdata<double>::count,count_docstring)
         .def("__repr__", static_cast<str(*)(mcdata<double> const &)>(&alps::python::print_mcdata))
+        .def("__format__", static_cast<str(*)(mcdata<double> const &, str const &)>(&alps::python::format_mcdata))
         .def("__deepcopy__", &alps::python::make_copy<mcdata<double> >)
         .def("__abs__", static_cast<mcdata<double>(*)(mcdata<double>)>(&abs))
         .def("__pow__", static_cast<mcdata<double>(*)(mcdata<double>, mcdata<double>::element_type)>(&pow))
@@ -270,14 +290,15 @@ BOOST_PYTHON_MODULE(pymcdata_c) {
         .def("__len__", static_cast<std::size_t(*)(alps::alea::mcdata<std::vector<double> > &)>(&alps::python::size))
         .def("__getitem__", static_cast<object(*)(back_reference<alps::alea::mcdata<std::vector<double> > & >, PyObject *)>(&alps::python::get_item))
         .def("__contains__", static_cast<bool(*)(alps::alea::mcdata<std::vector<double> > &, PyObject *)>(&alps::python::contains))
-        .add_property("mean", static_cast<numeric::array(*)(mcdata<std::vector<double> > const &)>(&alps::python::wrap_mean),mean_docstring)
-        .add_property("error", static_cast<numeric::array(*)(mcdata<std::vector<double> > const &)>(&alps::python::wrap_error),error_docstring)
-        .add_property("tau", static_cast<numeric::array(*)(mcdata<std::vector<double> > const &)>(&alps::python::wrap_tau),tau_docstring)
-        .add_property("variance", static_cast<numeric::array(*)(mcdata<std::vector<double> > const &)>(&alps::python::wrap_variance),variance_docstring)
-        .add_property("bins", static_cast<numeric::array(*)(mcdata<std::vector<double> > const &)>(&alps::python::wrap_bins),bins_docstring)
-        .add_property("jackknife", static_cast<numeric::array(*)(mcdata<std::vector<double> > const &)>(&alps::python::wrap_jackknife),jackknife_docstring)
+        .add_property("mean", static_cast<alps::python::numpy::array(*)(mcdata<std::vector<double> > const &)>(&alps::python::wrap_mean),mean_docstring)
+        .add_property("error", static_cast<alps::python::numpy::array(*)(mcdata<std::vector<double> > const &)>(&alps::python::wrap_error),error_docstring)
+        .add_property("tau", static_cast<alps::python::numpy::array(*)(mcdata<std::vector<double> > const &)>(&alps::python::wrap_tau),tau_docstring)
+        .add_property("variance", static_cast<alps::python::numpy::array(*)(mcdata<std::vector<double> > const &)>(&alps::python::wrap_variance),variance_docstring)
+        .add_property("bins", static_cast<alps::python::numpy::array(*)(mcdata<std::vector<double> > const &)>(&alps::python::wrap_bins),bins_docstring)
+        .add_property("jackknife", static_cast<alps::python::numpy::array(*)(mcdata<std::vector<double> > const &)>(&alps::python::wrap_jackknife),jackknife_docstring)
         .add_property("count", &mcdata<std::vector<double> >::count,count_docstring)
         .def("__repr__", static_cast<str(*)(mcdata<std::vector<double> > const &)>(&alps::python::print_mcdata))
+        .def("__format__", static_cast<str(*)(mcdata<std::vector<double> > const &, str const &)>(&alps::python::format_mcdata))
         .def("__deepcopy__", &alps::python::make_copy<mcdata<std::vector<double> > >)
         .def("__abs__", static_cast<mcdata<std::vector<double> >(*)(mcdata<std::vector<double> >)>(&abs))
         .def("__pow__", static_cast<mcdata<std::vector<double> >(*)(mcdata<std::vector<double> >, mcdata<double>::element_type)>(&pow))

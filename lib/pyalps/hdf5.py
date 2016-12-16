@@ -29,8 +29,8 @@
 This module contains the archive class, used to read / write hdf5 files
 """
 
-from pyngshdf5_c import hdf5_archive_impl
-from pyngshdf5_c import register_archive_exception_type
+from .cxx.pyngshdf5_c import hdf5_archive_impl
+from .cxx.pyngshdf5_c import register_archive_exception_type
 
 class ArchiveError(Exception): pass
 register_archive_exception_type(0, ArchiveError)

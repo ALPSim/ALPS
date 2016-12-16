@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -50,11 +51,11 @@ pyalps.runApplication('spinmc',input_file,Tmin=5,writexml=True)
 
 #get the list of result files
 result_files = pyalps.getResultFiles(prefix='parm1')
-print "Loading results from the files: ", result_files
+print("Loading results from the files: ", result_files)
 
 #print the observables stored in those files:
-print "The files contain the following mesurements:",
-print pyalps.loadObservableList(result_files)
+print("The files contain the following mesurements:", end=' ')
+print(pyalps.loadObservableList(result_files))
 
 #load a selection of measurements:
 data = pyalps.loadMeasurements(result_files,['|Magnetization|','Magnetization^2'])
@@ -63,10 +64,10 @@ data = pyalps.loadMeasurements(result_files,['|Magnetization|','Magnetization^2'
 plotdata = pyalps.collectXY(data,'T','|Magnetization|')
 
 # convert the data to text file for plotting using another tool
-print "The results in plain text are:"
-print pyalps.plot.convertToText(plotdata)
+print("The results in plain text are:")
+print(pyalps.plot.convertToText(plotdata))
 
-print "Saving into file parm1.txt"
+print("Saving into file parm1.txt")
 f = open ('parm1.txt','w')
 f.write(pyalps.plot.convertToText(plotdata))
 f.close()

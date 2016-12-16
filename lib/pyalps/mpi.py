@@ -31,12 +31,18 @@ if sys.platform == 'linux2':
     flags = sys.getdlopenflags()
     sys.setdlopenflags(dl.RTLD_NOW|dl.RTLD_GLOBAL)
     try:
-        from mpi_c import *
+        try:
+            from .cxx.mpi_c import *
+        except ImportError:
+            from mpi_c import *
     except ImportError:
         from boost.mpi import *
     sys.setdlopenflags(flags)
 else:
     try:
-        from mpi_c import *
+        try:
+            from .cxx.mpi_c import *
+        except ImportError:
+            from mpi_c import *
     except ImportError:
         from boost.mpi import *

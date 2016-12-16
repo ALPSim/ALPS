@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -32,8 +34,8 @@ import numpy as np
 import pyalps.hdf5 as h5
 import pyalps.alea as pa
 
-from dataset import ResultFile
-from dataset import DataSet
+from .dataset import ResultFile
+from .dataset import DataSet
 #from floatwitherror import FloatWithError as fwe
 
 import pyalps.pytools as pt # the C++ conversion functions
@@ -54,7 +56,7 @@ def log(m):
     if in_vistrails:
       debug.log(str(m))
     else:
-      print m
+      print(m)
     
 def parse_label(label):
     if '--' in label:
@@ -120,7 +122,7 @@ class Hdf5Loader:
                     try:
                         dict[m] = float(dict[m])
                     except:
-                        dict[m] = map(float,dict[m])
+                        dict[m] = list(map(float,dict[m]))
                 except ValueError:
                     pass
         return dict 
@@ -140,7 +142,7 @@ class Hdf5Loader:
                     rfile.props["ObservableList"] = [pt.hdf5_name_decode(x) for x in obs]
                 except: pass
                 resultfiles.append(rfile)
-            except Exception, e:
+            except Exception as e:
                 log(e)
                 log(traceback.format_exc())
         return resultfiles
@@ -204,7 +206,7 @@ class Hdf5Loader:
                             log( "Could not create DataSet")
                             pass
                 sets.append(fileset)
-            except Exception, e:
+            except Exception as e:
                 log(e)
                 log(traceback.format_exc())
         return sets
@@ -348,7 +350,7 @@ class Hdf5Loader:
                 sets.append(fileset)
             except RuntimeError:
                 raise
-            except Exception, e:
+            except Exception as e:
                 log(e)
                 log(traceback.format_exc())
         return sets
@@ -401,7 +403,7 @@ class Hdf5Loader:
                     except AttributeError:
                         log( "Could not create DataSet")
                 sets.append(fileset)
-            except Exception, e:
+            except Exception as e:
                 log( e)
                 log( traceback.format_exc())
         return sets
@@ -448,7 +450,7 @@ class Hdf5Loader:
                             obs=None
                             if not self.h5f.is_group(respath+'/'+m+'/timeseries'): # check for simple binning
                                 obs = np.array(self.h5f[respath+'/'+m+'/mean/value']);
-                                if params.has_key('L'): # ugly fix... really ugly
+                                if 'L' in params: # ugly fix... really ugly
                                   L = int(params['L'])
                                   if L == obs.size:
                                     params['origin'] = [(L-1.)/2.];
@@ -489,7 +491,7 @@ class Hdf5Loader:
                     except AttributeError:
                         log( "Could not create DataSet")
                 sets.append(fileset)
-            except Exception, e:
+            except Exception as e:
                 log(e)
                 log(traceback.format_exc())
         return sets
@@ -537,7 +539,7 @@ class Hdf5Loader:
                         obsset.append(d)
                     iterationset.append(obsset)
                 fileset.append(iterationset)
-            except Exception, e:
+            except Exception as e:
                 log( e)
                 log( traceback.format_exc())
         return fileset
@@ -719,7 +721,7 @@ def loadTimeEvolution( flist,globalproppath='/parameters',resroot='/timesteps/',
                     locdata[0][i].props.update(globalprops[0].props)
                 #Extend the total dataset with this data
                 data.extend(locdata)
-        except Exception, e:
+        except Exception as e:
             log(e)
             log( traceback.format_exc())
     return data

@@ -12,19 +12,19 @@ childs:  23
        [[1, 2],
         [3, 4]]], dtype=int32)
 /tuple:  array([1, 2, 3], dtype=int32)
-/dict:  {'string': 'str', 'numpycpx': array([ 1.1+1.j,  0.0+2.j,  3.5+0.j]), 'list': array([1, 2, 3], dtype=int32), '1': 1, 'scalar': 1, '4': {'a': array([1, 2, 3]), '(2+3j)': 'foo'}, 'numpy': array([1, 2, 3])}
+/dict:  [('1', 1), ('4', {'a': array([1, 2, 3]), '(2+3j)': 'foo'}), ('list', array([1, 2, 3], dtype=int32)), ('numpy', array([1, 2, 3])), ('numpycpx', array([ 1.1+1.j,  0.0+2.j,  3.5+0.j])), ('scalar', 1), ('string', 'str')]
 /numpy:  array([1, 2, 3])
 /numpy2:  array([ 1.1,  2. ,  3.5])
 /numpy3:  array([ 1.1+1.j,  0.0+2.j,  3.5+0.j])
 /numpyel:  1
 /numpyel2:  1.1
 /numpyel3:  (1.1+1j)
-/int:  ['a', 'list', 'of', 'strings']
+/int:  1
 /long:  1
-/double:  1
-/complex:  1.0
-/string:  (1+1j)
-/stringlist:  'str'
+/double:  1.0
+/complex:  (1+1j)
+/string:  'str'
+/stringlist:  ['a', 'list', 'of', 'strings']
 /inhomogenious:  [array([1, 2, 3], dtype=int32), array([1, 2, 3]), 'gurke', [[array([1, 2, 3]), 2, 3], ['x', (1+1j)]]]
 /inhomogenious2:  [array([[1, 2],
        [3, 4]], dtype=int32), array([[1, 2],

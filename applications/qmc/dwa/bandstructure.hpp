@@ -136,8 +136,8 @@ bandstructure::bandstructure(boost::python::object V0_, boost::python::object la
   , L            (L_)
   , Mmax         (Mmax_)
 {
-  V0 = alps::python::numpy::convert(V0_);
-  lambda = alps::python::numpy::convert(lambda_);
+  alps::python::numpy::convert(V0_, V0);
+  alps::python::numpy::convert(lambda_, lambda);
 
   if (V0.empty() || lambda.empty() || a_ == 0. || m_ == 0. || L == 0) 
     boost::throw_exception(std::runtime_error("Illegal initialization parameters for bandstructure class"));

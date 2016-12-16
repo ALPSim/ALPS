@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -32,11 +34,11 @@ mplversion = (int(mplversion[0]), int(mplversion[1]), mplversion[2])
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.axes3d import Axes3D;
 import numpy as np
-from hlist import flatten
-from dataset import DataSet
+from .hlist import flatten
+from .dataset import DataSet
 from matplotlib.font_manager import FontProperties
 import platform
-from plot_core import convertToText, makeGracePlot, makeGnuplotPlot
+from .plot_core import convertToText, makeGracePlot, makeGnuplotPlot
 
 colors = ['k','b','g','m','c','y']
 markers = ['s', 'o', '^', '>', 'v', '<', 'd', 'p', 'h', '8', '+', 'x']
@@ -310,13 +312,13 @@ class MplXYPlot_core:
                     if mplversion > (1,0,0):
                         plt.legend(loc=legend_loc,prop=FontProperties(legend_prop), frameon=showframe)
                     else:
-                        print 'Warning:', 'frameon option not supported with this matplotlib version (%s)' % matplotlib.__version__
+                        print('Warning:', 'frameon option not supported with this matplotlib version (%s)' % matplotlib.__version__)
                         plt.legend(loc=legend_loc,prop=FontProperties(legend_prop))
                 else:
                     if mplversion > (1,0,0):
                         plt.legend(loc=legend_loc, frameon=showframe)
                     else:
-                        print 'Warning:', 'frameon option not supported with this matplotlib version (%s)' % matplotlib.__version__
+                        print('Warning:', 'frameon option not supported with this matplotlib version (%s)' % matplotlib.__version__)
                         plt.legend(loc=legend_loc)
         
         if 'title' in self.plt:

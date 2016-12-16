@@ -26,8 +26,6 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define PY_ARRAY_UNIQUE_SYMBOL pyngshdf5_PyArrayHandle
-
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/pair.hpp>
 #include <alps/hdf5/vector.hpp>
@@ -36,14 +34,13 @@
 
 #include <alps/ngs/stacktrace.hpp>
 #include <alps/ngs/boost_python.hpp>
-#include <alps/ngs/detail/numpy_import.ipp>
 
+#include <alps/python/numpy_import.hpp>
 #include <alps/python/make_copy.hpp>
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/dict.hpp>
-#include <boost/python/numeric.hpp>
 #include <boost/python/to_python_converter.hpp>
 #include <boost/array.hpp>
 

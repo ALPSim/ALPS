@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -59,7 +60,7 @@ def read_testprop_xml(testinput):
     files = root.find('REFERENCE')    
     refFileList = [ rf.attrib['file'] for rf in files.getchildren() ]
     if not refFileList or None in refFileList:
-        print "Could not create list of Reference Files"
+        print("Could not create list of Reference Files")
         sys.exit(1)
 
     obsentries = root.find('OBSERVABLES')
@@ -117,17 +118,17 @@ def writeTest2stdout(comparelist, fobj):
                 obs_list.append( obs )
 
         if not obs_list:
-            print "<TESTTASK file='%s' status='PASS'>" % os.path.basename(comptask[0]['filename'])
-            print "</TESTTASK>"
+            print("<TESTTASK file='%s' status='PASS'>" % os.path.basename(comptask[0]['filename']))
+            print("</TESTTASK>")
         else:
-            print "<TESTTASK file='%s' status='FAIL'>" % comptask[0]['filename']
-            print "\t<OBSERVABLES>"
+            print("<TESTTASK file='%s' status='FAIL'>" % comptask[0]['filename'])
+            print("\t<OBSERVABLES>")
             for obs in obs_list:
-                print "\t<OBSERVABLE name='%s' diff='%s' tol='%s'/>" % \
-                    (obs['observable'], obs['difference'], obs['tolerance'])
+                print("\t<OBSERVABLE name='%s' diff='%s' tol='%s'/>" % \
+                    (obs['observable'], obs['difference'], obs['tolerance']))
 
-            print "\t</OBSERVABLES>"
-            print "</TESTTASK>"
+            print("\t</OBSERVABLES>")
+            print("</TESTTASK>")
 
     sys.stdout = sys.__stdout__
 
@@ -174,16 +175,16 @@ def compareMC( testfiles, reffiles, tol_factor='auto', whatlist=None ):
         if whatlist:
             notfoundtest = [ w for w in whatlist if w not in [ o.props['observable'] for o in testtask] ]
             if notfoundtest:
-                print "The following observables specified for comparison\nhave not been found in test results:"
-                print "File:", testfile
-                print notfoundtest
+                print("The following observables specified for comparison\nhave not been found in test results:")
+                print("File:", testfile)
+                print(notfoundtest)
                 sys.exit(1)
 
             notfoundref = [ w for w in whatlist if w not in [ o.props['observable'] for o in reftask] ]
             if notfoundref:
-                print "The following observables specified for comparison\nhave not been found in reference results:"
-                print "File:", reffile
-                print notfoundref
+                print("The following observables specified for comparison\nhave not been found in reference results:")
+                print("File:", reffile)
+                print(notfoundref)
                 sys.exit(1)
 
             testtask = [ o for o in testtask if o.props['observable'] in whatlist ]
@@ -259,16 +260,16 @@ def compareMixed( testfiles, reffiles, tol_factor='auto', whatlist = None ):
         if whatlist:
             notfoundtest = [ w for w in whatlist if w not in [ o.props['observable'] for o in testtask] ]
             if notfoundtest:
-                print "The following observables specified for comparison\nhave not been found in test results:"
-                print "File:", testfile
-                print notfoundtest
+                print("The following observables specified for comparison\nhave not been found in test results:")
+                print("File:", testfile)
+                print(notfoundtest)
                 sys.exit(1)
 
             notfoundref = [ w for w in whatlist if w not in [ o.props['observable'] for o in reftask] ]
             if notfoundref:
-                print "The following observables specified for comparison\nhave not been found in reference results:"
-                print "File:", reffile
-                print notfoundref
+                print("The following observables specified for comparison\nhave not been found in reference results:")
+                print("File:", reffile)
+                print(notfoundref)
                 sys.exit(1)
 
             testtask = [ o for o in testtask if o.props['observable'] in whatlist ]
@@ -338,10 +339,10 @@ def compareEpsilon( testfiles, reffiles, tol_factor='auto', whatlist = None ):
     refdata = pyalps.loadEigenstateMeasurements(reffiles) 
     if not testdata or not refdata:
         if not testdata:
-            print "loadEigenstateMeasurements of file %s returned an empty list" % testfiles
+            print("loadEigenstateMeasurements of file %s returned an empty list" % testfiles)
 
         if not refdata:
-            print "loadEigenstateMeasurements of file %s returned an empty list" % reffiles
+            print("loadEigenstateMeasurements of file %s returned an empty list" % reffiles)
 
         return
 
@@ -377,18 +378,18 @@ def compareEpsilon( testfiles, reffiles, tol_factor='auto', whatlist = None ):
             if whatlist:
                 notfoundtest = [ w for w in whatlist if w not in [ o.props['observable'] for o in testsector] ]
                 if notfoundtest:
-                    print "The following observables specified for comparison\n\
-                           have not been found in test results:"
-                    print "File:", testfile
-                    print notfoundtest
+                    print("The following observables specified for comparison\n\
+                           have not been found in test results:")
+                    print("File:", testfile)
+                    print(notfoundtest)
                     sys.exit(1)
 
                 notfoundref = [ w for w in whatlist if w not in [ o.props['observable'] for o in refsector] ]
                 if notfoundref:
-                    print "The following observables specified for comparison\n\
-                           have not been found in reference results:"
-                    print "File:", reffile
-                    print notfoundref
+                    print("The following observables specified for comparison\n\
+                           have not been found in reference results:")
+                    print("File:", reffile)
+                    print(notfoundref)
                     sys.exit(1)
 
                 testsector = [ o for o in testsector if o.props['observable'] in whatlist ]
@@ -470,16 +471,16 @@ def checkProperties( testfile, reffile ):
         rprop = ll.GetProperties( pyalps.make_list(reffile)  )[0].props
 
     except IndexError:
-        print """WARNING: Simulation properties of files %s and %s 
+        print("""WARNING: Simulation properties of files %s and %s 
         couldn't be loaded. Check for matching properties
-        has been skipped""" % ( testfile, reffile )
+        has been skipped""" % ( testfile, reffile ))
         return True
 
-    if tprop.has_key('SEED') and rprop.has_key('SEED'):
+    if 'SEED' in tprop and 'SEED' in rprop:
         del tprop['SEED']
         del rprop['SEED']
 
-    if tprop.has_key('filename') and rprop.has_key('filename'):
+    if 'filename' in tprop and 'filename' in rprop:
         del tprop['filename']
         del rprop['filename']
 
@@ -515,7 +516,7 @@ def compareTest( testinputfile, outputs, tmpdir, tstart, compMethod='auto' ):
         missmatch = [(tf,rf) for (tf,rf) in zip(outputs,refFileList) if not checkProperties(tf,rf)]
         if missmatch:
             for ft in missmatch:
-                print "Simulation parameter mismatch in files %s and %s" % (ft[0],ft[1])
+                print("Simulation parameter mismatch in files %s and %s" % (ft[0],ft[1]))
                 test_success = False
         else:
             for tfile, rfile in zip(outputs, refFileList):
@@ -527,7 +528,7 @@ def compareTest( testinputfile, outputs, tmpdir, tstart, compMethod='auto' ):
         missmatch = [(tf,rf) for (tf,rf) in zip(outputs,refFileList) if not checkProperties(tf,rf)]
         if missmatch:
             for ft in missmatch:
-                print "Simulation parameter mismatch in files %s and %s" % (ft[0],ft[1])
+                print("Simulation parameter mismatch in files %s and %s" % (ft[0],ft[1]))
                 test_success = False
         else:
             for tfile, rfile in zip(outputs, refFileList):
@@ -563,7 +564,7 @@ def compareTest( testinputfile, outputs, tmpdir, tstart, compMethod='auto' ):
         shutil.copy(outfile, '.')
     else:
         f = open(outfile)
-        print f.read()
+        print(f.read())
         f.close()
     return test_success
 
@@ -619,19 +620,19 @@ def runTest(testinputfile, outputs='auto', compMethod='auto', pyexec='auto'):
         outputs = [ os.path.join( tmpdir, os.path.basename(x) ) for x in refFileList ]
 
     elif type(outputs) == str:
-        print "Using glob '%s' to find outputs" % outputs
+        print("Using glob '%s' to find outputs" % outputs)
         outputs = pyalps.getResultFiles( pattern=os.path.basename(outputs), \
             dirname=os.path.dirname(outputs) )
 
     if not outputs:
-        print "\nList of output files of %s is empty\n" % script
+        print("\nList of output files of %s is empty\n" % script)
         test_success = False
 
     else:
         missing = [ x for x in outputs if not os.path.exists(x) ]
         if missing:
             for f in missing:
-                print "Output file '%s' does not exist" % f
+                print("Output file '%s' does not exist" % f)
             test_success = False
         else:
             # Start test
@@ -651,7 +652,7 @@ def writeTestInputFile( script, inputs, refparms, refFileList, what, dirname='.'
 
     refparms['TESTNAME'] = refparms['TESTNAME'].replace('.in.xml','') + postfix
     testinfile = os.path.join( os.path.expandvars(dirname), refparms['TESTNAME']+'.testin.xml')
-    f = file( testinfile, 'w' )
+    f = open( testinfile, 'w' )
     f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
     f.write('<?xml-stylesheet type="text/xsl" href="ALPS.xsl"?>\n')
     f.write('<TEST xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xml.comp-phys.org/2002/10/ALPS.xsd">\n') 
@@ -723,7 +724,7 @@ def createTest( script, inputs=None, outputs=None, prefix=None, refdir='./ref' )
 
         for f in inputs:
             if not os.path.expandvars(os.path.dirname(f)) == scriptdir:
-                print "Input files to %s should be in the same directory as %s" % (script, script)
+                print("Input files to %s should be in the same directory as %s" % (script, script))
                 sys.exit(1)
 
             shutil.copy(f, refdir)
@@ -743,7 +744,7 @@ def createTest( script, inputs=None, outputs=None, prefix=None, refdir='./ref' )
         reffiles = pyalps.getResultFiles(prefix=prefix, dirname=refdir)
 
     if not reffiles:
-        print "Reference files not found. (If you use 'loop' or 'dmrg', try to delete old result files.)"
+        print("Reference files not found. (If you use 'loop' or 'dmrg', try to delete old result files.)")
         sys.exit(1)
 
     # acquire a list of all observables
@@ -785,7 +786,7 @@ def createTest( script, inputs=None, outputs=None, prefix=None, refdir='./ref' )
     pyalps.tools.copyStylesheet(pardir)
 
     # Write .py test-start script
-    f = file( scriptname_prefixed, 'w' )
+    f = open( scriptname_prefixed, 'w' )
     f.write( '#!/usr/bin/env python\n\n' )
     f.write( 'import sys\n' )
     f.write( 'from pyalps import apptest\n' )
@@ -795,5 +796,5 @@ def createTest( script, inputs=None, outputs=None, prefix=None, refdir='./ref' )
     f.write('if not ret: sys.exit(1)\n')
 
     f.close()
-    os.chmod(scriptname_prefixed, 0755)
+    os.chmod(scriptname_prefixed, 0o755)
 

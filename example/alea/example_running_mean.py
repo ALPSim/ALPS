@@ -1,3 +1,4 @@
+from __future__ import print_function
 #/*****************************************************************************
 #*
 #* ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -44,9 +45,9 @@ running_mean = pyalps.alea.running_mean(obs)
 reverse_running_mean = pyalps.alea.reverse_running_mean(obs)
 
 # print the result
-print "The running mean of E is: " + str(running_mean)
-print
-print "The reverse running mean of E is: " + str(reverse_running_mean)
-print
+print("The running mean of E is: " + str(running_mean))
+print()
+print("The reverse running mean of E is: " + str(reverse_running_mean))
+print()
 
 

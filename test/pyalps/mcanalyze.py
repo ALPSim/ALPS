@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -31,15 +32,15 @@
 import numpy
 import pyalps
 import mcanalyze
-import matplotlib.pyplot as plt
-import pyalps.plot as alpsplt
+#import matplotlib.pyplot as plt
+#import pyalps.plot as alpsplt
 import pyalps.hdf5 as h5
 
 
 
-print 
-print "********** MCANALYZE PYTHON TEST **************"
-print 
+print() 
+print("********** MCANALYZE PYTHON TEST **************")
+print() 
 
 rng = pyalps.pytools.rng(42)
 
@@ -84,9 +85,9 @@ NPDATA = numpy.array(DATA)
 
 
 
-print
-print "before"
-print
+print()
+print("before")
+print()
 
 #iar = h5.archive('test/scalartestfile.h5', 'r')
 #for name in iar.list_children('/simulation/results'):
@@ -103,9 +104,9 @@ print
 
 #mcanalyze.write_to_file('test/scalartestfile.h5', "E", "/mean/error", binning_error)
 
-print
-print "after"
-print
+print()
+print("after")
+print()
 
 
 #iar = h5.archive('test/scalartestfile.h5', 'r')
@@ -118,6 +119,6 @@ print
 #    print name + ": " + str(obs)
 
 
-print 
-print "********** TEST END **************"
-print 
+print() 
+print("********** TEST END **************")
+print() 

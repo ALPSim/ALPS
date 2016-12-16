@@ -1,3 +1,4 @@
+from __future__ import print_function
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
  #                                                                                 #
  # ALPS Project: Algorithms and Libraries for Physics Simulations                  #
@@ -5,6 +6,7 @@
  # ALPS Libraries                                                                  #
  #                                                                                 #
  # Copyright (C) 2010 - 2012 by Lukas Gamper <gamperl@gmail.com>                   #
+ #               2016 - 2016 by Michele Dolfi <dolfim@phys.ethz.ch>                #
  #                                                                                 #
  # This software is part of the ALPS libraries, published under the ALPS           #
  # Library License; you can use, redistribute it and/or modify it under            #
@@ -27,6 +29,11 @@
 
 import numpy as np
 import pyalps.hdf5 as hdf5
+
+## Python 3 does not have `long` type anymore
+import sys
+if sys.version_info > (3,):
+    long = int
 
 ar = hdf5.archive('pyngs.h5', 'w')
 a = np.array([1, 2, 3]);
@@ -54,7 +61,7 @@ ar["/inhomogenious"] = [[1, 2, 3], a, "gurke", [[a, 2, 3], ["x", complex(1, 1)]]
 ar["/inhomogenious2"] = [[[1, 2], [3, 4]], [[1, 2], [3, 4]], [[1, 2], [3, 4]], [[1, 2], [3]]]
 ar["/inhomogenious3"] = [np.arange(3), np.arange(5)]
 ar["/inhomogenious4"] = [np.arange(3), 10 * np.arange(3)]
-ar["/inhomogenious5"] = [range(3), range(5), range(3)]
+ar["/inhomogenious5"] = [list(range(3)), list(range(5)), list(range(3))]
 ar["/numpylist1"] = [np.arange(5), np.arange(5,10)]
 ar["/numpylist2"] = [np.arange(5), np.arange(10)]
 
@@ -87,29 +94,29 @@ i5 = ar["/inhomogenious5"]
 nl1 = ar["/numpylist1"]
 nl2 = ar["/numpylist2"]
 
-print "childs: ", len(childs)
-print "/list: ", repr(l1)
-print "/list2: ", repr(l2)
-print "/tuple: ", repr(t1)
-print "/dict: ", repr(d1)
-print "/numpy: ", repr(n1)
-print "/numpy2: ", repr(n2)
-print "/numpy3: ", repr(n3)
-print "/numpyel: ", repr(e1)
-print "/numpyel2: ", repr(e2)
-print "/numpyel3: ", repr(e3)
-print "/int: ", repr(ls)
-print "/long: ", repr(s1)
-print "/double: ", repr(s2)
-print "/complex: ", repr(s3)
-print "/string: ", repr(s4)
-print "/stringlist: ", repr(s5)
-print "/inhomogenious: ", repr(i1)
-print "/inhomogenious2: ", repr(i2)
-print "/inhomogenious3: ", repr(i3)
-print "/inhomogenious4: ", repr(i4)
-print "/inhomogenious5: ", repr(i5)
-print "/numpylist1: ", repr(nl1)
-print "/numpylist2: ", repr(nl2)
+print("childs: ", len(childs))
+print("/list: ", repr(l1))
+print("/list2: ", repr(l2))
+print("/tuple: ", repr(t1))
+print("/dict: ", repr(list(sorted(d1.items()))))
+print("/numpy: ", repr(n1))
+print("/numpy2: ", repr(n2))
+print("/numpy3: ", repr(n3))
+print("/numpyel: ", repr(e1))
+print("/numpyel2: ", repr(e2))
+print("/numpyel3: ", repr(e3))
+print("/int: ", repr(s1))
+print("/long: ", repr(s1))
+print("/double: ", repr(s3))
+print("/complex: ", repr(s4))
+print("/string: ", repr(s5))
+print("/stringlist: ", repr(ls))
+print("/inhomogenious: ", repr(i1))
+print("/inhomogenious2: ", repr(i2))
+print("/inhomogenious3: ", repr(i3))
+print("/inhomogenious4: ", repr(i4))
+print("/inhomogenious5: ", repr(i5))
+print("/numpylist1: ", repr(nl1))
+print("/numpylist2: ", repr(nl2))
 
 del ar

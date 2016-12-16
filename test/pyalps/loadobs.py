@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -38,4 +39,4 @@ for name in iar.list_children('/simulation/results'):
     else:
         obs = alea.MCVectorData()
     obs.load('loadobs.h5', '/simulation/results/' + alps.hdf5_name_encode(name))
-    print name + ": " + str(obs)
+    print(name + ": " + str(obs))

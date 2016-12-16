@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -59,7 +60,7 @@ res = pyalps.runApplication('mps_optim',input_file,writexml=True)
 data = pyalps.loadEigenstateMeasurements(pyalps.getResultFiles(prefix=basename), ['Energy'])
 
 en_exact = -28.1129977
-print 'Exact energy for MAXSTATES=inf ::', en_exact
+print('Exact energy for MAXSTATES=inf ::', en_exact)
 for d in pyalps.flatten(data):
-    print d.props['observable'], '=', d.y
+    print(d.props['observable'], '=', d.y)
 

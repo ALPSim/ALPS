@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -33,7 +34,7 @@ import subprocess
 import platform
 import sys
 import glob
-import math
+from . import math
 import scipy.stats
 import copy
 
@@ -41,15 +42,15 @@ import pyalps.hdf5 as h5
 
 from pyalps.pytools import convert2xml, hdf5_name_encode, hdf5_name_decode, rng
 import pyalps.pytools # the C++ conversion functions
-from load import loadBinningAnalysis, loadMeasurements,loadEigenstateMeasurements, loadSpectra, loadIterationMeasurements, loadMPSIterations, loadObservableList, loadDMFTIterations, loadProperties, in_vistrails, log, Hdf5Loader
-from hlist import deep_flatten, flatten, depth
-from dict_intersect import dict_intersect
-from dataset import DataSet
-from floatwitherror import FloatWithError
-from plot_core import read_xml as readAlpsXMLPlot
-from dict_intersect import *
-from natural_sort import natural_sort
-import alea
+from .load import loadBinningAnalysis, loadMeasurements,loadEigenstateMeasurements, loadSpectra, loadIterationMeasurements, loadMPSIterations, loadObservableList, loadDMFTIterations, loadProperties, in_vistrails, log, Hdf5Loader
+from .hlist import deep_flatten, flatten, depth
+from .dict_intersect import dict_intersect
+from .dataset import DataSet
+from .floatwitherror import FloatWithError
+from .plot_core import read_xml as readAlpsXMLPlot
+from .dict_intersect import *
+from .natural_sort import natural_sort
+from . import alea
 import scipy.interpolate
 
 def make_list(infiles):
@@ -291,7 +292,7 @@ def copyStylesheet(dir):
       shutil.copyfile(xslPath(), target)
 
 def writeTaskXMLFile(filename,parms):
-    f = file(filename,'w')
+    f = open(filename,'w')
     f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
     f.write('<?xml-stylesheet type="text/xsl" href="ALPS.xsl"?>\n')
     f.write('<SIMULATION xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xml.comp-phys.org/2003/8/QMCXML.xsd">\n')
@@ -371,7 +372,7 @@ def writeInputFiles(fname,parms, baseseed=None):
     """
     dirname = os.path.dirname(fname)
     base_name = os.path.basename(fname)
-    f = file(fname+'.in.xml','w')
+    f = open(fname+'.in.xml','w')
     f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
     f.write('<?xml-stylesheet type="text/xsl" href="ALPS.xsl"?>\n')
     f.write('<JOB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xml.comp-phys.org/2003/8/job.xsd">\n')
@@ -380,7 +381,7 @@ def writeInputFiles(fname,parms, baseseed=None):
     bits = 31;
     n = len(parms)
     while n>0:
-      n /= 2
+      n //= 2
       bits -= 1
 
     if baseseed == None:
@@ -391,7 +392,7 @@ def writeInputFiles(fname,parms, baseseed=None):
       count += 1
       if not 'SEED' in p:
         seed = baseseed
-        for j in range(0,32/bits+1):
+        for j in range(0,32//bits+1):
           seed ^= ((count-1) << (j * bits))
           seed &= ((1<<30) | ((1<<30)-1))
           p['SEED'] = seed
@@ -419,7 +420,7 @@ def writeParameterFile(fname,parms):
           filename: the name of the parameter file to be written
           parms: the parameter dict
     """
-    f = file(fname,'w')
+    f = open(fname,'w')
     for key in parms:
       value = parms[key]
       if type(value) == str:
@@ -647,7 +648,7 @@ def collectXY(sets,x,y,foreach=[],ignoreProperties=False):
               res.props['label'] += '%s = %s ' % (foreach[im], k[im])
           
           foreach_sets[k] = res
-      return foreach_sets.values()
+      return list(foreach_sets.values())
 
 def ResultsToXY(sets,x,y,foreach=[]):
     """ combines observable x and y to build a list of DataSet with y vs x
@@ -707,7 +708,7 @@ def ResultsToXY(sets,x,y,foreach=[]):
         for p in foreach:
             res.props['label'] += '%s = %s ' % (p, res.props[p])
         
-    return foreach_sets.values()
+    return list(foreach_sets.values())
 
 def paramsAtFixedY(sets,x,y,fixedY,foreach=[]):
   XYs = collectXY(sets,x,y,foreach);
@@ -767,7 +768,7 @@ def groupSets(groups, for_each = []):
             else:
                 for_each_sets[fe_par_set] = [iset]
 
-        hgroups[idx] = for_each_sets.values()
+        hgroups[idx] = list(for_each_sets.values())
 
     if dd > 1:
         return groups

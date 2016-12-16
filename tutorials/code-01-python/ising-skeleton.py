@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -73,9 +74,9 @@ class Simulation:
             n = n-1
             
         # Print observables
-        print '|m|:\t', self.abs_magnetization.mean, '+-', self.abs_magnetization.error, ',\t tau =', self.abs_magnetization.tau
-        print 'E:\t', self.energy.mean, '+-', self.energy.error, ',\t tau =', self.energy.tau
-        print 'm:\t', self.magnetization.mean, '+-', self.magnetization.error, ',\t tau =', self.magnetization.tau
+        print('|m|:\t', self.abs_magnetization.mean, '+-', self.abs_magnetization.error, ',\t tau =', self.abs_magnetization.tau)
+        print('E:\t', self.energy.mean, '+-', self.energy.error, ',\t tau =', self.energy.tau)
+        print('m:\t', self.magnetization.mean, '+-', self.magnetization.error, ',\t tau =', self.magnetization.tau)
         
     def step(self):
         for s in range(self.L*self.L):
@@ -109,12 +110,12 @@ if __name__ == '__main__':
     L = 4       # Linear lattice size
     N = 5000    # of simulation steps
 
-    print '# L:', L, 'N:', N
+    print('# L:', L, 'N:', N)
 
     # Scan beta range [0,1] in steps of 0.1
     for beta in [0.,.1,.2,.3,.4,.5,.6,.7,.8,.9,1.]:
-        print '-----------'
-        print 'beta =', beta
+        print('-----------')
+        print('beta =', beta)
         sim = Simulation(beta,L)
         sim.run(N/2,N)
         sim.save('ising.L_'+str(L)+'beta_'+str(beta)+'.h5')

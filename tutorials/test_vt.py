@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -64,10 +65,10 @@ for workflow in workflows:
     (fn,tag) = workflow
     fn = os.path.join(os.getcwd(),fn)
     if not os.path.exists(fn):
-        print fn,'does not exist!'
+        print(fn,'does not exist!')
     cmd = vtapp + ['-b', fn+':'+tag]
-    print cmd
-    print fn + ':"' + tag + '" ',
+    print(cmd)
+    print(fn + ':"' + tag + '" ', end=' ')
     logfile.write(str(cmd)+'\n')
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output = process.communicate()
@@ -75,4 +76,4 @@ for workflow in workflows:
     for k in output:
         logfile.write(k)
     logfile.write('===============================================================\n')
-    print 'returned',process.returncode
+    print('returned',process.returncode)

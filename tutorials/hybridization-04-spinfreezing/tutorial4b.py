@@ -1,3 +1,4 @@
+from __future__ import print_function
  #############################################################################/
  #
  # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -73,11 +74,11 @@ for j in range(1,n_orb): # the matrix is symmetric
 
 u=generate_u_matrix(parms['N_ORBITALS'],parms['U'],parms["U'"],parms['J'])
 
-print 'U matrix:'
-print u
+print('U matrix:')
+print(u)
 
-print 'density-density correlation matrix:'
-print a
+print('density-density correlation matrix:')
+print(a)
 
 
 # calculate moments of the self-energy high-frequency tail from density-desnsity correlators
@@ -89,20 +90,20 @@ for i in range(n_orb): # average over all orbitals i
   for j in range(n_orb):
     sigma0 += u[i][j]*a[j][j]
 sigma0/=n_orb
-print "sigma0=", sigma0 # print average
+print("sigma0=", sigma0) # print average
 
 for i in range(n_orb): # average over all orbitals i
   for k in range(n_orb):
     for l in range(n_orb):
       sigma1 += u[i][k]*u[i][l]*(a[k][l]-a[k][k]*a[l][l])
 sigma1/=n_orb
-print "sigma1=", sigma1 # print average
+print("sigma1=", sigma1) # print average
 
 N=0.
 for i in range(n_orb):
   N+=ar['/simulation/results/density_%i/mean/value'%(i)]
 
-print "total density=" , N
+print("total density=" , N)
 
 Xvalues=[]
 Tvalues=[]

@@ -29,10 +29,10 @@
 from collections import MutableMapping
 import types
 
-from pyngsparams_c import params
+from .cxx.pyngsparams_c import params
 params.__bases__ = (MutableMapping, ) + params.__bases__
 
-from pyngsobservable_c import observable
+from .cxx.pyngsobservable_c import observable
 class ObservableOperators:
     def __lshift__(self, other):
         self.append(other)
@@ -52,20 +52,20 @@ class RealVectorObservable:
     def addToObservables(self, observables): #rename this with new ALEA
         observables.createRealVectorObservable(self.name, self.binnum)
 
-from pyngsobservables_c import observables
+from .cxx.pyngsobservables_c import observables
 observables.__bases__ = (MutableMapping, ) + observables.__bases__
 
-from pyngsobservable_c import createRealObservable #remove this with new ALEA!
-from pyngsobservable_c import createRealVectorObservable #remove this with new ALEA!
+from .cxx.pyngsobservable_c import createRealObservable #remove this with new ALEA!
+from .cxx.pyngsobservable_c import createRealVectorObservable #remove this with new ALEA!
 
-from pyngsresult_c import result
-from pyngsresult_c import observable2result #remove this with new ALEA!
+from .cxx.pyngsresult_c import result
+from .cxx.pyngsresult_c import observable2result #remove this with new ALEA!
 
-from pyngsresults_c import results
+from .cxx.pyngsresults_c import results
 results.__bases__ = (MutableMapping, ) + results.__bases__
 
-from pyngsbase_c import mcbase
+from .cxx.pyngsbase_c import mcbase
 
-from pyngsapi_c import collectResults, saveResults
+from .cxx.pyngsapi_c import collectResults, saveResults
 
-from pyngsrandom01_c import random01
+from .cxx.pyngsrandom01_c import random01

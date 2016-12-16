@@ -26,14 +26,12 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define PY_ARRAY_UNIQUE_SYMBOL pyngsobservable_PyArrayHandle
-
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/complex.hpp>
 #include <alps/ngs/mcobservable.hpp>
 
 #include <alps/ngs/boost_python.hpp>
-#include <alps/ngs/detail/numpy_import.ipp>
+#include <alps/python/numpy_import.hpp>
 
 #include <alps/alea/detailedbinning.h>
 

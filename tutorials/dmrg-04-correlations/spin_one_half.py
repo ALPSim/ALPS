@@ -1,3 +1,4 @@
+from __future__ import division
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -69,8 +70,8 @@ for run in data:
             d.x = np.arange(L)
             
             # sites with increasing distance l symmetric to the chain center
-            site1 = np.array([int(-(l+1)/2.0) for l in range(0,L)]) + L/2
-            site2 = np.array([int(  l   /2.0) for l in range(0,L)]) + L/2
+            site1 = np.array([int(-(l+1)/2.0) for l in range(0,L)]) + L//2
+            site2 = np.array([int(  l   /2.0) for l in range(0,L)]) + L//2
             indices = L*site1 + site2
             d.y = abs(s.y[0][indices])
             

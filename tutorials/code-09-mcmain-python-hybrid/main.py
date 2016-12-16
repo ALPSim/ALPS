@@ -1,3 +1,4 @@
+from __future__ import print_function
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
  # ALPS Project: Algorithms and Libraries for Physics Simulations                  #
  #                                                                                 #
@@ -42,7 +43,7 @@ if __name__ == '__main__':
         resume = True if 'c' in args else False
         outfile = positional[0]
     except (IndexError, getopt.GetoptError):
-        print 'usage: [-T timelimit] [-c] outputfile'
+        print('usage: [-T timelimit] [-c] outputfile')
         exit()
 
     sim = ising.sim({
@@ -68,6 +69,6 @@ if __name__ == '__main__':
         ar['/'] = sim
 
     results = ngs.collectResults(sim)
-    print results
+    print(results)
     with hdf5.archive(outfile, 'w') as ar:
         ngs.saveResults(results, sim.paramters, ar, "/simulation/results")

@@ -94,10 +94,10 @@ namespace  {
     def("search_xml_library_path", alps::search_xml_library_path,search_xml_library_path_docstring);
     /*
      def("convert2numpy",
-     static_cast<boost::python::numeric::array(*)(std::vector<double> const& )>
+     static_cast<alps::python::numpy::array(*)(std::vector<double> const& )>
      (&convert2numpy));
      def("convert2numpy",
-     static_cast<boost::python::numeric::array(*)(std::vector<int> const& )>
+     static_cast<alps::python::numpy::array(*)(std::vector<int> const& )>
      (&convert2numpy));
      
      def("convert2vector",&convert2vector<double>);

@@ -1,3 +1,4 @@
+from __future__ import print_function
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
  #                                                                                 #
  # ALPS Project: Algorithms and Libraries for Physics Simulations                  #
@@ -33,7 +34,7 @@ ar=hdf5.archive('foo%d.h5', 'al')
 s=2**10
 
 while s < 2**29:
-    print s
+    print(s)
     a = np.empty(s)
     ar[str(s)] = a
     s *= 2

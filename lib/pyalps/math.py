@@ -48,4 +48,4 @@ global_function = "def OPERATION(obj): \n\
 
 for operation in ["sq", "sqrt", "cb", "cbrt", "exp", "log", "sin", "cos", "tan", "asin", "acos", "atan", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh"]:
   function = global_function.replace("OPERATION",operation)
-  exec function
+  exec(function)

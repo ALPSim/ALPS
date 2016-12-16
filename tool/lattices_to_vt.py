@@ -1,3 +1,4 @@
+from __future__ import print_function
 #  Copyright Bela Bauer 2010.
 #  Distributed under the Boost Software License, Version 1.0.
 #      (See accompanying file LICENSE_1_0.txt or copy at
@@ -11,7 +12,6 @@ skip = ['inhomogeneous square lattice', 'inhomogeneous simple cubic lattice', 'd
 nameexceptions = {
   'NnnChainLattice':'NNNChainLattice',
   'NnnOpenChainLattice':'NNNOpenChainLattice',
-  ''
 }
 
 def replace_at(input, where, by):
@@ -56,30 +56,30 @@ def write_lattice(name, vtname, inputs, fixed, defaults, outfile):
 def parse_latticegraphs(fn,outfile):
     root = ElementTree.parse(fn).getroot()
     names = []
-    
+
     for lg in root.findall('LATTICEGRAPH'):
         name = lg.get('name')
-        
-        print 'Processing',name,':',
-        
+
+        print('Processing',name,':', end=' ')
+
         if 'vt_skip' in lg.keys():
-            print 'Skipped!'
+            print('Skipped!')
             continue
-        
+
         if 'vt_name' in lg.keys():
             vtname = lg.get('vt_name')
         else:
             vtname = camelify(name)
-        print 'Will become',vtname
-        
+        print('Will become',vtname)
+
         inputs = []
         fixed = {}
         defaults = {}
-        
+
         fl = lg.find('FINITELATTICE')
         # fixed['lattice'] = fl.find('LATTICE').get('ref')
         fixed['LATTICE'] = name
-        
+
         for extent in fl.findall('EXTENT'):
             size = extent.get('size')
             try:
@@ -88,12 +88,12 @@ def parse_latticegraphs(fn,outfile):
             except ValueError:
                 pass
             inputs.append(extent.get('size'))
-        
+
         for param in fl.findall('PARAMETER'):
             defaults[param.get('name')] = param.get('default')
-        
+
         # print name,inputs,fixed,defaults
-        
+
         write_lattice(name, vtname, inputs, fixed, defaults, outfile)
         names.append(vtname)
     return names
@@ -104,7 +104,7 @@ if __name__ == '__main__':
         outfile = sys.stdout
     else:
         outfile = open(sys.argv[2],'w')
-    
+
     outfile.write('''
 # VisTrails package for ALPS, Algorithms and Libraries for Physics Simulations
 #
@@ -130,9 +130,9 @@ class Lattice(parameters.FixedAndDefaultParameters):
    _input_ports = [('LATTICE',[basic.String]),
                    ('LATTICE_LIBRARY',[basic.File])]
 ''')
-    
+
     lattices = parse_latticegraphs(infilename, outfile)
-    
+
     outfile.write('''
 def register_lattice(type):
   reg = vistrails.core.modules.module_registry.get_module_registry()
@@ -141,14 +141,14 @@ def register_lattice(type):
 
 def initialize(): pass
 
-def selfRegister():    
+def selfRegister():
 
   reg = vistrails.core.modules.module_registry.get_module_registry()
-  
+
   reg.add_module(Lattice,namespace="Lattices")
   reg.add_output_port(Lattice, "value", Lattice)
-  
+
 ''')
-    
+
     for lattice in lattices:
         outfile.write('  register_lattice(%s)\n' % lattice)

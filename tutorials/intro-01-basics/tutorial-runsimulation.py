@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -32,5 +33,5 @@ input_file = 'parm1.in.xml'
 
 # and run the simulation
 result_files = pyalps.runApplication('spinmc',input_file,Tmin=5,writexml=True)
-print "The return value was", result_files[0]
-print "The results are stored in the file", result_files[1]
+print("The return value was", result_files[0])
+print("The results are stored in the file", result_files[1])

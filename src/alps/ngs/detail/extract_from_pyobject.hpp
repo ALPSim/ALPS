@@ -34,13 +34,15 @@
     #include <alps/ngs/cast.hpp>
     #include <alps/ngs/config.hpp>
 
+    #include <alps/python/numpy_import.hpp>
     #include <alps/ngs/boost_python.hpp>
     #include <alps/ngs/detail/type_wrapper.hpp>
-    #include <alps/ngs/detail/numpy_import.hpp>
     #include <alps/ngs/detail/get_numpy_type.hpp>
 
     #include <boost/python/list.hpp>
     #include <boost/python/dict.hpp>
+
+    #include <numpy/arrayscalars.h>
 
     namespace alps {
         namespace detail {
@@ -60,17 +62,17 @@
                 else if (dtype == "dict") visitor(boost::python::dict(data));
                 else if (dtype == "numpy.str") visitor(boost::python::call_method<std::string>(data.ptr(), "__str__"));
                 else if (dtype == "numpy.bool") visitor(boost::python::call_method<bool>(data.ptr(), "__bool__"));
-                else if (dtype == "numpy.int8") visitor(static_cast<boost::int8_t>(boost::python::call_method<long>(data.ptr(), "__long__")));
-                else if (dtype == "numpy.int16") visitor(static_cast<boost::int16_t>(boost::python::call_method<long>(data.ptr(), "__long__")));
-                else if (dtype == "numpy.int32") visitor(static_cast<boost::int32_t>(boost::python::call_method<long>(data.ptr(), "__long__")));
-                else if (dtype == "numpy.int64") visitor(static_cast<boost::int64_t>(boost::python::call_method<long>(data.ptr(), "__long__")));
-                else if (dtype == "numpy.uint8") visitor(static_cast<boost::uint8_t>(boost::python::call_method<long>(data.ptr(), "__long__")));
-                else if (dtype == "numpy.uint16") visitor(static_cast<boost::uint16_t>(boost::python::call_method<long>(data.ptr(), "__long__")));
-                else if (dtype == "numpy.uint32") visitor(static_cast<boost::uint32_t>(boost::python::call_method<long>(data.ptr(), "__long__")));
-                else if (dtype == "numpy.uint64") visitor(static_cast<boost::uint64_t>(boost::python::call_method<long>(data.ptr(), "__long__")));
+                else if (dtype == "numpy.int8") visitor(static_cast<boost::int8_t>(PyArrayScalar_VAL(data.ptr(),Int8)));
+                else if (dtype == "numpy.int16") visitor(static_cast<boost::int16_t>(PyArrayScalar_VAL(data.ptr(),Int16)));
+                else if (dtype == "numpy.int32") visitor(static_cast<boost::int32_t>(PyArrayScalar_VAL(data.ptr(),Int32)));
+                else if (dtype == "numpy.int64") visitor(static_cast<boost::int64_t>(PyArrayScalar_VAL(data.ptr(),Int64)));
+                else if (dtype == "numpy.uint8") visitor(static_cast<boost::uint8_t>(PyArrayScalar_VAL(data.ptr(),UInt8)));
+                else if (dtype == "numpy.uint16") visitor(static_cast<boost::uint16_t>(PyArrayScalar_VAL(data.ptr(),UInt16)));
+                else if (dtype == "numpy.uint32") visitor(static_cast<boost::uint32_t>(PyArrayScalar_VAL(data.ptr(),UInt32)));
+                else if (dtype == "numpy.uint64") visitor(static_cast<boost::uint64_t>(PyArrayScalar_VAL(data.ptr(),UInt64)));
                 else if (dtype == "numpy.float32") visitor(static_cast<float>(boost::python::call_method<double>(data.ptr(), "__float__")));
                 else if (dtype == "numpy.float64") visitor(static_cast<double>(boost::python::call_method<double>(data.ptr(), "__float__")));
-                else if (dtype == "numpy.complex64") 
+                else if (dtype == "numpy.complex64")
                     visitor(std::complex<float>(
                           boost::python::call_method<double>(PyObject_GetAttr(data.ptr(), boost::python::str("real").ptr()), "__float__")
                         , boost::python::call_method<double>(PyObject_GetAttr(data.ptr(), boost::python::str("imag").ptr()), "__float__")

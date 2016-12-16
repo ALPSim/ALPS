@@ -83,14 +83,14 @@ class LatticeLibrary:
                                 for n3 in n2.childNodes:
                                     if n3.localName == 'LATTICE':
                                         ref = n3.getAttribute("ref")
-                                        if ref and latticeparams.has_key(ref):
+                                        if ref and ref in latticeparams:
                                             for k in latticeparams[ref].keys():
                                                 p[k] = latticeparams[ref][k]
                                     elif n3.localName == 'PARAMETER':
                                         p[n3.getAttribute("name")] = n3.getAttribute("default")
                                     elif n3.localName == 'EXTENT':
                                         size = n3.getAttribute("size")
-                                        if not p.has_key(size) and not size.isdigit():
+                                        if size not in p and not size.isdigit():
                                             p[size] = ""
                         self.graphs.append(name)
                         self.params[name] = p
@@ -365,7 +365,7 @@ class LatticeParameterWindow(wx.Frame):
 
     def OnParameterInput(self, evt):
         key = evt.GetEventObject().GetName()
-        if self.parameters.has_key(key):
+        if key in self.parameters:
             self.parameters[key] = evt.GetEventObject().GetValue()
 
     def OnPreview(self, evt):

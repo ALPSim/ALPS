@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -52,7 +53,7 @@ data = pyalps.loadEigenstateMeasurements(pyalps.getResultFiles(prefix='parm_spin
 
 # print properties of the eigenvector:
 for s in data[0]:
-    print s.props['observable'], ' : ', s.y[0]
+    print(s.props['observable'], ' : ', s.y[0])
 
 # load and plot iteration history
 iter = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm_spin_one_half'),

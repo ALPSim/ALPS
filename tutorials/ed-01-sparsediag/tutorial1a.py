@@ -1,3 +1,4 @@
+from __future__ import print_function
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
 # 
@@ -48,12 +49,12 @@ data = pyalps.loadEigenstateMeasurements(pyalps.getResultFiles(prefix='parm1a'))
 
 # print properties of ground states in all sectors:
 for sector in data[0]:
-  print '\nSector with Sz =', sector[0].props['Sz'], 
-  print 'and k =', sector[0].props['TOTAL_MOMENTUM']
+  print('\nSector with Sz =', sector[0].props['Sz'], end=' ') 
+  print('and k =', sector[0].props['TOTAL_MOMENTUM'])
   for s in sector:
     if pyalps.size(s.y[0])==1:
-      print s.props['observable'], ' : ', s.y[0]
+      print(s.props['observable'], ' : ', s.y[0])
     else:
       for (x,y) in zip(s.x,s.y[0]):
-        print  s.props['observable'], '(', x, ') : ', y
+        print(s.props['observable'], '(', x, ') : ', y)
 

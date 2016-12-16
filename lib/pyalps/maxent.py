@@ -25,4 +25,8 @@
  #                                                                                 #
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-from maxent_c import *
+try:
+    from .maxent_c import *
+except ImportError:
+    from maxent_c import *
+    

@@ -1,3 +1,4 @@
+from __future__ import print_function
  #############################################################################/
  #
  # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -113,7 +114,7 @@ parms = {
 }# parms
 
 if mpi.rank==0:
-  print "generating initial hybridization..."
+  print("generating initial hybridization...")
   g=[]
   I=complex(0.,1.)
   mu=0.0
@@ -147,9 +148,9 @@ mpi.world.barrier() #wait until hybridization is written to file
 for it in range(dmft_iterations):
 
   if mpi.rank==0:
-    print "****************************************************************************"
-    print "*                           DMFT iteration %3i                             *"%(it)
-    print "****************************************************************************"
+    print("****************************************************************************")
+    print("*                           DMFT iteration %3i                             *"%(it))
+    print("****************************************************************************")
 
   # !always make sure that parameters are changed on all threads equally!
   # (i.e. don't wrap this into an 'if mpi.rank==0' statement)

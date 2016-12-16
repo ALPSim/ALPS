@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -136,7 +137,7 @@ for J1g in grouped:
         d = pyalps.DataSet()
         d.props = pyalps.dict_intersect([q.props for q in Szg])
         d.props['observable'] = 'gap'
-        print totalmin,d.props['Sz_total']
+        print(totalmin,d.props['Sz_total'])
         if d.props['Sz_total'] == 0:
             d.y = np.array([allE[1]-totalmin])
         else:

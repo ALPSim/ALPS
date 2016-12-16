@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -70,7 +71,7 @@ for data in susc1:
     fw.fit(None, f, pars, [v.mean for v in data.y], data.x)
     prefactor = pars[0].get()
     gap = pars[1].get()
-    print prefactor,gap
+    print(prefactor,gap)
     
     lines += plt.plot(data.x, f(None, data.x, pars))
     lines[-1].set_label('$J_2=%.4s$: $\chi = \\frac{%.4s}{T}\exp(\\frac{-%.4s}{T})$' % (data.props['J2'], prefactor,gap))

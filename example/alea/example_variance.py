@@ -1,3 +1,4 @@
+from __future__ import print_function
 #/*****************************************************************************
 #*
 #* ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -42,7 +43,7 @@ obs.load(filename, "simulation/results/" + pyalps.hdf5_name_encode("E"))
 variance = pyalps.alea.variance(obs)
 
 # print the result
-print "The variance of E is: " + str(variance)
+print("The variance of E is: " + str(variance))
   
 # write the result back to the file
 ar = pyalps.hdf5.archive(filename, 1)

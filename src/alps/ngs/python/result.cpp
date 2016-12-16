@@ -26,15 +26,12 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define PY_ARRAY_UNIQUE_SYMBOL pyngsresult_PyArrayHandle
-
 #include <alps/hdf5/archive.hpp>
 #include <alps/ngs/cast.hpp>
 #include <alps/ngs/mcresult.hpp>
 
 #include <alps/ngs/boost_python.hpp>
-#include <alps/ngs/detail/numpy_import.ipp>
-
+#include <alps/python/numpy_array.hpp>
 #include <alps/python/make_copy.hpp>
 
 
@@ -77,20 +74,11 @@ namespace alps {
                 throw std::runtime_error("Unsupported type." + ALPS_STACKTRACE);
         }
 
-        boost::python::object mcresult_vector2np(std::vector<double> const & data) {
-            import_numpy();
-            npy_intp size = data.size();
-            boost::python::object obj(boost::python::handle<>(PyArray_SimpleNew(1, &size, PyArray_DOUBLE)));
-            if (size)
-                memcpy(PyArray_DATA(obj.ptr()), &data.front(), PyArray_ITEMSIZE(obj.ptr()) * PyArray_SIZE(obj.ptr()));
-            return obj;
-        }
-
         boost::python::object mcresult_mean(alps::mcresult const & self) {
             if (self.is_type<double>())
                 return boost::python::object(self.mean<double>());
             else if (self.is_type<std::vector<double> >())
-                return mcresult_vector2np(self.mean<std::vector<double> >());
+                return alps::python::numpy::convert(self.mean<std::vector<double> >());
             else
                 throw std::runtime_error("Unsupported type." + ALPS_STACKTRACE);
             return boost::python::object();
@@ -100,7 +88,7 @@ namespace alps {
             if (self.is_type<double>())
                 return boost::python::object(self.error<double>());
             else if (self.is_type<std::vector<double> >())
-                return mcresult_vector2np(self.error<std::vector<double> >());
+                return alps::python::numpy::convert(self.error<std::vector<double> >());
             else
                 throw std::runtime_error("Unsupported type." + ALPS_STACKTRACE);
             return boost::python::object();
@@ -110,7 +98,7 @@ namespace alps {
             if (self.is_type<double>())
                 return boost::python::object(self.tau<double>());
             else if (self.is_type<std::vector<double> >())
-                return mcresult_vector2np(self.tau<std::vector<double> >());
+                return alps::python::numpy::convert(self.tau<std::vector<double> >());
             else
                 throw std::runtime_error("Unsupported type." + ALPS_STACKTRACE);
             return boost::python::object();
@@ -120,7 +108,7 @@ namespace alps {
             if (self.is_type<double>())
                 return boost::python::object(self.variance<double>());
             else if (self.is_type<std::vector<double> >())
-                return mcresult_vector2np(self.variance<std::vector<double> >());
+                return alps::python::numpy::convert(self.variance<std::vector<double> >());
             else
                 throw std::runtime_error("Unsupported type." + ALPS_STACKTRACE);
             return boost::python::object();
@@ -128,9 +116,9 @@ namespace alps {
 
         boost::python::object mcresult_bins(alps::mcresult const & self) {
             if (self.is_type<double>())
-                return mcresult_vector2np(self.bins<double>());
+                return alps::python::numpy::convert(self.bins<double>());
 //          else if (self.is_type<std::vector<double> >())
-//              return mcresult_vector2np(self.bins<std::vector<double> >());
+//              return alps::python::numpy::convert(self.bins<std::vector<double> >());
             else
                 throw std::runtime_error("Unsupported type." + ALPS_STACKTRACE);
             return boost::python::object();

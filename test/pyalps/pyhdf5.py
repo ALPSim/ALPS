@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -84,7 +85,7 @@ try:
     read(ar)
     del ar
     
-    print "SUCCESS"
-except Exception, e:
-    print "ERROR"
+    print("SUCCESS")
+except Exception as e:
+    print("ERROR")
     sys.exit(e)

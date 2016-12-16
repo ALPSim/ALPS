@@ -151,6 +151,10 @@ endif(BUILD_BOOST_SERIALIZATION)
 
 # Boost.Python
 if(BUILD_BOOST_PYTHON)
+  if(PYTHON_VERSION GREATER 3 AND Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION LESS 63)
+    message(WARNING "Python 3 support requires Boost 1.63.0 or newer. Previous versions might build but have sporadic segemtation faults at the end of the execution.")
+  endif()
+  
   set(BOOST_LINK_LIBS ${BOOST_LINK_LIBS} ${PYTHON_LIBRARY} ${PYTHON_EXTRA_LIBS})
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/python/src")
   set(SOURCES dict.cpp errors.cpp exec.cpp import.cpp list.cpp long.cpp
@@ -162,6 +166,12 @@ if(BUILD_BOOST_PYTHON)
       object/inheritance.cpp object/iterator.cpp object/life_support.cpp
       object/pickle_support.cpp object/stl_iterator.cpp
   )
+  if(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION GREATER 62)
+    set(SOURCES ${SOURCES}
+      numpy/dtype.cpp numpy/matrix.cpp numpy/ndarray.cpp
+      numpy/numpy.cpp numpy/scalars.cpp numpy/ufunc.cpp
+    )
+  endif(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION GREATER 62)
   foreach(S ${SOURCES})
     if(EXISTS ${DIRECTORY}/${S})
       set(BOOST_SOURCES ${BOOST_SOURCES} ${DIRECTORY}/${S})
@@ -295,10 +305,8 @@ if (NOT Boost_FOUND)
           test_tools.cpp test_tree.cpp unit_test_log.cpp unit_test_main.cpp
           unit_test_monitor.cpp unit_test_parameters.cpp unit_test_suite.cpp #(unit_test_suite.cpp renamed to test_tree.cpp in 2011)
           xml_log_formatter.cpp xml_report_formatter.cpp
+          junit_log_formatter.cpp
       )
-      if(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION GREATER 61)
-          set(SOURCES ${SOURCES} junit_log_formatter.cpp)
-      endif(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION GREATER 61)
 
       set (TEST_EXEC_MON_SOURCES "")
       foreach(S ${SOURCES})

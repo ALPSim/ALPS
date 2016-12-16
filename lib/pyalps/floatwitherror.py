@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -25,7 +26,7 @@
 # 
 # ****************************************************************************
 from sys  import stdin
-from math import *
+from .math import *
         
 def get_mean(f):
     try:
@@ -54,7 +55,7 @@ class FloatWithError:
     self.timeseries = list(timeseries)
     try:
       self.shape = self.mean.shape
-    except AttributeError,ValueError:
+    except AttributeError as ValueError:
       pass
 
   def __str__(self):

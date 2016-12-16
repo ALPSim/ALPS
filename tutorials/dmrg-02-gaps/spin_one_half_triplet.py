@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -55,11 +56,11 @@ data = pyalps.loadEigenstateMeasurements(pyalps.getResultFiles(prefix='parm_spin
 # print results:
 energies = {}
 for run in data:
-    print 'S_z =', run[0].props['Sz_total']
+    print('S_z =', run[0].props['Sz_total'])
     for s in run:
-        print '\t', s.props['observable'], ':', s.y[0]
+        print('\t', s.props['observable'], ':', s.y[0])
         if s.props['observable'] == 'Energy':
             sz = s.props['Sz_total']
             energies[sz] = s.y[0]
 
-print 'Gap:', energies[1]-energies[0]
+print('Gap:', energies[1]-energies[0])

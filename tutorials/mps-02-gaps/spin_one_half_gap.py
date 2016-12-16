@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -56,9 +57,9 @@ for s in data[0]:
     if s.props['observable'] == 'Energy':
         energies = s.y
     else:
-        print s.props['observable'], ':', s.y[0]
+        print(s.props['observable'], ':', s.y[0])
 energies.sort()
-print 'Energies:',
+print('Energies:', end=' ')
 for e in energies:
-    print e,
-print '\nGap:', abs(energies[1]-energies[0])
+    print(e, end=' ')
+print('\nGap:', abs(energies[1]-energies[0]))

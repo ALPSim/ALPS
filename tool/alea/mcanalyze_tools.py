@@ -1,3 +1,4 @@
+from __future__ import print_function
 #/*****************************************************************************
 #*
 #* ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -57,7 +58,7 @@ def impl_calculation(name, save_path, calculate):
     if len(options.variables) == 0:
       variables = ar.list_children(options.path)
       if options.verbose:
-        print "Variables in file " + filestring + ":  " + " ".join(variables)
+        print("Variables in file " + filestring + ":  " + " ".join(variables))
 
     for variablestring in variables:
       if ar.dimensions(options.path + "/" + pyalps.hdf5_name_encode(variablestring) + "/timeseries/data") == 1:
@@ -71,10 +72,10 @@ def impl_calculation(name, save_path, calculate):
       obs.load(filestring, options.path +"/" + pyalps.hdf5_name_encode(variablestring))
       result = calculate(obs)
       if options.verbose:
-        print "The " + name + " of variable " + variablestring + " in file " + filestring + " is: " + str(result)
+        print("The " + name + " of variable " + variablestring + " in file " + filestring + " is: " + str(result))
       if options.write:
         ar.write(options.path + "/" + pyalps.hdf5_name_encode(variablestring) + "/" + save_path, result)
-  print "Done"
+  print("Done")
 
 
 

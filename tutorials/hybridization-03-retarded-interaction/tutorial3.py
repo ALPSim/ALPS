@@ -1,3 +1,4 @@
+from __future__ import print_function
  #############################################################################/
  #
  # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -124,7 +125,7 @@ parms = {
 }# parms
 
 if mpi.rank==0:
-  print "generating initial hybridization..."
+  print("generating initial hybridization...")
   g=[]
   I=complex(0.,1.)
   mu=0.0
@@ -148,7 +149,7 @@ if mpi.rank==0:
     ar['/Delta_%i'%m]=delta
   del ar
 
-  print "generating retarded interaction..."
+  print("generating retarded interaction...")
   l   =parms['lambda']
   w0  =parms['w0']
   beta=parms['BETA']
@@ -156,7 +157,7 @@ if mpi.rank==0:
   K  = lambda tau: - (l**2)*(cosh(w0*(beta/2.0-tau))/sinh(w0*beta/2.0) - cosh(w0*beta/2.0)/sinh(w0*beta/2.0) )/(w0*w0)
   Kp = lambda tau: + (l**2)*(sinh(w0*(beta/2.0-tau))/sinh(w0*beta/2.0))/w0
 
-  print "U_screened =", parms['U'] - 2*l**2/w0
+  print("U_screened =", parms['U'] - 2*l**2/w0)
 
   k_tau=[]
   kp_tau=[]
@@ -187,9 +188,9 @@ mpi.world.barrier() # wait until solver input is written to file
 for it in range(dmft_iterations):
 
   if mpi.rank==0:
-    print "****************************************************************************"
-    print "*                           DMFT iteration %3i                             *"%(it)
-    print "****************************************************************************"
+    print("****************************************************************************")
+    print("*                           DMFT iteration %3i                             *"%(it))
+    print("****************************************************************************")
 
   # !always make sure that parameters are changed on all threads equally!
   # (i.e. don't wrap this into an 'if mpi.rank==0' statement)

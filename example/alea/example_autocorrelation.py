@@ -1,3 +1,4 @@
+from __future__ import print_function
 #/*****************************************************************************
 #*
 #* ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -49,8 +50,8 @@ int_autocorr_time = pyalps.alea.integrated_autocorrelation_time(pyalps.alea.cut_
 
 
 # print the result
-print "The autocorrelation of m is: " + str(auto_corr)
-print "The exponential fit is: " + str(fit.first) + " * e^( " + str(fit.second) + " * t)"
-print "The estimated integrated autocorrelation time is: " + str(int_autocorr_time)
+print("The autocorrelation of m is: " + str(auto_corr))
+print("The exponential fit is: " + str(fit.first) + " * e^( " + str(fit.second) + " * t)")
+print("The estimated integrated autocorrelation time is: " + str(int_autocorr_time))
 
 

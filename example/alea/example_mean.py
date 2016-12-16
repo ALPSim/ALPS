@@ -1,3 +1,4 @@
+from __future__ import print_function
 #/*****************************************************************************
 #*
 #* ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -42,7 +43,7 @@ obs.load(filename, "simulation/results/" + pyalps.hdf5_name_encode("E"))
 mean = pyalps.alea.mean(obs)
 
 # print the result
-print "The mean of E is: " + str(mean)
+print("The mean of E is: " + str(mean))
   
 # write the result back to the file
 ar = pyalps.hdf5.archive(filename, 1)

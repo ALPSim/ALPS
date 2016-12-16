@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -31,11 +32,11 @@ import pyalps.plot
 
 #get the list of result files
 result_files = pyalps.getResultFiles(prefix='parm1')
-print "Loading results from the files: ", result_files
+print("Loading results from the files: ", result_files)
 
 #print the observables stored in those files:
-print "The files contain the following mesurements:",
-print pyalps.loadObservableList(result_files)
+print("The files contain the following mesurements:", end=' ')
+print(pyalps.loadObservableList(result_files))
 
 #load a selection of measurements:
 data = pyalps.loadMeasurements(result_files,['|Magnetization|','Magnetization^2'])

@@ -30,8 +30,6 @@
 
 /* $Id: pyalea.cpp 3520 2010-04-09 16:49:53Z tamama $ */
 
-#define PY_ARRAY_UNIQUE_SYMBOL pyalea_PyArrayHandle
-
 #include <alps/python/make_copy.hpp>
 #include <alps/python/numpy_array.hpp>
 #include <alps/alea/detailedbinning.h>
@@ -46,8 +44,6 @@
 #include <boost/python.hpp>
 #include <boost/random/uniform_01.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-
-#include <numpy/arrayobject.h>
 
 #include <vector>
 #include <string>
@@ -77,22 +73,22 @@ namespace alps {
           return obs.representation();
       }
       
-      boost::python::numeric::array mean() const 
+      alps::python::numpy::array mean() const 
       {
           return alps::python::numpy::convert2numpy(obs.mean());
       }
       
-      boost::python::numeric::array error() const 
+      alps::python::numpy::array error() const 
       {
           return alps::python::numpy::convert2numpy(obs.error());
       }
       
-      boost::python::numeric::array tau() const 
+      alps::python::numpy::array tau() const 
       {
           return alps::python::numpy::convert2numpy(obs.tau());
       }
 
-     boost::python::numeric::array variance() const 
+      alps::python::numpy::array variance() const 
       {
           return alps::python::numpy::convert2numpy(obs.variance());
       }
@@ -134,7 +130,7 @@ namespace alps {
 
     #define ALPS_ALEA_FUNCTION_NUMPY_WRAPPER(function_name) \
     template <class T> \
-    boost::python::numeric::array function_name## _wrapper ( const T& arg1 ) { \
+    alps::python::numpy::array function_name## _wrapper ( const T& arg1 ) { \
       return alps::python::numpy::convert(function_name( arg1 )) ;  \
     } 
 

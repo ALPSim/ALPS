@@ -30,23 +30,23 @@
 namespace alps {
     namespace detail {
 
-        int get_numpy_type(bool) { return PyArray_BOOL; }
-        int get_numpy_type(char) { return PyArray_CHAR; }
-        int get_numpy_type(unsigned char) { return PyArray_UBYTE; }
-        int get_numpy_type(signed char) { return PyArray_BYTE; }
-        int get_numpy_type(short) { return PyArray_SHORT; }
-        int get_numpy_type(unsigned short) { return PyArray_USHORT; }
-        int get_numpy_type(int) { return PyArray_INT; }
-        int get_numpy_type(unsigned int) { return PyArray_UINT; }
-        int get_numpy_type(long) { return PyArray_LONG; }
-        int get_numpy_type(unsigned long) { return PyArray_ULONG; }
-        int get_numpy_type(long long) { return PyArray_LONGLONG; }
-        int get_numpy_type(unsigned long long) { return PyArray_ULONGLONG; }
-        int get_numpy_type(float) { return PyArray_FLOAT; }
-        int get_numpy_type(double) { return PyArray_DOUBLE; }
-        int get_numpy_type(long double) { return PyArray_LONGDOUBLE; }
-        int get_numpy_type(std::complex<float>) { return PyArray_CFLOAT; }
-        int get_numpy_type(std::complex<double>) { return PyArray_CDOUBLE; }
-        int get_numpy_type(std::complex<long double>) { return PyArray_CLONGDOUBLE; }
+        int get_numpy_type(bool) { return NPY_BOOL; }
+        int get_numpy_type(char) { return NPY_CHAR; }
+        int get_numpy_type(unsigned char) { return NPY_UBYTE; }
+        int get_numpy_type(signed char) { return NPY_BYTE; }
+        int get_numpy_type(short) { return NPY_SHORT; }
+        int get_numpy_type(unsigned short) { return NPY_USHORT; }
+        int get_numpy_type(int) { return NPY_INT; }
+        int get_numpy_type(unsigned int) { return NPY_UINT; }
+        int get_numpy_type(long) { return NPY_LONG; }
+        int get_numpy_type(unsigned long) { return NPY_ULONG; }
+        int get_numpy_type(long long) { return NPY_LONGLONG; }
+        int get_numpy_type(unsigned long long) { return NPY_ULONGLONG; }
+        int get_numpy_type(float) { return NPY_FLOAT; }
+        int get_numpy_type(double) { return NPY_DOUBLE; }
+        int get_numpy_type(long double) { return NPY_LONGDOUBLE; }
+        int get_numpy_type(std::complex<float>) { return NPY_CFLOAT; }
+        int get_numpy_type(std::complex<double>) { return NPY_CDOUBLE; }
+        int get_numpy_type(std::complex<long double>) { return NPY_CLONGDOUBLE; }
     }
 }

@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -55,4 +56,4 @@ data = pyalps.loadEigenstateMeasurements(pyalps.getResultFiles(prefix='parm_spin
 # print properties of the eigenvector for each run:
 for run in data:
     for s in run:
-        print s.props['observable'], ' : ', s.y[0]
+        print(s.props['observable'], ' : ', s.y[0])

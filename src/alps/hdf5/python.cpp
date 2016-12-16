@@ -27,9 +27,9 @@
 
 #include <alps/hdf5/python.hpp>
 #include <alps/ngs/detail/type_wrapper.hpp>
-#include <alps/ngs/detail/numpy_import.ipp>
 #include <alps/ngs/detail/get_numpy_type.hpp>
 #include <alps/ngs/detail/extract_from_pyobject.hpp>
+#include <alps/python/numpy_array.hpp>
 
 namespace alps {
     namespace hdf5 {
@@ -58,7 +58,7 @@ namespace alps {
                             return false;
                         first_extent = get_extent(boost::python::extract<boost::python::tuple>(value[0])());
                     } else if (first_dtype == "numpy.ndarray")
-                        first_extent = get_extent(boost::python::extract<boost::python::numeric::array>(value[0])());
+                        first_extent = get_extent(boost::python::extract<alps::python::numpy::array>(value[0])());
                     for(boost::python::ssize_t i = 0; i < size; ++i) {
                         std::string dtype = boost::python::object(value[i]).ptr()->ob_type->tp_name;
                         if (dtype == "list") {
@@ -74,7 +74,7 @@ namespace alps {
                             if (first_extent.size() != extent.size() || !std::equal(first_extent.begin(), first_extent.end(), extent.begin()))
                                 return false;
                         } else if (dtype == "numpy.ndarray") {
-                            std::vector<std::size_t> extent = get_extent(boost::python::extract<boost::python::numeric::array>(value[i])());
+                            std::vector<std::size_t> extent = get_extent(boost::python::extract<alps::python::numpy::array>(value[i])());
                             if (first_extent.size() != extent.size() || !std::equal(first_extent.begin(), first_extent.end(), extent.begin()))
                                 return false;
                         } else if (first_dtype != dtype || find(scalar_types, scalar_types + 19, dtype) == scalar_types + 19)
@@ -105,7 +105,7 @@ namespace alps {
                     std::vector<std::size_t> first_extent(get_extent(boost::python::extract<boost::python::tuple>(value[0])()));
                     copy(first_extent.begin(), first_extent.end(), back_inserter(extent));
                 } else if (first_dtype == "numpy.ndarray") {
-                    std::vector<std::size_t> first_extent = get_extent(boost::python::extract<boost::python::numeric::array>(value[0])());
+                    std::vector<std::size_t> first_extent = get_extent(boost::python::extract<alps::python::numpy::array>(value[0])());
                     copy(first_extent.begin(), first_extent.end(), back_inserter(extent));
                 }
                 return extent;
@@ -170,7 +170,7 @@ namespace alps {
             , std::vector<std::size_t> offset
         ) {
             save_generic<boost::python::tuple>(ar, path, value, size, chunk, offset);
-        }        
+        }
 
         void load(
               archive & ar
@@ -199,23 +199,24 @@ namespace alps {
 
         namespace detail {
 
-            bool is_vectorizable<boost::python::numeric::array>::apply(boost::python::numeric::array const & value) {
+            bool is_vectorizable<alps::python::numpy::array>::apply(alps::python::numpy::array const & value) {
                 return true;
             }
 
-            std::vector<std::size_t> get_extent<boost::python::numeric::array>::apply(boost::python::numeric::array const & value) {
-                if (!is_vectorizable<boost::python::numeric::array>::apply(value))
-                    throw archive_error("no rectengual matrix" + ALPS_STACKTRACE);
-                return std::vector<std::size_t>(PyArray_DIMS(value.ptr()), PyArray_DIMS(value.ptr()) + PyArray_NDIM(value.ptr()));
+            std::vector<std::size_t> get_extent<alps::python::numpy::array>::apply(alps::python::numpy::array const & value) {
+                if (!is_vectorizable<alps::python::numpy::array>::apply(value))
+                    throw archive_error("no rectangular matrix" + ALPS_STACKTRACE);
+                PyArrayObject * ptr = (PyArrayObject *)value.ptr();
+                return std::vector<std::size_t>(PyArray_DIMS(ptr), PyArray_DIMS(ptr) + PyArray_NDIM(ptr));
             }
 
             // To set the extent of a numpy array, we need the type, extent is set in load
-            void set_extent<boost::python::numeric::array>::apply(boost::python::numeric::array & value, std::vector<std::size_t> const & extent) {}
+            void set_extent<alps::python::numpy::array>::apply(alps::python::numpy::array & value, std::vector<std::size_t> const & extent) {}
 
             template <typename T> void load_python_numeric(
                   archive & ar
                 , std::string const & path
-                , boost::python::numeric::array & value
+                , alps::python::numpy::array & value
                 , std::vector<std::size_t> chunk
                 , std::vector<std::size_t> offset
                 , int type
@@ -225,12 +226,13 @@ namespace alps {
                     extent.pop_back();
                 std::vector<npy_intp> npextent(extent.begin(), extent.end());
                 std::size_t len = std::accumulate(extent.begin(), extent.end(), std::size_t(1), std::multiplies<std::size_t>());
-                value = boost::python::numeric::array(boost::python::handle<>(PyArray_SimpleNew(npextent.size(), &npextent.front(), type)));
+                value = alps::python::numpy::from_pyobject(boost::python::object(boost::python::handle<>(PyArray_SimpleNew(npextent.size(), &npextent.front(), type))));
                 if (len) {
                     boost::scoped_ptr<T> raw(new T[len]);
                     std::pair<T *, std::vector<std::size_t> > data(raw.get(), extent);
                     load(ar, path, data, chunk, offset);
-                    memcpy(PyArray_DATA(value.ptr()), raw.get(), PyArray_ITEMSIZE(value.ptr()) * PyArray_SIZE(value.ptr()));
+                    PyArrayObject * ptr = (PyArrayObject *)value.ptr();
+                    memcpy(PyArray_DATA(ptr), raw.get(), PyArray_ITEMSIZE(ptr) * PyArray_SIZE(ptr));
                 }
             }
         }
@@ -238,12 +240,11 @@ namespace alps {
         void save(
               archive & ar
             , std::string const & path
-            , boost::python::numeric::array const & value
+            , alps::python::numpy::array const & value
             , std::vector<std::size_t> size
             , std::vector<std::size_t> chunk
             , std::vector<std::size_t> offset
         ) {
-            using ::alps::detail::import_numpy;
             import_numpy();
             if (ar.is_group(path))
                 ar.delete_group(path);
@@ -252,7 +253,7 @@ namespace alps {
                 throw std::runtime_error("invalid numpy data" + ALPS_STACKTRACE);
             else if (!PyArray_ISNOTSWAPPED(ptr))
                 throw std::runtime_error("numpy array is not native" + ALPS_STACKTRACE);
-            else if (!(ptr = PyArray_GETCONTIGUOUS(ptr)))
+            else if (!(ptr = PyArray_GETCONTIGUOUS(ptr)))  // this does Py_INCREF(ptr)
                 throw std::runtime_error("numpy array cannot be converted to continous array" + ALPS_STACKTRACE);
             std::vector<std::size_t> extent(PyArray_DIMS(ptr), PyArray_DIMS(ptr) + PyArray_NDIM(ptr));
             std::copy(extent.begin(), extent.end(), std::back_inserter(size));
@@ -275,11 +276,10 @@ namespace alps {
         void load(
               archive & ar
             , std::string const & path
-            , boost::python::numeric::array & value
+            , alps::python::numpy::array & value
             , std::vector<std::size_t> chunk
             , std::vector<std::size_t> offset
         ) {
-            using ::alps::detail::import_numpy;
             import_numpy();
             if (false);
             #define NGS_PYTHON_HDF5_LOAD_NUMPY(T)                                                                                                               \
@@ -290,7 +290,7 @@ namespace alps {
             else
                 throw std::runtime_error("Unsupported type." + ALPS_STACKTRACE);
         }
-        
+
         void save(
               archive & ar
             , std::string const & path
@@ -301,15 +301,17 @@ namespace alps {
         ) {
             if (ar.is_group(path))
                 ar.delete_group(path);
-            const boost::python::object kit = value.iterkeys();
-            const boost::python::object vit = value.itervalues();
+            const boost::python::list keys = value.keys();
             using boost::python::len;
-            for (boost::python::ssize_t i = 0; i < len(value); ++i)
+            for (boost::python::ssize_t i = 0; i < len(keys); ++i) {
+                boost::python::object pyk = keys[i];
+                std::string k = boost::python::call_method<std::string>(pyk.ptr(), "__str__");
                 save(
                       ar
-                    , ar.complete_path(path) + "/" + ar.encode_segment(boost::python::call_method<std::string>(kit.attr("next")().ptr(), "__str__"))
-                    , vit.attr("next")()
+                    , ar.complete_path(path) + "/" + ar.encode_segment(k)
+                    , value.get(pyk)
                 );
+            }
         }
 
         void load(
@@ -337,7 +339,7 @@ namespace alps {
                 if (dtype == "list")
                     return is_vectorizable<boost::python::list>::apply(boost::python::extract<boost::python::list>(value)());
                 else if (dtype == "numpy.ndarray")
-                    return is_vectorizable<boost::python::numeric::array>::apply(boost::python::extract<boost::python::numeric::array>(value)());
+                    return is_vectorizable<alps::python::numpy::array>::apply(boost::python::extract<alps::python::numpy::array>(value)());
                 return find(scalar_types, scalar_types + 19, dtype) < scalar_types + 19;
             }
 
@@ -349,7 +351,7 @@ namespace alps {
                 if (dtype == "list")
                     return get_extent(boost::python::extract<boost::python::list>(value)());
                 else if (dtype == "numpy.ndarray")
-                    return get_extent(boost::python::extract<boost::python::numeric::array>(value)());
+                    return get_extent(boost::python::extract<alps::python::numpy::array>(value)());
                 else
                     return std::vector<std::size_t>();
             }
@@ -409,7 +411,7 @@ namespace alps {
         ) {
             std::string dtype = value.ptr()->ob_type->tp_name;
             if (dtype == "numpy.ndarray")
-                save(ar, path, boost::python::extract<boost::python::numeric::array>(value)(), size, chunk, offset);
+                save(ar, path, boost::python::extract<alps::python::numpy::array>(value)(), size, chunk, offset);
             else if (PyObject_HasAttrString(value.ptr(), "save") && std::string(PyObject_GetAttrString(value.ptr(), "save")->ob_type->tp_name) == "instancemethod") {
                 std::string context = ar.get_context();
                 ar.set_context(ar.complete_path(path));
@@ -467,7 +469,7 @@ namespace alps {
                 value = boost::python::list();
                 load(ar, path, static_cast<boost::python::list &>(value), chunk, offset);
             } else {
-                boost::python::numeric::array array(boost::python::make_tuple());
+                alps::python::numpy::array array = alps::python::numpy::from_pyobject(boost::python::object());
                 load(ar, path, array, chunk, offset);
                 value = array;
             }

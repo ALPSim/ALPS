@@ -1,3 +1,4 @@
+from __future__ import print_function
 #/*****************************************************************************
 #*
 #* ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -58,11 +59,11 @@ error_binning = pyalps.alea.error(obs, pyalps.alea.binning)
 error_corrtime = float(error_uncorr * numpy.sqrt(1. + 2. * int_autocorr_time))
 
 # print the result
-print "The estimated integrated autocorrelation time is: " + str(int_autocorr_time)
-print "The different error estimates are:"
-print "uncorrelated: " + str(error_uncorr)
-print "with binning: " + str(error_binning)
-print "with correlation time: " + str(error_corrtime)
+print("The estimated integrated autocorrelation time is: " + str(int_autocorr_time))
+print("The different error estimates are:")
+print("uncorrelated: " + str(error_uncorr))
+print("with binning: " + str(error_binning))
+print("with correlation time: " + str(error_corrtime))
 
 # we can also write one of the errors back to the file
 ar = pyalps.hdf5.archive(filename, 1)

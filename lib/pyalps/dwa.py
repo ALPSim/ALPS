@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 # ****************************************************************************
 #
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -26,14 +28,17 @@
 # ****************************************************************************
 
 import os;
-import math;
+from . import math;
 import numpy;
 import scipy;
 import matplotlib;
 import matplotlib.pyplot;
 import pyalps;
-from dwa_c import worldlines;
-from dwa_c import bandstructure;
+try:
+    from .dwa_c import worldlines, bandstructure
+except ImportError:
+    from dwa_c import worldlines, bandstructure
+from functools import reduce
 
 
 def format_string(string, loc):
@@ -380,7 +385,7 @@ def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, end_script
   elif cmd_lang == 'python':
     eval(cmd);
   else:
-    print "Error: The options for cmd_lang are 1) 'command_line' (default), or 2) 'python'."
+    print("Error: The options for cmd_lang are 1) 'command_line' (default), or 2) 'python'.")
     return;
 
   if follow_up_script != None:  

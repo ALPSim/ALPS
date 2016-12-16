@@ -1,3 +1,4 @@
+from __future__ import print_function
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
  #                                                                                 #
  # ALPS Project: Algorithms and Libraries for Physics Simulations                  #
@@ -29,6 +30,18 @@ import pyalps.hdf5 as hdf5
 import pyalps.ngs as ngs
 import sys
 
+orig_dict = {
+    'val1' : 42,
+    'val2' : '42',
+    'a' : 1,
+    'x' : 2,
+    'b' : 3
+}
+def assert_type(p, k):
+    assert type(p[k]) == type(orig_dict[k])
+
+
+## Create params
 p = ngs.params({
     'val1' : 42,
     'val2' : '42',
@@ -36,26 +49,28 @@ p = ngs.params({
     'x' : 2,
     'b' : 3
 })
-print type(p["val1"]), type(p["val2"]), type(p["undefined"])
+## check content
+for k in sorted(orig_dict.keys()):
+    assert p[k] == orig_dict[k]
+    assert_type(p, k)
+    print(k,'ok!')
+## Check nonetype
+assert type(p["undefined"]) == type(None)
 
-oar = hdf5.archive('parms1.h5', 'w')
-p.save(oar) # does not use path '/parameters'
-del oar
+## Write to hdf5
+with hdf5.archive('parms1.h5', 'w') as oar:
+    p.save(oar) # does not use path '/parameters'
 
-oar = hdf5.archive('parms2.h5', 'w')
+with hdf5.archive('parms2.h5', 'w') as oar:
+    for key in sorted(p.keys()):
+        print(key)
+        oar['parameters/' + key] = p[key]
+## Load from hdf5
+with hdf5.archive('parms2.h5', 'r') as oar:
+    iar = hdf5.archive('parms2.h5', 'r')
+    p.load(iar)
 
-print p.keys(), p.values()
-
-for key in p.keys():
-    print key
-    oar['parameters/' + key] = p[key]
-del oar
-
-iar = hdf5.archive('parms2.h5', 'r')
-p.load(iar)
-
-print type(p["val1"]), type(p["val2"])
-for key in p:
-    print key,p[key], type(p[key])
-
-del iar
+    for k in sorted(orig_dict.keys()):
+        assert p[k] == orig_dict[k]
+        assert_type(p, k)
+        print(k,'ok!')

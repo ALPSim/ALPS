@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -56,7 +57,7 @@ results = pyalps.evaluateQWL(pyalps.getResultFiles(prefix='parm6d'),DELTA_T=0.05
 data = []
 for s in pyalps.flatten(results):
   if s.props['ylabel']=='Staggered Structure Factor per Site':
-    print 'yes'
+    print('yes')
     d = copy.deepcopy(s) # make a deep copy to not change the original
     l = s.props['L']
     d.props['label']='L='+str(l)

@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -28,10 +29,10 @@
 
 import numpy as np
 from xml.etree import ElementTree
-from dataset import DataSet
-from floatwitherror import FloatWithError as fwe
-from floatwitherror import get_mean
-from hlist import flatten
+from .dataset import DataSet
+from .floatwitherror import FloatWithError as fwe
+from .floatwitherror import get_mean
+from .hlist import flatten
 
 def read_xml(filename):
     root = ElementTree.parse(filename).getroot()

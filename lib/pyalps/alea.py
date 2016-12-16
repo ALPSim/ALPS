@@ -37,11 +37,13 @@ This module contains classes for the evaluation of Monte Carlo measurements:
 - MCScalarTimeseriesView
 - MCVectorTimeseriesView
 """
+from __future__ import print_function
+from __future__ import absolute_import
 
-from pymcdata_c import *
-from pyalea_c import RealObservable, RealVectorObservable, RealTimeSeriesObservable, RealVectorTimeSeriesObservable
-from pyalea_c import MCScalarTimeseries, MCScalarTimeseriesView, MCVectorTimeseries, MCVectorTimeseries, ValueWithError, StdPairDouble, size, mean, variance, integrated_autocorrelation_time, running_mean, reverse_running_mean
-import alea_detail as detail
+from .cxx.pymcdata_c import *
+from .cxx.pyalea_c import RealObservable, RealVectorObservable, RealTimeSeriesObservable, RealVectorTimeSeriesObservable
+from .cxx.pyalea_c import MCScalarTimeseries, MCScalarTimeseriesView, MCVectorTimeseries, MCVectorTimeseries, ValueWithError, StdPairDouble, size, mean, variance, integrated_autocorrelation_time, running_mean, reverse_running_mean
+from . import alea_detail as detail
 import numpy
 import pyalps.dataset
 
@@ -68,7 +70,7 @@ returns: MCTimeseries object with the autocorrelation"
     return detail.autocorrelation_distance(timeseries, _distance)
   if _limit != None:
     return detail.autocorrelation_limit(timeseries, _limit)
-  print "Usage: autocorrelation(timeseries, [_distance = XXX | _limit = XXX] )"
+  print("Usage: autocorrelation(timeseries, [_distance = XXX | _limit = XXX] )")
 
 def cut_head(timeseries, _distance = None, _limit = None):
   "Creates a MCTimeseriesView object. Can be invoked with _distance or _limit.\n\
@@ -81,7 +83,7 @@ returns: MCTimeseriesView object with the smaller timeseries\n\
     return detail.cut_head_distance(timeseries, _distance)
   if _limit != None:
     return detail.cut_head_limit(timeseries, _limit)
-  print "Usage: cut_head(timeseries, [_distance = XXX | _limit = XXX] )"
+  print("Usage: cut_head(timeseries, [_distance = XXX | _limit = XXX] )")
 
 def cut_tail(timeseries, _distance = None, _limit = None):
   "Creates a MCTimeseriesView object. Can be invoked with _distance or _limit.\n\
@@ -94,7 +96,7 @@ returns: MCTimeseriesView object with the smaller timeseries\n\
     return detail.cut_tail_distance(timeseries, _distance)
   if _limit != None:
     return detail.cut_tail_limit(timeseries, _limit)
-  print "Usage: cut_head(timeseries, [_distance = XXX | _limit = XXX] )"
+  print("Usage: cut_head(timeseries, [_distance = XXX | _limit = XXX] )")
 
 def exponential_autocorrelation_time(autocorrelation, _from = None, _to = None, _max = None, _min = None):
   "Fits a timeseries exponentially. Can be invoked with _from and _to or with _max and _min.\n\
@@ -107,7 +109,7 @@ returns: StdPairDouble object FIT with the parameters of the fit\n\
     return detail.exponential_autocorrelation_time_distance(autocorrelation, _from, _to)
   if (_max != None and _min != None):
     return detail.exponential_autocorrelation_time_limit(autocorrelation, _max, _min)
-  print "Usage: exponential_autocorrelation_time(autocorrelation, [_from = XXX, _to = XXX | _max = XXX, _min = XXX] )"
+  print("Usage: exponential_autocorrelation_time(autocorrelation, [_from = XXX, _to = XXX | _max = XXX, _min = XXX] )")
 
 binning = "binning"
 uncorrelated = "uncorrelated"

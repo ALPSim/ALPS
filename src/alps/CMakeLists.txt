@@ -56,7 +56,7 @@ set(ALPS_SOURCES
   )
 
   if (ALPS_BUILD_PYTHON)
-    set(ALPS_SOURCES ${ALPS_SOURCES} ngs/lib/get_numpy_type.cpp hdf5/python.cpp)
+    set(ALPS_SOURCES ${ALPS_SOURCES} ngs/lib/get_numpy_type.cpp hdf5/python.cpp python/numpy_array.cpp)
   endif (ALPS_BUILD_PYTHON)
 
   # OpenMPI ULFM

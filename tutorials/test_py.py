@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -43,7 +44,7 @@ logfile = open('pytest.log', 'w')
 for f in pyfiles:
     if f.find('build_lattice.py') >= 0: # This is no tutorial and needs cmd line arguments
         continue
-    print f + ':',
+    print(f + ':', end=' ')
     dir = os.path.dirname(f)
     fn = os.path.basename(f)
     os.chdir(os.path.join(cwd,dir))
@@ -52,6 +53,6 @@ for f in pyfiles:
     logfile.write(f+':'+'\n')
     errors = []
     for k in output:
-        logfile.write(k)
+        logfile.write(k.decode(sys.stdout.encoding))
     logfile.write('===============================================================\n')
-    print 'returned',process.returncode
+    print('returned',process.returncode)

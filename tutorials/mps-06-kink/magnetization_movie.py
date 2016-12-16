@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys, shutil, tempfile
 import os.path
 import matplotlib
@@ -12,7 +13,7 @@ basename = 'sim_a'
 data = pyalps.loadIterationMeasurements(pyalps.getResultFiles(prefix=basename), what=['Local Magnetization'])
 
 dirname = tempfile.mkdtemp()
-print '..temp dir:', dirname
+print('..temp dir:', dirname)
 
 data = pyalps.flatten(data)
 ymax = 0.
@@ -27,7 +28,7 @@ counter = 0
 for d in sorted(data, key = lambda d: d.props['Time']):
     sw = d.props['Time']
     t = d.props['dt'] * (sw+1)
-    print '..plot iteration', int(sw)
+    print('..plot iteration', int(sw))
     # print group
     plt.figure()
     plt.title('$t = %s$' % t)
@@ -42,7 +43,7 @@ for d in sorted(data, key = lambda d: d.props['Time']):
     counter += 1
 
 oname = basename +'.density.mp4'
-print '..generating', oname
+print('..generating', oname)
 check_call(['ffmpeg',
             '-i', dirname+'/_anim.%08d.png',
             '-c:v','libx264','-profile:v','high','-crf','23','-pix_fmt','yuv420p','-y','-r','30',

@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -60,8 +61,8 @@ res = pyalps.runApplication('mps_optim',input_file,writexml=True)
 data = pyalps.loadEigenstateMeasurements(pyalps.getResultFiles(prefix=basename), ['String order 2', 'String order 4'])
 
 for d in pyalps.flatten(data):
-    print '##', d.props['observable']
+    print('##', d.props['observable'])
     for x,y in zip(d.x, d.y[0]):
-        print 'Sites:', x
-        print 'Val:  ', y
+        print('Sites:', x)
+        print('Val:  ', y)
 

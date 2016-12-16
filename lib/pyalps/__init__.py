@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -34,11 +35,11 @@ if sys.platform == 'darwin' and not os.path.exists(os.path.expanduser('~/.matplo
     except ImportError:
         pass
 
-from dataset import *
-from tools import *
-from pytools import *
-from floatwitherror import FloatWithError
-import fit_wrapper
+from .dataset import *
+from .tools import *
+from .pytools import *
+from .floatwitherror import FloatWithError
+from . import fit_wrapper
 
 # For ALPS DWA Application
 # from dwa import *

@@ -103,7 +103,18 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
   #EXEC_PYTHON_SCRIPT ("import scipy" nulle) # check that scipy is there...
   #EXEC_PYTHON_SCRIPT ("import tables" nulle) # check that tables is there...
   MESSAGE(STATUS "Python interpreter ok : version ${PYTHON_VERSION}" )
-
+  
+  #
+  # Python function to normalize linker flags
+  #
+  # Goal: CMake has two requiriments on the library flags:
+  # 1. the string cannot start with a spaces
+  # 2. if the string starts with a slash, the argument is interpreted as *a single library name* or a list of libraries
+  #    this is broken if the linker flags are, e.g. "/path/to/lib -framework MyFramework -sysroot /"
+  # --> we need to split the string into a list of elements starting with "/" or "-".
+  # TODO: there might be problems if some path contains spaces
+  set(PYFUNC_NORMALIZE_FLAGS "def normalize_flags(flags):\n flags=flags.strip()\n if flags[0]=='-':return flags\n parts=flags.split(' ', 1)\n if len(parts)>0:return parts[0].strip()+';'+normalize_flags(parts[1])\n return parts[0].strip()\n")
+  
   #
   # Check for Python include path
   #
@@ -136,15 +147,17 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
       #
       #EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import * ;print string.join(get_config_vars('VERSION'))"  PYTHON_VERSION_MAJOR_MINOR)
       EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import *; print(' '.join(get_config_vars('LIBPL')))" PYTHON_LIBRARY_BASE_PATH)
-      EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import *; print('libpython{}'.format(' '.join(get_config_vars('VERSION'))))" PYTHON_LIBRARY_BASE_FILE)
-      IF(BUILD_SHARED_LIBS)
-        FIND_FILE(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}.so" PATHS ${PYTHON_LIBRARY_BASE_PATH})
-        IF(NOT PYTHON_LIBRARY)
-          FIND_FILE(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}.a" PATHS ${PYTHON_LIBRARY_BASE_PATH})
-        ENDIF(NOT PYTHON_LIBRARY)
-      ELSE(BUILD_SHARED_LIBS)
-        FIND_FILE(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}.a" PATHS ${PYTHON_LIBRARY_BASE_PATH})
-      ENDIF(BUILD_SHARED_LIBS)
+      EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import *; print(get_config_vars('LIBRARY')[0])" PYTHON_LIBRARY_BASE_FILE)
+      FIND_FILE(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}" PATHS ${PYTHON_LIBRARY_BASE_PATH})
+      # EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import *; print('libpython{}'.format(' '.join(get_config_vars('VERSION'))))" PYTHON_LIBRARY_BASE_FILE)
+      # IF(BUILD_SHARED_LIBS)
+      #   FIND_FILE(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}.so" PATHS ${PYTHON_LIBRARY_BASE_PATH})
+      #   IF(NOT PYTHON_LIBRARY)
+      #     FIND_FILE(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}.a" PATHS ${PYTHON_LIBRARY_BASE_PATH})
+      #   ENDIF(NOT PYTHON_LIBRARY)
+      # ELSE(BUILD_SHARED_LIBS)
+      #   FIND_FILE(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}.a" PATHS ${PYTHON_LIBRARY_BASE_PATH})
+      # ENDIF(BUILD_SHARED_LIBS)
       IF(NOT PYTHON_LIBRARY)
         # On Debian/Ubuntu system, libpython*.so is located in /usr/lib/`gcc -print-multiarch`
         execute_process(COMMAND gcc -print-multiarch OUTPUT_VARIABLE TRIPLES)
@@ -160,7 +173,7 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
       #
       # libraries which must be linked in when embedding
       #
-      EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import * ;print( (str(get_config_var('LOCALMODLIBS')) + ' ' + str(get_config_var('LIBS'))).strip().replace('  ', ' ').replace(' -', ';-').replace(' /', ';/'))"
+      EXEC_PYTHON_SCRIPT ("${PYFUNC_NORMALIZE_FLAGS}from distutils.sysconfig import * ;print( normalize_flags( str(get_config_var('LOCALMODLIBS')) + ' ' + str(get_config_var('LIBS')) + ' ' + str(get_config_var('LDFLAGS')) ))"
                   PYTHON_EXTRA_LIBS)
       MESSAGE(STATUS "PYTHON_EXTRA_LIBS =${PYTHON_EXTRA_LIBS}" )
       mark_as_advanced(PYTHON_EXTRA_LIBS)

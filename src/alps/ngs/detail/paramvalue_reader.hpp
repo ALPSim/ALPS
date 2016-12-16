@@ -170,7 +170,8 @@ namespace alps {
                     template <typename U> void operator()(std::vector<U> const & v) const {
                         npy_intp npsize = v.size();
                         value = boost::python::object(boost::python::handle<>(PyArray_SimpleNew(1, &npsize, detail::get_numpy_type(U()))));
-                        memcpy(PyArray_DATA(value.ptr()), &v.front(), PyArray_ITEMSIZE(value.ptr()) * PyArray_SIZE(value.ptr()));
+                        PyArrayObject * ptr = (PyArrayObject *)value.ptr();
+                        memcpy(PyArray_DATA(ptr), &v.front(), PyArray_ITEMSIZE(ptr) * PyArray_SIZE(ptr));
                     }
 
                     void operator()(std::vector<std::string> const & v) const {

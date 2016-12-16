@@ -1,3 +1,4 @@
+from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -53,11 +54,11 @@ pyalps.runApplication('spinmc',input_file,Tmin=5,writexml=True)
 
 #get the list of result files
 result_files = pyalps.getResultFiles(prefix='parm1')
-print "Loading results from the files: ", result_files
+print("Loading results from the files: ", result_files)
 
 #print the observables stored in those files:
-print "The files contain the following mesurements:",
-print pyalps.loadObservableList(result_files)
+print("The files contain the following mesurements:", end=' ')
+print(pyalps.loadObservableList(result_files))
 
 #load a selection of measurements:
 data = pyalps.loadMeasurements(result_files,['|Magnetization|','Magnetization^2'])
@@ -72,20 +73,20 @@ plt.title('Ising model')
 plt.show()
 
 # convert the data to text file for plotting using another tool
-print pyalps.plot.convertToText(plotdata)
+print(pyalps.plot.convertToText(plotdata))
 
 # convert the data to grace file for plotting using xmgrace
-print pyalps.plot.makeGracePlot(plotdata)
+print(pyalps.plot.makeGracePlot(plotdata))
 
 # convert the data to gnuplot file for plotting using gnuplot
-print pyalps.plot.makeGnuplotPlot(plotdata)
+print(pyalps.plot.makeGnuplotPlot(plotdata))
 
 #calculate the Binder cumulants using jackknife-analysis
 binder = pyalps.DataSet()
 binder.props = pyalps.dict_intersect([d[0].props for d in data])
 binder.x = [d[0].props['T'] for d in data]
 binder.y = [d[1].y[0]/(d[0].y[0]*d[0].y[0]) for d in data]
-print binder
+print(binder)
 
 # ... and plot them
 plt.figure()

@@ -1,3 +1,4 @@
+from __future__ import print_function
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
 # 
@@ -67,11 +68,11 @@ plt.show()
 ## load the final iteration of G_{flavor=0}(tau)
 data_G_tau = pyalps.loadMeasurements(res_files, respath='/simulation/results/G_tau', what=listobs, verbose=False)  
 
-print "Occupation in the last iteration at flavor=0"
+print("Occupation in the last iteration at flavor=0")
 for d in pyalps.flatten(data_G_tau):
     # obtain occupation using relation: <n_{flavor=0}> = -<G_{flavor=0}(tau=beta)>
     d.y = np.array([-d.y[-1]])
-    print "n_0(beta =",d.props['BETA'],") =",d.y[0]
+    print("n_0(beta =",d.props['BETA'],") =",d.y[0])
     d.x = np.array([0])
     d.props['observable'] = 'occupation'
 
