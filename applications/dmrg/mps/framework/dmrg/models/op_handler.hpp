@@ -94,14 +94,10 @@ TagHandler<Matrix, SymmGroup>::get_product_tag(const typename
 
     // return tag of product, if already there
     try {
-#if defined(__xlC__) || defined(__FCC_VERSION)
-        if (product_tags.count(std::make_pair(t1, t2)) == 0)
+        pair_map_it_t match = product_tags.find(std::make_pair(t1, t2));
+        if (match == product_tags.end())
             throw std::out_of_range("");
-
-        return product_tags[std::make_pair(t1, t2)];
-#else
-        return product_tags.at(std::make_pair(t1, t2));
-#endif
+        return match->second;
     }
 
     // compute and register the product, then return the new tag
