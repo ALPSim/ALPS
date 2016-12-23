@@ -8,6 +8,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 find_package(ALPSCore REQUIRED COMPONENTS hdf5 accumulators mc params gf)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -ffast-math -DNDEBUG -DBOOST_DISABLE_ASSERTS")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -ffast-math -DNDEBUG -DBOOST_DISABLE_ASSERTS -g -fsanitize=address -fno-omit-frame-pointer")
 add_subdirectory(libcluster)
 add_subdirectory(libselfconsistency)
 add_subdirectory(tests)

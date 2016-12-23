@@ -73,6 +73,8 @@ template<class SOLV, class TRANS, class GFW, class GFT> void selfconsistency_loo
   double beta=parms["BETA"];
 
   int max_it = parms["sc.MAX_IT"];
+  bool adjust_mu = parms["sc.ADJUST_MU"];
+  double target_density = adjust_mu?parms["sc.TARGET_DENSITY"]:0.;
   double convergence_tolerance=parms["sc.SELFCONSISTENCY_CONVERGENCE"];
   std::string g0_output_path=parms["dca.G0_OMEGA_OUTPUT"].as<std::string>();
 
@@ -98,7 +100,12 @@ template<class SOLV, class TRANS, class GFW, class GFT> void selfconsistency_loo
     clustertrans.spin_symmetrize(G_omega);
     clustertrans.symmetrize_k_space(G_omega);
     clustertrans.dyson_get_self_energy(self_energy, G_omega, G0_omega);
-    clustertrans.matsubara_k_sum(G_omega_ksum, self_energy);
+    if(!adjust_mu)
+      clustertrans.matsubara_k_sum(G_omega_ksum, self_energy);
+    else{
+      double mu=clustertrans.matsubara_k_sum_adjust_mu(G_omega_ksum, self_energy, target_density);
+      solver.adjust_mu(mu);
+    }
     clustertrans.dyson_get_green0(G0_omega_new, self_energy, G_omega_ksum);
     clustertrans.dyson_get_self_energy(self_energy2, G_omega, G0_omega);
 

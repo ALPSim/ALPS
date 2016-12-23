@@ -31,6 +31,8 @@ void define_dca_parameters(alps::params &p){
   p.define<double>("dca.H", 0, "staggered magnetic field");
   p.define<double>("dca.MU_STAG_INIT", 0, "initial staggered chemical potential (for charge order). Will be turned off after 1st iteration");
   p.define<double>("dca.MU_STAG", 0, "staggered chemical potential (for charge order)");
+  p.define<double>("U", "Interaction strength. This is used to attach the interacting tail");
+  p.define<double>("V", 0, "nearest-neighbor Interaction strength. This is used to attach the interacting tail in the case of non-local interactions");
   p.define<std::string>("dca.G0_OMEGA_INPUT", "Location of the input G0 file");
   p.define<std::string>("dca.G0_OMEGA_OUTPUT", "Location of the output G0 file for continuing iterations");
   p.define<std::string>("dca.INITIAL_G0", "FREE", "choose ISOLATED or FREE for initial G0s");
@@ -48,6 +50,8 @@ ClusterTransformer::ClusterTransformer(const alps::params& params) : ClusterHelp
     weight_kl_(n_lattice_momenta()),
     nfreq_(params["NMATSUBARA"]),
     beta_(params["BETA"]),
+    U_(params["U"]),
+    V_(params["V"]),
     g0_input_path_(params["dca.G0_OMEGA_INPUT"].as<std::string>()),
     initial_g0_(params["dca.INITIAL_G0"].as<std::string>())
 {
@@ -280,15 +284,15 @@ void NormalStateClusterTransformer::attach_interacting_tail(cluster_matsubara_ks
   for(alps::gf::index f(0); f<n_flavors_; f++) {
     for(alps::gf::momentum_index k(0); k<n_cluster_sites(); ++k) {
       c1(k,f) = 1.;
-      c2(k,f) = epsav_[k()] - mu_+ U*density;
-      c3(k,f) = epssqav_[k()] - 2*mu_*epsav_[k()] + mu_*mu_+ 2.*U*density*(epsav_[k()]-mu_) + U*U*density;
+      c2(k,f) = epsav_[k()] - (mu_+U/2.)+ U*density;
+      c3(k,f) = 0.; //epssqav_[k()] - 2*mu_*epsav_[k()] + mu_*mu_+ 2.*U*density*(epsav_[k()]-mu_) + U*U*density;
     }
   }
   G.set_tail(1,c1);
   G.set_tail(2,c2);
   G.set_tail(3,c3);
 }
-void DoubleCellClusterTransformer::attach_interacting_tail(double_cell_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const{
+void DoubleCellClusterTransformer::attach_interacting_tail(double_cell_matsubara_kspace_gf &G, double U, double V, const std::vector<double> &densities) const{
   alps::gf::k_sigma1_sigma2_gf c1(G.mesh2(), G.mesh3(), G.mesh4());
   alps::gf::k_sigma1_sigma2_gf c2(G.mesh2(), G.mesh3(), G.mesh4());
   alps::gf::k_sigma1_sigma2_gf c3(G.mesh2(), G.mesh3(), G.mesh4());
@@ -302,8 +306,13 @@ void DoubleCellClusterTransformer::attach_interacting_tail(double_cell_matsubara
       c1(k  ,alps::gf::index(0), spin) = 1.;
       c1(k+1,alps::gf::index(1), spin) = 1.;
 
-     c2(k  ,alps::gf::index(0), spin) = epsav_[k()] - mu_+ U*density;
-     c2(k+1,alps::gf::index(1), spin) = epsav_[k()+1] - mu_+ U*density;
+     ///TODO: c2 here needs a proper derivation that accounts for the Hartree term. it is NOT U*density
+     //c2(k  ,alps::gf::index(0), spin) = epsav_[k()]   - (mu_+U/2.+2*dimension()*V)+ U*density;
+     //c2(k+1,alps::gf::index(1), spin) = epsav_[k()+1] - (mu_+U/2.+2*dimension()*V)+ U*density;
+
+     c2(k  ,alps::gf::index(0), spin) = 0.; //epsav_[k()] - mu_+ U*density;
+     c2(k+1,alps::gf::index(1), spin) = 0.;//epsav_[k()+1] - mu_+ U*density;
+
 
       //the off-diagonal elements
       c1(k  ,alps::gf::index(1), spin) = 0;
@@ -699,6 +708,46 @@ void NormalStateClusterTransformer::matsubara_k_sum(cluster_matsubara_kspace_gf 
     }
   }
 }
+double NormalStateClusterTransformer::density_for_mu(double mu, const cluster_matsubara_kspace_gf &sigma, double target_density_per_site){
+  double mu_old=mu_; mu_=mu;
+  std::vector<double> target_spin_densities(2,target_density_per_site/2.);
+  double computed_total_density=0.;
+  cluster_matsubara_kspace_gf G_omega(alps::gf::omega_k_sigma_gf(sigma.mesh1(), sigma.mesh2(), sigma.mesh3()));
+  cluster_itime_kspace_gf G_tau(alps::gf::itime_k_sigma_gf(alps::gf::itime_mesh(beta_,2),G_omega.mesh2(), G_omega.mesh3())); //G(tau) with only 0 and beta
+  matsubara_k_sum(G_omega,sigma); attach_interacting_tail(G_omega, U_, target_spin_densities); alps::gf::fourier_frequency_to_time(G_omega, G_tau);
+  for(alps::gf::momentum_index kc(0); kc<G_tau.mesh2().extent(); ++kc){
+    for(alps::gf::index f(0); f<G_tau.mesh3().extent();++f){
+      computed_total_density+=-G_tau(alps::gf::itime_index(1),kc,f);
+    }
+  }
+  mu_=mu_old;
+  return computed_total_density/n_cluster_sites();
+}
+///Compute the DMFT/DCA k-summation and adjust mu to get the right target density
+double NormalStateClusterTransformer::matsubara_k_sum_adjust_mu(cluster_matsubara_kspace_gf &G, const cluster_matsubara_kspace_gf &sigma, double target_density) {
+  double mu_min=-10; double mu_max=10; //hard coded. optionally put into parameters
+  double mu_convergence_tolerance=1.e-7;
+  double mu_old=mu_;
+  double density_min=density_for_mu(mu_min, sigma, target_density);
+  double density_max=density_for_mu(mu_max, sigma, target_density);
+  std::cout<<"at mu_min: "<<mu_min<<" found density: "<<density_min<<std::endl;
+  std::cout<<"at mu_max: "<<mu_max<<" found density: "<<density_max<<std::endl;
+  if(density_min > target_density) throw std::runtime_error("in Regula Falsi: target density is > minimum density");
+  if(density_max < target_density) throw std::runtime_error("in Regula Falsi: target density is < maximum density");
+  double density, mu_trial;
+  do{
+    mu_trial=(mu_max+mu_min)/2.;
+    density=density_for_mu(mu_trial, sigma, target_density);
+    if(density>target_density)
+      mu_max=mu_trial;
+    else
+      mu_min=mu_trial;
+  }while(std::abs(mu_max - mu_min)>mu_convergence_tolerance);
+  mu_=mu_trial;
+  matsubara_k_sum(G,sigma);
+  
+  return mu_;
+}
 ///Compute the DMFT/DCA k-summation in the double unit cell case
 void DoubleCellClusterTransformer::matsubara_k_sum(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma, double h, double mu_stag) const{
   two_by_two Ginv(0,0,0,0);
@@ -727,7 +776,51 @@ void DoubleCellClusterTransformer::matsubara_k_sum(double_cell_matsubara_kspace_
     }
   }
 }
+double DoubleCellClusterTransformer::density_for_mu(double mu, const double_cell_matsubara_kspace_gf &sigma, double target_density_per_site){
+  double mu_old=mu_; mu_=mu;
+  std::vector<double> target_spin_densities(2,target_density_per_site/2.);
+  double computed_total_density=0.;
+  double_cell_matsubara_kspace_gf G_omega(alps::gf::omega_k_sigma1_sigma2_gf(sigma.mesh1(), sigma.mesh2(), sigma.mesh3(), sigma.mesh4()));
+  double_cell_itime_kspace_gf G_tau(alps::gf::itime_k_sigma1_sigma2_gf(alps::gf::itime_mesh(beta_,2),G_omega.mesh2(), G_omega.mesh3(), G_omega.mesh4())); //G(tau) with only 0 and beta
+  matsubara_k_sum(G_omega,sigma); attach_interacting_tail(G_omega, U_, V_, target_spin_densities); alps::gf::fourier_frequency_to_time(G_omega, G_tau);
+  for(alps::gf::momentum_index kc(0); kc<G_tau.mesh2().extent(); kc+=2){
+    for(alps::gf::index f(0); f<G_tau.mesh3().extent();++f){
+      computed_total_density+=-G_tau(alps::gf::itime_index(1),kc  ,alps::gf::index(0), f);
+      computed_total_density+=-G_tau(alps::gf::itime_index(1),kc+1,alps::gf::index(1), f);
+    }
+  }
+  mu_=mu_old;
+  std::cout<<"added up to: "<<computed_total_density<<" dividing by cluster sites: "<<n_cluster_sites()<<std::endl;
+  return computed_total_density/(n_cluster_sites());
+}
+///Compute the DMFT/DCA k-summation and adjust mu to get the right target density
+//this is essentially a copy of the NormalState one above. All the difference is in density_for_mu. Merge the two?
+double DoubleCellClusterTransformer::matsubara_k_sum_adjust_mu(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma, double h, double mu_stag, double target_density) {
+  double mu_min=-10; double mu_max=10; //hard coded. optionally put into parameters
+  double mu_convergence_tolerance=1.e-7;
+  double mu_old=mu_;
+  double density_min=density_for_mu(mu_min, sigma, target_density);
+  double density_max=density_for_mu(mu_max, sigma, target_density);
+  std::cout<<"at mu_min: "<<mu_min<<" found density: "<<density_min<<std::endl;
+  std::cout<<"at mu_max: "<<mu_max<<" found density: "<<density_max<<std::endl;
+  if(density_min > target_density) throw std::runtime_error("in Regula Falsi: target density is < mu-minimum density");
+  if(density_max < target_density) throw std::runtime_error("in Regula Falsi: target density is > mu-maximum density");
+  double density, mu_trial;
+  do{
+    mu_trial=(mu_max+mu_min)/2.;
+    density=density_for_mu(mu_trial, sigma, target_density);
+    std::cout<<"attempting mu: "<<mu_trial<<" density: "<<density<<std::endl;
+    if(density>target_density)
+      mu_max=mu_trial;
+    else
+      mu_min=mu_trial;
+  }while(std::abs(mu_max - mu_min)>mu_convergence_tolerance);
+  mu_=mu_trial;
+  matsubara_k_sum(G,sigma);
 
+  return mu_;
+
+}
 ///Compute the DMFT/DCA k-summation
 void NambuClusterTransformer::matsubara_k_sum(cluster_nambu_matsubara_kspace_gf &G, const cluster_nambu_matsubara_kspace_gf &sigma,double eta1,double eta2) const{
   alps::gf::index up(0);
@@ -760,6 +853,9 @@ void NambuClusterTransformer::matsubara_k_sum(cluster_nambu_matsubara_kspace_gf 
       G(w, kc, dn,dn) /= n_cluster_cells();
     }
   }
+}
+double NambuClusterTransformer::matsubara_k_sum_adjust_mu(cluster_nambu_matsubara_kspace_gf &G, const cluster_nambu_matsubara_kspace_gf &sigma,double eta1,double eta2, double target_density) {
+  throw std::logic_error("not yet implemented. Bug Emanuel.");
 }
 
 void ClusterTransformer::compute_integration_weight_and_dispersion(){

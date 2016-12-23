@@ -54,7 +54,7 @@ public:
   virtual void attach_bare_tail(cluster_matsubara_kspace_gf &G0) const {throw std::logic_error("this should be implemented in an inherited class");}
   ///attach the DCA cluster high frequency behavior for the interacting GF
   virtual void attach_interacting_tail(cluster_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const {throw std::logic_error("this should be implemented in an inherited class");}
-  virtual void attach_interacting_tail(double_cell_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const {throw std::logic_error("this should be implemented in an inherited class");}
+  virtual void attach_interacting_tail(double_cell_matsubara_kspace_gf &G, double U, double V, const std::vector<double> &densities) const {throw std::logic_error("this should be implemented in an inherited class");}
   ///take a Green's function in k-space and transform it to real space
   virtual cluster_itime_realspace_gf transform_into_real_space(const cluster_itime_kspace_gf& G) const {throw std::logic_error("this should be implemented in an inherited class");}
   ///take a double cell Green's function in k-space and transform it to real space
@@ -88,6 +88,9 @@ protected:
   ///t is the basic energy unit of the hopping. t2 is the tprime. t_flavor is only used for mass imbalance
   double t_, t2_,t_flavor_;
   double beta_;
+  ///interaction is needed for high frequency information in the Fourier transform; same for the V
+  double U_;
+  double V_;
   int n_flavors_;
   int nfreq_;
   bool use_phase_;
@@ -118,6 +121,8 @@ public:
   void dyson_get_green0(cluster_matsubara_kspace_gf &G0, const cluster_matsubara_kspace_gf &sigma, const cluster_matsubara_kspace_gf &G) const;
   ///perform the k-sum to get G
   void matsubara_k_sum(cluster_matsubara_kspace_gf &G, const cluster_matsubara_kspace_gf &sigma) const;
+  ///perform the k-sum to get G, adjust the chemical potential internally
+  double matsubara_k_sum_adjust_mu(cluster_matsubara_kspace_gf &G, const cluster_matsubara_kspace_gf &sigma, double target_density);
 
   ///perform spin symmetrization of imaginary time k-space cluster Green's function
   void spin_symmetrize(cluster_itime_kspace_gf& G) const;
@@ -155,6 +160,8 @@ private:
   template<class GF, class TAIL> void symmetrize_helper_real_space(alps::gf::four_index_gf_with_tail<GF,TAIL> &G,
                                                         const std::pair<std::set<pair_class_type>::const_iterator,
                                                         std::set<pair_class_type>::const_iterator> pair_classes) const;
+  ///given a chemical potential, compute the density (assuming a tail for the target density)
+  double density_for_mu(double mu, const cluster_matsubara_kspace_gf &sigma, double target_density_per_site);
 public:
   template<class GF> void symmetrize_real_space(GF& G) const{return symmetrize_helper_real_space(G,pair_classes_real_space());}
   template<class GF> void symmetrize_k_space(GF& G) const{return symmetrize_helper_k_space(G,pair_classes_k_space());}
@@ -189,6 +196,12 @@ public:
   void matsubara_k_sum(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma) const{
     matsubara_k_sum(G, sigma, h_, mu_stag_);
   }
+  //the k-sum that will find the chem pot
+  double matsubara_k_sum_adjust_mu(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma, double h, double mu_stag, double target_density);
+  ///perform the k-sum to get G, adjust the chemical potential internally
+  double matsubara_k_sum_adjust_mu(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma, double target_density){
+    return matsubara_k_sum_adjust_mu(G, sigma, h_, mu_stag_,target_density);
+  }
 
   ///perform spin symmetrization of matsubara k-space Green's function
   void spin_symmetrize(double_cell_matsubara_kspace_gf& G) const;
@@ -202,11 +215,13 @@ private:
   ///attach a tail to the noninteracting GF
   void attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h, double mu_stag) const;
   ///attach a tail to the interacting GF
-  void attach_interacting_tail(double_cell_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const;
+  void attach_interacting_tail(double_cell_matsubara_kspace_gf &G, double U, double V, const std::vector<double> &densities) const;
   ///perform the AFM symmetrization
   void symmetrize_afm_kspace(double_cell_matsubara_kspace_gf &G) const;
   ///perform the CO symmetrization
   void symmetrize_co_kspace(double_cell_matsubara_kspace_gf &G) const;
+  ///given a chemical potential, compute the density (assuming a tail for the target density)
+  double density_for_mu(double mu, const double_cell_matsubara_kspace_gf &sigma, double target_density_per_site);
 
   ///initial magnetic field value
   const double h_init_;
@@ -254,6 +269,12 @@ public:
   ///the k-sum: short version, reroutes via long version by using h_ and mu_stag_
   void matsubara_k_sum(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma) const{
     matsubara_k_sum(G, sigma, eta1_, eta2_);
+  }
+  ///perform the k-sum to get G
+  double matsubara_k_sum_adjust_mu(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma, double eta1, double eta2, double target_density);
+  ///the k-sum: short version, reroutes via long version by using h_ and mu_stag_
+  double matsubara_k_sum_adjust_mu(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma, double target_density) {
+    return matsubara_k_sum_adjust_mu(G, sigma, eta1_, eta2_, target_density);
   }
   //Real space and k-space transformers for the Nambu Green's function
   virtual cluster_nambu_matsubara_realspace_gf nambu_transform_into_real_space(const cluster_nambu_matsubara_kspace_gf& G) const;

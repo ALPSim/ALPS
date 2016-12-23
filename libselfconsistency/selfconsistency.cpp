@@ -24,6 +24,8 @@ void define_selfconsistency_parameters(alps::params &p){
 
   p.define<double>("sc.SELFCONSISTENCY_CONVERGENCE", 1.e-10, "Difference in Green's function at which the iteration is converged");
   p.define<int>("sc.MAX_IT", 1000, "Maximum number of DMFT iterations");
+  p.define<bool>("sc.ADJUST_MU", false, "set to true to find target density, rather than run for fixed mu");
+  p.define<double>("sc.TARGET_DENSITY", "desired target density, see also sc.ADJUST_MU");
   p.define<double>("sc.RELAX_RATE", 1., "Convergence acceleration (or deceleration) parameter. Choose 1 if unsure.");
   p.define<bool>("sc.AFM_SELFCONSISTENCY", false, "Use the AFM self-consistency condition.");
   p.define<bool>("sc.SPIN_SYMMETRIZATION", true, "symmetrize 'up' and 'down' spins after each solver call.");

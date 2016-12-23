@@ -20,7 +20,8 @@ public:
     param_file_name_(param_file_name),
     infile_str_(p["solver.INFILE_H5GF"].as<std::string>()),
     outfile_str_(p["solver.OUTFILE_H5GF"].as<std::string>()),
-    params_(p){}
+    params_(p),
+    mu_(p["MU"]){}
 
   static void define_parameters(alps::params &p){
     p.define<std::string>("solver.INFILE_H5GF", "alps_solver_in.h5gf","Filename for temporary file");
@@ -49,6 +50,12 @@ public:
     boost::filesystem::remove(infile_str_);
     boost::filesystem::remove(outfile_str_);
   }
+  void adjust_mu(double mu){
+    double mu_old=params_["MU"];
+    params_["MU"]=mu;
+    std::cout<<"adjusting solver mu from: "<<mu_old<<" to: "<<mu<<std::endl;
+    mu_=mu;
+  }
 
 private:
   template<typename GF> void validate_nan_inf(const GF &G){
@@ -58,11 +65,11 @@ private:
   }
   /// call the executable
   void call_solver(){
-    std::string command = launch_command_ + " " + param_file_name_;
-    std::cerr << "Calling external solver as: " <<  command<<std::endl;
-    int result = std::system(command.c_str());
+    std::stringstream  command; command << launch_command_ << " " << param_file_name_<< " --MU="<<mu_;
+    std::cerr << "Calling external solver as: " <<  command.str()<<std::endl;
+    int result = std::system(command.str().c_str());
     if (result)
-      throw std::runtime_error("System error code " +boost::lexical_cast<std::string>(result) + " encountered when executing command:\n"+command);
+      throw std::runtime_error("System error code " +boost::lexical_cast<std::string>(result) + " encountered when executing command:\n"+command.str());
 
     if (!boost::filesystem::exists(outfile_str_))
       throw std::runtime_error("The external impurity solver failed to write the output file named " + outfile_str_);
@@ -73,7 +80,8 @@ private:
   const std::string param_file_name_;
   const std::string infile_str_;
   const std::string outfile_str_;
-  const alps::params params_;
+  alps::params params_;
+  double mu_;
 };
 
 inline void define_solver_parameters(alps::params &p){ 
