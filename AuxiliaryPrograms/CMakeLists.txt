@@ -12,6 +12,9 @@ find_package(Cluster REQUIRED)
 find_package(Selfconsistency REQUIRED)
 find_package(MPI REQUIRED)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -ffast-math -DNDEBUG -DBOOST_DISABLE_ASSERTS")
+
+
 include_directories(${BLAS_CLASSES_INCLUDE_DIR})
 include_directories(${FOURIER_INCLUDE_DIR})
 include_directories(${CLUSTER_INCLUDE_DIR})
