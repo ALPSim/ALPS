@@ -68,6 +68,7 @@ public:
     uint32_t dummy;
     dump >> dummy;
     dump.read_array(3, &(super_type::operator[](0)));
+    return dump;
   }
 };
 
