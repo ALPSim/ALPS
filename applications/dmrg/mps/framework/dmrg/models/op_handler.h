@@ -143,6 +143,7 @@ class KronHandler : public TagHandler<Matrix, SymmGroup>
     typedef TagHandler<Matrix, SymmGroup> base;
     typedef typename OPTable<Matrix, SymmGroup>::tag_type tag_type;
     typedef typename base::op_t op_t;
+    typedef typename base::pair_map_it_t pair_map_it_t;
 
 public:
 

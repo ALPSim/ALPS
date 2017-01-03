@@ -163,14 +163,10 @@ typename OPTable<Matrix, SymmGroup>::tag_type KronHandler<Matrix, SymmGroup>::ge
 
     // return tag of kronecker product, if already there
     try {
-#if defined(__xlC__) || defined(__FCC_VERSION)
-        if (kron_tags.count(std::make_pair(t1, t2)) == 0)
-            throw std::out_of_range("");
-
-        return kron_tags[std::make_pair(t1, t2)].first;
-#else
-        return kron_tags.at(std::make_pair(t1, t2)).first;
-#endif
+      pair_map_it_t match = kron_tags.find(std::make_pair(t1, t2));
+      if (match == kron_tags.end())
+          throw std::out_of_range("");
+      return match->second.first;
     }
     // compute and register the product, then return the new tag
     catch(const std::out_of_range& e) {
