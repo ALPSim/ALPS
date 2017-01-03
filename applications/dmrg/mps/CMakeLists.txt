@@ -60,10 +60,20 @@ else(NOT LAPACK_FOUND)
 
 
   ### LIBRARY TARGETS
-  add_library(mps_utils SHARED ${MPS_UTILS_SOURCES})
+  if(NOT WIN32 AND BUILD_SHARED_LIBS)
+    add_library(mps_utils SHARED ${MPS_UTILS_SOURCES})
+  else()
+    add_library(mps_utils STATIC ${MPS_UTILS_SOURCES})
+  endif(NOT WIN32 AND BUILD_SHARED_LIBS)
   target_link_libraries(mps_utils alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY} ${HDF5_LIBRARIES})
-  add_library(mps_models SHARED ${MPS_MODELS_SOURCES})
+  
+  if(NOT WIN32 AND BUILD_SHARED_LIBS)
+    add_library(mps_models SHARED ${MPS_MODELS_SOURCES})
+  else()
+    add_library(mps_models STATIC ${MPS_MODELS_SOURCES})
+  endif(NOT WIN32 AND BUILD_SHARED_LIBS)
   target_link_libraries(mps_models mps_utils alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY} ${HDF5_LIBRARIES})
+
   #### SCHEDULER
   add_library(mps_pscan STATIC libpscan/scheduler.cpp libpscan/options.cpp)
 
