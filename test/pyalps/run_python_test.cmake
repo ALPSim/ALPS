@@ -34,6 +34,9 @@ if(not_successful)
 endif(not_successful)
 
 if(output_path)
+    if(WIN32)
+      configure_file(${cmd}_output ${cmd}_output NEWLINE_STYLE LF)
+    endif(WIN32)
     execute_process(
         COMMAND ${CMAKE_COMMAND} -E compare_files ${output_path} ${cmd}_output
         RESULT_VARIABLE not_successful
