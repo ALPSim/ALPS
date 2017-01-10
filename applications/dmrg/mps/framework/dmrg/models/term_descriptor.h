@@ -73,7 +73,7 @@ public:
         if (rhs.size()   == 0) return false;
         
         if (this->position(0) == rhs.position(0))
-            return this->size() >= rhs.size();
+            return this->size() > rhs.size();
         return this->position(0) < rhs.position(0);
     }
     
