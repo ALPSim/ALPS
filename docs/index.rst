@@ -6,16 +6,13 @@
 Welcome to ALPS's documentation!
 ================================
 
+
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
-   userguide/introduction
-
    APIP/introduction
-   API/introduction
-   tutorials/index
    license/license
 
 Indices and tables
