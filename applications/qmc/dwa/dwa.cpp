@@ -146,10 +146,10 @@ directed_worm_algorithm
     , _thermalization_sweeps       (parms_.value_or_default("THERMALIZATION",0))
     , _total_sweeps                (parms_.value_or_default("SWEEPS",10000000))
     , _skip                        (parms_.value_or_default("SKIP",1))
-    // regarding lattice
-    , is_periodic_ (std::find((this->lattice().boundary()).begin(), (this->lattice().boundary()).end(), "open") == (this->lattice().boundary()).end())
     // regarding model
     , is_diagonal_onsite_          (std::abs(static_cast<double>(parms_.value_or_default("V",0.))) < 1e-6 ? true : false)
+    // regarding lattice
+    , is_periodic_ (std::find((this->lattice().boundary()).begin(), (this->lattice().boundary()).end(), "open") == (this->lattice().boundary()).end())
     // regarding experiment
     , finite_tof   (is_periodic_ ? false : (parms_.defined("tof_phase")))
     , finite_waist (parms_.defined("waist"))

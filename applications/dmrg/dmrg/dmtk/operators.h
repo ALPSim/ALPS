@@ -258,7 +258,7 @@ class BasicOp: public dmtk::BMatrix<T>
       s.write((const char *)&l, sizeof(size_t));
       s.write((const char *)t, l*sizeof(char));
       BMatrix<T>::write(s);
-      delete(t);
+      delete[](t);
     }
 
     void read(std::istream &s)
@@ -279,7 +279,7 @@ class BasicOp: public dmtk::BMatrix<T>
       t[l] = '\0';
       _name = string(t);
       BMatrix<T>::read(s);
-      delete(t);
+      delete[](t);
     }
 
 };
