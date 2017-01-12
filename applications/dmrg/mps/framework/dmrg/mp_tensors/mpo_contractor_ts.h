@@ -140,7 +140,10 @@ public:
             
             /// Perform multiplication with MPO
             SiteProblem<Matrix, SymmGroup> sp(left_[site1], right_[site2+1], ts_cache_mpo[site1]);
-            ietl::mult(sp, twin_mps, twin_mpsp);
+            // manual ietl::mult()
+            twin_mpsp = contraction::site_hamil2_mixed(twin_mpsp, twin_mps, sp.left, sp.right, sp.mpo);
+            twin_mps.make_left_paired();
+            assert(twin_mpsp.reasonable());
             tstp << twin_mpsp;
 
             

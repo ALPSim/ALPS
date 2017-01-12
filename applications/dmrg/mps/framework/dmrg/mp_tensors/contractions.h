@@ -476,6 +476,55 @@ struct contraction {
     
     template<class Matrix, class OtherMatrix, class SymmGroup>
     static MPSTensor<Matrix, SymmGroup>
+    site_hamil2_mixed(MPSTensor<Matrix, SymmGroup> const & bra_tensor,
+                      MPSTensor<Matrix, SymmGroup> ket_tensor,
+                      Boundary<OtherMatrix, SymmGroup> const & left,
+                      Boundary<OtherMatrix, SymmGroup> const & right,
+                      MPOTensor<Matrix, SymmGroup> const & mpo)
+    {
+        typedef typename SymmGroup::charge charge;
+        
+        MPSTensor<Matrix, SymmGroup> ret;
+        
+        ket_tensor.make_right_paired();
+        
+        std::vector<block_matrix<Matrix, SymmGroup> > t(left.aux_dim());
+        std::size_t loop_max = left.aux_dim();
+        
+        parallel_for(/*locale::scatter(mpo.placement_l)*/, std::size_t b = 0; b < loop_max; ++b) {
+            gemm_trim_left(transpose(left[b]), ket_tensor.data(), t[b]);
+        }
+        
+        Index<SymmGroup> const & physical_i = ket_tensor.site_dim(),
+                               & left_i = bra_tensor.row_dim(),
+                               & right_i = ket_tensor.col_dim(),
+                                 out_left_i = physical_i * left_i;
+        ProductBasis<SymmGroup> out_left_pb(physical_i, left_i);
+        ProductBasis<SymmGroup> in_right_pb(physical_i, right_i,
+                                            boost::lambda::bind(static_cast<charge(*)(charge, charge)>(SymmGroup::fuse),
+                                                                -boost::lambda::_1, boost::lambda::_2));
+        
+        loop_max = mpo.col_dim();
+        
+        parallel_for(/*locale::scatter(mpo.placement_r)*/, std::size_t b2 = 0; b2 < loop_max; ++b2) {
+            
+            block_matrix<Matrix, SymmGroup> contr_column = lbtm_kernel(b2, left, t, mpo, physical_i,
+                                                                       right_i, out_left_i, in_right_pb, out_left_pb);
+            block_matrix<Matrix, SymmGroup> tmp;
+            gemm(contr_column, right[b2], tmp);
+            #ifdef MAQUIS_OPENMP
+            #pragma omp critical
+            #endif
+            for (std::size_t k = 0; k < tmp.n_blocks(); ++k)
+                ret.data().match_and_add_block(tmp[k], tmp.left_basis()[k].first, tmp.right_basis()[k].first);
+        }
+        
+        ret.phys_i = bra_tensor.site_dim(); ret.left_i = bra_tensor.row_dim(); ret.right_i = bra_tensor.col_dim();
+        return ret;
+    }
+    
+    template<class Matrix, class OtherMatrix, class SymmGroup>
+    static MPSTensor<Matrix, SymmGroup>
     site_ortho_boundaries(MPSTensor<Matrix, SymmGroup> const & mps,
                           MPSTensor<Matrix, SymmGroup> const & ortho_mps,
                           block_matrix<OtherMatrix, SymmGroup> const & ortho_left,
