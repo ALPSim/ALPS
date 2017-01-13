@@ -321,6 +321,8 @@ void QMCRun<G,StateType>::create_common_observables()
     if (this->is_bipartite()) {
       this->measurements << alps::make_observable(alps::RealObservable("Staggered Magnetization"),is_signed_);
       this->measurements << alps::make_observable(alps::RealObservable("Staggered Magnetization Density"),is_signed_);
+      this->measurements << alps::make_observable(alps::RealObservable("|Staggered Magnetization|"),is_signed_);
+      this->measurements << alps::make_observable(alps::RealObservable("|Staggered Magnetization Density|"),is_signed_);
       this->measurements << alps::make_observable(alps::RealObservable("Staggered Magnetization^2"),is_signed_);
       this->measurements << alps::make_observable(alps::RealObservable("Staggered Magnetization Density^2"),is_signed_);
       this->measurements << alps::make_observable(alps::RealObservable("Staggered Magnetization^4"),is_signed_);
@@ -466,6 +468,8 @@ bool QMCRun<G,StateType>::do_common_measurements(double sign, const std::vector<
     if (this->is_bipartite()) {
       this->measurements["Staggered Magnetization"] << ssz*sign;
       this->measurements["Staggered Magnetization Density"] << ssz/NbSites*sign;
+      this->measurements["|Staggered Magnetization|"] << std::abs(ssz)*sign;
+      this->measurements["|Staggered Magnetization Density|"] << std::abs(ssz)/NbSites*sign;
       this->measurements["Staggered Magnetization^2"] << ssz*ssz*sign;
       this->measurements["Staggered Magnetization Density^2"] << ssz*ssz/NbSites/NbSites*sign;
       this->measurements["Staggered Magnetization^4"] << ssz*ssz*ssz*ssz*sign;
