@@ -443,6 +443,7 @@ template<class Matrix, class SymmGroup>
 class basis_mps_init : public mps_initializer<Matrix, SymmGroup>
 {
 public:
+    typedef std::vector<boost::tuple<typename SymmGroup::charge, std::size_t> > state_type;
     basis_mps_init(BaseParameters & params,
                    std::vector<Index<SymmGroup> > const& phys_dims_,
                    std::vector<int> const& site_type_)
@@ -510,7 +511,7 @@ template<class Matrix, class SymmGroup>
 class basis_mps_init_generic : public mps_initializer<Matrix, SymmGroup>
 {
 public:
-    typedef std::vector<boost::tuple<typename SymmGroup::charge, size_t> > state_type;
+    typedef std::vector<boost::tuple<typename SymmGroup::charge, std::size_t> > state_type;
     basis_mps_init_generic(BaseParameters & params,
                            std::vector<Index<SymmGroup> > const& phys_dims_,
                            typename SymmGroup::charge right_end_,

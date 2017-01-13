@@ -31,8 +31,8 @@
 
 #include <boost/tuple/tuple.hpp>
 
-template <class Matrix, class SymmGroup>
-MPS<Matrix, SymmGroup> state_mps(std::vector<boost::tuple<typename SymmGroup::charge, size_t> > const & state,
+template <class Matrix, class SymmGroup, class Charge>
+MPS<Matrix, SymmGroup> state_mps(std::vector<boost::tuple<Charge, std::size_t> > const & state,
                                  std::vector<Index<SymmGroup> > const& phys_dims, std::vector<int> const& site_type)
 {
     typedef typename SymmGroup::charge charge;
