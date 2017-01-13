@@ -1119,7 +1119,7 @@ namespace alps {
                                 std::size_t dataset_size = std::accumulate(size.begin(), size.end(), std::size_t(sizeof( T )), std::multiplies<std::size_t>());         \
                                 if (dataset_size < ALPS_HDF5_SZIP_BLOCK_SIZE * sizeof( T ))                                                                             \
                                     detail::check_error(H5Pset_layout(prop_id, H5D_COMPACT));                                                                           \
-                                else if (dataset_size < (1ULL<<32))                                                                                                     \
+                                else if (false && dataset_size < (1ULL<<32))                                                                                                     \
                                     detail::check_error(H5Pset_layout(prop_id, H5D_CONTIGUOUS));                                                                        \
                                 else {                                                                                                                                  \
                                     detail::check_error(H5Pset_layout(prop_id, H5D_CHUNKED));                                                                           \

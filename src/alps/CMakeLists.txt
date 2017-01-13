@@ -102,10 +102,18 @@ else (Boost_FOUND)
 endif (Boost_FOUND)
 
 if(BUILD_SHARED_LIBS)
+  if(HDF5_DEFINITIONS)
+    foreach (_hdf5_def ${HDF5_DEFINITIONS})
+      string(REPLACE "-D" "" _escaped_def ${_hdf5_def})
+      list(APPEND ALPS_SHARED_CPPFLAGS ${_escaped_def})
+    endforeach(_hdf5_def)
+  endif(HDF5_DEFINITIONS)
+  
   set_target_properties(alps PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
 else(BUILD_SHARED_LIBS)
   set_target_properties(alps PROPERTIES COMPILE_DEFINITIONS "${ALPS_STATIC_CPPFLAGS}")
 endif(BUILD_SHARED_LIBS)
+
 
 if(MSVC)
   get_target_property(LIB_NAME alps LOCATION)
