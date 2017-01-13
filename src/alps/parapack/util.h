@@ -35,7 +35,7 @@ namespace alps {
 
 int hash(int n, int s = 826);
 
-std::string id2string(int id, std::string const& pad = "_");
+ALPS_DECL std::string id2string(int id, std::string const& pad = "_");
 
 ALPS_DECL double parse_percentage(std::string const& str);
 
