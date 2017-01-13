@@ -11,6 +11,7 @@
 #include<sstream>
 #include<cmath>
 #include "cluster_graph.h"
+#include <iostream>
 
 std::vector<std::vector<double> > alps_graph::lookup_basis_from_name(const std::string &cluster_name, const std::string &cluster_library) const{
   std::vector<std::vector<double> > basis;
@@ -191,10 +192,11 @@ std::vector<std::vector<double> > alps_graph::compute_momenta(int L)const{
   return momenta;
 }
 std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > alps_graph::compute_cell_origins_and_offsets(int L){
-  std::vector<std::vector<double> > cell_origins;
-  std::vector<std::vector<int   > > cell_offsets;
+  int ncells=dimension()==1?L:dimension()==2?L*L:dimension()==3?L*L*L:throw std::runtime_error("dimension() should be 1, 2, or 3");
+  std::vector<std::vector<double> > cell_origins(ncells, std::vector<double>(dimension(), 0.));
+  std::vector<std::vector<int   > > cell_offsets(ncells, std::vector<int>(dimension(), 0));
   std::vector<double> cell_origin(dimension(), 0.);
-  std::vector<int   > cell_offset(dimension(), 0.);
+  std::vector<int   > cell_offset(dimension(), 0 );
   if(dimension()==3){
     for(int i=0;i<L;++i){
       for(int j=0;j<L;++j){
@@ -203,27 +205,30 @@ std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > alp
           cell_origin[1] =i* basis_vectors_[0][1]+j* basis_vectors_[1][1]+k* basis_vectors_[2][1];
           cell_origin[2] =i* basis_vectors_[0][2]+j* basis_vectors_[1][2]+k* basis_vectors_[2][2];
           cell_offset[0] =i; cell_offset[1] =j; cell_offset[2] =k;
-          cell_origins.push_back(cell_origin);
-          cell_offsets.push_back(cell_offset);
+          cell_origins[i*L*L+j*L+k]=cell_origin;
+          cell_offsets[i*L*L+j*L+k]=cell_offset;
         }
       }
     }
   }else if(dimension()==2){
+std::cerr<<"dimension 2 cell origin check."<<std::endl;
+std::cout<<"origin size: "<<cell_origin.size()<<" offset size: "<<cell_offset.size()<<" basis vectors size: "<<basis_vectors_.size()<<" "<<basis_vectors_[0].size()<<" "<<basis_vectors_[1].size()<<std::endl;
     for(int i=0;i<L;++i){
       for(int j=0;j<L;++j){
         cell_origin[0] =i* basis_vectors_[0][0]+j* basis_vectors_[1][0];
         cell_origin[1] =i* basis_vectors_[0][1]+j* basis_vectors_[1][1];
         cell_offset[0] =i; cell_offset[1] =j;
-        cell_origins.push_back(cell_origin);
-        cell_offsets.push_back(cell_offset);
+        cell_origins[i*L+j]=cell_origin;
+        cell_offsets[i*L+j]=cell_offset;
       }
     }
+std::cerr<<"dimension 2 cell origin check done"<<std::endl;
   }else if(dimension()==1){
     for(int i=0;i<L;++i){
       cell_origin[0] =i* basis_vectors_[0][0];
       cell_offset[0] =i;
-      cell_origins.push_back(cell_origin);
-      cell_offsets.push_back(cell_offset);
+      cell_origins[i]=cell_origin;
+      cell_offsets[i]=cell_offset;
     }
   }
   return std::make_pair(cell_origins, cell_offsets);

@@ -260,7 +260,7 @@ namespace blas{
       //the simple ones...
       if(size_==0) return 1;
       if(size_==1) return values_[0];
-      if(size_==2) return values_[0]*values_[3]-values_[1]*values_[2];
+      if(size_==2) return values_[0]*values_[memory_size_+1]-values_[1]*values_[memory_size_];
       int info=0;
       int *ipiv = new int[size_];
       //assert(size_==memory_size_); //otherwise think about plugging ing memory size to lda
@@ -425,6 +425,7 @@ namespace blas{
       std::swap(values_, M2.values_); //just exchange pointers
     }
     void invert(){
+      if (size_==0) return;
       std::vector<double> B(size_*size_, 0.);
       std::vector<int> ipiv(size_,0);
       int info;
