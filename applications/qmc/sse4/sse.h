@@ -108,7 +108,9 @@ public:
     
     double work_done() const
     {
-        return sweeps_done / double(nthermalization + nsweeps);
+        if (is_thermalized())
+            return (sweeps_done - nthermalization) / double(nsweeps);
+        return 0.;
     }
     
     bool change_parameter(std::string const& name, alps::StringValue const& value)
