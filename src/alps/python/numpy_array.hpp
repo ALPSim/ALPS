@@ -40,7 +40,7 @@
 namespace alps {
   namespace python {
     namespace numpy {
-      #if BOOST_VERSION >= 106300
+      #if defined(ALPS_HAVE_BOOST_NUMPY)
       typedef boost::python::numpy::ndarray array;
       #else
       typedef boost::python::numeric::array array;

@@ -29,7 +29,9 @@
 #ifndef ALPS_PYTHON_NUMPY_IMPORT_HPP
 #define ALPS_PYTHON_NUMPY_IMPORT_HPP
 
-#if BOOST_VERSION >= 106300
+#include <alps/config.h>
+
+#if defined(ALPS_HAVE_BOOST_NUMPY)
     #include <boost/python/numpy.hpp>
 #else
     #include <boost/python/numeric.hpp>
@@ -59,7 +61,7 @@ namespace alps {
             static bool inited = false;
             if (!inited) {
                 import_array1((void)0);
-                #if BOOST_VERSION >= 106300
+                #if defined(ALPS_HAVE_BOOST_NUMPY)
                 boost::python::numpy::initialize();
                 #else
                 boost::python::numeric::array::set_module_and_type("numpy", "ndarray");

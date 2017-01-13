@@ -142,6 +142,9 @@
 // Define to 1 if you have Python on your system.
 #cmakedefine ALPS_HAVE_PYTHON
 
+// Define to 1 if Boost Numpy (>=1.63) is available
+#cmakedefine ALPS_HAVE_BOOST_NUMPY
+
 //
 // OpenMP
 //

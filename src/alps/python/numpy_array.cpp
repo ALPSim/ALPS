@@ -36,7 +36,7 @@ namespace alps {
 
            alps::python::numpy::array from_pyobject(boost::python::object const & source)
            {
-               #if BOOST_VERSION >= 106300
+               #if defined(ALPS_HAVE_BOOST_NUMPY)
                return boost::python::numpy::array(source);
                #else
                return boost::python::numeric::array(source);

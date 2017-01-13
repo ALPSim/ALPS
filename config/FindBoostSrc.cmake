@@ -96,6 +96,11 @@ if(Boost_INCLUDE_DIR)
   MATH(EXPR Boost_SUBMINOR_VERSION "${Boost_VERSION} % 100")
 endif(Boost_INCLUDE_DIR)
 
+if(Boost_VERSION AND NOT Boost_VERSION LESS 106300)
+  # Boost Numpy is compiled if we have >= 1.63
+  set(ALPS_HAVE_BOOST_NUMPY ON)
+endif(Boost_VERSION AND NOT Boost_VERSION LESS 106300)
+
 if(Boost_ROOT_DIR)
   message(STATUS "Found Boost Source: ${Boost_ROOT_DIR}")
   message(STATUS "Boost Version: ${Boost_MAJOR_VERSION}_${Boost_MINOR_VERSION}_${Boost_SUBMINOR_VERSION}")
