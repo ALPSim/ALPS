@@ -26,9 +26,13 @@
 *****************************************************************************/
 
 #include <alps/utility/bitops.hpp>
+#include <boost/cstdint.hpp>
 
 int main()
 {
+    using boost::uint32_t;
+    using boost::uint64_t;
+    
     uint32_t ui  = 5;
     uint64_t uli = 5;
     ui   <<= sizeof(uint32_t)*8-4;
