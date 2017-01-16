@@ -282,7 +282,7 @@ def xslPath():
         return os.path.join(sys.exec_prefix,'../Resources/lib/xml/ALPS.xsl')
       if platform.system()=='Windows':
         return os.path.join(sys.exec_prefix,'..','vistrails','lib','xml','ALPS.xsl')
-    return pyalps.pytools.search_xml_library_path("ALPS.xsl")
+    return pyalps.pytools.search_xml_library_path("ALPS.xsl").replace(b'\0', '')
     
     
 def copyStylesheet(dir):
