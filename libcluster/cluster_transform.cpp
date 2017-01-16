@@ -1103,8 +1103,8 @@ void DoubleCellClusterTransformer::spin_symmetrize(double_cell_matsubara_kspace_
     }
    ;
   }else if(charge_order_symmetry_){
-     std::ofstream test_file("testCO",std::ios_base::app);
-  test_file<<" "<< real(G(alps::gf::matsubara_index (0), alps::gf::momentum_index (0)+2  ,alps::gf::index(1), alps::gf::index(0)))<<std::endl;
+     //std::ofstream test_file("testCO",std::ios_base::app);
+  //test_file<<" "<< real(G(alps::gf::matsubara_index (0), alps::gf::momentum_index (0)+2  ,alps::gf::index(1), alps::gf::index(0)))<<std::endl;
 
     for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
      for (alps::gf::momentum_index kc(0); kc<G.mesh2().extent(); kc+=2) {

@@ -211,8 +211,6 @@ std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > alp
       }
     }
   }else if(dimension()==2){
-std::cerr<<"dimension 2 cell origin check."<<std::endl;
-std::cout<<"origin size: "<<cell_origin.size()<<" offset size: "<<cell_offset.size()<<" basis vectors size: "<<basis_vectors_.size()<<" "<<basis_vectors_[0].size()<<" "<<basis_vectors_[1].size()<<std::endl;
     for(int i=0;i<L;++i){
       for(int j=0;j<L;++j){
         cell_origin[0] =i* basis_vectors_[0][0]+j* basis_vectors_[1][0];
@@ -222,7 +220,6 @@ std::cout<<"origin size: "<<cell_origin.size()<<" offset size: "<<cell_offset.si
         cell_offsets[i*L+j]=cell_offset;
       }
     }
-std::cerr<<"dimension 2 cell origin check done"<<std::endl;
   }else if(dimension()==1){
     for(int i=0;i<L;++i){
       cell_origin[0] =i* basis_vectors_[0][0];

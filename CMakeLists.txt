@@ -14,10 +14,11 @@ add_subdirectory(libselfconsistency)
 add_subdirectory(tests)
 
 
-find_package(LAPACK REQUIRED)
 # FIXME: make this compiler-dependent
 if (CMAKE_CXX_COMPILER_ID MATCHES Intel)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -xHost -ipo -no-prec-div -fp-model fast=2")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -xHost -ipo -no-prec-div -fp-model fast=2 -mkl=sequential")
+else()
+  find_package(LAPACK REQUIRED)
 endif()
 
 include_directories(${BLAS_CLASSES_INCLUDE_DIR})
