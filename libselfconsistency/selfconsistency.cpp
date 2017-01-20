@@ -125,10 +125,10 @@ void selfconsistency_loop_single_site(const alps::params& parms, ImpuritySolver&
   //define the Green's functions
   single_site_matsubara_gf G_old_omega(G0_omega);
   single_site_matsubara_gf G0_old_omega(G0_omega);
-  single_site_itime_gf G_tau(alps::gf::itime_sigma_gf(alps::gf::itime_mesh(beta,n_tau),alps::gf::index_mesh(n_orbital)));
-  single_site_itime_gf G0_tau(alps::gf::itime_sigma_gf(alps::gf::itime_mesh(beta,n_tau),alps::gf::index_mesh(n_orbital)));
-  single_site_itime_gf G_old_tau(alps::gf::itime_sigma_gf(alps::gf::itime_mesh(beta,n_tau),alps::gf::index_mesh(n_orbital)));
-  single_site_itime_gf G0_old_tau(alps::gf::itime_sigma_gf(alps::gf::itime_mesh(beta,n_tau),alps::gf::index_mesh(n_orbital)));
+  single_site_itime_gf G_tau(alps::gf::itime_sigma_gf(alps::gf::itime_mesh(beta,n_tau+1),alps::gf::index_mesh(n_orbital)));
+  single_site_itime_gf G0_tau(alps::gf::itime_sigma_gf(alps::gf::itime_mesh(beta,n_tau+1),alps::gf::index_mesh(n_orbital)));
+  single_site_itime_gf G_old_tau(alps::gf::itime_sigma_gf(alps::gf::itime_mesh(beta,n_tau+1),alps::gf::index_mesh(n_orbital)));
+  single_site_itime_gf G0_old_tau(alps::gf::itime_sigma_gf(alps::gf::itime_mesh(beta,n_tau+1),alps::gf::index_mesh(n_orbital)));
 
   do {
     iteration_ctr++;

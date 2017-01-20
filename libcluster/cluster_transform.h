@@ -57,6 +57,8 @@ public:
   virtual void attach_interacting_tail(double_cell_matsubara_kspace_gf &G, double U, double V, const std::vector<double> &densities) const {throw std::logic_error("this should be implemented in an inherited class");}
   ///take a Green's function in k-space and transform it to real space
   virtual cluster_itime_realspace_gf transform_into_real_space(const cluster_itime_kspace_gf& G) const {throw std::logic_error("this should be implemented in an inherited class");}
+  virtual cluster_itime_kspace_gf transform_into_k_space(const cluster_itime_realspace_gf& G) const {throw std::logic_error("this should be implemented in an inherited class");}
+  virtual cluster_matsubara_kspace_gf transform_into_k_space(const cluster_matsubara_realspace_gf& G) const {throw std::logic_error("this should be implemented in an inherited class");}
   ///take a double cell Green's function in k-space and transform it to real space
   virtual cluster_itime_realspace_gf transform_into_real_space(const double_cell_itime_kspace_gf& G) const {throw std::logic_error("this should be implemented in an inherited class");}
   ///reading input file
