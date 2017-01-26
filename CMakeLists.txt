@@ -7,12 +7,12 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH true)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 find_package(ALPSCore REQUIRED COMPONENTS hdf5 accumulators mc params gf)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -DNDEBUG -DBOOST_DISABLE_ASSERTS")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -DNDEBUG -DBOOST_DISABLE_ASSERTS")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -ffast-math -DNDEBUG -DBOOST_DISABLE_ASSERTS -g -fsanitize=address -fno-omit-frame-pointer")
 
 # FIXME: make this compiler-dependent
 if (CMAKE_CXX_COMPILER_ID MATCHES Intel)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -xHost -no-prec-div -fp-model fast=2 -mkl=sequential")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -xHost -no-prec-div -fp-model fast=2 -mkl=sequential")
   set(LAPACK_LIBRARIES "")
 else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
