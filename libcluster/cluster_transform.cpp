@@ -1077,17 +1077,17 @@ void DoubleCellClusterTransformer::spin_symmetrize(double_cell_matsubara_kspace_
          //OD component
           std::complex<double> GKQ=(G(w, kc  ,alps::gf::index(1), alps::gf::index(0))-G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
                                   +G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))-G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1)))/4.;       
-           if (w ==0 ){
-            std::cout<<"DD"<< G(w, kc  ,alps::gf::index(0), alps::gf::index(0))
-                           << G(w, kc  ,alps::gf::index(0), alps::gf::index(1))
-                           <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0)))
-                           <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1)))<<std::endl;
+//           if (w ==0 ){
+//            std::cout<<"DD"<< G(w, kc  ,alps::gf::index(0), alps::gf::index(0))
+//                           << G(w, kc  ,alps::gf::index(0), alps::gf::index(1))
+//                           <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0)))
+//                           <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1)))<<std::endl;
 
-            std::cout<<"OD"<< G(w, kc  ,alps::gf::index(1), alps::gf::index(0))
-                           <<-G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
-                           << G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))
-                           <<-G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))<<std::endl;
-           }
+//            std::cout<<"OD"<< G(w, kc  ,alps::gf::index(1), alps::gf::index(0))
+//                           <<-G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
+//                           << G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))
+//                           <<-G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))<<std::endl;
+//           }
 
           G(w, kc  ,alps::gf::index(0), alps::gf::index(0))=GK;
           G(w, kc  ,alps::gf::index(0), alps::gf::index(1))=GK;
@@ -1128,18 +1128,18 @@ void DoubleCellClusterTransformer::spin_symmetrize(double_cell_matsubara_kspace_
          //OD component
           std::complex<double> GKQ=(G(w, kc  ,alps::gf::index(1), alps::gf::index(0))+G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
                                   +G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))+G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1)))/4.;
-           if (w ==0 ){
-            std::cout<<"DD"<<G(w, kc  ,alps::gf::index(0), alps::gf::index(0))
-                           << G(w, kc  ,alps::gf::index(0), alps::gf::index(1))
-                           <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0)))
-                           <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1)))<<std::endl;
+//           if (w ==0 ){
+//            std::cout<<"DD"<<G(w, kc  ,alps::gf::index(0), alps::gf::index(0))
+//                           << G(w, kc  ,alps::gf::index(0), alps::gf::index(1))
+//                           <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0)))
+//                           <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1)))<<std::endl;
 
-            std::cout<<"OD"<< G(w, kc  ,alps::gf::index(1), alps::gf::index(0))
-                           << G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
-                           << G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))
-                           << G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))<<std::endl;
+//            std::cout<<"OD"<< G(w, kc  ,alps::gf::index(1), alps::gf::index(0))
+//                           << G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
+//                           << G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))
+//                           << G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))<<std::endl;
           
-           }
+//           }
 
           G(w, kc  ,alps::gf::index(0), alps::gf::index(0))=GK;
           G(w, kc  ,alps::gf::index(0), alps::gf::index(1))=GK;
