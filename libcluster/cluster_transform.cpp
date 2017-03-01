@@ -262,11 +262,11 @@ void DoubleCellClusterTransformer::attach_bare_tail(double_cell_matsubara_kspace
       c1(k+1,alps::gf::index(1), spin) = 1.;
 
      
-      c2(k  ,alps::gf::index(0), spin) = epsav_[k()  ] - mu_;
+      c2(k  ,alps::gf::index(0), spin) =epsav_[k()  ] - mu_;
       c2(k  ,alps::gf::index(1), spin) =mu_stag+spin_factor*h/2.;
 
       c2(k+1,alps::gf::index(0), spin) =mu_stag+spin_factor*h/2.;
-      c2(k+1,alps::gf::index(1), spin) = epsav_[k()+1] - mu_;
+      c2(k+1,alps::gf::index(1), spin) =epsav_[k()+1] - mu_;
     }
   }
   G0.set_tail(1,c1);
@@ -284,8 +284,8 @@ void NormalStateClusterTransformer::attach_interacting_tail(cluster_matsubara_ks
   for(alps::gf::index f(0); f<n_flavors_; f++) {
     for(alps::gf::momentum_index k(0); k<n_cluster_sites(); ++k) {
       c1(k,f) = 1.;
-      c2(k,f) = epsav_[k()] - (mu_+U/2.)+ U*density;
-      c3(k,f) = 0.; //epssqav_[k()] - 2*mu_*epsav_[k()] + mu_*mu_+ 2.*U*density*(epsav_[k()]-mu_) + U*U*density;
+      c2(k,f) =epsav_[k()] - (mu_+U/2.)+ U*density;
+      c3(k,f) = epssqav_[k()] - 2*mu_*epsav_[k()] + mu_*mu_+ 2.*U*density*(epsav_[k()]-mu_) + U*U*density;
     }
   }
   G.set_tail(1,c1);
@@ -588,7 +588,11 @@ void NormalStateClusterTransformer::dyson_get_self_energy(cluster_matsubara_kspa
 void DoubleCellClusterTransformer::dyson_get_self_energy(double_cell_matsubara_kspace_gf &sigma, const double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &G0) const{
   alps::gf::index Zero(0);
   alps::gf::index Q(1);
-  for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
+  //std::ofstream G0_omegaBEFORE_file("G0_omegaBEFORE",std::ios_base::app);
+  //G0_omegaBEFORE_file<<std::setprecision(14)<<G0;  
+  //std::ofstream G_omegaBEFORE_file("G_omegaBEFORE",std::ios_base::app);
+  //G_omegaBEFORE_file<<std::setprecision(14)<<G;
+for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
     for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); k+=2) {
       for (alps::gf::index spin(0); spin<G.mesh3().extent(); spin++) {
         std::complex<double> g0_block[4]={G0(w, k, Zero,spin),G0(w, k, Q,spin),G0(w, k+1, Zero,spin),G0(w, k+1, Q,spin)};
@@ -604,6 +608,11 @@ void DoubleCellClusterTransformer::dyson_get_self_energy(double_cell_matsubara_k
     }
   }
 
+//exit(0);
+ // std::ofstream G0_omegaAFTER_file("G0_omegaAFTER",std::ios_base::app);
+ // G0_omegaAFTER_file<<std::setprecision(14)<<G0;
+ // std::ofstream G_omegaAFTER_file("G_omegaAFTER",std::ios_base::app);
+ // G_omegaAFTER_file<<std::setprecision(14)<<G;
 }
 
 ///Use Dyson to get the self-energy in Nambu space
@@ -1089,15 +1098,15 @@ void DoubleCellClusterTransformer::spin_symmetrize(double_cell_matsubara_kspace_
 //                           <<-G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))<<std::endl;
 //           }
 
-          G(w, kc  ,alps::gf::index(0), alps::gf::index(0))=GK;
-          G(w, kc  ,alps::gf::index(0), alps::gf::index(1))=GK;
-          G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0))=-std::conj(GK);
-          G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1))=-std::conj(GK);
+  //        G(w, kc  ,alps::gf::index(0), alps::gf::index(0))=GK;
+  //        G(w, kc  ,alps::gf::index(0), alps::gf::index(1))=GK;
+  //        G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0))=-std::conj(GK);
+  //        G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1))=-std::conj(GK);
 
-          G(w, kc  ,alps::gf::index(1), alps::gf::index(0))=GKQ;
-          G(w, kc  ,alps::gf::index(1), alps::gf::index(1))=-GKQ;
-          G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))=GKQ;
-          G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))=-GKQ;
+  //        G(w, kc  ,alps::gf::index(1), alps::gf::index(0))=GKQ;
+  //        G(w, kc  ,alps::gf::index(1), alps::gf::index(1))=-GKQ;
+  //        G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))=GKQ;
+  //        G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))=-GKQ;
   
      }
     }
@@ -1120,36 +1129,40 @@ void DoubleCellClusterTransformer::spin_symmetrize(double_cell_matsubara_kspace_
 
     for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
      for (alps::gf::momentum_index kc(0); kc<G.mesh2().extent(); kc+=2) {
-          //DD component
-          std::complex<double> GK=(G(w, kc  ,alps::gf::index(0), alps::gf::index(0))+G(w, kc  ,alps::gf::index(0), alps::gf::index(1))
-                                  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0)))
-                                  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1))))/4.;
+         // Below was used for CO p-h case 
+         //DD component
+         // std::complex<double> GK=(G(w, kc  ,alps::gf::index(0), alps::gf::index(0))+G(w, kc  ,alps::gf::index(0), alps::gf::index(1))
+         //                         -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0)))
+         //                         -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1))))/4.;
      
          //OD component
-          std::complex<double> GKQ=(G(w, kc  ,alps::gf::index(1), alps::gf::index(0))+G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
-                                  +G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))+G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1)))/4.;
-//           if (w ==0 ){
-//            std::cout<<"DD"<<G(w, kc  ,alps::gf::index(0), alps::gf::index(0))
-//                           << G(w, kc  ,alps::gf::index(0), alps::gf::index(1))
-//                           <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0)))
-//                           <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1)))<<std::endl;
+         // std::complex<double> GKQ=(G(w, kc  ,alps::gf::index(1), alps::gf::index(0))+G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
+         //                         +G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))+G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1)))/4.;
 
-//            std::cout<<"OD"<< G(w, kc  ,alps::gf::index(1), alps::gf::index(0))
-//                           << G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
-//                           << G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))
-//                           << G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))<<std::endl;
-          
-//           }
 
-          G(w, kc  ,alps::gf::index(0), alps::gf::index(0))=GK;
-          G(w, kc  ,alps::gf::index(0), alps::gf::index(1))=GK;
-          G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0))=-std::conj(GK);
-          G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1))=-std::conj(GK);
+         //Less generic symmetry which works for both p-h and non-p-h cases
+            //DD component: only spin symmetrization
+            std::complex<double> GK=(G(w, kc  ,alps::gf::index(0), alps::gf::index(0))
+                                     +G(w, kc  ,alps::gf::index(0), alps::gf::index(1)))/2.;
+            std::complex<double> GkQkQ=(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0))
+                                        +G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1)))/2.;
+            //OD component Gup=Gdn, and Gkkq=Gkqk
+            std::complex<double> GKQ=(G(w, kc  ,alps::gf::index(1), alps::gf::index(0))+G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
+                                +G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))+G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1)))/4.;
 
-          G(w, kc  ,alps::gf::index(1), alps::gf::index(0))=GKQ;
-          G(w, kc  ,alps::gf::index(1), alps::gf::index(1))=GKQ;
-          G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))=GKQ;
-          G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))=GKQ;
+
+
+           
+
+           G(w, kc  ,alps::gf::index(0), alps::gf::index(0))=GK;
+           G(w, kc  ,alps::gf::index(0), alps::gf::index(1))=GK;
+           G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0))=GkQkQ;
+           G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1))=GkQkQ;
+
+           G(w, kc  ,alps::gf::index(1), alps::gf::index(0))=GKQ;
+           G(w, kc  ,alps::gf::index(1), alps::gf::index(1))=GKQ;
+           G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))=GKQ;
+           G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))=GKQ;
   
      }
     }
