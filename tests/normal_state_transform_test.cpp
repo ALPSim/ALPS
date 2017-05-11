@@ -30,6 +30,8 @@ protected:
     p["dca.LATTICE_DUMP"] = "./cluster.h5";
     p["MU"] = mu_;
     p["t"] = 1.;
+    p["U"] = 3.14;
+    p["V"] = 1.2;
     p["tprime"] = 0.;
     p["t_flavor"] = 0.;
     p["BETA"] = beta_;
