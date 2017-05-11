@@ -15,6 +15,8 @@ protected:
     p["dca.L"] = L_;
     p["MU"] = 0.;
     p["t"] = 1.;
+    p["U"] = 3.14159;
+    p["V"] = 1.2;
     p["tprime"] = 0.;
     p["t_flavor"] = 0.;
     p["BETA"] = 7.;
