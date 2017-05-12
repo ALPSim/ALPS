@@ -6,8 +6,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../cmake)
 
 find_package(ALPSCore REQUIRED COMPONENTS hdf5 accumulators mc params gf)
 find_package(BlasClasses REQUIRED)
-#find_package(BLAS REQUIRED)
-#find_package(LAPACK REQUIRED)
+include(find_blas_lapack)
 find_package(MPI REQUIRED)
 
 include_directories(${BLAS_CLASSES_INCLUDE_DIR})
