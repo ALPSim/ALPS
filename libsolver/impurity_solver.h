@@ -6,6 +6,7 @@
 
 #pragma once
 #include <cstdlib>
+#include <cstdio>
 #include <string>
 #include "alps/utilities/temporary_filename.hpp"
 #include "alps/params.hpp"
@@ -28,12 +29,13 @@ public:
     p.define<std::string>("solver.OUTFILE_H5GF", "alps_solver_out.h5gf","Filename for temporary file");
   }
   template<typename CTF> void write_cluster_info(const CTF& clustertransformer){
-    alps::hdf5::archive solver_input(infile_str_, alps::hdf5::archive::WRITE);
+    alps::hdf5::archive solver_input(infile_str_, "w");
     clustertransformer.write_hdf5(solver_input, "/cluster");
   }
   template<typename MGF, typename IGF> void solve(const MGF& G0_omega, const IGF &G0_tau, MGF &G_omega, IGF &G_tau){
+    std::cout<<"entering solve() command."<<std::endl;
     {
-      alps::hdf5::archive solver_input(infile_str_, alps::hdf5::archive::WRITE);
+      alps::hdf5::archive solver_input(infile_str_, "w");
       solver_input<<alps::make_pvp("/parameters", params_);
       G0_omega.save(solver_input,"/G0");
       //also create an imaginary time version of G0
@@ -41,14 +43,14 @@ public:
     }
     call_solver();
     {
-      alps::hdf5::archive ar(outfile_str_, alps::hdf5::archive::READ);
+      alps::hdf5::archive ar(outfile_str_, "r");
       G_omega.load(ar, "/G_omega");
       G_tau  .load(ar, "/G_tau");
       validate_nan_inf(G_omega);
       validate_nan_inf(G_tau);
     }
-    boost::filesystem::remove(infile_str_);
-    boost::filesystem::remove(outfile_str_);
+    std::remove(infile_str_.c_str());
+    std::remove(outfile_str_.c_str());
   }
   void adjust_mu(double mu){
     double mu_old=params_["MU"];
@@ -70,9 +72,11 @@ private:
     int result = std::system(command.str().c_str());
     if (result)
       throw std::runtime_error("System error code " +boost::lexical_cast<std::string>(result) + " encountered when executing command:\n"+command.str());
-
-    if (!boost::filesystem::exists(outfile_str_))
+    {
+    std::ifstream check(outfile_str_.c_str());
+    if(!check.good())
       throw std::runtime_error("The external impurity solver failed to write the output file named " + outfile_str_);
+    }
   }
 
   ///command to launch the solver executable

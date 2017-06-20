@@ -54,7 +54,7 @@ template<class GFW, class GFT> void print_all_green_functions(int iteration_ctr,
   selfenergy_file_newG0<<std::setprecision(14)<<selfenergy2;
 
   Greens_h5_name << "Greens_" <<iteration_ctr<<".h5";
-  alps::hdf5::archive ar(Greens_h5_name.str().c_str(), alps::hdf5::archive::WRITE);
+  alps::hdf5::archive ar(Greens_h5_name.str().c_str(), "w");
   G_omega.save(ar, "/G_komega");
   G0_omega.save(ar, "/G0_komega");
   selfenergy.save(ar, "/Sigma_komega");
@@ -64,7 +64,7 @@ template<class GFW> bool converged(const GFW &G_omega, const GFW &G_omega_old, d
   return ((G_omega-G_omega_old).norm() > tolerance)?false:true;
 }
 template<class GFW> void write_new_G0omega(const GFW &G0_omega, const std::string &path){
-  alps::hdf5::archive ar(path, alps::hdf5::archive::WRITE);
+  alps::hdf5::archive ar(path, "w");
   G0_omega.save(ar, "/G0");
 }
 

@@ -217,7 +217,7 @@ template<typename GFW, typename GFT> void ClusterTransformer::initial_G0(GFW &G0
     throw std::invalid_argument("choose FREE or ISOLATED as initial G0 parameters or provide an input hdf5 file");
 
   {
-    alps::hdf5::archive ar(g0_input_path_, alps::hdf5::archive::WRITE);
+    alps::hdf5::archive ar(g0_input_path_, "w");
     G0_omega.save(ar, "/G0");
 
     std::ofstream G0_omega_input_file("G0_omega_input.dat"); G0_omega_input_file<<G0_omega;

@@ -46,7 +46,7 @@ bool converged(const single_site_matsubara_gf &G_omega, const single_site_matsub
   return ((G_omega-G_omega_old).norm() > max_diff)?false:true;
 }
 template<class GFW> void write_new_G0omega(const GFW &G0_omega, const std::string &path){
-  alps::hdf5::archive ar(path, alps::hdf5::archive::WRITE);
+  alps::hdf5::archive ar(path, "w");
   G0_omega.save(ar, "/G0_omega");
 }
 void print_all_green_functions(int iteration_ctr,
@@ -83,7 +83,7 @@ void print_all_green_functions(int iteration_ctr,
   selfenergy_file<<std::setprecision(14)<<selfenergy;
 
   Greens_h5_name << "Greens_" <<iteration_ctr<<".h5";
-  alps::hdf5::archive ar(Greens_h5_name.str().c_str(), alps::hdf5::archive::WRITE);
+  alps::hdf5::archive ar(Greens_h5_name.str().c_str(), "w");
   G_omega.save(ar, "/G_omega");
   G0_omega.save(ar, "/G0_omega");
   selfenergy.save(ar, "/Sigma_omega");

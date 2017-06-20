@@ -390,7 +390,7 @@ void ClusterHelper::read_pair_class_set(alps::hdf5::archive &ar, pair_class_set_
 
 bool ClusterHelper::write() const{
   std::cout<<"entering write for name: "<<hdf5_dump_name_<<" cluster name: "<<cluster_name_<<std::endl;
-    alps::hdf5::archive ar(hdf5_dump_name_, alps::hdf5::archive::WRITE);
+    alps::hdf5::archive ar(hdf5_dump_name_, "w");
     if(ar.is_data("/"+cluster_name_+"/name")) return false; //already have a transformer there.
     ar<<alps::make_pvp("/"+cluster_name_+"/name", cluster_name_);
     ar<<alps::make_pvp("/"+cluster_name_+"/bipartite", bipartite_);
@@ -419,7 +419,7 @@ bool ClusterHelper::read(){
       std::ifstream in_file(hdf5_dump_name_.c_str());
       if(!in_file.is_open()) return false;
     }
-    alps::hdf5::archive ar(hdf5_dump_name_, alps::hdf5::archive::READ);
+    alps::hdf5::archive ar(hdf5_dump_name_, "r");
     if(!ar.is_data("/"+cluster_name_+"/name")) return false;
     std::string name;     ar>>alps::make_pvp("/"+cluster_name_+"/name", name);
     if(name!=cluster_name_) throw std::logic_error("reading cluster transformer with name: "+name+" for cluster: "+cluster_name_);

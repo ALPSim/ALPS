@@ -55,13 +55,13 @@ bool FrequencySpaceHilbertTransformer::read_initial_G0(single_site_matsubara_gf 
   {
     std::ifstream in_file(input_filename_.c_str()); if(!in_file.good()) return false;
   }
-  alps::hdf5::archive G0_input_file(input_filename_, alps::hdf5::archive::READ);
+  alps::hdf5::archive G0_input_file(input_filename_, "r");
   std::cout<<"reading initial G0_omega"<<std::endl;
   G0_omega.load(G0_input_file, "/G0_omega");
   return true;
 }
 void FrequencySpaceHilbertTransformer::write_initial_G0(const single_site_matsubara_gf &G0_omega){
-  alps::hdf5::archive G0_omega_file(input_filename_, alps::hdf5::archive::WRITE);
+  alps::hdf5::archive G0_omega_file(input_filename_, "w");
   G0_omega.save(G0_omega_file, "/G0_omega");
 }
 void FrequencySpaceHilbertTransformer::set_c1_unity(single_site_matsubara_gf &G0_omega) const{
