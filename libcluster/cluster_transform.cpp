@@ -643,19 +643,7 @@ void NormalStateClusterTransformer::dyson_get_green0(cluster_matsubara_kspace_gf
       }
     }
   }
-  alps::gf::k_sigma_gf tail_1(G0.mesh2(), G0.mesh3());
-  alps::gf::k_sigma_gf tail_2(G0.mesh2(), G0.mesh3());
-  alps::gf::k_sigma_gf tail_3(G0.mesh2(), G0.mesh3());
-  for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); ++k) {
-    for (alps::gf::index f(0); f<G.mesh3().extent(); ++f) {
-      tail_1(k,f)=1.;
-      tail_2(k,f)=dispersion_moments(k())-mu_;
-      tail_3(k,f)=0.;
-    }
-  }
-  G0.set_tail(1, tail_1);
-  G0.set_tail(2, tail_2);
-  G0.set_tail(3, tail_3);
+  attach_bare_tail(G0);
 }
 ///Use Dyson to get the G0 in AFM / CO space
 void DoubleCellClusterTransformer::dyson_get_green0(double_cell_matsubara_kspace_gf &G0, const double_cell_matsubara_kspace_gf &sigma, const double_cell_matsubara_kspace_gf &G) const{
