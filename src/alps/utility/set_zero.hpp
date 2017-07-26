@@ -53,6 +53,13 @@ set_zero(X& x)
   std::fill(x.begin(),x.end(),typename element_type<X>::type());
 }
 
+//Enable set_zero for valarrays
+template <class X> 
+inline typename boost::enable_if<is_sequence<std::valarray<X> >,void>::type
+set_zero(std::valarray<X> & x) 
+{
+  for(int i=0;i<x.size();++i) x[i]=X();
+}
 
 
 } // end namespace alps
