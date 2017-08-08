@@ -333,23 +333,23 @@ void ClusterHelper::write_site_class_set(alps::hdf5::archive &ar, const site_cla
   }
 }
 void ClusterHelper::write_pair_class_set(alps::hdf5::archive &ar, const pair_class_set_type &set, const std::string &name, const std::string &location) const{
-  int z=0;
-  std::stringstream path; path<<"/"+location+"/"<<name<<"/size";
-  ar<<alps::make_pvp(path.str(),set.size());
+  int z1=0;
+  std::vector<int> indices;
+  std::vector<int> values;
   for(pair_class_set_type::const_iterator it=set.begin(); it != set.end();++it){
-    int z1=0;
-    std::stringstream path; path<<"/"+location+"/"<<name<<"/"<<z<<"/size";
-    ar<<alps::make_pvp(path.str(),it->size());
+    indices.push_back(z1);
     for(pair_class_type::const_iterator it1=it->begin(); it1 != it->end();++it1){
-      std::stringstream path1, path2;
-      path1<<"/"+location+"/"<<name<<"/"<<z<<"/"<<z1<<"/first";
-      ar<<alps::make_pvp(path1.str(), it1->first);
-      path2<<"/"+location+"/"<<name<<"/"<<z<<"/"<<z1<<"/second";
-      ar<<alps::make_pvp(path2.str(), it1->second);
+      values.push_back(it1->first);
+      values.push_back(it1->second);
       z1++;
     }
-    z++;
   }
+  indices.push_back(z1);
+  std::stringstream path1, path2;
+  path1<<"/"+location+"/"<<name<<"/indices";
+  ar<<alps::make_pvp(path1.str(), indices);
+  path2<<"/"+location+"/"<<name<<"/values";
+  ar<<alps::make_pvp(path2.str(), values);
 }
 void ClusterHelper::read_site_class_set(alps::hdf5::archive &ar, site_class_set_type &set, const std::string &name, const std::string &location){
   int zmax, z1max;
@@ -369,19 +369,18 @@ void ClusterHelper::read_site_class_set(alps::hdf5::archive &ar, site_class_set_
   }
 }
 void ClusterHelper::read_pair_class_set(alps::hdf5::archive &ar, pair_class_set_type &set, const std::string &name, const std::string &location){
-  int zmax, z1max;
-  std::stringstream path; path<<"/"+location+"/"<<name<<"/size";
-  ar>>alps::make_pvp(path.str(),zmax);
-  for(int z=0;z<zmax;++z){
-    std::stringstream path; path<<"/"+location+"/"<<name<<"/"<<z<<"/size";
-    ar>>alps::make_pvp(path.str(),z1max);
+  std::stringstream path; path<<"/"+location+"/"<<name;
+  std::string root = path.str();
+  std::vector<int> indices;
+  ar>>alps::make_pvp(root + "/indices",indices);
+  std::vector<int> values;
+  ar>>alps::make_pvp(root + "/values",values);
+  for(int z = 0; z < indices.size()-1; ++z) {
     std::set<pair_type> s;
-    for(int z1=0;z1<z1max;++z1){
+    for(int z1 = indices[z]; z1 < indices[z+1]; ++z1) {
       pair_type val;
-      std::stringstream path1; path1<<"/"+location+"/"<<name<<"/"<<z<<"/"<<z1<<"/first";
-      std::stringstream path2; path2<<"/"+location+"/"<<name<<"/"<<z<<"/"<<z1<<"/second";
-      ar>>alps::make_pvp(path1.str(), val.first);
-      ar>>alps::make_pvp(path2.str(), val.second);
+      val.first  = values[z1*2    ];
+      val.second = values[z1*2 + 1];
       s.insert(val);
     }
     set.insert(s);
