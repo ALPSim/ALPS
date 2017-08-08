@@ -438,23 +438,7 @@ struct Forward {
 
 ///TODO: we could merge at least two of these, potentially four of these into one k-space FT
 cluster_matsubara_realspace_gf NormalStateClusterTransformer::transform_into_real_space(const cluster_matsubara_kspace_gf& G) const{
-  cluster_matsubara_realspace_gf G_new(alps::gf::omega_r1_r2_sigma_gf(G.mesh1(), real_space_mesh(), real_space_mesh(), G.mesh3()));
-  G_new.initialize();
-  for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); ++k) {
-    for (alps::gf::real_space_index i(0); i<G_new.mesh2().extent(); ++i) {
-      for (alps::gf::real_space_index j(0); j<G_new.mesh3().extent(); ++j) {
-        double phase = 0.;
-        for (unsigned int d=0; d<dimension(); ++d)
-          phase += cluster_momentum(k(),d)*(cluster_coordinate(i(),d)-cluster_coordinate(j(),d));
-        for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
-          for (alps::gf::index flavor(0); flavor<G.mesh3().extent(); ++flavor) {
-            G_new(w, i, j, flavor) += (cos(phase)/(double)(G.mesh2().extent()))* G(w, k, flavor);
-          }
-        }
-      }
-    }
-  }
-  return G_new;
+  return transform_into_real_space_(G);
 }
 cluster_nambu_matsubara_realspace_gf NambuClusterTransformer::nambu_transform_into_real_space(const cluster_nambu_matsubara_kspace_gf& G) const{
   cluster_nambu_matsubara_realspace_gf G_new(alps::gf::omega_r1_r2_sigma1_sigma2_gf(G.mesh1(), real_space_mesh(), real_space_mesh(), G.mesh3(), G.mesh4()));
@@ -478,23 +462,7 @@ cluster_nambu_matsubara_realspace_gf NambuClusterTransformer::nambu_transform_in
   return G_new;
 }
 cluster_itime_realspace_gf NormalStateClusterTransformer::transform_into_real_space(const cluster_itime_kspace_gf& G) const{
-  cluster_itime_realspace_gf G_new(alps::gf::itime_r1_r2_sigma_gf(G.mesh1(), real_space_mesh(), real_space_mesh(), G.mesh3()));
-  G_new.initialize();
-  for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); ++k) {
-    for (alps::gf::real_space_index i(0); i<G_new.mesh2().extent(); ++i) {
-      for (alps::gf::real_space_index j(0); j<G_new.mesh3().extent(); ++j) {
-        double phase = 0.;
-        for (int d=0; d<dimension(); ++d)
-          phase += cluster_momentum(k(),d)*(cluster_coordinate(i(),d)-cluster_coordinate(j(),d));
-        for (alps::gf::itime_index t(0); t<G.mesh1().extent(); ++t) {
-          for (alps::gf::index flavor(0); flavor<G.mesh3().extent(); ++flavor) {
-            G_new(t, i, j, flavor) += (cos(phase)/(double)(G.mesh2().extent()))* G(t, k, flavor);
-          }
-        }
-      }
-    }
-  }
-  return G_new;
+  return transform_into_real_space_(G);
 }
 cluster_nambu_itime_realspace_gf NambuClusterTransformer::nambu_transform_into_real_space(const cluster_nambu_itime_kspace_gf& G) const{
   cluster_nambu_itime_realspace_gf G_new(alps::gf::itime_r1_r2_sigma1_sigma2_gf(G.mesh1(), real_space_mesh(), real_space_mesh(), G.mesh3(), G.mesh4()));

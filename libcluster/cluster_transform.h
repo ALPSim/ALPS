@@ -164,6 +164,76 @@ private:
                                                         std::set<pair_class_type>::const_iterator> pair_classes) const;
   ///given a chemical potential, compute the density (assuming a tail for the target density)
   double density_for_mu(double mu, const cluster_matsubara_kspace_gf &sigma, double target_density_per_site);
+
+  /**
+    *  optimized Fourier transformation from reciprocal space to real space
+    *  The return Green's function is defined based on the GFT's first mesh type and value type.
+    *  As the first the phase factor will be computed. Then using loop order based on the index order 
+    *  the Fourier transform will performed. 
+    *  
+    *  @tparam GFT - type of K-space Green's to be transformed
+    *
+    *  @return - proper real-space Green's function for the GFT Green's function
+    */
+  template<typename GFT>
+   alps::gf::four_index_gf_with_tail<alps::gf::four_index_gf<typename GFT::gf_type::value_type,
+                  typename GFT::gf_type::mesh1_type,
+                  alps::gf::real_space_index_mesh,
+                  alps::gf::real_space_index_mesh,
+                  alps::gf::index_mesh>,
+                  alps::gf::three_index_gf<typename GFT::gf_type::value_type,
+                                alps::gf::real_space_index_mesh,
+                                alps::gf::real_space_index_mesh,
+                                alps::gf::index_mesh> >
+          transform_into_real_space_(const GFT & G) const{
+    // init output Green's function
+    alps::gf::four_index_gf_with_tail<alps::gf::four_index_gf<typename GFT::gf_type::value_type, // Green's function return value
+                  typename GFT::gf_type::mesh1_type, // mesh type (frequency or time)
+                  alps::gf::real_space_index_mesh,   // first real space index 
+                  alps::gf::real_space_index_mesh,   // second real space index
+                  alps::gf::index_mesh>,             // spin index
+                  alps::gf::three_index_gf<typename GFT::gf_type::value_type, // tail specialization
+                                alps::gf::real_space_index_mesh,
+                                alps::gf::real_space_index_mesh,
+                                alps::gf::index_mesh> >
+       G_new(alps::gf::four_index_gf<typename GFT::gf_type::value_type,
+                  typename GFT::gf_type::mesh1_type,
+                  alps::gf::real_space_index_mesh,
+                  alps::gf::real_space_index_mesh,
+                  alps::gf::index_mesh> (G.mesh1(), real_space_mesh(), real_space_mesh(), G.mesh3()));
+    G_new.initialize();
+    // define Fourier phase factor as alps Green's function
+    alps::gf::three_index_gf<double, alps::gf::momentum_index_mesh, alps::gf::real_space_index_mesh, alps::gf::real_space_index_mesh>
+      phase(G.mesh2(), G_new.mesh2(), G_new.mesh3());
+    // precompute fourier phase factor
+    for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); ++k) {
+      for (alps::gf::real_space_index i(0); i < G_new.mesh2().extent(); ++i) {
+        for (alps::gf::real_space_index j(0); j < G_new.mesh3().extent(); ++j) {
+          // accumulate phase factor into temporary variable
+          double ph = 0.;
+          for (unsigned int d=0; d<dimension(); ++d)
+            ph += cluster_momentum(k(),d)*(cluster_coordinate(i(),d)-cluster_coordinate(j(),d));
+          // store phase factor for <k, i, j> indices
+          phase(k, i, j) = cos(ph) / (double)(G.mesh2().extent());
+        }
+      }
+    }
+    // iterate over indices according to the order in the Green's functions
+    for (typename GFT::gf_type::mesh1_type::index_type w(0); w<G.mesh1().extent(); ++w) {
+      for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); ++k) {
+        for (alps::gf::real_space_index i(0); i<G_new.mesh2().extent(); ++i) {
+          for (alps::gf::real_space_index j(0); j<G_new.mesh3().extent(); ++j) {
+            for (alps::gf::index flavor(0); flavor<G.mesh3().extent(); ++flavor) {
+              G_new(w, i, j, flavor) += phase(k, i, j) * G ( w, k, flavor);
+            }
+          }
+        }
+      }
+    }
+    // return new Green's function
+    return G_new;
+  }
+
 public:
   template<class GF> void symmetrize_real_space(GF& G) const{return symmetrize_helper_real_space(G,pair_classes_real_space());}
   template<class GF> void symmetrize_k_space(GF& G) const{return symmetrize_helper_k_space(G,pair_classes_k_space());}

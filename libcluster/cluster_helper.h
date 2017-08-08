@@ -51,9 +51,9 @@ public:
   ClusterHelper(const alps::params& params);
   virtual ~ClusterHelper(){}
   
-  double cluster_coordinate(int i, int j) const { return cluster_coordinates_(i,j); }
-  double cluster_momentum(int i, int j) const { return cluster_momenta_(i,j); }
-  double lattice_momentum( int i,  int j) const { return lattice_momenta_(i,j); }
+  inline double cluster_coordinate(int i, int j) const { return cluster_coordinates_(i,j); }
+  inline double cluster_momentum(int i, int j) const { return cluster_momenta_(i,j); }
+  inline double lattice_momentum( int i,  int j) const { return lattice_momenta_(i,j); }
   ///this gives access to the basis in momentum space
   double reciprocal_basis_vector(const unsigned int i, const unsigned int j) const { return reciprocal_basis_(i,j); }
   ///this gives access to the basis in real space
