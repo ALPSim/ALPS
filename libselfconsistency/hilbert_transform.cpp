@@ -14,6 +14,7 @@
 void FrequencySpaceHilbertTransformer::define_parameters(alps::params &p){
   p.define<double>("t", "Hopping element for semi circular & square lattice density of states ");
   p.define<double>("tprime", 0., "Next-nearest Hopping element for square lattice density of states ");
+  p.define<double>("tdprime", 0., "Third-nearest Hopping element for square lattice density of states ");
   p.define<double>("MU", "Chemical Potential");
   p.define<int>("L", 200, "Number of Brillouin zone points for square lattice integration ");
   p.define<std::string>("G0_OMEGA_INPUT", "Input filename for input G0");
