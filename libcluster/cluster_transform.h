@@ -88,7 +88,7 @@ protected:
   double mu_;
   double half_filling_;
   ///t is the basic energy unit of the hopping. t2 is the tprime. t_flavor is only used for mass imbalance
-  double t_, t2_, t3_,t_flavor_;
+  double t_, t2_,t_flavor_;
   double beta_;
   ///interaction is needed for high frequency information in the Fourier transform; same for the V
   double U_;

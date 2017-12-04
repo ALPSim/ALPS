@@ -42,7 +42,6 @@ ClusterTransformer::ClusterTransformer(const alps::params& params) : ClusterHelp
     half_filling_(0.),
     t_(params["t"]),
     t2_(params["tprime"]),
-    t3_(params["tdprime"]),
     t_flavor_(params["t_flavor"]),
     n_flavors_(params["FLAVORS"]),
     use_phase_(params["dca.PHASE"]),
@@ -881,11 +880,6 @@ double ClusterTransformer::epsilon(const std::vector<double> &k) const
       eps -= 4*t2_*cos(k[0])*cos(k[2]);
       break;
     }
-
-  if (t3_!=0 && dimension()==2){
-	eps-= 2.0*t3_*(cos(2.0*k[0])+cos(2.0*k[1]));
-  }
-
   }
   return eps;
 }
