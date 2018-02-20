@@ -27,14 +27,14 @@ if (NOT Boost_ROOT_DIR)
   # before actual find_package for Boost.
   # - Ubuntu 10.10 does not have Boost.MPI package.
   set(MPI)
-  find_package(Boost 1.48.0 COMPONENTS mpi)
+  find_package(Boost 1.52.0 COMPONENTS mpi)
   if (Boost_FOUND)
     set(MPI mpi)
   endif (Boost_FOUND)
   # Linking to Boost.test Unit Test Framework is optional
   set(UTF)
   if (ALPS_LINK_BOOST_TEST)
-    find_package(Boost 1.48.0 COMPONENTS unit_test_framework)
+    find_package(Boost 1.52.0 COMPONENTS unit_test_framework)
     if (Boost_FOUND)
       set(UTF unit_test_framework)
       # Unset ALPS_INSTALL_BOOST_TEST
@@ -61,7 +61,11 @@ if (NOT Boost_ROOT_DIR)
     set(ALPS_HAVE_BOOST_NUMPY ON)
   endif (Boost_FOUND)
   # The final library finding for precompiled Boost.
-  find_package(Boost 1.48.0 COMPONENTS chrono date_time filesystem iostreams program_options python regex system serialization thread ${MPI} ${UTF} ${TIMER} ${NUMPY})
+  if(ALPS_BUILD_PYTHON)
+    find_package(Boost 1.52.0 COMPONENTS chrono date_time filesystem iostreams program_options python regex system serialization thread ${MPI} ${UTF} ${TIMER} ${NUMPY})
+  else(ALPS_BUILD_PYTHON)
+    find_package(Boost 1.52.0 COMPONENTS chrono date_time filesystem iostreams program_options regex system serialization thread ${MPI} ${UTF} ${TIMER} ${NUMPY})
+  endif(ALPS_BUILD_PYTHON)
   # Unset local variable
   unset(MPI)
   unset(UTF)
