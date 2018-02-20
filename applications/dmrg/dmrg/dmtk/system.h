@@ -558,8 +558,11 @@ class System
       inputfile.read((char *)&_numsweeps, sizeof(size_t));
       _sweeps.resize(2,_numsweeps+1);
       for(int i = 1; i <= _numsweeps; i++){
-        inputfile.read((char *)&_sweeps(0,i), sizeof(int));
-        inputfile.read((char *)&_sweeps(1,i), sizeof(int));
+        int l;
+        inputfile.read((char *)&l, sizeof(int));
+        _sweeps(0,i) = l;
+        inputfile.read((char *)&l, sizeof(int));
+        _sweeps(1,i) = l;
       }
       inputfile.read((char *)&_in_warmup, sizeof(bool));
       inputfile.read((char *)&_sweep, sizeof(int));
@@ -577,8 +580,10 @@ class System
     {
       s.write((const char *)&_numsweeps, sizeof(size_t));
       for(int i = 1; i <= _numsweeps; i++){
-        s.write((const char *)&_sweeps(0,i), sizeof(double));
-        s.write((const char *)&_sweeps(1,i), sizeof(double));
+        int l = _sweeps(0,i);
+        s.write((const char *)&l, sizeof(int));
+        l = _sweeps(1,i);
+        s.write((const char *)&l, sizeof(int));
       }
       s.write((const char *)&_in_warmup, sizeof(bool));
       s.write((const char *)&_sweep, sizeof(int));
@@ -608,8 +613,11 @@ class System
       s.read((char *)&_numsweeps, sizeof(size_t));
       _sweeps.resize(2,_numsweeps+1);
       for(int i = 1; i <= _numsweeps; i++){
-        s.read((char *)&_sweeps(0,i), sizeof(double));
-        s.read((char *)&_sweeps(1,i), sizeof(double));
+        int l;
+        s.read((char *)&l, sizeof(int));
+        _sweeps(0,i) = l;
+        s.read((char *)&l, sizeof(int));
+        _sweeps(1,i) = l;
       }
       s.read((char *)&_in_warmup, sizeof(bool));
       s.read((char *)&_sweep, sizeof(int));
