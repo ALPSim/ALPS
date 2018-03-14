@@ -239,7 +239,7 @@ namespace blas{
       double zero_double=0.;
       char notrans='N';
       Mres.clear(); //to satisfy valgrind on hreidar / acml
-      blas::dgemm_(&notrans, &notrans, &size_, &size_, &size_, &one_double, M2.values_, &memory_size_, values_, &memory_size_, &zero_double, Mres.values_, &Mres.memory_size_);
+      blas::dgemm_(&notrans, &notrans, &size_, &size_, &size_, &one_double, M2.values_, &M2.memory_size_, values_, &memory_size_, &zero_double, Mres.values_, &Mres.memory_size_);
     }
     inline void matrix_right_multiply(const blas::general_matrix<double> &M2,  blas::general_matrix<double>&Mres, const double beta=0.) const{
       //call the BLAS routine for matrix matrix multiplication:
