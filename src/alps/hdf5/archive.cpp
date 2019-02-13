@@ -33,6 +33,7 @@
 
 #include <boost/scoped_array.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/noncopyable.hpp>
 
 #include <hdf5.h>
 
