@@ -85,9 +85,9 @@ public:
   // forward a few things from container
 
   const_iterator begin() const { return histogram_.begin();}
-  const_iterator rbegin() const { return histogram_.rbegin();}
+  const_reverse_iterator rbegin() const { return histogram_.rbegin();}
   const_iterator end() const { return histogram_.end();}
-  const_iterator rend() const { return histogram_.rend();}
+  const_reverse_iterator rend() const { return histogram_.rend();}
   size_type size() const { return histogram_.size();}
   value_type operator[](size_type i) const { return histogram_[i];}
   value_type at(size_type i) const { return histogram_.at(i);}
