@@ -140,10 +140,10 @@ public:
         return diag_vertex_indices[e_index(state, utype, sites)];
     }
     
-    double max_diag_me() const
-    {
-        return _max_diag_me;
-    }
+    // double max_diag_me() const
+    // {
+    //     return _max_diag_me;
+    // }
     
     double c(unsigned unit_type) const
     {
