@@ -71,6 +71,8 @@ template<class GFW> void write_new_G0omega(const GFW &G0_omega, const std::strin
 template<class SOLV, class TRANS, class GFW, class GFT> void selfconsistency_loop_DCA(const alps::params& parms, SOLV& solver, TRANS& clustertrans, GFW &G0_omega, GFT &G0_tau)
 {
   double beta=parms["BETA"];
+  bool spin_symmetrize = parms["sc.SPIN_SYMMETRIZATION"];
+  std::cout<<"spin symmetrization is "<<spin_symmetrize<<std::endl;
 
   int max_it = parms["sc.MAX_IT"];
   bool adjust_mu = parms["sc.ADJUST_MU"];
@@ -97,7 +99,9 @@ template<class SOLV, class TRANS, class GFW, class GFT> void selfconsistency_loo
     alps::gf::fourier_frequency_to_time(G0_omega, G0_tau);
     solver.solve(G0_omega, G0_tau, G_omega, G_tau);
 
-    clustertrans.spin_symmetrize(G_omega);
+    std::cout<<"spin symmetrization is "<<spin_symmetrize<<std::endl;
+
+    if(spin_symmetrize){    clustertrans.spin_symmetrize(G_omega);}
     clustertrans.symmetrize_k_space(G_omega);
     clustertrans.dyson_get_self_energy(self_energy, G_omega, G0_omega);
     if(!adjust_mu)
