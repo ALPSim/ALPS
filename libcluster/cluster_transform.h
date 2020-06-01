@@ -337,10 +337,10 @@ public:
   ///Use Dyson to get the G0
   void dyson_get_green0(cluster_nambu_matsubara_kspace_gf &G0, const cluster_nambu_matsubara_kspace_gf &sigma, const cluster_nambu_matsubara_kspace_gf &G) const;
   ///perform the k-sum to get G
-  void matsubara_k_sum(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma, double eta1, double eta2) const;
+  void matsubara_k_sum(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma, double eta1, double eta2, double h) const;
   ///the k-sum: short version, reroutes via long version by using h_ and mu_stag_
   void matsubara_k_sum(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma) const{
-    matsubara_k_sum(G, sigma, eta1_, eta2_);
+    matsubara_k_sum(G, sigma, eta1_, eta2_, h_);
   }
   ///perform the k-sum to get G
   double matsubara_k_sum_adjust_mu(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma, double eta1, double eta2, double target_density);
@@ -354,12 +354,18 @@ public:
   virtual cluster_nambu_itime_realspace_gf nambu_transform_into_real_space(const cluster_nambu_itime_kspace_gf& G) const;
   virtual cluster_nambu_itime_kspace_gf nambu_transform_into_k_space(const cluster_nambu_itime_realspace_gf& G) const{ throw std::logic_error("not implemented");}
 
-  void attach_bare_tail(cluster_nambu_matsubara_kspace_gf &G0) const;
+  void attach_bare_tail(cluster_nambu_matsubara_kspace_gf &G0, double h) const;
+  // TODO: h should also enter interacting tail
   void attach_interacting_tail(cluster_nambu_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const;
   void symmetrize_dwave_kspace(cluster_nambu_matsubara_kspace_gf &G) const;
   void symmetrize_k_space(cluster_nambu_matsubara_kspace_gf &G) const{return symmetrize_dwave_kspace(G);}
 
 private:
+  ///initial magnetic field value, Ferromagnet only
+  const double h_init_;
+  ///magnetic field, Ferromagnet only
+  const double h_;
+
   ///superconducting bias field eta1, initial value
   double eta1_init_;
   ///superconducting bias field eta2, initial value
