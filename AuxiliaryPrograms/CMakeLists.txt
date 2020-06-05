@@ -23,7 +23,8 @@ include_directories(${SELFCONSISTENCY_INCLUDE_DIR})
 include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${MPI_CXX_INCLUDE_PATH})
 
-#add_executable(sigma_interpolate_sc sigma_interpolate_sc.cpp )
+add_executable(sigma_interpolate_sc sigma_interpolate_sc.cpp )
+target_link_libraries(sigma_interpolate_sc ${FOURIER_LIBRARIES} ${CLUSTER_LIBRARIES} ${SELFCONSISTENCY_LIBRARIES} ${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES} ${GSL_LIBRARIES} ${MPI_CXX_LIBRARIES})
 #
 add_executable(sigma_interpolate_normal sigma_interpolate_normal.cpp )
 
