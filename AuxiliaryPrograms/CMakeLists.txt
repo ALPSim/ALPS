@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
+if(POLICY CMP0074)
+    cmake_policy(SET CMP0074 NEW)
+endif()
 project (AuxiliaryPrograms)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../cmake)
@@ -23,9 +26,7 @@ include_directories(${SELFCONSISTENCY_INCLUDE_DIR})
 include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${MPI_CXX_INCLUDE_PATH})
 
-add_executable(sigma_interpolate_sc sigma_interpolate_sc.cpp )
-target_link_libraries(sigma_interpolate_sc ${FOURIER_LIBRARIES} ${CLUSTER_LIBRARIES} ${SELFCONSISTENCY_LIBRARIES} ${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES} ${GSL_LIBRARIES} ${MPI_CXX_LIBRARIES})
-#
-add_executable(sigma_interpolate_normal sigma_interpolate_normal.cpp )
-
-target_link_libraries(sigma_interpolate_normal ${FOURIER_LIBRARIES} ${CLUSTER_LIBRARIES} ${SELFCONSISTENCY_LIBRARIES} ${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES} ${GSL_LIBRARIES} ${MPI_CXX_LIBRARIES})
+foreach(f normal sc)
+    add_executable(sigma_interpolate_${f} sigma_interpolate_${f}.cpp)
+    target_link_libraries(sigma_interpolate_${f} ${FOURIER_LIBRARIES} ${CLUSTER_LIBRARIES} ${SELFCONSISTENCY_LIBRARIES} ${ALPSCore_LIBRARIES} ${LAPACK_LIBRARIES} ${GSL_LIBRARIES} ${MPI_CXX_LIBRARIES})
+endforeach()
