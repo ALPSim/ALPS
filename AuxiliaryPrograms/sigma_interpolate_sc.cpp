@@ -92,16 +92,16 @@ int main(int argc, char **argv){
   double beta_old=parms_old["BETA"];
   double mu_old=parms_old["MU"];
   double h_old=parms_old["H"];
-  double eta1_old=parms_old["ETA1"];
-  double eta2_old=parms_old["ETA2"];
+  double eta1_old=parms_old["dca.ETA1"];
+  double eta2_old=parms_old["dca.ETA2"];
   double nsites_old=parms_old["dca.SITES"];
   int nfreq_old = parms_new["NMATSUBARA"];
 
   double beta_new=parms_new["BETA"];
   double mu_new=parms_new["MU"];
   double h_new=parms_new["H"];
-  double eta1_new=parms_new["ETA1"];
-  double eta2_new=parms_new["ETA2"];
+  double eta1_new=parms_new["dca.ETA1_INIT"];
+  double eta2_new=parms_new["dca.ETA2_INIT"];
   int nfreq_new=parms_new["NMATSUBARA"];
   double nsites_new=parms_new["dca.SITES"];
   
@@ -190,7 +190,7 @@ int main(int argc, char **argv){
     std::ofstream s_file("sigma_in.dat"); s_file<<selfenergy_new;
   }
   std::cout<<"...running self-consistency..."<<std::endl;
-  CT_new.matsubara_k_sum(green_new, selfenergy_new);
+  CT_new.matsubara_k_sum(green_new, selfenergy_new, eta1_new, eta2_new, h_new);
   CT_new.dyson_get_green0(green0_new, selfenergy_new, green_new);
 
   {
