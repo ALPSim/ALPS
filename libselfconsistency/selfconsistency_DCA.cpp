@@ -110,6 +110,7 @@ template<class SOLV, class TRANS, class GFW, class GFT> void selfconsistency_loo
       double mu=clustertrans.matsubara_k_sum_adjust_mu(G_omega_ksum, self_energy, target_density);
       solver.adjust_mu(mu);
     }
+    clustertrans.symmetrize_k_space(G_omega_ksum);
     clustertrans.dyson_get_green0(G0_omega_new, self_energy, G_omega_ksum);
     clustertrans.dyson_get_self_energy(self_energy2, G_omega, G0_omega);
 
