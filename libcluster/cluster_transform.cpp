@@ -379,7 +379,7 @@ void NambuClusterTransformer::spin_symmetrize(cluster_nambu_matsubara_kspace_gf&
     for (alps::gf::momentum_index k=alps::gf::momentum_index(0); k<G.mesh2().extent(); ++k) {
       //symmetrize the diagonal G
       G(w, k, up,up)=std::complex<double>(0.5*(G(w,k,up,up).real()-G(w,k,dn,dn).real()),0.5*(G(w,k,up,up).imag()+G(w,k,dn,dn).imag()));
-      G(w, k, dn,dn)=std::complex<double>(-G(w,k,up,up).real(),G(w,k,dn,dn).imag());
+      G(w, k, dn,dn)=std::complex<double>(-G(w,k,up,up).real(),G(w,k,up,up).imag());
       //symmetrize the  F.
       G(w, k, up, dn)= (G(w, k, up, dn)+std::conj(G(w, k, dn, up)))/2.;
       G(w, k, dn, up)= std::conj(G(w, k, up, dn));
