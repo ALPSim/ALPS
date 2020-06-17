@@ -96,13 +96,17 @@ template<class SOLV, class TRANS, class GFW, class GFT> void selfconsistency_loo
   //This is the basic DCA self-consistency loop
   for(int iteration_ctr=0;iteration_ctr < max_it; ++iteration_ctr) {
     std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
+
+    std::cout<<"spin symmetrization is "<<spin_symmetrize<<std::endl;
+    clustertrans.symmetrize_k_space(G0_omega);
+    if(spin_symmetrize){ clustertrans.spin_symmetrize(G0_omega); }
+
     alps::gf::fourier_frequency_to_time(G0_omega, G0_tau);
     solver.solve(G0_omega, G0_tau, G_omega, G_tau);
 
-    std::cout<<"spin symmetrization is "<<spin_symmetrize<<std::endl;
-
-    if(spin_symmetrize){    clustertrans.spin_symmetrize(G_omega);}
+    if(spin_symmetrize){ clustertrans.spin_symmetrize(G_omega); }
     clustertrans.symmetrize_k_space(G_omega);
+
     clustertrans.dyson_get_self_energy(self_energy, G_omega, G0_omega);
     if(!adjust_mu)
       clustertrans.matsubara_k_sum(G_omega_ksum, self_energy);
@@ -111,6 +115,8 @@ template<class SOLV, class TRANS, class GFW, class GFT> void selfconsistency_loo
       solver.adjust_mu(mu);
     }
     clustertrans.symmetrize_k_space(G_omega_ksum);
+    if(spin_symmetrize){ clustertrans.spin_symmetrize(G_omega_ksum); }
+
     clustertrans.dyson_get_green0(G0_omega_new, self_energy, G_omega_ksum);
     clustertrans.dyson_get_self_energy(self_energy2, G_omega, G0_omega);
 
