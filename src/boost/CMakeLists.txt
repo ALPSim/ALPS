@@ -14,8 +14,12 @@ set(BOOST_LINK_LIBS "")
 # Boost.Date_Time
 if(BUILD_BOOST_DATE_TIME)
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/date_time/src")
-  set(SOURCES gregorian/date_generators.cpp gregorian/greg_month.cpp gregorian/greg_weekday.cpp
-      gregorian/gregorian_types.cpp posix_time/posix_time_types.cpp)
+  if(Boost_VERSION AND NOT Boost_VERSION LESS 107300)
+    set(SOURCES gregorian/greg_month.cpp)
+  else(Boost_VERSION AND NOT Boost_VERSION LESS 107300)
+    set(SOURCES gregorian/date_generators.cpp gregorian/greg_month.cpp gregorian/greg_weekday.cpp
+        gregorian/gregorian_types.cpp posix_time/posix_time_types.cpp)
+  endif(Boost_VERSION AND NOT Boost_VERSION LESS 107300)
   foreach(S ${SOURCES})
     if(EXISTS ${DIRECTORY}/${S})
       set(BOOST_SOURCES ${BOOST_SOURCES} ${DIRECTORY}/${S})
@@ -53,7 +57,7 @@ endif(BUILD_BOOST_TIMER)
 if(BUILD_BOOST_FILESYSTEM)
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/filesystem")
   set(SOURCES
-    codecvt_error_category.cpp operations.cpp path.cpp path_traits.cpp
+    codecvt_error_category.cpp directory.cpp exception.cpp operations.cpp path.cpp path_traits.cpp
     portability.cpp unique_path.cpp utf8_codecvt_facet.cpp
     windows_file_codecvt.cpp v2_operations.cpp v2_path.cpp v2_portability.cpp)
   foreach (D ${DIRECTORY}/src ${DIRECTORY}/v2/src ${DIRECTORY}/v3/src)
@@ -198,11 +202,11 @@ if(BUILD_BOOST_MPI)
   #ENDIF(NOT WIN32)
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/mpi/src")
   set(SOURCES broadcast.cpp communicator.cpp computation_tree.cpp
-      content_oarchive.cpp environment.cpp exception.cpp graph_communicator.cpp
+      content_oarchive.cpp environment.cpp error_string.cpp exception.cpp graph_communicator.cpp
       group.cpp intercommunicator.cpp mpi_datatype_cache.cpp
-      mpi_datatype_oarchive.cpp packed_iarchive.cpp packed_oarchive.cpp
+      mpi_datatype_oarchive.cpp offsets.cpp packed_iarchive.cpp packed_oarchive.cpp
       packed_skeleton_iarchive.cpp packed_skeleton_oarchive.cpp
-      point_to_point.cpp request.cpp text_skeleton_oarchive.cpp timer.cpp
+      point_to_point.cpp request.cpp status.cpp text_skeleton_oarchive.cpp timer.cpp
   )
   foreach(S ${SOURCES})
     if(EXISTS ${DIRECTORY}/${S})
@@ -300,12 +304,12 @@ if (NOT Boost_FOUND)
 
       set(SOURCES compiler_log_formatter.cpp debug.cpp decorator.cpp
           execution_monitor.cpp framework.cpp
-          interaction_based.cpp logged_expectations.cpp plain_report_formatter.cpp
+          interaction_based.cpp junit_log_formatter.cpp logged_expectations.cpp plain_report_formatter.cpp
           progress_monitor.cpp results_collector.cpp results_reporter.cpp
+          test_framework_init_observer.cpp
           test_tools.cpp test_tree.cpp unit_test_log.cpp unit_test_main.cpp
           unit_test_monitor.cpp unit_test_parameters.cpp unit_test_suite.cpp #(unit_test_suite.cpp renamed to test_tree.cpp in 2011)
           xml_log_formatter.cpp xml_report_formatter.cpp
-          junit_log_formatter.cpp
       )
 
       set (TEST_EXEC_MON_SOURCES "")

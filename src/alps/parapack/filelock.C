@@ -27,6 +27,7 @@
 
 #include "filelock.h"
 #include <boost/filesystem/operations.hpp>
+#include <boost/throw_exception.hpp>
 #include <iostream>
 #include <fcntl.h> // for open()
 #include <sys/stat.h>
