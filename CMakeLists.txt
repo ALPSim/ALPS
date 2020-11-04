@@ -128,9 +128,9 @@ endif(CMAKE_SIZEOF_VOID_P EQUAL 8 OR CMAKE_GENERATOR MATCHES Win64)
 #message (STATUS "Fortran compiler: ${CMAKE_Fortran_COMPILER}")
 #include (CMakeTestFortranCompiler)
 cmake_minimum_required(VERSION 2.8.0 FATAL_ERROR)
-if(NOT CMAKE_VERSION VERSION_LESS 3.0.0)
-  cmake_policy(SET CMP0042 OLD)
-endif(NOT CMAKE_VERSION VERSION_LESS 3.0.0)
+#if(NOT CMAKE_VERSION VERSION_LESS 3.0.0)
+#  cmake_policy(SET CMP0042 OLD)
+#endif(NOT CMAKE_VERSION VERSION_LESS 3.0.0)
 
 if(ALPS_BUILD_FORTRAN)
   project(alps C CXX Fortran)
@@ -289,16 +289,6 @@ endif(MSVC)
 ######################################################################
 # Packages
 ######################################################################
-
-# Boost Libraries
-find_package(BoostForALPS REQUIRED)
-if(Boost_ROOT_DIR)
-  message(STATUS "Adding Boost dir: ${Boost_ROOT_DIR} " )
-  include_directories(${Boost_ROOT_DIR})
-else(Boost_ROOT_DIR)
-  message(STATUS "Adding Boost dir: ${Boost_INCLUDE_DIR} " )
-  include_directories(${Boost_INCLUDE_DIR})
-endif(Boost_ROOT_DIR)
 
 # MPI
 if(ALPS_ENABLE_MPI)
@@ -485,6 +475,17 @@ ELSE (PYTHONLIBS_FOUND AND ALPS_BUILD_PYTHON)
   SET(ALPS_HAVE_PYTHON OFF)
 ENDIF (PYTHONLIBS_FOUND AND ALPS_BUILD_PYTHON)
 
+# Boost Libraries
+find_package(BoostForALPS REQUIRED)
+if(Boost_ROOT_DIR)
+  message(STATUS "Adding Boost dir: ${Boost_ROOT_DIR} " )
+  include_directories(${Boost_ROOT_DIR})
+else(Boost_ROOT_DIR)
+  message(STATUS "Adding Boost dir: ${Boost_INCLUDE_DIR} " )
+  include_directories(${Boost_INCLUDE_DIR})
+endif(Boost_ROOT_DIR)
+
+# XML Path
 set(ALPS_XML_PATH "lib" CACHE STRING "Directory to install ALPS XML directory in")
 if (ALPS_FOR_VISTRAILS)
   set(ALPS_XML_DIR "${CMAKE_INSTALL_PREFIX}/${VISTRAILS_APP_NAME}/${VISTRAILS_LIB_DIR}/xml")

@@ -1,8 +1,8 @@
 ######################################################################
 # Symmetries management
 ######################################################################
-set(DMRG_BUILD_SYMMETRIES "NU1" CACHE STRINGS "List of symmetry to include in the build objects. U1, TwoU1, NU1, Z2 and NONE are currently available.")
-set(DMRG_NUMSYMM 6 CACHE INT "Maximum number of U1 symmetries for NU1.")
+set(DMRG_BUILD_SYMMETRIES "NU1" CACHE STRING "List of symmetry to include in the build objects. U1, TwoU1, NU1, Z2 and NONE are currently available.")
+set(DMRG_NUMSYMM 6 CACHE STRING "Maximum number of U1 symmetries for NU1.")
 mark_as_advanced(DMRG_BUILD_SYMMETRIES DMRG_NUMSYMM)
 
 macro(get_symm_suffix RET SYMM)
