@@ -158,6 +158,11 @@ if(IS_CLANG)
     endif(NOT ${CMAKE_CXX_FLAGS} MATCHES "-(std=c\\+\\+11|stdlib=)")
 endif(IS_CLANG)
 
+# For gfortran 10 (see https://gcc.gnu.org/gcc-10/changes.html)
+if(ALPS_BUILD_FORTRAN AND CMAKE_COMPILER_IS_GNUCC AND CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER 9.99)
+  SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch")
+endif(ALPS_BUILD_FORTRAN AND CMAKE_COMPILER_IS_GNUCC AND CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER 9.99)
+
 IF(WIN32)
 ADD_DEFINITIONS(/bigobj)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
