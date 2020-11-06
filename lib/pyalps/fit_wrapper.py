@@ -44,7 +44,7 @@ class Parameter:
     def __call__(self):
         return self.value
 
-def fit(self,function, parameters, y, x = None):
+def fit(self,function, parameters, y, x = np.arange(0)):
     def f(params):
         i = 0
         for p in parameters:
@@ -52,6 +52,7 @@ def fit(self,function, parameters, y, x = None):
             i += 1
         return y - function(self,x,parameters)
 
-    if x == None: x = np.arange(y.shape[0])
+    if len(x) != y.shape[0]:
+        x = np.arange(y.shape[0])
     p = [param() for param in parameters]
     optimize.leastsq(f, p)

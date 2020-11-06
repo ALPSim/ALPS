@@ -65,8 +65,8 @@ def flatten(sl, fdepth = None):
     """
     
     if fdepth == None:
-        fdepth = depth(sl)
-    return HList(sl, fdepth)
+        fdepth = depth(list(sl))
+    return HList(list(sl), fdepth)
 
 def deep_flatten(sl, fdepth = None):
     return [x for x in flatten(sl, fdepth)]
