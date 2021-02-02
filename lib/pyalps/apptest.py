@@ -53,12 +53,12 @@ def read_testprop_xml(testinput):
     props = {}
     props['SCRIPT'] = root.find('SCRIPT').attrib['file']
     infos = root.find('TESTINFOS')
-    for tinfo in infos.getchildren():
+    for tinfo in list(infos):
         if tinfo.tag == 'TESTINFO':
             props[tinfo.attrib['name']] = tinfo.text
 
     files = root.find('REFERENCE')    
-    refFileList = [ rf.attrib['file'] for rf in files.getchildren() ]
+    refFileList = [ rf.attrib['file'] for rf in list(files) ]
     if not refFileList or None in refFileList:
         print("Could not create list of Reference Files")
         sys.exit(1)
@@ -66,10 +66,10 @@ def read_testprop_xml(testinput):
     obsentries = root.find('OBSERVABLES')
     obslist = []
     if obsentries is not None:
-        obslist = [ obs.text for obs in obsentries.getchildren() ]
+        obslist = [ obs.text for obs in list(obsentries) ]
 
     try:
-        inputs = [ inpf.attrib['file'] for inpf in root.find('SCRIPTINPUTFILES').getchildren() ]
+        inputs = [ inpf.attrib['file'] for inpf in list(root.find('SCRIPTINPUTFILES')) ]
 
     except AttributeError:
         inputs = None

@@ -45,7 +45,7 @@ def read_xml(filename):
     y = []
     dx = []
     dy = []
-    for point in root.find('set').getchildren():
+    for point in list(root.find('set')):
         x.append(float(point.find('x').text))
         y.append(float(point.find('y').text))
         if point.find('dx') != None:
@@ -57,7 +57,7 @@ def read_xml(filename):
     data.y = np.array(y)
     
     parameters = root.find('PARAMETERS')
-    for par in parameters.getchildren():
+    for par in list(parameters):
         data.props[par.attrib['name']] = par.text
     
     return data
