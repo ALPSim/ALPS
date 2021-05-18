@@ -79,6 +79,7 @@ else(NOT LAPACK_FOUND)
 
   #### SCHEDULER
   add_library(mps_pscan STATIC libpscan/scheduler.cpp libpscan/options.cpp)
+  target_link_libraries(mps_pscan alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY} ${HDF5_LIBRARIES})
 
   ### INSTALL LIBS
   install(TARGETS mps_models mps_utils DESTINATION lib EXPORT ALPSMPS-targets)
