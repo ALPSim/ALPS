@@ -58,6 +58,7 @@ if(LAPACK_FOUND)
   #Interaction Expansion
   set (DMFT_QMC_SOLVERS ${DMFT_QMC_SOLVERS} interaction_expansion_impl)
   add_library (interaction_expansion_impl STATIC ${DMFT_QMC_INTERACTION_EXPANSION_SOURCE})
+  target_link_libraries(interaction_expansion_impl alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
 
   target_link_libraries(dmft_qmc_impl alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
   add_definitions(${LAPACK_DEFINITIONS} )
