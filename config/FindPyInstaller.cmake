@@ -5,7 +5,7 @@
 find_package(PythonLibs REQUIRED)
 
 if(NOT PyInstaller_PATH)
-  find_path(PyInstaller_PATH Makespec.py
+  find_path(PyInstaller_PATH makespec.py
             $ENV{HOME}/pyinstaller
             $ENV{HOME}/src/pyinstaller
             $ENV{HOME}/ALPS/src/pyinstaller
@@ -18,7 +18,7 @@ if(NOT PyInstaller_PATH)
             "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/My Documents/pyinstaller-1.3"
             "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/My Documents/src/pyinstaller-1.3"
             "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/My Documents/ALPS/src/pyinstaller-1.3"
-            DOC "Path to the pyinstaller directory (where to find Makespec.py)")
+            DOC "Path to the pyinstaller directory (where to find makespec.py)")
   if(PyInstaller_PATH)
     set(PyInstaller_PATH ${PyInstaller_PATH} CACHE PATH "Path to PyInstaller")
     set(PyInstaller_FOUND 1 CACHE BOOL "Found PyInstaller")
@@ -31,7 +31,7 @@ if(NOT PyInstaller_PATH)
 endif(NOT PyInstaller_PATH)
 
 if(PyInstaller_PATH)
-  set(PI_MAKESPEC ${PyInstaller_PATH}/Makespec.py)
+  set(PI_MAKESPEC ${PyInstaller_PATH}/makespec.py)
   set(PI_BUILD ${PyInstaller_PATH}/Build.py)
 endif(PyInstaller_PATH)
 
