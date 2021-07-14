@@ -90,15 +90,15 @@ static const char xdr_zero[BYTES_PER_XDR_UNIT] = {0, 0, 0, 0};
 #endif
 
 #if  __BYTE_ORDER == __BIG_ENDIAN
-unsigned long
-htonl(unsigned long a)
+uint32_t
+htonl(uint32_t a)
 {
 
         return (a);
 }
 
-unsigned long
-ntohl(unsigned long a)
+uint32_t
+ntohl(uint32_t a)
 {
 
         return (a);
@@ -106,21 +106,21 @@ ntohl(unsigned long a)
 
 #else 
 #if __BYTE_ORDER == __LITTLE_ENDIAN 
-unsigned long
-htonl(unsigned long a)
+uint32_t
+htonl(uint32_t a)
 {
- return ((((unsigned long)(a) & 0xff000000) >> 24) | \
-         (((unsigned long)(a) & 0x00ff0000) >> 8)  | \
-         (((unsigned long)(a) & 0x0000ff00) << 8)  | \
-         (((unsigned long)(a) & 0x000000ff) << 24));
+ return ((((uint32_t)(a) & 0xff000000) >> 24) | \
+         (((uint32_t)(a) & 0x00ff0000) >> 8)  | \
+         (((uint32_t)(a) & 0x0000ff00) << 8)  | \
+         (((uint32_t)(a) & 0x000000ff) << 24));
 }
-unsigned long
-ntohl(unsigned long a)
+uint32_t
+ntohl(uint32_t a)
 {
- return ((((unsigned long)(a) & 0xff000000) >> 24) | \
-         (((unsigned long)(a) & 0x00ff0000) >> 8)  | \
-         (((unsigned long)(a) & 0x0000ff00) << 8)  | \
-         (((unsigned long)(a) & 0x000000ff) << 24));
+ return ((((uint32_t)(a) & 0xff000000) >> 24) | \
+         (((uint32_t)(a) & 0x00ff0000) >> 8)  | \
+         (((uint32_t)(a) & 0x0000ff00) << 8)  | \
+         (((uint32_t)(a) & 0x000000ff) << 24));
 }
 #endif
 #endif
@@ -131,7 +131,6 @@ ntohl(unsigned long a)
 bool_t
 xdr_int (XDR *xdrs, int *ip)
 {
-
 #if INT_MAX < LONG_MAX
   long l;
 
@@ -259,9 +258,7 @@ bool_t
 xdr_long (XDR *xdrs, long *lp)
 {
 
-  if (xdrs->x_op == XDR_ENCODE
-      && (sizeof (int32_t) == sizeof (long)
-	  || (int32_t) *lp == *lp))
+  if (xdrs->x_op == XDR_ENCODE)
     return XDR_PUTLONG (xdrs, lp);
 
   if (xdrs->x_op == XDR_DECODE)
@@ -295,10 +292,6 @@ xdr_u_long (XDR *xdrs, u_long *ulp)
       }
 
     case XDR_ENCODE:
-      if (sizeof (uint32_t) != sizeof (u_long)
-	  && (uint32_t) *ulp != *ulp)
-	return FALSE;
-
       return XDR_PUTLONG (xdrs, (long *) ulp);
 
     case XDR_FREE:
@@ -845,8 +838,8 @@ xdrstdio_getlong (XDR *xdrs, long *lp)
 static bool_t
 xdrstdio_putlong (XDR *xdrs, const long *lp)
 {
-  int32_t mycopy = htonl ((u_int32_t) *lp);
-
+  int32_t tmp = *lp;
+  int32_t mycopy = htonl ((u_int32_t) tmp);
   if (fwrite ((caddr_t) &mycopy, 4, 1, (FILE *) xdrs->x_private) != 1)
     return FALSE;
   return TRUE;
