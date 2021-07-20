@@ -26,7 +26,7 @@ set(ALPS_SOURCES
     model/bondterm.C model/globaloperator.C model/modellibrary.C model/siteterm.C
     # osiris
     osiris/buffer.C osiris/dump.C osiris/dumparchive.C osiris/process.C osiris/comm.C
-    osiris/mpdump.C osiris/xdrdump.C osiris/xdrcore.C
+    osiris/mpdump.C osiris/xdrdump.C
     # parameter
     parameter/parameter.C parameter/parameterlist.C parameter/parameters.C
     # parser
@@ -55,6 +55,10 @@ set(ALPS_SOURCES
     ngs/lib/mcresult.cpp ngs/lib/mcresults.cpp ngs/lib/mcobservables.cpp ngs/lib/mcobservable.cpp
   )
 
+  if (NOT ALPS_HAVE_RPC_XDR_H)
+    set(ALPS_SOURCES ${ALPS_SOURCES} osiris/xdr.c osiris/xdr_array.c osiris/xdr_float.c osiris/xdr_stdio.c)
+  endif (NOT ALPS_HAVE_RPC_XDR_H)
+  
   if (ALPS_BUILD_PYTHON)
     set(ALPS_SOURCES ${ALPS_SOURCES} ngs/lib/get_numpy_type.cpp hdf5/python.cpp python/numpy_array.cpp)
   endif (ALPS_BUILD_PYTHON)
