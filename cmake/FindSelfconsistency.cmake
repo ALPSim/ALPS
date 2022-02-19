@@ -3,6 +3,7 @@ include(FindPackageHandleStandardArgs)
 SET(INCLUDE_SEARCH_PATHS
  $ENV{LIBSELFCONSISTENCY_DIR}
  ${LIBSELFCONSISTENCY_DIR}
+ ${DMFT_DIR}/include
  ${DMFT_DIR}/libselfconsistency
  ${CMAKE_SOURCE_DIR}/libselfconsistency
  ${CMAKE_SOURCE_DIR}/../libselfconsistency
@@ -10,6 +11,7 @@ SET(INCLUDE_SEARCH_PATHS
 SET(LIBRARY_SEARCH_PATHS
  $ENV{LIBSELFCONSISTENCY_DIR}
  ${LIBSELFCONSISTENCY_DIR}
+ ${DMFT_DIR}/lib
  ${DMFT_DIR}/libselfconsistency
  ${CMAKE_SOURCE_DIR}/libselfconsistency
  ${CMAKE_SOURCE_DIR}/../libselfconsistency
