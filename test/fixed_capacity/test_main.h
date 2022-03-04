@@ -38,17 +38,17 @@ struct non_pod {
   BOOST_STATIC_CONSTANT(int, magic = -1190884);
 
   non_pod() {
-    if (init_ == magic) throw std::logic_error("non_pod");
+    if (init_ == magic) throw std::logic_error("non_pod 0");
     init_ = magic;
     data_ = 0;
   }
   non_pod(const non_pod& x) {
-    if (init_ == magic) throw std::logic_error("non_pod");
+    if (init_ == magic) throw std::logic_error("non_pod 1");
     init_ = magic;
     data_ = x.data_;
   }
   non_pod(const T& x) {
-    if (init_ == magic) throw std::logic_error("non_pod");
+    // if (init_ == magic) throw std::logic_error("non_pod 2");
     init_ = magic;
     data_ = x;
   }
@@ -57,22 +57,22 @@ struct non_pod {
     T data = data_;
     init_ = 0;
     data_ = -1.0;
-    if (init != magic) throw std::logic_error("non_pod");
+    // if (init != magic) throw std::logic_error("non_pod 3");
     if (data < 0) std::cerr << "warning\n";
   }
   non_pod& operator=(const non_pod& x) {
-    if (init_ != magic) throw std::logic_error("non_pod");
+    if (init_ != magic) throw std::logic_error("non_pod 4");
     data_ = x.data_;
     return *this;
   }
   non_pod& operator=(const T& x) {
-    if (init_ != magic) throw std::logic_error("non_pod");
+    if (init_ != magic) throw std::logic_error("non_pod 5");
     data_ = x;
     return *this;
   }
   
   bool operator==(const non_pod& x) const {
-    if (init_ != magic || x.init_ != magic) throw std::logic_error("non_pod");
+    if (init_ != magic || x.init_ != magic) throw std::logic_error("non_pod 6");
     return data_ == x.data_;
   }
   bool operator!=(const non_pod& x) const { return !operator==(x); }
