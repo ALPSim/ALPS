@@ -48,7 +48,7 @@ struct ALPS_DECL ParameterListParser : public bs::grammar<ParameterListParser> {
     bs::rule<ScannerT> parameterlist;
 
     definition(ParameterListParser const& self) {
-      self.stop = false;
+      self.stop = 0;
       parameterlist =
         +( self.global_p
             | ( bs::ch_p('{') >> *bs::eol_p >> bs::ch_p('}') >> *bs::eol_p
@@ -67,12 +67,12 @@ struct ALPS_DECL ParameterListParser : public bs::grammar<ParameterListParser> {
   };
 
   ParameterListParser(ParameterList& p) :
-    plist(p), global_p(global), local_p(local), stop(false) {}
+    plist(p), global_p(global), local_p(local), stop(0) {}
 
   ParameterList& plist;
   mutable Parameters global, local;
   ParametersParser global_p, local_p;
-  mutable bool stop;
+  mutable unsigned stop;
 };
 
 /// \brief Implementation handler of the ALPS XML parser for the ParameterList class

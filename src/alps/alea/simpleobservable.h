@@ -101,7 +101,7 @@ public:
     
     
   void operator<<(const T& x) { 
-    if (size(x) == 0)
+    if (alps::size(x) == 0)
       boost::throw_exception(std::runtime_error("Cannot save a measurement of size 0."));
     b_ << x;
   }

@@ -69,7 +69,7 @@ inline void read_vector_resize (std::istream& in, CONTAINER& v)
   std::vector<value_type> tmp;
   std::copy(std::istream_iterator<value_type>(in),std::istream_iterator<value_type>(),std::back_inserter(tmp));
   v.resize(tmp.size());
-  for (std::size_t i=0;i<size(v);++i)
+  for (std::size_t i=0;i<alps::size(v);++i)
     v[i]=tmp[i];
 }
 

@@ -134,9 +134,9 @@ int main(int argc, char** argv)
   std::cout << "\nsin(a): \t" << sin(a) << "\n";
   std::cout << "\ncos(a): \t" << cos(a) << "\n";
   std::cout << "\ntan(a): \t" << tan(a) << "\n";
-  std::cout << "\nasin(a): \t" << asin(a) << "\n";
-  std::cout << "\nacos(a): \t" << acos(a) << "\n";
-  std::cout << "\natan(a): \t" << atan(a) << "\n";
+  // std::cout << "\nasin(a): \t" << asin(a) << "\n";
+  // std::cout << "\nacos(a): \t" << acos(a) << "\n";
+  // std::cout << "\natan(a): \t" << atan(a) << "\n";
   std::cout << "\nsinh(a): \t" << sinh(a) << "\n";
   std::cout << "\ncosh(a): \t" << cosh(a) << "\n";
   std::cout << "\ntanh(a): \t" << tanh(a) << "\n";
@@ -251,9 +251,9 @@ int main(int argc, char** argv)
   std::cout << "\nsin(A): \t" << sin(vecA) << "\n";
   std::cout << "\ncos(A): \t" << cos(vecA) << "\n";
   std::cout << "\ntan(A): \t" << tan(vecA) << "\n";
-  std::cout << "\nasin(A): \t" << asin(vecA) << "\n";
-  std::cout << "\nacos(A): \t" << acos(vecA) << "\n";
-  std::cout << "\natan(A): \t" << atan(vecA) << "\n";
+  // std::cout << "\nasin(A): \t" << asin(vecA) << "\n";
+  // std::cout << "\nacos(A): \t" << acos(vecA) << "\n";
+  // std::cout << "\natan(A): \t" << atan(vecA) << "\n";
   std::cout << "\nsinh(A): \t" << sinh(vecA) << "\n";
   std::cout << "\ncosh(A): \t" << cosh(vecA) << "\n";
   std::cout << "\ntanh(A): \t" << tanh(vecA) << "\n";

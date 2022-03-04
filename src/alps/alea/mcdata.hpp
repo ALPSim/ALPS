@@ -1133,13 +1133,15 @@ namespace alps {
 
         ALPS_ALEA_MCDATA_IMPLEMENT_FUNCTION(sin, abs(cos(rhs.mean()) * rhs.error()))
         ALPS_ALEA_MCDATA_IMPLEMENT_FUNCTION(cos, abs(-sin(rhs.mean()) * rhs.error()))
-        ALPS_ALEA_MCDATA_IMPLEMENT_FUNCTION(tan, abs(1. / (cos(rhs.mean()) * cos(rhs.mean())) * rhs.error()))
+        // ALPS_ALEA_MCDATA_IMPLEMENT_FUNCTION(tan, abs(1. / (cos(rhs.mean()) * cos(rhs.mean())) * rhs.error())) // does not compile with gcc-11
+        ALPS_ALEA_MCDATA_IMPLEMENT_FUNCTION(tan, abs((cos(rhs.mean()) * cos(rhs.mean()) + sin(rhs.mean()) * sin(rhs.mean())) / (cos(rhs.mean()) * cos(rhs.mean())) * rhs.error())) // workaround for gcc-11
         ALPS_ALEA_MCDATA_IMPLEMENT_FUNCTION(sinh, abs(cosh(rhs.mean()) * rhs.error()))
         ALPS_ALEA_MCDATA_IMPLEMENT_FUNCTION(cosh, abs(sinh(rhs.mean()) * rhs.error()))
-        ALPS_ALEA_MCDATA_IMPLEMENT_FUNCTION(tanh, abs(1. / (cosh(rhs.mean()) * cosh(rhs.mean())) * rhs.error()))
-        ALPS_ALEA_MCDATA_IMPLEMENT_FUNCTION(asin, abs(1. / sqrt(1. - rhs.mean() * rhs.mean()) * rhs.error()))
-        ALPS_ALEA_MCDATA_IMPLEMENT_FUNCTION(acos, abs(-1. / sqrt(1. - rhs.mean() * rhs.mean()) * rhs.error()));
-        ALPS_ALEA_MCDATA_IMPLEMENT_FUNCTION(atan, abs(1. / (1. + rhs.mean() * rhs.mean()) * rhs.error()));
+        // ALPS_ALEA_MCDATA_IMPLEMENT_FUNCTION(tanh, abs(1. / (cosh(rhs.mean()) * cosh(rhs.mean())) * rhs.error())) // does not compile with gcc-11
+        ALPS_ALEA_MCDATA_IMPLEMENT_FUNCTION(tanh, abs((cosh(rhs.mean()) * cosh(rhs.mean()) - sinh(rhs.mean()) * sinh(rhs.mean())) / (cosh(rhs.mean()) * cosh(rhs.mean())) * rhs.error())) // workaround for gcc-11
+        // ALPS_ALEA_MCDATA_IMPLEMENT_FUNCTION(asin, abs(1. / sqrt(1. - rhs.mean() * rhs.mean()) * rhs.error())) // does not compile with gcc-11
+        // ALPS_ALEA_MCDATA_IMPLEMENT_FUNCTION(acos, abs(-1. / sqrt(1. - rhs.mean() * rhs.mean()) * rhs.error())); // does not compile with gcc-11
+        // ALPS_ALEA_MCDATA_IMPLEMENT_FUNCTION(atan, abs(1. / (1. + rhs.mean() * rhs.mean()) * rhs.error())); // does not compile with gcc-11
 // asinh, aconsh and atanh are not part of C++03 standard
 //        ALPS_ALEA_MCDATA_IMPLEMENT_FUNCTION(asinh, abs(1. / sqrt(rhs.mean() * rhs.mean() + 1.) * rhs.error()));
 //        ALPS_ALEA_MCDATA_IMPLEMENT_FUNCTION(acosh, abs(1. / sqrt(rhs.mean() * rhs.mean() - 1.) * rhs.error()));

@@ -154,7 +154,7 @@ void NoBinning<T>::operator<<(const T& x)
     resize_same_as(sum2_,x);
   }
 
-  if(size(x)!=size(sum_))
+  if(alps::size(x)!=alps::size(sum_))
     boost::throw_exception(std::runtime_error("Size of argument does not match in NoBinning<T>::add"));
 
   value_type y=x*x;

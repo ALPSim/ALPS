@@ -12,10 +12,10 @@ childs:  23
        [[1, 2],
         [3, 4]]], dtype=int32)
 /tuple:  array([1, 2, 3], dtype=int32)
-/dict:  [('1', 1), ('4', {'a': array([1, 2, 3]), '(2+3j)': 'foo'}), ('list', array([1, 2, 3], dtype=int32)), ('numpy', array([1, 2, 3])), ('numpycpx', array([ 1.1+1.j,  0.0+2.j,  3.5+0.j])), ('scalar', 1), ('string', 'str')]
+/dict:  [('1', 1), ('4', {'a': array([1, 2, 3]), '(2+3j)': 'foo'}), ('list', array([1, 2, 3], dtype=int32)), ('numpy', array([1, 2, 3])), ('numpycpx', array([1.1+1.j, 0. +2.j, 3.5+0.j])), ('scalar', 1), ('string', 'str')]
 /numpy:  array([1, 2, 3])
-/numpy2:  array([ 1.1,  2. ,  3.5])
-/numpy3:  array([ 1.1+1.j,  0.0+2.j,  3.5+0.j])
+/numpy2:  array([1.1, 2. , 3.5])
+/numpy3:  array([1.1+1.j, 0. +2.j, 3.5+0.j])
 /numpyel:  1
 /numpyel2:  1.1
 /numpyel3:  (1.1+1j)
