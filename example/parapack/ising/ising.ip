@@ -12,20 +12,3 @@ ALGORITHM = "ising"
 { T = 2; }
 { T = 1.8; }
 { T = 1.6; }
-
-ALGORITHM = "ising; exchange"
-
-NUM_REPLICAS = 4
-T_MIN = 2
-T_MAX = 4
-
-TEMPERATURE_DISTRIBUTION_TYPE = 2
-OPTIMIZE_TEMPERATURE = 1
-
-{
-RANDOM_EXCHANGE = 1
-}
-
-{
-RANDOM_EXCHANGE = 0
-}

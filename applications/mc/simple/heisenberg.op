@@ -37,7 +37,6 @@ Energy^2: 11.6833 +/- 0.237; tau = 0.161
     bin #4   : 512      entries: error = 0.243011
     bin #5   : 256      entries: error = 0.23069
     bin #6   : 128      entries: error = 0.237024
-Inverse Temperature: 0.5 +/- 0
 Magnetization Density Z: -0.0014035 +/- 0.00378; tau = 0.461
     bin #1   : 4096     entries: error = 0.00272521
     bin #2   : 2048     entries: error = 0.00323536
@@ -75,7 +74,6 @@ Magnetization Density^4: 0.0118512 +/- 0.000335; tau = 0.237
     bin #6   : 128      entries: error = 0.00033474
 Number of Sites: 16 +/- 0
 Specific Heat: 0.0822924 +/- 0.00175
-Temperature: 2 +/- 0
 [input parameters]
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
@@ -115,7 +113,6 @@ Energy^2: 13.0679 +/- 0.25; tau = 0.145
     bin #4   : 512      entries: error = 0.264709
     bin #5   : 256      entries: error = 0.257225
     bin #6   : 128      entries: error = 0.249599
-Inverse Temperature: 0.555556 +/- 0
 Magnetization Density Z: -0.00196423 +/- 0.00397; tau = 0.514
     bin #1   : 4096     entries: error = 0.002785
     bin #2   : 2048     entries: error = 0.00334971
@@ -153,7 +150,6 @@ Magnetization Density^4: 0.0126947 +/- 0.000358; tau = 0.227
     bin #6   : 128      entries: error = 0.000357857
 Number of Sites: 16 +/- 0
 Specific Heat: 0.0985324 +/- 0.00212
-Temperature: 1.8 +/- 0
 [input parameters]
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
@@ -193,7 +189,6 @@ Energy^2: 15.2667 +/- 0.303; tau = 0.273
     bin #4   : 512      entries: error = 0.30633
     bin #5   : 256      entries: error = 0.307032
     bin #6   : 128      entries: error = 0.30256
-Inverse Temperature: 0.625 +/- 0
 Magnetization Density Z: -0.00138146 +/- 0.00432; tau = 0.682
     bin #1   : 4096     entries: error = 0.00280836
     bin #2   : 2048     entries: error = 0.00342341
@@ -231,4 +226,3 @@ Magnetization Density^4: 0.0139643 +/- 0.000424; tau = 0.316
     bin #6   : 128      entries: error = 0.000424371
 Number of Sites: 16 +/- 0
 Specific Heat: 0.122699 +/- 0.00272
-Temperature: 1.6 +/- 0

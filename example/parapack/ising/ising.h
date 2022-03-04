@@ -150,6 +150,8 @@ public:
         obs.addObservable(binder);
       }
     }
+    if (obs.has("Inverse Temperature")) obs.erase("Inverse Temperature");
+    if (obs.has("Temperature")) obs.erase("Temperature");
   }
 };
 

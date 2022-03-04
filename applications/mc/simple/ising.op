@@ -36,7 +36,6 @@ Energy^2: 66.3281 +/- 0.967; tau = 0.25
     bin #4   : 512      entries: error = 0.912493
     bin #5   : 256      entries: error = 0.904217
     bin #6   : 128      entries: error = 0.966638
-Inverse Temperature: 0.5 +/- 0
 Magnetization Density: 0.00598145 +/- 0.0124; tau = 1.44 WARNING: ERRORS NOT CONVERGED!!!
     bin #1   : 4096     entries: error = 0.00628168
     bin #2   : 2048     entries: error = 0.00790767
@@ -60,7 +59,6 @@ Magnetization Density^4: 0.0660588 +/- 0.00287; tau = 0.266
     bin #6   : 128      entries: error = 0.00287155
 Number of Sites: 16 +/- 0
 Specific Heat: 0.191992 +/- 0.00475
-Temperature: 2 +/- 0
 [input parameters]
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
@@ -99,7 +97,6 @@ Energy^2: 77.0352 +/- 1.12; tau = 0.355
     bin #4   : 512      entries: error = 1.07864
     bin #5   : 256      entries: error = 1.06369
     bin #6   : 128      entries: error = 1.12343
-Inverse Temperature: 0.555556 +/- 0
 Magnetization Density: 0.0078125 +/- 0.0147; tau = 1.79 WARNING: ERRORS NOT CONVERGED!!!
     bin #1   : 4096     entries: error = 0.00685435
     bin #2   : 2048     entries: error = 0.00887069
@@ -123,7 +120,6 @@ Magnetization Density^4: 0.0885216 +/- 0.00385; tau = 0.401
     bin #6   : 128      entries: error = 0.0038547
 Number of Sites: 16 +/- 0
 Specific Heat: 0.238557 +/- 0.00526
-Temperature: 1.8 +/- 0
 [input parameters]
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
@@ -162,7 +158,6 @@ Energy^2: 89.3125 +/- 1.4; tau = 0.672 WARNING: check error convergence
     bin #4   : 512      entries: error = 1.26741
     bin #5   : 256      entries: error = 1.27719
     bin #6   : 128      entries: error = 1.39945
-Inverse Temperature: 0.625 +/- 0
 Magnetization Density: -0.00784302 +/- 0.0186; tau = 2.65 WARNING: ERRORS NOT CONVERGED!!!
     bin #1   : 4096     entries: error = 0.00741305
     bin #2   : 2048     entries: error = 0.00976475
@@ -186,4 +181,3 @@ Magnetization Density^4: 0.11879 +/- 0.00618; tau = 1.01 WARNING: ERRORS NOT CON
     bin #6   : 128      entries: error = 0.00618403
 Number of Sites: 16 +/- 0
 Specific Heat: 0.276209 +/- 0.00679 WARNING: check error convergence
-Temperature: 1.6 +/- 0

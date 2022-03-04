@@ -28,7 +28,6 @@ Energy^2: 67.1133 +/- 0.803; tau = -0.00181
     bin #4   : 512      entries: error = 0.863942
     bin #5   : 256      entries: error = 0.875367
     bin #6   : 128      entries: error = 0.803408
-Inverse Temperature: 0.5 +/- 0
 Magnetization: 0.224121 +/- 0.204; tau = 1.47 WARNING: ERRORS NOT CONVERGED!!!
     bin #1   : 4096     entries: error = 0.102898
     bin #2   : 2048     entries: error = 0.133003
@@ -52,7 +51,6 @@ Magnetization^4: 4697.92 +/- 223; tau = 0.437
     bin #6   : 128      entries: error = 223.283
 Number of Sites: 16 +/- 0
 Specific Heat: 0.195909 +/- 0.00455
-Temperature: 2 +/- 0
 [input parameters]
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
@@ -83,7 +81,6 @@ Energy^2: 74.8008 +/- 1; tau = 0.209
     bin #4   : 512      entries: error = 0.997756
     bin #5   : 256      entries: error = 1.0106
     bin #6   : 128      entries: error = 1.00071
-Inverse Temperature: 0.555556 +/- 0
 Magnetization: 0.019043 +/- 0.245; tau = 2.11 WARNING: ERRORS NOT CONVERGED!!!
     bin #1   : 4096     entries: error = 0.107278
     bin #2   : 2048     entries: error = 0.140875
@@ -107,7 +104,6 @@ Magnetization^4: 5388.82 +/- 282; tau = 0.727 WARNING: check error convergence
     bin #6   : 128      entries: error = 282.117
 Number of Sites: 16 +/- 0
 Specific Heat: 0.228534 +/- 0.00507
-Temperature: 1.8 +/- 0
 [input parameters]
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
@@ -138,7 +134,6 @@ Energy^2: 89.2188 +/- 1.07; tau = 0.193
     bin #4   : 512      entries: error = 1.16537
     bin #5   : 256      entries: error = 1.13355
     bin #6   : 128      entries: error = 1.06669
-Inverse Temperature: 0.625 +/- 0
 Magnetization: -0.380371 +/- 0.295; tau = 2.68 WARNING: ERRORS NOT CONVERGED!!!
     bin #1   : 4096     entries: error = 0.117015
     bin #2   : 2048     entries: error = 0.156402
@@ -162,7 +157,6 @@ Magnetization^4: 7470.37 +/- 389; tau = 0.94 WARNING: check error convergence
     bin #6   : 128      entries: error = 388.661
 Number of Sites: 16 +/- 0
 Specific Heat: 0.274705 +/- 0.0066
-Temperature: 1.6 +/- 0
 [input parameters]
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
@@ -200,7 +194,6 @@ Energy^2: 67.1133 +/- 0.803; tau = -0.00181
     bin #4   : 512      entries: error = 0.863942
     bin #5   : 256      entries: error = 0.875367
     bin #6   : 128      entries: error = 0.803408
-Inverse Temperature: 0.5 +/- 0
 Magnetization: 0.224121 +/- 0.204; tau = 1.47 WARNING: ERRORS NOT CONVERGED!!!
     bin #1   : 4096     entries: error = 0.102898
     bin #2   : 2048     entries: error = 0.133003
@@ -224,7 +217,6 @@ Magnetization^4: 4697.92 +/- 223; tau = 0.437
     bin #6   : 128      entries: error = 223.283
 Number of Sites: 16 +/- 0
 Specific Heat: 0.195909 +/- 0.00455
-Temperature: 2 +/- 0
 [[replica 1]]
 Binder Ratio of Magnetization: 0.408416 +/- 0.00664 WARNING: ERRORS NOT CONVERGED!!!
 Energy: -8.01172 +/- 0.0676; tau = 0.312
@@ -241,7 +233,6 @@ Energy^2: 75.7109 +/- 1.13; tau = 0.402 WARNING: check error convergence
     bin #4   : 512      entries: error = 1.0439
     bin #5   : 256      entries: error = 1.06092
     bin #6   : 128      entries: error = 1.1311
-Inverse Temperature: 0.555556 +/- 0
 Magnetization: 0.128906 +/- 0.249; tau = 2.13 WARNING: ERRORS NOT CONVERGED!!!
     bin #1   : 4096     entries: error = 0.108323
     bin #2   : 2048     entries: error = 0.142403
@@ -265,7 +256,6 @@ Magnetization^4: 5649.97 +/- 336; tau = 1.1 WARNING: ERRORS NOT CONVERGED!!!
     bin #6   : 128      entries: error = 335.719
 Number of Sites: 16 +/- 0
 Specific Heat: 0.222374 +/- 0.00492 WARNING: check error convergence
-Temperature: 1.8 +/- 0
 [[replica 2]]
 Binder Ratio of Magnetization: 0.437238 +/- 0.00822 WARNING: check error convergence
 Energy: -8.91113 +/- 0.0674; tau = 0.326
@@ -282,7 +272,6 @@ Energy^2: 90.6758 +/- 1.25; tau = 0.42
     bin #4   : 512      entries: error = 1.21644
     bin #5   : 256      entries: error = 1.19328
     bin #6   : 128      entries: error = 1.24634
-Inverse Temperature: 0.625 +/- 0
 Magnetization: -0.950195 +/- 0.31; tau = 2.83 WARNING: ERRORS NOT CONVERGED!!!
     bin #1   : 4096     entries: error = 0.120001
     bin #2   : 2048     entries: error = 0.16088
@@ -306,4 +295,3 @@ Magnetization^4: 8191.02 +/- 412; tau = 0.962 WARNING: check error convergence
     bin #6   : 128      entries: error = 411.83
 Number of Sites: 16 +/- 0
 Specific Heat: 0.275196 +/- 0.00673
-Temperature: 1.6 +/- 0

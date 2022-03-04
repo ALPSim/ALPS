@@ -3,8 +3,8 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-find_program(cmd_path ${cmd} ${binarydir} ${dllexedir})
-find_program(mpi_cmd_path ${mpirun} ${binarydir} ${dllexedir})
+find_program(cmd_path ${cmd} ${binarydir} ${dllexedir} NO_SYSTEM_ENVIRONMENT_PATH)
+find_program(mpi_cmd_path ${mpirun} ${binarydir} ${dllexedir} NO_SYSTEM_ENVIRONMENT_PATH)
 
 find_file(input_path ${input}.input-${procs} ${binarydir} ${sourcedir})
 if(NOT input_path)
