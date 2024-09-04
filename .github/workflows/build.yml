@@ -23,6 +23,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          pip install numpy scipy
           sudo apt install gcc-${{ matrix.plat.gcc_version }} g++-${{ matrix.plat.gcc_version }}
           sudo apt install liblapack-dev libblas-dev libopenmpi-dev libhdf5-serial-dev
           wget https://archives.boost.io/release/1.${{ matrix.plat.boost_version }}.0/source/boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
