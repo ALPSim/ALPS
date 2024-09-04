@@ -10,7 +10,7 @@ jobs:
       matrix:
         # macos-13 is an intel runner, macos-14 is apple silicon
         plat: 
-        - { os: ubuntu-latest, target: "", gcc_version: 10, py_version: "3.9", boost_version: 63}
+        - { os: ubuntu-latest, target: "", gcc_version: 10, py_version: "3.9", boost_version: 68}
         - { os: ubuntu-latest, target: "", gcc_version: 11, py_version: "3.10", boost_version: 81}
         - { os: ubuntu-latest, target: "", gcc_version: 12, py_version: "3.10", boost_version: 81}
 
