@@ -10,7 +10,7 @@ jobs:
       matrix:
         # macos-13 is an intel runner, macos-14 is apple silicon
         plat: 
-        - { os: ubuntu-latest, target: "", gcc_version: 10, py_version: "3.9", boost_version: 68}
+        - { os: ubuntu-latest, target: "", gcc_version: 10, py_version: "3.9", boost_version: 76}
         - { os: ubuntu-latest, target: "", gcc_version: 11, py_version: "3.10", boost_version: 81}
         - { os: ubuntu-latest, target: "", gcc_version: 12, py_version: "3.10", boost_version: 81}
 
@@ -34,6 +34,6 @@ jobs:
           CXX:  g++-${{ matrix.plat.gcc_version }}
         run: |
           cmake -S $GITHUB_WORKSPACE -B build -DBoost_ROOT_DIR=`pwd`/boost_1_${{ matrix.plat.boost_version }}_0 -DCMAKE_CXX_FLAGS="-std=c++14 -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF"
-          cmake --build build -j 4
-          cmake --build build -j 4 -t test
+          cmake --build build -j 2
+          cmake --build build -j 2 -t test
 
