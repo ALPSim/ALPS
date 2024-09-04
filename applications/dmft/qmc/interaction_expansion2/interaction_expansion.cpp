@@ -87,7 +87,7 @@ pert_hist(max_order)
   update_time=0;
   thermalized=therm_steps==0?true:false;
   if(!parms.defined("ATOMIC")) {
-    alps::hdf5::archive ar(parms["INFILE"],"r");
+    alps::hdf5::archive ar(parms["INFILE"].cast<std::string>(),"r");
     if(parms.defined("DMFT_FRAMEWORK") && parms["DMFT_FRAMEWORK"].cast<bool>()){
       //read in as green_function
 //      std::cerr << "Reading G0 ...";

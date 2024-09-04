@@ -80,7 +80,7 @@ void compute_greens_functions(const alps::results_type<HubbardInteractionExpansi
   matsubara_green_function_t bare_green_matsubara(n_matsubara, n_site, n_flavors);
   std::vector<double> densities(n_flavors);
   {
-    alps::hdf5::archive ar(parms["INFILE"],"r");
+    alps::hdf5::archive ar(parms["INFILE"].cast<std::string>(),"r");
     if(parms.defined("DMFT_FRAMEWORK") && static_cast<bool>(parms["DMFT_FRAMEWORK"])){
       //read in as green_function
       bare_green_matsubara.read_hdf5(ar,"/G0");
