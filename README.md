@@ -10,6 +10,7 @@ This is the legacy reposiory. For more information check [README.txt](README.txt
   - CMake > 2.8
   - Boost sources >= 1.68
   - BLAS/LAPACK
+  - HDF5
   - MPI
   - Python >= 3.9 (earlier versions maybe also work but unsupported)
   - C++ compiler (build has been tested on GCC 10.5, GCC 11.4, and GCC 12.3)
