@@ -10,9 +10,12 @@ jobs:
       matrix:
         # macos-13 is an intel runner, macos-14 is apple silicon
         plat: 
-        - { os: ubuntu-latest, target: "", gcc_version: 10, py_version: "3.9", boost_version: 76}
-        - { os: ubuntu-latest, target: "", gcc_version: 11, py_version: "3.10", boost_version: 81}
-        - { os: ubuntu-latest, target: "", gcc_version: 12, py_version: "3.10", boost_version: 81}
+        - { os: ubuntu-latest, target: "", c_compiler: gcc, cxx_compiler: g++, c_version: 10, py_version: "3.9", boost_version: 76}
+        - { os: ubuntu-latest, target: "", c_compiler: gcc, cxx_compiler: g++, c_version: 11, py_version: "3.10", boost_version: 81}
+        - { os: ubuntu-latest, target: "", c_compiler: gcc, cxx_compiler: g++, c_version: 12, py_version: "3.10", boost_version: 81}
+        - { os: ubuntu-latest, target: "", c_compiler: clang, cxx_compiler: clang++, c_version: 13, py_version: "3.10", boost_version: 81}
+        - { os: ubuntu-latest, target: "", c_compiler: clang, cxx_compiler: clang++, c_version: 14, py_version: "3.10", boost_version: 81}
+        - { os: ubuntu-latest, target: "", c_compiler: clang, cxx_compiler: clang++, c_version: 15, py_version: "3.10", boost_version: 81}
 
     steps:
       - uses: actions/checkout@v4
@@ -24,14 +27,14 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install numpy==1.26.4 scipy
-          sudo apt install gcc-${{ matrix.plat.gcc_version }} g++-${{ matrix.plat.gcc_version }}
+          sudo apt install ${{ matrix.plat.c_compiler }}-${{ matrix.plat.c_version }}  ${{ matrix.plat.cxx_compiler }}-${{ matrix.plat.c_version }} 
           sudo apt install liblapack-dev libblas-dev libopenmpi-dev libhdf5-serial-dev
           wget https://archives.boost.io/release/1.${{ matrix.plat.boost_version }}.0/source/boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
           tar -xzf boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
       - name: Build ALPS
         env:
-          CC:   gcc-${{ matrix.plat.gcc_version }}
-          CXX:  g++-${{ matrix.plat.gcc_version }}
+          CC:  ${{ matrix.plat.c_compiler }}-${{ matrix.plat.c_version }}
+          CXX: ${{ matrix.plat.cxx_compiler }}-${{ matrix.plat.c_version }}
         run: |
           cmake -S $GITHUB_WORKSPACE -B build -DBoost_ROOT_DIR=`pwd`/boost_1_${{ matrix.plat.boost_version }}_0 -DCMAKE_CXX_FLAGS="-std=c++14 -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF"
           cmake --build build -j 2
