@@ -58,7 +58,7 @@ else (NOT PYTHON_INTERPRETER AND NOT PYTHON_VISTRAILS_OVERRIDE)
   set(PYTHON_FOUND TRUE)
 endif (NOT PYTHON_INTERPRETER AND NOT PYTHON_VISTRAILS_OVERRIDE)
 
-set(PYTHON_MINIMAL_VERSION 2.6)
+set(PYTHON_MINIMAL_VERSION 3.9)
 
 if (WIN32 AND NOT ALPS_USE_VISTRAILS AND NOT PYTHON_VISTRAILS_OVERRIDE)
   MESSAGE (STATUS "Looking for PythonLibs")
@@ -90,16 +90,21 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
   # Check the interpreter and its version
   #
   EXEC_PYTHON_SCRIPT ("import sys, string; print(sys.version.split()[0])" PYTHON_VERSION)
-  STRING(COMPARE GREATER ${PYTHON_MINIMAL_VERSION} ${PYTHON_VERSION} PYTHON_VERSION_NOT_OK)
-  IF (PYTHON_VERSION_NOT_OK)
+#  STRING(COMPARE GREATER ${PYTHON_MINIMAL_VERSION} ${PYTHON_VERSION} PYTHON_VERSION_NOT_OK)
+#  IF (PYTHON_VERSION_NOT_OK)
+  IF( ${PYTHON_VERSION}  VERSION_LESS  ${PYTHON_MINIMAL_VERSION} )
     MESSAGE(WARNING "Python intepreter version is ${PYTHON_VERSION} . It should be >= ${PYTHON_MINIMAL_VERSION}")
     SET(PYTHON_FOUND FALSE)
-  ENDIF (PYTHON_VERSION_NOT_OK)
+  ENDIF ()
   EXEC_PYTHON_SCRIPT("import sys; print('{}{}'.format(sys.version_info.major,sys.version_info.minor))" PYVER) # e.g. 27, 38
 ENDIF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
 
 IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
+  if(PYTHON_VERSION VERSION_LESS "3.11")
   EXEC_PYTHON_SCRIPT ("import distutils " nulle) # check that distutils is there...
+  else()
+  EXEC_PYTHON_SCRIPT ("import sysconfig " nulle) # check that distutils is there...
+  endif()
   EXEC_PYTHON_SCRIPT ("import numpy" nulle) # check that numpy is there...
   #EXEC_PYTHON_SCRIPT ("import scipy" nulle) # check that scipy is there...
   #EXEC_PYTHON_SCRIPT ("import tables" nulle) # check that tables is there...
@@ -119,7 +124,11 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
   #
   # Check for Python include path
   #
+  if(PYTHON_VERSION VERSION_LESS "3.11")
   EXEC_PYTHON_SCRIPT ("import distutils ; from distutils.sysconfig import * ; print(distutils.sysconfig.get_python_inc())"  PYTHON_INCLUDE_DIRS )
+  else()
+  EXEC_PYTHON_SCRIPT ("import sysconfig ; print(sysconfig.get_path('include'))"  PYTHON_INCLUDE_DIRS )
+  endif()
   message(STATUS "PYTHON_INCLUDE_DIRS =  ${PYTHON_INCLUDE_DIRS}" )
   mark_as_advanced(PYTHON_INCLUDE_DIRS)
   FIND_PATH(TEST_PYTHON_INCLUDE patchlevel.h PATHS ${PYTHON_INCLUDE_DIRS} NO_DEFAULT_PATH)
@@ -137,8 +146,13 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
   #
   # Check for site packages
   #
+  if(PYTHON_VERSION VERSION_LESS "3.11")
   EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import * ;print(get_python_lib(0,0))"
               PYTHON_SITE_PKG)
+  else()
+  EXEC_PYTHON_SCRIPT ("import sysconfig ; print(sysconfig.get_path('purelib'))"
+              PYTHON_SITE_PKG)
+  endif()
   MESSAGE(STATUS "PYTHON_SITE_PKG = ${PYTHON_SITE_PKG}" )
   mark_as_advanced(PYTHON_SITE_PKG)
 
@@ -147,10 +161,18 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
       # Check for Python library path
       #
       #EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import * ;print string.join(get_config_vars('VERSION'))"  PYTHON_VERSION_MAJOR_MINOR)
-      EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import *; print(' '.join(get_config_vars('LIBPL')))" PYTHON_LIBRARY_BASE_PATH)
-      # this is the static libpython which is not always correct. it is better to give precedence to the shared one.
-      # EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import *; print(get_config_vars('LIBRARY')[0])" PYTHON_LIBRARY_BASE_FILE)
-      EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import *; print('libpython{}'.format(' '.join(get_config_vars('VERSION'))))" PYTHON_LIBRARY_BASE_FILE)
+      if(PYTHON_VERSION VERSION_LESS "3.11")
+        EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import *; print(' '.join(get_config_vars('LIBPL')))" PYTHON_LIBRARY_BASE_PATH)
+        # this is the static libpython which is not always correct. it is better to give precedence to the shared one.
+        # EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import *; print(get_config_vars('LIBRARY')[0])" PYTHON_LIBRARY_BASE_FILE)
+        EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import *; print('libpython{}'.format(' '.join(get_config_vars('VERSION'))))" PYTHON_LIBRARY_BASE_FILE)
+      else()
+        
+        EXEC_PYTHON_SCRIPT ("import string; from sysconfig import *; print(' '.join(get_config_vars('LIBPL')))" PYTHON_LIBRARY_BASE_PATH)
+        # this is the static libpython which is not always correct. it is better to give precedence to the shared one.
+        # EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import *; print(get_config_vars('LIBRARY')[0])" PYTHON_LIBRARY_BASE_FILE)
+        EXEC_PYTHON_SCRIPT ("from sysconfig import *; print('libpython{}'.format(' '.join(get_config_vars('VERSION'))))" PYTHON_LIBRARY_BASE_FILE)
+      endif()
       IF(BUILD_SHARED_LIBS)
         FIND_FILE(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}.so" PATHS ${PYTHON_LIBRARY_BASE_PATH})
         IF(NOT PYTHON_LIBRARY)
@@ -180,8 +202,13 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
       #
       # libraries which must be linked in when embedding
       #
-      EXEC_PYTHON_SCRIPT ("${PYFUNC_NORMALIZE_FLAGS}from distutils.sysconfig import * ;print( normalize_flags( str(get_config_var('LOCALMODLIBS')) + ' ' + str(get_config_var('LIBS')) + ' ' + str(get_config_var('LDFLAGS')) ))"
+      if(PYTHON_VERSION VERSION_LESS "3.11")
+        EXEC_PYTHON_SCRIPT ("${PYFUNC_NORMALIZE_FLAGS}from distutils.sysconfig import * ;print( normalize_flags( str(get_config_var('LOCALMODLIBS')) + ' ' + str(get_config_var('LIBS')) + ' ' + str(get_config_var('LDFLAGS')) ))"
                   PYTHON_EXTRA_LIBS)
+      else()
+        EXEC_PYTHON_SCRIPT ("${PYFUNC_NORMALIZE_FLAGS}from sysconfig import * ;print( normalize_flags( str(get_config_var('LOCALMODLIBS')) + ' ' + str(get_config_var('LIBS')) + ' ' + str(get_config_var('LDFLAGS')) ))"
+                  PYTHON_EXTRA_LIBS)
+      endif()
       MESSAGE(STATUS "PYTHON_EXTRA_LIBS =${PYTHON_EXTRA_LIBS}" )
       mark_as_advanced(PYTHON_EXTRA_LIBS)
 
@@ -189,8 +216,13 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
       # linking flags needed when embedding (building a shared lib)
       # To BE RETESTED
       #
-      EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import *;print(get_config_var('LINKFORSHARED'))"
+      if(PYTHON_VERSION VERSION_LESS "3.11")
+        EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import *;print(get_config_var('LINKFORSHARED'))"
                   PYTHON_LINK_FOR_SHARED)
+      else()
+        EXEC_PYTHON_SCRIPT ("from sysconfig import *;print(get_config_var('LINKFORSHARED'))"
+                  PYTHON_LINK_FOR_SHARED)
+     endif()
       MESSAGE(STATUS "PYTHON_LINK_FOR_SHARED =  ${PYTHON_LINK_FOR_SHARED}" )
       mark_as_advanced(PYTHON_LINK_FOR_SHARED)
     endif(NOT WIN32)
