@@ -102,8 +102,8 @@ void task::load() {
   if (on_memory()) boost::throw_exception(std::logic_error("task::load() task already loaded"));
   params_ = alps::params();
   clone_info_.clear();
-  boost::filesystem::path file_in = complete(boost::filesystem::path(file_in_str_), basedir_);
-  boost::filesystem::path file_out = complete(boost::filesystem::path(file_out_str_), basedir_);
+  boost::filesystem::path file_in = absolute(boost::filesystem::path(file_in_str_), basedir_);
+  boost::filesystem::path file_out = absolute(boost::filesystem::path(file_out_str_), basedir_);
   simulation_xml_handler handler(params_, clone_info_);
   XMLParser parser(handler);
   if (!exists(file_out)) {
@@ -140,7 +140,7 @@ void task::load() {
 
 void task::save(bool write_xml) const {
   if (!on_memory()) boost::throw_exception(std::logic_error("task not loaded"));
-  boost::filesystem::path file_out = complete(boost::filesystem::path(file_out_str_), basedir_);
+  boost::filesystem::path file_out = absolute(boost::filesystem::path(file_out_str_), basedir_);
   {
     filelock lock(file_out, /* lock_now = */ true, /* wait = */ 60);
     if (!lock.locked())
@@ -193,8 +193,8 @@ void task::check_parameter(bool write_xml) {
   // change in SEED : ignored
   // change in other parameters : throw away all the old clones
 
-  boost::filesystem::path file_in = complete(boost::filesystem::path(file_in_str_), basedir_);
-  boost::filesystem::path file_out = complete(boost::filesystem::path(file_out_str_), basedir_);
+  boost::filesystem::path file_in = absolute(boost::filesystem::path(file_in_str_), basedir_);
+  boost::filesystem::path file_out = absolute(boost::filesystem::path(file_out_str_), basedir_);
   if (exists(file_out)) {
     // loading parameters from *.in.xml
     alps::params params_in;

@@ -59,8 +59,8 @@ clone::clone(boost::filesystem::path const& basedir, dump_policy_t dump_policy,
   worker_ = ngs_parapack::worker_factory::make_worker(params_);
   if (!is_new) {
     bool exists = 
-      boost::filesystem::exists(complete(boost::filesystem::path(info_.dumpfile()), basedir_)) &&
-      boost::filesystem::exists(complete(boost::filesystem::path(info_.dumpfile_h5()), basedir_));
+      boost::filesystem::exists(absolute(boost::filesystem::path(info_.dumpfile()), basedir_)) &&
+      boost::filesystem::exists(absolute(boost::filesystem::path(info_.dumpfile_h5()), basedir_));
     if (exists) {
       this->load();
     } else {
@@ -106,7 +106,7 @@ clone_info const& clone::info() const { return info_; }
 
 void clone::load() {
   boost::filesystem::path dump_h5 =
-    complete(boost::filesystem::path(info_.dumpfile_h5()), basedir_);
+    absolute(boost::filesystem::path(info_.dumpfile_h5()), basedir_);
   bool workerdump = (dump_policy_ == dump_policy::All) ||
     (dump_policy_ == dump_policy::RunningOnly && info_.progress() < 1);
   #pragma omp critical (hdf5io)
@@ -119,7 +119,7 @@ void clone::load() {
 
 void clone::save() const{
   boost::filesystem::path dump_h5 =
-    complete(boost::filesystem::path(info_.dumpfile_h5()), basedir_);
+    absolute(boost::filesystem::path(info_.dumpfile_h5()), basedir_);
   bool workerdump = (dump_policy_ == dump_policy::All) ||
     (dump_policy_ == dump_policy::RunningOnly && info_.progress() < 1);
   #pragma omp critical (hdf5io)
@@ -190,7 +190,7 @@ clone_mpi::clone_mpi(boost::mpi::communicator const& ctrl, boost::mpi::communica
     worker_ = alps::ngs_parapack::worker_factory::make_worker(params_);
   if (!is_new) {
     bool exists = 
-      boost::filesystem::exists(complete(boost::filesystem::path(info_.dumpfile_h5()), basedir_));
+      boost::filesystem::exists(absolute(boost::filesystem::path(info_.dumpfile_h5()), basedir_));
     exists = boost::mpi::all_reduce(work_, exists, boost::mpi::bitwise_and<bool>());
     if (exists) {
       this->load();
@@ -323,7 +323,7 @@ clone_info const& clone_mpi::info() const { return info_; }
 
 void clone_mpi::load() {
   boost::filesystem::path dump_h5 =
-    complete(boost::filesystem::path(info_.dumpfile_h5()), basedir_);
+    absolute(boost::filesystem::path(info_.dumpfile_h5()), basedir_);
   bool workerdump = (dump_policy_ == dump_policy::All) ||
     (dump_policy_ == dump_policy::RunningOnly && info_.progress() < 1);
   broadcast(work_, workerdump, 0);
@@ -337,7 +337,7 @@ void clone_mpi::load() {
 
 void clone_mpi::save() const{
   boost::filesystem::path dump_h5 =
-    complete(boost::filesystem::path(info_.dumpfile_h5()), basedir_);
+    absolute(boost::filesystem::path(info_.dumpfile_h5()), basedir_);
   bool workerdump = (dump_policy_ == dump_policy::All) ||
     (dump_policy_ == dump_policy::RunningOnly && info_.progress() < 1);
   broadcast(work_, workerdump, 0);

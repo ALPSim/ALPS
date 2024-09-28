@@ -163,7 +163,7 @@ int evaluate(int argc, char **argv) {
     }
 
     BOOST_FOREACH(std::string const& file_str, opt.jobfiles) {
-      boost::filesystem::path file = complete(boost::filesystem::path(file_str)).normalize();
+      boost::filesystem::path file = absolute(boost::filesystem::path(file_str)).lexically_normal();
       if (!exists(file)) {
         std::cerr << "Error: file not found: " << file << std::endl;
         return 127;
@@ -178,8 +178,8 @@ int evaluate(int argc, char **argv) {
       int t = load_filename(file, file_in_str, file_out_str);
       if (t == 1) {
         // process all tasks
-        boost::filesystem::path file_in = complete(boost::filesystem::path(file_in_str), basedir);
-        boost::filesystem::path file_out = complete(boost::filesystem::path(file_out_str), basedir);
+        boost::filesystem::path file_in = absolute(boost::filesystem::path(file_in_str), basedir);
+        boost::filesystem::path file_out = absolute(boost::filesystem::path(file_out_str), basedir);
         std::string simname;
         load_tasks(file_in, file_out, basedir, simname, tasks, false, opt);
         std::cout << "  master input file  = " << file_in.string() << std::endl
@@ -452,7 +452,7 @@ int start_sgl(int argc, char** argv) {
 
   BOOST_FOREACH(std::string const& file_str, opt.jobfiles) {
     process_helper process;
-    boost::filesystem::path file = complete(boost::filesystem::path(file_str)).normalize();
+    boost::filesystem::path file = absolute(boost::filesystem::path(file_str)).lexically_normal();
     if (!exists(file)) {
       std::cerr << "Error: file not found: " << file << std::endl;
       return 127;
@@ -494,8 +494,8 @@ int start_sgl(int argc, char** argv) {
       std::cout << logger::header() << "starting evaluation on " << alps::hostname() << std::endl;
       int t = load_filename(file, file_in_str, file_out_str);
       if (t == 1) {
-        file_in = complete(boost::filesystem::path(file_in_str), basedir);
-        file_out = complete(boost::filesystem::path(file_out_str), basedir);
+        file_in = absolute(boost::filesystem::path(file_in_str), basedir);
+        file_out = absolute(boost::filesystem::path(file_out_str), basedir);
         std::string simname;
         load_tasks(file_in, file_out, basedir, simname, tasks, false, opt);
         std::cout << "  master input file  = " << file_in.string() << std::endl
@@ -526,9 +526,9 @@ int start_sgl(int argc, char** argv) {
       std::cerr << "invalid master file: " << file.string() << std::endl;
       process.halt();
     }
-    file_in = complete(boost::filesystem::path(file_in_str), basedir);
-    file_out = complete(boost::filesystem::path(file_out_str), basedir);
-    file_term = complete(boost::filesystem::path(regex_replace(file_out_str,
+    file_in = absolute(boost::filesystem::path(file_in_str), basedir);
+    file_out = absolute(boost::filesystem::path(file_out_str), basedir);
+    file_term = absolute(boost::filesystem::path(regex_replace(file_out_str,
                   boost::regex("\\.out\\.xml$"), ".term")), basedir);
 
     master_lock.set_file(file_out);
@@ -903,7 +903,7 @@ int start_mpi(int argc, char** argv) {
   BOOST_FOREACH(std::string const& file_str, opt.jobfiles) {
     process_helper_mpi
       process(world, world.size() * opt.threads_per_clone / num_total_threads);
-    boost::filesystem::path file = complete(boost::filesystem::path(file_str)).normalize();
+    boost::filesystem::path file = absolute(boost::filesystem::path(file_str)).lexically_normal();
     if (!exists(file)) {
       if (world.rank() == 0)
         std::cerr << "Error: file not found: " << file << std::endl;
@@ -937,8 +937,8 @@ int start_mpi(int argc, char** argv) {
         std::cout << logger::header() << "starting evaluation on " << alps::hostname() << std::endl;
         int t = load_filename(file, file_in_str, file_out_str);
         if (t == 1) {
-          file_in = complete(boost::filesystem::path(file_in_str), basedir);
-          file_out = complete(boost::filesystem::path(file_out_str), basedir);
+          file_in = absolute(boost::filesystem::path(file_in_str), basedir);
+          file_out = absolute(boost::filesystem::path(file_out_str), basedir);
           std::string simname;
           load_tasks(file_in, file_out, basedir, simname, tasks, true, opt);
           std::cout << "  master input file  = " << file_in.string() << std::endl
@@ -970,11 +970,11 @@ int start_mpi(int argc, char** argv) {
         std::cerr << "invalid master file: " << file.string() << std::endl;
         process.halt();
       }
-      file_in = complete(boost::filesystem::path(file_in_str), basedir);
-      file_out = complete(boost::filesystem::path(file_out_str), basedir);
-      file_term = complete(boost::filesystem::path(regex_replace(file_out_str,
+      file_in = absolute(boost::filesystem::path(file_in_str), basedir);
+      file_out = absolute(boost::filesystem::path(file_out_str), basedir);
+      file_term = absolute(boost::filesystem::path(regex_replace(file_out_str,
                     boost::regex("\\.out\\.xml$"), ".term")), basedir);
-      file_chp = complete(boost::filesystem::path(regex_replace(file_out_str,
+      file_chp = absolute(boost::filesystem::path(regex_replace(file_out_str,
                     boost::regex("\\.out\\.xml$"), ".checkpoints")), basedir);
 
       master_lock.set_file(file_out);
