@@ -194,9 +194,9 @@ try {
   if (outbase.size() >= 2 && outbase.substr(outbase.size()-1, outbase.size()) == "/")
     outbase.erase(outbase.size()-1, outbase.size());
   if (outbase.size() == 0 || outbase == ".")
-    outbase = boost::filesystem::path(inname).leaf().native_file_string();
+    outbase = boost::filesystem::path(inname).filename().string();
   if (boost::filesystem::is_directory(outbase))
-    outbase += '/' + boost::filesystem::path(inname).leaf().native_file_string();
+    outbase += '/' + boost::filesystem::path(inname).filename().string();
   if (!force && boost::filesystem::exists(outbase + ".out.xml")) {
     std::cerr << "Output files (" + outbase + ".out.xml, etc) exist.  "
               << "Please use '-f' option to force replacing input HDF5 files.\n"

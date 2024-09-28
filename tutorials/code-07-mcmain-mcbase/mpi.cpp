@@ -53,9 +53,9 @@ int main(int argc, char *argv[]) {
         alps::parameters_type<ising_sim>::type parameters;
         if (comm.rank() > 0)
             /* do nothing */ ;
-        else if (boost::filesystem::extension(options.input_file) == ".xml")
+        else if (boost::filesystem::path(options.input_file).extension().string() == ".xml")
             parameters = alps::make_parameters_from_xml(options.input_file);
-        else if (boost::filesystem::extension(options.input_file) == ".h5")
+        else if (boost::filesystem::path(options.input_file).extension().string() == ".h5")
             alps::hdf5::archive(options.input_file)["/parameters"] >> parameters;
         else
             parameters = alps::parameters_type<ising_sim>::type(options.input_file);

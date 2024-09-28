@@ -47,8 +47,8 @@ int main(int argc, char** argv) {
   std::vector<version_t> versions;
   alps::parapack::load_version(file, versions);
 
-  boost::filesystem::path file_in = complete(boost::filesystem::path(file_in_str), basedir);
-  boost::filesystem::path file_out = complete(boost::filesystem::path(file_out_str), basedir);
+  boost::filesystem::path file_in = absolute(boost::filesystem::path(file_in_str), basedir);
+  boost::filesystem::path file_out = absolute(boost::filesystem::path(file_out_str), basedir);
   std::string simname;
   std::vector<alps::task> tasks;
 

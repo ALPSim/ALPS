@@ -59,9 +59,9 @@ int main(int argc, char **argv) {
   for (int i = 1; i < argc; ++i) {
     std::string basename = regex_replace(std::string(argv[i]), boost::regex("\\.snap$"), "");
     boost::filesystem::path snapfile =
-      complete(boost::filesystem::path(basename + ".snap")).normalize();
+      absolute(boost::filesystem::path(basename + ".snap")).lexically_normal();
     boost::filesystem::path vtkfile =
-      complete(boost::filesystem::path(basename + ".vtk")).normalize();
+      absolute(boost::filesystem::path(basename + ".vtk")).lexically_normal();
     if (!exists(snapfile)) {
       std::cerr << "Warning: " << snapfile << " not found. Skipped.\n";
       continue;

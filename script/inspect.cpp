@@ -224,7 +224,7 @@ namespace
   bool visit_predicate( const path & pth )
   {
     string local( boost::inspect::relative_to( pth, search_root_path() ) );
-    string leaf( pth.leaf().string() );
+    string leaf( pth.filename().string() );
     if (leaf[0] == '.')  // ignore hidden by convention directories such as
       return false;      //  .htaccess, .git, .svn, .bzr, .DS_Store, etc.
      
@@ -273,7 +273,7 @@ namespace
   bool find_signature( const path & file_path,
     const boost::inspect::string_set & signatures )
   {
-    string name( file_path.leaf().string() );
+    string name( file_path.filename().string() );
     if ( signatures.find( name ) == signatures.end() )
     {
       string::size_type pos( name.rfind( '.' ) );
@@ -335,7 +335,7 @@ namespace
           visit_all<DirectoryIterator>( cur_lib, *itr, insps );
         }
       }
-      else if (itr->path().leaf().string()[0] != '.') // ignore if hidden
+      else if (itr->path().filename().string()[0] != '.') // ignore if hidden
       {
         ++file_count;
         string content;
@@ -479,7 +479,7 @@ namespace
             {
               std::cout << "\n  " << this_rel_path.parent_path().string() << '/';
             }
-            std::cout << "\n    " << this_rel_path.leaf() << ':';
+            std::cout << "\n    " << this_rel_path.filename() << ':';
           }
         }
         if ( current.library != itr->library
@@ -955,10 +955,10 @@ int cpp_main( int argc_param, char * argv_param[] )
 
   //// perform the actual inspection, using the requested type of iteration
   //if ( cvs )
-  //  visit_all<hack::cvs_iterator>( search_root.leaf().string(),
+  //  visit_all<hack::cvs_iterator>( search_root.filename().string(),
   //    search_root, inspectors );
   //else
-    visit_all<fs::directory_iterator>( search_root.leaf().string(),
+    visit_all<fs::directory_iterator>( search_root.filename().string(),
       search_root, inspectors );
 
   // close

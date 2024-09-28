@@ -144,12 +144,12 @@ void Index::exec(fs::path xmlPath) {
         int t = alps::parapack::load_filename(xmlPath, file_in_str, file_out_str);
         if (t == 1) {
           std::vector<alps::task> tasks;
-          fs::path file_in = complete(fs::path(file_in_str), basedir);
-          fs::path file_out = complete(fs::path(file_out_str), basedir);
+          fs::path file_in = absolute(fs::path(file_in_str), basedir);
+          fs::path file_out = absolute(fs::path(file_out_str), basedir);
           std::string simname;
           alps::parapack::load_tasks(file_in, file_out, basedir, simname, tasks);
           BOOST_FOREACH(alps::task& t, tasks) {
-            fs::path f = complete(fs::path(t.file_out_str()), basedir);
+            fs::path f = absolute(fs::path(t.file_out_str()), basedir);
             if (fs::exists(f)) {
               files.push_back(f);
             } else {

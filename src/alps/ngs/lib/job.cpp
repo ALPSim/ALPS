@@ -55,7 +55,7 @@ namespace ngs_parapack {
 task::task() : status_(task_status::Undefined) {}
 
 task::task(boost::filesystem::path const& file) : status_(task_status::Undefined) {
-  basedir_ = file.branch_path();
+  basedir_ = file.parent_path();
   file_in_str_ = file.filename().string();
   file_out_str_ = regex_replace(file.filename().string(), boost::regex("\\.in\\.xml$"), ".out.xml");
   if (file_in_str_ == file_out_str_) {

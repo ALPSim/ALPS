@@ -84,9 +84,9 @@ int main(int argc, char *argv[]) {
     alps::mcoptions options(argc, argv);
 
     alps::parameters_type<my_sim_type>::type params;
-    if (boost::filesystem::extension(options.input_file) == ".xml")
+    if (boost::filesystem::path(options.input_file).extension().string() == ".xml")
         params = alps::make_parameters_from_xml(options.input_file);
-    else if (boost::filesystem::extension(options.input_file) == ".h5")
+    else if (boost::filesystem::path(options.input_file).extension().string() == ".h5")
         alps::hdf5::archive(options.input_file)["/parameters"] >> params;
     else
         params = alps::parameters_type<my_sim_type>::type(options.input_file);

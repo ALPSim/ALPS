@@ -107,7 +107,7 @@ int main(int ac, char* av[]) {
 
                 else {
                         db.setVerbose(vm.count("verbose"));
-                        db.open(complete(fs::path(vm["db-file"].as<std::string>())));
+                        db.open(absolute(fs::path(vm["db-file"].as<std::string>())));
 
                         if (vm["command"].as<std::string>() == "install" || vm["command"].as<std::string>() == "i") {
                                 #ifdef USEPATTERN
@@ -126,10 +126,10 @@ int main(int ac, char* av[]) {
                                         throw std::runtime_error("no plot-file specified");
                                 else if (!vm.count("output-path"))
                                         throw std::runtime_error("no output-path specified");
-                                fs::path plotPath = complete(fs::path(vm["plot-file"].as<std::string>()));
+                                fs::path plotPath = absolute(fs::path(vm["plot-file"].as<std::string>()));
                                 if (vm.count("positional-arg"))
-                                  plotPath = complete(fs::path(vm["positional-arg"].as<std::string>()));
-                                fs::path outputPath = complete(fs::path(vm["output-path"].as<std::string>()));
+                                  plotPath = absolute(fs::path(vm["positional-arg"].as<std::string>()));
+                                fs::path outputPath = absolute(fs::path(vm["output-path"].as<std::string>()));
                                 Plot(outputPath, db).exec(XML(true)(plotPath, true), plotPath.filename().string());
 
                         } else {
@@ -140,7 +140,7 @@ int main(int ac, char* av[]) {
                                                 throw std::runtime_error("Could not clear tables!");
                                 } else if (vm["command"].as<std::string>() != "append" && vm["command"].as<std::string>() != "a")
                                         throw std::runtime_error(std::string("Unknown command '") + vm["command"].as<std::string>() + std::string("'"));
-                                Index(db, vm.count("verbose")).exec(complete(fs::path(vm["xml-file"].as<std::string>())));
+                                Index(db, vm.count("verbose")).exec(absolute(fs::path(vm["xml-file"].as<std::string>())));
                         }
                 }
         } catch(std::exception& e) {

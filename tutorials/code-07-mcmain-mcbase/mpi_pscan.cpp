@@ -85,9 +85,9 @@ int main(int argc, char *argv[]) {
 
             alps::parameters_type<ising_sim>::type parameters;
             if (comm_local.rank() > 0);
-            else if (boost::filesystem::extension(infile) == ".xml")
+            else if (boost::filesystem::path(infile).extension().string() == ".xml")
                 parameters = alps::make_parameters_from_xml(infile);
-            else if (boost::filesystem::extension(infile) == ".h5")
+            else if (boost::filesystem::path(infile).extension().string() == ".h5")
                 alps::hdf5::archive(infile)["/parameters"] >> parameters;
             else
                 parameters = alps::parameters_type<ising_sim>::type(infile);

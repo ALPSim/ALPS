@@ -50,10 +50,10 @@ int main(int argc, char *argv[]) {
 
         // read in parameters from the input file, can be xml, hd5f, or plain text
         alps::parameters_type<sim_type>::type parameters;
-        if (boost::filesystem::extension(options.input_file) == ".xml") {
+        if (boost::filesystem::path(options.input_file).extension().string() == ".xml") {
             parameters = alps::make_parameters_from_xml(options.input_file);
         }
-        else if (boost::filesystem::extension(options.input_file) == ".h5") {
+        else if (boost::filesystem::path(options.input_file).extension().string() == ".h5") {
             alps::hdf5::archive(options.input_file)["/parameters"] >> parameters;
         }
         else {

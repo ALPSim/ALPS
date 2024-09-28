@@ -56,7 +56,7 @@ public:
         ++count;
         
         vout = vin;
-        fill(vout.begin(), vout.end(), 0);
+        std::fill(vout.begin(), vout.end(), 0);
         
         for (unsigned int s = 0; s < L; ++s) {
             vout[(s+1)%L] += -vin[s];
