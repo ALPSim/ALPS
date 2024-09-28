@@ -244,11 +244,11 @@ void Worker::load_from_file(const boost::filesystem::path& fn,const boost::files
 
 void Worker::save_to_file(const boost::filesystem::path& fnpath, const boost::filesystem::path& hdf5path) const
 {
-  boost::filesystem::path bakpath=fnpath.branch_path()/(fnpath.filename().string()+".bak");
+  boost::filesystem::path bakpath=fnpath.parent_path()/(fnpath.filename().string()+".bak");
   bool backup=boost::filesystem::exists(fnpath);
   
 #ifdef ALPS_HAVE_HDF5
-  boost::filesystem::path hdf5bakpath =  fnpath.branch_path()/(hdf5path.filename().string()+".bak");
+  boost::filesystem::path hdf5bakpath =  fnpath.parent_path()/(hdf5path.filename().string()+".bak");
   backup =  backup || boost::filesystem::exists(fnpath);
   {
     boost::filesystem::path p = backup ? hdf5bakpath : hdf5path;

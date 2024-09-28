@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
   os << alps::header("UTF-8");
 
   boost::filesystem::path file(argv[1]);
-  boost::filesystem::path basedir = file.branch_path();
+  boost::filesystem::path basedir = file.parent_path();
   std::string file_in_str, file_out_str;
 
   alps::parapack::load_filename(file, file_in_str, file_out_str);

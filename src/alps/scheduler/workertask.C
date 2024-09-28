@@ -94,10 +94,10 @@ void WorkerTask::handle_tag(std::istream& infile, const XMLTag& intag)
       boost::throw_exception(std::runtime_error("file attribute missing in <CHECKPOINT> element in task file"));
     if (tag.attributes["format"]=="osiris")
       files.in=boost::filesystem::absolute(
-      boost::filesystem::path(tag.attributes["file"]),infilename.branch_path());
+      boost::filesystem::path(tag.attributes["file"]),infilename.parent_path());
     else if (tag.attributes["format"]=="hdf5")
       files.hdf5in=boost::filesystem::absolute(
-      boost::filesystem::path(tag.attributes["file"]),infilename.branch_path());
+      boost::filesystem::path(tag.attributes["file"]),infilename.parent_path());
     else
       boost::throw_exception(std::runtime_error("unknown format in <CHECKPOINT> element in task file"));
     skip_element(infile,tag);
@@ -403,7 +403,7 @@ inline boost::filesystem::path optional_complete(boost::filesystem::path const& 
 
 // checkpoint: save into a file
 void WorkerTask::write_xml_body(alps::oxstream& out, const boost::filesystem::path& fn, bool) const {
-  boost::filesystem::path dir=fn.branch_path();
+  boost::filesystem::path dir=fn.parent_path();
   for (unsigned int i=0;i<runs.size();++i) {
     if(workerstatus[i] == RunNotExisting) {
       if(runs[i])
@@ -418,7 +418,7 @@ void WorkerTask::write_xml_body(alps::oxstream& out, const boost::filesystem::pa
         if (!runfiles[i].hdf5out.empty())
           runfiles[i].hdf5in=optional_complete(runfiles[i].hdf5out,dir);
         else {
-          runfiles[i].hdf5in=runfiles[i].in.branch_path()/(runfiles[i].in.filename().string()+".h5");
+          runfiles[i].hdf5in=runfiles[i].in.parent_path()/(runfiles[i].in.filename().string()+".h5");
         }
 #endif
       }

@@ -240,7 +240,7 @@ protected:
   virtual void checkpoint() {
     bool make_backup=boost::filesystem::exists(checkpoint_filename);
     boost::filesystem::path fname = checkpoint_filename;
-    boost::filesystem::path dir = checkpoint_filename.branch_path();
+    boost::filesystem::path dir = checkpoint_filename.parent_path();
                                                                                 
     if (make_backup)
       fname=dir/(fname.filename().string()+".bak");

@@ -70,7 +70,7 @@ void filelock::set_file(boost::filesystem::path const& file) {
     release();
   }
   file_ = file.string();
-  lock_ = file.branch_path() / (file.filename().string() + ".lck");
+  lock_ = file.parent_path() / (file.filename().string() + ".lck");
 }
 
 void filelock::lock(int wait) {

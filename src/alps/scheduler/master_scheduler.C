@@ -127,7 +127,7 @@ void MasterScheduler::parse_job_file(const boost::filesystem::path& filename)
   if (tag.name=="OUTPUT") {
     if(tag.attributes["file"]!="")
       outfilepath=boost::filesystem::absolute(
-               boost::filesystem::path(tag.attributes["file"]),filename.branch_path());
+               boost::filesystem::path(tag.attributes["file"]),filename.parent_path());
     else
       boost::throw_exception(std::runtime_error(
                "missing 'file' attribute in <OUTPUT> element in jobfile"));
@@ -171,7 +171,7 @@ void MasterScheduler::parse_job_file(const boost::filesystem::path& filename)
     }
     if (files.out.empty())
       files.out=files.in;
-    files.in=boost::filesystem::absolute(files.in,filename.branch_path());
+    files.in=boost::filesystem::absolute(files.in,filename.parent_path());
     if (tag.name!="/TASK")
       boost::throw_exception(std::runtime_error(
                "missing </TASK> tag in jobfile"));
@@ -203,7 +203,7 @@ void MasterScheduler::checkpoint()
 {
   bool make_backup=boost::filesystem::exists(outfilepath);
   boost::filesystem::path filename=outfilepath;
-  boost::filesystem::path dir=outfilepath.branch_path();
+  boost::filesystem::path dir=outfilepath.parent_path();
   if (make_backup)
     filename=dir/(filename.filename().string()+".bak");
   { // scope for out
@@ -283,7 +283,7 @@ void MasterScheduler::finish_task(int i)
   if (make_summary) {
     sim_results[i] = tasks[i]->get_summary();
   }
-  tasks[i]->checkpoint(boost::filesystem::absolute(taskfiles[i].out,outfilepath.branch_path()),write_xml);
+  tasks[i]->checkpoint(boost::filesystem::absolute(taskfiles[i].out,outfilepath.parent_path()),write_xml);
   delete tasks[i];
   tasks[i]=0;
   taskstatus[i] = TaskFinished;      

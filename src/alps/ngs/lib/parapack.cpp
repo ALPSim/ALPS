@@ -172,7 +172,7 @@ int start_impl(int argc, char **argv) {
 //         std::cerr << "Error: file not found: " << file << std::endl;
 //         return -1;
 //       }
-//       boost::filesystem::path basedir = file.branch_path();
+//       boost::filesystem::path basedir = file.parent_path();
 //       std::string file_in_str;
 //       std::string file_out_str;
 //       std::vector<task> tasks;
@@ -431,7 +431,7 @@ int start_sgl(int argc, char** argv) {
       std::cerr << "Error: file not found: " << file << std::endl;
       return -1;
     }
-    boost::filesystem::path basedir = file.branch_path();
+    boost::filesystem::path basedir = file.parent_path();
 
     // only for master scheduler
     signal_handler signals;
@@ -832,7 +832,7 @@ int start_mpi(int argc, char** argv) {
         std::cerr << "Error: file not found: " << file << std::endl;
       return -1;
     }
-    boost::filesystem::path basedir = file.branch_path();
+    boost::filesystem::path basedir = file.parent_path();
 
     // only for master scheduler
     signal_handler signals;

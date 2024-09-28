@@ -48,7 +48,7 @@ try {
   boost::filesystem::path outpath(outname);
   
   bool make_backup = boost::filesystem::exists(outpath);
-  boost::filesystem::path writepath = (make_backup ? outpath.branch_path()/(outpath.filename().string()+".bak") : outpath);
+  boost::filesystem::path writepath = (make_backup ? outpath.parent_path()/(outpath.filename().string()+".bak") : outpath);
   
   std::cout << "Compacting run file " << inname << " to " <<  outname
             <<std::endl;

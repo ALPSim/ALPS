@@ -137,7 +137,7 @@ void Index::list(bool inFullList) {
 void Index::exec(fs::path xmlPath) {
         if (!fs::exists(xmlPath))
                 throw std::runtime_error(std::string("Not found: ") + xmlPath.string());
-        fs::path basedir = xmlPath.branch_path();
+        fs::path basedir = xmlPath.parent_path();
         std::string file_in_str;
         std::string file_out_str;
         std::vector<fs::path> files;

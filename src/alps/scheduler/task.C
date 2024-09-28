@@ -247,7 +247,7 @@ void Task::write_xml_trailer(oxstream& out) const
 // checkpoint: save into a file
 void Task::checkpoint(const boost::filesystem::path& fn, bool writeallxml) const
 {
-  boost::filesystem::path dir=fn.branch_path();
+  boost::filesystem::path dir=fn.parent_path();
   bool make_backup = boost::filesystem::exists(fn);
 
 #ifdef ALPS_HAVE_HDF5
@@ -294,7 +294,7 @@ void Task::checkpoint(const boost::filesystem::path& fn, bool writeallxml) const
 void Task::checkpoint_hdf5(const boost::filesystem::path& fn) const
 {
 #ifdef ALPS_HAVE_HDF5
-  boost::filesystem::path dir=fn.branch_path();
+  boost::filesystem::path dir=fn.parent_path();
   bool make_backup = boost::filesystem::exists(fn);
 
   std::string task_path = fn.string().substr(0, fn.string().find_last_of('.')) + ".h5";
@@ -321,7 +321,7 @@ void Task::checkpoint_hdf5(const boost::filesystem::path& fn) const
 // checkpoint: save into a file
 void Task::checkpoint_xml(const boost::filesystem::path& fn, bool writeallxml) const
 {
-  boost::filesystem::path dir=fn.branch_path();
+  boost::filesystem::path dir=fn.parent_path();
   bool make_backup = boost::filesystem::exists(fn);
 
 #ifndef ALPS_ONE_CHECKPOINT_FILE_ONLY

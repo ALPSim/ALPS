@@ -276,8 +276,8 @@ bool MCRun::is_thermalized() const
 
 void MCRun::write_xml(const boost::filesystem::path& name) const
 {
-  oxstream xml(name.branch_path()/(name.filename().string()+".xml"));
-  boost::filesystem::path fn_hdf5(name.branch_path()/(name.filename().string()+".hdf"));
+  oxstream xml(name.parent_path()/(name.filename().string()+".xml"));
+  boost::filesystem::path fn_hdf5(name.parent_path()/(name.filename().string()+".hdf"));
 
   xml << header("UTF-8") << stylesheet(xslt_path("ALPS.xsl"));
   xml << start_tag("SIMULATION") << xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")

@@ -95,7 +95,7 @@ int main(int argc, char** argv)
     }
     // set working directory
     boost::filesystem::path p(static_cast<std::string>(parms["BASENAME"]));
-    chdir(p.branch_path().string().c_str());
+    chdir(p.parent_path().string().c_str());
 
     //perform selfconsistency loop in...
     if(!parms.defined("CLUSTER_LOOP")) {

@@ -475,9 +475,9 @@ namespace
           {
             path current_rel_path(current.rel_path);
             path this_rel_path(itr->rel_path);
-            if (current_rel_path.branch_path() != this_rel_path.branch_path())
+            if (current_rel_path.parent_path() != this_rel_path.parent_path())
             {
-              std::cout << "\n  " << this_rel_path.branch_path().string() << '/';
+              std::cout << "\n  " << this_rel_path.parent_path().string() << '/';
             }
             std::cout << "\n    " << this_rel_path.leaf() << ':';
           }
