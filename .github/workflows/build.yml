@@ -3,7 +3,7 @@ name: ALPS CI/CD
 on: [push, pull_request]
 
 jobs:
-  build:
+  linux-build:
     name: Build ALPS on ${{ matrix.plat.os }}
     runs-on: ${{ matrix.plat.os }}
     strategy:
@@ -40,6 +40,33 @@ jobs:
           pip install numpy==1.26.4 scipy
           sudo apt install ${{ matrix.plat.comp_pack }}
           sudo apt install liblapack-dev libblas-dev libopenmpi-dev libhdf5-serial-dev
+          wget https://archives.boost.io/release/1.${{ matrix.plat.boost_version }}.0/source/boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
+          tar -xzf boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
+      - name: Build ALPS
+        env:
+          CC:  ${{ matrix.plat.c_compiler }}-${{ matrix.plat.c_version }}
+          CXX: ${{ matrix.plat.cxx_compiler }}-${{ matrix.plat.c_version }}
+        run: |
+          cmake -S $GITHUB_WORKSPACE -B build -DBoost_ROOT_DIR=`pwd`/boost_1_${{ matrix.plat.boost_version }}_0 -DCMAKE_CXX_FLAGS="-std=c++14 -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED"
+          cmake --build build -j 2
+          cmake --build build -j 2 -t test
+
+  macos-build:
+    name: Build ALPS on ${{ matrix.plat.os }}
+    runs-on: ${{ matrix.plat.os }}
+    strategy:
+      matrix:
+        # macos-13 is an intel runner, macos-14 is apple silicon
+        plat: 
+        - { os: macos-14, target: "", comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.12", boost_version: 86}
+
+    steps:
+      - name: Install dependencies
+        run: |
+          brew install gcc python
+          python3 -m pip install --upgrade pip
+          pip3 install numpy==1.26.4 scipy  --break-system-packages
+          brew install openmpi hdf5
           wget https://archives.boost.io/release/1.${{ matrix.plat.boost_version }}.0/source/boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
           tar -xzf boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
       - name: Build ALPS
