@@ -64,8 +64,8 @@ jobs:
       - name: Install dependencies
         run: |
           brew install gcc python
-          python3 -m pip install --upgrade pip
-          pip3 install numpy==1.26.4 scipy  --break-system-packages
+          python3 -m pip install --upgrade pip --break-system-packages
+          pip3 install numpy==1.26.4 scipy --break-system-packages
           brew install openmpi hdf5
           wget https://archives.boost.io/release/1.${{ matrix.plat.boost_version }}.0/source/boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
           tar -xzf boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
