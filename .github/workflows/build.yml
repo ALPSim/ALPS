@@ -61,6 +61,7 @@ jobs:
         - { os: macos-14, target: "", comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.12", boost_version: 86}
 
     steps:
+      - uses: actions/checkout@v4
       - name: Install dependencies
         run: |
           brew install gcc python
