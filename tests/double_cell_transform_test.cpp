@@ -77,8 +77,8 @@ TEST_F(DoubleUnitCellTransformTest, ComputeIsolatedClusterSolution){
   for(int k=0;k<n_sites_;k+=2){
     std::vector<double> momentum(CT_->dimension());
     std::vector<double> momentum_plus_pi(CT_->dimension());
-    for(int z=0;z<momentum        .size();++z) momentum        [z]=CT_->momentum_mesh().points()[k  ][z];
-    for(int z=0;z<momentum_plus_pi.size();++z) momentum_plus_pi[z]=CT_->momentum_mesh().points()[k+1][z];
+    for(int z=0;z<momentum        .size();++z) momentum        [z]=CT_->momentum_mesh().points()(k  ,z);
+    for(int z=0;z<momentum_plus_pi.size();++z) momentum_plus_pi[z]=CT_->momentum_mesh().points()(k+1,z);
     for(int i=0;i<n_freq_;++i){
       for(int spin=0;spin<2;++spin){
         double spin_factor=spin==0?1.:-1.;

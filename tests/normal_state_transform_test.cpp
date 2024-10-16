@@ -66,7 +66,7 @@ TEST_F(NormalStateTransformTest, ComputeIsolatedClusterSolution){
   CT_->compute_isolated_cluster_G0(G0_init);
   for(int k=0;k<n_sites_;++k){
     std::vector<double> momentum(CT_->dimension());
-    for(int z=0;z<momentum.size();++z) momentum[z]=CT_->momentum_mesh().points()[k][z];
+    for(int z=0;z<momentum.size();++z) momentum[z]=CT_->momentum_mesh().points()(k,z);
     for(int i=0;i<n_freq_;++i){
       for(int spin=0;spin<2;++spin){
         std::complex<double> atomic_value=1./(std::complex<double>(mu_-CT_->epsilon(momentum),(2*i+1)*M_PI/beta_));

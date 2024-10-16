@@ -92,29 +92,29 @@ protected:
 
 TEST_F(ClusterTransformTest, MomentumMeshMakesSense){
   alps::gf::momentum_index_mesh mmesh=CT_->momentum_mesh();
-  alps::gf::momentum_index_mesh::container_type four_site_mesh(boost::extents[4][2]);
-  four_site_mesh[0][0]=0.; four_site_mesh[0][1]=0.;
-  four_site_mesh[1][0]=M_PI; four_site_mesh[1][1]=M_PI;
-  four_site_mesh[2][0]=0.; four_site_mesh[2][1]=M_PI;
-  four_site_mesh[3][0]=M_PI; four_site_mesh[3][1]=0.;
+  alps::gf::momentum_index_mesh::container_type four_site_mesh(4, 2);
+  four_site_mesh(0,0)=0.; four_site_mesh(0, 1)=0.;
+  four_site_mesh(1,0)=M_PI; four_site_mesh(1,1)=M_PI;
+  four_site_mesh(2,0)=0.; four_site_mesh(2,1)=M_PI;
+  four_site_mesh(3,0)=M_PI; four_site_mesh(3,1)=0.;
 
   for(int i=0;i<CT_->n_cluster_sites();++i){
     for(int j=0;j<CT_->dimension(); ++j){
-      EXPECT_NEAR(four_site_mesh[i][j], mmesh.points()[i][j], 1.e-10);
+      EXPECT_NEAR(four_site_mesh(i, j), mmesh.points()(i, j), 1.e-10);
     }
   }
 }
 TEST_F(ClusterTransformTest, RealSpaceMeshMakesSense){
   alps::gf::real_space_index_mesh rmesh=CT_->real_space_mesh();
-  alps::gf::real_space_index_mesh::container_type four_site_mesh(boost::extents[4][2]);
-  four_site_mesh[0][0]=0.; four_site_mesh[0][1]=0.;
-  four_site_mesh[1][0]=0.; four_site_mesh[1][1]=1.;
-  four_site_mesh[2][0]=1.; four_site_mesh[2][1]=1.;
-  four_site_mesh[3][0]=1.; four_site_mesh[3][1]=0.;
+  alps::gf::real_space_index_mesh::container_type four_site_mesh(4, 2);
+  four_site_mesh(0, 0)=0.; four_site_mesh(0, 1)=0.;
+  four_site_mesh(1, 0)=0.; four_site_mesh(1, 1)=1.;
+  four_site_mesh(2, 0)=1.; four_site_mesh(2, 1)=1.;
+  four_site_mesh(3, 0)=1.; four_site_mesh(3, 1)=0.;
 
   for(int i=0;i<CT_->n_cluster_sites();++i){
     for(int j=0;j<CT_->dimension(); ++j){
-      EXPECT_NEAR(four_site_mesh[i][j], rmesh.points()[i][j], 1.e-10);
+      EXPECT_NEAR(four_site_mesh(i, j), rmesh.points()(i, j), 1.e-10);
     }
   }
 }

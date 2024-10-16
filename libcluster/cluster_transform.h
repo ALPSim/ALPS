@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <boost/multi_array.hpp>
 #include "cluster_graph.h"
 #include "cluster_helper.h"
 

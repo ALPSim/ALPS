@@ -331,19 +331,19 @@ void DoubleCellClusterTransformer::attach_interacting_tail(double_cell_matsubara
 }
 
 alps::gf::momentum_index_mesh ClusterTransformer::momentum_mesh() const{
-  alps::gf::momentum_index_mesh::container_type points(boost::extents[n_cluster_sites()][dimension()]);
+  alps::gf::momentum_index_mesh::container_type points(n_cluster_sites(), dimension());
   for(int i=0;i<n_cluster_sites();++i){
     for(int j=0;j<dimension();++j){
-      points[i][j]=cluster_momentum(i,j);
+      points(i,j)=cluster_momentum(i,j);
     }
   }
   return alps::gf::momentum_index_mesh(points);
 }
 alps::gf::real_space_index_mesh ClusterTransformer::real_space_mesh() const{
-  alps::gf::real_space_index_mesh::container_type points(boost::extents[n_cluster_sites()][dimension()]);
+  alps::gf::real_space_index_mesh::container_type points(n_cluster_sites(),dimension());
   for(int i=0;i<n_cluster_sites();++i){
     for(int j=0;j<dimension();++j){
-      points[i][j]=cluster_coordinate(i,j);
+      points(i,j)=cluster_coordinate(i,j);
     }
   }
   return alps::gf::real_space_index_mesh(points);
