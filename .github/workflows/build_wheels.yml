@@ -18,23 +18,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.19.0
         env:
           CIBW_BUILD: cp39-* cp310-* cp311-* cp312-*
           CIBW_ARCHS: ${{ matrix.plat.arch }}
 
           CIBW_ENVIRONMENT_MACOS: >
-            GMP_DIR=${{ matrix.plat.homebrew }}
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.plat.target }}
-#          CIBW_ENVIRONMENT: >
-
-        # env:
-        #   CIBW_SOME_OPTION: value
-        #    ...
-        # with:
-        #   package-dir: .
-        #   output-dir: wheelhouse
-        #   config-file: "{package}/pyproject.toml"
 
       - uses: actions/upload-artifact@v4
         with:
