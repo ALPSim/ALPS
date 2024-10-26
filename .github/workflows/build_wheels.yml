@@ -3,33 +3,6 @@ name: Continuation CI/CD
 on: [push, pull_request]
 
 jobs:
-  build_wheels:
-    name: Build wheels on ${{ matrix.plat.os }}
-    runs-on: ${{ matrix.plat.os }}
-    strategy:
-      matrix:
-        # macos-13 is an intel runner, macos-14 is apple silicon
-        plat: 
-        - { os: ubuntu-latest, target: "", arch: x86_64, homebrew: ''}
-        - { os: macos-13, target: "13.0" , arch: x86_64, homebrew: '/usr/local'}
-        - { os: macos-14, target: "14.0" , arch: arm64, homebrew: '/opt/homebrew'}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build wheels
-        env:
-          CIBW_BUILD: cp39-* cp310-* cp311-* cp312-*
-          CIBW_ARCHS: ${{ matrix.plat.arch }}
-
-          CIBW_ENVIRONMENT_MACOS: >
-            MACOSX_DEPLOYMENT_TARGET=${{ matrix.plat.target }}
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: cibw-wheels-${{ matrix.plat.os }}-${{ strategy.job-index }}
-          path: ./wheelhouse/*.whl
-
 
   build_sdist:
     name: Build source distribution
