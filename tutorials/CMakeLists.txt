@@ -3,6 +3,7 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
+if(NOT ALPS_PYTHON_WHEEL)
 if (ALPS_BUILD_SOURCE)
   if (ALPS_BUILD_TUTORIALS_PACKAGE)
     set (destdir .)
@@ -29,3 +30,4 @@ else (ALPS_BUILD_SOURCE)
           PATTERN "*.h5" EXCLUDE  EXCLUDE  PATTERN "parm*xml" EXCLUDE PATTERN "*.chkp" EXCLUDE
           PATTERN "*.xsl" EXCLUDE PATTERN "*.run*" EXCLUDE PATTERN "*clone*" EXCLUDE PATTERN "dump.xml" EXCLUDE)
 endif (ALPS_BUILD_SOURCE)
+endif()

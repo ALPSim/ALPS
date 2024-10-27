@@ -19,6 +19,8 @@
 #  - PYTHON_EXTRA_LIBS :  libraries which must be linked in when embedding
 #  - PYTHON_LINK_FOR_SHARED :  linking flags needed when building a shared lib for external modules
 
+message(STATUS "Search for Python")
+
 SET(PYTHON_VISTRAILS_OVERRIDE OFF)
 if (ALPS_USE_VISTRAILS OR ALPS_FOR_VISTRAILS)
   #set up the installation for Vistrail's Python
@@ -40,7 +42,15 @@ endif (ALPS_USE_VISTRAILS OR ALPS_FOR_VISTRAILS)
 
 
 if (NOT PYTHON_INTERPRETER AND NOT PYTHON_VISTRAILS_OVERRIDE)
-  find_program(PYTHON_INTERPRETER NAMES python python3 PATHS $ENV{PATH})
+  #find_program(PYTHON_INTERPRETER NAMES python3 python PATHS $ENV{PATH})
+  find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
+  #find_package(PythonLibs REQUIRED)
+  MESSAGE(STATUS "PYTHON_LIBRARY = ${Python3_LIBRARIES} ${Python_LIBRARIES} ${PYTHON3_LIBRARIES}" )
+  MESSAGE(STATUS "PYTHON_LIBRARY = ${PYTHON_LIBRARY} ${Python_LIBRARIES} ${PYTHON_LIBRARIES}" )
+  set(PYTHON_INTERPRETER ${Python_EXECUTABLE})
+  #set(PYTHON_LIBRARY ${Python3_LIBRARIES})
+  MESSAGE(STATUS "PYTHON_LIBRARY = ${PYTHON_LIBRARY} ${Python_LIBRARIES} ${PYTHON_LIBRARIES}" )
+  set(PYTHON_LIBRARY Python::Module)
   if (NOT PYTHON_INTERPRETER)
     set (PYTHON_FOUND FALSE)
   else(NOT PYTHON_INTERPRETER)
@@ -154,13 +164,13 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
       #
       #EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import * ;print string.join(get_config_vars('VERSION'))"  PYTHON_VERSION_MAJOR_MINOR)
       if(PYTHON_VERSION VERSION_LESS "3.11")
-        EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import *; print(' '.join(get_config_vars('LIBPL')))" PYTHON_LIBRARY_BASE_PATH)
+        EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import *; print(' '.join(get_config_vars('LIBDIR')))" PYTHON_LIBRARY_BASE_PATH)
         # this is the static libpython which is not always correct. it is better to give precedence to the shared one.
         # EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import *; print(get_config_vars('LIBRARY')[0])" PYTHON_LIBRARY_BASE_FILE)
         EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import *; print('libpython{}'.format(' '.join(get_config_vars('VERSION'))))" PYTHON_LIBRARY_BASE_FILE)
       else()
         
-        EXEC_PYTHON_SCRIPT ("import string; from sysconfig import *; print(' '.join(get_config_vars('LIBPL')))" PYTHON_LIBRARY_BASE_PATH)
+        EXEC_PYTHON_SCRIPT ("import string; from sysconfig import *; print(' '.join(get_config_vars('LIBDIR')))" PYTHON_LIBRARY_BASE_PATH)
         # this is the static libpython which is not always correct. it is better to give precedence to the shared one.
         # EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import *; print(get_config_vars('LIBRARY')[0])" PYTHON_LIBRARY_BASE_FILE)
         EXEC_PYTHON_SCRIPT ("from sysconfig import *; print('libpython{}'.format(' '.join(get_config_vars('VERSION'))))" PYTHON_LIBRARY_BASE_FILE)

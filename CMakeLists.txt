@@ -8,6 +8,7 @@
 #  $ cmake -DALPS_USE_MACHINE=/full/path/to/machine.cmake
 # or
 #  $ cmake -DALPS_USE_MACHINE=machine-name
+cmake_minimum_required(VERSION 3.15.0)
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
   message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there. You may need to remove CMakeCache.txt.")
@@ -65,6 +66,9 @@ option(ALPS_PATCH_VISTRAILS "Patch VisTrails from VisTrails git repository" OFF)
 option(ALPS_NGS_USE_NEW_ALEA "Use the ALPS ngs-alea instead of just alea" OFF)
 option(ALPS_NGS_OPENMPI_ULFM "Userlevel failure mitigation is available" OFF)
 option(ALPS_INSTALL_MPS_FRAMEWORK "Install headers and libs for the MPS framework" ON)
+option(ALPS_PYTHON_WHEEL "Build python wheel" OFF)
+
+
 
 mark_as_advanced(BIND_FORTRAN_LOWERCASE)
 mark_as_advanced(ALPS_BUILD_TUTORIALS_PACKAGE)
@@ -73,6 +77,7 @@ mark_as_advanced(ALPS_INSTALL_BOOST_TEST)
 mark_as_advanced(ALPS_PATCH_VISTRAILS)
 mark_as_advanced(ALPS_NGS_USE_NEW_ALEA)
 mark_as_advanced(ALPS_NGS_OPENMPI_ULFM)
+mark_as_advanced(ALPS_PYTHON_WHEEL)
 
 option(ALPS_USE_MKL_PARALLEL "Use parallel version of MKL" OFF)
 mark_as_advanced(ALPS_USE_MKL_PARALLEL)
@@ -127,10 +132,17 @@ endif(CMAKE_SIZEOF_VOID_P EQUAL 8 OR CMAKE_GENERATOR MATCHES Win64)
 #include (CMakeDetermineFortranCompiler)
 #message (STATUS "Fortran compiler: ${CMAKE_Fortran_COMPILER}")
 #include (CMakeTestFortranCompiler)
-cmake_minimum_required(VERSION 2.8.0 FATAL_ERROR)
+
 #if(NOT CMAKE_VERSION VERSION_LESS 3.0.0)
 #  cmake_policy(SET CMP0042 OLD)
 #endif(NOT CMAKE_VERSION VERSION_LESS 3.0.0)
+
+if(${ALPS_PYTHON_WHEEL})
+  set(ALPS_BUILD_APPLICATIONS OFF)
+  set(ALPS_ENABLE_MPI OFF)
+  set(ALPS_BUILD_SHARED_LIBS OFF)
+  set(BUILD_SHARED_LIBS OFF)
+endif()
 
 if(ALPS_BUILD_FORTRAN)
   project(alps C CXX Fortran)
@@ -192,7 +204,7 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
 ######################################################################
 
 if (ALPS_BUILD_PYTHON OR WIN32 OR APPLE)
-  find_package(Vistrails)
+  find_package(PythonMod REQUIRED) # COMPONENTS Interpreter Development.Module )
 endif (ALPS_BUILD_PYTHON OR WIN32 OR APPLE)
 
 if (ALPS_BUILD_SOURCE)
@@ -451,13 +463,13 @@ if (ALPS_BUILD_PYTHON)
     endif(WIN32)
     if(NOT WIN32)
       set(ALPS_USE_VISTRAILS "FALSE")
-      find_package(Python)
+      find_package(PythonMod)
       set(ALPS_USE_VISTRAILS "TRUE")
     endif(NOT WIN32)
     set(PYTHONLIBS_FOUND TRUE)
     set(PYTHON_FOUND TRUE)
   endif (ALPS_USE_VISTRAILS)
-  find_package(Python)
+  find_package(PythonMod)
 endif (ALPS_BUILD_PYTHON)
 
 if(WIN32 AND NOT UNIX AND ALPS_BUILD_PYTHON AND NOT ALPS_FOR_VISTRAILS)
@@ -656,9 +668,6 @@ endif(PYTHON_INCLUDE_DIRS)
 if(PYTHON_NUMPY_INCLUDE_DIR)
   list(APPEND ALPS_EXTRA_INCLUDE_DIRS ${PYTHON_NUMPY_INCLUDE_DIR})
 endif(PYTHON_NUMPY_INCLUDE_DIR)
-# if(Boost_ROOT_DIR)
-#   list(APPEND ALPS_EXTRA_INCLUDE_DIRS ${Boost_ROOT_DIR}) # FindBoostSrc.cmake is setting Boost_INCLUDE_DIR=Boost_ROOT_DIR
-# endif(Boost_ROOT_DIR)
 if(Boost_INCLUDE_DIR_CONFIG)
   list(APPEND ALPS_EXTRA_INCLUDE_DIRS ${Boost_INCLUDE_DIR_CONFIG})
 endif(Boost_INCLUDE_DIR_CONFIG)
@@ -724,7 +733,11 @@ set (HDF5_LIBRARIES ${HDF5_LIBRARIES_SAVE})
 # installation
 ######################################################################
 include(InstallRequiredSystemLibraries)
-
+if(${ALPS_PYTHON_WHEEL})
+    install(DIRECTORY lib/pyalps DESTINATION .  COMPONENT python
+          FILES_MATCHING PATTERN "*.py"
+          PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+else()
 if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
 if (ALPS_BUILD_SOURCE)
   FILE(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/*.txt")
@@ -849,7 +862,7 @@ else (ALPS_BUILD_SOURCE)
   endif (NOT ALPS_FOR_VISTRAILS)
 endif (ALPS_BUILD_SOURCE)
 endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
-
+endif()
 #
 ######################################################################
 # patch VisTrailss
@@ -908,12 +921,12 @@ endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
 # programs
 ######################################################################
 
-if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
+if (NOT ALPS_BUILD_TUTORIALS_PACKAGE AND NOT ALPS_PYTHON_WHEEL)
   add_subdirectory(tool)
   if (ALPS_BUILD_EXAMPLES AND NOT ALPS_BUILD_SOURCE)
     add_subdirectory(example)
   endif (ALPS_BUILD_EXAMPLES AND NOT ALPS_BUILD_SOURCE)
-endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
+endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE AND NOT ALPS_PYTHON_WHEEL)
 
 
 ######################################################################

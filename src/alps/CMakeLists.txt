@@ -140,9 +140,17 @@ endif(NOT WIN32 AND NOT APPLE)
 if(NOT WIN32 AND NOT APPLE)
     set(ALPS_LINK_LIBS ${ALPS_LINK_LIBS} rt)
 endif(NOT WIN32 AND NOT APPLE)
+
+if(ALPS_BUILD_FORTRAN)
+  set(ALPS_FORTRAN_SOURCES fortran/fwrapper_impl.C)
+  add_library(alps_fortran STATIC ${ALPS_FORTRAN_SOURCES})
+  target_link_libraries(alps_fortran ${CMAKE_Fortran_RUNTIME_LIBRARIES})
+  set_target_properties(alps_fortran PROPERTIES COMPILE_DEFINITIONS "${ALPS_STATIC_CPPFLAGS}")
+endif()
 #######################################################################
 # install
 #######################################################################
+if(NOT ALPS_PYTHON_WHEEL)
 if (NOT ALPS_FOR_VISTRAILS)
   install(TARGETS alps COMPONENT libraries
           ARCHIVE DESTINATION lib
@@ -166,10 +174,6 @@ endif (ALPS_FOR_VISTRAILS)
 
 
 if(ALPS_BUILD_FORTRAN)
-  set(ALPS_FORTRAN_SOURCES fortran/fwrapper_impl.C)
-  add_library(alps_fortran STATIC ${ALPS_FORTRAN_SOURCES})
-  target_link_libraries(alps_fortran ${CMAKE_Fortran_RUNTIME_LIBRARIES})
-  set_target_properties(alps_fortran PROPERTIES COMPILE_DEFINITIONS "${ALPS_STATIC_CPPFLAGS}")
   if(NOT ALPS_FOR_VISTRAILS)
     install(TARGETS alps_fortran COMPONENT libraries
             ARCHIVE DESTINATION lib
@@ -183,3 +187,4 @@ if(ALPS_BUILD_FORTRAN)
             RUNTIME DESTINATION ${VISTRAILS_DYLIB_DIR})
   endif(ALPS_INSTALL_VISTRAILS_PACKAGES)
 endif(ALPS_BUILD_FORTRAN)
+endif()

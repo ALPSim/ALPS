@@ -12,6 +12,8 @@ set(ALPS_STATIC_CPPFLAGS "")
 
 if (ALPS_HAVE_PYTHON)
 
+  set(OLD_SHARED ${BUILD_SHARED_LIBS})
+  set(BUILD_SHARED_LIBS ON)
   set(PYALEA_SOURCES ../../src/alps/python/pyalea.cpp )
   set(PYMCDATA_SOURCES ../../src/alps/python/pymcdata.cpp )
   set(PYTOOLS_SOURCES ../../src/alps/python/pytools.cpp)
@@ -93,6 +95,8 @@ if (ALPS_HAVE_PYTHON)
     python_add_module(pyngsaccumulator_c ${PYNGSACCUMULATOR_SOURCES})
   endif(ALPS_NGS_USE_NEW_ALEA)
 
+
+
   FOREACH (name ${PYALPS_SOURCES})
     if(BUILD_SHARED_LIBS)
       set_target_properties(${name} PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
@@ -117,9 +121,9 @@ if (ALPS_HAVE_PYTHON)
   if (NOT ALPS_FOR_VISTRAILS)
     install(TARGETS ${PYALPS_SOURCES}
             COMPONENT python
-            RUNTIME DESTINATION bin
-            ARCHIVE DESTINATION ${PYTHON_EXTENSION_DIR}/pyalps
-            LIBRARY DESTINATION ${PYTHON_EXTENSION_DIR}/pyalps)
+            RUNTIME DESTINATION pyalps/bin
+            ARCHIVE DESTINATION pyalps
+            LIBRARY DESTINATION pyalps)
   endif(NOT ALPS_FOR_VISTRAILS)
-
+  set(BUILD_SHARED_LIBS ${OLD_SHARED})
 endif (ALPS_HAVE_PYTHON)

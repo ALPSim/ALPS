@@ -2,7 +2,7 @@
 #  Distributed under the Boost Software License, Version 1.0.
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
-
+if(NOT ALPS_PYTHON_WHEEL)
 add_subdirectory(accumulator)
 add_subdirectory(alea)
 add_subdirectory(fixed_capacity)
@@ -19,3 +19,4 @@ add_subdirectory(parser)
 add_subdirectory(pyalps)
 add_subdirectory(random)
 add_subdirectory(utility)
+endif()

@@ -295,7 +295,11 @@ endif (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE AND Boos
 # Setting "boost" target not needed when precompiled Boost libraries found.
 
 if (NOT Boost_FOUND)
+  if(ALPS_PYTHON_WHEEL)
+  add_library(${ALPS_BOOST_LIBRARY_NAME} STATIC ${BOOST_SOURCES})
+  else()
   add_library(${ALPS_BOOST_LIBRARY_NAME} ${BOOST_SOURCES})
+  endif()
   target_link_libraries(${ALPS_BOOST_LIBRARY_NAME} ${BOOST_LINK_LIBS})
 
     # Boost.Test
@@ -384,7 +388,7 @@ if (NOT Boost_FOUND)
         INSTALL_NAME_DIR "@executable_path/../Frameworks"
       )
     endif (ALPS_FOR_VISTRAILS)
-
+    if(NOT ALPS_PYTHON_WHEEL)
     if (ALPS_INSTALL_VISTRAILS_PACKAGES)
       install(TARGETS ${ALPS_BOOST_LIBRARY_NAME}  COMPONENT vistrails
               RUNTIME DESTINATION ${VISTRAILS_DYLIB_DIR}
@@ -404,5 +408,8 @@ if (NOT Boost_FOUND)
               LIBRARY DESTINATION lib)
       endif(ALPS_INSTALL_BOOST_TEST)
     endif (NOT ALPS_FOR_VISTRAILS)
+else()
+message(STATUS "SKIP INSTALLING boost")
+    endif()
   endif (NOT ALPS_BUILD_SOURCE)
 endif (NOT Boost_FOUND)
