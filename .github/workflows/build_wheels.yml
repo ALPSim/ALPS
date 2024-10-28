@@ -26,6 +26,7 @@ jobs:
           CIBW_ENVIRONMENT_MACOS: >
             Boost_ROOT_DIR=/Users/runner/work/ALPS/ALPS/boost_1_86_0
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.plat.target }}
+            CXXFLAGS="-stdlib=libc++"
 #          CIBW_ENVIRONMENT: >
 
         # env:
