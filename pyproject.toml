@@ -16,6 +16,10 @@ CMAKE_C_FLAGS = "-fPIC"
 CMAKE_BUILD_PARALLEL_LEVEL = "1"
 ALPS_PYTHON_WHEEL = "ON"
 
+[[tool.scikit-build.overrides]]
+if.platform-system = "^darwin"
+cmake.define.CMAKE_CXX_FLAGS = "-fPIC -stdlib=libc++ -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED"
+
 [project]
 name = "pyalps"
 version = "2.3.3b0"
