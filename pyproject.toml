@@ -23,7 +23,7 @@ authors = [
   { name="Sergei Iskakov", email="siskakov@umich.edu" },
 ]
 
-dependencies = ["numpy", "h5py", "scipy"]
+dependencies = ["numpy", "scipy"]
 
 description = "Python Applications and Libraries for Physics Simulations"
 readme = "README.md"
@@ -38,8 +38,8 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://green-phys.org"
-Issues = "https://github.com/Green-Phys/green-ac/issues"
+Homepage = "https://alps.comp-phys.com"
+Issues = "https://github.com/ALPSim/ALPS/issues"
 
 
 [project.optional-dependencies]
@@ -56,11 +56,11 @@ test-command = "pytest {project}/test"
 manylinux-x86_64-image = "manylinux_2_28"
 
 [tool.cibuildwheel.linux]
-before-all = "wget https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz; yum install -y eigen3-devel gmp-devel"
+before-all = "wget https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz; tar -xzf boost_1_86_0.tar.gz; export Boost_ROOT_DIR=`pwd`/boost_1_86_0; dnf install -y fftw-devel hdf5-devel openblas-devel"
 #test-command = "echo 'installed'"
 
 [tool.cibuildwheel.macos]
-before-all = "brew reinstall eigen gmp"
+before-all = "wget https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz; tar -xzf boost_1_86_0.tar.gz; export Boost_ROOT_DIR=`pwd`/boost_1_86_0; brew reinstall eigen gmp"
 #test-command = "echo 'installed'"
 
 
