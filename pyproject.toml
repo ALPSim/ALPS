@@ -18,12 +18,12 @@ ALPS_PYTHON_WHEEL = "ON"
 
 [project]
 name = "pyalps"
-version = "2.3.2"
+version = "2.3.3b0"
 authors = [
   { name="Sergei Iskakov", email="siskakov@umich.edu" },
 ]
 
-dependencies = ["numpy", "scipy"]
+dependencies = ["numpy<2.0", "scipy"]
 
 description = "Python Applications and Libraries for Physics Simulations"
 readme = "README.md"
