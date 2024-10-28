@@ -56,7 +56,7 @@ test-command = "pytest {project}/test"
 manylinux-x86_64-image = "manylinux_2_28"
 
 [tool.cibuildwheel.linux]
-before-all = "wget https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz; tar -xzf boost_1_86_0.tar.gz; export Boost_ROOT_DIR=`pwd`/boost_1_86_0; dnf install -y fftw-devel hdf5-devel openblas-devel"
+before-all = "dnf install -y epel-release; dnf config-manager --set-enabled powertools; dnf install hdf5 hdf5-devel hdf5-static; dnf install -y fftw-devel hdf5-devel openblas-devel wget; wget https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz; tar -xzf boost_1_86_0.tar.gz; export Boost_ROOT_DIR=`pwd`/boost_1_86_0; echo `pwd`"
 #test-command = "echo 'installed'"
 
 [tool.cibuildwheel.macos]
