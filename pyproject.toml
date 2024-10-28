@@ -60,7 +60,7 @@ before-all = "dnf install -y epel-release; dnf config-manager --set-enabled powe
 #test-command = "echo 'installed'"
 
 [tool.cibuildwheel.macos]
-before-all = "wget https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz; tar -xzf boost_1_86_0.tar.gz; export Boost_ROOT_DIR=`pwd`/boost_1_86_0; brew reinstall eigen gmp"
+before-all = " brew reinstall hdf5 fftw; wget https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz; tar -xzf boost_1_86_0.tar.gz; export Boost_ROOT_DIR=`pwd`/boost_1_86_0; echo '`pwd`'"
 #test-command = "echo 'installed'"
 
 
