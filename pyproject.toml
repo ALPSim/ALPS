@@ -24,7 +24,7 @@ cmake.define.ALPS_PYTHON_WHEEL = "ON"
 
 [project]
 name = "pyalps"
-version = "2.3.3b0"
+version = "2.3.3b1"
 authors = [
   { name="Sergei Iskakov", email="siskakov@umich.edu" },
 ]
@@ -32,12 +32,21 @@ authors = [
 dependencies = ["numpy<2.0", "scipy"]
 
 description = "Python Applications and Libraries for Physics Simulations"
-readme = "README.md"
-requires-python = ">=3.9"
+readme = "README-py.md"
+requires-python = ">=3.9,<3.13"
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
+    "Development Status :: 4 - Beta",
+    'Intended Audience :: Science/Research',
+    'Intended Audience :: Developers',
+    'Programming Language :: C++',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3 :: Only',
+    'Programming Language :: Python :: Implementation :: CPython',
     "Operating System :: POSIX",
     "Operating System :: Unix",
     "Operating System :: MacOS",

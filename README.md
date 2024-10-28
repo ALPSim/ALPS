@@ -2,7 +2,7 @@
 
 ## Algorithms and Libraries for Physics Simulations
 
-This is the legacy reposiory. For more information check [README.txt](README.txt).
+For more information check [README.txt](README.txt).
 
 ### Installation instruction
 
