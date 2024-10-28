@@ -64,12 +64,10 @@ manylinux-x86_64-image = "manylinux_2_28"
 [tool.cibuildwheel.linux]
 before-all = "dnf install -y epel-release; dnf config-manager --set-enabled powertools; dnf install -y fftw-devel hdf5-devel openblas-devel wget; wget https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz; tar -xzf boost_1_86_0.tar.gz; ln -s `pwd`/boost_1_86_0 /usr/local"
 environment = "Boost_ROOT_DIR=/usr/local/boost_1_86_0"
-#test-command = "echo 'installed'"
+test-command = "echo 'installed'"
 
 [tool.cibuildwheel.macos]
 before-all = " brew reinstall hdf5 fftw; wget https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz; tar -xzf boost_1_86_0.tar.gz; export Boost_ROOT_DIR=`pwd`/boost_1_86_0;"
 environment = "Boost_ROOT_DIR=/Users/runner/work/ALPS/ALPS/boost_1_86_0"
-#test-command = "echo 'installed'"
-
-
+test-command = "echo 'installed'"
 
