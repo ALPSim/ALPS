@@ -20,11 +20,11 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.19.0
         env:
-          CIBW_BUILD: cp38-* cp39-* cp310-* cp311-* cp312-*
+          CIBW_BUILD: cp39-* cp310-* cp311-* cp312-*
           CIBW_ARCHS: ${{ matrix.plat.arch }}
 
           CIBW_ENVIRONMENT_MACOS: >
-            GMP_DIR=${{ matrix.plat.homebrew }}
+            Boost_ROOT_DIR=/Users/runner/work/ALPS/ALPS/boost_1_86_0
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.plat.target }}
 #          CIBW_ENVIRONMENT: >
 
