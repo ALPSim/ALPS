@@ -3,7 +3,7 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-if(NOT ALPS_PYTHON_WHEEL)
+if(NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
 if (ALPS_BUILD_SOURCE)
   if (ALPS_BUILD_TUTORIALS_PACKAGE)
     set (destdir .)

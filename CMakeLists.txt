@@ -67,6 +67,7 @@ option(ALPS_NGS_USE_NEW_ALEA "Use the ALPS ngs-alea instead of just alea" OFF)
 option(ALPS_NGS_OPENMPI_ULFM "Userlevel failure mitigation is available" OFF)
 option(ALPS_INSTALL_MPS_FRAMEWORK "Install headers and libs for the MPS framework" ON)
 option(ALPS_PYTHON_WHEEL "Build python wheel" OFF)
+option(ALPS_BUILD_LIBS_ONLY "Build only libraries" OFF)
 
 
 
@@ -78,6 +79,7 @@ mark_as_advanced(ALPS_PATCH_VISTRAILS)
 mark_as_advanced(ALPS_NGS_USE_NEW_ALEA)
 mark_as_advanced(ALPS_NGS_OPENMPI_ULFM)
 mark_as_advanced(ALPS_PYTHON_WHEEL)
+mark_as_advanced(ALPS_BUILD_LIBS_ONLY)
 
 option(ALPS_USE_MKL_PARALLEL "Use parallel version of MKL" OFF)
 mark_as_advanced(ALPS_USE_MKL_PARALLEL)
@@ -137,11 +139,15 @@ endif(CMAKE_SIZEOF_VOID_P EQUAL 8 OR CMAKE_GENERATOR MATCHES Win64)
 #  cmake_policy(SET CMP0042 OLD)
 #endif(NOT CMAKE_VERSION VERSION_LESS 3.0.0)
 
-if(${ALPS_PYTHON_WHEEL})
+if(ALPS_PYTHON_WHEEL)
   set(ALPS_BUILD_APPLICATIONS OFF)
   set(ALPS_ENABLE_MPI OFF)
-  set(ALPS_BUILD_SHARED_LIBS OFF)
-  set(BUILD_SHARED_LIBS OFF)
+  #set(ALPS_BUILD_SHARED_LIBS OFF)
+  #set(BUILD_SHARED_LIBS OFF)
+endif()
+
+if(ALPS_BUILD_LIBS_ONLY)
+  set(ALPS_BUILD_APPLICATIONS OFF)
 endif()
 
 if(ALPS_BUILD_FORTRAN)
@@ -203,9 +209,9 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
 # set default CMAKE_INSTALL_PREFIX
 ######################################################################
 
-if (ALPS_BUILD_PYTHON OR WIN32 OR APPLE)
+if (ALPS_BUILD_PYTHON OR WIN32)
   find_package(PythonMod REQUIRED) # COMPONENTS Interpreter Development.Module )
-endif (ALPS_BUILD_PYTHON OR WIN32 OR APPLE)
+endif (ALPS_BUILD_PYTHON OR WIN32)
 
 if (ALPS_BUILD_SOURCE)
   set (CMAKE_INSTALL_PREFIX .)
@@ -733,10 +739,11 @@ set (HDF5_LIBRARIES ${HDF5_LIBRARIES_SAVE})
 # installation
 ######################################################################
 include(InstallRequiredSystemLibraries)
-if(${ALPS_PYTHON_WHEEL})
+if(ALPS_PYTHON_WHEEL)
     install(DIRECTORY lib/pyalps DESTINATION .  COMPONENT python
           FILES_MATCHING PATTERN "*.py"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+elseif(ALPS_BUILD_LIBS_ONLY)
 else()
 if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
 if (ALPS_BUILD_SOURCE)
@@ -921,25 +928,25 @@ endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
 # programs
 ######################################################################
 
-if (NOT ALPS_BUILD_TUTORIALS_PACKAGE AND NOT ALPS_PYTHON_WHEEL)
+if (NOT ALPS_BUILD_TUTORIALS_PACKAGE AND NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
   add_subdirectory(tool)
   if (ALPS_BUILD_EXAMPLES AND NOT ALPS_BUILD_SOURCE)
     add_subdirectory(example)
   endif (ALPS_BUILD_EXAMPLES AND NOT ALPS_BUILD_SOURCE)
-endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE AND NOT ALPS_PYTHON_WHEEL)
+endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE AND NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
 
 
 ######################################################################
 # applications
 ######################################################################
 
-if (ALPS_BUILD_APPLICATIONS AND NOT ALPS_BUILD_TUTORIALS_PACKAGE)
+if (ALPS_BUILD_APPLICATIONS AND NOT ALPS_BUILD_TUTORIALS_PACKAGE AND NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
   add_subdirectory(applications)
-endif (ALPS_BUILD_APPLICATIONS AND NOT ALPS_BUILD_TUTORIALS_PACKAGE)
+endif (ALPS_BUILD_APPLICATIONS AND NOT ALPS_BUILD_TUTORIALS_PACKAGE AND NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
 
-if (NOT ALPS_FOR_VISTRAILS AND ALPS_INCLUDE_TUTORIALS)
+if (NOT ALPS_FOR_VISTRAILS AND ALPS_INCLUDE_TUTORIALS AND NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
   add_subdirectory(tutorials)
-endif (NOT ALPS_FOR_VISTRAILS AND ALPS_INCLUDE_TUTORIALS)
+endif (NOT ALPS_FOR_VISTRAILS AND ALPS_INCLUDE_TUTORIALS AND NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
 
 ######################################################################
 # developer tools
