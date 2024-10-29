@@ -77,7 +77,7 @@ environment = "Boost_ROOT_DIR=/usr/local/boost_1_86_0"
 test-command = "echo 'installed'"
 
 [tool.cibuildwheel.macos]
-before-all = "brew reinstall hdf5 fftw; wget https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz; tar -xzf boost_1_86_0.tar.gz; export Boost_ROOT_DIR=`pwd`/boost_1_86_0; cmake -S ${GITHUB_WORKSPACE} -B /tmp/build_alps -DBoost_ROOT_DIR=`pwd`/boost_1_86_0 -DCMAKE_CXX_FLAGS='-stdlib=libc++ -fpermissive  -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_AC_USE_PTHREADS -DBOOST_SP_USE_PTHREADS  -DBOOST_TIMER_ENABLE_DEPRECATED' -DALPS_BUILD_PYTHON=OFF -DALPS_BUILD_LIBS_ONLY=ON"; cmake --build /tmp/build_alps -j 2;
+before-all = "brew reinstall hdf5 fftw; wget https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz; tar -xzf boost_1_86_0.tar.gz; export Boost_ROOT_DIR=`pwd`/boost_1_86_0; cmake -S ${GITHUB_WORKSPACE} -B /tmp/build_alps -DBoost_ROOT_DIR=`pwd`/boost_1_86_0 -DCMAKE_CXX_FLAGS='-stdlib=libc++ -fpermissive  -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_AC_USE_PTHREADS -DBOOST_SP_USE_PTHREADS  -DBOOST_TIMER_ENABLE_DEPRECATED' -DALPS_BUILD_PYTHON=OFF -DALPS_BUILD_LIBS_ONLY=ON; cmake --build /tmp/build_alps -j 2;"
 repair-wheel-command = "DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:/tmp/build_alps/src/alps:/tmp/build_alps/src/boost delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
 environment = "Boost_ROOT_DIR=/Users/runner/work/ALPS/ALPS/boost_1_86_0"
 test-command = "echo 'installed'"
