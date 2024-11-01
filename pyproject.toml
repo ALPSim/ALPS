@@ -71,14 +71,11 @@ test-command = "pytest {project}/test"
 manylinux-x86_64-image = "manylinux_2_28"
 
 [tool.cibuildwheel.linux]
-before-all = "dnf install -y epel-release; dnf config-manager --set-enabled powertools; dnf install -y fftw-devel hdf5-devel openblas-devel wget; wget https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz; tar -xzf boost_1_86_0.tar.gz; ln -s `pwd`/boost_1_86_0 /usr/local; cmake -S . -B /tmp/build -DBoost_ROOT_DIR=${Boost_ROOT_DIR} -DALPS_BUILD_PYTHON=OFF -DALPS_BUILD_LIBS_ONLY=ON -DCMAKE_CXX_FLAGS='-fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED'; cmake --build /tmp/build/ -j 2"
-repair-wheel-command = "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/tmp/build/src/alps:/tmp/build/src/boost auditwheel repair -w {dest_dir} {wheel}"
+before-all = "dnf install -y epel-release; dnf config-manager --set-enabled powertools; dnf install -y fftw-devel hdf5-devel openblas-devel wget; wget https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz; tar -xzf boost_1_86_0.tar.gz; ln -s `pwd`/boost_1_86_0 /usr/local;"
 environment = "Boost_ROOT_DIR=/usr/local/boost_1_86_0"
-test-command = "echo 'installed'"
+test-command = "pytest {project}/test/pyalps"
 
 [tool.cibuildwheel.macos]
-before-all = "brew reinstall hdf5 fftw; wget https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz; tar -xzf boost_1_86_0.tar.gz; export Boost_ROOT_DIR=`pwd`/boost_1_86_0; cmake -S ${GITHUB_WORKSPACE} -B /tmp/build_alps -DBoost_ROOT_DIR=`pwd`/boost_1_86_0 -DCMAKE_CXX_FLAGS='-stdlib=libc++ -fpermissive  -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_AC_USE_PTHREADS -DBOOST_SP_USE_PTHREADS  -DBOOST_TIMER_ENABLE_DEPRECATED' -DALPS_BUILD_PYTHON=OFF -DALPS_BUILD_LIBS_ONLY=ON; cmake --build /tmp/build_alps -j 2;"
-repair-wheel-command = "DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:/tmp/build_alps/src/alps:/tmp/build_alps/src/boost delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
+before-all = "brew reinstall hdf5 fftw; wget https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz; tar -xzf boost_1_86_0.tar.gz; export Boost_ROOT_DIR=`pwd`/boost_1_86_0;"
 environment = "Boost_ROOT_DIR=/Users/runner/work/ALPS/ALPS/boost_1_86_0"
-test-command = "echo 'installed'"
-
+test-command = "pytest {project}/test/pyalps"

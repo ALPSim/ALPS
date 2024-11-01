@@ -106,6 +106,7 @@ if (ALPS_HAVE_PYTHON AND NOT ALPS_BUILD_LIBS_ONLY)
       endif(WIN32 AND NOT UNIX)
     endif(BUILD_SHARED_LIBS)
     target_link_libraries(${name} alps ${LINK_LIBRARIES} ${BLAS_LIBRARY} ${LAPACK_LIBRARY} ${LAPACK_LINKER_FLAGS})
+    set_target_properties(${name} PROPERTIES INSTALL_RPATH "${CMAKE_BINARY_DIR}/src/alps;${CMAKE_BINARY_DIR}/src/boost" )
   ENDFOREACH(name)
 
   #######################################################################

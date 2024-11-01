@@ -69,7 +69,7 @@ def read(ar):
     if np.any(x[0] != np.array([1 + 1j,2 +2j])) or np.any(x[1] != np.array([3 + 3j,4 + 4j])):
         raise Exception('invalid array value')
 
-try:
+def test_hdf5():
     oar = h5.archive("py.h5", 'w')
     write(oar)
     del oar
@@ -86,6 +86,3 @@ try:
     del ar
     
     print("SUCCESS")
-except Exception as e:
-    print("ERROR")
-    sys.exit(e)

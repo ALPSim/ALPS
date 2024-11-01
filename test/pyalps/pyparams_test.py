@@ -40,37 +40,37 @@ orig_dict = {
 def assert_type(p, k):
     assert type(p[k]) == type(orig_dict[k])
 
-
-## Create params
-p = ngs.params({
-    'val1' : 42,
-    'val2' : '42',
-    'a' : 1,
-    'x' : 2,
-    'b' : 3
-})
-## check content
-for k in sorted(orig_dict.keys()):
-    assert p[k] == orig_dict[k]
-    assert_type(p, k)
-    print(k,'ok!')
-## Check nonetype
-assert type(p["undefined"]) == type(None)
-
-## Write to hdf5
-with hdf5.archive('parms1.h5', 'w') as oar:
-    p.save(oar) # does not use path '/parameters'
-
-with hdf5.archive('parms2.h5', 'w') as oar:
-    for key in sorted(p.keys()):
-        print(key)
-        oar['parameters/' + key] = p[key]
-## Load from hdf5
-with hdf5.archive('parms2.h5', 'r') as oar:
-    iar = hdf5.archive('parms2.h5', 'r')
-    p.load(iar)
-
+def test_params():    
+    ## Create params
+    p = ngs.params({
+        'val1' : 42,
+        'val2' : '42',
+        'a' : 1,
+        'x' : 2,
+        'b' : 3
+    })
+    ## check content
     for k in sorted(orig_dict.keys()):
         assert p[k] == orig_dict[k]
         assert_type(p, k)
         print(k,'ok!')
+    ## Check nonetype
+    assert type(p["undefined"]) == type(None)
+    
+    ## Write to hdf5
+    with hdf5.archive('parms1.h5', 'w') as oar:
+        p.save(oar) # does not use path '/parameters'
+    
+    with hdf5.archive('parms2.h5', 'w') as oar:
+        for key in sorted(p.keys()):
+            print(key)
+            oar['parameters/' + key] = p[key]
+    ## Load from hdf5
+    with hdf5.archive('parms2.h5', 'r') as oar:
+        iar = hdf5.archive('parms2.h5', 'r')
+        p.load(iar)
+    
+        for k in sorted(orig_dict.keys()):
+            assert p[k] == orig_dict[k]
+            assert_type(p, k)
+            print(k,'ok!')
