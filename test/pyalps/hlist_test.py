@@ -24,8 +24,6 @@
 # DEALINGS IN THE SOFTWARE.
 # 
 # ****************************************************************************
-import pytest
-
 from pyalps.hlist import HList
 
 
