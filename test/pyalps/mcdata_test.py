@@ -173,3 +173,7 @@ def test_mcdata():
     print("X.sinh():\n" + str_prec(X.sinh()))
     print("X.cosh():\n" + str_prec(X.cosh()))
     print("X.tanh():\n" + str_prec(X.tanh()))
+
+
+if __name__ == '__main__':
+    test_mcdata()

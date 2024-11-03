@@ -8,6 +8,7 @@
 #
 
 set(ALPS_SOURCES "")
+set(ALPS_PYTHON_SOURCES "")
 set(ALPS_SHARED_CPPFLAGS ALPS_EXPORTS=1)
 set(ALPS_STATIC_CPPFLAGS "")
 
@@ -60,7 +61,7 @@ set(ALPS_SOURCES
   endif (NOT ALPS_HAVE_RPC_XDR_H)
   
   if (ALPS_BUILD_PYTHON)
-    set(ALPS_SOURCES ${ALPS_SOURCES} ngs/lib/get_numpy_type.cpp hdf5/python.cpp python/numpy_array.cpp)
+    set(ALPS_PYTHON_SOURCES ${ALPS_PYTHON_SOURCES} ngs/lib/get_numpy_type.cpp hdf5/python.cpp python/numpy_array.cpp)
   endif (ALPS_BUILD_PYTHON)
 
   # OpenMPI ULFM
@@ -87,6 +88,21 @@ if (NOT ALPS_FOR_VISTRAILS)
   )
 endif(NOT ALPS_FOR_VISTRAILS)
 
+if(ALPS_HAVE_PYTHON)
+  if(ALPS_PYTHON_WHEEL)
+    set(ALPS_PYTHON_SOURCES ${ALPS_PYTHON_SOURCES} ${ALPS_SOURCES})
+    add_library(alps_python ${ALPS_PYTHON_SOURCES})
+    target_compile_definitions(alps_python PRIVATE ALPS_HAVE_PYTHON)
+    get_target_property(XXX alps_python COMPILE_DEFINITIONS)
+    message(STATUS "ALPS_PYTHON: ${XXX}")
+    if(ALPS_HAVE_BOOST_NUMPY)
+      target_compile_definitions(alps_python INTERFACE ALPS_HAVE_BOOST_NUMPY)
+    endif()
+  else()
+    set(ALPS_SOURCES ${ALPS_PYTHON_SOURCES} ${ALPS_SOURCES})
+  endif()
+endif()
+
 add_library(alps ${ALPS_SOURCES})
 
 find_package(HDF5)
@@ -106,6 +122,13 @@ if (Boost_FOUND)
 else (Boost_FOUND)
   # "boost" target available when Boost libraries are built from source
   target_link_libraries(alps ${ALPS_BOOST_LIBRARY_NAME} ${HDF5_LIBRARIES}) # ${SZIP_LIBRARIES} ${ZLIB_LIBRARIES})
+  if(ALPS_HAVE_PYTHON)
+    if(ALPS_PYTHON_WHEEL)
+      target_link_libraries(alps_python ${ALPS_BOOST_LIBRARY_NAME} ${ALPS_BOOST_PYTHON_LIBRARY_NAME} ${HDF5_LIBRARIES}) # ${SZIP_LIBRARIES} ${ZLIB_LIBRARIES})
+    else()
+      target_link_libraries(alps ${ALPS_BOOST_PYTHON_LIBRARY_NAME}) # ${SZIP_LIBRARIES} ${ZLIB_LIBRARIES})
+    endif()
+  endif()
 endif (Boost_FOUND)
 
 if(BUILD_SHARED_LIBS)
@@ -117,8 +140,25 @@ if(BUILD_SHARED_LIBS)
   endif(HDF5_DEFINITIONS)
   
   set_target_properties(alps PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
+  if(ALPS_HAVE_PYTHON)
+    if(ALPS_PYTHON_WHEEL)
+      set_target_properties(alps_python PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
+      target_compile_definitions(alps_python PUBLIC ALPS_HAVE_PYTHON)
+      if(ALPS_HAVE_BOOST_NUMPY)
+        target_compile_definitions(alps_python PUBLIC ALPS_HAVE_BOOST_NUMPY)
+      endif()
+    else(ALPS_PYTHON_WHEEL)
+      target_compile_definitions(alps PUBLIC ALPS_HAVE_PYTHON)
+      if(ALPS_HAVE_BOOST_NUMPY)
+        target_compile_definitions(alps PUBLIC ALPS_HAVE_BOOST_NUMPY)
+      endif()
+    endif(ALPS_PYTHON_WHEEL)
+  endif()
 else(BUILD_SHARED_LIBS)
   set_target_properties(alps PROPERTIES COMPILE_DEFINITIONS "${ALPS_STATIC_CPPFLAGS}")
+  if(ALPS_HAVE_PYTHON)
+    set_target_properties(alps_python PROPERTIES COMPILE_DEFINITIONS "${ALPS_STATIC_CPPFLAGS}")
+  endif()
 endif(BUILD_SHARED_LIBS)
 
 
@@ -156,6 +196,12 @@ if (NOT ALPS_FOR_VISTRAILS)
           ARCHIVE DESTINATION lib
           LIBRARY DESTINATION lib
           RUNTIME DESTINATION bin)
+  if(ALPS_PYTHON_WHEEL)
+    install(TARGETS alps_python COMPONENT libraries
+          ARCHIVE DESTINATION lib
+          LIBRARY DESTINATION lib
+          RUNTIME DESTINATION bin)
+  endif()
 endif (NOT ALPS_FOR_VISTRAILS)
 
 if (ALPS_FOR_VISTRAILS)

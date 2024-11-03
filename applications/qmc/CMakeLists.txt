@@ -4,9 +4,13 @@
 #          http://www.boost.org/LICENSE_1_0.txt)
 
 if (ALPS_BUILD_SOURCE)
+if(ALPS_PYTHON_WHEEL)
+
+else()
   install(FILES CMakeLists.txt qmc.h DESTINATION alps/applications/qmc)
   install(DIRECTORY checksign looper qwl sse4 worms dwa DESTINATION alps/applications/qmc
           FILES_MATCHING PATTERN "*"  PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+endif()
 else (ALPS_BUILD_SOURCE)
 
   add_subdirectory(checksign)

@@ -81,8 +81,6 @@ else(NOT LAPACK_FOUND)
   add_library(mps_pscan STATIC libpscan/scheduler.cpp libpscan/options.cpp)
   target_link_libraries(mps_pscan alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY} ${HDF5_LIBRARIES})
 
-  ### INSTALL LIBS
-  install(TARGETS mps_models mps_utils DESTINATION lib EXPORT ALPSMPS-targets)
 
   ### APPLICATIONS
   # ${ALPS_BOOST_LIBRARY_NAME} ${HDF5_LIBRARIES} included in `alps`
@@ -101,6 +99,11 @@ else(NOT LAPACK_FOUND)
   endif(ALPS_MPS_TESTING)
 
   if(ALPS_INSTALL_MPS_FRAMEWORK)
+if(ALPS_PYTHON_WHEEL)
+
+else()
+    ### INSTALL LIBS
+    install(TARGETS mps_models mps_utils DESTINATION lib EXPORT ALPSMPS-targets)
     ## Install headers and libs
     install(DIRECTORY framework/dmrg framework/utils
             DESTINATION include
@@ -130,6 +133,7 @@ else(NOT LAPACK_FOUND)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/ALPS_MPSConfig.cmake DESTINATION share/alps)
     # TODO: Export ALPS targets that are required by this.
     # install(EXPORT ALPSMPS-targets DESTINATION share/alps)
+endif()
   endif(ALPS_INSTALL_MPS_FRAMEWORK)
 
 endif(NOT LAPACK_FOUND)

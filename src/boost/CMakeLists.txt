@@ -8,8 +8,10 @@
 #
 
 set(BOOST_SOURCES "")
+set(BOOST_PYTHON_SOURCES "")
 set(BOOST_MPI_PYTHON_SOURCES "")
 set(BOOST_LINK_LIBS "")
+set(BOOST_PYTHON_LINK_LIBS "")
 
 # Boost.Date_Time
 if(BUILD_BOOST_DATE_TIME)
@@ -159,7 +161,7 @@ if(BUILD_BOOST_PYTHON)
     message(WARNING "Python 3 support requires Boost 1.63.0 or newer. Previous versions might build but have sporadic segemtation faults at the end of the execution.")
   endif()
   
-  set(BOOST_LINK_LIBS ${BOOST_LINK_LIBS} ${PYTHON_LIBRARY} ${PYTHON_EXTRA_LIBS})
+  set(BOOST_PYTHON_LINK_LIBS ${BOOST_LINK_LIBS} ${PYTHON_LIBRARY} ${PYTHON_EXTRA_LIBS})
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/python/src")
   set(SOURCES dict.cpp errors.cpp exec.cpp import.cpp list.cpp long.cpp
       module.cpp numeric.cpp object_operators.cpp object_protocol.cpp slice.cpp
@@ -178,7 +180,7 @@ if(BUILD_BOOST_PYTHON)
   endif(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION GREATER 62)
   foreach(S ${SOURCES})
     if(EXISTS ${DIRECTORY}/${S})
-      set(BOOST_SOURCES ${BOOST_SOURCES} ${DIRECTORY}/${S})
+      set(BOOST_PYTHON_SOURCES ${BOOST_PYTHON_SOURCES} ${DIRECTORY}/${S})
     endif(EXISTS ${DIRECTORY}/${S})
   endforeach(S)
   add_definitions(-DBOOST_PYTHON_SOURCE)
@@ -268,7 +270,7 @@ if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE AND Boost_R
     endif (BUILD_SHARED_LIBS)
 
     set_target_properties(mpi_c PROPERTIES PREFIX "")
-    target_link_libraries(mpi_c ${ALPS_BOOST_LIBRARY_NAME} ${BOOST_LINK_LIBS})
+    target_link_libraries(mpi_c ${ALPS_BOOST_LIBRARY_NAME} ${ALPS_BOOST_PYTHON_LIBRARY_NAME} ${BOOST_LINK_LIBS} ${BOOST_PYTHON_LINK_LIBS})
 
     if(ALPS_INSTALL_VISTRAILS_PACKAGES)
         install(TARGETS mpi_c COMPONENT vistrails
@@ -297,7 +299,10 @@ endif (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE AND Boos
 if (NOT Boost_FOUND)
   add_library(${ALPS_BOOST_LIBRARY_NAME} ${BOOST_SOURCES})
   target_link_libraries(${ALPS_BOOST_LIBRARY_NAME} ${BOOST_LINK_LIBS})
-
+  if(BUILD_BOOST_PYTHON)
+    add_library(${ALPS_BOOST_PYTHON_LIBRARY_NAME} ${BOOST_PYTHON_SOURCES})
+    target_link_libraries(${ALPS_BOOST_PYTHON_LIBRARY_NAME} ${BOOST_PYTHON_LINK_LIBS})
+  endif()
     # Boost.Test
     if(BUILD_BOOST_TEST AND NOT ALPS_FOR_VISTRAILS)
       set(DIRECTORY "${Boost_ROOT_DIR}/libs/test/src")
@@ -396,6 +401,12 @@ if (NOT Boost_FOUND)
               RUNTIME DESTINATION bin
               ARCHIVE DESTINATION lib
               LIBRARY DESTINATION lib)
+      if(BUILD_BOOST_PYTHON)
+        install(TARGETS ${ALPS_BOOST_PYTHON_LIBRARY_NAME} COMPONENT libraries
+              RUNTIME DESTINATION bin
+              ARCHIVE DESTINATION lib
+              LIBRARY DESTINATION lib)
+      endif()
       if (ALPS_INSTALL_BOOST_TEST)
         install(TARGETS boost_unit_test_framework boost_test_exec_monitor boost_prg_exec_monitor
               COMPONENT libraries

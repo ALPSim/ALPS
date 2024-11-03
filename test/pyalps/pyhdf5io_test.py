@@ -121,3 +121,6 @@ def test_hdf5io():
     print("/numpylist2: ", repr(nl2))
     
     del ar
+
+if __name__ == '__main__':
+    test_hdf5io()

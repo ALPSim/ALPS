@@ -70,3 +70,7 @@ def test_hlist():
     print(hl[4])
     assert hl[4] == 13
     # 13
+
+
+if __name__ == '__main__':
+    test_hlist()

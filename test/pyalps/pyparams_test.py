@@ -74,3 +74,6 @@ def test_params():
             assert p[k] == orig_dict[k]
             assert_type(p, k)
             print(k,'ok!')
+
+if __name__ == '__main__':
+    test_params()

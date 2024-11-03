@@ -37,16 +37,8 @@
  # Run this script as:
  # alpspython tutorial1.py
  #
- # This python script is MPI aware and can hence be called using mpirun:
- #
- # mpirun -np 2 alpspython tutorial1.py
- #
- # In case this does not work, try:
- #
- # mpirun -np 2 sh alpspython tutorial1.py
 
 import pyalps.cthyb as cthyb # the solver module
-import pyalps.mpi as mpi     # MPI library (required)
 
 # specify solver parameters
 parms={
@@ -70,11 +62,10 @@ parms={
 # coupled to a single noninteracting bath site with hybridization
 # V=1 at energy epsilon=0: Delta(tau)=-V^2/2=const.
 
-if mpi.rank==0:
-  f=open("delta.dat","w")
-  for i in range(parms["N_TAU"]+1):
+f=open("delta.dat","w")
+for i in range(parms["N_TAU"]+1):
     f.write("%i %f %f\n"%(i,-0.5,-0.5))
-  f.close()
+f.close()
 
 # solve the impurity model
 cthyb.solve(parms)

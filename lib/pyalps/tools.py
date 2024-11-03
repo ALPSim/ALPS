@@ -25,7 +25,7 @@ from __future__ import absolute_import
 # DEALINGS IN THE SOFTWARE.
 # 
 # ****************************************************************************
-
+import os
 import os.path
 import datetime
 import shutil
@@ -52,6 +52,27 @@ from .dict_intersect import *
 from .natural_sort import natural_sort
 from . import alea
 import scipy.interpolate
+
+if not "ALPS_XML_PATH" in os.environ:
+    import pyalps
+    path = os.path.dirname(pyalps.__file__) + "/xml"
+    os.environ["ALPS_XML_PATH"] = path
+
+def check_existence(cmd):
+    if cmd is None:
+        return False
+    import shutil
+    path_to_cmd = shutil.which(cmd)
+    if path_to_cmd is None:
+        if cmd.startswith("/"):
+            raise RuntimeError(f"There is no {cmd} on the path!")
+        import os
+        import pyalps
+        path = os.path.dirname(pyalps.__file__) + "/bin"
+        os.environ["PATH"] += os.pathsep + path
+        if shutil.which(cmd) is None:
+            raise RuntimeError(f"There is no {cmd} on the path!")
+
 
 def make_list(infiles):
     if type(infiles) == list:
@@ -104,6 +125,7 @@ def runApplication(appname, parmfiles, T=None, Tmin=None, Tmax=None, writexml=Fa
         MPI: optional parameter specifying the number of processes to be used in an MPI simulation. MPI is not used if this parameter is left at ots default value  None.
         mpirun: optional parameter giving the name of the executable used to laucnh MPI applications. The default is 'mpirun'
     """
+    check_existence(appname)
     if isinstance(parmfiles, str):
       parmfiles = [parmfiles];
 

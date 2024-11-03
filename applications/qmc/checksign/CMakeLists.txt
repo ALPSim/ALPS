@@ -5,4 +5,9 @@
 
 add_executable(checksign checksign.C)
 target_link_libraries(checksign alps)
+if(ALPS_PYTHON_WHEEL)
+set_target_properties(checksign  PROPERTIES INSTALL_RPATH "${CMAKE_BINARY_DIR}/src/alps;${CMAKE_BINARY_DIR}/src/boost" )
+install(TARGETS checksign RUNTIME DESTINATION pyalps/bin COMPONENT applications)
+else()
 install(TARGETS checksign RUNTIME DESTINATION bin COMPONENT applications)
+endif()
