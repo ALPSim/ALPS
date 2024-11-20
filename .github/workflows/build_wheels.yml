@@ -13,6 +13,7 @@ jobs:
         - { os: ubuntu-latest, target: "", arch: x86_64, homebrew: ''}
         - { os: macos-13, target: "13.0" , arch: x86_64, homebrew: '/usr/local'}
         - { os: macos-14, target: "14.0" , arch: arm64, homebrew: '/opt/homebrew'}
+        - { os: macos-15, target: "15.0" , arch: arm64, homebrew: '/opt/homebrew'}
 
     steps:
       - uses: actions/checkout@v4
@@ -24,7 +25,7 @@ jobs:
           CIBW_ARCHS: ${{ matrix.plat.arch }}
 
           CIBW_ENVIRONMENT_MACOS: >
-            Boost_ROOT_DIR=/Users/runner/work/ALPS/ALPS/boost_1_86_0
+            Boost_ROOT_DIR=/Users/runner/work/ALPS/ALPS/boost_1_87_0
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.plat.target }}
             CXXFLAGS="-stdlib=libc++"
 #          CIBW_ENVIRONMENT: >
