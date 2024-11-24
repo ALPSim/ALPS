@@ -64,13 +64,14 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install dependencies
         run: |
-          brew install gcc python
-          python3 -m pip install --upgrade pip --break-system-packages
-          pip3 install numpy==1.26.4 scipy --break-system-packages
+          brew unlink pkg-config@0.29.2
+          brew install gcc python@${{ py_version }}
+          python${{ py_version }} -m pip install --upgrade pip --break-system-packages
+          pip${{ py_version }} install numpy==1.26.4 scipy --break-system-packages
           brew install openmpi hdf5
           wget https://archives.boost.io/release/1.${{ matrix.plat.boost_version }}.0/source/boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
           tar -xzf boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
-          ln -s /opt/homebrew/bin/python3 /opt/homebrew/bin/python
+          ln -s /opt/homebrew/bin/python${{ py_version }} /opt/homebrew/bin/python
       - name: Build ALPS
         env:
           CC:  ${{ matrix.plat.c_compiler }}-${{ matrix.plat.c_version }}
