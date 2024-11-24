@@ -92,7 +92,7 @@ SUBROUTINE CloseHdf5File(fileId)
 !Purpose : Terminate access to and close an hdf5 File.  
 !
 IMPLICIT NONE
-INTEGER, INTENT(INOUT) :: fileId
+INTEGER(HID_T), INTENT(INOUT) :: fileId
 
  CALL h5fclose_f(fileid, error) ! Terminate access to the file.
 
@@ -103,9 +103,9 @@ SUBROUTINE CreateGroup(groupName, groupId, fileId)
 !Purpose: Create a group called groupName in the file labelled by fileId
 !
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: fileId
+INTEGER(HID_T), INTENT(IN) :: fileId
 CHARACTER(len=*), INTENT(IN) :: groupName
-INTEGER, INTENT(INOUT) :: groupId
+INTEGER(HID_T), INTENT(INOUT) :: groupId
 
  CALL h5gcreate_f(fileid, groupname, groupid, error) ! Create a group named "groupname" in the file.
 
@@ -116,9 +116,9 @@ SUBROUTINE OpenGroup(groupName, groupId, fileId)
 !Purpose: Create a group called groupName in the file labelled by fileId
 !
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: fileId
+INTEGER(HID_T), INTENT(IN) :: fileId
 CHARACTER(len=*), INTENT(IN) :: groupName
-INTEGER, INTENT(INOUT) :: groupId
+INTEGER(HID_T), INTENT(INOUT) :: groupId
 
  CALL h5gopen_f(fileId,groupName,groupid, error) ! Create a group named "groupname" in the file.
 
@@ -130,8 +130,8 @@ SUBROUTINE CreateSubGroup(subGroupName, subGroupId, groupId)
 !
 IMPLICIT NONE
 CHARACTER(len=*), INTENT(IN) :: subGroupName
-INTEGER, INTENT(IN) :: groupId
-INTEGER, INTENT(INOUT) :: subGroupId
+INTEGER(HID_T), INTENT(IN) :: groupId
+INTEGER(HID_T), INTENT(INOUT) :: subGroupId
 
  CALL h5gcreate_f(groupid, subgroupName, subgroupid, error) ! Create group "subgroupName1" in group "groupname" using relative name.
 
@@ -546,7 +546,7 @@ SUBROUTINE CloseGroup(groupId)
 !Purpose:Close a group.
 !
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: groupId
+INTEGER(HID_T), INTENT(IN) :: groupId
 
  CALL h5gclose_f(groupid, error)! Close the group.
 

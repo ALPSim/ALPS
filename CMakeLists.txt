@@ -8,7 +8,7 @@
 #  $ cmake -DALPS_USE_MACHINE=/full/path/to/machine.cmake
 # or
 #  $ cmake -DALPS_USE_MACHINE=machine-name
-cmake_minimum_required(VERSION 3.15.0)
+cmake_minimum_required(VERSION 3.18.0)
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
   message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there. You may need to remove CMakeCache.txt.")
@@ -431,7 +431,7 @@ if(MSVC AND NOT ALPS_FOR_VISTRAILS)
 endif(MSVC AND NOT ALPS_FOR_VISTRAILS)
  
 # HDF5
-find_package(HDF5)
+find_package(HDF5 COMPONENTS C HL Fortran)
 IF(HDF5_FOUND)
   SET(HAVE_LIBHDF5 1)  
   INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIR})

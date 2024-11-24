@@ -92,7 +92,7 @@ CLOSE(138)
 rtpChiLimit=chiLimit
 rtpTruncLimit=truncLimit
 
-
+#if defined(_OPENMP)
 !Set number of openmp threads
 numProcs=omp_get_num_procs()
 IF(numThr.le.numProcs) THEN
@@ -103,6 +103,10 @@ ELSE
 	numThr=numProcs
 	CALL omp_set_num_threads(numThr)
 END IF
+#else
+numProcs=1
+numThr=1
+#endif
 
 !Output SystemSettings to hdf5
 CALL WriteSystemSettings()

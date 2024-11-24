@@ -14,11 +14,13 @@ Boost_ROOT_DIR = {env="Boost_ROOT_DIR", default="EMPTY"}
 CMAKE_CXX_FLAGS = "-fPIC -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED"
 CMAKE_C_FLAGS = "-fPIC"
 ALPS_PYTHON_WHEEL = "ON"
+ALPS_BUILD_FORTRAN = "ON"
 
 [[tool.scikit-build.overrides]]
 if.platform-system = "^darwin"
 cmake.define.CMAKE_CXX_FLAGS = "-fPIC -stdlib=libc++ -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED"
 cmake.define.Boost_ROOT_DIR = {env="Boost_ROOT_DIR", default="EMPTY"}
+cmake.define.ALPS_BUILD_FORTRAN = "ON"
 cmake.define.CMAKE_C_FLAGS = "-fPIC"
 cmake.define.ALPS_PYTHON_WHEEL = "ON"
 

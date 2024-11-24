@@ -836,6 +836,7 @@ def runTEBD(infileList):
     """ run a TEBD application """
     resList=[]
     appname='tebd'
+    check_existence(appname)
     for infile in infileList:
         cmdline = [appname]
         cmdline += [infile]
