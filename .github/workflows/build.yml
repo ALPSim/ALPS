@@ -64,19 +64,20 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install dependencies
         run: |
-          brew install gcc python
-          python3 -m pip install --upgrade pip --break-system-packages
-          pip3 install numpy==1.26.4 scipy --break-system-packages
+          brew unlink pkg-config@0.29.2
+          brew install gcc python@${{ matrix.plat.py_version }}
+          python${{ matrix.plat.py_version }} -m pip install --upgrade pip --break-system-packages
+          pip${{ matrix.plat.py_version }} install numpy==1.26.4 scipy --break-system-packages
           brew install openmpi hdf5
           wget https://archives.boost.io/release/1.${{ matrix.plat.boost_version }}.0/source/boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
           tar -xzf boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
-          ln -s /opt/homebrew/bin/python3 /opt/homebrew/bin/python
+          ln -s /opt/homebrew/bin/python${{ matrix.plat.py_version }} /opt/homebrew/bin/python
       - name: Build ALPS
         env:
           CC:  ${{ matrix.plat.c_compiler }}-${{ matrix.plat.c_version }}
           CXX: ${{ matrix.plat.cxx_compiler }}-${{ matrix.plat.c_version }}
         run: |
-          cmake -S $GITHUB_WORKSPACE -B build -DBoost_ROOT_DIR=`pwd`/boost_1_${{ matrix.plat.boost_version }}_0 -DCMAKE_CXX_FLAGS="-std=c++14 -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED"
+          cmake -S $GITHUB_WORKSPACE -B build -DBoost_ROOT_DIR=`pwd`/boost_1_${{ matrix.plat.boost_version }}_0 -DCMAKE_CXX_FLAGS="-std=c++14 -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED" -DPython_ROOT_DIR=/opt/homebrew/Cellar/python@3.12/3.12.7_1/
           cmake --build build -j 2
           cmake --build build -j 2 -t test
 
