@@ -67,7 +67,7 @@ jobs:
           brew unlink pkg-config@0.29.2
           brew install gcc python@${{ matrix.plat.py_version }}
           python${{ matrix.plat.py_version }} -m pip install --upgrade pip --break-system-packages
-          pip${{ py_version }} install numpy==1.26.4 scipy --break-system-packages
+          pip${{ matrix.plat.py_version }} install numpy==1.26.4 scipy --break-system-packages
           brew install openmpi hdf5
           wget https://archives.boost.io/release/1.${{ matrix.plat.boost_version }}.0/source/boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
           tar -xzf boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
