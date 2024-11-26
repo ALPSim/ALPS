@@ -16,13 +16,15 @@ pip install pyalps
 ### Installation instruction from sources
 
 1. Prerequisites
-  - CMake > 3.15
+  - CMake > 3.18
   - Boost sources >= 1.76
   - BLAS/LAPACK
   - HDF5
   - MPI
-  - Python >= 3.9 and < 3.13 (earlier versions maybe also work but unsupported)
-  - C++ compiler (build has been tested on GCC 10.5, GCC 11.4, GCC 12.3 and GCC 13.2)
+  - Python >= 3.9
+    - Python 3.13 requires Boost version 1.87 or later
+    - Earlier versions maybe also work but unsupported
+  - C++ compiler (build has been tested on GCC 10.5 through 14.2)
   - GNU Make or Ninja build system
 
 You need to download and unpack boost library:
