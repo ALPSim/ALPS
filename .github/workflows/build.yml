@@ -64,7 +64,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install dependencies
         run: |
-          brew unlink pkg-config@0.29.2
           brew install gcc python@${{ matrix.plat.py_version }}
           python${{ matrix.plat.py_version }} -m pip install --upgrade pip --break-system-packages
           pip${{ matrix.plat.py_version }} install numpy==1.26.4 scipy --break-system-packages

@@ -79,6 +79,6 @@ environment = "Boost_ROOT_DIR=/usr/local/boost_1_87_0"
 test-command = "pytest {project}/test/pyalps"
 
 [tool.cibuildwheel.macos]
-before-all = "brew unlink pkg-config@0.29.2; brew reinstall hdf5 fftw gfortran; wget https://archives.boost.io/beta/1.87.0.beta1/source/boost_1_87_0_b1.tar.gz; tar -xzf boost_1_87_0_b1.tar.gz; export Boost_ROOT_DIR=`pwd`/boost_1_86_0;"
+before-all = "brew reinstall hdf5 fftw gfortran; wget https://archives.boost.io/beta/1.87.0.beta1/source/boost_1_87_0_b1.tar.gz; tar -xzf boost_1_87_0_b1.tar.gz; export Boost_ROOT_DIR=`pwd`/boost_1_86_0;"
 environment = "Boost_ROOT_DIR=/Users/runner/work/ALPS/ALPS/boost_1_87_0"
 test-command = "pytest {project}/test/pyalps"
