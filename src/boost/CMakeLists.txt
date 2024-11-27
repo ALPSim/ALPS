@@ -160,8 +160,11 @@ if(BUILD_BOOST_PYTHON)
   if(PYTHON_VERSION GREATER 3 AND Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION LESS 63)
     message(WARNING "Python 3 support requires Boost 1.63.0 or newer. Previous versions might build but have sporadic segemtation faults at the end of the execution.")
   endif()
-  
-  set(BOOST_PYTHON_LINK_LIBS ${BOOST_LINK_LIBS} ${PYTHON_LIBRARY} ${PYTHON_EXTRA_LIBS})
+  if(ALPS_PYTHON_WHEEL AND PYTHON_VERSION VERSION_GREATER_EQUAL "3.13" AND APPLE)
+    set(BOOST_PYTHON_LINK_LIBS ${BOOST_LINK_LIBS} ${PYTHON_LIBRARY}) # ${PYTHON_EXTRA_LIBS})
+  else(ALPS_PYTHON_WHEEL AND PYTHON_VERSION VERSION_GREATER_EQUAL "3.13" AND APPLE)
+    set(BOOST_PYTHON_LINK_LIBS ${BOOST_LINK_LIBS} ${PYTHON_LIBRARY} ${PYTHON_EXTRA_LIBS})
+  endif(ALPS_PYTHON_WHEEL AND PYTHON_VERSION VERSION_GREATER_EQUAL "3.13" AND APPLE)
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/python/src")
   set(SOURCES dict.cpp errors.cpp exec.cpp import.cpp list.cpp long.cpp
       module.cpp numeric.cpp object_operators.cpp object_protocol.cpp slice.cpp

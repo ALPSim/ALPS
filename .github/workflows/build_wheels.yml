@@ -23,6 +23,7 @@ jobs:
         env:
           CIBW_BUILD: cp39-* cp310-* cp311-* cp312-* cp313-*
           CIBW_ARCHS: ${{ matrix.plat.arch }}
+          CIBW_ARCHS_MACOS: ${{ matrix.plat.arch }}
 
           CIBW_ENVIRONMENT_MACOS: >
             Boost_ROOT_DIR=/Users/runner/work/ALPS/ALPS/boost_1_87_0
