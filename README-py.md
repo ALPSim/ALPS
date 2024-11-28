@@ -29,7 +29,7 @@ pip install pyalps
 
 You need to download and unpack boost library:
 ```
-wget https://archives.boost.io/release/1.76.0/source/boost_1_86_0.tar.gz
+wget https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz
 tar -xzf boost_1_86_0.tar.gz
 ```
 Here we download `boost v1.86.0`, we have tested ALPS with versions `1.76.0` and `1.86.0`.
