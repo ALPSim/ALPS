@@ -76,7 +76,7 @@ jobs:
           CC:  ${{ matrix.plat.c_compiler }}-${{ matrix.plat.c_version }}
           CXX: ${{ matrix.plat.cxx_compiler }}-${{ matrix.plat.c_version }}
         run: |
-          cmake -S $GITHUB_WORKSPACE -B build -DBoost_ROOT_DIR=`pwd`/boost_1_${{ matrix.plat.boost_version }}_0 -DCMAKE_CXX_FLAGS="-std=c++14 -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED" -DPython_ROOT_DIR=/opt/homebrew/Cellar/python@3.12/3.12.7_1/
+          cmake -S $GITHUB_WORKSPACE -B build -DBoost_ROOT_DIR=`pwd`/boost_1_${{ matrix.plat.boost_version }}_0 -DCMAKE_CXX_FLAGS="-std=c++14 -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED" -DPython_ROOT_DIR=/opt/homebrew/Cellar/python@3.12/3.12.8/
           cmake --build build -j 2
           cmake --build build -j 2 -t test
 
