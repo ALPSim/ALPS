@@ -9,81 +9,32 @@
 
 # Since Boost_ROOT_DIR is used for setting Boost source directory,
 # we use precompiled Boost libraries only when Boost_ROOT_DIR is not set.
-if (NOT Boost_ROOT_DIR)
+message(STATUS "BOOST: ${Boost_SRC_DIR}")
 
-  # Old version of CMake (< 2.8.8) do not support for new Boost version
-  set(Boost_ADDITIONAL_VERSIONS "1.56.0" "1.56" "1.55.0" "1.55" "1.54.0" "1.54" "1.53.0" "1.53" "1.52.0" "1.52")
-  # Debian and Ubuntu packages are multithreaded by default but not on MacOSX.
-  # Explicitly set multithread flag.
-  set(Boost_USE_MULTITHREADED ON)
-  # If you want to use static libraries, uncomment this option.
-  #  set(Boost_USE_STATIC_LIBS ON)
-  # Debug flag for FindBoost.cmake
-  #  set(Boost_DEBUG TRUE)
+if (NOT Boost_SRC_DIR)
+  message(STATUS "Environment variable Boost_SRC_DIR has not been set.")
+  message(STATUS "Downloading the most recent Boost release...")
 
-  message(STATUS "Looking for precompiled Boost libraries (version >= 1.49)")
+  include(FetchContent)
 
-  # We do not require Boost.MPI, therefore check whether Boost.MPI exists
-  # before actual find_package for Boost.
-  # - Ubuntu 10.10 does not have Boost.MPI package.
-  set(MPI)
-  find_package(Boost 1.49.0 COMPONENTS mpi)
-  if (Boost_FOUND)
-    set(MPI mpi)
-  endif (Boost_FOUND)
-  # Linking to Boost.test Unit Test Framework is optional
-  set(UTF)
-  if (ALPS_LINK_BOOST_TEST)
-    find_package(Boost 1.49.0 COMPONENTS unit_test_framework)
-    if (Boost_FOUND)
-      set(UTF unit_test_framework)
-      # Unset ALPS_INSTALL_BOOST_TEST
-      # since Boost.Test dynamic library is already installed
-      unset(ALPS_INSTALL_BOOST_TEST)
-      # Add definitions needed to link Boost.test Unit Test Framework.
-      add_definitions(-DBOOST_TEST_DYN_LINK)
-      add_definitions(-DALPS_LINK_BOOST_TEST)
-    endif (Boost_FOUND)
-  endif(ALPS_LINK_BOOST_TEST)
-  # Linking to Boost.timer (v2) is not used (and thus optional) as of ALPS 2.1.
-  # However, Boost.timer (v2) is built and linked when boost is built together.
-  # Therefore, When Boost.timer (v2) is found, link ALPS against it.
-  set(TIMER)
-  find_package(Boost 1.49.0 COMPONENTS timer)
-  if (Boost_FOUND)
-    set(TIMER timer)
-  endif (Boost_FOUND)
-  set(NUMPY)
-  set(PYTHON python)
-  set(ALPS_HAVE_BOOST_NUMPY OFF)
-  find_package(Boost 1.49.0 COMPONENTS numpy${PYVER})
-  if (Boost_FOUND)
-    set(NUMPY numpy${PYVER})
-    set(PYTHON python${PYVER})
-    set(ALPS_HAVE_BOOST_NUMPY ON)
-  endif (Boost_FOUND)
-  if (NOT ALPS_HAVE_BOOST_NUMPY)
-    find_package(Boost 1.49.0 COMPONENTS numpy)
-    if (Boost_FOUND)
-      set(NUMPY numpy)
-      set(PYTHON python)
-      set(ALPS_HAVE_BOOST_NUMPY ON)
-    endif (Boost_FOUND)
-  endif (NOT ALPS_HAVE_BOOST_NUMPY)
-  # The final library finding for precompiled Boost.
-  if(ALPS_BUILD_PYTHON)
-    find_package(Boost 1.49.0 COMPONENTS chrono date_time filesystem iostreams program_options ${PYTHON} regex system serialization thread ${MPI} ${UTF} ${TIMER} ${NUMPY})
-  else(ALPS_BUILD_PYTHON)
-    find_package(Boost 1.49.0 COMPONENTS chrono date_time filesystem iostreams program_options regex system serialization thread ${MPI} ${UTF} ${TIMER})
-  endif(ALPS_BUILD_PYTHON)
-  # Unset local variable
-  unset(MPI)
-  unset(UTF)
-  unset(TIMER)
-  unset(NUMPY)
-  unset(PYTHON)
+  FetchContent_Declare(
+    boost_src
+    URL      https://boostorg.jfrog.io/artifactory/main/release/1.87.0/source/boost_1_87_0_rc1.tar.gz
+    URL_HASH SHA256=f55c340aa49763b1925ccf02b2e83f35fdcf634c9d5164a2acb87540173c741d
+    EXCLUDE_FROM_ALL
+  )
 
-endif(NOT Boost_ROOT_DIR)
+  FetchContent_MakeAvailable(boost_src)
+
+  message(STATUS "Boost sources are in ${boost_src_SOURCE_DIR}")
+
+#  set(Boost_FOUND TRUE)
+  set(Boost_ROOT_DIR ${boost_src_SOURCE_DIR})
+
+else(NOT Boost_SRC_DIR)
+  set(Boost_ROOT_DIR ${Boost_SRC_DIR})
+
+endif(NOT Boost_SRC_DIR)
 
 # Boost_FOUND is set only when FindBoost.cmake succeeds.
 # if not, build Boost libraries from source.

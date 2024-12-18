@@ -29,7 +29,7 @@ Here we download `boost v1.86.0`, we have tested ALPS with versions `1.76.0` and
 ```
 git clone https://github.com/alpsim/ALPS ALPS
 cmake -S ALPS -B alps_build -DCMAKE_INSTALL_PREFIX=</path/to/install/dir> \
-      -DBoost_ROOT_DIR=`pwd`/boost_1_86_0                                 \
+      -DBoost_SRC_DIR=`pwd`/boost_1_86_0                                 \
       -DCMAKE_CXX_FLAGS="-std=c++14 -fpermissive"
 cmake --build alps_build -j 8
 cmake --build alps_build -t test

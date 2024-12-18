@@ -38,7 +38,7 @@ Here we download `boost v1.86.0`, we have tested ALPS with versions `1.76.0` and
 ```
 git clone https://github.com/alpsim/ALPS ALPS
 cd ALPS
-Boost_ROOT_DIR=`pwd`/../boost_1_86_0 python3 -m build --wheel
+Boost_SRC_DIR=`pwd`/../boost_1_86_0 python3 -m build --wheel
 ```
 This will download the most recent version of ALPS from the github repository, and build pyALPS python package.
 
