@@ -9,7 +9,6 @@
 
 # Since Boost_ROOT_DIR is used for setting Boost source directory,
 # we use precompiled Boost libraries only when Boost_ROOT_DIR is not set.
-message(STATUS "BOOST: ${Boost_SRC_DIR}")
 
 if (NOT Boost_SRC_DIR)
   message(STATUS "Environment variable Boost_SRC_DIR has not been set.")
