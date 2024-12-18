@@ -111,6 +111,15 @@ else(Boost_ROOT_DIR)
   message(FATAL_ERROR "Boost Source not Found")
 endif(Boost_ROOT_DIR)
 
+if(BUILD_BOOST_PYTHON) 
+  MESSAGE(STATUS "Python interpreter ok : version ${PYTHON_VERSION}" )
+  EXEC_PYTHON_SCRIPT ("import numpy; print(numpy.__version__)" numpy_ver)
+  MESSAGE(STATUS "Python interpreter ok : version ${numpy_ver}" )
+  if(${numpy_ver} VERSION_GREATER_EQUAL "2.0.0" AND "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}" VERSION_LESS "1.87.0" )
+    message(FATAL_ERROR "NumPy version >=2.0 requres Boost version >=1.87.0, you have Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}.")
+  endif()
+endif()
+
 # Avoid auto link of Boost library
 add_definitions(-DBOOST_ALL_NO_LIB=1)
 if(BUILD_SHARED_LIBS)
