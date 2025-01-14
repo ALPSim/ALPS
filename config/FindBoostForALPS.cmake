@@ -18,7 +18,7 @@ if (NOT Boost_SRC_DIR)
 
   FetchContent_Declare(
     boost_src
-    URL      https://boostorg.jfrog.io/artifactory/main/release/1.87.0/source/boost_1_87_0_rc1.tar.gz
+    URL      https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.gz
     URL_HASH SHA256=f55c340aa49763b1925ccf02b2e83f35fdcf634c9d5164a2acb87540173c741d
     EXCLUDE_FROM_ALL
   )
