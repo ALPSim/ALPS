@@ -25,14 +25,17 @@ namespace alps {
   std::string temporary_filename(std::string name)
   {
     name +="XXXXXX";
+    char aux[255];
+    snprintf(aux, 255, "%s", name.c_str());
 
 #ifdef BOOST_MSVC
     name = _mktemp(const_cast<char*>(name.c_str()));
     int res=0; 
     //int res=open(name.c_str(),O_RDWR|O_BINARY|O_CREAT|O_EXCL|_O_SHORT_LIVED, 128|256);
 #else
-    name = mkstemp(const_cast<char*>(name.c_str()));
-    int res=0;
+//    name = mkstemp(const_cast<char*>(name.c_str()));
+    int res = mkstemp(aux);
+    name = aux;
     //int res = mkstemp(const_cast<char*>(name.c_str()));
 #endif
     if (res<0)
