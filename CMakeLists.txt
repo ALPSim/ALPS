@@ -211,9 +211,7 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
 ######################################################################
 
 if (ALPS_BUILD_PYTHON OR WIN32)
-  #set(ALPS_PYTHON_LIB_DEST_ROOT "" CACHE PATH "")
   find_package(PythonMod REQUIRED) # COMPONENTS Interpreter Development.Module )
-  message(STATUS "PYTHON: !!!!!!! ${ALPS_PYTHON_LIB_DEST_ROOT}")
 endif (ALPS_BUILD_PYTHON OR WIN32)
 
 if (ALPS_BUILD_SOURCE)
@@ -848,7 +846,6 @@ else (ALPS_BUILD_SOURCE)
           FILES_MATCHING PATTERN "*.xsl"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 
-    #configure_file(${PROJECT_SOURCE_DIR}/lib/pyalps/pyalps_config.py.in ${PROJECT_BINARY_DIR}/lib/pyalps/pyalps_config.py)
     install(DIRECTORY lib/pyalps DESTINATION ${ALPS_PYTHON_LIB_DEST_ROOT}  COMPONENT python
           FILES_MATCHING PATTERN "*.py" PATTERN "*.pyc"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
