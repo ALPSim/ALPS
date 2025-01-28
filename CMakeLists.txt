@@ -211,7 +211,9 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
 ######################################################################
 
 if (ALPS_BUILD_PYTHON OR WIN32)
+  #set(ALPS_PYTHON_LIB_DEST_ROOT "" CACHE PATH "")
   find_package(PythonMod REQUIRED) # COMPONENTS Interpreter Development.Module )
+  message(STATUS "PYTHON: !!!!!!! ${ALPS_PYTHON_LIB_DEST_ROOT}")
 endif (ALPS_BUILD_PYTHON OR WIN32)
 
 if (ALPS_BUILD_SOURCE)
@@ -256,7 +258,7 @@ else (ALPS_BUILD_SOURCE)
       endif (APPLE)
     else (ALPS_FOR_VISTRAILS)
       if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-        set(CMAKE_INSTALL_PREFIX "/opt/alps" CACHE PATH "ALPS install prefix" FORCE)
+#        set(CMAKE_INSTALL_PREFIX "/opt/alps" CACHE PATH "ALPS install prefix" FORCE)
       endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     endif (ALPS_FOR_VISTRAILS)
   endif(WIN32 AND NOT UNIX)
@@ -568,7 +570,7 @@ set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 if(APPLE AND (CMAKE_VERSION VERSION_LESS 2.8.12))
   set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
 else(APPLE AND (CMAKE_VERSION VERSION_LESS 2.8.12))
-  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+  SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH}:$ORIGIN/../lib")
   set(CMAKE_SKIP_BUILD_RPATH FALSE)
   set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
   set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
@@ -846,7 +848,8 @@ else (ALPS_BUILD_SOURCE)
           FILES_MATCHING PATTERN "*.xsl"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 
-    install(DIRECTORY lib/pyalps DESTINATION lib  COMPONENT python
+    #configure_file(${PROJECT_SOURCE_DIR}/lib/pyalps/pyalps_config.py.in ${PROJECT_BINARY_DIR}/lib/pyalps/pyalps_config.py)
+    install(DIRECTORY lib/pyalps DESTINATION ${ALPS_PYTHON_LIB_DEST_ROOT}  COMPONENT python
           FILES_MATCHING PATTERN "*.py" PATTERN "*.pyc"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
           
@@ -864,6 +867,18 @@ else (ALPS_BUILD_SOURCE)
             
     install(FILES LICENSE.txt README.txt  LICENSE-applications.txt CITATIONS.txt
             DESTINATION share/alps COMPONENT libraries)
+    string(CONFIGURE [[
+     set(PROJECT_SOURCE_DIR "@PROJECT_SOURCE_DIR@")
+     set(ALPS_PYTHON_LIB_DEST_ROOT "@ALPS_PYTHON_LIB_DEST_ROOT@")
+     message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
+     message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
+     message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
+     message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+     message(STATUS "ALPS_PYTHON_LIB_DEST_ROOT: ${ALPS_PYTHON_LIB_DEST_ROOT}")
+
+     configure_file(${PROJECT_SOURCE_DIR}/lib/pyalps/pyalps_config.py.in ${CMAKE_INSTALL_PREFIX}/${ALPS_PYTHON_LIB_DEST_ROOT}/pyalps/pyalps_config.py)
+    ]] install_script @ONLY)
+    install(CODE ${install_script})
             
     if (VISTRAILS_FOUND AND (APPLE OR WIN32))
       message (STATUS "VisTrails found.")

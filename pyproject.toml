@@ -26,7 +26,7 @@ cmake.define.ALPS_PYTHON_WHEEL = "ON"
 
 [project]
 name = "pyalps"
-version = "2.3.3b6"
+version = "2.3.3b7"
 authors = [
   { name="Sergei Iskakov", email="siskakov@umich.edu" },
 ]

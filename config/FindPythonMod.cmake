@@ -242,6 +242,10 @@ ENDIF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
 
 set (PYTHONLIBS_FOUND ${PYTHON_FOUND})
 
+
+EXEC_PYTHON_SCRIPT("import sys; print('{}.{}'.format(sys.version_info.major,sys.version_info.minor))" PYVER) # e.g. 27, 38
+set(ALPS_PYTHON_LIB_DEST_ROOT lib/python${PYVER}/site-packages CACHE PATH "Module install path")
+
 #
 # This function writes down a script to compile f2py modules
 # indeed, one needs to use the f2py of the correct numpy module.

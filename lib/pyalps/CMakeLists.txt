@@ -76,7 +76,7 @@ if (ALPS_HAVE_PYTHON AND NOT ALPS_BUILD_LIBS_ONLY)
     set_target_properties(maxent_c PROPERTIES COMPILE_FLAGS "-DBUILD_PYTHON_MODULE") 
     set_target_properties(cthyb PROPERTIES COMPILE_FLAGS "-DBUILD_PYTHON_MODULE") 
     set_target_properties(ctint PROPERTIES COMPILE_FLAGS "-DBUILD_PYTHON_MODULE") 
- endif(LAPACK_FOUND AND ALPS_BUILD_APPLICATIONS)
+  endif(LAPACK_FOUND AND ALPS_BUILD_APPLICATIONS)
 
   python_add_module(pyalea_c ${PYALEA_SOURCES})
   python_add_module(pymcdata_c ${PYMCDATA_SOURCES})
@@ -111,6 +111,7 @@ if (ALPS_HAVE_PYTHON AND NOT ALPS_BUILD_LIBS_ONLY)
       set_target_properties(${name} PROPERTIES INSTALL_RPATH "${CMAKE_BINARY_DIR}/src/alps;${CMAKE_BINARY_DIR}/src/boost" )
     else()
       target_link_libraries(${name} alps)
+      set_target_properties(${name} PROPERTIES INSTALL_RPATH "$ORIGIN/../../.." )
     endif()
   ENDFOREACH(name)
 
@@ -125,11 +126,19 @@ if (ALPS_HAVE_PYTHON AND NOT ALPS_BUILD_LIBS_ONLY)
             LIBRARY DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps)
   endif (ALPS_INSTALL_VISTRAILS_PACKAGES)
   if (NOT ALPS_FOR_VISTRAILS)
-    install(TARGETS ${PYALPS_SOURCES}
+    if(NOT ALPS_PYTHON_WHEEL)
+      install(TARGETS ${PYALPS_SOURCES}
+            COMPONENT python
+            RUNTIME DESTINATION ${ALPS_PYTHON_LIB_DEST_ROOT}/pyalps/bin
+            ARCHIVE DESTINATION ${ALPS_PYTHON_LIB_DEST_ROOT}/pyalps
+            LIBRARY DESTINATION ${ALPS_PYTHON_LIB_DEST_ROOT}/pyalps)
+    else(NOT ALPS_PYTHON_WHEEL)
+      install(TARGETS ${PYALPS_SOURCES}
             COMPONENT python
             RUNTIME DESTINATION pyalps/bin
             ARCHIVE DESTINATION pyalps
             LIBRARY DESTINATION pyalps)
+    endif(NOT ALPS_PYTHON_WHEEL)
   endif(NOT ALPS_FOR_VISTRAILS)
   set(BUILD_SHARED_LIBS ${OLD_SHARED})
 endif (ALPS_HAVE_PYTHON AND NOT ALPS_BUILD_LIBS_ONLY)

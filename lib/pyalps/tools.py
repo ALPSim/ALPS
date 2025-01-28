@@ -56,7 +56,12 @@ import scipy.interpolate
 if not "ALPS_XML_PATH" in os.environ:
     import pyalps
     path = os.path.dirname(pyalps.__file__) + "/xml"
-    os.environ["ALPS_XML_PATH"] = path
+    if os.path.isdir(path):
+        os.environ["ALPS_XML_PATH"] = path
+    else:
+        from . import pyalps_config
+        os.environ["ALPS_XML_PATH"] = pyalps_config.ALPS_XML_INSTALL_DIR
+    
 
 def check_existence(cmd):
     if cmd is None:
@@ -69,7 +74,11 @@ def check_existence(cmd):
         import os
         import pyalps
         path = os.path.dirname(pyalps.__file__) + "/bin"
-        os.environ["PATH"] += os.pathsep + path
+        if os.path.isdir(path):
+            os.environ["PATH"] += os.pathsep + path
+        else:
+            from . import pyalps_config
+            os.environ["PATH"] += os.pathsep + pyalps_config.ALPS_BIN_INSTALL_DIR
         if shutil.which(cmd) is None:
             raise RuntimeError(f"There is no {cmd} on the path!")
 
