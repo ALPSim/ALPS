@@ -31,3 +31,4 @@ tests/cluster_helper_test
 tests/cluster_transform_test
 tests/double_cell_transform_test
 tests/normal_state_transform_test
+build

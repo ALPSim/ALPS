@@ -23,6 +23,7 @@ endif()
 
 add_subdirectory(libcluster)
 add_subdirectory(libselfconsistency)
+add_subdirectory(libsolver)
 add_subdirectory(tests)
 
 include_directories(${BLAS_CLASSES_INCLUDE_DIR})
