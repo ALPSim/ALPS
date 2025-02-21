@@ -30,6 +30,7 @@ version = "2.3.3b7"
 authors = [
   { name="Sergei Iskakov", email="siskakov@umich.edu" },
 ]
+license = {text = "MIT License"}
 
 dependencies = ["numpy<2.1", "scipy"]
 

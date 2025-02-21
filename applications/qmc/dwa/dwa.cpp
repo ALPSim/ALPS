@@ -9,21 +9,22 @@
 *                       Lode Pollet      <pollet@phys.ethz.ch> ,
 *                       Ping Nang Ma     <tamama@yotcopi.com> 
 *
-* This software is part of the ALPS libraries, published under the ALPS
-* Library License; you can use, redistribute it and/or modify it under
-* the terms of the license, either version 1 or (at your option) any later
-* version.
+* Permission is hereby granted, free of charge, to any person obtaining
+* a copy of this software and associated documentation files (the “Software”),
+* to deal in the Software without restriction, including without limitation
+* the rights to use, copy, modify, merge, publish, distribute, sublicense,
+* and/or sell copies of the Software, and to permit persons to whom the
+* Software is furnished to do so, subject to the following conditions:
 *
-* You should have received a copy of the ALPS Library License along with
-* the ALPS Libraries; see the file LICENSE.txt. If not, the license is also
-* available from http://alps.comp-phys.org/.
+* The above copyright notice and this permission notice shall be included
+* in all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
-* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
-* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
-* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+* THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS
+* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 * DEALINGS IN THE SOFTWARE.
 *
 *****************************************************************************/
@@ -50,21 +51,22 @@ void
           << "\n*                       Lode Pollet      <pollet@phys.ethz.ch> ,"
           << "\n*                       Ping Nang Ma     <pingnang@phys.ethz.ch>"
           << "\n*"
-          << "\n* This software is part of the ALPS libraries, published under the ALPS"
-          << "\n* Library License; you can use, redistribute it and/or modify it under"
-          << "\n* the terms of the license, either version 1 or (at your option) any later"
-          << "\n* version."
+          << "\n* Permission is hereby granted, free of charge, to any person obtaining"
+          << "\n* a copy of this software and associated documentation files (the “Software”),"
+          << "\n* to deal in the Software without restriction, including without limitation"
+          << "\n* the rights to use, copy, modify, merge, publish, distribute, sublicense,"
+          << "\n* and/or sell copies of the Software, and to permit persons to whom the"
+          << "\n* Software is furnished to do so, subject to the following conditions:"
           << "\n*"
-          << "\n* You should have received a copy of the ALPS Library License along with"
-          << "\n* the ALPS Libraries; see the file LICENSE.txt. If not, the license is also"
-          << "\n* available from http://alps.comp-phys.org/."
+          << "\n* The above copyright notice and this permission notice shall be included"
+          << "\n* in all copies or substantial portions of the Software."
           << "\n*"
-          << "\n* THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR"
-          << "\n* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"
-          << "\n* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT"
-          << "\n* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE"
-          << "\n* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,"
-          << "\n* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER"
+          << "\n* THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS"
+          << "\n* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"
+          << "\n* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE"
+          << "\n* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER"
+          << "\n* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING"
+          << "\n* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER"
           << "\n* DEALINGS IN THE SOFTWARE."
           << "\n*"
           << "\n*****************************************************************************/"
