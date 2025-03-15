@@ -1,5 +1,5 @@
 [build-system]
-requires = ["scikit-build-core", "numpy<2.1", "scipy", "patchelf==0.14.5.0"]
+requires = ["scikit-build-core", "numpy<2.1", "scipy"]
 build-backend = "scikit_build_core.build"
 
 [tool.scikit-build]
