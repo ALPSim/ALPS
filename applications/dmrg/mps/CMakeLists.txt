@@ -100,7 +100,7 @@ else(NOT LAPACK_FOUND)
 
   if(ALPS_INSTALL_MPS_FRAMEWORK)
 if(ALPS_PYTHON_WHEEL)
-
+   install(TARGETS mps_models mps_utils DESTINATION pyalps/lib EXPORT ALPSMPS-targets)
 else()
     ### INSTALL LIBS
     install(TARGETS mps_models mps_utils DESTINATION lib EXPORT ALPSMPS-targets)

@@ -1,11 +1,11 @@
 [build-system]
-requires = ["scikit-build-core", "numpy<2.1", "scipy"]
+requires = ["scikit-build-core", "numpy<2.1", "scipy", "patchelf==0.14.5.0"]
 build-backend = "scikit_build_core.build"
 
 [tool.scikit-build]
 wheel.packages = ["python/pyalps"]
 cmake.verbose = true
-build-dir = "./build_alps"
+#build-dir = "./build_alps"
 #build.tool-args = ["-j8", "-l13"]
 logging.level = "DEBUG"
 
@@ -75,7 +75,8 @@ test-command = "pytest {project}/test"
 manylinux-x86_64-image = "manylinux_2_28"
 
 [tool.cibuildwheel.linux]
-before-all = "dnf install -y epel-release; dnf config-manager --set-enabled powertools; dnf install -y fftw-devel hdf5-devel openblas-devel wget;"
+before-all = "dnf install -y epel-release; dnf config-manager --set-enabled powertools; dnf install -y fftw-devel hdf5-devel openblas-devel wget; pipx install patchelf==0.14.5.0 --force"
+#before-build=""
 test-command = "pytest {project}/test/pyalps"
 
 [tool.cibuildwheel.macos]

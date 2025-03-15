@@ -432,6 +432,15 @@ if (NOT Boost_FOUND)
               LIBRARY DESTINATION lib)
       endif(ALPS_INSTALL_BOOST_TEST)
     endif (NOT ALPS_FOR_VISTRAILS)
+    else ()
+      install(TARGETS ${ALPS_BOOST_LIBRARY_NAME}  COMPONENT libraries
+              RUNTIME DESTINATION pyalps/bin
+              ARCHIVE DESTINATION pyalps/lib
+              LIBRARY DESTINATION pyalps/lib)
+      install(TARGETS ${ALPS_BOOST_PYTHON_LIBRARY_NAME} COMPONENT libraries
+              RUNTIME DESTINATION pyalps/bin
+              ARCHIVE DESTINATION pyalps/lib
+              LIBRARY DESTINATION pyalps/lib)
     endif()
   endif (NOT ALPS_BUILD_SOURCE)
 endif (NOT Boost_FOUND)

@@ -187,7 +187,7 @@ if(MSVC)
 endif(MSVC)
 
 # Set soversion for library
-if(NOT WIN32 AND NOT APPLE)
+if(NOT WIN32 AND NOT APPLE AND NOT ALPS_PYTHON_WHEEL)
   set_target_properties(alps
     PROPERTIES
     SOVERSION "${ALPS_VERSION_MAJOR}"
@@ -214,12 +214,7 @@ if (NOT ALPS_FOR_VISTRAILS)
           ARCHIVE DESTINATION lib
           LIBRARY DESTINATION lib
           RUNTIME DESTINATION bin)
-  if(ALPS_PYTHON_WHEEL)
-    install(TARGETS alps_python COMPONENT libraries
-          ARCHIVE DESTINATION lib
-          LIBRARY DESTINATION lib
-          RUNTIME DESTINATION bin)
-  endif()
+
 endif (NOT ALPS_FOR_VISTRAILS)
 
 if (ALPS_FOR_VISTRAILS)
@@ -251,4 +246,13 @@ if(ALPS_BUILD_FORTRAN)
             RUNTIME DESTINATION ${VISTRAILS_DYLIB_DIR})
   endif(ALPS_INSTALL_VISTRAILS_PACKAGES)
 endif(ALPS_BUILD_FORTRAN)
+else ()
+  install(TARGETS alps_python COMPONENT libraries
+          ARCHIVE DESTINATION pyalps/lib
+          LIBRARY DESTINATION pyalps/lib
+          RUNTIME DESTINATION pyalps/bin)
+  install(TARGETS alps COMPONENT libraries
+          ARCHIVE DESTINATION pyalps/lib
+          LIBRARY DESTINATION pyalps/lib
+          RUNTIME DESTINATION pyalps/bin)
 endif()
