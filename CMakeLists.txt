@@ -413,9 +413,6 @@ if(MSVC AND SQLite_FOUND)
   file(COPY ${SQLite_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
 endif(MSVC AND SQLite_FOUND)
 
-# FFTW
-find_package(FFTW)
-
 # LPSolve
 find_package(LPSolve)
 
