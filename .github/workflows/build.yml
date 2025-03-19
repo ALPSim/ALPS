@@ -44,7 +44,7 @@ jobs:
         run: |
           sudo apt-get update
           python -m pip install --upgrade pip
-          pip install numpy==1.26.4 scipy
+          pip install numpy==1.26.4 scipy==1.13.0
           sudo apt install ${{ matrix.plat.comp_pack }}
           sudo apt install liblapack-dev libblas-dev libopenmpi-dev libhdf5-serial-dev
           wget https://archives.boost.io/release/1.${{ matrix.plat.boost_version }}.0/source/boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
@@ -73,7 +73,7 @@ jobs:
         run: |
           brew install gcc python@${{ matrix.plat.py_version }}
           python${{ matrix.plat.py_version }} -m pip install --upgrade pip --break-system-packages
-          pip${{ matrix.plat.py_version }} install numpy==1.26.4 scipy --break-system-packages
+          pip${{ matrix.plat.py_version }} install numpy==1.26.4 scipy==1.13.0 --break-system-packages
           brew install openmpi hdf5
           wget https://archives.boost.io/release/1.${{ matrix.plat.boost_version }}.0/source/boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
           tar -xzf boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
