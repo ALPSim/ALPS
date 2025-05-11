@@ -21,6 +21,7 @@ jobs:
         - { os: ubuntu-24.04, target: "", comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.12", boost_version: 86}
         - { os: ubuntu-24.04, target: "", comp_pack: "gcc-13 g++-13", c_compiler: gcc, cxx_compiler: g++, c_version: 13, py_version: "3.12", boost_version: 87}
         - { os: ubuntu-24.04, target: "", comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.12", boost_version: 87}
+        - { os: ubuntu-24.04, target: "", comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.12", boost_version: 88}
         - { os: ubuntu-22.04, target: "", comp_pack: "clang-13", c_compiler: clang, cxx_compiler: clang++, c_version: 13, py_version: "3.10", boost_version: 81}
         - { os: ubuntu-22.04, target: "", comp_pack: "clang-14", c_compiler: clang, cxx_compiler: clang++, c_version: 14, py_version: "3.10", boost_version: 81}
         - { os: ubuntu-22.04, target: "", comp_pack: "clang-15", c_compiler: clang, cxx_compiler: clang++, c_version: 15, py_version: "3.10", boost_version: 81}
@@ -33,6 +34,7 @@ jobs:
         - { os: ubuntu-24.04, target: "", comp_pack: "clang-16", c_compiler: clang, cxx_compiler: clang++, c_version: 16, py_version: "3.12", boost_version: 86}
         - { os: ubuntu-24.04, target: "", comp_pack: "clang-17", c_compiler: clang, cxx_compiler: clang++, c_version: 17, py_version: "3.12", boost_version: 86}
         - { os: ubuntu-24.04, target: "", comp_pack: "clang-18", c_compiler: clang, cxx_compiler: clang++, c_version: 18, py_version: "3.12", boost_version: 86}
+        - { os: ubuntu-24.04, target: "", comp_pack: "clang-18", c_compiler: clang, cxx_compiler: clang++, c_version: 18, py_version: "3.12", boost_version: 88}
 
     steps:
       - uses: actions/checkout@v4
@@ -66,13 +68,15 @@ jobs:
         # macos-13 is an intel runner, macos-14 is apple silicon
         plat: 
         - { os: macos-14, target: "", comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.12", boost_version: 86}
+        - { os: macos-15, target: "", comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.12", boost_version: 88}
 
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
         run: |
           brew install gcc python@${{ matrix.plat.py_version }}
-          python${{ matrix.plat.py_version }} -m pip install --upgrade pip --break-system-packages
+          # pip already exists, pip install fails
+          # python${{ matrix.plat.py_version }} -m pip install --upgrade pip --break-system-packages
           pip${{ matrix.plat.py_version }} install numpy==1.26.4 scipy==1.13.0 --break-system-packages
           brew install openmpi hdf5
           wget https://archives.boost.io/release/1.${{ matrix.plat.boost_version }}.0/source/boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
