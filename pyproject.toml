@@ -32,7 +32,7 @@ authors = [
 ]
 license = {text = "MIT License"}
 
-dependencies = ["numpy<2.1", "scipy"]
+dependencies = ["numpy", "scipy"]
 
 description = "Python Applications and Libraries for Physics Simulations"
 readme = "README-py.md"
