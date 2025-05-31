@@ -18,6 +18,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Install Fortran compiler based on OS
+      - name: Install dependencies
+        run: |
+          if [ "${{ matrix.plat.os }}" = "ubuntu-latest" ]; then
+            sudo apt-get update
+            sudo apt-get install -y gfortran
+          else
+            brew update
+            brew install gfortran
+          fi
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.22.0
         env:
@@ -25,6 +36,10 @@ jobs:
           CIBW_ARCHS: ${{ matrix.plat.arch }}
           CIBW_ARCHS_MACOS: ${{ matrix.plat.arch }}
 
+          # Set Fortran compiler for all platforms
+          CIBW_ENVIRONMENT: "FC=gfortran"
+
+          # macOS-specific settings
           CIBW_ENVIRONMENT_MACOS: >
             Boost_ROOT_DIR=/Users/runner/work/ALPS/ALPS/boost_1_87_0
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.plat.target }}
