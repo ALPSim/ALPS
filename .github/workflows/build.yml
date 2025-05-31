@@ -95,16 +95,19 @@ jobs:
           ln -s /opt/homebrew/bin/python${{ matrix.plat.py_version }} /opt/homebrew/bin/python
 
           # Configure Clang
-          echo "CC=clang" >> $GITHUB_ENV
-          echo "CXX=clang++" >> $GITHUB_ENV
+          #echo "CC=clang" >> $GITHUB_ENV
+          #echo "CXX=clang++" >> $GITHUB_ENV
         
       - name: Build ALPS
         env:
-          CC:  ${{ matrix.plat.c_compiler }}-${{ matrix.plat.c_version }}
-          CXX: ${{ matrix.plat.cxx_compiler }}-${{ matrix.plat.c_version }}
+          #CC:  ${{ matrix.plat.c_compiler }}-${{ matrix.plat.c_version }}
+          #CXX: ${{ matrix.plat.cxx_compiler }}-${{ matrix.plat.c_version }}
           FC: gfortran
         run: |
-          cmake -S $GITHUB_WORKSPACE -B build -DBoost_ROOT_DIR=`pwd`/boost_1_${{ matrix.plat.boost_version }}_0 -DCMAKE_CXX_FLAGS="-std=c++14 -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED" -DPython_ROOT_DIR=`/opt/homebrew/bin/python${{ matrix.plat.py_version }} -c "import sys, os; print(os.path.dirname(os.path.dirname(str(sys.executable))));"` \
+          cmake -S $GITHUB_WORKSPACE -B build \
+                -DCMAKE_C_COMPILER=/usr/bin/clang \
+                -DCMAKE_CXX_COMPILER=/usr/bin/clang++ \
+                -DBoost_ROOT_DIR=`pwd`/boost_1_${{ matrix.plat.boost_version }}_0 -DCMAKE_CXX_FLAGS="-std=c++14 -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED" -DPython_ROOT_DIR=`/opt/homebrew/bin/python${{ matrix.plat.py_version }} -c "import sys, os; print(os.path.dirname(os.path.dirname(str(sys.executable))));"` \
                 -DCMAKE_Fortran_COMPILER=gfortran
 
           cmake --build build -j $(sysctl -n hw.ncpu)
