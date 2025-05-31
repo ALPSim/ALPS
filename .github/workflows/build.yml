@@ -66,28 +66,50 @@ jobs:
     strategy:
       matrix:
         # macos-13 is an intel runner, macos-14 is apple silicon
+        # - { os: macos-14, target: "", comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.12", boost_version: 86}
+        # - { os: macos-15, target: "", comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.12", boost_version: 88}
         plat: 
-        - { os: macos-14, target: "", comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.12", boost_version: 86}
-        - { os: macos-15, target: "", comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.12", boost_version: 88}
-
+        - { os: macos-14, target: "", comp_pack: "clang", c_compiler: clang, cxx_compiler: clang++, c_version: "", py_version: "3.12", boost_version: 86}
+        - { os: macos-15, target: "", comp_pack: "clang", c_compiler: clang, cxx_compiler: clang++, c_version: "", py_version: "3.12", boost_version: 88}
+       
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
         run: |
-          brew install gcc python@${{ matrix.plat.py_version }}
+          # brew install gcc python@${{ matrix.plat.py_version }}
           # pip already exists, pip install fails
           # python${{ matrix.plat.py_version }} -m pip install --upgrade pip --break-system-packages
+
+          # Install Python and Fortran
+          brew install python@${{ matrix.plat.py_version }} gfortran
           pip${{ matrix.plat.py_version }} install numpy==1.26.4 scipy==1.13.0 --break-system-packages
+
+          # Install build dependencies
           brew install openmpi hdf5
+          
+          # Download Boost
           wget https://archives.boost.io/release/1.${{ matrix.plat.boost_version }}.0/source/boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
           tar -xzf boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
+
+          # Create Python symlink
           ln -s /opt/homebrew/bin/python${{ matrix.plat.py_version }} /opt/homebrew/bin/python
+
+          # Configure Clang
+          echo "CC=clang" >> $GITHUB_ENV
+          echo "CXX=clang++" >> $GITHUB_ENV
+        
       - name: Build ALPS
         env:
           CC:  ${{ matrix.plat.c_compiler }}-${{ matrix.plat.c_version }}
           CXX: ${{ matrix.plat.cxx_compiler }}-${{ matrix.plat.c_version }}
+          FC: gfortran
         run: |
-          cmake -S $GITHUB_WORKSPACE -B build -DBoost_ROOT_DIR=`pwd`/boost_1_${{ matrix.plat.boost_version }}_0 -DCMAKE_CXX_FLAGS="-std=c++14 -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED" -DPython_ROOT_DIR=`/opt/homebrew/bin/python${{ matrix.plat.py_version }} -c "import sys, os; print(os.path.dirname(os.path.dirname(str(sys.executable))));"`
-          cmake --build build -j 2
-          cmake --build build -j 2 -t test
+          cmake -S $GITHUB_WORKSPACE -B build -DBoost_ROOT_DIR=`pwd`/boost_1_${{ matrix.plat.boost_version }}_0 -DCMAKE_CXX_FLAGS="-std=c++14 -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED" -DPython_ROOT_DIR=`/opt/homebrew/bin/python${{ matrix.plat.py_version }} -c "import sys, os; print(os.path.dirname(os.path.dirname(str(sys.executable))));"` \
+                -DCMAKE_Fortran_COMPILER=gfortran
+
+          cmake --build build -j $(sysctl -n hw.ncpu)
+          cmake --build build -t test
+        
+          #cmake --build build -j 2
+          #cmake --build build -j 2 -t test
 
