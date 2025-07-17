@@ -10,6 +10,7 @@ T    = 0.05;
 SWEEPS=2000000;
 THERMALIZATION=150000;
 SKIP=500;
+MEASURE[Winding Number]=1;
 
 { L=4; t=0.01; }
 { L=4; t=0.02; }
