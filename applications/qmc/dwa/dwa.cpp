@@ -1040,8 +1040,10 @@ void
         total_particle_number += wl.site_state(site);
         double this_energy_vertex = -static_cast<double>(wl.num_kinks(site)-1)/2;
         double this_energy_onsite = onsite_energy(site, wl.site_state(site));
-        for (neighbor_bond_iterator it=neighbor_bonds(site).first; it != neighbor_bonds(site).second; ++it)
-            this_energy_onsite += onbond_energy(*it, wl.site_state(site), wl.site_state(target(*it)))/2.; 
+        if (!is_diagonal_onsite_) {
+          for (neighbor_bond_iterator it=neighbor_bonds(site).first; it != neighbor_bonds(site).second; ++it)
+              this_energy_onsite += onbond_energy(*it, wl.site_state(site), wl.site_state(target(*it)))/2.; 
+        }
         total_energy_vertex   += this_energy_vertex;
         total_energy_onsite   += this_energy_onsite;
         if (measure_density2_)
