@@ -150,8 +150,8 @@ def plot3D(sets, centeredAtOrigin=False, layer=None):
     if len(shape) < 2 or len(shape) > 3:
       return;
 
-    x = np.arange(shape[0]);
-    y = np.arange(shape[1]);
+    x = np.arange(shape[0], dtype = float);
+    y = np.arange(shape[1], dtype = float);
     if centeredAtOrigin:
       x -= (shape[0]-1)/2.
       y -= (shape[1]-1)/2.
@@ -162,7 +162,7 @@ def plot3D(sets, centeredAtOrigin=False, layer=None):
       if layer == None: # column integrate
         Z = np.sum(Z, axis=2);
       elif layer == "center":
-        Z = Z[:,:,shape[2]/2]
+        Z = Z[:,:,shape[2]//2]
       else:
         Z = Z[:,:,layer]
 

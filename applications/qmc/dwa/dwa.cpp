@@ -70,7 +70,29 @@ void
           << "\n* DEALINGS IN THE SOFTWARE."
           << "\n*"
           << "\n*****************************************************************************/"
-          << "\n\n";
+          << "\n\n"
+   	  << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+          << "\n\n"
+          << "\n! WARNING WARNING WARNING "
+          << "\n\n"
+          << "\n! This code is deprecated and will be removed in a future version of ALPS. "
+          << "\n! Meanwhile, we refer to an open source code with similar functionality which "
+          << "\n! can be found here: "
+          << "\n! N. Sadoune and L. Pollet, Efficient and scalable path integral Monte Carlo "
+          << "\n! simulations with worm-type updates for Bose-Hubbard and XXZ models "
+          << "\n! https://scipost.org/SciPostPhysCodeb.9 "
+          << "\n! doi:10.21468/SciPostPhysCodeb.9 "
+          << "\n! doi:10.21468/SciPostPhysCodeb.9-r1.0 "
+          << "\n! https://github.com/LodePollet/worm "
+          << "\n!" 
+          << "\n! Note that for the ALPS DWA code I currently cannot guarantee the results of "
+          << "\n! the momentum distribution nor of the TOF images. Only real space densities  "
+          << "\n! and quantities such as the winding number have been tested for on-site "
+          << "\n! interactions.    " 
+          << "\n! Contact: Lode Pollet <Lode.Pollet@lmu.de> "
+          << "\n\n"
+          << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+          << "\n\n\n\n";
     }
 
 void
@@ -999,9 +1021,9 @@ void
         std::cout << " Valid : ";
 #endif 
 
-      std::cout << "Checkpoint Sweep " << _sweep_counter
-                << " ... Probability : " << probability_worm_insertion() << " / " << probability_bounce() 
-                ;
+      //std::cout << "Checkpoint Sweep " << _sweep_counter
+      //          << " ... Probability : " << probability_worm_insertion() << " / " << probability_bounce() 
+      //          ;
 
       // measurements
       if (measure_)
@@ -1014,11 +1036,11 @@ void
       if (measure_simulation_speed_)
       {
         std::time(&_simulation_timer.second);
-        std::cout << " ... speed = " << std::difftime(_simulation_timer.second, _simulation_timer.first); 
+        //std::cout << " ... speed = " << std::difftime(_simulation_timer.second, _simulation_timer.first); 
         std::time(&_simulation_timer.first);
       }      
 
-      std::cout << "\n";
+      //std::cout << "\n";
     }
 
 void

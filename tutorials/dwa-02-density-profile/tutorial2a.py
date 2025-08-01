@@ -33,20 +33,20 @@ import pyalps
 parms = [
   {
     'LATTICE' : 'inhomogeneous simple cubic lattice' ,
-    'L'       : 120 ,
+    'L'       : 21 ,
 
     'MODEL'   : 'boson Hubbard' ,
-    'Nmax'    : 20 ,
+    'Nmax'    : 5 ,
 
     't'  : 1. ,
     'U'  : 8.11 ,
-    'mu' : '4.05 - (0.0073752*(x-(L-1)/2.)*(x-(L-1)/2.) + 0.0036849*(y-(L-1)/2.)*(y-(L-1)/2.) + 0.0039068155*(z-(L-1)/2.)*(z-(L-1)/2.))' ,
+    'mu' : '4.05 - (0.2*(x-(L-1)/2.)*(x-(L-1)/2.) + 0.2*(y-(L-1)/2.)*(y-(L-1)/2.) + 0.2*(z-(L-1)/2.)*(z-(L-1)/2.))' ,
 
     'T'  : 1. ,
 
-    'THERMALIZATION' : 1500 ,
-    'SWEEPS'         : 7000 ,
-    'SKIP'           : 50 , 
+    'THERMALIZATION' : 2000,
+    'SWEEPS'         : 20000,
+    'SKIP'           : 10, 
 
     'MEASURE[Local Density]': 1
   }
