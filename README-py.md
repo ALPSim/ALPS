@@ -2,7 +2,7 @@
 
 ## Python Algorithms and Libraries for Physics Simulations
 
-This is python packages for `Algorithms and Libraries for Physics Simulations` project.
+This is python packages for `Algorithms and Libraries for Physics Simulations` project. For more information check [README.txt](https://pypi.org/project/pyalps/2.3.3/README.txt).
 
 ### Installation instruction from binaries
 
