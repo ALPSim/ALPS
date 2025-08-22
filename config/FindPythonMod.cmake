@@ -220,12 +220,14 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
       #
       # libraries which must be linked in when embedding
       #
+      if(NOT DEFINED PYTHON_EXTRA_LIBS)
       if(PYTHON_VERSION VERSION_LESS "3.11")
         EXEC_PYTHON_SCRIPT ("${PYFUNC_NORMALIZE_FLAGS}from distutils.sysconfig import * ;print( normalize_flags( str(get_config_var('LOCALMODLIBS')) + ' ' + str(get_config_var('LIBS')) + ' ' + str(get_config_var('LDFLAGS')) ))"
                   PYTHON_EXTRA_LIBS)
       else()
         EXEC_PYTHON_SCRIPT ("${PYFUNC_NORMALIZE_FLAGS}from sysconfig import * ;print( normalize_flags( str(get_config_var('LOCALMODLIBS')) + ' ' + str(get_config_var('LIBS')) + ' ' + str(get_config_var('LDFLAGS')) ))"
                   PYTHON_EXTRA_LIBS)
+      endif()
       endif()
       MESSAGE(STATUS "PYTHON_EXTRA_LIBS =${PYTHON_EXTRA_LIBS}" )
       mark_as_advanced(PYTHON_EXTRA_LIBS)
