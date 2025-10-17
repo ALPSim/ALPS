@@ -11,7 +11,7 @@ jobs:
         # macos-13 is an intel runner, macos-14 is apple silicon
         plat: 
         - { os: ubuntu-latest, target: "", arch: x86_64, homebrew: ''}
-        - { os: macos-13, target: "13.0" , arch: x86_64, homebrew: '/usr/local'}
+        #- { os: macos-13, target: "13.0" , arch: x86_64, homebrew: '/usr/local'} #DEPRECATED. Too old.
         - { os: macos-14, target: "14.0" , arch: arm64, homebrew: '/opt/homebrew'}
         - { os: macos-15, target: "15.0" , arch: arm64, homebrew: '/opt/homebrew'}
 
