@@ -315,10 +315,10 @@ AbstractFitter::AbstractFitter(const std::string& fit_file_name)
   char new_name[256];
   if (boost::filesystem::exists(fname)) {
     counter = 1;
-    sprintf(new_name, "%s_restart%i_LOG", fit_file_name.c_str(), counter);
+    snprintf(new_name, sizeof(new_name), "%s_restart%i_LOG", fit_file_name.c_str(), counter);
     while (boost::filesystem::exists(new_name)) {
       counter++;
-      sprintf(new_name, "%s_restart%i_LOG", fit_file_name.c_str(), counter);
+      snprintf(new_name, sizeof(new_name), "%s_restart%i_LOG", fit_file_name.c_str(), counter);
     }
     tracefile.open(new_name, std::fstream::out);
   } else
@@ -1148,8 +1148,8 @@ void AbstractFitter::print_results(const std::string filename) const
   char time_measure[256];
   boost::posix_time::time_duration time_used;
   time_used = boost::posix_time::second_clock::local_time() - start_time;
-  sprintf(time_measure,"\nRan %i hours, %i minutes %i seconds.", 
-               time_used.hours(), time_used.minutes(), 
+  snprintf(time_measure,sizeof(time_measure), "\nRan %i hours, %i minutes %i seconds.",
+               time_used.hours(), time_used.minutes(),
                time_used.seconds());
 
   mean_stream << "\n" << time_measure << std::endl;

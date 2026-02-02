@@ -254,7 +254,7 @@ class BasicOp: public dmtk::BMatrix<T>
       dqn.write(s);
       size_t n = _name.size()+1;
       char *t = new char[n];
-      sprintf(t, "%s", _name.c_str());
+      snprintf(t, sizeof(t), "%s", _name.c_str());
       size_t l = strlen(t);
       s.write((const char *)&l, sizeof(size_t));
       s.write((const char *)t, l*sizeof(char));

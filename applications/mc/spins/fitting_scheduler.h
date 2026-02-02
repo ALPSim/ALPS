@@ -266,7 +266,7 @@ protected:
     sim_results_set = theFitter->get_sim_results_plot_set();
 
     char title[50];
-    sprintf(title, "Fitting after %i steps", step);
+    snprintf(title, "Fitting after %i steps", step);
     alps::plot::Plot<double> myPlot(title);
     myPlot << exp_results_set;
     myPlot << sim_results_set;
@@ -276,8 +276,8 @@ protected:
     myPlot.show_legend(true);
 
     char plot_xml_name[128], plot_xmgr_name[128];
-    sprintf(plot_xml_name,"%s_results_plot%i.xml",namebase.c_str(),step);
-    sprintf(plot_xmgr_name, "%s_results_plot%i.xmgr", namebase.c_str(),step);
+    snprintf(plot_xml_name,"%s_results_plot%i.xml",namebase.c_str(),step);
+    snprintf(plot_xmgr_name, "%s_results_plot%i.xmgr", namebase.c_str(),step);
     make_and_show(myPlot, plot_xml_name, plot_xmgr_name, show_results_plots);
   }
 
@@ -289,7 +289,7 @@ protected:
     residui_set = theFitter->get_res_abs_plot_set();
 
     char title[50];
-    sprintf(title, "Residui after %i Steps and Measurement Error", step);
+    snprintf(title, "Residui after %i Steps and Measurement Error", step);
     alps::plot::Plot<double> myPlot(title);
     myPlot << exp_error_set;
     myPlot << residui_set;
@@ -299,8 +299,8 @@ protected:
     myPlot.show_legend(true);
 
     char plot_xml_name[128], plot_xmgr_name[128];
-    sprintf(plot_xml_name, "%s_residual_plot%i.xml", namebase.c_str(), step);
-    sprintf(plot_xmgr_name, "%s_residual_plot%i.xmgr", namebase.c_str(), step);
+    snprintf(plot_xml_name, "%s_residual_plot%i.xml", namebase.c_str(), step);
+    snprintf(plot_xmgr_name, "%s_residual_plot%i.xmgr", namebase.c_str(), step);
     make_and_show(myPlot, plot_xml_name, plot_xmgr_name, show_residui_plots);
   }
 
@@ -311,14 +311,14 @@ protected:
     alps::plot::Set<double> sim_percent = theFitter->get_res_percent_plot_set();
     
     char title[64];
-    sprintf(title, "Residuum Size and Measurement Error after %i steps", step);
+    snprintf(title, "Residuum Size and Measurement Error after %i steps", step);
     alps::plot::Plot<double> myPlot(title);
     myPlot << exp_percent_set;
     myPlot << sim_percent;
     
     char plot_xml_name[128], plot_xmgr_name[128];
-    sprintf(plot_xml_name, "%s_percent_plot%i.xml", namebase.c_str(), step);
-    sprintf(plot_xmgr_name, "%s_percent_plot%i.xmgr", namebase.c_str(), step);
+    snprintf(plot_xml_name, "%s_percent_plot%i.xml", namebase.c_str(), step);
+    snprintf(plot_xmgr_name, "%s_percent_plot%i.xmgr", namebase.c_str(), step);
     
     myPlot.set_labels("Temperature [K]", "Percents of Measurement value");
     myPlot.show_legend(true);
@@ -335,12 +335,12 @@ protected:
     out << plot;
                                                                                 
     char make_plot[128];
-    sprintf(make_plot, "plot2xmgr %s > %s", xml_name, xmgr_name);
+    snprintf(make_plot, "plot2xmgr %s > %s", xml_name, xmgr_name);
     system(make_plot);
                                                                                 
     if (show) {
       char show_plot[64];
-      sprintf(show_plot, "xmgrace %s &", xmgr_name);
+      snprintf(show_plot, "xmgrace %s &", xmgr_name);
       system(show_plot);
     }
   }
@@ -361,20 +361,20 @@ protected:
     char cmd[256];
 
     if (delete_infiles) {
-      sprintf(cmd,"rm %s.step%i.in.xml %s.step%i.task*.in.xml", 
+      snprintf(cmd,"rm %s.step%i.in.xml %s.step%i.task*.in.xml",
                namebase.c_str(),step_count, namebase.c_str(), step_count);
       system(cmd);
     }
 
     if (delete_runfiles) {
       // delete the runfiles of the previous step, as the ones of the current
-      sprintf(cmd,"rm %s.step%i.task*.out.run*", namebase.c_str(),step_count-1);
+      snprintf(cmd,"rm %s.step%i.task*.out.run*", namebase.c_str(),step_count-1);
       system(cmd);
     }
 
     if (delete_outfiles) {
       // again, delete the files of the previous step
-      sprintf(cmd,"rm %s.step%i.out.xml %s.step%i.task*.out.xml",
+      snprintf(cmd,"rm %s.step%i.out.xml %s.step%i.task*.out.xml",
                namebase.c_str(),step_count-1, namebase.c_str(), step_count-1);
       system(cmd);
     }

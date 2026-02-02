@@ -103,22 +103,22 @@ public:
                     dd = int((t - hh*3600 - mm*60 - ss)*100);
                     
                     if(ss < 10) 
-                      sprintf(cs,"0%i",ss);
+                      snprintf(cs, sizeof(cs), "0%i",ss);
                     else
-                      sprintf(cs,"%i",ss);
-                    if(mm < 10) 
-                      sprintf(cm,"0%i",mm);
+                      snprintf(cs, sizeof(cs), "%i",ss);
+                    if(mm < 10)
+                      snprintf(cm, sizeof(cm), "0%i",mm);
                     else
-                      sprintf(cm,"%i",mm);
-                    if(dd < 10) 
-                      sprintf(cd,"0%i",dd);
+                      snprintf(cm, sizeof(cm), "%i",mm);
+                    if(dd < 10)
+                      snprintf(cd, sizeof(cd), "0%i",dd);
                     else
-                      sprintf(cd,"%i",dd);
-                    sprintf(s,"%i:%s:%s.%s",hh,cm,cs,cd);
+                      snprintf(cd, sizeof(cd), "%i",dd);
+                    snprintf(s, sizeof(s), "%i:%s:%s.%s",hh,cm,cs,cd);
                     break;
                   case CTIMER_SECONDS:
                   default:
-                    sprintf(s,"%f sec.",t);
+                    snprintf(s, sizeof(s), "%f sec.",t);
                     break;
                 }
 
