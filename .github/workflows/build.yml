@@ -122,12 +122,12 @@ jobs:
       - name: Run tests
         run: cd build && ctest --output-on-failure --rerun-failed
         
-      -name: Upload test logs on failure
-       if: failure()
-       uses: actions/upload-artifact@v4
-       with:
-         name: test-logs-${{ github.run_id }}
-         path: |
-           build/Testing/Temporary/**
-           build/Testing/Temporary/LastTest.log
+      - name: Upload test logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs-${{ github.run_id }}
+          path: |
+            build/Testing/Temporary/**
+            build/Testing/Temporary/LastTest.log
 
