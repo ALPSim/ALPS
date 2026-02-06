@@ -12,8 +12,8 @@ jobs:
         plat: 
         - { os: ubuntu-latest, target: "", arch: x86_64, homebrew: ''}
         #- { os: macos-13, target: "13.0" , arch: x86_64, homebrew: '/usr/local'} #DEPRECATED. Too old.
-        - { os: macos-14, target: "14.0" , arch: arm64, homebrew: '/opt/homebrew'}
         - { os: macos-15, target: "15.0" , arch: arm64, homebrew: '/opt/homebrew'}
+        - { os: macos-26, target: "26.0" , arch: arm64, homebrew: '/opt/homebrew'}
 
     steps:
       - uses: actions/checkout@v4

@@ -70,9 +70,9 @@ jobs:
         # macos-13 is an intel runner, macos-14 is apple silicon
         # - { os: macos-14, target: "", comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.12", boost_version: 86}
         # - { os: macos-15, target: "", comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.12", boost_version: 88}
-        plat: 
-        - { os: macos-14, target: "", comp_pack: "clang", c_compiler: clang, cxx_compiler: clang++, c_version: "", py_version: "3.12", boost_version: 87}
+        plat:
         - { os: macos-15, target: "", comp_pack: "clang", c_compiler: clang, cxx_compiler: clang++, c_version: "", py_version: "3.12", boost_version: 87}
+        - { os: macos-26, target: "", comp_pack: "clang", c_compiler: clang, cxx_compiler: clang++, c_version: "", py_version: "3.12", boost_version: 87}
 
        
     steps:
