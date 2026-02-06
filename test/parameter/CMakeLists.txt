@@ -22,7 +22,7 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${Boost_ROOT_DIR})
 
 IF(NOT ALPS_LLVM_WORKAROUND)
-  FOREACH (name expression expression2 flatten parameter parameterlist parameterlist_xml parameters parameters_xml parameters_hdf5)
+  FOREACH (name expression expression2 flatten parameter parameterlist parameterlist_xml parameters parameters_xml)
     add_executable(${name} ${name}.C)
     add_dependencies(${name} alps)
     target_link_libraries(${name} alps)
