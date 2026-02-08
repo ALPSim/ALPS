@@ -1,6 +1,14 @@
 name: ALPS Python Packaging CI/CD
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main    # the default branch
+    tags:
+      - 'v*'    # this triggers the workflow when a tag starting with 'v' is pushed
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build_wheels:
@@ -83,7 +91,7 @@ jobs:
       id-token: write
     #if: github.event_name == 'release' && github.event.action == 'published'
     # or, alternatively, upload to PyPI on every tag starting with 'v' (remove on: release above to use this)
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')  || github.event_name == 'release'
+    if: startsWith(github.ref, 'refs/tags/v')  || github.event_name == 'release'
     steps:
       - uses: actions/download-artifact@v4
         with:
