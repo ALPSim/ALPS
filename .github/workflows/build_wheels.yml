@@ -3,12 +3,12 @@ name: ALPS Python Packaging CI/CD
 on:
   push:
     branches:
-      - main    # the default branch
+      - master    # the default branch
     tags:
       - 'v*'    # this triggers the workflow when a tag starting with 'v' is pushed
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   build_wheels:
