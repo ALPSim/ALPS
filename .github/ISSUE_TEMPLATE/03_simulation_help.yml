@@ -1,0 +1,84 @@
+name: Simulation help
+description: Ask for help with a simulation (tutorial, lattice, model, method)
+title: "[SimHelp]: "
+labels: ["question", "simulation"]
+body:
+  - type: textarea
+    id: tutorial_help
+    attributes:
+      label: Tutorial help (if applicable)
+      description: If your question relates to a specific tutorial, please provide details.
+      placeholder: |
+        - Tutorial name: [e.g., "ed-01-sparsediag"]
+        - What was not understood or went wrong? [describe]
+        - Is the result what you expected? [yes/no/not sure, and why]
+    validations:
+      required: false
+
+  - type: dropdown
+    id: lattice_dim
+    attributes:
+      label: Lattice dimension
+      description: What dimension is your lattice?
+      options:
+        - 1D
+        - 2D
+        - 3D
+    validations:
+      required: true
+
+  - type: dropdown
+    id: lattice_type
+    attributes:
+      label: Lattice type
+      description: What type of lattice are you using?
+      options:
+        - Square
+        - Triangular
+        - Honeycomb
+        - Kagome
+        - Chain (1D)
+        - Cubic (3D)
+        - Other (please specify in additional context)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: model
+    attributes:
+      label: Model
+      description: Which Hamiltonian/model are you simulating?
+      options:
+        - Ising
+        - Transverse Field Ising (TFIM)
+        - Heisenberg
+        - Bose-Hubbard
+        - Hubbard
+        - XY model
+        - Other (please specify in additional context)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: method
+    attributes:
+      label: Method
+      description: Which numerical method are you using?
+      options:
+        - Exact Diagonalization (ED)
+        - Quantum Monte Carlo (QMC)
+        - Density Matrix Renormalization Group (DMRG)
+        - Dynamical Mean Field Theory (DMFT)
+        - Other (please specify in additional context)
+    validations:
+      required: true
+
+  - type: textarea
+    id: file_or_log
+    attributes:
+      label: Logs, code, or attached files
+      description: |
+        **Paste relevant logs, code snippets, or error messages here.**
+        You can also **attach files** (e.g., input scripts, output files, screenshots) by dragging & dropping them into this field or clicking the "attach" icon below.
+      placeholder: |
+        Example: 
