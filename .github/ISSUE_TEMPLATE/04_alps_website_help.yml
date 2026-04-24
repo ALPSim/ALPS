@@ -1,0 +1,50 @@
+name: ALPS website help
+description: Ask a question or report an issue about the ALPS website (alps.comp-phys.org)
+title: "[ALPS]: "
+labels: ["alps", "question"]
+assignees: ""
+body:
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What type of question or feedback do you have?
+      options:
+        - Website Improvement (suggestions, broken links, UI issues)
+        - ALPS Installation (problems installing ALPS packages)
+        - ALPS Documentation (errors, missing content, clarity)
+        - ALPS Tutorials (questions about tutorial steps, examples, code)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe your question or issue
+      description: Please provide a clear and detailed description.
+      placeholder: |
+        - What were you trying to do?
+        - What happened (or what did you expect)?
+        - Any relevant URLs, error messages, or screenshots.
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment (if installation or code‑related)
+      description: For installation or tutorial issues, please provide:
+      placeholder: |
+        - OS: [e.g., Ubuntu 22.04, macOS Ventura, Windows 11]
+        - ALPS version: [e.g., 2.3.0, latest git]
+        - Compiler/Python version if relevant
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Add any other information, logs, or screenshots.
+    validations:
+      required: false
