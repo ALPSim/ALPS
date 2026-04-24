@@ -1,0 +1,40 @@
+name: Simulation Help Router
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  route_by_method:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Parse issue body
+        id: parse
+        uses: actions-cool/issues-helper@v1.11
+        with:
+          actions: 'parse-form'
+          issue-number: ${{ github.event.issue.number }}
+          body: ${{ github.event.issue.body }}
+
+      - name: Assign maintainer based on 'Method' choice
+        env:
+          METHOD_FROM_FORM: ${{ steps.parse.outputs.method }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          assignee=""
+          case "$METHOD_FROM_FORM" in
+            *Exact*Diagonalization* | *ED*) assignee="vws100" ;;
+            *Quantum*Monte*Carlo* | *SSE*) assignee="wistaria" ;;
+            *Quantum*Monte*Carlo* | *Worm*) assignee="LodePollet" ;;
+            *Density*Matrix*Renormalization*Group* | *DMRG*) assignee="afeiguin" ;;
+            *Dynamical*Mean*Field*Theory* | *DMFT*) assignee="egull" ;;
+            *) assignee="Ooolab" ;;
+          esac
+
+          if [ -n "$assignee" ]; then
+            gh issue edit $ISSUE_NUMBER --add-assignee "$assignee"
+          fi
