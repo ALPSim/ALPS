@@ -1,8 +1,8 @@
 name: ALPS website help
 description: Ask a question or report an issue about the ALPS website (alps.comp-phys.org)
 title: "[ALPS]: "
-labels: ["alps", "question"]
-assignees: ""
+labels: ["Website"]
+assignees: "Ooolab"
 body:
   - type: dropdown
     id: category
