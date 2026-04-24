@@ -66,7 +66,8 @@ body:
       description: Which numerical method are you using?
       options:
         - Exact Diagonalization (ED)
-        - Quantum Monte Carlo (QMC)
+        - Quantum Monte Carlo (SSE)
+        - Quantum Monte Carlo (Worm)
         - Density Matrix Renormalization Group (DMRG)
         - Dynamical Mean Field Theory (DMFT)
         - Other (please specify in additional context)
