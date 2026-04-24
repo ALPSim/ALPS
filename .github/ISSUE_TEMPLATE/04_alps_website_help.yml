@@ -33,7 +33,7 @@ body:
     id: environment
     attributes:
       label: Environment (if installation or code‑related)
-      description: For installation or tutorial issues, please provide:
+      description: For installation or tutorial issues, please provide
       placeholder: |
         - OS: [e.g., Ubuntu 22.04, macOS Ventura, Windows 11]
         - ALPS version: [e.g., 2.3.0, latest git]
