@@ -5,7 +5,6 @@
 #          http://www.boost.org/LICENSE_1_0.txt)
 
 
-scp alps-vistrails*.*[gez] root@alps.ethz.ch:/var/www/vistrails
 scp alps-download*.*[gez] root@alps.ethz.ch:/var/www/software/releases
 scp alps-src*.*z root@alps.ethz.ch:/var/www/software/releases
 scp alps-2*.*[gez] root@alps.ethz.ch:/var/www/software/releases

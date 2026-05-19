@@ -43,7 +43,7 @@ import pyalps.hdf5 as h5
 
 from pyalps.pytools import convert2xml, hdf5_name_encode, hdf5_name_decode, rng
 import pyalps.pytools # the C++ conversion functions
-from .load import loadBinningAnalysis, loadMeasurements,loadEigenstateMeasurements, loadSpectra, loadIterationMeasurements, loadMPSIterations, loadObservableList, loadDMFTIterations, loadProperties, in_vistrails, log, Hdf5Loader
+from .load import loadBinningAnalysis, loadMeasurements,loadEigenstateMeasurements, loadSpectra, loadIterationMeasurements, loadMPSIterations, loadObservableList, loadDMFTIterations, loadProperties, log, Hdf5Loader
 from .hlist import deep_flatten, flatten, depth
 from .dict_intersect import dict_intersect
 from .dataset import DataSet
@@ -311,19 +311,8 @@ def evaluateFulldiagVersusH(infiles, appname='fulldiag_evaluate', DELTA_H=None, 
     return datasets
 
        
-def inVistrails():
-    """ returns True if called from within VisTrails """
-    #return in_vistrails
-    return (sys.prefix.find('VisTrails') != -1)
-
-    
 def xslPath():
     """ return the path to the ALPS.xsl stylesheet """
-    if inVistrails():
-      if platform.system()=='Darwin':
-        return os.path.join(sys.exec_prefix,'../Resources/lib/xml/ALPS.xsl')
-      if platform.system()=='Windows':
-        return os.path.join(sys.exec_prefix,'..','vistrails','lib','xml','ALPS.xsl')
     return pyalps.pytools.search_xml_library_path("ALPS.xsl").replace('\0', '')
     
     
@@ -1064,7 +1053,7 @@ def writeTEBDfiles(parmsList, fileName):
             #find out lengths of chi, trunc, and convCriteria, if they exist
             if 'ITP_CHIS' in parms:
                 #convert from strings of the form '[float, float]' to
-                # [float, float] etc. for use with vistrails modules
+                # [float, float] etc.
                 if type(parms['ITP_CHIS'])==str:
                     itpChiList=map(int,(parms['ITP_CHIS'].replace('[','').replace(']','').replace(' ','').split(',')))
                 else:

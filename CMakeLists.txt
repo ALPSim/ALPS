@@ -51,7 +51,6 @@ if (NOT_BUILD_SHARED_LIBS)
 else (NOT_BUILD_SHARED_LIBS)
 	option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 endif (NOT_BUILD_SHARED_LIBS)
-option(ALPS_FOR_VISTRAILS "Build for use within VisTrails" OFF)
 if (NOT_ALPS_BUILD_PYTHON)
 	option(ALPS_BUILD_PYTHON "Build ALPS python extentions" OFF)
 else (NOT_ALPS_BUILD_PYTHON)
@@ -71,12 +70,10 @@ option(ALPS_BUILD_FORTRAN "Build the ALPS fortran applications and tools" OFF)
 option(ALPS_INCLUDE_TUTORIALS "Include the ALPS tutorials" ON)
 option(ALPS_BUILD_TUTORIALS_PACKAGE "Build only a tutorials package" OFF)
 option(BIND_FORTRAN_LOWERCASE "FORTRAN functions are compiled without a trailing underscore" OFF)
-option(ALPS_VISTRAILS_32BIT "Force Vistrails packages to be built in 32 bit" OFF)
 option(ALPS_LINK_BOOST_TEST "Link Boost.test pre-built library" OFF)
 option(ALPS_INSTALL_BOOST_TEST "Install Boost Test framework" OFF)
 option(ALPS_PACKAGE_LIBRARIES "Install all dependent libraries into package" OFF)
 option(ALPS_DOWNLOAD_PACKAGES "Prepare an installer that downloads instead of containing the installation packages" OFF)
-option(ALPS_PATCH_VISTRAILS "Patch VisTrails from VisTrails git repository" OFF)
 option(ALPS_NGS_USE_NEW_ALEA "Use the ALPS ngs-alea instead of just alea" OFF)
 option(ALPS_NGS_OPENMPI_ULFM "Userlevel failure mitigation is available" OFF)
 option(ALPS_INSTALL_MPS_FRAMEWORK "Install headers and libs for the MPS framework" ON)
@@ -89,7 +86,6 @@ mark_as_advanced(BIND_FORTRAN_LOWERCASE)
 mark_as_advanced(ALPS_BUILD_TUTORIALS_PACKAGE)
 mark_as_advanced(ALPS_LINK_BOOST_TEST)
 mark_as_advanced(ALPS_INSTALL_BOOST_TEST)
-mark_as_advanced(ALPS_PATCH_VISTRAILS)
 mark_as_advanced(ALPS_NGS_USE_NEW_ALEA)
 mark_as_advanced(ALPS_NGS_OPENMPI_ULFM)
 mark_as_advanced(ALPS_PYTHON_WHEEL)
@@ -98,17 +94,8 @@ mark_as_advanced(ALPS_BUILD_LIBS_ONLY)
 option(ALPS_USE_MKL_PARALLEL "Use parallel version of MKL" OFF)
 mark_as_advanced(ALPS_USE_MKL_PARALLEL)
     
-if (ALPS_FOR_VISTRAILS)
-  if (NOT WIN32 AND NOT APPLE)
-    message(ERROR "Use ALPS_INSTALL_VISTRAILS_PACKAGES instead of ALPS_FOR_VISTRAILS on Linux")
-  endif (NOT WIN32 AND NOT APPLE)
-  set(NOT_ALPS_FOR_VISTRAILS OFF)
-else (ALPS_FOR_VISTRAILS)
-  set(NOT_ALPS_FOR_VISTRAILS ON)
-endif (ALPS_FOR_VISTRAILS)
-
 #IF(EXISTS ${PROJECT_SOURCE_DIR}/applications)
-  SET (APPLICATIONS_CAN_BE_BUILT  ${NOT_ALPS_FOR_VISTRAILS})
+  SET (APPLICATIONS_CAN_BE_BUILT  ON)
 #ELSE(EXISTS ${PROJECT_SOURCE_DIR}/applications)
 #  SET (APPLICATIONS_CAN_BE_BUILT OFF)
 #ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/applications)
@@ -116,27 +103,23 @@ endif (ALPS_FOR_VISTRAILS)
 set(ALPS_BOOST_LIBRARY_NAME "boost" CACHE STRING "name of the boost library")
 set(ALPS_BOOST_PYTHON_LIBRARY_NAME "boost_python" CACHE STRING "name of the boost library")
 set(PYTHON_EXTENSION_DIR "lib" CACHE STRING "path for Python extensions")
-set(ALPS_ENABLE_MPI ${NOT_ALPS_FOR_VISTRAILS} CACHE BOOL "Enable MPI Parallelization")
-set(ALPS_INSTALL_HEADERS  ${NOT_ALPS_FOR_VISTRAILS} CACHE BOOL "Install headers for ALPS and all dependent libraries")
-set(ALPS_BUILD_EXAMPLES ${NOT_ALPS_FOR_VISTRAILS} CACHE BOOL "Build ALPS examples")
-set(ALPS_BUILD_TESTS ${NOT_ALPS_FOR_VISTRAILS} CACHE BOOL "Build ALPS tests")
+set(ALPS_ENABLE_MPI ON CACHE BOOL "Enable MPI Parallelization")
+set(ALPS_INSTALL_HEADERS  ON CACHE BOOL "Install headers for ALPS and all dependent libraries")
+set(ALPS_BUILD_EXAMPLES ON CACHE BOOL "Build ALPS examples")
+set(ALPS_BUILD_TESTS ON CACHE BOOL "Build ALPS tests")
 set(ALPS_BUILD_DOC ${ALPS_BUILD_SOURCE} CACHE BOOL "Build ALPS documentation")
 set(ALPS_BUILD_NEW_DOC ${ALPS_BUILD_SOURCE} CACHE BOOL "Build ALPS Sphinx documentation")
 set(ALPS_INCLUDE_BOOST_SOURCE OFF CACHE BOOL "Include Boost sources in the source tarball")
 set(ALPS_SYSTEM_NAME "" CACHE STRING "Override the package name")
 set(ALPS_PACKAGE_VERSION "" CACHE STRING "Override the package version")
 set(ALPS_BUILD_APPLICATIONS ${APPLICATIONS_CAN_BE_BUILT} CACHE BOOL "Build ALPS applications")
-set(ALPS_USE_VISTRAILS ${ALPS_FOR_VISTRAILS} CACHE BOOL "Use the libraries deployed with VisTrails")
-set(ALPS_INSTALL_VISTRAILS_PACKAGES ${ALPS_FOR_VISTRAILS} CACHE BOOL "Install the ALPS VisTrails extensions")
 set(ALPS_DEVELOPER_ID "" CACHE STRING "Developer id used to sign the packages")
 
 mark_as_advanced(ALPS_BOOST_LIBRARY_NAME)
 mark_as_advanced(PYTHON_EXTENSION_DIR)
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8 OR CMAKE_GENERATOR MATCHES Win64)
-  if (NOT ALPS_VISTRAILS_32BIT)
-    set (ALPS_64BIT ON)
-  endif (NOT ALPS_VISTRAILS_32BIT)
+  set (ALPS_64BIT ON)
 endif(CMAKE_SIZEOF_VOID_P EQUAL 8 OR CMAKE_GENERATOR MATCHES Win64)
 
 # maintenance building options
@@ -237,47 +220,22 @@ if (ALPS_BUILD_SOURCE)
   set (CMAKE_INSTALL_PREFIX .)
 else (ALPS_BUILD_SOURCE)
   if(WIN32 AND NOT UNIX)
-    if (ALPS_FOR_VISTRAILS)
+    if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
       if (ALPS_64BIT)
-        set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}/Program Files/VisTrails" CACHE PATH "ALPS install prefix")
+        set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}/Program Files/ALPS" CACHE PATH "ALPS install prefix" FORCE)
       else (ALPS_64BIT)
-        set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}/Program Files (x86)/VisTrails" CACHE PATH "ALPS install prefix")
-      endif(ALPS_64BIT)
-      set(CMAKE_INSTALL_ALTERNATE_PREFIX "$ENV{HOMEDRIVE}/Program Files/VisTrails" CACHE PATH "ALPS install prefix")
-    else (ALPS_FOR_VISTRAILS)
-      if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-        if (ALPS_64BIT)
-          set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}/Program Files/ALPS" CACHE PATH "ALPS install prefix" FORCE)
-        else (ALPS_64BIT)
-          set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}/Program Files (x86)/VisTrails" CACHE PATH "ALPS install prefix")
-        endif(ALPS_64BIT)
         set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}/Program Files (x86)/ALPS" CACHE PATH "ALPS install prefix" FORCE)
-        set(CMAKE_INSTALL_ALTERNATE_PREFIX "$ENV{HOMEDRIVE}/Program Files/ALPS" CACHE PATH "ALPS install prefix")
-      endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    endif (ALPS_FOR_VISTRAILS)
+      endif(ALPS_64BIT)
+      set(CMAKE_INSTALL_ALTERNATE_PREFIX "$ENV{HOMEDRIVE}/Program Files/ALPS" CACHE PATH "ALPS install prefix")
+    endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   else(WIN32 AND NOT UNIX)
     if (ALPS_MACOS106)
       set(CMAKE_OSX_DEPLOYMENT_TARGET "10.6")
     endif (ALPS_MACOS106)
     set(CPACK_OSX_PACKAGE_VERSION "10.5")
-    if (ALPS_FOR_VISTRAILS)
-      if (APPLE)
-        if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-          set(CMAKE_INSTALL_PREFIX ${VISTRAILS_APP_DIR} CACHE PATH "ALPS install prefix" FORCE)
-        endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-        if (ALPS_VISTRAILS_32BIT)
-          set(CMAKE_OSX_DEPLOYMENT_TARGET "10.5")
-          set(CMAKE_OSX_ARCHITECTURES "i386")
-          set(CPACK_OSX_PACKAGE_VERSION "10.5")
-        endif (ALPS_VISTRAILS_32BIT)
-      else (APPLE)
-        # what happens to the above variables in this case?
-      endif (APPLE)
-    else (ALPS_FOR_VISTRAILS)
-      if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 #        set(CMAKE_INSTALL_PREFIX "/opt/alps" CACHE PATH "ALPS install prefix" FORCE)
-      endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    endif (ALPS_FOR_VISTRAILS)
+    endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   endif(WIN32 AND NOT UNIX)
 endif(ALPS_BUILD_SOURCE)
 
@@ -340,10 +298,10 @@ endif(MSVC)
 # MPI
 if(ALPS_ENABLE_MPI)
   IF(NOT MPI_FOUND)
-    IF(ALPS_PACKAGE_LIBRARIES AND NOT ALPS_USE_VISTRAILS AND APPLE)
+    IF(ALPS_PACKAGE_LIBRARIES AND APPLE)
       set(MPI_COMPILER ${CMAKE_INSTALL_PREFIX}/bin/mpicxx)
       message (STATUS "MPI compiler is ${MPI_COMPILER}")
-    ENDIF(ALPS_PACKAGE_LIBRARIES AND NOT ALPS_USE_VISTRAILS AND APPLE)
+    ENDIF(ALPS_PACKAGE_LIBRARIES AND APPLE)
     find_package(MPIForALPS)
       message (STATUS "MPI compiler was ${MPI_COMPILER}")
   ENDIF(NOT MPI_FOUND)
@@ -423,28 +381,28 @@ find_package(LPSolve)
 
 # Zlib
 find_package(ZLIB)
-if(ZLIB_FOUND AND NOT ALPS_USE_VISTRAILS)
+if(ZLIB_FOUND)
   include_directories(${ZLIB_INCLUDE_DIR})
   link_libraries(${ZLIB_LIBRARIES})
   if(MSVC)
     file(COPY ${ZLIB_LIBRARIES} DESTINATION ${PROJECT_BINARY_DIR}/lib)
   endif(MSVC)
-endif(ZLIB_FOUND AND NOT ALPS_USE_VISTRAILS)
+endif(ZLIB_FOUND)
 
 
 # SZip
 find_package(SZIP)
-if(SZIP_FOUND AND NOT ALPS_USE_VISTRAILS)
+if(SZIP_FOUND)
   include_directories(${SZIP_INCLUDE_DIR})
   link_libraries(${SZIP_LIBRARIES})
   if(MSVC)
     file(COPY ${SZIP_LIBRARIES} DESTINATION ${PROJECT_BINARY_DIR}/lib)
   endif(MSVC)
-endif(SZIP_FOUND AND NOT ALPS_USE_VISTRAILS)
+endif(SZIP_FOUND)
 
-if(MSVC AND NOT ALPS_FOR_VISTRAILS)
+if(MSVC)
   file(COPY ${SZIP_DLLS} ${ZLIB_DLLS} ${PYTHON_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
-endif(MSVC AND NOT ALPS_FOR_VISTRAILS)
+endif(MSVC)
  
 # HDF5
 if(ALPS_BUILD_FORTRAN)
@@ -481,28 +439,13 @@ ENDIF(HDF5_IS_PARALLEL)
 
 if (ALPS_BUILD_PYTHON)
   set(PYTHON_SCRIPTDIR "${CMAKE_INSTALL_PREFIX}/lib/python")
-  if (ALPS_USE_VISTRAILS)
-    #set up the installation for VisTrail's Python
-    if (WIN32)
-      SET(PYTHON_LIBRARY "${VISTRAILS_APP_DIR}/${VISTRAILS_PYTHON_DIR}/libs/python27.lib" CACHE STRING "Python libraries")
-      SET(PYTHON_INCLUDE_DIRS ${VISTRAILS_APP_DIR}/${VISTRAILS_PYTHON_DIR}/include CACHE PATH "Python include directory")
-      SET(PYTHON_NUMPY_INCLUDE_DIR ${VISTRAILS_APP_DIR}/${VISTRAILS_PYTHON_EXTENSION_DIR}/numpy/core/include CACHE PATH "Numpy include directory")
-    endif(WIN32)
-    if(NOT WIN32)
-      set(ALPS_USE_VISTRAILS "FALSE")
-      find_package(PythonMod)
-      set(ALPS_USE_VISTRAILS "TRUE")
-    endif(NOT WIN32)
-    set(PYTHONLIBS_FOUND TRUE)
-    set(PYTHON_FOUND TRUE)
-  endif (ALPS_USE_VISTRAILS)
   find_package(PythonMod)
 endif (ALPS_BUILD_PYTHON)
 
-if(WIN32 AND NOT UNIX AND ALPS_BUILD_PYTHON AND NOT ALPS_FOR_VISTRAILS)
+if(WIN32 AND NOT UNIX AND ALPS_BUILD_PYTHON)
   find_package(PyInstaller)
   include(UsePyInstaller)
-endif(WIN32 AND NOT UNIX AND ALPS_BUILD_PYTHON AND NOT ALPS_FOR_VISTRAILS)
+endif(WIN32 AND NOT UNIX AND ALPS_BUILD_PYTHON)
 
 IF (PYTHONLIBS_FOUND AND ALPS_BUILD_PYTHON)
   include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
@@ -527,17 +470,10 @@ endif(Boost_ROOT_DIR)
 
 # XML Path
 set(ALPS_XML_PATH "lib" CACHE STRING "Directory to install ALPS XML directory in")
-if (ALPS_FOR_VISTRAILS)
-  set(ALPS_XML_DIR "${CMAKE_INSTALL_PREFIX}/${VISTRAILS_APP_NAME}/${VISTRAILS_LIB_DIR}/xml")
-  if (WIN32 AND NOT UNIX)
-    set(ALPS_XML_ALTERNATE_DIR "${CMAKE_INSTALL_ALTERNATE_PREFIX}/${VISTRAILS_APP_NAME}/${VISTRAILS_LIB_DIR}/xml")
-  endif (WIN32 AND NOT UNIX)
-else (ALPS_FOR_VISTRAILS)
-  set(ALPS_XML_DIR "${CMAKE_INSTALL_PREFIX}/${ALPS_XML_PATH}/xml")
-  if (WIN32 AND NOT UNIX)
-    set(ALPS_XML_ALTERNATE_DIR "${CMAKE_INSTALL_ALTERNATE_PREFIX}/${ALPS_XML_PATH}/xml")
-  endif (WIN32 AND NOT UNIX)
-endif (ALPS_FOR_VISTRAILS)
+set(ALPS_XML_DIR "${CMAKE_INSTALL_PREFIX}/${ALPS_XML_PATH}/xml")
+if (WIN32 AND NOT UNIX)
+  set(ALPS_XML_ALTERNATE_DIR "${CMAKE_INSTALL_ALTERNATE_PREFIX}/${ALPS_XML_PATH}/xml")
+endif (WIN32 AND NOT UNIX)
 
 message (STATUS "ALPS XML dir is ${ALPS_XML_DIR}")
 
@@ -565,8 +501,6 @@ configure_file(src/alps/version.h.in ${PROJECT_BINARY_DIR}/src/alps/version.h)
 
 configure_file(lib/xml/lattices.xml.in ${PROJECT_BINARY_DIR}/lib/xml/lattices.xml)
 configure_file(lib/xml/models.xml.in ${PROJECT_BINARY_DIR}/lib/xml/models.xml)
-
-configure_file(vistrails/alps/__init__.py.in ${PROJECT_BINARY_DIR}/vistrails/alps/__init__.py)
 
 ######################################################################
 # include directories
@@ -599,7 +533,7 @@ endif(APPLE AND (CMAKE_VERSION VERSION_LESS 2.8.12))
 # install dependent libraries under Windows, from applications
 ######################################################################
 
-if(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS AND NOT ALPS_BUILD_SOURCE)
+if(WIN32 AND NOT UNIX AND NOT ALPS_BUILD_SOURCE)
   # Lapack
   if(LAPACK_LIBRARIES)
     foreach(file ${LAPACK_LIBRARIES})
@@ -640,16 +574,7 @@ if(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS AND NOT ALPS_BUILD_SOURCE)
     # COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/ising.exe ${PROJECT_BINARY_DIR}/bin
     # COMMAND cmake -E copy_directory ${CMAKE_INSTALL_PREFIX}/lib/xml ${PROJECT_BINARY_DIR}/lib/xml    
   # )
-  if (ALPS_USE_VISTRAILS)
-    install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_DIR}/python27.dll DESTINATION bin COMPONENT dependentlibraries)
-    install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/msvcr71.dll DESTINATION bin COMPONENT dependentlibraries)
-    install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/msvcr80.dll DESTINATION bin COMPONENT dependentlibraries)
-    install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/hdf5dll.dll DESTINATION bin COMPONENT dependentlibraries)
-    install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/szlibdll.dll DESTINATION bin COMPONENT dependentlibraries)
-    install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/zlib.dll DESTINATION bin COMPONENT dependentlibraries)
-  endif (ALPS_USE_VISTRAILS)
-
-endif(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS AND NOT ALPS_BUILD_SOURCE)
+endif(WIN32 AND NOT UNIX AND NOT ALPS_BUILD_SOURCE)
 
 ######################################################################
 # setting up ALPSConfig.cmake and include.mk
@@ -779,7 +704,7 @@ if (ALPS_BUILD_SOURCE)
   FILE(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/*.txt")
   INSTALL(FILES ${files} DESTINATION alps)  
   INSTALL(FILES script/hdf5.sh script/cmake3.sh DESTINATION alps/script)  
-  install(DIRECTORY config example legacy lib src test tool vistrails DESTINATION alps
+  install(DIRECTORY config example legacy lib src test tool DESTINATION alps
           FILES_MATCHING PATTERN "*"  PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
   if (ALPS_INCLUDE_BOOST_SOURCE)
     install(DIRECTORY ${Boost_ROOT_DIR} DESTINATION . PATTERN "*" 
@@ -811,58 +736,22 @@ else (ALPS_BUILD_SOURCE)
 
   endif(ALPS_INSTALL_HEADERS)
 
-  if (ALPS_FOR_VISTRAILS)
-    install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_LIB_DIR} COMPONENT vistrails)
-  endif (ALPS_FOR_VISTRAILS)
-
-  # if (APPLE AND NOT ALPS_FOR_VISTRAILS)
+  # if (APPLE)
   #   configure_file(tool/postflight.sh.in ${PROJECT_BINARY_DIR}/tool/postflight.sh)
   #   file(WRITE ${PROJECT_BINARY_DIR}/tool/paths "${CMAKE_INSTALL_PREFIX}/bin")
   #   install(FILES ${PROJECT_BINARY_DIR}/tool/paths DESTINATION share/alps COMPONENT environment)
-  # endif (APPLE AND NOT ALPS_FOR_VISTRAILS)
+  # endif (APPLE)
 
   if(ALPS_PACKAGE_LIBRARIES)
     install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/lib DESTINATION . COMPONENT dependentlibraries)
     FILE(GLOB depfiles "${PROJECT_BINARY_DIR}/deplibs/bin/*")
     install(PROGRAMS ${depfiles} DESTINATION bin COMPONENT dependentlibraries)
-    if(NOT ALPS_FOR_VISTRAILS AND MSVC)
+    if(MSVC)
       install(PROGRAMS ${HDF5_DLLS} ${PYTHON_DLLS} ${ZLIB_DLLS} ${SZIP_DLLS} DESTINATION bin COMPONENT dependentlibraries)
-    endif(NOT ALPS_FOR_VISTRAILS AND MSVC)
+    endif(MSVC)
   endif(ALPS_PACKAGE_LIBRARIES)
 
-  if (ALPS_FOR_VISTRAILS)
-    install(DIRECTORY lib/xml DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_LIB_DIR}  COMPONENT vistrails
-          FILES_MATCHING PATTERN "*.xsl"
-          PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
-
-    install(DIRECTORY lib/pyalps DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR} COMPONENT vistrails
-          FILES_MATCHING PATTERN "*.py" PATTERN "*.pyc"
-          PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.C" EXCLUDE)
-
-      if (MSVC)
-        install(PROGRAMS ${HDF5_DLLS} ${ZLIB_DLLS} ${SZIP_DLLS} DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps  COMPONENT vistrails)
-      endif(MSVC)
-
-    install(DIRECTORY vistrails/alps DESTINATION ${VISTRAILS_PACKAGE_DIR} COMPONENT vistrails
-        FILES_MATCHING PATTERN "*.py"  PATTERN "*.xml" PATTERN "*.pyc"
-        PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
-    install(FILES ${PROJECT_BINARY_DIR}/vistrails/alps/__init__.py DESTINATION ${VISTRAILS_PACKAGE_DIR}/alps COMPONENT vistrails)
-  endif (ALPS_FOR_VISTRAILS)
-
-  if (NOT ALPS_FOR_VISTRAILS)
-    if(ALPS_INSTALL_VISTRAILS_PACKAGES)
-      install(DIRECTORY vistrails/alps DESTINATION  ${VISTRAILS_APP_DIR}/${VISTRAILS_PACKAGE_DIR} COMPONENT vistrails
-          FILES_MATCHING PATTERN "*.py"  PATTERN "*.xml" PATTERN "*.pyc"
-          PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
-      install(FILES ${PROJECT_BINARY_DIR}/vistrails/alps/__init__.py DESTINATION ${VISTRAILS_APP_DIR}/${VISTRAILS_PACKAGE_DIR}/alps COMPONENT vistrails)
-
-      install(DIRECTORY lib/pyalps DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR} COMPONENT vistrails
-              FILES_MATCHING PATTERN "*.py" PATTERN "*.pyc"
-              PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.C" EXCLUDE)
-
-    endif(ALPS_INSTALL_VISTRAILS_PACKAGES)
-
-    install(DIRECTORY lib/xml DESTINATION ${ALPS_XML_PATH} COMPONENT xml
+  install(DIRECTORY lib/xml DESTINATION ${ALPS_XML_PATH} COMPONENT xml
           FILES_MATCHING PATTERN "*.xsl"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 
@@ -897,48 +786,11 @@ else (ALPS_BUILD_SOURCE)
     ]] install_script @ONLY)
     install(CODE ${install_script})
             
-    if (VISTRAILS_FOUND AND (APPLE OR WIN32))
-      message (STATUS "VisTrails found.")
-      set(PYTHONEXEC "${CMAKE_INSTALL_PREFIX}/bin/vispython")
-    else (VISTRAILS_FOUND AND (APPLE OR WIN32))
-      set(PYTHONEXEC python)
-    endif (VISTRAILS_FOUND AND (APPLE OR WIN32))
+    set(PYTHONEXEC python)
 
-    install(FILES vistrails/latex/includevistrail.py vistrails/latex/alpsvistrails.sty 
-            DESTINATION share/alps/latex COMPONENT vistrails)
-
-  endif (NOT ALPS_FOR_VISTRAILS)
 endif (ALPS_BUILD_SOURCE)
 endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
 endif()
-#
-######################################################################
-# patch VisTrailss
-######################################################################
-
-if(ALPS_PATCH_VISTRAILS)
-  find_package(VistrailsGit)
-  MESSAGE (STATUS "patching VisTrails from ${VISTRAILS_GIT_DIR}")
-  if (APPLE)
-    foreach (DIR api core db gui packages tests)
-      install(DIRECTORY ${VISTRAILS_GIT_DIR}/vistrails  COMPONENT vistrails
-              DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}
-              PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.pyc" EXCLUDE)
-    endforeach(DIR)
-#    install(FILES ${VISTRAILS_GIT_DIR}/vistrails/vistrails.py  COMPONENT vistrails
-#            DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/../..)
-  else(APPLE)
-    if (WIN32) 
-        install(DIRECTORY ${VISTRAILS_GIT_DIR}/vistrails  COMPONENT vistrails
-                DESTINATION .
-                PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.pyc" EXCLUDE)
-    else (WIN32)
-      message(ERROR "Cannot patch VisTrails on this system. Just install the latest Vistrails nightly snapshot.")
-    endif (WIN32)
-  endif(APPLE)
-endif(ALPS_PATCH_VISTRAILS)
-
-
 ######################################################################
 # documentation
 ######################################################################
@@ -985,9 +837,9 @@ if (ALPS_BUILD_APPLICATIONS AND NOT ALPS_BUILD_TUTORIALS_PACKAGE AND NOT ALPS_BU
   add_subdirectory(applications)
 endif (ALPS_BUILD_APPLICATIONS AND NOT ALPS_BUILD_TUTORIALS_PACKAGE AND NOT ALPS_BUILD_LIBS_ONLY)
 
-if (NOT ALPS_FOR_VISTRAILS AND ALPS_INCLUDE_TUTORIALS AND NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
+if (ALPS_INCLUDE_TUTORIALS AND NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
   add_subdirectory(tutorials)
-endif (NOT ALPS_FOR_VISTRAILS AND ALPS_INCLUDE_TUTORIALS AND NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
+endif (ALPS_INCLUDE_TUTORIALS AND NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
 
 ######################################################################
 # developer tools
@@ -1020,8 +872,6 @@ if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
  set(CPACK_COMPONENT_BUILD_DISPLAY_NAME "Build system support")
  set(CPACK_COMPONENT_DOCUMENTATION_DISPLAY_NAME "Documentation")
  set(CPACK_COMPONENT_TUTORIALS_DISPLAY_NAME "Tutorials")
- set(CPACK_COMPONENT_VISTRAILS_DISPLAY_NAME "ALPS VisTrails extensions")
- 
  set(CPACK_COMPONENT_LIBRARIES_DESCRIPTION "The libraries needed by the ALPS applications")
  set(CPACK_COMPONENT_HEADERS_DESCRIPTION "The ALPS header files")
  set(CPACK_COMPONENT_DEPRECATED_DESCRIPTION "Deprecated ALPS header files")
@@ -1035,8 +885,6 @@ if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
  set(CPACK_COMPONENT_BUILD_DESCRIPTION "Include files for CMake and make to simplify the building of ALPS applications")
  set(CPACK_COMPONENT_DOCUMENTATION_DESCRIPTION "Documentation for the ALPS libraries")
  set(CPACK_COMPONENT_TUTORIALS_DESCRIPTION "Tutorials for the ALPS libraries and applications")
- set(CPACK_COMPONENT_VISTRAILS_DESCRIPTION "VisTrails extensions and patches to the latest VisTrails release needed for ALPS")
-
  set(CPACK_COMPONENT_LIBRARIES_GROUP "Runtime")
  set(CPACK_COMPONENT_APPLICATIONS_GROUP "Runtime")
  set(CPACK_COMPONENT_XML_GROUP "Runtime")
@@ -1066,34 +914,28 @@ if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
  set(CPACK_COMPONENT_EXAMPLES_DEPENDS libraries)
  set(CPACK_COMPONENT_TUTORIALS_DEPENDS python applications libraries tools)
  
- # if (APPLE AND NOT ALPS_FOR_VISTRAILS)
+ # if (APPLE)
  #  set(CPACK_COMPONENT_ENVIRONMENT_DISPLAY_NAME "ALPS PATH environment")
  #  set(CPACK_COMPONENT_ENVIRONMENT_DESCRIPTION "Set PATH variables to find ALPS applications in the Terminal")
  #  set(CPACK_POSTFLIGHT_SCRIPT ${PROJECT_BINARY_DIR}/tool/postflight.sh)
- # endif (APPLE AND NOT ALPS_FOR_VISTRAILS)
+ # endif (APPLE)
  
 endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
  
-if (ALPS_FOR_VISTRAILS)
-  set(CPACK_PACKAGE_NAME "alps-vistrails")
-  set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY OFF)
-  set(CPACK_NSIS_MODIFY_PATH OFF)
-else(ALPS_FOR_VISTRAILS)
-  if (ALPS_BUILD_TUTORIALS_PACKAGE)
-    set(CPACK_PACKAGE_NAME "alps-tutorials")
-  elseif (ALPS_BUILD_TUTORIALS_PACKAGE)
-    if (BUILD_SHARED_LIBS)
-      set(CPACK_PACKAGE_NAME "alps")
-    elseif (BUILD_SHARED_LIBS)
-      set(CPACK_PACKAGE_NAME "alps-static")
-    endif (BUILD_SHARED_LIBS)
+if (ALPS_BUILD_TUTORIALS_PACKAGE)
+  set(CPACK_PACKAGE_NAME "alps-tutorials")
+elseif (ALPS_BUILD_TUTORIALS_PACKAGE)
+  if (BUILD_SHARED_LIBS)
+    set(CPACK_PACKAGE_NAME "alps")
+  elseif (BUILD_SHARED_LIBS)
+    set(CPACK_PACKAGE_NAME "alps-static")
+  endif (BUILD_SHARED_LIBS)
 
-    set(CPACK_NSIS_MODIFY_PATH ON)
-    if(ALPS_DOWNLOAD_PACKAGES)
-      set(CPACK_PACKAGE_NAME "${CPACK_PACKAGE_NAME}-download")
-    endif(ALPS_DOWNLOAD_PACKAGES)
-  endif (ALPS_BUILD_TUTORIALS_PACKAGE)
-endif(ALPS_FOR_VISTRAILS)
+  set(CPACK_NSIS_MODIFY_PATH ON)
+  if(ALPS_DOWNLOAD_PACKAGES)
+    set(CPACK_PACKAGE_NAME "${CPACK_PACKAGE_NAME}-download")
+  endif(ALPS_DOWNLOAD_PACKAGES)
+endif (ALPS_BUILD_TUTORIALS_PACKAGE)
 
 set(CPACK_PACKAGE_VENDOR "ALPS Collaboration")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ALPS ${ALPS_VERSION}")
@@ -1119,11 +961,7 @@ else(ALPS_VERSION_BUILD)
   set(CPACK_PACKAGE_VERSION_PATCH "${ALPS_VERSION_PATCH}")
 endif(ALPS_VERSION_BUILD)
 
-if (ALPS_FOR_VISTRAILS)
-  set(CPACK_PACKAGE_INSTALL_DIRECTORY "VisTrails")
-else (ALPS_FOR_VISTRAILS)
-  set(CPACK_PACKAGE_INSTALL_DIRECTORY "ALPS")
-endif (ALPS_FOR_VISTRAILS)
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "ALPS")
 
 
 set(CPACK_PACKAGING_INSTALL_PREFIX "/")
@@ -1145,11 +983,7 @@ if (ALPS_PACKAGE_VERSION)
   set (CPACK_PACKAGE_VERSION ${ALPS_PACKAGE_VERSION})
 endif (ALPS_PACKAGE_VERSION)
   
-if (ALPS_FOR_VISTRAILS)
-set(CPACK_PACKAGE_DEFAULT_LOCATION "/")
-else (ALPS_FOR_VISTRAILS)
 set(CPACK_PACKAGE_DEFAULT_LOCATION ${CMAKE_INSTALL_PREFIX})
-endif(ALPS_FOR_VISTRAILS)
 
 set(CPACK_PACKAGE_RELOCATABLE ON)
 # set(CPACK_MONOLITHIC_INSTALL ON)
@@ -1191,9 +1025,7 @@ if(WIN32 AND NOT UNIX)
   if (ALPS_64BIT)
     set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
   endif (ALPS_64BIT)
-  if (NOT ALPS_FOR_VISTRAILS)
-    set(CPACK_NSIS_MODIFY_PATH ON)
-  endif (NOT ALPS_FOR_VISTRAILS)
+  set(CPACK_NSIS_MODIFY_PATH ON)
   
   set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${CPACK_NSIS_DISPLAY_NAME}")
 endif(WIN32 AND NOT UNIX)

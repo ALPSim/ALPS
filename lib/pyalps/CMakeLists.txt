@@ -140,15 +140,7 @@ if (ALPS_HAVE_PYTHON AND NOT ALPS_BUILD_LIBS_ONLY)
   #######################################################################
   # install
   #######################################################################
-  if (ALPS_INSTALL_VISTRAILS_PACKAGES)
-    install(TARGETS ${PYALPS_SOURCES}
-            COMPONENT vistrails
-            RUNTIME DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps
-            ARCHIVE DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps
-            LIBRARY DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps)
-  endif (ALPS_INSTALL_VISTRAILS_PACKAGES)
-  if (NOT ALPS_FOR_VISTRAILS)
-    if(NOT ALPS_PYTHON_WHEEL)
+  if(NOT ALPS_PYTHON_WHEEL)
       install(TARGETS ${PYALPS_SOURCES}
             COMPONENT python
             RUNTIME DESTINATION ${ALPS_PYTHON_LIB_DEST_ROOT}/pyalps/bin
@@ -160,7 +152,6 @@ if (ALPS_HAVE_PYTHON AND NOT ALPS_BUILD_LIBS_ONLY)
             RUNTIME DESTINATION pyalps/bin
             ARCHIVE DESTINATION pyalps
             LIBRARY DESTINATION pyalps)
-    endif(NOT ALPS_PYTHON_WHEEL)
-  endif(NOT ALPS_FOR_VISTRAILS)
+  endif(NOT ALPS_PYTHON_WHEEL)
   set(BUILD_SHARED_LIBS ${OLD_SHARED})
 endif (ALPS_HAVE_PYTHON AND NOT ALPS_BUILD_LIBS_ONLY)
