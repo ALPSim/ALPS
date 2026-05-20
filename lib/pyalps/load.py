@@ -45,19 +45,8 @@ import pyalps.pytools as pt # the C++ conversion functions
 from pyalps.alea import MCScalarData as fwe
 from pyalps.alea import MCVectorData as vwe
 
-in_vistrails=True
-try:
-  import vistrails.core.modules.basic_modules
-  from core import debug
-except:
-  in_vistrails=False
-
 def log(m):
-    """ print a log message either to the console or through the VisTrails logger """
-    if in_vistrails:
-      debug.log(str(m))
-    else:
-      print(m)
+    print(m)
     
 def parse_label(label):
     if '--' in label:

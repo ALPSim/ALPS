@@ -7,5 +7,5 @@
 cd $1
 for f in *py
 do
-  vispython $f
+  alpspython $f
 done

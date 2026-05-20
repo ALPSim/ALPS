@@ -19,6 +19,6 @@
 
 
 install(FILES FindBoostSrc.cmake FindDocbookDtd.cmake FindDocbookXsl.cmake
-              FindFop.cmake FindLPSolve.cmake FindVistrails.cmake
+              FindFop.cmake FindLPSolve.cmake
               FindXsltproc.cmake
         DESTINATION share/cmake COMPONENT build)

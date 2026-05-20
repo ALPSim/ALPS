@@ -40,25 +40,6 @@ manually. Choose "Control Panel" --> "System" --> "Advanced" -->
 (e.g. C:\Program Files\ALPS\bin) to the PATH variable. 
 
 
-Additionally install Vistrails and Python tools (recommended)
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-To use the full Python functionality or the Vistrails provenance system,
-download and install the latest version of Vistrails. Install Vistrails
-also if you just want to use the ALPS Python tools without Vistrails,
-since the binary packages have been compiled against the Python
-installation that comes with Vistrails. 
-
-Note: On Windows you will need to tell Vistrails where you have
-installed ALPS if you use a a 64-bit version of Windows and have
-installed the 32 bit version of ALPS. To do so, launch Vistrails and
-select Preferences from the Edit menu. Then click the "Module Packages"
-tab and enable the ALPS package. After enabling the ALPS package, select
-"alps" click "configure" and change the "alpspath" variable to point to
-your ALPS installation. On a 64-bit version of Windows this will most
-likely just be changing "Program Files" to 'Program Files
-(x86)". However, we recommend installing there 64-bit version instead. 
-
-
 Non-default install locations for the binary packages
 +++++++++++++++++++++++++++++++++++++++++++++++++++++
 If you install it in a non-default location you will have to 
