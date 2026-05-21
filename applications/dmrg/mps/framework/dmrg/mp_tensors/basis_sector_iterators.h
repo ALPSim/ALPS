@@ -30,6 +30,7 @@
 
 #include "dmrg/block_matrix/indexing.h"
 
+#include <boost/bind/bind.hpp>
 #include <boost/operators.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
@@ -104,7 +105,7 @@ private:
     charge total_charge() const
     {
         return std::accumulate(state.begin(), state.end(), SymmGroup::IdentityCharge,
-                               boost::bind(static_cast<charge(*)(charge,charge)>(&SymmGroup::fuse), _1,  boost::bind(getter_fn, _2)) );
+                               boost::bind(static_cast<charge(*)(charge,charge)>(&SymmGroup::fuse), boost::placeholders::_1, boost::bind(getter_fn, boost::placeholders::_2)) );
     }
     
     void advance()
