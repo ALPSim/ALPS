@@ -38,7 +38,7 @@
 #include <string>
 #include <sstream>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 namespace generate_mpo
 {
@@ -59,8 +59,8 @@ namespace generate_mpo
         void canonical_order() // TODO: check and fix for fermions
         {
             std::sort(operators.begin(), operators.end(),
-                      boost::bind(&op_pair_t::first, _1) <
-                      boost::bind(&op_pair_t::first, _2));
+                      boost::bind(&op_pair_t::first, boost::placeholders::_1) <
+                      boost::bind(&op_pair_t::first, boost::placeholders::_2));
         }
         
         bool operator< (Operator_Tag_Term const & rhs) const
@@ -125,8 +125,8 @@ namespace generate_mpo
         void canonical_order() // TODO: check and fix for fermions
         {
             std::sort(operators.begin(), operators.end(),
-                      boost::bind(&op_pair_t::first, _1) <
-                      boost::bind(&op_pair_t::first, _2));
+                      boost::bind(&op_pair_t::first, boost::placeholders::_1) <
+                      boost::bind(&op_pair_t::first, boost::placeholders::_2));
         }
         
         bool operator< (Operator_Term const & rhs) const

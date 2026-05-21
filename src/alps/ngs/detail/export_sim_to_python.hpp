@@ -33,7 +33,7 @@
 
 #include <alps/python/make_copy.hpp>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/python/dict.hpp>
 #include <boost/python/wrapper.hpp>
 #include <boost/python/return_internal_reference.hpp>

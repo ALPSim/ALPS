@@ -31,7 +31,7 @@
 
 #include <alps/ngs/detail/tcpsession.hpp>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>

@@ -35,7 +35,7 @@
 #include <alps/numeric/vector_functions.hpp>
 
 #include <boost/iterator/counting_iterator.hpp>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/lambda/lambda.hpp>
 
 
