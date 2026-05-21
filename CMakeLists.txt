@@ -176,11 +176,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive  -DBOOST_NO_AUTO_PTR -DBOOS
 STRING(REGEX MATCH "clang" IS_CLANG "${ALPS_COMPILER_VERSION}")
 if(IS_CLANG)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftemplate-depth-256 -Wall -Wno-unknown-pragmas -Wno-unused-function -Wno-overloaded-virtual -Wno-unneeded-internal-declaration -Wno-unused-variable -Wno-return-type-c-linkage")
-    if(NOT ${CMAKE_CXX_FLAGS} MATCHES "-(std=c\\+\\+11|stdlib=)")
-        # compilation fails with -stdlib=libc++, which is new default on Mavericks
-        message(STATUS "Forcing -stdlib=libstdc++. If you want to override this decision explicitly add -stdlib=libc++ or -std=c++11 to CMAKE_CXX_FLAGS.")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
-    endif(NOT ${CMAKE_CXX_FLAGS} MATCHES "-(std=c\\+\\+11|stdlib=)")
 endif(IS_CLANG)
 
 # For gfortran 10 (see https://gcc.gnu.org/gcc-10/changes.html)
