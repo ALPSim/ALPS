@@ -757,7 +757,7 @@ OBSERVABLE_FUNCTION(tan)
 
 namespace detail {
 
-template <class T> struct function_pow : public std::unary_function<T,double>
+template <class T> struct function_pow
 {
   function_pow(double p) : pow_(p) {}
   T operator()(T x) const { using std::pow; return pow(x, pow_); }

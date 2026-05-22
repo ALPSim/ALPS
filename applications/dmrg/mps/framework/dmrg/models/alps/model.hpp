@@ -38,7 +38,7 @@
 #undef tolower
 #undef toupper
 #include <boost/tokenizer.hpp>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/container/flat_map.hpp>
 
 #include "symm_handler.hpp"
@@ -56,7 +56,7 @@ bool safe_is_fermionic(alps::SiteBasisDescriptor<I> const& b, alps::SiteOperator
 {
     using boost::bind;
     std::set<std::string> operator_names = op.operator_names();
-    return std::count_if(operator_names.begin(), operator_names.end(), boost::bind(&alps::SiteBasisDescriptor<I>::is_fermionic, b, _1)) % 2;
+    return std::count_if(operator_names.begin(), operator_names.end(), boost::bind(&alps::SiteBasisDescriptor<I>::is_fermionic, b, boost::placeholders::_1)) % 2;
 }
 
 

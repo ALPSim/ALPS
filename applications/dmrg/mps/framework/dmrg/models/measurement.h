@@ -44,6 +44,7 @@
 
 #include <stdexcept>
 
+#include <boost/bind/bind.hpp>
 #include <boost/regex.hpp>
 #include <boost/static_assert.hpp>
 
@@ -198,7 +199,7 @@ template<class Matrix, class SymmGroup>
 bool is_hermitian_meas(std::vector<block_matrix<Matrix, SymmGroup> > const & ops)
 {
     return all_true(ops.begin(), ops.end(),
-                    boost::bind(static_cast<bool (*)(block_matrix<Matrix, SymmGroup> const&)>(&is_hermitian), _1));
+                    boost::bind(static_cast<bool (*)(block_matrix<Matrix, SymmGroup> const&)>(&is_hermitian), boost::placeholders::_1));
 }
 
 template<class Matrix, class SymmGroup>

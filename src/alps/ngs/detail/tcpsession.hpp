@@ -29,7 +29,7 @@
 #ifndef ALPS_NGS_DETAIL_TCPSESSION_HPP
 #define ALPS_NGS_DETAIL_TCPSESSION_HPP
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/lexical_cast.hpp>
 

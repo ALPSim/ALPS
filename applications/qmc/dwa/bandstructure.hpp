@@ -33,7 +33,7 @@
 #include <boost/multi_array.hpp>
 #include <alps/numeric/vector_functions.hpp>
 #include <alps/ngs/boost_python.hpp>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <alps/python/numpy_array.hpp>
 

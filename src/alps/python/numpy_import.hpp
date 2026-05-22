@@ -38,8 +38,10 @@
     #include <boost/python/numeric.hpp>
 #endif
 
-// this should be set to the latest numpy version we have tested
+// Allow callers to pin an earlier API version; default to the latest we have tested.
+#ifndef NPY_NO_DEPRECATED_API
 #define NPY_NO_DEPRECATED_API NPY_1_11_API_VERSION
+#endif
 #include <numpy/arrayobject.h>
 
 namespace alps {

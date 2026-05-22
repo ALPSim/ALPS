@@ -41,7 +41,7 @@
 #include <boost/throw_exception.hpp>
 #include <boost/lambda/lambda.hpp>
 #include <boost/lambda/bind.hpp>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 #include <vector>
 #include <algorithm>
