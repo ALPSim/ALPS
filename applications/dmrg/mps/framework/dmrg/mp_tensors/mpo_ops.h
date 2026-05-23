@@ -147,7 +147,6 @@ template<class Matrix, class SymmGroup>
 MPO<Matrix, SymmGroup>
 square_mpo(MPO<Matrix, SymmGroup> const & mpo)
 {
-    typedef typename SymmGroup::charge charge;
     typedef typename MPOTensor<Matrix, SymmGroup>::row_proxy row_proxy;
     typedef typename MPOTensor<Matrix, SymmGroup>::index_type index_type;
     
