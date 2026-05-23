@@ -32,13 +32,14 @@
 
 #include <alps/multi_array/multi_array.hpp>
 #include <alps/numeric/special_functions.hpp>
+#include <boost/functional.hpp>
 
 namespace alps {
 
 #define ALPS_IMPLEMENT_FUNCTION(FUN)                                                                                            \
     template <class T, std::size_t D, class Allocator> multi_array<T,D,Allocator> FUN (multi_array<T, D, Allocator> arg) {      \
         using std:: FUN;                                                                                                        \
-        std::transform(arg.data(), arg.data() + arg.num_elements(), arg.data(), std::ptr_fun<T, T>(FUN));                       \
+        std::transform(arg.data(), arg.data() + arg.num_elements(), arg.data(), boost::ptr_fun<T, T>(FUN));                       \
         return arg;                                                                                                             \
     }
 
@@ -62,7 +63,7 @@ ALPS_IMPLEMENT_FUNCTION(fabs)
 #define ALPS_IMPLEMENT_FUNCTION(FUN)                                                                                            \
     template <class T, std::size_t D, class Allocator> multi_array<T, D, Allocator> FUN (multi_array<T, D, Allocator> arg) {    \
         using alps::numeric:: FUN ;                                                                                             \
-        std::transform(arg.data(), arg.data() + arg.num_elements(), arg.data(), std::ptr_fun<T, T>(FUN));                       \
+        std::transform(arg.data(), arg.data() + arg.num_elements(), arg.data(), boost::ptr_fun<T, T>(FUN));                       \
         return arg;                                                                                                             \
     }
 
@@ -75,8 +76,8 @@ ALPS_IMPLEMENT_FUNCTION(cbrt)
     template <class T1, class T2, std::size_t D, class Allocator>
     multi_array<T1,D,Allocator> pow(multi_array<T1,D,Allocator> a, T2 s)
   {
-    std::pointer_to_binary_function <T1,T2,T1> PowObject (std::ptr_fun<T1,T2,T1>(std::pow));
-    std::transform(a.data(),a.data()+a.num_elements(),a.data(),std::bind2nd(PowObject,s));
+    std::pointer_to_binary_function <T1,T2,T1> PowObject (boost::ptr_fun<T1,T2,T1>(std::pow));
+    std::transform(a.data(),a.data()+a.num_elements(),a.data(),boost::bind2nd(PowObject,s));
     return a;
   }
 
