@@ -209,7 +209,6 @@ MPS<Matrix, typename grouped_symmetry<InSymm>::type> mpo_to_smps_group(MPO<Matri
     typedef typename grouped_symmetry<InSymm>::type OutSymm;
     typedef typename InSymm::charge in_charge;
     typedef typename OutSymm::charge out_charge;
-    typedef boost::unordered_map<size_t,std::pair<out_charge,size_t> > bond_charge_map;
     typedef typename MPOTensor<Matrix, InSymm>::row_proxy row_proxy;
     
     MPS<Matrix, OutSymm> mps(mpo.size());

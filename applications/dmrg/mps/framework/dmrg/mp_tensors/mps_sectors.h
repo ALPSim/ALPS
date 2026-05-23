@@ -48,9 +48,7 @@ inline std::vector<Index<SymmGroup> > allowed_sectors(std::vector<int> const& si
     bool finitegroup = SymmGroup::finite;
 
     std::size_t L = site_type.size();
-    
-    typedef typename SymmGroup::subcharge subcharge;
-    
+
     std::vector<typename SymmGroup::charge> maximum_charges(phys_dims.size()), minimum_charges(phys_dims.size());
     for (int type=0; type<phys_dims.size(); ++type) {
         Index<SymmGroup> physc = phys_dims[type];

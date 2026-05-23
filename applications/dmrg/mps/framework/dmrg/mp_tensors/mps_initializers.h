@@ -352,14 +352,12 @@ public:
     {
         assert(coeff.size() == mps.length());
         if (phys_dims[0].size() != 1) throw std::runtime_error("coherent_mps_init only for TrivialGroup.");
-        
-        typedef typename SymmGroup::charge charge;
-        
+
         using std::exp; using std::sqrt; using std::pow;
         using boost::math::factorial;
-        
+
         size_t L = coeff.size();
-        
+
         Index<SymmGroup> trivial_i;
         trivial_i.insert(std::make_pair(SymmGroup::IdentityCharge, 1));
         
@@ -402,13 +400,11 @@ public:
         
         assert(coeff.size() == mps.length());
         if (phys_rho_dims[0].size() != 1) throw std::runtime_error("coherent_dm_mps_init only for TrivialGroup.");
-        
+
         std::vector<Index<SymmGroup> > phys_psi_dims(phys_rho_dims.size());
         for (int type=0; type<phys_rho_dims.size(); ++type)
             phys_psi_dims[type].insert( std::make_pair( SymmGroup::IdentityCharge, static_cast<size_t>(sqrt(double(phys_rho_dims[type][0].second))) ) );
-        
-        typedef typename SymmGroup::charge charge;
-        
+
         using std::exp; using std::sqrt; using std::pow;
         using boost::math::factorial;
         

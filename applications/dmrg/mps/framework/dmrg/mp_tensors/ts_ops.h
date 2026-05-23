@@ -49,7 +49,6 @@ MPOTensor<MPSMatrix, SymmGroup> make_twosite_mpo(MPOTensor<MPOMatrix, SymmGroup>
 
     typedef typename MPOTensor<MPOMatrix, SymmGroup>::index_type index_type;
     typedef typename MPOTensor<MPOMatrix, SymmGroup>::row_proxy row_proxy;
-    typedef typename MPOTensor<MPOMatrix, SymmGroup>::col_proxy col_proxy;
     typedef typename OPTable<MPSMatrix, SymmGroup>::tag_type tag_type;
     typedef typename OPTable<MPSMatrix, SymmGroup>::op_t op_t;
     typedef typename MPSMatrix::value_type value_type;
