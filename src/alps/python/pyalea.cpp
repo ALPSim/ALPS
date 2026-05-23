@@ -397,7 +397,19 @@ ALPS_MCANALYZE_EXPORT_TIMESERIES_FUNCTION_SCALAR_ONLY(running_mean, alps::alea::
 ALPS_MCANALYZE_EXPORT_TIMESERIES_FUNCTION_SCALAR_ONLY(reverse_running_mean, alps::alea::reverse_running_mean, reverse_running_mean_docstring)
 
 ALPS_MCANALYZE_EXPORT_MCTIMESERIES_CLASSES(double, MCScalarTimeseries)
-ALPS_MCANALYZE_EXPORT_MCTIMESERIES_CLASSES(std::vector<double>, MCVectorTimeseries)
+class_<alps::alea::mctimeseries< std::vector<double> > >( "MCVectorTimeseries" , mctimeseries_docstring)
+    .def(init<alps::alea::mcdata< std::vector<double> > >(mcdata_constructor_docstring))
+    .def("timeseries", &alps::alea::mctimeseries< std::vector<double> >::timeseries_python, mctimeseries_timeseries_docstring)
+    .add_property("size", &alps::alea::mctimeseries< std::vector<double> >::size, size_docstring)
+    .def("__repr__", &alps::alea::print_to_python<alps::alea::mctimeseries< std::vector<double> > >)
+  ;
+
+  class_<alps::alea::mctimeseries_view< std::vector<double> > >( "MCVectorTimeseriesView", mctimeseries_view_docstring, init< alps::alea::mctimeseries< std::vector<double> > >(mctimeseries_constructor_docstring))
+    .def(init< alps::alea::mctimeseries_view< std::vector<double> > >(mctimeseries_view_constructor_docstring))
+    .def("timeseries", &alps::alea::mctimeseries_view< std::vector<double> >::timeseries_python, numpy_constructor_docstring)
+    .add_property("size", &alps::alea::mctimeseries_view< std::vector<double> >::size, size_docstring)
+    .def("__repr__", &alps::alea::print_to_python<alps::alea::mctimeseries_view< std::vector<double> > >)
+  ;
 //ALPS_MCANALYZE_EXPORT_MCTIMESERIES_CLASSES(alps::alea::value_with_error<double>, MCScalarTimeseriesWithError)
 
 
