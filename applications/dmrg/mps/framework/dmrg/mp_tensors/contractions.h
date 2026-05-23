@@ -964,8 +964,6 @@ struct contraction {
     density_matrix_2(MPSTensor<Matrix, SymmGroup> const & bra_tensor,
                      MPSTensor<Matrix, SymmGroup> const & ket_tensor)
     {
-        typedef typename SymmGroup::charge charge;
-        
         assert( bra_tensor.row_dim() == ket_tensor.row_dim() );
         assert( bra_tensor.col_dim() == ket_tensor.col_dim() );
         assert( bra_tensor.site_dim() == ket_tensor.site_dim() );
