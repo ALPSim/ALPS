@@ -63,8 +63,7 @@ if (NOT Boost_ROOT_DIR)
       "$ENV{HOMEDRIVE}$ENV{HOMEPATH}"
       "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/src"
       "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/ALPS/src")
-    # FIXIT: | TODO: | TBD: THIS IS UGLY!
-    set(DIR1 boost boostsrc boost_1_48_0 boost_1_47_0)
+    set(DIR1 boost boostsrc)
     set(_boost_SEARCH_PATH "")
     foreach(D0 ${DIR0})
       foreach(D1 ${DIR1})

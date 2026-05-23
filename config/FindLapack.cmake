@@ -256,64 +256,6 @@ IF(HAVE_MKL)
 ENDIF(HAVE_MKL)
 
 
-# SET(MKL_PATHS 
-#   $ENV{MKL_HOME}/lib/intel64
-#   $ENV{MKL_HOME}/lib/em${QMC_BITS}t
-#   $ENV{MKL_HOME}/lib/${QMC_BITS}
-#   $ENV{MKL_HOME}/lib
-#   ${MKL_PATHS} 
-#   ) 
-# #MESSAGE(STATUS "Looking for intel/mkl library in ${MKL_PATHS}")
-# 
-# IF(NOT LAPACK_LIBRARY_INIT)
-#   IF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64")
-#     IF(LINK_LAPACK_OLD)
-#       FIND_LIBRARY(LAPACK_LIBRARY NAMES mkl_lapack PATHS ${MKL_PATHS})
-#       FIND_LIBRARY(BLAS_LIBRARY NAMES mkl PATHS ${MKL_PATHS})
-#     ELSE(LINK_LAPACK_OLD)
-#       FIND_LIBRARY(LAPACK_LIBRARY STATIC NAMES mkl_lapack PATHS ${MKL_PATHS})
-#       FIND_LIBRARY(BLAS_LIBRARY  NAMES mkl_em64t PATHS ${MKL_PATHS})
-#       MESSAGE("-- mkl 10.0.[0-2] warning for EM64T")
-#       MESSAGE("-- Replace libmkl_lapack.so in CMakeCache.txt by libmkl_lapack.a")
-#     ENDIF(LINK_LAPACK_OLD)
-#   ELSE(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64")
-#     FIND_LIBRARY(LAPACK_LIBRARY 
-#       NAMES mkl_lapack 
-#       PATHS ${MKL_PATHS}
-#       )
-#     FIND_LIBRARY(BLAS_LIBRARY
-#       NAMES mkl
-#       PATHS ${MKL_PATHS}
-#     )
-#   ENDIF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64")
-# 
-#   FIND_LIBRARY(INTEL_GUIDE_LIBRARY
-#     NAMES guide
-#     PATHS ${MKL_PATHS}
-#   )
-#   MARK_AS_ADVANCED(INTEL_GUIDE_LIBRARY)
-#   IF(NOT INTEL_GUIDE_LIBRARY MATCHES "NOTFOUND")
-#     SET(REQUIRE_PTHREAD TRUE)
-#     FIND_LIBRARY(PTHREAD_LIBRARY NAMES pthread)
-#   ENDIF(NOT INTEL_GUIDE_LIBRARY MATCHES "NOTFOUND")
-#   IF(NOT BLAS_guide_LIBRARY MATCHES "NOTFOUND")
-#     SET(REQUIRE_PTHREAD TRUE)
-#     FIND_LIBRARY(PTHREAD_LIBRARY NAMES pthread)
-#   ENDIF(NOT BLAS_guide_LIBRARY MATCHES "NOTFOUND")
-# 
-#   IF(LAPACK_LIBRARY MATCHES "mkl")
-#     MESSAGE(STATUS "Found intel/mkl library")
-#     SET(LAPACK_LIBRARY_INIT 1)
-#     SET(BLAS_LIBRARY_INIT 1)
-#     SET(HAVE_MKL 1) # CACHE BOOL "HAVE_MKL is set to 1")
-#     SET(MKL_INC_PATHS $ENV{MKL_HOME}/include ${MKL_PATHS}) 
-#     FIND_PATH(MKL_INCLUDE_DIR mkl.h ${MKL_INC_PATHS})
-#     INCLUDE_DIRECTORIES(${MKL_INCLUDE_DIR})
-#   ENDIF(LAPACK_LIBRARY MATCHES "mkl")
-# 
-# ENDIF(NOT LAPACK_LIBRARY_INIT)
-
-
 ###################################################
 # Looking for Veclib.
 # (in case MKL was not found)
@@ -374,28 +316,6 @@ IF(NOT LAPACK_LIBRARY_INIT)
     SET(LAPACK_LIBRARY_INIT 1)
   ENDIF($ENV{LAPACK} MATCHES "lapack")
 
-  IF(${CMAKE_SYSTEM_NAME} MATCHES "AIX")
-    SET(ELIB essl)
-    IF(ENABLE_OMP)
-      SET(ELIB esslsmp)
-    ENDIF(ENABLE_OMP)
-   
-    IF(NOT LAPACK_LIBRARY_INIT)
-      SET(LLIB lapack-SP4_${QMC_BITS} lapack)
-      FIND_LIBRARY(LAPACK_LIBRARY  
-        NAMES ${LLIB}
-        PATHS /usr/apps/math/lapack/LAPACK
-        lib
-        )
-      FIND_LIBRARY(BLAS_LIBRARY ${ELIB}
-                   /usr/lib
-                  )
-    ENDIF(NOT LAPACK_LIBRARY_INIT)
-
-    SET(LAPACK_LIBRARY_INIT 1)
-    SET(BLAS_LIBRARY_INIT 1)
-    MESSAGE(STATUS "Found lapack/blas on AIX system")
-  ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "AIX")
 ENDIF(NOT LAPACK_LIBRARY_INIT)
 
 
@@ -452,48 +372,6 @@ IF(NOT BLAS_LIBRARY_INIT AND NOT LAPACK_LIBRARY_INIT)
     endif(BLAS_FOUND)
   endif(NOT BLAS_LIBRARY_INIT AND NOT LAPACK_LIBRARY_INIT)
 ENDIF(NOT BLAS_LIBRARY_INIT AND NOT LAPACK_LIBRARY_INIT)
-
-
-###################################################
-# Looking for SCALAPACK.
-###################################################
-
-IF(USE_SCALAPACK)
-  SET(PNPATHS 
-    ${MKL_PATHS}
-    ${BLACS_HOME}/lib
-    ${SCALAPACK_HOME}/lib
-    /usr/lib
-    /opt/lib
-    /usr/local/lib
-    /sw/lib
-    )
-
-  IF(INTEL_MKL)
-    FIND_LIBRARY(BLACSLIB mkl_blacs_${PLAT}_lp${QMC_BITS} PATHS  ${PNPATHS})
-    FIND_LIBRARY(SCALAPACKLIB mkl_scalapack PATHS  ${PNPATHS})
-  ENDIF(INTEL_MKL)
-
-  IF(NOT SCALAPACKLIB)
-    FIND_LIBRARY(BLACSLIB blacs_MPI-${PLAT}-{BLACSDBGLVL} PATHS  ${PNPATHS})
-    FIND_LIBRARY(BLACSCINIT blacsCinit_MPI-${PLAT}-{BLACSDBGLVL} PATHS  ${PNPATHS})
-    FIND_LIBRARY(SCALAPACKLIB scalapack PATHS  ${PNPATHS})
-  ENDIF(NOT SCALAPACKLIB)
-
-  IF(BLACSLIB AND SCALAPACKLIB)
-    SET(FOUND_SCALAPACK 1 CACHE BOOL "Found scalapack library")
-  ELSE(BLACSLIB AND SCALAPACKLIB)
-    SET(FOUND_SCALAPACK 0 CACHE BOOL "Mising scalapack library")
-  ENDIF(BLACSLIB AND SCALAPACKLIB)
-
-  MARK_AS_ADVANCED(
-    BLACSCINIT
-    BLACSLIB
-    SCALAPACKLIB
-    FOUND_SCALAPACK
-    )
-ENDIF(USE_SCALAPACK)
-
 
 
 ###################################################
