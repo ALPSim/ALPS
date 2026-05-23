@@ -164,7 +164,6 @@ void SpinSim<M, MIdMatrix<double,M::dim> >::load(alps::IDump& dump)
 template <class M, class MAT> 
 update_info_type SpinSim<M,MAT>::do_update()
 {
-    typedef AbstractSpinSim<MAT> parent;
     if (this->general_case_)
       local_update_self(this->graph(),spins_, this->beta_,this->random_01,
           this->couplings_,this->selfinteraction_,this->spinfactor_,this->g_,this->h_);
@@ -180,7 +179,6 @@ update_info_type SpinSim<M,MAT>::do_update()
 template<class M>
 update_info_type SpinSim<M,MIdMatrix<double,M::dim> >::do_update()
 {
-  typedef AbstractSpinSim<MIdMatrix<double,M::dim> > parent;
   if (this->cluster_updates_)
     if (this->general_case_)
       return cluster_update(this->graph(),spins_, this->beta_,

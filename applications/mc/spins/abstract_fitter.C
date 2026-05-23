@@ -1148,9 +1148,9 @@ void AbstractFitter::print_results(const std::string filename) const
   char time_measure[256];
   boost::posix_time::time_duration time_used;
   time_used = boost::posix_time::second_clock::local_time() - start_time;
-  snprintf(time_measure,sizeof(time_measure), "\nRan %i hours, %i minutes %i seconds.",
-               time_used.hours(), time_used.minutes(),
-               time_used.seconds());
+  snprintf(time_measure,sizeof(time_measure), "\nRan %ld hours, %ld minutes %ld seconds.",
+               static_cast<long>(time_used.hours()), static_cast<long>(time_used.minutes()),
+               static_cast<long>(time_used.seconds()));
 
   mean_stream << "\n" << time_measure << std::endl;
   error_stream << "\n" << time_measure << std::endl;
