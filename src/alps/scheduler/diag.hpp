@@ -132,7 +132,7 @@ void DiagTask<T,G>::save(hdf5::archive & ar) const {
     for (unsigned j=0;j<this->quantumnumbervalues_[i].size();++j)
       ar << make_pvp(sectorpath + "/quantumnumbers/" + this->quantumnumbervalues_[i][j].first,
                      this->quantumnumbervalues_[i][j].second);
-      ar << make_pvp(sectorpath + "/energies",eigenvalues_[i]);
+    ar << make_pvp(sectorpath + "/energies",eigenvalues_[i]);
     if (calc_averages() || this->parms.value_or_default("MEASURE_ENERGY",true))
       ar << make_pvp(sectorpath,measurements_[i]);
   }

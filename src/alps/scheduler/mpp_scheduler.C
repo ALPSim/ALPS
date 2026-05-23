@@ -177,9 +177,9 @@ void MPPScheduler::assign_processes(ProcessList& free)
       if(found>=0) {
         if(first_new<0)
           first_new=found;
-          more_processes[found]=min_cpus*active[found].cpus;
-          free_processes-=min_cpus*active[found].cpus;
-        }
+        more_processes[found]=min_cpus*active[found].cpus;
+        free_processes-=min_cpus*active[found].cpus;
+      }
       } while ((found >= 0) && free_processes>=min_cpus);
 
       // don't use local process if no new tasks are started
