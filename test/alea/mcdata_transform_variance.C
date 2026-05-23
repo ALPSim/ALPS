@@ -58,14 +58,13 @@ int main() {
                     "transform_linear: variance() should equal the supplied value");
     }
 
-    // transform_linear: boost::none must clear the variance
+    // transform_linear: boost::none must clear the variance (unconditional: set it first)
     {
         alps::alea::mcdata<double> data(obs);
-        if (data.has_variance()) {
-            data.transform_linear([](double x){ return 2.0 * x; }, 1.5, boost::none);
-            ok &= check(!data.has_variance(),
-                        "transform_linear: has_variance() should be false after supplying boost::none");
-        }
+        data.transform_linear([](double x){ return x; }, 1.5, boost::optional<double>(42.0));
+        data.transform_linear([](double x){ return x; }, 1.5, boost::none);
+        ok &= check(!data.has_variance(),
+                    "transform_linear: has_variance() should be false after supplying boost::none");
     }
 
     // transform (single-observable overload): supplied variance must be stored
@@ -78,6 +77,19 @@ int main() {
                     "transform: has_variance() should be true after supplying variance");
         ok &= check(data.has_variance() && std::abs(data.variance() - expected) < 1e-10,
                     "transform: variance() should equal the supplied value");
+    }
+
+    // transform (binary overload): supplied variance must be stored
+    {
+        alps::alea::mcdata<double> lhs(obs);
+        alps::alea::mcdata<double> rhs(obs);
+        const double expected = 7.0;
+        lhs.transform(rhs, [](double x, double y){ return x + y; }, 3.0,
+                      boost::optional<double>(expected));
+        ok &= check(lhs.has_variance(),
+                    "binary transform: has_variance() should be true after supplying variance");
+        ok &= check(lhs.has_variance() && std::abs(lhs.variance() - expected) < 1e-10,
+                    "binary transform: variance() should equal the supplied value");
     }
 
     return ok ? 0 : 1;
