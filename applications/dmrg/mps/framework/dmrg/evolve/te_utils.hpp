@@ -333,7 +333,6 @@ MPO<Matrix, SymmGroup> make_exp_mpo(Lattice const& lat, Model<Matrix, SymmGroup>
                                     std::vector<term_descriptor<typename Matrix::value_type> > const& hamil_terms,
                                     typename Matrix::value_type const & alpha = 1)
 {
-    typedef term_descriptor<typename Matrix::value_type> term_t;
     typedef OPTable<Matrix, SymmGroup> op_table_t;
     typedef boost::shared_ptr<op_table_t> op_table_ptr;
     typedef typename op_table_t::tag_type tag_type;
