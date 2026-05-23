@@ -65,14 +65,13 @@ void gemm(block_matrix<Matrix1, SymmGroup> const & A,
           block_matrix<Matrix3, SymmGroup> & C)
 {
     C.clear();
-    
-    typedef typename SymmGroup::charge charge;
+
     for (std::size_t k = 0; k < A.n_blocks(); ++k) {
         std::size_t matched_block = B.left_basis().position(A.right_basis()[k].first);
 
         if ( matched_block == B.left_basis().size() )
             continue;
-        
+
         std::size_t new_block = C.insert_block(new Matrix3(num_rows(A[k]), num_cols(B[matched_block])),
                                                A.left_basis()[k].first, B.right_basis()[matched_block].first);
         gemm(A[k], B[matched_block], C[new_block]);
@@ -85,8 +84,7 @@ void gemm_trim_left(block_matrix<Matrix1, SymmGroup> const & A,
           block_matrix<Matrix3, SymmGroup> & C)
 {
     C.clear();
-    
-    typedef typename SymmGroup::charge charge;
+
     for (std::size_t k = 0; k < A.n_blocks(); ++k) {
         std::size_t matched_block = B.left_basis().position(A.right_basis()[k].first);
 
@@ -110,8 +108,7 @@ void gemm_trim_right(block_matrix<Matrix1, SymmGroup> const & A,
           block_matrix<Matrix3, SymmGroup> & C)
 {
     C.clear();
-    
-    typedef typename SymmGroup::charge charge;
+
     for (std::size_t k = 0; k < B.n_blocks(); ++k) {
         std::size_t matched_block = A.right_basis().position(B.left_basis()[k].first);
 
