@@ -105,7 +105,7 @@ namespace generate_mpo
         os << "operators:";
         for (int i=0; i<op.operators.size(); ++i)
             os << " {"  << op.operators[i].first << "," << op.operators[i].second << "}";
-            os << std::endl;
+        os << std::endl;
         return os;
     }
     
