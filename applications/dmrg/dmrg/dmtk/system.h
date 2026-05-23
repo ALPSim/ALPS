@@ -1968,10 +1968,9 @@ System<T>::truncate(int position, int new_size)
     for(biter = rho.begin(); biter != rho.end(); biter++){
       SubMatrix<T> &block(*biter);
       bool found = false;
-      bool first = false;
       for(ib = 0; ib < bsize; ib++){
         SubMatrix<T> *_block = bvector(bidx(ib));
-        if(_block == &block) { found = true; first = (ib == 0); break; }
+        if(_block == &block) { found = true; break; }
       }
       if(!found) continue; 
 
@@ -3158,7 +3157,6 @@ System<T>::measure(const VectorState<T> *v)
       res = T(0);
       for(int ib = 0; ib < 4; ib++) aux_term[ib].clear();
       bool found = true;
-      int bmask = 0;
       for(int i = 0; i < t.size(); i++){
         BasicOp<T> top = t[i];
         if(block(top.site()) == BLOCK_NONE){
@@ -3168,7 +3166,6 @@ System<T>::measure(const VectorState<T> *v)
         for(int ib = 1; ib <= 4; ib++){
           if(block(top.site()) == (size_t)ib){
             aux_term[ib-1] *= top;
-            bmask |= mask((size_t)ib);
           }
         }
       } 
