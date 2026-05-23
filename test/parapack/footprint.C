@@ -32,7 +32,7 @@
 class myclass
 {
 public:
-  std::size_t footprint() const { return sizeof(*this); }
+  std::size_t footprint() const { (void)a; (void)b; return sizeof(*this); }
 private:
   int a;
   double b;
@@ -47,7 +47,7 @@ int main() {
   std::cerr << "footprint of std::string is " << alps::footprint(c) << std::endl;
   myclass d;
   std::cerr << "footprint of myclass is " << alps::footprint(d) << std::endl;
-  double* ptr;
+  double* ptr = nullptr;
   std::cerr << "footprint of double* is " << alps::footprint(ptr) << std::endl;
   return 0;
 }
