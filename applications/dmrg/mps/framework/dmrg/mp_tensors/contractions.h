@@ -186,7 +186,6 @@ struct contraction {
     {
         typedef typename MPOTensor<OtherMatrix, SymmGroup>::index_type index_type;
         typedef typename MPOTensor<OtherMatrix, SymmGroup>::row_proxy row_proxy;
-        typedef typename MPOTensor<OtherMatrix, SymmGroup>::col_proxy col_proxy;
 
         typedef typename SymmGroup::charge charge;
         typedef std::size_t size_t;
