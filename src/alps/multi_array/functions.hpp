@@ -76,8 +76,7 @@ ALPS_IMPLEMENT_FUNCTION(cbrt)
     template <class T1, class T2, std::size_t D, class Allocator>
     multi_array<T1,D,Allocator> pow(multi_array<T1,D,Allocator> a, T2 s)
   {
-    std::pointer_to_binary_function <T1,T2,T1> PowObject (boost::ptr_fun<T1,T2,T1>(std::pow));
-    std::transform(a.data(),a.data()+a.num_elements(),a.data(),boost::bind2nd(PowObject,s));
+    std::transform(a.data(),a.data()+a.num_elements(),a.data(),[s](T1 x){ return std::pow(x, s); });
     return a;
   }
 

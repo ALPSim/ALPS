@@ -31,6 +31,7 @@
 #define ALPS_MULTI_ARRAY_BASE_HPP
 
 #include <boost/multi_array.hpp>
+#include <boost/functional.hpp>
 
 namespace alps{
 
