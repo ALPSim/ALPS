@@ -31,6 +31,7 @@
 #define ALPS_MULTI_ARRAY_BASE_HPP
 
 #include <boost/multi_array.hpp>
+#include <boost/functional.hpp>
 
 namespace alps{
 
@@ -99,7 +100,7 @@ namespace alps{
 
         array_type& operator+=(const T s)
         {
-            std::transform((*this).data(),(*this).data()+(*this).num_elements(),(*this).data(),std::bind2nd(std::plus<T>(),s));
+            std::transform((*this).data(),(*this).data()+(*this).num_elements(),(*this).data(),boost::bind2nd(std::plus<T>(),s));
             return *this;
         }
 
@@ -112,7 +113,7 @@ namespace alps{
 
         array_type& operator-=(const T s)
         {
-            std::transform((*this).data(),(*this).data()+(*this).num_elements(),(*this).data(),std::bind2nd(std::minus<T>(),s));
+            std::transform((*this).data(),(*this).data()+(*this).num_elements(),(*this).data(),boost::bind2nd(std::minus<T>(),s));
             return *this;
         }
 
@@ -125,7 +126,7 @@ namespace alps{
 
         array_type& operator*=(const T s)
         {
-            std::transform((*this).data(),(*this).data()+(*this).num_elements(),(*this).data(),std::bind2nd(std::multiplies<T>(),s));
+            std::transform((*this).data(),(*this).data()+(*this).num_elements(),(*this).data(),boost::bind2nd(std::multiplies<T>(),s));
             return *this;
         }
 
@@ -138,7 +139,7 @@ namespace alps{
 
         array_type& operator/=(const T s)
         {
-            std::transform((*this).data(),(*this).data()+(*this).num_elements(),(*this).data(),std::bind2nd(std::divides<T>(),s));
+            std::transform((*this).data(),(*this).data()+(*this).num_elements(),(*this).data(),boost::bind2nd(std::divides<T>(),s));
             return *this;
         }
 
