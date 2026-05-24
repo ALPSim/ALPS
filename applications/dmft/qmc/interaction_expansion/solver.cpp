@@ -37,7 +37,6 @@ void InteractionExpansionRun::interaction_expansion_step(void)
   int pert_order=vertices.size();   //current order of perturbation series
   double metropolis_weight=0.;
   //double oldsign=sign;
-  static unsigned int i=0; ++i;    
   if(random_01()<0.5){  //trying to ADD vertex
     if(vertices.size()>=max_order) 
       return; //we have already reached the highest perturbation order
