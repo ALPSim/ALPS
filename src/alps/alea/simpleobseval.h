@@ -739,7 +739,7 @@ namespace alps {
 
 #define OBSERVABLE_FUNCTION(F) \
 namespace detail { \
-template <class T> struct function_##F : public std::unary_function<T,T> \
+template <class T> struct function_##F \
 { T operator()(T x) const { using std:: F ; return F(x); } }; \
 } \
 template <class T> alps::SimpleObservableEvaluator<T> \

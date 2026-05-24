@@ -310,7 +310,7 @@ mctimeseries_view<typename TimeseriesType::value_type > cut_head_limit (const Ti
   mctimeseries_view<typename TimeseriesType::value_type > OUT(timeseries);  
   int cutoff(0);
   limit = limit * *OUT.begin();  
-  std::find_if(OUT.begin(), OUT.end(), ( ++boost::lambda::var(cutoff), boost::lambda::_1 <= limit ));  
+  (void)std::find_if(OUT.begin(), OUT.end(), ( ++boost::lambda::var(cutoff), boost::lambda::_1 <= limit ));
   OUT.cut_head(cutoff);  
   return OUT;  
 }
@@ -319,7 +319,7 @@ mctimeseries_view<typename TimeseriesType::value_type > cut_tail_limit (const Ti
   mctimeseries_view<typename TimeseriesType::value_type > OUT(timeseries);  
   int cutoff(0);
   limit = limit * *OUT.begin();  
-  std::find_if(OUT.begin(), OUT.end(), ( ++boost::lambda::var(cutoff), boost::lambda::_1 <= limit ));  
+  (void)std::find_if(OUT.begin(), OUT.end(), ( ++boost::lambda::var(cutoff), boost::lambda::_1 <= limit ));
   cutoff = OUT.size() - cutoff;
   OUT.cut_tail(cutoff);  
   return OUT;  
@@ -470,8 +470,8 @@ std::pair<typename average_type<typename TimeseriesType::value_type >::type, typ
   std::size_t from_int(0);
   std::size_t to_int(0);
 
-  std::find_if(autocorrelation.begin(), autocorrelation.end(), ( ++boost::lambda::var(from_int), boost::lambda::_1 <= max ));
-  std::find_if(autocorrelation.begin(), autocorrelation.end(), ( ++boost::lambda::var(to_int), boost::lambda::_1 <= min ));
+  (void)std::find_if(autocorrelation.begin(), autocorrelation.end(), ( ++boost::lambda::var(from_int), boost::lambda::_1 <= max ));
+  (void)std::find_if(autocorrelation.begin(), autocorrelation.end(), ( ++boost::lambda::var(to_int), boost::lambda::_1 <= min ));
 
   if ( (to_int - 1) < from_int) std::cout << "Warning: Invalid Range! If you want to fit a positive exponential, exchange min and max.\n";
 
@@ -562,7 +562,6 @@ mctimeseries< typename average_type<typename TimeseriesType::value_type>::type >
 template <class TimeseriesType>
 mctimeseries< typename average_type<typename TimeseriesType::value_type>::type > reverse_running_mean(const TimeseriesType& timeseries) {
   typedef typename average_type<typename TimeseriesType::value_type>::type average_type;
-  typedef mctimeseries< average_type > return_type;
   using boost::numeric::operators::operator/;
 
   mctimeseries<average_type> _reverse_running_mean;
