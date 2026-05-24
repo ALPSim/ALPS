@@ -483,7 +483,7 @@ namespace ietl
         fortran_int_t lwork=8*n;
         fortran_int_t info;
 
-        double vl, vu;
+        double vl = 0., vu = 0.;
 
         double *w = new double[n];
         double *z = new double[n];
@@ -523,7 +523,7 @@ namespace ietl
         fortran_int_t ldz=n;
         fortran_int_t lwork=8*n;
         fortran_int_t info; 
-        double vl, vu;
+        double vl = 0., vu = 0.;
 
         double * w = new double[n];
         std::complex<double> * z = new std::complex<double>[n];

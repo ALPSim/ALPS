@@ -65,7 +65,6 @@ namespace ietl {
         {
             typedef VECTOR vector_t;
             typedef SCALAR scalar_t;
-            typedef typename real_type<scalar_t>::type real_t;
             typedef typename number_traits<SCALAR>::magnitude_type magnitude_t;
             typedef std::vector<vector_t> vector_set_t;
             typedef ublas::matrix<scalar_t, ublas::row_major> matrix_t;
