@@ -48,7 +48,6 @@ typename multiply_return_type_helper<matrix<T>,Vector>::type multiply(::boost::n
     using ::boost::numeric::ublas::map_std;
     BOOST_STATIC_ASSERT(( boost::is_same<A, map_std<std::size_t, map_std<std::size_t, T> > >::value ));
     BOOST_STATIC_ASSERT(( boost::is_same<L, ::boost::numeric::ublas::row_major>::value ));
-    typedef A array_type;
     typedef typename map_std<std::size_t, map_std<std::size_t, T> >::const_iterator const_iterator1;
     typedef typename map_std<std::size_t, T>::const_iterator                        const_iterator2;
 
