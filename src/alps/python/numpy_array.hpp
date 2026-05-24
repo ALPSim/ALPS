@@ -123,7 +123,7 @@ namespace alps {
         T * data = (T *) PyArray_DATA(ptr);
 
         std::vector<T> vec(vec_size);
-        memcpy(&vec.front(), data, PyArray_ITEMSIZE(ptr) * vec_size);
+        std::copy(data, data + vec_size, vec.begin());
         return vec;
       }
 
