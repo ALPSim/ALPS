@@ -502,6 +502,7 @@ configure_file(lib/xml/models.xml.in ${PROJECT_BINARY_DIR}/lib/xml/models.xml)
 ######################################################################
 include_directories(${PROJECT_BINARY_DIR}/src)
 include_directories(src)
+include_directories(SYSTEM ${PROJECT_SOURCE_DIR}/bindings)
 
 # order the include directories so that directories which are in the
 # source or build tree always come before directories outside the project.
