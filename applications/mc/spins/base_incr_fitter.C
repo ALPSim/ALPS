@@ -178,7 +178,7 @@ void BaseIncrFitter::save_choose(int expected, int min, int max, int nbiggest)
     exp_results.push_back(all_exp_res[ranking[i]]);
     remaining_curv_sum -= curvature[i];
   }
-  delete ranking;
+  delete[] ranking;
   // choose the remaining elements by adding elements
   if (min > nbiggest)
     add_exp_results(expected-nbiggest, min-nbiggest, max-nbiggest);
