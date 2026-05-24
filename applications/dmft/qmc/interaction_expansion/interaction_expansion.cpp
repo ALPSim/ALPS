@@ -90,7 +90,6 @@ InteractionExpansionRun::InteractionExpansionRun(const alps::ProcessList &where,
   if(!parms.defined("ATOMIC")) {
     std::istringstream in_omega(parms["G0(omega)"]);
     read_freq(in_omega, bare_green_matsubara);
-    bare_green_matsubara = bare_green_matsubara;
     FourierTransformer::generate_transformer(parms, fourier_ptr);
     fourier_ptr->backward_ft(bare_green_itime, bare_green_matsubara);
   }
