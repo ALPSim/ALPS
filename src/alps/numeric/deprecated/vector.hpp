@@ -125,7 +125,7 @@ namespace blas{
     template <class ForwardIterator, typename T>
     void multiplies_assign(ForwardIterator start1, ForwardIterator end1, T lambda) 
     {
-        std::transform(start1, end1, start1, std::bind2nd(std::multiplies<T>(), lambda));
+        std::transform(start1, end1, start1, [&lambda](T x) { return x * lambda; });
     }
     
     template<typename T>

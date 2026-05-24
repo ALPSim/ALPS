@@ -100,7 +100,7 @@ namespace alps {
 
 
     template <typename T> 
-    struct hash : public std::unary_function<T, std::size_t> {
+    struct hash {
       /*!
 Generates a hash. 
 \return Returns an unsigned integer of type std::size_t.
