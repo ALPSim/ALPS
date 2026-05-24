@@ -754,7 +754,7 @@ namespace alps {
                         boost::throw_exception(std::runtime_error("the observable needs measurements"));
                     mean_ = op(mean_);
                     error_ = error;
-                    variance_opt_ = variance_opt_;
+                    variance_opt_ = variance_opt;
                     std::transform(values_.begin(), values_.end(), values_.begin(), op);
                     if (jacknife_bins_valid_)
                         std::transform(jack_.begin(), jack_.end(), jack_.begin(), op);
@@ -768,9 +768,8 @@ namespace alps {
                     cannot_rebin_ = true;
                     mean_ = op(mean_);
                     error_ = error;
-                    variance_opt_ = variance_opt_;
-                    if (!variance_opt_)
-                        tau_opt_ = boost::none;
+                    variance_opt_ = variance_opt;
+                    // tau is invariant under single-variable transforms f(a), so tau_opt_ is preserved
                     std::transform(values_.begin(), values_.end(), values_.begin(), op);
                     if (jacknife_bins_valid_)
                        std::transform(jack_.begin(), jack_.end(), jack_.begin(), op);
@@ -787,7 +786,7 @@ namespace alps {
                     cannot_rebin_ = true;
                     mean_ = op(mean_, rhs.mean_);
                     error_ = error;
-                    variance_opt_ = variance_opt_;
+                    variance_opt_ = variance_opt;
                     if (!variance_opt_)
                         tau_opt_ = boost::none;
                     std::transform(values_.begin(), values_.end(), rhs.values_.begin(), values_.begin(), op);
