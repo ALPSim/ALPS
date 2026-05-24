@@ -195,7 +195,6 @@ namespace boost { namespace numeric
         // element-wise min of std::vector
         template<typename Left, typename Right>
         struct min_assign<Left, Right, std_vector_tag, std_vector_tag>
-          : std::binary_function<Left, Right, void>
         {
             void operator ()(Left &left, Right &right) const
             {
@@ -214,7 +213,6 @@ namespace boost { namespace numeric
         // element-wise max of std::vector
         template<typename Left, typename Right>
         struct max_assign<Left, Right, std_vector_tag, std_vector_tag>
-          : std::binary_function<Left, Right, void>
         {
             void operator ()(Left &left, Right &right) const
             {
@@ -242,7 +240,6 @@ namespace boost { namespace numeric
         // promote
         template<typename To, typename From>
         struct promote<To, From, std_vector_tag, std_vector_tag>
-          : std::unary_function<From, To>
         {
             To operator ()(From &arr) const
             {
@@ -257,7 +254,6 @@ namespace boost { namespace numeric
 
         template<typename ToFrom>
         struct promote<ToFrom, ToFrom, std_vector_tag, std_vector_tag>
-          : std::unary_function<ToFrom, ToFrom>
         {
             ToFrom &operator ()(ToFrom &tofrom) const
             {
@@ -269,7 +265,6 @@ namespace boost { namespace numeric
         // functional::as_min
         template<typename T>
         struct as_min<T, std_vector_tag>
-          : std::unary_function<T, typename remove_const<T>::type>
         {
             typename remove_const<T>::type operator ()(T &arr) const
             {
@@ -283,7 +278,6 @@ namespace boost { namespace numeric
         // functional::as_max
         template<typename T>
         struct as_max<T, std_vector_tag>
-          : std::unary_function<T, typename remove_const<T>::type>
         {
             typename remove_const<T>::type operator ()(T &arr) const
             {
@@ -297,7 +291,6 @@ namespace boost { namespace numeric
         // functional::as_zero
         template<typename T>
         struct as_zero<T, std_vector_tag>
-          : std::unary_function<T, typename remove_const<T>::type>
         {
             typename remove_const<T>::type operator ()(T &arr) const
             {
@@ -311,7 +304,6 @@ namespace boost { namespace numeric
         // functional::as_one
         template<typename T>
         struct as_one<T, std_vector_tag>
-          : std::unary_function<T, typename remove_const<T>::type>
         {
             typename remove_const<T>::type operator ()(T &arr) const
             {

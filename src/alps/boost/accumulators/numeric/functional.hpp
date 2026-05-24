@@ -97,10 +97,6 @@ namespace boost { namespace numeric
         };                                                                                      \
         template<typename Arg, typename EnableIf>                                               \
         struct Name ## _base                                                                    \
-          : std::unary_function<                                                                \
-                typename remove_const<Arg>::type                                                \
-              , typename result_of_ ## Name<Arg>::type                                          \
-            >                                                                                   \
         {                                                                                       \
             typename result_of_ ## Name<Arg>::type operator ()(Arg &arg) const                  \
             {                                                                                   \
@@ -136,11 +132,6 @@ namespace boost { namespace numeric
         };                                                                                      \
         template<typename Left, typename Right, typename EnableIf>                              \
         struct Name ## _base                                                                    \
-          : std::binary_function<                                                               \
-                typename remove_const<Left>::type                                               \
-              , typename remove_const<Right>::type                                              \
-              , typename result_of_ ## Name<Left, Right>::type                                  \
-            >                                                                                   \
         {                                                                                       \
             typename result_of_ ## Name<Left, Right>::type                                      \
             operator ()(Left &left, Right &right) const                                         \
@@ -217,7 +208,6 @@ namespace boost { namespace numeric
     {
         template<typename Left, typename Right, typename EnableIf>
         struct min_assign_base
-          : std::binary_function<Left, Right, void>
         {
             void operator ()(Left &left, Right &right) const
             {
@@ -230,7 +220,6 @@ namespace boost { namespace numeric
 
         template<typename Left, typename Right, typename EnableIf>
         struct max_assign_base
-          : std::binary_function<Left, Right, void>
         {
             void operator ()(Left &left, Right &right) const
             {
@@ -255,7 +244,6 @@ namespace boost { namespace numeric
 
         template<typename To, typename From, typename EnableIf>
         struct promote_base
-          : std::unary_function<From, To>
         {
             To operator ()(From &from) const
             {
@@ -265,7 +253,6 @@ namespace boost { namespace numeric
 
         template<typename ToFrom>
         struct promote_base<ToFrom, ToFrom, void>
-          : std::unary_function<ToFrom, ToFrom>
         {
             ToFrom &operator ()(ToFrom &tofrom)
             {
@@ -275,7 +262,6 @@ namespace boost { namespace numeric
 
         template<typename Arg, typename EnableIf>
         struct as_min_base
-          : std::unary_function<Arg, typename remove_const<Arg>::type>
         {
             typename remove_const<Arg>::type operator ()(Arg &) const
             {
@@ -285,7 +271,6 @@ namespace boost { namespace numeric
 
         template<typename Arg>
         struct as_min_base<Arg, typename enable_if<is_floating_point<Arg> >::type>
-          : std::unary_function<Arg, typename remove_const<Arg>::type>
         {
             typename remove_const<Arg>::type operator ()(Arg &) const
             {
@@ -295,7 +280,6 @@ namespace boost { namespace numeric
 
         template<typename Arg, typename EnableIf>
         struct as_max_base
-          : std::unary_function<Arg, typename remove_const<Arg>::type>
         {
             typename remove_const<Arg>::type operator ()(Arg &) const
             {
@@ -305,7 +289,6 @@ namespace boost { namespace numeric
 
         template<typename Arg, typename EnableIf>
         struct as_zero_base
-          : std::unary_function<Arg, typename remove_const<Arg>::type>
         {
             typename remove_const<Arg>::type operator ()(Arg &) const
             {
@@ -315,7 +298,6 @@ namespace boost { namespace numeric
 
         template<typename Arg, typename EnableIf>
         struct as_one_base
-          : std::unary_function<Arg, typename remove_const<Arg>::type>
         {
             typename remove_const<Arg>::type operator ()(Arg &) const
             {

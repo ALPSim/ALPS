@@ -118,16 +118,6 @@ namespace boost { namespace numeric
     #define BOOST_NUMERIC_FUNCTIONAL_DEFINE_VALARRAY_BIN_OP(Name, Op)                   \
         template<typename Left, typename Right>                                         \
         struct Name<Left, Right, std_valarray_tag, std_valarray_tag>                    \
-          : std::binary_function<                                                       \
-                Left                                                                    \
-              , Right                                                                   \
-              , std::valarray<                                                          \
-                    typename Name<                                                      \
-                        typename Left::value_type                                       \
-                      , typename Right::value_type                                      \
-                    >::result_type                                                      \
-                >                                                                       \
-            >                                                                           \
         {                                                                               \
             typedef typename Left::value_type left_value_type;                          \
             typedef typename Right::value_type right_value_type;                        \
@@ -145,13 +135,6 @@ namespace boost { namespace numeric
         };                                                                              \
         template<typename Left, typename Right>                                         \
         struct Name<Left, Right, std_valarray_tag, void>                                \
-          : std::binary_function<                                                       \
-                Left                                                                    \
-              , Right                                                                   \
-              , std::valarray<                                                          \
-                    typename Name<typename Left::value_type, Right>::result_type        \
-                >                                                                       \
-            >                                                                           \
         {                                                                               \
             typedef typename Left::value_type left_value_type;                          \
             typedef                                                                     \
@@ -167,13 +150,6 @@ namespace boost { namespace numeric
         };                                                                              \
         template<typename Left, typename Right>                                         \
         struct Name<Left, Right, void, std_valarray_tag>                                \
-          : std::binary_function<                                                       \
-                Left                                                                    \
-              , Right                                                                   \
-              , std::valarray<                                                          \
-                    typename Name<Left, typename Right::value_type>::result_type        \
-                >                                                                       \
-            >                                                                           \
         {                                                                               \
             typedef typename Right::value_type right_value_type;                        \
             typedef                                                                     \
@@ -200,7 +176,6 @@ namespace boost { namespace numeric
         // element-wise min of std::valarray
         template<typename Left, typename Right>
         struct min_assign<Left, Right, std_valarray_tag, std_valarray_tag>
-          : std::binary_function<Left, Right, void>
         {
             void operator ()(Left &left, Right &right) const
             {
@@ -219,7 +194,6 @@ namespace boost { namespace numeric
         // element-wise max of std::valarray
         template<typename Left, typename Right>
         struct max_assign<Left, Right, std_valarray_tag, std_valarray_tag>
-          : std::binary_function<Left, Right, void>
         {
             void operator ()(Left &left, Right &right) const
             {
@@ -247,7 +221,6 @@ namespace boost { namespace numeric
         // promote
         template<typename To, typename From>
         struct promote<To, From, std_valarray_tag, std_valarray_tag>
-          : std::unary_function<From, To>
         {
             To operator ()(From &arr) const
             {
@@ -262,7 +235,6 @@ namespace boost { namespace numeric
 
         template<typename ToFrom>
         struct promote<ToFrom, ToFrom, std_valarray_tag, std_valarray_tag>
-          : std::unary_function<ToFrom, ToFrom>
         {
             ToFrom &operator ()(ToFrom &tofrom) const
             {
@@ -275,7 +247,6 @@ namespace boost { namespace numeric
         //   if(numeric::promote<bool>(a == b))
         template<typename From>
         struct promote<bool, From, void, std_valarray_tag>
-          : std::unary_function<From, bool>
         {
             bool operator ()(From &arr) const
             {
@@ -300,7 +271,6 @@ namespace boost { namespace numeric
         // functional::as_min
         template<typename T>
         struct as_min<T, std_valarray_tag>
-            : std::unary_function<T, typename remove_const<T>::type>
         {
             typename remove_const<T>::type operator ()(T &arr) const
             {
@@ -314,7 +284,6 @@ namespace boost { namespace numeric
         // functional::as_max
         template<typename T>
         struct as_max<T, std_valarray_tag>
-          : std::unary_function<T, typename remove_const<T>::type>
         {
             typename remove_const<T>::type operator ()(T &arr) const
             {
@@ -328,7 +297,6 @@ namespace boost { namespace numeric
         // functional::as_zero
         template<typename T>
         struct as_zero<T, std_valarray_tag>
-          : std::unary_function<T, typename remove_const<T>::type>
         {
             typename remove_const<T>::type operator ()(T &arr) const
             {
@@ -342,7 +310,6 @@ namespace boost { namespace numeric
         // functional::as_one
         template<typename T>
         struct as_one<T, std_valarray_tag>
-          : std::unary_function<T, typename remove_const<T>::type>
         {
             typename remove_const<T>::type operator ()(T &arr) const
             {
