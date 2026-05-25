@@ -86,10 +86,10 @@ if (canonical) {
   if (static_cast<int>(parms["NUMBER_OF_PARTICLES"])==get_particle_number()) 
     measure();
 }
-else 
+else
   measure();
 
-  steps++;
+steps++;
 #ifdef TIMINGS
   tt += dclock();
   std::cerr << "Meas time: " << tt << " seconds\n";
