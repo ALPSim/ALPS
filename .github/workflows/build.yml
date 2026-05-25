@@ -101,13 +101,24 @@ jobs:
           cmake --build build -j 2 -t test
 
   macos-build:
-    name: Build ALPS on ${{ matrix.plat.os }}
+    name: Build ALPS on ${{ matrix.plat.os }} / ${{ matrix.plat.c_compiler }}
     runs-on: ${{ matrix.plat.os }}
     strategy:
       matrix:
         plat:
-        - { os: macos-15, comp_pack: "clang", c_compiler: clang, cxx_compiler: clang++, c_version: "", py_version: "3.14", boost_version: 91 }
-        - { os: macos-26, comp_pack: "clang", c_compiler: clang, cxx_compiler: clang++, c_version: "", py_version: "3.14", boost_version: 91 }
+        # ── Apple Clang (system) ──────────────────────────────────────────────
+        # macos-14 = Sonoma / Apple Clang 16, macos-15 = Sequoia / Clang 17,
+        # macos-15-intel = last x86_64 runner, macos-26 = Tahoe / Clang 21.
+        - { os: macos-14,       c_compiler: /usr/bin/clang, cxx_compiler: /usr/bin/clang++, comp_pack: "",      cxx_stdlib: "-stdlib=libc++", py_version: "3.14", boost_version: 91 }
+        - { os: macos-15,       c_compiler: /usr/bin/clang, cxx_compiler: /usr/bin/clang++, comp_pack: "",      cxx_stdlib: "-stdlib=libc++", py_version: "3.14", boost_version: 91 }
+        - { os: macos-15-intel, c_compiler: /usr/bin/clang, cxx_compiler: /usr/bin/clang++, comp_pack: "",      cxx_stdlib: "-stdlib=libc++", py_version: "3.14", boost_version: 91 }
+        - { os: macos-26,       c_compiler: /usr/bin/clang, cxx_compiler: /usr/bin/clang++, comp_pack: "",      cxx_stdlib: "-stdlib=libc++", py_version: "3.14", boost_version: 91 }
+        # ── Homebrew GCC on macos-15 ──────────────────────────────────────────
+        # GCC requires the macOS 15 SDK; the macOS 26 SDK uses _Static_assert
+        # in kernel headers which GCC does not support in C++ mode.
+        # Restrict to macos-15 where the default SDK is safe.
+        - { os: macos-15, c_compiler: gcc-13, cxx_compiler: g++-13, comp_pack: "gcc@13", cxx_stdlib: "", py_version: "3.14", boost_version: 91 }
+        - { os: macos-15, c_compiler: gcc-14, cxx_compiler: g++-14, comp_pack: "gcc@14", cxx_stdlib: "", py_version: "3.14", boost_version: 91 }
 
     steps:
       - uses: actions/checkout@v4
@@ -116,20 +127,23 @@ jobs:
           brew install python@${{ matrix.plat.py_version }} gfortran
           pip${{ matrix.plat.py_version }} install "numpy>=1.26" "scipy>=1.13" --break-system-packages
           brew install openmpi hdf5
+          if [[ -n "${{ matrix.plat.comp_pack }}" ]]; then
+            brew install ${{ matrix.plat.comp_pack }}
+          fi
           wget https://archives.boost.io/release/1.${{ matrix.plat.boost_version }}.0/source/boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
           tar -xzf boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
-          ln -s /opt/homebrew/bin/python${{ matrix.plat.py_version }} /opt/homebrew/bin/python
+          ln -sf $(brew --prefix)/bin/python${{ matrix.plat.py_version }} $(brew --prefix)/bin/python
 
       - name: Build ALPS
         env:
           FC: gfortran
         run: |
           cmake -S $GITHUB_WORKSPACE -B build \
-                -DCMAKE_C_COMPILER=/usr/bin/clang \
-                -DCMAKE_CXX_COMPILER=/usr/bin/clang++ \
+                -DCMAKE_C_COMPILER=${{ matrix.plat.c_compiler }} \
+                -DCMAKE_CXX_COMPILER=${{ matrix.plat.cxx_compiler }} \
                 -DBoost_ROOT_DIR=`pwd`/boost_1_${{ matrix.plat.boost_version }}_0 \
-                -DCMAKE_CXX_FLAGS="-stdlib=libc++ -std=c++14 -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED" \
-                -DPython_ROOT_DIR=`/opt/homebrew/bin/python${{ matrix.plat.py_version }} -c "import sys, os; print(os.path.dirname(os.path.dirname(str(sys.executable))));"` \
+                -DCMAKE_CXX_FLAGS="${{ matrix.plat.cxx_stdlib }} -std=c++14 -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED" \
+                -DPython_ROOT_DIR=`$(brew --prefix)/bin/python${{ matrix.plat.py_version }} -c "import sys, os; print(os.path.dirname(os.path.dirname(str(sys.executable))));"` \
                 -DCMAKE_Fortran_COMPILER=gfortran
           cmake --build build -j $(sysctl -n hw.ncpu)
           cmake --build build -t test
