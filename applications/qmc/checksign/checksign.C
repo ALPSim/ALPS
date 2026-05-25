@@ -72,14 +72,12 @@ void check_xmlfile(const std::string& name)
   std::ifstream xml(name.c_str());
   alps::XMLTag tag=alps::parse_tag(xml,true);
   if (tag.name=="JOB") {
-    int j=0;
     tag=alps::parse_tag(xml,true);
     while (tag.name!="/JOB") {
       if (tag.name=="TASK") {
         tag=alps::parse_tag(xml,true);
         while (tag.name !="/TASK") {
           if (tag.name=="INPUT") {
-            ++j;         
             check_xmlfile(tag.attributes["file"]);
           }
           else
