@@ -36,7 +36,7 @@ if(input_path)
     COMMAND ${cmd_path}
     RESULT_VARIABLE not_successful
     INPUT_FILE ${input_path}
-    OUTPUT_FILE ${cmd}_output
+    OUTPUT_FILE ${cmd}_${input}_output
     ERROR_VARIABLE err
     TIMEOUT 600
   )
@@ -44,7 +44,7 @@ else(input_path)
   execute_process(
     COMMAND ${cmd_path}
     RESULT_VARIABLE not_successful
-    OUTPUT_FILE ${cmd}_output
+    OUTPUT_FILE ${cmd}_${input}_output
     ERROR_VARIABLE err
     TIMEOUT 600
   )
@@ -56,10 +56,10 @@ endif(not_successful)
 
 if(output_path)
   if(WIN32)
-    configure_file(${cmd}_output ${cmd}_output NEWLINE_STYLE LF)
+    configure_file(${cmd}_${input}_output ${cmd}_${input}_output NEWLINE_STYLE LF)
   endif(WIN32)
   execute_process(
-    COMMAND ${CMAKE_COMMAND} -E compare_files ${output_path} ${cmd}_output
+    COMMAND ${CMAKE_COMMAND} -E compare_files ${output_path} ${cmd}_${input}_output
     RESULT_VARIABLE not_successful
     OUTPUT_VARIABLE out
     ERROR_VARIABLE err
@@ -70,4 +70,4 @@ if(output_path)
   endif(not_successful)
 endif(output_path)
 
-file(REMOVE ${cmd}_output)
+file(REMOVE ${cmd}_${input}_output)
