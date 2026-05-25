@@ -23,8 +23,10 @@ jobs:
 
         # ── Group 2: Compiler versions ────────────────────────────────────────
         # Full sweep of GCC 10–16 and Clang 13–22, modern Python + Boost.
-        # Each compiler is run on the oldest Ubuntu that ships it natively.
-        # gcc-12, gcc-14, gcc-16, clang-15, clang-18, clang-22 already in Group 1.
+        # GCC entries use the oldest Ubuntu that ships them natively; newer
+        # Clang entries may be installed from apt.llvm.org on the oldest Ubuntu
+        # used for that compiler version. gcc-12, gcc-14, gcc-16, clang-15,
+        # clang-18, clang-22 already in Group 1.
         - { os: ubuntu-22.04, comp_pack: "gcc-10 g++-10",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 10, py_version: "3.14", boost_version: 91 }
         - { os: ubuntu-22.04, comp_pack: "gcc-11 g++-11",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 11, py_version: "3.14", boost_version: 91 }
         - { os: ubuntu-24.04, comp_pack: "gcc-13 g++-13",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 13, py_version: "3.14", boost_version: 91 }
