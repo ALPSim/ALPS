@@ -47,7 +47,7 @@ for u in [4.,5.,6.,8.]:
               'N'                       : 500,
               'NMATSUBARA'              : 500, 
               'N_MEAS'                  : 1000,
-              'N_ORDER'                 : 50,
+              'N_HISTOGRAM_ORDERS'                 : 50,
               'OMEGA_LOOP'              : 1,
               'SEED'                    : 0, 
               'SITES'                   : 1,              
