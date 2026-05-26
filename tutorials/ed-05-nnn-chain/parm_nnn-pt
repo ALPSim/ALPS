@@ -3,7 +3,7 @@ MODEL      = "spin"
 local_S    = 0.5
 J          = 1
 NUMBER_EIGENVALUES = 5
-CONSERVED_QUANTUMNUMBER = 'Sz'
+CONSERVED_QUANTUMNUMBERS = 'Sz'
 
 { L=8; Sz_total=0; J1=0.0 }
 { L=8; Sz_total=0; J1=0.1 }

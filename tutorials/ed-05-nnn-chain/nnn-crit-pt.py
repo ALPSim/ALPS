@@ -45,7 +45,7 @@ for L in [6,8]:
               'local_S'              : 0.5,
               'J'                    : 1,
               'NUMBER_EIGENVALUES'   : 2,
-              'CONSERVED_QUANTUMNUMBER' : 'Sz',
+              'CONSERVED_QUANTUMNUMBERS' : 'Sz',
               'Sz_total'             : Szt,
               'J1'                   : J1,
               'L'                    : L

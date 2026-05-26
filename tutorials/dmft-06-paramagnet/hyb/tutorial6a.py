@@ -43,7 +43,7 @@ parms.append(
           'N'                   : 1000,
           'NMATSUBARA'          : 1000,
           'N_MEAS'              : 10000,
-          'N_ORDER'             : 50,
+          'N_HISTOGRAM_ORDERS'             : 50,
           'OMEGA_LOOP'          : 1,
           'SEED'                : 0,
           'SITES'               : 1,

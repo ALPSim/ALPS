@@ -57,7 +57,7 @@ for u in [3.]:
                 'SOLVER' : "hybridization",   # we take the hybridization impurity solver
                 'SC_WRITE_DELTA' : 1,         # input for the hybridization impurity solver is the hybridization function Delta, which has to be written by the selfconsistency
                 'N_MEAS' : 5000,              # number of Monte Carlo steps between measurements
-                'N_ORDER' : 50,               # histogram size
+                'N_HISTOGRAM_ORDERS' : 50,               # histogram size
                 'TWODBS' : 1,     # the Hilbert transformation integral runs in k-space, sets square lattice
                 't' : 1,          # the nearest-neighbor hopping
                 'tprime' : 0,     # the second nearest-neighbor hopping

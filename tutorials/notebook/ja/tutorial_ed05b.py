@@ -42,7 +42,7 @@ for L in [10,12]:
         'J'                    : 1,
         'J1'                   : 0.25,
         'NUMBER_EIGENVALUES'   : 5,
-        'CONSERVED_QUANTUMNUMBER' : 'Sz',
+        'CONSERVED_QUANTUMNUMBERS' : 'Sz',
         'Sz_total' : 0,
         'L'        : L
     })
