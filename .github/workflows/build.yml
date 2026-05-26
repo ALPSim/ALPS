@@ -8,35 +8,62 @@ jobs:
     runs-on: ${{ matrix.plat.os }}
     strategy:
       matrix:
-        # macos-13 is an intel runner, macos-14 is apple silicon
-        plat: 
-        - { os: ubuntu-22.04, target: "", comp_pack: "gcc-10 g++-10", c_compiler: gcc, cxx_compiler: g++, c_version: 10, py_version: "3.9", boost_version: 76}
-        - { os: ubuntu-22.04, target: "", comp_pack: "gcc-11 g++-11", c_compiler: gcc, cxx_compiler: g++, c_version: 11, py_version: "3.10", boost_version: 81}
-        - { os: ubuntu-22.04, target: "", comp_pack: "gcc-12 g++-12", c_compiler: gcc, cxx_compiler: g++, c_version: 12, py_version: "3.10", boost_version: 81}
-        - { os: ubuntu-22.04, target: "", comp_pack: "gcc-11 g++-11", c_compiler: gcc, cxx_compiler: g++, c_version: 11, py_version: "3.11", boost_version: 81}
-        - { os: ubuntu-22.04, target: "", comp_pack: "gcc-12 g++-12", c_compiler: gcc, cxx_compiler: g++, c_version: 12, py_version: "3.11", boost_version: 81}
-        - { os: ubuntu-22.04, target: "", comp_pack: "gcc-11 g++-11", c_compiler: gcc, cxx_compiler: g++, c_version: 11, py_version: "3.12", boost_version: 86}
-        - { os: ubuntu-22.04, target: "", comp_pack: "gcc-12 g++-12", c_compiler: gcc, cxx_compiler: g++, c_version: 12, py_version: "3.12", boost_version: 86}
-        - { os: ubuntu-24.04, target: "", comp_pack: "gcc-13 g++-13", c_compiler: gcc, cxx_compiler: g++, c_version: 13, py_version: "3.12", boost_version: 86}
-        - { os: ubuntu-24.04, target: "", comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.12", boost_version: 86}
-        - { os: ubuntu-24.04, target: "", comp_pack: "gcc-13 g++-13", c_compiler: gcc, cxx_compiler: g++, c_version: 13, py_version: "3.12", boost_version: 87}
-        - { os: ubuntu-24.04, target: "", comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.12", boost_version: 87}
-        - { os: ubuntu-24.04, target: "", comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.12", boost_version: 88}
-        - { os: ubuntu-22.04, target: "", comp_pack: "clang-13", c_compiler: clang, cxx_compiler: clang++, c_version: 13, py_version: "3.10", boost_version: 81}
-        - { os: ubuntu-22.04, target: "", comp_pack: "clang-14", c_compiler: clang, cxx_compiler: clang++, c_version: 14, py_version: "3.10", boost_version: 81}
-        - { os: ubuntu-22.04, target: "", comp_pack: "clang-15", c_compiler: clang, cxx_compiler: clang++, c_version: 15, py_version: "3.10", boost_version: 81}
-        - { os: ubuntu-22.04, target: "", comp_pack: "clang-13", c_compiler: clang, cxx_compiler: clang++, c_version: 13, py_version: "3.11", boost_version: 81}
-        - { os: ubuntu-22.04, target: "", comp_pack: "clang-14", c_compiler: clang, cxx_compiler: clang++, c_version: 14, py_version: "3.11", boost_version: 81}
-        - { os: ubuntu-22.04, target: "", comp_pack: "clang-15", c_compiler: clang, cxx_compiler: clang++, c_version: 15, py_version: "3.11", boost_version: 81}
-        - { os: ubuntu-22.04, target: "", comp_pack: "clang-13", c_compiler: clang, cxx_compiler: clang++, c_version: 13, py_version: "3.12", boost_version: 86}
-        - { os: ubuntu-22.04, target: "", comp_pack: "clang-14", c_compiler: clang, cxx_compiler: clang++, c_version: 14, py_version: "3.12", boost_version: 86}
-        - { os: ubuntu-22.04, target: "", comp_pack: "clang-15", c_compiler: clang, cxx_compiler: clang++, c_version: 15, py_version: "3.12", boost_version: 86}
-        - { os: ubuntu-24.04, target: "", comp_pack: "clang-16", c_compiler: clang, cxx_compiler: clang++, c_version: 16, py_version: "3.12", boost_version: 86}
-        - { os: ubuntu-24.04, target: "", comp_pack: "clang-17", c_compiler: clang, cxx_compiler: clang++, c_version: 17, py_version: "3.12", boost_version: 86}
-        - { os: ubuntu-24.04, target: "", comp_pack: "clang-18", c_compiler: clang, cxx_compiler: clang++, c_version: 18, py_version: "3.12", boost_version: 86}
-        - { os: ubuntu-24.04, target: "", comp_pack: "clang-18", c_compiler: clang, cxx_compiler: clang++, c_version: 18, py_version: "3.12", boost_version: 87}
-        - { os: ubuntu-24.04, target: "", comp_pack: "clang-18", c_compiler: clang, cxx_compiler: clang++, c_version: 18, py_version: "3.12", boost_version: 88}
-        - { os: ubuntu-24.04, target: "", comp_pack: "clang-18", c_compiler: clang, cxx_compiler: clang++, c_version: 18, py_version: "3.12", boost_version: 89}
+        plat:
+        # ── Group 1: Ubuntu OS versions ───────────────────────────────────────
+        # Best-available compiler per OS, modern Python + Boost.
+        # ubuntu-22.04 tops out at gcc-12 / clang-15 in its apt repos.
+        # ubuntu-24.04 tops out at gcc-14 / clang-18.
+        - { os: ubuntu-22.04, comp_pack: "gcc-12 g++-12",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 12, py_version: "3.14", boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 14, py_version: "3.14", boost_version: 91 }
+        - { os: ubuntu-22.04, comp_pack: "clang-15",        c_compiler: clang, cxx_compiler: clang++, c_version: 15, py_version: "3.14", boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "clang-18",        c_compiler: clang, cxx_compiler: clang++, c_version: 18, py_version: "3.14", boost_version: 91 }
+
+        # ── Group 2: Compiler versions ────────────────────────────────────────
+        # Full sweep of GCC 10–15 and Clang 13–22, modern Python + Boost.
+        # gcc-12, gcc-14, clang-15, clang-18 already covered in Group 1.
+        # GCC 15: installed via ubuntu-toolchain-r/test PPA on ubuntu-24.04.
+        # Clang 19–22: installed via apt.llvm.org on ubuntu-24.04.
+        - { os: ubuntu-22.04, comp_pack: "gcc-10 g++-10",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 10, py_version: "3.14", boost_version: 91 }
+        - { os: ubuntu-22.04, comp_pack: "gcc-11 g++-11",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 11, py_version: "3.14", boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-13 g++-13",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 13, py_version: "3.14", boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-15 g++-15",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 15, py_version: "3.14", boost_version: 91 }
+        - { os: ubuntu-22.04, comp_pack: "clang-13",        c_compiler: clang, cxx_compiler: clang++, c_version: 13, py_version: "3.14", boost_version: 91 }
+        - { os: ubuntu-22.04, comp_pack: "clang-14",        c_compiler: clang, cxx_compiler: clang++, c_version: 14, py_version: "3.14", boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "clang-16",        c_compiler: clang, cxx_compiler: clang++, c_version: 16, py_version: "3.14", boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "clang-17",        c_compiler: clang, cxx_compiler: clang++, c_version: 17, py_version: "3.14", boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "clang-19",        c_compiler: clang, cxx_compiler: clang++, c_version: 19, py_version: "3.14", boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "clang-20",        c_compiler: clang, cxx_compiler: clang++, c_version: 20, py_version: "3.14", boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "clang-21",        c_compiler: clang, cxx_compiler: clang++, c_version: 21, py_version: "3.14", boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "clang-22",        c_compiler: clang, cxx_compiler: clang++, c_version: 22, py_version: "3.14", boost_version: 91 }
+
+        # ── Group 3: Boost versions ───────────────────────────────────────────
+        # Full sweep of all supported Boost releases.
+        # ubuntu-24.04, gcc-14, Python 3.14. boost 91 is the baseline above.
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 76 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 81 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 86 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 87 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 88 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 89 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 90 }
+
+        # ── Group 4: Python versions ──────────────────────────────────────────
+        # Full sweep of supported Python releases.
+        # ubuntu-24.04, gcc-14, Boost 1.91. Python 3.14 is the baseline above.
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.9",  boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.10", boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.11", boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.12", boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.13", boost_version: 91 }
+
+        # ── Group 5: C++ standard versions ───────────────────────────────────
+        # Full sweep C++11 through C++23, newest everything else.
+        # ubuntu-24.04, gcc-14, Python 3.14, Boost 1.91. cxx_standard defaults to 14.
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 91, cxx_standard: 11 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 91, cxx_standard: 14 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 91, cxx_standard: 17 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 91, cxx_standard: 20 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 91, cxx_standard: 23 }
 
     steps:
       - uses: actions/checkout@v4
@@ -48,9 +75,19 @@ jobs:
         run: |
           sudo apt-get update
           python -m pip install --upgrade pip
-          pip install numpy==1.26.4 scipy==1.13.0
-          sudo apt install ${{ matrix.plat.comp_pack }}
+          pip install "numpy>=1.26" "scipy>=1.13"
           sudo apt install liblapack-dev libblas-dev libopenmpi-dev libhdf5-serial-dev
+          # Clang >= 19: not in Ubuntu's default apt repos; use apt.llvm.org.
+          # GCC >= 15: not in Ubuntu's default apt repos; use ubuntu-toolchain-r PPA.
+          if [[ "${{ matrix.plat.c_compiler }}" == "clang" && "${{ matrix.plat.c_version }}" -ge 19 ]]; then
+            wget -qO- https://apt.llvm.org/llvm.sh | sudo bash -s -- ${{ matrix.plat.c_version }} all
+          else
+            if [[ "${{ matrix.plat.c_compiler }}" == "gcc" && "${{ matrix.plat.c_version }}" -ge 15 ]]; then
+              sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+              sudo apt-get update
+            fi
+            sudo apt install ${{ matrix.plat.comp_pack }}
+          fi
           wget https://archives.boost.io/release/1.${{ matrix.plat.boost_version }}.0/source/boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
           tar -xzf boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
       - name: Build ALPS
@@ -58,67 +95,63 @@ jobs:
           CC:  ${{ matrix.plat.c_compiler }}-${{ matrix.plat.c_version }}
           CXX: ${{ matrix.plat.cxx_compiler }}-${{ matrix.plat.c_version }}
         run: |
-          cmake -S $GITHUB_WORKSPACE -B build -DBoost_ROOT_DIR=`pwd`/boost_1_${{ matrix.plat.boost_version }}_0 -DCMAKE_CXX_FLAGS="-std=c++14 -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED"
+          cmake -S $GITHUB_WORKSPACE -B build \
+                -DBoost_ROOT_DIR=`pwd`/boost_1_${{ matrix.plat.boost_version }}_0 \
+                -DCMAKE_CXX_FLAGS="-std=c++${{ matrix.plat.cxx_standard || '14' }} -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED"
           cmake --build build -j 2
           cmake --build build -j 2 -t test
 
   macos-build:
-    name: Build ALPS on ${{ matrix.plat.os }}
+    name: Build ALPS on ${{ matrix.plat.os }} / ${{ matrix.plat.c_compiler }}
     runs-on: ${{ matrix.plat.os }}
     strategy:
       matrix:
-        # macos-13 is an intel runner, macos-14 is apple silicon
-        # - { os: macos-14, target: "", comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.12", boost_version: 86}
-        # - { os: macos-15, target: "", comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.12", boost_version: 88}
         plat:
-        - { os: macos-15, target: "", comp_pack: "clang", c_compiler: clang, cxx_compiler: clang++, c_version: "", py_version: "3.12", boost_version: 87}
-        - { os: macos-26, target: "", comp_pack: "clang", c_compiler: clang, cxx_compiler: clang++, c_version: "", py_version: "3.12", boost_version: 87}
+        # ── Apple Clang (system) ──────────────────────────────────────────────
+        # macos-14 = Sonoma / Apple Clang 16, macos-15 = Sequoia / Clang 17,
+        # macos-15-intel = last x86_64 runner, macos-26 = Tahoe / Clang 21.
+        - { os: macos-14,       c_compiler: /usr/bin/clang, cxx_compiler: /usr/bin/clang++, comp_pack: "",      cxx_stdlib: "-stdlib=libc++", py_version: "3.14", boost_version: 91 }
+        - { os: macos-15,       c_compiler: /usr/bin/clang, cxx_compiler: /usr/bin/clang++, comp_pack: "",      cxx_stdlib: "-stdlib=libc++", py_version: "3.14", boost_version: 91 }
+        - { os: macos-15-intel, c_compiler: /usr/bin/clang, cxx_compiler: /usr/bin/clang++, comp_pack: "",      cxx_stdlib: "-stdlib=libc++", py_version: "3.14", boost_version: 91 }
+        - { os: macos-26,       c_compiler: /usr/bin/clang, cxx_compiler: /usr/bin/clang++, comp_pack: "",      cxx_stdlib: "-stdlib=libc++", py_version: "3.14", boost_version: 91 }
+        # ── Homebrew GCC on macos-15 ──────────────────────────────────────────
+        # GCC requires the macOS 15 SDK; the macOS 26 SDK uses _Static_assert
+        # in kernel headers which GCC does not support in C++ mode.
+        # Restrict to macos-15 where the default SDK is safe.
+        - { os: macos-15, c_compiler: gcc-13, cxx_compiler: g++-13, comp_pack: "gcc@13", cxx_stdlib: "", py_version: "3.14", boost_version: 91 }
+        - { os: macos-15, c_compiler: gcc-14, cxx_compiler: g++-14, comp_pack: "gcc@14", cxx_stdlib: "", py_version: "3.14", boost_version: 91 }
 
-       
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
         run: |
-          # brew install gcc python@${{ matrix.plat.py_version }}
-          # pip already exists, pip install fails
-          # python${{ matrix.plat.py_version }} -m pip install --upgrade pip --break-system-packages
-
-          # Install Python and Fortran
           brew install python@${{ matrix.plat.py_version }} gfortran
-          pip${{ matrix.plat.py_version }} install numpy==1.26.4 scipy==1.13.0 --break-system-packages
-
-          # Install build dependencies
+          pip${{ matrix.plat.py_version }} install "numpy>=1.26" "scipy>=1.13" --break-system-packages
           brew install openmpi hdf5
-          
-          # Download Boost
+          if [[ -n "${{ matrix.plat.comp_pack }}" ]]; then
+            brew install ${{ matrix.plat.comp_pack }}
+          fi
           wget https://archives.boost.io/release/1.${{ matrix.plat.boost_version }}.0/source/boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
           tar -xzf boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
+          ln -sf $(brew --prefix)/bin/python${{ matrix.plat.py_version }} $(brew --prefix)/bin/python
 
-          # Create Python symlink
-          ln -s /opt/homebrew/bin/python${{ matrix.plat.py_version }} /opt/homebrew/bin/python
-
-          # Configure Clang
-          #echo "CC=clang" >> $GITHUB_ENV
-          #echo "CXX=clang++" >> $GITHUB_ENV
-        
       - name: Build ALPS
         env:
-          #CC:  ${{ matrix.plat.c_compiler }}-${{ matrix.plat.c_version }}
-          #CXX: ${{ matrix.plat.cxx_compiler }}-${{ matrix.plat.c_version }}
           FC: gfortran
         run: |
           cmake -S $GITHUB_WORKSPACE -B build \
-                -DCMAKE_C_COMPILER=/usr/bin/clang \
-                -DCMAKE_CXX_COMPILER=/usr/bin/clang++ \
-                -DBoost_ROOT_DIR=`pwd`/boost_1_${{ matrix.plat.boost_version }}_0 -DCMAKE_CXX_FLAGS="-stdlib=libc++ -std=c++14 -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED" -DPython_ROOT_DIR=`/opt/homebrew/bin/python${{ matrix.plat.py_version }} -c "import sys, os; print(os.path.dirname(os.path.dirname(str(sys.executable))));"` \
+                -DCMAKE_C_COMPILER=${{ matrix.plat.c_compiler }} \
+                -DCMAKE_CXX_COMPILER=${{ matrix.plat.cxx_compiler }} \
+                -DBoost_ROOT_DIR=`pwd`/boost_1_${{ matrix.plat.boost_version }}_0 \
+                -DCMAKE_CXX_FLAGS="${{ matrix.plat.cxx_stdlib }} -std=c++14 -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED" \
+                -DPython_ROOT_DIR=`$(brew --prefix)/bin/python${{ matrix.plat.py_version }} -c "import sys, os; print(os.path.dirname(os.path.dirname(str(sys.executable))));"` \
                 -DCMAKE_Fortran_COMPILER=gfortran
-
           cmake --build build -j $(sysctl -n hw.ncpu)
           cmake --build build -t test
-        
+
       - name: Run tests
         run: cd build && ctest --output-on-failure --rerun-failed
-        
+
       - name: Upload test logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -127,4 +160,3 @@ jobs:
           path: |
             build/Testing/Temporary/**
             build/Testing/Temporary/LastTest.log
-
