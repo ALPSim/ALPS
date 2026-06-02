@@ -139,9 +139,6 @@ solve_ietl_lanczos(SiteProblem<Matrix, SymmGroup> & sp,
     
     SingleSiteVS<Matrix, SymmGroup> vs(initial, std::vector<MPSTensor<Matrix, SymmGroup> >());
     
-    typedef ietl::vectorspace<Vector> Vecspace;
-    typedef boost::lagged_fibonacci607 Gen;
-    
     ietl::lanczos<SiteProblem<Matrix, SymmGroup>, SingleSiteVS<Matrix, SymmGroup> > lanczos(sp, vs);
     
     //            Vector test;

@@ -37,8 +37,7 @@ MPS<Matrix, SymmGroup> state_mps(std::vector<boost::tuple<Charge, std::size_t> >
                                  std::vector<Index<SymmGroup> > const& phys_dims, std::vector<int> const& site_type)
 {
     typedef typename SymmGroup::charge charge;
-    typedef boost::tuple<charge, size_t> local_state;
-    
+
     MPS<Matrix, SymmGroup> mps(state.size());
     
     Index<SymmGroup> curr_i;

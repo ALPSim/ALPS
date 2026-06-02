@@ -92,7 +92,6 @@ void follow_and_print_terms(MPO<Matrix, SymmGroup> const& mpo, int p, int b1, in
     }
     
     typedef typename MPOTensor<Matrix, SymmGroup>::row_proxy row_proxy;
-    typedef typename MPOTensor<Matrix, SymmGroup>::col_proxy col_proxy;
     row_proxy myrow = mpo[p+1].row(b2);
     for (typename row_proxy::const_iterator row_it = myrow.begin(); row_it != myrow.end(); ++row_it)
         follow_and_print_terms(mpo, p+1, b2, row_it.index(), ss.str(), scale);
@@ -201,9 +200,6 @@ template<class Matrix, class SymmGroup>
 MPO<Matrix, SymmGroup>
 zero_after(MPO<Matrix, SymmGroup> mpo, int p0)
 {
-    typedef typename MPOTensor<Matrix, SymmGroup>::CSRMatrix CSRMatrix;
-    typedef typename MPOTensor<Matrix, SymmGroup>::CSCMatrix CSCMatrix;
-
     maquis::cout << "Zeroing out MPO after site " << p0 << std::endl;
 
     for (int p = p0+1; p < mpo.size(); ++p) {
