@@ -107,7 +107,6 @@ struct contraction {
                 ProductBasis<SymmGroup> const & out_left_pb)
     {
         typedef typename MPOTensor<OtherMatrix, SymmGroup>::index_type index_type;
-        typedef typename MPOTensor<OtherMatrix, SymmGroup>::row_proxy row_proxy;
         typedef typename MPOTensor<OtherMatrix, SymmGroup>::col_proxy col_proxy;
 
         typedef typename SymmGroup::charge charge;
@@ -187,7 +186,6 @@ struct contraction {
     {
         typedef typename MPOTensor<OtherMatrix, SymmGroup>::index_type index_type;
         typedef typename MPOTensor<OtherMatrix, SymmGroup>::row_proxy row_proxy;
-        typedef typename MPOTensor<OtherMatrix, SymmGroup>::col_proxy col_proxy;
 
         typedef typename SymmGroup::charge charge;
         typedef std::size_t size_t;
@@ -966,8 +964,6 @@ struct contraction {
     density_matrix_2(MPSTensor<Matrix, SymmGroup> const & bra_tensor,
                      MPSTensor<Matrix, SymmGroup> const & ket_tensor)
     {
-        typedef typename SymmGroup::charge charge;
-        
         assert( bra_tensor.row_dim() == ket_tensor.row_dim() );
         assert( bra_tensor.col_dim() == ket_tensor.col_dim() );
         assert( bra_tensor.site_dim() == ket_tensor.site_dim() );
