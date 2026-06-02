@@ -56,7 +56,6 @@ namespace measurements {
                            Model<Matrix, SymmGroup> const& model,
                            bool repeat_one=false)
         {
-            typedef boost::ptr_vector<measurement<Matrix, SymmGroup> > measurements_container;
             typedef typename Model<Matrix, SymmGroup>::op_t op_t;
             typedef std::vector<op_t> op_vec;
             typedef std::vector<std::pair<op_vec, bool> > meas_operators_type;
