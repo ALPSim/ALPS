@@ -1,7 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
-if(POLICY CMP0074)
-    cmake_policy(SET CMP0074 NEW)
-endif()
+cmake_minimum_required(VERSION 3.5...3.28)
 project (AuxiliaryPrograms)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../cmake)

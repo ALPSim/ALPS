@@ -1,10 +1,11 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5...3.28)
 
 project (DMFT)
 
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH true)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+find_package(Boost REQUIRED)
 find_package(ALPSCore REQUIRED COMPONENTS hdf5 accumulators mc params gf)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -DNDEBUG -DBOOST_DISABLE_ASSERTS")
