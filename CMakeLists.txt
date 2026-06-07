@@ -664,10 +664,12 @@ else (ALPS_BUILD_SOURCE)
           FILES_MATCHING PATTERN "*.xsl"
          )
 
-    install(DIRECTORY lib/pyalps DESTINATION ${ALPS_PYTHON_LIB_DEST_ROOT}  COMPONENT python
-          FILES_MATCHING PATTERN "*.py" PATTERN "*.pyc"
-         )
-          
+    if(ALPS_BUILD_PYTHON AND ALPS_PYTHON_LIB_DEST_ROOT)
+      install(DIRECTORY lib/pyalps DESTINATION ${ALPS_PYTHON_LIB_DEST_ROOT}  COMPONENT python
+            FILES_MATCHING PATTERN "*.py" PATTERN "*.pyc"
+           )
+    endif()
+
     install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION ${ALPS_XML_PATH} COMPONENT xml)
 
     add_subdirectory(config)
@@ -679,21 +681,23 @@ else (ALPS_BUILD_SOURCE)
             config/run_test_mpi.cmake
             config/add_alps_test.cmake
             DESTINATION share/alps COMPONENT build)
-            
-    install(FILES LICENSE.txt README.md 
-            DESTINATION share/alps COMPONENT libraries)
-    string(CONFIGURE [[
-     set(PROJECT_SOURCE_DIR "@PROJECT_SOURCE_DIR@")
-     set(ALPS_PYTHON_LIB_DEST_ROOT "@ALPS_PYTHON_LIB_DEST_ROOT@")
-     message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
-     message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
-     message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
-     message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
-     message(STATUS "ALPS_PYTHON_LIB_DEST_ROOT: ${ALPS_PYTHON_LIB_DEST_ROOT}")
 
-     configure_file(${PROJECT_SOURCE_DIR}/lib/pyalps/pyalps_config.py.in ${CMAKE_INSTALL_PREFIX}/${ALPS_PYTHON_LIB_DEST_ROOT}/pyalps/pyalps_config.py)
-    ]] install_script @ONLY)
-    install(CODE ${install_script})
+    install(FILES LICENSE.txt README.md
+            DESTINATION share/alps COMPONENT libraries)
+    if(ALPS_BUILD_PYTHON AND ALPS_PYTHON_LIB_DEST_ROOT)
+      string(CONFIGURE [[
+       set(PROJECT_SOURCE_DIR "@PROJECT_SOURCE_DIR@")
+       set(ALPS_PYTHON_LIB_DEST_ROOT "@ALPS_PYTHON_LIB_DEST_ROOT@")
+       message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
+       message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
+       message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
+       message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+       message(STATUS "ALPS_PYTHON_LIB_DEST_ROOT: ${ALPS_PYTHON_LIB_DEST_ROOT}")
+
+       configure_file(${PROJECT_SOURCE_DIR}/lib/pyalps/pyalps_config.py.in ${CMAKE_INSTALL_PREFIX}/${ALPS_PYTHON_LIB_DEST_ROOT}/pyalps/pyalps_config.py)
+      ]] install_script @ONLY)
+      install(CODE ${install_script})
+    endif()
             
     set(PYTHONEXEC python)
 
