@@ -80,8 +80,9 @@ public:
     {
         epsilon = params.value_or_default("EPSILON", 0.0);
         if (epsilon <= 0.0 && model.is_signed())
-            std::cout << "Warning: Hamiltonian has a sign problem and EPSILON=0; "
-                "make sure that EPSILON is ergodic.\n";
+            std::cout << "Note: Hamiltonian has a sign problem and EPSILON is unset; "
+                "defaulting EPSILON to the largest diagonal matrix element so the "
+                "diagonal update is ergodic (pass EPSILON explicitly to override).\n";
         
         _nbstates.resize(lattice.max_site_type() + 1);
         for (unsigned i = 0; i < lattice.nsites(); ++i) {
@@ -328,9 +329,32 @@ private:
         if (epsilon == 0.0 && !have_diagonal)
             throw std::runtime_error("Hamiltonian looks purely off-diagonal. "
                 "Parameter EPSILON has to be non zero for SSE to work.");
-                
-        if (epsilon <= 0.0)
-            epsilon = 1e-6;
+
+        if (epsilon <= 0.0) {
+            if (model.is_signed()) {
+                // With EPSILON ~= 0 the maximum-diagonal vertex is left with
+                // diagonal-insertion weight c - me = epsilon ~= 0 (where
+                // c(type) = epsilon + _max_diag_me[type]). On a
+                // sign-problematic (frustrated / non-bipartite) Hamiltonian
+                // that makes the diagonal update NON-ERGODIC: the worker
+                // freezes, undersamples the expansion order, and reports a
+                // confidently-wrong, seed-dependent <H> (e.g. periodic 3x3
+                // Heisenberg -> -3.39 vs the exact -2.6525 at beta=1). The
+                // SSE energy is INVARIANT to EPSILON (it is a constant shift
+                // of the operator string), so default it to the largest
+                // diagonal matrix element, giving that vertex an O(1)
+                // weight. Pass EPSILON explicitly to override. Sign-free
+                // models are ergodic at EPSILON=0, so keep the tiny shift
+                // there to avoid needlessly inflating the expansion order.
+                double ergodic = 1e-6;
+                for (std::vector<double>::const_iterator it = _max_diag_me.begin();
+                        it != _max_diag_me.end(); ++it)
+                    if (*it > ergodic) ergodic = *it;
+                epsilon = ergodic;
+            } else {
+                epsilon = 1e-6;
+            }
+        }
         
         std::set<unsigned>::const_iterator sti = site_types.begin();
         for (; sti != site_types.end(); ++sti)
