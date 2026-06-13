@@ -114,7 +114,12 @@ if(BUILD_BOOST_PYTHON)
   EXEC_PYTHON_SCRIPT ("import numpy; print(numpy.__version__)" numpy_ver)
   MESSAGE(STATUS "numpy version ${numpy_ver}" )
   if(${numpy_ver} VERSION_GREATER_EQUAL "2.0.0" AND "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}" VERSION_LESS "1.87.0" )
-    message(FATAL_ERROR "NumPy version >=2.0 requres Boost version >=1.87.0, you have Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}.")
+    message(WARNING
+      "Boost ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION} "
+      "does not support NumPy >= 2.0 (requires Boost >= 1.87). "
+      "Falling back to boost::python::numeric::array. "
+      "Upgrade to Boost >= 1.87 to silence this warning.")
+    set(ALPS_HAVE_BOOST_NUMPY OFF)
   endif()
 endif()
 
