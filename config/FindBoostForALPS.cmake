@@ -31,9 +31,6 @@ if(ALPS_USE_SYSTEM_BOOST)
   # System Boost path
   # -----------------------------------------------------------------------
 
-  # Note: boost::system is header-only since Boost 1.69 and has no library
-  # file to link against — omitting it from the component list avoids a
-  # FindBoost failure when ALPS_USE_SYSTEM_BOOST=ON with Boost >= 1.69.
   set(_alps_boost_components
       filesystem serialization program_options regex
       thread date_time chrono timer iostreams unit_test_framework)
@@ -55,7 +52,21 @@ if(ALPS_USE_SYSTEM_BOOST)
   endif()
 
   # Find the non-Python components first (all required).
+  # Note: boost::system is intentionally absent — it became header-only in
+  # Boost 1.69 (no library file to link).  Boost < 1.69 is not supported
+  # in this mode; the version check below enforces that.
   find_package(Boost REQUIRED COMPONENTS ${_alps_boost_components})
+
+  # Enforce the minimum: for Boost < 1.69 boost::system is a compiled
+  # library required by filesystem, and omitting it from the component list
+  # would produce a mis-linked binary.
+  if(Boost_VERSION_STRING VERSION_LESS "1.69.0")
+    message(FATAL_ERROR
+      "ALPS_USE_SYSTEM_BOOST requires Boost >= 1.69 "
+      "(found ${Boost_VERSION_STRING}). "
+      "Upgrade the system Boost installation or disable ALPS_USE_SYSTEM_BOOST.")
+  endif()
+
   # Save Boost_LIBRARIES now — a second find_package(Boost) call below
   # (for the Python component) would overwrite this variable.
   set(_alps_boost_libraries_saved ${Boost_LIBRARIES})
