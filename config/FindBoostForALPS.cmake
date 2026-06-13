@@ -31,8 +31,11 @@ if(ALPS_USE_SYSTEM_BOOST)
   # System Boost path
   # -----------------------------------------------------------------------
 
+  # Note: boost::system is header-only since Boost 1.69 and has no library
+  # file to link against — omitting it from the component list avoids a
+  # FindBoost failure when ALPS_USE_SYSTEM_BOOST=ON with Boost >= 1.69.
   set(_alps_boost_components
-      filesystem serialization system program_options regex
+      filesystem serialization program_options regex
       thread date_time chrono timer iostreams unit_test_framework)
 
   if(ALPS_ENABLE_MPI)
