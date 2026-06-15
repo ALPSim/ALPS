@@ -189,12 +189,12 @@ if(BUILD_BOOST_PYTHON)
       object/inheritance.cpp object/iterator.cpp object/life_support.cpp
       object/pickle_support.cpp object/stl_iterator.cpp
   )
-  if(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION GREATER 62)
+  if(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION GREATER 62 AND ALPS_HAVE_BOOST_NUMPY)
     set(SOURCES ${SOURCES}
       numpy/dtype.cpp numpy/matrix.cpp numpy/ndarray.cpp
       numpy/numpy.cpp numpy/scalars.cpp numpy/ufunc.cpp
     )
-  endif(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION GREATER 62)
+  endif(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION GREATER 62 AND ALPS_HAVE_BOOST_NUMPY)
   foreach(S ${SOURCES})
     if(EXISTS ${DIRECTORY}/${S})
       set(BOOST_PYTHON_SOURCES ${BOOST_PYTHON_SOURCES} ${DIRECTORY}/${S})
