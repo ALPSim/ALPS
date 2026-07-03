@@ -49,12 +49,8 @@ if (NOT Boost_FOUND AND ALPS_BUILD_DOC)
   endforeach (D)
   add_executable(quickbook ${QUICKBOOK_SOURCES})
   target_link_libraries(quickbook ${ALPS_BOOST_LIBRARY_NAME})
-  if (NOT ALPS_BUILD_SOURCE)
-    install(TARGETS quickbook RUNTIME DESTINATION bin COMPONENT tools)
-  endif (NOT ALPS_BUILD_SOURCE)
+  install(TARGETS quickbook RUNTIME DESTINATION bin COMPONENT tools)
 endif (NOT Boost_FOUND AND ALPS_BUILD_DOC)
-
-if (NOT ALPS_BUILD_SOURCE)
 
   add_subdirectory(alea)
 
@@ -146,7 +142,7 @@ endif(SQLite_FOUND)
   #
   
   set(ALPSPYTHON_CONFIGURED FALSE)
-  if(PYTHON_INTERPRETER AND NOT ALPS_PACKAGE_LIBRARIES)
+  if(PYTHON_INTERPRETER)
     if (NOT WIN32)
       set(PYTHONPATH "${ALPS_PYTHON_LIB_DEST_ROOT}")
       set(PYTHONBIN "${PYTHON_INTERPRETER}")
@@ -166,6 +162,4 @@ endif(SQLite_FOUND)
       install(PROGRAMS ${PROJECT_BINARY_DIR}/tool/alpspython.bat DESTINATION bin COMPONENT tools)
     endif (NOT WIN32)
     set(ALPSPYTHON_CONFIGURED TRUE)
-  endif(PYTHON_INTERPRETER AND NOT ALPS_PACKAGE_LIBRARIES)
-
-endif (NOT ALPS_BUILD_SOURCE)
+  endif(PYTHON_INTERPRETER)

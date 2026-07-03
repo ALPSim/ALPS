@@ -262,7 +262,7 @@ endif(BUILD_BOOST_THREAD)
 
 
 # Boost.MPI Python bindings
-if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE AND Boost_ROOT_DIR)
+if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND Boost_ROOT_DIR)
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/mpi/src/python")
   set(SOURCES collectives.cpp py_communicator.cpp datatypes.cpp
       documentation.cpp py_environment.cpp py_nonblocking.cpp py_exception.cpp
@@ -295,7 +295,7 @@ if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE AND Boost_R
             LIBRARY DESTINATION ${ALPS_PYTHON_LIB_DEST_ROOT}/pyalps)
   endif(BOOST_MPI_PYTHON_SOURCES)
 
-endif (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE AND Boost_ROOT_DIR)
+endif (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND Boost_ROOT_DIR)
 
 
 #######################################################################
@@ -384,40 +384,38 @@ if (NOT Boost_FOUND)
     set_target_properties(boost PROPERTIES COMPILE_DEFINITIONS "${defs}")
   endif(WIN32)
 
-  if (NOT ALPS_BUILD_SOURCE)
-    if(MSVC)
-      get_target_property(LIB_NAME ${ALPS_BOOST_LIBRARY_NAME} LOCATION)
-      add_custom_command(TARGET ${ALPS_BOOST_LIBRARY_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_NAME} ${PROJECT_BINARY_DIR}/bin)
-    endif(MSVC)
+  if(MSVC)
+    get_target_property(LIB_NAME ${ALPS_BOOST_LIBRARY_NAME} LOCATION)
+    add_custom_command(TARGET ${ALPS_BOOST_LIBRARY_NAME} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy ${LIB_NAME} ${PROJECT_BINARY_DIR}/bin)
+  endif(MSVC)
 
-    if(NOT ALPS_PYTHON_WHEEL)
-    install(TARGETS ${ALPS_BOOST_LIBRARY_NAME} COMPONENT libraries
-              RUNTIME DESTINATION bin
-              ARCHIVE DESTINATION lib
-              LIBRARY DESTINATION lib)
-      if(BUILD_BOOST_PYTHON)
-        install(TARGETS ${ALPS_BOOST_PYTHON_LIBRARY_NAME} COMPONENT libraries
-              RUNTIME DESTINATION bin
-              ARCHIVE DESTINATION lib
-              LIBRARY DESTINATION lib)
-      endif()
-      if (ALPS_INSTALL_BOOST_TEST)
-        install(TARGETS boost_unit_test_framework boost_test_exec_monitor boost_prg_exec_monitor
-              COMPONENT libraries
-              RUNTIME DESTINATION bin
-              ARCHIVE DESTINATION lib
-              LIBRARY DESTINATION lib)
-      endif(ALPS_INSTALL_BOOST_TEST)
-    else ()
-      install(TARGETS ${ALPS_BOOST_LIBRARY_NAME}  COMPONENT libraries
-              RUNTIME DESTINATION pyalps/bin
-              ARCHIVE DESTINATION pyalps/lib
-              LIBRARY DESTINATION pyalps/lib)
+  if(NOT ALPS_PYTHON_WHEEL)
+  install(TARGETS ${ALPS_BOOST_LIBRARY_NAME} COMPONENT libraries
+            RUNTIME DESTINATION bin
+            ARCHIVE DESTINATION lib
+            LIBRARY DESTINATION lib)
+    if(BUILD_BOOST_PYTHON)
       install(TARGETS ${ALPS_BOOST_PYTHON_LIBRARY_NAME} COMPONENT libraries
-              RUNTIME DESTINATION pyalps/bin
-              ARCHIVE DESTINATION pyalps/lib
-              LIBRARY DESTINATION pyalps/lib)
+            RUNTIME DESTINATION bin
+            ARCHIVE DESTINATION lib
+            LIBRARY DESTINATION lib)
     endif()
-  endif (NOT ALPS_BUILD_SOURCE)
+    if (ALPS_INSTALL_BOOST_TEST)
+      install(TARGETS boost_unit_test_framework boost_test_exec_monitor boost_prg_exec_monitor
+            COMPONENT libraries
+            RUNTIME DESTINATION bin
+            ARCHIVE DESTINATION lib
+            LIBRARY DESTINATION lib)
+    endif(ALPS_INSTALL_BOOST_TEST)
+  else ()
+    install(TARGETS ${ALPS_BOOST_LIBRARY_NAME}  COMPONENT libraries
+            RUNTIME DESTINATION pyalps/bin
+            ARCHIVE DESTINATION pyalps/lib
+            LIBRARY DESTINATION pyalps/lib)
+    install(TARGETS ${ALPS_BOOST_PYTHON_LIBRARY_NAME} COMPONENT libraries
+            RUNTIME DESTINATION pyalps/bin
+            ARCHIVE DESTINATION pyalps/lib
+            LIBRARY DESTINATION pyalps/lib)
+  endif()
 endif (NOT Boost_FOUND)
