@@ -104,8 +104,6 @@ set(ALPS_ENABLE_MPI ON CACHE BOOL "Enable MPI Parallelization")
 set(ALPS_INSTALL_HEADERS  ON CACHE BOOL "Install headers for ALPS and all dependent libraries")
 set(ALPS_BUILD_EXAMPLES ON CACHE BOOL "Build ALPS examples")
 set(ALPS_BUILD_TESTS ON CACHE BOOL "Build ALPS tests")
-set(ALPS_BUILD_DOC ${ALPS_BUILD_SOURCE} CACHE BOOL "Build ALPS documentation")
-set(ALPS_BUILD_NEW_DOC ${ALPS_BUILD_SOURCE} CACHE BOOL "Build ALPS Sphinx documentation")
 set(ALPS_INCLUDE_BOOST_SOURCE OFF CACHE BOOL "Include Boost sources in the source tarball")
 set(ALPS_SYSTEM_NAME "" CACHE STRING "Override the package name")
 set(ALPS_PACKAGE_VERSION "" CACHE STRING "Override the package version")
@@ -705,19 +703,6 @@ endif (ALPS_BUILD_SOURCE)
 endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
 endif()
 ######################################################################
-# documentation
-######################################################################
-
-if (ALPS_BUILD_DOC AND NOT ALPS_BUILD_TUTORIALS_PACKAGE)
-add_subdirectory(doc)
-endif (ALPS_BUILD_DOC AND NOT ALPS_BUILD_TUTORIALS_PACKAGE)
-
-if (ALPS_BUILD_NEW_DOC AND NOT ALPS_BUILD_TUTORIALS_PACKAGE)
-add_subdirectory(docs)
-endif (ALPS_BUILD_NEW_DOC AND NOT ALPS_BUILD_TUTORIALS_PACKAGE)
-
-
-######################################################################
 # libraries
 ######################################################################
 
@@ -783,7 +768,6 @@ if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
  set(CPACK_COMPONENT_DEPENDENTHEADERS_DISPLAY_NAME "Headers of dependent libraries")
  set(CPACK_COMPONENT_EXAMPLES_DISPLAY_NAME "ALPS examples")
  set(CPACK_COMPONENT_BUILD_DISPLAY_NAME "Build system support")
- set(CPACK_COMPONENT_DOCUMENTATION_DISPLAY_NAME "Documentation")
  set(CPACK_COMPONENT_TUTORIALS_DISPLAY_NAME "Tutorials")
  set(CPACK_COMPONENT_LIBRARIES_DESCRIPTION "The libraries needed by the ALPS applications")
  set(CPACK_COMPONENT_HEADERS_DESCRIPTION "The ALPS header files")
@@ -796,7 +780,6 @@ if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
  set(CPACK_COMPONENT_DEPENDENTHEADERS_DESCRIPTION "Headers of libraries that ALPS depends on")
  set(CPACK_COMPONENT_EXAMPLES_DESCRIPTION "ALPS examples")
  set(CPACK_COMPONENT_BUILD_DESCRIPTION "Include files for CMake and make to simplify the building of ALPS applications")
- set(CPACK_COMPONENT_DOCUMENTATION_DESCRIPTION "Documentation for the ALPS libraries")
  set(CPACK_COMPONENT_TUTORIALS_DESCRIPTION "Tutorials for the ALPS libraries and applications")
  set(CPACK_COMPONENT_LIBRARIES_GROUP "Runtime")
  set(CPACK_COMPONENT_APPLICATIONS_GROUP "Runtime")
