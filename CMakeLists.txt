@@ -206,7 +206,7 @@ endif(ALPS_BUILD_SOURCE)
 ######################################################################
 # Version information
 ######################################################################
-set(ALPS_YEAR 2024)
+set(ALPS_YEAR 2026)
 set(ALPS_VERSION_MAJOR 2)
 set(ALPS_VERSION_MINOR 3)
 set(ALPS_VERSION_PATCH 3)
