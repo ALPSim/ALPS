@@ -17,22 +17,10 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-if (ALPS_BUILD_SOURCE)
-if(ALPS_PYTHON_WHEEL)
-
-else()
-  install(FILES CMakeLists.txt qmc.h DESTINATION alps/applications/qmc)
-  install(DIRECTORY checksign looper qwl sse4 worms dwa DESTINATION alps/applications/qmc
-          FILES_MATCHING PATTERN "*"  PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
-endif()
-else (ALPS_BUILD_SOURCE)
-
-  add_subdirectory(checksign)
-  add_subdirectory(looper)
-  add_subdirectory(qwl)
-  #add_subdirectory(sse)
-  add_subdirectory(sse4)
-  add_subdirectory(worms)
-  add_subdirectory(dwa)
-
-endif (ALPS_BUILD_SOURCE)
+add_subdirectory(checksign)
+add_subdirectory(looper)
+add_subdirectory(qwl)
+#add_subdirectory(sse)
+add_subdirectory(sse4)
+add_subdirectory(worms)
+add_subdirectory(dwa)

@@ -17,34 +17,11 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-# If you want to load a machine configuration,
-# give the filename with full-path or the name of your machine:
-#  $ cmake -DALPS_USE_MACHINE=/full/path/to/machine.cmake
-# or
-#  $ cmake -DALPS_USE_MACHINE=machine-name
 cmake_minimum_required(VERSION 3.18.0)
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
   message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there. You may need to remove CMakeCache.txt.")
 endif()
-
-if (ALPS_USE_MACHINE)
-  if (EXISTS ${ALPS_USE_MACHINE})
-    # given full-path case
-    set(ALPS_MACHINE_CONF ${ALPS_USE_MACHINE})
-    message("-- Loading machine configuration: ${ALPS_MACHINE_CONF}")
-    include(${ALPS_MACHINE_CONF})
-  else (EXISTS ${ALPS_USE_MACHINE})
-    # given machine-name case
-    set(ALPS_MACHINE_CONF "${CMAKE_CURRENT_SOURCE_DIR}/config/${ALPS_USE_MACHINE}.cmake")
-    if (EXISTS ${ALPS_MACHINE_CONF})
-      message("-- Loading machine configuration: ${ALPS_MACHINE_CONF}")
-      include(${ALPS_MACHINE_CONF})
-    else (EXISTS ${ALPS_MACHINE_CONF})
-      message(FATAL_ERROR "Can't find your macnine-configuration file")
-    endif (EXISTS ${ALPS_MACHINE_CONF})
-  endif (EXISTS ${ALPS_USE_MACHINE})
-endif (ALPS_USE_MACHINE)
 
 if (NOT_BUILD_SHARED_LIBS)
 	option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
@@ -62,16 +39,12 @@ option(ALPS_BUILD_DEVELOPER_TOOLS "Build tools used by developers to maintain AL
 option(ALPS_ENABLE_OPENMP "Enable OpenMP parallelization" OFF)
 option(ALPS_ENABLE_OPENMP_WORKER "Enable OpenMP worker support" OFF)
 option(ALPS_BUILD_ON_CRAY "Build ALPS for cray" OFF)
-option(ALPS_BUILD_SOURCE "Build a source distribution" OFF)
 option(LAPACK_64_BIT "Use 64-bit version of LAPACK" OFF)
 option(ALPS_BUILD_FORTRAN "Build the ALPS fortran applications and tools" OFF)
 option(ALPS_INCLUDE_TUTORIALS "Include the ALPS tutorials" ON)
-option(ALPS_BUILD_TUTORIALS_PACKAGE "Build only a tutorials package" OFF)
 option(BIND_FORTRAN_LOWERCASE "FORTRAN functions are compiled without a trailing underscore" OFF)
 option(ALPS_LINK_BOOST_TEST "Link Boost.test pre-built library" OFF)
 option(ALPS_INSTALL_BOOST_TEST "Install Boost Test framework" OFF)
-option(ALPS_PACKAGE_LIBRARIES "Install all dependent libraries into package" OFF)
-option(ALPS_DOWNLOAD_PACKAGES "Prepare an installer that downloads instead of containing the installation packages" OFF)
 option(ALPS_NGS_USE_NEW_ALEA "Use the ALPS ngs-alea instead of just alea" OFF)
 option(ALPS_NGS_OPENMPI_ULFM "Userlevel failure mitigation is available" OFF)
 option(ALPS_INSTALL_MPS_FRAMEWORK "Install headers and libs for the MPS framework" ON)
@@ -81,7 +54,6 @@ option(ALPS_BUILD_LIBS_ONLY "Build only libraries" OFF)
 
 
 mark_as_advanced(BIND_FORTRAN_LOWERCASE)
-mark_as_advanced(ALPS_BUILD_TUTORIALS_PACKAGE)
 mark_as_advanced(ALPS_LINK_BOOST_TEST)
 mark_as_advanced(ALPS_INSTALL_BOOST_TEST)
 mark_as_advanced(ALPS_NGS_USE_NEW_ALEA)
@@ -92,11 +64,7 @@ mark_as_advanced(ALPS_BUILD_LIBS_ONLY)
 option(ALPS_USE_MKL_PARALLEL "Use parallel version of MKL" OFF)
 mark_as_advanced(ALPS_USE_MKL_PARALLEL)
     
-#IF(EXISTS ${PROJECT_SOURCE_DIR}/applications)
-  SET (APPLICATIONS_CAN_BE_BUILT  ON)
-#ELSE(EXISTS ${PROJECT_SOURCE_DIR}/applications)
-#  SET (APPLICATIONS_CAN_BE_BUILT OFF)
-#ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/applications)
+SET (APPLICATIONS_CAN_BE_BUILT ON)
 
 set(ALPS_BOOST_LIBRARY_NAME "boost" CACHE STRING "name of the boost library")
 set(ALPS_BOOST_PYTHON_LIBRARY_NAME "boost_python" CACHE STRING "name of the boost library")
@@ -104,19 +72,11 @@ set(ALPS_ENABLE_MPI ON CACHE BOOL "Enable MPI Parallelization")
 set(ALPS_INSTALL_HEADERS  ON CACHE BOOL "Install headers for ALPS and all dependent libraries")
 set(ALPS_BUILD_EXAMPLES ON CACHE BOOL "Build ALPS examples")
 set(ALPS_BUILD_TESTS ON CACHE BOOL "Build ALPS tests")
-set(ALPS_BUILD_DOC ${ALPS_BUILD_SOURCE} CACHE BOOL "Build ALPS documentation")
-set(ALPS_BUILD_NEW_DOC ${ALPS_BUILD_SOURCE} CACHE BOOL "Build ALPS Sphinx documentation")
-set(ALPS_INCLUDE_BOOST_SOURCE OFF CACHE BOOL "Include Boost sources in the source tarball")
-set(ALPS_SYSTEM_NAME "" CACHE STRING "Override the package name")
-set(ALPS_PACKAGE_VERSION "" CACHE STRING "Override the package version")
+set(ALPS_BUILD_DOC OFF CACHE BOOL "Build ALPS documentation")
+set(ALPS_BUILD_NEW_DOC OFF CACHE BOOL "Build ALPS Sphinx documentation")
 set(ALPS_BUILD_APPLICATIONS ${APPLICATIONS_CAN_BE_BUILT} CACHE BOOL "Build ALPS applications")
-set(ALPS_DEVELOPER_ID "" CACHE STRING "Developer id used to sign the packages")
 
 mark_as_advanced(ALPS_BOOST_LIBRARY_NAME)
-
-if(CMAKE_SIZEOF_VOID_P EQUAL 8 OR CMAKE_GENERATOR MATCHES Win64)
-  set (ALPS_64BIT ON)
-endif(CMAKE_SIZEOF_VOID_P EQUAL 8 OR CMAKE_GENERATOR MATCHES Win64)
 
 if(ALPS_PYTHON_WHEEL)
   set(ALPS_BUILD_APPLICATIONS ON)
@@ -141,10 +101,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # print extensive compiler information
-if(NOT WIN32)
-  execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version COMMAND head -n1 OUTPUT_VARIABLE ALPS_COMPILER_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
-  message(STATUS "Compiler version: ${ALPS_COMPILER_VERSION}")
-endif(NOT WIN32)
+execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version COMMAND head -n1 OUTPUT_VARIABLE ALPS_COMPILER_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+message(STATUS "Compiler version: ${ALPS_COMPILER_VERSION}")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED")
 
@@ -160,16 +118,6 @@ if(ALPS_BUILD_FORTRAN AND CMAKE_COMPILER_IS_GNUCC AND CMAKE_Fortran_COMPILER_VER
   SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch")
 endif(ALPS_BUILD_FORTRAN AND CMAKE_COMPILER_IS_GNUCC AND CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER 9.99)
 
-IF(WIN32)
-ADD_DEFINITIONS(/bigobj)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
-SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
-SET(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} /bigobj")
-SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /bigobj")
-SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /bigobj")
-ENDIF(WIN32)
-
-
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Type of build" FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
@@ -184,24 +132,9 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
 # set default CMAKE_INSTALL_PREFIX
 ######################################################################
 
-if (ALPS_BUILD_PYTHON OR WIN32)
+if (ALPS_BUILD_PYTHON)
   find_package(PythonMod REQUIRED) # COMPONENTS Interpreter Development.Module )
-endif (ALPS_BUILD_PYTHON OR WIN32)
-
-if (ALPS_BUILD_SOURCE)
-  set (CMAKE_INSTALL_PREFIX .)
-else (ALPS_BUILD_SOURCE)
-  if(WIN32 AND NOT UNIX)
-    if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-      if (ALPS_64BIT)
-        set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}/Program Files/ALPS" CACHE PATH "ALPS install prefix" FORCE)
-      else (ALPS_64BIT)
-        set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}/Program Files (x86)/ALPS" CACHE PATH "ALPS install prefix" FORCE)
-      endif(ALPS_64BIT)
-      set(CMAKE_INSTALL_ALTERNATE_PREFIX "$ENV{HOMEDRIVE}/Program Files/ALPS" CACHE PATH "ALPS install prefix")
-    endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  endif(WIN32 AND NOT UNIX)
-endif(ALPS_BUILD_SOURCE)
+endif (ALPS_BUILD_PYTHON)
 
 ######################################################################
 # Version information
@@ -243,10 +176,6 @@ CHECK_INCLUDE_FILE(windows.h ALPS_HAVE_WINDOWS_H)
 include(CheckIncludeFileCXX)
 CHECK_INCLUDE_FILE_CXX(valarray ALPS_HAVE_VALARRAY)
 
-if(MSVC)
-  add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS)
-endif(MSVC)
-
 ######################################################################
 # Packages
 ######################################################################
@@ -254,10 +183,6 @@ endif(MSVC)
 # MPI
 if(ALPS_ENABLE_MPI)
   IF(NOT MPI_FOUND)
-    IF(ALPS_PACKAGE_LIBRARIES AND APPLE)
-      set(MPI_COMPILER ${CMAKE_INSTALL_PREFIX}/bin/mpicxx)
-      message (STATUS "MPI compiler is ${MPI_COMPILER}")
-    ENDIF(ALPS_PACKAGE_LIBRARIES AND APPLE)
     find_package(MPIForALPS)
       message (STATUS "MPI compiler was ${MPI_COMPILER}")
   ENDIF(NOT MPI_FOUND)
@@ -307,55 +232,28 @@ if (LAPACK_FOUND)
   set(ALPS_HAVE_LAPACK 1)
   set(ALPS_HAVE_BLAS 1)
 endif(LAPACK_FOUND)
-if(MSVC)
-  file(COPY ${LAPACK_LIBRARY} ${BLAS_LIBRARY} DESTINATION ${PROJECT_BINARY_DIR}/lib)
-endif(MSVC)
-IF(NOT WIN32)
-  IF (REQUIRE_PTHREAD)
-    SET(LAPACK_LIBRARY "${LAPACK_LIBRARY};${PTHREAD_LIBRARY}")
-    SET(LAPACK_LIBRARIES "${LAPACK_LIBRARIES};${PTHREAD_LIBRARY}")
-  ENDIF (REQUIRE_PTHREAD)
-ENDIF(NOT WIN32)
+IF (REQUIRE_PTHREAD)
+  SET(LAPACK_LIBRARY "${LAPACK_LIBRARY};${PTHREAD_LIBRARY}")
+  SET(LAPACK_LIBRARIES "${LAPACK_LIBRARIES};${PTHREAD_LIBRARY}")
+ENDIF (REQUIRE_PTHREAD)
 if(MAC_VECLIB)
   set(LAPACK_LDFLAGS "-framework ${BLAS_LAPACK_MAC_FRAMEWORK}")
-endif(MAC_VECLIB) 
+endif(MAC_VECLIB)
 set(LAPACK_LINKER_FLAGS ${LAPACK_LDFLAGS})
 
 # SQLite
 find_package(SQLite)
-if(MSVC AND SQLite_FOUND)
-  file(COPY ${SQLite_LIBRARIES} DESTINATION ${PROJECT_BINARY_DIR}/lib)
-  file(COPY ${SQLite_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
-endif(MSVC AND SQLite_FOUND)
 
 # LPSolve
 find_package(LPSolve)
-
-# Zlib
-find_package(ZLIB)
-if(ZLIB_FOUND)
-  include_directories(${ZLIB_INCLUDE_DIR})
-  link_libraries(${ZLIB_LIBRARIES})
-  if(MSVC)
-    file(COPY ${ZLIB_LIBRARIES} DESTINATION ${PROJECT_BINARY_DIR}/lib)
-  endif(MSVC)
-endif(ZLIB_FOUND)
-
 
 # SZip
 find_package(SZIP)
 if(SZIP_FOUND)
   include_directories(${SZIP_INCLUDE_DIR})
   link_libraries(${SZIP_LIBRARIES})
-  if(MSVC)
-    file(COPY ${SZIP_LIBRARIES} DESTINATION ${PROJECT_BINARY_DIR}/lib)
-  endif(MSVC)
 endif(SZIP_FOUND)
 
-if(MSVC)
-  file(COPY ${SZIP_DLLS} ${ZLIB_DLLS} ${PYTHON_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
-endif(MSVC)
- 
 # HDF5
 if(ALPS_BUILD_FORTRAN)
   find_package(HDF5 COMPONENTS C HL Fortran)
@@ -363,15 +261,10 @@ else()
   find_package(HDF5 COMPONENTS C HL)
 endif()
 IF(HDF5_FOUND)
-  SET(HAVE_LIBHDF5 1)  
+  SET(HAVE_LIBHDF5 1)
   INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIR})
   add_definitions(${HDF5_DEFINTIONS})
   SET(ALPS_HAVE_HDF5 1)
-  if(MSVC)
-    file(COPY ${HDF5_hdf5_LIBRARY_RELEASE} ${HDF5_hdf5_hl_LIBRARY_RELEASE}
-      DESTINATION ${PROJECT_BINARY_DIR}/lib)
-    file(COPY ${HDF5_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
-  endif(MSVC)
 ELSE(HDF5_FOUND)
   MESSAGE(FATAL_ERROR "Require hdf5 1.8.2 or higher. Set HDF5_HOME")
 ENDIF(HDF5_FOUND)
@@ -393,11 +286,6 @@ if (ALPS_BUILD_PYTHON)
   set(PYTHON_SCRIPTDIR "${CMAKE_INSTALL_PREFIX}/lib/python")
   find_package(PythonMod)
 endif (ALPS_BUILD_PYTHON)
-
-if(WIN32 AND NOT UNIX AND ALPS_BUILD_PYTHON)
-  find_package(PyInstaller)
-  include(UsePyInstaller)
-endif(WIN32 AND NOT UNIX AND ALPS_BUILD_PYTHON)
 
 IF (PYTHONLIBS_FOUND AND ALPS_BUILD_PYTHON)
   include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
@@ -423,9 +311,6 @@ endif(Boost_ROOT_DIR)
 # XML Path
 set(ALPS_XML_PATH "lib" CACHE STRING "Directory to install ALPS XML directory in")
 set(ALPS_XML_DIR "${CMAKE_INSTALL_PREFIX}/${ALPS_XML_PATH}/xml")
-if (WIN32 AND NOT UNIX)
-  set(ALPS_XML_ALTERNATE_DIR "${CMAKE_INSTALL_ALTERNATE_PREFIX}/${ALPS_XML_PATH}/xml")
-endif (WIN32 AND NOT UNIX)
 
 message (STATUS "ALPS XML dir is ${ALPS_XML_DIR}")
 
@@ -438,9 +323,7 @@ endif (BIND_FORTRAN_LOWERCASE)
 ######################################################################
 # test environment
 ######################################################################
-if (NOT ALPS_BUILD_SOURCE)
 include(add_alps_test)
-endif (NOT ALPS_BUILD_SOURCE)
 
 ######################################################################
 # configuration files
@@ -484,52 +367,12 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 set(CMAKE_MACOSX_RPATH 1)
 
 ######################################################################
-# install dependent libraries under Windows, from applications
-######################################################################
-
-if(WIN32 AND NOT UNIX AND NOT ALPS_BUILD_SOURCE)
-  # Lapack
-  if(LAPACK_LIBRARIES)
-    foreach(file ${LAPACK_LIBRARIES})
-      get_filename_component(LAPACK_PATH ${file} PATH)
-    endforeach(file ${LAPACK_LIBRARIES})
-    add_custom_target(liblapack ALL
-      COMMAND cmake -E make_directory ${PROJECT_BINARY_DIR}/lib
-      COMMAND cmake -E copy_if_different ${LAPACK_PATH}/lapack.lib ${PROJECT_BINARY_DIR}/lib
-      COMMAND cmake -E copy_if_different ${LAPACK_PATH}/blas.lib ${PROJECT_BINARY_DIR}/lib
-      #COMMAND cmake -E copy_if_different ${LAPACK_PATH}/f2c.lib ${PROJECT_BINARY_DIR}/lib
-    )
-    install(FILES ${PROJECT_BINARY_DIR}/lib/lapack.lib ${PROJECT_BINARY_DIR}/lib/blas.lib
-            DESTINATION lib COMPONENT dependentlibraries
-#            ${PROJECT_BINARY_DIR}/lib/f2c.lib
-    )
-  endif(LAPACK_LIBRARIES)
-  # SQLite
-  if(SQLite_LIBRARIES)
-    get_filename_component(SQLite_PATH ${SQLite_LIBRARIES} PATH)
-    get_filename_component(SQLite_BASE ${SQLite_PATH} PATH)
-    get_filename_component(SQLite_NAME ${SQLite_LIBRARIES} NAME_WE)
-    add_custom_target(libsqlite ALL
-      COMMAND cmake -E make_directory ${PROJECT_BINARY_DIR}/lib
-      COMMAND cmake -E copy_if_different ${SQLite_LIBRARIES} ${PROJECT_BINARY_DIR}/lib
-      COMMAND cmake -E copy_if_different ${SQLite_BASE}/bin/${SQLite_NAME}.dll ${PROJECT_BINARY_DIR}/bin
-    )
-    install(FILES ${PROJECT_BINARY_DIR}/lib/${SQLite_NAME}.lib DESTINATION lib COMPONENT dependentlibraries)
-    install(FILES ${PROJECT_BINARY_DIR}/bin/${SQLite_NAME}.dll DESTINATION bin COMPONENT dependentlibraries)
-  endif(SQLite_LIBRARIES)
-endif(WIN32 AND NOT UNIX AND NOT ALPS_BUILD_SOURCE)
-
-######################################################################
 # setting up ALPSConfig.cmake and include.mk
 ######################################################################
 
 set(ALPS_USE_FILE ${CMAKE_INSTALL_PREFIX}/share/alps/UseALPS.cmake)
 
-if(ALPS_PACKAGE_LIBRARIES)
-    set(Boost_INCLUDE_DIR_CONFIG ${CMAKE_INSTALL_PREFIX}/include)
-else()
-    set(Boost_INCLUDE_DIR_CONFIG ${Boost_INCLUDE_DIR})
-endif(ALPS_PACKAGE_LIBRARIES)
+set(Boost_INCLUDE_DIR_CONFIG ${Boost_INCLUDE_DIR})
 
 set(ALPS_INCLUDE_DIRS_CONFIG ${CMAKE_INSTALL_PREFIX}/include)
 list(APPEND ALPS_INCLUDE_DIRS_CONFIG ${Boost_INCLUDE_DIR_CONFIG})
@@ -614,141 +457,103 @@ if(ALPS_PYTHON_WHEEL)
     install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION pyalps COMPONENT xml)
 elseif(ALPS_BUILD_LIBS_ONLY)
 else()
-if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
-if (ALPS_BUILD_SOURCE)
-  FILE(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/*.txt")
-  INSTALL(FILES ${files} DESTINATION alps)  
-  INSTALL(FILES script/hdf5.sh script/cmake3.sh DESTINATION alps/script)  
-  install(DIRECTORY config example legacy lib src test tool DESTINATION alps
-          FILES_MATCHING PATTERN "*" )
-  if (ALPS_INCLUDE_BOOST_SOURCE)
-    install(DIRECTORY ${Boost_ROOT_DIR} DESTINATION . PATTERN "*" 
-            PATTERN *fop-* EXCLUDE PATTERN "docbook-[dx]*" EXCLUDE)
-  endif (ALPS_INCLUDE_BOOST_SOURCE)
-else (ALPS_BUILD_SOURCE)
-  if (ALPS_INSTALL_HEADERS)
-    set(ALPS_HEADER_DIR "include")
-    install(DIRECTORY src/alps src/boost src/ietl src/mocasito COMPONENT headers DESTINATION ${ALPS_HEADER_DIR}
-            FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
-           )
-    install(FILES ${PROJECT_BINARY_DIR}/src/alps/config.h ${PROJECT_BINARY_DIR}/src/alps/version.h DESTINATION ${ALPS_HEADER_DIR}/alps COMPONENT headers)
-    if (ALPS_INSTALL_DEPRECATED)
-      install(DIRECTORY legacy/alps COMPONENT deprecated DESTINATION ${ALPS_HEADER_DIR}
-              FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" 
-             )
-    endif (ALPS_INSTALL_DEPRECATED)
 
-    if(ALPS_PACKAGE_LIBRARIES)
-       install(DIRECTORY ${Boost_ROOT_DIR}/boost DESTINATION ${ALPS_HEADER_DIR} COMPONENT dependentheaders
-               FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
-              )
-       install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/include
-                         ${PROJECT_BINARY_DIR}/deplibs/etc
-                         ${PROJECT_BINARY_DIR}/deplibs/share
-               DESTINATION . COMPONENT dependentheaders)
-       #install(DIRECTORY  DESTINATION . COMPONENT dependentheaders)
-    endif(ALPS_PACKAGE_LIBRARIES)
-
-  endif(ALPS_INSTALL_HEADERS)
-
-  if(ALPS_PACKAGE_LIBRARIES)
-    install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/lib DESTINATION . COMPONENT dependentlibraries)
-    FILE(GLOB depfiles "${PROJECT_BINARY_DIR}/deplibs/bin/*")
-    install(PROGRAMS ${depfiles} DESTINATION bin COMPONENT dependentlibraries)
-    if(MSVC)
-      install(PROGRAMS ${HDF5_DLLS} ${PYTHON_DLLS} ${ZLIB_DLLS} ${SZIP_DLLS} DESTINATION bin COMPONENT dependentlibraries)
-    endif(MSVC)
-  endif(ALPS_PACKAGE_LIBRARIES)
-
-  install(DIRECTORY lib/xml DESTINATION ${ALPS_XML_PATH} COMPONENT xml
-          FILES_MATCHING PATTERN "*.xsl"
+if (ALPS_INSTALL_HEADERS)
+  set(ALPS_HEADER_DIR "include")
+  install(DIRECTORY src/alps src/boost src/ietl src/mocasito COMPONENT headers DESTINATION ${ALPS_HEADER_DIR}
+          FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
          )
-
-    if(ALPS_BUILD_PYTHON AND ALPS_PYTHON_LIB_DEST_ROOT)
-      install(DIRECTORY lib/pyalps DESTINATION ${ALPS_PYTHON_LIB_DEST_ROOT}  COMPONENT python
-            FILES_MATCHING PATTERN "*.py" PATTERN "*.pyc"
+  install(FILES ${PROJECT_BINARY_DIR}/src/alps/config.h ${PROJECT_BINARY_DIR}/src/alps/version.h DESTINATION ${ALPS_HEADER_DIR}/alps COMPONENT headers)
+  if (ALPS_INSTALL_DEPRECATED)
+    install(DIRECTORY legacy/alps COMPONENT deprecated DESTINATION ${ALPS_HEADER_DIR}
+            FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
            )
-    endif()
+  endif (ALPS_INSTALL_DEPRECATED)
+endif(ALPS_INSTALL_HEADERS)
 
-    install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION ${ALPS_XML_PATH} COMPONENT xml)
+install(DIRECTORY lib/xml DESTINATION ${ALPS_XML_PATH} COMPONENT xml
+        FILES_MATCHING PATTERN "*.xsl"
+       )
 
-    add_subdirectory(config)
+if(ALPS_BUILD_PYTHON AND ALPS_PYTHON_LIB_DEST_ROOT)
+  install(DIRECTORY lib/pyalps DESTINATION ${ALPS_PYTHON_LIB_DEST_ROOT}  COMPONENT python
+        FILES_MATCHING PATTERN "*.py" PATTERN "*.pyc"
+       )
+endif()
 
-    install(FILES config/UseALPS.cmake
-            ${PROJECT_BINARY_DIR}/config/ALPSConfig.cmake
-            ${PROJECT_BINARY_DIR}/config/include.mk
-            config/run_test.cmake
-            config/run_test_mpi.cmake
-            config/add_alps_test.cmake
-            DESTINATION share/alps COMPONENT build)
+install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION ${ALPS_XML_PATH} COMPONENT xml)
 
-    install(FILES LICENSE.txt README.md
-            DESTINATION share/alps COMPONENT libraries)
-    if(ALPS_BUILD_PYTHON AND ALPS_PYTHON_LIB_DEST_ROOT)
-      string(CONFIGURE [[
-       set(PROJECT_SOURCE_DIR "@PROJECT_SOURCE_DIR@")
-       set(ALPS_PYTHON_LIB_DEST_ROOT "@ALPS_PYTHON_LIB_DEST_ROOT@")
-       message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
-       message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
-       message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
-       message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
-       message(STATUS "ALPS_PYTHON_LIB_DEST_ROOT: ${ALPS_PYTHON_LIB_DEST_ROOT}")
+add_subdirectory(config)
 
-       configure_file(${PROJECT_SOURCE_DIR}/lib/pyalps/pyalps_config.py.in ${CMAKE_INSTALL_PREFIX}/${ALPS_PYTHON_LIB_DEST_ROOT}/pyalps/pyalps_config.py)
-      ]] install_script @ONLY)
-      install(CODE ${install_script})
-    endif()
-            
-    set(PYTHONEXEC python)
+install(FILES config/UseALPS.cmake
+        ${PROJECT_BINARY_DIR}/config/ALPSConfig.cmake
+        ${PROJECT_BINARY_DIR}/config/include.mk
+        config/run_test.cmake
+        config/run_test_mpi.cmake
+        config/add_alps_test.cmake
+        DESTINATION share/alps COMPONENT build)
 
-endif (ALPS_BUILD_SOURCE)
-endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
+install(FILES LICENSE.txt README.md
+        DESTINATION share/alps COMPONENT libraries)
+if(ALPS_BUILD_PYTHON AND ALPS_PYTHON_LIB_DEST_ROOT)
+  string(CONFIGURE [[
+   set(PROJECT_SOURCE_DIR "@PROJECT_SOURCE_DIR@")
+   set(ALPS_PYTHON_LIB_DEST_ROOT "@ALPS_PYTHON_LIB_DEST_ROOT@")
+   message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
+   message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
+   message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
+   message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+   message(STATUS "ALPS_PYTHON_LIB_DEST_ROOT: ${ALPS_PYTHON_LIB_DEST_ROOT}")
+
+   configure_file(${PROJECT_SOURCE_DIR}/lib/pyalps/pyalps_config.py.in ${CMAKE_INSTALL_PREFIX}/${ALPS_PYTHON_LIB_DEST_ROOT}/pyalps/pyalps_config.py)
+  ]] install_script @ONLY)
+  install(CODE ${install_script})
+endif()
+
+set(PYTHONEXEC python)
+
 endif()
 ######################################################################
 # documentation
 ######################################################################
 
-if (ALPS_BUILD_DOC AND NOT ALPS_BUILD_TUTORIALS_PACKAGE)
+if (ALPS_BUILD_DOC)
 add_subdirectory(doc)
-endif (ALPS_BUILD_DOC AND NOT ALPS_BUILD_TUTORIALS_PACKAGE)
+endif (ALPS_BUILD_DOC)
 
-if (ALPS_BUILD_NEW_DOC AND NOT ALPS_BUILD_TUTORIALS_PACKAGE)
+if (ALPS_BUILD_NEW_DOC)
 add_subdirectory(docs)
-endif (ALPS_BUILD_NEW_DOC AND NOT ALPS_BUILD_TUTORIALS_PACKAGE)
+endif (ALPS_BUILD_NEW_DOC)
 
 
 ######################################################################
 # libraries
 ######################################################################
 
-if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
-  add_subdirectory(src/boost)
-  if (NOT ALPS_BUILD_SOURCE)
-    add_subdirectory(src/alps)
-    add_subdirectory(lib/pyalps)
-  endif (NOT ALPS_BUILD_SOURCE)
-endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
+add_subdirectory(src/boost)
+add_subdirectory(src/alps)
+add_subdirectory(lib/pyalps)
 
 
 ######################################################################
 # programs
 ######################################################################
 
-if (NOT ALPS_BUILD_TUTORIALS_PACKAGE AND NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
+if (NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
   add_subdirectory(tool)
-  if (ALPS_BUILD_EXAMPLES AND NOT ALPS_BUILD_SOURCE)
+  if (ALPS_BUILD_EXAMPLES)
     add_subdirectory(example)
-  endif (ALPS_BUILD_EXAMPLES AND NOT ALPS_BUILD_SOURCE)
-endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE AND NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
+  endif (ALPS_BUILD_EXAMPLES)
+endif (NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
 
 
 ######################################################################
 # applications
 ######################################################################
 
-if (ALPS_BUILD_APPLICATIONS AND NOT ALPS_BUILD_TUTORIALS_PACKAGE AND NOT ALPS_BUILD_LIBS_ONLY)
+if (ALPS_BUILD_APPLICATIONS AND NOT ALPS_BUILD_LIBS_ONLY)
   add_subdirectory(applications)
-endif (ALPS_BUILD_APPLICATIONS AND NOT ALPS_BUILD_TUTORIALS_PACKAGE AND NOT ALPS_BUILD_LIBS_ONLY)
+endif (ALPS_BUILD_APPLICATIONS AND NOT ALPS_BUILD_LIBS_ONLY)
 
 if (ALPS_INCLUDE_TUTORIALS AND NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
   add_subdirectory(tutorials)
@@ -758,175 +563,17 @@ endif (ALPS_INCLUDE_TUTORIALS AND NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_
 # developer tools
 ######################################################################
 
-if (ALPS_BUILD_DEVELOPER_TOOLS AND NOT ALPS_BUILD_SOURCE)
+if (ALPS_BUILD_DEVELOPER_TOOLS)
   add_subdirectory(script)
-endif (ALPS_BUILD_DEVELOPER_TOOLS AND NOT ALPS_BUILD_SOURCE)
-
-##########################################################################
-# Binary packages                                                        #
-##########################################################################
-
-if (NOT WIN32)
-  set (CPACK_SET_DESTDIR ON)
-endif (NOT WIN32)
-
-
-if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
- set(CPACK_COMPONENT_LIBRARIES_DISPLAY_NAME "ALPS and Boost libraries")
- set(CPACK_COMPONENT_HEADERS_DISPLAY_NAME "ALPS headers")
- set(CPACK_COMPONENT_DEPRECATED_DISPLAY_NAME "Deprecated ALPS headers")
- set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "ALPS applications")
- set(CPACK_COMPONENT_XML_DISPLAY_NAME "XML files")
- set(CPACK_COMPONENT_PYTHON_DISPLAY_NAME "ALPS Python packages")
- set(CPACK_COMPONENT_TOOLS_DISPLAY_NAME "ALPS tools")
- set(CPACK_COMPONENT_DEPENDENTLIBRARIES_DISPLAY_NAME "Dependent libraries")
- set(CPACK_COMPONENT_DEPENDENTHEADERS_DISPLAY_NAME "Headers of dependent libraries")
- set(CPACK_COMPONENT_EXAMPLES_DISPLAY_NAME "ALPS examples")
- set(CPACK_COMPONENT_BUILD_DISPLAY_NAME "Build system support")
- set(CPACK_COMPONENT_DOCUMENTATION_DISPLAY_NAME "Documentation")
- set(CPACK_COMPONENT_TUTORIALS_DISPLAY_NAME "Tutorials")
- set(CPACK_COMPONENT_LIBRARIES_DESCRIPTION "The libraries needed by the ALPS applications")
- set(CPACK_COMPONENT_HEADERS_DESCRIPTION "The ALPS header files")
- set(CPACK_COMPONENT_DEPRECATED_DESCRIPTION "Deprecated ALPS header files")
- set(CPACK_COMPONENT_APPLICATIONS_DESCRIPTION "The ALPS application programs")
- set(CPACK_COMPONENT_XML_DESCRIPTION "The XML files and XSL stylefiles for ALPS input and evaluation")
- set(CPACK_COMPONENT_PYTHON_DESCRIPTION "The ALPS Python packages for data evaluation")
- set(CPACK_COMPONENT_TOOLS_DESCRIPTION "The ALPS tools")
- set(CPACK_COMPONENT_DEPENDENTLIBRARIES_DESCRIPTION "External libraries that ALPS depends on. They do not need to be installed if they already exist on the system and can be found by the ALPS applications")
- set(CPACK_COMPONENT_DEPENDENTHEADERS_DESCRIPTION "Headers of libraries that ALPS depends on")
- set(CPACK_COMPONENT_EXAMPLES_DESCRIPTION "ALPS examples")
- set(CPACK_COMPONENT_BUILD_DESCRIPTION "Include files for CMake and make to simplify the building of ALPS applications")
- set(CPACK_COMPONENT_DOCUMENTATION_DESCRIPTION "Documentation for the ALPS libraries")
- set(CPACK_COMPONENT_TUTORIALS_DESCRIPTION "Tutorials for the ALPS libraries and applications")
- set(CPACK_COMPONENT_LIBRARIES_GROUP "Runtime")
- set(CPACK_COMPONENT_APPLICATIONS_GROUP "Runtime")
- set(CPACK_COMPONENT_XML_GROUP "Runtime")
- set(CPACK_COMPONENT_PYTHON_GROUP "Runtime")
- set(CPACK_COMPONENT_TOOLS_GROUP "Runtime")
- set(CPACK_COMPONENT_DEPENDENTLIBRARIES_GROUP "Runtime")
- set(CPACK_COMPONENT_HEADERS_GROUP "Development")
- set(CPACK_COMPONENT_DEPRECATED_GROUP "Development")
- set(CPACK_COMPONENT_DEPENDENTHEADERS_GROUP "Development")
- set(CPACK_COMPONENT_BUILD_GROUP "Development")
-
- set(CPACK_COMPONENT_DEPRECATED_DISABLED ON)
-
- set(CPACK_COMPONENT_GROUP_DEVELOPMENT_DISPLAY_NAME "Development")
- set(CPACK_COMPONENT_GROUP_RUNTIME_DISPLAY_NAME "Runtime")
-
- set(CPACK_COMPONENT_GROUP_DEVELOPMENT_DESCRIPTION "Components needed only to build applications based on the ALPS libraries")
- set(CPACK_COMPONENT_GROUP_RUNTIME_DESCRIPTION "Components needed to run the ALPS applications")
- set(CPACK_COMPONENT_APPLICATIONS_DEPENDS libraries)
- set(CPACK_COMPONENT_PYTHON_DEPENDS libraries)
- set(CPACK_COMPONENT_TOOLS_DEPENDS libraries)
- set(CPACK_COMPONENT_EXAMPLES_DEPENDS libraries)
- set(CPACK_COMPONENT_TUTORIALS_DEPENDS python applications libraries tools)
-
-endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
- 
-if (ALPS_BUILD_TUTORIALS_PACKAGE)
-  set(CPACK_PACKAGE_NAME "alps-tutorials")
-else ()
-  if (BUILD_SHARED_LIBS)
-    set(CPACK_PACKAGE_NAME "alps")
-  else ()
-    set(CPACK_PACKAGE_NAME "alps-static")
-  endif ()
-
-  set(CPACK_NSIS_MODIFY_PATH ON)
-  if(ALPS_DOWNLOAD_PACKAGES)
-    set(CPACK_PACKAGE_NAME "${CPACK_PACKAGE_NAME}-download")
-  endif(ALPS_DOWNLOAD_PACKAGES)
-endif (ALPS_BUILD_TUTORIALS_PACKAGE)
-
-set(CPACK_PACKAGE_VENDOR "ALPS Collaboration")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ALPS ${ALPS_VERSION}")
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
-set(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/README.md")
-
-if (ALPS_PACKAGE_LIBRARIES)
-  set(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/README-package.txt")
-  set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE-package.txt")
-else (ALPS_PACKAGE_LIBRARIES)
-  set(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/README.md")
-  set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.txt")
-endif (ALPS_PACKAGE_LIBRARIES)
-
-set(CPACK_RESOURCE_FILE_WELCOME "${PROJECT_SOURCE_DIR}/Welcome.txt")
-set(CPACK_PACKAGE_VERSION "${ALPS_VERSION}")
-set(CPACK_PACKAGE_VERSION_MAJOR "${ALPS_VERSION_MAJOR}")
-set(CPACK_PACKAGE_VERSION_MINOR "${ALPS_VERSION_MINOR}")
-if(ALPS_VERSION_BUILD)
-  set(CPACK_PACKAGE_VERSION_PATCH "${ALPS_VERSION_PATCH}-${ALPS_VERSION_BUILD}")
-else(ALPS_VERSION_BUILD)
-  set(CPACK_PACKAGE_VERSION_PATCH "${ALPS_VERSION_PATCH}")
-endif(ALPS_VERSION_BUILD)
-
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "ALPS")
-
-
-set(CPACK_PACKAGING_INSTALL_PREFIX "/")
-
-# override package name manually
-if (ALPS_SYSTEM_NAME)
-  set (CPACK_SYSTEM_NAME ${ALPS_SYSTEM_NAME})
-else (ALPS_SYSTEM_NAME)
-  if(ALPS_BUILD_SOURCE)
-    if (ALPS_INCLUDE_BOOST_SOURCE)
-      set (CPACK_SYSTEM_NAME "src-with-boost")
-    else (ALPS_INCLUDE_BOOST_SOURCE)
-      set (CPACK_SYSTEM_NAME "src")
-    endif (ALPS_INCLUDE_BOOST_SOURCE)
-  endif(ALPS_BUILD_SOURCE)
-endif (ALPS_SYSTEM_NAME)
-if (ALPS_PACKAGE_VERSION)
-  set (CPACK_PACKAGE_VERSION ${ALPS_PACKAGE_VERSION})
-endif (ALPS_PACKAGE_VERSION)
-  
-set(CPACK_PACKAGE_DEFAULT_LOCATION ${CMAKE_INSTALL_PREFIX})
-
-set(CPACK_PACKAGE_RELOCATABLE ON)
-
-set(CPACK_RPM_PACKAGE_ARCHITECTURE "x86_64")
-set(CPACK_RPM_PACKAGE_LICENSE "ALPS License")
-set(CPACK_RPM_PACKAGE_GROUP "${CPACK_PACKAGE_VENDOR}")
-
-if(WIN32 AND NOT UNIX)
-  set(CPACK_NSIS_DISPLAY_NAME "ALPS ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}")
-  set(CPACK_NSIS_CONTACT "wistaria@comp-phys.org")
-  set(CPACK_NSIS_HELP_LINK "http://alps.comp-phys.org")
-  set(CPACK_NSIS_URL_INFO_ABOUT "http://alps.comp-phys.org")
-  if (ALPS_64BIT)
-    set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
-  endif (ALPS_64BIT)
-  set(CPACK_NSIS_MODIFY_PATH ON)
-  
-  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${CPACK_NSIS_DISPLAY_NAME}")
-endif(WIN32 AND NOT UNIX)
-
-include(CPack)
-if(APPLE)
-  include(MacPKG)
-endif(APPLE)
-
-if (ALPS_DOWNLOAD_PACKAGES)
-  if(COMMAND cpack_configure_downloads)
-    cpack_configure_downloads(
-    "http://alps.comp-phys.org/static/software/releases/packages/"
-      ALL ADD_REMOVE)
-  endif()
-endif(ALPS_DOWNLOAD_PACKAGES)
-
-##########################################################################
-
+endif (ALPS_BUILD_DEVELOPER_TOOLS)
 
 ######################################################################
 # tests
 ######################################################################
 
-if (ALPS_BUILD_TESTS AND NOT ALPS_BUILD_SOURCE)
+if (ALPS_BUILD_TESTS)
   include(ALPSBuildname)
   enable_testing()
   include(CTest)
   add_subdirectory(test)
-endif (ALPS_BUILD_TESTS AND NOT ALPS_BUILD_SOURCE)
+endif (ALPS_BUILD_TESTS)
