@@ -47,7 +47,6 @@ option(ALPS_LINK_BOOST_TEST "Link Boost.test pre-built library" OFF)
 option(ALPS_INSTALL_BOOST_TEST "Install Boost Test framework" OFF)
 option(ALPS_NGS_USE_NEW_ALEA "Use the ALPS ngs-alea instead of just alea" OFF)
 option(ALPS_NGS_OPENMPI_ULFM "Userlevel failure mitigation is available" OFF)
-option(ALPS_INSTALL_MPS_FRAMEWORK "Install headers and libs for the MPS framework" ON)
 option(ALPS_PYTHON_WHEEL "Build python wheel" OFF)
 option(ALPS_BUILD_LIBS_ONLY "Build only libraries" OFF)
 

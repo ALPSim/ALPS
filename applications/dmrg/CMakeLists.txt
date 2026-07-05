@@ -17,10 +17,5 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-option(ALPS_BUILD_MPS "Build and install MPS application" ON)
-
-if(ALPS_BUILD_MPS)
-  add_subdirectory(mps)
-endif(ALPS_BUILD_MPS)
 add_subdirectory(dmrg)
 add_subdirectory(tebd)
