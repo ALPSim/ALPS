@@ -18,4 +18,3 @@
 #   DEALINGS IN THE SOFTWARE.
 
 add_subdirectory(dmrg)
-add_subdirectory(tebd)
