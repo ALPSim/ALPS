@@ -90,6 +90,12 @@ if(LAPACK_FOUND)
 
   target_link_libraries(hybridization dmft_qmc_impl)
   target_link_libraries(interaction dmft_qmc_impl)
+
+  # Regression tests for the shared DMFT QMC infrastructure.
+  add_executable(dmft_fouriertransform_offdiag_numeric dmft_fouriertransform_offdiag_numeric.C)
+  target_link_libraries(dmft_fouriertransform_offdiag_numeric dmft_qmc_impl)
+  set_property(TARGET dmft_fouriertransform_offdiag_numeric PROPERTY LABELS dmft)
+  add_alps_test(dmft_fouriertransform_offdiag_numeric)
 if(ALPS_PYTHON_WHEEL)
   if(APPLE)
     set_target_properties(dmft PROPERTIES INSTALL_RPATH "@loader_path/../lib" )
