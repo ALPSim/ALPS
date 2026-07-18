@@ -196,21 +196,26 @@ matsubara_green_function_t GeneralFSHilbertTransformer::operator()(const matsuba
   } else {
     std::cout<<"GeneralFSHilbertTransformer: AFM version; using: mu="<<mu<<", h="<<h<<", beta="<<beta<<std::endl;
     if(G_omega.nflavor()%2!=0){throw std::logic_error("GeneralFSHilbertTransformer::operator(): don't know how to handle odd number of flavors in the AFM case.");}
-    for(spin_t f=0; f<G_omega.nflavor()/2; f+=2){
+    // Iterate every (f, f+1) flavour pair. The bound used to be nflavor()/2
+    // with 2*f indexing, which -- combined with the stride-2 step -- skipped
+    // every pair beyond the first (e.g. flavours 2,3 for nflavor==4). This
+    // form matches SemicircleFSHilbertTransformer::operator() and is
+    // identical at nflavor==2.
+    for(spin_t f=0; f<G_omega.nflavor(); f+=2){
       for(frequency_t w=0; w<G_omega.nfreq(); ++w){
-        Sigma(0,2*f)=1./G0_omega(w,2*f)-1./G_omega(w,2*f);
-        Sigma(0,2*f+1)=1./G0_omega(w,2*f+1)-1./G_omega(w,2*f+1);
+        Sigma(0,f)=1./G0_omega(w,f)-1./G_omega(w,f);
+        Sigma(0,f+1)=1./G0_omega(w,f+1)-1./G_omega(w,f+1);
         double wn=(2.*w+1)*M_PI/beta;
-        std::complex<double> zeta_0=std::complex<double>(mu-h,wn)-Sigma(0,2*f);
-        std::complex<double> zeta_1=std::complex<double>(mu+h,wn)-Sigma(0,2*f+1);
-        
-        std::complex<double> integral=bandstruct->HilbertIntegral_AFM(zeta_0*zeta_1,2*f);
-        
+        std::complex<double> zeta_0=std::complex<double>(mu-h,wn)-Sigma(0,f);
+        std::complex<double> zeta_1=std::complex<double>(mu+h,wn)-Sigma(0,f+1);
+
+        std::complex<double> integral=bandstruct->HilbertIntegral_AFM(zeta_0*zeta_1,f);
+
         //compute the new G's:
-        G_omega_new(0,2*f)=zeta_1*integral; //formula 97 in review
-        G_omega_new(0,2*f+1)=zeta_0*integral;
-        G0_omega(w,2*f)=1./(1./G_omega_new(0,2*f)+Sigma(0,2*f));
-        G0_omega(w,2*f+1)=1./(1./G_omega_new(0,2*f+1)+Sigma(0,2*f+1));
+        G_omega_new(0,f)=zeta_1*integral; //formula 97 in review
+        G_omega_new(0,f+1)=zeta_0*integral;
+        G0_omega(w,f)=1./(1./G_omega_new(0,f)+Sigma(0,f));
+        G0_omega(w,f+1)=1./(1./G_omega_new(0,f+1)+Sigma(0,f+1));
       }
     }
   }
