@@ -60,31 +60,20 @@ itime_green_function_t HilbertTransformer::initial_G0(const alps::Parameters& pa
 
 
 
-itime_green_function_t SemicircleHilbertTransformer::operator()(const itime_green_function_t& G_tau, 
-                                                                double mu, double h, double beta) const
+itime_green_function_t SemicircleHilbertTransformer::operator()(const itime_green_function_t& /*G_tau*/,
+                                                                double /*mu*/, double /*h*/, double /*beta*/) const
 {
-  matsubara_green_function_t G_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
-  matsubara_green_function_t G0_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
-  itime_green_function_t G0_tau(G_tau.ntime(), G_tau.nsite(), G_tau.nflavor());
-  std::cerr << "SemicircleHilbertTransformer::operator(): Fouriertransformation of G_tau at this point is requested. Densities needed!\n";
-  exit(1);
-  boost::shared_ptr<FourierTransformer> fourier_ptr;
-  //FourierTransformer::generate_transformer(parms, fourier_ptr); ????
-  fourier_ptr->forward_ft(G_tau, G_omega);
-  //std::cout<<"G omega real: "<<std::endl;
-  print_real_green_matsubara(std::cout, G_omega, beta);
-  for(spin_t flavor=0;flavor<G_omega.nflavor(); flavor++){
-    spin_t fbar=flavor%2==0?flavor+1:flavor-1;
-    for(unsigned i=0; i<G_omega.nfreq(); i++) {
-      std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-      std::complex<double> zeta = iw + mu + (flavor%2 ? h : -h);
-      G0_omega(i, flavor) = 1./(zeta - bethe_parms.second_moment(flavor)*G_omega(i,fbar));
-    }
-  }
-  //std::cout<<"symmetrized G0 omega real: "<<std::endl;
-  print_real_green_matsubara(std::cout, G0_omega, beta);
-  fourier_ptr->backward_ft(G0_tau, G0_omega);
-  return G0_tau;
+  // The imaginary-time Hilbert transform for the semicircle DOS was never
+  // implemented (it needs the densities; the generate_transformer call was
+  // left commented out, followed by a dereference of a default-constructed
+  // null FourierTransformer pointer). Report cleanly so the driver's
+  // exception handler can surface it, rather than hard-aborting via exit(1).
+  // Use the Matsubara (OMEGA_LOOP) self-consistency path, which has a
+  // working Hilbert transform.
+  throw std::logic_error(
+      "SemicircleHilbertTransformer::operator(): the imaginary-time Hilbert "
+      "transform is not implemented (densities needed); use the Matsubara "
+      "(OMEGA_LOOP) self-consistency path.");
 }
 
 
