@@ -8,8 +8,6 @@ debian/tmp/usr/bin/hirschfye usr/bin/
 debian/tmp/usr/bin/hybridization usr/bin/
 debian/tmp/usr/bin/interaction usr/bin/
 debian/tmp/usr/bin/loop usr/bin/
-debian/tmp/usr/bin/mps_evolve usr/bin/
-debian/tmp/usr/bin/mps_optim usr/bin/
 debian/tmp/usr/bin/qwl usr/bin/
 debian/tmp/usr/bin/qwl_evaluate usr/bin/
 debian/tmp/usr/bin/sparsediag usr/bin/

@@ -605,13 +605,6 @@ def loadIterationMeasurements(files,what=None,verbose=False):
       what = [what]
     return ll.ReadDiagDataFromFile(files,measurements=what,loadIterations=True,verbose=verbose)
 
-def loadMPSIterations(files,what=None,verbose=False):
-    ## MPS iterations are stored in: /simulation/iteration/X/results/M with X the sweep index and M the name of the measurement
-    ll = Hdf5Loader()
-    if isinstance(what,str):
-      what = [what]
-    return ll.ReadDiagDataFromFile(files,measurements=what,respath='/simulation',loadIterations=True,verbose=verbose)
-
 def loadSpectra(files,verbose=False):
     """ loads ALPS spectra from ALPS HDF5 result files
     
