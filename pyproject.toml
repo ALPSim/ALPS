@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [tool.scikit-build]
 wheel.packages = ["python/pyalps"]
-cmake.verbose = true
+build.verbose = true
 #build-dir = "./build_alps"
 #build.tool-args = ["-j8", "-l13"]
 logging.level = "DEBUG"
