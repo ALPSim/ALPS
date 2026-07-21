@@ -95,8 +95,17 @@ y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
       }
   }
   else if (p_f_grid=="linear") {
-    for (int i=0; i<nfreq_; ++i) 
-      t_array_[i] = double(i)/(nfreq_-1);
+    // t_array_ holds nfreq_+1 knots spanning [0,1]; MaxEntParameters reads
+    // t_array_[i] and t_array_[i+1] for i in [0,nfreq_) to build
+    // omega_coord_ and delta_omega_, so all nfreq_+1 knots must be filled —
+    // as the Lorentzian and log branches above do. Stopping at nfreq_ left
+    // the last knot unwritten; with that knot at 0 the last bin width
+    // becomes omega_of_t(0) - omega_of_t(t_array_[nfreq_-1]), i.e. about
+    // OMEGA_MIN - OMEGA_MAX — large and negative — which collapses the
+    // default-model normalisation and turns every linear-grid run into a
+    // NaN spectrum.
+    for (int i=0; i<nfreq_+1; ++i)
+      t_array_[i] = double(i)/(nfreq_);
   }
   else 
     boost::throw_exception(std::invalid_argument("No valid frequency grid specified"));
