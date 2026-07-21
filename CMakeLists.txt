@@ -71,8 +71,6 @@ set(ALPS_ENABLE_MPI ON CACHE BOOL "Enable MPI Parallelization")
 set(ALPS_INSTALL_HEADERS  ON CACHE BOOL "Install headers for ALPS and all dependent libraries")
 set(ALPS_BUILD_EXAMPLES ON CACHE BOOL "Build ALPS examples")
 set(ALPS_BUILD_TESTS ON CACHE BOOL "Build ALPS tests")
-set(ALPS_BUILD_DOC OFF CACHE BOOL "Build ALPS documentation")
-set(ALPS_BUILD_NEW_DOC OFF CACHE BOOL "Build ALPS Sphinx documentation")
 set(ALPS_BUILD_APPLICATIONS ${APPLICATIONS_CAN_BE_BUILT} CACHE BOOL "Build ALPS applications")
 
 mark_as_advanced(ALPS_BOOST_LIBRARY_NAME)
@@ -512,19 +510,6 @@ endif()
 set(PYTHONEXEC python)
 
 endif()
-######################################################################
-# documentation
-######################################################################
-
-if (ALPS_BUILD_DOC)
-add_subdirectory(doc)
-endif (ALPS_BUILD_DOC)
-
-if (ALPS_BUILD_NEW_DOC)
-add_subdirectory(docs)
-endif (ALPS_BUILD_NEW_DOC)
-
-
 ######################################################################
 # libraries
 ######################################################################

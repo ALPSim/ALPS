@@ -23,36 +23,7 @@
 # 
 
 
-#
-# quickbook
-#
-
-# If Boost precompiled libraries found, don't build quickbook,
-# since sources are not available.
-if (NOT Boost_FOUND AND ALPS_BUILD_DOC)
-  set (QUICKBOOK_SOURCES "")
-  foreach (D "${Boost_ROOT_DIR}/tools/quickbook/detail" "${Boost_ROOT_DIR}/tools/quickbook/src")
-    set (FILES actions.cpp actions_class.cpp block_element_grammar.cpp
-               block_grammar.cpp code_snippet.cpp collector.cpp 
-               dependency_tracker.cpp
-               doc_info_actions.cpp doc_info_grammar.cpp document_state.cpp files.cpp
-               glob.cpp grammar.cpp id_generation.cpp id_manager.cpp id_xml.cpp input_path.cpp 
-               include_paths.cpp main_grammar.cpp 
-               markups.cpp native_text.cpp phrase_element_grammar.cpp phrase_grammar.cpp 
-               post_process.cpp quickbook.cpp state.cpp string_ref.cpp 
-               syntax_highlight.cpp template_stack.cpp utils.cpp values.cpp)
-    foreach(S ${FILES})
-      if(EXISTS ${D}/${S})
-        set(QUICKBOOK_SOURCES ${QUICKBOOK_SOURCES} ${D}/${S})
-      endif(EXISTS ${D}/${S})
-    endforeach(S)
-  endforeach (D)
-  add_executable(quickbook ${QUICKBOOK_SOURCES})
-  target_link_libraries(quickbook ${ALPS_BOOST_LIBRARY_NAME})
-  install(TARGETS quickbook RUNTIME DESTINATION bin COMPONENT tools)
-endif (NOT Boost_FOUND AND ALPS_BUILD_DOC)
-
-  add_subdirectory(alea)
+add_subdirectory(alea)
 
   #
   # Script to setup ALPS_HOME, PATH, LD_LIBRARY_PATH, PYTHONPATH
@@ -135,6 +106,13 @@ endif(SQLite_FOUND)
     add_executable(maxent maxent.cpp maxent_helper.cpp maxent_simulation.cpp maxent_parms.cpp)
     target_link_libraries(maxent alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
     install(TARGETS maxent RUNTIME DESTINATION bin COMPONENT tools)
+
+    # Regression test: linear-FREQUENCY_GRID runs must produce a finite
+    # spectrum (guards the t_array_ knot fill in maxent_parms.cpp).
+    add_executable(maxent_linear_grid_numeric maxent_linear_grid_numeric.cpp
+                   maxent_helper.cpp maxent_simulation.cpp maxent_parms.cpp)
+    target_link_libraries(maxent_linear_grid_numeric alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
+    add_alps_test(maxent_linear_grid_numeric)
    endif(LAPACK_FOUND)
 
   #
