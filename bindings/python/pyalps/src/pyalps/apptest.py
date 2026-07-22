@@ -470,8 +470,9 @@ def checkProperties( testfile, reffile ):
         del tprop['filename']
         del rprop['filename']
 
-    if cmp(tprop, rprop) == 0:    return True
-    else:   return False
+    if tprop.keys() != rprop.keys():
+        return False
+    return all(np.array_equal(tprop[key], rprop[key]) for key in tprop)
 
 def compareTest( testinputfile, outputs, tmpdir, tstart, compMethod='auto' ):
 
@@ -783,4 +784,3 @@ def createTest( script, inputs=None, outputs=None, prefix=None, refdir='./ref' )
 
     f.close()
     os.chmod(scriptname_prefixed, 0o755)
-

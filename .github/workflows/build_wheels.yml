@@ -34,11 +34,11 @@ jobs:
           restore-keys: pyalps-ccache-${{ runner.os }}-${{ matrix.plat.arch }}-
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.22.0
+        uses: pypa/cibuildwheel@v3.4.1
         with:
           package-dir: bindings/python/pyalps
         env:
-          CIBW_BUILD: cp39-* cp310-* cp311-* cp312-* cp313-*
+          CIBW_BUILD: cp310-* cp311-* cp312-* cp313-* cp314-*
           CIBW_ARCHS: ${{ matrix.plat.arch }}
           CIBW_ARCHS_MACOS: ${{ matrix.plat.arch }}
           CIBW_ENVIRONMENT: >

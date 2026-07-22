@@ -7,10 +7,12 @@ Physics Simulations (ALPS) project. Binary wheels are available from PyPI:
 python -m pip install pyalps
 ```
 
+Install `pyalps[plot]` to use the Matplotlib plotting helpers.
+
 The bindings are built as a standalone `scikit-build-core` project using
-nanobind. A source build requires CMake 3.18 or newer, a C++17 compiler,
-BLAS/LAPACK, HDF5, and an installed ALPS C++ SDK. Point `ALPS_DIR` at the
-SDK's `share/alps` package directory.
+nanobind. A source build requires Python 3.10 or newer, CMake 3.18 or newer,
+a C++17 compiler, BLAS/LAPACK, HDF5, and an installed ALPS C++ SDK. Point
+`ALPS_DIR` at the SDK's `share/alps` package directory.
 
 From the repository root:
 
