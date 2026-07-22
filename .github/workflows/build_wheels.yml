@@ -34,6 +34,8 @@ jobs:
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.22.0
+        with:
+          package-dir: bindings/python/pyalps
         env:
           CIBW_BUILD: cp39-* cp310-* cp311-* cp312-* cp313-*
           CIBW_ARCHS: ${{ matrix.plat.arch }}
@@ -97,7 +99,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build sdist
-        run: pipx run build --sdist
+        run: pipx run build --sdist --outdir dist bindings/python/pyalps
 
       - uses: actions/upload-artifact@v4
         with:

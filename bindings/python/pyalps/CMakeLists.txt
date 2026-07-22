@@ -22,6 +22,10 @@ list(PREPEND CMAKE_PREFIX_PATH "${_nanobind_cmake_dir}")
 find_package(nanobind 2.10 CONFIG REQUIRED)
 
 get_filename_component(_repo_root "${CMAKE_CURRENT_SOURCE_DIR}/../../.." ABSOLUTE)
+set(_alps_source_root "${_repo_root}")
+if(NOT EXISTS "${_alps_source_root}/tool/maxent.cpp")
+  set(_alps_source_root "${CMAKE_CURRENT_SOURCE_DIR}/_vendor")
+endif()
 set(_bindings "${CMAKE_CURRENT_SOURCE_DIR}/cpp")
 
 link_directories(${ALPS_LIBRARY_DIRS})
@@ -67,19 +71,19 @@ nanobind_add_module(pyngsrandom01_c NB_STATIC "${_bindings}/ngs/random01.cpp")
 nanobind_add_module(pyngsaccumulator_c NB_STATIC "${_bindings}/ngs/accumulator.cpp")
 
 if(PYALPS_BUILD_APPLICATIONS)
-  if(NOT EXISTS "${_repo_root}/tool/maxent.cpp")
+  if(NOT EXISTS "${_alps_source_root}/tool/maxent.cpp")
     message(FATAL_ERROR
-      "PYALPS_BUILD_APPLICATIONS requires an ALPS source checkout. "
+      "PYALPS_BUILD_APPLICATIONS requires an ALPS source checkout or pyalps sdist. "
       "Configure with -DPYALPS_BUILD_APPLICATIONS=OFF for the core-only package.")
   endif()
 
-  set(_dmft "${_repo_root}/applications/dmft/qmc")
+  set(_dmft "${_alps_source_root}/applications/dmft/qmc")
 
   nanobind_add_module(maxent_c NB_STATIC
-    "${_repo_root}/tool/maxent.cpp"
-    "${_repo_root}/tool/maxent_helper.cpp"
-    "${_repo_root}/tool/maxent_simulation.cpp"
-    "${_repo_root}/tool/maxent_parms.cpp")
+    "${_alps_source_root}/tool/maxent.cpp"
+    "${_alps_source_root}/tool/maxent_helper.cpp"
+    "${_alps_source_root}/tool/maxent_simulation.cpp"
+    "${_alps_source_root}/tool/maxent_parms.cpp")
 
   nanobind_add_module(cthyb NB_STATIC
     "${_dmft}/hybridization/hybmain.cpp"
@@ -116,7 +120,7 @@ if(PYALPS_BUILD_APPLICATIONS)
     target_compile_definitions(${_target} PRIVATE BUILD_PYTHON_MODULE)
     target_include_directories(${_target} PRIVATE "${_bindings}" "${_dmft}")
   endforeach()
-  target_include_directories(dwa_c PRIVATE "${_repo_root}/applications/qmc/dwa")
+  target_include_directories(dwa_c PRIVATE "${_alps_source_root}/applications/qmc/dwa")
 endif()
 
 foreach(_target IN LISTS _pyalps_targets)
