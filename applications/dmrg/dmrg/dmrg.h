@@ -269,7 +269,36 @@ void DMRGTask<value_type>::dostep()
 {
   if (finished()) 
     return;
-  
+
+  // The measurement-rotation path (dmtk::System::rotate_hami) dereferences
+  // the result of System::operator()(op) without a null check. operator()
+  // legitimately returns 0 when a measurement operator's site is not yet
+  // covered by the current b1..b4 block layout for a given final_sweep
+  // iteration -- which is always the case during the first iterations for
+  // sites near the chain endpoints. Every input requesting MEASURE_LOCAL /
+  // MEASURE_AVERAGE / MEASURE_CORRELATIONS / MEASURE_STRUCTURE_FACTOR
+  // therefore crashes with SIGSEGV before producing any output.
+  //
+  // A correct fix needs the block operator-set bookkeeping re-derived so
+  // measurement operators are guaranteed present at every iteration. Until
+  // then, refuse the request with a clear error instead of crashing.
+  // (The mps_optim application, which supported the same MEASURE_* syntax,
+  // was removed from this repository; releases up to and including the last
+  // one that shipped it can be used for these measurements.)
+  if (!this->local_expressions.empty()
+      || !this->average_expressions.empty()
+      || !this->correlation_expressions.empty()
+      || !this->structurefactor_expressions.empty()) {
+    boost::throw_exception(std::runtime_error(
+        "MEASURE_LOCAL / MEASURE_AVERAGE / MEASURE_CORRELATIONS / "
+        "MEASURE_STRUCTURE_FACTOR are not supported by the classic 'dmrg' "
+        "binary: the legacy DMTK measurement path dereferences a null "
+        "operator lookup in dmtk::System::rotate_hami and crashes. Remove "
+        "the MEASURE_* parameters to compute the energy/entropy only, or "
+        "use the 'mps_optim' application from an ALPS release that still "
+        "ships it to evaluate these observables."));
+  }
+
   dmtk::Lattice l(num_sites(),dmtk::OBC);
   hami = dmtk::Hami<value_type >(l);
   site_block.resize(alps::maximum_vertex_type(graph())+1);
