@@ -103,7 +103,7 @@ ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& 
     outfile= alps::temporary_filename("alps_external_solver_out_");
   }
   p["INFILE"]=infile;
-  p["OUTFILE"]=infile;
+  p["OUTFILE"]=outfile;
   
   // write input file
   {
