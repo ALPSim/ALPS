@@ -11,6 +11,7 @@ From the repository root:
 cmake -S . -B _build/alps -G Ninja \
   -DCMAKE_INSTALL_PREFIX="$PWD/_build/install" \
   -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+  -DALPS_ENABLE_MPI=OFF \
   -DALPS_BUILD_LIBS_ONLY=ON
 cmake --build _build/alps --target install
 

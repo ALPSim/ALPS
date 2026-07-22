@@ -93,30 +93,3 @@ endif(SQLite_FOUND)
     target_link_libraries(maxent_linear_grid_numeric alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
     add_alps_test(maxent_linear_grid_numeric)
    endif(LAPACK_FOUND)
-
-  #
-  # alpspython script
-  #
-  
-  set(ALPSPYTHON_CONFIGURED FALSE)
-  if(PYTHON_INTERPRETER)
-    if (NOT WIN32)
-      set(PYTHONPATH "${ALPS_PYTHON_LIB_DEST_ROOT}")
-      set(PYTHONBIN "${PYTHON_INTERPRETER}")
-      string(CONFIGURE [[
-        set(PROJECT_SOURCE_DIR "@PROJECT_SOURCE_DIR@")
-        set(PYTHONBIN "@PYTHONBIN@")
-        set(PYTHONPATH "${CMAKE_INSTALL_PREFIX}/@PYTHONPATH@")
-        message(STATUS ": ${PYTHONPATH}")
-        message(STATUS ": ${PYTHONBIN}")
-        configure_file(${PROJECT_SOURCE_DIR}/tool/alpspython.in ${CMAKE_INSTALL_PREFIX}/bin/alpspython )
-        ]] install_script @ONLY)
-      install(CODE ${install_script})
-    else (NOT WIN32)
-      set(PYTHONPATH "%HOMEDRIVE%\\Program Files\\ALPS\\lib;%HOMEDRIVE%\\Program Files (x86)\\ALPS\\lib")
-      set(PYTHONBIN "python")
-      configure_file(alpspython.bat.in ${PROJECT_BINARY_DIR}/tool/alpspython.bat)
-      install(PROGRAMS ${PROJECT_BINARY_DIR}/tool/alpspython.bat DESTINATION bin COMPONENT tools)
-    endif (NOT WIN32)
-    set(ALPSPYTHON_CONFIGURED TRUE)
-  endif(PYTHON_INTERPRETER)

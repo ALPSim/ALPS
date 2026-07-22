@@ -22,10 +22,7 @@
 #
 
 set(BOOST_SOURCES "")
-set(BOOST_PYTHON_SOURCES "")
-set(BOOST_MPI_PYTHON_SOURCES "")
 set(BOOST_LINK_LIBS "")
-set(BOOST_PYTHON_LINK_LIBS "")
 
 # Boost.Date_Time
 if(BUILD_BOOST_DATE_TIME)
@@ -169,40 +166,6 @@ if(BUILD_BOOST_SERIALIZATION)
   add_definitions(-DBOOST_SERIALIZATION_DYN_LINK=1)
 endif(BUILD_BOOST_SERIALIZATION)
 
-# Boost.Python
-if(BUILD_BOOST_PYTHON)
-  if(PYTHON_VERSION GREATER 3 AND Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION LESS 63)
-    message(WARNING "Python 3 support requires Boost 1.63.0 or newer. Previous versions might build but have sporadic segemtation faults at the end of the execution.")
-  endif()
-  if(ALPS_PYTHON_WHEEL AND PYTHON_VERSION VERSION_GREATER_EQUAL "3.13" AND APPLE)
-    set(BOOST_PYTHON_LINK_LIBS ${BOOST_LINK_LIBS} ${PYTHON_LIBRARY}) # ${PYTHON_EXTRA_LIBS})
-  else(ALPS_PYTHON_WHEEL AND PYTHON_VERSION VERSION_GREATER_EQUAL "3.13" AND APPLE)
-    set(BOOST_PYTHON_LINK_LIBS ${BOOST_LINK_LIBS} ${PYTHON_LIBRARY} ${PYTHON_EXTRA_LIBS})
-  endif(ALPS_PYTHON_WHEEL AND PYTHON_VERSION VERSION_GREATER_EQUAL "3.13" AND APPLE)
-  set(DIRECTORY "${Boost_ROOT_DIR}/libs/python/src")
-  set(SOURCES dict.cpp errors.cpp exec.cpp import.cpp list.cpp long.cpp
-      module.cpp numeric.cpp object_operators.cpp object_protocol.cpp slice.cpp
-      str.cpp tuple.cpp wrapper.cpp converter/arg_to_python_base.cpp
-      converter/builtin_converters.cpp converter/from_python.cpp
-      converter/registry.cpp converter/type_id.cpp object/class.cpp
-      object/enum.cpp object/function.cpp object/function_doc_signature.cpp
-      object/inheritance.cpp object/iterator.cpp object/life_support.cpp
-      object/pickle_support.cpp object/stl_iterator.cpp
-  )
-  if(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION GREATER 62 AND ALPS_HAVE_BOOST_NUMPY)
-    set(SOURCES ${SOURCES}
-      numpy/dtype.cpp numpy/matrix.cpp numpy/ndarray.cpp
-      numpy/numpy.cpp numpy/scalars.cpp numpy/ufunc.cpp
-    )
-  endif(Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION GREATER 62 AND ALPS_HAVE_BOOST_NUMPY)
-  foreach(S ${SOURCES})
-    if(EXISTS ${DIRECTORY}/${S})
-      set(BOOST_PYTHON_SOURCES ${BOOST_PYTHON_SOURCES} ${DIRECTORY}/${S})
-    endif(EXISTS ${DIRECTORY}/${S})
-  endforeach(S)
-  add_definitions(-DBOOST_PYTHON_SOURCE)
-endif(BUILD_BOOST_PYTHON)
-
 # Boost.System
 if(BUILD_BOOST_SYSTEM)
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/system/src")
@@ -261,43 +224,6 @@ if(BUILD_BOOST_THREAD)
 endif(BUILD_BOOST_THREAD)
 
 
-# Boost.MPI Python bindings
-if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND Boost_ROOT_DIR)
-  set(DIRECTORY "${Boost_ROOT_DIR}/libs/mpi/src/python")
-  set(SOURCES collectives.cpp py_communicator.cpp datatypes.cpp
-      documentation.cpp py_environment.cpp py_nonblocking.cpp py_exception.cpp
-      py_request.cpp skeleton_and_content.cpp status.cpp py_timer.cpp serialize.cpp
-  )
-  foreach(S ${SOURCES})
-    if(EXISTS ${DIRECTORY}/${S})
-      set(BOOST_MPI_PYTHON_SOURCES ${BOOST_MPI_PYTHON_SOURCES} ${DIRECTORY}/${S})
-    endif(EXISTS ${DIRECTORY}/${S})
-  endforeach(S)
-
-  # renmae mpi module to mpi_c
-  set(BOOST_MPI_PYTHON_SOURCES ${BOOST_MPI_PYTHON_SOURCES} mpi/module.cpp)
-
-  if (BOOST_MPI_PYTHON_SOURCES)
-    python_add_module(mpi_c ${BOOST_MPI_PYTHON_SOURCES})
-    if(BUILD_SHARED_LIBS)
-      set_target_properties(mpi_c PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
-    if(WIN32 AND NOT UNIX)
-      set_target_properties(mpi_c PROPERTIES SUFFIX ".pyd")
-    endif(WIN32 AND NOT UNIX)
-    endif (BUILD_SHARED_LIBS)
-
-    set_target_properties(mpi_c PROPERTIES PREFIX "")
-    target_link_libraries(mpi_c ${ALPS_BOOST_LIBRARY_NAME} ${ALPS_BOOST_PYTHON_LIBRARY_NAME} ${BOOST_LINK_LIBS} ${BOOST_PYTHON_LINK_LIBS})
-
-    install(TARGETS mpi_c COMPONENT python
-            RUNTIME DESTINATION bin
-            ARCHIVE DESTINATION ${ALPS_PYTHON_LIB_DEST_ROOT}/pyalps
-            LIBRARY DESTINATION ${ALPS_PYTHON_LIB_DEST_ROOT}/pyalps)
-  endif(BOOST_MPI_PYTHON_SOURCES)
-
-endif (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND Boost_ROOT_DIR)
-
-
 #######################################################################
 # install
 #######################################################################
@@ -307,10 +233,6 @@ endif (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND Boost_ROOT_DIR)
 if (NOT Boost_FOUND)
   add_library(${ALPS_BOOST_LIBRARY_NAME} ${BOOST_SOURCES})
   target_link_libraries(${ALPS_BOOST_LIBRARY_NAME} ${BOOST_LINK_LIBS})
-  if(BUILD_BOOST_PYTHON)
-    add_library(${ALPS_BOOST_PYTHON_LIBRARY_NAME} ${BOOST_PYTHON_SOURCES})
-    target_link_libraries(${ALPS_BOOST_PYTHON_LIBRARY_NAME} ${BOOST_PYTHON_LINK_LIBS})
-  endif()
     # Boost.Test
     if(BUILD_BOOST_TEST)
       set(DIRECTORY "${Boost_ROOT_DIR}/libs/test/src")
@@ -390,32 +312,15 @@ if (NOT Boost_FOUND)
       COMMAND ${CMAKE_COMMAND} -E copy ${LIB_NAME} ${PROJECT_BINARY_DIR}/bin)
   endif(MSVC)
 
-  if(NOT ALPS_PYTHON_WHEEL)
   install(TARGETS ${ALPS_BOOST_LIBRARY_NAME} COMPONENT libraries
             RUNTIME DESTINATION bin
             ARCHIVE DESTINATION lib
             LIBRARY DESTINATION lib)
-    if(BUILD_BOOST_PYTHON)
-      install(TARGETS ${ALPS_BOOST_PYTHON_LIBRARY_NAME} COMPONENT libraries
-            RUNTIME DESTINATION bin
-            ARCHIVE DESTINATION lib
-            LIBRARY DESTINATION lib)
-    endif()
-    if (ALPS_INSTALL_BOOST_TEST)
-      install(TARGETS boost_unit_test_framework boost_test_exec_monitor boost_prg_exec_monitor
+  if (ALPS_INSTALL_BOOST_TEST)
+    install(TARGETS boost_unit_test_framework boost_test_exec_monitor boost_prg_exec_monitor
             COMPONENT libraries
             RUNTIME DESTINATION bin
             ARCHIVE DESTINATION lib
             LIBRARY DESTINATION lib)
-    endif(ALPS_INSTALL_BOOST_TEST)
-  else ()
-    install(TARGETS ${ALPS_BOOST_LIBRARY_NAME}  COMPONENT libraries
-            RUNTIME DESTINATION pyalps/bin
-            ARCHIVE DESTINATION pyalps/lib
-            LIBRARY DESTINATION pyalps/lib)
-    install(TARGETS ${ALPS_BOOST_PYTHON_LIBRARY_NAME} COMPONENT libraries
-            RUNTIME DESTINATION pyalps/bin
-            ARCHIVE DESTINATION pyalps/lib
-            LIBRARY DESTINATION pyalps/lib)
-  endif()
+  endif(ALPS_INSTALL_BOOST_TEST)
 endif (NOT Boost_FOUND)
