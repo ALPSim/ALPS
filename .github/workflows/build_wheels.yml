@@ -21,7 +21,6 @@ jobs:
         - { os: ubuntu-latest, target: "", arch: x86_64, homebrew: ''}
         #- { os: macos-13, target: "13.0" , arch: x86_64, homebrew: '/usr/local'} #DEPRECATED. Too old.
         - { os: macos-15, target: "15.0" , arch: arm64, homebrew: '/opt/homebrew'}
-        - { os: macos-26, target: "26.0" , arch: arm64, homebrew: '/opt/homebrew'}
 
     steps:
       - uses: actions/checkout@v4
@@ -45,18 +44,7 @@ jobs:
             CCACHE_NAMESPACE=pyalps-wheel
             CMAKE_ARGS="-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
           CIBW_BEFORE_ALL_LINUX: >
-            dnf install -y ccache cmake hdf5-devel openmpi-devel lapack-devel ninja-build &&
-            cmake -S {project} -B {project}/_build/cibw-alps -G Ninja
-            -DCMAKE_BUILD_TYPE=Release
-            -DCMAKE_INSTALL_PREFIX={project}/_build/cibw-install
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-            -DALPS_BUILD_LIBS_ONLY=ON
-            -DALPS_BUILD_TESTS=OFF
-            -DALPS_BUILD_EXAMPLES=OFF
-            -DALPS_BUILD_APPLICATIONS=OFF &&
-            cmake --build {project}/_build/cibw-alps --target install -j2
-          CIBW_BEFORE_ALL_MACOS: >
-            brew install ccache cmake hdf5 open-mpi ninja &&
+            dnf install -y ccache cmake hdf5-devel lapack-devel ninja-build &&
             cmake -S {project} -B {project}/_build/cibw-alps -G Ninja
             -DCMAKE_BUILD_TYPE=Release
             -DCMAKE_INSTALL_PREFIX={project}/_build/cibw-install
@@ -65,6 +53,19 @@ jobs:
             -DALPS_BUILD_TESTS=OFF
             -DALPS_BUILD_EXAMPLES=OFF
             -DALPS_BUILD_APPLICATIONS=OFF
+            -DALPS_ENABLE_MPI=OFF &&
+            cmake --build {project}/_build/cibw-alps --target install -j2
+          CIBW_BEFORE_ALL_MACOS: >
+            brew install ccache cmake hdf5 ninja &&
+            cmake -S {project} -B {project}/_build/cibw-alps -G Ninja
+            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_INSTALL_PREFIX={project}/_build/cibw-install
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+            -DALPS_BUILD_LIBS_ONLY=ON
+            -DALPS_BUILD_TESTS=OFF
+            -DALPS_BUILD_EXAMPLES=OFF
+            -DALPS_BUILD_APPLICATIONS=OFF
+            -DALPS_ENABLE_MPI=OFF
             -DHDF5_ROOT=${{ matrix.plat.homebrew }}/opt/hdf5 &&
             cmake --build {project}/_build/cibw-alps --target install -j2
           CIBW_ENVIRONMENT_MACOS: >
@@ -74,6 +75,12 @@ jobs:
             CMAKE_ARGS="-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.plat.target }}
             CXXFLAGS="-stdlib=libc++"
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
+            auditwheel repair -w {dest_dir} {wheel} &&
+            auditwheel show {dest_dir}/*.whl
+          CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
+            delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel} &&
+            delocate-listdeps --all {dest_dir}/*.whl
           CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: pytest -q {project}/test/pyalps
 
