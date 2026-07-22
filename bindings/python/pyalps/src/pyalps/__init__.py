@@ -28,13 +28,6 @@ from __future__ import absolute_import
 # ****************************************************************************
 
 import sys
-import os.path
-if sys.platform == 'darwin' and not os.path.exists(os.path.expanduser('~/.matplotlib/matplotlibrc')):
-    try:
-        import matplotlib
-        matplotlib.use('macosx')
-    except ImportError:
-        pass
 
 from .dataset import *
 from .tools import *

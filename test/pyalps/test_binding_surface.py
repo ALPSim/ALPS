@@ -10,6 +10,7 @@ import copy
 import importlib
 import os
 import tempfile
+from types import SimpleNamespace
 
 import numpy as np
 
@@ -136,6 +137,48 @@ def test_optional_application_extension_surface():
     for name in ("maxent_c", "dwa_c", "cthyb", "ctint"):
         module = importlib.import_module("pyalps._ext." + name)
         assert module.__name__.endswith(name)
+
+
+def test_current_python_numpy_and_scipy_compatibility(monkeypatch):
+    import pyalps
+    import pyalps.dwa as dwa
+
+    assert callable(dwa.thermalized)
+
+    parsed = pyalps.stringListToList("[1,[2,3],4]")
+    assert parsed == [[1.0], [2.0, 3.0], [4.0]]
+
+    shared = pyalps.dict_intersect([
+        {"array": np.array([1, 2]), "scalar": 3},
+        {"array": np.array([1, 2]), "scalar": 3},
+    ])
+    np.testing.assert_array_equal(shared["array"], [1, 2])
+    assert shared["scalar"] == 3
+
+    monkeypatch.setattr(
+        pyalps,
+        "loadTimeSeries",
+        lambda *_args: np.array([1.0, 1.1, 0.9, 1.0]),
+    )
+    steady = pyalps.checkSteadyState(outfile="unused.h5", observable="energy")
+    assert isinstance(steady["value"], (bool, np.bool_))
+
+
+def test_python3_property_comparison(monkeypatch):
+    import pyalps
+    import pyalps.apptest as apptest
+
+    properties = {
+        "test.h5": {"vector": np.array([1, 2]), "value": 3},
+        "reference.h5": {"vector": np.array([1, 2]), "value": 3},
+    }
+
+    class Loader:
+        def GetProperties(self, filenames):
+            return [SimpleNamespace(props=properties[filenames[0]].copy())]
+
+    monkeypatch.setattr(pyalps.load, "Hdf5Loader", Loader)
+    assert apptest.checkProperties("test.h5", "reference.h5")
 
 
 if __name__ == "__main__":

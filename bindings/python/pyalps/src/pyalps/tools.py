@@ -36,6 +36,7 @@ import platform
 import sys
 import glob
 from . import math
+import numpy as np
 import scipy.stats
 import copy
 
@@ -231,7 +232,7 @@ def evaluateQWL(infiles, appname='qwl_evaluate', DELTA_T=None, T_MIN=None, T_MAX
     cmdline += make_list(infiles)
     res = executeCommand(cmdline)
     if res != 0:
-      raise Excpetion("Execution error in evaluateQWL: " + str(res))
+      raise RuntimeError("Execution error in evaluateQWL: " + str(res))
     datasets = []
     for infile in infiles:
       datasets.append([])
@@ -566,9 +567,9 @@ def checkSteadyState(sets=None, outfile=None, observable=None, confidenceInterva
   else:
     ts  = pyalps.loadTimeSeries(outfile, observable);  ### y
     N   = ts.size;
-    idx = scipy.linspace(1, N, N);                     ### x
+    idx = np.linspace(1, N, N);                       ### x
 
-    beta1 = scipy.polyfit(idx, ts, 1)[0];              ### slope
+    beta1 = np.polyfit(idx, ts, 1)[0];                 ### slope
     
     ts_std    = np.std(ts, ddof=1);                          ### unbiased estimate of standard deviation in y
     beta1_std = math.sqrt((12.*ts_std*ts_std)/(N * (N*N-1)));   ### unbiased estimate of standard deviation in slope
@@ -852,7 +853,7 @@ def stringListToList(inList):
         #find number of bracketed items (they come in pairs)
         numbrackets=dum.count('[')
         if numbrackets==0 :
-            unbracketed=map(float,dum.replace('[','').replace(']','').replace(' ','').split(','))
+            unbracketed=list(map(float,dum.replace('[','').replace(']','').replace(' ','').split(',')))
             for q in unbracketed:
                 outList.append([q])
         elif numbrackets>0:
@@ -862,16 +863,16 @@ def stringListToList(inList):
                 startInd=dum.find('[',count)
                 finishInd=dum.find(']', count)
                 if startInd>count:
-                    unbracketed=map(float,(dum[count:startInd-1].replace('[','').replace(']','')\
-                    .replace(' ','').split(',')))
+                    unbracketed=list(map(float,(dum[count:startInd-1].replace('[','').replace(']','')\
+                    .replace(' ','').split(','))))
                     for q in unbracketed:
                         outList.append([q])
-                outList.append(map(float,dum[startInd:finishInd+1].replace('[','').\
-                replace(']','').replace(' ','').split(',')))
+                outList.append(list(map(float,dum[startInd:finishInd+1].replace('[','').\
+                replace(']','').replace(' ','').split(','))))
                 count=finishInd+2
             if len(dum)-count>0:
-                unbracketed=map(float,dum[count:len(dum)].replace('[','').replace(']','')\
-                .replace(' ','').split(','))
+                unbracketed=list(map(float,dum[count:len(dum)].replace('[','').replace(']','')\
+                .replace(' ','').split(',')))
                 for q in unbracketed:
                     outList.append([q])
     else:
@@ -1065,4 +1066,3 @@ def CycleMarkers (data, foreach,
             q.props['line'] = all[key] + '-'
 
     return data
-

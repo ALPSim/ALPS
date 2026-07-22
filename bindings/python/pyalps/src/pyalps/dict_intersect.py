@@ -28,6 +28,12 @@
 
 import numpy as np
 
+def _values_equal(left, right):
+    try:
+        return bool(np.all(left == right))
+    except (TypeError, ValueError):
+        return False
+
 def dict_intersect(dicts):
     """ computes the intersection of a list of dicts
     
@@ -42,12 +48,8 @@ def dict_intersect(dicts):
         take = True
         val0 = dicts[0][key]
         for idict in dicts:
-            try:
-                if val0 != idict[key]:
-                    take = False
-            except:
-                if np.all(val0 != idict[key]):
-                    take = False
+            if not _values_equal(val0, idict[key]):
+                take = False
         if take:
             ret[key] = dicts[0][key]
     return ret
@@ -62,7 +64,7 @@ def dict_difference(dicts):
         take = True
         val0 = dicts[0][key]
         for idict in dicts:
-            if val0 != idict[key]:
+            if not _values_equal(val0, idict[key]):
                 take = False
         if not take:
             ret.append(key)

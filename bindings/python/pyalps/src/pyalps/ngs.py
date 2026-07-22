@@ -27,12 +27,7 @@
  #                                                                                 #
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-import sys
-
-if sys.version_info[:2] >= (3, 8):
-    from collections.abc import MutableMapping
-else:
-    from collections import MutableMapping
+from collections.abc import MutableMapping
 from .cxx.pyngsparams_c import params
 
 from .cxx.pyngsobservable_c import observable
