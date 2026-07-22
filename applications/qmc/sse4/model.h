@@ -71,29 +71,39 @@ public:
     
     typedef boost::multi_array<double, 2> site_tensor_type;
     typedef boost::multi_array<double, 4> bond_tensor_type;
-    
+
     Model(alps::Parameters const& params,
-            model_type& model, lattice_type& lattice) :
-        model(model),
-        lattice(lattice),
-        params(params)
-    {
-        epsilon = params.value_or_default("EPSILON", 0.0);
-        if (epsilon <= 0.0 && model.is_signed())
-            std::cout << "Warning: Hamiltonian has a sign problem and EPSILON=0; "
-                "make sure that EPSILON is ergodic.\n";
-        
-        _nbstates.resize(lattice.max_site_type() + 1);
-        for (unsigned i = 0; i < lattice.nsites(); ++i) {
-            unsigned stype = lattice.sitei2alps_type(i);
-            _nbstates[stype] = model.site_basis(stype).num_states();
-        }
-        
-        _raising_matrix_elements.resize(lattice.max_site_type() + 1);
-        _lowering_matrix_elements.resize(lattice.max_site_type() + 1);
-        
-        construct_vertices();
+        model_type& model, lattice_type& lattice) :
+    model(model),
+    lattice(lattice),
+    params(params)
+	{
+    epsilon = params.value_or_default("EPSILON", 0.0);
+
+    _nbstates.resize(lattice.max_site_type() + 1);
+    for (unsigned i = 0; i < lattice.nsites(); ++i) {
+        unsigned stype = lattice.sitei2alps_type(i);
+        _nbstates[stype] = model.site_basis(stype).num_states();
     }
+
+    _raising_matrix_elements.resize(lattice.max_site_type() + 1);
+    _lowering_matrix_elements.resize(lattice.max_site_type() + 1);
+
+    construct_vertices();
+
+    if (epsilon <= 0.0 && model.is_signed()) {
+        epsilon = *std::max_element(
+            _max_diag_me.begin(),
+            _max_diag_me.end()
+        );
+
+        std::cout
+            << "Warning: Hamiltonian has a sign problem and EPSILON<=0.\n"
+            << "Automatically setting EPSILON = "
+            << epsilon
+            << " (largest diagonal matrix element).\n";
+    }
+	}
     
     std::vector<unsigned> const& nbstates() const
     {
@@ -279,7 +289,8 @@ private:
             unsigned nneighbors0 = lattice.nneighbors(sites[0]);
             unsigned nneighbors1 = lattice.nneighbors(sites[1]);
             
-            _max_diag_me[i] = std::numeric_limits<double>::min();
+            // _max_diag_me[i] = std::numeric_limits<double>::min();
+	    _max_diag_me[i] = std::numeric_limits<double>::lowest();
             
             for (unsigned l = 0; l < nstates[i]; ++l) {
                 vertex_type vertex;
