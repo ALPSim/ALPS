@@ -646,4 +646,3 @@ ALPS_MCANALYZE_IMPLEMENT_OSTREAM(mctimeseries_view)
 #endif
 
 
-

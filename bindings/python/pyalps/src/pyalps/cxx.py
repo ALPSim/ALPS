@@ -18,28 +18,30 @@ from __future__ import absolute_import
 ## while testing (absolute modules, available via PYTHONPATH)
 
 try:
-    from . import pyalea_c
-    from . import pymcdata_c
-    from . import pyngsapi_c
-    from . import pyngsbase_c
-    from . import pyngshdf5_c
-    from . import pyngsobservable_c
-    from . import pyngsobservables_c
-    from . import pyngsparams_c
-    from . import pyngsrandom01_c
-    from . import pyngsresult_c
-    from . import pyngsresults_c
-    from . import pytools_c
+    from ._ext import pyalea_c
+    from ._ext import pymcdata_c
+    from ._ext import pyngsbase_c
+    from ._ext import pyngsapi_c
+    from ._ext import pyngshdf5_c
+    from ._ext import pyngsobservable_c
+    from ._ext import pyngsobservables_c
+    from ._ext import pyngsparams_c
+    from ._ext import pyngsrandom01_c
+    from ._ext import pyngsaccumulator_c
+    from ._ext import pyngsresult_c
+    from ._ext import pyngsresults_c
+    from ._ext import pytools_c
 except ImportError:
     import pyalea_c
     import pymcdata_c
-    import pyngsapi_c
     import pyngsbase_c
+    import pyngsapi_c
     import pyngshdf5_c
     import pyngsobservable_c
     import pyngsobservables_c
     import pyngsparams_c
     import pyngsrandom01_c
+    import pyngsaccumulator_c
     import pyngsresult_c
     import pyngsresults_c
     import pytools_c

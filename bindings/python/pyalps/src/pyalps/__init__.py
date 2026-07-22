@@ -26,3 +26,12 @@ from .tools import *
 from .pytools import *
 from .floatwitherror import FloatWithError
 from . import fit_wrapper
+
+# Optional solver modules are present when the wheel was built from an ALPS
+# checkout with application bindings enabled.
+try:
+    from ._ext import cthyb, ctint
+    sys.modules[__name__ + ".cthyb"] = cthyb
+    sys.modules[__name__ + ".ctint"] = ctint
+except ImportError:
+    pass
