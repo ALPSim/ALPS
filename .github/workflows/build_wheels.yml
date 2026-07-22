@@ -42,8 +42,8 @@ jobs:
           CIBW_ARCHS: ${{ matrix.plat.arch }}
           CIBW_ARCHS_MACOS: ${{ matrix.plat.arch }}
           CIBW_ENVIRONMENT: >
-            ALPS_DIR={project}/_build/cibw-install/share/alps
-            CCACHE_DIR={project}/_build/ccache
+            ALPS_DIR=$(pwd)/_build/cibw-install/share/alps
+            CCACHE_DIR=$(pwd)/_build/ccache
             CCACHE_NAMESPACE=pyalps-wheel
             CMAKE_ARGS="-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
           CIBW_BEFORE_ALL_LINUX: >
@@ -72,8 +72,8 @@ jobs:
             -DHDF5_ROOT=${{ matrix.plat.homebrew }}/opt/hdf5 &&
             cmake --build {project}/_build/cibw-alps --target install -j2
           CIBW_ENVIRONMENT_MACOS: >
-            ALPS_DIR={project}/_build/cibw-install/share/alps
-            CCACHE_DIR={project}/_build/ccache
+            ALPS_DIR=$(pwd)/_build/cibw-install/share/alps
+            CCACHE_DIR=$(pwd)/_build/ccache
             CCACHE_NAMESPACE=pyalps-wheel
             CMAKE_ARGS="-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.plat.target }}
