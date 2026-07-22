@@ -37,6 +37,7 @@
 #include "selfconsistency.h"
 #include "externalsolver.h"
 #include "hilberttransformer.h"
+#include "interaction_expansion_choice.h"
 
 #include <alps/parameter.h>
 #include <alps/utility/copyright.hpp>
@@ -135,10 +136,9 @@ int main(int argc, char** argv)
           throw std::logic_error("Incompatible parameters: ANTIFERROMAGNET==1,  SYMMETRIZATION==1.");
         }
           
-        alps::scheduler::BasicFactory<InteractionExpansionSim,HalfFillingHubbardInteractionExpansionRun> interaction_expansion_factory_sshf;
-        alps::scheduler::BasicFactory<InteractionExpansionSim,HubbardInteractionExpansionRun> interaction_expansion_factory_ss; 
-        alps::scheduler::BasicFactory<InteractionExpansionSim,MultiBandDensityHubbardInteractionExpansionRun> interaction_expansion_factory_mbd; 
-        
+        alps::scheduler::BasicFactory<InteractionExpansionSim,HubbardInteractionExpansionRun> interaction_expansion_factory_ss;
+        alps::scheduler::BasicFactory<InteractionExpansionSim,MultiBandDensityHubbardInteractionExpansionRun> interaction_expansion_factory_mbd;
+
         boost::shared_ptr<FrequencySpaceHilbertTransformer> transform_ptr;
         if (parms.value_or_default("SEMICIRCLE_HILBERT",false)) {
           transform_ptr.reset(new SemicircleFSHilbertTransformer(parms));
@@ -146,29 +146,37 @@ int main(int argc, char** argv)
           transform_ptr.reset(new GeneralFSHilbertTransformer(parms));
         }
         
-        boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;  
-        if ((parms["SOLVER"]=="Interaction Expansion") && (parms.value_or_default("FLAVORS", "2")=="1")){
-          std::cout<<"using single site Hubbard solver for half filling"<<std::endl;
-          solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_sshf,argc,argv));
-        }
-        if ((parms["SOLVER"]=="Interaction Expansion") && (parms.value_or_default("FLAVORS", "2")=="2")){
-          std::cout<<"using single site Hubbard solver"<<std::endl;
-          solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_ss,argc,argv));
-        }
-        else if ((parms["SOLVER"]=="Interaction Expansion") && (parms.value_or_default("SITES", "1") =="1")){
-          std::cout<<"using multiband Hubbard solver"<<std::endl;
-          solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_mbd,argc,argv));
-        }
-        else
-          if (parms["SOLVER"]=="Hybridization") {
-            throw std::invalid_argument("The internal hybridization solver has been replaced by a standalone hybridzation solver.\nPlease use the \'hybridization\' program");
-          } 
-          else {
-            std::string p(parms["SOLVER"]);
-            std::cout<<"using external solver: "<<p<<std::endl;
-            if(parms["SOLVER"]=="hybridization") parms["SC_WRITE_DELTA"]=1; //we need the hybridization function for this solver
-            solver_ptr.reset(new ExternalSolver(p));
+        // Exactly one impurity solver is selected. The CT-INT run type is
+        // chosen by select_interaction_expansion (FLAVORS/SITES read as ints);
+        // every other SOLVER value is handed to the external/hybridization
+        // path. No solver is constructed-then-discarded.
+        boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;
+        if (parms["SOLVER"]=="Interaction Expansion") {
+          const int flavors = static_cast<int>(parms.value_or_default("FLAVORS", 2));
+          const int sites   = static_cast<int>(parms.value_or_default("SITES", 1));
+          switch (select_interaction_expansion(flavors, sites)) {
+            case interaction_expansion_choice::single_site_hubbard:
+              std::cout<<"using single site Hubbard solver"<<std::endl;
+              solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_ss,argc,argv));
+              break;
+            case interaction_expansion_choice::multiband_density:
+              std::cout<<"using multiband Hubbard solver"<<std::endl;
+              solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_mbd,argc,argv));
+              break;
+            case interaction_expansion_choice::unsupported:
+              throw std::runtime_error("DMFT Interaction Expansion: unsupported (FLAVORS, SITES) "
+                                       "combination; set FLAVORS=2 (single site) or SITES=1 (multiband).");
           }
+        }
+        else if (parms["SOLVER"]=="Hybridization") {
+          throw std::invalid_argument("The internal hybridization solver has been replaced by a standalone hybridzation solver.\nPlease use the \'hybridization\' program");
+        }
+        else {
+          std::string p(parms["SOLVER"]);
+          std::cout<<"using external solver: "<<p<<std::endl;
+          if(parms["SOLVER"]=="hybridization") parms["SC_WRITE_DELTA"]=1; //we need the hybridization function for this solver
+          solver_ptr.reset(new ExternalSolver(p));
+        }
         selfconsistency_loop_omega(parms, *solver_ptr, *transform_ptr);
       }
     }

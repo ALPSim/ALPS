@@ -90,6 +90,31 @@ if(LAPACK_FOUND)
 
   target_link_libraries(hybridization dmft_qmc_impl)
   target_link_libraries(interaction dmft_qmc_impl)
+
+  # Regression tests for the shared DMFT QMC infrastructure.
+  add_executable(dmft_fouriertransform_offdiag_numeric dmft_fouriertransform_offdiag_numeric.C)
+  target_link_libraries(dmft_fouriertransform_offdiag_numeric dmft_qmc_impl)
+  set_property(TARGET dmft_fouriertransform_offdiag_numeric PROPERTY LABELS dmft)
+  add_alps_test(dmft_fouriertransform_offdiag_numeric)
+
+  add_executable(dmft_hilberttransformer_itime_throw dmft_hilberttransformer_itime_throw.C)
+  target_link_libraries(dmft_hilberttransformer_itime_throw dmft_qmc_impl)
+  set_property(TARGET dmft_hilberttransformer_itime_throw PROPERTY LABELS dmft)
+  add_alps_test(dmft_hilberttransformer_itime_throw)
+
+  add_executable(dmft_externalsolver_outfile_param dmft_externalsolver_outfile_param.C)
+  target_link_libraries(dmft_externalsolver_outfile_param dmft_qmc_impl)
+  set_property(TARGET dmft_externalsolver_outfile_param PROPERTY LABELS dmft)
+  add_alps_test(dmft_externalsolver_outfile_param)
+
+  add_executable(dmft_hilberttransformer_afm_multiband_numeric dmft_hilberttransformer_afm_multiband_numeric.C)
+  target_link_libraries(dmft_hilberttransformer_afm_multiband_numeric dmft_qmc_impl)
+  set_property(TARGET dmft_hilberttransformer_afm_multiband_numeric PROPERTY LABELS dmft)
+  add_alps_test(dmft_hilberttransformer_afm_multiband_numeric)
+
+  add_executable(dmft_interaction_expansion_choice dmft_interaction_expansion_choice.C)
+  set_property(TARGET dmft_interaction_expansion_choice PROPERTY LABELS dmft)
+  add_alps_test(dmft_interaction_expansion_choice)
 if(ALPS_PYTHON_WHEEL)
   if(APPLE)
     set_target_properties(dmft PROPERTIES INSTALL_RPATH "@loader_path/../lib" )
