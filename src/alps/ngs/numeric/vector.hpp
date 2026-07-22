@@ -95,36 +95,12 @@ namespace alps {
                 using boost::numeric::operators::operator+;
                 return lhs + rhs;
             }
-            //------------------- operator + with scalar -------------------
-            template<typename T, std::size_t N>
-            std::vector<T> operator + (std::vector<T> arg, T const & scalar) {
-                std::transform(arg.begin(), arg.end(), arg.begin(), boost::lambda::_1 + scalar);
-                return arg;
-            }
-            template<typename T, std::size_t N>
-            std::vector<T> operator + (T const & scalar, std::vector<T> arg) {
-                std::transform(arg.begin(), arg.end(), arg.begin(), scalar + boost::lambda::_1);
-                return arg;
-            }
-
             //------------------- operator - -------------------
             template<typename T, typename U>
             std::vector<T> operator - (std::vector<T> const & lhs, std::vector<U> const & rhs) {
                 using boost::numeric::operators::operator-;
                 return lhs - rhs;
             }
-            //------------------- operator + with scalar -------------------
-            template<typename T, std::size_t N>
-            std::vector<T> operator - (std::vector<T> arg, T const & scalar) {
-                std::transform(arg.begin(), arg.end(), arg.begin(), boost::lambda::_1 + scalar);
-                return arg;
-            }
-            template<typename T, std::size_t N>
-            std::vector<T> operator - (T const & scalar, std::vector<T> arg) {
-                std::transform(arg.begin(), arg.end(), arg.begin(), scalar + boost::lambda::_1);
-                return arg;
-            }
-
             //------------------- operator * vector-vector-------------------
             template<typename T, typename U>
             std::vector<T> operator * (std::vector<T> const & lhs, std::vector<U> const & rhs) {
@@ -141,12 +117,14 @@ namespace alps {
             //------------------- operator + with scalar -------------------
             template<typename T>
             std::vector<T> operator + (T const & scalar, std::vector<T> lhs) {
-                std::transform(lhs.begin(), lhs.end(), lhs.begin(), bind1st(std::plus<T>(), scalar));
+                std::transform(lhs.begin(), lhs.end(), lhs.begin(),
+                               [scalar](T const & value) { return scalar + value; });
                 return lhs;
             }
             template<typename T>
             std::vector<T> operator + (std::vector<T> lhs, T const & scalar) {
-                std::transform(lhs.begin(), lhs.end(), lhs.begin(), bind2nd(std::plus<T>(), scalar));
+                std::transform(lhs.begin(), lhs.end(), lhs.begin(),
+                               [scalar](T const & value) { return value + scalar; });
                 return lhs;
             }
 

@@ -26,16 +26,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Install Fortran compiler based on OS
-      - name: Install dependencies
-        run: |
-          if [ "${{ matrix.plat.os }}" = "ubuntu-latest" ]; then
-            sudo apt-get update
-            sudo apt-get install -y gfortran
-          else
-            brew update
-            brew install gfortran
-          fi
+      - name: Restore compiler cache
+        uses: actions/cache@v4
+        with:
+          path: _build/ccache
+          key: pyalps-ccache-${{ runner.os }}-${{ matrix.plat.arch }}-${{ hashFiles('src/**', 'bindings/python/**', 'applications/**', 'tool/maxent*') }}
+          restore-keys: pyalps-ccache-${{ runner.os }}-${{ matrix.plat.arch }}-
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.22.0
@@ -43,24 +39,43 @@ jobs:
           CIBW_BUILD: cp39-* cp310-* cp311-* cp312-* cp313-*
           CIBW_ARCHS: ${{ matrix.plat.arch }}
           CIBW_ARCHS_MACOS: ${{ matrix.plat.arch }}
-
-          # Set Fortran compiler for all platforms
-          CIBW_ENVIRONMENT: "FC=gfortran"
-
-          # macOS-specific settings
+          CIBW_ENVIRONMENT: >
+            ALPS_DIR={project}/_build/cibw-install/share/alps
+            CCACHE_DIR={project}/_build/ccache
+            CCACHE_NAMESPACE=pyalps-wheel
+            CMAKE_ARGS="-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+          CIBW_BEFORE_ALL_LINUX: >
+            dnf install -y ccache cmake hdf5-devel openmpi-devel lapack-devel ninja-build &&
+            cmake -S {project} -B {project}/_build/cibw-alps -G Ninja
+            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_INSTALL_PREFIX={project}/_build/cibw-install
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+            -DALPS_BUILD_LIBS_ONLY=ON
+            -DALPS_BUILD_TESTS=OFF
+            -DALPS_BUILD_EXAMPLES=OFF
+            -DALPS_BUILD_APPLICATIONS=OFF &&
+            cmake --build {project}/_build/cibw-alps --target install -j2
+          CIBW_BEFORE_ALL_MACOS: >
+            brew install ccache cmake hdf5 open-mpi ninja &&
+            cmake -S {project} -B {project}/_build/cibw-alps -G Ninja
+            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_INSTALL_PREFIX={project}/_build/cibw-install
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+            -DALPS_BUILD_LIBS_ONLY=ON
+            -DALPS_BUILD_TESTS=OFF
+            -DALPS_BUILD_EXAMPLES=OFF
+            -DALPS_BUILD_APPLICATIONS=OFF
+            -DHDF5_ROOT=${{ matrix.plat.homebrew }}/opt/hdf5 &&
+            cmake --build {project}/_build/cibw-alps --target install -j2
           CIBW_ENVIRONMENT_MACOS: >
-            Boost_ROOT_DIR=/Users/runner/work/ALPS/ALPS/boost_1_87_0
+            ALPS_DIR={project}/_build/cibw-install/share/alps
+            CCACHE_DIR={project}/_build/ccache
+            CCACHE_NAMESPACE=pyalps-wheel
+            CMAKE_ARGS="-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.plat.target }}
             CXXFLAGS="-stdlib=libc++"
-#          CIBW_ENVIRONMENT: >
-
-        # env:
-        #   CIBW_SOME_OPTION: value
-        #    ...
-        # with:
-        #   package-dir: .
-        #   output-dir: wheelhouse
-        #   config-file: "{package}/pyproject.toml"
+          CIBW_TEST_REQUIRES: pytest
+          CIBW_TEST_COMMAND: pytest -q {project}/test/pyalps
 
       - uses: actions/upload-artifact@v4
         with:

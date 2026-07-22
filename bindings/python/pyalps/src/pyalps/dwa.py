@@ -35,10 +35,7 @@ import scipy;
 import matplotlib;
 import matplotlib.pyplot;
 import pyalps;
-try:
-    from .dwa_c import worldlines, bandstructure
-except ImportError:
-    from dwa_c import worldlines, bandstructure
+from ._ext.dwa_c import worldlines, bandstructure
 from functools import reduce
 
 

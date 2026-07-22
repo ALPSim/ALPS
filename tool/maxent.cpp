@@ -59,11 +59,11 @@ bool stop_callback(boost::posix_time::ptime const & end_time) {
 
 
 #ifdef BUILD_PYTHON_MODULE
-//compile it as a python module (requires boost::python library)
-using namespace boost::python;
+#include "dict_to_params.hpp"
+namespace nb = nanobind;
 
-void run_it(boost::python::dict parms_){
-    alps::parameters_type<MaxEntSimulation>::type parms(parms_);
+void run_it(nb::dict const & parms_){
+    alps::parameters_type<MaxEntSimulation>::type parms = pyalps::params_from_dict(parms_);
     std::string out_file = boost::lexical_cast<std::string>(parms["BASENAME"]|"results")+std::string(".out.h5");
 
 #else
@@ -104,9 +104,7 @@ void run_it(boost::python::dict parms_){
 }
     
 #ifdef BUILD_PYTHON_MODULE
-    BOOST_PYTHON_MODULE(maxent_c)
-    {
-        def("AnalyticContinuation",run_it);//define python-callable run method
-    };
+    NB_MODULE(maxent_c, m) {
+        m.def("AnalyticContinuation", run_it);
+    }
 #endif
-

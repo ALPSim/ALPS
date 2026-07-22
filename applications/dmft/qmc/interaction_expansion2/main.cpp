@@ -44,11 +44,11 @@ void compute_greens_functions(const alps::results_type<HubbardInteractionExpansi
 int global_mpi_rank;
 
 #ifdef BUILD_PYTHON_MODULE
-//compile it as a python module (requires boost::python library)
-using namespace boost::python;
+#include "dict_to_params.hpp"
+namespace nb = nanobind;
 
-void solve(boost::python::dict parms_){
-    alps::parameters_type<HubbardInteractionExpansion>::type parms(parms_);
+void solve(nb::dict const & parms_){
+    alps::parameters_type<HubbardInteractionExpansion>::type parms = pyalps::params_from_dict(parms_);
     std::string output_file = boost::lexical_cast<std::string>(parms["BASENAME"]|"results")+std::string(".out.h5");
 #else
 int main(int argc, char** argv)
@@ -114,9 +114,8 @@ int main(int argc, char** argv)
 }
 
 #ifdef BUILD_PYTHON_MODULE
-    BOOST_PYTHON_MODULE(ctint)
-    {
-        def("solve",solve);//define python-callable run method
-    };
+    NB_MODULE(ctint, m) {
+        m.def("solve", solve);
+    }
 #endif
     

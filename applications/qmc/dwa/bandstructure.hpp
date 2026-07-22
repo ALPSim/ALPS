@@ -32,10 +32,6 @@
 #include <vector>
 #include <boost/multi_array.hpp>
 #include <alps/numeric/vector_functions.hpp>
-#include <alps/ngs/boost_python.hpp>
-#include <boost/bind/bind.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-#include <alps/python/numpy_array.hpp>
 
 
 // LAPACK Library: dsteqr -- description: diagonalize a real tridiagonal matrix
@@ -47,7 +43,7 @@ class bandstructure
 {
 public:
   bandstructure(double V0_, double lambda_, double a_, double m_, unsigned int L_, int Mmax_=10);
-  bandstructure(boost::python::object V0_, boost::python::object lambda_, double a_, double m_, unsigned int L_, int Mmax_=10); 
+  bandstructure(std::vector<double> const & V0_, std::vector<double> const & lambda_, double a_, double m_, unsigned int L_, int Mmax_=10);
 
   std::vector<double> get_t()    {  if(!is_evaluated)  evaluate();  return t;     }
   double              get_U()    {  if(!is_evaluated)  evaluate();  return U;     }
@@ -132,15 +128,15 @@ bandstructure::bandstructure(double V0_, double lambda_, double a_, double m_, u
   wk2_d = 1.;
 }
 
-bandstructure::bandstructure(boost::python::object V0_, boost::python::object lambda_, double a_, double m_, unsigned int L_, int Mmax_)
+bandstructure::bandstructure(std::vector<double> const & V0_, std::vector<double> const & lambda_, double a_, double m_, unsigned int L_, int Mmax_)
   : is_evaluated (false)
   , L            (L_)
   , Mmax         (Mmax_)
 {
-  alps::python::numpy::convert(V0_, V0);
-  alps::python::numpy::convert(lambda_, lambda);
+  V0     = V0_;
+  lambda = lambda_;
 
-  if (V0.empty() || lambda.empty() || a_ == 0. || m_ == 0. || L == 0) 
+  if (V0.empty() || lambda.empty() || a_ == 0. || m_ == 0. || L == 0)
     boost::throw_exception(std::runtime_error("Illegal initialization parameters for bandstructure class"));
 
   V0.resize    (3, V0.back());
