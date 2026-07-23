@@ -1,3 +1,0 @@
-debian/tmp/usr/lib/pyalps/*.py usr/lib/python2.7/dist-packages/pyalps/
-debian/tmp/usr/lib/pyalps/*.so usr/lib/python2.7/dist-packages/pyalps/
-debian/tmp/usr/lib/python/alps usr/lib/python2.7/dist-packages/

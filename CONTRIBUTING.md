@@ -52,9 +52,9 @@ Before opening a new issue, please search existing issues to avoid duplicates.
 
 - CMake ≥ 3.18
 - A C++17-capable compiler (GCC, Clang, Intel, or Fujitsu)
-- Boost (bundled copy included; or provide your own with `-DALPS_USE_SYSTEM_BOOST=ON`)
+- Boost (downloaded automatically during configuration; or use a system install with `-DALPS_USE_SYSTEM_BOOST=ON`)
 - For Fortran bindings: gfortran (or compatible Fortran compiler)
-- For Python bindings: Python ≥ 3.9, plus `numpy` and `scipy`
+- For Python bindings: Python ≥ 3.10, plus `numpy` and `scipy`
 
 See the [installation page](https://alps.comp-phys.org/documentation/install/) for full platform-specific instructions.
 
@@ -79,11 +79,16 @@ cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j$(nproc)
 ```
 
-To build with Python bindings:
+Alternatively, use the bundled CMake preset (requires CMake ≥ 3.21, which is
+newer than the 3.18 minimum for a plain configure):
 ```bash
-pip install scikit-build-core numpy scipy
-pip install --no-build-isolation -e .
+cmake --preset default
+cmake --build --preset default
 ```
+
+The Python bindings are a separate `scikit-build-core` project that builds
+against an installed ALPS C++ SDK; see the
+[`pyalps` build instructions](bindings/python/pyalps/README.md).
 
 ### Run the tests
 

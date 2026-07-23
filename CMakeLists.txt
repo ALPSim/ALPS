@@ -109,7 +109,7 @@ message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
 ######################################################################
 # CMAKE_MODULE_PATH
 ######################################################################
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 ######################################################################
 # set default CMAKE_INSTALL_PREFIX
@@ -393,8 +393,8 @@ endif(LAPACK_LIBRARIES)
 if(HDF5_LIBRARIES)
   list(APPEND ALPS_EXTRA_LIBRARIES ${HDF5_LIBRARIES})
 endif(HDF5_LIBRARIES)
-configure_file(config/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/config/ALPSConfig.cmake @ONLY)
-configure_file(config/include.mk.in ${PROJECT_BINARY_DIR}/config/include.mk)
+configure_file(cmake/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/config/ALPSConfig.cmake @ONLY)
+configure_file(cmake/include.mk.in ${PROJECT_BINARY_DIR}/config/include.mk)
 
 
 # installation
@@ -425,17 +425,17 @@ install(DIRECTORY lib/xml DESTINATION ${ALPS_XML_PATH} COMPONENT xml
 
 install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION ${ALPS_XML_PATH} COMPONENT xml)
 
-add_subdirectory(config)
+add_subdirectory(cmake)
 
-install(FILES config/UseALPS.cmake
+install(FILES cmake/UseALPS.cmake
         ${PROJECT_BINARY_DIR}/config/ALPSConfig.cmake
         ${PROJECT_BINARY_DIR}/config/include.mk
-        config/run_test.cmake
-        config/run_test_mpi.cmake
-        config/add_alps_test.cmake
+        cmake/run_test.cmake
+        cmake/run_test_mpi.cmake
+        cmake/add_alps_test.cmake
         DESTINATION share/alps COMPONENT build)
 
-install(FILES LICENSE.txt README.md
+install(FILES CITATION.md LICENSE.txt README.md
         DESTINATION share/alps COMPONENT libraries)
 ######################################################################
 # libraries
