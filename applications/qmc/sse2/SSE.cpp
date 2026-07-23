@@ -35,7 +35,7 @@
 void SSE::print_copyright(std::ostream& out)
 {
   out << "Quantum Monte simulations using the generalized directed loop algorithm v. 1.1\n"
-      << "  available from http://alps.comp-phys.org/\n"
+      << "  available from https://alps.comp-phys.org/\n"
       << "  copyright (c) 2001-2005 by Fabien Alet <alet@comp-phys.org>,\n"
       << "                             Synge Todo <wistaria@comp-phys.org>,\n"
       << "                             and Matthias Troyer <troyer@comp-phys.org>\n"

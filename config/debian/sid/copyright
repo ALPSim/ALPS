@@ -5,7 +5,7 @@ This work was packaged for Debian by:
 
 It was downloaded from:
 
-    <http://alps.comp-phys.org/>
+    <https://alps.comp-phys.org/>
 
 Upstream Author(s):
 
@@ -17,10 +17,8 @@ Copyright:
 
 License:
 
-    ALPS LIBRARY LICENSE version 1.1
-    see LICENCE.txt.
-    ALPS APPLICATION LICENCE version 1.0
-    see LICENCE-package.txt.
+    MIT
+    See LICENSE.txt.
 
 The Debian packaging is:
 

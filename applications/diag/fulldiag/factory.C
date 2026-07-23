@@ -49,7 +49,7 @@ alps::scheduler::Task* FullDiagFactory::make_task(const alps::ProcessList& w, co
 void FullDiagFactory::print_copyright(std::ostream& out) const
 {
   out << "ALPS full diagonalization application version 1.1\n"
-      << "  available from http://alps.comp-phys.org/\n"
+      << "  available from https://alps.comp-phys.org/\n"
       << "  copyright (c) 2003-2007 by Matthias Troyer <troyer@comp-phys.org>\n"
       << "                          and Andreas Honecker <ahoneck@uni-goettingen.de>\n"
       << " for details see the publication:\n"

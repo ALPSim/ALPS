@@ -117,7 +117,7 @@ int main(int argc, char** argv)
 #endif
 
   std::cout << "ALPS application to check for a sign problem in a quantum model\n"
-            << "  available from http://alps.comp-phys.org/\n"
+            << "  available from https://alps.comp-phys.org/\n"
             << "  copyright (c) 2003-2007 by Matthias Troyer <troyer@comp-phys.org>\n\n";
   alps::print_copyright(std::cout);
   
