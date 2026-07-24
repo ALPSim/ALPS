@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.18)
 project(alpsize NONE)
 
 # enable C and C++ compilers
