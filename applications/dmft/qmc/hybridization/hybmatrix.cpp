@@ -333,7 +333,11 @@ void hybmatrix::measure_Gl(std::vector<double> &Gl, std::vector<double> &Fl , co
   for (int i = 0; i < size(); i++) {
     double f_pref=(F_prefactor.find(c_times[i]))->second;
     for (int j = 0; j < size(); j++) {
-      double M_ji = operator() (j, i) * sign;
+      // The MC sign enters exactly once, via bubble_sign below — the same
+      // convention as measure_G and measure_Gw. Multiplying it into M_ji as
+      // well squares it away (sign^2 = 1), which made the Legendre channel
+      // sign-independent and biased in signful runs.
+      double M_ji = operator() (j, i);
       double argument = c_times[i] - cdagger_times[j];
       double bubble_sign = sign;
       if (argument < 0) {

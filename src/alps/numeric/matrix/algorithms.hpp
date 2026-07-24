@@ -157,11 +157,13 @@ namespace alps {
         Matrix kron(Matrix const& M1, Matrix const& M2)
         {
             Matrix MM(num_rows(M1)*num_rows(M2), num_cols(M1)*num_cols(M2));
+            // Standard Kronecker layout: the INNER factor M2's dimensions
+            // stride the output, (M1 (x) M2)(i1*r2+i2, j1*c2+j2) = M1(i1,j1)*M2(i2,j2).
             for (size_t i1=0; i1<num_rows(M1); ++i1)
                 for (size_t j1=0; j1<num_cols(M1); ++j1)
                     for (size_t i2=0; i2<num_rows(M2); ++i2)
                         for (size_t j2=0; j2<num_cols(M2); ++j2)
-                            MM( i1*num_rows(M1)+i2 , j1*num_cols(M1)+j2 ) = M1(i1, j1) * M2(i2, j2);
+                            MM( i1*num_rows(M2)+i2 , j1*num_cols(M2)+j2 ) = M1(i1, j1) * M2(i2, j2);
             return MM;
         }
 
