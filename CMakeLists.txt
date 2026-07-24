@@ -393,8 +393,8 @@ endif(LAPACK_LIBRARIES)
 if(HDF5_LIBRARIES)
   list(APPEND ALPS_EXTRA_LIBRARIES ${HDF5_LIBRARIES})
 endif(HDF5_LIBRARIES)
-configure_file(cmake/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/config/ALPSConfig.cmake @ONLY)
-configure_file(cmake/include.mk.in ${PROJECT_BINARY_DIR}/config/include.mk)
+configure_file(cmake/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/cmake/ALPSConfig.cmake @ONLY)
+configure_file(cmake/include.mk.in ${PROJECT_BINARY_DIR}/cmake/include.mk)
 
 
 # installation
@@ -428,8 +428,8 @@ install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION ${ALPS_XML_PATH} COM
 add_subdirectory(cmake)
 
 install(FILES cmake/UseALPS.cmake
-        ${PROJECT_BINARY_DIR}/config/ALPSConfig.cmake
-        ${PROJECT_BINARY_DIR}/config/include.mk
+        ${PROJECT_BINARY_DIR}/cmake/ALPSConfig.cmake
+        ${PROJECT_BINARY_DIR}/cmake/include.mk
         cmake/run_test.cmake
         cmake/run_test_mpi.cmake
         cmake/add_alps_test.cmake

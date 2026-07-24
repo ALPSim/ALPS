@@ -26,7 +26,7 @@ python -m pip install "pyalps[plot]"
 
 ### Build from source
 
-A native build requires CMake 3.18 or newer, a C++14 compiler, HDF5, and BLAS/LAPACK. MPI is enabled by default when available. The legacy Fortran interface is disabled by default. If a Boost source tree is not supplied, configuration downloads one and therefore requires network access.
+A native build requires CMake 3.18 or newer, a C++14 compiler, HDF5, and BLAS/LAPACK. The bundled CMake presets require CMake 3.21 or newer. MPI is enabled by default when available. The legacy Fortran interface is disabled by default. If a Boost source tree is not supplied, configuration downloads one and therefore requires network access.
 
 Configure a release build with an explicit installation prefix, then build and install it:
 
@@ -36,6 +36,13 @@ cmake -S . -B _build/release \
   -DCMAKE_INSTALL_PREFIX=/path/to/alps
 cmake --build _build/release --parallel
 cmake --install _build/release
+```
+
+Alternatively, with CMake 3.21 or newer:
+
+```sh
+cmake --preset default
+cmake --build --preset default
 ```
 
 Add `-DALPS_ENABLE_MPI=OFF` to the configure command for a serial-only build. To build the legacy Fortran interface and its examples, add `-DALPS_BUILD_FORTRAN=ON`; this requires a Fortran compiler and the HDF5 Fortran component.

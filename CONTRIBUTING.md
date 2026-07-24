@@ -50,7 +50,7 @@ Before opening a new issue, please search existing issues to avoid duplicates.
 
 ### Prerequisites
 
-- CMake ≥ 3.18
+- CMake ≥ 3.18 for normal configuration; CMake ≥ 3.21 for presets
 - A C++17-capable compiler (GCC, Clang, Intel, or Fujitsu)
 - Boost (downloaded automatically during configuration; or use a system install with `-DALPS_USE_SYSTEM_BOOST=ON`)
 - For Fortran bindings: gfortran (or compatible Fortran compiler)
@@ -79,8 +79,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j$(nproc)
 ```
 
-Alternatively, use the bundled CMake preset (requires CMake ≥ 3.21, which is
-newer than the 3.18 minimum for a plain configure):
+Alternatively, use the bundled CMake preset (requires CMake ≥ 3.21):
 ```bash
 cmake --preset default
 cmake --build --preset default
@@ -178,7 +177,8 @@ If you are contributing a new simulation application or library, the Governing C
 
 ### CMake
 
-- CMake ≥ 3.18 features are acceptable.
+- CMake ≥ 3.18 features are acceptable. Preset files may use features available
+  in CMake ≥ 3.21.
 - Use target-based linking (`target_link_libraries`, `target_include_directories`) rather than directory-level commands.
 
 ---
