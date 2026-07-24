@@ -31,14 +31,8 @@ from __future__ import absolute_import
 import os;
 from . import math;
 import numpy;
-import scipy;
-import matplotlib;
-import matplotlib.pyplot;
 import pyalps;
-try:
-    from .dwa_c import worldlines, bandstructure
-except ImportError:
-    from dwa_c import worldlines, bandstructure
+from ._ext.dwa_c import worldlines, bandstructure
 from functools import reduce
 
 
@@ -106,8 +100,8 @@ def thermalized(h5_outfile, observables, tolerance=0.01, simplified=False, inclu
     timeseries = pyalps.hdf5.archive(h5_outfile, 'r')["/simulation/results/" + observable]['timeseries']['data'];
     mean = timeseries.mean();
 
-    index = scipy.linspace(0, timeseries.size-1, timeseries.size);
-    timeseries = scipy.polyval(scipy.polyfit(index, timeseries, 1), index);  # timeseries get fitted
+    index = numpy.linspace(0, timeseries.size-1, timeseries.size);
+    timeseries = numpy.polyval(numpy.polyfit(index, timeseries, 1), index);  # timeseries get fitted
 
     percentage_increment = (timeseries[-1] - timeseries[0])/mean;
     result = abs(percentage_increment) < tolerance;
@@ -206,6 +200,8 @@ def extract_worldlines(infile, outfile=None):
     return wl;
 
 def show_worldlines(wl=None, reshape=None, at=None, scatter_plot=False, Nmax=20, linewidth=2, linespace=0.1):
+  import matplotlib.pyplot as plt
+
   if wl == None:
     return;
 
@@ -231,15 +227,15 @@ def show_worldlines(wl=None, reshape=None, at=None, scatter_plot=False, Nmax=20,
       wl_coordinates.append([idx,wl_time[idx][idx2]]);
   [wl_coordinates_site, wl_coordinates_time] = numpy.array(wl_coordinates).transpose();
 
-  matplotlib.pyplot.figure(frameon=False);
-  matplotlib.pyplot.xticks(range(wl_idx.size), wl_idx);
-  matplotlib.pyplot.yticks([0,1]);
-  matplotlib.pyplot.xlim(-0.5, wl_idx.size-0.5);
-  matplotlib.pyplot.ylim(-0.05,1.05);
+  plt.figure(frameon=False);
+  plt.xticks(range(wl_idx.size), wl_idx);
+  plt.yticks([0,1]);
+  plt.xlim(-0.5, wl_idx.size-0.5);
+  plt.ylim(-0.05,1.05);
 
   if scatter_plot:
-    matplotlib.pyplot.scatter(wl_coordinates_site, wl_coordinates_time);
-    matplotlib.pyplot.show();
+    plt.scatter(wl_coordinates_site, wl_coordinates_time);
+    plt.show();
     return;
 
   wl_state_segments = [];
@@ -275,23 +271,23 @@ def show_worldlines(wl=None, reshape=None, at=None, scatter_plot=False, Nmax=20,
 
   for wl_n_state_segment in wl_n_state_segments[0]:
     [segment_site, segment_time] = numpy.array(wl_n_state_segment).transpose();  
-    matplotlib.pyplot.plot(segment_site, segment_time, '--k', linewidth=linewidth);
+    plt.plot(segment_site, segment_time, '--k', linewidth=linewidth);
   
   for wl_n_state_segment in wl_n_state_segments[1]:
     [segment_site, segment_time] = numpy.array(wl_n_state_segment).transpose();
-    matplotlib.pyplot.plot(segment_site, segment_time, '-k', linewidth=linewidth);
+    plt.plot(segment_site, segment_time, '-k', linewidth=linewidth);
   
   for n in range(2,Nmax+1):
     for wl_n_state_segment in wl_n_state_segments[n]:
       [segment_site, segment_time] = numpy.array(wl_n_state_segment).transpose();
       for m in range(n):
-        matplotlib.pyplot.plot(segment_site - (m - (n-1)/2.)*linespace, segment_time, '-k', linewidth=2);
+        plt.plot(segment_site - (m - (n-1)/2.)*linespace, segment_time, '-k', linewidth=2);
   
   for wl_vertex_segment in wl_vertex_segments:
     [segment_site, segment_time] = numpy.array(wl_vertex_segment).transpose();
-    matplotlib.pyplot.plot(segment_site, segment_time, '-k', linewidth=linewidth);
+    plt.plot(segment_site, segment_time, '-k', linewidth=linewidth);
   
-  matplotlib.pyplot.show();
+  plt.show();
   return;  
 
 def recursiveRun(cmd, cmd_lang='command_line', follow_up_script=None, end_script=None, n=None, break_if=None, break_elseif=None, write_status=None, loc=None, loc0=None, batch_submit=False, batch_cmd_prefix=None, batch_run_directory=None, batch_run_script='run.script', batch_next_run_script=None, batch_run_now=False, batch_noRun=False):
@@ -511,6 +507,4 @@ def summaryReport(h5_outfile):
   print('E/N  : ' + str(ar['/simulation/results/Energy/mean/value']/ar['/simulation/results/Total Particle Number/mean/value'])); 
 
   
-
-
 

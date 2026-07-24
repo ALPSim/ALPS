@@ -1,0 +1,37 @@
+[build-system]
+requires = ["scikit-build-core>=1.0", "nanobind>=2.10"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "pyalps"
+version = "2.3.4b1"
+description = "Python Applications and Libraries for Physics Simulations"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+dependencies = ["numpy>=1.26", "scipy>=1.13"]
+
+[project.optional-dependencies]
+plot = ["matplotlib>=3.8"]
+test = ["pytest>=8"]
+
+[tool.scikit-build]
+cmake.source-dir = "."
+wheel.packages = ["src/pyalps"]
+wheel.force-include = { "LICENSE.txt" = "${SKBUILD_METADATA_DIR}/licenses/LICENSE.txt" }
+build.verbose = true
+
+[tool.scikit-build.cmake.define]
+ALPS_DIR = { env = "ALPS_DIR" }
+
+# Application bindings compile selected legacy application sources. Preserve
+# those sources when this subproject is distributed independently of the
+# repository checkout so wheels can also be rebuilt from the sdist.
+[tool.scikit-build.sdist.force-include]
+"../../../LICENSE.txt" = "LICENSE.txt"
+"../../../applications/dmft/qmc" = "_vendor/applications/dmft/qmc"
+"../../../applications/qmc/dwa" = "_vendor/applications/qmc/dwa"
+"../../../tool" = "_vendor/tool"
+
+[tool.cibuildwheel]
+manylinux-x86_64-image = "manylinux_2_28"

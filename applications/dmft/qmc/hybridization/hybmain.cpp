@@ -47,11 +47,11 @@ void master_final_tasks(const alps::results_type<hybridization>::type &results, 
 int global_mpi_rank;
 
 #ifdef BUILD_PYTHON_MODULE
-//compile it as a python module (requires boost::python library)
-using namespace boost::python;
+#include "dict_to_params.hpp"
+namespace nb = nanobind;
 
-void solve(boost::python::dict parms_){
-  alps::parameters_type<hybridization>::type parms(parms_);
+void solve(nb::dict const & parms_){
+  alps::parameters_type<hybridization>::type parms = pyalps::params_from_dict(parms_);
   std::string output_file = boost::lexical_cast<std::string>(parms["BASENAME"]|"results")+std::string(".out.h5");
 #else
 int main(int argc, char** argv){
@@ -137,12 +137,10 @@ void master_final_tasks(const alps::results_type<hybridization>::type &results,
 }
 
 #ifdef BUILD_PYTHON_MODULE
-BOOST_PYTHON_MODULE(cthyb)
-{
-    def("solve",solve);//define python-callable run method
-};
+NB_MODULE(cthyb, m) {
+    m.def("solve", solve);
+}
 #endif
-
 
 
 

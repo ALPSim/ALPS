@@ -1,12 +1,11 @@
-from __future__ import absolute_import
 # ****************************************************************************
-#
+# 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
-#
+# 
 # ALPS Libraries
-#
-# Copyright (C) 2016 by Michele Dolfi <dolfim@phys.ethz.ch>
-#
+# 
+# Copyright (C) 1994-2009 by Bela Bauer <bauerb@phys.ethz.ch>
+# 
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the “Software”),
 # to deal in the Software without restriction, including without limitation
@@ -24,42 +23,49 @@ from __future__ import absolute_import
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
-#
+# 
 # ****************************************************************************
 
+import numpy as np
 
-## The purpose of this script is to import the compiled modules both in the
-## installed directory (relative to the script) and in the build dicrectory
-## while testing (absolute modules, available via PYTHONPATH)
+def _values_equal(left, right):
+    try:
+        return bool(np.all(left == right))
+    except (TypeError, ValueError):
+        return False
 
-try:
-    from . import pyalea_c
-    from . import pymcdata_c
-    from . import pyngsapi_c
-    from . import pyngsbase_c
-    from . import pyngshdf5_c
-    from . import pyngsobservable_c
-    from . import pyngsobservables_c
-    from . import pyngsparams_c
-    from . import pyngsrandom01_c
-    from . import pyngsresult_c
-    from . import pyngsresults_c
-    from . import pytools_c
-except ImportError:
-    import pyalea_c
-    import pymcdata_c
-    import pyngsapi_c
-    import pyngsbase_c
-    import pyngshdf5_c
-    import pyngsobservable_c
-    import pyngsobservables_c
-    import pyngsparams_c
-    import pyngsrandom01_c
-    import pyngsresult_c
-    import pyngsresults_c
-    import pytools_c
+def dict_intersect(dicts):
+    """ computes the intersection of a list of dicts
+    
+        this function takes a list of dicts as input and returns a dict containing all those key-value pairs that appear with identical values in all dicts 
+    """
+    sets = [set(q.keys()) for q in dicts]
+    intersection = sets[0]
+    for iset in sets:
+        intersection &= iset
+    ret = {}
+    for key in intersection:
+        take = True
+        val0 = dicts[0][key]
+        for idict in dicts:
+            if not _values_equal(val0, idict[key]):
+                take = False
+        if take:
+            ret[key] = dicts[0][key]
+    return ret
 
-import sys
-for k in list(locals().keys()):
-    if k.endswith('_c'):
-        sys.modules["{}.cxx.{}".format(__package__, k)] = locals()[k]
+def dict_difference(dicts):
+    sets = [set(q.keys()) for q in dicts]
+    intersection = sets[0]
+    for iset in sets:
+        intersection &= iset
+    ret = []
+    for key in intersection:
+        take = True
+        val0 = dicts[0][key]
+        for idict in dicts:
+            if not _values_equal(val0, idict[key]):
+                take = False
+        if not take:
+            ret.append(key)
+    return ret

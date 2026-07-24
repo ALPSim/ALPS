@@ -27,22 +27,14 @@
  #                                                                                 #
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-import sys
-
-if sys.version_info[:2] >= (3, 8):
-    from collections.abc import MutableMapping
-else:
-    from collections import MutableMapping
-import types
-
+from collections.abc import MutableMapping
 from .cxx.pyngsparams_c import params
-params.__bases__ = (MutableMapping, ) + params.__bases__
 
 from .cxx.pyngsobservable_c import observable
-class ObservableOperators:
-    def __lshift__(self, other):
-        self.append(other)
-observable.__bases__ = (ObservableOperators, ) + observable.__bases__
+def _observable_lshift(self, other):
+    self.append(other)
+    return self
+observable.__lshift__ = _observable_lshift
 
 class RealObservable:
     def __init__(self, name, binnum = 0):
@@ -59,7 +51,6 @@ class RealVectorObservable:
         observables.createRealVectorObservable(self.name, self.binnum)
 
 from .cxx.pyngsobservables_c import observables
-observables.__bases__ = (MutableMapping, ) + observables.__bases__
 
 from .cxx.pyngsobservable_c import createRealObservable #remove this with new ALEA!
 from .cxx.pyngsobservable_c import createRealVectorObservable #remove this with new ALEA!
@@ -68,7 +59,17 @@ from .cxx.pyngsresult_c import result
 from .cxx.pyngsresult_c import observable2result #remove this with new ALEA!
 
 from .cxx.pyngsresults_c import results
-results.__bases__ = (MutableMapping, ) + results.__bases__
+
+# Boost.Python allowed mutating extension-type base classes after creation.
+# nanobind extension types use a different allocator/deallocator layout, so
+# register them as virtual MutableMapping implementations and copy the mixin
+# methods onto the concrete classes instead.
+for _mapping_type in (params, observables, results):
+    MutableMapping.register(_mapping_type)
+    for _method in ("keys", "values", "items", "get", "pop", "popitem",
+                    "clear", "update", "setdefault", "__eq__", "__ne__"):
+        if not hasattr(_mapping_type, _method):
+            setattr(_mapping_type, _method, getattr(MutableMapping, _method))
 
 from .cxx.pyngsbase_c import mcbase
 

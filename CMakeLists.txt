@@ -28,12 +28,6 @@ if (NOT_BUILD_SHARED_LIBS)
 else (NOT_BUILD_SHARED_LIBS)
 	option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 endif (NOT_BUILD_SHARED_LIBS)
-if (NOT_ALPS_BUILD_PYTHON)
-	option(ALPS_BUILD_PYTHON "Build ALPS python extentions" OFF)
-else (NOT_ALPS_BUILD_PYTHON)
-	option(ALPS_BUILD_PYTHON "Build ALPS python extentions" ON)
-endif (NOT_ALPS_BUILD_PYTHON)
-
 option(ALPS_INSTALL_DEPRECATED "Install deprecated headers for ALPS" OFF)
 option(ALPS_BUILD_DEVELOPER_TOOLS "Build tools used by developers to maintain ALPS" OFF)
 option(ALPS_ENABLE_OPENMP "Enable OpenMP parallelization" OFF)
@@ -47,7 +41,6 @@ option(ALPS_LINK_BOOST_TEST "Link Boost.test pre-built library" OFF)
 option(ALPS_INSTALL_BOOST_TEST "Install Boost Test framework" OFF)
 option(ALPS_NGS_USE_NEW_ALEA "Use the ALPS ngs-alea instead of just alea" OFF)
 option(ALPS_NGS_OPENMPI_ULFM "Userlevel failure mitigation is available" OFF)
-option(ALPS_PYTHON_WHEEL "Build python wheel" OFF)
 option(ALPS_BUILD_LIBS_ONLY "Build only libraries" OFF)
 
 
@@ -57,7 +50,6 @@ mark_as_advanced(ALPS_LINK_BOOST_TEST)
 mark_as_advanced(ALPS_INSTALL_BOOST_TEST)
 mark_as_advanced(ALPS_NGS_USE_NEW_ALEA)
 mark_as_advanced(ALPS_NGS_OPENMPI_ULFM)
-mark_as_advanced(ALPS_PYTHON_WHEEL)
 mark_as_advanced(ALPS_BUILD_LIBS_ONLY)
 
 option(ALPS_USE_MKL_PARALLEL "Use parallel version of MKL" OFF)
@@ -66,7 +58,6 @@ mark_as_advanced(ALPS_USE_MKL_PARALLEL)
 SET (APPLICATIONS_CAN_BE_BUILT ON)
 
 set(ALPS_BOOST_LIBRARY_NAME "boost" CACHE STRING "name of the boost library")
-set(ALPS_BOOST_PYTHON_LIBRARY_NAME "boost_python" CACHE STRING "name of the boost library")
 set(ALPS_ENABLE_MPI ON CACHE BOOL "Enable MPI Parallelization")
 set(ALPS_INSTALL_HEADERS  ON CACHE BOOL "Install headers for ALPS and all dependent libraries")
 set(ALPS_BUILD_EXAMPLES ON CACHE BOOL "Build ALPS examples")
@@ -74,11 +65,6 @@ set(ALPS_BUILD_TESTS ON CACHE BOOL "Build ALPS tests")
 set(ALPS_BUILD_APPLICATIONS ${APPLICATIONS_CAN_BE_BUILT} CACHE BOOL "Build ALPS applications")
 
 mark_as_advanced(ALPS_BOOST_LIBRARY_NAME)
-
-if(ALPS_PYTHON_WHEEL)
-  set(ALPS_BUILD_APPLICATIONS ON)
-  set(ALPS_ENABLE_MPI OFF)
-endif()
 
 if(ALPS_BUILD_LIBS_ONLY)
   set(ALPS_BUILD_APPLICATIONS OFF)
@@ -128,10 +114,6 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
 ######################################################################
 # set default CMAKE_INSTALL_PREFIX
 ######################################################################
-
-if (ALPS_BUILD_PYTHON)
-  find_package(PythonMod REQUIRED) # COMPONENTS Interpreter Development.Module )
-endif (ALPS_BUILD_PYTHON)
 
 ######################################################################
 # Version information
@@ -276,24 +258,8 @@ IF(HDF5_IS_PARALLEL)
   INCLUDE_DIRECTORIES(${MPI_INCLUDE_PATH})
 ENDIF(HDF5_IS_PARALLEL)
 
-# python
-
-
-if (ALPS_BUILD_PYTHON)
-  set(PYTHON_SCRIPTDIR "${CMAKE_INSTALL_PREFIX}/lib/python")
-  find_package(PythonMod)
-endif (ALPS_BUILD_PYTHON)
-
-IF (PYTHONLIBS_FOUND AND ALPS_BUILD_PYTHON)
-  include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
-    MESSAGE (STATUS "Numpy include in ${PYTHON_NUMPY_INCLUDE_DIR}")
-  SET(ALPS_HAVE_PYTHON ON)
-  INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIRS})
-  set(BUILD_BOOST_PYTHON TRUE)
-ELSE (PYTHONLIBS_FOUND AND ALPS_BUILD_PYTHON)
-  set(BUILD_BOOST_PYTHON OFF)
-  SET(ALPS_HAVE_PYTHON OFF)
-ENDIF (PYTHONLIBS_FOUND AND ALPS_BUILD_PYTHON)
+# Python bindings are built by the standalone scikit-build-core project in
+# bindings/python/pyalps.  The C++ SDK deliberately has no Python dependency.
 
 # Boost Libraries
 find_package(BoostForALPS REQUIRED)
@@ -396,12 +362,6 @@ endif(MPI_INCLUDE_DIR)
 if(HDF5_INCLUDE_DIR)
   list(APPEND ALPS_EXTRA_INCLUDE_DIRS ${HDF5_INCLUDE_DIR})
 endif(HDF5_INCLUDE_DIR)
-if(PYTHON_INCLUDE_DIRS)
-  list(APPEND ALPS_EXTRA_INCLUDE_DIRS ${PYTHON_INCLUDE_DIRS})
-endif(PYTHON_INCLUDE_DIRS)
-if(PYTHON_NUMPY_INCLUDE_DIR)
-  list(APPEND ALPS_EXTRA_INCLUDE_DIRS ${PYTHON_NUMPY_INCLUDE_DIR})
-endif(PYTHON_NUMPY_INCLUDE_DIR)
 if(Boost_INCLUDE_DIR_CONFIG)
   list(APPEND ALPS_EXTRA_INCLUDE_DIRS ${Boost_INCLUDE_DIR_CONFIG})
 endif(Boost_INCLUDE_DIR_CONFIG)
@@ -433,10 +393,6 @@ endif(LAPACK_LIBRARIES)
 if(HDF5_LIBRARIES)
   list(APPEND ALPS_EXTRA_LIBRARIES ${HDF5_LIBRARIES})
 endif(HDF5_LIBRARIES)
-if(PYTHON_LIBRARY)
-  list(APPEND ALPS_EXTRA_LIBRARIES ${PYTHON_LIBRARY})
-endif(PYTHON_LIBRARY)
-
 configure_file(config/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/config/ALPSConfig.cmake @ONLY)
 configure_file(config/include.mk.in ${PROJECT_BINARY_DIR}/config/include.mk)
 
@@ -444,20 +400,15 @@ configure_file(config/include.mk.in ${PROJECT_BINARY_DIR}/config/include.mk)
 # installation
 ######################################################################
 include(InstallRequiredSystemLibraries)
-if(ALPS_PYTHON_WHEEL)
-    install(DIRECTORY lib/pyalps DESTINATION .  COMPONENT python
-          FILES_MATCHING PATTERN "*.py"
-         )
-    install(DIRECTORY lib/xml DESTINATION pyalps COMPONENT xml
-          FILES_MATCHING PATTERN "*.xsl"
-         )
-    install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION pyalps COMPONENT xml)
-elseif(ALPS_BUILD_LIBS_ONLY)
-else()
-
 if (ALPS_INSTALL_HEADERS)
   set(ALPS_HEADER_DIR "include")
   install(DIRECTORY src/alps src/boost src/ietl src/mocasito COMPONENT headers DESTINATION ${ALPS_HEADER_DIR}
+          FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
+         )
+  # ALPS' public headers include the vendored Boost.Numeric bindings.  Install
+  # them as part of the C++ SDK so downstream consumers do not need the ALPS
+  # source tree on their include path.
+  install(DIRECTORY bindings/boost COMPONENT headers DESTINATION ${ALPS_HEADER_DIR}
           FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
          )
   install(FILES ${PROJECT_BINARY_DIR}/src/alps/config.h ${PROJECT_BINARY_DIR}/src/alps/version.h DESTINATION ${ALPS_HEADER_DIR}/alps COMPONENT headers)
@@ -471,12 +422,6 @@ endif(ALPS_INSTALL_HEADERS)
 install(DIRECTORY lib/xml DESTINATION ${ALPS_XML_PATH} COMPONENT xml
         FILES_MATCHING PATTERN "*.xsl"
        )
-
-if(ALPS_BUILD_PYTHON AND ALPS_PYTHON_LIB_DEST_ROOT)
-  install(DIRECTORY lib/pyalps DESTINATION ${ALPS_PYTHON_LIB_DEST_ROOT}  COMPONENT python
-        FILES_MATCHING PATTERN "*.py" PATTERN "*.pyc"
-       )
-endif()
 
 install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION ${ALPS_XML_PATH} COMPONENT xml)
 
@@ -492,43 +437,24 @@ install(FILES config/UseALPS.cmake
 
 install(FILES LICENSE.txt README.md
         DESTINATION share/alps COMPONENT libraries)
-if(ALPS_BUILD_PYTHON AND ALPS_PYTHON_LIB_DEST_ROOT)
-  string(CONFIGURE [[
-   set(PROJECT_SOURCE_DIR "@PROJECT_SOURCE_DIR@")
-   set(ALPS_PYTHON_LIB_DEST_ROOT "@ALPS_PYTHON_LIB_DEST_ROOT@")
-   message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
-   message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
-   message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
-   message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
-   message(STATUS "ALPS_PYTHON_LIB_DEST_ROOT: ${ALPS_PYTHON_LIB_DEST_ROOT}")
-
-   configure_file(${PROJECT_SOURCE_DIR}/lib/pyalps/pyalps_config.py.in ${CMAKE_INSTALL_PREFIX}/${ALPS_PYTHON_LIB_DEST_ROOT}/pyalps/pyalps_config.py)
-  ]] install_script @ONLY)
-  install(CODE ${install_script})
-endif()
-
-set(PYTHONEXEC python)
-
-endif()
 ######################################################################
 # libraries
 ######################################################################
 
 add_subdirectory(src/boost)
 add_subdirectory(src/alps)
-add_subdirectory(lib/pyalps)
 
 
 ######################################################################
 # programs
 ######################################################################
 
-if (NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
+if (NOT ALPS_BUILD_LIBS_ONLY)
   add_subdirectory(tool)
   if (ALPS_BUILD_EXAMPLES)
     add_subdirectory(example)
   endif (ALPS_BUILD_EXAMPLES)
-endif (NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
+endif (NOT ALPS_BUILD_LIBS_ONLY)
 
 
 ######################################################################
@@ -539,9 +465,9 @@ if (ALPS_BUILD_APPLICATIONS AND NOT ALPS_BUILD_LIBS_ONLY)
   add_subdirectory(applications)
 endif (ALPS_BUILD_APPLICATIONS AND NOT ALPS_BUILD_LIBS_ONLY)
 
-if (ALPS_INCLUDE_TUTORIALS AND NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
+if (ALPS_INCLUDE_TUTORIALS AND NOT ALPS_BUILD_LIBS_ONLY)
   add_subdirectory(tutorials)
-endif (ALPS_INCLUDE_TUTORIALS AND NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
+endif (ALPS_INCLUDE_TUTORIALS AND NOT ALPS_BUILD_LIBS_ONLY)
 
 ######################################################################
 # developer tools

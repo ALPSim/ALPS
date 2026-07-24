@@ -28,19 +28,21 @@ from __future__ import absolute_import
 # ****************************************************************************
 
 import sys
-import os.path
-if sys.platform == 'darwin' and not os.path.exists(os.path.expanduser('~/.matplotlib/matplotlibrc')):
-    try:
-        import matplotlib
-        matplotlib.use('macosx')
-    except ImportError:
-        pass
 
 from .dataset import *
 from .tools import *
 from .pytools import *
 from .floatwitherror import FloatWithError
 from . import fit_wrapper
+
+# Optional solver modules are present when the wheel was built from an ALPS
+# checkout with application bindings enabled.
+try:
+    from ._ext import cthyb, ctint
+    sys.modules[__name__ + ".cthyb"] = cthyb
+    sys.modules[__name__ + ".ctint"] = ctint
+except ImportError:
+    pass
 
 # For ALPS DWA Application
 # from dwa import *
