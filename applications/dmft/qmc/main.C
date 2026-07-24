@@ -85,7 +85,6 @@ int main(int argc, char** argv)
     std::cout << "  Computer Physics Communications 182, 1078 (2011)              "<<std::endl;
     std::cout << "                                                                "<<std::endl;
     std::cout << "  copyright (c) 2005-2010 by the ALPS collaboration.            "<<std::endl;
-    std::cout << "  Consult the web page for license details.                     "<<std::endl;
     std::cout << std::endl;
     alps::print_copyright(std::cout);
     alps::Parameters parms;

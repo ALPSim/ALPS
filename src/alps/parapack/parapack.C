@@ -219,7 +219,7 @@ void print_copyright(std::ostream& os) {
 }
 
 void print_license(std::ostream& os) {
-  os << "Please look at the file LICENSE for the license conditions.\n";
+  alps::print_license(os);
 }
 
 std::string alps_version() {

@@ -39,7 +39,7 @@
 void SpinFactory::print_copyright(std::ostream& out) const
 {
   out << "Generic classical Monte Carlo program using local or cluster updates\n"
-      << "  available from http://alps.comp-phys.org/\n"
+      << "  available from https://alps.comp-phys.org/\n"
       << "  copyright(c) 1999-2007 by Matthias Troyer <troyer@comp-phys.org>\n"
       << "                            Mathias Koerner <mkoerner@comp-phys.org>\n"
       << " for details see the publication:\n"
