@@ -34,7 +34,6 @@ else (NOT_ALPS_BUILD_PYTHON)
 	option(ALPS_BUILD_PYTHON "Build ALPS python extentions" ON)
 endif (NOT_ALPS_BUILD_PYTHON)
 
-option(ALPS_INSTALL_DEPRECATED "Install deprecated headers for ALPS" OFF)
 option(ALPS_BUILD_DEVELOPER_TOOLS "Build tools used by developers to maintain ALPS" OFF)
 option(ALPS_ENABLE_OPENMP "Enable OpenMP parallelization" OFF)
 option(ALPS_ENABLE_OPENMP_WORKER "Enable OpenMP worker support" OFF)
@@ -461,11 +460,6 @@ if (ALPS_INSTALL_HEADERS)
           FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
          )
   install(FILES ${PROJECT_BINARY_DIR}/src/alps/config.h ${PROJECT_BINARY_DIR}/src/alps/version.h DESTINATION ${ALPS_HEADER_DIR}/alps COMPONENT headers)
-  if (ALPS_INSTALL_DEPRECATED)
-    install(DIRECTORY legacy/alps COMPONENT deprecated DESTINATION ${ALPS_HEADER_DIR}
-            FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
-           )
-  endif (ALPS_INSTALL_DEPRECATED)
 endif(ALPS_INSTALL_HEADERS)
 
 install(DIRECTORY lib/xml DESTINATION ${ALPS_XML_PATH} COMPONENT xml

@@ -5,9 +5,9 @@
 #          http://www.boost.org/LICENSE_1_0.txt)
 
 echo "ALPS Libraries:"
-echo C++:; find legacy lib src tool -name "*.h" -or -name "*.hpp" -or -name "*.C" -or -name "*.cpp" | grep -v svn | grep -v boost | xargs wc -l | tail -1
-echo py:; find legacy lib src tool -name "*.py" | grep -v svn | grep -v boost | xargs wc -l | tail -1
-echo f90:; find legacy lib src tool -name "*.f90" | grep -v svn | grep -v boost | xargs wc -l | tail -1
+echo C++:; find lib src tool -name "*.h" -or -name "*.hpp" -or -name "*.C" -or -name "*.cpp" | grep -v svn | grep -v boost | xargs wc -l | tail -1
+echo py:; find lib src tool -name "*.py" | grep -v svn | grep -v boost | xargs wc -l | tail -1
+echo f90:; find lib src tool -name "*.f90" | grep -v svn | grep -v boost | xargs wc -l | tail -1
 
 echo "ALPS Applications:"
 echo C++:; find applications -name "*.h" -or -name "*.hpp" -or -name "*.C" -or -name "*.cpp" | grep -v svn | grep -v boost | xargs wc -l | tail -1
