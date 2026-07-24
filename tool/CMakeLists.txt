@@ -75,16 +75,6 @@ endif(SQLite_FOUND)
     install(PROGRAMS msxsl.exe DESTINATION bin COMPONENT tools)
   endif(UNIX AND NOT WIN32)
 
-#
-  # lattice-preview and helper program
-  #
-
-  configure_file(config.py.in ${CMAKE_CURRENT_BINARY_DIR}/config.py)
-  configure_file(lattice-preview.in ${CMAKE_CURRENT_BINARY_DIR}/lattice-preview)
-  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/lattice-preview DESTINATION bin COMPONENT tools)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/config.py preview.py license.py
-    DESTINATION lib/python/alps COMPONENT tools)
-
   #
   # Analytical continuation with MaxEnt
   #
