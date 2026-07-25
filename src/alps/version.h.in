@@ -30,34 +30,46 @@
 #ifndef ALPS_VERSION_H
 #define ALPS_VERSION_H
 
-// ALPS version
-#cmakedefine ALPS_VERSION "@ALPS_VERSION@"
+// Plain #define for everything the build always sets: the cmakedefine directive
+// emits an "undef" when its value is false-y, and CMake counts 0 as false-y, so
+// a zero component (2.4.0) would vanish. It is used below only where the macro
+// is genuinely optional. (configure_file matches that directive even inside a
+// comment, hence no leading '#' on it here.)
 
-#cmakedefine ALPS_VERSION_MAJOR @ALPS_VERSION_MAJOR@
-#cmakedefine ALPS_VERSION_MINOR @ALPS_VERSION_MINOR@
-#cmakedefine ALPS_VERSION_PATCH @ALPS_VERSION_PATCH@
-#cmakedefine ALPS_SVN_REVISION @ALPS_WC_REVISION@
+// ALPS version
+#define ALPS_VERSION "@ALPS_VERSION@"
+
+#define ALPS_VERSION_MAJOR @ALPS_VERSION_MAJOR@
+#define ALPS_VERSION_MINOR @ALPS_VERSION_MINOR@
+#define ALPS_VERSION_PATCH @ALPS_VERSION_PATCH@
+
+// ALPS version as a single integer, for preprocessor comparisons:
+//   #if ALPS_VERSION_NUMBER >= ALPS_VERSION_NUM(2, 3, 4)
+#define ALPS_VERSION_NUM(major, minor, patch) \
+  ((major) * 100000 + (minor) * 100 + (patch))
+#define ALPS_VERSION_NUMBER \
+  ALPS_VERSION_NUM(ALPS_VERSION_MAJOR, ALPS_VERSION_MINOR, ALPS_VERSION_PATCH)
 
 // ALPS version (full string)
-#cmakedefine ALPS_VERSION_STRING "@ALPS_VERSION_STRING@"
+#define ALPS_VERSION_STRING "@ALPS_VERSION_STRING@"
 
 // latest publish year of ALPS
-#cmakedefine ALPS_YEAR "@ALPS_YEAR@"
+#define ALPS_YEAR "@ALPS_YEAR@"
 
 // install path of ALPS
-#cmakedefine ALPS_PREFIX "@ALPS_PREFIX@"
-
-// source directory of ALPS
-#cmakedefine ALPS_SRCDIR "@ALPS_SRCDIR@"
+#define ALPS_PREFIX "@ALPS_PREFIX@"
 
 // XSLT PATH
-#cmakedefine ALPS_XML_DIR "@ALPS_XML_DIR@"
+#define ALPS_XML_DIR "@ALPS_XML_DIR@"
+
+// Optional Windows fallback for the 32/64-bit "Program Files" split. Never set
+// by the build, and guarded by #ifdef in parser/xslt_path.C.
 #cmakedefine ALPS_XML_ALTERNATE_DIR "@ALPS_XML_ALTERNATE_DIR@"
 
 // hostname where configure script was executed
-#cmakedefine ALPS_CONFIG_HOST "@ALPS_CONFIG_HOST@"
+#define ALPS_CONFIG_HOST "@ALPS_CONFIG_HOST@"
 
 // username who executed configure script
-#cmakedefine ALPS_CONFIG_USER "@ALPS_CONFIG_USER@"
+#define ALPS_CONFIG_USER "@ALPS_CONFIG_USER@"
 
 #endif // ALPS_VERSION_H
