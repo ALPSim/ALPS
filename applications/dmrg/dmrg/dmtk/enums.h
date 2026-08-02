@@ -60,6 +60,11 @@ enum
   BLOCK4,
 };
 
+enum
+{
+  MASK_PRODUCT_DEFAULT = 1 << 0,
+  MASK_PRODUCT_HC = 1 << 1,
+};
 } // namespace dmtk
 
 #endif // __DMTK_ENUMS_H__

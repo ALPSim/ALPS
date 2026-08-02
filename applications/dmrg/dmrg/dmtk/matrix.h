@@ -76,7 +76,7 @@ class Matrix:public std::vector<T>
 
     Matrix(size_t ncols, size_t nrows, const T* v):vector(nrows*ncols,v),num_rows(nrows),num_cols(ncols),v_capacity(nrows * ncols) { init(); }
 
-    Matrix(const Matrix<T>& m):vector(m.rows()*m.cols()),num_rows(m.rows()),num_cols(m.cols()),v_capacity(m.v_capacity)
+    Matrix(const Matrix<T>& m):vector(m.rows()*m.cols()),num_rows(m.rows()),num_cols(m.cols()),v_capacity(m.rows()*m.cols())
       { 
         init(); 
         const T* orig = m.array();

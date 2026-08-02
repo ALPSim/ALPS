@@ -45,7 +45,6 @@ class QN
     static Vector<std::string> _qn_name;
     static int _qn_fermion;
     static int _qn_mask;
-    static size_t QN_LAST;
 
     typedef alps::half_integer<short> half_integer_type;
 
@@ -57,6 +56,7 @@ class QN
     alps::half_integer<short> _qn5;
 
   public:
+    static size_t QN_LAST;
     QN(): _qn0(0),_qn1(0),_qn2(0),_qn3(0),_qn4(0),_qn5(0) {}
     QN(half_integer_type val): _qn0(val),_qn1(val),_qn2(val),_qn3(val),_qn4(val),_qn5(val) {}
     QN(const QN &_qn):
@@ -218,6 +218,16 @@ size_t QN::QN_LAST = 0;
 dmtk::Vector<std::string> QN::_qn_name = dmtk::Vector<std::string>(4);
 int QN::_qn_mask = 0;
 int QN::_qn_fermion = 0;
+
+std::ostream& operator << (std::ostream& s, const QN& q)
+{
+  s << "(" << q[0];
+  for(int i = 1; i < QN::QN_LAST; i++)
+    s << "," << q[i];
+  s << ")";
+
+  return s;
+}
 
 inline bool
 QN::operator==(const QN &qn) const

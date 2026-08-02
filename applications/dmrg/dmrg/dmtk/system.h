@@ -51,6 +51,7 @@
 #include "ctimer.h"
 #include "util.h"
 #include "globals.h"
+#include "product.h"
 #ifdef WITH_PTHREADS
 #include <pthread.h>
 #include <unistd.h>
@@ -95,6 +96,34 @@ VectorState<T> product(const System<T>& ss, const VectorState<T>& vv);
 
 template<class T> 
 VectorState<T> product_default(const System<T>& ss, const VectorState<T>& vv, const Hami<T>* hami = NULL, bool only_local = false);
+
+template<class T>
+VectorState<T> product_composite(System<T>& ss, const VectorState<T>& vv, int mask_hc = (MASK_PRODUCT_DEFAULT|MASK_PRODUCT_HC));
+
+template<class T>
+class AuxTerm{
+  public:
+    Term<T> t;
+    Term<T> cterm[4]; // composite term
+    BasicOp<T> top[4]; // reference operator
+    const BasicOp<T> *op[4]; // original operator
+    const BasicOp<T> *ref_op[4]; // complementary operator
+    BasicOp<T> sum_op; // complementary operator
+    size_t pos[4]; // original position in the term
+    size_t b1, b2, b3;
+    int mask;
+    bool done;
+    int nblocks;
+
+    AuxTerm(): b1(BLOCK_NONE), b2(BLOCK_NONE), b3(BLOCK_NONE), mask(0), done(false), nblocks(0) { op[0] = op[1] = op[2] = op[3] = NULL; ref_op[0] = ref_op[1] = ref_op[2] = ref_op[3] = NULL; }
+};
+
+template<class T>
+void product_term(const System<T>& ss, const AuxTerm<T> &auxt, const Term<T> &t, const VectorState<T> &vv, VectorState<T> &res);
+template<class T>
+void init_terms_composite(System<T>& ss, const VectorState<T>& vv);
+template<class T>
+void init_term_composite(System<T>& ss, const AuxTerm<T> &auxt, const Term<T> &t, const VectorState<T> &vv, VectorState<T> &res);
 
 class FileList 
 {
@@ -174,6 +203,7 @@ class System
     bool _use_k;
     bool _use_seed;
     bool _use_basic_seed;
+    bool _use_composite;
     bool _grow_symmetric;
     bool _grow_outward;
     bool _custom_qns;
@@ -181,6 +211,7 @@ class System
     bool _measure_symmetric;
     bool _apply_hami;
     bool _apply_extern;
+    bool _rotate_terms;
     bool _full_sweep; // run sweep from 1 to ls-3/ls-4
     bool _use_coef_tol; 
     double _coef_tol;
@@ -192,7 +223,7 @@ class System
     double _lanczos_tol;
     int _lanczos_maxiter;
 
-    virtual void init_iteration(const B&b1, const B&b2, const B&b3, const B&b4, bool use_seed = false);
+    virtual void init_iteration(const B&b1, const B&b2, const B&b3, const B&b4, bool use_seed = false, bool create_composite = true);
     void rotate_hami(int position, Block<T> &b, Basis &basis, Basis &rho_basis, const Hami<T> *this_hami = NULL);
     void rotate_terms(int position, Block<T> &b, Basis &basis, Basis &rho_basis, const Hami<T> *this_hami = NULL);
     void rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis, const Hami<T> *this_hami = NULL);
@@ -209,8 +240,12 @@ class System
 
     bool (*signal_handler) (System<T> &, size_t signal_id, void *data);
 
+    std::vector<ProductTerm<T> > product_terms;
+
     B rightblock;
     B leftblock;
+    B site1;
+    B site2;
     B newblock;
 
     const B* _b1;
@@ -242,6 +277,7 @@ class System
     H<T> h12;
     H<T> h23;
     H<T> h34;
+    std::list<AuxTerm<T> > aux_terms;
 
     std::list<BasicOp<T> > dm_ops;
     Hami<T> ops;
@@ -271,6 +307,7 @@ class System
     , _use_k(false)
     , _use_seed(true)
     , _use_basic_seed(false)
+    , _use_composite(true)
     , _grow_symmetric(true)
     , _grow_outward(false)
     , _custom_qns(true)
@@ -278,6 +315,7 @@ class System
     , _measure_symmetric(false)
     , _apply_hami(true)
     , _apply_extern(true)
+    , _rotate_terms(true)
     , _full_sweep(false)
     , _use_coef_tol(false)
     , _coef_tol(1.e-5) 
@@ -306,6 +344,7 @@ class System
      , _use_k(false)
      , _use_seed(true)
      , _use_basic_seed(false)
+     , _use_composite(true)
      , _grow_symmetric(true)
      , _grow_outward(false)
      , _custom_qns(true)
@@ -313,6 +352,7 @@ class System
      , _measure_symmetric(false)
      , _apply_hami(true)
      , _apply_extern(true)
+     , _rotate_terms(true)
      , _full_sweep(false)
      , _use_coef_tol(false)
      , _coef_tol(1.e-5) 
@@ -376,6 +416,7 @@ class System
       { snprintf(_name, sizeof(_name), "%s", the_name); }
     const char* name() const { return _name; }
 
+    void create_interactions(bool create_composite = true);
     virtual void diagonalize(bool use_seed = true);
     virtual void build_target_states(int pos = 0);
     virtual void truncate(int block, int new_size);
@@ -431,9 +472,9 @@ class System
     size_t size() const 
       { return _b1->lattice().size()+ _b2->lattice().size()+
                _b3->lattice().size()+ _b4->lattice().size(); }
-    int site1() const 
-      { if(dir == LEFT2RIGHT) return iter; else return h.lattice().size()-iter-2; }
-    int site2() const { return site1()+1; }
+//    int site1() const 
+//      { if(dir == LEFT2RIGHT) return iter; else return h.lattice().size()-iter-2; }
+//    int site2() const { return site1()+1; }
 
     const Lattice& lattice() const { return _lattice; } 
 
@@ -460,6 +501,8 @@ class System
     bool use_seed() const { return _use_seed; }
     System<T>& set_use_basic_seed(bool b) { _use_basic_seed = b; return *this; }
     bool use_basic_seed() const { return _use_basic_seed; }
+    System<T>& set_use_composite(bool b) { _use_composite = b; return *this; }
+    bool use_composite() const { return _use_composite; }
     System<T>& set_apply_hami(bool b) { _apply_hami = b; return *this; }
     bool apply_hami() const { return _apply_hami; }
     System<T>& set_apply_extern(bool b) { _apply_extern = b; return *this; }
@@ -479,6 +522,11 @@ class System
     int qn_mask() const { return _grand_canonical; }
     System<T>& set_full_sweep(bool b) { _full_sweep = b; return *this; }
     bool full_sweep() const { return _full_sweep; }
+    void set_rotate_terms(bool b) { _rotate_terms = b; }
+    bool rotate_terms() { return _rotate_terms; }
+
+    void hint(int _mask, bool add_local_h = true, const Hami<T> *_h = NULL);
+    void build_composite_operators(const Hami<T> *_h = NULL);
 
     System<T>& set_calc_gap(int b)
       {
@@ -1360,6 +1408,8 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
   outputfile.close();
 }
 
+
+
 /////////////////////////////////////////////////////////////////////////
 // main_loop: 
 // if we don't care about increasing the number of states 
@@ -1381,7 +1431,22 @@ System<T>::main_loop(size_t nsweeps, size_t t)
 /////////////////////////////////////////////////////////////////////////
 template <class T>
 void
-System<T>::init_iteration(const B&b1, const B&b2, const B&b3, const B&b4, bool use_seed)
+System<T>::create_interactions(bool create_composite)
+{
+#ifndef USE_PRODUCT_DEFAULT
+  cout << "Creating interaction terms" << endl;
+  hint(MASK_BLOCK1|MASK_BLOCK2);
+  hint(MASK_BLOCK3|MASK_BLOCK4);
+  hint(MASK_BLOCK2|MASK_BLOCK3, false);
+  if(create_composite)
+    build_composite_operators();
+#endif
+}
+
+
+template <class T>
+void
+System<T>::init_iteration(const B&b1, const B&b2, const B&b3, const B&b4, bool use_seed, bool create_composite)
 {
   _b1 = &b1;
   _b2 = &b2;
@@ -1587,7 +1652,15 @@ System<T>::init_iteration(const B&b1, const B&b2, const B&b3, const B&b4, bool u
 
   gs.set_qn_mask(qn, _grand_canonical);
   gs.resize(_b1->_basis,_b2->_basis,_b3->_basis,_b4->_basis);
+#ifndef USE_PRODUCT_DEFAULT
+  if(create_composite && _rotate_terms){
+    create_interactions(create_composite);
+    init_terms_composite(*this, this->gs);
+  }
+#endif
 
+  create_interactions(create_composite);
+  init_terms_composite(*this, this->gs);
 }
 
 #include "lanczos.cc"
@@ -1835,6 +1908,21 @@ System<T>::truncate(int position, int new_size)
     }
   }
 
+#ifndef USE_PRODUCT_DEFAULT
+  if(_rotate_terms){
+    H<T> haux(h23);
+    hint(MASK_BLOCK2|MASK_BLOCK3);
+    VectorState<T> v23 = gs.condense(MASK_BLOCK2|MASK_BLOCK3);
+    VectorState<T> res23(v23);
+    res23 = T(0);
+    product(h23, v23, res23, BLOCK2, T(1), false);
+    cout << "LOCAL ENERGY " << (dir == LEFT2RIGHT ? iter : ls-2-iter) << " " << product(res23,v23)/product(v23,v23) << endl;
+    h23 = haux;
+  }
+#endif // USE_PRODUCT_DEFAULT
+//********************************************************************
+//                   DENSITY MATRIX
+//********************************************************************
 //////////////////////////////////////////////////////////////////////////
   signal_emit(SYSTEM_SIGNAL_BUILD_DM, NULL);
   if(verbose() > 0)
@@ -2072,6 +2160,329 @@ System<T>::truncate(int position, int new_size)
   outputfile.close();
 }
 
+/////////////////////////////////////////////////////////////////////////
+// hint:
+// build new interaction Hamiltonian between two blocks.
+/////////////////////////////////////////////////////////////////////////
+template<class T>
+void
+System<T>::hint(int _mask, bool add_local_h, const Hami<T> *_h)
+{
+  if(!_rotate_terms) return;
+#ifdef USE_PRODUCT_DEFAULT
+  return;
+#endif //USE_PRODUCT_DEFAULT
+  if(!_h) _h = &this->h;
+  const Hami<T> &this_hami = *_h;
+
+  const Block<T> *pb1;
+  const Block<T> *pb2;
+  BasicOp<T> *_hij;
+  size_t pos1, pos2;
+  switch(_mask){
+    case (MASK_BLOCK1|MASK_BLOCK2):
+      pb1 = _b1;
+      pb2 = _b2;
+      _hij = &h12;
+      pos1 = BLOCK1;
+      pos2 = BLOCK2;
+      break;
+    case (MASK_BLOCK2|MASK_BLOCK3):
+      pb1 = _b2;
+      pb2 = _b3;
+      _hij = &h23;
+      pos1 = BLOCK2;
+      pos2 = BLOCK3;
+      break;
+    case (MASK_BLOCK3|MASK_BLOCK4):
+      pb1 = _b3;
+      pb2 = _b4;
+      _hij = &h34;
+      pos1 = BLOCK3;
+      pos2 = BLOCK4;
+      break;
+  }
+
+  const Block<T> &b1(*pb1);
+  const Block<T> &b2(*pb2);
+  BasicOp<T> &hij(*_hij);
+//  hij.dqn.kx2() = qnt.kx2();
+//  hij.dqn.ky2() = qnt.ky2();
+
+  Basis aux_basis(b1.basis(),b2.basis());
+  aux_basis.reorder();
+  hij.resize(aux_basis);
+  hij = T(0);
+
+// We use indentity matrix for the new operators since
+// we don't want to rotate or truncate them
+
+  BMatrix<T> aux_rho(aux_basis);
+  aux_rho.clear();
+  typename PackedBasis::const_iterator biter;
+  for(biter = aux_basis.subspaces().begin(); biter != aux_basis.subspaces().end(); biter++){
+    SubMatrix<T> block(biter->qn(),*biter,*biter);
+    block=(I<T>());
+    aux_rho.push_back(block);
+  }
+
+  CTimer clock;
+  clock.Start();
+  if(add_local_h && apply_hami()){
+    clock.Lap();
+//    if(verbose() > 0)
+      cout << "OPERATOR H2 " << this_hami.name() << endl;
+    const BasicOp<T> *hop = b2(this_hami);
+    if(hop) new_operator(hij, *hop, aux_rho, aux_basis, RIGHT, T(1), false);
+//    cout << "Lap: " << clock.LapTime().c_str() << endl;
+
+    clock.Lap();
+//    if(verbose() > 0)
+      cout << "OPERATOR H1 " << this_hami.name() << endl;
+    hop = b1(this_hami);
+    if(hop) new_operator(hij, *hop, aux_rho, aux_basis, LEFT, T(1), false);
+//   cout << "Lap: " << clock.LapTime().c_str() << endl;
+  }
+
+  typename Hami<T>::const_iterator hiter;
+  for(hiter = this_hami.begin(); hiter != this_hami.end(); hiter++){
+    const Term<T>& t = (*hiter);
+//    if(T(t.coef()) == T(0)) continue;
+    if(t.type() == TERM_EXTERN) continue;
+    if(t.size() == 1 && t.type() != TERM_LOCAL && apply_hami() && t[0].name() != this_hami.name()) {
+//      continue;
+      const BasicOp<T>&top = t[0];
+      size_t ib = block(top.site());
+      if((ib == BLOCK2 && _mask == (MASK_BLOCK1|MASK_BLOCK2)) || (ib == BLOCK3 && _mask == (MASK_BLOCK3|MASK_BLOCK4)) || (ib == BLOCK1 && _mask == (MASK_BLOCK1|MASK_BLOCK2) && b1.lattice().size() == 1) || (ib == BLOCK4 && _mask == (MASK_BLOCK3|MASK_BLOCK4) && b2.lattice().size() == 1)){
+
+        bool calc_hc = this_hami.use_hc();
+
+        const BasicOp<T>* op= operator()(top);
+        if(op){
+          if (op->is_diagonal()) calc_hc = false;
+
+//          if(verbose() > 0)
+            if(!calc_hc)
+              cout << "H12 TERM " << t.name(true) << endl;
+            else
+              cout << "H12 TERM " << t.name(true) << " + h.c." << endl;
+
+          clock.Lap();
+
+          size_t position = _mask;
+          if(_mask == (MASK_BLOCK1|MASK_BLOCK2))
+            position = ib == BLOCK2 ? RIGHT : LEFT;
+          else
+            position = ib == BLOCK4 ? RIGHT : LEFT;
+
+          new_operator(hij, *op, aux_rho, aux_basis, position, T(t.coef()));
+          cout << "Lap: " << clock.LapTime().c_str() << endl;
+        }
+      }
+    }
+    if(t.size() >= 2 && ((t.type() == TERM_PRODUCT && apply_hami()) || (t.type() == TERM_EXTERN && apply_extern()))){
+      bool found1 = false;
+      bool found2 = false;
+      bool found = true;
+      Term<T> aux_term1, aux_term2;
+      int bmask = 0;
+      for(int i = 0; i < t.size(); i++){
+        BasicOp<T> top = t[i].internals();
+        bmask |= mask(block(top.site()));
+//        cout << top.description() << " " << pos1 << " " << pos2 << " " << block(top.site()) << endl;
+        if(block(top.site()) == pos1){
+          aux_term1 *= top;
+          found1 = true;
+        }
+        if(block(top.site()) == pos2){
+          aux_term2 *= top;
+          found2 = true;
+        }
+        if(block(top.site()) == BLOCK_NONE){
+          found = false;
+          break;
+        }
+      }
+      if(found && (bmask & _mask) == bmask && found1 && found2){ // we have a new composite operator
+
+        BasicOp<T> top1, top2;
+        if(aux_term1.size() == 1) // the piece contains a single operator
+          top1 = aux_term1[0].internals();
+        else
+          top1 = aux_term1; // the piece contains more than one operator
+        if(aux_term2.size() == 1) // the piece contains a single operator
+          top2 = aux_term2[0].internals();
+        else
+          top2 = aux_term2; // the piece contains more than one operator
+        const BasicOp<T>* op1 = operator()(top1);
+        const BasicOp<T>* op2 = operator()(top2);
+
+        if(!op1) {
+          cout << "ERROR : Operator " << top1.description() << " in term " << t.description() << " not found\n";
+          continue;
+        }
+        if(!op2) {
+          cout << "ERROR : Operator " << top2.description() << " in term " << t.description() << " not found\n";
+          continue;
+        }
+
+        bool calc_hc = this_hami.use_hc();
+//        if (op1->is_diagonal() && op2->is_diagonal()) calc_hc = false;
+        if (t.is_diagonal()) calc_hc = false;
+//        if (t.size() > 2) {
+////          calc_hc = false; // you need to include h.c. terms explicitly
+//          bool is_diag = true;
+//          for(int i = 0; i < t.size(); i++)
+//            if(t[i].is_diagonal()) { is_diag = false; break; }
+//          if(is_diag) calc_hc = false;
+//        }
+
+        if(op1 && op2){
+          clock.Lap();
+
+          if(!calc_hc)
+            cout << "H12 TERM " << t.description() << endl;
+          else
+            cout << "H12 TERM " << t.description() << " + h.c." << endl;
+          new_operator(hij, *op1, *op2, pos1, pos2, aux_rho, aux_basis, T(t.coef()), calc_hc);
+
+          cout << "Lap: " << clock.LapTime().c_str() << endl;
+        }
+      }
+    }
+
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////
+// product_term:
+//////////////////////////////////////////////////////////////////////////
+template<class T>
+void
+product_term(const System<T> &ss, const AuxTerm<T> &auxt, const Term<T> &t, const VectorState<T> &vv, VectorState<T> &res)
+{
+  CTimer aux_timer;
+#ifdef WITH_PTHREADS
+  DMTKglobals<T> *globals = NULL;
+#else
+  DMTKglobals<T> *globals = get_globals(T(0));
+#endif
+
+  aux_timer.Start();
+
+  bool calc_hc = ss.h.use_hc();
+// TODO WARNING: This may cause problems ?
+//#warning If you are using use_hc and you have problems, make sure you are not including the h.c. operator in the Hamiltonian
+  int ndiag = 0;
+  if(t.is_diagonal()) calc_hc = false;
+/*
+  for(int i = 0; i < t.size(); i++){
+    if(t[i].is_diagonal()) ndiag++;
+  }
+  if(ndiag == t.size()) calc_hc = false;
+*/
+///////////////////////////////////////////////
+  if(ss.verbose() > 0){
+    if(!calc_hc){
+      cout << "APPLYING " << t.description() << endl;
+    }else{
+      cout << "APPLYING " << t.description() << " + h.c." << endl;
+    }
+  }
+
+  if(auxt.mask == (MASK_BLOCK1|MASK_BLOCK2) || auxt.mask == (MASK_BLOCK2|MASK_BLOCK3) || auxt.mask == (MASK_BLOCK3|MASK_BLOCK4) || auxt.mask == (MASK_BLOCK1|MASK_BLOCK4) || auxt.mask == (MASK_BLOCK1|MASK_BLOCK3) || auxt.mask == (MASK_BLOCK2|MASK_BLOCK4)){
+
+    aux_timer.Lap();
+
+    if(ss.use_composite()){
+//      if(auxt.ref_op[0]->is_diagonal() && auxt.sum_op.is_diagonal()) calc_hc = false;
+      if(auxt.b1 < auxt.b2)
+        product(*(auxt.ref_op[0]), auxt.sum_op, vv, res, auxt.b1, auxt.b2, T(1), calc_hc, globals, false);
+      else
+        product(auxt.sum_op, *(auxt.ref_op[0]), vv, res, auxt.b2, auxt.b1, T(1), calc_hc, globals, false);
+    } else {
+//      if(auxt.op[size_t(auxt.b1)-1]->is_diagonal() && auxt.op[size_t(auxt.b2)-1]->is_diagonal()) calc_hc = false;
+      if(auxt.b1 < auxt.b2)
+        product(*auxt.op[size_t(auxt.b1)-1], *auxt.op[size_t(auxt.b2)-1], vv, res, auxt.b1, auxt.b2, t.coef(), calc_hc, globals, false);
+      else
+        product(*auxt.op[size_t(auxt.b2)-1], *auxt.op[size_t(auxt.b1)-1], vv, res, auxt.b2, auxt.b1, t.coef(), calc_hc, globals, false);
+    }
+
+    if(ss.verbose() > 0)
+      cout << "PRODUCT TIME= " << aux_timer.LapTime().c_str() << endl;
+  }
+  else if(auxt.mask == (MASK_BLOCK1|MASK_BLOCK2|MASK_BLOCK3|MASK_BLOCK4)){
+    aux_timer.Lap();
+
+//    if(auxt.op[0]->is_diagonal() && auxt.op[1]->is_diagonal() && auxt.op[2]->is_diagonal() && auxt.op[3]->is_diagonal()) calc_hc = false;
+    product(*(auxt.op[0]), *(auxt.op[1]), *(auxt.op[2]), *(auxt.op[3]), vv, res, BLOCK1, BLOCK2, BLOCK3, BLOCK4, T(t.coef()), calc_hc, globals);
+    if(ss.verbose() > 0)
+      cout << "PRODUCT TIME= " << aux_timer.LapTime().c_str() << endl;
+  }
+  else if(auxt.mask == (MASK_BLOCK1|MASK_BLOCK2|MASK_BLOCK3)){
+    aux_timer.Lap();
+    if(ss.use_composite()){
+//      if(auxt.sum_op.is_diagonal() && auxt.ref_op[0]->is_diagonal() && auxt.ref_op[1]->is_diagonal()) calc_hc = false;
+      product(auxt.sum_op, *(auxt.ref_op[0]), *(auxt.ref_op[1]), vv, res, BLOCK1, BLOCK2, BLOCK3, T(1), calc_hc, globals);
+    } else {
+//      if(auxt.op[0]->is_diagonal() && auxt.op[1]->is_diagonal() && auxt.op[2]->is_diagonal()) calc_hc = false;
+      product(*(auxt.op[0]), *(auxt.op[1]), *(auxt.op[2]), vv, res, BLOCK1, BLOCK2, BLOCK3, T(t.coef()), calc_hc, globals);
+    }
+
+    if(ss.verbose() > 0)
+      cout << "PRODUCT TIME= " << aux_timer.LapTime().c_str() << endl;
+  }
+  else if(auxt.mask == (MASK_BLOCK1|MASK_BLOCK2|MASK_BLOCK4)){
+    aux_timer.Lap();
+
+    if(ss.use_composite()){
+//      if(auxt.sum_op.is_diagonal() && auxt.ref_op[0]->is_diagonal() && auxt.ref_op[1]->is_diagonal()) calc_hc = false;
+      if(auxt.b2 < auxt.b3){
+        product(auxt.sum_op, *(auxt.ref_op[0]), *(auxt.ref_op[1]), vv, res, BLOCK1, BLOCK2, BLOCK4, T(1), calc_hc, globals);
+      } else {
+        product(*(auxt.ref_op[1]), *(auxt.ref_op[0]), auxt.sum_op, vv, res, BLOCK1, BLOCK2, BLOCK4, T(1), calc_hc, globals);
+      }
+    } else {
+//      if(auxt.op[0]->is_diagonal() && auxt.op[1]->is_diagonal() && auxt.op[3]->is_diagonal()) calc_hc = false;
+      product(*(auxt.op[0]), *(auxt.op[1]), *(auxt.op[3]), vv, res, BLOCK1, BLOCK2, BLOCK4, T(t.coef()), calc_hc, globals);
+    }
+
+    if(ss.verbose() > 0)
+      cout << "PRODUCT TIME= " << aux_timer.LapTime().c_str() << endl;
+  }
+  else if(auxt.mask == (MASK_BLOCK1|MASK_BLOCK3|MASK_BLOCK4)){
+    aux_timer.Lap();
+
+    if(ss.use_composite()){
+//      if(auxt.sum_op.is_diagonal() && auxt.ref_op[0]->is_diagonal() && auxt.ref_op[1]->is_diagonal()) calc_hc = false;
+      if(auxt.b2 < auxt.b3){
+        product(auxt.sum_op, *(auxt.ref_op[0]), *(auxt.ref_op[1]), vv, res, BLOCK1, BLOCK3, BLOCK4, T(1), calc_hc, globals);
+      } else {
+        product(*(auxt.ref_op[1]), *(auxt.ref_op[0]), auxt.sum_op, vv, res, BLOCK1, BLOCK3, BLOCK4, T(1), calc_hc, globals);
+      }
+    } else {
+//      if(auxt.op[0]->is_diagonal() && auxt.op[2]->is_diagonal() && auxt.op[3]->is_diagonal()) calc_hc = false;
+      product(*(auxt.op[0]), *(auxt.op[2]), *(auxt.op[3]), vv, res, BLOCK1, BLOCK3, BLOCK4, T(t.coef()), calc_hc, globals);
+    }
+
+    if(ss.verbose() > 0)
+      cout << "PRODUCT TIME= " << aux_timer.LapTime().c_str() << endl;
+  }
+  else if(auxt.mask == (MASK_BLOCK2|MASK_BLOCK3|MASK_BLOCK4)){
+    aux_timer.Lap();
+
+    if(ss.use_composite()) {
+//      if(auxt.sum_op.is_diagonal() && auxt.ref_op[0]->is_diagonal() && auxt.ref_op[1]->is_diagonal()) calc_hc = false;
+      product(*(auxt.ref_op[0]), *(auxt.ref_op[1]), auxt.sum_op, vv, res, BLOCK2, BLOCK3, BLOCK4, T(1), calc_hc, globals);
+    } else {
+//      if(auxt.op[1]->is_diagonal() && auxt.op[2]->is_diagonal() && auxt.op[3]->is_diagonal()) calc_hc = false;
+      product(*(auxt.op[1]), *(auxt.op[2]), *(auxt.op[3]), vv, res, BLOCK2, BLOCK3, BLOCK4, T(t.coef()), calc_hc, globals);
+    }
+
+    if(ss.verbose() > 0)
+      cout << "PRODUCT TIME= " << aux_timer.LapTime().c_str() << endl;
+  }
+}
 /////////////////////////////////////////////////////////////////////////
 // rotate:
 // build new block and operators, truncating with the density matrix.
@@ -2797,6 +3208,21 @@ System<T>::rotate_hami(int position, Block<T> &b, Basis &basis, Basis &rho_basis
   if(!_this_hami) _this_hami = &this->h;
   const Hami<T> &this_hami = *_this_hami;
 
+#ifndef USE_PRODUCT_DEFAULT
+
+  BasicOp<T> _h = BasicOp<T>(this->h);
+  _h.resize(rho_basis);
+  if(position == LEFT){
+    new_operator(_h, h12, rho, basis);
+    b.push_back(_h);
+  } else { // position == RIGHT
+    new_operator(_h, h34, rho, basis);
+    b.push_back(_h);
+  }
+
+  return;
+#else // USE_PRODUCT_DEFAULT
+
   const Block<T> *pb1 = _b1;
   const Block<T> *pb2 = _b2;
   int _mask = MASK_BLOCK1 | MASK_BLOCK2;
@@ -2979,7 +3405,7 @@ System<T>::rotate_hami(int position, Block<T> &b, Basis &basis, Basis &rho_basis
   }
 
   b.push_back(_h);
-
+#endif
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -3248,6 +3674,7 @@ System<T>::measure_operator(const BasicOp<T> &top, const VectorState<T> *v)
   return val;
 }
 
+
 //////////////////////////////////////////////////////////////////////
 // product_default:
 // This version of product uses the four blocks
@@ -3488,6 +3915,10 @@ for(biter = local_op4->begin(); biter != local_op4->end(); biter++){
   return res;
 }
 
+/////////////////////////////////////////////////////////////////////////
+// product: 
+/////////////////////////////////////////////////////////////////////////
+#ifdef USE_PRODUCT_DEFAULT
 template<class T>
 VectorState<T>
 product(const System<T>& ss, const VectorState<T>& vv)
@@ -3506,6 +3937,492 @@ product(const System<T>& ss, const VectorState<T>& vv)
 
   return res;
 }
+#else // USE_PRODUCT_DEFAULT
+////////////////////////////////////////////////////////////////////////
+// build_composite:
+////////////////////////////////////////////////////////////////////////
+template<class T>
+void
+System<T>::build_composite_operators(const Hami<T> *this_hami)
+{
+  CTimer aux_timer;
+  aux_timer.Start();
+
+  if(!this_hami) aux_terms.clear();
+
+  const Hami<T> *ph = &h;
+  if(this_hami) ph = this_hami;
+  const Hami<T> &_h = *ph;
+
+  typename Hami<T>::const_iterator hiter;
+  for(hiter = _h.begin(); hiter != _h.end(); hiter++){
+    const Term<T> t = *hiter;
+    if(_use_coef_tol && fabs(dmtk::real(t.coef())) <= _coef_tol) continue;
+
+    if(t.size() == 1 && t[0].is_hami()) {
+      build_composite_operators(&t[0].hami());
+    }
+
+    if(t.size() >= 2 && ((apply_hami() && t.type() == TERM_PRODUCT) || (apply_extern() && t.type() == TERM_EXTERN))){
+      AuxTerm<T> new_term;
+      new_term.t = (*hiter);
+
+      int bmask = 0;
+      bool found = true;
+      for(int i = 0; i < t.size(); i++){
+        const BasicOp<T> top = t[i].internals();
+        if(block(top.site()) == BLOCK_NONE){
+          found = false;
+//          cout << "WARNING: *** Operator " << top.description() << " " << top.site() << " not found\n";
+          break;
+        }
+        for(int ib = 1; ib <= 4; ib++){
+          if(block(top.site()) == (size_t)ib){
+            new_term.cterm[ib-1] *= top;
+            new_term.pos[ib-1] = i;
+            bmask |= mask((size_t)ib);
+          }
+        }
+      }
+      new_term.mask = bmask;
+      new_term.nblocks = 0;
+      new_term.nblocks += ((bmask & MASK_BLOCK1) == MASK_BLOCK1 ? 1 : 0);
+      new_term.nblocks += ((bmask & MASK_BLOCK2) == MASK_BLOCK2 ? 1 : 0);
+      new_term.nblocks += ((bmask & MASK_BLOCK3) == MASK_BLOCK3 ? 1 : 0);
+      new_term.nblocks += ((bmask & MASK_BLOCK4) == MASK_BLOCK4 ? 1 : 0);
+// WARNING: FIXME
+if(bmask == (MASK_BLOCK1|MASK_BLOCK2|MASK_BLOCK4) || bmask == (MASK_BLOCK1|MASK_BLOCK3|MASK_BLOCK4)) new_term.nblocks = 3;
+if(bmask == (MASK_BLOCK1|MASK_BLOCK2|MASK_BLOCK3) || bmask == (MASK_BLOCK4|MASK_BLOCK3|MASK_BLOCK2)) new_term.nblocks = 3;
+
+      bool found_op = true;
+      if(found && bmask != MASK_BLOCK1 && bmask != MASK_BLOCK2 && bmask != MASK_BLOCK3 && bmask != MASK_BLOCK4 && ((t.type() != TERM_EXTERN && bmask != (MASK_BLOCK1|MASK_BLOCK2) && bmask != (MASK_BLOCK2|MASK_BLOCK3) && bmask != (MASK_BLOCK3|MASK_BLOCK4)) || t.type() == TERM_EXTERN || this_hami != NULL)){
+        for(int ib = 3; ib >= 0 ; ib--){
+          if(new_term.cterm[ib].size() != 0){
+            if(new_term.cterm[ib].size() == 1)
+              new_term.top[ib] = new_term.cterm[ib][0];
+            else
+              new_term.top[ib] = new_term.cterm[ib];
+
+            new_term.op[ib] = operator()(new_term.top[ib]);
+            if(!new_term.op[ib]) {
+              cout << "ERROR : Operator " << new_term.top[ib].description() << " not found\n";
+              found_op = false;
+            }
+          }
+        }
+
+        if(found_op) aux_terms.push_back(new_term);
+      }
+    }
+  }
+
+//  cout << "COMPOSITE TERMS: " << aux_terms.size() << endl;
+  typename std::list<AuxTerm<T> >::iterator titer;
+  for(titer = aux_terms.begin(); titer != aux_terms.end(); titer++){
+    AuxTerm<T>& auxt = (*titer);
+    const Term<T>& t = (auxt.t);
+//    T sign = T(1);
+
+    if(!auxt.done){
+
+      if(auxt.mask == (MASK_BLOCK1|MASK_BLOCK4)){
+        auxt.b1 = BLOCK4, auxt.b2 = BLOCK1;
+        if(operator[](BLOCK1).lattice().size() < operator[](BLOCK4).lattice().size()){
+          auxt.b1 = BLOCK1; auxt.b2 = BLOCK4;
+        }
+        if(auxt.cterm[0].size() == 1) { auxt.b1 = BLOCK1; auxt.b2 = BLOCK4; }
+        if(auxt.cterm[3].size() == 1) { auxt.b1 = BLOCK4; auxt.b2 = BLOCK1; }
+      } else if(auxt.mask == (MASK_BLOCK2|MASK_BLOCK4)){
+        auxt.b1 = BLOCK2; auxt.b2 = BLOCK4;
+      } else if(auxt.mask == (MASK_BLOCK1|MASK_BLOCK3)){
+        auxt.b1 = BLOCK3; auxt.b2 = BLOCK1;
+//------------------------------------------------------------------
+      } else if(auxt.mask == (MASK_BLOCK1|MASK_BLOCK2)){
+        auxt.b1 = BLOCK2; auxt.b2 = BLOCK1;
+      } else if(auxt.mask == (MASK_BLOCK3|MASK_BLOCK4)){
+        auxt.b1 = BLOCK3; auxt.b2 = BLOCK4;
+      } else if(auxt.mask == (MASK_BLOCK2|MASK_BLOCK3)){
+        auxt.b1 = BLOCK2; auxt.b2 = BLOCK3;
+      } else if(auxt.mask == (MASK_BLOCK1|MASK_BLOCK2|MASK_BLOCK3)){
+        auxt.b1 = BLOCK2; auxt.b2 = BLOCK1; auxt.b3 = BLOCK3;
+      } else if(auxt.mask == (MASK_BLOCK4|MASK_BLOCK2|MASK_BLOCK3)){
+        auxt.b1 = BLOCK2; auxt.b2 = BLOCK4; auxt.b3 = BLOCK3;
+      } else if(auxt.mask == (MASK_BLOCK1|MASK_BLOCK2|MASK_BLOCK4)){
+        auxt.b1 = BLOCK2; auxt.b2 = BLOCK1; auxt.b3 = BLOCK4;
+        if(operator[](BLOCK1).lattice().size() < operator[](BLOCK4).lattice().size()){
+          auxt.b3 = BLOCK1; auxt.b2 = BLOCK4;
+        }
+        if(auxt.cterm[3].size() > 1) { auxt.b3 = BLOCK1; auxt.b2 = BLOCK4; }
+        if(auxt.cterm[0].size() > 1) { auxt.b3 = BLOCK4; auxt.b2 = BLOCK1; }
+      } else if(auxt.mask == (MASK_BLOCK1|MASK_BLOCK3|MASK_BLOCK4)){
+        auxt.b1 = BLOCK3; auxt.b2 = BLOCK1; auxt.b3 = BLOCK4;
+        if(operator[](BLOCK1).lattice().size() < operator[](BLOCK4).lattice().size()){
+          auxt.b3 = BLOCK1; auxt.b2 = BLOCK4;
+        }
+        if(auxt.cterm[3].size() > 1) { auxt.b3 = BLOCK1; auxt.b2 = BLOCK4; }
+        if(auxt.cterm[0].size() > 1) { auxt.b3 = BLOCK4; auxt.b2 = BLOCK1; }
+      } else
+        continue;
+
+      if(!use_composite()) continue;
+
+      auxt.ref_op[0] = (auxt.op[int(auxt.b1)-1]);
+      auxt.sum_op = *(auxt.op[int(auxt.b2)-1]);
+      if(auxt.nblocks >= 3) auxt.ref_op[1] = (auxt.op[int(auxt.b3)-1]);
+
+//      if(auxt.pos[auxt.b1-1] < auxt.pos[auxt.b2-1] && auxt.b1 > auxt.b2 && (auxt.ref_op[0]->fermion() || auxt.sum_op.fermion())) sign = T(-1);
+
+      typename BMatrix<T>::iterator biter;
+      for(biter = auxt.sum_op.begin(); biter != auxt.sum_op.end(); biter++){
+        SubMatrix<T> &sm = (*biter);
+        sm *= t.coef();
+      }
+      auxt.done = true;
+
+//      if(verbose() > 0)
+      {
+//        cout << "COMPOSITE TERM " << auxt.t.description() << " " << auxt.nblocks << " " << auxt.ref_op[0]->description();
+        if(auxt.nblocks >=3 ) cout << " " << auxt.ref_op[1]->description();
+        cout << endl;
+      }
+
+      int nterm = 1;
+      typename std::list<AuxTerm<T> >::iterator titer2;
+      for(titer2 = titer; titer2 != aux_terms.end(); titer2++){
+        AuxTerm<T>& auxt2 = (*titer2);
+        const Term<T>& t2 = auxt2.t;
+//        sign = T(1);
+// FIXME
+        if(!auxt2.done && auxt2.mask == auxt.mask && auxt.t.is_diagonal() == auxt2.t.is_diagonal() && auxt.t.dqn() == auxt2.t.dqn() && ( (auxt.nblocks == 2 && auxt2.op[int(auxt.b1)-1]->dqn == auxt.ref_op[0]->dqn && auxt2.op[int(auxt.b1)-1]->internals() == auxt.ref_op[0]->internals()) || (auxt.nblocks == 3 && auxt2.op[int(auxt.b1)-1]->dqn == auxt.ref_op[0]->dqn && auxt2.op[int(auxt.b3)-1]->dqn == auxt.ref_op[1]->dqn && auxt2.op[int(auxt.b1)-1]->internals() == auxt.ref_op[0]->internals() && auxt2.op[int(auxt.b3)-1]->internals() == auxt.ref_op[1]->internals()))){
+//        if(!auxt2.done && auxt2.mask == auxt.mask && auxt.t.dqn() == auxt2.t.dqn() && (auxt2.op[int(auxt.b1)-1]->internals() == auxt.ref_op[0]->internals() && auxt.nblocks == 2)) {
+          auxt2.done = true;
+//          if(verbose() > 0)
+//            cout << "COMPOSITE TERM SUM " << auxt2.t.description() << " " << auxt2.t.dqn() << endl;
+          auxt2.mask = 0;
+//          if(auxt2.pos[auxt.b1-1] < auxt2.pos[auxt.b2-1] && auxt2.b1 > auxt2.b2 && (auxt.ref_op[0]->fermion() || auxt.sum_op.fermion())) sign = T(-1);
+          typename BMatrix<T>::iterator biter1;
+          const BMatrix<T>& bm2 = *auxt2.op[int(auxt.b2)-1];
+
+//////////////////////////////////////////////
+// If this is the second term in the sum,
+// initialize sum_op to include all the blocks
+//////////////////////////////////////////////
+          if(nterm == 1){
+            BasicOp<T> aux_sum;
+            aux_sum = auxt.sum_op.internals();
+            const Block<T> *_block;
+            valarray<const Block<T>* > b(4);
+            b[0] = _b1;
+            b[1] = _b2;
+            b[2] = _b3;
+            b[3] = _b4;
+            _block = b[int(auxt.b2)-1];
+            aux_sum.resize(_block->basis().subspaces());
+            for(biter1 = auxt.sum_op.begin(); biter1 != auxt.sum_op.end(); biter1++){
+              SubMatrix<T> &_sm1 = (*biter1);
+              SubMatrix<T> *_sm2 = aux_sum.block(_sm1.qn());
+              *_sm2 = _sm1;
+            }
+            auxt.sum_op = aux_sum;
+          }
+//////////////////////////////////////////////
+
+          nterm++;
+          typename BMatrix<T>::const_iterator biter2;
+          for(biter2 = bm2.begin(); biter2 != bm2.end(); biter2++){
+            const SubMatrix<T> &_sm2 = (*biter2);
+            SubMatrix<T> *_sm1 = auxt.sum_op.block(_sm2.qn());
+            if(_sm1){
+              Matrix<T> sm2 = _sm2;
+              Matrix<T> &sm1 = *_sm1;
+              sm2 *= t2.coef();
+              sm1 += sm2;
+            } else {
+              cout << "WARNING: Block not found " << auxt.t.description() << " " << auxt2.t.description() << endl;
+;
+            }
+          }
+          if(titer2 != titer) titer2 = aux_terms.erase(titer2);
+        }
+      }
+    }
+  }
+//  cout << "COMPOSITE TERMS: " << aux_terms.size() << endl;
+//  cout << "Build composite time: " << aux_timer.TotalTime().c_str() << endl;
+}
+
+
+template<class T>
+VectorState<T>
+product_composite(System<T>& ss, const VectorState<T>& vv, int mask_hc)
+{
+  VectorState<T> res(vv);
+  res = T(0);
+  CTimer aux_timer;
+  DMTKglobals<T> globals = get_globals(T(0));
+
+  aux_timer.Start();
+  VectorState<T> v12 = vv.condense(MASK_BLOCK1|MASK_BLOCK2);
+  VectorState<T> v1234 = v12.condense(MASK_BLOCK3|MASK_BLOCK4);
+  VectorState<T> res1234(v1234);
+  if(ss.verbose() > 0)
+    cout << "CONDENSE TIME= " << aux_timer.LapTime().c_str() << endl;
+  aux_timer.Lap();
+  res1234 = T(0);
+  if(ss.verbose() > 0)
+    cout << "PRODUCT H12\n";
+  product(ss.h12, v1234, res1234, BLOCK1, T(1), false, &globals);
+  if(ss.verbose() > 0)
+    cout << aux_timer.LapTime().c_str() << endl;
+  aux_timer.Lap();
+  if(ss.verbose() > 0)
+    cout << "PRODUCT H34\n";
+  product(ss.h34, v1234, res1234, BLOCK4, T(1), false, &globals);
+  if(ss.verbose() > 0)
+    cout << aux_timer.LapTime().c_str() << endl;
+  aux_timer.Lap();
+  VectorState<T> res12 = res1234.decondense(MASK_BLOCK3|MASK_BLOCK4, v12);
+  res = res12.decondense(MASK_BLOCK1|MASK_BLOCK2, vv);
+  if(ss.verbose() > 0)
+    cout << "DECONDENSE TIME= " << aux_timer.LapTime().c_str() << endl;
+
+// Blocks 2 and 3
+
+  if(ss.verbose() > 0)
+    cout << "PRODUCT H23\n";
+  VectorState<T> v23 = vv.condense(MASK_BLOCK2|MASK_BLOCK3);
+  VectorState<T> res23(v23);
+  res23 = T(0);
+  product(ss.h23, v23, res23, BLOCK2, T(1), false, &globals);
+  res += res23.decondense(MASK_BLOCK2|MASK_BLOCK3, vv);
+
+  typename std::vector<ProductTerm<T> >::iterator term_iter;
+  for(term_iter = ss.product_terms.begin(); term_iter != ss.product_terms.end(); term_iter++){
+    ProductTerm<T> &pterm = *term_iter;
+    product_term(pterm, vv, res, mask_hc, &globals);
+  }
+
+ if(ss.project()){
+    for(int i = 0; i < ss._project_states.size(); i++){
+      VectorState<T> aux = *ss._project_states[i];
+      T p = product(aux,vv);
+      res = res + aux * p*T(100000);
+    }
+  }
+
+  if(ss.verbose() > 0)
+    cout << "CPU Time (product): " << aux_timer.TotalTime() << endl;
+
+  return res;
+}
+
+template<class T>
+void
+init_terms_composite(System<T>& ss, const VectorState<T>& vv)
+{
+  if(!ss.rotate_terms()) return;
+
+  VectorState<T> res(vv);
+  res = T(0);
+  std::vector<ProductTerm<T> > new_terms;
+  cout << "Initializing product terms\n";
+  ss.product_terms.clear();
+// Interactions between blocks (1-3,2-4,2-3), and external and local terms
+  VectorState<T> aux(res), aux_res(res);
+  typename Hami<T>::const_iterator hiter;
+//////////////////////////////////////////////////////////////////////////
+// product-4+  products of 4 or more operators
+//////////////////////////////////////////////////////////////////////////
+  int nterm = 0;
+  typename std::list<AuxTerm<T> >::const_iterator titer;
+  for(titer = ss.aux_terms.begin(); titer != ss.aux_terms.end(); titer++){
+    const AuxTerm<T> &auxt = (*titer);
+
+    Term<T> t = (auxt.t);
+
+    init_term_composite(ss, auxt, t, vv, res);
+  }
+//////////////////////////////////////////////////////////////////////////
+// product-hami
+//////////////////////////////////////////////////////////////////////////
+  for(hiter = ss.h.begin(); hiter != ss.h.end(); hiter++){
+    const Term<T>& t = *hiter;
+
+    if(t.size() == 1 && t[0].is_hami()){
+      const Hami<T>& h = t[0].hami();
+      const BasicOp<T> *op = ss._b1->operator()(t[0]);
+      if(op) {
+        new_terms = get_product_terms(*op, vv, res, BLOCK1);
+        ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+      }
+      op = ss._b2->operator()(t[0]);
+      if(op) {
+        new_terms = get_product_terms(*op, vv, res, BLOCK2);
+        ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+      }
+      op = ss._b3->operator()(t[0]);
+      if(op) {
+        new_terms = get_product_terms(*op, vv, res, BLOCK3);
+        ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+      }
+      op = ss._b4->operator()(t[0]);
+      if(op) {
+        new_terms = get_product_terms(*op, vv, res, BLOCK4);
+        ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+      }
+    }
+  }
+//////////////////////////////////////////////////////////////////////////
+// product-1 (only for TERM_EXTERN || TERM_LOCAL || IDENTITY)
+//////////////////////////////////////////////////////////////////////////
+  for(hiter = ss.h.begin(); hiter != ss.h.end(); hiter++){
+    const Term<T>& t = *hiter;
+
+    if(ss.use_coef_tol() && fabs(dmtk::real(t.coef())) <= ss.coef_tol()) continue;
+
+    if(t.size() == 1 && t[0].name() == "I"){
+      VectorState<T> aux = vv;
+      aux *= t.coef();
+      res += aux;
+      continue;
+    }
+
+    if((t.type() == TERM_EXTERN && ss.apply_extern() && t.size() == 1 && t[0].name() != ss.h.name()) || (t.type() == TERM_LOCAL && t[0].name() != ss.h.name())){
+      size_t bmask = 0;
+      for(int i = 0; i < t.size(); i++)
+        bmask |= mask(ss.block(t[i].site()));
+
+      if(bmask == MASK_BLOCK1 || bmask == MASK_BLOCK2 || bmask == MASK_BLOCK3 || bmask == MASK_BLOCK4){
+        BasicOp<T> top = t[0].internals();
+        const BasicOp<T>* _op = ss(top);
+        if(!_op && ss.verbose() >= 0) {
+          cout << "ERROR EXTERN: Operator " << top.description() << " not found\n";
+        }
+        if(_op){
+          bool calc_hc = ss.h.use_hc();
+          if (_op && _op->is_diagonal()) calc_hc = false;
+
+          size_t pos = ss.block(t[0].site());
+          if(_op){
+            new_terms = get_product_terms(*_op, vv, res, pos, T(t.coef()), false);
+            ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+            // obviously, op1 has to preserve the quantum numbers,
+            // or we are working in the grand canonical
+            if(calc_hc) {
+              new_terms = get_product_terms(*_op, vv, res, pos, T(t.coef()), calc_hc);
+              ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+template<class T>
+VectorState<T>
+product(System<T>& ss, const VectorState<T>& vv)
+{
+  if(!ss.rotate_terms()) {
+    cout << "WARNING: product not possible (rotate_terms == FALSE)\n";
+    return vv;
+  }
+  return product_composite(ss, vv);
+}
+
+#endif //USE_PRODUCT_DEFAULT
+
+//////////////////////////////////////////////////////////////////////////
+// product_term:
+//////////////////////////////////////////////////////////////////////////
+template<class T>
+void
+init_term_composite(System<T> &ss, const AuxTerm<T> &auxt, const Term<T> &t, const VectorState<T> &vv, VectorState<T> &res)
+{
+  if(!ss.rotate_terms()) return;
+
+  std::vector<ProductTerm<T> > new_terms;
+  bool calc_hc = ss.h.use_hc();
+// TODO WARNING: This may cause problems ?
+//#warning If you are using use_hc and you have problems, make sure you are not including the h.c. operator in the Hamiltonian
+  int ndiag = 0;
+  if(t.is_diagonal()) calc_hc = false;
+///////////////////////////////////////////////
+  if(auxt.mask == (MASK_BLOCK1|MASK_BLOCK2) || auxt.mask == (MASK_BLOCK2|MASK_BLOCK3) || auxt.mask == (MASK_BLOCK3|MASK_BLOCK4) || auxt.mask == (MASK_BLOCK1|MASK_BLOCK4) || auxt.mask == (MASK_BLOCK1|MASK_BLOCK3) || auxt.mask == (MASK_BLOCK2|MASK_BLOCK4)){
+
+    if(ss.use_composite()){
+      if(auxt.b1 < auxt.b2){
+        new_terms = get_product_terms(*(auxt.ref_op[0]), auxt.sum_op, vv, res, auxt.b1, auxt.b2, T(1), calc_hc);
+        ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+      } else {
+        new_terms = get_product_terms(auxt.sum_op, *(auxt.ref_op[0]), vv, res, auxt.b2, auxt.b1, T(1), calc_hc);
+        ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+      }
+    } else {
+      if(auxt.b1 < auxt.b2){
+        new_terms = get_product_terms(*auxt.op[size_t(auxt.b1)-1], *auxt.op[size_t(auxt.b2)-1], vv, res, auxt.b1, auxt.b2, t.coef(), calc_hc);
+        ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+      } else {
+        new_terms = get_product_terms(*auxt.op[size_t(auxt.b2)-1], *auxt.op[size_t(auxt.b1)-1], vv, res, auxt.b2, auxt.b1, t.coef(), calc_hc);
+        ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+      }
+    }
+  }
+  else if(auxt.mask == (MASK_BLOCK1|MASK_BLOCK2|MASK_BLOCK3|MASK_BLOCK4)){
+
+    new_terms = get_product_terms(*(auxt.op[0]), *(auxt.op[1]), *(auxt.op[2]), *(auxt.op[3]), vv, res, BLOCK1, BLOCK2, BLOCK3, BLOCK4, T(t.coef()), calc_hc);
+    ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+  }
+  else if(auxt.mask == (MASK_BLOCK1|MASK_BLOCK2|MASK_BLOCK3)){
+    if(ss.use_composite()){
+      new_terms = get_product_terms(auxt.sum_op, *(auxt.ref_op[0]), *(auxt.ref_op[1]), vv, res, BLOCK1, BLOCK2, BLOCK3, T(1), calc_hc);
+      ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+    } else {
+      new_terms = get_product_terms(*(auxt.op[0]), *(auxt.op[1]), *(auxt.op[2]), vv, res, BLOCK1, BLOCK2, BLOCK3, T(t.coef()), calc_hc);
+      ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+    }
+  }
+  else if(auxt.mask == (MASK_BLOCK1|MASK_BLOCK2|MASK_BLOCK4)){
+    if(ss.use_composite()){
+      if(auxt.b2 < auxt.b3){
+        new_terms = get_product_terms(auxt.sum_op, *(auxt.ref_op[0]), *(auxt.ref_op[1]), vv, res, BLOCK1, BLOCK2, BLOCK4, T(1), calc_hc);
+        ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+      } else {
+        new_terms = get_product_terms(*(auxt.ref_op[1]), *(auxt.ref_op[0]), auxt.sum_op, vv, res, BLOCK1, BLOCK2, BLOCK4, T(1), calc_hc);
+        ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+      }
+
+    } else {
+      new_terms = get_product_terms(*(auxt.op[0]), *(auxt.op[1]), *(auxt.op[3]), vv, res, BLOCK1, BLOCK2, BLOCK4, T(t.coef()), calc_hc);
+      ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+    }
+  }
+  else if(auxt.mask == (MASK_BLOCK1|MASK_BLOCK3|MASK_BLOCK4)){
+
+    if(ss.use_composite()){
+      if(auxt.b2 < auxt.b3){
+        new_terms = get_product_terms(auxt.sum_op, *(auxt.ref_op[0]), *(auxt.ref_op[1]), vv, res, BLOCK1, BLOCK3, BLOCK4, T(1), calc_hc);
+        ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+      } else {
+        new_terms = get_product_terms(*(auxt.ref_op[1]), *(auxt.ref_op[0]), auxt.sum_op, vv, res, BLOCK1, BLOCK3, BLOCK4, T(1), calc_hc);
+        ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+      }
+    } else {
+      new_terms = get_product_terms(*(auxt.op[0]), *(auxt.op[2]), *(auxt.op[3]), vv, res, BLOCK1, BLOCK3, BLOCK4, T(t.coef()), calc_hc);
+      ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+    }
+  }
+  else if(auxt.mask == (MASK_BLOCK2|MASK_BLOCK3|MASK_BLOCK4)){
+    if(ss.use_composite()) {
+      new_terms = get_product_terms(*(auxt.ref_op[0]), *(auxt.ref_op[1]), auxt.sum_op, vv, res, BLOCK2, BLOCK3, BLOCK4, T(1), calc_hc);
+      ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+    } else {
+      new_terms = get_product_terms(*(auxt.op[1]), *(auxt.op[2]), *(auxt.op[3]), vv, res, BLOCK2, BLOCK3, BLOCK4, T(t.coef()), calc_hc);
+      ss.product_terms.insert(ss.product_terms.end(),new_terms.begin(),new_terms.end());
+    }
+  }
+}
+
 
 template <class T>
 size_t 
