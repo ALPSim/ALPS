@@ -133,7 +133,7 @@ template<class value_type>
 bool
 handler(dmtk::System<value_type>& S, size_t signal_id, void *data)
 {
-  DMRGTask<value_type> &task = * (DMRGTask<value_type> *)S.get_data();
+  DMRGTask<value_type> &task = * (DMRGTask<value_type> *)data;
   if(signal_id == dmtk::SYSTEM_SIGNAL_END_ITER){
     task.iteration_measurements["Direction"].push_back(S.get_dir());
     task.iteration_measurements["Iteration"].push_back(S.get_iter());
@@ -361,18 +361,20 @@ void DMRGTask<value_type>::dostep()
       for (bond_iterator bit=bonds().first; bit!=bonds().second;++bit,++i) {
         dmtk::Hami<value_type > meas;
         build_bond_operator(get_bond_operator(ex.second,parms),*bit,meas);
-        meas.set_name((ex.first+"["+boost::lexical_cast<std::string>(i)+"]").c_str());
-//meas.set_name(meas.description().c_str());
-        meas_terms += dmtk::BasicOp<value_type >(meas);
+        dmtk::Term<value_type > tmeas = meas[0];
+//        tmeas.set_name((ex.first+"["+boost::lexical_cast<std::string>(i)+"]").c_str());
+//        meas_terms += dmtk::BasicOp<value_type >(tmeas);
+        meas_terms += tmeas;
       }
     }
     else {
       for (site_iterator sit=sites().first; sit!=sites().second;++sit) {
         dmtk::Hami<value_type > meas;
         build_site_operator(make_site_term(ex.second),*sit,meas);
-        meas.set_name((ex.first+"["+boost::lexical_cast<std::string>(*sit)+"]").c_str());
-//meas.set_name(meas.description().c_str());
-        meas_terms += dmtk::BasicOp<value_type >(meas);
+        dmtk::Term<value_type > tmeas = meas[0];
+//        tmeas.set_name((ex.first+"["+boost::lexical_cast<std::string>(*sit)+"]").c_str());
+//        meas_terms += dmtk::BasicOp<value_type >(tmeas);
+        meas_terms += tmeas[0];
       }
     }
   }
@@ -393,6 +395,7 @@ void DMRGTask<value_type>::dostep()
         build_site_operator(make_site_term(ex.second),*sit,meas);
       meas.set_name(ex.first.c_str());
 //meas.set_name(meas.description().c_str());
+//      meas_terms += dmtk::BasicOp<value_type >(meas);
       meas_terms += dmtk::BasicOp<value_type >(meas);
     }
     // store into average_values instead of local_values
@@ -406,8 +409,6 @@ void DMRGTask<value_type>::dostep()
   // calculate correlations
   typedef std::pair<std::string,std::pair<std::string,std::string> > string_string_pair_pair;
   BOOST_FOREACH (string_string_pair_pair const& ex, this->correlation_expressions) {
-    std::vector<dmtk::Hami<value_type > > corr_meas(num_distances());
-
     alps::SiteOperator ops1 = make_site_term(ex.second.first+"(i)");
     alps::SiteOperator ops2 = make_site_term(ex.second.second+"(i)");
     alps::SiteOperator ops = make_site_term(ex.second.first+"(i)*"+ex.second.second+"(i)");
@@ -423,30 +424,26 @@ void DMRGTask<value_type>::dostep()
           // use ops
           dmtk::Hami<value_type > meas;
           build_site_operator(ops,*sit1,meas);
-          meas.set_name((ex.first+"["+boost::lexical_cast<std::string>(d)+"]").c_str());
-          meas *= 1./double(distance_mult[d]);
-          corr_meas[d] += meas;
+          dmtk::Term<value_type > tmeas = meas[0];
+          tmeas *= 1./double(distance_mult[d]);
+//          tmeas.set_name((ex.first+"["+boost::lexical_cast<std::string>(d)+"]").c_str());
+          meas_terms += tmeas[0];
         }
         else {
           // use ops1 and ops2
           dmtk::Hami<value_type > meas;
           build_2site_operator(std::make_pair(ops1,ops2),std::pair<int,int>(*sit1,*sit2),meas);
-          meas *= 1./double(distance_mult[d]);
-          corr_meas[d] += meas;
+          dmtk::Term<value_type > tmeas = meas[0];
+          tmeas *= 1./double(distance_mult[d]);
+//          tmeas.set_name((ex.first+"["+boost::lexical_cast<std::string>(d)+"]").c_str());
+          meas_terms += dmtk::BasicOp<value_type >(tmeas);
         }
     }
-    for (unsigned d=0; d<num_distances();++d) {
-      corr_meas[d].set_name((ex.first+"["+boost::lexical_cast<std::string>(d)+"]").c_str());
-      meas_terms += dmtk::BasicOp<value_type >(corr_meas[d]);
-    }
   }
-
   typename dmtk::Hami<value_type>::iterator iter;
-  int i = 0;
-  
   if (verbose) {
-    for(iter = meas_terms.begin(); iter != meas_terms.end(); i++, iter++)
-      cout << i << " " << iter->name() << " " << iter->description() << endl;
+    for(iter = meas_terms.begin(); iter != meas_terms.end(); iter++)
+      cout << iter->name() << " " << iter->description() << endl;
 
     std::cout << meas_terms.description() << "\n";
   }
@@ -459,8 +456,8 @@ void DMRGTask<value_type>::dostep()
     cout << hami.description() << endl;
   this->system = dmtk::System<value_type >(hami,l,"ALPS");
   dmtk::System<value_type > &S = this->system;
-  S.set_data(this);
-  S.signal_handler = handler;
+  S.set_store_products(false);
+  S.signal_connect(handler, dmtk::SYSTEM_SIGNAL_END_ITER, this);
   if(error > 0.0) S.set_error(error, maxstates);
   if(lanczos_tol > 0.0) S.set_lanczos_tolerance(lanczos_tol);
   
@@ -483,9 +480,10 @@ void DMRGTask<value_type>::dostep()
   } else {
     S.run(nwarmup);
   }
-  S.corr = meas_terms;
+  if(S.store_products()) S.set_full_sweep(true);
+  S.corr += meas_terms;
   S.final_sweep(num_states[num_states.size()-1], dmtk::RIGHT2LEFT, 1, true); 
-  S.measure();
+  if(!S.store_products()) S.measure();
   save_results();
   for(int i = 1; i < S._target.size(); i++){
     S.gs = S._target[i];
@@ -513,22 +511,27 @@ DMRGTask<value_type>::save_results()
   // store local measurements
   BOOST_FOREACH (string_pair const& ex, this->local_expressions) {
     std::vector<value_type> av;
-    for (int i=0; i< (has_bond_operator(ex.second) ? num_bonds() : num_sites());++i)
+    for (int i=0; i< (has_bond_operator(ex.second) ? num_bonds() : num_sites());++i){
+      cout << iter->name() << " " << iter->description() << " " << iter->value() << endl;
       av.push_back(real(iter++->value()));   
+    }
     this->local_values[ex.first].push_back(av);
   }
   
   // average measurements will be identical loops, but all terms added instead of stored separately
 
    BOOST_FOREACH (string_pair const& ex, this->average_expressions) {
+    cout << iter->name() << " " << iter->description() << " " << iter->value() << endl;
     this->average_values[ex.first].push_back(real(iter++->value()));
   }
   
   // correlations
   BOOST_FOREACH (string_string_pair_pair const& ex, this->correlation_expressions) {
     std::vector<value_type> av;
-    for (int i=0; i<num_distances();++i)
+    for (int i=0; i<num_distances();++i){
+      cout << iter->name() << " " << iter->description() << " " << iter->value() << endl;
       av.push_back(real(iter++->value()));   
+    }
     this->correlation_values[ex.first].push_back(av);
   }
 
