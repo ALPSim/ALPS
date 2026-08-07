@@ -203,9 +203,9 @@ class BasicOp: public dmtk::BMatrix<T>
 */
 
     BasicOp& operator=(const Matrix<T> &m)
-      { bmatrix_from_matrix(m); return *this; }
+      { this->bmatrix_from_matrix(m); return *this; }
     BasicOp& set_matrix(const Matrix<T> &m, const Basis &b, QN _dqn)
-      { dqn = _dqn; _BM::repack(b); bmatrix_from_matrix(m); return *this; }
+      { dqn = _dqn; _BM::repack(b); this->bmatrix_from_matrix(m); return *this; }
 
     BasicOp internals() const
       {
@@ -322,7 +322,7 @@ class BasicOp: public dmtk::BMatrix<T>
       dqn.write(s);
       size_t n = _name.size()+1;
       char *t = new char[n];
-      snprintf(t, sizeof(t), "%s", _name.c_str());
+      snprintf(t, n, "%s", _name.c_str());
       size_t l = strlen(t);
       s.write((const char *)&l, sizeof(size_t));
       s.write((const char *)t, l*sizeof(char));
