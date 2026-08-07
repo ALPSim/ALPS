@@ -425,7 +425,7 @@ product_term1(const ProductTerm<T> &pterm,
             gslice_iter<T> subres = res_slice(slice(0,res_slice.size1(),1),i2,i3,slice(0,res_slice.size4(),1));
             maux2.reshape(subres.size2(),subres.size1());
             maux1 = subv;
-            matrix_matrix_product(do_hc,'T',static_cast<Matrix<T> >(block1),maux1,maux2,coef);
+            matrix_matrix_product(do_hc,'T',static_cast<const Matrix<T>&>(block1),maux1,maux2,coef);
             subres.transpose() += maux2.array();
           }
         }
@@ -437,7 +437,7 @@ product_term1(const ProductTerm<T> &pterm,
             gslice_iter<T> subres = res_slice(i1,slice(0,res_slice.size2(),1),i3,slice(0,res_slice.size4(),1));
             maux1 = subv;
             maux2.reshape(subres.size2(),subres.size1());
-            matrix_matrix_product(do_hc,'T',static_cast<Matrix<T> >(block1),maux1,maux2,coef);
+            matrix_matrix_product(do_hc,'T',static_cast<const Matrix<T>&>(block1),maux1,maux2,coef);
             subres.transpose() += maux2.array();
           }
         }
@@ -449,7 +449,7 @@ product_term1(const ProductTerm<T> &pterm,
             gslice_iter<T> subres = res_slice(i1,slice(0,res_slice.size2(),1),slice(0,res_slice.size3(),1),i4);
             maux1 = subv;
             maux2.reshape(subres.size1(),subres.size2());
-            matrix_matrix_product(do_hc,'N',static_cast<Matrix<T> >(block1),maux1,maux2,coef);
+            matrix_matrix_product(do_hc,'N',static_cast<const Matrix<T>&>(block1),maux1,maux2,coef);
             subres += maux2.array();
           }
         }
@@ -461,7 +461,7 @@ product_term1(const ProductTerm<T> &pterm,
             gslice_iter<T> subres = res_slice(slice(0,res_slice.size1(),1),i2,i3,slice(0,res_slice.size4(),1));
             maux1 = subv;
             maux2.reshape(subres.size1(),subres.size2());
-            matrix_matrix_product(do_hc,'N',static_cast<Matrix<T> >(block1),maux1,maux2,coef);
+            matrix_matrix_product(do_hc,'N',static_cast<const Matrix<T>&>(block1),maux1,maux2,coef);
             subres += maux2.array();
           }
         }
