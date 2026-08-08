@@ -915,7 +915,7 @@ class System
     bool signal_emit(std::string signal_id)
       {
          int n = this->get_signal_id(signal_id);
-         if(n > 0) return this->signal_emit(n);
+         if(n >= 0) return this->signal_emit(n);
       }
     std::string signal_description(size_t signal_id)
       {
