@@ -52,6 +52,7 @@
 #include "util.h"
 #include "globals.h"
 #include "product.h"
+#include "signals.h"
 #ifdef WITH_PTHREADS
 #include <pthread.h>
 #include <unistd.h>
@@ -228,17 +229,37 @@ class System
     void rotate_terms(int position, Block<T> &b, Basis &basis, Basis &rho_basis, const Hami<T> *this_hami = NULL);
     void rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis, const Hami<T> *this_hami = NULL);
 
-    bool signal_emit(size_t signal_id, void * data)
-      {
-        if(signal_handler)
-          return signal_handler(*this, signal_id, data);
-        return true;
-      }
-    void * _data;
+    typename std::list<Signal<System<T> > > handlers;
+    std::vector<std::string> _signal_id;
+
+    void init_signals()
+    {
+        _signal_id.push_back(std::string("SYSTEM_SIGNAL_GS"));
+        _signal_id.push_back(std::string("SYSTEM_SIGNAL_TRUNCATE"));
+        _signal_id.push_back(std::string("SYSTEM_SIGNAL_BUILD_DM"));
+        _signal_id.push_back(std::string("SYSTEM_SIGNAL_DM_READY"));
+        _signal_id.push_back(std::string("SYSTEM_SIGNAL_ROTATE"));
+        _signal_id.push_back(std::string("SYSTEM_SIGNAL_START_ITER"));
+        _signal_id.push_back(std::string("SYSTEM_SIGNAL_END_ITER"));
+        _signal_id.push_back(std::string("SYSTEM_SIGNAL_MEASURE"));
+        _signal_id.push_back(std::string("SYSTEM_SIGNAL_END_SWEEP"));
+    }
+    int get_signal_id(std::string signal_id){
+         int n = 0;
+         std::vector<std::string>::iterator iter = _signal_id.begin();
+         while (iter!=_signal_id.end()) {
+           if (*iter==signal_id) break;
+           ++iter;
+           ++n;
+         }
+         if(iter == _signal_id.end()) {
+            cerr << "ERROR: signal_connect : signal " << signal_id << " not found \n";
+            return -1;
+         }
+         return n;
+    }
 
   public:
-
-    bool (*signal_handler) (System<T> &, size_t signal_id, void *data);
 
     std::vector<ProductTerm<T> > product_terms;
 
@@ -325,7 +346,7 @@ class System
     , qnt(0)
     , _ntargets(1)
     , _nstates(1)
-    { _sweeps.resize(2,10); _target.resize(1); _target_weight.resize(1); set_name(""); };
+    { _sweeps.resize(2,10); _target.resize(1); _target_weight.resize(1); set_name(""); init_signals(); };
 
     System(const Hami<T> &_h, const Lattice& lattice, const char *the_name)
      : _lattice(lattice)
@@ -363,7 +384,7 @@ class System
      , _ntargets(1)
      , _nstates(1)
      , h(_h)
-      { set_name(the_name); m1 = m2 = m3 = m4 = _h.get_site(0).dim(); m = m1 * m2; _sweeps.resize(2,10); _target.resize(1); _target_weight.resize(1); _target_weight[0] = double(1); }
+      { set_name(the_name); m1 = m2 = m3 = m4 = _h.get_site(0).dim(); m = m1 * m2; _sweeps.resize(2,10); _target.resize(1); _target_weight.resize(1); _target_weight[0] = double(1); init_signals(); }
 
     virtual ~System() {}
 //  Methods
@@ -429,7 +450,7 @@ class System
     virtual void final_sweep(size_t t, size_t dir, int _start, bool _rotate);
     virtual void measure(const VectorState<T> *v=NULL); 
     virtual void measure_n(size_t n, const VectorState<T> *v=NULL); 
-    virtual T measure_operator(const BasicOp<T> &top, const VectorState<T> *v=NULL);
+    virtual T measure_operator(const BasicOp<T> &top, const VectorState<T> *v, bool &info);
 
     size_t get_iter() const { return iter; }
     size_t get_dir() const { return dir; }
@@ -558,8 +579,6 @@ class System
     int lanczos_maxiter() { return _lanczos_maxiter; }
     double truncation_error() const { return _truncation_error; }
     double entropy() const { return _entropy; }
-    System<T>& set_data (void *data) { _data = data; return *this; }
-    void *get_data () const { return _data;}
 
     // Streams
 
@@ -868,6 +887,49 @@ class System
       }
     }
 
+    System<T>& signal_connect(typename Signal<System<T> >::callback handler, size_t signal_id, void *data)
+      {
+         Signal<System<T> > signal(handler, this, signal_id, data);
+         this->handlers.push_back(signal);
+         return *this;
+      }
+    System<T>& signal_connect(typename Signal<System<T> >::callback handler, std::string signal_id, void *data)
+      {
+         int n = this->get_signal_id(signal_id);
+         Signal<System<T> > signal(handler, this, n, data);
+         this->handlers.push_back(signal);
+         return *this;
+      }
+
+    bool signal_emit(size_t signal_id)
+      {
+         typename std::list<Signal<System<T> > >::reverse_iterator siter;
+         for(siter = handlers.rbegin(); siter != handlers.rend(); siter++){
+           Signal<System<T> > &signal = *siter;
+           if(signal.signal_id() == signal_id) {
+              if(!signal.emit()) return false;
+           }
+         }
+         return true;
+      }
+    bool signal_emit(std::string signal_id)
+      {
+         int n = this->get_signal_id(signal_id);
+         if(n >= 0) return this->signal_emit(n);
+      }
+    std::string signal_description(size_t signal_id)
+      {
+          return this->_signal_id[signal_id];
+      }
+    int signal_id(std::string signal_id)
+      {
+          return this->get_signal_id(signal_id);
+      }
+    System<T>& signal_disconnect_all()
+      {
+         this->handlers.clear();
+         return *this;
+      }
 };
 
 /////////////////////////////////////////////////////////////////////////
@@ -923,7 +985,7 @@ System<T>::warmup_loop(size_t t, const Vector<QN> &qns)
 
   for(iter = 1; iter < max; iter++)
   {
-    signal_emit(SYSTEM_SIGNAL_START_ITER, NULL);
+    signal_emit(SYSTEM_SIGNAL_START_ITER);
 //    qn = qns[_grow_symmetric?iter*2+2-1:(SGN(iter) == 1?iter+3:iter+2)];
     qn = qns[_grow_symmetric?iter*2+2-1:iter+3];
 
@@ -964,6 +1026,7 @@ System<T>::warmup_loop(size_t t, const Vector<QN> &qns)
     rotate(LEFT, newblock);
     write_iter(LEFT);
 
+
 #ifndef GRANDCANONICAL 
     if((_grow_symmetric && iter < mid_size-1) || (_grand_canonical  == 0 && iter == 1)) { 
       truncate(RIGHT, m4);
@@ -984,7 +1047,7 @@ System<T>::warmup_loop(size_t t, const Vector<QN> &qns)
       outputfile << "Iteration time: " << _timer.LapTime().c_str() << endl;
       outputfile << "===========================================\n";
     }
-    signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
+    signal_emit(SYSTEM_SIGNAL_END_ITER);
   }
 
   qn = qnt;
@@ -996,7 +1059,7 @@ System<T>::warmup_loop(size_t t, const Vector<QN> &qns)
 
     for(iter = mid_size; iter < sweep_max; iter++)
     {
-      signal_emit(SYSTEM_SIGNAL_START_ITER, NULL);
+      signal_emit(SYSTEM_SIGNAL_START_ITER);
       read_block(rightblock, ls-iter-2, RIGHT);
       read_block(leftblock, iter, LEFT);
       const Block<T>& site1 = h.get_site(iter);
@@ -1028,7 +1091,7 @@ System<T>::warmup_loop(size_t t, const Vector<QN> &qns)
         outputfile << "Iteration time: " << _timer.LapTime().c_str() << endl;
         outputfile << "===========================================\n";
       }
-      signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
+      signal_emit(SYSTEM_SIGNAL_END_ITER);
     }
   } else {
     cout << "RIGHT-TO-LEFT sweep to get B(1)B(2)...B(L/2-1)\n";
@@ -1037,7 +1100,7 @@ System<T>::warmup_loop(size_t t, const Vector<QN> &qns)
 
     for(iter = 1; iter < sweep_max; iter++)
     {
-      signal_emit(SYSTEM_SIGNAL_START_ITER, NULL);
+      signal_emit(SYSTEM_SIGNAL_START_ITER);
       read_block(leftblock, ls-iter-2, LEFT);
       read_block(rightblock, iter, RIGHT);
       const Block<T>& site1 = h.get_site(ls-2-iter);
@@ -1069,7 +1132,7 @@ System<T>::warmup_loop(size_t t, const Vector<QN> &qns)
         outputfile << "Iteration time: " << _timer.LapTime().c_str() << endl;
         outputfile << "===========================================\n";
       }
-      signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
+      signal_emit(SYSTEM_SIGNAL_END_ITER);
     }
 
     dir = LEFT2RIGHT;
@@ -1077,7 +1140,7 @@ System<T>::warmup_loop(size_t t, const Vector<QN> &qns)
 
     for(iter = 1; iter < sweep_max; iter++)
     {
-      signal_emit(SYSTEM_SIGNAL_START_ITER, NULL);
+      signal_emit(SYSTEM_SIGNAL_START_ITER);
       read_block(rightblock, ls-iter-2, RIGHT);
       read_block(leftblock, iter, LEFT);
       const Block<T>& site1 = h.get_site(iter);
@@ -1114,7 +1177,7 @@ System<T>::warmup_loop(size_t t, const Vector<QN> &qns)
         outputfile << "Iteration time: " << _timer.LapTime().c_str() << endl;
         outputfile << "===========================================\n";
       }
-      signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
+      signal_emit(SYSTEM_SIGNAL_END_ITER);
     }
   }
     
@@ -1160,7 +1223,7 @@ System<T>::sweep(size_t t1, size_t t2, size_t _dir, int start)
   if(dir == RIGHT2LEFT){
     for(iter = start; iter < sweep_max; iter++)
     {
-      signal_emit(SYSTEM_SIGNAL_START_ITER, NULL);
+      signal_emit(SYSTEM_SIGNAL_START_ITER);
       read_block(leftblock, ls-iter-2, LEFT);
       read_block(rightblock, iter, RIGHT);
       const Block<T>& site1 = h.get_site(ls-2-iter);
@@ -1184,6 +1247,9 @@ System<T>::sweep(size_t t1, size_t t2, size_t _dir, int start)
       truncate(RIGHT, m4);
       rotate(RIGHT, newblock);
       write_iter(RIGHT);
+      if(!_store_products){
+        if (signal_emit(SYSTEM_SIGNAL_MEASURE)) measure();
+      }
 
       if(verbose() > 0) {
         cout << "===========================================\n";
@@ -1193,7 +1259,7 @@ System<T>::sweep(size_t t1, size_t t2, size_t _dir, int start)
         outputfile << "Iteration time: " << _timer.LapTime().c_str() << endl;
         outputfile << "===========================================\n";
       }
-      signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
+      signal_emit(SYSTEM_SIGNAL_END_ITER);
     }
 
     start = 1;
@@ -1205,7 +1271,7 @@ System<T>::sweep(size_t t1, size_t t2, size_t _dir, int start)
 
   for(iter = start; iter < sweep_max; iter++)
   {
-    signal_emit(SYSTEM_SIGNAL_START_ITER, NULL);
+    signal_emit(SYSTEM_SIGNAL_START_ITER);
     read_block(rightblock, ls-iter-2, RIGHT);
     read_block(leftblock, iter, LEFT);
     const Block<T>& site1 = h.get_site(iter);
@@ -1229,6 +1295,9 @@ System<T>::sweep(size_t t1, size_t t2, size_t _dir, int start)
     truncate(LEFT, m1);
     rotate(LEFT, newblock);
     write_iter(LEFT);
+    if(!_store_products){
+      if (signal_emit(SYSTEM_SIGNAL_MEASURE)) measure();
+    }
 
     if(verbose() > 0) {
       cout << "===========================================\n";
@@ -1238,7 +1307,7 @@ System<T>::sweep(size_t t1, size_t t2, size_t _dir, int start)
       outputfile << "Iteration time: " << _timer.LapTime().c_str() << endl;
       outputfile << "===========================================\n";
     }
-    signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
+    signal_emit(SYSTEM_SIGNAL_END_ITER);
   }
 
   outputfile.close();
@@ -1292,7 +1361,7 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
   if(dir == RIGHT2LEFT){
     for(iter = _start; iter < sweep_max; iter++) // ls/2-1; iter++);
     {
-      signal_emit(SYSTEM_SIGNAL_START_ITER, NULL);
+      signal_emit(SYSTEM_SIGNAL_START_ITER);
       read_block(rightblock, iter, RIGHT);
       read_block(leftblock, ls-iter-2, LEFT);
       const Block<T>& site1 = h.get_site(ls-2-iter);
@@ -1312,7 +1381,6 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
       init_iteration(leftblock, site1, site2, rightblock, _use_seed);
   
       diagonalize(_use_seed);
-      if(!_store_products) measure();
   
       m = t;
       m4 = std::min(m4*m3,m);
@@ -1320,6 +1388,9 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
       truncate(RIGHT, m4);
       rotate(RIGHT, newblock);
       write_iter(RIGHT);
+      if(!_store_products){
+        if (signal_emit(SYSTEM_SIGNAL_MEASURE)) measure();
+      }
 
       if(verbose() > 0) {
         cout << "===========================================\n";
@@ -1329,7 +1400,7 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
         outputfile << "Iteration time: " << _timer.LapTime().c_str() << endl;
         outputfile << "===========================================\n";
       }
-      signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
+      signal_emit(SYSTEM_SIGNAL_END_ITER);
     }
     _start = 1;
   }
@@ -1339,7 +1410,7 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
 
   for(iter = _start; iter < sweep_max; iter++)
   {
-    signal_emit(SYSTEM_SIGNAL_START_ITER, NULL);
+    signal_emit(SYSTEM_SIGNAL_START_ITER);
     read_block(rightblock, ls-iter-2, RIGHT);
     read_block(leftblock, iter, LEFT);
     const Block<T>& site1 = h.get_site(iter);
@@ -1359,7 +1430,6 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
     init_iteration(leftblock, site1, site2, rightblock, _use_seed); 
 
     diagonalize(_use_seed);
-    if(!_store_products) measure();
 
     m = t;
     m1 = std::min(m1*m2,m);
@@ -1367,6 +1437,9 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
     truncate(LEFT, m1);
     rotate(LEFT, newblock);
     write_iter(LEFT);
+    if(!_store_products){
+      if (signal_emit(SYSTEM_SIGNAL_MEASURE)) measure();
+    }
 
     if(verbose() > 0) {
       cout << "===========================================\n";
@@ -1391,7 +1464,9 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
 //  set_lanczos_tolerance(std::min(1.e-16,_lanczos_tol));
 //    set_lanczos_maxiter(30);
     diagonalize(_use_seed);
-    if(!_store_products) measure();
+    if(!_store_products){
+      if (signal_emit(SYSTEM_SIGNAL_MEASURE)) measure();
+    }
     if(_rotate){
       m = t;
       m1 = std::min(m1*m2,m);
@@ -1401,9 +1476,12 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
       write_iter(LEFT);
     } else {
       write_gs(gs, ls/2-1, LEFT);
+      if(!_store_products){
+        if (signal_emit(SYSTEM_SIGNAL_MEASURE)) measure();
+      }
     }
   }
-  signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
+  signal_emit(SYSTEM_SIGNAL_END_ITER);
   
   outputfile.close();
 }
@@ -1434,7 +1512,7 @@ void
 System<T>::create_interactions(bool create_composite)
 {
 #ifndef USE_PRODUCT_DEFAULT
-  cout << "Creating interaction terms" << endl;
+  if(this->verbose() > 0) cout << "Creating interaction terms" << endl;
   hint(MASK_BLOCK1|MASK_BLOCK2);
   hint(MASK_BLOCK3|MASK_BLOCK4);
   hint(MASK_BLOCK2|MASK_BLOCK3, false);
@@ -1743,7 +1821,7 @@ System<T>::diagonalize(bool use_seed)
     cout << "-------------------------------------------\n";
   }
   outputfile.close();
-  signal_emit(SYSTEM_SIGNAL_GS, NULL);
+  signal_emit(SYSTEM_SIGNAL_GS);
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -1864,7 +1942,7 @@ System<T>::truncate(int position, int new_size)
 //********************************************************************
 //                   DENSITY MATRIX
 //********************************************************************
-  signal_emit(SYSTEM_SIGNAL_TRUNCATE, NULL);
+  signal_emit(SYSTEM_SIGNAL_TRUNCATE);
 //******* Calculate density matrix (block by block)
 
   Basis basis(_b1->basis(),_b2->basis());
@@ -1882,28 +1960,29 @@ System<T>::truncate(int position, int new_size)
   typename Hami<T>::iterator op_iter;
   for(op_iter = control_ops.begin(); op_iter != control_ops.end(); op_iter++){
     Term<T> &term = *op_iter;
-    BasicOp<T> this_op = term[0];
+    BasicOp<T> this_op = term[0].internals();
+    bool info;
     if(dir == LEFT2RIGHT){
       if(iter > 1 && iter < ls-3){
-        measure_operator(this_op.set_site(iter));
+        measure_operator(this_op.set_site(iter),NULL,info);
       } else if(iter == 1) {
-        measure_operator(this_op.set_site(0));
-        measure_operator(this_op.set_site(1));
+        measure_operator(this_op.set_site(0),NULL,info);
+        measure_operator(this_op.set_site(1),NULL,info);
       } else if(iter == ls-3){
-        measure_operator(this_op.set_site(ls-3));
-        measure_operator(this_op.set_site(ls-2));
-        measure_operator(this_op.set_site(ls-1));
+        measure_operator(this_op.set_site(ls-3),NULL,info);
+        measure_operator(this_op.set_site(ls-2),NULL,info);
+        measure_operator(this_op.set_site(ls-1),NULL,info);
       }
     } else {
       if(iter > 1 && iter < ls-3){
-        measure_operator(this_op.set_site(ls-2-iter));
+        measure_operator(this_op.set_site(ls-2-iter),NULL,info);
       } else if(iter == 1) {
-        measure_operator(this_op.set_site(ls-1));
-        measure_operator(this_op.set_site(ls-2));
-        measure_operator(this_op.set_site(ls-3));
+        measure_operator(this_op.set_site(ls-1),NULL,info);
+        measure_operator(this_op.set_site(ls-2),NULL,info);
+        measure_operator(this_op.set_site(ls-3),NULL,info);
       } else if(iter == ls-3){
-        measure_operator(this_op.set_site(1));
-        measure_operator(this_op.set_site(0));
+        measure_operator(this_op.set_site(1),NULL,info);
+        measure_operator(this_op.set_site(0),NULL,info);
       }
     }
   }
@@ -1924,7 +2003,7 @@ System<T>::truncate(int position, int new_size)
 //                   DENSITY MATRIX
 //********************************************************************
 //////////////////////////////////////////////////////////////////////////
-  signal_emit(SYSTEM_SIGNAL_BUILD_DM, NULL);
+  signal_emit(SYSTEM_SIGNAL_BUILD_DM);
   if(verbose() > 0)
     cout << "Building Density Matrix in blocks \n";
 
@@ -1961,7 +2040,7 @@ System<T>::truncate(int position, int new_size)
 
   if(verbose() > 0)
     cout << "TRACE = " << trace << endl; 
-  signal_emit(SYSTEM_SIGNAL_DM_READY, &rho);
+  signal_emit(SYSTEM_SIGNAL_DM_READY);
 //******* Diagonalize Density Matrix in blocks
   if(verbose() > 0)
     cout << "Diagonalizing Density Matrix in blocks\n";
@@ -2230,14 +2309,14 @@ System<T>::hint(int _mask, bool add_local_h, const Hami<T> *_h)
   clock.Start();
   if(add_local_h && apply_hami()){
     clock.Lap();
-//    if(verbose() > 0)
+    if(verbose() > 0)
       cout << "OPERATOR H2 " << this_hami.name() << endl;
     const BasicOp<T> *hop = b2(this_hami);
     if(hop) new_operator(hij, *hop, aux_rho, aux_basis, RIGHT, T(1), false);
 //    cout << "Lap: " << clock.LapTime().c_str() << endl;
 
     clock.Lap();
-//    if(verbose() > 0)
+    if(verbose() > 0)
       cout << "OPERATOR H1 " << this_hami.name() << endl;
     hop = b1(this_hami);
     if(hop) new_operator(hij, *hop, aux_rho, aux_basis, LEFT, T(1), false);
@@ -2261,11 +2340,13 @@ System<T>::hint(int _mask, bool add_local_h, const Hami<T> *_h)
         if(op){
           if (op->is_diagonal()) calc_hc = false;
 
-//          if(verbose() > 0)
-            if(!calc_hc)
+          if(this->verbose() > 0){
+            if(!calc_hc){
               cout << "H12 TERM " << t.name(true) << endl;
-            else
+            }else{
               cout << "H12 TERM " << t.name(true) << " + h.c." << endl;
+            }
+          }
 
           clock.Lap();
 
@@ -2276,7 +2357,7 @@ System<T>::hint(int _mask, bool add_local_h, const Hami<T> *_h)
             position = ib == BLOCK4 ? RIGHT : LEFT;
 
           new_operator(hij, *op, aux_rho, aux_basis, position, T(t.coef()));
-          cout << "Lap: " << clock.LapTime().c_str() << endl;
+//          cout << "Lap: " << clock.LapTime().c_str() << endl;
         }
       }
     }
@@ -2340,13 +2421,16 @@ System<T>::hint(int _mask, bool add_local_h, const Hami<T> *_h)
         if(op1 && op2){
           clock.Lap();
 
-          if(!calc_hc)
-            cout << "H12 TERM " << t.description() << endl;
-          else
-            cout << "H12 TERM " << t.description() << " + h.c." << endl;
+          if(this->verbose() > 0){
+            if(!calc_hc){
+              cout << "H12 TERM " << t.description() << endl;
+            } else {
+              cout << "H12 TERM " << t.description() << " + h.c." << endl;
+            }
+          }
           new_operator(hij, *op1, *op2, pos1, pos2, aux_rho, aux_basis, T(t.coef()), calc_hc);
 
-          cout << "Lap: " << clock.LapTime().c_str() << endl;
+//          cout << "Lap: " << clock.LapTime().c_str() << endl;
         }
       }
     }
@@ -2491,7 +2575,7 @@ template<class T>
 void
 System<T>::rotate(int position, Block<T>& b)
 {
-  signal_emit(SYSTEM_SIGNAL_ROTATE, NULL);
+  signal_emit(SYSTEM_SIGNAL_ROTATE);
 
   const Block<T> *pb1 = _b1;
   const Block<T> *pb2 = _b2;
@@ -2600,7 +2684,7 @@ System<T>::rotate(int position, Block<T>& b)
 }
 
 /////////////////////////////////////////////////////////////////////////
-// rotate_tems:
+// rotate_terms:
 // rotate hamiltonian terms 
 /////////////////////////////////////////////////////////////////////////
 template<class T>
@@ -2645,6 +2729,7 @@ System<T>::rotate_terms(int position, Block<T> &b, Basis &basis, Basis &rho_basi
   for(titer = this_hami.begin(); titer != this_hami.end(); titer++){
     const Term<T>& t = (*titer);
 //    if(T(t.coef()) == T(0)) continue;
+    if(t.size() == 1 && t[0].name() == "I") continue;
   
     bool found = false; 
     const BasicOp<T> *_op = NULL;
@@ -2867,9 +2952,10 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
   if(!this_hami){
     for(titer = ops.begin(); titer != ops.end(); titer++){
       const Term<T>& t = (*titer);
+
+      if(t.size() == 1 && (!_store_products && !t[0].is_hami())) continue;
  
       bool found = false; 
-
       typename Term<T>::const_iterator oiter;
       int bmask = 0;
       for(oiter = t.begin(); oiter != t.end(); oiter++){
@@ -2911,11 +2997,12 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
         if(!add && _op){ // If we haven't added it yet, we do it now
           real_op.resize(rho_basis);
   
-          if(verbose() > 0)
-            cout << "ADDING NEW MEAS. OPERATOR " << real_op.description() << endl;
+//          if(verbose() > 0)
+            cout << "ADDING NEW MEAS. OPERATOR 1 " << top1.name() << " " << real_op.name() << " " << real_op.description() << endl;
           clock.Lap();
   
           new_operator(real_op, *_op, rho, basis, 1-position);
+//          real_op.set_name(t.name().c_str());
           b.push_back(real_op);
           if(verbose() > 0)
             cout << "Lap: " << clock.LapTime().c_str() << endl;
@@ -2950,6 +3037,7 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
         continue;
       }
     }
+    if(t.size() == 1 && (!_store_products && !t[0].is_hami())) continue;
     if(position == LEFT && (bmask & MASK_BLOCK2) && !(bmask & MASK_BLOCK1)) found = true;
     if(position == RIGHT && (bmask & MASK_BLOCK3) && !(bmask & MASK_BLOCK4)) found = true;
 
@@ -2984,11 +3072,12 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
       if(!add && _op){ // If we haven't added it yet, we do it now
         real_op.resize(rho_basis);
 
-        if(verbose() > 0)
-          cout << "ADDING NEW MEAS. OPERATOR " << real_op.description() << endl;
+//        if(verbose() > 0)
+          cout << "ADDING NEW MEAS. OPERATOR 2 " << t.name() << " " << top1.name() << " " << real_op.name() << " " << real_op.description() << endl;
         clock.Lap();
 
         new_operator(real_op, *_op, rho, basis, 1-position);
+
         b.push_back(real_op);
         if(verbose() > 0)
           cout << "Lap: " << clock.LapTime().c_str() << endl;
@@ -3004,6 +3093,8 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
     for(titer = ops.begin(); titer != ops.end(); titer++){
       const Term<T>& t = (*titer);
       bool found = false;
+
+      if(t.size() == 1 && (!_store_products && !t[0].is_hami())) continue;
   
       typename Term<T>::const_iterator oiter;
       int bmask = 0;
@@ -3053,6 +3144,8 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
             cout << "NEW MEAS. OPERATOR " << new_op.description() << endl;
           new_op = T(0);
           new_operator(new_op, *_op, rho, basis, position);
+//          new_op.set_name(t.name().c_str());
+cout << "NEW MEAS. OPERATOR " << t.name() << " " << new_op.name() << endl;
           b.push_back(new_op);
           if(verbose() > 0)
             cout << "Lap: " << clock.LapTime().c_str() << endl;
@@ -3067,6 +3160,7 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
 
   for(titer = _h.begin(); titer != _h.end(); titer++){
     const Term<T>& t = (*titer);
+    if(t.size() == 1 && (!_store_products && !t[0].is_hami())) continue;
     bool found = false;
 
     typename Term<T>::const_iterator oiter;
@@ -3100,7 +3194,7 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
       const BasicOp<T>* _op = operator()(top1);
 
       if(!_op) {
-        cout << "ERROR 2b: Operator " << top1.description() << " not found\n";
+        if(_store_products) cout << "ERROR 2b: Operator " << top1.description() << " not found\n";
         continue;
       }
 
@@ -3116,6 +3210,7 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
           cout << "NEW MEAS. OPERATOR " << new_op.description() << endl;
         new_op = T(0);
         new_operator(new_op, *_op, rho, basis, position);
+//        new_op.set_name(t.name().c_str());
         b.push_back(new_op);
         if(verbose() > 0)
           cout << "Lap: " << clock.LapTime().c_str() << endl;
@@ -3184,6 +3279,7 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
               cout << "ADDING NEW CORR. TERM " << new_op.description() << endl;
             new_op = T(0);
             new_operator(new_op, *op1, *op2, pos1, pos2, rho, basis, T(1));
+//            new_op.set_name(new_term.name().c_str());
   
             b.push_back(new_op);
             if(verbose() > 0)
@@ -3210,28 +3306,30 @@ System<T>::rotate_hami(int position, Block<T> &b, Basis &basis, Basis &rho_basis
 
 #ifndef USE_PRODUCT_DEFAULT
 
-  BasicOp<T> _h = BasicOp<T>(this->h);
-  _h.resize(rho_basis);
-  if(position == LEFT){
-    new_operator(_h, h12, rho, basis);
-    b.push_back(_h);
-  } else { // position == RIGHT
-    new_operator(_h, h34, rho, basis);
-    b.push_back(_h);
+  if(_this_hami == &this->h){
+    BasicOp<T> _h = BasicOp<T>(this->h);
+    _h.resize(rho_basis);
+    if(position == LEFT){
+      new_operator(_h, this->h12, rho, basis);
+      b.push_back(_h);
+    } else { // position == RIGHT
+      new_operator(_h, this->h34, rho, basis);
+      b.push_back(_h);
+    }
+    return;
   }
 
-  return;
-#else // USE_PRODUCT_DEFAULT
+#endif // USE_PRODUCT_DEFAULT
 
-  const Block<T> *pb1 = _b1;
-  const Block<T> *pb2 = _b2;
+  const Block<T> *pb1 = this->_b1;
+  const Block<T> *pb2 = this->_b2;
   int _mask = MASK_BLOCK1 | MASK_BLOCK2;
   size_t pos1 = BLOCK1;
   size_t pos2 = BLOCK2;
 
   if(position == RIGHT){
-    pb1 = _b3;
-    pb2 = _b4;
+    pb1 = this->_b3;
+    pb2 = this->_b4;
     _mask = MASK_BLOCK3 | MASK_BLOCK4;
     pos1 = BLOCK3;
     pos2 = BLOCK4;
@@ -3405,7 +3503,6 @@ System<T>::rotate_hami(int position, Block<T> &b, Basis &basis, Basis &rho_basis
   }
 
   b.push_back(_h);
-#endif
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -3442,10 +3539,15 @@ System<T>::measure_n(size_t n , const VectorState<T> *v )
     typename Term<T>::iterator iter;
     iter = t.end();
     iter--;
+    bool done = true;
     while(true){
       BasicOp<T> top = *iter;
 
       size_t ib = block(top.site());
+      if(n == 1 && !_store_products && !operator[](ib).single_site()) {
+        done = false;
+        break;
+      }
 
       const BasicOp<T>* op = operator()(top);
       if(op){ 
@@ -3455,11 +3557,16 @@ System<T>::measure_n(size_t n , const VectorState<T> *v )
 
         product(*op, aux, res, ib);
         aux = res;
+      } else {
+        done = false;
+        break;
       }
 
       if(iter == t.begin()) break;
       iter--;
     }
+    if(!done) continue;
+
     T val = T(0);
     if(gs.qn().equal(res.qn(), _grand_canonical) || _grand_canonical == 0)
       val = t.coef()*product(gs,res)/x/x0;
@@ -3476,7 +3583,7 @@ System<T>::measure_n(size_t n , const VectorState<T> *v )
     cout << " = " << val << endl;
 */
 
-//// cout << setprecision(10) << t.name(true) << " = " << val << endl;
+//    cout << setprecision(10) << t.name(true) << " = " << val << endl;
     t.set_value(val);
   }
 
@@ -3488,7 +3595,7 @@ System<T>::measure(const VectorState<T> *v)
 {
 
   using namespace std;
-  //DMTKglobals<T> &globals = get_globals(T(0));
+  DMTKglobals<T> &globals = get_globals(T(0));
 
   const VectorState<T> *pv = NULL;
   if(!v)
@@ -3513,8 +3620,13 @@ System<T>::measure(const VectorState<T> *v)
       res = T(0);
       res = product_default(*this, *pv, &t[0].hami());
       T val = product(*pv,res)/x;  
-//      cout << setprecision(10) << t[0].hami().name() << " = " << val << endl;
       real_t.set_value(val);
+      continue;
+    }
+    if(t.size() == 1 && !t[0].is_hami()) {
+      bool info;
+      T val = measure_operator(t[0], v, info);
+      if(info) real_t.set_value(val);
       continue;
     }
 
@@ -3525,17 +3637,17 @@ System<T>::measure(const VectorState<T> *v)
   
       size_t ib1 = block(top1.site());
       size_t ib2 = block(top2.site());
-  
+ 
       if(ib1 != BLOCK_NONE && ib2 != BLOCK_NONE){
         if(ib1 != ib2){
             
           const BasicOp<T>* op1 = operator()(top1);
           const BasicOp<T>* op2 = operator()(top2);
-  
+ 
           if(op1 && op2){
             if(op1->name() != top1.name() || op2->name() != top2.name()) 
                  continue; 
-  
+ 
             res = T(0);
             product(*op1, *op2, *pv, res, ib1, ib2, T(t.coef()));
             T val = product(*pv,res)/x;
@@ -3547,7 +3659,7 @@ System<T>::measure(const VectorState<T> *v)
               cout << setprecision(10) << t.coef() << "*" << top1.name().c_str() << "(" << h.lattice().x(top1.site()) << "," << h.lattice().y(top1.site()) << "," << top1.internal_site() << ")" << top2.name().c_str() << "(" << h.lattice().x(top2.site()) << "," << h.lattice().y(top2.site()) << "," << top2.internal_site() << ") = " << val << endl;
 */
   
-////          cout << setprecision(10) << t.name(true) << " = " << val << endl;
+//            cout << setprecision(10) << t.name(true) << " = " << val << endl;
   
             real_t.set_value(val);
           }
@@ -3556,7 +3668,8 @@ System<T>::measure(const VectorState<T> *v)
 
           BasicOp<T> aux_op(t);
           const BasicOp<T>* op = operator()(aux_op);
-  
+
+ 
           if(op){
             res = T(0);
             product(*op, *pv, res, ib1, T(t.coef()));
@@ -3569,7 +3682,7 @@ System<T>::measure(const VectorState<T> *v)
               cout << setprecision(10) << t.coef() << "*" << top1.name().c_str() << "(" << h.lattice().x(top1.site()) << "," << h.lattice().y(top1.site()) << "," << top1.internal_site() << ")" << top2.name().c_str() << "(" << h.lattice().x(top2.site()) << "," << h.lattice().y(top2.site()) << "," << top2.internal_site() << ") = " << val << endl;
 */
   
-////          cout << setprecision(10) << t.name(true) << " = " << val << endl;
+//            cout << setprecision(10) << t.name(true) << " = " << val << endl;
 
             real_t.set_value(val);
           }
@@ -3583,8 +3696,9 @@ System<T>::measure(const VectorState<T> *v)
       res = T(0);
       for(int ib = 0; ib < 4; ib++) aux_term[ib].clear();
       bool found = true;
+      int bmask = 0;
       for(int i = 0; i < t.size(); i++){
-        BasicOp<T> top = t[i];
+        BasicOp<T> top = t[i].internals();
         if(block(top.site()) == BLOCK_NONE){
           found = false;
           break;
@@ -3592,52 +3706,93 @@ System<T>::measure(const VectorState<T> *v)
         for(int ib = 1; ib <= 4; ib++){
           if(block(top.site()) == (size_t)ib){
             aux_term[ib-1] *= top;
+            bmask |= mask((size_t)ib);
           }
         }
-      } 
+      }
   
       if(!found) continue;
-  
+
+      found = true;
       const BasicOp<T> *aux_op[4];
       aux_op[0] = aux_op[1] = aux_op[2] = aux_op[3] = NULL;
       for(int ib = 3; ib >= 0 ; ib--){
         if(aux_term[ib].size() != 0){
           BasicOp<T> top;
           if(aux_term[ib].size() == 1)
-            top = aux_term[ib][0];
+            top = aux_term[ib][0].internals();
           else
             top = aux_term[ib];
-  
+
           aux_op[ib] = operator()(top);
-          if(!aux_op[ib]) {
+          if(!aux_op[ib]){ // && _verbose >= 0) {
             cout << "ERROR : Operator " << top.description() << " not found\n";
+            found = false;
+            break;
           }
         }
       }
 
-      aux = aux_res = *pv;
-      for(int ib = 3; ib >= 0 ; ib--){
-        if(aux_op[ib]){
-          res.set_qn_mask(aux.qn()+aux_op[ib]->dqn, _grand_canonical);
-          res.resize(aux.b1(),aux.b2(),aux.b3(),aux.b4());
-          res = T(0);
-
-          product(*aux_op[ib], aux, res, (size_t)(ib+1));
-          aux = res;
-        }
+      if(!found) continue;
+  
+      if (bmask == (MASK_BLOCK1|MASK_BLOCK2|MASK_BLOCK3|MASK_BLOCK4)){
+        product(*(aux_op[0]), *(aux_op[1]), *(aux_op[2]), *(aux_op[3]), *pv, res, BLOCK1, BLOCK2, BLOCK3, BLOCK4, T(t.coef()), false, &globals);
+        T val = product(*pv,res)/sqrt(x)/sqrt(x0);
+        real_t.set_value(val);
+        if(_verbose >= 0) cout << setprecision(10) << t.description() << " = " << val << endl;
       }
-      T val = product(*pv,res)/sqrt(x)/sqrt(x0);
-      real_t.set_value(val*t.coef());
-//      cout << setprecision(10) << t.description() << " = " << real_t.value() << endl;
+      else if(bmask == (MASK_BLOCK1|MASK_BLOCK2|MASK_BLOCK3)){
+        product(*(aux_op[0]), *(aux_op[1]), *(aux_op[2]), *pv, res, BLOCK1, BLOCK2, BLOCK3, T(t.coef()), false, &globals);
+        T val = product(*pv,res)/sqrt(x)/sqrt(x0);
+        real_t.set_value(val);
+        if(_verbose >= 0) cout << setprecision(10) << t.description() << " = " << val << endl;
+      }
+      else if(bmask == (MASK_BLOCK1|MASK_BLOCK2|MASK_BLOCK4)){
+        product(*(aux_op[0]), *(aux_op[1]), *(aux_op[3]), *pv, res, BLOCK1, BLOCK2, BLOCK4, T(t.coef()), false, &globals);
+        T val = product(*pv,res)/sqrt(x)/sqrt(x0);
+        real_t.set_value(val);
+        if(_verbose >= 0) cout << setprecision(10) << t.description() << " = " << val << endl;
+      }
+      else if(bmask == (MASK_BLOCK1|MASK_BLOCK3|MASK_BLOCK4)){
+        product(*(aux_op[0]), *(aux_op[2]), *(aux_op[3]), *pv, res, BLOCK1, BLOCK3, BLOCK4, T(t.coef()), false, &globals);
+        T val = product(*pv,res)/sqrt(x)/sqrt(x0);
+        real_t.set_value(val);
+        if(_verbose >= 0) cout << setprecision(10) << t.description() << " = " << val << endl;
+      }
+      else if(bmask == (MASK_BLOCK2|MASK_BLOCK3|MASK_BLOCK4)){
+        product(*(aux_op[1]), *(aux_op[2]), *(aux_op[3]), *pv, res, BLOCK2, BLOCK3, BLOCK4, T(t.coef()), false, &globals);
+        T val = product(*pv,res)/sqrt(x)/sqrt(x0);
+        real_t.set_value(val);
+        if(_verbose >= 0) cout << setprecision(10) << t.description() << " = " << val << endl;
+      }
+      else
+      {
+        aux = aux_res = *pv;
+        for(int ib = 3; ib >= 0 ; ib--){
+          if(aux_op[ib]){
+            res.set_qn_mask(aux.qn()+aux_op[ib]->dqn, res.qn_mask());
+// FIXME
+            res.resize(aux.b1(),aux.b2(),aux.b3(),aux.b4());
+            res = T(0);
+
+            product(*aux_op[ib], aux, res, (size_t)(ib+1));
+            aux = res;
+          }
+        }
+        T val = product(*pv,res)/sqrt(x)/sqrt(x0);
+        real_t.set_value(val*t.coef());
+        if(_verbose >= 0) cout << setprecision(10) << t.description() << " = " << real_t.value() << endl;
+      }
     }
   }
 }
 
 template<class T>
 T
-System<T>::measure_operator(const BasicOp<T> &top, const VectorState<T> *v)
+System<T>::measure_operator(const BasicOp<T> &top, const VectorState<T> *v, bool &info)
 {
   using namespace std;
+  info = false;
 
   const VectorState<T> *pv = NULL;
   if(!v)
@@ -3652,10 +3807,18 @@ System<T>::measure_operator(const BasicOp<T> &top, const VectorState<T> *v)
 
   size_t ib = block(top.site());
 
-  cout << "MEASURE OPERATOR " << top.name() << endl;
   const BasicOp<T>* op = operator()(top);
+  if(!op) {
+#ifdef WITH_WARNINGS
+// Your are likely to be using _sotre_products == FALSE
+    cout << "WARNING: Operator " << top.name() << "not found\n";
+#endif
+    return T(0);
+  }
+
   if(op->name() != top.name()) return T(0);
 
+  info = true;
   res.set_qn_mask(aux.qn()+op->dqn, _grand_canonical);
   res.resize(aux.b1(),aux.b2(),aux.b3(),aux.b4());
   res = T(0);
@@ -4225,7 +4388,7 @@ init_terms_composite(System<T>& ss, const VectorState<T>& vv)
   VectorState<T> res(vv);
   res = T(0);
   std::vector<ProductTerm<T> > new_terms;
-  cout << "Initializing product terms\n";
+  if(ss.verbose() > 0) cout << "Initializing product terms\n";
   ss.product_terms.clear();
 // Interactions between blocks (1-3,2-4,2-3), and external and local terms
   VectorState<T> aux(res), aux_res(res);
@@ -4485,7 +4648,6 @@ System<T>::operator()(const BasicOp<T>& op) const
            BasicOp<T> _op(op);
            if(b[i]->single_site()) _op.set_site(op.site() - offset[i]);
            
-// cout << op.name() << " " << op.site() << " " << op.internal_site() << " " << i << " " <<  _op.site() << endl;
            return (b[i]->operator()(_op));
         }
     }
