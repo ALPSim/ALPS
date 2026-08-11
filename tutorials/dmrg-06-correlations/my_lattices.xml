@@ -6,7 +6,7 @@
    http://www.boost.org/LICENSE_1_0.txt)
   -->
   
-<LATTICES>
+  <LATTICES>
  <GRAPH name = "open chain lattice with special edges 32" dimension="1" vertices=" 32 " edges="31">
   <VERTEX id="1" type="0"><COORDINATE>0</COORDINATE></VERTEX>
   <VERTEX id="2" type="1"><COORDINATE>2</COORDINATE></VERTEX>

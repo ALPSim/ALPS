@@ -1,17 +1,16 @@
 LATTICE="open chain lattice"
 MODEL="spin"
-CONSERVED_QUANTUMNUMBERS="Sz"
-Sz_total=0
-J=1
+CONSERVED_QUANTUMNUMBERS="N,Sz"
 SWEEPS=6
+J=1
 NUMBER_EIGENVALUES=1
 MEASURE_AVERAGE[Magnetization]=Sz
 MEASURE_AVERAGE[Exchange]=exchange
 MEASURE_LOCAL[Local magnetization]=Sz
 MEASURE_CORRELATIONS[Diagonal spin correlations]=Sz
 MEASURE_CORRELATIONS[Offdiagonal spin correlations]="Splus:Sminus"
-L=32
-{ MAXSTATES=20 }
-{ MAXSTATES=40 }
-{ MAXSTATES=60 }
-
+L=64
+MAXSTATES=100
+{ Sz_total=0 }
+{ Sz_total=1 }
+{ Sz_total=2 }

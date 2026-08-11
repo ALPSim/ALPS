@@ -1,4 +1,3 @@
-from __future__ import division
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -33,22 +32,18 @@ import pyalps.plot
 
 #prepare the input parameters
 parms = []
-for D in [20,40,60]:
+for sz in [0,1,2]:
     parms.append( { 
-        'LATTICE'                               : 'open chain lattice', 
-        'MODEL'                                 : 'spin',
+        'LATTICE'                               : "open chain lattice", 
+        'MODEL'                                 : "spin",
         'CONSERVED_QUANTUMNUMBERS'              : 'N,Sz',
-        'Sz_total'                              : 0,
+        'Sz_total'                              : sz,
         'J'                                     : 1,
         'SWEEPS'                                : 6,
         'NUMBER_EIGENVALUES'                    : 1,
-        'L'                                     : 32,
-        'MAXSTATES'                             : D,
-        'MEASURE_AVERAGE[Magnetization]'        : 'Sz',
-        'MEASURE_AVERAGE[Exchange]'             : 'exchange',
-        'MEASURE_LOCAL[Local magnetization]'    : 'Sz',
-        'MEASURE_CORRELATIONS[Diagonal spin correlations]'      : 'Sz',
-        'MEASURE_CORRELATIONS[Offdiagonal spin correlations]'   : 'Splus:Sminus'
+        'L'                                     : 64,
+        'MAXSTATES'                             : 100,
+        'MEASURE_LOCAL[Local magnetization]'    : 'Sz'
        } )
 
 #write the input file and run the simulation
@@ -58,34 +53,23 @@ res = pyalps.runApplication('dmrg',input_file,writexml=True)
 #load all measurements for all states
 data = pyalps.loadEigenstateMeasurements(pyalps.getResultFiles(prefix='parm_spin_one_half'))
 
-# extract Sz correlation data
+# extract local magnetization data
 curves = []
 for run in data:
     for s in run:
-        if s.props['observable'] == 'Diagonal spin correlations':
-            d = pyalps.DataSet()
-            d.props['observable'] = 'Sz correlations'
-            d.props['label'] = 'D = '+str(s.props['MAXSTATES'])
-            L = int(s.props['L'])
-            d.x = np.arange(L)
-            
-            # sites with increasing distance l symmetric to the chain center
-            site1 = np.array([int(-(l+1)/2.0) for l in range(0,L)]) + L//2
-            site2 = np.array([int(  l   /2.0) for l in range(0,L)]) + L//2
-            indices = L*site1 + site2
-            d.y = abs(s.y[0][indices])
-            
-            curves.append(d)
-
-# Plot correlation vs. distance
+        if s.props['observable'] == 'Local magnetization':
+            sz = s.props['Sz_total']
+            s.props['label'] = '$S_z = ' + str(sz) + '$'
+            s.y = s.y.flatten()
+            curves.append(s)
+        
+# Plot local magnetization vs. site
 plt.figure()
 pyalps.plot.plot(curves)
-plt.xscale('log')
-plt.yscale('log')
 plt.legend()
-plt.title('Spin correlations in antiferromagnetic Heisenberg chain (S=1/2)')
-plt.ylabel('correlations $| \\langle S^z_{L/2-l/2} S^z_{L/2+l/2} \\rangle |$')
-plt.xlabel('distance $l$')
+plt.title('Magnetization of antiferromagnetic Heisenberg chain (S=1/2)')
+plt.ylabel('local magnetization')
+plt.xlabel('site')
 
 
 plt.show()

@@ -1,0 +1,14 @@
+LATTICE_LIBRARY="my_lattice.xml"
+LATTICE="open chain lattice with special edges"
+MODEL="spin"
+local_S0=0.5
+local_S1=1
+CONSERVED_QUANTUMNUMBERS="N,Sz"
+J=1
+NUMBER_EIGENVALUES=1
+SWEEPS=6
+MAXSTATES=100
+MEASURE_LOCAL[Local magnetization]=Sz
+{ Sz_total=0 }
+{ Sz_total=1 }
+{ Sz_total=2 }
