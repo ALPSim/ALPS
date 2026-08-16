@@ -44,7 +44,15 @@ bool parse_options(int argc, char** argv, std::string& infile, std::string& outf
 {
 	std::cout << "ALPS Hirsch-Fye solver for the single site impurity problem.\n\n";
 	alps::print_copyright(std::cout);
-	
+
+	std::cout << "****************************************************************"<<std::endl;
+	std::cout << "* Recommended citation in scientific publications:             *"<<std::endl;
+	std::cout << "* We used the ALPS [1] implementation [2] of the Hirsch-Fye    *"<<std::endl;
+	std::cout << "* [3] impurity solver.                                         *"<<std::endl;
+	std::cout << "* [1] JSTAT (2011) P05001; [2] CPC 182, 1078 (2011); [3] PRL   *"<<std::endl;
+	std::cout << "* 56, 2521 (1986).                                             *"<<std::endl;
+	std::cout << "****************************************************************"<<std::endl;
+
 	namespace po = boost::program_options;
 	
 	po::options_description desc("Allowed options");
