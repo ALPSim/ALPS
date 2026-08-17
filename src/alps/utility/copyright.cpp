@@ -35,16 +35,18 @@
 
 void alps::print_copyright(std::ostream& out) {
   out << "based on the ALPS libraries version " << ALPS_VERSION << "\n";
-  out << "  available from http://alps.comp-phys.org/\n";
+  out << "  available from https://alps.comp-phys.org/\n";
   out << "  copyright (c) 1994-" << ALPS_YEAR
       << " by the ALPS collaboration.\n";
-  out << "  Consult the web page for license details.\n";
+  out << "  Licensed under the MIT License.\n";
+  out << "  License text: https://github.com/ALPSim/ALPS/blob/master/LICENSE.txt\n";
   out << "  For details see the publication: \n"
       << "  B. Bauer et al., J. Stat. Mech. (2011) P05001.\n\n";
 }
 
 void alps::print_license(std::ostream& out) {
-  out << "Please look at the file LICENSE.txt for the license conditions\n";
+  out << "Licensed under the MIT License.\n";
+  out << "License text: https://github.com/ALPSim/ALPS/blob/master/LICENSE.txt\n";
 }
 
 std::string alps::version() { return ALPS_VERSION; }

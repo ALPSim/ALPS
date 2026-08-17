@@ -69,7 +69,7 @@ void InteractionExpansion::print(std::ostream &os){
   os<<"***********************************************************************************************************"<<std::endl;
   os<<"*** ALPS InteractionExpansion solver                                                                    ***"<<std::endl;
   os<<"*** Emanuel Gull, Philipp Werner, Sebastian Fuchs, Brigitte Surer, Thomas Pruschke, and Matthias Troyer ***"<<std::endl;
-  os<<"*** Published under the ALPS cite-me license in:                                                        ***"<<std::endl;
+  os<<"*** Please cite the interaction-expansion method described in:                                         ***"<<std::endl;
   os<<"*** ***************** Computer Physics Communications 182, 1078 (2011). ******************************* ***"<<std::endl;
   os<<"***********************************************************************************************************"<<std::endl;
   os<<"***                                                                                                     ***"<<std::endl;
