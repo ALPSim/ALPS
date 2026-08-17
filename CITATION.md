@@ -1,6 +1,6 @@
 # Citing ALPS
 
-If ALPS contributes to published research, please cite the framework papers below and any method-specific paper relevant to the application you used. Citation is requested as scholarly acknowledgement; it is not a condition of the MIT license in [`LICENSE.txt`](LICENSE.txt).
+If ALPS contributes to published research, please cite the framework papers below and any method-specific paper relevant to the application you used.
 
 ## Framework papers
 
