@@ -58,7 +58,7 @@ int main() {
         scalar_data.load(filename, "/test/result/Scalar");
         std::cout << scalar_data;
 
-        std::cout << size(scalar_data) << "\n";
+        std::cout << alps::size(scalar_data) << "\n";
         std::cout << alps::alea::mean(scalar_data) << "\n";
 
 

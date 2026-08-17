@@ -326,7 +326,7 @@ typename average_type< typename TimeseriesType::value_type >::type mean(const Ti
   for (typename const_iterator_type<TimeseriesType>::type iter = range_begin(timeseries); iter != range_end(timeseries); ++iter)
     OUT = OUT + *iter;
 
-  return OUT / double(size(timeseries));
+  return OUT / double(alps::size(timeseries));
 }
 
 
@@ -340,7 +340,7 @@ typename average_type< typename TimeseriesType::value_type >::type variance(cons
   using std::pow;
   using alps::numeric::pow;
 
-  if (size(timeseries) < 2) boost::throw_exception(NotEnoughMeasurementsError());
+  if (alps::size(timeseries) < 2) boost::throw_exception(NotEnoughMeasurementsError());
 
   return_type _mean = mean(timeseries);
   return_type OUT;
@@ -351,7 +351,7 @@ typename average_type< typename TimeseriesType::value_type >::type variance(cons
     OUT = OUT + pow(*iter-_mean, 2.);
   }
 
-  return OUT / double(size(timeseries) - 1);
+  return OUT / double(alps::size(timeseries) - 1);
 }
 
 
@@ -365,7 +365,7 @@ mctimeseries< typename average_type< typename TimeseriesType::value_type >::type
   using boost::numeric::operators::operator/;
   using boost::numeric::operators::operator+;
 
-  std::size_t _size = size(timeseries);
+  std::size_t _size = alps::size(timeseries);
   average_type _mean = alps::alea::mean(timeseries);
   average_type _variance = alps::alea::variance(timeseries);
   mctimeseries< average_type > OUT;
@@ -397,7 +397,7 @@ mctimeseries< typename average_type< typename TimeseriesType::value_type >::type
   using boost::numeric::operators::operator/;
   using boost::numeric::operators::operator+;
 
-  std::size_t _size = size(timeseries);
+  std::size_t _size = alps::size(timeseries);
   average_type _mean = mean(timeseries);
   average_type _variance = variance(timeseries);
   mctimeseries< average_type > OUT;
@@ -431,10 +431,10 @@ std::pair<typename average_type<typename TimeseriesType::value_type >::type, typ
   typedef typename average_type<typename TimeseriesType::value_type >::type average_type;
   using std::exp;
 
-  if (from < 0) from = from + size(autocorrelation);
-  if (to < 0) to = to + size(autocorrelation);
+  if (from < 0) from = from + alps::size(autocorrelation);
+  if (to < 0) to = to + alps::size(autocorrelation);
 
-  mctimeseries_view<average_type> autocorrelation_view = cut_head_distance(cut_tail_distance(autocorrelation, size(autocorrelation) - to), from - 1);
+  mctimeseries_view<average_type> autocorrelation_view = cut_head_distance(cut_tail_distance(autocorrelation, alps::size(autocorrelation) - to), from - 1);
 
   std::pair<average_type, average_type> OUT( alps::numeric::exponential_timeseries_fit(autocorrelation_view.begin(), autocorrelation_view.end()) );
   OUT.first *= exp((-1.) * OUT.second * (from - 1));
@@ -477,7 +477,7 @@ typename average_type< typename TimeseriesType::value_type >::type integrated_au
 
   return_type OUT = std::accumulate(autocorrelation.begin(), autocorrelation.end(), 0.);
 
-  OUT -= (tau.first / tau.second) * std::exp(tau.second * (size(autocorrelation) + 0.5));
+  OUT -= (tau.first / tau.second) * std::exp(tau.second * (alps::size(autocorrelation) + 0.5));
 
   return OUT;
 }
@@ -496,7 +496,7 @@ typename average_type< typename TimeseriesType::value_type >::type error (const 
   using alps::numeric::sqrt;
   using boost::numeric::operators::operator/;
 
-  return sqrt( variance(timeseries) / double(size(timeseries)) );
+  return sqrt( variance(timeseries) / double(alps::size(timeseries)) );
 }
 
 
@@ -532,7 +532,7 @@ mctimeseries< typename average_type<typename TimeseriesType::value_type>::type >
   using boost::numeric::operators::operator/;
 
   return_type _running_mean;
-  _running_mean.resize(size(timeseries) );
+  _running_mean.resize(alps::size(timeseries) );
 
   std::partial_sum(range_begin(timeseries), range_end(timeseries), _running_mean.begin(), alps::numeric::plus<average_type, average_type, average_type>() );
 
@@ -550,13 +550,13 @@ mctimeseries< typename average_type<typename TimeseriesType::value_type>::type >
   using boost::numeric::operators::operator/;
 
   mctimeseries<average_type> _reverse_running_mean;
-  _reverse_running_mean.resize(size(timeseries) );
+  _reverse_running_mean.resize(alps::size(timeseries) );
 
   std::partial_sum(static_cast <std::reverse_iterator<typename const_iterator_type<TimeseriesType>::type> > (range_end(timeseries)),
                    static_cast <std::reverse_iterator<typename const_iterator_type<TimeseriesType>::type> > (range_begin(timeseries)),
                    static_cast <std::reverse_iterator<typename iterator_type<TimeseriesType>::type> > (_reverse_running_mean.end() ), alps::numeric::plus<average_type, average_type, average_type>() );
 
-  std::size_t count = size(timeseries);
+  std::size_t count = alps::size(timeseries);
   for (typename iterator_type<TimeseriesType>::type iter = _reverse_running_mean.begin(); iter != _reverse_running_mean.end(); ++iter)
     *iter = *iter / count--;
 
