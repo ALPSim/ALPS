@@ -141,3 +141,31 @@ install(TARGETS ${_pyalps_targets}
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/pyalps/"
   DESTINATION pyalps
   FILES_MATCHING PATTERN "*.py")
+
+# Runtime fallback paths pointing at the ALPS SDK this build used. The
+# in-package pyalps/xml and pyalps/bin directories take precedence in
+# pyalps.tools when they exist.
+set(PYALPS_ALPS_ROOT "${ALPS_ROOT_DIR}")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/pyalps/pyalps_config.py.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/pyalps_config.py" @ONLY)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pyalps_config.py" DESTINATION pyalps)
+
+# The ALPS XML/XSL library ships inside the package (pyalps/xml), as the
+# legacy wheel build did: the stylesheets plus the lattice and model
+# libraries that parameter files reference by default.
+set(_alps_xml_source "${_alps_source_root}/lib/xml")
+if(NOT EXISTS "${_alps_xml_source}/ALPS.xsl")
+  message(FATAL_ERROR
+    "ALPS XML stylesheets not found at ${_alps_xml_source}. "
+    "They are required so the pyalps package can bundle pyalps/xml.")
+endif()
+install(DIRECTORY "${_alps_xml_source}/" DESTINATION pyalps/xml
+  FILES_MATCHING PATTERN "*.xsl")
+configure_file("${_alps_xml_source}/lattices.xml.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/xml/lattices.xml" COPYONLY)
+configure_file("${_alps_xml_source}/models.xml.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/xml/models.xml" COPYONLY)
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/xml/lattices.xml"
+  "${CMAKE_CURRENT_BINARY_DIR}/xml/models.xml"
+  DESTINATION pyalps/xml)
