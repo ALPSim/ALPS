@@ -59,14 +59,64 @@ jobs:
       - name: Build sdist
         run: pipx run build --sdist --outdir dist bindings/python/pyalps
 
+      # The sdist must remain buildable outside the repository checkout:
+      # verify its metadata and that the vendored ALPS sources it needs
+      # (applications, tools, XML library) actually made it in.
+      - name: Smoke check sdist
+        run: |
+          pipx run twine check dist/*.tar.gz
+          tar -tzf dist/*.tar.gz > sdist-manifest.txt
+          for path in _vendor/lib/xml/ALPS.xsl _vendor/tool/maxent.cpp \
+                      _vendor/applications/dmft/qmc _vendor/applications/qmc/dwa \
+                      LICENSE.txt src/pyalps/__init__.py; do
+            grep -q "$path" sdist-manifest.txt || { echo "missing $path in sdist"; exit 1; }
+          done
+
       - uses: actions/upload-artifact@v7
         with:
           name: cibw-sdist
           path: dist/*.tar.gz
 
 
+  # cibuildwheel already runs test/pyalps against every wheel inside the build
+  # environment; this job checks the artifacts as they would reach PyPI: the
+  # repaired, uploaded-and-downloaded wheel installed with pip on a clean
+  # runner, at the oldest and newest supported Python.
+  smoke_test:
+    name: Smoke test wheels on ${{ matrix.os }} / py${{ matrix.python }}
+    needs: [build_wheels]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-15, macos-26]
+        python: ["3.10", "3.14"]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: cibw-wheels-*
+          path: wheelhouse
+          merge-multiple: true
+
+      - name: Install wheel from artifacts
+        run: |
+          pipx run twine check wheelhouse/*.whl
+          python -m pip install numpy scipy pytest
+          python -m pip install --no-index --no-deps --find-links wheelhouse pyalps
+
+      - name: Import and run binding surface tests
+        run: |
+          python -c "import pyalps, pyalps.alea, pyalps.hdf5, pyalps.pytools; print(pyalps.__file__)"
+          python -m pytest -q test/pyalps
+
   upload_pypi:
-    needs: [build_wheels, build_sdist]
+    needs: [build_wheels, build_sdist, smoke_test]
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
