@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Restore compiler cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: _build/ccache
           key: pyalps-ccache-${{ runner.os }}-${{ matrix.plat.arch }}-${{ hashFiles('src/**', 'bindings/python/**', 'applications/**', 'tool/maxent*') }}
