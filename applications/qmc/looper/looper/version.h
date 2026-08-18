@@ -57,7 +57,7 @@ inline std::ostream& print_copyright(std::ostream& os = std::cout) {
 }
 
 inline std::ostream& print_license(std::ostream& os = std::cout) {
-  os << "Please look at the file LICENSE for the license conditions.\n";
+  alps::print_license(os);
   return os;
 }
 
