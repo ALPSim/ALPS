@@ -48,7 +48,6 @@ const char* boost_no_inspect = "boost-" "no-inspect";
 #include "copyright_check.hpp"
 #include "crlf_check.hpp"
 #include "end_check.hpp"
-#include "license_check.hpp"
 #include "link_check.hpp"
 #include "path_name_check.hpp"
 #include "tab_check.hpp"
@@ -635,7 +634,6 @@ namespace
   const char * options()
   {
     return
-         "  -license\n"
          "  -copyright\n"
          "  -crlf\n"
          "  -end\n"
@@ -820,7 +818,6 @@ int cpp_main( int argc_param, char * argv_param[] )
     return 0;
   }
 
-  bool license_ck = true;
   bool copyright_ck = true;
   bool crlf_ck = true;
   bool end_ck = true;
@@ -861,7 +858,6 @@ int cpp_main( int argc_param, char * argv_param[] )
 
   if ( argc > 1 && *argv[1] == '-' )
   {
-    license_ck = false;
     copyright_ck = false;
     crlf_ck = false;
     end_ck = false;
@@ -879,9 +875,7 @@ int cpp_main( int argc_param, char * argv_param[] )
   bool invalid_options = false;
   for(; argc > 1; --argc, ++argv )
   {
-    if ( std::strcmp( argv[1], "-license" ) == 0 )
-      license_ck = true;
-    else if ( std::strcmp( argv[1], "-copyright" ) == 0 )
+    if ( std::strcmp( argv[1], "-copyright" ) == 0 )
       copyright_ck = true;
     else if ( std::strcmp( argv[1], "-crlf" ) == 0 )
         crlf_ck = true;
@@ -926,8 +920,6 @@ int cpp_main( int argc_param, char * argv_param[] )
   // leaving, due to destruction of the inspector_list object
   inspector_list inspectors;
 
-  if ( license_ck )
-    inspectors.push_back( inspector_element( new boost::inspect::license_check ) );
   if ( copyright_ck )
     inspectors.push_back( inspector_element( new boost::inspect::copyright_check ) );
   if ( crlf_ck )

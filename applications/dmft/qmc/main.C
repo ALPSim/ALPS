@@ -2,30 +2,15 @@
  *
  * ALPS DMFT Project
  *
- * Copyright (C) 2005 - 2009 by Emanuel Gull <gull@phys.columbia.edu>
- *                              Philipp Werner <werner@itp.phys.ethz.ch>,
+ * Copyright (C) 2005 - 2026 by Emanuel Gull <gull@phys.columbia.edu>
+ *               2005 - 2009 by Philipp Werner <werner@itp.phys.ethz.ch>,
  *                              Sebastian Fuchs <fuchs@theorie.physik.uni-goettingen.de>
  *                              Matthias Troyer <troyer@comp-phys.org>
  *               2012 - 2013 by Jakub Imriska <jimriska@phys.ethz.ch>
  *
  *
-* Permission is hereby granted, free of charge, to any person obtaining
-* a copy of this software and associated documentation files (the “Software”),
-* to deal in the Software without restriction, including without limitation
-* the rights to use, copy, modify, merge, publish, distribute, sublicense,
-* and/or sell copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included
-* in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS
-* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-* DEALINGS IN THE SOFTWARE.
+* ALPS Project: https://alps.comp-phys.org/
+* SPDX-License-Identifier: MIT
  *
  *****************************************************************************/
 
@@ -84,10 +69,15 @@ int main(int argc, char** argv)
     std::cout << "  For further information see the ALPS DMFT paper:              "<<std::endl;
     std::cout << "  Computer Physics Communications 182, 1078 (2011)              "<<std::endl;
     std::cout << "                                                                "<<std::endl;
-    std::cout << "  copyright (c) 2005-2010 by the ALPS collaboration.            "<<std::endl;
-    std::cout << "  Consult the web page for license details.                     "<<std::endl;
+    std::cout << "  copyright (c) 2005-2026 by the ALPS collaboration.            "<<std::endl;
     std::cout << std::endl;
     alps::print_copyright(std::cout);
+
+    std::cout << "****************************************************************"<<std::endl;
+    std::cout << "* Recommended citation in scientific publications:             *"<<std::endl;
+    std::cout << "* This code used the ALPS [1] DMFT framework [2]               *"<<std::endl;
+    std::cout << "* [1] JSTAT (2011) P05001; [2] CPC 182, 1078 (2011)            *"<<std::endl;
+    std::cout << "****************************************************************"<<std::endl;
     alps::Parameters parms;
     {
       std::ifstream is(argv[1]);
