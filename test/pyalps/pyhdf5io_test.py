@@ -28,6 +28,7 @@ import pyalps.hdf5 as hdf5
 
 def _write_all(ar):
     a = np.array([1, 2, 3])
+    b = np.array([1.1, 2.0, 3.5])
     c = np.array([1.1 + 1j, 2.0j, 3.5])
     d = {"a": a, 2 + 3j: "foo"}
 
@@ -36,10 +37,10 @@ def _write_all(ar):
     ar["/tuple"] = (1, 2, 3)
     ar["/dict"] = {"scalar": 1, "numpy": a, "numpycpx": c, "list": [1, 2, 3], "string": "str", 1: 1, 4: d}
     ar["/numpy"] = a
-    ar["/numpy2"] = np.array([1.1, 2.0, 3.5])
+    ar["/numpy2"] = b
     ar["/numpy3"] = c
     ar["/numpyel"] = a[0]
-    ar["/numpyel2"] = np.array([1.1, 2.0, 3.5])[0]
+    ar["/numpyel2"] = b[0]
     ar["/numpyel3"] = c[0]
     ar["/int"] = int(1)
     ar["/long"] = 1
@@ -60,6 +61,14 @@ def _write_all(ar):
     ar["/boollist"] = [True, False]
     ar["/mixedlist"] = [1, 2.5]
     ar["/biglist"] = [2 ** 40, 2 ** 41]
+    ar["/npscalars"] = list(np.arange(3))          # numpy.int64 scalars
+    ar["/npboollist"] = list(np.array([True, False]))
+    ar["/numpylist3"] = [np.arange(3), [3, 4, 5]]  # ndarray/list mix, legacy stacked
+    ar["/boolmix"] = [np.arange(2), [True, False]]  # bool leaves veto stacking
+    ar["/longmixed"] = [1, 2.5, "x"] + list(range(10))  # 13-child group
+    ar["/emptylist"] = []
+    ar["/shrink"] = [1, "a", "b"]
+    ar["/shrink"] = [1, "a"]                       # group re-save must drop stale children
 
 
 def _assert_int_array(value, expected, dtype=np.int32):
@@ -77,7 +86,7 @@ def test_hdf5io():
 
         ar = hdf5.archive(path, "r")
 
-        assert len(ar.list_children("/")) == 28
+        assert len(ar.list_children("/")) == 35
 
         # homogeneous int lists/tuples keep the int element type on disk
         _assert_int_array(ar["/list"], [1, 2, 3])
@@ -174,6 +183,43 @@ def test_hdf5io():
         bl = ar["/biglist"]
         assert np.issubdtype(bl.dtype, np.integer)
         np.testing.assert_array_equal(bl, [2 ** 40, 2 ** 41])
+
+        # regression: numpy-scalar lists keep their dtype in one dataset
+        # (numpy.int64 etc. were vectorizable in the legacy build)
+        nps = ar["/npscalars"]
+        assert isinstance(nps, np.ndarray) and np.issubdtype(nps.dtype, np.integer)
+        np.testing.assert_array_equal(nps, [0, 1, 2])
+        # HDF5 has no native bool: bool arrays are stored (and read
+        # back) as their int8 storage type; only the values survive
+        npb = ar["/npboollist"]
+        assert isinstance(npb, np.ndarray)
+        assert npb.dtype == np.bool_ or npb.dtype == np.int8
+        np.testing.assert_array_equal(npb, [1, 0])
+
+        # regression: rectangular ndarray/list mixes stack, like legacy
+        nl3 = ar["/numpylist3"]
+        assert isinstance(nl3, np.ndarray) and nl3.shape == (2, 3)
+        np.testing.assert_array_equal(nl3, [[0, 1, 2], [3, 4, 5]])
+
+        # regression: plain bools among the leaves veto stacking — numpy
+        # would silently promote True to 1
+        bm = ar["/boolmix"]
+        assert isinstance(bm, list) and len(bm) == 2
+        np.testing.assert_array_equal(bm[0], [0, 1])
+        assert bm[1] == [True, False]
+
+        # regression: a group-saved list with more than ten elements
+        # still loads as a list, in order (children come back from HDF5
+        # lexicographically)
+        lm = ar["/longmixed"]
+        assert lm == [1, 2.5, "x"] + list(range(10)), lm
+
+        # regression: empty lists stay integer-typed datasets
+        el = ar["/emptylist"]
+        assert len(el) == 0
+
+        # regression: re-saving a group-shaped list drops stale children
+        assert ar["/shrink"] == [1, "a"]
 
         del ar
 

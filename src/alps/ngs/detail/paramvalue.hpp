@@ -19,7 +19,6 @@
 #include <alps/ngs/detail/remove_cvr.hpp>
 #include <alps/ngs/detail/paramvalue_reader.hpp>
 
-
 #include <boost/variant.hpp>
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/pop_back.hpp>

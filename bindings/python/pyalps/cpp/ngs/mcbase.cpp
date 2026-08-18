@@ -44,8 +44,6 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/make_iterator.h>
 #include <nanobind/stl/function.h>
-#include <nanobind/stl/string.h>
-#include <nanobind/stl/vector.h>
 #include <nanobind/trampoline.h>
 namespace nb = nanobind;
 #ifdef ALPS_HAVE_MPI
@@ -54,8 +52,6 @@ namespace nb = nanobind;
 #include <cstddef>
 #include <functional>
 #include <stdexcept>
-#include <string>
-#include <vector>
 #include "../dict_to_params.hpp"
 namespace alps {
     // Trampoline: holds Python overrides for pure-virtuals. The

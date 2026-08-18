@@ -265,10 +265,38 @@ def test_params_mapping_equality_and_value_ladder():
         raise AssertionError("None must be rejected")
     except TypeError as error:
         assert "None" in str(error)
-    # oversized integers raise instead of truncating silently
+    # oversized integers raise instead of truncating silently —
+    # inside lists too, where the double-widening fallback would
+    # otherwise corrupt values beyond 2**53
     try:
         p["n"] = 2 ** 40
         raise AssertionError("2**40 must be rejected")
+    except TypeError as error:
+        assert "32-bit" in str(error)
+    try:
+        p["nl"] = [2 ** 53 + 1]
+        raise AssertionError("[2**53+1] must be rejected")
+    except TypeError as error:
+        assert "32-bit" in str(error)
+    # bools (numpy bools included) never coerce to numbers
+    for bad in ([True, False], [np.bool_(True)]):
+        try:
+            p["flags"] = bad
+            raise AssertionError("bool list must be rejected")
+        except TypeError:
+            pass
+    # numpy integer scalars are accepted like numpy floats are —
+    # as scalars and inside lists, with the same 32-bit range policy
+    p["npint"] = np.int64(8)
+    assert p["npint"] == 8 and type(p["npint"]) is int
+    p["npbool"] = np.bool_(True)
+    assert p["npbool"] is True
+    p["npints"] = [np.int64(1), np.int64(2)]
+    assert p["npints"] == [1, 2]
+    assert all(type(v) is int for v in p["npints"])
+    try:
+        p["npbig"] = [np.int64(2 ** 40)]
+        raise AssertionError("[np.int64(2**40)] must be rejected")
     except TypeError as error:
         assert "32-bit" in str(error)
     # exact-type lists round-trip with their element type
@@ -295,6 +323,18 @@ def test_observable_lshift_chains():
     returned = (observable << 1.0) << 2.0
     assert returned is observable
     assert ngs.observable2result(observable).count == 2
+
+
+def test_observables_item_deletion():
+    from pyalps import ngs
+
+    observables = ngs.observables()
+    observables.createRealObservable("a")
+    observables.createRealObservable("b")
+    del observables["a"]
+    assert "a" not in observables and "b" in observables
+    observables.clear()
+    assert len(observables) == 0
 
 
 def test_mcbase_save_load_overrides_reach_cpp_dispatch():
@@ -385,6 +425,7 @@ if __name__ == "__main__":
         test_optional_application_extension_surface,
         test_params_mapping_equality_and_value_ladder,
         test_observable_lshift_chains,
+        test_observables_item_deletion,
         test_mcbase_save_load_overrides_reach_cpp_dispatch,
         test_accumulator_result_inplace_identity,
     ):

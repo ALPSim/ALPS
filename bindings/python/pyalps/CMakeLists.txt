@@ -127,15 +127,24 @@ if(PYALPS_BUILD_APPLICATIONS)
   target_include_directories(dwa_c PRIVATE "${_alps_source_root}/applications/qmc/dwa")
 endif()
 
+# Compile the bindings with the same preprocessor configuration the
+# ALPS SDK was built with (BOOST_NO_AUTO_PTR and friends), so the Boost
+# headers on both sides of the library boundary are configured
+# identically. The -D entries are lifted from the exported
+# ALPS_CMAKE_CXX_FLAGS rather than hand-copied from the root
+# CMakeLists, so a define added there cannot silently desync.
+separate_arguments(_alps_sdk_cxx_flags NATIVE_COMMAND "${ALPS_CMAKE_CXX_FLAGS}")
+set(_alps_sdk_definitions "")
+foreach(_flag IN LISTS _alps_sdk_cxx_flags)
+  if(_flag MATCHES "^-D(.+)$")
+    list(APPEND _alps_sdk_definitions "${CMAKE_MATCH_1}")
+  endif()
+endforeach()
+
 foreach(_target IN LISTS _pyalps_targets)
-  # Mirror the Boost configuration macros libalps is compiled with
-  # (root CMakeLists.txt, CMAKE_CXX_FLAGS) so the Boost headers both
-  # sides of the ALPS library boundary include are configured
-  # identically.
-  target_compile_definitions(${_target} PRIVATE
-    BOOST_NO_AUTO_PTR
-    BOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF
-    BOOST_TIMER_ENABLE_DEPRECATED)
+  if(_alps_sdk_definitions)
+    target_compile_definitions(${_target} PRIVATE ${_alps_sdk_definitions})
+  endif()
   target_include_directories(${_target} PRIVATE
     ${ALPS_INCLUDE_DIRS}
     ${ALPS_EXTRA_INCLUDE_DIRS})

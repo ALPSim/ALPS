@@ -21,7 +21,6 @@
 namespace alps {
     namespace detail {
 
-
         struct paramvalue_saver: public boost::static_visitor<> {
 
             paramvalue_saver(hdf5::archive & a)
@@ -31,7 +30,6 @@ namespace alps {
             template<typename T> void operator()(T const & v) const {
                 ar[""] << v;
             }
-            
 
             hdf5::archive & ar;
         };
@@ -44,7 +42,6 @@ namespace alps {
                 template <typename U> void operator()(U const & v) const {
                     os << short_print(v);
                 }
-                
 
             private:
 

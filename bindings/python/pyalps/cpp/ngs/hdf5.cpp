@@ -27,6 +27,8 @@
 #include <complex>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
+#include <cstring>
 #include <limits>
 #include <stdexcept>
 #include <string>
@@ -45,44 +47,47 @@ namespace alps {
         struct list_vectorizer {
             enum class leaf_kind { none, integral, floating, cplx, text };
             std::vector<std::size_t> extent;   // rectangular extents per depth
-            std::ptrdiff_t leaf_depth = -1;
-            leaf_kind kind = leaf_kind::none;
+            leaf_kind kind = leaf_kind::none;  // != none also means "a leaf was seen"
             std::vector<long long> ints;
             std::vector<double> reals;
             std::vector<std::complex<double>> cplxs;
             std::vector<std::string> texts;
             bool fits_int = true;
             bool analyze(nb::handle node, std::size_t depth) {
-                nb::object seq = nb::borrow<nb::object>(node);
-                std::size_t const n = nb::len(seq);
+                std::size_t const n = nb::len(node);
                 if (depth == extent.size())
                     extent.push_back(n);
                 else if (extent[depth] != n)
                     return false;                                   // ragged
                 for (std::size_t i = 0; i < n; ++i) {
-                    nb::object item = seq[i];
-                    PyObject * p = item.ptr();
-                    if (PyBool_Check(p))
+                    nb::object item = node[i];
+                    PyObject * raw = item.ptr();
+                    if (PyBool_Check(raw))
                         return false;         // legacy: bool never vectorizes
-                    if (PyList_Check(p) || PyTuple_Check(p)) {
-                        // a sequence may not appear at the leaf level
-                        if (leaf_depth != -1
-                            && static_cast<std::ptrdiff_t>(depth + 1) >= leaf_depth)
+                    if (PyList_Check(raw) || PyTuple_Check(raw)) {
+                        // once a leaf has fixed the depth (extent can no
+                        // longer grow), sequences may not appear at or
+                        // below the leaf level
+                        if (kind != leaf_kind::none && depth + 1 >= extent.size())
                             return false;
                         if (!analyze(item, depth + 1))
                             return false;
                         continue;
                     }
-                    // scalar leaf: all leaves must sit at one depth
-                    if (leaf_depth == -1) {
-                        if (extent.size() != depth + 1)
-                            return false;
-                        leaf_depth = static_cast<std::ptrdiff_t>(depth + 1);
-                    } else if (leaf_depth != static_cast<std::ptrdiff_t>(depth + 1))
+                    // scalar leaf: all leaves sit at one depth — the
+                    // deepest extent recorded so far
+                    if (depth + 1 != extent.size())
                         return false;
-                    if (PyLong_Check(p)) {
+                    // Exact numeric types only, mirroring the legacy
+                    // tp_name dispatch: numpy scalars (np.float64 and
+                    // np.complex128 included, although they subclass the
+                    // builtins) take the numpy-stacking path below,
+                    // which preserves their dtype like the legacy
+                    // scalar_types table did. str accepts subclasses —
+                    // np.str_ was a legacy string dtype too.
+                    if (PyLong_Check(raw)) {   // np ints don't subclass int
                         int overflow = 0;
-                        long long v = PyLong_AsLongLongAndOverflow(p, &overflow);
+                        long long v = PyLong_AsLongLongAndOverflow(raw, &overflow);
                         if (overflow)
                             return false;   // → descent; the per-element save raises, like legacy
                         if (!accept(leaf_kind::integral))
@@ -90,18 +95,16 @@ namespace alps {
                         if (v < std::numeric_limits<int>::min() || v > std::numeric_limits<int>::max())
                             fits_int = false;
                         ints.push_back(v);
-                    } else if (PyFloat_Check(p)) {
-                        // includes numpy.float64, which subclasses float
+                    } else if (PyFloat_CheckExact(raw)) {
                         if (!accept(leaf_kind::floating))
                             return false;
-                        reals.push_back(PyFloat_AsDouble(p));
-                    } else if (PyComplex_Check(p)) {
-                        // includes numpy.complex128, which subclasses complex
+                        reals.push_back(PyFloat_AsDouble(raw));
+                    } else if (PyComplex_CheckExact(raw)) {
                         if (!accept(leaf_kind::cplx))
                             return false;
-                        Py_complex c = PyComplex_AsCComplex(p);
+                        Py_complex c = PyComplex_AsCComplex(raw);
                         cplxs.emplace_back(c.real, c.imag);
-                    } else if (PyUnicode_Check(p)) {
+                    } else if (PyUnicode_Check(raw)) {
                         if (!accept(leaf_kind::text))
                             return false;
                         texts.push_back(nb::cast<std::string>(item));
@@ -171,13 +174,16 @@ namespace alps {
                         case list_vectorizer::leaf_kind::none:
                             break;   // e.g. [[], []] → group descent
                     }
-                } else if (all_ndarrays(l)) {
-                    // Legacy stacked equal-shape numpy arrays into one
-                    // dataset; delegate to numpy so shape checking and
-                    // dtype promotion match numpy's rules, then feed
+                } else if (numpy_stackable(l)) {
+                    // Legacy vectorized numpy content too: homogeneous
+                    // numpy-scalar lists (numpy.int64 etc. were
+                    // scalar_types entries) and rectangular trees
+                    // mixing ndarrays with nested sequences all became
+                    // one dataset. Delegate to numpy so shape checking
+                    // and dtype handling match numpy's rules, then feed
                     // the stacked array through the ndarray save path.
-                    // Ragged shapes (numpy raises) and object dtype
-                    // fall through to the group descent below.
+                    // Ragged shapes (numpy raises) and non-numeric
+                    // dtypes fall through to the group descent below.
                     nb::object arr;
                     try {
                         arr = nb::borrow<nb::object>(alps::python::numpy_module())
@@ -186,10 +192,10 @@ namespace alps {
                         arr = nb::object();
                     }
                     if (arr.is_valid()) {
-                        std::string dtype_kind =
+                        std::string const dtype_kind =
                             nb::cast<std::string>(arr.attr("dtype").attr("kind"));
-                        if (dtype_kind.find_first_of("biufc") != std::string::npos
-                            && dtype_kind.size() == 1) {
+                        if (dtype_kind.size() == 1
+                            && std::strchr("biufc", dtype_kind[0])) {
                             hdf5_save_py11_visitor child_visitor{ar, path};
                             extract_from_pyobject_py11(child_visitor, arr);
                             return;
@@ -199,6 +205,10 @@ namespace alps {
                 // Heterogeneous / ragged / bool-containing — recurse
                 // per-element into <path>/<index>, letting each entry
                 // be stored as its own native type (legacy behaviour).
+                // Legacy wiped any existing group before a list save;
+                // create_group alone would keep stale children around.
+                if (ar.is_group(path))
+                    ar.delete_group(path);
                 ar.create_group(path);
                 Py_ssize_t i = 0;
                 for (auto item : l) {
@@ -207,16 +217,73 @@ namespace alps {
                     extract_from_pyobject_py11(child_visitor, item);
                 }
             }
-            static bool all_ndarrays(nb::list const & l) {
-                for (auto item : l)
-                    if (std::string(item.ptr()->ob_type->tp_name) != "numpy.ndarray")
+            static bool is_ndarray(PyObject * raw) {
+                return std::strcmp(Py_TYPE(raw)->tp_name, "numpy.ndarray") == 0;
+            }
+            struct tree_scan {
+                bool has_ndarray = false;
+                bool has_bool_leaf = false;
+            };
+            static void scan_tree(nb::handle node, tree_scan & scan) {
+                std::size_t const n = nb::len(node);
+                for (std::size_t i = 0; i < n; ++i) {
+                    nb::object item = node[i];
+                    PyObject * raw = item.ptr();
+                    if (is_ndarray(raw))
+                        scan.has_ndarray = true;
+                    else if (PyList_Check(raw) || PyTuple_Check(raw))
+                        scan_tree(item, scan);
+                    else if (PyBool_Check(raw)
+                             || std::strncmp(Py_TYPE(raw)->tp_name, "numpy.bool", 10) == 0)
+                        scan.has_bool_leaf = true;
+                    if (scan.has_bool_leaf)
+                        return;   // verdict fixed: bool leaves veto stacking
+                }
+            }
+            // The list shapes the legacy build stacked into one
+            // dataset beyond plain scalars: (a) numpy scalars of ONE
+            // type (exact tp_name match, like legacy scalar_types), or
+            // (b) sequences/ndarrays only, with an ndarray somewhere in
+            // the tree (legacy vectorized extent-matched mixes of
+            // list/tuple/ndarray nodes) — but never when a plain bool
+            // sits among the leaves, which numpy would silently promote
+            // to 0/1. Pure-list trees never reach (b) — their
+            // exact-type handling stays with list_vectorizer.
+            static bool numpy_stackable(nb::list const & l) {
+                char const * first_scalar = nullptr;
+                bool scalars_only = true;
+                bool sequences_only = true;
+                for (auto item : l) {
+                    PyObject * raw = item.ptr();
+                    char const * tp = Py_TYPE(raw)->tp_name;
+                    if (is_ndarray(raw) || PyList_Check(raw) || PyTuple_Check(raw)) {
+                        scalars_only = false;
+                        continue;
+                    }
+                    sequences_only = false;
+                    if (std::strncmp(tp, "numpy.", 6) != 0)
                         return false;
-                return true;
+                    if (!first_scalar)
+                        first_scalar = tp;
+                    else if (std::strcmp(tp, first_scalar) != 0)
+                        return false;
+                }
+                if (scalars_only && first_scalar)
+                    return true;
+                if (!sequences_only)
+                    return false;
+                tree_scan scan;
+                scan_tree(l, scan);
+                return scan.has_ndarray && !scan.has_bool_leaf;
             }
             void operator()(nb::dict const & d) const {
                 // Store a dict as a group with one child per key. Keys
                 // are stringified (HDF5 paths are strings), values go
-                // through the same save dispatch recursively.
+                // through the same save dispatch recursively. Like the
+                // list descent above (and the legacy build), wipe an
+                // existing group first so stale keys don't survive.
+                if (ar.is_group(path))
+                    ar.delete_group(path);
                 ar.create_group(path);
                 for (auto item : d) {
                     std::string key = nb::cast<std::string>(nb::str(item.first));
@@ -266,21 +333,40 @@ namespace alps {
         nb::object python_hdf5_load_impl(alps::hdf5::archive & ar,
                                          std::string const & path) {
             // Groups (not datasets) get loaded recursively. Children
-            // whose names are consecutive decimal integers starting at 0
-            // are recovered as a Python list (preserving round-trip for
-            // list-saved-as-group); otherwise a dict.
+            // whose names are exactly the decimal integers 0..n-1 are
+            // recovered as a Python list (preserving round-trip for
+            // list-saved-as-group); otherwise a dict. The backend
+            // yields child names in lexicographic order ("0", "1",
+            // "10", "2", ...), so the check is on the name SET and the
+            // list is loaded in numeric order — the legacy loader was
+            // order-insensitive the same way, indexing
+            // value[cast<size_t>(name)].
             if (ar.is_group(path)) {
                 auto children = ar.list_children(path);
                 bool list_shaped = true;
-                for (std::size_t i = 0; list_shaped && i < children.size(); ++i) {
-                    if (children[i] != std::to_string(i))
+                std::vector<bool> seen(children.size(), false);
+                for (auto const & child : children) {
+                    bool numeric = !child.empty() && child.size() < 20;
+                    for (char c : child)
+                        if (c < '0' || c > '9') {
+                            numeric = false;
+                            break;
+                        }
+                    std::size_t index = numeric
+                        ? static_cast<std::size_t>(std::strtoull(child.c_str(), nullptr, 10))
+                        : 0;
+                    if (!numeric || std::to_string(index) != child
+                        || index >= children.size() || seen[index]) {
                         list_shaped = false;
+                        break;
+                    }
+                    seen[index] = true;
                 }
                 if (list_shaped) {
                     nb::list result;
-                    for (auto const & child : children)
+                    for (std::size_t i = 0; i < children.size(); ++i)
                         result.append(
-                            python_hdf5_load_impl(ar, path + "/" + child));
+                            python_hdf5_load_impl(ar, path + "/" + std::to_string(i)));
                     return nb::object(std::move(result));
                 } else {
                     nb::dict result;

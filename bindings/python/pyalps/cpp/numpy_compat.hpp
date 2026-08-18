@@ -12,6 +12,7 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
 #include <nanobind/stl/string.h>
+#include <atomic>
 #include <complex>
 #include <cstddef>
 #include <cstdint>
@@ -40,11 +41,26 @@ namespace alps {
         template <> struct numpy_dtype<std::complex<double>> { static constexpr char const* name = "complex128"; };
         // Cached numpy module. Importing per call was a sys.modules
         // lookup + import-lock acquisition on every array conversion.
-        // The reference is deliberately leaked: a static nb_::object
-        // would decref during static destruction, potentially after
-        // interpreter finalization.
+        // Not a function-local static: the winning thread's import can
+        // release the GIL, so blocking a GIL-holding second thread on
+        // the C++ static-init guard would deadlock. With the atomic
+        // double-check, racing first callers both import (idempotent
+        // under the import lock) and the loser drops its reference.
+        // The winning reference is deliberately leaked so it stays
+        // valid until interpreter shutdown regardless of static
+        // destruction order.
         inline nb_::handle numpy_module() {
-            static PyObject * mod = nb_::module_::import_("numpy").release().ptr();
+            static std::atomic<PyObject *> cached{nullptr};
+            PyObject * mod = cached.load(std::memory_order_acquire);
+            if (!mod) {
+                mod = nb_::module_::import_("numpy").release().ptr();
+                PyObject * expected = nullptr;
+                if (!cached.compare_exchange_strong(expected, mod,
+                                                    std::memory_order_acq_rel)) {
+                    Py_DECREF(mod);
+                    mod = expected;
+                }
+            }
             return mod;
         }
         // Allocates numpy.empty(shape, dtype=numpy_dtype<T>::name) and
@@ -55,13 +71,18 @@ namespace alps {
                                             std::vector<std::size_t> const& shape) {
             nb_::handle np = numpy_module();
             nb_::tuple shape_tuple = nb_::steal<nb_::tuple>(PyTuple_New(static_cast<Py_ssize_t>(shape.size())));
+            if (!shape_tuple.is_valid())
+                throw nb_::python_error();
             // PyTuple_SetItem (not the SET_ITEM macro): the macro pokes
             // tuple internals directly and is unavailable under the
             // limited API, which is otherwise within reach for these
-            // bindings.
-            for (std::size_t i = 0; i < shape.size(); ++i)
-                PyTuple_SetItem(shape_tuple.ptr(), static_cast<Py_ssize_t>(i),
-                                PyLong_FromUnsignedLongLong(shape[i]));
+            // bindings. SetItem steals the reference to dim.
+            for (std::size_t i = 0; i < shape.size(); ++i) {
+                PyObject * dim = PyLong_FromUnsignedLongLong(shape[i]);
+                if (!dim)
+                    throw nb_::python_error();
+                PyTuple_SetItem(shape_tuple.ptr(), static_cast<Py_ssize_t>(i), dim);
+            }
             nb_::object arr = np.attr("empty")(
                 shape_tuple, nb_::arg("dtype") = numpy_dtype<T>::name);
             // Bridge the freshly-allocated numpy buffer through nb::ndarray

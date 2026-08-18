@@ -31,8 +31,6 @@
 #include <boost/accumulators/numeric/functional/vector.hpp>
 #include <boost/parameter.hpp>
 
-
-
 #include <vector>
 #include <iostream>
 #include <iterator>

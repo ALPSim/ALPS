@@ -23,7 +23,6 @@
 #include <alps/ngs/mcobservables.hpp> // TODO: replace by new alea
 #include <alps/ngs/thread_exceptions.hpp>
 
-
 #include <alps/random/mersenne_twister.hpp>
 
 #include <boost/function.hpp>
@@ -142,7 +141,6 @@ namespace alps {
                 return !stop_callback();
             }
 
-
             result_names_type result_names() const {
                 result_names_type names;
                 
@@ -251,7 +249,6 @@ namespace alps {
             mutex mutable result_mutex;
 
         private:
-        
 
             status_type m_status;
     };

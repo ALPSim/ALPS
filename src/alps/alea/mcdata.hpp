@@ -60,7 +60,6 @@
 #include <numeric>
 #include <iostream>
 
-
 namespace alps { 
     namespace alea {
 
@@ -152,7 +151,6 @@ namespace alps {
                     , mean_(mean)
                     , error_(error)
                 {}
-
 
                 std::size_t size() const { return bins().size();}
           

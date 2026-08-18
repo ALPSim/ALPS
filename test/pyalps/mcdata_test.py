@@ -22,8 +22,8 @@ import numpy as np
 
 
 def assert_scalar(value, mean, error):
-    assert np.isclose(value.mean, mean, rtol=1e-9), (value.mean, mean)
-    assert np.isclose(value.error, error, rtol=1e-9), (value.error, error)
+    np.testing.assert_allclose(value.mean, mean, rtol=1e-9)
+    np.testing.assert_allclose(value.error, error, rtol=1e-9)
 
 
 def assert_vector(value, means, errors):

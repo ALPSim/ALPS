@@ -19,7 +19,6 @@
 #include <alps/numeric/vector_functions.hpp>
 #include <alps/type_traits/element_type.hpp>
 
-
 #include <boost/type_traits.hpp>
 #include <iostream>
 #include <iomanip>

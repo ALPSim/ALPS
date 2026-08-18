@@ -38,7 +38,6 @@ namespace alps {
         }
     }
 
-
     std::size_t params::size() const {
         return keys.size();
     }

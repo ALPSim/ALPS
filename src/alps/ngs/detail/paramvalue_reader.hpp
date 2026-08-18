@@ -19,7 +19,6 @@
 
 #include <boost/variant.hpp>
 
-
 namespace alps {
     namespace detail {
 
@@ -32,7 +31,6 @@ namespace alps {
             template <typename U> void operator()(U * const, std::vector<std::size_t>) {
                 throw std::runtime_error(std::string("cannot cast from std::vector<") + typeid(U).name() + "> to " + typeid(T).name() + ALPS_STACKTRACE);
             }
-
 
             T value;
         };
@@ -51,7 +49,6 @@ namespace alps {
                         (*this)(*it);
             }
 
-
             std::vector<T> value;
         };
 
@@ -68,7 +65,6 @@ namespace alps {
                     for (U const * it = ptr; it != ptr + size[0]; ++it)
                         value += (it == ptr ? "," : "") + cast<std::string>(*it);
             }
-
 
             std::string value;
         };
@@ -89,7 +85,6 @@ namespace alps {
                 void operator()(T const & v) const {
                     visitor.value = v; 
                 }
-
 
                 T const & get_value() {
                     return visitor.value;

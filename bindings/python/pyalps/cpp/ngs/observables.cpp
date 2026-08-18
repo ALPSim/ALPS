@@ -85,6 +85,14 @@ NB_MODULE(pyngsobservables_c, m) {
         .def("__setitem__",  [](alps::mcobservables & self, std::string const & k, alps::mcobservable const & v) {
                                  self.insert(k, v);
                              })
+        // mcobservables derives publicly from std::map; item deletion
+        // restores what the legacy map_indexing_suite provided (and
+        // what the MutableMapping mixins pop/popitem/clear need).
+        .def("__delitem__",  [](alps::mcobservables & self, std::string const & k) {
+                                 if (!self.has(k))
+                                     throw nb::key_error(k.c_str());
+                                 self.erase(k);
+                             })
         .def("__iter__",     [](alps::mcobservables & self) {
                                  return nb::make_key_iterator(nb::type<alps::mcobservables>(), "key_iterator", self.begin(), self.end());
                              },

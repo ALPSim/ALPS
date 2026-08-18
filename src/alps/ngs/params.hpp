@@ -20,7 +20,6 @@
 #include <alps/ngs/detail/paramproxy.hpp>
 #include <alps/ngs/detail/paramiterator.hpp>
 
-
 #include <boost/filesystem.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/vector.hpp>
@@ -59,7 +58,6 @@ namespace alps {
             params(hdf5::archive ar, std::string const & path = "/parameters");
 
             params(boost::filesystem::path const &);
-
 
             std::size_t size() const;
 

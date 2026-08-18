@@ -44,13 +44,18 @@ void params_setitem(alps::params & self, nb::object const & key_obj, nb::object 
 }
 nb::object params_getitem(alps::params & self, nb::object const & key_obj) {
     std::string key = nb::cast<std::string>(nb::str(key_obj));
+    // defined() answers the (common) miss with one map lookup;
+    // paramiterator steps re-do a map find each, so walking the whole
+    // container to conclude "absent" would be much slower.
+    if (!self.defined(key))
+        return nb::none();
     // params doesn't expose the underlying map directly, but
-    // paramiterator yields (key, paramvalue) pairs; a single walk both
-    // answers "defined?" and hands the variant to paramvalue_to_py.
+    // paramiterator yields (key, paramvalue) pairs; walk it to find the
+    // entry and hand the variant to paramvalue_to_py.
     for (auto it = self.begin(); it != self.end(); ++it)
         if (it->first == key)
             return paramvalue_to_py(it->second);
-    return nb::none();
+    return nb::none();  // defensive — defined()==true should guarantee a hit
 }
 void params_delitem(alps::params & self, nb::object const & key_obj) {
     self.erase(nb::cast<std::string>(nb::str(key_obj)));
