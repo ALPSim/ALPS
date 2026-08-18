@@ -243,6 +243,117 @@ def test_current_python_numpy_and_scipy_compatibility(monkeypatch):
     assert isinstance(steady["value"], (bool, np.bool_))
 
 
+def test_params_mapping_equality_and_value_ladder():
+    from pyalps import ngs
+
+    # MutableMapping equality — lost by the old hasattr-guarded shim,
+    # present under the Boost.Python __bases__ inheritance
+    assert ngs.params({"a": 1}) == ngs.params({"a": 1})
+    assert ngs.params({"a": 1}) != ngs.params({"a": 2})
+    assert ngs.params({"a": 1}) == {"a": 1}
+    # and, like a Mapping with __eq__, unhashable
+    try:
+        hash(ngs.params({}))
+        raise AssertionError("params must be unhashable")
+    except TypeError:
+        pass
+
+    p = ngs.params({})
+    # None is rejected with a message that says so
+    try:
+        p["x"] = None
+        raise AssertionError("None must be rejected")
+    except TypeError as error:
+        assert "None" in str(error)
+    # oversized integers raise instead of truncating silently
+    try:
+        p["n"] = 2 ** 40
+        raise AssertionError("2**40 must be rejected")
+    except TypeError as error:
+        assert "32-bit" in str(error)
+    # exact-type lists round-trip with their element type
+    p["ilist"] = [1, 2, 3]
+    assert p["ilist"] == [1, 2, 3]
+    assert all(type(v) is int for v in p["ilist"])
+    p["flist"] = [1.5, 2.5]
+    assert p["flist"] == [1.5, 2.5]
+    p["slist"] = ["a", "b"]
+    assert p["slist"] == ["a", "b"]
+    # mixed numeric lists widen to double; complex scalars are stored
+    p["mixed"] = [1, 2.5]
+    assert p["mixed"] == [1.0, 2.5]
+    p["cplx"] = 1 + 2j
+    assert p["cplx"] == 1 + 2j
+
+
+def test_observable_lshift_chains():
+    from pyalps import ngs
+
+    observables = ngs.observables()
+    observables.createRealObservable("chain")
+    observable = observables["chain"]
+    returned = (observable << 1.0) << 2.0
+    assert returned is observable
+    assert ngs.observable2result(observable).count == 2
+
+
+def test_mcbase_save_load_overrides_reach_cpp_dispatch():
+    from pyalps import ngs
+    from pyalps.cxx import pyngshdf5_c
+
+    calls = []
+
+    class Simulation(ngs.mcbase):
+        def update(self):
+            pass
+
+        def measure(self):
+            pass
+
+        def fraction_completed(self):
+            return 1.0
+
+        def save(self, archive):
+            calls.append("save")
+            super().save(archive)
+
+        def load(self, archive):
+            calls.append("load")
+            super().load(archive)
+
+    simulation = Simulation({"SEED": 42})
+    # the base save/load expects a non-empty measurements container
+    simulation.measurements << ngs.RealObservable("energy")
+    simulation.measurements["energy"] << 1.0
+    with tempfile.TemporaryDirectory() as directory:
+        path = os.path.join(directory, "checkpoint.h5")
+        archive = pyngshdf5_c.hdf5_archive_impl(path, "w")
+        # Call through the base binding: this goes through C++ virtual
+        # dispatch — the same path any C++-side checkpoint takes — and
+        # must reach the Python override (trampoline forwards save/load).
+        ngs.mcbase.save(simulation, archive)
+        del archive
+        assert calls == ["save"]
+
+        archive = pyngshdf5_c.hdf5_archive_impl(path, "r")
+        ngs.mcbase.load(simulation, archive)
+        del archive
+        assert calls == ["save", "load"]
+
+
+def test_accumulator_result_inplace_identity():
+    from pyalps.cxx.pyngsaccumulator_c import error_accumulator
+
+    accumulator = error_accumulator()
+    accumulator(1.0)
+    accumulator(2.0)
+    result = accumulator.result()
+    alias = result
+    alias += 1.0
+    assert alias is result
+    assert np.isclose(result.mean(), 2.5)
+
+
 def test_python3_property_comparison(monkeypatch):
     import pyalps
     import pyalps.apptest as apptest
@@ -272,6 +383,10 @@ if __name__ == "__main__":
         test_name_encoding_roundtrip,
         test_accumulator_surface,
         test_optional_application_extension_surface,
+        test_params_mapping_equality_and_value_ladder,
+        test_observable_lshift_chains,
+        test_mcbase_save_load_overrides_reach_cpp_dispatch,
+        test_accumulator_result_inplace_identity,
     ):
         test()
     print("pyalps binding surface: green")
