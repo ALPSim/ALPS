@@ -4,23 +4,8 @@
 *
 * Copyright (C) 2003-2010 by Sergei Isakov <isakov@itp.phys.ethz.ch>
 *
-* Permission is hereby granted, free of charge, to any person obtaining
-* a copy of this software and associated documentation files (the “Software”),
-* to deal in the Software without restriction, including without limitation
-* the rights to use, copy, modify, merge, publish, distribute, sublicense,
-* and/or sell copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included
-* in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS
-* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-* DEALINGS IN THE SOFTWARE.
+* ALPS Project: https://alps.comp-phys.org/
+* SPDX-License-Identifier: MIT
 *
 *****************************************************************************/
 
@@ -90,19 +75,6 @@ public:
     _lowering_matrix_elements.resize(lattice.max_site_type() + 1);
 
     construct_vertices();
-
-    if (epsilon <= 0.0 && model.is_signed()) {
-        epsilon = *std::max_element(
-            _max_diag_me.begin(),
-            _max_diag_me.end()
-        );
-
-        std::cout
-            << "Warning: Hamiltonian has a sign problem and EPSILON<=0.\n"
-            << "Automatically setting EPSILON = "
-            << epsilon
-            << " (largest diagonal matrix element).\n";
-    }
 	}
     
     std::vector<unsigned> const& nbstates() const
@@ -289,8 +261,7 @@ private:
             unsigned nneighbors0 = lattice.nneighbors(sites[0]);
             unsigned nneighbors1 = lattice.nneighbors(sites[1]);
             
-            // _max_diag_me[i] = std::numeric_limits<double>::min();
-	    _max_diag_me[i] = std::numeric_limits<double>::lowest();
+            _max_diag_me[i] = std::numeric_limits<double>::lowest();
             
             for (unsigned l = 0; l < nstates[i]; ++l) {
                 vertex_type vertex;
@@ -339,9 +310,26 @@ private:
         if (epsilon == 0.0 && !have_diagonal)
             throw std::runtime_error("Hamiltonian looks purely off-diagonal. "
                 "Parameter EPSILON has to be non zero for SSE to work.");
-                
-        if (epsilon <= 0.0)
-            epsilon = 1e-6;
+        if (epsilon <= 0.0) {
+            if (model.is_signed()) {
+                // A tiny EPSILON can make the diagonal update effectively
+                // non-ergodic for signed models. Use the largest positive
+                // diagonal matrix element once those elements are known.
+                epsilon = 1e-6;
+                for (std::vector<double>::const_iterator it = _max_diag_me.begin();
+                        it != _max_diag_me.end(); ++it)
+                    if (*it > epsilon)
+                        epsilon = *it;
+
+                std::cout
+                    << "Warning: Hamiltonian has a sign problem and EPSILON<=0.\n"
+                    << "Automatically setting EPSILON = " << epsilon
+                    << " (largest positive diagonal matrix element, with a "
+                       "1e-6 minimum).\n";
+            } else {
+                epsilon = 1e-6;
+            }
+        }
         
         std::set<unsigned>::const_iterator sti = site_types.begin();
         for (; sti != site_types.end(); ++sti)

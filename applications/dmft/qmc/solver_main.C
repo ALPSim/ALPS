@@ -8,23 +8,8 @@
  *                              Matthias Troyer <troyer@comp-phys.org>
  *
  *
-* Permission is hereby granted, free of charge, to any person obtaining
-* a copy of this software and associated documentation files (the “Software”),
-* to deal in the Software without restriction, including without limitation
-* the rights to use, copy, modify, merge, publish, distribute, sublicense,
-* and/or sell copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included
-* in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS
-* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-* DEALINGS IN THE SOFTWARE.
+* ALPS Project: https://alps.comp-phys.org/
+* SPDX-License-Identifier: MIT
  *
  *****************************************************************************/
 
@@ -44,7 +29,15 @@ bool parse_options(int argc, char** argv, std::string& infile, std::string& outf
 {
 	std::cout << "ALPS Hirsch-Fye solver for the single site impurity problem.\n\n";
 	alps::print_copyright(std::cout);
-	
+
+	std::cout << "****************************************************************"<<std::endl;
+	std::cout << "* Recommended citation in scientific publications:             *"<<std::endl;
+	std::cout << "* We used the ALPS [1] implementation [2] of the Hirsch-Fye    *"<<std::endl;
+	std::cout << "* [3] impurity solver.                                         *"<<std::endl;
+	std::cout << "* [1] JSTAT (2011) P05001; [2] CPC 182, 1078 (2011); [3] PRL   *"<<std::endl;
+	std::cout << "* 56, 2521 (1986).                                             *"<<std::endl;
+	std::cout << "****************************************************************"<<std::endl;
+
 	namespace po = boost::program_options;
 	
 	po::options_description desc("Allowed options");
