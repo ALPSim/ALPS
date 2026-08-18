@@ -38,9 +38,10 @@
 // libalps still declares a params(boost::python::dict) ctor in its
 // header, but we don't want to drag boost::python through the
 // nanobind bindings. Instead, we convert nb::dict → alps::params at the
-// binding boundary by iterating and setitem-ing concrete C++ values
-// (int/float/bool/str/list). That sidesteps the cross-registry issue
-// and keeps the libalps ABI untouched.
+// binding boundary through the shared ladder in ../dict_to_params.hpp,
+// so mcbase, params and the application modules ingest parameters
+// identically. That sidesteps the cross-registry issue and keeps the
+// libalps ABI untouched.
 #define PY_ARRAY_UNIQUE_SYMBOL pyngsbase_PyArrayHandle
 #include <alps/mcbase.hpp>
 #include <alps/hdf5/archive.hpp>
@@ -59,37 +60,7 @@ namespace nb = nanobind;
 #include <stdexcept>
 #include <string>
 #include <vector>
-namespace alps {
-    namespace detail {
-        // Convert a Python dict into an alps::params, extracting concrete
-        // C++ values for each entry. This mirrors what the libalps
-        // params(boost::python::dict) ctor does, but without routing the
-        // nb::object through the boost::python::object variant alternative
-        // — everything stays within the nanobind type registry.
-        inline alps::params py_dict_to_params(nb::dict const & d) {
-            alps::params p;
-            for (auto item : d) {
-                std::string k = nb::cast<std::string>(nb::str(item.first));
-                nb::handle v = item.second;
-                if (nb::isinstance<nb::bool_>(v))
-                    p[k] = nb::cast<bool>(v);
-                else if (nb::isinstance<nb::int_>(v))
-                    p[k] = nb::cast<int>(v);
-                else if (nb::isinstance<nb::float_>(v))
-                    p[k] = nb::cast<double>(v);
-                else if (nb::isinstance<nb::str>(v))
-                    p[k] = nb::cast<std::string>(v);
-                else if (nb::isinstance<nb::list>(v) || nb::isinstance<nb::tuple>(v))
-                    p[k] = nb::cast<std::vector<double>>(v);
-                else
-                    throw nb::type_error((
-                        "unsupported type for key '" + k +
-                        "' in params dict (expected bool/int/float/str/list)").c_str());
-            }
-            return p;
-        }
-    }
-}
+#include "../dict_to_params.hpp"
 namespace alps {
     // Trampoline: holds Python overrides for pure-virtuals. The
     // protected mcbase members (random / parameters / measurements)
@@ -98,16 +69,21 @@ namespace alps {
     // class's own member functions / friends).
     class PyMCBase : public mcbase {
         public:
-            NB_TRAMPOLINE(mcbase, 3);
+            // Slot count = the number of NB_OVERRIDE* calls below.
+            // mcbase (src/alps/mcbase.hpp) declares five virtuals:
+            // update / measure / fraction_completed (pure) and
+            // save(archive&) / load(archive&); all five must be
+            // forwarded so Python overrides are seen by C++ callers.
+            NB_TRAMPOLINE(mcbase, 5);
             #ifdef ALPS_HAVE_MPI
                 PyMCBase(nb::dict const & arg,
                          std::size_t seed_offset = 42,
                          boost::mpi::communicator const & /*comm*/ = boost::mpi::communicator())
-                    : mcbase(alps::detail::py_dict_to_params(arg), seed_offset)
+                    : mcbase(pyalps::params_from_dict(arg), seed_offset)
                 {}
             #else
                 PyMCBase(nb::dict const & arg, std::size_t seed_offset = 42)
-                    : mcbase(alps::detail::py_dict_to_params(arg), seed_offset)
+                    : mcbase(pyalps::params_from_dict(arg), seed_offset)
                 {}
             #endif
             void update() override {
@@ -118,6 +94,14 @@ namespace alps {
             }
             double fraction_completed() const override {
                 NB_OVERRIDE_PURE(fraction_completed);
+            }
+            // Non-pure: fall through to the C++ implementation when the
+            // Python subclass doesn't override (NB_OVERRIDE, not _PURE).
+            void save(alps::hdf5::archive & ar) const override {
+                NB_OVERRIDE(save, ar);
+            }
+            void load(alps::hdf5::archive & ar) override {
+                NB_OVERRIDE(load, ar);
             }
             // Accessors for protected mcbase members. Called from the
             // binding lambdas below (they friend-in through PyMCBase).

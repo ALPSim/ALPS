@@ -124,6 +124,14 @@ if(PYALPS_BUILD_APPLICATIONS)
 endif()
 
 foreach(_target IN LISTS _pyalps_targets)
+  # Mirror the Boost configuration macros libalps is compiled with
+  # (root CMakeLists.txt, CMAKE_CXX_FLAGS) so the Boost headers both
+  # sides of the ALPS library boundary include are configured
+  # identically.
+  target_compile_definitions(${_target} PRIVATE
+    BOOST_NO_AUTO_PTR
+    BOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF
+    BOOST_TIMER_ENABLE_DEPRECATED)
   target_include_directories(${_target} PRIVATE
     ${ALPS_INCLUDE_DIRS}
     ${ALPS_EXTRA_INCLUDE_DIRS})

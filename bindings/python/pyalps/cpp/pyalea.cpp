@@ -345,6 +345,14 @@ NB_MODULE(pyalea_c, m) {
     m.def("variance", &variance_vector<alps::alea::mctimeseries_view<std::vector<double>>>);
     // integrated_autocorrelation_time — scalar only. The C++ signature
     // takes the (slope, intercept) pair by const-ref.
+    //
+    // NOTE: four overloads in total — the two std::pair forms here
+    // (satisfied by any 2-tuple via <nanobind/stl/pair.h>) and the two
+    // StdPairDouble forms further down. They are disjoint today because
+    // StdPairDouble's implicit conversion to std::pair is invisible to
+    // nanobind; keep the pair overloads registered FIRST and do not add
+    // an implicitly_convertible between the two, or the dispatch order
+    // silently changes.
     m.def("integrated_autocorrelation_time",
           static_cast<double (*)(alps::alea::mctimeseries<double> const &,
                                  std::pair<double, double> const &)>(

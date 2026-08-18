@@ -62,6 +62,10 @@ void createRealVectorObservable(alps::mcobservables & self, std::string const & 
 void addObservable(alps::mcobservables & self, nb::object const & obj) {
     // Mirror boost::python::call_method<void>(obj, "addToObservables", ref(self)):
     // bounce the call back into Python, passing `self` by reference.
+    // nanobind's instance registry returns the already-registered
+    // wrapper for &self (the one this call came through, verified
+    // empirically), so the callback sees the identical Python object —
+    // no duplicate wrapper, no separate lifetime to manage.
     obj.attr("addToObservables")(nb::cast(&self, nb::rv_policy::reference));
 }
 }  // namespace

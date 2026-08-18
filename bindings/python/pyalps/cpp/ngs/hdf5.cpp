@@ -27,12 +27,95 @@
 #include <complex>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <stdexcept>
 #include <string>
 #include <vector>
 namespace nb = nanobind;
 namespace alps {
     namespace detail {
+        // Analysis of a Python list/tuple tree against the legacy
+        // Boost.Python vectorization rules (src/alps/hdf5/python.cpp,
+        // is_vectorizable_generic): a list is written as one dataset
+        // only when every leaf has the SAME exact scalar type — plain
+        // bool was never a vectorizable dtype — and all nested extents
+        // are rectangular. Everything else becomes a group with one
+        // child per index. The checked-in pyhdf5io fixture documents
+        // this contract ([1, 2, 3] must stay int32 on disk).
+        struct list_vectorizer {
+            enum class leaf_kind { none, integral, floating, cplx, text };
+            std::vector<std::size_t> extent;   // rectangular extents per depth
+            std::ptrdiff_t leaf_depth = -1;
+            leaf_kind kind = leaf_kind::none;
+            std::vector<long long> ints;
+            std::vector<double> reals;
+            std::vector<std::complex<double>> cplxs;
+            std::vector<std::string> texts;
+            bool fits_int = true;
+            bool analyze(nb::handle node, std::size_t depth) {
+                nb::object seq = nb::borrow<nb::object>(node);
+                std::size_t const n = nb::len(seq);
+                if (depth == extent.size())
+                    extent.push_back(n);
+                else if (extent[depth] != n)
+                    return false;                                   // ragged
+                for (std::size_t i = 0; i < n; ++i) {
+                    nb::object item = seq[i];
+                    PyObject * p = item.ptr();
+                    if (PyBool_Check(p))
+                        return false;         // legacy: bool never vectorizes
+                    if (PyList_Check(p) || PyTuple_Check(p)) {
+                        // a sequence may not appear at the leaf level
+                        if (leaf_depth != -1
+                            && static_cast<std::ptrdiff_t>(depth + 1) >= leaf_depth)
+                            return false;
+                        if (!analyze(item, depth + 1))
+                            return false;
+                        continue;
+                    }
+                    // scalar leaf: all leaves must sit at one depth
+                    if (leaf_depth == -1) {
+                        if (extent.size() != depth + 1)
+                            return false;
+                        leaf_depth = static_cast<std::ptrdiff_t>(depth + 1);
+                    } else if (leaf_depth != static_cast<std::ptrdiff_t>(depth + 1))
+                        return false;
+                    if (PyLong_Check(p)) {
+                        int overflow = 0;
+                        long long v = PyLong_AsLongLongAndOverflow(p, &overflow);
+                        if (overflow)
+                            return false;   // → descent; the per-element save raises, like legacy
+                        if (!accept(leaf_kind::integral))
+                            return false;
+                        if (v < std::numeric_limits<int>::min() || v > std::numeric_limits<int>::max())
+                            fits_int = false;
+                        ints.push_back(v);
+                    } else if (PyFloat_Check(p)) {
+                        // includes numpy.float64, which subclasses float
+                        if (!accept(leaf_kind::floating))
+                            return false;
+                        reals.push_back(PyFloat_AsDouble(p));
+                    } else if (PyComplex_Check(p)) {
+                        // includes numpy.complex128, which subclasses complex
+                        if (!accept(leaf_kind::cplx))
+                            return false;
+                        Py_complex c = PyComplex_AsCComplex(p);
+                        cplxs.emplace_back(c.real, c.imag);
+                    } else if (PyUnicode_Check(p)) {
+                        if (!accept(leaf_kind::text))
+                            return false;
+                        texts.push_back(nb::cast<std::string>(item));
+                    } else
+                        return false;   // numpy scalars/arrays, other objects
+                }
+                return true;
+            }
+            bool accept(leaf_kind k) {
+                if (kind == leaf_kind::none)
+                    kind = k;
+                return kind == k;       // legacy: mixed scalar kinds → group
+            }
+        };
         // Save-side visitor: receives a concrete C++ value (or a
         // nb::list / nb::dict) from extract_from_pyobject_py11 and
         // writes it to the archive at `path`.
@@ -51,25 +134,71 @@ namespace alps {
                 ar << alps::make_pvp(path, ptr, sizes);
             }
             void operator()(nb::list const & l) const {
-                // Order: flat numeric first, then nested numeric, then
-                // strings. Heterogeneous / deeply-nested / mixed-type
-                // lists fall through to the descent branch below which
-                // stores each entry under a numeric child path.
-                try { ar[path] << nb::cast<std::vector<double>>(l); return; }
-                catch (nb::cast_error const &) {}
-                try { ar[path] << nb::cast<std::vector<int>>(l); return; }
-                catch (nb::cast_error const &) {}
-                try { ar[path] << nb::cast<std::vector<std::complex<double>>>(l); return; }
-                catch (nb::cast_error const &) {}
-                try { ar[path] << nb::cast<std::vector<std::vector<double>>>(l); return; }
-                catch (nb::cast_error const &) {}
-                try { ar[path] << nb::cast<std::vector<std::vector<int>>>(l); return; }
-                catch (nb::cast_error const &) {}
-                try { ar[path] << nb::cast<std::vector<std::string>>(l); return; }
-                catch (nb::cast_error const &) {}
-                // Inhomogeneous — recurse per-element into
-                // <path>/<index>, letting each entry be stored as its
-                // own native type.
+                // Reproduce the legacy vectorization rules (see
+                // list_vectorizer above): exact-type homogeneous
+                // rectangular list trees become one N-D dataset that
+                // keeps the element type — [1, 2, 3] stays int32 on
+                // disk, floats stay float64 — while bool-containing,
+                // mixed-type and ragged lists become a group with one
+                // child per index.
+                if (nb::len(l) == 0) {
+                    // legacy wrote an empty integer dataset
+                    ar[path] << std::vector<int>();
+                    return;
+                }
+                list_vectorizer v;
+                if (v.analyze(l, 0)) {
+                    switch (v.kind) {
+                        case list_vectorizer::leaf_kind::integral:
+                            if (v.fits_int) {
+                                std::vector<int> buf(v.ints.begin(), v.ints.end());
+                                (*this)(buf.data(), v.extent);
+                            } else
+                                (*this)(v.ints.data(), v.extent);
+                            return;
+                        case list_vectorizer::leaf_kind::floating:
+                            (*this)(v.reals.data(), v.extent);
+                            return;
+                        case list_vectorizer::leaf_kind::cplx:
+                            (*this)(v.cplxs.data(), v.extent);
+                            return;
+                        case list_vectorizer::leaf_kind::text:
+                            if (v.extent.size() == 1) {
+                                ar[path] << v.texts;
+                                return;
+                            }
+                            break;   // nested string lists → group descent
+                        case list_vectorizer::leaf_kind::none:
+                            break;   // e.g. [[], []] → group descent
+                    }
+                } else if (all_ndarrays(l)) {
+                    // Legacy stacked equal-shape numpy arrays into one
+                    // dataset; delegate to numpy so shape checking and
+                    // dtype promotion match numpy's rules, then feed
+                    // the stacked array through the ndarray save path.
+                    // Ragged shapes (numpy raises) and object dtype
+                    // fall through to the group descent below.
+                    nb::object arr;
+                    try {
+                        arr = nb::borrow<nb::object>(alps::python::numpy_module())
+                                  .attr("asarray")(l);
+                    } catch (nb::python_error &) {
+                        arr = nb::object();
+                    }
+                    if (arr.is_valid()) {
+                        std::string dtype_kind =
+                            nb::cast<std::string>(arr.attr("dtype").attr("kind"));
+                        if (dtype_kind.find_first_of("biufc") != std::string::npos
+                            && dtype_kind.size() == 1) {
+                            hdf5_save_py11_visitor child_visitor{ar, path};
+                            extract_from_pyobject_py11(child_visitor, arr);
+                            return;
+                        }
+                    }
+                }
+                // Heterogeneous / ragged / bool-containing — recurse
+                // per-element into <path>/<index>, letting each entry
+                // be stored as its own native type (legacy behaviour).
                 ar.create_group(path);
                 Py_ssize_t i = 0;
                 for (auto item : l) {
@@ -77,6 +206,12 @@ namespace alps {
                     hdf5_save_py11_visitor child_visitor{ar, child};
                     extract_from_pyobject_py11(child_visitor, item);
                 }
+            }
+            static bool all_ndarrays(nb::list const & l) {
+                for (auto item : l)
+                    if (std::string(item.ptr()->ob_type->tp_name) != "numpy.ndarray")
+                        return false;
+                return true;
             }
             void operator()(nb::dict const & d) const {
                 // Store a dict as a group with one child per key. Keys
@@ -252,10 +387,14 @@ namespace alps {
             if (id < 0 || id >= static_cast<int>(exception_type.size()))
                 throw std::out_of_range(
                     "register_archive_exception_type: id out of range");
-            // Py_INCREF the incoming type so it survives past this call
-            // (we're keeping a raw PyObject* in a static array).
+            // Keep a strong reference in the static table — the entry
+            // is deliberately pinned until process exit because the
+            // translators can fire at any time — but release any
+            // previous entry so re-registration doesn't leak it.
+            PyObject * previous = exception_type[id];
             Py_INCREF(type.ptr());
             exception_type[id] = type.ptr();
+            Py_XDECREF(previous);
         }
     }
 }

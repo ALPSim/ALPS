@@ -16,10 +16,6 @@ from collections.abc import MutableMapping
 from .cxx.pyngsparams_c import params
 
 from .cxx.pyngsobservable_c import observable
-def _observable_lshift(self, other):
-    self.append(other)
-    return self
-observable.__lshift__ = _observable_lshift
 
 class RealObservable:
     def __init__(self, name, binnum = 0):
@@ -48,12 +44,17 @@ from .cxx.pyngsresults_c import results
 # Boost.Python allowed mutating extension-type base classes after creation.
 # nanobind extension types use a different allocator/deallocator layout, so
 # register them as virtual MutableMapping implementations and copy the mixin
-# methods onto the concrete classes instead.
+# methods onto the concrete classes instead. A method is copied when the
+# class doesn't provide its own — "inherited from object" counts as absent,
+# otherwise __eq__/__ne__ (which every type inherits from object) would be
+# skipped and mapping equality lost. __hash__ rides along as None, exactly
+# as MutableMapping inheritance made these types unhashable before.
 for _mapping_type in (params, observables, results):
     MutableMapping.register(_mapping_type)
     for _method in ("keys", "values", "items", "get", "pop", "popitem",
-                    "clear", "update", "setdefault", "__eq__", "__ne__"):
-        if not hasattr(_mapping_type, _method):
+                    "clear", "update", "setdefault", "__eq__", "__ne__",
+                    "__hash__"):
+        if getattr(_mapping_type, _method, None) is getattr(object, _method, None):
             setattr(_mapping_type, _method, getattr(MutableMapping, _method))
 
 from .cxx.pyngsbase_c import mcbase

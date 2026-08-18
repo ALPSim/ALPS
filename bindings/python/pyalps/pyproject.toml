@@ -1,5 +1,8 @@
 [build-system]
-requires = ["scikit-build-core>=1.0", "nanobind>=2.10"]
+# nanobind is capped below the next major: all extension modules in one
+# process must agree on the nanobind ABI, and its API/ABI may break at
+# major versions. Bump the cap deliberately, with a full test run.
+requires = ["scikit-build-core>=1.0", "nanobind>=2.10,<3"]
 build-backend = "scikit_build_core.build"
 
 [project]

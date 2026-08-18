@@ -38,17 +38,30 @@ namespace alps {
         template <> struct numpy_dtype<double>               { static constexpr char const* name = "float64"; };
         template <> struct numpy_dtype<std::complex<float>>  { static constexpr char const* name = "complex64"; };
         template <> struct numpy_dtype<std::complex<double>> { static constexpr char const* name = "complex128"; };
+        // Cached numpy module. Importing per call was a sys.modules
+        // lookup + import-lock acquisition on every array conversion.
+        // The reference is deliberately leaked: a static nb_::object
+        // would decref during static destruction, potentially after
+        // interpreter finalization.
+        inline nb_::handle numpy_module() {
+            static PyObject * mod = nb_::module_::import_("numpy").release().ptr();
+            return mod;
+        }
         // Allocates numpy.empty(shape, dtype=numpy_dtype<T>::name) and
         // memcpy's `data` (length = product(shape)) into it. Returns
         // a writable numpy.ndarray.
         template <typename T>
         inline nb_::object make_numpy_array(T const* data,
                                             std::vector<std::size_t> const& shape) {
-            nb_::object np = nb_::module_::import_("numpy");
+            nb_::handle np = numpy_module();
             nb_::tuple shape_tuple = nb_::steal<nb_::tuple>(PyTuple_New(static_cast<Py_ssize_t>(shape.size())));
+            // PyTuple_SetItem (not the SET_ITEM macro): the macro pokes
+            // tuple internals directly and is unavailable under the
+            // limited API, which is otherwise within reach for these
+            // bindings.
             for (std::size_t i = 0; i < shape.size(); ++i)
-                PyTuple_SET_ITEM(shape_tuple.ptr(), static_cast<Py_ssize_t>(i),
-                                 PyLong_FromUnsignedLongLong(shape[i]));
+                PyTuple_SetItem(shape_tuple.ptr(), static_cast<Py_ssize_t>(i),
+                                PyLong_FromUnsignedLongLong(shape[i]));
             nb_::object arr = np.attr("empty")(
                 shape_tuple, nb_::arg("dtype") = numpy_dtype<T>::name);
             // Bridge the freshly-allocated numpy buffer through nb::ndarray
@@ -84,7 +97,7 @@ namespace alps {
         // of through the numpy C headers at compile time.
         template <typename T>
         inline contiguous_view<T> as_contiguous(nb_::handle obj) {
-            nb_::object np = nb_::module_::import_("numpy");
+            nb_::handle np = numpy_module();
             nb_::object arr = np.attr("ascontiguousarray")(
                 obj, nb_::arg("dtype") = numpy_dtype<T>::name);
             auto nd = nb_::cast<nb_::ndarray<T, nb_::c_contig>>(arr);

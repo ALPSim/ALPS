@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: MIT
 #include <nanobind/nanobind.h>
 #include <nanobind/make_iterator.h>
+#include <nanobind/stl/complex.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
 #include <alps/hdf5/archive.hpp>
@@ -18,13 +19,9 @@
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
 #include <vector>
+#include "../dict_to_params.hpp"
 namespace nb = nanobind;
 namespace {
-// Convert a Python dict into an alps::params. Same shape as the
-// helper in mcbase.cpp but kept local to params.cpp so a change to
-// the dispatch (e.g. adding complex support) can stay in one place
-// alongside the other setitem logic.
-alps::params py_dict_to_params(nb::dict const & d);
 // Walk the paramvalue variant and wrap each native alternative as a
 // nb::object. Called from __getitem__.
 struct paramvalue_to_py_visitor : boost::static_visitor<nb::object> {
@@ -39,39 +36,21 @@ nb::object paramvalue_to_py(alps::detail::paramvalue const & pv) {
         static_cast<alps::detail::paramvalue_base const &>(pv));
 }
 // Deposit a native C++ value from a Python object into the paramvalue
-// via paramproxy's templated operator=.
+// via paramproxy's templated operator= — shared ladder in
+// ../dict_to_params.hpp so params, mcbase and the application modules
+// all ingest values identically.
 void params_setitem(alps::params & self, nb::object const & key_obj, nb::object const & value) {
-    std::string key = nb::cast<std::string>(nb::str(key_obj));
-    if (nb::isinstance<nb::bool_>(value))
-        self[key] = nb::cast<bool>(value);
-    else if (nb::isinstance<nb::int_>(value))
-        self[key] = nb::cast<int>(value);
-    else if (nb::isinstance<nb::float_>(value))
-        self[key] = nb::cast<double>(value);
-    else if (nb::isinstance<nb::str>(value))
-        self[key] = nb::cast<std::string>(value);
-    else if (nb::isinstance<nb::list>(value) || nb::isinstance<nb::tuple>(value)) {
-        // Heuristic: try doubles first, strings as fallback.
-        try {
-            self[key] = nb::cast<std::vector<double>>(value);
-        } catch (nb::cast_error &) {
-            self[key] = nb::cast<std::vector<std::string>>(value);
-        }
-    } else {
-        throw nb::type_error("unsupported value type for params[]");
-    }
+    pyalps::set_param_value(self, nb::cast<std::string>(nb::str(key_obj)), value);
 }
 nb::object params_getitem(alps::params & self, nb::object const & key_obj) {
     std::string key = nb::cast<std::string>(nb::str(key_obj));
-    if (!self.defined(key))
-        return nb::none();
     // params doesn't expose the underlying map directly, but
-    // paramiterator yields (key, paramvalue) pairs; walk it to find the
-    // entry and hand the variant to paramvalue_to_py.
+    // paramiterator yields (key, paramvalue) pairs; a single walk both
+    // answers "defined?" and hands the variant to paramvalue_to_py.
     for (auto it = self.begin(); it != self.end(); ++it)
         if (it->first == key)
             return paramvalue_to_py(it->second);
-    return nb::none();  // defensive — defined()==true should guarantee a hit
+    return nb::none();
 }
 void params_delitem(alps::params & self, nb::object const & key_obj) {
     self.erase(nb::cast<std::string>(nb::str(key_obj)));
@@ -97,41 +76,13 @@ std::string params_print(alps::params & self) {
 alps::params params_deepcopy(alps::params const & self, nb::handle /*memo*/) {
     return alps::params(self);
 }
-// Materialise an alps::params from a Python dict. Re-uses the same
-// type dispatch as params_setitem so a round-tripped dict-built
-// params contains exactly the same variant alternatives.
-alps::params py_dict_to_params(nb::dict const & d) {
-    alps::params p;
-    for (auto item : d) {
-        std::string k = nb::cast<std::string>(nb::str(item.first));
-        nb::handle v = item.second;
-        if (nb::isinstance<nb::bool_>(v))
-            p[k] = nb::cast<bool>(v);
-        else if (nb::isinstance<nb::int_>(v))
-            p[k] = nb::cast<int>(v);
-        else if (nb::isinstance<nb::float_>(v))
-            p[k] = nb::cast<double>(v);
-        else if (nb::isinstance<nb::str>(v))
-            p[k] = nb::cast<std::string>(v);
-        else if (nb::isinstance<nb::list>(v) || nb::isinstance<nb::tuple>(v)) {
-            try { p[k] = nb::cast<std::vector<double>>(v); }
-            catch (nb::cast_error &) {
-                p[k] = nb::cast<std::vector<std::string>>(v);
-            }
-        } else {
-            throw nb::type_error(
-                ("unsupported value type for params key '" + k + "'").c_str());
-        }
-    }
-    return p;
-}
 }  // namespace
 NB_MODULE(pyngsparams_c, m) {
     nb::class_<alps::params>(m, "params")
         .def(nb::init<>())
         .def("__init__",
              [](alps::params * self, nb::dict const & d) {
-                 new (self) alps::params(py_dict_to_params(d));
+                 new (self) alps::params(pyalps::params_from_dict(d));
              },
              nb::arg("dict"))
         // Read a classic ALPS text parameter file, matching the str

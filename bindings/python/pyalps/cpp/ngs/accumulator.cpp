@@ -28,14 +28,18 @@ template <typename Result>
 void bind_result_operators(nb::class_<Result> & cls) {
     cls
         .def("__neg__", [](Result value) { value.negate(); return value; })
-        .def("__iadd__", [](Result & self, Result const & other) -> Result & { self += other; return self; }, nb::rv_policy::reference_internal)
-        .def("__iadd__", [](Result & self, double value) -> Result & { self += value; return self; }, nb::rv_policy::reference_internal)
-        .def("__isub__", [](Result & self, Result const & other) -> Result & { self -= other; return self; }, nb::rv_policy::reference_internal)
-        .def("__isub__", [](Result & self, double value) -> Result & { self -= value; return self; }, nb::rv_policy::reference_internal)
-        .def("__imul__", [](Result & self, Result const & other) -> Result & { self *= other; return self; }, nb::rv_policy::reference_internal)
-        .def("__imul__", [](Result & self, double value) -> Result & { self *= value; return self; }, nb::rv_policy::reference_internal)
-        .def("__itruediv__", [](Result & self, Result const & other) -> Result & { self /= other; return self; }, nb::rv_policy::reference_internal)
-        .def("__itruediv__", [](Result & self, double value) -> Result & { self /= value; return self; }, nb::rv_policy::reference_internal)
+        // In-place operators return *this: rv_policy::none hands back
+        // the existing Python wrapper without any ownership or
+        // keep_alive bookkeeping, and is_operator() gives the standard
+        // NotImplemented behaviour on foreign operand types.
+        .def("__iadd__", [](Result & self, Result const & other) -> Result & { self += other; return self; }, nb::rv_policy::none, nb::is_operator())
+        .def("__iadd__", [](Result & self, double value) -> Result & { self += value; return self; }, nb::rv_policy::none, nb::is_operator())
+        .def("__isub__", [](Result & self, Result const & other) -> Result & { self -= other; return self; }, nb::rv_policy::none, nb::is_operator())
+        .def("__isub__", [](Result & self, double value) -> Result & { self -= value; return self; }, nb::rv_policy::none, nb::is_operator())
+        .def("__imul__", [](Result & self, Result const & other) -> Result & { self *= other; return self; }, nb::rv_policy::none, nb::is_operator())
+        .def("__imul__", [](Result & self, double value) -> Result & { self *= value; return self; }, nb::rv_policy::none, nb::is_operator())
+        .def("__itruediv__", [](Result & self, Result const & other) -> Result & { self /= other; return self; }, nb::rv_policy::none, nb::is_operator())
+        .def("__itruediv__", [](Result & self, double value) -> Result & { self /= value; return self; }, nb::rv_policy::none, nb::is_operator())
         .def("__add__", [](Result value, Result const & other) { value += other; return value; }, nb::is_operator())
         .def("__add__", [](Result value, double other) { value += other; return value; }, nb::is_operator())
         .def("__radd__", [](Result value, double other) { value += other; return value; }, nb::is_operator())

@@ -74,8 +74,21 @@ NB_MODULE(pyngsobservable_c, m) {
     m.def("createRealVectorObservable", &alps::detail::create_RealVectorObservable_export);
     nb::class_<alps::mcobservable>(m, "observable")
         .def("append",          &alps::detail::observable_append)
+        // obs << value appends and returns obs so it chains. Bound in
+        // C++ (rv_policy::none returns the existing wrapper) instead of
+        // the former ngs.py monkeypatch onto the extension type, which
+        // would break if nanobind ever marks its types immutable.
+        .def("__lshift__",
+             [](alps::mcobservable & self, nb::object const & data) -> alps::mcobservable & {
+                 alps::detail::observable_append(self, data);
+                 return self;
+             },
+             nb::rv_policy::none)
         .def("merge",           &alps::mcobservable::merge)
         .def("save",            &alps::mcobservable::save)
         .def("load",            &alps::detail::observable_load)
+        // Mirrors the legacy Boost.Python module, which (oddly, but
+        // load-compatibly) bound addToObservable to the same helper
+        // as load.
         .def("addToObservable", &alps::detail::observable_load);
 }
