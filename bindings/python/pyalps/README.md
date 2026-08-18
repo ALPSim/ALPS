@@ -10,27 +10,26 @@ python -m pip install pyalps
 Install `pyalps[plot]` to use the Matplotlib plotting helpers.
 
 The bindings are built as a standalone `scikit-build-core` project using
-nanobind. A source build requires Python 3.10 or newer, CMake 3.18 or newer,
-a C++17 compiler, BLAS/LAPACK, HDF5, and an installed ALPS C++ SDK. Point
-`ALPS_DIR` at the SDK's `share/alps` package directory.
+nanobind. A source build requires Python 3.10 or newer, CMake 3.21 or newer,
+Ninja, a C++17 compiler, BLAS/LAPACK, HDF5, and an installed ALPS C++ SDK.
+Point `ALPS_DIR` at the SDK's `share/alps` package directory.
 
+The `wheel-deps` CMake preset builds the SDK exactly as the wheel CI does.
 From the repository root:
 
 ```sh
-cmake -S . -B _build/alps -G Ninja \
-  -DCMAKE_INSTALL_PREFIX="$PWD/_build/install" \
-  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-  -DALPS_ENABLE_MPI=OFF \
-  -DALPS_BUILD_LIBS_ONLY=ON
-cmake --build _build/alps --target install
+cmake --preset wheel-deps
+cmake --build --preset wheel-deps
 
-ALPS_DIR="$PWD/_build/install/share/alps" \
-  CMAKE_ARGS="-DCMAKE_CXX_COMPILER_LAUNCHER=ccache" \
+ALPS_DIR="$PWD/_build/wheel-deps/install/share/alps" \
   python -m build --wheel bindings/python/pyalps
 ```
 
 The wheel is written to `bindings/python/pyalps/dist` and can be installed
-with `python -m pip install`.
+with `python -m pip install`. With ccache installed, configure with
+`cmake --preset wheel-deps -DCMAKE_CXX_COMPILER_LAUNCHER=ccache` and set
+`CMAKE_ARGS="-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"` for the wheel build to
+speed up rebuilds.
 
 `PYALPS_BUILD_APPLICATIONS=ON` is the default and preserves the MaxEnt,
 DWA, CT-HYB, and CT-INT extension modules. Set it to `OFF` through CMake

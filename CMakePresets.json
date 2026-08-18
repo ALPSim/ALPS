@@ -13,12 +13,33 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
+    },
+    {
+      "name": "wheel-deps",
+      "displayName": "ALPS C++ SDK for pyalps wheels",
+      "description": "Libs-only SDK install that the standalone pyalps wheel build links against (ALPS_DIR=_build/wheel-deps/install/share/alps).",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build/wheel-deps",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/wheel-deps/install",
+        "ALPS_BUILD_LIBS_ONLY": "ON",
+        "ALPS_BUILD_TESTS": "OFF",
+        "ALPS_BUILD_EXAMPLES": "OFF",
+        "ALPS_BUILD_APPLICATIONS": "OFF",
+        "ALPS_ENABLE_MPI": "OFF"
+      }
     }
   ],
   "buildPresets": [
     {
       "name": "default",
       "configurePreset": "default"
+    },
+    {
+      "name": "wheel-deps",
+      "configurePreset": "wheel-deps",
+      "targets": ["install"]
     }
   ],
   "testPresets": [
