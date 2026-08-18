@@ -56,6 +56,10 @@ set(_pyalps_targets
   pyngsrandom01_c
   pyngsaccumulator_c)
 
+# Policy (see README "Free-threading and stable-ABI policy"): do NOT
+# add FREE_THREADED (libalps relies on the GIL as its lock around
+# shared state) and do not add STABLE_ABI without revisiting the wheel
+# matrix — per-version wheels are deliberate.
 nanobind_add_module(pyalea_c NB_STATIC "${_bindings}/pyalea.cpp")
 nanobind_add_module(pymcdata_c NB_STATIC "${_bindings}/pymcdata.cpp")
 nanobind_add_module(pytools_c NB_STATIC "${_bindings}/pytools.cpp")

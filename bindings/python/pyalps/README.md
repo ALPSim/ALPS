@@ -34,3 +34,24 @@ speed up rebuilds.
 `PYALPS_BUILD_APPLICATIONS=ON` is the default and preserves the MaxEnt,
 DWA, CT-HYB, and CT-INT extension modules. Set it to `OFF` through CMake
 configuration for a smaller core-only developer build.
+
+## Free-threading and stable-ABI policy
+
+pyalps ships per-version wheels (CPython 3.10–3.14) and deliberately opts
+into neither of nanobind's special ABI modes:
+
+- **Free-threading (3.13t/3.14t):** the extension modules do not declare
+  free-threading support, so importing pyalps on a free-threaded
+  interpreter re-enables the GIL for the process. That is intentional:
+  the ALPS C++ library relies on the GIL as its lock around shared state
+  (`mcobservable`'s reference-count table, the `alps::ngs::signal`
+  singleton, `mcdata`'s lazily-computed statistics). Do not add
+  `FREE_THREADED` to `nanobind_add_module` without first making that
+  state thread-safe.
+- **Stable ABI (abi3):** the bindings contain no limited-API violations
+  (the last one, a `PyTuple_SET_ITEM`, was removed deliberately to keep
+  this option open), but per-version wheels are kept because the wheel
+  matrix is fully automated, linked abi3 would raise the floor to
+  CPython 3.12, and split mode adds a runtime dependency plus per-call
+  overhead on hot accessor paths. Revisit when a new CPython release
+  makes day-one support pressing.
