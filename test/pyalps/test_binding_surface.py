@@ -104,6 +104,19 @@ def test_alea_numpy_and_mcdata_operators():
     assert duplicate.error == total.error
 
 
+def test_params_from_parameter_file():
+    from pyalps.cxx.pyngsparams_c import params
+
+    with tempfile.TemporaryDirectory() as directory:
+        path = os.path.join(directory, "input.parm")
+        with open(path, "w") as parameter_file:
+            parameter_file.write('LATTICE="chain lattice";\nL=10;\nT=2.25;\n')
+        loaded = params(path)
+        assert str(loaded["LATTICE"]) == "chain lattice"
+        assert int(loaded["L"]) == 10
+        assert float(loaded["T"]) == 2.25
+
+
 def test_alea_mcanalyze_surface():
     from pyalps import alea
     from pyalps.cxx.pyalea_c import (
@@ -251,6 +264,7 @@ if __name__ == "__main__":
     for test in (
         test_extension_import_surface,
         test_cross_module_parameter_archive_and_rng_roundtrip,
+        test_params_from_parameter_file,
         test_alea_numpy_and_mcdata_operators,
         test_alea_mcanalyze_surface,
         test_packaged_xml_stylesheets,

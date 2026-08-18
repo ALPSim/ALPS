@@ -10,6 +10,7 @@
 #include <alps/hdf5/archive.hpp>
 #include <alps/ngs/params.hpp>
 #include <alps/ngs/detail/paramvalue.hpp>
+#include <boost/filesystem/path.hpp>
 #include <complex>
 #include <sstream>
 #include <stdexcept>
@@ -133,6 +134,13 @@ NB_MODULE(pyngsparams_c, m) {
                  new (self) alps::params(py_dict_to_params(d));
              },
              nb::arg("dict"))
+        // Read a classic ALPS text parameter file, matching the str
+        // constructor of the Boost.Python module.
+        .def("__init__",
+             [](alps::params * self, std::string const & filename) {
+                 new (self) alps::params(boost::filesystem::path(filename));
+             },
+             nb::arg("filename"))
         .def(nb::init<alps::hdf5::archive, std::string const &>(),
              nb::arg("archive"),
              nb::arg("path") = std::string("/parameters"))
