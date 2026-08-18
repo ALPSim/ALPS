@@ -104,6 +104,72 @@ def test_alea_numpy_and_mcdata_operators():
     assert duplicate.error == total.error
 
 
+def test_alea_mcanalyze_surface():
+    from pyalps import alea
+    from pyalps.cxx.pyalea_c import (
+        MCScalarTimeseries,
+        MCScalarTimeseriesView,
+        MCVectorTimeseries,
+        StdPairDouble,
+        integrated_autocorrelation_time,
+        size,
+    )
+    from pyalps.cxx.pytools_c import rng
+
+    generator = rng(42)
+    samples = []
+    state = 0.0
+    for _ in range(512):
+        state = 0.9 * state + 0.1 * (2 * generator() - 1)
+        samples.append(state)
+    series = MCScalarTimeseries(np.asarray(samples))
+
+    correlation = alea.autocorrelation(series, _distance=16)
+    assert isinstance(correlation, MCScalarTimeseries)
+    assert size(correlation) == 16
+    limited = alea.autocorrelation(series, _limit=0.2)
+    assert size(limited) >= 1
+
+    head = alea.cut_head(series, _distance=100)
+    tail = alea.cut_tail(series, _distance=100)
+    assert isinstance(head, MCScalarTimeseriesView)
+    assert size(head) == 412
+    assert size(tail) == 412
+    assert size(alea.cut_head(correlation, _limit=0.5)) < 16
+
+    fit = alea.exponential_autocorrelation_time(correlation, _from=1, _to=8)
+    assert isinstance(fit, StdPairDouble)
+    assert fit.second < 0  # decaying autocorrelation
+    ranged = alea.exponential_autocorrelation_time(correlation, _max=0.8, _min=0.2)
+    assert isinstance(ranged, StdPairDouble)
+
+    tau_from_pair = integrated_autocorrelation_time(correlation, fit)
+    tau_from_tuple = integrated_autocorrelation_time(correlation, (fit.first, fit.second))
+    assert tau_from_pair == tau_from_tuple
+    assert tau_from_pair > 0
+
+    assert alea.error(series) > 0
+    assert alea.error(series, "binning") > 0
+
+    vector_series = MCVectorTimeseries(np.asarray([[float(i + j) for j in range(3)] for i in range(64)]))
+    vector_error = alea.error(vector_series)
+    assert vector_error.shape == (3,)
+    assert np.all(vector_error > 0)
+    vector_correlation = alea.autocorrelation(vector_series, _distance=4)
+    assert vector_correlation.timeseries().shape == (4, 3)
+
+
+def test_packaged_xml_stylesheets():
+    import pyalps.tools
+
+    xsl = pyalps.tools.xslPath()
+    assert os.path.basename(xsl) == "ALPS.xsl"
+    assert os.path.exists(xsl)
+    xml_dir = os.path.dirname(xsl)
+    for name in ("lattices.xml", "models.xml", "plot2mpl.xsl"):
+        assert os.path.exists(os.path.join(xml_dir, name))
+
+
 def test_ngs_observable_containers():
     from pyalps import ngs
 
@@ -186,6 +252,8 @@ if __name__ == "__main__":
         test_extension_import_surface,
         test_cross_module_parameter_archive_and_rng_roundtrip,
         test_alea_numpy_and_mcdata_operators,
+        test_alea_mcanalyze_surface,
+        test_packaged_xml_stylesheets,
         test_ngs_observable_containers,
         test_name_encoding_roundtrip,
         test_accumulator_surface,
