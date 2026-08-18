@@ -96,7 +96,11 @@ else(ALPS_BUILD_FORTRAN)
   project(alps VERSION ${ALPS_VERSION_CORE} LANGUAGES C CXX)
 endif(ALPS_BUILD_FORTRAN)
 
-set(CMAKE_CXX_STANDARD 14)
+# C++17 is the minimum supported standard; allow callers (and CI) to select
+# a newer one with -DCMAKE_CXX_STANDARD=20/23.
+if(NOT DEFINED CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 17)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
