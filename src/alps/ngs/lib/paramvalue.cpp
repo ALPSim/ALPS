@@ -21,39 +21,6 @@
 namespace alps {
     namespace detail {
 
-        #if defined(ALPS_HAVE_PYTHON)
-            struct paramvalue_save_python_visitor {
-            
-                paramvalue_save_python_visitor(hdf5::archive & a)
-                    : ar(a) 
-                {}
-
-                template <typename U> void operator()(U const & data) {
-                    ar[""] << data;
-                }
-                
-                template <typename U> void operator()(U * const ptr, std::vector<std::size_t> const & size) {
-                    ar << make_pvp("", ptr, size);
-                }
-
-                void operator()(boost::python::list const & raw) {
-                    std::vector<std::string> data;
-                    for(boost::python::ssize_t i = 0; i < boost::python::len(raw); ++i) {
-                        // TODO: also consider other types than strings ...
-                        paramvalue_reader_visitor<std::string> scalar;
-                        extract_from_pyobject(scalar, raw[i]);
-                        data.push_back(scalar.value);
-                    }
-                    ar[""] << data;
-                }
-
-                void operator()(boost::python::dict const &) {
-                    throw std::invalid_argument("python dict cannot be used in alps::params" + ALPS_STACKTRACE);
-                }
-
-                hdf5::archive & ar;
-            };
-        #endif
 
         struct paramvalue_saver: public boost::static_visitor<> {
 
@@ -65,12 +32,6 @@ namespace alps {
                 ar[""] << v;
             }
             
-            #if defined(ALPS_HAVE_PYTHON)
-                void operator()(boost::python::object const & v) const {
-                    paramvalue_save_python_visitor visitor(ar);
-                    extract_from_pyobject(visitor, v);
-                }
-            #endif
 
             hdf5::archive & ar;
         };
@@ -84,11 +45,6 @@ namespace alps {
                     os << short_print(v);
                 }
                 
-                #if defined(ALPS_HAVE_PYTHON)
-                    void operator()(boost::python::object const & v) const {
-                        os << boost::python::call_method<std::string>(v.ptr(), "__str__");
-                    }
-                #endif
 
             private:
 

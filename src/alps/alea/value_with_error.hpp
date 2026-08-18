@@ -19,10 +19,6 @@
 #include <alps/numeric/vector_functions.hpp>
 #include <alps/type_traits/element_type.hpp>
 
-#ifdef ALPS_HAVE_PYTHON
-#include <boost/python.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-#endif
 
 #include <boost/type_traits.hpp>
 #include <iostream>
@@ -53,9 +49,6 @@ namespace alps {
     
     public:
       // constructors, assignment operator
-#ifdef ALPS_HAVE_PYTHON
-      value_with_error(boost::python::object const & mean_nparray, boost::python::object const & error_nparray);
-#endif
       value_with_error(value_type mean =value_type(), value_type error =value_type())
         : _mean(mean)
         , _error(error) 
@@ -72,10 +65,6 @@ namespace alps {
       inline value_type mean()  const {  return _mean;  }
       inline value_type error() const {  return _error; }
 
-#ifdef ALPS_HAVE_PYTHON
-      boost::python::object mean_nparray() const;
-      boost::python::object error_nparray() const;
-#endif    
       // comparison
       inline bool operator==(value_with_error const & rhs)
       {  return ((_mean == rhs._mean) && (_error == rhs._error));  }

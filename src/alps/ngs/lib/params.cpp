@@ -38,31 +38,6 @@ namespace alps {
         }
     }
 
-    #ifdef ALPS_HAVE_PYTHON
-        params::params(boost::python::dict const & arg) {
-            boost::python::extract<boost::python::dict> dict(arg);
-            if (!dict.check())
-                throw std::invalid_argument("parameters can only be created from a dict" + ALPS_STACKTRACE);
-            const boost::python::list keys = dict().keys();
-            for (std::size_t i = 0; i < boost::python::len(keys); ++i) {
-                boost::python::object pyk = keys[i];
-                std::string k = boost::python::call_method<std::string>(pyk.ptr(), "__str__");
-                setter(k, dict().get(pyk));
-            }
-        }
-
-        // TODO: merge with params::params(boost::filesystem::path const & path);
-        params::params(boost::python::str const & arg) {
-            std::string path = boost::python::extract<std::string>(arg)();
-            boost::filesystem::ifstream ifs(path);
-            Parameters par(ifs);
-            for (Parameters::const_iterator it = par.begin(); it != par.end(); ++it) {
-                detail::paramvalue val(it->value());
-                setter(it->key(), val);
-            }
-        }
-
-    #endif
 
     std::size_t params::size() const {
         return keys.size();

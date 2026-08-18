@@ -20,10 +20,6 @@
 #include <alps/ngs/detail/paramproxy.hpp>
 #include <alps/ngs/detail/paramiterator.hpp>
 
-#ifdef ALPS_HAVE_PYTHON
-    #include <alps/ngs/boost_python.hpp>
-    #include <boost/python/dict.hpp>
-#endif
 
 #include <boost/filesystem.hpp>
 #include <boost/serialization/map.hpp>
@@ -64,10 +60,6 @@ namespace alps {
 
             params(boost::filesystem::path const &);
 
-            #ifdef ALPS_HAVE_PYTHON
-                params(boost::python::dict const & arg);
-                params(boost::python::str const & arg);
-            #endif
 
             std::size_t size() const;
 

@@ -31,10 +31,6 @@
 #include <boost/accumulators/numeric/functional/vector.hpp>
 #include <boost/parameter.hpp>
 
-#ifdef ALPS_HAVE_PYTHON
-  #include <boost/python.hpp>
-  #include <alps/python/numpy_array.hpp>
-#endif
 
 
 #include <vector>
@@ -134,9 +130,6 @@ public:
 
   // debug constructors. can eventually be deleted.
   mctimeseries(const std::vector<ValueType>& timeseries):_timeseries(new std::vector<ValueType>(timeseries)) {}
-#ifdef ALPS_HAVE_PYTHON
-  mctimeseries(boost::python::object IN);
-#endif
 
   // shallow assign
   void shallow_assign(const mctimeseries<ValueType>& IN) {
@@ -165,9 +158,6 @@ public:
 
   // get functions
   inline std::vector<ValueType> timeseries() const {return *_timeseries;}
-#ifdef ALPS_HAVE_PYTHON
-  boost::python::object timeseries_python() const;
-#endif
 
   void print () const {
     using alps::numeric::operator<<;
@@ -216,9 +206,6 @@ public:
 
   // this copies the sub-vector. is there a better way?
   inline std::vector<ValueType> timeseries() const {return std::vector<ValueType>(begin(), end());}
-#ifdef ALPS_HAVE_PYTHON
-  boost::python::object timeseries_python() const;
-#endif
 
   void print () const {
     using alps::numeric::operator<<;

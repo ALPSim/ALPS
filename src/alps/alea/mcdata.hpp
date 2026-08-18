@@ -60,19 +60,6 @@
 #include <numeric>
 #include <iostream>
 
-#ifdef ALPS_HAVE_PYTHON
-
-    #include <boost/python.hpp>
-
-    #ifdef tolower
-        #undef tolower
-    #endif
-
-    #ifdef toupper
-        #undef toupper
-    #endif
-
-#endif
 
 namespace alps { 
     namespace alea {
@@ -166,10 +153,6 @@ namespace alps {
                     , error_(error)
                 {}
 
-                #ifdef ALPS_HAVE_PYTHON
-                    mcdata(boost::python::object const & mean);
-                    mcdata(boost::python::object const & mean, boost::python::object const & error);
-                #endif
 
                 std::size_t size() const { return bins().size();}
           

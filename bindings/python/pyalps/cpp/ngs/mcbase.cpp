@@ -35,13 +35,9 @@
 // pattern becomes a standard trampoline-plus-alias pair.
 //
 // Params ingestion: the public alps::mcbase ctor wants an alps::params.
-// libalps still declares a params(boost::python::dict) ctor in its
-// header, but we don't want to drag boost::python through the
-// nanobind bindings. Instead, we convert nb::dict → alps::params at the
-// binding boundary through the shared ladder in ../dict_to_params.hpp,
-// so mcbase, params and the application modules ingest parameters
-// identically. That sidesteps the cross-registry issue and keeps the
-// libalps ABI untouched.
+// We convert nb::dict → alps::params at the binding boundary through
+// the shared ladder in ../dict_to_params.hpp, so mcbase, params and
+// the application modules ingest parameters identically.
 #define PY_ARRAY_UNIQUE_SYMBOL pyngsbase_PyArrayHandle
 #include <alps/mcbase.hpp>
 #include <alps/hdf5/archive.hpp>
