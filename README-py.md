@@ -16,7 +16,7 @@ pip install pyalps
 ### Installation instruction from sources
 
 1. Prerequisites
-  - CMake > 3.18
+  - CMake >= 3.21
   - Boost sources >= 1.76
   - BLAS/LAPACK
   - HDF5

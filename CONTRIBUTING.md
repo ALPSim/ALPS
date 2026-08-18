@@ -50,13 +50,13 @@ Before opening a new issue, please search existing issues to avoid duplicates.
 
 ### Prerequisites
 
-- CMake ≥ 3.18 for normal configuration; CMake ≥ 3.21 for presets
+- CMake ≥ 3.21
 - A C++17-capable compiler (GCC, Clang, Intel, or Fujitsu)
 - Boost (downloaded automatically during configuration; or use a system install with `-DALPS_USE_SYSTEM_BOOST=ON`)
 - For Fortran bindings: gfortran (or compatible Fortran compiler)
 - For Python bindings: Python ≥ 3.10, plus `numpy` and `scipy`
 
-See the [installation page](https://alps.comp-phys.org/documentation/install/) for full platform-specific instructions.
+See the [installation page](https://alps.comp-phys.org/install/) for full platform-specific instructions.
 
 ### Fork and clone
 
@@ -79,7 +79,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j$(nproc)
 ```
 
-Alternatively, use the bundled CMake preset (requires CMake ≥ 3.21):
+Alternatively, use the bundled CMake preset:
 ```bash
 cmake --preset default
 cmake --build --preset default
@@ -177,8 +177,7 @@ If you are contributing a new simulation application or library, the Governing C
 
 ### CMake
 
-- CMake ≥ 3.18 features are acceptable. Preset files may use features available
-  in CMake ≥ 3.21.
+- CMake ≥ 3.21 features are acceptable.
 - Use target-based linking (`target_link_libraries`, `target_include_directories`) rather than directory-level commands.
 
 ---
