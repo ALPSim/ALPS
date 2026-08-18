@@ -132,6 +132,14 @@ template <typename T>
 nb::object variance_vector(T const & x) {
     return seq_to_numpy(alps::alea::variance(x));
 }
+template <typename T>
+nb::object uncorrelated_error_vector(T const & x) {
+    return seq_to_numpy(alps::alea::uncorrelated_error(x));
+}
+template <typename T>
+nb::object binning_error_vector(T const & x) {
+    return seq_to_numpy(alps::alea::binning_error(x));
+}
 // mctimeseries.timeseries() returns std::vector<ValueType>; hand
 // back to Python as numpy. For scalar ValueType we pack 1-D; for
 // vector<double> ValueType we pack 2-D. mctimeseries_view has the
@@ -365,4 +373,80 @@ NB_MODULE(pyalea_c, m) {
           static_cast<alps::alea::mctimeseries<double> (*)(alps::alea::mctimeseries_view<double> const &)>(
               &alps::alea::reverse_running_mean));
     #undef DEF_ALL
+    // ─── mcanalyze free functions consumed by pyalps.alea ────────────
+    //
+    // autocorrelation / cut_head / cut_tail / error in alea.py dispatch
+    // to these through alea_detail; the instantiation set matches the
+    // Boost.Python module.
+    #define DEF_TS_SCALAR(name, fn)                                                      \
+        m.def(name, &fn<alps::alea::mcdata<double>>);                                    \
+        m.def(name, &fn<alps::alea::mctimeseries<double>>);                              \
+        m.def(name, &fn<alps::alea::mctimeseries_view<double>>);
+    #define DEF_TS_VECTOR(name, fn)                                                      \
+        m.def(name, &fn<alps::alea::mcdata<std::vector<double>>>);                       \
+        m.def(name, &fn<alps::alea::mctimeseries<std::vector<double>>>);                 \
+        m.def(name, &fn<alps::alea::mctimeseries_view<std::vector<double>>>);
+    // autocorrelation — by distance or by decay limit.
+    DEF_TS_SCALAR("autocorrelation_distance", alps::alea::autocorrelation_distance)
+    DEF_TS_VECTOR("autocorrelation_distance", alps::alea::autocorrelation_distance)
+    DEF_TS_SCALAR("autocorrelation_limit", alps::alea::autocorrelation_limit)
+    DEF_TS_VECTOR("autocorrelation_limit", alps::alea::autocorrelation_limit)
+    // head/tail cuts — views by distance for scalar and vector series;
+    // by decay limit for scalar series only.
+    DEF_TS_SCALAR("cut_head_distance", alps::alea::cut_head_distance)
+    DEF_TS_VECTOR("cut_head_distance", alps::alea::cut_head_distance)
+    DEF_TS_SCALAR("cut_tail_distance", alps::alea::cut_tail_distance)
+    DEF_TS_VECTOR("cut_tail_distance", alps::alea::cut_tail_distance)
+    DEF_TS_SCALAR("cut_head_limit", alps::alea::cut_head_limit)
+    DEF_TS_SCALAR("cut_tail_limit", alps::alea::cut_tail_limit)
+    // error estimates — scalar overloads return float, vector overloads numpy.
+    DEF_TS_SCALAR("uncorrelated_error", alps::alea::uncorrelated_error)
+    DEF_TS_SCALAR("binning_error", alps::alea::binning_error)
+    m.def("uncorrelated_error", &uncorrelated_error_vector<alps::alea::mcdata<std::vector<double>>>);
+    m.def("uncorrelated_error", &uncorrelated_error_vector<alps::alea::mctimeseries<std::vector<double>>>);
+    m.def("uncorrelated_error", &uncorrelated_error_vector<alps::alea::mctimeseries_view<std::vector<double>>>);
+    m.def("binning_error", &binning_error_vector<alps::alea::mcdata<std::vector<double>>>);
+    m.def("binning_error", &binning_error_vector<alps::alea::mctimeseries<std::vector<double>>>);
+    m.def("binning_error", &binning_error_vector<alps::alea::mctimeseries_view<std::vector<double>>>);
+    #undef DEF_TS_SCALAR
+    #undef DEF_TS_VECTOR
+    // exponential_autocorrelation_time fits — return StdPairDouble so the
+    // fit.first / fit.second attribute API documented in pyalps.alea
+    // is preserved.
+    m.def("exponential_autocorrelation_time_distance",
+          [](alps::alea::mctimeseries<double> const & ts, int from, int to) {
+              std::pair<double, double> fit =
+                  alps::alea::exponential_autocorrelation_time_distance(ts, from, to);
+              return StdPairDouble(fit.first, fit.second);
+          });
+    m.def("exponential_autocorrelation_time_distance",
+          [](alps::alea::mctimeseries_view<double> const & ts, int from, int to) {
+              std::pair<double, double> fit =
+                  alps::alea::exponential_autocorrelation_time_distance(ts, from, to);
+              return StdPairDouble(fit.first, fit.second);
+          });
+    m.def("exponential_autocorrelation_time_limit",
+          [](alps::alea::mctimeseries<double> const & ts, double max, double min) {
+              std::pair<double, double> fit =
+                  alps::alea::exponential_autocorrelation_time_limit(ts, max, min);
+              return StdPairDouble(fit.first, fit.second);
+          });
+    m.def("exponential_autocorrelation_time_limit",
+          [](alps::alea::mctimeseries_view<double> const & ts, double max, double min) {
+              std::pair<double, double> fit =
+                  alps::alea::exponential_autocorrelation_time_limit(ts, max, min);
+              return StdPairDouble(fit.first, fit.second);
+          });
+    // integrated_autocorrelation_time also accepts the StdPairDouble
+    // returned by the fit helpers, in addition to a plain 2-tuple.
+    m.def("integrated_autocorrelation_time",
+          [](alps::alea::mctimeseries<double> const & ts, StdPairDouble const & fit) {
+              return alps::alea::integrated_autocorrelation_time(
+                  ts, std::pair<double, double>(fit.first, fit.second));
+          });
+    m.def("integrated_autocorrelation_time",
+          [](alps::alea::mctimeseries_view<double> const & ts, StdPairDouble const & fit) {
+              return alps::alea::integrated_autocorrelation_time(
+                  ts, std::pair<double, double>(fit.first, fit.second));
+          });
 }
