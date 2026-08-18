@@ -50,7 +50,7 @@ Before opening a new issue, please search existing issues to avoid duplicates.
 
 ### Prerequisites
 
-- CMake ≥ 3.21
+- CMake ≥ 3.22
 - A C++17-capable compiler (GCC, Clang, Intel, or Fujitsu)
 - Boost (downloaded automatically during configuration; or use a system install with `-DALPS_USE_SYSTEM_BOOST=ON`)
 - For Fortran bindings: gfortran (or compatible Fortran compiler)
@@ -177,7 +177,7 @@ If you are contributing a new simulation application or library, the Governing C
 
 ### CMake
 
-- CMake ≥ 3.21 features are acceptable.
+- CMake ≥ 3.22 features are acceptable.
 - Use target-based linking (`target_link_libraries`, `target_include_directories`) rather than directory-level commands.
 
 ---
