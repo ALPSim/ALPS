@@ -9,8 +9,6 @@ python -m pip install pyalps
 
 Install `pyalps[plot]` to use the Matplotlib plotting helpers.
 Install `pyalps[mpi]` for the mpi4py-backed `pyalps.mpi` compatibility layer.
-Projects moving from the Boost.Python build should also read
-[the nanobind migration guide](https://github.com/ALPSim/ALPS/blob/master/bindings/python/pyalps/MIGRATION.md).
 
 The bindings are built as a standalone `scikit-build-core` project using
 nanobind. A source build requires Python 3.10 or newer, CMake 3.21 or newer,
