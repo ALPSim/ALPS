@@ -31,8 +31,9 @@
 //
 // Trampoline (PyMCBase) forwards the three pure-virtual mcbase methods
 // (update / measure / fraction_completed) back into the Python subclass
-// through nanobind's trampoline support. The old wrapper<mcbase>
-// pattern becomes a standard trampoline-plus-alias pair.
+// through nanobind's trampoline support. Binding mcbase itself with
+// PyMCBase as its alias preserves the public base class of downstream
+// simulations, as in the Boost.Python bindings.
 //
 // Params ingestion: the public alps::mcbase ctor wants an alps::params.
 // We convert nb::dict → alps::params at the binding boundary through
@@ -48,9 +49,13 @@
 namespace nb = nanobind;
 #include <cstddef>
 #include <functional>
-#include <stdexcept>
+#include <type_traits>
+#include <utility>
 #include "../dict_to_params.hpp"
 namespace alps {
+    static_assert(std::has_virtual_destructor<mcbase>::value,
+                  "mcbase must safely destroy nanobind trampoline aliases");
+
     // Trampoline: holds Python overrides for pure-virtuals. The
     // protected mcbase members (random / parameters / measurements)
     // are accessed via lambdas in the binding below, which friend-in
@@ -91,19 +96,10 @@ namespace alps {
             alps::random01 & get_random() { return random; }
             mcbase::parameters_type & get_parameters() { return parameters; }
             alps::mcobservables & get_measurements() { return measurements; }
-            // mcbase::run takes a std::function<bool()>; wrap a Python
-            // callable so the stop_callback can be driven from Python.
-            bool run_py(nb::object stop_callback) {
-                return mcbase::run([stop_callback]() -> bool {
-                    nb::gil_scoped_acquire gil;
-                    return nb::cast<bool>(stop_callback());
-                });
-            }
     };
 }
 NB_MODULE(pyngsbase_c, m) {
-    nb::class_<alps::mcbase>(m, "_mcbase", nb::never_destruct());
-    nb::class_<alps::PyMCBase, alps::mcbase>(m, "mcbase")
+    nb::class_<alps::mcbase, alps::PyMCBase>(m, "mcbase")
         // Retain the legacy third argument without binding Boost.MPI. The
         // Boost.Python-era constructor accepted a communicator but never
         // passed it to alps::mcbase (which has no communicator constructor),
@@ -115,20 +111,31 @@ NB_MODULE(pyngsbase_c, m) {
              nb::arg("communicator") = nb::none())
         .def_prop_ro(
             "random",
-            [](alps::PyMCBase & self) -> alps::random01 & { return self.get_random(); },
+            [](alps::mcbase & self) -> alps::random01 & {
+                return dynamic_cast<alps::PyMCBase &>(self).get_random();
+            },
             nb::rv_policy::reference_internal)
         .def_prop_ro(
             "parameters",
-            [](alps::PyMCBase & self) -> alps::mcbase::parameters_type & { return self.get_parameters(); },
+            [](alps::mcbase & self) -> alps::mcbase::parameters_type & {
+                return dynamic_cast<alps::PyMCBase &>(self).get_parameters();
+            },
             nb::rv_policy::reference_internal)
         .def_prop_ro(
             "measurements",
-            [](alps::PyMCBase & self) -> alps::mcobservables & { return self.get_measurements(); },
+            [](alps::mcbase & self) -> alps::mcobservables & {
+                return dynamic_cast<alps::PyMCBase &>(self).get_measurements();
+            },
             nb::rv_policy::reference_internal)
         .def("run",
-             [](alps::PyMCBase & self, nb::object cb) { return self.run_py(std::move(cb)); })
-        // Pure-virtual methods: bound on the base class; the trampoline's
-        // The trampoline forwards the call into the Python subclass.
+             [](alps::mcbase & self, nb::object stop_callback) {
+                 return self.run([stop_callback = std::move(stop_callback)]() -> bool {
+                     nb::gil_scoped_acquire gil;
+                     return nb::cast<bool>(stop_callback());
+                 });
+             })
+        // Pure-virtual methods are bound on the base class; the trampoline
+        // forwards each call into the Python subclass.
         .def("update",             &alps::mcbase::update)
         .def("measure",            &alps::mcbase::measure)
         .def("fraction_completed", &alps::mcbase::fraction_completed)

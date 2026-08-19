@@ -14,6 +14,8 @@ import pyalps.ngs as ngs
 parameters = ngs.params({"SEED": 7, "SWEEPS": 10})
 simulation = ising_c.sim(parameters)
 
+assert issubclass(ising_c.sim, ngs.mcbase)
+assert isinstance(simulation, ngs.mcbase)
 assert int(simulation.parameters["SWEEPS"]) == 10
 assert len(simulation.measurements) == 1
 assert 0.0 <= simulation.random() < 1.0

@@ -35,10 +35,7 @@ public:
                                  std::size_t seed_offset = 0)
         : Simulation(parameters, seed_offset) {}
 
-    // mcbase predates virtual-destructor guidance. The Python-owned concrete
-    // wrapper is nevertheless polymorphic, so give this boundary type its own
-    // virtual destructor and ensure nanobind always destroys the full object.
-    virtual ~exported_simulation() = default;
+    ~exported_simulation() override = default;
 
     bool run_python(nb::object stop_callback) {
         return Simulation::run([stop_callback]() -> bool {

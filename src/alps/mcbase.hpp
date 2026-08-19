@@ -46,6 +46,7 @@ namespace alps {
             #endif
 
             mcbase(parameters_type const & parms, std::size_t seed_offset = 0);
+            virtual ~mcbase();
 
             virtual void update() = 0;
             virtual void measure() = 0;
