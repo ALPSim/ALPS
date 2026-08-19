@@ -34,7 +34,7 @@ class cg_wrapper
   }
 
 template < class scalar_type >  
-  void operator()(const Matrix& A, scalar_type s, VectorX& x, const VectorB& b) throw (std::runtime_error)
+  void operator()(const Matrix& A, scalar_type s, VectorX& x, const VectorB& b)
   {
     if (N_ == 0)
     { 
@@ -89,7 +89,7 @@ class cgs_wrapper
   }
 
   template < class scalar_type >
-  void operator()(const Matrix& A, scalar_type s, VectorX& x, const VectorB& b) throw (std::runtime_error)
+  void operator()(const Matrix& A, scalar_type s, VectorX& x, const VectorB& b)
   {
     if (N_ == 0)
     {
@@ -144,7 +144,7 @@ class bicg_wrapper
   }
 
   template < class scalar_type >  
-  void operator()(const Matrix& A, scalar_type s, VectorX& x, const VectorB& b) throw (std::runtime_error)
+  void operator()(const Matrix& A, scalar_type s, VectorX& x, const VectorB& b)
   {
     if (N_ == 0)
     { 
@@ -200,7 +200,7 @@ class gmres_wrapper
   }
 
   template < class scalar_type >
-  void operator()(const Matrix& A, scalar_type s, VectorX& x, const VectorB& b) throw (std::runtime_error)
+  void operator()(const Matrix& A, scalar_type s, VectorX& x, const VectorB& b)
   {
     if (N_ == 0)
     {
@@ -255,7 +255,7 @@ class bicgstab_wrapper
   }
 
   template < class scalar_type >
-  void operator()(const Matrix& A, scalar_type s, VectorX& x, const VectorB& b) throw (std::runtime_error)
+  void operator()(const Matrix& A, scalar_type s, VectorX& x, const VectorB& b)
   {
     if (N_ == 0)
     {
@@ -311,7 +311,7 @@ class qmr_wrapper
   }
 
   template < class scalar_type >
-  void operator()(const Matrix& A, scalar_type s, VectorX& x, const VectorB& b) throw (std::runtime_error)
+  void operator()(const Matrix& A, scalar_type s, VectorX& x, const VectorB& b)
   {
     if (N_ == 0)
     {
@@ -385,7 +385,7 @@ class tfqmr_wrapper
   }
 
   template < class scalar_type >
-  void operator()(const Matrix& A, scalar_type s, VectorX& x, const VectorB& b) throw (std::runtime_error)
+  void operator()(const Matrix& A, scalar_type s, VectorX& x, const VectorB& b)
   {
     if (N_ == 0)
     {
@@ -455,7 +455,7 @@ class gcr_wrapper
   }
 
   template < class scalar_type >
-  void operator()(const Matrix& A, scalar_type s, VectorX& x, const VectorB& b) throw (std::runtime_error)
+  void operator()(const Matrix& A, scalar_type s, VectorX& x, const VectorB& b)
   {
     if (N_ == 0)
     {
@@ -513,7 +513,7 @@ class cheby_wrapper
   }
 
   template < class scalar_type >
-  void operator()(const Matrix& A, scalar_type s, VectorX& x, const VectorB& b) throw (std::runtime_error)
+  void operator()(const Matrix& A, scalar_type s, VectorX& x, const VectorB& b)
   {
     if (N_ == 0)
     {
@@ -568,7 +568,7 @@ class richardson_wrapper
   }
 
   template < class scalar_type >
-  void operator()(const Matrix& A, scalar_type s, VectorX& x, const VectorB& b) throw (std::runtime_error)
+  void operator()(const Matrix& A, scalar_type s, VectorX& x, const VectorB& b)
   {
     if (N_ == 0)
     {
