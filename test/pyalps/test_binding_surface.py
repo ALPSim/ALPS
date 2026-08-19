@@ -10,6 +10,7 @@ import copy
 import importlib
 import os
 from pathlib import Path
+import signal
 import subprocess
 import sys
 import tempfile
@@ -240,6 +241,72 @@ def test_optional_application_extension_surface():
     assert isinstance(worldlines.states(), dwa_c.std_vector_unsigned_short)
     bands = dwa_c.bandstructure([1.0], [2.0], 1.0, 1.0, 1)
     assert len(bands.t()) == 3
+
+
+def test_ctqmc_solvers_restore_python_signal_handlers(tmp_path, monkeypatch):
+    from pyalps import cthyb, ctint
+    import pyalps.hdf5 as hdf5
+
+    monkeypatch.chdir(tmp_path)
+
+    delta_path = tmp_path / "delta.dat"
+    delta_path.write_text("".join(f"{i} -0.5 -0.5\n" for i in range(11)))
+    cthyb_params = {
+        "SWEEPS": 1,
+        "MAX_TIME": 1,
+        "THERMALIZATION": 0,
+        "SEED": 0,
+        "N_MEAS": 1,
+        "N_HISTOGRAM_ORDERS": 4,
+        "N_ORBITALS": 2,
+        "U": 1.0,
+        "MU": 0.5,
+        "DELTA": str(delta_path),
+        "N_TAU": 10,
+        "BETA": 1.0,
+        "TEXT_OUTPUT": 0,
+        "BASENAME": str(tmp_path / "cthyb-signal"),
+    }
+
+    ctint_input = tmp_path / "ctint-input.h5"
+    archive = hdf5.archive(str(ctint_input), "w")
+    bare_green = np.asarray([-1j, -0.3j, -0.2j, -0.1j])
+    archive["/G0_0"] = bare_green
+    archive["/G0_1"] = bare_green
+    del archive
+    ctint_params = {
+        "SWEEPS": 1,
+        "MAX_TIME": 1,
+        "THERMALIZATION": 0,
+        "BETA": 1.0,
+        "U": 1.0,
+        "MU": 0.5,
+        "ALPHA": 0.5,
+        "N_MATSUBARA": 4,
+        "N_TAU": 4,
+        "INFILE": str(ctint_input),
+        "BASENAME": str(tmp_path / "ctint-signal"),
+    }
+
+    calls = []
+
+    def python_sigint_handler(signum, frame):
+        calls.append((signum, frame))
+
+    previous_handler = signal.signal(signal.SIGINT, python_sigint_handler)
+    try:
+        # Run each solver twice: restoration alone is not enough if ALPS' own
+        # handlers are not reinstalled for the next embedded call.
+        for solver, params in ((cthyb, cthyb_params), (ctint, ctint_params)):
+            for _ in range(2):
+                solver.solve(params)
+                assert signal.getsignal(signal.SIGINT) is python_sigint_handler
+                signal.raise_signal(signal.SIGINT)
+                assert calls[-1][0] == signal.SIGINT
+    finally:
+        signal.signal(signal.SIGINT, previous_handler)
+
+    assert len(calls) == 4
 
 
 def test_mpi4py_compatibility_surface():

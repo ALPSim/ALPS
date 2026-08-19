@@ -31,9 +31,11 @@ int global_mpi_rank;
 
 #ifdef BUILD_PYTHON_MODULE
 #include "dict_to_params.hpp"
+#include "scoped_signal_handlers.hpp"
 namespace nb = nanobind;
 
 void solve(nb::dict const & parms_){
+    pyalps::scoped_signal_handlers signal_handlers;
     alps::parameters_type<HubbardInteractionExpansion>::type parms = pyalps::params_from_dict(parms_);
     std::string output_file = boost::lexical_cast<std::string>(parms["BASENAME"]|"results")+std::string(".out.h5");
 #else
