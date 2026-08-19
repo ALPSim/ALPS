@@ -20,11 +20,14 @@ set(ALPS_LIBRARY_DIRS "@ALPS_LIBRARY_DIRS_CONFIG@")
 # of runtime binaries for each configuration type.
 set(ALPS_RUNTIME_LIBRARY_DIRS "@ALPS_RUNTIME_LIBRARY_DIRS_CONFIG@")
 
-# The ALPS version number.
+# The ALPS version number. ALPS_VERSION carries the prerelease label when there
+# is one; ALPS_VERSION_CORE is always plain MAJOR.MINOR.PATCH and is what
+# ALPSConfigVersion.cmake compares against.
 SET(ALPS_VERSION_MAJOR "@ALPS_VERSION_MAJOR@")
 SET(ALPS_VERSION_MINOR "@ALPS_VERSION_MINOR@")
 SET(ALPS_VERSION_PATCH "@ALPS_VERSION_PATCH@")
-SET(ALPS_VERSION_BUILD "@ALPS_VERSION_BUILD@")
+SET(ALPS_VERSION_PRERELEASE "@ALPS_VERSION_PRERELEASE@")
+SET(ALPS_VERSION_CORE "@ALPS_VERSION_CORE@")
 SET(ALPS_VERSION "@ALPS_VERSION@")
 
 # The location of the UseALPS.cmake file.

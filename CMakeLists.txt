@@ -17,7 +17,7 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-cmake_minimum_required(VERSION 3.18.0)
+cmake_minimum_required(VERSION 3.22)
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
   message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there. You may need to remove CMakeCache.txt.")
@@ -83,13 +83,17 @@ if(ALPS_BUILD_LIBS_ONLY)
   set(ALPS_BUILD_APPLICATIONS OFF)
 endif()
 
+# Sets ALPS_VERSION_CORE from ALPS_VERSION.txt. Included by full path because
+# CMAKE_MODULE_PATH is not set up until after project().
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ALPSVersion.cmake)
+
 if(ALPS_BUILD_FORTRAN)
-  project(alps C CXX Fortran)
+  project(alps VERSION ${ALPS_VERSION_CORE} LANGUAGES C CXX Fortran)
   if (APPLE)
    set (CMAKE_Fortran_RUNTIME_LIBRARIES "-lgcc_s.1")
   endif(APPLE)
 else(ALPS_BUILD_FORTRAN)
-  project(alps C CXX)
+  project(alps VERSION ${ALPS_VERSION_CORE} LANGUAGES C CXX)
 endif(ALPS_BUILD_FORTRAN)
 
 set(CMAKE_CXX_STANDARD 14)
@@ -122,7 +126,7 @@ message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
 ######################################################################
 # CMAKE_MODULE_PATH
 ######################################################################
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 ######################################################################
 # set default CMAKE_INSTALL_PREFIX
@@ -135,25 +139,35 @@ endif (ALPS_BUILD_PYTHON)
 ######################################################################
 # Version information
 ######################################################################
-set(ALPS_YEAR 2026)
-set(ALPS_VERSION_MAJOR 2)
-set(ALPS_VERSION_MINOR 3)
-set(ALPS_VERSION_PATCH 3)
-set(ALPS_VERSION_BUILD "")
+# The numeric components come from project() above, which took its version from
+# ALPS_VERSION.txt. Do not hardcode them here.
+set(ALPS_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+set(ALPS_VERSION_MINOR ${PROJECT_VERSION_MINOR})
+set(ALPS_VERSION_PATCH ${PROJECT_VERSION_PATCH})
 
-if(ALPS_VERSION_BUILD)
-  set(ALPS_VERSION "${ALPS_VERSION_MAJOR}.${ALPS_VERSION_MINOR}.${ALPS_VERSION_PATCH}-${ALPS_VERSION_BUILD}")
-else(ALPS_VERSION_BUILD)
-  set(ALPS_VERSION "${ALPS_VERSION_MAJOR}.${ALPS_VERSION_MINOR}.${ALPS_VERSION_PATCH}")
-endif(ALPS_VERSION_BUILD)
+# Prerelease label, e.g. "beta.2" for the v2.3.4-beta.2 tag. Display only: it is
+# deliberately kept out of the numeric version that drives SOVERSION and
+# find_package() matching. Set by the release process, not checked in.
+set(ALPS_VERSION_PRERELEASE "" CACHE STRING
+    "Prerelease label for this build, e.g. beta.2 (affects version strings only)")
+mark_as_advanced(ALPS_VERSION_PRERELEASE)
+
+if(ALPS_VERSION_PRERELEASE)
+  set(ALPS_VERSION "${ALPS_VERSION_CORE}-${ALPS_VERSION_PRERELEASE}")
+else()
+  set(ALPS_VERSION "${ALPS_VERSION_CORE}")
+endif()
 set(ALPS_VERSION_STRING "ALPS Libraries version ${ALPS_VERSION}")
-MESSAGE(STATUS "ALPS version: ${ALPS_VERSION}") 
+message(STATUS "ALPS version: ${ALPS_VERSION}")
+
+# Derived, never hardcoded. string(TIMESTAMP) honours SOURCE_DATE_EPOCH, so
+# distro and conda reproducible builds still get a stable year.
+string(TIMESTAMP ALPS_YEAR "%Y" UTC)
 
 set(ALPS_CONFIG_HOST unknown)
 set(ALPS_CONFIG_USER unknown)
 
 set(ALPS_PREFIX "${CMAKE_INSTALL_PREFIX}")
-set(ALPS_SRCDIR "${CMAKE_SOURCE_DIR}")
 set(libdir "${CMAKE_INSTALL_PREFIX}/lib")
 set(bindir "${CMAKE_INSTALL_PREFIX}/bin")
 
@@ -436,8 +450,16 @@ if(PYTHON_LIBRARY)
   list(APPEND ALPS_EXTRA_LIBRARIES ${PYTHON_LIBRARY})
 endif(PYTHON_LIBRARY)
 
-configure_file(config/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/config/ALPSConfig.cmake @ONLY)
-configure_file(config/include.mk.in ${PROJECT_BINARY_DIR}/config/include.mk)
+configure_file(cmake/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/cmake/ALPSConfig.cmake @ONLY)
+configure_file(cmake/include.mk.in ${PROJECT_BINARY_DIR}/cmake/include.mk)
+
+# Without this file find_package(ALPS <version>) accepts any version it finds
+# and silently discards the constraint. SameMinorVersion: patch releases within
+# a minor series are drop-in, a minor bump is not guaranteed to be.
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  ${PROJECT_BINARY_DIR}/cmake/ALPSConfigVersion.cmake
+  COMPATIBILITY SameMinorVersion)
 
 
 # installation
@@ -474,17 +496,18 @@ endif()
 
 install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION ${ALPS_XML_PATH} COMPONENT xml)
 
-add_subdirectory(config)
+add_subdirectory(cmake)
 
-install(FILES config/UseALPS.cmake
-        ${PROJECT_BINARY_DIR}/config/ALPSConfig.cmake
-        ${PROJECT_BINARY_DIR}/config/include.mk
-        config/run_test.cmake
-        config/run_test_mpi.cmake
-        config/add_alps_test.cmake
+install(FILES cmake/UseALPS.cmake
+        ${PROJECT_BINARY_DIR}/cmake/ALPSConfig.cmake
+        ${PROJECT_BINARY_DIR}/cmake/ALPSConfigVersion.cmake
+        ${PROJECT_BINARY_DIR}/cmake/include.mk
+        cmake/run_test.cmake
+        cmake/run_test_mpi.cmake
+        cmake/add_alps_test.cmake
         DESTINATION share/alps COMPONENT build)
 
-install(FILES LICENSE.txt README.md
+install(FILES CITATION.md LICENSE.txt README.md
         DESTINATION share/alps COMPONENT libraries)
 if(ALPS_BUILD_PYTHON AND ALPS_PYTHON_LIB_DEST_ROOT)
   string(CONFIGURE [[

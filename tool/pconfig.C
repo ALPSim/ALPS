@@ -20,7 +20,6 @@
 int main() {
   std::cout << "ALPS version:          " << alps::version() << std::endl
             << "Boost version:         " << BOOST_LIB_VERSION << std::endl
-            << "source directory:      " << ALPS_SRCDIR << std::endl
             << "installed at:          " << ALPS_PREFIX << std::endl
             << "configured on:         " << alps::config_host() << std::endl
             << "configured by:         " << alps::config_user() << std::endl
