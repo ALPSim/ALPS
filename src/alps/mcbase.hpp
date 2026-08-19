@@ -26,15 +26,13 @@ namespace alps {
 
     class ALPS_DECL mcbase {
 
-        protected:
+        public:
 
             #ifdef ALPS_NGS_USE_NEW_ALEA
                 typedef alps::accumulator::accumulator_set observable_collection_type;
             #else
                 typedef alps::mcobservables observable_collection_type;
             #endif
-
-        public:
 
             typedef alps::params parameters_type;
             typedef std::vector<std::string> result_names_type;
@@ -62,6 +60,13 @@ namespace alps {
             void load(boost::filesystem::path const & filename);
             virtual void save(alps::hdf5::archive & ar) const;
             virtual void load(alps::hdf5::archive & ar);
+
+            // Non-virtual accessors for language bindings and downstream
+            // exporters. Keeping these on the actual base class avoids
+            // assuming that every derived simulation is a Python trampoline.
+            alps::random01 & get_random() { return random; }
+            parameters_type & get_parameters() { return parameters; }
+            observable_collection_type & get_measurements() { return measurements; }
 
         protected:
 

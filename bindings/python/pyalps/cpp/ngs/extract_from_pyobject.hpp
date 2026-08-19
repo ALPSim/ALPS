@@ -9,6 +9,7 @@
 /// <numpy/arrayobject.h>.
 #ifndef PYALPS_NGS_EXTRACT_FROM_PYOBJECT_HPP
 #define PYALPS_NGS_EXTRACT_FROM_PYOBJECT_HPP
+    #include "../numpy_compat.hpp"
     #include <alps/ngs/cast.hpp>
     #include <alps/ngs/config.hpp>
     #include <nanobind/nanobind.h>
@@ -87,7 +88,7 @@
                 else if (dtype == "numpy.ndarray"
                          || nb_::isinstance(
                              data,
-                             nb_::module_::import_("numpy").attr("ndarray"))) {
+                             alps::python::numpy_module().attr("ndarray"))) {
                     // Reject non-native byte order explicitly.  nanobind's
                     // failed ndarray cast would otherwise surface only as
                     // the unhelpful message "std::bad_cast".

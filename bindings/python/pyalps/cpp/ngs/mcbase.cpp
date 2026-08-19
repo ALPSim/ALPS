@@ -56,11 +56,7 @@ namespace alps {
     static_assert(std::has_virtual_destructor<mcbase>::value,
                   "mcbase must safely destroy nanobind trampoline aliases");
 
-    // Trampoline: holds Python overrides for pure-virtuals. The
-    // protected mcbase members (random / parameters / measurements)
-    // are accessed via lambdas in the binding below, which friend-in
-    // through PyMCBase (a protected member is visible to a derived
-    // class's own member functions / friends).
+    // Trampoline: holds Python overrides for pure-virtuals.
     class PyMCBase : public mcbase {
         public:
             // Slot count = the number of NB_OVERRIDE* calls below.
@@ -91,11 +87,6 @@ namespace alps {
             void load(alps::hdf5::archive & ar) override {
                 NB_OVERRIDE(load, ar);
             }
-            // Accessors for protected mcbase members. Called from the
-            // binding lambdas below (they friend-in through PyMCBase).
-            alps::random01 & get_random() { return random; }
-            mcbase::parameters_type & get_parameters() { return parameters; }
-            alps::mcobservables & get_measurements() { return measurements; }
     };
 }
 NB_MODULE(pyngsbase_c, m) {
@@ -112,19 +103,19 @@ NB_MODULE(pyngsbase_c, m) {
         .def_prop_ro(
             "random",
             [](alps::mcbase & self) -> alps::random01 & {
-                return dynamic_cast<alps::PyMCBase &>(self).get_random();
+                return self.get_random();
             },
             nb::rv_policy::reference_internal)
         .def_prop_ro(
             "parameters",
             [](alps::mcbase & self) -> alps::mcbase::parameters_type & {
-                return dynamic_cast<alps::PyMCBase &>(self).get_parameters();
+                return self.get_parameters();
             },
             nb::rv_policy::reference_internal)
         .def_prop_ro(
             "measurements",
             [](alps::mcbase & self) -> alps::mcobservables & {
-                return dynamic_cast<alps::PyMCBase &>(self).get_measurements();
+                return self.get_measurements();
             },
             nb::rv_policy::reference_internal)
         .def("run",

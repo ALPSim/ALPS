@@ -19,6 +19,12 @@ assert isinstance(simulation, ngs.mcbase)
 assert int(simulation.parameters["SWEEPS"]) == 10
 assert len(simulation.measurements) == 1
 assert 0.0 <= simulation.random() < 1.0
+# The base descriptors must work for a downstream C++ simulation too. This
+# used to throw std::bad_cast because mcbase assumed every instance was its
+# Python trampoline alias.
+assert ngs.mcbase.parameters.__get__(simulation) is simulation.parameters
+assert ngs.mcbase.measurements.__get__(simulation) is simulation.measurements
+assert ngs.mcbase.random.__get__(simulation) is simulation.random
 assert simulation.run(lambda: False)
 assert simulation.resultNames() == ["Magnetization"]
 before = simulation.collectResults()

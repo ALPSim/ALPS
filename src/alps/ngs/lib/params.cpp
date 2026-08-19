@@ -45,7 +45,7 @@ namespace alps {
     void params::erase(std::string const & key) {
         if (!defined(key))
             throw std::invalid_argument("the key " + key + " does not exists" + ALPS_STACKTRACE);
-        keys.erase(find(keys.begin(), keys.end(), key));
+        keys.erase(std::find(keys.begin(), keys.end(), key));
         values.erase(key);
     }
 
@@ -67,6 +67,11 @@ namespace alps {
 
     bool params::defined(std::string const & key) const {
         return values.find(key) != values.end();
+    }
+
+    detail::paramvalue const * params::find(std::string const & key) const {
+        std::map<std::string, detail::paramvalue>::const_iterator it = values.find(key);
+        return it == values.end() ? nullptr : &it->second;
     }
 
     params::iterator params::begin() {

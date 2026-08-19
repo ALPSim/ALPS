@@ -69,6 +69,11 @@ namespace alps {
 
             bool defined(std::string const &) const;
 
+            // Direct native lookup for consumers that need to inspect the
+            // stored variant. The returned pointer remains owned by params
+            // and is null when the key is absent.
+            detail::paramvalue const * find(std::string const &) const;
+
             iterator begin();
             const_iterator begin() const;
 

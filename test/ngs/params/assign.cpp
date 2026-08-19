@@ -40,6 +40,9 @@ int main() {
     parms["std::string"] = std::string("asdf");
 
     assert(parms["std::vector<bool>"].cast<std::vector<bool> >() == bool_vector);
+    assert(parms.find("int") != nullptr);
+    assert(parms.find("int")->cast<int>() == 1);
+    assert(parms.find("missing") == nullptr);
 
     std::cout << parms << std::endl;
     return 0;

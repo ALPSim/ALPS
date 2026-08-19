@@ -8,6 +8,7 @@
 // module ingests parameters identically.
 #ifndef PYALPS_DICT_TO_PARAMS_HPP
 #define PYALPS_DICT_TO_PARAMS_HPP
+#include "numpy_compat.hpp"
 #include <alps/ngs/params.hpp>
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/complex.h>
@@ -40,12 +41,14 @@ inline bool is_bool_like(PyObject * raw) {
 inline bool is_numpy_array(nb::handle value) {
     // isinstance, rather than an exact tp_name comparison, keeps ndarray
     // subclasses (for example an unmasked numpy.ma.MaskedArray) on the same
-    // native-copy path. Import lookup itself is cached by Python.
-    return nb::isinstance(value, nb::module_::import_("numpy").attr("ndarray"));
+    // native-copy path. Reuse the process-lifetime module handle shared by
+    // the other NumPy conversion helpers.
+    return nb::isinstance(
+        value, alps::python::numpy_module().attr("ndarray"));
 }
 
 inline char numpy_scalar_kind(nb::handle value) {
-    nb::object numpy = nb::module_::import_("numpy");
+    nb::handle numpy = alps::python::numpy_module();
     if (!nb::isinstance(value, numpy.attr("generic")))
         return '\0';
     std::string const kind = nb::cast<std::string>(
