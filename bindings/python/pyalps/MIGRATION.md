@@ -61,6 +61,19 @@ NB_MODULE(my_sim, m) {
 and keep the existing export macro call. See
 `tutorials/ngs/5_export_python` for a complete standalone CMake build.
 
+After creating the nanobind target, link it with the installed SDK helper:
+
+```cmake
+include("${ALPS_PYTHON_USE_FILE}")
+alps_target_link_pyalps(my_sim PYTHON_EXECUTABLE "${Python_EXECUTABLE}")
+```
+
+Do not link a wheel consumer directly to a second system `libalps`/HDF5
+stack. Repaired wheels carry private shared libraries, and stateful values
+such as HDF5 handles are valid only in the library image that created them.
+The helper selects the wheel's exact runtime when present, retains normal SDK
+linking for source installs, and makes direct `import my_sim` work on macOS.
+
 The removed `alps/python/numpy_array.hpp` API should be replaced with
 `nanobind::ndarray` or nanobind's STL casters. The old
 `alps/hdf5/python.hpp` operators accepted `boost::python::object` and have no

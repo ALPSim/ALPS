@@ -351,6 +351,7 @@ set(CMAKE_MACOSX_RPATH 1)
 ######################################################################
 
 set(ALPS_USE_FILE ${CMAKE_INSTALL_PREFIX}/share/alps/UseALPS.cmake)
+set(ALPS_PYTHON_USE_FILE ${CMAKE_INSTALL_PREFIX}/share/alps/UsePyALPS.cmake)
 
 set(Boost_INCLUDE_DIR_CONFIG ${Boost_INCLUDE_DIR})
 
@@ -448,6 +449,7 @@ install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION ${ALPS_XML_PATH} COM
 add_subdirectory(cmake)
 
 install(FILES cmake/UseALPS.cmake
+        cmake/UsePyALPS.cmake
         ${PROJECT_BINARY_DIR}/cmake/ALPSConfig.cmake
         ${PROJECT_BINARY_DIR}/cmake/ALPSConfigVersion.cmake
         ${PROJECT_BINARY_DIR}/cmake/include.mk

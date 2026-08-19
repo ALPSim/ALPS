@@ -33,6 +33,9 @@ SET(ALPS_VERSION "@ALPS_VERSION@")
 # The location of the UseALPS.cmake file.
 set(ALPS_USE_FILE "@ALPS_USE_FILE@")
 
+# Helper for nanobind extensions that exchange ALPS objects with pyalps.
+set(ALPS_PYTHON_USE_FILE "@ALPS_PYTHON_USE_FILE@")
+
 # The Boost Root Dir used by ALPS
 set(ALPS_Boost_ROOT_DIR "@Boost_ROOT_DIR@")
 set(ALPS_Boost_INCLUDE_DIR "@Boost_INCLUDE_DIR_CONFIG@")

@@ -4,10 +4,11 @@
 import os
 import tempfile
 
+# Importing the consumer first verifies its wheel-runtime rpath. Its module
+# initializer loads the owning pyalps bindings before registering C++ types.
+import ising_c
 import pyalps.hdf5 as hdf5
 import pyalps.ngs as ngs
-
-import ising_c
 
 
 parameters = ngs.params({"SEED": 7, "SWEEPS": 10})
