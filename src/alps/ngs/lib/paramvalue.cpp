@@ -95,6 +95,7 @@ namespace alps {
                     )
                 ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK(double, std::vector<double>)
                 ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK(int, std::vector<int>)
+                ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK(bool, std::vector<bool>)
                 ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK(
                     std::string, std::vector<std::string>
                 )

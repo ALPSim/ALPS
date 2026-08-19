@@ -153,6 +153,14 @@ namespace alps {
             }
             template <typename U>
             void operator()(U const * ptr, std::vector<std::size_t> const & sizes) const {
+                // NumPy uses rank zero for a 0-D array.  Passing an empty
+                // size vector to archive::write creates an HDF5 NULL
+                // dataspace, which silently turns the scalar into an empty
+                // array.  Store the pointed-to value as a scalar instead.
+                if (sizes.empty()) {
+                    ar[path] << *ptr;
+                    return;
+                }
                 // Use make_pvp(path, ptr, size-vector) to preserve the
                 // dimensional shape — a plain vector<U> flatten would
                 // round-trip the data but lose the rank.
@@ -372,7 +380,13 @@ namespace alps {
             std::size_t total = 1;
             for (auto s : shape) total *= s;
             std::vector<T> flat(total);
-            if (shape.size() <= 1) {
+            // archive::read rejects a zero-sized chunk.  The HDF5 dataset
+            // already carries the complete extent, so for arrays such as
+            // (0, 2) and (2, 0) there is no payload to read: construct the
+            // correctly shaped NumPy array directly.
+            if (total == 0) {
+                return alps::python::make_numpy_array<T>(nullptr, shape);
+            } else if (shape.size() <= 1) {
                 // vector<T> overload works directly.
                 ar[path] >> flat;
             } else {
@@ -447,7 +461,22 @@ namespace alps {
             // array.
             if (ar.is_complex(path)) {
                 auto ext = ar.extent(path);
-                if (ext.size() == 1) {
+                bool const single_value = ext.size() == 1;
+                // Preserve the component precision.  The legacy loader
+                // returned complex64 datasets as NumPy complex64 rather than
+                // widening them to complex128; only a complex128 scalar used
+                // the ordinary Python ``complex`` shortcut.
+                if (ar.is_datatype<float>(path)) {
+                    if (single_value) {
+                        std::complex<float> value;
+                        ar[path] >> value;
+                        return alps::python::make_numpy_array(
+                            &value, std::vector<std::size_t>());
+                    }
+                    std::vector<std::size_t> shape(ext.begin(), ext.end() - 1);
+                    return load_nd_array<std::complex<float>>(ar, path, shape);
+                }
+                if (single_value) {
                     std::complex<double> v; ar[path] >> v; return nb::cast(v);
                 }
                 std::vector<std::size_t> shape(ext.begin(), ext.end() - 1);

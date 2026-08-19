@@ -306,9 +306,104 @@ def test_hdf5_nested_numpy_scalar_vectorization():
         del ar
 
 
+def test_hdf5_zero_dimensional_and_zero_extent_arrays():
+    scalar_cases = [
+        np.array(True),
+        np.array(-3, dtype=np.int32),
+        np.array(2**40, dtype=np.int64),
+        np.array(1.25, dtype=np.float32),
+        np.array(1.25, dtype=np.float64),
+        np.array(1 + 2j, dtype=np.complex64),
+        np.array(1 + 2j, dtype=np.complex128),
+    ]
+    empty_cases = [
+        np.empty((0,), dtype=np.float64),
+        np.empty((0, 2), dtype=np.int32),
+        np.empty((2, 0), dtype=np.int32),
+        np.empty((2, 0, 3), dtype=np.complex128),
+    ]
+
+    with tempfile.TemporaryDirectory() as directory:
+        path = os.path.join(directory, "zero-shapes.h5")
+        with hdf5.archive(path, "w") as ar:
+            for index, value in enumerate(scalar_cases):
+                ar[f"/scalar/{index}"] = value
+            for index, value in enumerate(empty_cases):
+                ar[f"/empty/{index}"] = value
+
+        with hdf5.archive(path, "r") as ar:
+            for index, expected in enumerate(scalar_cases):
+                actual = ar[f"/scalar/{index}"]
+                assert np.asarray(actual).shape == ()
+                assert actual == expected.item()
+                if expected.dtype == np.complex64:
+                    assert np.asarray(actual).dtype == np.complex64
+            for index, expected in enumerate(empty_cases):
+                actual = ar[f"/empty/{index}"]
+                assert isinstance(actual, np.ndarray)
+                assert actual.shape == expected.shape
+                assert actual.dtype == expected.dtype
+
+
+def test_hdf5_complex_array_precision_roundtrip():
+    values = [
+        np.array([1 + 2j, 3 + 4j], dtype=np.complex64),
+        np.array([[1 + 2j], [3 + 4j]], dtype=np.complex64),
+        np.array([1 + 2j, 3 + 4j], dtype=np.complex128),
+    ]
+    with tempfile.TemporaryDirectory() as directory:
+        path = os.path.join(directory, "complex-precision.h5")
+        with hdf5.archive(path, "w") as ar:
+            for index, value in enumerate(values):
+                ar[f"/{index}"] = value
+        with hdf5.archive(path, "r") as ar:
+            for index, expected in enumerate(values):
+                actual = ar[f"/{index}"]
+                assert actual.dtype == expected.dtype
+                np.testing.assert_array_equal(actual, expected)
+
+
+def test_hdf5_strided_array_roundtrip():
+    base = np.arange(24, dtype=np.float64).reshape(4, 6)
+    values = [
+        base[:, ::2],
+        base.T,
+        base[::-1, ::-2],
+        np.ma.array(base[:, ::2], mask=False),
+        (base.astype(np.complex64) * (1 + 2j))[::2, 1::2],
+    ]
+    assert all(not value.flags.c_contiguous for value in values)
+    with tempfile.TemporaryDirectory() as directory:
+        path = os.path.join(directory, "strided.h5")
+        with hdf5.archive(path, "w") as ar:
+            for index, value in enumerate(values):
+                ar[f"/{index}"] = value
+        with hdf5.archive(path, "r") as ar:
+            for index, expected in enumerate(values):
+                actual = ar[f"/{index}"]
+                assert actual.dtype == expected.dtype
+                np.testing.assert_array_equal(actual, expected)
+
+
+def test_hdf5_non_native_array_error_is_actionable():
+    value = np.arange(4, dtype=np.int32).byteswap().view(np.dtype(">i4"))
+    with tempfile.TemporaryDirectory() as directory:
+        path = os.path.join(directory, "non-native.h5")
+        with hdf5.archive(path, "w") as ar:
+            try:
+                ar["/value"] = value
+                raise AssertionError("non-native arrays must be rejected")
+            except RuntimeError as error:
+                assert "not native" in str(error)
+
+
 if __name__ == "__main__":
     test_hdf5io()
     test_hdf5_empty_dict_roundtrip()
     test_hdf5_dict_key_roundtrip()
     test_hdf5_nested_numpy_scalar_vectorization()
+    test_hdf5_zero_dimensional_and_zero_extent_arrays()
+    test_hdf5_complex_array_precision_roundtrip()
+    test_hdf5_strided_array_roundtrip()
+    test_hdf5_non_native_array_error_is_actionable()
     print("SUCCESS")

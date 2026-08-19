@@ -14,6 +14,9 @@
 
 #include <alps/ngs/params.hpp>
 
+#include <cassert>
+#include <vector>
+
 int main() {
 
     alps::params parms;
@@ -32,7 +35,11 @@ int main() {
     parms["double"] = static_cast<double>(1);
     parms["long double"] = static_cast<long double>(1);
     parms["bool"] = static_cast<bool>(1);
+    std::vector<bool> const bool_vector{true, false, true};
+    parms["std::vector<bool>"] = bool_vector;
     parms["std::string"] = std::string("asdf");
+
+    assert(parms["std::vector<bool>"].cast<std::vector<bool> >() == bool_vector);
 
     std::cout << parms << std::endl;
     return 0;

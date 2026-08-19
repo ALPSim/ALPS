@@ -39,7 +39,7 @@ nb::object paramvalue_to_py(alps::detail::paramvalue const & pv) {
 // via paramproxy's templated operator= — shared ladder in
 // ../dict_to_params.hpp so params, mcbase and the application modules
 // all ingest values identically.
-void params_setitem(alps::params & self, nb::object const & key_obj, nb::object const & value) {
+void params_setitem(alps::params & self, nb::object const & key_obj, nb::handle value) {
     pyalps::set_param_value(self, nb::cast<std::string>(nb::str(key_obj)), value);
 }
 nb::object params_getitem(alps::params & self, nb::object const & key_obj) {

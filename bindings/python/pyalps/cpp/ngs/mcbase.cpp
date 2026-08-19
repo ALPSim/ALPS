@@ -46,9 +46,6 @@
 #include <nanobind/stl/function.h>
 #include <nanobind/trampoline.h>
 namespace nb = nanobind;
-#ifdef ALPS_HAVE_MPI
-    #include <boost/mpi.hpp>
-#endif
 #include <cstddef>
 #include <functional>
 #include <stdexcept>
@@ -67,17 +64,11 @@ namespace alps {
             // save(archive&) / load(archive&); all five must be
             // forwarded so Python overrides are seen by C++ callers.
             NB_TRAMPOLINE(mcbase, 5);
-            #ifdef ALPS_HAVE_MPI
-                PyMCBase(nb::dict const & arg,
-                         std::size_t seed_offset = 42,
-                         boost::mpi::communicator const & /*comm*/ = boost::mpi::communicator())
-                    : mcbase(pyalps::params_from_dict(arg), seed_offset)
-                {}
-            #else
-                PyMCBase(nb::dict const & arg, std::size_t seed_offset = 42)
-                    : mcbase(pyalps::params_from_dict(arg), seed_offset)
-                {}
-            #endif
+            PyMCBase(nb::dict const & arg,
+                     std::size_t seed_offset = 42,
+                     nb::handle /*communicator*/ = nb::none())
+                : mcbase(pyalps::params_from_dict(arg), seed_offset)
+            {}
             void update() override {
                 NB_OVERRIDE_PURE(update);
             }
@@ -113,16 +104,15 @@ namespace alps {
 NB_MODULE(pyngsbase_c, m) {
     nb::class_<alps::mcbase>(m, "_mcbase", nb::never_destruct());
     nb::class_<alps::PyMCBase, alps::mcbase>(m, "mcbase")
-        // Always expose the (dict, seed_offset) form from Python. When
-        // ALPS_HAVE_MPI is on we'd *like* to offer an optional
-        // communicator too, but boost::mpi::communicator is not a
-        // nanobind-registered type so nb::arg(..).default_value() can't
-        // materialise it. MPI simulations that actually need to hand
-        // Python a communicator should do so from C++ using the
-        // extended trampoline ctor directly.
-        .def(nb::init<nb::dict const &, std::size_t>(),
+        // Retain the legacy third argument without binding Boost.MPI. The
+        // Boost.Python-era constructor accepted a communicator but never
+        // passed it to alps::mcbase (which has no communicator constructor),
+        // so accepting and ignoring it is behaviorally faithful. Python-side
+        // communication is provided by pyalps.mpi's mpi4py adapter.
+        .def(nb::init<nb::dict const &, std::size_t, nb::handle>(),
              nb::arg("dict"),
-             nb::arg("seed_offset") = 42)
+             nb::arg("seed_offset") = 42,
+             nb::arg("communicator") = nb::none())
         .def_prop_ro(
             "random",
             [](alps::PyMCBase & self) -> alps::random01 & { return self.get_random(); },

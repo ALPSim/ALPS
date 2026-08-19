@@ -84,17 +84,23 @@
                     ));
                 else if (dtype == "numpy.complex128")
                     visitor(nb_::cast<std::complex<double>>(data));
-                else if (dtype == "numpy.ndarray") {
+                else if (dtype == "numpy.ndarray"
+                         || nb_::isinstance(
+                             data,
+                             nb_::module_::import_("numpy").attr("ndarray"))) {
+                    // Reject non-native byte order explicitly.  nanobind's
+                    // failed ndarray cast would otherwise surface only as
+                    // the unhelpful message "std::bad_cast".
+                    if (!nb_::cast<bool>(data.attr("dtype").attr("isnative")))
+                        throw std::runtime_error("numpy array is not native" + ALPS_STACKTRACE);
                     // Raw buffer access via nb::ndarray, with a strict
                     // dtype match — nb::cast<nb::ndarray<T>>(arr) of a
                     // mismatched-dtype array silently coerces (e.g.
                     // int → bool yields all-true), so we inspect
                     // .dtype() ourselves and pick the matching arm.
-                    // We require C-contiguity; the typical save path
-                    // is bulk contiguous data and silently copying
-                    // behind the user's back was the old
-                    // PyArray_GETCONTIGUOUS behaviour we don't want
-                    // to inherit.
+                    // The C-contiguous caster preserves the legacy
+                    // PyArray_GETCONTIGUOUS behaviour for sliced and
+                    // transposed arrays by materialising a temporary copy.
                     auto arr_any = nb_::cast<nb_::ndarray<nb_::ro, nb_::c_contig>>(data);
                     std::vector<std::size_t> sizes;
                     sizes.reserve(arr_any.ndim());

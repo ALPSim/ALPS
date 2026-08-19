@@ -115,8 +115,38 @@ jobs:
           python -c "import pyalps, pyalps.alea, pyalps.hdf5, pyalps.pytools; print(pyalps.__file__)"
           python -m pytest -q test/pyalps
 
+  # The ordinary wheel tests deliberately keep mpi4py optional. This job
+  # installs one consistent Open MPI stack and verifies real inter-rank
+  # collectives, requests and point-to-point traffic through pyalps.mpi.
+  mpi_smoke:
+    name: Smoke test MPI adapter with two ranks
+    needs: [build_wheels]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: cibw-wheels-ubuntu-latest-*
+          path: wheelhouse
+          merge-multiple: true
+
+      - name: Install wheel and MPI runtime
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libopenmpi-dev openmpi-bin
+          python -m pip install numpy scipy pytest mpi4py
+          python -m pip install --no-index --no-deps --find-links wheelhouse pyalps
+
+      - name: Run two-rank compatibility surface
+        run: mpiexec -n 2 python -m pytest -q test/pyalps/test_binding_surface.py::test_mpi4py_compatibility_surface
+
   upload_pypi:
-    needs: [build_wheels, build_sdist, smoke_test]
+    needs: [build_wheels, build_sdist, smoke_test, mpi_smoke]
     runs-on: ubuntu-latest
     environment: pypi
     permissions:

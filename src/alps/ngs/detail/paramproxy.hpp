@@ -115,7 +115,10 @@ namespace alps {
         #define ALPS_NGS_PARAMPROXY_ADD_OPERATOR_DECL(T)                                 \
             ALPS_DECL T operator+(paramproxy const & p, T s);                            \
             ALPS_DECL T operator+(T s, paramproxy const & p);
-        ALPS_NGS_FOREACH_PARAMETERVALUE_TYPE(ALPS_NGS_PARAMPROXY_ADD_OPERATOR_DECL)
+        // vector<bool> is a native stored parameter type, but unlike the
+        // historic numeric/string alternatives it has no meaningful or
+        // portable element-wise operator+=.
+        ALPS_NGS_FOREACH_PARAMETERVALUE_ADDABLE_TYPE(ALPS_NGS_PARAMPROXY_ADD_OPERATOR_DECL)
         #undef ALPS_NGS_PARAMPROXY_ADD_OPERATOR_DECL
 
         ALPS_DECL std::string operator+(paramproxy const & p, char const * s);

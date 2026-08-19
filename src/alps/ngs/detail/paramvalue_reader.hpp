@@ -44,7 +44,7 @@ namespace alps {
             template <typename U> void operator()(U * const ptr, std::vector<std::size_t> size) {
                 if (size.size() != 1)
                     throw std::invalid_argument("only 1 D array are supported in alps::params" + ALPS_STACKTRACE);
-                else
+                else if (size[0] != 0)
                     for (U const * it = ptr; it != ptr + size[0]; ++it)
                         (*this)(*it);
             }
@@ -61,7 +61,7 @@ namespace alps {
             template <typename U> void operator()(U * const ptr, std::vector<std::size_t> size) {
                 if (size.size() != 1)
                     throw std::invalid_argument("only 1 D array are supported in alps::params" + ALPS_STACKTRACE);
-                else
+                else if (size[0] != 0)
                     for (U const * it = ptr; it != ptr + size[0]; ++it)
                         value += (it == ptr ? "," : "") + cast<std::string>(*it);
             }
@@ -79,11 +79,18 @@ namespace alps {
                 }
                 
                 template <typename U> void operator()(std::vector<U> const & v) const {
-                    visitor(&v.front(), std::vector<std::size_t>(1, v.size()));
+                    visitor(v.data(), std::vector<std::size_t>(1, v.size()));
                 }
 
-                void operator()(T const & v) const {
-                    visitor.value = v; 
+                // std::vector<bool> stores proxy bits rather than contiguous
+                // bool objects and therefore has no usable data() pointer.
+                // Materialise byte values for the existing conversion visitor;
+                // scalar targets still reject vector input, while vector targets
+                // convert each byte to their requested element type.
+                void operator()(std::vector<bool> const & v) const {
+                    std::vector<unsigned char> contiguous(v.begin(), v.end());
+                    visitor(contiguous.data(),
+                            std::vector<std::size_t>(1, contiguous.size()));
                 }
 
                 T const & get_value() {

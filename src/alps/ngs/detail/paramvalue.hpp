@@ -33,7 +33,7 @@
 #include <ostream>
 #include <stdexcept>
 
-#define ALPS_NGS_FOREACH_PARAMETERVALUE_TYPE_NO_PYTHON(CALLBACK)                    \
+#define ALPS_NGS_FOREACH_PARAMETERVALUE_ADDABLE_TYPE(CALLBACK)                      \
     CALLBACK(double)                                                                \
     CALLBACK(int)                                                                   \
     CALLBACK(bool)                                                                  \
@@ -43,6 +43,10 @@
     CALLBACK(std::vector<int>)                                                      \
     CALLBACK(std::vector<std::string>)                                              \
     CALLBACK(std::vector<std::complex<double> >)
+
+#define ALPS_NGS_FOREACH_PARAMETERVALUE_TYPE_NO_PYTHON(CALLBACK)                    \
+    ALPS_NGS_FOREACH_PARAMETERVALUE_ADDABLE_TYPE(CALLBACK)                          \
+    CALLBACK(std::vector<bool>)
 
     #define ALPS_NGS_FOREACH_PARAMETERVALUE_TYPE(CALLBACK)                          \
         ALPS_NGS_FOREACH_PARAMETERVALUE_TYPE_NO_PYTHON(CALLBACK)
@@ -78,6 +82,9 @@ namespace alps {
 		};
 		template <> struct paramvalue_index<std::vector<std::complex<double> > > {
 			enum { value = 8 };
+		};
+		template <> struct paramvalue_index<std::vector<bool> > {
+			enum { value = 9 };
 		};
 
         class paramvalue;
