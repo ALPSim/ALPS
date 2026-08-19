@@ -48,10 +48,8 @@ into neither of nanobind's special ABI modes:
   singleton, `mcdata`'s lazily-computed statistics). Do not add
   `FREE_THREADED` to `nanobind_add_module` without first making that
   state thread-safe.
-- **Stable ABI (abi3):** the bindings contain no limited-API violations
-  (the last one, a `PyTuple_SET_ITEM`, was removed deliberately to keep
-  this option open), but per-version wheels are kept because the wheel
-  matrix is fully automated, linked abi3 would raise the floor to
-  CPython 3.12, and split mode adds a runtime dependency plus per-call
-  overhead on hot accessor paths. Revisit when a new CPython release
-  makes day-one support pressing.
+- **Stable ABI (abi3):** not enabled or currently supported. Some binding
+  paths still inspect CPython type internals (`tp_name`), and no abi3 build
+  runs in CI. Per-version wheels are deliberate; do not add `STABLE_ABI`
+  until the code is limited-API clean and CI compiles and imports the
+  resulting extensions.

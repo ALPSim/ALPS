@@ -224,6 +224,91 @@ def test_hdf5io():
         del ar
 
 
+def test_hdf5_empty_dict_roundtrip():
+    with tempfile.TemporaryDirectory() as directory:
+        path = os.path.join(directory, "empty-dict.h5")
+        ar = hdf5.archive(path, "w")
+        ar["/value"] = {}
+        del ar
+
+        ar = hdf5.archive(path, "r")
+        value = ar["/value"]
+        assert type(value) is dict
+        assert value == {}
+        del ar
+
+
+def test_hdf5_dict_key_roundtrip():
+    expected = {
+        "a/b": 1,
+        "a": {"b": 2},
+        "amp&key": 3,
+        "entity&#47;": 4,
+    }
+    with tempfile.TemporaryDirectory() as directory:
+        path = os.path.join(directory, "dict-keys.h5")
+        ar = hdf5.archive(path, "w")
+        ar["/value"] = expected
+        ar.create_group("/rawamp")
+        ar["/rawamp/literal&child"] = 5
+        del ar
+
+        ar = hdf5.archive(path, "r")
+        assert ar["/value"] == expected
+        # A raw ampersand from a non-pyalps HDF5 producer is not an
+        # encoded path entity and must remain literal.
+        assert ar["/rawamp"] == {"literal&child": 5}
+        del ar
+
+
+def test_hdf5_nested_numpy_scalar_vectorization():
+    with tempfile.TemporaryDirectory() as directory:
+        path = os.path.join(directory, "nested-numpy-scalars.h5")
+        ar = hdf5.archive(path, "w")
+        ar["/rectangular"] = [
+            [np.int16(1), np.int16(2)],
+            [np.int16(3), np.int16(4)],
+        ]
+        ar["/ragged"] = [
+            [np.int16(1)],
+            [np.int16(2), np.int16(3)],
+        ]
+        ar["/mixed"] = [
+            [np.int16(1), np.int16(2)],
+            [np.int32(3), np.int32(4)],
+        ]
+        ar["/arrayandscalar"] = [np.arange(2), np.int64(3)]
+        del ar
+
+        ar = hdf5.archive(path, "r")
+        rectangular = ar["/rectangular"]
+        assert isinstance(rectangular, np.ndarray)
+        assert rectangular.dtype == np.int16
+        assert rectangular.shape == (2, 2)
+        np.testing.assert_array_equal(rectangular, [[1, 2], [3, 4]])
+
+        # The new recursive case must not widen its acceptance: ragged
+        # trees, mixed NumPy scalar dtypes, and sequence/scalar mixtures
+        # retain the existing group representation.
+        ragged = ar["/ragged"]
+        assert isinstance(ragged, list) and len(ragged) == 2
+        assert all(row.dtype == np.int16 for row in ragged)
+        np.testing.assert_array_equal(ragged[0], [1])
+        np.testing.assert_array_equal(ragged[1], [2, 3])
+        mixed = ar["/mixed"]
+        assert isinstance(mixed, list) and len(mixed) == 2
+        assert mixed[0].dtype == np.int16
+        assert mixed[1].dtype == np.int32
+        array_and_scalar = ar["/arrayandscalar"]
+        assert isinstance(array_and_scalar, list)
+        np.testing.assert_array_equal(array_and_scalar[0], [0, 1])
+        assert array_and_scalar[1] == 3
+        del ar
+
+
 if __name__ == "__main__":
     test_hdf5io()
+    test_hdf5_empty_dict_roundtrip()
+    test_hdf5_dict_key_roundtrip()
+    test_hdf5_nested_numpy_scalar_vectorization()
     print("SUCCESS")

@@ -36,6 +36,28 @@
 namespace nb = nanobind;
 namespace alps {
     namespace detail {
+        // Decode one layer of the two entities produced by
+        // archive::encode_segment.  Do this locally instead of calling
+        // archive::decode_segment unconditionally: HDF5 files created by
+        // other tools may legitimately contain a raw '&' in a child name.
+        // A literal name containing exactly "&#38;" or "&#47;" remains
+        // ambiguous because the existing ALPS format has no type marker.
+        static std::string decode_dict_key(std::string const & segment) {
+            std::string result;
+            result.reserve(segment.size());
+            for (std::size_t pos = 0; pos < segment.size();) {
+                if (segment.compare(pos, 5, "&#38;") == 0) {
+                    result.push_back('&');
+                    pos += 5;
+                } else if (segment.compare(pos, 5, "&#47;") == 0) {
+                    result.push_back('/');
+                    pos += 5;
+                } else {
+                    result.push_back(segment[pos++]);
+                }
+            }
+            return result;
+        }
         // Analysis of a Python list/tuple tree against the legacy
         // Boost.Python vectorization rules (src/alps/hdf5/python.cpp,
         // is_vectorizable_generic): a list is written as one dataset
@@ -220,24 +242,50 @@ namespace alps {
             static bool is_ndarray(PyObject * raw) {
                 return std::strcmp(Py_TYPE(raw)->tp_name, "numpy.ndarray") == 0;
             }
+            static bool is_numpy_scalar(PyObject * raw) {
+                static std::array<char const *, 16> const scalar_types{{
+                    "numpy.str_", "numpy.str", "numpy.bool_", "numpy.bool",
+                    "numpy.int8", "numpy.int16", "numpy.int32", "numpy.int64",
+                    "numpy.uint8", "numpy.uint16", "numpy.uint32", "numpy.uint64",
+                    "numpy.float32", "numpy.float64",
+                    "numpy.complex64", "numpy.complex128",
+                }};
+                for (char const * scalar_type : scalar_types)
+                    if (std::strcmp(Py_TYPE(raw)->tp_name, scalar_type) == 0)
+                        return true;
+                return false;
+            }
             struct tree_scan {
                 bool has_ndarray = false;
+                bool has_numpy_scalar = false;
+                bool has_other_scalar = false;
                 bool has_bool_leaf = false;
+                bool homogeneous_numpy_scalars = true;
+                PyTypeObject * numpy_scalar_type = nullptr;
             };
             static void scan_tree(nb::handle node, tree_scan & scan) {
                 std::size_t const n = nb::len(node);
                 for (std::size_t i = 0; i < n; ++i) {
                     nb::object item = node[i];
                     PyObject * raw = item.ptr();
-                    if (is_ndarray(raw))
+                    if (is_ndarray(raw)) {
                         scan.has_ndarray = true;
-                    else if (PyList_Check(raw) || PyTuple_Check(raw))
+                    } else if (PyList_Check(raw) || PyTuple_Check(raw)) {
                         scan_tree(item, scan);
-                    else if (PyBool_Check(raw)
-                             || std::strncmp(Py_TYPE(raw)->tp_name, "numpy.bool", 10) == 0)
-                        scan.has_bool_leaf = true;
-                    if (scan.has_bool_leaf)
-                        return;   // verdict fixed: bool leaves veto stacking
+                    } else if (is_numpy_scalar(raw)) {
+                        scan.has_numpy_scalar = true;
+                        PyTypeObject * scalar_type = Py_TYPE(raw);
+                        if (!scan.numpy_scalar_type)
+                            scan.numpy_scalar_type = scalar_type;
+                        else if (scan.numpy_scalar_type != scalar_type)
+                            scan.homogeneous_numpy_scalars = false;
+                        if (std::strncmp(Py_TYPE(raw)->tp_name, "numpy.bool", 10) == 0)
+                            scan.has_bool_leaf = true;
+                    } else {
+                        scan.has_other_scalar = true;
+                        if (PyBool_Check(raw))
+                            scan.has_bool_leaf = true;
+                    }
                 }
             }
             // The list shapes the legacy build stacked into one
@@ -274,6 +322,16 @@ namespace alps {
                     return false;
                 tree_scan scan;
                 scan_tree(l, scan);
+                // A rectangular tree made solely from one exact NumPy
+                // scalar type is vectorizable at any nesting depth.
+                // np.asarray below performs the final rectangularity
+                // check and preserves the scalar dtype.
+                if (scan.has_numpy_scalar && !scan.has_ndarray
+                    && !scan.has_other_scalar)
+                    return scan.homogeneous_numpy_scalars;
+                // Preserve the legacy ndarray/list stacking path.  Bool
+                // leaves remain a veto because NumPy would silently turn
+                // them into 0/1 when combined with a numeric ndarray.
                 return scan.has_ndarray && !scan.has_bool_leaf;
             }
             void operator()(nb::dict const & d) const {
@@ -287,7 +345,7 @@ namespace alps {
                 ar.create_group(path);
                 for (auto item : d) {
                     std::string key = nb::cast<std::string>(nb::str(item.first));
-                    std::string child = path + "/" + key;
+                    std::string child = path + "/" + ar.encode_segment(key);
                     hdf5_save_py11_visitor child_visitor{ar, child};
                     extract_from_pyobject_py11(child_visitor, item.second);
                 }
@@ -343,7 +401,9 @@ namespace alps {
             // value[cast<size_t>(name)].
             if (ar.is_group(path)) {
                 auto children = ar.list_children(path);
-                bool list_shaped = true;
+                // Match the legacy dynamic loader: an empty group is a
+                // dict. Empty lists use the dataset representation.
+                bool list_shaped = !children.empty();
                 std::vector<bool> seen(children.size(), false);
                 for (auto const & child : children) {
                     bool numeric = !child.empty() && child.size() < 20;
@@ -370,9 +430,11 @@ namespace alps {
                     return nb::object(std::move(result));
                 } else {
                     nb::dict result;
-                    for (auto const & child : children)
-                        result[nb::str(child.c_str())] =
+                    for (auto const & child : children) {
+                        std::string const key = decode_dict_key(child);
+                        result[nb::str(key.c_str())] =
                             python_hdf5_load_impl(ar, path + "/" + child);
+                    }
                     return nb::object(std::move(result));
                 }
             }

@@ -14,7 +14,8 @@ from __future__ import print_function
 
 import pyalps.hdf5 as hdf5
 import pyalps.ngs as ngs
-import sys
+import os
+import tempfile
 
 orig_dict = {
     'val1' : 42,
@@ -43,19 +44,23 @@ def test_params():
     ## Check nonetype
     assert type(p["undefined"]) == type(None)
     
-    ## Write to hdf5
-    with hdf5.archive('parms1.h5', 'w') as oar:
-        p.save(oar) # does not use path '/parameters'
-    
-    with hdf5.archive('parms2.h5', 'w') as oar:
-        for key in sorted(p.keys()):
-            print(key)
-            oar['parameters/' + key] = p[key]
-    ## Load from hdf5
-    with hdf5.archive('parms2.h5', 'r') as oar:
-        iar = hdf5.archive('parms2.h5', 'r')
-        p.load(iar)
-    
+    ## Write to and load from hdf5 without leaving test artifacts in the tree.
+    with tempfile.TemporaryDirectory() as directory:
+        parms1 = os.path.join(directory, 'parms1.h5')
+        parms2 = os.path.join(directory, 'parms2.h5')
+        with hdf5.archive(parms1, 'w') as oar:
+            p.save(oar) # does not use path '/parameters'
+
+        with hdf5.archive(parms2, 'w') as oar:
+            for key in sorted(p.keys()):
+                print(key)
+                oar['parameters/' + key] = p[key]
+
+        # Preserve the existing simultaneous-reader exercise.
+        with hdf5.archive(parms2, 'r'):
+            with hdf5.archive(parms2, 'r') as iar:
+                p.load(iar)
+
         for k in sorted(orig_dict.keys()):
             assert p[k] == orig_dict[k]
             assert_type(p, k)

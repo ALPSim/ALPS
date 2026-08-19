@@ -15,7 +15,8 @@ from __future__ import print_function
 
 import pyalps.hdf5 as h5
 import numpy as np
-import sys
+import os
+import tempfile
 
 def write(ar):
     ar["/int"] =  9
@@ -56,19 +57,21 @@ def read(ar):
         raise Exception('invalid array value')
 
 def test_hdf5():
-    oar = h5.archive("py.h5", 'w')
-    write(oar)
-    del oar
-    
-    iar = h5.archive("py.h5", 'r')
-    if iar.is_complex("/int") or not iar.is_complex("/cplx") or not iar.extent("/np/cplx"):
-        raise Exception('invalid complex detection')
-    read(iar)
-    del iar
-    
-    ar = h5.archive("py.h5", 'w')
-    write(ar)
-    read(ar)
-    del ar
+    with tempfile.TemporaryDirectory() as directory:
+        path = os.path.join(directory, "py.h5")
+        oar = h5.archive(path, 'w')
+        write(oar)
+        del oar
+
+        iar = h5.archive(path, 'r')
+        if iar.is_complex("/int") or not iar.is_complex("/cplx") or not iar.extent("/np/cplx"):
+            raise Exception('invalid complex detection')
+        read(iar)
+        del iar
+
+        ar = h5.archive(path, 'w')
+        write(ar)
+        read(ar)
+        del ar
     
     print("SUCCESS")
