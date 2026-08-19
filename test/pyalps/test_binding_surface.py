@@ -487,10 +487,14 @@ def test_downstream_nanobind_simulation_export(tmp_path):
     )
     completed = subprocess.run(
         [sys.executable, str(tutorial / "smoke_test.py")],
-        check=True,
         capture_output=True,
         env=environment,
         text=True,
+    )
+    assert completed.returncode == 0, (
+        "downstream exporter smoke test failed\n"
+        f"stdout:\n{completed.stdout}\n"
+        f"stderr:\n{completed.stderr}"
     )
     assert "downstream nanobind export: ok" in completed.stdout
 
