@@ -1,3 +1,6 @@
+# Copyright (C) 2026 by the ALPS collaboration
+# SPDX-License-Identifier: MIT
+#
 # Link a downstream nanobind module to the same ALPS runtime as pyalps.
 #
 # Binary wheels relocate libalps and its non-system dependencies into a
