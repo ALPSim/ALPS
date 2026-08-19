@@ -38,6 +38,11 @@ FOREACH (name hdf5_complex hdf5_copy hdf5_real_complex_vec hdf5_real_complex_mat
     set_property(TEST ${name} PROPERTY LABELS hdf5)
 ENDFOREACH(name)
 
+# Reads a reference .h5 file from the source tree; see the note in
+# test/numeric/CMakeLists.txt.
+target_compile_definitions(hdf5_fortran_string
+                           PRIVATE ALPS_SRCDIR="${PROJECT_SOURCE_DIR}")
+
 IF (ALPS_ENABLE_OPENMP AND OPENMP_FOUND)
     add_executable(hdf5_omp hdf5_omp.cpp)
     add_dependencies(hdf5_omp alps)

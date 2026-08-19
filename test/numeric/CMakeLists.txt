@@ -30,5 +30,12 @@ if(LAPACK_FOUND)
     add_alps_test(${name})
     set_property(TEST ${name} PROPERTY LABELS numeric)
   ENDFOREACH(name)
+
+  # This test reads a reference .h5 file from the source tree. That path is a
+  # property of this build, not of the installed library, so it is a private
+  # definition on the one target that needs it rather than a macro in the
+  # installed alps/version.h.
+  target_compile_definitions(matrix_deprecated_hdf5_format_test
+                             PRIVATE ALPS_SRCDIR="${PROJECT_SOURCE_DIR}")
 endif(LAPACK_FOUND)
 

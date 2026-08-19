@@ -63,8 +63,13 @@ struct non_pod {
   }
   bool operator!=(const non_pod& x) const { return !operator==(x); }
   
-  friend bool operator==(T x, const non_pod& y) { return y == x; }
-  friend bool operator!=(T x, const non_pod& y) { return y != x; }
+  // Compare data_ directly: delegating to (y == x) selects this same
+  // operator as a C++20 reversed candidate and recurses infinitely.
+  friend bool operator==(T x, const non_pod& y) {
+    if (y.init_ != magic) throw std::logic_error("non_pod 6");
+    return y.data_ == x;
+  }
+  friend bool operator!=(T x, const non_pod& y) { return !(x == y); }
   friend std::ostream& operator<<(std::ostream& os, const non_pod& x) {
     os << x.data_;
     return os;

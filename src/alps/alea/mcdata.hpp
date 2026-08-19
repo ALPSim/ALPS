@@ -812,7 +812,7 @@ namespace alps {
                 }
 
                 template <typename X> std::vector<X> replace_valarray_by_vector(std::valarray<X> const & value) {
-                    return std::vector<X>(data(value), data(value) + value.size());
+                    return std::vector<X>(alps::data(value), alps::data(value) + value.size());
                 }
 
                 void collect_bins(uint64_t howmany) {

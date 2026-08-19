@@ -1,8 +1,21 @@
-# Build directories
-*build*/
+# Build and generated directories
+/build/
+/_build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
 
-# IDE directories
-.idea/*
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+
+# Python tooling
+.pytest_cache/
+.ruff_cache/
+__pycache__/
+*.py[cod]
 
 # Prerequisites
 *.d
@@ -36,5 +49,3 @@
 *.exe
 *.out
 *.app
-
-__pycache__
