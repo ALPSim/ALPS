@@ -65,19 +65,39 @@ function(alps_target_link_pyalps target)
   if(_pyalps_private_runtime)
     set(_pyalps_private_libraries "")
     foreach(_library IN LISTS _pyalps_link_libraries)
+      # Installed ALPSConfig files may record dependencies as bare linker
+      # names (alps), linker flags (-lalps), or absolute paths
+      # (/usr/lib64/liblapack.so). Wheel repair tools rename all three forms
+      # to a private file such as liblapack-<hash>.so. Normalize the original
+      # entry to its library stem before looking up that repaired file.
+      set(_library_stem "${_library}")
+      if(IS_ABSOLUTE "${_library_stem}")
+        get_filename_component(_library_stem "${_library_stem}" NAME)
+      endif()
+      string(REGEX REPLACE "^-l" "" _library_stem "${_library_stem}")
+      string(REGEX REPLACE "^lib" "" _library_stem "${_library_stem}")
+      string(REGEX REPLACE "\\.so(\\.[0-9]+)*$" "" _library_stem
+        "${_library_stem}")
+      string(REGEX REPLACE "(\\.[0-9]+)*\\.dylib$" "" _library_stem
+        "${_library_stem}")
+      string(REGEX REPLACE "\\.a$" "" _library_stem "${_library_stem}")
+      if(_library_stem STREQUAL "hdf5-shared")
+        set(_library_stem "hdf5")
+      endif()
+
       file(GLOB _matches LIST_DIRECTORIES FALSE
-        "${_pyalps_private_runtime}/lib${_library}.so*"
-        "${_pyalps_private_runtime}/lib${_library}-*.so*"
-        "${_pyalps_private_runtime}/lib${_library}.dylib"
-        "${_pyalps_private_runtime}/lib${_library}.*.dylib"
-        "${_pyalps_private_runtime}/lib${_library}-*.dylib")
+        "${_pyalps_private_runtime}/lib${_library_stem}.so*"
+        "${_pyalps_private_runtime}/lib${_library_stem}-*.so*"
+        "${_pyalps_private_runtime}/lib${_library_stem}.dylib"
+        "${_pyalps_private_runtime}/lib${_library_stem}.*.dylib"
+        "${_pyalps_private_runtime}/lib${_library_stem}-*.dylib")
       list(REMOVE_DUPLICATES _matches)
       list(LENGTH _matches _match_count)
       if(NOT _match_count EQUAL 1)
         message(FATAL_ERROR
           "pyalps uses a private wheel runtime, but exactly one bundled "
-          "${_library} library was expected in ${_pyalps_private_runtime}; "
-          "found: ${_matches}")
+          "${_library_stem} library (from '${_library}') was expected in "
+          "${_pyalps_private_runtime}; found: ${_matches}")
       endif()
       list(GET _matches 0 _match)
       list(APPEND _pyalps_private_libraries "${_match}")
@@ -114,6 +134,7 @@ function(alps_target_link_pyalps target)
           VERBATIM)
       endif()
     endforeach()
+    list(REMOVE_DUPLICATES _pyalps_private_libraries)
 
     set(_pyalps_link_libraries ${_pyalps_private_libraries})
     set(_pyalps_runtime_paths "${_pyalps_private_runtime}")
