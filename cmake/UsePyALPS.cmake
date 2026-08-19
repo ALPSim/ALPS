@@ -138,6 +138,13 @@ function(alps_target_link_pyalps target)
 
     set(_pyalps_link_libraries ${_pyalps_private_libraries})
     set(_pyalps_runtime_paths "${_pyalps_private_runtime}")
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+      # GNU DT_RUNPATH is searched only for direct dependencies. Wheel
+      # libraries such as LAPACK can themselves depend on relocated runtime
+      # libraries (for example auditwheel's libgfortran copy), so emit the
+      # transitive DT_RPATH tag for this consumer module instead.
+      target_link_options("${target}" PRIVATE "LINKER:--disable-new-dtags")
+    endif()
     message(STATUS
       "${target}: using pyalps wheel runtime at ${_pyalps_private_runtime}")
   else()
