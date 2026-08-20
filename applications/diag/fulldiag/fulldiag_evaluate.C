@@ -13,16 +13,26 @@
 /* $Id$ */
 
 #include "fulldiag.h"
+#include <alps/utility/copyright.hpp>
+#include <cstdlib>
+#include <cstring>
 #include <fstream>
+#include <iostream>
 
-// Print usage and exit
+namespace {
 
-void error_exit(char *pname)
- {
-    std::cerr << "Usage:\n" << pname << " [--T_MIN ...] [--T_MAX ...] [--DELTA_T ...] [--H_MIN ...] [--H_MAX ... ] [--DELTA_H ... ] [--versus h] [--DENSITIES ...] filenames\n";
-    std::cerr << "or:\n" << pname << " --couple mu [--T_MIN ...] [--T_MAX ...] [--DELTA_T ...] [--MU_MIN ...] [--MU_MAX ... ] [--DELTA_MU ...] [--versus mu] [--DENSITIES ...] filenames\n";
-    exit(1);
- }
+void print_usage(std::ostream& out, const char* pname)
+{
+  out << "Usage:\n"
+      << pname << " [--T_MIN ...] [--T_MAX ...] [--DELTA_T ...] [--H_MIN ...] [--H_MAX ... ] [--DELTA_H ... ] [--versus h] [--DENSITIES ...] filenames\n"
+      << "or:\n"
+      << pname << " --couple mu [--T_MIN ...] [--T_MAX ...] [--DELTA_T ...] [--MU_MIN ...] [--MU_MAX ... ] [--DELTA_MU ...] [--versus mu] [--DENSITIES ...] filenames\n"
+      << "\nOptions:\n"
+      << "  -h, --help     produce help message\n"
+      << "  -l, --license  print license conditions\n";
+}
+
+} // namespace
 
 int main(int argc, char** argv)
 {
@@ -33,14 +43,41 @@ try {
   int i=1;  
   alps::Parameters parms;
 
-  while (i<argc-1 && argv[i][0]=='-') {
+  while (i<argc && argv[i][0]=='-') {
+    if (!std::strcmp(argv[i], "--help") || !std::strcmp(argv[i], "-h")) {
+      print_usage(std::cout, argv[0]);
+      alps::print_copyright(std::cout);
+      return 0;
+    }
+    if (!std::strcmp(argv[i], "--license") || !std::strcmp(argv[i], "-l")) {
+      alps::print_license(std::cout);
+      return 0;
+    }
+    if (!std::strcmp(argv[i], "--")) {
+      ++i;
+      break;
+    }
+    if (argv[i][1]!='-' || argv[i][2]=='\0') {
+      std::cerr << "Unknown option: " << argv[i] << "\n";
+      print_usage(std::cerr, argv[0]);
+      return 1;
+    }
+    if (i+1>=argc) {
+      std::cerr << "Missing value for option: " << argv[i] << "\n";
+      print_usage(std::cerr, argv[0]);
+      return 1;
+    }
     parms[argv[i]+2]=argv[i+1];
     i+=2;
   }
 
+  alps::print_copyright(std::cout);
+
   // no filename found
-  if(i >= argc)
-    error_exit(argv[0]);
+  if(i >= argc) {
+    print_usage(std::cerr, argv[0]);
+    return 1;
+  }
 
   while (i<argc) {
     boost::filesystem::path p(argv[i]);
