@@ -28,8 +28,11 @@ jobs:
 
       # Install Fortran compiler based on OS
       - name: Install dependencies
+        timeout-minutes: 20
         run: |
           if [ "${{ matrix.plat.os }}" = "ubuntu-latest" ]; then
+            printf 'Acquire::Retries "3";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' \
+              | sudo tee /etc/apt/apt.conf.d/99ci-timeouts > /dev/null
             sudo apt-get update
             sudo apt-get install -y gfortran
           else
