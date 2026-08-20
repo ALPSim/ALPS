@@ -33,6 +33,27 @@
 #define DMRG_VERSION "1.0.0"
 #define DMRG_DATE "2006/10/02"
 
+inline void print_dmrg_copyright(std::ostream& os)
+{
+  os << "ALPS/dmrg version " DMRG_VERSION " (" DMRG_DATE ")\n"
+     << "  Density Matrix Renormalization Group algorithm\n"
+     << "  for low-dimensional interacting systems.\n"
+     << "  available from http://alps.comp-phys.org/\n"
+     << "  copyright (c) 2006-2013 by Adrian E. Feiguin\n\n"
+     << "********************************************************************\n"
+     << "* Recommended citation in scientific publications:                 *\n"
+     << "* This code used the ALPS [1] implementation [2] of DMRG [3-6].    *\n"
+     << "* [1] JSTAT (2011) P05001;                                         *\n"
+     << "* [2] A.E. Feiguin, The Density Matrix Renormalization Group. In:  *\n"
+     << "*     Strongly Correlated Systems. Springer Series in Solid-State  *\n"
+     << "*     Sciences, vol 176 (2013)                                     *\n"
+     << "* [3] Phys. Rev. Lett. 69, 2863 (1992)                             *\n"
+     << "* [4] Phys. Rev. B 48, 10345 (1993)                                *\n"
+     << "* [5] Rev. Mod. Phys. 77, 259 (2005)                               *\n"
+     << "* [6] Adv. Phys. 55, 477 (2006)                                    *\n"
+     << "********************************************************************\n\n";
+}
+
 #include <alps/hdf5.hpp>
 
 template<class value_type>
@@ -51,13 +72,7 @@ public:
 
   static void print_copyright(std::ostream& os = std::cout) 
   {
-    os << "ALPS/dmrg version " DMRG_VERSION " (" DMRG_DATE ")\n"
-       << "  Density Matrix Renormalization Group algorithm\n"
-       << "  for low-dimensional interacting systems.\n"
-       << "  available from http://alps.comp-phys.org/\n"
-       << "  copyright (c) 2006-2013 by Adrian E. Feiguin\n"
-       << "  for details see the publication: \n"
-       << "  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).\n\n";
+    print_dmrg_copyright(os);
   }
 
   void save(alps::hdf5::archive &) const;
@@ -675,6 +690,5 @@ DMRGTask<value_type>::build_bond_operator(alps::BondOperator const& bondop, bond
     this_hami += real_t;
   }
 }
-
 
 
