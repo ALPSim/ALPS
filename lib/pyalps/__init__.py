@@ -26,6 +26,3 @@ from .tools import *
 from .pytools import *
 from .floatwitherror import FloatWithError
 from . import fit_wrapper
-
-# For ALPS DWA Application
-# from dwa import *
