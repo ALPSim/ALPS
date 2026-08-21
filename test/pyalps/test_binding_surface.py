@@ -18,6 +18,8 @@ import time
 from types import SimpleNamespace
 
 import numpy as np
+
+from pyalps.hdf5 import archive as hdf5_archive
 import pytest
 
 
@@ -223,7 +225,7 @@ def test_accumulator_surface():
 
 
 def test_optional_application_extension_surface():
-    for name in ("maxent_c", "dwa_c", "cthyb", "ctint"):
+    for name in ("maxent_c", "cthyb", "ctint"):
         module = importlib.import_module("pyalps._ext." + name)
         assert module.__name__.endswith(name)
         assert importlib.import_module("pyalps." + name) is module
@@ -232,16 +234,6 @@ def test_optional_application_extension_surface():
     assert callable(maxent_c.AnalyticContinuation)
     assert callable(cthyb.solve)
     assert callable(ctint.solve)
-
-    from pyalps._ext import dwa_c
-
-    worldlines = dwa_c.worldlines(3)
-    assert worldlines.states() == [0, 0, 0]
-    assert dwa_c.std_vector_double([1.0, 2.0]) == [1.0, 2.0]
-    assert isinstance(worldlines.states(), dwa_c.std_vector_unsigned_short)
-    bands = dwa_c.bandstructure([1.0], [2.0], 1.0, 1.0, 1)
-    assert len(bands.t()) == 3
-
 
 def test_ctqmc_solvers_restore_python_signal_handlers(tmp_path, monkeypatch):
     from pyalps import cthyb, ctint
@@ -307,6 +299,55 @@ def test_ctqmc_solvers_restore_python_signal_handlers(tmp_path, monkeypatch):
         signal.signal(signal.SIGINT, previous_handler)
 
     assert len(calls) == 4
+
+
+def test_maxent_restores_python_signal_handlers(tmp_path, monkeypatch):
+    """MaxEnt must hand SIGINT back to Python, like cthyb and ctint do.
+
+    Note the assertion style: signal.getsignal() is NOT a valid check here.
+    ALPS installs its handler with sigaction() behind CPython's back, so
+    getsignal() keeps reporting the Python handler while the OS-level
+    disposition belongs to ALPS -- an unguarded run passes a getsignal()
+    check and still swallows Ctrl-C, printing "Received signal 2" instead.
+    Only actually raising the signal and observing whether the Python
+    handler runs detects it.
+    """
+    maxent = pytest.importorskip("pyalps.maxent_c")
+
+    monkeypatch.chdir(tmp_path)
+
+    ndat = 6
+    parms = {
+        "BETA": 2.0, "NDAT": ndat, "NFREQ": 20, "N_ALPHA": 2,
+        "ALPHA_MIN": 0.1, "ALPHA_MAX": 1.0, "MAX_IT": 2,
+        "OMEGA_MAX": 4.0, "FREQUENCY_GRID": "linear", "KERNEL": "fermionic",
+        "DATASPACE": "time", "TEXT_OUTPUT": 0, "VERBOSE": 0,
+        "PARTICLE_HOLE_SYMMETRY": 1, "NORM": 1.0, "MAX_TIME": 1,
+        "BASENAME": str(tmp_path / "maxent-signal"),
+    }
+    for index in range(ndat):
+        parms["X_%d" % index] = -0.5
+        parms["SIGMA_%d" % index] = 0.01
+
+    calls = []
+
+    def python_sigint_handler(signum, frame):
+        calls.append(signum)
+
+    previous_handler = signal.signal(signal.SIGINT, python_sigint_handler)
+    try:
+        # Twice: restoring once is not enough if ALPS' own handlers are not
+        # reinstalled for the next embedded call.
+        for _ in range(2):
+            maxent.AnalyticContinuation(parms)
+            signal.raise_signal(signal.SIGINT)
+    finally:
+        signal.signal(signal.SIGINT, previous_handler)
+
+    assert calls == [signal.SIGINT, signal.SIGINT], (
+        "SIGINT was not handed back to Python after AnalyticContinuation; "
+        "ALPS still owns the OS-level handler"
+    )
 
 
 def test_mpi4py_compatibility_surface():
@@ -568,9 +609,6 @@ def test_downstream_nanobind_simulation_export(tmp_path):
 
 def test_current_python_numpy_and_scipy_compatibility(monkeypatch):
     import pyalps
-    import pyalps.dwa as dwa
-
-    assert callable(dwa.thermalized)
 
     parsed = pyalps.stringListToList("[1,[2,3],4]")
     assert parsed == [[1.0], [2.0, 3.0], [4.0]]
@@ -712,6 +750,141 @@ def test_params_mapping_equality_and_value_ladder():
             pass
 
 
+def test_params_mapping_mixins_handle_none_getitem():
+    """get/pop/setdefault must honour their contracts on params.
+
+    params.__getitem__ returns None for an undefined key rather than raising
+    KeyError, so MutableMapping's mixins -- which are written against the
+    KeyError contract -- silently misbehaved: get() ignored its default,
+    setdefault() returned None and stored nothing, and pop() surfaced the C++
+    "key does not exist" error instead of KeyError or the default.
+    """
+    from pyalps import ngs
+
+    p = ngs.params({"a": 1})
+
+    assert p["absent"] is None          # the preserved legacy quirk
+    assert p.get("a") == 1
+    assert p.get("absent") is None
+    assert p.get("absent", 9) == 9
+
+    assert p.setdefault("a", 5) == 1 and p["a"] == 1
+    assert p.setdefault("new", 4) == 4
+    assert "new" in p and p["new"] == 4
+
+    assert p.pop("new") == 4 and "new" not in p
+    assert p.pop("absent", 7) == 7
+    with pytest.raises(KeyError):
+        p.pop("absent")
+
+    # observables and results raise KeyError natively, so get() is fine there,
+    # but pop() needs the same replacement: MutableMapping.pop reads
+    # self._MutableMapping__marker, which a copied method cannot resolve.
+    obs = ngs.observables()
+    obs.createRealObservable("x")
+    assert obs.get("absent", 3) == 3
+    assert obs.pop("absent", 3) == 3
+    with pytest.raises(KeyError):
+        obs.pop("absent")
+    assert obs.pop("x") is not None and "x" not in obs
+
+
+def test_archive_errors_use_the_typed_hierarchy(tmp_path):
+    """pyalps.hdf5's exception classes must actually be raised.
+
+    nanobind compiles extensions with -fvisibility=hidden, so the catch
+    clauses in the exception translator could not match the exceptions libalps
+    threw: every archive failure arrived as a bare RuntimeError carrying the
+    whole ALPS_STACKTRACE, and ArchiveNotFound/ArchiveClosed were never seen.
+    Assert on the message length too -- a translated exception is trimmed to
+    its first line, so a multi-line message means the translator was bypassed.
+    """
+    import pyalps.hdf5 as hdf5
+
+    with pytest.raises(hdf5.ArchiveNotFound) as missing:
+        hdf5.archive(str(tmp_path / "does-not-exist.h5"), "r")
+    assert len(str(missing.value).splitlines()) == 1
+
+    archive = hdf5.archive(str(tmp_path / "a.h5"), "w")
+    archive["/v"] = 1
+    archive.close()
+    with pytest.raises(hdf5.ArchiveClosed) as closed:
+        archive["/v"]
+    assert len(str(closed.value).splitlines()) == 1
+
+    # every one of them derives from ArchiveError, so callers can catch broadly
+    for cls in (hdf5.ArchiveNotFound, hdf5.ArchiveClosed, hdf5.InvalidPath,
+                hdf5.PathNotFound, hdf5.WrongType):
+        assert issubclass(cls, hdf5.ArchiveError)
+
+
+def test_complex_params_hdf5_roundtrip(tmp_path):
+    """Complex parameters must survive a checkpoint.
+
+    Two separate defects made this fail. archive::set_complex() did not
+    resolve its path against the current context, so the marker attribute for
+    a value written at the empty path landed on the root group; and
+    paramvalue::load() sent complex scalars into the vector branch, because a
+    complex scalar has is_scalar() == false (it is stored as a trailing
+    dimension of two reals). Rank distinguishes them: 1 for a scalar, 2 for a
+    vector of any length.
+    """
+    from pyalps import ngs
+
+    cases = {"scalar": 1 + 2j, "vector": [1 + 2j, 3 + 4j], "one": [5 + 6j]}
+    for name, value in cases.items():
+        path = str(tmp_path / ("complex-%s.h5" % name))
+        with hdf5_archive(path, "w") as archive:
+            ngs.params({name: value}).save(archive)
+        loaded = ngs.params()
+        with hdf5_archive(path, "r") as archive:
+            loaded.load(archive, "/")
+        got = list(loaded[name]) if isinstance(value, list) else loaded[name]
+        assert got == value, "%s: %r != %r" % (name, got, value)
+
+
+def test_mcbase_base_save_is_not_virtual(tmp_path):
+    """Calling the base save() from an override must not re-enter the override.
+
+    save/load were bound as pointers-to-member, which dispatch through the
+    vtable, so ngs.mcbase.save(self, ar) -- and super().save(ar) -- landed back
+    in the Python override and ran its body twice.
+    """
+    from pyalps import ngs
+
+    class Base(ngs.mcbase):
+        def __init__(self, parms):
+            ngs.mcbase.__init__(self, parms, 42)
+            self.measurements.createRealObservable("E")
+            self.steps = 0
+
+        def update(self):
+            self.steps += 1
+
+        def measure(self):
+            self.measurements["E"] << 1.0
+
+        def fraction_completed(self):
+            return self.steps / 5.0
+
+    for label, use_super in (("explicit", False), ("super", True)):
+        calls = []
+
+        class Override(Base):
+            def save(self, archive):
+                calls.append(label)
+                if use_super:
+                    super().save(archive)
+                else:
+                    ngs.mcbase.save(self, archive)
+
+        simulation = Override({"SWEEPS": 5, "THERMALIZATION": 0, "SEED": 1})
+        simulation.run(lambda: False)
+        with hdf5_archive(str(tmp_path / ("mcbase-%s.h5" % label)), "w") as archive:
+            simulation.save(archive)
+        assert calls == [label], "%s: save() ran %d times" % (label, len(calls))
+
+
 def test_params_native_bool_vector_hdf5_roundtrip(tmp_path):
     from pyalps import hdf5, ngs
 
@@ -735,6 +908,33 @@ def test_observable_lshift_chains():
     assert ngs.observable2result(observable).count == 2
 
 
+def test_standalone_observables_accept_samples():
+    """ngs.createRealObservable() handles must accept measurements.
+
+    They stopped doing so under nanobind: extensions are compiled with
+    -fvisibility=hidden, so instantiating a libalps class template inside a
+    binding TU emits a hidden vtable/type_info that cannot merge with
+    libalps' copy, and the dynamic_cast<RecordableObservable<T>*> in
+    Observable::add then fails with "Cannot add measurement to observable".
+    The fix keeps construction on the libalps side; this pins it.
+    """
+    import numpy as np
+
+    from pyalps import ngs
+
+    scalar = ngs.createRealObservable("Energy")
+    scalar << 1.0
+    scalar << 2.0
+
+    vector = ngs.createRealVectorObservable("Correlations")
+    vector << np.array([1.0, 2.0, 3.0])
+
+    # the container-held equivalents must keep working too
+    observables = ngs.observables()
+    observables.createRealObservable("Energy")
+    observables["Energy"] << 1.5
+
+
 def test_observables_item_deletion():
     from pyalps import ngs
 
@@ -745,6 +945,54 @@ def test_observables_item_deletion():
     assert "a" not in observables and "b" in observables
     observables.clear()
     assert len(observables) == 0
+
+
+def test_mapping_views_are_set_like():
+    """keys/values/items must be MutableMapping views, not one-shot iterators.
+
+    Boost.Python's map_indexing_suite defined none of the three, so on the
+    legacy build they resolved through MutableMapping to KeysView/ValuesView/
+    ItemsView: sized, re-iterable and set-like. The nanobind port must keep
+    that, which means NOT defining them natively in C++ -- pyalps/ngs.py only
+    grafts a mixin onto names the extension type leaves alone.
+    """
+    from collections.abc import MutableMapping
+
+    from pyalps import ngs
+
+    observables = ngs.observables()
+    observables.createRealObservable("a")
+    observables.createRealObservable("b")
+
+    for mapping in (observables, ngs.params({"a": 1, "b": 2})):
+        keys = mapping.keys()
+        # sized, and re-iterable (a nanobind iterator is exhausted after one pass)
+        assert len(keys) == 2
+        assert sorted(keys) == ["a", "b"]
+        assert sorted(keys) == ["a", "b"]
+        # set-like
+        assert keys & {"a"} == {"a"}
+        assert keys | {"c"} == {"a", "b", "c"}
+
+        items = mapping.items()
+        assert len(items) == 2
+        assert sorted(k for k, _ in items) == ["a", "b"]
+        assert sorted(k for k, _ in items) == ["a", "b"]
+
+        values = mapping.values()
+        assert len(values) == 2
+        assert len(list(values)) == 2
+        assert len(list(values)) == 2
+
+    # `results` is the third mapping type and goes through the same shim, but
+    # it is deliberately not constructible from Python -- master bound it with
+    # boost::python::no_init and the port binds no nb::init<> either -- so the
+    # view semantics are asserted here only through the two types that are.
+    for _name in ("keys", "values", "items"):
+        assert getattr(ngs.results, _name) is getattr(MutableMapping, _name), (
+            "results.%s must come from the MutableMapping mixin, not a native "
+            "one-shot nanobind iterator" % _name
+        )
 
 
 def test_mcbase_save_load_overrides_reach_cpp_dispatch():
@@ -777,16 +1025,22 @@ def test_mcbase_save_load_overrides_reach_cpp_dispatch():
     simulation.measurements["energy"] << 1.0
     with tempfile.TemporaryDirectory() as directory:
         path = os.path.join(directory, "checkpoint.h5")
+        # Drive a real C++-side checkpoint rather than calling the base
+        # binding: `archive[path] = simulation` hands the object to the C++
+        # save path, which must reach the Python override. Calling
+        # ngs.mcbase.save(simulation, archive) would NOT test this -- that is
+        # the base implementation and deliberately does not dispatch
+        # virtually, so it cannot re-enter the override (see
+        # test_mcbase_base_save_is_not_virtual).
         archive = pyngshdf5_c.hdf5_archive_impl(path, "w")
-        # Call through the base binding: this goes through C++ virtual
-        # dispatch — the same path any C++-side checkpoint takes — and
-        # must reach the Python override (trampoline forwards save/load).
-        ngs.mcbase.save(simulation, archive)
+        archive["/simulation"] = simulation
         del archive
         assert calls == ["save"]
-
+        # the override's super().save() must have written the real payload
         archive = pyngshdf5_c.hdf5_archive_impl(path, "r")
-        ngs.mcbase.load(simulation, archive)
+        assert "measurements" in archive.list_children("/simulation")
+        archive.set_context("/simulation")
+        simulation.load(archive)
         del archive
         assert calls == ["save", "load"]
 
@@ -834,8 +1088,11 @@ if __name__ == "__main__":
         test_accumulator_surface,
         test_optional_application_extension_surface,
         test_params_mapping_equality_and_value_ladder,
+        test_params_mapping_mixins_handle_none_getitem,
         test_observable_lshift_chains,
+        test_standalone_observables_accept_samples,
         test_observables_item_deletion,
+        test_mapping_views_are_set_like,
         test_mcbase_save_load_overrides_reach_cpp_dispatch,
         test_accumulator_result_inplace_identity,
     ):

@@ -33,8 +33,19 @@ with `python -m pip install`. With ccache installed, configure with
 speed up rebuilds.
 
 `PYALPS_BUILD_APPLICATIONS=ON` is the default and preserves the MaxEnt,
-DWA, CT-HYB, and CT-INT extension modules. Set it to `OFF` through CMake
+CT-HYB, and CT-INT extension modules. Set it to `OFF` through CMake
 configuration for a smaller core-only developer build.
+
+`PYALPS_BUNDLE_APPLICATIONS=ON` is the default and copies the ALPS
+application executables (`spinmc`, `dmrg`, `sparsediag`, `loop`, `qwl`, ...)
+from the SDK into `pyalps/bin`, together with the SDK's shared libraries in
+`pyalps/lib` that their `../lib` RPATH resolves against. `pyalps.tools`
+prepends `pyalps/bin` to `PATH`, so this is what makes
+`pyalps.runApplication('spinmc', ...)` work from a wheel install — the
+`wheel-deps` preset therefore builds the applications. Configure with
+`-DPYALPS_BUNDLE_APPLICATIONS=OFF` for a bindings-only wheel; the
+`runApplication` helpers then require the executables on `PATH` by other
+means.
 
 ## Free-threading and stable-ABI policy
 
@@ -49,8 +60,8 @@ into neither of nanobind's special ABI modes:
   singleton, `mcdata`'s lazily-computed statistics). Do not add
   `FREE_THREADED` to `nanobind_add_module` without first making that
   state thread-safe.
-- **Stable ABI (abi3):** not enabled or currently supported. Some binding
-  paths still inspect CPython type internals (`tp_name`), and no abi3 build
-  runs in CI. Per-version wheels are deliberate; do not add `STABLE_ABI`
-  until the code is limited-API clean and CI compiles and imports the
-  resulting extensions.
+- **Stable ABI (abi3):** not enabled. Nanobind isolates stable-ABI and
+  ordinary extensions from each other. ALPS supports downstream nanobind
+  modules that derive from pyalps types, so an abi3 pyalps wheel would force
+  every such consumer to use the limited API too. Per-version wheels preserve
+  ordinary downstream extension interoperability.

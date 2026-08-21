@@ -3,8 +3,10 @@
 #
 # Link a downstream nanobind module to the same ALPS runtime as pyalps.
 #
-# Binary wheels relocate libalps and its non-system dependencies into a
-# wheel-private directory. Linking a consumer module to a separately installed
+# Binary wheels keep libalps and its non-system dependencies in
+# wheel-private directories: the ALPS libraries in pyalps/lib, and the
+# dependencies the repair tools relocated in pyalps.libs (auditwheel) or
+# pyalps/.dylibs (delocate). Linking a consumer module to a separately installed
 # ALPS/HDF5 stack is unsafe: objects such as hdf5::archive carry handles that
 # are valid only in the HDF5 image that created them. This helper discovers a
 # repaired wheel's private runtime and links the target to those exact files.
@@ -51,15 +53,38 @@ function(alps_target_link_pyalps target)
     ERROR_QUIET)
 
   if(_pyalps_location_result EQUAL 0 AND _pyalps_package_dir)
-    set(_pyalps_runtime_candidates
-      "${_pyalps_package_dir}/.dylibs"
-      "${_pyalps_package_dir}/../pyalps.libs")
-    foreach(_candidate IN LISTS _pyalps_runtime_candidates)
+    # A repair-tool directory is what marks this install as a relocated wheel:
+    # auditwheel writes <site-packages>/pyalps.libs, delocate writes
+    # pyalps/.dylibs.
+    set(_pyalps_repaired_dirs "")
+    foreach(_candidate IN ITEMS
+        "${_pyalps_package_dir}/.dylibs"
+        "${_pyalps_package_dir}/../pyalps.libs")
       if(IS_DIRECTORY "${_candidate}")
-        get_filename_component(_pyalps_private_runtime "${_candidate}" REALPATH)
-        break()
+        get_filename_component(_candidate "${_candidate}" REALPATH)
+        list(APPEND _pyalps_repaired_dirs "${_candidate}")
       endif()
     endforeach()
+
+    if(_pyalps_repaired_dirs)
+      # The repaired runtime spans two directories. The ALPS libraries
+      # themselves are bundled into pyalps/lib by the wheel build -- one copy,
+      # shared with the programs in pyalps/bin -- while the repair tools
+      # vendor the external dependencies (HDF5, LAPACK, ...) into their own
+      # directory. Search both.
+      #
+      # pyalps/lib alone must not trigger this path: a developer install has
+      # that directory too, without any of the vendored dependencies the loop
+      # below insists on finding, and such an install is meant to keep using
+      # the ordinary ALPSConfig.cmake library paths.
+      if(IS_DIRECTORY "${_pyalps_package_dir}/lib")
+        get_filename_component(_pyalps_bundled_libs
+          "${_pyalps_package_dir}/lib" REALPATH)
+        list(APPEND _pyalps_private_runtime "${_pyalps_bundled_libs}")
+      endif()
+      list(APPEND _pyalps_private_runtime ${_pyalps_repaired_dirs})
+      list(REMOVE_DUPLICATES _pyalps_private_runtime)
+    endif()
   endif()
 
   if(_pyalps_private_runtime)
@@ -85,12 +110,16 @@ function(alps_target_link_pyalps target)
         set(_library_stem "hdf5")
       endif()
 
-      file(GLOB _matches LIST_DIRECTORIES FALSE
-        "${_pyalps_private_runtime}/lib${_library_stem}.so*"
-        "${_pyalps_private_runtime}/lib${_library_stem}-*.so*"
-        "${_pyalps_private_runtime}/lib${_library_stem}.dylib"
-        "${_pyalps_private_runtime}/lib${_library_stem}.*.dylib"
-        "${_pyalps_private_runtime}/lib${_library_stem}-*.dylib")
+      set(_matches "")
+      foreach(_runtime_dir IN LISTS _pyalps_private_runtime)
+        file(GLOB _runtime_dir_matches LIST_DIRECTORIES FALSE
+          "${_runtime_dir}/lib${_library_stem}.so*"
+          "${_runtime_dir}/lib${_library_stem}-*.so*"
+          "${_runtime_dir}/lib${_library_stem}.dylib"
+          "${_runtime_dir}/lib${_library_stem}.*.dylib"
+          "${_runtime_dir}/lib${_library_stem}-*.dylib")
+        list(APPEND _matches ${_runtime_dir_matches})
+      endforeach()
       list(REMOVE_DUPLICATES _matches)
       list(LENGTH _matches _match_count)
       if(NOT _match_count EQUAL 1)
@@ -127,17 +156,19 @@ function(alps_target_link_pyalps target)
         list(GET _install_name_lines 1 _install_name)
         string(STRIP "${_install_name}" _install_name)
         get_filename_component(_runtime_name "${_match}" NAME)
-        add_custom_command(TARGET "${target}" POST_BUILD
-          COMMAND "${CMAKE_INSTALL_NAME_TOOL}" -change
-            "${_install_name}" "@rpath/${_runtime_name}"
-            "$<TARGET_FILE:${target}>"
-          VERBATIM)
+        if(NOT _install_name STREQUAL "@rpath/${_runtime_name}")
+          add_custom_command(TARGET "${target}" POST_BUILD
+            COMMAND "${CMAKE_INSTALL_NAME_TOOL}" -change
+              "${_install_name}" "@rpath/${_runtime_name}"
+              "$<TARGET_FILE:${target}>"
+            VERBATIM)
+        endif()
       endif()
     endforeach()
     list(REMOVE_DUPLICATES _pyalps_private_libraries)
 
     set(_pyalps_link_libraries ${_pyalps_private_libraries})
-    set(_pyalps_runtime_paths "${_pyalps_private_runtime}")
+    set(_pyalps_runtime_paths ${_pyalps_private_runtime})
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
       # GNU DT_RUNPATH is searched only for direct dependencies. Wheel
       # libraries such as LAPACK can themselves depend on relocated runtime
@@ -145,8 +176,9 @@ function(alps_target_link_pyalps target)
       # transitive DT_RPATH tag for this consumer module instead.
       target_link_options("${target}" PRIVATE "LINKER:--disable-new-dtags")
     endif()
+    string(REPLACE ";" ", " _pyalps_runtime_report "${_pyalps_private_runtime}")
     message(STATUS
-      "${target}: using pyalps wheel runtime at ${_pyalps_private_runtime}")
+      "${target}: using pyalps wheel runtime at ${_pyalps_runtime_report}")
   else()
     target_link_directories("${target}" PRIVATE ${_pyalps_runtime_paths})
   endif()

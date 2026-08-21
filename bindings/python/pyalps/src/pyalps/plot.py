@@ -1,5 +1,3 @@
-from __future__ import print_function
-from __future__ import absolute_import
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -144,7 +142,7 @@ def plot3D(sets, centeredAtOrigin=False, layer=None):
     X,Y = np.meshgrid(x,y) 
 
     if len(shape) == 3:
-      if layer == None: # column integrate
+      if layer is None: # column integrate
         Z = np.sum(Z, axis=2);
       elif layer == "center":
         Z = Z[:,:,shape[2]//2]
@@ -214,7 +212,7 @@ class MplXYPlot_core:
                 else:
                     self.lines.append([plt.scatter(xmeans, ymeans,
                                         marker=thismarker, c=thiscolor, facecolors='none')])
-                if xerrors != None or yerrors != None:
+                if xerrors is not None or yerrors is not None:
                     plt.errorbar(xmeans, ymeans, yerr=yerrors, xerr=xerrors, fmt=None)
             else:
                 line_props = '-'

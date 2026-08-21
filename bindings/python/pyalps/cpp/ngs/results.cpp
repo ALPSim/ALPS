@@ -59,27 +59,12 @@ NB_MODULE(pyngsresults_c, m) {
                                      self.begin(), self.end());
                              },
                              nb::keep_alive<0, 1>())
-        .def("keys",         [](alps::mcresults & self) {
-                                 return nb::make_key_iterator(
-                                     nb::type<alps::mcresults>(),
-                                     "key_iterator",
-                                     self.begin(), self.end());
-                             },
-                             nb::keep_alive<0, 1>())
-        .def("values",       [](alps::mcresults & self) {
-                                 return nb::make_value_iterator(
-                                     nb::type<alps::mcresults>(),
-                                     "value_iterator",
-                                     self.begin(), self.end());
-                             },
-                             nb::keep_alive<0, 1>())
-        .def("items",        [](alps::mcresults & self) {
-                                 return nb::make_iterator(
-                                     nb::type<alps::mcresults>(),
-                                     "item_iterator",
-                                     self.begin(), self.end());
-                             },
-                             nb::keep_alive<0, 1>())
+        // keys/values/items are deliberately NOT defined here. Boost.Python's
+        // map_indexing_suite did not define them either, so they resolved through
+        // MutableMapping to set-like KeysView/ValuesView/ItemsView. Defining them
+        // natively as nanobind iterators would narrow that surface (no len(), no
+        // set operators, exhausted after one pass) and pyalps/ngs.py cannot
+        // recover it -- its guard skips any name the C++ class already provides.
         .def("__str__",      &alps::detail::mcresults_print)
         .def("save",         &alps::mcresults::save)
         .def("load",         &alps::detail::mcresults_load);

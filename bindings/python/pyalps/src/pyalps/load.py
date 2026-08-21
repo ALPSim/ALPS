@@ -1,5 +1,3 @@
-from __future__ import print_function
-from __future__ import absolute_import
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -54,7 +52,7 @@ def parse_labels(labels):
       v = parse_label(x)
       larr.append(v)
       if '--' in x:      
-        if first==None:
+        if first is None:
           first = v[0]
         else:
           if first != v[0] or len(v) != 2:
@@ -198,7 +196,7 @@ class Hdf5Loader:
             
             respath = current_path+'/iteration/'+it+'/results'
             list_ = self.GetObservableList(respath)
-            if measurements == None:
+            if measurements is None:
                 obslist = list_
             else:
                 obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
@@ -212,7 +210,7 @@ class Hdf5Loader:
                             measurements_props = {}
                             measurements_props['hdf5_path'] = itresultspath 
                             measurements_props['observable'] = pt.hdf5_name_decode(m)
-                            if index == None:
+                            if index is None:
                                 d.y = self.h5f[itresultspath+'/mean/value']
                                 d.x = np.arange(0,len(d.y))
                             else:
@@ -245,7 +243,7 @@ class Hdf5Loader:
                 params = self.ReadParameters(proppath)
                 if 'results' in self.h5f.list_children(respath):
                     list_ = self.GetObservableList(respath+'/results')
-                    if measurements == None:
+                    if measurements is None:
                         obslist = list_
                     else:
                         obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
@@ -261,7 +259,7 @@ class Hdf5Loader:
                                     secresultspath = respath+'/results/'+m
                                     d.props['hdf5_path'] = secresultspath 
                                     d.props['observable'] = pt.hdf5_name_decode(m)
-                                    if index == None:
+                                    if index is None:
                                         d.y = self.h5f[secresultspath+'/mean/value']
                                         d.x = np.arange(0,len(d.y))
                                     else:
@@ -283,7 +281,7 @@ class Hdf5Loader:
                         fileset.append(self.GetIterations(respath, params, measurements, index, verbose))
                 if 'sectors' in self.h5f.list_children(respath):
                     list_ = self.GetObservableList(respath+'/sectors/0/results')
-                    if measurements == None:
+                    if measurements is None:
                         obslist = list_
                     else:
                         obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
@@ -298,7 +296,7 @@ class Hdf5Loader:
                                     secresultspath = respath+'/sectors/'+secnum+'/results/'+m
                                     d.props['hdf5_path'] = secresultspath 
                                     d.props['observable'] = pt.hdf5_name_decode(m)
-                                    if index == None:
+                                    if index is None:
                                         d.y = self.h5f[secresultspath+'/mean/value']
                                         d.x = np.arange(0,len(d.y))
                                     else:
@@ -341,14 +339,14 @@ class Hdf5Loader:
                 if verbose: log( 'loading from file ' +f)
                 self.h5f = h5.archive(f, 'r')
                 self.h5fname = f
-                if respath == None:
+                if respath is None:
                   respath="/simulation/results"
                 list_ = self.GetObservableList(respath)
                 # this is exception-safe in the sense that it's also required in the line above
                 #grp = self.h5f.require_group(respath)
                 params = self.ReadParameters(proppath)
                 obslist = []
-                if measurements == None:
+                if measurements is None:
                     obslist = list_
                 else:
                     obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
@@ -397,7 +395,7 @@ class Hdf5Loader:
                 list_ = self.GetObservableList(respath)
                 params = self.ReadParameters(proppath)
                 obslist = []
-                if measurements == None:
+                if measurements is None:
                     obslist = list_
                 else:
                     obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]

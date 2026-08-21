@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 # ****************************************************************************
 #
 # ALPS Project: Algorithms and Libraries for Physics Simulations

@@ -724,6 +724,14 @@ namespace alps {
             if (context_ == NULL)
                 throw archive_closed("the archive is closed" + ALPS_STACKTRACE);
             ALPS_HDF5_FAKE_THREADSAFETY
+            // Resolve against the current context first, as every sibling here
+            // does. Without it a relative path -- in particular the empty path
+            // that paramvalue's saver uses, `ar[""] << value` under a context
+            // set to the parameter name -- produced the marker attribute path
+            // "/@__complex__", i.e. an attribute on the root group rather than
+            // on the dataset just written. Saving a complex parameter then
+            // failed with "HDF5 error: -1".
+            path = complete_path(path);
             if (path.find_last_of('@') != std::string::npos)
                 write(path.substr(0, path.find_last_of('@')) + "@__complex__:" + path.substr(path.find_last_of('@') + 1), true);
             else {

@@ -1,4 +1,3 @@
-from __future__ import print_function
 
 import numpy as np
 from pyngsaccumulator_c import count_accumulator, mean_accumulator, error_accumulator, binning_analysis_accumulator, max_num_binning_accumulator

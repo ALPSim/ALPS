@@ -50,7 +50,7 @@ def showgraph(graph):
     if(dimension > 2):
         raise RuntimeError('This function only supports 1 and 2 dimensional lattices.')
 
-    if(len(vertices.values()[0]) == 1):
+    if(len(next(iter(vertices.values()))) == 1):
         vertices = {k: (v[0],0) for k, v in vertices.items()}
     
     x = [v[0] for v in vertices.values()]

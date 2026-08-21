@@ -46,8 +46,8 @@ def run_exp(args):
     else:                                           # good old sequential way of doing things
         for run_infile in runs:
             run_out = sp.check_output([args.program, run_infile])
-            print '--- run {} ---'.format(run_infile)
-            print run_out
+            print('--- run {} ---'.format(run_infile))
+            print(run_out)
     if not args.no_analysis:                        # run analysis if not otherwise specified
         analyze(args)
 
@@ -108,12 +108,12 @@ def get_corr(result_files):
             cbins[i][j] = np.abs( np.sum(cbins[i][j]) / float(len(cbins[i][j])) ) # take the mean for every distance
 
         # group distance, mean correlation into a numpy array 
-        result[i] = np.array([(d, c) for (d, c) in cbins[i].iteritems()], dtype = dist_corr_dt)
+        result[i] = np.array([(d, c) for (d, c) in cbins[i].items()], dtype = dist_corr_dt)
         result[i].sort(order='dist')                                        # sort in order of ascending distance
     return result, T
 
 def analyze(args):
-    print 'running analysis'
+    print('running analysis')
     runs = pyalps.getResultFiles(prefix = args.infile)
 
     chi_data = get_chi(runs)

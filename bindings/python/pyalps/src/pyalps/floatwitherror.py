@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -33,21 +32,23 @@ def get_error(f):
 class FloatWithError:
 
 
-  def __init__(self,mean_=0,error_=0,jackknife=[],binsize=0,timeseries=[]):
+  def __init__(self,mean_=0,error_=0,jackknife=None,binsize=0,timeseries=()):
     self.mean  = mean_
     self.error = error_
-    self.jackknife = jackknife
+    # `jackknife=[]` as a default shared one list across every instance
+    # that did not pass the argument.
+    self.jackknife = [] if jackknife is None else jackknife
     self.binsize = binsize
     self.timeseries = list(timeseries)
     try:
       self.shape = self.mean.shape
-    except AttributeError as ValueError:
+    # NB: `except AttributeError as ValueError` bound the caught exception
+    # to the name ValueError, shadowing the builtin for the rest of the scope.
+    except AttributeError:
       pass
 
   def __str__(self):
     return str(self.mean) + ' +/- ' + str(self.error)
-  def __expr__(self):
-    return expr(self.mean) + ' +/- ' + expr(self.error)
   def __repr__(self):
     return self.__str__()
   

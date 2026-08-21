@@ -130,8 +130,17 @@ NB_MODULE(pyngsbase_c, m) {
         .def("update",             &alps::mcbase::update)
         .def("measure",            &alps::mcbase::measure)
         .def("fraction_completed", &alps::mcbase::fraction_completed)
-        .def("save", static_cast<void (alps::mcbase::*)(alps::hdf5::archive &) const>(
-                         &alps::mcbase::save))
-        .def("load", static_cast<void (alps::mcbase::*)(alps::hdf5::archive &)>(
-                         &alps::mcbase::load));
+        // Bind the BASE implementations with qualified calls so that they do
+        // not dispatch virtually. Binding &alps::mcbase::save as a
+        // pointer-to-member dispatches through the vtable, so a Python
+        // subclass that overrode save() and then called
+        // ngs.mcbase.save(self, ar) -- or super().save(ar) -- re-entered its
+        // own override and ran the body twice. Overriding subclasses still
+        // reach C++ through the trampoline's NB_OVERRIDE, which is unaffected.
+        .def("save", [](alps::mcbase const & self, alps::hdf5::archive & ar) {
+                         self.alps::mcbase::save(ar);
+                     })
+        .def("load", [](alps::mcbase & self, alps::hdf5::archive & ar) {
+                         self.alps::mcbase::load(ar);
+                     });
 }

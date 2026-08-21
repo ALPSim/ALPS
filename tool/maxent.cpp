@@ -46,9 +46,15 @@ bool stop_callback(boost::posix_time::ptime const & end_time) {
 
 #ifdef BUILD_PYTHON_MODULE
 #include "dict_to_params.hpp"
+#include "scoped_signal_handlers.hpp"
 namespace nb = nanobind;
 
 void run_it(nb::dict const & parms_){
+  // MaxEntSimulation derives from alps::mcbase, and stop_callback above
+  // constructs an alps::ngs::signal, so running it installs ALPS handlers
+  // for SIGINT and for SIGSEGV/SIGBUS. Restore Python's before returning
+  // to the interpreter, exactly as cthyb::solve and ctint::solve do.
+  pyalps::scoped_signal_handlers signal_handlers;
     alps::parameters_type<MaxEntSimulation>::type parms = pyalps::params_from_dict(parms_);
     std::string out_file = boost::lexical_cast<std::string>(parms["BASENAME"]|"results")+std::string(".out.h5");
 

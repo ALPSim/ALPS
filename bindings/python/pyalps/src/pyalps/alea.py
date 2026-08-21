@@ -23,12 +23,10 @@ This module contains classes for the evaluation of Monte Carlo measurements:
 - MCScalarTimeseriesView
 - MCVectorTimeseriesView
 """
-from __future__ import print_function
-from __future__ import absolute_import
 
 from .cxx.pymcdata_c import *
 from .cxx.pyalea_c import RealObservable, RealVectorObservable, RealTimeSeriesObservable, RealVectorTimeSeriesObservable
-from .cxx.pyalea_c import MCScalarTimeseries, MCScalarTimeseriesView, MCVectorTimeseries, MCVectorTimeseries, ValueWithError, StdPairDouble, size, mean, variance, integrated_autocorrelation_time, running_mean, reverse_running_mean
+from .cxx.pyalea_c import MCScalarTimeseries, MCScalarTimeseriesView, MCVectorTimeseries, MCVectorTimeseriesView, ValueWithError, StdPairDouble, size, mean, variance, integrated_autocorrelation_time, running_mean, reverse_running_mean
 from . import alea_detail as detail
 import numpy
 import pyalps.dataset
@@ -52,9 +50,9 @@ timeseries: Any MCTimeseries or MCData object\n\
 _distance: Calculates the autocorrelation until a specific length\n\
 _limit: Calculates the autocorrelation until it has reached _limit of its initial value\n\
 returns: MCTimeseries object with the autocorrelation"
-  if _distance != None:
+  if _distance is not None:
     return detail.autocorrelation_distance(timeseries, _distance)
-  if _limit != None:
+  if _limit is not None:
     return detail.autocorrelation_limit(timeseries, _limit)
   print("Usage: autocorrelation(timeseries, [_distance = XXX | _limit = XXX] )")
 
@@ -65,9 +63,9 @@ _distance: Cuts the first _distance entries\n\
 _limit: Cuts the front until the timeseries reaches _limit of its initial value\n\
 returns: MCTimeseriesView object with the smaller timeseries\n\
   Note: does not copy the data, only creates a reference."
-  if _distance != None:
+  if _distance is not None:
     return detail.cut_head_distance(timeseries, _distance)
-  if _limit != None:
+  if _limit is not None:
     return detail.cut_head_limit(timeseries, _limit)
   print("Usage: cut_head(timeseries, [_distance = XXX | _limit = XXX] )")
 
@@ -78,9 +76,9 @@ _distance: Cuts the last _distance entries\n\
 _limit: Cuts the tail until the timeseries only decays from its initial value to _limit of its initial value\n\
 returns: MCTimeseriesView object with the smaller timeseries\n\
   Note: does not copy the data, only creates a reference."
-  if _distance != None:
+  if _distance is not None:
     return detail.cut_tail_distance(timeseries, _distance)
-  if _limit != None:
+  if _limit is not None:
     return detail.cut_tail_limit(timeseries, _limit)
   print("Usage: cut_head(timeseries, [_distance = XXX | _limit = XXX] )")
 
@@ -91,9 +89,9 @@ _from & _to: fits the autocorrelation between _from and _to\n\
 _max & _min: fits the autocorrelation between the values where it is at _max and where it is at _min from its initial value\n\
 returns: StdPairDouble object FIT with the parameters of the fit\n\
   Note: The equation is FIT.first * exp(FIT.second * t)"
-  if (_from != None and _to != None):
+  if (_from is not None and _to is not None):
     return detail.exponential_autocorrelation_time_distance(autocorrelation, _from, _to)
-  if (_max != None and _min != None):
+  if (_max is not None and _min is not None):
     return detail.exponential_autocorrelation_time_limit(autocorrelation, _max, _min)
   print("Usage: exponential_autocorrelation_time(autocorrelation, [_from = XXX, _to = XXX | _max = XXX, _min = XXX] )")
 

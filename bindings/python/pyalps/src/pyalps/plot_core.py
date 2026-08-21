@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -34,9 +33,9 @@ def read_xml(filename):
     for point in list(root.find('set')):
         x.append(float(point.find('x').text))
         y.append(float(point.find('y').text))
-        if point.find('dx') != None:
+        if point.find('dx') is not None:
             x[-1] = fwe(x[-1],float(point.find('dx').text))
-        if point.find('dy') != None:
+        if point.find('dy') is not None:
             y[-1] = fwe(y[-1],float(point.find('dy').text))
 
     data.x = np.array(x)
@@ -50,37 +49,37 @@ def read_xml(filename):
 
 def Axis(label=None,mmin=None,mmax=None,log=False):
     d = {}
-    if label != None:
+    if label is not None:
         d['label'] = label
-    if mmin != None:
+    if mmin is not None:
         d['min'] = min
-    if mmax != None:
+    if mmax is not None:
         d['max'] = max
-    if log != None:
+    if log is not None:
         d['log'] = log
     return d
 
 def Legend(location=None):
     d = {}
-    if location != None:
+    if location is not None:
         d['location'] = location
     return d
 
 def Plot(data,xaxis=None,yaxis=None,legend=None):
     d = {'data':data}
-    if xaxis != None:
+    if xaxis is not None:
         d['xaxis'] = xaxis
-    if yaxis != None:
+    if yaxis is not None:
         d['yaxis'] = yaxis
-    if legend != None:
+    if legend is not None:
         d['legend'] = legend
 
 def convertToText(data,title=None,xaxis=None,yaxis=None):
     output = ''
-    if  title!=None:
+    if  title is not None:
         output += title + '\n'
     
-    if xaxis != None:
+    if xaxis is not None:
         output += '# X'
         if 'label' in xaxis:
             output += ': ' + xaxis['label']
@@ -88,7 +87,7 @@ def convertToText(data,title=None,xaxis=None,yaxis=None):
             output += ': ' + str(xaxis['min']) + ' to ' + str(xaxis['max'])
         output+='\n'
 
-    if yaxis != None:
+    if yaxis is not None:
         output += '# Y'
         if 'label' in yaxis:
             output += ': ' + yaxis['label']
@@ -132,27 +131,27 @@ def makeGracePlot(data,title=None,xaxis=None,yaxis=None,legend=None):
 
         xrange = [0,1]
         yrange = [0,1]
-        if xaxis != None:
+        if xaxis is not None:
           if 'min' in xaxis and 'max' in xaxis: 
             xrange = [ xaxis['min'],xaxis['max']]
-        if yaxis != None:
+        if yaxis is not None:
           if 'min' in yaxis and 'max' in yaxis:
             yrange = [ yaxis['min'],yaxis['max']]
 
         output += '@    world ' + str(xrange[0])+', ' + str (yrange[0]) + ','
         output +=                 str(xrange[1])+', ' + str (yrange[1]) + '\n'
 
-        if title != None:
+        if title is not None:
             output += '@    title "'+ title + '"\n'           
             output += '@    title size 1.500000\n'
 
         xlog = False
         ylog = False
-        if xaxis != None:
+        if xaxis is not None:
           if  'logarithmic' in xaxis: 
             xlog = xaxis['logarithmic']
-        if yaxis != None:
-          if 'logarithmic' in yaxis and yaxis['logarithmic'] != None:
+        if yaxis is not None:
+          if 'logarithmic' in yaxis and yaxis['logarithmic'] is not None:
             ylog = yaxis['logarithmic']
             
         if xlog:
@@ -165,7 +164,7 @@ def makeGracePlot(data,title=None,xaxis=None,yaxis=None,legend=None):
         else:
             output += '@    yaxes scale Normal\n'
 
-        if xaxis != None:
+        if xaxis is not None:
           if 'label' in xaxis:
             output += '@    xaxis  label "' + xaxis['label'] +'"\n'
             output += '@    xaxis  label char size 1.500000\n'
@@ -178,7 +177,7 @@ def makeGracePlot(data,title=None,xaxis=None,yaxis=None,legend=None):
         output += '@    xaxis  ticklabel char size 1.250000\n'
         output += '@    xaxis  tick minor ticks 4\n'
 
-        if yaxis != None:
+        if yaxis is not None:
           if 'label' in yaxis:
             output += '@    yaxis  label "' + yaxis['label'] +'"\n'
             output += '@    yaxis  label char size 1.500000\n'
@@ -191,7 +190,7 @@ def makeGracePlot(data,title=None,xaxis=None,yaxis=None,legend=None):
         output += '@    yaxis  ticklabel char size 1.250000\n'
         output += '@    yaxis  tick minor ticks 4\n'
         
-        if legend != None and legend != False:
+        if legend is not None and legend != False:
             output += '@    legend on\n'
             output += '@    legend loctype view\n'
             output += '@    legend 0.85, 0.8\n'
@@ -226,19 +225,19 @@ def makeGracePlot(data,title=None,xaxis=None,yaxis=None,legend=None):
                 except AttributeError:
                     yerrors = None
                     
-                if xerrors == None and yerrors == None:
+                if xerrors is None and yerrors is None:
                     output += '@type xy\n'
                     for i in range(len(q.x)):
                         output += str(q.x[i]) + '\t' + str(q.y[i]) + '\n'
-                if xerrors == None and yerrors != None:
+                if xerrors is None and yerrors is not None:
                     output += '@type xydy\n'
                     for i in range(len(q.x)):
                         output += str(q.x[i]) + '\t' + str(q.y[i].mean) + '\t' + str(q.y[i].error) + '\n'
-                if xerrors != None and yerrors == None:
+                if xerrors is not None and yerrors is None:
                     output += '@type xydx\n'
                     for i in range(len(q.x)):
                         output += str(q.x[i]) + '\t' + str(q.y[i].mean) + '\t' + str(q.x[i].error) + '\n'
-                if xerrors != None and yerrors != None:
+                if xerrors is not None and yerrors is not None:
                     output += '@type xydxdy\n'
                     for i in range(len(q.x)):
                         output += str(q.x[i]) + '\t' + str(q.y[i].mean) + '\t' + str(q.x[i].error) + '\t' + str(q.x[i].error) + '\n'
@@ -262,37 +261,37 @@ def convert_to_grace(desc):
   
 def makeGnuplotPlot(data,title=None,xaxis=None,yaxis=None,legend=None, outfile=None, terminal=None, fontsize=24):
     output =  '# Gnuplot project file\n'
-    if outfile != None:
+    if outfile is not None:
         output += 'set output "' + outfile + '"\n'
-        if terminal==None:
+        if terminal is None:
           if outfile[-3:]=='eps':
             terminal='postscript color eps enhanced ' + str(fontsize)
           if outfile[-3:]=='pdf':
             terminal='pdf color enhanced'
-    if terminal != None:
+    if terminal is not None:
         output += 'set terminal ' + str(terminal) +'\n'
-    if xaxis != None:
+    if xaxis is not None:
       if 'min' in xaxis and 'max' in xaxis: 
         xrange = [ xaxis['min'],xaxis['max']]
         output += 'set xrange [' + str(xrange[0])+': ' + str (xrange[1]) + ']\n'
-    if yaxis != None:
+    if yaxis is not None:
       if 'min' in yaxis and 'max' in yaxis:
         yrange = [ yaxis['min'],yaxis['max']]
         output += 'set yrange [' + str(yrange[0])+': ' + str (yrange[1]) + ']\n'
     
-    if title != None:
+    if title is not None:
         output += 'set title "'+ title + '"\n'           
 
     xlog = False
     ylog = False
-    if xaxis != None:
+    if xaxis is not None:
       if 'logarithmic' in xaxis:
         xlog = xaxis['logarithmic']
         output += 'set xlogscale \n'
     else:
         output += '# no xlogscale \n'
 
-    if yaxis != None:
+    if yaxis is not None:
       if 'logarithmic' in yaxis:
         ylog = yaxis['logarithmic']
         output += 'set ylogscale\n'
@@ -300,15 +299,15 @@ def makeGnuplotPlot(data,title=None,xaxis=None,yaxis=None,legend=None, outfile=N
         output += '# no ylogscale\n'
         
 
-    if xaxis != None:
+    if xaxis is not None:
       if 'label' in xaxis:
         output += 'set xlabel "' + xaxis['label'] +'"\n'
 
-    if yaxis != None:
+    if yaxis is not None:
       if 'label' in yaxis:
         output += 'set ylabel "' + yaxis['label'] +'"\n'
                     
-    if legend != None and legend != False:
+    if legend is not None and legend != False:
         output += 'set key top right\n'
         
     num = 0
@@ -327,62 +326,62 @@ def makeGnuplotPlot(data,title=None,xaxis=None,yaxis=None,legend=None, outfile=N
                 yerrors = None
         if 'line' in q.props and q.props['line'] == 'scatter':
             if 'label' in q.props:
-                if xerrors == None and yerrors == None:
+                if xerrors is None and yerrors is None:
                     output += ' "-" using 1:2 title "' + q.props['label'] + '",'
-                if xerrors == None and yerrors != None:
+                if xerrors is None and yerrors is not None:
                     output += ' "-" using 1:2:3 w yerrorbars  title "' + q.props['label'] + '",'
-                if xerrors != None and yerrors == None:
+                if xerrors is not None and yerrors is None:
                     output += ' "-" using 1:2:3 w xerrorbars  title "' + q.props['label'] + '",'
-                if xerrors != None and yerrors != None:
+                if xerrors is not None and yerrors is not None:
                     output += ' "-" using 1:2:3:4 w xyerrorbars  title "' + q.props['label'] + '",'
             else:
-                if xerrors == None and yerrors == None:
+                if xerrors is None and yerrors is None:
                     output += ' "-" using 1:2 notitle ,"' 
-                if xerrors == None and yerrors != None:
+                if xerrors is None and yerrors is not None:
                     output += ' "-" using 1:2:3 w yerrorbars  notitle ,' 
-                if xerrors != None and yerrors == None:
+                if xerrors is not None and yerrors is None:
                     output += ' "-" using 1:2:3 w xerrorbars  notitle ,' 
-                if xerrors != None and yerrors != None:
+                if xerrors is not None and yerrors is not None:
                     output += ' "-" using 1:2:3:4 w xyerrorbars  notitle ,'
         else:
             if 'label' in q.props:
-                if xerrors == None and yerrors == None:
+                if xerrors is None and yerrors is None:
                     output += ' "-" using 1:2 title "' + q.props['label'] + '",'
-                if xerrors == None and yerrors != None:
+                if xerrors is None and yerrors is not None:
                     output += ' "-" using 1:2:3 w yerrorline  title "' + q.props['label'] + '",'
-                if xerrors != None and yerrors == None:
+                if xerrors is not None and yerrors is None:
                     output += ' "-" using 1:2:3 w xerrorline  title "' + q.props['label'] + '",'
-                if xerrors != None and yerrors != None:
+                if xerrors is not None and yerrors is not None:
                     output += ' "-" using 1:2:3:4 w xyerrorline  title "' + q.props['label'] + '",'
             else:
-                if xerrors == None and yerrors == None:
+                if xerrors is None and yerrors is None:
                     output += ' "-" using 1:2 notitle ,"' 
-                if xerrors == None and yerrors != None:
+                if xerrors is None and yerrors is not None:
                     output += ' "-" using 1:2:3 w yerrorline  notitle ,' 
-                if xerrors != None and yerrors == None:
+                if xerrors is not None and yerrors is None:
                     output += ' "-" using 1:2:3 w xerrorline  notitle ,' 
-                if xerrors != None and yerrors != None:
+                if xerrors is not None and yerrors is not None:
                     output += ' "-" using 1:2:3:4 w xyerrorline  notitle ,'
     output=output[:-1]
     output+='\n'
     
     for q in flatten(data):    
-            if xerrors == None and yerrors == None:
+            if xerrors is None and yerrors is None:
                 output += '# X Y \n'
                 for i in range(len(q.x)):
                     output += str(q.x[i]) + '\t' + str(q.y[i]) + '\n'
                 output += 'end \n'
-            if xerrors == None and yerrors != None:
+            if xerrors is None and yerrors is not None:
                 output += '# X Y DY \n'
                 for i in range(len(q.x)):
                     output += str(q.x[i]) + '\t' + str(q.y[i].mean) + '\t' + str(q.y[i].error) + '\n'
                 output += 'end \n'
-            if xerrors != None and yerrors == None:
+            if xerrors is not None and yerrors is None:
                 output += '# X Y DX \n'
                 for i in range(len(q.x)):
                     output += str(q.x[i].mean) + '\t' + str(q.y[i]) + '\t' + str(q.x[i].error) + '\n'
                 output += 'end \n'
-            if xerrors != None and yerrors != None:
+            if xerrors is not None and yerrors is not None:
                 output += '# X Y DXY \n'
                 for i in range(len(q.x)):
                     output += str(q.x[i].mean) + '\t' + str(q.y[i].mean) + '\t' + str(q.x[i].error) + '\t' + str(q.y[i].error) + '\n'

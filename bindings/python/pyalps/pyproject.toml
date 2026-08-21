@@ -65,7 +65,6 @@ ALPS_DIR = { env = "ALPS_DIR" }
 [tool.scikit-build.sdist.force-include]
 "../../../LICENSE.txt" = "LICENSE.txt"
 "../../../applications/dmft/qmc" = "_vendor/applications/dmft/qmc"
-"../../../applications/qmc/dwa" = "_vendor/applications/qmc/dwa"
 "../../../tool" = "_vendor/tool"
 "../../../lib/xml" = "_vendor/lib/xml"
 

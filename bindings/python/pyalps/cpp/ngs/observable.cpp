@@ -32,6 +32,7 @@
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/complex.hpp>
 #include <alps/ngs/mcobservable.hpp>
+#include <alps/ngs/mcobservables.hpp>
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
 #include <nanobind/stl/string.h>
@@ -61,11 +62,36 @@ namespace alps {
             self.load(ar);
             ar.set_context(current);
         }
+        // Construct the underlying alea observable inside libalps rather than
+        // in this translation unit.
+        //
+        // nanobind compiles extensions with -fvisibility=hidden
+        // (CXX_VISIBILITY_PRESET hidden). Instantiating a libalps class
+        // template here therefore emits a *hidden* vtable and type_info for it,
+        // which the dynamic loader cannot merge with libalps' own copy. The
+        // object then carries this module's RTTI, and the
+        // dynamic_cast<RecordableObservable<T>*> that libalps performs in
+        // Observable::add (src/alps/alea/observable.h:161) fails, so appending a
+        // sample raised "Cannot add measurement to observable <name>".
+        //
+        // The legacy Boost.Python modules were built with default visibility
+        // (cmake/FindPythonMod.cmake's PYTHON_ADD_MODULE set no visibility
+        // flag), so the two type_infos merged and the same code worked there.
+        //
+        // Routing through mcobservables::create_RealObservable keeps every
+        // construction, clone and cast on the libalps side of the boundary.
+        // Do NOT "simplify" this back to constructing alps::RealObservable
+        // here. The temporary set owns the observable until the copy taken on
+        // return bumps its reference count.
         alps::mcobservable create_RealObservable_export(std::string name) {
-            return alps::mcobservable(std::make_shared<alps::RealObservable>(name).get());
+            alps::mcobservables set;
+            set.create_RealObservable(name);
+            return set[name];
         }
         alps::mcobservable create_RealVectorObservable_export(std::string name) {
-            return alps::mcobservable(std::make_shared<alps::RealVectorObservable>(name).get());
+            alps::mcobservables set;
+            set.create_RealVectorObservable(name);
+            return set[name];
         }
     }
 }

@@ -81,7 +81,15 @@ namespace alps {
             #define ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK(T, U)                        \
                 else if (ar.is_datatype< T >(""))                                    \
                     ALPS_NGS_PARAMVALUE_LOAD_HDF5(U)
-            if (ar.is_scalar("")) {
+            // A complex scalar is stored as a trailing dimension of two
+            // reals, so archive::is_scalar() reports false for it and it fell
+            // into the vector branch below, where loading it as
+            // vector<complex> failed with "dimensions do not match". Rank
+            // tells them apart: a complex scalar has dimensions() == 1, a
+            // complex vector -- even a one-element one -- has 2.
+            if (ar.is_complex("") && ar.dimensions("") < 2)
+                ALPS_NGS_PARAMVALUE_LOAD_HDF5(std::complex<double>)
+            else if (ar.is_scalar("")) {
                 if (ar.is_complex(""))
                     ALPS_NGS_PARAMVALUE_LOAD_HDF5(std::complex<double>)
                 ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK(double, double)
