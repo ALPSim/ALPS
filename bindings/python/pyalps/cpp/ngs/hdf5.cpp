@@ -33,6 +33,7 @@
 #include <alps/ngs/stacktrace.hpp>
 #pragma GCC visibility pop
 #include "extract_from_pyobject.hpp"
+#include "../archive_savable.hpp"
 #include "../numpy_compat.hpp"
 #include <array>
 #include <complex>
@@ -152,6 +153,15 @@ namespace alps {
                 return kind == k;       // legacy: mixed scalar kinds → group
             }
         };
+        // The full save dispatch, defined below. Container children are
+        // routed back through it rather than straight into the visitor, so
+        // that an object nested in a list or dict is offered the same
+        // save() paths as one assigned at the top level -- otherwise
+        // `archive[p] = {'Energy': observable}` failed while
+        // `archive[p] = observable` worked.
+        void python_hdf5_save(alps::hdf5::archive & ar,
+                              std::string const & path,
+                              nb::handle data);
         // Save-side visitor: receives a concrete C++ value (or a
         // nb::list / nb::dict) from extract_from_pyobject_py11 and
         // writes it to the archive at `path`.
@@ -254,8 +264,7 @@ namespace alps {
                 Py_ssize_t i = 0;
                 for (auto item : l) {
                     std::string child = path + "/" + std::to_string(static_cast<long long>(i++));
-                    hdf5_save_py11_visitor child_visitor{ar, child};
-                    extract_from_pyobject_py11(child_visitor, item);
+                    python_hdf5_save(ar, child, item);
                 }
             }
             static bool is_ndarray(PyObject * raw) {
@@ -365,50 +374,79 @@ namespace alps {
                 for (auto item : d) {
                     std::string key = nb::cast<std::string>(nb::str(item.first));
                     std::string child = path + "/" + ar.encode_segment(key);
-                    hdf5_save_py11_visitor child_visitor{ar, child};
-                    extract_from_pyobject_py11(child_visitor, item.second);
+                    python_hdf5_save(ar, child, item.second);
                 }
             }
         };
         std::string python_hdf5_get_filename(alps::hdf5::archive & ar) {
             return ar.get_filename();
         }
-        // Does `data` expose a save() written in Python (as opposed to one
-        // inherited from a bound C++ type)?  The legacy build dispatched to
-        // obj.save(archive) here, but gated it on the bound method's type
-        // name being "instancemethod" -- a Python 2 spelling, so the branch
-        // was dead on Python 3 and `ar["/"] = simulation` raised
-        // "Unsupported type" instead of checkpointing the object. Gate on
-        // types.MethodType instead, which is the Python 3 equivalent and,
-        // like the original, does not match nanobind's own method objects --
-        // so registered extension types keep their native save path.
-        bool has_python_save_method(nb::handle data) {
+        // Run `save` with the archive's context moved to `path`, then restore
+        // it -- the calling convention every ALPS save() expects, since they
+        // write relative to the current context. Shared by the Python-object
+        // and declared-capability branches of python_hdf5_save below.
+        template <typename Save>
+        void save_in_path_context(alps::hdf5::archive & ar,
+                                  std::string const & path,
+                                  Save && save) {
+            std::string context = ar.get_context();
+            ar.set_context(ar.complete_path(path));
+            try {
+                save();
+            } catch (...) {
+                ar.set_context(context);
+                throw;
+            }
+            ar.set_context(context);
+        }
+        // Can `data` save itself into an archive?
+        //
+        // Two ways to qualify. An object defined in Python is duck-typed on a
+        // bound save() method, as the legacy build did -- except that it gated
+        // on the method's type name being "instancemethod", a Python 2
+        // spelling, so the branch was dead on Python 3 and
+        // `ar["/"] = simulation` raised "Unsupported type" instead of
+        // checkpointing the object. "method" is the Python 3 equivalent.
+        //
+        // An extension type qualifies by declaring the capability at its
+        // binding site with pyalps::mark_archive_savable (see
+        // ../archive_savable.hpp). Duck-typing cannot work there: nanobind's
+        // bound methods are their own type, and a save() that takes
+        // (filename, observable_name) rather than an archive -- as the
+        // alps::alea observables' does -- must not be called with one.
+        bool has_archive_save_method(nb::handle data) {
             if (!nb::hasattr(data, "save"))
                 return false;
+            if (nb::hasattr(data, pyalps::archive_savable_attr))
+                return true;
             nb::object attr = nb::getattr(data, "save");
-            // A bound method defined in Python has tp_name "method"; the
-            // legacy code compared against "instancemethod", the Python 2
-            // spelling. Compare the type name rather than calling
-            // PyMethod_Check: nanobind links extensions against a restricted
-            // CPython symbol list that does not export PyMethod_Type. This
-            // also matches the is_ndarray() check above.
+            // Compare the type name rather than calling PyMethod_Check:
+            // nanobind links extensions against a restricted CPython symbol
+            // list that does not export PyMethod_Type. This also matches the
+            // is_ndarray() check above.
             return std::strcmp(Py_TYPE(attr.ptr())->tp_name, "method") == 0;
         }
         void python_hdf5_save(alps::hdf5::archive & ar,
                               std::string const & path,
                               nb::handle data) {
-            if (has_python_save_method(data)) {
-                std::string context = ar.get_context();
-                ar.set_context(ar.complete_path(path));
-                try {
+            if (has_archive_save_method(data)) {
+                save_in_path_context(ar, path, [&] {
                     nb::getattr(data, "save")(nb::cast(&ar, nb::rv_policy::reference));
-                } catch (...) {
-                    ar.set_context(context);
-                    throw;
-                }
-                ar.set_context(context);
+                });
                 return;
             }
+            // A type that has a save() but did not declare it archive-shaped
+            // -- alps::alea's MCScalarData / MCVectorData and the pyalea
+            // observables, whose save() opens a file of its own. Naming the
+            // spelling that works beats letting the visitor below report the
+            // type as merely "Unsupported": the operation the user wants
+            // exists.
+            if (nb::hasattr(data, "save"))
+                throw nb::type_error(
+                    "this object's save() takes a file name rather than an "
+                    "archive, so it cannot be stored with "
+                    "archive[path] = object. Call object.save(filename, path) "
+                    "instead.");
             hdf5_save_py11_visitor visitor{ar, path};
             extract_from_pyobject_py11(visitor, data);
         }

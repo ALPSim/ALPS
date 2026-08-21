@@ -1,2 +1,13 @@
-ALPS_XML_INSTALL_DIR="@PYALPS_ALPS_ROOT@/lib/xml"
-ALPS_BIN_INSTALL_DIR="@PYALPS_ALPS_ROOT@/bin"
+# Generated from pyalps_config.py.in by bindings/python/pyalps/CMakeLists.txt.
+#
+# Last-resort fallbacks for the ALPS XML library and the application binaries,
+# consulted by pyalps.tools only when the package does not carry them
+# in-package as pyalps/xml and pyalps/bin.
+#
+# They are empty whenever the package does carry them, which is the default
+# and what every published wheel uses. Filling them in unconditionally would
+# bake absolute paths from the machine that built the wheel into the artifact:
+# directories that exist nowhere else, that leak the build host's layout, and
+# that make two builds of identical source differ.
+ALPS_XML_INSTALL_DIR="@PYALPS_ALPS_XML_FALLBACK@"
+ALPS_BIN_INSTALL_DIR="@PYALPS_ALPS_BIN_FALLBACK@"

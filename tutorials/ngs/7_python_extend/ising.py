@@ -79,13 +79,17 @@ class sim(ngs.mcbase):
         try:
             ngs.mcbase.load(self, ar)
 
-            self.length = int(self.parameters["L"]);
-            self.thermalization_sweeps = int(self.parameters["THERMALIZATION"]);
-            self.total_sweeps = int(self.parameters["SWEEPS"]);
-            self.beta = 1. / double(self.parameters["T"]);
+            self.length = int(self.parameters["L"])
+            self.thermalization_sweeps = int(self.parameters["THERMALIZATION"])
+            self.total_sweeps = int(self.parameters["SWEEPS"])
+            # double() is not a Python builtin; load() had never run.
+            self.beta = 1. / float(self.parameters["T"])
 
-            self.sweeps = ar["/simulation/realizations/0/clones/0/sweeps"]
-            self.spins = ar["/simulation/realizations/0/clones/0/spins"]
+            # Read back from the paths save() actually writes: it puts both
+            # under .../clones/0/checkpoint, which load() omitted.
+            checkpoint = "/simulation/realizations/0/clones/0/checkpoint/"
+            self.sweeps = int(ar[checkpoint + "sweeps"])
+            self.spins = ar[checkpoint + "spins"]
 
         except:
             traceback.print_exc(file=sys.stderr)

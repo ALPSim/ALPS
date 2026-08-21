@@ -13,6 +13,7 @@
 #include <nanobind/stl/string.h>
 #include <alps/hdf5.hpp>
 #include <alps/ngs/mcresults.hpp>
+#include "../archive_savable.hpp"
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -68,4 +69,5 @@ NB_MODULE(pyngsresults_c, m) {
         .def("__str__",      &alps::detail::mcresults_print)
         .def("save",         &alps::mcresults::save)
         .def("load",         &alps::detail::mcresults_load);
+    pyalps::mark_archive_savable(m.attr("results"));
 }

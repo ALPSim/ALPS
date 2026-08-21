@@ -1075,6 +1075,128 @@ def test_python3_property_comparison(monkeypatch):
     assert apptest.checkProperties("test.h5", "reference.h5")
 
 
+def test_archive_setitem_saves_registered_alps_types():
+    """`archive[path] = obj` must reach the save() of a registered ALPS type.
+
+    Each of these binds an archive-taking save(), but the __setitem__ gate only
+    recognised bound methods defined in Python -- nanobind's are a distinct
+    type -- so every one of them fell through to extract_from_pyobject, which
+    has no branch for them, and raised "Unsupported type" even though
+    obj.save(archive) worked when called directly.
+    """
+    from pyalps import hdf5, ngs
+
+    parameters = ngs.params({"L": 8, "T": 2.5, "MODEL": "spin"})
+    observable = ngs.createRealObservable("Energy")
+    observable << 1.0
+    observable << 2.0
+    result = ngs.observable2result(observable)
+    container = ngs.observables()
+    container.createRealObservable("Magnetization")
+    container["Magnetization"] << 0.5
+
+    cases = {
+        "parameters": parameters,
+        "observable": observable,
+        "result": result,
+        "observables": container,
+    }
+
+    with tempfile.TemporaryDirectory() as directory:
+        path = os.path.join(directory, "registered.h5")
+        with hdf5.archive(path, "w") as archive:
+            for key, value in cases.items():
+                archive["/" + key] = value
+
+        with hdf5.archive(path, "r") as archive:
+            # Each save() writes a group of its own children; an empty or
+            # missing group would mean the dispatch silently did nothing.
+            for key in cases:
+                assert archive.is_group("/" + key), key
+                assert archive.list_children("/" + key), key
+            assert sorted(archive.list_children("/parameters")) == ["L", "MODEL", "T"]
+            assert archive.list_children("/observables") == ["Magnetization"]
+
+        restored = ngs.params()
+        with hdf5.archive(path, "r") as archive:
+            restored.load(archive, "/parameters")
+        assert int(restored["L"]) == 8
+        assert float(restored["T"]) == 2.5
+        assert str(restored["MODEL"]) == "spin"
+
+
+def test_archive_setitem_reaches_registered_types_nested_in_containers():
+    """A dict or list of ALPS objects is what a checkpoint actually looks like.
+
+    Container children used to be handed straight to the save visitor, which
+    bypassed the save() dispatch entirely, so `archive[p] = {...}` failed for
+    exactly the values that worked at the top level.
+    """
+    from pyalps import hdf5, ngs
+
+    first = ngs.createRealObservable("Energy")
+    first << 1.0
+    second = ngs.createRealObservable("Magnetization")
+    second << 0.25
+
+    with tempfile.TemporaryDirectory() as directory:
+        path = os.path.join(directory, "nested.h5")
+        with hdf5.archive(path, "w") as archive:
+            archive["/measurements"] = {"Energy": first, "Magnetization": second}
+            archive["/sequence"] = [ngs.params({"A": 1}), ngs.params({"B": 2})]
+            archive["/deep"] = {"clone": {"Energy": first}}
+
+        with hdf5.archive(path, "r") as archive:
+            assert sorted(archive.list_children("/measurements")) == [
+                "Energy", "Magnetization"]
+            assert archive.list_children("/measurements/Energy")
+            assert sorted(archive.list_children("/sequence")) == ["0", "1"]
+            assert archive.list_children("/sequence/0") == ["A"]
+            assert archive.list_children("/deep/clone/Energy")
+
+
+def test_archive_setitem_rejects_mcdata_with_actionable_advice():
+    """The one ALPS family whose save() is not archive-shaped.
+
+    MCScalarData.save takes (filename, observable_name), so it is deliberately
+    excluded from the dispatch above -- but the message has to name the
+    spelling that does work rather than calling the type unsupported.
+    """
+    from pyalps import alea, hdf5
+
+    observable = alea.MCScalarData(1.0, 0.1)
+
+    with tempfile.TemporaryDirectory() as directory:
+        path = os.path.join(directory, "mcdata.h5")
+        with hdf5.archive(path, "w") as archive:
+            with pytest.raises(TypeError, match="save.filename, path."):
+                archive["/observable"] = observable
+
+        # The documented spelling still works.
+        target = os.path.join(directory, "direct.h5")
+        observable.save(target, "/simulation/results/Energy")
+        restored = alea.MCScalarData()
+        restored.load(target, "/simulation/results/Energy")
+        assert restored.mean == pytest.approx(1.0)
+
+
+def test_accumulator_results_are_printable():
+    """__str__ returns std::string, which needs the caster in that module.
+
+    Without nanobind/stl/string.h in accumulator.cpp, str() on all ten
+    accumulator and result types raised TypeError.
+    """
+    from pyalps.cxx import pyngsaccumulator_c as accumulator
+
+    for name in ("count_accumulator", "mean_accumulator", "error_accumulator",
+                 "binning_analysis_accumulator", "max_num_binning_accumulator"):
+        accum = getattr(accumulator, name)()
+        for sample in range(16):
+            accum(float(sample))
+        assert isinstance(str(accum), str) and str(accum), name
+        assert isinstance(str(accum.result()), str) and str(accum.result()), name
+
+
 if __name__ == "__main__":
     for test in (
         test_extension_import_surface,
@@ -1095,6 +1217,10 @@ if __name__ == "__main__":
         test_mapping_views_are_set_like,
         test_mcbase_save_load_overrides_reach_cpp_dispatch,
         test_accumulator_result_inplace_identity,
+        test_archive_setitem_saves_registered_alps_types,
+        test_archive_setitem_reaches_registered_types_nested_in_containers,
+        test_archive_setitem_rejects_mcdata_with_actionable_advice,
+        test_accumulator_results_are_printable,
     ):
         test()
     print("pyalps binding surface: green")

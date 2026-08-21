@@ -6,6 +6,7 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>
 #include <alps/ngs/random01.hpp>
+#include "../archive_savable.hpp"
 #include <alps/hdf5/archive.hpp>
 namespace nb = nanobind;
 NB_MODULE(pyngsrandom01_c, m) {
@@ -21,4 +22,5 @@ NB_MODULE(pyngsrandom01_c, m) {
                  &alps::random01::operator()))
         .def("save", &alps::random01::save)
         .def("load", &alps::random01::load);
+    pyalps::mark_archive_savable(m.attr("random01"));
 }

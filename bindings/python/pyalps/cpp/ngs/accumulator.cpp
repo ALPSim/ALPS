@@ -10,6 +10,12 @@
 #include <alps/ngs/accumulator/feature/max_num_binning.hpp>
 #include <alps/hdf5/vector.hpp>
 #include <nanobind/nanobind.h>
+// bind_serializable() below binds __str__ as a std::string-returning
+// function, which needs the string caster in this translation unit --
+// without it every accumulator's and result's str() raised
+// "Unable to convert function return value to a Python type".
+#include <nanobind/stl/string.h>
+#include "../archive_savable.hpp"
 #include <sstream>
 #include <string>
 namespace nb = nanobind;
@@ -68,6 +74,7 @@ void bind_serializable(nb::class_<T> & cls) {
        .def("save", &T::save)
        .def("load", &T::load)
        .def("reset", &T::reset);
+    pyalps::mark_archive_savable(cls);
 }
 } // namespace
 NB_MODULE(pyngsaccumulator_c, m) {

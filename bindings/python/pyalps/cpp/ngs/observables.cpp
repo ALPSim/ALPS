@@ -39,6 +39,7 @@
 #include <alps/hdf5/archive.hpp>
 #include <alps/ngs/mcobservable.hpp>
 #include <alps/ngs/mcobservables.hpp>
+#include "../archive_savable.hpp"
 #include <alps/ngs/observablewrappers.hpp>
 #include <nanobind/nanobind.h>
 #include <nanobind/make_iterator.h>
@@ -111,4 +112,5 @@ NB_MODULE(pyngsobservables_c, m) {
              nb::arg("name"), nb::arg("binnum") = 0)
         .def("createRealVectorObservable", &createRealVectorObservable,
              nb::arg("name"), nb::arg("binnum") = 0);
+    pyalps::mark_archive_savable(m.attr("observables"));
 }

@@ -42,7 +42,7 @@ if __name__ == '__main__':
         try:
             with hdf5.archive(outfile[0:outfile.rfind('.h5')] + '.clone0.h5', 'r') as ar:
                 sim.load(ar)
-        except ArchiveNotFound: pass
+        except hdf5.ArchiveNotFound: pass
 
     if limit == 0:
         sim.run(lambda: False)

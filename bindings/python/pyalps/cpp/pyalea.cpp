@@ -17,7 +17,7 @@
 #include <alps/hdf5.hpp>
 #include <alps/numeric/vector_functions.hpp>
 #include "numpy_compat.hpp"
-#include "save_observable_to_hdf5.hpp"
+#include <alps/python/save_observable_to_hdf5.hpp>
 #include <alps/random.h>
 #include <cstddef>
 #include <sstream>

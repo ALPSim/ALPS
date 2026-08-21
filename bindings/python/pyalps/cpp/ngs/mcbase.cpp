@@ -43,6 +43,7 @@
 #include <alps/mcbase.hpp>
 #include <alps/hdf5/archive.hpp>
 #include <nanobind/nanobind.h>
+#include "../archive_savable.hpp"
 #include <nanobind/make_iterator.h>
 #include <nanobind/stl/function.h>
 #include <nanobind/trampoline.h>
@@ -143,4 +144,5 @@ NB_MODULE(pyngsbase_c, m) {
         .def("load", [](alps::mcbase & self, alps::hdf5::archive & ar) {
                          self.alps::mcbase::load(ar);
                      });
+    pyalps::mark_archive_savable(m.attr("mcbase"));
 }

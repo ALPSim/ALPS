@@ -194,10 +194,20 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/pyalps/"
   DESTINATION pyalps
   FILES_MATCHING PATTERN "*.py")
 
-# Runtime fallback paths pointing at the ALPS SDK this build used. The
-# in-package pyalps/xml and pyalps/bin directories take precedence in
-# pyalps.tools when they exist.
-set(PYALPS_ALPS_ROOT "${ALPS_ROOT_DIR}")
+# Runtime fallback paths for pyalps.tools, used only when the package does
+# not carry the resource in question. The XML/XSL library below is always
+# bundled, so its fallback is always empty; the application binaries are
+# bundled unless PYALPS_BUNDLE_APPLICATIONS is OFF, and only that
+# configuration needs to point back at the SDK that built the package.
+#
+# Never fill these in for a bundled package: they would be absolute paths on
+# the build machine, baked into a redistributable artifact.
+set(PYALPS_ALPS_XML_FALLBACK "")
+if(PYALPS_BUNDLE_APPLICATIONS)
+  set(PYALPS_ALPS_BIN_FALLBACK "")
+else()
+  set(PYALPS_ALPS_BIN_FALLBACK "${ALPS_ROOT_DIR}/bin")
+endif()
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/pyalps/pyalps_config.py.in"
   "${CMAKE_CURRENT_BINARY_DIR}/pyalps_config.py" @ONLY)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pyalps_config.py" DESTINATION pyalps)

@@ -32,6 +32,7 @@
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/complex.hpp>
 #include <alps/ngs/mcobservable.hpp>
+#include "../archive_savable.hpp"
 #include <alps/ngs/mcobservables.hpp>
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
@@ -117,4 +118,5 @@ NB_MODULE(pyngsobservable_c, m) {
         // load-compatibly) bound addToObservable to the same helper
         // as load.
         .def("addToObservable", &alps::detail::observable_load);
+    pyalps::mark_archive_savable(m.attr("observable"));
 }

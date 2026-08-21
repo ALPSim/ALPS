@@ -9,6 +9,7 @@
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
 #include <alps/hdf5/archive.hpp>
+#include "../archive_savable.hpp"
 #include <alps/ngs/params.hpp>
 #include <alps/ngs/detail/paramvalue.hpp>
 #include <boost/filesystem/path.hpp>
@@ -111,4 +112,5 @@ NB_MODULE(pyngsparams_c, m) {
         .def("load",         &params_load,
              nb::arg("archive"),
              nb::arg("path") = std::string("/parameters"));
+    pyalps::mark_archive_savable(m.attr("params"));
 }

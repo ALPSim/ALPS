@@ -4,6 +4,7 @@
 // Part of the ALPS Project — see LICENSE.txt for full license text.
 // SPDX-License-Identifier: MIT
 #include <nanobind/nanobind.h>
+#include "../archive_savable.hpp"
 #include <nanobind/ndarray.h>
 #include <nanobind/stl/string.h>
 #include <alps/hdf5/archive.hpp>
@@ -178,4 +179,5 @@ NB_MODULE(pyngsresult_c, m) {
         .def("tanh", static_cast<R(*)(R)>(&tanh))
         .def("save", &R::save)
         .def("load", &R::load);
+    pyalps::mark_archive_savable(m.attr("result"));
 }
