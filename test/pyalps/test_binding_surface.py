@@ -1169,7 +1169,7 @@ def test_archive_setitem_rejects_mcdata_with_actionable_advice():
     with tempfile.TemporaryDirectory() as directory:
         path = os.path.join(directory, "mcdata.h5")
         with hdf5.archive(path, "w") as archive:
-            with pytest.raises(TypeError, match="save.filename, path."):
+            with pytest.raises(TypeError, match="does not declare an archive-shaped"):
                 archive["/observable"] = observable
 
         # The documented spelling still works.

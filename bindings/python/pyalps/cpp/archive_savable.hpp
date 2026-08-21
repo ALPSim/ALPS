@@ -33,4 +33,12 @@ inline void mark_archive_savable(nanobind::handle cls) {
     cls.attr(archive_savable_attr) = true;
 }
 } // namespace pyalps
+// Scope: pyalps-internal. This header is not installed, so a downstream
+// nanobind module cannot mark its own types -- and does not need to. A class
+// exported with ALPS_EXPORT_SIM_TO_PYTHON derives from alps::mcbase and
+// inherits the marker from it, and export_sim_to_python binds save() on the
+// derived type, so `archive[path] = simulation` reaches the derived save and
+// writes the same tree that simulation.save(archive) does. Tutorial 5's
+// smoke test asserts exactly that. Ship this header with the SDK only if a
+// downstream type ever needs the marker without deriving from mcbase.
 #endif // PYALPS_ARCHIVE_SAVABLE_HPP

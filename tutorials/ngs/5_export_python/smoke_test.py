@@ -44,4 +44,44 @@ with tempfile.TemporaryDirectory() as directory:
     assert after["Magnetization"].count == before["Magnetization"].count
     assert after["Magnetization"].mean == before["Magnetization"].mean
 
+    # `archive[path] = simulation` must write exactly what simulation.save()
+    # writes. It reaches save() through the archive-savable marker that this
+    # class inherits from mcbase -- but mcbase's own bound save() is a
+    # deliberately *non-virtual* qualified call (so that a Python subclass
+    # calling super().save(ar) does not re-enter its own override). If the
+    # exporter ever stopped binding save() on the derived type, that inherited
+    # non-virtual base save is what would run, and this spelling would silently
+    # checkpoint the base state only -- a partial write where the previous
+    # behaviour was a loud "Unsupported type". Compare the two trees.
+    def entries(archive, path="/", found=None, depth=0):
+        found = [] if found is None else found
+        if depth > 12:
+            return found
+        for child in archive.list_children(path):
+            child_path = path.rstrip("/") + "/" + child
+            found.append(child_path)
+            if archive.is_group(child_path):
+                entries(archive, child_path, found, depth + 1)
+        return found
+
+    trees = {}
+    for label, write in (("explicit", lambda sim, ar: sim.save(ar)),
+                         ("setitem", lambda sim, ar: ar.__setitem__("/", sim))):
+        fresh = ising_c.sim(parameters)
+        assert fresh.run(lambda: False)
+        target = os.path.join(directory, label + ".h5")
+        with hdf5.archive(target, "w") as archive:
+            write(fresh, archive)
+        with hdf5.archive(target, "r") as archive:
+            trees[label] = sorted(entries(archive))
+
+    assert trees["setitem"] == trees["explicit"], (
+        "archive['/'] = simulation wrote a different tree than "
+        "simulation.save(archive):\n"
+        f"  only in explicit: {sorted(set(trees['explicit']) - set(trees['setitem']))}\n"
+        f"  only in setitem:  {sorted(set(trees['setitem']) - set(trees['explicit']))}")
+    # Guard against both spellings degenerating to base-only state.
+    assert any(entry.endswith("/checkpoint/sweeps") for entry in trees["setitem"]), \
+        trees["setitem"]
+
 print("downstream nanobind export: ok")
