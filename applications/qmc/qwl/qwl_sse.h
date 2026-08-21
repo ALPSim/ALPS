@@ -717,7 +717,14 @@ void QWL_SSE_Simulation::print_copyright(std::ostream& out)
       << "  copyright(c) 2004 Stefan Wessel <wessel@comp-phys.org>\n"
       << "  for details see the publications:\n"     
       << "  M. Troyer, S. Wessel, and F. Alet, Phys. Rev. Lett. 90, 120201 (2003).\n"
-      << "  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).\n\n";
+      << "  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).\n\n"
+      << "********************************************************************\n"
+      << "* Recommended citation in scientific publications:                 *\n"
+      << "* This code used the ALPS [1] implementation [2] of quantum        *\n"
+      << "* Wang-Landau flat-histogram QMC.                                  *\n"
+      << "* [1] JSTAT (2011) P05001;                                         *\n"
+      << "* [2] Phys. Rev. Lett. 90, 120201 (2003)                           *\n"
+      << "********************************************************************\n\n";
 }
 
 #endif
