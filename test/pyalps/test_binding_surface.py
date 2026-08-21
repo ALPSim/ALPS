@@ -1197,6 +1197,117 @@ def test_accumulator_results_are_printable():
         assert isinstance(str(accum.result()), str) and str(accum.result()), name
 
 
+def test_numpy_arrays_are_writable_and_own_their_buffer():
+    """Arrays handed to Python must stay writable and outlive their C++ owner.
+
+    The output path builds nb::ndarray over a heap std::vector owned by a
+    capsule, rather than allocating numpy.empty and memcpy'ing into it. Two
+    ways that could corrupt results instead of failing loudly: the array
+    coming back read-only, or the vector being freed while NumPy still points
+    at it.
+    """
+    import gc
+
+    from pyalps import alea
+
+    observable = alea.MCVectorData(np.array([1.0, 2.0, 3.0]),
+                                   np.array([0.1, 0.2, 0.3]))
+    mean = observable.mean
+    assert isinstance(mean, np.ndarray)
+    assert mean.flags.writeable
+    assert mean.flags.c_contiguous
+    assert mean.base is not None, "array does not keep its owner alive"
+
+    mean[0] = 99.0
+    assert mean[0] == 99.0
+    # Each access copies out of C++; mutating one must not touch the observable.
+    assert observable.mean[0] == 1.0
+
+    def orphan():
+        local = alea.MCVectorData(np.arange(1000, dtype=float), np.full(1000, 0.5))
+        return local.mean
+
+    survivor = orphan()
+    for _ in range(3):
+        gc.collect()
+    churn = [bytearray(1 << 20) for _ in range(16)]
+    del churn
+    gc.collect()
+    assert survivor[0] == 0.0 and survivor[999] == 999.0
+    assert survivor.sum() == 499500.0
+    survivor[500] = -1.0
+    assert survivor[500] == -1.0
+
+
+def test_archive_arrays_preserve_shape_dtype_and_outlive_the_archive():
+    """The HDF5 load path shares the same nb::ndarray helper."""
+    import gc
+
+    from pyalps import hdf5
+
+    with tempfile.TemporaryDirectory() as directory:
+        path = os.path.join(directory, "arrays.h5")
+        with hdf5.archive(path, "w") as archive:
+            archive["/vector"] = np.arange(6.0)
+            archive["/matrix"] = np.arange(6.0).reshape(2, 3)
+            archive["/complex"] = np.array([1 + 2j, 3 - 4j])
+            archive["/ints"] = np.arange(4, dtype=np.int64)
+            archive["/empty"] = np.empty(0)
+
+        with hdf5.archive(path, "r") as archive:
+            vector = archive["/vector"]
+            matrix = archive["/matrix"]
+            assert np.array_equal(vector, np.arange(6.0))
+            assert vector.flags.writeable
+            assert matrix.shape == (2, 3)
+            assert np.array_equal(matrix, np.arange(6.0).reshape(2, 3))
+            assert archive["/complex"].dtype == np.complex128
+            assert np.array_equal(archive["/complex"], np.array([1 + 2j, 3 - 4j]))
+            assert archive["/ints"].dtype == np.int64
+            assert archive["/empty"].shape == (0,)
+
+        # The archive is closed and collected; the arrays must still be valid.
+        gc.collect()
+        assert np.array_equal(vector, np.arange(6.0))
+        assert matrix.shape == (2, 3)
+
+
+def test_integer_arrays_keep_their_exact_numpy_dtype():
+    """Integer dtypes must come back exactly as before, not merely equal.
+
+    The zero-copy output path describes its buffer through DLPack, which
+    encodes "signed 64-bit" and cannot distinguish `long` from `long long`.
+    NumPy can: different dtype objects, different .char ('l' vs 'q'), and a
+    different repr. Routing integers that way silently turned int64 into
+    longlong, which is why they keep the dtype-named path.
+    """
+    from pyalps import hdf5
+
+    cases = {
+        "/i64": np.arange(3, dtype=np.int64),
+        "/u64": np.arange(3, dtype=np.uint64),
+        "/i32": np.arange(3, dtype=np.int32),
+        "/f64": np.arange(3, dtype=np.float64),
+        "/c128": np.array([1 + 2j], dtype=np.complex128),
+    }
+
+    with tempfile.TemporaryDirectory() as directory:
+        path = os.path.join(directory, "dtypes.h5")
+        with hdf5.archive(path, "w") as archive:
+            for key, value in cases.items():
+                archive[key] = value
+
+        with hdf5.archive(path, "r") as archive:
+            for key, value in cases.items():
+                restored = archive[key]
+                # Not just ==: .char distinguishes long from long long, and
+                # repr() is what the reference outputs pin down.
+                assert restored.dtype.char == value.dtype.char, (
+                    f"{key}: dtype.char {restored.dtype.char!r} != "
+                    f"{value.dtype.char!r}")
+                assert repr(restored) == repr(value), key
+
+
 if __name__ == "__main__":
     for test in (
         test_extension_import_surface,
@@ -1221,6 +1332,9 @@ if __name__ == "__main__":
         test_archive_setitem_reaches_registered_types_nested_in_containers,
         test_archive_setitem_rejects_mcdata_with_actionable_advice,
         test_accumulator_results_are_printable,
+        test_numpy_arrays_are_writable_and_own_their_buffer,
+        test_archive_arrays_preserve_shape_dtype_and_outlive_the_archive,
+        test_integer_arrays_keep_their_exact_numpy_dtype,
     ):
         test()
     print("pyalps binding surface: green")

@@ -62,7 +62,7 @@ namespace alps {
                 std::vector<double> tmp(n);
                 for (std::size_t i = 0; i < n; ++i)
                     tmp[i] = static_cast<double>(v[i]);
-                return alps::python::make_numpy_array<double>(tmp.data(), {n});
+                return alps::python::make_numpy_array<double>(std::move(tmp), {n});
             }
             nb::object mean()     const { return _to_numpy(obs.mean());     }
             nb::object error()    const { return _to_numpy(obs.error());    }
@@ -88,7 +88,7 @@ nb::object seq_to_numpy(Container const & v) {
     std::vector<double> tmp(n);
     for (std::size_t i = 0; i < n; ++i)
         tmp[i] = static_cast<double>(v[i]);
-    return alps::python::make_numpy_array<double>(tmp.data(), {n});
+    return alps::python::make_numpy_array<double>(std::move(tmp), {n});
 }
 // Copy a numpy array into a std::vector<ValueType>. Used when the
 // caller still instantiates mctimeseries<ValueType> from a
@@ -154,7 +154,7 @@ nb::object ts_to_numpy_vector_rows(TS const & ts) {
     auto const & rows = ts.timeseries();
     if (rows.empty())
         return alps::python::make_numpy_array<double>(
-            static_cast<double const*>(nullptr), {std::size_t{0}, std::size_t{0}});
+            std::vector<double>(), {std::size_t{0}, std::size_t{0}});
     std::size_t nrows = rows.size();
     std::size_t ncols = rows.front().size();
     for (auto const & row : rows)
@@ -166,7 +166,7 @@ nb::object ts_to_numpy_vector_rows(TS const & ts) {
         for (std::size_t j = 0; j < ncols; ++j)
             *dst++ = static_cast<double>(row[j]);
     }
-    return alps::python::make_numpy_array<double>(flat.data(), {nrows, ncols});
+    return alps::python::make_numpy_array<double>(std::move(flat), {nrows, ncols});
 }
 } // namespace
 NB_MODULE(pyalea_c, m) {

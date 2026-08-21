@@ -23,8 +23,8 @@ namespace alps {
         // std::vector<double>. Allocates a fresh array via
         // numpy.empty + memcpy through the buffer protocol — no
         // numpy headers.
-        inline nb::object vec_to_numpy(std::vector<double> const & v) {
-            return make_numpy_array<double>(v.data(), {v.size()});
+        inline nb::object vec_to_numpy(std::vector<double> v) {
+            return make_numpy_array<double>(std::move(v));
         }
         // Build a 2-D numpy.ndarray from a vector<vector<double>>.
         // Rows must be equal-length; on mismatch throw a value error
@@ -42,7 +42,7 @@ namespace alps {
                 std::copy(row.begin(), row.end(), dst);
                 dst += cols;
             }
-            return make_numpy_array<double>(flat.data(), {rows, cols});
+            return make_numpy_array<double>(std::move(flat), {rows, cols});
         }
         // __repr__ for mcdata<double> — "<mean> +/- <error>".
         template <typename T>

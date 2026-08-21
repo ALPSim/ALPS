@@ -17,14 +17,15 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <type_traits>
 #include <utility>
 #include <vector>
 namespace alps {
     namespace python {
         namespace nb_ = nanobind;
-        // numpy dtype strings, indexed by the corresponding C++ type.
-        // Used by make_numpy_array() / as_contiguous() to drive the
-        // numpy.empty(dtype=…) / numpy.ascontiguousarray(dtype=…) calls.
+        // numpy dtype strings, indexed by the corresponding C++ type. Used by
+        // as_contiguous() and by the integer arm of make_numpy_array, where
+        // the dtype has to be named exactly (see the comment there).
         template <typename T> struct numpy_dtype;
         template <> struct numpy_dtype<bool>                 { static constexpr char const* name = "bool"; };
         template <> struct numpy_dtype<std::int8_t>          { static constexpr char const* name = "int8"; };
@@ -63,40 +64,80 @@ namespace alps {
             }
             return mod;
         }
-        // Allocates numpy.empty(shape, dtype=numpy_dtype<T>::name) and
-        // memcpy's `data` (length = product(shape)) into it. Returns
-        // a writable numpy.ndarray.
+        // Hand a heap-owned std::vector to NumPy through nb::ndarray. The
+        // capsule keeps the vector alive for as long as the array (or any
+        // view of it) exists, so the data is not copied on the way out.
+        //
+        // This used to allocate numpy.empty(shape, dtype=...) through the
+        // cached numpy module and memcpy into it: two copies per conversion
+        // (callers build a vector, which was then copied again) plus a Python
+        // call. nb::ndarray hands NumPy the buffer C++ already owns.
+        //
+        // The returned array is writable: NumPy takes no ownership, only a
+        // reference to the capsule, matching what numpy.empty + memcpy
+        // produced. An empty shape yields a 0-d array, as numpy.empty(())
+        // did.
+        template <typename T>
+        inline nb_::object make_numpy_array(std::vector<T> values,
+                                            std::vector<std::size_t> const& shape) {
+            if constexpr (std::is_integral_v<T>) {
+                // Integers keep the numpy.empty + memcpy route. nb::ndarray
+                // describes the buffer through DLPack, which encodes only
+                // "signed 64-bit" and so cannot distinguish `long` from
+                // `long long`. NumPy can: they are different dtype objects
+                // with different .char ('l' vs 'q') and different reprs, and
+                // routing int64 through DLPack changed
+                // archive["/ints"] from int64 to longlong. Same bits, but a
+                // visible change in returned dtype, which this migration has
+                // no business making. Passing the dtype name keeps it exact.
+                nb_::handle np = numpy_module();
+                nb_::tuple shape_tuple = nb_::steal<nb_::tuple>(
+                    PyTuple_New(static_cast<Py_ssize_t>(shape.size())));
+                if (!shape_tuple.is_valid())
+                    throw nb_::python_error();
+                for (std::size_t i = 0; i < shape.size(); ++i) {
+                    PyObject* dim = PyLong_FromUnsignedLongLong(shape[i]);
+                    if (!dim)
+                        throw nb_::python_error();
+                    PyTuple_SetItem(shape_tuple.ptr(),
+                                    static_cast<Py_ssize_t>(i), dim);
+                }
+                nb_::object array = np.attr("empty")(
+                    shape_tuple, nb_::arg("dtype") = numpy_dtype<T>::name);
+                if (!values.empty()) {
+                    auto view = nb_::cast<nb_::ndarray<T, nb_::c_contig>>(array);
+                    std::memcpy(view.data(), values.data(),
+                                values.size() * sizeof(T));
+                }
+                return array;
+            } else {
+                // Floating point and complex have one unambiguous NumPy dtype
+                // each, so the zero-copy route is exact.
+                auto* owned = new std::vector<T>(std::move(values));
+                nb_::capsule owner(owned, [](void* pointer) noexcept {
+                    delete static_cast<std::vector<T>*>(pointer);
+                });
+                return nb_::cast(nb_::ndarray<nb_::numpy, T>(
+                    owned->data(), shape.size(), shape.data(), owner));
+            }
+        }
+        template <typename T>
+        inline nb_::object make_numpy_array(std::vector<T> values) {
+            std::size_t const size = values.size();
+            return make_numpy_array<T>(std::move(values), {size});
+        }
+        // Copying entry point, for callers whose source is not a vector they
+        // can give up (a single stack value, or a null pointer standing for an
+        // empty extent). `data` may be null when the shape has no elements.
         template <typename T>
         inline nb_::object make_numpy_array(T const* data,
                                             std::vector<std::size_t> const& shape) {
-            nb_::handle np = numpy_module();
-            nb_::tuple shape_tuple = nb_::steal<nb_::tuple>(PyTuple_New(static_cast<Py_ssize_t>(shape.size())));
-            if (!shape_tuple.is_valid())
-                throw nb_::python_error();
-            // PyTuple_SetItem (not the SET_ITEM macro): the macro pokes
-            // tuple internals directly and is unavailable under the
-            // limited API, which is otherwise within reach for these
-            // bindings. SetItem steals the reference to dim.
-            for (std::size_t i = 0; i < shape.size(); ++i) {
-                PyObject * dim = PyLong_FromUnsignedLongLong(shape[i]);
-                if (!dim)
-                    throw nb_::python_error();
-                PyTuple_SetItem(shape_tuple.ptr(), static_cast<Py_ssize_t>(i), dim);
-            }
-            nb_::object arr = np.attr("empty")(
-                shape_tuple, nb_::arg("dtype") = numpy_dtype<T>::name);
-            // Bridge the freshly-allocated numpy buffer through nb::ndarray
-            // to get a writable raw pointer.
-            auto nd = nb_::cast<nb_::ndarray<T, nb_::c_contig>>(arr);
             std::size_t total = 1;
-            for (auto s : shape) total *= s;
-            if (total > 0)
-                std::memcpy(nd.data(), data, total * sizeof(T));
-            return arr;
-        }
-        template <typename T>
-        inline nb_::object make_numpy_array(std::vector<T> const& v) {
-            return make_numpy_array<T>(v.data(), {v.size()});
+            for (auto extent : shape) total *= extent;
+            std::vector<T> values(total);
+            if (total > 0 && data != nullptr)
+                std::memcpy(values.data(), data, total * sizeof(T));
+            return make_numpy_array<T>(std::move(values), shape);
         }
         // Strong-ref'd C-contiguous view onto a numpy array of dtype T.
         // The owner handle keeps the array alive for the lifetime of

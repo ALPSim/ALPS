@@ -468,7 +468,7 @@ namespace alps {
             // (0, 2) and (2, 0) there is no payload to read: construct the
             // correctly shaped NumPy array directly.
             if (total == 0) {
-                return alps::python::make_numpy_array<T>(nullptr, shape);
+                return alps::python::make_numpy_array<T>(std::vector<T>(), shape);
             } else if (shape.size() <= 1) {
                 // vector<T> overload works directly.
                 ar[path] >> flat;
@@ -477,7 +477,7 @@ namespace alps {
                 // multi-dim dataset into a flat buffer.
                 ar >> alps::make_pvp(path, flat.data(), shape);
             }
-            return alps::python::make_numpy_array<T>(flat.data(), shape);
+            return alps::python::make_numpy_array<T>(std::move(flat), shape);
         }
         nb::object python_hdf5_load_impl(alps::hdf5::archive & ar,
                                          std::string const & path);
