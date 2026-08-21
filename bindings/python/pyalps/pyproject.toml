@@ -7,7 +7,12 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "pyalps"
-version = "2.3.4b1"
+# Inherited from ALPS_VERSION.txt at the repository root, the same file
+# cmake/ALPSVersion.cmake reads, so a release bump is one edit. A prerelease
+# label comes from the ALPS_VERSION_PRERELEASE environment variable, matching
+# how CMake takes it from the cache variable of that name. See
+# _build_support/alps_version.py.
+dynamic = ["version"]
 description = "Python Applications and Libraries for Physics Simulations"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -46,6 +51,9 @@ test = ["pytest>=8"]
 tests = ["pytest>=8", "coverage>=7", "pytest-benchmark>=5"]
 mpi = ["mpi4py>=4"]
 
+[[tool.dynamic-metadata]]
+provider = { path = "_build_support", module = "alps_version" }
+
 [tool.scikit-build]
 cmake.source-dir = "."
 wheel.packages = ["src/pyalps"]
@@ -64,6 +72,8 @@ ALPS_DIR = { env = "ALPS_DIR" }
 # be rebuilt from the sdist.
 [tool.scikit-build.sdist.force-include]
 "../../../LICENSE.txt" = "LICENSE.txt"
+# The version file, so an sdist build can still derive its own version.
+"../../../ALPS_VERSION.txt" = "ALPS_VERSION.txt"
 "../../../applications/dmft/qmc" = "_vendor/applications/dmft/qmc"
 "../../../tool" = "_vendor/tool"
 "../../../lib/xml" = "_vendor/lib/xml"
@@ -78,6 +88,10 @@ test-command = "pytest -q {project}/test/pyalps"
 # CMake preset; ALPS_DIR points every wheel build at that install. The ccache
 # in _build/ccache spans the SDK and all wheel builds (cached across CI runs).
 [tool.cibuildwheel.environment]
+# The release state of the wheels this CI publishes. The numeric version comes
+# from ALPS_VERSION.txt; this is the prerelease label CMake would take from
+# ALPS_VERSION_PRERELEASE. Clear it to publish a final release.
+ALPS_VERSION_PRERELEASE = "beta.1"
 ALPS_DIR = "$(pwd)/_build/wheel-deps/install/share/alps"
 CCACHE_DIR = "$(pwd)/_build/ccache"
 CCACHE_NAMESPACE = "pyalps-wheel"

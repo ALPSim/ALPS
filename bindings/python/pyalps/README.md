@@ -65,3 +65,33 @@ into neither of nanobind's special ABI modes:
   modules that derive from pyalps types, so an abi3 pyalps wheel would force
   every such consumer to use the limited API too. Per-version wheels preserve
   ordinary downstream extension interoperability.
+
+## Versioning
+
+pyalps does not carry a version of its own. The numeric version is read from
+`ALPS_VERSION.txt` at the repository root — the same file
+`cmake/ALPSVersion.cmake` reads for `ALPS_VERSION_CORE` — so a release bump is
+one edit rather than two that can drift. `test/pyalps/test_wheel_payload.py`
+fails if the installed version and that file disagree.
+
+A prerelease label cannot live in that file: `project(VERSION ...)` rejects a
+non-numeric version, and neither `find_package()` matching nor the library
+SOVERSION has a notion of prerelease ordering. CMake takes it from the
+`ALPS_VERSION_PRERELEASE` cache variable; the Python build takes it from the
+environment variable of the same name, using the same vocabulary:
+
+| `ALPS_VERSION_PRERELEASE` | version with `ALPS_VERSION.txt` = 2.3.4 |
+|---|---|
+| unset | `2.3.4` |
+| `beta.1` | `2.3.4b1` |
+| `alpha.2` | `2.3.4a2` |
+| `rc.1` | `2.3.4rc1` |
+| `dev.3` | `2.3.4.dev3` |
+
+The wheels CI sets it in `[tool.cibuildwheel.environment]`; clear it there to
+publish a final release. `python bindings/python/pyalps/_build_support/alps_version.py`
+prints the version a build would produce.
+
+Note the consequence: because the number is inherited, a Python-only API change
+cannot be signalled in the pyalps version alone — it takes a bump of
+`ALPS_VERSION.txt`, which moves the whole project.

@@ -151,3 +151,32 @@ def test_every_bundled_program_can_be_loaded():
             )
 
     assert not failures, "bundled programs that cannot start:\n  " + "\n  ".join(failures)
+
+
+def test_version_is_inherited_from_the_repository():
+    """pyalps' version must come from ALPS_VERSION.txt, not a second copy.
+
+    The numeric core is read from that file at build time; a prerelease label,
+    which cannot live there because project(VERSION ...) rejects a non-numeric
+    version, comes from the ALPS_VERSION_PRERELEASE environment variable. So the
+    installed version must be the file's contents followed by nothing or by a
+    PEP 440 prerelease segment -- never a different number.
+    """
+    import pyalps
+
+    version_file = Path(__file__).resolve().parents[2] / "ALPS_VERSION.txt"
+    if not version_file.is_file():
+        pytest.skip("not running from an ALPS checkout")
+
+    core = version_file.read_text(encoding="utf-8").strip().splitlines()[0].strip()
+    assert re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", core), core
+
+    installed = pyalps.__version__
+    assert installed.startswith(core), (
+        f"pyalps.__version__ is {installed!r} but ALPS_VERSION.txt says {core!r}; "
+        "the version is no longer inherited from the repository"
+    )
+    suffix = installed[len(core):]
+    assert re.fullmatch(r"|(a|b|rc)[0-9]+|\.dev[0-9]+", suffix), (
+        f"unexpected version suffix {suffix!r}"
+    )

@@ -12,6 +12,7 @@
 # ****************************************************************************
 
 import sys
+from importlib.metadata import PackageNotFoundError, version as _distribution_version
 
 from .dataset import *
 from .tools import *
@@ -19,6 +20,15 @@ from .pytools import *
 from .floatwitherror import FloatWithError
 from . import fit_wrapper
 from . import cxx as cxx
+
+# Read from the installed distribution rather than restated here: the version
+# comes from ALPS_VERSION.txt at build time (see
+# bindings/python/pyalps/_build_support/alps_version.py), and a second copy in
+# the source would be a second thing to bump.
+try:
+    __version__ = _distribution_version("pyalps")
+except PackageNotFoundError:  # an uninstalled source tree
+    __version__ = "0.0.0+unknown"
 
 
 # The extensions live in ``pyalps._ext`` in wheels, but Boost.Python-era
