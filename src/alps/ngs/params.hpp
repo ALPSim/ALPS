@@ -20,11 +20,6 @@
 #include <alps/ngs/detail/paramproxy.hpp>
 #include <alps/ngs/detail/paramiterator.hpp>
 
-#ifdef ALPS_HAVE_PYTHON
-    #include <alps/ngs/boost_python.hpp>
-    #include <boost/python/dict.hpp>
-#endif
-
 #include <boost/filesystem.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/vector.hpp>
@@ -64,11 +59,6 @@ namespace alps {
 
             params(boost::filesystem::path const &);
 
-            #ifdef ALPS_HAVE_PYTHON
-                params(boost::python::dict const & arg);
-                params(boost::python::str const & arg);
-            #endif
-
             std::size_t size() const;
 
             void erase(std::string const &);
@@ -78,6 +68,11 @@ namespace alps {
             value_type const operator[](std::string const &) const;
 
             bool defined(std::string const &) const;
+
+            // Direct native lookup for consumers that need to inspect the
+            // stored variant. The returned pointer remains owned by params
+            // and is null when the key is absent.
+            detail::paramvalue const * find(std::string const &) const;
 
             iterator begin();
             const_iterator begin() const;

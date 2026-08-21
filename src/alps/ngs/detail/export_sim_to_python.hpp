@@ -1,80 +1,104 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                                                 *
- * ALPS Project: Algorithms and Libraries for Physics Simulations                  *
- *                                                                                 *
- * ALPS Libraries                                                                  *
- *                                                                                 *
- * Copyright (C) 2010 - 2011 by Lukas Gamper <gamperl@gmail.com>                   *
- *                                                                                 *
- * ALPS Project: https://alps.comp-phys.org/                                       *
- * SPDX-License-Identifier: MIT                                                    *
- *                                                                                 *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+// Copyright (C) 2010-2012 by Lukas Gamper
+//               2026      by the ALPS collaboration
+// SPDX-License-Identifier: MIT
+//
+// Header-only nanobind support for downstream ALPS simulations.  Keeping this
+// integration in an opt-in header prevents libalps itself from depending on
+// Python or nanobind while preserving the historic public include path and
+// ALPS_EXPORT_SIM_TO_PYTHON entry point.
 #ifndef ALPS_NGS_DETAIL_EXPORT_SIM_TO_PYTHON_HPP
 #define ALPS_NGS_DETAIL_EXPORT_SIM_TO_PYTHON_HPP
 
-#include <alps/ngs/boost_python.hpp>
+#include <alps/hdf5/archive.hpp>
+#include <alps/mcbase.hpp>
 
-#include <alps/python/make_copy.hpp>
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
 
-#include <boost/bind/bind.hpp>
-#include <boost/python/dict.hpp>
-#include <boost/python/wrapper.hpp>
-#include <boost/python/return_internal_reference.hpp>
+#include <cstddef>
+#include <string>
 
 namespace alps {
+namespace python {
 
-    template<typename T> class export2python_wrapper : public T {
+namespace nb = nanobind;
 
-        public:
+template <typename Simulation>
+class exported_simulation : public Simulation {
+public:
+    using parameters_type = typename Simulation::parameters_type;
+    using result_names_type = typename Simulation::result_names_type;
+    using results_type = typename Simulation::results_type;
 
-            export2python_wrapper(typename T::parameters_type const & parm, std::size_t seed_offset = 0)
-                : T(parm, seed_offset)
-            {}
+    explicit exported_simulation(parameters_type const & parameters,
+                                 std::size_t seed_offset = 0)
+        : Simulation(parameters, seed_offset) {}
 
-            typename T::results_type collect_results(typename T::result_names_type const & names = typename T::result_names_type()) {
-                return names.size() ? T::collect_results(names) : T::collect_results();
-            }
+    ~exported_simulation() override = default;
 
-            bool run(boost::python::object stop_callback) {
-                return T::run(boost::bind(&export2python_wrapper<T>::run_helper, this, stop_callback));
-            }
+    bool run_python(nb::object stop_callback) {
+        return Simulation::run([stop_callback]() -> bool {
+            nb::gil_scoped_acquire gil;
+            return nb::cast<bool>(stop_callback());
+        });
+    }
 
-            alps::random01 & get_random() {
-                return T::random;
-            }
+    results_type collect_results_python(
+        result_names_type const & names = result_names_type()) const {
+        return names.empty() ? Simulation::collect_results()
+                             : Simulation::collect_results(names);
+    }
 
-            typename T::parameters_type & get_parameters() {
-                return T::parameters;
-            }
+    alps::random01 & get_random() { return this->random; }
+    parameters_type & get_parameters() { return this->parameters; }
+    auto & get_measurements() {
+        return this->measurements;
+    }
+};
 
-        private:
+template <typename Simulation>
+void export_sim_to_python(nb::module_ & module, char const * name) {
+    // nanobind's type registry is shared across extension modules. Import the
+    // owning pyalps modules before declaring a derived simulation so mcbase,
+    // params, archive, result and observable types are already registered.
+    nb::module_::import_("pyalps.ngs");
+    nb::module_::import_("pyalps.hdf5");
 
-            bool run_helper(boost::python::object stop_callback) {
-              return boost::python::call<bool>(stop_callback.ptr());
-            }
-    };
-
+    using wrapper = exported_simulation<Simulation>;
+    nb::class_<wrapper, alps::mcbase>(module, name)
+        .def(nb::init<typename wrapper::parameters_type const &, std::size_t>(),
+             nb::arg("parameters"), nb::arg("seed_offset") = 0)
+        .def_prop_ro("random", &wrapper::get_random,
+                     nb::rv_policy::reference_internal)
+        .def_prop_ro("parameters", &wrapper::get_parameters,
+                     nb::rv_policy::reference_internal)
+        .def_prop_ro("measurements", &wrapper::get_measurements,
+                     nb::rv_policy::reference_internal)
+        .def("run", &wrapper::run_python, nb::arg("stop_callback"))
+        .def("resultNames", &wrapper::result_names)
+        .def("unsavedResultNames", &wrapper::unsaved_result_names)
+        .def("collectResults", &wrapper::collect_results_python,
+             nb::arg("names") = typename wrapper::result_names_type())
+        .def("save",
+             [](wrapper const & self, alps::hdf5::archive & archive) {
+                 static_cast<Simulation const &>(self).save(archive);
+             })
+        .def("load",
+             [](wrapper & self, alps::hdf5::archive & archive) {
+                 static_cast<Simulation &>(self).load(archive);
+             });
 }
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(collect_results_overloads, collect_results, 0, 1)
 
-#define ALPS_EXPORT_SIM_TO_PYTHON(NAME, CLASS)                                                                                                              \
-    boost::python::class_< alps::export2python_wrapper< CLASS >, boost::noncopyable, boost::python::bases<alps::mcbase> >(                                  \
-          #NAME ,                                                                                                                                           \
-          boost::python::init< CLASS ::parameters_type const &, boost::python::optional<std::size_t> >()                                                    \
-    )                                                                                                                                                       \
-        .add_property("random", boost::python::make_function(                                                                                               \
-            &alps::export2python_wrapper< CLASS >::get_random, boost::python::return_internal_reference<>())                                                \
-         )                                                                                                                                                  \
-        .add_property("parameters", boost::python::make_function(                                                                                           \
-            &alps::export2python_wrapper< CLASS >::get_parameters, boost::python::return_internal_reference<>())                                            \
-         )                                                                                                                                                  \
-        .def("run", static_cast<bool(alps::export2python_wrapper< CLASS >::*)(boost::python::object)>(&alps::export2python_wrapper< CLASS >::run))          \
-        .def("resultNames", &alps::export2python_wrapper< CLASS >::result_names)                                                                            \
-        .def("unsavedResultNames", &alps::export2python_wrapper< CLASS >::unsaved_result_names)                                                             \
-        .def("collectResults", &alps::export2python_wrapper< CLASS >::collect_results, collect_results_overloads(boost::python::args("names")))             \
-        .def("save", static_cast<void(alps::export2python_wrapper< CLASS >::*)(alps::hdf5::archive &) const>(&alps::export2python_wrapper< CLASS >::save))  \
-        .def("load", static_cast<void(alps::export2python_wrapper< CLASS >::*)(alps::hdf5::archive &)>(&alps::export2python_wrapper< CLASS >::load))
+}  // namespace python
+}  // namespace alps
+
+#define ALPS_NANOBIND_EXPORT_SIM_TO_PYTHON(MODULE, NAME, CLASS) \
+    ::alps::python::export_sim_to_python<CLASS>((MODULE), #NAME)
+
+// Source-compatible spelling for old export.cpp files after changing their
+// module declaration to ``NB_MODULE(module_name, m)``.
+#define ALPS_EXPORT_SIM_TO_PYTHON(NAME, CLASS) \
+    ALPS_NANOBIND_EXPORT_SIM_TO_PYTHON(m, NAME, CLASS)
 
 #endif

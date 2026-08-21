@@ -1,4 +1,3 @@
-from __future__ import print_function
 #############################################################################
 #
 # ALPS Project Applications: Directed Worm Algorithm  

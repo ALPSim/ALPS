@@ -20,7 +20,7 @@ if __name__ == '__main__':
     sim.run(lambda: False)
 
     results = sim.collectResults()
-    print results
+    print(results)
 
     with pyalps.hdf5.archive(outfile, 'w') as ar:
         ar['parameters'] = sim.parameters

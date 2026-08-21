@@ -17,7 +17,7 @@ import sys, os, os.path
 from subprocess import Popen, PIPE
 
 def verbose(what):
-        print what
+        print(what)
 
 # ignored
 # log = os.path.join(sys.argv[1], "Log.xml")
@@ -35,18 +35,18 @@ ex = None
 stdout = None
 stderr = None
 try:
-    print argv
+    print(argv)
     subproc = Popen(argv, stdout=PIPE, stderr=PIPE)
     (stdout, stderr) = subproc.communicate()
-except EnvironmentError, e:
+except OSError as e:
     ex = e
 
 returncode = subproc.returncode
 
 if stdout:
-    print stdout
+    print(stdout)
 if stderr:
-    print stderr
+    print(stderr)
 
 if not ex: 
     # possibly flip the return code
@@ -66,7 +66,7 @@ if not ex:
 else:
     # if there is an os error 'above' the actual exit status of the subprocess,
     # use the errno
-    print "Error in build system: " + str(ex.strerror)
+    print("Error in build system: " + str(ex.strerror))
     sys.exit(ex.errno)
 
     

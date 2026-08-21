@@ -19,10 +19,6 @@
 #include <alps/ngs/detail/remove_cvr.hpp>
 #include <alps/ngs/detail/paramvalue_reader.hpp>
 
-#if defined(ALPS_HAVE_PYTHON)
-    #include <alps/ngs/boost_python.hpp>
-#endif
-
 #include <boost/variant.hpp>
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/pop_back.hpp>
@@ -37,7 +33,7 @@
 #include <ostream>
 #include <stdexcept>
 
-#define ALPS_NGS_FOREACH_PARAMETERVALUE_TYPE_NO_PYTHON(CALLBACK)                    \
+#define ALPS_NGS_FOREACH_PARAMETERVALUE_ADDABLE_TYPE(CALLBACK)                      \
     CALLBACK(double)                                                                \
     CALLBACK(int)                                                                   \
     CALLBACK(bool)                                                                  \
@@ -48,14 +44,12 @@
     CALLBACK(std::vector<std::string>)                                              \
     CALLBACK(std::vector<std::complex<double> >)
 
-#if defined(ALPS_HAVE_PYTHON)
-    #define ALPS_NGS_FOREACH_PARAMETERVALUE_TYPE(CALLBACK)                          \
-        ALPS_NGS_FOREACH_PARAMETERVALUE_TYPE_NO_PYTHON(CALLBACK)                    \
-        CALLBACK(boost::python::object)
-#else
+#define ALPS_NGS_FOREACH_PARAMETERVALUE_TYPE_NO_PYTHON(CALLBACK)                    \
+    ALPS_NGS_FOREACH_PARAMETERVALUE_ADDABLE_TYPE(CALLBACK)                          \
+    CALLBACK(std::vector<bool>)
+
     #define ALPS_NGS_FOREACH_PARAMETERVALUE_TYPE(CALLBACK)                          \
         ALPS_NGS_FOREACH_PARAMETERVALUE_TYPE_NO_PYTHON(CALLBACK)
-#endif
 
 namespace alps {
 
@@ -89,11 +83,9 @@ namespace alps {
 		template <> struct paramvalue_index<std::vector<std::complex<double> > > {
 			enum { value = 8 };
 		};
-		#if defined(ALPS_HAVE_PYTHON)
-			template <> struct paramvalue_index<boost::python::object> {
-				enum { value = 9 };
-			};
-		#endif
+		template <> struct paramvalue_index<std::vector<bool> > {
+			enum { value = 9 };
+		};
 
         class paramvalue;
 

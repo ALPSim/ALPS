@@ -67,91 +67,6 @@ if(ALPS_USE_SYSTEM_BOOST)
       "Upgrade the system Boost installation or disable ALPS_USE_SYSTEM_BOOST.")
   endif()
 
-  # Save Boost_LIBRARIES now — a second find_package(Boost) call below
-  # (for the Python component) would overwrite this variable.
-  set(_alps_boost_libraries_saved ${Boost_LIBRARIES})
-
-  # Python component: library naming varies by Boost/distro version.
-  # Try python<major><minor> (e.g. python311), then python3, then python.
-  if(ALPS_HAVE_PYTHON)
-    set(_alps_python_component "")
-    set(_alps_python_library "")
-    foreach(_pycomp "python${PYVER}" "python3" "python")
-      find_package(Boost QUIET COMPONENTS ${_pycomp})
-      if(Boost_${_pycomp}_FOUND)
-        # Capture Boost_LIBRARIES right here: after a single-component
-        # find_package it contains exactly that one library path.
-        set(_alps_python_library ${Boost_LIBRARIES})
-        set(_alps_python_component ${_pycomp})
-        break()
-      endif()
-    endforeach()
-
-    # Restore the full library list (overwritten by the python find_package).
-    if(_alps_python_component)
-      message(STATUS "Found system Boost.Python component: ${_alps_python_component}")
-      set(Boost_LIBRARIES ${_alps_boost_libraries_saved} ${_alps_python_library})
-    else()
-      message(WARNING
-        "System Boost.Python library not found (tried python${PYVER}, python3, python). "
-        "Python bindings will be disabled.")
-      set(Boost_LIBRARIES ${_alps_boost_libraries_saved})
-      set(ALPS_HAVE_PYTHON OFF)
-      set(BUILD_BOOST_PYTHON OFF)
-    endif()
-  endif()
-
-  # Set ALPS_HAVE_BOOST_NUMPY for Boost >= 1.63 (when boost::python::numpy
-  # was introduced).
-  if(Boost_VERSION_STRING VERSION_GREATER_EQUAL "1.63.0")
-    set(ALPS_HAVE_BOOST_NUMPY ON)
-  endif()
-
-  # Scenario 3: system Boost 1.63-1.86 + NumPy >= 2.0.
-  # (evaluated below; set the flag early so the numpy lib search is guarded by it)
-  # boost::python::numpy in these versions uses deprecated NumPy C API
-  # removed in NumPy 2.0.  Fall back to boost::python::numeric::array,
-  # which uses only the stable NumPy C API.
-  if(ALPS_HAVE_BOOST_NUMPY AND ALPS_HAVE_PYTHON)
-    EXEC_PYTHON_SCRIPT("import numpy; print(numpy.__version__)" _alps_numpy_ver)
-    message(STATUS "NumPy version: ${_alps_numpy_ver}")
-    if(_alps_numpy_ver VERSION_GREATER_EQUAL "2.0.0" AND
-       Boost_VERSION_STRING VERSION_LESS "1.87.0")
-      message(WARNING
-        "System Boost ${Boost_VERSION_STRING} does not support NumPy >= 2.0 "
-        "(requires Boost >= 1.87). "
-        "Falling back to boost::python::numeric::array. "
-        "Upgrade system Boost to >= 1.87 to silence this warning.")
-      set(ALPS_HAVE_BOOST_NUMPY OFF)
-    endif()
-  endif()
-
-  # Boost.NumPy library: only link when ALPS_HAVE_BOOST_NUMPY is still ON
-  # after the scenario-3 check above.  Library naming mirrors python: try
-  # numpy<major><minor>, numpy3, numpy.
-  if(ALPS_HAVE_BOOST_NUMPY AND ALPS_HAVE_PYTHON)
-    set(_alps_boost_libs_before_numpy ${Boost_LIBRARIES})
-    set(_alps_numpy_lib_found "")
-    foreach(_npcomp "numpy${PYVER}" "numpy3" "numpy")
-      find_package(Boost QUIET COMPONENTS ${_npcomp})
-      if(Boost_${_npcomp}_FOUND)
-        message(STATUS "Found system Boost.NumPy component: ${_npcomp}")
-        # Boost_LIBRARIES is now just the numpy lib — capture and restore.
-        set(_alps_numpy_library ${Boost_LIBRARIES})
-        set(Boost_LIBRARIES ${_alps_boost_libs_before_numpy} ${_alps_numpy_library})
-        set(_alps_numpy_lib_found TRUE)
-        break()
-      endif()
-    endforeach()
-    if(NOT _alps_numpy_lib_found)
-      message(WARNING
-        "System Boost.NumPy library not found (tried numpy${PYVER}, numpy3, numpy). "
-        "Falling back to boost::python::numeric::array.")
-      set(Boost_LIBRARIES ${_alps_boost_libs_before_numpy})
-      set(ALPS_HAVE_BOOST_NUMPY OFF)
-    endif()
-  endif()
-
   # Align Boost_INCLUDE_DIR (singular) used elsewhere in the build.
   set(Boost_INCLUDE_DIR ${Boost_INCLUDE_DIRS})
 
@@ -165,8 +80,6 @@ if(ALPS_USE_SYSTEM_BOOST)
   message(STATUS "Using system Boost ${Boost_VERSION_STRING}")
   message(STATUS "  includes:           ${Boost_INCLUDE_DIRS}")
   message(STATUS "  libraries:          ${Boost_LIBRARIES}")
-  message(STATUS "  ALPS_HAVE_BOOST_NUMPY: ${ALPS_HAVE_BOOST_NUMPY}")
-
   return()
 
 endif() # ALPS_USE_SYSTEM_BOOST

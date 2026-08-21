@@ -57,7 +57,7 @@ namespace alps {
                 using boost::numeric::operators::operator+=;                            \
                 return s += p.cast< T >();                                              \
             }
-        ALPS_NGS_FOREACH_PARAMETERVALUE_TYPE(ALPS_NGS_PARAMPROXY_ADD_OPERATOR_IMPL)
+        ALPS_NGS_FOREACH_PARAMETERVALUE_ADDABLE_TYPE(ALPS_NGS_PARAMPROXY_ADD_OPERATOR_IMPL)
         #undef ALPS_NGS_PARAMPROXY_ADD_OPERATOR_IMPL
 
         std::string operator+(paramproxy const & p, char const * s) {

@@ -141,7 +141,7 @@ to the parameter file. Do not forget to convert the parameter file to hdf5 forma
 \subsection{Python interface}
 \label{pythoninterface}
 
-If ALPS is built with Python support (parameter \verb#ALPS_BUILD_PYTHON=ON#), the solver is also built as a Python module. It can directly be called from within a Python script. This provides a flexible framework which allows one to easily set up tasks ranging from calculations for multiple parameters to complex selfconsistency schemes.
+The standalone pyalps wheel includes the solver module when built with application bindings enabled (the default). It can directly be called from within a Python script. This provides a flexible framework which allows one to easily set up tasks ranging from calculations for multiple parameters to complex selfconsistency schemes.
 
 Basic usage of the Python interface is illustrated by the following script, which repeats the previous example for the standalone executable:
 \begin{verbatim}

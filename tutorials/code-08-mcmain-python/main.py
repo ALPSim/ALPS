@@ -1,4 +1,3 @@
-from __future__ import print_function
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
  # ALPS Project: Algorithms and Libraries for Physics Simulations                  #
  #                                                                                 #
@@ -53,7 +52,7 @@ if __name__ == '__main__':
         ar['/'] = sim
 
     results = sim.collectResults() # TODO: how should we do that?
-    for key, value in results.iteritems():
+    for key, value in results.items():
         print("{}: {}".format(key, value))
 
     with hdf5.archive(outfile, 'w') as ar:
