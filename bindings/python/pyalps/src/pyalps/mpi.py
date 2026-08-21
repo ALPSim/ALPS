@@ -13,7 +13,6 @@ serialization bridge or skeleton/content optimization; use mpi4py buffers for
 that level of interoperability.
 """
 
-from __future__ import annotations
 
 import atexit as _atexit
 from functools import reduce as _python_reduce
