@@ -6,6 +6,9 @@ CMakeCache.txt
 cmake_install.cmake
 compile_commands.json
 
+# Lattice files the tutorials tell the reader to generate with build_lattice.py
+tutorials/dmrg-*/my_lattice.xml
+
 # Editors and operating systems
 .idea/
 .vscode/

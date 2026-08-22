@@ -24,7 +24,7 @@ for lattice in [32, 64, 96, 128]:
             'LATTICE'                   : "open chain lattice",
             'MODEL'                     : "spin",
             'local_S'                   : '1',
-            'CONSERVED_QUANTUMNUMBERS'  : 'Sz',
+            'CONSERVED_QUANTUMNUMBERS'  : 'N,Sz',
             'Sz_total'                  : 0,
             'J'                         : 1,
             'SWEEPS'                    : 5,

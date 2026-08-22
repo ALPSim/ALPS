@@ -34,7 +34,7 @@ for l in [8,10,12,16]:
               'SWEEPS'         : 50000, 
               'MODEL'          : "spin",
               'L'              : l,
-              'W'              : l/2
+              'W'              : l//2
             }
     )
     
