@@ -22,7 +22,6 @@
 #
 
 set(ALPS_SOURCES "")
-set(ALPS_PYTHON_SOURCES "")
 set(ALPS_SHARED_CPPFLAGS ALPS_EXPORTS=1)
 set(ALPS_STATIC_CPPFLAGS "")
 
@@ -74,10 +73,6 @@ set(ALPS_SOURCES
     set(ALPS_SOURCES ${ALPS_SOURCES} osiris/xdr.c osiris/xdr_array.c osiris/xdr_float.c osiris/xdr_stdio.c)
   endif (NOT ALPS_HAVE_RPC_XDR_H)
   
-  if (ALPS_BUILD_PYTHON)
-    set(ALPS_PYTHON_SOURCES ${ALPS_PYTHON_SOURCES} ngs/lib/get_numpy_type.cpp hdf5/python.cpp python/numpy_array.cpp)
-  endif (ALPS_BUILD_PYTHON)
-
   # OpenMPI ULFM
   if (ALPS_NGS_OPENMPI_ULFM)
     set(ALPS_SOURCES ${ALPS_SOURCES} ngs/lib/ulfm.cpp)
@@ -100,34 +95,12 @@ set(ALPS_SOURCES ${ALPS_SOURCES}
     ngs/lib/clone.cpp ngs/lib/clone_info.cpp ngs/lib/job.cpp ngs/lib/parapack.cpp ngs/lib/worker_factory.cpp
 )
 
-if(ALPS_HAVE_PYTHON)
-  if(ALPS_PYTHON_WHEEL)
-    set(ALPS_PYTHON_SOURCES ${ALPS_PYTHON_SOURCES} ${ALPS_SOURCES})
-    add_library(alps_python ${ALPS_PYTHON_SOURCES})
-    target_compile_definitions(alps_python PRIVATE ALPS_HAVE_PYTHON)
-    get_target_property(XXX alps_python COMPILE_DEFINITIONS)
-    message(STATUS "ALPS_PYTHON: ${XXX}")
-    if(ALPS_HAVE_BOOST_NUMPY)
-      target_compile_definitions(alps_python INTERFACE ALPS_HAVE_BOOST_NUMPY)
-    endif()
-  else()
-    set(ALPS_SOURCES ${ALPS_PYTHON_SOURCES} ${ALPS_SOURCES})
-  endif()
-endif()
-
 add_library(alps ${ALPS_SOURCES})
 
 find_package(HDF5)
 if (Boost_FOUND)
   # link to ${Boost_LIBRARIES} when precompiled Boost libraries found
   set(ALPS_LINK_LIBS ${Boost_LIBRARIES} ${HDF5_LIBRARIES}) # ${SZIP_LIBRARIES})
-  if(PYTHONLIBS_FOUND)
-    if(ALPS_PYTHON_WHEEL AND PYTHON_VERSION VERSION_GREATER_EQUAL "3.13" AND APPLE)
-      set(ALPS_LINK_LIBS ${ALPS_LINK_LIBS} ${PYTHON_LIBRARY}) # ${PYTHON_EXTRA_LIBS})
-    else(ALPS_PYTHON_WHEEL AND PYTHON_VERSION VERSION_GREATER_EQUAL "3.13" AND APPLE)
-      set(ALPS_LINK_LIBS ${ALPS_LINK_LIBS} ${PYTHON_LIBRARY} ${PYTHON_EXTRA_LIBS})
-    endif(ALPS_PYTHON_WHEEL AND PYTHON_VERSION VERSION_GREATER_EQUAL "3.13" AND APPLE)
-  endif(PYTHONLIBS_FOUND)
   if(MPI_FOUND)
     set(ALPS_LINK_LIBS ${ALPS_LINK_LIBS} ${MPI_LIBRARIES})
     if(MPI_EXTRA_LIBRARY)
@@ -138,13 +111,6 @@ if (Boost_FOUND)
 else (Boost_FOUND)
   # "boost" target available when Boost libraries are built from source
   target_link_libraries(alps ${ALPS_BOOST_LIBRARY_NAME} ${HDF5_LIBRARIES}) # ${SZIP_LIBRARIES})
-  if(ALPS_HAVE_PYTHON)
-    if(ALPS_PYTHON_WHEEL)
-      target_link_libraries(alps_python ${ALPS_BOOST_LIBRARY_NAME} ${ALPS_BOOST_PYTHON_LIBRARY_NAME} ${HDF5_LIBRARIES}) # ${SZIP_LIBRARIES})
-    else()
-      target_link_libraries(alps ${ALPS_BOOST_PYTHON_LIBRARY_NAME}) # ${SZIP_LIBRARIES})
-    endif()
-  endif()
 endif (Boost_FOUND)
 
 if(BUILD_SHARED_LIBS)
@@ -156,25 +122,8 @@ if(BUILD_SHARED_LIBS)
   endif(HDF5_DEFINITIONS)
   
   set_target_properties(alps PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
-  if(ALPS_HAVE_PYTHON)
-    if(ALPS_PYTHON_WHEEL)
-      set_target_properties(alps_python PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
-      target_compile_definitions(alps_python PUBLIC ALPS_HAVE_PYTHON)
-      if(ALPS_HAVE_BOOST_NUMPY)
-        target_compile_definitions(alps_python PUBLIC ALPS_HAVE_BOOST_NUMPY)
-      endif()
-    else(ALPS_PYTHON_WHEEL)
-      target_compile_definitions(alps PUBLIC ALPS_HAVE_PYTHON)
-      if(ALPS_HAVE_BOOST_NUMPY)
-        target_compile_definitions(alps PUBLIC ALPS_HAVE_BOOST_NUMPY)
-      endif()
-    endif(ALPS_PYTHON_WHEEL)
-  endif()
 else(BUILD_SHARED_LIBS)
   set_target_properties(alps PROPERTIES COMPILE_DEFINITIONS "${ALPS_STATIC_CPPFLAGS}")
-  if(ALPS_HAVE_PYTHON)
-    set_target_properties(alps_python PROPERTIES COMPILE_DEFINITIONS "${ALPS_STATIC_CPPFLAGS}")
-  endif()
 endif(BUILD_SHARED_LIBS)
 
 
@@ -185,12 +134,12 @@ if(MSVC)
 endif(MSVC)
 
 # Set soversion for library
-if(NOT WIN32 AND NOT APPLE AND NOT ALPS_PYTHON_WHEEL)
+if(NOT WIN32 AND NOT APPLE)
   set_target_properties(alps
     PROPERTIES
     SOVERSION "${ALPS_VERSION_MAJOR}"
     VERSION "${ALPS_VERSION_MAJOR}.${ALPS_VERSION_MINOR}.${ALPS_VERSION_PATCH}" )
-endif(NOT WIN32 AND NOT APPLE AND NOT ALPS_PYTHON_WHEEL)
+endif(NOT WIN32 AND NOT APPLE)
 
 
 #boost librt linking
@@ -207,7 +156,6 @@ endif()
 #######################################################################
 # install
 #######################################################################
-if(NOT ALPS_PYTHON_WHEEL)
 install(TARGETS alps COMPONENT libraries
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
@@ -219,13 +167,3 @@ if(ALPS_BUILD_FORTRAN)
           LIBRARY DESTINATION lib
           RUNTIME DESTINATION bin)
 endif(ALPS_BUILD_FORTRAN)
-else ()
-  install(TARGETS alps_python COMPONENT libraries
-          ARCHIVE DESTINATION pyalps/lib
-          LIBRARY DESTINATION pyalps/lib
-          RUNTIME DESTINATION pyalps/bin)
-  install(TARGETS alps COMPONENT libraries
-          ARCHIVE DESTINATION pyalps/lib
-          LIBRARY DESTINATION pyalps/lib
-          RUNTIME DESTINATION pyalps/bin)
-endif()

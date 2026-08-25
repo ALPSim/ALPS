@@ -1,4 +1,3 @@
-from __future__ import division
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations

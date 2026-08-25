@@ -16,7 +16,7 @@
 #   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
-if(NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
+if(NOT ALPS_BUILD_LIBS_ONLY)
 add_subdirectory(accumulator)
 add_subdirectory(alea)
 add_subdirectory(fixed_capacity)
@@ -30,7 +30,6 @@ add_subdirectory(osiris)
 add_subdirectory(parameter)
 add_subdirectory(parapack)
 add_subdirectory(parser)
-add_subdirectory(pyalps)
 add_subdirectory(random)
 add_subdirectory(utility)
 endif()

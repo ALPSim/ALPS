@@ -17,15 +17,15 @@ import matplotlib.pyplot as plt
 from numpy import zeros
 from math import sin, cos, pi, sqrt
 
-print "Description:"
-print "This program produces histogram of the density of states for square lattice in the tight-binding approximation, with nearest-neighbor hopping amplitude taken to be t=1."
-print "by Jakub Imriska\n"
-print "Enter the linear discretization GRID (cost: GRID^2/2):"
-GRID = eval(raw_input('--> '))
-print "  (the histogram will be computed on a grid of ", 2*GRID,' x ',2*GRID,' k-points in the Brillouin zone; the program makes use of the symmetries)'
-print "Enter the number of bins of the histogram (recommended divisible by 4, for Simpson integration later):"
-BINS = eval(raw_input('--> '))
-print "  (the output file will have ",BINS+1," rows, at the ends there are halves of bins)"
+print("Description:")
+print("This program produces histogram of the density of states for square lattice in the tight-binding approximation, with nearest-neighbor hopping amplitude taken to be t=1.")
+print("by Jakub Imriska\n")
+print("Enter the linear discretization GRID (cost: GRID^2/2):")
+GRID = eval(input('--> '))
+print("  (the histogram will be computed on a grid of ", 2*GRID,' x ',2*GRID,' k-points in the Brillouin zone; the program makes use of the symmetries)')
+print("Enter the number of bins of the histogram (recommended divisible by 4, for Simpson integration later):")
+BINS = eval(input('--> '))
+print("  (the output file will have ",BINS+1," rows, at the ends there are halves of bins)")
 
 # dispersion relation is given by:
 #   e(kx,ky) = -2t (\cos(k_x*a) + \cos(k_y*a))
@@ -46,7 +46,7 @@ cos_ = zeros(2*GRID+8)
 for i in range(-GRID,GRID):
   cos_[i+GRID] = cos(pi*i/GRID)
 
-print " ... histogram building in progres ..."
+print(" ... histogram building in progres ...")
 
 increment(GRID,GRID,1)
 increment(0,0,1)
@@ -70,7 +70,7 @@ inc = 1./(4.*GRID*GRID*bin_width)  # normalized to 1
 for x in range(0,len(DOS)):
   counter+=DOS[x]
   DOS[x]*=inc
-print "Number of processed k-points: ",counter, "  (should be ", 4*GRID*GRID,')'
+print("Number of processed k-points: ",counter, "  (should be ", 4*GRID*GRID,')')
   
 # correct normalization for the 1st and last bin
 DOS[0] *= 2.      # it is a half-bin (has only half of the usual width)
@@ -104,13 +104,13 @@ def Integrate(n):
   sum1 = 2. * sum1 + 4. * (sum2+func(BINS-1,n)) + func(0,n) + func(BINS,n);
   return sum1 * halfstep / 3.
 
-print "Checks:"
+print("Checks:")
 norm = Integrate(0)
-print "  normalization = ", norm,"  (close to 1)"
-print "  first moment of the normalized DOS = ", Integrate(1)/norm,"  (exact: 0.0)"
-print "  second moment of the normalized DOS = ", Integrate(2)/norm,"  (exact: 4.0)"
+print("  normalization = ", norm,"  (close to 1)")
+print("  first moment of the normalized DOS = ", Integrate(1)/norm,"  (exact: 0.0)")
+print("  second moment of the normalized DOS = ", Integrate(2)/norm,"  (exact: 4.0)")
 
-print "Histogram created."
+print("Histogram created.")
 
 plt.plot(energies[0:BINS+1],DOS[0:BINS+1],'r-')      
 plt.xlabel('energy / t --->')
@@ -118,13 +118,13 @@ plt.ylabel('DOS  --->')
 plt.title('DOS of the square lattice')
 plt.show()
 
-print "Do you wish to save the histogram [y/n] ?"
-answer = raw_input('--> ')
+print("Do you wish to save the histogram [y/n] ?")
+answer = input('--> ')
 
 if answer[0]=='y':
   # write into file
-  print "Set the name for the histogram output file:"
-  file_name = raw_input('--> ')
+  print("Set the name for the histogram output file:")
+  file_name = input('--> ')
   file_out = open(file_name,'w')
   for j in range(0, BINS+1):
     file_out.write(str(energies[j]))

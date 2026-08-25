@@ -21,40 +21,6 @@
 namespace alps {
     namespace detail {
 
-        #if defined(ALPS_HAVE_PYTHON)
-            struct paramvalue_save_python_visitor {
-            
-                paramvalue_save_python_visitor(hdf5::archive & a)
-                    : ar(a) 
-                {}
-
-                template <typename U> void operator()(U const & data) {
-                    ar[""] << data;
-                }
-                
-                template <typename U> void operator()(U * const ptr, std::vector<std::size_t> const & size) {
-                    ar << make_pvp("", ptr, size);
-                }
-
-                void operator()(boost::python::list const & raw) {
-                    std::vector<std::string> data;
-                    for(boost::python::ssize_t i = 0; i < boost::python::len(raw); ++i) {
-                        // TODO: also consider other types than strings ...
-                        paramvalue_reader_visitor<std::string> scalar;
-                        extract_from_pyobject(scalar, raw[i]);
-                        data.push_back(scalar.value);
-                    }
-                    ar[""] << data;
-                }
-
-                void operator()(boost::python::dict const &) {
-                    throw std::invalid_argument("python dict cannot be used in alps::params" + ALPS_STACKTRACE);
-                }
-
-                hdf5::archive & ar;
-            };
-        #endif
-
         struct paramvalue_saver: public boost::static_visitor<> {
 
             paramvalue_saver(hdf5::archive & a)
@@ -64,13 +30,6 @@ namespace alps {
             template<typename T> void operator()(T const & v) const {
                 ar[""] << v;
             }
-            
-            #if defined(ALPS_HAVE_PYTHON)
-                void operator()(boost::python::object const & v) const {
-                    paramvalue_save_python_visitor visitor(ar);
-                    extract_from_pyobject(visitor, v);
-                }
-            #endif
 
             hdf5::archive & ar;
         };
@@ -83,12 +42,6 @@ namespace alps {
                 template <typename U> void operator()(U const & v) const {
                     os << short_print(v);
                 }
-                
-                #if defined(ALPS_HAVE_PYTHON)
-                    void operator()(boost::python::object const & v) const {
-                        os << boost::python::call_method<std::string>(v.ptr(), "__str__");
-                    }
-                #endif
 
             private:
 
@@ -128,7 +81,15 @@ namespace alps {
             #define ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK(T, U)                        \
                 else if (ar.is_datatype< T >(""))                                    \
                     ALPS_NGS_PARAMVALUE_LOAD_HDF5(U)
-            if (ar.is_scalar("")) {
+            // A complex scalar is stored as a trailing dimension of two
+            // reals, so archive::is_scalar() reports false for it and it fell
+            // into the vector branch below, where loading it as
+            // vector<complex> failed with "dimensions do not match". Rank
+            // tells them apart: a complex scalar has dimensions() == 1, a
+            // complex vector -- even a one-element one -- has 2.
+            if (ar.is_complex("") && ar.dimensions("") < 2)
+                ALPS_NGS_PARAMVALUE_LOAD_HDF5(std::complex<double>)
+            else if (ar.is_scalar("")) {
                 if (ar.is_complex(""))
                     ALPS_NGS_PARAMVALUE_LOAD_HDF5(std::complex<double>)
                 ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK(double, double)
@@ -142,6 +103,7 @@ namespace alps {
                     )
                 ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK(double, std::vector<double>)
                 ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK(int, std::vector<int>)
+                ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK(bool, std::vector<bool>)
                 ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK(
                     std::string, std::vector<std::string>
                 )
