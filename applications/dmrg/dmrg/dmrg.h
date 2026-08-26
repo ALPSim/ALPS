@@ -593,6 +593,7 @@ DMRGTask<value_type>::create_site_operator(std::string const& name, alps::SiteOp
     new_op.dqn = dqn;
     new_op.resize(block.basis());
     new_op = dest;
+    new_op.set_fermion(dqn.fermion_sign() == -1);
     block.push_back(new_op);
     return new_op;
   }
