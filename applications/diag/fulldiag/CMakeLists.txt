@@ -27,6 +27,18 @@ if(LAPACK_FOUND)
   add_executable(fulldiag_evaluate fulldiag_evaluate.C)
   target_link_libraries(fulldiag fulldiag_impl)
   target_link_libraries(fulldiag_evaluate fulldiag_impl)
+
+  if(ALPS_BUILD_TESTS)
+    add_test(NAME fulldiag_evaluate_help COMMAND fulldiag_evaluate --help)
+    set_tests_properties(fulldiag_evaluate_help PROPERTIES
+      PASS_REGULAR_EXPRESSION "Usage:")
+    add_test(NAME fulldiag_evaluate_license COMMAND fulldiag_evaluate --license)
+    set_tests_properties(fulldiag_evaluate_license PROPERTIES
+      PASS_REGULAR_EXPRESSION "Licensed under the MIT License")
+    add_test(NAME fulldiag_evaluate_no_arguments COMMAND fulldiag_evaluate)
+    set_tests_properties(fulldiag_evaluate_no_arguments PROPERTIES WILL_FAIL TRUE)
+  endif()
+
   if(ALPS_PYTHON_WHEEL)
   if(APPLE)
     set_target_properties(fulldiag PROPERTIES INSTALL_RPATH "@loader_path/../lib" )
