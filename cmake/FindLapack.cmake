@@ -115,14 +115,56 @@ if(NOT HAVE_MKL AND NOT LAPACK_LIBRARY_INIT)
   endif()
 
   if(mkl_home MATCHES "mkl")
-    file( STRINGS "${mkl_home}/include/mkl.h" _mkl_h_content REGEX "__INTEL_MKL" )
-    if(NOT _mkl_h_content MATCHES "__INTEL_MKL__")
-      file( STRINGS "${mkl_home}/include/mkl_version.h" _mkl_h_content REGEX "__INTEL_MKL" )
+    # Read the MKL version from the headers.  MKL >= 11.1 keeps the macros in
+    # mkl_version.h, older releases in mkl.h.  oneAPI column-aligns the values
+    # ("#define __INTEL_MKL__          2025"), so the whitespace between macro
+    # name and value has to be matched as [ \t]+ -- a single-space pattern
+    # silently fails and leaves the raw header lines in MKL_VERSION, which
+    # then blows up the unquoted if() checks below with "Unknown arguments".
+    set(_mkl_h_content "")
+    foreach(_mkl_header mkl_version.h mkl.h)
+      if(EXISTS "${mkl_home}/include/${_mkl_header}")
+        file(STRINGS "${mkl_home}/include/${_mkl_header}" _mkl_h_content
+             REGEX "#define[ \t]+__INTEL_MKL(__|_MINOR__|_UPDATE__)[ \t]+[0-9]+")
+        if(_mkl_h_content)
+          break()
+        endif()
+      endif()
+    endforeach()
+    unset(_mkl_header)
+
+    set(MKL_VERSION "")
+    if("${_mkl_h_content}" MATCHES "#define[ \t]+__INTEL_MKL__[ \t]+([0-9]+)")
+      set(MKL_VERSION_MAJOR "${CMAKE_MATCH_1}")
+      set(MKL_VERSION_MINOR 0)
+      set(MKL_VERSION_UPDATE 0)
+      if("${_mkl_h_content}" MATCHES "#define[ \t]+__INTEL_MKL_MINOR__[ \t]+([0-9]+)")
+        set(MKL_VERSION_MINOR "${CMAKE_MATCH_1}")
+      endif()
+      if("${_mkl_h_content}" MATCHES "#define[ \t]+__INTEL_MKL_UPDATE__[ \t]+([0-9]+)")
+        set(MKL_VERSION_UPDATE "${CMAKE_MATCH_1}")
+      endif()
+      set(MKL_VERSION "${MKL_VERSION_MAJOR}.${MKL_VERSION_MINOR}.${MKL_VERSION_UPDATE}")
+    else()
+      message(WARNING "MKL found in ${mkl_home}, but its version could not be read from "
+                      "include/mkl_version.h or include/mkl.h; assuming a current release.")
     endif()
-    string(REGEX REPLACE ".*#define __INTEL_MKL__ ([0-9]+).*"        "\\1" MKL_VERSION_MAJOR  "${_mkl_h_content}")
-    string(REGEX REPLACE ".*#define __INTEL_MKL_MINOR__ ([0-9]+).*"  "\\1" MKL_VERSION_MINOR  "${_mkl_h_content}")
-    string(REGEX REPLACE ".*#define __INTEL_MKL_UPDATE__ ([0-9]+).*" "\\1" MKL_VERSION_UPDATE "${_mkl_h_content}")
-    set(MKL_VERSION "${MKL_VERSION_MAJOR}.${MKL_VERSION_MINOR}.${MKL_VERSION_UPDATE}")
+    unset(_mkl_h_content)
+
+    # MKL 10.0 introduced the layered libraries (mkl_intel_lp64 /
+    # mkl_sequential|mkl_*_thread / mkl_core); every later release, including
+    # the year-numbered ones (2017 ... oneAPI 2025), uses them.  Only
+    # pre-10.0 releases need the monolithic -lmkl -lguide.  MKL 10.3 moved
+    # the libraries from lib/em64t to lib/intel64 (Linux) and lib (macOS).
+    # An unparsable version is treated as a current release.
+    set(_mkl_layered TRUE)
+    set(_mkl_flat_libdir TRUE)
+    if(MKL_VERSION AND MKL_VERSION VERSION_LESS 10.0)
+      set(_mkl_layered FALSE)
+    endif()
+    if(MKL_VERSION AND MKL_VERSION VERSION_LESS 10.3)
+      set(_mkl_flat_libdir FALSE)
+    endif()
     
     # STRING(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" MKL_VERSION ${mkl_home})
     # set(MKL_VERSION_RAW ${MKL_VERSION})
@@ -156,7 +198,7 @@ if(NOT HAVE_MKL AND NOT LAPACK_LIBRARY_INIT)
         set(MKL_CORE -lmkl_gnu_thread -lmkl_core -lgfortran)
       endif()
     else()
-      if(${MKL_VERSION} MATCHES "1[0-1]\\.[0-3]\\.[0-9]+")
+      if(_mkl_layered)
         set(MKL_CORE -lmkl_sequential -lmkl_core)
       else() # MKL < 10.0
         set(MKL_CORE -lmkl_lapack -lmkl -lguide)
@@ -164,7 +206,7 @@ if(NOT HAVE_MKL AND NOT LAPACK_LIBRARY_INIT)
     endif()
     # basic data type model interface
     # - assuming ILP32 or LP64
-    if(${MKL_VERSION} MATCHES "1[0-1]\\.[0-3]\\.[0-9]+")
+    if(_mkl_layered)
       if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64" OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "ia64")
         set(MKL_INTERFACE -lmkl_intel_lp64)
       elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "i386" OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "i686")
@@ -177,7 +219,7 @@ if(NOT HAVE_MKL AND NOT LAPACK_LIBRARY_INIT)
     endif()
     # MKL library path
     if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-      if(${MKL_VERSION} MATCHES "11\\.[0-9]\\.[0-9]+" OR ${MKL_VERSION} MATCHES "10\\.3\\.[0-9]+")
+      if(_mkl_flat_libdir)
         set(MKL_LIBRARY_PATH -L${mkl_home}/lib)
       else() # MKL < 10.3
         if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64")
@@ -189,9 +231,15 @@ if(NOT HAVE_MKL AND NOT LAPACK_LIBRARY_INIT)
         endif()
       endif()
     elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-      if(${MKL_VERSION} MATCHES "11\\.[0-9]\\.[0-9]+" OR ${MKL_VERSION} MATCHES "10\\.3\\.[0-9]+")
+      if(_mkl_flat_libdir)
         if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64")
-          set(MKL_LIBRARY_PATH -L${mkl_home}/lib/intel64)
+          # oneAPI 2024+ ships the libraries directly in lib/ and keeps
+          # lib/intel64 at most as a compatibility symlink.
+          if(IS_DIRECTORY "${mkl_home}/lib/intel64")
+            set(MKL_LIBRARY_PATH -L${mkl_home}/lib/intel64)
+          else()
+            set(MKL_LIBRARY_PATH -L${mkl_home}/lib)
+          endif()
         elseif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "i386" OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "i686")
           set(MKL_LIBRARY_PATH -L${mkl_home}/lib/ia32)
         else()
@@ -211,11 +259,17 @@ if(NOT HAVE_MKL AND NOT LAPACK_LIBRARY_INIT)
     endif()
     # combine together
     set(LAPACK_LIBRARY ${MKL_LIBRARY_PATH} ${MKL_INTERFACE} ${MKL_CORE} ${CMAKE_THREAD_LIBS_INIT} -lm)
+    if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+      # mkl_core dlopen()s its CPU-specific kernels at run time
+      list(APPEND LAPACK_LIBRARY -ldl)
+    endif()
 
     # unset local variables
     unset(MKL_LIBRARY_PATH)
     unset(MKL_INTERFACE)
     unset(MKL_CORE)
+    unset(_mkl_layered)
+    unset(_mkl_flat_libdir)
 
     set(BLAS_LIBRARY "")
     set(HAVE_MKL TRUE)
@@ -240,7 +294,7 @@ IF(HAVE_MKL)
     message(STATUS "Found intel/mkl library")
     set(LAPACK_LIBRARY_INIT 1)
     set(BLAS_LIBRARY_INIT 1)
-    set(MKL_INC_PATHS $ENV{MKLROOT}/include $ENV{mkl_home}/include ${MKL_PATHS}) 
+    set(MKL_INC_PATHS $ENV{MKLROOT}/include ${mkl_home}/include ${MKL_PATHS})
     find_path(MKL_INCLUDE_DIR mkl.h ${MKL_INC_PATHS})
     include_directories(${MKL_INCLUDE_DIR})
     set(ALPS_HAVE_MKL 1) # MKL flag set in alps/config.h

@@ -85,9 +85,26 @@ endif(Boost_ROOT_DIR)
 if(Boost_INCLUDE_DIR)
   set(_boost_VERSION 0)
   set(_boost_LIB_VERSION "")
+  # Stop here with one clear message if the directory is not a Boost source
+  # tree (typically Boost_SRC_DIR pointing at an empty or wrong directory).
+  # Otherwise file(READ) fails, the MATH() calls below error out on empty
+  # strings, and the run ends with "Boost Version: ERROR_ERROR_ERROR".
+  if(NOT EXISTS "${Boost_INCLUDE_DIR}/boost/version.hpp")
+    message(FATAL_ERROR
+      "Boost source tree at ${Boost_INCLUDE_DIR} does not contain boost/version.hpp. "
+      "Point Boost_SRC_DIR (or BOOST_ROOT) at an unpacked Boost source release, "
+      "leave it unset to let ALPS download one, or set ALPS_USE_SYSTEM_BOOST=ON "
+      "to build against an installed Boost.")
+  endif()
   file(READ "${Boost_INCLUDE_DIR}/boost/version.hpp" _boost_VERSION_HPP_CONTENTS)
-  string(REGEX REPLACE ".*#define BOOST_VERSION ([0-9]+).*" "\\1" _boost_VERSION "${_boost_VERSION_HPP_CONTENTS}")
-  string(REGEX REPLACE ".*#define BOOST_LIB_VERSION \"([0-9_]+)\".*" "\\1" _boost_LIB_VERSION "${_boost_VERSION_HPP_CONTENTS}")
+  if(NOT _boost_VERSION_HPP_CONTENTS MATCHES "#define BOOST_VERSION ([0-9]+)")
+    message(FATAL_ERROR
+      "Could not read BOOST_VERSION from ${Boost_INCLUDE_DIR}/boost/version.hpp.")
+  endif()
+  set(_boost_VERSION "${CMAKE_MATCH_1}")
+  if(_boost_VERSION_HPP_CONTENTS MATCHES "#define BOOST_LIB_VERSION \"([0-9_]+)\"")
+    set(_boost_LIB_VERSION "${CMAKE_MATCH_1}")
+  endif()
   set(Boost_LIB_VERSION ${_boost_LIB_VERSION} CACHE INTERNAL "The library version string for boost libraries")
   set(Boost_VERSION ${_boost_VERSION} CACHE INTERNAL "The version number for boost libraries")
   MATH(EXPR Boost_MAJOR_VERSION "${Boost_VERSION} / 100000")
