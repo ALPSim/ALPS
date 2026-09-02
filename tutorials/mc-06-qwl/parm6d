@@ -1,11 +1,7 @@
 LATTICE="simple cubic lattice"
 MODEL="spin"
 local_S=1/2
-T=0.946
 J=1
-T_MIN   = 0.5
-T_MAX   = 5.0
-DELTA_T = 0.05
-CUTOFF  = 1000
-{L = 6}
+{L = 4; CUTOFF = 500}
+{L = 6; CUTOFF = 1000}
 
