@@ -117,6 +117,13 @@ endif()
 
 add_library(alps ${ALPS_SOURCES})
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  # The legacy "lagged_fibonacci607" generator uses a 48-bit word with a 32-bit
+  # result type, so max() truncates by design; keep it for stream compatibility.
+  set_source_files_properties(random/rngfactory.C PROPERTIES
+    COMPILE_OPTIONS "-Wno-constant-conversion")
+endif()
+
 find_package(HDF5)
 if (Boost_FOUND)
   # link to ${Boost_LIBRARIES} when precompiled Boost libraries found

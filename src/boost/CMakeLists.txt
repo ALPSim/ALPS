@@ -307,9 +307,16 @@ endif (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND Boost_ROOT_DIR)
 if (NOT Boost_FOUND)
   add_library(${ALPS_BOOST_LIBRARY_NAME} ${BOOST_SOURCES})
   target_link_libraries(${ALPS_BOOST_LIBRARY_NAME} ${BOOST_LINK_LIBS})
+  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    # Boost.MPI's environment::abort() is declared noreturn but relies on
+    # MPI_Abort not returning, which the compiler cannot verify
+    target_compile_options(${ALPS_BOOST_LIBRARY_NAME} PRIVATE -Wno-invalid-noreturn)
+  endif()
   if(BUILD_BOOST_PYTHON)
     add_library(${ALPS_BOOST_PYTHON_LIBRARY_NAME} ${BOOST_PYTHON_SOURCES})
     target_link_libraries(${ALPS_BOOST_PYTHON_LIBRARY_NAME} ${BOOST_PYTHON_LINK_LIBS})
+    # Boost.Python <= 1.87 uses _PyUnicode_AsString, deprecated since Python 3.14
+    target_compile_options(${ALPS_BOOST_PYTHON_LIBRARY_NAME} PRIVATE -Wno-deprecated-declarations)
   endif()
     # Boost.Test
     if(BUILD_BOOST_TEST)
