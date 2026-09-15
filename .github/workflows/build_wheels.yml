@@ -11,8 +11,23 @@ on:
       - master
 
 jobs:
+  check_version:
+    name: Check release version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - run: python -m pip install packaging
+      - name: Test release validation
+        run: python -m unittest discover -s test/packaging -v
+      - name: Check package, SDK, and tag versions
+        run: python script/check_release_version.py
+
   build_wheels:
     name: Build wheels on ${{ matrix.plat.os }}
+    needs: [check_version]
     runs-on: ${{ matrix.plat.os }}
     strategy:
       matrix:
@@ -73,6 +88,7 @@ jobs:
 
   build_sdist:
     name: Build source distribution
+    needs: [check_version]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -87,21 +103,28 @@ jobs:
 
 
   upload_pypi:
-    needs: [build_wheels, build_sdist]
+    needs: [check_version, build_wheels, build_sdist]
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
+      contents: read
       id-token: write
-    #if: github.event_name == 'release' && github.event.action == 'published'
-    # or, alternatively, upload to PyPI on every tag starting with 'v' (remove on: release above to use this)
-    if: startsWith(github.ref, 'refs/tags/v')  || github.event_name == 'release'
+    if: startsWith(github.ref, 'refs/tags/v')
     steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - run: python -m pip install packaging
       - uses: actions/download-artifact@v8
         with:
           # unpacks all CIBW artifacts into dist/
           pattern: cibw-*
           path: dist
           merge-multiple: true
+
+      - name: Check every distribution before publishing
+        run: python script/check_release_version.py --dist dist
 
       - uses: pypa/gh-action-pypi-publish@release/v1
         #with:

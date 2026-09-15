@@ -11,6 +11,7 @@ Contributions at every level — from a one-line bug report to a new simulation 
 - [Getting started with the code](#getting-started-with-the-code)
 - [Making a change](#making-a-change)
 - [Submitting a pull request](#submitting-a-pull-request)
+- [Preparing a release](#preparing-a-release)
 - [Review process](#review-process)
 - [Code style](#code-style)
 - [Recognition](#recognition)
@@ -144,6 +145,33 @@ All tests must pass before submitting a pull request.
 4. Ensure CI passes (build + tests on Linux and macOS).
 
 For substantial changes — new simulation applications, new libraries, significant API modifications — we encourage you to **open an issue or start a discussion first** to get early feedback before investing significant time.
+
+---
+
+## Preparing a release
+
+Update both `ALPS_VERSION.txt` (the C++ SDK version) and `[project].version`
+in `pyproject.toml` before creating a release tag. For a final release, both
+must be `X.Y.Z` and the tag must be `vX.Y.Z`. For a prerelease such as
+`vX.Y.Z-beta.1`, keep the SDK core at `X.Y.Z` and use the Python version
+`X.Y.Zb1`. The other supported tag suffixes are `alpha.N`, `rc.N`, and `dev.N`.
+
+Validate the intended tag locally using Python 3.11 or newer:
+
+```bash
+python -m pip install packaging
+python script/check_release_version.py --ref refs/tags/vX.Y.Z
+```
+
+The packaging workflow checks these versions before building and checks every
+wheel and source distribution, including its embedded metadata, before upload.
+Only a tag push publishes to PyPI. Merge and validate the release commit before
+tagging it.
+
+If a published tag contains the wrong version, rerunning its workflow will
+rebuild the same incorrect artifacts. Prepare a new patch release with both
+version files updated and a new tag; do not move an existing published tag or
+use `skip-existing` to hide a version mismatch.
 
 ---
 
