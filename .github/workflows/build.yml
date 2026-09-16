@@ -1,10 +1,25 @@
 name: ALPS CI/CD
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   linux-build:
-    name: Build ALPS on ${{ matrix.plat.os }}
+    name: >-
+      ALPS / ${{ matrix.plat.os }} / ${{ matrix.plat.c_compiler }}-${{ matrix.plat.c_version }} /
+      Python ${{ matrix.plat.py_version }} / Boost 1.${{ matrix.plat.boost_version }} /
+      C++${{ matrix.plat.cxx_standard || '17' }}
     runs-on: ${{ matrix.plat.os }}
     # Worst observed healthy job is ~60 min cold; a hang otherwise burns the
     # 6-hour GitHub default.
@@ -110,7 +125,9 @@ jobs:
           cmake --build build -j 2 -t test
 
   macos-build:
-    name: Build ALPS on ${{ matrix.plat.os }} / ${{ matrix.plat.c_compiler }}
+    name: >-
+      ALPS / ${{ matrix.plat.os }} / ${{ matrix.plat.c_compiler }} /
+      Python ${{ matrix.plat.py_version }} / Boost 1.${{ matrix.plat.boost_version }} / C++17
     runs-on: ${{ matrix.plat.os }}
     # Intel runners are slow and variable; worst observed healthy job ~85 min.
     timeout-minutes: 120

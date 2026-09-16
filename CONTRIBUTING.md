@@ -165,14 +165,9 @@ python script/check_release_version.py --ref refs/tags/vX.Y.Z
 
 The packaging workflow checks these versions before building and checks every
 wheel and source distribution, including its embedded metadata, before upload.
-Tag pushes publish the full release to PyPI. Merge and validate the release
-commit before tagging it.
-
-To add the missing CPython 3.14 wheels to an existing release, manually run
-`build_wheels.yml` with `release_tag` set to that tag (for example, `v3.0.0`).
-This builds from the tag's validated commit and uploads only the three
-CPython 3.14 wheels. Existing wheels and the source distribution are not
-uploaded again, and the release tag does not need to move.
+Tag pushes publish the full release to PyPI, including CPython 3.9–3.14 wheels.
+Merge and validate the release commit before tagging it. Keep tags fixed once
+their release has been published.
 
 If a published tag contains the wrong version, rerunning its workflow will
 rebuild the same incorrect artifacts. Correct both version files first. If
