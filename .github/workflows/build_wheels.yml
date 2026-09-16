@@ -19,9 +19,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-      - run: python -m pip install packaging
+      - run: python -m pip install packaging pytest
       - name: Test release validation
-        run: python -m unittest discover -s test/packaging -v
+        run: python -m pytest test/packaging -q
       - name: Check package, SDK, and tag versions
         run: python script/check_release_version.py
 
@@ -31,10 +31,8 @@ jobs:
     runs-on: ${{ matrix.plat.os }}
     strategy:
       matrix:
-        # macos-13 is an intel runner, macos-14 is apple silicon
-        plat: 
+        plat:
         - { os: ubuntu-latest, target: "", arch: x86_64, homebrew: ''}
-        #- { os: macos-13, target: "13.0" , arch: x86_64, homebrew: '/usr/local'} #DEPRECATED. Too old.
         - { os: macos-15, target: "15.0" , arch: arm64, homebrew: '/opt/homebrew'}
         - { os: macos-26, target: "26.0" , arch: arm64, homebrew: '/opt/homebrew'}
 
@@ -70,15 +68,6 @@ jobs:
             Boost_ROOT_DIR=/Users/runner/work/ALPS/ALPS/boost_1_87_0
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.plat.target }}
             CXXFLAGS="-stdlib=libc++"
-#          CIBW_ENVIRONMENT: >
-
-        # env:
-        #   CIBW_SOME_OPTION: value
-        #    ...
-        # with:
-        #   package-dir: .
-        #   output-dir: wheelhouse
-        #   config-file: "{package}/pyproject.toml"
 
       - uses: actions/upload-artifact@v7
         with:
@@ -103,7 +92,7 @@ jobs:
 
 
   upload_pypi:
-    needs: [check_version, build_wheels, build_sdist]
+    needs: [build_wheels, build_sdist]
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
@@ -127,6 +116,3 @@ jobs:
         run: python script/check_release_version.py --dist dist
 
       - uses: pypa/gh-action-pypi-publish@release/v1
-        #with:
-          # To test: 
-          # repository-url: https://test.pypi.org/legacy/
