@@ -169,8 +169,11 @@ Only a tag push publishes to PyPI. Merge and validate the release commit before
 tagging it.
 
 If a published tag contains the wrong version, rerunning its workflow will
-rebuild the same incorrect artifacts. Prepare a new patch release with both
-version files updated and a new tag; do not move an existing published tag or
+rebuild the same incorrect artifacts. Correct both version files first. If
+the intended version has no distributions on PyPI, maintainers can approve
+resetting the tag to the validated correction and publishing that version.
+If the intended version already has distributions, prepare a new patch
+release instead: PyPI does not allow replacing uploaded filenames. Do not
 use `skip-existing` to hide a version mismatch.
 
 ---
