@@ -19,7 +19,7 @@
 
 #include <alps/model/quantumnumber.h>
 #include <alps/model/sitestate.h>
-#include<boost/config.hpp>
+#include <boost/config.hpp>
 #include <vector>
 #include <iostream>
 
