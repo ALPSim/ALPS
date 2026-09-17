@@ -11,30 +11,44 @@ jobs:
   route_by_method:
     runs-on: ubuntu-latest
     steps:
-      - name: Parse issue body
+      # The "Simulation help" issue form renders every field as a
+      # "### <label>" heading followed by the chosen value, so the "Method"
+      # dropdown can be read straight from the event payload.  No third-party
+      # action is involved: the previously used actions-cool/issues-helper
+      # could not be downloaded by the runner ("Repository access blocked"),
+      # which made every new issue fail this workflow (#137).
+      #
+      # The body is passed through an environment variable rather than being
+      # interpolated into the script, so issue text cannot inject shell code.
+      - name: Read 'Method' from the issue form
         id: parse
-        uses: actions-cool/issues-helper@v1.11
-        with:
-          actions: 'parse-form'
-          issue-number: ${{ github.event.issue.number }}
-          body: ${{ github.event.issue.body }}
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          method=$(printf '%s\n' "$ISSUE_BODY" | tr -d '\r' | awk '
+            /^### /         { in_method = ($0 ~ /^### Method[[:space:]]*$/); next }
+            in_method && NF { print; exit }
+          ')
+          echo "method=$method" >> "$GITHUB_OUTPUT"
+          echo "Method: '${method:-<none>}'"
 
+      # Issues without a Method field (bug reports, feature requests, website
+      # help) and the "Other" choice fall through to the default assignee.
       - name: Assign maintainer based on 'Method' choice
         env:
           METHOD_FROM_FORM: ${{ steps.parse.outputs.method }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
-          assignee=""
           case "$METHOD_FROM_FORM" in
-            *Exact*Diagonalization* | *ED*) assignee="vws100" ;;
-            *Quantum*Monte*Carlo* | *SSE*) assignee="wistaria" ;;
-            *Quantum*Monte*Carlo* | *Worm*) assignee="LodePollet" ;;
-            *Density*Matrix*Renormalization*Group* | *DMRG*) assignee="afeiguin" ;;
-            *Dynamical*Mean*Field*Theory* | *DMFT*) assignee="egull" ;;
-            *) assignee="Ooolab" ;;
+            *Exact*Diagonalization* | *"(ED)"*)                  assignee="vws100" ;;
+            *"(SSE)"*)                                            assignee="wistaria" ;;
+            *"(Worm)"*)                                           assignee="LodePollet" ;;
+            *Density*Matrix*Renormalization*Group* | *"(DMRG)"*) assignee="afeiguin" ;;
+            *Dynamical*Mean*Field*Theory* | *"(DMFT)"*)          assignee="egull" ;;
+            *)                                                    assignee="Ooolab" ;;
           esac
 
-          if [ -n "$assignee" ]; then
-            gh issue edit $ISSUE_NUMBER --add-assignee "$assignee"
-          fi
+          echo "Assigning #$ISSUE_NUMBER to $assignee"
+          gh issue edit "$ISSUE_NUMBER" --add-assignee "$assignee"
