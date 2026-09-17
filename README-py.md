@@ -6,12 +6,33 @@ This is python packages for `Algorithms and Libraries for Physics Simulations` p
 
 ### Installation instruction from binaries
 
-1. pyALPS can be installed on most Linux and MacOS mcachines from prebuilt biniaries available on [PyPi](https://pypi.org/project/pyalps).
+1. pyALPS can be installed on most Linux and MacOS machines from prebuilt binaries available on [PyPI](https://pypi.org/project/pyalps).
 pyALPS can be installed using `pip` Python package manager:
 
 ```
 pip install pyalps
 ```
+
+Wheels are published for CPython on x86_64 Linux (manylinux) and Apple-silicon macOS; the Python versions covered by a release are listed under "Download files" on PyPI. If no wheel matches your interpreter, `pip` silently falls back to compiling pyALPS **and Boost** from the source distribution, which takes an hour or more and several gigabytes of memory. To make `pip` stop with a clear message instead, install with
+
+```
+pip install --only-binary=:all: pyalps
+```
+
+### Installation on Windows
+
+pyALPS has no native Windows build. Use the [Windows Subsystem for Linux](https://learn.microsoft.com/windows/wsl/install) (WSL 2) with a Linux distribution such as Ubuntu, create a virtual environment inside WSL with a Python version for which a Linux wheel exists (see above), and run the `pip install` command there.
+
+If the installation is killed while "Building wheel for pyalps", `pip` found no wheel and started a source build that ran out of memory; WSL becoming unresponsive at the same time is the usual symptom. Switch to a supported Python version or, if you do want to build from source inside WSL, first give the VM enough memory by creating `%USERPROFILE%\.wslconfig` on the Windows side:
+
+```
+[wsl2]
+memory=12GB
+swap=32GB
+processors=4
+```
+
+Run `wsl --shutdown` from PowerShell, reopen the WSL terminal, and follow the source-build instructions below. Note that the pyalps 2.3.3 source distribution on PyPI does not build with scikit-build-core 0.10 or newer (`ERROR: Use build.verbose instead of cmake.verbose`); build from a Git checkout as described below instead.
 
 ### Installation instruction from sources
 

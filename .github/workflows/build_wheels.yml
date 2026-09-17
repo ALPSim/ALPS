@@ -40,10 +40,13 @@ jobs:
             brew install gfortran
           fi
 
+      # cibuildwheel >= 3.0 is needed for CPython 3.14.  Without a cp314
+      # wheel, pip on Python 3.14 silently falls back to compiling pyALPS and
+      # Boost from the sdist, which is what killed the WSL install in #118.
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.22.0
+        uses: pypa/cibuildwheel@v4.2.0
         env:
-          CIBW_BUILD: cp39-* cp310-* cp311-* cp312-* cp313-*
+          CIBW_BUILD: cp39-* cp310-* cp311-* cp312-* cp313-* cp314-*
           CIBW_ARCHS: ${{ matrix.plat.arch }}
           CIBW_ARCHS_MACOS: ${{ matrix.plat.arch }}
 
