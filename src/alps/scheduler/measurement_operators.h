@@ -82,7 +82,8 @@ public:
   
   template <class LatticeModel>
   EigenvectorMeasurements(LatticeModel const&);
-  
+  virtual ~EigenvectorMeasurements() {}
+
   void write_xml_one_vector(oxstream& out, const boost::filesystem::path&, std::size_t j) const;
   XMLTag handle_tag(std::istream& infile, const XMLTag& intag);
   

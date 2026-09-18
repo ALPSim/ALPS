@@ -34,20 +34,14 @@ from __future__ import annotations
 
 import os
 import re
+from email.parser import BytesParser
 from pathlib import Path
 
-#: Where ALPS_VERSION.txt can be, in the order tried.
-#:
-#: A build from the repository finds it three levels up. An sdist build finds it
-#: at the root, because pyproject.toml force-includes it there -- the sdist is
-#: rooted at this project directory and cannot reach outside itself, which is
-#: also why the CMake side keeps its own repo-or-_vendor check.
-_CANDIDATES = (
-    Path("ALPS_VERSION.txt"),
-    Path("..") / ".." / ".." / "ALPS_VERSION.txt",
-)
-
-_CORE = re.compile(r"^(?P<core>[0-9]+\.[0-9]+\.[0-9]+)$")
+# A checkout carries the version file three levels above this project; an
+# sdist carries it at the project root through sdist.force-include.
+_CORE_PATTERN = r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)"
+_CORE = re.compile(_CORE_PATTERN)
+_TAG = re.compile(rf"v(?P<core>{_CORE_PATTERN})(?:-(?P<label>(?:alpha|beta|rc|dev)\.[0-9]+))?")
 
 #: CMake's prerelease vocabulary mapped to PEP 440 separators.
 _PRERELEASE_KINDS = {
@@ -65,14 +59,14 @@ _PRERELEASE_KINDS = {
 _PRERELEASE = re.compile(r"^(?P<kind>[A-Za-z]+)[.\-_]?(?P<number>[0-9]+)?$")
 
 
-def _read_core() -> str:
+def _read_core(project_dir: Path) -> str:
     """Return MAJOR.MINOR.PATCH from ALPS_VERSION.txt."""
-    for candidate in _CANDIDATES:
+    candidates = (project_dir / "ALPS_VERSION.txt", project_dir / "../../../ALPS_VERSION.txt")
+    for candidate in candidates:
         if not candidate.is_file():
             continue
-        text = candidate.read_text(encoding="utf-8").strip().splitlines()
-        core = text[0].strip() if text else ""
-        match = _CORE.match(core)
+        core = candidate.read_text(encoding="utf-8").strip()
+        match = _CORE.fullmatch(core)
         if match is None:
             raise RuntimeError(
                 f"{candidate} must contain exactly MAJOR.MINOR.PATCH, but reads "
@@ -80,9 +74,9 @@ def _read_core() -> str:
                 f"ALPS_VERSION_PRERELEASE environment variable, and the leading "
                 f"'v' of a release tag is not part of the version."
             )
-        return match.group("core")
+        return core
 
-    tried = ", ".join(str(path) for path in _CANDIDATES)
+    tried = ", ".join(str(path) for path in candidates)
     raise RuntimeError(
         "Cannot find ALPS_VERSION.txt, which supplies the pyalps version. "
         f"Looked in: {tried} (relative to {Path.cwd()}). A build from the ALPS "
@@ -115,9 +109,39 @@ def _pep440_suffix(label: str) -> str:
     return f"{_PRERELEASE_KINDS[kind]}{match.group('number') or '0'}"
 
 
-def version() -> str:
+def version(project_dir: Path | None = None, ref: str | None = None) -> str:
     """The full PEP 440 version for this build."""
-    return _read_core() + _pep440_suffix(os.environ.get("ALPS_VERSION_PRERELEASE", ""))
+    project_dir = project_dir or Path(__file__).resolve().parents[1]
+    core = _read_core(project_dir)
+    label = os.environ.get("ALPS_VERSION_PRERELEASE", "")
+    ref = os.environ.get("GITHUB_REF", "") if ref is None else ref
+    if ref.startswith("refs/tags/"):
+        tag = ref.removeprefix("refs/tags/")
+        match = _TAG.fullmatch(tag)
+        if match is None:
+            raise ValueError(f"Invalid release tag {tag!r}; expected vMAJOR.MINOR.PATCH[-{{alpha,beta,rc,dev}}.N]")
+        if match.group("core") != core:
+            raise ValueError(f"Release tag {tag} disagrees with ALPS_VERSION.txt ({core})")
+        tag_label = match.group("label") or ""
+        if label and _pep440_suffix(label) != _pep440_suffix(tag_label):
+            raise ValueError(f"Release tag {tag} disagrees with ALPS_VERSION_PRERELEASE={label!r}")
+        label = tag_label
+    computed = core + _pep440_suffix(label)
+    # Version cannot change between an sdist and wheels rebuilt from it
+    # (PEP 643). The build machine's prerelease environment is not present
+    # when a user later installs the sdist, so preserve its recorded version.
+    pkg_info = project_dir / "PKG-INFO"
+    if pkg_info.is_file():
+        metadata = BytesParser().parsebytes(pkg_info.read_bytes())
+        frozen = metadata.get("Version", "")
+        if metadata.get("Name") != "pyalps" or not re.fullmatch(
+            re.escape(core) + r"(?:(?:a|b|rc)[0-9]+|\.dev[0-9]+)?", frozen
+        ):
+            raise ValueError("sdist PKG-INFO disagrees with ALPS_VERSION.txt")
+        if (label or ref.startswith("refs/tags/")) and computed != frozen:
+            raise ValueError(f"Build version {computed} disagrees with sdist version {frozen}")
+        return frozen
+    return computed
 
 
 def dynamic_metadata(settings, project):  # noqa: ARG001 - provider protocol

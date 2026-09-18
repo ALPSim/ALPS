@@ -88,10 +88,6 @@ test-command = "pytest -q {project}/test/pyalps"
 # CMake preset; ALPS_DIR points every wheel build at that install. The ccache
 # in _build/ccache spans the SDK and all wheel builds (cached across CI runs).
 [tool.cibuildwheel.environment]
-# The release state of the wheels this CI publishes. The numeric version comes
-# from ALPS_VERSION.txt; this is the prerelease label CMake would take from
-# ALPS_VERSION_PRERELEASE. Clear it to publish a final release.
-ALPS_VERSION_PRERELEASE = "beta.1"
 ALPS_DIR = "$(pwd)/_build/wheel-deps/install/share/alps"
 CCACHE_DIR = "$(pwd)/_build/ccache"
 CCACHE_NAMESPACE = "pyalps-wheel"
@@ -101,6 +97,7 @@ CMAKE_ARGS = "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
 # musllinux (Alpine/musl) has neither: install libtirpc for the system
 # XDR path (ALPS_HAVE_RPC_XDR_H) and disable the execinfo backtrace.
 [tool.cibuildwheel.linux]
+environment-pass = ["GITHUB_REF", "ALPS_VERSION_PRERELEASE"]
 before-all = [
   "if command -v dnf >/dev/null 2>&1; then dnf install -y ccache cmake hdf5-devel lapack-devel ninja-build; EXTRA=; else apk add --no-cache ccache ninja-is-really-ninja hdf5-dev lapack-dev libtirpc-dev; ln -sf /usr/include/tirpc/rpc /usr/include/rpc; ln -sf /usr/include/tirpc/netconfig.h /usr/include/netconfig.h; export CXXFLAGS=-DALPS_NGS_NO_STACKTRACE; EXTRA='-DALPS_HAVE_RPC_XDR_H=1 -DCMAKE_CXX_STANDARD_LIBRARIES=-ltirpc'; fi",
   "cd {project}",

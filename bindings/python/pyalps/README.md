@@ -11,7 +11,7 @@ Install `pyalps[plot]` to use the Matplotlib plotting helpers.
 Install `pyalps[mpi]` for the mpi4py-backed `pyalps.mpi` compatibility layer.
 
 The bindings are built as a standalone `scikit-build-core` project using
-nanobind. A source build requires Python 3.10 or newer, CMake 3.21 or newer,
+nanobind. A source build requires Python 3.10 or newer, CMake 3.22 or newer,
 Ninja, a C++17 compiler, BLAS/LAPACK, HDF5, and an installed ALPS C++ SDK.
 Point `ALPS_DIR` at the SDK's `share/alps` package directory.
 
@@ -88,9 +88,14 @@ environment variable of the same name, using the same vocabulary:
 | `rc.1` | `2.3.4rc1` |
 | `dev.3` | `2.3.4.dev3` |
 
-The wheels CI sets it in `[tool.cibuildwheel.environment]`; clear it there to
-publish a final release. `python bindings/python/pyalps/_build_support/alps_version.py`
-prints the version a build would produce.
+In GitHub release builds, the provider takes the prerelease label from
+`GITHUB_REF` (for example, `refs/tags/v3.0.0-beta.1`). It rejects a tag whose
+numeric version differs from `ALPS_VERSION.txt`, or whose label conflicts with
+an explicit `ALPS_VERSION_PRERELEASE`. Wheels and source distributions use the
+same provider. `python bindings/python/pyalps/_build_support/alps_version.py`
+prints the version a build would produce, from any working directory.
+An sdist preserves its recorded version when rebuilt without the original
+build environment.
 
 Note the consequence: because the number is inherited, a Python-only API change
 cannot be signalled in the pyalps version alone — it takes a bump of

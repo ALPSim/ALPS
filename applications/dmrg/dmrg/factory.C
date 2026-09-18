@@ -25,11 +25,5 @@ alps::scheduler::Task* DMRGFactory::make_task(const alps::ProcessList& w, const 
   
 void DMRGFactory::print_copyright(std::ostream& out) const
 {
-   out << "ALPS/dmrg version " DMRG_VERSION " (" DMRG_DATE ")\n"
-       << "  Density Matrix Renormalization Group algorithm\n"
-       << "  for low-dimensional interacting systems.\n"
-       << "  available from http://alps.comp-phys.org/\n"
-       << "  copyright (c) 2006-2013 by Adrian E. Feiguin\n"
-       << "  for details see the publication: \n"
-       << "  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).\n\n";
+   print_dmrg_copyright(out);
 }

@@ -233,6 +233,14 @@ endif(BUILD_BOOST_THREAD)
 if (NOT Boost_FOUND)
   add_library(${ALPS_BOOST_LIBRARY_NAME} ${BOOST_SOURCES})
   target_link_libraries(${ALPS_BOOST_LIBRARY_NAME} ${BOOST_LINK_LIBS})
+  # Boost.Filesystem's directory.cpp uses readdir_r, deprecated by recent
+  # macOS SDKs and glibc
+  target_compile_options(${ALPS_BOOST_LIBRARY_NAME} PRIVATE -Wno-deprecated-declarations)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    # Boost.MPI's environment::abort() is declared noreturn but relies on
+    # MPI_Abort not returning, which the compiler cannot verify
+    target_compile_options(${ALPS_BOOST_LIBRARY_NAME} PRIVATE -Wno-invalid-noreturn)
+  endif()
     # Boost.Test
     if(BUILD_BOOST_TEST)
       set(DIRECTORY "${Boost_ROOT_DIR}/libs/test/src")
