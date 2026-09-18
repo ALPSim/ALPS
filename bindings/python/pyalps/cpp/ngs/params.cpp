@@ -4,7 +4,6 @@
 // Part of the ALPS Project — see LICENSE.txt for full license text.
 // SPDX-License-Identifier: MIT
 #include <nanobind/nanobind.h>
-#include <nanobind/make_iterator.h>
 #include <nanobind/stl/complex.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
@@ -98,14 +97,15 @@ NB_MODULE(pyngsparams_c, m) {
         .def("__delitem__",  &params_delitem)
         .def("__contains__", &params_contains)
         .def("__iter__",     [](alps::params & self) {
-                                 // paramiterator yields pair<string const, paramvalue>;
-                                 // make_key_iterator projects out pair.first.
-                                 return nb::make_key_iterator(
-                                     nb::type<alps::params>(),
-                                     "key_iterator",
-                                     self.begin(), self.end());
-                             },
-                             nb::keep_alive<0, 1>())
+                                 // Snapshot keys: params' native iterator
+                                 // holds a vector iterator invalidated by
+                                 // insertion or deletion, even while the
+                                 // params object itself remains alive.
+                                 nb::list keys;
+                                 for (auto const & entry : self)
+                                     keys.append(nb::cast(entry.first));
+                                 return keys.attr("__iter__")();
+                             })
         .def("__str__",      &params_print)
         .def("valueOrDefault", &value_or_default)
         .def("save",         &alps::params::save)

@@ -40,9 +40,9 @@
 #include <alps/ngs/mcobservable.hpp>
 #include <alps/ngs/mcobservables.hpp>
 #include "../archive_savable.hpp"
+#include "../mapping_lifetime.hpp"
 #include <alps/ngs/observablewrappers.hpp>
 #include <nanobind/nanobind.h>
-#include <nanobind/make_iterator.h>
 #include <nanobind/stl/string.h>
 namespace nb = nanobind;
 #include <cstdint>
@@ -84,20 +84,19 @@ NB_MODULE(pyngsobservables_c, m) {
                              },
                              nb::rv_policy::reference_internal)
         .def("__setitem__",  [](alps::mcobservables & self, std::string const & k, alps::mcobservable const & v) {
-                                 self.insert(k, v);
+                                 if (self.has(k)) self[k] = v;
+                                 else self.insert(k, v);
                              })
         // mcobservables derives publicly from std::map; item deletion
         // restores what the legacy map_indexing_suite provided (and
         // what the MutableMapping mixins pop/popitem/clear need).
-        .def("__delitem__",  [](alps::mcobservables & self, std::string const & k) {
-                                 if (!self.has(k))
-                                     throw nb::key_error(k.c_str());
-                                 self.erase(k);
-                             })
+        .def("__delitem__", &pyalps::erase_map_item<alps::mcobservables>)
         .def("__iter__",     [](alps::mcobservables & self) {
-                                 return nb::make_key_iterator(nb::type<alps::mcobservables>(), "key_iterator", self.begin(), self.end());
-                             },
-                             nb::keep_alive<0, 1>())
+                                 nb::list keys;
+                                 for (auto const & entry : self)
+                                     keys.append(nb::cast(entry.first));
+                                 return keys.attr("__iter__")();
+                             })
         // keys/values/items are deliberately NOT defined here. Boost.Python's
         // map_indexing_suite did not define them either, so they resolved through
         // MutableMapping to set-like KeysView/ValuesView/ItemsView. Defining them

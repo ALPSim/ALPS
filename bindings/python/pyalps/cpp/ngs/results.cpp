@@ -9,11 +9,11 @@
 // by hand instead. (Same applies to nanobind's bind_map.)
 #define PY_ARRAY_UNIQUE_SYMBOL pyngsresults_PyArrayHandle
 #include <nanobind/nanobind.h>
-#include <nanobind/make_iterator.h>
 #include <nanobind/stl/string.h>
 #include <alps/hdf5.hpp>
 #include <alps/ngs/mcresults.hpp>
 #include "../archive_savable.hpp"
+#include "../mapping_lifetime.hpp"
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -46,20 +46,16 @@ NB_MODULE(pyngsresults_c, m) {
                              },
                              nb::rv_policy::reference_internal)
         .def("__setitem__",  [](alps::mcresults & self, std::string const & k, alps::mcresult const & v) {
-                                 self.insert(k, v);
+                                 if (self.has(k)) self[k] = v;
+                                 else self.insert(k, v);
                              })
-        .def("__delitem__",  [](alps::mcresults & self, std::string const & k) {
-                                 if (!self.has(k))
-                                     throw nb::key_error(k.c_str());
-                                 self.erase(k);
-                             })
+        .def("__delitem__", &pyalps::erase_map_item<alps::mcresults>)
         .def("__iter__",     [](alps::mcresults & self) {
-                                 return nb::make_key_iterator(
-                                     nb::type<alps::mcresults>(),
-                                     "key_iterator",
-                                     self.begin(), self.end());
-                             },
-                             nb::keep_alive<0, 1>())
+                                 nb::list keys;
+                                 for (auto const & entry : self)
+                                     keys.append(nb::cast(entry.first));
+                                 return keys.attr("__iter__")();
+                             })
         // keys/values/items are deliberately NOT defined here. Boost.Python's
         // map_indexing_suite did not define them either, so they resolved through
         // MutableMapping to set-like KeysView/ValuesView/ItemsView. Defining them
