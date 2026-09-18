@@ -73,7 +73,13 @@ namespace alps {
                 ar["/simulation/results/" + obs.representation()] << obs;
             }
             typename T::count_type       count()            const { return obs.count(); }
-            typename T::convergence_type converged_errors() const { return obs.converged_errors(); }
+            nb::object converged_errors() const {
+                auto const values = obs.converged_errors();
+                std::vector<std::int32_t> result(values.size());
+                for (std::size_t i = 0; i < values.size(); ++i)
+                    result[i] = values[i];
+                return alps::python::make_numpy_array(std::move(result));
+            }
           private:
             T obs;
         };
@@ -266,12 +272,12 @@ NB_MODULE(pyalea_c, m) {
     #define ALPS_PY_EXPORT_MCTIMESERIES_SCALAR(Value, PyName)                             \
         nb::class_<alps::alea::mctimeseries<Value>>(m, PyName)                            \
             .def(nb::init<>())                                                            \
+            .def(nb::init<alps::alea::mcdata<Value>>())                                   \
             .def("__init__",                                                              \
                  [](alps::alea::mctimeseries<Value> * self, nb::handle a) {               \
                      new (self) alps::alea::mctimeseries<Value>(                          \
                          numpy_to_vector<Value>(a));                                      \
                  })                                                                       \
-            .def(nb::init<alps::alea::mcdata<Value>>())                                   \
             .def("timeseries", [](alps::alea::mctimeseries<Value> const & self) {         \
                     return ts_to_numpy_scalar<Value>(self);                               \
                 })                                                                        \
@@ -294,6 +300,8 @@ NB_MODULE(pyalea_c, m) {
     using VecMcD   = alps::alea::mcdata<std::vector<double>>;
     nb::class_<VecTs>(m, "MCVectorTimeseries")
         .def(nb::init<>())
+        // Register typed overloads before the catch-all array constructor.
+        .def(nb::init<VecMcD>())
         .def("__init__", [](VecTs * self, nb::handle a) {
                 auto view = alps::python::as_contiguous<double>(a);
                 if (view.ndim() != 2)
@@ -310,7 +318,6 @@ NB_MODULE(pyalea_c, m) {
                 }
                 new (self) VecTs(rows);
             })
-        .def(nb::init<VecMcD>())
         .def("timeseries", [](VecTs const & self) { return ts_to_numpy_vector_rows(self); })
         .def_prop_ro("size", &VecTs::size)
         .def("__repr__", &stream_repr<VecTs>);

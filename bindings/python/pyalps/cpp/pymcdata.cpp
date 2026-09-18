@@ -228,9 +228,15 @@ NB_MODULE(pymcdata_c, m) {
     nb::class_<Vector>(m, "MCVectorData",
         "Vector-valued Monte Carlo data.")
         .def(nb::init<>())
-        .def(nb::init<std::vector<double>>(), nb::arg("mean"))
-        .def(nb::init<std::vector<double>, std::vector<double>>(),
-             nb::arg("mean"), nb::arg("error"))
+        .def("__init__", [](Vector * self, std::vector<double> const & mean) {
+                 new (self) Vector(mean, std::vector<double>(mean.size(), 0.0));
+             }, nb::arg("mean"))
+        .def("__init__", [](Vector * self, std::vector<double> const & mean,
+                           std::vector<double> const & error) {
+                 if (mean.size() != error.size())
+                     throw nb::value_error("mean and error must have the same length");
+                 new (self) Vector(mean, error);
+             }, nb::arg("mean"), nb::arg("error"))
         .def("__len__",
              [](Vector & v) {
                  return v.mean().size();

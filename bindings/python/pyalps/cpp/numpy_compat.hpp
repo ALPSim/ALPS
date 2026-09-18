@@ -145,7 +145,7 @@ namespace alps {
         template <typename T>
         struct contiguous_view {
             nb_::object owner;
-            nb_::ndarray<T, nb_::c_contig> nd;
+            nb_::ndarray<T const, nb_::c_contig> nd;
             T const* data() const { return nd.data(); }
             std::size_t ndim() const { return nd.ndim(); }
             std::size_t shape(int i) const { return nd.shape(i); }
@@ -162,7 +162,7 @@ namespace alps {
             nb_::handle np = numpy_module();
             nb_::object arr = np.attr("ascontiguousarray")(
                 obj, nb_::arg("dtype") = numpy_dtype<T>::name);
-            auto nd = nb_::cast<nb_::ndarray<T, nb_::c_contig>>(arr);
+            auto nd = nb_::cast<nb_::ndarray<T const, nb_::c_contig>>(arr);
             return contiguous_view<T>{std::move(arr), std::move(nd)};
         }
     } // namespace python

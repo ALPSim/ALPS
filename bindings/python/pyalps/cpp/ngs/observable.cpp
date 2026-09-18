@@ -51,7 +51,7 @@ namespace alps {
                 return;
             }
             try {
-                auto values = nb::cast<nb::ndarray<double, nb::c_contig>>(data);
+                auto values = nb::cast<nb::ndarray<double const, nb::c_contig>>(data);
                 self << std::valarray<double>(values.data(), values.size());
             } catch (nb::cast_error const &) {
                 throw nb::type_error("observable samples must be numeric scalars or contiguous float64 arrays");

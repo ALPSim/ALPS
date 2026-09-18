@@ -82,7 +82,10 @@ NB_MODULE(pyngsaccumulator_c, m) {
     using count_accumulator = Accumulator<double, alps::accumulator::count_tag, AccumulatorBase<double>>;
     using count_result = count_accumulator::result_type;
     nb::class_<count_accumulator> count_acc(m, "count_accumulator");
-    count_acc.def(nb::init<>()).def("__call__", [](count_accumulator & self, double value) { self(value); })
+    // A count-only accumulator never examines the sample. The old Python
+    // binding accepted any object, including arrays and complex samples.
+    count_acc.def(nb::init<>()).def("__call__", [](count_accumulator & self, nb::handle) { self(0.0); },
+                                  nb::arg("sample").none())
              .def("result", &make_result<count_accumulator>).def("count", &count_accumulator::count);
     bind_serializable(count_acc);
     nb::class_<count_result> count_res(m, "count_result");
