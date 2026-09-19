@@ -17,6 +17,9 @@ that level of interoperability.
 import atexit as _atexit
 from functools import reduce as _python_reduce
 import sys
+import threading as _threading
+import time as _time
+import weakref as _weakref
 from typing import Any
 
 try:
@@ -53,39 +56,113 @@ any_tag = _MPI.ANY_TAG
 Exception = _MPI.Exception
 Status = _MPI.Status
 
+# Object-mode MPI.Irecv reserves a fixed-size pickle buffer (32 KiB by
+# default). A matched probe gives us the actual message size instead. Keep
+# probes in posting order, including across wrappers of the same communicator,
+# so waiting for a later wildcard receive cannot steal an earlier one's data.
+_pending_receives = []
+_receive_lock = _threading.RLock()
+
+
+def _progress_receives():
+    with _receive_lock:
+        pending = []
+        for reference in _pending_receives:
+            request = reference()
+            if request is None or request._result is not None:
+                continue
+            status = Status()
+            message = request._comm.improbe(request._source, request._tag, status)
+            if message is None:
+                pending.append(reference)
+            else:
+                # A message can arrive between two probes. Give it to the
+                # earliest posted receive that matches its actual envelope.
+                recipient = request
+                for earlier in pending:
+                    candidate = earlier()
+                    if (candidate is not None and candidate._comm == request._comm
+                            and candidate._source in (any_source, status.source)
+                            and candidate._tag in (any_tag, status.tag)):
+                        recipient = candidate
+                        pending.remove(earlier)
+                        pending.append(reference)
+                        break
+                recipient._request = message.irecv()
+        _pending_receives[:] = pending
+
 
 class Request:
     """Non-value request with the Boost.MPI ``wait``/``test`` contract."""
 
     def __init__(self, request: Any):
         self._request = request
+        self._result = None
+        self._reported = False
+
+    def _test(self):
+        if self._result is None and self._request is not None:
+            status = Status()
+            flag, value = self._request.test(status)
+            if flag:
+                self._result = value, status
+        return self._result
+
+    def _wait(self):
+        while True:
+            # Progress receives even while waiting on a send: rendezvous
+            # sends (including self-sends) otherwise cannot complete.
+            _progress_receives()
+            result = self._test()
+            if result is not None:
+                self._reported = True
+                return result
+            _time.sleep(0.0001)
 
     def wait(self):
-        status = Status()
-        self._request.wait(status)
-        return status
+        return self._wait()[1]
 
     def test(self):
-        status = Status()
-        flag, _value = self._request.test(status)
-        return status if flag else None
+        _progress_receives()
+        result = self._test()
+        if result is not None:
+            self._reported = True
+            return result[1]
+        return None
 
     def cancel(self) -> None:
-        self._request.cancel()
+        with _receive_lock:
+            if self._result is not None:
+                return
+            if self._request is None:
+                status = Status()
+                status.Set_cancelled(True)
+                self._result = None, status
+            else:
+                self._request.cancel()
 
 
 class RequestWithValue(Request):
     """Receive request whose completion returns ``(value, status)``."""
 
+    @classmethod
+    def _receive(cls, comm, source, tag):
+        request = cls(None)
+        request._comm, request._source, request._tag = comm, source, tag
+        with _receive_lock:
+            _pending_receives.append(_weakref.ref(request))
+            _progress_receives()
+        return request
+
     def wait(self):
-        status = Status()
-        value = self._request.wait(status)
-        return value, status
+        return self._wait()
 
     def test(self):
-        status = Status()
-        flag, value = self._request.test(status)
-        return (value, status) if flag else None
+        _progress_receives()
+        result = self._test()
+        if result is not None:
+            self._reported = True
+        return result
 
 
 class RequestList(list):
@@ -115,7 +192,7 @@ class Communicator:
         return isinstance(other, Communicator) and self._comm == other._comm
 
     def send(self, dest: int, tag: int = 0, value: Any = None) -> None:
-        self._comm.send(value, dest=dest, tag=tag)
+        self.isend(dest, tag, value).wait()
 
     def recv(
         self,
@@ -123,15 +200,14 @@ class Communicator:
         tag: int = any_tag,
         return_status: bool = False,
     ) -> Any:
-        status = _MPI.Status() if return_status else None
-        value = self._comm.recv(source=source, tag=tag, status=status)
+        value, status = self.irecv(source, tag).wait()
         return (value, status) if return_status else value
 
     def isend(self, dest: int, tag: int = 0, value: Any = None):
         return Request(self._comm.isend(value, dest=dest, tag=tag))
 
     def irecv(self, source: int = any_source, tag: int = any_tag):
-        return RequestWithValue(self._comm.irecv(source=source, tag=tag))
+        return RequestWithValue._receive(self._comm, source, tag)
 
     def probe(self, source: int = any_source, tag: int = any_tag):
         status = _MPI.Status()
@@ -216,58 +292,73 @@ def _check_requests(requests) -> None:
         raise TypeError("requests must contain pyalps.mpi Request objects")
 
 
-def _raw_requests(requests):
+def _poll_requests(requests):
     _check_requests(requests)
-    return [request._request for request in requests]
+    _progress_receives()
+    # Cache individual completions: test_all must not lose a value when only
+    # part of the batch has arrived, and every receive must get a chance to
+    # progress before a large send is waited on.
+    return [request._test() for request in requests]
 
 
 def wait_any(requests):
-    status = Status()
-    index, value = _MPI.Request.waitany(_raw_requests(requests), status)
-    return value, status, index
+    while True:
+        result = test_any(requests)
+        if result is not None:
+            return result
+        _time.sleep(0.0001)
 
 
 def test_any(requests):
-    status = Status()
-    index, flag, value = _MPI.Request.testany(_raw_requests(requests), status)
-    return (value, status, index) if flag else None
+    for index, result in enumerate(_poll_requests(requests)):
+        if result is not None and not requests[index]._reported:
+            requests[index]._reported = True
+            return result[0], result[1], index
+    if all(request._reported for request in requests):
+        return None, Status(), _MPI.UNDEFINED
+    return None
 
 
 def wait_all(requests, callable=None) -> None:
-    statuses = [Status() for _ in requests]
-    values = _MPI.Request.waitall(_raw_requests(requests), statuses)
-    if callable is not None:
-        for value, status in zip(values, statuses):
-            callable(value, status)
+    while not test_all(requests, callable):
+        _time.sleep(0.0001)
 
 
 def test_all(requests, callable=None) -> bool:
-    statuses = [Status() for _ in requests]
-    flag, values = _MPI.Request.testall(_raw_requests(requests), statuses)
-    if flag and callable is not None and values is not None:
-        for value, status in zip(values, statuses):
+    results = _poll_requests(requests)
+    if any(result is None for result in results):
+        return False
+    for request in requests:
+        request._reported = True
+    if callable is not None:
+        for value, status in results:
             callable(value, status)
-    return bool(flag)
+    return True
 
 
 def wait_some(requests, callable=None) -> int:
-    statuses = [Status() for _ in requests]
-    indices, values = _MPI.Request.waitsome(_raw_requests(requests), statuses)
-    return _finish_some(requests, indices, values, statuses, callable)
+    while True:
+        boundary = test_some(requests, callable)
+        if boundary < len(requests) or all(r._reported for r in requests):
+            return boundary
+        _time.sleep(0.0001)
 
 
 def test_some(requests, callable=None) -> int:
-    statuses = [Status() for _ in requests]
-    indices, values = _MPI.Request.testsome(_raw_requests(requests), statuses)
-    return _finish_some(requests, indices, values, statuses, callable)
+    results = _poll_requests(requests)
+    indices = [i for i, result in enumerate(results)
+               if result is not None and not requests[i]._reported]
+    for index in indices:
+        requests[index]._reported = True
+    return _finish_some(requests, indices, results, callable)
 
 
-def _finish_some(requests, indices, values, statuses, callable) -> int:
+def _finish_some(requests, indices, results, callable) -> int:
     if not indices:
         return len(requests)
     if callable is not None:
-        for value, status in zip(values, statuses):
-            callable(value, status)
+        for index in indices:
+            callable(*results[index])
 
     # Boost.MPI partitions the mutable RequestList into pending requests
     # followed by completed requests and returns the first completed index.

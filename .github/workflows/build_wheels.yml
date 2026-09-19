@@ -168,7 +168,7 @@ jobs:
           python -m pip install --no-index --find-links wheelhouse pyalps
 
       - name: Run two-rank compatibility surface
-        run: mpiexec -n 2 python -m pytest -q test/pyalps/test_binding_surface.py::test_mpi4py_compatibility_surface
+        run: mpiexec -n 2 python -m pytest -q test/pyalps/test_binding_surface.py::test_mpi4py_compatibility_surface test/pyalps/test_mpi_requests.py
 
   upload_pypi:
     needs: [build_wheels, build_sdist, smoke_test, mpi_smoke]
