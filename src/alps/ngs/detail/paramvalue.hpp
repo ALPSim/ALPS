@@ -105,6 +105,9 @@ namespace alps {
             virtual void save(hdf5::archive &) const = 0;
             virtual void print(std::ostream &) const = 0;
             virtual void * object(char const * binding) const = 0;
+            // Some bindings give sequences a specific textual form. Keep
+            // that conversion separate from a homogeneous numeric snapshot.
+            virtual bool native_text(std::string &) const { return false; }
         };
 
     }
@@ -171,6 +174,11 @@ namespace alps {
                 }
                 template<typename T> T cast() const {
                     if (source_) {
+                        if constexpr (std::is_same<T, std::string>::value) {
+                            std::string value;
+                            if (source_->native_text(value))
+                                return value;
+                        }
                         if constexpr (paramvalue_vector<T>::value) {
                             std::vector<paramvalue> elements;
                             if (source_->native_elements(elements)) {

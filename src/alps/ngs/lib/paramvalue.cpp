@@ -23,6 +23,52 @@ namespace alps {
 
         paramvalue_source::~paramvalue_source() = default;
 
+        namespace {
+            // Retain scalar types when a Python list checkpoint is resumed by
+            // a native simulation. Reuse the existing value-provider contract
+            // so conversion happens in the type requested by the consumer.
+            class checkpoint_list final : public paramvalue_source {
+            public:
+                explicit checkpoint_list(std::vector<paramvalue> values)
+                    : values_(std::move(values)) {}
+                bool native_elements(std::vector<paramvalue> & values) const override {
+                    values = values_;
+                    return true;
+                }
+                paramvalue native_value() const override {
+                    bool text = false, complex = false, real = false, integer = false;
+                    for (auto const & value : values_) {
+                        text |= value.which() == paramvalue_index<std::string>::value;
+                        complex |= value.which() == paramvalue_index<std::complex<double>>::value;
+                        real |= value.which() == paramvalue_index<double>::value;
+                        integer |= value.which() == paramvalue_index<int>::value;
+                    }
+                    if (text) return converted<std::string>();
+                    if (complex) return converted<std::complex<double>>();
+                    if (real) return converted<double>();
+                    if (integer) return converted<int>();
+                    return converted<bool>();
+                }
+                void save(hdf5::archive & ar) const override {
+                    if (ar.is_data("")) ar.delete_data("");
+                    if (ar.is_group("")) ar.delete_group("");
+                    ar.create_group("");
+                    for (std::size_t i = 0; i < values_.size(); ++i)
+                        ar[std::to_string(i)] << values_[i];
+                }
+                void print(std::ostream & out) const override { out << native_value(); }
+                void * object(char const *) const override { return nullptr; }
+            private:
+                template <typename T> std::vector<T> converted() const {
+                    std::vector<T> values;
+                    values.reserve(values_.size());
+                    for (auto const & value : values_) values.push_back(value.cast<T>());
+                    return values;
+                }
+                std::vector<paramvalue> values_;
+            };
+        }
+
         struct paramvalue_saver: public boost::static_visitor<> {
 
             paramvalue_saver(hdf5::archive & a)
@@ -77,6 +123,56 @@ namespace alps {
         }
 
         void paramvalue::load(hdf5::archive & ar) {
+            if (ar.is_group("")) {
+                // The Python archive stores Boolean/mixed lists as numbered
+                // scalar children. Native-only simulations must be able to
+                // resume those parameters too, without a Python decoder.
+                auto children = ar.list_children("");
+                if (children.empty())
+                    throw std::runtime_error("Cannot load an empty parameter group" + ALPS_STACKTRACE);
+                std::vector<paramvalue> values;
+                values.reserve(children.size());
+                for (std::size_t i = 0; i < children.size(); ++i) {
+                    std::string child = std::to_string(i);
+                    if (!ar.is_data(child))
+                        throw std::runtime_error("Parameter group is not a scalar list" + ALPS_STACKTRACE);
+                    if (ar.is_complex(child) && ar.dimensions(child) < 2) {
+                        std::complex<double> number;
+                        ar[child] >> number;
+                        values.emplace_back(number);
+                    } else if (!ar.is_scalar(child)) {
+                        throw std::runtime_error("Parameter list contains a nonscalar value" + ALPS_STACKTRACE);
+                    } else if (ar.is_datatype<signed char>(child)) {
+                        // bool and int8 share their HDF5 storage type. Reading
+                        // the byte directly preserves both 0/1 and signed data.
+                        signed char number;
+                        ar[child] >> number;
+                        std::string type;
+                        if (ar.is_attribute(child + "/@__alps_type__"))
+                            ar[child + "/@__alps_type__"] >> type;
+                        if (type == "int8") values.emplace_back(static_cast<int>(number));
+                        else values.emplace_back(number != 0);
+                    } else if (ar.is_datatype<double>(child)
+                               || ar.is_datatype<float>(child)
+                               || ar.is_datatype<long double>(child)) {
+                        double number;
+                        ar[child] >> number;
+                        values.emplace_back(number);
+                    } else if (ar.is_datatype<int>(child)) {
+                        int number;
+                        ar[child] >> number;
+                        values.emplace_back(number);
+                    } else {
+                        // Keep wider integers exact despite the native
+                        // variant's int-sized integer alternative.
+                        std::string value;
+                        ar[child] >> value;
+                        values.emplace_back(value);
+                    }
+                }
+                *this = paramvalue(std::make_shared<checkpoint_list>(std::move(values)));
+                return;
+            }
             #define ALPS_NGS_PARAMVALUE_LOAD_HDF5(T)                                \
                 {                                                                    \
                     T value;                                                        \

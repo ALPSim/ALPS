@@ -51,4 +51,22 @@ int main() {
         parameters["wide"].cast<int>();
         throw std::runtime_error("overflowing conversion unexpectedly succeeded");
     } catch (std::out_of_range const &) {}
+
+    parameters["names"] = std::vector<std::string>{"Energy", "Stiffness"};
+    require(parameters["names"].cast<std::string>() == "Energy,Stiffness");
+    parameters["names"] = std::vector<std::string>{"", "middle", ""};
+    require(parameters["names"].cast<std::string>() == ",middle,");
+
+    alps::hdf5::archive archive("param_external_list.h5", "w");
+    archive["/list/0"] << true;
+    archive["/list/1"] << 2;
+    archive["/list/2"] << 10.5;
+    archive.set_context("/list");
+    alps::detail::paramvalue list;
+    list.load(archive);
+    require(list.cast<std::vector<double>>() == std::vector<double>({1., 2., 10.5}));
+    require(list.cast<std::vector<int>>() == std::vector<int>({1, 2, 10}));
+    list.save(archive);
+    list.load(archive);
+    require(list.cast<std::vector<int>>() == std::vector<int>({1, 2, 10}));
 }

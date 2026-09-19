@@ -317,6 +317,22 @@ public:
             elements.push_back(python_paramvalue_source(items[i], key_).native_value());
         return true;
     }
+    bool native_text(std::string & text) const override {
+        nb::gil_scoped_acquire gil;
+        nb::handle items(value_);
+        if (!nb::isinstance<nb::list>(items) && !nb::isinstance<nb::tuple>(items))
+            return false;
+        // The original reader joined Python element strings. Converting a
+        // mixed sequence to one native vector first both rejects valid text
+        // parameters and changes representations such as True and 3.0.
+        text.clear();
+        for (std::size_t i = 0; i < nb::len(items); ++i) {
+            if (i) text += ',';
+            nb::object item = items[i];
+            text += nb::cast<std::string>(nb::str(item));
+        }
+        return true;
+    }
     alps::detail::paramvalue native_value() const override {
         nb::gil_scoped_acquire gil;
         // Defer large integers to ALPS' checked text-to-target conversion.

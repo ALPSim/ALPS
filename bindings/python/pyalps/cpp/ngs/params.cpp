@@ -46,6 +46,13 @@ nb::object paramvalue_to_py(alps::detail::paramvalue const & pv) {
         auto * value = static_cast<PyObject *>(pv.source()->object("python"));
         if (value)
             return nb::borrow<nb::object>(value);
+        std::vector<alps::detail::paramvalue> elements;
+        if (pv.source()->native_elements(elements)) {
+            nb::list result;
+            for (auto const & element : elements)
+                result.append(paramvalue_to_py(element));
+            return result;
+        }
         return paramvalue_to_py(pv.source()->native_value());
     }
     return boost::apply_visitor(
@@ -64,7 +71,7 @@ nb::object params_getitem(alps::params & self, nb::object const & key_obj) {
     nb::object result = paramvalue_to_py(*value);
     // Materialize native checkpoint values once. Retain the object so later
     // mutations survive both subsequent Python lookups and C++ conversions.
-    if (!value->source())
+    if (!value->source() || !value->source()->object("python"))
         pyalps::set_param_value(self, key, result);
     return result;
 }

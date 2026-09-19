@@ -13,6 +13,12 @@ NB_MODULE(parameter_probe, module) {
     module.def("vector", [](alps::params const & p) { return p["value"].cast<std::vector<double>>(); });
     module.def("complex_vector", [](alps::params const & p) { return p["value"].cast<std::vector<std::complex<double>>>(); });
     module.def("integer_vector", [](alps::params const & p) { return p["value"].cast<std::vector<long long>>(); });
+    module.def("text", [](alps::params const & p) { return p["value"].cast<std::string>(); });
+    module.def("native_text", [] {
+        alps::params p;
+        p["value"] = std::vector<std::string>{"", "middle", ""};
+        return p["value"].cast<std::string>();
+    });
     module.def("integer", [](alps::params const & p) { return p["value"].cast<int>(); });
     module.def("wide_integer", [](alps::params const & p) { return p["value"].cast<long long>(); });
     module.def("clone", [](alps::params const & p) { return alps::params(p); });
@@ -27,6 +33,7 @@ NB_MODULE(parameter_probe, module) {
         return p;
     });
     module.def("load", [](alps::params & p, alps::hdf5::archive & ar) { p.load(ar); });
+    module.def("save", [](alps::params const & p, alps::hdf5::archive & ar) { p.save(ar); });
     module.def("threaded_vector", [](alps::params const & p) {
         std::vector<double> values;
         std::exception_ptr error;

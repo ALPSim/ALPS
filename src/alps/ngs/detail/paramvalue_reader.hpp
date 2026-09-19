@@ -63,7 +63,7 @@ namespace alps {
                     throw std::invalid_argument("only 1 D array are supported in alps::params" + ALPS_STACKTRACE);
                 else if (size[0] != 0)
                     for (U const * it = ptr; it != ptr + size[0]; ++it)
-                        value += (it == ptr ? "," : "") + cast<std::string>(*it);
+                        value += (it == ptr ? "" : ",") + cast<std::string>(*it);
             }
 
             std::string value;
