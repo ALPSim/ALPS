@@ -427,8 +427,9 @@ namespace alps {
             return std::strcmp(Py_TYPE(attr.ptr())->tp_name, "method") == 0;
         }
         void python_hdf5_save(alps::hdf5::archive & ar,
-                              std::string const & path,
+                              std::string const & relative_path,
                               nb::handle data) {
+            std::string const path = ar.complete_path(relative_path);
             if (has_archive_save_method(data)) {
                 save_in_path_context(ar, path, [&] {
                     nb::getattr(data, "save")(nb::cast(&ar, nb::rv_policy::reference));
@@ -483,7 +484,7 @@ namespace alps {
                                          std::string const & path);
         nb::object python_hdf5_load(alps::hdf5::archive & ar,
                                     std::string const & path) {
-            return python_hdf5_load_impl(ar, path);
+            return python_hdf5_load_impl(ar, ar.complete_path(path));
         }
         nb::object python_hdf5_load_impl(alps::hdf5::archive & ar,
                                          std::string const & path) {
@@ -571,6 +572,27 @@ namespace alps {
             // Windows — so we can't rely on just `int` matching).
             #define TRY_SCALAR(T)                                                                \
                 if (ar.is_datatype<T>(path)) { T v; ar[path] >> v; return nb::cast(v); }
+            if (ar.is_datatype<std::int8_t>(path)) {
+                std::string marker = ar.complete_path(path);
+                auto at = marker.find_last_of('@');
+                marker = at == std::string::npos
+                    ? marker + "/@__alps_type__"
+                    : marker.substr(0, at) + "@__alps_type__:" + marker.substr(at + 1);
+                std::string kind;
+                if (ar.is_attribute(marker))
+                    ar[marker] >> kind;
+                // Unmarked legacy signed-byte data was read as bool by the
+                // Boost.Python loader. New native/Python writes distinguish
+                // int8 explicitly, including scalar and attribute values.
+                if (ar.is_scalar(path)) {
+                    if (kind == "int8") {
+                        std::int8_t value; ar[path] >> value; return nb::cast(value);
+                    }
+                    bool value; ar[path] >> value; return nb::cast(value);
+                }
+                auto array = load_nd_array<std::int8_t>(ar, path, ar.extent(path));
+                return kind == "int8" ? array : array.attr("astype")("bool");
+            }
             if (ar.is_scalar(path)) {
                 TRY_SCALAR(std::string)
                 TRY_SCALAR(double)

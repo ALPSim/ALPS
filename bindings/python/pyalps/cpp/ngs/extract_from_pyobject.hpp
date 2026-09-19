@@ -18,6 +18,7 @@
     #include <nanobind/stl/string.h>
     #include <complex>
     #include <cstdint>
+    #include <limits>
     #include <stdexcept>
     #include <string>
     #include <vector>
@@ -48,7 +49,20 @@
             template<typename T> void extract_from_pyobject_py11(T & visitor, nb_::handle data) {
                 std::string dtype = data.ptr()->ob_type->tp_name;
                 if (dtype == "bool") visitor(nb_::cast<bool>(data));
-                else if (dtype == "int") visitor(nb_::cast<int>(data));
+                else if (dtype == "int") {
+                    int overflow = 0;
+                    long long value = PyLong_AsLongLongAndOverflow(data.ptr(), &overflow);
+                    if (PyErr_Occurred()) throw nb_::python_error();
+                    if (overflow) {
+                        unsigned long long wide = PyLong_AsUnsignedLongLong(data.ptr());
+                        if (PyErr_Occurred()) throw nb_::python_error();
+                        visitor(wide);
+                    } else if (value >= std::numeric_limits<int>::min()
+                               && value <= std::numeric_limits<int>::max())
+                        visitor(static_cast<int>(value));
+                    else
+                        visitor(value);
+                }
                 else if (dtype == "long") visitor(nb_::cast<long>(data));
                 else if (dtype == "float") visitor(nb_::cast<double>(data));
                 else if (dtype == "complex") visitor(nb_::cast<std::complex<double>>(data));
