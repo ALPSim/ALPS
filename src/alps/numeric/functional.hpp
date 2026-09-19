@@ -33,12 +33,14 @@ namespace alps {
         template <typename T, typename U, typename R> struct plus {
             R operator()(T const & x, U const & y) const {
                 using boost::numeric::operators::operator+;
+                using alps::numeric::operator+;
                 return x + y;
             }
         };
         template <typename T> struct plus<T, T, T> {
             T operator()(T const & x, T const & y) const {
                 using boost::numeric::operators::operator+;
+                using alps::numeric::operator+;
                 return x + y;
             }
         };
@@ -46,12 +48,14 @@ namespace alps {
         template <typename T, typename U, typename R> struct minus {
             R operator()(T const & x, U const & y) const {
                 using boost::numeric::operators::operator-;
+                using alps::numeric::operator-;
                 return x - y;
             }
         };
         template <typename T> struct minus<T, T, T> {
             T operator()(T const & x, T const & y) const {
                 using boost::numeric::operators::operator-;
+                using alps::numeric::operator-;
                 return x - y;
             }
         };

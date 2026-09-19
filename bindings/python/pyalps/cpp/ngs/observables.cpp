@@ -49,10 +49,9 @@ namespace nb = nanobind;
 #include <string>
 namespace {
 void mcobservables_load(alps::mcobservables & self, alps::hdf5::archive & ar, std::string const & path) {
-    std::string current = ar.get_context();
-    ar.set_context(path);
-    self.load(ar);
-    ar.set_context(current);
+    alps::hdf5::archive reader(ar);
+    reader.set_context(ar.complete_path(path));
+    self.load(reader);
 }
 void createRealObservable(alps::mcobservables & self, std::string const & name, std::uint32_t binnum) {
     self << alps::ngs::RealObservable(name, binnum);

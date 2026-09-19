@@ -26,15 +26,19 @@ namespace alps {
             return sstr.str();
         }
         void mcresults_load(alps::mcresults & self, alps::hdf5::archive & ar, std::string const & path) {
-            std::string current = ar.get_context();
-            ar.set_context(path);
-            self.load(ar);
-            ar.set_context(current);
+            alps::hdf5::archive reader(ar);
+            reader.set_context(ar.complete_path(path));
+            alps::mcresults loaded;
+            loaded.load(reader);
+            while (!self.empty())
+                pyalps::erase_map_item(self, self.begin()->first);
+            self.swap(loaded);
         }
     }
 }
 NB_MODULE(pyngsresults_c, m) {
     nb::class_<alps::mcresults>(m, "results")
+        .def(nb::init<>())
         .def("__len__",      [](alps::mcresults const & self) { return self.size(); })
         .def("__contains__", [](alps::mcresults const & self, std::string const & k) {
                                  return self.has(k);

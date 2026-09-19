@@ -120,7 +120,7 @@ NB_MODULE(pyngsresult_c, m) {
         .def("__repr__", &alps::detail::mcresult_print)
         .def("__deepcopy__",
              [](R const & self, nb::handle /*memo*/) {
-                 return R(self);
+                 return self.count() ? self + 0.0 : R();
              })
         .def("__abs__", static_cast<R(*)(R)>(&abs))
         .def("__pow__", static_cast<R(*)(R, double)>(&pow))
@@ -133,8 +133,14 @@ NB_MODULE(pyngsresult_c, m) {
         // mcresult's unary +/- operate on non-const self and return a
         // reference (not a new value). Wrap them in lambdas that
         // return a fresh copy, which is what Python's +obj/-obj expect.
-        .def("__pos__", [](R self) { return +self; })
-        .def("__neg__", [](R self) { return -self; })
+        .def("__pos__", [](R const & self) {
+            if (!self.count()) throw nb::value_error("result has no measurements");
+            return self + 0.0;
+        })
+        .def("__neg__", [](R const & self) {
+            if (!self.count()) throw nb::value_error("result has no measurements");
+            return self * -1.0;
+        })
         // In-place operators — return self by reference so the original
         // object is modified in place (Python's __i*__ semantics).
         .def("__iadd__", [](R & self, R const & o) -> R & { return self += o; }, nb::is_operator())
