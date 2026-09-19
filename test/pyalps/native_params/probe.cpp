@@ -3,6 +3,7 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/vector.h>
 #include <nanobind/stl/string.h>
+#include <nanobind/stl/complex.h>
 #include <exception>
 #include <thread>
 
@@ -10,6 +11,8 @@ namespace nb = nanobind;
 NB_MODULE(parameter_probe, module) {
     nb::module_::import_("pyalps.ngs");
     module.def("vector", [](alps::params const & p) { return p["value"].cast<std::vector<double>>(); });
+    module.def("complex_vector", [](alps::params const & p) { return p["value"].cast<std::vector<std::complex<double>>>(); });
+    module.def("integer_vector", [](alps::params const & p) { return p["value"].cast<std::vector<long long>>(); });
     module.def("integer", [](alps::params const & p) { return p["value"].cast<int>(); });
     module.def("wide_integer", [](alps::params const & p) { return p["value"].cast<long long>(); });
     module.def("clone", [](alps::params const & p) { return alps::params(p); });

@@ -98,6 +98,10 @@ namespace alps {
         struct ALPS_DECL paramvalue_source {
             virtual ~paramvalue_source();
             virtual paramvalue native_value() const = 0;
+            // A heterogeneous sequence must be converted element by element
+            // to the type requested by the consumer, without first forcing
+            // every element into one variant alternative.
+            virtual bool native_elements(std::vector<paramvalue> &) const { return false; }
             virtual void save(hdf5::archive &) const = 0;
             virtual void print(std::ostream &) const = 0;
             virtual void * object(char const * binding) const = 0;
@@ -108,6 +112,9 @@ namespace alps {
     template<typename T> T extract (detail::paramvalue const & arg);
 
     namespace detail {
+
+        template <typename T> struct paramvalue_vector : std::false_type {};
+        template <typename T> struct paramvalue_vector<std::vector<T>> : std::true_type {};
 
         template<class Archive> struct paramvalue_serializer 
             : public boost::static_visitor<> 
@@ -163,8 +170,19 @@ namespace alps {
                   return *this;
                 }
                 template<typename T> T cast() const {
-                    if (source_)
+                    if (source_) {
+                        if constexpr (paramvalue_vector<T>::value) {
+                            std::vector<paramvalue> elements;
+                            if (source_->native_elements(elements)) {
+                                T values;
+                                values.reserve(elements.size());
+                                for (auto const & element : elements)
+                                    values.push_back(element.cast<typename T::value_type>());
+                                return values;
+                            }
+                        }
                         return source_->native_value().cast<T>();
+                    }
                     paramvalue_reader< T > visitor;
                     boost::apply_visitor(visitor, *this);
                     return visitor.get_value();

@@ -540,6 +540,8 @@ def test_mpi4py_compatibility_surface():
 
 def test_mpi_finalization_ownership():
     pytest.importorskip("mpi4py")
+    if any(name in os.environ for name in ("OMPI_COMM_WORLD_SIZE", "PMI_RANK", "PMIX_RANK")):
+        pytest.skip("standalone MPI initialization subprocesses cannot inherit an active MPI rank")
 
     # Boost.MPI finalized only an environment its Python module initialized.
     # Importing pyalps.mpi after an existing mpi4py user must therefore leave

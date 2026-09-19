@@ -302,6 +302,21 @@ public:
             Py_DECREF(value_);
         }
     }
+    bool native_elements(std::vector<alps::detail::paramvalue> & elements) const override {
+        nb::gil_scoped_acquire gil;
+        nb::object items = nb::borrow<nb::object>(value_);
+        if (detail::is_numpy_array(items)) {
+            if (nb::cast<int>(items.attr("ndim")) != 1)
+                return false;
+            items = items.attr("tolist")();
+        }
+        if (!nb::isinstance<nb::list>(items) && !nb::isinstance<nb::tuple>(items))
+            return false;
+        elements.reserve(nb::len(items));
+        for (std::size_t i = 0; i < nb::len(items); ++i)
+            elements.push_back(python_paramvalue_source(items[i], key_).native_value());
+        return true;
+    }
     alps::detail::paramvalue native_value() const override {
         nb::gil_scoped_acquire gil;
         // Defer large integers to ALPS' checked text-to-target conversion.

@@ -42,6 +42,21 @@ else:
 parameters["value"] = np.array(2 ** 53 + 1, dtype=np.int64)
 assert native.wide_integer(parameters) == 2 ** 53 + 1
 
+# The legacy reader converted each list element to the requested C++ type.
+# A homogeneous intermediate vector rejects valid mixed inputs or loses an
+# imaginary component before a complex-valued consumer can read it.
+for value, real, complex_values, integers in (
+    ([True, 2, 3.5], [1., 2., 3.5], [1+0j, 2+0j, 3.5+0j], [1, 2, 3]),
+    ([1, "2.5", 3.5], [1., 2.5, 3.5], [1+0j, 2.5+0j, 3.5+0j], [1, 2, 3]),
+    ([True, 2+3j, "4"], [1., 2., 4.], [1+0j, 2+3j, 4+0j], [1, 2, 4]),
+    ((1, "2", 3), [1., 2., 3.], [1+0j, 2+0j, 3+0j], [1, 2, 3]),
+    ([2**53+1, 2], [float(2**53+1), 2.], [complex(2**53+1), 2+0j], [2**53+1, 2]),
+):
+    parameters["value"] = value
+    assert native.vector(parameters) == real
+    assert native.complex_vector(parameters) == complex_values
+    assert native.integer_vector(parameters) == integers
+
 with tempfile.TemporaryDirectory() as directory:
     with hdf5.archive(directory + "/parameters.h5", "w") as archive:
         archive["value"] = np.array([2.0, 4.0])
