@@ -118,11 +118,24 @@ jobs:
           CXX: ${{ matrix.plat.cxx_compiler }}-${{ matrix.plat.c_version }}
         run: |
           cmake -S $GITHUB_WORKSPACE -B build \
-                -DBoost_ROOT_DIR=`pwd`/boost_1_${{ matrix.plat.boost_version }}_0 \
+                -DBoost_SRC_DIR="$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" \
+                -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/build/install" \
                 -DCMAKE_CXX_STANDARD=${{ matrix.plat.cxx_standard || '17' }} \
                 -DCMAKE_CXX_FLAGS="-fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED"
           cmake --build build -j 2
           cmake --build build -j 2 -t test
+
+      # Compile the public exporter as a downstream project, rather than only
+      # checking that its compatibility header is present in the install.
+      - name: Smoke test downstream nanobind simulation extension
+        if: matrix.plat.os == 'ubuntu-24.04' && matrix.plat.c_compiler == 'gcc' && matrix.plat.c_version == 14 && matrix.plat.py_version == '3.14' && matrix.plat.boost_version == 91 && matrix.plat.cxx_standard == null
+        run: |
+          python -m pip install "nanobind>=2.10,<3"
+          cmake --install build
+          cmake -S tutorials/ngs/5_export_python -B downstream-export-build \
+                -DALPS_DIR="$PWD/build/install/share/alps" \
+                -DPython_EXECUTABLE="$(command -v python)"
+          cmake --build downstream-export-build -j 2
 
   macos-build:
     name: >-
@@ -170,7 +183,7 @@ jobs:
           cmake -S $GITHUB_WORKSPACE -B build \
                 -DCMAKE_C_COMPILER=${{ matrix.plat.c_compiler }} \
                 -DCMAKE_CXX_COMPILER=${{ matrix.plat.cxx_compiler }} \
-                -DBoost_ROOT_DIR=`pwd`/boost_1_${{ matrix.plat.boost_version }}_0 \
+                -DBoost_SRC_DIR="$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" \
                 -DCMAKE_CXX_STANDARD=17 \
                 -DCMAKE_CXX_FLAGS="${{ matrix.plat.cxx_stdlib }} -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED" \
                 -DPython_ROOT_DIR=`$(brew --prefix)/bin/python${{ matrix.plat.py_version }} -c "import sys, os; print(os.path.dirname(os.path.dirname(str(sys.executable))));"` \

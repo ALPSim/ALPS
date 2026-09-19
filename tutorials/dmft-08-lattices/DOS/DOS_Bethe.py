@@ -17,12 +17,12 @@ import matplotlib.pyplot as plt
 from numpy import zeros
 from math import pi, sqrt
 
-print "Description:"
-print "This program produces file containing the density of states for the Bethe lattice (in infinitely many dimensions) to be read as input by ALPS application DMFT (with option DOSFILE)."
-print "by Jakub Imriska\n"
-print "Enter the discretization of the density of states (recommended divisible by 2, for Simpson integration later):"
-BINS = eval(raw_input('--> '))
-print "  (the output file will have ",BINS+1," rows, at the ends there are halves of bins)"
+print("Description:")
+print("This program produces file containing the density of states for the Bethe lattice (in infinitely many dimensions) to be read as input by ALPS application DMFT (with option DOSFILE).")
+print("by Jakub Imriska\n")
+print("Enter the discretization of the density of states (recommended divisible by 2, for Simpson integration later):")
+BINS = eval(input('--> '))
+print("  (the output file will have ",BINS+1," rows, at the ends there are halves of bins)")
 
 # The DOS of Bethe lattice is semicircular, thus the normalized DOS is simply
 #   DOS(e) = 
@@ -65,11 +65,11 @@ def Integrate(n):
   sum1 = 2. * sum1 + 4. * (sum2+func(BINS-1,n)) + func(0,n) + func(BINS,n);
   return sum1 * halfstep / 3.
 
-print "Checks:"
+print("Checks:")
 norm = Integrate(0)
-print "  normalization = ", norm,"  (close to 1)"
-print "  first moment of the normalized DOS = ", Integrate(1)/norm,"  (exact: 0.0)"
-print "  second moment of the normalized DOS = ", Integrate(2)/norm,"  (exact: 1.0)"
+print("  normalization = ", norm,"  (close to 1)")
+print("  first moment of the normalized DOS = ", Integrate(1)/norm,"  (exact: 0.0)")
+print("  second moment of the normalized DOS = ", Integrate(2)/norm,"  (exact: 1.0)")
 
 plt.plot(energies[0:BINS+1],dos[0:BINS+1],'r-')      
 plt.xlabel('energy / t --->')
@@ -77,13 +77,13 @@ plt.ylabel('DOS  --->')
 plt.title('DOS of the Bethe lattice')
 plt.show()
 
-print "Do you wish to save the histogram [y/n] ?"
-answer = raw_input('--> ')
+print("Do you wish to save the histogram [y/n] ?")
+answer = input('--> ')
 
 if answer[0]=='y':
   # write into file
-  print "Set the name for the histogram output file:"
-  file_name = raw_input('--> ')
+  print("Set the name for the histogram output file:")
+  file_name = input('--> ')
   file_out = open(file_name,'w')
   for j in range(0, BINS+1):
     file_out.write(str(energies[j]))

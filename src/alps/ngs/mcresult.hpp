@@ -186,6 +186,7 @@ namespace alps {
         private:
 
             void construct(Observable const * obs);
+            detail::mcresult_impl_base * implementation() const;
 
             detail::mcresult_impl_base * impl_;
             static std::map<detail::mcresult_impl_base *, std::size_t> ref_cnt_;

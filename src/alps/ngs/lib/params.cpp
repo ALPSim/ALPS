@@ -38,32 +38,6 @@ namespace alps {
         }
     }
 
-    #ifdef ALPS_HAVE_PYTHON
-        params::params(boost::python::dict const & arg) {
-            boost::python::extract<boost::python::dict> dict(arg);
-            if (!dict.check())
-                throw std::invalid_argument("parameters can only be created from a dict" + ALPS_STACKTRACE);
-            const boost::python::list keys = dict().keys();
-            for (std::size_t i = 0; i < boost::python::len(keys); ++i) {
-                boost::python::object pyk = keys[i];
-                std::string k = boost::python::call_method<std::string>(pyk.ptr(), "__str__");
-                setter(k, dict().get(pyk));
-            }
-        }
-
-        // TODO: merge with params::params(boost::filesystem::path const & path);
-        params::params(boost::python::str const & arg) {
-            std::string path = boost::python::extract<std::string>(arg)();
-            boost::filesystem::ifstream ifs(path);
-            Parameters par(ifs);
-            for (Parameters::const_iterator it = par.begin(); it != par.end(); ++it) {
-                detail::paramvalue val(it->value());
-                setter(it->key(), val);
-            }
-        }
-
-    #endif
-
     std::size_t params::size() const {
         return keys.size();
     }
@@ -71,7 +45,7 @@ namespace alps {
     void params::erase(std::string const & key) {
         if (!defined(key))
             throw std::invalid_argument("the key " + key + " does not exists" + ALPS_STACKTRACE);
-        keys.erase(find(keys.begin(), keys.end(), key));
+        keys.erase(std::find(keys.begin(), keys.end(), key));
         values.erase(key);
     }
 
@@ -93,6 +67,11 @@ namespace alps {
 
     bool params::defined(std::string const & key) const {
         return values.find(key) != values.end();
+    }
+
+    detail::paramvalue const * params::find(std::string const & key) const {
+        std::map<std::string, detail::paramvalue>::const_iterator it = values.find(key);
+        return it == values.end() ? nullptr : &it->second;
     }
 
     params::iterator params::begin() {
@@ -117,14 +96,20 @@ namespace alps {
     }
 
     void params::load(hdf5::archive & ar) {
-        keys.clear();
-        values.clear();
+        params loaded;
         std::vector<std::string> list = ar.list_children(ar.get_context());
         for (std::vector<std::string>::const_iterator it = list.begin(); it != list.end(); ++it) {
             detail::paramvalue value;
-            ar[*it] >> value;
-            setter(*it, value);
+            if (value_reader_) {
+                hdf5::archive reader(ar);
+                reader.set_context(ar.complete_path(*it));
+                value = value_reader_(reader);
+            } else
+                ar[*it] >> value;
+            loaded.setter(*it, value);
         }
+        keys.swap(loaded.keys);
+        values.swap(loaded.values);
     }
 
     #ifdef ALPS_HAVE_MPI

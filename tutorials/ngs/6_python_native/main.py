@@ -26,7 +26,7 @@ if __name__ == '__main__':
         resume = True if 'c' in args else False
         outfile = positional[0]
     except (IndexError, getopt.GetoptError):
-        print 'usage: [-T timelimit] [-c] outputfile'
+        print('usage: [-T timelimit] [-c] outputfile')
         exit()
 
     sim = ising.sim({
@@ -40,7 +40,7 @@ if __name__ == '__main__':
         try:
             with hdf5.archive(outfile[0:outfile.rfind('.h5')] + '.clone0.h5', 'r') as ar:
                 sim.load(ar)
-        except ArchiveNotFound: pass
+        except hdf5.ArchiveNotFound: pass
 
     if limit == 0:
         sim.run(lambda: False)
@@ -52,8 +52,8 @@ if __name__ == '__main__':
         ar['/'] = sim
 
     results = sim.collectResults() # TODO: how should we do that?
-    for key, value in results.iteritems():
-        print "{}: {}".format(key, value)
+    for key, value in results.items():
+        print("{}: {}".format(key, value))
 
     with hdf5.archive(outfile, 'w') as ar:
         ar['/parameters'] = sim.parameters

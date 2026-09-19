@@ -39,7 +39,7 @@ data = pyalps.loadMeasurements(pyalps.getResultFiles())
 # print all measurements
 for s in pyalps.flatten(data):
   if len(s.x)==1:
-    print s.props['observable'], ' : ', s.y[0]
+    print(s.props['observable'], ' : ', s.y[0])
   else:
     for (x,y) in zip(s.x,s.y):
-      print  s.props['observable'], x, ' : ', y
+      print(s.props['observable'], x, ' : ', y)

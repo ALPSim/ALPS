@@ -133,29 +133,29 @@ namespace alps {
                     return alea::mcdata<T>::accurate_covariance(static_cast<alea::mcdata<T> const &>(arg));
                 }
                 #define ALPS_NGS_MCRESULT_IMPL_DERIVED_OPERATOR(NAME, OP, OP_ASSIGN)                                                           \
-                    template <typename U> typename boost::enable_if<                                                                           \
+                    template <typename U> typename boost::enable_if<typename boost::mpl::or_< \
                           typename boost::is_same<T, U >::type                                                                                 \
-                      /*, typename boost::is_same<typename alea::mcdata<T>::element_type, U>::type*/                                           \
-                    >::type NAME ## _assign (U const & rhs) {                                                                                  \
+                      , typename boost::is_same<typename alea::mcdata<T>::element_type, U>::type                                           \
+                    >::type>::type NAME ## _assign (U const & rhs) {                                                                                  \
                         static_cast<alea::mcdata<T> &>(*this) OP_ASSIGN rhs;                                                                   \
                     }                                                                                                                          \
                                                                                                                                                \
-                    template <typename U> typename boost::disable_if<                                                                          \
+                    template <typename U> typename boost::disable_if<typename boost::mpl::or_<                                                 \
                           typename boost::is_same<T, U >::type                                                                                 \
-                      /*, typename boost::is_same<typename alea::mcdata<T>::element_type, U>::type*/                                           \
-                    >::type NAME ## _assign (U const & rhs) {                                                                                  \
+                      , typename boost::is_same<typename alea::mcdata<T>::element_type, U>::type                                           \
+                    >::type>::type NAME ## _assign (U const & rhs) {                                                                                  \
                         throw std::runtime_error("Invalid cast" + ALPS_STACKTRACE);                                                            \
                     }                                                                                                                          \
                                                                                                                                                \
                     void NAME ## _assign_virtual (B const * rhs) {                                                                             \
                         static_cast<alea::mcdata<T> &>(*this)                                                                                  \
-                            OP_ASSIGN static_cast<alea::mcdata<T> const &>(*dynamic_cast<mcresult_impl_derived<B, T> const *>(rhs));           \
+                            OP_ASSIGN static_cast<alea::mcdata<T> const &>(dynamic_cast<mcresult_impl_derived<B, T> const &>(*rhs));           \
                     }                                                                                                                          \
                                                                                                                                                \
                                                                                                                                                \
                     template <typename U> typename boost::enable_if<typename boost::mpl::or_<                                                  \
                           typename boost::is_same<T, U>::type                                                                                  \
-                      /*, typename boost::is_same<typename alea::mcdata<T>::element_type, U>::type*/                                           \
+                      , typename boost::is_same<typename alea::mcdata<T>::element_type, U>::type                                           \
                     >::type, B *>::type NAME (U const & rhs) const {                                                                           \
                         return new mcresult_impl_derived<B, T>(                                                                                \
                             static_cast<alea::mcdata<T> const &>(*this) OP rhs                                                                 \
@@ -164,7 +164,7 @@ namespace alps {
                                                                                                                                                \
                     template <typename U> typename boost::disable_if<typename boost::mpl::or_<                                                 \
                           typename boost::is_same<T, U>::type                                                                                  \
-                      /* , typename boost::is_same<typename alea::mcdata<T>::element_type, U>::type*/                                          \
+                      , typename boost::is_same<typename alea::mcdata<T>::element_type, U>::type                                          \
                     >::type, B *>::type NAME (U const & rhs) const {                                                                           \
                         throw std::runtime_error("Invalid cast" + ALPS_STACKTRACE);                                                            \
                         return NULL;                                                                                                           \
@@ -262,7 +262,7 @@ namespace alps {
                 }
 
                 void load(hdf5::archive & ar) {
-                    alea::mcdata<T>::save(ar);
+                    alea::mcdata<T>::load(ar);
                 }
 
                 void output(std::ostream & os) const {

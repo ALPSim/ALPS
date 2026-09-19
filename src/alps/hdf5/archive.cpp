@@ -187,6 +187,30 @@ namespace alps {
                 return type_id;
             }
 
+            // bool and signed char historically share H5T_NATIVE_SCHAR.
+            // Mark new writes without changing the on-disk numeric type, so
+            // old ALPS readers and native typed reads remain compatible.
+            inline void mark_signed_byte(archive const & ar, std::string path,
+                                         std::string const & kind) {
+                std::size_t at = path.find_last_of('@');
+                if (at != std::string::npos) {
+                    std::string name = path.substr(at + 1);
+                    if (name.compare(0, 2, "__") == 0)
+                        return;
+                    path = path.substr(0, at) + "@__alps_type__:" + name;
+                } else
+                    path += "/@__alps_type__";
+                ar.write(path, kind);
+            }
+            template <typename T>
+            void mark_signed_byte(archive const &, std::string const &, T *) {}
+            inline void mark_signed_byte(archive const & ar, std::string const & path, bool *) {
+                mark_signed_byte(ar, path, std::string("bool"));
+            }
+            inline void mark_signed_byte(archive const & ar, std::string const & path, signed char *) {
+                mark_signed_byte(ar, path, std::string("int8"));
+            }
+
             hid_t open_attribute(archive const & ar, hid_t file_id, std::string path) {
                 if ((path = ar.complete_path(path)).find_last_of('@') == std::string::npos)
                     throw invalid_path("no attribute path: " + path + ALPS_STACKTRACE);
@@ -489,6 +513,7 @@ namespace alps {
                     ctx = ctx.substr(0, ctx.find_last_of('/'));
                     path = path.size() == 2 ? "" : path.substr(3);
                 }
+                if (ctx.empty()) ctx = "/";
                 return ctx + (ctx.size() == 1 || !path.size() ? "" : "/") + path;
             }
         }
@@ -716,14 +741,28 @@ namespace alps {
                 throw archive_closed("the archive is closed" + ALPS_STACKTRACE);
             if ((path = complete_path(path)).find_last_of('@') == std::string::npos)
                 throw invalid_path("no attribute path: " + path + ALPS_STACKTRACE);
-            // TODO: implement
-            throw std::logic_error("Not implemented!" + ALPS_STACKTRACE);
+            ALPS_HDF5_FAKE_THREADSAFETY
+            if (is_attribute(path)) {
+                auto at = path.find_last_of('@');
+                std::string parent = path.substr(0, at - 1);
+                if (parent.empty()) parent = "/";
+                detail::check_error(H5Adelete_by_name(context_->file_id_,
+                    parent.c_str(), path.substr(at + 1).c_str(), H5P_DEFAULT));
+            }
         }
     
         void archive::set_complex(std::string path) {
             if (context_ == NULL)
                 throw archive_closed("the archive is closed" + ALPS_STACKTRACE);
             ALPS_HDF5_FAKE_THREADSAFETY
+            // Resolve against the current context first, as every sibling here
+            // does. Without it a relative path -- in particular the empty path
+            // that paramvalue's saver uses, `ar[""] << value` under a context
+            // set to the parameter name -- produced the marker attribute path
+            // "/@__complex__", i.e. an attribute on the root group rather than
+            // on the dataset just written. Saving a complex parameter then
+            // failed with "HDF5 error: -1".
+            path = complete_path(path);
             if (path.find_last_of('@') != std::string::npos)
                 write(path.substr(0, path.find_last_of('@')) + "@__complex__:" + path.substr(path.find_last_of('@') + 1), true);
             else {
@@ -1024,6 +1063,7 @@ namespace alps {
                     else                                                                                                                                                \
                         detail::check_data(parent_id);                                                                                                                  \
                 }                                                                                                                                                       \
+                detail::mark_signed_byte(*this, path, static_cast<T *>(nullptr)); \
             }
         ALPS_NGS_FOREACH_NATIVE_HDF5_TYPE(ALPS_NGS_HDF5_WRITE_SCALAR)
         #undef ALPS_NGS_HDF5_WRITE_SCALAR
@@ -1212,6 +1252,7 @@ namespace alps {
                     else                                                                                                                                                \
                         detail::check_data(parent_id);                                                                                                                  \
                 }                                                                                                                                                       \
+                detail::mark_signed_byte(*this, path, static_cast<T *>(nullptr)); \
             }
         ALPS_NGS_FOREACH_NATIVE_HDF5_TYPE(ALPS_NGS_HDF5_WRITE_VECTOR)
         #undef ALPS_NGS_HDF5_WRITE_VECTOR
@@ -1304,6 +1345,10 @@ namespace alps {
         #undef ALPS_NGS_HDF5_IS_DATATYPE_IMPL_IMPL
 
         void archive::construct(std::string const & filename, std::size_t props) {
+            // Contexts must be absolute so restoring the root after nested
+            // save/load calls cannot resolve an empty string relative to the
+            // last dataset visited.
+            current_ = "/";
             ALPS_HDF5_LOCK_MUTEX
             detail::check_error(H5Eset_auto2(H5E_DEFAULT, NULL, NULL));
             if (props & COMPRESS) {
