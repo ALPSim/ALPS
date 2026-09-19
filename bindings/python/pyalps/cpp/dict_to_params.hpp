@@ -147,14 +147,14 @@ inline std::string string_value(nb::handle value) {
     return nb::cast<std::string>(decoded);
 }
 } // namespace detail
-// Store one Python value under `key`. paramvalue's only integral
+// Materialize a checked native snapshot. paramvalue's only integral
 // alternative is a 32-bit int and libalps static_casts wider integer
 // types down to it, so out-of-range integers are rejected loudly here
 // — for scalars and inside lists alike — rather than truncated or
 // silently widened to double. Sequence elements are classified before
 // conversion so integers round-trip as ints, mixed real numerics widen to
 // double, and complex values can never be coerced through a real-number path.
-inline void set_param_value(alps::params & p, std::string const & key, nb::handle value) {
+inline void set_native_param_value(alps::params & p, std::string const & key, nb::handle value) {
     if (value.is_none())
         throw nb::type_error(("cannot store None for parameter '" + key
             + "': params has no null type; delete the key instead").c_str());
@@ -167,14 +167,13 @@ inline void set_param_value(alps::params & p, std::string const & key, nb::handl
             throw nb::python_error();
         p[key] = (truth == 1);
     } else if (detail::is_numpy_array(value)) {
-        // params is deliberately Python-object-free.  Convert the NumPy
-        // value once at the boundary and store one of paramvalue's native
-        // scalar/vector alternatives.  ALPS parameters are one-dimensional;
-        // preserving an arbitrary N-D ndarray would require an object escape
-        // hatch or a new tensor type in the C++ API.
+        // A native consumer can request scalar/vector values. The original
+        // Python object (including higher-rank metadata) remains owned by
+        // python_paramvalue_source; only this snapshot has the native shape
+        // restrictions.
         std::size_t const ndim = nb::cast<std::size_t>(value.attr("ndim"));
         if (ndim == 0) {
-            set_param_value(p, key, value.attr("item")());
+            set_native_param_value(p, key, value.attr("item")());
             return;
         }
         if (ndim != 1)
@@ -199,7 +198,7 @@ inline void set_param_value(alps::params & p, std::string const & key, nb::handl
                     + kind + "'").c_str());
             return;
         }
-        set_param_value(p, key, items);
+        set_native_param_value(p, key, items);
         return;
     } else if (scalar_type == detail::scalar_kind::integer) {
         p[key] = detail::integer_value(value, key);
@@ -290,8 +289,101 @@ inline void set_param_value(alps::params & p, std::string const & key, nb::handl
               " numpy array, or a sequence of those scalar types)").c_str());
     }
 }
+// Keep interpreter ownership in the binding, not in libalps. Copies share the
+// provider (matching the original object-valued parameters), native consumers
+// request a checked snapshot, and Python lookups/saves see all mutations.
+class python_paramvalue_source final : public alps::detail::paramvalue_source {
+public:
+    python_paramvalue_source(nb::handle value, std::string key)
+        : value_(value.inc_ref().ptr()), key_(std::move(key)) {}
+    ~python_paramvalue_source() override {
+        if (Py_IsInitialized()) {
+            nb::gil_scoped_acquire gil;
+            Py_DECREF(value_);
+        }
+    }
+    alps::detail::paramvalue native_value() const override {
+        nb::gil_scoped_acquire gil;
+        // Defer large integers to ALPS' checked text-to-target conversion.
+        // Narrowing to the native variant's int first would corrupt values.
+        nb::object normalized = nb::borrow<nb::object>(value_);
+        if (detail::is_numpy_array(normalized)
+            && nb::cast<int>(normalized.attr("ndim")) == 0)
+            normalized = normalized.attr("item")();
+        nb::handle value(normalized);
+        if (!detail::is_numpy_array(value)
+            && detail::classify_scalar(value) == detail::scalar_kind::integer) {
+            nb::object integer = nb::steal<nb::object>(PyNumber_Index(value.ptr()));
+            if (!integer.is_valid()) throw nb::python_error();
+            int overflow = 0;
+            long long number = PyLong_AsLongLongAndOverflow(integer.ptr(), &overflow);
+            if (PyErr_Occurred()) throw nb::python_error();
+            if (overflow || number < std::numeric_limits<int>::min()
+                         || number > std::numeric_limits<int>::max())
+                return alps::detail::paramvalue(nb::cast<std::string>(nb::str(integer)));
+        }
+        nb::object items = nb::borrow<nb::object>(value);
+        if (detail::is_numpy_array(value) && nb::cast<int>(value.attr("ndim")) == 1)
+            items = value.attr("tolist")();
+        if (nb::isinstance<nb::list>(items) || nb::isinstance<nb::tuple>(items)) {
+            bool integral = nb::len(items) > 0, wide = false;
+            std::vector<std::string> integers;
+            for (std::size_t i = 0; i < nb::len(items); ++i) {
+                nb::object item = items[i];
+                if (detail::classify_scalar(item) != detail::scalar_kind::integer) {
+                    integral = false;
+                    break;
+                }
+                nb::object integer = nb::steal<nb::object>(PyNumber_Index(item.ptr()));
+                if (!integer.is_valid()) throw nb::python_error();
+                int overflow = 0;
+                long long number = PyLong_AsLongLongAndOverflow(integer.ptr(), &overflow);
+                if (PyErr_Occurred()) throw nb::python_error();
+                wide |= overflow || number < std::numeric_limits<int>::min()
+                                 || number > std::numeric_limits<int>::max();
+                integers.push_back(nb::cast<std::string>(nb::str(integer)));
+            }
+            if (integral && wide)
+                return alps::detail::paramvalue(integers);
+        }
+        alps::params snapshot;
+        set_native_param_value(snapshot, key_, value);
+        return *snapshot.find(key_);
+    }
+    void save(alps::hdf5::archive & ar) const override {
+        nb::gil_scoped_acquire gil;
+        nb::module_::import_("pyalps.cxx.pyngshdf5_c");
+        nb::cast(&ar, nb::rv_policy::reference).attr("__setitem__")("", nb::handle(value_));
+    }
+    void print(std::ostream & stream) const override {
+        nb::gil_scoped_acquire gil;
+        stream << nb::cast<std::string>(nb::str(nb::handle(value_)));
+    }
+    void * object(char const * binding) const override {
+        return std::strcmp(binding, "python") == 0 ? value_ : nullptr;
+    }
+private:
+    PyObject * value_;
+    std::string key_;
+};
+
+inline void set_param_value(alps::params & p, std::string const & key, nb::handle value) {
+    p[key] = alps::detail::paramvalue(std::make_shared<python_paramvalue_source>(value, key));
+}
+
+inline void enable_python_param_reader(alps::params & params) {
+    params.set_value_reader([](alps::hdf5::archive & ar) {
+        nb::gil_scoped_acquire gil;
+        nb::module_::import_("pyalps.cxx.pyngshdf5_c");
+        nb::object value = nb::cast(&ar, nb::rv_policy::reference).attr("__getitem__")("");
+        return alps::detail::paramvalue(
+            std::make_shared<python_paramvalue_source>(value, ar.get_context()));
+    });
+}
+
 inline alps::params params_from_dict(nb::dict const & values) {
     alps::params result;
+    enable_python_param_reader(result);
     for (auto item : values)
         set_param_value(result,
                         nb::cast<std::string>(nb::str(item.first)),

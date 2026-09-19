@@ -66,6 +66,34 @@ into neither of nanobind's special ABI modes:
   every such consumer to use the limited API too. Per-version wheels preserve
   ordinary downstream extension interoperability.
 
+## Compatibility and checkpoints
+
+Parameters created from Python retain their Python values. NumPy arrays keep
+array arithmetic, and changes through a list, array, or shared reference are
+visible to subsequent Python and C++ reads. A C++ consumer converts the current
+value to its requested scalar or one-dimensional vector type; incompatible
+metadata and out-of-range conversions raise an exception. Python metadata may
+use other shapes and containers supported by the HDF5 writer. Objects such as
+`None` can be held in memory but have no ALPS HDF5 representation.
+
+The C++ SDK remains independent of Python and nanobind. Python-owned values and
+their checkpoint decoder are supplied by the bindings. Rebuild downstream C++
+extensions against the SDK from the same source revision as the wheel; the
+parameter layout changed during this migration.
+
+New HDF5 writes distinguish Boolean and signed-byte values with an
+`__alps_type__` attribute while retaining the existing numeric storage format.
+Unmarked signed-byte data from old ALPS files retains the legacy Boolean
+interpretation. The old format cannot distinguish an unmarked `int8` array
+from a Boolean mask; use a typed reader such as h5py when an old dataset is
+known to contain signed bytes.
+
+`pyalps.mpi` receives Python objects using matched probes, so asynchronous
+receives and the wait/test helpers can handle messages larger than mpi4py's
+default object receive buffer. This adapter exchanges mpi4py messages;
+Boost.MPI's C++ serialization protocol and skeleton/content API are not wire
+compatible. Communicating processes must use the same protocol.
+
 ## Versioning
 
 pyalps does not carry a version of its own. The numeric version is read from

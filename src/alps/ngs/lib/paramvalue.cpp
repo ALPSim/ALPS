@@ -21,6 +21,8 @@
 namespace alps {
     namespace detail {
 
+        paramvalue_source::~paramvalue_source() = default;
+
         struct paramvalue_saver: public boost::static_visitor<> {
 
             paramvalue_saver(hdf5::archive & a)
@@ -50,9 +52,7 @@ namespace alps {
 
         #define ALPS_NGS_PARAMVALUE_OPERATOR_T_IMPL(T)                                \
             paramvalue::operator T () const {                                        \
-                paramvalue_reader< T > visitor;                                        \
-                boost::apply_visitor(visitor, *this);                               \
-                return visitor.get_value();                                            \
+                return cast<T>();                                                   \
             }
         ALPS_NGS_FOREACH_PARAMETERVALUE_TYPE(ALPS_NGS_PARAMVALUE_OPERATOR_T_IMPL)
         #undef ALPS_NGS_PARAMVALUE_OPERATOR_T_IMPL
@@ -60,12 +60,17 @@ namespace alps {
         #define ALPS_NGS_PARAMVALUE_OPERATOR_EQ_IMPL(T)                                \
             paramvalue & paramvalue::operator=( T const & arg) {                    \
                 paramvalue_base::operator=(arg);                                    \
+                source_.reset();                                                   \
                 return *this;                                                        \
             }
         ALPS_NGS_FOREACH_PARAMETERVALUE_TYPE(ALPS_NGS_PARAMVALUE_OPERATOR_EQ_IMPL)
         #undef ALPS_NGS_PARAMVALUE_OPERATOR_EQ_IMPL
 
         void paramvalue::save(hdf5::archive & ar) const {
+            if (source_) {
+                source_->save(ar);
+                return;
+            }
             boost::apply_visitor(
                 paramvalue_saver(ar), static_cast<paramvalue_base const &>(*this)
             );
@@ -113,6 +118,10 @@ namespace alps {
         }
 
         std::ostream & operator<<(std::ostream & os, paramvalue const & arg) {
+            if (arg.source()) {
+                arg.source()->print(os);
+                return os;
+            }
             paramvalue_ostream visitor(os);
             boost::apply_visitor(visitor, arg);
             return os;

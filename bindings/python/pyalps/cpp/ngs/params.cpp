@@ -29,23 +29,44 @@ struct paramvalue_to_py_visitor : boost::static_visitor<nb::object> {
     nb::object operator()(T const & value) const {
         return nb::cast(value);
     }
+    template <typename T>
+    nb::object operator()(std::vector<T> const & value) const {
+        // An empty sequence has no elements from which NumPy can infer its
+        // type. Preserve the native family (especially Boolean masks).
+        if constexpr (std::is_same<T, std::string>::value)
+            return alps::python::numpy_module().attr("array")(
+                nb::cast(value), nb::arg("dtype") = "str");
+        else
+            return alps::python::numpy_module().attr("array")(
+                nb::cast(value), nb::arg("dtype") = alps::python::numpy_dtype<T>::name);
+    }
 };
 nb::object paramvalue_to_py(alps::detail::paramvalue const & pv) {
+    if (pv.source()) {
+        auto * value = static_cast<PyObject *>(pv.source()->object("python"));
+        if (value)
+            return nb::borrow<nb::object>(value);
+        return paramvalue_to_py(pv.source()->native_value());
+    }
     return boost::apply_visitor(
         paramvalue_to_py_visitor(),
         static_cast<alps::detail::paramvalue_base const &>(pv));
 }
-// Deposit a native C++ value from a Python object into the paramvalue
-// via paramproxy's templated operator= — shared ladder in
-// ../dict_to_params.hpp so params, mcbase and the application modules
-// all ingest values identically.
+// Retain the value through the shared binding-owned provider.
 void params_setitem(alps::params & self, nb::object const & key_obj, nb::handle value) {
     pyalps::set_param_value(self, nb::cast<std::string>(nb::str(key_obj)), value);
 }
 nb::object params_getitem(alps::params & self, nb::object const & key_obj) {
     std::string key = nb::cast<std::string>(nb::str(key_obj));
     alps::detail::paramvalue const * value = self.find(key);
-    return value ? paramvalue_to_py(*value) : nb::none();
+    if (!value)
+        return nb::none();
+    nb::object result = paramvalue_to_py(*value);
+    // Materialize native checkpoint values once. Retain the object so later
+    // mutations survive both subsequent Python lookups and C++ conversions.
+    if (!value->source())
+        pyalps::set_param_value(self, key, result);
+    return result;
 }
 void params_delitem(alps::params & self, nb::object const & key_obj) {
     self.erase(nb::cast<std::string>(nb::str(key_obj)));
@@ -57,24 +78,32 @@ nb::object value_or_default(alps::params & self, nb::object const & key, nb::obj
     return params_contains(self, key) ? params_getitem(self, key) : dflt;
 }
 void params_load(alps::params & self, alps::hdf5::archive & ar, std::string const & path) {
-    std::string current = ar.get_context();
-    ar.set_context(path);
-    self.load(ar);
-    ar.set_context(current);
+    alps::hdf5::archive reader(ar);
+    reader.set_context(ar.complete_path(path));
+    pyalps::enable_python_param_reader(self);
+    self.load(reader);
 }
 std::string params_print(alps::params & self) {
     std::stringstream ss;
     ss << self;
     return ss.str();
 }
-// deepcopy support — nanobind passes (self, memo); memo unused.
-alps::params params_deepcopy(alps::params const & self, nb::handle /*memo*/) {
-    return alps::params(self);
+// deepcopy support, including shared objects in the caller's memo.
+alps::params params_deepcopy(alps::params & self, nb::handle memo) {
+    nb::dict values;
+    for (auto const & entry : self) {
+        nb::str key(entry.first.c_str());
+        values[key] = params_getitem(self, key);
+    }
+    return pyalps::params_from_dict(nb::cast<nb::dict>(
+        nb::module_::import_("copy").attr("deepcopy")(values, memo)));
 }
 }  // namespace
 NB_MODULE(pyngsparams_c, m) {
     nb::class_<alps::params>(m, "params")
-        .def(nb::init<>())
+        .def("__init__", [](alps::params * self) {
+            new (self) alps::params(pyalps::params_from_dict(nb::dict()));
+        })
         .def("__init__",
              [](alps::params * self, nb::dict const & d) {
                  new (self) alps::params(pyalps::params_from_dict(d));
@@ -85,15 +114,20 @@ NB_MODULE(pyngsparams_c, m) {
         .def("__init__",
              [](alps::params * self, std::string const & filename) {
                  new (self) alps::params(boost::filesystem::path(filename));
+                 pyalps::enable_python_param_reader(*self);
              },
              nb::arg("filename"))
-        .def(nb::init<alps::hdf5::archive, std::string const &>(),
+        .def("__init__", [](alps::params * self, alps::hdf5::archive & ar, std::string const & path) {
+                 alps::params loaded;
+                 params_load(loaded, ar, path);
+                 new (self) alps::params(loaded);
+             },
              nb::arg("archive"),
              nb::arg("path") = std::string("/parameters"))
         .def("__len__",      [](alps::params const & self) { return self.size(); })
         .def("__deepcopy__", &params_deepcopy)
         .def("__getitem__",  &params_getitem)
-        .def("__setitem__",  &params_setitem)
+        .def("__setitem__",  &params_setitem, nb::arg("key"), nb::arg("value").none())
         .def("__delitem__",  &params_delitem)
         .def("__contains__", &params_contains)
         .def("__iter__",     [](alps::params & self) {

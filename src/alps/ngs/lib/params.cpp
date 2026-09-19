@@ -96,14 +96,20 @@ namespace alps {
     }
 
     void params::load(hdf5::archive & ar) {
-        keys.clear();
-        values.clear();
+        params loaded;
         std::vector<std::string> list = ar.list_children(ar.get_context());
         for (std::vector<std::string>::const_iterator it = list.begin(); it != list.end(); ++it) {
             detail::paramvalue value;
-            ar[*it] >> value;
-            setter(*it, value);
+            if (value_reader_) {
+                hdf5::archive reader(ar);
+                reader.set_context(ar.complete_path(*it));
+                value = value_reader_(reader);
+            } else
+                ar[*it] >> value;
+            loaded.setter(*it, value);
         }
+        keys.swap(loaded.keys);
+        values.swap(loaded.values);
     }
 
     #ifdef ALPS_HAVE_MPI

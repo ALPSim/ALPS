@@ -32,6 +32,8 @@
 #include <complex>
 #include <ostream>
 #include <stdexcept>
+#include <memory>
+#include <utility>
 
 #define ALPS_NGS_FOREACH_PARAMETERVALUE_ADDABLE_TYPE(CALLBACK)                      \
     CALLBACK(double)                                                                \
@@ -89,6 +91,18 @@ namespace alps {
 
         class paramvalue;
 
+        // Optional value provider for language bindings. No interpreter
+        // headers or runtime are required by the native library. A binding
+        // can retain a mutable value and supply a checked native snapshot
+        // only when a C++ consumer actually requests it.
+        struct ALPS_DECL paramvalue_source {
+            virtual ~paramvalue_source();
+            virtual paramvalue native_value() const = 0;
+            virtual void save(hdf5::archive &) const = 0;
+            virtual void print(std::ostream &) const = 0;
+            virtual void * object(char const * binding) const = 0;
+        };
+
     }
 
     template<typename T> T extract (detail::paramvalue const & arg);
@@ -134,14 +148,23 @@ namespace alps {
 
                 paramvalue(paramvalue const & v)
                     : paramvalue_base(static_cast<paramvalue_base const &>(v))
+                    , source_(v.source_)
                 {}
+
+                explicit paramvalue(std::shared_ptr<paramvalue_source> source)
+                    : source_(std::move(source)) {}
+
+                std::shared_ptr<paramvalue_source> const & source() const { return source_; }
 
                 paramvalue const& operator=(paramvalue const& x)
                 {
                   static_cast<paramvalue_base&>(*this) = static_cast<paramvalue_base const&>(x);
+                  source_ = x.source_;
                   return *this;
                 }
                 template<typename T> T cast() const {
+                    if (source_)
+                        return source_->native_value().cast<T>();
                     paramvalue_reader< T > visitor;
                     boost::apply_visitor(visitor, *this);
                     return visitor.get_value();
@@ -189,6 +212,8 @@ namespace alps {
                 void load(hdf5::archive &);
                 
             private:
+
+                std::shared_ptr<paramvalue_source> source_;
             
                 friend class boost::serialization::access;
 
@@ -196,7 +221,11 @@ namespace alps {
                     Archive & ar, const unsigned int version
                 ) const {
                     paramvalue_serializer<Archive> visitor(ar);
-                    boost::apply_visitor(visitor, *this);
+                    if (source_) {
+                        paramvalue native = source_->native_value();
+                        boost::apply_visitor(visitor, native);
+                    } else
+                        boost::apply_visitor(visitor, *this);
                 }
 
                 template<class Archive> void load(
@@ -225,9 +254,7 @@ namespace alps {
         ALPS_DECL std::ostream & operator<<(std::ostream & os, paramvalue const & arg);
 
         template<typename T> T extract_impl (paramvalue const & arg, T) {
-            paramvalue_reader< T > visitor;
-            boost::apply_visitor(visitor, arg);
-            return visitor.get_value();
+            return arg.cast<T>();
         }
     }
 
@@ -238,9 +265,7 @@ namespace alps {
     };
 
     template<typename T> T extract (detail::paramvalue const & arg) {
-        detail::paramvalue_reader< T > visitor;
-        boost::apply_visitor(visitor, arg);
-        return visitor.get_value();
+        return arg.cast<T>();
     }
 }
 

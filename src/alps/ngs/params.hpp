@@ -32,6 +32,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <functional>
 
 namespace alps {
 
@@ -53,6 +54,7 @@ namespace alps {
             params(params const & arg)
                 : keys(arg.keys)
                 , values(arg.values)
+                , value_reader_(arg.value_reader_)
             {}
 
             params(hdf5::archive ar, std::string const & path = "/parameters");
@@ -84,6 +86,11 @@ namespace alps {
 
             void load(hdf5::archive &);
 
+            // A binding-owned decoder, preserved when parameters are copied
+            // into a native simulation. Native-only parameters need none.
+            typedef std::function<detail::paramvalue(hdf5::archive &)> value_reader;
+            void set_value_reader(value_reader reader) { value_reader_ = std::move(reader); }
+
             #ifdef ALPS_HAVE_MPI
                 void broadcast(boost::mpi::communicator const &, int = 0);
             #endif
@@ -104,6 +111,7 @@ namespace alps {
 
             std::vector<std::string> keys;
             std::map<std::string, detail::paramvalue> values;
+            value_reader value_reader_;
     };
 
     ALPS_DECL std::ostream & operator<<(std::ostream & os, params const & arg);
