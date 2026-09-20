@@ -14,13 +14,14 @@
 #ifndef PARAPACK_FILELOCK_H
 #define PARAPACK_FILELOCK_H
 
+#include <alps/export.h>
 #include <alps/config.h>
 
 #include <boost/filesystem/path.hpp>
 
 namespace alps {
 
-class filelock {
+class ALPS_DECL filelock {
 public:
   filelock();
   filelock(boost::filesystem::path const& file, bool lock_now = false, int wait = -1,

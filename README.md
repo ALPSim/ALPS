@@ -12,6 +12,9 @@ The ALPS software package aims to provide a set of well tested, robust, and stan
 
 For current binary, source, and Spack installation instructions, see the [ALPS installation website](https://alps.comp-phys.org/install/).
 
+For source builds, including MSVC/vcpkg presets for Windows x64 and ARM64 and the
+exported CMake SDK target, see [the development setup](CONTRIBUTING.md#getting-started-with-the-code).
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development and contribution guidance.

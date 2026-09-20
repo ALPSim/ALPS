@@ -81,12 +81,12 @@ public:
 
   uint32_t version_id() const { return version;}
 
-  ALPS_DUMMY_VOID reset(bool forthermalization) { obs_.reset(forthermalization); ALPS_RETURN_VOID; }
+  void reset(bool forthermalization) { obs_.reset(forthermalization);  }
 
-  ALPS_DUMMY_VOID output(std::ostream& out) const
+  void output(std::ostream& out) const
   {
     output_helper<typename alps::is_scalar<value_type>::type>::output(*this,out);
-    obs_.output(out); ALPS_RETURN_VOID;
+    obs_.output(out);
   }
   void output_scalar(std::ostream&) const;
   void output_vector(std::ostream&) const;
@@ -377,9 +377,7 @@ void AbstractSignedObservable<OBS,SIGN>::output_vector(std::ostream& out) const
   }
 }
 
-#ifndef BOOST_NO_INCLASS_MEMBER_INITIALIZATION
 template <class OBS, class SIGN> const int AbstractSignedObservable<OBS,SIGN>::version;
-#endif
 
 }
 

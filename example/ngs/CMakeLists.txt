@@ -19,6 +19,5 @@
 
 if (ALPS_BUILD_EXAMPLES)
 
-    add_subdirectory(alea)
 
 endif (ALPS_BUILD_EXAMPLES)

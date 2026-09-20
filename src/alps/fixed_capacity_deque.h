@@ -127,10 +127,8 @@ struct deque_iterator
 
 }; // deque_iterator
 
-#ifndef BOOST_NO_INCLASS_MEMBER_INITIALIZATION
 template<class T, std::size_t N, class Ref, class Ptr>
 const std::size_t deque_iterator<T,N,Ref,Ptr>::M;
-#endif
 
 
 } // namespace fixed_capacity_deque
@@ -155,15 +153,9 @@ public:
                                                    iterator;
   typedef fixed_capacity::deque_iterator<T, N, const T&, const T*>
                                                    const_iterator;
-#if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION) && \
-  !defined(BOOST_MSVC_STD_ITERATOR)
   typedef std::reverse_iterator<iterator>          reverse_iterator;
   typedef std::reverse_iterator<const_iterator>    const_reverse_iterator;
-#else
-  // workaround for broken reverse_iterator implementations
-  typedef std::reverse_iterator<iterator, T>       reverse_iterator;
-  typedef std::reverse_iterator<const_iterator, T> const_reverse_iterator;
-#endif
+
     
   BOOST_STATIC_CONSTANT(size_type, static_max_size = N);
     
@@ -449,12 +441,10 @@ private:
 
 }; // fixed_capacity_deque
 
-#ifndef BOOST_NO_INCLASS_MEMBER_INITIALIZATION
 template<class T, std::size_t N, class CheckingPolicy>
 const std::size_t fixed_capacity_deque<T,N,CheckingPolicy>::M;
 template<class T, std::size_t N, class CheckingPolicy>
 const std::size_t fixed_capacity_deque<T,N,CheckingPolicy>::static_max_size;
-#endif
 
 template<class T, std::size_t N>
 inline bool operator==(const fixed_capacity_deque<T, N>& x,

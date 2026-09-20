@@ -583,7 +583,7 @@ namespace alps {
                 std::vector<boost::uint_t<8>::fast> distances(distance_to_boarder.size(), num_vertices(G));
                 for (typename std::vector<typename boost::graph_traits<Graph>::vertex_descriptor>::const_iterator it = pinning.begin(); it != pinning.end(); ++it)
                     for(std::size_t d = 0; d < distance_to_boarder.size(); ++d)
-                        distances[d] = std::min(distances[d], distance_to_boarder[d][*it]);
+                        distances[d] = (std::min)(distances[d], distance_to_boarder[d][*it]);
                 std::vector<boost::uint16_t> lattice_pinning(pinning.size());
                 for (typename std::vector<typename boost::graph_traits<Graph>::vertex_descriptor>::const_iterator it = pinning.begin(); it != pinning.end(); ++it) {
                     lattice_pinning[it - pinning.begin()] = *it % unit_cell_size;
@@ -610,8 +610,8 @@ namespace alps {
 
                 typename boost::graph_traits<Subgraph>::edge_iterator s_ei, s_ee;
                 for (boost::tie(s_ei, s_ee) = edges(S); s_ei != s_ee; ++s_ei) {
-                    std::size_t v1 = std::min(lattice_pinning[source(*s_ei, S)], lattice_pinning[target(*s_ei, S)]);
-                    std::size_t v2 = std::max(lattice_pinning[source(*s_ei, S)], lattice_pinning[target(*s_ei, S)]);
+                    std::size_t v1 = (std::min)(lattice_pinning[source(*s_ei, S)], lattice_pinning[target(*s_ei, S)]);
+                    std::size_t v2 = (std::max)(lattice_pinning[source(*s_ei, S)], lattice_pinning[target(*s_ei, S)]);
                     std::size_t index = v1 * num_vertices(S) - (v1 - 1) * v1 / 2 + v2 - v1;
                     (*embedding_generic.edges)[index >> 6] |= 0x01 << (index & 0x3F);
                 }
@@ -650,10 +650,10 @@ namespace alps {
                             } };
                             boost::array<boost::uint_t<8>::fast, 2> max_dist_to_boarder = { { 0, 0} };
                             for (boost::uint_t<8>::fast i = 0; i < it_generic->pinning.size(); ++i) {
-                                min_dist_to_boarder[0] = std::min(min_dist_to_boarder[0], distance_to_boarder[0][it_generic->pinning[i]]);
-                                min_dist_to_boarder[1] = std::min(min_dist_to_boarder[1], distance_to_boarder[1][it_generic->pinning[i]]);
-                                max_dist_to_boarder[0] = std::max(max_dist_to_boarder[0], distance_to_boarder[0][it_generic->pinning[i]]);
-                                max_dist_to_boarder[1] = std::max(max_dist_to_boarder[1], distance_to_boarder[1][it_generic->pinning[i]]);
+                                min_dist_to_boarder[0] = (std::min)(min_dist_to_boarder[0], distance_to_boarder[0][it_generic->pinning[i]]);
+                                min_dist_to_boarder[1] = (std::min)(min_dist_to_boarder[1], distance_to_boarder[1][it_generic->pinning[i]]);
+                                max_dist_to_boarder[0] = (std::max)(max_dist_to_boarder[0], distance_to_boarder[0][it_generic->pinning[i]]);
+                                max_dist_to_boarder[1] = (std::max)(max_dist_to_boarder[1], distance_to_boarder[1][it_generic->pinning[i]]);
                             }
                             
                             for (std::size_t i = min_dist_to_boarder[0]; i <= max_dist_to_boarder[0]; ++i) {
@@ -679,10 +679,10 @@ namespace alps {
                             } };
                             boost::array<boost::uint_t<8>::fast, 2> max_dist_to_boarder = { { 0, 0} };
                             for (boost::uint_t<8>::fast i = 0; i < pinning.size(); ++i) {
-                                min_dist_to_boarder[0] = std::min(min_dist_to_boarder[0], distance_to_boarder[0][pinning[i]]);
-                                min_dist_to_boarder[1] = std::min(min_dist_to_boarder[1], distance_to_boarder[1][pinning[i]]);
-                                max_dist_to_boarder[0] = std::max(max_dist_to_boarder[0], distance_to_boarder[0][pinning[i]]);
-                                max_dist_to_boarder[1] = std::max(max_dist_to_boarder[1], distance_to_boarder[1][pinning[i]]);
+                                min_dist_to_boarder[0] = (std::min)(min_dist_to_boarder[0], distance_to_boarder[0][pinning[i]]);
+                                min_dist_to_boarder[1] = (std::min)(min_dist_to_boarder[1], distance_to_boarder[1][pinning[i]]);
+                                max_dist_to_boarder[0] = (std::max)(max_dist_to_boarder[0], distance_to_boarder[0][pinning[i]]);
+                                max_dist_to_boarder[1] = (std::max)(max_dist_to_boarder[1], distance_to_boarder[1][pinning[i]]);
                             }
                             
                             for (std::size_t i = min_dist_to_boarder[0]; i <= max_dist_to_boarder[0]; ++i) {
@@ -719,10 +719,10 @@ namespace alps {
                             } };
                             boost::array<boost::uint_t<8>::fast, 2> max_dist_to_boarder = { { 0, 0} };
                             for (boost::uint_t<8>::fast i = 0; i < it_2d->pinning.size(); ++i) {
-                                min_dist_to_boarder[0] = std::min(min_dist_to_boarder[0], distance_to_boarder[0][it_2d->pinning[i]]);
-                                min_dist_to_boarder[1] = std::min(min_dist_to_boarder[1], distance_to_boarder[1][it_2d->pinning[i]]);
-                                max_dist_to_boarder[0] = std::max(max_dist_to_boarder[0], distance_to_boarder[0][it_2d->pinning[i]]);
-                                max_dist_to_boarder[1] = std::max(max_dist_to_boarder[1], distance_to_boarder[1][it_2d->pinning[i]]);
+                                min_dist_to_boarder[0] = (std::min)(min_dist_to_boarder[0], distance_to_boarder[0][it_2d->pinning[i]]);
+                                min_dist_to_boarder[1] = (std::min)(min_dist_to_boarder[1], distance_to_boarder[1][it_2d->pinning[i]]);
+                                max_dist_to_boarder[0] = (std::max)(max_dist_to_boarder[0], distance_to_boarder[0][it_2d->pinning[i]]);
+                                max_dist_to_boarder[1] = (std::max)(max_dist_to_boarder[1], distance_to_boarder[1][it_2d->pinning[i]]);
                             }
                             
                             for (std::size_t i = min_dist_to_boarder[0]; i <= max_dist_to_boarder[0]; ++i) {
@@ -750,10 +750,10 @@ namespace alps {
                             } };
                             boost::array<boost::uint_t<8>::fast, 2> max_dist_to_boarder = { { 0, 0} };
                             for (boost::uint_t<8>::fast i = 0; i < pinning.size(); ++i) {
-                                min_dist_to_boarder[0] = std::min(min_dist_to_boarder[0], distance_to_boarder[0][pinning[i]]);
-                                min_dist_to_boarder[1] = std::min(min_dist_to_boarder[1], distance_to_boarder[1][pinning[i]]);
-                                max_dist_to_boarder[0] = std::max(max_dist_to_boarder[0], distance_to_boarder[0][pinning[i]]);
-                                max_dist_to_boarder[1] = std::max(max_dist_to_boarder[1], distance_to_boarder[1][pinning[i]]);
+                                min_dist_to_boarder[0] = (std::min)(min_dist_to_boarder[0], distance_to_boarder[0][pinning[i]]);
+                                min_dist_to_boarder[1] = (std::min)(min_dist_to_boarder[1], distance_to_boarder[1][pinning[i]]);
+                                max_dist_to_boarder[0] = (std::max)(max_dist_to_boarder[0], distance_to_boarder[0][pinning[i]]);
+                                max_dist_to_boarder[1] = (std::max)(max_dist_to_boarder[1], distance_to_boarder[1][pinning[i]]);
                             }
                             
                             for (std::size_t i = min_dist_to_boarder[0]; i <= max_dist_to_boarder[0]; ++i) {

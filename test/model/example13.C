@@ -13,6 +13,7 @@
 
 /* $Id$ */
 
+#include <boost/math/constants/constants.hpp>
 #include <alps/numeric/round.hpp>
 #include <alps/model.h>
 #include <alps/model/blochbasisstates.h>
@@ -33,7 +34,7 @@ int main()
     ham.set_parameters(parms);
     alps::basis_states_descriptor<short> basis(ham.basis(),lattices.graph());
     for (int ik=0;ik<lattices.num_sites();++ik) {
-      std::vector<double> k(1,2.*ik*M_PI/double(lattices.num_sites()));
+      std::vector<double> k(1,2.*ik*boost::math::constants::pi<double>()/double(lattices.num_sites()));
       std::vector<std::pair<std::complex<double>,std::vector<std::size_t> > > trans = lattices.translations(k);
       for (int i=0;i<trans.size();++i) {
         std::cout << "Translation " << i << " with phase "

@@ -1,3 +1,5 @@
+#include <chrono>
+#include <thread>
 /*****************************************************************************
 *
 * ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -15,26 +17,14 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/throw_exception.hpp>
 #include <iostream>
-#include <fcntl.h> // for open()
-#include <sys/stat.h>
+#include <cstdio>
+#include <cerrno>
+#include <system_error>
 #include <stdexcept>
-
-#include <alps/config.h>
-#if defined(ALPS_HAVE_UNISTD_H)
-# include <unistd.h>
-#elif defined(ALPS_HAVE_WINDOWS_H)
-# include <windows.h>
-#endif
-#if defined(ALPS_HAVE_SYS_STAT_H)
-# include <sys/stat.h>
-#endif
-#if defined(ALPS_HAVE_WINDOWS_H)
-# include <io.h>
-#endif
 
 namespace alps {
 
-filelock::filelock() : is_locking_(false) {}
+filelock::filelock() : auto_release_(true), is_locking_(false) {}
 
 filelock::filelock(boost::filesystem::path const& file, bool lock_now, int wait,
   bool auto_release) : auto_release_(auto_release), is_locking_(false) {
@@ -66,31 +56,16 @@ void filelock::lock(int wait) {
   }
   for (int i = 0; wait < 0 || i < wait+1; ++i) {
     if (i != 0) {
-      std::cerr << "Waring: file \"" << file_ << "\" is locked.  Still trying.\n";
-#if defined(ALPS_HAVE_UNISTD_H)
-      sleep(1);    // sleep 1 Sec
-#elif defined(ALPS_HAVE_WINDOWS_H)
-      Sleep(1000); // sleep 1000 mSec
-#else
-# error "sleep not found"
-#endif
-      //sleep(1);
+      std::cerr << "Warning: file \"" << file_ << "\" is locked.  Still trying.\n";
+      std::this_thread::sleep_for(std::chrono::seconds(1));
     }
-#if defined(ALPS_HAVE_WINDOWS_H)
-    int fd = _open(lock_.string().c_str(), O_WRONLY | O_CREAT | O_EXCL , _S_IWRITE);
-#else
-    int fd = open(lock_.string().c_str(), O_WRONLY | O_CREAT | O_EXCL , S_IWRITE);
-#endif
-
-    if (fd > 0) {
+    if (auto* stream = std::fopen(lock_.string().c_str(), "wx")) {
+      std::fclose(stream);
       is_locking_ = true;
-#if defined(ALPS_HAVE_WINDOWS_H)
-      _close(fd);
-#else
-      close(fd);
-#endif	  
       break;
     }
+    if (errno != EEXIST)
+      throw std::system_error(errno, std::generic_category(), "create lock file");
   }
   if (!is_locking_) {
     std::cerr << "Error: lock for file \"" << file_ << "\" failed.\n";

@@ -65,9 +65,7 @@ template <class T> struct VectorHelper<T,true> {
 } // end namespace alps
 
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 template <class T, class Allocator>
 inline alps::IDump& operator >> (alps::IDump& dump,
@@ -118,8 +116,6 @@ inline alps::ODump& operator << (alps::ODump& dump,
   return dump;
 }          
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // OSIRIS_STD_VECTOR_H

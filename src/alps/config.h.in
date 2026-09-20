@@ -26,7 +26,6 @@
 //
 
 // Define to 1 if you have rpc/rpc.h and rpc/xdr.h
-#cmakedefine ALPS_HAVE_RPC_XDR_H
 
 // Define to 1 if you have the <stdarg.h> header file.
 #cmakedefine ALPS_HAVE_STDARG_H
@@ -45,12 +44,6 @@
 
 // Define to 1 if you have the <windows.h> header file.
 #cmakedefine ALPS_HAVE_WINDOWS_H
-
-// If defined, the new ngs alea will be used, instead of the old alea
-#cmakedefine ALPS_NGS_USE_NEW_ALEA
-
-// If defined, the openmpi specific ulfm is used.
-#cmakedefine ALPS_NGS_OPENMPI_ULFM
 
 //
 // Libraries
@@ -109,7 +102,7 @@
 #cmakedefine ALPS_HAVE_ATLAS
 
 // Set 8-byte integers for Boost bindings if needed
-#cmakedefine BIND_FORTRAN_INTEGER_8
+#cmakedefine BIND_FORTRAN_INTEGER_8 1
 
 //
 // XML parser
@@ -161,7 +154,6 @@ using boost::uint32_t;
 using boost::uint_least32_t;
 using boost::uint_fast32_t;
 
-#ifndef BOOST_NO_INT64_T
 
 using boost::int64_t;
 using boost::int_least64_t;
@@ -170,45 +162,17 @@ using boost::uint64_t;
 using boost::uint_least64_t;
 using boost::uint_fast64_t;
 
-#endif
 
 } // end namespace alps
 
 #include <boost/config.hpp>
 
-#ifndef BOOST_NO_VOID_RETURNS
-# define ALPS_DUMMY_VOID void
-# define ALPS_RETURN_VOID
-#else
-# define ALPS_DUMMY_VOID bool
-# define ALPS_RETURN_VOID return true;
-#endif
 
 //
 // for Microsoft Visual C++
 //
 
-#if defined(BOOST_HAS_DECLSPEC)
-# if defined(ALPS_EXPORTS)
-#  define ALPS_DECL __declspec(dllexport)
-#  define ALPS_TEMPL_DECL __declspec(dllexport)
-# else
-#  define ALPS_DECL __declspec(dllimport)
-#  define ALPS_TEMPL_DECL
-# endif
-# if defined(PYALPS_EXPORTS)
-#  define PYALPS_DECL __declspec(dllexport)
-#  define PYALPS_TEMPL_DECL __declspec(dllexport)
-# else
-#  define PYALPS_DECL __declspec(dllimport)
-#  define PYALPS_TEMPL_DECL
-# endif
-#else
-# define ALPS_TEMPL_DECL
-# define ALPS_DECL
-# define PYALPS_TEMPL_DECL
-# define PYALPS_DECL
-#endif
+#include <alps/export.h>
 
 //
 // Enable HDF5 checkpoints: no ALPS checkpoint data is written into XDR files 

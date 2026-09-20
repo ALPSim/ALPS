@@ -66,7 +66,7 @@ void seed(
   {
      //seeds the seeder, which in turn gives the seedvalue for the mersenne_twister-rng
     typedef boost::uniform_int<unsigned int> dist_t;    
-    boost::variate_generator<lcg64a&, dist_t> rng(engine, dist_t(0u, std::numeric_limits<unsigned int>::max()));
+    boost::variate_generator<lcg64a&, dist_t> rng(engine, dist_t(0u, (std::numeric_limits<unsigned int>::max)()));
 
     //warm-up to improve decorrelations
     for(unsigned int i = 0; i < 1000; i++)

@@ -51,15 +51,15 @@ ALPS_DECL bool runs_parallel();
 //-----------------------------------------------------------------------
 
 namespace detail {
-int local_id(); // return the id of this Process
-int invalid_id(); // return an invalid id
+ALPS_DECL int local_id(); // return the id of this Process
+ALPS_DECL int invalid_id(); // return an invalid id
 }
 
 ALPS_DECL bool is_master(); // is this the master Process ?
 
-Process local_process(); // make a descriptor of the local Process
-ProcessList all_processes(); // get a list of all running processes
-Process master_process(); // get the master Process
+ALPS_DECL Process local_process(); // make a descriptor of the local Process
+ALPS_DECL ProcessList all_processes(); // get a list of all running processes
+ALPS_DECL Process master_process(); // get the master Process
 
 } // end namespace alps
 

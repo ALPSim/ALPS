@@ -112,9 +112,7 @@ typedef std::map<std::string,FiniteLatticeDescriptor> FiniteLatticeMap;
 } // end namespace alps
 
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 inline alps::oxstream& operator<<(alps::oxstream& out, const alps::LatticeDescriptor& l)
 {
@@ -142,8 +140,6 @@ inline std::ostream& operator<<(std::ostream& out, const alps::FiniteLatticeDesc
   return out;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // ALPS_LATTICE_LATTICEDESCRIPTOR_H

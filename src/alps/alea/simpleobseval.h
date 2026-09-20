@@ -49,7 +49,7 @@ struct ObservableNamingHelper {
     typename boost::enable_if<boost::is_arithmetic<T> >::type* = 0) {
     return boost::lexical_cast<std::string, T>(t);
   }
-  
+
   template<typename T>
   static std::string generate(T const&,
     typename boost::disable_if<boost::is_arithmetic<T> >::type* = 0) {
@@ -69,7 +69,7 @@ struct ObservableNamingHelper {
 //-----------------------------------------------------------------------
 
 template <class T>
-class ALPS_TEMPL_DECL SimpleObservableEvaluator : public AbstractSimpleObservable<T>
+class SimpleObservableEvaluator : public AbstractSimpleObservable<T>
 {
   typedef AbstractSimpleObservable<T> super_type;
  public:
@@ -124,7 +124,7 @@ class ALPS_TEMPL_DECL SimpleObservableEvaluator : public AbstractSimpleObservabl
     Observable::rename(n);
     automatic_naming_ = a;
   }
-  ALPS_DUMMY_VOID reset(bool = false);
+  void reset(bool = false);
 
   bool has_tau() const { return all_.has_tau(); }
   bool has_variance() const { return all_.has_variance(); }
@@ -154,7 +154,7 @@ class ALPS_TEMPL_DECL SimpleObservableEvaluator : public AbstractSimpleObservabl
   uint32_t get_thermalization() const { return all_.get_thermalization(); }
   bool can_set_thermalization() const { return all_.can_set_thermalization(); }
 
-  ALPS_DUMMY_VOID compact();
+  void compact();
 
   // Transformations
 
@@ -187,7 +187,7 @@ class ALPS_TEMPL_DECL SimpleObservableEvaluator : public AbstractSimpleObservabl
   template <class X>
   const SimpleObservableEvaluator<T>& operator/=(const SimpleObservableEvaluator<X>&);
 
-  ALPS_DUMMY_VOID output(std::ostream&) const;
+  void output(std::ostream&) const;
   void output_scalar(std::ostream&) const;
   void output_vector(std::ostream&) const;
 
@@ -416,24 +416,24 @@ SimpleObservableEvaluator<T>::slice(const S& sl) const
 }
 
 template <class T>
-inline ALPS_DUMMY_VOID SimpleObservableEvaluator<T>::reset(bool)
+inline void SimpleObservableEvaluator<T>::reset(bool)
 {
   all_ = SimpleObservableData<T>();
-  ALPS_RETURN_VOID
+
 }
 
 template <class T>
-inline ALPS_DUMMY_VOID SimpleObservableEvaluator<T>::compact()
+inline void SimpleObservableEvaluator<T>::compact()
 {
   all_.compact();
-  ALPS_RETURN_VOID
+
 }
 
 template <class T>
-ALPS_DUMMY_VOID SimpleObservableEvaluator<T>::output(std::ostream& out) const
+void SimpleObservableEvaluator<T>::output(std::ostream& out) const
 {
   output_helper<typename is_scalar<T>::type>::output(*this,out);
-  ALPS_RETURN_VOID
+
 }
 
 template <class T>
@@ -584,9 +584,7 @@ inline const SimpleObservableEvaluator<T>& SimpleObservableEvaluator<T>::operato
 // # SimpleObservableEvaluator
 //
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 /// sum of two observables
 template <class T, class U>
@@ -716,9 +714,7 @@ inline alps::SimpleObservableEvaluator<T> operator/(const Y& x, alps::SimpleObse
   return res;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 namespace alps {
 
@@ -772,5 +768,8 @@ pow(const alps::SimpleObservableEvaluator<T>& x, int p)
 }
 
 } // end namespace alps
+
+// Template definitions must be available to every consumer.
+#include <alps/alea/simpleobseval.ipp>
 
 #endif // ALPS_ALEA_SIMPLEOBSEVAL_H

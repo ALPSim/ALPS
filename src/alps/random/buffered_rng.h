@@ -82,7 +82,7 @@ public:
   template <class OutputIterator>
   OutputIterator generate_n(std::size_t n, OutputIterator it);
 
-  /// seed with an unsigned integer
+  /// seed with an unsigned integer, discarding buffered values
   virtual void seed(uint32_t) = 0;
   /// seed with the default value
   virtual void seed() =0;
@@ -125,13 +125,13 @@ public:
   buffered_rng(RNG rng) : rng_(rng) {}
 
   template <class IT>
-  void seed(IT start, IT end) { rng_.seed(start, end); }
+  void seed(IT start, IT end) { rng_.seed(start, end); ptr_ = buf_.end(); }
   /// seed from an integer using seed_with_sequence
   /// \sa seed_with_sequence()
-  void seed(uint32_t s) { seed_with_sequence(rng_,s); }
+  void seed(uint32_t s) { seed_with_sequence(rng_,s); ptr_ = buf_.end(); }
   void seed();
   /// seed with the pseudo_des generator
-  void seed(pseudo_des& inigen) { seed_with_generator(rng_, inigen); }
+  void seed(pseudo_des& inigen) { seed_with_generator(rng_, inigen); ptr_ = buf_.end(); }
 
   result_type min BOOST_PREVENT_MACRO_SUBSTITUTION () const { return rng_.min BOOST_PREVENT_MACRO_SUBSTITUTION (); }
   result_type max BOOST_PREVENT_MACRO_SUBSTITUTION () const { return rng_.max BOOST_PREVENT_MACRO_SUBSTITUTION (); }
@@ -150,6 +150,7 @@ template <class RNG>
 void buffered_rng<RNG>::seed()
 {
   rng_.seed();
+  ptr_ = buf_.end();
 }
 
 template <class RNG>
@@ -199,9 +200,7 @@ void buffered_rng<RNG>::fill_buffer()
 
 } // end namespace
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 /// writes the state of the generator to a std::ostream
 /// \sa buffered_rng_base
@@ -217,8 +216,6 @@ inline std::istream& operator>>(std::istream& is, buffered_rng_base& r) {
   return is;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // ALPS_RANDOM_H

@@ -13,9 +13,10 @@
 
 #ifndef ALPS_APPLICATIONS_MC_SPIN_XY_H_
 #define ALPS_APPLICATIONS_MC_SPIN_XY_H_
+#include <boost/math/constants/constants.hpp>
 #include <cmath>
 
-#define   TWOPI 2.*M_PI
+#define   TWOPI 2.*boost::math::constants::pi<double>()
 
 class XYMoment {
 public:
@@ -30,7 +31,7 @@ public:
 #endif
   }
   */
-  void update(update_type dir) {state_ = mod2pi(mod2pi(2*dir-state_)-M_PI);}
+  void update(update_type dir) {state_ = mod2pi(mod2pi(2*dir-state_)-boost::math::constants::pi<double>());}
   friend double energy_change(XYMoment s1,XYMoment s2,update_type dir)
   { 
 #ifdef CSE  

@@ -114,9 +114,7 @@ private:
   result_type binvariance(std::size_t i) const;
 };
 
-#ifndef BOOST_NO_INCLASS_MEMBER_INITIALIZATION
 template <class T> const bool SimpleBinning<T>::has_tau;
-#endif
 
 template <class T>
 inline SimpleBinning<T>::SimpleBinning(std::size_t)

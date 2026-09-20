@@ -18,7 +18,7 @@ jobs:
   linux-build:
     name: >-
       ALPS / ${{ matrix.plat.os }} / ${{ matrix.plat.c_compiler }}-${{ matrix.plat.c_version }} /
-      Python ${{ matrix.plat.py_version }} / Boost 1.${{ matrix.plat.boost_version }} /
+      Boost 1.${{ matrix.plat.boost_version }} /
       C++${{ matrix.plat.cxx_standard || '17' }}
     runs-on: ${{ matrix.plat.os }}
     # Worst observed healthy job is ~60 min cold; a hang otherwise burns the
@@ -31,10 +31,10 @@ jobs:
         # Best-available compiler per OS, modern Python + Boost.
         # ubuntu-22.04 tops out at gcc-12 / clang-15 in its apt repos.
         # ubuntu-24.04 tops out at gcc-14 / clang-18.
-        - { os: ubuntu-22.04, comp_pack: "gcc-12 g++-12",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 12, py_version: "3.14", boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 14, py_version: "3.14", boost_version: 91 }
-        - { os: ubuntu-22.04, comp_pack: "clang-15",        c_compiler: clang, cxx_compiler: clang++, c_version: 15, py_version: "3.14", boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "clang-18",        c_compiler: clang, cxx_compiler: clang++, c_version: 18, py_version: "3.14", boost_version: 91 }
+        - { os: ubuntu-22.04, comp_pack: "gcc-12 g++-12",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 12, boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 14, boost_version: 91 }
+        - { os: ubuntu-22.04, comp_pack: "clang-15",        c_compiler: clang, cxx_compiler: clang++, c_version: 15, boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "clang-18",        c_compiler: clang, cxx_compiler: clang++, c_version: 18, boost_version: 91 }
 
         # ── Group 2: Compiler versions ────────────────────────────────────────
         # Full sweep of GCC 11–15 and Clang 14–22, modern Python + Boost.
@@ -42,50 +42,41 @@ jobs:
         # gcc-12, gcc-14, clang-15, clang-18 already covered in Group 1.
         # GCC 15: installed via ubuntu-toolchain-r/test PPA on ubuntu-24.04.
         # Clang 19–22: installed via apt.llvm.org on ubuntu-24.04.
-        - { os: ubuntu-22.04, comp_pack: "gcc-11 g++-11",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 11, py_version: "3.14", boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-13 g++-13",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 13, py_version: "3.14", boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-15 g++-15",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 15, py_version: "3.14", boost_version: 91 }
-        - { os: ubuntu-22.04, comp_pack: "clang-14",        c_compiler: clang, cxx_compiler: clang++, c_version: 14, py_version: "3.14", boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "clang-16",        c_compiler: clang, cxx_compiler: clang++, c_version: 16, py_version: "3.14", boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "clang-17",        c_compiler: clang, cxx_compiler: clang++, c_version: 17, py_version: "3.14", boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "clang-19",        c_compiler: clang, cxx_compiler: clang++, c_version: 19, py_version: "3.14", boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "clang-20",        c_compiler: clang, cxx_compiler: clang++, c_version: 20, py_version: "3.14", boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "clang-21",        c_compiler: clang, cxx_compiler: clang++, c_version: 21, py_version: "3.14", boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "clang-22",        c_compiler: clang, cxx_compiler: clang++, c_version: 22, py_version: "3.14", boost_version: 91 }
+        - { os: ubuntu-22.04, comp_pack: "gcc-11 g++-11",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 11, boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-13 g++-13",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 13, boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-15 g++-15",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 15, boost_version: 91 }
+        - { os: ubuntu-22.04, comp_pack: "clang-14",        c_compiler: clang, cxx_compiler: clang++, c_version: 14, boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "clang-16",        c_compiler: clang, cxx_compiler: clang++, c_version: 16, boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "clang-17",        c_compiler: clang, cxx_compiler: clang++, c_version: 17, boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "clang-19",        c_compiler: clang, cxx_compiler: clang++, c_version: 19, boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "clang-20",        c_compiler: clang, cxx_compiler: clang++, c_version: 20, boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "clang-21",        c_compiler: clang, cxx_compiler: clang++, c_version: 21, boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "clang-22",        c_compiler: clang, cxx_compiler: clang++, c_version: 22, boost_version: 91 }
 
         # ── Group 3: Boost versions ───────────────────────────────────────────
         # Full sweep of all supported Boost releases.
         # ubuntu-24.04, gcc-14, Python 3.14. boost 91 is the baseline above.
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 76 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 81 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 86 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 87 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 88 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 89 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 90 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, boost_version: 76 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, boost_version: 81 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, boost_version: 86 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, boost_version: 87 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, boost_version: 88 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, boost_version: 89 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, boost_version: 90 }
 
-        # ── Group 4: Python versions ──────────────────────────────────────────
-        # Full sweep of supported Python releases.
-        # ubuntu-24.04, gcc-14, Boost 1.91. Python 3.14 is the baseline above.
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.9",  boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.10", boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.11", boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.12", boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.13", boost_version: 91 }
-
-        # ── Group 5: C++ standard versions ───────────────────────────────────
+        # ── Group 4: C++ standard versions ───────────────────────────────────
         # C++17 is the default and minimum (set in CMakeLists.txt); every other
         # job in the matrix builds it. Sweep the newer standards on top.
         # ubuntu-24.04, gcc-14, Python 3.14, Boost 1.91.
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 91, cxx_standard: 20 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, py_version: "3.14", boost_version: 91, cxx_standard: 23 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, boost_version: 91, cxx_standard: 20 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, boost_version: 91, cxx_standard: 23 }
 
     steps:
       - uses: actions/checkout@v7
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: ${{ matrix.plat.py_version }}
+          python-version: '3.14'
       - name: Install dependencies
         # A wedged mirror must fail the step in minutes, not hang the job to
         # its 90-minute cap (observed multi-hour stalls in this step).
@@ -95,8 +86,6 @@ jobs:
           printf 'Acquire::Retries "3";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' \
             | sudo tee /etc/apt/apt.conf.d/99ci-timeouts > /dev/null
           sudo apt-get update
-          python -m pip install --upgrade pip
-          pip install "numpy>=1.26" "scipy>=1.13"
           sudo apt install liblapack-dev libblas-dev libopenmpi-dev libhdf5-serial-dev
           # Clang >= 19: not in Ubuntu's default apt repos; use apt.llvm.org.
           # GCC >= 15: not in Ubuntu's default apt repos; use ubuntu-toolchain-r PPA.
@@ -117,30 +106,31 @@ jobs:
           CC:  ${{ matrix.plat.c_compiler }}-${{ matrix.plat.c_version }}
           CXX: ${{ matrix.plat.cxx_compiler }}-${{ matrix.plat.c_version }}
         run: |
+          bash script/build-boost.sh "$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" "$GITHUB_WORKSPACE/boost-install"
           cmake -S $GITHUB_WORKSPACE -B build \
-                -DBoost_SRC_DIR="$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" \
+                -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/boost-install" \
                 -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/build/install" \
-                -DCMAKE_CXX_STANDARD=${{ matrix.plat.cxx_standard || '17' }} \
-                -DCMAKE_CXX_FLAGS="-fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED"
+                -DCMAKE_CXX_STANDARD=${{ matrix.plat.cxx_standard || '17' }}
           cmake --build build -j 2
-          cmake --build build -j 2 -t test
+          ctest --test-dir build --output-on-failure --parallel 2
 
       # Compile the public exporter as a downstream project, rather than only
       # checking that its compatibility header is present in the install.
       - name: Smoke test downstream nanobind simulation extension
-        if: matrix.plat.os == 'ubuntu-24.04' && matrix.plat.c_compiler == 'gcc' && matrix.plat.c_version == 14 && matrix.plat.py_version == '3.14' && matrix.plat.boost_version == 91 && matrix.plat.cxx_standard == null
+        if: matrix.plat.os == 'ubuntu-24.04' && matrix.plat.c_compiler == 'gcc' && matrix.plat.c_version == 14 && matrix.plat.boost_version == 91 && matrix.plat.cxx_standard == null
         run: |
           python -m pip install "nanobind>=2.10,<3"
           cmake --install build
           cmake -S tutorials/ngs/5_export_python -B downstream-export-build \
                 -DALPS_DIR="$PWD/build/install/share/alps" \
+                -DCMAKE_PREFIX_PATH="$PWD/boost-install" \
                 -DPython_EXECUTABLE="$(command -v python)"
           cmake --build downstream-export-build -j 2
 
   macos-build:
     name: >-
       ALPS / ${{ matrix.plat.os }} / ${{ matrix.plat.c_compiler }} /
-      Python ${{ matrix.plat.py_version }} / Boost 1.${{ matrix.plat.boost_version }} / C++17
+      Boost 1.${{ matrix.plat.boost_version }} / C++17
     runs-on: ${{ matrix.plat.os }}
     # Intel runners are slow and variable; worst observed healthy job ~85 min.
     timeout-minutes: 120
@@ -150,49 +140,44 @@ jobs:
         # ── Apple Clang (system) ──────────────────────────────────────────────
         # macos-14 = Sonoma / Apple Clang 16, macos-15 = Sequoia / Clang 17,
         # macos-15-intel = last x86_64 runner, macos-26 = Tahoe / Clang 21.
-        - { os: macos-14,       c_compiler: /usr/bin/clang, cxx_compiler: /usr/bin/clang++, comp_pack: "",      cxx_stdlib: "-stdlib=libc++", py_version: "3.14", boost_version: 91 }
-        - { os: macos-15,       c_compiler: /usr/bin/clang, cxx_compiler: /usr/bin/clang++, comp_pack: "",      cxx_stdlib: "-stdlib=libc++", py_version: "3.14", boost_version: 91 }
-        - { os: macos-15-intel, c_compiler: /usr/bin/clang, cxx_compiler: /usr/bin/clang++, comp_pack: "",      cxx_stdlib: "-stdlib=libc++", py_version: "3.14", boost_version: 91 }
-        - { os: macos-26,       c_compiler: /usr/bin/clang, cxx_compiler: /usr/bin/clang++, comp_pack: "",      cxx_stdlib: "-stdlib=libc++", py_version: "3.14", boost_version: 91 }
+        - { os: macos-14,       c_compiler: /usr/bin/clang, cxx_compiler: /usr/bin/clang++, comp_pack: "",      cxx_stdlib: "-stdlib=libc++", boost_version: 91 }
+        - { os: macos-15,       c_compiler: /usr/bin/clang, cxx_compiler: /usr/bin/clang++, comp_pack: "",      cxx_stdlib: "-stdlib=libc++", boost_version: 91 }
+        - { os: macos-15-intel, c_compiler: /usr/bin/clang, cxx_compiler: /usr/bin/clang++, comp_pack: "",      cxx_stdlib: "-stdlib=libc++", boost_version: 91 }
+        - { os: macos-26,       c_compiler: /usr/bin/clang, cxx_compiler: /usr/bin/clang++, comp_pack: "",      cxx_stdlib: "-stdlib=libc++", boost_version: 91 }
         # ── Homebrew GCC on macos-15 ──────────────────────────────────────────
         # GCC requires the macOS 15 SDK; the macOS 26 SDK uses _Static_assert
         # in kernel headers which GCC does not support in C++ mode.
         # Restrict to macos-15 where the default SDK is safe.
-        - { os: macos-15, c_compiler: gcc-13, cxx_compiler: g++-13, comp_pack: "gcc@13", cxx_stdlib: "", py_version: "3.14", boost_version: 91 }
-        - { os: macos-15, c_compiler: gcc-14, cxx_compiler: g++-14, comp_pack: "gcc@14", cxx_stdlib: "", py_version: "3.14", boost_version: 91 }
+        - { os: macos-15, c_compiler: gcc-13, cxx_compiler: g++-13, comp_pack: "gcc@13", cxx_stdlib: "", boost_version: 91 }
+        - { os: macos-15, c_compiler: gcc-14, cxx_compiler: g++-14, comp_pack: "gcc@14", cxx_stdlib: "", boost_version: 91 }
 
     steps:
       - uses: actions/checkout@v7
       - name: Install dependencies
         timeout-minutes: 30
         run: |
-          brew install python@${{ matrix.plat.py_version }} gfortran
-          pip${{ matrix.plat.py_version }} install "numpy>=1.26" "scipy>=1.13" --break-system-packages
           brew install openmpi hdf5
           if [[ -n "${{ matrix.plat.comp_pack }}" ]]; then
             brew install ${{ matrix.plat.comp_pack }}
           fi
           wget -nv --tries=3 --timeout=60 --waitretry=10 https://archives.boost.io/release/1.${{ matrix.plat.boost_version }}.0/source/boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
           tar -xzf boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
-          ln -sf $(brew --prefix)/bin/python${{ matrix.plat.py_version }} $(brew --prefix)/bin/python
 
       - name: Build ALPS
         env:
-          FC: gfortran
+          CXX: ${{ matrix.plat.cxx_compiler }}
         run: |
+          bash script/build-boost.sh "$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" "$GITHUB_WORKSPACE/boost-install"
           cmake -S $GITHUB_WORKSPACE -B build \
                 -DCMAKE_C_COMPILER=${{ matrix.plat.c_compiler }} \
                 -DCMAKE_CXX_COMPILER=${{ matrix.plat.cxx_compiler }} \
-                -DBoost_SRC_DIR="$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" \
+                -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/boost-install" \
                 -DCMAKE_CXX_STANDARD=17 \
-                -DCMAKE_CXX_FLAGS="${{ matrix.plat.cxx_stdlib }} -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED" \
-                -DPython_ROOT_DIR=`$(brew --prefix)/bin/python${{ matrix.plat.py_version }} -c "import sys, os; print(os.path.dirname(os.path.dirname(str(sys.executable))));"` \
-                -DCMAKE_Fortran_COMPILER=gfortran
+                -DCMAKE_CXX_FLAGS="${{ matrix.plat.cxx_stdlib }}"
           cmake --build build -j $(sysctl -n hw.ncpu)
-          cmake --build build -t test
 
       - name: Run tests
-        run: cd build && ctest --output-on-failure --rerun-failed
+        run: ctest --test-dir build --output-on-failure --parallel 2
 
       - name: Upload test logs on failure
         if: failure()

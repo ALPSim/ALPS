@@ -13,6 +13,7 @@
  *
  *****************************************************************************/
 
+#include <boost/math/constants/constants.hpp>
 #include "interaction_expansion.hpp"
 #include <ctime>
 #include "xml.h"
@@ -105,7 +106,7 @@ pert_hist(max_order)
       for(site_t site1=0; site1<n_site; ++site1) 
         for(site_t site2=0; site2<n_site; ++site2) 
           for(unsigned int k=0; k<n_matsubara; ++k) 
-            bare_green_matsubara(k, site1, site2, flavor)=std::complex<double>(0, -beta/((2*k+1)*M_PI)); 
+            bare_green_matsubara(k, site1, site2, flavor)=std::complex<double>(0, -beta/((2*k+1)*boost::math::constants::pi<double>()));
     //fourier transform of -1/2
   }
   //initialize the simulation variables
@@ -177,7 +178,7 @@ void c_or_cdagger::initialize_simulation(const alps::params &p)
   nm_=p["NMATSUBARA_MEASUREMENTS"] | (p["NMATSUBARA"]|p["N_MATSUBARA"]);
   omegan_ = new double[nm_];
   for(unsigned int i=0;i<nm_;++i) {
-    omegan_[i]=(2.*i+1.)*M_PI/beta_;
+    omegan_[i]=(2.*i+1.)*boost::math::constants::pi<double>()/beta_;
   }
   if(p.defined("TAU_DISCRETIZATION_FOR_EXP")) {
     ntau_=p["TAU_DISCRETIZATION_FOR_EXP"];

@@ -15,6 +15,7 @@
 #ifndef ALPS_TOOL_DEFAULT_MODEL_HPP
 #define ALPS_TOOL_DEFAULT_MODEL_HPP
 
+#include <boost/math/constants/constants.hpp>
 #include <math.h>
 #include <alps/parameter.h>
 #include <alps/ngs.hpp>
@@ -114,7 +115,7 @@ public:
   Gaussian(const alps::params& p) : sigma(static_cast<double>(p["SIGMA"])) {}
   
   virtual double operator()(const double omega) {
-    return std::exp(-omega*omega/2./sigma/sigma)/sqrt(2*M_PI)/sigma;
+    return std::exp(-omega*omega/2./sigma/sigma)/sqrt(2*boost::math::constants::pi<double>())/sigma;
   }
 
 private:
@@ -132,7 +133,7 @@ public:
     norm1(static_cast<double>(p["NORM1"]|0.5)) {}
     
     virtual double operator()(const double omega) {
-        return norm1*std::exp(-(omega-shift1)*(omega-shift1)/2./sigma1/sigma1)/sqrt(2*M_PI)/sigma1+(1.0-norm1)*std::exp(-(omega-shift2)*(omega-shift2)/2./sigma2/sigma2)/sqrt(2*M_PI)/sigma2;
+        return norm1*std::exp(-(omega-shift1)*(omega-shift1)/2./sigma1/sigma1)/sqrt(2*boost::math::constants::pi<double>())/sigma1+(1.0-norm1)*std::exp(-(omega-shift2)*(omega-shift2)/2./sigma2/sigma2)/sqrt(2*boost::math::constants::pi<double>())/sigma2;
     }
     
 private:

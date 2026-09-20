@@ -4,6 +4,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <queue>
+#include <alps/export.h>
 
 namespace alps {
 namespace parapack {
@@ -11,7 +12,7 @@ namespace parapack {
 typedef
 boost::tuple<int /* task_id */,int /* clone_id */,int /* group_id*/> suspended_queue_t;
 
-void load_checkpoints(boost::filesystem::path const& file_chp,
+ALPS_DECL void load_checkpoints(boost::filesystem::path const& file_chp,
 		      boost::filesystem::path const& basedir,
 		      std::queue<suspended_queue_t>& suspended_queue);
 

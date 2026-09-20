@@ -23,9 +23,7 @@
 #include <stdexcept>
 #include <string>
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 //=======================================================================
 // string templates
@@ -75,8 +73,6 @@ inline alps::ODump& operator << (alps::ODump& dump, const std::string& s)
   return dump;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // OSIRIS_STD_STRING_H

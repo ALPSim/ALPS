@@ -18,12 +18,7 @@
 
 using namespace alps::numeric;
 
-#ifdef ALPS_NGS_USE_NEW_ALEA
-  using alps::accumulator::max_bin_number;
-  #define NUM_BINS_CONSTRUCTOR_ARG max_bin_number=NUM_BINS
-#else
   #define NUM_BINS_CONSTRUCTOR_ARG NUM_BINS
-#endif
 
 typedef alps::accumulator::RealVectorObservable vec_obs_t;
 typedef alps::accumulator::RealObservable obs_t;
@@ -129,24 +124,14 @@ void hybridization::create_measurements(){//called once in the constructor
       if(MEASURE_g2w){    //the two-particle Green's function is large and error is usually not needed -> declare as simple observable
         std::stringstream g2wr_name; g2wr_name<<"g2w_re_"<<i<<"_"<<j; g2wr_names[i].push_back(g2wr_name.str());
         std::stringstream g2wi_name; g2wi_name<<"g2w_im_"<<i<<"_"<<j; g2wi_names[i].push_back(g2wi_name.str());
-#ifdef ALPS_NGS_USE_NEW_ALEA
-        measurements << alps::accumulator::SimpleRealVectorObservable(g2wr_name.str());
-        measurements << alps::accumulator::SimpleRealVectorObservable(g2wi_name.str());
-#else
         measurements << alps::ngs::SimpleRealVectorObservable(g2wr_name.str());
         measurements << alps::ngs::SimpleRealVectorObservable(g2wi_name.str());
-#endif
       }
       if(MEASURE_h2w){
         std::stringstream h2wr_name; h2wr_name<<"h2w_re_"<<i<<"_"<<j; h2wr_names[i].push_back(h2wr_name.str());
         std::stringstream h2wi_name; h2wi_name<<"h2w_im_"<<i<<"_"<<j; h2wi_names[i].push_back(h2wi_name.str());
-#ifdef ALPS_NGS_USE_NEW_ALEA
-        measurements << alps::accumulator::SimpleRealVectorObservable(h2wr_name.str());
-        measurements << alps::accumulator::SimpleRealVectorObservable(h2wi_name.str());
-#else
         measurements << alps::ngs::SimpleRealVectorObservable(h2wr_name.str());
         measurements << alps::ngs::SimpleRealVectorObservable(h2wi_name.str());
-#endif
       }
     }
   }

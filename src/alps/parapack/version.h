@@ -15,10 +15,11 @@
 #define PARAPACK_VERSION_H
 
 #include <string>
+#include <alps/export.h>
 
 namespace alps {
 
-std::string parapack_copyright();
+ALPS_DECL std::string parapack_copyright();
 
 }
 

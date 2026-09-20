@@ -179,9 +179,7 @@ void ParametersXMLHandler::end_child(const std::string&, xml::tag_type type)
 } // namespace alps
 
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 std::ostream& operator<<(std::ostream& os, const alps::Parameters& p)
 {
@@ -199,6 +197,4 @@ std::ostream& operator<<(std::ostream& os, const alps::Parameters& p)
   return os;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif

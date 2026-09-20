@@ -5,8 +5,9 @@ import os
 import tempfile
 import numpy as np
 
-# Importing the consumer first verifies its wheel-runtime rpath. Its module
-# initializer loads the owning pyalps bindings before registering C++ types.
+# Initialize the package's library search directories before loading a
+# downstream extension that shares its native runtime.
+import pyalps
 import ising_c
 import pyalps.hdf5 as hdf5
 import pyalps.ngs as ngs

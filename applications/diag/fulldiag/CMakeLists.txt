@@ -18,8 +18,8 @@
 #   DEALINGS IN THE SOFTWARE.
 
 if(LAPACK_FOUND)
-  add_definitions(${LAPACK_DEFINITIONS})
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
+
+
   add_library(fulldiag_impl STATIC factory.C)
   target_link_libraries(fulldiag_impl alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
 
@@ -28,7 +28,7 @@ if(LAPACK_FOUND)
   target_link_libraries(fulldiag fulldiag_impl)
   target_link_libraries(fulldiag_evaluate fulldiag_impl)
 
-  if(ALPS_BUILD_TESTS)
+  if(BUILD_TESTING)
     add_test(NAME fulldiag_evaluate_help COMMAND fulldiag_evaluate --help)
     set_tests_properties(fulldiag_evaluate_help PROPERTIES
       PASS_REGULAR_EXPRESSION "Usage:")
@@ -39,7 +39,7 @@ if(LAPACK_FOUND)
     set_tests_properties(fulldiag_evaluate_no_arguments PROPERTIES WILL_FAIL TRUE)
   endif()
 
-  install(TARGETS fulldiag fulldiag_evaluate RUNTIME DESTINATION bin COMPONENT applications)
+  install(TARGETS fulldiag fulldiag_evaluate RUNTIME_DEPENDENCY_SET alps_runtime RUNTIME DESTINATION bin COMPONENT applications)
 else(LAPACK_FOUND)
   message(STATUS "fulldiag will not be built since lapack library has not been found")
 endif(LAPACK_FOUND)

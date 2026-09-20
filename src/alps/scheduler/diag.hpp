@@ -129,7 +129,7 @@ void DiagTask<T,G>::write_xml_body(oxstream& out, const boost::filesystem::path&
 {
   if (writeallxml) {
     for (unsigned i=0;i<eigenvalues_.size();++i) {
-      unsigned num_eigenvalues = std::min(unsigned(this->parms.value_or_default("NUMBER_EIGENVALUES",
+      unsigned num_eigenvalues = (std::min)(unsigned(this->parms.value_or_default("NUMBER_EIGENVALUES",
                   eigenvalues_[i].size())),unsigned(eigenvalues_[i].size()));
       out << start_tag("EIGENVALUES") << attribute("number",num_eigenvalues);
       for (unsigned j=0;j<this->quantumnumbervalues_[i].size();++j)
@@ -142,7 +142,7 @@ void DiagTask<T,G>::write_xml_body(oxstream& out, const boost::filesystem::path&
 
     if (calc_averages() || this->parms.value_or_default("MEASURE_ENERGY",true)) {
       for (unsigned i=0;i<eigenvalues_.size();++i) {
-         unsigned num_eigenvalues = std::min(unsigned(this->parms.value_or_default("NUMBER_EIGENVALUES",
+         unsigned num_eigenvalues = (std::min)(unsigned(this->parms.value_or_default("NUMBER_EIGENVALUES",
                   eigenvalues_[i].size())),unsigned(eigenvalues_[i].size()));
         out << start_tag("EIGENSTATES") << attribute("number",num_eigenvalues);
         for (unsigned j=0;j<this->quantumnumbervalues_[i].size();++j)

@@ -1,0 +1,8 @@
+add_executable(portability portability.cpp)
+target_link_libraries(portability PRIVATE ALPS::alps)
+add_test(NAME portability COMMAND portability)
+if(ALPS_HAVE_BLAS AND ALPS_HAVE_LAPACK)
+  add_executable(numerics numerics.cpp)
+  target_link_libraries(numerics PRIVATE ALPS::alps)
+  add_test(NAME numerics COMMAND numerics)
+endif()

@@ -281,7 +281,6 @@ class well
         UIntType state_i;
 };
 
-#ifndef BOOST_NO_INCLASS_MEMBER_INITIALIZATION
 template<class UIntType, int statesize, UIntType val, class F1, class F2, class F3, class F4, class F5, class F6, class F7, class F8, int p1,  int p2,  int p3, UIntType mask, class RNG>
 const bool well<UIntType, statesize, val, F1, F2, F3, F4, F5, F6, F7, F8, p1, p2, p3, mask, RNG>::has_fixed_range;
 
@@ -290,7 +289,6 @@ const UIntType well<UIntType, statesize, val, F1, F2, F3, F4, F5, F6, F7, F8, p1
 
 template<class UIntType, int statesize, UIntType val, class F1, class F2, class F3, class F4, class F5, class F6, class F7, class F8, int p1,  int p2,  int p3, UIntType mask, class RNG>
 const UIntType well<UIntType, statesize, val, F1, F2, F3, F4, F5, F6, F7, F8, p1, p2, p3, mask, RNG>::max_value;
-#endif
 
 /// A 512-bit version of the WELL generator
 typedef well<uint32_t,16,1584514050u,mat0neg<-16>, mat0neg<-15>, mat0pos<11>, 

@@ -10,6 +10,8 @@
 #ifndef BOOST_NUMERIC_BINDINGS_DETAIL_CONFIG_FORTRAN_HPP
 #define BOOST_NUMERIC_BINDINGS_DETAIL_CONFIG_FORTRAN_HPP
 
+#include <cstdint>
+
 #if defined(BIND_FORTRAN_LOWERCASE_UNDERSCORE) || defined(BIND_FORTRAN_LOWERCASE)
 // Allow manual override of the defaults, e.g. if you want to use a fortran
 // lib compiled with gcc from MSVC
@@ -60,17 +62,17 @@
 // Most fortran compilers use fortran_int_t := int by default, so we follow
 // this default, even so f2c (=clapack) uses "typedef long int integer;"
 #ifndef BIND_FORTRAN_INTEGER_8
-typedef int fortran_int_t;
+typedef std::int32_t fortran_int_t;
 #else
-typedef std::ptrdiff_t fortran_int_t;
+typedef std::int64_t fortran_int_t;
 #endif
 
 // Looks like fortran_int_t and fortran_bool_t should be identical, the unsigned is
 // required so overloads can distinguish between fortran_bool_t and fortran_int_t.
 #ifndef BIND_FORTRAN_INTEGER_8
-typedef unsigned int fortran_bool_t;
+typedef std::uint32_t fortran_bool_t;
 #else
-typedef std::size_t fortran_bool_t;
+typedef std::uint64_t fortran_bool_t;
 #endif
 
 // This definition of external_fp is identical to the definition of L_fp from

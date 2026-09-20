@@ -17,6 +17,7 @@
 #ifndef ALPS_SCHEDULER_WORKER_H
 #define ALPS_SCHEDULER_WORKER_H
 
+#include <alps/export.h>
 #include <alps/config.h>
 #include <alps/scheduler/info.h>
 #include <alps/parameter.h>
@@ -167,7 +168,7 @@ private:
 // Allows for transparent access to remote objects
 //-----------------------------------------------------------------------
 
-class RemoteWorker : public AbstractWorker
+class ALPS_DECL RemoteWorker : public AbstractWorker
 {
 public:
   // constructors/destructor also constructs/destroys actual object

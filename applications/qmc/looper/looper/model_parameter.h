@@ -70,18 +70,14 @@ protected:
 
 } // end namespace looper
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace looper {
-#endif
 
 inline std::ostream& operator<<(std::ostream& os, looper::site_parameter const& p) {
   p.output(os);
   return os;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace looper
-#endif
 
 namespace looper {
 
@@ -141,9 +137,7 @@ protected:
 
 } // end namespace looper
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace looper {
-#endif
 
 inline std::ostream& operator<<(std::ostream& os, looper::bond_parameter_xxz const& p) {
   p.print(os);
@@ -155,9 +149,7 @@ inline std::ostream& operator<<(std::ostream& os, looper::bond_parameter_xyz con
   return os;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace looper
-#endif
 
 namespace looper {
 

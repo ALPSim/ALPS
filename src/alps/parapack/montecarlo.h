@@ -64,9 +64,7 @@ private:
 
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 inline alps::ODump& operator<<(alps::ODump& dp, alps::mc_steps const& mcs) {
   mcs.save(dp);
@@ -78,9 +76,7 @@ inline alps::IDump& operator>>(alps::IDump& dp, alps::mc_steps& mcs) {
   return dp;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 namespace alps {
 
@@ -117,9 +113,7 @@ private:
 
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 inline alps::ODump& operator<<(alps::ODump& dp, alps::hybrid_weight_parameter const& wp) {
   wp.save(dp);
@@ -135,8 +129,6 @@ inline alps::hybrid_weight_parameter operator*(double x, alps::hybrid_weight_par
   return wp * x;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // PARAPACK_MONTECARLO_H

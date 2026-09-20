@@ -33,11 +33,11 @@ Observable::Observable(const Observable& o)
 {
 }
 
-ALPS_DUMMY_VOID Observable::reset(bool equilibrated)
+void Observable::reset(bool equilibrated)
 {
 }
 
-ALPS_DUMMY_VOID Observable::output(std::ostream&) const
+void Observable::output(std::ostream&) const
 {
 }
 

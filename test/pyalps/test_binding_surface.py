@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import copy
 import importlib
+import json
 import os
 from pathlib import Path
 import signal
@@ -574,7 +575,9 @@ def test_downstream_nanobind_simulation_export(tmp_path):
     """Build and run a consumer extension against the installed ALPS SDK."""
     repository = Path(__file__).resolve().parents[2]
     tutorial = repository / "tutorials" / "ngs" / "5_export_python"
-    alps_dir = repository / "_build" / "wheel-deps" / "install" / "share" / "alps"
+    alps_dir = Path(os.environ.get(
+        "ALPS_DIR", repository / "_build/wheel-deps/install/share/alps"
+    ))
     build = tmp_path / "export-python-build"
 
     assert (alps_dir / "ALPSConfig.cmake").is_file()
@@ -583,11 +586,15 @@ def test_downstream_nanobind_simulation_export(tmp_path):
             "cmake", "-S", str(tutorial), "-B", str(build),
             "-DALPS_DIR={}".format(alps_dir),
             "-DPython_EXECUTABLE={}".format(sys.executable),
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=" + str(build),
+            "-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=" + str(build),
+            *json.loads(os.environ.get("ALPS_TEST_CMAKE_ARGS", "[]")),
         ],
         check=True,
     )
     subprocess.run(
-        ["cmake", "--build", str(build), "--parallel", "2"],
+        ["cmake", "--build", str(build), "--config", "Release", "--parallel", "2"],
         check=True,
     )
 
@@ -639,10 +646,14 @@ def test_native_parameter_contracts(tmp_path):
     build = tmp_path / "native-params"
     subprocess.run([
         "cmake", "-S", str(source), "-B", str(build),
-        "-DALPS_DIR=" + str(repository / "_build/wheel-deps/install/share/alps"),
+        "-DALPS_DIR=" + os.environ.get("ALPS_DIR", str(repository / "_build/wheel-deps/install/share/alps")),
         "-DPython_EXECUTABLE=" + sys.executable,
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=" + str(build),
+        "-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=" + str(build),
+        *json.loads(os.environ.get("ALPS_TEST_CMAKE_ARGS", "[]")),
     ], check=True)
-    subprocess.run(["cmake", "--build", str(build), "--parallel", "2"], check=True)
+    subprocess.run(["cmake", "--build", str(build), "--config", "Release", "--parallel", "2"], check=True)
     completed = subprocess.run(
         [sys.executable, "-X", "faulthandler", str(source / "check.py")],
         env={**os.environ, "PYTHONPATH": str(build), "MallocScribble": "1"},

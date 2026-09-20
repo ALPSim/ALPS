@@ -17,6 +17,7 @@
 #ifndef ALPS_MODEL_BONDTERM_H
 #define ALPS_MODEL_BONDTERM_H
 
+#include <alps/export.h>
 #include <alps/model/bondoperator.h>
 #include <alps/model/siteoperator.h>
 #include <alps/numeric/is_nonzero.hpp>
@@ -24,7 +25,7 @@
 namespace alps {
 
 
-class BondTermDescriptor : public BondOperator
+class ALPS_DECL BondTermDescriptor : public BondOperator
 {
 public:
   BondTermDescriptor() : BondOperator(), type_(-2) {}
@@ -129,9 +130,7 @@ expression::Expression<T> BondOperatorEvaluator<I,T,STATE1,STATE2>::partial_eval
 
 } // namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 inline alps::oxstream& operator<<(alps::oxstream& out, const alps::BondTermDescriptor& q)
 {
@@ -146,8 +145,6 @@ inline std::ostream& operator<<(std::ostream& out, const alps::BondTermDescripto
   return out;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // namespace alps
-#endif
 
 #endif

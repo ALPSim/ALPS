@@ -14,6 +14,7 @@
 #ifndef PARAPACK_CLONE_INFO_H
 #define PARAPACK_CLONE_INFO_H
 
+#include <alps/export.h>
 #include "process.h"
 #include "types.h"
 #include <alps/hdf5.hpp>
@@ -72,9 +73,7 @@ private:
 
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 ALPS_DECL alps::oxstream& operator<<(alps::oxstream& os, alps::clone_phase const& phase);
 
@@ -82,9 +81,7 @@ ALPS_DECL alps::oxstream& operator<<(alps::oxstream& os, alps::clone_phase const
 
 // ALPS_DECL alps::IDump& operator>>(alps::IDump& dump, alps::clone_phase& phase);
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // namespace alps
-#endif
 
 namespace alps {
 
@@ -161,9 +158,7 @@ private:
 
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 ALPS_DECL alps::oxstream& operator<<(alps::oxstream& os, alps::clone_info const& info);
 
@@ -171,9 +166,7 @@ ALPS_DECL alps::ODump& operator<<(alps::ODump& dp, alps::clone_info const& info)
 
 ALPS_DECL alps::IDump& operator>>(alps::IDump& dp, alps::clone_info& info);
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // namespace alps
-#endif
 
 #ifdef ALPS_HAVE_MPI
 
@@ -183,7 +176,7 @@ namespace alps {
 // clone_info_mpi
 //
 
-class clone_info_mpi : public clone_info {
+class ALPS_DECL clone_info_mpi : public clone_info {
 public:
   // interprocess communication is required
   clone_info_mpi(boost::mpi::communicator const& comm, cid_t cid, Parameters const& params,

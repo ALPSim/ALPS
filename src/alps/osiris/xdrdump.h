@@ -25,25 +25,13 @@
 #include <string>
 #include <stdio.h>
 
-#ifdef ALPS_HAVE_RPC_XDR_H
-#include <rpc/rpc.h>
-#else
 #include <alps/osiris/xdrcore.h>
-#endif
 // remove harmful 'enum_t' macro
 // (which conflicts with boost/detail/scoped_enum_emulation.hpp in Boost 1.41.0)
 #ifdef enum_t
 # undef enum_t
 #endif
 
-#ifdef BOOST_NO_STDC_NAMESPACE
-  namespace std {
-    using ::FILE;
-    using ::fopen;
-    using ::fclose;
-    using ::ftell;
-  }
-#endif
 
 namespace alps {
 

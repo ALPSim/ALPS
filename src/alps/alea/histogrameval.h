@@ -81,7 +81,7 @@ public:
     Observable::rename(n);
     automatic_naming_=a;
   }
-  ALPS_DUMMY_VOID reset(bool=false);
+  void reset(bool=false);
 
   value_type operator[](int i) const { collect(); return all_[i]; }
 
@@ -95,7 +95,7 @@ public:
   uint32_t number_of_runs() const;
   Observable* get_run(uint32_t) const;
 
-  ALPS_DUMMY_VOID output(std::ostream&) const;
+  void output(std::ostream&) const;
   void output_histogram(std::ostream&) const;
 
   void operator<<(const HistogramObservableData<T>& obs);
@@ -145,7 +145,7 @@ inline void HistogramObservableEvaluator<T>::update_super() const
     for (std::size_t i=0;i<all_.size();++i)
         supertype::histogram_[i] = all_[i];
 }
-    
+
 template<class T>
 inline void HistogramObservableEvaluator<T>::collect() const
 {
@@ -205,12 +205,12 @@ inline uint32_t HistogramObservableEvaluator<T>::number_of_runs() const
 }
 
 template <class T>
-inline ALPS_DUMMY_VOID HistogramObservableEvaluator<T>::reset(bool)
+inline void HistogramObservableEvaluator<T>::reset(bool)
 {
   supertype::reset();
   runs_.clear();
   all_ = HistogramObservableData<T>();
-  ALPS_RETURN_VOID
+
 }
 
 template <class T>
@@ -222,10 +222,10 @@ inline Observable* HistogramObservableEvaluator<T>::get_run(uint32_t i) const
 }
 
 template <class T>
-ALPS_DUMMY_VOID HistogramObservableEvaluator<T>::output(std::ostream& out) const
+void HistogramObservableEvaluator<T>::output(std::ostream& out) const
 {
   HistogramObservableEvaluator<T>::output_histogram(out);
-  ALPS_RETURN_VOID
+
 }
 
 template<class T>
@@ -289,5 +289,3 @@ inline HistogramObservableEvaluator<T>::HistogramObservableEvaluator(const std::
 } //end namespace alps
 
 #endif
-
-

@@ -39,7 +39,7 @@ int main(int argc, char** argv)
   std::cout << "------------------\n";
 
   std::cout << "valA:\t";
-  std::copy(&valA[0],&valA[valA.size()],std::ostream_iterator<double>(std::cout,"\t"));
+  std::copy(std::begin(valA),std::end(valA),std::ostream_iterator<double>(std::cout,"\t"));
   std::cout << "\n";
 
   std::cout << "vecA:\t";
@@ -61,7 +61,7 @@ int main(int argc, char** argv)
   std::cout << "\n";
 
   std::cout << "valB:\t";
-  std::copy(&valB[0],&valB[valB.size()],std::ostream_iterator<double>(std::cout,"\t"));
+  std::copy(std::begin(valB),std::end(valB),std::ostream_iterator<double>(std::cout,"\t"));
   std::cout << "\n";
 
 

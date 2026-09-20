@@ -1,0 +1,9 @@
+{
+  "name": "openblas",
+  "version": "0.3.34",
+  "description": "Official Windows ARM64 OpenBLAS binaries with modern LAPACK",
+  "homepage": "https://github.com/OpenMathLib/OpenBLAS",
+  "license": "BSD-3-Clause",
+  "supports": "arm64 & windows & !uwp & !mingw & !static",
+  "dependencies": [{ "name": "vcpkg-cmake-config", "host": true }]
+}

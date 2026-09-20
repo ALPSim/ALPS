@@ -103,10 +103,10 @@ class ALPS_DECL Observable {
   virtual void rename(const std::string&);
 
   /** reset the observable */
-  virtual ALPS_DUMMY_VOID reset(bool equilibrated=false);
+  virtual void reset(bool equilibrated=false);
 
   /** output the result */
-  virtual ALPS_DUMMY_VOID output(std::ostream&) const;
+  virtual void output(std::ostream&) const;
 
   /** output the result */
   virtual void write_xml(oxstream& oxs, const boost::filesystem::path& fn_hdf5=boost::filesystem::path()) const;
@@ -204,16 +204,12 @@ void Observable::operator<<(const T& x)
 } // end namespace alps
 
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 /// write an observable to a std::ostream
 inline std::ostream& operator<<(std::ostream& out, const alps::Observable& m)
 { m.output(out); return out; }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // ALPS_ALEA_OBSERVABLE_H

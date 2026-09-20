@@ -101,9 +101,7 @@ private:
 
 } // namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 inline alps::oxstream& operator<<(alps::oxstream& os, const alps::ModelLibrary& l)
 {
@@ -124,9 +122,7 @@ inline std::istream& operator>>(std::istream& is, alps::ModelLibrary& l)
   return is;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // namespace alps
-#endif
 
 #endif
 

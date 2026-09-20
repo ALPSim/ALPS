@@ -23,8 +23,6 @@
 #include <string>
 #include <iomanip>
 #include <math.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include "enums.h"
 #include "vector.h"
 #include "matrix.h"
@@ -43,13 +41,8 @@
 #include <unistd.h>
 #endif // WITH_PTHREADS
 
-#include <sys/stat.h>
-
-#ifdef BOOST_MSVC
-#include <io.h>
-#endif
-
 #include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <alps/utility/temporary_filename.hpp>
 
 using namespace std;
@@ -124,13 +117,10 @@ class FileList
     void set_temp_dir(const char *dir) 
       { 
          std::string aux = std::string(dir);
-#ifndef BOOST_MSVC
-         struct stat dir_ptr;
-         if((!stat(aux.c_str(),&dir_ptr)) == 0) {
+         if (!boost::filesystem::is_directory(aux)) {
              std::cerr << "*** ERROR: ALPS DMRG could not open directory for temporary files. Create the directory " + aux + " or choose a different path.\n";
                          boost::throw_exception(std::runtime_error("*** ERROR: ALPS DMRG could not open directory for temporary files. Create the directory " + aux + " or choose a different path."));
          }
-#endif
          std::cout << "ALPS DMRG temporary files will be written to " << aux << std::endl;
          temp_dir = boost::filesystem::path(aux); 
       }

@@ -14,6 +14,7 @@
 #ifndef PARAPACK_TYPES_H
 #define PARAPACK_TYPES_H
 
+#include <alps/export.h>
 #include <alps/scheduler/signal.hpp>
 #include <alps/scheduler/types.h>
 #include "integer_range.h"
@@ -44,7 +45,7 @@ struct parapack_dump {
 };
 typedef parapack_dump::parapack_dump_t parapack_dump_t;
 
-struct dump_format {
+struct ALPS_DECL dump_format {
   enum dump_format_t {
     hdf5, // default
     xdr
@@ -53,7 +54,7 @@ struct dump_format {
 };
 typedef dump_format::dump_format_t dump_format_t;
 
-struct dump_policy {
+struct ALPS_DECL dump_policy {
   enum dump_policy_t {
     Never,
     RunningOnly, // default
@@ -81,7 +82,7 @@ struct mcmp_tag {
 };
 typedef mcmp_tag::mcmp_tag_t mcmp_tag_t;
 
-struct task_status {
+struct ALPS_DECL task_status {
   enum task_status_t {
     Undefined,
     Ready,       // on memory  but not started
@@ -98,7 +99,7 @@ struct task_status {
 };
 typedef task_status::task_status_t task_status_t;
 
-struct clone_status {
+struct ALPS_DECL clone_status {
   enum clone_status_t {
     Undefined,
     NotStarted,

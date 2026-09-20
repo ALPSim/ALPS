@@ -17,6 +17,7 @@
 #ifndef ALPS_LATTICE_HYPERCUBIC_H
 #define ALPS_LATTICE_HYPERCUBIC_H
 
+#include <boost/math/constants/constants.hpp>
 #include <alps/config.h>
 #include <alps/lattice/lattice.h>
 #include <alps/lattice/coordinate_traits.h>
@@ -31,9 +32,6 @@
 #include <cmath>
 #include <vector>
 
-#ifndef M_PI
-#define M_PI std::acos(-1.)
-#endif
 
 namespace alps {
 
@@ -381,7 +379,7 @@ public:
         int x=cell_iterator::offset_[i];
         if (x>l/2)
           x-=l;
-        k_[i] = 2.*M_PI*double(x)/double(l);
+        k_[i] = 2.*boost::math::constants::pi<double>()*double(x)/double(l);
       }
     }
   };
@@ -407,13 +405,13 @@ public:
       if (bc_[i]=="periodic") {
         if (ks.empty())
           for (int j = 0; j < static_cast<int>(extent_[i]); ++j)
-            ks.push_back(vector_type(1,2.*j*M_PI/ static_cast<int>(extent_[i])));
+            ks.push_back(vector_type(1,2.*j*boost::math::constants::pi<double>()/ static_cast<int>(extent_[i])));
         else {
           std::vector<vector_type> newks;
           for (std::size_t l=0;l<ks.size();++l) 
             for (int j = 0; j < static_cast<int>(extent_[i]); ++j) {
               vector_type k=ks[l];
-              k.push_back(2.*j*M_PI/ static_cast<int>(extent_[i]));
+              k.push_back(2.*j*boost::math::constants::pi<double>()/ static_cast<int>(extent_[i]));
               newks.push_back(k);
             }
           ks.swap(newks);

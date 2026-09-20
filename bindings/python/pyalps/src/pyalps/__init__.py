@@ -12,6 +12,16 @@
 # ****************************************************************************
 
 import sys
+import os
+from pathlib import Path
+
+# Python 3.8+ resolves extension dependencies using registered DLL directories.
+# Keep the handle alive for delayed imports and use the same runtime as bin/*.exe.
+if sys.platform == "win32":
+    _dll_directory = Path(__file__).resolve().parent / "bin"
+    if _dll_directory.is_dir():
+        _dll_directory_handle = os.add_dll_directory(str(_dll_directory))
+
 from importlib.metadata import PackageNotFoundError, version as _distribution_version
 
 from .dataset import *

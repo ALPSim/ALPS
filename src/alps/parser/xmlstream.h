@@ -16,22 +16,6 @@
 #ifndef ALPS_PARSER_XMLSTREAM_H
 #define ALPS_PARSER_XMLSTREAM_H
 
-// for MSVC
-#if defined(_MSC_VER)
-# pragma warning(disable:4251)
-#include <complex>
-template <class T>
-bool _isnan(std::complex<T> const& x)
-{
-  return _isnan(x.real()) || _isnan(x.imag());
-}
-template <class T>
-bool _finite(std::complex<T> const& x)
-{
-  return _finite(x.real()) || _isnan(x.imag());
-}
-#endif
-
 #include <alps/config.h>
 #include <alps/parser/xmlattributes.h>
 
@@ -45,13 +29,21 @@ bool _finite(std::complex<T> const& x)
 #include <stack>
 #include <string>
 #include <complex>
-#ifdef BOOST_MSVC
-# include <float.h>
-#endif
+#include <cmath>
+#include <type_traits>
 
 namespace alps {
 
 namespace detail {
+
+template<class T>
+std::string xml_number(const T& value) {
+  if constexpr (std::is_floating_point_v<T>) {
+    if (std::isnan(value)) return "nan";
+    if (std::isinf(value)) return std::signbit(value) ? "-inf" : "inf";
+  }
+  return boost::lexical_cast<std::string>(value);
+}
 
 struct header_t
 {
@@ -131,7 +123,7 @@ public:
 
 # define ALPS_XMLSTREAM_DO_TYPE(T) \
   oxstream& operator<<(const T t) \
-  { return text_str(boost::lexical_cast<std::string, T>(t)); }
+  { return text_str(detail::xml_number(t)); }
   ALPS_XMLSTREAM_DO_TYPE(bool)
   ALPS_XMLSTREAM_DO_TYPE(signed char)
   ALPS_XMLSTREAM_DO_TYPE(unsigned char)
@@ -232,20 +224,11 @@ ALPS_DECL std::string convert(const std::string& str);
 template<class T>
 inline std::string precision(const T& d, int n)
 {
-  std::ostringstream stream;
-#ifndef BOOST_MSVC
-  stream << std::setprecision(n) << d;
-#else
-  if (_finite(d)) {
-    stream << std::setprecision(n) << d;
-  } else {
-    if (_isnan(d)) {
-      stream << "nan";
-    } else {
-      stream << "inf"; // (d > 0 ? "inf" : "-inf");
-    }
+  if constexpr (std::is_floating_point_v<T>) {
+    if (!std::isfinite(d)) return detail::xml_number(d);
   }
-#endif
+  std::ostringstream stream;
+  stream << std::setprecision(n) << d;
   return stream.str();
 }
 

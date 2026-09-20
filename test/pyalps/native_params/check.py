@@ -4,8 +4,8 @@ import tempfile
 import weakref
 
 import numpy as np
-import parameter_probe as native
 from pyalps import hdf5, ngs
+import parameter_probe as native
 
 empty = native.empty_vectors()
 for key, kind in {"integer": "i", "real": "f", "complex": "c", "boolean": "b", "text": "U"}.items():

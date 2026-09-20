@@ -23,9 +23,7 @@
 
 /// deserialize a boost::numeric::ublas::vector container
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 template <class T, class STORAGE>
 inline alps::IDump& operator >> (alps::IDump& dump,
@@ -48,8 +46,6 @@ inline alps::ODump& operator << (alps::ODump& dump,
   return dump;
 }          
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // OSIRIS_BOOST_UBLAS_H

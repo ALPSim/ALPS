@@ -18,7 +18,7 @@
 #   DEALINGS IN THE SOFTWARE.
 
 if(LAPACK_FOUND)
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
+
   add_library(spinmc_impl STATIC abstract_fitter.C base_incr_fitter.C
 		 dummy_fitter.C est_grad_fitter.C fitting_scheduler.C spinmc_factory.C)
   target_link_libraries(spinmc_impl alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
@@ -26,7 +26,7 @@ if(LAPACK_FOUND)
   add_executable(spinmc_evaluate spinmc_evaluate.C)
   target_link_libraries(spinmc spinmc_impl)
   target_link_libraries(spinmc_evaluate spinmc_impl)
-  install(TARGETS spinmc spinmc_evaluate RUNTIME DESTINATION bin COMPONENT applications)
+  install(TARGETS spinmc spinmc_evaluate RUNTIME_DEPENDENCY_SET alps_runtime RUNTIME DESTINATION bin COMPONENT applications)
 else(LAPACK_FOUND)
   message(STATUS "spins will not be built since lapack library is not found")
 endif(LAPACK_FOUND)

@@ -32,9 +32,6 @@
 #include <alps/ngs/thread_exceptions.hpp>
 #include <alps/ngs/observablewrappers.hpp> // TODO: remove!
 
-#ifdef ALPS_NGS_USE_NEW_ALEA
-	#include <alps/ngs/accumulator.hpp>
-#else
 	namespace alps {
 		namespace accumulator {
 
@@ -51,7 +48,6 @@
 			typedef ::alps::ngs::SignedSimpleRealVectorObservable SignedSimpleRealVectorObservable;
 		}
 	}
-#endif
 
 // #include <alps/mcbase.hpp>
 // #include <alps/parseargs.hpp>

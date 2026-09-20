@@ -38,11 +38,10 @@
 #include <string.h>
 /* 2021-07-20 by ST */
 #include "xdrcore.h"
-#include <libintl.h>
 #include <limits.h>
 #include <wchar.h>
 
-#define LASTUNSIGNED	((u_int)0-1)
+#define LASTUNSIGNED	((alps_xdr_uint)0-1)
 
 
 /*
@@ -55,19 +54,19 @@
 bool_t
 xdr_array (XDR *xdrs,
 	   /* array pointer */
-	   caddr_t *addrp,
+	   alps_xdr_address *addrp,
 	   /* number of elements */
-	   u_int *sizep,
+	   alps_xdr_uint *sizep,
 	   /* max numberof elements */
-	   u_int maxsize,
+	   alps_xdr_uint maxsize,
 	   /* size in bytes of each element */
-	   u_int elsize,
+	   alps_xdr_uint elsize,
 	   /* xdr routine to handle each element */
 	   xdrproc_t elproc)
 {
-  u_int i;
-  caddr_t target = *addrp;
-  u_int c;		/* the actual element count */
+  alps_xdr_uint i;
+  alps_xdr_address target = *addrp;
+  alps_xdr_uint c;		/* the actual element count */
   bool_t stat = TRUE;
 
   /* like strings, arrays are really counted arrays */
@@ -98,7 +97,7 @@ xdr_array (XDR *xdrs,
 	*addrp = target = calloc (c, elsize);
 	if (target == NULL)
 	  {
-	    (void) __fxprintf (NULL, "%s: %s", __func__, "out of memory\n");
+	    (void) fprintf (stderr, "%s: %s", __func__, "out of memory\n");
 	    return FALSE;
 	  }
 	break;
@@ -128,11 +127,6 @@ xdr_array (XDR *xdrs,
     }
   return stat;
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_array)
-#else
-libc_hidden_nolink_sunrpc (xdr_array, GLIBC_2_0)
-#endif
 
 /*
  * xdr_vector():
@@ -145,10 +139,10 @@ libc_hidden_nolink_sunrpc (xdr_array, GLIBC_2_0)
  * > xdr_elem: routine to XDR each element
  */
 bool_t
-xdr_vector (XDR *xdrs, char *basep, u_int nelem, u_int elemsize,
+xdr_vector (XDR *xdrs, char *basep, alps_xdr_uint nelem, alps_xdr_uint elemsize,
 	    xdrproc_t xdr_elem)
 {
-  u_int i;
+  alps_xdr_uint i;
   char *elptr;
 
   elptr = basep;
@@ -162,4 +156,3 @@ xdr_vector (XDR *xdrs, char *basep, u_int nelem, u_int elemsize,
     }
   return TRUE;
 }
-libc_hidden_nolink_sunrpc (xdr_vector, GLIBC_2_0)

@@ -71,7 +71,7 @@ bool same_values(StringValue const& x, StringValue const& y, double eps)
     expression::Expression<double> expry(y);
     expression::ParameterEvaluator<double> eval(Parameters(),false);
     if (exprx.can_evaluate(eval) && expry.can_evaluate(eval)) {
-      return std::abs(exprx.value()-expry.value()) <= eps*std::max(std::abs(exprx.value()),std::abs(expry.value())) ;
+      return std::abs(exprx.value()-expry.value()) <= eps*(std::max)(std::abs(exprx.value()),std::abs(expry.value())) ;
     } else {
       return x==y;
     }

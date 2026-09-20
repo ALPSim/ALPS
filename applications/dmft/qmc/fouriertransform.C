@@ -14,6 +14,7 @@
  *****************************************************************************/
 
 
+#include <boost/math/constants/constants.hpp>
 #include <alps/config.h> // needed to set up correct bindings
 #include <boost/numeric/bindings/ublas.hpp>
 #include <boost/numeric/bindings/lapack/driver/gesv.hpp>
@@ -47,13 +48,13 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
         } 
         else {
           for (unsigned int k=0; k<N_omega; k++) {
-            std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
+            std::complex<double> iw(0,(2*k+1)*boost::math::constants::pi<double>()/beta_);
             G_omega_no_model(k,s1,s2,f) -= f_omega(iw, c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2]);
           } 
           for (unsigned int i=0; i<N_tau; i++) {
             G_tau(i,s1,s2,f) = f_tau(i*dt, beta_, c1_[f][s1][s2], c2_[f][s1][s2], c3_[f][s1][s2]); 
             for (unsigned int k=0; k<N_omega; k++) {
-              double wt((2*k+1)*i*M_PI/N_tau);
+              double wt((2*k+1)*i*boost::math::constants::pi<double>()/N_tau);
               G_tau(i,s1,s2,f) += 2/beta_*(cos(wt)*G_omega_no_model(k,s1,s2,f).real()+
                                            sin(wt)*G_omega_no_model(k,s1,s2,f).imag());
             }
@@ -163,7 +164,7 @@ void FourierTransformer::forward_ft(const itime_green_function_t & gtau, matsuba
         v_omega.assign(N_omega, 0);
         
         for (int k=0; k<N_omega; k++) {
-          std::complex<double> iw(0, M_PI*(2*k+1)/beta_);
+          std::complex<double> iw(0, boost::math::constants::pi<double>()*(2*k+1)/beta_);
           for (int n=1; n<N; n++) {
             v_omega[k] += exp(iw*(n*dt))*(v2[n+1]-2*v2[n]+v2[n-1]); //partial integration, four times. Then approximate the fourth derivative by finite differences
           }
@@ -191,7 +192,7 @@ void FourierTransformer::append_tail(matsubara_green_function_t& G_omega,
       << " " << Sc1_[flavor][k][k]
       << " " << Sc2_[flavor][k][k] << std::endl;
       for (frequency_t freq=nfreq_measured; freq<G0_omega.nfreq(); ++freq) {
-        std::complex<double> iw(0,(2*freq+1)*M_PI/beta_);
+        std::complex<double> iw(0,(2*freq+1)*boost::math::constants::pi<double>()/beta_);
         std::complex<double> Sigma = Sc0_[flavor][k][k] + Sc1_[flavor][k][k]/iw + Sc2_[flavor][k][k]/(iw*iw);
         G_omega(freq, k, k, flavor) = 1./(1./G0_omega(freq, k, k, flavor) - Sigma);
       }

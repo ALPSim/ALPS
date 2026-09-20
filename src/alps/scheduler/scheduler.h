@@ -22,6 +22,7 @@
 // tasks to be performed
 //=======================================================================
 
+#include <alps/export.h>
 #include <alps/config.h>
 #include <alps/scheduler/factory.h>
 #include <alps/scheduler/options.h>
@@ -166,7 +167,7 @@ private:
 // a scheduler for a single task
 //-----------------------------------------------------------------------
 
-class ALPS_DECL SingleScheduler : public Scheduler 
+class ALPS_DECL SingleScheduler : public Scheduler
 {
 public:
   SingleScheduler(const NoJobfileOptions&,const Factory&);
@@ -189,7 +190,7 @@ private:
 // a scheduler for a single CPU, finishes one simulation after the other
 //-----------------------------------------------------------------------
 
-class SerialScheduler : public MasterScheduler 
+class ALPS_DECL SerialScheduler : public MasterScheduler
 {
 public:
   SerialScheduler(const Options&,const Factory&);
@@ -207,7 +208,7 @@ public:
 //-----------------------------------------------------------------------
 
 
-class ALPS_DECL MPPScheduler : public MasterScheduler 
+class ALPS_DECL MPPScheduler : public MasterScheduler
 {
   private:
 

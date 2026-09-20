@@ -105,9 +105,7 @@ site_basis<I,STATE>::site_basis(const SiteBasisDescriptor<I>& b)
 
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 template <class I, class STATE>
 std::ostream& operator<<(std::ostream& out, const alps::site_basis<I,STATE>& s)
@@ -123,8 +121,6 @@ std::ostream& operator<<(std::ostream& out, const alps::site_basis<I,STATE>& s)
   return out;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // namespace alps
-#endif
 
 #endif

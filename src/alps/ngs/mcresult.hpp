@@ -17,10 +17,6 @@
 #include <alps/hdf5/archive.hpp>
 #include <alps/ngs/config.hpp>
 #include <alps/ngs/mcobservable.hpp>
-
-// #ifdef ALPS_NGS_USE_NEW_ALEA
-//     #include <alps/ngs/alea/accumulator_set.hpp>
-// #endif
 #include <alps/alea/observable_fwd.hpp>
 #include <alps/type_traits/covariance_type.hpp>
 
@@ -121,9 +117,6 @@ namespace alps {
 
             mcresult();
             mcresult(Observable const * obs);
-            // #ifdef ALPS_NGS_USE_NEW_ALEA
-            //     mcresult(alps::accumulator::detail::accumulator_wrapper const & acc_wrapper);
-            // #endif
             mcresult(mcresult const & rhs);
             mcresult(mcobservable const & rhs);
 

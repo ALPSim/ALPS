@@ -35,9 +35,7 @@ namespace alps {
                 , communicator(comm)
                 , schedule_checker(check)
                 , clone(comm.rank())
-#ifndef ALPS_NGS_USE_NEW_ALEA
                 , binnumber(parameters["BINNUMBER"] | 128)
-#endif
             {}
 
             double fraction_completed() const {
@@ -66,23 +64,11 @@ namespace alps {
             typename Base::results_type collect_results(typename Base::result_names_type const & names) const {
                 typename Base::results_type partial_results;
                 for(typename Base::result_names_type::const_iterator it = names.begin(); it != names.end(); ++it) {
-                    #ifdef ALPS_NGS_USE_NEW_ALEA
-                        if (communicator.rank() == 0) {
-                            if (this->measurements[*it].count()) {
-                                typename Base::observable_collection_type::value_type merged = this->measurements[*it];
-                                merged.collective_merge(communicator, 0);
-                                partial_results.insert(*it, merged.result());
-                            } else
-                                partial_results.insert(*it, this->measurements[*it].result());
-                        } else if (this->measurements[*it].count())
-                            this->measurements[*it].collective_merge(communicator, 0);
-                    #else
                         alps::mcresult result(this->measurements[*it]); // TODO: use Base::collect_results
                         if (result.count())
                             partial_results.insert(*it, result.reduce(communicator, binnumber));
                         else
                             partial_results.insert(*it, result);
-                    #endif
                 }
                 return partial_results;
             }
@@ -94,9 +80,7 @@ namespace alps {
             ScheduleChecker schedule_checker;
             double fraction;
             int clone;
-#ifndef ALPS_NGS_USE_NEW_ALEA
             std::size_t binnumber;
-#endif
     };
 }
 

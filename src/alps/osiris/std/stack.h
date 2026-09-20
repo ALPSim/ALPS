@@ -22,9 +22,7 @@
 
 #include <stack>
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 template <class T, class Sequence>
 inline alps::IDump& operator>>(alps::IDump& dump, std::stack<T,Sequence>& x)
@@ -51,8 +49,6 @@ inline alps::ODump& operator<<(alps::ODump& dump, const std::stack<T,Sequence>& 
   return dump;
 }          
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // OSIRIS_STD_STACK_HPP

@@ -200,9 +200,7 @@ inline half_integer<I> abs(const half_integer<I>& x)
 } // namespace alps
 
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 template <class I>
 inline bool operator==(double x, const alps::half_integer<I>& y)
@@ -277,8 +275,6 @@ inline std::istream& operator>>(std::istream& is, alps::half_integer<I>& x)
   return is;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif

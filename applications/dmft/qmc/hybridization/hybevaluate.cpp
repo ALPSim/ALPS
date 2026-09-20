@@ -14,6 +14,7 @@
  *
  *****************************************************************************/
 
+#include <boost/math/constants/constants.hpp>
 #include "hyb.hpp"
 #include "hybevaluate.hpp"
 #include <alps/config.h>
@@ -161,21 +162,10 @@ void evaluate_time(const alps::results_type<hybridization>::type &results,
     boost::numeric::ublas::matrix<double> cov(N_t+1, N_t+1);
     std::stringstream g_name; g_name<<"g_"<<i;
 
-#ifdef ALPS_NGS_USE_NEW_ALEA
-    {
-      typedef alps::accumulator::RealVectorObservable::result_type result_type;
-      result_type const & arg = results[g_name.str()].extract<result_type>();
-      if (accurate)
-        cov = arg.accurate_covariance(arg);
-      else
-        cov = arg.covariance(arg);
-    }
-#else
     if (accurate)
       cov=results[g_name.str()].accurate_covariance<std::vector<double> >(results[g_name.str()]);
     else
       cov=results[g_name.str()].covariance<std::vector<double> >(results[g_name.str()]);
-#endif
 
     std::vector<double> data((N_t+1)*(N_t+1));
     for(std::size_t t1=0; t1<=N_t; t1++)
@@ -188,21 +178,10 @@ void evaluate_time(const alps::results_type<hybridization>::type &results,
     solver_output<<alps::make_pvp(data_path.str(), data);
     g_name.str(""); g_name<<"f_"<<i;
 
-#ifdef ALPS_NGS_USE_NEW_ALEA
-    {
-      typedef alps::accumulator::RealVectorObservable::result_type result_type;
-      result_type const & arg = results[g_name.str()].extract<result_type>();
-      if (accurate)
-        cov = arg.accurate_covariance(arg);
-      else
-        cov = arg.covariance(arg);
-    }
-#else
     if (accurate)
       cov=results[g_name.str()].accurate_covariance<std::vector<double> >(results[g_name.str()]);
     else
       cov=results[g_name.str()].covariance<std::vector<double> >(results[g_name.str()]);      
-#endif
 
     for(std::size_t t1=0; t1<=N_t; t1++)
       for(std::size_t t2=0; t2<=N_t; t2++)
@@ -299,7 +278,7 @@ void evaluate_freq(const alps::results_type<hybridization>::type &results,
     
   std::ofstream Gw_file("Gw.dat");
   for(std::size_t n=0;n<N_w;++n){
-    Gw_file<<(2.*n+1)*M_PI/beta;
+    Gw_file<<(2.*n+1)*boost::math::constants::pi<double>()/beta;
     for(std::size_t j=0;j<n_orbitals;++j){
       Gw_file<<" "<<G_omega(n,0,0,j).real()<<" "<<G_omega(n,0,0,j).imag();
     }
@@ -309,7 +288,7 @@ void evaluate_freq(const alps::results_type<hybridization>::type &results,
 
   std::ofstream Fw_file("Fw.dat");
   for(std::size_t n=0;n<N_w;++n){
-    Fw_file<<(2.*n+1)*M_PI/beta;
+    Fw_file<<(2.*n+1)*boost::math::constants::pi<double>()/beta;
     for(std::size_t j=0;j<n_orbitals;++j){
       Fw_file<<" "<<F_omega(n,0,0,j).real()<<" "<<F_omega(n,0,0,j).imag();
     }
@@ -319,7 +298,7 @@ void evaluate_freq(const alps::results_type<hybridization>::type &results,
 
   std::ofstream Sw_file("Sw.dat");
   for(std::size_t n=0;n<N_w;++n){
-    Sw_file<<(2.*n+1)*M_PI/beta;
+    Sw_file<<(2.*n+1)*boost::math::constants::pi<double>()/beta;
     for(std::size_t j=0;j<n_orbitals;++j){
       Sw_file<<" "<<S_omega(n,0,0,j).real()<<" "<<S_omega(n,0,0,j).imag();
     }
@@ -443,7 +422,7 @@ void evaluate_legendre(const alps::results_type<hybridization>::type &results,
     Ftl_file.close();
     std::ofstream Gw_file("Gwl.dat");
     for(std::size_t t=0;t<N_w;++t){
-      Gw_file<<(2.*t+1)*M_PI/beta;
+      Gw_file<<(2.*t+1)*boost::math::constants::pi<double>()/beta;
       for(std::size_t j=0;j<n_orbitals;++j){
         Gw_file<<" "<<G_l_omega(t,0,0,j).real()<<" "<<G_l_omega(t,0,0,j).imag();
       }
@@ -452,7 +431,7 @@ void evaluate_legendre(const alps::results_type<hybridization>::type &results,
     Gw_file.close();
     std::ofstream Fw_file("Fwl.dat");
     for(std::size_t t=0;t<N_w;++t){
-      Fw_file<<(2.*t+1)*M_PI/beta;
+      Fw_file<<(2.*t+1)*boost::math::constants::pi<double>()/beta;
       for(std::size_t j=0;j<n_orbitals;++j){
         Fw_file<<" "<<F_l_omega(t,0,0,j).real()<<" "<<F_l_omega(t,0,0,j).imag();
       }
@@ -461,7 +440,7 @@ void evaluate_legendre(const alps::results_type<hybridization>::type &results,
     Fw_file.close();
     std::ofstream Sw_file("Swl.dat");
     for(std::size_t t=0;t<N_w;++t){
-      Sw_file<<(2.*t+1)*M_PI/beta;
+      Sw_file<<(2.*t+1)*boost::math::constants::pi<double>()/beta;
       for(std::size_t j=0;j<n_orbitals;++j){
         Sw_file<<" "<<S_l_omega(t,0,0,j).real()<<" "<<S_l_omega(t,0,0,j).imag();
       }
@@ -543,7 +522,7 @@ void evaluate_nnw(const alps::results_type<hybridization>::type &results,
     nnw_file << std::endl;
     for(std::size_t m=0;m<N_W;++m){
       pos=0;
-      double wm=2*m*M_PI/beta;
+      double wm=2*m*boost::math::constants::pi<double>()/beta;
       nnw_file << wm;
       for(std::size_t i=0;i<n_orbitals;++i)
         for(std::size_t j=0;j<=i;++j)

@@ -19,7 +19,7 @@
 
 add_executable(simplemc main.C evaluator.C ising.C xy.C heisenberg.C)
 target_link_libraries(simplemc alps)
-install(TARGETS simplemc RUNTIME DESTINATION bin COMPONENT applications)
+install(TARGETS simplemc RUNTIME_DEPENDENCY_SET alps_runtime RUNTIME DESTINATION bin COMPONENT applications)
 enable_testing()
 add_alps_test(simplemc_ising simplemc ising ising)
 add_alps_test(simplemc_xy simplemc xy xy)

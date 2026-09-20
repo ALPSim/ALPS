@@ -16,6 +16,7 @@
 #ifndef PARAPACK_FACTORY_H
 #define PARAPACK_FACTORY_H
 
+#include <alps/export.h>
 #include "process.h"
 #include <alps/config.h>
 #include <alps/alea.h>
@@ -251,7 +252,7 @@ public:
 // parallel_worker_factory
 //
 
-class parallel_worker_factory : private boost::noncopyable {
+class ALPS_DECL parallel_worker_factory : private boost::noncopyable {
 private:
   typedef boost::shared_ptr<abstract_worker> worker_pointer_type;
   typedef boost::shared_ptr<abstract_parallel_worker_creator> creator_pointer_type;

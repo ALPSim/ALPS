@@ -352,11 +352,9 @@ private:
 } // end namespace parapack
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
 namespace parapack {
 namespace exmc {
-#endif
 
 inline alps::ODump& operator<<(alps::ODump& dp,
   alps::parapack::exmc::inverse_temperature_set const& beta) {
@@ -370,11 +368,9 @@ inline alps::IDump& operator>>(alps::IDump& dp,
   return dp;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace exmc
 } // end namespace parapack
 } // end namespace alps
-#endif
 
 namespace alps {
 namespace parapack {
@@ -512,11 +508,9 @@ private:
 } // end namespace alps
 
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
 namespace parapack {
 namespace exmc {
-#endif
 
 inline alps::ODump& operator<<(alps::ODump& dp, alps::parapack::exmc::exchange_steps const& mcs) {
   mcs.save(dp);
@@ -528,11 +522,9 @@ inline alps::IDump& operator>>(alps::IDump& dp, alps::parapack::exmc::exchange_s
   return dp;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace exmc
 } // end namespace parapack
 } // end namespace alps
-#endif
 
 
 namespace alps {
@@ -883,7 +875,7 @@ public:
       nrep_max_ = 0;
       for (int p = 0; p < comm_.size(); ++p) {
         boost::tie(nreps_[p], offsets_[p]) = calc_nrep(p);
-        nrep_max_ = std::max(nrep_max_, nreps_[p]);
+        nrep_max_ = (std::max)(nrep_max_, nreps_[p]);
       }
       std::cout << "EXMC: number of replicas = " << nrep << std::endl
                 << "EXMC: number of replicas on each process = "

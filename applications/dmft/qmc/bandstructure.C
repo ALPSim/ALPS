@@ -11,6 +11,7 @@
 *
 *****************************************************************************/
  
+#include <boost/math/constants/constants.hpp>
 #include<iostream>
 #include "bandstructure.h"
 
@@ -324,13 +325,13 @@ boost::shared_ptr<Bandstructure> BandstructureFactory(const alps::Parameters& pa
 
 // static data member initialization
 
-const double SquareLatticeBandstructure::kx_min=-M_PI;
-const double SquareLatticeBandstructure::ky_min=-M_PI;
-const double SquareLatticeBandstructure::kx_max=M_PI;
-const double SquareLatticeBandstructure::ky_max=M_PI;
+const double SquareLatticeBandstructure::kx_min=-boost::math::constants::pi<double>();
+const double SquareLatticeBandstructure::ky_min=-boost::math::constants::pi<double>();
+const double SquareLatticeBandstructure::kx_max=boost::math::constants::pi<double>();
+const double SquareLatticeBandstructure::ky_max=boost::math::constants::pi<double>();
 
 
-const double HexagonalLatticeBandstructure::kx_min=-M_PI;
-const double HexagonalLatticeBandstructure::ky_min=-M_PI/2.;
-const double HexagonalLatticeBandstructure::kx_max=M_PI;
-const double HexagonalLatticeBandstructure::ky_max=M_PI/2.;
+const double HexagonalLatticeBandstructure::kx_min=-boost::math::constants::pi<double>();
+const double HexagonalLatticeBandstructure::ky_min=-boost::math::constants::pi<double>()/2.;
+const double HexagonalLatticeBandstructure::kx_max=boost::math::constants::pi<double>();
+const double HexagonalLatticeBandstructure::ky_max=boost::math::constants::pi<double>()/2.;

@@ -13,6 +13,7 @@
  *
  *****************************************************************************/
 
+#include <boost/math/constants/constants.hpp>
 #include "hybmatrix.hpp"
 
 void hybmatrix::measure_Gw(std::vector<double> &Gwr, std::vector<double> &Gwi , std::vector<double> &Fwr, std::vector<double> &Fwi , const std::map<double,double> &F_prefactor, double sign) const{
@@ -29,8 +30,8 @@ void hybmatrix::measure_Gw(std::vector<double> &Gwr, std::vector<double> &Gwi , 
     cdagger_times[it->second] = it->first;
   }
 
-  for(int i=0;i<size();++i){ c_exp      [i]=std::exp(std::complex<double>(0,  M_PI*c_times      [i]/beta_)); }
-  for(int i=0;i<size();++i){ cdagger_exp[i]=std::exp(std::complex<double>(0, -M_PI*cdagger_times[i]/beta_)); }
+  for(int i=0;i<size();++i){ c_exp      [i]=std::exp(std::complex<double>(0,  boost::math::constants::pi<double>()*c_times      [i]/beta_)); }
+  for(int i=0;i<size();++i){ cdagger_exp[i]=std::exp(std::complex<double>(0, -boost::math::constants::pi<double>()*cdagger_times[i]/beta_)); }
   //measures the Fourier transform of G(tau-tau'):=-<T c(tau) c^dagger(tau')>
   for (int i = 0; i < size(); i++) {
     //note: strictly F_prefactor should be evaluated for cdagger_times for F(tau)
@@ -43,7 +44,7 @@ void hybmatrix::measure_Gw(std::vector<double> &Gwr, std::vector<double> &Gwi , 
       std::complex<double> exp=c_exp[i]*cdagger_exp[j];
       std::complex<double> dexp=exp*exp;
       for(std::size_t wn=0; wn<Gwr.size(); wn++){
-        //std::complex<double> meas = -M_ji*std::exp(std::complex<double>(0,(2.*wn+1)*M_PI/beta_*(c_times[i]-cdagger_times[j])))/beta_;
+        //std::complex<double> meas = -M_ji*std::exp(std::complex<double>(0,(2.*wn+1)*boost::math::constants::pi<double>()/beta_*(c_times[i]-cdagger_times[j])))/beta_;
         std::complex<double> meas = -M_ji*exp/beta_;
         Gwr[wn] += meas.real();
         Gwi[wn] += meas.imag();
@@ -76,8 +77,8 @@ void hybmatrix::measure_G2w(std::vector<std::complex<double> > &G2w, std::vector
   memset(&(G2w[0]),0, G2w.size()*sizeof(std::complex<double>));
   memset(&(F2w[0]),0, F2w.size()*sizeof(std::complex<double>));
 
-  double w_ini = (2*(-N_w2/2)+1)*M_PI/beta_;
-  double w_inc = 2*M_PI/beta_;
+  double w_ini = (2*(-N_w2/2)+1)*boost::math::constants::pi<double>()/beta_;
+  double w_inc = 2*boost::math::constants::pi<double>()/beta_;
   for(int i=0;i<size();++i){ c_exp_ini      [i]=std::exp(std::complex<double>(0,  w_ini*c_times      [i])); }
   for(int i=0;i<size();++i){ c_exp_inc      [i]=std::exp(std::complex<double>(0,  w_inc*c_times      [i])); }
   for(int i=0;i<size();++i){ cdagger_exp_ini[i]=std::exp(std::complex<double>(0, -w_ini*cdagger_times[i])); }

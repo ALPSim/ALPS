@@ -23,6 +23,7 @@
 #ifndef OSIRIS_MPDUMP_H
 #define OSIRIS_MPDUMP_H
 
+#include <alps/export.h>
 #include <alps/config.h>
 #include <alps/osiris/dump.h>
 #include <alps/osiris/process.h>
@@ -37,7 +38,7 @@ namespace alps {
 // they can be received as an alps::IDump
 //-----------------------------------------------------------------------
 
-class OMPDump : public ODump
+class ALPS_DECL OMPDump : public ODump
 {
 public:
   OMPDump(); 
@@ -90,7 +91,7 @@ private:
 // can be received as a message
 //-----------------------------------------------------------------------
 
-class IMPDump : public IDump
+class ALPS_DECL IMPDump : public IDump
 {
 public:
   

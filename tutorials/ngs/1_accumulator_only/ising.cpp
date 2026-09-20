@@ -13,7 +13,8 @@
 
 #include "ising.hpp"
 
-#include <boost/lambda/lambda.hpp>
+#include <cmath>
+#include <sstream>
 
 ising_sim::ising_sim(parameters_type const & params)
     : parameters(params)
@@ -28,11 +29,11 @@ ising_sim::ising_sim(parameters_type const & params)
     for(int i = 0; i < length; ++i)
         spins[i] = (random() < 0.5 ? 1 : -1);
     measurements
-        << alps::accumulator::RealObservable("Energy")
-        << alps::accumulator::RealObservable("Magnetization")
-        << alps::accumulator::RealObservable("Magnetization^2")
-        << alps::accumulator::RealObservable("Magnetization^4")
-        << alps::accumulator::RealVectorObservable("Correlations")
+        << alps::ngs::RealObservable("Energy")
+        << alps::ngs::RealObservable("Magnetization")
+        << alps::ngs::RealObservable("Magnetization^2")
+        << alps::ngs::RealObservable("Magnetization^4")
+        << alps::ngs::RealVectorObservable("Correlations")
     ;
 }
 
@@ -105,7 +106,7 @@ ising_sim::results_type ising_sim::collect_results() const {
 ising_sim::results_type ising_sim::collect_results(result_names_type const & names) const {
     results_type partial_results;
     for(result_names_type::const_iterator it = names.begin(); it != names.end(); ++it)
-        partial_results[*it] = measurements[*it].result());
+        partial_results.insert(*it, alps::mcresult(measurements[*it]));
     return partial_results;
 }
 

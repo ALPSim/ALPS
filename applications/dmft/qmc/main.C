@@ -31,9 +31,7 @@
 #include <fstream>
 #include <cassert>
 #include <stdio.h>
-#ifdef BOOST_MSVC
-#include <direct.h>
-#endif
+#include <boost/filesystem/operations.hpp>
 
 #include "interaction_expansion/interaction_expansion.hpp"
 
@@ -87,7 +85,7 @@ int main(int argc, char** argv)
     }
     // set working directory
     boost::filesystem::path p(static_cast<std::string>(parms["BASENAME"]));
-    chdir(p.parent_path().string().c_str());
+    boost::filesystem::current_path(p.parent_path());
 
     //perform selfconsistency loop in...
     if(!parms.defined("CLUSTER_LOOP")) {

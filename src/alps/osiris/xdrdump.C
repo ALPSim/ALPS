@@ -18,24 +18,15 @@
 #include <alps/osiris/std/string.h>
 
 #include <boost/throw_exception.hpp>
-#include <boost/static_assert.hpp>
+#include <cstdint>
+#include <cstring>
 #include <cstdio>
 #include <stdexcept>
 #include <string>
 
 namespace alps {
 
-#ifdef BOOST_HAS_LONG_LONG
-
-namespace {
-
-void static_assertion() {
-  BOOST_STATIC_ASSERT(sizeof(long long) == 8);
-}
-    
-} // end namespace
-
-#endif
+static_assert(sizeof(long long) == 8, "XDR requires 64-bit long long");
 
 namespace detail {
 
@@ -71,52 +62,26 @@ static bool xdr_s_char(XDR *xdrs, signed char *scp)
   return false;
 }
 
-bool xdr_hyper(XDR *xdrs, long long *llp)
+bool xdr_u_hyper(XDR *xdrs, unsigned long long *value)
 {
-#if defined( __LP64__ ) && defined(__APPLE__)
-  int t1;
-  unsigned int t2;
-#else
-  long t1;
-  unsigned long t2;
-#endif
+  uint32_t high = 0, low = 0;
   if (xdrs->x_op == XDR_ENCODE) {
-    t1 = (long)((*llp) >> 32);
-    t2 = (unsigned long)(*llp - (((long long) t1) << 32));
-    return (::xdr_long(xdrs, &t1) && ::xdr_u_long(xdrs, &t2));
-  } else if (xdrs->x_op == XDR_DECODE) {
-    if (!::xdr_long(xdrs, &t1) || !::xdr_u_long(xdrs, &t2)) return false;
-    *llp = ((long long) t1) << 32;
-    *llp |= t2;
-    return true;
-  } else if (xdrs->x_op == XDR_FREE) {
-    return true;
+    high = static_cast<uint32_t>(*value >> 32);
+    low = static_cast<uint32_t>(*value);
   }
-  return false;
+  if (!::xdr_uint32_t(xdrs, &high) || !::xdr_uint32_t(xdrs, &low)) return false;
+  if (xdrs->x_op == XDR_DECODE)
+    *value = (static_cast<unsigned long long>(high) << 32) | low;
+  return true;
 }
 
-bool xdr_u_hyper(XDR *xdrs, unsigned long long *llp)
+bool xdr_hyper(XDR *xdrs, long long *value)
 {
-#if defined(__LP64__) && defined(__APPLE__)
-  unsigned int t1;
-  unsigned int t2;
-#else
-  unsigned long t1;
-  unsigned long t2;
-#endif
-  if (xdrs->x_op == XDR_ENCODE) {
-    t1 = (unsigned long)((*llp) >> 32);
-    t2 = (unsigned long)(*llp - (((unsigned long long) t1) << 32));
-    return (::xdr_u_long(xdrs, &t1) && ::xdr_u_long(xdrs, &t2));
-  } else if (xdrs->x_op == XDR_DECODE) {
-    if (!::xdr_u_long(xdrs, &t1) || !::xdr_u_long(xdrs, &t2)) return false;
-    *llp = ((unsigned long long) t1) << 32;
-    *llp |= t2;
-    return true;
-  } else if (xdrs->x_op == XDR_FREE) {
-    return true;
-  }
-  return false;
+  unsigned long long bits = 0;
+  if (xdrs->x_op == XDR_ENCODE) std::memcpy(&bits, value, sizeof(bits));
+  if (!alps::detail::xdr_u_hyper(xdrs, &bits)) return false;
+  if (xdrs->x_op == XDR_DECODE) std::memcpy(value, &bits, sizeof(bits));
+  return true;
 }
 
 bool xdr_long_8(XDR *xdrs, long *lp)
@@ -188,13 +153,9 @@ ALPS_DUMP_DO_TYPE(short, xdr_short)
 ALPS_DUMP_DO_TYPE(unsigned short, xdr_u_short)
 ALPS_DUMP_DO_TYPE(int, xdr_int)
 ALPS_DUMP_DO_TYPE(unsigned int, xdr_u_int)
-#if defined (__LP64__) && defined(__APPLE__)
-ALPS_DUMP_DO_TYPE_N(int, 4, xdr_long)
-ALPS_DUMP_DO_TYPE_N(unsigned int, 4, xdr_u_long)
-#else
 ALPS_DUMP_DO_TYPE_N(long, 4, xdr_long)
 ALPS_DUMP_DO_TYPE_N(unsigned long, 4, xdr_u_long)
-#endif
+
 ALPS_DUMP_DO_TYPE_N(long, 8, xdr_long_8)
 ALPS_DUMP_DO_TYPE_N(unsigned long, 8, xdr_u_long_8)
 #ifdef BOOST_HAS_LONG_LONG

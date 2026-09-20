@@ -82,7 +82,7 @@ struct XMLTag
 
 
 /// reads an XML tag or attribute name from a \c std::istream
-std::string parse_identifier(std::istream& in);
+ALPS_DECL std::string parse_identifier(std::istream& in);
 
 /// \brief reads an ALPS parameter name from a \c std::istream
 /// 
@@ -97,7 +97,7 @@ ALPS_DECL std::string parse_parameter_name(std::istream& in);
 /// \param end the character until which should be read
 /// \return  string containing the characters read, excluding leading and trailing whitespace 
 /// and excluding the terminating character \a end.
-std::string read_until(std::istream& in, char end);
+ALPS_DECL std::string read_until(std::istream& in, char end);
 
 /// \brief checks that the next character read from the stream.
 /// \param in the stream to be read

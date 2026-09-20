@@ -27,7 +27,7 @@ include_directories(${PROJECT_SOURCE_DIR}/tool/alea)
     add_executable(${program} ${program}.cpp)
     add_dependencies(${program} alps)
     target_link_libraries(${program} alps)
-    #install(TARGETS ${program} RUNTIME DESTINATION bin COMPONENT tools) 
+    #install(TARGETS ${program} RUNTIME_DEPENDENCY_SET alps_runtime RUNTIME DESTINATION bin COMPONENT tools)
   ENDFOREACH(program)
 
 

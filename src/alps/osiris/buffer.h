@@ -17,16 +17,17 @@
 #ifndef OSIRIS_BUFFER_H
 #define OSIRIS_BUFFER_H
 
+#include <alps/export.h>
 #include <alps/config.h>
 #include <vector>
 
 namespace alps {
 namespace detail {
 
-class Buffer;
+class ALPS_DECL Buffer;
 
 /** a simple Buffer class. values can be written into it or read from it. */
-class Buffer : public std::vector<char>
+class ALPS_DECL Buffer : public std::vector<char>
 {
   public:
   /** create a buffer. */

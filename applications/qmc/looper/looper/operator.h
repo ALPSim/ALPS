@@ -151,9 +151,7 @@ bool is_bond(const local_operator<QMC, LOC_G, TIME>& op) { return op.is_bond(); 
 
 } // end namespace looper
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace looper {
-#endif
 
 template<class QMC, class LOC_G, class TIME>
 alps::ODump& operator<<(alps::ODump& dump,
@@ -165,8 +163,6 @@ alps::IDump& operator>>(alps::IDump& dump,
                         looper::local_operator<QMC, LOC_G, TIME>& op)
 { op.load(dump); return dump; }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace looper
-#endif
 
 #endif // LOOPER_TYPE_H

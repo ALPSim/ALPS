@@ -48,10 +48,8 @@ inline Term<T> Evaluatable<T>::term() const { return Term<T>(); }
 } // end namespace expression
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
 namespace expression {
-#endif
 
 template<class T>
 inline std::ostream& operator<<(std::ostream& os, const alps::expression::Evaluatable<T>& e)
@@ -60,9 +58,7 @@ inline std::ostream& operator<<(std::ostream& os, const alps::expression::Evalua
   return os;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace expression
 } // end namespace alps
-#endif
 
 #endif // ! ALPS_EXPRESSION_IMPL_H

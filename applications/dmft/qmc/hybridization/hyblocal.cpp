@@ -13,6 +13,7 @@
  *
  *****************************************************************************/
 
+#include <boost/math/constants/constants.hpp>
 #include"hyblocal.hpp"
 #include<algorithm>
 
@@ -587,7 +588,7 @@ void local_configuration::measure_nnw(int i, std::vector<double> &nnw_re, double
   if(N_W == 1) return;
   for(segment_container_t::const_iterator it=segments_[i].begin();it!=segments_[i].end();++it){//same contribution for winding segments
     double wm=0;
-    double dw=2*M_PI/beta_;
+    double dw=2*boost::math::constants::pi<double>()/beta_;
     std::complex<double> exp_s=1.;
     std::complex<double> exp_e=1.;
     std::complex<double> dexp_s=std::exp(std::complex<double>(0,dw*it->t_start_) );

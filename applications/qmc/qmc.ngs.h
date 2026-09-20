@@ -16,6 +16,7 @@
 #ifndef ALPS_APPLICATIONS_QMC_NGS_H
 #define ALPS_APPLICATIONS_QMC_NGS_H
 
+#include <boost/math/constants/constants.hpp>
 #include <boost/optional.hpp>
 
 #include <alps/lattice.h>
@@ -704,7 +705,7 @@ bool qmcbase<G,StateType>::do_common_measurements(double sign, const std::vector
         std::complex<double> val;
         for (typename super_type::site_iterator sit=this->sites().first; sit!=this->sites().second;++sit)
         {
-            double phase = M_PI * (super_type::coordinate(*sit)[0] + super_type::coordinate(*sit)[1]);
+            double phase = boost::math::constants::pi<double>() * (super_type::coordinate(*sit)[0] + super_type::coordinate(*sit)[1]);
             val += local[*sit] * (std::complex<double> ( std::cos(phase), std::sin(phase) ));            
         }
         double CBS_order = (std::abs(val) * std::abs(val) * sign) / this->num_sites();

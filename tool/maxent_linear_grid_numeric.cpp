@@ -13,6 +13,7 @@
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/vector.hpp>
 #include <alps/ngs/params.hpp>
+#include <boost/filesystem.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -83,8 +84,8 @@ int main() {
   p["MAX_TIME"] = 600;
   p["VERBOSE"] = 0;
 
-  const char* tmpdir = std::getenv("TMPDIR");
-  std::string base = std::string(tmpdir ? tmpdir : "/tmp") + "/maxent_lock_check";
+  const std::string base = (boost::filesystem::temp_directory_path() /
+      boost::filesystem::unique_path("maxent-numeric-%%%%%%%%")).string();
   const std::string in_h5 = base + ".h5";
   const std::string out_h5 = base + ".out.h5";
   p["DATA"] = in_h5;
@@ -128,6 +129,8 @@ int main() {
     std::fprintf(stderr, "maxent_lock_check: %d check(s) FAILED\n", failures);
     return 1;
   }
+  std::remove(in_h5.c_str());
+  std::remove(out_h5.c_str());
   std::fprintf(stderr, "maxent_lock_check: PASS\n");
   return 0;
 }

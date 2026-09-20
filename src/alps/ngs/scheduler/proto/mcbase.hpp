@@ -39,11 +39,7 @@ namespace alps {
 
     class mcbase_ng {
         public:
-            // #ifdef ALPS_NGS_USE_NEW_ALEA
-            //     typedef accumulator::accumulator_set observables_type;
-            // #else
-                typedef mcobservables observables_type;
-            // #endif
+            typedef mcobservables observables_type;
         private:
 
             struct lock_guard_impl : boost::noncopyable {

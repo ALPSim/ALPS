@@ -262,9 +262,7 @@ void SiteBasisDescriptor<I>::write_xml(oxstream& os) const
 
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 template <class I>
 inline alps::oxstream& operator<<(alps::oxstream& out, const alps::SiteBasisDescriptor<I>& q)
@@ -281,8 +279,6 @@ inline std::ostream& operator<<(std::ostream& out, const alps::SiteBasisDescript
   return out;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // namespace alps
-#endif
 
 #endif

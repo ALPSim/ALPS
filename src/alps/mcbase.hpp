@@ -28,20 +28,12 @@ namespace alps {
 
         public:
 
-            #ifdef ALPS_NGS_USE_NEW_ALEA
-                typedef alps::accumulator::accumulator_set observable_collection_type;
-            #else
                 typedef alps::mcobservables observable_collection_type;
-            #endif
 
             typedef alps::params parameters_type;
             typedef std::vector<std::string> result_names_type;
 
-            #ifdef ALPS_NGS_USE_NEW_ALEA
-                typedef alps::accumulator::result_set results_type;
-            #else
                 typedef alps::mcresults results_type;
-            #endif
 
             mcbase(parameters_type const & parms, std::size_t seed_offset = 0);
             virtual ~mcbase();

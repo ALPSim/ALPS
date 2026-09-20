@@ -1,3 +1,5 @@
+#include <chrono>
+#include <thread>
 /*****************************************************************************
 *
 * ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -17,15 +19,7 @@
 #include <alps/scheduler/scheduler.h>
 #include <alps/config.h>
 #include <cstdio>
-#ifdef ALPS_HAVE_UNISTD_H
-# include <unistd.h>
-#endif
 
-#if defined(ALPS_HAVE_UNISTD_H)
-# include <unistd.h>
-#elif defined(ALPS_HAVE_WINDOWS_H)
-# include <windows.h>
-#endif
 
 using namespace boost::posix_time;
 
@@ -93,13 +87,7 @@ int MPPScheduler::run()
     if(theTask)
       theTask->run();
     else
-#if defined(ALPS_HAVE_UNISTD_H)
-  sleep(1);    // sleep 1 Sec
-#elif defined(ALPS_HAVE_WINDOWS_H)
-  Sleep(1000); // sleep 1000 mSec
-#else
-# error "sleep not found"
-#endif
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 
     // check if tasks have finished
 

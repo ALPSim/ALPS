@@ -241,7 +241,7 @@ namespace alps {
                             unsigned int v = *it;
                             while ((v = translated_vertex_along_d[v]) != invalid)
                             {
-                                assert( distance_to_boarder[d][*it] < std::numeric_limits<boost::uint_t<8>::fast>::max() && "Overflow in distance_to_boarder!");
+                                assert( distance_to_boarder[d][*it] < (std::numeric_limits<boost::uint_t<8>::fast>::max)() && "Overflow in distance_to_boarder!");
                                 ++distance_to_boarder[d][*it];
                             }
                         }
@@ -308,10 +308,10 @@ namespace alps {
                 template <typename Graph>
                 void get_distance_to_boarder(std::vector<boost::uint_t<8>::fast> & distance, std::vector<typename boost::graph_traits<Graph>::vertex_descriptor> const& pinning, Graph const& G) const
                 {
-                    distance.resize(distance_to_boarder_.size(), std::numeric_limits<boost::uint_t<8>::fast>::max());
+                    distance.resize(distance_to_boarder_.size(), (std::numeric_limits<boost::uint_t<8>::fast>::max)());
                     for(std::size_t d = 0; d < distance_to_boarder_.size(); ++d)
                     {
-                        boost::uint_t<8>::fast dist = std::numeric_limits<boost::uint_t<8>::fast>::max();
+                        boost::uint_t<8>::fast dist = (std::numeric_limits<boost::uint_t<8>::fast>::max)();
                         for (typename std::vector<typename boost::graph_traits<Graph>::vertex_descriptor>::const_iterator it = pinning.begin(); it != pinning.end(); ++it)
                             dist = (std::min)(dist, distance_to_boarder_[d][*it]);
                         distance[d] = dist;

@@ -1,0 +1,77 @@
+name: Native Windows
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  msvc:
+    name: MSVC ${{ matrix.arch }} ${{ matrix.config }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    env:
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/.cache/vcpkg
+      CMAKE_BUILD_PARALLEL_LEVEL: 2
+      CTEST_PARALLEL_LEVEL: 2
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-latest, arch: x64, config: Release }
+          - { os: windows-latest, arch: x64, config: Debug }
+          - { os: windows-11-arm, arch: arm64, config: Release }
+    steps:
+      - uses: actions/checkout@v7
+      - name: Create dependency cache directory
+        shell: pwsh
+        run: New-Item -ItemType Directory -Force $env:VCPKG_DEFAULT_BINARY_CACHE
+      - uses: actions/cache@v6
+        with:
+          path: .cache/vcpkg
+          key: windows-${{ matrix.arch }}-vcpkg-${{ hashFiles('vcpkg.json', 'CMakePresets.json', 'cmake/vcpkg*/**') }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+          architecture: ${{ matrix.arch }}
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
+      - name: Configure SDK
+        shell: pwsh
+        run: |
+          $env:VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
+          cmake --preset windows-${{ matrix.arch }}
+      - name: Build SDK
+        run: cmake --build --preset windows-${{ matrix.arch }} --config ${{ matrix.config }}
+      - name: Test SDK
+        run: ctest --preset windows-${{ matrix.arch }} -C ${{ matrix.config }}
+      - name: Install SDK
+        run: cmake --install _build/windows-${{ matrix.arch }} --config ${{ matrix.config }}
+      - name: Install Python build requirements
+        if: matrix.config == 'Release'
+        run: python -m pip install build nanobind numpy scipy matplotlib h5py pytest scikit-build-core
+      - name: Build Python bindings
+        if: matrix.config == 'Release'
+        shell: pwsh
+        run: |
+          $env:ALPS_DIR = "$pwd/_build/windows-${{ matrix.arch }}/install/share/alps"
+          python -m pip install ./bindings/python/pyalps --no-build-isolation `
+            --config-settings "cmake.define.CMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" `
+            --config-settings "cmake.define.VCPKG_INSTALLED_DIR=$pwd/_build/windows-${{ matrix.arch }}/vcpkg_installed" `
+            --config-settings cmake.define.VCPKG_MANIFEST_MODE=OFF `
+            --config-settings cmake.define.VCPKG_TARGET_TRIPLET=${{ matrix.arch }}-windows
+      - name: Test Python bindings
+        if: matrix.config == 'Release'
+        shell: pwsh
+        run: |
+          $env:ALPS_DIR = "$pwd/_build/windows-${{ matrix.arch }}/install/share/alps"
+          $env:PYALPS_TEST_DOWNSTREAM_EXPORT = '1'
+          $env:ALPS_TEST_CMAKE_ARGS = @('-G', 'Ninja', "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake", "-DVCPKG_INSTALLED_DIR=$pwd/_build/windows-${{ matrix.arch }}/vcpkg_installed", '-DVCPKG_MANIFEST_MODE=OFF', '-DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-windows') | ConvertTo-Json -Compress
+          python -m pytest test/pyalps test/cmake -q
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: native-windows-${{ matrix.arch }}-${{ matrix.config }}-logs
+          path: |
+            _build/windows-${{ matrix.arch }}/Testing/Temporary/**
+            _build/windows-${{ matrix.arch }}/CMakeFiles/CMakeConfigureLog.yaml

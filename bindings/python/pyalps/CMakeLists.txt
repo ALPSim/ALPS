@@ -2,7 +2,10 @@
 # SPDX-License-Identifier: MIT
 
 cmake_minimum_required(VERSION 3.22)
-project(pyalps LANGUAGES CXX)
+# The installed SDK supplies one runtime directory. Per-module vcpkg copies
+# would introduce duplicate DLL paths when CMake collects wheel dependencies.
+set(VCPKG_APPLOCAL_DEPS OFF)
+project(pyalps LANGUAGES C CXX)
 
 option(PYALPS_BUILD_APPLICATIONS "Build optional ALPS application bindings" ON)
 
@@ -11,6 +14,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(ALPS REQUIRED CONFIG)
+if(NOT ALPS_BUILD_SHARED_LIBS)
+  message(FATAL_ERROR "pyalps requires a shared ALPS SDK so every extension uses the same C++ runtime")
+endif()
 find_package(Python 3.10 REQUIRED COMPONENTS Interpreter Development.Module)
 
 execute_process(
@@ -27,19 +33,6 @@ if(NOT EXISTS "${_alps_source_root}/tool/maxent.cpp")
   set(_alps_source_root "${CMAKE_CURRENT_SOURCE_DIR}/_vendor")
 endif()
 set(_bindings "${CMAKE_CURRENT_SOURCE_DIR}/cpp")
-
-link_directories(${ALPS_LIBRARY_DIRS})
-if(ALPS_HDF5_INCLUDE_DIR)
-  get_filename_component(_alps_hdf5_prefix "${ALPS_HDF5_INCLUDE_DIR}" DIRECTORY)
-  link_directories("${_alps_hdf5_prefix}/lib")
-endif()
-
-# Legacy ALPSConfig.cmake serializes the HDF5 imported target name into
-# ALPS_LIBRARIES.  Outside the original build tree that target no longer
-# exists, while the installed library keeps its conventional `hdf5` name.
-set(_pyalps_link_libraries ${ALPS_LIBRARIES})
-list(TRANSFORM _pyalps_link_libraries REPLACE "^hdf5-shared$" "hdf5")
-separate_arguments(_pyalps_link_options NATIVE_COMMAND "${ALPS_EXTRA_LINKER_FLAGS}")
 
 set(_pyalps_targets
   pyalea_c
@@ -129,20 +122,6 @@ if(PYALPS_BUILD_APPLICATIONS)
   endforeach()
 endif()
 
-# Compile the bindings with the same preprocessor configuration the
-# ALPS SDK was built with (BOOST_NO_AUTO_PTR and friends), so the Boost
-# headers on both sides of the library boundary are configured
-# identically. The -D entries are lifted from the exported
-# ALPS_CMAKE_CXX_FLAGS rather than hand-copied from the root
-# CMakeLists, so a define added there cannot silently desync.
-separate_arguments(_alps_sdk_cxx_flags NATIVE_COMMAND "${ALPS_CMAKE_CXX_FLAGS}")
-set(_alps_sdk_definitions "")
-foreach(_flag IN LISTS _alps_sdk_cxx_flags)
-  if(_flag MATCHES "^-D(.+)$")
-    list(APPEND _alps_sdk_definitions "${CMAKE_MATCH_1}")
-  endif()
-endforeach()
-
 option(PYALPS_BUNDLE_APPLICATIONS
   "Bundle the ALPS application executables into pyalps/bin" ON)
 
@@ -164,29 +143,36 @@ if(APPLE)
 else()
   set(_pyalps_in_package_libs "$ORIGIN/../lib")
 endif()
+set(_pyalps_hdf5_runtime_dirs "")
+foreach(_library IN LISTS HDF5_LIBRARIES)
+  if(TARGET "${_library}")
+    get_target_property(_type "${_library}" TYPE)
+    if(_type MATCHES "^(SHARED|UNKNOWN)_LIBRARY$")
+      list(APPEND _pyalps_hdf5_runtime_dirs "$<TARGET_FILE_DIR:${_library}>")
+    endif()
+  elseif(IS_ABSOLUTE "${_library}")
+    get_filename_component(_directory "${_library}" DIRECTORY)
+    list(APPEND _pyalps_hdf5_runtime_dirs "${_directory}")
+  endif()
+endforeach()
+list(REMOVE_DUPLICATES _pyalps_hdf5_runtime_dirs)
 if(PYALPS_BUNDLE_APPLICATIONS)
   set(_pyalps_install_rpath
-    "${_pyalps_in_package_libs};${_alps_hdf5_prefix}/lib")
+    "${_pyalps_in_package_libs};${_pyalps_hdf5_runtime_dirs}")
 else()
   set(_pyalps_install_rpath
-    "${ALPS_LIBRARY_DIRS};${_alps_hdf5_prefix}/lib")
+    "${ALPS_LIBRARY_DIRS};${_pyalps_hdf5_runtime_dirs}")
 endif()
 
 foreach(_target IN LISTS _pyalps_targets)
-  if(_alps_sdk_definitions)
-    target_compile_definitions(${_target} PRIVATE ${_alps_sdk_definitions})
-  endif()
-  target_include_directories(${_target} PRIVATE
-    ${ALPS_INCLUDE_DIRS}
-    ${ALPS_EXTRA_INCLUDE_DIRS})
-  target_link_libraries(${_target} PRIVATE ${_pyalps_link_libraries})
-  target_link_options(${_target} PRIVATE ${_pyalps_link_options})
+  target_link_libraries(${_target} PRIVATE ALPS::alps)
   set_target_properties(${_target} PROPERTIES
     INSTALL_RPATH "${_pyalps_install_rpath}")
 endforeach()
 
 set(_extension_dir "pyalps/_ext")
 install(TARGETS ${_pyalps_targets}
+  RUNTIME_DEPENDENCY_SET pyalps_runtime
   LIBRARY DESTINATION "${_extension_dir}"
   RUNTIME DESTINATION "${_extension_dir}")
 
@@ -248,10 +234,15 @@ if(PYALPS_BUNDLE_APPLICATIONS)
     worm
     worm_evaluate)
   set(_alps_programs "")
+  set(_alps_program_targets "")
   set(_alps_missing_programs "")
   foreach(_program IN LISTS _alps_application_names)
-    if(EXISTS "${_alps_bin_dir}/${_program}")
-      list(APPEND _alps_programs "${_alps_bin_dir}/${_program}")
+    if(EXISTS "${_alps_bin_dir}/${_program}${CMAKE_EXECUTABLE_SUFFIX}")
+      list(APPEND _alps_programs "${_alps_bin_dir}/${_program}${CMAKE_EXECUTABLE_SUFFIX}")
+      add_executable(_pyalps_program_${_program} IMPORTED)
+      set_target_properties(_pyalps_program_${_program} PROPERTIES
+        IMPORTED_LOCATION "${_alps_bin_dir}/${_program}${CMAKE_EXECUTABLE_SUFFIX}")
+      list(APPEND _alps_program_targets _pyalps_program_${_program})
     else()
       list(APPEND _alps_missing_programs "${_program}")
     endif()
@@ -266,40 +257,35 @@ if(PYALPS_BUNDLE_APPLICATIONS)
   endif()
   list(LENGTH _alps_programs _alps_program_count)
   message(STATUS "pyalps: bundling ${_alps_program_count} ALPS programs into pyalps/bin")
-  install(PROGRAMS ${_alps_programs} DESTINATION pyalps/bin)
+  install(IMPORTED_RUNTIME_ARTIFACTS ${_alps_program_targets}
+    RUNTIME_DEPENDENCY_SET pyalps_runtime RUNTIME DESTINATION pyalps/bin)
 
-  # The bundled programs resolve libalps and libboost through their ../lib
-  # RPATH, so the SDK's shared libraries have to travel with them -- each one
-  # exactly once. install(DIRECTORY) is the wrong tool here: it would copy the
-  # whole SONAME chain (libalps.so, libalps.so.2, libalps.so.2.3.4), and since
-  # a wheel cannot carry symlinks those arrive as three byte-identical 10 MB
-  # files. Install only the SONAME-named file, which is the name every
-  # DT_NEEDED / LC_LOAD_DYLIB entry actually asks for.
-  #
-  # src/alps/CMakeLists.txt gives libalps SOVERSION ${ALPS_VERSION_MAJOR} on
-  # ELF platforms and no version at all on APPLE, so "<name>.<major>" is the
-  # SONAME spelling wherever a versioned form exists. test/pyalps guards both
-  # halves of this: that no library is bundled twice, and that every bundled
-  # program can still be loaded.
-  file(GLOB _alps_runtime_libs LIST_DIRECTORIES FALSE
-    "${ALPS_ROOT_DIR}/lib/*.so" "${ALPS_ROOT_DIR}/lib/*.dylib")
-  if(NOT _alps_runtime_libs)
-    message(FATAL_ERROR
-      "PYALPS_BUNDLE_APPLICATIONS is ON but no shared libraries were found in "
-      "${ALPS_ROOT_DIR}/lib. The bundled programs would ship without the "
-      "libalps they link against.")
+  # Imported target metadata identifies the actual runtime and its SONAME on
+  # ELF and macOS alike. Copy its bytes once, using the loader-visible name.
+  if(NOT WIN32)
+    install(FILES "$<TARGET_FILE:ALPS::alps>" DESTINATION pyalps/lib
+      RENAME "$<TARGET_SONAME_FILE_NAME:ALPS::alps>")
   endif()
-  foreach(_lib IN LISTS _alps_runtime_libs)
-    get_filename_component(_lib_name "${_lib}" NAME)
-    set(_lib_soname "${_lib_name}")
-    if(EXISTS "${_lib}.${ALPS_VERSION_MAJOR}")
-      set(_lib_soname "${_lib_name}.${ALPS_VERSION_MAJOR}")
-    endif()
-    get_filename_component(_lib_real "${_lib}" REALPATH)
-    install(PROGRAMS "${_lib_real}" DESTINATION pyalps/lib
-      RENAME "${_lib_soname}")
-  endforeach()
 endif()
+
+# Windows extensions and child processes share the DLLs next to the bundled
+# executables. Python registers this directory before loading any extension.
+if(WIN32)
+  install(RUNTIME_DEPENDENCY_SET pyalps_runtime
+    DIRECTORIES "${ALPS_RUNTIME_LIBRARY_DIRS}"
+    PRE_EXCLUDE_REGEXES "api-ms-.*" "ext-ms-.*" "python[0-9]+.*\\.dll"
+    POST_EXCLUDE_REGEXES ".*[/\\\\][Ww][Ii][Nn][Dd][Oo][Ww][Ss][/\\\\].*"
+    RUNTIME DESTINATION pyalps/bin)
+endif()
+include("${_alps_source_root}/cmake/ALPSRuntime.cmake")
+alps_install_compiler_runtime(pyalps/bin)
+
+# Run after all runtime files have been installed. Wheel repair regenerates this
+# manifest once auditwheel/delocate have finalized their paths and install names.
+install(CODE "execute_process(COMMAND \"${Python_EXECUTABLE}\"
+  \"${CMAKE_CURRENT_SOURCE_DIR}/_build_support/runtime_manifest.py\"
+  --tree \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\" --alps-version \"${ALPS_VERSION}\"
+  COMMAND_ERROR_IS_FATAL ANY)")
 
 # The ALPS XML/XSL library ships inside the package (pyalps/xml), as the
 # legacy wheel build did: the stylesheets plus the lattice and model

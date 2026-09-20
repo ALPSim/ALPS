@@ -33,54 +33,6 @@ template <class S1, class S2, class S3, class VP, class EP, class GP, class S4>
 class adjacency_list;
 }
 
-#if BOOST_VERSION == 105100
-
-//
-// The workaround/patch by Lukas for boost bug https://svn.boost.org/trac/boost/ticket/7378 in boost 1.51.0
-// 
-namespace boost {
-
-  template <typename Tag, typename T, typename PropName>
-  struct lookup_one_property_internal<boost::property<Tag, T, boost::no_property>, PropName>: lookup_one_property_internal<boost::no_property, PropName> {
-    typedef T type;
-  };
-
-  template <typename Tag, typename T>
-  struct lookup_one_property_internal<boost::property<Tag, T, boost::no_property>, Tag> {
-    BOOST_STATIC_CONSTANT(bool, found = true);
-    typedef property<Tag, T, boost::no_property> prop;
-    typedef T type;
-    template <typename U>
-    static typename enable_if<is_same<prop, U>, T&>::type
-    lookup(U& prop, const Tag&) {return prop.m_value;}
-    template <typename U>
-    static typename enable_if<is_same<prop, U>, const T&>::type
-    lookup(const U& prop, const Tag&) {return prop.m_value;}
-  };
-  
-#define BGL_PATCH_ALL_PROP(tag) \
-  template <typename Tag, typename T> \
-  struct lookup_one_property_internal<property<Tag, T, boost::no_property>, tag> { /* Avoid ambiguity */ \
-    BOOST_STATIC_CONSTANT(bool, found = false); \
-    typedef property<Tag, T, boost::no_property> type; \
-    static type& lookup(type& x, tag) {return x;} \
-    static const type& lookup(const type& x, tag) {return x;} \
-  };
-BGL_PATCH_ALL_PROP(vertex_all_t)
-BGL_PATCH_ALL_PROP(edge_all_t)
-BGL_PATCH_ALL_PROP(graph_all_t)
-BGL_PATCH_ALL_PROP(vertex_bundle_t)
-BGL_PATCH_ALL_PROP(edge_bundle_t)
-BGL_PATCH_ALL_PROP(graph_bundle_t)
-#undef BGL_PATCH_ALL_PROP
-
-  template <typename Tag> struct property_value<boost::no_property, Tag> {
-    BOOST_STATIC_CONSTANT(bool, found = false);
-    typedef boost::no_property type;
-  };
-
-}
-#endif // BOOST_VERSION
 
 namespace alps {
 
@@ -139,7 +91,6 @@ struct found_property_type_or_default_impl<true,PropertyList,Tag,Default> {
 };
 // helper functions to probe for graph properties
 
-#if BOOST_VERSION > 105000
 
 template <class PropertyList, class Tag, class Default=int>
 struct found_property_type_or_default
@@ -150,18 +101,6 @@ struct found_property_type_or_default
     , Default
 > {};
 
-#else //BOOST_VERSION
-
-template <class PropertyList, class Tag, class Default=int>
-struct found_property_type_or_default
-: found_property_type_or_default_impl<
-      !boost::is_same<typename boost::property_value<PropertyList,Tag>::type, boost::detail::error_property_not_found>::value
-    , PropertyList
-    , Tag
-    , Default
-> {};
-
-#endif //BOOST_VERSION
 
 
 } // end namespace detail
@@ -206,7 +145,6 @@ struct has_property<P, boost::adjacency_list<s1,s2,s3,VP,EP,GP,s4>, D>
   typedef edge_property_type bond_property_type;
 };
 
-#ifndef BOOST_NO_INCLASS_MEMBER_INITIALIZATION
 template <class s1, class s2, class s3, class VP, class EP, class GP, class s4, class P, class D>
 const bool has_property<P, boost::adjacency_list<s1,s2,s3,VP,EP,GP,s4>,D>::vertex_property;
 template <class s1, class s2, class s3, class VP, class EP, class GP, class s4, class P, class D>
@@ -219,7 +157,6 @@ template <class s1, class s2, class s3, class VP, class EP, class GP, class s4, 
 const bool has_property<P, boost::adjacency_list<s1,s2,s3,VP,EP,GP,s4>,D>::site_property;
 template <class s1, class s2, class s3, class VP, class EP, class GP, class s4, class P, class D>
 const bool has_property<P, boost::adjacency_list<s1,s2,s3,VP,EP,GP,s4>,D>::bond_property;
-#endif
 
 template <class s1, class s2, class s3, class VP, class EP, class GP, class s4, class P, class D>
 struct has_property<P, const boost::adjacency_list<s1,s2,s3,VP,EP,GP,s4>, D>
@@ -243,7 +180,6 @@ struct has_property<P, const boost::adjacency_list<s1,s2,s3,VP,EP,GP,s4>, D>
   typedef edge_property_type bond_property_type;
 };
 
-#ifndef BOOST_NO_INCLASS_MEMBER_INITIALIZATION
 template <class s1, class s2, class s3, class VP, class EP, class GP, class s4, class P, class D>
 const bool has_property<P, const boost::adjacency_list<s1,s2,s3,VP,EP,GP,s4>,D>::vertex_property;
 template <class s1, class s2, class s3, class VP, class EP, class GP, class s4, class P, class D>
@@ -256,7 +192,6 @@ template <class s1, class s2, class s3, class VP, class EP, class GP, class s4, 
 const bool has_property<P, const boost::adjacency_list<s1,s2,s3,VP,EP,GP,s4>,D>::site_property;
 template <class s1, class s2, class s3, class VP, class EP, class GP, class s4, class P, class D>
 const bool has_property<P, const boost::adjacency_list<s1,s2,s3,VP,EP,GP,s4>,D>::bond_property;
-#endif
 
 template <class P, class G, class Default>
 struct property_map

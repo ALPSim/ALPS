@@ -22,9 +22,7 @@
 
 #include <boost/array.hpp>
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 template<class T, std::size_t N> 
 inline alps::IDump& operator>>(alps::IDump& dump, boost::array<T, N>& x)
@@ -40,8 +38,6 @@ inline alps::ODump& operator<<(alps::ODump& dump, const boost::array<T,N>& x)
   return dump;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // OSIRIS_BOOST_ARRAY_HPP

@@ -14,7 +14,6 @@
 
 #include <boost/version.hpp>
 
-#if BOOST_VERSION >= 104000
 
 #define BOOST_ARCHIVE_SOURCE
 #include <boost/archive/detail/archive_serializer_map.hpp>
@@ -29,5 +28,3 @@ template class detail::archive_serializer_map<alps::idump_archive>;
 
 } // namespace archive
 } // namespace boost
-
-#endif //  BOOST_VERSION >= 104000

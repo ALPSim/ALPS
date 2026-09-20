@@ -38,20 +38,19 @@
 #include <stdio.h>
 #include <limits.h>
 #include <string.h>
-#include <libintl.h>
 #include <wchar.h>
 #include <stdint.h>
 
 /* 2021-07-20 by ST */
 #include "xdrcore.h"
-int __fxprintf (FILE *fp, const char *fmt, ...) { return 0; }
+
 
 /*
  * constants specific to the xdr "protocol"
  */
 #define XDR_FALSE	((long) 0)
 #define XDR_TRUE	((long) 1)
-#define LASTUNSIGNED	((u_int) 0-1)
+#define LASTUNSIGNED	((alps_xdr_uint) 0-1)
 
 /*
  * for unit alignment
@@ -70,11 +69,6 @@ xdr_free (xdrproc_t proc, char *objp)
   x.x_op = XDR_FREE;
   (*proc) (&x, objp);
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_free)
-#else
-libc_hidden_nolink_sunrpc (xdr_free, GLIBC_2_0)
-#endif
 
 /*
  * XDR nothing
@@ -84,11 +78,6 @@ xdr_void (void)
 {
   return TRUE;
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_void)
-#else
-libc_hidden_nolink_sunrpc (xdr_void, GLIBC_2_0)
-#endif
 
 /*
  * XDR integers
@@ -124,17 +113,12 @@ xdr_int (XDR *xdrs, int *ip)
 #error unexpected integer sizes in_xdr_int()
 #endif
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_int)
-#else
-libc_hidden_nolink_sunrpc (xdr_int, GLIBC_2_0)
-#endif
 
 /*
  * XDR unsigned integers
  */
 bool_t
-xdr_u_int (XDR *xdrs, u_int *up)
+xdr_u_int (XDR *xdrs, alps_xdr_uint *up)
 {
 #if UINT_MAX < ULONG_MAX
   long l;
@@ -142,7 +126,7 @@ xdr_u_int (XDR *xdrs, u_int *up)
   switch (xdrs->x_op)
     {
     case XDR_ENCODE:
-      l = (u_long) * up;
+      l = (alps_xdr_ulong) * up;
       return XDR_PUTLONG (xdrs, &l);
 
     case XDR_DECODE:
@@ -150,24 +134,19 @@ xdr_u_int (XDR *xdrs, u_int *up)
 	{
 	  return FALSE;
 	}
-      *up = (u_int) (u_long) l;
+      *up = (alps_xdr_uint) (alps_xdr_ulong) l;
     case XDR_FREE:
       return TRUE;
     }
   return FALSE;
 #elif UINT_MAX == ULONG_MAX
-  return xdr_u_long (xdrs, (u_long *) up);
+  return xdr_u_long (xdrs, (alps_xdr_ulong *) up);
 #elif UINT_MAX == USHRT_MAX
   return xdr_short (xdrs, (short *) up);
 #else
 #error unexpected integer sizes in_xdr_u_int()
 #endif
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_u_int)
-#else
-libc_hidden_nolink_sunrpc (xdr_u_int, GLIBC_2_0)
-#endif
 
 /*
  * XDR long integers
@@ -191,11 +170,6 @@ xdr_long (XDR *xdrs, long *lp)
 
   return FALSE;
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_long)
-#else
-libc_hidden_nolink_sunrpc (xdr_long, GLIBC_2_0)
-#endif
 
 /*
  * XDR unsigned long integers
@@ -203,7 +177,7 @@ libc_hidden_nolink_sunrpc (xdr_long, GLIBC_2_0)
  * compatibility. Instead xdr_u_int() should be used.
  */
 bool_t
-xdr_u_long (XDR *xdrs, u_long *ulp)
+xdr_u_long (XDR *xdrs, alps_xdr_ulong *ulp)
 {
   switch (xdrs->x_op)
     {
@@ -219,7 +193,7 @@ xdr_u_long (XDR *xdrs, u_long *ulp)
       }
 
     case XDR_ENCODE:
-      if (sizeof (uint32_t) != sizeof (u_long)
+      if (sizeof (uint32_t) != sizeof (alps_xdr_ulong)
 	  && (uint32_t) *ulp != *ulp)
 	return FALSE;
 
@@ -230,18 +204,13 @@ xdr_u_long (XDR *xdrs, u_long *ulp)
     }
   return FALSE;
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_u_long)
-#else
-libc_hidden_nolink_sunrpc (xdr_u_long, GLIBC_2_0)
-#endif
 
 /*
  * XDR hyper integers
  * same as xdr_u_hyper - open coded to save a proc call!
  */
 bool_t
-xdr_hyper (XDR *xdrs, quad_t *llp)
+xdr_hyper (XDR *xdrs, alps_xdr_int64 *llp)
 {
   long int t1, t2;
 
@@ -256,7 +225,7 @@ xdr_hyper (XDR *xdrs, quad_t *llp)
     {
       if (!XDR_GETLONG(xdrs, &t1) || !XDR_GETLONG(xdrs, &t2))
 	return FALSE;
-      *llp = ((quad_t) t1) << 32;
+      *llp = ((alps_xdr_int64) t1) << 32;
       *llp |= (uint32_t) t2;
       return TRUE;
     }
@@ -266,18 +235,13 @@ xdr_hyper (XDR *xdrs, quad_t *llp)
 
   return FALSE;
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_hyper)
-#else
-libc_hidden_nolink_sunrpc (xdr_hyper, GLIBC_2_1_1)
-#endif
 
 /*
  * XDR hyper integers
  * same as xdr_hyper - open coded to save a proc call!
  */
 bool_t
-xdr_u_hyper (XDR *xdrs, u_quad_t *ullp)
+xdr_u_hyper (XDR *xdrs, alps_xdr_uint64 *ullp)
 {
   long int t1, t2;
 
@@ -292,7 +256,7 @@ xdr_u_hyper (XDR *xdrs, u_quad_t *ullp)
     {
       if (!XDR_GETLONG(xdrs, &t1) || !XDR_GETLONG(xdrs, &t2))
 	return FALSE;
-      *ullp = ((u_quad_t) t1) << 32;
+      *ullp = ((alps_xdr_uint64) t1) << 32;
       *ullp |= (uint32_t) t2;
       return TRUE;
     }
@@ -302,33 +266,18 @@ xdr_u_hyper (XDR *xdrs, u_quad_t *ullp)
 
   return FALSE;
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_u_hyper)
-#else
-libc_hidden_nolink_sunrpc (xdr_u_hyper, GLIBC_2_1_1)
-#endif
 
 bool_t
-xdr_longlong_t (XDR *xdrs, quad_t *llp)
+xdr_longlong_t (XDR *xdrs, alps_xdr_int64 *llp)
 {
   return xdr_hyper (xdrs, llp);
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_longlong_t)
-#else
-libc_hidden_nolink_sunrpc (xdr_longlong_t, GLIBC_2_1_1)
-#endif
 
 bool_t
-xdr_u_longlong_t (XDR *xdrs, u_quad_t *ullp)
+xdr_u_longlong_t (XDR *xdrs, alps_xdr_uint64 *ullp)
 {
   return xdr_u_hyper (xdrs, ullp);
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_u_longlong_t)
-#else
-libc_hidden_nolink_sunrpc (xdr_u_longlong_t, GLIBC_2_1_1)
-#endif
 
 /*
  * XDR short integers
@@ -357,24 +306,19 @@ xdr_short (XDR *xdrs, short *sp)
     }
   return FALSE;
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_short)
-#else
-libc_hidden_nolink_sunrpc (xdr_short, GLIBC_2_0)
-#endif
 
 /*
  * XDR unsigned short integers
  */
 bool_t
-xdr_u_short (XDR *xdrs, u_short *usp)
+xdr_u_short (XDR *xdrs, alps_xdr_ushort *usp)
 {
   long l;
 
   switch (xdrs->x_op)
     {
     case XDR_ENCODE:
-      l = (u_long) * usp;
+      l = (alps_xdr_ulong) * usp;
       return XDR_PUTLONG (xdrs, &l);
 
     case XDR_DECODE:
@@ -382,7 +326,7 @@ xdr_u_short (XDR *xdrs, u_short *usp)
 	{
 	  return FALSE;
 	}
-      *usp = (u_short) (u_long) l;
+      *usp = (alps_xdr_ushort) (alps_xdr_ulong) l;
       return TRUE;
 
     case XDR_FREE:
@@ -390,11 +334,6 @@ xdr_u_short (XDR *xdrs, u_short *usp)
     }
   return FALSE;
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_u_short)
-#else
-libc_hidden_nolink_sunrpc (xdr_u_short, GLIBC_2_0)
-#endif
 
 
 /*
@@ -413,19 +352,14 @@ xdr_char (XDR *xdrs, char *cp)
   *cp = i;
   return TRUE;
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_char)
-#else
-libc_hidden_nolink_sunrpc (xdr_char, GLIBC_2_0)
-#endif
 
 /*
  * XDR an unsigned char
  */
 bool_t
-xdr_u_char (XDR *xdrs, u_char *cp)
+xdr_u_char (XDR *xdrs, alps_xdr_uchar *cp)
 {
-  u_int u;
+  alps_xdr_uint u;
 
   u = (*cp);
   if (!xdr_u_int (xdrs, &u))
@@ -435,11 +369,6 @@ xdr_u_char (XDR *xdrs, u_char *cp)
   *cp = u;
   return TRUE;
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_u_char)
-#else
-libc_hidden_nolink_sunrpc (xdr_u_char, GLIBC_2_0)
-#endif
 
 /*
  * XDR booleans
@@ -468,11 +397,6 @@ xdr_bool (XDR *xdrs, bool_t *bp)
     }
   return FALSE;
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_bool)
-#else
-libc_hidden_nolink_sunrpc (xdr_bool, GLIBC_2_0)
-#endif
 
 /*
  * XDR enumerations
@@ -523,11 +447,6 @@ xdr_enum (XDR *xdrs, enum_t *ep)
       return FALSE;
     }
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_enum)
-#else
-libc_hidden_nolink_sunrpc (xdr_enum, GLIBC_2_0)
-#endif
 
 /*
  * XDR opaque data
@@ -535,9 +454,9 @@ libc_hidden_nolink_sunrpc (xdr_enum, GLIBC_2_0)
  * cp points to the opaque object and cnt gives the byte length.
  */
 bool_t
-xdr_opaque (XDR *xdrs, caddr_t cp, u_int cnt)
+xdr_opaque (XDR *xdrs, alps_xdr_address cp, alps_xdr_uint cnt)
 {
-  u_int rndup;
+  alps_xdr_uint rndup;
   static char crud[BYTES_PER_XDR_UNIT];
 
   /*
@@ -562,7 +481,7 @@ xdr_opaque (XDR *xdrs, caddr_t cp, u_int cnt)
 	}
       if (rndup == 0)
 	return TRUE;
-      return XDR_GETBYTES (xdrs, (caddr_t)crud, rndup);
+      return XDR_GETBYTES (xdrs, (alps_xdr_address)crud, rndup);
 
     case XDR_ENCODE:
       if (!XDR_PUTBYTES (xdrs, cp, cnt))
@@ -578,11 +497,6 @@ xdr_opaque (XDR *xdrs, caddr_t cp, u_int cnt)
     }
   return FALSE;
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_opaque)
-#else
-libc_hidden_nolink_sunrpc (xdr_opaque, GLIBC_2_0)
-#endif
 
 /*
  * XDR counted bytes
@@ -590,10 +504,10 @@ libc_hidden_nolink_sunrpc (xdr_opaque, GLIBC_2_0)
  * If *cpp is NULL maxsize bytes are allocated
  */
 bool_t
-xdr_bytes (XDR *xdrs, char **cpp, u_int *sizep, u_int maxsize)
+xdr_bytes (XDR *xdrs, char **cpp, alps_xdr_uint *sizep, alps_xdr_uint maxsize)
 {
   char *sp = *cpp;	/* sp is the actual string pointer */
-  u_int nodesize;
+  alps_xdr_uint nodesize;
 
   /*
    * first deal with the length since xdr bytes are counted
@@ -624,7 +538,7 @@ xdr_bytes (XDR *xdrs, char **cpp, u_int *sizep, u_int maxsize)
 	}
       if (sp == NULL)
 	{
-	  (void) __fxprintf (NULL, "%s: %s", __func__, "out of memory\n");
+	  (void) fprintf (stderr, "%s: %s", __func__, "out of memory\n");
 	  return FALSE;
 	}
       /* fall into ... */
@@ -642,11 +556,6 @@ xdr_bytes (XDR *xdrs, char **cpp, u_int *sizep, u_int maxsize)
     }
   return FALSE;
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_bytes)
-#else
-libc_hidden_nolink_sunrpc (xdr_bytes, GLIBC_2_0)
-#endif
 
 /*
  * Implemented here due to commonality of the object.
@@ -657,11 +566,6 @@ xdr_netobj (XDR *xdrs, struct netobj *np)
 
   return xdr_bytes (xdrs, &np->n_bytes, &np->n_len, MAX_NETOBJ_SZ);
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_netobj)
-#else
-libc_hidden_nolink_sunrpc (xdr_netobj, GLIBC_2_0)
-#endif
 
 /*
  * XDR a discriminated union
@@ -712,7 +616,6 @@ xdr_union (XDR *xdrs,
   return ((dfault == NULL_xdrproc_t) ? FALSE :
 	  (*dfault) (xdrs, unp, LASTUNSIGNED));
 }
-libc_hidden_nolink_sunrpc (xdr_union, GLIBC_2_0)
 
 
 /*
@@ -730,13 +633,13 @@ libc_hidden_nolink_sunrpc (xdr_union, GLIBC_2_0)
  * of the string as specified by a protocol.
  */
 bool_t
-xdr_string (XDR *xdrs, char **cpp, u_int maxsize)
+xdr_string (XDR *xdrs, char **cpp, alps_xdr_uint maxsize)
 {
   char *sp = *cpp;	/* sp is the actual string pointer */
   /* Initialize to silence the compiler.  It is not really needed because SIZE
      never actually gets used without being initialized.  */
-  u_int size = 0;
-  u_int nodesize;
+  alps_xdr_uint size = 0;
+  alps_xdr_uint nodesize;
 
   /*
    * first deal with the length since xdr strings are counted-strings
@@ -784,7 +687,7 @@ xdr_string (XDR *xdrs, char **cpp, u_int maxsize)
 	*cpp = sp = (char *) mem_alloc (nodesize);
       if (sp == NULL)
 	{
-	  (void) __fxprintf (NULL, "%s: %s", __func__, "out of memory\n");
+	  (void) fprintf (stderr, "%s: %s", __func__, "out of memory\n");
 	  return FALSE;
 	}
       sp[size] = 0;
@@ -800,11 +703,6 @@ xdr_string (XDR *xdrs, char **cpp, u_int maxsize)
     }
   return FALSE;
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_string)
-#else
-libc_hidden_nolink_sunrpc (xdr_string, GLIBC_2_0)
-#endif
 
 /*
  * Wrapper for xdr_string that can be called directly from
@@ -819,8 +717,3 @@ xdr_wrapstring (XDR *xdrs, char **cpp)
     }
   return FALSE;
 }
-#ifdef EXPORT_RPC_SYMBOLS
-libc_hidden_def (xdr_wrapstring)
-#else
-libc_hidden_nolink_sunrpc (xdr_wrapstring, GLIBC_2_0)
-#endif

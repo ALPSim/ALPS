@@ -88,9 +88,7 @@ class NoBinning : public AbstractBinning<T>
     uint32_t count_;          // total number of measurements
 };
 
-#ifndef BOOST_NO_INCLASS_MEMBER_INITIALIZATION
 template <class T> const bool NoBinning<T>::has_tau;
-#endif
 
 typedef SimpleObservable<int32_t,NoBinning<int32_t> > SimpleIntObservable;
 typedef SimpleObservable<double,NoBinning<double> > SimpleRealObservable;

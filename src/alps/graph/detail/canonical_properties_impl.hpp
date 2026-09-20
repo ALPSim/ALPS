@@ -86,7 +86,7 @@ namespace alps {
                 // B = {(i, j): Vj shatters Vi}
                 std::size_t maxsize = 0;
                 for (typename partition_type<Graph>::type::const_iterator it = pi.begin(); it != pi.end(); ++it)
-                    maxsize = std::max(maxsize,it->size());
+                    maxsize = (std::max)(maxsize,it->size());
                 boost::multi_array<std::size_t,2> adjacent_numbers(boost::extents[pi.size()][maxsize]);
                 // For each Vi
                 for (typename partition_type<Graph>::type::const_iterator it = pi.begin(); it != pi.end(); ++it) {

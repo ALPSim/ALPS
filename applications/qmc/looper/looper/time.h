@@ -12,6 +12,7 @@
 #ifndef LOOPER_TIME_H
 #define LOOPER_TIME_H
 
+#include <boost/math/constants/constants.hpp>
 #include <alps/config.h>
 #include <alps/osiris.h>
 #include <cmath>
@@ -20,11 +21,11 @@
 namespace looper {
 
 inline std::complex<double> ctime(double t) {
-  return std::exp(std::complex<double>(0, 2*M_PI*t));
+  return std::exp(std::complex<double>(0, 2*boost::math::constants::pi<double>()*t));
 }
 
 inline std::complex<double> ctime2(double t) {
-  return std::exp(std::complex<double>(0, 4*M_PI*t));
+  return std::exp(std::complex<double>(0, 4*boost::math::constants::pi<double>()*t));
 }
 
 template<int STORE_CTIME = 1> class imaginary_time;
@@ -97,9 +98,7 @@ inline std::complex<double> const& ctime2(imaginary_time<2> const& t) {
 
 } // end namespace looper
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace looper {
-#endif
 
 template<int STORE_CTIME>
 alps::ODump& operator<<(alps::ODump& dp, looper::imaginary_time<STORE_CTIME> const& t) {
@@ -114,8 +113,6 @@ alps::IDump& operator>>(alps::IDump& dp, looper::imaginary_time<STORE_CTIME>& t)
   return dp;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace looper
-#endif
 
 #endif // LOOPER_TIME_H

@@ -272,9 +272,7 @@ void bloch_basis_states<I,S,SS>::build(const translation_type& trans, const std:
 
 } // namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 template <class I, class S, class SS>
 inline std::ostream& operator<<(std::ostream& out, const alps::bloch_basis_states<I,S,SS>& q)
@@ -292,8 +290,6 @@ inline std::ostream& operator<<(std::ostream& out, const alps::bloch_basis_state
 }
 
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // namespace alps
-#endif
 
 #endif

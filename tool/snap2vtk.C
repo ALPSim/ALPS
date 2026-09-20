@@ -20,6 +20,7 @@
 //   coordinate_of_site3(vector of double)  state_of_site3(vector of double)
 //   ...
 
+#include <boost/math/constants/constants.hpp>
 #include <alps/osiris.h>
 #include <alps/scheduler/types.h>
 #include <alps/utility/vectorio.hpp>
@@ -32,7 +33,7 @@
 #include <vector>
 
 double angle(double x, double y) {
-  double g = arg(std::complex<double>(x, y)) / (2 * M_PI);
+  double g = arg(std::complex<double>(x, y)) / (2 * boost::math::constants::pi<double>());
   return (g >= 0) ? g : (g + 1);
 }
 

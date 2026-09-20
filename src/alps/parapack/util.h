@@ -19,7 +19,7 @@
 
 namespace alps {
 
-int hash(int n, int s = 826);
+ALPS_DECL int hash(int n, int s = 826);
 
 ALPS_DECL std::string id2string(int id, std::string const& pad = "_");
 

@@ -137,9 +137,7 @@ private:
 
 } // end namespace looper
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace looper {
-#endif
 
 template<typename T, typename U>
 looper::integer_range<T> operator*(looper::integer_range<T> const& t, U x) {
@@ -171,8 +169,6 @@ alps::IDump& operator>>(alps::IDump& dp, looper::integer_range<T>& ir) {
   return dp;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace looper
-#endif
 
 #endif // LOOPER_INTEGER_RANGE_H

@@ -80,9 +80,7 @@ inline bool LatticeLibrary::get_graph(G& g, const std::string& name) const
 
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 inline alps::oxstream& operator<<(alps::oxstream& xml, const alps::LatticeLibrary& l)
 {
@@ -103,8 +101,6 @@ inline std::istream& operator>>(std::istream& is, alps::LatticeLibrary& l)
   return is;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // ALPS_LATTICE_LIBRARY_H

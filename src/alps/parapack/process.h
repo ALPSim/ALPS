@@ -14,6 +14,7 @@
 #ifndef PARAPACK_PROCESS_H
 #define PARAPACK_PROCESS_H
 
+#include <alps/export.h>
 #include "types.h"
 #include "staging.h"
 #include <alps/osiris.h>
@@ -85,7 +86,7 @@ namespace alps {
 // process_helper_mpi
 //
 
-class process_helper_mpi {
+class ALPS_DECL process_helper_mpi {
 private:
   enum group_state { Free, Active };
 

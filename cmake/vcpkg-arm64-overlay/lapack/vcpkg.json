@@ -1,0 +1,8 @@
+{
+  "name": "lapack",
+  "version": "3.12.0",
+  "description": "LAPACK supplied by the official Windows ARM64 OpenBLAS package",
+  "license": null,
+  "supports": "arm64 & windows & !uwp & !mingw & !static",
+  "dependencies": ["openblas"]
+}

@@ -75,6 +75,7 @@ def test_prerelease_sdist_keeps_its_version_without_the_build_environment(tmp_pa
         archive.extractall(tmp_path, filter="data")
     environment.pop("GITHUB_REF")
     unpacked = tmp_path / f"pyalps-{core}b2"
+    assert (unpacked / "_build_support/runtime_manifest.py").is_file()
     completed = subprocess.run(
         [sys.executable, "-c",
          "from scikit_build_core.build import prepare_metadata_for_build_wheel; "

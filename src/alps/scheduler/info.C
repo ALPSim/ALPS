@@ -54,7 +54,7 @@ void Info::load(hdf5::archive & ar) {
 
 void Info::save(ODump& dump) const
 {
-  dump << host_ << boost::posix_time::to_iso_string(startt_) 
+  dump << host_ << boost::posix_time::to_iso_string(startt_)
        << boost::posix_time::to_iso_string(stopt_) << phase_;
 }
 
@@ -89,7 +89,7 @@ void Info::load(IDump& dump, int version)
     }
   }
   else
-    dump >> phase_; 
+    dump >> phase_;
 }
 
 
@@ -122,17 +122,17 @@ const std::string& Info::phase() const { return phase_; }
 
 const std::string& Info::host() const { return host_; }
 
-ALPS_DUMMY_VOID Info::write_xml(alps::oxstream& xml) const
+void Info::write_xml(alps::oxstream& xml) const
 {
   xml << start_tag("EXECUTED");
   if (phase_!="")
     xml << attribute("phase",phase_);
   xml << start_tag("FROM") << no_linebreak << boost::posix_time::to_simple_string(startt_) << end_tag("FROM");
   xml << start_tag("TO") << no_linebreak << boost::posix_time::to_simple_string(stopt_) << end_tag("TO");
-  xml << start_tag("MACHINE") << no_linebreak << start_tag("NAME") << host_ 
+  xml << start_tag("MACHINE") << no_linebreak << start_tag("NAME") << host_
       << end_tag("NAME") << end_tag("MACHINE");
   xml << end_tag("EXECUTED");
-  ALPS_RETURN_VOID
+
 }
 
 #ifdef ALPS_HAVE_HDF5

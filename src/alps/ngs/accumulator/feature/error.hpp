@@ -38,7 +38,7 @@ namespace alps {
         // but gcc <= 4.4 has lookup error, so name it different
         struct error_tag;
 
-        template<typename T> struct error_type : public mean_type<T> {};
+        template<typename T> struct error_type : public alps::accumulator::mean_type<T> {};
 
         template<typename T> struct has_feature<T, error_tag> {
             template<typename R, typename C> static char helper(R(C::*)() const);
@@ -48,7 +48,7 @@ namespace alps {
             typedef boost::integral_constant<bool, sizeof(char) == sizeof(check<T>(0))> type;
         };
 
-        template<typename T> typename error_type<T>::type error(T const & arg) {
+        template<typename T> typename alps::accumulator::error_type<T>::type error(T const & arg) {
             return arg.error();
         }
 
@@ -56,17 +56,17 @@ namespace alps {
 
             template<typename A> typename boost::enable_if<
                   typename has_feature<A, error_tag>::type
-                , typename error_type<A>::type
+                , typename alps::accumulator::error_type<A>::type
             >::type error_impl(A const & acc) {
                 return error(acc);
             }
 
             template<typename A> typename boost::disable_if<
                   typename has_feature<A, error_tag>::type
-                , typename error_type<A>::type
+                , typename alps::accumulator::error_type<A>::type
             >::type error_impl(A const & acc) {
                 throw std::runtime_error(std::string(typeid(A).name()) + " has no error-method" + ALPS_STACKTRACE);
-                return typename error_type<A>::type();
+                return typename alps::accumulator::error_type<A>::type();
             }
         }
 
@@ -366,7 +366,7 @@ namespace alps {
             template<typename T, typename B> class BaseWrapper<T, error_tag, B> : public B {
                 public:
                     virtual bool has_error() const = 0;
-                    virtual typename error_type<B>::type error() const = 0;
+                    virtual typename alps::accumulator::error_type<B>::type error() const = 0;
             };
 
             template<typename T, typename B> class DerivedWrapper<T, error_tag, B> : public B {
@@ -376,7 +376,7 @@ namespace alps {
 
                     bool has_error() const { return has_feature<T, error_tag>::type::value; }
 
-                    typename error_type<B>::type error() const { return detail::error_impl(this->m_data); }
+                    typename alps::accumulator::error_type<B>::type error() const { return detail::error_impl(this->m_data); }
             };
 
         }

@@ -1,3 +1,5 @@
+#include <chrono>
+#include <thread>
 /*****************************************************************************
 *
 * ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -42,11 +44,6 @@
 #include <vector>
 #include <time.h>
 
-#if defined(ALPS_HAVE_UNISTD_H)
-# include <unistd.h>
-#elif defined(ALPS_HAVE_WINDOWS_H)
-# include <windows.h>
-#endif
 
 #ifdef _OPENMP
 # include <omp.h>
@@ -700,11 +697,7 @@ int start_sgl(int argc, char** argv) {
             if (process.check_halted()) {
               break;
             } else {
-              #if defined(ALPS_HAVE_UNISTD_H)
-                sleep(1);    // sleep 1 Sec
-              #elif defined(ALPS_HAVE_WINDOWS_H)
-                Sleep(100); // sleep 100 mSec
-              #endif
+              std::this_thread::sleep_for(std::chrono::seconds(1));
             }
           } else {
             break;

@@ -56,8 +56,8 @@ public:
 
   void set_range(T min, T max, T stepsize=1);
   virtual Observable* clone() const {return new HistogramObservable<T>(*this);}
-  virtual ALPS_DUMMY_VOID reset(bool forthermalization=false);
-  virtual ALPS_DUMMY_VOID output(std::ostream&) const;
+  virtual void reset(bool forthermalization=false);
+  virtual void output(std::ostream&) const;
 
   virtual uint32_t version_id() const { return version; }
   virtual void save(ODump& dump) const;
@@ -183,16 +183,16 @@ inline void HistogramObservable<T>::add(const T& x)
 }
 
 template <class T>
-inline ALPS_DUMMY_VOID
+inline void
 HistogramObservable<T>::reset(bool /* forthermalization */)
 {
   count_=0;
   std::fill(histogram_.begin(),histogram_.end(),0);
-  ALPS_RETURN_VOID
+
 }
 
 template <class T>
-inline ALPS_DUMMY_VOID
+inline void
 HistogramObservable<T>::output(std::ostream& out) const
 {
   out << name() << ":\n";
@@ -207,7 +207,7 @@ HistogramObservable<T>::output(std::ostream& out) const
         out << "[" << min_+i*stepsize_ << "," << min_+(i+1)*stepsize_ << "[";
     out << ": " << histogram_[i] << " entries.\n";
   }
-  ALPS_RETURN_VOID
+
 }
 
 template <class T>
@@ -231,7 +231,7 @@ inline void HistogramObservable<T>::load(IDump& dump)
 }
 
 template <class T> inline void HistogramObservable<T>::save(hdf5::archive & ar) const {
-    ar 
+    ar
         << make_pvp("histogram", histogram_)
         << make_pvp("count",count_)
         << make_pvp("@min", min_)
@@ -241,7 +241,7 @@ template <class T> inline void HistogramObservable<T>::save(hdf5::archive & ar) 
 }
 
 template <class T> inline void HistogramObservable<T>::load(hdf5::archive & ar) {
-    ar 
+    ar
         >> make_pvp("histogram",histogram_)
         >> make_pvp("count",count_)
         >> make_pvp("@min", min_)

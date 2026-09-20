@@ -58,9 +58,7 @@ private:
 
 } // namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 /// \brief XML output of params
 ///
@@ -77,8 +75,6 @@ inline alps::oxstream& operator<<(alps::oxstream& oxs, const alps::params& p) {
   return oxs;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // NGS_PARAMS_P_H

@@ -85,14 +85,14 @@ namespace alps {
             errno = 0;
             if constexpr (std::is_signed<T>::value) {
                 long long value = std::strtoll(text.c_str(), nullptr, 10);
-                if (errno == ERANGE || value < std::numeric_limits<T>::min()
-                                    || value > std::numeric_limits<T>::max())
+                if (errno == ERANGE || value < (std::numeric_limits<T>::min)()
+                                    || value > (std::numeric_limits<T>::max)())
                     throw std::out_of_range("integer parameter out of range: " + text);
                 return static_cast<T>(value);
             } else {
                 auto first = text.find_first_not_of(" \t\r\n\f\v");
                 unsigned long long value = std::strtoull(text.c_str(), nullptr, 10);
-                if (errno == ERANGE || value > std::numeric_limits<T>::max()
+                if (errno == ERANGE || value > (std::numeric_limits<T>::max)()
                     || (first != std::string::npos && text[first] == '-'))
                     throw std::out_of_range("integer parameter out of range: " + text);
                 return static_cast<T>(value);

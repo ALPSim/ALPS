@@ -61,9 +61,7 @@ private:
 
 } // end namespace looper
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace looper {
-#endif
 
 inline alps::ODump& operator<<(alps::ODump& dp, looper::mc_steps const& mcs) {
   mcs.save(dp);
@@ -75,9 +73,7 @@ inline alps::IDump& operator>>(alps::IDump& dp, looper::mc_steps& mcs) {
   return dp;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace looper
-#endif
 
 namespace looper {
 
@@ -145,9 +141,7 @@ private:
 
 } // end namespace looper
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace looper {
-#endif
 
 inline alps::ODump& operator<<(alps::ODump& dp, looper::wl_steps const& mcs) {
   mcs.save(dp);
@@ -159,8 +153,6 @@ inline alps::IDump& operator>>(alps::IDump& dp, looper::wl_steps& mcs) {
   return dp;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace looper
-#endif
 
 #endif // LOOPER_MONTECARLO_H

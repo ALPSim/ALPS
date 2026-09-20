@@ -64,10 +64,8 @@ public:
   /// the type of the matrix storing the Cholesky decomposition of the covariance matrix 
   typedef boost::numeric::ublas::matrix<RealType> matrix_type;
 
-#if !defined(BOOST_NO_LIMITS_COMPILE_TIME_CONSTANTS) && !(defined(BOOST_MSVC) && BOOST_MSVC <= 1300)
 /// INTERNAL ONLY
     BOOST_STATIC_ASSERT(!std::numeric_limits<RealType>::is_integer);
-#endif
 
   /// @brief the constructor of the multi-variate normal distribution
   /// @param mean the vector of mean values
@@ -158,7 +156,6 @@ public:
     return *ptr_++;
   }
 
-#if !defined(BOOST_NO_OPERATORS_IN_NAMESPACE) && !defined(BOOST_NO_MEMBER_TEMPLATE_FRIENDS)
   template<class CharT, class Traits>
   friend std::basic_ostream<CharT,Traits>&
   operator<<(std::basic_ostream<CharT,Traits>& os, const multivariate_normal_distribution& mnd)
@@ -178,7 +175,6 @@ public:
     mnd.ptr_ = mnd.buffer_.begin() + pos;
     return is;
   }
-#endif
 private:
   vector_type mean_;
   matrix_type cholesky_;

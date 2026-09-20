@@ -56,7 +56,7 @@ NoJobfileOptions::NoJobfileOptions(int argc, char** argv)
     ("Tmax", po::value<double>(&max_check_time)->default_value(900),"maximum time between checks whether a simulation is finished")
     ("time-limit,T", po::value<double>(&time_limit)->default_value(0),"time limit for the simulation")
     ("Nmin", po::value<int>(&min_cpus)->default_value(1),"minimum number of CPUs per simulation")
-    ("Nmax", po::value<int>(&max_cpus)->default_value(std::numeric_limits<int>::max()),"maximum number of CPUs per simulation")
+    ("Nmax", po::value<int>(&max_cpus)->default_value((std::numeric_limits<int>::max)()),"maximum number of CPUs per simulation")
     ("write-xml","write results to XML files");
   po::positional_options_description p;
   p.add("input-file", 1);
@@ -122,7 +122,7 @@ Options::Options(int argc, char** argv)
     ("Tmax", po::value<double>(&max_check_time)->default_value(900),"maximum time between checks whether a simulation is finished")
     ("time-limit,T", po::value<double>(&time_limit)->default_value(0),"time limit for the simulation")
     ("Nmin", po::value<int>(&min_cpus)->default_value(1),"minimum number of CPUs per simulation")
-    ("Nmax", po::value<int>(&max_cpus)->default_value(std::numeric_limits<int>::max()),"maximum number of CPUs per simulation")
+    ("Nmax", po::value<int>(&max_cpus)->default_value((std::numeric_limits<int>::max)()),"maximum number of CPUs per simulation")
     ("write-xml","write results to XML files")
     ("input-file", po::value<std::string>(&filename), "input file");
   po::positional_options_description p;

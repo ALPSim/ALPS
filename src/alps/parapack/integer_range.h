@@ -87,8 +87,8 @@ public:
   }
   void include(param_type v) {
     if (valid()) {
-      mi_ = std::min(mi_, v);
-      ma_ = std::max(ma_, v);
+      mi_ = (std::min)(mi_, v);
+      ma_ = (std::max)(ma_, v);
     } else {
       mi_ = v;
       ma_ = v;
@@ -97,8 +97,8 @@ public:
   void include(integer_range const& r) {
     if (r.valid()) {
       if (valid()) {
-        mi_ = std::min(mi_, r.min BOOST_PREVENT_MACRO_SUBSTITUTION ());
-        ma_ = std::max(ma_, r.max BOOST_PREVENT_MACRO_SUBSTITUTION ());
+        mi_ = (std::min)(mi_, r.min BOOST_PREVENT_MACRO_SUBSTITUTION ());
+        ma_ = (std::max)(ma_, r.max BOOST_PREVENT_MACRO_SUBSTITUTION ());
       } else {
         mi_ = r.min BOOST_PREVENT_MACRO_SUBSTITUTION ();
         ma_ = r.max BOOST_PREVENT_MACRO_SUBSTITUTION ();
@@ -193,9 +193,7 @@ integer_range<T> unify(integer_range<T> const& r0, integer_range<T> const& r1) {
 
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 template<typename T, typename U>
 alps::integer_range<T> operator*(alps::integer_range<T> const& t, U x) {
@@ -230,8 +228,6 @@ alps::IDump& operator>>(alps::IDump& dp, alps::integer_range<T>& ir) {
   return dp;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // PARAPACK_INTEGER_RANGE_H

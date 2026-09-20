@@ -18,6 +18,7 @@
 #ifndef NGS_PARAPACK_CLONE_INFO_H
 #define NGS_PARAPACK_CLONE_INFO_H
 
+#include <alps/export.h>
 #include <alps/ngs/params.hpp>
 #include <alps/parapack/process.h>
 #include <alps/parapack/types.h>
@@ -77,10 +78,8 @@ private:
 } // end namespace ngs_parapack
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
 namespace ngs_parapack {
-#endif
 
 ALPS_DECL alps::oxstream& operator<<(alps::oxstream& os, alps::ngs_parapack::clone_phase const& phase);
 
@@ -88,10 +87,8 @@ ALPS_DECL alps::oxstream& operator<<(alps::oxstream& os, alps::ngs_parapack::clo
 
 // ALPS_DECL alps::IDump& operator>>(alps::IDump& dump, alps::clone_phase& phase);
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // namespace ngs_parapack
 } // namespace alps
-#endif
 
 namespace alps {
 namespace ngs_parapack {
@@ -167,10 +164,8 @@ private:
 } // end namespace ngs_parapack
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
 namespace ngs_parapack {
-#endif
 
 ALPS_DECL alps::oxstream& operator<<(alps::oxstream& os, alps::ngs_parapack::clone_info const& info);
 
@@ -178,10 +173,8 @@ ALPS_DECL alps::oxstream& operator<<(alps::oxstream& os, alps::ngs_parapack::clo
 
 // ALPS_DECL alps::IDump& operator>>(alps::IDump& dp, alps::ngs_parapack::clone_info& info);
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // namespace ngs_parapack
 } // namespace alps
-#endif
 
 #ifdef ALPS_HAVE_MPI
 
@@ -192,7 +185,7 @@ namespace ngs_parapack {
 // clone_info_mpi
 //
 
-class clone_info_mpi : public clone_info {
+class ALPS_DECL clone_info_mpi : public clone_info {
 public:
   // interprocess communication is required
   clone_info_mpi(boost::mpi::communicator const& comm, cid_t cid, alps::params const& p,

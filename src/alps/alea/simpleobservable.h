@@ -37,7 +37,7 @@ namespace alps {
 //-----------------------------------------------------------------------
 
 template <class T,class BINNING>
-class ALPS_TEMPL_DECL SimpleObservable: public AbstractSimpleObservable<T>, public RecordableObservable<T>
+class SimpleObservable: public AbstractSimpleObservable<T>, public RecordableObservable<T>
 {
 public:
   typedef typename AbstractSimpleObservable<T>::value_type value_type;
@@ -69,7 +69,7 @@ public:
 
   void output(std::ostream&) const;
 
-  ALPS_DUMMY_VOID reset(bool why)
+  void reset(bool why)
   {
     b_.reset(why);
   }
@@ -128,9 +128,7 @@ private:
   binning_type b_;
 };
 
-#ifndef BOOST_NO_INCLASS_MEMBER_INITIALIZATION
 template <class T, class BINNING> const int SimpleObservable<T,BINNING>::version;
-#endif
 
 
 //=======================================================================
@@ -183,5 +181,8 @@ template <class T,class BINNING>
 hdf5::archive & operator>>(hdf5::archive & ar,  SimpleObservable<T,BINNING>& obs);
 
 } // end namespace alps
+
+// Template definitions must be available to every consumer.
+#include <alps/alea/simpleobservable.ipp>
 
 #endif // ALPS_ALEA_SIMPLEOBSERVABLE_H

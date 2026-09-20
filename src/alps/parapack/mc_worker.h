@@ -14,6 +14,7 @@
 #ifndef PARAPACK_WORKER_H
 #define PARAPACK_WORKER_H
 
+#include <alps/export.h>
 #include "measurement.h"
 #include "worker_factory.h"
 #include "rng_helper.h"
@@ -28,7 +29,7 @@ namespace parapack {
 // workers
 //
 
-class dumb_worker : public abstract_worker {
+class ALPS_DECL dumb_worker : public abstract_worker {
 public:
   virtual ~dumb_worker();
   static void print_copyright(std::ostream& out);

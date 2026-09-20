@@ -25,4 +25,4 @@ add_executable(worm_evaluate evaluate.C)
 
 target_link_libraries(worm worm_impl)
 target_link_libraries(worm_evaluate worm_impl)
-install(TARGETS worm worm_evaluate RUNTIME DESTINATION bin COMPONENT applications)
+install(TARGETS worm worm_evaluate RUNTIME_DEPENDENCY_SET alps_runtime RUNTIME DESTINATION bin COMPONENT applications)

@@ -26,14 +26,7 @@ namespace alps { namespace numeric {
 #undef isinf
 #endif
 
-#if defined( BOOST_MSVC)
-  template <class T>
-  bool isinf(T x) { return !_finite(x) && !_isnan(x);}
-#elif (defined(__INTEL_COMPILER) && __cplusplus <= 199711L) || defined(_CRAYC) || defined(__FCC_VERSION)
-  using ::isinf;
-#else
-  using std::isinf;
-#endif
+using std::isinf;
 
 } } // end namespace
 

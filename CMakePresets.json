@@ -15,6 +15,18 @@
       }
     },
     {
+      "name": "sdk",
+      "displayName": "Library and installed C++ SDK",
+      "inherits": "default",
+      "binaryDir": "${sourceDir}/_build/sdk",
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/sdk/install",
+        "BUILD_TESTING": "OFF",
+        "ALPS_BUILD_APPLICATIONS": "OFF",
+        "ALPS_ENABLE_MPI": "OFF"
+      }
+    },
+    {
       "name": "wheel-deps",
       "displayName": "ALPS C++ SDK for pyalps wheels",
       "description": "SDK install that the standalone pyalps wheel build links against (ALPS_DIR=_build/wheel-deps/install/share/alps). Applications are built so the wheel can bundle them into pyalps/bin, as the legacy ALPS_PYTHON_WHEEL build did; MPI is off, matching that build.",
@@ -23,12 +35,51 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/wheel-deps/install",
-        "ALPS_BUILD_LIBS_ONLY": "OFF",
-        "ALPS_BUILD_TESTS": "OFF",
         "ALPS_BUILD_EXAMPLES": "OFF",
         "ALPS_BUILD_APPLICATIONS": "ON",
         "ALPS_ENABLE_MPI": "OFF",
-        "ALPS_INCLUDE_TUTORIALS": "OFF"
+        "ALPS_INCLUDE_TUTORIALS": "OFF",
+        "BUILD_TESTING": "OFF"
+      }
+    },
+    {
+      "name": "windows-x64",
+      "displayName": "Windows x64 SDK and applications (MSVC/vcpkg)",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/_build/windows-x64",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-windows",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/windows-x64/install",
+        "ALPS_ENABLE_MPI": "OFF",
+        "ALPS_BUILD_EXAMPLES": "OFF",
+        "ALPS_INCLUDE_TUTORIALS": "OFF",
+        "BUILD_SHARED_LIBS": "ON",
+        "BUILD_TESTING": "ON"
+      }
+    },
+    {
+      "name": "windows-x64-on-arm64",
+      "displayName": "Windows x64 on an ARM64 host",
+      "inherits": "windows-x64",
+      "binaryDir": "${sourceDir}/_build/windows-x64-on-arm64",
+      "cacheVariables": {
+        "VCPKG_OVERLAY_PORTS": "${sourceDir}/cmake/vcpkg-overlay",
+        "VCPKG_HOST_TRIPLET": "arm64-windows",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/windows-x64-on-arm64/install"
+      }
+    },
+    {
+      "name": "windows-arm64",
+      "displayName": "Native Windows ARM64 SDK and applications (MSVC/vcpkg)",
+      "inherits": "windows-x64",
+      "architecture": "ARM64",
+      "binaryDir": "${sourceDir}/_build/windows-arm64",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "arm64-windows",
+        "VCPKG_OVERLAY_PORTS": "${sourceDir}/cmake/vcpkg-arm64-overlay",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/windows-arm64/install"
       }
     }
   ],
@@ -38,17 +89,99 @@
       "configurePreset": "default"
     },
     {
+      "name": "sdk",
+      "configurePreset": "sdk"
+    },
+    {
       "name": "wheel-deps",
       "configurePreset": "wheel-deps",
       "targets": [
         "install"
       ]
+    },
+    {
+      "name": "windows-x64",
+      "configurePreset": "windows-x64",
+      "configuration": "Release"
+    },
+    {
+      "name": "windows-x64-debug",
+      "configurePreset": "windows-x64",
+      "configuration": "Debug"
+    },
+    {
+      "name": "windows-x64-on-arm64",
+      "configurePreset": "windows-x64-on-arm64",
+      "configuration": "Release"
+    },
+    {
+      "name": "windows-x64-on-arm64-debug",
+      "configurePreset": "windows-x64-on-arm64",
+      "configuration": "Debug"
+    },
+    {
+      "name": "windows-arm64",
+      "configurePreset": "windows-arm64",
+      "configuration": "Release"
+    },
+    {
+      "name": "windows-arm64-debug",
+      "configurePreset": "windows-arm64",
+      "configuration": "Debug"
     }
   ],
   "testPresets": [
     {
       "name": "default",
       "configurePreset": "default",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "windows-x64",
+      "configurePreset": "windows-x64",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "windows-x64-debug",
+      "configurePreset": "windows-x64",
+      "configuration": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "windows-x64-on-arm64",
+      "configurePreset": "windows-x64-on-arm64",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "windows-x64-on-arm64-debug",
+      "configurePreset": "windows-x64-on-arm64",
+      "configuration": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "windows-arm64",
+      "configurePreset": "windows-arm64",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "windows-arm64-debug",
+      "configurePreset": "windows-arm64",
+      "configuration": "Debug",
       "output": {
         "outputOnFailure": true
       }

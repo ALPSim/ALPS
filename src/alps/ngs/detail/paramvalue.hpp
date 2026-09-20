@@ -14,6 +14,7 @@
 #ifndef ALPS_NGS_DETAIL_PARAMVALUE_HPP
 #define ALPS_NGS_DETAIL_PARAMVALUE_HPP
 
+#include <alps/export.h>
 #include <alps/hdf5/archive.hpp>
 #include <alps/ngs/config.hpp>
 #include <alps/ngs/detail/remove_cvr.hpp>
@@ -198,8 +199,8 @@ namespace alps {
 
                 #define ALPS_NGS_PARAMVALUE_MEMBER_DECL(T)                          \
                     paramvalue( T const & v) : paramvalue_base(v) {}                \
-                    operator T () const;                                            \
-                    paramvalue & operator=( T const &);
+                    ALPS_DECL operator T () const;                                  \
+                    ALPS_DECL paramvalue & operator=( T const &);
                 ALPS_NGS_FOREACH_PARAMETERVALUE_TYPE(ALPS_NGS_PARAMVALUE_MEMBER_DECL)
                 #undef ALPS_NGS_PARAMVALUE_MEMBER_DECL
 
@@ -234,8 +235,8 @@ namespace alps {
                     return *this = std::string(value); 
                 }
 
-                void save(hdf5::archive &) const;
-                void load(hdf5::archive &);
+                ALPS_DECL void save(hdf5::archive &) const;
+                ALPS_DECL void load(hdf5::archive &);
                 
             private:
 

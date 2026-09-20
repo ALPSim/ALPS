@@ -45,9 +45,7 @@ class odump_archive
 {
 public:
   odump_archive(ODump& d, bool c=true) :
-#if (BOOST_VERSION >= 103300)
     boost::archive::detail::common_oarchive<odump_archive>(0),
-#endif
     dump_(d), compatible_(c) {}
 //  template<class T>
 //  odump_archive& operator<<(const T & t)
@@ -84,76 +82,44 @@ public:
     // any datatype not specifed below will be handled
     // by this function
     template<class T>
- #if (BOOST_VERSION < 105900)
-    void save_override(const T & t, BOOST_PFTO int)
- #else
     void save_override(const T & t)
- #endif
     {
         boost::archive::save(* this->This(), t);
     }
     // binary files don't include the optional information
-#if (BOOST_VERSION < 105900)
-    void save_override(const boost::archive::class_id_optional_type & /* t */, int){}
-#else
     void save_override(const boost::archive::class_id_optional_type & /* t */){}
-#endif
 
-#if (BOOST_VERSION < 105900)
-    void save_override(const boost::archive::version_type & t, int){
-#else
     void save_override(const boost::archive::version_type & t){
-#endif
       if (!compatible_) {  // upto 255 versions
         // note:t.t resolves borland ambguity
         uint16_t x = t;
         * this->This() << x;
       }
     }
-#if (BOOST_VERSION < 105900)
-    void save_override(const boost::archive::class_id_type & t, int){
-#else
     void save_override(const boost::archive::class_id_type & t){
-#endif
       if (!compatible_) {   // upto 32K classes
         int_least16_t x = t;
         * this->This() << x;
       }
     }
-#if (BOOST_VERSION < 105900)
-    void save_override(const boost::archive::class_id_reference_type & t, int){
-#else
     void save_override(const boost::archive::class_id_reference_type & t){
-#endif
       if (!compatible_) {  // upto 32K classes
         int_least16_t x = t;
         * this->This() << x;
       }
     }
-#if (BOOST_VERSION < 105900)
-    void save_override(const boost::archive::object_id_type & t, int){
-#else
     void save_override(const boost::archive::object_id_type & t){
-#endif
       if (!compatible_) {  // upto 2G objects
         uint_least32_t x = t;
         * this->This() << x;
       }
     }
-#if (BOOST_VERSION < 105900)
-    void save_override(const boost::archive::object_reference_type & t, int){
-#else
     void save_override(const boost::archive::object_reference_type & t){
-#endif
         // upto 2G objects
         uint_least32_t x = t;
         * this->This() << x;
     }
-#if (BOOST_VERSION < 105900)
-    void save_override(const boost::archive::tracking_type & t, int){
-#else
     void save_override(const boost::archive::tracking_type & t){
-#endif
       if (!compatible_) {
         char x = t.t;
         * this->This() << x;
@@ -161,16 +127,8 @@ public:
     }
 
     // explicitly convert to char * to avoid compile ambiguities
-#if (BOOST_VERSION < 105900)
-    void save_override(const boost::archive::class_name_type & t, int){
-#else
     void save_override(const boost::archive::class_name_type & t){
-#endif
-#if (BOOST_VERSION >= 103300)
         this->This()->save(std::string(static_cast<const char *>(t)));
-#else
-        * this->This() << std::string(static_cast<const char *>(t));
-#endif
     }
 
 private:
@@ -185,9 +143,7 @@ class idump_archive
 {
 public:
   idump_archive(IDump& d, bool c=true) :
-#if (BOOST_VERSION >= 103300)
     boost::archive::detail::common_iarchive<idump_archive>(0),
-#endif
     dump_(d), compatible_(c) {}
 
 //  template<class T>
@@ -227,29 +183,17 @@ public:
     // fot templates in the absence of partial function
     // template ordering
     template<class T>
-#if (BOOST_VERSION < 105900)
-    void load_override(T & t, BOOST_PFTO int)
-#else
     void load_override(T & t)
-#endif
     {
         boost::archive::load(* this->This(), t);
     }
 
     // binary files don't include the optional information
-#if (BOOST_VERSION < 105900)
-    void load_override(boost::archive::class_id_optional_type &, int){}
-#else
     void load_override(boost::archive::class_id_optional_type &){}
-#endif
 
     // the following have been overridden to provide specific sizes
     // for these pseudo prmitive types.
-#if (BOOST_VERSION < 105900)
-    void load_override(boost::archive::version_type & t, int){
-#else
     void load_override(boost::archive::version_type & t){
-#endif
       if (!compatible_) { // upto 255 versions
         uint16_t x;
         * this->This() >> x;
@@ -258,55 +202,35 @@ public:
       else
         t  = boost::archive::version_type(dump_.version());
     }
-#if (BOOST_VERSION < 105900)
-    void load_override(boost::archive::class_id_type & t, int){
-#else
     void load_override(boost::archive::class_id_type & t){
-#endif
       if (!compatible_) {   // upto 32K classes
         int_least16_t x;
         * this->This() >> x;
         t = boost::archive::class_id_type(x);
       }
     }
-#if (BOOST_VERSION < 105900)
-    void load_override(boost::archive::class_id_reference_type & t, int){
-#else
     void load_override(boost::archive::class_id_reference_type & t){
-#endif
       if (!compatible_) {   // upto 32K classes
         int_least16_t x;
         * this->This() >> x;
         t = boost::archive::class_id_reference_type(boost::archive::class_id_type(x));
       }
     }
-#if (BOOST_VERSION < 105900)
-    void load_override(boost::archive::object_id_type & t, int){
-#else
     void load_override(boost::archive::object_id_type & t){
-#endif
       if (!compatible_) {   // upto 2G objects
         uint_least32_t x;
         * this->This() >> x;
         t = boost::archive::object_id_type(x);
       }
     }
-#if (BOOST_VERSION < 105900)
-    void load_override(boost::archive::object_reference_type & t, int){
-#else
     void load_override(boost::archive::object_reference_type & t){
-#endif
       if (!compatible_) {   // upto 2G objects
         uint_least32_t x;
         * this->This() >> x;
         t = boost::archive::object_reference_type(boost::archive::object_id_type(x));
       }
     }
-#if (BOOST_VERSION < 105900)
-    void load_override(boost::archive::tracking_type & t, int){
-#else
     void load_override(boost::archive::tracking_type & t){
-#endif
       if (!compatible_) {
         char x;
         * this->This() >> x;
@@ -314,19 +238,11 @@ public:
       }
     }
 
-#if (BOOST_VERSION < 105900)
-    void load_override(boost::archive::class_name_type & t, int){
-#else
     void load_override(boost::archive::class_name_type & t){
-#endif
       if (!compatible_) {
         std::string cn;
         cn.reserve(BOOST_SERIALIZATION_MAX_KEY_SIZE);
-#if (BOOST_VERSION < 105900)
-        load_override(cn, 0);
-#else
         load_override(cn);
-#endif
         if(cn.size() > (BOOST_SERIALIZATION_MAX_KEY_SIZE - 1))
             boost::throw_exception(
                 boost::archive::archive_exception(boost::archive::archive_exception::invalid_class_name)

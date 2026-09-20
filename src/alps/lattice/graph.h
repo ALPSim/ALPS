@@ -352,9 +352,7 @@ inline std::size_t maximum_vertex_type(const G& g)
 
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace boost {
-#endif
 
 template<class T0, class T1, class T2, class T3, class T4, class T5, class T6>
 inline std::ostream& operator<<(std::ostream& os,
@@ -373,8 +371,6 @@ inline alps::oxstream& operator<<(alps::oxstream& oxs,
   return oxs;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace boost
-#endif
 
 #endif // ALPS_LATTICE_GRAPH_H

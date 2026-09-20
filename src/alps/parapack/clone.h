@@ -14,6 +14,7 @@
 #ifndef PARAPACK_CLONE_H
 #define PARAPACK_CLONE_H
 
+#include <alps/export.h>
 #include "clone_info.h"
 #include "clone_timer.h"
 #include "option.h"
@@ -58,7 +59,7 @@ public:
   virtual void suspend() = 0;
 };
 
-class clone : public abstract_clone {
+class ALPS_DECL clone : public abstract_clone {
 public:
   clone(boost::filesystem::path const& basedir, alps::parapack::option opt, tid_t tid, cid_t cid,
     Parameters const& params, std::string const& base, bool is_new);
@@ -147,7 +148,7 @@ struct clone_halt_msg_t {
   void serialize(Archive & ar, const unsigned int) { ar & task_id & clone_id & group_id; }
 };
 
-class clone_mpi : public abstract_clone {
+class ALPS_DECL clone_mpi : public abstract_clone {
 public:
   clone_mpi(boost::mpi::communicator const& ctrl, boost::mpi::communicator const& work,
     boost::filesystem::path const& basedir, alps::parapack::option opt,

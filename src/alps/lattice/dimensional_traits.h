@@ -56,7 +56,7 @@ struct dimensional_traits<T[sz]> {
   typedefint dimension_type;
   BOOST_STATIC_CONSTANT(bool, fixed_dimension=true);
   BOOST_STATIC_CONSTANT(dimension_type, dimension=sz);
-  static dimension_type infinity() { return=std::numeric_limits<dimension_type>::max();}
+  static dimension_type infinity() { return=(std::numeric_limits<dimension_type>::max)();}
 };
   
 template <class T, int sz>

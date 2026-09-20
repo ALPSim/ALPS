@@ -41,9 +41,7 @@ inline bool is_site(const location& loc) { return loc.is_site(); }
 
 } // end namespace looper
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace looper {
-#endif
 
 inline alps::ODump& operator<<(alps::ODump& dump, const looper::location& loc) {
   loc.save(dump); return dump;
@@ -53,9 +51,7 @@ inline alps::IDump& operator>>(alps::IDump& dump, looper::location& loc) {
   loc.load(dump); return dump;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace looper
-#endif
 
 
 namespace looper {
@@ -89,9 +85,7 @@ inline bool is_site(const location_bond&) { return false; }
 
 } // end namespace looper
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace looper {
-#endif
 
 inline alps::ODump& operator<<(alps::ODump& dump, const looper::location_bond& loc) {
   loc.save(dump); return dump;
@@ -101,9 +95,7 @@ inline alps::IDump& operator>>(alps::IDump& dump, looper::location_bond& loc) {
   loc.load(dump); return dump;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace looper
-#endif
 
 
 namespace looper {
@@ -142,9 +134,7 @@ inline bool is_site(const location_longrange&) { return false; }
 
 } // end namespace looper
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace looper {
-#endif
 
 inline alps::ODump& operator<<(alps::ODump& dump, const looper::location_longrange& loc) {
   loc.save(dump); return dump;
@@ -154,8 +144,6 @@ inline alps::IDump& operator>>(alps::IDump& dump, looper::location_longrange& lo
   loc.load(dump); return dump;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace looper
-#endif
 
 #endif // LOOPER_LOCATION_IMPL_H

@@ -17,152 +17,64 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-macro(add_alps_test)
-  if(${ARGC} EQUAL 1)
-    set(name ${ARGV0})
-    set(cmd ${ARGV0})
-    set(input ${ARGV0})
-    set(output ${ARGV0})
-  else(${ARGC} EQUAL 1)
-    if(${ARGC} EQUAL 2)
-      set(name ${ARGV0})
-      set(cmd ${ARGV0})
-      set(input ${ARGV1})
-      set(output ${ARGV1})
-    else(${ARGC} EQUAL 2)
-      if(${ARGC} EQUAL 3)
-        set(name ${ARGV0})
-        set(cmd ${ARGV0})
-        set(input ${ARGV1})
-        set(output ${ARGV2})
-      else(${ARGC} EQUAL 3)
-        set(name ${ARGV0})
-        set(cmd ${ARGV1})
-        set(input ${ARGV2})
-        set(output ${ARGV3})
-      endif(${ARGC} EQUAL 3)
-    endif(${ARGC} EQUAL 2)
-  endif(${ARGC} EQUAL 1)
-  enable_testing()
-  if(MSVC)
-    get_target_property(EXE_NAME ${cmd} LOCATION)
-    add_custom_command(TARGET ${name} POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy ${EXE_NAME} ${PROJECT_BINARY_DIR}/bin)
-  endif(MSVC)
+include_guard(GLOBAL)
 
-  if(RUN_TEST_DIR AND EXISTS ${RUN_TEST_DIR}/run_test.cmake)
-    set(RUN_TEST ${RUN_TEST_DIR}/run_test.cmake)
-  else(RUN_TEST_DIR AND EXISTS ${RUN_TEST_DIR}/run_test.cmake)
-    if(EXISTS ${PROJECT_SOURCE_DIR}/cmake/run_test.cmake)
-      set(RUN_TEST ${PROJECT_SOURCE_DIR}/cmake/run_test.cmake)
-    else(EXISTS ${PROJECT_SOURCE_DIR}/cmake/run_test.cmake)
-      if(EXISTS ${ALPS_ROOT_DIR}/share/alps/run_test.cmake)
-        set(RUN_TEST ${ALPS_ROOT_DIR}/share/alps/run_test.cmake)
-      else(EXISTS ${ALPS_ROOT_DIR}/share/alps/run_test.cmake)
-        set(RUN_TEST ${CMAKE_INSTALL_PREFIX}/share/alps/run_test.cmake)
-      endif(EXISTS ${ALPS_ROOT_DIR}/share/alps/run_test.cmake)
-    endif(EXISTS ${PROJECT_SOURCE_DIR}/cmake/run_test.cmake)
-  endif(RUN_TEST_DIR AND EXISTS ${RUN_TEST_DIR}/run_test.cmake)
-    
-  add_test(${name}
-    ${CMAKE_COMMAND}
-      -Dcmd=${cmd}
-      -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
-      -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
-      -Ddllexedir=${PROJECT_BINARY_DIR}/bin
-      -Dinput=${input}
-      -Doutput=${output}
-      -P ${RUN_TEST}
-    )
-endmacro(add_alps_test)
+# Preserve the historical positional API while passing the actual executable
+# path to CTest. TARGET_FILE handles suffixes and multi-configuration layouts.
+function(add_alps_test name)
+  set(program ${name})
+  set(input ${name})
+  set(output ${name})
+  if(ARGC EQUAL 4)
+    set(program ${ARGV1})
+    set(input ${ARGV2})
+    set(output ${ARGV3})
+  elseif(ARGC GREATER 1)
+    set(input ${ARGV1})
+    set(output ${ARGV1})
+    if(ARGC EQUAL 3)
+      set(output ${ARGV2})
+    endif()
+  endif()
+  add_test(NAME ${name} COMMAND ${CMAKE_COMMAND}
+    "-Dname=${name}" "-Dcmd_path=$<TARGET_FILE:${program}>"
+    "-Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}"
+    "-Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}"
+    "-Dinput=${input}" "-Doutput=${output}"
+    -P "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/run_test.cmake")
+endfunction()
 
-macro(add_alps_test_mpi)
-  if(${ARGC} EQUAL 1)
-    set(name ${ARGV0})
-    set(cmd ${ARGV0})
-    set(procs 1)
-    set(opt "")
-    set(input ${ARGV0})
-    set(output ${ARGV0})
-  else(${ARGC} EQUAL 1)
-    if(${ARGC} EQUAL 2)
-      set(name ${ARGV0})
-      set(cmd ${ARGV0})
-      set(procs ${ARGV1})
-      set(opt "")
-      set(input ${ARGV0})
-      set(output ${ARGV0})
-    else(${ARGC} EQUAL 2)
-      if(${ARGC} EQUAL 3)
-        set(name ${ARGV0})
-        set(mcd ${ARGV0})
-        set(procs ${ARGV1})
-        set(opt ${ARGV2})
-        set(input ${ARGV0})
-        set(output ${ARGV0})
-      else(${ARGC} EQUAL 3)
-        if(${ARGC} EQUAL 4)
-          set(name ${ARGV0})
-          set(cmd ${ARGV0})
-          set(procs ${ARGV1})
-          set(opt ${ARGV2})
-          set(input ${ARGV3})
-          set(output ${ARGV3})
-        else(${ARGC} EQUAL 4)
-          if(${ARGC} EQUAL 5)
-            set(name ${ARGV0})
-            set(cmd ${ARGV0})
-            set(procs ${ARGV1})
-            set(opt ${ARGV2})
-            set(input ${ARGV3})
-            set(output ${ARGV4})
-          else(${ARGC} EQUAL 5)
-            set(name ${ARGV0})
-            set(cmd ${ARGV1})
-            set(procs ${ARGV2})
-            set(opt ${ARGV3})
-            set(input ${ARGV4})
-            set(output ${ARGV5})
-          endif(${ARGC} EQUAL 5)
-        endif(${ARGC} EQUAL 4)
-      endif(${ARGC} EQUAL 3)
-    endif(${ARGC} EQUAL 2)
-  endif(${ARGC} EQUAL 1)
-  enable_testing()
-  if(MSVC)
-    get_target_property(EXE_NAME ${cmd} LOCATION)
-    add_custom_command(TARGET ${name} POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy ${EXE_NAME} ${PROJECT_BINARY_DIR}/bin)
-  endif(MSVC)
-  
-  if(RUN_TEST_DIR AND EXISTS ${RUN_TEST_DIR}/run_test_mpi.cmake)
-    set(RUN_TEST ${RUN_TEST_DIR}/run_test_mpi.cmake)
-  else(RUN_TEST_DIR AND EXISTS ${RUN_TEST_DIR}/run_test_mpi.cmake)
-    if(EXISTS ${PROJECT_SOURCE_DIR}/cmake/run_test_mpi.cmake)
-      set(RUN_TEST ${PROJECT_SOURCE_DIR}/cmake/run_test_mpi.cmake)
-    else(EXISTS ${PROJECT_SOURCE_DIR}/cmake/run_test_mpi.cmake)
-      if(EXISTS ${ALPS_ROOT_DIR}/share/alps/run_test_mpi.cmake)
-        set(RUN_TEST ${ALPS_ROOT_DIR}/share/alps/run_test_mpi.cmake)
-      else(EXISTS ${ALPS_ROOT_DIR}/share/alps/run_test_mpi.cmake)
-        set(RUN_TEST ${CMAKE_INSTALL_PREFIX}/share/alps/run_test_mpi.cmake)
-      endif(EXISTS ${ALPS_ROOT_DIR}/share/alps/run_test_mpi.cmake)
-    endif(EXISTS ${PROJECT_SOURCE_DIR}/cmake/run_test_mpi.cmake)
-  endif(RUN_TEST_DIR AND EXISTS ${RUN_TEST_DIR}/run_test_mpi.cmake)
-    
-  add_test(${name}-np${procs}
-    ${CMAKE_COMMAND}
-      -Dcmd=${cmd}
-      -Dopt=${opt}
-      -Dmpiexec=${MPIEXEC}
-      -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
-      -Dprocs=${procs}
-      -Dmpiexec_preflags=${MPIEXEC_PREFLAGS}
-      -Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}
-      -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
-      -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
-      -Ddllexedir=${PROJECT_BINARY_DIR}/bin
-      -Dinput=${input}
-      -Doutput=${output}
-      -P ${RUN_TEST}
-    )
-endmacro(add_alps_test_mpi)
+function(add_alps_test_mpi name)
+  set(program ${name})
+  set(procs 1)
+  set(opt "")
+  set(input ${name})
+  set(output ${name})
+  set(args "${ARGN}")
+  if(ARGC EQUAL 6)
+    list(POP_FRONT args program)
+  endif()
+  list(LENGTH args count)
+  if(count GREATER 0)
+    list(POP_FRONT args procs)
+  endif()
+  if(count GREATER 1)
+    list(POP_FRONT args opt)
+  endif()
+  if(count GREATER 2)
+    list(POP_FRONT args input)
+    set(output ${input})
+  endif()
+  if(count GREATER 3)
+    list(POP_FRONT args output)
+  endif()
+  add_test(NAME ${name}-np${procs} COMMAND ${CMAKE_COMMAND}
+    "-Dname=${name}-np${procs}" "-Dcmd_path=$<TARGET_FILE:${program}>"
+    "-Dopt=${opt}" "-Dmpiexec=${MPIEXEC_EXECUTABLE}"
+    "-Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}" "-Dprocs=${procs}"
+    "-Dmpiexec_preflags=${MPIEXEC_PREFLAGS}" "-Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}"
+    "-Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}"
+    "-Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}"
+    "-Dinput=${input}" "-Doutput=${output}"
+    -P "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/run_test_mpi.cmake")
+endfunction()

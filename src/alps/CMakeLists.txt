@@ -21,10 +21,6 @@
 # libalps
 #
 
-set(ALPS_SOURCES "")
-set(ALPS_SHARED_CPPFLAGS ALPS_EXPORTS=1)
-set(ALPS_STATIC_CPPFLAGS "")
-
 set(ALPS_SOURCES
     # utility
     utility/encode.cpp utility/copyright.cpp utility/os.cpp utility/temporary_filename.cpp
@@ -69,21 +65,8 @@ set(ALPS_SOURCES
     ngs/lib/mcresult.cpp ngs/lib/mcresults.cpp ngs/lib/mcobservables.cpp ngs/lib/mcobservable.cpp
   )
 
-  if (NOT ALPS_HAVE_RPC_XDR_H)
-    set(ALPS_SOURCES ${ALPS_SOURCES} osiris/xdr.c osiris/xdr_array.c osiris/xdr_float.c osiris/xdr_stdio.c)
-  endif (NOT ALPS_HAVE_RPC_XDR_H)
+  list(APPEND ALPS_SOURCES osiris/xdr.c osiris/xdr_array.c osiris/xdr_float.c osiris/xdr_stdio.c)
   
-  # OpenMPI ULFM
-  if (ALPS_NGS_OPENMPI_ULFM)
-    set(ALPS_SOURCES ${ALPS_SOURCES} ngs/lib/ulfm.cpp)
-  endif (ALPS_NGS_OPENMPI_ULFM)
-
-  # new alea
-  if (ALPS_NGS_USE_NEW_ALEA)
-#    set(ALPS_SOURCES ${ALPS_SOURCES} ngs/lib/alea/accumulator_set.cpp ngs/lib/alea/result_set.cpp)
-    set(ALPS_SOURCES ${ALPS_SOURCES} ngs/accumulator/accumulator.cpp)
-  endif (ALPS_NGS_USE_NEW_ALEA)
-
 set(ALPS_SOURCES ${ALPS_SOURCES}
     # parapack
     parapack/clone.C parapack/clone_info.C parapack/filelock.C parapack/logger.C
@@ -97,80 +80,81 @@ set(ALPS_SOURCES ${ALPS_SOURCES}
 
 add_library(alps ${ALPS_SOURCES})
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  # The legacy "lagged_fibonacci607" generator uses a 48-bit word with a 32-bit
-  # result type, so max() truncates by design; keep it for stream compatibility.
-  set_source_files_properties(random/rngfactory.C PROPERTIES
-    COMPILE_OPTIONS "-Wno-constant-conversion")
+add_library(ALPS::alps ALIAS alps)
+add_library(alps_headers INTERFACE)
+add_library(ALPS::headers ALIAS alps_headers)
+set_target_properties(alps_headers PROPERTIES EXPORT_NAME headers)
+target_compile_features(alps_headers INTERFACE cxx_std_17)
+target_compile_features(alps PRIVATE c_std_11)
+target_include_directories(alps_headers INTERFACE
+  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/bindings>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+target_link_libraries(alps_headers INTERFACE Boost::headers)
+set(ALPS_HEADER_DEPENDENCIES ${ALPS_HDF5_TARGETS})
+if(ALPS_ENABLE_MPI)
+  list(APPEND ALPS_HEADER_DEPENDENCIES MPI::MPI_CXX)
 endif()
-
-find_package(HDF5)
-if (Boost_FOUND)
-  # link to ${Boost_LIBRARIES} when precompiled Boost libraries found
-  set(ALPS_LINK_LIBS ${Boost_LIBRARIES} ${HDF5_LIBRARIES}) # ${SZIP_LIBRARIES})
-  if(MPI_FOUND)
-    set(ALPS_LINK_LIBS ${ALPS_LINK_LIBS} ${MPI_LIBRARIES})
-    if(MPI_EXTRA_LIBRARY)
-      set(ALPS_LINK_LIBS ${ALPS_LINK_LIBS} ${MPI_EXTRA_LIBRARY})
-    endif(MPI_EXTRA_LIBRARY)
-  endif(MPI_FOUND)
-  target_link_libraries(alps ${ALPS_LINK_LIBS})
-else (Boost_FOUND)
-  # "boost" target available when Boost libraries are built from source
-  target_link_libraries(alps ${ALPS_BOOST_LIBRARY_NAME} ${HDF5_LIBRARIES}) # ${SZIP_LIBRARIES})
-endif (Boost_FOUND)
-
-if(BUILD_SHARED_LIBS)
-  if(HDF5_DEFINITIONS)
-    foreach (_hdf5_def ${HDF5_DEFINITIONS})
-      string(REPLACE "-D" "" _escaped_def ${_hdf5_def})
-      list(APPEND ALPS_SHARED_CPPFLAGS ${_escaped_def})
-    endforeach(_hdf5_def)
-  endif(HDF5_DEFINITIONS)
-  
-  set_target_properties(alps PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
-else(BUILD_SHARED_LIBS)
-  set_target_properties(alps PROPERTIES COMPILE_DEFINITIONS "${ALPS_STATIC_CPPFLAGS}")
-endif(BUILD_SHARED_LIBS)
-
-
-if(MSVC)
-  get_target_property(LIB_NAME alps LOCATION)
-  add_custom_command(TARGET alps POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${LIB_NAME} ${PROJECT_BINARY_DIR}/bin)
-endif(MSVC)
-
-# Set soversion for library
-if(NOT WIN32 AND NOT APPLE)
-  set_target_properties(alps
-    PROPERTIES
-    SOVERSION "${ALPS_VERSION_MAJOR}"
-    VERSION "${ALPS_VERSION_MAJOR}.${ALPS_VERSION_MINOR}.${ALPS_VERSION_PATCH}" )
-endif(NOT WIN32 AND NOT APPLE)
-
-
-#boost librt linking
-if(NOT WIN32 AND NOT APPLE)
-    set(ALPS_LINK_LIBS ${ALPS_LINK_LIBS} rt)
-endif(NOT WIN32 AND NOT APPLE)
+if(ALPS_ENABLE_OPENMP)
+  list(APPEND ALPS_HEADER_DEPENDENCIES OpenMP::OpenMP_CXX)
+endif()
+foreach(dependency IN LISTS ALPS_HEADER_DEPENDENCIES)
+  foreach(property IN ITEMS INCLUDE_DIRECTORIES COMPILE_DEFINITIONS COMPILE_OPTIONS COMPILE_FEATURES)
+    set_property(TARGET alps_headers APPEND PROPERTY INTERFACE_${property}
+      "$<TARGET_PROPERTY:${dependency},INTERFACE_${property}>")
+  endforeach()
+endforeach()
+target_compile_definitions(alps PRIVATE
+  BOOST_TIMER_ENABLE_DEPRECATED BOOST_ALLOW_DEPRECATED_HEADERS)
+target_link_libraries(alps PUBLIC alps_headers ${Boost_LIBRARIES} ${ALPS_HDF5_TARGETS} Threads::Threads)
+if(ALPS_BLAS_TARGET)
+  target_link_libraries(alps PUBLIC ${ALPS_BLAS_TARGET})
+endif()
+if(LAPACK_FOUND)
+  target_link_libraries(alps PUBLIC ${ALPS_LAPACK_TARGET})
+endif()
+if(BIND_FORTRAN_LOWERCASE)
+  target_compile_definitions(alps_headers INTERFACE BIND_FORTRAN_LOWERCASE)
+endif()
+if(BIND_FORTRAN_INTEGER_8)
+  target_compile_definitions(alps_headers INTERFACE BIND_FORTRAN_INTEGER_8=1)
+endif()
+if(ALPS_ENABLE_MPI)
+  target_link_libraries(alps PUBLIC MPI::MPI_CXX)
+endif()
+if(ALPS_ENABLE_OPENMP)
+  target_link_libraries(alps PUBLIC OpenMP::OpenMP_CXX)
+endif()
+include(GenerateExportHeader)
+generate_export_header(alps EXPORT_MACRO_NAME ALPS_DECL
+  EXPORT_FILE_NAME "${PROJECT_BINARY_DIR}/src/alps/export.h")
+if(NOT BUILD_SHARED_LIBS)
+  target_compile_definitions(alps_headers INTERFACE ALPS_STATIC_DEFINE)
+endif()
+set_target_properties(alps PROPERTIES
+  POSITION_INDEPENDENT_CODE ON VERSION ${PROJECT_VERSION}
+  SOVERSION ${PROJECT_VERSION_MAJOR})
+install(FILES "${PROJECT_BINARY_DIR}/src/alps/export.h"
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alps COMPONENT headers)
 
 if(ALPS_BUILD_FORTRAN)
   set(ALPS_FORTRAN_SOURCES fortran/fwrapper_impl.C)
   add_library(alps_fortran STATIC ${ALPS_FORTRAN_SOURCES})
-  target_link_libraries(alps_fortran ${CMAKE_Fortran_RUNTIME_LIBRARIES})
-  set_target_properties(alps_fortran PROPERTIES COMPILE_DEFINITIONS "${ALPS_STATIC_CPPFLAGS}")
+  target_link_libraries(alps_fortran PUBLIC alps)
 endif()
 #######################################################################
 # install
 #######################################################################
-install(TARGETS alps COMPONENT libraries
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin)
+install(TARGETS alps EXPORT ALPSTargets RUNTIME_DEPENDENCY_SET alps_runtime COMPONENT libraries
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS alps_headers EXPORT ALPSTargets COMPONENT headers)
 
 if(ALPS_BUILD_FORTRAN)
-  install(TARGETS alps_fortran COMPONENT libraries
-          ARCHIVE DESTINATION lib
-          LIBRARY DESTINATION lib
-          RUNTIME DESTINATION bin)
+  install(TARGETS alps_fortran EXPORT ALPSTargets COMPONENT libraries
+          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif(ALPS_BUILD_FORTRAN)

@@ -156,7 +156,7 @@ public:
     if (sign_ == is_positive) {
       if (rhs.sign_ == is_positive) {
         // pos + pos
-        log_ = std::max(log_, rhs.log_) + std::log(1 + std::exp(-std::abs(log_ - rhs.log_)));
+        log_ = (std::max)(log_, rhs.log_) + std::log(1 + std::exp(-std::abs(log_ - rhs.log_)));
       } else if (rhs.sign_ == is_negative) {
         if (log_ > rhs.log_) {
           // pos + neg = pos
@@ -185,7 +185,7 @@ public:
         }
       } else if (rhs.sign_ == is_negative)
         // neg + neg
-        log_ = std::max(log_, rhs.log_) + std::log(1 + std::exp(-std::abs(log_ - rhs.log_)));
+        log_ = (std::max)(log_, rhs.log_) + std::log(1 + std::exp(-std::abs(log_ - rhs.log_)));
     } else {
       log_ = rhs.log_;
       sign_ = rhs.sign_;
@@ -269,9 +269,7 @@ inline exp_number<double> exp_value(double v) {
 
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 //
 // opertor>
@@ -467,8 +465,6 @@ alps::IDump& operator>>(alps::IDump& dp, alps::exp_number<T>& x) {
   return dp;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // namespace alps
-#endif
 
 #endif // PARAPACK_EXP_NUMBER_H

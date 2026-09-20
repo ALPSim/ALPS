@@ -52,8 +52,9 @@ Before opening a new issue, please search existing issues to avoid duplicates.
 ### Prerequisites
 
 - CMake ≥ 3.22
-- A C++17-capable compiler (GCC, Clang, Intel, or Fujitsu)
-- Boost (downloaded automatically during configuration; or use a system install with `-DALPS_USE_SYSTEM_BOOST=ON`)
+- A C++17 compiler and C11 compiler (GCC, Clang, or MSVC 2022)
+- An installed Boost ≥ 1.76, HDF5 with its C/HL libraries, and BLAS/LAPACK
+- MPI and Boost.MPI for the default parallel build; use `-DALPS_ENABLE_MPI=OFF` for a serial build
 - For Fortran bindings: gfortran (or compatible Fortran compiler)
 - For Python bindings: Python ≥ 3.10, plus `numpy` and `scipy`
 
@@ -75,9 +76,9 @@ See the [installation page](https://alps.comp-phys.org/install/) for full platfo
 ### Build
 
 ```bash
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j$(nproc)
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel 2
+ctest --test-dir build --output-on-failure
 ```
 
 Alternatively, use the bundled CMake preset:
@@ -89,6 +90,128 @@ cmake --build --preset default
 The Python bindings are a separate `scikit-build-core` project that builds
 against an installed ALPS C++ SDK; see the
 [`pyalps` build instructions](bindings/python/pyalps/README.md).
+
+Dependencies are discovered through their CMake packages. Set
+`CMAKE_PREFIX_PATH` for a non-system installation. ALPS no longer downloads
+or compiles a private copy of Boost during configuration, changes the chosen
+compiler, or adds `-fpermissive`. The old `Boost_SRC_DIR` and
+`ALPS_USE_SYSTEM_BOOST` switches have been removed.
+
+### Native Windows (MSVC)
+
+Install Visual Studio 2022's **Desktop development with C++** workload,
+CMake ≥ 3.22, Git, and [vcpkg](https://github.com/microsoft/vcpkg).
+Set `VCPKG_ROOT` to its checkout and run in PowerShell:
+
+```powershell
+cmake --preset windows-x64
+cmake --build --preset windows-x64
+ctest --preset windows-x64
+cmake --install _build/windows-x64 --config Release
+```
+
+The manifest pins Boost, HDF5, OpenBLAS and LAPACK. This preset builds x64
+shared libraries and applications with MPI disabled. To build and test Debug,
+use the `windows-x64-debug` build and test presets. Install Debug and Release
+into separate prefixes (`cmake --install ... --config Debug --prefix ...`).
+
+On a Windows 11 ARM64 host, use `windows-x64-on-arm64` for configuration,
+building, and testing (or its `-debug` build/test presets). This opt-in preset
+applies a narrowly scoped vcpkg overlay so LAPACK can use x64 GFortran under
+Windows emulation. The ordinary x64 preset and CI use upstream ports. The
+outputs are x64. Keep Python and all dependencies on the same target
+architecture. The install contains the required non-system DLLs in `bin`.
+
+For native Windows ARM64, use `windows-arm64` instead:
+
+```powershell
+cmake --preset windows-arm64
+cmake --build --preset windows-arm64
+ctest --preset windows-arm64
+cmake --install _build/windows-arm64 --config Release
+```
+
+This preset uses `arm64-windows` dependencies and a
+[small numerical-package overlay](cmake/vcpkg-arm64-overlay/README.md) for the
+official OpenBLAS ARM64 binaries, including LAPACK 3.12.0. The stock vcpkg
+CLAPACK/OpenBLAS combination has incompatible return conventions and fails a
+numerical regression. The overlay needs no separate Fortran compiler and uses
+the upstream Release C-ABI DLL for both Release and Debug consumers.
+Use ARM64 Python for native Python bindings. Keep separate dependency install
+directories for x64 and ARM64: vcpkg manifest installation synchronizes its
+directory to the requested target and removes packages for other targets.
+
+For a Ninja build, start a matching Visual Studio developer shell and pass
+the vcpkg toolchain and triplet explicitly. Build outputs use `bin` for
+executables/DLLs and `lib` for link libraries; multi-configuration generators
+add their configuration subdirectory automatically.
+
+Keep machine-specific paths, job limits and disk preferences in an untracked
+`CMakeUserPresets.json`. To reclaim dependency intermediates automatically, set
+`VCPKG_INSTALL_OPTIONS` to
+`--clean-buildtrees-after-build;--clean-packages-after-build`. On machines with
+limited disk space, setting the Debug executable/shared/module linker flags to
+`/DEBUG /INCREMENTAL:NO` retains symbols without large incremental-link caches.
+
+For everyday work, reuse one build directory per configuration and build only
+the target being changed, for example:
+
+```powershell
+cmake --build --preset windows-x64-debug --target spinmc
+```
+
+That builds the target and its dependencies without building every application
+and test. The `sdk` preset disables tests, applications and MPI for a small
+library build. The default and Windows presets include full native validation.
+`BUILD_TESTING` is the single test switch; `ALPS_BUILD_APPLICATIONS` controls
+simulation applications and command-line tools together. Examples and tutorial
+installation are opt-in. SDK headers are always installed.
+
+`add_subdirectory(ALPS)` defaults to the library alone, with MPI disabled.
+An embedding project can explicitly enable the capabilities it needs. MPI,
+OpenMP, OpenMP worker scheduling and Fortran remain independent supported
+capabilities; worker scheduling requires OpenMP. The unused switch for replacing
+the simulation engine's accumulators and the obsolete OpenMPI ULFM prototype
+have been retired. The accumulator feature classes used by Python remain.
+
+Migration: replace `ALPS_BUILD_TESTS` with `BUILD_TESTING`, and replace
+`ALPS_BUILD_LIBS_ONLY=ON` with `ALPS_BUILD_APPLICATIONS=OFF`. Remove
+`ALPS_INSTALL_HEADERS`; select installation components instead if needed.
+
+### Numerical libraries
+
+`BLA_SIZEOF_INTEGER=4` is the default BLAS/LAPACK integer ABI. Use `8` only
+with ILP64 dependencies. It replaces the old `LAPACK_64_BIT` alias.
+`BLA_VENDOR` and `BLA_STATIC` are passed to CMake's numerical-library
+finders. Nondefault requests must resolve successfully. The default build
+prefers provider targets to preserve Debug/Release library selection.
+The regression suite checks LAPACK's integer ABI and a numerical solve.
+`BUILD_TESTING=OFF` also leaves Boost.Test out of the vcpkg manifest features
+and the installed SDK never requires it.
+
+### Consuming the C++ SDK
+
+After `cmake --install`, set `CMAKE_PREFIX_PATH` to the SDK prefix (and any
+dependency prefixes) or set `ALPS_DIR` to `<prefix>/share/alps`:
+
+```cmake
+project(my_simulation LANGUAGES C CXX)
+find_package(ALPS CONFIG REQUIRED)
+add_executable(my_simulation main.cpp)
+target_link_libraries(my_simulation PRIVATE ALPS::alps)
+```
+
+The exported target carries the include paths, C++17 requirement, compile
+definitions and transitive dependencies. Consumers choose their own compiler
+and build flags. Use the same ABI and build configuration as the SDK.
+Dependency discovery preserves the parent's numerical-provider variables.
+`ALPS::headers` exposes the compile interface separately for extensions that
+must link the exact runtime from a Python wheel.
+
+After installing an MPI-disabled LP64 SDK, run the consumer contracts with
+`ALPS_DIR=<prefix>/share/alps python -m pytest test/cmake`. They check parent
+project defaults, numerical ABI rejection, installed and relocated consumers.
+`ALPS_TEST_CMAKE_ARGS` accepts a JSON array of toolchain arguments when needed.
 
 ### Run the tests
 

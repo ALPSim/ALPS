@@ -47,6 +47,28 @@ prepends `pyalps/bin` to `PATH`, so this is what makes
 `runApplication` helpers then require the executables on `PATH` by other
 means.
 
+On Windows, first build and install the `windows-x64` or `windows-arm64` preset
+described in [CONTRIBUTING.md](../../../CONTRIBUTING.md#native-windows-msvc).
+Use CPython and a Visual Studio developer shell targeting the same architecture
+as the SDK, then:
+
+```powershell
+$arch = 'arm64' # Use 'x64' for the x64 SDK and Python.
+$env:ALPS_DIR = "$pwd/_build/windows-$arch/install/share/alps"
+python -m pip install build
+python -m build --wheel bindings/python/pyalps `
+  --config-setting "cmake.define.CMAKE_TOOLCHAIN_FILE=$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" `
+  --config-setting "cmake.define.VCPKG_INSTALLED_DIR=$pwd/_build/windows-$arch/vcpkg_installed" `
+  --config-setting cmake.define.VCPKG_MANIFEST_MODE=OFF `
+  --config-setting "cmake.define.VCPKG_TARGET_TRIPLET=$arch-windows"
+```
+
+Windows wheels place DLLs in `pyalps/bin` alongside the programs; package
+initialization registers that directory with Python's DLL loader before any
+extension import. This directory is also included for bindings-only wheels.
+Downstream Python packages should import `pyalps` before importing their own
+native extension, so Python can resolve that extension's ALPS DLL dependencies.
+
 ## Free-threading and stable-ABI policy
 
 pyalps ships per-version wheels (CPython 3.10–3.14) and deliberately opts
@@ -135,3 +157,20 @@ build environment.
 Note the consequence: because the number is inherited, a Python-only API change
 cannot be signalled in the pyalps version alone — it takes a bump of
 `ALPS_VERSION.txt`, which moves the whole project.
+## Downstream native extensions
+
+Use the installed SDK's `ALPS::alps` target for standalone C++ programs. For a
+nanobind extension that shares objects or HDF5 handles with pyalps, include
+`${ALPS_PYTHON_USE_FILE}` and call
+`alps_target_link_pyalps(my_module PYTHON_EXECUTABLE "${Python_EXECUTABLE}")`.
+The SDK version must match the wheel.
+
+Wheel installation writes `pyalps/runtime.json`. After auditwheel or delocate
+repair, regenerate it with
+`python bindings/python/pyalps/_build_support/runtime_manifest.py --wheel path/to/pyalps.whl`.
+This command requires the `wheel` package and rewrites the wheel's RECORD.
+Cibuildwheel runs it automatically. The manifest records exact relative
+library paths and Mach-O install names, so downstream CMake does not guess
+hashed dependency names or clone dependency target graphs. Unrepaired developer
+installs use the SDK's regular link interface; Windows uses its import libraries
+and the wheel's DLL directory.

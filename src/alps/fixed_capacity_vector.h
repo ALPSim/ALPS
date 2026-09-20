@@ -47,15 +47,9 @@ public:
   typedef const T&                                 const_reference;
   typedef T*                                       iterator;
   typedef const T*                                 const_iterator;
-#if !defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION) && \
-  !defined(BOOST_MSVC_STD_ITERATOR)
   typedef std::reverse_iterator<iterator>          reverse_iterator;
   typedef std::reverse_iterator<const_iterator>    const_reverse_iterator;
-#else
-  // workaround for broken reverse_iterator implementations
-  typedef std::reverse_iterator<iterator, T>       reverse_iterator;
-  typedef std::reverse_iterator<const_iterator, T> const_reverse_iterator;
-#endif
+
   
   BOOST_STATIC_CONSTANT(size_type, static_max_size = N);
   
@@ -359,11 +353,9 @@ inline void swap(fixed_capacity_vector<T, N>& x,
   x.swap(y);
 }
 
-#ifndef BOOST_NO_INCLASS_MEMBER_INITIALIZATION
 template<class T, std::size_t N, class CheckingPolicy>
 const typename fixed_capacity_vector<T,N,CheckingPolicy>::size_type
 fixed_capacity_vector<T,N,CheckingPolicy>::static_max_size;
-#endif
 
 } // namespace alps
 

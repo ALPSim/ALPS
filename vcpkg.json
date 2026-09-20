@@ -1,0 +1,54 @@
+{
+  "name": "alps",
+  "version-string": "3.0.0",
+  "builtin-baseline": "e6f9e70a29a3e80a1fc510d8503304315447112f",
+  "dependencies": [
+    "boost-accumulators",
+    "boost-algorithm",
+    "boost-asio",
+    "boost-chrono",
+    "boost-date-time",
+    "boost-dynamic-bitset",
+    "boost-filesystem",
+    "boost-foreach",
+    "boost-format",
+    "boost-graph",
+    "boost-iostreams",
+    "boost-lambda",
+    "boost-math",
+    "boost-multi-array",
+    "boost-ublas",
+    "boost-program-options",
+    "boost-random",
+    "boost-regex",
+    "boost-serialization",
+    "boost-spirit",
+    "boost-thread",
+    "boost-timer",
+    "boost-units",
+    {
+      "name": "hdf5",
+      "default-features": false,
+      "features": [
+        "hl",
+        "zlib"
+      ]
+    },
+    "openblas",
+    "lapack"
+  ],
+  "features": {
+    "mpi": {
+      "description": "MPI-enabled C++ SDK",
+      "dependencies": [
+        "boost-mpi"
+      ]
+    },
+    "tests": {
+      "description": "Headers for the Boost.Test regression suite",
+      "dependencies": [
+        "boost-test"
+      ]
+    }
+  }
+}

@@ -226,9 +226,7 @@ private:
 } // end namespace alps
 
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 /// output all observables in an ObservableSet
 inline std::ostream& operator<<(std::ostream& out,const alps::ObservableSet& obs)
@@ -237,8 +235,6 @@ inline std::ostream& operator<<(std::ostream& out,const alps::ObservableSet& obs
   return out;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // ALPS_ALEA_OBSERVABLESET_H

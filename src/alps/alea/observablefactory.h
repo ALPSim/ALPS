@@ -19,6 +19,7 @@
 #ifndef ALPS_ALEA_OBSERVABLEFACTORY_H
 #define ALPS_ALEA_OBSERVABLEFACTORY_H
 
+#include <alps/export.h>
 #include <alps/config.h>
 #include <alps/factory.h>
 #include <alps/alea/observable.h>
@@ -28,7 +29,7 @@ namespace alps {
 /** A class to collect the various measurements performed in a simulation
     It is implemented as a map, with std::string as key type */
 
-class ObservableFactory : public factory<uint32_t,Observable>
+class ALPS_DECL ObservableFactory : public factory<uint32_t,Observable>
 {
 public:
   ObservableFactory();

@@ -29,11 +29,11 @@ add_subdirectory(alea)
   # Script to setup ALPS_HOME, PATH, LD_LIBRARY_PATH, PYTHONPATH
   #
 
-  if(UNIX AND NOT WIN32)
+  if(UNIX)
     configure_file(alpsvars.sh.in ${CMAKE_CURRENT_BINARY_DIR}/alpsvars.sh @ONLY)
     configure_file(alpsvars.csh.in ${CMAKE_CURRENT_BINARY_DIR}/alpsvars.csh @ONLY)
     install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/alpsvars.sh ${CMAKE_CURRENT_BINARY_DIR}/alpsvars.csh DESTINATION bin COMPONENT tools)
-  endif(UNIX AND NOT WIN32)
+  endif(UNIX)
 
 
   set (TOOLS parameter2xml parameter2hdf5 convert2xml compactrun lattice2xml pevaluate pconfig
@@ -41,7 +41,7 @@ add_subdirectory(alea)
   foreach(program ${TOOLS})
     add_executable(${program} ${program}.C)
     target_link_libraries(${program} alps)
-    install(TARGETS ${program} RUNTIME DESTINATION bin COMPONENT tools) 
+    install(TARGETS ${program} RUNTIME_DEPENDENCY_SET alps_runtime RUNTIME DESTINATION bin COMPONENT tools)
   endforeach(program)
 
   #
@@ -50,7 +50,7 @@ add_subdirectory(alea)
   foreach(program p2h5)
     add_executable(${program} ${program}.cpp)
     target_link_libraries(${program} alps)
-    install(TARGETS ${program} RUNTIME DESTINATION bin COMPONENT tools) 
+    install(TARGETS ${program} RUNTIME_DEPENDENCY_SET alps_runtime RUNTIME DESTINATION bin COMPONENT tools)
   endforeach(program)
 
 
@@ -59,37 +59,37 @@ if(SQLite_FOUND)
   add_executable(archive archive.cpp archive_index.cpp archive_node.cpp archive_plot.cpp
     archive_sqlite.cpp archive_xml.cpp)
   target_link_libraries(archive alps ${SQLite_LIBRARIES})
-  install(TARGETS archive RUNTIME DESTINATION bin  COMPONENT tools)
+  install(TARGETS archive RUNTIME_DEPENDENCY_SET alps_runtime RUNTIME DESTINATION bin  COMPONENT tools)
 endif(SQLite_FOUND)
 
 #
 # legacy shell scripts that stay around for backwards compatibility until the new solutions are there
 #
 
-  if(UNIX AND NOT WIN32)
+  if(UNIX)
     install(PROGRAMS archivecat convert2html convert2text extractgp extracthtml 
             extractmpl  extracttext extractxmgr plot2gp plot2html plot2mpl 
             plot2text plot2xmgr use_local_stylesheet xslttransform 
             DESTINATION bin COMPONENT tools)
-  else(UNIX AND NOT WIN32)
-    install(PROGRAMS msxsl.exe DESTINATION bin COMPONENT tools)
-  endif(UNIX AND NOT WIN32)
+  endif(UNIX)
 
   #
   # Analytical continuation with MaxEnt
   #
 
   if(LAPACK_FOUND)
-    add_definitions(${LAPACK_DEFINITIONS} -DBIND_FORTRAN_LOWERCASE_UNDERSCORE)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
+
+
     add_executable(maxent maxent.cpp maxent_helper.cpp maxent_simulation.cpp maxent_parms.cpp)
     target_link_libraries(maxent alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
-    install(TARGETS maxent RUNTIME DESTINATION bin COMPONENT tools)
+    install(TARGETS maxent RUNTIME_DEPENDENCY_SET alps_runtime RUNTIME DESTINATION bin COMPONENT tools)
 
+    if(BUILD_TESTING)
     # Regression test: linear-FREQUENCY_GRID runs must produce a finite
     # spectrum (guards the t_array_ knot fill in maxent_parms.cpp).
     add_executable(maxent_linear_grid_numeric maxent_linear_grid_numeric.cpp
                    maxent_helper.cpp maxent_simulation.cpp maxent_parms.cpp)
     target_link_libraries(maxent_linear_grid_numeric alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
     add_alps_test(maxent_linear_grid_numeric)
+    endif()
    endif(LAPACK_FOUND)

@@ -17,11 +17,12 @@
 #ifndef ALPS_MODEL_SITETERM_H
 #define ALPS_MODEL_SITETERM_H
 
+#include <alps/export.h>
 #include <alps/model/siteoperator.h>
 
 namespace alps {
 
-class SiteTermDescriptor : public SiteOperator
+class ALPS_DECL SiteTermDescriptor : public SiteOperator
 {
 public:
   typedef SiteOperator super_type;
@@ -145,9 +146,7 @@ expression::Expression<T> SiteOperatorEvaluator<I,T,STATE>::partial_evaluate_fun
 
 } // namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 inline alps::oxstream& operator<<(alps::oxstream& out, const alps::SiteTermDescriptor& q)
 {
@@ -162,8 +161,6 @@ inline std::ostream& operator<<(std::ostream& out, const alps::SiteTermDescripto
   return out;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // namespace alps
-#endif
 
 #endif

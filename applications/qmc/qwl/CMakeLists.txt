@@ -22,4 +22,4 @@ add_executable(qwl_evaluate qwl_evaluate.C)
 
 target_link_libraries(qwl alps)
 target_link_libraries(qwl_evaluate alps)
-install(TARGETS qwl qwl_evaluate RUNTIME DESTINATION bin COMPONENT applications)
+install(TARGETS qwl qwl_evaluate RUNTIME_DEPENDENCY_SET alps_runtime RUNTIME DESTINATION bin COMPONENT applications)

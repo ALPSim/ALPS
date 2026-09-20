@@ -93,7 +93,7 @@ public:
   void read_xml_scalar(std::istream&, const XMLTag&);
   void read_xml_vector(std::istream&, const XMLTag&, label_type& label);
 
-  inline ALPS_DUMMY_VOID set_thermalization(uint32_t todiscard);
+  inline void set_thermalization(uint32_t todiscard);
   inline uint32_t get_thermalization() const;
   inline bool can_set_thermalization() const { return can_set_thermal_ && !nonlinear_operations_;}
 
@@ -130,7 +130,7 @@ public:
     return SimpleObservableData<typename element_type<T>::type>(*this,s);
   }
 
-  ALPS_DUMMY_VOID compact();
+  void compact();
 
   void extract_timeseries(ODump& dump) const;
   void save(ODump& dump) const;

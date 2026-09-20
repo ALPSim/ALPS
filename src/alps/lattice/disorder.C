@@ -17,10 +17,8 @@
 #include <alps/expression.h>
 #include <boost/assert.hpp>
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
 namespace detail {
-#endif
 
 alps::oxstream& operator<<(alps::oxstream& out,
                            const alps::detail::BasicVertexReference& d)
@@ -53,10 +51,8 @@ alps::oxstream& operator<<(alps::oxstream& out,
   return out;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace detail
 } // end namespace alps
-#endif
 
 
 namespace alps {
