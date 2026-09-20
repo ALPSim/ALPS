@@ -14,7 +14,6 @@
 
 #include <alps/graph/lattice_constant.hpp>
 
-#include <boost/progress.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
 #include <iostream>
@@ -140,7 +139,6 @@ int main() {
 
     int success = 0;
     {
-        boost::progress_timer timer;
         for(std::vector<std::pair<graph_type,lc_type> >::iterator it= g.begin(); it != g.end(); ++it)
         {
             lc_type lc = alps::graph::lattice_constant(

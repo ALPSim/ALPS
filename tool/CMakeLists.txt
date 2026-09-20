@@ -5,10 +5,10 @@
 #   the rights to use, copy, modify, merge, publish, distribute, sublicense,
 #   and/or sell copies of the Software, and to permit persons to whom the
 #   Software is furnished to do so, subject to the following conditions:
-#  
+#
 #   The above copyright notice and this permission notice shall be included
 #   in all copies or substantial portions of the Software.
-#  
+#
 #   THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS
 #   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 #   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -17,79 +17,73 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-
-#
-# basic C++ tools
-# 
-
-
 add_subdirectory(alea)
 
-  #
-  # Script to setup ALPS_HOME, PATH, LD_LIBRARY_PATH, PYTHONPATH
-  #
+foreach(
+  program IN
+  ITEMS parameter2xml
+        parameter2hdf5
+        convert2xml
+        compactrun
+        lattice2xml
+        pevaluate
+        pconfig
+        poutput
+        printgraph
+        txt2archive
+        xml2archive
+        snap2vtk)
+  add_executable(${program} ${program}.C)
+  target_link_libraries(${program} PRIVATE ALPS::alps)
+  install(TARGETS ${program} RUNTIME_DEPENDENCY_SET alps_runtime
+          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT tools)
+endforeach()
+add_executable(p2h5 p2h5.cpp)
+target_link_libraries(p2h5 PRIVATE ALPS::alps)
+install(TARGETS p2h5 RUNTIME_DEPENDENCY_SET alps_runtime RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+                                                                 COMPONENT tools)
 
-  if(UNIX)
-    configure_file(alpsvars.sh.in ${CMAKE_CURRENT_BINARY_DIR}/alpsvars.sh @ONLY)
-    configure_file(alpsvars.csh.in ${CMAKE_CURRENT_BINARY_DIR}/alpsvars.csh @ONLY)
-    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/alpsvars.sh ${CMAKE_CURRENT_BINARY_DIR}/alpsvars.csh DESTINATION bin COMPONENT tools)
-  endif(UNIX)
-
-
-  set (TOOLS parameter2xml parameter2hdf5 convert2xml compactrun lattice2xml pevaluate pconfig
-             poutput printgraph txt2archive xml2archive snap2vtk)
-  foreach(program ${TOOLS})
-    add_executable(${program} ${program}.C)
-    target_link_libraries(${program} alps)
-    install(TARGETS ${program} RUNTIME_DEPENDENCY_SET alps_runtime RUNTIME DESTINATION bin COMPONENT tools)
-  endforeach(program)
-
-  #
-  # ngs tools
-  # 
-  foreach(program p2h5)
-    add_executable(${program} ${program}.cpp)
-    target_link_libraries(${program} alps)
-    install(TARGETS ${program} RUNTIME_DEPENDENCY_SET alps_runtime RUNTIME DESTINATION bin COMPONENT tools)
-  endforeach(program)
-
-
-if(SQLite_FOUND)
-  include_directories(${SQLite_INCLUDE_DIR})
+if(ALPS_BUILD_ARCHIVE)
+  find_package(SQLite3 REQUIRED)
   add_executable(archive archive.cpp archive_index.cpp archive_node.cpp archive_plot.cpp
-    archive_sqlite.cpp archive_xml.cpp)
-  target_link_libraries(archive alps ${SQLite_LIBRARIES})
-  install(TARGETS archive RUNTIME_DEPENDENCY_SET alps_runtime RUNTIME DESTINATION bin  COMPONENT tools)
-endif(SQLite_FOUND)
+                         archive_sqlite.cpp archive_xml.cpp)
+  target_link_libraries(archive PRIVATE ALPS::alps SQLite::SQLite3)
+  install(
+    TARGETS
+    archive RUNTIME_DEPENDENCY_SET alps_runtime
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT tools)
+endif()
 
-#
-# legacy shell scripts that stay around for backwards compatibility until the new solutions are there
-#
+if(UNIX)
+  install(
+    PROGRAMS archivecat
+             convert2html
+             convert2text
+             extractgp
+             extracthtml
+             extractmpl
+             extracttext
+             extractxmgr
+             plot2gp
+             plot2html
+             plot2mpl
+             plot2text
+             plot2xmgr
+             use_local_stylesheet
+             xslttransform
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
+    COMPONENT tools)
+endif()
 
-  if(UNIX)
-    install(PROGRAMS archivecat convert2html convert2text extractgp extracthtml 
-            extractmpl  extracttext extractxmgr plot2gp plot2html plot2mpl 
-            plot2text plot2xmgr use_local_stylesheet xslttransform 
-            DESTINATION bin COMPONENT tools)
-  endif(UNIX)
-
-  #
-  # Analytical continuation with MaxEnt
-  #
-
-  if(LAPACK_FOUND)
-
-
-    add_executable(maxent maxent.cpp maxent_helper.cpp maxent_simulation.cpp maxent_parms.cpp)
-    target_link_libraries(maxent alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
-    install(TARGETS maxent RUNTIME_DEPENDENCY_SET alps_runtime RUNTIME DESTINATION bin COMPONENT tools)
-
-    if(BUILD_TESTING)
-    # Regression test: linear-FREQUENCY_GRID runs must produce a finite
-    # spectrum (guards the t_array_ knot fill in maxent_parms.cpp).
-    add_executable(maxent_linear_grid_numeric maxent_linear_grid_numeric.cpp
-                   maxent_helper.cpp maxent_simulation.cpp maxent_parms.cpp)
-    target_link_libraries(maxent_linear_grid_numeric alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
-    add_alps_test(maxent_linear_grid_numeric)
-    endif()
-   endif(LAPACK_FOUND)
+include(maxent_sources.cmake)
+add_library(maxent_impl STATIC ${ALPS_MAXENT_SOURCES})
+target_link_libraries(maxent_impl PUBLIC ALPS::alps)
+add_executable(maxent maxent.cpp)
+target_link_libraries(maxent PRIVATE maxent_impl)
+install(TARGETS maxent RUNTIME_DEPENDENCY_SET alps_runtime
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT tools)
+if(BUILD_TESTING)
+  add_executable(maxent_linear_grid_numeric maxent_linear_grid_numeric.cpp)
+  target_link_libraries(maxent_linear_grid_numeric PRIVATE maxent_impl)
+  alps_add_test(maxent_linear_grid_numeric)
+endif()

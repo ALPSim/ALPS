@@ -13,14 +13,19 @@ function(alps_target_link_pyalps target)
   if(NOT PYALPS_PYTHON_EXECUTABLE)
     message(FATAL_ERROR "alps_target_link_pyalps requires a Python interpreter")
   endif()
-  execute_process(COMMAND "${PYALPS_PYTHON_EXECUTABLE}" -c
-    "import importlib.util,pathlib; s=importlib.util.find_spec('pyalps'); print(pathlib.Path(next(iter(s.submodule_search_locations))).resolve() if s and s.submodule_search_locations else '')"
-    OUTPUT_VARIABLE package OUTPUT_STRIP_TRAILING_WHITESPACE
-    COMMAND_ERROR_IS_FATAL ANY)
+  execute_process(
+    COMMAND
+      "${PYALPS_PYTHON_EXECUTABLE}" -c
+      "import importlib.util,pathlib; s=importlib.util.find_spec('pyalps'); print(pathlib.Path(next(iter(s.submodule_search_locations))).resolve() if s and s.submodule_search_locations else '')"
+    OUTPUT_VARIABLE package
+    OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)
   set(manifest "${package}/runtime.json")
   if(NOT EXISTS "${manifest}")
     if(IS_DIRECTORY "${package}/../pyalps.libs" OR IS_DIRECTORY "${package}/.dylibs")
-      message(FATAL_ERROR "The repaired pyalps wheel has no runtime.json; rebuild it with the runtime manifest packaging step")
+      message(
+        FATAL_ERROR
+          "The repaired pyalps wheel has no runtime.json; rebuild it with the runtime manifest packaging step"
+      )
     endif()
     target_link_libraries("${target}" PRIVATE ALPS::alps)
     return()
@@ -30,7 +35,10 @@ function(alps_target_link_pyalps target)
   string(JSON version GET "${metadata}" alps_version)
   string(JSON repaired GET "${metadata}" repaired)
   if(NOT schema EQUAL 1 OR NOT version STREQUAL ALPS_VERSION)
-    message(FATAL_ERROR "The pyalps runtime manifest requires schema 1 and the matching ALPS SDK version (${ALPS_VERSION})")
+    message(
+      FATAL_ERROR
+        "The pyalps runtime manifest requires schema 1 and the matching ALPS SDK version (${ALPS_VERSION})"
+    )
   endif()
   # Windows import libraries retain stable DLL names. Python registers the
   # wheel's bin directory before loading extensions. Unrepaired Unix builds
@@ -61,9 +69,12 @@ function(alps_target_link_pyalps target)
     if(APPLE)
       string(JSON install_name GET "${metadata}" libraries ${index} install_name)
       get_filename_component(filename "${library}" NAME)
-      add_custom_command(TARGET "${target}" POST_BUILD
-        COMMAND "${CMAKE_INSTALL_NAME_TOOL}" -change "${install_name}"
-          "@rpath/${filename}" "$<TARGET_FILE:${target}>" VERBATIM)
+      add_custom_command(
+        TARGET "${target}"
+        POST_BUILD
+        COMMAND "${CMAKE_INSTALL_NAME_TOOL}" -change "${install_name}" "@rpath/${filename}"
+                "$<TARGET_FILE:${target}>"
+        VERBATIM)
     endif()
   endforeach()
   list(REMOVE_DUPLICATES runtime_paths)
@@ -71,7 +82,13 @@ function(alps_target_link_pyalps target)
     # DT_RPATH also resolves transitive dependencies such as libgfortran.
     target_link_options("${target}" PRIVATE "LINKER:--disable-new-dtags")
   endif()
-  set_property(TARGET "${target}" APPEND PROPERTY BUILD_RPATH ${runtime_paths})
-  set_property(TARGET "${target}" APPEND PROPERTY INSTALL_RPATH ${runtime_paths})
+  set_property(
+    TARGET "${target}"
+    APPEND
+    PROPERTY BUILD_RPATH ${runtime_paths})
+  set_property(
+    TARGET "${target}"
+    APPEND
+    PROPERTY INSTALL_RPATH ${runtime_paths})
   message(STATUS "${target}: using the recorded pyalps wheel runtime")
 endfunction()

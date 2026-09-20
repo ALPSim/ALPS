@@ -5,10 +5,10 @@
 #   the rights to use, copy, modify, merge, publish, distribute, sublicense,
 #   and/or sell copies of the Software, and to permit persons to whom the
 #   Software is furnished to do so, subject to the following conditions:
-#  
+#
 #   The above copyright notice and this permission notice shall be included
 #   in all copies or substantial portions of the Software.
-#  
+#
 #   THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS
 #   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 #   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -17,13 +17,8 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-if(LAPACK_FOUND)
-
-
-  include_directories(${PROJECT_SOURCE_DIR}/applications/qmc/looper)
-  add_executable(loop loop.C loop_custom.C loop_model.C path_integral.C sse.C)
-  target_link_libraries(loop alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
-  install(TARGETS loop RUNTIME_DEPENDENCY_SET alps_runtime RUNTIME DESTINATION bin COMPONENT applications)
-else(LAPACK_FOUND)
-  message(STATUS "loop will not be built since lapack library is not found")
-endif(LAPACK_FOUND)
+# Looper headers use their package-relative include paths.
+add_executable(loop loop.C loop_custom.C loop_model.C path_integral.C sse.C)
+target_include_directories(loop PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+target_link_libraries(loop PRIVATE ALPS::alps)
+alps_install_applications(loop)

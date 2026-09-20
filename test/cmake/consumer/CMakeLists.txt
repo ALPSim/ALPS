@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.27)
 project(alps_sdk_contract LANGUAGES C CXX)
 
 # A parent may already use MPI and have its own numerical-provider preferences.
@@ -10,11 +10,23 @@ set(saved_flags "${CMAKE_CXX_FLAGS}")
 if(ALPS_SOURCE)
   unset(BLA_VENDOR)
   add_subdirectory("${ALPS_SOURCE}" alps EXCLUDE_FROM_ALL)
-  if(ALPS_ENABLE_MPI OR ALPS_BUILD_APPLICATIONS OR BUILD_TESTING)
+  if(ALPS_ENABLE_MPI
+     OR ALPS_BUILD_APPLICATIONS
+     OR BUILD_TESTING)
     message(FATAL_ERROR "Embedded ALPS must default to a library-only build")
   endif()
 else()
-  find_package(ALPS CONFIG REQUIRED)
+  if(EXPECT_APPLICATIONS)
+    find_package(ALPS CONFIG REQUIRED COMPONENTS applications)
+    set(application_paths "")
+    foreach(application IN LISTS ALPS_APPLICATION_TARGETS)
+      string(APPEND application_paths "$<TARGET_FILE:${application}>\n")
+    endforeach()
+    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/applications-$<CONFIG>.txt"
+      CONTENT "${application_paths}")
+  else()
+    find_package(ALPS CONFIG REQUIRED)
+  endif()
   get_filename_component(expected_prefix "${ALPS_DIR}/../.." REALPATH)
   get_target_property(runtime ALPS::alps IMPORTED_LOCATION_RELEASE)
   cmake_path(IS_PREFIX expected_prefix "${runtime}" NORMALIZE relocated)
@@ -43,7 +55,11 @@ add_executable(sdk_contract main.cpp)
 target_link_libraries(sdk_contract PRIVATE ALPS::alps)
 enable_testing()
 add_test(NAME sdk_contract COMMAND sdk_contract)
-if(WIN32 AND NOT ALPS_SOURCE)
-  set_tests_properties(sdk_contract PROPERTIES
-    ENVIRONMENT "PATH=${ALPS_RUNTIME_LIBRARY_DIRS}\;$ENV{PATH}")
+if(NOT ALPS_SOURCE)
+  add_test(NAME sdk_resources COMMAND "${CMAKE_COMMAND}" -E env --unset=ALPS_XML_PATH
+    "ALPS_ROOT=${expected_prefix}" -- "$<TARGET_FILE:sdk_contract>" "${ALPS_DATA_DIR}/xml")
+endif()
+if(NOT ALPS_SOURCE)
+  set_tests_properties(sdk_contract sdk_resources PROPERTIES ENVIRONMENT_MODIFICATION
+    "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
 endif()

@@ -831,11 +831,13 @@ template<typename T> struct creator<boost::numeric::ublas::matrix<T, boost::nume
                     value(i, j) = creator<T>::random();
         return value;
     }
-    static base_type empty() { return base_type(MATRIX_SIZE, MATRIX_SIZE); }
-    static base_type special() { return base_type(MATRIX_SIZE, MATRIX_SIZE); }
-    template<typename X> static base_type random(X const &) { return base_type(MATRIX_SIZE, MATRIX_SIZE); }
-    template<typename X> static base_type empty(X const &) { return base_type(MATRIX_SIZE, MATRIX_SIZE); }
-    template<typename X> static base_type special(X const &) { return base_type(MATRIX_SIZE, MATRIX_SIZE); }
+    // uBLAS storage may leave fundamental elements uninitialized. Comparing
+    // such fixtures can fail on arbitrary NaNs even after a correct round trip.
+    static base_type empty() { return base_type(MATRIX_SIZE, MATRIX_SIZE, T{}); }
+    static base_type special() { return base_type(MATRIX_SIZE, MATRIX_SIZE, T{}); }
+    template<typename X> static base_type random(X const &) { return base_type(MATRIX_SIZE, MATRIX_SIZE, T{}); }
+    template<typename X> static base_type empty(X const &) { return base_type(MATRIX_SIZE, MATRIX_SIZE, T{}); }
+    template<typename X> static base_type special(X const &) { return base_type(MATRIX_SIZE, MATRIX_SIZE, T{}); }
 };
 template<typename T> bool equal(boost::numeric::ublas::matrix<T, boost::numeric::ublas::column_major> const & a, boost::numeric::ublas::matrix<T, boost::numeric::ublas::column_major> const & b) {
     for (std::size_t i = 0; i < MATRIX_SIZE; ++i)

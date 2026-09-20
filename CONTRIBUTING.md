@@ -51,11 +51,12 @@ Before opening a new issue, please search existing issues to avoid duplicates.
 
 ### Prerequisites
 
-- CMake ≥ 3.22
+- CMake ≥ 3.27
 - A C++17 compiler and C11 compiler (GCC, Clang, or MSVC 2022)
-- An installed Boost ≥ 1.76, HDF5 with its C/HL libraries, and BLAS/LAPACK
+- An installed Boost ≥ 1.76, HDF5 with its C library, and BLAS/LAPACK
 - MPI and Boost.MPI for the default parallel build; use `-DALPS_ENABLE_MPI=OFF` for a serial build
-- For Fortran bindings: gfortran (or compatible Fortran compiler)
+- For Fortran examples and simulations: gfortran (or a compatible Fortran compiler).
+  The `ALPS_BUILD_FORTRAN` C++ wrapper itself needs no Fortran compiler.
 - For Python bindings: Python ≥ 3.10, plus `numpy` and `scipy`
 
 See the [installation page](https://alps.comp-phys.org/install/) for full platform-specific instructions.
@@ -100,7 +101,7 @@ compiler, or adds `-fpermissive`. The old `Boost_SRC_DIR` and
 ### Native Windows (MSVC)
 
 Install Visual Studio 2022's **Desktop development with C++** workload,
-CMake ≥ 3.22, Git, and [vcpkg](https://github.com/microsoft/vcpkg).
+CMake ≥ 3.27, Git, and [vcpkg](https://github.com/microsoft/vcpkg).
 Set `VCPKG_ROOT` to its checkout and run in PowerShell:
 
 ```powershell
@@ -167,6 +168,17 @@ library build. The default and Windows presets include full native validation.
 simulation applications and command-line tools together. Examples and tutorial
 installation are opt-in. SDK headers are always installed.
 
+`ALPS_BUILD_EXTENSIVE_TESTS=ON` adds the expensive graph and HDF5 type-matrix
+tests to `BUILD_TESTING`. The HDF5 matrix compiles each type once and exercises
+dataset, attribute and compression modes at runtime; unavailable SZIP encoding
+is reported as a skipped test. It replaces `ALPS_BUILD_GRAPH_TESTS` and
+`ALPS_BUILD_HDF5_TESTS`.
+
+`ALPS_BUILD_ARCHIVE=ON` adds the optional SQLite archive tool and requires
+SQLite3. Its dependency is discovered only when the tool is requested; vcpkg
+selects the corresponding manifest feature. The obsolete Boost-source-tree
+maintenance tool and its `ALPS_BUILD_DEVELOPER_TOOLS` option have been retired.
+
 `add_subdirectory(ALPS)` defaults to the library alone, with MPI disabled.
 An embedding project can explicitly enable the capabilities it needs. MPI,
 OpenMP, OpenMP worker scheduling and Fortran remain independent supported
@@ -183,7 +195,8 @@ Migration: replace `ALPS_BUILD_TESTS` with `BUILD_TESTING`, and replace
 `BLA_SIZEOF_INTEGER=4` is the default BLAS/LAPACK integer ABI. Use `8` only
 with ILP64 dependencies. It replaces the old `LAPACK_64_BIT` alias.
 `BLA_VENDOR` and `BLA_STATIC` are passed to CMake's numerical-library
-finders. Nondefault requests must resolve successfully. The default build
+finders. Both numerical libraries are required; missing dependencies cause a
+configuration error instead of silently dropping simulation programs. The default build
 prefers provider targets to preserve Debug/Release library selection.
 The regression suite checks LAPACK's integer ABI and a numerical solve.
 `BUILD_TESTING=OFF` also leaves Boost.Test out of the vcpkg manifest features
@@ -207,6 +220,28 @@ and build flags. Use the same ABI and build configuration as the SDK.
 Dependency discovery preserves the parent's numerical-provider variables.
 `ALPS::headers` exposes the compile interface separately for extensions that
 must link the exact runtime from a Python wheel.
+
+The SDK also exports `ALPS::fortran` when the Fortran wrapper is built.
+It carries the GNU Fortran compatibility flag needed by the legacy untyped
+Fortran bridge; the flag applies only to Fortran consumers of that target.
+The two installed Fortran tutorials also require Fortran OpenMP because their
+source calls the OpenMP runtime directly.
+An SDK with applications exports their executable targets (for example,
+`ALPS::spinmc`), listed in `ALPS_APPLICATION_TARGETS`. Consumers may request
+`find_package(ALPS CONFIG REQUIRED COMPONENTS applications)` to require them.
+Wheel packaging uses these targets directly, including their installed paths.
+
+Legacy `ALPS_USE_FILE`, `ALPS_LIBRARIES` and dependency-variable aliases have
+been removed. Link to the exported targets instead. `find_package(ALPS)` also
+provides `alps_target_link_pyalps` for extensions sharing a wheel's runtime;
+no additional use-file include is needed.
+
+Installation follows `GNUInstallDirs`, including customized `CMAKE_INSTALL_BINDIR`
+and `CMAKE_INSTALL_LIBDIR`. XML resources and optional tutorials live under
+`${CMAKE_INSTALL_DATADIR}/alps`, exported as `ALPS_DATA_DIR`. Wheels bundle the
+SDK's installed XML resources directly.
+The former `ALPS_XML_PATH` CMake cache option and `alpsvars` shell scripts have
+been removed; the `ALPS_XML_PATH` runtime environment override remains available.
 
 After installing an MPI-disabled LP64 SDK, run the consumer contracts with
 `ALPS_DIR=<prefix>/share/alps python -m pytest test/cmake`. They check parent
@@ -332,7 +367,8 @@ If you are contributing a new simulation application or library, the Governing C
 
 ### CMake
 
-- CMake ≥ 3.22 features are acceptable.
+- CMake ≥ 3.27 features are acceptable. Express dependencies and compiler settings
+  on targets with explicit `PRIVATE`, `PUBLIC` or `INTERFACE` scope.
 - Use target-based linking (`target_link_libraries`, `target_include_directories`) rather than directory-level commands.
 
 ---

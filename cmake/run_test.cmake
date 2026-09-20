@@ -4,29 +4,34 @@ if(NOT EXISTS "${cmd_path}")
 endif()
 set(input_names "${input}.input" "${input}.ip")
 set(output_names "${output}.output" "${output}.op")
-if(DEFINED procs)
-  list(PREPEND input_names "${input}.input-${procs}" "${input}.ip-${procs}")
-  set(output_names "${output}.output-${procs}" "${output}.op-${procs}")
-endif()
-find_file(input_path NAMES ${input_names} PATHS "${binarydir}" "${sourcedir}" NO_DEFAULT_PATH)
-find_file(output_path NAMES ${output_names} PATHS "${binarydir}" "${sourcedir}" NO_DEFAULT_PATH)
+find_file(
+  input_path
+  NAMES ${input_names}
+  PATHS "${binarydir}" "${sourcedir}"
+  NO_DEFAULT_PATH)
+find_file(
+  output_path
+  NAMES ${output_names}
+  PATHS "${binarydir}" "${sourcedir}"
+  NO_DEFAULT_PATH)
 set(input_args)
 if(input_path)
   list(APPEND input_args INPUT_FILE "${input_path}")
 endif()
-if(NOT test_command)
-  set(test_command "${cmd_path}")
-endif()
 set(actual "${binarydir}/${name}.actual")
 set(ENV{OMP_NUM_THREADS} 1)
-execute_process(COMMAND ${test_command} ${input_args}
-  OUTPUT_FILE "${actual}" ERROR_VARIABLE error RESULT_VARIABLE result TIMEOUT 600)
+execute_process(
+  COMMAND "${cmd_path}" ${input_args}
+  OUTPUT_FILE "${actual}"
+  ERROR_VARIABLE error
+  RESULT_VARIABLE result
+  TIMEOUT 600)
 if(NOT result STREQUAL "0")
   message(FATAL_ERROR "${name} failed (${result}): ${error}; output: ${actual}")
 endif()
 if(output_path)
-  execute_process(COMMAND "${CMAKE_COMMAND}" -E compare_files --ignore-eol
-    "${output_path}" "${actual}" RESULT_VARIABLE mismatch)
+  execute_process(COMMAND "${CMAKE_COMMAND}" -E compare_files --ignore-eol "${output_path}"
+                          "${actual}" RESULT_VARIABLE mismatch)
   if(mismatch)
     message(FATAL_ERROR "${name}: ${actual} differs from ${output_path}")
   endif()

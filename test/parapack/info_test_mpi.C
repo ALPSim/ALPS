@@ -13,6 +13,8 @@
 
 #include <alps/parapack/clone_info.h>
 #include <alps/osiris/comm.h>
+#include <chrono>
+#include <thread>
 
 namespace mpi = boost::mpi;
 
@@ -23,11 +25,11 @@ int main(int argc, char **argv) {
   params["SEED"] = 29832;
   alps::clone_info_mpi info(world, 0, params, "info_test");
   info.start("test 1");
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::seconds(1));
   info.stop();
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::seconds(1));
   info.start("test 2");
-  sleep(1);
+  std::this_thread::sleep_for(std::chrono::seconds(1));
   info.stop();
   info.set_progress(0.593483);
   if (world.rank() == 0) {

@@ -78,13 +78,14 @@ jobs:
 
       # The sdist must remain buildable outside the repository checkout:
       # verify its metadata and that the vendored ALPS sources it needs
-      # (applications, tools, XML library) actually made it in.
+      # (applications, tools and their build descriptions) actually made it in.
       - name: Smoke check sdist
         run: |
           pipx run twine check dist/*.tar.gz
           tar -tzf dist/*.tar.gz > sdist-manifest.txt
-          for path in _vendor/lib/xml/ALPS.xsl _vendor/tool/maxent.cpp \
-                      _vendor/applications/dmft/qmc \
+          for path in _vendor/tool/maxent.cpp _vendor/tool/maxent_sources.cmake \
+                      _vendor/applications/dmft/qmc/sources.cmake \
+                      _vendor/cmake/ALPSRuntime.cmake \
                       LICENSE.txt src/pyalps/__init__.py; do
             grep -q "$path" sdist-manifest.txt || { echo "missing $path in sdist"; exit 1; }
           done

@@ -11,7 +11,7 @@ Install `pyalps[plot]` to use the Matplotlib plotting helpers.
 Install `pyalps[mpi]` for the mpi4py-backed `pyalps.mpi` compatibility layer.
 
 The bindings are built as a standalone `scikit-build-core` project using
-nanobind. A source build requires Python 3.10 or newer, CMake 3.22 or newer,
+nanobind. A source build requires Python 3.10 or newer, CMake 3.27 or newer,
 Ninja, a C++17 compiler, BLAS/LAPACK, HDF5, and an installed ALPS C++ SDK.
 Point `ALPS_DIR` at the SDK's `share/alps` package directory.
 
@@ -160,9 +160,9 @@ cannot be signalled in the pyalps version alone — it takes a bump of
 ## Downstream native extensions
 
 Use the installed SDK's `ALPS::alps` target for standalone C++ programs. For a
-nanobind extension that shares objects or HDF5 handles with pyalps, include
-`${ALPS_PYTHON_USE_FILE}` and call
+nanobind extension that shares objects or HDF5 handles with pyalps, call
 `alps_target_link_pyalps(my_module PYTHON_EXECUTABLE "${Python_EXECUTABLE}")`.
+The function is supplied by `find_package(ALPS CONFIG REQUIRED)`.
 The SDK version must match the wheel.
 
 Wheel installation writes `pyalps/runtime.json`. After auditwheel or delocate

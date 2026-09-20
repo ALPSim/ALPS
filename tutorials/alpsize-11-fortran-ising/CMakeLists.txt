@@ -1,15 +1,9 @@
-cmake_minimum_required(VERSION 3.22)
-project(alpsize NONE)
+cmake_minimum_required(VERSION 3.27)
+project(alpsize LANGUAGES C CXX Fortran)
 
-# find ALPS Library
-find_package(ALPS REQUIRED PATHS ${ALPS_ROOT_DIR} $ENV{ALPS_HOME} NO_SYSTEM_ENVIRONMENT_PATH)
-message(STATUS "Found ALPS: ${ALPS_ROOT_DIR} (revision: ${ALPS_VERSION})")
-include(${ALPS_USE_FILE})
-
-# enable C, C++, and Fortran compilers
-enable_language(C CXX Fortran)
-set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_C_FLAGS}")
+find_package(ALPS CONFIG REQUIRED COMPONENTS fortran)
+find_package(OpenMP REQUIRED COMPONENTS Fortran)
 
 # rule for generating ising program
 add_executable(ising ising.C ising_impl.f90)
-target_link_libraries(ising ${ALPS_LIBRARIES} ${ALPS_FORTRAN_LIBRARIES})
+target_link_libraries(ising PRIVATE ALPS::fortran OpenMP::OpenMP_Fortran)

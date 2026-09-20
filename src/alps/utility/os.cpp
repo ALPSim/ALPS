@@ -46,25 +46,16 @@ boost::filesystem::path temp_directory_path() {
   return boost::filesystem::temp_directory_path();
 }
 
-#ifdef ALPS_PREFIX
 boost::filesystem::path installation_directory()
 {
   return boost::filesystem::path(ALPS_PREFIX);
 }
-#else
-boost::filesystem::path installation_directory()
-{
-  return boost::filesystem::path("");
-}
-
-#endif
 
 boost::filesystem::path bin_directory()
 {
-  const char* val = 0;
   if (const char* bin = std::getenv("ALPS_BIN_PATH"))
     return boost::filesystem::path(bin);
-  return installation_directory() / "bin";
+  return boost::filesystem::path(ALPS_BIN_DIR);
 }
 
   

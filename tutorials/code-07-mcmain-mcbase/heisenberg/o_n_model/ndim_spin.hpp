@@ -29,10 +29,10 @@
  * The simulation class derives from mcbase.
  */
 template <int N>
-class ALPS_DECL ndim_spin_sim : public alps::mcbase {
+class ndim_spin_sim : public alps::mcbase {
 
     public:
-        typedef tinyvector<double, N, INTRIN_OPT> spintype;
+        typedef tinyvector<double, N> spintype;
         ndim_spin_sim(parameters_type const & parms, std::size_t seed_offset = 0);
 
         virtual void update();
@@ -49,7 +49,7 @@ class ALPS_DECL ndim_spin_sim : public alps::mcbase {
         const spintype random_spin();
 
     private:
-        
+
         alps::graph_helper<> lattice;
         int num_sites;
         std::vector<spintype> spins;
@@ -186,4 +186,4 @@ const typename ndim_spin_sim<N>::spintype ndim_spin_sim<N>::random_spin() {
     return random_spin_gen(random.engine());
 }
 
-#endif 
+#endif

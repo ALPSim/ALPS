@@ -39,6 +39,7 @@ jobs:
       - name: Configure SDK
         shell: pwsh
         run: |
+          python -m pip install "cmake>=3.27"
           $env:VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
           cmake --preset windows-${{ matrix.arch }}
       - name: Build SDK

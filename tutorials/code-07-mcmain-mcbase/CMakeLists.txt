@@ -1,26 +1,20 @@
-cmake_minimum_required(VERSION 3.22)
-project(alpsize NONE)
+cmake_minimum_required(VERSION 3.27)
+project(alpsize LANGUAGES C CXX)
 
-# find ALPS Library
-find_package(ALPS REQUIRED PATHS ${ALPS_ROOT_DIR} $ENV{ALPS_HOME} NO_SYSTEM_ENVIRONMENT_PATH)
-message(STATUS "Found ALPS: ${ALPS_ROOT_DIR} (revision: ${ALPS_VERSION})")
-include(${ALPS_USE_FILE})
-
-# enable C and C++ compilers
-enable_language(C CXX)
+find_package(ALPS CONFIG REQUIRED)
 
 # rule for generating single core ising program
 add_executable(single ising.cpp single.cpp)
-target_link_libraries(single ${ALPS_LIBRARIES})
+target_link_libraries(single PRIVATE ALPS::alps)
 
-if (MPI_FOUND)
+if(ALPS_MPI_ENABLED)
 
-	# rule for generating mpi ising program
-	add_executable(mpi ising.cpp mpi.cpp)
-	target_link_libraries(mpi ${ALPS_LIBRARIES})
+  # rule for generating mpi ising program
+  add_executable(mpi ising.cpp mpi.cpp)
+  target_link_libraries(mpi PRIVATE ALPS::alps)
 
-	# rule for generating mpi pscan ising program
-	add_executable(mpi_pscan ising.cpp mpi_pscan.cpp)
-	target_link_libraries(mpi_pscan ${ALPS_LIBRARIES})
+  # rule for generating mpi pscan ising program
+  add_executable(mpi_pscan ising.cpp mpi_pscan.cpp)
+  target_link_libraries(mpi_pscan PRIVATE ALPS::alps)
 
-endif (MPI_FOUND)
+endif(ALPS_MPI_ENABLED)

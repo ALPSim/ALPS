@@ -5,10 +5,10 @@
 #   the rights to use, copy, modify, merge, publish, distribute, sublicense,
 #   and/or sell copies of the Software, and to permit persons to whom the
 #   Software is furnished to do so, subject to the following conditions:
-#  
+#
 #   The above copyright notice and this permission notice shall be included
 #   in all copies or substantial portions of the Software.
-#  
+#
 #   THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS
 #   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 #   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -18,9 +18,21 @@
 #   DEALINGS IN THE SOFTWARE.
 
 add_executable(simplemc main.C evaluator.C ising.C xy.C heisenberg.C)
-target_link_libraries(simplemc alps)
-install(TARGETS simplemc RUNTIME_DEPENDENCY_SET alps_runtime RUNTIME DESTINATION bin COMPONENT applications)
-enable_testing()
-add_alps_test(simplemc_ising simplemc ising ising)
-add_alps_test(simplemc_xy simplemc xy xy)
-add_alps_test(simplemc_heisenberg simplemc heisenberg heisenberg)
+target_link_libraries(simplemc PRIVATE ALPS::alps)
+alps_install_applications(simplemc)
+
+alps_add_test(
+  simplemc_ising
+  TARGET simplemc
+  INPUT ising
+  OUTPUT ising)
+alps_add_test(
+  simplemc_xy
+  TARGET simplemc
+  INPUT xy
+  OUTPUT xy)
+alps_add_test(
+  simplemc_heisenberg
+  TARGET simplemc
+  INPUT heisenberg
+  OUTPUT heisenberg)

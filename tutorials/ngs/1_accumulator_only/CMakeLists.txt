@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.27)
 project(alps_ising_tutorial LANGUAGES C CXX)
 
 find_package(ALPS CONFIG REQUIRED)

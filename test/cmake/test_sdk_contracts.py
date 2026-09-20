@@ -46,16 +46,29 @@ def test_sdk_rejects_integer_abi_mismatch(tmp_path):
     assert "requires BLA_SIZEOF_INTEGER=4" in output
 
 
+def test_sdk_exports_installed_applications(tmp_path):
+    if not (Path(os.environ["ALPS_DIR"]) / "ALPSApplicationTargets.cmake").is_file():
+        pytest.skip("requires an SDK with applications")
+    configure(tmp_path, "-DEXPECT_APPLICATIONS=ON")
+    # Generator expressions resolve the selected configuration and suffix.
+    paths = (tmp_path / "applications-Release.txt").read_text().splitlines()
+    assert len(paths) == 18
+    assert len(set(paths)) == 18
+    assert all(Path(path).is_file() for path in paths)
+
+
 def test_relocated_sdk(tmp_path):
     prefix = Path(os.environ["ALPS_DIR"]).resolve().parents[1]
     relocated = tmp_path / "relocated"
     # Only copy SDK artifacts, not application programs or dependency caches.
-    for directory in ("include", "lib", "share/alps"):
+    libdir = os.environ.get("ALPS_TEST_INSTALL_LIBDIR", "lib")
+    bindir = os.environ.get("ALPS_TEST_INSTALL_BINDIR", "bin")
+    for directory in ("include", libdir, "share/alps"):
         shutil.copytree(prefix / directory, relocated / directory, symlinks=True)
     if os.name == "nt":
-        (relocated / "bin").mkdir()
-        for library in (prefix / "bin").glob("*.dll"):
-            shutil.copy2(library, relocated / "bin" / library.name)
+        (relocated / bindir).mkdir(parents=True)
+        for library in (prefix / bindir).glob("*.dll"):
+            shutil.copy2(library, relocated / bindir / library.name)
     build = tmp_path / "consumer"
     configure(build, f"-DALPS_DIR={relocated / 'share/alps'}")
     build_and_run(build)

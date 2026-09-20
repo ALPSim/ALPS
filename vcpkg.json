@@ -30,7 +30,6 @@
       "name": "hdf5",
       "default-features": false,
       "features": [
-        "hl",
         "zlib"
       ]
     },
@@ -38,6 +37,10 @@
     "lapack"
   ],
   "features": {
+    "archive": {
+      "description": "Optional SQLite archive tool",
+      "dependencies": ["sqlite3"]
+    },
     "mpi": {
       "description": "MPI-enabled C++ SDK",
       "dependencies": [

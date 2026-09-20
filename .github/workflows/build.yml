@@ -32,7 +32,7 @@ jobs:
         # ubuntu-22.04 tops out at gcc-12 / clang-15 in its apt repos.
         # ubuntu-24.04 tops out at gcc-14 / clang-18.
         - { os: ubuntu-22.04, comp_pack: "gcc-12 g++-12",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 12, boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 14, boost_version: 91 }
+        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 14, boost_version: 91, extras: true }
         - { os: ubuntu-22.04, comp_pack: "clang-15",        c_compiler: clang, cxx_compiler: clang++, c_version: 15, boost_version: 91 }
         - { os: ubuntu-24.04, comp_pack: "clang-18",        c_compiler: clang, cxx_compiler: clang++, c_version: 18, boost_version: 91 }
 
@@ -82,11 +82,15 @@ jobs:
         # its 90-minute cap (observed multi-hour stalls in this step).
         timeout-minutes: 20
         run: |
+          python -m pip install "cmake>=3.27"
           # Bound every apt network operation: 30 s socket timeout, 3 retries.
           printf 'Acquire::Retries "3";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' \
             | sudo tee /etc/apt/apt.conf.d/99ci-timeouts > /dev/null
           sudo apt-get update
           sudo apt install liblapack-dev libblas-dev libopenmpi-dev libhdf5-serial-dev
+          if [[ "${{ matrix.plat.extras }}" == "true" ]]; then
+            sudo apt install gfortran libsqlite3-dev
+          fi
           # Clang >= 19: not in Ubuntu's default apt repos; use apt.llvm.org.
           # GCC >= 15: not in Ubuntu's default apt repos; use ubuntu-toolchain-r PPA.
           if [[ "${{ matrix.plat.c_compiler }}" == "clang" && "${{ matrix.plat.c_version }}" -ge 19 ]]; then
@@ -107,25 +111,38 @@ jobs:
           CXX: ${{ matrix.plat.cxx_compiler }}-${{ matrix.plat.c_version }}
         run: |
           bash script/build-boost.sh "$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" "$GITHUB_WORKSPACE/boost-install"
+          extra_args=()
+          if [[ "${{ matrix.plat.extras }}" == "true" ]]; then
+            extra_args=(-DALPS_BUILD_EXAMPLES=ON -DALPS_BUILD_FORTRAN=ON
+                        -DALPS_INCLUDE_TUTORIALS=ON -DALPS_BUILD_ARCHIVE=ON
+                        -DALPS_ENABLE_OPENMP=ON)
+          fi
           cmake -S $GITHUB_WORKSPACE -B build \
                 -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/boost-install" \
                 -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/build/install" \
-                -DCMAKE_CXX_STANDARD=${{ matrix.plat.cxx_standard || '17' }}
+                -DCMAKE_CXX_STANDARD=${{ matrix.plat.cxx_standard || '17' }} \
+                "${extra_args[@]}"
           cmake --build build -j 2
           ctest --test-dir build --output-on-failure --parallel 2
 
       # Compile the public exporter as a downstream project, rather than only
       # checking that its compatibility header is present in the install.
-      - name: Smoke test downstream nanobind simulation extension
-        if: matrix.plat.os == 'ubuntu-24.04' && matrix.plat.c_compiler == 'gcc' && matrix.plat.c_version == 14 && matrix.plat.boost_version == 91 && matrix.plat.cxx_standard == null
+      - name: Build installed C, C++, Fortran and Python extension tutorials
+        if: matrix.plat.extras
         run: |
           python -m pip install "nanobind>=2.10,<3"
           cmake --install build
-          cmake -S tutorials/ngs/5_export_python -B downstream-export-build \
-                -DALPS_DIR="$PWD/build/install/share/alps" \
-                -DCMAKE_PREFIX_PATH="$PWD/boost-install" \
-                -DPython_EXECUTABLE="$(command -v python)"
-          cmake --build downstream-export-build -j 2
+          tutorials="$PWD/build/install/share/alps/tutorials"
+          find "$tutorials" -mindepth 2 -name CMakeLists.txt -print0 | while IFS= read -r -d '' file; do
+            source="${file%/CMakeLists.txt}"
+            output="_build/tutorials/${source#"$tutorials/"}"
+            cmake -S "$source" -B "$output" \
+                  -DALPS_DIR="$PWD/build/install/share/alps" \
+                  -DCMAKE_PREFIX_PATH="$PWD/boost-install" \
+                  -DPython_EXECUTABLE="$(command -v python)"
+            cmake --build "$output" -j 2
+            ctest --test-dir "$output" --output-on-failure
+          done
 
   macos-build:
     name: >-
@@ -156,7 +173,7 @@ jobs:
       - name: Install dependencies
         timeout-minutes: 30
         run: |
-          brew install openmpi hdf5
+          brew install cmake openmpi hdf5
           if [[ -n "${{ matrix.plat.comp_pack }}" ]]; then
             brew install ${{ matrix.plat.comp_pack }}
           fi

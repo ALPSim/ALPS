@@ -27,15 +27,6 @@
 
 // Define to 1 if you have rpc/rpc.h and rpc/xdr.h
 
-// Define to 1 if you have the <stdarg.h> header file.
-#cmakedefine ALPS_HAVE_STDARG_H
-
-// Define to 1 if you have the <sys/stat.h> header file.
-#cmakedefine ALPS_HAVE_SYS_STAT_H
-
-// Define to 1 if you have the <sys/systeminfo.h> header file.
-#cmakedefine ALPS_HAVE_SYS_SYSTEMINFO_H
-
 // Define to 1 if you have the <sys/types.h> header file.
 #cmakedefine ALPS_HAVE_SYS_TYPES_H
 
@@ -49,9 +40,6 @@
 // Libraries
 //
 
-// Define to 1 if you have the PTHREAD library
-#cmakedefine ALPS_HAVE_PTHREAD
-
 // Define to 1 if you have the MPI library
 #cmakedefine ALPS_HAVE_MPI
 
@@ -64,15 +52,6 @@
 // Define to 1 if you have the Boost.MPI library
 #cmakedefine ALPS_HAVE_BOOST_MPI
 
-// Define to 1 if you have the Boost.Signals library
-#cmakedefine ALPS_HAVE_BOOST_SIGNALS
-
-// Define to 1 if you have the Boost.ThreadMPI library
-#cmakedefine ALPS_HAVE_BOOST_THREAD
-
-// Define to 1 if you have wchar support in Boost.Regex and Boost.Serialization
-#cmakedefine ALPS_HAVE_BOOST_WCHAR
-
 //
 // BLAS and LAPACK
 //
@@ -82,24 +61,6 @@
 
 // Define if you have LAPACK library
 #cmakedefine ALPS_HAVE_LAPACK
-
-// Define if you have Intel Math Kernel Library
-#cmakedefine ALPS_HAVE_MKL
-
-// Define if you have the Digital Extended Math Library
-#cmakedefine ALPS_HAVE_DXML
-
-// Define if you have SGI SCSL Library
-#cmakedefine ALPS_HAVE_SCSL
-
-// Define if you have Mac OS X vecLib framework
-#cmakedefine ALPS_HAVE_VECLIB
-
-// Define if you have IBM ESSL Library
-#cmakedefine ALPS_HAVE_ESSL
-
-// Define if you have ATLAS library
-#cmakedefine ALPS_HAVE_ATLAS
 
 // Set 8-byte integers for Boost bindings if needed
 #cmakedefine BIND_FORTRAN_INTEGER_8 1

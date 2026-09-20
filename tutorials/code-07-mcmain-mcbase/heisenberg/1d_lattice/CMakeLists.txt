@@ -1,14 +1,8 @@
-cmake_minimum_required(VERSION 3.22)
-project(heisenberg NONE)
+cmake_minimum_required(VERSION 3.27)
+project(heisenberg LANGUAGES C CXX)
 
-# find ALPS Library
-find_package(ALPS REQUIRED PATHS ${ALPS_ROOT_DIR} $ENV{ALPS_HOME} NO_SYSTEM_ENVIRONMENT_PATH)
-message(STATUS "Found ALPS: ${ALPS_ROOT_DIR} (revision: ${ALPS_VERSION})")
-include(${ALPS_USE_FILE})
-
-# enable C and C++ compilers
-enable_language(C CXX)
+find_package(ALPS CONFIG REQUIRED)
 
 # rule for generating single core heisenberg program
 add_executable(single heisenberg.cpp single.cpp)
-target_link_libraries(single ${ALPS_LIBRARIES})
+target_link_libraries(single PRIVATE ALPS::alps)

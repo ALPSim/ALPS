@@ -43,13 +43,10 @@
 
 // install path of ALPS
 #define ALPS_PREFIX "@ALPS_PREFIX@"
+#define ALPS_BIN_DIR "@ALPS_BIN_DIR@"
 
 // XSLT PATH
 #define ALPS_XML_DIR "@ALPS_XML_DIR@"
-
-// Optional Windows fallback for the 32/64-bit "Program Files" split. Never set
-// by the build, and guarded by #ifdef in parser/xslt_path.C.
-#cmakedefine ALPS_XML_ALTERNATE_DIR "@ALPS_XML_ALTERNATE_DIR@"
 
 // hostname where configure script was executed
 #define ALPS_CONFIG_HOST "@ALPS_CONFIG_HOST@"

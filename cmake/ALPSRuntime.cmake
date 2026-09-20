@@ -7,8 +7,12 @@ function(alps_install_compiler_runtime destination)
   if(CMAKE_CXX_COMPILER_ARCHITECTURE_ID STREQUAL "ARM64")
     list(FILTER CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS EXCLUDE REGEX "/vcruntime140_1d?\\.dll$")
   endif()
-  install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
-    DESTINATION "${destination}" COMPONENT runtime)
-  install(DIRECTORY ${CMAKE_INSTALL_SYSTEM_RUNTIME_DIRECTORIES}
-    DESTINATION "${destination}" COMPONENT runtime)
+  install(
+    PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+    DESTINATION "${destination}"
+    COMPONENT runtime)
+  install(
+    DIRECTORY ${CMAKE_INSTALL_SYSTEM_RUNTIME_DIRECTORIES}
+    DESTINATION "${destination}"
+    COMPONENT runtime)
 endfunction()

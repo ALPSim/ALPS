@@ -6,6 +6,8 @@
 #include <alps/ngs/params.hpp>
 #include <alps/ngs/accumulator/feature/binning_analysis.hpp>
 #include <alps/ngs/accumulator/feature/max_num_binning.hpp>
+#include <alps/parser/xslt_path.h>
+#include <boost/filesystem/operations.hpp>
 #include <vector>
 
 using namespace alps::accumulator;
@@ -23,7 +25,15 @@ template<class Accumulator> bool check_accumulator() {
     return accumulator.count() == 3 && accumulator.mean() == 2.0;
 }
 
-int main() {
+int main(int argc, char** argv) {
+    if (argc == 2) {
+        for (const char* resource : {"lattices.xml", "models.xml", "ALPS.xsl"}) {
+            if (!boost::filesystem::equivalent(alps::search_xml_library_path(resource),
+                                               boost::filesystem::path(argv[1]) / resource))
+                return 1;
+        }
+        return 0;
+    }
     alps::params parameters;
     parameters["count"] = 3;
     const std::vector<double> expected{1.0, 2.0, 3.0};

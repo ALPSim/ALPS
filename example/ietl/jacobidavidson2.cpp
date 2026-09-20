@@ -34,7 +34,7 @@
 #include <ietl/interface/ublas.h>
 #include <boost/random.hpp>
 #include <boost/limits.hpp>
-#include <boost/timer.hpp>
+#include <chrono>
 
 #include <cassert>
 
@@ -121,7 +121,7 @@ int main () {
     std::cout << "solve without preconditioning...";
     std::cout.precision(10);
     std::cout.flush();
-    boost::timer clock;
+    auto start = std::chrono::steady_clock::now();
 
     //correction equation solver
     ietl::ietl_gmres solver;
@@ -133,7 +133,9 @@ int main () {
     catch (std::runtime_error& e) {
         std::cerr << "Something went wrong: " << e.what() << "\n";
     }
-    std::cout << " done. \n\t time: "<< clock.elapsed() << " \t iterations: " << iter.iterations() << "\n";
+    std::cout << " done. \n\t time: "
+              << std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count()
+              << " \t iterations: " << iter.iterations() << "\n";
 
     jd_test.reset();
 
@@ -161,7 +163,7 @@ int main () {
 
     std::cout << "solve with jacobi preconditioning...";
     std::cout.flush();
-    clock.restart();
+    start = std::chrono::steady_clock::now();
     try{
         jd_test.eigensystem(iter3, gen, k, K, solver2);
     }
@@ -170,7 +172,9 @@ int main () {
     }
     //] funccall
 
-    std::cout << "done. \n time: "<< clock.elapsed() << " \t iterations: " << iter3.iterations() << "\n";
+    std::cout << "done. \n time: "
+              << std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count()
+              << " \t iterations: " << iter3.iterations() << "\n";
 
     for(int i = 0; i < jd_test.eigenvalues().size(); ++i)
         std::cout <<"eigenvalue #"<< i <<"\t" << jd_test.eigenvalue(i) <<"\n";/*<<jd_test.eigenvector(i)*///<<"\n\n";

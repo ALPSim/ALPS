@@ -5,10 +5,10 @@
 #   the rights to use, copy, modify, merge, publish, distribute, sublicense,
 #   and/or sell copies of the Software, and to permit persons to whom the
 #   Software is furnished to do so, subject to the following conditions:
-#  
+#
 #   The above copyright notice and this permission notice shall be included
 #   in all copies or substantial portions of the Software.
-#  
+#
 #   THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS
 #   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 #   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -17,29 +17,22 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-if(LAPACK_FOUND)
+add_library(fulldiag_impl STATIC factory.C)
+target_link_libraries(fulldiag_impl PUBLIC ALPS::alps)
 
+add_executable(fulldiag fulldiag.C)
+add_executable(fulldiag_evaluate fulldiag_evaluate.C)
+target_link_libraries(fulldiag PRIVATE fulldiag_impl)
+target_link_libraries(fulldiag_evaluate PRIVATE fulldiag_impl)
 
-  add_library(fulldiag_impl STATIC factory.C)
-  target_link_libraries(fulldiag_impl alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
+if(BUILD_TESTING)
+  add_test(NAME fulldiag_evaluate_help COMMAND fulldiag_evaluate --help)
+  set_tests_properties(fulldiag_evaluate_help PROPERTIES PASS_REGULAR_EXPRESSION "Usage:")
+  add_test(NAME fulldiag_evaluate_license COMMAND fulldiag_evaluate --license)
+  set_tests_properties(fulldiag_evaluate_license PROPERTIES PASS_REGULAR_EXPRESSION
+                                                            "Licensed under the MIT License")
+  add_test(NAME fulldiag_evaluate_no_arguments COMMAND fulldiag_evaluate)
+  set_tests_properties(fulldiag_evaluate_no_arguments PROPERTIES WILL_FAIL TRUE)
+endif()
 
-  add_executable(fulldiag fulldiag.C)
-  add_executable(fulldiag_evaluate fulldiag_evaluate.C)
-  target_link_libraries(fulldiag fulldiag_impl)
-  target_link_libraries(fulldiag_evaluate fulldiag_impl)
-
-  if(BUILD_TESTING)
-    add_test(NAME fulldiag_evaluate_help COMMAND fulldiag_evaluate --help)
-    set_tests_properties(fulldiag_evaluate_help PROPERTIES
-      PASS_REGULAR_EXPRESSION "Usage:")
-    add_test(NAME fulldiag_evaluate_license COMMAND fulldiag_evaluate --license)
-    set_tests_properties(fulldiag_evaluate_license PROPERTIES
-      PASS_REGULAR_EXPRESSION "Licensed under the MIT License")
-    add_test(NAME fulldiag_evaluate_no_arguments COMMAND fulldiag_evaluate)
-    set_tests_properties(fulldiag_evaluate_no_arguments PROPERTIES WILL_FAIL TRUE)
-  endif()
-
-  install(TARGETS fulldiag fulldiag_evaluate RUNTIME_DEPENDENCY_SET alps_runtime RUNTIME DESTINATION bin COMPONENT applications)
-else(LAPACK_FOUND)
-  message(STATUS "fulldiag will not be built since lapack library has not been found")
-endif(LAPACK_FOUND)
+alps_install_applications(fulldiag fulldiag_evaluate)

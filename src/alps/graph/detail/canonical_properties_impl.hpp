@@ -814,13 +814,10 @@ namespace alps {
                 };
             } // end namespace label
 
-            template <typename Graph, typename LabelCreator>
+            template <typename Graph, typename LabelCreator, typename CandidateLabels>
             void build_ordering_and_label_from_best_label_candidate(
                   typename canonical_properties_type<Graph>::type * result
-                , std::map<
-                      typename LabelCreator::internal_label_type
-                    , typename partition_type<Graph>::type
-                  > const& candidate_labels
+                , CandidateLabels const& candidate_labels
                 , Graph const& G 
                 , LabelCreator & label_creator
             ) {
@@ -836,13 +833,10 @@ namespace alps {
                 get<alps::graph::label>(*result) = label_creator.fix_final_graph_label(best->first, best->second, G);
             }
 
-            template <typename Graph>
+            template <typename Graph, typename CandidateLabels>
             void build_ordering_and_label_from_best_label_candidate(
                   typename canonical_properties_type<Graph>::type * result
-                , std::map<
-                      typename label::graph_label_creator<Graph, label::no_coloring_policy, label::edge_coloring_with_symmetries_policy>::internal_label_type
-                    , typename partition_type<Graph>::type
-                  > const& candidate_labels
+                , CandidateLabels const& candidate_labels
                 , Graph const& G 
                 , label::graph_label_creator<Graph, label::no_coloring_policy, label::edge_coloring_with_symmetries_policy> & label_creator
             ) {

@@ -13,6 +13,8 @@
 
 #include <alps/parapack/process.h>
 #include <iostream>
+#include <chrono>
+#include <thread>
 
 namespace mpi = boost::mpi;
 
@@ -20,7 +22,7 @@ int main(int argc, char** argv) {
   mpi::environment mpi(argc, argv);
   mpi::communicator world;
   alps::process_helper_mpi process(world, 1);
-  if (world.rank() == 0) sleep(1);
+  if (world.rank() == 0) std::this_thread::sleep_for(std::chrono::seconds(1));
   process.halt();
   while (true) {
     if (process.check_halted()) {
@@ -28,7 +30,7 @@ int main(int argc, char** argv) {
       break;
     } else {
       std::cerr << "process " << world.rank() << " is not halted yet\n";
-      sleep(1);
+      std::this_thread::sleep_for(std::chrono::seconds(1));
     }
   }
 }

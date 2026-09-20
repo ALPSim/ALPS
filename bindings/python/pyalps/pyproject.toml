@@ -67,10 +67,9 @@ build.verbose = true
 [tool.scikit-build.cmake.define]
 ALPS_DIR = { env = "ALPS_DIR" }
 
-# Application bindings compile selected legacy application sources, and the
-# package bundles the ALPS XML/XSL library. Preserve both when this subproject
+# Application bindings compile selected application sources. Preserve them when this subproject
 # is distributed independently of the repository checkout so wheels can also
-# be rebuilt from the sdist.
+# be rebuilt from the sdist. Runtime data comes from the installed SDK.
 [tool.scikit-build.sdist.force-include]
 "../../../cmake/ALPSRuntime.cmake" = "_vendor/cmake/ALPSRuntime.cmake"
 "../../../LICENSE.txt" = "LICENSE.txt"
@@ -78,7 +77,6 @@ ALPS_DIR = { env = "ALPS_DIR" }
 "../../../ALPS_VERSION.txt" = "ALPS_VERSION.txt"
 "../../../applications/dmft/qmc" = "_vendor/applications/dmft/qmc"
 "../../../tool" = "_vendor/tool"
-"../../../lib/xml" = "_vendor/lib/xml"
 
 [tool.cibuildwheel]
 build = ["cp310-*", "cp311-*", "cp312-*", "cp313-*", "cp314-*"]
@@ -99,7 +97,8 @@ CMAKE_ARGS = "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
 [tool.cibuildwheel.linux]
 environment-pass = ["GITHUB_REF", "ALPS_VERSION_PRERELEASE"]
 before-all = [
-  "if command -v dnf >/dev/null 2>&1; then dnf install -y ccache cmake curl hdf5-devel lapack-devel ninja-build; else apk add --no-cache ccache curl ninja-is-really-ninja hdf5-dev lapack-dev; export CXXFLAGS=-DALPS_NGS_NO_STACKTRACE; fi",
+  "if command -v dnf >/dev/null 2>&1; then dnf install -y ccache curl hdf5-devel lapack-devel ninja-build; else apk add --no-cache ccache curl ninja-is-really-ninja hdf5-dev lapack-dev; export CXXFLAGS=-DALPS_NGS_NO_STACKTRACE; fi",
+  "python -m pip install 'cmake>=3.27'",
   "cd {project}",
   "curl --fail --location --retry 3 https://archives.boost.io/release/1.91.0/source/boost_1_91_0.tar.gz -o /tmp/alps-boost.tar.gz",
   "echo '5734305f40a76c30f951c9abd409a45a2a19fb546efe4162119250bbe4d3a463  /tmp/alps-boost.tar.gz' | sha256sum -c -",

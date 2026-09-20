@@ -23,7 +23,7 @@
 
 typedef boost::array<double, 3> spintype;
 
-class ALPS_DECL heisenberg_sim : public alps::mcbase {
+class heisenberg_sim : public alps::mcbase {
 
     public:
 

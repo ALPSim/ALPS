@@ -23,7 +23,7 @@
 #include <string>
 
 // TODO: merge 2-... into 2 and avoid copying ising*
-class ALPS_DECL ising_sim : public alps::mcbase {
+class ising_sim : public alps::mcbase {
 
     public:
         

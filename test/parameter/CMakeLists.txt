@@ -5,10 +5,10 @@
 #   the rights to use, copy, modify, merge, publish, distribute, sublicense,
 #   and/or sell copies of the Software, and to permit persons to whom the
 #   Software is furnished to do so, subject to the following conditions:
-#  
+#
 #   The above copyright notice and this permission notice shall be included
 #   in all copies or substantial portions of the Software.
-#  
+#
 #   THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS
 #   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 #   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -17,17 +17,20 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-include_directories(${PROJECT_BINARY_DIR}/src)
-include_directories(${PROJECT_SOURCE_DIR}/src)
-include_directories(${Boost_ROOT_DIR})
+foreach(
+  name
+  expression
+  expression2
+  flatten
+  parameter
+  parameterlist
+  parameterlist_xml
+  parameters
+  parameters_xml)
+  add_executable(${name} ${name}.C)
 
-IF(NOT ALPS_LLVM_WORKAROUND)
-  FOREACH (name expression expression2 flatten parameter parameterlist parameterlist_xml parameters parameters_xml)
-    add_executable(${name} ${name}.C)
-    add_dependencies(${name} alps)
-    target_link_libraries(${name} alps)
-    set_property(TARGET ${name} PROPERTY LABELS parameter)
-    add_alps_test(${name})
-    set_property(TEST ${name} PROPERTY LABELS parameter)
-  ENDFOREACH(name)
-ENDIF(NOT ALPS_LLVM_WORKAROUND)
+  target_link_libraries(${name} PRIVATE ALPS::alps)
+  set_property(TARGET ${name} PROPERTY LABELS parameter)
+  alps_add_test(${name})
+  set_property(TEST ${name} PROPERTY LABELS parameter)
+endforeach()
