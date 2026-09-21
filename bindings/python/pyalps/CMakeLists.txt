@@ -10,7 +10,9 @@ project(pyalps LANGUAGES C CXX)
 option(PYALPS_BUILD_APPLICATIONS "Build optional ALPS application bindings" ON)
 option(PYALPS_BUNDLE_APPLICATIONS "Bundle the ALPS application executables into pyalps/bin" ON)
 
-set(CMAKE_CXX_STANDARD 17)
+if(NOT DEFINED CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 17)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -40,21 +42,6 @@ if(NOT EXISTS "${_alps_source_root}/tool/maxent.cpp")
 endif()
 set(_bindings "${CMAKE_CURRENT_SOURCE_DIR}/cpp")
 
-set(_pyalps_targets
-    pyalea_c
-    pymcdata_c
-    pytools_c
-    pyngsparams_c
-    pyngshdf5_c
-    pyngsbase_c
-    pyngsobservable_c
-    pyngsobservables_c
-    pyngsresult_c
-    pyngsresults_c
-    pyngsapi_c
-    pyngsrandom01_c
-    pyngsaccumulator_c)
-
 # Policy (see README "Free-threading and stable-ABI policy"): do NOT
 # add FREE_THREADED (libalps relies on the GIL as its lock around
 # shared state) and do not add STABLE_ABI without revisiting the wheel
@@ -62,23 +49,25 @@ set(_pyalps_targets
 # NB_STATIC keeps nanobind's core private to each extension. On musllinux,
 # MUSL_DYNAMIC_LIBCPP prevents nanobind from also embedding libstdc++ and
 # libgcc into every module; auditwheel vendors those shared runtimes once.
-set(_pyalps_nanobind_options NB_STATIC MUSL_DYNAMIC_LIBCPP)
+function(pyalps_add_module target)
+  nanobind_add_module(${target} NB_STATIC MUSL_DYNAMIC_LIBCPP ${ARGN})
+  list(APPEND _pyalps_targets ${target})
+  set(_pyalps_targets "${_pyalps_targets}" PARENT_SCOPE)
+endfunction()
 
-nanobind_add_module(pyalea_c ${_pyalps_nanobind_options} "${_bindings}/pyalea.cpp")
-nanobind_add_module(pymcdata_c ${_pyalps_nanobind_options} "${_bindings}/pymcdata.cpp")
-nanobind_add_module(pytools_c ${_pyalps_nanobind_options} "${_bindings}/pytools.cpp")
-nanobind_add_module(pyngsparams_c ${_pyalps_nanobind_options} "${_bindings}/ngs/params.cpp")
-nanobind_add_module(pyngshdf5_c ${_pyalps_nanobind_options} "${_bindings}/ngs/hdf5.cpp")
-nanobind_add_module(pyngsbase_c ${_pyalps_nanobind_options} "${_bindings}/ngs/mcbase.cpp")
-nanobind_add_module(pyngsobservable_c ${_pyalps_nanobind_options} "${_bindings}/ngs/observable.cpp")
-nanobind_add_module(pyngsobservables_c ${_pyalps_nanobind_options}
-                    "${_bindings}/ngs/observables.cpp")
-nanobind_add_module(pyngsresult_c ${_pyalps_nanobind_options} "${_bindings}/ngs/result.cpp")
-nanobind_add_module(pyngsresults_c ${_pyalps_nanobind_options} "${_bindings}/ngs/results.cpp")
-nanobind_add_module(pyngsapi_c ${_pyalps_nanobind_options} "${_bindings}/ngs/api.cpp")
-nanobind_add_module(pyngsrandom01_c ${_pyalps_nanobind_options} "${_bindings}/ngs/random01.cpp")
-nanobind_add_module(pyngsaccumulator_c ${_pyalps_nanobind_options}
-                    "${_bindings}/ngs/accumulator.cpp")
+pyalps_add_module(pyalea_c "${_bindings}/pyalea.cpp")
+pyalps_add_module(pymcdata_c "${_bindings}/pymcdata.cpp")
+pyalps_add_module(pytools_c "${_bindings}/pytools.cpp")
+pyalps_add_module(pyngsparams_c "${_bindings}/ngs/params.cpp")
+pyalps_add_module(pyngshdf5_c "${_bindings}/ngs/hdf5.cpp")
+pyalps_add_module(pyngsbase_c "${_bindings}/ngs/mcbase.cpp")
+pyalps_add_module(pyngsobservable_c "${_bindings}/ngs/observable.cpp")
+pyalps_add_module(pyngsobservables_c "${_bindings}/ngs/observables.cpp")
+pyalps_add_module(pyngsresult_c "${_bindings}/ngs/result.cpp")
+pyalps_add_module(pyngsresults_c "${_bindings}/ngs/results.cpp")
+pyalps_add_module(pyngsapi_c "${_bindings}/ngs/api.cpp")
+pyalps_add_module(pyngsrandom01_c "${_bindings}/ngs/random01.cpp")
+pyalps_add_module(pyngsaccumulator_c "${_bindings}/ngs/accumulator.cpp")
 
 if(PYALPS_BUILD_APPLICATIONS)
   if(NOT EXISTS "${_alps_source_root}/tool/maxent.cpp")
@@ -91,14 +80,10 @@ if(PYALPS_BUILD_APPLICATIONS)
 
   include("${_alps_source_root}/tool/maxent_sources.cmake")
   include("${_dmft}/sources.cmake")
-  nanobind_add_module(maxent_c ${_pyalps_nanobind_options} "${_alps_source_root}/tool/maxent.cpp"
-                      ${ALPS_MAXENT_SOURCES})
-  nanobind_add_module(cthyb ${_pyalps_nanobind_options} "${_dmft}/hybridization/hybmain.cpp"
-                      ${ALPS_CTHYB_SOURCES})
-  nanobind_add_module(ctint ${_pyalps_nanobind_options} "${_dmft}/interaction_expansion2/main.cpp"
-                      ${ALPS_CTINT_SOURCES})
+  pyalps_add_module(maxent_c "${_alps_source_root}/tool/maxent.cpp" ${ALPS_MAXENT_SOURCES})
+  pyalps_add_module(cthyb "${_dmft}/hybridization/hybmain.cpp" ${ALPS_CTHYB_SOURCES})
+  pyalps_add_module(ctint "${_dmft}/interaction_expansion2/main.cpp" ${ALPS_CTINT_SOURCES})
 
-  list(APPEND _pyalps_targets maxent_c cthyb ctint)
   foreach(_target IN ITEMS maxent_c cthyb ctint)
     target_compile_definitions(${_target} PRIVATE BUILD_PYTHON_MODULE)
     target_include_directories(${_target} PRIVATE "${_bindings}" "${_dmft}")

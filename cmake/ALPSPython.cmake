@@ -3,7 +3,10 @@
 include_guard(GLOBAL)
 
 function(alps_target_link_pyalps target)
-  cmake_parse_arguments(PYALPS "" "PYTHON_EXECUTABLE" "" ${ARGN})
+  cmake_parse_arguments(PARSE_ARGV 1 PYALPS "" "PYTHON_EXECUTABLE" "")
+  if(PYALPS_UNPARSED_ARGUMENTS OR PYALPS_KEYWORDS_MISSING_VALUES)
+    message(FATAL_ERROR "Invalid arguments to alps_target_link_pyalps(${target})")
+  endif()
   if(NOT TARGET "${target}")
     message(FATAL_ERROR "alps_target_link_pyalps requires an existing target")
   endif()

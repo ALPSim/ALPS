@@ -8,10 +8,6 @@ function(alps_install_applications)
     EXPORT ALPSApplicationTargets
     RUNTIME_DEPENDENCY_SET alps_runtime
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT applications)
-  foreach(application IN LISTS ARGN)
-    set_property(
-      TARGET alps
-      APPEND
-      PROPERTY ALPS_APPLICATION_TARGETS "ALPS::${application}")
-  endforeach()
+  list(TRANSFORM ARGN PREPEND "ALPS::")
+  set_property(TARGET alps APPEND PROPERTY ALPS_APPLICATION_TARGETS ${ARGN})
 endfunction()

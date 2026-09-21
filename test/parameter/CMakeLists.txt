@@ -30,7 +30,6 @@ foreach(
   add_executable(${name} ${name}.C)
 
   target_link_libraries(${name} PRIVATE ALPS::alps)
-  set_property(TARGET ${name} PROPERTY LABELS parameter)
   alps_add_test(${name})
   set_property(TEST ${name} PROPERTY LABELS parameter)
 endforeach()

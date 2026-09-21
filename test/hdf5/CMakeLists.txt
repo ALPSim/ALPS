@@ -43,7 +43,6 @@ foreach(
   add_executable(${name} ${name}.cpp)
 
   target_link_libraries(${name} PRIVATE ALPS::alps)
-  set_property(TARGET ${name} PROPERTY LABELS hdf5)
   alps_add_test(${name})
   set_property(TEST ${name} PROPERTY LABELS hdf5)
 endforeach()
@@ -56,7 +55,6 @@ if(ALPS_ENABLE_OPENMP)
   add_executable(hdf5_omp hdf5_omp.cpp)
 
   target_link_libraries(hdf5_omp PRIVATE ALPS::alps)
-  set_property(TARGET hdf5_omp PROPERTY LABELS hdf5)
   add_test(NAME hdf5_omp COMMAND hdf5_omp)
   set_tests_properties(hdf5_omp PROPERTIES LABELS hdf5 TIMEOUT 600
                                          ENVIRONMENT "OMP_NUM_THREADS=2")

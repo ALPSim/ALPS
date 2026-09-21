@@ -34,7 +34,6 @@ foreach(
   add_executable(lattice_${name} ${name}.C)
 
   target_link_libraries(lattice_${name} PRIVATE ALPS::alps)
-  set_property(TARGET lattice_${name} PROPERTY LABELS lattice)
   alps_add_test(
     lattice_${name}
     INPUT ${name}
@@ -45,7 +44,6 @@ foreach(name coloring parity)
   add_executable(${name} ${name}.C)
 
   target_link_libraries(${name} PRIVATE ALPS::alps)
-  set_property(TARGET ${name} PROPERTY LABELS lattice)
   alps_add_test(${name})
   set_property(TEST ${name} PROPERTY LABELS lattice)
 endforeach()

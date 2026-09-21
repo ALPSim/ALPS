@@ -35,7 +35,6 @@ foreach(
 
   target_link_libraries(${name} PRIVATE ALPS::alps)
   target_compile_definitions(${name} PRIVATE ALPS_DISABLE_MATRIX_ELEMENT_ITERATOR_WARNING)
-  set_property(TARGET ${name} PROPERTY LABELS numeric)
   alps_add_test(${name})
   set_property(TEST ${name} PROPERTY LABELS numeric)
 endforeach()
