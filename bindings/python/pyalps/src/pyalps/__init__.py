@@ -15,6 +15,12 @@ import sys
 import os
 from pathlib import Path
 
+
+def get_cmake_dir():
+    """Return the CMake package directory providing ``pyalps::runtime``."""
+    return str(Path(__file__).resolve().parent / "cmake")
+
+
 # Python 3.8+ resolves extension dependencies using registered DLL directories.
 # Keep the handle alive for delayed imports and use the same runtime as bin/*.exe.
 if sys.platform == "win32":

@@ -98,7 +98,7 @@ endif()
 # as well is not a harmless fallback: auditwheel/delocate resolve the first
 # match, find libalps outside the wheel, and vendor a second copy into
 # pyalps.libs (or pyalps/.dylibs), so the wheel carries the same 10 MB library
-# twice. HDF5 stays on the list precisely because it *should* be vendored.
+# twice. External dependency directories stay available to the repair tools.
 #
 # With PYALPS_BUNDLE_APPLICATIONS=OFF nothing installs libalps into the
 # package, so there the SDK directory is the only way for the repair tools to
@@ -108,12 +108,21 @@ if(APPLE)
 else()
   set(_pyalps_in_package_libs "$ORIGIN/../lib")
 endif()
-# The SDK records the selected HDF5 target, including its configuration.
-set(_pyalps_hdf5_runtime_dirs "$<TARGET_FILE_DIR:${ALPS_HDF5_TARGETS}>")
+# Use the SDK's public dependency targets, including configuration-specific paths.
+get_target_property(_alps_dependencies ALPS::alps INTERFACE_LINK_LIBRARIES)
+set(_pyalps_dependency_dirs "")
+foreach(_dependency IN LISTS _alps_dependencies)
+  if(TARGET "${_dependency}")
+    get_target_property(_type "${_dependency}" TYPE)
+    if(_type MATCHES "^(SHARED|UNKNOWN)_LIBRARY$")
+      list(APPEND _pyalps_dependency_dirs "$<TARGET_FILE_DIR:${_dependency}>")
+    endif()
+  endif()
+endforeach()
 if(PYALPS_BUNDLE_APPLICATIONS)
-  set(_pyalps_install_rpath "${_pyalps_in_package_libs};${_pyalps_hdf5_runtime_dirs}")
+  set(_pyalps_install_rpath "${_pyalps_in_package_libs};${_pyalps_dependency_dirs}")
 else()
-  set(_pyalps_install_rpath "$<TARGET_FILE_DIR:ALPS::alps>;${_pyalps_hdf5_runtime_dirs}")
+  set(_pyalps_install_rpath "$<TARGET_FILE_DIR:ALPS::alps>;${_pyalps_dependency_dirs}")
 endif()
 
 foreach(_target IN LISTS _pyalps_targets)
@@ -131,7 +140,8 @@ install(
   DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/pyalps/"
   DESTINATION pyalps
   FILES_MATCHING
-  PATTERN "*.py")
+  PATTERN "*.py"
+  PATTERN "*.cmake")
 
 # Runtime fallback paths for pyalps.tools, used only when the package does
 # not carry the resource in question. The XML/XSL library below is always

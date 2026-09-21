@@ -46,6 +46,10 @@ def test_sdk_rejects_integer_abi_mismatch(tmp_path):
     assert "requires BLA_SIZEOF_INTEGER=4" in output
 
 
+def test_sdk_preserves_missing_dependency_diagnostic(tmp_path):
+    configure(tmp_path, "-DEXPECT_MISSING_DEPENDENCY=ON", "-DCMAKE_DISABLE_FIND_PACKAGE_Boost=ON")
+
+
 def test_sdk_exports_installed_applications(tmp_path):
     if not (Path(os.environ["ALPS_DIR"]) / "ALPSApplicationTargets.cmake").is_file():
         pytest.skip("requires an SDK with applications")

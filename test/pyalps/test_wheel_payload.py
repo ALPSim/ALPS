@@ -89,6 +89,30 @@ def test_runtime_manifest_paths_survive_installation():
         assert metadata["libraries"]
 
 
+def test_wheel_owns_its_cmake_package():
+    import pyalps
+
+    directory = Path(pyalps.get_cmake_dir())
+    assert directory == _package_dir() / "cmake"
+    assert (directory / "pyalpsConfig.cmake").is_file()
+    output = subprocess.check_output([sys.executable, "-m", "pyalps", "--cmake-dir"], text=True)
+    assert Path(output.strip()) == directory
+
+
+@pytest.mark.skipif(sys.platform != "darwin", reason="Mach-O install names")
+def test_repaired_dylibs_can_be_linked_by_downstream_extensions():
+    package = _package_dir()
+    metadata = json.loads((package / "runtime.json").read_text())
+    if not metadata["repaired"]:
+        pytest.skip("requires a repaired wheel")
+    for entry in metadata["libraries"]:
+        library = package / entry["path"]
+        if library.suffix == ".dylib":
+            output = subprocess.check_output(["otool", "-D", str(library)], text=True)
+            assert f"@rpath/{library.name}" in output
+            subprocess.run(["codesign", "--verify", str(library)], check=True)
+
+
 def _library_dirs() -> list[Path]:
     """Every directory in the installed package that holds bundled libraries."""
     pkg = _package_dir()

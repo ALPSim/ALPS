@@ -576,7 +576,7 @@ def test_downstream_nanobind_simulation_export(tmp_path):
     repository = Path(__file__).resolve().parents[2]
     tutorial = repository / "tutorials" / "ngs" / "5_export_python"
     alps_dir = Path(os.environ.get(
-        "ALPS_DIR", repository / "_build/wheel-deps/install/share/alps"
+        "ALPS_DIR", repository / "_build/distribution/install/share/alps"
     ))
     build = tmp_path / "export-python-build"
 
@@ -646,7 +646,7 @@ def test_native_parameter_contracts(tmp_path):
     build = tmp_path / "native-params"
     subprocess.run([
         "cmake", "-S", str(source), "-B", str(build),
-        "-DALPS_DIR=" + os.environ.get("ALPS_DIR", str(repository / "_build/wheel-deps/install/share/alps")),
+        "-DALPS_DIR=" + os.environ.get("ALPS_DIR", str(repository / "_build/distribution/install/share/alps")),
         "-DPython_EXECUTABLE=" + sys.executable,
         "-DCMAKE_BUILD_TYPE=Release",
         "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=" + str(build),

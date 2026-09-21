@@ -30,7 +30,13 @@ def write_manifest(tree: Path, version: str | None = None, *, repaired=False):
                 continue
             entry = {"path": f"{relative}/{library.name}"}
             if library.suffix == ".dylib":
-                # Record the actual Mach-O ID, including delocate's loader prefix.
+                if repaired:
+                    # New consumers must be able to link these libraries directly.
+                    # Existing wheel references remain relative to their loaders.
+                    subprocess.run([
+                        "install_name_tool", "-id", f"@rpath/{library.name}", str(library)
+                    ], check=True)
+                    subprocess.run(["codesign", "--force", "--sign", "-", str(library)], check=True)
                 output = subprocess.check_output(["otool", "-D", str(library)], text=True)
                 names = {line.strip() for line in output.splitlines() if line and not line.endswith(":")}
                 if len(names) != 1:

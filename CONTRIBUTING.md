@@ -218,8 +218,7 @@ The exported target carries the include paths, C++17 requirement, compile
 definitions and transitive dependencies. Consumers choose their own compiler
 and build flags. Use the same ABI and build configuration as the SDK.
 Dependency discovery preserves the parent's numerical-provider variables.
-`ALPS::headers` exposes the compile interface separately for extensions that
-must link the exact runtime from a Python wheel.
+`ALPS::headers` exposes the compile interface without linking the library.
 
 The SDK also exports `ALPS::fortran` when the Fortran wrapper is built.
 It carries the GNU Fortran compatibility flag needed by the legacy untyped
@@ -229,17 +228,15 @@ source calls the OpenMP runtime directly.
 An SDK with applications exports their executable targets (for example,
 `ALPS::spinmc`), listed in `ALPS_APPLICATION_TARGETS`. Consumers may request
 `find_package(ALPS CONFIG REQUIRED COMPONENTS applications)` to require them.
-Wheel packaging uses these targets directly, including their installed paths.
 
 Legacy `ALPS_USE_FILE`, `ALPS_LIBRARIES` and dependency-variable aliases have
-been removed. Link to the exported targets instead. `find_package(ALPS)` also
-provides `alps_target_link_pyalps` for extensions sharing a wheel's runtime;
-no additional use-file include is needed.
+been removed. Link to the exported targets instead. The C++ package has no
+Python discovery or wheel integration. Native Python extensions use the separate
+[CMake package supplied by pyalps](bindings/python/pyalps/README.md#downstream-native-extensions).
 
 Installation follows `GNUInstallDirs`, including customized `CMAKE_INSTALL_BINDIR`
 and `CMAKE_INSTALL_LIBDIR`. XML resources and optional tutorials live under
-`${CMAKE_INSTALL_DATADIR}/alps`, exported as `ALPS_DATA_DIR`. Wheels bundle the
-SDK's installed XML resources directly.
+`${CMAKE_INSTALL_DATADIR}/alps`, exported as `ALPS_DATA_DIR`.
 The former `ALPS_XML_PATH` CMake cache option and `alpsvars` shell scripts have
 been removed; the `ALPS_XML_PATH` runtime environment override remains available.
 

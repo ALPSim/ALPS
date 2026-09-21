@@ -225,7 +225,7 @@ install(
   COMPONENT build)
 install(
   FILES "${PROJECT_BINARY_DIR}/cmake/ALPSConfig.cmake"
-        "${PROJECT_BINARY_DIR}/cmake/ALPSConfigVersion.cmake" cmake/ALPSPython.cmake
+        "${PROJECT_BINARY_DIR}/cmake/ALPSConfigVersion.cmake"
   DESTINATION ${CMAKE_INSTALL_DATADIR}/alps
   COMPONENT build)
 install(
@@ -245,6 +245,6 @@ if(WIN32)
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)
 endif()
 
-# Use CMake's compiler-runtime discovery for redistributable SDKs and wheels.
+# Use CMake's compiler-runtime discovery for redistributable installations.
 include(cmake/ALPSRuntime.cmake)
 alps_install_compiler_runtime("${CMAKE_INSTALL_BINDIR}")

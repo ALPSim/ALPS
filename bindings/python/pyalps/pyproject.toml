@@ -84,11 +84,11 @@ manylinux-x86_64-image = "manylinux_2_28"
 test-requires = ["pytest"]
 test-command = "pytest -q {project}/test/pyalps"
 
-# The ALPS C++ SDK is built once per platform in before-all via the wheel-deps
+# The ALPS C++ SDK is built once per platform in before-all via the distribution
 # CMake preset; ALPS_DIR points every wheel build at that install. The ccache
 # in _build/ccache spans the SDK and all wheel builds (cached across CI runs).
 [tool.cibuildwheel.environment]
-ALPS_DIR = "$(pwd)/_build/wheel-deps/install/share/alps"
+ALPS_DIR = "$(pwd)/_build/distribution/install/share/alps"
 CCACHE_DIR = "$(pwd)/_build/ccache"
 CCACHE_NAMESPACE = "pyalps-wheel"
 CMAKE_ARGS = "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
@@ -104,8 +104,8 @@ before-all = [
   "echo '5734305f40a76c30f951c9abd409a45a2a19fb546efe4162119250bbe4d3a463  /tmp/alps-boost.tar.gz' | sha256sum -c -",
   "tar -xzf /tmp/alps-boost.tar.gz -C /tmp",
   "ALPS_BOOST_MPI=OFF bash script/build-boost.sh /tmp/boost_1_91_0 /usr/local",
-  "cmake --preset wheel-deps -DCMAKE_CXX_COMPILER_LAUNCHER=ccache",
-  "cmake --build --preset wheel-deps -j2",
+  "cmake --preset distribution -DCMAKE_CXX_COMPILER_LAUNCHER=ccache",
+  "cmake --build --preset distribution -j2",
 ]
 repair-wheel-command = [
   "python -m pip install wheel",
@@ -118,8 +118,8 @@ repair-wheel-command = [
 before-all = [
   "brew install boost ccache cmake hdf5 ninja",
   "cd {project}",
-  "cmake --preset wheel-deps -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DHDF5_ROOT=$(brew --prefix hdf5)",
-  "cmake --build --preset wheel-deps -j2",
+  "cmake --preset distribution -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DHDF5_ROOT=$(brew --prefix hdf5)",
+  "cmake --build --preset distribution -j2",
 ]
 repair-wheel-command = [
   "python -m pip install wheel",

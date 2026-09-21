@@ -15,20 +15,20 @@ nanobind. A source build requires Python 3.10 or newer, CMake 3.27 or newer,
 Ninja, a C++17 compiler, BLAS/LAPACK, HDF5, and an installed ALPS C++ SDK.
 Point `ALPS_DIR` at the SDK's `share/alps` package directory.
 
-The `wheel-deps` CMake preset builds the SDK exactly as the wheel CI does.
+The `distribution` CMake preset builds the SDK exactly as the wheel CI does.
 From the repository root:
 
 ```sh
-cmake --preset wheel-deps
-cmake --build --preset wheel-deps
+cmake --preset distribution
+cmake --build --preset distribution
 
-ALPS_DIR="$PWD/_build/wheel-deps/install/share/alps" \
+ALPS_DIR="$PWD/_build/distribution/install/share/alps" \
   python -m build --wheel bindings/python/pyalps
 ```
 
 The wheel is written to `bindings/python/pyalps/dist` and can be installed
 with `python -m pip install`. With ccache installed, configure with
-`cmake --preset wheel-deps -DCMAKE_CXX_COMPILER_LAUNCHER=ccache` and set
+`cmake --preset distribution -DCMAKE_CXX_COMPILER_LAUNCHER=ccache` and set
 `CMAKE_ARGS="-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"` for the wheel build to
 speed up rebuilds.
 
@@ -42,7 +42,7 @@ from the SDK into `pyalps/bin`, together with the SDK's shared libraries in
 `pyalps/lib` that their `../lib` RPATH resolves against. `pyalps.tools`
 prepends `pyalps/bin` to `PATH`, so this is what makes
 `pyalps.runApplication('spinmc', ...)` work from a wheel install — the
-`wheel-deps` preset therefore builds the applications. Configure with
+`distribution` preset therefore builds the applications. Configure with
 `-DPYALPS_BUNDLE_APPLICATIONS=OFF` for a bindings-only wheel; the
 `runApplication` helpers then require the executables on `PATH` by other
 means.
@@ -159,18 +159,37 @@ cannot be signalled in the pyalps version alone — it takes a bump of
 `ALPS_VERSION.txt`, which moves the whole project.
 ## Downstream native extensions
 
-Use the installed SDK's `ALPS::alps` target for standalone C++ programs. For a
-nanobind extension that shares objects or HDF5 handles with pyalps, call
-`alps_target_link_pyalps(my_module PYTHON_EXECUTABLE "${Python_EXECUTABLE}")`.
-The function is supplied by `find_package(ALPS CONFIG REQUIRED)`.
-The SDK version must match the wheel.
+The C++ SDK supplies `ALPS::alps` for standalone programs. The installed Python
+package separately supplies `pyalps::runtime` for extensions that share ALPS
+objects or HDF5 handles with pyalps. A matching C++ SDK is still required for
+headers and compile settings.
+
+```cmake
+find_package(Python 3.10 REQUIRED COMPONENTS Interpreter Development.Module)
+execute_process(
+  COMMAND "${Python_EXECUTABLE}" -m pyalps --cmake-dir
+  OUTPUT_VARIABLE pyalps_DIR
+  OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)
+find_package(pyalps CONFIG REQUIRED)
+target_link_libraries(my_module PRIVATE pyalps::runtime)
+```
+
+`pyalps.get_cmake_dir()` exposes the same directory to Python tools. The C++ SDK
+neither installs this package nor discovers Python. The former SDK function
+`alps_target_link_pyalps` has been removed.
 
 Wheel installation writes `pyalps/runtime.json`. After auditwheel or delocate
 repair, regenerate it with
 `python bindings/python/pyalps/_build_support/runtime_manifest.py --wheel path/to/pyalps.whl`.
-This command requires the `wheel` package and rewrites the wheel's RECORD.
-Cibuildwheel runs it automatically. The manifest records exact relative
-library paths and Mach-O install names, so downstream CMake does not guess
-hashed dependency names or clone dependency target graphs. Unrepaired developer
-installs use the SDK's regular link interface; Windows uses its import libraries
-and the wheel's DLL directory.
+Cibuildwheel runs this automatically. The manifest records the final relative
+library paths; pyalps exposes these as imported CMake targets. On macOS, wheel
+finalization sets linkable `@rpath` library IDs and refreshes their signatures,
+so downstream builds need no binary-patching commands. Windows uses the matching
+SDK import libraries and pyalps' registered DLL directory.
+
+CMake derives build-time search paths from the imported targets. If you install
+or redistribute your extension, set its `INSTALL_RPATH` for the destination
+layout using normal CMake installation rules. The target does not hard-code the
+build environment's Python installation into installed extensions.
+For an extension installed for the same environment, CMake's
+`INSTALL_RPATH_USE_LINK_PATH` target property can retain the runtime search paths.

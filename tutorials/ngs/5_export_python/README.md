@@ -18,7 +18,6 @@ For an old export source, replace `BOOST_PYTHON_MODULE(name) {` with
 The helper imports pyalps' owning extension modules before registering the
 derived class, so ALPS parameter, archive, observable, and result types are
 shared safely through nanobind's process-wide type registry. The example also
-uses `alps_target_link_pyalps`, supplied by `find_package(ALPS CONFIG REQUIRED)`, to link a
-consumer to the exact `libalps`, Boost, and HDF5 copies carried by a repaired
-pyalps wheel. This is required for stateful library objects such as HDF5
+discovers the CMake package shipped by pyalps and links `pyalps::runtime` to use
+the exact `libalps`, Boost, and HDF5 copies carried by a repaired pyalps wheel. This is required for stateful library objects such as HDF5
 handles; do not replace it with a second system HDF5 linkage.

@@ -27,14 +27,13 @@
       }
     },
     {
-      "name": "wheel-deps",
-      "displayName": "ALPS C++ SDK for pyalps wheels",
-      "description": "SDK install that the standalone pyalps wheel build links against (ALPS_DIR=_build/wheel-deps/install/share/alps). Applications are built so the wheel can bundle them into pyalps/bin, as the legacy ALPS_PYTHON_WHEEL build did; MPI is off, matching that build.",
+      "name": "distribution",
+      "displayName": "Redistributable SDK and applications",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/_build/wheel-deps",
+      "binaryDir": "${sourceDir}/_build/distribution",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/wheel-deps/install",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/distribution/install",
         "ALPS_BUILD_EXAMPLES": "OFF",
         "ALPS_BUILD_APPLICATIONS": "ON",
         "ALPS_ENABLE_MPI": "OFF",
@@ -93,8 +92,8 @@
       "configurePreset": "sdk"
     },
     {
-      "name": "wheel-deps",
-      "configurePreset": "wheel-deps",
+      "name": "distribution",
+      "configurePreset": "distribution",
       "targets": [
         "install"
       ]
