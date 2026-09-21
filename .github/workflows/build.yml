@@ -1,224 +1,220 @@
-name: ALPS CI/CD
+name: ALPS source CI
 
 on:
   push:
-    branches:
-      - master
-    tags:
-      - 'v*'
+    branches: [master]
+    tags: ['v*']
   pull_request:
-    branches:
-      - master
+  merge_group:
+  schedule:
+    - cron: '23 4 * * 1'
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: Source-build coverage
+        type: choice
+        options: [quick, full]
+        default: quick
+
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+defaults:
+  run:
+    shell: bash
+
+env:
+  CMAKE_BUILD_PARALLEL_LEVEL: 2
+  CTEST_PARALLEL_LEVEL: 2
+
 jobs:
-  linux-build:
-    name: >-
-      ALPS / ${{ matrix.plat.os }} / ${{ matrix.plat.c_compiler }}-${{ matrix.plat.c_version }} /
-      Boost 1.${{ matrix.plat.boost_version }} /
-      C++${{ matrix.plat.cxx_standard || '17' }}
-    runs-on: ${{ matrix.plat.os }}
-    # Worst observed healthy job is ~60 min cold; a hang otherwise burns the
-    # 6-hour GitHub default.
-    timeout-minutes: 90
-    strategy:
-      matrix:
-        plat:
-        # ── Group 1: Ubuntu OS versions ───────────────────────────────────────
-        # Best-available compiler per OS, modern Python + Boost.
-        # ubuntu-22.04 tops out at gcc-12 / clang-15 in its apt repos.
-        # ubuntu-24.04 tops out at gcc-14 / clang-18.
-        - { os: ubuntu-22.04, comp_pack: "gcc-12 g++-12",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 12, boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 14, boost_version: 91, extras: true }
-        - { os: ubuntu-22.04, comp_pack: "clang-15",        c_compiler: clang, cxx_compiler: clang++, c_version: 15, boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "clang-18",        c_compiler: clang, cxx_compiler: clang++, c_version: 18, boost_version: 91 }
-
-        # ── Group 2: Compiler versions ────────────────────────────────────────
-        # Full sweep of GCC 11–15 and Clang 14–22, modern Python + Boost.
-        # GCC 11 / Clang 14 (Ubuntu 22.04 / RHEL 9 defaults) are the tested floor.
-        # gcc-12, gcc-14, clang-15, clang-18 already covered in Group 1.
-        # GCC 15: installed via ubuntu-toolchain-r/test PPA on ubuntu-24.04.
-        # Clang 19–22: installed via apt.llvm.org on ubuntu-24.04.
-        - { os: ubuntu-22.04, comp_pack: "gcc-11 g++-11",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 11, boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-13 g++-13",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 13, boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-15 g++-15",   c_compiler: gcc,   cxx_compiler: g++,     c_version: 15, boost_version: 91 }
-        - { os: ubuntu-22.04, comp_pack: "clang-14",        c_compiler: clang, cxx_compiler: clang++, c_version: 14, boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "clang-16",        c_compiler: clang, cxx_compiler: clang++, c_version: 16, boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "clang-17",        c_compiler: clang, cxx_compiler: clang++, c_version: 17, boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "clang-19",        c_compiler: clang, cxx_compiler: clang++, c_version: 19, boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "clang-20",        c_compiler: clang, cxx_compiler: clang++, c_version: 20, boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "clang-21",        c_compiler: clang, cxx_compiler: clang++, c_version: 21, boost_version: 91 }
-        - { os: ubuntu-24.04, comp_pack: "clang-22",        c_compiler: clang, cxx_compiler: clang++, c_version: 22, boost_version: 91 }
-
-        # ── Group 3: Boost versions ───────────────────────────────────────────
-        # Full sweep of all supported Boost releases.
-        # ubuntu-24.04, gcc-14, Python 3.14. boost 91 is the baseline above.
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, boost_version: 76 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, boost_version: 81 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, boost_version: 86 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, boost_version: 87 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, boost_version: 88 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, boost_version: 89 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, boost_version: 90 }
-
-        # ── Group 4: C++ standard versions ───────────────────────────────────
-        # C++17 is the default and minimum (set in CMakeLists.txt); every other
-        # job in the matrix builds it. Sweep the newer standards on top.
-        # ubuntu-24.04, gcc-14, Python 3.14, Boost 1.91.
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, boost_version: 91, cxx_standard: 20 }
-        - { os: ubuntu-24.04, comp_pack: "gcc-14 g++-14", c_compiler: gcc, cxx_compiler: g++, c_version: 14, boost_version: 91, cxx_standard: 23 }
-
+  prepare:
+    name: Validate CI and select builds
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v7
-      - name: Set up Python
-        uses: actions/setup-python@v7
         with:
-          python-version: '3.14'
-      - name: Install dependencies
-        # A wedged mirror must fail the step in minutes, not hang the job to
-        # its 90-minute cap (observed multi-hour stalls in this step).
-        timeout-minutes: 20
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Lint workflows and shell helpers
         run: |
-          python -m pip install "cmake>=4.3"
-          # Bound every apt network operation: 30 s socket timeout, 3 retries.
-          printf 'Acquire::Retries "3";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' \
-            | sudo tee /etc/apt/apt.conf.d/99ci-timeouts > /dev/null
-          sudo apt-get update
-          sudo apt install liblapack-dev libblas-dev libopenmpi-dev libhdf5-serial-dev
-          if [[ "${{ matrix.plat.extras }}" == "true" ]]; then
-            sudo apt install gfortran xsltproc
-            python -m pip install pytest
-          fi
-          # Clang >= 19: not in Ubuntu's default apt repos; use apt.llvm.org.
-          # GCC >= 15: not in Ubuntu's default apt repos; use ubuntu-toolchain-r PPA.
-          if [[ "${{ matrix.plat.c_compiler }}" == "clang" && "${{ matrix.plat.c_version }}" -ge 19 ]]; then
-            wget -nv --tries=3 --timeout=60 -O /tmp/llvm.sh https://apt.llvm.org/llvm.sh
-            sudo bash /tmp/llvm.sh ${{ matrix.plat.c_version }} all
-          else
-            if [[ "${{ matrix.plat.c_compiler }}" == "gcc" && "${{ matrix.plat.c_version }}" -ge 15 ]]; then
-              sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-              sudo apt-get update
-            fi
-            sudo apt install ${{ matrix.plat.comp_pack }}
-          fi
-          wget -nv --tries=3 --timeout=60 --waitretry=10 https://archives.boost.io/release/1.${{ matrix.plat.boost_version }}.0/source/boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
-          tar -xzf boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
-      - name: Build ALPS
+          curl --fail --location --retry 3 --connect-timeout 30 --max-time 300 \
+            https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz \
+            -o "$RUNNER_TEMP/actionlint.tar.gz"
+          echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  $RUNNER_TEMP/actionlint.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/actionlint.tar.gz" -C "$RUNNER_TEMP" actionlint
+          "$RUNNER_TEMP/actionlint" -color
+          shellcheck .github/scripts/*.sh
+      - name: Test CI helpers
+        run: |
+          python -m pip install pytest
+          python -m pytest tests/ci -q --junitxml=ci-tests.xml
+      - name: Select source matrix
+        id: matrix
         env:
-          CC:  ${{ matrix.plat.c_compiler }}-${{ matrix.plat.c_version }}
-          CXX: ${{ matrix.plat.cxx_compiler }}-${{ matrix.plat.c_version }}
-        run: |
-          bash .github/scripts/build-boost.sh "$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" "$GITHUB_WORKSPACE/boost-install"
-          extra_args=()
-          if [[ "${{ matrix.plat.extras }}" == "true" ]]; then
-            extra_args=(-DALPS_BUILD_EXAMPLES=ON
-                        -DALPS_ENABLE_OPENMP=ON)
-          fi
-          cmake -S $GITHUB_WORKSPACE -B build \
-                -DCMAKE_BUILD_TYPE=Release \
-                -DALPS_ENABLE_MPI=ON \
-                -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/boost-install" \
-                -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/build/install" \
-                -DCMAKE_CXX_STANDARD=${{ matrix.plat.cxx_standard || '17' }} \
-                "${extra_args[@]}"
-          cmake --build build -j 2
-          ctest --test-dir build --output-on-failure --parallel 2
+          TIER: ${{ inputs.tier || 'auto' }}
+        run: python .github/scripts/ci_matrix.py --tier "$TIER"
+      - name: Summarize helper tests
+        if: always()
+        run: python .github/scripts/junit_summary.py ci-tests.xml
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: ci-helper-tests
+          path: ci-tests.xml
 
-      - name: Test installed XML tools after relocation
-        if: matrix.plat.extras
-        env:
-          ALPS_XML_BUILD: build
-        run: python -m pytest tests/cli -q
-
-      # Python extension examples are built against installed wheels by wheel CI.
-      - name: Build installed C, C++ and Fortran tutorials
-        if: matrix.plat.extras
-        run: |
-          cmake --install build
-          cmake --install build --component tutorials
-          tutorials="$PWD/build/install/share/alps/tutorials"
-          cmake -S "$tutorials/examples" -B _build/library-examples \
-                -DALPS_DIR="$PWD/build/install/share/alps" \
-                -DCMAKE_PREFIX_PATH="$PWD/boost-install"
-          cmake --build _build/library-examples -j 2
-          ctest --test-dir _build/library-examples --output-on-failure
-          cmake -S "$tutorials/examples/fortran" -B _build/fortran \
-                -DALPS_DIR="$PWD/build/install/share/alps" \
-                -DCMAKE_PREFIX_PATH="$PWD/boost-install"
-          cmake --build _build/fortran -j 2
-          ctest --test-dir _build/fortran --output-on-failure
-          find "$tutorials" -mindepth 1 -path "$tutorials/examples" -prune -o -name CMakeLists.txt -print0 | while IFS= read -r -d '' file; do
-            source="${file%/CMakeLists.txt}"
-            output="_build/tutorials/${source#"$tutorials/"}"
-            cmake -S "$source" -B "$output" \
-                  -DALPS_DIR="$PWD/build/install/share/alps" \
-                  -DCMAKE_PREFIX_PATH="$PWD/boost-install"
-            cmake --build "$output" -j 2
-            ctest --test-dir "$output" --output-on-failure
-          done
-
-  macos-build:
-    name: >-
-      ALPS / ${{ matrix.plat.os }} / ${{ matrix.plat.c_compiler }} /
-      Boost 1.${{ matrix.plat.boost_version }} / C++17
-    runs-on: ${{ matrix.plat.os }}
-    # Intel runners are slow and variable; worst observed healthy job ~85 min.
+  build:
+    name: Source / ${{ matrix.id }}
+    needs: prepare
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 120
     strategy:
-      matrix:
-        plat:
-        # ── Apple Clang (system) ──────────────────────────────────────────────
-        # macos-14 = Sonoma / Apple Clang 16, macos-15 = Sequoia / Clang 17,
-        # macos-15-intel = last x86_64 runner, macos-26 = Tahoe / Clang 21.
-        - { os: macos-14,       c_compiler: /usr/bin/clang, cxx_compiler: /usr/bin/clang++, comp_pack: "",      cxx_stdlib: "-stdlib=libc++", boost_version: 91 }
-        - { os: macos-15,       c_compiler: /usr/bin/clang, cxx_compiler: /usr/bin/clang++, comp_pack: "",      cxx_stdlib: "-stdlib=libc++", boost_version: 91 }
-        - { os: macos-15-intel, c_compiler: /usr/bin/clang, cxx_compiler: /usr/bin/clang++, comp_pack: "",      cxx_stdlib: "-stdlib=libc++", boost_version: 91 }
-        - { os: macos-26,       c_compiler: /usr/bin/clang, cxx_compiler: /usr/bin/clang++, comp_pack: "",      cxx_stdlib: "-stdlib=libc++", boost_version: 91 }
-        # ── Homebrew GCC on macos-15 ──────────────────────────────────────────
-        # GCC requires the macOS 15 SDK; the macOS 26 SDK uses _Static_assert
-        # in kernel headers which GCC does not support in C++ mode.
-        # Restrict to macos-15 where the default SDK is safe.
-        - { os: macos-15, c_compiler: gcc-13, cxx_compiler: g++-13, comp_pack: "gcc@13", cxx_stdlib: "", boost_version: 91 }
-        - { os: macos-15, c_compiler: gcc-14, cxx_compiler: g++-14, comp_pack: "gcc@14", cxx_stdlib: "", boost_version: 91 }
-
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+      ALPS_BOOST_MPI: ${{ matrix.mpi }}
+      BOOST_VERSION: ${{ matrix.boost }}
+      BOOST_SHA256: ${{ matrix.boost_sha256 }}
+      COMPILER_PACKAGES: ${{ matrix.packages }}
+      COMPILER_REPOSITORY: ${{ matrix.repository }}
+      EXTRAS: ${{ matrix.extras }}
+      EXTENSIVE: ${{ matrix.extensive }}
+      SANITIZER: ${{ matrix.sanitizer }}
+      CXX_STANDARD: ${{ matrix.standard }}
     steps:
       - uses: actions/checkout@v7
-      - name: Install dependencies
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install CMake and test tools
+        run: python -m pip install 'cmake>=4.3' ninja pytest
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        timeout-minutes: 20
+        run: |
+          printf 'Acquire::Retries "3";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' \
+            | sudo tee /etc/apt/apt.conf.d/99ci-timeouts > /dev/null
+          if [[ "$COMPILER_REPOSITORY" == gcc ]]; then
+            sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          elif [[ "$COMPILER_REPOSITORY" == llvm ]]; then
+            curl --fail --location --retry 3 --connect-timeout 30 --max-time 300 \
+              https://apt.llvm.org/llvm-snapshot.gpg.key -o "$RUNNER_TEMP/llvm.asc"
+            sudo install -m 644 "$RUNNER_TEMP/llvm.asc" /usr/share/keyrings/llvm.asc
+            echo 'deb [signed-by=/usr/share/keyrings/llvm.asc] https://apt.llvm.org/noble/ llvm-toolchain-noble-22 main' \
+              | sudo tee /etc/apt/sources.list.d/llvm.list > /dev/null
+          fi
+          sudo apt-get update
+          read -r -a compiler_packages <<< "$COMPILER_PACKAGES"
+          sudo apt-get install -y liblapack-dev libblas-dev libopenmpi-dev libhdf5-dev "${compiler_packages[@]}"
+          if [[ "$EXTRAS" == true ]]; then sudo apt-get install -y gfortran xsltproc; fi
+      - name: Install macOS dependencies
+        if: runner.os == 'macOS'
+        timeout-minutes: 30
+        run: brew install open-mpi hdf5
+      - name: Build verified Boost sources
         timeout-minutes: 30
         run: |
-          brew install cmake openmpi hdf5
-          if [[ -n "${{ matrix.plat.comp_pack }}" ]]; then
-            brew install ${{ matrix.plat.comp_pack }}
-          fi
-          wget -nv --tries=3 --timeout=60 --waitretry=10 https://archives.boost.io/release/1.${{ matrix.plat.boost_version }}.0/source/boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
-          tar -xzf boost_1_${{ matrix.plat.boost_version }}_0.tar.gz
-
-      - name: Build ALPS
-        env:
-          CXX: ${{ matrix.plat.cxx_compiler }}
+          archive="$RUNNER_TEMP/boost.tar.gz"
+          directory="boost_${BOOST_VERSION//./_}"
+          curl --fail --location --retry 3 --connect-timeout 30 --max-time 600 \
+            "https://archives.boost.io/release/$BOOST_VERSION/source/$directory.tar.gz" -o "$archive"
+          printf '%s  %s\n' "$BOOST_SHA256" "$archive" | shasum -a 256 --check
+          tar -xzf "$archive" -C "$RUNNER_TEMP"
+          bash .github/scripts/build-boost.sh "$RUNNER_TEMP/$directory" "$PWD/_build/boost-install"
+      - name: Configure and build SDK
         run: |
-          bash .github/scripts/build-boost.sh "$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" "$GITHUB_WORKSPACE/boost-install"
-          cmake -S $GITHUB_WORKSPACE -B build \
-                -DCMAKE_BUILD_TYPE=Release \
-                -DALPS_ENABLE_MPI=ON \
-                -DCMAKE_C_COMPILER=${{ matrix.plat.c_compiler }} \
-                -DCMAKE_CXX_COMPILER=${{ matrix.plat.cxx_compiler }} \
-                -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/boost-install" \
-                -DCMAKE_CXX_STANDARD=17 \
-                -DCMAKE_CXX_FLAGS="${{ matrix.plat.cxx_stdlib }}"
-          cmake --build build -j $(sysctl -n hw.ncpu)
-
-      - name: Run tests
-        run: ctest --test-dir build --output-on-failure --parallel 2
-
-      - name: Upload test logs on failure
-        if: failure()
+          extra_args=()
+          if [[ "$EXTRAS" == true ]]; then
+            extra_args+=(-DALPS_BUILD_EXAMPLES=ON -DALPS_ENABLE_OPENMP=ON)
+          fi
+          if [[ "$EXTENSIVE" == true ]]; then extra_args+=(-DALPS_BUILD_EXTENSIVE_TESTS=ON); fi
+          if [[ "$SANITIZER" == true ]]; then
+            flags='-fsanitize=address,undefined -fno-omit-frame-pointer'
+            extra_args+=(-DCMAKE_BUILD_TYPE=Debug
+                         '-DCMAKE_C_FLAGS_DEBUG=-O1 -g' '-DCMAKE_CXX_FLAGS_DEBUG=-O1 -g'
+                         "-DCMAKE_C_FLAGS=$flags" "-DCMAKE_CXX_FLAGS=$flags"
+                         "-DCMAKE_EXE_LINKER_FLAGS=$flags" "-DCMAKE_SHARED_LINKER_FLAGS=$flags")
+          fi
+          cmake -S . -B _build/ci -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON \
+            "-DALPS_ENABLE_MPI=$ALPS_BOOST_MPI" \
+            "-DCMAKE_PREFIX_PATH=$PWD/_build/boost-install" \
+            "-DCMAKE_INSTALL_PREFIX=$PWD/_build/ci/install" \
+            "-DCMAKE_CXX_STANDARD=$CXX_STANDARD" "${extra_args[@]}"
+          cmake --build _build/ci
+      - name: Test SDK
+        env:
+          # Allocation-limit tests deliberately request impossible allocations.
+          # Leak checking of uninstrumented system dependencies is separate from
+          # the address and undefined-behavior checks in this job.
+          ASAN_OPTIONS: detect_leaks=0:allocator_may_return_null=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+        run: ctest --test-dir _build/ci --output-on-failure --output-junit ctest.xml --no-tests=error
+      - name: Test installed XML tools after relocation
+        if: matrix.extras
+        env:
+          ALPS_XML_BUILD: _build/ci
+        run: python -m pytest tests/cli -q --junitxml=_build/ci/cli.xml
+      - name: Build installed C, C++ and Fortran tutorials
+        if: matrix.extras
+        run: |
+          cmake --install _build/ci
+          cmake --install _build/ci --component tutorials
+          tutorials="$PWD/_build/ci/install/share/alps/tutorials"
+          for source in "$tutorials/examples" "$tutorials/examples/fortran"; do
+            output="_build/consumers/${source#"$tutorials/"}"
+            cmake -S "$source" -B "$output" -G Ninja \
+              "-DALPS_DIR=$PWD/_build/ci/install/share/alps" \
+              "-DCMAKE_PREFIX_PATH=$PWD/_build/boost-install"
+            cmake --build "$output"
+            ctest --test-dir "$output" --output-on-failure --output-junit ctest.xml --no-tests=error
+          done
+          find "$tutorials" -mindepth 1 -path "$tutorials/examples" -prune -o -name CMakeLists.txt -print0 | while IFS= read -r -d '' file; do
+            source="${file%/CMakeLists.txt}"
+            output="_build/consumers/${source#"$tutorials/"}"
+            cmake -S "$source" -B "$output" -G Ninja \
+              "-DALPS_DIR=$PWD/_build/ci/install/share/alps" \
+              "-DCMAKE_PREFIX_PATH=$PWD/_build/boost-install"
+            cmake --build "$output"
+            ctest --test-dir "$output" --output-on-failure --output-junit ctest.xml
+          done
+      - name: Summarize test results
+        if: always()
+        run: python .github/scripts/junit_summary.py '_build/**/ctest.xml' _build/ci/cli.xml
+      - name: Retain test and configure evidence
+        if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: test-logs-${{ github.run_id }}
+          name: source-${{ matrix.id }}-reports
           path: |
-            build/Testing/Temporary/**
-            build/Testing/Temporary/LastTest.log
+            _build/**/ctest.xml
+            _build/ci/cli.xml
+            _build/**/Testing/Temporary/**
+            _build/**/CMakeFiles/CMakeConfigureLog.yaml
+
+  source-status:
+    name: Source CI
+    if: always()
+    needs: [prepare, build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require successful validation and builds
+        env:
+          PREPARE_RESULT: ${{ needs.prepare.result }}
+          BUILD_RESULT: ${{ needs.build.result }}
+        run: test "$PREPARE_RESULT" = success && test "$BUILD_RESULT" = success

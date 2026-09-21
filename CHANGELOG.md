@@ -15,6 +15,7 @@ Release notes and migration guidance for ALPS. Changes awaiting release are coll
 
 - Python requires GIL-enabled CPython 3.12 or newer. Native wheels use the CPython 3.12 stable ABI (`cp312-abi3`), with one build per platform/architecture tested across Python 3.12–3.14. Downstream nanobind extensions exchanging ALPS objects must also enable `STABLE_ABI` and be rebuilt. Free-threaded Python is unsupported.
 - Source builds require CMake 4.3 or newer and C++17. Dependencies and compiler requirements propagate through exported CMake targets.
+- Source CI uses four routine configurations and fourteen weekly, release-tag, or manually requested configurations, including sanitizer coverage. Windows and stable-ABI wheel checks remain separate; workflow linting, verified Boost downloads, and test summaries make failures easier to diagnose.
 - MPI is opt-in. Embedded builds default to the library alone. `BUILD_TESTING` controls the tests; `ALPS_BUILD_APPLICATIONS` controls applications and CLI tools; `ALPS_BUILD_EXTENSIVE_TESTS` adds the expensive graph and HDF5 tests. C++ examples are opt-in, and tutorials are a separate installation component.
 - BLAS and LAPACK are required and use one LP64 ABI: 32-bit integers and lowercase symbols with a trailing underscore.
 - Python bindings build as a separate `scikit-build-core` project against an installed C++ SDK. Python extensions reuse the SDK's solver libraries.

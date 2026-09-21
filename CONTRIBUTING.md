@@ -285,11 +285,19 @@ ALPS_XML_BUILD=build python -m pytest tests/cli -q
    - How to test the change
    - Any known limitations or follow-up work
 
-4. Ensure CI passes (build + tests on Linux and macOS).
+4. Ensure CI passes, including source builds, native Windows builds, and Python wheel validation.
 
 For substantial changes — new simulation applications, new libraries, significant API modifications — we encourage you to **open an issue or start a discussion first** to get early feedback before investing significant time.
 
 ---
+
+## CI coverage
+
+Pull requests against any branch, merge-queue entries, and pushes to `master` run four source configurations: GCC 11 with the minimum Boost 1.76, GCC 14 with installed examples and XML tools, Clang 18 with C++23, and Apple Clang on macOS ARM64. The separate Windows workflow retains x64 Release/Debug and ARM64 Release builds. Packaging workflows test the same `cp312-abi3` wheel across Python 3.12–3.14, including native Windows and macOS forward compatibility.
+
+The source workflow runs its full fourteen-configuration matrix weekly and on release tags. The full tier adds GCC 15, Clang 14 and 22, Linux ARM64, macOS Intel and macOS 26, representative intermediate Boost releases, C++20 with the extensive graph and HDF5 tests, and AddressSanitizer plus UndefinedBehaviorSanitizer. Sanitizer runs disable MPI and dependency leak detection; address and undefined-behavior errors fail the job. This tests supported boundaries and representative combinations without rebuilding every compiler/Boost permutation on every pull request.
+
+To request the full matrix before merging, open **Actions → ALPS source CI → Run workflow**, select the branch and the `full` tier. The single manifest [`.github/ci-matrix.json`](.github/ci-matrix.json) defines both tiers and pins the Boost archive checksums. The `Source CI` check aggregates matrix results and is suitable as a required branch check. Workflow linting and CI-helper tests run before compilation; native and installed-wheel jobs retain test reports and display result counts in their job summaries. Manual packaging runs build and test artifacts; only a pushed release tag can publish to PyPI.
 
 ## Preparing a release
 

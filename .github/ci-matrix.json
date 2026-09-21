@@ -1,0 +1,24 @@
+{
+  "boost": {
+    "1.76.0": "7bd7ddceec1a1dfdcbdb3e609b60d01739c38390a5f956385a12f3122049f0ca",
+    "1.81.0": "205666dea9f6a7cfed87c7a6dfbeb52a2c1b9de55712c9c1a87735d7181452b6",
+    "1.86.0": "2575e74ffc3ef1cd0babac2c1ee8bdb5782a0ee672b1912da40e5b4b591ca01f",
+    "1.91.0": "5734305f40a76c30f951c9abd409a45a2a19fb546efe4162119250bbe4d3a463"
+  },
+  "builds": [
+    {"id": "gcc-minimum", "quick": true, "os": "ubuntu-22.04", "cc": "gcc-11", "cxx": "g++-11", "packages": "gcc-11 g++-11", "boost": "1.76.0"},
+    {"id": "gcc-extras", "quick": true, "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "extras": true},
+    {"id": "clang-cxx23", "quick": true, "os": "ubuntu-24.04", "cc": "clang-18", "cxx": "clang++-18", "packages": "clang-18", "standard": 23},
+    {"id": "macos-arm64", "quick": true, "os": "macos-15", "cc": "/usr/bin/clang", "cxx": "/usr/bin/clang++"},
+    {"id": "gcc-latest", "os": "ubuntu-24.04", "cc": "gcc-15", "cxx": "g++-15", "packages": "gcc-15 g++-15", "repository": "gcc"},
+    {"id": "clang-latest", "os": "ubuntu-24.04", "cc": "clang-22", "cxx": "clang++-22", "packages": "clang-22", "repository": "llvm"},
+    {"id": "clang-minimum", "os": "ubuntu-22.04", "cc": "clang-14", "cxx": "clang++-14", "packages": "clang-14"},
+    {"id": "linux-arm64", "os": "ubuntu-24.04-arm", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14"},
+    {"id": "macos-intel", "os": "macos-15-intel", "cc": "/usr/bin/clang", "cxx": "/usr/bin/clang++"},
+    {"id": "macos-latest", "os": "macos-26", "cc": "/usr/bin/clang", "cxx": "/usr/bin/clang++"},
+    {"id": "boost-81", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.81.0"},
+    {"id": "boost-86", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.86.0"},
+    {"id": "gcc-cxx20", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "standard": 20, "extensive": true},
+    {"id": "clang-sanitizers", "os": "ubuntu-24.04", "cc": "clang-18", "cxx": "clang++-18", "packages": "clang-18", "sanitizer": true}
+  ]
+}

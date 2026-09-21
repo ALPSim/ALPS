@@ -7,8 +7,11 @@ on:
     tags:
       - 'v*'
   pull_request:
-    branches:
-      - master
+  merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
@@ -18,9 +21,12 @@ jobs:
   check_version:
     name: Check release version
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-python@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.13'
       - run: python -m pip install packaging pytest "scikit-build-core>=1.0" "cmake>=4.3" ninja
@@ -33,7 +39,9 @@ jobs:
     name: Build wheels on ${{ matrix.plat.os }}
     needs: [check_version]
     runs-on: ${{ matrix.plat.os }}
+    timeout-minutes: 120
     strategy:
+      fail-fast: false
       matrix:
         plat:
         - { os: ubuntu-latest, target: "", arch: x86_64 }
@@ -41,6 +49,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Restore compiler cache
         uses: actions/cache@v6
@@ -70,8 +80,11 @@ jobs:
     name: Build source distribution
     needs: [check_version]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Build sdist
         run: pipx run build --sdist --outdir dist python/pyalps
@@ -109,6 +122,7 @@ jobs:
     name: Smoke test wheels on ${{ matrix.plat.os }} / py${{ matrix.python }}
     needs: [build_wheels]
     runs-on: ${{ matrix.plat.os }}
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -121,6 +135,8 @@ jobs:
         python: ["3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-python@v7
         with:
@@ -149,6 +165,10 @@ jobs:
           name: pyalps-validation-${{ matrix.plat.os }}-py${{ matrix.python }}
           path: _build/validation
 
+      - name: Summarize wheel tests
+        if: always()
+        run: python .github/scripts/junit_summary.py _build/validation/pytest.xml
+
   # The ordinary wheel tests deliberately keep mpi4py optional. This job
   # installs one consistent Open MPI stack and verifies real inter-rank
   # collectives, requests and point-to-point traffic through pyalps.mpi.
@@ -156,8 +176,11 @@ jobs:
     name: Smoke test MPI adapter with two ranks
     needs: [build_wheels]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-python@v7
         with:
@@ -185,14 +208,17 @@ jobs:
   upload_pypi:
     needs: [build_wheels, build_sdist, smoke_test, mpi_smoke]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment: pypi
     permissions:
       contents: read
       id-token: write
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-python@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.13'
       - run: python -m pip install packaging
