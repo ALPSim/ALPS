@@ -37,7 +37,6 @@
         "ALPS_BUILD_EXAMPLES": "OFF",
         "ALPS_BUILD_APPLICATIONS": "ON",
         "ALPS_ENABLE_MPI": "OFF",
-        "ALPS_INCLUDE_TUTORIALS": "OFF",
         "BUILD_TESTING": "OFF"
       }
     },
@@ -53,7 +52,6 @@
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/windows-x64/install",
         "ALPS_ENABLE_MPI": "OFF",
         "ALPS_BUILD_EXAMPLES": "OFF",
-        "ALPS_INCLUDE_TUTORIALS": "OFF",
         "BUILD_SHARED_LIBS": "ON",
         "BUILD_TESTING": "ON"
       }

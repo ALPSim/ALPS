@@ -38,7 +38,11 @@ def test_installed_sdk_preserves_parent_settings(tmp_path, standard):
 
 def test_embedded_defaults_and_mpi_isolation(tmp_path):
     # Configure only: no duplicate ALPS object files are needed for this contract.
-    configure(tmp_path, f"-DALPS_SOURCE={SOURCE}")
+    configure(tmp_path, f"-DALPS_SOURCE={SOURCE}",
+              "-DBUILD_SHARED_LIBS=OFF",
+              "-DCMAKE_POSITION_INDEPENDENT_CODE=OFF",
+              *(f"-DCMAKE_{kind}_OUTPUT_DIRECTORY={tmp_path.as_posix()}/{kind.lower()}"
+                for kind in ("RUNTIME", "LIBRARY", "ARCHIVE")))
 
 
 def test_sdk_rejects_integer_abi_mismatch(tmp_path):

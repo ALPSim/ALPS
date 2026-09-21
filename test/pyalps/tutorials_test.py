@@ -4,8 +4,8 @@
 
 """Run the pure-Python ngs tutorials as part of the wheel test suite.
 
-tutorials/ngs/5_export_python is covered by build.yml, which compiles it as a
-downstream CMake project. Its two pure-Python siblings needed no compiler and so
+The compiled example in bindings/python/pyalps/examples/ising is covered by
+test_binding_surface.py against an installed wheel. Its two pure-Python siblings needed no compiler and so
 had no coverage at all -- and both were broken in ways only running them shows:
 6_python_native could not store an ngs.params or its measurements dict through
 `archive[path] = ...`, and neither one's load() had ever executed (one wrote to
@@ -26,8 +26,7 @@ import pytest
 
 TUTORIALS = Path(__file__).resolve().parents[2] / "tutorials" / "ngs"
 
-# 5_export_python is absent: its smoke test imports a compiled extension that
-# only exists after the downstream CMake build in build.yml.
+# The compiled exporter has its own downstream build test.
 PURE_PYTHON_TUTORIALS = ["6_python_native", "7_python_extend"]
 
 

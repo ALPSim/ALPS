@@ -12,7 +12,8 @@ cmake --build build
 PYTHONPATH="$PWD/build" python main.py
 ```
 
-For an old export source, replace `BOOST_PYTHON_MODULE(name) {` with
+For an old export source, include `<pyalps/export_simulation.hpp>` in place of
+`<alps/ngs/detail/export_sim_to_python.hpp>` and replace `BOOST_PYTHON_MODULE(name) {` with
 `NB_MODULE(name, m) {`; the existing
 `ALPS_EXPORT_SIM_TO_PYTHON(PythonName, SimulationClass)` call remains valid.
 The helper imports pyalps' owning extension modules before registering the

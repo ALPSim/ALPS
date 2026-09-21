@@ -150,11 +150,6 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pyalps_config.py" DESTINATION pyalps)
 
 # Application locations come from the SDK export, including custom bin dirs.
 if(PYALPS_BUNDLE_APPLICATIONS)
-  if(NOT ALPS_applications_FOUND)
-    message(
-      FATAL_ERROR "Bundling applications requires an SDK built with ALPS_BUILD_APPLICATIONS=ON. "
-                  "Use PYALPS_BUNDLE_APPLICATIONS=OFF for a bindings-only wheel.")
-  endif()
   install(
     IMPORTED_RUNTIME_ARTIFACTS ${ALPS_APPLICATION_TARGETS}
     RUNTIME_DEPENDENCY_SET pyalps_runtime

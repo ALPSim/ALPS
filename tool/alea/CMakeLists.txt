@@ -22,5 +22,4 @@ foreach(program mean variance)
   target_include_directories(${program} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 
   target_link_libraries(${program} PRIVATE ALPS::alps)
-  #install(TARGETS ${program} RUNTIME_DEPENDENCY_SET alps_runtime RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT tools)
 endforeach()

@@ -43,6 +43,9 @@ source distribution includes only two files from the repository root:
 `ALPS_VERSION.txt` and `LICENSE.txt`, shared release metadata. It can be built
 outside the checkout against an installed SDK, without the C++ source tree.
 
+The [Ising extension example](examples/ising/README.md) demonstrates exporting
+a simulation through nanobind against the installed SDK and pyalps wheel.
+
 `PYALPS_BUNDLE_APPLICATIONS=ON` is the default and copies the ALPS
 application executables (`spinmc`, `dmrg`, `sparsediag`, `loop`, `qwl`, ...)
 from the SDK into `pyalps/bin`, together with the SDK's shared libraries in

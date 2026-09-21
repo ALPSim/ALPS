@@ -92,6 +92,12 @@ The Python bindings are a separate `scikit-build-core` project that builds
 against an installed ALPS C++ SDK; see the
 [`pyalps` build instructions](bindings/python/pyalps/README.md).
 
+Tutorial sources are an opt-in installation component. After installing the
+SDK with `cmake --install build`, use `cmake --install build --component tutorials`
+to add them under `share/alps/tutorials`; no configuration switch is needed.
+The Python extension example belongs to the
+[`pyalps` package](bindings/python/pyalps/examples/ising/README.md).
+
 Dependencies are discovered through their CMake packages. Set
 `CMAKE_PREFIX_PATH` for a non-system installation. ALPS no longer downloads
 or compiles a private copy of Boost during configuration, changes the chosen

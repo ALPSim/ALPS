@@ -24,9 +24,9 @@
 // ALPS version
 #define ALPS_VERSION "@ALPS_VERSION@"
 
-#define ALPS_VERSION_MAJOR @ALPS_VERSION_MAJOR@
-#define ALPS_VERSION_MINOR @ALPS_VERSION_MINOR@
-#define ALPS_VERSION_PATCH @ALPS_VERSION_PATCH@
+#define ALPS_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define ALPS_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define ALPS_VERSION_PATCH @PROJECT_VERSION_PATCH@
 
 // ALPS version as a single integer, for preprocessor comparisons:
 //   #if ALPS_VERSION_NUMBER >= ALPS_VERSION_NUM(2, 3, 4)
@@ -36,22 +36,22 @@
   ALPS_VERSION_NUM(ALPS_VERSION_MAJOR, ALPS_VERSION_MINOR, ALPS_VERSION_PATCH)
 
 // ALPS version (full string)
-#define ALPS_VERSION_STRING "@ALPS_VERSION_STRING@"
+#define ALPS_VERSION_STRING "ALPS Libraries version @ALPS_VERSION@"
 
 // latest publish year of ALPS
 #define ALPS_YEAR "@ALPS_YEAR@"
 
 // install path of ALPS
-#define ALPS_PREFIX "@ALPS_PREFIX@"
-#define ALPS_BIN_DIR "@ALPS_BIN_DIR@"
+#define ALPS_PREFIX "@CMAKE_INSTALL_PREFIX@"
+#define ALPS_BIN_DIR "@CMAKE_INSTALL_FULL_BINDIR@"
 
 // XSLT PATH
-#define ALPS_XML_DIR "@ALPS_XML_DIR@"
+#define ALPS_XML_DIR "@CMAKE_INSTALL_FULL_DATADIR@/alps/xml"
 
 // hostname where configure script was executed
-#define ALPS_CONFIG_HOST "@ALPS_CONFIG_HOST@"
+#define ALPS_CONFIG_HOST "unknown"
 
 // username who executed configure script
-#define ALPS_CONFIG_USER "@ALPS_CONFIG_USER@"
+#define ALPS_CONFIG_USER "unknown"
 
 #endif // ALPS_VERSION_H

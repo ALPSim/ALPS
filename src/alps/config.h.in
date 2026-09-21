@@ -44,7 +44,7 @@
 #cmakedefine ALPS_HAVE_MPI
 
 // Define to 1 if you have the HDF5 library
-#cmakedefine ALPS_HAVE_HDF5
+#define ALPS_HAVE_HDF5
 
 // Define to 1 if you have the HDF5 library with parallel(MPI) support
 #cmakedefine ALPS_HAVE_HDF5_PARALLEL
@@ -57,10 +57,10 @@
 //
 
 // Define if you have BLAS library
-#cmakedefine ALPS_HAVE_BLAS
+#define ALPS_HAVE_BLAS
 
 // Define if you have LAPACK library
-#cmakedefine ALPS_HAVE_LAPACK
+#define ALPS_HAVE_LAPACK
 
 // Set 8-byte integers for Boost bindings if needed
 #cmakedefine BIND_FORTRAN_INTEGER_8 1

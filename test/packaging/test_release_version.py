@@ -77,6 +77,8 @@ def test_prerelease_sdist_keeps_its_version_without_the_build_environment(tmp_pa
     environment.pop("GITHUB_REF")
     unpacked = tmp_path / f"pyalps-{core}b2"
     assert (unpacked / "_build_support/runtime_manifest.py").is_file()
+    assert (unpacked / "examples/ising/CMakeLists.txt").is_file()
+    assert (unpacked / "examples/ising/export2py.cpp").is_file()
     for binding in ("maxent_c", "cthyb", "ctint"):
         assert (unpacked / "cpp" / f"{binding}.cpp").is_file()
     completed = subprocess.run(

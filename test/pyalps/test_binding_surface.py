@@ -574,7 +574,7 @@ assert mpi.finalized()
 def test_downstream_nanobind_simulation_export(tmp_path):
     """Build and run a consumer extension against the installed ALPS SDK."""
     repository = Path(__file__).resolve().parents[2]
-    tutorial = repository / "tutorials" / "ngs" / "5_export_python"
+    tutorial = repository / "bindings/python/pyalps/examples/ising"
     alps_dir = Path(os.environ.get(
         "ALPS_DIR", repository / "_build/distribution/install/share/alps"
     ))

@@ -114,7 +114,7 @@ jobs:
           extra_args=()
           if [[ "${{ matrix.plat.extras }}" == "true" ]]; then
             extra_args=(-DALPS_BUILD_EXAMPLES=ON -DALPS_BUILD_FORTRAN=ON
-                        -DALPS_INCLUDE_TUTORIALS=ON -DALPS_BUILD_ARCHIVE=ON
+                        -DALPS_BUILD_ARCHIVE=ON
                         -DALPS_ENABLE_OPENMP=ON)
           fi
           cmake -S $GITHUB_WORKSPACE -B build \
@@ -125,21 +125,19 @@ jobs:
           cmake --build build -j 2
           ctest --test-dir build --output-on-failure --parallel 2
 
-      # Compile the public exporter as a downstream project, rather than only
-      # checking that its compatibility header is present in the install.
-      - name: Build installed C, C++, Fortran and Python extension tutorials
+      # Python extension examples are built against installed wheels by wheel CI.
+      - name: Build installed C, C++ and Fortran tutorials
         if: matrix.plat.extras
         run: |
-          python -m pip install "nanobind>=2.10,<3"
           cmake --install build
+          cmake --install build --component tutorials
           tutorials="$PWD/build/install/share/alps/tutorials"
           find "$tutorials" -mindepth 2 -name CMakeLists.txt -print0 | while IFS= read -r -d '' file; do
             source="${file%/CMakeLists.txt}"
             output="_build/tutorials/${source#"$tutorials/"}"
             cmake -S "$source" -B "$output" \
                   -DALPS_DIR="$PWD/build/install/share/alps" \
-                  -DCMAKE_PREFIX_PATH="$PWD/boost-install" \
-                  -DPython_EXECUTABLE="$(command -v python)"
+                  -DCMAKE_PREFIX_PATH="$PWD/boost-install"
             cmake --build "$output" -j 2
             ctest --test-dir "$output" --output-on-failure
           done

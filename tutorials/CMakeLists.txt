@@ -21,6 +21,7 @@ install(
   DIRECTORY .
   DESTINATION ${CMAKE_INSTALL_DATADIR}/alps/tutorials
   COMPONENT tutorials
+  EXCLUDE_FROM_ALL
   FILES_MATCHING
   PATTERN "*.py"
   PATTERN "*.ipynb"
