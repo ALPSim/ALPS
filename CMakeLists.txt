@@ -215,6 +215,7 @@ install(
 configure_package_config_file(
   cmake/ALPSConfig.cmake.in "${PROJECT_BINARY_DIR}/cmake/ALPSConfig.cmake"
   INSTALL_DESTINATION ${CMAKE_INSTALL_DATADIR}/alps
+  NO_SET_AND_CHECK_MACRO
   PATH_VARS CMAKE_INSTALL_BINDIR CMAKE_INSTALL_DATADIR)
 write_basic_package_version_file("${PROJECT_BINARY_DIR}/cmake/ALPSConfigVersion.cmake"
                                  COMPATIBILITY SameMinorVersion)

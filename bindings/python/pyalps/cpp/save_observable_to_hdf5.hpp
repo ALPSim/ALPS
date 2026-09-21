@@ -10,8 +10,7 @@
 namespace alps {
 namespace python {
 
-// Despite its historic namespace this helper is ordinary typed C++ and has no
-// dependency on Python. Retain it for downstream source compatibility.
+// Implementation of the Python observable.save(filename) convenience method.
 template <typename Observable>
 void save_observable_to_hdf5(Observable const & observable,
                              std::string const & filename) {

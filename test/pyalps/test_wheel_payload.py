@@ -95,6 +95,7 @@ def test_wheel_owns_its_cmake_package():
     directory = Path(pyalps.get_cmake_dir())
     assert directory == _package_dir() / "cmake"
     assert (directory / "pyalpsConfig.cmake").is_file()
+    assert (_package_dir() / "include/pyalps/export_simulation.hpp").is_file()
     output = subprocess.check_output([sys.executable, "-m", "pyalps", "--cmake-dir"], text=True)
     assert Path(output.strip()) == directory
 

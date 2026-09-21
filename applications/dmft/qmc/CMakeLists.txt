@@ -39,7 +39,41 @@ set(DMFT_QMC_INTERACTION_EXPANSION_SOURCE
     interaction_expansion/measurements.cpp
     interaction_expansion/model.cpp)
 
-include(sources.cmake)
+add_library(alps_cthyb STATIC
+    hybridization/run.cpp
+    hybridization/hybsim.cpp
+    hybridization/hyblocal.cpp
+    hybridization/hybint.cpp
+    hybridization/hybfun.cpp
+    hybridization/hybretintfun.cpp
+    hybridization/hybmatrix.cpp
+    hybridization/hybmatrix_ft.cpp
+    hybridization/hybconfig.cpp
+    hybridization/hybupdates.cpp
+    hybridization/hybevaluate.cpp
+    hybridization/hybmeasurements.cpp)
+add_library(alps_ctint STATIC
+    interaction_expansion2/run.cpp
+    fouriertransform.C
+    interaction_expansion2/auxiliary.cpp
+    interaction_expansion2/observables.cpp
+    interaction_expansion2/fastupdate.cpp
+    interaction_expansion2/selfenergy.cpp
+    interaction_expansion2/solver.cpp
+    interaction_expansion2/io.cpp
+    interaction_expansion2/splines.cpp
+    interaction_expansion2/interaction_expansion.cpp
+    interaction_expansion2/measurements.cpp
+    interaction_expansion2/model.cpp)
+foreach(solver IN ITEMS cthyb ctint)
+  add_library(ALPS::${solver} ALIAS alps_${solver})
+  set_target_properties(alps_${solver} PROPERTIES EXPORT_NAME ${solver}
+    CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
+  target_link_libraries(alps_${solver} PUBLIC ALPS::alps)
+  target_include_directories(alps_${solver} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+endforeach()
+install(TARGETS alps_cthyb alps_ctint EXPORT ALPSTargets
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
 
 #Interaction Expansion
 add_library(interaction_expansion_impl STATIC ${DMFT_QMC_INTERACTION_EXPANSION_SOURCE})
@@ -53,14 +87,14 @@ target_include_directories(interaction_expansion_impl PRIVATE "${CMAKE_CURRENT_S
 add_executable(dmft main.C selfconsistency.C)
 add_executable(hirschfye solver_main.C)
 
-add_executable(hybridization hybridization/hybmain.cpp ${ALPS_CTHYB_SOURCES})
-add_executable(interaction interaction_expansion2/main.cpp ${ALPS_CTINT_SOURCES})
+add_executable(hybridization hybridization/hybmain.cpp)
+add_executable(interaction interaction_expansion2/main.cpp)
 
 target_link_libraries(dmft PRIVATE dmft_qmc_impl interaction_expansion_impl)
 target_link_libraries(hirschfye PRIVATE dmft_qmc_impl)
 
-target_link_libraries(hybridization PRIVATE dmft_qmc_impl)
-target_link_libraries(interaction PRIVATE dmft_qmc_impl)
+target_link_libraries(hybridization PRIVATE ALPS::cthyb)
+target_link_libraries(interaction PRIVATE ALPS::ctint)
 
 if(BUILD_TESTING)
   # Regression tests for the shared DMFT QMC infrastructure.

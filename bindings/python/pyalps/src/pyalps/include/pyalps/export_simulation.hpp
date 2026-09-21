@@ -2,12 +2,10 @@
 //               2026      by the ALPS collaboration
 // SPDX-License-Identifier: MIT
 //
-// Header-only nanobind support for downstream ALPS simulations.  Keeping this
-// integration in an opt-in header prevents libalps itself from depending on
-// Python or nanobind while preserving the historic public include path and
-// ALPS_EXPORT_SIM_TO_PYTHON entry point.
-#ifndef ALPS_NGS_DETAIL_EXPORT_SIM_TO_PYTHON_HPP
-#define ALPS_NGS_DETAIL_EXPORT_SIM_TO_PYTHON_HPP
+// Python-owned nanobind support for downstream ALPS simulations.
+// The pyalps::runtime CMake target supplies this header's include directory.
+#ifndef PYALPS_EXPORT_SIMULATION_HPP
+#define PYALPS_EXPORT_SIMULATION_HPP
 
 #include <alps/hdf5/archive.hpp>
 #include <alps/mcbase.hpp>

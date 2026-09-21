@@ -229,6 +229,12 @@ An SDK with applications exports their executable targets (for example,
 `ALPS::spinmc`), listed in `ALPS_APPLICATION_TARGETS`. Consumers may request
 `find_package(ALPS CONFIG REQUIRED COMPONENTS applications)` to require them.
 
+The same build installs the static solver libraries `ALPS::maxent`,
+`ALPS::cthyb`, and `ALPS::ctint`. Require `COMPONENTS solvers` and include
+`<alps/solvers.hpp>` to run them from C++. Each function accepts `alps::params`
+and an output filename. The native programs and Python wrappers use these same
+implementations; building pyalps never compiles application sources.
+
 Legacy `ALPS_USE_FILE`, `ALPS_LIBRARIES` and dependency-variable aliases have
 been removed. Link to the exported targets instead. The C++ package has no
 Python discovery or wheel integration. Native Python extensions use the separate
@@ -305,11 +311,11 @@ For substantial changes — new simulation applications, new libraries, signific
 
 ## Preparing a release
 
-Update both `ALPS_VERSION.txt` (the C++ SDK version) and `[project].version`
-in `pyproject.toml` before creating a release tag. For a final release, both
-must be `X.Y.Z` and the tag must be `vX.Y.Z`. For a prerelease such as
-`vX.Y.Z-beta.1`, keep the SDK core at `X.Y.Z` and use the Python version
-`X.Y.Zb1`. The other supported tag suffixes are `alpha.N`, `rc.N`, and `dev.N`.
+Update `ALPS_VERSION.txt`, the shared SDK and Python release version, before
+creating a release tag. For a final release, it must be `X.Y.Z` and the tag
+must be `vX.Y.Z`. For a prerelease such as `vX.Y.Z-beta.1`, keep the file at
+`X.Y.Z`; the Python metadata provider derives `X.Y.Zb1` from the tag. The
+other supported tag suffixes are `alpha.N`, `rc.N`, and `dev.N`.
 
 Validate the intended tag locally using Python 3.11 or newer:
 
@@ -320,7 +326,7 @@ python script/check_release_version.py --ref refs/tags/vX.Y.Z
 
 The packaging workflow checks these versions before building and checks every
 wheel and source distribution, including its embedded metadata, before upload.
-Tag pushes publish the full release to PyPI, including CPython 3.9–3.14 wheels.
+Tag pushes publish the full release to PyPI, including CPython 3.10–3.14 wheels.
 Merge and validate the release commit before tagging it. Keep tags fixed once
 their release has been published.
 

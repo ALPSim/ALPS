@@ -34,7 +34,14 @@ speed up rebuilds.
 
 `PYALPS_BUILD_APPLICATIONS=ON` is the default and preserves the MaxEnt,
 CT-HYB, and CT-INT extension modules. Set it to `OFF` through CMake
-configuration for a smaller core-only developer build.
+configuration for a smaller core-only developer build. These modules link
+`ALPS::maxent`, `ALPS::cthyb`, and `ALPS::ctint` from an SDK built with
+`ALPS_BUILD_APPLICATIONS=ON`; they do not compile solver implementations.
+
+All binding sources and build helpers live under this package directory. The
+source distribution includes only two files from the repository root:
+`ALPS_VERSION.txt` and `LICENSE.txt`, shared release metadata. It can be built
+outside the checkout against an installed SDK, without the C++ source tree.
 
 `PYALPS_BUNDLE_APPLICATIONS=ON` is the default and copies the ALPS
 application executables (`spinmc`, `dmrg`, `sparsediag`, `loop`, `qwl`, ...)
@@ -177,6 +184,11 @@ target_link_libraries(my_module PRIVATE pyalps::runtime)
 `pyalps.get_cmake_dir()` exposes the same directory to Python tools. The C++ SDK
 neither installs this package nor discovers Python. The former SDK function
 `alps_target_link_pyalps` has been removed.
+
+The same target supplies `<pyalps/export_simulation.hpp>` for exporting a
+derived simulation through nanobind. This Python-owned header replaces the old
+SDK header `<alps/ngs/detail/export_sim_to_python.hpp>`; update that include
+when rebuilding a downstream extension.
 
 Wheel installation writes `pyalps/runtime.json`. After auditwheel or delocate
 repair, regenerate it with

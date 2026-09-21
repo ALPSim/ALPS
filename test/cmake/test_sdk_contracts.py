@@ -61,6 +61,13 @@ def test_sdk_exports_installed_applications(tmp_path):
     assert all(Path(path).is_file() for path in paths)
 
 
+def test_sdk_exports_solver_libraries(tmp_path):
+    if not (Path(os.environ["ALPS_DIR"]) / "ALPSApplicationTargets.cmake").is_file():
+        pytest.skip("requires an SDK with solvers")
+    configure(tmp_path, "-DEXPECT_SOLVERS=ON")
+    build_and_run(tmp_path)
+
+
 def test_relocated_sdk(tmp_path):
     prefix = Path(os.environ["ALPS_DIR"]).resolve().parents[1]
     relocated = tmp_path / "relocated"

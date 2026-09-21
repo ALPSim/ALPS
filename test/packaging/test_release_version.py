@@ -72,10 +72,13 @@ def test_prerelease_sdist_keeps_its_version_without_the_build_environment(tmp_pa
         cwd=project, env=environment, check=True, capture_output=True, text=True,
     )
     with tarfile.open(tmp_path / f"pyalps-{core}b2.tar.gz") as archive:
+        assert not any("/_vendor/" in name for name in archive.getnames())
         archive.extractall(tmp_path, filter="data")
     environment.pop("GITHUB_REF")
     unpacked = tmp_path / f"pyalps-{core}b2"
     assert (unpacked / "_build_support/runtime_manifest.py").is_file()
+    for binding in ("maxent_c", "cthyb", "ctint"):
+        assert (unpacked / "cpp" / f"{binding}.cpp").is_file()
     completed = subprocess.run(
         [sys.executable, "-c",
          "from scikit_build_core.build import prepare_metadata_for_build_wheel; "

@@ -16,11 +16,14 @@ endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-if(PYALPS_BUNDLE_APPLICATIONS)
-  find_package(ALPS REQUIRED CONFIG COMPONENTS applications)
-else()
-  find_package(ALPS REQUIRED CONFIG)
+set(_alps_components "")
+if(PYALPS_BUILD_APPLICATIONS)
+  list(APPEND _alps_components solvers)
 endif()
+if(PYALPS_BUNDLE_APPLICATIONS)
+  list(APPEND _alps_components applications)
+endif()
+find_package(ALPS REQUIRED CONFIG COMPONENTS ${_alps_components})
 get_target_property(_alps_library_type ALPS::alps TYPE)
 if(NOT _alps_library_type STREQUAL "SHARED_LIBRARY")
   message(
@@ -35,11 +38,6 @@ execute_process(
 list(PREPEND CMAKE_PREFIX_PATH "${_nanobind_cmake_dir}")
 find_package(nanobind 2.10 CONFIG REQUIRED)
 
-get_filename_component(_repo_root "${CMAKE_CURRENT_SOURCE_DIR}/../../.." ABSOLUTE)
-set(_alps_source_root "${_repo_root}")
-if(NOT EXISTS "${_alps_source_root}/tool/maxent.cpp")
-  set(_alps_source_root "${CMAKE_CURRENT_SOURCE_DIR}/_vendor")
-endif()
 set(_bindings "${CMAKE_CURRENT_SOURCE_DIR}/cpp")
 
 # Policy (see README "Free-threading and stable-ABI policy"): do NOT
@@ -70,23 +68,11 @@ pyalps_add_module(pyngsrandom01_c "${_bindings}/ngs/random01.cpp")
 pyalps_add_module(pyngsaccumulator_c "${_bindings}/ngs/accumulator.cpp")
 
 if(PYALPS_BUILD_APPLICATIONS)
-  if(NOT EXISTS "${_alps_source_root}/tool/maxent.cpp")
-    message(
-      FATAL_ERROR "PYALPS_BUILD_APPLICATIONS requires an ALPS source checkout or pyalps sdist. "
-                  "Configure with -DPYALPS_BUILD_APPLICATIONS=OFF for the core-only package.")
-  endif()
-
-  set(_dmft "${_alps_source_root}/applications/dmft/qmc")
-
-  include("${_alps_source_root}/tool/maxent_sources.cmake")
-  include("${_dmft}/sources.cmake")
-  pyalps_add_module(maxent_c "${_alps_source_root}/tool/maxent.cpp" ${ALPS_MAXENT_SOURCES})
-  pyalps_add_module(cthyb "${_dmft}/hybridization/hybmain.cpp" ${ALPS_CTHYB_SOURCES})
-  pyalps_add_module(ctint "${_dmft}/interaction_expansion2/main.cpp" ${ALPS_CTINT_SOURCES})
-
-  foreach(_target IN ITEMS maxent_c cthyb ctint)
-    target_compile_definitions(${_target} PRIVATE BUILD_PYTHON_MODULE)
-    target_include_directories(${_target} PRIVATE "${_bindings}" "${_dmft}")
+  pyalps_add_module(maxent_c "${_bindings}/maxent_c.cpp")
+  target_link_libraries(maxent_c PRIVATE ALPS::maxent)
+  foreach(_solver IN ITEMS cthyb ctint)
+    pyalps_add_module(${_solver} "${_bindings}/${_solver}.cpp")
+    target_link_libraries(${_solver} PRIVATE ALPS::${_solver})
   endforeach()
 endif()
 
@@ -141,7 +127,8 @@ install(
   DESTINATION pyalps
   FILES_MATCHING
   PATTERN "*.py"
-  PATTERN "*.cmake")
+  PATTERN "*.cmake"
+  PATTERN "*.hpp")
 
 # Runtime fallback paths for pyalps.tools, used only when the package does
 # not carry the resource in question. The XML/XSL library below is always
@@ -193,9 +180,17 @@ if(WIN32)
     POST_EXCLUDE_REGEXES
     ".*[/\\\\][Ww][Ii][Nn][Dd][Oo][Ww][Ss][/\\\\].*"
     RUNTIME DESTINATION pyalps/bin)
+
+  # Discover the compiler's redistributables independently of the C++ sources.
+  set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+  include(InstallRequiredSystemLibraries)
+  # The ARM64 redist also carries an ARM64EC exception runtime; it is not a
+  # native ARM64 binary and must not be included in an ARM64 wheel.
+  if(CMAKE_CXX_COMPILER_ARCHITECTURE_ID STREQUAL "ARM64")
+    list(FILTER CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS EXCLUDE REGEX "/vcruntime140_1d?\\.dll$")
+  endif()
+  install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION pyalps/bin)
 endif()
-include("${_alps_source_root}/cmake/ALPSRuntime.cmake")
-alps_install_compiler_runtime(pyalps/bin)
 
 # Run after all runtime files have been installed. Wheel repair regenerates this
 # manifest once auditwheel/delocate have finalized their paths and install names.

@@ -77,19 +77,22 @@ jobs:
         run: pipx run build --sdist --outdir dist bindings/python/pyalps
 
       # The sdist must remain buildable outside the repository checkout:
-      # verify its metadata and that the vendored ALPS sources it needs
-      # (applications, tools and their build descriptions) actually made it in.
+      # verify its metadata and Python-owned sources. Solver implementations
+      # belong to the installed C++ SDK and must not be vendored here.
       - name: Smoke check sdist
         run: |
           pipx run twine check dist/*.tar.gz
           tar -tzf dist/*.tar.gz > sdist-manifest.txt
-          for path in _vendor/tool/maxent.cpp _vendor/tool/maxent_sources.cmake \
-                      _vendor/applications/dmft/qmc/sources.cmake \
-                      _vendor/cmake/ALPSRuntime.cmake \
+          for path in cpp/maxent_c.cpp cpp/cthyb.cpp cpp/ctint.cpp \
                       LICENSE.txt src/pyalps/__init__.py src/pyalps/__main__.py \
-                      src/pyalps/cmake/pyalpsConfig.cmake; do
+                      src/pyalps/cmake/pyalpsConfig.cmake \
+                      src/pyalps/include/pyalps/export_simulation.hpp; do
             grep -q "$path" sdist-manifest.txt || { echo "missing $path in sdist"; exit 1; }
           done
+          if grep -q '/_vendor/' sdist-manifest.txt; then
+            echo "sdist contains vendored C++ SDK sources"
+            exit 1
+          fi
 
       - uses: actions/upload-artifact@v7
         with:

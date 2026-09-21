@@ -4,7 +4,7 @@
 
 #include "ising.hpp"
 
-#include <alps/ngs/detail/export_sim_to_python.hpp>
+#include <pyalps/export_simulation.hpp>
 #include <nanobind/nanobind.h>
 
 NB_MODULE(ising_c, m) {

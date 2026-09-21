@@ -67,16 +67,12 @@ build.verbose = true
 [tool.scikit-build.cmake.define]
 ALPS_DIR = { env = "ALPS_DIR" }
 
-# Application bindings compile selected application sources. Preserve them when this subproject
-# is distributed independently of the repository checkout so wheels can also
-# be rebuilt from the sdist. Runtime data comes from the installed SDK.
+# Only shared release metadata comes from the repository root. All build code
+# and binding sources belong to this package; solvers come from the installed SDK.
 [tool.scikit-build.sdist.force-include]
-"../../../cmake/ALPSRuntime.cmake" = "_vendor/cmake/ALPSRuntime.cmake"
 "../../../LICENSE.txt" = "LICENSE.txt"
 # The version file, so an sdist build can still derive its own version.
 "../../../ALPS_VERSION.txt" = "ALPS_VERSION.txt"
-"../../../applications/dmft/qmc" = "_vendor/applications/dmft/qmc"
-"../../../tool" = "_vendor/tool"
 
 [tool.cibuildwheel]
 build = ["cp310-*", "cp311-*", "cp312-*", "cp313-*", "cp314-*"]
