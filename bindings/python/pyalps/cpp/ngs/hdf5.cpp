@@ -201,6 +201,7 @@ namespace alps {
                     return;
                 }
                 list_vectorizer v;
+                std::string stack_dtype;
                 if (v.analyze(l, 0)) {
                     switch (v.kind) {
                         case list_vectorizer::leaf_kind::integral:
@@ -225,7 +226,7 @@ namespace alps {
                         case list_vectorizer::leaf_kind::none:
                             break;   // e.g. [[], []] → group descent
                     }
-                } else if (numpy_stackable(l)) {
+                } else if (numpy_stackable(l, stack_dtype)) {
                     // Legacy vectorized numpy content too: homogeneous
                     // numpy-scalar lists (numpy.int64 etc. were
                     // scalar_types entries) and rectangular trees
@@ -237,8 +238,9 @@ namespace alps {
                     // dtypes fall through to the group descent below.
                     nb::object arr;
                     try {
-                        arr = nb::borrow<nb::object>(alps::python::numpy_module())
-                                  .attr("asarray")(l);
+                        arr = alps::python::numpy_module().attr("asarray")(
+                            l, nb::arg("dtype") = stack_dtype.empty()
+                                ? nb::none() : nb::cast(stack_dtype));
                     } catch (nb::python_error &) {
                         arr = nb::object();
                     }
@@ -290,12 +292,43 @@ namespace alps {
                 bool has_bool_leaf = false;
                 bool homogeneous_numpy_scalars = true;
                 PyTypeObject * numpy_scalar_type = nullptr;
+                bool homogeneous_storage = true;
+                bool homogeneous_scalar_rows = true;
+                std::string storage_dtype;
+                void inspect_storage(nb::handle value) {
+                    std::string dtype;
+                    PyObject * raw = value.ptr();
+                    if (is_ndarray(raw) || is_numpy_scalar(raw))
+                        dtype = nb::cast<std::string>(value.attr("dtype").attr("name"));
+                    else if (PyLong_CheckExact(raw)) {
+                        int overflow = 0;
+                        long long number = PyLong_AsLongLongAndOverflow(raw, &overflow);
+                        if (!overflow)
+                            dtype = number >= std::numeric_limits<int>::min()
+                                 && number <= std::numeric_limits<int>::max()
+                                ? "int32" : "int64";
+                    } else if (PyFloat_CheckExact(raw))
+                        dtype = "float64";
+                    else if (PyComplex_CheckExact(raw))
+                        dtype = "complex128";
+                    if (dtype.empty() || (!storage_dtype.empty() && storage_dtype != dtype))
+                        homogeneous_storage = false;
+                    if (storage_dtype.empty()) storage_dtype = std::move(dtype);
+                }
             };
             static void scan_tree(nb::handle node, tree_scan & scan) {
                 std::size_t const n = nb::len(node);
+                PyTypeObject * row_scalar_type = nullptr;
                 for (std::size_t i = 0; i < n; ++i) {
                     nb::object item = node[i];
                     PyObject * raw = item.ptr();
+                    if (!PyList_Check(raw) && !PyTuple_Check(raw))
+                        scan.inspect_storage(item);
+                    if (!PyList_Check(raw) && !PyTuple_Check(raw) && !is_ndarray(raw)) {
+                        if (row_scalar_type && row_scalar_type != Py_TYPE(raw))
+                            scan.homogeneous_scalar_rows = false;
+                        row_scalar_type = Py_TYPE(raw);
+                    }
                     if (is_ndarray(raw)) {
                         scan.has_ndarray = true;
                     } else if (PyList_Check(raw) || PyTuple_Check(raw)) {
@@ -318,14 +351,15 @@ namespace alps {
             }
             // The list shapes the legacy build stacked into one
             // dataset beyond plain scalars: (a) numpy scalars of ONE
-            // type (exact tp_name match, like legacy scalar_types), or
+            // type (exact tp_name match, like legacy scalar_types), compatible
+            // Python/NumPy rows with the same ALPS storage dtype, or
             // (b) sequences/ndarrays only, with an ndarray somewhere in
             // the tree (legacy vectorized extent-matched mixes of
             // list/tuple/ndarray nodes) — but never when a plain bool
             // sits among the leaves, which numpy would silently promote
             // to 0/1. Pure-list trees never reach (b) — their
             // exact-type handling stays with list_vectorizer.
-            static bool numpy_stackable(nb::list const & l) {
+            static bool numpy_stackable(nb::list const & l, std::string & dtype) {
                 char const * first_scalar = nullptr;
                 bool scalars_only = true;
                 bool sequences_only = true;
@@ -350,6 +384,16 @@ namespace alps {
                     return false;
                 tree_scan scan;
                 scan_tree(l, scan);
+                // ALPS writes ordinary Python integers as int32 when they
+                // fit. Letting NumPy infer the dtype of the entire tree
+                // widens [[1, 2], array([3, 4], dtype=int32)] to int64.
+                // Select the shared storage dtype only when every leaf
+                // agrees, so this never narrows a wider integer/array.
+                if (scan.homogeneous_storage) dtype = scan.storage_dtype;
+                if (scan.has_numpy_scalar && scan.has_other_scalar
+                    && scan.homogeneous_storage && scan.homogeneous_scalar_rows
+                    && !scan.has_bool_leaf)
+                    return true;
                 // A rectangular tree made solely from one exact NumPy
                 // scalar type is vectorizable at any nesting depth.
                 // np.asarray below performs the final rectangularity

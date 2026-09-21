@@ -134,8 +134,14 @@ jobs:
 
       - name: Import and run binding surface tests
         run: |
-          python -c "import pyalps, pyalps.alea, pyalps.hdf5, pyalps.pytools; print(pyalps.__file__)"
-          python -m pytest -q test/pyalps
+          python script/validate_pyalps.py --output _build/validation --wheelhouse wheelhouse
+
+      - name: Retain installed-wheel validation evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: pyalps-validation-${{ matrix.plat.os }}-py${{ matrix.python }}
+          path: _build/validation
 
   # The ordinary wheel tests deliberately keep mpi4py optional. This job
   # installs one consistent Open MPI stack and verifies real inter-rank

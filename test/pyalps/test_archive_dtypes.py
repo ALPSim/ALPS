@@ -6,6 +6,61 @@ import pytest
 from pyalps import hdf5, ngs
 
 
+@pytest.mark.parametrize("depth", [2, 3])
+@pytest.mark.parametrize("reverse", [False, True])
+@pytest.mark.parametrize(
+    "second_row,dtype",
+    [
+        ([np.int32(3), np.int32(4)], np.int32),
+        ([np.float64(3), np.float64(4)], np.float64),
+        ([np.complex128(3), np.complex128(4)], np.complex128),
+        (np.array([3, 4], dtype=np.int32), np.int32),
+    ],
+)
+def test_rectangular_python_numpy_rows_keep_array_contract(
+    tmp_path, second_row, dtype, reverse, depth
+):
+    # Both rows have the same ALPS storage dtype. Plain Python integers use
+    # int32, even when NumPy's platform-default integer is int64.
+    scalar = {np.int32: int, np.float64: float, np.complex128: complex}[dtype]
+    value = [[scalar(1), scalar(2)], second_row]
+    if reverse:
+        value.reverse()
+    if depth == 3:
+        value = [value, value]
+    expected = np.asarray(value, dtype=dtype)
+    filename = str(tmp_path / "rectangular.h5")
+    with hdf5.archive(filename, "w") as archive:
+        archive["table"] = value
+    with hdf5.archive(filename, "r") as archive:
+        restored = archive["table"]
+        assert archive.is_data("table")
+    # Value-only NumPy comparisons coerce lists and miss changed arithmetic.
+    assert isinstance(restored, np.ndarray)
+    assert restored.dtype == expected.dtype and restored.shape == expected.shape
+    np.testing.assert_array_equal(restored[..., 0], expected[..., 0])
+    np.testing.assert_array_equal(restored * 2, expected * 2)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        [[1, np.int32(2)], [np.int32(3), np.int32(4)]],
+        [[1, 2], [np.int32(3)]],
+        [[True, False], [np.int32(3), np.int32(4)]],
+        [[2**53 + 1, 2**53 + 3], [np.int32(3), np.int32(4)]],
+    ],
+)
+def test_incompatible_python_numpy_rows_keep_groups(tmp_path, value):
+    with hdf5.archive(str(tmp_path / "groups.h5"), "w") as archive:
+        archive["table"] = value
+        assert archive.is_group("table")
+        restored = archive["table"]
+    assert isinstance(restored, list)
+    for actual, expected in zip(restored, value):
+        assert list(actual) == list(expected)
+
+
 @pytest.mark.parametrize("dtype", [np.bool_, np.int8])
 @pytest.mark.parametrize("shape", [(), (3,), (2, 3), (2, 1, 3), (0,), (2, 0)])
 @pytest.mark.parametrize("attribute", [False, True])
