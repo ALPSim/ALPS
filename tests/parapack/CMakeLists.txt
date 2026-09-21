@@ -11,6 +11,7 @@ foreach(
   footprint
   info_test
   integer_range
+  integer_range_limits
   linear_regression
   merge
   percentage

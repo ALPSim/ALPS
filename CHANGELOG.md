@@ -49,6 +49,8 @@ Release notes and migration guidance for ALPS. Changes awaiting release are coll
 
 ### Fixed
 
+- Default observable data initializes its thermalization state. Integer ranges retain valid bounds across the entire integer domain; `size()` returns `std::uintmax_t` and throws `std::overflow_error` when the count cannot fit that type.
+- Simulation-help issues route Worm and SSE to their respective maintainers without an external form parser. DMFT startup notices preserve scientific credit while removing duplicate citation requests and mandatory-citation wording.
 - Windows ARM64 numerical builds use a compatible BLAS/LAPACK provider instead of mixing incompatible CLAPACK and OpenBLAS return conventions.
 - ALPS uses the upstream Spirit Classic headers and namespace directly, so including Boost Spirit before ALPS no longer depends on an ALPS compatibility macro.
 - Installed examples include their parameter files and fixed HDF5 input; their tests locate SDK resources and Windows runtime DLLs.

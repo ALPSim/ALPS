@@ -5,36 +5,26 @@ on:
     types: [opened]
 
 permissions:
+  contents: read
   issues: write
 
 jobs:
   route_by_method:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - name: Parse issue body
-        id: parse
-        uses: actions-cool/issues-helper@v1.11
+      - uses: actions/checkout@v7
         with:
-          actions: 'parse-form'
-          issue-number: ${{ github.event.issue.number }}
-          body: ${{ github.event.issue.body }}
+          persist-credentials: false
 
-      - name: Assign maintainer based on 'Method' choice
+      - name: Read Method from the issue form
+        id: route
+        run: python3 .github/scripts/route_issue.py
+
+      - name: Assign maintainer
         env:
-          METHOD_FROM_FORM: ${{ steps.parse.outputs.method }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-        run: |
-          assignee=""
-          case "$METHOD_FROM_FORM" in
-            *Exact*Diagonalization* | *ED*) assignee="vws100" ;;
-            *Quantum*Monte*Carlo* | *SSE*) assignee="wistaria" ;;
-            *Quantum*Monte*Carlo* | *Worm*) assignee="LodePollet" ;;
-            *Density*Matrix*Renormalization*Group* | *DMRG*) assignee="afeiguin" ;;
-            *Dynamical*Mean*Field*Theory* | *DMFT*) assignee="egull" ;;
-            *) assignee="Ooolab" ;;
-          esac
-
-          if [ -n "$assignee" ]; then
-            gh issue edit $ISSUE_NUMBER --add-assignee "$assignee"
-          fi
+          ASSIGNEE: ${{ steps.route.outputs.assignee }}
+        run: gh issue edit "$ISSUE_NUMBER" --add-assignee "$ASSIGNEE"

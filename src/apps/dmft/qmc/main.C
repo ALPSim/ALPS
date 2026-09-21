@@ -63,18 +63,15 @@ int main(int argc, char** argv)
       std::cerr<<"mpi-run mpi_options program_name -- parameter_file"<<std::endl;
       exit(1);
     }
-    std::cout << "ALPS DMFT framework for the single site impurity problem.       "<<std::endl;
-    std::cout << "  For further information see the ALPS DMFT paper:              "<<std::endl;
-    std::cout << "  Computer Physics Communications 182, 1078 (2011)              "<<std::endl;
-    std::cout << "                                                                "<<std::endl;
-    std::cout << "  copyright (c) 2005-2026 by the ALPS collaboration.            "<<std::endl;
+    std::cout << "ALPS DMFT framework for the single site impurity problem."<<std::endl;
+    std::cout << "  copyright (c) 2005-2026 by the ALPS collaboration."<<std::endl;
     std::cout << std::endl;
     alps::print_copyright(std::cout);
 
     std::cout << "****************************************************************"<<std::endl;
-    std::cout << "* Recommended citation in scientific publications:             *"<<std::endl;
-    std::cout << "* This code used the ALPS [1] DMFT framework [2]               *"<<std::endl;
-    std::cout << "* [1] JSTAT (2011) P05001; [2] CPC 182, 1078 (2011)            *"<<std::endl;
+    std::cout << "* Please cite in scientific publications:                      *"<<std::endl;
+    std::cout << "* We used the ALPS [1] DMFT framework [2].                     *"<<std::endl;
+    std::cout << "* [1] JSTAT (2011) P05001; [2] CPC 182, 1078 (2011).           *"<<std::endl;
     std::cout << "****************************************************************"<<std::endl;
     alps::Parameters parms;
     {

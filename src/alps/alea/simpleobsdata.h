@@ -214,6 +214,7 @@ SimpleObservableData<T>::SimpleObservableData()
  : count_(0),
    has_variance_(false),
    has_tau_(false),
+   can_set_thermal_(false),
    binsize_(0),
    max_bin_number_(0),
    discardedmeas_(0),

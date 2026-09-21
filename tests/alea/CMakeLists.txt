@@ -9,6 +9,7 @@ foreach(
   histogram2
   signed
   simpleobseval
+  simpleobs_initialization
   testobservableset
   observableset_hdf5
   observableset_xml

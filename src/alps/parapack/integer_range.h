@@ -21,6 +21,7 @@
 #include <boost/spirit/include/classic_actor.hpp>
 #include <boost/spirit/include/classic_core.hpp>
 #include <boost/throw_exception.hpp>
+#include <cstdint>
 #include <iosfwd>
 #include <limits>
 #include <stdexcept>
@@ -36,6 +37,7 @@ template<class T>
 class integer_range {
 public:
   typedef T value_type;
+  using size_type = std::uintmax_t;
   typedef typename boost::call_traits<value_type>::param_type param_type;
 
   integer_range() : mi_(1), ma_(0) {}
@@ -109,9 +111,16 @@ public:
 
   value_type min BOOST_PREVENT_MACRO_SUBSTITUTION () const { return mi_; }
   value_type max BOOST_PREVENT_MACRO_SUBSTITUTION () const { return ma_; }
-  value_type size() const { return 1 + ma_ - mi_; }
-  bool empty() const { return size() == 0; }
-  bool valid() const { return size() != 0; }
+  size_type size() const {
+    if (empty()) return 0;
+    // Unsigned subtraction also handles signed ranges that cross zero.
+    const size_type span = static_cast<size_type>(ma_) - static_cast<size_type>(mi_);
+    if (span == (std::numeric_limits<size_type>::max)())
+      boost::throw_exception(std::overflow_error("integer_range: size exceeds uintmax_t"));
+    return span + 1;
+  }
+  bool empty() const { return mi_ > ma_; }
+  bool valid() const { return !empty(); }
   bool is_included(param_type v) const { return (v >= min BOOST_PREVENT_MACRO_SUBSTITUTION ()) && (v <= max BOOST_PREVENT_MACRO_SUBSTITUTION ()); }
 
   integer_range overlap(integer_range const& r) const {

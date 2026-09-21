@@ -28,11 +28,11 @@ bool parse_options(int argc, char** argv, std::string& infile, std::string& outf
 	alps::print_copyright(std::cout);
 
 	std::cout << "****************************************************************"<<std::endl;
-	std::cout << "* Recommended citation in scientific publications:             *"<<std::endl;
+	std::cout << "* Please cite in scientific publications:                      *"<<std::endl;
 	std::cout << "* We used the ALPS [1] implementation [2] of the Hirsch-Fye    *"<<std::endl;
-	std::cout << "* [3] impurity solver.                                         *"<<std::endl;
-	std::cout << "* [1] JSTAT (2011) P05001; [2] CPC 182, 1078 (2011); [3] PRL   *"<<std::endl;
-	std::cout << "* 56, 2521 (1986).                                             *"<<std::endl;
+	std::cout << "* impurity solver [3].                                         *"<<std::endl;
+	std::cout << "* [1] JSTAT (2011) P05001; [2] CPC 182, 1078 (2011);           *"<<std::endl;
+	std::cout << "* [3] PRL 56, 2521 (1986).                                     *"<<std::endl;
 	std::cout << "****************************************************************"<<std::endl;
 
 	namespace po = boost::program_options;

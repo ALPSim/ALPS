@@ -48,11 +48,12 @@ void alps::solvers::ctint(alps::params const& parms, std::string const& output_f
   if (rank==0) {
     alps::print_copyright(std::cout);
     std::cout << "****************************************************************"<<std::endl;
-    std::cout << "* Recommended citation in scientific publications:             *"<<std::endl;
+    std::cout << "* Please cite in scientific publications:                      *"<<std::endl;
     std::cout << "* We used the ALPS [1] implementation [2] of the CT-INT        *"<<std::endl;
-    std::cout << "* interaction expansion CT-QMC [3,4] solver.                   *"<<std::endl;
+    std::cout << "* interaction expansion CT-QMC solver [3,4,5].                 *"<<std::endl;
     std::cout << "* [1] JSTAT (2011) P05001; [2] CPC 182, 1078 (2011);           *"<<std::endl;
-    std::cout << "* [3] PRB 72, 035122 (2005); [4] RMP 83, 349 (2011).           *"<<std::endl;
+    std::cout << "* [3] JETP Lett. 80, 61 (2004); [4] PRB 72, 035122 (2005);     *"<<std::endl;
+    std::cout << "* [5] RMP 83, 349 (2011).                                      *"<<std::endl;
     std::cout << "****************************************************************"<<std::endl;
   }
   //run the simulation
