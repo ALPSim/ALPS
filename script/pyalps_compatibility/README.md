@@ -93,6 +93,14 @@ reference tests. Arrays retain dtype and shape; selected parameter probes also
 record their Python type. The ordinary tests assert arithmetic and ownership
 contracts that a normalized fingerprint alone cannot establish.
 
+`test/pyalps/test_archive_dtypes.py` also checks mixed numeric rows at the
+float64 precision boundary and the int64/uint64 limits, in both row orders and
+with nested containers. These tests compare integers as Python ints: ordinary
+NumPy int/float equality can itself round the expected integer and hide data
+loss. Lossy mixtures must retain separately typed rows; exactly representable
+mixtures must still load as arrays. These fast cases run in the existing wheel
+smoke suite and need no additional CI job.
+
 The runner also writes checkpoints using each implementation and reads them
 with the other. These cover ordinary parameters, RNG continuation, scalar and
 vector observations, and persisted results. Legacy `result.load()` is broken;

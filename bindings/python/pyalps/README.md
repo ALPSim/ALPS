@@ -88,6 +88,13 @@ interpretation. The old format cannot distinguish an unmarked `int8` array
 from a Boolean mask; use a typed reader such as h5py when an old dataset is
 known to contain signed bytes.
 
+Rectangular mixtures of numeric rows are stored as a single array when every
+integer remains exact in the common dtype. If mixing integer widths or mixing
+integers with floating-point or complex rows would round a value, the archive
+stores the rows separately and reads them back as a list. For example, a
+`uint64` row containing `2**63 + 1` alongside an `int64` row retains its exact
+integer values instead of silently converting them to `float64`.
+
 `pyalps.mpi` receives Python objects using matched probes, so asynchronous
 receives and the wait/test helpers can handle messages larger than mpi4py's
 default object receive buffer. This adapter exchanges mpi4py messages;

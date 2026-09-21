@@ -234,8 +234,9 @@ namespace alps {
                     // one dataset. Delegate to numpy so shape checking
                     // and dtype handling match numpy's rules, then feed
                     // the stacked array through the ndarray save path.
-                    // Ragged shapes (numpy raises) and non-numeric
-                    // dtypes fall through to the group descent below.
+                    // Ragged shapes (numpy raises), non-numeric dtypes,
+                    // and lossy integer promotions fall through to the
+                    // group descent below.
                     nb::object arr;
                     try {
                         arr = alps::python::numpy_module().attr("asarray")(
@@ -249,9 +250,20 @@ namespace alps {
                             nb::cast<std::string>(arr.attr("dtype").attr("kind"));
                         if (dtype_kind.size() == 1
                             && std::strchr("biufc", dtype_kind[0])) {
-                            hdf5_save_py11_visitor child_visitor{ar, path};
-                            extract_from_pyobject_py11(child_visitor, arr);
-                            return;
+                            bool lossless = true;
+                            if (stack_dtype.empty()
+                                && std::strchr("fc", dtype_kind[0])) {
+                                nb::object dtype = arr.attr("dtype");
+                                int precision = nb::cast<int>(
+                                    alps::python::numpy_module().attr("finfo")(
+                                        dtype).attr("nmant")) + 1;
+                                lossless = integers_preserved(l, dtype, precision);
+                            }
+                            if (lossless) {
+                                hdf5_save_py11_visitor child_visitor{ar, path};
+                                extract_from_pyobject_py11(child_visitor, arr);
+                                return;
+                            }
                         }
                     }
                 }
@@ -284,6 +296,39 @@ namespace alps {
                     if (std::strcmp(Py_TYPE(raw)->tp_name, scalar_type) == 0)
                         return true;
                 return false;
+            }
+            // NumPy promotes int64/uint64 mixtures to float64, and also
+            // mixes wide integers with float/complex rows. Its numeric
+            // equality can report rounded integers as equal after that
+            // same promotion. Compare Python objects instead, and only
+            // inspect integer types wider than the target's significand.
+            static bool integers_preserved(nb::handle node, nb::handle dtype,
+                                           int precision) {
+                PyObject * raw = node.ptr();
+                if (PyList_Check(raw) || PyTuple_Check(raw)) {
+                    for (std::size_t i = 0; i < nb::len(node); ++i)
+                        if (!integers_preserved(node[i], dtype, precision))
+                            return false;
+                    return true;
+                }
+                if (is_ndarray(raw) || is_numpy_scalar(raw)) {
+                    nb::object source_dtype = node.attr("dtype");
+                    std::string kind = nb::cast<std::string>(source_dtype.attr("kind"));
+                    if (kind != "i" && kind != "u") return true;
+                    int bits = 8 * nb::cast<int>(source_dtype.attr("itemsize"))
+                             - (kind == "i" ? 1 : 0);
+                    if (bits <= precision) return true;
+                } else if (!PyLong_Check(raw)) {
+                    return true;
+                }
+                nb::handle np = alps::python::numpy_module();
+                // astype(object) unboxes NumPy integer scalars to Python
+                // ints; asarray(scalar, dtype=object) can retain the NumPy
+                // scalar and its lossy mixed-type comparison semantics.
+                nb::object original = np.attr("asarray")(node).attr("astype")("object");
+                nb::object converted = np.attr("asarray")(
+                    node, nb::arg("dtype") = dtype).attr("astype")("object");
+                return nb::cast<bool>(np.attr("array_equal")(original, converted));
             }
             struct tree_scan {
                 bool has_ndarray = false;
