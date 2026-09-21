@@ -66,16 +66,6 @@
 #cmakedefine BIND_FORTRAN_INTEGER_8 1
 
 //
-// XML parser
-//
-
-// Define to 1 if you use Expat XML parser by James Clark.
-#cmakedefine ALPS_HAVE_EXPAT_PARSER
-
-// Define to 1 if you use Xerces C++ XML parser by Apache Software Foundation.
-#cmakedefine ALPS_HAVE_XERCES_PARSER
-
-//
 // OpenMP
 //
 
