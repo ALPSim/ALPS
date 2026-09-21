@@ -18,9 +18,10 @@
 
 #include "parameters.h"
 #include "parameter_p.h"
-#include <boost/classic_spirit.hpp>
+#include <boost/spirit/include/classic_actor.hpp>
+#include <boost/spirit/include/classic_core.hpp>
 
-namespace bs = boost::spirit;
+namespace bs = boost::spirit::classic;
 
 namespace alps {
 

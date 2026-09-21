@@ -37,6 +37,7 @@
 #include <boost/type_traits/is_scalar.hpp>
 #include <boost/type_traits/is_integral.hpp>
 
+#include <iomanip>
 #include <limits>
 #include <stdexcept>
 

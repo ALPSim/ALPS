@@ -37,10 +37,6 @@
     "lapack"
   ],
   "features": {
-    "archive": {
-      "description": "Optional SQLite archive tool",
-      "dependencies": ["sqlite3"]
-    },
     "mpi": {
       "description": "MPI-enabled C++ SDK",
       "dependencies": [

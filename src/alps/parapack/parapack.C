@@ -459,11 +459,11 @@ int start_sgl(int argc, char** argv) {
       boost::throw_exception(std::runtime_error("Invalid number of threads"));
       return 127;
     }
-#if defined(_OPENMP) && defined(ALPS_ENABLE_OPENMP_WORKER)
+#if defined(ALPS_ENABLE_OPENMP)
     omp_set_nested(true);
 #else
     if (opt.threads_per_clone > 1) {
-      std::cerr << "OpenMP worker parallelization is not supported.  Please rebuild ALPS with -DALPS_ENABLE_OPENMP=ON -DALPS_ENABLE_OPENMP_WORKER=ON.\n";
+      std::cerr << "OpenMP worker parallelization is not supported.  Please rebuild ALPS with -DALPS_ENABLE_OPENMP=ON.\n";
       boost::throw_exception(std::runtime_error("OpenMP worker parallelization is not supported"));
       return 127;
     }
@@ -548,7 +548,7 @@ int start_sgl(int argc, char** argv) {
     #pragma omp parallel num_threads(num_groups)
     {
       thread_group group(thread_id());
-#if defined(_OPENMP) && defined(ALPS_ENABLE_OPENMP_WORKER)
+#if defined(ALPS_ENABLE_OPENMP)
       if (omp_get_max_threads() != opt.threads_per_clone)
         omp_set_num_threads(opt.threads_per_clone);
 #endif

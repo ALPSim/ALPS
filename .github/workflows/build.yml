@@ -82,14 +82,15 @@ jobs:
         # its 90-minute cap (observed multi-hour stalls in this step).
         timeout-minutes: 20
         run: |
-          python -m pip install "cmake>=3.27"
+          python -m pip install "cmake>=4.3"
           # Bound every apt network operation: 30 s socket timeout, 3 retries.
           printf 'Acquire::Retries "3";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' \
             | sudo tee /etc/apt/apt.conf.d/99ci-timeouts > /dev/null
           sudo apt-get update
           sudo apt install liblapack-dev libblas-dev libopenmpi-dev libhdf5-serial-dev
           if [[ "${{ matrix.plat.extras }}" == "true" ]]; then
-            sudo apt install gfortran libsqlite3-dev
+            sudo apt install gfortran xsltproc
+            python -m pip install pytest
           fi
           # Clang >= 19: not in Ubuntu's default apt repos; use apt.llvm.org.
           # GCC >= 15: not in Ubuntu's default apt repos; use ubuntu-toolchain-r PPA.
@@ -110,20 +111,27 @@ jobs:
           CC:  ${{ matrix.plat.c_compiler }}-${{ matrix.plat.c_version }}
           CXX: ${{ matrix.plat.cxx_compiler }}-${{ matrix.plat.c_version }}
         run: |
-          bash script/build-boost.sh "$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" "$GITHUB_WORKSPACE/boost-install"
+          bash .github/scripts/build-boost.sh "$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" "$GITHUB_WORKSPACE/boost-install"
           extra_args=()
           if [[ "${{ matrix.plat.extras }}" == "true" ]]; then
-            extra_args=(-DALPS_BUILD_EXAMPLES=ON -DALPS_BUILD_FORTRAN=ON
-                        -DALPS_BUILD_ARCHIVE=ON
+            extra_args=(-DALPS_BUILD_EXAMPLES=ON
                         -DALPS_ENABLE_OPENMP=ON)
           fi
           cmake -S $GITHUB_WORKSPACE -B build \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DALPS_ENABLE_MPI=ON \
                 -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/boost-install" \
                 -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/build/install" \
                 -DCMAKE_CXX_STANDARD=${{ matrix.plat.cxx_standard || '17' }} \
                 "${extra_args[@]}"
           cmake --build build -j 2
           ctest --test-dir build --output-on-failure --parallel 2
+
+      - name: Test installed XML tools after relocation
+        if: matrix.plat.extras
+        env:
+          ALPS_XML_BUILD: build
+        run: python -m pytest tests/cli -q
 
       # Python extension examples are built against installed wheels by wheel CI.
       - name: Build installed C, C++ and Fortran tutorials
@@ -132,7 +140,17 @@ jobs:
           cmake --install build
           cmake --install build --component tutorials
           tutorials="$PWD/build/install/share/alps/tutorials"
-          find "$tutorials" -mindepth 2 -name CMakeLists.txt -print0 | while IFS= read -r -d '' file; do
+          cmake -S "$tutorials/examples" -B _build/library-examples \
+                -DALPS_DIR="$PWD/build/install/share/alps" \
+                -DCMAKE_PREFIX_PATH="$PWD/boost-install"
+          cmake --build _build/library-examples -j 2
+          ctest --test-dir _build/library-examples --output-on-failure
+          cmake -S "$tutorials/examples/fortran" -B _build/fortran \
+                -DALPS_DIR="$PWD/build/install/share/alps" \
+                -DCMAKE_PREFIX_PATH="$PWD/boost-install"
+          cmake --build _build/fortran -j 2
+          ctest --test-dir _build/fortran --output-on-failure
+          find "$tutorials" -mindepth 1 -path "$tutorials/examples" -prune -o -name CMakeLists.txt -print0 | while IFS= read -r -d '' file; do
             source="${file%/CMakeLists.txt}"
             output="_build/tutorials/${source#"$tutorials/"}"
             cmake -S "$source" -B "$output" \
@@ -182,8 +200,10 @@ jobs:
         env:
           CXX: ${{ matrix.plat.cxx_compiler }}
         run: |
-          bash script/build-boost.sh "$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" "$GITHUB_WORKSPACE/boost-install"
+          bash .github/scripts/build-boost.sh "$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" "$GITHUB_WORKSPACE/boost-install"
           cmake -S $GITHUB_WORKSPACE -B build \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DALPS_ENABLE_MPI=ON \
                 -DCMAKE_C_COMPILER=${{ matrix.plat.c_compiler }} \
                 -DCMAKE_CXX_COMPILER=${{ matrix.plat.cxx_compiler }} \
                 -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/boost-install" \

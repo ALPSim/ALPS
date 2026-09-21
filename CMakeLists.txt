@@ -1,23 +1,7 @@
 #  Copyright Synge Todo and Matthias Troyer 2009 - 2010.
-#   Permission is hereby granted, free of charge, to any person obtaining
-#   a copy of this software and associated documentation files (the “Software”),
-#   to deal in the Software without restriction, including without limitation
-#   the rights to use, copy, modify, merge, publish, distribute, sublicense,
-#   and/or sell copies of the Software, and to permit persons to whom the
-#   Software is furnished to do so, subject to the following conditions:
-#
-#   The above copyright notice and this permission notice shall be included
-#   in all copies or substantial portions of the Software.
-#
-#   THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS
-#   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-#   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-#   DEALINGS IN THE SOFTWARE.
+#   SPDX-License-Identifier: MIT
 
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 4.3)
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
   message(FATAL_ERROR "Use an out-of-source build: cmake -S . -B build")
 endif()
@@ -29,21 +13,14 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
   set(_alps_top_level ON)
 endif()
 option(BUILD_TESTING "Build and register tests" ${_alps_top_level})
-option(ALPS_ENABLE_MPI "Enable MPI parallelization" ${_alps_top_level})
+option(ALPS_ENABLE_MPI "Enable MPI parallelization" OFF)
 option(ALPS_BUILD_APPLICATIONS "Build simulation applications and command-line tools"
        ${_alps_top_level})
-option(ALPS_BUILD_ARCHIVE "Build the optional SQLite archive tool" OFF)
-if(ALPS_BUILD_ARCHIVE AND NOT ALPS_BUILD_APPLICATIONS)
-  message(FATAL_ERROR "ALPS_BUILD_ARCHIVE requires ALPS_BUILD_APPLICATIONS=ON")
-endif()
 if(BUILD_TESTING)
   list(APPEND VCPKG_MANIFEST_FEATURES tests)
 endif()
 if(ALPS_ENABLE_MPI)
   list(APPEND VCPKG_MANIFEST_FEATURES mpi)
-endif()
-if(ALPS_BUILD_ARCHIVE)
-  list(APPEND VCPKG_MANIFEST_FEATURES archive)
 endif()
 project(
   alps
@@ -55,19 +32,13 @@ include(CMakePackageConfigHelpers)
 
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(ALPS_ENABLE_OPENMP "Enable OpenMP parallelization" OFF)
-option(ALPS_ENABLE_OPENMP_WORKER "Enable OpenMP worker support" OFF)
-option(ALPS_BUILD_FORTRAN "Build the C++ wrapper for Fortran simulations" OFF)
 option(ALPS_BUILD_EXAMPLES "Build examples" OFF)
 option(ALPS_BUILD_EXTENSIVE_TESTS "Build expensive graph and HDF5 type-matrix tests" OFF)
-option(BIND_FORTRAN_LOWERCASE "Fortran symbols have no trailing underscore" OFF)
 set(ALPS_VERSION_PRERELEASE
     ""
     CACHE STRING "Optional prerelease version label")
 
-if(NOT DEFINED CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 17)
-endif()
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# Language requirements belong to ALPS::headers and propagate to every consumer.
 set(CMAKE_CXX_EXTENSIONS OFF)
 if(NOT DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -82,14 +53,6 @@ foreach(kind IN ITEMS LIBRARY ARCHIVE)
     set(CMAKE_${kind}_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
   endif()
 endforeach()
-if(PROJECT_IS_TOP_LEVEL
-   AND NOT CMAKE_CONFIGURATION_TYPES
-   AND NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE
-      Release
-      CACHE STRING "Build configuration" FORCE)
-endif()
-message(STATUS "C++ compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 
 set(ALPS_VERSION ${PROJECT_VERSION})
 if(ALPS_VERSION_PRERELEASE)
@@ -116,12 +79,7 @@ if(ALPS_ENABLE_MPI)
 endif()
 find_package(Boost 1.76 CONFIG REQUIRED COMPONENTS ${ALPS_BOOST_COMPONENTS})
 
-# HDF5's config version file requires a matching major release; check our
-# lower bound separately so a newer major can still supply its own targets.
 find_package(HDF5 REQUIRED COMPONENTS C)
-if(HDF5_VERSION VERSION_LESS 1.8.2)
-  message(FATAL_ERROR "ALPS requires HDF5 >= 1.8.2")
-endif()
 # Prefer HDF5's exported targets: older FindHDF5 aggregate targets flatten
 # Debug/Release import libraries into whichever configuration was found first.
 set(ALPS_HDF5_TARGETS hdf5::hdf5)
@@ -139,18 +97,9 @@ endif()
 if(ALPS_ENABLE_OPENMP)
   find_package(OpenMP REQUIRED COMPONENTS CXX)
 endif()
-if(ALPS_ENABLE_OPENMP_WORKER AND NOT ALPS_ENABLE_OPENMP)
-  message(FATAL_ERROR "ALPS_ENABLE_OPENMP_WORKER requires ALPS_ENABLE_OPENMP=ON")
-endif()
 
 include(cmake/ALPSNumerics.cmake)
 
-include(CheckIncludeFile)
-foreach(header IN ITEMS sys/types.h unistd.h windows.h)
-  string(TOUPPER "${header}" feature)
-  string(REGEX REPLACE "[/.]" "_" feature "${feature}")
-  check_include_file("${header}" "ALPS_HAVE_${feature}")
-endforeach()
 # The bundled XDR implementation is portable and preserves the legacy format.
 # Using it consistently avoids incompatible platform RPC typedefs and ABIs.
 configure_file(src/alps/config.h.in src/alps/config.h)
@@ -169,45 +118,16 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 include(CTest)
 include(cmake/ALPSTesting.cmake)
-include(cmake/ALPSApplications.cmake)
 add_subdirectory(src/alps)
 if(ALPS_BUILD_APPLICATIONS)
-  add_subdirectory(tool)
-  add_subdirectory(applications)
+  add_subdirectory(src/tools)
+  add_subdirectory(src/apps)
   get_target_property(ALPS_APPLICATION_TARGETS alps ALPS_APPLICATION_TARGETS)
-  install(
-    EXPORT ALPSApplicationTargets
-    NAMESPACE ALPS::
-    DESTINATION ${CMAKE_INSTALL_DATADIR}/alps
-    COMPONENT applications)
-endif()
-if(ALPS_BUILD_EXAMPLES)
-  add_subdirectory(example)
 endif()
 add_subdirectory(tutorials)
 if(BUILD_TESTING)
-  add_subdirectory(test)
+  add_subdirectory(tests)
 endif()
-
-install(
-  DIRECTORY src/alps src/boost src/ietl src/mocasito bindings/boost
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  COMPONENT headers
-  FILES_MATCHING
-  PATTERN "*.h"
-  PATTERN "*.hpp"
-  PATTERN "*.ipp")
-install(
-  FILES "${PROJECT_BINARY_DIR}/src/alps/config.h" "${PROJECT_BINARY_DIR}/src/alps/version.h"
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alps
-  COMPONENT headers)
-install(
-  DIRECTORY lib/xml/
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/alps/xml
-  COMPONENT xml
-  FILES_MATCHING
-  PATTERN "*.xml"
-  PATTERN "*.xsl")
 
 configure_package_config_file(
   cmake/ALPSConfig.cmake.in "${PROJECT_BINARY_DIR}/cmake/ALPSConfig.cmake"
@@ -227,7 +147,7 @@ install(
   DESTINATION ${CMAKE_INSTALL_DATADIR}/alps
   COMPONENT build)
 install(
-  FILES CITATION.md LICENSE.txt README.md
+  FILES CHANGELOG.md CITATION.md CONTRIBUTING.md LICENSE.txt README.md
   DESTINATION ${CMAKE_INSTALL_DATADIR}/alps
   COMPONENT libraries)
 
@@ -244,5 +164,13 @@ if(WIN32)
 endif()
 
 # Use CMake's compiler-runtime discovery for redistributable installations.
-include(cmake/ALPSRuntime.cmake)
-alps_install_compiler_runtime("${CMAKE_INSTALL_BINDIR}")
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+include(InstallRequiredSystemLibraries)
+# The MSVC ARM64 redist also contains an ARM64EC-only exception runtime.
+if(CMAKE_CXX_COMPILER_ARCHITECTURE_ID STREQUAL "ARM64")
+  list(FILTER CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS EXCLUDE REGEX "/vcruntime140_1d?\\.dll$")
+endif()
+install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+  DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)
+install(DIRECTORY ${CMAKE_INSTALL_SYSTEM_RUNTIME_DIRECTORIES}
+  DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)

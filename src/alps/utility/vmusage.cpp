@@ -21,7 +21,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#ifdef ALPS_HAVE_UNISTD_H
+#ifndef _WIN32
 # include <unistd.h> // getpid
 #else
   int getpid() { return -1; }

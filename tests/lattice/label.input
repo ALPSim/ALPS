@@ -1,0 +1,3 @@
+LATTICE_LIBRARY = "lattices.xml"
+LATTICE = "square lattice"
+L = 4

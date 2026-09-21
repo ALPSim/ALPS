@@ -22,7 +22,7 @@
 #include <string>
 #include <cstdlib>
 
-namespace bs = boost::spirit;
+namespace bs = boost::spirit::classic;
 
 namespace alps {
 

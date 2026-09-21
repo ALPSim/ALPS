@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 4.3)
 project(heisenberg LANGUAGES C CXX)
 
 find_package(ALPS CONFIG REQUIRED)

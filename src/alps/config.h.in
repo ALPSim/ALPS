@@ -22,21 +22,6 @@
 #define BOOST_FILESYSTEM_DEPRECATED
 
 //
-// C headers
-//
-
-// Define to 1 if you have rpc/rpc.h and rpc/xdr.h
-
-// Define to 1 if you have the <sys/types.h> header file.
-#cmakedefine ALPS_HAVE_SYS_TYPES_H
-
-// Define to 1 if you have the <unistd.h> header file.
-#cmakedefine ALPS_HAVE_UNISTD_H
-
-// Define to 1 if you have the <windows.h> header file.
-#cmakedefine ALPS_HAVE_WINDOWS_H
-
-//
 // Libraries
 //
 
@@ -62,15 +47,17 @@
 // Define if you have LAPACK library
 #define ALPS_HAVE_LAPACK
 
-// Set 8-byte integers for Boost bindings if needed
-#cmakedefine BIND_FORTRAN_INTEGER_8 1
+// One numerical ABI throughout the SDK and its applications.
+#if defined(BIND_FORTRAN_INTEGER_8) || defined(BIND_FORTRAN_LOWERCASE)
+# error ALPS requires LP64 BLAS/LAPACK with lowercase underscore symbols
+#endif
 
 //
 // OpenMP
 //
 
 // Define to 1 if OpenMP Worker is supported in ALPS/parpack scheduler
-#cmakedefine ALPS_ENABLE_OPENMP_WORKER
+#cmakedefine ALPS_ENABLE_OPENMP
 
 //
 // Introduce [int,uint]*_t into alps namespace

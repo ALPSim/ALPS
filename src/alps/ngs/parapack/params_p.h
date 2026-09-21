@@ -22,9 +22,6 @@
 
 #include <alps/parameter/parameter_p.h>
 #include <alps/ngs/params.hpp>
-#include <boost/classic_spirit.hpp>
-
-namespace bs = boost::spirit;
 
 namespace alps {
 

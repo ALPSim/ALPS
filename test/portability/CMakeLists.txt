@@ -1,6 +1,0 @@
-add_executable(portability portability.cpp)
-target_link_libraries(portability PRIVATE ALPS::alps)
-add_test(NAME portability COMMAND portability)
-add_executable(numerics numerics.cpp)
-target_link_libraries(numerics PRIVATE ALPS::alps)
-add_test(NAME numerics COMMAND numerics)

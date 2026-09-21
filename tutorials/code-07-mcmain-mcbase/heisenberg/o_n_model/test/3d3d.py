@@ -9,7 +9,7 @@ if __name__ == '__main__':
     outfile = '3d3d_result.h5'
 
     sim = ndsim.heisenberg_sim(pyalps.ngs.params({
-        'LATTICE_LIBRARY'   :   '/opt/alps/lib/xml/lattices.xml',
+        'LATTICE_LIBRARY'   :   'lattices.xml',
         'LATTICE'           :   'simple cubic lattice',
         'L'                 :   '20',
         'THERMALIZATION'    :   '1000',

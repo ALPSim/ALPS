@@ -21,7 +21,7 @@
  # tutorial4a.py script.
  #
  # Run this script as:
- # alpspython tutorial4c.py
+ # python tutorial4c.py
 
 from pyalps.hdf5 import archive # hdf5 interface
 from numpy import *

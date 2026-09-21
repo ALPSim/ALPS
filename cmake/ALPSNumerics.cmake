@@ -1,24 +1,20 @@
 # SPDX-License-Identifier: MIT
-# Preserve provider targets for the default build; delegate explicit provider,
-# linkage and integer-ABI requests to CMake's standard numerical finders.
+# Preserve provider targets for the default build; delegate explicit provider
+# and linkage requests to CMake's standard numerical finders.
 set(ALPS_BLA_VENDOR "${BLA_VENDOR}")
 set(ALPS_BLA_STATIC "${BLA_STATIC}")
 if(BLA_F95)
   message(FATAL_ERROR "ALPS uses the BLAS/LAPACK F77 ABI; BLA_F95 is not supported")
 endif()
-if(NOT DEFINED BLA_SIZEOF_INTEGER)
-  set(BLA_SIZEOF_INTEGER 4)
+if(DEFINED BLA_SIZEOF_INTEGER AND NOT BLA_SIZEOF_INTEGER STREQUAL "4")
+  message(FATAL_ERROR "ALPS requires BLA_SIZEOF_INTEGER=4 (LP64)")
 endif()
-if(NOT BLA_SIZEOF_INTEGER MATCHES "^(4|8)$")
-  message(FATAL_ERROR "ALPS requires BLA_SIZEOF_INTEGER=4 or 8 (not ANY)")
+if(BIND_FORTRAN_LOWERCASE OR BIND_FORTRAN_INTEGER_8)
+  message(FATAL_ERROR "ALPS requires LP64 BLAS/LAPACK with lowercase underscore symbols")
 endif()
-set(BIND_FORTRAN_INTEGER_8 OFF)
-if(BLA_SIZEOF_INTEGER EQUAL 8)
-  set(BIND_FORTRAN_INTEGER_8 ON)
-endif()
+set(BLA_SIZEOF_INTEGER 4)
 
-if(BLA_SIZEOF_INTEGER EQUAL 4
-   AND NOT BLA_STATIC
+if(NOT BLA_STATIC
    AND NOT BLA_PREFER_PKGCONFIG
    AND (NOT BLA_VENDOR OR BLA_VENDOR STREQUAL "All"))
   find_package(OpenBLAS CONFIG QUIET)

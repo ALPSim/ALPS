@@ -39,7 +39,7 @@ jobs:
       - name: Configure SDK
         shell: pwsh
         run: |
-          python -m pip install "cmake>=3.27"
+          python -m pip install "cmake>=4.3"
           $env:VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
           cmake --preset windows-${{ matrix.arch }}
       - name: Build SDK
@@ -50,17 +50,30 @@ jobs:
         run: cmake --install _build/windows-${{ matrix.arch }} --config ${{ matrix.config }}
       - name: Install Python build requirements
         if: matrix.config == 'Release'
-        run: python -m pip install build nanobind numpy scipy matplotlib h5py pytest scikit-build-core
-      - name: Build Python bindings
+        run: python -m pip install build "nanobind>=2.10,<3" numpy scipy matplotlib h5py pytest "scikit-build-core>=1.0" abi3audit
+      - name: Build and audit Python wheel
         if: matrix.config == 'Release'
         shell: pwsh
         run: |
           $env:ALPS_DIR = "$pwd/_build/windows-${{ matrix.arch }}/install/share/alps"
-          python -m pip install ./bindings/python/pyalps --no-build-isolation `
-            --config-settings "cmake.define.CMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" `
-            --config-settings "cmake.define.VCPKG_INSTALLED_DIR=$pwd/_build/windows-${{ matrix.arch }}/vcpkg_installed" `
-            --config-settings cmake.define.VCPKG_MANIFEST_MODE=OFF `
-            --config-settings cmake.define.VCPKG_TARGET_TRIPLET=${{ matrix.arch }}-windows
+          python -m build --wheel --no-isolation --outdir _build/python-wheel python/pyalps `
+            --config-setting "cmake.define.CMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" `
+            --config-setting "cmake.define.VCPKG_INSTALLED_DIR=$pwd/_build/windows-${{ matrix.arch }}/vcpkg_installed" `
+            --config-setting cmake.define.VCPKG_MANIFEST_MODE=OFF `
+            --config-setting cmake.define.VCPKG_TARGET_TRIPLET=${{ matrix.arch }}-windows
+          if ($LASTEXITCODE) { throw 'Python wheel build failed' }
+          Get-ChildItem _build/python-wheel/*.whl | ForEach-Object {
+            python -m abi3audit --strict --verbose $_.FullName
+            if ($LASTEXITCODE) { throw 'Python stable ABI audit failed' }
+            python -m pip install --no-deps $_.FullName
+            if ($LASTEXITCODE) { throw 'Python wheel installation failed' }
+          }
+          # abi3audit scans .pyd files, so also check the shared runtime DLL.
+          $runtime = python -c "from pyalps._resources import runtime_directory; print(runtime_directory() / 'bin/pyalps_nanobind.dll')"
+          Copy-Item -LiteralPath $runtime -Destination _build/python-wheel/pyalps_nanobind.pyd
+          python -m abi3audit --strict --verbose --assume-minimum-abi3 3.12 _build/python-wheel/pyalps_nanobind.pyd
+          if ($LASTEXITCODE) { throw 'Shared nanobind stable ABI audit failed' }
+          Remove-Item -LiteralPath _build/python-wheel/pyalps_nanobind.pyd
       - name: Test Python bindings
         if: matrix.config == 'Release'
         shell: pwsh
@@ -68,7 +81,12 @@ jobs:
           $env:ALPS_DIR = "$pwd/_build/windows-${{ matrix.arch }}/install/share/alps"
           $env:PYALPS_TEST_DOWNSTREAM_EXPORT = '1'
           $env:ALPS_TEST_CMAKE_ARGS = @('-G', 'Ninja', "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake", "-DVCPKG_INSTALLED_DIR=$pwd/_build/windows-${{ matrix.arch }}/vcpkg_installed", '-DVCPKG_MANIFEST_MODE=OFF', '-DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-windows') | ConvertTo-Json -Compress
-          python -m pytest test/pyalps test/cmake -q
+          python -m pytest tests/pyalps tests/cmake -q
+      - uses: actions/upload-artifact@v7
+        if: matrix.config == 'Release'
+        with:
+          name: windows-abi3-${{ matrix.arch }}
+          path: _build/python-wheel/*.whl
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
@@ -76,3 +94,30 @@ jobs:
           path: |
             _build/windows-${{ matrix.arch }}/Testing/Temporary/**
             _build/windows-${{ matrix.arch }}/CMakeFiles/CMakeConfigureLog.yaml
+
+  python_compatibility:
+    name: Windows ${{ matrix.platform.arch }} / Python ${{ matrix.python }}
+    needs: msvc
+    runs-on: ${{ matrix.platform.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - { os: windows-latest, arch: x64 }
+          - { os: windows-11-arm, arch: arm64 }
+        python: ['3.12', '3.13', '3.14']
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+          architecture: ${{ matrix.platform.arch }}
+      - uses: actions/download-artifact@v8
+        with:
+          name: windows-abi3-${{ matrix.platform.arch }}
+          path: wheelhouse
+      - name: Test the same wheel across Python versions
+        run: |
+          python -m pip install numpy scipy pytest h5py
+          python -m pip install --no-index --find-links wheelhouse pyalps
+          python -m pytest tests/pyalps -q

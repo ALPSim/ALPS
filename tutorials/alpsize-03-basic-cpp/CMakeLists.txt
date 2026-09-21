@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 4.3)
 project(alpsize LANGUAGES C CXX)
 
 # rule for generating wolff program

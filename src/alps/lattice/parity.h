@@ -19,7 +19,8 @@
 
 #include <alps/config.h>
 #include <alps/lattice/graphproperties.h>
-#include <boost/classic_spirit.hpp>
+#include <boost/spirit/include/classic_actor.hpp>
+#include <boost/spirit/include/classic_core.hpp>
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/undirected_dfs.hpp>
 #include <boost/graph/visitors.hpp>
@@ -153,7 +154,7 @@ struct parity_helper<Graph, Parity, true>
 
 template<typename Graph, typename Parity>
 bool set_parity(Graph& g, alps::Parameters const& p, Parity) {
-  using namespace boost::spirit;
+  using namespace boost::spirit::classic;
   typedef detail::parity_helper<Graph, Parity,
     has_property<Parity, Graph>::vertex_property> parity_helper;
 

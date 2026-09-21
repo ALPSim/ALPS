@@ -23,7 +23,7 @@
 #include <alps/ngs/mcobservables.hpp> // TODO: replace by new alea
 #include <alps/ngs/thread_exceptions.hpp>
 
-#include <alps/random/mersenne_twister.hpp>
+#include <boost/random/mersenne_twister.hpp>
 
 #include <boost/function.hpp>
 #include <boost/weak_ptr.hpp>

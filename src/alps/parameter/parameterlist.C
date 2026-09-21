@@ -23,7 +23,7 @@
 #include <iostream>
 #include <stdexcept>
 
-namespace bs = boost::spirit;
+namespace bs = boost::spirit::classic;
 
 namespace alps {
 

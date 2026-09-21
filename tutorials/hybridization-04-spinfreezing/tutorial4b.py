@@ -19,7 +19,7 @@
  # tutorial4a.py script.
  #
  # Run this script as:
- # alpspython tutoria4b.py
+ # python tutorial4b.py
 
 from pyalps.hdf5 import archive #hdf5 interface
 from numpy import *

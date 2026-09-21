@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 4.3)
 project(alpsize LANGUAGES C CXX Fortran)
 
 find_package(ALPS CONFIG REQUIRED COMPONENTS fortran)

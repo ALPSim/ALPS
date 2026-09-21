@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+# Copyright (C) 2026 ALPS collaboration. SPDX-License-Identifier: MIT
+"""Render ALPS plots and simulation XML using the installed XSLT resources."""
+import argparse
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import xml.etree.ElementTree as ET
+
+
+XML_DIR = (Path(__file__).resolve().parent / "@ALPS_XML_FROM_BINDIR@").resolve()
+PLOT_STYLES = {
+    "text": "plot2text.xsl",
+    "html": "ALPS.xsl",
+    "gnuplot": "plot2gp.xsl",
+    "matplotlib": "plot2mpl.xsl",
+    "grace": "plot2xmgr.xsl",
+}
+CONVERT_STYLES = {"text": "QMCXML2text.xsl", "html": "ALPS.xsl"}
+
+
+def transform(source, stylesheet):
+    """Keep filenames as arguments and publish output only after success."""
+    return subprocess.run(
+        ["xsltproc", "--nonet", str(stylesheet.resolve(strict=True)),
+         str(source.resolve(strict=True))],
+        check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    ).stdout
+
+
+def extract(specification, inputs, style):
+    archive = ET.Element("ARCHIVE")
+    for source in inputs:
+        root = ET.parse(source).getroot()
+        if root.tag == "SIMULATION":
+            archive.append(root)
+        elif root.tag == "ARCHIVE":
+            archive.extend(root.findall("SIMULATION"))
+        else:
+            raise ValueError(f"{source}: expected SIMULATION or ARCHIVE XML")
+    if not len(archive):
+        raise ValueError("The input contains no simulations")
+
+    with tempfile.TemporaryDirectory(prefix="alps-xml-") as directory:
+        temporary = Path(directory)
+        archive_path = temporary / "archive.xml"
+        ET.ElementTree(archive).write(archive_path, encoding="utf-8", xml_declaration=True)
+
+        stylesheet = ET.fromstring(transform(specification, XML_DIR / "plot2xsl.xsl"))
+        # The generated stylesheet lives in a temporary directory; resolve its
+        # library includes against the installed resources, including spaces.
+        for include in stylesheet.findall("{http://www.w3.org/1999/XSL/Transform}include"):
+            include.set("href", (XML_DIR / include.attrib["href"]).as_uri())
+        stylesheet_path = temporary / "extract.xsl"
+        ET.ElementTree(stylesheet).write(stylesheet_path, encoding="utf-8", xml_declaration=True)
+        plot_path = temporary / "plot.xml"
+        plot_path.write_bytes(transform(archive_path, stylesheet_path))
+        return transform(plot_path, XML_DIR / style)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     epilog="Requires Python 3 and xsltproc on PATH.")
+    commands = parser.add_subparsers(dest="command", required=True)
+    for command, styles, help_text in (
+        ("plot", PLOT_STYLES, "render a plot XML file"),
+        ("convert", CONVERT_STYLES, "render simulation or job XML"),
+        ("extract", PLOT_STYLES, "extract a plot from simulation or archive XML"),
+    ):
+        subparser = commands.add_parser(command, help=help_text)
+        subparser.add_argument("format", choices=styles)
+        if command == "extract":
+            subparser.add_argument("specification", type=Path, help="plot definition XML")
+        subparser.add_argument("input", type=Path, nargs="+" if command == "extract" else None)
+        subparser.add_argument("-o", "--output", type=Path, help="write to a file instead of stdout")
+        subparser.set_defaults(styles=styles)
+    args = parser.parse_args()
+
+    try:
+        if args.command == "extract":
+            result = extract(args.specification, args.input, args.styles[args.format])
+        else:
+            result = transform(args.input, XML_DIR / args.styles[args.format])
+        if args.output:
+            args.output.write_bytes(result)
+        else:
+            sys.stdout.buffer.write(result)
+    except subprocess.CalledProcessError as error:
+        parser.exit(1, f"alps-xml: xsltproc failed: {error.stderr.decode(errors='replace').strip()}\n")
+    except (OSError, ValueError, ET.ParseError) as error:
+        parser.exit(1, f"alps-xml: {error}\n")
+
+
+if __name__ == "__main__":
+    main()

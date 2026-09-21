@@ -25,7 +25,7 @@
 
 #include <alps/hdf5.hpp>
 
-namespace bs = boost::spirit;
+namespace bs = boost::spirit::classic;
 
 namespace alps {
 

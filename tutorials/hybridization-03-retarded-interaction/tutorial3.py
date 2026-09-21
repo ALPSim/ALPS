@@ -26,15 +26,11 @@
  # These are written to stdout in human-readable (plottable) format.
  #
  # Run this script as:
- # alpspython tutorial2.py
+ # python tutorial3.py
  #
  # This python script is MPI aware and can hence be called using mpirun:
  #
- # mpirun -np 2 alpspython tutorial2.py
- #
- # In case this does not work, try:
- #
- # mpirun -np 2 sh alpspython tutorial2.py
+ # mpirun -np 2 python tutorial3.py
 
 import shutil
 import pyalps.mpi as mpi                # mpi library

@@ -27,15 +27,11 @@
  # hybridization solver). For details on how to use the solver see the documentation
  #
  # Run this script as:
- # alpspython tutorial1.py
+ # python tutorial2.py
  #
  # This python script is MPI aware and can hence be called using mpirun:
  #
- # mpirun -np 2 alpspython tutorial1.py
- #
- # In case this does not work, try:
- #
- # mpirun -np 2 sh alpspython tutorial1.py
+ # mpirun -np 2 python tutorial2.py
 
 import pyalps.mpi as mpi          # MPI library
 from pyalps.hdf5 import archive       # hdf5 interface

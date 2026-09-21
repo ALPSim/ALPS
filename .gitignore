@@ -4,8 +4,17 @@
 CMakeFiles/
 CMakeCache.txt
 CMakeUserPresets.json
+/CMakeUserFiles/
 cmake_install.cmake
 compile_commands.json
+
+# Generated hybridization manual
+/tutorials/hybridization/hybdoc.aux
+/tutorials/hybridization/hybdoc.bbl
+/tutorials/hybridization/hybdoc.blg
+/tutorials/hybridization/hybdoc.log
+/tutorials/hybridization/hybdoc.out
+/tutorials/hybridization/hybdoc.pdf
 
 # Lattice files the tutorials tell the reader to generate with build_lattice.py
 tutorials/dmrg-*/my_lattice.xml
@@ -14,8 +23,10 @@ tutorials/dmrg-*/my_lattice.xml
 .idea/
 .vscode/
 .DS_Store
+semantic.cache
 
 # Python tooling
+/.venv/
 .pytest_cache/
 .ruff_cache/
 __pycache__/

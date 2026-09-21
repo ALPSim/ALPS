@@ -323,7 +323,7 @@ There is different workflows available, the one shown here is python based becau
 </ol>
 <h3>Using python with ALPS</h3>
 <p>The first task is easily achieved by running the ALPS programm <code>parameter2xml</code> or <code>paramter2hdf5</code> on a parameter file like the following.</p>
-<div class="codehilite"><pre>LATTICE_LIBRARY=&quot;/opt/alps/lib/xml/lattices.xml&quot;
+<div class="codehilite"><pre>LATTICE_LIBRARY=&quot;lattices.xml&quot;
 LATTICE=&quot;simple cubic lattice&quot;
 L=10
 THERMALIZATION=1000
@@ -339,7 +339,7 @@ SWEEPS=100000
 <div class="codehilite"><pre><span class="kn">import</span> <span class="nn">pyalps</span>
 
 <span class="n">param_tpl</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">T</span> <span class="p">:</span> <span class="p">{</span>
-    <span class="s">&quot;LATTICE_LIBRARY&quot;</span> <span class="p">:</span> <span class="s">&quot;/opt/alps/lib/xml/lattices.xml&quot;</span><span class="p">,</span>
+    <span class="s">&quot;LATTICE_LIBRARY&quot;</span> <span class="p">:</span> <span class="s">&quot;lattices.xml&quot;</span><span class="p">,</span>
     <span class="s">&quot;LATTICE&quot;</span>         <span class="p">:</span> <span class="s">&quot;simple cubic lattice&quot;</span><span class="p">,</span>
     <span class="s">&quot;L&quot;</span>               <span class="p">:</span> <span class="mi">10</span>
     <span class="s">&quot;THERMALIZATION&quot;</span>  <span class="p">:</span> <span class="mi">1000</span>
@@ -414,7 +414,7 @@ and return ready-to-plot data.</p>
 
 <h3>Results</h3>
 <p>The graphs below show the results obtained by running the simulation with the following parameters:</p>
-<div class="codehilite"><pre>LATTICE_LIBRARY=&quot;/opt/alps/lib/xml/lattices.xml&quot;
+<div class="codehilite"><pre>LATTICE_LIBRARY=&quot;lattices.xml&quot;
 LATTICE=&quot;simple cubic lattice&quot;
 L=10
 THERMALIZATION=1000

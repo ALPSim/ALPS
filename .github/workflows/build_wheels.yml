@@ -23,11 +23,11 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-      - run: python -m pip install packaging pytest "scikit-build-core>=1.0" "cmake>=3.27" ninja
+      - run: python -m pip install packaging pytest "scikit-build-core>=1.0" "cmake>=4.3" ninja
       - name: Test release validation
-        run: python -m pytest test/packaging -q
+        run: python -m pytest tests/packaging -q
       - name: Check package, SDK, and tag versions
-        run: python script/check_release_version.py
+        run: python .github/scripts/check_release_version.py
 
   build_wheels:
     name: Build wheels on ${{ matrix.plat.os }}
@@ -46,16 +46,16 @@ jobs:
         uses: actions/cache@v6
         with:
           path: _build/ccache
-          key: pyalps-ccache-${{ runner.os }}-${{ matrix.plat.arch }}-${{ hashFiles('src/**', 'bindings/python/**', 'applications/**', 'tool/maxent*') }}
+          key: pyalps-ccache-${{ runner.os }}-${{ matrix.plat.arch }}-${{ hashFiles('src/**', 'third_party/**', 'python/pyalps/**') }}
           restore-keys: pyalps-ccache-${{ runner.os }}-${{ matrix.plat.arch }}-
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v4.2.0
         with:
-          package-dir: bindings/python/pyalps
+          package-dir: python/pyalps
         env:
           # The wheel build is configured in [tool.cibuildwheel] in
-          # bindings/python/pyalps/pyproject.toml and the distribution preset in
+          # python/pyalps/pyproject.toml and the distribution preset in
           # CMakePresets.json; only matrix-derived values live here.
           CIBW_ARCHS: ${{ matrix.plat.arch }}
           MACOSX_DEPLOYMENT_TARGET: ${{ matrix.plat.target }}
@@ -74,7 +74,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Build sdist
-        run: pipx run build --sdist --outdir dist bindings/python/pyalps
+        run: pipx run build --sdist --outdir dist python/pyalps
 
       # The sdist must remain buildable outside the repository checkout:
       # verify its metadata and Python-owned sources. Solver implementations
@@ -84,9 +84,10 @@ jobs:
           pipx run twine check dist/*.tar.gz
           tar -tzf dist/*.tar.gz > sdist-manifest.txt
           for path in cpp/maxent_c.cpp cpp/cthyb.cpp cpp/ctint.cpp \
+                      cpp/params.cpp cpp/hdf5.cpp cpp/extract_from_pyobject.hpp \
                       LICENSE.txt src/pyalps/__init__.py src/pyalps/__main__.py \
-                      src/pyalps/cmake/pyalpsConfig.cmake \
-                      src/pyalps/include/pyalps/export_simulation.hpp; do
+                      _build_support/pyalpsConfig.cmake \
+                      cpp/export_simulation.hpp; do
             grep -q "$path" sdist-manifest.txt || { echo "missing $path in sdist"; exit 1; }
           done
           if grep -q '/_vendor/' sdist-manifest.txt; then
@@ -100,10 +101,10 @@ jobs:
           path: dist/*.tar.gz
 
 
-  # cibuildwheel already runs test/pyalps against every wheel inside the build
+  # cibuildwheel already runs tests/pyalps against every wheel inside the build
   # environment; this job checks the artifacts as they would reach PyPI: the
   # repaired, uploaded-and-downloaded wheel installed with pip on a clean
-  # runner, at the oldest and newest supported Python.
+  # runner, using the same abi3 wheel on every supported Python version.
   smoke_test:
     name: Smoke test wheels on ${{ matrix.plat.os }} / py${{ matrix.python }}
     needs: [build_wheels]
@@ -117,7 +118,7 @@ jobs:
           # The macOS 15 deployment target is forward-compatible; test that
           # wheel on the newest runner rather than publishing a second copy.
           - { os: macos-26, artifact_os: macos-15 }
-        python: ["3.10", "3.14"]
+        python: ["3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v7
 
@@ -139,7 +140,7 @@ jobs:
 
       - name: Import and run binding surface tests
         run: |
-          python script/validate_pyalps.py --output _build/validation --wheelhouse wheelhouse
+          python .github/scripts/validate_pyalps.py --output _build/validation --wheelhouse wheelhouse
 
       - name: Retain installed-wheel validation evidence
         if: always()
@@ -179,7 +180,7 @@ jobs:
           python -m pip install --no-index --find-links wheelhouse pyalps
 
       - name: Run two-rank compatibility surface
-        run: mpiexec -n 2 python -m pytest -q test/pyalps/test_binding_surface.py::test_mpi4py_compatibility_surface test/pyalps/test_mpi_requests.py
+        run: mpiexec -n 2 python -m pytest -q tests/pyalps/test_binding_surface.py::test_mpi4py_compatibility_surface tests/pyalps/test_mpi_requests.py
 
   upload_pypi:
     needs: [build_wheels, build_sdist, smoke_test, mpi_smoke]
@@ -202,6 +203,6 @@ jobs:
           merge-multiple: true
 
       - name: Check every distribution before publishing
-        run: python script/check_release_version.py --dist dist
+        run: python .github/scripts/check_release_version.py --dist dist
 
       - uses: pypa/gh-action-pypi-publish@release/v1

@@ -25,7 +25,7 @@
 #include <alps/config.h>
 #include <alps/random/pseudo_des.h>
 #include <alps/random/seed.h>
-#include <alps/random/mersenne_twister.hpp>
+#include <boost/random/mersenne_twister.hpp>
 
 #include <boost/integer_traits.hpp>
 #include <boost/utility.hpp>

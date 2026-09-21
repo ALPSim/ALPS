@@ -23,5 +23,17 @@ function(alps_add_test name)
       "-Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}" "-Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}"
       "-Dinput=${TEST_INPUT}" "-Doutput=${TEST_OUTPUT}" -P
       "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/run_test.cmake")
-  set_tests_properties("${name}" PROPERTIES TIMEOUT 600)
+  if(ALPS_DATA_DIR)
+    set(xml_resources "${ALPS_DATA_DIR}/xml")
+  else()
+    set(xml_resources "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../src/alps/resources")
+  endif()
+  set_tests_properties("${name}" PROPERTIES TIMEOUT 600
+    ENVIRONMENT_MODIFICATION "ALPS_XML_PATH=set:${xml_resources}")
+  if(WIN32)
+    foreach(directory IN LISTS ALPS_RUNTIME_LIBRARY_DIRS)
+      set_property(TEST "${name}" APPEND PROPERTY ENVIRONMENT_MODIFICATION
+        "PATH=path_list_prepend:${directory}")
+    endforeach()
+  endif()
 endfunction()

@@ -1,5 +1,0 @@
-LATTICE_LIBRARY = "../../lib/xml/lattices.xml"
-MODEL_LIBRARY = "../../lib/xml/models.xml"
-LATTICE = "chain lattice"
-L       = 4
-MODEL   = "spin"

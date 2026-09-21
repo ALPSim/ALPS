@@ -1,2 +1,0 @@
-#! /bin/sh
-echo "changestylesheet is deprecated. Please use use_local_stylesheet instead."

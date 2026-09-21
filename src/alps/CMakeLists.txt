@@ -1,21 +1,5 @@
 #  Copyright Matthias Troyer 2009 - 2010.
-#   Permission is hereby granted, free of charge, to any person obtaining
-#   a copy of this software and associated documentation files (the “Software”),
-#   to deal in the Software without restriction, including without limitation
-#   the rights to use, copy, modify, merge, publish, distribute, sublicense,
-#   and/or sell copies of the Software, and to permit persons to whom the
-#   Software is furnished to do so, subject to the following conditions:
-#
-#   The above copyright notice and this permission notice shall be included
-#   in all copies or substantial portions of the Software.
-#
-#   THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS
-#   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-#   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-#   DEALINGS IN THE SOFTWARE.
+#   SPDX-License-Identifier: MIT
 
 #
 # libalps
@@ -99,10 +83,10 @@ add_library(alps
   ngs/lib/mcresults.cpp
   ngs/lib/mcobservables.cpp
   ngs/lib/mcobservable.cpp
-  osiris/xdr.c
-  osiris/xdr_array.c
-  osiris/xdr_float.c
-  osiris/xdr_stdio.c
+  "${PROJECT_SOURCE_DIR}/third_party/xdr/src/xdr.c"
+  "${PROJECT_SOURCE_DIR}/third_party/xdr/src/xdr_array.c"
+  "${PROJECT_SOURCE_DIR}/third_party/xdr/src/xdr_float.c"
+  "${PROJECT_SOURCE_DIR}/third_party/xdr/src/xdr_stdio.c"
   parapack/clone.C
   parapack/clone_info.C
   parapack/filelock.C
@@ -135,9 +119,9 @@ target_compile_features(alps_headers INTERFACE cxx_std_17)
 target_compile_features(alps PRIVATE c_std_11)
 target_include_directories(
   alps_headers
-  INTERFACE $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src>
-            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
-            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/bindings>
+  INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/third_party/boost_numeric_bindings/include>
+            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/third_party/xdr/include>
             $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 target_link_libraries(alps_headers INTERFACE Boost::headers)
 set(ALPS_HEADER_DEPENDENCIES ${ALPS_HDF5_TARGETS})
@@ -155,12 +139,6 @@ target_link_libraries(alps PUBLIC alps_headers ${ALPS_HDF5_TARGETS} Threads::Thr
 foreach(component IN LISTS ALPS_BOOST_COMPONENTS)
   target_link_libraries(alps PUBLIC Boost::${component})
 endforeach()
-if(BIND_FORTRAN_LOWERCASE)
-  target_compile_definitions(alps_headers INTERFACE BIND_FORTRAN_LOWERCASE)
-endif()
-if(BIND_FORTRAN_INTEGER_8)
-  target_compile_definitions(alps_headers INTERFACE BIND_FORTRAN_INTEGER_8=1)
-endif()
 if(ALPS_ENABLE_MPI)
   target_link_libraries(alps PUBLIC MPI::MPI_CXX)
 endif()
@@ -178,24 +156,21 @@ set_target_properties(
   PROPERTIES VERSION ${PROJECT_VERSION}
              SOVERSION ${PROJECT_VERSION_MAJOR}
              INSTALL_RPATH "${ALPS_LOADER_ORIGIN}")
-install(
-  FILES "${PROJECT_BINARY_DIR}/src/alps/export.h"
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alps
-  COMPONENT headers)
+target_sources(alps_headers INTERFACE
+  FILE_SET HEADERS
+  BASE_DIRS "${PROJECT_BINARY_DIR}/src"
+  FILES "${PROJECT_BINARY_DIR}/src/alps/config.h"
+        "${PROJECT_BINARY_DIR}/src/alps/version.h"
+        "${PROJECT_BINARY_DIR}/src/alps/export.h")
 
-if(ALPS_BUILD_FORTRAN)
-  add_library(alps_fortran STATIC fortran/fwrapper_impl.C)
-  add_library(ALPS::fortran ALIAS alps_fortran)
-  set_target_properties(alps_fortran PROPERTIES EXPORT_NAME fortran)
-  target_link_libraries(alps_fortran PUBLIC alps)
-  # The legacy F77 entry points deliberately accept several argument types.
-  # Keep their required compiler compatibility setting on the Fortran bridge.
-  target_compile_options(alps_fortran INTERFACE
-    "$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-fallow-argument-mismatch>")
-endif()
-#######################################################################
-# install
-#######################################################################
+# This is a C++ bridge; only its consumers need a Fortran compiler.
+add_library(alps_fortran STATIC fortran/fwrapper_impl.C)
+add_library(ALPS::fortran ALIAS alps_fortran)
+set_target_properties(alps_fortran PROPERTIES EXPORT_NAME fortran)
+target_link_libraries(alps_fortran PUBLIC alps)
+# The F77 entry points accept several argument types.
+target_compile_options(alps_fortran INTERFACE
+  "$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-fallow-argument-mismatch>")
 install(
   TARGETS alps
   EXPORT ALPSTargets
@@ -205,16 +180,36 @@ install(
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(
-  TARGETS alps_headers
+  TARGETS alps_headers alps_fortran
   EXPORT ALPSTargets
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries
+  FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers)
+
+install(
+  DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps"
+            "${PROJECT_SOURCE_DIR}/src/ietl"
+            "${PROJECT_SOURCE_DIR}/third_party/boost_numeric_bindings/include/boost"
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  COMPONENT headers
+  FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
+  PATTERN "resources" EXCLUDE)
+
+install(
+  DIRECTORY "${PROJECT_SOURCE_DIR}/third_party/xdr/include/"
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  COMPONENT headers)
+install(
+  FILES "${PROJECT_SOURCE_DIR}/third_party/xdr/LICENSE"
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/alps/licenses/xdr
+  COMPONENT libraries)
+
+install(
+  FILES "${PROJECT_SOURCE_DIR}/third_party/boost_numeric_bindings/LICENSE_1_0.txt"
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/alps/licenses/boost_numeric_bindings
   COMPONENT headers)
 
-if(ALPS_BUILD_FORTRAN)
-  install(
-    TARGETS alps_fortran
-    EXPORT ALPSTargets
-    COMPONENT libraries
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-endif(ALPS_BUILD_FORTRAN)
+install(
+  DIRECTORY resources/
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/alps/xml
+  COMPONENT xml
+  FILES_MATCHING PATTERN "*.xml" PATTERN "*.xsl")

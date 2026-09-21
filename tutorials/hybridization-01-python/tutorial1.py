@@ -21,7 +21,7 @@
  # exact result obtained by exact diagonalization (see subdirectory ED).
  #
  # Run this script as:
- # alpspython tutorial1.py
+ # python tutorial1.py
  #
 
 import pyalps.cthyb as cthyb # the solver module

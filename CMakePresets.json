@@ -1,70 +1,54 @@
 {
-  "version": 3,
+  "version": 10,
   "cmakeMinimumRequired": {
-    "major": 3,
-    "minor": 27,
+    "major": 4,
+    "minor": 3,
     "patch": 0
   },
   "configurePresets": [
     {
       "name": "default",
       "displayName": "Default release build",
-      "binaryDir": "${sourceDir}/_build/default",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/${presetName}/install"
+      },
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build/${presetName}"
     },
     {
       "name": "sdk",
       "displayName": "Library and installed C++ SDK",
       "inherits": "default",
-      "binaryDir": "${sourceDir}/_build/sdk",
       "cacheVariables": {
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/sdk/install",
         "BUILD_TESTING": "OFF",
-        "ALPS_BUILD_APPLICATIONS": "OFF",
-        "ALPS_ENABLE_MPI": "OFF"
+        "ALPS_BUILD_APPLICATIONS": "OFF"
       }
     },
     {
       "name": "distribution",
       "displayName": "Redistributable SDK and applications",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/_build/distribution",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/distribution/install",
-        "ALPS_BUILD_EXAMPLES": "OFF",
         "ALPS_BUILD_APPLICATIONS": "ON",
-        "ALPS_ENABLE_MPI": "OFF",
         "BUILD_TESTING": "OFF"
-      }
+      },
+      "inherits": "default"
     },
     {
       "name": "windows-x64",
       "displayName": "Windows x64 SDK and applications (MSVC/vcpkg)",
       "generator": "Visual Studio 17 2022",
       "architecture": "x64",
-      "binaryDir": "${sourceDir}/_build/windows-x64",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "VCPKG_TARGET_TRIPLET": "x64-windows",
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/windows-x64/install",
-        "ALPS_ENABLE_MPI": "OFF",
-        "ALPS_BUILD_EXAMPLES": "OFF",
-        "BUILD_SHARED_LIBS": "ON",
-        "BUILD_TESTING": "ON"
-      }
-    },
-    {
-      "name": "windows-x64-on-arm64",
-      "displayName": "Windows x64 on an ARM64 host",
-      "inherits": "windows-x64",
-      "binaryDir": "${sourceDir}/_build/windows-x64-on-arm64",
-      "cacheVariables": {
-        "VCPKG_OVERLAY_PORTS": "${sourceDir}/cmake/vcpkg-overlay",
-        "VCPKG_HOST_TRIPLET": "arm64-windows",
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/windows-x64-on-arm64/install"
+        "CMAKE_BUILD_TYPE": null
+      },
+      "inherits": "default",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
       }
     },
     {
@@ -72,11 +56,9 @@
       "displayName": "Native Windows ARM64 SDK and applications (MSVC/vcpkg)",
       "inherits": "windows-x64",
       "architecture": "ARM64",
-      "binaryDir": "${sourceDir}/_build/windows-arm64",
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "arm64-windows",
-        "VCPKG_OVERLAY_PORTS": "${sourceDir}/cmake/vcpkg-arm64-overlay",
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/windows-arm64/install"
+        "VCPKG_OVERLAY_PORTS": "${sourceDir}/cmake/vcpkg-arm64-overlay"
       }
     }
   ],
@@ -102,29 +84,9 @@
       "configuration": "Release"
     },
     {
-      "name": "windows-x64-debug",
-      "configurePreset": "windows-x64",
-      "configuration": "Debug"
-    },
-    {
-      "name": "windows-x64-on-arm64",
-      "configurePreset": "windows-x64-on-arm64",
-      "configuration": "Release"
-    },
-    {
-      "name": "windows-x64-on-arm64-debug",
-      "configurePreset": "windows-x64-on-arm64",
-      "configuration": "Debug"
-    },
-    {
       "name": "windows-arm64",
       "configurePreset": "windows-arm64",
       "configuration": "Release"
-    },
-    {
-      "name": "windows-arm64-debug",
-      "configurePreset": "windows-arm64",
-      "configuration": "Debug"
     }
   ],
   "testPresets": [
@@ -133,6 +95,9 @@
       "configurePreset": "default",
       "output": {
         "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
       }
     },
     {
@@ -142,31 +107,10 @@
       "inherits": "default"
     },
     {
-      "name": "windows-x64-debug",
-      "configuration": "Debug",
-      "inherits": "windows-x64"
-    },
-    {
-      "name": "windows-x64-on-arm64",
-      "configurePreset": "windows-x64-on-arm64",
-      "configuration": "Release",
-      "inherits": "default"
-    },
-    {
-      "name": "windows-x64-on-arm64-debug",
-      "configuration": "Debug",
-      "inherits": "windows-x64-on-arm64"
-    },
-    {
       "name": "windows-arm64",
       "configurePreset": "windows-arm64",
       "configuration": "Release",
       "inherits": "default"
-    },
-    {
-      "name": "windows-arm64-debug",
-      "configuration": "Debug",
-      "inherits": "windows-arm64"
     }
   ]
 }

@@ -18,7 +18,8 @@
 #include <alps/osiris.h>
 #include <boost/config.hpp>
 #include <boost/call_traits.hpp>
-#include <boost/classic_spirit.hpp>
+#include <boost/spirit/include/classic_actor.hpp>
+#include <boost/spirit/include/classic_core.hpp>
 #include <boost/throw_exception.hpp>
 #include <iosfwd>
 #include <limits>
@@ -123,7 +124,7 @@ public:
 
 protected:
   void init(std::string const& str, Parameters const& p) {
-    using namespace boost::spirit;
+    using namespace boost::spirit::classic;
     std::string mi_str, ma_str;
     if (!parse(
       str.c_str(),

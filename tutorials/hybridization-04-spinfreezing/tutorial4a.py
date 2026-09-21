@@ -36,15 +36,11 @@
  # converged results. It is recommended to run it in parallel on a cluster.
  #
  # Run this script as:
- # alpspython tutoria4a.py
+ # python tutorial4a.py
  #
  # This python script is MPI aware and can hence be called using mpirun:
  #
- # mpirun -np 32 alpspython tutoria4a.py
- #
- # In case this does not work, try:
- #
- # mpirun -np 32 sh alpspython tutorial4a.py
+ # mpirun -np 32 python tutorial4a.py
 
 import pyalps.mpi as mpi      # MPI library
 from pyalps.hdf5 import archive   # hdf5 interface

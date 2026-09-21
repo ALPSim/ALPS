@@ -1,21 +1,9 @@
 #  Copyright Matthias Troyer and Synge Todo 2009 - 2015.
-#   Permission is hereby granted, free of charge, to any person obtaining
-#   a copy of this software and associated documentation files (the “Software”),
-#   to deal in the Software without restriction, including without limitation
-#   the rights to use, copy, modify, merge, publish, distribute, sublicense,
-#   and/or sell copies of the Software, and to permit persons to whom the
-#   Software is furnished to do so, subject to the following conditions:
-#
-#   The above copyright notice and this permission notice shall be included
-#   in all copies or substantial portions of the Software.
-#
-#   THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS
-#   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-#   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-#   DEALINGS IN THE SOFTWARE.
+#   SPDX-License-Identifier: MIT
+
+if(ALPS_BUILD_EXAMPLES)
+  add_subdirectory(examples)
+endif()
 
 install(
   DIRECTORY .
@@ -23,13 +11,19 @@ install(
   COMPONENT tutorials
   EXCLUDE_FROM_ALL
   FILES_MATCHING
+  PATTERN "*.md"
+  PATTERN "*.jpg"
+  PATTERN "*.tex"
+  PATTERN "*.bib"
   PATTERN "*.py"
   PATTERN "*.ipynb"
   PATTERN "*.sh"
   PATTERN "parm*"
+  PATTERN "params*"
   PATTERN "*params"
   PATTERN "*.ip"
   PATTERN "*.op"
+  PATTERN "*.op-*"
   PATTERN "*.dat"
   PATTERN "*.parm"
   PATTERN "*.xml"
@@ -52,3 +46,14 @@ install(
   PATTERN "*.run*" EXCLUDE
   PATTERN "*clone*" EXCLUDE
   PATTERN "dump.xml" EXCLUDE)
+
+# The examples share the golden-output runner with the repository tests.
+install(
+  FILES ../cmake/ALPSTesting.cmake ../cmake/run_test.cmake
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/alps/cmake
+  COMPONENT tutorials EXCLUDE_FROM_ALL)
+# This is a fixed example input, unlike generated tutorial result archives.
+install(
+  FILES examples/alea/testfile.h5
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/alps/tutorials/examples/alea
+  COMPONENT tutorials EXCLUDE_FROM_ALL)

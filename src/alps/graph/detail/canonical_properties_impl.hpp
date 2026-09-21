@@ -937,7 +937,7 @@ namespace alps {
 // is not fixed by a found automorphism.
 //
 // A good (first) test are the graphs of colored_edges_with_color_symmetry_test7() in
-// test/graph/canonical_label_with_color_symmetries_test.cpp (r7646).
+// tests/graph/canonical_label_with_color_symmetries_test.cpp (r7646).
 // For a good implementation both graphs should find all possible graph labels.
 // Currently the first realization of the graph skips two possible labels.
 //

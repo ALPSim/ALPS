@@ -22,12 +22,6 @@
 #include <iostream>
 #include <signal.h>
 #include <stdexcept>
-#ifdef ALPS_HAVE_UNISTD_H
-# include <unistd.h>
-#endif
-#ifdef ALPS_HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
 
 namespace alps {
 namespace scheduler {
