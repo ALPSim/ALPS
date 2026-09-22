@@ -8,8 +8,30 @@ import parameter_probe as native
 from pyalps import hdf5, ngs
 
 empty = native.empty_vectors()
-for key, kind in {"integer": "i", "real": "f", "complex": "c", "boolean": "b", "text": "U"}.items():
+for key, kind in {"integer": "i", "real": "f", "complex": "c", "boolean": "b"}.items():
     assert empty[key].size == 0 and empty[key].dtype.kind == kind
+assert isinstance(empty["text"], list) and empty["text"] == []
+
+# Native string vectors must allow names to grow. A NumPy array inferred
+# from "Sz" has dtype U2 and silently changes "Magnetization" to "Ma".
+parameters = native.string_parameters()
+names = parameters["value"]
+assert native.string_vector(parameters) == ["Sz"]
+names[0] = "Magnetization"
+assert names[0] == "Magnetization"
+assert native.string_vector(parameters) == ["Magnetization"]
+assert isinstance(names, list)
+names.append("Susceptibility")
+assert parameters["value"] is names
+assert native.string_vector(parameters) == ["Magnetization", "Susceptibility"]
+
+# Explicit Python arrays keep their caller-selected representation.
+names = np.array(["Sz"], dtype="U16")
+parameters = ngs.params({"value": names})
+assert parameters["value"] is names
+names[0] = "Magnetization"
+assert parameters["value"].dtype == np.dtype("U16")
+assert native.string_vector(parameters) == ["Magnetization"]
 
 values = np.array([1.0, 2.0])
 parameters = ngs.params({"value": values})

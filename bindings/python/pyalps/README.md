@@ -76,6 +76,17 @@ metadata and out-of-range conversions raise an exception. Python metadata may
 use other shapes and containers supported by the HDF5 writer. Objects such as
 `None` can be held in memory but have no ALPS HDF5 representation.
 
+Native C++ numeric and Boolean vectors become NumPy arrays when accessed from
+Python. Native string vectors become lists so names can be replaced with longer
+strings or appended without NumPy's fixed-width string truncation. These
+materialized objects retain mutations for subsequent Python and C++ reads.
+Explicitly supplied Python lists and NumPy arrays keep their original types.
+
+Integer conversion from text is range checked in the C++ SDK, including when
+parameters originate outside Python. Negative text converted to an unsigned
+integer now raises an exception instead of wrapping; replace negative textual
+sentinels with an explicit value in the target type's range.
+
 The C++ SDK remains independent of Python and nanobind. Python-owned values and
 their checkpoint decoder are supplied by the bindings. Rebuild downstream C++
 extensions against the SDK from the same source revision as the wheel; the
@@ -100,6 +111,11 @@ receives and the wait/test helpers can handle messages larger than mpi4py's
 default object receive buffer. This adapter exchanges mpi4py messages;
 Boost.MPI's C++ serialization protocol and skeleton/content API are not wire
 compatible. Communicating processes must use the same protocol.
+
+Communicator wrappers compare equal when their underlying mpi4py communicators
+compare equal. They are intentionally unhashable, matching mpi4py. Unlike the
+old Boost.MPI wrappers, they cannot be used as dictionary keys or set members;
+applications needing such associations should use explicit application keys.
 
 ## Versioning
 

@@ -14,6 +14,12 @@ NB_MODULE(parameter_probe, module) {
     module.def("complex_vector", [](alps::params const & p) { return p["value"].cast<std::vector<std::complex<double>>>(); });
     module.def("integer_vector", [](alps::params const & p) { return p["value"].cast<std::vector<long long>>(); });
     module.def("text", [](alps::params const & p) { return p["value"].cast<std::string>(); });
+    module.def("string_vector", [](alps::params const & p) { return p["value"].cast<std::vector<std::string>>(); });
+    module.def("string_parameters", [] {
+        alps::params p;
+        p["value"] = std::vector<std::string>{"Sz"};
+        return p;
+    });
     module.def("native_text", [] {
         alps::params p;
         p["value"] = std::vector<std::string>{"", "middle", ""};

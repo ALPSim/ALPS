@@ -9,6 +9,19 @@ pytest.importorskip("mpi4py")
 from pyalps import mpi
 
 
+def test_communicator_equality_and_hashability():
+    from mpi4py import MPI
+
+    wrappers = (mpi.world, mpi.Communicator(), mpi.Communicator(mpi.world))
+    for comm in wrappers:
+        assert comm == mpi.world
+        assert not (comm != mpi.world)
+        assert comm != mpi.Communicator(MPI.COMM_NULL)
+        assert comm != object()
+        with pytest.raises(TypeError):
+            hash(comm)
+
+
 def poll(function):
     deadline = time.monotonic() + 15
     while time.monotonic() < deadline:

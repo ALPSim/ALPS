@@ -170,7 +170,11 @@ class RequestList(list):
 
 
 class Communicator:
-    """Boost.MPI-compatible wrapper around an ``mpi4py.MPI.Comm``."""
+    """Wrapper around an ``mpi4py.MPI.Comm`` with Boost.MPI operation names.
+
+    Wrappers compare by their underlying communicator and are intentionally
+    unhashable, matching mpi4py rather than Boost.MPI's identity semantics.
+    """
 
     def __init__(self, comm: Any = None):
         if isinstance(comm, Communicator):

@@ -31,11 +31,12 @@ struct paramvalue_to_py_visitor : boost::static_visitor<nb::object> {
     }
     template <typename T>
     nb::object operator()(std::vector<T> const & value) const {
-        // An empty sequence has no elements from which NumPy can infer its
-        // type. Preserve the native family (especially Boolean masks).
+        // String parameters need variable-length elements: NumPy's inferred
+        // fixed-width Unicode dtype silently truncates longer replacements.
         if constexpr (std::is_same<T, std::string>::value)
-            return alps::python::numpy_module().attr("array")(
-                nb::cast(value), nb::arg("dtype") = "str");
+            return nb::cast(value);
+        // An empty numeric sequence has no elements from which NumPy can
+        // infer its type. Preserve the native family, including Boolean masks.
         else
             return alps::python::numpy_module().attr("array")(
                 nb::cast(value), nb::arg("dtype") = alps::python::numpy_dtype<T>::name);
