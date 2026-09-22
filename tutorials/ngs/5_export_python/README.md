@@ -2,9 +2,12 @@
 
 This example replaces the former Boost.Python export tutorial while retaining
 the public `ALPS_EXPORT_SIM_TO_PYTHON` helper. Build it against an installed
-ALPS SDK and the Python environment containing pyalps and nanobind:
+ALPS SDK and the Python environment containing pyalps and nanobind. The
+nanobind release must match the one that built pyalps; `alps_target_link_pyalps`
+stops at configure time if it does not:
 
 ```sh
+python -m pip install "nanobind==$(python -c 'import pyalps.pyalps_config as c; print(c.NANOBIND_VERSION)')"
 cmake -S . -B build -GNinja \
   -DALPS_DIR=/path/to/alps/share/alps \
   -DPython_EXECUTABLE="$(command -v python)"

@@ -208,6 +208,14 @@ if(PYALPS_BUNDLE_APPLICATIONS)
 else()
   set(PYALPS_ALPS_BIN_FALLBACK "${ALPS_ROOT_DIR}/bin")
 endif()
+# Record the nanobind ABI so alps_target_link_pyalps can reject downstream
+# modules that would not share pyalps types.
+include("${ALPS_PYTHON_USE_FILE}")
+set(PYALPS_NANOBIND_INTERNALS_VERSION "")
+if(COMMAND alps_nanobind_internals_version)  # absent from older SDKs
+  alps_nanobind_internals_version(PYALPS_NANOBIND_INTERNALS_VERSION)
+endif()
+set(PYALPS_NANOBIND_VERSION "${nanobind_VERSION}")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/pyalps/pyalps_config.py.in"
   "${CMAKE_CURRENT_BINARY_DIR}/pyalps_config.py" @ONLY)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pyalps_config.py" DESTINATION pyalps)

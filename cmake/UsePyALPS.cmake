@@ -15,6 +15,19 @@
 
 include_guard(GLOBAL)
 
+# nanobind shares types between extension modules only within one internals
+# ABI (NB_INTERNALS_VERSION), which changes within 2.x minor releases. Read it
+# from the nanobind found by find_package(nanobind); empty if unavailable.
+function(alps_nanobind_internals_version out_var)
+  set(_version "")
+  if(NB_DIR AND EXISTS "${NB_DIR}/src/nb_abi.h")
+    file(STRINGS "${NB_DIR}/src/nb_abi.h" _line
+      REGEX "^#[ \t]*define[ \t]+NB_INTERNALS_VERSION[ \t]+[0-9]+")
+    string(REGEX MATCH "[0-9]+$" _version "${_line}")
+  endif()
+  set(${out_var} "${_version}" PARENT_SCOPE)
+endfunction()
+
 function(alps_target_link_pyalps target)
   if(NOT TARGET "${target}")
     message(FATAL_ERROR
@@ -53,6 +66,32 @@ function(alps_target_link_pyalps target)
     ERROR_QUIET)
 
   if(_pyalps_location_result EQUAL 0 AND _pyalps_package_dir)
+    # A module built on a different nanobind internals ABI cannot see pyalps
+    # types, and nanobind aborts the interpreter when it is imported. Fail
+    # here instead. Older packages that do not record their ABI are skipped.
+    alps_nanobind_internals_version(_consumer_nb_abi)
+    set(_pyalps_config "${_pyalps_package_dir}/pyalps_config.py")
+    if(_consumer_nb_abi AND EXISTS "${_pyalps_config}")
+      file(STRINGS "${_pyalps_config}" _pyalps_nb_lines
+        REGEX "^NANOBIND_(VERSION|INTERNALS_VERSION)=")
+      string(REGEX MATCH "NANOBIND_INTERNALS_VERSION=\"([0-9]+)\""
+        _match "${_pyalps_nb_lines}")
+      set(_pyalps_nb_abi "${CMAKE_MATCH_1}")
+      string(REGEX MATCH "NANOBIND_VERSION=\"([^\"]*)\""
+        _match "${_pyalps_nb_lines}")
+      set(_pyalps_nb_version "${CMAKE_MATCH_1}")
+      if(_pyalps_nb_abi AND NOT _pyalps_nb_abi STREQUAL _consumer_nb_abi)
+        message(FATAL_ERROR
+          "${target}: nanobind ${nanobind_VERSION} (internals ABI "
+          "v${_consumer_nb_abi}) does not match the nanobind ${_pyalps_nb_version} "
+          "(ABI v${_pyalps_nb_abi}) that built pyalps at ${_pyalps_package_dir}. "
+          "The module could not use pyalps types and would abort Python on "
+          "import. Install the matching release, e.g. "
+          "'${PYALPS_PYTHON_EXECUTABLE} -m pip install nanobind==${_pyalps_nb_version}', "
+          "and reconfigure with a fresh build directory.")
+      endif()
+    endif()
+
     # A repair-tool directory is what marks this install as a relocated wheel:
     # auditwheel writes <site-packages>/pyalps.libs, delocate writes
     # pyalps/.dylibs.

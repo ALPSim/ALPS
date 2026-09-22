@@ -11,3 +11,8 @@
 # that make two builds of identical source differ.
 ALPS_XML_INSTALL_DIR="@PYALPS_ALPS_XML_FALLBACK@"
 ALPS_BIN_INSTALL_DIR="@PYALPS_ALPS_BIN_FALLBACK@"
+
+# nanobind that built these extensions. Downstream modules deriving from pyalps
+# types must use the same internals ABI; cmake/UsePyALPS.cmake checks it.
+NANOBIND_VERSION="@PYALPS_NANOBIND_VERSION@"
+NANOBIND_INTERNALS_VERSION="@PYALPS_NANOBIND_INTERNALS_VERSION@"

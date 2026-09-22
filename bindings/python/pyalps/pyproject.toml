@@ -1,8 +1,10 @@
 [build-system]
-# nanobind is capped below the next major: all extension modules in one
-# process must agree on the nanobind ABI, and its API/ABI may break at
-# major versions. Bump the cap deliberately, with a full test run.
-requires = ["scikit-build-core>=1.0", "nanobind>=2.10,<3"]
+# nanobind is pinned exactly: downstream modules that derive from pyalps
+# types must share its internals ABI, which changes within 2.x minor
+# releases (2.10 -> v17, 2.15 -> v21). An unpinned build would let every
+# wheel pick up whatever is newest. Bump deliberately, with a full test run,
+# and keep the test-requires pin below in step.
+requires = ["scikit-build-core>=1.0", "nanobind==2.15.0"]
 build-backend = "scikit_build_core.build"
 
 [project]
@@ -125,7 +127,7 @@ repair-wheel-command = [
 select = "cp314-*"
 inherit.environment = "append"
 environment = { PYALPS_TEST_DOWNSTREAM_EXPORT = "1" }
-test-requires = ["pytest", "nanobind>=2.10,<3"]
+test-requires = ["pytest", "nanobind==2.15.0"]
 
 [[tool.cibuildwheel.overrides]]
 select = "*-macosx_*"

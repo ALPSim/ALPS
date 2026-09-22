@@ -92,6 +92,16 @@ their checkpoint decoder are supplied by the bindings. Rebuild downstream C++
 extensions against the SDK from the same source revision as the wheel; the
 parameter layout changed during this migration.
 
+Downstream nanobind modules must also use the same nanobind internals ABI as
+the installed wheel; otherwise nanobind cannot see pyalps types and aborts the
+interpreter at import (`base type "alps::mcbase" not known to nanobind`). The
+wheel is built with the nanobind version pinned in `pyproject.toml` and records
+its ABI in `pyalps.pyalps_config`; `alps_target_link_pyalps` rejects a
+mismatched nanobind at CMake configure time. Install the matching release, for
+example `python -m pip install "nanobind==$(python -c 'import
+pyalps.pyalps_config as c; print(c.NANOBIND_VERSION)')"`. The compiler's C++
+standard library must also match (libc++ on macOS, libstdc++ on Linux).
+
 New HDF5 writes distinguish Boolean and signed-byte values with an
 `__alps_type__` attribute while retaining the existing numeric storage format.
 Unmarked signed-byte data from old ALPS files retains the legacy Boolean
