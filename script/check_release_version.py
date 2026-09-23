@@ -2,6 +2,7 @@
 
 import argparse
 from email.parser import BytesParser
+import importlib.util
 import os
 from pathlib import Path
 import re
@@ -26,9 +27,17 @@ def check_version(root: Path, ref: str) -> Version:
     if not re.fullmatch(CORE_PATTERN, core):
         raise ValueError("ALPS_VERSION.txt must contain MAJOR.MINOR.PATCH")
 
-    with (root / "pyproject.toml").open("rb") as stream:
+    project_dir = root / "bindings/python/pyalps"
+    with (project_dir / "pyproject.toml").open("rb") as stream:
         project = tomllib.load(stream)["project"]
-    version = Version(project["version"])
+    if "version" in project.get("dynamic", []):
+        provider_path = Path(__file__).resolve().parents[1] / "bindings/python/pyalps/_build_support/alps_version.py"
+        spec = importlib.util.spec_from_file_location("alps_version", provider_path)
+        provider = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(provider)
+        version = Version(provider.version(project_dir, ref=ref))
+    else:
+        version = Version(project["version"])
     if version.release != Version(core).release:
         raise ValueError(
             f"pyproject.toml version {version} disagrees with ALPS_VERSION.txt ({core})"
@@ -102,7 +111,7 @@ def main() -> None:
         print(f"Release version: {version}")
         if args.dist is not None:
             check_distributions(args.dist, version)
-    except (OSError, ValueError, KeyError, tarfile.TarError, zipfile.BadZipFile) as error:
+    except (OSError, ValueError, RuntimeError, KeyError, tarfile.TarError, zipfile.BadZipFile) as error:
         parser.exit(1, f"Release version check failed: {error}\n")
 
 

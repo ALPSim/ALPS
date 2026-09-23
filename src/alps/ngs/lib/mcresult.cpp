@@ -27,8 +27,16 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <memory>
+#include <utility>
 
 namespace alps {
+
+    detail::mcresult_impl_base * mcresult::implementation() const {
+        if (!impl_)
+            throw std::runtime_error("Result has no measurements" + ALPS_STACKTRACE);
+        return impl_;
+    }
 
     mcresult::mcresult()
         : impl_(NULL) 
@@ -65,7 +73,8 @@ namespace alps {
 // #endif
 
     mcresult::mcresult(mcresult const & rhs) {
-        ++ref_cnt_[impl_ = rhs.impl_];
+        impl_ = rhs.impl_;
+        if (impl_) ++ref_cnt_[impl_];
     }
 
     mcresult::mcresult(mcobservable const & obs) {
@@ -73,41 +82,41 @@ namespace alps {
     }
 
     mcresult::~mcresult() {
-        if (impl_ && !--ref_cnt_[impl_])
+        if (impl_ && !--ref_cnt_[impl_]) {
+            ref_cnt_.erase(impl_);
             delete impl_;
+        }
     }
 
     mcresult & mcresult::operator=(mcresult rhs) {
-        if (impl_ && !--ref_cnt_[impl_])
-            delete impl_;
-        ++ref_cnt_[impl_ = rhs.impl_];
+        std::swap(impl_, rhs.impl_);
         return *this;
     }
     
     #define ALPS_MCRESULT_TPL_IMPL(T)                                                                                               \
-        template<> ALPS_DECL bool mcresult::is_type< T >() const { return impl_->is_type< T >(); }                                  \
-        template<> ALPS_DECL std::vector< T > const & mcresult::bins< T >() const { return impl_->bins< T >(); }                    \
-        template<> ALPS_DECL T const & mcresult::mean< T >() const { return impl_->mean< T >(); }                                   \
-        template<> ALPS_DECL T const & mcresult::error< T >() const { return impl_->error< T >(); }                                 \
-        template<> ALPS_DECL T const & mcresult::variance< T >() const { return impl_->variance< T >(); }                           \
-        template<> ALPS_DECL T const & mcresult::tau< T >() const { return impl_->tau< T >(); }                                     \
+        template<> ALPS_DECL bool mcresult::is_type< T >() const { return impl_ && implementation()->is_type< T >(); }                         \
+        template<> ALPS_DECL std::vector< T > const & mcresult::bins< T >() const { return implementation()->bins< T >(); }                    \
+        template<> ALPS_DECL T const & mcresult::mean< T >() const { return implementation()->mean< T >(); }                                   \
+        template<> ALPS_DECL T const & mcresult::error< T >() const { return implementation()->error< T >(); }                                 \
+        template<> ALPS_DECL T const & mcresult::variance< T >() const { return implementation()->variance< T >(); }                           \
+        template<> ALPS_DECL T const & mcresult::tau< T >() const { return implementation()->tau< T >(); }                                     \
         template<> ALPS_DECL covariance_type<T>::type mcresult::covariance< T >(mcresult const & arg) const {                       \
-            return impl_->covariance< T >(*arg.impl_);                                                                              \
+            return implementation()->covariance< T >(*arg.implementation());                                                                              \
         }                                                        \
         template<> ALPS_DECL covariance_type<T>::type mcresult::accurate_covariance< T >(mcresult const & arg) const {                       \
-            return impl_->accurate_covariance< T >(*arg.impl_);                                                                           \
+            return implementation()->accurate_covariance< T >(*arg.implementation());                                                                           \
         }                                                        \
-        template<> ALPS_DECL mcresult & mcresult::operator+=< T >( T const & rhs) { impl_->add_assign(rhs); return *this; }         \
-        template<> ALPS_DECL mcresult & mcresult::operator-=< T >( T const & rhs) { impl_->sub_assign(rhs); return *this; }         \
-        template<> ALPS_DECL mcresult & mcresult::operator*=< T >( T const & rhs) { impl_->mul_assign(rhs); return *this; }         \
-        template<> ALPS_DECL mcresult & mcresult::operator/=< T >( T const & rhs) { impl_->div_assign(rhs); return *this; }
+        template<> ALPS_DECL mcresult & mcresult::operator+=< T >( T const & rhs) { implementation()->add_assign(rhs); return *this; }         \
+        template<> ALPS_DECL mcresult & mcresult::operator-=< T >( T const & rhs) { implementation()->sub_assign(rhs); return *this; }         \
+        template<> ALPS_DECL mcresult & mcresult::operator*=< T >( T const & rhs) { implementation()->mul_assign(rhs); return *this; }         \
+        template<> ALPS_DECL mcresult & mcresult::operator/=< T >( T const & rhs) { implementation()->div_assign(rhs); return *this; }
     ALPS_MCRESULT_TPL_IMPL(double)
     ALPS_MCRESULT_TPL_IMPL(std::vector<double>)
     #undef ALPS_MCRESULT_TPL_IMPL
 
     #define ALPS_NGS_MCRESULT_OPERATOR_IMPL(OP, NAME)         \
         mcresult & mcresult:: OP (mcresult const & rhs) {     \
-            impl_-> NAME ## _assign (rhs.impl_);              \
+            implementation()-> NAME ## _assign (rhs.implementation());              \
             return *this;                                     \
         }
     ALPS_NGS_MCRESULT_OPERATOR_IMPL(operator+=, add)
@@ -117,61 +126,77 @@ namespace alps {
     #undef ALPS_NGS_MCRESULT_OPERATOR_IMPL
 
     bool mcresult::can_rebin() const {
-        return impl_->can_rebin();
+        return implementation()->can_rebin();
     }
 
     bool mcresult::jackknife_valid() const {
-        return impl_->jackknife_valid();
+        return implementation()->jackknife_valid();
     }
 
     uint64_t mcresult::count() const {
-        return impl_->count();
+        return impl_ ? implementation()->count() : 0;
     }
 
     uint64_t mcresult::bin_size() const {
-        return impl_->bin_size();
+        return implementation()->bin_size();
     }
 
     uint64_t mcresult::max_bin_number() const {
-        return impl_->max_bin_number();
+        return implementation()->max_bin_number();
     }
 
     std::size_t mcresult::bin_number() const {
-        return impl_->bin_number();
+        return implementation()->bin_number();
     }
 
     bool mcresult::has_variance() const {
-        return impl_->has_variance();
+        return implementation()->has_variance();
     }
 
     bool mcresult::has_tau() const {
-        return impl_->has_tau();
+        return implementation()->has_tau();
     }
 
     void mcresult::set_bin_size(uint64_t binsize) {
-        impl_->set_bin_size(binsize);
+        implementation()->set_bin_size(binsize);
     }
 
     void mcresult::set_bin_number(uint64_t bin_number) {
-        impl_->set_bin_number(bin_number);
+        implementation()->set_bin_number(bin_number);
     }
 
     void mcresult::save(hdf5::archive & ar) const {
-        impl_->save(ar);
+        if (!impl_)
+            throw std::runtime_error("Cannot save an uninitialized result" + ALPS_STACKTRACE);
+        implementation()->save(ar);
     }
 
     void mcresult::load(hdf5::archive & ar) {
-        impl_->save(ar);
+        // Read into an independent payload before touching this result. This
+        // also discovers the type of a default-constructed result and keeps
+        // aliases and the old value intact if any archive read fails.
+        std::unique_ptr<detail::mcresult_impl_base> payload;
+        if (ar.is_scalar("mean/value"))
+            payload.reset(new detail::mcresult_impl_derived<detail::mcresult_impl_base, double>(alea::mcdata<double>()));
+        else if (ar.dimensions("mean/value") == 1)
+            payload.reset(new detail::mcresult_impl_derived<detail::mcresult_impl_base, std::vector<double> >(alea::mcdata<std::vector<double> >()));
+        else
+            throw std::runtime_error("Unsupported result shape" + ALPS_STACKTRACE);
+        payload->load(ar);
+        mcresult replacement;
+        ref_cnt_[payload.get()] = 1;
+        replacement.impl_ = payload.release();
+        std::swap(impl_, replacement.impl_);
     }
 
     void mcresult::output(std::ostream & os) const {
-        impl_->output(os);
+        implementation()->output(os);
     }
 
     #ifdef ALPS_HAVE_MPI
         mcresult mcresult::reduce(boost::mpi::communicator const & communicator, std::size_t binnumber) {
             mcresult lhs;
-            detail::mcresult_impl_base * impl = impl_->reduce(communicator, binnumber);
+            detail::mcresult_impl_base * impl = implementation()->reduce(communicator, binnumber);
             if (communicator.rank() == 0)
                 ref_cnt_[lhs.impl_ = impl] = 1;
             return lhs;
@@ -179,18 +204,17 @@ namespace alps {
     #endif
 
     bool mcresult::operator== (mcresult const & rhs) const {
-        return impl_->operator== (rhs.impl_);
+        return implementation()->operator== (rhs.implementation());
     }
     bool mcresult::operator!= (mcresult const & rhs) const {
-        return impl_->operator!= (rhs.impl_);
+        return implementation()->operator!= (rhs.implementation());
     }
 
     mcresult & mcresult::operator+() {
-        impl_->operator-();
         return *this;
     }
     mcresult & mcresult::operator-() {
-        impl_->operator-();
+        implementation()->operator-();
         return *this;
     }
 
@@ -219,7 +243,7 @@ namespace alps {
     #define ALPS_NGS_MCRESULT_FREE_UNITARY_FUN(FUN_NAME)                 \
         mcresult FUN_NAME (mcresult rhs) {                               \
             mcresult lhs;                                                \
-            lhs.ref_cnt_[lhs.impl_ = rhs.impl_-> FUN_NAME ()] = 1;       \
+            lhs.ref_cnt_[lhs.impl_ = rhs.implementation()-> FUN_NAME ()] = 1;       \
             return lhs;                                                  \
         }
     ALPS_NGS_MCRESULT_FREE_UNITARY_FUN(sin)
@@ -246,19 +270,19 @@ namespace alps {
 
     mcresult pow(mcresult rhs, double exponent) {
         mcresult lhs;
-        lhs.ref_cnt_[lhs.impl_ = rhs.impl_->pow(exponent)] = 1;
+        lhs.ref_cnt_[lhs.impl_ = rhs.implementation()->pow(exponent)] = 1;
         return lhs;
     }
 
     #define ALPS_NGS_MCRESULT_FREE_OPERATOR_TPL_IMPL(T, OP, NAME)                  \
         mcresult OP(mcresult const & lhs, T const & rhs) {                         \
             mcresult res;                                                          \
-            res.ref_cnt_[res.impl_ = lhs.impl_-> NAME (rhs)] = 1;                  \
+            res.ref_cnt_[res.impl_ = lhs.implementation()-> NAME (rhs)] = 1;                  \
             return res;                                                            \
         }                                                                          \
         mcresult OP(T const & lhs, mcresult const & rhs) {                         \
             mcresult res;                                                          \
-            res.ref_cnt_[res.impl_ = rhs.impl_-> NAME ## _inverse (lhs)] = 1;      \
+            res.ref_cnt_[res.impl_ = rhs.implementation()-> NAME ## _inverse (lhs)] = 1;      \
             return res;                                                            \
         }
     #define ALPS_NGS_MCRESULT_FREE_OPERATOR_IMPL(OP, NAME)                         \
@@ -266,7 +290,7 @@ namespace alps {
         ALPS_NGS_MCRESULT_FREE_OPERATOR_TPL_IMPL(std::vector<double>, OP, NAME)    \
         mcresult OP (mcresult const & lhs, mcresult const & rhs) {                 \
             mcresult res;                                                          \
-            res.ref_cnt_[res.impl_ = lhs.impl_-> NAME (rhs.impl_)] = 1;            \
+            res.ref_cnt_[res.impl_ = lhs.implementation()-> NAME (rhs.implementation())] = 1;            \
             return res;                                                            \
         }
     ALPS_NGS_MCRESULT_FREE_OPERATOR_IMPL(operator+, add)

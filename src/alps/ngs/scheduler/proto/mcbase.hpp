@@ -23,10 +23,6 @@
 #include <alps/ngs/mcobservables.hpp> // TODO: replace by new alea
 #include <alps/ngs/thread_exceptions.hpp>
 
-#ifdef ALPS_HAVE_PYTHON
-    #include <alps/ngs/boost_python.hpp>
-#endif
-
 #include <alps/random/mersenne_twister.hpp>
 
 #include <boost/function.hpp>
@@ -145,14 +141,6 @@ namespace alps {
                 return !stop_callback();
             }
 
-            #ifdef ALPS_HAVE_PYTHON
-                bool run(
-                    boost::python::object stop_callback
-                ) {
-                    return run(boost::bind(callback_wrapper, stop_callback));
-                }
-            #endif
-
             result_names_type result_names() const {
                 result_names_type names;
                 
@@ -261,12 +249,6 @@ namespace alps {
             mutex mutable result_mutex;
 
         private:
-        
-            #ifdef ALPS_HAVE_PYTHON
-                static bool callback_wrapper(boost::python::object stop_callback) {
-                   return boost::python::call<bool>(stop_callback.ptr());
-                }
-            #endif
 
             status_type m_status;
     };

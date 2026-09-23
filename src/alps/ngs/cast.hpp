@@ -14,6 +14,11 @@
 #ifndef ALPS_NGS_CAST_HPP
 #define ALPS_NGS_CAST_HPP
 
+#include <cerrno>
+#include <cstdlib>
+#include <limits>
+#include <type_traits>
+
 #include <alps/ngs/config.hpp>
 #include <alps/ngs/stacktrace.hpp>
 
@@ -73,6 +78,28 @@ namespace alps {
         }
     };
 
+    namespace detail {
+        template <typename T> T checked_integer_string(std::string const & text) {
+            // Keep the historical decimal-prefix parsing (e.g. "4.0" -> 4),
+            // but never let scanf silently wrap an out-of-range parameter.
+            errno = 0;
+            if constexpr (std::is_signed<T>::value) {
+                long long value = std::strtoll(text.c_str(), nullptr, 10);
+                if (errno == ERANGE || value < std::numeric_limits<T>::min()
+                                    || value > std::numeric_limits<T>::max())
+                    throw std::out_of_range("integer parameter out of range: " + text);
+                return static_cast<T>(value);
+            } else {
+                auto first = text.find_first_not_of(" \t\r\n\f\v");
+                unsigned long long value = std::strtoull(text.c_str(), nullptr, 10);
+                if (errno == ERANGE || value > std::numeric_limits<T>::max()
+                    || (first != std::string::npos && text[first] == '-'))
+                    throw std::out_of_range("integer parameter out of range: " + text);
+                return static_cast<T>(value);
+            }
+        }
+    }
+
     #define ALPS_NGS_CAST_STRING(T, p, c)                                            \
         template<> struct cast_hook<std::string, T > {                                \
             static inline std::string apply( T arg) {                                \
@@ -86,6 +113,8 @@ namespace alps {
         };                                                                            \
         template<> struct cast_hook< T, std::string> {                                \
             static inline T apply(std::string arg) {                                \
+                if constexpr (std::is_integral<T>::value)                           \
+                    return detail::checked_integer_string<T>(arg);                 \
                 T value = 0;                                                        \
                 if (arg.size() && sscanf(arg.c_str(), "%" c, &value) < 0)            \
                     throw std::runtime_error(                                        \

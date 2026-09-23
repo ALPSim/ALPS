@@ -33,12 +33,14 @@ namespace alps {
         template <typename T, typename U, typename R> struct plus {
             R operator()(T const & x, U const & y) const {
                 using boost::numeric::operators::operator+;
+                using alps::numeric::operator+;
                 return x + y;
             }
         };
         template <typename T> struct plus<T, T, T> {
             T operator()(T const & x, T const & y) const {
                 using boost::numeric::operators::operator+;
+                using alps::numeric::operator+;
                 return x + y;
             }
         };
@@ -46,13 +48,39 @@ namespace alps {
         template <typename T, typename U, typename R> struct minus {
             R operator()(T const & x, U const & y) const {
                 using boost::numeric::operators::operator-;
+                using alps::numeric::operator-;
                 return x - y;
             }
         };
         template <typename T> struct minus<T, T, T> {
             T operator()(T const & x, T const & y) const {
                 using boost::numeric::operators::operator-;
+                using alps::numeric::operator-;
                 return x - y;
+            }
+        };
+
+        // Older GCC versions lose the vector/scalar overload in the mixed
+        // Boost/ALPS using-declarations above. Resolve it explicitly for
+        // these operations instead of depending on that overload set.
+        template <typename T> struct plus<std::vector<T>, T, std::vector<T>> {
+            std::vector<T> operator()(std::vector<T> const & x, T const & y) const {
+                return alps::numeric::operator+(x, y);
+            }
+        };
+        template <typename T> struct plus<T, std::vector<T>, std::vector<T>> {
+            std::vector<T> operator()(T const & x, std::vector<T> const & y) const {
+                return alps::numeric::operator+(x, y);
+            }
+        };
+        template <typename T> struct minus<std::vector<T>, T, std::vector<T>> {
+            std::vector<T> operator()(std::vector<T> const & x, T const & y) const {
+                return alps::numeric::operator-(x, y);
+            }
+        };
+        template <typename T> struct minus<T, std::vector<T>, std::vector<T>> {
+            std::vector<T> operator()(T const & x, std::vector<T> const & y) const {
+                return alps::numeric::operator-(x, y);
             }
         };
 

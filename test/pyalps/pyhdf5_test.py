@@ -1,4 +1,3 @@
-from __future__ import print_function
 # ****************************************************************************
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -15,7 +14,8 @@ from __future__ import print_function
 
 import pyalps.hdf5 as h5
 import numpy as np
-import sys
+import os
+import tempfile
 
 def write(ar):
     ar["/int"] =  9
@@ -56,19 +56,63 @@ def read(ar):
         raise Exception('invalid array value')
 
 def test_hdf5():
-    oar = h5.archive("py.h5", 'w')
-    write(oar)
-    del oar
-    
-    iar = h5.archive("py.h5", 'r')
-    if iar.is_complex("/int") or not iar.is_complex("/cplx") or not iar.extent("/np/cplx"):
-        raise Exception('invalid complex detection')
-    read(iar)
-    del iar
-    
-    ar = h5.archive("py.h5", 'w')
-    write(ar)
-    read(ar)
-    del ar
+    with tempfile.TemporaryDirectory() as directory:
+        path = os.path.join(directory, "py.h5")
+        oar = h5.archive(path, 'w')
+        write(oar)
+        del oar
+
+        iar = h5.archive(path, 'r')
+        if iar.is_complex("/int") or not iar.is_complex("/cplx") or not iar.extent("/np/cplx"):
+            raise Exception('invalid complex detection')
+        read(iar)
+        del iar
+
+        ar = h5.archive(path, 'w')
+        write(ar)
+        read(ar)
+        del ar
     
     print("SUCCESS")
+
+
+def test_archive_open_state():
+    """is_open is a property, and `closed` therefore actually works.
+
+    The legacy Boost.Python module bound the name twice -- add_property
+    followed by .def -- and add_to_namespace only merges with an existing
+    *function*, so the .def overwrote the property and `ar.is_open` was a bound
+    method: always truthy, which left pyalps.hdf5.archive.closed permanently
+    False. The nanobind port binds is_open only as a read-only property.
+    """
+    with tempfile.TemporaryDirectory() as directory:
+        path = os.path.join(directory, "open_state.h5")
+
+        ar = h5.archive(path, 'w')
+        assert ar.is_open is True
+        assert ar.closed is False
+        # regression guard: a property, not a callable
+        try:
+            ar.is_open()
+        except TypeError:
+            pass
+        else:
+            raise AssertionError("is_open must be a property, not a method")
+
+        ar['/a'] = 1
+        ar.close()
+        assert ar.is_open is False
+        assert ar.closed is True
+
+        # xml() consults `closed`, so it must now refuse a closed archive
+        try:
+            ar.xml()
+        except h5.ArchiveClosed:
+            pass
+        else:
+            raise AssertionError("xml() on a closed archive must raise ArchiveClosed")
+
+        # the context manager closes on exit
+        with h5.archive(path, 'r') as reader:
+            assert reader.is_open is True and reader.closed is False
+        assert reader.closed is True

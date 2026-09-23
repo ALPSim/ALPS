@@ -1,0 +1,37 @@
+--- a/lib/pyalps/CMakeLists.txt
++++ b/lib/pyalps/CMakeLists.txt
+@@ -36,9 +36,9 @@
+       pyngsobservable_c pyngsobservables_c pyngsresult_c pyngsresults_c pyngsapi_c pyngsrandom01_c
+   )
+
+-  if(ALPS_NGS_USE_NEW_ALEA)
++  if(TRUE)
+     list(APPEND PYALPS_SOURCES pyngsaccumulator_c)
+-  endif(ALPS_NGS_USE_NEW_ALEA)
++  endif(TRUE)
+
+   set (MAXENT_SOURCES ../../tool/maxent.cpp ../../tool/maxent_helper.cpp
+                       ../../tool/maxent_simulation.cpp ../../tool/maxent_parms.cpp)
+@@ -103,9 +103,9 @@
+   python_add_module(pyngsapi_c ${PYNGSAPI_SOURCES})
+   python_add_module(pyngsrandom01_c ${PYNGSRANDOM01_SOURCES})
+
+-  if(ALPS_NGS_USE_NEW_ALEA)
++  if(TRUE)
+     python_add_module(pyngsaccumulator_c ${PYNGSACCUMULATOR_SOURCES})
+-  endif(ALPS_NGS_USE_NEW_ALEA)
++  endif(TRUE)
+
+
+
+--- a/cmake/FindPythonMod.cmake
++++ b/cmake/FindPythonMod.cmake
+@@ -273,3 +273,8 @@
+
+   ENDIF(PYTHON_ENABLE_MODULE_${_NAME})
+ ENDFUNCTION(PYTHON_ADD_MODULE)
++
++# Local audit only: standalone Python dylib already links its private dependencies.
++set(PYTHON_EXTRA_LIBS "")
++
++set(PYTHON_LIBRARY Python::Module)

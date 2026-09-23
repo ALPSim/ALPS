@@ -22,11 +22,66 @@ SPEC.loader.exec_module(release)
 def versions(tmp_path):
     def write(core="3.0.0", python="3.0.0"):
         (tmp_path / "ALPS_VERSION.txt").write_text(core + "\n")
-        (tmp_path / "pyproject.toml").write_text(
+        project_dir = tmp_path / "bindings/python/pyalps"
+        project_dir.mkdir(parents=True, exist_ok=True)
+        (project_dir / "pyproject.toml").write_text(
             f'[project]\nname = "pyalps"\nversion = "{python}"\n'
         )
         return tmp_path
     return write
+
+
+@pytest.mark.parametrize("ref,expected", [
+    ("refs/heads/master", "3.0.0"),
+    ("refs/tags/v3.0.0", "3.0.0"),
+    ("refs/tags/v3.0.0-beta.2", "3.0.0b2"),
+    ("refs/tags/v3.0.0-rc.1", "3.0.0rc1"),
+])
+def test_standalone_dynamic_version(versions, monkeypatch, ref, expected):
+    root = versions()
+    monkeypatch.delenv("ALPS_VERSION_PRERELEASE", raising=False)
+    (root / "bindings/python/pyalps/pyproject.toml").write_text(
+        '[project]\nname = "pyalps"\ndynamic = ["version"]\n'
+    )
+    assert release.check_version(root, ref) == Version(expected)
+
+
+def test_dynamic_version_rejects_stale_tag_and_conflicting_label(versions, monkeypatch):
+    root = versions()
+    (root / "bindings/python/pyalps/pyproject.toml").write_text(
+        '[project]\nname = "pyalps"\ndynamic = ["version"]\n'
+    )
+    with pytest.raises(ValueError, match="disagrees with ALPS_VERSION.txt"):
+        release.check_version(root, "refs/tags/v2.3.4")
+    monkeypatch.setenv("ALPS_VERSION_PRERELEASE", "beta.1")
+    with pytest.raises(ValueError, match="disagrees with ALPS_VERSION_PRERELEASE"):
+        release.check_version(root, "refs/tags/v3.0.0")
+
+
+def test_prerelease_sdist_keeps_its_version_without_the_build_environment(tmp_path):
+    """Exercise the backend: a user rebuild must keep the published version."""
+    repository = SCRIPT.parents[1]
+    project = repository / "bindings/python/pyalps"
+    core = (repository / "ALPS_VERSION.txt").read_text().strip()
+    environment = {**os.environ, "GITHUB_REF": f"refs/tags/v{core}-beta.2"}
+    environment.pop("ALPS_VERSION_PRERELEASE", None)
+    subprocess.run(
+        [sys.executable, "-c",
+         "from scikit_build_core.build import build_sdist; "
+         "import sys; build_sdist(sys.argv[1])", str(tmp_path)],
+        cwd=project, env=environment, check=True, capture_output=True, text=True,
+    )
+    with tarfile.open(tmp_path / f"pyalps-{core}b2.tar.gz") as archive:
+        archive.extractall(tmp_path, filter="data")
+    environment.pop("GITHUB_REF")
+    unpacked = tmp_path / f"pyalps-{core}b2"
+    completed = subprocess.run(
+        [sys.executable, "-c",
+         "from scikit_build_core.build import prepare_metadata_for_build_wheel; "
+         "print(prepare_metadata_for_build_wheel('metadata'))"],
+        cwd=unpacked, env=environment, check=True, capture_output=True, text=True,
+    )
+    assert f"pyalps-{core}b2.dist-info" in completed.stdout
 
 
 @pytest.mark.parametrize("ref", [

@@ -1,22 +1,12 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                                                 *
- * ALPS Project: Algorithms and Libraries for Physics Simulations                  *
- *                                                                                 *
- * ALPS Libraries                                                                  *
- *                                                                                 *
- * Copyright (C) 2010 - 2012 by Lukas Gamper <gamperl@gmail.com>                   *
- *                                                                                 *
- * ALPS Project: https://alps.comp-phys.org/                                       *
- * SPDX-License-Identifier: MIT                                                    *
- *                                                                                 *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-#define PY_ARRAY_UNIQUE_SYMBOL isingsim_PyArrayHandle
+// Copyright (C) 2010-2012 by Lukas Gamper
+//               2026      by the ALPS collaboration
+// SPDX-License-Identifier: MIT
 
 #include "ising.hpp"
 
 #include <alps/ngs/detail/export_sim_to_python.hpp>
+#include <nanobind/nanobind.h>
 
-BOOST_PYTHON_MODULE(ising_c) {
+NB_MODULE(ising_c, m) {
     ALPS_EXPORT_SIM_TO_PYTHON(sim, ising_sim);
 }
