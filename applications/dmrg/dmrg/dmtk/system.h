@@ -50,7 +50,7 @@
 #endif
 
 #include <boost/filesystem/path.hpp>
-#include <alps/utility/temporary_filename.hpp>
+#include "filelist.h"
 
 using namespace std;
 
@@ -110,44 +110,6 @@ template<class T>
 void init_terms_composite(System<T>& ss, const VectorState<T>& vv);
 template<class T>
 void init_term_composite(System<T>& ss, const AuxTerm<T> &auxt, const Term<T> &t, const VectorState<T> &vv, VectorState<T> &res);
-
-class FileList 
-{
-  private:
-    std::map<std::string,std::string> _tmp_filenames;
-    std::string last_filename;
-    boost::filesystem::path temp_dir;
-  public:
-    FileList() { set_temp_dir("."); };
-    FileList(const char *dir) { set_temp_dir(dir); }
-
-    void set_temp_dir(const char *dir) 
-      { 
-         std::string aux = std::string(dir);
-#ifndef BOOST_MSVC
-         struct stat dir_ptr;
-         if((!stat(aux.c_str(),&dir_ptr)) == 0) {
-             std::cerr << "*** ERROR: ALPS DMRG could not open directory for temporary files. Create the directory " + aux + " or choose a different path.\n";
-                         boost::throw_exception(std::runtime_error("*** ERROR: ALPS DMRG could not open directory for temporary files. Create the directory " + aux + " or choose a different path."));
-         }
-#endif
-         std::cout << "ALPS DMRG temporary files will be written to " << aux << std::endl;
-         temp_dir = boost::filesystem::path(aux); 
-      }
-
-    const char * get_filename(const char *input) 
-      {
-         std::string filename(input);
-         std::map<std::string,std::string>::iterator old_name = _tmp_filenames.find(filename);
-         if(old_name != _tmp_filenames.end()) return (old_name->second).c_str();
-
-         filename = filename.substr(0,filename.find_first_of('.'));
-         this->last_filename = alps::temporary_filename((temp_dir / filename).string());
-         _tmp_filenames[std::string(input)] = this->last_filename;
-         std::cout << "Creating temp file " << this->last_filename << std::endl;
-         return this->last_filename.c_str();
-      }
-};
 
 FileList tmp_files;
 
