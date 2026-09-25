@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 #include "applications/dmrg/dmrg/dmtk/filelist.h"
 #include <fstream>
+#include <iterator>
 #include <stdexcept>
 #include <vector>
 #ifndef BOOST_MSVC
@@ -54,6 +55,30 @@ int main()
     require(fs::is_empty(root / "second"), "exception or directory change prevented cleanup");
 
 #ifndef BOOST_MSVC
+    // Relative scratch paths must still work when their absolute form is
+    // longer than the old temporary_filename buffer. Each path component
+    // stays short enough for ordinary filesystem limits.
+    fs::path long_directory = root / "long";
+    while (long_directory.string().size() < 300)
+      long_directory /= std::string(60, 'd');
+    fs::create_directories(long_directory / "scratch");
+    fs::current_path(long_directory);
+    const fs::path scratch = fs::current_path() / "scratch";
+    const fs::path sentinel = scratch / "unrelated";
+    std::ofstream(sentinel.string()) << "keep me";
+    {
+      dmtk::FileList files("scratch");
+      const fs::path block = files.get_filename("block_ALPS_1.dat");
+      const fs::path rho = files.get_filename("rho_ALPS_1.dat");
+      require(block.parent_path() == scratch && rho.parent_path() == scratch,
+              "long scratch path was truncated or escaped its directory");
+      require(block != rho && fs::exists(block) && fs::exists(rho),
+              "long scratch paths did not reserve distinct files");
+      fs::current_path(original_directory);
+    }
+    require(std::distance(fs::directory_iterator(scratch), fs::directory_iterator()) == 1
+            && fs::exists(sentinel), "long-path cleanup leaked files or removed an unrelated file");
+
     // The first available descriptor must remain available after repeated calls.
     int before = open("/dev/null", O_RDONLY);
     require(before >= 0, "could not open descriptor probe");

@@ -44,5 +44,17 @@ if(TARGET dmrg AND TARGET parameter2xml)
       -Dxml_dir=${PROJECT_BINARY_DIR}/lib/xml
       -Dtest_dir=${CMAKE_CURRENT_BINARY_DIR}/dmrg-scratch
       -P ${CMAKE_CURRENT_SOURCE_DIR}/dmrg_scratch_cleanup.cmake)
+  if(UNIX)
+    add_test(NAME dmrg_scratch_cleanup_long_paths
+      COMMAND ${CMAKE_COMMAND}
+        -Ddmrg=$<TARGET_FILE:dmrg>
+        -Dparameter2xml=$<TARGET_FILE:parameter2xml>
+        -Dsource_dir=${PROJECT_SOURCE_DIR}
+        -Dxml_dir=${PROJECT_BINARY_DIR}/lib/xml
+        -Dtest_dir=${CMAKE_CURRENT_BINARY_DIR}/dmrg-long-scratch
+        -Dlong_relative_paths=ON
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/dmrg_scratch_cleanup.cmake)
+    set_tests_properties(dmrg_scratch_cleanup_long_paths PROPERTIES LABELS "dmrg" TIMEOUT 120)
+  endif()
   set_tests_properties(dmrg_scratch_cleanup PROPERTIES LABELS "dmrg" TIMEOUT 120)
 endif()

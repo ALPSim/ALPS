@@ -1,6 +1,22 @@
 # Two calculations in one process must use their own directories and release
 # scratch storage without removing unrelated files or saved solver results.
 file(REMOVE_RECURSE "${test_dir}")
+if(long_relative_paths)
+  # Reproduce a long working directory with short, relative TEMP_DIRECTORY
+  # parameters. Only the total path exceeds 255 bytes, not a single component.
+  string(REPEAT "nested-" 10 component)
+  string(LENGTH "${test_dir}" path_length)
+  while(path_length LESS 300)
+    string(APPEND test_dir "/${component}")
+    string(LENGTH "${test_dir}" path_length)
+  endwhile()
+endif()
+set(first_scratch "${test_dir}/first")
+set(second_scratch "${test_dir}/second")
+if(long_relative_paths)
+  set(first_scratch "first")
+  set(second_scratch "second")
+endif()
 file(MAKE_DIRECTORY "${test_dir}/first" "${test_dir}/second" "${test_dir}/xml")
 file(COPY "${xml_dir}/lattices.xml" "${xml_dir}/models.xml" "${source_dir}/lib/xml/ALPS.xsl"
   DESTINATION "${test_dir}/xml")
@@ -16,8 +32,8 @@ J=1
 SWEEPS=2
 NUMBER_EIGENVALUES=1
 MAXSTATES=20
-{ L=8; TEMP_DIRECTORY=\"${test_dir}/first\"; }
-{ L=8; TEMP_DIRECTORY=\"${test_dir}/second\"; }
+{ L=8; TEMP_DIRECTORY=\"${first_scratch}\"; }
+{ L=8; TEMP_DIRECTORY=\"${second_scratch}\"; }
 ")
 execute_process(COMMAND "${CMAKE_COMMAND}" -E env "ALPS_XML_PATH=${test_dir}/xml"
   "${parameter2xml}" parameters
