@@ -35,8 +35,12 @@ namespace alps {
 #else
 //    name = mkstemp(const_cast<char*>(name.c_str()));
     int res = mkstemp(aux);
+    if (res >= 0) {
+      // Callers reopen the reserved filename with their own streams. The
+      // descriptor from mkstemp must not remain open for every scratch file.
+      close(res);
+    }
     name = aux;
-    //int res = mkstemp(const_cast<char*>(name.c_str()));
 #endif
     if (res<0)
       boost::throw_exception(std::runtime_error("Could not open temporary file"));
