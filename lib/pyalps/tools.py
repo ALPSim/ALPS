@@ -516,6 +516,7 @@ def getResultFiles(dirname='.',pattern=None,prefix=None,format=None):
     else:
       res = recursiveGlob(dirname, pattern)
     return list(dict.fromkeys(res))
+    
 def loadTimeSeries(outfile, observable=None):
   if isinstance(outfile,str):
     if isinstance(observable,str):
