@@ -477,7 +477,7 @@ def getResultFiles(dirname='.',pattern=None,prefix=None,format=None):
     
         This function returns a list of all ALPS result files matching a given pattern, starting recursively from a given directory.
         The pattern can be either specificed by giving a prefix for the files, which is then augmented with the default ALPS file name suffixes. 
-        ALternatively a fiull custom regular expression pattern can be specified.
+        ALternatively a full custom regular expression pattern can be specified.
         
         The paramters are:
         
@@ -510,12 +510,12 @@ def getResultFiles(dirname='.',pattern=None,prefix=None,format=None):
           if len(res)==0:
             pattern = prefix+'*h5'
             res=recursiveGlob(dirname, pattern)
+
+      if format != 'xml':
+        res += recursiveGlob(dirname, prefix+'*replica*h5')
     else:
       res = recursiveGlob(dirname, pattern)
-    replicas=recursiveGlob(dirname, prefix+'*replica*h5')
-    res += replicas
-    return res
-
+    return list(dict.fromkeys(res))
 def loadTimeSeries(outfile, observable=None):
   if isinstance(outfile,str):
     if isinstance(observable,str):
