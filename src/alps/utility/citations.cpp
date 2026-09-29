@@ -7,6 +7,7 @@ namespace {
 struct citation_entry {
   const char* component;
   const char* text;
+  const char* details;
 };
 
 #include <alps/utility/citations_data.inc>
@@ -21,4 +22,15 @@ std::string alps::citation_text(const std::string& component) {
 
 void alps::print_citations(std::ostream& out, const std::string& component) {
   out << citation_text(component);
+}
+
+std::string alps::citation_details(const std::string& component) {
+  for (const auto& entry : citation_entries)
+    if (component == entry.component)
+      return entry.details;
+  throw std::invalid_argument("Unknown ALPS citation component: " + component);
+}
+
+void alps::print_citation_details(std::ostream& out, const std::string& component) {
+  out << citation_details(component);
 }

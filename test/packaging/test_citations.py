@@ -46,11 +46,30 @@ class CitationTests(unittest.TestCase):
             self.assertEqual(generator.select_references(self.policy, self.framework, component)["algorithm"], algorithms)
 
     def test_framework_deduplicated_but_both_roles_retained(self):
-        text = generator.notice(self.policy, self.references, self.framework, "qwl")
+        text = generator.detailed_notice(self.policy, self.references, self.framework, "qwl")
         self.assertEqual(" ".join(text.split()).count(self.references[self.framework]["title"]), 1)
-        self.assertIn("Implementation: [4], [5]", text)
-        self.assertIn("Framework: [4]", text)
+        self.assertIn("Implementation: [1], [5]", text)
+        self.assertIn("Framework: [1]", text)
         self.assertNotIn("P05001", text)
+
+    def test_startup_box_is_compact_and_framework_first(self):
+        for component in self.policy["components"]:
+            with self.subTest(component=component):
+                text = generator.notice(self.policy, self.references, self.framework, component)
+                lines = text.rstrip().splitlines()
+                self.assertEqual(lines[0], "*" * 80)
+                self.assertEqual(lines[-1], lines[0])
+                self.assertTrue(all(len(line) == 80 for line in lines))
+                self.assertLessEqual(len(lines), 15)
+                self.assertIn("Framework: [1]", text)
+                self.assertIn("[1] " + self.references[self.framework]["title"].split(":")[0], text)
+                self.assertNotIn("https://doi.org/", text)
+                self.assertIn("Full references: --citations", text)
+                details = generator.detailed_notice(self.policy, self.references, self.framework, component)
+                self.assertIn("Framework: [1]", details)
+                self.assertIn("[1] F. Alet et al.", details)
+                if component != "framework":
+                    self.assertIn("https://doi.org/", details)
 
     def test_valid_cff_rejects_custom_policy_fields(self):
         self.cff["components"] = self.policy["components"]
@@ -154,7 +173,7 @@ class CitationTests(unittest.TestCase):
         source = self.root / "escaping.cpp"
         source.write_text(
             '#include <iostream>\n#include <string>\n'
-            'struct citation_entry { const char* component; const char* text; };\n'
+            'struct citation_entry { const char* component; const char* text; const char* details; };\n'
             + generator.cpp_data(self.policy, self.references, self.framework)
             + '\nint main() { for (auto e : citation_entries) if (std::string(e.component) == "framework") std::cout << e.text; }\n',
             encoding="utf-8")

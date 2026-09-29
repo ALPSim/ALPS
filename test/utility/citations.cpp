@@ -19,9 +19,9 @@ int main() {
     if (text.find("P05001") != std::string::npos)
       throw std::runtime_error("Outdated framework paper in notice");
   }
-  if (alps::citation_text("interaction").find("10.1103/PhysRevB.72.035122") == std::string::npos)
+  if (alps::citation_details("interaction").find("10.1103/PhysRevB.72.035122") == std::string::npos)
     throw std::runtime_error("CT-INT algorithm reference missing");
-  if (alps::citation_text("hybridization").find("10.1103/PhysRevB.72.035122") != std::string::npos)
+  if (alps::citation_details("hybridization").find("10.1103/PhysRevB.72.035122") != std::string::npos)
     throw std::runtime_error("CT-HYB incorrectly recommends CT-INT");
   try {
     alps::citation_text("unknown-component");

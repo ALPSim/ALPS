@@ -16,7 +16,8 @@ for mode, component in (("single", "spinmc"), ("parapack", "looper"), ("owned-qu
     with tempfile.TemporaryDirectory(prefix="alps-citation-runtime-") as cwd:
         result = subprocess.run(launcher + [binary, mode] + arguments, cwd=cwd,
                                 input="SEED=17; {} {}", text=True, capture_output=True, timeout=45)
-    expected = generator.notice(policy, references, framework, component)
+    render = generator.detailed_notice if mode in ("owned-query", "single-query") else generator.notice
+    expected = render(policy, references, framework, component)
     assert result.returncode == 0, result.stdout + result.stderr
     assert result.stdout.count(expected) == 1, result.stdout
     assert result.stdout.count("Recommended citations for ") == 1, result.stdout

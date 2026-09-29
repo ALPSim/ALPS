@@ -34,7 +34,8 @@ Commit the two authority files, generated `CITATION.md`, and
 `script/citations/generated/`. CI regenerates all derived files and checks that
 they match. To add an application, add its component mapping and connect
 its startup path to the component key; do not put bibliographic text in C++.
-Use `alps::print_citations(out, component)` for a citation-only notice or
+Use `alps::print_citations(out, component)` for a compact citation box,
+`alps::print_citation_details(out, component)` for complete references, or
 `alps::print_copyright(out, component)` for the combined framework banner.
 Conventional scheduler applications pass the component as the fourth argument to
 `alps::scheduler::start`. Parapack applications register it with
@@ -94,11 +95,16 @@ not inferred.
 
 ## CLI printing policy
 
-Calculation startup prints one catalog-derived notice per invocation, on the master
+Calculation startup prints one compact, decorative citation box per invocation, on the master
 rank for MPI calculations. This includes looper's stdin path. Multiple tasks in one
-invocation share the notice. Each application provides these standalone queries:
+invocation share the notice. The framework paper is always reference [1], followed
+by algorithm and implementation references, with each paper listed once. Startup
+uses publication coordinates rather than full titles and DOI links; unpublished
+papers retain their title and status. Saved-data notices preserve this startup box,
+while their CFF bibliography retains the complete records.
+Each application provides these standalone queries:
 
-- `--citations`: print only its generated citation guidance and exit successfully.
+- `--citations`: print complete guidance with paper titles and DOI links, and exit successfully.
 - `--help` / `-h`: print usage and information options, without citation guidance.
 - `--license` / `-l`: print legal license terms, without citation guidance.
 

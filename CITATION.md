@@ -7,9 +7,9 @@ If ALPS contributes to published research, please cite the relevant algorithm, i
 
 This is a request for scientific credit, separate from the MIT license terms.
 
+- **Framework:** Cite the most recent ALPS release paper, recorded as preferred-citation in CITATION.cff.
 - **Algorithm:** Credit the original algorithms relevant to the calculation.
 - **Implementation:** Credit the ALPS implementations and infrastructure used in the calculation.
-- **Framework:** Cite the most recent ALPS release paper, recorded as preferred-citation in CITATION.cff.
 
 ## Framework paper
 

@@ -11,7 +11,7 @@ generator = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(generator)
 _, policy, references, framework = generator.load_catalog(root)
 binary, component, *launcher = sys.argv[1:]
-expected = generator.notice(policy, references, framework, component)
+expected = generator.detailed_notice(policy, references, framework, component)
 for argument in ("--help", "-h", "--license", "-l", "--citations"):
     for mpi_flag in ([], ["--mpi"]):
         with tempfile.TemporaryDirectory(prefix="alps-citation-cli-") as cwd:

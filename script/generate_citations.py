@@ -25,7 +25,7 @@ except ImportError as exc:
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMAS = Path(__file__).resolve().parent / "citations"
-ROLES = ("algorithm", "implementation", "framework")
+ROLES = ("framework", "algorithm", "implementation")
 KEY_DESCRIPTION = "ALPS reference key"
 
 
@@ -157,7 +157,7 @@ def citation(reference):
     return text
 
 
-def notice(policy, references, framework, component):
+def detailed_notice(policy, references, framework, component):
     entry = policy["components"][component]
     selected = select_references(policy, framework, component)
     keys = list(dict.fromkeys(key for role in ROLES for key in selected[role]))
@@ -177,15 +177,55 @@ def notice(policy, references, framework, component):
     return "\n".join(lines) + "\n\n"
 
 
+def compact_citation(reference):
+    """Use publication coordinates; unpublished papers retain their title/status."""
+    venue = reference.get("journal") or reference.get("collection-title")
+    text = venue or reference["title"]
+    if venue:
+        if "volume" in reference:
+            text += " " + str(reference["volume"])
+        if "start" in reference:
+            text += ", " + str(reference["start"])
+    if "year" in reference:
+        text += " (" + str(reference["year"]) + ")"
+    if "status" in reference:
+        text += "; " + reference["status"].replace("-", " ")
+    return text + "."
+
+
+def notice(policy, references, framework, component):
+    """Short startup box; complete bibliography is available through --citations."""
+    selected = select_references(policy, framework, component)
+    keys = list(dict.fromkeys(key for role in ROLES for key in selected[role]))
+    numbers = {key: index + 1 for index, key in enumerate(keys)}
+    entry = policy["components"][component]
+    width = 76
+    lines = textwrap.wrap("Recommended citations for " + entry["name"] + ":", width)
+    labels = [role.capitalize() + ": " + ", ".join(f"[{numbers[key]}]" for key in selected[role])
+              for role in ROLES if selected[role]]
+    lines += textwrap.wrap("; ".join(labels), width)
+    for key in keys:
+        lines += textwrap.wrap(compact_citation(references[key]), width,
+                               initial_indent=f"[{numbers[key]}] ", subsequent_indent="    ")
+    if entry.get("note"):
+        lines += textwrap.wrap(entry["note"], width)
+    lines += textwrap.wrap(policy["policy"]["license_note"], width)
+    lines.append("Full references: --citations")
+    border = "*" * (width + 4)
+    return "\n".join([border] + ["* " + line.ljust(width) + " *" for line in lines] + [border]) + "\n\n"
+
+
 def cpp_data(policy, references, framework):
     lines = ["// Generated from CITATION.cff and CITATIONS.yaml. Do not edit.",
              "static const citation_entry citation_entries[] = {"]
     for component in sorted(policy["components"]):
         # JSON escaping is also valid for these C++ UTF-8 string literals.
-        value = notice(policy, references, framework, component)
         lines.append("  {" + json.dumps(component) + ",")
-        lines.extend("   " + json.dumps(line, ensure_ascii=False)
-                     for line in value.splitlines(keepends=True))
+        for render in (notice, detailed_notice):
+            value = render(policy, references, framework, component)
+            pieces = value.splitlines(keepends=True)
+            lines.extend("   " + json.dumps(line, ensure_ascii=False) for line in pieces[:-1])
+            lines.append("   " + json.dumps(pieces[-1], ensure_ascii=False) + ",")
         lines.append("  },")
     lines.extend(["};", ""])
     return "\n".join(lines)

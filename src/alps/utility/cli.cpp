@@ -81,7 +81,7 @@ bool alps::handle_cli_information(int argc, char** argv, const std::string& comp
     } else if (query == "--license" || query == "-l") {
       print_license(std::cout);
     } else {
-      print_citations(std::cout, component);
+      print_citation_details(std::cout, component);
     }
   }
   return true;
