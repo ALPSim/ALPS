@@ -26,3 +26,5 @@ from .tools import *
 from .pytools import *
 from .floatwitherror import FloatWithError
 from . import fit_wrapper
+
+from .citations import read_citations, export_citations

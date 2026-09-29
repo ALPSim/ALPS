@@ -14,6 +14,7 @@
 #ifndef ALPS_NGS_SCHEDULER_MCBASE_NG_HPP
 #define ALPS_NGS_SCHEDULER_MCBASE_NG_HPP
 
+#include <alps/utility/citation_provenance.hpp>
 #include <alps/hdf5/archive.hpp>
 #include <alps/ngs/mutex.hpp>
 #include <alps/ngs/config.hpp>
@@ -49,6 +50,8 @@ namespace alps {
                 typedef mcobservables observables_type;
             // #endif
         private:
+
+            citation_history citation_history_;
 
             struct lock_guard_impl : boost::noncopyable {
 
@@ -108,6 +111,8 @@ namespace alps {
 
             virtual void save(alps::hdf5::archive & ar) const {
                 lock_guard result_lock(get_result_lock());
+                write_citations(ar, citation_history_);
+                write_citations(ar, "framework", "unspecified");
                 ar["/parameters"] << params;
                 ar["/simulation/realizations/0/clones/0/results"] << measurements;
             }
@@ -115,6 +120,7 @@ namespace alps {
             // TODO: do we want to load the parameters?
             virtual void load(alps::hdf5::archive & ar) {
                 lock_guard result_lock(get_result_lock());
+                citation_history_ = read_citations(ar);
                 ar["/simulation/realizations/0/clones/0/results"] >> measurements;
             }
 

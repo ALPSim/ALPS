@@ -12,6 +12,7 @@
 
 /* $Id$ */
 
+#include <alps/utility/cli.hpp>
 #include "fulldiag.h"
 #include <alps/utility/copyright.hpp>
 #include <cstdlib>
@@ -40,19 +41,14 @@ int main(int argc, char** argv)
 try {
 #endif
 
+  if (alps::handle_cli_information(argc, argv, "fulldiag", [&] { print_usage(std::cout, argv[0]); })) return 0;
+
   int i=1;  
   alps::Parameters parms;
 
   while (i<argc && argv[i][0]=='-') {
-    if (!std::strcmp(argv[i], "--help") || !std::strcmp(argv[i], "-h")) {
-      print_usage(std::cout, argv[0]);
-      alps::print_copyright(std::cout);
-      return 0;
-    }
-    if (!std::strcmp(argv[i], "--license") || !std::strcmp(argv[i], "-l")) {
-      alps::print_license(std::cout);
-      return 0;
-    }
+
+
     if (!std::strcmp(argv[i], "--")) {
       ++i;
       break;
@@ -71,7 +67,6 @@ try {
     i+=2;
   }
 
-  alps::print_copyright(std::cout);
 
   // no filename found
   if(i >= argc) {
@@ -79,12 +74,16 @@ try {
     return 1;
   }
 
+  alps::cli_mpi_guard mpi(argc, argv);
+  if (alps::cli_is_master()) alps::print_copyright(std::cout, "fulldiag");
+
   while (i<argc) {
     boost::filesystem::path p(argv[i]);
     std::string name=argv[i];
     name.erase(name.rfind(".out.xml"),8);
     alps::ProcessList nowhere;
     FullDiagMatrix<double> matrix (nowhere,p);
+    matrix.set_citation_component("fulldiag", "analysis");
     matrix.evaluate(parms,name); 
     ++i; 
   }

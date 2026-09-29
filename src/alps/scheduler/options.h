@@ -34,6 +34,7 @@ namespace scheduler {
 class ALPS_DECL NoJobfileOptions
 {
 public:
+  std::string citation_component; // producing application; not a simulation parameter
   std::string programname;    // name of the executable
   double min_check_time;      // minimum time between checks
   double max_check_time;      // maximum time between checks
@@ -46,6 +47,7 @@ public:
   bool write_xml;             // shall we write the results to XML?
 
   NoJobfileOptions(int argc, char** argv);
+  NoJobfileOptions(int argc, char** argv, const std::string& citation_component);
   NoJobfileOptions();
 };
 
@@ -55,6 +57,7 @@ public:
   boost::filesystem::path jobfilename;      // name of the jobfile
 
   Options(int argc, char** argv);
+  Options(int argc, char** argv, const std::string& citation_component);
   Options();
 };
 
@@ -62,4 +65,3 @@ public:
 } // end namespace
 
 #endif
-

@@ -160,8 +160,10 @@ public:
 
   static void print_copyright(std::ostream& out);
   static std::string version();
+  static std::string citation_component();
   bool set_copyright(std::string const& str);
   bool set_version(std::string const& str);
+  bool set_citation_component(std::string const& str);
 
   static worker_pointer_type make_worker(Parameters const& params);
 
@@ -191,6 +193,7 @@ private:
   static worker_factory* instance_;
   std::string copyright_string_;
   std::string version_string_;
+  std::string citation_component_;
   creator_map_type worker_creators_;
 };
 
@@ -294,6 +297,12 @@ const bool BOOST_JOIN(copyright_, __LINE__) \
 namespace { \
 const bool BOOST_JOIN(version_, __LINE__) \
   = alps::parapack::worker_factory::instance()->set_version(str); \
+}
+
+#define PARAPACK_SET_CITATION_COMPONENT(str) \
+namespace { \
+const bool BOOST_JOIN(citation_, __LINE__) \
+  = alps::parapack::worker_factory::instance()->set_citation_component(str); \
 }
 
 #define PARAPACK_REGISTER_ALGORITHM(worker, name) \

@@ -41,7 +41,11 @@ class ImpuritySolver : public ::ImpuritySolver, public ::MatsubaraImpuritySolver
 {
 public:
   ImpuritySolver(const scheduler::Factory& f, int argc=0, char** argv=0, bool h5input=false);
+  ImpuritySolver(const scheduler::Factory& f, int argc, char** argv, bool h5input, const std::string& citation_component);
   ~ImpuritySolver();
+  citation_history citations() const override {
+    return {make_citation_snapshot(citation_component_)};
+  }
     
   scheduler::AbstractTask* get_task() const 
   { 
@@ -58,11 +62,11 @@ public:
   
   itime_green_function_t solve(
     const itime_green_function_t& G0, 
-    const Parameters& parms =Parameters());
+    const Parameters& parms =Parameters()) override;
     
   std::pair<matsubara_green_function_t, itime_green_function_t> solve_omega(
       const matsubara_green_function_t& G0_omega
-    , const Parameters& parms=Parameters());
+    , const Parameters& parms=Parameters()) override;
 
 protected:
   int solve_it(Parameters const& p);
@@ -70,6 +74,7 @@ protected:
   //scheduler::SingleScheduler* master_scheduler;
   int argc_;
   char **argv_;
+  std::string citation_component_;
 };
 
 

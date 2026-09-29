@@ -9,6 +9,8 @@
 *
 *****************************************************************************/
 
+#include <alps/utility/cli.hpp>
+#include <alps/utility/copyright.hpp>
 #include <alps/alea.h>
 #include <alps/plot.h>
 #include <alps/scheduler.h>
@@ -23,6 +25,7 @@ std::pair<const std::basic_string<char,std::char_traits<char>,std::allocator<cha
 void evaluate(const boost::filesystem::path& p, const alps::Parameters new_parms) {
   alps::ProcessList nowhere;
   alps::scheduler::MCSimulation sim(nowhere,p);
+  sim.set_citation_component("qwl", "analysis");
   alps::Parameters parms=sim.get_parameters();  
   alps::graph_helper<> lattice(parms);
   int Ns=num_sites(lattice.graph());
@@ -166,24 +169,27 @@ int main(int argc, char** argv)
 try {
 #endif
  
+  if (alps::handle_cli_information(argc, argv, "qwl", [&] {
+    std::cout << "Usage: " << argv[0] << " [--T_MIN ...] [--T_MAX ...] [--DELTA_T ...] inputfile [inputfile ...]\n";
+  })) return 0;
   alps::scheduler::SimpleMCFactory<alps::scheduler::DummyMCRun> factory;
   alps::scheduler::init(factory);
 
   int i=1;
   alps::Parameters parms;
 
-  while (i<argc-1 && argv[i][0]=='-' && argv[i][1]=='-') {
-    std::string name = argv[i]+2;
-    if (name=="help") {
-      std::cerr << "Usage: \n" << argv[0] << " [--T_MIN ...] [--T_MAX ...] [--DELTA_T ...] inputfile1 [inputfile2 [.....]] \n";
-      ++i;
-    }
-    else {
-      parms[name]=argv[i+1];
-      i+=2;
-    }
+  while (i < argc && argv[i][0] == '-') {
+    const std::string option(argv[i]);
+    if (option == "--") { ++i; break; }
+    if (option.size() <= 2 || option[1] != '-' || i + 1 >= argc)
+      throw std::invalid_argument("Expected an option value and input file");
+    parms[option.substr(2)] = argv[i+1];
+    i += 2;
   }
-  
+  if (i >= argc) throw std::invalid_argument("Expected an input file");
+  alps::cli_mpi_guard mpi(argc, argv);
+  if (alps::cli_is_master()) alps::print_copyright(std::cout, "qwl");
+
   while (i < argc) {
     boost::filesystem::path p(argv[i]);
     evaluate(boost::filesystem::absolute(p),parms);

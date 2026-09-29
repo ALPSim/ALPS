@@ -43,20 +43,22 @@ class ExternalSolver
 public:
     /// @param executable the path to the executable
     ExternalSolver(const boost::filesystem::path& executable) ;
+    alps::citation_history citations() const override { return citation_history_; }
   
     ImpuritySolver::result_type solve(
               const itime_green_function_t& G0
-            , const alps::Parameters& parms);
+            , const alps::Parameters& parms) override;
     
     MatsubaraImpuritySolver::result_type solve_omega(
               const matsubara_green_function_t& G0_omega
-            , const alps::Parameters& parms );
+            , const alps::Parameters& parms ) override;
     private:
     /// call the executable
     void call(std::string const& infile, std::string const& outfile);
       
     ///path to the solver executable
     boost::filesystem::path exe_;
+    alps::citation_history citation_history_;
 };
 
 

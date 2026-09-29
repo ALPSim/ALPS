@@ -18,6 +18,7 @@
 #ifndef NGS_PARAPACK_CLONE_H
 #define NGS_PARAPACK_CLONE_H
 
+#include <alps/utility/citation_provenance.hpp>
 #include <alps/ngs/parapack/worker_factory.h>
 #include <alps/ngs/parapack/clone_info.h>
 #include <alps/parapack/clone_timer.h>
@@ -75,6 +76,7 @@ private:
   tid_t task_id_;
   cid_t clone_id_;
 
+  citation_history citation_history_;
   alps::params params_;
 
   boost::filesystem::path basedir_;
@@ -172,6 +174,7 @@ private:
   cid_t clone_id_;
   gid_t group_id_;
 
+  citation_history citation_history_;
   alps::params params_;
 
   boost::filesystem::path basedir_;

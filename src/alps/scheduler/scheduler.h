@@ -91,6 +91,7 @@ public:
 
 protected:
 
+  std::string citation_component_;
   AbstractTask* theTask; //the simulation running on this node
   boost::filesystem::path defaultpath;
   
@@ -232,12 +233,14 @@ class ALPS_DECL MPPScheduler : public MasterScheduler
 
 // create a scheduler, I want to do some simulations
 ALPS_DECL int start(int,char**,const Factory&);
+ALPS_DECL int start(int,char**,const Factory&,const std::string& citation_component);
 
 // create a scheduler, I just want to evaluate some simulations
 ALPS_DECL void init(const Factory&);
 
 // initialize a scheduler for real work, parsing the command line
 ALPS_DECL SingleScheduler* start_single(const Factory& p, int argc=0, char** argv=0);
+ALPS_DECL SingleScheduler* start_single(const Factory&, int, char**, const std::string& citation_component);
 ALPS_DECL void stop_single(bool exit_=true);
 
 

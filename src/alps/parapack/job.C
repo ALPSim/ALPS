@@ -81,6 +81,7 @@ uint32_t task::num_started() const {
 
 void task::load() {
   if (on_memory()) boost::throw_exception(std::logic_error("task::load() task already loaded"));
+  citation_history_.clear();
   params_.clear();
   obs_.clear();
   clone_info_.clear();
@@ -143,6 +144,9 @@ void task::save(alps::parapack::option const& opt) const {
 
 void task::save_observable(alps::parapack::option const& opt) const {
   if (!on_memory()) boost::throw_exception(std::logic_error("task not loaded"));
+  auto history = citation_history_;
+  merge_citations(history, citation_history{make_citation_snapshot(parapack::worker_factory::citation_component(),
+                  (opt.for_evaluate || opt.evaluate_only) ? "analysis" : "calculation")});
   boost::filesystem::path file_out = absolute(boost::filesystem::path(file_out_str_), basedir_);
   {
     filelock lock(file_out, /* lock_now = */ true, /* wait = */ 60);
@@ -165,6 +169,7 @@ void task::save_observable(alps::parapack::option const& opt) const {
             boost::filesystem::path file = absolute(boost::filesystem::path(base_ + ".out.h5"),
               basedir_);
             hdf5::archive h5(file.string(), "a");
+            replace_citations(h5, history);
             h5["/parameters"] << params_tmp;
             h5["/simulation/results"] << obs_[0];
             // for (std::size_t n = 0; n < oss.size(); ++n)
@@ -187,6 +192,7 @@ void task::save_observable(alps::parapack::option const& opt) const {
               boost::filesystem::path file = absolute(boost::filesystem::path(
                 base_ + ".replica" + boost::lexical_cast<std::string>(i+1) + ".h5"), basedir_);
               hdf5::archive h5(file.string(), "a");
+              replace_citations(h5, history);
               h5["/parameters"] << p;
               h5["/simulation/results"] << obs_[i];
               // for (std::size_t n = 0; n < oss.size(); ++n)
@@ -228,6 +234,7 @@ void task::halt() {
     boost::throw_exception(std::logic_error("unknown task_status"));
   }
 
+  citation_history_.clear();
   params_.clear();
   obs_.clear();
   clone_status_.clear();
@@ -331,6 +338,7 @@ void task::evaluate(alps::parapack::option const& opt) {
   std::cout << "evaluating " << file_out_str() << std::endl;
 
   if (!on_memory()) load();
+  citation_history_.clear(); // recompute ancestry from the clones actually read
 
   // bool same_weight = params_.defined("EVALUATE_CLONES_WITH_SAME_WEIGHT") &&
   //   static_cast<bool>(alps::evaluate("EVALUATE_CLONES_WITH_SAME_WEIGHT", params_));
@@ -370,6 +378,7 @@ void task::evaluate(alps::parapack::option const& opt) {
         {
           hdf5::archive h5(dump_h5);
           success = load_observable(h5, cid, o);
+          if (success) merge_citations(citation_history_, read_citations(h5));
         }
       } else {
         IXDRFileDump dp(dump_xdr);
@@ -392,6 +401,7 @@ void task::evaluate(alps::parapack::option const& opt) {
           {
             hdf5::archive h5(dump_h5);
             success = load_observable(h5, cid, w, o);
+            if (success) merge_citations(citation_history_, read_citations(h5));
           }
         } else {
           IXDRFileDump dp(dump_xdr);

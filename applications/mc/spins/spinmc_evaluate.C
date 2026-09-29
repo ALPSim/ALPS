@@ -9,6 +9,8 @@
 *
 *****************************************************************************/
 
+#include <alps/utility/cli.hpp>
+#include <alps/utility/copyright.hpp>
 #include <alps/config.h>
 #include <alps/alea.h>
 #include <alps/scheduler.h>
@@ -18,6 +20,7 @@
 void evaluate(const boost::filesystem::path& p, const bool write_xml) {
   alps::ProcessList nowhere;
   alps::scheduler::MCSimulation sim(nowhere,p);
+  sim.set_citation_component("spinmc", "analysis");
   const alps::ObservableSet& m_in=sim.get_measurements();
   alps::Parameters parms=sim.get_parameters();
   alps::graph_helper<> graph(parms);
@@ -67,6 +70,9 @@ int main(int argc, char** argv)
 #ifndef BOOST_NO_EXCEPTIONS
 try {
 #endif
+  if (alps::handle_cli_information(argc, argv, "spinmc", [&] {
+    std::cout << "Usage: " << argv[0] << " [--write-xml] inputfile [inputfile ...]\n";
+  })) return 0;
   alps::scheduler::SimpleMCFactory<alps::scheduler::DummyMCRun> factory;
   alps::scheduler::init(factory);
   if (argc < 2) {
@@ -83,6 +89,10 @@ try {
    i=1;
   }
 
+
+  if (i >= argc) throw std::invalid_argument("Expected an input file");
+  alps::cli_mpi_guard mpi(argc, argv);
+  if (alps::cli_is_master()) alps::print_copyright(std::cout, "spinmc");
 
   for(; i<argc; i++)
    {

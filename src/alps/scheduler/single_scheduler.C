@@ -14,6 +14,7 @@
 
 /* $Id$ */
 
+#include <alps/utility/cli.hpp>
 #include <alps/scheduler/scheduler.h>
 #include <boost/assert.hpp>
 #include <alps/utility/copyright.hpp>
@@ -39,7 +40,9 @@ SingleScheduler::SingleScheduler(const NoJobfileOptions& opt,const Factory& f)
 void SingleScheduler::create_task(Parameters const& p)
 {
   destroy_task();
-  theTask = proc.make_task(processes,p);
+  Task* task = proc.make_task(processes,p);
+  task->set_citation_component(citation_component_);
+  theTask = task;
   if(theTask->cpus()>processes.size()) 
     boost::throw_exception(std::runtime_error("Task needs more CPUs than available"));
 }
@@ -108,20 +111,23 @@ int SingleScheduler::run()
 // initialize a scheduler for real work, parsing the command line
 SingleScheduler* start_single(const Factory& p, int argc, char** argv)
 {
+  return start_single(p, argc, argv, "scheduler");
+}
+
+SingleScheduler* start_single(const Factory& p, int argc, char** argv,
+                              const std::string& citation_component)
+{
+  NoJobfileOptions opt;
+  opt.citation_component = citation_component;
+  if (argc) opt = NoJobfileOptions(argc, argv, citation_component);
+  if (!opt.valid) return 0;
   alps::comm_init(argc,argv,false);
-  if (is_master()) {
+  if (alps::cli_is_master()) {
     p.print_copyright(std::cout);
     alps::scheduler::print_copyright(std::cout);
-    alps::print_copyright(std::cout);
+    alps::print_copyright(std::cout, citation_component);
   }
-  
-  NoJobfileOptions opt;
-  if (argc)
-    opt = NoJobfileOptions(argc,argv);
-  
-  if (!opt.valid)
-    return 0; // do not actually run
-  
+
   if (is_master()) {
     SingleScheduler* s=new SingleScheduler(opt,p);
     theScheduler = s;

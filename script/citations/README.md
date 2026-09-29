@@ -1,0 +1,130 @@
+# Maintaining ALPS citations
+
+Two files own distinct information:
+
+- `CITATION.cff` owns bibliographic records and the preferred framework citation.
+  It follows the unextended Citation File Format 1.2.0 schema. Each record has
+  one ordinary `identifiers` entry with `type: other`, `description: ALPS reference key`,
+  and a stable `value` such as `white1992`. Other identifiers remain available.
+- `CITATIONS.yaml` owns the scientific-credit request and the application-to-paper
+  relationships. Its `algorithm` and `implementation` lists reference those keys.
+  Every component also cites the CFF `preferred-citation`. The optional `uses`
+  list includes another component's references; this credits the conventional
+  scheduler when an application uses it. Empty lists explicitly mean no reference
+  is specified for that tier. Missing lists are invalid.
+
+No selection rules are encoded in CFF `scope`, `notes`, or other free-text fields.
+The YAML policy is checked against `policy.schema.json`; the generator also checks
+reference identifiers, duplicate DOIs, component dependencies, and cycles. Reference
+order follows the explicit lists, with a paper printed once even when it serves
+multiple roles. Legal license terms remain in `LICENSE.txt`.
+
+## Editing and validation
+
+Use an existing Python environment where practical (Python 3.9 or newer):
+
+```sh
+python -m pip install -r script/citations/requirements.txt
+python script/generate_citations.py --markdown CITATION.md
+python script/generate_citations.py --check
+python -m unittest discover -s test/packaging -p '*citations.py' -v
+```
+
+Commit the two authority files and the generated `CITATION.md`. CI checks that the
+Markdown is current. To add an application, add its component mapping and connect
+its startup path to the component key; do not put bibliographic text in C++.
+Use `alps::print_citations(out, component)` for a citation-only notice or
+`alps::print_copyright(out, component)` for the combined framework banner.
+Conventional scheduler applications pass the component as the fourth argument to
+`alps::scheduler::start`. Parapack applications register it with
+`PARAPACK_SET_CITATION_COMPONENT`.
+
+## Building and distributing
+
+CMake validates the source files and generates `src/alps/utility/citations_data.inc`,
+`citation_snapshots.inc`, and `CITATION.md` in the build directory. A change to either authority, the generator,
+or a schema automatically reruns generation on the next build. Generated C++ data
+is compiled into libalps; execution needs neither Python nor YAML parsing, a data-file
+lookup, or network access. Updating an installed catalog does not alter a binary:
+rebuild it to update its embedded notice.
+
+Python, PyYAML, and jsonschema are build-time tools even when Python bindings are
+disabled. Set `-DALPS_CITATION_PYTHON=/path/to/python` to choose an existing environment.
+Wheel builds declare these requirements in `pyproject.toml` and use the build
+environment's interpreter. The citation generation step needs no Python development
+headers or NumPy. Validation schemas are local, so generation works offline.
+
+Native and library-only installations include the authorities and generated guidance
+in `share/alps`; wheels include them in `pyalps/share/alps`. Source distributions
+must retain the two authorities, generator, and schema directory. Website maintainers
+can consume these same files or generated Markdown from a release tag; the website
+must not become a separately maintained citation list.
+
+## Initial policy and publication status
+
+The initial catalog was transcribed from the release 3.0 paper's citation policy,
+application table, bibliography, and DMFT discussion at the revision recorded in
+`CITATIONS.yaml`. These repository files now own ongoing updates. The source paper
+is provenance, not a dependency of the build.
+
+- QWL credits the two Wang–Landau papers and the quantum Wang–Landau paper as
+  algorithm references, with the release 3.0 paper as implementation and framework.
+- The aggregate DMFT table row is split into the driver, CT-INT, CT-HYB, and
+  Hirsch–Fye, using the manuscript's solver discussion. The driver asks users to
+  cite their chosen solver as well. Arbitrary external solvers cannot be inferred.
+- Scheduler-dependent applications also credit the scheduler implementation listed
+  in the paper. Parapack/looper is not assumed to be the same scheduler.
+- The release 3.0 preferred citation is explicitly an unpublished manuscript.
+  No publication year, journal, DOI, or preprint identifier has been invented.
+  Update this record when publication metadata is assigned. The current draft
+  author list is transcribed from the manuscript and should be checked at release.
+- Existing runtime references absent from the paper (for example the extra CT-HYB
+  PRB 84 reference) were not carried over automatically. Additional scientific
+  requirements should be reviewed and added explicitly to the authorities.
+
+Recommendations are application-level; parameter-dependent algorithm selection is
+not inferred.
+
+## CLI printing policy
+
+Calculation startup prints one catalog-derived notice per invocation, on the master
+rank for MPI calculations. This includes looper's stdin path. Multiple tasks in one
+invocation share the notice. Each application provides these standalone queries:
+
+- `--citations`: print only its generated citation guidance and exit successfully.
+- `--help` / `-h`: print usage and information options, without citation guidance.
+- `--license` / `-l`: print legal license terms, without citation guidance.
+
+Queries require no input files and create no simulation outputs. An optional `--mpi`
+is accepted; in MPI builds, rank zero prints the query result even when `--mpi` is
+omitted. Mixing queries or adding calculation arguments is rejected. `--` ends option
+recognition. Ordinary parsing failures do not print a citation notice.
+
+New entry points should use `alps::handle_cli_information` before reading input.
+The helper owns MPI initialization only when needed and preserves MPI owned by its
+caller. The scheduler, mcoptions, and both parapack implementations use this helper.
+`start_single` also accepts an explicit component key; its original overload defaults
+to the scheduler profile. Library callers that own MPI should initialize it before
+starting work. The printing helper does not change the calculation's execution mode.
+
+CTest compares each shipped simulation/diagnostic entry point's information output
+with the catalog, checks help/license separation and absence of output files, and
+repeats the contract with two ranks when an MPI launcher is available. Startup tests
+cover a two-task looper calculation, the embedded scheduler, parallel stdin workers,
+and both caller-owned MPI and unconditional cleanup after an information query.
+
+## Saved data
+
+HDF5 checkpoints and results embed historical CFF bibliographies, application
+roles, and the producing build's notice at `/provenance/alps/citations`.
+See [Citations in saved ALPS data](saved-data.md) for the schema, restart and
+pipeline rules, reader/export APIs, and format coverage. New integrations must
+connect their save path as well as their CLI component.
+
+## CFF schema attribution
+
+`cff-1.2.0.schema.json` is an unmodified copy from the Citation File Format project:
+https://github.com/citation-file-format/citation-file-format/blob/1.2.0/schema.json
+
+It is distributed under Creative Commons Attribution 4.0 International; see
+`CFF-LICENSE`. ALPS's policy schema and generator are separate project code.

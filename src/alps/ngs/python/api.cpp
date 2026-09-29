@@ -12,6 +12,7 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <alps/utility/citation_provenance.hpp>
 #include <alps/ngs.hpp>
 #include <alps/mcbase.hpp>
 
@@ -19,6 +20,7 @@ namespace alps {
     namespace detail {
 
         void save_results_export(mcresults const & res, params const & par, alps::hdf5::archive & ar, std::string const & path) {
+            write_citations(ar, "framework", "unspecified");
             ar["/parameters"] << par;
             if (res.size())
                 ar[path] << res;

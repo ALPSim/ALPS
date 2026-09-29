@@ -37,7 +37,7 @@ namespace scheduler {
 void print_copyright(std::ostream& out) {
   out << "using the ALPS parallelizing scheduler\n";
   out << "  copyright (c) 1994-2006 by Matthias Troyer <troyer@comp-phys.org>.\n";
-  out << "  see Lecture Notes in Computer Science, Vol. 1505, p. 191 (1998).\n\n";
+  out << "\n";
 }
 
 // global variable: the scheduler on this node
@@ -139,7 +139,7 @@ int Scheduler::run() // a slave scheduler
 Scheduler::Scheduler(const NoJobfileOptions& opt, const Factory& p)
   : proc(p), 
     programname(opt.programname), 
-    theTask(0),
+    citation_component_(opt.citation_component), theTask(0),
     min_check_time(opt.min_check_time),
     max_check_time(opt.max_check_time),
     checkpoint_time(opt.checkpoint_time),
@@ -184,7 +184,8 @@ AbstractTask* Scheduler::make_task(const ProcessList& w,const boost::filesystem:
     found=where.begin()->local();
   }
   if(found)  { // local
-    AbstractTask* task= proc.make_task(where,fname);
+    Task* task= proc.make_task(where,fname);
+    task->set_citation_component(citation_component_);
     //dynamic_cast<Task*>(task)->construct();
 
     return task;
@@ -202,12 +203,14 @@ AbstractTask* Scheduler::make_task(const boost::filesystem::path& fn)
 
 AbstractWorker* Scheduler::make_worker(const ProcessList& w, const alps::Parameters& p,int n)
 {
-  return proc.make_worker(w,p,n);
+  Worker* worker = proc.make_worker(w,p,n);
+  worker->set_citation_component(citation_component_);
+  return worker;
 }
 
 AbstractWorker* Scheduler::make_worker(const alps::Parameters& p)
 {
-  return proc.make_worker(ProcessList(),p,0);
+  return make_worker(ProcessList(),p,0);
 }
 
 void init(const Factory& p)
@@ -218,12 +221,18 @@ void init(const Factory& p)
 // initialize a scheduler for real work, parsing the command line
 int start(int argc, char** argv, const Factory& p)
 {
-  Options opt(argc,argv);
+  return start(argc, argv, p, "scheduler");
+}
+
+int start(int argc, char** argv, const Factory& p, const std::string& citation_component)
+{
+  Options opt(argc,argv,citation_component);
+  if (!opt.valid) return 0;
   comm_init(argc,argv,opt.use_mpi);
   if (is_master() || !runs_parallel()) {
     p.print_copyright(std::cout);
     alps::scheduler::print_copyright(std::cout);
-    alps::print_copyright(std::cout);
+    alps::print_copyright(std::cout, citation_component);
   }
   
   int res=0;
