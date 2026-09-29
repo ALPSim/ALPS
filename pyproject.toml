@@ -1,5 +1,5 @@
 [build-system]
-requires = ["scikit-build-core", "numpy", "scipy", "PyYAML>=6,<7", "jsonschema>=4,<5"]
+requires = ["scikit-build-core", "numpy", "scipy"]
 build-backend = "scikit_build_core.build"
 
 [tool.scikit-build]

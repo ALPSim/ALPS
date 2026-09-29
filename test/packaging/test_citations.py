@@ -116,6 +116,11 @@ class CitationTests(unittest.TestCase):
         expected = generator.markdown(self.policy, self.references, self.framework)
         self.assertEqual((ROOT / "CITATION.md").read_text(encoding="utf-8"), expected)
 
+    def test_checked_in_native_data_is_current(self):
+        for filename, content in generator.native_outputs(ROOT, self.cff, self.policy, self.references, self.framework).items():
+            with self.subTest(filename=filename):
+                self.assertEqual((ROOT / filename).read_text(encoding="utf-8"), content)
+
     def test_saved_snapshots_are_valid_cff_and_match_cli_selection(self):
         for component in self.policy["components"]:
             with self.subTest(component=component):
@@ -158,24 +163,30 @@ class CitationTests(unittest.TestCase):
         self.assertEqual(subprocess.check_output([str(binary)], text=True), expected)
 
     @unittest.skipUnless(shutil.which("cmake"), "CMake unavailable")
-    def test_cmake_regeneration_and_all_install_layouts(self):
-        # Use the real generation/install module without configuring ALPS's
-        # numerical dependencies. Only the small citation inputs are copied.
+    def test_native_build_needs_no_python_and_all_install_layouts(self):
+        # Exercise the real native module with an unusable Python path. The
+        # generator runs only for the explicit maintainer regeneration below.
         shutil.copytree(ROOT / "script/citations", self.root / "script/citations")
         shutil.copyfile(ROOT / "script/generate_citations.py", self.root / "script/generate_citations.py")
+        shutil.copyfile(ROOT / "CITATION.md", self.root / "CITATION.md")
         project = self.root / "CMakeLists.txt"
         project.write_text(
             'cmake_minimum_required(VERSION 3.22)\nproject(citation_test LANGUAGES NONE)\n'
             f'include("{ROOT.as_posix()}/cmake/ALPSCitations.cmake")\n', encoding="utf-8")
         build = self.root / "build"
-        for mode, destination in (("native", "share/alps"), ("libraries", "share/alps"), ("wheel", "pyalps/share/alps")):
+        for mode, destination, version in (("native", "share/alps", "3.0.0"),
+                                           ("libraries", "share/alps", "3.0.0-rc.2"),
+                                           ("wheel", "pyalps/share/alps", '3.0.0-review;"quoted"\\path')):
             with self.subTest(mode=mode):
                 subprocess.run(["cmake", "-S", str(self.root), "-B", str(build),
-                                f"-DALPS_CITATION_PYTHON={sys.executable}",
+                                "-DALPS_CITATION_PYTHON=/nonexistent/python",
+                                "-DCMAKE_DISABLE_FIND_PACKAGE_Python3=ON", f"-DALPS_VERSION={version}",
                                 "-DALPS_BUILD_PYTHON=OFF",
                                 f"-DALPS_BUILD_LIBS_ONLY={'ON' if mode == 'libraries' else 'OFF'}",
                                 f"-DALPS_PYTHON_WHEEL={'ON' if mode == 'wheel' else 'OFF'}"],
                                check=True, capture_output=True)
+                expected = generator.cpp_snapshots(self.cff, self.policy, self.references, self.framework, version)
+                self.assertEqual((build / "src/alps/utility/citation_snapshots.inc").read_text(encoding="utf-8"), expected)
                 prefix = self.root / ("install-" + mode)
                 subprocess.run(["cmake", "--install", str(build), "--prefix", str(prefix), "--component", "libraries"],
                                check=True, capture_output=True)
@@ -183,15 +194,31 @@ class CitationTests(unittest.TestCase):
                     self.assertTrue((prefix / destination / filename).is_file())
         data = build / "src/alps/utility/citations_data.inc"
         before = data.read_text(encoding="utf-8")
-        self.cff["preferred-citation"]["title"] = "Changed using only the catalog"
+        self.cff["preferred-citation"]["title"] = "Changed using only the catalog @DO_NOT_REPLACE@"
         self.save()
+        self.cff, self.policy, self.references, self.framework = generator.load_catalog(self.root)
+        stale = subprocess.run(["cmake", "--build", str(build)], capture_output=True, text=True)
+        self.assertNotEqual(stale.returncode, 0)
+        self.assertIn("Generated citation data is stale", stale.stdout + stale.stderr)
+        subprocess.run([sys.executable, str(self.root / "script/generate_citations.py"), "--regenerate"],
+                       check=True, capture_output=True)
         subprocess.run(["cmake", "--build", str(build)], check=True, capture_output=True)
         after = data.read_text(encoding="utf-8")
         self.assertNotEqual(before, after)
         self.assertIn("Changed using only the catalog", after)
+        self.assertIn("@DO_NOT_REPLACE@", (build / "src/alps/utility/citation_snapshots.inc").read_text(encoding="utf-8"))
+        self.assertEqual((build / "src/alps/utility/citation_snapshots.inc").read_text(encoding="utf-8"),
+                         generator.cpp_snapshots(self.cff, self.policy, self.references, self.framework, version))
+        derived = self.root / "script/citations/generated/citations_data.inc"
+        with derived.open("a", encoding="utf-8") as output:
+            output.write("\n// manually edited generated data\n")
+        stale = subprocess.run(["cmake", "--build", str(build)], capture_output=True, text=True)
+        self.assertNotEqual(stale.returncode, 0)
+        self.assertIn("Generated citation data is stale", stale.stdout + stale.stderr)
         self.policy["components"]["dmrg"]["algorithm"] = ["missing_reference"]
         self.save()
-        invalid = subprocess.run(["cmake", "--build", str(build)], capture_output=True, text=True)
+        invalid = subprocess.run([sys.executable, str(self.root / "script/generate_citations.py"), "--regenerate"],
+                                 capture_output=True, text=True)
         self.assertNotEqual(invalid.returncode, 0)
         self.assertIn("unknown reference missing_reference", " ".join((invalid.stdout + invalid.stderr).split()))
 

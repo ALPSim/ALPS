@@ -16,6 +16,19 @@
 #   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
+# Python is optional for native builds, including builds of C++ tests. These
+# catalog/CLI tests are maintainer checks and run when an interpreter is available.
+if(NOT ALPS_CITATION_PYTHON)
+  if(PYTHON_INTERPRETER)
+    set(ALPS_CITATION_PYTHON "${PYTHON_INTERPRETER}")
+  else()
+    find_package(Python3 3.9 QUIET COMPONENTS Interpreter)
+    if(Python3_Interpreter_FOUND)
+      set(ALPS_CITATION_PYTHON "${Python3_EXECUTABLE}")
+    endif()
+  endif()
+endif()
+if(ALPS_CITATION_PYTHON)
 add_test(NAME citation_catalog
   COMMAND "${ALPS_CITATION_PYTHON}" "${PROJECT_SOURCE_DIR}/script/generate_citations.py" --check)
 set_property(TEST citation_catalog PROPERTY LABELS "utility;citations")
@@ -53,6 +66,10 @@ if(TARGET loop)
     COMMAND "${ALPS_CITATION_PYTHON}" "${PROJECT_SOURCE_DIR}/test/utility/check_citation_startup.py"
             "$<TARGET_FILE:loop>" "${PROJECT_BINARY_DIR}/lib/xml")
   set_property(TEST citation_calculation_loop PROPERTY LABELS citations)
+endif()
+
+else()
+  message(STATUS "Python unavailable: skipping citation catalog and CLI wrapper tests")
 endif()
 
 if(NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)

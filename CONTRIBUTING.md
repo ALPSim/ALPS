@@ -52,8 +52,6 @@ Before opening a new issue, please search existing issues to avoid duplicates.
 ### Prerequisites
 
 - CMake ≥ 3.22
-- For citation generation: Python ≥ 3.9 with `PyYAML` and `jsonschema`
-  (`python -m pip install -r script/citations/requirements.txt`), including C++-only builds
 - A C++17-capable compiler (GCC, Clang, Intel, or Fujitsu)
 - Boost (downloaded automatically during configuration; or use a system install with `-DALPS_USE_SYSTEM_BOOST=ON`)
 - For Fortran bindings: gfortran (or compatible Fortran compiler)
@@ -78,7 +76,12 @@ See the [installation page](https://alps.comp-phys.org/install/) for full platfo
 
 Citation metadata and application rules live in `CITATION.cff` and `CITATIONS.yaml`.
 See [citation maintenance](script/citations/README.md) for generation and validation.
-If needed, select the build-tool interpreter with `-DALPS_CITATION_PYTHON=/path/to/python`.
+Native builds use checked-in generated citation data and do not require Python.
+Editing that data requires Python ≥ 3.9 with `PyYAML` and `jsonschema`:
+`python -m pip install -r script/citations/requirements.txt`, then
+`python script/generate_citations.py --regenerate`. Commit the generated files
+alongside the authorities; CI checks that they agree. For the optional citation
+tests, select an interpreter with `-DALPS_CITATION_PYTHON=/path/to/python`.
 
 ```bash
 mkdir build && cd build

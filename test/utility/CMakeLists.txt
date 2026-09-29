@@ -29,6 +29,7 @@ FOREACH(name vmusage bitops citations)
   set_property(TEST ${name} PROPERTY LABELS utility)
 ENDFOREACH(name)
 
+if(ALPS_CITATION_PYTHON)
 add_executable(citation_runtime citation_runtime.cpp)
 target_link_libraries(citation_runtime alps)
 add_test(NAME citation_runtime_serial
@@ -58,3 +59,4 @@ add_test(NAME citation_provenance_hdf5
   COMMAND "${ALPS_CITATION_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/check_citation_provenance.py"
           "$<TARGET_FILE:citation_provenance>")
 set_property(TEST citation_provenance_hdf5 PROPERTY LABELS "citations;hdf5")
+endif()

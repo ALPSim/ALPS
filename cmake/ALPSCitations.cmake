@@ -1,36 +1,69 @@
-# Validate the citation authorities and embed an offline snapshot in libalps.
-# Python is a build tool here; Python bindings/development headers are not needed.
-if(NOT ALPS_CITATION_PYTHON)
-  if(PYTHON_INTERPRETER)
-    set(_alps_citation_python "${PYTHON_INTERPRETER}")
-  else()
-    find_package(Python3 3.9 REQUIRED COMPONENTS Interpreter)
-    set(_alps_citation_python "${Python3_EXECUTABLE}")
+# Native builds consume checked-in, validated data and need no Python parser.
+set(_alps_citation_generated "${PROJECT_SOURCE_DIR}/script/citations/generated")
+include("${_alps_citation_generated}/snapshots.cmake")
+if(NOT _alps_citation_generated_format EQUAL 1)
+  message(FATAL_ERROR "Unsupported generated ALPS citation format")
+endif()
+list(LENGTH _alps_citation_files _alps_citation_count)
+math(EXPR _alps_citation_last "${_alps_citation_count} - 1")
+foreach(_index RANGE ${_alps_citation_last})
+  list(GET _alps_citation_files ${_index} _file)
+  list(GET _alps_citation_hashes ${_index} _expected)
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/${_file}")
+  file(SHA256 "${PROJECT_SOURCE_DIR}/${_file}" _actual)
+  if(NOT _actual STREQUAL _expected)
+    message(FATAL_ERROR "Generated citation data is stale (${_file}).\n"
+      "After editing citation sources, run: python script/generate_citations.py --regenerate\n"
+      "Python with PyYAML/jsonschema is a maintainer tool, not a native build requirement.")
   endif()
-  set(ALPS_CITATION_PYTHON "${_alps_citation_python}" CACHE FILEPATH
-      "Python interpreter with PyYAML and jsonschema for citation generation")
-endif()
+endforeach()
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_alps_citation_generated}/snapshots.cmake")
 
-set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
-  "${PROJECT_SOURCE_DIR}/CITATION.cff"
-  "${PROJECT_SOURCE_DIR}/CITATIONS.yaml"
-  "${PROJECT_SOURCE_DIR}/script/generate_citations.py"
-  "${PROJECT_SOURCE_DIR}/script/citations/cff-1.2.0.schema.json"
-  "${PROJECT_SOURCE_DIR}/script/citations/policy.schema.json")
-
-execute_process(
-  COMMAND "${ALPS_CITATION_PYTHON}" "${PROJECT_SOURCE_DIR}/script/generate_citations.py"
-          --root "${PROJECT_SOURCE_DIR}"
-          --cpp "${PROJECT_BINARY_DIR}/src/alps/utility/citations_data.inc"
-          --markdown "${PROJECT_BINARY_DIR}/CITATION.md"
-          --snapshot-cpp "${PROJECT_BINARY_DIR}/src/alps/utility/citation_snapshots.inc"
-          --software-version "${ALPS_VERSION}"
-  RESULT_VARIABLE _alps_citation_result
-  ERROR_VARIABLE _alps_citation_error)
-if(NOT _alps_citation_result EQUAL 0)
-  message(FATAL_ERROR "Cannot generate ALPS citations using ${ALPS_CITATION_PYTHON}:\n"
-    "${_alps_citation_error}")
+# JSON escaping also gives C++ string-literal escaping for ordinary version text.
+# The CFF's quoted version is embedded in another JSON/C++ string, so escape twice.
+function(_alps_citation_json_escape _input _output)
+  string(REPLACE "\\" "\\\\" _escaped "${_input}")
+  string(REPLACE "\"" "\\\"" _escaped "${_escaped}")
+  string(REPLACE "\n" "\\n" _escaped "${_escaped}")
+  string(REPLACE "\r" "\\r" _escaped "${_escaped}")
+  string(REPLACE "\t" "\\t" _escaped "${_escaped}")
+  set(${_output} "${_escaped}" PARENT_SCOPE)
+endfunction()
+if(NOT ALPS_VERSION)
+  set(ALPS_VERSION "unknown")
 endif()
+_alps_citation_json_escape("${ALPS_VERSION}" ALPS_CITATION_VERSION_JSON)
+_alps_citation_json_escape("${ALPS_CITATION_VERSION_JSON}" ALPS_CITATION_VERSION_CFF_JSON)
+foreach(_component IN LISTS _alps_citation_components)
+  foreach(ALPS_CITATION_ACTIVITY calculation analysis unspecified)
+    set(_payload "${_alps_citation_payload_${_component}}")
+    foreach(_field ACTIVITY VERSION_CFF_JSON VERSION_JSON)
+      string(REPLACE "@ALPS_CITATION_${_field}@" "${ALPS_CITATION_${_field}}" _payload "${_payload}")
+    endforeach()
+    string(SHA256 ALPS_CITATION_${_component}_${ALPS_CITATION_ACTIVITY}_ID "${_payload}")
+  endforeach()
+endforeach()
+configure_file("${_alps_citation_generated}/citations_data.inc"
+               "${PROJECT_BINARY_DIR}/src/alps/utility/citations_data.inc" COPYONLY)
+file(READ "${_alps_citation_generated}/citation_snapshots.inc.in" _snapshots)
+foreach(_component IN LISTS _alps_citation_components)
+  foreach(_activity calculation analysis unspecified)
+    set(_field "ALPS_CITATION_${_component}_${_activity}_ID")
+    string(REPLACE "@${_field}@" "${${_field}}" _snapshots "${_snapshots}")
+  endforeach()
+endforeach()
+foreach(_field VERSION_CFF_JSON VERSION_JSON)
+  string(REPLACE "@ALPS_CITATION_${_field}@" "${ALPS_CITATION_${_field}}" _snapshots "${_snapshots}")
+endforeach()
+set(_snapshot_output "${PROJECT_BINARY_DIR}/src/alps/utility/citation_snapshots.inc")
+set(_previous "")
+if(EXISTS "${_snapshot_output}")
+  file(READ "${_snapshot_output}" _previous)
+endif()
+if(NOT _previous STREQUAL _snapshots)
+  file(WRITE "${_snapshot_output}" "${_snapshots}")
+endif()
+configure_file("${PROJECT_SOURCE_DIR}/CITATION.md" "${PROJECT_BINARY_DIR}/CITATION.md" COPYONLY)
 
 if(ALPS_PYTHON_WHEEL)
   set(_alps_citation_destination "pyalps/share/alps")

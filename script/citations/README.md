@@ -25,13 +25,14 @@ Use an existing Python environment where practical (Python 3.9 or newer):
 
 ```sh
 python -m pip install -r script/citations/requirements.txt
-python script/generate_citations.py --markdown CITATION.md
+python script/generate_citations.py --regenerate
 python script/generate_citations.py --check
 python -m unittest discover -s test/packaging -p '*citations.py' -v
 ```
 
-Commit the two authority files and the generated `CITATION.md`. CI checks that the
-Markdown is current. To add an application, add its component mapping and connect
+Commit the two authority files, generated `CITATION.md`, and
+`script/citations/generated/`. CI regenerates all derived files and checks that
+they match. To add an application, add its component mapping and connect
 its startup path to the component key; do not put bibliographic text in C++.
 Use `alps::print_citations(out, component)` for a citation-only notice or
 `alps::print_copyright(out, component)` for the combined framework banner.
@@ -41,22 +42,28 @@ Conventional scheduler applications pass the component as the fourth argument to
 
 ## Building and distributing
 
-CMake validates the source files and generates `src/alps/utility/citations_data.inc`,
-`citation_snapshots.inc`, and `CITATION.md` in the build directory. A change to either authority, the generator,
-or a schema automatically reruns generation on the next build. Generated C++ data
-is compiled into libalps; execution needs neither Python nor YAML parsing, a data-file
-lookup, or network access. Updating an installed catalog does not alter a binary:
-rebuild it to update its embedded notice.
+CMake consumes the checked-in generated data without running Python or parsing
+YAML. It verifies SHA-256 checksums of the authorities, generator, schemas, and
+derived files; stale data stops configuration with the regeneration command.
+A source change also triggers this check on the next incremental build. This
+prevents a modified catalog from silently compiling yesterday's recommendations.
 
-Python, PyYAML, and jsonschema are build-time tools even when Python bindings are
-disabled. Set `-DALPS_CITATION_PYTHON=/path/to/python` to choose an existing environment.
-Wheel builds declare these requirements in `pyproject.toml` and use the build
-environment's interpreter. The citation generation step needs no Python development
-headers or NumPy. Validation schemas are local, so generation works offline.
+CMake substitutes the actual build version, including prerelease labels, and
+computes each snapshot's fingerprint from its pre-generated canonical JSON.
+Release-version changes therefore need no catalog regeneration or Python.
+Generated C++ data is compiled into libalps; execution needs no data-file lookup
+or network access. Updating an installed catalog does not alter a binary.
+
+Python, PyYAML, and jsonschema are catalog-maintenance and validation tools, not
+dependencies of normal native or wheel builds. The schemas are local, so
+regeneration works offline. Optional citation tests use
+`-DALPS_CITATION_PYTHON=/path/to/python`; C++ builds remain available when Python
+is absent. The generated directory is marked as derived for GitHub diff display,
+so scientific review can focus on the authority files and readable matrix.
 
 Native and library-only installations include the authorities and generated guidance
 in `share/alps`; wheels include them in `pyalps/share/alps`. Source distributions
-must retain the two authorities, generator, and schema directory. Website maintainers
+must retain the two authorities, generator, schemas, and generated directory. Website maintainers
 can consume these same files or generated Markdown from a release tag; the website
 must not become a separately maintained citation list.
 
