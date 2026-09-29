@@ -189,6 +189,30 @@ def test_boolean_and_signed_byte_round_trip(tmp_path, dtype, shape, attribute):
         np.testing.assert_array_equal(actual, value)
 
 
+@pytest.mark.parametrize("scalar", [bool, np.bool_])
+@pytest.mark.parametrize("value", [False, True])
+@pytest.mark.parametrize("attribute", [False, True])
+def test_boolean_scalar_round_trip(tmp_path, scalar, value, attribute):
+    path = "/group/@flag" if attribute else "/flag"
+    filename = str(tmp_path / "boolean-scalar.h5")
+    with hdf5.archive(filename, "w") as archive:
+        archive.create_group("/group")
+        archive[path] = scalar(value)
+    with hdf5.archive(filename, "r") as archive:
+        assert archive[path] is value
+
+
+@pytest.mark.parametrize("value", [False, True])
+def test_numpy_boolean_scalar_parameter_checkpoint(tmp_path, value):
+    filename = str(tmp_path / "boolean-parameter.h5")
+    parameters = ngs.params({"flag": np.bool_(value)})
+    with hdf5.archive(filename, "w") as archive:
+        archive["parameters"] = parameters
+    with hdf5.archive(filename, "r") as archive:
+        restored = ngs.params(archive, "/parameters")
+    assert restored["flag"] is value
+
+
 def test_boolean_mask_remains_a_mask_after_reload(tmp_path):
     with hdf5.archive(str(tmp_path / "mask.h5"), "w") as archive:
         archive["mask"] = np.array([True, False, True])

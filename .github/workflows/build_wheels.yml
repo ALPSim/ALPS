@@ -129,7 +129,7 @@ jobs:
       - name: Install wheel from artifacts
         run: |
           pipx run twine check wheelhouse/*.whl
-          python -m pip install numpy scipy pytest
+          python -m pip install numpy scipy matplotlib pytest
           python -m pip install --no-index --find-links wheelhouse pyalps
 
       - name: Import and run binding surface tests
@@ -170,7 +170,7 @@ jobs:
             | sudo tee /etc/apt/apt.conf.d/99ci-timeouts > /dev/null
           sudo apt-get update
           sudo apt-get install -y libopenmpi-dev openmpi-bin
-          python -m pip install numpy scipy pytest mpi4py
+          python -m pip install numpy scipy matplotlib pytest mpi4py
           python -m pip install --no-index --find-links wheelhouse pyalps
 
       - name: Run two-rank compatibility surface

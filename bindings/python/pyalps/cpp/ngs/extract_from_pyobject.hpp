@@ -81,7 +81,7 @@
                 else if (dtype == "numpy.str_" || dtype == "numpy.str")
                     visitor(std::string(nb_::cast<std::string>(nb_::str(data.attr("__str__")()))));
                 else if (dtype == "numpy.bool_" || dtype == "numpy.bool")
-                    visitor(nb_::cast<bool>(data));
+                    visitor(nb_::cast<bool>(data.attr("__bool__")()));
                 else if (dtype == "numpy.int8")  visitor(static_cast<std::int8_t>(nb_::cast<long>(data)));
                 else if (dtype == "numpy.int16") visitor(static_cast<std::int16_t>(nb_::cast<long>(data)));
                 else if (dtype == "numpy.int32") visitor(static_cast<std::int32_t>(nb_::cast<long>(data)));
