@@ -124,6 +124,13 @@ def convert_to_text(desc):
     return convertToText(desc['data'],title=t,xaxis=x,yaxis=y)    
 
             
+def _errors(values):
+    """Return the error bars of values as an array, or None if they have none."""
+    try:
+        return np.array([v.error for v in values])
+    except AttributeError:
+        return None
+
 def makeGracePlot(data,title=None,xaxis=None,yaxis=None,legend=None):
         output =  '# Grace project file\n'
         output += '#\n@    g0 on\n@    with g0\n'
@@ -216,32 +223,25 @@ def makeGracePlot(data,title=None,xaxis=None,yaxis=None,legend=None):
             output += '\n'
 
             if len(q.y):
-                try:
-                    xerrors = np.array([xx.error for xx in q.x])
-                except AttributeError:
-                    xerrors = None
-                
-                try:
-                    yerrors = np.array([xx.error for xx in q.y])
-                except AttributeError:
-                    yerrors = None
-                    
-                if xerrors == None and yerrors == None:
+                xerrors = _errors(q.x)
+                yerrors = _errors(q.y)
+
+                if xerrors is None and yerrors is None:
                     output += '@type xy\n'
                     for i in range(len(q.x)):
                         output += str(q.x[i]) + '\t' + str(q.y[i]) + '\n'
-                if xerrors == None and yerrors != None:
+                if xerrors is None and yerrors is not None:
                     output += '@type xydy\n'
                     for i in range(len(q.x)):
                         output += str(q.x[i]) + '\t' + str(q.y[i].mean) + '\t' + str(q.y[i].error) + '\n'
-                if xerrors != None and yerrors == None:
+                if xerrors is not None and yerrors is None:
                     output += '@type xydx\n'
                     for i in range(len(q.x)):
-                        output += str(q.x[i]) + '\t' + str(q.y[i].mean) + '\t' + str(q.x[i].error) + '\n'
-                if xerrors != None and yerrors != None:
+                        output += str(q.x[i].mean) + '\t' + str(q.y[i]) + '\t' + str(q.x[i].error) + '\n'
+                if xerrors is not None and yerrors is not None:
                     output += '@type xydxdy\n'
                     for i in range(len(q.x)):
-                        output += str(q.x[i]) + '\t' + str(q.y[i].mean) + '\t' + str(q.x[i].error) + '\t' + str(q.x[i].error) + '\n'
+                        output += str(q.x[i].mean) + '\t' + str(q.y[i].mean) + '\t' + str(q.x[i].error) + '\t' + str(q.y[i].error) + '\n'
                 output += '&\n'
                 num+=1
                      
@@ -314,75 +314,70 @@ def makeGnuplotPlot(data,title=None,xaxis=None,yaxis=None,legend=None, outfile=N
     num = 0
     output += 'plot '
     
+    # Error bars of each dataset, reused when its data is written below.
+    errors = []
     for q in flatten(data):
-        if len(q.y):
-            try:
-                xerrors = np.array([xx.error for xx in q.x])
-            except AttributeError:
-                xerrors = None
-                
-            try:
-                yerrors = np.array([xx.error for xx in q.y])
-            except AttributeError:
-                yerrors = None
+        xerrors = _errors(q.x) if len(q.y) else None
+        yerrors = _errors(q.y) if len(q.y) else None
+        errors.append((xerrors, yerrors))
         if 'line' in q.props and q.props['line'] == 'scatter':
             if 'label' in q.props:
-                if xerrors == None and yerrors == None:
+                if xerrors is None and yerrors is None:
                     output += ' "-" using 1:2 title "' + q.props['label'] + '",'
-                if xerrors == None and yerrors != None:
+                if xerrors is None and yerrors is not None:
                     output += ' "-" using 1:2:3 w yerrorbars  title "' + q.props['label'] + '",'
-                if xerrors != None and yerrors == None:
+                if xerrors is not None and yerrors is None:
                     output += ' "-" using 1:2:3 w xerrorbars  title "' + q.props['label'] + '",'
-                if xerrors != None and yerrors != None:
+                if xerrors is not None and yerrors is not None:
                     output += ' "-" using 1:2:3:4 w xyerrorbars  title "' + q.props['label'] + '",'
             else:
-                if xerrors == None and yerrors == None:
-                    output += ' "-" using 1:2 notitle ,"' 
-                if xerrors == None and yerrors != None:
+                if xerrors is None and yerrors is None:
+                    output += ' "-" using 1:2 notitle ,' 
+                if xerrors is None and yerrors is not None:
                     output += ' "-" using 1:2:3 w yerrorbars  notitle ,' 
-                if xerrors != None and yerrors == None:
+                if xerrors is not None and yerrors is None:
                     output += ' "-" using 1:2:3 w xerrorbars  notitle ,' 
-                if xerrors != None and yerrors != None:
+                if xerrors is not None and yerrors is not None:
                     output += ' "-" using 1:2:3:4 w xyerrorbars  notitle ,'
         else:
             if 'label' in q.props:
-                if xerrors == None and yerrors == None:
+                if xerrors is None and yerrors is None:
                     output += ' "-" using 1:2 title "' + q.props['label'] + '",'
-                if xerrors == None and yerrors != None:
+                if xerrors is None and yerrors is not None:
                     output += ' "-" using 1:2:3 w yerrorline  title "' + q.props['label'] + '",'
-                if xerrors != None and yerrors == None:
+                if xerrors is not None and yerrors is None:
                     output += ' "-" using 1:2:3 w xerrorline  title "' + q.props['label'] + '",'
-                if xerrors != None and yerrors != None:
+                if xerrors is not None and yerrors is not None:
                     output += ' "-" using 1:2:3:4 w xyerrorline  title "' + q.props['label'] + '",'
             else:
-                if xerrors == None and yerrors == None:
-                    output += ' "-" using 1:2 notitle ,"' 
-                if xerrors == None and yerrors != None:
+                if xerrors is None and yerrors is None:
+                    output += ' "-" using 1:2 notitle ,' 
+                if xerrors is None and yerrors is not None:
                     output += ' "-" using 1:2:3 w yerrorline  notitle ,' 
-                if xerrors != None and yerrors == None:
+                if xerrors is not None and yerrors is None:
                     output += ' "-" using 1:2:3 w xerrorline  notitle ,' 
-                if xerrors != None and yerrors != None:
+                if xerrors is not None and yerrors is not None:
                     output += ' "-" using 1:2:3:4 w xyerrorline  notitle ,'
     output=output[:-1]
     output+='\n'
     
-    for q in flatten(data):    
-            if xerrors == None and yerrors == None:
+    for q, (xerrors, yerrors) in zip(flatten(data), errors):
+            if xerrors is None and yerrors is None:
                 output += '# X Y \n'
                 for i in range(len(q.x)):
                     output += str(q.x[i]) + '\t' + str(q.y[i]) + '\n'
                 output += 'end \n'
-            if xerrors == None and yerrors != None:
+            if xerrors is None and yerrors is not None:
                 output += '# X Y DY \n'
                 for i in range(len(q.x)):
                     output += str(q.x[i]) + '\t' + str(q.y[i].mean) + '\t' + str(q.y[i].error) + '\n'
                 output += 'end \n'
-            if xerrors != None and yerrors == None:
+            if xerrors is not None and yerrors is None:
                 output += '# X Y DX \n'
                 for i in range(len(q.x)):
                     output += str(q.x[i].mean) + '\t' + str(q.y[i]) + '\t' + str(q.x[i].error) + '\n'
                 output += 'end \n'
-            if xerrors != None and yerrors != None:
+            if xerrors is not None and yerrors is not None:
                 output += '# X Y DXY \n'
                 for i in range(len(q.x)):
                     output += str(q.x[i].mean) + '\t' + str(q.y[i].mean) + '\t' + str(q.x[i].error) + '\t' + str(q.y[i].error) + '\n'

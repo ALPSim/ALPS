@@ -29,7 +29,7 @@ include_directories(${Boost_ROOT_DIR})
 enable_testing()
 if (ALPS_BUILD_PYTHON AND BUILD_SHARED_LIBS)
 #    FOREACH (name pyioarchive pyhdf5io numpylarge pyparams hlist_test mcdata pyhdf5 mcanalyze, accumulators)
-    FOREACH (name pyioarchive pyhdf5io_test pyparams_test hlist_test mcdata_test pyhdf5_test mcanalyze)
+    FOREACH (name pyioarchive pyhdf5io_test pyparams_test hlist_test mcdata_test pyhdf5_test mcanalyze plot_core_test)
         add_test(python_${name}
             ${CMAKE_COMMAND}
                 -Dpython_interpreter=${PYTHON_INTERPRETER}
