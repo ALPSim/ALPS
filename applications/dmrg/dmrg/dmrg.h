@@ -168,13 +168,6 @@ DMRGTask<value_type>::DMRGTask(const alps::ProcessList& w,const alps::Parameters
 template<class value_type>
 void DMRGTask<value_type>::init()
 {
-  if (parms.defined("TEMP_DIRECTORY")) {
-    std::string temp_dir = parms["TEMP_DIRECTORY"];
-    dmtk::tmp_files.set_temp_dir(temp_dir.c_str());
-  } else {
-    dmtk::tmp_files.set_temp_dir(alps::temp_directory_path().string().c_str());
-  }
-
   num_eigenvalues = this->parms.value_or_default("NUMBER_EIGENVALUES",1);
    
   typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
@@ -267,9 +260,18 @@ std::string simplify_name(const SiteOp &op)
 template<class value_type>
 void DMRGTask<value_type>::dostep() 
 {
-  if (finished()) 
+  if (finished())
     return;
-  
+
+  // Select scratch storage when this task runs; other tasks may have been
+  // constructed since init().
+  if (parms.defined("TEMP_DIRECTORY")) {
+    std::string temp_dir = parms["TEMP_DIRECTORY"];
+    dmtk::tmp_files.set_temp_dir(temp_dir.c_str());
+  } else {
+    dmtk::tmp_files.set_temp_dir(alps::temp_directory_path().string().c_str());
+  }
+
   dmtk::Lattice l(num_sites(),dmtk::OBC);
   hami = dmtk::Hami<value_type >(l);
   site_block.resize(alps::maximum_vertex_type(graph())+1);
@@ -495,6 +497,7 @@ void DMRGTask<value_type>::dostep()
   }
   this->average_values["Truncation error"].push_back(S.truncation_error());
   finish();
+  dmtk::tmp_files.cleanup();
 }
 
 
