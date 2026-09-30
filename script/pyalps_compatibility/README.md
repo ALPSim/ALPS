@@ -114,7 +114,7 @@ Build the matching native SDK using the documented `wheel-deps` preset. Set
 `ALPS_DIR` to its installed `share/alps` directory. Then, outside the checkout:
 
 ```sh
-python -m build --sdist --outdir dist "$PR_SOURCE/bindings/python/pyalps"
+python -m build --sdist --outdir dist "$PR_SOURCE/python/pyalps"
 mkdir extracted
 tar -xzf dist/pyalps-*.tar.gz -C extracted
 python -m build --wheel --outdir wheelhouse extracted/pyalps-*

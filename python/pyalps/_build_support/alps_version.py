@@ -37,7 +37,7 @@ import re
 from email.parser import BytesParser
 from pathlib import Path
 
-# A checkout carries the version file three levels above this project; an
+# A checkout carries the version file two levels above this project; an
 # sdist carries it at the project root through sdist.force-include.
 _CORE_PATTERN = r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)"
 _CORE = re.compile(_CORE_PATTERN)
@@ -61,7 +61,7 @@ _PRERELEASE = re.compile(r"^(?P<kind>[A-Za-z]+)[.\-_]?(?P<number>[0-9]+)?$")
 
 def _read_core(project_dir: Path) -> str:
     """Return MAJOR.MINOR.PATCH from ALPS_VERSION.txt."""
-    candidates = (project_dir / "ALPS_VERSION.txt", project_dir / "../../../ALPS_VERSION.txt")
+    candidates = (project_dir / "ALPS_VERSION.txt", project_dir / "../../ALPS_VERSION.txt")
     for candidate in candidates:
         if not candidate.is_file():
             continue

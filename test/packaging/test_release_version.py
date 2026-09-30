@@ -22,7 +22,7 @@ SPEC.loader.exec_module(release)
 def versions(tmp_path):
     def write(core="3.0.0", python="3.0.0"):
         (tmp_path / "ALPS_VERSION.txt").write_text(core + "\n")
-        project_dir = tmp_path / "bindings/python/pyalps"
+        project_dir = tmp_path / "python/pyalps"
         project_dir.mkdir(parents=True, exist_ok=True)
         (project_dir / "pyproject.toml").write_text(
             f'[project]\nname = "pyalps"\nversion = "{python}"\n'
@@ -40,7 +40,7 @@ def versions(tmp_path):
 def test_standalone_dynamic_version(versions, monkeypatch, ref, expected):
     root = versions()
     monkeypatch.delenv("ALPS_VERSION_PRERELEASE", raising=False)
-    (root / "bindings/python/pyalps/pyproject.toml").write_text(
+    (root / "python/pyalps/pyproject.toml").write_text(
         '[project]\nname = "pyalps"\ndynamic = ["version"]\n'
     )
     assert release.check_version(root, ref) == Version(expected)
@@ -48,7 +48,7 @@ def test_standalone_dynamic_version(versions, monkeypatch, ref, expected):
 
 def test_dynamic_version_rejects_stale_tag_and_conflicting_label(versions, monkeypatch):
     root = versions()
-    (root / "bindings/python/pyalps/pyproject.toml").write_text(
+    (root / "python/pyalps/pyproject.toml").write_text(
         '[project]\nname = "pyalps"\ndynamic = ["version"]\n'
     )
     with pytest.raises(ValueError, match="disagrees with ALPS_VERSION.txt"):
@@ -61,7 +61,7 @@ def test_dynamic_version_rejects_stale_tag_and_conflicting_label(versions, monke
 def test_prerelease_sdist_keeps_its_version_without_the_build_environment(tmp_path):
     """Exercise the backend: a user rebuild must keep the published version."""
     repository = SCRIPT.parents[1]
-    project = repository / "bindings/python/pyalps"
+    project = repository / "python/pyalps"
     core = (repository / "ALPS_VERSION.txt").read_text().strip()
     environment = {**os.environ, "GITHUB_REF": f"refs/tags/v{core}-beta.2"}
     environment.pop("ALPS_VERSION_PRERELEASE", None)
@@ -72,6 +72,16 @@ def test_prerelease_sdist_keeps_its_version_without_the_build_environment(tmp_pa
         cwd=project, env=environment, check=True, capture_output=True, text=True,
     )
     with tarfile.open(tmp_path / f"pyalps-{core}b2.tar.gz") as archive:
+        prefix = f"pyalps-{core}b2/"
+        required = {
+            "ALPS_VERSION.txt", "LICENSE.txt", "CMakeLists.txt", "pyproject.toml",
+            "_build_support/alps_version.py", "src/pyalps/__init__.py",
+            "cpp/ngs/hdf5.cpp", "_vendor/tool/maxent.cpp",
+            "_vendor/applications/dmft/qmc/hybridization/hybmain.cpp",
+            "_vendor/applications/dmft/qmc/interaction_expansion2/main.cpp",
+            "_vendor/lib/xml/ALPS.xsl", "_vendor/lib/xml/models.xml.in",
+        }
+        assert {prefix + name for name in required} <= set(archive.getnames())
         archive.extractall(tmp_path, filter="data")
     environment.pop("GITHUB_REF")
     unpacked = tmp_path / f"pyalps-{core}b2"

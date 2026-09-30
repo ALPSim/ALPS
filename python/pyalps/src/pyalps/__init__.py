@@ -23,7 +23,7 @@ from . import cxx as cxx
 
 # Read from the installed distribution rather than restated here: the version
 # comes from ALPS_VERSION.txt at build time (see
-# bindings/python/pyalps/_build_support/alps_version.py), and a second copy in
+# python/pyalps/_build_support/alps_version.py), and a second copy in
 # the source would be a second thing to bump.
 try:
     __version__ = _distribution_version("pyalps")

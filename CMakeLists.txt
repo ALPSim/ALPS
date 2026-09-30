@@ -276,7 +276,7 @@ IF(HDF5_IS_PARALLEL)
 ENDIF(HDF5_IS_PARALLEL)
 
 # Python bindings are built by the standalone scikit-build-core project in
-# bindings/python/pyalps.  The C++ SDK deliberately has no Python dependency.
+# python/pyalps.  The C++ SDK deliberately has no Python dependency.
 
 # Boost Libraries
 find_package(BoostForALPS REQUIRED)

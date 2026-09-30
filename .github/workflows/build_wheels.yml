@@ -46,16 +46,16 @@ jobs:
         uses: actions/cache@v6
         with:
           path: _build/ccache
-          key: pyalps-ccache-${{ runner.os }}-${{ matrix.plat.arch }}-${{ hashFiles('src/**', 'bindings/python/**', 'applications/**', 'tool/maxent*') }}
+          key: pyalps-ccache-${{ runner.os }}-${{ matrix.plat.arch }}-${{ hashFiles('src/**', 'python/**', 'applications/**', 'tool/maxent*') }}
           restore-keys: pyalps-ccache-${{ runner.os }}-${{ matrix.plat.arch }}-
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v4.2.0
         with:
-          package-dir: bindings/python/pyalps
+          package-dir: python/pyalps
         env:
           # The wheel build is configured in [tool.cibuildwheel] in
-          # bindings/python/pyalps/pyproject.toml and the wheel-deps preset in
+          # python/pyalps/pyproject.toml and the wheel-deps preset in
           # CMakePresets.json; only matrix-derived values live here.
           CIBW_ARCHS: ${{ matrix.plat.arch }}
           MACOSX_DEPLOYMENT_TARGET: ${{ matrix.plat.target }}
@@ -74,7 +74,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Build sdist
-        run: pipx run build --sdist --outdir dist bindings/python/pyalps
+        run: pipx run build --sdist --outdir dist python/pyalps
 
       # The sdist must remain buildable outside the repository checkout:
       # verify its metadata and that the vendored ALPS sources it needs

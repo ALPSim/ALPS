@@ -23,10 +23,10 @@ cmake --preset wheel-deps
 cmake --build --preset wheel-deps
 
 ALPS_DIR="$PWD/_build/wheel-deps/install/share/alps" \
-  python -m build --wheel bindings/python/pyalps
+  python -m build --wheel python/pyalps
 ```
 
-The wheel is written to `bindings/python/pyalps/dist` and can be installed
+The wheel is written to `python/pyalps/dist` and can be installed
 with `python -m pip install`. With ccache installed, configure with
 `cmake --preset wheel-deps -DCMAKE_CXX_COMPILER_LAUNCHER=ccache` and set
 `CMAKE_ARGS="-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"` for the wheel build to
@@ -153,7 +153,7 @@ In GitHub release builds, the provider takes the prerelease label from
 `GITHUB_REF` (for example, `refs/tags/v3.0.0-beta.1`). It rejects a tag whose
 numeric version differs from `ALPS_VERSION.txt`, or whose label conflicts with
 an explicit `ALPS_VERSION_PRERELEASE`. Wheels and source distributions use the
-same provider. `python bindings/python/pyalps/_build_support/alps_version.py`
+same provider. `python python/pyalps/_build_support/alps_version.py`
 prints the version a build would produce, from any working directory.
 An sdist preserves its recorded version when rebuilt without the original
 build environment.

@@ -27,11 +27,11 @@ def check_version(root: Path, ref: str) -> Version:
     if not re.fullmatch(CORE_PATTERN, core):
         raise ValueError("ALPS_VERSION.txt must contain MAJOR.MINOR.PATCH")
 
-    project_dir = root / "bindings/python/pyalps"
+    project_dir = root / "python/pyalps"
     with (project_dir / "pyproject.toml").open("rb") as stream:
         project = tomllib.load(stream)["project"]
     if "version" in project.get("dynamic", []):
-        provider_path = Path(__file__).resolve().parents[1] / "bindings/python/pyalps/_build_support/alps_version.py"
+        provider_path = Path(__file__).resolve().parents[1] / "python/pyalps/_build_support/alps_version.py"
         spec = importlib.util.spec_from_file_location("alps_version", provider_path)
         provider = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(provider)

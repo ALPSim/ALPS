@@ -1,4 +1,4 @@
-# Generated from pyalps_config.py.in by bindings/python/pyalps/CMakeLists.txt.
+# Generated from pyalps_config.py.in by python/pyalps/CMakeLists.txt.
 #
 # Last-resort fallbacks for the ALPS XML library and the application binaries,
 # consulted by pyalps.tools only when the package does not carry them

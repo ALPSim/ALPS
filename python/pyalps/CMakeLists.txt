@@ -21,7 +21,7 @@ execute_process(
 list(PREPEND CMAKE_PREFIX_PATH "${_nanobind_cmake_dir}")
 find_package(nanobind 2.10 CONFIG REQUIRED)
 
-get_filename_component(_repo_root "${CMAKE_CURRENT_SOURCE_DIR}/../../.." ABSOLUTE)
+get_filename_component(_repo_root "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
 set(_alps_source_root "${_repo_root}")
 if(NOT EXISTS "${_alps_source_root}/tool/maxent.cpp")
   set(_alps_source_root "${CMAKE_CURRENT_SOURCE_DIR}/_vendor")
