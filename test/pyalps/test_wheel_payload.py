@@ -46,6 +46,8 @@ EXPECTED_BUNDLED_PROGRAMS = {
     "spinmc_evaluate",
     "worm",
     "worm_evaluate",
+    "parameter2xml",
+    "printgraph",
 }
 
 
