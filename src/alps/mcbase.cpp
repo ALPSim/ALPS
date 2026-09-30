@@ -24,6 +24,8 @@ namespace alps {
         alps::ngs::signal::listen();
     }
 
+    mcbase::~mcbase() = default;
+
     void mcbase::save(boost::filesystem::path const & filename) const {
         alps::hdf5::archive ar(filename, "w");
         ar["/simulation/realizations/0/clones/0"] << *this;

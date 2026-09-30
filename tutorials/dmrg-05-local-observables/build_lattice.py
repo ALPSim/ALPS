@@ -14,7 +14,6 @@
 # 
 # ****************************************************************************
 
-from __future__ import print_function
 import sys
 
 ns = sys.argv[1]

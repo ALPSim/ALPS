@@ -1,102 +1,42 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                                                 *
- * ALPS Project: Algorithms and Libraries for Physics Simulations                  *
- *                                                                                 *
- * ALPS Libraries                                                                  *
- *                                                                                 *
- * Copyright (C) 2010 - 2013 by Lukas Gamper <gamperl@gmail.com>                   *
- *                                                                                 *
- * ALPS Project: https://alps.comp-phys.org/                                       *
- * SPDX-License-Identifier: MIT                                                    *
- *                                                                                 *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+// Copyright (C) 2010-2012 by Lukas Gamper
+//               2026      by the ALPS collaboration
+// SPDX-License-Identifier: MIT
 
 #include "ising.hpp"
 
-#include <boost/lambda/lambda.hpp>
+#include <alps/hdf5/archive.hpp>
+#include <alps/ngs.hpp>
 
-ising_sim::ising_sim(parameters_type const & parms, std::size_t seed_offset)
-    : alps::mcbase(parms, seed_offset)
-    , length(parameters["L"])
-    , sweeps(0)
-    , thermalization_sweeps(int(parameters["THERMALIZATION"]))
-    , total_sweeps(int(parameters["SWEEPS"]))
-    , beta(1. / double(parameters["T"]))
-    , spins(length)
-{
-    for(int i = 0; i < length; ++i)
-        spins[i] = (random() < 0.5 ? 1 : -1);
-    measurements
-        << alps::ngs::RealObservable("Energy")
-        << alps::ngs::RealObservable("Magnetization")
-        << alps::ngs::RealObservable("Magnetization^2")
-        << alps::ngs::RealObservable("Magnetization^4")
-        << alps::ngs::RealVectorObservable("Correlations")
-    ;
+#include <algorithm>
+
+ising_sim::ising_sim(parameters_type const & parameters,
+                     std::size_t seed_offset)
+    : alps::mcbase(parameters, seed_offset),
+      total_sweeps_(parameters["SWEEPS"] | 10) {
+    measurements << alps::accumulator::RealObservable("Magnetization");
 }
 
 void ising_sim::update() {
-    for (int j = 0; j < length; ++j) {
-        using std::exp;
-        int i = int(double(length) * random());
-        int right = ( i + 1 < length ? i + 1 : 0 );
-        int left = ( i - 1 < 0 ? length - 1 : i - 1 );
-        double p = exp( 2. * beta * spins[i] * ( spins[right] + spins[left] ));
-        if ( p >= 1. || random() < p )
-            spins[i] = -spins[i];
-    }
+    state_ = random() < 0.5 ? -1.0 : 1.0;
+    ++sweeps_;
 }
 
 void ising_sim::measure() {
-    sweeps++;
-    if (sweeps > thermalization_sweeps) {
-        double tmag = 0;
-        double ten = 0;
-        double sign = 1;
-        std::vector<double> corr(length);
-        for (int i = 0; i < length; ++i) {
-            tmag += spins[i];
-            sign *= spins[i];
-            ten += -spins[i] * spins[ i + 1 < length ? i + 1 : 0 ];
-            for (int d = 0; d < length; ++d)
-                corr[d] += spins[i] * spins[( i + d ) % length ];
-        }
-        std::transform(corr.begin(), corr.end(), corr.begin(), boost::lambda::_1 / double(length));
-        ten /= length;
-        tmag /= length;
-        measurements["Energy"] << ten;
-        measurements["Magnetization"] << tmag;
-        measurements["Magnetization^2"] << tmag * tmag;
-        measurements["Magnetization^4"] << tmag * tmag * tmag * tmag;
-        measurements["Correlations"] << corr;
-    }
+    measurements["Magnetization"] << state_;
 }
 
 double ising_sim::fraction_completed() const {
-    return (sweeps < thermalization_sweeps ? 0. : ( sweeps - thermalization_sweeps ) / double(total_sweeps));
+    return std::min(1.0, static_cast<double>(sweeps_) / total_sweeps_);
 }
 
-void ising_sim::save(alps::hdf5::archive & ar) const {
-    mcbase::save(ar);
-
-    std::string context = ar.get_context();
-    ar.set_context("/simulation/realizations/0/clones/0/checkpoint");
-    ar["sweeps"] << sweeps;
-    ar["spins"] << spins;
-    ar.set_context(context);
+void ising_sim::save(alps::hdf5::archive & archive) const {
+    alps::mcbase::save(archive);
+    archive["/checkpoint/sweeps"] << sweeps_;
+    archive["/checkpoint/state"] << state_;
 }
 
-void ising_sim::load(alps::hdf5::archive & ar) {
-    mcbase::load(ar);
-
-    length = int(parameters["L"]);
-    thermalization_sweeps = int(parameters["THERMALIZATION"]);
-    total_sweeps = int(parameters["SWEEPS"]);
-    beta = 1. / double(parameters["T"]);
-
-    std::string context = ar.get_context();
-    ar.set_context("/simulation/realizations/0/clones/0/checkpoint");
-    ar["sweeps"] >> sweeps;
-    ar["spins"] >> spins;
-    ar.set_context(context);
+void ising_sim::load(alps::hdf5::archive & archive) {
+    alps::mcbase::load(archive);
+    archive["/checkpoint/sweeps"] >> sweeps_;
+    archive["/checkpoint/state"] >> state_;
 }

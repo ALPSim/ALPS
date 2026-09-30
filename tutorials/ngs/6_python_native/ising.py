@@ -9,11 +9,12 @@
  # SPDX-License-Identifier: MIT                                                    #
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+import pyalps
 import pyalps.hdf5 as hdf5
 import pyalps.ngs as ngs # move mcbase usw to pyalps.montecarlo
 import numpy as np
 import sys
-
+import traceback
 class sim:
 
     # TODO: how do we deal with typedefs?
@@ -30,8 +31,8 @@ class sim:
 
         self.length = int(self.parameters['L'])
         self.sweeps = 0
-        self.thermalization_sweeps = long(self.parameters['THERMALIZATION'])
-        self.total_sweeps = long(self.parameters['SWEEPS'])
+        self.thermalization_sweeps = int(self.parameters['THERMALIZATION'])
+        self.total_sweeps = int(self.parameters['SWEEPS'])
         self.beta = 1. / float(self.parameters['T'])
         self.spins = np.array([(-x if self.random() < 0.5 else x) for x in np.ones(self.length)])
         
@@ -71,14 +72,6 @@ class sim:
     def fraction_completed(self):
         return 0 if self.sweeps < self.thermalization_sweeps else (self.sweeps - self.thermalization_sweeps) / float(self.total_sweeps)
 
-    def save(self, filename):
-        with hdf5.archive(filename, 'w') as ar:
-            ar['/'] = self
-
-    def load(self, filename):
-        with hdf5.archive(filename, 'r') as ar:
-            self = ar['/']
-
     def run(self, stopCallback):
         stopped = False
         while True:
@@ -114,7 +107,10 @@ class sim:
             ar.set_context("checkpoint")
             ar["sweeps"] = self.sweeps
             ar["spins"] = self.spins
-            ar["engine"] = self.random
+            # random01.save() writes its state under <context>/engine, so it
+            # takes the archive directly -- ar["engine"] = self.random would
+            # nest it a second level down at <context>/engine/engine.
+            self.random.save(ar)
 
             ar.set_context(context);
 
@@ -125,22 +121,25 @@ class sim:
     def load(self,  ar):
 
         try:
-        
-            self.parameters.load(ar["/parameters"]) # TODO: do we want to load the parameters?
+
+            self.parameters.load(ar, "/parameters")
 
             context = ar.context
             ar.set_context("/simulation/realizations/0/clones/0")
-            ar["measurements"] = self.measurements
+            # save() stored the measurements dict as a group with one
+            # HDF5-encoded child per observable; read each one back in place.
+            for name, observable in self.measurements.items():
+                observable.load(ar, "measurements/" + pyalps.hdf5_name_encode(name))
 
-            self.length = int(self.parameters["L"]);
-            self.thermalization_sweeps = int(self.parameters["THERMALIZATION"]);
-            self.total_sweeps = int(self.parameters["SWEEPS"]);
-            self.beta = 1. / double(self.parameters["T"]);
+            self.length = int(self.parameters["L"])
+            self.thermalization_sweeps = int(self.parameters["THERMALIZATION"])
+            self.total_sweeps = int(self.parameters["SWEEPS"])
+            self.beta = 1. / float(self.parameters["T"])
 
             ar.set_context("checkpoint")
-            self.sweeps = ar["sweeps"]
+            self.sweeps = int(ar["sweeps"])
             self.spins = ar["spins"]
-            self.random.load(ar["engine"])
+            self.random.load(ar)
 
             ar.set_context(context)
 
