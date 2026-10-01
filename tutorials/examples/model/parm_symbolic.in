@@ -1,0 +1,5 @@
+LATTICE_LIBRARY = "../../../src/alps/resources/lattices.xml"
+MODEL_LIBRARY = "../../../src/alps/resources/models.xml"
+LATTICE = "chain lattice"
+L       = 4
+MODEL   = "spin"

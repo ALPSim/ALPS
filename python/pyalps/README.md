@@ -132,7 +132,7 @@ applications needing such associations should use explicit application keys.
 pyalps does not carry a version of its own. The numeric version is read from
 `ALPS_VERSION.txt` at the repository root — the same file
 `cmake/ALPSVersion.cmake` reads for `ALPS_VERSION_CORE` — so a release bump is
-one edit rather than two that can drift. `test/pyalps/test_wheel_payload.py`
+one edit rather than two that can drift. `tests/pyalps/test_wheel_payload.py`
 fails if the installed version and that file disagree.
 
 A prerelease label cannot live in that file: `project(VERSION ...)` rejects a

@@ -160,7 +160,7 @@ Validate the intended tag locally using Python 3.11 or newer:
 
 ```bash
 python -m pip install packaging
-python script/check_release_version.py --ref refs/tags/vX.Y.Z
+python .github/scripts/check_release_version.py --ref refs/tags/vX.Y.Z
 ```
 
 The packaging workflow checks these versions before building and checks every

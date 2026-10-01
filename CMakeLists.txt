@@ -314,15 +314,15 @@ set (BIND_FORTRAN_INTEGER_8 ${LAPACK_64_BIT})
 configure_file(src/alps/config.h.in ${PROJECT_BINARY_DIR}/src/alps/config.h)
 configure_file(src/alps/version.h.in ${PROJECT_BINARY_DIR}/src/alps/version.h)
 
-configure_file(lib/xml/lattices.xml.in ${PROJECT_BINARY_DIR}/lib/xml/lattices.xml)
-configure_file(lib/xml/models.xml.in ${PROJECT_BINARY_DIR}/lib/xml/models.xml)
+configure_file(src/alps/resources/lattices.xml.in ${PROJECT_BINARY_DIR}/src/alps/resources/lattices.xml)
+configure_file(src/alps/resources/models.xml.in ${PROJECT_BINARY_DIR}/src/alps/resources/models.xml)
 
 ######################################################################
 # include directories
 ######################################################################
 include_directories(${PROJECT_BINARY_DIR}/src)
 include_directories(src)
-include_directories(SYSTEM ${PROJECT_SOURCE_DIR}/bindings)
+include_directories(SYSTEM ${PROJECT_SOURCE_DIR}/third_party/boost_numeric_bindings/include)
 
 # order the include directories so that directories which are in the
 # source or build tree always come before directories outside the project.
@@ -434,17 +434,17 @@ if (ALPS_INSTALL_HEADERS)
   # ALPS' public headers include the vendored Boost.Numeric bindings.  Install
   # them as part of the C++ SDK so downstream consumers do not need the ALPS
   # source tree on their include path.
-  install(DIRECTORY bindings/boost COMPONENT headers DESTINATION ${ALPS_HEADER_DIR}
+  install(DIRECTORY third_party/boost_numeric_bindings/include/boost COMPONENT headers DESTINATION ${ALPS_HEADER_DIR}
           FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
          )
   install(FILES ${PROJECT_BINARY_DIR}/src/alps/config.h ${PROJECT_BINARY_DIR}/src/alps/version.h DESTINATION ${ALPS_HEADER_DIR}/alps COMPONENT headers)
 endif(ALPS_INSTALL_HEADERS)
 
-install(DIRECTORY lib/xml DESTINATION ${ALPS_XML_PATH} COMPONENT xml
+install(DIRECTORY src/alps/resources/ DESTINATION ${ALPS_XML_PATH}/xml COMPONENT xml
         FILES_MATCHING PATTERN "*.xsl"
        )
 
-install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION ${ALPS_XML_PATH} COMPONENT xml)
+install(DIRECTORY ${PROJECT_BINARY_DIR}/src/alps/resources/ DESTINATION ${ALPS_XML_PATH}/xml COMPONENT xml)
 
 add_subdirectory(cmake)
 
@@ -473,9 +473,9 @@ add_subdirectory(src/alps)
 ######################################################################
 
 if (NOT ALPS_BUILD_LIBS_ONLY)
-  add_subdirectory(tool)
+  add_subdirectory(src/tools)
   if (ALPS_BUILD_EXAMPLES)
-    add_subdirectory(example)
+    add_subdirectory(tutorials/examples)
   endif (ALPS_BUILD_EXAMPLES)
 endif (NOT ALPS_BUILD_LIBS_ONLY)
 
@@ -485,7 +485,7 @@ endif (NOT ALPS_BUILD_LIBS_ONLY)
 ######################################################################
 
 if (ALPS_BUILD_APPLICATIONS AND NOT ALPS_BUILD_LIBS_ONLY)
-  add_subdirectory(applications)
+  add_subdirectory(src/apps)
 endif (ALPS_BUILD_APPLICATIONS AND NOT ALPS_BUILD_LIBS_ONLY)
 
 if (ALPS_INCLUDE_TUTORIALS AND NOT ALPS_BUILD_LIBS_ONLY)
@@ -508,5 +508,5 @@ if (ALPS_BUILD_TESTS)
   include(ALPSBuildname)
   enable_testing()
   include(CTest)
-  add_subdirectory(test)
+  add_subdirectory(tests)
 endif (ALPS_BUILD_TESTS)
