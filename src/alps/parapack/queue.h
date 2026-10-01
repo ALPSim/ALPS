@@ -18,6 +18,7 @@
 #ifndef PARAPACK_QUEUE_H
 #define PARAPACK_QUEUE_H
 
+#include <alps/export.h>
 #include "job.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <queue>
@@ -55,7 +56,7 @@ struct check_type {
 };
 typedef check_type::check_type_t check_type_t;
 
-struct check_queue_element_t {
+struct ALPS_DECL check_queue_element_t {
   check_queue_element_t(check_type_t tp, boost::posix_time::ptime const& tm, tid_t tid, cid_t cid,
     gid_t gid) : type(tp), time(tm), task_id(tid), clone_id(cid), group_id(gid) {}
   check_type_t type;

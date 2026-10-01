@@ -13,7 +13,8 @@
 
 #include "util.h"
 #include <alps/random/pseudo_des.h>
-#include <boost/classic_spirit.hpp>
+#include <boost/spirit/include/classic_actor.hpp>
+#include <boost/spirit/include/classic_core.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/throw_exception.hpp>
 #include <stdexcept>
@@ -38,7 +39,7 @@ std::string id2string(int id, std::string const& pad) {
 }
 
 double parse_percentage(std::string const& str) {
-  using namespace boost::spirit;
+  using namespace boost::spirit::classic;
   double r;
   if (!parse(str.c_str(), real_p[assign_a(r)] >> '%' >> end_p, space_p).full)
     boost::throw_exception(std::runtime_error("error in parsing \"" + str + '\"'));

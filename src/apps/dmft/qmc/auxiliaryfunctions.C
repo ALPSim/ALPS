@@ -13,6 +13,7 @@
  *
  *****************************************************************************/
 
+#include <boost/math/constants/constants.hpp>
 #include "types.h"
 #include "green_function.h"
 #include "U_matrix.h"
@@ -56,7 +57,7 @@ std::ostream &operator<<(std::ostream &os, const complex_vector &v){
 void print_imag_green_matsubara(std::ostream &os, const multiple_complex_vector_type &v, const double beta){
   os<<std::setprecision(20);
   for(unsigned int i=0;i<v.first.size();++i)
-    os<<(2*i+1)*M_PI/beta<<"\t"<<v.first[i].imag()<<"\t"<<v.second[i].imag()<<std::endl;
+    os<<(2*i+1)*boost::math::constants::pi<double>()/beta<<"\t"<<v.first[i].imag()<<"\t"<<v.second[i].imag()<<std::endl;
 }
 
 
@@ -66,7 +67,7 @@ void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function
 {
   os<<std::setprecision(20);
   for(unsigned int i=0;i<v.nfreq();++i){
-    os<<(2*i+1)*M_PI/beta<<"\t";
+    os<<(2*i+1)*boost::math::constants::pi<double>()/beta<<"\t";
     switch (shape) {
       case diagonal:
         for (unsigned int k=0; k<v.nsite(); ++k) 
@@ -100,7 +101,7 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
   switch (shape) {
     case diagonal:
       for(unsigned int i=0;i<g_bare.nfreq();++i){
-        os<<(2*i+1)*M_PI/beta<<"\t";
+        os<<(2*i+1)*boost::math::constants::pi<double>()/beta<<"\t";
         for (unsigned int k=0; k<g_bare.nsite(); ++k) 
           for(unsigned int f=0;f<g_bare.nflavor();++f)
             os<<(1./g_bare(i,k,k,f) - 1./g_dressed(i,k,k,f)).real()<<"\t"<<(1./g_bare(i,k,k,f) - 1./g_dressed(i,k,k,f)).imag()<<"\t";
@@ -126,7 +127,7 @@ void print_quasiparticle_estimate(std::ostream &os, const multiple_complex_vecto
   os<<"Quasiparticle weight estimate Zeta for Z, using sigma(pi T) and sigma(3 Pi T):"<<std::endl;
   double sigma_1=1./g_bare.first[0].imag() - 1./g_dressed.first[0].imag();
   double sigma_2=1./g_bare.first[1].imag() - 1./g_dressed.first[1].imag();
-  os<<"1: "<<"\t"<<1./(1.-sigma_1*beta/M_PI)<<"\t"<<1./(1.-(sigma_2)*beta/M_PI/3.)<<std::endl;
+  os<<"1: "<<"\t"<<1./(1.-sigma_1*beta/boost::math::constants::pi<double>())<<"\t"<<1./(1.-(sigma_2)*beta/boost::math::constants::pi<double>()/3.)<<std::endl;
 }
 
 
@@ -140,7 +141,7 @@ void print_quasiparticle_estimate(std::ostream &os, const matsubara_green_functi
     for(unsigned int f=0;f<g_bare.nflavor();++f){
       double sigma_1=1./g_bare(0,k,k,f).imag() - 1./g_dressed(0,k,k,f).imag();
       double sigma_2=1./g_bare(1,k,k,f).imag() - 1./g_dressed(1,k,k,f).imag();
-      os<<k<<":"<<"\t"<<1./(1.-sigma_1*beta/M_PI)<<"\t"<<1./(1.-(sigma_2)*beta/M_PI/3.)<<std::endl;
+      os<<k<<":"<<"\t"<<1./(1.-sigma_1*beta/boost::math::constants::pi<double>())<<"\t"<<1./(1.-(sigma_2)*beta/boost::math::constants::pi<double>()/3.)<<std::endl;
     }
   }
 }
@@ -151,7 +152,7 @@ void print_quasiparticle_estimate(std::ostream &os, const matsubara_green_functi
 void print_real_green_matsubara(std::ostream &os, const multiple_complex_vector_type &v, const double beta){
   os<<std::setprecision(20);
   for(unsigned int i=0;i<v.first.size();++i){
-    os<<(2*i+1)*M_PI/beta<<"\t"<<v.first[i].real()<<"\t"<<v.second[i].real()<<std::endl;
+    os<<(2*i+1)*boost::math::constants::pi<double>()/beta<<"\t"<<v.first[i].real()<<"\t"<<v.second[i].real()<<std::endl;
   }
 }
 
@@ -161,7 +162,7 @@ void print_real_green_matsubara(std::ostream &os, const multiple_complex_vector_
 void print_real_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta, const shape_t shape){
   os<<std::setprecision(20);
   for(unsigned int i=0;i<v.nfreq();++i){
-    os<<(2*i+1)*M_PI/beta<<"\t";
+    os<<(2*i+1)*boost::math::constants::pi<double>()/beta<<"\t";
     switch (shape) {
       case diagonal:
         for (unsigned int k=0; k<v.nsite(); ++k) 

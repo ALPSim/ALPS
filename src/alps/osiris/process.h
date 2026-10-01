@@ -17,6 +17,7 @@
 #ifndef OSIRIS_PROCESS_H
 #define OSIRIS_PROCESS_H
 
+#include <alps/export.h>
 #include <alps/config.h>
 #include <alps/osiris/std/vector.h>
 #include <alps/osiris/dump.h>
@@ -29,7 +30,7 @@ namespace alps {
  
 /** a process descriptor. */
     
-class Process
+class ALPS_DECL Process
 {
 public:
   
@@ -66,9 +67,7 @@ typedef std::vector<Process> ProcessList;
 }
 
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 inline std::ostream& operator<<(std::ostream& out, const alps::Process& p)
 {
@@ -76,8 +75,6 @@ inline std::ostream& operator<<(std::ostream& out, const alps::Process& p)
   return out;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // OSIRIS_PROCESS_H

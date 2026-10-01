@@ -45,7 +45,6 @@ public:
   template<class Engine>
   const result_type& operator()(Engine& eng) { return base_(eng); }
 
-#if !defined(BOOST_NO_OPERATORS_IN_NAMESPACE) && !defined(BOOST_NO_MEMBER_TEMPLATE_FRIENDS)
   template<class CharT, class Traits>
   friend std::basic_ostream<CharT,Traits>&
   operator<<(std::basic_ostream<CharT,Traits>& os, const uniform_on_sphere_n& sd)
@@ -61,7 +60,6 @@ public:
     is >> sd.base_;
     return is;
   }
-#endif
 
 private:
   base_type base_;
@@ -89,7 +87,6 @@ public:
     return container_;
   }
 
-#if !defined(BOOST_NO_OPERATORS_IN_NAMESPACE) && !defined(BOOST_NO_MEMBER_TEMPLATE_FRIENDS)
   template<class CharT, class Traits>
   friend std::basic_ostream<CharT,Traits>&
   operator<<(std::basic_ostream<CharT,Traits>& os, const uniform_on_sphere_n&)
@@ -104,7 +101,6 @@ public:
     sd.container_.resize(sd.dim);
     return is;
   }
-#endif
 
 private:
   boost::uniform_real<RealType> real_;
@@ -133,16 +129,13 @@ public:
       v2 = real_(eng); // (-1..1)
       s = v1 * v1 + v2 * v2;
     } while (s > 1);
-#ifndef BOOST_NO_STDC_NAMESPACE
     using std::sqrt;
-#endif
     const RealType a = 1.0 / std::sqrt(s);
     container_[0] = a * v1;
     container_[1] = a * v2;
     return container_;
   }
 
-#if !defined(BOOST_NO_OPERATORS_IN_NAMESPACE) && !defined(BOOST_NO_MEMBER_TEMPLATE_FRIENDS)
   template<class CharT, class Traits>
   friend std::basic_ostream<CharT,Traits>&
   operator<<(std::basic_ostream<CharT,Traits>& os, const uniform_on_sphere_n&)
@@ -157,7 +150,6 @@ public:
     sd.container_.resize(sd.dim);
     return is;
   }
-#endif
 
 private:
   boost::uniform_real<RealType> real_;
@@ -186,9 +178,7 @@ public:
       v2 = real_(eng); // (-1..1)
       s = v1 * v1 + v2 * v2;
     } while (s > 1);
-#ifndef BOOST_NO_STDC_NAMESPACE
     using std::sqrt;
-#endif
     const RealType a = 2 * std::sqrt(1 - s);
     container_[0] = a * v1;
     container_[1] = a * v2;
@@ -196,7 +186,6 @@ public:
     return container_;
   }
 
-#if !defined(BOOST_NO_OPERATORS_IN_NAMESPACE) && !defined(BOOST_NO_MEMBER_TEMPLATE_FRIENDS)
   template<class CharT, class Traits>
   friend std::basic_ostream<CharT,Traits>&
   operator<<(std::basic_ostream<CharT,Traits>& os, const uniform_on_sphere_n&)
@@ -211,7 +200,6 @@ public:
     sd.container_.resize(sd.dim);
     return is;
   }
-#endif
 
 private:
   boost::uniform_real<RealType> real_;

@@ -23,6 +23,7 @@
 #include <vector>
 #include <valarray>
 #include <algorithm>
+#include <iterator>
 
 
 namespace alps {

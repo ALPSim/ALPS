@@ -38,7 +38,7 @@ namespace alps {
         struct mean_tag;
 
         template<typename T> struct mean_type
-            : public boost::mpl::if_<boost::is_integral<typename value_type<T>::type>, double, typename value_type<T>::type>
+            : public boost::mpl::if_<boost::is_integral<typename alps::accumulator::value_type<T>::type>, double, typename alps::accumulator::value_type<T>::type>
         {};
 
         template<typename T> struct has_feature<T, mean_tag> {
@@ -48,7 +48,7 @@ namespace alps {
             typedef boost::integral_constant<bool, sizeof(char) == sizeof(check<T>(0))> type;
         };
 
-        template<typename T> typename mean_type<T>::type mean(T const & arg) {
+        template<typename T> typename alps::accumulator::mean_type<T>::type mean(T const & arg) {
             return arg.mean();
         }
 
@@ -56,17 +56,17 @@ namespace alps {
 
             template<typename A> typename boost::enable_if<
                   typename has_feature<A, mean_tag>::type
-                , typename mean_type<A>::type
+                , typename alps::accumulator::mean_type<A>::type
             >::type mean_impl(A const & acc) {
                 return mean(acc);
             }
 
             template<typename A> typename boost::disable_if<
                   typename has_feature<A, mean_tag>::type
-                , typename mean_type<A>::type
+                , typename alps::accumulator::mean_type<A>::type
             >::type mean_impl(A const & acc) {
                 throw std::runtime_error(std::string(typeid(A).name()) + " has no mean-method" + ALPS_STACKTRACE);
-                return typename mean_type<A>::type();
+                return typename alps::accumulator::mean_type<A>::type();
             }
         }
 
@@ -308,7 +308,7 @@ namespace alps {
             template<typename T, typename B> class BaseWrapper<T, mean_tag, B> : public B {
                 public:
                     virtual bool has_mean() const = 0;
-                    virtual typename mean_type<B>::type mean() const = 0;
+                    virtual typename alps::accumulator::mean_type<B>::type mean() const = 0;
             };
 
             template<typename T, typename B> class DerivedWrapper<T, mean_tag, B> : public B {
@@ -318,7 +318,7 @@ namespace alps {
 
                     bool has_mean() const { return has_feature<T, mean_tag>::type::value; }
 
-                    typename mean_type<B>::type mean() const { return detail::mean_impl(this->m_data); }
+                    typename alps::accumulator::mean_type<B>::type mean() const { return detail::mean_impl(this->m_data); }
             };
 
         }

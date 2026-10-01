@@ -5,41 +5,26 @@
 
 
 #include <alps/utility/temporary_filename.hpp>
-#include <boost/throw_exception.hpp>
-#include <boost/lexical_cast.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <cerrno>
+#include <cstdio>
 #include <stdexcept>
-#include <sys/stat.h>
-#include <iostream>
-#include <cstdlib>
-
-
-#ifdef BOOST_WINDOWS
-#include <fcntl.h>
-#include <io.h>
-#else
-#include <unistd.h>
-#endif
-
+#include <system_error>
 
 namespace alps {
-  std::string temporary_filename(std::string name)
-  {
-    name +="XXXXXX";
-    char aux[255];
-    snprintf(aux, 255, "%s", name.c_str());
-
-#ifdef BOOST_MSVC
-    name = _mktemp(const_cast<char*>(name.c_str()));
-    int res=0; 
-    //int res=open(name.c_str(),O_RDWR|O_BINARY|O_CREAT|O_EXCL|_O_SHORT_LIVED, 128|256);
-#else
-//    name = mkstemp(const_cast<char*>(name.c_str()));
-    int res = mkstemp(aux);
-    name = aux;
-    //int res = mkstemp(const_cast<char*>(name.c_str()));
-#endif
-    if (res<0)
-      boost::throw_exception(std::runtime_error("Could not open temporary file"));
-    return name;
-  }
+std::string temporary_filename(std::string prefix) {
+    // C11 exclusive creation reserves the name, unlike mktemp. Close the
+    // stream here: callers own the file, not an otherwise leaked descriptor.
+    for (int attempt = 0; attempt < 128; ++attempt) {
+        auto name = prefix + boost::filesystem::unique_path("%%%%%%%%%%%%").string();
+        if (auto* file = std::fopen(name.c_str(), "wbx")) {
+            if (std::fclose(file) != 0)
+                throw std::system_error(errno, std::generic_category(), "close temporary file");
+            return name;
+        }
+        if (errno != EEXIST)
+            throw std::system_error(errno, std::generic_category(), "create temporary file");
+    }
+    throw std::runtime_error("Could not reserve a unique temporary filename");
+}
 }

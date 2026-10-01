@@ -46,10 +46,8 @@ public:
   // Initialization routine with complexity O(N).
   template<class CONT>
   void init(const CONT& weights) {
-#ifndef BOOST_NO_LIMITS_COMPILE_TIME_CONSTANTS
     BOOST_STATIC_ASSERT(std::numeric_limits<IntType>::is_integer);
     BOOST_STATIC_ASSERT(!std::numeric_limits<RealType>::is_integer);
-#endif
     if (weights.size() == 0)
       boost::throw_exception(std::invalid_argument("random_choice_walker_d::init"));
     IntType n = weights.size();
@@ -103,10 +101,8 @@ public:
   // Trans. Math. Software, 3, 253 (1077).
   template<class CONT>
   void init_walker1977(const CONT& weights, RealType tol = 1.0e-10) {
-#ifndef BOOST_NO_LIMITS_COMPILE_TIME_CONSTANTS
     BOOST_STATIC_ASSERT(std::numeric_limits<IntType>::is_integer);
     BOOST_STATIC_ASSERT(!std::numeric_limits<RealType>::is_integer);
-#endif
     if (weights.size() == 0)
       boost::throw_exception(std::invalid_argument("random_choice_walker_d::init_walker1977"));
     IntType n = weights.size();
@@ -217,16 +213,10 @@ public:
 
   template<class CONT>
   void init(const CONT& weights) {
-#ifndef BOOST_NO_LIMITS_COMPILE_TIME_CONSTANTS
     BOOST_STATIC_ASSERT(std::numeric_limits<IntType>::is_integer);
     BOOST_STATIC_ASSERT(std::numeric_limits<IntType>::digits == 32);
     BOOST_STATIC_ASSERT(!std::numeric_limits<IntType>::is_signed);
     BOOST_STATIC_ASSERT(!std::numeric_limits<RealType>::is_integer);
-#else
-    if (std::numeric_limits<IntType>::min() != 0 ||
-        std::numeric_limits<IntType>::max() != 4294967295ul)
-      boost::throw_exception(std::range_error("random_choice_walker_i::init"));
-#endif
     if (weights.size() == 0)
       boost::throw_exception(std::range_error("random_choice_walker_i::init"));
     IntType n = 2;
@@ -330,10 +320,8 @@ public:
 
   template<class CONT>
   void init(CONT const& weights) {
-#ifndef BOOST_NO_LIMITS_COMPILE_TIME_CONSTANTS
     BOOST_STATIC_ASSERT(std::numeric_limits<IntType>::is_integer);
     BOOST_STATIC_ASSERT(!std::numeric_limits<RealType>::is_integer);
-#endif
     if (weights.size() == 0)
       boost::throw_exception(std::invalid_argument("random_choice_bsearch::init"));
     RealType norm = 0;
@@ -418,10 +406,8 @@ public:
 
   template<class CONT>
   void init(CONT const& weights) {
-#ifndef BOOST_NO_LIMITS_COMPILE_TIME_CONSTANTS
     BOOST_STATIC_ASSERT(std::numeric_limits<IntType>::is_integer);
     BOOST_STATIC_ASSERT(!std::numeric_limits<RealType>::is_integer);
-#endif
     if (weights.size() == 0)
       boost::throw_exception(std::invalid_argument("random_choice_lsearch::init"));
     double norm = 0;

@@ -19,6 +19,7 @@
 #ifndef ALPS_SIMPLE_MC_XY_H
 #define ALPS_SIMPLE_MC_XY_H
 
+#include <boost/math/constants/constants.hpp>
 #include <alps/parapack/worker.h>
 #include <alps/parapack/util.h> // for alps::id2string
 
@@ -45,7 +46,7 @@ public:
     }
 
     // random initial spins
-    for (int s = 0; s < num_sites(); ++s) spins_[s] = std::polar(1.0, 2 * M_PI * uniform_01());
+    for (int s = 0; s < num_sites(); ++s) spins_[s] = std::polar(1.0, 2 * boost::math::constants::pi<double>() * uniform_01());
     update_energy();
 
     snapshot_interval_ =
@@ -75,7 +76,7 @@ public:
   void run(alps::ObservableSet& obs) {
     ++mcs_;
     for (int s = 0; s < num_sites(); ++s) {
-      spin_type spin_new = std::polar(1.0, 2 * M_PI * uniform_01());
+      spin_type spin_new = std::polar(1.0, 2 * boost::math::constants::pi<double>() * uniform_01());
       double diff = field_ * real(spins_[s] - spin_new);
       neighbor_bond_iterator itr, itr_end;
       for (boost::tie(itr, itr_end) = neighbor_bonds(s); itr != itr_end; ++itr) {

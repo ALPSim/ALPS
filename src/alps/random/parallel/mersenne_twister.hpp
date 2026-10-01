@@ -24,7 +24,7 @@
 #ifndef ALPS_RANDOM_PARALLEL_MERSENNE_TWISTER_HPP
 #define ALPS_RANDOM_PARALLEL_MERSENNE_TWISTER_HPP
 
-#include <alps/random/mersenne_twister.hpp>
+#include <boost/random/mersenne_twister.hpp>
 #include <alps/random/parallel/lcg64.hpp>
 #include <alps/random/parallel/seed.hpp>
 
@@ -66,7 +66,7 @@ void seed(
   {
      //seeds the seeder, which in turn gives the seedvalue for the mersenne_twister-rng
     typedef boost::uniform_int<unsigned int> dist_t;    
-    boost::variate_generator<lcg64a&, dist_t> rng(engine, dist_t(0u, std::numeric_limits<unsigned int>::max()));
+    boost::variate_generator<lcg64a&, dist_t> rng(engine, dist_t(0u, (std::numeric_limits<unsigned int>::max)()));
 
     //warm-up to improve decorrelations
     for(unsigned int i = 0; i < 1000; i++)

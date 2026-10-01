@@ -14,6 +14,7 @@
 #ifndef PARAPACK_RNG_HELPER_H
 #define PARAPACK_RNG_HELPER_H
 
+#include <alps/export.h>
 #include "process.h"
 #include "types.h"
 #include <alps/config.h>
@@ -23,7 +24,7 @@
 
 namespace alps {
 
-class rng_helper {
+class ALPS_DECL rng_helper {
 public:
   rng_helper(const Parameters& p);
   void init(const Parameters& p);
@@ -51,9 +52,7 @@ private:
 
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 inline alps::IDump& operator>>(alps::IDump& dp, alps::rng_helper& rng) {
   rng.load(dp);
@@ -65,9 +64,7 @@ inline alps::ODump& operator<<(alps::ODump& dp, alps::rng_helper const& rng) {
   return dp;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 namespace alps {
   

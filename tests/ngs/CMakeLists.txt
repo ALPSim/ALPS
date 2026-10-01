@@ -19,18 +19,13 @@
 #   DEALINGS IN THE SOFTWARE.
 
 
-include_directories(${PROJECT_BINARY_DIR}/src)
-include_directories(${PROJECT_SOURCE_DIR}/src)
-include_directories(${Boost_ROOT_DIR})
+foreach(name ngs_hdf5 ngs_hash)
+  add_executable(${name} ${name}.cpp)
 
-FOREACH (name ngs_hdf5 ngs_hash)
-    add_executable(${name} ${name}.cpp)
-    add_dependencies(${name} alps)
-    target_link_libraries(${name} alps)
-    add_alps_test(${name})
-ENDFOREACH(name)
+  target_link_libraries(${name} PRIVATE ALPS::alps)
+  alps_add_test(${name})
+endforeach()
 
 #TODO: does not compile in clang
-add_subdirectory(alea)
 add_subdirectory(params)
 add_subdirectory(scheduler)

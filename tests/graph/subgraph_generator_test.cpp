@@ -14,6 +14,7 @@
 
 //#define USE_COMPRESSED_EMBEDDING2
 
+#include <alps/parser/xslt_path.h>
 #include <alps/graph/subgraph_generator.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <vector>
@@ -26,7 +27,7 @@ enum { test_graph_size = 10 };
 template <typename Graph>
 void subgraph_generator_test(unsigned int order_ )
 {
-    std::ifstream in("../../src/alps/resources/lattices.xml");
+    std::ifstream in(alps::search_xml_library_path("lattices.xml"));
     alps::Parameters parm;
     parm["LATTICE"] = "square lattice";
     parm["L"] = 2*order_+1;

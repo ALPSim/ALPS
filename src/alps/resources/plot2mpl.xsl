@@ -32,13 +32,13 @@
   <xsl:text>subplot(111)</xsl:text><xsl:value-of select="$newline"/>
   
   <xsl:for-each select="set">
-    <xsl:text>data = zip(*[</xsl:text><xsl:value-of select="$newline"/>
+    <xsl:text>data = list(zip(*[</xsl:text><xsl:value-of select="$newline"/>
     <xsl:if test= "point">
       <xsl:apply-templates select="point">
         <xsl:sort select="x" data-type="number"/>
       </xsl:apply-templates>
     </xsl:if>
-    <xsl:text>])</xsl:text><xsl:value-of select="$newline"/>
+    <xsl:text>]))</xsl:text><xsl:value-of select="$newline"/>
     <xsl:text>if len(data):</xsl:text><xsl:value-of select="$newline"/><xsl:text>     errorbar(data[0],data[1]</xsl:text>
     <xsl:if test= "point/dy">
       <xsl:text>,yerr=data[3]</xsl:text>

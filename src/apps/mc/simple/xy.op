@@ -1,5 +1,5 @@
 [input parameters]
-LATTICE_LIBRARY = ../../../src/alps/resources/lattices.xml;
+LATTICE_LIBRARY = lattices.xml;
 LATTICE = "chain lattice";
 L = 16;
 SEED = 2873;
@@ -75,7 +75,7 @@ Magnetization Density^4: 0.0207872 +/- 0.000803; tau = 0.363
 Number of Sites: 16 +/- 0
 Specific Heat: 0.116464 +/- 0.00309
 [input parameters]
-LATTICE_LIBRARY = ../../../src/alps/resources/lattices.xml;
+LATTICE_LIBRARY = lattices.xml;
 LATTICE = "chain lattice";
 L = 16;
 SEED = 2873;
@@ -151,7 +151,7 @@ Magnetization Density^4: 0.0227477 +/- 0.000834; tau = 0.347
 Number of Sites: 16 +/- 0
 Specific Heat: 0.141491 +/- 0.00363
 [input parameters]
-LATTICE_LIBRARY = ../../../src/alps/resources/lattices.xml;
+LATTICE_LIBRARY = lattices.xml;
 LATTICE = "chain lattice";
 L = 16;
 SEED = 2873;

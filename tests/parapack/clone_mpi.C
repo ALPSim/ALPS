@@ -11,8 +11,8 @@
 *
 *****************************************************************************/
 
-#include <example/single/ising.h>
-#include <example/multiple/ising.h>
+#include "../../tutorials/00-examples/parapack/single/ising.h"
+#include "../../tutorials/00-examples/parapack/multiple/ising.h"
 #include <alps/parapack/clone_mpi.h>
 #include <alps/parapack/clone_proxy_mpi.h>
 #include <alps/parapack/parallel_factory.h>

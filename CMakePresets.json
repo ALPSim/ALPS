@@ -1,34 +1,75 @@
 {
-  "version": 3,
+  "version": 7,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 22,
+    "minor": 27,
     "patch": 0
   },
   "configurePresets": [
     {
       "name": "default",
       "displayName": "Default release build",
-      "binaryDir": "${sourceDir}/_build/default",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/${presetName}/install"
+      },
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build/${presetName}"
+    },
+    {
+      "name": "sdk",
+      "displayName": "Library and installed C++ SDK",
+      "inherits": "default",
+      "cacheVariables": {
+        "ALPS_BUILD_TESTING": "OFF",
+        "ALPS_BUILD_APPLICATIONS": "OFF"
       }
     },
     {
-      "name": "wheel-deps",
-      "displayName": "ALPS C++ SDK for pyalps wheels",
-      "description": "SDK install that the standalone pyalps wheel build links against (ALPS_DIR=_build/wheel-deps/install/share/alps). Applications are built so the wheel can bundle them into pyalps/bin, as the legacy ALPS_PYTHON_WHEEL build did; MPI is off, matching that build.",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/_build/wheel-deps",
+      "name": "distribution",
+      "displayName": "Redistributable SDK and applications",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/wheel-deps/install",
-        "ALPS_BUILD_LIBS_ONLY": "OFF",
-        "ALPS_BUILD_TESTS": "OFF",
-        "ALPS_BUILD_EXAMPLES": "OFF",
         "ALPS_BUILD_APPLICATIONS": "ON",
-        "ALPS_ENABLE_MPI": "OFF",
-        "ALPS_INCLUDE_TUTORIALS": "OFF"
+        "ALPS_BUILD_TESTING": "OFF"
+      },
+      "inherits": "default"
+    },
+    {
+      "name": "windows-x64",
+      "displayName": "Unofficial Windows x64 build (MSVC/vcpkg)",
+      "description": "Optional pinned vcpkg dependencies; set VCPKG_ROOT and activate MSVC. Generic presets use existing dependencies.",
+      "generator": "Ninja Multi-Config",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl",
+        "CMAKE_CXX_COMPILER": "cl",
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-windows",
+        "VCPKG_MANIFEST_DIR": "${sourceDir}/cmake/vcpkg",
+        "CMAKE_BUILD_TYPE": null
+      },
+      "inherits": "default",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "windows-arm64",
+      "displayName": "Unofficial Windows ARM64 build (MSVC/vcpkg)",
+      "description": "Optional pinned vcpkg dependencies with the ARM64 numerical overlay; set VCPKG_ROOT and activate ARM64 MSVC.",
+      "inherits": "windows-x64",
+      "architecture": {
+        "value": "ARM64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "arm64-windows",
+        "VCPKG_OVERLAY_PORTS": "${sourceDir}/cmake/vcpkg-arm64-overlay"
       }
     }
   ],
@@ -38,11 +79,25 @@
       "configurePreset": "default"
     },
     {
-      "name": "wheel-deps",
-      "configurePreset": "wheel-deps",
+      "name": "sdk",
+      "configurePreset": "sdk"
+    },
+    {
+      "name": "distribution",
+      "configurePreset": "distribution",
       "targets": [
         "install"
       ]
+    },
+    {
+      "name": "windows-x64",
+      "configurePreset": "windows-x64",
+      "configuration": "Release"
+    },
+    {
+      "name": "windows-arm64",
+      "configurePreset": "windows-arm64",
+      "configuration": "Release"
     }
   ],
   "testPresets": [
@@ -51,7 +106,22 @@
       "configurePreset": "default",
       "output": {
         "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
       }
+    },
+    {
+      "name": "windows-x64",
+      "configurePreset": "windows-x64",
+      "configuration": "Release",
+      "inherits": "default"
+    },
+    {
+      "name": "windows-arm64",
+      "configurePreset": "windows-arm64",
+      "configuration": "Release",
+      "inherits": "default"
     }
   ]
 }

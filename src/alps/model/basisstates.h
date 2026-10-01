@@ -279,9 +279,7 @@ void basis_states<I,S,SS>::build(const std::vector<std::pair<std::string,half_in
 
 } // namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 template <class I, class S, class SS>
 inline std::ostream& operator<<(std::ostream& out, const alps::basis_states<I,S,SS>& q)
@@ -310,8 +308,6 @@ inline std::ostream& operator<<(std::ostream& out, const alps::lookup_basis_stat
   return out;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // namespace alps
-#endif
 
 #endif

@@ -59,10 +59,10 @@ class RealVectorObsevaluatorXMLHandler;
 // Observable class interface
 //-----------------------------------------------------------------------
 
-template <class T> class ALPS_TEMPL_DECL SimpleObservableEvaluator;
+template <class T> class SimpleObservableEvaluator;
 
 template <class T>
-class ALPS_TEMPL_DECL AbstractSimpleObservable: public Observable
+class AbstractSimpleObservable: public Observable
 {
 public:
   friend class RealVectorObsevaluatorXMLHandler;
@@ -345,5 +345,8 @@ AbstractSimpleObservable<T>::slice (S s, const std::string& n) const
 
 } // end namespace alps
 
+
+// Template definitions must be available to every consumer.
+#include <alps/alea/abstractsimpleobservable.ipp>
 
 #endif // ALPS_ALEA_ABSTRACTSIMPLEOBSERVABLE_H

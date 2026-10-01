@@ -22,7 +22,7 @@
 #include <string>
 #include <cstdlib>
 
-namespace bs = boost::spirit;
+namespace bs = boost::spirit::classic;
 
 namespace alps {
 
@@ -103,9 +103,7 @@ void ParameterXMLHandler::text(const std::string& text) {
 } // namespace alps
 
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 std::ostream& operator<<(std::ostream& os, const alps::Parameter& p) {
   if (p.value().valid()) {
@@ -120,6 +118,4 @@ std::ostream& operator<<(std::ostream& os, const alps::Parameter& p) {
   return os;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif

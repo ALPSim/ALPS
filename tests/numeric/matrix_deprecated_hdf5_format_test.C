@@ -21,7 +21,7 @@
 
 int main() {
     boost::filesystem::path   infile(ALPS_SRCDIR);
-    infile = infile / "test" / "numeric" / "matrix_deprecated_hdf5_format_test.h5";
+    infile = infile / "tests" / "numeric" / "matrix_deprecated_hdf5_format_test.h5";
     if (!boost::filesystem::exists(infile))
     {
         std::cout << "Reference file " << infile << " not found." << std::endl;

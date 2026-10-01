@@ -12,8 +12,19 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "matrix_unit_tests.hpp"
+#include <new>
 
 using alps::numeric::matrix;
+
+// Force allocation failures without asking the operating system for enormous
+// allocations (sanitizer allocators may abort instead of throwing).
+template<class T>
+struct failing_matrix_storage : std::vector<T> {
+    failing_matrix_storage() = default;
+    failing_matrix_storage(std::size_t size, T const& value)
+        : std::vector<T>(size, value) {}
+    explicit failing_matrix_storage(std::size_t) { throw std::bad_alloc(); }
+};
 
 BOOST_AUTO_TEST_CASE_TEMPLATE( constructors_test, T, test_types )
 {
@@ -215,53 +226,34 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( resize_test, T, test_types )
 
 BOOST_AUTO_TEST_CASE_TEMPLATE( resize_exception_test, T, test_types )
 {
-    matrix<T> a(22,18);
+    using test_matrix = matrix<T, failing_matrix_storage<T>>;
+    test_matrix a(22,18);
     fill_matrix_with_numbers(a);
 
     // What happens if an exception is thrown?
     // Remains the matrix unchanged if an exception is thrown during the resize process?
     // Case 1: size1 > reserved_size1_
-    matrix<T> ref(a);
-    matrix<T> c(a);
-    matrix<T> d(a);
-    std::vector<T> test;
-    std::size_t max_size = test.max_size();
-    try
-    {
-        resize(a,max_size+10,1);
-    }
-    catch(...)
-    {
-        BOOST_CHECK_EQUAL(a,ref);
-    }
+    test_matrix ref(a);
+    test_matrix c(a);
+    test_matrix d(a);
+    BOOST_CHECK_THROW(resize(a,32,18), std::bad_alloc);
+    BOOST_CHECK_EQUAL(a,ref);
 
     // Resize case 2:
     // Shrinking in one dimension
     // size1 < reserved_size1
     // size1 < size1_ (-> shrinking)
-    try
-    {
-        resize(c,1,max_size+10);
-    }
-    catch(...)
-    {
-        BOOST_CHECK_EQUAL(c,ref);
-    }
+    BOOST_CHECK_THROW(resize(c,1,28), std::bad_alloc);
+    BOOST_CHECK_EQUAL(c,ref);
 
     // Resize case 3:
     // Enlargement within the already reserved range
     // size1 < reserved_size1
     // size1 > size1_
     resize(d,2,5);
-    matrix<T> ref_d(d);
-    try
-    {
-        resize(d,4,max_size/2+5);
-    }
-    catch(...)
-    {
-        BOOST_CHECK_EQUAL(d,ref_d);
-    }
+    test_matrix ref_d(d);
+    BOOST_CHECK_THROW(resize(d,4,28), std::bad_alloc);
+    BOOST_CHECK_EQUAL(d,ref_d);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE( reserve_test, T, test_types)

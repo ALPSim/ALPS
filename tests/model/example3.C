@@ -13,6 +13,7 @@
 
 /* $Id$ */
 
+#include <alps/parser/xslt_path.h>
 #include <alps/model.h>
 #include <fstream>
 #include <iostream>
@@ -27,7 +28,7 @@ int main()
     typedef alps::Expression Expression_;
 
     // create the library from an XML file
-    std::ifstream in("../../src/alps/resources/models.xml");
+    std::ifstream in(alps::search_xml_library_path("models.xml"));
     alps::ModelLibrary lib(in);
     alps::Parameters p;
 

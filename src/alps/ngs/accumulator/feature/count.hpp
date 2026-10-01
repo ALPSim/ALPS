@@ -38,29 +38,29 @@ namespace alps {
         };
 
         template<typename T> struct has_feature<T, count_tag> {
-            template<typename C> static char helper(typename count_type<T>::type (C::*)() const);
+            template<typename C> static char helper(typename alps::accumulator::count_type<T>::type (C::*)() const);
             template<typename C> static char check(boost::integral_constant<std::size_t, sizeof(helper(&C::count))>*);
             template<typename C> static double check(...);
             typedef boost::integral_constant<bool, sizeof(char) == sizeof(check<T>(0))> type;
         };
 
-        template<typename T> typename count_type<T>::type count(T const & arg) {
+        template<typename T> typename alps::accumulator::count_type<T>::type count(T const & arg) {
             return arg.count();
         }
 
         namespace detail {
 
             template<typename A> typename boost::enable_if<
-                typename has_feature<A, count_tag>::type, typename count_type<A>::type
+                typename has_feature<A, count_tag>::type, typename alps::accumulator::count_type<A>::type
             >::type count_impl(A const & acc) {
                 return count(acc);
             }
 
             template<typename A> typename boost::disable_if<
-                typename has_feature<A, count_tag>::type, typename count_type<A>::type
+                typename has_feature<A, count_tag>::type, typename alps::accumulator::count_type<A>::type
             >::type count_impl(A const & acc) {
                 throw std::runtime_error(std::string(typeid(A).name()) + " has no count-method" + ALPS_STACKTRACE);
-                return typename count_type<A>::type();
+                return typename alps::accumulator::count_type<A>::type();
             }
 
         }
@@ -70,7 +70,7 @@ namespace alps {
             template<typename T, typename B> class Result<T, count_tag, B> : public B {
 
                 public:
-                    typedef typename count_type<T>::type count_type;
+                    typedef typename alps::accumulator::count_type<T>::type count_type;
 
                     Result()
                         : m_count(count_type())
@@ -129,7 +129,7 @@ namespace alps {
                     template<typename U> void augadd(U const & arg, typename boost::disable_if<boost::is_scalar<U>, int>::type = 0) {
                         if (m_count == 0 || arg.count() == 0)
                             throw std::runtime_error("Both results needs measurements" + ALPS_STACKTRACE);
-                        m_count = std::min(m_count,  arg.count());
+                        m_count = (std::min)(m_count,  arg.count());
                         B::operator+=(arg);
                     }
 
@@ -141,7 +141,7 @@ namespace alps {
                     template<typename U> void augsub(U const & arg, typename boost::disable_if<boost::is_scalar<U>, int>::type = 0) {
                         if (m_count == 0 || arg.count() == 0)
                             throw std::runtime_error("Both results needs measurements" + ALPS_STACKTRACE);
-                        m_count = std::min(m_count,  arg.count());
+                        m_count = (std::min)(m_count,  arg.count());
                         B::operator-=(arg);
                     }
 
@@ -153,7 +153,7 @@ namespace alps {
                     template<typename U> void augmul(U const & arg, typename boost::disable_if<boost::is_scalar<U>, int>::type = 0) {
                         if (m_count == 0 || arg.count() == 0)
                             throw std::runtime_error("Both results needs measurements" + ALPS_STACKTRACE);
-                        m_count = std::min(m_count,  arg.count());
+                        m_count = (std::min)(m_count,  arg.count());
                         B::operator*=(arg);
                     }
 
@@ -165,7 +165,7 @@ namespace alps {
                     template<typename U> void augdiv(U const & arg, typename boost::disable_if<boost::is_scalar<U>, int>::type = 0) {
                         if (m_count == 0 || arg.count() == 0)
                             throw std::runtime_error("Both results needs measurements" + ALPS_STACKTRACE);
-                        m_count = std::min(m_count,  arg.count());
+                        m_count = (std::min)(m_count,  arg.count());
                         B::operator/=(arg);
                     }
 
@@ -175,7 +175,7 @@ namespace alps {
             template<typename T, typename B> struct Accumulator<T, count_tag, B> : public B {
 
                 public:
-                    typedef typename count_type<T>::type count_type;
+                    typedef typename alps::accumulator::count_type<T>::type count_type;
                     typedef Result<T, count_tag, typename B::result_type> result_type;
 
                     Accumulator(): m_count(count_type()) {}

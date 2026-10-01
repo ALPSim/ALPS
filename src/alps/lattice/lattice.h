@@ -17,6 +17,7 @@
 #ifndef ALPS_LATTICE_LATTICE_H
 #define ALPS_LATTICE_LATTICE_H
 
+#include <boost/math/constants/constants.hpp>
 #include <alps/config.h>
 #include <alps/lattice/unitcell.h>
 #include <alps/lattice/coordinate_traits.h>
@@ -169,11 +170,11 @@ momentum(const typename lattice_traits<Lattice>::vector_type& m, const Lattice& 
   if (first!=last) {
     typename lattice_traits<Lattice>::vector_type v(*first);
     for (std::size_t j=0; j<v.size(); ++j)
-      v[j] *= m[0]/(2.*M_PI);
+      v[j] *= m[0]/(2.*boost::math::constants::pi<double>());
     ++first;
     for (int i=1; first!=last; ++first, ++i)
       for (std::size_t j=0; j<v.size(); ++j)
-    v[j] = v[j] + (*first)[j] * m[i]/(2.*M_PI);
+    v[j] = v[j] + (*first)[j] * m[i]/(2.*boost::math::constants::pi<double>());
     return v;
   }
   else

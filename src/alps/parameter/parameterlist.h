@@ -91,9 +91,7 @@ public:
 
 } // end namespace
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 /// \brief write the parameters to a std::ostream
 ///
@@ -142,8 +140,6 @@ inline alps::oxstream& operator<<(alps::oxstream& oxs,
   oxs << alps::end_tag("PARAMETERLIST");
   return oxs;
 }
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // ALPS_PARAMETER_PARAMETERLIST_H

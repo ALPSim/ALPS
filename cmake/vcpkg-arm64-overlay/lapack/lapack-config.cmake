@@ -1,0 +1,7 @@
+include(CMakeFindDependencyMacro)
+find_dependency(OpenBLAS CONFIG)
+if(NOT TARGET lapack)
+    add_library(lapack INTERFACE IMPORTED)
+    target_link_libraries(lapack INTERFACE OpenBLAS::OpenBLAS)
+endif()
+set(lapack_VERSION 3.12.0)

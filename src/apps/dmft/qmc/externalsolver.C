@@ -18,15 +18,13 @@
 /// @file externalsolver.C
 /// @brief implements the external solver
 /// @sa ExternalSolver
+#include <boost/math/constants/constants.hpp>
 #include "externalsolver.h"
 #include "fouriertransform.h"
 #include "U_matrix.h"
 #include "bandstructure.h"
 #include <cstdlib>
 #include <fstream>
-#ifdef BOOST_MSVC
-#include <io.h>exe
-#endif
 #include "boost/tuple/tuple.hpp"
 #include "alps/parser/parser.h"
 #include "alps/utility/vectorio.hpp"
@@ -160,7 +158,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
       for (int f = 0; f < n_orbital; ++f) {
         double hsign = f%2 ? h : -h;
         for (int i = 0; i < n_matsubara; ++i) {
-          Delta_matsubara(i, f) = -1. / G0_omega(i, f) + (std::complex < double >(mu+hsign, (2. * i + 1) * M_PI / beta));
+          Delta_matsubara(i, f) = -1. / G0_omega(i, f) + (std::complex < double >(mu+hsign, (2. * i + 1) * boost::math::constants::pi<double>() / beta));
         }
       }
       Fourier.backward_ft(Delta_itime, Delta_matsubara);
@@ -238,4 +236,3 @@ void ExternalSolver::call(std::string const& infile, std::string const& outfile)
   if (!boost::filesystem::exists(outfile))
     boost::throw_exception(std::runtime_error("The external impurity solver failed to write the output file named " + outfile));
 }
-

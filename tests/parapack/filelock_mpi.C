@@ -16,7 +16,8 @@
 #include <iostream>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/timer.hpp>
+#include <chrono>
+#include <thread>
 
 namespace mpi = boost::mpi;
 
@@ -37,7 +38,7 @@ int main(int argc, char **argv) {
     lock.lock();
     std::cerr << "process #0 lock acquired\n";
     world.barrier();
-    sleep(2);
+    std::this_thread::sleep_for(std::chrono::seconds(2));
     lock.release();
     std::cerr << "process #0 lock released\n";
   } else if (world.rank() == 1) {
@@ -58,7 +59,7 @@ int main(int argc, char **argv) {
     std::cerr << "process #" << world.rank() << " lock trying\n";
     alps::filelock lock2(file, true);
     std::cerr << "process #" << world.rank() << " lock acquired\n";
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     lock2.release();
   }
   std::cerr << "process #" << world.rank() << " lock released\n";

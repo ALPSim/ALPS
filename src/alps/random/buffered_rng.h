@@ -25,7 +25,7 @@
 #include <alps/config.h>
 #include <alps/random/pseudo_des.h>
 #include <alps/random/seed.h>
-#include <alps/random/mersenne_twister.hpp>
+#include <boost/random/mersenne_twister.hpp>
 
 #include <boost/integer_traits.hpp>
 #include <boost/utility.hpp>
@@ -199,9 +199,7 @@ void buffered_rng<RNG>::fill_buffer()
 
 } // end namespace
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 /// writes the state of the generator to a std::ostream
 /// \sa buffered_rng_base
@@ -217,8 +215,6 @@ inline std::istream& operator>>(std::istream& is, buffered_rng_base& r) {
   return is;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // ALPS_RANDOM_H

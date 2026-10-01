@@ -109,9 +109,7 @@ void clone_phase::load(hdf5::archive & ar) {
 
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 alps::oxstream& operator<<(alps::oxstream& os, alps::clone_phase const& phase) {
   phase.write_xml(os);
@@ -128,9 +126,7 @@ alps::IDump& operator>>(alps::IDump& dp, alps::clone_phase& phase) {
   return dp;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // namespace alps
-#endif
 
 namespace alps {
 
@@ -309,9 +305,7 @@ void clone_info::load(hdf5::archive & ar) {
 
 } // namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 alps::oxstream& operator<<(alps::oxstream& os, clone_info const& info) {
   info.write_xml(os);
@@ -328,9 +322,7 @@ alps::IDump& operator>>(alps::IDump& dp, alps::clone_info& info) {
   return dp;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // namespace alps
-#endif
 
 #ifdef ALPS_HAVE_MPI
 

@@ -15,6 +15,7 @@
 #ifndef ALPS_APPLICATIONS_QMC_H
 #define ALPS_APPLICATIONS_QMC_H
 
+#include <boost/math/constants/constants.hpp>
 #include <alps/scheduler/montecarlo.h>
 #include <alps/scheduler/measurement_operators.h>
 #include <alps/alea.h>
@@ -636,7 +637,7 @@ bool QMCRun<G,StateType>::do_common_measurements(double sign, const std::vector<
         std::complex<double> val;
         for (typename super_type::site_iterator sit=this->sites().first; sit!=this->sites().second;++sit)
         {
-            double phase = M_PI * (alps::scheduler::LatticeModelMCRun<G>::coordinate(*sit)[0] + alps::scheduler::LatticeModelMCRun<G>::coordinate(*sit)[1]);
+            double phase = boost::math::constants::pi<double>() * (alps::scheduler::LatticeModelMCRun<G>::coordinate(*sit)[0] + alps::scheduler::LatticeModelMCRun<G>::coordinate(*sit)[1]);
             val += local[*sit] * (std::complex<double> ( std::cos(phase), std::sin(phase) ));            
         }
         double CBS_order = (std::abs(val) * std::abs(val) * sign) / this->num_sites();

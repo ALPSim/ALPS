@@ -11,6 +11,7 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <alps/parser/xslt_path.h>
 #include <alps/graph/subgraph_generator.hpp>
 #include <alps/graph/utils.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -20,7 +21,7 @@ static unsigned int const test_graph_size = 7;
 template <typename Graph>
 void subgraph_generator_with_color_symmetries_test(unsigned int order)
 {
-    std::ifstream in("../../src/alps/resources/lattices.xml");
+    std::ifstream in(alps::search_xml_library_path("lattices.xml"));
     alps::Parameters parm;
     parm["LATTICE"] = "anisotropic triangular lattice";
     parm["L"]       = 2*order+1;

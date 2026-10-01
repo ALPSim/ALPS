@@ -16,8 +16,30 @@
 #include <iostream>
 #include <string>
 
+template<class T>
+void check_range_boundaries() {
+  const T lo = (std::numeric_limits<T>::min)();
+  const T hi = (std::numeric_limits<T>::max)();
+  const alps::integer_range<T> full(lo, hi), empty;
+  if (full.empty() || !full.valid() || !empty.empty() || empty.size() != 0 ||
+      alps::integer_range<T>(lo).size() != 1 || alps::integer_range<T>(hi).size() != 1 ||
+      alps::integer_range<T>(0, hi - 1).size() != hi ||
+      unify(full, full) != full)
+    throw std::runtime_error("integer_range boundary check failed");
+  try {
+    full.size();
+  } catch (std::overflow_error const&) {
+    return;
+  }
+  throw std::runtime_error("integer_range failed to reject an unrepresentable size");
+}
+
 int main()
 {
+  check_range_boundaries<int>();
+  check_range_boundaries<unsigned int>();
+  check_range_boundaries<long long>();
+  check_range_boundaries<unsigned long long>();
   std::string str;
   alps::Parameters params;
   while (std::getline(std::cin, str) && str.size())

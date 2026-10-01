@@ -41,16 +41,12 @@ public:
   /// type of the random numbers
   typedef uint32_t result_type;
   
-#ifndef BOOST_NO_INCLASS_MEMBER_INITIALIZATION
   /// the range is fixed
   static const bool has_fixed_range = true;
   /// minimum value is 0
   static const result_type min_value = boost::integer_traits<result_type>::const_min;
   /// maximum value is 2^32-1
   static const result_type max_value = boost::integer_traits<result_type>::const_max;
-#else
-  BOOST_STATIC_CONSTANT(bool, has_fixed_range = false);
-#endif
 
   /// the default seed is 4357
   BOOST_STATIC_CONSTANT(uint32_t, default_seed = 4357);

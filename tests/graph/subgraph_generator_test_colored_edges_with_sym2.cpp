@@ -11,6 +11,7 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <alps/parser/xslt_path.h>
 #include <alps/graph/subgraph_generator.hpp>
 #include <alps/graph/utils.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -105,7 +106,7 @@ bool test_lattices(unsigned int order)
         std::cout << "----------------------------------------------" << std::endl;
         std::cout << "anisotropic tirangular lattice - 3 couplings: " << std::endl;
         std::cout << "----------------------------------------------" << std::endl;
-        std::ifstream in("../../src/alps/resources/lattices.xml");
+        std::ifstream in(alps::search_xml_library_path("lattices.xml"));
         alps::Parameters parm;
         parm["LATTICE"] = "anisotropic triangular lattice";
         parm["L"]       = 2*order+1;
@@ -124,7 +125,7 @@ bool test_lattices(unsigned int order)
         std::cout << "----------------------------------------------" << std::endl;
         std::cout << "anisotropic tirangular lattice - 2 couplings: " << std::endl;
         std::cout << "----------------------------------------------" << std::endl;
-        std::ifstream in("../../src/alps/resources/lattices.xml");
+        std::ifstream in(alps::search_xml_library_path("lattices.xml"));
         alps::Parameters parm;
         parm["LATTICE"] = "anisotropic triangular lattice";
         parm["L"]       = 2*order+1;

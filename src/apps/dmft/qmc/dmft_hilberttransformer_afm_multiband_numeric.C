@@ -21,6 +21,7 @@
 // (2,3) untransformed, so its output differs from pair (0,1); the fixed
 // code is symmetric.
 
+#include <boost/math/constants/constants.hpp>
 #include "hilberttransformer.h"
 
 #include <alps/parameter.h>
@@ -60,7 +61,7 @@ int main() {
   matsubara_green_function_t G_omega(nfreq, 1, 4);
   matsubara_green_function_t G0_omega(nfreq, 1, 4);
   for (unsigned w = 0; w < nfreq; ++w) {
-    const std::complex<double> iw(0.0, (2 * w + 1) * M_PI / beta);
+    const std::complex<double> iw(0.0, (2 * w + 1) * boost::math::constants::pi<double>() / beta);
     const std::complex<double> z_up = 1.0 / (iw + 0.3);
     const std::complex<double> z_dn = 1.0 / (iw - 0.3);
     const std::complex<double> g_up = 1.0 / (iw + 0.5);
@@ -79,7 +80,7 @@ int main() {
   double max_asym   = 0.0;  // |pair(2,3) - pair(0,1)|
   double max_change = 0.0;  // how far pair(0,1) moved from its input
   for (unsigned w = 0; w < nfreq; ++w) {
-    const std::complex<double> iw(0.0, (2 * w + 1) * M_PI / beta);
+    const std::complex<double> iw(0.0, (2 * w + 1) * boost::math::constants::pi<double>() / beta);
     max_asym   = std::max(max_asym, std::abs(out(w, 2) - out(w, 0)));
     max_asym   = std::max(max_asym, std::abs(out(w, 3) - out(w, 1)));
     max_change = std::max(max_change, std::abs(out(w, 0) - 1.0 / (iw + 0.5)));

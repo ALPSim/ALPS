@@ -12,6 +12,7 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <alps/parser/xslt_path.h>
 #include <alps/lattice.h>
 #include <alps/graph/lattice_constant.hpp>
 
@@ -30,7 +31,7 @@ int main() {
     alps::Parameters parm;
     unsigned int side_length = 40;
     
-    std::ifstream in("../../src/alps/resources/lattices.xml");
+    std::ifstream in(alps::search_xml_library_path("lattices.xml"));
     parm["LATTICE"] = "square lattice";
     parm["L"] = side_length;
     alps::graph_helper<>::vertex_descriptor center_vertex = side_length * side_length / 2 + side_length / 2;

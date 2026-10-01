@@ -86,7 +86,7 @@ namespace alps {
                 // B = {(i, j): Vj shatters Vi}
                 std::size_t maxsize = 0;
                 for (typename partition_type<Graph>::type::const_iterator it = pi.begin(); it != pi.end(); ++it)
-                    maxsize = std::max(maxsize,it->size());
+                    maxsize = (std::max)(maxsize,it->size());
                 boost::multi_array<std::size_t,2> adjacent_numbers(boost::extents[pi.size()][maxsize]);
                 // For each Vi
                 for (typename partition_type<Graph>::type::const_iterator it = pi.begin(); it != pi.end(); ++it) {
@@ -814,13 +814,10 @@ namespace alps {
                 };
             } // end namespace label
 
-            template <typename Graph, typename LabelCreator>
+            template <typename Graph, typename LabelCreator, typename CandidateLabels>
             void build_ordering_and_label_from_best_label_candidate(
                   typename canonical_properties_type<Graph>::type * result
-                , std::map<
-                      typename LabelCreator::internal_label_type
-                    , typename partition_type<Graph>::type
-                  > const& candidate_labels
+                , CandidateLabels const& candidate_labels
                 , Graph const& G 
                 , LabelCreator & label_creator
             ) {
@@ -836,13 +833,10 @@ namespace alps {
                 get<alps::graph::label>(*result) = label_creator.fix_final_graph_label(best->first, best->second, G);
             }
 
-            template <typename Graph>
+            template <typename Graph, typename CandidateLabels>
             void build_ordering_and_label_from_best_label_candidate(
                   typename canonical_properties_type<Graph>::type * result
-                , std::map<
-                      typename label::graph_label_creator<Graph, label::no_coloring_policy, label::edge_coloring_with_symmetries_policy>::internal_label_type
-                    , typename partition_type<Graph>::type
-                  > const& candidate_labels
+                , CandidateLabels const& candidate_labels
                 , Graph const& G 
                 , label::graph_label_creator<Graph, label::no_coloring_policy, label::edge_coloring_with_symmetries_policy> & label_creator
             ) {
@@ -943,7 +937,7 @@ namespace alps {
 // is not fixed by a found automorphism.
 //
 // A good (first) test are the graphs of colored_edges_with_color_symmetry_test7() in
-// test/graph/canonical_label_with_color_symmetries_test.cpp (r7646).
+// tests/graph/canonical_label_with_color_symmetries_test.cpp (r7646).
 // For a good implementation both graphs should find all possible graph labels.
 // Currently the first realization of the graph skips two possible labels.
 //

@@ -20,10 +20,10 @@
 #include <iostream>
 #include <ctime>
 #include <iomanip>
-#include <boost/classic_spirit.hpp>
+#include <boost/spirit/include/classic.hpp>
 #include <boost/throw_exception.hpp>
 
-namespace sp = boost::spirit;
+namespace sp = boost::spirit::classic;
 
 #include "archive_xml.hpp"
 

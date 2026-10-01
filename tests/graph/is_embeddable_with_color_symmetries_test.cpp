@@ -11,6 +11,7 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <alps/parser/xslt_path.h>
 #include <alps/graph/is_embeddable.hpp>
 #include <alps/graph/utils.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -162,7 +163,7 @@ void is_embeddable_with_color_symmetries_test3()
     color_symmetry[0] = 0;
     color_symmetry[1] = 0;
 
-    std::ifstream in("../../src/alps/resources/lattices.xml");
+    std::ifstream in(alps::search_xml_library_path("lattices.xml"));
     alps::Parameters parm;
     parm["LATTICE"] = "anisotropic triangular lattice";
     parm["L"]       = 2*5+1;

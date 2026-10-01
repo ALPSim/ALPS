@@ -96,20 +96,16 @@ void clone_phase::load(hdf5::archive & ar) {
 } // end namespace ngs_parapack
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
 namespace ngs_parapack {
-#endif
 
 alps::oxstream& operator<<(alps::oxstream& os, alps::ngs_parapack::clone_phase const& phase) {
   phase.write_xml(os);
   return os;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // namespace ngs_parapack
 } // namespace alps
-#endif
 
 namespace alps {
 namespace ngs_parapack {
@@ -273,20 +269,16 @@ void clone_info::load(hdf5::archive & ar) {
 } // namespace ngs_parapack
 } // namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
 namespace ngs_parapack {
-#endif
 
 alps::oxstream& operator<<(alps::oxstream& os, alps::ngs_parapack::clone_info const& info) {
   info.write_xml(os);
   return os;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // namespace ngs_parapack
 } // namespace alps
-#endif
 
 #ifdef ALPS_HAVE_MPI
 

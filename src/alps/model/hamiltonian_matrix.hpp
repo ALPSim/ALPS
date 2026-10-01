@@ -325,8 +325,8 @@ void hamiltonian_matrix<M,G>::apply_operator(const STATES& states, const boost::
             if (mat[is1][is2][js1][js2].second) {
               // calculate fermionic sign
               bool f=(s2>=s1);
-              int start = std::min(s1,s2);
-              int end = std::max(s1,s2);
+              int start = (std::min)(s1,s2);
+              int end = (std::max)(s1,s2);
 
               for (int i=start;i<end;++i)
                 if (is_fermionic(model_.model().basis().site_basis(graph_.site_type(i)),basis_[i][state[i]]))

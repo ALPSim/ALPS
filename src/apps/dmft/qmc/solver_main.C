@@ -21,9 +21,6 @@
 #include <alps/utility/vectorio.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/program_options.hpp>
-#ifdef BOOST_MSVC
-#include <direct.h>
-#endif
 
 bool parse_options(int argc, char** argv, std::string& infile, std::string& outfile)
 {

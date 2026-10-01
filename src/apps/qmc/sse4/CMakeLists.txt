@@ -18,5 +18,5 @@
 #   DEALINGS IN THE SOFTWARE.
 
 add_executable(dirloop_sse main.cc lp_sse.cpp)
-target_link_libraries(dirloop_sse alps)
-install(TARGETS dirloop_sse RUNTIME DESTINATION bin COMPONENT applications)
+target_link_libraries(dirloop_sse PRIVATE ALPS::alps)
+alps_install_applications(dirloop_sse)

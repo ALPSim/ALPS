@@ -90,9 +90,7 @@ typedef lattice_graph<hypercubic_lattice<coordinate_lattice<simple_lattice<Graph
 
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 inline alps::oxstream& operator<< (alps::oxstream& out, const alps::LatticeGraphDescriptor& l)
   {
@@ -108,8 +106,6 @@ inline std::ostream& operator<< (std::ostream& out, const alps::LatticeGraphDesc
   }
 
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // ALPS_LATTICE_LATTICEGRAPHDESCRIPTOR_H

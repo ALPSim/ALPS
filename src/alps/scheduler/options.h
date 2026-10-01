@@ -17,6 +17,7 @@
 #ifndef ALPS_SCHEDULER_OPTIONS_H
 #define ALPS_SCHEDULER_OPTIONS_H
 
+#include <alps/export.h>
 #include <alps/config.h>
 #include <boost/filesystem/path.hpp>
 #include <string>
@@ -49,7 +50,7 @@ public:
   NoJobfileOptions();
 };
 
-class Options : public NoJobfileOptions
+class ALPS_DECL Options : public NoJobfileOptions
 {
 public:
   boost::filesystem::path jobfilename;      // name of the jobfile

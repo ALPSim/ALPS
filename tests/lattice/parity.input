@@ -1,4 +1,4 @@
-LATTICE_LIBRARY = "../../lib/xml/lattices.xml"
+LATTICE_LIBRARY = "lattices.xml"
 L = 4
 {
 LATTICE = "square lattice"

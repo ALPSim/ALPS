@@ -1,3 +1,5 @@
+#include <chrono>
+#include <thread>
 /*****************************************************************************
 *
 * ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -35,18 +37,12 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/foreach.hpp>
 #include <boost/regex.hpp>
-#include <boost/timer.hpp>
 
+#include <ctime>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <time.h>
 
-#if defined(ALPS_HAVE_UNISTD_H)
-# include <unistd.h>
-#elif defined(ALPS_HAVE_WINDOWS_H)
-# include <windows.h>
-#endif
 
 #ifdef _OPENMP
 # include <omp.h>
@@ -362,11 +358,11 @@ int run_sequential(int argc, char **argv) {
 
   for (std::size_t i = 0; i < parameterlist.size(); ++i) {
     alps::Parameters p = parameterlist[i];
-    boost::timer tm;
+    const std::clock_t tm = std::clock();
     if (!p.defined("DIR_NAME")) p["DIR_NAME"] = ".";
     if (!p.defined("BASE_NAME")) p["BASE_NAME"] = "task" + boost::lexical_cast<std::string>(i+1);
     if (!p.defined("CLONE_ID")) p["CLONE_ID"] = 1;
-    if (!p.defined("SEED")) p["SEED"] = static_cast<unsigned int>(time(0));
+    if (!p.defined("SEED")) p["SEED"] = static_cast<unsigned int>(std::time(0));
     p["WORKER_SEED"] = p["SEED"];
     p["DISORDER_SEED"] = p["SEED"];
     std::cout << "[input parameters]\n" << p << std::flush;
@@ -388,7 +384,8 @@ int run_sequential(int argc, char **argv) {
       evaluator = evaluator_factory::make_evaluator(p);
     evaluator->load(obs, obs_out);
     evaluator->evaluate(obs_out);
-    std::cerr << "[speed]\nelapsed time = " << tm.elapsed() << " sec\n";
+    std::cerr << "[speed]\nelapsed time = "
+              << static_cast<double>(std::clock() - tm) / CLOCKS_PER_SEC << " sec\n";
     std::cout << "[results]\n";
     if (obs_out.size() == 1) {
       std::cout << obs_out[0];
@@ -462,11 +459,11 @@ int start_sgl(int argc, char** argv) {
       boost::throw_exception(std::runtime_error("Invalid number of threads"));
       return 127;
     }
-#if defined(_OPENMP) && defined(ALPS_ENABLE_OPENMP_WORKER)
+#if defined(ALPS_ENABLE_OPENMP)
     omp_set_nested(true);
 #else
     if (opt.threads_per_clone > 1) {
-      std::cerr << "OpenMP worker parallelization is not supported.  Please rebuild ALPS with -DALPS_PARAPACK_ENABLE_OPENMP_WORKER=ON.\n";
+      std::cerr << "OpenMP worker parallelization is not supported.  Please rebuild ALPS with -DALPS_ENABLE_OPENMP=ON.\n";
       boost::throw_exception(std::runtime_error("OpenMP worker parallelization is not supported"));
       return 127;
     }
@@ -551,7 +548,7 @@ int start_sgl(int argc, char** argv) {
     #pragma omp parallel num_threads(num_groups)
     {
       thread_group group(thread_id());
-#if defined(_OPENMP) && defined(ALPS_ENABLE_OPENMP_WORKER)
+#if defined(ALPS_ENABLE_OPENMP)
       if (omp_get_max_threads() != opt.threads_per_clone)
         omp_set_num_threads(opt.threads_per_clone);
 #endif
@@ -700,11 +697,7 @@ int start_sgl(int argc, char** argv) {
             if (process.check_halted()) {
               break;
             } else {
-              #if defined(ALPS_HAVE_UNISTD_H)
-                sleep(1);    // sleep 1 Sec
-              #elif defined(ALPS_HAVE_WINDOWS_H)
-                Sleep(100); // sleep 100 mSec
-              #endif
+              std::this_thread::sleep_for(std::chrono::seconds(1));
             }
           } else {
             break;
@@ -755,10 +748,10 @@ int run_sequential_mpi(int argc, char** argv) {
   for (int i = 0; i < parameterlist.size(); ++i) {
     alps::Parameters p = parameterlist[i];
     world.barrier();
-    boost::timer tm;
+    const std::clock_t tm = std::clock();
     if (!p.defined("DIR_NAME")) p["DIR_NAME"] = ".";
     if (!p.defined("BASE_NAME")) p["BASE_NAME"] = "task" + boost::lexical_cast<std::string>(i+1);
-    if (!p.defined("SEED")) p["SEED"] = static_cast<unsigned int>(time(0));
+    if (!p.defined("SEED")) p["SEED"] = static_cast<unsigned int>(std::time(0));
     p["WORKER_SEED"] = static_cast<unsigned int>(p["SEED"]) ^ (world.rank() << 11);
     p["DISORDER_SEED"] = p["SEED"];
     if (world.rank() == 0) std::cout << "[input parameters]\n" << p << std::flush;
@@ -779,7 +772,8 @@ int run_sequential_mpi(int argc, char** argv) {
     }
     world.barrier();
     if (world.rank() == 0) {
-      std::cerr << "[speed]\nelapsed time = " << tm.elapsed() << " sec" << std::endl;
+      std::cerr << "[speed]\nelapsed time = "
+                << static_cast<double>(std::clock() - tm) / CLOCKS_PER_SEC << " sec" << std::endl;
     }
     std::vector<alps::ObservableSet> obs_out;
     boost::shared_ptr<alps::parapack::abstract_evaluator>

@@ -21,6 +21,7 @@
 // off-diagonal input into G_tau instead of being zeroed. This test fails on
 // the pre-fix code and passes once the guard reads c1==0 && c2==0 && c3==0.
 
+#include <boost/math/constants/constants.hpp>
 #include "fouriertransform.h"
 
 #include <algorithm>
@@ -41,7 +42,7 @@ int main() {
 
   matsubara_green_function_t G_omega(N_omega, n_site, n_flavor);
   for (unsigned k = 0; k < N_omega; ++k) {
-    const std::complex<double> iw(0.0, (2 * k + 1) * M_PI / beta);
+    const std::complex<double> iw(0.0, (2 * k + 1) * boost::math::constants::pi<double>() / beta);
     G_omega(k, 0, 0, 0) = 1.0 / (iw - 0.3);                  // real diagonal data
     G_omega(k, 1, 1, 0) = 1.0 / (iw + 0.3);
     G_omega(k, 0, 1, 0) = std::complex<double>(0.05, -0.02); // bogus off-diagonal

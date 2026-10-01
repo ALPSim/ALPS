@@ -235,9 +235,7 @@ private:
 
 } // namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 /// write parameters in text-form to a std::ostream
 ALPS_DECL std::ostream& operator<<(std::ostream& os, const alps::Parameters& p);
@@ -284,8 +282,6 @@ inline alps::oxstream& operator<<(alps::oxstream& oxs,
   return oxs;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // ALPS_PARAMETER_PARAMETERS_H

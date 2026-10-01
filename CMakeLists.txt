@@ -17,496 +17,168 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-cmake_minimum_required(VERSION 3.22)
-
-if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
-  message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there. You may need to remove CMakeCache.txt.")
+cmake_minimum_required(VERSION 3.27...4.3)
+if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
+  message(FATAL_ERROR "Use an out-of-source build: cmake -S . -B build")
 endif()
+include(cmake/ALPSVersion.cmake)
+# These options must precede project(): vcpkg reads manifest features when the
+# toolchain is loaded. Embedded builds default to just the library.
+string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" _alps_top_level)
+option(ALPS_BUILD_TESTING "Build and register ALPS tests" ${_alps_top_level})
+option(ALPS_ENABLE_MPI "Enable MPI parallelization" OFF)
+option(ALPS_BUILD_APPLICATIONS "Build simulation applications and command-line tools"
+       ${_alps_top_level})
+if(ALPS_BUILD_TESTING)
+  list(APPEND VCPKG_MANIFEST_FEATURES tests)
+endif()
+if(ALPS_ENABLE_MPI)
+  list(APPEND VCPKG_MANIFEST_FEATURES mpi)
+endif()
+project(alps VERSION ${ALPS_VERSION_CORE} LANGUAGES C CXX)
+include(cmake/ALPSBuildConcurrency.cmake)
 
-if (NOT_BUILD_SHARED_LIBS)
-	option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
-else (NOT_BUILD_SHARED_LIBS)
-	option(BUILD_SHARED_LIBS "Build shared libraries" ON)
-endif (NOT_BUILD_SHARED_LIBS)
-option(ALPS_BUILD_DEVELOPER_TOOLS "Build tools used by developers to maintain ALPS" OFF)
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+# A local default must not change later add_library() calls in a parent project.
+if(NOT DEFINED BUILD_SHARED_LIBS)
+  set(BUILD_SHARED_LIBS ON)
+endif()
+option(ALPS_NGS_USE_NEW_ALEA "Use the experimental NGS accumulator implementation" OFF)
+option(ALPS_NGS_OPENMPI_ULFM "Enable user-level failure mitigation with a compatible OpenMPI" OFF)
+mark_as_advanced(ALPS_NGS_USE_NEW_ALEA ALPS_NGS_OPENMPI_ULFM)
 option(ALPS_ENABLE_OPENMP "Enable OpenMP parallelization" OFF)
-option(ALPS_ENABLE_OPENMP_WORKER "Enable OpenMP worker support" OFF)
-option(ALPS_BUILD_ON_CRAY "Build ALPS for cray" OFF)
-option(LAPACK_64_BIT "Use 64-bit version of LAPACK" OFF)
-option(ALPS_BUILD_FORTRAN "Build the ALPS fortran applications and tools" OFF)
-option(ALPS_INCLUDE_TUTORIALS "Include the ALPS tutorials" ON)
-option(BIND_FORTRAN_LOWERCASE "FORTRAN functions are compiled without a trailing underscore" OFF)
-option(ALPS_LINK_BOOST_TEST "Link Boost.test pre-built library" OFF)
-option(ALPS_INSTALL_BOOST_TEST "Install Boost Test framework" OFF)
-option(ALPS_NGS_USE_NEW_ALEA "Use the ALPS ngs-alea instead of just alea" OFF)
-option(ALPS_NGS_OPENMPI_ULFM "Userlevel failure mitigation is available" OFF)
-option(ALPS_BUILD_LIBS_ONLY "Build only libraries" OFF)
+option(ALPS_BUILD_EXTENSIVE_TESTS "Build expensive graph and HDF5 type-matrix tests" OFF)
+set(ALPS_VERSION_PRERELEASE "" CACHE STRING "Optional prerelease version label")
 
-
-
-mark_as_advanced(BIND_FORTRAN_LOWERCASE)
-mark_as_advanced(ALPS_LINK_BOOST_TEST)
-mark_as_advanced(ALPS_INSTALL_BOOST_TEST)
-mark_as_advanced(ALPS_NGS_USE_NEW_ALEA)
-mark_as_advanced(ALPS_NGS_OPENMPI_ULFM)
-mark_as_advanced(ALPS_BUILD_LIBS_ONLY)
-
-option(ALPS_USE_MKL_PARALLEL "Use parallel version of MKL" OFF)
-mark_as_advanced(ALPS_USE_MKL_PARALLEL)
-    
-SET (APPLICATIONS_CAN_BE_BUILT ON)
-
-set(ALPS_BOOST_LIBRARY_NAME "boost" CACHE STRING "name of the boost library")
-set(ALPS_ENABLE_MPI ON CACHE BOOL "Enable MPI Parallelization")
-set(ALPS_INSTALL_HEADERS  ON CACHE BOOL "Install headers for ALPS and all dependent libraries")
-set(ALPS_BUILD_EXAMPLES ON CACHE BOOL "Build ALPS examples")
-set(ALPS_BUILD_TESTS ON CACHE BOOL "Build ALPS tests")
-set(ALPS_BUILD_APPLICATIONS ${APPLICATIONS_CAN_BE_BUILT} CACHE BOOL "Build ALPS applications")
-
-mark_as_advanced(ALPS_BOOST_LIBRARY_NAME)
-
-if(ALPS_BUILD_LIBS_ONLY)
-  set(ALPS_BUILD_APPLICATIONS OFF)
-endif()
-
-# Sets ALPS_VERSION_CORE from ALPS_VERSION.txt. Included by full path because
-# CMAKE_MODULE_PATH is not set up until after project().
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ALPSVersion.cmake)
-
-if(ALPS_BUILD_FORTRAN)
-  project(alps VERSION ${ALPS_VERSION_CORE} LANGUAGES C CXX Fortran)
-  if (APPLE)
-   set (CMAKE_Fortran_RUNTIME_LIBRARIES "-lgcc_s.1")
-  endif(APPLE)
-else(ALPS_BUILD_FORTRAN)
-  project(alps VERSION ${ALPS_VERSION_CORE} LANGUAGES C CXX)
-endif(ALPS_BUILD_FORTRAN)
-
-# C++17 is the minimum supported standard; allow callers (and CI) to select
-# a newer one with -DCMAKE_CXX_STANDARD=20/23.
-if(NOT DEFINED CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 17)
-endif()
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# Language requirements belong to ALPS::headers and propagate to every consumer.
 set(CMAKE_CXX_EXTENSIONS OFF)
-
-# print extensive compiler information
-execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version COMMAND head -n1 OUTPUT_VARIABLE ALPS_COMPILER_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
-message(STATUS "Compiler version: ${ALPS_COMPILER_VERSION}")
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -DBOOST_NO_AUTO_PTR= -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED -DBOOST_ALLOW_DEPRECATED_HEADERS -DBOOST_BIND_GLOBAL_PLACEHOLDERS")
-
-
-# set convenient warning flags for clang
-STRING(REGEX MATCH "clang" IS_CLANG "${ALPS_COMPILER_VERSION}")
-if(IS_CLANG)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftemplate-depth-256 -Wall -Wno-unknown-pragmas -Wno-unused-function -Wno-overloaded-virtual -Wno-unneeded-internal-declaration -Wno-unused-variable -Wno-return-type-c-linkage")
-endif(IS_CLANG)
-
-# For gfortran 10 (see https://gcc.gnu.org/gcc-10/changes.html)
-if(ALPS_BUILD_FORTRAN AND CMAKE_COMPILER_IS_GNUCC AND CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER 9.99)
-  SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch")
-endif(ALPS_BUILD_FORTRAN AND CMAKE_COMPILER_IS_GNUCC AND CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER 9.99)
-
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Type of build" FORCE)
-endif(NOT CMAKE_BUILD_TYPE)
-message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
-
-######################################################################
-# CMAKE_MODULE_PATH
-######################################################################
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-
-######################################################################
-# set default CMAKE_INSTALL_PREFIX
-######################################################################
-
-######################################################################
-# Version information
-######################################################################
-# The numeric components come from project() above, which took its version from
-# ALPS_VERSION.txt. Do not hardcode them here.
-set(ALPS_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
-set(ALPS_VERSION_MINOR ${PROJECT_VERSION_MINOR})
-set(ALPS_VERSION_PATCH ${PROJECT_VERSION_PATCH})
-
-# Prerelease label, e.g. "beta.2" for the v2.3.4-beta.2 tag. Display only: it is
-# deliberately kept out of the numeric version that drives SOVERSION and
-# find_package() matching. Set by the release process, not checked in.
-set(ALPS_VERSION_PRERELEASE "" CACHE STRING
-    "Prerelease label for this build, e.g. beta.2 (affects version strings only)")
-mark_as_advanced(ALPS_VERSION_PRERELEASE)
-
-if(ALPS_VERSION_PRERELEASE)
-  set(ALPS_VERSION "${ALPS_VERSION_CORE}-${ALPS_VERSION_PRERELEASE}")
-else()
-  set(ALPS_VERSION "${ALPS_VERSION_CORE}")
+if(NOT DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
-set(ALPS_VERSION_STRING "ALPS Libraries version ${ALPS_VERSION}")
-message(STATUS "ALPS version: ${ALPS_VERSION}")
+# Build mechanics are private to this directory tree, not SDK usage requirements.
+add_compile_options("$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/bigobj;/permissive-;/Zc:__cplusplus>")
+if(NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
+endif()
+foreach(kind IN ITEMS LIBRARY ARCHIVE)
+  if(NOT DEFINED CMAKE_${kind}_OUTPUT_DIRECTORY)
+    set(CMAKE_${kind}_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
+  endif()
+endforeach()
 
-# Derived, never hardcoded. string(TIMESTAMP) honours SOURCE_DATE_EPOCH, so
-# distro and conda reproducible builds still get a stable year.
+set(ALPS_VERSION ${PROJECT_VERSION})
+if(ALPS_VERSION_PRERELEASE)
+  string(APPEND ALPS_VERSION "-${ALPS_VERSION_PRERELEASE}")
+endif()
 string(TIMESTAMP ALPS_YEAR "%Y" UTC)
 
-set(ALPS_CONFIG_HOST unknown)
-set(ALPS_CONFIG_USER unknown)
-
-set(ALPS_PREFIX "${CMAKE_INSTALL_PREFIX}")
-set(libdir "${CMAKE_INSTALL_PREFIX}/lib")
-set(bindir "${CMAKE_INSTALL_PREFIX}/bin")
-
-######################################################################
-# C & C++ Headers
-######################################################################
-include(CheckIncludeFile)
-CHECK_INCLUDE_FILE(rpc/rpc.h ALPS_HAVE_RPC_XDR_H)
-CHECK_INCLUDE_FILE(stdarg.h ALPS_HAVE_STDARG_H)
-CHECK_INCLUDE_FILE(sys/stat.h ALPS_HAVE_SYS_STAT_H)
-CHECK_INCLUDE_FILE(sys/systeminfo.h ALPS_HAVE_SYS_SYSTEMINFO_H)
-CHECK_INCLUDE_FILE(sys/types.h ALPS_HAVE_SYS_TYPES_H)
-CHECK_INCLUDE_FILE(unistd.h ALPS_HAVE_UNISTD_H)
-CHECK_INCLUDE_FILE(windows.h ALPS_HAVE_WINDOWS_H)
-
-include(CheckIncludeFileCXX)
-CHECK_INCLUDE_FILE_CXX(valarray ALPS_HAVE_VALARRAY)
-
-######################################################################
-# Packages
-######################################################################
-
-# MPI
+find_package(Threads REQUIRED)
+set(ALPS_BOOST_COMPONENTS filesystem serialization program_options regex thread date_time chrono)
 if(ALPS_ENABLE_MPI)
-  IF(NOT MPI_FOUND)
-    find_package(MPIForALPS)
-      message (STATUS "MPI compiler was ${MPI_COMPILER}")
-  ENDIF(NOT MPI_FOUND)
+  find_package(MPI REQUIRED COMPONENTS CXX)
+  list(APPEND ALPS_BOOST_COMPONENTS mpi)
+  set(ALPS_HAVE_MPI 1)
+  set(ALPS_HAVE_BOOST_MPI 1)
+endif()
+find_package(Boost 1.76 CONFIG REQUIRED COMPONENTS ${ALPS_BOOST_COMPONENTS})
 
-  set(MPI_DEFINITIONS ${MPI_COMPILE_FLAGS})
-  if(MPI_INCLUDE_DIR)
-    set(MPI_DEFINITIONS "${MPI_COMPILE_FLAGS} -I${MPI_INCLUDE_DIR}")
-  endif(MPI_INCLUDE_DIR)
- 
-  set(MPI_INCLUDE_DIR ${MPI_INCLUDE_PATH})
-  IF(MPI_FOUND)
-    include_directories(${MPI_INCLUDE_DIR})
-    SET(ALPS_HAVE_MPI 1)
-    SET(ALPS_HAVE_BOOST_MPI 1)
-    set(BUILD_BOOST_MPI TRUE)
-    foreach(arg ${MPI_LIBRARIES})
-      set(MPI_LIBS "${MPI_LIBS} ${arg}")
-    endforeach(arg ${MPI_LIBRARIES})
-  ELSE(MPI_FOUND)
-    set(BUILD_BOOST_MPI FALSE)
-  ENDIF(MPI_FOUND)
-else (ALPS_ENABLE_MPI)
-    SET(ALPS_HAVE_MPI 0)
-    SET(ALPS_HAVE_BOOST_MPI 0)
-    set(BUILD_BOOST_MPI FALSE)
-endif(ALPS_ENABLE_MPI)
-
-# OpenMP
+# FindHDF5 supplies HDF5::HDF5 and preserves the provider's configurations.
+find_package(HDF5 MODULE REQUIRED COMPONENTS C)
+if(HDF5_IS_PARALLEL AND NOT ALPS_ENABLE_MPI)
+  message(FATAL_ERROR "Parallel HDF5 requires ALPS_ENABLE_MPI=ON")
+endif()
+set(ALPS_HAVE_HDF5_PARALLEL "${HDF5_IS_PARALLEL}")
 if(ALPS_ENABLE_OPENMP)
-  find_package(OpenMP)
-  if(OPENMP_FOUND)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    # Almost always OpenMP flags are same both for C and for Fortran.
-    if(ALPS_BUILD_FORTRAN)
-      set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_C_FLAGS}")
-    endif(ALPS_BUILD_FORTRAN)
-  endif(OPENMP_FOUND)
-endif(ALPS_ENABLE_OPENMP)
-
-# Lapack
-# For parallel MKL, this section should be executed after OpenMP check.
-if (NOT LAPACK_FOUND)
-  find_package(Lapack)
-endif (NOT LAPACK_FOUND)
-if (LAPACK_FOUND)
-  set(ALPS_HAVE_LAPACK 1)
-  set(ALPS_HAVE_BLAS 1)
-endif(LAPACK_FOUND)
-IF (REQUIRE_PTHREAD)
-  SET(LAPACK_LIBRARY "${LAPACK_LIBRARY};${PTHREAD_LIBRARY}")
-  SET(LAPACK_LIBRARIES "${LAPACK_LIBRARIES};${PTHREAD_LIBRARY}")
-ENDIF (REQUIRE_PTHREAD)
-if(MAC_VECLIB)
-  set(LAPACK_LDFLAGS "-framework ${BLAS_LAPACK_MAC_FRAMEWORK}")
-endif(MAC_VECLIB)
-set(LAPACK_LINKER_FLAGS ${LAPACK_LDFLAGS})
-
-# SQLite
-find_package(SQLite)
-
-# LPSolve
-find_package(LPSolve)
-
-# SZip
-find_package(SZIP)
-if(SZIP_FOUND)
-  include_directories(${SZIP_INCLUDE_DIR})
-  link_libraries(${SZIP_LIBRARIES})
-endif(SZIP_FOUND)
-
-# HDF5
-if(ALPS_BUILD_FORTRAN)
-  find_package(HDF5 COMPONENTS C HL Fortran)
-else()
-  find_package(HDF5 COMPONENTS C HL)
+  find_package(OpenMP REQUIRED COMPONENTS CXX)
 endif()
-IF(HDF5_FOUND)
-  SET(HAVE_LIBHDF5 1)
-  INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIR})
-  add_definitions(${HDF5_DEFINTIONS})
-  SET(ALPS_HAVE_HDF5 1)
-ELSE(HDF5_FOUND)
-  MESSAGE(FATAL_ERROR "Require hdf5 1.8.2 or higher. Set HDF5_HOME")
-ENDIF(HDF5_FOUND)
 
+include(cmake/ALPSNumerics.cmake)
 
-IF(HDF5_IS_PARALLEL)
-  SET(ALPS_HAVE_HDF5_PARALLEL 1)
-  MESSAGE(WARNING "parallel(MPI) hdf5 is detected. We will compile but ALPS does not use parallel HDF5. The standard version is preferred.")
-  IF(NOT MPI_FOUND)
-    MESSAGE(FATAL_ERROR "parallel(MPI) hdf5 needs MPI. Enable MPI or install serial HDF5 libraries.")
-  ENDIF(NOT MPI_FOUND)
-  INCLUDE_DIRECTORIES(${MPI_INCLUDE_PATH})
-ENDIF(HDF5_IS_PARALLEL)
+# The bundled XDR implementation is portable and preserves the legacy format.
+# Using it consistently avoids incompatible platform RPC typedefs and ABIs.
+configure_file(src/alps/config.h.in src/alps/config.h)
+configure_file(src/alps/version.h.in src/alps/version.h)
 
-# Python bindings are built by the standalone scikit-build-core project in
-# python/pyalps.  The C++ SDK deliberately has no Python dependency.
-
-# Boost Libraries
-find_package(BoostForALPS REQUIRED)
-if(Boost_ROOT_DIR)
-  message(STATUS "Adding Boost dir: ${Boost_ROOT_DIR} " )
-  include_directories(${Boost_ROOT_DIR})
-else(Boost_ROOT_DIR)
-  message(STATUS "Adding Boost dir: ${Boost_INCLUDE_DIR} " )
-  include_directories(${Boost_INCLUDE_DIR})
-endif(Boost_ROOT_DIR)
-
-# XML Path
-set(ALPS_XML_PATH "lib" CACHE STRING "Directory to install ALPS XML directory in")
-set(ALPS_XML_DIR "${CMAKE_INSTALL_PREFIX}/${ALPS_XML_PATH}/xml")
-
-message (STATUS "ALPS XML dir is ${ALPS_XML_DIR}")
-
-
-if (BIND_FORTRAN_LOWERCASE)
-  add_definitions(-DBIND_FORTRAN_LOWERCASE)
-endif (BIND_FORTRAN_LOWERCASE)
-  
-  
-######################################################################
-# test environment
-######################################################################
-include(add_alps_test)
-
-######################################################################
-# configuration files
-######################################################################
-
-set (BIND_FORTRAN_INTEGER_8 ${LAPACK_64_BIT})
-
-configure_file(src/alps/config.h.in ${PROJECT_BINARY_DIR}/src/alps/config.h)
-configure_file(src/alps/version.h.in ${PROJECT_BINARY_DIR}/src/alps/version.h)
-
-configure_file(src/alps/resources/lattices.xml.in ${PROJECT_BINARY_DIR}/src/alps/resources/lattices.xml)
-configure_file(src/alps/resources/models.xml.in ${PROJECT_BINARY_DIR}/src/alps/resources/models.xml)
-
-######################################################################
-# include directories
-######################################################################
-include_directories(${PROJECT_BINARY_DIR}/src)
-include_directories(src)
-include_directories(SYSTEM ${PROJECT_SOURCE_DIR}/third_party/boost_numeric_bindings/include)
-
-# order the include directories so that directories which are in the
-# source or build tree always come before directories outside the project.
-set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
-
-######################################################################
-# RPATH setting
-######################################################################
-set(_alps_install_rpath)
-if(CMAKE_INSTALL_RPATH)
-  list(APPEND _alps_install_rpath ${CMAKE_INSTALL_RPATH})
-endif()
+file(RELATIVE_PATH _alps_bin_to_lib "${CMAKE_INSTALL_FULL_BINDIR}" "${CMAKE_INSTALL_FULL_LIBDIR}")
 if(APPLE)
-  list(APPEND _alps_install_rpath "@loader_path/../lib")
-else()
-  list(APPEND _alps_install_rpath "$ORIGIN/../lib")
+  set(ALPS_LOADER_ORIGIN "@loader_path")
+elseif(UNIX)
+  set(ALPS_LOADER_ORIGIN "$ORIGIN")
 endif()
-set(CMAKE_INSTALL_RPATH "${_alps_install_rpath}")
-set(CMAKE_SKIP_BUILD_RPATH FALSE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+if(ALPS_LOADER_ORIGIN)
+  list(APPEND CMAKE_INSTALL_RPATH "${ALPS_LOADER_ORIGIN}/${_alps_bin_to_lib}")
+endif()
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-set(CMAKE_MACOSX_RPATH 1)
 
-######################################################################
-# setting up ALPSConfig.cmake and include.mk
-######################################################################
-
-set(ALPS_USE_FILE ${CMAKE_INSTALL_PREFIX}/share/alps/UseALPS.cmake)
-set(ALPS_PYTHON_USE_FILE ${CMAKE_INSTALL_PREFIX}/share/alps/UsePyALPS.cmake)
-
-set(Boost_INCLUDE_DIR_CONFIG ${Boost_INCLUDE_DIR})
-
-set(ALPS_INCLUDE_DIRS_CONFIG ${CMAKE_INSTALL_PREFIX}/include)
-list(APPEND ALPS_INCLUDE_DIRS_CONFIG ${Boost_INCLUDE_DIR_CONFIG})
-set(ALPS_LIBRARY_DIRS_CONFIG ${CMAKE_INSTALL_PREFIX}/lib)
-set(ALPS_RUNTIME_LIBRARY_DIRS_CONFIG ${CMAKE_INSTALL_PREFIX}/bin)
-
-if(MPI_DEFINITIONS)
-  set(ALPS_EXTRA_DEFINITIONS "${ALPS_EXTRA_DEFINITIONS} ${MPI_DEFINITIONS}")
-endif(MPI_DEFINITIONS)
-if(LAPACK_DEFINITIONS)
-  set(ALPS_EXTRA_DEFINITIONS "${ALPS_EXTRA_DEFINITIONS} ${LAPACK_DEFINITIONS}")
-endif(LAPACK_DEFINITIONS)
-if(HDF5_DEFINITIONS)
-  set(ALPS_EXTRA_DEFINITIONS "${ALPS_EXTRA_DEFINITIONS} ${HDF5_DEFINITIONS}")
-endif(HDF5_DEFINITIONS)
-
-if(MPI_INCLUDE_DIR)
-  list(APPEND ALPS_EXTRA_INCLUDE_DIRS ${MPI_INCLUDE_DIR})
-  string(REPLACE ";" " -I" MPI_INCLUDE_DIR_FIXED "${MPI_INCLUDE_DIR}")
-  set (MPI_INCLUDE_DIR_FIXED "-I${MPI_INCLUDE_DIR_FIXED}")
-else(MPI_INCLUDE_DIR)
-  set (MPI_INCLUDE_DIR_FIXED "")
-endif(MPI_INCLUDE_DIR)
-if(HDF5_INCLUDE_DIR)
-  list(APPEND ALPS_EXTRA_INCLUDE_DIRS ${HDF5_INCLUDE_DIR})
-endif(HDF5_INCLUDE_DIR)
-if(Boost_INCLUDE_DIR_CONFIG)
-  list(APPEND ALPS_EXTRA_INCLUDE_DIRS ${Boost_INCLUDE_DIR_CONFIG})
-endif(Boost_INCLUDE_DIR_CONFIG)
-
-if(NOT Boost_FOUND)
-  set(Boost_LIBRARIES ${ALPS_BOOST_LIBRARY_NAME})
-  set(Boost_LIBS "-l${ALPS_BOOST_LIBRARY_NAME}")
-else()
-  string (REPLACE ";" " " Boost_LIBS "${Boost_LIBRARIES}") # variable for Makefile
-endif(NOT Boost_FOUND)
-set(ALPS_Boost_UNIT_TEST_FRAMEWORK_LIBRARY "ALPS_Boost_UNIT_TEST_FRAMEWORK_LIBRARY-NOTFOUND")
-if(ALPS_INSTALL_BOOST_TEST)
-  set(ALPS_Boost_UNIT_TEST_FRAMEWORK_LIBRARY "-lboost_unit_test_framework -lboost_test_exec_monitor -lboost_prg_exec_monitor")
-endif(ALPS_INSTALL_BOOST_TEST)
-
-if(MPI_LINKER_FLAGS)
-  set(ALPS_EXTRA_LINKER_FLAGS "${ALPS_EXTRA_LINKER_FLAGS} ${MPI_LINKER_FLAGS}")
-endif(MPI_LINKER_FLAGS)
-if(LAPACK_LINKER_FLAGS)
-  set(ALPS_EXTRA_LINKER_FLAGS "${ALPS_EXTRA_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
-endif(LAPACK_LINKER_FLAGS)
-
-if(MPI_LIBRARIES)
-  list(APPEND ALPS_EXTRA_LIBRARIES ${MPI_LIBRARIES})
-endif(MPI_LIBRARIES)
-if(LAPACK_LIBRARIES)
-  list(APPEND ALPS_EXTRA_LIBRARIES ${LAPACK_LIBRARIES})
-endif(LAPACK_LIBRARIES)
-if(HDF5_LIBRARIES)
-  list(APPEND ALPS_EXTRA_LIBRARIES ${HDF5_LIBRARIES})
-endif(HDF5_LIBRARIES)
-configure_file(cmake/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/cmake/ALPSConfig.cmake @ONLY)
-configure_file(cmake/include.mk.in ${PROJECT_BINARY_DIR}/cmake/include.mk)
-
-# Without this file find_package(ALPS <version>) accepts any version it finds
-# and silently discards the constraint. SameMinorVersion: patch releases within
-# a minor series are drop-in, a minor bump is not guaranteed to be.
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-  ${PROJECT_BINARY_DIR}/cmake/ALPSConfigVersion.cmake
-  COMPATIBILITY SameMinorVersion)
-
-
-# installation
-######################################################################
-include(InstallRequiredSystemLibraries)
-if (ALPS_INSTALL_HEADERS)
-  set(ALPS_HEADER_DIR "include")
-  install(DIRECTORY src/alps src/boost src/ietl src/mocasito COMPONENT headers DESTINATION ${ALPS_HEADER_DIR}
-          FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
-         )
-  # ALPS' public headers include the vendored Boost.Numeric bindings.  Install
-  # them as part of the C++ SDK so downstream consumers do not need the ALPS
-  # source tree on their include path.
-  install(DIRECTORY third_party/boost_numeric_bindings/include/boost COMPONENT headers DESTINATION ${ALPS_HEADER_DIR}
-          FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
-         )
-  install(FILES ${PROJECT_BINARY_DIR}/src/alps/config.h ${PROJECT_BINARY_DIR}/src/alps/version.h DESTINATION ${ALPS_HEADER_DIR}/alps COMPONENT headers)
-endif(ALPS_INSTALL_HEADERS)
-
-install(DIRECTORY src/alps/resources/ DESTINATION ${ALPS_XML_PATH}/xml COMPONENT xml
-        FILES_MATCHING PATTERN "*.xsl"
-       )
-
-install(DIRECTORY ${PROJECT_BINARY_DIR}/src/alps/resources/ DESTINATION ${ALPS_XML_PATH}/xml COMPONENT xml)
-
-add_subdirectory(cmake)
-
-install(FILES cmake/UseALPS.cmake
-        cmake/UsePyALPS.cmake
-        ${PROJECT_BINARY_DIR}/cmake/ALPSConfig.cmake
-        ${PROJECT_BINARY_DIR}/cmake/ALPSConfigVersion.cmake
-        ${PROJECT_BINARY_DIR}/cmake/include.mk
-        cmake/run_test.cmake
-        cmake/run_test_mpi.cmake
-        cmake/add_alps_test.cmake
-        DESTINATION share/alps COMPONENT build)
-
-install(FILES CITATION.md LICENSE.txt README.md
-        DESTINATION share/alps COMPONENT libraries)
-######################################################################
-# libraries
-######################################################################
-
-add_subdirectory(src/boost)
-add_subdirectory(src/alps)
-
-
-######################################################################
-# programs
-######################################################################
-
-if (NOT ALPS_BUILD_LIBS_ONLY)
-  add_subdirectory(src/tools)
-  if (ALPS_BUILD_EXAMPLES)
-    add_subdirectory(tutorials/examples)
-  endif (ALPS_BUILD_EXAMPLES)
-endif (NOT ALPS_BUILD_LIBS_ONLY)
-
-
-######################################################################
-# applications
-######################################################################
-
-if (ALPS_BUILD_APPLICATIONS AND NOT ALPS_BUILD_LIBS_ONLY)
-  add_subdirectory(src/apps)
-endif (ALPS_BUILD_APPLICATIONS AND NOT ALPS_BUILD_LIBS_ONLY)
-
-if (ALPS_INCLUDE_TUTORIALS AND NOT ALPS_BUILD_LIBS_ONLY)
-  add_subdirectory(tutorials)
-endif (ALPS_INCLUDE_TUTORIALS AND NOT ALPS_BUILD_LIBS_ONLY)
-
-######################################################################
-# developer tools
-######################################################################
-
-if (ALPS_BUILD_DEVELOPER_TOOLS)
-  add_subdirectory(script)
-endif (ALPS_BUILD_DEVELOPER_TOOLS)
-
-######################################################################
-# tests
-######################################################################
-
-if (ALPS_BUILD_TESTS)
-  include(ALPSBuildname)
+if(ALPS_BUILD_TESTING)
   enable_testing()
-  include(CTest)
+endif()
+include(cmake/ALPSTesting.cmake)
+add_subdirectory(src/alps)
+if(ALPS_BUILD_APPLICATIONS)
+  if(ALPS_LOADER_ORIGIN)
+    # Programs also link directly to the SDK's dependencies. ELF RUNPATH is
+    # not transitive, and automatic RPATH discovery omits dependency archives
+    # staged inside the source/build tree. Reuse the configuration-aware paths
+    # already derived for libalps, preserving the programs' relative SDK path.
+    get_target_property(_alps_dependency_rpaths alps INSTALL_RPATH)
+    list(REMOVE_ITEM _alps_dependency_rpaths "${ALPS_LOADER_ORIGIN}")
+    list(APPEND CMAKE_INSTALL_RPATH ${_alps_dependency_rpaths})
+    list(REMOVE_DUPLICATES CMAKE_INSTALL_RPATH)
+  endif()
+  add_subdirectory(src/tools)
+  add_subdirectory(src/apps)
+  get_target_property(ALPS_APPLICATION_TARGETS alps ALPS_APPLICATION_TARGETS)
+endif()
+add_subdirectory(tutorials)
+if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
-endif (ALPS_BUILD_TESTS)
+endif()
+
+configure_package_config_file(
+  cmake/ALPSConfig.cmake.in "${PROJECT_BINARY_DIR}/cmake/ALPSConfig.cmake"
+  INSTALL_DESTINATION ${CMAKE_INSTALL_DATADIR}/alps
+  NO_SET_AND_CHECK_MACRO
+  PATH_VARS CMAKE_INSTALL_BINDIR CMAKE_INSTALL_DATADIR)
+write_basic_package_version_file("${PROJECT_BINARY_DIR}/cmake/ALPSConfigVersion.cmake"
+                                 COMPATIBILITY SameMinorVersion)
+install(
+  EXPORT ALPSTargets
+  NAMESPACE ALPS::
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/alps
+  COMPONENT build)
+install(
+  FILES "${PROJECT_BINARY_DIR}/cmake/ALPSConfig.cmake"
+        "${PROJECT_BINARY_DIR}/cmake/ALPSConfigVersion.cmake"
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/alps
+  COMPONENT build)
+install(
+  FILES CHANGELOG.md CITATION.md CONTRIBUTING.md LICENSE.txt README.md
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/alps
+  COMPONENT libraries)
+
+# Windows resolves DLLs alongside executables. CMake follows the actual PE
+# dependency graph, including numerical-library runtimes, at install time.
+if(WIN32)
+  install(
+    RUNTIME_DEPENDENCY_SET alps_runtime
+    DIRECTORIES "$<TARGET_FILE_DIR:alps>"
+    PRE_EXCLUDE_REGEXES "api-ms-.*" "ext-ms-.*"
+    POST_EXCLUDE_REGEXES
+    ".*[/\\\\][Ww][Ii][Nn][Dd][Oo][Ww][Ss][/\\\\].*"
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)
+endif()
+
+# Use CMake's compiler-runtime discovery for redistributable installations.
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+include(InstallRequiredSystemLibraries)
+# The MSVC ARM64 redist also contains an ARM64EC-only exception runtime.
+if(CMAKE_CXX_COMPILER_ARCHITECTURE_ID STREQUAL "ARM64")
+  list(FILTER CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS EXCLUDE REGEX "/vcruntime140_1d?\\.dll$")
+endif()
+install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+  DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)
+install(DIRECTORY ${CMAKE_INSTALL_SYSTEM_RUNTIME_DIRECTORIES}
+  DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)

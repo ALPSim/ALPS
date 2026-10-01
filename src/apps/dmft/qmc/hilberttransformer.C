@@ -17,6 +17,7 @@
 
 
 
+#include <boost/math/constants/constants.hpp>
 #include "hilberttransformer.h"
 #include <functional>
 #include <math.h>
@@ -123,7 +124,7 @@ matsubara_green_function_t GeneralFSHilbertTransformer::initial_G0(const alps::P
   if (parms.defined("INSULATING")) {
     std::cout<<"calculating insulating initial G0_omega"<<std::endl;
     for(unsigned int i=0; i<G0_omega.nfreq(); i++) {
-      std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
+      std::complex<double> iw(0.,(2*i+1)*boost::math::constants::pi<double>()/beta);
       for(spin_t flavor=0;flavor<G0_omega.nflavor(); flavor++) {
         std::complex<double> zeta = iw+mu+(flavor%2 ? h : -h);
         G0_omega(i, flavor) = 1./zeta;
@@ -169,7 +170,7 @@ matsubara_green_function_t GeneralFSHilbertTransformer::operator()(const matsuba
   if (!AFM) {
     std::cout<<"GeneralFSHilbertTransformer: PM version; using: mu="<<mu<<", h="<<h<<", beta="<<beta<<std::endl;
     for(frequency_t w=0; w<G_omega.nfreq(); ++w){
-      double wn=(2.*w+1)*M_PI/beta;
+      double wn=(2.*w+1)*boost::math::constants::pi<double>()/beta;
       for(spin_t f=0; f<G_omega.nflavor(); ++f){
         Sigma(0,f)=1./G0_omega(w,f)-1./G_omega(w,f);
         std::complex<double> zeta=std::complex<double>(mu-h,wn)-Sigma(0,f);
@@ -190,7 +191,7 @@ matsubara_green_function_t GeneralFSHilbertTransformer::operator()(const matsuba
       for(frequency_t w=0; w<G_omega.nfreq(); ++w){
         Sigma(0,f)=1./G0_omega(w,f)-1./G_omega(w,f);
         Sigma(0,f+1)=1./G0_omega(w,f+1)-1./G_omega(w,f+1);
-        double wn=(2.*w+1)*M_PI/beta;
+        double wn=(2.*w+1)*boost::math::constants::pi<double>()/beta;
         std::complex<double> zeta_0=std::complex<double>(mu-h,wn)-Sigma(0,f);
         std::complex<double> zeta_1=std::complex<double>(mu+h,wn)-Sigma(0,f+1);
 
@@ -227,7 +228,7 @@ matsubara_green_function_t SemicircleFSHilbertTransformer::operator()(const mats
   //formula according to review, p. 61, formula 221. 
   if(G_omega.nflavor()==1){ //special case. 
     for(unsigned i=0; i<G_omega.nfreq(); i++) {
-      std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
+      std::complex<double> iw(0.,(2*i+1)*boost::math::constants::pi<double>()/beta);
       G0_omega(i,0) =1./(iw + mu - bandstruct.second_moment(0)*G_omega(i,0));
     }
   }
@@ -235,7 +236,7 @@ matsubara_green_function_t SemicircleFSHilbertTransformer::operator()(const mats
     if(G_omega.nflavor()!=2){throw std::logic_error("SemicircleFSHilbertTransformer::operator(): don't know how to handle != 2 flavors in AFM case.");}
     for(unsigned flavor=0;flavor<G_omega.nflavor();flavor+=2){
       for(unsigned i=0; i<G_omega.nfreq(); i++) {
-        std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
+        std::complex<double> iw(0.,(2*i+1)*boost::math::constants::pi<double>()/beta);
         G0_omega(i,flavor  ) =1./(iw + mu -h - bandstruct.second_moment(flavor)*G_omega(i,flavor+1)); 
         G0_omega(i,flavor+1) =1./(iw + mu +h - bandstruct.second_moment(flavor)*G_omega(i,flavor  )); 
       }

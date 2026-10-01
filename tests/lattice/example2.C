@@ -14,6 +14,7 @@
 
 /* $Id$ */
 
+#include <alps/parser/xslt_path.h>
 #include <alps/lattice.h>
 #include <fstream>
 #include <iostream>
@@ -29,7 +30,7 @@ int main()
   try {
 #endif
     // create the library from an XML file
-    std::ifstream in("../../src/alps/resources/lattices.xml");
+    std::ifstream in(alps::search_xml_library_path("lattices.xml"));
     alps::LatticeLibrary lib(in);
 
     // write one of the graphs in XML

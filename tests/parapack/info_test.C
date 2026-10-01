@@ -13,11 +13,8 @@
 
 #include <alps/parapack/clone_info.h>
 #include <alps/osiris/comm.h>
-#if defined(ALPS_HAVE_UNISTD_H)
-# include <unistd.h>
-#elif defined(ALPS_HAVE_WINDOWS_H)
-# include <windows.h>
-#endif
+#include <chrono>
+#include <thread>
 
 int main(int argc, char **argv) {
   alps::comm_init(argc, argv);
@@ -25,23 +22,11 @@ int main(int argc, char **argv) {
   params["SEED"] = 29832;
   alps::clone_info info(0, params, "info_test");
   info.start("test 1");
-  #if defined(ALPS_HAVE_UNISTD_H)
-    sleep(1); // sleep 1 Sec
-  #elif defined(ALPS_HAVE_WINDOWS_H)
-    Sleep(1000); // sleep 1000 mSec
-  #endif
+  std::this_thread::sleep_for(std::chrono::seconds(1));
   info.stop();
-  #if defined(ALPS_HAVE_UNISTD_H)
-    sleep(1); // sleep 1 Sec
-  #elif defined(ALPS_HAVE_WINDOWS_H)
-    Sleep(1000); // sleep 1000 mSec
-  #endif
+  std::this_thread::sleep_for(std::chrono::seconds(1));
   info.start("test 2");
-  #if defined(ALPS_HAVE_UNISTD_H)
-    sleep(1); // sleep 1 Sec
-  #elif defined(ALPS_HAVE_WINDOWS_H)
-    Sleep(1000); // sleep 1000 mSec
-  #endif
+  std::this_thread::sleep_for(std::chrono::seconds(1));
   info.stop();
   info.set_progress(0.593483);
   if (alps::is_master()) {

@@ -21,7 +21,7 @@ int main () {
     bool result = false;
     try {
 #pragma omp parallel for
-        for (unsigned i=0; i<10; ++i) {
+        for (int i=0; i<10; ++i) {
             std::string filename = "omp." + boost::lexical_cast<std::string>(i) + ".h5";
             alps::hdf5::archive ar(filename, "w");
             ar["/value"] << i;

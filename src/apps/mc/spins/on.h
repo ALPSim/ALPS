@@ -13,6 +13,7 @@
 #ifndef ALPS_APPLICATIONS_MC_SPIN_ON_H_2
 #define ALPS_APPLICATIONS_MC_SPIN_ON_H_2
 
+#include <boost/math/constants/constants.hpp>
 #include "tinyvec.h"
 #include "matrices.h"
 #include <iostream>
@@ -35,9 +36,7 @@ public:
       container_[i] = val;
       sqsum += val * val;
     }
-#ifndef BOOST_NO_STDC_NAMESPACE
     using std::sqrt;
-#endif
     // renormalise to length 1
     container_ /= sqrt(sqsum);
     return container_;
@@ -68,7 +67,7 @@ public:
 
   template <class RNG> result_type operator()(RNG& rng)
   {
-    double phi=boost::uniform_real<>(0,2.*M_PI)(rng);
+    double phi=boost::uniform_real<>(0,2.*boost::math::constants::pi<double>())(rng);
     return result_type(cos(phi),sin(phi));
   }
 };
@@ -83,7 +82,7 @@ public:
 
   template <class RNG> result_type operator()(RNG& rng)
   {
-    boost::uniform_real<> float_random1(0.,2.*M_PI);
+    boost::uniform_real<> float_random1(0.,2.*boost::math::constants::pi<double>());
     double phi=float_random1(rng);
     double z=boost::uniform_real<>(-1.,1.)(rng);
     double r = sqrt(1.-z*z);
@@ -297,7 +296,7 @@ class ONMoment<3> {
     // distributed rotation angle.
     // rotate the current spin around this axis by the chosen angle
     template<class RNG> update_type random_update(RNG& rng) {
-      double phi = boost::uniform_real<>(0, 2*M_PI)(rng);
+      double phi = boost::uniform_real<>(0, 2*boost::math::constants::pi<double>())(rng);
       // choose uniformly distributed rotation axis
       update_type axis = uniform_on_sphere<3>()(rng);
       // rotate current state around axis with angle phi
