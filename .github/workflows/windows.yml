@@ -1,0 +1,242 @@
+# Unofficial native builds are opt-in and never gate releases.
+name: Unofficial Windows SDK and wheel
+on:
+  workflow_dispatch:
+    inputs:
+      architecture:
+        type: choice
+        options: [x64, arm64]
+        default: x64
+      configuration:
+        type: choice
+        options: [Release, Debug]
+        default: Release
+      wheel:
+        type: boolean
+        default: true
+      editable:
+        description: Exercise editable bindings (Release only)
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  msvc:
+    name: MSVC ${{ inputs.architecture }} ${{ inputs.configuration }}
+    runs-on: ${{ inputs.architecture == 'arm64' && 'windows-11-arm' || 'windows-latest' }}
+    timeout-minutes: 120
+    env:
+      CMAKE_BUILD_PARALLEL_LEVEL: 4
+      CTEST_PARALLEL_LEVEL: 2
+      CMAKE_C_COMPILER_LAUNCHER: ccache
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
+      CCACHE_DIR: ${{ github.workspace }}/_build/ccache
+      CCACHE_MAXSIZE: 1G
+      PIP_ONLY_BINARY: ':all:'
+      # Keep a Windows minimum-version build alongside current-CMake wheels.
+      CMAKE_REQUIREMENT: ${{ inputs.architecture == 'x64' && inputs.configuration == 'Debug' && 'cmake==3.27.9' || 'cmake>=3.27' }}
+    steps:
+      - name: Validate requested configuration
+        if: inputs.configuration != 'Release' && (inputs.wheel || inputs.editable)
+        shell: pwsh
+        run: throw 'Python wheels and editable bindings require Release; disable both for a Debug SDK build.'
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.13'
+          architecture: ${{ inputs.architecture }}
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
+        with:
+          arch: ${{ inputs.architecture }}
+      - name: Install native compiler cache
+        shell: pwsh
+        run: .github/scripts/install-ccache.ps1 -Architecture ${{ inputs.architecture }} -Destination _build/ccache-tool
+      - name: Restore compiler cache
+        id: compiler-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: _build/ccache
+          key: ccache-windows-${{ inputs.architecture }}-${{ inputs.configuration }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: ccache-windows-${{ inputs.architecture }}-${{ inputs.configuration }}-
+      - name: Reset compiler cache counters
+        run: ccache --zero-stats
+      - name: Restore vcpkg binary cache
+        id: dependency-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/AppData/Local/vcpkg/archives
+          key: vcpkg-${{ inputs.architecture }}-${{ hashFiles('cmake/vcpkg/vcpkg.json', 'cmake/vcpkg-arm64-overlay/**') }}
+      - name: Prepare pinned dependency SDK
+        shell: pwsh
+        run: |
+          python .github/scripts/build_metrics.py run 'Dependency preparation' python .github/scripts/prepare_dependencies.py windows-${{ inputs.architecture }} _build/dependencies
+          if ($LASTEXITCODE) { throw 'Dependency download failed' }
+          # MSVC activation sets VCPKG_ROOT to Visual Studio's bundled checkout.
+          "VCPKG_ROOT=$env:GITHUB_WORKSPACE/_build/dependencies" >> $env:GITHUB_ENV
+      - name: Save prepared vcpkg packages
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/AppData/Local/vcpkg/archives
+          key: ${{ steps.dependency-cache.outputs.cache-primary-key }}
+      - name: Configure SDK
+        shell: pwsh
+        run: |
+          python -m pip install --only-binary=:all: $env:CMAKE_REQUIREMENT ninja
+          if ($LASTEXITCODE) { throw 'Build tool installation failed' }
+          # The project serializes link/DLL-staging edges in a Ninja pool while
+          # keeping compilation parallel.
+          # Embed Debug information in each object so it can be cached independently.
+          python .github/scripts/build_metrics.py run 'SDK configure' cmake --preset windows-${{ inputs.architecture }} `
+            '-DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>' `
+            -DVCPKG_MANIFEST_MODE=OFF `
+            "-DVCPKG_INSTALLED_DIR=$env:VCPKG_ROOT/installed"
+      - name: Build SDK
+        run: python .github/scripts/build_metrics.py run 'SDK build' cmake --build --preset windows-${{ inputs.architecture }} --config ${{ inputs.configuration }}
+      - name: Test SDK
+        run: python .github/scripts/build_metrics.py run 'SDK tests' ctest --preset windows-${{ inputs.architecture }} -C ${{ inputs.configuration }} --output-junit ctest.xml --no-tests=error --timeout 600
+      - name: Install SDK
+        run: cmake --install _build/windows-${{ inputs.architecture }} --config ${{ inputs.configuration }}
+      - name: Stage installed SDK runtime checks
+        if: inputs.wheel
+        shell: pwsh
+        run: |
+          Copy-Item -Recurse _build/windows-${{ inputs.architecture }}/install/bin _build/sdk-runtime
+          foreach ($probe in @('portability', 'numerics', 'hdf5_complex')) {
+            Copy-Item "_build/windows-${{ inputs.architecture }}/bin/${{ inputs.configuration }}/$probe.exe" _build/sdk-runtime/
+          }
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        if: inputs.wheel
+        with:
+          name: sdk-runtime-windows-${{ inputs.architecture }}
+          path: _build/sdk-runtime
+          if-no-files-found: error
+      - name: Install Python build requirements
+        if: inputs.wheel || inputs.editable
+        run: python -m pip install build "nanobind==2.15.0" numpy scipy matplotlib h5py pytest "scikit-build-core>=1.0"
+      - name: Build Python wheel
+        if: inputs.wheel
+        env:
+          # CMake compiler launchers are supported by Ninja, not Visual Studio.
+          CMAKE_GENERATOR: Ninja
+        shell: pwsh
+        run: |
+          $env:ALPS_DIR = "$pwd/_build/windows-${{ inputs.architecture }}/install/share/alps"
+          python .github/scripts/build_metrics.py run 'Wheel build' python -m build --wheel --no-isolation --outdir _build/python-wheel python/pyalps `
+            --config-setting "build-dir=$pwd/_build/python-wheel-build" `
+            --config-setting "cmake.define.CMAKE_TOOLCHAIN_FILE=$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" `
+            --config-setting "cmake.define.VCPKG_INSTALLED_DIR=$env:VCPKG_ROOT/installed" `
+            --config-setting cmake.define.VCPKG_MANIFEST_MODE=OFF `
+            --config-setting cmake.define.VCPKG_TARGET_TRIPLET=${{ inputs.architecture }}-windows
+          if ($LASTEXITCODE) { throw 'Python wheel build failed' }
+          Get-ChildItem _build/python-wheel/*.whl | ForEach-Object {
+            python -m pip install --no-deps $_.FullName
+            if ($LASTEXITCODE) { throw 'Python wheel installation failed' }
+          }
+      - name: Install editable Python bindings
+        if: inputs.editable
+        env:
+          CMAKE_GENERATOR: Ninja
+        shell: pwsh
+        run: |
+          $env:ALPS_DIR = "$pwd/_build/windows-${{ inputs.architecture }}/install/share/alps"
+          python -m pip install --no-build-isolation -e python/pyalps `
+            --config-setting "build-dir=$pwd/_build/contributor-python" `
+            --config-setting "cmake.define.CMAKE_TOOLCHAIN_FILE=$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" `
+            --config-setting "cmake.define.VCPKG_INSTALLED_DIR=$env:VCPKG_ROOT/installed" `
+            --config-setting cmake.define.VCPKG_MANIFEST_MODE=OFF `
+            --config-setting cmake.define.VCPKG_TARGET_TRIPLET=${{ inputs.architecture }}-windows
+          if ($LASTEXITCODE) { throw 'Editable Python installation failed' }
+      - name: Test Python bindings
+        if: inputs.wheel || inputs.editable
+        shell: pwsh
+        run: |
+          $env:ALPS_DIR = "$pwd/_build/windows-${{ inputs.architecture }}/install/share/alps"
+          $env:PYALPS_TEST_DOWNSTREAM_EXPORT = '1'
+          $env:ALPS_TEST_CMAKE_ARGS = @('-G', 'Ninja', "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake", "-DVCPKG_INSTALLED_DIR=$env:VCPKG_ROOT/installed", '-DVCPKG_MANIFEST_MODE=OFF', '-DVCPKG_TARGET_TRIPLET=${{ inputs.architecture }}-windows') | ConvertTo-Json -Compress
+          python .github/scripts/build_metrics.py run --timeout 900 'Wheel and downstream tests' python -m pytest tests/pyalps tests/cmake -v -s --junitxml=_build/windows-${{ inputs.architecture }}/pytest.xml
+      - name: Check whether compiler cache changed
+        id: cache-policy
+        if: always()
+        run: python .github/scripts/build_metrics.py cache-policy
+      - name: Save compiler cache
+        if: ${{ !cancelled() && steps.compiler-cache.outcome == 'success' && steps.cache-policy.outputs.changed == 'true' }}
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: _build/ccache
+          key: ${{ steps.compiler-cache.outputs.cache-primary-key }}
+      - name: Summarize build performance
+        if: always()
+        env:
+          CCACHE_RESTORED_KEY: ${{ steps.compiler-cache.outputs.cache-matched-key }}
+        run: python .github/scripts/build_metrics.py summary
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        if: inputs.wheel
+        with:
+          name: cibw-wheels-windows-${{ inputs.architecture }}
+          path: _build/python-wheel/*.whl
+      - name: Summarize SDK and binding tests
+        if: always()
+        run: python .github/scripts/junit_summary.py _build/windows-${{ inputs.architecture }}/ctest.xml _build/windows-${{ inputs.architecture }}/pytest.xml
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        if: always()
+        with:
+          name: native-windows-${{ inputs.architecture }}-${{ inputs.configuration }}-logs
+          path: |
+            _build/windows-${{ inputs.architecture }}/Testing/Temporary/**
+            _build/windows-${{ inputs.architecture }}/CMakeFiles/CMakeConfigureLog.yaml
+            _build/windows-${{ inputs.architecture }}/ctest.xml
+            _build/windows-${{ inputs.architecture }}/pytest.xml
+            _build/metrics/**
+
+  smoke:
+    name: Installed wheel / ${{ inputs.architecture }}
+    needs: msvc
+    if: inputs.wheel
+    runs-on: ${{ inputs.architecture == 'arm64' && 'windows-11-arm' || 'windows-latest' }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.13'
+          architecture: ${{ inputs.architecture }}
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: cibw-wheels-windows-${{ inputs.architecture }}
+          path: wheelhouse
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: sdk-runtime-windows-${{ inputs.architecture }}
+          path: _build/sdk-runtime
+
+      - name: Test installed SDK without build dependencies
+        shell: pwsh
+        run: |
+          $env:PATH = "$env:SystemRoot/System32"
+          Set-Location _build/sdk-runtime
+          foreach ($probe in @('portability', 'numerics', 'hdf5_complex')) {
+            & "./$probe.exe"
+            if ($LASTEXITCODE) { throw "Installed SDK runtime check failed: $probe" }
+          }
+
+      - name: Install and validate wheel without the build SDK
+        shell: pwsh
+        run: |
+          python -m pip install twine numpy scipy matplotlib pytest h5py
+          if ($LASTEXITCODE) { throw 'Validation dependency installation failed' }
+          python -m twine check wheelhouse/*.whl
+          if ($LASTEXITCODE) { throw 'Wheel metadata validation failed' }
+          python -m pip install --no-index --find-links wheelhouse pyalps
+          if ($LASTEXITCODE) { throw 'Wheel installation failed' }
+          python .github/scripts/validate_pyalps.py --output _build/validation --wheelhouse wheelhouse
+          if ($LASTEXITCODE) { throw 'Installed wheel validation failed' }
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        if: always()
+        with:
+          name: windows-${{ inputs.architecture }}-wheel-validation
+          path: _build/validation

@@ -18,9 +18,15 @@ check the repaired artifact rather than the build tree.
 from __future__ import annotations
 
 import collections
+from importlib.metadata import distribution
+import json
+import os
 from pathlib import Path
 import re
+import struct
 import subprocess
+import sys
+import sysconfig
 
 import pytest
 
@@ -50,13 +56,80 @@ EXPECTED_BUNDLED_PROGRAMS = {
 
 
 def _package_dir() -> Path:
-    return Path(pyalps.__file__).resolve().parent
+    from pyalps._resources import runtime_directory
+    return runtime_directory()
+
+
+def test_wheel_uses_the_active_cpython_abi():
+    import sys
+    installed = distribution("pyalps")
+    assert installed.metadata["Requires-Python"] == ">=3.10"
+    tags = [line.removeprefix("Tag: ") for line in installed.read_text("WHEEL").splitlines()
+            if line.startswith("Tag: ")]
+    abi = f"cp{sys.version_info.major}{sys.version_info.minor}"
+    assert tags and all(tag.startswith(f"{abi}-{abi}-") for tag in tags)
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="Windows PE architecture check")
+def test_windows_binaries_match_python_architecture():
+    expected = {"win32": 0x14C, "win-amd64": 0x8664, "win-arm64": 0xAA64}[
+        sysconfig.get_platform()
+    ]
+    binaries = [p for p in _package_dir().rglob("*")
+                if p.suffix.lower() in {".exe", ".dll", ".pyd"}]
+    assert binaries
+    for path in binaries:
+        data = path.read_bytes()
+        assert data[:2] == b"MZ", path
+        offset, = struct.unpack_from("<I", data, 0x3C)
+        assert data[offset:offset + 4] == b"PE\0\0", path
+        machine, = struct.unpack_from("<H", data, offset + 4)
+        assert machine == expected, f"{path}: {machine:#x}, expected {expected:#x}"
+
+
+def test_runtime_manifest_paths_survive_installation():
+    package = _package_dir()
+    metadata = json.loads((package / "runtime.json").read_text(encoding="utf-8"))
+    assert metadata["schema"] == 1
+    for entry in metadata["libraries"]:
+        assert not Path(entry["path"]).is_absolute()
+        library = (package / entry["path"]).resolve()
+        assert library.is_relative_to(package.parent)
+        assert library.is_file(), entry
+    if (package.parent / "pyalps.libs").is_dir() or (package / ".dylibs").is_dir():
+        assert metadata["repaired"]
+        assert metadata["libraries"]
+
+
+def test_wheel_owns_its_cmake_package():
+    import pyalps
+
+    directory = Path(pyalps.get_cmake_dir())
+    assert directory == _package_dir() / "cmake"
+    assert (directory / "pyalpsConfig.cmake").is_file()
+    assert (_package_dir() / "include/pyalps/export_simulation.hpp").is_file()
+    output = subprocess.check_output([sys.executable, "-m", "pyalps", "--cmake-dir"], text=True)
+    assert Path(output.strip()) == directory
+
+
+@pytest.mark.skipif(sys.platform != "darwin", reason="Mach-O install names")
+def test_repaired_dylibs_can_be_linked_by_downstream_extensions():
+    package = _package_dir()
+    metadata = json.loads((package / "runtime.json").read_text())
+    if not metadata["repaired"]:
+        pytest.skip("requires a repaired wheel")
+    for entry in metadata["libraries"]:
+        library = package / entry["path"]
+        if library.suffix == ".dylib":
+            output = subprocess.check_output(["otool", "-D", str(library)], text=True)
+            assert f"@rpath/{library.name}" in output
+            subprocess.run(["codesign", "--verify", str(library)], check=True)
 
 
 def _library_dirs() -> list[Path]:
     """Every directory in the installed package that holds bundled libraries."""
     pkg = _package_dir()
-    candidates = [pkg / "lib", pkg / ".dylibs", pkg.parent / f"{pkg.name}.libs"]
+    candidates = [pkg / "lib", pkg / "bin", pkg / ".dylibs", pkg.parent / f"{pkg.name}.libs"]
     return [d for d in candidates if d.is_dir()]
 
 
@@ -71,6 +144,8 @@ def _library_stem(name: str) -> str:
         stem = name.split(".so", 1)[0]
     elif name.endswith(".dylib"):
         stem = re.sub(r"(\.\d+)+$", "", name[: -len(".dylib")])
+    elif name.lower().endswith(".dll"):
+        stem = name[:-4].lower()
     else:
         return ""
     return re.sub(r"-[0-9a-f]{6,}$", "", stem)
@@ -107,9 +182,12 @@ def test_every_bundled_program_can_be_loaded():
     if not bin_dir.is_dir():
         pytest.skip("this install does not bundle the ALPS programs")
 
-    programs = sorted(p for p in bin_dir.iterdir() if p.is_file())
+    suffix = ".exe" if sys.platform == "win32" else ""
+    programs = sorted(p for p in bin_dir.iterdir() if p.is_file() and p.suffix == suffix)
+    if not programs and sys.platform == "win32":
+        pytest.skip("bindings-only install carries DLLs but no applications")
     assert programs, f"{bin_dir} exists but is empty"
-    assert {p.name for p in programs} == EXPECTED_BUNDLED_PROGRAMS
+    assert {p.stem if suffix else p.name for p in programs} == EXPECTED_BUNDLED_PROGRAMS
 
     # Signatures the dynamic loader emits when a dependency cannot be resolved
     # from inside the installed package.  A program is free to reject --help
@@ -127,12 +205,17 @@ def test_every_bundled_program_can_be_loaded():
     )
 
     failures = []
+    # Developer search paths must not hide missing libraries in the package.
+    environment = {**os.environ, "PATH": ""}
+    environment.pop("LD_LIBRARY_PATH", None)
+    environment.pop("DYLD_LIBRARY_PATH", None)
     for program in programs:
         try:
             proc = subprocess.run(
                 [str(program), "--help"],
                 capture_output=True,
                 text=True,
+                env=environment,
                 timeout=60,
             )
         except subprocess.TimeoutExpired:
@@ -144,10 +227,14 @@ def test_every_bundled_program_can_be_loaded():
         output = f"{proc.stdout}\n{proc.stderr}"
         hit = next((sig for sig in loader_errors if sig in output), None)
         if hit is not None:
-            failures.append(f"{program.name}: loader error ({hit!r})")
-        elif proc.returncode == 127:
+            failures.append(f"{program.name}: loader error ({hit!r}): {output.strip()[:500]}")
+        elif proc.returncode == 127 or (proc.returncode & 0xFFFFFFFF) in {
+            0xC0000135,  # STATUS_DLL_NOT_FOUND
+            0xC0000139,  # STATUS_ENTRYPOINT_NOT_FOUND
+            0xC000007B,  # STATUS_INVALID_IMAGE_FORMAT (wrong architecture)
+        }:
             failures.append(
-                f"{program.name}: exited 127: {output.strip()[:200]}"
+                f"{program.name}: exited {proc.returncode}: {output.strip()[:200]}"
             )
 
     assert not failures, "bundled programs that cannot start:\n  " + "\n  ".join(failures)
@@ -164,7 +251,7 @@ def test_version_is_inherited_from_the_repository():
     """
     import pyalps
 
-    version_file = Path(__file__).resolve().parents[2] / "ALPS_VERSION.txt"
+    version_file = Path(__file__).resolve().parents[2] / "cmake/ALPS_VERSION.txt"
     if not version_file.is_file():
         pytest.skip("not running from an ALPS checkout")
 

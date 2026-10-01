@@ -9,6 +9,7 @@ from __future__ import annotations
 import copy
 import importlib
 import os
+import json
 from pathlib import Path
 import signal
 import subprocess
@@ -573,22 +574,24 @@ assert mpi.finalized()
 def test_downstream_nanobind_simulation_export(tmp_path):
     """Build and run a consumer extension against the installed ALPS SDK."""
     repository = Path(__file__).resolve().parents[2]
-    tutorial = repository / "tutorials" / "ngs" / "5_export_python"
-    alps_dir = repository / "_build" / "wheel-deps" / "install" / "share" / "alps"
+    tutorial = repository / "python/pyalps/examples/ising"
+    alps_dir = Path(os.environ["ALPS_DIR"])
     build = tmp_path / "export-python-build"
 
     assert (alps_dir / "ALPSConfig.cmake").is_file()
     subprocess.run(
         [
             "cmake", "-S", str(tutorial), "-B", str(build),
+            "-DCMAKE_BUILD_TYPE=Release",
             "-DALPS_DIR={}".format(alps_dir),
             "-DPython_EXECUTABLE={}".format(sys.executable),
+            *json.loads(os.environ.get("ALPS_TEST_CMAKE_ARGS", "[]")),
         ],
-        check=True,
+        check=True, timeout=300,
     )
     subprocess.run(
-        ["cmake", "--build", str(build), "--parallel", "2"],
-        check=True,
+        ["cmake", "--build", str(build), "--config", "Release", "--parallel", "2"],
+        check=True, timeout=300,
     )
 
     environment = os.environ.copy()
@@ -596,10 +599,10 @@ def test_downstream_nanobind_simulation_export(tmp_path):
         filter(None, (str(build), environment.get("PYTHONPATH")))
     )
     completed = subprocess.run(
-        [sys.executable, str(tutorial / "smoke_test.py")],
+        [sys.executable, "-u", "-X", "faulthandler", str(tutorial / "smoke_test.py")],
         capture_output=True,
         env=environment,
-        text=True,
+        text=True, timeout=120,
     )
     assert completed.returncode == 0, (
         "downstream exporter smoke test failed\n"
@@ -635,14 +638,16 @@ def test_current_python_numpy_and_scipy_compatibility(monkeypatch):
                     reason="compiled consumer enabled once per platform in CI")
 def test_native_parameter_contracts(tmp_path):
     repository = Path(__file__).resolve().parents[2]
-    source = repository / "test" / "pyalps" / "native_params"
+    source = repository / "tests" / "pyalps" / "native_params"
     build = tmp_path / "native-params"
     subprocess.run([
         "cmake", "-S", str(source), "-B", str(build),
-        "-DALPS_DIR=" + str(repository / "_build/wheel-deps/install/share/alps"),
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DALPS_DIR=" + os.environ["ALPS_DIR"],
         "-DPython_EXECUTABLE=" + sys.executable,
+        *json.loads(os.environ.get("ALPS_TEST_CMAKE_ARGS", "[]")),
     ], check=True)
-    subprocess.run(["cmake", "--build", str(build), "--parallel", "2"], check=True)
+    subprocess.run(["cmake", "--build", str(build), "--config", "Release", "--parallel", "2"], check=True)
     completed = subprocess.run(
         [sys.executable, "-X", "faulthandler", str(source / "check.py")],
         env={**os.environ, "PYTHONPATH": str(build), "MallocScribble": "1"},
