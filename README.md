@@ -1,6 +1,4 @@
-[![Build](https://github.com/ALPSim/ALPS/actions/workflows/build.yml/badge.svg)](https://github.com/ALPSim/ALPS/actions/workflows/build.yml)
-[![Python wheels](https://github.com/ALPSim/ALPS/actions/workflows/build_wheels.yml/badge.svg)](https://github.com/ALPSim/ALPS/actions/workflows/build_wheels.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.txt)
+[![Build](https://github.com/ALPSim/ALPS/actions/workflows/build.yml/badge.svg)](https://github.com/ALPSim/ALPS/actions/workflows/build.yml) [![Python wheels](https://github.com/ALPSim/ALPS/actions/workflows/build_wheels.yml/badge.svg)](https://github.com/ALPSim/ALPS/actions/workflows/build_wheels.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.txt)
 
 # ALPS — Algorithms and Libraries for Physics Simulations
 
@@ -8,9 +6,32 @@ The ALPS software package aims to provide a set of well tested, robust, and stan
 
 **Project website:** [alps.comp-phys.org](https://alps.comp-phys.org/)
 
+## Learn ALPS
+
+Start with the [tutorial guide](tutorials/README.md): run your first simulation, choose a numerical method, or learn to develop with the ALPS libraries. It includes recommended learning paths, notebooks, and focused API examples.
+
 ## Installation
 
-For current binary, source, and Spack installation instructions, see the [ALPS installation website](https://alps.comp-phys.org/install/).
+Build this checkout with standard CMake and Python packaging commands; see [CONTRIBUTING.md](CONTRIBUTING.md#getting-started-with-the-code) for dependencies and platform instructions. Use your existing dependency provider and toolchain. The [ALPS installation website](https://alps.comp-phys.org/install/) also covers upstream releases and Spack; its combined Boost.Python source-build instructions use a different interface from this SDK checkout.
+
+Source builds require **CMake 3.27 or newer**. If your system provides an older version, follow the [CMake and Ninja setup](CONTRIBUTING.md#install-cmake-and-ninja) for pip installation or official binary downloads. For the full build instructions and exported CMake SDK target, see [the development setup](CONTRIBUTING.md#getting-started-with-the-code).
+
+The [pyalps build instructions](python/pyalps/README.md) explain how to build the Python package against an installed C++ SDK.
+
+See [CHANGELOG.md](CHANGELOG.md) for release notes and upgrade guidance.
+
+## Develop from source
+
+After installing the [prerequisites](CONTRIBUTING.md#prerequisites), configure, build and test the SDK:
+
+```sh
+cmake --preset default
+cmake --build --preset default --parallel 2
+ctest --preset default
+cmake --install _build/default
+```
+
+Then follow the [editable Python installation](python/pyalps/README.md#editable-development), pointing `ALPS_DIR` at `_build/default/install/share/alps`.
 
 ## Contributing
 
