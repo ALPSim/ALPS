@@ -47,6 +47,31 @@ prepends `pyalps/bin` to `PATH`, so this is what makes
 `runApplication` helpers then require the executables on `PATH` by other
 means.
 
+## Interpreting `checkSteadyState`
+
+`pyalps.checkSteadyState` checks for a linear trend in an observable's
+measurement time series. `confidenceInterval` is the central normal
+confidence level: the default `0.6827` corresponds to approximately one
+sigma, and `0.9` corresponds to approximately 1.645 sigma. Increasing this
+level widens the no-drift acceptance region; it does **not** provide a
+stricter equilibration check.
+
+The diagnostic retains the historical slope statistic and its
+independent-sample normal approximation. It does not account for Monte
+Carlo autocorrelation or certify equilibrium. In particular, a constant
+series passes the no-drift check even if the chain is stuck; inspect time
+series and convergence diagnostics as well. Very short series do not
+provide a reliable statistical assessment.
+
+The confidence level must lie strictly between zero and one, and the
+series must contain at least two finite real scalar samples. Invalid
+inputs raise `ValueError`. Constant series return a no-drift flag with
+zero slope, slope error, and z statistic.
+
+This corrects the former complementary-confidence cutoff, so existing
+calls can return different flags even with the same data and confidence
+setting. The return structure and dataset annotation API are unchanged.
+
 ## Free-threading and stable-ABI policy
 
 pyalps ships per-version wheels (CPython 3.10–3.14) and deliberately opts

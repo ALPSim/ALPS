@@ -42,7 +42,10 @@ import matplotlib.pyplot as plt
 plt.plot(ts_M)
 plt.show()
 
-# ALPS Python provides a convenient tool to check whether a measurement observable(s) has (have) reached steady state equilibrium.
+# Check for linear drift in the measurement time series. Passing this check
+# does not prove equilibration: autocorrelation and a stuck chain require
+# separate inspection. A higher confidence level widens the acceptance region
+# for zero slope; it is not a stricter equilibration check.
 #
 # Here is one example:
 print(pyalps.checkSteadyState(outfile=files[0], observable='|Magnetization|', confidenceInterval=0.95))
