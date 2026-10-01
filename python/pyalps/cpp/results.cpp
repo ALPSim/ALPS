@@ -12,8 +12,8 @@
 #include <nanobind/stl/string.h>
 #include <alps/hdf5.hpp>
 #include <alps/ngs/mcresults.hpp>
-#include "../archive_savable.hpp"
-#include "../mapping_lifetime.hpp"
+#include "archive_savable.hpp"
+#include "mapping_lifetime.hpp"
 #include <sstream>
 #include <stdexcept>
 #include <string>

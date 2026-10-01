@@ -15,26 +15,17 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
-// nanobind builds extensions with -fvisibility=hidden
-// (CXX_VISIBILITY_PRESET hidden). A hidden type_info cannot be merged with
-// libalps' own copy, and a catch clause only matches when the two agree --
-// so the register_exception_translator below silently failed to catch any
-// alps::hdf5::* exception and every archive failure reached Python as a bare
-// RuntimeError carrying the whole ALPS_STACKTRACE, with
-// pyalps.hdf5.ArchiveNotFound and friends never raised. The legacy
-// Boost.Python modules were built with default visibility, which is why the
-// same translator worked there. Give ALPS' types default visibility here.
-#pragma GCC visibility push(default)
+// The SDK exports its exception types, preserving their identity across DLLs
+// and extensions compiled with hidden visibility.
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/pair.hpp>
 #include <alps/hdf5/pointer.hpp>
 #include <alps/hdf5/vector.hpp>
 #include <alps/hdf5/complex.hpp>
 #include <alps/ngs/stacktrace.hpp>
-#pragma GCC visibility pop
 #include "extract_from_pyobject.hpp"
-#include "../archive_savable.hpp"
-#include "../numpy_compat.hpp"
+#include "archive_savable.hpp"
+#include "numpy_compat.hpp"
 #include <array>
 #include <complex>
 #include <cstddef>
@@ -136,8 +127,7 @@ namespace alps {
                     } else if (PyComplex_CheckExact(raw)) {
                         if (!accept(leaf_kind::cplx))
                             return false;
-                        Py_complex c = PyComplex_AsCComplex(raw);
-                        cplxs.emplace_back(c.real, c.imag);
+                        cplxs.push_back(nb::cast<std::complex<double>>(item));
                     } else if (PyUnicode_Check(raw)) {
                         if (!accept(leaf_kind::text))
                             return false;
@@ -206,7 +196,10 @@ namespace alps {
                     switch (v.kind) {
                         case list_vectorizer::leaf_kind::integral:
                             if (v.fits_int) {
-                                std::vector<int> buf(v.ints.begin(), v.ints.end());
+                                std::vector<int> buf;
+                                buf.reserve(v.ints.size());
+                                for (auto value : v.ints)
+                                    buf.push_back(static_cast<int>(value)); // checked by fits_int
                                 (*this)(buf.data(), v.extent);
                             } else
                                 (*this)(v.ints.data(), v.extent);
@@ -282,7 +275,7 @@ namespace alps {
                 }
             }
             static bool is_ndarray(PyObject * raw) {
-                return std::strcmp(Py_TYPE(raw)->tp_name, "numpy.ndarray") == 0;
+                return alps::python::type_name(raw) == "numpy.ndarray";
             }
             static bool is_numpy_scalar(PyObject * raw) {
                 static std::array<char const *, 16> const scalar_types{{
@@ -292,8 +285,9 @@ namespace alps {
                     "numpy.float32", "numpy.float64",
                     "numpy.complex64", "numpy.complex128",
                 }};
+                std::string const name = alps::python::type_name(raw);
                 for (char const * scalar_type : scalar_types)
-                    if (std::strcmp(Py_TYPE(raw)->tp_name, scalar_type) == 0)
+                    if (name == scalar_type)
                         return true;
                 return false;
             }
@@ -385,7 +379,7 @@ namespace alps {
                             scan.numpy_scalar_type = scalar_type;
                         else if (scan.numpy_scalar_type != scalar_type)
                             scan.homogeneous_numpy_scalars = false;
-                        if (std::strncmp(Py_TYPE(raw)->tp_name, "numpy.bool", 10) == 0)
+                        if (alps::python::type_name(raw).compare(0, 10, "numpy.bool") == 0)
                             scan.has_bool_leaf = true;
                     } else {
                         scan.has_other_scalar = true;
@@ -405,25 +399,25 @@ namespace alps {
             // to 0/1. Pure-list trees never reach (b) — their
             // exact-type handling stays with list_vectorizer.
             static bool numpy_stackable(nb::list const & l, std::string & dtype) {
-                char const * first_scalar = nullptr;
+                std::string first_scalar;
                 bool scalars_only = true;
                 bool sequences_only = true;
                 for (auto item : l) {
                     PyObject * raw = item.ptr();
-                    char const * tp = Py_TYPE(raw)->tp_name;
+                    std::string const tp = alps::python::type_name(raw);
                     if (is_ndarray(raw) || PyList_Check(raw) || PyTuple_Check(raw)) {
                         scalars_only = false;
                         continue;
                     }
                     sequences_only = false;
-                    if (std::strncmp(tp, "numpy.", 6) != 0)
+                    if (tp.compare(0, 6, "numpy.") != 0)
                         return false;
-                    if (!first_scalar)
+                    if (first_scalar.empty())
                         first_scalar = tp;
-                    else if (std::strcmp(tp, first_scalar) != 0)
+                    else if (tp != first_scalar)
                         return false;
                 }
-                if (scalars_only && first_scalar)
+                if (scalars_only && !first_scalar.empty())
                     return true;
                 if (!sequences_only)
                     return false;
@@ -513,7 +507,7 @@ namespace alps {
             // nanobind links extensions against a restricted CPython symbol
             // list that does not export PyMethod_Type. This also matches the
             // is_ndarray() check above.
-            return std::strcmp(Py_TYPE(attr.ptr())->tp_name, "method") == 0;
+            return alps::python::type_name(attr) == "method";
         }
         void python_hdf5_save(alps::hdf5::archive & ar,
                               std::string const & relative_path,

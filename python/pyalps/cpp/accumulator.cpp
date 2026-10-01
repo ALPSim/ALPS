@@ -15,7 +15,7 @@
 // without it every accumulator's and result's str() raised
 // "Unable to convert function return value to a Python type".
 #include <nanobind/stl/string.h>
-#include "../archive_savable.hpp"
+#include "archive_savable.hpp"
 #include <sstream>
 #include <string>
 namespace nb = nanobind;

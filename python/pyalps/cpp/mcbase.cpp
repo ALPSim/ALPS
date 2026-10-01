@@ -43,7 +43,7 @@
 #include <alps/mcbase.hpp>
 #include <alps/hdf5/archive.hpp>
 #include <nanobind/nanobind.h>
-#include "../archive_savable.hpp"
+#include "archive_savable.hpp"
 #include <nanobind/make_iterator.h>
 #include <nanobind/stl/function.h>
 #include <nanobind/trampoline.h>
@@ -52,7 +52,7 @@ namespace nb = nanobind;
 #include <functional>
 #include <type_traits>
 #include <utility>
-#include "../dict_to_params.hpp"
+#include "dict_to_params.hpp"
 namespace alps {
     static_assert(std::has_virtual_destructor<mcbase>::value,
                   "mcbase must safely destroy nanobind trampoline aliases");

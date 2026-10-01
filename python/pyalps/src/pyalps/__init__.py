@@ -12,6 +12,22 @@
 # ****************************************************************************
 
 import sys
+import os
+from ._resources import runtime_directory as _runtime_directory
+
+
+def get_cmake_dir():
+    """Return the CMake package directory providing ``pyalps::runtime``."""
+    return str(_runtime_directory() / "cmake")
+
+
+# Python 3.8+ resolves extension dependencies using registered DLL directories.
+# Keep the handle alive for delayed imports and use the same runtime as bin/*.exe.
+if sys.platform == "win32":
+    _dll_directory = _runtime_directory() / "bin"
+    if _dll_directory.is_dir():
+        _dll_directory_handle = os.add_dll_directory(str(_dll_directory))
+
 from importlib.metadata import PackageNotFoundError, version as _distribution_version
 
 from .dataset import *
@@ -22,7 +38,7 @@ from . import fit_wrapper
 from . import cxx as cxx
 
 # Read from the installed distribution rather than restated here: the version
-# comes from ALPS_VERSION.txt at build time (see
+# comes from cmake/ALPS_VERSION.txt at build time (see
 # python/pyalps/_build_support/alps_version.py), and a second copy in
 # the source would be a second thing to bump.
 try:
@@ -55,8 +71,7 @@ for _extension_name in (
     globals()[_extension_name] = _extension
     sys.modules[__name__ + "." + _extension_name] = _extension
 
-# Optional solver modules are present when the wheel was built from an ALPS
-# checkout with application bindings enabled.
+# Optional solver modules are present when PYALPS_BUILD_SOLVERS is enabled.
 for _extension_name in ("maxent_c", "cthyb", "ctint"):
     try:
         _extension = __import__(

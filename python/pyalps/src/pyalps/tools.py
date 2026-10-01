@@ -39,47 +39,31 @@ from .natural_sort import natural_sort
 from . import alea
 import scipy.interpolate
 
-def _packaged_or_configured_dir(name, configured):
-    """Locate an ALPS resource directory shipped with pyalps.
-
-    The in-package copy (pyalps/<name>) wins. `configured` is the fallback
-    baked in by CMake for builds that do not bundle the resource; it is empty
-    for a bundled package, in which case there is nothing to fall back to and
-    we leave the environment alone rather than exporting an empty path.
-    """
-    import pyalps
-    path = os.path.join(os.path.dirname(pyalps.__file__), name)
-    if os.path.isdir(path):
-        return path
-    from . import pyalps_config
-    configured = getattr(pyalps_config, configured, "")
-    return configured if configured and os.path.isdir(configured) else None
+def _packaged_dir(name):
+    from ._resources import runtime_directory
+    path = runtime_directory() / name
+    return str(path) if path.is_dir() else None
 
 
-if not "ALPS_XML_PATH" in os.environ:
-    _xml_path = _packaged_or_configured_dir("xml", "ALPS_XML_INSTALL_DIR")
-    if _xml_path is not None:
-        os.environ["ALPS_XML_PATH"] = _xml_path
-
-if not "ALPS_BIN_PATH" in os.environ:
-    _bin_path = _packaged_or_configured_dir("bin", "ALPS_BIN_INSTALL_DIR")
-    if _bin_path is not None:
-        os.environ["ALPS_BIN_PATH"] = _bin_path
+for _resource, _variable in (("xml", "ALPS_XML_PATH"), ("bin", "ALPS_BIN_PATH")):
+    _directory = _packaged_dir(_resource)
+    if _directory is not None:
+        os.environ.setdefault(_variable, _directory)
+del _resource, _variable, _directory
 
 
 def check_existence(cmd):
     if cmd is None:
         return False
-    import shutil
-    path_to_cmd = shutil.which(cmd)
-    if path_to_cmd is None:
-        if cmd.startswith("/"):
-            raise RuntimeError(f"There is no {cmd} on the path!")
-        path = _packaged_or_configured_dir("bin", "ALPS_BIN_INSTALL_DIR")
-        if path is not None:
-            os.environ["PATH"] += os.pathsep + path
-        if shutil.which(cmd) is None:
-            raise RuntimeError(f"There is no {cmd} on the path!")
+    if shutil.which(cmd) is not None:
+        return
+    # Search explicit and bundled executable directories without an SDK path
+    # baked in at build time. A DLL-only bin directory is harmless here.
+    path = os.pathsep.join(filter(None, (
+        os.environ.get("ALPS_BIN_PATH"), _packaged_dir("bin"), os.environ.get("PATH", ""))))
+    if shutil.which(cmd, path=path) is None:
+        raise RuntimeError(f"There is no {cmd} on the path!")
+    os.environ["PATH"] = path
 
 
 def make_list(infiles):

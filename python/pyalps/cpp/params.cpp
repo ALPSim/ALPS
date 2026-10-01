@@ -8,7 +8,7 @@
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
 #include <alps/hdf5/archive.hpp>
-#include "../archive_savable.hpp"
+#include "archive_savable.hpp"
 #include <alps/ngs/params.hpp>
 #include <alps/ngs/detail/paramvalue.hpp>
 #include <boost/filesystem/path.hpp>
@@ -19,7 +19,7 @@
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
 #include <vector>
-#include "../dict_to_params.hpp"
+#include "dict_to_params.hpp"
 namespace nb = nanobind;
 namespace {
 // Walk the paramvalue variant and wrap each native alternative as a

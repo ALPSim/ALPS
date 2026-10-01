@@ -4,7 +4,7 @@
 // Part of the ALPS Project — see LICENSE.txt for full license text.
 // SPDX-License-Identifier: MIT
 #include <nanobind/nanobind.h>
-#include "../archive_savable.hpp"
+#include "archive_savable.hpp"
 #include <nanobind/ndarray.h>
 #include <nanobind/stl/string.h>
 #include <alps/hdf5/archive.hpp>

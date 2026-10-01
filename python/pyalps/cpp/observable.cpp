@@ -32,7 +32,7 @@
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/complex.hpp>
 #include <alps/ngs/mcobservable.hpp>
-#include "../archive_savable.hpp"
+#include "archive_savable.hpp"
 #include <alps/ngs/mcobservables.hpp>
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>

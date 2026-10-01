@@ -39,8 +39,8 @@
 #include <alps/hdf5/archive.hpp>
 #include <alps/ngs/mcobservable.hpp>
 #include <alps/ngs/mcobservables.hpp>
-#include "../archive_savable.hpp"
-#include "../mapping_lifetime.hpp"
+#include "archive_savable.hpp"
+#include "mapping_lifetime.hpp"
 #include <alps/ngs/observablewrappers.hpp>
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>
