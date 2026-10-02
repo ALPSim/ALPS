@@ -1,6 +1,9 @@
 # Build and generated directories
 /build/
 /_build/
+*.ppt
+*.pptx
+/doc/ALPSCore-reconciliation.md
 CMakeFiles/
 CMakeCache.txt
 CMakeUserPresets.json

@@ -4,7 +4,7 @@ This standalone project compiles the same source against **one installed SDK at
 a time**. The runner exchanges temporary HDF5 files between fresh processes.
 Never combine the two SDK include paths or runtime implementations in one binary.
 The probes characterize differences; a successful comparison does not establish
-drop-in compatibility. See the [migration gates](../../doc/ALPSCore-reconciliation.md).
+drop-in compatibility.
 
 The runner covers 20 archive payload cases, params access/conversion behavior,
 full params versus dictionary checkpoint loading, and wider scalar checkpoints.
@@ -88,4 +88,4 @@ This is a small contract baseline, not a full format/ABI audit. It does not yet
 exercise schema-defined defaults/provenance, scientific-container adapters,
 multidimensional shape inspection, compression/family files, concurrent access,
 signal/crash cleanup, leak instrumentation, Python providers, MPI, or MaxEnt
-scientific results. These remain explicit gates in the migration plan.
+scientific results.
