@@ -65,12 +65,17 @@ void alps::comm_init(int&, char**&, bool usempi)
 void alps::comm_exit(bool kill_all)
 {
   MPI_Initialized(&mpi_initialized);
-  if (!mpi_initialized)
+  int finalized = 0;
+  MPI_Finalized(&finalized);
+  if (!mpi_initialized || finalized) {
+    mpi_initialized = 0;
     return;
+  }
   if(kill_all)
     MPI_Abort(MPI_COMM_WORLD,-2);
   else
     MPI_Finalize();
+  mpi_initialized = 0;
 }
 #else
 void alps::comm_exit(bool ) {}

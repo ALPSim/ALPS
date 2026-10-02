@@ -194,6 +194,14 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/pyalps/"
   DESTINATION pyalps
   FILES_MATCHING PATTERN "*.py")
 
+# Bundle the catalog from the linked SDK so it matches the recommendations
+# embedded in libalps, including when building from a standalone pyalps sdist.
+install(FILES
+  "${ALPS_ROOT_DIR}/share/alps/CITATION.cff"
+  "${ALPS_ROOT_DIR}/share/alps/CITATIONS.yaml"
+  "${ALPS_ROOT_DIR}/share/alps/CITATION.md"
+  DESTINATION pyalps/share/alps)
+
 # Runtime fallback paths for pyalps.tools, used only when the package does
 # not carry the resource in question. The XML/XSL library below is always
 # bundled, so its fallback is always empty; the application binaries are

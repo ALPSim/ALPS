@@ -27,8 +27,7 @@ void SpinFactory::print_copyright(std::ostream& out) const
       << "  available from http://alps.comp-phys.org/\n"
       << "  copyright(c) 1999-2007 by Matthias Troyer <troyer@comp-phys.org>\n"
       << "                            Mathias Koerner <mkoerner@comp-phys.org>\n"
-      << " for details see the publication:\n"
-      << " A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).\n\n";
+      << "\n";
 }
 
 

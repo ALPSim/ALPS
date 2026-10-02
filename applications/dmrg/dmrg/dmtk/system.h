@@ -118,7 +118,8 @@ class FileList
     std::string last_filename;
     boost::filesystem::path temp_dir;
   public:
-    FileList() { set_temp_dir("."); };
+    // Actual calculation setup selects and announces the temporary directory.
+    FileList() : temp_dir(".") {}
     FileList(const char *dir) { set_temp_dir(dir); }
 
     void set_temp_dir(const char *dir) 

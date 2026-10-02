@@ -74,6 +74,15 @@ See the [installation page](https://alps.comp-phys.org/install/) for full platfo
 
 ### Build
 
+Citation metadata and application rules live in `CITATION.cff` and `CITATIONS.yaml`.
+See [citation maintenance](script/citations/README.md) for generation and validation.
+Native builds use checked-in generated citation data and do not require Python.
+Editing that data requires Python ≥ 3.9 with `PyYAML` and `jsonschema`:
+`python -m pip install -r script/citations/requirements.txt`, then
+`python script/generate_citations.py --regenerate`. Commit the generated files
+alongside the authorities; CI checks that they agree. For the optional citation
+tests, select an interpreter with `-DALPS_CITATION_PYTHON=/path/to/python`.
+
 ```bash
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release

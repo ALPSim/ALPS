@@ -18,6 +18,7 @@
 #include "hirschfyesim.h"
 #include <alps/parameter.h>
 #include <alps/utility/copyright.hpp>
+#include <alps/utility/cli.hpp>
 #include <alps/utility/vectorio.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/program_options.hpp>
@@ -27,16 +28,6 @@
 
 bool parse_options(int argc, char** argv, std::string& infile, std::string& outfile)
 {
-	std::cout << "ALPS Hirsch-Fye solver for the single site impurity problem.\n\n";
-	alps::print_copyright(std::cout);
-
-	std::cout << "****************************************************************"<<std::endl;
-	std::cout << "* Recommended citation in scientific publications:             *"<<std::endl;
-	std::cout << "* We used the ALPS [1] implementation [2] of the Hirsch-Fye    *"<<std::endl;
-	std::cout << "* [3] impurity solver.                                         *"<<std::endl;
-	std::cout << "* [1] JSTAT (2011) P05001; [2] CPC 182, 1078 (2011); [3] PRL   *"<<std::endl;
-	std::cout << "* 56, 2521 (1986).                                             *"<<std::endl;
-	std::cout << "****************************************************************"<<std::endl;
 
 	namespace po = boost::program_options;
 	
@@ -46,6 +37,7 @@ bool parse_options(int argc, char** argv, std::string& infile, std::string& outf
   ("license,l", "print license conditions") 
   ("input-file", po::value<std::string>(&infile), "input file")
   ("output-file", po::value<std::string>(&outfile), "output file");
+  if (alps::handle_cli_information(argc, argv, "hirschfye", [&] { std::cout << desc << "\n"; })) return false;
 	po::positional_options_description p;
 	p.add("input-file", 1);
 	p.add("output-file", 1);
@@ -54,17 +46,9 @@ bool parse_options(int argc, char** argv, std::string& infile, std::string& outf
 	po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
 	po::notify(vm);    
 	
-	bool valid=true;
-	
-	if (vm.count("help")) {
-		std::cout << desc << "\n";
-		valid=false;
-	}
-	if (vm.count("license")) {
-		alps::print_license(std::cout);
-		valid=false;
-	}
-	return valid;
+  if (infile.empty() || outfile.empty())
+    throw std::invalid_argument("Expected input and output files");
+  return true;
 }
 
 /// @brief The main program of the impurity solver
@@ -81,6 +65,7 @@ int main(int argc, char** argv)
 		std::string outfile;
 		if (!parse_options(argc,argv,infile,outfile))
 			return 0;
+    alps::cli_mpi_guard mpi(argc, argv);
 		// read parameters and G0
 		
     alps::hdf5::archive ar(infile, "r");
@@ -93,6 +78,10 @@ int main(int argc, char** argv)
     int flavors=parms.value_or_default("FLAVORS", 2);
     
     matsubara_green_function_t g0(N, sites, flavors); g0.read_hdf5(ar, "/G0");
+    if (alps::cli_is_master()) {
+      std::cout << "ALPS Hirsch-Fye solver for the single site impurity problem.\n\n";
+      alps::print_copyright(std::cout, "hirschfye");
+    }
     alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;
     alps::ImpuritySolver solver(factory,argc,argv,true);
 		

@@ -313,6 +313,7 @@ set (BIND_FORTRAN_INTEGER_8 ${LAPACK_64_BIT})
 
 configure_file(src/alps/config.h.in ${PROJECT_BINARY_DIR}/src/alps/config.h)
 configure_file(src/alps/version.h.in ${PROJECT_BINARY_DIR}/src/alps/version.h)
+include(ALPSCitations)
 
 configure_file(lib/xml/lattices.xml.in ${PROJECT_BINARY_DIR}/lib/xml/lattices.xml)
 configure_file(lib/xml/models.xml.in ${PROJECT_BINARY_DIR}/lib/xml/models.xml)
@@ -458,7 +459,7 @@ install(FILES cmake/UseALPS.cmake
         cmake/add_alps_test.cmake
         DESTINATION share/alps COMPONENT build)
 
-install(FILES CITATION.md LICENSE.txt README.md
+install(FILES LICENSE.txt README.md
         DESTINATION share/alps COMPONENT libraries)
 ######################################################################
 # libraries

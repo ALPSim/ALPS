@@ -25,19 +25,10 @@
 #define LOOPER_COPYRIGHT LOOPER_VERSION_STRING "\n" \
   "  multi-cluster quantum Monte Carlo algorithms for spin systems\n" \
   "  available from http://wistaria.comp-phys.org/alps-looper/\n" \
-  "  copyright (c) 1997-2010 by Synge Todo <wistaria@comp-phys.org>\n\n" \
-  "********************************************************************\n" \
-  "* Recommended citation in scientific publications:                 *\n" \
-  "* This code used the ALPS [1] implementation [2] of the loop       *\n" \
-  "* algorithm [3-5].                                                 *\n" \
-  "* [1] JSTAT (2011) P05001;                                         *\n" \
-  "* [2] Phys. Rev. Lett. 87, 047203 (2001)                           *\n" \
-  "* [3] Phys. Rev. Lett. 70, 875 (1993)                              *\n" \
-  "* [4] Phys. Rev. Lett. 77, 5130 (1996)                             *\n" \
-  "* [5] Adv. Phys. 52, 1 (2003)                                      *\n" \
-  "********************************************************************\n" \
+  "  copyright (c) 1997-2010 by Synge Todo <wistaria@comp-phys.org>\n\n"
 
 #include <alps/utility/copyright.hpp>
+#include <alps/utility/citations.hpp>
 #include <iostream>
 
 namespace looper {
@@ -48,6 +39,7 @@ inline std::string version() {
 
 inline std::ostream& print_copyright(std::ostream& os = std::cout) {
   os << LOOPER_COPYRIGHT << "\n";
+  alps::print_citations(os, "looper");
   return os;
 }
 

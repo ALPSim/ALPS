@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 try {
 #endif
 
-   return alps::scheduler::start(argc,argv,DMRGFactory());
+   return alps::scheduler::start(argc,argv,DMRGFactory(), "dmrg");
 
 #ifndef BOOST_NO_EXCEPTIONS
 }

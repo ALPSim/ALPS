@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 try {
 #endif
 
-   return alps::scheduler::start(argc,argv,SparseDiagFactory());
+   return alps::scheduler::start(argc,argv,SparseDiagFactory(), "sparsediag");
 
 #ifndef BOOST_NO_EXCEPTIONS
 }

@@ -12,6 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <alps/ngs/mcoptions.hpp>
+#include <alps/utility/cli.hpp>
 #include <alps/ngs/stacktrace.hpp>
 
 #include <boost/program_options.hpp>
@@ -21,7 +22,9 @@
 
 namespace alps {
 
-    mcoptions::mcoptions(int argc, char* argv[]) : valid(false), resume(false), type(SINGLE) {
+    mcoptions::mcoptions(int argc, char* argv[]) : mcoptions(argc, argv, "framework") {}
+
+    mcoptions::mcoptions(int argc, char* argv[], const std::string& citation_component) : valid(false), resume(false), type(SINGLE) {
         boost::program_options::options_description desc("Allowed options");
         desc.add_options()
             ("help", "produce help message")
@@ -37,6 +40,7 @@ namespace alps {
             ("input-file", boost::program_options::value<std::string>(&input_file), "input file in hdf5 format")
             ("output-file", boost::program_options::value<std::string>(&output_file)->default_value("<unspecified>"), "output file in hdf5 format")
             ("checkpoint-file", boost::program_options::value<std::string>(&checkpoint_file)->default_value(""), "checkpoint file in hdf5 format");
+        if (handle_cli_information(argc, argv, citation_component, [&] { std::cout << desc << "\n"; })) return;
         boost::program_options::positional_options_description p;
         p.add("input-file", 1);
         p.add("output-file", 1);
@@ -44,9 +48,8 @@ namespace alps {
         boost::program_options::variables_map vm;
         boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
         boost::program_options::notify(vm);
-        if (!(valid = !vm.count("help")))
-            std::cout << desc << std::endl;
-        else if (input_file.empty())
+        valid = true;
+        if (input_file.empty())
             throw std::invalid_argument("No job file specified" + ALPS_STACKTRACE);
         if (vm.count("threaded") && vm.count("mpi"))
             type = HYBRID;

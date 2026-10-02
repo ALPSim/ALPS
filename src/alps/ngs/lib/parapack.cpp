@@ -15,6 +15,7 @@
 *
 *****************************************************************************/
 
+#include <alps/utility/cli.hpp>
 #include <alps/ngs/parapack/parapack.h>
 #include <alps/ngs/parapack/clone.h>
 #include <alps/ngs/parapack/clone_proxy.h>
@@ -65,6 +66,11 @@ int start_impl(int argc, char **argv) {
   try {
   #endif
 
+    if (alps::handle_cli_information(argc, argv, "framework", [&] {
+      alps::parapack::option help(1, argv, false);
+      help.print(std::cout);
+    })) return 0;
+
     alps::parapack::option opt(argc, argv);
     if (!opt.valid) {
       std::cerr << "Error: unknown command line option(s)\n";
@@ -74,31 +80,9 @@ int start_impl(int argc, char **argv) {
     int ret;
     if (opt.jobfiles.size() == 0) {
       if (!opt.use_mpi) {
-        if (opt.show_help) {
-          opt.print(std::cout);
-          return 0;
-        }
-        if (opt.show_license) {
-          print_copyright(std::cout);
-          print_license(std::cout);
-          return 0;
-        }
         ret = run_sequential(argc, argv);
       } else {
 #ifdef ALPS_HAVE_MPI
-        if (opt.show_help || opt.show_license) {
-          boost::mpi::environment env(argc, argv);
-          boost::mpi::communicator world;
-          if (world.rank() == 0) {
-            if (opt.show_help) {
-              opt.print(std::cout);
-            } else {
-              print_copyright(std::cout);
-              print_license(std::cout);
-            }
-          }
-          return 0;
-        }
         ret = run_sequential_mpi(argc, argv);
 #else
         std::cerr << "ERROR: MPI is not supported\n";
@@ -337,13 +321,18 @@ void save_tasks(boost::filesystem::path const& file, std::string const& simname,
 }
 
 int run_sequential(int argc, char **argv) {
-
 #ifndef BOOST_NO_EXCEPTIONS
   try {
 #endif
 
+  if (alps::handle_cli_information(argc, argv, "framework", [&] {
+    alps::parapack::option help(1, argv, false);
+    help.print(std::cout);
+  })) return 0;
+
   alps::ParameterList parameterlist;
   std::cin >> parameterlist;
+  if (alps::cli_is_master() && !parameterlist.empty()) print_copyright(std::cerr);
 
 #ifdef _OPENMP
   // set default number of threads to 1
@@ -388,22 +377,19 @@ int run_sequential(int argc, char **argv) {
 }
 
 int start_sgl(int argc, char** argv) {
+  if (alps::handle_cli_information(argc, argv, "framework", [&] {
+    alps::parapack::option help(1, argv, false);
+    help.print(std::cout);
+  })) return 0;
+
   alps::parapack::option opt(argc, argv);
   if (!opt.valid) {
     std::cerr << "Error: unknown command line option(s)\n";
     opt.print(std::cerr);
     return -1;
   }
-  if (opt.show_help) {
-    opt.print(std::cout);
-    return 0;
-  }
-  if (opt.show_license) {
-    print_copyright(std::cout);
-    print_license(std::cout);
-    return 0;
-  }
-  print_copyright(std::cout);
+
+  if (alps::cli_is_master()) print_copyright(std::cout);
 
   boost::posix_time::ptime end_time =
     boost::posix_time::second_clock::local_time() + opt.time_limit;
@@ -702,10 +688,14 @@ int start_sgl(int argc, char** argv) {
 #ifdef ALPS_HAVE_MPI
 
 int run_sequential_mpi(int argc, char** argv) {
-
 #ifndef BOOST_NO_EXCEPTIONS
   try {
 #endif
+
+  if (alps::handle_cli_information(argc, argv, "framework", [&] {
+    alps::parapack::option help(1, argv, false);
+    help.print(std::cout);
+  })) return 0;
 
 #ifdef _OPENMP
   // set default number of threads to 1
@@ -718,6 +708,7 @@ int run_sequential_mpi(int argc, char** argv) {
   alps::ParameterList parameterlist;
   if (world.rank() == 0) std::cin >> parameterlist;
   broadcast(world, parameterlist, 0);
+  if (world.rank() == 0 && !parameterlist.empty()) print_copyright(std::cerr);
 
   for (int i = 0; i < parameterlist.size(); ++i) {
     alps::params p;
@@ -767,6 +758,11 @@ int run_sequential_mpi(int argc, char** argv) {
 #else // ALPS_HAVE_MPI
 
 int run_sequential_mpi(int argc, char** argv) {
+  if (alps::handle_cli_information(argc, argv, "framework", [&] {
+    alps::parapack::option help(1, argv, false);
+    help.print(std::cout);
+  })) return 0;
+
   std::cerr << "This program has not been compiled for use with MPI\n";
   return -1;
 }
@@ -776,6 +772,11 @@ int run_sequential_mpi(int argc, char** argv) {
 #ifdef ALPS_HAVE_MPI
 
 int start_mpi(int argc, char** argv) {
+  if (alps::handle_cli_information(argc, argv, "framework", [&] {
+    alps::parapack::option help(1, argv, false);
+    help.print(std::cout);
+  })) return 0;
+
   boost::mpi::environment env(argc, argv);
   boost::mpi::communicator world;
   alps::parapack::option opt(argc, argv);
@@ -786,17 +787,7 @@ int start_mpi(int argc, char** argv) {
     }
     return -1;
   }
-  if (opt.show_help) {
-    if (world.rank() == 0) opt.print(std::cout);
-    return 0;
-  }
-  if (opt.show_license) {
-    if (world.rank() == 0) {
-      print_copyright(std::cout);
-      print_license(std::cout);
-    }
-    return 0;
-  }
+
   if (world.rank() == 0) print_copyright(std::cout);
 
   boost::posix_time::ptime end_time =

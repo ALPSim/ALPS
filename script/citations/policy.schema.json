@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ALPS citation policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source", "policy", "components"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["document", "revision", "sections"],
+      "properties": {
+        "document": {"$ref": "#/definitions/text"},
+        "revision": {"$ref": "#/definitions/text"},
+        "sections": {"$ref": "#/definitions/text"}
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["request", "license_note", "algorithm", "implementation", "framework"],
+      "properties": {
+        "request": {"$ref": "#/definitions/text"},
+        "license_note": {"$ref": "#/definitions/text"},
+        "algorithm": {"$ref": "#/definitions/text"},
+        "implementation": {"$ref": "#/definitions/text"},
+        "framework": {"$ref": "#/definitions/text"}
+      }
+    },
+    "components": {
+      "type": "object",
+      "required": ["framework"],
+      "minProperties": 1,
+      "propertyNames": {"pattern": "^[a-z][a-z0-9_]*$"},
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "algorithm", "implementation"],
+        "properties": {
+          "name": {"$ref": "#/definitions/text"},
+          "algorithm": {"$ref": "#/definitions/keys"},
+          "implementation": {"$ref": "#/definitions/keys"},
+          "uses": {"$ref": "#/definitions/keys"},
+          "note": {"$ref": "#/definitions/text"}
+        }
+      }
+    }
+  },
+  "definitions": {
+    "text": {"type": "string", "minLength": 1},
+    "keys": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]*$"}
+    }
+  }
+}
