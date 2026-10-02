@@ -21,8 +21,7 @@ void WRun::print_copyright(std::ostream& out)
   out << "Worm algorithm quantum Monte Carlo simulation v2.0\n"
       << "  copyright (c) 1997-2007 by Simon Trebst <trebst@comp-phys.org>\n"
       << "                          and Matthias Troyer <troyer@comp-phys.org>\n"
-      << " for details see the publication:\n"     
-      << " A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).\n\n";
+      << "\n";
 }
 
 

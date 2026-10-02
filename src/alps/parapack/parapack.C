@@ -11,6 +11,7 @@
 *
 *****************************************************************************/
 
+#include <alps/utility/cli.hpp>
 #include "parapack.h"
 #include "clone.h"
 #include "clone_proxy.h"
@@ -61,6 +62,11 @@ int start(int argc, char **argv) {
   try {
   #endif
 
+    if (alps::handle_cli_information(argc, argv, worker_factory::citation_component(), [&] {
+      option help(1, argv, false);
+      help.print(std::cout);
+    })) return 0;
+
     option opt(argc, argv, /* for_evaluate = */ false);
     if (!opt.valid) {
       std::cerr << "Error: unknown command line option(s)\n";
@@ -70,31 +76,9 @@ int start(int argc, char **argv) {
     int ret;
     if (opt.jobfiles.size() == 0) {
       if (!opt.use_mpi) {
-        if (opt.show_help) {
-          opt.print(std::cout);
-          return 0;
-        }
-        if (opt.show_license) {
-          print_copyright(std::cout);
-          print_license(std::cout);
-          return 0;
-        }
         ret = run_sequential(argc, argv);
       } else {
 #ifdef ALPS_HAVE_MPI
-        if (opt.show_help || opt.show_license) {
-          boost::mpi::environment env(argc, argv);
-          boost::mpi::communicator world;
-          if (world.rank() == 0) {
-            if (opt.show_help) {
-              opt.print(std::cout);
-            } else {
-              print_copyright(std::cout);
-              print_license(std::cout);
-            }
-          }
-          return 0;
-        }
         ret = run_sequential_mpi(argc, argv);
 #else
         std::cerr << "ERROR: MPI is not supported\n";
@@ -132,21 +116,19 @@ int evaluate(int argc, char **argv) {
   try {
   #endif
 
+    if (alps::handle_cli_information(argc, argv, worker_factory::citation_component(), [&] {
+      option help(1, argv, true);
+      help.print(std::cout);
+    })) return 0;
+
     option opt(argc, argv, /* for_evaluate = */ true);
     if (!opt.valid) {
       std::cerr << "Error: unknown command line option(s)\n";
       opt.print(std::cerr);
       return 127;
     }
-    if (opt.show_help) {
-      opt.print(std::cout);
-      return 0;
-    }
-    if (opt.show_license) {
-      print_copyright(std::cout);
-      print_license(std::cout);
-      return 0;
-    }
+
+    if (alps::cli_is_master() && !opt.jobfiles.empty()) print_copyright(std::cout);
 
     BOOST_FOREACH(std::string const& file_str, opt.jobfiles) {
       boost::filesystem::path file = absolute(boost::filesystem::path(file_str)).lexically_normal();
@@ -200,7 +182,7 @@ int evaluate(int argc, char **argv) {
 void print_copyright(std::ostream& os) {
   worker_factory::print_copyright(os);
   os << std::endl << "using " << parapack_copyright() << std::endl;
-  alps::print_copyright(os);
+  alps::print_copyright(os, worker_factory::citation_component());
 }
 
 void print_license(std::ostream& os) {
@@ -346,13 +328,18 @@ void save_tasks(boost::filesystem::path const& file, std::string const& simname,
 }
 
 int run_sequential(int argc, char **argv) {
-
 #ifndef BOOST_NO_EXCEPTIONS
   try {
 #endif
 
+  if (alps::handle_cli_information(argc, argv, worker_factory::citation_component(), [&] {
+    option help(1, argv, false);
+    help.print(std::cout);
+  })) return 0;
+
   alps::ParameterList parameterlist;
   std::cin >> parameterlist;
+  if (alps::cli_is_master() && !parameterlist.empty()) print_copyright(std::cerr);
 
 #ifdef _OPENMP
   // set default number of threads to 1
@@ -414,22 +401,19 @@ int run_sequential(int argc, char **argv) {
 }
 
 int start_sgl(int argc, char** argv) {
+  if (alps::handle_cli_information(argc, argv, worker_factory::citation_component(), [&] {
+    option help(1, argv, false);
+    help.print(std::cout);
+  })) return 0;
+
   option opt(argc, argv, /* for_evaluate = */ false);
   if (!opt.valid) {
     std::cerr << "Error: unknown command line option(s)\n";
     opt.print(std::cerr);
     return 127;
   }
-  if (opt.show_help) {
-    opt.print(std::cout);
-    return 0;
-  }
-  if (opt.show_license) {
-    print_copyright(std::cout);
-    print_license(std::cout);
-    return 0;
-  }
-  print_copyright(std::cout);
+
+  if (alps::cli_is_master()) print_copyright(std::cout);
 
   boost::posix_time::ptime end_time =
     boost::posix_time::second_clock::local_time() + opt.time_limit;
@@ -735,10 +719,14 @@ int start_sgl(int argc, char** argv) {
 #ifdef ALPS_HAVE_MPI
 
 int run_sequential_mpi(int argc, char** argv) {
-
 #ifndef BOOST_NO_EXCEPTIONS
   try {
 #endif
+
+  if (alps::handle_cli_information(argc, argv, worker_factory::citation_component(), [&] {
+    option help(1, argv, false);
+    help.print(std::cout);
+  })) return 0;
 
 #ifdef _OPENMP
   // set default number of threads to 1
@@ -751,6 +739,7 @@ int run_sequential_mpi(int argc, char** argv) {
   alps::ParameterList parameterlist;
   if (world.rank() == 0) std::cin >> parameterlist;
   broadcast(world, parameterlist, 0);
+  if (world.rank() == 0 && !parameterlist.empty()) print_copyright(std::cerr);
 
   for (int i = 0; i < parameterlist.size(); ++i) {
     alps::Parameters p = parameterlist[i];
@@ -818,6 +807,11 @@ int run_sequential_mpi(int argc, char** argv) {
 #else // ALPS_HAVE_MPI
 
 int run_sequential_mpi(int argc, char** argv) {
+  if (alps::handle_cli_information(argc, argv, worker_factory::citation_component(), [&] {
+    option help(1, argv, false);
+    help.print(std::cout);
+  })) return 0;
+
   std::cerr << "This program has not been compiled for use with MPI\n";
   return 127;
 }
@@ -827,6 +821,11 @@ int run_sequential_mpi(int argc, char** argv) {
 #ifdef ALPS_HAVE_MPI
 
 int start_mpi(int argc, char** argv) {
+  if (alps::handle_cli_information(argc, argv, worker_factory::citation_component(), [&] {
+    option help(1, argv, false);
+    help.print(std::cout);
+  })) return 0;
+
   boost::mpi::environment env(argc, argv);
   boost::mpi::communicator world;
   option opt(argc, argv, /* for_evaluate = */ false);
@@ -837,17 +836,7 @@ int start_mpi(int argc, char** argv) {
     }
     return 127;
   }
-  if (opt.show_help) {
-    if (world.rank() == 0) opt.print(std::cout);
-    return 0;
-  }
-  if (opt.show_license) {
-    if (world.rank() == 0) {
-      print_copyright(std::cout);
-      print_license(std::cout);
-    }
-    return 0;
-  }
+
   if (world.rank() == 0) print_copyright(std::cout);
 
   boost::posix_time::ptime end_time =

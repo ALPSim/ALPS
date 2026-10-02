@@ -15,6 +15,7 @@
 
 #include <alps/scheduler/options.h>
 #include <alps/utility/copyright.hpp>
+#include <alps/utility/cli.hpp>
 #include <boost/limits.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/program_options.hpp>
@@ -38,7 +39,10 @@ NoJobfileOptions::NoJobfileOptions()
 {
 }
 
-NoJobfileOptions::NoJobfileOptions(int argc, char** argv) 
+NoJobfileOptions::NoJobfileOptions(int argc, char** argv)
+  : NoJobfileOptions(argc, argv, "scheduler") {}
+
+NoJobfileOptions::NoJobfileOptions(int argc, char** argv, const std::string& citation_component)
   : programname(std::string(argv[0])),
     use_mpi(false),
     valid(true), // shall we really run?
@@ -58,29 +62,16 @@ NoJobfileOptions::NoJobfileOptions(int argc, char** argv)
     ("Nmin", po::value<int>(&min_cpus)->default_value(1),"minimum number of CPUs per simulation")
     ("Nmax", po::value<int>(&max_cpus)->default_value(std::numeric_limits<int>::max()),"maximum number of CPUs per simulation")
     ("write-xml","write results to XML files");
+  if (alps::handle_cli_information(argc, argv, citation_component, [&] { std::cout << desc << "\n"; })) {
+    valid = false;
+    return;
+  }
   po::positional_options_description p;
   p.add("input-file", 1);
   
-  bool error=false;
   po::variables_map vm;
-  try {
-	  po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
-	  po::notify(vm);  
-  }
-  catch (...) {
-  error = true;
-  }
-
-  if (error || vm.count("help")) {
-    std::cout << desc << "\n";
-    valid=false;
-  }
-  if (vm.count("license")) {
-    print_license(std::cout);
-    valid=false;
-  }
-  if (!valid)
-    return;
+  po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
+  po::notify(vm);
 
   if (vm.count("mpi")) {
     use_mpi = true;
@@ -105,7 +96,10 @@ Options::Options()
 {
 }
 
-Options::Options(int argc, char** argv) 
+Options::Options(int argc, char** argv)
+  : Options(argc, argv, "scheduler") {}
+
+Options::Options(int argc, char** argv, const std::string& citation_component)
 {
   programname = std::string(argv[0]);
   valid = true;
@@ -125,6 +119,10 @@ Options::Options(int argc, char** argv)
     ("Nmax", po::value<int>(&max_cpus)->default_value(std::numeric_limits<int>::max()),"maximum number of CPUs per simulation")
     ("write-xml","write results to XML files")
     ("input-file", po::value<std::string>(&filename), "input file");
+  if (alps::handle_cli_information(argc, argv, citation_component, [&] { std::cout << desc << "\n"; })) {
+    valid = false;
+    return;
+  }
   po::positional_options_description p;
   p.add("input-file", 1);
   
@@ -133,17 +131,6 @@ Options::Options(int argc, char** argv)
   po::notify(vm);    
 
 
-  if (vm.count("help")) {
-    std::cout << desc << "\n";
-    valid=false;
-  }
-  if (vm.count("license")) {
-    print_license(std::cout);
-    valid=false;
-  }
-  if (!valid)
-    return;
-  
   if (vm.count("mpi")) {
     use_mpi = true;
   }

@@ -51,16 +51,8 @@ void InteractionExpansion::read_bare_green(std::ifstream &G0_omega, std::ifstrea
 
 
 void InteractionExpansion::print(std::ostream &os){
-  os<<"***********************************************************************************************************"<<std::endl;
-  os<<"*** ALPS InteractionExpansion solver                                                                    ***"<<std::endl;
-  os<<"*** Emanuel Gull, Philipp Werner, Sebastian Fuchs, Brigitte Surer, Thomas Pruschke, and Matthias Troyer ***"<<std::endl;
-  os<<"*** Please cite the interaction-expansion method described in:                                         ***"<<std::endl;
-  os<<"*** ***************** Computer Physics Communications 182, 1078 (2011). ******************************* ***"<<std::endl;
-  os<<"***********************************************************************************************************"<<std::endl;
-  os<<"***                                                                                                     ***"<<std::endl;
-  os<<"*** implementing the interaction expansion algorithm by Rubtsov et al., JETP Letters 80, 61.            ***"<<std::endl;
-  os<<"***                                                                                                     ***"<<std::endl;
-  os<<"***********************************************************************************************************"<<std::endl;
+  os << "ALPS InteractionExpansion solver\n";
+  os << "Emanuel Gull, Philipp Werner, Sebastian Fuchs, Brigitte Surer, Thomas Pruschke, and Matthias Troyer\n";
   os<<"max order\t"<<max_order<<"\tn_flavors: "
     <<n_flavors<<"\tn_site: "<<n_site
     <<"\tn_matsubara: "<<n_matsubara<<std::endl;

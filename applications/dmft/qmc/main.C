@@ -26,6 +26,7 @@
 
 #include <alps/parameter.h>
 #include <alps/utility/copyright.hpp>
+#include <alps/utility/cli.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -60,30 +61,21 @@ int main(int argc, char** argv)
 #ifndef BOOST_NO_EXCEPTIONS
   try {
 #endif
-    if(argc <2){
-      std::cerr<<"use: program_name parameter_file. Under MPI to pass argument to nodes use"<<std::endl;
-      std::cerr<<"mpi-run mpi_options program_name -- parameter_file"<<std::endl;
-      exit(1);
-    }
-    std::cout << "ALPS DMFT framework for the single site impurity problem.       "<<std::endl;
-    std::cout << "  For further information see the ALPS DMFT paper:              "<<std::endl;
-    std::cout << "  Computer Physics Communications 182, 1078 (2011)              "<<std::endl;
-    std::cout << "                                                                "<<std::endl;
-    std::cout << "  copyright (c) 2005-2026 by the ALPS collaboration.            "<<std::endl;
-    std::cout << std::endl;
-    alps::print_copyright(std::cout);
-
-    std::cout << "****************************************************************"<<std::endl;
-    std::cout << "* Recommended citation in scientific publications:             *"<<std::endl;
-    std::cout << "* This code used the ALPS [1] DMFT framework [2]               *"<<std::endl;
-    std::cout << "* [1] JSTAT (2011) P05001; [2] CPC 182, 1078 (2011)            *"<<std::endl;
-    std::cout << "****************************************************************"<<std::endl;
+    if (alps::handle_cli_information(argc, argv, "dmft", [&] {
+      std::cout << "Usage: " << argv[0] << " parameter_file\n";
+    })) return 0;
+    if (argc != 2) throw std::invalid_argument("Expected one parameter file");
+    alps::cli_mpi_guard mpi(argc, argv);
     alps::Parameters parms;
     {
       std::ifstream is(argv[1]);
-      if(!is.is_open()){std::cerr<<"parameter file argv[1] "<<argv[1]<<" is not open! exiting!"<<std::endl; abort(); }
+      if (!is.is_open()) throw std::runtime_error(std::string("Cannot open parameter file: ") + argv[1]);
       is>>parms;
       parms["BASENAME"]=std::string(argv[1]);
+    }
+    if (alps::cli_is_master()) {
+      std::cout << "ALPS DMFT framework for the single site impurity problem.\n\n";
+      alps::print_copyright(std::cout, "dmft");
     }
     // set working directory
     boost::filesystem::path p(static_cast<std::string>(parms["BASENAME"]));

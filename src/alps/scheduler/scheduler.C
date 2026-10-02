@@ -37,7 +37,7 @@ namespace scheduler {
 void print_copyright(std::ostream& out) {
   out << "using the ALPS parallelizing scheduler\n";
   out << "  copyright (c) 1994-2006 by Matthias Troyer <troyer@comp-phys.org>.\n";
-  out << "  see Lecture Notes in Computer Science, Vol. 1505, p. 191 (1998).\n\n";
+  out << "\n";
 }
 
 // global variable: the scheduler on this node
@@ -218,12 +218,18 @@ void init(const Factory& p)
 // initialize a scheduler for real work, parsing the command line
 int start(int argc, char** argv, const Factory& p)
 {
-  Options opt(argc,argv);
+  return start(argc, argv, p, "scheduler");
+}
+
+int start(int argc, char** argv, const Factory& p, const std::string& citation_component)
+{
+  Options opt(argc,argv,citation_component);
+  if (!opt.valid) return 0;
   comm_init(argc,argv,opt.use_mpi);
   if (is_master() || !runs_parallel()) {
     p.print_copyright(std::cout);
     alps::scheduler::print_copyright(std::cout);
-    alps::print_copyright(std::cout);
+    alps::print_copyright(std::cout, citation_component);
   }
   
   int res=0;
