@@ -136,9 +136,35 @@ class CitationTests(unittest.TestCase):
         self.assertEqual((ROOT / "CITATION.md").read_text(encoding="utf-8"), expected)
 
     def test_checked_in_native_data_is_current(self):
-        for filename, content in generator.native_outputs(ROOT, self.policy, self.references, self.framework).items():
+        for filename, content in generator.native_outputs(ROOT, self.cff, self.policy, self.references, self.framework).items():
             with self.subTest(filename=filename):
                 self.assertEqual((ROOT / filename).read_text(encoding="utf-8"), content)
+
+    def test_saved_snapshots_are_valid_cff_and_match_cli_selection(self):
+        for component in self.policy["components"]:
+            with self.subTest(component=component):
+                record = generator.snapshot(self.cff, self.policy, self.references, self.framework,
+                                            component, "3.0.0-test")
+                bibliography = yaml.safe_load(record["bibliography_cff"])
+                generator.validate_schema(bibliography, "cff-1.2.0.schema.json")
+                available = {generator.reference_key(ref) for ref in
+                             [bibliography["preferred-citation"]] + bibliography.get("references", [])}
+                selected = {key for role in generator.ROLES for key in record[role]}
+                self.assertEqual(available, selected)
+                self.assertEqual(record["notice"], generator.notice(self.policy, self.references, self.framework, component))
+                self.assertEqual(record["id"], generator.canonical_digest({k:v for k,v in record.items() if k != "id"}))
+
+    def test_snapshot_fingerprint_tracks_policy_bibliography_version_and_activity(self):
+        def snapshot(version="3.0.0", activity="calculation"):
+            return generator.snapshot(self.cff, self.policy, self.references, self.framework, "looper", version, activity)
+        original = snapshot()
+        self.assertNotEqual(original["id"], snapshot("3.0.1")["id"])
+        self.assertNotEqual(original["id"], snapshot(activity="analysis")["id"])
+        reordered = dict(reversed(list(self.policy.items())))
+        self.assertEqual(original["catalog_sha256"], generator.canonical_digest({"cff": self.cff, "policy": reordered}))
+        self.cff["preferred-citation"]["title"] += " corrected metadata"
+        self.assertNotEqual(original["catalog_sha256"], snapshot()["catalog_sha256"])
+        self.assertNotEqual(original["id"], snapshot()["id"])
 
     @unittest.skipUnless(shutil.which("c++"), "C++ compiler unavailable")
     def test_generated_cpp_round_trip_escaping(self):
@@ -167,20 +193,22 @@ class CitationTests(unittest.TestCase):
             'cmake_minimum_required(VERSION 3.22)\nproject(citation_test LANGUAGES NONE)\n'
             f'include("{ROOT.as_posix()}/cmake/ALPSCitations.cmake")\n', encoding="utf-8")
         build = self.root / "build"
-        for mode in ("native", "libraries"):
+        for mode, destination, version in (("native", "share/alps", "3.0.0"),
+                                           ("libraries", "share/alps", "3.0.0-rc.2"),
+                                           ("escaped-version", "share/alps", '3.0.0-review;"quoted"\\path')):
             with self.subTest(mode=mode):
                 subprocess.run(["cmake", "-S", str(self.root), "-B", str(build),
                                 "-DALPS_CITATION_PYTHON=/nonexistent/python",
-                                "-DCMAKE_DISABLE_FIND_PACKAGE_Python3=ON",
+                                "-DCMAKE_DISABLE_FIND_PACKAGE_Python3=ON", f"-DALPS_VERSION={version}",
                                 f"-DALPS_BUILD_LIBS_ONLY={'ON' if mode == 'libraries' else 'OFF'}"],
                                check=True, capture_output=True)
-                expected = generator.cpp_data(self.policy, self.references, self.framework)
-                self.assertEqual((build / "src/alps/utility/citations_data.inc").read_text(encoding="utf-8"), expected)
+                expected = generator.cpp_snapshots(self.cff, self.policy, self.references, self.framework, version)
+                self.assertEqual((build / "src/alps/utility/citation_snapshots.inc").read_text(encoding="utf-8"), expected)
                 prefix = self.root / ("install-" + mode)
                 subprocess.run(["cmake", "--install", str(build), "--prefix", str(prefix), "--component", "libraries"],
                                check=True, capture_output=True)
                 for filename in ("CITATION.cff", "CITATIONS.yaml", "CITATION.md"):
-                    self.assertTrue((prefix / "share/alps" / filename).is_file())
+                    self.assertTrue((prefix / destination / filename).is_file())
         data = build / "src/alps/utility/citations_data.inc"
         before = data.read_text(encoding="utf-8")
         self.cff["preferred-citation"]["title"] = "Changed using only the catalog @DO_NOT_REPLACE@"
@@ -195,8 +223,9 @@ class CitationTests(unittest.TestCase):
         after = data.read_text(encoding="utf-8")
         self.assertNotEqual(before, after)
         self.assertIn("Changed using only the catalog", after)
-        self.assertIn("@DO_NOT_REPLACE@", after)
-        self.assertEqual(after, generator.cpp_data(self.policy, self.references, self.framework))
+        self.assertIn("@DO_NOT_REPLACE@", (build / "src/alps/utility/citation_snapshots.inc").read_text(encoding="utf-8"))
+        self.assertEqual((build / "src/alps/utility/citation_snapshots.inc").read_text(encoding="utf-8"),
+                         generator.cpp_snapshots(self.cff, self.policy, self.references, self.framework, version))
         derived = self.root / "script/citations/generated/citations_data.inc"
         with derived.open("a", encoding="utf-8") as output:
             output.write("\n// manually edited generated data\n")

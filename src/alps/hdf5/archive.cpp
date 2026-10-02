@@ -775,6 +775,29 @@ namespace alps {
             }
         }
     
+        void archive::write_utf8(std::string path, std::string const& value) const {
+            ALPS_HDF5_FAKE_THREADSAFETY
+            if (context_ == NULL)
+                throw archive_closed("the archive is closed" + ALPS_STACKTRACE);
+            if (!context_->write_)
+                throw archive_error("the archive is not writeable" + ALPS_STACKTRACE);
+            path = complete_path(path);
+            if (path.find('@') != std::string::npos || is_data(path) || is_group(path))
+                throw invalid_path("UTF-8 dataset requires a new dataset path: " + path + ALPS_STACKTRACE);
+            if (value.find('\0') != std::string::npos)
+                throw archive_error("UTF-8 text contains an embedded null" + ALPS_STACKTRACE);
+            if (path.find_last_of('/') > 0)
+                create_group(path.substr(0, path.find_last_of('/')));
+            detail::type_type type(H5Tcopy(H5T_C_S1));
+            detail::check_error(H5Tset_size(type, H5T_VARIABLE));
+            detail::check_error(H5Tset_cset(type, H5T_CSET_UTF8));
+            detail::space_type space(H5Screate(H5S_SCALAR));
+            detail::data_type data(H5Dcreate2(context_->file_id_, path.c_str(), type, space,
+                                            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+            const char* text = value.c_str();
+            detail::check_error(H5Dwrite(data, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, &text));
+        }
+
         detail::archive_proxy<archive> archive::operator[](std::string const & path) {
             return detail::archive_proxy<archive>(path, *this);
         }

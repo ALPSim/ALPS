@@ -5,6 +5,7 @@ Requires script/citations/requirements.txt. No network access is performed.
 """
 
 import argparse
+import copy
 import hashlib
 import json
 from pathlib import Path
@@ -230,11 +231,81 @@ def cpp_data(policy, references, framework):
     return "\n".join(lines)
 
 
-def native_outputs(root, policy, references, framework):
-    """Checked-in documentation and C++ data for builds without Python."""
+def canonical_digest(data):
+    """Fingerprint semantic metadata, independent of YAML whitespace/key order."""
+    return hashlib.sha256(json.dumps(data, sort_keys=True, ensure_ascii=False,
+                                     separators=(",", ":")).encode("utf-8")).hexdigest()
+
+
+def snapshot(cff, policy, references, framework, component, software_version, activity="calculation"):
+    if activity not in ("calculation", "analysis", "unspecified"):
+        raise ValueError("Unknown citation activity: " + activity)
+    roles = select_references(policy, framework, component)
+    keys = list(dict.fromkeys(key for role in ROLES for key in roles[role]))
+    bibliography = copy.deepcopy(cff)
+    bibliography["message"] = "Historical application-level citation recommendations saved with ALPS data."
+    bibliography["version"] = software_version
+    bibliography["references"] = [copy.deepcopy(references[key]) for key in keys if key != framework]
+    if not bibliography["references"]:
+        del bibliography["references"]
+    validate_schema(bibliography, "cff-1.2.0.schema.json")
+    entry = policy["components"][component]
+    # Quote the version consistently so CMake can substitute any build version
+    # into pre-generated data without needing a YAML parser.
+    bibliography_text = yaml.safe_dump({key: value for key, value in bibliography.items() if key != "version"},
+                                      allow_unicode=True, sort_keys=False)
+    bibliography_text += "version: " + json.dumps(software_version, ensure_ascii=False) + "\n"
+    record = dict(component=component, software_version=software_version,
+                  catalog_sha256=canonical_digest({"cff": cff, "policy": policy}),
+                  selection_basis="application", activity=activity,
+                  bibliography_cff=bibliography_text,
+                  notice=notice(policy, references, framework, component),
+                  request=policy["policy"]["request"], note=entry.get("note", ""),
+                  license_note=policy["policy"]["license_note"], **roles)
+    record["id"] = canonical_digest(record)
+    return record
+
+
+def cpp_snapshots(cff, policy, references, framework, software_version):
+    lines = ["// Generated citation snapshots. Do not edit.",
+             "static const citation_snapshot_entry citation_snapshot_entries[] = {"]
+    fields = ("component", "software_version", "catalog_sha256", "bibliography_cff", "notice",
+              "request", "note", "license_note", "algorithm", "implementation", "framework")
+    for component in sorted(policy["components"]):
+        records = [snapshot(cff, policy, references, framework, component, software_version, activity)
+                   for activity in ("calculation", "analysis", "unspecified")]
+        values = [record["id"] for record in records]
+        values += ["\n".join(records[0][key]) if key in ROLES else records[0][key] for key in fields]
+        lines.append("  {")
+        for value in values:
+            pieces = value.splitlines(keepends=True) or [""]
+            lines.extend("    " + json.dumps(piece, ensure_ascii=False) for piece in pieces[:-1])
+            lines.append("    " + json.dumps(pieces[-1], ensure_ascii=False) + ",")
+        lines.append("  },")
+    lines.extend(["};", ""])
+    return "\n".join(lines)
+
+
+def native_outputs(root, cff, policy, references, framework):
+    """Checked-in data for native builds; only CMake substitutes the version."""
+    sentinel = "ALPS_CITATION_VERSION_TOKEN"
+    template = cpp_snapshots(cff, policy, references, framework, sentinel)
+    payloads = {}
+    for component in sorted(policy["components"]):
+        for activity in ("calculation", "analysis", "unspecified"):
+            record = snapshot(cff, policy, references, framework, component, sentinel, activity)
+            template = template.replace(record["id"], f"@ALPS_CITATION_{component}_{activity}_ID@")
+        record.pop("id")
+        record["activity"] = "@ALPS_CITATION_ACTIVITY@"
+        record["software_version"] = "@ALPS_CITATION_VERSION_JSON@"
+        record["bibliography_cff"] = record["bibliography_cff"].replace(sentinel, "@ALPS_CITATION_VERSION_CFF_JSON@")
+        payloads[component] = json.dumps(record, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+    template = template.replace('"' + sentinel + '"', '"@ALPS_CITATION_VERSION_JSON@"')
+    template = template.replace(sentinel, "@ALPS_CITATION_VERSION_CFF_JSON@")
     generated = "script/citations/generated/"
     outputs = {"CITATION.md": markdown(policy, references, framework),
-               generated + "citations_data.inc": cpp_data(policy, references, framework)}
+               generated + "citations_data.inc": cpp_data(policy, references, framework),
+               generated + "citation_snapshots.inc.in": template}
     inputs = ("CITATION.cff", "CITATIONS.yaml", "script/generate_citations.py",
               "script/citations/cff-1.2.0.schema.json", "script/citations/policy.schema.json")
     hashes = {path: hashlib.sha256((root / path).read_bytes()).hexdigest() for path in inputs}
@@ -242,7 +313,13 @@ def native_outputs(root, policy, references, framework):
     lines = ["# Generated by script/generate_citations.py --regenerate. Do not edit.",
              "set(_alps_citation_generated_format 1)",
              "set(_alps_citation_files " + " ".join(hashes) + ")",
-             "set(_alps_citation_hashes " + " ".join(hashes.values()) + ")"]
+             "set(_alps_citation_hashes " + " ".join(hashes.values()) + ")",
+             "set(_alps_citation_components " + " ".join(payloads) + ")"]
+    for component, payload in payloads.items():
+        fence = "="
+        while "]" + fence + "]" in payload:
+            fence += "="
+        lines.append(f"set(_alps_citation_payload_{component} [{fence}[{payload}]{fence}])")
     outputs[generated + "snapshots.cmake"] = "\n".join(lines) + "\n"
     return outputs
 
@@ -296,15 +373,17 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=ROOT)
     parser.add_argument("--cpp", type=Path, help="Write generated C++ data to this build-tree path")
+    parser.add_argument("--snapshot-cpp", type=Path, help="Write structured citation snapshots")
+    parser.add_argument("--software-version", default="unknown", help="Software version saved in snapshots")
     parser.add_argument("--markdown", type=Path, help="Write generated readable guidance")
     parser.add_argument("--regenerate", action="store_true", help="Refresh checked-in native data and CITATION.md")
     parser.add_argument("--check", action="store_true", help="Require all checked-in generated files to be current")
     args = parser.parse_args()
     try:
-        _, policy, references, framework = load_catalog(args.root)
+        cff, policy, references, framework = load_catalog(args.root)
         doc = markdown(policy, references, framework)
         if args.check or args.regenerate:
-            outputs = native_outputs(args.root, policy, references, framework)
+            outputs = native_outputs(args.root, cff, policy, references, framework)
             for filename, content in outputs.items():
                 path = args.root / filename
                 if args.check and (not path.exists() or path.read_bytes() != content.encode("utf-8")):
@@ -313,6 +392,9 @@ def main():
                     write_if_changed(path, content)
         if args.cpp:
             write_if_changed(args.cpp, cpp_data(policy, references, framework))
+        if args.snapshot_cpp:
+            write_if_changed(args.snapshot_cpp, cpp_snapshots(cff, policy, references, framework,
+                                                          args.software_version or "unknown"))
         if args.markdown:
             write_if_changed(args.markdown, doc)
     except (ValueError, OSError, yaml.YAMLError, jsonschema.ValidationError) as exc:
