@@ -31,7 +31,7 @@
 #include <alps/hdf5/pointer.hpp>
 
 #ifdef UBLAS
-#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
+#include <boost/numeric/bindings/ublas/matrix.hpp>
 typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 typedef boost::numeric::ublas::matrix<std::complex<double>,boost::numeric::ublas::column_major> complex_dense_matrix;
 #endif
