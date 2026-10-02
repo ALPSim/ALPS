@@ -27,5 +27,4 @@ foreach(name ngs_hdf5 ngs_hash)
 endforeach()
 
 #TODO: does not compile in clang
-add_subdirectory(params)
 add_subdirectory(scheduler)

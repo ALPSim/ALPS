@@ -6,6 +6,7 @@
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/vector.hpp>
 #include <alps/ngs/params.hpp>
+#include <alps/utility/encode.hpp>
 #include <alps/ngs/accumulator/feature/binning_analysis.hpp>
 #include <alps/ngs/accumulator/feature/max_num_binning.hpp>
 #include <alps/parser/xslt_path.h>
@@ -38,6 +39,9 @@ int main(int argc, char** argv) {
         }
         return 0;
     }
+    const std::string archive_name = "a/path with spaces";
+    if (alps::hdf5_name_decode(alps::hdf5_name_encode(archive_name)) != archive_name)
+        return 1;
     alps::params parameters;
     parameters["count"] = 3;
     const alps::integer_range<int> range("[2:5]");

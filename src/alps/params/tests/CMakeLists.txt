@@ -23,4 +23,5 @@ foreach(name default ordering stream assign not_found external)
 
   target_link_libraries(param_${name} PRIVATE ALPS::alps)
   alps_add_test(param_${name})
+  set_property(TEST param_${name} PROPERTY LABELS params)
 endforeach()

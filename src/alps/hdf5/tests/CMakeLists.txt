@@ -26,11 +26,8 @@ foreach(
   hdf5_bool
   hdf5_replace
   hdf5_pair
-  hdf5_parms
-  hdf5_ising
   hdf5_family
   hdf5_valgrind
-  hdf5_observableset
   hdf5_multi_array
   hdf5_memory
   hdf5_misc
@@ -46,9 +43,9 @@ foreach(
   set_property(TEST ${name} PROPERTY LABELS hdf5)
 endforeach()
 
-# Reads a reference .h5 file from the source tree; see the note in
-# tests/numeric/CMakeLists.txt.
-target_compile_definitions(hdf5_fortran_string PRIVATE ALPS_SRCDIR="${PROJECT_SOURCE_DIR}")
+# Keep the reference archive with the test that reads it.
+target_compile_definitions(hdf5_fortran_string PRIVATE
+  ALPS_TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 if(ALPS_ENABLE_OPENMP)
   add_executable(hdf5_omp hdf5_omp.cpp)

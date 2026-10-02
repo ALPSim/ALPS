@@ -174,14 +174,18 @@ For development questions, use [Discord](https://discord.gg/JRNWnnva9g); reprodu
 
 | Location | Contents |
 | --- | --- |
-| `src/alps/` | C++ libraries and public headers |
+| `src/alps/` | C++ runtime, with [module-owned headers, implementations and tests](src/alps/README.md) for utilities, HDF5 and NGS parameters |
 | `src/apps/`, `src/tools/` | Simulation applications, shared solver implementations and CLI tools |
 | `python/pyalps/` | Python sources, bindings, packaging and extension example |
 | `src/alps/resources/` | Shared XML definitions and stylesheets |
 | `tutorials/` | [Ordered tutorials and standalone library examples](tutorials/README.md) |
-| `tests/` | Native, Python, SDK, CLI and build-helper tests |
+| `tests/` | Cross-module integration, remaining native, Python, SDK, CLI and build-helper tests |
 | `third_party/` | [Numeric Bindings headers](third_party/boost_numeric_bindings/README.md) and [XDR serialization](third_party/xdr/README.md) |
 | `cmake/`, `.github/` | Build configuration, shared version file, CI and release helpers |
+
+Utilities, HDF5 and NGS parameters use `src/alps/<module>/{include/alps,src,tests}`. Their public headers are listed explicitly in the module's `CMakeLists.txt`; add new exported headers there. MaxEnt uses `src/apps/maxent/{src,cli,tests}`, with its callable API in `<alps/solvers.hpp>`. Keep module tests beside the implementation and cross-module compatibility tests in `tests/integration/`. The existing CMake options control all these tests.
+
+These directories establish source ownership for ALPSCore reconciliation. They still build into `ALPS::alps` and `ALPS::maxent`; they are not independently configurable packages. Public include paths remain unchanged. See the [module boundaries and next steps](src/alps/README.md) before separating libraries or importing ALPSCore code.
 
 ### Build options
 

@@ -20,8 +20,8 @@
 #include <string>
 
 int main() {
-    boost::filesystem::path infile(ALPS_SRCDIR);
-    infile = infile / "tests" / "hdf5" / "hdf5_fortran_string.h5";
+    boost::filesystem::path infile(ALPS_TEST_SOURCE_DIR);
+    infile = infile / "hdf5_fortran_string.h5";
     if (!boost::filesystem::exists(infile)) {
         std::cout << "Reference file " << infile << " not found." << std::endl;
         return -1;

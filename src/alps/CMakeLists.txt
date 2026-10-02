@@ -22,11 +22,6 @@
 #
 
 add_library(alps
-  utility/encode.cpp
-  utility/copyright.cpp
-  utility/os.cpp
-  utility/temporary_filename.cpp
-  utility/vmusage.cpp
   alea/nan.C
   alea/observable.C
   alea/observablefactory.C
@@ -57,9 +52,6 @@ add_library(alps
   parser/xmlparser.C
   parser/xmlstream.C
   parser/xslt_path.C
-  hdf5/archive.cpp
-  ngs/lib/signal.cpp
-  ngs/lib/stacktrace.cpp
   random/rngfactory.C
   random/parallel/get_prime.cpp
   random/parallel/primelist_64.cpp
@@ -84,17 +76,10 @@ add_library(alps
   scheduler/workertask.C
   stop_callback.cpp
   ngs/lib/api.cpp
-  ngs/lib/short_print.cpp
-  ngs/lib/sleep.cpp
-  ngs/lib/paramvalue.cpp
-  ngs/lib/paramproxy.cpp
-  ngs/lib/params.cpp
   mcbase.cpp
   parseargs.cpp
   ngs/lib/mcoptions.cpp
   ngs/lib/observablewrappers.cpp
-  ngs/lib/make_deprecated_parameters.cpp
-  ngs/lib/make_parameters_from_xml.cpp
   ngs/lib/mcresult.cpp
   ngs/lib/mcresults.cpp
   ngs/lib/mcobservables.cpp
@@ -219,6 +204,11 @@ target_sources(alps_headers INTERFACE
         "${PROJECT_BINARY_DIR}/src/alps/version.h"
         "${PROJECT_BINARY_DIR}/src/alps/export.h")
 
+# Source ownership is modular; binary separation follows dependency reconciliation.
+add_subdirectory(utilities)
+add_subdirectory(hdf5)
+add_subdirectory(params)
+
 # This is a C++ bridge; only its consumers need a Fortran compiler.
 add_library(alps_fortran STATIC fortran/fwrapper_impl.C)
 add_library(ALPS::fortran ALIAS alps_fortran)
@@ -239,11 +229,23 @@ install(
   TARGETS alps_headers alps_fortran
   EXPORT ALPSTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries
-  FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers)
+  FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers
+  FILE_SET utilities_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers
+  FILE_SET hdf5_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers
+  FILE_SET params_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers)
 
 install(
   DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps"
-            "${PROJECT_SOURCE_DIR}/src/ietl"
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  COMPONENT headers
+  FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
+  PATTERN "resources" EXCLUDE
+  PATTERN "utilities" EXCLUDE
+  PATTERN "hdf5" EXCLUDE
+  PATTERN "params" EXCLUDE)
+
+install(
+  DIRECTORY "${PROJECT_SOURCE_DIR}/src/ietl"
             "${PROJECT_SOURCE_DIR}/third_party/boost_numeric_bindings/include/boost"
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   COMPONENT headers
