@@ -80,6 +80,7 @@ void Task::parse_task_file(bool read_parms_only)
   
   if (boost::filesystem::exists(boost::filesystem::path(h5name))) {
     hdf5::archive ar(h5name);
+    citation_history_ = read_citations(ar);
     if (read_parms_only)
       ar["/parameters"] >> parms;
     else 
@@ -145,10 +146,20 @@ Parameters Task::parse_ext_task_file(std::string infilename)
   return res;
 }
 
+void Task::set_citation_component(const std::string& component, const std::string& activity) {
+  make_citation_snapshot(component, activity); // reject unknown profiles before saving
+  citation_component_ = component;
+  citation_activity_ = activity;
+}
+
 void Task::load(hdf5::archive & ar) {
+    citation_history_ = read_citations(ar);
     ar["/parameters"] >> parms;
 }
 void Task::save(hdf5::archive & ar) const {
+    auto history = citation_history_;
+    merge_citations(history, citation_history{make_citation_snapshot(citation_component_, citation_activity_)});
+    replace_citations(ar, history);
     ar["/parameters"] << parms;
 }
 

@@ -142,6 +142,7 @@ void Worker::save_worker(ODump& dump) const
  
 void Worker::load(hdf5::archive & ar) 
 {
+  citation_history_ = read_citations(ar);
   std::string state;
   std::string rngname;
   ar["/parameters"] >> parms;
@@ -159,6 +160,9 @@ void Worker::load(hdf5::archive & ar)
 
 void Worker::save(hdf5::archive & ar) const 
 {
+  auto history = citation_history_;
+  merge_citations(history, citation_history{make_citation_snapshot(citation_component_, citation_activity_)});
+  replace_citations(ar, history);
   std::ostringstream rngstream;
   rngstream << *engine_ptr;
   ar["/parameters"] << parms;
@@ -166,6 +170,12 @@ void Worker::save(hdf5::archive & ar) const
   ar["/rng/@name"] << rng_name();
   if(node == 0)
       ar["/log/alps"] << info;
+}
+
+void Worker::set_citation_component(const std::string& component, const std::string& activity) {
+  make_citation_snapshot(component, activity);
+  citation_component_ = component;
+  citation_activity_ = activity;
 }
 
 TaskInfo Worker::get_info() const
@@ -366,4 +376,3 @@ ResultType Worker::get_summary() const
 }
 } // namespace scheduler
 } // namespace alps
-

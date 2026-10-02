@@ -25,6 +25,7 @@ std::pair<const std::basic_string<char,std::char_traits<char>,std::allocator<cha
 void evaluate(const boost::filesystem::path& p, const alps::Parameters new_parms) {
   alps::ProcessList nowhere;
   alps::scheduler::MCSimulation sim(nowhere,p);
+  sim.set_citation_component("qwl", "analysis");
   alps::Parameters parms=sim.get_parameters();  
   alps::graph_helper<> lattice(parms);
   int Ns=num_sites(lattice.graph());

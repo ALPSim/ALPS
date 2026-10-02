@@ -19,6 +19,7 @@
 #include <alps/parameter.h>
 #include <alps/utility/copyright.hpp>
 #include <alps/utility/cli.hpp>
+#include <alps/utility/citation_provenance.hpp>
 #include <alps/utility/vectorio.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/program_options.hpp>
@@ -69,6 +70,7 @@ int main(int argc, char** argv)
 		// read parameters and G0
 		
     alps::hdf5::archive ar(infile, "r");
+    const auto input_citations = alps::read_citations(ar);
 		alps::Parameters parms;
     ar["/parameters"] >> parms;
     parms["INFILE"]=infile;
@@ -83,10 +85,14 @@ int main(int argc, char** argv)
       alps::print_copyright(std::cout, "hirschfye");
     }
     alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;
-    alps::ImpuritySolver solver(factory,argc,argv,true);
+    alps::ImpuritySolver solver(factory,argc,argv,true,"hirschfye");
 		
 		// write g into output file
     solver.solve_omega(g0,parms);
+    if (alps::cli_is_master()) {
+      alps::hdf5::archive output(outfile, "a");
+      alps::write_citations(output, input_citations);
+    }
 #ifndef BOOST_NO_EXCEPTIONS
 	}
 	catch (std::exception& exc) {

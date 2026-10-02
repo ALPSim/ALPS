@@ -28,6 +28,7 @@ namespace alps {
 
     void mcbase::save(boost::filesystem::path const & filename) const {
         alps::hdf5::archive ar(filename, "w");
+        replace_citations(ar, citations());
         ar["/simulation/realizations/0/clones/0"] << *this;
     }
 
@@ -72,13 +73,27 @@ namespace alps {
         return partial_results;
     }
 
+    void mcbase::set_citation_component(const std::string& component, const std::string& activity) {
+        make_citation_snapshot(component, activity);
+        citation_component_ = component; citation_activity_ = activity;
+    }
+    void mcbase::inherit_citations(const citation_history& history) {
+        merge_citations(citation_history_, history);
+    }
+    citation_history mcbase::citations() const {
+        citation_history result = citation_history_;
+        merge_citations(result, citation_history{make_citation_snapshot(citation_component_, citation_activity_)});
+        return result;
+    }
     void mcbase::save(alps::hdf5::archive & ar) const {
+        write_citations(ar, citations());
         ar["/parameters"] << parameters;
         ar["measurements"] << measurements;
         ar["checkpoint/engine"] << random;
     }
 
     void mcbase::load(alps::hdf5::archive & ar) {
+        citation_history_ = read_citations(ar);
         ar["/parameters"] >> parameters;
         ar["measurements"] >> measurements;
         ar["checkpoint/engine"] >> random;

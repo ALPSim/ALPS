@@ -83,6 +83,7 @@ try {
     name.erase(name.rfind(".out.xml"),8);
     alps::ProcessList nowhere;
     FullDiagMatrix<double> matrix (nowhere,p);
+    matrix.set_citation_component("fulldiag", "analysis");
     matrix.evaluate(parms,name); 
     ++i; 
   }

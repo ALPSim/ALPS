@@ -14,6 +14,7 @@
 #ifndef PARAPACK_JOB_H
 #define PARAPACK_JOB_H
 
+#include <alps/utility/citation_provenance.hpp>
 #include "clone_info.h"
 #include "integer_range.h"
 #include "logger.h"
@@ -221,6 +222,7 @@ private:
   std::string base_;
 
   // these parameters will be read from simulation xml file
+  citation_history citation_history_;
   Parameters params_;
   std::vector<ObservableSet> obs_;
 

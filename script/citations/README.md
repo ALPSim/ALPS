@@ -49,6 +49,9 @@ derived files; stale data stops configuration with the regeneration command.
 A source change also triggers this check on the next incremental build. This
 prevents a modified catalog from silently compiling yesterday's recommendations.
 
+CMake substitutes the actual build version, including prerelease labels, and
+computes each snapshot's fingerprint from its pre-generated canonical JSON.
+Release-version changes therefore need no catalog regeneration or Python.
 Generated C++ data is compiled into libalps; execution needs no data-file lookup
 or network access. Updating an installed catalog does not alter a binary.
 
@@ -99,7 +102,8 @@ write the startup notice to stderr to preserve their numerical stdout format.
 Multiple tasks in one invocation share the notice. The framework paper is always
 reference [1], followed by algorithm and implementation references, with each paper
 listed once. Startup uses publication coordinates rather than full titles and DOI links; unpublished
-papers retain their title and status.
+papers retain their title and status. Saved-data notices preserve this startup box,
+while their CFF bibliography retains the complete records.
 Each application provides these standalone queries:
 
 - `--citations`: print complete guidance with paper titles and DOI links, and exit successfully.
@@ -123,6 +127,14 @@ with the catalog, checks help/license separation and absence of output files, an
 repeats the contract with two ranks when an MPI launcher is available. Startup tests
 cover a two-task looper calculation, the embedded scheduler, parallel stdin workers,
 and both caller-owned MPI and unconditional cleanup after an information query.
+
+## Saved data
+
+HDF5 checkpoints and results embed historical CFF bibliographies, application
+roles, and the producing build's notice at `/provenance/alps/citations`.
+See [Citations in saved ALPS data](saved-data.md) for the schema, restart and
+pipeline rules, reader/export APIs, and format coverage. New integrations must
+connect their save path as well as their CLI component.
 
 ## CFF schema attribution
 

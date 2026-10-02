@@ -14,6 +14,7 @@
 #ifndef ALPS_NGS_API_HPP
 #define ALPS_NGS_API_HPP
 
+#include <alps/utility/citation_provenance.hpp>
 #include <alps/ngs/config.hpp>
 #include <alps/ngs/params.hpp>
 #include <alps/ngs/mcresults.hpp>
@@ -67,12 +68,16 @@ namespace alps {
 
     #ifdef ALPS_NGS_USE_NEW_ALEA
         ALPS_DECL void save_results(alps::accumulator::accumulator_set const & observables, params const & params, boost::filesystem::path const & filename, std::string const & path);
+        ALPS_DECL void save_results(alps::accumulator::accumulator_set const & observables, params const & params, boost::filesystem::path const & filename, std::string const & path, citation_history const & citations);
         ALPS_DECL void save_results(alps::accumulator::result_set const & results, params const & params, boost::filesystem::path const & filename, std::string const & path);
+        ALPS_DECL void save_results(alps::accumulator::result_set const & results, params const & params, boost::filesystem::path const & filename, std::string const & path, citation_history const & citations);
     #endif
 
     ALPS_DECL void save_results(mcresults const & results, params const & params, boost::filesystem::path const & filename, std::string const & path);
+    ALPS_DECL void save_results(mcresults const & results, params const & params, boost::filesystem::path const & filename, std::string const & path, citation_history const & citations);
 
     ALPS_DECL void save_results(mcobservables const & observables, params const & params, boost::filesystem::path const & filename, std::string const & path);
+    ALPS_DECL void save_results(mcobservables const & observables, params const & params, boost::filesystem::path const & filename, std::string const & path, citation_history const & citations);
 
     template<typename C, typename P> void broadcast(C const & c, P & p, int r = 0) {
         p.broadcast(c, r);

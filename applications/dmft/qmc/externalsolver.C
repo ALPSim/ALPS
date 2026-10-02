@@ -43,6 +43,14 @@ ExternalSolver::ExternalSolver(const boost::filesystem::path& executable)
 
 void print_green_itime(std::ostream &os, const itime_green_function_t &v, const double beta, const shape_t shape);
 
+namespace {
+void save_input_citations(alps::hdf5::archive& ar, const alps::citation_history& solver_history) {
+  auto history = solver_history;
+  alps::merge_citations(history, alps::citation_history{alps::make_citation_snapshot("dmft")});
+  alps::replace_citations(ar, history);
+}
+}
+
 void prepare_parms_for_hybridization(alps::Parameters& p, alps::hdf5::archive& solver_input) {
   double mu=p["MU"];
   U_matrix U(p);
@@ -92,7 +100,8 @@ ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& 
   
   // write input file
   {
-    alps::hdf5::archive solver_input(infile, "a");
+    alps::hdf5::archive solver_input(infile, "w");
+    save_input_citations(solver_input, citation_history_);
     if(parms.value_or_default("SC_WRITE_DELTA", false)){
       //write \Delta(\tau)
       //note: G0 is the full G
@@ -122,6 +131,7 @@ ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& 
   itime_green_function_t g(n_tau+1, n_site, n_orbital);
   {
     alps::hdf5::archive ar(outfile, "r");
+    alps::merge_citations(citation_history_, alps::read_citations(ar));
     g.read_hdf5(ar, "/G_tau");
   }
   boost::filesystem::remove(outfile);
@@ -147,7 +157,8 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
   p["INFILE"]=infile;
   p["OUTFILE"]=outfile;
   {
-    alps::hdf5::archive solver_input(infile, "a");
+    alps::hdf5::archive solver_input(infile, "w");
+    save_input_citations(solver_input, citation_history_);
     if(parms.value_or_default("SC_WRITE_DELTA", false)){
       //write Delta(i\omega_n) along with \Delta(\tau)
       
@@ -180,6 +191,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
   matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
   itime_green_function_t G_tau(n_tau+1, n_site, n_orbital);
   alps::hdf5::archive ar(outfile, "r");
+  alps::merge_citations(citation_history_, alps::read_citations(ar));
   if (ar.is_group("G_omega")) {    
     G_omega.read_hdf5(ar, "/G_omega");
     G_tau.read_hdf5(ar, "/G_tau");
@@ -238,4 +250,3 @@ void ExternalSolver::call(std::string const& infile, std::string const& outfile)
   if (!boost::filesystem::exists(outfile))
     boost::throw_exception(std::runtime_error("The external impurity solver failed to write the output file named " + outfile));
 }
-

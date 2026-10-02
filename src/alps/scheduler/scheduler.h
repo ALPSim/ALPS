@@ -91,6 +91,7 @@ public:
 
 protected:
 
+  std::string citation_component_;
   AbstractTask* theTask; //the simulation running on this node
   boost::filesystem::path defaultpath;
   

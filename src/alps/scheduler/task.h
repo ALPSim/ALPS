@@ -23,6 +23,7 @@
   #define ALPS_WRITE_ALL_XML true
 #endif
 
+#include <alps/utility/citation_provenance.hpp>
 #include <alps/config.h>
 #include <alps/scheduler/worker.h>
 #include <alps/parameter.h>
@@ -146,6 +147,7 @@ public:
   virtual ResultType get_summary() const; 
   static Parameters parse_ext_task_file(std::string);
   
+  void set_citation_component(const std::string& component, const std::string& activity = "calculation");
   virtual void load(hdf5::archive &);
   virtual void save(hdf5::archive &) const;
 
@@ -163,6 +165,9 @@ protected:
 
 private:
   void parse_task_file(bool=false);
+  citation_history citation_history_;
+  std::string citation_component_ = "framework";
+  std::string citation_activity_ = "unspecified";
   bool started_; // is the task running?
 };
 

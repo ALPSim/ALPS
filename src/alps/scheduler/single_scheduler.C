@@ -40,7 +40,9 @@ SingleScheduler::SingleScheduler(const NoJobfileOptions& opt,const Factory& f)
 void SingleScheduler::create_task(Parameters const& p)
 {
   destroy_task();
-  theTask = proc.make_task(processes,p);
+  Task* task = proc.make_task(processes,p);
+  task->set_citation_component(citation_component_);
+  theTask = task;
   if(theTask->cpus()>processes.size()) 
     boost::throw_exception(std::runtime_error("Task needs more CPUs than available"));
 }
@@ -116,6 +118,7 @@ SingleScheduler* start_single(const Factory& p, int argc, char** argv,
                               const std::string& citation_component)
 {
   NoJobfileOptions opt;
+  opt.citation_component = citation_component;
   if (argc) opt = NoJobfileOptions(argc, argv, citation_component);
   if (!opt.valid) return 0;
   alps::comm_init(argc,argv,false);
