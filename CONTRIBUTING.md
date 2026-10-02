@@ -185,7 +185,7 @@ For development questions, use [Discord](https://discord.gg/JRNWnnva9g); reprodu
 
 Utilities, HDF5 and NGS parameters use `src/alps/<module>/{include/alps,src,tests}`. Their public headers are listed explicitly in the module's `CMakeLists.txt`; add new exported headers there. MaxEnt uses `src/apps/maxent/{src,cli,tests}`, with its callable API in `<alps/solvers.hpp>`. Keep module tests beside the implementation and cross-module compatibility tests in `tests/integration/`. The existing CMake options control all these tests.
 
-These directories establish source ownership for ALPSCore reconciliation. They still build into `ALPS::alps` and `ALPS::maxent`; they are not independently configurable packages. Public include paths remain unchanged. See the [module boundaries and next steps](src/alps/README.md) before separating libraries or importing ALPSCore code.
+These directories establish source ownership for ALPSCore reconciliation. `ALPS::utilities` is an independently linkable library; `ALPS::alps` links it transitively and still owns HDF5 and params. MaxEnt remains `ALPS::maxent`. The modules share one project configuration and public include paths remain unchanged. See the [module boundaries and next steps](src/alps/README.md) before separating more libraries or importing ALPSCore code.
 
 ### Build options
 
@@ -218,7 +218,7 @@ add_executable(my_simulation main.cpp)
 target_link_libraries(my_simulation PRIVATE ALPS::alps)
 ```
 
-The imported target carries headers, C++17 requirements, compile definitions and transitive dependencies. Use a compiler and configuration compatible with the SDK's ABI. `ALPS::headers` exposes the compile interface without linking; `ALPS::fortran` supplies the C++ Fortran bridge and its GNU Fortran compatibility flag.
+The imported target carries headers, C++17 requirements, compile definitions and transitive dependencies. Use a compiler and configuration compatible with the SDK's ABI. `ALPS::headers` exposes the compile interface without linking; `ALPS::fortran` supplies the C++ Fortran bridge and its GNU Fortran compatibility flag. Programs using only utilities can request `find_package(ALPS CONFIG REQUIRED COMPONENTS utilities)` and link `ALPS::utilities`. Package discovery still checks the SDK's complete dependency set; component-specific configuration is future work.
 
 An SDK built with applications also exports executable targets such as `ALPS::spinmc` and the solver libraries `ALPS::maxent`, `ALPS::cthyb` and `ALPS::ctint`. Require them with `find_package(ALPS CONFIG REQUIRED COMPONENTS applications solvers)`. The solver API is in `<alps/solvers.hpp>`. Python extensions that share ALPS objects with pyalps use its separate [downstream CMake package](python/pyalps/README.md#downstream-native-extensions).
 

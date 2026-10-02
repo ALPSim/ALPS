@@ -187,16 +187,19 @@ if(ALPS_LOADER_ORIGIN)
   endforeach()
 endif()
 
-if(WIN32 AND BUILD_SHARED_LIBS)
-  # Follow imported configurations: a Debug consumer may use a Release C-ABI
-  # dependency that vcpkg's configuration-specific DLL search does not find.
-  set(runtime_copy_script "${CMAKE_CURRENT_BINARY_DIR}/copy-runtime-$<CONFIG>.cmake")
-  file(GENERATE OUTPUT "${runtime_copy_script}" CONTENT
-    "set(dlls \"$<TARGET_RUNTIME_DLLS:alps>\")\nfile(COPY \${dlls} DESTINATION \"$<TARGET_FILE_DIR:alps>\")\n")
-  add_custom_command(TARGET alps POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -P "${runtime_copy_script}"
-    VERBATIM)
-endif()
+function(alps_copy_runtime_dependencies target)
+  if(WIN32 AND BUILD_SHARED_LIBS)
+    # Follow imported configurations: a Debug consumer may use a Release C-ABI
+    # dependency that vcpkg's configuration-specific DLL search does not find.
+    set(runtime_copy_script "${CMAKE_CURRENT_BINARY_DIR}/copy-runtime-$<CONFIG>.cmake")
+    file(GENERATE OUTPUT "${runtime_copy_script}" CONTENT
+      "set(dlls \"$<TARGET_RUNTIME_DLLS:${target}>\")\nif(dlls)\nfile(COPY \${dlls} DESTINATION \"$<TARGET_FILE_DIR:${target}>\")\nendif()\n")
+    add_custom_command(TARGET ${target} POST_BUILD
+      COMMAND "${CMAKE_COMMAND}" -P "${runtime_copy_script}"
+      VERBATIM)
+  endif()
+endfunction()
+alps_copy_runtime_dependencies(alps)
 target_sources(alps_headers INTERFACE
   FILE_SET HEADERS
   BASE_DIRS "${PROJECT_BINARY_DIR}/src"
@@ -204,8 +207,9 @@ target_sources(alps_headers INTERFACE
         "${PROJECT_BINARY_DIR}/src/alps/version.h"
         "${PROJECT_BINARY_DIR}/src/alps/export.h")
 
-# Source ownership is modular; binary separation follows dependency reconciliation.
+# Extracted components are linked once; HDF5 and params still contribute sources.
 add_subdirectory(utilities)
+target_link_libraries(alps PUBLIC ALPS::utilities)
 add_subdirectory(hdf5)
 add_subdirectory(params)
 

@@ -17,6 +17,7 @@
 #include <vector>
 #include <boost/array.hpp>
 #include <alps/multi_array.hpp>
+#include <alps/utilities_export.h>
 #include <ostream>
 
 namespace alps {
@@ -39,9 +40,9 @@ namespace alps {
     }
     
     namespace detail {
-        std::ostream & operator<<(std::ostream & os, short_print_proxy<float> const & v);
-        std::ostream & operator<<(std::ostream & os, short_print_proxy<double> const & v);
-        std::ostream & operator<<(std::ostream & os, short_print_proxy<long double> const & v);
+        ALPS_UTILITIES_DECL std::ostream & operator<<(std::ostream & os, short_print_proxy<float> const & v);
+        ALPS_UTILITIES_DECL std::ostream & operator<<(std::ostream & os, short_print_proxy<double> const & v);
+        ALPS_UTILITIES_DECL std::ostream & operator<<(std::ostream & os, short_print_proxy<long double> const & v);
 
         template<typename T>
         std::ostream & print_for_sequence(std::ostream & os, T const & value)

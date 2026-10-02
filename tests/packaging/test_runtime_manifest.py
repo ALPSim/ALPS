@@ -53,3 +53,26 @@ def test_repair_preserves_nanobind_abi(tmp_path):
     runtime.write_manifest(tmp_path, repaired=True)
     metadata = json.loads((tmp_path / "pyalps/runtime.json").read_text())
     assert metadata["nanobind"] == {"version": "2.15.0", "internals_abi": "21"}
+
+
+def test_macos_component_dependencies_use_packaged_libraries(tmp_path, monkeypatch):
+    package = tmp_path / "pyalps"
+    (package / "lib").mkdir(parents=True)
+    (package / "_ext").mkdir()
+    core = package / "lib/libalps.3.dylib"
+    utilities = package / "lib/libalps_utilities.3.dylib"
+    extension = package / "_ext/example.so"
+    for binary in (core, utilities, extension):
+        binary.touch()
+    monkeypatch.setattr(runtime.sys, "platform", "darwin")
+    monkeypatch.setattr(runtime.subprocess, "check_output",
+                        lambda command, **kwargs: f"{command[-1]}:\n@rpath/{Path(command[-1]).name}\n")
+    commands = []
+    monkeypatch.setattr(runtime.subprocess, "run", lambda command, **kwargs: commands.append(command))
+    runtime.write_manifest(tmp_path, "3.0.0")
+    rewrites = {command[-1]: command for command in commands if command[0] == "install_name_tool"}
+    assert set(rewrites) == {str(core), str(utilities), str(extension)}
+    assert "@loader_path/libalps_utilities.3.dylib" in rewrites[str(core)]
+    assert "@loader_path/../lib/libalps_utilities.3.dylib" in rewrites[str(extension)]
+    signed = {command[-1] for command in commands if command[0] == "codesign"}
+    assert signed == set(rewrites)

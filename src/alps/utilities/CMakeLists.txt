@@ -1,5 +1,5 @@
-# Module-owned implementation and public headers; linked into the common ALPS runtime.
-target_sources(alps PRIVATE
+# Utilities have no link dependency on the simulation or archive runtime.
+add_library(alps_utilities
   src/copyright.cpp
   src/encode.cpp
   src/os.cpp
@@ -8,6 +8,25 @@ target_sources(alps PRIVATE
   src/stacktrace.cpp
   src/temporary_filename.cpp
   src/vmusage.cpp)
+add_library(ALPS::utilities ALIAS alps_utilities)
+set_target_properties(alps_utilities PROPERTIES
+  EXPORT_NAME utilities
+  VERSION ${PROJECT_VERSION}
+  SOVERSION ${PROJECT_VERSION_MAJOR}
+  INSTALL_RPATH "${ALPS_LOADER_ORIGIN};$<TARGET_FILE_DIR:Boost::filesystem>")
+target_link_libraries(alps_utilities PUBLIC alps_headers Boost::filesystem Threads::Threads)
+alps_copy_runtime_dependencies(alps_utilities)
+if(WIN32)
+  target_link_libraries(alps_utilities PRIVATE ws2_32 mswsock)
+endif()
+generate_export_header(alps_utilities EXPORT_MACRO_NAME ALPS_UTILITIES_DECL
+  EXPORT_FILE_NAME "${PROJECT_BINARY_DIR}/src/alps/utilities_export.h")
+if(NOT BUILD_SHARED_LIBS)
+  target_compile_definitions(alps_headers INTERFACE ALPS_UTILITIES_STATIC_DEFINE)
+endif()
+target_sources(alps_headers INTERFACE
+  FILE_SET HEADERS
+  FILES "${PROJECT_BINARY_DIR}/src/alps/utilities_export.h")
 target_sources(alps_headers INTERFACE
   FILE_SET utilities_headers TYPE HEADERS
   BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
@@ -34,6 +53,13 @@ target_sources(alps_headers INTERFACE
     include/alps/utility/temporary_filename.hpp
     include/alps/utility/vectorio.hpp
     include/alps/utility/vmusage.hpp)
+
+install(TARGETS alps_utilities EXPORT ALPSTargets
+  RUNTIME_DEPENDENCY_SET alps_runtime
+  COMPONENT libraries
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)

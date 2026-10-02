@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -49,14 +50,16 @@ def write_manifest(tree: Path, version: str | None = None, *, repaired=False, na
             libraries.append(entry)
     if sys.platform == "darwin" and not repaired:
         # Resolve our own runtimes unambiguously before delocate follows SDK
-        # RPATHs and copies a second libalps into .dylibs. Separate copies have
-        # separate global state, which breaks downstream C++ extensions.
-        changes = []
-        for entry in libraries:
-            if "install_name" in entry:
-                changes.extend(("-change", entry["install_name"],
-                                f"@loader_path/../{entry['path']}"))
-        for binary in [*(package / "_ext").glob("*.so"), *(package / "bin").glob("*")]:
+        # RPATHs and copies a second ALPS component into .dylibs. Include the
+        # libraries themselves: libalps also links the utilities component.
+        binaries = {*(package / "_ext").glob("*.so"), *(package / "bin").glob("*"),
+                    *(package / entry["path"] for entry in libraries)}
+        for binary in sorted(binaries):
+            changes = []
+            for entry in libraries:
+                if "install_name" in entry:
+                    relative = Path(os.path.relpath(package / entry["path"], binary.parent)).as_posix()
+                    changes.extend(("-change", entry["install_name"], f"@loader_path/{relative}"))
             if binary.is_file() and changes:
                 subprocess.run(["install_name_tool", *changes, str(binary)], check=True)
                 subprocess.run(["codesign", "--force", "--sign", "-", str(binary)], check=True)

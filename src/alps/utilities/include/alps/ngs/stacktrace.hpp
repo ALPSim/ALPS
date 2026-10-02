@@ -14,6 +14,7 @@
 #ifndef ALPS_NGS_STACKTRACE_HPP
 #define ALPS_NGS_STACKTRACE_HPP
 
+#include <alps/utilities_export.h>
 #include <alps/ngs/config.hpp>
 #include <alps/ngs/stringify.hpp>
 
@@ -31,7 +32,7 @@
 namespace alps {
     namespace ngs {
 
-        ALPS_DECL std::string stacktrace();
+        ALPS_UTILITIES_DECL std::string stacktrace();
 
     }
 }

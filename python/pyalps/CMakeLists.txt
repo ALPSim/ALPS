@@ -15,7 +15,7 @@ execute_process(
   COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/_build_support/alps_version.py" --core
   OUTPUT_VARIABLE PYALPS_VERSION_CORE
   OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)
-set(_alps_components "")
+set(_alps_components utilities)
 if(PYALPS_BUILD_SOLVERS)
   list(APPEND _alps_components solvers)
 endif()
@@ -93,8 +93,10 @@ install(TARGETS nanobind RUNTIME_DEPENDENCY_SET pyalps_runtime
 
 # Required libraries are bundled whether or not command-line programs are wanted.
 if(NOT WIN32)
-  install(FILES "$<TARGET_FILE:ALPS::alps>" DESTINATION pyalps/lib
-    RENAME "$<TARGET_SONAME_FILE_NAME:ALPS::alps>")
+  foreach(runtime IN LISTS ALPS_RUNTIME_TARGETS)
+    install(FILES "$<TARGET_FILE:${runtime}>" DESTINATION pyalps/lib
+      RENAME "$<TARGET_SONAME_FILE_NAME:${runtime}>")
+  endforeach()
 endif()
 if(PYALPS_BUNDLE_APPLICATIONS)
   install(IMPORTED_RUNTIME_ARTIFACTS ${ALPS_APPLICATION_TARGETS}

@@ -19,11 +19,14 @@ def consumer(tmp_path):
     sdk.mkdir()
     (sdk / "ALPSConfig.cmake").write_text(
         'set(ALPS_VERSION "3.0.0")\n'
-        'foreach(target ALPS::alps ALPS::headers Threads::Threads)\n'
+        'set(ALPS_RUNTIME_TARGETS ALPS::alps ALPS::utilities)\n'
+        'foreach(target ALPS::alps ALPS::utilities ALPS::headers Threads::Threads Boost::filesystem)\n'
         '  if(NOT TARGET ${target})\n'
         '    add_library(${target} INTERFACE IMPORTED)\n'
         '  endif()\n'
-        'endforeach()\n')
+        'endforeach()\n'
+        'set_property(TARGET ALPS::alps PROPERTY INTERFACE_LINK_LIBRARIES "ALPS::utilities;ALPS::headers")\n'
+        'set_property(TARGET ALPS::utilities PROPERTY INTERFACE_LINK_LIBRARIES "Boost::filesystem")\n')
     (sdk / "src").mkdir()
     (sdk / "src/nb_abi.h").write_text("#  define NB_INTERNALS_VERSION 21\n")
     package = tmp_path / "original" / "pyalps"
@@ -60,6 +63,11 @@ else()
       message(FATAL_ERROR "Runtime did not follow the relocated package: ${location}")
     endif()
   else()
+    get_target_property(links pyalps::runtime INTERFACE_LINK_LIBRARIES)
+    if("ALPS::utilities" IN_LIST links OR "ALPS::alps" IN_LIST links
+       OR NOT "Boost::filesystem" IN_LIST links)
+      message(FATAL_ERROR "Developer extensions must use packaged components and SDK external dependencies")
+    endif()
     get_target_property(location pyalps::library0 IMPORTED_LOCATION)
     if(NOT location MATCHES "/pyalps/lib/libalps-hashed.so.3$")
       message(FATAL_ERROR "Developer runtime must use the package-owned ALPS library")

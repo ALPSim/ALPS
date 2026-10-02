@@ -20,7 +20,7 @@
 foreach(name vmusage bitops)
   add_executable(${name} ${name}.cpp)
 
-  target_link_libraries(${name} PRIVATE ALPS::alps)
+  target_link_libraries(${name} PRIVATE ALPS::utilities)
   alps_add_test(${name})
   set_property(TEST ${name} PROPERTY LABELS utility)
 endforeach()
