@@ -144,7 +144,7 @@ foreach(_flag IN LISTS _alps_sdk_cxx_flags)
 endforeach()
 
 option(PYALPS_BUNDLE_APPLICATIONS
-  "Bundle the ALPS application executables into pyalps/bin" ON)
+  "Bundle ALPS applications and core tutorial tools into pyalps/bin" ON)
 
 # Where the extension modules look for libalps at run time.
 #
@@ -194,6 +194,10 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/pyalps/"
   DESTINATION pyalps
   FILES_MATCHING PATTERN "*.py")
 
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/pyalps_cli/"
+  DESTINATION pyalps_cli
+  FILES_MATCHING PATTERN "*.py")
+
 # Runtime fallback paths for pyalps.tools, used only when the package does
 # not carry the resource in question. The XML/XSL library below is always
 # bundled, so its fallback is always empty; the application binaries are
@@ -222,12 +226,11 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pyalps_config.py" DESTINATION pyalps)
 
 # The ALPS application executables ship inside the package (pyalps/bin), as
 # the legacy ALPS_PYTHON_WHEEL build did. Keep this list explicit: the SDK's
-# bin directory also contains conversion and plotting tools whose relative
-# data paths assume a prefix install rather than the wheel layout.
-# pyalps.tools.check_existence() still prepends <pyalps>/bin to PATH, so
-# without these files runApplication('spinmc', ...) fails on a wheel install
-# with "There is no spinmc on the path!" -- the fallback it tries instead,
-# pyalps_config.ALPS_BIN_INSTALL_DIR, is the build machine's SDK path.
+# bin directory also contains legacy conversion and plotting scripts whose
+# relative data paths assume a prefix install rather than the wheel layout.
+# Bundle the core tutorial tools too; pyalps_cli supplies their XML path.
+# Both the shell launchers and pyalps.runApplication() need these programs;
+# bundled wheels never fall back to paths on the SDK build machine.
 #
 # The programs are copied from the SDK rather than rebuilt here. The root
 # CMakeLists gives every installed target an RPATH of @loader_path/../lib
@@ -236,7 +239,7 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pyalps_config.py" DESTINATION pyalps)
 # modules point at, so one copy of each library serves both.
 if(PYALPS_BUNDLE_APPLICATIONS)
   set(_alps_bin_dir "${ALPS_ROOT_DIR}/bin")
-  set(_alps_application_names
+  set(_alps_program_names
     checksign
     dirloop_sse
     dmft
@@ -254,10 +257,12 @@ if(PYALPS_BUNDLE_APPLICATIONS)
     spinmc
     spinmc_evaluate
     worm
-    worm_evaluate)
+    worm_evaluate
+    parameter2xml
+    printgraph)
   set(_alps_programs "")
   set(_alps_missing_programs "")
-  foreach(_program IN LISTS _alps_application_names)
+  foreach(_program IN LISTS _alps_program_names)
     if(EXISTS "${_alps_bin_dir}/${_program}")
       list(APPEND _alps_programs "${_alps_bin_dir}/${_program}")
     else()
@@ -267,10 +272,10 @@ if(PYALPS_BUNDLE_APPLICATIONS)
   if(_alps_missing_programs)
     message(FATAL_ERROR
       "PYALPS_BUNDLE_APPLICATIONS is ON but the wheel SDK is missing these "
-      "legacy wheel applications: ${_alps_missing_programs}. Build the ALPS "
+      "wheel applications/tools: ${_alps_missing_programs}. Build the ALPS "
       "SDK with the wheel-deps preset, or configure with "
-      "-DPYALPS_BUNDLE_APPLICATIONS=OFF for a bindings-only wheel -- in which "
-      "case pyalps.runApplication() will not work.")
+      "-DPYALPS_BUNDLE_APPLICATIONS=OFF for a bindings-only wheel that uses "
+      "SDK executables instead.")
   endif()
   list(LENGTH _alps_programs _alps_program_count)
   message(STATUS "pyalps: bundling ${_alps_program_count} ALPS programs into pyalps/bin")

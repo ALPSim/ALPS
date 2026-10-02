@@ -1,8 +1,8 @@
 # Generated from pyalps_config.py.in by python/pyalps/CMakeLists.txt.
 #
 # Last-resort fallbacks for the ALPS XML library and the application binaries,
-# consulted by pyalps.tools only when the package does not carry them
-# in-package as pyalps/xml and pyalps/bin.
+# consulted by pyalps.tools and the command-line launchers when the package
+# does not carry them in-package as pyalps/xml and pyalps/bin.
 #
 # They are empty whenever the package does carry them, which is the default
 # and what every published wheel uses. Filling them in unconditionally would

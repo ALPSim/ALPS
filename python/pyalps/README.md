@@ -7,6 +7,38 @@ Physics Simulations (ALPS) project. Binary wheels are available from PyPI:
 python -m pip install pyalps
 ```
 
+## Command-line applications
+
+The wheel installs shell commands for all bundled applications, including
+`spinmc`, `loop`, `worm`, `dmrg`, and `sparsediag`, plus the tutorial tools
+`parameter2xml` and `printgraph`. Activate your Python environment so its
+`bin` directory is on `PATH`, then follow the command-line tutorials:
+
+```sh
+parameter2xml simulation.in
+spinmc simulation.in.in.xml
+printgraph lattice.in
+```
+
+`parameter2xml simulation.in` creates `simulation.in.in.xml` (the job file)
+and the task input files. Download tutorial inputs from the
+[ALPS tutorial pages](https://alps.comp-phys.org/tutorials/); tutorial
+directories are not included in the wheel.
+
+The launchers execute the binaries bundled with this Python installation,
+with the bundled XML library as the default `ALPS_XML_PATH`. An explicit
+`ALPS_XML_PATH` override is respected. Pip does not edit shell startup files;
+for a user installation, ensure Python's scripts directory is on `PATH`.
+When an environment is active, its ALPS commands may take precedence over
+another ALPS installation. Use a full executable path to select that install.
+
+Legacy conversion/plotting scripts such as `convert2text` and `plot2*` are
+not bundled. Those require an SDK/source installation with their external
+dependencies. Bundled applications are serial; installing `pyalps[mpi]`
+does not turn them into MPI-enabled executables.
+
+## Python and source builds
+
 Install `pyalps[plot]` to use the Matplotlib plotting helpers.
 Install `pyalps[mpi]` for the mpi4py-backed `pyalps.mpi` compatibility layer.
 
@@ -38,14 +70,17 @@ configuration for a smaller core-only developer build.
 
 `PYALPS_BUNDLE_APPLICATIONS=ON` is the default and copies the ALPS
 application executables (`spinmc`, `dmrg`, `sparsediag`, `loop`, `qwl`, ...)
-from the SDK into `pyalps/bin`, together with the SDK's shared libraries in
-`pyalps/lib` that their `../lib` RPATH resolves against. `pyalps.tools`
-prepends `pyalps/bin` to `PATH`, so this is what makes
+and the `parameter2xml` and `printgraph` tools from the SDK into `pyalps/bin`,
+together with the SDK's shared libraries in `pyalps/lib` that their `../lib` RPATH
+resolves against. `pyalps.tools` adds `pyalps/bin` to `PATH`, so this is what makes
 `pyalps.runApplication('spinmc', ...)` work from a wheel install — the
 `wheel-deps` preset therefore builds the applications. Configure with
 `-DPYALPS_BUNDLE_APPLICATIONS=OFF` for a bindings-only wheel; the
-`runApplication` helpers then require the executables on `PATH` by other
-means.
+shell launchers and `pyalps.runApplication` then use executables from the
+SDK used to build that wheel, or from an explicit `ALPS_BIN_PATH` override.
+Keep that SDK installed in a separate prefix from the Python environment,
+so pip's launchers do not replace its binaries. Bundled wheels always execute
+their bundled binaries; they never fall back to an SDK or search `PATH`.
 
 ## Free-threading and stable-ABI policy
 
