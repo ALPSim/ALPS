@@ -2,11 +2,11 @@
   {
     "file": "src/alps/graph/include/alps/graph/is_embeddable.hpp",
     "include": "alps/graph/lattice_constant_2d.hpp",
-    "reason": "Pre-existing optional USE_LATTICE_CONSTANT_2D branch references a backend absent at f27ed2316. normal graph builds do not define this macro."
+    "reason": "Pre-existing optional USE_LATTICE_CONSTANT_2D branch references a backend absent at 0f7b995d5. normal graph builds do not define this macro."
   },
   {
     "file": "src/alps/graph/include/alps/graph/lattice_constant_debug.hpp",
     "include": "alps/graph/lattice_constant_2d.hpp",
-    "reason": "Pre-existing optional USE_LATTICE_CONSTANT_2D branch references a backend absent at f27ed2316. normal graph builds do not define this macro."
+    "reason": "Pre-existing optional USE_LATTICE_CONSTANT_2D branch references a backend absent at 0f7b995d5. normal graph builds do not define this macro."
   }
 ]
