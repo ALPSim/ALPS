@@ -38,7 +38,9 @@ def test_save_results_preserves_readable_citations(tmp_path):
         pyalps.export_citations(source, destination)
 
     with archive(str(source), "a") as output:
-        output[f"/provenance/alps/citations/records/{record['id']}/notice"] = "changed"
+        path = f"/provenance/alps/citations/records/{record['id']}/notice"
+        output.delete_data(path)
+        output[path] = "changed"
     with pytest.raises(ValueError, match="fingerprint mismatch"):
         pyalps.read_citations(source)
 
