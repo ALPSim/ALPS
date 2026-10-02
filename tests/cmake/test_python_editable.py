@@ -45,9 +45,10 @@ def test_editable_core_install(tmp_path):
         "--config-settings=cmake.define.PYALPS_BUILD_SOLVERS=OFF",
         "--config-settings=cmake.define.PYALPS_BUNDLE_APPLICATIONS=OFF",
     ], check=True, env=build_env, cwd=tmp_path)
-    probe = """
+    probe = r"""
 import json
 from pathlib import Path
+import re
 import sys
 import pyalps
 from pyalps._resources import runtime_directory
@@ -65,9 +66,16 @@ assert not (runtime / 'bin/spinmc').exists()
 assert not (runtime / 'bin/spinmc.exe').exists()
 assert not hasattr(pyalps, 'cthyb')
 manifest = json.loads((runtime / 'runtime.json').read_text())
-assert any('alps' in entry['path'] for entry in manifest['libraries'])
+components = set()
 for entry in manifest['libraries']:
-    assert (runtime / entry['path']).is_file()
+    library = runtime / entry['path']
+    assert library.is_file()
+    # Normalize Unix SONAME versions, repaired-wheel hashes and Windows DLLs.
+    stem = re.sub(r'(?:\.so(?:\.\d+)*|(?:\.\d+)*\.dylib|\.dll)$', '', library.name.lower())
+    components.add(re.sub(r'-[0-9a-f]{6,}$', '', stem).removeprefix('lib'))
+required = {'alps', 'alps_utilities', 'alps_hdf5', 'alps_params',
+            'alps_osiris', 'alps_xml', 'alps_cli'}
+assert required <= components, f'Missing runtime components: {sorted(required - components)}'
 """
     def check(script):
         subprocess.run([str(python), "-c", script, str(source), str(purelib)],

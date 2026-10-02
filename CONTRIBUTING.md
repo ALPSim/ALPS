@@ -176,9 +176,10 @@ For development questions, use [Discord](https://discord.gg/JRNWnnva9g); reprodu
 | Location | Contents |
 | --- | --- |
 | `src/alps/` | C++ component coordination; see the [source ownership map](src/alps/README.md) |
-| `src/alps/{utilities,hdf5,params,osiris}/` | Independently linkable components with public headers, sources and local tests |
+| `src/alps/{utilities,hdf5,params,osiris,xml,cli}/` | Independently linkable components with public headers, sources and local tests |
 | `src/alps/{containers,numerics,ietl,graph}/` | Container, numerical, eigensolver and graph headers and tests |
-| `src/alps/{xml,legacy_parameters,expression,lattice,model,random,alea,accumulators,mc,scheduler,parapack}/` | Semantic source modules contributing to `ALPS::alps` and its compile interface |
+| `src/alps/plotting/` | `<alps/plot.h>` output helpers combining XML and older parameters; contributes headers, not a separate library |
+| `src/alps/{legacy_parameters,expression,lattice,model,random,alea,accumulators,mc,scheduler,parapack}/` | Semantic source modules contributing to `ALPS::alps` and its compile interface |
 | `src/alps/solvers/` | Public callable solver declarations shared by MaxEnt and CT-QMC |
 | `src/alps/fortran/` | Public headers and implementation of the `ALPS::fortran` bridge |
 | `src/apps/`, `src/tools/` | Simulation applications, shared solver implementations and CLI tools |
@@ -193,7 +194,9 @@ Sources use `src/alps/<module>/{include,src,tests}` where applicable; the broad 
 
 `ALPS::headers` remains the aggregate compile interface. Physical modules are not automatically independent libraries: numerical headers still depend on XML/parser headers and other include cycles remain. MaxEnt uses `src/apps/maxent/{src,cli,tests}`; `<alps/solvers.hpp>` lives in `src/alps/solvers/include/alps/` because it also declares CT-QMC entry points. Keep subsystem tests beside their owner and cross-module compatibility tests in `tests/integration/`. Existing CMake options and test names are preserved; moving inactive fixtures does not enable them.
 
-`ALPS::utilities`, `ALPS::hdf5`, `ALPS::params` and `ALPS::osiris` are independently linkable libraries; `ALPS::alps` links them transitively and owns the params text/XML and older `Parameters` adapters in `src/alps/params/adapters/`. `ALPS::maxent` links the foundations, Osiris and numerical providers without `ALPS::alps`; its CLI still uses the aggregate runtime's options parser. Rebuild downstream binaries after the Osiris split. This cleanup prepares MaxEnt, HDF5 and params for ALPSCore reconciliation without importing Core implementations. See the [module boundaries and next steps](src/alps/README.md).
+`ALPS::utilities`, `ALPS::hdf5`, `ALPS::params`, `ALPS::osiris`, `ALPS::xml` and `ALPS::cli` are independently linkable libraries; `ALPS::alps` links them transitively and owns the params text/XML and older `Parameters` adapters in `src/alps/params/adapters/`. XML parsing/output belongs to `ALPS::xml`; file-to-parameter conversion still belongs to those adapters. `ALPS::cli` owns the unchanged `mcoptions` and `parseargs` implementations under their existing public header names.
+
+`ALPS::maxent` links the foundations, Osiris and numerical providers without `ALPS::alps`; its executable adds `ALPS::cli` for argument parsing and reads HDF5 params directly. These extractions preserve scientific algorithms and existing input grammars. Rebuild downstream binaries after the library splits. This cleanup prepares MaxEnt, HDF5 and params for ALPSCore reconciliation without importing Core implementations. See the [module boundaries and next steps](src/alps/README.md).
 
 CMake generates `alps-module-manifest.json` from module declarations and actual header/source lists. After configuration, check ownership and declared include dependencies with:
 
@@ -236,7 +239,7 @@ add_executable(my_simulation main.cpp)
 target_link_libraries(my_simulation PRIVATE ALPS::alps)
 ```
 
-The imported target carries headers, C++17 requirements, compile definitions and transitive dependencies. Use a compiler and configuration compatible with the SDK's ABI. `ALPS::headers` exposes the compile interface without linking; `ALPS::fortran` supplies the C++ Fortran bridge and its GNU Fortran compatibility flag. Programs using only utilities can request `find_package(ALPS CONFIG REQUIRED COMPONENTS utilities)` and link `ALPS::utilities`. Archive-only programs can similarly request the `hdf5` component and link `ALPS::hdf5`, which also owns archive signal cleanup. Typed parameter programs can request the `params` component and link `ALPS::params`. The parameter-file constructor and text/XML conversion adapters require `ALPS::alps`. Package discovery still checks the SDK's complete dependency set; component-specific configuration is future work.
+The imported target carries headers, C++17 requirements, compile definitions and transitive dependencies. Use a compiler and configuration compatible with the SDK's ABI. `ALPS::headers` exposes the compile interface without linking; `ALPS::fortran` supplies the C++ Fortran bridge and its GNU Fortran compatibility flag. Programs using only utilities can request `find_package(ALPS CONFIG REQUIRED COMPONENTS utilities)` and link `ALPS::utilities`. Archive-only programs can similarly request the `hdf5` component and link `ALPS::hdf5`, which also owns archive signal cleanup. Typed parameter programs can request the `params` component and link `ALPS::params`. XML parsing/output and command-line parsing are available through the `xml` and `cli` components and targets `ALPS::xml` and `ALPS::cli`. The parameter-file constructor and text/XML conversion adapters still require `ALPS::alps`. Package discovery still checks the SDK's complete dependency set; component-specific configuration is future work.
 
 An SDK built with applications also exports executable targets such as `ALPS::spinmc` and the solver libraries `ALPS::maxent`, `ALPS::cthyb` and `ALPS::ctint`. Require them with `find_package(ALPS CONFIG REQUIRED COMPONENTS applications solvers)`. The solver API is in `<alps/solvers.hpp>`. Python extensions that share ALPS objects with pyalps use its separate [downstream CMake package](python/pyalps/README.md#downstream-native-extensions).
 

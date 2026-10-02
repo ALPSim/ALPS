@@ -116,12 +116,13 @@ target_sources(alps_headers INTERFACE
 include("${PROJECT_SOURCE_DIR}/cmake/ALPSModules.cmake")
 alps_register_module(NAME configuration ROOT "${PROJECT_SOURCE_DIR}/cmake/config"
   GENERATED_HEADERS alps/config.h alps/version.h alps/export.h)
-foreach(module IN ITEMS utilities containers numerics ietl solvers xml
+foreach(module IN ITEMS utilities cli containers numerics ietl solvers xml plotting
                         legacy_parameters expression graph lattice model random
                         osiris hdf5 params alea accumulators mc scheduler parapack fortran)
   add_subdirectory(${module})
 endforeach()
-target_link_libraries(alps PUBLIC ALPS::utilities ALPS::osiris ALPS::hdf5 ALPS::params)
+target_link_libraries(alps PUBLIC ALPS::utilities ALPS::osiris ALPS::hdf5 ALPS::params
+                                  ALPS::xml ALPS::cli)
 
 install(
   TARGETS alps

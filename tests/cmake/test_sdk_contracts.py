@@ -57,13 +57,13 @@ def test_components_link_without_building_the_core_runtime(tmp_path):
     subprocess.run([
         "cmake", "--build", str(tmp_path), "--config", "Release",
         "--target", "utilities_contract", "hdf5_contract", "params_contract", "osiris_contract",
-        "maxent_independent_contract", "--parallel", "2",
+        "xml_contract", "cli_contract", "maxent_independent_contract", "maxent", "--parallel", "2",
     ], check=True)
     core_runtime = Path((tmp_path / "core-runtime-Release.txt").read_text().strip())
     assert not core_runtime.exists(), f"Extracted components built the core runtime: {core_runtime}"
     subprocess.run([
         "ctest", "--test-dir", str(tmp_path), "-C", "Release", "--output-on-failure",
-        "-R", "^(utilities|hdf5|params|osiris|maxent_independent)_contract$", "--no-tests=error",
+        "-R", "^(utilities|hdf5|params|osiris|xml|cli|maxent_independent)_contract$", "--no-tests=error",
     ], check=True)
 
 

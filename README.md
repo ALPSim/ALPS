@@ -33,6 +33,8 @@ cmake --install _build/default
 
 Then follow the [editable Python installation](python/pyalps/README.md#editable-development), pointing `ALPS_DIR` at `_build/default/install/share/alps`.
 
+The [module layout](src/alps/README.md) prepares MaxEnt, HDF5 and typed params for ALPSCore reconciliation. Utilities, HDF5, params, Osiris, XML and command-line parsing have separate exported libraries; both the MaxEnt solver and executable link components without `ALPS::alps`. Public include names and scientific algorithms are preserved. `ALPS::headers` still provides a shared compile interface, so source ownership does not imply that every module is independent.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development and contribution guidance.

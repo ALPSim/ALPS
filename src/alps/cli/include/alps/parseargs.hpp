@@ -4,38 +4,36 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2011 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2010 - 2013 by Lukas Gamper <gamperl@gmail.com>                   *
  *                                                                                 *
  * ALPS Project: https://alps.comp-phys.org/                                       *
  * SPDX-License-Identifier: MIT                                                    *
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_NGS_MCOPTIONS_HPP
-#define ALPS_NGS_MCOPTIONS_HPP
+#ifndef ALPS_NGS_SCHEDULER_PARSEARGS_HPP
+#define ALPS_NGS_SCHEDULER_PARSEARGS_HPP
 
 #include <alps/ngs/config.hpp>
+#include <alps/cli_export.h>
 
 #include <string>
 
 namespace alps {
 
-      class ALPS_DECL mcoptions {
+	struct ALPS_CLI_DECL parseargs {
+	    parseargs(int argc, char *argv[]);
 
-        public:
+	    bool resume;
 
-            typedef enum { SINGLE, THREADED, MPI, HYBRID } execution_types;
+	    std::size_t timelimit;
+	    std::size_t tmin;
+	    std::size_t tmax;
 
-            mcoptions(int argc, char* argv[]);
+	    std::string input_file;
+	    std::string output_file;
+	};
 
-            bool valid;
-            bool resume;
-            std::size_t time_limit;
-            std::string input_file;
-            std::string output_file;
-            std::string checkpoint_file;
-            execution_types type;
-    };
 }
 
 #endif

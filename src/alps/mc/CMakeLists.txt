@@ -2,8 +2,6 @@
 target_sources(alps PRIVATE
   src/mcbase.cpp
   src/ngs/api.cpp
-  src/ngs/mcoptions.cpp
-  src/parseargs.cpp
   src/stop_callback.cpp)
 
 target_sources(alps_headers INTERFACE
@@ -15,12 +13,10 @@ target_sources(alps_headers INTERFACE
     include/alps/mcmpiadapter.hpp
     include/alps/ngs.hpp
     include/alps/ngs/api.hpp
-    include/alps/ngs/mcoptions.hpp
-    include/alps/parseargs.hpp
     include/alps/progress_callback.hpp
     include/alps/stop_callback.hpp)
 
 alps_register_module(NAME mc HEADER_SET mc_headers
   TARGETS alps
-  DEPENDS accumulators alea hdf5 params random utilities
+  DEPENDS accumulators alea cli hdf5 params random utilities
 )

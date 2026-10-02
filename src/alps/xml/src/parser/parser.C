@@ -73,7 +73,7 @@ std::string read_until(std::istream& in, char end)
   return s;
 }
 
-ALPS_DECL void check_character(std::istream& in, char test, const std::string& error) 
+ALPS_XML_DECL void check_character(std::istream& in, char test, const std::string& error)
 {
   char c;
   in >> c;

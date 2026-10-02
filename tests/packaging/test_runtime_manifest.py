@@ -67,8 +67,10 @@ def test_macos_component_dependencies_use_packaged_libraries(tmp_path, monkeypat
     hdf5 = package / "lib/libalps_hdf5.3.dylib"
     params = package / "lib/libalps_params.3.dylib"
     osiris = package / "lib/libalps_osiris.3.dylib"
+    xml = package / "lib/libalps_xml.3.dylib"
+    cli = package / "lib/libalps_cli.3.dylib"
     extension = package / "_ext/example.so"
-    for binary in (core, params, hdf5, utilities, osiris, extension):
+    for binary in (core, params, hdf5, utilities, osiris, xml, cli, extension):
         binary.touch()
     monkeypatch.setattr(runtime.sys, "platform", "darwin")
     monkeypatch.setattr(runtime.subprocess, "check_output",
@@ -77,7 +79,7 @@ def test_macos_component_dependencies_use_packaged_libraries(tmp_path, monkeypat
     monkeypatch.setattr(runtime.subprocess, "run", lambda command, **kwargs: commands.append(command))
     runtime.write_manifest(tmp_path, "3.0.0")
     rewrites = {command[-1]: command for command in commands if command[0] == "install_name_tool"}
-    assert set(rewrites) == {str(core), str(params), str(hdf5), str(utilities), str(osiris), str(extension)}
+    assert set(rewrites) == {str(core), str(params), str(hdf5), str(utilities), str(osiris), str(xml), str(cli), str(extension)}
     assert "@loader_path/libalps_utilities.3.dylib" in rewrites[str(core)]
     assert "@loader_path/../lib/libalps_utilities.3.dylib" in rewrites[str(extension)]
     assert "@loader_path/libalps_hdf5.3.dylib" in rewrites[str(core)]
@@ -85,16 +87,18 @@ def test_macos_component_dependencies_use_packaged_libraries(tmp_path, monkeypat
     assert "@loader_path/libalps_params.3.dylib" in rewrites[str(core)]
     assert "@loader_path/libalps_hdf5.3.dylib" in rewrites[str(params)]
     assert "@loader_path/../lib/libalps_params.3.dylib" in rewrites[str(extension)]
-    for binary, destination in (
-        (core, "@loader_path/libalps_osiris.3.dylib"),
-        (extension, "@loader_path/../lib/libalps_osiris.3.dylib"),
-    ):
-        command = rewrites[str(binary)]
-        index = command.index("@rpath/libalps_osiris.3.dylib")
-        assert command[index - 1:index + 2] == [
-            "-change", "@rpath/libalps_osiris.3.dylib", destination]
     manifest = json.loads((package / "runtime.json").read_text())
-    assert {"path": "lib/libalps_osiris.3.dylib",
-            "install_name": "@rpath/libalps_osiris.3.dylib"} in manifest["libraries"]
+    for name in ("osiris", "xml", "cli"):
+        filename = f"libalps_{name}.3.dylib"
+        for binary, destination in (
+            (core, f"@loader_path/{filename}"),
+            (extension, f"@loader_path/../lib/{filename}"),
+        ):
+            command = rewrites[str(binary)]
+            index = command.index(f"@rpath/{filename}")
+            assert command[index - 1:index + 2] == [
+                "-change", f"@rpath/{filename}", destination]
+        assert {"path": f"lib/{filename}",
+                "install_name": f"@rpath/{filename}"} in manifest["libraries"]
     signed = {command[-1] for command in commands if command[0] == "codesign"}
     assert signed == set(rewrites)

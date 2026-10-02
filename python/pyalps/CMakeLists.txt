@@ -92,7 +92,12 @@ install(TARGETS nanobind RUNTIME_DEPENDENCY_SET pyalps_runtime
   LIBRARY DESTINATION pyalps/lib RUNTIME DESTINATION pyalps/bin)
 
 # Required libraries are bundled whether or not command-line programs are wanted.
-if(NOT WIN32)
+if(WIN32)
+  # An unused import library need not appear in an extension's PE imports.
+  # Install every component and include its dependencies in the DLL scan.
+  install(IMPORTED_RUNTIME_ARTIFACTS ${ALPS_RUNTIME_TARGETS}
+    RUNTIME_DEPENDENCY_SET pyalps_runtime RUNTIME DESTINATION pyalps/bin)
+else()
   foreach(runtime IN LISTS ALPS_RUNTIME_TARGETS)
     install(FILES "$<TARGET_FILE:${runtime}>" DESTINATION pyalps/lib
       RENAME "$<TARGET_SONAME_FILE_NAME:${runtime}>")

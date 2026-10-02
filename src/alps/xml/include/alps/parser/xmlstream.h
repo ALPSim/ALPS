@@ -17,6 +17,7 @@
 #define ALPS_PARSER_XMLSTREAM_H
 
 #include <alps/config.h>
+#include <alps/xml_export.h>
 #include <alps/parser/xmlattributes.h>
 
 #include <boost/config.hpp>
@@ -85,7 +86,7 @@ struct pi_t : public start_tag_t
 
 } // namespace detail
 
-class ALPS_DECL oxstream
+class ALPS_XML_DECL oxstream
 {
 public:
   oxstream();
@@ -219,7 +220,7 @@ inline oxstream& end_cdata(oxstream& oxs) { return oxs.end_comment(); }
 inline oxstream& no_linebreak(oxstream& oxs) { return oxs.no_linebreak(); }
 
 // replace "<", "&", etc to entities
-ALPS_DECL std::string convert(const std::string& str);
+ALPS_XML_DECL std::string convert(const std::string& str);
 
 template<class T>
 inline std::string precision(const T& d, int n)

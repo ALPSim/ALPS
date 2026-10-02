@@ -17,6 +17,7 @@
 #ifndef ALPS_XML_XMLHANDLER_H
 #define ALPS_XML_XMLHANDLER_H
 
+#include <alps/xml_export.h>
 #include <alps/parser/xmlattributes.h>
 #include <alps/parser/xmlstream.h>
 
@@ -33,7 +34,7 @@ enum tag_type { element, processing_instruction, stylesheet };
 
 } // namespace xml
 
-class ALPS_DECL XMLHandlerBase
+class ALPS_XML_DECL XMLHandlerBase
 {
 public:
   XMLHandlerBase(const std::string& basename) : basename_(basename) {
@@ -62,7 +63,7 @@ private:
 };
 
 
-class ALPS_DECL DummyXMLHandler : public XMLHandlerBase
+class ALPS_XML_DECL DummyXMLHandler : public XMLHandlerBase
 {
 public:
   DummyXMLHandler(const std::string& basename)
@@ -141,7 +142,7 @@ private:
 };
 
 
-class ALPS_DECL CompositeXMLHandler : public XMLHandlerBase
+class ALPS_XML_DECL CompositeXMLHandler : public XMLHandlerBase
 {
 private:
   typedef XMLHandlerBase base_type;
@@ -215,7 +216,7 @@ private:
 };
 
 
-class ALPS_DECL PrintXMLHandler : public XMLHandlerBase
+class ALPS_XML_DECL PrintXMLHandler : public XMLHandlerBase
 {
 public:
   PrintXMLHandler(std::ostream& os = std::cout)
@@ -264,7 +265,7 @@ private:
 };
 
 
-class ALPS_DECL StylesheetXMLHandler : public XMLHandlerBase
+class ALPS_XML_DECL StylesheetXMLHandler : public XMLHandlerBase
 {
 public:
   StylesheetXMLHandler(std::string& style)

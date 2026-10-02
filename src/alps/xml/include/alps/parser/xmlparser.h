@@ -18,6 +18,7 @@
 #define ALPS_XML_XMLPARSER_H
 
 #include <alps/config.h>
+#include <alps/xml_export.h>
 #include <alps/parser/xmlhandler.h>
 
 #include <boost/filesystem/path.hpp>
@@ -26,7 +27,7 @@
 
 namespace alps {
 
-class ALPS_DECL XMLParser
+class ALPS_XML_DECL XMLParser
 {
 public:
   XMLParser(XMLHandlerBase&);

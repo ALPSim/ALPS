@@ -159,7 +159,8 @@ def test_alps_runtime_components_are_bundled():
              for path in directory.iterdir() if path.is_file()}
     prefix = "" if sys.platform == "win32" else "lib"
     assert {prefix + name for name in
-            ("alps", "alps_utilities", "alps_hdf5", "alps_params", "alps_osiris")} <= stems
+            ("alps", "alps_utilities", "alps_hdf5", "alps_params", "alps_osiris",
+             "alps_xml", "alps_cli")} <= stems
 
 
 def test_no_shared_library_is_bundled_twice():

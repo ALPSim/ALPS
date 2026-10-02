@@ -23,6 +23,7 @@
 #endif
 
 #include <alps/config.h>
+#include <alps/xml_export.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/throw_exception.hpp>
 #include <cstddef>
@@ -33,7 +34,7 @@
 
 namespace alps {
 
-class ALPS_DECL XMLAttribute
+class ALPS_XML_DECL XMLAttribute
 {
 public:
   typedef std::string key_type;
@@ -58,7 +59,7 @@ private:
   value_type value_;
 };
 
-class ALPS_DECL XMLAttributes
+class ALPS_XML_DECL XMLAttributes
 {
 public:
   typedef XMLAttribute::key_type    key_type;
