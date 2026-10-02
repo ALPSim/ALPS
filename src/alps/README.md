@@ -69,7 +69,7 @@ Update the owning module's CMake declarations when adding files or dependencies;
 
 ### Recorded architectural debt
 
-After the XML and CLI extractions, `alps-module-architecture.json` inventories 26 source owners, 517 public include spellings and 626 production files. The owners include `cli`, `plotting` and separate MaxEnt solver/executable owners for `src/apps/maxent/src/` and `src/apps/maxent/cli/`. These are ownership counts, not counts of independent libraries or passing tests. The earlier code checkpoint `627d4f500` had 24 owners, before the CLI and plotting modules were separated.
+With application builds enabled, `alps-module-architecture.json` inventories 34 source owners, 517 public include spellings and 654 production files. The owners include `cli`, `plotting`, separate MaxEnt solver/executable owners, and eight [tool groups](../tools/README.md). Tool ownership includes historical inactive C++ sources without adding executable targets. These are ownership counts, not counts of independent libraries or passing tests. The earlier code checkpoint `627d4f500` had 24 owners, before the CLI and plotting modules were separated.
 
 The current observed include graph contains a five-module cycle (`containers`, `hdf5`, `numerics`, `utilities`, `xml`) and a two-module cycle (`expression`, `legacy_parameters`). The earlier eight-module cycle at `627d4f500` has therefore narrowed, but the remaining cycles still need deliberate reconciliation. Dependency declarations constrain new include edges. Regenerate the report after changing module ownership or dependencies.
 

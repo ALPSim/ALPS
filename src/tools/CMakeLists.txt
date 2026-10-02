@@ -18,37 +18,14 @@
 #   DEALINGS IN THE SOFTWARE.
 
 
-#
-# basic C++ tools
-#
+# Each group owns its command sources, dependencies and installation rules.
+add_subdirectory(parameters)
+add_subdirectory(lattice)
+add_subdirectory(scheduler)
+add_subdirectory(parapack)
+add_subdirectory(diagnostics)
+add_subdirectory(xml)
 
-
-foreach(
-  program IN
-  ITEMS parameter2xml
-        parameter2hdf5
-        convert2xml
-        compactrun
-        lattice2xml
-        pevaluate
-        pconfig
-        poutput
-        printgraph
-        snap2vtk)
-  add_executable(${program} ${program}.C)
-  target_link_libraries(${program} PRIVATE ALPS::alps)
-  install(TARGETS ${program} RUNTIME_DEPENDENCY_SET alps_runtime
-          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT tools)
-endforeach()
-add_executable(p2h5 p2h5.cpp)
-target_link_libraries(p2h5 PRIVATE ALPS::alps)
-install(TARGETS p2h5 RUNTIME_DEPENDENCY_SET alps_runtime RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-                                                                 COMPONENT tools)
-
-if(UNIX)
-  file(RELATIVE_PATH ALPS_XML_FROM_BINDIR
-    "${CMAKE_INSTALL_FULL_BINDIR}" "${CMAKE_INSTALL_FULL_DATADIR}/alps/xml")
-  configure_file(alps-xml.in alps-xml @ONLY NEWLINE_STYLE UNIX)
-  install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/alps-xml"
-    DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT xml)
-endif()
+# Ownership inventory only: these historical programs remain unbuilt.
+add_subdirectory(result_archive)
+add_subdirectory(alea)

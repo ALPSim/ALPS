@@ -182,7 +182,7 @@ For development questions, use [Discord](https://discord.gg/JRNWnnva9g); reprodu
 | `src/alps/{legacy_parameters,expression,lattice,model,random,alea,accumulators,mc,scheduler,parapack}/` | Semantic source modules contributing to `ALPS::alps` and its compile interface |
 | `src/alps/solvers/` | Public callable solver declarations shared by MaxEnt and CT-QMC |
 | `src/alps/fortran/` | Public headers and implementation of the `ALPS::fortran` bridge |
-| `src/apps/`, `src/tools/` | Simulation applications, shared solver implementations and CLI tools |
+| `src/apps/`, `src/tools/` | Simulation applications, shared solver implementations and [CLI tools grouped by responsibility](src/tools/README.md) |
 | `python/pyalps/` | Python sources, bindings, packaging and extension example |
 | `src/alps/resources/` | Shared XML definitions and stylesheets |
 | `tutorials/` | [Ordered tutorials and standalone library examples](tutorials/README.md) |

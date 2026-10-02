@@ -17,17 +17,8 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-include_directories(${PROJECT_SOURCE_DIR}/src/tools/alea)
-#include_directories(${PROJECT_BINARY_DIR}/src)
-#include_directories(${PROJECT_SOURCE_DIR}/src)
-#include_directories(${Boost_ROOT_DIR})
-
-
-  FOREACH(program mean variance)
-    add_executable(${program} ${program}.cpp)
-    add_dependencies(${program} alps)
-    target_link_libraries(${program} alps)
-    #install(TARGETS ${program} RUNTIME DESTINATION bin COMPONENT tools) 
-  ENDFOREACH(program)
-
-
+# These C++ and Python analysis programs remain unbuilt and uninstalled.
+# Ownership registration is separate from enabling or supporting a program.
+alps_register_module(NAME tools_alea
+  EXTRA_FILES mean.cpp variance.cpp mcanalyze_tools.hpp mcanalyze_tools.ipp
+  DEPENDS alea hdf5 numerics utilities)
