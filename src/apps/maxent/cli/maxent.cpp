@@ -15,11 +15,19 @@
 #include <alps/ngs/mcoptions.hpp>
 #include <alps/ngs/params.hpp>
 #include <boost/lexical_cast.hpp>
+#include <exception>
+#include <iostream>
 
 int main(int argc, char** argv) {
-  alps::mcoptions options(argc, argv);
-  alps::params parms(alps::hdf5::archive(options.input_file));
-  std::string output_file = boost::lexical_cast<std::string>(parms["BASENAME"] | options.output_file) + ".out.h5";
-  alps::solvers::maxent(parms, output_file);
-  return 0;
+  try {
+    alps::mcoptions options(argc, argv);
+    if (!options.valid) return 0;
+    alps::params parms(alps::hdf5::archive(options.input_file));
+    std::string output_file = boost::lexical_cast<std::string>(parms["BASENAME"] | options.output_file) + ".out.h5";
+    alps::solvers::maxent(parms, output_file);
+    return 0;
+  } catch (std::exception const& error) {
+    std::cerr << "maxent: " << error.what() << '\n';
+    return 1;
+  }
 }
