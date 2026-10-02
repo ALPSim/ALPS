@@ -107,6 +107,11 @@ if(LAPACK_FOUND)
   set_property(TARGET dmft_externalsolver_outfile_param PROPERTY LABELS dmft)
   add_alps_test(dmft_externalsolver_outfile_param)
 
+  add_executable(dmft_citation_provenance dmft_citation_provenance.C)
+  target_link_libraries(dmft_citation_provenance dmft_qmc_impl)
+  add_test(NAME dmft_citation_provenance COMMAND dmft_citation_provenance)
+  set_tests_properties(dmft_citation_provenance PROPERTIES LABELS "dmft;citations;hdf5" TIMEOUT 45)
+
   add_executable(dmft_hilberttransformer_afm_multiband_numeric dmft_hilberttransformer_afm_multiband_numeric.C)
   target_link_libraries(dmft_hilberttransformer_afm_multiband_numeric dmft_qmc_impl)
   set_property(TARGET dmft_hilberttransformer_afm_multiband_numeric PROPERTY LABELS dmft)

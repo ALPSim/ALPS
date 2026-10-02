@@ -14,6 +14,7 @@
 #ifndef ALPS_NGS_MCBASE_HPP
 #define ALPS_NGS_MCBASE_HPP
 
+#include <alps/utility/citation_provenance.hpp>
 #include <alps/ngs.hpp>
 
 #include <boost/function.hpp>
@@ -56,6 +57,9 @@ namespace alps {
             results_type collect_results() const;
             results_type collect_results(result_names_type const & names) const;
 
+            void set_citation_component(const std::string& component, const std::string& activity = "calculation");
+            citation_history citations() const;
+            void inherit_citations(const citation_history& history);
             void save(boost::filesystem::path const & filename) const;
             void load(boost::filesystem::path const & filename);
             virtual void save(alps::hdf5::archive & ar) const;
@@ -70,6 +74,8 @@ namespace alps {
 
         protected:
 
+            citation_history citation_history_;
+            std::string citation_component_ = "framework", citation_activity_ = "unspecified";
             parameters_type parameters;
             parameters_type & params; // TODO: deprecated, remove!
             alps::random01 mutable random;

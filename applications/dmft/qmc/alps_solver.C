@@ -28,6 +28,11 @@
 #define DEFAULT_CHECK_TIME 300
 
 alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc, char** argv, bool h5input)
+  : ImpuritySolver(factory, argc, argv, h5input, "framework") {}
+
+alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc, char** argv, bool h5input,
+                                    const std::string& citation_component)
+  : citation_component_(citation_component)
 {
 #ifdef ALPS_HAVE_MPI
 	comm_init(argc,argv, true);
@@ -36,6 +41,7 @@ alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc
 #endif
 	if(is_master()){
     alps::scheduler::NoJobfileOptions opt(1,argv);
+    opt.citation_component = citation_component;
     unsigned int max_time;
     if (!h5input){
       alps::Parameters parms;
@@ -57,6 +63,7 @@ alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc
     master_scheduler = new alps::scheduler::SingleScheduler(opt,factory);
 	} else{ //a slave lives for many iterations...
     alps::scheduler::NoJobfileOptions opt(1,argv);
+    opt.citation_component = citation_component;
     alps::scheduler::Scheduler *slave_scheduler = new alps::scheduler::Scheduler(opt,factory);
     slave_scheduler->run();
     delete slave_scheduler;
@@ -94,6 +101,7 @@ itime_green_function_t  alps::ImpuritySolver::solve(const itime_green_function_t
   std::string basename=parms["BASENAME"];
   //boost::filesystem::remove(basename+".h5");
   alps::hdf5::archive dumpfile(basename+".h5", "a");
+  write_citations(dumpfile, citations());
   dumpfile["/parameters"]<<parms;
   
   std::ostringstream G0_text;
@@ -124,6 +132,7 @@ alps::ImpuritySolver::solve_omega(const matsubara_green_function_t& G0_omega, co
   std::string basename=parms["BASENAME"];
   //boost::filesystem::remove(basename+".h5");
   alps::hdf5::archive dumpfile(basename+".h5", "a");
+  write_citations(dumpfile, citations());
   dumpfile["/parameters"]<<parms;
   
   std::ostringstream G0_omega_text;
@@ -144,6 +153,5 @@ alps::ImpuritySolver::solve_omega(const matsubara_green_function_t& G0_omega, co
   return G;
   
 }
-
 
 

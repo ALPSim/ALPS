@@ -73,9 +73,15 @@ void run_it(nb::dict const & parms_){
   
     std::string out_file(boost::lexical_cast<std::string>(parms["BASENAME"]|options.output_file)+std::string(".out.h5"));
 //    std::cout << out_file << std::endl;
+#endif
+#ifndef BUILD_PYTHON_MODULE
   if (alps::cli_is_master()) alps::print_copyright(std::cout);
 #endif
   MaxEntSimulation my_sim(parms,out_file); // creat a simulation
+  my_sim.set_citation_component("framework", "analysis");
+#ifndef BUILD_PYTHON_MODULE
+  my_sim.inherit_citations(alps::read_citations(boost::filesystem::path(options.input_file)));
+#endif
   my_sim.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds((int)(parms["MAX_TIME"]|60)))); // run the simulation
 #ifdef BUILD_PYTHON_MODULE
   return;

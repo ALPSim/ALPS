@@ -14,10 +14,12 @@
 #include <alps/ngs/params.hpp>
 #include <alps/hdf5/archive.hpp>
 #include <alps/mcbase.hpp>
+#include <alps/utility/citation_provenance.hpp>
 namespace nb = nanobind;
 namespace alps {
     namespace detail {
         void save_results_export(mcresults const & res, params const & par, alps::hdf5::archive & ar, std::string const & path) {
+            write_citations(ar, "framework", "unspecified");
             ar["/parameters"] << par;
             if (res.size())
                 ar[path] << res;

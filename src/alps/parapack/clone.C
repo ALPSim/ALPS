@@ -11,6 +11,7 @@
 *
 *****************************************************************************/
 
+#include <alps/utility/citation_provenance.hpp>
 #include "clone.h"
 #include "logger.h"
 #include <boost/filesystem/operations.hpp>
@@ -240,12 +241,16 @@ void clone::save() const{
 }
 
 void clone::load(hdf5::archive & ar) {
+  citation_history_ = read_citations(ar);
   ar["parameters"] >> params_;
   ar["log/alps"] >> info_;
   load_observable(ar, clone_id_, measurements_);
 }
 
 void clone::save(hdf5::archive & ar) const {
+  auto history = citation_history_;
+  merge_citations(history, citation_history{make_citation_snapshot(parapack::worker_factory::citation_component())});
+  replace_citations(ar, history);
   ar["parameters"] << params_;
   ar["log/alps"] << info_;
   save_observable(ar, clone_id_, measurements_);
@@ -500,6 +505,7 @@ void clone_mpi::save() const{
 }
 
 void clone_mpi::load(hdf5::archive & ar) {
+  citation_history_ = read_citations(ar);
   ar["parameters"] >> params_;
   ar["log/alps"] >> info_;
   if (work_.size() == 1)
@@ -509,6 +515,9 @@ void clone_mpi::load(hdf5::archive & ar) {
 }
 
 void clone_mpi::save(hdf5::archive & ar) const {
+  auto history = citation_history_;
+  merge_citations(history, citation_history{make_citation_snapshot(parapack::worker_factory::citation_component())});
+  replace_citations(ar, history);
   ar["parameters"] << params_;
   ar["log/alps"] << info_;
   if (work_.size() == 1)

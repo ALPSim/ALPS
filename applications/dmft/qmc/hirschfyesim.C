@@ -18,6 +18,7 @@
 /// @file hirschfyesim.h
 /// @brief the actual Hirsch-Fye simulation
 
+#include <alps/utility/citation_provenance.hpp>
 #include "hirschfyesim.h"
 #include "xml.h"
 #include "fouriertransform.h"
@@ -361,6 +362,7 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
   FourierTransformer::generate_transformer_U(parms, fourier_ptr, densities);
   fourier_ptr->forward_ft(green_result, green_result_matsubara);
   alps::hdf5::archive ar(static_cast<std::string>(parms["OUTFILE"]), "a");
+  alps::replace_citations(ar, alps::citation_history{alps::make_citation_snapshot("hirschfye")});
   green_result.write_hdf5(ar, "/G_tau");
   green_result_matsubara.write_hdf5(ar, "/G_omega");
   return std::make_pair(green_result_matsubara, green_result);
@@ -411,5 +413,4 @@ void HirschFyeRun::green_vector_from_matrix(itime_green_function_t &green_tau, c
     }
   }
 }
-
 

@@ -22,6 +22,7 @@
 void evaluate(const boost::filesystem::path& p, std::ostream& out, const bool write_xml) {
   alps::ProcessList nowhere;
   alps::scheduler::MCSimulation sim(nowhere,p);
+  sim.set_citation_component("worm", "analysis");
 
   // read in parameters
   alps::Parameters parms=sim.get_parameters();

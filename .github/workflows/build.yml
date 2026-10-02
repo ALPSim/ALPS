@@ -108,7 +108,7 @@ jobs:
             | sudo tee /etc/apt/apt.conf.d/99ci-timeouts > /dev/null
           sudo apt-get update
           python -m pip install --upgrade pip
-          pip install "numpy>=1.26" "scipy>=1.13" -r script/citations/requirements.txt
+          pip install "numpy>=1.26" "scipy>=1.13" h5py -r script/citations/requirements.txt
           sudo apt install liblapack-dev libblas-dev libopenmpi-dev libhdf5-serial-dev
           # Clang >= 19: not in Ubuntu's default apt repos; use apt.llvm.org.
           # GCC >= 15: not in Ubuntu's default apt repos; use ubuntu-toolchain-r PPA.
@@ -180,7 +180,7 @@ jobs:
         timeout-minutes: 30
         run: |
           brew install python@${{ matrix.plat.py_version }} gfortran
-          pip${{ matrix.plat.py_version }} install "numpy>=1.26" "scipy>=1.13" -r script/citations/requirements.txt --break-system-packages
+          pip${{ matrix.plat.py_version }} install "numpy>=1.26" "scipy>=1.13" h5py -r script/citations/requirements.txt --break-system-packages
           brew install openmpi hdf5
           if [[ -n "${{ matrix.plat.comp_pack }}" ]]; then
             brew install ${{ matrix.plat.comp_pack }}

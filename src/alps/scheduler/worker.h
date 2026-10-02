@@ -18,6 +18,7 @@
 #define ALPS_SCHEDULER_WORKER_H
 
 #include <alps/config.h>
+#include <alps/utility/citation_provenance.hpp>
 #include <alps/scheduler/info.h>
 #include <alps/parameter.h>
 #include <alps/random.h>
@@ -109,6 +110,7 @@ public:
   
   virtual void save(hdf5::archive &) const;
   virtual void load(hdf5::archive &);
+  void set_citation_component(const std::string& component, const std::string& activity = "calculation");
 
   virtual void write_xml(const boost::filesystem::path& name) const;
   void save_to_file(const boost::filesystem::path&,const boost::filesystem::path&) const;
@@ -151,6 +153,8 @@ protected:
   mutable boost::variate_generator<engine_type&, boost::uniform_real<> > random_01;
 
 private:
+  citation_history citation_history_;
+  std::string citation_component_ = "framework", citation_activity_ = "unspecified";
   std::string rng_name() const { return parms.value_or_default("RNG","mt19937");}
   TaskInfo info;
   int started;

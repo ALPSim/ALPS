@@ -27,7 +27,7 @@ namespace scheduler {
 namespace po = boost::program_options;
 
 NoJobfileOptions::NoJobfileOptions()
-  : min_check_time(60),
+  : citation_component("scheduler"), min_check_time(60),
     max_check_time(900),
     checkpoint_time(1800),
     min_cpus(1),
@@ -43,7 +43,7 @@ NoJobfileOptions::NoJobfileOptions(int argc, char** argv)
   : NoJobfileOptions(argc, argv, "scheduler") {}
 
 NoJobfileOptions::NoJobfileOptions(int argc, char** argv, const std::string& citation_component)
-  : programname(std::string(argv[0])),
+  : citation_component(citation_component), programname(std::string(argv[0])),
     use_mpi(false),
     valid(true), // shall we really run?
     write_xml(false)
@@ -101,6 +101,7 @@ Options::Options(int argc, char** argv)
 
 Options::Options(int argc, char** argv, const std::string& citation_component)
 {
+  this->citation_component = citation_component;
   programname = std::string(argv[0]);
   valid = true;
   if (argc) {

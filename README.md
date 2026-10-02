@@ -19,3 +19,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development and contribution guidance
 ## License and citations
 
 ALPS is distributed under the terms in [LICENSE.txt](LICENSE.txt). See [CITATION.md](CITATION.md) for citation guidance, generated from the bibliography in [CITATION.cff](CITATION.cff) and application policy in [CITATIONS.yaml](CITATIONS.yaml). Simulation applications print the relevant guidance at startup; use `--citations` to display it without input files. `--help` and `--license` show usage and legal terms separately.
+
+HDF5 checkpoints and results retain the producing build's citation guidance and
+carry it through supported restart and analysis paths. Use `pyalps.read_citations`
+to inspect saved recommendations or `pyalps.export_citations` to extract a standard
+CFF bibliography. See [saved-data citations](script/citations/saved-data.md) for
+the schema, integration rules, and format coverage.

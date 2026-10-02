@@ -14,6 +14,7 @@
 #ifndef PARAPACK_CLONE_H
 #define PARAPACK_CLONE_H
 
+#include <alps/utility/citation_provenance.hpp>
 #include "clone_info.h"
 #include "clone_timer.h"
 #include "option.h"
@@ -88,6 +89,7 @@ private:
   tid_t task_id_;
   cid_t clone_id_;
 
+  citation_history citation_history_;
   Parameters params_;
 
   boost::filesystem::path basedir_;
@@ -186,6 +188,7 @@ private:
   cid_t clone_id_;
   gid_t group_id_;
 
+  citation_history citation_history_;
   Parameters params_;
 
   boost::filesystem::path basedir_;

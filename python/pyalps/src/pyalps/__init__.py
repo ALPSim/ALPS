@@ -18,6 +18,7 @@ from .dataset import *
 from .tools import *
 from .pytools import *
 from .floatwitherror import FloatWithError
+from .citations import read_citations, export_citations
 from . import fit_wrapper
 from . import cxx as cxx
 

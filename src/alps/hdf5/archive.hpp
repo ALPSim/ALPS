@@ -154,6 +154,9 @@ namespace alps {
 
                 void set_complex(std::string path);
 
+                /// Create a scalar UTF-8 text dataset; refuse an existing path.
+                void write_utf8(std::string path, std::string const& value) const;
+
 /* TODO: implement
                 void move_data(std::string current_path, std::string new_path) const;
                 void move_attribute(std::string current_path, std::string new_path) const;

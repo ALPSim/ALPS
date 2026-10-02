@@ -18,6 +18,7 @@
 /// @file main.C
 /// @brief main program of the DMFT program
 
+#include <alps/utility/citation_provenance.hpp>
 #include "hirschfyesim.h"
 #include "selfconsistency.h"
 #include "externalsolver.h"
@@ -82,6 +83,7 @@ int main(int argc, char** argv)
     chdir(p.parent_path().string().c_str());
 
     //perform selfconsistency loop in...
+    alps::citation_history citation_history;
     if(!parms.defined("CLUSTER_LOOP")) {
       if(!parms.value_or_default("OMEGA_LOOP",false)){
         //...imaginary time tau
@@ -91,7 +93,7 @@ int main(int argc, char** argv)
           std::cout<<"solving Hirsch Fye"<<std::endl;
           // we need a factory to create Hirsch-Fye simulations
           alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;  
-          solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
+          solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv,false,"hirschfye"));
           selfconsistency_loop(parms, *solver_ptr, transform);
         }
         else if (parms["SOLVER"]=="Hybridization") {
@@ -107,6 +109,7 @@ int main(int argc, char** argv)
           solver_ptr.reset(new ExternalSolver(/*boost::filesystem::absolute(*/p/*)*/));
           selfconsistency_loop(parms, *solver_ptr, transform);
         }
+        alps::merge_citations(citation_history, solver_ptr->citations());
       }
       else {
         //perform self consistency loop in Matsubara frequency omega
@@ -139,11 +142,11 @@ int main(int argc, char** argv)
           switch (select_interaction_expansion(flavors, sites)) {
             case interaction_expansion_choice::single_site_hubbard:
               std::cout<<"using single site Hubbard solver"<<std::endl;
-              solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_ss,argc,argv));
+              solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_ss,argc,argv,false,"interaction"));
               break;
             case interaction_expansion_choice::multiband_density:
               std::cout<<"using multiband Hubbard solver"<<std::endl;
-              solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_mbd,argc,argv));
+              solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_mbd,argc,argv,false,"interaction"));
               break;
             case interaction_expansion_choice::unsupported:
               throw std::runtime_error("DMFT Interaction Expansion: unsupported (FLAVORS, SITES) "
@@ -160,6 +163,7 @@ int main(int argc, char** argv)
           solver_ptr.reset(new ExternalSolver(p));
         }
         selfconsistency_loop_omega(parms, *solver_ptr, *transform_ptr);
+        alps::merge_citations(citation_history, solver_ptr->citations());
       }
     }
     else { //CLUSTER_LOOP
@@ -172,6 +176,8 @@ int main(int argc, char** argv)
     }
     {
       alps::hdf5::archive os(std::string(argv[1])+".h5", "a");
+      alps::write_citations(os, citation_history);
+      alps::write_citations(os, "dmft");
       os<<alps::make_pvp("/parameters",parms);
     }
 #ifndef BOOST_NO_EXCEPTIONS

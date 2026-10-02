@@ -10,6 +10,7 @@
  *
  *****************************************************************************/
 
+#include <alps/utility/citation_provenance.hpp>
 #include "interaction_expansion.hpp"
 #include "fouriertransform.h"
 #include <alps/utility/copyright.hpp>
@@ -69,6 +70,10 @@ int main(int argc, char** argv)
       global_mpi_rank=c.rank();
       sim_type s(parms, c);
 #endif
+      s.set_citation_component("interaction");
+#ifndef BUILD_PYTHON_MODULE
+      s.inherit_citations(alps::read_citations(boost::filesystem::path(options.input_file)));
+#endif
       if (global_mpi_rank==0) {
         alps::print_copyright(std::cout, "interaction");
       }
@@ -78,7 +83,7 @@ int main(int argc, char** argv)
       //on the master: collect MC results and store them in file, then postprocess
       if (global_mpi_rank==0){
         alps::results_type<HubbardInteractionExpansion>::type results = collect_results(s);
-        save_results(results, parms, output_file, "/simulation/results");
+        save_results(results, parms, output_file, "/simulation/results", s.citations());
         //compute the output Green's function and Fourier transform it, store in the right path
         compute_greens_functions(results, parms, output_file);
 #ifdef ALPS_HAVE_MPI

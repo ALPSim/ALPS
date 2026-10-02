@@ -13,6 +13,7 @@
  *
  *****************************************************************************/
 
+#include <alps/utility/citation_provenance.hpp>
 #include "hyb.hpp"
 #include "hybevaluate.hpp"
 #include <alps/utility/copyright.hpp>
@@ -72,6 +73,10 @@ int main(int argc, char** argv){
       global_mpi_rank=c.rank();
       sim_type s(parms, c);
 #endif
+      s.set_citation_component("hybridization");
+#ifndef BUILD_PYTHON_MODULE
+      s.inherit_citations(alps::read_citations(boost::filesystem::path(options.input_file)));
+#endif
       if (global_mpi_rank==0) {
         alps::print_copyright(std::cout, "hybridization");
       }
@@ -82,7 +87,7 @@ int main(int argc, char** argv){
       if (global_mpi_rank==0){
         alps::results_type<hybridization>::type results = collect_results(s);
         std::string output_path = boost::lexical_cast<std::string>(parms["BASEPATH"]|"")+"/simulation/results";
-        save_results(results, parms, output_file, output_path); //"/simulation/results");
+        save_results(results, parms, output_file, output_path, s.citations()); //"/simulation/results");
         master_final_tasks(results, parms, output_file);
 #ifdef ALPS_HAVE_MPI
       } else{ //on any slave: send back results to master.
@@ -138,4 +143,5 @@ NB_MODULE(cthyb, m) {
     m.def("solve", solve);
 }
 #endif
+
 

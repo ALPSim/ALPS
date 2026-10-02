@@ -25,6 +25,7 @@
 #include "green_function.h"
 
 #include <alps/parameter.h>
+#include <alps/utility/citation_provenance.hpp>
 #include <vector>
 #include <utility>
 
@@ -52,6 +53,7 @@ public:
             , const alps::Parameters& parms)=0;
             
   virtual ~ImpuritySolver() {}
+  virtual alps::citation_history citations() const { return {}; }
 };
 
 /// the base class for all impurity solvers taking a Green's function in imaginary 
@@ -77,6 +79,7 @@ public:
                   const alps::Parameters& parms =alps::Parameters())=0;
             
   virtual ~MatsubaraImpuritySolver() {}
+  virtual alps::citation_history citations() const { return {}; }
 };
 
 

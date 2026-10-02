@@ -12,6 +12,7 @@
  *
  *****************************************************************************/
 
+#include <alps/utility/citation_provenance.hpp>
 #include "maxent.hpp"
 #include <alps/config.h> // needed to set up correct bindings
 #include <boost/filesystem/operations.hpp>
@@ -123,6 +124,7 @@ void MaxEntSimulation::dostep()
   if (verbose) std::cerr << "chi scale factor: " << factor << std::endl;
   
   alps::hdf5::archive ar(name+"out.h5", alps::hdf5::archive::WRITE);
+  alps::replace_citations(ar, citations());
   ar << alps::make_pvp("/alpha/values",alpha);
   
   vector_type om(spectra[0].size());

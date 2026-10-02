@@ -15,6 +15,7 @@
 *
 *****************************************************************************/
 
+#include <alps/utility/citation_provenance.hpp>
 #include <alps/ngs/parapack/clone.h>
 // #include <alps/parapack/clone.h>
 #include <alps/parapack/logger.h>
@@ -117,10 +118,14 @@ void clone::save() const{
 }
 
 void clone::load(hdf5::archive & ar) {
+  citation_history_ = read_citations(ar);
   ar >> make_pvp("log/alps", info_);
 }
 
 void clone::save(hdf5::archive & ar) const {
+  auto history = citation_history_;
+  merge_citations(history, citation_history{make_citation_snapshot("framework", "unspecified")});
+  replace_citations(ar, history);
   ar << make_pvp("log/alps", info_);
 }
 
@@ -336,10 +341,14 @@ void clone_mpi::save() const{
 }
 
 void clone_mpi::load(hdf5::archive & ar) {
+  citation_history_ = read_citations(ar);
   ar >> make_pvp("log/alps", info_);
 }
 
 void clone_mpi::save(hdf5::archive & ar) const {
+  auto history = citation_history_;
+  merge_citations(history, citation_history{make_citation_snapshot("framework", "unspecified")});
+  replace_citations(ar, history);
   ar << make_pvp("log/alps", info_);
 }
 

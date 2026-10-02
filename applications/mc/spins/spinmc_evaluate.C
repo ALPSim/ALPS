@@ -20,6 +20,7 @@
 void evaluate(const boost::filesystem::path& p, const bool write_xml) {
   alps::ProcessList nowhere;
   alps::scheduler::MCSimulation sim(nowhere,p);
+  sim.set_citation_component("spinmc", "analysis");
   const alps::ObservableSet& m_in=sim.get_measurements();
   alps::Parameters parms=sim.get_parameters();
   alps::graph_helper<> graph(parms);

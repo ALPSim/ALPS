@@ -36,12 +36,27 @@ add_test(NAME citation_runtime_serial
   COMMAND "${ALPS_CITATION_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/check_citation_runtime.py"
           "$<TARGET_FILE:citation_runtime>")
 set_property(TEST citation_runtime_serial PROPERTY LABELS citations)
+add_test(NAME citation_clone_serial
+  COMMAND "${ALPS_CITATION_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/check_citation_clone.py"
+          "$<TARGET_FILE:citation_runtime>")
+set_property(TEST citation_clone_serial PROPERTY LABELS "citations;hdf5")
 if(ALPS_HAVE_MPI AND MPIEXEC_EXECUTABLE)
   add_test(NAME citation_runtime_mpi
     COMMAND "${ALPS_CITATION_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/check_citation_runtime.py"
             "$<TARGET_FILE:citation_runtime>"
             "${MPIEXEC_EXECUTABLE}" "${MPIEXEC_NUMPROC_FLAG}" "2" ${MPIEXEC_PREFLAGS})
   set_tests_properties(citation_runtime_mpi PROPERTIES LABELS citations PROCESSORS 2)
+  add_test(NAME citation_clone_mpi
+    COMMAND "${ALPS_CITATION_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/check_citation_clone.py"
+            "$<TARGET_FILE:citation_runtime>"
+            "${MPIEXEC_EXECUTABLE}" "${MPIEXEC_NUMPROC_FLAG}" "2" ${MPIEXEC_PREFLAGS})
+  set_tests_properties(citation_clone_mpi PROPERTIES LABELS "citations;hdf5" PROCESSORS 2)
 endif()
 
+add_executable(citation_provenance citation_provenance.cpp)
+target_link_libraries(citation_provenance alps)
+add_test(NAME citation_provenance_hdf5
+  COMMAND "${ALPS_CITATION_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/check_citation_provenance.py"
+          "$<TARGET_FILE:citation_provenance>")
+set_property(TEST citation_provenance_hdf5 PROPERTY LABELS "citations;hdf5")
 endif()
