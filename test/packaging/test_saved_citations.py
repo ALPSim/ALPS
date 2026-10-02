@@ -18,7 +18,7 @@ def module(name, path):
 
 
 generator = module("citation_generator", ROOT / "script/generate_citations.py")
-citations = module("saved_citations", ROOT / "lib/pyalps/citations.py")
+citations = module("saved_citations", ROOT / "python/pyalps/src/pyalps/citations.py")
 BASE = "/provenance/alps/citations"
 
 

@@ -149,6 +149,17 @@ void alps::replace_citations(hdf5::archive& ar, const citation_history& history)
   citation_history validated;
   merge_citations(validated, history);
   merge_citations(previous, validated); // retained identities must keep the same payload
-  if (ar.is_group(root)) ar.delete_group(root);
+  if (validated.empty()) {
+    if (ar.is_group(root)) ar.delete_group(root);
+    return;
+  }
+  // Retain complete records in place; a checkpoint should not rewrite immutable
+  // payloads merely because the caller owns the full result's citation set.
+  if (ar.is_group(root + "/records")) {
+    for (const auto& id : ar.list_children(root + "/records")) {
+      if (std::none_of(validated.begin(), validated.end(), [&](const citation_snapshot& s) { return s.id == id; }))
+        ar.delete_group(root + "/records/" + id);
+    }
+  }
   write_citations(ar, validated);
 }

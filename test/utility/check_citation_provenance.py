@@ -22,7 +22,7 @@ with tempfile.TemporaryDirectory(prefix="alps-citation-provenance-") as director
         h5py = None
     if h5py is not None:
         root = Path(__file__).resolve().parents[2]
-        reader = load("saved_citations", root / "lib/pyalps/citations.py")
+        reader = load("saved_citations", root / "python/pyalps/src/pyalps/citations.py")
         generator = load("citation_generator", root / "script/generate_citations.py")
         cff, policy, references, framework = generator.load_catalog(root)
         for filename in Path(directory).glob("*.h5"):

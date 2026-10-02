@@ -13,7 +13,7 @@ import pyalps.hdf5 as hdf5
 import pyalps.ngs as ngs # move mcbase usw to pyalps.montecarlo
 import numpy as np
 import sys
-
+import traceback
 class sim:
 
     # TODO: how do we deal with typedefs?
@@ -30,8 +30,8 @@ class sim:
 
         self.length = int(self.parameters['L'])
         self.sweeps = 0
-        self.thermalization_sweeps = long(self.parameters['THERMALIZATION'])
-        self.total_sweeps = long(self.parameters['SWEEPS'])
+        self.thermalization_sweeps = int(self.parameters['THERMALIZATION'])
+        self.total_sweeps = int(self.parameters['SWEEPS'])
         self.beta = 1. / float(self.parameters['T'])
         self.spins = np.array([(-x if self.random() < 0.5 else x) for x in np.ones(self.length)])
         

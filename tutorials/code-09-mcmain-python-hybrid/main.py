@@ -1,4 +1,3 @@
-from __future__ import print_function
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
  # ALPS Project: Algorithms and Libraries for Physics Simulations                  #
  #                                                                                 #
@@ -57,4 +56,4 @@ if __name__ == '__main__':
     results = ngs.collectResults(sim)
     print(results)
     with hdf5.archive(outfile, 'w') as ar:
-        ngs.saveResults(results, sim.paramters, ar, "/simulation/results")
+        ngs.saveResults(results, sim.parameters, ar, "/simulation/results")

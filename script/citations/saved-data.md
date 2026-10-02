@@ -37,7 +37,8 @@ The role arrays refer to the ordinary ALPS reference identifiers in that CFF.
 No custom policy fields are inserted into CFF. This uses CFF's standard
 [`preferred-citation` and `references`](https://github.com/citation-file-format/citation-file-format/blob/1.2.0/schema-guide.md).
 
-`notice` is exactly the text produced by that build's `--citations` query. The
+`notice` is exactly the compact citation notice printed at startup by that build.
+The `--citations` query includes additional titles and DOI links. The
 separate request and role arrays allow tools to present the same policy without
 parsing the notice. All text datasets declare UTF-8 encoding; role keys use
 ASCII strings. Empty arrays use the existing ALPS HDF5 null-dataspace convention.
@@ -72,7 +73,8 @@ requires explicit metadata replacement because ALPS's HDF5 `"w"` mode starts
 from a copy of an existing archive. `replace_citations` replaces the set supplied
 by a complete-result writer; `write_citations` appends recommendations to an
 existing contribution or shared archive. Both reject unsupported schemas before
-changing metadata.
+changing metadata. Replacement removes unrelated records and appends missing
+ones, preserving unchanged complete records in place.
 
 The conventional scheduler propagates its application component to task and
 worker checkpoints. Parapack clone checkpoints preserve loaded histories and

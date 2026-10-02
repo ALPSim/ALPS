@@ -29,7 +29,8 @@ with tempfile.TemporaryDirectory(prefix="alps-citation-calculation-") as cwd:
     result = subprocess.run([sys.argv[1]], cwd=cwd, input=parameters, text=True,
                             capture_output=True, timeout=45)
 assert result.returncode == 0, result.stdout + result.stderr
-assert result.stdout.count(expected) == 1, result.stdout
-assert result.stdout.count("Recommended citations for ") == 1, result.stdout
+assert result.stderr.count(expected) == 1, result.stderr
+assert result.stderr.count("Recommended citations for ") == 1, result.stderr
+assert "Recommended citations for " not in result.stdout, result.stdout
+assert result.stdout.startswith("[input parameters]"), result.stdout
 assert result.stdout.count("[results]") == 2, result.stdout
-assert result.stdout.index(expected) < result.stdout.index("[input parameters]"), result.stdout

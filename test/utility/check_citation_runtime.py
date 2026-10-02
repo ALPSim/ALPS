@@ -19,9 +19,12 @@ for mode, component in (("single", "spinmc"), ("parapack", "looper"), ("owned-qu
     render = generator.detailed_notice if mode in ("owned-query", "single-query") else generator.notice
     expected = render(policy, references, framework, component)
     assert result.returncode == 0, result.stdout + result.stderr
-    assert result.stdout.count(expected) == 1, result.stdout
-    assert result.stdout.count("Recommended citations for ") == 1, result.stdout
+    notice_output = result.stderr if mode == "parapack" else result.stdout
+    assert notice_output.count(expected) == 1, notice_output
+    assert notice_output.count("Recommended citations for ") == 1, notice_output
     if mode == "parapack":
+        assert "Recommended citations for " not in result.stdout, result.stdout
+        assert result.stdout.startswith("[input parameters]"), result.stdout
         assert result.stdout.count("[input parameters]") == 2, result.stdout
         if launcher:
             for rank in range(2):

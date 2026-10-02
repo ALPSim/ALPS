@@ -182,7 +182,7 @@ class CitationTests(unittest.TestCase):
         self.assertEqual(subprocess.check_output([str(binary)], text=True), expected)
 
     @unittest.skipUnless(shutil.which("cmake"), "CMake unavailable")
-    def test_native_build_needs_no_python_and_all_install_layouts(self):
+    def test_native_build_needs_no_python(self):
         # Exercise the real native module with an unusable Python path. The
         # generator runs only for the explicit maintainer regeneration below.
         shutil.copytree(ROOT / "script/citations", self.root / "script/citations")
@@ -195,14 +195,12 @@ class CitationTests(unittest.TestCase):
         build = self.root / "build"
         for mode, destination, version in (("native", "share/alps", "3.0.0"),
                                            ("libraries", "share/alps", "3.0.0-rc.2"),
-                                           ("wheel", "pyalps/share/alps", '3.0.0-review;"quoted"\\path')):
+                                           ("escaped-version", "share/alps", '3.0.0-review;"quoted"\\path')):
             with self.subTest(mode=mode):
                 subprocess.run(["cmake", "-S", str(self.root), "-B", str(build),
                                 "-DALPS_CITATION_PYTHON=/nonexistent/python",
                                 "-DCMAKE_DISABLE_FIND_PACKAGE_Python3=ON", f"-DALPS_VERSION={version}",
-                                "-DALPS_BUILD_PYTHON=OFF",
-                                f"-DALPS_BUILD_LIBS_ONLY={'ON' if mode == 'libraries' else 'OFF'}",
-                                f"-DALPS_PYTHON_WHEEL={'ON' if mode == 'wheel' else 'OFF'}"],
+                                f"-DALPS_BUILD_LIBS_ONLY={'ON' if mode == 'libraries' else 'OFF'}"],
                                check=True, capture_output=True)
                 expected = generator.cpp_snapshots(self.cff, self.policy, self.references, self.framework, version)
                 self.assertEqual((build / "src/alps/utility/citation_snapshots.inc").read_text(encoding="utf-8"), expected)

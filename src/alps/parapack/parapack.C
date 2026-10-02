@@ -339,7 +339,7 @@ int run_sequential(int argc, char **argv) {
 
   alps::ParameterList parameterlist;
   std::cin >> parameterlist;
-  if (alps::cli_is_master() && !parameterlist.empty()) print_copyright(std::cout);
+  if (alps::cli_is_master() && !parameterlist.empty()) print_copyright(std::cerr);
 
 #ifdef _OPENMP
   // set default number of threads to 1
@@ -739,7 +739,7 @@ int run_sequential_mpi(int argc, char** argv) {
   alps::ParameterList parameterlist;
   if (world.rank() == 0) std::cin >> parameterlist;
   broadcast(world, parameterlist, 0);
-  if (world.rank() == 0 && !parameterlist.empty()) print_copyright(std::cout);
+  if (world.rank() == 0 && !parameterlist.empty()) print_copyright(std::cerr);
 
   for (int i = 0; i < parameterlist.size(); ++i) {
     alps::Parameters p = parameterlist[i];

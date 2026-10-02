@@ -101,13 +101,13 @@ void InteractionExpansion::initialize_observables(void)
     sz_name<<"Sz_"<<i;
     sz2_name<<"Sz2_"<<i;
     sz0_szj_name<<"Sz0_Sz"<<i;
-// #ifndef ALPS_NGS_USE_NEW_ALEA
-//     measurements << alps::ngs::SignedRealObservable(sz_name.str().c_str());
-//     measurements << alps::ngs::SignedRealObservable(sz2_name.str().c_str());
-//     measurements << alps::ngs::SignedRealObservable(sz0_szj_name.str().c_str());
-// #else
+#ifndef ALPS_NGS_USE_NEW_ALEA
+    measurements << alps::ngs::SignedRealObservable(sz_name.str().c_str());
+    measurements << alps::ngs::SignedRealObservable(sz2_name.str().c_str());
+    measurements << alps::ngs::SignedRealObservable(sz0_szj_name.str().c_str());
+#else
   throw std::runtime_error("alps::ngs::SignedRealVectorObservable is not implemented");
-// #endif //ALPS_NGS_USE_NEW_ALEA
+#endif //ALPS_NGS_USE_NEW_ALEA
   }
   //acceptance probabilities
 #ifdef ALPS_NGS_USE_NEW_ALEA

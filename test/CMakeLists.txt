@@ -17,15 +17,19 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 # Python is optional for native builds, including builds of C++ tests. These
-# catalog/CLI tests are maintainer checks and run when an interpreter is available.
+# catalog/CLI tests run when an interpreter and the maintainer dependencies are available.
 if(NOT ALPS_CITATION_PYTHON)
-  if(PYTHON_INTERPRETER)
-    set(ALPS_CITATION_PYTHON "${PYTHON_INTERPRETER}")
-  else()
-    find_package(Python3 3.9 QUIET COMPONENTS Interpreter)
-    if(Python3_Interpreter_FOUND)
-      set(ALPS_CITATION_PYTHON "${Python3_EXECUTABLE}")
-    endif()
+  find_package(Python3 3.9 QUIET COMPONENTS Interpreter)
+  if(Python3_Interpreter_FOUND)
+    set(ALPS_CITATION_PYTHON "${Python3_EXECUTABLE}")
+  endif()
+endif()
+if(ALPS_CITATION_PYTHON)
+  execute_process(COMMAND "${ALPS_CITATION_PYTHON}" -c "import yaml, jsonschema"
+    RESULT_VARIABLE _alps_citation_dependencies OUTPUT_QUIET ERROR_QUIET)
+  if(NOT _alps_citation_dependencies EQUAL 0)
+    message(STATUS "Skipping citation wrapper tests: install script/citations/requirements.txt in ${ALPS_CITATION_PYTHON}")
+    set(ALPS_CITATION_PYTHON "")
   endif()
 endif()
 if(ALPS_CITATION_PYTHON)
@@ -69,10 +73,10 @@ if(TARGET loop)
 endif()
 
 else()
-  message(STATUS "Python unavailable: skipping citation catalog and CLI wrapper tests")
+  message(STATUS "Python citation dependencies unavailable: skipping catalog and CLI wrapper tests")
 endif()
 
-if(NOT ALPS_PYTHON_WHEEL AND NOT ALPS_BUILD_LIBS_ONLY)
+if(NOT ALPS_BUILD_LIBS_ONLY)
 add_subdirectory(accumulator)
 add_subdirectory(alea)
 add_subdirectory(fixed_capacity)
@@ -86,7 +90,6 @@ add_subdirectory(osiris)
 add_subdirectory(parameter)
 add_subdirectory(parapack)
 add_subdirectory(parser)
-add_subdirectory(pyalps)
 add_subdirectory(random)
 add_subdirectory(utility)
 endif()

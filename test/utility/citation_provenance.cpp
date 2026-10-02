@@ -60,6 +60,29 @@ int main(int argc, char** argv) {
     }
     auto history = alps::read_citations(file);
     require(history.size() == 3, "History lost after reopen");
+    {
+      alps::hdf5::archive ar((dir / "replacement.h5").string(), "w");
+      ar["/simulation/results/value"] << 42.;
+      alps::write_citations(ar, alps::citation_history{calculation, analysis});
+      const auto record_path = "/provenance/alps/citations/records/" + calculation.id;
+      ar[record_path + "/@retained"] << 17;
+      const auto added = alps::make_citation_snapshot("interaction");
+      const alps::citation_history replacement{calculation, added};
+      alps::replace_citations(ar, replacement);
+      alps::replace_citations(ar, replacement);
+      int retained = 0;
+      ar[record_path + "/@retained"] >> retained;
+      require(retained == 17, "Replacement rewrote an unchanged citation record");
+      const auto records = alps::read_citations(ar);
+      require(records.size() == 2, "Replacement did not retain the requested citation set");
+      require(!ar.is_group("/provenance/alps/citations/records/" + analysis.id), "Replacement retained an unrelated citation");
+      require(ar.is_group("/provenance/alps/citations/records/" + added.id), "Replacement failed to append a new citation");
+      alps::replace_citations(ar, alps::citation_history{});
+      require(!ar.is_group("/provenance/alps/citations"), "Empty replacement retained citation metadata");
+      double value = 0;
+      ar["/simulation/results/value"] >> value;
+      require(value == 42., "Replacement changed numerical data");
+    }
     // Simulate a result copied to a new file: all old snapshots travel with it.
     {
       alps::hdf5::archive ar((dir / "copied.h5").string(), "w");

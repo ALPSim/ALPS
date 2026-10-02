@@ -19,6 +19,9 @@
 #ifndef ALPS_NUMERIC_SPECIAL_FUNCTIONS_HPP
 #define ALPS_NUMERIC_SPECIAL_FUNCTIONS_HPP
 
+// Boost.Math 1.76 includes <utility> inside its meta_programming namespace.
+// Include it globally first so newer standard libraries are not declared there.
+#include <utility>
 #include <boost/accumulators/numeric/functional/vector.hpp>
 #include <boost/math/special_functions.hpp>
 

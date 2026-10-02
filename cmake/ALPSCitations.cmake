@@ -65,13 +65,8 @@ if(NOT _previous STREQUAL _snapshots)
 endif()
 configure_file("${PROJECT_SOURCE_DIR}/CITATION.md" "${PROJECT_BINARY_DIR}/CITATION.md" COPYONLY)
 
-if(ALPS_PYTHON_WHEEL)
-  set(_alps_citation_destination "pyalps/share/alps")
-else()
-  set(_alps_citation_destination "share/alps")
-endif()
 install(FILES
   "${PROJECT_SOURCE_DIR}/CITATION.cff"
   "${PROJECT_SOURCE_DIR}/CITATIONS.yaml"
   "${PROJECT_BINARY_DIR}/CITATION.md"
-  DESTINATION "${_alps_citation_destination}" COMPONENT libraries)
+  DESTINATION "share/alps" COMPONENT libraries)

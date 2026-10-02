@@ -97,7 +97,7 @@ cmake --build --preset default
 
 The Python bindings are a separate `scikit-build-core` project that builds
 against an installed ALPS C++ SDK; see the
-[`pyalps` build instructions](bindings/python/pyalps/README.md).
+[`pyalps` build instructions](python/pyalps/README.md).
 
 ### Run the tests
 

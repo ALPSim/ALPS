@@ -63,8 +63,9 @@ is absent. The generated directory is marked as derived for GitHub diff display,
 so scientific review can focus on the authority files and readable matrix.
 
 Native and library-only installations include the authorities and generated guidance
-in `share/alps`; wheels include them in `pyalps/share/alps`. Source distributions
-must retain the two authorities, generator, schemas, and generated directory. Website maintainers
+in `share/alps`; wheels include them in `pyalps/share/alps`. The standalone pyalps
+source distribution uses the catalog installed with its linked C++ SDK. Native ALPS source archives must retain the two authorities, generator,
+schemas, and generated directory. Website maintainers
 can consume these same files or generated Markdown from a release tag; the website
 must not become a separately maintained citation list.
 
@@ -96,10 +97,11 @@ not inferred.
 ## CLI printing policy
 
 Calculation startup prints one compact, decorative citation box per invocation, on the master
-rank for MPI calculations. This includes looper's stdin path. Multiple tasks in one
-invocation share the notice. The framework paper is always reference [1], followed
-by algorithm and implementation references, with each paper listed once. Startup
-uses publication coordinates rather than full titles and DOI links; unpublished
+rank for MPI calculations. This includes looper's stdin path. Stdin calculations
+write the startup notice to stderr to preserve their numerical stdout format.
+Multiple tasks in one invocation share the notice. The framework paper is always
+reference [1], followed by algorithm and implementation references, with each paper
+listed once. Startup uses publication coordinates rather than full titles and DOI links; unpublished
 papers retain their title and status. Saved-data notices preserve this startup box,
 while their CFF bibliography retains the complete records.
 Each application provides these standalone queries:
