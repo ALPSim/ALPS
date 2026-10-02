@@ -19,13 +19,14 @@ def consumer(tmp_path):
     sdk.mkdir()
     (sdk / "ALPSConfig.cmake").write_text(
         'set(ALPS_VERSION "3.0.0")\n'
-        'set(ALPS_RUNTIME_TARGETS ALPS::alps ALPS::hdf5 ALPS::utilities)\n'
-        'foreach(target ALPS::alps ALPS::hdf5 ALPS::utilities ALPS::headers Threads::Threads Boost::filesystem HDF5::HDF5)\n'
+        'set(ALPS_RUNTIME_TARGETS ALPS::alps ALPS::params ALPS::hdf5 ALPS::utilities)\n'
+        'foreach(target ALPS::alps ALPS::params ALPS::hdf5 ALPS::utilities ALPS::headers Threads::Threads Boost::filesystem Boost::serialization HDF5::HDF5)\n'
         '  if(NOT TARGET ${target})\n'
         '    add_library(${target} INTERFACE IMPORTED)\n'
         '  endif()\n'
         'endforeach()\n'
-        'set_property(TARGET ALPS::alps PROPERTY INTERFACE_LINK_LIBRARIES "ALPS::hdf5;ALPS::utilities;ALPS::headers")\n'
+        'set_property(TARGET ALPS::alps PROPERTY INTERFACE_LINK_LIBRARIES "ALPS::params;ALPS::hdf5;ALPS::utilities;ALPS::headers")\n'
+        'set_property(TARGET ALPS::params PROPERTY INTERFACE_LINK_LIBRARIES "ALPS::hdf5;Boost::serialization")\n'
         'set_property(TARGET ALPS::hdf5 PROPERTY INTERFACE_LINK_LIBRARIES "ALPS::utilities;HDF5::HDF5")\n'
         'set_property(TARGET ALPS::utilities PROPERTY INTERFACE_LINK_LIBRARIES "Boost::filesystem")\n')
     (sdk / "src").mkdir()
@@ -65,8 +66,8 @@ else()
     endif()
   else()
     get_target_property(links pyalps::runtime INTERFACE_LINK_LIBRARIES)
-    if("ALPS::utilities" IN_LIST links OR "ALPS::alps" IN_LIST links OR "ALPS::hdf5" IN_LIST links
-       OR NOT "Boost::filesystem" IN_LIST links OR NOT "HDF5::HDF5" IN_LIST links)
+    if("ALPS::utilities" IN_LIST links OR "ALPS::alps" IN_LIST links OR "ALPS::hdf5" IN_LIST links OR "ALPS::params" IN_LIST links
+       OR NOT "Boost::filesystem" IN_LIST links OR NOT "HDF5::HDF5" IN_LIST links OR NOT "Boost::serialization" IN_LIST links)
       message(FATAL_ERROR "Developer extensions must use packaged components and SDK external dependencies")
     endif()
     get_target_property(location pyalps::library0 IMPORTED_LOCATION)

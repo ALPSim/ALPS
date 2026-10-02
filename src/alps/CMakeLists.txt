@@ -211,12 +211,13 @@ target_sources(alps_headers INTERFACE
         "${PROJECT_BINARY_DIR}/src/alps/version.h"
         "${PROJECT_BINARY_DIR}/src/alps/export.h")
 
-# Extracted components are linked once; params still contributes sources.
+# Extracted components are linked once; legacy params adapters remain in alps.
 add_subdirectory(utilities)
 target_link_libraries(alps PUBLIC ALPS::utilities)
 add_subdirectory(hdf5)
 target_link_libraries(alps PUBLIC ALPS::hdf5)
 add_subdirectory(params)
+target_link_libraries(alps PUBLIC ALPS::params)
 
 # This is a C++ bridge; only its consumers need a Fortran compiler.
 add_library(alps_fortran STATIC fortran/fwrapper_impl.C)

@@ -6,7 +6,8 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Changed
 
-- Export `ALPS::hdf5` as a separate archive library with its own symbol exports and NGS signal cleanup. It links utilities and HDF5/Boost dependencies without the simulation runtime; `ALPS::alps` links it transitively. Python packages include one copy of all three runtime libraries. Rebuild downstream binaries after the split; archive formats and public include paths are unchanged.
+- Export `ALPS::params` as a separate typed parameter library with component-owned exports. Isolate the existing parameter-file constructor, XML input and older `Parameters` conversion in adapters owned by `ALPS::alps`; their source APIs and parsing behavior are preserved. Python packages carry all four runtime libraries. Rebuild downstream binaries after the split.
+- Export `ALPS::hdf5` as a separate archive library with its own symbol exports and NGS signal cleanup. It links utilities and HDF5/Boost dependencies without the simulation runtime; `ALPS::alps` links it transitively. Python packages include one copy of this runtime component. Rebuild downstream binaries after the split; archive formats and public include paths are unchanged.
 - Export `ALPS::utilities` as a separate library with its own symbol exports. `ALPS::alps` links it transitively, and Python packages carry this runtime component. Rebuild downstream binaries after this library split; source include paths and utility APIs are unchanged.
 - Group utilities, HDF5 and NGS parameter headers, implementations and tests by module under `src/alps/`; separate MaxEnt's implementation, CLI and tests under `src/apps/maxent/`. Public include paths and exported library targets are unchanged. See the [module layout](src/alps/README.md) for the ALPSCore reconciliation boundaries.
 

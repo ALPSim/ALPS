@@ -13,8 +13,6 @@
 
 #include <alps/ngs/params.hpp>
 
-#include <alps/parameter.h>
-
 #include <boost/bind/bind.hpp>
 using namespace boost::placeholders;
 
@@ -27,15 +25,6 @@ namespace alps {
         ar.set_context(path);
         load(ar);
         ar.set_context(context);
-    }
-
-    params::params(boost::filesystem::path const & path) {
-        boost::filesystem::ifstream ifs(path);
-        Parameters par(ifs);
-        for (Parameters::const_iterator it = par.begin(); it != par.end(); ++it) {
-            detail::paramvalue val(it->value());
-            setter(it->key(), val);
-        }
     }
 
     std::size_t params::size() const {

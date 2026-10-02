@@ -15,7 +15,7 @@ execute_process(
   COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/_build_support/alps_version.py" --core
   OUTPUT_VARIABLE PYALPS_VERSION_CORE
   OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)
-set(_alps_components utilities hdf5)
+set(_alps_components utilities hdf5 params)
 if(PYALPS_BUILD_SOLVERS)
   list(APPEND _alps_components solvers)
 endif()

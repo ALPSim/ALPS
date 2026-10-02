@@ -55,11 +55,11 @@ def test_components_link_without_building_the_core_runtime(tmp_path):
                 for kind in ("RUNTIME", "LIBRARY", "ARCHIVE")))
     subprocess.run([
         "cmake", "--build", str(tmp_path), "--config", "Release",
-        "--target", "utilities_contract", "hdf5_contract", "--parallel", "2",
+        "--target", "utilities_contract", "hdf5_contract", "params_contract", "--parallel", "2",
     ], check=True)
     subprocess.run([
         "ctest", "--test-dir", str(tmp_path), "-C", "Release", "--output-on-failure",
-        "-R", "^(utilities|hdf5)_contract$", "--no-tests=error",
+        "-R", "^(utilities|hdf5|params)_contract$", "--no-tests=error",
     ], check=True)
 
 
