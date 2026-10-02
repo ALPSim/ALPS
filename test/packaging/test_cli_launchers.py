@@ -76,6 +76,15 @@ def test_missing_binary_is_actionable_and_does_not_search_path(launcher):
     assert "Traceback" not in result.stderr
 
 
+def test_missing_bundled_binary_never_uses_sdk_override(launcher):
+    run, package, env = launcher
+    (package / "pyalps_config.py").write_text('ALPS_BIN_INSTALL_DIR = ""\n')
+    env["ALPS_BIN_PATH"] = env["PATH"]  # contains a working, conflicting spinmc
+    result = run()
+    assert result.returncode == 127
+    assert "PYALPS_BUNDLE_APPLICATIONS=ON" in result.stderr
+
+
 def test_nonexecutable_binary_is_reported(launcher):
     run, package, _ = launcher
     (package / "bin/spinmc").write_text("not executable")
@@ -89,3 +98,25 @@ def test_native_signal_is_preserved(launcher):
     run, _, _ = launcher
     result = run('import os, signal; os.kill(os.getpid(), signal.SIGTERM)')
     assert result.returncode == -signal.SIGTERM
+
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX exec signal semantics")
+@pytest.mark.parametrize("signal_name", ["SIGPIPE", "SIGXFSZ"])
+def test_python_ignored_signals_have_native_defaults(launcher, signal_name):
+    native_signal = getattr(signal, signal_name, None)
+    if native_signal is None:
+        pytest.skip(f"{signal_name} is unavailable on this platform")
+    run, package, _ = launcher
+    executable = package / "bin/spinmc"
+    # Use a native shell: another Python interpreter would ignore these
+    # signals again. Disable core dumps before sending SIGXFSZ.
+    executable.write_text(
+        f"#!/bin/sh\nulimit -c 0\nkill -{native_signal} $$\nexit 99\n"
+    )
+    executable.chmod(0o755)
+    direct = subprocess.run(
+        [str(executable)], capture_output=True, text=True, timeout=10,
+    )
+    assert direct.returncode == -native_signal
+    result = run()
+    assert result.returncode == direct.returncode

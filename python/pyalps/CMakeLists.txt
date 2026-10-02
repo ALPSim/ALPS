@@ -274,8 +274,8 @@ if(PYALPS_BUNDLE_APPLICATIONS)
       "PYALPS_BUNDLE_APPLICATIONS is ON but the wheel SDK is missing these "
       "wheel applications/tools: ${_alps_missing_programs}. Build the ALPS "
       "SDK with the wheel-deps preset, or configure with "
-      "-DPYALPS_BUNDLE_APPLICATIONS=OFF for a bindings-only wheel -- in which "
-      "case pyalps.runApplication() will not work.")
+      "-DPYALPS_BUNDLE_APPLICATIONS=OFF for a bindings-only wheel that uses "
+      "SDK executables instead.")
   endif()
   list(LENGTH _alps_programs _alps_program_count)
   message(STATUS "pyalps: bundling ${_alps_program_count} ALPS programs into pyalps/bin")

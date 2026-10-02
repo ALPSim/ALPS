@@ -76,9 +76,11 @@ resolves against. `pyalps.tools` adds `pyalps/bin` to `PATH`, so this is what ma
 `pyalps.runApplication('spinmc', ...)` work from a wheel install — the
 `wheel-deps` preset therefore builds the applications. Configure with
 `-DPYALPS_BUNDLE_APPLICATIONS=OFF` for a bindings-only wheel; the
-pip-installed shell launchers report a clear error in that configuration.
-Invoke SDK executables by their full paths, including when passing them to
-`pyalps.runApplication`, to avoid selecting the wheel's launchers on `PATH`.
+shell launchers and `pyalps.runApplication` then use executables from the
+SDK used to build that wheel, or from an explicit `ALPS_BIN_PATH` override.
+Keep that SDK installed in a separate prefix from the Python environment,
+so pip's launchers do not replace its binaries. Bundled wheels always execute
+their bundled binaries; they never fall back to an SDK or search `PATH`.
 
 ## Free-threading and stable-ABI policy
 
