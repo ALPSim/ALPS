@@ -1,0 +1,290 @@
+{
+  "environment": {
+    "machine": "arm64",
+    "system": "Darwin"
+  },
+  "measurements": {
+    "ALPS->ALPS/archive": {
+      "/bool": "ok",
+      "/bools": "ok",
+      "/complex": "ok",
+      "/complex_vector": "ok",
+      "/double": "ok",
+      "/empty_string": "ok",
+      "/empty_vector": "ok",
+      "/int": "ok",
+      "/int/@bool": "ok",
+      "/int/@number": "ok",
+      "/int/@string": "ok",
+      "/int/@strings": "ok",
+      "/int/@vector": "ok",
+      "/int8": "ok",
+      "/int8s": "ok",
+      "/map": "ok",
+      "/ragged": "ok",
+      "/string": "ok",
+      "/strings": "ok",
+      "/vector": "ok",
+      "bool_type_marker": "1",
+      "int8_type_marker": "1"
+    },
+    "ALPS->ALPS/extended-params": {
+      "boolean": "1",
+      "float": "1.25",
+      "integer": "42",
+      "load": "ok",
+      "real": "1.25",
+      "text": "example",
+      "unsigned": "42",
+      "vector": "ok",
+      "wide": "0"
+    },
+    "ALPS->ALPS/params": {
+      "boolean": "1",
+      "integer": "42",
+      "load": "ok",
+      "real": "1.25",
+      "text": "example",
+      "vector": "ok"
+    },
+    "ALPS->ALPSCore/archive": {
+      "/bool": "ok",
+      "/bools": "ok",
+      "/complex": "ok",
+      "/complex_vector": "ok",
+      "/double": "ok",
+      "/empty_string": "ok",
+      "/empty_vector": "ok",
+      "/int": "ok",
+      "/int/@bool": "ok",
+      "/int/@number": "ok",
+      "/int/@string": "ok",
+      "/int/@strings": "ok",
+      "/int/@vector": "ok",
+      "/int8": "ok",
+      "/int8s": "ok",
+      "/map": "ok",
+      "/ragged": "ok",
+      "/string": "ok",
+      "/strings": "ok",
+      "/vector": "ok",
+      "bool_type_marker": "1",
+      "int8_type_marker": "1"
+    },
+    "ALPS->ALPSCore/dictionary": {
+      "boolean": "1",
+      "integer": "42",
+      "load": "ok",
+      "real": "1.25",
+      "text": "example",
+      "vector": "ok"
+    },
+    "ALPS->ALPSCore/extended-params": {
+      "boolean": "throws",
+      "float": "throws",
+      "integer": "throws",
+      "load": "throws",
+      "real": "throws",
+      "text": "throws",
+      "unsigned": "throws",
+      "vector": "throws",
+      "wide": "throws"
+    },
+    "ALPS->ALPSCore/params": {
+      "boolean": "throws",
+      "integer": "throws",
+      "load": "throws",
+      "real": "throws",
+      "text": "throws",
+      "vector": "throws"
+    },
+    "ALPS/archive-semantics": {
+      "context_complex": "ok",
+      "empty_map_exists": "0",
+      "initial_context": "root",
+      "overflow_string_to_int": "throws"
+    },
+    "ALPS/params-semantics": {
+      "double_to_int": "4",
+      "erase_missing": "throws",
+      "int_to_double": "4",
+      "iteration": "z,a",
+      "missing_lookup_size": "0",
+      "native_long_bits": "64",
+      "scalar_to_vector": "ok",
+      "string_to_int": "4",
+      "wide_integer": "0"
+    },
+    "ALPS/write-archive": {
+      "/bool": "ok",
+      "/bools": "ok",
+      "/complex": "ok",
+      "/complex_vector": "ok",
+      "/double": "ok",
+      "/empty_string": "ok",
+      "/empty_vector": "ok",
+      "/int": "ok",
+      "/int/@bool": "ok",
+      "/int/@number": "ok",
+      "/int/@string": "ok",
+      "/int/@strings": "ok",
+      "/int/@vector": "ok",
+      "/int8": "ok",
+      "/int8s": "ok",
+      "/map": "ok",
+      "/ragged": "ok",
+      "/string": "ok",
+      "/strings": "ok",
+      "/vector": "ok"
+    },
+    "ALPS/write-extended-params": {
+      "save": "ok"
+    },
+    "ALPS/write-params": {
+      "save": "ok"
+    },
+    "ALPSCore->ALPS/archive": {
+      "/bool": "ok",
+      "/bools": "ok",
+      "/complex": "ok",
+      "/complex_vector": "ok",
+      "/double": "ok",
+      "/empty_string": "ok",
+      "/empty_vector": "ok",
+      "/int": "ok",
+      "/int/@bool": "ok",
+      "/int/@number": "ok",
+      "/int/@string": "ok",
+      "/int/@strings": "ok",
+      "/int/@vector": "ok",
+      "/int8": "ok",
+      "/int8s": "ok",
+      "/map": "ok",
+      "/ragged": "ok",
+      "/string": "ok",
+      "/strings": "ok",
+      "/vector": "ok",
+      "bool_type_marker": "0",
+      "int8_type_marker": "0"
+    },
+    "ALPSCore->ALPS/extended-params": {
+      "boolean": "1",
+      "float": "0",
+      "integer": "42",
+      "load": "ok",
+      "real": "1.25",
+      "text": "example",
+      "unsigned": "0",
+      "vector": "ok",
+      "wide": "0"
+    },
+    "ALPSCore->ALPS/params": {
+      "boolean": "1",
+      "integer": "42",
+      "load": "ok",
+      "real": "1.25",
+      "text": "example",
+      "vector": "ok"
+    },
+    "ALPSCore->ALPSCore/archive": {
+      "/bool": "ok",
+      "/bools": "ok",
+      "/complex": "ok",
+      "/complex_vector": "ok",
+      "/double": "ok",
+      "/empty_string": "ok",
+      "/empty_vector": "ok",
+      "/int": "ok",
+      "/int/@bool": "ok",
+      "/int/@number": "ok",
+      "/int/@string": "ok",
+      "/int/@strings": "ok",
+      "/int/@vector": "ok",
+      "/int8": "ok",
+      "/int8s": "ok",
+      "/map": "ok",
+      "/ragged": "ok",
+      "/string": "ok",
+      "/strings": "ok",
+      "/vector": "ok",
+      "bool_type_marker": "0",
+      "int8_type_marker": "0"
+    },
+    "ALPSCore->ALPSCore/dictionary": {
+      "boolean": "1",
+      "integer": "42",
+      "load": "ok",
+      "real": "1.25",
+      "text": "example",
+      "vector": "ok"
+    },
+    "ALPSCore->ALPSCore/extended-params": {
+      "boolean": "1",
+      "float": "1.25",
+      "integer": "42",
+      "load": "ok",
+      "real": "1.25",
+      "text": "example",
+      "unsigned": "42",
+      "vector": "ok",
+      "wide": "1099511627776"
+    },
+    "ALPSCore->ALPSCore/params": {
+      "boolean": "1",
+      "integer": "42",
+      "load": "ok",
+      "real": "1.25",
+      "text": "example",
+      "vector": "ok"
+    },
+    "ALPSCore/archive-semantics": {
+      "context_complex": "throws",
+      "empty_map_exists": "1",
+      "initial_context": "empty",
+      "overflow_string_to_int": "-1"
+    },
+    "ALPSCore/params-semantics": {
+      "double_to_int": "throws",
+      "erase_missing": "ok",
+      "int_to_double": "4",
+      "iteration": "a,z",
+      "missing_lookup_size": "1",
+      "native_long_bits": "64",
+      "scalar_to_vector": "throws",
+      "string_to_int": "throws",
+      "wide_integer": "1099511627776"
+    },
+    "ALPSCore/write-archive": {
+      "/bool": "ok",
+      "/bools": "ok",
+      "/complex": "ok",
+      "/complex_vector": "ok",
+      "/double": "ok",
+      "/empty_string": "ok",
+      "/empty_vector": "ok",
+      "/int": "ok",
+      "/int/@bool": "ok",
+      "/int/@number": "ok",
+      "/int/@string": "ok",
+      "/int/@strings": "ok",
+      "/int/@vector": "ok",
+      "/int8": "ok",
+      "/int8s": "ok",
+      "/map": "ok",
+      "/ragged": "ok",
+      "/string": "ok",
+      "/strings": "ok",
+      "/vector": "ok"
+    },
+    "ALPSCore/write-extended-params": {
+      "save": "ok"
+    },
+    "ALPSCore/write-params": {
+      "save": "ok"
+    }
+  },
+  "probe_sha256": {
+    "ALPS": "92b879c3b6fa32a95b294728ec0ead111c718de41b5d51a75215302788cd6cff",
+    "ALPSCore": "bb8bb0738055cea0e928a8bcec0cec287a5b7f52274ecca4df74929c92a13974"
+  }
+}

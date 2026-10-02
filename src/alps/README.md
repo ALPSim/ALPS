@@ -2,6 +2,10 @@
 
 This layout prepares ALPS for incremental reconciliation with ALPSCore after the CMake modernization. It establishes ownership of existing code and tests and extracts utilities, HDF5 and typed params as independently linkable libraries. It does not import ALPSCore implementations or change scientific algorithms.
 
+The [reconciliation report](../../doc/ALPSCore-reconciliation.md) pins an ALPSCore
+revision, records measured archive/params compatibility, and defines migration
+gates. Reproduce the comparison with the [separate-process probes](../../tests/reconciliation/README.md).
+
 ## Source ownership
 
 ```text
@@ -57,7 +61,7 @@ The parameter-file constructor `params(boost::filesystem::path const&)`, `make_p
 | Utilities | Independently linkable; shared SDK configuration and header-only numeric/container traits remain compile dependencies. The unused parser include in `vectorio.hpp` is removed | Narrow the shared compile interface and package dependency discovery if a separately configurable utility package is needed |
 | HDF5 | Independently linkable; utility casts/stack traces, shared configuration and numeric-container adapters. Archive and NGS signal cleanup have one runtime owner | Compare archive contracts with ALPSCore; assess signal ownership and adapter dependencies before implementation replacement |
 | NGS params | Independently linkable typed runtime; HDF5 and header-only numeric helpers. Text/XML and older `Parameters` conversion are isolated adapters in `ALPS::alps` | Compare typed access, missing/default values, iteration, value conversions and input semantics against ALPSCore; keep adapter contracts explicit before replacing an implementation |
-| MaxEnt | NGS/mcbase, scheduler, parameters, observables, HDF5 and numerical libraries | Reduce framework coupling around the solver and compare input/output and numerical behavior against the candidate ALPSCore-based implementation |
+| MaxEnt | Typed params already in use; mcbase execution, Osiris diagnostic gating, CLI mcoptions, HDF5 and BLAS/LAPACK | Separate execution/diagnostics/CLI dependencies and use the solver as a scientific acceptance workload for reconciled foundations; the pinned ALPSCore repo contains no MaxEnt implementation |
 
 Directory separation alone does not remove these dependencies. Utilities, HDF5 and typed params now have tested binary boundaries. The params adapters keep the older parameter/parser dependency outside the typed runtime.
 
