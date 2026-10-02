@@ -15,6 +15,7 @@
 #define ALPS_NGS_HDF5_HPP
 
 #include <alps/ngs/config.hpp>
+#include <alps/hdf5_export.h>
 #include <alps/ngs/stacktrace.hpp>
 #include <alps/hdf5/errors.hpp>
 #include <alps/ngs/detail/remove_cvr.hpp>
@@ -93,7 +94,7 @@ namespace alps {
             };
         }
 
-        class ALPS_DECL archive {
+        class ALPS_HDF5_DECL archive {
 
             public:
 
@@ -337,23 +338,23 @@ namespace alps {
             {};                                                                                                                                                        \
                                                                                                                                                                        \
             namespace detail {                                                                                                                                         \
-                template<> struct ALPS_DECL is_vectorizable< T > {                                                                                                     \
+                template<> struct ALPS_HDF5_DECL is_vectorizable< T > {                                                                                                     \
                     static bool apply(T const & value);                                                                                                                \
                 };                                                                                                                                                     \
-                template<> struct ALPS_DECL is_vectorizable< T const > {                                                                                               \
+                template<> struct ALPS_HDF5_DECL is_vectorizable< T const > {                                                                                               \
                     static bool apply(T & value);                                                                                                                      \
                 };                                                                                                                                                     \
                                                                                                                                                                        \
-                template<> struct ALPS_DECL get_pointer< T > {                                                                                                         \
+                template<> struct ALPS_HDF5_DECL get_pointer< T > {                                                                                                         \
                     static alps::hdf5::scalar_type< T >::type * apply( T & value);                                                                                     \
                 };                                                                                                                                                     \
                                                                                                                                                                        \
-                template<> struct ALPS_DECL get_pointer< T const > {                                                                                                   \
+                template<> struct ALPS_HDF5_DECL get_pointer< T const > {                                                                                                   \
                     static alps::hdf5::scalar_type< T >::type const * apply( T const & value);                                                                         \
                 };                                                                                                                                                     \
             }                                                                                                                                                          \
                                                                                                                                                                        \
-            ALPS_DECL void save(                                                                                                                                       \
+            ALPS_HDF5_DECL void save(                                                                                                                                       \
                   archive & ar                                                                                                                                         \
                 , std::string const & path                                                                                                                             \
                 , T const & value                                                                                                                                      \
@@ -362,7 +363,7 @@ namespace alps {
                 , std::vector<std::size_t> offset = std::vector<std::size_t>()                                                                                         \
             );                                                                                                                                                         \
                                                                                                                                                                        \
-            ALPS_DECL void load(                                                                                                                                       \
+            ALPS_HDF5_DECL void load(                                                                                                                                       \
                   archive & ar                                                                                                                                         \
                 , std::string const & path                                                                                                                             \
                 , T & value                                                                                                                                            \

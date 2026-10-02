@@ -161,8 +161,8 @@ endforeach()
     capture = tmp_path / "capture.cmake"
     capture.write_text(
         'file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/runtime-$<CONFIG>.txt"\n'
-        '  CONTENT "$<TARGET_GENEX_EVAL:alps,$<TARGET_PROPERTY:alps,INSTALL_RPATH>>;'
-        '$<TARGET_RUNTIME_DLLS:alps>" TARGET alps)\n'
+        '  CONTENT "$<TARGET_GENEX_EVAL:alps_hdf5,$<TARGET_PROPERTY:alps_hdf5,INSTALL_RPATH>>;'
+        '$<TARGET_RUNTIME_DLLS:alps_hdf5>" TARGET alps_hdf5)\n'
         'file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/program-runtime-$<CONFIG>.txt"\n'
         '  CONTENT "$<TARGET_GENEX_EVAL:dmrg,$<TARGET_PROPERTY:dmrg,INSTALL_RPATH>>"\n'
         '  TARGET dmrg)\n')

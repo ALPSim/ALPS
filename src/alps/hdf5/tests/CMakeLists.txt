@@ -38,7 +38,7 @@ foreach(
   hdf5_vecvecdbl)
   add_executable(${name} ${name}.cpp)
 
-  target_link_libraries(${name} PRIVATE ALPS::alps)
+  target_link_libraries(${name} PRIVATE ALPS::hdf5)
   alps_add_test(${name})
   set_property(TEST ${name} PROPERTY LABELS hdf5)
 endforeach()
@@ -50,7 +50,7 @@ target_compile_definitions(hdf5_fortran_string PRIVATE
 if(ALPS_ENABLE_OPENMP)
   add_executable(hdf5_omp hdf5_omp.cpp)
 
-  target_link_libraries(hdf5_omp PRIVATE ALPS::alps)
+  target_link_libraries(hdf5_omp PRIVATE ALPS::hdf5 OpenMP::OpenMP_CXX)
   add_test(NAME hdf5_omp COMMAND hdf5_omp)
   set_tests_properties(hdf5_omp PROPERTIES LABELS hdf5 TIMEOUT 600
                                          ENVIRONMENT "OMP_NUM_THREADS=2")
@@ -280,7 +280,7 @@ if(ALPS_BUILD_EXTENSIVE_TESTS)
     configure_file(type_check.cpp.in "${target}.cpp" @ONLY)
     add_executable(${target} "${CMAKE_CURRENT_BINARY_DIR}/${target}.cpp")
     target_include_directories(${target} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-    target_link_libraries(${target} PRIVATE ALPS::alps)
+    target_link_libraries(${target} PRIVATE ALPS::hdf5)
     foreach(mode IN ITEMS dataset attribute compressed)
       add_test(NAME ${target}.${mode} COMMAND ${target} ${mode})
       set_tests_properties(${target}.${mode} PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 600 LABELS

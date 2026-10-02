@@ -13,8 +13,9 @@ set_target_properties(alps_utilities PROPERTIES
   EXPORT_NAME utilities
   VERSION ${PROJECT_VERSION}
   SOVERSION ${PROJECT_VERSION_MAJOR}
-  INSTALL_RPATH "${ALPS_LOADER_ORIGIN};$<TARGET_FILE_DIR:Boost::filesystem>")
+  INSTALL_RPATH "${ALPS_LOADER_ORIGIN}")
 target_link_libraries(alps_utilities PUBLIC alps_headers Boost::filesystem Threads::Threads)
+alps_dependency_rpath(alps_utilities)
 alps_copy_runtime_dependencies(alps_utilities)
 if(WIN32)
   target_link_libraries(alps_utilities PRIVATE ws2_32 mswsock)

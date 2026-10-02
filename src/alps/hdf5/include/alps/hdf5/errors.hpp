@@ -15,13 +15,14 @@
 #define ALPS_NGS_HDF5_ERROR_HPP
 
 #include <alps/config.h>
+#include <alps/hdf5_export.h>
 #include <string>
 #include <stdexcept>
 
 namespace alps {
     namespace hdf5 {
 
-        class ALPS_DECL archive_error : public std::runtime_error {
+        class ALPS_HDF5_DECL archive_error : public std::runtime_error {
             public:
                 archive_error(std::string const & what)
                     : std::runtime_error(what) 
@@ -29,7 +30,7 @@ namespace alps {
         };
 
         #define DEFINE_ALPS_HDF5_EXCEPTION(name)                                    \
-            class ALPS_DECL name : public archive_error {                           \
+            class ALPS_HDF5_DECL name : public archive_error {                           \
                 public:                                                             \
                     name (std::string const & what)                                 \
                         : archive_error(what)                                       \

@@ -165,27 +165,31 @@ set_target_properties(
              SOVERSION ${PROJECT_VERSION_MAJOR}
              INSTALL_RPATH "${ALPS_LOADER_ORIGIN}")
 
-if(ALPS_LOADER_ORIGIN)
+function(alps_dependency_rpath target)
+  if(NOT ALPS_LOADER_ORIGIN)
+    return()
+  endif()
   # CMake's automatic install RPATH omits dependency prefixes inside the source
   # or build tree. Imported shared libraries still need to be found after the
   # SDK is installed, including when CI extracts its dependencies in _build/.
-  get_target_property(dependencies alps LINK_LIBRARIES)
-  # FindHDF5's aggregate preserves configuration-aware provider targets, or
-  # absolute library paths when the provider has no CMake package.
-  get_target_property(hdf5_dependencies HDF5::HDF5 INTERFACE_LINK_LIBRARIES)
-  list(APPEND dependencies ${hdf5_dependencies})
+  get_target_property(dependencies ${target} LINK_LIBRARIES)
+  list(APPEND dependencies ${ARGN})
   foreach(dependency IN LISTS dependencies)
     if(TARGET "${dependency}")
       get_target_property(dependency_type "${dependency}" TYPE)
-      if(dependency_type MATCHES "^(SHARED|UNKNOWN)_LIBRARY$")
-        set_property(TARGET alps APPEND PROPERTY INSTALL_RPATH "$<TARGET_FILE_DIR:${dependency}>")
+      get_target_property(dependency_imported "${dependency}" IMPORTED)
+      if(dependency_imported AND dependency_type MATCHES "^(SHARED|UNKNOWN)_LIBRARY$")
+        set_property(TARGET ${target} APPEND PROPERTY INSTALL_RPATH "$<TARGET_FILE_DIR:${dependency}>")
       endif()
     elseif(IS_ABSOLUTE "${dependency}")
       get_filename_component(dependency_directory "${dependency}" DIRECTORY)
-      set_property(TARGET alps APPEND PROPERTY INSTALL_RPATH "${dependency_directory}")
+      set_property(TARGET ${target} APPEND PROPERTY INSTALL_RPATH "${dependency_directory}")
     endif()
   endforeach()
-endif()
+endfunction()
+# Keep paths for transitive libraries present on the core/program link lines.
+get_target_property(hdf5_dependencies HDF5::HDF5 INTERFACE_LINK_LIBRARIES)
+alps_dependency_rpath(alps ${hdf5_dependencies})
 
 function(alps_copy_runtime_dependencies target)
   if(WIN32 AND BUILD_SHARED_LIBS)
@@ -207,10 +211,11 @@ target_sources(alps_headers INTERFACE
         "${PROJECT_BINARY_DIR}/src/alps/version.h"
         "${PROJECT_BINARY_DIR}/src/alps/export.h")
 
-# Extracted components are linked once; HDF5 and params still contribute sources.
+# Extracted components are linked once; params still contributes sources.
 add_subdirectory(utilities)
 target_link_libraries(alps PUBLIC ALPS::utilities)
 add_subdirectory(hdf5)
+target_link_libraries(alps PUBLIC ALPS::hdf5)
 add_subdirectory(params)
 
 # This is a C++ bridge; only its consumers need a Fortran compiler.

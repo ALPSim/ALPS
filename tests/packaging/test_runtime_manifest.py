@@ -61,8 +61,9 @@ def test_macos_component_dependencies_use_packaged_libraries(tmp_path, monkeypat
     (package / "_ext").mkdir()
     core = package / "lib/libalps.3.dylib"
     utilities = package / "lib/libalps_utilities.3.dylib"
+    hdf5 = package / "lib/libalps_hdf5.3.dylib"
     extension = package / "_ext/example.so"
-    for binary in (core, utilities, extension):
+    for binary in (core, hdf5, utilities, extension):
         binary.touch()
     monkeypatch.setattr(runtime.sys, "platform", "darwin")
     monkeypatch.setattr(runtime.subprocess, "check_output",
@@ -71,8 +72,10 @@ def test_macos_component_dependencies_use_packaged_libraries(tmp_path, monkeypat
     monkeypatch.setattr(runtime.subprocess, "run", lambda command, **kwargs: commands.append(command))
     runtime.write_manifest(tmp_path, "3.0.0")
     rewrites = {command[-1]: command for command in commands if command[0] == "install_name_tool"}
-    assert set(rewrites) == {str(core), str(utilities), str(extension)}
+    assert set(rewrites) == {str(core), str(hdf5), str(utilities), str(extension)}
     assert "@loader_path/libalps_utilities.3.dylib" in rewrites[str(core)]
     assert "@loader_path/../lib/libalps_utilities.3.dylib" in rewrites[str(extension)]
+    assert "@loader_path/libalps_hdf5.3.dylib" in rewrites[str(core)]
+    assert "@loader_path/libalps_utilities.3.dylib" in rewrites[str(hdf5)]
     signed = {command[-1] for command in commands if command[0] == "codesign"}
     assert signed == set(rewrites)

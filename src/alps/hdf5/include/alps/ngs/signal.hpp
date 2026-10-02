@@ -15,6 +15,7 @@
 #define ALPS_NGS_SIGNAL_HPP
 
 #include <alps/ngs/config.hpp>
+#include <alps/hdf5_export.h>
 
 #include <boost/array.hpp>
 
@@ -23,7 +24,7 @@
 namespace alps {
   namespace ngs {
 
-    class ALPS_DECL signal{
+    class ALPS_HDF5_DECL signal{
 
     public:
 

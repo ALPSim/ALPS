@@ -47,19 +47,19 @@ def test_embedded_defaults_and_mpi_isolation(tmp_path):
                 for kind in ("RUNTIME", "LIBRARY", "ARCHIVE")))
 
 
-def test_utilities_link_without_building_the_core_runtime(tmp_path):
-    # Compile only the extracted component, including the static export mode.
+def test_components_link_without_building_the_core_runtime(tmp_path):
+    # Compile only the extracted components, including the static export modes.
     configure(tmp_path, f"-DALPS_SOURCE={SOURCE}", "-DBUILD_SHARED_LIBS=OFF",
               "-DCMAKE_POSITION_INDEPENDENT_CODE=OFF",
               *(f"-DCMAKE_{kind}_OUTPUT_DIRECTORY={tmp_path.as_posix()}/{kind.lower()}"
                 for kind in ("RUNTIME", "LIBRARY", "ARCHIVE")))
     subprocess.run([
         "cmake", "--build", str(tmp_path), "--config", "Release",
-        "--target", "utilities_contract", "--parallel", "2",
+        "--target", "utilities_contract", "hdf5_contract", "--parallel", "2",
     ], check=True)
     subprocess.run([
         "ctest", "--test-dir", str(tmp_path), "-C", "Release", "--output-on-failure",
-        "-R", "^utilities_contract$", "--no-tests=error",
+        "-R", "^(utilities|hdf5)_contract$", "--no-tests=error",
     ], check=True)
 
 
