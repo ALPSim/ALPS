@@ -15,13 +15,13 @@ get_target_property(hdf5_dependencies HDF5::HDF5 INTERFACE_LINK_LIBRARIES)
 alps_dependency_rpath(alps_hdf5 ${hdf5_dependencies})
 alps_copy_runtime_dependencies(alps_hdf5)
 generate_export_header(alps_hdf5 EXPORT_MACRO_NAME ALPS_HDF5_DECL
-  EXPORT_FILE_NAME "${PROJECT_BINARY_DIR}/src/alps/hdf5_export.h")
+  EXPORT_FILE_NAME "${PROJECT_BINARY_DIR}/generated/include/alps/hdf5_export.h")
 if(NOT BUILD_SHARED_LIBS)
   target_compile_definitions(alps_headers INTERFACE ALPS_HDF5_STATIC_DEFINE)
 endif()
 target_sources(alps_headers INTERFACE
   FILE_SET HEADERS
-  FILES "${PROJECT_BINARY_DIR}/src/alps/hdf5_export.h")
+  FILES "${PROJECT_BINARY_DIR}/generated/include/alps/hdf5_export.h")
 target_sources(alps_headers INTERFACE
   FILE_SET hdf5_headers TYPE HEADERS
   BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"

@@ -6,6 +6,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Changed
 
+- Complete the source layout under `src/alps/`: shared ALPS/IETL headers and configuration templates live in `common/`; the remaining runtime uses `runtime/{include/alps,src,tests}`; the Fortran bridge has its own include/source layout. Native subsystem tests follow their source owner. Explicit file sets install first-party public headers, and generated headers use `<build-dir>/generated/include/alps/`. Public include names, library ownership and registered test names are preserved.
 - Export `ALPS::params` as a separate typed parameter library with component-owned exports. Isolate the existing parameter-file constructor, XML input and older `Parameters` conversion in adapters owned by `ALPS::alps`; their source APIs and parsing behavior are preserved. Python packages carry all four runtime libraries. Rebuild downstream binaries after the split.
 - Export `ALPS::hdf5` as a separate archive library with its own symbol exports and NGS signal cleanup. It links utilities and HDF5/Boost dependencies without the simulation runtime; `ALPS::alps` links it transitively. Python packages include one copy of this runtime component. Rebuild downstream binaries after the split; archive formats and public include paths are unchanged.
 - Export `ALPS::utilities` as a separate library with its own symbol exports. `ALPS::alps` links it transitively, and Python packages carry this runtime component. Rebuild downstream binaries after this library split; source include paths and utility APIs are unchanged.
@@ -39,6 +40,9 @@ The old build interfaces are removed without compatibility aliases. Reconfigure 
 | `plot2*`, `convert2html`, `convert2text`, `extract*` shell tools | `alps-xml plot`, `alps-xml convert`, `alps-xml extract`; see [XML tools](CONTRIBUTING.md#xml-resources-and-tools) for formats and dependencies |
 | Top-level `import mpi` compatibility module | `import pyalps.mpi`; install the `mpi` extra for mpi4py |
 | `applications/`, `tool/`, `test/`, `example/` | `src/apps/`, `src/tools/`, `tests/`, `tutorials/00-examples/` |
+| Loose runtime sources and subsystem trees in `src/alps/` | `src/alps/runtime/{include/alps,src,tests}`; shared headers live in `src/alps/common/include/` |
+| `src/ietl/` | `src/alps/common/include/ietl/`; public `<ietl/...>` includes are unchanged |
+| Build-tree `src/alps/` generated headers | `<build-dir>/generated/include/alps/`; consumers use exported CMake targets |
 | XML definitions and stylesheets in `lib/xml/` | `src/alps/resources/` in the source tree; installed under `share/alps/xml/` |
 | `tutorials/alpsize-*`, `tutorials/code-*`, `tutorials/ngs/` | `tutorials/08-alpsize/*`, `tutorials/09-code/*`, `tutorials/10-ngs/`; the Python export example is now in `python/pyalps/examples/ising/` |
 | Root `ALPS_VERSION.txt` | `cmake/ALPS_VERSION.txt`, still shared by the SDK and Python package |

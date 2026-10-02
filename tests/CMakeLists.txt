@@ -16,20 +16,8 @@
 #   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
-add_subdirectory(alea)
-add_subdirectory(fixed_capacity)
-add_subdirectory(graph)
 add_subdirectory(integration/hdf5)
 add_subdirectory(integration/params)
-add_subdirectory(lattice)
-add_subdirectory(model)
-add_subdirectory(ngs)
-add_subdirectory(numeric)
-add_subdirectory(osiris)
-add_subdirectory(parameter)
-add_subdirectory(parapack)
-add_subdirectory(parser)
-add_subdirectory(random)
 add_subdirectory(portability)
 if(ALPS_BUILD_APPLICATIONS)
   add_subdirectory(cli)

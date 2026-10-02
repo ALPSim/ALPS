@@ -21,106 +21,7 @@
 # libalps
 #
 
-add_library(alps
-  alea/nan.C
-  alea/observable.C
-  alea/observablefactory.C
-  alea/observableset.C
-  expression/evaluator.C
-  lattice/disorder.C
-  lattice/latticedescriptor.C
-  lattice/latticegraphdescriptor.C
-  lattice/latticelibrary.C
-  lattice/unitcell.C
-  model/bondterm.C
-  model/globaloperator.C
-  model/modellibrary.C
-  model/siteterm.C
-  osiris/buffer.C
-  osiris/dump.C
-  osiris/dumparchive.C
-  osiris/process.C
-  osiris/comm.C
-  osiris/mpdump.C
-  osiris/xdrdump.C
-  parameter/parameter.C
-  parameter/parameterlist.C
-  parameter/parameters.C
-  parser/parser.C
-  parser/xmlattributes.C
-  parser/xmlhandler.C
-  parser/xmlparser.C
-  parser/xmlstream.C
-  parser/xslt_path.C
-  random/rngfactory.C
-  random/parallel/get_prime.cpp
-  random/parallel/primelist_64.cpp
-  scheduler/abstract_task.C
-  scheduler/convertxdr.C
-  scheduler/factory.C
-  scheduler/info.C
-  scheduler/master_scheduler.C
-  scheduler/measurement_operators.C
-  scheduler/montecarlo.C
-  scheduler/mpp_scheduler.C
-  scheduler/options.C
-  scheduler/remote_task.C
-  scheduler/remote_worker.C
-  scheduler/scheduler.C
-  scheduler/serial_scheduler.C
-  scheduler/signal.C
-  scheduler/single_scheduler.C
-  scheduler/slave_task.C
-  scheduler/task.C
-  scheduler/worker.C
-  scheduler/workertask.C
-  stop_callback.cpp
-  ngs/lib/api.cpp
-  mcbase.cpp
-  parseargs.cpp
-  ngs/lib/mcoptions.cpp
-  ngs/lib/observablewrappers.cpp
-  ngs/lib/mcresult.cpp
-  ngs/lib/mcresults.cpp
-  ngs/lib/mcobservables.cpp
-  ngs/lib/mcobservable.cpp
-  "${PROJECT_SOURCE_DIR}/third_party/xdr/src/xdr.c"
-  "${PROJECT_SOURCE_DIR}/third_party/xdr/src/xdr_array.c"
-  "${PROJECT_SOURCE_DIR}/third_party/xdr/src/xdr_float.c"
-  "${PROJECT_SOURCE_DIR}/third_party/xdr/src/xdr_stdio.c"
-  parapack/clone.C
-  parapack/clone_info.C
-  parapack/filelock.C
-  parapack/logger.C
-  parapack/job.C
-  parapack/mc_worker.C
-  parapack/measurement.C
-  parapack/process_impl.C
-  parapack/option.C
-  parapack/parapack.C
-  parapack/queue.C
-  parapack/rng_helper.C
-  parapack/types.C
-  parapack/util.C
-  parapack/version.C
-  parapack/worker_factory.C
-  parapack/staging.C
-  ngs/lib/clone.cpp
-  ngs/lib/clone_info.cpp
-  ngs/lib/job.cpp
-  ngs/lib/parapack.cpp
-  ngs/lib/worker_factory.cpp)
-
-
-if(ALPS_NGS_USE_NEW_ALEA)
-  target_sources(alps PRIVATE ngs/accumulator/accumulator.cpp)
-endif()
-if(ALPS_NGS_OPENMPI_ULFM)
-  if(NOT ALPS_ENABLE_MPI)
-    message(FATAL_ERROR "ALPS_NGS_OPENMPI_ULFM requires ALPS_ENABLE_MPI=ON")
-  endif()
-  target_sources(alps PRIVATE ngs/lib/ulfm.cpp)
-endif()
+add_library(alps)
 add_library(ALPS::alps ALIAS alps)
 add_library(alps_headers INTERFACE)
 add_library(ALPS::headers ALIAS alps_headers)
@@ -129,8 +30,7 @@ target_compile_features(alps_headers INTERFACE cxx_std_17)
 target_compile_features(alps PRIVATE c_std_11)
 target_include_directories(
   alps_headers
-  INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
-            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/third_party/boost_numeric_bindings/include>
+  INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/third_party/boost_numeric_bindings/include>
             $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/third_party/xdr/include>
             $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 target_link_libraries(alps_headers INTERFACE Boost::headers)
@@ -155,7 +55,7 @@ if(ALPS_ENABLE_OPENMP)
 endif()
 include(GenerateExportHeader)
 generate_export_header(alps EXPORT_MACRO_NAME ALPS_DECL EXPORT_FILE_NAME
-                       "${PROJECT_BINARY_DIR}/src/alps/export.h")
+                       "${PROJECT_BINARY_DIR}/generated/include/alps/export.h")
 if(NOT BUILD_SHARED_LIBS)
   target_compile_definitions(alps_headers INTERFACE ALPS_STATIC_DEFINE)
 endif()
@@ -206,12 +106,14 @@ endfunction()
 alps_copy_runtime_dependencies(alps)
 target_sources(alps_headers INTERFACE
   FILE_SET HEADERS
-  BASE_DIRS "${PROJECT_BINARY_DIR}/src"
-  FILES "${PROJECT_BINARY_DIR}/src/alps/config.h"
-        "${PROJECT_BINARY_DIR}/src/alps/version.h"
-        "${PROJECT_BINARY_DIR}/src/alps/export.h")
+  BASE_DIRS "${PROJECT_BINARY_DIR}/generated/include"
+  FILES "${PROJECT_BINARY_DIR}/generated/include/alps/config.h"
+        "${PROJECT_BINARY_DIR}/generated/include/alps/version.h"
+        "${PROJECT_BINARY_DIR}/generated/include/alps/export.h")
 
-# Extracted components are linked once; legacy params adapters remain in alps.
+# Each directory declares its sources, public headers and tests.
+add_subdirectory(common)
+add_subdirectory(runtime)
 add_subdirectory(utilities)
 target_link_libraries(alps PUBLIC ALPS::utilities)
 add_subdirectory(hdf5)
@@ -219,14 +121,8 @@ target_link_libraries(alps PUBLIC ALPS::hdf5)
 add_subdirectory(params)
 target_link_libraries(alps PUBLIC ALPS::params)
 
-# This is a C++ bridge; only its consumers need a Fortran compiler.
-add_library(alps_fortran STATIC fortran/fwrapper_impl.C)
-add_library(ALPS::fortran ALIAS alps_fortran)
-set_target_properties(alps_fortran PROPERTIES EXPORT_NAME fortran)
-target_link_libraries(alps_fortran PUBLIC alps)
-# The F77 entry points accept several argument types.
-target_compile_options(alps_fortran INTERFACE
-  "$<$<COMPILE_LANG_AND_ID:Fortran,GNU>:-fallow-argument-mismatch>")
+add_subdirectory(fortran)
+
 install(
   TARGETS alps
   EXPORT ALPSTargets
@@ -236,27 +132,19 @@ install(
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(
-  TARGETS alps_headers alps_fortran
+  TARGETS alps_headers
   EXPORT ALPSTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries
+  FILE_SET common_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers
+  FILE_SET runtime_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers
+  FILE_SET fortran_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers
   FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers
   FILE_SET utilities_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers
   FILE_SET hdf5_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers
   FILE_SET params_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers)
 
 install(
-  DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps"
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  COMPONENT headers
-  FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
-  PATTERN "resources" EXCLUDE
-  PATTERN "utilities" EXCLUDE
-  PATTERN "hdf5" EXCLUDE
-  PATTERN "params" EXCLUDE)
-
-install(
-  DIRECTORY "${PROJECT_SOURCE_DIR}/src/ietl"
-            "${PROJECT_SOURCE_DIR}/third_party/boost_numeric_bindings/include/boost"
+  DIRECTORY "${PROJECT_SOURCE_DIR}/third_party/boost_numeric_bindings/include/boost"
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   COMPONENT headers
   FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"

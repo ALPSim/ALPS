@@ -16,13 +16,13 @@ endif()
 alps_dependency_rpath(alps_params)
 alps_copy_runtime_dependencies(alps_params)
 generate_export_header(alps_params EXPORT_MACRO_NAME ALPS_PARAMS_DECL
-  EXPORT_FILE_NAME "${PROJECT_BINARY_DIR}/src/alps/params_export.h")
+  EXPORT_FILE_NAME "${PROJECT_BINARY_DIR}/generated/include/alps/params_export.h")
 if(NOT BUILD_SHARED_LIBS)
   target_compile_definitions(alps_headers INTERFACE ALPS_PARAMS_STATIC_DEFINE)
 endif()
 target_sources(alps_headers INTERFACE
   FILE_SET HEADERS
-  FILES "${PROJECT_BINARY_DIR}/src/alps/params_export.h")
+  FILES "${PROJECT_BINARY_DIR}/generated/include/alps/params_export.h")
 target_sources(alps_headers INTERFACE
   FILE_SET params_headers TYPE HEADERS
   BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"

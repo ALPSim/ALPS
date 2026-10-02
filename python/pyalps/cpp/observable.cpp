@@ -72,7 +72,7 @@ namespace alps {
         // which the dynamic loader cannot merge with libalps' own copy. The
         // object then carries this module's RTTI, and the
         // dynamic_cast<RecordableObservable<T>*> that libalps performs in
-        // Observable::add (src/alps/alea/observable.h:161) fails, so appending a
+        // Observable::add (src/alps/runtime/include/alps/alea/observable.h:161) fails, so appending a
         // sample raised "Cannot add measurement to observable <name>".
         //
         // The legacy Boost.Python modules were built with default visibility

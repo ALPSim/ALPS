@@ -61,7 +61,7 @@ namespace alps {
     class PyMCBase : public mcbase {
         public:
             // Slot count = the number of NB_OVERRIDE* calls below.
-            // mcbase (src/alps/mcbase.hpp) declares five virtuals:
+            // mcbase (src/alps/runtime/include/alps/mcbase.hpp) declares five virtuals:
             // update / measure / fraction_completed (pure) and
             // save(archive&) / load(archive&); all five must be
             // forwarded so Python overrides are seen by C++ callers.

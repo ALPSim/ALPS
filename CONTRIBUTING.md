@@ -174,18 +174,24 @@ For development questions, use [Discord](https://discord.gg/JRNWnnva9g); reprodu
 
 | Location | Contents |
 | --- | --- |
-| `src/alps/` | C++ runtime, with [module-owned headers, implementations and tests](src/alps/README.md) for utilities, HDF5 and NGS parameters |
+| `src/alps/` | C++ component coordination; see the [source ownership map](src/alps/README.md) |
+| `src/alps/common/` | Shared ALPS/IETL headers, configuration templates, numerical and fixed-capacity tests |
+| `src/alps/{utilities,hdf5,params}/` | Independently linkable components with public headers, sources and local tests |
+| `src/alps/runtime/` | Remaining `ALPS::alps` subsystem headers, sources and native tests |
+| `src/alps/fortran/` | Public headers and implementation of the `ALPS::fortran` bridge |
 | `src/apps/`, `src/tools/` | Simulation applications, shared solver implementations and CLI tools |
 | `python/pyalps/` | Python sources, bindings, packaging and extension example |
 | `src/alps/resources/` | Shared XML definitions and stylesheets |
 | `tutorials/` | [Ordered tutorials and standalone library examples](tutorials/README.md) |
-| `tests/` | Cross-module integration, remaining native, Python, SDK, CLI and build-helper tests |
+| `tests/` | Cross-module integration, Python, SDK, CLI, build-helper and reconciliation tests |
 | `third_party/` | [Numeric Bindings headers](third_party/boost_numeric_bindings/README.md) and [XDR serialization](third_party/xdr/README.md) |
 | `cmake/`, `.github/` | Build configuration, shared version file, CI and release helpers |
 
-Utilities, HDF5 and NGS parameters use `src/alps/<module>/{include/alps,src,tests}`. Their public headers are listed explicitly in the module's `CMakeLists.txt`; add new exported headers there. MaxEnt uses `src/apps/maxent/{src,cli,tests}`, with its callable API in `<alps/solvers.hpp>`. Keep module tests beside the implementation and cross-module compatibility tests in `tests/integration/`. The existing CMake options control all these tests.
+Utilities, HDF5 and NGS parameters use `src/alps/<module>/{include/alps,src,tests}`. The remaining runtime keeps subsystem names below `runtime/{include/alps,src,tests}`; the Fortran bridge uses `fortran/{include/alps/fortran,src}`. First-party public headers are listed explicitly in each area's CMake `HEADERS` file set; add new exported headers there. These include roots preserve installed `<alps/...>` and `<ietl/...>` names. Generated headers live in `<build-dir>/generated/include/alps/`, with templates in `src/alps/common/config/`.
 
-These directories establish source ownership for ALPSCore reconciliation. `ALPS::utilities`, `ALPS::hdf5` and `ALPS::params` are independently linkable libraries; `ALPS::alps` links them transitively and owns the params text/XML and older `Parameters` adapters in `src/alps/params/adapters/`. MaxEnt remains `ALPS::maxent`. The modules share one project configuration and public include paths remain unchanged. See the [module boundaries and next steps](src/alps/README.md) before separating more libraries or importing ALPSCore code.
+`common/` groups shared headers, including numerical helpers and IETL, while `ALPS::headers` remains the aggregate compile interface. It is not a separate library API: some common numerical headers still depend on runtime parser headers. MaxEnt uses `src/apps/maxent/{src,cli,tests}`; `<alps/solvers.hpp>` lives in `common/include/alps/` because it also declares the CT-QMC entry points. Keep subsystem tests beside their owner and cross-module compatibility tests in `tests/integration/`. Existing CMake options and test names are preserved; moving inactive test fixtures does not enable them.
+
+These directories establish source ownership for ALPSCore reconciliation. `ALPS::utilities`, `ALPS::hdf5` and `ALPS::params` are independently linkable libraries; `ALPS::alps` links them transitively and owns the params text/XML and older `Parameters` adapters in `src/alps/params/adapters/`. MaxEnt remains `ALPS::maxent`. The filesystem organization preserves these binary boundaries and one shared project configuration. See the [module boundaries and next steps](src/alps/README.md) before separating more libraries or importing ALPSCore code.
 
 ### Build options
 

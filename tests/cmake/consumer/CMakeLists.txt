@@ -10,6 +10,8 @@ set(saved_flags "${CMAKE_CXX_FLAGS}")
 if(ALPS_SOURCE)
   unset(BLA_VENDOR)
   add_subdirectory("${ALPS_SOURCE}" alps EXCLUDE_FROM_ALL)
+  file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/core-runtime-$<CONFIG>.txt"
+    CONTENT "$<TARGET_FILE:ALPS::alps>\n")
   if(ALPS_ENABLE_MPI
      OR ALPS_BUILD_APPLICATIONS
      OR ALPS_BUILD_TESTING)
@@ -50,7 +52,8 @@ else()
     message(FATAL_ERROR "The C++ SDK still installs Python-owned headers")
   endif()
   foreach(private_directory IN ITEMS alps/utilities alps/hdf5/include alps/hdf5/src
-                                     alps/hdf5/tests alps/params)
+                                     alps/hdf5/tests alps/params alps/common alps/runtime
+                                     alps/fortran/include alps/fortran/src alps/fortran/tests)
     if(EXISTS "${expected_prefix}/include/${private_directory}")
       message(FATAL_ERROR "The SDK installs a module's private layout: ${private_directory}")
     endif()

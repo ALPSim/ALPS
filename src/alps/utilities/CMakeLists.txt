@@ -21,13 +21,13 @@ if(WIN32)
   target_link_libraries(alps_utilities PRIVATE ws2_32 mswsock)
 endif()
 generate_export_header(alps_utilities EXPORT_MACRO_NAME ALPS_UTILITIES_DECL
-  EXPORT_FILE_NAME "${PROJECT_BINARY_DIR}/src/alps/utilities_export.h")
+  EXPORT_FILE_NAME "${PROJECT_BINARY_DIR}/generated/include/alps/utilities_export.h")
 if(NOT BUILD_SHARED_LIBS)
   target_compile_definitions(alps_headers INTERFACE ALPS_UTILITIES_STATIC_DEFINE)
 endif()
 target_sources(alps_headers INTERFACE
   FILE_SET HEADERS
-  FILES "${PROJECT_BINARY_DIR}/src/alps/utilities_export.h")
+  FILES "${PROJECT_BINARY_DIR}/generated/include/alps/utilities_export.h")
 target_sources(alps_headers INTERFACE
   FILE_SET utilities_headers TYPE HEADERS
   BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
