@@ -14,6 +14,10 @@
 #include <boost/math/constants/constants.hpp>
 #include "maxent.hpp"
 #include <alps/config.h> // needed to set up correct bindings
+#include <alps/hdf5/vector.hpp>
+#include <boost/lexical_cast.hpp>
+#include <limits>
+#include <sstream>
 #include <boost/numeric/bindings/ublas.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/vector_expression.hpp>
@@ -23,7 +27,6 @@
 
 #define MAXIMUM(a,b) ((a>b) ? a : a)
 
-//ContiParameters::ContiParameters(const alps::Parameters& p) :
 ContiParameters::ContiParameters(const alps::params& p) :
 Default_(make_default_model(p, "DEFAULT_MODEL")),
 T_(p["T"]|1./static_cast<double>(p["BETA"])),
@@ -421,7 +424,6 @@ void ContiParameters::setup_kernel(const alps::params& p, const int ntab, const 
 }
 
 
-//MaxEntParameters::MaxEntParameters(const alps::Parameters& p) :
 MaxEntParameters::MaxEntParameters(const alps::params& p) :
 ContiParameters(p),
 U_(ndat(), ndat()), Vt_(ndat(), nfreq()), Sigma_(ndat(), ndat()), 
@@ -487,7 +489,6 @@ omega_coord_(nfreq()), delta_omega_(nfreq()), ns_(0)
   double chi = ublas::norm_2(y_-y2);             //this measures the loss of precision when transforming to singular space and back.
   std::cout << "minimal chi2: " << chi*chi/y_.size() << std::endl;
 }
-
 
 
 

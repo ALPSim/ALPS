@@ -12,7 +12,9 @@
 *****************************************************************************/
 
 #include <alps/solvers.hpp>
-#include <alps/ngs.hpp>
+#include <alps/ngs/mcoptions.hpp>
+#include <alps/ngs/params.hpp>
+#include <boost/lexical_cast.hpp>
 
 int main(int argc, char** argv) {
   alps::mcoptions options(argc, argv);

@@ -36,7 +36,7 @@
 
 /* 2021-07-20 by ST */
 #include "rpc_types.h"
-#include <alps/export.h>
+#include <alps/osiris_export.h>
 
 
 
@@ -282,50 +282,50 @@ struct xdr_discrim
  * know whether the call is a read or a write to the passed parameter
  * also, the XDR structure is always updated by some of these calls.
  */
-extern ALPS_DECL bool_t xdr_void (void) ;
-extern ALPS_DECL bool_t xdr_short (XDR *__xdrs, short *__sp) ;
-extern ALPS_DECL bool_t xdr_u_short (XDR *__xdrs, alps_xdr_ushort *__usp) ;
-extern ALPS_DECL bool_t xdr_int (XDR *__xdrs, int *__ip) ;
-extern ALPS_DECL bool_t xdr_u_int (XDR *__xdrs, alps_xdr_uint *__up) ;
-extern ALPS_DECL bool_t xdr_long (XDR *__xdrs, long *__lp) ;
-extern ALPS_DECL bool_t xdr_u_long (XDR *__xdrs, alps_xdr_ulong *__ulp) ;
-extern ALPS_DECL bool_t xdr_hyper (XDR *__xdrs, alps_xdr_int64 *__llp) ;
-extern ALPS_DECL bool_t xdr_u_hyper (XDR *__xdrs, alps_xdr_uint64 *__ullp) ;
-extern ALPS_DECL bool_t xdr_longlong_t (XDR *__xdrs, alps_xdr_int64 *__llp) ;
-extern ALPS_DECL bool_t xdr_u_longlong_t (XDR *__xdrs, alps_xdr_uint64 *__ullp) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_void (void) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_short (XDR *__xdrs, short *__sp) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_u_short (XDR *__xdrs, alps_xdr_ushort *__usp) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_int (XDR *__xdrs, int *__ip) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_u_int (XDR *__xdrs, alps_xdr_uint *__up) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_long (XDR *__xdrs, long *__lp) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_u_long (XDR *__xdrs, alps_xdr_ulong *__ulp) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_hyper (XDR *__xdrs, alps_xdr_int64 *__llp) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_u_hyper (XDR *__xdrs, alps_xdr_uint64 *__ullp) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_longlong_t (XDR *__xdrs, alps_xdr_int64 *__llp) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_u_longlong_t (XDR *__xdrs, alps_xdr_uint64 *__ullp) ;
 extern bool_t xdr_int8_t (XDR *__xdrs, int8_t *__ip) ;
 extern bool_t xdr_uint8_t (XDR *__xdrs, uint8_t *__up) ;
 extern bool_t xdr_int16_t (XDR *__xdrs, int16_t *__ip) ;
 extern bool_t xdr_uint16_t (XDR *__xdrs, uint16_t *__up) ;
-extern ALPS_DECL bool_t xdr_int32_t (XDR *__xdrs, int32_t *__ip) ;
-extern ALPS_DECL bool_t xdr_uint32_t (XDR *__xdrs, uint32_t *__up) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_int32_t (XDR *__xdrs, int32_t *__ip) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_uint32_t (XDR *__xdrs, uint32_t *__up) ;
 extern bool_t xdr_int64_t (XDR *__xdrs, int64_t *__ip) ;
 extern bool_t xdr_uint64_t (XDR *__xdrs, uint64_t *__up) ;
 extern bool_t xdr_quad_t (XDR *__xdrs, alps_xdr_int64 *__ip) ;
 extern bool_t xdr_u_quad_t (XDR *__xdrs, alps_xdr_uint64 *__up) ;
-extern ALPS_DECL bool_t xdr_bool (XDR *__xdrs, bool_t *__bp) ;
-extern ALPS_DECL bool_t xdr_enum (XDR *__xdrs, enum_t *__ep) ;
-extern ALPS_DECL bool_t xdr_array (XDR * _xdrs, alps_xdr_address *__addrp, alps_xdr_uint *__sizep,
+extern ALPS_OSIRIS_DECL bool_t xdr_bool (XDR *__xdrs, bool_t *__bp) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_enum (XDR *__xdrs, enum_t *__ep) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_array (XDR * _xdrs, alps_xdr_address *__addrp, alps_xdr_uint *__sizep,
 			 alps_xdr_uint __maxsize, alps_xdr_uint __elsize, xdrproc_t __elproc)
      ;
-extern ALPS_DECL bool_t xdr_bytes (XDR *__xdrs, char **__cpp, alps_xdr_uint *__sizep,
+extern ALPS_OSIRIS_DECL bool_t xdr_bytes (XDR *__xdrs, char **__cpp, alps_xdr_uint *__sizep,
 			 alps_xdr_uint __maxsize) ;
-extern ALPS_DECL bool_t xdr_opaque (XDR *__xdrs, alps_xdr_address __cp, alps_xdr_uint __cnt) ;
-extern ALPS_DECL bool_t xdr_string (XDR *__xdrs, char **__cpp, alps_xdr_uint __maxsize) ;
-extern ALPS_DECL bool_t xdr_union (XDR *__xdrs, enum_t *__dscmp, char *__unp,
+extern ALPS_OSIRIS_DECL bool_t xdr_opaque (XDR *__xdrs, alps_xdr_address __cp, alps_xdr_uint __cnt) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_string (XDR *__xdrs, char **__cpp, alps_xdr_uint __maxsize) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_union (XDR *__xdrs, enum_t *__dscmp, char *__unp,
 			 const struct xdr_discrim *__choices,
 			 xdrproc_t __dfault) ;
-extern ALPS_DECL bool_t xdr_char (XDR *__xdrs, char *__cp) ;
-extern ALPS_DECL bool_t xdr_u_char (XDR *__xdrs, alps_xdr_uchar *__cp) ;
-extern ALPS_DECL bool_t xdr_vector (XDR *__xdrs, char *__basep, alps_xdr_uint __nelem,
+extern ALPS_OSIRIS_DECL bool_t xdr_char (XDR *__xdrs, char *__cp) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_u_char (XDR *__xdrs, alps_xdr_uchar *__cp) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_vector (XDR *__xdrs, char *__basep, alps_xdr_uint __nelem,
 			  alps_xdr_uint __elemsize, xdrproc_t __xdr_elem) ;
-extern ALPS_DECL bool_t xdr_float (XDR *__xdrs, float *__fp) ;
-extern ALPS_DECL bool_t xdr_double (XDR *__xdrs, double *__dp) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_float (XDR *__xdrs, float *__fp) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_double (XDR *__xdrs, double *__dp) ;
 extern bool_t xdr_reference (XDR *__xdrs, alps_xdr_address *__xpp, alps_xdr_uint __size,
 			     xdrproc_t __proc) ;
 extern bool_t xdr_pointer (XDR *__xdrs, char **__objpp,
 			   alps_xdr_uint __obj_size, xdrproc_t __xdr_obj) ;
-extern ALPS_DECL bool_t xdr_wrapstring (XDR *__xdrs, char **__cpp) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_wrapstring (XDR *__xdrs, char **__cpp) ;
 extern alps_xdr_ulong xdr_sizeof (xdrproc_t, void *) ;
 
 /*
@@ -339,7 +339,7 @@ struct netobj
   char *n_bytes;
 };
 typedef struct netobj netobj;
-extern ALPS_DECL bool_t xdr_netobj (XDR *__xdrs, struct netobj *__np) ;
+extern ALPS_OSIRIS_DECL bool_t xdr_netobj (XDR *__xdrs, struct netobj *__np) ;
 
 /*
  * These are the public routines for the various implementations of
@@ -351,7 +351,7 @@ extern void xdrmem_create (XDR *__xdrs, const alps_xdr_address __addr,
 			   alps_xdr_uint __size, enum xdr_op __xop) ;
 
 /* XDR using stdio library */
-extern ALPS_DECL void xdrstdio_create (XDR *__xdrs, FILE *__file, enum xdr_op __xop)
+extern ALPS_OSIRIS_DECL void xdrstdio_create (XDR *__xdrs, FILE *__file, enum xdr_op __xop)
      ;
 
 /* XDR pseudo records for tcp */
@@ -370,7 +370,7 @@ extern bool_t xdrrec_skiprecord (XDR *__xdrs) ;
 extern bool_t xdrrec_eof (XDR *__xdrs) ;
 
 /* free memory buffers for xdr */
-extern ALPS_DECL void xdr_free (xdrproc_t __proc, char *__objp) ;
+extern ALPS_OSIRIS_DECL void xdr_free (xdrproc_t __proc, char *__objp) ;
 
 #ifdef __cplusplus
 }

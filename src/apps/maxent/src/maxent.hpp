@@ -17,20 +17,12 @@
 #ifndef ALPS_TOOL_MAXENT_HPP
 #define ALPS_TOOL_MAXENT_HPP
 
-#include <alps/scheduler.h>
 #include <alps/config.h>
+#include <boost/function.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/numeric/bindings/blas/level3/gemm.hpp>
 #include <boost/numeric/bindings/blas/level2/gemv.hpp>
 #include "maxent_parms.hpp"
-
-
-
-class MaxEntFactory : public alps::scheduler::Factory 
-{
-  alps::scheduler::Task* make_task(const alps::ProcessList&, const boost::filesystem::path&) const;  
-  void print_copyright(std::ostream& out) const;
-};
-
 
 
 
@@ -42,7 +34,6 @@ public :
   typedef MaxEntParameters::vector_type vector_type;
   typedef MaxEntParameters::omega_complex_type omega_complex_type;
 
-//  MaxEntHelper(const alps::Parameters& p);
   MaxEntHelper(const alps::params& p);
 
   double omega_coord(const int i) const { return MaxEntParameters::omega_coord(i); }
@@ -124,18 +115,15 @@ matrix_type prec_prod_trans(const matrix_type &p, const matrix_type &q) const{
 
 
 
-class MaxEntSimulation : private MaxEntHelper,public alps::mcbase
+class MaxEntSimulation : private MaxEntHelper
 {
 
 public:
   
-    MaxEntSimulation(parameters_type const & parms,const std::string &outfile);
+  MaxEntSimulation(alps::params const & parms,const std::string &outfile);
   ~MaxEntSimulation();
-  void write_xml_body(alps::oxstream&, const boost::filesystem::path&, bool writeall) const;
+  bool run(boost::function<bool()> const& stop_callback);
   void dostep();
-    void update() {dostep();}
-    void measure() {;}
-    double fraction_completed() const {return ((double) finished);}
   vector_type levenberg_marquardt(vector_type u, const double alpha) const;
   vector_type iteration(vector_type u, const double alpha, const double mu) const;
 

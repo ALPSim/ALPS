@@ -15,6 +15,8 @@
 #include <boost/math/constants/constants.hpp>
 #include "maxent.hpp"
 #include <alps/config.h> // needed to set up correct bindings
+#include <alps/hdf5/ublas/vector.hpp>
+#include <alps/ngs/signal.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/numeric/bindings/lapack/driver/gesv.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
@@ -26,7 +28,6 @@
 
 MaxEntSimulation::MaxEntSimulation(const alps::params &parms,const std::string &outfile)
 : MaxEntHelper(parms)
-, alps::mcbase(parms)
 , alpha((int)parms["N_ALPHA"])              //This is the # of \alpha parameters that should be tried.
 , norm(parms["NORM"]|1.0)                                             //The integral is normalized to NORM (use e.g. for self-energies
 , max_it(parms["MAX_IT"]|1000)                                       //The number of iterations done in the root finding procedure
@@ -37,6 +38,10 @@ MaxEntSimulation::MaxEntSimulation(const alps::params &parms,const std::string &
 , text_output(parms["TEXT_OUTPUT"]|false)
 , self(parms["SELF"]|false)
 {
+  // Preserve the seed conversion and archive signal setup previously supplied
+  // by mcbase, even though deterministic MaxEnt does not consume random values.
+  (void)static_cast<int>(parms["SEED"] | 42);
+  alps::ngs::signal::listen();
   if(norm != 1.) std::cerr<<"WARNING: Redefinition of parameter NORM: Input (and output) data are assumed to be normalized to NORM."<<std::endl;
   const double alpha_min = parms["ALPHA_MIN"];                                          //Smallest value of \alpha that is tried
   const double alpha_max = parms["ALPHA_MAX"];                                          //Largest  value of \alpha that is tried
@@ -50,6 +55,15 @@ MaxEntSimulation::~MaxEntSimulation()
 {
 }
 
+bool MaxEntSimulation::run(boost::function<bool()> const& stop_callback)
+{
+  // Keep mcbase's callback ordering: check before a step and once after it,
+  // even when the step finished. One step computes the complete alpha sweep.
+  bool stopped = false;
+  while (!(stopped = stop_callback()) && !finished)
+    dostep();
+  return !stopped;
+}
 
 
 
@@ -301,18 +315,4 @@ MaxEntSimulation::vector_type MaxEntSimulation::iteration(vector_type u, const d
   ublas::vector<fortran_int_t> ipiv(b.size());
   bindings::lapack::gesv(M, ipiv, B);
   return ublas::matrix_column<matrix_type>(B, 0);
-}
-
-
-
-//this function is nonsensical. Why do we need it? It has zero content!
-void MaxEntSimulation::write_xml_body(alps::oxstream& out, const boost::filesystem::path&, bool write_all_xml) const
-{
-  if (write_all_xml) {
-    out << alps::start_tag("AVERAGES");
-    out << alps::start_tag("SCALAR_AVERAGE") << alps::attribute("name","Zeug") << alps::no_linebreak
-    << alps::start_tag("MEAN") << 42 << alps::end_tag("MEAN")
-    << alps::end_tag("SCALAR_AVERAGE");
-    out << alps::end_tag("AVERAGES");
-  }
 }

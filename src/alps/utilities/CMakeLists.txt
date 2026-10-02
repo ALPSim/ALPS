@@ -32,12 +32,38 @@ target_sources(alps_headers INTERFACE
   FILE_SET utilities_headers TYPE HEADERS
   BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
   FILES
+    include/alps/cctype.h
+    include/alps/factory.h
+    include/alps/functional.h
+    include/alps/lambda.hpp
+    include/alps/ngs/boost_mpi.hpp
     include/alps/ngs/cast.hpp
+    include/alps/ngs/config.hpp
     include/alps/ngs/detail/remove_cvr.hpp
     include/alps/ngs/detail/type_wrapper.hpp
+    include/alps/ngs/hash.hpp
+    include/alps/ngs/mutex.hpp
     include/alps/ngs/short_print.hpp
     include/alps/ngs/sleep.hpp
     include/alps/ngs/stacktrace.hpp
+    include/alps/ngs/stringify.hpp
+    include/alps/ngs/thread_exceptions.hpp
+    include/alps/stringvalue.h
+    include/alps/type_traits/average_type.hpp
+    include/alps/type_traits/change_value_type.hpp
+    include/alps/type_traits/covariance_type.hpp
+    include/alps/type_traits/element_type.hpp
+    include/alps/type_traits/has_value_type.hpp
+    include/alps/type_traits/is_complex.hpp
+    include/alps/type_traits/is_scalar.hpp
+    include/alps/type_traits/is_sequence.hpp
+    include/alps/type_traits/is_symbolic.hpp
+    include/alps/type_traits/iterator_type.hpp
+    include/alps/type_traits/norm_type.hpp
+    include/alps/type_traits/param_type.hpp
+    include/alps/type_traits/real_type.hpp
+    include/alps/type_traits/slice.hpp
+    include/alps/type_traits/type_tag.hpp
     include/alps/utility/assign.hpp
     include/alps/utility/bitops.hpp
     include/alps/utility/copyright.hpp
@@ -65,3 +91,9 @@ install(TARGETS alps_utilities EXPORT ALPSTargets
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
+
+alps_register_module(NAME utilities HEADER_SET utilities_headers
+  TARGETS alps alps_utilities
+  DEPENDS configuration containers numerics
+  GENERATED_HEADERS alps/utilities_export.h
+)

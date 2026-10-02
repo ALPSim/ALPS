@@ -80,7 +80,7 @@ def test_mcdata_scalar():
 
     # NOTE: documents a long-standing libalps bug, present in the old
     # Boost.Python build too (the historic fixture also shows +1.2):
-    # mcdata<T>::operator-() (src/alps/runtime/include/alps/alea/mcdata.hpp) negates a copy
+    # mcdata<T>::operator-() (src/alps/alea/include/alps/alea/mcdata.hpp) negates a copy
     # and returns *this unchanged, so unary minus is a no-op. When the
     # C++ operator is fixed, flip these expectations to -1.2 / negated
     # means.

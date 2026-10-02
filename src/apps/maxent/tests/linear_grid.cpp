@@ -38,6 +38,9 @@ double trapz(const std::vector<double>& x, const std::vector<double>& y) {
 }
 
 int main() {
+  int failures = 0;
+  #define REQUIRE(cond, msg) do { if (!(cond)) { std::fprintf(stderr, "FAIL: %s\n", msg); ++failures; } } while (0)
+
   const double beta = 10.0;
   const int n_tau = 40;
   const int nom = 401;
@@ -98,7 +101,26 @@ int main() {
 
   {
     MaxEntSimulation sim(p, out_h5);
-    sim.run(boost::function<bool()>([]() { return false; }));
+    int callbacks = 0;
+    REQUIRE(!sim.run([&]() { ++callbacks; return true; }), "initial stop request ignored");
+    REQUIRE(callbacks == 1, "initial stop callback count changed");
+    REQUIRE(!boost::filesystem::exists(out_h5), "stopped run created scientific output");
+
+    bool propagated = false;
+    try {
+      sim.run([]() -> bool { throw std::logic_error("stop callback failure"); });
+    } catch (std::logic_error const& error) {
+      propagated = std::string(error.what()) == "stop callback failure";
+    }
+    REQUIRE(propagated, "stop callback exception not propagated");
+
+    callbacks = 0;
+    REQUIRE(sim.run([&]() { ++callbacks; return false; }), "complete run reported stopped");
+    REQUIRE(callbacks == 2, "callback must run before and after the alpha sweep");
+
+    callbacks = 0;
+    REQUIRE(!sim.run([&]() { ++callbacks; return true; }), "completed run ignored stop callback");
+    REQUIRE(callbacks == 1, "completed run must check the callback once");
   }
 
   std::vector<double> w, Aavg, Amax, Achi;
@@ -109,9 +131,6 @@ int main() {
     ar >> alps::make_pvp("/spectrum/maximum", Amax);
     ar >> alps::make_pvp("/spectrum/chi", Achi);
   }
-
-  int failures = 0;
-  #define REQUIRE(cond, msg) do { if (!(cond)) { std::fprintf(stderr, "FAIL: %s\n", msg); ++failures; } } while (0)
 
   REQUIRE(!w.empty(), "omega grid empty");
   REQUIRE(all_finite(w), "omega grid not finite");

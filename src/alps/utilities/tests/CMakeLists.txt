@@ -24,3 +24,7 @@ foreach(name vmusage bitops)
   alps_add_test(${name})
   set_property(TEST ${name} PROPERTY LABELS utility)
 endforeach()
+
+add_executable(ngs_hash ngs_hash.cpp)
+target_link_libraries(ngs_hash PRIVATE ALPS::utilities)
+alps_add_test(ngs_hash)

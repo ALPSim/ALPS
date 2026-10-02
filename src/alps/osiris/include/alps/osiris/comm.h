@@ -1,0 +1,67 @@
+/*****************************************************************************
+*
+* ALPS Project: Algorithms and Libraries for Physics Simulations
+*
+* ALPS Libraries
+*
+* Copyright (C) 1994-2009 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
+*                            Synge Todo <wistaria@comp-phys.org>
+*
+* ALPS Project: https://alps.comp-phys.org/
+* SPDX-License-Identifier: MIT
+*
+*****************************************************************************/
+
+/* $Id$ */
+
+#ifndef OSIRIS_COMM_H
+#define OSIRIS_COMM_H
+
+#include <alps/osiris/process.h>
+#include <alps/config.h>
+#include <alps/osiris_export.h>
+
+namespace alps {
+
+
+//=======================================================================
+// INITIALIZATION AND CLEANUP
+//
+// initialize or stop the message passing library 
+//-----------------------------------------------------------------------
+
+// initialize everything
+
+ALPS_OSIRIS_DECL void comm_init(int& argc, char**& argv, bool=false);
+
+
+// stop message passing
+// the bool parameter indicates if all slave processes should be killed
+
+ALPS_OSIRIS_DECL void comm_exit(bool kill_slaves=false);
+
+
+// do we actually run in parallel?
+
+ALPS_OSIRIS_DECL bool runs_parallel();
+
+//=======================================================================
+// HOST/PROCESS ENQUIRIES
+//
+// ask for processes, hosts, ... 
+//-----------------------------------------------------------------------
+
+namespace detail {
+ALPS_OSIRIS_DECL int local_id(); // return the id of this Process
+ALPS_OSIRIS_DECL int invalid_id(); // return an invalid id
+}
+
+ALPS_OSIRIS_DECL bool is_master(); // is this the master Process ?
+
+ALPS_OSIRIS_DECL Process local_process(); // make a descriptor of the local Process
+ALPS_OSIRIS_DECL ProcessList all_processes(); // get a list of all running processes
+ALPS_OSIRIS_DECL Process master_process(); // get the master Process
+
+} // end namespace alps
+
+#endif // OSIRIS_COMM_H

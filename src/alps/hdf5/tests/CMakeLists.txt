@@ -288,3 +288,7 @@ if(ALPS_BUILD_EXTENSIVE_TESTS)
     endforeach()
   endforeach()
 endif()
+
+add_executable(ngs_hdf5 ngs_hdf5.cpp)
+target_link_libraries(ngs_hdf5 PRIVATE ALPS::hdf5)
+alps_add_test(ngs_hdf5)

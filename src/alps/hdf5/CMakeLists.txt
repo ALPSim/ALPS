@@ -26,14 +26,13 @@ target_sources(alps_headers INTERFACE
   FILE_SET hdf5_headers TYPE HEADERS
   BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
   FILES
+    include/alps/hdf5.hpp
     include/alps/hdf5/archive.hpp
     include/alps/hdf5/array.hpp
     include/alps/hdf5/complex.hpp
     include/alps/hdf5/errors.hpp
     include/alps/hdf5/map.hpp
-    include/alps/hdf5/matrix.hpp
     include/alps/hdf5/multi_array.hpp
-    include/alps/hdf5/numeric_vector.hpp
     include/alps/hdf5/pair.hpp
     include/alps/hdf5/pointer.hpp
     include/alps/hdf5/shared_array.hpp
@@ -43,7 +42,6 @@ target_sources(alps_headers INTERFACE
     include/alps/hdf5/ublas/vector.hpp
     include/alps/hdf5/valarray.hpp
     include/alps/hdf5/vector.hpp
-    include/alps/hdf5.hpp
     include/alps/ngs/signal.hpp)
 
 install(TARGETS alps_hdf5 EXPORT ALPSTargets
@@ -56,3 +54,9 @@ install(TARGETS alps_hdf5 EXPORT ALPSTargets
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
+
+alps_register_module(NAME hdf5 HEADER_SET hdf5_headers
+  TARGETS alps alps_hdf5
+  DEPENDS configuration containers utilities
+  GENERATED_HEADERS alps/hdf5_export.h
+)

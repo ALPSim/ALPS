@@ -1,107 +1,89 @@
 # Module layout and ALPSCore reconciliation
 
-This layout prepares ALPS for incremental reconciliation with ALPSCore after the CMake modernization. Utilities, HDF5 and typed params have independently linkable libraries. The remaining runtime, shared headers and Fortran bridge also have explicit source, include and test locations. This filesystem organization preserves existing binary ownership and scientific implementations.
+ALPS sources are grouped by responsibility to prepare MaxEnt, HDF5 and typed params for ALPSCore reconciliation. Utilities, HDF5, params and Osiris have separate runtime libraries. Other source modules contribute to the existing `ALPS::alps` library or its shared compile interface. This cleanup imports no ALPSCore implementation and preserves scientific algorithms.
 
-The [reconciliation report](../../doc/ALPSCore-reconciliation.md) pins an ALPSCore
-revision, records measured archive/params compatibility, and defines migration
-gates. Reproduce the comparison with the [separate-process probes](../../tests/reconciliation/README.md).
+The [reconciliation report](../../doc/ALPSCore-reconciliation.md) pins the ALPSCore reference, records measured archive/params compatibility and defines migration gates. Reproduce that comparison with the [separate-process probes](../../tests/reconciliation/README.md).
 
 ## Source ownership
 
-```text
-src/alps/
-  CMakeLists.txt          # Shared compile interface, component coordination and exports
-  common/
-    CMakeLists.txt        # Shared public headers and generated-header inputs
-    config/              # ALPS config/version and IETL configuration templates
-    include/alps/        # Numeric/container traits, shared helpers, solvers.hpp
-    include/ietl/        # IETL headers
-    tests/               # numeric/ and fixed_capacity/
-  utilities/
-    CMakeLists.txt        # Implementation sources and explicit public-header file set
-    include/alps/        # Existing utility/ and selected low-level ngs/ include paths
-    src/
-    tests/
-  hdf5/
-    CMakeLists.txt
-    include/alps/        # hdf5.hpp, hdf5/ and ngs/signal.hpp
-    src/
-    tests/               # Includes reference archives and serialization test helpers
-  params/
-    CMakeLists.txt
-    include/alps/ngs/    # NGS params and its implementation headers
-    src/                 # Typed params, proxy and value implementation
-    adapters/            # Text/XML and older Parameters bridges, owned by ALPS::alps
-    tests/
-  runtime/
-    CMakeLists.txt        # Remaining ALPS::alps implementation
-    include/alps/        # Existing subsystem headers and public template definitions
-    src/                 # alea/, expression/, lattice/, model/, ngs/, osiris/, ...
-    tests/               # Subsystem-native tests, preserving their existing names
-  fortran/
-    CMakeLists.txt        # Existing ALPS::fortran bridge
-    include/alps/fortran/
-    src/
-  resources/             # XML definitions and stylesheets
-src/apps/maxent/
-  CMakeLists.txt         # ALPS::maxent solver and maxent executable
-  src/                   # Solver implementation and private headers
-  cli/                   # Command-line entry point
-  tests/                 # Numerical regression
-tests/integration/hdf5/ # Archive compatibility with older parameters and observables
-tests/integration/params/ # Text/XML adapter contracts across the runtime boundary
-tests/                   # SDK, Python, CLI, build-policy and reconciliation checks
+Each module uses `include/`, `src/` and `tests/` where applicable. Public include spellings describe the API, independently of the physical owner: for example, NGS measurement headers live in `alea/include/alps/ngs/`, while typed parameters live in `params/include/alps/ngs/`.
+
+| Source module under `src/alps/` | Responsibility | Binary or compile owner |
+| --- | --- | --- |
+| `utilities/` | Utility functions, general helpers, type traits and NGS configuration helpers | `ALPS::utilities`, `ALPS::headers` |
+| `containers/` | Fixed-capacity and ALPS multi-array containers | `ALPS::headers` |
+| `numerics/` | Numerical helpers and matrix/vector interfaces | `ALPS::headers` |
+| `ietl/` | Iterative eigensolver headers under `include/ietl/` | `ALPS::headers` |
+| `hdf5/` | Archive API, container adapters, shared context registry and signal cleanup | `ALPS::hdf5` |
+| `params/` | Typed values, lookup/proxies, iteration and HDF5 checkpoints | `ALPS::params`; `adapters/` contributes to `ALPS::alps` |
+| `osiris/` | Dump serialization, process/communication state and XDR implementation | `ALPS::osiris` |
+| `xml/`, `legacy_parameters/`, `expression/` | XML/parser support, older `alps::Parameters` and expression evaluation | `ALPS::alps` |
+| `graph/`, `lattice/`, `model/` | Graph helpers, lattice definitions and physical models | `ALPS::headers`, `ALPS::alps` |
+| `random/` | Random generators and their factories | `ALPS::alps` |
+| `alea/`, `accumulators/` | Observable/result facilities and accumulator implementations | `ALPS::alps` |
+| `mc/`, `scheduler/`, `parapack/` | Simulation API, execution and scheduling | `ALPS::alps` |
+| `fortran/` | C++ bridge with public headers in `include/alps/fortran/` | `ALPS::fortran` |
+| `solvers/` | Shared `<alps/solvers.hpp>` declarations for MaxEnt and CT-QMC | `ALPS::headers` |
+| `resources/` | XML definitions and stylesheets | Installed data component |
+
+The broad `common/` and `runtime/` source groups are removed. ALPS and IETL configuration templates live in `cmake/config/`; generated public headers live under `<build-dir>/generated/include/alps/`. MaxEnt remains in `src/apps/maxent/{src,cli,tests}`. Subsystem tests follow their source owner; cross-module integration, SDK, Python, CLI, packaging and reconciliation checks stay under root `tests/`. Relocation preserves registered test names and leaves inactive fixtures inactive.
+
+All first-party public headers have explicit CMake `HEADERS` file sets. These declare build include roots and preserve installed `<alps/...>` and `<ietl/...>` paths; consumers use exported targets rather than broad source-tree include roots. Public template definitions remain installed, while private source files, tests and physical `include/` nesting do not enter the SDK.
+
+## Library boundaries
+
+`ALPS::utilities` owns utility symbols and links Boost.Filesystem and platform threads without the simulation runtime, HDF5 or BLAS/LAPACK.
+
+`ALPS::hdf5` owns archive symbols, exception exports, shared archive state and the NGS signal handler that closes archives. It links utilities, HDF5, Boost.Filesystem, Boost.Thread and platform threads. Archive and signal code remain together to preserve cleanup behavior. A parallel HDF5 provider can bring its own MPI dependency.
+
+`ALPS::params` owns typed values, proxies, checkpoint I/O and the `paramvalue_source` interface used by Python bindings. It links HDF5 and Boost.Serialization; MPI builds additionally link MPI and Boost.MPI. Its parameter-file constructor, XML input and older `Parameters` conversion remain in `params/adapters/`, compiled into `ALPS::alps`. The older `alps::Parameters` implementation itself belongs to `legacy_parameters/`.
+
+`ALPS::osiris` owns dump/process APIs, XDR symbols and the communication state used by `comm_init()` and `is_master()`. It links Boost.Serialization/Filesystem and, when enabled, MPI. This gives communication state one owner and permits MaxEnt to preserve existing diagnostic gating without linking the simulation runtime.
+
+`ALPS::maxent` links params, HDF5, utilities, Osiris and its Boost/numerical providers. It owns its deterministic run loop; its numerical calculations and stop-callback ordering are preserved. The `maxent` CLI additionally links `ALPS::alps` for the existing `mcoptions` parser. Its public callable API remains `<alps/solvers.hpp>`.
+
+`ALPS::alps` links the four extracted runtime components publicly. These libraries follow `BUILD_SHARED_LIBS`, with component-specific generated export headers. Python extensions require shared runtime libraries and package one copy of every component in `ALPS_RUNTIME_TARGETS`. Rebuild downstream binaries after the Osiris extraction, as after the earlier library splits.
+
+Physical ownership does not imply independent linkability. `ALPS::headers` still exposes the aggregate compile interface; numerical headers depend on parser support, and other include cycles remain. The semantic modules make these dependencies visible without claiming that each can already be configured or linked alone. Package discovery still checks the full SDK dependency set. Shared build policy remains in the root CMake files and `cmake/`.
+
+## Architecture checks
+
+CMake generates `alps-module-manifest.json` from module declarations, public-header file sets and source lists. The [architecture checker](../../.github/scripts/check_module_architecture.py) checks production-file ownership, public include ownership, declared include dependencies and public/private boundaries. It reports observed cycles, nonliteral includes and documented unresolved includes for review. It does not replace compilation, link-dependency checks or scientific validation.
+
+After configuring the build, run:
+
+```sh
+python .github/scripts/check_module_architecture.py \
+  --manifest _build/default/alps-module-manifest.json \
+  --write-report _build/default/alps-module-report.json
 ```
 
-The module name `params` refers to `alps::params` (`<alps/ngs/params.hpp>`). The older `alps::Parameters` API (`<alps/parameter.h>`) belongs to `runtime/include/alps/parameter/` and `runtime/src/parameter/`. Keep that distinction explicit when comparing ALPSCore APIs.
+Update the owning module's CMake declarations when adding files or dependencies; the manifest is generated rather than hand-maintained. A declared existing cycle is visible architectural debt, not evidence of independent components.
 
-Utilities, HDF5 and typed params build the `alps_utilities`, `alps_hdf5` and `alps_params` libraries. The sources in `params/adapters/` contribute to `alps`, alongside the older parameter/parser implementation in `runtime/`. The Fortran bridge retains its own `ALPS::fortran` target. These library boundaries are unchanged by the filesystem pass.
+### Recorded architectural debt
 
-Every first-party public header is listed explicitly in a CMake `HEADERS` file set on the shared SDK compile interface `alps_headers`. The file sets supply component include roots and preserve installed `<alps/...>` and `<ietl/...>` paths. Public template definitions remain installed even when they are implementation details. Generated headers live under `<build-dir>/generated/include/alps/`; their inputs live in `common/config/`. Builds use the declared include roots rather than broad source-tree or build-tree `src/` include paths. Module sources, tests, configuration templates and physical `include/` nesting do not enter the SDK.
+The current `alps-module-architecture.json` reports 24 source owners, including separate MaxEnt solver and CLI owners for `src/apps/maxent/src/` and `src/apps/maxent/cli/`. This is an ownership count, not a count of independent libraries.
 
-`common/` owns shared source headers, not an independently linkable API or library. It holds numerical/container helpers, type traits, fixed-capacity containers, selected NGS configuration helpers and the solver declarations shared by MaxEnt and CT-QMC. Some numerical headers still include runtime parser headers. `ALPS::headers` exposes these compile dependencies together; moving headers does not remove their dependencies or require a simulation-runtime link.
+The observed include graph contains one eight-module cycle: `containers`, `expression`, `hdf5`, `legacy_parameters`, `numerics`, `random`, `utilities` and `xml`. Dependency declarations constrain new include edges, while the existing cycle remains visible work for later reconciliation.
 
-`runtime/` preserves the existing subsystem subdivisions under `include/alps/`, `src/` and `tests/`. Its test areas are alea, graph, lattice, model, NGS, Osiris, older parameters, parapack, parser, random and accumulator. Common numerical and fixed-capacity tests live in `common/tests/`. Relocation preserves test registration and names; inactive test fixtures remain inactive. Cross-module integration and build/package/Python checks stay under root `tests/`.
+The report inventories 82 exact unresolved file/include pairs already present at baseline `f27ed2316`: 80 in dormant accumulator code and two in the optional `USE_LATTICE_CONSTANT_2D` graph backend. Each exemption names its file, include and reason; they do not establish support for those inactive paths. Resolve or remove these dependencies deliberately rather than adding broad exclusions.
 
-`ALPS::utilities` owns utility symbols and has no link dependency on `ALPS::alps`, HDF5 or the numerical libraries. It links Boost.Filesystem and the platform threading library.
-
-`ALPS::hdf5` owns archive symbols, exception exports, shared archive state and the NGS signal handler that closes archives. It links utilities, HDF5, Boost.Filesystem, Boost.Thread and platform threads, with no direct dependency on `ALPS::alps`, MPI or BLAS/LAPACK; a parallel HDF5 provider can bring its own MPI dependency. Archive and signal code remain together to preserve cleanup behavior; their mutual calls are internal to this component.
-
-`ALPS::params` owns typed values, lookup, iteration, parameter proxies, HDF5 checkpoint I/O and the `paramvalue_source` interface used by bindings. It links HDF5 and Boost.Serialization; MPI-enabled builds additionally link MPI and Boost.MPI for broadcast. It has no link dependency on `ALPS::alps` or BLAS/LAPACK.
-
-The parameter-file constructor `params(boost::filesystem::path const&)`, `make_parameters_from_xml` and `make_deprecated_parameters` use the older parameter/parser implementation and remain in `ALPS::alps`. Link that target when using these adapters. `params` methods have individual export annotations: typed operations use `ALPS_PARAMS_DECL`, while the file constructor uses `ALPS_DECL`. This permits the constructor to live in a different Windows DLL without a dependency cycle. Public source APIs and input semantics are preserved.
-
-`ALPS::alps` links all three components publicly, so existing source consumers keep the same target. All four runtime libraries follow `BUILD_SHARED_LIBS`; Python extensions require shared libraries and package one copy of each component listed in `ALPS_RUNTIME_TARGETS`. Utilities, HDF5 and params use `ALPS_UTILITIES_DECL`, `ALPS_HDF5_DECL` and `ALPS_PARAMS_DECL` with generated export headers, including for Windows DLLs. Downstream binaries must be rebuilt after the splits.
-
-`ALPS::headers` remains a shared compile interface, and `ALPS::maxent` remains the solver library with its public entry point declared in `<alps/solvers.hpp>`. Package discovery still checks the full SDK dependency set. Module CMake files are subdirectories of the main build, not standalone projects.
-
-## Dependencies to reconcile
-
-| Area | Current coupling | Next work |
-| --- | --- | --- |
-| Utilities | Independently linkable; shared SDK configuration and header-only numeric/container traits remain compile dependencies. The unused parser include in `vectorio.hpp` is removed | Narrow the shared compile interface and package dependency discovery if a separately configurable utility package is needed |
-| HDF5 | Independently linkable; utility casts/stack traces, shared configuration and numeric-container adapters. Archive and NGS signal cleanup have one runtime owner | Compare archive contracts with ALPSCore; assess signal ownership and adapter dependencies before implementation replacement |
-| NGS params | Independently linkable typed runtime; HDF5 and header-only numeric helpers. Text/XML and older `Parameters` conversion are isolated adapters in `ALPS::alps` | Compare typed access, missing/default values, iteration, value conversions and input semantics against ALPSCore; keep adapter contracts explicit before replacing an implementation |
-| MaxEnt | Typed params already in use; mcbase execution, Osiris diagnostic gating, CLI mcoptions, HDF5 and BLAS/LAPACK | Separate execution/diagnostics/CLI dependencies and use the solver as a scientific acceptance workload for reconciled foundations; the pinned ALPSCore repo contains no MaxEnt implementation |
-
-Directory separation alone does not remove these dependencies. Utilities, HDF5 and typed params have tested binary boundaries. The params adapters keep the older parameter/parser dependency outside the typed runtime. `common/` and the runtime subsystem folders describe source ownership; they do not introduce further library boundaries.
+With `ALPS_BUILD_TESTING=ON`, CTest runs `module_architecture` and writes `<build-dir>/alps-module-architecture.json`; this requires a Python interpreter ≥ 3.10. Builds with testing disabled do not need Python for module configuration or manifest generation.
 
 ## Reconciliation sequence
 
-1. **Establish this structural baseline.** Build the runtime and applications, run existing tests, install the SDK and build external consumers. Verify that public header paths, test identities and scientific implementations survive the moves.
-2. **Compare HDF5 and params contracts.** Record namespace/symbol overlap, dependency and license requirements, archive formats, scalar/container conversions, parameter parsing and error behavior. Add compatibility fixtures before selecting implementations. Do not link overlapping ALPS/ALPSCore definitions into one process without an explicit symbol-ownership plan.
-3. **Extend actual library boundaries.** Utilities, HDF5 and typed params are extracted and tested through their own targets. Keep adapter ownership explicit when reconciling implementations. Exercise each target from an installed consumer. Keep the Python runtime identity coherent across extensions.
-4. **Use MaxEnt as the first scientific integration.** Route its parameter and archive access through the agreed interfaces. Retain the current numerical regression and add representative scientific/reference data comparisons with agreed tolerances before switching solvers.
-5. **Extract further libraries only as needed.** Reconcile the next subsystem after the initial contracts are stable. The consistent filesystem layout makes its sources easier to locate without implying that each historical subsystem is independently linkable.
-
-Shared build policy stays in the top-level CMake files and `cmake/`. Module CMake files declare sources, public headers and local tests without a second project/version/dependency-discovery framework.
+1. **Validate the boundaries.** Build applications and native tests, install the SDK and exercise individual component consumers, including Osiris and MaxEnt. Verify public headers, test identities, relocation and Python runtime ownership.
+2. **Resolve HDF5 and params contracts.** Use the pinned cross-read fixtures to address archive metadata, unsupported value decoding, conversions, exception behavior and resource lifetime. Keep older scientific input adapters explicit.
+3. **Use MaxEnt as the first scientific workload.** Extend the existing linear-grid regression with representative kernels, grids, covariance and reference spectra before selecting replacement implementations. ALPSCore's pinned repository contains no MaxEnt solver to import.
+4. **Replace one owner at a time.** Never load overlapping ALPS and ALPSCore archive implementations into one process. Preserve the agreed API, serialization and Python contracts, then rebuild dependents.
+5. **Extract further libraries when dependencies permit.** Use the declared and observed module graph to choose the next boundary; source directories alone do not establish it.
 
 ## Validation
 
-`ALPS_BUILD_TESTING` controls both module-local and central tests. `ALPS_BUILD_APPLICATIONS` additionally controls MaxEnt and its test. The existing test names are preserved; labels permit focused runs after building:
+`ALPS_BUILD_TESTING` controls module-local and central native tests. `ALPS_BUILD_APPLICATIONS` additionally controls MaxEnt and its regression. After building, focused existing labels include:
 
 ```sh
 ctest --test-dir <build-dir> --output-on-failure -L '^(utility|hdf5|params|maxent)$'
 ```
 
-Run the full native suite for changes to these shared interfaces. The installed SDK consumer in `tests/cmake/consumer/` exercises HDF5 and params through `ALPS::alps`, and separate executables link only `ALPS::utilities`, `ALPS::hdf5` or `ALPS::params`. HDF5 and params module tests also link only their components; integration tests for older parameters, observables and input adapters keep `ALPS::alps`. The adapter contract also runs through the installed SDK. A static embedding test builds and runs only the three extracted components without building the simulation runtime. The installed consumer also rejects private module directories in the installation. The SDK contract suite also checks C++17/C++20 consumers, embedding and relocation. Python packaging continues to consume the installed SDK; validate its bindings before changing binary or API ownership.
+Run the full native suite for shared-interface changes. The SDK consumers in `tests/cmake/consumer/` exercise aggregate and component links; integration tests for older inputs and observables keep `ALPS::alps`. Check shared/static consumers, installed-header ownership, SDK relocation and Python extension interoperability. The MaxEnt regression also exercises early stop, callback exceptions and completion ordering. These are validation requirements; this ownership map does not assert that every platform/configuration has passed them.

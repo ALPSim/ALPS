@@ -111,17 +111,17 @@ target_sources(alps_headers INTERFACE
         "${PROJECT_BINARY_DIR}/generated/include/alps/version.h"
         "${PROJECT_BINARY_DIR}/generated/include/alps/export.h")
 
-# Each directory declares its sources, public headers and tests.
-add_subdirectory(common)
-add_subdirectory(runtime)
-add_subdirectory(utilities)
-target_link_libraries(alps PUBLIC ALPS::utilities)
-add_subdirectory(hdf5)
-target_link_libraries(alps PUBLIC ALPS::hdf5)
-add_subdirectory(params)
-target_link_libraries(alps PUBLIC ALPS::params)
-
-add_subdirectory(fortran)
+# Filesystem ownership follows scientific responsibilities. Some modules still
+# contribute to libalps until their dependency cycles have been disentangled.
+include("${PROJECT_SOURCE_DIR}/cmake/ALPSModules.cmake")
+alps_register_module(NAME configuration ROOT "${PROJECT_SOURCE_DIR}/cmake/config"
+  GENERATED_HEADERS alps/config.h alps/version.h alps/export.h)
+foreach(module IN ITEMS utilities containers numerics ietl solvers xml
+                        legacy_parameters expression graph lattice model random
+                        osiris hdf5 params alea accumulators mc scheduler parapack fortran)
+  add_subdirectory(${module})
+endforeach()
+target_link_libraries(alps PUBLIC ALPS::utilities ALPS::osiris ALPS::hdf5 ALPS::params)
 
 install(
   TARGETS alps
@@ -131,17 +131,13 @@ install(
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(
-  TARGETS alps_headers
-  EXPORT ALPSTargets
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries
-  FILE_SET common_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers
-  FILE_SET runtime_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers
-  FILE_SET fortran_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers
-  FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers
-  FILE_SET utilities_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers
-  FILE_SET hdf5_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers
-  FILE_SET params_headers DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers)
+get_target_property(header_sets alps_headers INTERFACE_HEADER_SETS)
+set(header_install_args "")
+foreach(header_set IN LISTS header_sets)
+  list(APPEND header_install_args FILE_SET ${header_set}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers)
+endforeach()
+install(TARGETS alps_headers EXPORT ALPSTargets ${header_install_args})
 
 install(
   DIRECTORY "${PROJECT_SOURCE_DIR}/third_party/boost_numeric_bindings/include/boost"
@@ -150,10 +146,6 @@ install(
   FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
   PATTERN "resources" EXCLUDE)
 
-install(
-  DIRECTORY "${PROJECT_SOURCE_DIR}/third_party/xdr/include/"
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  COMPONENT headers)
 install(
   FILES "${PROJECT_SOURCE_DIR}/third_party/xdr/LICENSE"
   DESTINATION ${CMAKE_INSTALL_DATADIR}/alps/licenses/xdr

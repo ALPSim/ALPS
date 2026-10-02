@@ -17,3 +17,10 @@ target_sources(alps_headers INTERFACE
 
 install(TARGETS alps_fortran EXPORT ALPSTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+
+alps_register_module(NAME fortran HEADER_SET fortran_headers
+  TARGETS alps alps_fortran
+  DEPENDS legacy_parameters parapack
+  PRIVATE_FILES
+    src/fwrapper_impl.C
+)

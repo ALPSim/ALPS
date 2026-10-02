@@ -17,9 +17,17 @@
 
 #include <boost/math/constants/constants.hpp>
 #include <math.h>
-#include <alps/parameter.h>
-#include <alps/ngs.hpp>
+#include <alps/ngs/params.hpp>
+#include <alps/osiris/comm.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/throw_exception.hpp>
+#include <algorithm>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 
 //Note the slightly crooked structure here:

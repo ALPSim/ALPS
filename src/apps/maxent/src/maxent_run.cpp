@@ -12,7 +12,10 @@
 *****************************************************************************/
 
 #include "maxent.hpp"
+#include <alps/ngs/signal.hpp>
 #include <alps/solvers.hpp>
+#include <boost/bind/bind.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace {
 bool stop_requested(boost::posix_time::ptime const& end_time) {

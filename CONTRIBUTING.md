@@ -33,6 +33,7 @@ git remote add upstream https://github.com/ALPSim/ALPS.git
 
 - CMake ≥ 3.27, Ninja for the bundled presets, and C++17/C11 compilers such as GCC or Clang.
 - Boost ≥ 1.76 with its compiled libraries and CMake packages, HDF5's C library, and LP64 BLAS/LAPACK. Use serial HDF5 for the default MPI-disabled build; see [numerical libraries](#numerical-libraries).
+- For native tests (`ALPS_BUILD_TESTING=ON`): Python ≥ 3.10 for the CTest module-architecture audit; this does not require building the Python bindings.
 - For Python development: GIL-enabled CPython ≥ 3.10 in a writable Python environment. Pip installs NumPy, SciPy and Matplotlib with pyalps. Free-threaded Python is unsupported.
 - Optional: MPI and Boost.MPI for `ALPS_ENABLE_MPI=ON`; an OpenMP runtime for `ALPS_ENABLE_OPENMP=ON`; a Fortran compiler for the Fortran examples.
 
@@ -71,7 +72,7 @@ python -m pip install "cmake>=3.27" ninja
 
 Skip the first two lines if already using a suitable environment. On Debian/Ubuntu, creating a venv may first require `sudo apt-get install python3-venv`. Activate the same environment in each new terminal. Both CMake and CTest must be at least 3.27; use `command -v cmake` to check which installation your shell finds.
 
-C++-only development does not require Python: system packages or [official CMake binaries](https://cmake.org/download/) and Ninja also work. A generator other than Ninja can be selected with a plain CMake invocation instead of a preset.
+C++ library/application builds with `ALPS_BUILD_TESTING=OFF` do not require Python: system packages or [official CMake binaries](https://cmake.org/download/) and Ninja also work. Native tests require the interpreter listed above. A generator other than Ninja can be selected with a plain CMake invocation instead of a preset.
 
 ### Build
 
@@ -175,9 +176,10 @@ For development questions, use [Discord](https://discord.gg/JRNWnnva9g); reprodu
 | Location | Contents |
 | --- | --- |
 | `src/alps/` | C++ component coordination; see the [source ownership map](src/alps/README.md) |
-| `src/alps/common/` | Shared ALPS/IETL headers, configuration templates, numerical and fixed-capacity tests |
-| `src/alps/{utilities,hdf5,params}/` | Independently linkable components with public headers, sources and local tests |
-| `src/alps/runtime/` | Remaining `ALPS::alps` subsystem headers, sources and native tests |
+| `src/alps/{utilities,hdf5,params,osiris}/` | Independently linkable components with public headers, sources and local tests |
+| `src/alps/{containers,numerics,ietl,graph}/` | Container, numerical, eigensolver and graph headers and tests |
+| `src/alps/{xml,legacy_parameters,expression,lattice,model,random,alea,accumulators,mc,scheduler,parapack}/` | Semantic source modules contributing to `ALPS::alps` and its compile interface |
+| `src/alps/solvers/` | Public callable solver declarations shared by MaxEnt and CT-QMC |
 | `src/alps/fortran/` | Public headers and implementation of the `ALPS::fortran` bridge |
 | `src/apps/`, `src/tools/` | Simulation applications, shared solver implementations and CLI tools |
 | `python/pyalps/` | Python sources, bindings, packaging and extension example |
@@ -185,13 +187,23 @@ For development questions, use [Discord](https://discord.gg/JRNWnnva9g); reprodu
 | `tutorials/` | [Ordered tutorials and standalone library examples](tutorials/README.md) |
 | `tests/` | Cross-module integration, Python, SDK, CLI, build-helper and reconciliation tests |
 | `third_party/` | [Numeric Bindings headers](third_party/boost_numeric_bindings/README.md) and [XDR serialization](third_party/xdr/README.md) |
-| `cmake/`, `.github/` | Build configuration, shared version file, CI and release helpers |
+| `cmake/`, `.github/` | Build configuration, `cmake/config/` header templates, shared version file, architecture checks, CI and release helpers |
 
-Utilities, HDF5 and NGS parameters use `src/alps/<module>/{include/alps,src,tests}`. The remaining runtime keeps subsystem names below `runtime/{include/alps,src,tests}`; the Fortran bridge uses `fortran/{include/alps/fortran,src}`. First-party public headers are listed explicitly in each area's CMake `HEADERS` file set; add new exported headers there. These include roots preserve installed `<alps/...>` and `<ietl/...>` names. Generated headers live in `<build-dir>/generated/include/alps/`, with templates in `src/alps/common/config/`.
+Sources use `src/alps/<module>/{include,src,tests}` where applicable; the broad `common/` and `runtime/` source groups are removed. First-party public headers are listed explicitly in each owner's CMake `HEADERS` file set; add new exported headers there. Public `<alps/...>` and `<ietl/...>` include names are preserved independently of physical ownership. Generated headers live in `<build-dir>/generated/include/alps/`, with templates in `cmake/config/`.
 
-`common/` groups shared headers, including numerical helpers and IETL, while `ALPS::headers` remains the aggregate compile interface. It is not a separate library API: some common numerical headers still depend on runtime parser headers. MaxEnt uses `src/apps/maxent/{src,cli,tests}`; `<alps/solvers.hpp>` lives in `common/include/alps/` because it also declares the CT-QMC entry points. Keep subsystem tests beside their owner and cross-module compatibility tests in `tests/integration/`. Existing CMake options and test names are preserved; moving inactive test fixtures does not enable them.
+`ALPS::headers` remains the aggregate compile interface. Physical modules are not automatically independent libraries: numerical headers still depend on XML/parser headers and other include cycles remain. MaxEnt uses `src/apps/maxent/{src,cli,tests}`; `<alps/solvers.hpp>` lives in `src/alps/solvers/include/alps/` because it also declares CT-QMC entry points. Keep subsystem tests beside their owner and cross-module compatibility tests in `tests/integration/`. Existing CMake options and test names are preserved; moving inactive fixtures does not enable them.
 
-These directories establish source ownership for ALPSCore reconciliation. `ALPS::utilities`, `ALPS::hdf5` and `ALPS::params` are independently linkable libraries; `ALPS::alps` links them transitively and owns the params text/XML and older `Parameters` adapters in `src/alps/params/adapters/`. MaxEnt remains `ALPS::maxent`. The filesystem organization preserves these binary boundaries and one shared project configuration. See the [module boundaries and next steps](src/alps/README.md) before separating more libraries or importing ALPSCore code.
+`ALPS::utilities`, `ALPS::hdf5`, `ALPS::params` and `ALPS::osiris` are independently linkable libraries; `ALPS::alps` links them transitively and owns the params text/XML and older `Parameters` adapters in `src/alps/params/adapters/`. `ALPS::maxent` links the foundations, Osiris and numerical providers without `ALPS::alps`; its CLI still uses the aggregate runtime's options parser. Rebuild downstream binaries after the Osiris split. This cleanup prepares MaxEnt, HDF5 and params for ALPSCore reconciliation without importing Core implementations. See the [module boundaries and next steps](src/alps/README.md).
+
+CMake generates `alps-module-manifest.json` from module declarations and actual header/source lists. After configuration, check ownership and declared include dependencies with:
+
+```sh
+python .github/scripts/check_module_architecture.py \
+  --manifest _build/default/alps-module-manifest.json \
+  --write-report _build/default/alps-module-report.json
+```
+
+Update the owning module's CMake declarations when adding production files or dependencies. The checker reports existing cycles and nonliteral includes for review; it does not prove independent linkability or replace builds and scientific tests.
 
 ### Build options
 
