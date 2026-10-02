@@ -197,6 +197,9 @@ namespace alps {
                 ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK(int, int)
                 ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK(bool, bool)
                 ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK(std::string, std::string)
+                else
+                    throw std::runtime_error("Unsupported parameter scalar datatype at "
+                                             + ar.complete_path("") + ALPS_STACKTRACE);
             } else {
                 if (ar.is_complex(""))
                     ALPS_NGS_PARAMVALUE_LOAD_HDF5(
@@ -208,6 +211,9 @@ namespace alps {
                 ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK(
                     std::string, std::vector<std::string>
                 )
+                else
+                    throw std::runtime_error("Unsupported parameter array datatype at "
+                                             + ar.complete_path("") + ALPS_STACKTRACE);
             }
             #undef ALPS_NGS_PARAMVALUE_LOAD_HDF5
             #undef ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK

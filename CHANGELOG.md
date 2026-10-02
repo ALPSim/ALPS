@@ -52,6 +52,7 @@ The old build interfaces are removed without compatibility aliases. Reconfigure 
 
 ### Fixed
 
+- Reject unsupported native C++ parameter checkpoint datatypes with the dataset path in the diagnostic, instead of silently substituting zero. Existing supported types and custom readers retain their decoding behavior; a failed parameter reload preserves the previous values.
 - Generate XML plotting scripts compatible with Python 3 through the `alps-xml` CLI.
 - Correct the Heisenberg tutorial's vector dot product and allow its vector implementation to compile without x86 SIMD support.
 - Remove undefined behavior in XDR callbacks and integer-range boundary checks exposed by sanitizers.

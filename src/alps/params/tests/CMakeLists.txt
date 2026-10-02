@@ -18,7 +18,7 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-foreach(name default ordering stream assign not_found external)
+foreach(name default ordering stream assign not_found external checkpoint)
   add_executable(param_${name} ${name}.cpp)
 
   target_link_libraries(param_${name} PRIVATE ALPS::params)

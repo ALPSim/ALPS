@@ -58,9 +58,15 @@ cmake --build "$scratch/core-probe" --parallel 2
 python "$alps_repo/tests/reconciliation/compare.py" \
   --alps "$scratch/alps-probe/reconciliation_probe" \
   --alpscore "$scratch/core-probe/reconciliation_probe" \
-  --output "$scratch/results.json" \
-  --expect "$alps_repo/tests/reconciliation/baseline-darwin-arm64.json"
+  --output "$scratch/results.json"
 ```
+
+The committed `baseline-darwin-arm64.json` is a historical measurement from
+before ALPS rejected unsupported native parameter checkpoint types. Its
+ALPSCore-to-ALPS extended checkpoint silently loaded float, unsigned and wide
+integer values as zero; current ALPS rejects that checkpoint instead. Use
+`--expect` only when comparing against a baseline appropriate for the tested
+revision and platform, and review intentional behavior changes separately.
 
 Adjust paths, compiler and executable suffix for other platforms. Do not use the
 macOS baseline as a universal expectation: the wide-integer case uses native
