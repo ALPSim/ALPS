@@ -21,8 +21,6 @@
 #include <vector>
 #include <algorithm>
 #include <cassert>
-#include <alps/hdf5/archive.hpp>
-#include <alps/hdf5/pointer.hpp>
 
 inline double expfunc(double entry)
 {
@@ -197,19 +195,6 @@ namespace blas{
           resize(size_+1);
           std::vector<double>::iterator it = values_.begin();
           values_.insert(it+i,value);
-      }
-
-      void save(alps::hdf5::archive & ar) const
-      {
-          using namespace alps;
-          ar << make_pvp("", &values_.front(), std::vector<std::size_t>(1, size_));
-      }
-
-      void load(alps::hdf5::archive & ar)
-      {
-          using namespace alps;
-          resize(ar.extent("")[0]);
-          ar >> make_pvp("", &values_.front(), std::vector<std::size_t>(1, size_));
       }
 
     private:

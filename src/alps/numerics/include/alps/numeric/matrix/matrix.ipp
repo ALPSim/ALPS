@@ -395,29 +395,6 @@ namespace numeric {
         this->reserved_size1_ = rows;
     }
 
-    template <typename T, typename MemoryBlock>
-    void matrix<T, MemoryBlock>::write_xml(oxstream& xml) const
-    {
-        xml << start_tag("MATRIX");
-        xml << attribute("cols", num_cols());
-        xml << attribute("rows", num_rows());
-        for(size_type i=0; i < num_rows(); ++i)
-        {
-            xml << start_tag("ROW");
-            for(size_type j=0; j < num_cols(); ++j)
-            {
-                std::stringstream sts;
-                sts << this->operator()(i,j);
-
-                xml << start_tag("ELEMENT");
-                xml << sts.str();
-                xml << end_tag("ELEMENT");
-            }
-            xml << end_tag("ROW");
-        }
-        xml << end_tag("MATRIX");
-    }
-
 //////////////////////////////////////////////////////////////////////////////
 
     template <typename T, typename MemoryBlock>
@@ -453,13 +430,6 @@ namespace numeric {
     {
         detail::print_matrix(os, m);
         return os;
-    }
-
-    template <typename T, typename MemoryBlock>
-    alps::oxstream& operator << (alps::oxstream& xml, matrix<T,MemoryBlock> const& m)
-    {
-        m.write_xml(xml);
-        return xml;
     }
 
    template <typename T, typename MemoryBlock>

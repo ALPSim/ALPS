@@ -11,6 +11,7 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <alps/hdf5/matrix.hpp>
 #include <alps/hdf5/archive.hpp>
 #include <alps/numeric/matrix.hpp>
 #include <alps/utility/vectorio.hpp>

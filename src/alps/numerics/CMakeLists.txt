@@ -1,13 +1,21 @@
+add_library(alps_numerics INTERFACE)
+add_library(ALPS::numerics ALIAS alps_numerics)
+set_target_properties(alps_numerics PROPERTIES EXPORT_NAME numerics)
+target_link_libraries(alps_numerics INTERFACE ALPS::configuration ALPS::containers ALPS::utilities
+  ${ALPS_BLAS_TARGET} ${ALPS_LAPACK_TARGET})
 # Numerics source ownership.
-target_sources(alps_headers INTERFACE
+target_sources(alps_numerics INTERFACE
   FILE_SET numerics_headers TYPE HEADERS
   BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
   FILES
+    include/alps/multi_array.hpp
+    include/alps/multi_array/functions.hpp
+    include/alps/multi_array/operators.hpp
+    include/alps/functional.h
+    include/alps/utility/numeric_cast.hpp
     include/alps/boost/accumulators/numeric/functional.hpp
     include/alps/boost/accumulators/numeric/functional/valarray.hpp
     include/alps/boost/accumulators/numeric/functional/vector.hpp
-    include/alps/hdf5/matrix.hpp
-    include/alps/hdf5/numeric_vector.hpp
     include/alps/ngs/numeric.hpp
     include/alps/ngs/numeric/array.hpp
     include/alps/ngs/numeric/detail.hpp
@@ -100,6 +108,7 @@ if(ALPS_BUILD_TESTING)
 endif()
 
 alps_register_module(NAME numerics HEADER_SET numerics_headers
+  HEADER_TARGETS alps_numerics
   TARGETS alps
-  DEPENDS configuration containers hdf5 utilities xml
+  DEPENDS configuration containers utilities
 )

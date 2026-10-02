@@ -33,7 +33,7 @@ foreach(
   real_tests)
   add_executable(${name} ${name}.C)
 
-  target_link_libraries(${name} PRIVATE ALPS::alps)
+  target_link_libraries(${name} PRIVATE ALPS::numerics)
   target_compile_definitions(${name} PRIVATE ALPS_DISABLE_MATRIX_ELEMENT_ITERATOR_WARNING)
   alps_add_test(${name})
   set_property(TEST ${name} PROPERTY LABELS numeric)
@@ -45,3 +45,7 @@ endforeach()
 # installed alps/version.h.
 target_compile_definitions(matrix_deprecated_hdf5_format_test
                            PRIVATE ALPS_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+
+foreach(target IN ITEMS matrix_hdf5 matrix_deprecated_hdf5_format_test)
+  target_link_libraries(${target} PRIVATE ALPS::numeric_io)
+endforeach()

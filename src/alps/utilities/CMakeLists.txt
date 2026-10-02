@@ -14,7 +14,10 @@ set_target_properties(alps_utilities PROPERTIES
   VERSION ${PROJECT_VERSION}
   SOVERSION ${PROJECT_VERSION_MAJOR}
   INSTALL_RPATH "${ALPS_LOADER_ORIGIN}")
-target_link_libraries(alps_utilities PUBLIC alps_headers Boost::filesystem Threads::Threads)
+target_link_libraries(alps_utilities PUBLIC ALPS::configuration ALPS::containers Boost::filesystem Threads::Threads)
+if(ALPS_ENABLE_MPI)
+  target_link_libraries(alps_utilities PUBLIC "$<COMPILE_ONLY:MPI::MPI_CXX;Boost::mpi>")
+endif()
 alps_dependency_rpath(alps_utilities)
 alps_copy_runtime_dependencies(alps_utilities)
 if(WIN32)
@@ -23,18 +26,18 @@ endif()
 generate_export_header(alps_utilities EXPORT_MACRO_NAME ALPS_UTILITIES_DECL
   EXPORT_FILE_NAME "${PROJECT_BINARY_DIR}/generated/include/alps/utilities_export.h")
 if(NOT BUILD_SHARED_LIBS)
-  target_compile_definitions(alps_headers INTERFACE ALPS_UTILITIES_STATIC_DEFINE)
+  target_compile_definitions(alps_utilities PUBLIC ALPS_UTILITIES_STATIC_DEFINE)
 endif()
-target_sources(alps_headers INTERFACE
+target_sources(alps_utilities PUBLIC
   FILE_SET HEADERS
+  BASE_DIRS "${PROJECT_BINARY_DIR}/generated/include"
   FILES "${PROJECT_BINARY_DIR}/generated/include/alps/utilities_export.h")
-target_sources(alps_headers INTERFACE
+target_sources(alps_utilities PUBLIC
   FILE_SET utilities_headers TYPE HEADERS
   BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
   FILES
     include/alps/cctype.h
     include/alps/factory.h
-    include/alps/functional.h
     include/alps/lambda.hpp
     include/alps/ngs/boost_mpi.hpp
     include/alps/ngs/cast.hpp
@@ -72,7 +75,6 @@ target_sources(alps_headers INTERFACE
     include/alps/utility/factory.hpp
     include/alps/utility/generator.hpp
     include/alps/utility/make_copy.hpp
-    include/alps/utility/numeric_cast.hpp
     include/alps/utility/os.hpp
     include/alps/utility/resize.hpp
     include/alps/utility/set_zero.hpp
@@ -81,19 +83,13 @@ target_sources(alps_headers INTERFACE
     include/alps/utility/vectorio.hpp
     include/alps/utility/vmusage.hpp)
 
-install(TARGETS alps_utilities EXPORT ALPSTargets
-  RUNTIME_DEPENDENCY_SET alps_runtime
-  COMPONENT libraries
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
 alps_register_module(NAME utilities HEADER_SET utilities_headers
+  HEADER_TARGETS alps_utilities
   TARGETS alps alps_utilities
-  DEPENDS configuration containers numerics
+  DEPENDS configuration containers
   GENERATED_HEADERS alps/utilities_export.h
 )

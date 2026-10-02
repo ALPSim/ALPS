@@ -12,6 +12,7 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <alps/hdf5/matrix.hpp>
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <alps/numeric/matrix.hpp>

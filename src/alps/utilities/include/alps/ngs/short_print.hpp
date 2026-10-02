@@ -16,7 +16,7 @@
 
 #include <vector>
 #include <boost/array.hpp>
-#include <alps/multi_array.hpp>
+#include <alps/multi_array/multi_array.hpp>
 #include <alps/utilities_export.h>
 #include <ostream>
 

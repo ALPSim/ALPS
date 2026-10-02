@@ -18,7 +18,7 @@ set_target_properties(alps_osiris PROPERTIES
   SOVERSION ${PROJECT_VERSION_MAJOR}
   INSTALL_RPATH "${ALPS_LOADER_ORIGIN}")
 target_compile_features(alps_osiris PRIVATE c_std_11)
-target_link_libraries(alps_osiris PUBLIC alps_headers Boost::serialization Boost::filesystem)
+target_link_libraries(alps_osiris PUBLIC ALPS::configuration Boost::serialization Boost::filesystem)
 if(ALPS_ENABLE_MPI)
   target_link_libraries(alps_osiris PUBLIC MPI::MPI_CXX)
 endif()
@@ -27,13 +27,14 @@ alps_copy_runtime_dependencies(alps_osiris)
 generate_export_header(alps_osiris EXPORT_MACRO_NAME ALPS_OSIRIS_DECL
   EXPORT_FILE_NAME "${PROJECT_BINARY_DIR}/generated/include/alps/osiris_export.h")
 if(NOT BUILD_SHARED_LIBS)
-  target_compile_definitions(alps_headers INTERFACE ALPS_OSIRIS_STATIC_DEFINE)
+  target_compile_definitions(alps_osiris PUBLIC ALPS_OSIRIS_STATIC_DEFINE)
 endif()
-target_sources(alps_headers INTERFACE
+target_sources(alps_osiris PUBLIC
   FILE_SET HEADERS
+  BASE_DIRS "${PROJECT_BINARY_DIR}/generated/include"
   FILES "${PROJECT_BINARY_DIR}/generated/include/alps/osiris_export.h")
 
-target_sources(alps_headers INTERFACE
+target_sources(alps_osiris PUBLIC
   FILE_SET osiris_headers TYPE HEADERS
   BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
             "${PROJECT_SOURCE_DIR}/third_party/xdr/include"
@@ -62,18 +63,12 @@ target_sources(alps_headers INTERFACE
     "${PROJECT_SOURCE_DIR}/third_party/xdr/include/alps/osiris/rpc_types.h"
     "${PROJECT_SOURCE_DIR}/third_party/xdr/include/alps/osiris/xdrcore.h")
 
-install(TARGETS alps_osiris EXPORT ALPSTargets
-  RUNTIME_DEPENDENCY_SET alps_runtime
-  COMPONENT libraries
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
 alps_register_module(NAME osiris HEADER_SET osiris_headers
+  HEADER_TARGETS alps_osiris
   TARGETS alps alps_osiris
   DEPENDS configuration
   PRIVATE_FILES

@@ -1,4 +1,5 @@
-#include <alps/ngs.hpp>
+#include <alps/ngs/params.hpp>
+#include <iostream>
 
 int main(int argc, char** argv){
     alps::params parms;

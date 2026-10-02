@@ -12,6 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <alps/hdf5/archive.hpp>
+#include <iostream>
 #include <alps/hdf5/vector.hpp>
 #include <alps/hdf5/multi_array.hpp>
 

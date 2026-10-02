@@ -46,6 +46,27 @@ def test_embedded_defaults_and_mpi_isolation(tmp_path):
               *(f"-DCMAKE_{kind}_OUTPUT_DIRECTORY={tmp_path.as_posix()}/{kind.lower()}"
                 for kind in ("RUNTIME", "LIBRARY", "ARCHIVE")))
 
+    allowed = {
+        "utilities": {"utilities", "containers"},
+        "hdf5": {"hdf5", "utilities", "containers"},
+        "params": {"params", "hdf5", "utilities", "containers"},
+        "osiris": {"osiris"},
+        "xml": {"xml", "utilities", "containers"},
+        "cli": {"cli", "utilities", "containers"},
+        "numeric": {"numerics", "utilities", "containers"},
+        "numeric_io": {"numeric_io", "numerics", "hdf5", "utilities", "containers"},
+    }
+    for line in (tmp_path / "component-includes-Release.txt").read_text().splitlines():
+        component, includes = line.split("=", 1)
+        module_paths = []
+        for include in includes.split("|"):
+            try:
+                module_paths.append(Path(include).relative_to(SOURCE / "src/alps"))
+            except ValueError:
+                continue
+        assert {path.parts[0] for path in module_paths} == allowed[component]
+        assert not any("adapters" in path.parts for path in module_paths)
+
 
 def test_components_link_without_building_the_core_runtime(tmp_path):
     # Compile only the extracted components, including the static export modes.
@@ -57,13 +78,14 @@ def test_components_link_without_building_the_core_runtime(tmp_path):
     subprocess.run([
         "cmake", "--build", str(tmp_path), "--config", "Release",
         "--target", "utilities_contract", "hdf5_contract", "params_contract", "osiris_contract",
-        "xml_contract", "cli_contract", "maxent_independent_contract", "maxent", "--parallel", "2",
+        "xml_contract", "cli_contract", "numeric_contract", "numeric_io_contract",
+        "maxent_independent_contract", "maxent", "--parallel", "2",
     ], check=True)
     core_runtime = Path((tmp_path / "core-runtime-Release.txt").read_text().strip())
     assert not core_runtime.exists(), f"Extracted components built the core runtime: {core_runtime}"
     subprocess.run([
         "ctest", "--test-dir", str(tmp_path), "-C", "Release", "--output-on-failure",
-        "-R", "^(utilities|hdf5|params|osiris|xml|cli|maxent_independent)_contract$", "--no-tests=error",
+        "-R", "^(utilities|hdf5|params|osiris|xml|cli|numeric|numeric_io|maxent_independent)_contract$", "--no-tests=error",
     ], check=True)
 
 

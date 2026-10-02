@@ -43,6 +43,8 @@ foreach(
   set_property(TEST ${name} PROPERTY LABELS hdf5)
 endforeach()
 
+target_link_libraries(hdf5_real_complex_matrix PRIVATE ALPS::numeric_io)
+
 # Keep the reference archive with the test that reads it.
 target_compile_definitions(hdf5_fortran_string PRIVATE
   ALPS_TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
@@ -280,7 +282,7 @@ if(ALPS_BUILD_EXTENSIVE_TESTS)
     configure_file(type_check.cpp.in "${target}.cpp" @ONLY)
     add_executable(${target} "${CMAKE_CURRENT_BINARY_DIR}/${target}.cpp")
     target_include_directories(${target} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-    target_link_libraries(${target} PRIVATE ALPS::hdf5)
+    target_link_libraries(${target} PRIVATE ALPS::numeric_io)
     foreach(mode IN ITEMS dataset attribute compressed)
       add_test(NAME ${target}.${mode} COMMAND ${target} ${mode})
       set_tests_properties(${target}.${mode} PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 600 LABELS

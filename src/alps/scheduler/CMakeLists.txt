@@ -59,7 +59,7 @@ endif()
 
 alps_register_module(NAME scheduler HEADER_SET scheduler_headers
   TARGETS alps
-  DEPENDS alea configuration expression hdf5 lattice legacy_parameters mc model numerics osiris params random utilities xml
+  DEPENDS numeric_io alea configuration expression hdf5 lattice legacy_parameters mc model numerics osiris params random utilities xml
   PRIVATE_FILES
     src/ngs/ulfm.cpp
 )

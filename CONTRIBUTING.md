@@ -177,7 +177,8 @@ For development questions, use [Discord](https://discord.gg/JRNWnnva9g); reprodu
 | --- | --- |
 | `src/alps/` | C++ component coordination; see the [source ownership map](src/alps/README.md) |
 | `src/alps/{utilities,hdf5,params,osiris,xml,cli}/` | Independently linkable components with public headers, sources and local tests |
-| `src/alps/{containers,numerics,ietl,graph}/` | Container, numerical, eigensolver and graph headers and tests |
+| `src/alps/{containers,numerics,numeric_io}/` | Separate interface targets for container storage, numerical algorithms and numerical HDF5 adapters |
+| `src/alps/{ietl,graph}/` | Eigensolver and graph headers and tests contributing to the aggregate interface |
 | `src/alps/plotting/` | `<alps/plot.h>` output helpers combining XML and older parameters; contributes headers, not a separate library |
 | `src/alps/{legacy_parameters,expression,lattice,model,random,alea,accumulators,mc,scheduler,parapack}/` | Semantic source modules contributing to `ALPS::alps` and its compile interface |
 | `src/alps/solvers/` | Public callable solver declarations shared by MaxEnt and CT-QMC |
@@ -192,9 +193,11 @@ For development questions, use [Discord](https://discord.gg/JRNWnnva9g); reprodu
 
 Sources use `src/alps/<module>/{include,src,tests}` where applicable; the broad `common/` and `runtime/` source groups are removed. First-party public headers are listed explicitly in each owner's CMake `HEADERS` file set; add new exported headers there. Public `<alps/...>` and `<ietl/...>` include names are preserved independently of physical ownership. Generated headers live in `<build-dir>/generated/include/alps/`, with templates in `cmake/config/`.
 
-`ALPS::headers` remains the aggregate compile interface. Physical modules are not automatically independent libraries: numerical headers still depend on XML/parser headers and other include cycles remain. MaxEnt uses `src/apps/maxent/{src,cli,tests}`; `<alps/solvers.hpp>` lives in `src/alps/solvers/include/alps/` because it also declares CT-QMC entry points. Keep subsystem tests beside their owner and cross-module compatibility tests in `tests/integration/`. Existing CMake options and test names are preserved; moving inactive fixtures does not enable them.
+`ALPS::configuration`, `ALPS::containers`, `ALPS::numerics`, `ALPS::numeric_io` and `ALPS::solver_headers` are exported interface targets with their own header sets and declared dependencies. Foundation targets do not inherit the aggregate `ALPS::headers` interface. Numerical headers no longer depend on HDF5 or XML; archive adapters belong to `numeric_io`. The aggregate remains available for simulation modules, including the separate `expression`/`legacy_parameters` include cycle. Physical source ownership does not make every module an independent library.
 
-`ALPS::utilities`, `ALPS::hdf5`, `ALPS::params`, `ALPS::osiris`, `ALPS::xml` and `ALPS::cli` are independently linkable libraries; `ALPS::alps` links them transitively and owns the params text/XML and older `Parameters` adapters in `src/alps/params/adapters/`. XML parsing/output belongs to `ALPS::xml`; file-to-parameter conversion still belongs to those adapters. `ALPS::cli` owns the unchanged `mcoptions` and `parseargs` implementations under their existing public header names.
+MaxEnt uses `src/apps/maxent/{src,cli,tests}`; `<alps/solvers.hpp>` lives in `src/alps/solvers/include/alps/` and is exported through `ALPS::solver_headers` because it also declares CT-QMC entry points. Keep subsystem tests beside their owner and cross-module compatibility tests in `tests/integration/`. Existing CMake options and test names are preserved; moving inactive fixtures does not enable them.
+
+`ALPS::utilities`, `ALPS::hdf5`, `ALPS::params`, `ALPS::osiris`, `ALPS::xml` and `ALPS::cli` are independently linkable libraries; `ALPS::alps` links them transitively and owns the params text/XML and older `Parameters` adapters in `src/alps/params/adapters/`. Their conversion headers live under `adapters/include/`, with unchanged public include names exposed through the aggregate interface. XML parsing/output belongs to `ALPS::xml`; file-to-parameter conversion still belongs to those adapters. `ALPS::cli` owns the unchanged `mcoptions` and `parseargs` implementations under their existing public header names.
 
 `ALPS::maxent` links the foundations, Osiris and numerical providers without `ALPS::alps`; its executable adds `ALPS::cli` for argument parsing and reads HDF5 params directly. These extractions preserve scientific algorithms and existing input grammars. Rebuild downstream binaries after the library splits. This cleanup prepares MaxEnt, HDF5 and params for ALPSCore reconciliation without importing Core implementations. See the [module boundaries and next steps](src/alps/README.md).
 
@@ -240,6 +243,15 @@ target_link_libraries(my_simulation PRIVATE ALPS::alps)
 ```
 
 The imported target carries headers, C++17 requirements, compile definitions and transitive dependencies. Use a compiler and configuration compatible with the SDK's ABI. `ALPS::headers` exposes the compile interface without linking; `ALPS::fortran` supplies the C++ Fortran bridge and its GNU Fortran compatibility flag. Programs using only utilities can request `find_package(ALPS CONFIG REQUIRED COMPONENTS utilities)` and link `ALPS::utilities`. Archive-only programs can similarly request the `hdf5` component and link `ALPS::hdf5`, which also owns archive signal cleanup. Typed parameter programs can request the `params` component and link `ALPS::params`. XML parsing/output and command-line parsing are available through the `xml` and `cli` components and targets `ALPS::xml` and `ALPS::cli`. The parameter-file constructor and text/XML conversion adapters still require `ALPS::alps`. Package discovery still checks the SDK's complete dependency set; component-specific configuration is future work.
+
+Use `ALPS::containers` for array storage and `ALPS::numerics` for matrix/vector algorithms and array mathematics, including the existing `<alps/multi_array.hpp>` umbrella. Numerical archive consumers link `ALPS::numeric_io` and explicitly include `<alps/hdf5/matrix.hpp>` or `<alps/hdf5/numeric_vector.hpp>`. For example:
+
+```cmake
+find_package(ALPS CONFIG REQUIRED COMPONENTS numeric_io)
+target_link_libraries(my_simulation PRIVATE ALPS::numeric_io)
+```
+
+`<alps/numeric/matrix.hpp>` no longer includes its HDF5 adapter. Diagonal/deprecated matrix/vector HDF5 `save`/`load` members and matrix XML output methods, unused in this repository, were removed without compatibility adapters. These API changes are separate from the byte-preserving header moves, and no scientific algorithms were changed or imported from ALPSCore. See the [migration notes](CHANGELOG.md#removed-and-migration).
 
 An SDK built with applications also exports executable targets such as `ALPS::spinmc` and the solver libraries `ALPS::maxent`, `ALPS::cthyb` and `ALPS::ctint`. Require them with `find_package(ALPS CONFIG REQUIRED COMPONENTS applications solvers)`. The solver API is in `<alps/solvers.hpp>`. Python extensions that share ALPS objects with pyalps use its separate [downstream CMake package](python/pyalps/README.md#downstream-native-extensions).
 

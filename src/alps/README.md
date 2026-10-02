@@ -4,15 +4,18 @@ ALPS sources are grouped by responsibility to prepare MaxEnt, HDF5 and typed par
 
 The [separate-process probes](../../tests/reconciliation/README.md) record the pinned ALPSCore reference and reproduce measured archive/params compatibility checks.
 
+Before replacing HDF5, agree on the generic serialization contract with the new ALEA maintainer: buffer ownership and lifetime, shapes/types, error behavior and the owner of the HDF5 implementation. Start one measurement-application pilot in parallel with params reconciliation, and explicitly list the legacy result and checkpoint formats it must preserve. MaxEnt remains an acceptance test for the foundations; it does not exercise ALEA migration. `src/alps/alea/` still contains the legacy `Observable`/`ObservableSet` implementation; this pass imports neither new ALEA nor a compatibility shim. The pinned ALPSCore probes disable ALEA, so they do not validate ALEA compatibility.
+
 ## Source ownership
 
 Each module uses `include/`, `src/` and `tests/` where applicable. Public include spellings describe the API, independently of the physical owner: for example, NGS measurement headers live in `alea/include/alps/ngs/`, while typed parameters live in `params/include/alps/ngs/`.
 
 | Source module under `src/alps/` | Responsibility | Binary or compile owner |
 | --- | --- | --- |
-| `utilities/` | Utility functions, general helpers, type traits and NGS configuration helpers | `ALPS::utilities`, `ALPS::headers` |
-| `containers/` | Fixed-capacity and ALPS multi-array containers | `ALPS::headers` |
-| `numerics/` | Numerical helpers and matrix/vector interfaces | `ALPS::headers` |
+| `utilities/` | Utility functions, general helpers, type traits and NGS configuration helpers | `ALPS::utilities` |
+| `containers/` | Fixed-capacity containers, ALPS multi-array storage and Boost serialization | `ALPS::containers` |
+| `numerics/` | Numerical helpers, array mathematics and matrix/vector interfaces | `ALPS::numerics` |
+| `numeric_io/` | HDF5 adapters for numerical matrices and vectors | `ALPS::numeric_io` |
 | `ietl/` | Iterative eigensolver headers under `include/ietl/` | `ALPS::headers` |
 | `hdf5/` | Archive API, container adapters, shared context registry and signal cleanup | `ALPS::hdf5` |
 | `params/` | Typed values, lookup/proxies, iteration and HDF5 checkpoints | `ALPS::params`; `adapters/` contributes to `ALPS::alps` |
@@ -26,20 +29,26 @@ Each module uses `include/`, `src/` and `tests/` where applicable. Public includ
 | `alea/`, `accumulators/` | Observable/result facilities and accumulator implementations | `ALPS::alps` |
 | `mc/`, `scheduler/`, `parapack/` | Simulation API, execution and scheduling | `ALPS::alps` |
 | `fortran/` | C++ bridge with public headers in `include/alps/fortran/` | `ALPS::fortran` |
-| `solvers/` | Shared `<alps/solvers.hpp>` declarations for MaxEnt and CT-QMC | `ALPS::headers` |
+| `solvers/` | Shared `<alps/solvers.hpp>` declarations for MaxEnt and CT-QMC | `ALPS::solver_headers` |
 | `resources/` | XML definitions and stylesheets | Installed data component |
 
-The broad `common/` and `runtime/` source groups are removed. ALPS and IETL configuration templates live in `cmake/config/`; generated public headers live under `<build-dir>/generated/include/alps/`. MaxEnt remains in `src/apps/maxent/{src,cli,tests}`. Subsystem tests follow their source owner; cross-module integration, SDK, Python, CLI, packaging and reconciliation checks stay under root `tests/`. Relocation preserves registered test names and leaves inactive fixtures inactive.
+The broad `common/` and `runtime/` source groups are removed. ALPS and IETL configuration templates live in `cmake/config/`; generated public headers live under `<build-dir>/generated/include/alps/`. `ALPS::configuration` carries the shared configuration headers and compile requirements. MaxEnt remains in `src/apps/maxent/{src,cli,tests}`. Subsystem tests follow their source owner; cross-module integration, SDK, Python, CLI, packaging and reconciliation checks stay under root `tests/`. Relocation preserves registered test names and leaves inactive fixtures inactive.
 
 All first-party public headers have explicit CMake `HEADERS` file sets. These declare build include roots and preserve installed `<alps/...>` and `<ietl/...>` paths; consumers use exported targets rather than broad source-tree include roots. Public template definitions remain installed, while private source files, tests and physical `include/` nesting do not enter the SDK.
 
 ## Library boundaries
 
+`ALPS::configuration`, `ALPS::containers`, `ALPS::numerics`, `ALPS::numeric_io` and `ALPS::solver_headers` are exported interface targets, not new binary libraries. Foundation targets own their public header sets and declare their actual dependencies; they do not inherit `ALPS::headers`. The aggregate compile interface instead collects these foundations and the remaining simulation headers.
+
+`ALPS::containers` provides storage without the mathematical umbrella. Array functions/operators, `<alps/multi_array.hpp>`, `<alps/functional.h>` and `<alps/utility/numeric_cast.hpp>` now belong to numerics, with their implementations and public include names preserved. Utility array resizing, abbreviated printing and MPI helpers include only the container facilities they use. `ALPS::numerics` adds utilities, containers and BLAS/LAPACK without HDF5 or XML.
+
+`ALPS::numeric_io` combines numerics and HDF5. Include `<alps/hdf5/matrix.hpp>` or `<alps/hdf5/numeric_vector.hpp>` explicitly and link `ALPS::numeric_io` when using these archive adapters; `<alps/numeric/matrix.hpp>` no longer includes the matrix archive adapter. Diagonal/deprecated matrix/vector HDF5 `save`/`load` members and matrix `write_xml`/XML insertion overloads, unused in this repository, are removed without replacement adapters. This pass therefore includes API removals as well as ownership moves; it changes no numerical algorithms and imports no ALPSCore implementation.
+
 `ALPS::utilities` owns utility symbols and links Boost.Filesystem and platform threads without the simulation runtime, HDF5 or BLAS/LAPACK.
 
 `ALPS::hdf5` owns archive symbols, exception exports, shared archive state and the NGS signal handler that closes archives. It links utilities, HDF5, Boost.Filesystem, Boost.Thread and platform threads. Archive and signal code remain together to preserve cleanup behavior. A parallel HDF5 provider can bring its own MPI dependency.
 
-`ALPS::params` owns typed values, proxies, checkpoint I/O and the `paramvalue_source` interface used by Python bindings. It links HDF5 and Boost.Serialization; MPI builds additionally link MPI and Boost.MPI. Its parameter-file constructor, XML input and older `Parameters` conversion remain in `params/adapters/`, compiled into `ALPS::alps`. The older `alps::Parameters` implementation itself belongs to `legacy_parameters/`.
+`ALPS::params` owns typed values, proxies, checkpoint I/O and the `paramvalue_source` interface used by Python bindings. It links HDF5 and Boost.Serialization; MPI builds additionally link MPI and Boost.MPI. Its parameter-file constructor, XML input and older `Parameters` conversion remain in `params/adapters/`, compiled into `ALPS::alps`. The two conversion headers now live in `params/adapters/include/alps/ngs/`, retaining their public names through the aggregate interface rather than the typed params target. The older `alps::Parameters` implementation itself belongs to `legacy_parameters/`.
 
 `ALPS::osiris` owns dump/process APIs, XDR symbols and the communication state used by `comm_init()` and `is_master()`. It links Boost.Serialization/Filesystem and, when enabled, MPI. This gives communication state one owner and permits MaxEnt to preserve existing diagnostic gating without linking the simulation runtime.
 
@@ -51,7 +60,7 @@ All first-party public headers have explicit CMake `HEADERS` file sets. These de
 
 `ALPS::alps` links the extracted runtime components publicly. These libraries follow `BUILD_SHARED_LIBS`, with component-specific generated export headers. Python extensions require shared runtime libraries and package one copy of every component in `ALPS_RUNTIME_TARGETS`. Rebuild downstream binaries after the XML and CLI extractions, as after the earlier library splits.
 
-Physical ownership does not imply independent linkability. `ALPS::headers` still exposes the aggregate compile interface; numerical headers depend on parser support, and other include cycles remain. The semantic modules make these dependencies visible without claiming that each can already be configured or linked alone. Package discovery still checks the full SDK dependency set. Shared build policy remains in the root CMake files and `cmake/`.
+Physical ownership does not imply independent linkability for every module. `ALPS::headers` still exposes the aggregate compile interface for the simulation modules, including the remaining expression/older-parameters cycle. The foundation interfaces have narrower dependencies, but package discovery still checks the full SDK dependency set. Shared build policy remains in the root CMake files and `cmake/`.
 
 ## Architecture checks
 
@@ -69,9 +78,9 @@ Update the owning module's CMake declarations when adding files or dependencies;
 
 ### Recorded architectural debt
 
-With application builds enabled, `alps-module-architecture.json` inventories 34 source owners, 517 public include spellings and 654 production files. The owners include `cli`, `plotting`, separate MaxEnt solver/executable owners, and eight [tool groups](../tools/README.md). Tool ownership includes historical inactive C++ sources without adding executable targets. These are ownership counts, not counts of independent libraries or passing tests. The earlier code checkpoint `f6f4501c0` had 24 owners, before the CLI and plotting modules were separated.
+With application builds enabled, `alps-module-architecture.json` inventories 35 source owners, 517 public include spellings and 654 production files. The owners include `numeric_io`, `cli`, `plotting`, separate MaxEnt solver/executable owners, and eight [tool groups](../tools/README.md). Tool ownership includes historical inactive C++ sources without adding executable targets. These are ownership counts, not counts of independent libraries or passing tests. The earlier code checkpoint `f6f4501c0` had 24 owners, before the CLI and plotting modules were separated.
 
-The current observed include graph contains a five-module cycle (`containers`, `hdf5`, `numerics`, `utilities`, `xml`) and a two-module cycle (`expression`, `legacy_parameters`). The earlier eight-module cycle at `f6f4501c0` has therefore narrowed, but the remaining cycles still need deliberate reconciliation. Dependency declarations constrain new include edges. Regenerate the report after changing module ownership or dependencies.
+The foundation include cycle involving containers, HDF5, numerics, utilities and XML is removed. The current observed include graph retains the separate two-module cycle between `expression` and `legacy_parameters`; it still needs deliberate reconciliation. Dependency declarations constrain new include edges. Regenerate the report after changing module ownership or dependencies.
 
 The report inventories 82 exact unresolved file/include pairs already present at baseline `0f7b995d5`: 80 in dormant accumulator code and two in the optional `USE_LATTICE_CONSTANT_2D` graph backend. Each exemption names its file, include and reason; they do not establish support for those inactive paths. Resolve or remove these dependencies deliberately rather than adding broad exclusions.
 

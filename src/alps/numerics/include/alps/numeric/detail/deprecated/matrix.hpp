@@ -27,8 +27,6 @@
 #include <vector>
 #include <numeric>
 
-#include <alps/hdf5/archive.hpp>
-#include <alps/hdf5/pointer.hpp>
 
 #ifdef UBLAS
 #include <boost/numeric/bindings/ublas/matrix.hpp>
@@ -518,19 +516,6 @@ namespace blas{
             for(int i=0;i<size_;++i){
                 dscal_(&size_, &diagonal_matrix(i), &values_[i], &size_);
             }
-        }
-
-        void save(alps::hdf5::archive &ar) const
-        {
-            using namespace alps;
-            ar << make_pvp("", &values_.front(), std::vector<std::size_t>(2, size_));
-        }
-
-        void load(alps::hdf5::archive &ar)
-        {
-            using namespace alps;
-            resize(ar.extent("")[0]);
-            ar >> make_pvp("", &values_.front(), std::vector<std::size_t>(2, size_));
         }
 
     private:

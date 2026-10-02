@@ -28,3 +28,9 @@ endforeach()
 add_executable(ngs_hash ngs_hash.cpp)
 target_link_libraries(ngs_hash PRIVATE ALPS::utilities)
 alps_add_test(ngs_hash)
+
+# This consumer has no aggregate or numerical include roots.
+add_executable(foundation_headers foundation_headers.cpp)
+target_link_libraries(foundation_headers PRIVATE ALPS::utilities)
+alps_add_test(foundation_headers)
+set_property(TEST foundation_headers PROPERTY LABELS utility architecture)

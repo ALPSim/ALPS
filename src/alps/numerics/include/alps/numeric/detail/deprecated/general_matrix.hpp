@@ -27,7 +27,6 @@
 #include <sys/types.h>
 #include <vector>
 
-#include <alps/hdf5.hpp>
 
 #ifdef USE_MATRIX_DISPATCH //use dispatch to tiny matrix functions for small matrices
 #undef __APPLE_CC__
@@ -354,19 +353,6 @@ namespace blas{
         
         general_matrix &invert(){
             throw(std::logic_error(std::string("you linked the general case for invert. Please use the specializations.")));
-        }
-
-        void save(alps::hdf5::archive &ar) const
-        {
-            using namespace alps;
-            ar << make_pvp("", &values_.front(), std::vector<std::size_t>(2, size1_,size2_));
-        }
-
-        void load(alps::hdf5::archive &ar)
-        {
-            using namespace alps;
-            resize(ar.extent("")[0]);
-            ar >> make_pvp("", &values_.front(), std::vector<std::size_t>(2, size1_,size2_));
         }
 
     private:

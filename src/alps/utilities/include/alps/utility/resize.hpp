@@ -20,7 +20,7 @@
 #define ALPS_UTILITY_RESIZE_HPP
 
 #include <alps/type_traits/is_sequence.hpp>
-#include <alps/multi_array.hpp>
+#include <alps/multi_array/multi_array.hpp>
 
 #include <boost/mpl/or.hpp>
 #include <boost/mpl/and.hpp>
@@ -28,6 +28,7 @@
 #include <boost/array.hpp>
 
 #include <algorithm>
+#include <vector>
 
 namespace alps {
 
