@@ -18,16 +18,13 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-include_directories(${Boost_ROOT_DIR})
-
-IF(ALPS_NGS_USE_NEW_ALEA)
-    FOREACH (name ngs_alea_next ngs_alea_compare)
-        add_executable(${name} ${name}.cpp)
-        add_dependencies(${name} alps)
-        target_link_libraries(${name} alps)
-        add_alps_test(${name})
-    ENDFOREACH(name)
-ENDIF(ALPS_NGS_USE_NEW_ALEA)
+if(ALPS_NGS_USE_NEW_ALEA)
+  foreach(name IN ITEMS ngs_alea_next ngs_alea_compare)
+    add_executable(${name} ${name}.cpp)
+    target_link_libraries(${name} PRIVATE ALPS::alps)
+    alps_add_test(${name})
+  endforeach()
+endif()
 
 IF(FALSE AND ALPS_NGS_USE_NEW_ALEA)
     FOREACH (name   ngs_alea_count_test_compile

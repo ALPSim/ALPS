@@ -22,30 +22,10 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 ##########################################################################
-# This file provides a set of CMake macros that support regression
-# testing for Boost libraries. For each of the test macros below, the
-# first argument, testname, states the name of the test that will be
-# created. If no other arguments are provided, the source file
-# testname.cpp will be used as the source file; otherwise, source
-# files should be listed immediately after the name of the test.
-#
-# The macros for creating regression tests are:
-#   boost_test_run: Builds an executable and runs it as a test. The test
-#                   succeeds if it builds and returns 0 when executed.
-#
-#   boost_test_run_fail: Builds an executable and runs it as a test. The
-#                        test succeeds if it builds but returns a non-zero
-#                        exit code when executed.
-#  
-#   boost_test_compile: Tests that the given source file compiles without 
-#                       any errors.
-#
-#   boost_test_compile_fail: Tests that the given source file produces 
-#                            errors when compiled.
-
-# User-controlled option that can be used to enable/disable regression
-# testing. By default, we ena testing, because most users building from source will
-# want to check whether the buils is correct
+# alps_add_test(<name> [TARGET <target>] [INPUT <file>] [OUTPUT <file>])
+#   Runs <target> (default: <name>) through run_test.cmake, feeding INPUT on
+#   stdin and comparing stdout byte-for-byte with OUTPUT. Does nothing unless
+#   ALPS_BUILD_TESTING is ON.
 include_guard(GLOBAL)
 
 # Golden-output tests need stdin and byte comparison in addition to CTest's

@@ -36,6 +36,30 @@ if(ALPS_ENABLE_MPI)
   list(APPEND VCPKG_MANIFEST_FEATURES mpi)
 endif()
 project(alps VERSION ${ALPS_VERSION_CORE} LANGUAGES C CXX)
+
+# Options removed in 3.0 are otherwise ignored with only CMake's generic
+# "Manually-specified variables were not used" warning. See CHANGELOG.md.
+foreach(legacy IN ITEMS
+    "ALPS_BUILD_TESTS|use ALPS_BUILD_TESTING"
+    "ALPS_BUILD_LIBS_ONLY|use ALPS_BUILD_APPLICATIONS=OFF"
+    "ALPS_BUILD_EXAMPLES|build tutorials/00-examples against the installed SDK"
+    "ALPS_BUILD_FORTRAN|ALPS::fortran is always built"
+    "ALPS_INSTALL_HEADERS|headers are always installed"
+    "ALPS_INCLUDE_TUTORIALS|use cmake --install <build> --component tutorials"
+    "ALPS_ENABLE_OPENMP_WORKER|use ALPS_ENABLE_OPENMP"
+    "ALPS_USE_SYSTEM_BOOST|an installed Boost >= 1.76 is always required"
+    "Boost_SRC_DIR|bundled Boost builds were removed; set Boost_ROOT"
+    "LAPACK_64_BIT|only LP64 BLAS/LAPACK is supported")
+  string(REPLACE "|" ";" legacy "${legacy}")
+  list(GET legacy 0 name)
+  list(GET legacy 1 hint)
+  if(DEFINED ${name})
+    message(WARNING "${name} is no longer supported: ${hint}.")
+  endif()
+endforeach()
+if(NOT ALPS_ENABLE_MPI)
+  message(STATUS "MPI is disabled (opt-in since 3.0); pass -DALPS_ENABLE_MPI=ON to enable it")
+endif()
 include(cmake/ALPSBuildConcurrency.cmake)
 
 include(GNUInstallDirs)
@@ -138,6 +162,8 @@ if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
+get_property(ALPS_SDK_COMPONENTS GLOBAL PROPERTY ALPS_SDK_COMPONENTS)
+get_property(ALPS_SDK_RUNTIME_TARGETS GLOBAL PROPERTY ALPS_SDK_RUNTIME_TARGETS)
 configure_package_config_file(
   cmake/ALPSConfig.cmake.in "${PROJECT_BINARY_DIR}/cmake/ALPSConfig.cmake"
   INSTALL_DESTINATION ${CMAKE_INSTALL_DATADIR}/alps
