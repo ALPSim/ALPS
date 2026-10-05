@@ -10,7 +10,7 @@ Matplotlib plotting helpers are included with `pyalps`. Install `pyalps[mpi]` fo
 
 Wheels bundle simulation applications for `pyalps.runApplication`, but do not add them to your shell's `PATH` or include auxiliary tools such as `parameter2xml`, `printgraph`, and `alps-xml`. Install the [C++ SDK and tools](../../CONTRIBUTING.md#build) for those command-line workflows. Tutorial files are available in the [source collection](../../tutorials/README.md), with an optional SDK installation component.
 
-The bindings are built as a standalone `scikit-build-core` project using nanobind. A source build requires GIL-enabled CPython 3.10 or newer, CMake 3.27 or newer, Ninja, a C++17 compiler, BLAS/LAPACK, HDF5, and an installed shared ALPS C++ SDK. The SDK's numeric version must match `ALPS_VERSION.txt`; CMake rejects a mismatch before compiling. Point `ALPS_DIR` at the SDK's `share/alps` package directory.
+The bindings are built as a standalone `scikit-build-core` project using nanobind. A source build requires GIL-enabled CPython 3.11 or newer, CMake 3.27 or newer, Ninja, a C++17 compiler, BLAS/LAPACK, HDF5, and an installed shared ALPS C++ SDK. The SDK's numeric version must match `ALPS_VERSION.txt`; CMake rejects a mismatch before compiling. Point `ALPS_DIR` at the SDK's `share/alps` package directory.
 
 Before building the SDK below, follow the [CMake and Ninja setup](../../CONTRIBUTING.md#install-cmake-and-ninja) if your system CMake is older than 3.27.
 
@@ -72,9 +72,9 @@ The extensions share one nanobind library, named `pyalps_nanobind` to avoid file
 
 ## Python compatibility
 
-pyalps supports GIL-enabled CPython 3.10 and newer. Wheels use the ABI of the interpreter that built them; they do not use the limited API or `abi3`. Free-threaded Python is unsupported.
+pyalps supports GIL-enabled CPython 3.11 and newer. Python 3.11 has a separate `cp311` wheel. Python 3.12 and newer share a `cp312-abi3` wheel using the limited API, including the shared nanobind runtime. Free-threaded Python is unsupported.
 
-Build dependencies pin nanobind 2.15.0. The installed `runtime.json` records both its version and internals ABI. The downstream CMake package checks that ABI before creating `pyalps::runtime`, so an incompatible nanobind installation produces a configuration error rather than an interpreter abort. Rebuild native consumers against the same SDK and nanobind release as the installed pyalps package.
+Build dependencies pin nanobind 2.15.0. The installed `runtime.json` records both its version and internals ABI. The downstream CMake package checks that ABI before creating `pyalps::runtime`, so an incompatible nanobind installation produces a configuration error rather than an interpreter abort. Rebuild native consumers against the same SDK and nanobind release as the installed pyalps package. Consumers must also pass `STABLE_ABI` to `nanobind_add_module` to share pyalps types on Python 3.12 and newer; nanobind ignores this flag on Python 3.11.
 
 ## Versioning
 
@@ -98,7 +98,8 @@ Note the consequence: because the number is inherited, a Python-only API change 
 The C++ SDK supplies `ALPS::alps` for standalone programs. The installed Python package separately supplies `pyalps::runtime` for extensions that share ALPS objects or HDF5 handles with pyalps. A matching C++ SDK is still required for headers and compile settings.
 
 ```cmake
-find_package(Python 3.10 REQUIRED COMPONENTS Interpreter Development.Module)
+find_package(Python 3.11 REQUIRED COMPONENTS Interpreter Development.Module
+  OPTIONAL_COMPONENTS Development.SABIModule)
 execute_process(
   COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
   OUTPUT_VARIABLE nanobind_ROOT
@@ -109,7 +110,7 @@ execute_process(
   OUTPUT_VARIABLE pyalps_DIR
   OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)
 find_package(pyalps CONFIG REQUIRED)
-nanobind_add_module(my_module NB_STATIC my_module.cpp)
+nanobind_add_module(my_module STABLE_ABI NB_STATIC my_module.cpp)
 target_link_libraries(my_module PRIVATE pyalps::runtime)
 ```
 

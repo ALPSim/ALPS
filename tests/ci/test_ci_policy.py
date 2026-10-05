@@ -71,7 +71,7 @@ def test_quick_smoke_matrix_only_uses_built_artifacts():
     matrices = policy.packaging_matrices("quick")
     assert len(matrices["wheel_matrix"]["plat"]) == 1
     assert {p["artifact"] for p in matrices["smoke_matrix"]["plat"]} == {"cibw-wheels-manylinux"}
-    assert matrices["smoke_matrix"]["python"] == ["3.10", "3.14"]
+    assert matrices["smoke_matrix"]["python"] == ["3.11", "3.14"]
 
 
 def test_actions_output_round_trips_json(tmp_path, monkeypatch):
@@ -92,7 +92,7 @@ def test_full_packaging_only_builds_and_smokes_supported_platforms():
     assert {p['artifact'] for p in smoke['plat']} <= built
     assert all(p['os'].startswith(('ubuntu-', 'macos-')) for p in smoke['plat'])
     assert not smoke.get('include')
-    assert smoke['python'] == ['3.10', '3.11', '3.12', '3.13', '3.14']
+    assert smoke['python'] == ['3.11', '3.12', '3.13', '3.14']
 
 
 def test_native_windows_is_manual_and_outside_release_gates():

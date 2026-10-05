@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.27...4.3)
 project(alps_nanobind_export_example LANGUAGES C CXX)
 
-find_package(Python 3.10 REQUIRED COMPONENTS Interpreter Development.Module)
+find_package(Python 3.11 REQUIRED COMPONENTS Interpreter Development.Module
+  OPTIONAL_COMPONENTS Development.SABIModule)
 
 execute_process(
   COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
@@ -19,5 +20,5 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-nanobind_add_module(ising_c NB_STATIC export2py.cpp ising.cpp)
+nanobind_add_module(ising_c STABLE_ABI NB_STATIC export2py.cpp ising.cpp)
 target_link_libraries(ising_c PRIVATE pyalps::runtime)

@@ -60,14 +60,16 @@ def _package_dir() -> Path:
     return runtime_directory()
 
 
-def test_wheel_uses_the_active_cpython_abi():
-    import sys
+def test_wheel_uses_the_supported_python_abi():
     installed = distribution("pyalps")
-    assert installed.metadata["Requires-Python"] == ">=3.10"
+    assert installed.metadata["Requires-Python"] == ">=3.11"
     tags = [line.removeprefix("Tag: ") for line in installed.read_text("WHEEL").splitlines()
             if line.startswith("Tag: ")]
-    abi = f"cp{sys.version_info.major}{sys.version_info.minor}"
-    assert tags and all(tag.startswith(f"{abi}-{abi}-") for tag in tags)
+    expected = "cp311-cp311-" if sys.version_info < (3, 12) else "cp312-abi3-"
+    assert tags and all(tag.startswith(expected) for tag in tags)
+    extensions = list((_package_dir() / "_ext").glob("*.so"))
+    if sys.platform != "win32" and sys.version_info >= (3, 12):
+        assert extensions and all(path.name.endswith(".abi3.so") for path in extensions)
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="Windows PE architecture check")

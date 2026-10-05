@@ -7,14 +7,13 @@
 #ifndef PYALPS_EXPORT_SIMULATION_HPP
 #define PYALPS_EXPORT_SIMULATION_HPP
 
-#ifdef Py_LIMITED_API
-#error "pyalps consumers must use the same per-interpreter CPython ABI as pyalps"
-#endif
-
 #include <alps/hdf5/archive.hpp>
 #include <alps/mcbase.hpp>
 
 #include <nanobind/nanobind.h>
+#if PY_VERSION_HEX >= 0x030C0000 && !defined(Py_LIMITED_API)
+#error "pyalps consumers on Python 3.12+ must pass STABLE_ABI to nanobind_add_module"
+#endif
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
 

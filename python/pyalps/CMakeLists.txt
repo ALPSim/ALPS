@@ -10,7 +10,15 @@ option(PYALPS_BUILD_SOLVERS "Build the MaxEnt, CT-HYB, and CT-INT bindings" ON)
 option(PYALPS_BUNDLE_APPLICATIONS "Include the ALPS command-line programs" ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(Python 3.10 REQUIRED COMPONENTS Interpreter Development.Module)
+find_package(Python 3.11 REQUIRED COMPONENTS Interpreter Development.Module)
+if(NOT Python_INTERPRETER_ID STREQUAL "Python" OR Python_SOABI MATCHES "[0-9]t")
+  message(FATAL_ERROR "pyalps requires GIL-enabled CPython")
+endif()
+set(_pyalps_nanobind_runtime nanobind)
+if(Python_VERSION VERSION_GREATER_EQUAL 3.12)
+  find_package(Python REQUIRED COMPONENTS Development.SABIModule)
+  set(_pyalps_nanobind_runtime nanobind-abi3)
+endif()
 execute_process(
   COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/_build_support/alps_version.py" --core
   OUTPUT_VARIABLE PYALPS_VERSION_CORE
@@ -42,19 +50,15 @@ string(REGEX MATCH "[0-9]+$" PYALPS_NANOBIND_ABI "${_nb_abi_line}")
 if(NOT PYALPS_NANOBIND_ABI)
   message(FATAL_ERROR "Cannot determine the nanobind internals ABI")
 endif()
-if(NOT Python_INTERPRETER_ID STREQUAL "Python" OR NB_FREE_THREADED)
-  message(FATAL_ERROR "pyalps requires GIL-enabled CPython")
-endif()
-
 if(APPLE)
   set(_loader_origin "@loader_path")
 elseif(UNIX)
   set(_loader_origin "$ORIGIN")
 endif()
 
-# Extensions and their shared nanobind runtime use the active CPython ABI.
+# nanobind uses abi3 from Python 3.12 onward and the CPython ABI on 3.11.
 function(pyalps_add_module target source)
-  nanobind_add_module(${target} NB_SHARED MUSL_DYNAMIC_LIBCPP ${source})
+  nanobind_add_module(${target} STABLE_ABI NB_SHARED MUSL_DYNAMIC_LIBCPP ${source})
   target_link_libraries(${target} PRIVATE ALPS::alps ${ARGN})
   # CMake derives dependency locations from the resolved link interface.
   # Wheel repair removes external paths; the packaged runtime always comes first.
@@ -86,9 +90,9 @@ if(PYALPS_BUILD_SOLVERS)
 endif()
 
 # A package-specific name avoids DLL/SONAME collisions with other nanobind users.
-set_target_properties(nanobind PROPERTIES OUTPUT_NAME pyalps_nanobind
+set_target_properties(${_pyalps_nanobind_runtime} PROPERTIES OUTPUT_NAME pyalps_nanobind
   INSTALL_RPATH "${_loader_origin}" INSTALL_RPATH_USE_LINK_PATH TRUE)
-install(TARGETS nanobind RUNTIME_DEPENDENCY_SET pyalps_runtime
+install(TARGETS ${_pyalps_nanobind_runtime} RUNTIME_DEPENDENCY_SET pyalps_runtime
   LIBRARY DESTINATION pyalps/lib RUNTIME DESTINATION pyalps/bin)
 
 # Required libraries are bundled whether or not command-line programs are wanted.

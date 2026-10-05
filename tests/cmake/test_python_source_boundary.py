@@ -32,7 +32,7 @@ def test_standalone_python_sources(tmp_path):
     commands = json.loads((build / "compile_commands.json").read_text())
     nanobind_root = Path(nanobind.__file__).resolve().parent
     for command in commands:
-        assert "Py_LIMITED_API" not in command["command"]
+        assert ("Py_LIMITED_API=0x030C0000" in command["command"]) == (sys.version_info >= (3, 12))
         compiled_source = Path(command["file"]).resolve()
         assert (compiled_source.is_relative_to(source)
                 or compiled_source.is_relative_to(nanobind_root)), compiled_source

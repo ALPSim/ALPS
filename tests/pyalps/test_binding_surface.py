@@ -650,7 +650,8 @@ def test_native_parameter_contracts(tmp_path):
     subprocess.run(["cmake", "--build", str(build), "--config", "Release", "--parallel", "2"], check=True)
     completed = subprocess.run(
         [sys.executable, "-X", "faulthandler", str(source / "check.py")],
-        env={**os.environ, "PYTHONPATH": str(build), "MallocScribble": "1"},
+        env={**os.environ, "PYTHONPATH": os.pathsep.join(filter(None, (
+            str(build), os.environ.get("PYTHONPATH")))), "MallocScribble": "1"},
         capture_output=True, text=True, timeout=60,
     )
     assert completed.returncode == 0, completed.stdout + completed.stderr

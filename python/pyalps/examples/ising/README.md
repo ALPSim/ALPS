@@ -2,7 +2,7 @@
 
 This example replaces the former Boost.Python export tutorial while retaining the public `ALPS_EXPORT_SIM_TO_PYTHON` helper. Build it against an installed ALPS SDK and the Python environment containing pyalps and nanobind:
 
-Use GIL-enabled CPython 3.10 or newer and nanobind 2.15.0. Build this example with the same interpreter as the installed pyalps package. Both use the ordinary CPython ABI; the CMake package checks nanobind's internals ABI before linking.
+Use GIL-enabled CPython 3.11 or newer and nanobind 2.15.0. The example passes `STABLE_ABI` to share pyalps types on Python 3.12 and newer; nanobind uses the ordinary CPython ABI on 3.11. The CMake package checks nanobind's internals ABI before linking.
 
 ```sh
 cmake -S . -B build -GNinja \

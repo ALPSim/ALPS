@@ -34,7 +34,7 @@ git remote add upstream https://github.com/ALPSim/ALPS.git
 - CMake ≥ 3.27, Ninja for the bundled presets, and C++17/C11 compilers such as GCC or Clang.
 - Boost ≥ 1.76 with its compiled libraries and CMake packages, HDF5's C library, and LP64 BLAS/LAPACK. Use serial HDF5 for the default MPI-disabled build; see [numerical libraries](#numerical-libraries).
 - For native tests (`ALPS_BUILD_TESTING=ON`): Python ≥ 3.10 for the CTest module-architecture audit; this does not require building the Python bindings.
-- For Python development: GIL-enabled CPython ≥ 3.10 in a writable Python environment. Pip installs NumPy, SciPy and Matplotlib with pyalps. Free-threaded Python is unsupported.
+- For Python development: GIL-enabled CPython ≥ 3.11 in a writable Python environment. Pip installs NumPy, SciPy and Matplotlib with pyalps. Free-threaded Python is unsupported.
 - Optional: MPI and Boost.MPI for `ALPS_ENABLE_MPI=ON`; an OpenMP runtime for `ALPS_ENABLE_OPENMP=ON`; a Fortran compiler for the Fortran examples.
 
 Use existing dependencies or your preferred package manager. Keep the compiler, architecture and native dependency stack consistent between the SDK, bindings and downstream extensions. Older website instructions for a combined Boost.Python build do not describe this checkout.
