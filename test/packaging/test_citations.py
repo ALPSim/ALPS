@@ -52,6 +52,50 @@ class CitationTests(unittest.TestCase):
         self.assertIn("Framework: [1]", text)
         self.assertNotIn("P05001", text)
 
+    def test_citation_expected_output(self):
+        cases = [
+            ({"title": "Cluster algorithm", "authors": [
+                {"given-names": "R. H.", "family-names": "Swendsen"},
+                {"given-names": "J.-S.", "family-names": "Wang"}],
+              "journal": "Physical Review Letters", "volume": "58",
+              "start": "86", "end": "88", "year": 1987, "doi": "10.1103/PhysRevLett.58.86"},
+             'R. H. Swendsen, J.-S. Wang, "Cluster algorithm." Physical Review Letters 58, 86–88 (1987). https://doi.org/10.1103/PhysRevLett.58.86',
+             "R. H. Swendsen, J.-S. Wang, Physical Review Letters 58, 86 (1987)."),
+            ({"title": "Numerical methods", "authors": [{"given-names": "A. E.", "family-names": "Feiguin"}],
+              "collection-title": "Strongly Correlated Systems: Numerical Methods",
+              "volume": "176", "start": "31", "end": "64", "year": 2013},
+             'A. E. Feiguin, "Numerical methods." Strongly Correlated Systems: Numerical Methods 176, 31–64 (2013).',
+             "A. E. Feiguin, Strongly Correlated Systems: Numerical Methods 176, 31 (2013)."),
+            ({"title": "A methods book", "authors": [{"given-names": "A.", "name-particle": "van", "family-names": "Dijk"}],
+              "year": 2020},
+             'A. van Dijk, "A methods book." (2020).',
+             "A. van Dijk, A methods book (2020)."),
+            ({"title": "Release manuscript", "authors": [
+                {"given-names": "F.", "family-names": "Alet"},
+                {"family-names": "Chen"}, {"family-names": "Feiguin"}, {"family-names": "Wolf"}],
+              "status": "in-preparation"},
+             'F. Alet et al., "Release manuscript." In preparation.',
+             "F. Alet et al., Release manuscript; in preparation."),
+            ({"title": "Undated paper", "authors": [{"name": "ALPS collaboration"}],
+              "journal": "Physics Journal", "volume": "5", "start": "7"},
+             'ALPS collaboration, "Undated paper." Physics Journal 5, 7.',
+             "ALPS collaboration, Physics Journal 5, 7."),
+            ({"title": "Three authors", "authors": [
+                {"family-names": "Troyer"}, {"family-names": "Ammon"}, {"family-names": "Heeb"}]},
+             'Troyer, Ammon, Heeb, "Three authors."',
+             "Troyer, Ammon, Heeb, Three authors."),
+        ]
+        for reference, detailed, compact in cases:
+            with self.subTest(title=reference["title"]):
+                self.assertEqual(generator.citation(reference), detailed)
+                self.assertEqual(generator.compact_citation(reference), compact)
+
+    def test_wolf_initials(self):
+        authors = self.cff["preferred-citation"]["authors"]
+        wolf, = [author for author in authors if author.get("family-names") == "Wolf"]
+        self.assertEqual(wolf["given-names"], "T. M. R.")
+        self.assertEqual(generator.person_name(wolf), "T. M. R. Wolf")
+
     def test_startup_box_is_compact_and_framework_first(self):
         for component in self.policy["components"]:
             with self.subTest(component=component):
@@ -60,9 +104,11 @@ class CitationTests(unittest.TestCase):
                 self.assertEqual(lines[0], "*" * 80)
                 self.assertEqual(lines[-1], lines[0])
                 self.assertTrue(all(len(line) == 80 for line in lines))
-                self.assertLessEqual(len(lines), 15)
+                # DMRG's seven entries need 17 lines with recognizable authors.
+                self.assertLessEqual(len(lines), 17 if component == "dmrg" else 15)
                 self.assertIn("Framework: [1]", text)
-                self.assertIn("[1] " + self.references[self.framework]["title"].split(":")[0], text)
+                content = " ".join(line[2:-2].strip() for line in lines[1:-1])
+                self.assertIn("[1] F. Alet et al., " + self.references[self.framework]["title"], content)
                 self.assertNotIn("https://doi.org/", text)
                 self.assertIn("Full references: --citations", text)
                 details = generator.detailed_notice(self.policy, self.references, self.framework, component)

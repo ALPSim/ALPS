@@ -1,5 +1,6 @@
 """A tiny real looper run: two stdin tasks must share one startup notice."""
 import importlib.util
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -25,12 +26,23 @@ ALGORITHM="loop"
 {{T=1;}}
 {{T=2;}}
 '''
-with tempfile.TemporaryDirectory(prefix="alps-citation-calculation-") as cwd:
-    result = subprocess.run([sys.argv[1]], cwd=cwd, input=parameters, text=True,
-                            capture_output=True, timeout=45)
-assert result.returncode == 0, result.stdout + result.stderr
-assert result.stderr.count(expected) == 1, result.stderr
-assert result.stderr.count("Recommended citations for ") == 1, result.stderr
-assert "Recommended citations for " not in result.stdout, result.stdout
-assert result.stdout.startswith("[input parameters]"), result.stdout
-assert result.stdout.count("[results]") == 2, result.stdout
+for disabled in (False, True):
+    env = os.environ.copy()
+    env.pop("ALPS_NO_CITATIONS", None)
+    if disabled:
+        env["ALPS_NO_CITATIONS"] = "1"
+    with tempfile.TemporaryDirectory(prefix="alps-citation-calculation-") as cwd:
+        result = subprocess.run([sys.argv[1]], cwd=cwd, env=env, input=parameters, text=True,
+                                capture_output=True, timeout=45)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert result.stderr.count(expected) == (0 if disabled else 1), result.stderr
+    assert result.stderr.count("Recommended citations for ") == (0 if disabled else 1), result.stderr
+    assert "copyright (c)" in result.stderr, result.stderr
+    assert "Licensed under the MIT License." in result.stderr, result.stderr
+    assert "Recommended citations for " not in result.stdout, result.stdout
+    assert result.stdout.startswith("[input parameters]"), result.stdout
+    assert result.stdout.count("[results]") == 2, result.stdout
+    if disabled:
+        assert result.stdout == numerical_stdout, result.stdout
+    else:
+        numerical_stdout = result.stdout

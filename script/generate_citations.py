@@ -129,10 +129,13 @@ def person_name(person):
     return " ".join(person[field] for field in ("given-names", "name-particle", "family-names", "name-suffix") if person.get(field))
 
 
-def citation(reference):
+def citation_authors(reference):
     authors = [person_name(author) for author in reference["authors"]]
-    author_text = authors[0] + " et al." if len(authors) > 3 else ", ".join(authors)
-    text = author_text + ', "' + reference["title"] + '."'
+    return authors[0] + " et al." if len(authors) > 3 else ", ".join(authors)
+
+
+def citation(reference):
+    text = citation_authors(reference) + ', "' + reference["title"] + '."'
     venue = reference.get("journal") or reference.get("collection-title")
     if venue:
         text += " " + venue
@@ -142,9 +145,10 @@ def citation(reference):
             text += ", " + str(reference["start"])
             if "end" in reference:
                 text += "–" + str(reference["end"])
-        text += "."
     if "year" in reference:
-        text += " (" + str(reference["year"]) + ")."
+        text += " (" + str(reference["year"]) + ")"
+    if venue or "year" in reference:
+        text += "."
     if "status" in reference:
         text += " " + reference["status"].replace("-", " ").capitalize() + "."
     if "notes" in reference:
@@ -177,9 +181,9 @@ def detailed_notice(policy, references, framework, component):
 
 
 def compact_citation(reference):
-    """Use publication coordinates; unpublished papers retain their title/status."""
+    """Short authors and publication coordinates, or unpublished title/status."""
     venue = reference.get("journal") or reference.get("collection-title")
-    text = venue or reference["title"]
+    text = citation_authors(reference) + ", " + (venue or reference["title"])
     if venue:
         if "volume" in reference:
             text += " " + str(reference["volume"])

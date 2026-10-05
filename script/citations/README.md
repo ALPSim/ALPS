@@ -98,8 +98,18 @@ rank for MPI calculations. This includes looper's stdin path. Stdin calculations
 write the startup notice to stderr to preserve their numerical stdout format.
 Multiple tasks in one invocation share the notice. The framework paper is always
 reference [1], followed by algorithm and implementation references, with each paper
-listed once. Startup uses publication coordinates rather than full titles and DOI links; unpublished
-papers retain their title and status.
+listed once. Startup uses short authors and publication coordinates; unpublished
+papers retain their title and status. Up to three authors are listed; longer lists
+use the first author followed by "et al.". Complete titles and DOI links appear
+in the detailed guidance.
+
+Set `ALPS_NO_CITATIONS=1` to suppress automatic compact citation notices in batch
+runs. Only the literal value `1` disables them: unset, empty, `0`, and other values
+leave notices enabled. Copyright and license notices remain visible.
+`citation_text`, `citation_details`, `print_citation_details`, and explicit
+`--citations` queries always provide their usual output, including when
+`ALPS_NO_CITATIONS=1`.
+
 Each application provides these standalone queries:
 
 - `--citations`: print complete guidance with paper titles and DOI links, and exit successfully.

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 #include <alps/utility/citations.hpp>
+#include <cstdlib>
 #include <ostream>
 #include <stdexcept>
 
@@ -21,6 +22,8 @@ std::string alps::citation_text(const std::string& component) {
 }
 
 void alps::print_citations(std::ostream& out, const std::string& component) {
+  const char* disabled = std::getenv("ALPS_NO_CITATIONS");
+  if (disabled && std::string(disabled) == "1") return;
   out << citation_text(component);
 }
 

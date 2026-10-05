@@ -14,6 +14,7 @@ namespace alps {
 ALPS_DECL std::string citation_text(const std::string& component = "framework");
 
 /// Print one notice with distinct bibliography entries and all applicable roles.
+/// Suppressed only when ALPS_NO_CITATIONS is exactly "1".
 ALPS_DECL void print_citations(std::ostream& out, const std::string& component = "framework");
 
 /// Complete guidance with titles and DOI links, used by --citations.

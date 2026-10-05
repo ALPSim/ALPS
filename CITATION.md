@@ -45,119 +45,119 @@ F. Alet et al., "The ALPS project release 3.0: open source software for strongly
 
 ### troyer1998scheduler
 
-M. Troyer, B. Ammon, E. Heeb, "Parallel Object Oriented Monte Carlo Simulations." Computing in Object-Oriented Parallel Environments 1505, 191–198. (1998). Lecture Notes in Computer Science. https://doi.org/10.1007/3-540-49372-7_20
+M. Troyer, B. Ammon, E. Heeb, "Parallel Object Oriented Monte Carlo Simulations." Computing in Object-Oriented Parallel Environments 1505, 191–198 (1998). Lecture Notes in Computer Science. https://doi.org/10.1007/3-540-49372-7_20
 
 ### lanczos1950
 
-C. Lanczos, "An Iteration Method for the Solution of the Eigenvalue Problem of Linear Differential and Integral Operators." Journal of Research of the National Bureau of Standards 45, 255–282. (1950). https://doi.org/10.6028/jres.045.026
+C. Lanczos, "An Iteration Method for the Solution of the Eigenvalue Problem of Linear Differential and Integral Operators." Journal of Research of the National Bureau of Standards 45, 255–282 (1950). https://doi.org/10.6028/jres.045.026
 
 ### swendsenwang1987
 
-R. H. Swendsen, J.-S. Wang, "Nonuniversal Critical Dynamics in Monte Carlo Simulations." Physical Review Letters 58, 86–88. (1987). https://doi.org/10.1103/PhysRevLett.58.86
+R. H. Swendsen, J.-S. Wang, "Nonuniversal Critical Dynamics in Monte Carlo Simulations." Physical Review Letters 58, 86–88 (1987). https://doi.org/10.1103/PhysRevLett.58.86
 
 ### wolff1989
 
-U. Wolff, "Collective Monte Carlo Updating for Spin Systems." Physical Review Letters 62, 361–364. (1989). https://doi.org/10.1103/PhysRevLett.62.361
+U. Wolff, "Collective Monte Carlo Updating for Spin Systems." Physical Review Letters 62, 361–364 (1989). https://doi.org/10.1103/PhysRevLett.62.361
 
 ### evertz1993
 
-H. G. Evertz, G. Lana, M. Marcu, "Cluster Algorithm for Vertex Models." Physical Review Letters 70, 875–879. (1993). https://doi.org/10.1103/PhysRevLett.70.875
+H. G. Evertz, G. Lana, M. Marcu, "Cluster Algorithm for Vertex Models." Physical Review Letters 70, 875–879 (1993). https://doi.org/10.1103/PhysRevLett.70.875
 
 ### beard1996
 
-B. B. Beard, U.-J. Wiese, "Simulations of Discrete Quantum Systems in Continuous Euclidean Time." Physical Review Letters 77, 5130–5133. (1996). https://doi.org/10.1103/PhysRevLett.77.5130
+B. B. Beard, U.-J. Wiese, "Simulations of Discrete Quantum Systems in Continuous Euclidean Time." Physical Review Letters 77, 5130–5133 (1996). https://doi.org/10.1103/PhysRevLett.77.5130
 
 ### evertz2003
 
-H. G. Evertz, "The Loop Algorithm." Advances in Physics 52, 1–66. (2003). https://doi.org/10.1080/0001873021000049195
+H. G. Evertz, "The Loop Algorithm." Advances in Physics 52, 1–66 (2003). https://doi.org/10.1080/0001873021000049195
 
 ### todo2001
 
-S. Todo, K. Kato, "Cluster Algorithms for General-S Quantum Spin Systems." Physical Review Letters 87, 047203. (2001). https://doi.org/10.1103/PhysRevLett.87.047203
+S. Todo, K. Kato, "Cluster Algorithms for General-S Quantum Spin Systems." Physical Review Letters 87, 047203 (2001). https://doi.org/10.1103/PhysRevLett.87.047203
 
 ### sandvik1999
 
-A. W. Sandvik, "Stochastic Series Expansion Method with Operator-Loop Update." Physical Review B 59, R14157–R14160. (1999). https://doi.org/10.1103/PhysRevB.59.R14157
+A. W. Sandvik, "Stochastic Series Expansion Method with Operator-Loop Update." Physical Review B 59, R14157–R14160 (1999). https://doi.org/10.1103/PhysRevB.59.R14157
 
 ### syljuasen2002
 
-O. F. Syljuåsen, A. W. Sandvik, "Quantum Monte Carlo with Directed Loops." Physical Review E 66, 046701. (2002). https://doi.org/10.1103/PhysRevE.66.046701
+O. F. Syljuåsen, A. W. Sandvik, "Quantum Monte Carlo with Directed Loops." Physical Review E 66, 046701 (2002). https://doi.org/10.1103/PhysRevE.66.046701
 
 ### alet2005directed
 
-F. Alet, S. Wessel, M. Troyer, "Generalized Directed Loop Method for Quantum Monte Carlo Simulations." Physical Review E 71, 036706. (2005). https://doi.org/10.1103/PhysRevE.71.036706
+F. Alet, S. Wessel, M. Troyer, "Generalized Directed Loop Method for Quantum Monte Carlo Simulations." Physical Review E 71, 036706 (2005). https://doi.org/10.1103/PhysRevE.71.036706
 
 ### prokofev1998
 
-N. V. Prokof'ev, B. V. Svistunov, I. S. Tupitsyn, "``Worm'' Algorithm in Quantum Monte Carlo Simulations." Physics Letters A 238, 253–257. (1998). https://doi.org/10.1016/S0375-9601(97)00957-2
+N. V. Prokof'ev, B. V. Svistunov, I. S. Tupitsyn, "``Worm'' Algorithm in Quantum Monte Carlo Simulations." Physics Letters A 238, 253–257 (1998). https://doi.org/10.1016/S0375-9601(97)00957-2
 
 ### Prokofev1998JETP
 
-N. V. Prokof'ev, B. V. Svistunov, I. S. Tupitsyn, "Exact, complete, and universal continuous-time worldline Monte Carlo approach to the statistics of discrete quantum systems." Journal of Experimental and Theoretical Physics 87, 310–321. (1998). https://doi.org/10.1134/1.558661
+N. V. Prokof'ev, B. V. Svistunov, I. S. Tupitsyn, "Exact, complete, and universal continuous-time worldline Monte Carlo approach to the statistics of discrete quantum systems." Journal of Experimental and Theoretical Physics 87, 310–321 (1998). https://doi.org/10.1134/1.558661
 
 ### wang2001prl
 
-F. Wang, D. P. Landau, "Efficient, Multiple-Range Random Walk Algorithm to Calculate the Density of States." Physical Review Letters 86, 2050–2053. (2001). https://doi.org/10.1103/PhysRevLett.86.2050
+F. Wang, D. P. Landau, "Efficient, Multiple-Range Random Walk Algorithm to Calculate the Density of States." Physical Review Letters 86, 2050–2053 (2001). https://doi.org/10.1103/PhysRevLett.86.2050
 
 ### wang2001pre
 
-F. Wang, D. P. Landau, "Determining the Density of States for Classical Statistical Models: A Random Walk Algorithm to Produce a Flat Histogram." Physical Review E 64, 056101. (2001). https://doi.org/10.1103/PhysRevE.64.056101
+F. Wang, D. P. Landau, "Determining the Density of States for Classical Statistical Models: A Random Walk Algorithm to Produce a Flat Histogram." Physical Review E 64, 056101 (2001). https://doi.org/10.1103/PhysRevE.64.056101
 
 ### troyer2003qwl
 
-M. Troyer, S. Wessel, F. Alet, "Flat-Histogram Methods for Quantum Systems: Algorithms to Overcome Tunneling Problems and Calculate the Free Energy." Physical Review Letters 90, 120201. (2003). https://doi.org/10.1103/PhysRevLett.90.120201
+M. Troyer, S. Wessel, F. Alet, "Flat-Histogram Methods for Quantum Systems: Algorithms to Overcome Tunneling Problems and Calculate the Free Energy." Physical Review Letters 90, 120201 (2003). https://doi.org/10.1103/PhysRevLett.90.120201
 
 ### white1992
 
-S. R. White, "Density Matrix Formulation for Quantum Renormalization Groups." Physical Review Letters 69, 2863–2866. (1992). https://doi.org/10.1103/PhysRevLett.69.2863
+S. R. White, "Density Matrix Formulation for Quantum Renormalization Groups." Physical Review Letters 69, 2863–2866 (1992). https://doi.org/10.1103/PhysRevLett.69.2863
 
 ### white1993
 
-S. R. White, "Density-Matrix Algorithms for Quantum Renormalization Groups." Physical Review B 48, 10345–10356. (1993). https://doi.org/10.1103/PhysRevB.48.10345
+S. R. White, "Density-Matrix Algorithms for Quantum Renormalization Groups." Physical Review B 48, 10345–10356 (1993). https://doi.org/10.1103/PhysRevB.48.10345
 
 ### schollwock2005
 
-U. Schollwöck, "The Density-Matrix Renormalization Group." Reviews of Modern Physics 77, 259–315. (2005). https://doi.org/10.1103/RevModPhys.77.259
+U. Schollwöck, "The Density-Matrix Renormalization Group." Reviews of Modern Physics 77, 259–315 (2005). https://doi.org/10.1103/RevModPhys.77.259
 
 ### hallberg2006
 
-K. A. Hallberg, "New Trends in Density Matrix Renormalization." Advances in Physics 55, 477–526. (2006). https://doi.org/10.1080/00018730600766432
+K. A. Hallberg, "New Trends in Density Matrix Renormalization." Advances in Physics 55, 477–526 (2006). https://doi.org/10.1080/00018730600766432
 
 ### feiguin2013
 
-A. E. Feiguin, "The Density Matrix Renormalization Group." Strongly Correlated Systems: Numerical Methods 176, 31–65. (2013). Springer Series in Solid-State Sciences. https://doi.org/10.1007/978-3-642-35106-8_2
+A. E. Feiguin, "The Density Matrix Renormalization Group." Strongly Correlated Systems: Numerical Methods 176, 31–65 (2013). Springer Series in Solid-State Sciences. https://doi.org/10.1007/978-3-642-35106-8_2
 
 ### rubtsov2005
 
-A. N. Rubtsov, V. V. Savkin, A. I. Lichtenstein, "Continuous-Time Quantum Monte Carlo Method for Fermions." Physical Review B 72, 035122. (2005). https://doi.org/10.1103/PhysRevB.72.035122
+A. N. Rubtsov, V. V. Savkin, A. I. Lichtenstein, "Continuous-Time Quantum Monte Carlo Method for Fermions." Physical Review B 72, 035122 (2005). https://doi.org/10.1103/PhysRevB.72.035122
 
 ### werner2006
 
-P. Werner et al., "Continuous-Time Solver for Quantum Impurity Models." Physical Review Letters 97, 076405. (2006). https://doi.org/10.1103/PhysRevLett.97.076405
+P. Werner et al., "Continuous-Time Solver for Quantum Impurity Models." Physical Review Letters 97, 076405 (2006). https://doi.org/10.1103/PhysRevLett.97.076405
 
 ### gull2011
 
-E. Gull et al., "Continuous-Time Monte Carlo Methods for Quantum Impurity Models." Reviews of Modern Physics 83, 349–404. (2011). https://doi.org/10.1103/RevModPhys.83.349
+E. Gull et al., "Continuous-Time Monte Carlo Methods for Quantum Impurity Models." Reviews of Modern Physics 83, 349–404 (2011). https://doi.org/10.1103/RevModPhys.83.349
 
 ### gull2011cpc
 
-E. Gull et al., "Continuous-Time Quantum Monte Carlo Impurity Solvers." Computer Physics Communications 182, 1078–1082. (2011). https://doi.org/10.1016/j.cpc.2010.12.050
+E. Gull et al., "Continuous-Time Quantum Monte Carlo Impurity Solvers." Computer Physics Communications 182, 1078–1082 (2011). https://doi.org/10.1016/j.cpc.2010.12.050
 
 ### hirschfye1986
 
-J. E. Hirsch, R. M. Fye, "Monte Carlo Method for Magnetic Impurities in Metals." Physical Review Letters 56, 2521–2524. (1986). https://doi.org/10.1103/PhysRevLett.56.2521
+J. E. Hirsch, R. M. Fye, "Monte Carlo Method for Magnetic Impurities in Metals." Physical Review Letters 56, 2521–2524 (1986). https://doi.org/10.1103/PhysRevLett.56.2521
 
 ### metzner1989
 
-Walter Metzner, Dieter Vollhardt, "Correlated Lattice Fermions in d=∞ Dimensions." Phys. Rev. Lett. 62, 324–327. (1989). https://doi.org/10.1103/PhysRevLett.62.324
+Walter Metzner, Dieter Vollhardt, "Correlated Lattice Fermions in d=∞ Dimensions." Phys. Rev. Lett. 62, 324–327 (1989). https://doi.org/10.1103/PhysRevLett.62.324
 
 ### georges1992
 
-Antoine Georges, Gabriel Kotliar, "Hubbard model in infinite dimensions." Phys. Rev. B 45, 6479–6483. (1992). https://doi.org/10.1103/PhysRevB.45.6479
+Antoine Georges, Gabriel Kotliar, "Hubbard model in infinite dimensions." Phys. Rev. B 45, 6479–6483 (1992). https://doi.org/10.1103/PhysRevB.45.6479
 
 ### georges1996
 
-A. Georges et al., "Dynamical Mean-Field Theory of Strongly Correlated Fermion Systems and the Limit of Infinite Dimensions." Reviews of Modern Physics 68, 13–125. (1996). https://doi.org/10.1103/RevModPhys.68.13
+A. Georges et al., "Dynamical Mean-Field Theory of Strongly Correlated Fermion Systems and the Limit of Infinite Dimensions." Reviews of Modern Physics 68, 13–125 (1996). https://doi.org/10.1103/RevModPhys.68.13
 
 ## Policy provenance
 
