@@ -14,7 +14,7 @@ def check_series(monkeypatch, values, **kwargs):
 
 
 @pytest.mark.parametrize("confidence,cutoff", [
-    (0.6827, 1.0000217133229992),
+    (0.6827, 1.0000217133229992),  #two-sided standard normal quantiles, (confidence,num_std)
     (0.9, 1.6448536269514722),
     (0.95, 1.959963984540054),
 ])
