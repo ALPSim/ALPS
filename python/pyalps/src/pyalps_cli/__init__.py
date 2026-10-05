@@ -147,3 +147,59 @@ def parameter2xml():
 
 def printgraph():
     return _run("printgraph")
+
+
+def convert2xml():
+    return _run("convert2xml")
+
+
+def snap2vtk():
+    return _run("snap2vtk")
+
+
+def maxent():
+    return _run("maxent")
+
+
+def _transform(program, stylesheet):
+    # Import the XSLT dependency only for exporters. Native commands remain
+    # independent of both lxml and the scientific Python stack.
+    import argparse
+    from lxml import etree
+
+    parser = argparse.ArgumentParser(prog=program, description="Export ALPS XML to stdout.")
+    parser.add_argument("input", help="input XML file, or - for standard input")
+    args = parser.parse_args()
+    package = Path(__file__).resolve().parent.parent / "pyalps"
+    xml_dir = Path(os.environ.get("ALPS_XML_PATH", package / "xml"))
+    # ALPS XML files can refer to a remote DTD; conversion needs only their
+    # contents. Keep relative xsl:include resolution for helpers.xsl.
+    xml_parser = etree.XMLParser(load_dtd=False, resolve_entities=False, no_network=True)
+    if hasattr(signal, "SIGPIPE"):
+        signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+    try:
+        source = sys.stdin.buffer if args.input == "-" else args.input
+        document = etree.parse(source, xml_parser)
+        transform = etree.XSLT(etree.parse(str(xml_dir / stylesheet), xml_parser))
+        sys.stdout.buffer.write(bytes(transform(document)))
+        sys.stdout.buffer.flush()
+    except (OSError, etree.Error) as error:
+        print(f"{program}: {error}", file=sys.stderr)
+        return 1
+    return 0
+
+
+def convert2text():
+    return _transform("convert2text", "QMCXML2text.xsl")
+
+
+def plot2text():
+    return _transform("plot2text", "plot2text.xsl")
+
+
+def plot2gp():
+    return _transform("plot2gp", "plot2gp.xsl")
+
+
+def plot2xmgr():
+    return _transform("plot2xmgr", "plot2xmgr.xsl")

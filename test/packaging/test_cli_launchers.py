@@ -34,16 +34,65 @@ def launcher(tmp_path):
     (other / "spinmc").chmod(0o755)
     env["PATH"] = str(other)
 
-    def run(body=None, args=(), **kwargs):
+    def run(body=None, args=(), program="spinmc", isolated=True, **kwargs):
         if body is not None:
             executable.write_text(f"#!{sys.executable}\n{body}\n")
             executable.chmod(0o755)
         return subprocess.run(
-            [sys.executable, "-S", "-c", "import pyalps_cli; raise SystemExit(pyalps_cli.spinmc())", *args],
+            [sys.executable, *(["-S"] if isolated else []), "-c",
+             f"import pyalps_cli; raise SystemExit(pyalps_cli.{program}())", *args],
             cwd=root, env=env, text=True, capture_output=True, timeout=10, **kwargs,
         )
 
     return run, package, env
+
+
+@pytest.mark.parametrize("program, xml, expected", [
+    ("convert2text", '<SIMULATION><PARAMETERS><PARAMETER name="L">4</PARAMETER>'
+     '</PARAMETERS></SIMULATION>', "L = 4"),
+    ("plot2text", '<plot><set><point><x>1</x><y>2</y></point></set></plot>', "1\t2"),
+    ("plot2gp", '<plot name="test"><set><point><x>1</x><y>2</y></point></set></plot>',
+     'set title "test"'),
+    ("plot2xmgr", '<plot name="test"><set><point><x>1</x><y>2</y></point></set></plot>',
+     '@    title "test"'),
+])
+def test_exporters_without_pyalps_or_external_programs(launcher, tmp_path, program, xml, expected):
+    run, package, _ = launcher
+    stylesheets = Path(__file__).resolve().parents[2] / "lib/xml"
+    shutil.copytree(stylesheets, package / "xml", dirs_exist_ok=True)
+    source = tmp_path / "input with spaces.xml"
+    source.write_text('<?xml version="1.0"?>\n'
+                      '<!DOCTYPE plot SYSTEM "https://invalid.example/unavailable.dtd">\n' + xml)
+    result = run(program=program, isolated=False, args=[str(source)])
+    assert result.returncode == 0, result.stderr
+    assert expected in result.stdout
+    assert not result.stderr
+
+
+def test_exporter_stdin_and_stylesheet_override(launcher, tmp_path):
+    run, _, env = launcher
+    custom = tmp_path / "custom stylesheets"
+    custom.mkdir()
+    (custom / "plot2text.xsl").write_text('''<xsl:stylesheet version="1.0"
+      xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+      <xsl:output method="text"/><xsl:template match="/">override</xsl:template>
+      </xsl:stylesheet>''')
+    env["ALPS_XML_PATH"] = str(custom)
+    result = run(program="plot2text", isolated=False, args=["-"], input="<plot/>")
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == "override"
+
+
+@pytest.mark.parametrize("xml", [None, "<broken>"])
+def test_exporter_reports_bad_input(launcher, tmp_path, xml):
+    run, _, _ = launcher
+    source = tmp_path / "input.xml"
+    if xml is not None:
+        source.write_text(xml)
+    result = run(program="plot2text", isolated=False, args=[str(source)])
+    assert result.returncode == 1
+    assert "plot2text:" in result.stderr
+    assert "Traceback" not in result.stderr
 
 
 def test_arguments_streams_exit_status_and_default_resources(launcher):

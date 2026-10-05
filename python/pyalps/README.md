@@ -11,7 +11,8 @@ python -m pip install pyalps
 
 The wheel installs shell commands for all bundled applications, including
 `spinmc`, `loop`, `worm`, `dmrg`, and `sparsediag`, plus the tutorial tools
-`parameter2xml` and `printgraph`. Activate your Python environment so its
+`parameter2xml`, `printgraph`, `convert2xml`, `convert2text`, `plot2text`,
+`plot2gp`, `plot2xmgr`, `snap2vtk`, and `maxent`. Activate your Python environment so its
 `bin` directory is on `PATH`, then follow the command-line tutorials:
 
 ```sh
@@ -32,9 +33,29 @@ for a user installation, ensure Python's scripts directory is on `PATH`.
 When an environment is active, its ALPS commands may take precedence over
 another ALPS installation. Use a full executable path to select that install.
 
-Legacy conversion/plotting scripts such as `convert2text` and `plot2*` are
-not bundled. Those require an SDK/source installation with their external
-dependencies. Bundled applications are serial; installing `pyalps[mpi]`
+The four text/plot exporters use the packaged XSL stylesheets through `lxml`,
+which pip installs automatically; no system `xsltproc` is needed. They take
+an XML filename (or `-` for standard input) and write to standard output:
+
+```sh
+convert2text simulation.in.task1.out.xml > results.txt
+plot2text susceptibility.plot.xml > susceptibility.txt
+```
+
+`convert2xml` converts legacy simulation checkpoints to XML, `snap2vtk`
+converts simulation snapshots for visualization, and `maxent` runs analytic
+continuation from an HDF5 parameter file. Gnuplot, Grace, and VTK viewers
+are separate applications; the exporters produce their input files.
+
+The obsolete `alpspython` wrapper has been removed: run `python` in your
+active environment instead. `plot2mpl`, `extractmpl`, and their Python 2
+code-generating stylesheet have also been removed; use `pyalps.plot` for
+Matplotlib plots. The unused `transformall` helper and deprecated no-op
+`changestylesheet` command have been removed. Other specialized SDK tools
+remain available from source/SDK installations. `dirloop_sse_evaluate`
+is not currently built and is not included in wheels.
+
+Bundled applications are serial; installing `pyalps[mpi]`
 does not turn them into MPI-enabled executables.
 
 ## Python and source builds
@@ -70,7 +91,8 @@ configuration for a smaller core-only developer build.
 
 `PYALPS_BUNDLE_APPLICATIONS=ON` is the default and copies the ALPS
 application executables (`spinmc`, `dmrg`, `sparsediag`, `loop`, `qwl`, ...)
-and the `parameter2xml` and `printgraph` tools from the SDK into `pyalps/bin`,
+and the `parameter2xml`, `printgraph`, `convert2xml`, `snap2vtk`, and `maxent`
+tools from the SDK into `pyalps/bin`,
 together with the SDK's shared libraries in `pyalps/lib` that their `../lib` RPATH
 resolves against. `pyalps.tools` adds `pyalps/bin` to `PATH`, so this is what makes
 `pyalps.runApplication('spinmc', ...)` work from a wheel install — the

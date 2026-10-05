@@ -19,7 +19,7 @@ description = "Python Applications and Libraries for Physics Simulations"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
-dependencies = ["numpy>=1.26", "scipy>=1.13", "matplotlib>=3.8"]
+dependencies = ["numpy>=1.26", "scipy>=1.13", "matplotlib>=3.8", "lxml>=5"]
 authors = [
   { name = "Sergei Iskakov", email = "siskakov@umich.edu" },
   { name = "Fei Lin", email = "feilin.physics@gmail.com" },
@@ -68,6 +68,13 @@ worm = "pyalps_cli:worm"
 worm_evaluate = "pyalps_cli:worm_evaluate"
 parameter2xml = "pyalps_cli:parameter2xml"
 printgraph = "pyalps_cli:printgraph"
+convert2xml = "pyalps_cli:convert2xml"
+snap2vtk = "pyalps_cli:snap2vtk"
+maxent = "pyalps_cli:maxent"
+convert2text = "pyalps_cli:convert2text"
+plot2text = "pyalps_cli:plot2text"
+plot2gp = "pyalps_cli:plot2gp"
+plot2xmgr = "pyalps_cli:plot2xmgr"
 
 [project.optional-dependencies]
 plot = ["matplotlib>=3.8"]

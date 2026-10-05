@@ -48,6 +48,9 @@ EXPECTED_BUNDLED_PROGRAMS = {
     "worm_evaluate",
     "parameter2xml",
     "printgraph",
+    "convert2xml",
+    "snap2vtk",
+    "maxent",
 }
 
 

@@ -259,7 +259,10 @@ if(PYALPS_BUNDLE_APPLICATIONS)
     worm
     worm_evaluate
     parameter2xml
-    printgraph)
+    printgraph
+    convert2xml
+    snap2vtk
+    maxent)
   set(_alps_programs "")
   set(_alps_missing_programs "")
   foreach(_program IN LISTS _alps_program_names)
