@@ -45,12 +45,12 @@ plt.show()
 # ALPS Python provides a convenient tool to check whether a measurement observable(s) has (have) reached steady state equilibrium.
 #
 # Here is one example:
-print pyalps.checkSteadyState(outfile=files[0], observable='|Magnetization|', confidenceInterval=0.95)
+print(pyalps.checkSteadyState(outfile=files[0], observable='|Magnetization|', confidenceInterval=0.95))
 print
 
 # and another one:
 observables = pyalps.loadMeasurements(files, ['|Magnetization|', 'Energy'])
 observables = pyalps.checkSteadyState(observables, confidenceInterval=0.95)
 for o in observables:
-    print '{}:\t{}'.format(o.props['observable'], o.props['checkSteadyState'])
+    print('{}:\t{}'.format(o.props['observable'], o.props['checkSteadyState']))
 

@@ -1,51 +1,28 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                                                 *
- * ALPS Project: Algorithms and Libraries for Physics Simulations                  *
- *                                                                                 *
- * ALPS Libraries                                                                  *
- *                                                                                 *
- * Copyright (C) 2010 - 2013 by Lukas Gamper <gamperl@gmail.com>                   *
- *                                                                                 *
- * ALPS Project: https://alps.comp-phys.org/                                       *
- * SPDX-License-Identifier: MIT                                                    *
- *                                                                                 *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+// Copyright (C) 2010-2012 by Lukas Gamper
+//               2026      by the ALPS collaboration
+// SPDX-License-Identifier: MIT
+#ifndef ALPS_TUTORIAL_EXPORTED_ISING_HPP
+#define ALPS_TUTORIAL_EXPORTED_ISING_HPP
 
-#ifndef ALPS_TUTORIAL_ISING_HPP
-#define ALPS_TUTORIAL_ISING_HPP
+#include <alps/mcbase.hpp>
 
-#include <alps/ngs.hpp>
+#include <cstddef>
 
-#include <boost/function.hpp>
-#include <boost/filesystem/path.hpp>
+class ising_sim : public alps::mcbase {
+public:
+    explicit ising_sim(parameters_type const & parameters,
+                       std::size_t seed_offset = 0);
 
-#include <vector>
-#include <string>
+    void update() override;
+    void measure() override;
+    double fraction_completed() const override;
+    void save(alps::hdf5::archive & archive) const override;
+    void load(alps::hdf5::archive & archive) override;
 
-class ALPS_DECL ising_sim : public alps::mcbase {
-
-    public:
-        
-        ising_sim(parameters_type const & parms, std::size_t seed_offset = 0);
-
-        virtual void update();
-        virtual void measure();
-        virtual double fraction_completed() const;
-
-        using alps::mcbase::save;
-        virtual void save(alps::hdf5::archive & ar) const;
-
-        using alps::mcbase::load;
-        virtual void load(alps::hdf5::archive & ar);
-
-    private:
-        
-        int length;
-        int sweeps;
-        int thermalization_sweeps;
-        int total_sweeps;
-        double beta;
-        std::vector<int> spins;
+private:
+    std::size_t sweeps_ = 0;
+    std::size_t total_sweeps_ = 1;
+    double state_ = 1.0;
 };
 
 #endif

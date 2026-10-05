@@ -1,0 +1,596 @@
+{
+  "MCVectorData/full": {
+    "legacy": {
+      "ok": {
+        "error": {
+          "array": [],
+          "dtype": "<f8",
+          "shape": [
+            0
+          ]
+        },
+        "mean": {
+          "array": [],
+          "dtype": "<f8",
+          "shape": [
+            0
+          ]
+        }
+      }
+    },
+    "nanobind": {
+      "ok": {
+        "error": {
+          "array": [
+            0.25,
+            0.5,
+            0.75
+          ],
+          "dtype": "<f8",
+          "shape": [
+            3
+          ]
+        },
+        "mean": {
+          "array": [
+            1.5,
+            2.5,
+            3.5
+          ],
+          "dtype": "<f8",
+          "shape": [
+            3
+          ]
+        }
+      }
+    },
+    "reason": "Full slicing returns the vector instead of a legacy empty slice."
+  },
+  "RealVectorObservable/converged_errors": {
+    "legacy": {
+      "error": "TypeError",
+      "message": "No to_python (by-value) converter found for C++ type: std::__1::valarray<int>"
+    },
+    "nanobind": {
+      "ok": {
+        "array": [
+          1,
+          1
+        ],
+        "dtype": "<i4",
+        "shape": [
+          2
+        ]
+      }
+    },
+    "reason": "The registered integer NumPy return replaces the legacy unregistered valarray error."
+  },
+  "RealVectorTimeSeriesObservable/converged_errors": {
+    "legacy": {
+      "error": "TypeError",
+      "message": "No to_python (by-value) converter found for C++ type: std::__1::valarray<int>"
+    },
+    "nanobind": {
+      "ok": {
+        "array": [
+          1,
+          1
+        ],
+        "dtype": "<i4",
+        "shape": [
+          2
+        ]
+      }
+    },
+    "reason": "The registered integer NumPy return replaces the legacy unregistered valarray error."
+  },
+  "hdf/array/int8/(2, 1, 3)/C": {
+    "legacy": {
+      "ok": {
+        "array": [
+          [
+            [
+              false,
+              true,
+              true
+            ]
+          ],
+          [
+            [
+              true,
+              true,
+              true
+            ]
+          ]
+        ],
+        "dtype": "|b1",
+        "shape": [
+          2,
+          1,
+          3
+        ]
+      }
+    },
+    "nanobind": {
+      "ok": {
+        "array": [
+          [
+            [
+              0,
+              1,
+              2
+            ]
+          ],
+          [
+            [
+              3,
+              4,
+              5
+            ]
+          ]
+        ],
+        "dtype": "|i1",
+        "shape": [
+          2,
+          1,
+          3
+        ]
+      }
+    },
+    "reason": "New signed-byte metadata preserves int8 instead of the legacy Boolean interpretation."
+  },
+  "hdf/array/int8/(2, 1, 3)/F": {
+    "legacy": {
+      "ok": {
+        "array": [
+          [
+            [
+              false,
+              true,
+              true
+            ]
+          ],
+          [
+            [
+              true,
+              true,
+              true
+            ]
+          ]
+        ],
+        "dtype": "|b1",
+        "shape": [
+          2,
+          1,
+          3
+        ]
+      }
+    },
+    "nanobind": {
+      "ok": {
+        "array": [
+          [
+            [
+              0,
+              1,
+              2
+            ]
+          ],
+          [
+            [
+              3,
+              4,
+              5
+            ]
+          ]
+        ],
+        "dtype": "|i1",
+        "shape": [
+          2,
+          1,
+          3
+        ]
+      }
+    },
+    "reason": "New signed-byte metadata preserves int8 instead of the legacy Boolean interpretation."
+  },
+  "hdf/array/int8/(2, 1, 3)/readonly": {
+    "legacy": {
+      "ok": {
+        "array": [
+          [
+            [
+              false,
+              true,
+              true
+            ]
+          ],
+          [
+            [
+              true,
+              true,
+              true
+            ]
+          ]
+        ],
+        "dtype": "|b1",
+        "shape": [
+          2,
+          1,
+          3
+        ]
+      }
+    },
+    "nanobind": {
+      "ok": {
+        "array": [
+          [
+            [
+              0,
+              1,
+              2
+            ]
+          ],
+          [
+            [
+              3,
+              4,
+              5
+            ]
+          ]
+        ],
+        "dtype": "|i1",
+        "shape": [
+          2,
+          1,
+          3
+        ]
+      }
+    },
+    "reason": "New signed-byte metadata preserves int8 instead of the legacy Boolean interpretation."
+  },
+  "hdf/array/int8/(2, 3)/C": {
+    "legacy": {
+      "ok": {
+        "array": [
+          [
+            false,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ]
+        ],
+        "dtype": "|b1",
+        "shape": [
+          2,
+          3
+        ]
+      }
+    },
+    "nanobind": {
+      "ok": {
+        "array": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            3,
+            4,
+            5
+          ]
+        ],
+        "dtype": "|i1",
+        "shape": [
+          2,
+          3
+        ]
+      }
+    },
+    "reason": "New signed-byte metadata preserves int8 instead of the legacy Boolean interpretation."
+  },
+  "hdf/array/int8/(2, 3)/F": {
+    "legacy": {
+      "ok": {
+        "array": [
+          [
+            false,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ]
+        ],
+        "dtype": "|b1",
+        "shape": [
+          2,
+          3
+        ]
+      }
+    },
+    "nanobind": {
+      "ok": {
+        "array": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            3,
+            4,
+            5
+          ]
+        ],
+        "dtype": "|i1",
+        "shape": [
+          2,
+          3
+        ]
+      }
+    },
+    "reason": "New signed-byte metadata preserves int8 instead of the legacy Boolean interpretation."
+  },
+  "hdf/array/int8/(2, 3)/readonly": {
+    "legacy": {
+      "ok": {
+        "array": [
+          [
+            false,
+            true,
+            true
+          ],
+          [
+            true,
+            true,
+            true
+          ]
+        ],
+        "dtype": "|b1",
+        "shape": [
+          2,
+          3
+        ]
+      }
+    },
+    "nanobind": {
+      "ok": {
+        "array": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            3,
+            4,
+            5
+          ]
+        ],
+        "dtype": "|i1",
+        "shape": [
+          2,
+          3
+        ]
+      }
+    },
+    "reason": "New signed-byte metadata preserves int8 instead of the legacy Boolean interpretation."
+  },
+  "hdf/array/int8/(6,)/C": {
+    "legacy": {
+      "ok": {
+        "array": [
+          false,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "dtype": "|b1",
+        "shape": [
+          6
+        ]
+      }
+    },
+    "nanobind": {
+      "ok": {
+        "array": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "dtype": "|i1",
+        "shape": [
+          6
+        ]
+      }
+    },
+    "reason": "New signed-byte metadata preserves int8 instead of the legacy Boolean interpretation."
+  },
+  "hdf/array/int8/(6,)/F": {
+    "legacy": {
+      "ok": {
+        "array": [
+          false,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "dtype": "|b1",
+        "shape": [
+          6
+        ]
+      }
+    },
+    "nanobind": {
+      "ok": {
+        "array": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "dtype": "|i1",
+        "shape": [
+          6
+        ]
+      }
+    },
+    "reason": "New signed-byte metadata preserves int8 instead of the legacy Boolean interpretation."
+  },
+  "hdf/array/int8/(6,)/readonly": {
+    "legacy": {
+      "ok": {
+        "array": [
+          false,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "dtype": "|b1",
+        "shape": [
+          6
+        ]
+      }
+    },
+    "nanobind": {
+      "ok": {
+        "array": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "dtype": "|i1",
+        "shape": [
+          6
+        ]
+      }
+    },
+    "reason": "New signed-byte metadata preserves int8 instead of the legacy Boolean interpretation."
+  },
+  "hdf/container/empty-dict": {
+    "legacy": {
+      "ok": {
+        "array": [],
+        "dtype": "<i4",
+        "shape": [
+          0
+        ]
+      }
+    },
+    "nanobind": {
+      "ok": {}
+    },
+    "reason": "An empty dictionary replaces the previous dataset with an empty group."
+  },
+  "hdf/scalar/8": {
+    "legacy": {
+      "ok": true
+    },
+    "nanobind": {
+      "ok": -7
+    },
+    "reason": "New signed-byte metadata preserves int8 instead of the legacy Boolean interpretation."
+  },
+  "members/pyngsaccumulator_c/max_num_binning_result": {
+    "legacy": {
+      "ok": [
+        "count",
+        "error",
+        "load",
+        "mean",
+        "reset",
+        "save"
+      ]
+    },
+    "nanobind": {
+      "ok": [
+        "abs",
+        "cos",
+        "cosh",
+        "count",
+        "error",
+        "load",
+        "log",
+        "mean",
+        "reset",
+        "save",
+        "sin",
+        "sinh",
+        "sqrt",
+        "tan",
+        "tanh"
+      ]
+    },
+    "reason": "Scalar result exposes additional supported math methods."
+  },
+  "members/pyngsobservables_c/map_indexing_suite_observables_entry": {
+    "legacy": {
+      "ok": [
+        "data",
+        "key"
+      ]
+    },
+    "nanobind": null,
+    "reason": "Boost indexing implementation classes are removed; mapping behavior is tested separately."
+  },
+  "members/pyngsresults_c/map_indexing_suite_results_entry": {
+    "legacy": {
+      "ok": [
+        "data",
+        "key"
+      ]
+    },
+    "nanobind": null,
+    "reason": "Boost indexing implementation classes are removed; mapping behavior is tested separately."
+  },
+  "surface/pyngsobservables_c": {
+    "legacy": {
+      "ok": [
+        "map_indexing_suite_observables_entry",
+        "observables"
+      ]
+    },
+    "nanobind": {
+      "ok": [
+        "observables"
+      ]
+    },
+    "reason": "Boost indexing implementation classes are removed; mapping behavior is tested separately."
+  },
+  "surface/pyngsresults_c": {
+    "legacy": {
+      "ok": [
+        "map_indexing_suite_results_entry",
+        "results"
+      ]
+    },
+    "nanobind": {
+      "ok": [
+        "results"
+      ]
+    },
+    "reason": "Boost indexing implementation classes are removed; mapping behavior is tested separately."
+  }
+}

@@ -40,10 +40,6 @@ if (NOT DEFINED BUILD_BOOST_SYSTEM)
   set(BUILD_BOOST_SYSTEM TRUE)
 endif (NOT DEFINED BUILD_BOOST_SYSTEM)
 
-if (NOT DEFINED BUILD_BOOST_PYTHON)
-  set(BUILD_BOOST_PYTHON TRUE)
-endif(NOT DEFINED BUILD_BOOST_PYTHON)
-
 if (NOT DEFINED BUILD_BOOST_THREAD)
   set(BUILD_BOOST_THREAD TRUE)
 endif (NOT DEFINED BUILD_BOOST_THREAD)
@@ -95,11 +91,6 @@ if(Boost_INCLUDE_DIR)
   MATH(EXPR Boost_SUBMINOR_VERSION "${Boost_VERSION} % 100")
 endif(Boost_INCLUDE_DIR)
 
-if(Boost_VERSION AND NOT Boost_VERSION LESS 106300)
-  # Boost Numpy is compiled if we have >= 1.63
-  set(ALPS_HAVE_BOOST_NUMPY ON)
-endif(Boost_VERSION AND NOT Boost_VERSION LESS 106300)
-
 if(Boost_ROOT_DIR)
   message(STATUS "Found Boost Source: ${Boost_ROOT_DIR}")
   message(STATUS "Boost Version: ${Boost_MAJOR_VERSION}_${Boost_MINOR_VERSION}_${Boost_SUBMINOR_VERSION}")
@@ -109,19 +100,6 @@ if(Boost_ROOT_DIR)
 else(Boost_ROOT_DIR)
   message(FATAL_ERROR "Boost Source not Found")
 endif(Boost_ROOT_DIR)
-
-if(BUILD_BOOST_PYTHON)
-  EXEC_PYTHON_SCRIPT ("import numpy; print(numpy.__version__)" numpy_ver)
-  MESSAGE(STATUS "numpy version ${numpy_ver}" )
-  if(${numpy_ver} VERSION_GREATER_EQUAL "2.0.0" AND "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}" VERSION_LESS "1.87.0" )
-    message(WARNING
-      "Boost ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION} "
-      "does not support NumPy >= 2.0 (requires Boost >= 1.87). "
-      "Falling back to boost::python::numeric::array. "
-      "Upgrade to Boost >= 1.87 to silence this warning.")
-    set(ALPS_HAVE_BOOST_NUMPY OFF)
-  endif()
-endif()
 
 # Avoid auto link of Boost library
 add_definitions(-DBOOST_ALL_NO_LIB=1)

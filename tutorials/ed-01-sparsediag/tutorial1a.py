@@ -1,4 +1,3 @@
-from __future__ import print_function
 # 
 # ALPS Project: Algorithms and Libraries for Physics Simulations
 # 
