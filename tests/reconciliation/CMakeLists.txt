@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.27...4.3)
 project(ALPSReconciliationProbe LANGUAGES C CXX)
 
 # Configure twice, in separate build directories and with separate SDK prefixes.

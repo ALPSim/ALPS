@@ -1,5 +1,12 @@
 # Copyright (C) 2026 ALPS collaboration. SPDX-License-Identifier: MIT
 @PACKAGE_INIT@
+# block() and the exported $<COMPILE_ONLY:...> interfaces need CMake 3.27.
+# Fail with a clear message instead of "Unknown CMake command block".
+if(CMAKE_VERSION VERSION_LESS 3.27)
+  set(ALPS_FOUND FALSE)
+  set(ALPS_NOT_FOUND_MESSAGE "ALPS requires CMake 3.27 or newer (found ${CMAKE_VERSION})")
+  return()
+endif()
 include(CMakeFindDependencyMacro)
 if(DEFINED BLA_SIZEOF_INTEGER AND NOT BLA_SIZEOF_INTEGER STREQUAL "4")
   set(ALPS_FOUND FALSE)
@@ -28,24 +35,13 @@ include("${CMAKE_CURRENT_LIST_DIR}/ALPSTargets.cmake")
 
 set(ALPS_VERSION "@ALPS_VERSION@")
 set(ALPS_RUNTIME_LIBRARY_DIRS "@PACKAGE_CMAKE_INSTALL_BINDIR@")
-set(ALPS_RUNTIME_TARGETS ALPS::alps ALPS::params ALPS::hdf5 ALPS::utilities
-                         ALPS::osiris ALPS::xml ALPS::cli)
+set(ALPS_RUNTIME_TARGETS "@ALPS_SDK_RUNTIME_TARGETS@")
 set(ALPS_DATA_DIR "@PACKAGE_CMAKE_INSTALL_DATADIR@/alps")
 set(ALPS_MPI_ENABLED "@ALPS_ENABLE_MPI@")
-set(ALPS_alps_FOUND TRUE)
-set(ALPS_headers_FOUND TRUE)
-set(ALPS_solver_headers_FOUND TRUE)
-set(ALPS_configuration_FOUND TRUE)
-set(ALPS_containers_FOUND TRUE)
-set(ALPS_numerics_FOUND TRUE)
-set(ALPS_numeric_io_FOUND TRUE)
-set(ALPS_utilities_FOUND TRUE)
-set(ALPS_osiris_FOUND TRUE)
-set(ALPS_xml_FOUND TRUE)
-set(ALPS_cli_FOUND TRUE)
-set(ALPS_hdf5_FOUND TRUE)
-set(ALPS_params_FOUND TRUE)
-set(ALPS_fortran_FOUND TRUE)
+# Generated from ALPS_SDK_TARGETS in src/alps/CMakeLists.txt.
+foreach(component IN ITEMS @ALPS_SDK_COMPONENTS@)
+  set(ALPS_${component}_FOUND TRUE)
+endforeach()
 set(ALPS_solvers_FOUND "@ALPS_BUILD_APPLICATIONS@")
 set(ALPS_applications_FOUND FALSE)
 if("applications" IN_LIST ALPS_FIND_COMPONENTS AND @ALPS_BUILD_APPLICATIONS@

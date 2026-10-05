@@ -38,6 +38,39 @@
 #include "rpc_types.h"
 #include <alps/osiris_export.h>
 
+/* Link-time names unique to ALPS. macOS libSystem exports most of these
+   xdr_* functions with an incompatible struct xdr_ops; without distinct
+   symbols a program can bind some calls there and others here. Source code
+   keeps using the standard names. */
+#define xdr_array         alps_xdr_array
+#define xdr_bool          alps_xdr_bool
+#define xdr_bytes         alps_xdr_bytes
+#define xdr_char          alps_xdr_char
+#define xdr_double        alps_xdr_double
+#define xdr_enum          alps_xdr_enum
+#define xdr_float         alps_xdr_float
+#define xdr_free          alps_xdr_free
+#define xdr_hyper         alps_xdr_hyper
+#define xdr_int           alps_xdr_int
+#define xdr_int32_t       alps_xdr_int32_t
+#define xdr_long          alps_xdr_long
+#define xdr_longlong_t    alps_xdr_longlong_t
+#define xdr_netobj        alps_xdr_netobj
+#define xdr_opaque        alps_xdr_opaque
+#define xdr_short         alps_xdr_short
+#define xdr_string        alps_xdr_string
+#define xdr_u_char        alps_xdr_u_char
+#define xdr_u_hyper       alps_xdr_u_hyper
+#define xdr_u_int         alps_xdr_u_int
+#define xdr_u_long        alps_xdr_u_long
+#define xdr_u_longlong_t  alps_xdr_u_longlong_t
+#define xdr_u_short       alps_xdr_u_short
+#define xdr_uint32_t      alps_xdr_uint32_t
+#define xdr_union         alps_xdr_union
+#define xdr_vector        alps_xdr_vector
+#define xdr_void          alps_xdr_void
+#define xdr_wrapstring    alps_xdr_wrapstring
+#define xdrstdio_create   alps_xdrstdio_create
 
 
 

@@ -17,13 +17,10 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-include_directories(${Boost_ROOT_DIR})
-
-IF(ALPS_NGS_USE_NEW_ALEA)
-	FOREACH (name count mean)
-		add_executable(accumulator_${name} ${name}.cpp)
-		add_dependencies(accumulator_${name} alps)
-		target_link_libraries(accumulator_${name} alps)
-		add_alps_test(accumulator_${name})
-	ENDFOREACH(name)
-ENDIF(ALPS_NGS_USE_NEW_ALEA)
+if(ALPS_NGS_USE_NEW_ALEA)
+  foreach(name IN ITEMS count mean)
+    add_executable(accumulator_${name} ${name}.cpp)
+    target_link_libraries(accumulator_${name} PRIVATE ALPS::alps)
+    alps_add_test(accumulator_${name})
+  endforeach()
+endif()

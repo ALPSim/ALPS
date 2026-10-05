@@ -72,3 +72,7 @@ if(ALPS_BLA_STATIC AND NOT BLA_STATIC)
 endif()
 set(BLA_VENDOR "${ALPS_BLA_VENDOR}")
 set(BLA_STATIC "${ALPS_BLA_STATIC}")
+# An installed OpenBLAS package wins over the platform default (e.g. Accelerate)
+# when BLA_VENDOR is unset; make the choice visible.
+message(STATUS "ALPS numerics: BLAS=${ALPS_BLAS_TARGET} LAPACK=${ALPS_LAPACK_TARGET}"
+               " (set BLA_VENDOR to choose a provider)")

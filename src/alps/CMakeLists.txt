@@ -124,11 +124,30 @@ if(ALPS_ENABLE_OPENMP)
   target_link_libraries(alps_headers INTERFACE "$<COMPILE_ONLY:OpenMP::OpenMP_CXX>")
 endif()
 
+# The one list of SDK targets. ALPSConfig.cmake derives its component names and
+# runtime targets from it, so adding a module here is the only edit needed.
+set(ALPS_SDK_TARGETS alps alps_utilities alps_hdf5 alps_params alps_osiris
+                     alps_xml alps_cli alps_headers alps_configuration
+                     alps_containers alps_numerics alps_numeric_io alps_solver_headers)
+set(sdk_components "")
+set(sdk_runtime_targets "")
+foreach(target IN LISTS ALPS_SDK_TARGETS ITEMS alps_fortran)
+  get_target_property(component ${target} EXPORT_NAME)
+  if(NOT component)
+    set(component ${target})
+  endif()
+  list(APPEND sdk_components ${component})
+  get_target_property(type ${target} TYPE)
+  if(NOT type STREQUAL "INTERFACE_LIBRARY" AND NOT target STREQUAL "alps_fortran")
+    list(APPEND sdk_runtime_targets ALPS::${component})
+  endif()
+endforeach()
+set_property(GLOBAL PROPERTY ALPS_SDK_COMPONENTS ${sdk_components})
+set_property(GLOBAL PROPERTY ALPS_SDK_RUNTIME_TARGETS ${sdk_runtime_targets})
+
 # Install each target's actual public file sets, including generated exports.
 # This keeps header installation policy identical for runtimes and interfaces.
-foreach(target IN ITEMS alps alps_utilities alps_hdf5 alps_params alps_osiris
-                        alps_xml alps_cli alps_headers alps_configuration
-                        alps_containers alps_numerics alps_numeric_io alps_solver_headers)
+foreach(target IN LISTS ALPS_SDK_TARGETS)
   get_target_property(header_sets ${target} INTERFACE_HEADER_SETS)
   set(header_install_args "")
   if(header_sets)
