@@ -15,6 +15,32 @@ set_target_properties(alps_utilities PROPERTIES
   SOVERSION ${PROJECT_VERSION_MAJOR}
   INSTALL_RPATH "${ALPS_LOADER_ORIGIN}")
 target_link_libraries(alps_utilities PUBLIC ALPS::configuration ALPS::containers Boost::filesystem Threads::Threads)
+
+# Stacktraces require both platform headers and linkable runtime symbols.
+# Detect them for every build, including embedded consumers on musl.
+include(CheckCXXSourceCompiles)
+include(CMakePushCheckState)
+block()
+  cmake_push_check_state(RESET)
+  set(CMAKE_TRY_COMPILE_TARGET_TYPE EXECUTABLE)
+  check_cxx_source_compiles([[
+    #include <cxxabi.h>
+    #include <execinfo.h>
+    #include <cstdlib>
+    int main() {
+      void *frames[1];
+      int depth = backtrace(frames, 1);
+      std::free(backtrace_symbols(frames, depth));
+      int status = 0;
+      std::free(abi::__cxa_demangle("", 0, 0, &status));
+    }
+  ]] ALPS_HAVE_STACKTRACE)
+  cmake_pop_check_state()
+endblock()
+if(NOT ALPS_HAVE_STACKTRACE)
+  target_compile_definitions(alps_utilities PRIVATE ALPS_NGS_NO_STACKTRACE)
+endif()
+
 if(ALPS_ENABLE_MPI)
   target_link_libraries(alps_utilities PUBLIC "$<COMPILE_ONLY:MPI::MPI_CXX;Boost::mpi>")
 endif()

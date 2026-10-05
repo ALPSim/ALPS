@@ -40,14 +40,8 @@
     #define ALPS_NGS_NO_SIGNALS
 #endif
 
-// do not print a stacktrace in error messages
-#ifndef __GNUC__
-    #define ALPS_NGS_NO_STACKTRACE
-#endif
-
 // TODO: have_python
 // TODO: have_mpi
 // TODO: have_thread
 
 #endif
-
