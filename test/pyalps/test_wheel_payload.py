@@ -20,6 +20,7 @@ from __future__ import annotations
 import collections
 from pathlib import Path
 import re
+import signal
 import subprocess
 
 import pytest
@@ -119,9 +120,9 @@ def test_every_bundled_program_can_be_loaded():
     # Signatures the dynamic loader emits when a dependency cannot be resolved
     # from inside the installed package.  A program is free to reject --help
     # however it likes -- several of these tools have no option parsing and
-    # abort on an uncaught C++ exception, so the exit status alone says nothing
-    # -- but it is not free to fail to start.  dyld and glibc/musl both print a
-    # distinctive message before dying, which is what this matches on.
+    # abort on an uncaught C++ exception. Other fatal signals are failures:
+    # malformed ELF headers can segfault in the loader without any message.
+    # dyld and glibc/musl also print distinctive dependency-error messages.
     loader_errors = (
         "error while loading shared libraries",  # glibc
         "cannot open shared object file",        # glibc, detail line
@@ -150,6 +151,8 @@ def test_every_bundled_program_can_be_loaded():
         hit = next((sig for sig in loader_errors if sig in output), None)
         if hit is not None:
             failures.append(f"{program.name}: loader error ({hit!r})")
+        elif proc.returncode < 0 and proc.returncode != -signal.SIGABRT:
+            failures.append(f"{program.name}: terminated by signal {-proc.returncode}")
         elif proc.returncode == 127:
             failures.append(
                 f"{program.name}: exited 127: {output.strip()[:200]}"

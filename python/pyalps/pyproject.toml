@@ -136,6 +136,10 @@ before-all = [
   "cmake --build --preset wheel-deps -j2",
 ]
 repair-wheel-command = [
+  # The pinned manylinux image has patchelf 0.17.2.4, which can corrupt
+  # non-PIE executables when auditwheel grows their RPATH/dynamic sections.
+  "python -m pip install --only-binary=:all: patchelf==0.19.1.0",
+  "patchelf --version",
   "auditwheel repair -w {dest_dir} {wheel}",
   "auditwheel show {dest_dir}/*.whl",
 ]
