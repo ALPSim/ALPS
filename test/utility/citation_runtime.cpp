@@ -4,7 +4,14 @@
 #include <alps/parapack/worker_factory.h>
 #include <alps/scheduler.h>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
+#include <vector>
+#ifdef ALPS_HAVE_MPI
+#include <boost/io/ios_state.hpp>
+#include <boost/mpi/collectives/gather.hpp>
+#include <boost/serialization/string.hpp>
+#endif
 
 // Exercise the real stdin scheduler with a small deterministic worker, including
 // its parallel-worker path (the shipped loop executable registers serial workers).
@@ -61,6 +68,20 @@ int main(int argc, char** argv) {
       alps::parapack::worker_factory::instance()->set_citation_component("looper");
 #ifdef ALPS_HAVE_MPI
       alps::parapack::parallel_worker_factory::instance()->register_worker<citation_worker>("citation-test");
+      if (argc == 2 && std::string(argv[1]) == "--mpi") {
+        alps::cli_mpi_guard mpi(argc, argv);
+        boost::mpi::communicator world;
+        std::ostringstream output;
+        boost::io::basic_ios_rdbuf_saver<char> stdout_saver(std::cout, output.rdbuf());
+        const int result = alps::parapack::start(argc, argv);
+        stdout_saver.restore();
+        // Preserve every rank's output without depending on launcher merge order.
+        std::vector<std::string> rank_output;
+        boost::mpi::gather(world, output.str(), rank_output, 0);
+        if (world.rank() == 0)
+          for (const auto& text : rank_output) std::cout << text;
+        return result;
+      }
 #endif
       return alps::parapack::start(argc, argv);
     }
