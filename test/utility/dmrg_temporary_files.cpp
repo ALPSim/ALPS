@@ -5,10 +5,8 @@
 #include <iterator>
 #include <stdexcept>
 #include <vector>
-#ifndef BOOST_MSVC
 #include <fcntl.h>
 #include <unistd.h>
-#endif
 
 namespace fs = boost::filesystem;
 
@@ -54,7 +52,6 @@ int main()
     } catch (const std::runtime_error&) {}
     require(fs::is_empty(root / "second"), "exception or directory change prevented cleanup");
 
-#ifndef BOOST_MSVC
     // Relative scratch paths must still work when their absolute form is
     // longer than the old temporary_filename buffer. Each path component
     // stays short enough for ordinary filesystem limits.
@@ -91,7 +88,6 @@ int main()
     close(after);
     require(after == before, "temporary_filename leaked a file descriptor");
     for (const auto& name : names) fs::remove(name);
-#endif
     fs::remove(unrelated);
     fs::remove_all(root);
   } catch (...) {
