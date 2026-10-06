@@ -56,8 +56,7 @@ set(_pyalps_targets
   pyngsrandom01_c
   pyngsaccumulator_c)
 
-# Policy (see README "Free-threading and stable-ABI policy"): do NOT
-# add FREE_THREADED (libalps relies on the GIL as its lock around
+# Do not add FREE_THREADED (libalps relies on the GIL as its lock around
 # shared state) and do not add STABLE_ABI without revisiting the wheel
 # matrix — per-version wheels are deliberate.
 # NB_STATIC keeps nanobind's core private to each extension. On musllinux,
