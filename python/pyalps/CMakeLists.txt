@@ -143,8 +143,26 @@ foreach(_flag IN LISTS _alps_sdk_cxx_flags)
   endif()
 endforeach()
 
-option(PYALPS_BUNDLE_APPLICATIONS
-  "Bundle ALPS applications and core tutorial tools into pyalps/bin" ON)
+# Entry points are resolved before CMake runs. Use the same environment setting
+# for metadata and native payload, rather than a CMake-only option that could
+# leave bindings-only wheels with launchers that overwrite SDK executables.
+execute_process(
+  COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/_build_support/alps_version.py"
+    --bundle-applications
+  OUTPUT_VARIABLE _pyalps_bundle_applications
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  COMMAND_ERROR_IS_FATAL ANY)
+if(DEFINED PYALPS_BUNDLE_APPLICATIONS AND
+   ((PYALPS_BUNDLE_APPLICATIONS AND NOT _pyalps_bundle_applications) OR
+    (NOT PYALPS_BUNDLE_APPLICATIONS AND _pyalps_bundle_applications)))
+  message(FATAL_ERROR
+    "Set the environment variable PYALPS_BUNDLE_APPLICATIONS=OFF (or ON) for "
+    "the entire Python build, instead of -DPYALPS_BUNDLE_APPLICATIONS. "
+    "Wheel entry points and the CMake payload must use the same setting. "
+    "Remove PYALPS_BUNDLE_APPLICATIONS from an existing CMake cache when switching modes.")
+endif()
+unset(PYALPS_BUNDLE_APPLICATIONS CACHE)
+set(PYALPS_BUNDLE_APPLICATIONS "${_pyalps_bundle_applications}")
 
 # Where the extension modules look for libalps at run time.
 #
@@ -198,15 +216,8 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/pyalps_cli/"
   DESTINATION pyalps_cli
   FILES_MATCHING PATTERN "*.py")
 
-# Runtime fallback paths for pyalps.tools, used only when the package does
-# not carry the resource in question. The XML/XSL library below is always
-# bundled, so its fallback is always empty; the application binaries are
-# bundled unless PYALPS_BUNDLE_APPLICATIONS is OFF, and only that
-# configuration needs to point back at the SDK that built the package.
-#
-# Never fill these in for a bundled package: they would be absolute paths on
-# the build machine, baked into a redistributable artifact.
-set(PYALPS_ALPS_XML_FALLBACK "")
+# Only bindings-only builds record the SDK's executable directory. Bundled
+# wheels must not contain paths to the SDK on the build machine.
 if(PYALPS_BUNDLE_APPLICATIONS)
   set(PYALPS_ALPS_BIN_FALLBACK "")
 else()
@@ -277,7 +288,7 @@ if(PYALPS_BUNDLE_APPLICATIONS)
       "PYALPS_BUNDLE_APPLICATIONS is ON but the wheel SDK is missing these "
       "wheel applications/tools: ${_alps_missing_programs}. Build the ALPS "
       "SDK with the wheel-deps preset, or configure with "
-      "-DPYALPS_BUNDLE_APPLICATIONS=OFF for a bindings-only wheel that uses "
+      "the environment variable PYALPS_BUNDLE_APPLICATIONS=OFF for a bindings-only wheel that uses "
       "SDK executables instead.")
   endif()
   list(LENGTH _alps_programs _alps_program_count)

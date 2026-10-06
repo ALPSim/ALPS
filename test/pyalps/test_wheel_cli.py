@@ -8,10 +8,26 @@ import math
 import os
 from pathlib import Path
 import subprocess
+import sys
 import sysconfig
 import xml.etree.ElementTree as ET
 
 import pytest
+
+
+@pytest.mark.parametrize("sdk_override", [None, "/explicit/sdk/bin"])
+def test_import_preserves_binary_selection_environment(tmp_path, sdk_override):
+    env = os.environ.copy()
+    for key in ("ALPS_BIN_PATH", "PYTHONPATH", "PYTHONHOME"):
+        env.pop(key, None)
+    if sdk_override is not None:
+        env["ALPS_BIN_PATH"] = sdk_override
+    result = subprocess.run(
+        [sys.executable, "-c", "import os, pyalps; "
+         f"assert os.environ.get('ALPS_BIN_PATH') == {sdk_override!r}"],
+        cwd=tmp_path, env=env, text=True, capture_output=True, timeout=60,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 @pytest.fixture
@@ -51,6 +67,7 @@ def test_entry_points_cover_bundled_programs(wheel_cli):
         assert (scripts / name).is_file()
         assert callable(entry.load())
         assert entry.module == "pyalps_cli"
+        assert entry.attr == "main"
 
 
 @pytest.mark.parametrize("via_python", [False, True])
@@ -72,10 +89,14 @@ SEED=42
     job = parameters.name + ".in.xml"
     assert ET.parse(tmp_path / job).getroot().tag == "JOB"
     if via_python:
-        # runApplication now encounters pip's launcher on PATH as well.
+        # Python resolves the native program directly, even with pip's launcher
+        # on PATH. It must select the same payload as the shell command.
         run("python", "-c",
-            "import pyalps, sys; sys.exit(pyalps.runApplication("
-            "'spinmc', sys.argv[1], Tmin=1, writexml=True)[0])", job)
+            "import os, pyalps, sys; "
+            "assert 'ALPS_BIN_PATH' not in os.environ; "
+            "status = pyalps.runApplication("
+            "'spinmc', sys.argv[1], Tmin=1, writexml=True)[0]; "
+            "assert 'ALPS_BIN_PATH' not in os.environ; sys.exit(status)", job)
     else:
         run("spinmc", "--Tmin", "1", "--write-xml", job)
     output = tmp_path / (parameters.name + ".task1.out.xml")

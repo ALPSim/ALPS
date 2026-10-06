@@ -4,8 +4,15 @@ Python applications and libraries for the Algorithms and Libraries for
 Physics Simulations (ALPS) project. Binary wheels are available from PyPI:
 
 ```sh
+python -m venv .venv
+. .venv/bin/activate
 python -m pip install pyalps
 ```
+
+Keep this environment separate from a source-installed ALPS SDK. Pip and CMake
+do not share file ownership: installing a bundled wheel into the SDK's prefix
+can overwrite its commands, and uninstalling the wheel will not restore them.
+For Python bindings that share an SDK prefix, use the bindings-only build below.
 
 ## Command-line applications
 
@@ -94,15 +101,35 @@ application executables (`spinmc`, `dmrg`, `sparsediag`, `loop`, `qwl`, ...)
 and the `parameter2xml`, `printgraph`, `convert2xml`, `snap2vtk`, and `maxent`
 tools from the SDK into `pyalps/bin`,
 together with the SDK's shared libraries in `pyalps/lib` that their `../lib` RPATH
-resolves against. `pyalps.tools` adds `pyalps/bin` to `PATH`, so this is what makes
-`pyalps.runApplication('spinmc', ...)` work from a wheel install — the
-`wheel-deps` preset therefore builds the applications. Configure with
-`-DPYALPS_BUNDLE_APPLICATIONS=OFF` for a bindings-only wheel; the
-shell launchers and `pyalps.runApplication` then use executables from the
-SDK used to build that wheel, or from an explicit `ALPS_BIN_PATH` override.
-Keep that SDK installed in a separate prefix from the Python environment,
-so pip's launchers do not replace its binaries. Bundled wheels always execute
-their bundled binaries; they never fall back to an SDK or search `PATH`.
+resolves against. Both the shell launchers and `pyalps.runApplication('spinmc', ...)`
+resolve that bundled executable directly; another command on `PATH` cannot
+override it. The `wheel-deps` preset therefore builds the applications.
+
+For a bindings-only installation, set the **environment variable**
+`PYALPS_BUNDLE_APPLICATIONS=OFF` for the entire Python build:
+
+```sh
+ALPS_DIR="/path/to/sdk/share/alps" PYALPS_BUNDLE_APPLICATIONS=OFF \
+  python -m pip install ./python/pyalps
+```
+
+This installs no command launchers, so the SDK retains ownership of its
+executables even if it shares the Python environment's prefix. Add the SDK's
+`bin` directory to `PATH` to use its shell commands. Python's application and
+evaluation helpers use `ALPS_BIN_PATH` if explicitly set, otherwise the SDK
+recorded at build time. A missing selected executable is an error; the helpers
+do not silently select another installation from `PATH`.
+
+The environment setting replaces the CMake-only
+`-DPYALPS_BUNDLE_APPLICATIONS=OFF` option: wheel metadata is prepared before
+CMake runs, so both stages must receive the same choice. Bindings-only wheels
+remain tied to an installed SDK and are intended for local use.
+
+In either build mode, pass a full executable path (or a relative path containing
+a directory) to select a particular application, including a source-built MPI
+application. For bare command names, bundled wheels always use their own
+payload and ignore `ALPS_BIN_PATH`; bindings-only builds honor the SDK selection
+described above. `ALPS_XML_PATH` remains an independent resource override.
 
 ## Free-threading and stable-ABI policy
 

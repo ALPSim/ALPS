@@ -16,7 +16,6 @@ import datetime
 import shutil
 import tempfile
 import subprocess
-import platform
 import sys
 import glob
 from . import math
@@ -38,48 +37,31 @@ from .dict_intersect import *
 from .natural_sort import natural_sort
 from . import alea
 import scipy.interpolate
+from pyalps_cli import resolve_executable as _resolve_executable
 
-def _packaged_or_configured_dir(name, configured):
-    """Locate an ALPS resource directory shipped with pyalps.
-
-    The in-package copy (pyalps/<name>) wins. `configured` is the fallback
-    baked in by CMake for builds that do not bundle the resource; it is empty
-    for a bundled package, in which case there is nothing to fall back to and
-    we leave the environment alone rather than exporting an empty path.
-    """
-    import pyalps
-    path = os.path.join(os.path.dirname(pyalps.__file__), name)
-    if os.path.isdir(path):
-        return path
-    from . import pyalps_config
-    configured = getattr(pyalps_config, configured, "")
-    return configured if configured and os.path.isdir(configured) else None
-
-
-if not "ALPS_XML_PATH" in os.environ:
-    _xml_path = _packaged_or_configured_dir("xml", "ALPS_XML_INSTALL_DIR")
-    if _xml_path is not None:
+# XML resources are bundled in both build modes. Executable selection is
+# resolved per invocation and must not change the caller's ALPS_BIN_PATH.
+if "ALPS_XML_PATH" not in os.environ:
+    _xml_path = os.path.join(os.path.dirname(__file__), "xml")
+    if os.path.isdir(_xml_path):
         os.environ["ALPS_XML_PATH"] = _xml_path
-
-if not "ALPS_BIN_PATH" in os.environ:
-    _bin_path = _packaged_or_configured_dir("bin", "ALPS_BIN_INSTALL_DIR")
-    if _bin_path is not None:
-        os.environ["ALPS_BIN_PATH"] = _bin_path
 
 
 def check_existence(cmd):
     if cmd is None:
         return False
-    import shutil
-    path_to_cmd = shutil.which(cmd)
-    if path_to_cmd is None:
-        if cmd.startswith("/"):
-            raise RuntimeError(f"There is no {cmd} on the path!")
-        path = _packaged_or_configured_dir("bin", "ALPS_BIN_INSTALL_DIR")
-        if path is not None:
-            os.environ["PATH"] += os.pathsep + path
-        if shutil.which(cmd) is None:
-            raise RuntimeError(f"There is no {cmd} on the path!")
+    return _resolve_executable(cmd)
+
+
+def _execute_application(cmdline, executable=None):
+    # ALPS helpers pass arguments, not shell syntax. In particular, SDK paths
+    # and input filenames may contain spaces or shell metacharacters.
+    log(list2cmdline(cmdline))
+    env = os.environ.copy()
+    # DMFT can launch other SDK programs. Keep them with the selected
+    # executable, including when mpirun is the first command in cmdline.
+    env["ALPS_BIN_PATH"] = os.path.dirname(executable or cmdline[0])
+    return subprocess.call(cmdline, env=env)
 
 
 def make_list(infiles):
@@ -96,19 +78,12 @@ def size(lst):
 
 def list2cmdline(lst):
     """ convert a list of arguments to a valid commandline """
-    if platform.system() == 'Windows':
-      return subprocess.list2cmdline(lst)
-    else:
-      return subprocess.list2cmdline(lst)
+    return subprocess.list2cmdline(lst)
 
 def executeCommand(cmdline):
     """ execute the command given as list of arguments """
     cmd = list2cmdline(cmdline)
     log(cmd)
-    # proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    # sout, serr = proc.communicate() # serr should be empty
-    # log(sout)
-    # return proc.returncode
     return subprocess.call(cmd, shell=True)
 
 def executeCommandLogged(cmdline,logfile):
@@ -133,7 +108,7 @@ def runApplication(appname, parmfiles, T=None, Tmin=None, Tmax=None, writexml=Fa
         MPI: optional parameter specifying the number of processes to be used in an MPI simulation. MPI is not used if this parameter is left at ots default value  None.
         mpirun: optional parameter giving the name of the executable used to laucnh MPI applications. The default is 'mpirun'
     """
-    check_existence(appname)
+    executable = check_existence(appname)
     if isinstance(parmfiles, str):
       parmfiles = [parmfiles];
 
@@ -141,10 +116,10 @@ def runApplication(appname, parmfiles, T=None, Tmin=None, Tmax=None, writexml=Fa
       cmdline = []
       if MPI is not None:
           cmdline += [mpirun,'-np',str(MPI)]
-      cmdline += [appname]
+      cmdline += [executable]
       if MPI is not None:
           cmdline += ['--mpi']
-          if appname in ['sparsediag','fulldiag','dmrg']:
+          if os.path.basename(appname) in ['sparsediag','fulldiag','dmrg']:
               cmdline += ['--Nmax','1']
       cmdline += [parmfile]
       if T:
@@ -156,9 +131,9 @@ def runApplication(appname, parmfiles, T=None, Tmin=None, Tmax=None, writexml=Fa
       if writexml:
         cmdline += ['--write-xml']
       if parmfile.find('.xml') != -1:
-        return (executeCommand(cmdline),parmfile.replace('.in.xml','.out.xml'))  # no iteration for xml i/o
+        return (_execute_application(cmdline, executable),parmfile.replace('.in.xml','.out.xml'))  # no iteration for xml i/o
       if parmfile.find('.h5') != -1:
-        executeCommand(cmdline);
+        _execute_application(cmdline, executable);
    
 
 def runDMFT(infiles,apppath=''):
@@ -169,8 +144,8 @@ def runDMFT(infiles,apppath=''):
         Optional parameter apppath allows setting the path to the binary.
     """
     appname='dmft'
-    check_existence(apppath+appname)
-    return (executeCommand([apppath+appname] + make_list(infiles)))
+    executable = check_existence(apppath+appname)
+    return (_execute_application([executable] + make_list(infiles)))
     
 def evaluateLoop(infiles, appname='loop', write_xml=False):
     """ evaluate results of the looper QMC application 
@@ -179,11 +154,11 @@ def evaluateLoop(infiles, appname='loop', write_xml=False):
         
         write_xml: if this optional argument is set to True, the results will also bw written to the XML files
     """
-    cmdline = [appname,'--evaluate']
+    cmdline = [check_existence(appname),'--evaluate']
     if write_xml:
       cmdline += ['--write-xml']
     cmdline += make_list(infiles)
-    return executeCommand(cmdline)
+    return _execute_application(cmdline)
 
 def evaluateSpinMC(infiles, appname='spinmc_evaluate', write_xml=False):
     """ evaluate results of the spinmc application 
@@ -194,11 +169,11 @@ def evaluateSpinMC(infiles, appname='spinmc_evaluate', write_xml=False):
         
         
     """
-    cmdline = [appname]
+    cmdline = [check_existence(appname)]
     if write_xml:
       cmdline += ['--write-xml']
     cmdline += make_list(infiles)
-    return executeCommand(cmdline)
+    return _execute_application(cmdline)
 
 def evaluateQWL(infiles, appname='qwl_evaluate', DELTA_T=None, T_MIN=None, T_MAX=None):
     """ evaluate results of the quantum Wang-Landau application 
@@ -210,7 +185,7 @@ def evaluateQWL(infiles, appname='qwl_evaluate', DELTA_T=None, T_MIN=None, T_MAX
         
         This function returns a list of lists of DataSet objects, for the various properties evaluated for each of the input files.
     """
-    cmdline = [appname]
+    cmdline = [check_existence(appname)]
     if DELTA_T:
       cmdline += ['--DELTA_T',str(DELTA_T)]
     if T_MIN:
@@ -218,7 +193,7 @@ def evaluateQWL(infiles, appname='qwl_evaluate', DELTA_T=None, T_MIN=None, T_MAX
     if T_MAX:
       cmdline += ['--T_MAX',str(T_MAX)]
     cmdline += make_list(infiles)
-    res = executeCommand(cmdline)
+    res = _execute_application(cmdline)
     if res != 0:
       raise RuntimeError("Execution error in evaluateQWL: " + str(res))
     datasets = []
@@ -242,7 +217,7 @@ def evaluateFulldiagVersusT(infiles, appname='fulldiag_evaluate', DELTA_T=None, 
         
         This function returns a list of lists of DataSet objects, for the various properties evaluated for each of the input files.
     """
-    cmdline = [appname]
+    cmdline = [check_existence(appname)]
     if DELTA_T is not None:
       cmdline += ['--DELTA_T',str(DELTA_T)]
     if T_MIN is not None:
@@ -252,7 +227,7 @@ def evaluateFulldiagVersusT(infiles, appname='fulldiag_evaluate', DELTA_T=None, 
     if H is not None:
       cmdline += ['--H',str(H)]
     cmdline += make_list(infiles)
-    res = executeCommand(cmdline)
+    res = _execute_application(cmdline)
     if res != 0:
       raise Exception("Execution error in evaluateFulldiagVersusT: " + str(res))
     datasets = []
@@ -276,7 +251,7 @@ def evaluateFulldiagVersusH(infiles, appname='fulldiag_evaluate', DELTA_H=None, 
         
         This function returns a list of lists of DataSet objects, for the various properties evaluated for each of the input files.
     """
-    cmdline = [appname,'--versus', 'h']
+    cmdline = [check_existence(appname),'--versus', 'h']
     if DELTA_H is not None:
       cmdline += ['--DELTA_H',str(DELTA_H)]
     if H_MIN is not None:
@@ -286,7 +261,7 @@ def evaluateFulldiagVersusH(infiles, appname='fulldiag_evaluate', DELTA_H=None, 
     if T is not None:
       cmdline += ['--T',str(T)]
     cmdline += make_list(infiles)
-    res = executeCommand(cmdline)
+    res = _execute_application(cmdline)
     if res != 0:
       raise Exception("Execution error in evaluateFulldiagVersusH: " + str(res))
     datasets = []

@@ -40,7 +40,8 @@ def launcher(tmp_path):
             executable.chmod(0o755)
         return subprocess.run(
             [sys.executable, *(["-S"] if isolated else []), "-c",
-             f"import pyalps_cli; raise SystemExit(pyalps_cli.{program}())", *args],
+             f"import sys, pyalps_cli; sys.argv[0] = {program!r}; "
+             "raise SystemExit(pyalps_cli.main())", *args],
             cwd=root, env=env, text=True, capture_output=True, timeout=10, **kwargs,
         )
 
@@ -109,12 +110,12 @@ sys.exit(23)''', args=["a b", "", "$(not-a-shell)", "--flag"], input="input data
     assert result.stderr == "native stderr\n"
 
 
-def test_explicit_resource_overrides(launcher):
-    run, _, env = launcher
+def test_xml_override_does_not_select_another_binary_installation(launcher):
+    run, package, env = launcher
     env.update(ALPS_XML_PATH="/custom/xml", ALPS_BIN_PATH="/custom/bin")
     result = run('import os; print(os.environ["ALPS_XML_PATH"]); print(os.environ["ALPS_BIN_PATH"])')
     assert result.returncode == 0
-    assert result.stdout.splitlines() == ["/custom/xml", "/custom/bin"]
+    assert result.stdout.splitlines() == ["/custom/xml", str(package / "bin")]
 
 
 def test_missing_binary_is_actionable_and_does_not_search_path(launcher):

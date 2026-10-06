@@ -1,7 +1,7 @@
 # Copyright (C) 2026 by the ALPS collaboration
 # SPDX-License-Identifier: MIT
 
-"""Shell entry points for bundled or configured SDK programs, without pyalps.
+"""Bundled shell commands and ALPS executable selection, without importing pyalps.
 
 Keep this outside pyalps: importing that package also loads the scientific
 Python stack, which the native command-line applications do not need.
@@ -14,47 +14,63 @@ import signal
 import sys
 
 
-def _run(program):
-    package = Path(__file__).resolve().parent.parent / "pyalps"
-    executable = package / "bin" / program
-    if not executable.is_file():
-        # Only bindings-only builds record an SDK fallback. Load this small
-        # generated file directly: importing pyalps would load its extensions.
+NATIVE_PROGRAMS = (
+    "checksign", "dirloop_sse", "dmft", "dmrg", "fulldiag", "fulldiag_evaluate",
+    "hirschfye", "hybridization", "interaction", "loop", "qwl", "qwl_evaluate",
+    "simplemc", "sparsediag", "spinmc", "spinmc_evaluate", "worm", "worm_evaluate",
+    "parameter2xml", "printgraph", "convert2xml", "snap2vtk", "maxent",
+)
+EXPORTERS = {
+    "convert2text": "QMCXML2text.xsl",
+    "plot2text": "plot2text.xsl",
+    "plot2gp": "plot2gp.xsl",
+    "plot2xmgr": "plot2xmgr.xsl",
+}
+
+
+def resolve_executable(program):
+    """Resolve an explicit path, a bundled program, or a bindings-only SDK tool.
+
+    PATH is deliberately not searched. Only bindings-only builds record an SDK
+    fallback; ALPS_BIN_PATH can override that SDK, but never a bundled payload.
+    """
+    program = os.fspath(program)
+    if os.path.dirname(program):
+        executable = Path(program).resolve()
+    else:
+        package = Path(__file__).resolve().parent.parent / "pyalps"
         config = package / "pyalps_config.py"
         sdk_bin = (
             runpy.run_path(str(config)).get("ALPS_BIN_INSTALL_DIR", "")
             if config.is_file() else ""
         )
-        if sdk_bin:
-            sdk_bin = os.environ.get("ALPS_BIN_PATH") or sdk_bin
-            executable = Path(sdk_bin).resolve() / program
-            # An SDK installed into this Python environment may have had its
-            # executable replaced by pip's launcher. Never execute ourselves.
-            if (
-                executable.is_file() and os.path.isfile(sys.argv[0])
-                and os.path.samefile(executable, sys.argv[0])
-            ):
-                print(
-                    f"{program}: the configured ALPS SDK executable {executable} "
-                    "is this pyalps launcher. Use an SDK installed in a separate prefix.",
-                    file=sys.stderr,
-                )
-                return 127
+        directory = (os.environ.get("ALPS_BIN_PATH") or sdk_bin) if sdk_bin else package / "bin"
+        executable = Path(directory).resolve() / program
     if not executable.is_file():
-        print(
+        raise RuntimeError(
             f"{program}: no executable was found at {executable}. "
-            "Install a wheel built with PYALPS_BUNDLE_APPLICATIONS=ON, or invoke "
-            "the executable from your ALPS SDK by its full path.",
-            file=sys.stderr,
+            "Use a full executable path, or select an installed SDK with "
+            "ALPS_BIN_PATH for a bindings-only build. Bundled wheels require "
+            "their own PYALPS_BUNDLE_APPLICATIONS=ON payload."
         )
+    return str(executable)
+
+
+def _run(program):
+    package = Path(__file__).resolve().parent.parent / "pyalps"
+    try:
+        executable = Path(resolve_executable(program))
+    except RuntimeError as error:
+        print(error, file=sys.stderr)
         return 127
 
     env = os.environ.copy()
-    # Respect explicit resource overrides, just like pyalps.tools.
+    # XML resources can be overridden independently. Auxiliary executables
+    # (for example DMFT solvers) must come from the selected installation.
     env.setdefault("ALPS_XML_PATH", str(package / "xml"))
-    env.setdefault("ALPS_BIN_PATH", str(executable.parent))
+    env["ALPS_BIN_PATH"] = str(executable.parent)
     try:
-        # Use the bundled or configured SDK path, never PATH: it may contain this
+        # Use the resolved path, never PATH: it may contain this
         # very launcher or an unrelated ALPS install. Replace the process so
         # arguments, streams, exit status and signals reach the native tool.
         # exec preserves ignored signals, including the ones Python ignores
@@ -67,98 +83,6 @@ def _run(program):
     except OSError as error:
         print(f"{program}: cannot execute {executable}: {error}", file=sys.stderr)
         return 126
-
-
-def checksign():
-    return _run("checksign")
-
-
-def dirloop_sse():
-    return _run("dirloop_sse")
-
-
-def dmft():
-    return _run("dmft")
-
-
-def dmrg():
-    return _run("dmrg")
-
-
-def fulldiag():
-    return _run("fulldiag")
-
-
-def fulldiag_evaluate():
-    return _run("fulldiag_evaluate")
-
-
-def hirschfye():
-    return _run("hirschfye")
-
-
-def hybridization():
-    return _run("hybridization")
-
-
-def interaction():
-    return _run("interaction")
-
-
-def loop():
-    return _run("loop")
-
-
-def qwl():
-    return _run("qwl")
-
-
-def qwl_evaluate():
-    return _run("qwl_evaluate")
-
-
-def simplemc():
-    return _run("simplemc")
-
-
-def sparsediag():
-    return _run("sparsediag")
-
-
-def spinmc():
-    return _run("spinmc")
-
-
-def spinmc_evaluate():
-    return _run("spinmc_evaluate")
-
-
-def worm():
-    return _run("worm")
-
-
-def worm_evaluate():
-    return _run("worm_evaluate")
-
-
-def parameter2xml():
-    return _run("parameter2xml")
-
-
-def printgraph():
-    return _run("printgraph")
-
-
-def convert2xml():
-    return _run("convert2xml")
-
-
-def snap2vtk():
-    return _run("snap2vtk")
-
-
-def maxent():
-    return _run("maxent")
 
 
 def _transform(program, stylesheet):
@@ -189,17 +113,11 @@ def _transform(program, stylesheet):
     return 0
 
 
-def convert2text():
-    return _transform("convert2text", "QMCXML2text.xsl")
-
-
-def plot2text():
-    return _transform("plot2text", "plot2text.xsl")
-
-
-def plot2gp():
-    return _transform("plot2gp", "plot2gp.xsl")
-
-
-def plot2xmgr():
-    return _transform("plot2xmgr", "plot2xmgr.xsl")
+def main():
+    program = Path(sys.argv[0]).name
+    if program in EXPORTERS:
+        return _transform(program, EXPORTERS[program])
+    if program in NATIVE_PROGRAMS:
+        return _run(program)
+    print(f"{program}: unknown ALPS command", file=sys.stderr)
+    return 127
