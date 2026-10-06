@@ -25,18 +25,20 @@ namespace alps {
   std::string temporary_filename(std::string name)
   {
     name +="XXXXXX";
-    char aux[255];
-    snprintf(aux, 255, "%s", name.c_str());
 
 #ifdef BOOST_MSVC
     name = _mktemp(const_cast<char*>(name.c_str()));
     int res=0; 
     //int res=open(name.c_str(),O_RDWR|O_BINARY|O_CREAT|O_EXCL|_O_SHORT_LIVED, 128|256);
 #else
-//    name = mkstemp(const_cast<char*>(name.c_str()));
-    int res = mkstemp(aux);
-    name = aux;
-    //int res = mkstemp(const_cast<char*>(name.c_str()));
+    // Keep the entire path, including the six-character random suffix.
+    // C++17 provides writable, null-terminated storage for mkstemp.
+    int res = mkstemp(name.data());
+    if (res >= 0) {
+      // Callers reopen the reserved filename with their own streams. The
+      // descriptor from mkstemp must not remain open for every scratch file.
+      close(res);
+    }
 #endif
     if (res<0)
       boost::throw_exception(std::runtime_error("Could not open temporary file"));
