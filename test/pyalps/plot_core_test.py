@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 from pyalps.dataset import DataSet
 from pyalps.floatwitherror import FloatWithError
-from pyalps.plot_core import makeGracePlot, makeGnuplotPlot
+from pyalps.plot_core import convertToText, makeGracePlot, makeGnuplotPlot
 
 
 def dataset(x, y, label=None):
@@ -57,8 +57,21 @@ def test_gnuplot_plot_line():
     assert '1.0\t3.0' in gnuplot
 
 
+def test_mismatched_lengths():
+    # x and y of different lengths must raise instead of failing midway or dropping data.
+    for x, y in [([1.0, 2.0, 3.0], [1.0, 2.0]), ([1.0, 2.0], [1.0, 2.0, 3.0]), ([1.0], [])]:
+        for make_plot in (convertToText, makeGracePlot, makeGnuplotPlot):
+            try:
+                make_plot([dataset(x, y)])
+            except ValueError:
+                pass
+            else:
+                raise AssertionError('%s accepted x and y of lengths %d and %d' % (make_plot.__name__, len(x), len(y)))
+
+
 if __name__ == '__main__':
     test_multi_point_errors()
     test_grace_x_errors()
     test_gnuplot_errors_per_dataset()
     test_gnuplot_plot_line()
+    test_mismatched_lengths()

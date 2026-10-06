@@ -97,6 +97,7 @@ def convertToText(data,title=None,xaxis=None,yaxis=None):
             
     
     for q in flatten(data):
+        _check_lengths(q)
         if 'label' in q.props and q.props['label'] != 'none':
             output += '# ' + q.props['label']
         elif 'filename' in q.props:
@@ -129,6 +130,11 @@ def _errors(values):
         return np.array([v.error for v in values])
     except AttributeError:
         return None
+
+def _check_lengths(q):
+    """Raise ValueError if the dataset's x and y have different lengths."""
+    if len(q.x) != len(q.y):
+        raise ValueError('x and y have different lengths (%d and %d)' % (len(q.x), len(q.y)))
 
 def makeGracePlot(data,title=None,xaxis=None,yaxis=None,legend=None):
         output =  '# Grace project file\n'
@@ -205,6 +211,7 @@ def makeGracePlot(data,title=None,xaxis=None,yaxis=None,legend=None):
         num = 0
         symnum = 0
         for q in flatten(data):
+            _check_lengths(q)
             output += '@target G0.S'+str(num)+'\n'
             output += '@    s'+str(num)+' symbol ' + str(num+1) +'\n'
             output += '@    s'+str(num)+' symbol size 0.500000\n'
@@ -316,6 +323,7 @@ def makeGnuplotPlot(data,title=None,xaxis=None,yaxis=None,legend=None, outfile=N
     # Error bars of each dataset, reused when its data is written below.
     errors = []
     for q in flatten(data):
+        _check_lengths(q)
         xerrors = _errors(q.x) if len(q.y) else None
         yerrors = _errors(q.y) if len(q.y) else None
         errors.append((xerrors, yerrors))
