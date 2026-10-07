@@ -109,7 +109,9 @@ endif()
 find_package(Boost 1.76 CONFIG REQUIRED COMPONENTS ${ALPS_BOOST_COMPONENTS})
 
 # FindHDF5 supplies HDF5::HDF5 and preserves the provider's configurations.
-find_package(HDF5 MODULE REQUIRED COMPONENTS C)
+# Keep the manylinux_2_28 system package within the supported source-build range.
+set(ALPS_HDF5_MIN_VERSION 1.10.5)
+find_package(HDF5 ${ALPS_HDF5_MIN_VERSION} MODULE REQUIRED COMPONENTS C)
 if(HDF5_IS_PARALLEL AND NOT ALPS_ENABLE_MPI)
   message(FATAL_ERROR "Parallel HDF5 requires ALPS_ENABLE_MPI=ON")
 endif()
