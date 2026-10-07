@@ -105,6 +105,8 @@ def test_mcdata_vector():
     Y = X + 1.0
 
     assert_vector(X, [2.3, 1.2, 0.7], [0.01] * 3)
+    # The retired Boost.Python comparison caught full slices returning empty data.
+    assert_vector(X[:], [2.3, 1.2, 0.7], [0.01] * 3)
     assert_vector(Y, [3.3, 2.2, 1.7], [0.01] * 3)
 
     assert_vector(X + Y, [5.6, 3.4, 2.4], [0.014142135624] * 3)

@@ -3,6 +3,7 @@
 import copy
 import gc
 import os
+from pathlib import Path
 import subprocess
 import sys
 import textwrap
@@ -12,6 +13,38 @@ import numpy as np
 import pytest
 
 from pyalps import hdf5, ngs
+
+
+def test_historical_checkpoint_remains_readable():
+    """Load bytes written by f28d428, rather than round-tripping today's writer."""
+    filename = Path(__file__).with_name("fixtures") / "legacy_checkpoint.h5"
+    with hdf5.archive(str(filename), "r") as archive:
+        parameters = ngs.params(archive, "/parameters")
+        assert parameters["L"] == 16 and parameters["T"] == 1.25
+        assert parameters["SEED"] == 42 and parameters["label"] == "check Ω"
+        np.testing.assert_array_equal(parameters["couplings"], [1., 2., 3.])
+        rng = ngs.random01(0)
+        archive.set_context("/rng")
+        rng.load(archive)
+        np.testing.assert_array_equal([rng() for _ in range(8)], archive["/expected_rng"])
+        observables = ngs.observables()
+        observables.load(archive, "/observables")
+        for name, path, mean, next_sample in (
+            ("Energy", "/result", 31.5, 64.),
+            ("Correlations", "/vector_result", [31.5, 63.], np.array([64., 128.])),
+        ):
+            restored = ngs.result()
+            archive.set_context(path)
+            restored.load(archive)
+            measured = ngs.observable2result(observables[name])
+            for value in (restored, measured):
+                assert value.count == 64
+                np.testing.assert_array_equal(value.mean, mean)
+                np.testing.assert_array_equal(value.error, archive[path + "/mean/error"])
+            observables[name] << next_sample
+            continued = ngs.observable2result(observables[name])
+            assert continued.count == 65
+            np.testing.assert_array_equal(continued.mean, np.array(mean) * 64 / 63)
 
 
 def result(vector=False, offset=0):

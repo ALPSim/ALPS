@@ -6,4 +6,4 @@ if(UNIX)
     DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT xml)
 endif()
 
-# txt2archive and the historical shell wrappers remain unbuilt/uninstalled.
+# txt2archive remains unbuilt/uninstalled.
