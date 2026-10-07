@@ -28,3 +28,6 @@ FOREACH(name vmusage bitops)
   add_alps_test(${name})
   set_property(TEST ${name} PROPERTY LABELS utility)
 ENDFOREACH(name)
+
+# filelist unit test
+include(${CMAKE_CURRENT_SOURCE_DIR}/dmrg_filelist_tests.cmake)

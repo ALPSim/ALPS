@@ -20,8 +20,8 @@
  # This tutorial requires the results to be produced first by running the
  # tutorial4a.py script.
  #
- # Run this script as:
- # alpspython tutorial4c.py
+ # Activate the Python environment containing pyalps, then run:
+ # python tutorial4c.py
 
 from pyalps.hdf5 import archive # hdf5 interface
 from numpy import *
