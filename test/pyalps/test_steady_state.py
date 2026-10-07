@@ -14,6 +14,8 @@ def check_series(monkeypatch, values, **kwargs):
 
 
 @pytest.mark.parametrize("confidence,cutoff", [
+    (0.2, 0.2533471031357997),
+    (0.5, 0.6744897501960817),
     (0.6827, 1.0000217133229992),  #two-sided standard normal quantiles, (confidence,num_std)
     (0.9, 1.6448536269514722),
     (0.95, 1.959963984540054),
@@ -66,7 +68,11 @@ def test_invalid_series_is_rejected(monkeypatch, values):
         check_series(monkeypatch, values)
 
 
-@pytest.mark.parametrize("confidence", [0., 1., -0.1, 1.1, np.nan, np.inf, None, [0.9]])
+@pytest.mark.parametrize("confidence", [
+    0., 1., -0.1, 1.1, np.nan, np.inf, None, [0.9],
+    pytest.param(10**1000, id="overflowing-integer"),
+    0.9 + 1j, np.complex64(0.9), np.complex128(0.9 + 1j),
+])
 def test_invalid_confidence_is_rejected_before_loading(monkeypatch, confidence):
     def unexpected_load(*_):
         pytest.fail("invalid confidence should be rejected before reading a file")
@@ -113,3 +119,60 @@ def test_threshold_near_one_stays_finite(monkeypatch):
     result = check_series(monkeypatch, [1., 0., 0., 1.],
                           confidenceInterval=np.nextafter(1., 0.), includeLog=True)
     assert np.isfinite(result["statistics"]["z0"])
+
+
+@pytest.mark.parametrize("confidence", [1e-18, np.nextafter(0., 1.)])
+def test_tiny_confidence_accepts_constant_series(monkeypatch, confidence):
+    result = check_series(monkeypatch, np.full(8, 3.),
+                          confidenceInterval=confidence, includeLog=True)
+    assert result["value"]
+    # Near zero the central normal quantile is confidence * sqrt(pi / 2).
+    assert result["statistics"]["z0"] > 0.
+    assert result["statistics"]["z0"] == pytest.approx(
+        confidence * np.sqrt(np.pi / 2.), rel=1e-14, abs=0.)
+
+
+@pytest.mark.parametrize("values", [
+    2**60 + np.arange(32, dtype=np.int64),
+    2**63 + np.arange(32, dtype=np.uint64),
+    np.array([2**63 - 2, 2**63 - 1], dtype=np.int64),
+    np.array([2**64 - 2, 2**64 - 1], dtype=np.uint64),
+])
+def test_lossy_integer_conversion_is_rejected(monkeypatch, values):
+    with pytest.raises(ValueError, match="exactly representable as float64"):
+        check_series(monkeypatch, values, confidenceInterval=0.95)
+
+
+def test_lossy_integer_timeseries_from_hdf5_is_rejected(tmp_path):
+    from pyalps.hdf5 import archive
+    filename = str(tmp_path / "integer-drift.h5")
+    with archive(filename, "w") as output:
+        output["/simulation/results/Energy/timeseries/data"] = (
+            2**60 + np.arange(32, dtype=np.int64))
+    with pytest.raises(ValueError, match="exactly representable as float64"):
+        pyalps.checkSteadyState(outfile=filename, observable="Energy")
+
+
+@pytest.mark.parametrize("dtype", [np.int64, np.uint64, np.float32, np.float64])
+def test_exactly_representable_series_remains_supported(monkeypatch, dtype):
+    result = check_series(monkeypatch, np.arange(32, dtype=dtype),
+                          confidenceInterval=0.95, includeLog=True)
+    assert not result["value"]
+    assert result["statistics"]["beta1"]["value"] == pytest.approx(1.)
+    assert result["statistics"]["z"] == pytest.approx(np.sqrt(31.))
+
+
+@pytest.mark.skipif(np.finfo(np.longdouble).nmant <= np.finfo(float).nmant,
+                    reason="long double has no extra precision on this platform")
+def test_lossy_extended_precision_conversion_is_rejected(monkeypatch):
+    values = np.array([1., np.nextafter(np.longdouble(1.), np.longdouble(2.))])
+    with pytest.raises(ValueError, match="exactly representable as float64"):
+        check_series(monkeypatch, values)
+
+
+@pytest.mark.skipif(np.finfo(np.longdouble).max <= np.finfo(float).max,
+                    reason="long double has no extra range on this platform")
+def test_overflowing_conversion_is_rejected(monkeypatch):
+    values = np.full(2, np.longdouble(np.finfo(float).max) * 2)
+    with pytest.raises(ValueError, match="exactly representable as float64"):
+        check_series(monkeypatch, values)

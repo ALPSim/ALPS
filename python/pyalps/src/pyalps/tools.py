@@ -20,6 +20,7 @@ import sys
 import glob
 from . import math
 import numpy as np
+import scipy.special
 import scipy.stats
 import copy
 
@@ -534,7 +535,8 @@ def checkSteadyState(sets=None, outfile=None, observable=None, confidenceInterva
   stationarity test. A passing result only means no linear drift was
   detected; a stuck chain or nonlinear drift may pass as well.
 
-  The time series must contain at least two finite real scalar samples.
+  The time series must contain at least two finite real scalar samples
+  exactly representable as float64, the precision used by the slope fit.
   Constant series have slope and slope error zero and are assigned z=0.
   Invalid inputs raise ValueError rather than returning a misleading flag.
 
@@ -547,10 +549,10 @@ def checkSteadyState(sets=None, outfile=None, observable=None, confidenceInterva
   correcting it can change the reported flags for the same time series.
   """
   try:
-    if not np.isscalar(confidenceInterval):
+    if not np.isscalar(confidenceInterval) or np.iscomplexobj(confidenceInterval):
       raise ValueError
     confidenceInterval = float(confidenceInterval)
-  except (TypeError, ValueError):
+  except (TypeError, ValueError, OverflowError):
     raise ValueError("confidenceInterval must be a finite scalar strictly between 0 and 1") from None
   if not np.isfinite(confidenceInterval) or not 0. < confidenceInterval < 1.:
     raise ValueError("confidenceInterval must be a finite scalar strictly between 0 and 1")
@@ -568,7 +570,16 @@ def checkSteadyState(sets=None, outfile=None, observable=None, confidenceInterva
   if (ts.ndim != 1 or ts.size < 2 or ts.dtype.kind not in "biuf"
       or not np.all(np.isfinite(ts))):
     raise ValueError("time series must contain at least two finite real scalar samples")
-  ts = ts.astype(float, copy=False)
+  try:
+    with np.errstate(over='raise', invalid='raise'):
+      float_ts = ts.astype(float, copy=False)
+      # Compare in the original dtype: mixed integer/float equality can
+      # itself round large integers and hide a loss of sample variation.
+      if not np.array_equal(float_ts.astype(ts.dtype, copy=False), ts):
+        raise ValueError("time series samples must be exactly representable as float64")
+  except FloatingPointError:
+    raise ValueError("time series samples must be exactly representable as float64") from None
+  ts = float_ts
   N = ts.size
 
   if np.all(ts == ts[0]):
@@ -583,8 +594,12 @@ def checkSteadyState(sets=None, outfile=None, observable=None, confidenceInterva
       raise ValueError("time series must yield a finite slope and a finite positive slope error")
     z = abs(beta1 / beta1_std)
 
-  # isf avoids rounding (1 + confidenceInterval) / 2 to 1 near the endpoint.
-  z0 = scipy.stats.norm.isf((1. - confidenceInterval) / 2.)
+  # erfinv avoids cancellation near zero; isf avoids rounding the
+  # equivalent upper-tail percentile to one near the other endpoint.
+  if confidenceInterval <= 0.5:
+    z0 = np.sqrt(2.) * scipy.special.erfinv(confidenceInterval)
+  else:
+    z0 = scipy.stats.norm.isf((1. - confidenceInterval) / 2.)
   result = {'value': bool(z < z0)}
   if includeLog:
     result['props'] = {'outfile': outfile, 'observable': observable}
