@@ -8,13 +8,22 @@ target_link_libraries(maxent_linear_grid_numeric PRIVATE ALPS::maxent)
 alps_add_test(maxent_linear_grid_numeric)
 set_property(TEST maxent_linear_grid_numeric PROPERTY LABELS maxent)
 
-add_executable(maxent_reference reference.cpp)
-target_link_libraries(maxent_reference PRIVATE ALPS::maxent)
-add_test(NAME maxent_reference
-  COMMAND maxent_reference "${CMAKE_CURRENT_SOURCE_DIR}/reference_cases.json")
-set_tests_properties(maxent_reference PROPERTIES TIMEOUT 120 LABELS maxent)
+# Keep a native public-API/linkage probe alongside the shared scientific oracle.
+add_executable(maxent_api_contract "${PROJECT_SOURCE_DIR}/tests/cmake/consumer/maxent_independent.cpp")
+target_link_libraries(maxent_api_contract PRIVATE ALPS::maxent)
+alps_add_test(maxent_api_contract)
+set_property(TEST maxent_api_contract PROPERTY LABELS maxent)
 
 find_package(Python 3.10 REQUIRED COMPONENTS Interpreter)
+execute_process(COMMAND "${Python_EXECUTABLE}" -c "import numpy, h5py"
+  RESULT_VARIABLE missing_reference_dependencies ERROR_QUIET)
+if(missing_reference_dependencies)
+  message(FATAL_ERROR "MaxEnt reference tests require NumPy and h5py for ${Python_EXECUTABLE}")
+endif()
+add_test(NAME maxent_reference
+  COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/reference.py" "$<TARGET_FILE:maxent>")
+set_tests_properties(maxent_reference PROPERTIES TIMEOUT 120 LABELS maxent)
+
 add_test(NAME maxent_cli_contract
   COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/cli_contract.py"
     "$<TARGET_FILE:maxent>")

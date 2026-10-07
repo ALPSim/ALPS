@@ -66,12 +66,12 @@ Check `cmake --version`, `ctest --version` and `ninja --version`. Reuse suitable
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install "cmake>=3.27" ninja
+python -m pip install "cmake>=3.27" ninja numpy h5py
 ```
 
 Skip the first two lines if already using a suitable environment. On Debian/Ubuntu, creating a venv may first require `sudo apt-get install python3-venv`. Activate the same environment in each new terminal. Both CMake and CTest must be at least 3.27; use `command -v cmake` to check which installation your shell finds.
 
-Application CLI tests require a Python ≥ 3.10 interpreter. CMake and Ninja can also come from system packages or [official CMake binaries](https://cmake.org/download/). A generator other than Ninja can be selected with a plain CMake invocation instead of a preset.
+Application tests require a Python ≥ 3.10 interpreter; MaxEnt reference tests also require NumPy and h5py. CMake and Ninja can also come from system packages or [official CMake binaries](https://cmake.org/download/). A generator other than Ninja can be selected with a plain CMake invocation instead of a preset.
 
 ### Build
 
@@ -110,6 +110,8 @@ This editable installation reuses `_build/python` for binding builds. `--no-buil
 Reuse build directories for ordinary edits. Machine-specific CMake settings belong in an untracked `CMakeUserPresets.json`. For a focused native rebuild, use `cmake --build --preset default --target <target> --parallel 2`.
 
 ## Run the tests
+
+Native MaxEnt reference tests require NumPy and h5py in the CMake-selected Python interpreter (`python -m pip install numpy h5py`). The executable and Python binding share the same scientific validation.
 
 CTest runs the native suite only. After the SDK build, run:
 
@@ -244,7 +246,7 @@ Plot/extraction formats are `text`, `html`, `gnuplot`, `matplotlib` and `grace`;
 
 ## CI coverage
 
-Pull requests report aggregate `Source CI` and `Packaging CI` checks. Every pull request targeting master, master push, and release tag runs the complete source and packaging matrices. The source matrix preserves the upstream compiler, Boost, macOS, and C++ standard sweeps; only Python 3.9/3.10 rows are removed because the bindings now require Python 3.11+. Installed-SDK and contributor checks validate the new build layout. Broader changes to CI tiers and path-based selection are deferred to [the separate CI coverage proposal](https://github.com/ALPSim/ALPS/issues/164). The [source workflow](.github/workflows/build.yml), [coverage matrix](.github/ci-matrix.json) and [packaging workflow](.github/workflows/build_wheels.yml) are the authoritative lists of tested configurations.
+Pull requests report aggregate `Source CI` and `Packaging CI` checks. Every pull request targeting master, master push, and release tag runs the complete source and packaging matrices. The source matrix preserves the upstream compiler, Boost, macOS, and C++ standard sweeps; only Python 3.9/3.10 rows are removed because the bindings now require Python 3.11+. Installed-SDK and contributor checks validate the new build layout. Broader changes to CI tiers and path-based selection are deferred to [the separate CI coverage proposal](https://github.com/ALPSim/ALPS/issues/164). The [source workflow](.github/workflows/build.yml) and [packaging workflow](.github/workflows/build_wheels.yml) are the authoritative lists of tested configurations.
 
 Coverage includes Linux/macOS source builds, CMake 3.27, MPI/OpenMP, installed-SDK consumers, direct CMake/editable-pip contributor workflows and repaired wheels tested on fresh runners. Dependency providers in CI are runner configuration, not requirements to use that package manager locally. Packaging CI tests the CPython 3.11 and Python 3.12+ abi3 wheels and the source distribution; local editable tests do not replace that validation.
 

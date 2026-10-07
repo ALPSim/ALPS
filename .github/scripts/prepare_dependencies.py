@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def prepare_boost(version: str, destination: Path):
-    checksums = json.loads((ROOT / '.github/ci-matrix.json').read_text())['boost']
+    checksums = json.loads((ROOT / '.github/dependencies.json').read_text())['boost']
     if version not in checksums:
         raise ValueError(f'Unpinned Boost version: {version}')
     stamp = destination / '.alps-boost-sha256'

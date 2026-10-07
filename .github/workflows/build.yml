@@ -25,11 +25,9 @@ env:
 
 jobs:
   prepare:
-    name: Validate CI and expand source matrix
+    name: Validate CI helpers
     runs-on: ubuntu-24.04
     timeout-minutes: 10
-    outputs:
-      matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -50,9 +48,6 @@ jobs:
         run: |
           python -m pip install pytest
           python -m pytest tests/ci -q --junitxml=ci-tests.xml
-      - name: Expand source matrix
-        id: matrix
-        run: python .github/scripts/ci_matrix.py
       - name: Summarize helper tests
         if: always()
         run: python .github/scripts/junit_summary.py ci-tests.xml
@@ -69,7 +64,40 @@ jobs:
     timeout-minutes: 120
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+      matrix:
+        include:
+          - {"id": "ubuntu-2204-gcc-12-boost91-py314-cxx17", "os": "ubuntu-22.04", "cc": "gcc-12", "cxx": "g++-12", "packages": "gcc-12 g++-12", "boost": "1.91.0", "python": "3.14", "standard": 17}
+          - {"id": "ubuntu-2404-gcc-14-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.14", "standard": 17, "extras": true}
+          - {"id": "ubuntu-2204-clang-15-boost91-py314-cxx17", "os": "ubuntu-22.04", "cc": "clang-15", "cxx": "clang++-15", "packages": "clang-15", "boost": "1.91.0", "python": "3.14", "standard": 17}
+          - {"id": "ubuntu-2404-clang-18-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-18", "cxx": "clang++-18", "packages": "clang-18", "boost": "1.91.0", "python": "3.14", "standard": 17}
+          - {"id": "ubuntu-2204-gcc-11-boost91-py314-cxx17", "os": "ubuntu-22.04", "cc": "gcc-11", "cxx": "g++-11", "packages": "gcc-11 g++-11", "boost": "1.91.0", "python": "3.14", "standard": 17}
+          - {"id": "ubuntu-2404-gcc-13-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-13", "cxx": "g++-13", "packages": "gcc-13 g++-13", "boost": "1.91.0", "python": "3.14", "standard": 17}
+          - {"id": "ubuntu-2404-gcc-15-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-15", "cxx": "g++-15", "packages": "gcc-15 g++-15", "boost": "1.91.0", "python": "3.14", "standard": 17, "repository": "gcc"}
+          - {"id": "ubuntu-2204-clang-14-boost91-py314-cxx17", "os": "ubuntu-22.04", "cc": "clang-14", "cxx": "clang++-14", "packages": "clang-14", "boost": "1.91.0", "python": "3.14", "standard": 17}
+          - {"id": "ubuntu-2404-clang-16-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-16", "cxx": "clang++-16", "packages": "clang-16", "boost": "1.91.0", "python": "3.14", "standard": 17}
+          - {"id": "ubuntu-2404-clang-17-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-17", "cxx": "clang++-17", "packages": "clang-17", "boost": "1.91.0", "python": "3.14", "standard": 17}
+          - {"id": "ubuntu-2404-clang-19-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-19", "cxx": "clang++-19", "packages": "clang-19", "boost": "1.91.0", "python": "3.14", "standard": 17, "repository": "llvm"}
+          - {"id": "ubuntu-2404-clang-20-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-20", "cxx": "clang++-20", "packages": "clang-20", "boost": "1.91.0", "python": "3.14", "standard": 17, "repository": "llvm"}
+          - {"id": "ubuntu-2404-clang-21-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-21", "cxx": "clang++-21", "packages": "clang-21", "boost": "1.91.0", "python": "3.14", "standard": 17, "repository": "llvm"}
+          - {"id": "ubuntu-2404-clang-22-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-22", "cxx": "clang++-22", "packages": "clang-22", "boost": "1.91.0", "python": "3.14", "standard": 17, "repository": "llvm"}
+          - {"id": "ubuntu-2404-gcc-14-boost76-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.76.0", "python": "3.14", "standard": 17}
+          - {"id": "ubuntu-2404-gcc-14-boost81-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.81.0", "python": "3.14", "standard": 17}
+          - {"id": "ubuntu-2404-gcc-14-boost86-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.86.0", "python": "3.14", "standard": 17}
+          - {"id": "ubuntu-2404-gcc-14-boost87-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.87.0", "python": "3.14", "standard": 17}
+          - {"id": "ubuntu-2404-gcc-14-boost88-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.88.0", "python": "3.14", "standard": 17}
+          - {"id": "ubuntu-2404-gcc-14-boost89-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.89.0", "python": "3.14", "standard": 17}
+          - {"id": "ubuntu-2404-gcc-14-boost90-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.90.0", "python": "3.14", "standard": 17}
+          - {"id": "ubuntu-2404-gcc-14-boost91-py311-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.11", "standard": 17}
+          - {"id": "ubuntu-2404-gcc-14-boost91-py312-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.12", "standard": 17}
+          - {"id": "ubuntu-2404-gcc-14-boost91-py313-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.13", "standard": 17}
+          - {"id": "ubuntu-2404-gcc-14-boost91-py314-cxx20", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.14", "standard": 20, "extensive": true}
+          - {"id": "ubuntu-2404-gcc-14-boost91-py314-cxx23", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.14", "standard": 23}
+          - {"id": "macos-14-clang-boost91-py314-cxx17", "os": "macos-14", "cc": "/usr/bin/clang", "cxx": "/usr/bin/clang++", "packages": "", "boost": "1.91.0", "python": "3.14", "standard": 17}
+          - {"id": "macos-15-clang-boost91-py314-cxx17", "os": "macos-15", "cc": "/usr/bin/clang", "cxx": "/usr/bin/clang++", "packages": "", "boost": "1.91.0", "python": "3.14", "standard": 17}
+          - {"id": "macos-15-intel-clang-boost91-py314-cxx17", "os": "macos-15-intel", "cc": "/usr/bin/clang", "cxx": "/usr/bin/clang++", "packages": "", "boost": "1.91.0", "python": "3.14", "standard": 17}
+          - {"id": "macos-26-clang-boost91-py314-cxx17", "os": "macos-26", "cc": "/usr/bin/clang", "cxx": "/usr/bin/clang++", "packages": "", "boost": "1.91.0", "python": "3.14", "standard": 17}
+          - {"id": "macos-15-gcc-13-boost91-py314-cxx17", "os": "macos-15", "cc": "gcc-13", "cxx": "g++-13", "packages": "gcc@13", "boost": "1.91.0", "python": "3.14", "standard": 17}
+          - {"id": "macos-15-gcc-14-boost91-py314-cxx17", "os": "macos-15", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc@14", "boost": "1.91.0", "python": "3.14", "standard": 17}
     env:
       # Keep the small macOS runners and memory-heavy jobs at two compilers.
       CMAKE_BUILD_PARALLEL_LEVEL: ${{ (startsWith(matrix.os, 'macos-') || matrix.extensive) && '2' || '4' }}
@@ -79,8 +107,9 @@ jobs:
       CCACHE_MAXSIZE: 1G
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}
-      ALPS_BOOST_MPI: ${{ matrix.mpi }}
-      DEPENDENCY: ${{ matrix.dependency }}
+      ALPS_BOOST_MPI: 'ON'
+      DEPENDENCY: boost-${{ matrix.boost }}
+      BOOST_VERSION: ${{ matrix.boost }}
       COMPILER_PACKAGES: ${{ matrix.packages }}
       COMPILER_REPOSITORY: ${{ matrix.repository }}
       EXTRAS: ${{ matrix.extras }}
@@ -96,7 +125,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - name: Install CMake and test tools
-        run: python -m pip install "$CMAKE_REQUIREMENT" ninja pytest
+        run: python -m pip install "$CMAKE_REQUIREMENT" ninja pytest numpy h5py
       - name: Install Linux dependencies
         if: runner.os == 'Linux'
         timeout-minutes: 20
@@ -136,12 +165,18 @@ jobs:
           } > "$RUNNER_TEMP/boost-toolchain"
           hash=$(ccache --hash-file "$RUNNER_TEMP/boost-toolchain")
           echo "hash=$hash" >> "$GITHUB_OUTPUT"
+          python - <<'PYTHON'
+          import json, os
+          checksums = json.load(open('.github/dependencies.json'))['boost']
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              print('boost_sha256=' + checksums[os.environ['BOOST_VERSION']], file=output)
+          PYTHON
       - name: Restore compiler cache
         id: compiler-cache
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: _build/ccache
-          key: ccache-source-${{ matrix.id }}-${{ steps.toolchain.outputs.hash }}-${{ hashFiles('CMakeLists.txt', 'CMakePresets.json', 'cmake/**', 'src/**', 'third_party/**', 'tests/**', 'python/pyalps/**', '.github/ci-matrix.json', '.github/scripts/build-boost.sh', '.github/scripts/prepare_dependencies.py') }}
+          key: ccache-source-${{ matrix.id }}-${{ steps.toolchain.outputs.hash }}-${{ hashFiles('CMakeLists.txt', 'CMakePresets.json', 'cmake/**', 'src/**', 'third_party/**', 'tests/**', 'python/pyalps/**', '.github/dependencies.json', '.github/scripts/build-boost.sh', '.github/scripts/prepare_dependencies.py') }}
           restore-keys: ccache-source-${{ matrix.id }}-
       - name: Reset compiler cache counters
         run: ccache --zero-stats
@@ -150,7 +185,7 @@ jobs:
         with:
           path: _build/boost-install
           # Boost always uses C++17 and has no Python dependency.
-          key: boost-${{ matrix.os }}-${{ runner.arch }}-${{ matrix.cxx }}-${{ matrix.mpi }}-${{ matrix.boost_sha256 }}-${{ steps.toolchain.outputs.hash }}-${{ hashFiles('.github/scripts/build-boost.sh', '.github/scripts/prepare_dependencies.py') }}
+          key: boost-${{ matrix.os }}-${{ runner.arch }}-${{ matrix.cxx }}-${{ env.ALPS_BOOST_MPI }}-${{ steps.toolchain.outputs.boost_sha256 }}-${{ steps.toolchain.outputs.hash }}-${{ hashFiles('.github/scripts/build-boost.sh', '.github/scripts/prepare_dependencies.py') }}
       - name: Prepare pinned Boost
         timeout-minutes: 30
         run: python .github/scripts/prepare_dependencies.py "$DEPENDENCY" _build/boost-install
@@ -273,7 +308,7 @@ jobs:
           echo "CMAKE_PREFIX_PATH=$(brew --prefix boost):$(brew --prefix hdf5):$(brew --prefix openblas)" >> "$GITHUB_ENV"
       - name: Install Python build and test prerequisites
         run: |
-          python -m pip install 'cmake>=3.27' ninja 'scikit-build-core>=1.0' 'nanobind==2.15.0' build pytest h5py
+          python -m pip install 'cmake>=3.27' ninja 'scikit-build-core>=1.0' 'nanobind==2.15.0' build pytest numpy h5py
           if [[ "$RUNNER_OS" == Linux ]]; then python -m pip install 'patchelf>=0.14'; fi
       - name: Build, test and install with CMake
         run: |

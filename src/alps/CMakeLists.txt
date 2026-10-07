@@ -98,6 +98,25 @@ function(alps_copy_runtime_dependencies target)
   endif()
 endfunction()
 alps_copy_runtime_dependencies(alps)
+
+# Shared export/install policy; sources and dependencies stay with each component.
+function(alps_configure_component target component)
+  add_library(ALPS::${component} ALIAS ${target})
+  set_target_properties(${target} PROPERTIES
+    EXPORT_NAME ${component} VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR} INSTALL_RPATH "${ALPS_LOADER_ORIGIN}")
+  alps_dependency_rpath(${target} ${ARGN})
+  alps_copy_runtime_dependencies(${target})
+  string(TOUPPER "${component}" upper)
+  set(export_header "${PROJECT_BINARY_DIR}/generated/include/alps/${component}_export.h")
+  generate_export_header(${target} EXPORT_MACRO_NAME ALPS_${upper}_DECL
+    EXPORT_FILE_NAME "${export_header}")
+  if(NOT BUILD_SHARED_LIBS)
+    target_compile_definitions(${target} PUBLIC ALPS_${upper}_STATIC_DEFINE)
+  endif()
+  target_sources(${target} PUBLIC FILE_SET HEADERS
+    BASE_DIRS "${PROJECT_BINARY_DIR}/generated/include" FILES "${export_header}")
+endfunction()
 target_sources(alps_configuration INTERFACE
   FILE_SET HEADERS
   BASE_DIRS "${PROJECT_BINARY_DIR}/generated/include"

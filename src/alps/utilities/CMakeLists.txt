@@ -8,12 +8,6 @@ add_library(alps_utilities
   src/stacktrace.cpp
   src/temporary_filename.cpp
   src/vmusage.cpp)
-add_library(ALPS::utilities ALIAS alps_utilities)
-set_target_properties(alps_utilities PROPERTIES
-  EXPORT_NAME utilities
-  VERSION ${PROJECT_VERSION}
-  SOVERSION ${PROJECT_VERSION_MAJOR}
-  INSTALL_RPATH "${ALPS_LOADER_ORIGIN}")
 target_link_libraries(alps_utilities PUBLIC ALPS::configuration ALPS::containers Boost::filesystem Threads::Threads)
 
 # Stacktraces require both platform headers and linkable runtime symbols.
@@ -44,20 +38,10 @@ endif()
 if(ALPS_ENABLE_MPI)
   target_link_libraries(alps_utilities PUBLIC "$<COMPILE_ONLY:MPI::MPI_CXX;Boost::mpi>")
 endif()
-alps_dependency_rpath(alps_utilities)
-alps_copy_runtime_dependencies(alps_utilities)
 if(WIN32)
   target_link_libraries(alps_utilities PRIVATE ws2_32 mswsock)
 endif()
-generate_export_header(alps_utilities EXPORT_MACRO_NAME ALPS_UTILITIES_DECL
-  EXPORT_FILE_NAME "${PROJECT_BINARY_DIR}/generated/include/alps/utilities_export.h")
-if(NOT BUILD_SHARED_LIBS)
-  target_compile_definitions(alps_utilities PUBLIC ALPS_UTILITIES_STATIC_DEFINE)
-endif()
-target_sources(alps_utilities PUBLIC
-  FILE_SET HEADERS
-  BASE_DIRS "${PROJECT_BINARY_DIR}/generated/include"
-  FILES "${PROJECT_BINARY_DIR}/generated/include/alps/utilities_export.h")
+alps_configure_component(alps_utilities utilities)
 target_sources(alps_utilities PUBLIC
   FILE_SET utilities_headers TYPE HEADERS
   BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"

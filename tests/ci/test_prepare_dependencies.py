@@ -26,7 +26,7 @@ def test_boost_checksum_failure_never_extracts_or_builds(tmp_path, monkeypatch):
 def test_matching_boost_cache_avoids_network(tmp_path, monkeypatch):
     monkeypatch.setenv('CXX', 'clang++')
     monkeypatch.setenv('ALPS_BOOST_MPI', 'OFF')
-    checksum = json.loads((ROOT / '.github/ci-matrix.json').read_text())['boost']['1.91.0']
+    checksum = json.loads((ROOT / '.github/dependencies.json').read_text())['boost']['1.91.0']
     (tmp_path / '.alps-boost-sha256').write_text(checksum + 'clang++OFF')
     monkeypatch.setattr(dependencies.urllib.request, 'urlopen', lambda *a, **kw: pytest.fail('Cached dependency downloaded again'))
     dependencies.prepare_boost('1.91.0', tmp_path)

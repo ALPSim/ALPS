@@ -70,14 +70,14 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: _build/boost-install
-          key: wheel-boost-${{ matrix.plat.family }}-${{ hashFiles('.github/ci-matrix.json', '.github/scripts/build-boost.sh', '.github/scripts/prepare_dependencies.py') }}
+          key: wheel-boost-${{ matrix.plat.family }}-${{ hashFiles('.github/dependencies.json', '.github/scripts/build-boost.sh', '.github/scripts/prepare_dependencies.py') }}
 
       - name: Restore compiler cache
         id: compiler-cache
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: _build/ccache
-          key: pyalps-ccache-${{ matrix.plat.family }}-${{ matrix.plat.arch }}-${{ hashFiles('CMakeLists.txt', 'CMakePresets.json', 'cmake/**', 'src/**', 'third_party/**', 'tests/**', 'python/pyalps/**', '.github/dependencies.json', '.github/ci-matrix.json', '.github/scripts/build-boost.sh', '.github/scripts/prepare_dependencies.py', '.github/workflows/build_wheels.yml') }}
+          key: pyalps-ccache-${{ matrix.plat.family }}-${{ matrix.plat.arch }}-${{ hashFiles('CMakeLists.txt', 'CMakePresets.json', 'cmake/**', 'src/**', 'third_party/**', 'tests/**', 'python/pyalps/**', '.github/dependencies.json', '.github/scripts/build-boost.sh', '.github/scripts/prepare_dependencies.py', '.github/workflows/build_wheels.yml') }}
           restore-keys: pyalps-ccache-${{ matrix.plat.family }}-${{ matrix.plat.arch }}-
 
       - name: Build wheels
