@@ -7,9 +7,7 @@ on:
     tags:
       - 'v*'
   pull_request:
-  merge_group:
-  schedule:
-    - cron: '43 4 * * 1'
+    branches: [master]
   workflow_dispatch:
 
 permissions:
@@ -28,28 +26,25 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
-      packaging: ${{ steps.policy.outputs.packaging }}
-      wheel_matrix: ${{ steps.policy.outputs.wheel_matrix }}
-      smoke_matrix: ${{ steps.policy.outputs.smoke_matrix }}
+      wheel_matrix: ${{ steps.matrix.outputs.wheel_matrix }}
+      smoke_matrix: ${{ steps.matrix.outputs.smoke_matrix }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-          fetch-depth: 0
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: '3.13'
       - run: python -m pip install packaging pytest "scikit-build-core>=1.0" "cmake>=3.27" ninja
       - name: Test release validation
         run: python -m pytest tests/packaging -q
-      - name: Select packaging coverage
-        id: policy
-        run: python .github/scripts/ci_policy.py
+      - name: Expand packaging matrices
+        id: matrix
+        run: python .github/scripts/packaging_matrix.py
       - name: Check package, SDK, and tag versions
         run: python .github/scripts/check_release_version.py
 
   build_wheels:
-    if: needs.check_version.outputs.packaging != 'none'
     name: Build wheels / ${{ matrix.plat.family }}
     needs: [check_version, build_sdist]
     runs-on: ${{ matrix.plat.os }}
@@ -152,7 +147,6 @@ jobs:
 
 
   build_sdist:
-    if: needs.check_version.outputs.packaging != 'none'
     name: Build source distribution
     needs: [check_version]
     runs-on: ubuntu-latest
@@ -248,7 +242,6 @@ jobs:
   # installs one consistent Open MPI stack and verifies real inter-rank
   # collectives, requests and point-to-point traffic through pyalps.mpi.
   mpi_smoke:
-    if: needs.check_version.outputs.packaging == 'full'
     name: Smoke test MPI adapter with two ranks
     needs: [check_version, build_wheels]
     runs-on: ubuntu-latest
@@ -296,23 +289,14 @@ jobs:
           import json, os
           jobs = json.loads(os.environ['RESULTS'])
           assert jobs['check_version']['result'] == 'success', jobs
-          tier = jobs['check_version']['outputs']['packaging']
           for name, job in jobs.items():
               if name == 'check_version':
                   continue
-              required = tier == 'full' or (tier == 'quick' and name != 'mpi_smoke')
-              assert job['result'] == ('success' if required else 'skipped'), (name, job)
+              assert job['result'] == 'success', (name, job)
           PY
 
-  release-source:
-    name: Release source validation
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-    uses: ./.github/workflows/build.yml
-    with:
-      tier: full
-
   upload_pypi:
-    needs: [packaging-status, release-source]
+    needs: [packaging-status]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: pypi

@@ -1,4 +1,4 @@
-"""Check matrix selection and summaries using the actual Actions interfaces."""
+"""Preserve upstream source coverage through the SDK/Python migration."""
 
 import importlib.util
 import json
@@ -12,51 +12,6 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 
 
-@pytest.mark.parametrize(
-    ("event", "ref", "tier", "count"),
-    [
-        ("pull_request", "refs/pull/1/merge", "auto", 1),
-        ("merge_group", "refs/heads/gh-readonly-queue/master/test", "auto", 1),
-        ("push", "refs/heads/master", "auto", 4),
-        ("push", "refs/tags/v3.0.0", "auto", 14),
-        ("schedule", "refs/heads/master", "auto", 14),
-        ("workflow_dispatch", "refs/heads/feature", "full", 14),
-        ("workflow_dispatch", "refs/heads/feature", "quick", 1),
-    ],
-)
-def test_matrix_event_selection(tmp_path, event, ref, tier, count):
-    output = tmp_path / "output"
-    summary = tmp_path / "summary"
-    payload = tmp_path / "event.json"
-    payload.write_text("{}")
-    subprocess.run(
-        [sys.executable, str(ROOT / ".github/scripts/ci_matrix.py"), "--tier", tier],
-        env={**os.environ, "GITHUB_EVENT_NAME": event, "GITHUB_REF": ref,
-             "GITHUB_EVENT_PATH": str(payload), "GITHUB_OUTPUT": str(output),
-             "GITHUB_STEP_SUMMARY": str(summary)},
-        check=True, capture_output=True, text=True,
-    )
-    values = dict(line.split("=", 1) for line in output.read_text().splitlines())
-    assert values["developer"] == str(count == 14 or event in {"pull_request", "merge_group"}).lower()
-    value = values["matrix"]
-    builds = json.loads(value)["include"]
-    assert len(builds) == count
-    assert len({build["id"] for build in builds}) == count
-    assert all(build["boost_sha256"] for build in builds)
-    if count > 1:
-        assert any(build["extras"] for build in builds)
-        assert any(build["os"] == "macos-15" for build in builds)
-        assert any(build["boost"] == "1.76.0" for build in builds)
-    else:
-        assert builds[0]["python"] and builds[0]["mpi"] == "OFF"
-        assert not builds[0]["extras"]
-    if count == 14:
-        assert any(build["extensive"] for build in builds)
-        sanitized = [build for build in builds if build["sanitizer"]]
-        assert sanitized and all(build["mpi"] == "OFF" for build in sanitized)
-    assert f"{count} builds" in summary.read_text()
-
-
 def load_helper(name):
     spec = importlib.util.spec_from_file_location(name, ROOT / f".github/scripts/{name}.py")
     module = importlib.util.module_from_spec(spec)
@@ -64,37 +19,64 @@ def load_helper(name):
     return module
 
 
-@pytest.mark.parametrize(("tier", "only", "developer", "expected"), [
-    ("full", "clang-sanitizers", "false", "false"),
-    ("full", "clang-sanitizers", "true", "true"),
-    ("quick", "", "true", "true"),
+def test_source_matrix_preserves_upstream_compatibility():
+    manifest = json.loads((ROOT / ".github/ci-matrix.json").read_text())
+    builds = load_helper("ci_matrix").select_matrix(manifest)["include"]
+    # The upstream source matrix, minus only the intentionally unsupported
+    # Python 3.9/3.10 rows. Compare combinations, not just totals or versions.
+    expected = {
+        (os_name, compiler, "3.14", "1.91.0", 17)
+        for os_name, compiler in [
+            ("ubuntu-22.04", "gcc-11"), ("ubuntu-22.04", "gcc-12"),
+            ("ubuntu-24.04", "gcc-13"), ("ubuntu-24.04", "gcc-14"),
+            ("ubuntu-24.04", "gcc-15"),
+            ("ubuntu-22.04", "clang-14"), ("ubuntu-22.04", "clang-15"),
+            *[("ubuntu-24.04", f"clang-{version}") for version in range(16, 23)],
+            *[(os_name, "/usr/bin/clang") for os_name in
+              ("macos-14", "macos-15", "macos-15-intel", "macos-26")],
+            ("macos-15", "gcc-13"), ("macos-15", "gcc-14"),
+        ]
+    }
+    expected |= {("ubuntu-24.04", "gcc-14", "3.14", f"1.{v}.0", 17)
+                 for v in (76, 81, 86, 87, 88, 89, 90)}
+    expected |= {("ubuntu-24.04", "gcc-14", v, "1.91.0", 17)
+                 for v in ("3.11", "3.12", "3.13")}
+    expected |= {("ubuntu-24.04", "gcc-14", "3.14", "1.91.0", v)
+                 for v in (20, 23)}
+    actual = {(b["os"], b["cc"], b["python"], b["boost"], b["standard"])
+              for b in builds}
+    assert len(builds) == len(actual) == len(expected) == 32
+    assert actual == expected
+    assert all(b["mpi"] == "ON" for b in builds)
+    assert all(b["repository"] == "llvm" for b in builds
+               if b["cc"] in {f"clang-{v}" for v in range(19, 23)})
+    assert all(b["packages"] == b["cc"].replace("gcc-", "gcc@") for b in builds
+               if b["os"].startswith("macos-") and b["cc"].startswith("gcc-"))
+
+
+@pytest.mark.parametrize("event,paths", [
+    ("pull_request", ["README.md"]),
+    ("pull_request", ["python/pyalps/src/pyalps/tools.py"]),
+    ("pull_request", ["src/alps/alea/src/alea/observable.C"]),
+    ("push", []), ("workflow_dispatch", []),
 ])
-def test_targeted_build_and_developer_outputs(tmp_path, tier, only, developer, expected):
+def test_matrix_is_not_reduced_by_event_or_paths(tmp_path, event, paths):
     output = tmp_path / "output"
+    summary = tmp_path / "summary"
     payload = tmp_path / "event.json"
-    payload.write_text("{}")
-    subprocess.run([
-        sys.executable, str(ROOT / ".github/scripts/ci_matrix.py"),
-        "--tier", tier, "--only", only,
-    ], env={**os.environ, "GITHUB_EVENT_NAME": "workflow_dispatch",
-            "GITHUB_REF": "refs/heads/feature", "GITHUB_EVENT_PATH": str(payload),
-            "GITHUB_OUTPUT": str(output), "DEVELOPER_SETUP": developer},
-        check=True, capture_output=True, text=True)
+    payload.write_text(json.dumps({"commits": [{"modified": paths}]}))
+    subprocess.run(
+        [sys.executable, str(ROOT / ".github/scripts/ci_matrix.py")],
+        env={**os.environ, "GITHUB_EVENT_NAME": event,
+             "GITHUB_EVENT_PATH": str(payload), "GITHUB_OUTPUT": str(output),
+             "GITHUB_STEP_SUMMARY": str(summary)},
+        check=True, capture_output=True, text=True,
+    )
     values = dict(line.split("=", 1) for line in output.read_text().splitlines())
     builds = json.loads(values["matrix"])["include"]
-    assert len(builds) == 1
-    if only:
-        assert builds[0]["id"] == only
-    assert values["developer"] == expected
-
-
-@pytest.mark.parametrize(("tier", "only"), [
-    ("full", "unknown"), ("quick", "clang-sanitizers"),
-])
-def test_reject_unavailable_build_selection(tier, only):
-    manifest = json.loads((ROOT / ".github/ci-matrix.json").read_text())
-    with pytest.raises(ValueError, match="Empty"):
-        load_helper("ci_matrix").select_matrix(manifest, tier, only)
+    assert len(builds) == 32
+    assert len({build["id"] for build in builds}) == 32
+    assert "all 32 builds" in summary.read_text()
 
 
 @pytest.mark.parametrize("problem", ["duplicate", "checksum", "empty"])
@@ -107,7 +89,7 @@ def test_reject_broken_matrix(problem):
     else:
         manifest["builds"] = []
     with pytest.raises(ValueError):
-        load_helper("ci_matrix").select_matrix(manifest, "full")
+        load_helper("ci_matrix").select_matrix(manifest)
 
 
 def test_mixed_junit_results(tmp_path):

@@ -273,7 +273,7 @@ Plot/extraction formats are `text`, `html`, `gnuplot`, `matplotlib` and `grace`;
 
 ## CI coverage
 
-Pull requests report aggregate `Source CI` and `Packaging CI` checks. Path-based selection limits documentation-only runs; build-system and public-header changes select broader coverage. Scheduled and release runs use the full matrix. The [source workflow](.github/workflows/build.yml), [coverage matrix](.github/ci-matrix.json) and [packaging workflow](.github/workflows/build_wheels.yml) are the authoritative lists of tested configurations.
+Pull requests report aggregate `Source CI` and `Packaging CI` checks. Every pull request targeting master, master push, and release tag runs the complete source and packaging matrices. The source matrix preserves the upstream compiler, Boost, macOS, and C++ standard sweeps; only Python 3.9/3.10 rows are removed because the bindings now require Python 3.11+. Installed-SDK and contributor checks validate the new build layout. Broader changes to CI tiers and path-based selection are deferred to [the separate CI coverage proposal](https://github.com/ALPSim/ALPS/issues/164). The [source workflow](.github/workflows/build.yml), [coverage matrix](.github/ci-matrix.json) and [packaging workflow](.github/workflows/build_wheels.yml) are the authoritative lists of tested configurations.
 
 Coverage includes Linux/macOS source builds, CMake 3.27, MPI/OpenMP, installed-SDK consumers, direct CMake/editable-pip contributor workflows and repaired wheels tested on fresh runners. Dependency providers in CI are runner configuration, not requirements to use that package manager locally. Wheel builds are per CPython interpreter; local editable tests do not replace wheel and source-distribution validation.
 
