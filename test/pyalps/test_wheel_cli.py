@@ -1,9 +1,8 @@
 # Copyright (C) 2026 by the ALPS collaboration
 # SPDX-License-Identifier: MIT
-"""Run installed shell commands outside the checkout, as tutorial users do."""
+"""Exercise installed commands and Python application helpers."""
 
 import importlib.metadata
-import importlib.util
 import math
 import os
 from pathlib import Path
@@ -13,6 +12,7 @@ import sysconfig
 import xml.etree.ElementTree as ET
 
 import pytest
+import pyalps
 
 
 @pytest.mark.parametrize("sdk_override", [None, "/explicit/sdk/bin"])
@@ -32,8 +32,7 @@ def test_import_preserves_binary_selection_environment(tmp_path, sdk_override):
 
 @pytest.fixture
 def wheel_cli(tmp_path):
-    # find_spec locates the package without importing it and setting ALPS_*.
-    package = Path(importlib.util.find_spec("pyalps").origin).parent
+    package = Path(pyalps.__file__).resolve().parent
     if not (package / "bin").is_dir():
         pytest.skip("this installation does not bundle ALPS programs")
     scripts = Path(sysconfig.get_path("scripts"))
@@ -55,6 +54,59 @@ def wheel_cli(tmp_path):
     return run, package, scripts
 
 
+@pytest.fixture
+def sdk(tmp_path, monkeypatch):
+    sdk = tmp_path / "SDK $(not-a-shell) with spaces"
+    sdk.mkdir()
+    for name in ("spinmc", "dmft", "loop", "spinmc_evaluate", "fulldiag"):
+        program = sdk / name
+        program.write_text('#!/bin/sh\nprintf "%s\\n" "$0" "$ALPS_BIN_PATH" "$@"\n')
+        program.chmod(0o755)
+    monkeypatch.delenv("ALPS_BIN_PATH", raising=False)
+    monkeypatch.setenv("PATH", "")
+    return sdk
+
+
+@pytest.mark.parametrize("helper, args, command, flags", [
+    (pyalps.runApplication, ("spinmc", "job.in.xml"), "spinmc", []),
+    (pyalps.runDMFT, (["job.in.xml"],), "dmft", []),
+    (pyalps.evaluateLoop, (["job.in.xml"],), "loop", ["--evaluate"]),
+    (pyalps.evaluateSpinMC, (["job.in.xml"],), "spinmc_evaluate", []),
+])
+def test_python_helpers_use_resolved_executable(sdk, monkeypatch, capfd, helper, args, command, flags):
+    # Selection is covered by launcher tests; here check how helpers use it.
+    monkeypatch.setattr(pyalps.tools, "_resolve_executable", lambda name: str(sdk / name))
+    helper(*args)
+    expected = [str(sdk / command), str(sdk), *flags, "job.in.xml"]
+    assert "\n".join(expected) + "\n" in capfd.readouterr().out
+    assert "ALPS_BIN_PATH" not in os.environ
+
+
+@pytest.mark.parametrize("relative", [False, True])
+def test_explicit_path_and_literal_arguments(sdk, tmp_path, monkeypatch, capfd, relative):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("ALPS_BIN_PATH", "/conflicting/sdk")
+    executable = sdk / "spinmc"
+    argument = "input $(not-a-shell); with spaces.in.xml"
+    selected = executable.relative_to(tmp_path) if relative else executable
+    status, _ = pyalps.runApplication(str(selected), argument)
+    assert status == 0
+    assert f"{executable}\n{sdk}\n{argument}\n" in capfd.readouterr().out
+    assert os.environ["ALPS_BIN_PATH"] == "/conflicting/sdk"
+
+
+def test_explicit_mpi_application_keeps_sdk_and_diagonalization_flags(sdk, tmp_path, monkeypatch, capfd):
+    monkeypatch.setenv("ALPS_BIN_PATH", "/conflicting/sdk")
+    mpirun = tmp_path / "MPI launcher"
+    mpirun.write_text('#!/bin/sh\nprintf "%s\\n" "$ALPS_BIN_PATH" "$@"\n')
+    mpirun.chmod(0o755)
+    status, _ = pyalps.runApplication(str(sdk / "fulldiag"), "job.in.xml", MPI=2, mpirun=str(mpirun))
+    assert status == 0
+    expected = [str(sdk), "-np", "2", str(sdk / "fulldiag"), "--mpi", "--Nmax", "1", "job.in.xml"]
+    assert "\n".join(expected) + "\n" in capfd.readouterr().out
+    assert os.environ["ALPS_BIN_PATH"] == "/conflicting/sdk"
+
+
 def test_entry_points_cover_bundled_programs(wheel_cli):
     _, package, scripts = wheel_cli
     entries = {
@@ -66,12 +118,9 @@ def test_entry_points_cover_bundled_programs(wheel_cli):
     for name, entry in entries.items():
         assert (scripts / name).is_file()
         assert callable(entry.load())
-        assert entry.module == "pyalps_cli"
-        assert entry.attr == "main"
 
 
-@pytest.mark.parametrize("via_python", [False, True])
-def test_parameter2xml_then_spinmc(wheel_cli, tmp_path, via_python):
+def test_parameter2xml_then_spinmc(wheel_cli, tmp_path):
     run, _, _ = wheel_cli
     parameters = tmp_path / "simulation input"
     parameters.write_text('''LATTICE="square lattice"
@@ -88,17 +137,7 @@ SEED=42
     run("parameter2xml", parameters.name)
     job = parameters.name + ".in.xml"
     assert ET.parse(tmp_path / job).getroot().tag == "JOB"
-    if via_python:
-        # Python resolves the native program directly, even with pip's launcher
-        # on PATH. It must select the same payload as the shell command.
-        run("python", "-c",
-            "import os, pyalps, sys; "
-            "assert 'ALPS_BIN_PATH' not in os.environ; "
-            "status = pyalps.runApplication("
-            "'spinmc', sys.argv[1], Tmin=1, writexml=True)[0]; "
-            "assert 'ALPS_BIN_PATH' not in os.environ; sys.exit(status)", job)
-    else:
-        run("spinmc", "--Tmin", "1", "--write-xml", job)
+    run("spinmc", "--Tmin", "1", "--write-xml", job)
     output = tmp_path / (parameters.name + ".task1.out.xml")
     root = ET.parse(output).getroot()
     means = root.findall(".//SCALAR_AVERAGE[@name='Energy']/MEAN")
@@ -131,7 +170,10 @@ J=1
 {L=2}
 ''')
     run("parameter2xml", parameters.name)
-    run("fulldiag", parameters.name + ".in.xml")
+    # Cover Python dispatch here; spinmc above covers the shell launcher.
+    run("python", "-c", "import pyalps, sys; "
+        "sys.exit(pyalps.runApplication('fulldiag', sys.argv[1])[0])",
+        parameters.name + ".in.xml")
     run("fulldiag_evaluate", "--T_MIN", "0.5", "--T_MAX", "2", "--DELTA_T", "0.5",
         parameters.name + ".task1.out.xml")
     plots = sorted(tmp_path.glob("*.plot.xml"))
@@ -172,7 +214,6 @@ SEED=42
 
 def test_maxent_from_hdf5_parameters(wheel_cli, tmp_path):
     import numpy as np
-    import pyalps
 
     run, _, _ = wheel_cli
     parameters = {

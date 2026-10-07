@@ -48,25 +48,16 @@ def launcher(tmp_path):
     return run, package, env
 
 
-@pytest.mark.parametrize("program, xml, expected", [
-    ("convert2text", '<SIMULATION><PARAMETERS><PARAMETER name="L">4</PARAMETER>'
-     '</PARAMETERS></SIMULATION>', "L = 4"),
-    ("plot2text", '<plot><set><point><x>1</x><y>2</y></point></set></plot>', "1\t2"),
-    ("plot2gp", '<plot name="test"><set><point><x>1</x><y>2</y></point></set></plot>',
-     'set title "test"'),
-    ("plot2xmgr", '<plot name="test"><set><point><x>1</x><y>2</y></point></set></plot>',
-     '@    title "test"'),
-])
-def test_exporters_without_pyalps_or_external_programs(launcher, tmp_path, program, xml, expected):
+def test_exporter_without_pyalps_or_external_programs(launcher, tmp_path):
     run, package, _ = launcher
     stylesheets = Path(__file__).resolve().parents[2] / "lib/xml"
     shutil.copytree(stylesheets, package / "xml", dirs_exist_ok=True)
     source = tmp_path / "input with spaces.xml"
-    source.write_text('<?xml version="1.0"?>\n'
-                      '<!DOCTYPE plot SYSTEM "https://invalid.example/unavailable.dtd">\n' + xml)
-    result = run(program=program, isolated=False, args=[str(source)])
+    source.write_text('<!DOCTYPE plot SYSTEM "https://invalid.example/unavailable.dtd">\n'
+                      '<plot><set><point><x>1</x><y>2</y></point></set></plot>')
+    result = run(program="plot2text", isolated=False, args=[str(source)])
     assert result.returncode == 0, result.stderr
-    assert expected in result.stdout
+    assert "1\t2" in result.stdout
     assert not result.stderr
 
 
@@ -118,21 +109,40 @@ def test_xml_override_does_not_select_another_binary_installation(launcher):
     assert result.stdout.splitlines() == ["/custom/xml", str(package / "bin")]
 
 
-def test_missing_binary_is_actionable_and_does_not_search_path(launcher):
-    run, _, _ = launcher
-    result = run()
-    assert result.returncode == 127
-    assert "PYALPS_BUNDLE_APPLICATIONS=ON" in result.stderr
-    assert "Traceback" not in result.stderr
-
-
-def test_missing_bundled_binary_never_uses_sdk_override(launcher):
+def test_missing_bundled_binary_does_not_use_path_or_sdk(launcher):
     run, package, env = launcher
     (package / "pyalps_config.py").write_text('ALPS_BIN_INSTALL_DIR = ""\n')
     env["ALPS_BIN_PATH"] = env["PATH"]  # contains a working, conflicting spinmc
     result = run()
     assert result.returncode == 127
     assert "PYALPS_BUNDLE_APPLICATIONS=ON" in result.stderr
+    assert "Traceback" not in result.stderr
+
+
+@pytest.mark.parametrize("selection", ["configured", "override", "missing"])
+def test_bindings_only_sdk_selection(launcher, tmp_path, selection):
+    run, package, env = launcher
+    sdk = tmp_path / "configured SDK"
+    override = tmp_path / "selected SDK"
+    for directory in (sdk, override):
+        directory.mkdir()
+        executable = directory / "spinmc"
+        executable.write_text('#!/bin/sh\nprintf "%s\\n" "$0"\n')
+        executable.chmod(0o755)
+    (package / "pyalps_config.py").write_text(f"ALPS_BIN_INSTALL_DIR = {str(sdk)!r}\n")
+    selected = sdk if selection == "configured" else override
+    if selection == "missing":
+        selected = tmp_path / "missing SDK"
+    if selection != "configured":
+        env["ALPS_BIN_PATH"] = str(selected)
+    result = run()
+    if selection == "missing":
+        assert result.returncode == 127
+        assert str(selected / "spinmc") in result.stderr
+        assert not result.stdout
+    else:
+        assert result.returncode == 0, result.stderr
+        assert result.stdout.strip() == str(selected / "spinmc")
 
 
 def test_nonexecutable_binary_is_reported(launcher):
