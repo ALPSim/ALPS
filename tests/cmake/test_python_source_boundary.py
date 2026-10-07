@@ -44,5 +44,5 @@ def test_standalone_python_sources(tmp_path):
     # Core-only builds retain the same source boundary and need no solver targets.
     subprocess.run([
         "cmake", "-S", str(source), "-B", str(build),
-        "-DPYALPS_BUILD_SOLVERS=OFF", "-DPYALPS_BUNDLE_APPLICATIONS=OFF",
-    ], check=True)
+        "-DPYALPS_BUILD_SOLVERS=OFF",
+    ], check=True, env={**os.environ, "PYALPS_BUNDLE_APPLICATIONS": "OFF"})

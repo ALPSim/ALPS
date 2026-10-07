@@ -14,7 +14,7 @@ import sys
 import tempfile
 
 
-def write_manifest(tree: Path, version: str | None = None, *, repaired=False, nanobind_version=None, nanobind_abi=None):
+def write_manifest(tree: Path, version: str | None = None, *, repaired=False, nanobind_version=None, nanobind_abi=None, sdk_bin=None):
     package = tree / "pyalps"
     manifest = package / "runtime.json"
     previous = json.loads(manifest.read_text(encoding="utf-8")) if manifest.exists() else {}
@@ -65,6 +65,7 @@ def write_manifest(tree: Path, version: str | None = None, *, repaired=False, na
                 subprocess.run(["codesign", "--force", "--sign", "-", str(binary)], check=True)
     manifest.write_text(json.dumps({
         "schema": 1,
+        "sdk_bin": previous.get("sdk_bin", "") if sdk_bin is None else sdk_bin,
         "nanobind": nanobind_metadata,
         "alps_version": version,
         "repaired": repaired,
@@ -89,11 +90,12 @@ if __name__ == "__main__":
     parser.add_argument("--alps-version")
     parser.add_argument("--nanobind-version")
     parser.add_argument("--nanobind-abi")
+    parser.add_argument("--sdk-bin")
     parser.add_argument("--destination", type=Path)
     arguments = parser.parse_args()
     if arguments.tree:
         write_manifest(arguments.tree, arguments.alps_version,
-                       nanobind_version=arguments.nanobind_version, nanobind_abi=arguments.nanobind_abi)
+                       nanobind_version=arguments.nanobind_version, nanobind_abi=arguments.nanobind_abi, sdk_bin=arguments.sdk_bin)
     else:
         for wheel in arguments.wheel:
             finalize_wheel(wheel, arguments.destination or wheel.parent)

@@ -37,6 +37,7 @@ The top-level numbers suggest a browsing order; each topic keeps its existing le
 | `09-code/` | Simulation skeletons and implementation examples |
 | `10-ngs/` | Accumulator and simulation-interface examples |
 | `11-notebook/` | Interactive versions of lessons, usable alongside the other topics |
+| `12-optical-lattice/` | Band structure and Hubbard parameters for optical lattices |
 
 `00-examples` is a reference collection, not a prerequisite. For writing simulations, follow `08-alpsize` before using the templates in `09-code` and the interfaces in `10-ngs`. Notebooks provide an alternative presentation rather than a final advanced lesson.
 

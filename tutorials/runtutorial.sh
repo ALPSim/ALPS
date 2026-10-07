@@ -4,8 +4,8 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_
 
-cd $1
-for f in *py
+cd "$1" || exit 1
+for f in *.py
 do
-  alpspython $f
+  python "$f" || exit
 done

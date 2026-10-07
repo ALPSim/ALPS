@@ -21,3 +21,7 @@ add_executable(dmrg dmrg.C factory.C)
 target_include_directories(dmrg PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(dmrg PRIVATE ALPS::alps)
 alps_install_applications(dmrg)
+
+if(ALPS_BUILD_TESTING)
+  add_subdirectory(tests)
+endif()

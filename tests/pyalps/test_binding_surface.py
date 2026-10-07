@@ -192,7 +192,7 @@ def test_packaged_xml_stylesheets():
     assert os.path.basename(xsl) == "ALPS.xsl"
     assert os.path.exists(xsl)
     xml_dir = os.path.dirname(xsl)
-    for name in ("lattices.xml", "models.xml", "plot2mpl.xsl"):
+    for name in ("lattices.xml", "models.xml", "plot2text.xsl"):
         assert os.path.exists(os.path.join(xml_dir, name))
 
 

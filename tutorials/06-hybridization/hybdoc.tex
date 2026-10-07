@@ -177,19 +177,14 @@ The first line imports the solver module. Note that importing the MPI library in
 The parameters are specified in the form of a Python \verb#dict#.
 Finally the solver is invoked by executing the \verb#solve# method of the Python module. The latter takes the parameter dict as an argument. The hybridization function is read from file. Results are written to the file \verb#results.out.h5#. The name (without suffix) can be altered by specifying the parameter \verb#BASENAME#.
 
-The script is executed as follows:
+Activate the Python environment containing pyalps, then execute the script as follows:
 \begin{verbatim}
-alpspython scriptname.py
+python scriptname.py
 \end{verbatim}
 or using MPI:
 \begin{verbatim}
-mpirun -np 2 alpspython scriptname.py
+mpirun -np 2 python scriptname.py
 \end{verbatim}
-On some machines it may be necessary to use 
-\begin{verbatim}
-mpirun -np 2 bash alpspython scriptname.py
-\end{verbatim}
-instead.
 Note that on some platforms mpirun has to be replaced by a different command to invoke MPI. See your MPI manual for details. 
 
 The above example and more advanced examples on how to use the Python framework can be found in the hybridization tutorials within the \verb#/tutorials# directory inside the ALPS installation directory:
@@ -587,7 +582,7 @@ within the \verb#tutorials# subdirectory in the ALPS installation directory.
 
 \subsection{Python interface}
 
-Using alpspython together with the Python interface of the solver (the cthyb Python module) provides a very flexible framework for setting up any desired selfconsistency scheme.
+Using Python together with the Python interface of the solver (the cthyb Python module) provides a very flexible framework for setting up any desired selfconsistency scheme.
 The selfconsistency is thereby implemented within a Python script which can be executed on a parallel machine using MPI.
 Two examples are given in the ALPS tutorials, i.e in the directories
 \begin{verbatim}

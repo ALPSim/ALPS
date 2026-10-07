@@ -7,7 +7,6 @@ set(VCPKG_APPLOCAL_DEPS OFF)
 project(pyalps LANGUAGES C CXX)
 
 option(PYALPS_BUILD_SOLVERS "Build the MaxEnt, CT-HYB, and CT-INT bindings" ON)
-option(PYALPS_BUNDLE_APPLICATIONS "Include the ALPS command-line programs" ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(Python 3.11 REQUIRED COMPONENTS Interpreter Development.Module)
@@ -23,6 +22,27 @@ execute_process(
   COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/_build_support/alps_version.py" --core
   OUTPUT_VARIABLE PYALPS_VERSION_CORE
   OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)
+# Entry points are resolved before CMake runs. Use the same environment setting
+# for metadata and native payload, rather than a CMake-only option that could
+# leave bindings-only wheels with launchers that overwrite SDK executables.
+execute_process(
+  COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/_build_support/alps_version.py"
+    --bundle-applications
+  OUTPUT_VARIABLE _pyalps_bundle_applications
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  COMMAND_ERROR_IS_FATAL ANY)
+if(DEFINED PYALPS_BUNDLE_APPLICATIONS AND
+   ((PYALPS_BUNDLE_APPLICATIONS AND NOT _pyalps_bundle_applications) OR
+    (NOT PYALPS_BUNDLE_APPLICATIONS AND _pyalps_bundle_applications)))
+  message(FATAL_ERROR
+    "Set the environment variable PYALPS_BUNDLE_APPLICATIONS=OFF (or ON) for "
+    "the entire Python build, instead of -DPYALPS_BUNDLE_APPLICATIONS. "
+    "Wheel entry points and the CMake payload must use the same setting. "
+    "Remove PYALPS_BUNDLE_APPLICATIONS from an existing CMake cache when switching modes.")
+endif()
+unset(PYALPS_BUNDLE_APPLICATIONS CACHE)
+set(PYALPS_BUNDLE_APPLICATIONS "${_pyalps_bundle_applications}")
+
 set(_alps_components utilities hdf5 params)
 if(PYALPS_BUILD_SOLVERS)
   list(APPEND _alps_components solvers)
@@ -147,9 +167,16 @@ install(DIRECTORY "${ALPS_DATA_DIR}/xml/" DESTINATION pyalps/xml
   FILES_MATCHING PATTERN "*.xsl" PATTERN "*.xml")
 install(FILES "${ALPS_DATA_DIR}/licenses/xdr/LICENSE" DESTINATION pyalps/licenses/xdr)
 
+# Only bindings-only builds may fall back to their chosen SDK executables.
+set(_pyalps_sdk_bin "")
+if(NOT PYALPS_BUNDLE_APPLICATIONS)
+  set(_pyalps_sdk_bin "${ALPS_BIN_DIR}")
+endif()
+
 # Repair tools regenerate this manifest after changing library names and paths.
 install(CODE "execute_process(COMMAND \"${Python_EXECUTABLE}\"
   \"${CMAKE_CURRENT_SOURCE_DIR}/_build_support/runtime_manifest.py\"
   --tree \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\" --alps-version \"${ALPS_VERSION}\"
+  --sdk-bin \"${_pyalps_sdk_bin}\"
   --nanobind-version \"${nanobind_VERSION}\" --nanobind-abi \"${PYALPS_NANOBIND_ABI}\"
   COMMAND_ERROR_IS_FATAL ANY)")

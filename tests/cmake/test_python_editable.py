@@ -35,6 +35,7 @@ def test_editable_core_install(tmp_path):
     build_env = dict(os.environ)
     build_env.pop("PYTHONPATH", None)
     build_env["CMAKE_GENERATOR"] = "Ninja"
+    build_env["PYALPS_BUNDLE_APPLICATIONS"] = "OFF"
     build_env["CMAKE_ARGS"] = " ".join(
         '"' + argument + '"' for argument in
         json.loads(os.environ.get("ALPS_TEST_CMAKE_ARGS", "[]")))
@@ -43,7 +44,6 @@ def test_editable_core_install(tmp_path):
         "--no-deps", "--no-build-isolation", "--editable", str(source),
         "--config-settings=build-dir=" + str(tmp_path / "native"),
         "--config-settings=cmake.define.PYALPS_BUILD_SOLVERS=OFF",
-        "--config-settings=cmake.define.PYALPS_BUNDLE_APPLICATIONS=OFF",
     ], check=True, env=build_env, cwd=tmp_path)
     probe = r"""
 import json
@@ -51,6 +51,7 @@ from pathlib import Path
 import re
 import sys
 import pyalps
+from importlib.metadata import distribution
 from pyalps._resources import runtime_directory
 source, purelib = map(Path, sys.argv[1:])
 assert Path(pyalps.__file__) == source / 'src/pyalps/__init__.py'
@@ -66,6 +67,8 @@ assert not (runtime / 'bin/spinmc').exists()
 assert not (runtime / 'bin/spinmc.exe').exists()
 assert not hasattr(pyalps, 'cthyb')
 manifest = json.loads((runtime / 'runtime.json').read_text())
+assert manifest['sdk_bin']
+assert not distribution('pyalps').entry_points
 components = set()
 for entry in manifest['libraries']:
     library = runtime / entry['path']

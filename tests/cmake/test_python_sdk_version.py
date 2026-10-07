@@ -27,13 +27,14 @@ def test_python_rejects_mismatched_sdk(tmp_path, advertised_version):
         'endif()\n', encoding="utf-8")
     (sdk / "ALPSConfig.cmake").write_text('set(ALPS_VERSION "99.0.0")\n', encoding="utf-8")
     environment = dict(os.environ)
+    environment["PYALPS_BUNDLE_APPLICATIONS"] = "OFF"
     # Developer environments also expose install/bin on PATH, from which CMake
     # can infer the real prefix after rejecting the mock's version file.
     real_prefix = Path(environment.pop("ALPS_DIR")).resolve().parents[1]
     result = subprocess.run([
         "cmake", "-S", str(SOURCE / "python/pyalps"), "-B", str(tmp_path / "build"),
         "-G", "Ninja", "-DALPS_DIR=" + str(sdk), "-DPython_EXECUTABLE=" + sys.executable,
-        "-DPYALPS_BUILD_SOLVERS=OFF", "-DPYALPS_BUNDLE_APPLICATIONS=OFF",
+        "-DPYALPS_BUILD_SOLVERS=OFF",
         *json.loads(os.environ.get("ALPS_TEST_CMAKE_ARGS", "[]")),
         "-DCMAKE_IGNORE_PREFIX_PATH=" + real_prefix.as_posix(),
     ], capture_output=True, text=True, env=environment)

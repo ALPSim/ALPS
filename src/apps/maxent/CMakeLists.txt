@@ -13,7 +13,9 @@ install(TARGETS alps_maxent EXPORT ALPSTargets
 
 add_executable(maxent cli/maxent.cpp)
 target_link_libraries(maxent PRIVATE ALPS::maxent ALPS::cli)
-install(TARGETS maxent RUNTIME_DEPENDENCY_SET alps_runtime
+set_target_properties(maxent PROPERTIES EXPORT_NAME maxent_executable)
+set_property(TARGET alps APPEND PROPERTY ALPS_APPLICATION_TARGETS ALPS::maxent_executable)
+install(TARGETS maxent EXPORT ALPSApplicationTargets RUNTIME_DEPENDENCY_SET alps_runtime
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT tools)
 
 if(ALPS_BUILD_TESTING)

@@ -137,8 +137,8 @@ def test_sdk_exports_installed_applications(tmp_path):
     configure(tmp_path, "-DEXPECT_APPLICATIONS=ON")
     # Generator expressions resolve the selected configuration and suffix.
     paths = (tmp_path / "applications-Release.txt").read_text().splitlines()
-    assert len(paths) == 18
-    assert len(set(paths)) == 18
+    assert len(paths) == 23
+    assert len(set(paths)) == 23
     assert all(Path(path).is_file() for path in paths)
 
 

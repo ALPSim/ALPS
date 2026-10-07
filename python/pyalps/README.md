@@ -1,98 +1,72 @@
 # pyalps
 
-Python applications and libraries for the Algorithms and Libraries for Physics Simulations (ALPS) project. Binary wheels are available from PyPI:
+Python applications and libraries for the [ALPS project](https://alps.comp-phys.org/). Install from PyPI in a virtual environment:
 
 ```sh
+python -m venv .venv
+. .venv/bin/activate
 python -m pip install pyalps
 ```
 
-Matplotlib plotting helpers are included with `pyalps`. Install `pyalps[mpi]` for the mpi4py-backed `pyalps.mpi` compatibility layer.
+Use a separate environment to avoid overwriting commands from a source-installed ALPS SDK, or use the bindings-only installation described below.
 
-Wheels bundle simulation applications for `pyalps.runApplication`, but do not add them to your shell's `PATH` or include auxiliary tools such as `parameter2xml`, `printgraph`, and `alps-xml`. Install the [C++ SDK and tools](../../CONTRIBUTING.md#build) for those command-line workflows. Tutorial files are available in the [source collection](../../tutorials/README.md), with an optional SDK installation component.
+Install `pyalps[mpi]` for the mpi4py-backed `pyalps.mpi` interface. Bundled applications are serial even with this extra installed.
 
-The bindings are built as a standalone `scikit-build-core` project using nanobind. A source build requires GIL-enabled CPython 3.11 or newer, CMake 3.27 or newer, Ninja, a C++17 compiler, BLAS/LAPACK, HDF5 1.10.5 or newer, and an installed shared ALPS C++ SDK. The SDK's numeric version must match `ALPS_VERSION.txt`; CMake rejects a mismatch before compiling. Point `ALPS_DIR` at the SDK's `share/alps` package directory.
+## Command-line tools
 
-Before building the SDK below, follow the [CMake and Ninja setup](../../CONTRIBUTING.md#install-cmake-and-ninja) if your system CMake is older than 3.27.
+Wheels include commands for the bundled applications, including `spinmc`, `loop`, `worm`, `dmrg`, and `sparsediag`, plus the tutorial tools `parameter2xml`, `printgraph`, `convert2xml`, `convert2text`, `plot2text`, `plot2gp`, `plot2xmgr`, `snap2vtk`, and `maxent`. For example:
 
-The `distribution` CMake preset builds the SDK exactly as the wheel CI does. From the repository root:
+```sh
+parameter2xml simulation.in
+spinmc --write-xml simulation.in.in.xml
+convert2text simulation.in.task1.out.xml > results.txt
+```
+
+Download inputs from the [ALPS tutorials](https://alps.comp-phys.org/tutorials/); they are not included in wheels. Set `ALPS_XML_PATH` only to override the bundled XML resources.
+
+For older tutorials, use `python` instead of the removed `alpspython` wrapper and `pyalps.plot` instead of `plot2mpl` or `extractmpl`.
+
+## Building from source
+
+Requires GIL-enabled CPython 3.11+, CMake 3.27+, Ninja, a C++17 compiler, external Boost 1.76+, LP64 BLAS/LAPACK, and HDF5 1.10.5+. Reuse an installed ALPS C++ SDK, or build one with the `distribution` preset. From the repository root, build the SDK and Python wheel with:
 
 ```sh
 cmake --preset distribution
 cmake --build --preset distribution
 
-export ALPS_DIR="$PWD/_build/distribution/install/share/alps"
 python -m pip install build
-python -m build --wheel python/pyalps
+ALPS_DIR="$PWD/_build/distribution/install/share/alps" \
+  python -m build --wheel python/pyalps
 ```
 
-The wheel is written to `python/pyalps/dist` and can be installed with `python -m pip install`. With ccache installed, configure with `cmake --preset distribution -DCMAKE_CXX_COMPILER_LAUNCHER=ccache` and set `CMAKE_ARGS="-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"` for the wheel build to speed up rebuilds.
+Install the wheel from `python/pyalps/dist` with `python -m pip install`. It bundles the SDK's applications and libraries; shell launchers and Python helpers use those executables regardless of `PATH` or `ALPS_BIN_PATH`.
 
-`PYALPS_BUILD_SOLVERS=ON` is the default and builds the MaxEnt, CT-HYB, and CT-INT extension modules. Set it to `OFF` through CMake configuration for a smaller core-only developer build. These modules link `ALPS::maxent`, `ALPS::cthyb`, and `ALPS::ctint` from an SDK built with `ALPS_BUILD_APPLICATIONS=ON`; they do not compile solver implementations.
+For bindings only, set `ALPS_DIR` to the existing SDK's `share/alps` directory and set the environment variable `PYALPS_BUNDLE_APPLICATIONS=OFF`:
 
-All binding sources and build helpers live under this package directory. The source distribution includes shared release metadata from `cmake/ALPS_VERSION.txt` and `LICENSE.txt`, stored at its root as `ALPS_VERSION.txt` and `LICENSE.txt`. It can be built outside the checkout against an installed SDK, without the C++ source tree.
+```sh
+ALPS_DIR="/path/to/sdk/share/alps" PYALPS_BUNDLE_APPLICATIONS=OFF \
+  python -m pip install ./python/pyalps
+```
 
-The [Ising extension example](examples/ising/README.md) demonstrates exporting a simulation through nanobind against the installed SDK and pyalps wheel.
+This installs no command launchers and can safely share the SDK's prefix. Keep the SDK installed and add its `bin` to `PATH` for shell use. Python helpers use `ALPS_BIN_PATH` or the SDK recorded in the installed runtime manifest; they do not search `PATH`.
 
-`PYALPS_BUNDLE_APPLICATIONS=ON` independently controls inclusion of the ALPS command-line programs (`spinmc`, `dmrg`, `sparsediag`, `loop`, `qwl`, ...) in `pyalps/bin`. Required shared libraries are included even when this option is `OFF`. The `runApplication` helpers first honor programs already on `PATH`, then search `ALPS_BIN_PATH` and the bundled directory. A bindings-only installation can therefore use separately installed programs through either environment variable. XML resources come from the package unless `ALPS_XML_PATH` is set; installations contain no fallback paths to the machine that built the wheel.
+In either mode, pass a full executable path to a Python helper to select a different application, including a source-built MPI application.
+
+## Compatibility
+
+- Python 3.11 has a separate `cp311` wheel; Python 3.12+ shares a `cp312-abi3` wheel. Free-threaded Python is unsupported.
+- Rebuild downstream C++ extensions against the same SDK revision, nanobind internals ABI, and C++ standard library as the wheel. Nanobind is pinned to 2.15.0; its version and internals ABI are recorded in the installed `pyalps/runtime.json`.
+- Legacy HDF5 signed-byte datasets without type metadata are read as booleans. Use a typed reader such as h5py when such a dataset contains integers.
+- `pyalps.mpi` uses mpi4py's protocol, which is incompatible with Boost.MPI serialization. Communicators cannot be used as dictionary keys.
+
+The package version comes from `cmake/ALPS_VERSION.txt`. For local prereleases, set `ALPS_VERSION_PRERELEASE` (for example, `beta.1`); release builds derive it from the Git tag.
 
 ## Editable development
 
-Build and install the C++ SDK using [CMake](../../CONTRIBUTING.md#build), then use the Python environment of your choice for an editable installation. Keep the SDK and bindings on the same compiler, architecture and native dependency stack.
+After installing the matching SDK and build dependencies, use `python -m pip install --no-build-isolation -e python/pyalps`. Python edits take effect in a new interpreter; rebuild after native changes. Installed runtime resources are located through `runtime.json`, separately from editable Python sources. See [contributor setup](../../CONTRIBUTING.md#build).
 
-After installing the matching SDK, install build dependencies in your active Python environment and use pip's editable mode:
+`PYALPS_BUILD_SOLVERS=OFF` disables MaxEnt, CT-HYB and CT-INT bindings independently of bundling executables. Pass it as `--config-setting cmake.define.PYALPS_BUILD_SOLVERS=OFF`; use the `PYALPS_BUNDLE_APPLICATIONS=OFF` environment setting when building against an SDK without applications. Solver bindings otherwise link the installed SDK libraries without recompiling their implementations.
 
-```sh
-export ALPS_DIR="$PWD/_build/distribution/install/share/alps"
-python -m pip install "scikit-build-core>=1.0" "nanobind==2.15.0" "cmake>=3.27" ninja \
-  "patchelf>=0.14; sys_platform == 'linux'"
-python -m pip install --no-build-isolation -e python/pyalps \
-  --config-setting "build-dir=$PWD/_build/manual-python"
-```
-
-The example uses the SDK installed by the `distribution` preset above. For another SDK, change `ALPS_DIR` to its installed `share/alps` directory. The Linux `patchelf` dependency is required when bundling applications; `--no-build-isolation` makes installing build dependencies your responsibility. Pip installs NumPy, SciPy, and Matplotlib as runtime dependencies.
-
-For a smaller SDK and core-only editable Python installation on Linux/macOS, use the `sdk` preset and disable both solver bindings and bundled programs. After installing the build dependencies above:
-
-```sh
-cmake --preset sdk
-cmake --build --preset sdk --parallel 2
-cmake --install _build/sdk
-export ALPS_DIR="$PWD/_build/sdk/install/share/alps"
-python -m pip install --no-build-isolation -e python/pyalps \
-  --config-setting "build-dir=$PWD/_build/manual-python-core" \
-  --config-setting cmake.define.PYALPS_BUILD_SOLVERS=OFF \
-  --config-setting cmake.define.PYALPS_BUNDLE_APPLICATIONS=OFF
-```
-
-Python edits take effect in a new interpreter without reinstalling. Rebuild and reinstall the SDK after SDK C++ changes, then rerun the editable install after changing binding C++ sources, build configuration, or packaged runtime resources. If you switch SDKs, compilers, or dependency providers while reusing a manual binding build directory, add `--config-setting cmake.args=--fresh` once to clear cached discovery. Scikit-build-core owns the Python source mapping; CMake installs the native modules, libraries, XML, downstream headers, and CMake package. Resource lookup uses the installed runtime manifest, so it also works when these files live separately from the Python sources.
-
-## Native runtime layout
-
-The extensions share one nanobind library, named `pyalps_nanobind` to avoid filename collisions with other packages, and one packaged copy of each ALPS runtime component (`alps`, `alps_params`, `alps_hdf5`, `alps_utilities`, `alps_osiris`, `alps_xml` and `alps_cli`). The SDK lists these targets in `ALPS_RUNTIME_TARGETS`. On Unix, CMake installs relative runtime paths with the package's `lib` directory first and derives any additional dependency directories from resolved link targets. On macOS, manifest generation also redirects dependencies between the packaged ALPS libraries, so they do not load a second SDK copy. Linux and macOS wheels intended for redistribution must then be repaired with auditwheel or delocate, respectively, to bundle external dependencies and replace build-machine paths; the wheel CI performs this step. See [downstream native extensions](#downstream-native-extensions) for manifest finalization after repair.
-
-## Python compatibility
-
-pyalps supports GIL-enabled CPython 3.11 and newer. Python 3.11 has a separate `cp311` wheel. Python 3.12 and newer share a `cp312-abi3` wheel using the limited API, including the shared nanobind runtime. Free-threaded Python is unsupported.
-
-Build dependencies pin nanobind 2.15.0. The installed `runtime.json` records both its version and internals ABI. The downstream CMake package checks that ABI before creating `pyalps::runtime`, so an incompatible nanobind installation produces a configuration error rather than an interpreter abort. Rebuild native consumers against the same SDK and nanobind release as the installed pyalps package. Consumers must also pass `STABLE_ABI` to `nanobind_add_module` to share pyalps types on Python 3.12 and newer; nanobind ignores this flag on Python 3.11.
-
-## Versioning
-
-pyalps does not carry a version of its own. The numeric version is read from `cmake/ALPS_VERSION.txt` — the same file `cmake/ALPSVersion.cmake` reads for `ALPS_VERSION_CORE` — so a release bump is one edit rather than two that can drift. `tests/pyalps/test_wheel_payload.py` fails if the installed version and that file disagree.
-
-A prerelease label cannot live in that file: `project(VERSION ...)` rejects a non-numeric version, and neither `find_package()` matching nor the library SOVERSION has a notion of prerelease ordering. CMake takes it from the `ALPS_VERSION_PRERELEASE` cache variable; the Python build takes it from the environment variable of the same name, using the same vocabulary:
-
-| `ALPS_VERSION_PRERELEASE` | version with `ALPS_VERSION.txt` = 2.3.4 |
-|---|---|
-| unset | `2.3.4` |
-| `beta.1` | `2.3.4b1` |
-| `alpha.2` | `2.3.4a2` |
-| `rc.1` | `2.3.4rc1` |
-| `dev.3` | `2.3.4.dev3` |
-
-In GitHub release builds, the provider takes the prerelease label from `GITHUB_REF` (for example, `refs/tags/v3.0.0-beta.1`). It rejects a tag whose numeric version differs from `ALPS_VERSION.txt`, or whose label conflicts with an explicit `ALPS_VERSION_PRERELEASE`. Wheels and source distributions use the same provider. `python python/pyalps/_build_support/alps_version.py` prints the version a build would produce, from any working directory. An sdist preserves its recorded version when rebuilt without the original build environment.
-
-Note the consequence: because the number is inherited, a Python-only API change cannot be signalled in the pyalps version alone — it takes a bump of `cmake/ALPS_VERSION.txt`, which moves the whole project.
 ## Downstream native extensions
 
 The C++ SDK supplies `ALPS::alps` for standalone programs. The installed Python package separately supplies `pyalps::runtime` for extensions that share ALPS objects or HDF5 handles with pyalps. A matching C++ SDK is still required for headers and compile settings.

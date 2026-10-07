@@ -24,7 +24,7 @@ def test_manifest_records_repaired_paths_without_sdk_name_matching(tmp_path):
     runtime.write_manifest(tmp_path, "3.0.0", repaired=True)
     manifest = json.loads((package / "runtime.json").read_text())
     assert manifest == {
-        "schema": 1, "nanobind": {}, "alps_version": "3.0.0", "repaired": True,
+        "schema": 1, "sdk_bin": "", "nanobind": {}, "alps_version": "3.0.0", "repaired": True,
         "libraries": [
             {"path": "lib/libalps.so.3"},
             {"path": "lib/libalps_osiris-a1b2c3.so.3"},
@@ -52,9 +52,10 @@ def test_windows_manifest_records_dlls_only(tmp_path):
 
 def test_repair_preserves_nanobind_abi(tmp_path):
     (tmp_path / "pyalps").mkdir()
-    runtime.write_manifest(tmp_path, "3.0.0", nanobind_version="2.15.0", nanobind_abi="21")
+    runtime.write_manifest(tmp_path, "3.0.0", nanobind_version="2.15.0", nanobind_abi="21", sdk_bin="/chosen SDK/bin")
     runtime.write_manifest(tmp_path, repaired=True)
     metadata = json.loads((tmp_path / "pyalps/runtime.json").read_text())
+    assert metadata["sdk_bin"] == "/chosen SDK/bin"
     assert metadata["nanobind"] == {"version": "2.15.0", "internals_abi": "21"}
 
 
