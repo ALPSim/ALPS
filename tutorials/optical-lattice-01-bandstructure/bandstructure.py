@@ -12,6 +12,11 @@ Wannier function in each direction and evaluates
 Energies are in recoil energies E_r = h^2 / (2 m lambda^2) and lengths in lattice
 spacings lambda/2 until converted to nK at the end. This replaces
 pyalps.dwa.bandstructure, which was removed together with the DWA application.
+
+Usage, from this directory:
+
+    from bandstructure import hubbard_parameters
+    t, U = hubbard_parameters(V0, wlen, a, m, L)
 """
 
 import numpy as np
@@ -23,13 +28,6 @@ kB   = 1.380649e-23
 amu  = 1.66053906660e-27
 bohr = 5.29177210903e-11
 
-V0   = np.array([8., 8., 8.])        # lattice depth in recoil energies
-wlen = np.array([843., 843., 843.])  # laser wavelength in nanometer
-a    = 114.8                         # s-wave scattering length in bohr radius
-m    = 86.99                         # mass in atomic mass unit
-L    = 200                           # lattice size (along 1 direction)
-M    = 20                            # plane waves e^{i 2 m pi x}, m = -M..M
-
 
 def trapezoid(f, dx):
     """Trapezoidal rule for samples f on a uniform grid with spacing dx."""
@@ -37,7 +35,7 @@ def trapezoid(f, dx):
 
 
 def band_1d(V0, L, M):
-    """Lowest band of one lattice direction.
+    """Lowest band of one lattice direction of depth V0 (in E_r).
 
     Returns the hopping t in E_r, and the Wannier function w sampled on a grid x
     in lattice spacings with spacing dx.
@@ -53,26 +51,32 @@ def band_1d(V0, L, M):
         eps[i], c[i] = e[0], v[:, 0] * np.sign(v[M, 0])   # fix the gauge: c_0 > 0
     t = -np.mean(eps * np.cos(2 * np.pi * ks))
 
-    # w(x) decays exponentially, so a few lattice spacings around its site suffice.
-    x, dx = np.linspace(-4, 4, 4001, retstep=True)
-    q = ks[:, None] + ms[None, :]                          # q = k_x + m
-    w = (c[:, :, None] * np.exp(2j * np.pi * q[:, :, None] * x)).sum((0, 1)).real / L
-    return t, w, dx
+    # w(x) decays exponentially, so ten lattice spacings around its site suffice.
+    # With c_0 > 0 the Wannier function is real and even, a sum of cosines.
+    x, dx = np.linspace(-10, 10, 10001, retstep=True)
+    w = np.zeros_like(x)
+    for i, k in enumerate(ks):
+        w += c[i] @ np.cos(2 * np.pi * np.outer(ms + k, x))
+    return t, w / L, dx
 
 
-Er2nK = h**2 / (2 * m * amu * (wlen * 1e-9)**2) / kB * 1e9
+def hubbard_parameters(V0, wlen, a, m, L, M=20):
+    """Hopping t (one per direction) and onsite interaction U, both in nK.
 
-t, norm, w4 = np.empty(3), np.empty(3), np.empty(3)
-for d in range(3):
-    t[d], w, dx = band_1d(V0[d], L, M)
-    norm[d] = trapezoid(w**2, dx)
-    w4[d] = trapezoid(w**4, dx) / (wlen[d] / 2 * 1e-9)    # in 1/m
+    V0   -- lattice depth in recoil energies, one value per direction
+    wlen -- laser wavelength in nanometer, one value per direction
+    a    -- s-wave scattering length in Bohr radii
+    m    -- mass in atomic mass units
+    L    -- lattice size along one direction
+    M    -- plane-wave cutoff, e^{i 2 m pi x} with m = -M..M
+    """
+    V0, wlen = np.asarray(V0, dtype=float), np.asarray(wlen, dtype=float)
+    Er2nK = h**2 / (2 * m * amu * (wlen * 1e-9)**2) / kB * 1e9
 
-t_nK = t * Er2nK
-U_nK = 4 * np.pi * hbar**2 * a * bohr / (m * amu) * np.prod(w4) / kB * 1e9
+    t, w4 = np.empty(len(V0)), np.empty(len(V0))
+    for d in range(len(V0)):
+        t[d], w, dx = band_1d(V0[d], L, M)
+        w4[d] = trapezoid(w**4, dx) / (wlen[d] / 2 * 1e-9)    # in 1/m
 
-print(f'Er2nK  = {Er2nK}')
-print(f't [nK] = {t_nK}')
-print(f'U [nK] = {U_nK:.6g}')
-print(f'U/t    = {U_nK / t_nK}')
-print(f'norm of w (should be 1) = {norm}')
+    U = 4 * np.pi * hbar**2 * a * bohr / (m * amu) * np.prod(w4) / kB * 1e9
+    return t * Er2nK, U
