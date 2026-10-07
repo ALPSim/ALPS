@@ -73,8 +73,3 @@ target_sources(alps_headers INTERFACE
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
-
-alps_register_module(NAME parapack HEADER_SET parapack_headers
-  TARGETS alps
-  DEPENDS alea configuration expression hdf5 lattice legacy_parameters mc model numerics osiris params random scheduler utilities xml
-)

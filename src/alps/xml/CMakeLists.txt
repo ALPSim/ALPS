@@ -41,10 +41,3 @@ target_sources(alps_xml PUBLIC
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
-
-alps_register_module(NAME xml HEADER_SET xml_headers
-  HEADER_TARGETS alps_xml
-  TARGETS alps_xml
-  DEPENDS configuration utilities
-  GENERATED_HEADERS alps/xml_export.h
-)

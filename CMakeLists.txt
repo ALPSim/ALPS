@@ -22,19 +22,12 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
   message(FATAL_ERROR "Use an out-of-source build: cmake -S . -B build")
 endif()
 include(cmake/ALPSVersion.cmake)
-# These options must precede project(): vcpkg reads manifest features when the
-# toolchain is loaded. Embedded builds default to just the library.
+# Embedded builds default to just the library.
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" _alps_top_level)
 option(ALPS_BUILD_TESTING "Build and register ALPS tests" ${_alps_top_level})
 option(ALPS_ENABLE_MPI "Enable MPI parallelization" OFF)
 option(ALPS_BUILD_APPLICATIONS "Build simulation applications and command-line tools"
        ${_alps_top_level})
-if(ALPS_BUILD_TESTING)
-  list(APPEND VCPKG_MANIFEST_FEATURES tests)
-endif()
-if(ALPS_ENABLE_MPI)
-  list(APPEND VCPKG_MANIFEST_FEATURES mpi)
-endif()
 project(alps VERSION ${ALPS_VERSION_CORE} LANGUAGES C CXX)
 
 # Options removed in 3.0 are otherwise ignored with only CMake's generic
@@ -158,7 +151,6 @@ if(ALPS_BUILD_APPLICATIONS)
   add_subdirectory(src/apps)
   get_target_property(ALPS_APPLICATION_TARGETS alps ALPS_APPLICATION_TARGETS)
 endif()
-alps_write_module_manifest()
 add_subdirectory(tutorials)
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)

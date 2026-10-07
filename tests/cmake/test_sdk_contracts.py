@@ -46,28 +46,6 @@ def test_embedded_defaults_and_mpi_isolation(tmp_path):
               *(f"-DCMAKE_{kind}_OUTPUT_DIRECTORY={tmp_path.as_posix()}/{kind.lower()}"
                 for kind in ("RUNTIME", "LIBRARY", "ARCHIVE")))
 
-    allowed = {
-        "utilities": {"utilities", "containers"},
-        "hdf5": {"hdf5", "utilities", "containers"},
-        "params": {"params", "hdf5", "utilities", "containers"},
-        "osiris": {"osiris"},
-        "xml": {"xml", "utilities", "containers"},
-        "cli": {"cli", "utilities", "containers"},
-        "numeric": {"numerics", "utilities", "containers"},
-        "numeric_io": {"numeric_io", "numerics", "hdf5", "utilities", "containers"},
-    }
-    for line in (tmp_path / "component-includes-Release.txt").read_text().splitlines():
-        component, includes = line.split("=", 1)
-        module_paths = []
-        for include in includes.split("|"):
-            try:
-                module_paths.append(Path(include).relative_to(SOURCE / "src/alps"))
-            except ValueError:
-                continue
-        assert {path.parts[0] for path in module_paths} == allowed[component]
-        assert not any("adapters" in path.parts for path in module_paths)
-
-
 def test_components_link_without_building_the_core_runtime(tmp_path):
     # Compile only the extracted components, including the static export modes.
     configure(tmp_path, f"-DALPS_SOURCE={SOURCE}", "-DBUILD_SHARED_LIBS=OFF",

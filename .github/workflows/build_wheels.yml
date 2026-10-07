@@ -25,9 +25,6 @@ jobs:
     name: Check release version
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    outputs:
-      wheel_matrix: ${{ steps.matrix.outputs.wheel_matrix }}
-      smoke_matrix: ${{ steps.matrix.outputs.smoke_matrix }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -38,9 +35,6 @@ jobs:
       - run: python -m pip install packaging pytest "scikit-build-core>=1.0" "cmake>=3.27" ninja
       - name: Test release validation
         run: python -m pytest tests/packaging -q
-      - name: Expand packaging matrices
-        id: matrix
-        run: python .github/scripts/packaging_matrix.py
       - name: Check package, SDK, and tag versions
         run: python .github/scripts/check_release_version.py
 
@@ -53,7 +47,11 @@ jobs:
       CMAKE_BUILD_PARALLEL_LEVEL: ${{ matrix.plat.family == 'macos' && '2' || '4' }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.check_version.outputs.wheel_matrix) }}
+      matrix:
+        plat:
+          - {os: ubuntu-24.04, target: '', arch: x86_64, family: manylinux, build: 'cp3{11,12,13,14}-manylinux*'}
+          - {os: ubuntu-24.04, target: '', arch: x86_64, family: musllinux, build: 'cp3{11,12,13,14}-musllinux*'}
+          - {os: macos-15, target: '15.0', arch: arm64, family: macos, build: 'cp3{11,12,13,14}-macosx*'}
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -79,7 +77,7 @@ jobs:
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: _build/ccache
-          key: pyalps-ccache-${{ matrix.plat.family }}-${{ matrix.plat.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: pyalps-ccache-${{ matrix.plat.family }}-${{ matrix.plat.arch }}-${{ hashFiles('CMakeLists.txt', 'CMakePresets.json', 'cmake/**', 'src/**', 'third_party/**', 'tests/**', 'python/pyalps/**', '.github/dependencies.json', '.github/ci-matrix.json', '.github/scripts/build-boost.sh', '.github/scripts/prepare_dependencies.py', '.github/workflows/build_wheels.yml') }}
           restore-keys: pyalps-ccache-${{ matrix.plat.family }}-${{ matrix.plat.arch }}-
 
       - name: Build wheels
@@ -94,7 +92,7 @@ jobs:
           CIBW_BUILD: ${{ matrix.plat.build }}
           # cibuildwheel copies /project; mount the compiler cache explicitly
           # so Linux builds update the directory that Actions saves afterward.
-          CIBW_CONTAINER_ENGINE: 'docker; create_args: --volume "${{ github.workspace }}/_build/boost-install:/project/_build/boost-install" --volume "${{ github.workspace }}/_build/ccache:/project/_build/ccache" --volume "${{ github.workspace }}/_build/metrics:/project/_build/metrics"'
+          CIBW_CONTAINER_ENGINE: 'docker; create_args: --volume "${{ github.workspace }}/_build/boost-install:/project/_build/boost-install" --volume "${{ github.workspace }}/_build/ccache:/project/_build/ccache"'
           MACOSX_DEPLOYMENT_TARGET: ${{ matrix.plat.target }}
 
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
@@ -113,32 +111,20 @@ jobs:
           python -m pip install build 'scikit-build-core>=1.0' 'nanobind==2.15.0' 'cmake>=3.27' ninja
           archives=(_build/release-sdist/*.tar.gz)
           test "${#archives[@]}" -eq 1
-          python .github/scripts/build_metrics.py run --timeout 900 'Release sdist rebuild' \
+          python .github/scripts/run_with_timeout.py 900 \
             python .github/scripts/check_sdist.py "${archives[0]}" \
             --config-setting "cmake.define.HDF5_ROOT=$(brew --prefix hdf5)"
 
-      - name: Check whether compiler cache changed
-        id: cache-policy
-        if: always()
-        run: python .github/scripts/build_metrics.py cache-policy
+      - name: Show compiler cache statistics
+        if: ${{ always() && runner.os == 'macOS' }}
+        continue-on-error: true
+        run: ccache --show-stats
       - name: Save compiler cache
-        if: ${{ !cancelled() && steps.compiler-cache.outcome == 'success' && steps.cache-policy.outputs.changed == 'true' }}
+        if: ${{ !cancelled() && steps.compiler-cache.outcome == 'success' && steps.compiler-cache.outputs.cache-hit != 'true' }}
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: _build/ccache
           key: ${{ steps.compiler-cache.outputs.cache-primary-key }}
-
-      - name: Summarize build performance
-        if: always()
-        env:
-          CCACHE_RESTORED_KEY: ${{ steps.compiler-cache.outputs.cache-matched-key }}
-        run: python .github/scripts/build_metrics.py summary
-      - name: Retain build performance reports
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: wheel-performance-${{ matrix.plat.family }}
-          path: _build/metrics/**
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
@@ -196,7 +182,12 @@ jobs:
     timeout-minutes: 30
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.check_version.outputs.smoke_matrix) }}
+      matrix:
+        plat:
+          - {os: ubuntu-24.04, architecture: x64, artifact: cibw-wheels-manylinux}
+          - {os: macos-15, architecture: arm64, artifact: cibw-wheels-macos}
+          - {os: macos-26, architecture: arm64, artifact: cibw-wheels-macos}
+        python: ['3.11', '3.12', '3.13', '3.14']
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:

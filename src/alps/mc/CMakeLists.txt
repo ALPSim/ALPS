@@ -15,8 +15,3 @@ target_sources(alps_headers INTERFACE
     include/alps/ngs/api.hpp
     include/alps/progress_callback.hpp
     include/alps/stop_callback.hpp)
-
-alps_register_module(NAME mc HEADER_SET mc_headers
-  TARGETS alps
-  DEPENDS accumulators alea cli hdf5 params random utilities
-)

@@ -28,8 +28,3 @@ target_sources(alps_headers INTERFACE
     include/ietl/tmatrix.h
     include/ietl/traits.h
     include/ietl/vectorspace.h)
-
-alps_register_module(NAME ietl HEADER_SET ietl_headers
-  TARGETS alps
-  DEPENDS configuration
-)

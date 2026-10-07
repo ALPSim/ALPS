@@ -33,44 +33,6 @@
         "ALPS_BUILD_TESTING": "OFF"
       },
       "inherits": "default"
-    },
-    {
-      "name": "windows-x64",
-      "displayName": "Unofficial Windows x64 build (MSVC/vcpkg)",
-      "description": "Optional pinned vcpkg dependencies; set VCPKG_ROOT and activate MSVC. Generic presets use existing dependencies.",
-      "generator": "Ninja Multi-Config",
-      "architecture": {
-        "value": "x64",
-        "strategy": "external"
-      },
-      "cacheVariables": {
-        "CMAKE_C_COMPILER": "cl",
-        "CMAKE_CXX_COMPILER": "cl",
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-windows",
-        "VCPKG_MANIFEST_DIR": "${sourceDir}/cmake/vcpkg",
-        "CMAKE_BUILD_TYPE": null
-      },
-      "inherits": "default",
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
-      }
-    },
-    {
-      "name": "windows-arm64",
-      "displayName": "Unofficial Windows ARM64 build (MSVC/vcpkg)",
-      "description": "Optional pinned vcpkg dependencies with the ARM64 numerical overlay; set VCPKG_ROOT and activate ARM64 MSVC.",
-      "inherits": "windows-x64",
-      "architecture": {
-        "value": "ARM64",
-        "strategy": "external"
-      },
-      "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "arm64-windows",
-        "VCPKG_OVERLAY_PORTS": "${sourceDir}/cmake/vcpkg-arm64-overlay"
-      }
     }
   ],
   "buildPresets": [
@@ -88,16 +50,6 @@
       "targets": [
         "install"
       ]
-    },
-    {
-      "name": "windows-x64",
-      "configurePreset": "windows-x64",
-      "configuration": "Release"
-    },
-    {
-      "name": "windows-arm64",
-      "configurePreset": "windows-arm64",
-      "configuration": "Release"
     }
   ],
   "testPresets": [
@@ -110,18 +62,6 @@
       "execution": {
         "noTestsAction": "error"
       }
-    },
-    {
-      "name": "windows-x64",
-      "configurePreset": "windows-x64",
-      "configuration": "Release",
-      "inherits": "default"
-    },
-    {
-      "name": "windows-arm64",
-      "configurePreset": "windows-arm64",
-      "configuration": "Release",
-      "inherits": "default"
     }
   ]
 }

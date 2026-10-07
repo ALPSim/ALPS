@@ -48,10 +48,3 @@ target_sources(alps_hdf5 PUBLIC
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
-
-alps_register_module(NAME hdf5 HEADER_SET hdf5_headers
-  HEADER_TARGETS alps_hdf5
-  TARGETS alps alps_hdf5
-  DEPENDS configuration containers utilities
-  GENERATED_HEADERS alps/hdf5_export.h
-)

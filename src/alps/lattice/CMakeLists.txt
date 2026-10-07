@@ -39,8 +39,3 @@ target_sources(alps_headers INTERFACE
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
-
-alps_register_module(NAME lattice HEADER_SET lattice_headers
-  TARGETS alps
-  DEPENDS configuration containers expression legacy_parameters numerics osiris random utilities xml
-)

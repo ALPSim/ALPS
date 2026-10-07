@@ -49,7 +49,7 @@ jobs:
       - name: Test CI helpers
         run: |
           python -m pip install pytest
-          python -m pytest tests/ci tests/architecture -q --junitxml=ci-tests.xml
+          python -m pytest tests/ci -q --junitxml=ci-tests.xml
       - name: Expand source matrix
         id: matrix
         run: python .github/scripts/ci_matrix.py
@@ -126,17 +126,9 @@ jobs:
           if [[ -n "$COMPILER_PACKAGES" ]]; then
             brew install "$COMPILER_PACKAGES"
           fi
-      - name: Restore compiler cache
-        id: compiler-cache
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: _build/ccache
-          key: ccache-source-${{ matrix.id }}-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: ccache-source-${{ matrix.id }}-
-      - name: Identify Boost toolchain and reset compiler cache counters
+      - name: Identify Boost toolchain
         id: toolchain
         run: |
-          ccache --zero-stats
           {
             echo "$ImageVersion"
             "$CXX" --version
@@ -144,6 +136,15 @@ jobs:
           } > "$RUNNER_TEMP/boost-toolchain"
           hash=$(ccache --hash-file "$RUNNER_TEMP/boost-toolchain")
           echo "hash=$hash" >> "$GITHUB_OUTPUT"
+      - name: Restore compiler cache
+        id: compiler-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: _build/ccache
+          key: ccache-source-${{ matrix.id }}-${{ steps.toolchain.outputs.hash }}-${{ hashFiles('CMakeLists.txt', 'CMakePresets.json', 'cmake/**', 'src/**', 'third_party/**', 'tests/**', 'python/pyalps/**', '.github/ci-matrix.json', '.github/scripts/build-boost.sh', '.github/scripts/prepare_dependencies.py') }}
+          restore-keys: ccache-source-${{ matrix.id }}-
+      - name: Reset compiler cache counters
+        run: ccache --zero-stats
       - name: Restore pinned Boost build
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
@@ -152,7 +153,7 @@ jobs:
           key: boost-${{ matrix.os }}-${{ runner.arch }}-${{ matrix.cxx }}-${{ matrix.mpi }}-${{ matrix.boost_sha256 }}-${{ steps.toolchain.outputs.hash }}-${{ hashFiles('.github/scripts/build-boost.sh', '.github/scripts/prepare_dependencies.py') }}
       - name: Prepare pinned Boost
         timeout-minutes: 30
-        run: python .github/scripts/build_metrics.py run 'Dependency preparation' python .github/scripts/prepare_dependencies.py "$DEPENDENCY" _build/boost-install
+        run: python .github/scripts/prepare_dependencies.py "$DEPENDENCY" _build/boost-install
       - name: Configure SDK
         run: |
           extra_args=()
@@ -160,16 +161,16 @@ jobs:
             extra_args+=(-DALPS_ENABLE_OPENMP=ON)
           fi
           if [[ "$EXTENSIVE" == true ]]; then extra_args+=(-DALPS_BUILD_EXTENSIVE_TESTS=ON); fi
-          python .github/scripts/build_metrics.py run 'SDK configure' cmake -S . -B _build/ci -G Ninja \
+          cmake -S . -B _build/ci -G Ninja \
             -DCMAKE_BUILD_TYPE=Release -DALPS_BUILD_TESTING=ON \
             "-DALPS_ENABLE_MPI=$ALPS_BOOST_MPI" \
             "-DCMAKE_PREFIX_PATH=$PWD/_build/boost-install" \
             "-DCMAKE_INSTALL_PREFIX=$PWD/_build/ci/install" \
             "-DCMAKE_CXX_STANDARD=$CXX_STANDARD" "${extra_args[@]}"
       - name: Build SDK
-        run: python .github/scripts/build_metrics.py run 'SDK build' cmake --build _build/ci
+        run: cmake --build _build/ci
       - name: Test SDK
-        run: python .github/scripts/build_metrics.py run 'SDK tests' ctest --test-dir _build/ci --output-on-failure --output-junit ctest.xml --no-tests=error
+        run: ctest --test-dir _build/ci --output-on-failure --output-junit ctest.xml --no-tests=error
       - name: Test bindings against the installed SDK
         env:
           ALPS_DIR: ${{ github.workspace }}/_build/ci/install/share/alps
@@ -180,9 +181,9 @@ jobs:
           cmake --install _build/ci
           python -m pip install build 'nanobind==2.15.0' 'scikit-build-core>=1.0' numpy scipy matplotlib h5py
           if [[ "$RUNNER_OS" == Linux ]]; then python -m pip install patchelf; fi
-          python .github/scripts/build_metrics.py run 'Editable bindings' python -m pip install --no-build-isolation --no-deps -e python/pyalps \
+          python -m pip install --no-build-isolation --no-deps -e python/pyalps \
             --config-settings "build-dir=$PWD/_build/ci-python"
-          python .github/scripts/build_metrics.py run --timeout 900 'Bindings against installed SDK' \
+          python .github/scripts/run_with_timeout.py 900 \
             python -m pytest tests/pyalps -q --junitxml=_build/ci/python.xml
       - name: Test installed XML tools after relocation
         if: matrix.extras
@@ -200,7 +201,7 @@ jobs:
             cmake -S "$source" -B "$output" -G Ninja \
               "-DALPS_DIR=$PWD/_build/ci/install/share/alps" \
               "-DCMAKE_PREFIX_PATH=$PWD/_build/boost-install"
-            python .github/scripts/build_metrics.py run "Tutorial ${source#"$tutorials/"}" cmake --build "$output"
+            cmake --build "$output"
             ctest --test-dir "$output" --output-on-failure --output-junit ctest.xml --no-tests=error
           done
           find "$tutorials" -mindepth 1 -path "$tutorials/00-examples" -prune -o -name CMakeLists.txt -print0 | while IFS= read -r -d '' file; do
@@ -211,24 +212,19 @@ jobs:
             cmake -S "$source" -B "$output" -G Ninja \
               "-DALPS_DIR=$PWD/_build/ci/install/share/alps" \
               "-DCMAKE_PREFIX_PATH=$PWD/_build/boost-install"
-            python .github/scripts/build_metrics.py run "Tutorial ${source#"$tutorials/"}" cmake --build "$output"
+            cmake --build "$output"
             ctest --test-dir "$output" --output-on-failure --output-junit ctest.xml
           done
-      - name: Check whether compiler cache changed
-        id: cache-policy
+      - name: Show compiler cache statistics
         if: always()
-        run: python .github/scripts/build_metrics.py cache-policy
+        continue-on-error: true
+        run: ccache --show-stats
       - name: Save compiler cache
-        if: ${{ !cancelled() && steps.compiler-cache.outcome == 'success' && steps.cache-policy.outputs.changed == 'true' }}
+        if: ${{ !cancelled() && steps.compiler-cache.outcome == 'success' && steps.compiler-cache.outputs.cache-hit != 'true' }}
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: _build/ccache
           key: ${{ steps.compiler-cache.outputs.cache-primary-key }}
-      - name: Summarize build performance
-        if: always()
-        env:
-          CCACHE_RESTORED_KEY: ${{ steps.compiler-cache.outputs.cache-matched-key }}
-        run: python .github/scripts/build_metrics.py summary
       - name: Summarize test results
         if: always()
         run: python .github/scripts/junit_summary.py '_build/**/ctest.xml' _build/ci/cli.xml _build/ci/python.xml
@@ -243,7 +239,6 @@ jobs:
             _build/ci/python.xml
             _build/**/Testing/Temporary/**
             _build/**/CMakeFiles/CMakeConfigureLog.yaml
-            _build/metrics/**
 
   developer-setup:
     name: Contributor commands / ${{ matrix.os }}

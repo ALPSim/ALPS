@@ -33,7 +33,6 @@ git remote add upstream https://github.com/ALPSim/ALPS.git
 
 - CMake ≥ 3.27, Ninja for the bundled presets, and C++17/C11 compilers such as GCC or Clang.
 - Boost ≥ 1.76 with its compiled libraries and CMake packages, HDF5 ≥ 1.10.5 (C library), and LP64 BLAS/LAPACK. Use serial HDF5 for the default MPI-disabled build; see [numerical libraries](#numerical-libraries).
-- For native tests (`ALPS_BUILD_TESTING=ON`): Python ≥ 3.10 for the CTest module-architecture audit; this does not require building the Python bindings.
 - For Python development: GIL-enabled CPython ≥ 3.11 in a writable Python environment. Pip installs NumPy, SciPy and Matplotlib with pyalps. Free-threaded Python is unsupported.
 - Optional: MPI and Boost.MPI for `ALPS_ENABLE_MPI=ON`; an OpenMP runtime for `ALPS_ENABLE_OPENMP=ON`; a Fortran compiler for the Fortran examples.
 
@@ -57,7 +56,7 @@ These are optional provider examples. For another non-system installation, set t
 
 ### Windows users
 
-The supported workflow for Windows users is a Linux distribution inside WSL, following the Linux instructions here. Native Windows is unsupported; its [manual CI workflow](.github/workflows/windows.yml) records experimental build commands and does not gate releases.
+On Windows, use a Linux distribution inside WSL and follow the Linux instructions here.
 
 ### Install CMake and Ninja
 
@@ -72,7 +71,7 @@ python -m pip install "cmake>=3.27" ninja
 
 Skip the first two lines if already using a suitable environment. On Debian/Ubuntu, creating a venv may first require `sudo apt-get install python3-venv`. Activate the same environment in each new terminal. Both CMake and CTest must be at least 3.27; use `command -v cmake` to check which installation your shell finds.
 
-C++ library/application builds with `ALPS_BUILD_TESTING=OFF` do not require Python: system packages or [official CMake binaries](https://cmake.org/download/) and Ninja also work. Native tests require the interpreter listed above. A generator other than Ninja can be selected with a plain CMake invocation instead of a preset.
+Application CLI tests require a Python ≥ 3.10 interpreter. CMake and Ninja can also come from system packages or [official CMake binaries](https://cmake.org/download/). A generator other than Ninja can be selected with a plain CMake invocation instead of a preset.
 
 ### Build
 
@@ -173,43 +172,15 @@ For development questions, use [Discord](https://discord.gg/JRNWnnva9g); reprodu
 
 ### Repository layout
 
-| Location | Contents |
-| --- | --- |
-| `src/alps/` | C++ component coordination; see the [source ownership map](src/alps/README.md) |
-| `src/alps/{utilities,hdf5,params,osiris,xml,cli}/` | Independently linkable components with public headers, sources and local tests |
-| `src/alps/{containers,numerics,numeric_io}/` | Separate interface targets for container storage, numerical algorithms and numerical HDF5 adapters |
-| `src/alps/{ietl,graph}/` | Eigensolver and graph headers and tests contributing to the aggregate interface |
-| `src/alps/plotting/` | `<alps/plot.h>` output helpers combining XML and older parameters; contributes headers, not a separate library |
-| `src/alps/{legacy_parameters,expression,lattice,model,random,alea,accumulators,mc,scheduler,parapack}/` | Semantic source modules contributing to `ALPS::alps` and its compile interface |
-| `src/alps/solvers/` | Public callable solver declarations shared by MaxEnt and CT-QMC |
-| `src/alps/fortran/` | Public headers and implementation of the `ALPS::fortran` bridge |
-| `src/apps/`, `src/tools/` | Simulation applications, shared solver implementations and [CLI tools grouped by responsibility](src/tools/README.md) |
-| `python/pyalps/` | Python sources, bindings, packaging and extension example |
-| `src/alps/resources/` | Shared XML definitions and stylesheets |
-| `tutorials/` | [Ordered tutorials and standalone library examples](tutorials/README.md) |
-| `tests/` | Cross-module integration, Python, SDK, CLI, build-helper and reconciliation tests |
-| `third_party/` | [Numeric Bindings headers](third_party/boost_numeric_bindings/README.md) and [XDR serialization](third_party/xdr/README.md) |
-| `cmake/`, `.github/` | Build configuration, `cmake/config/` header templates, shared version file, architecture checks, CI and release helpers |
+- `src/alps/`: C++ components, public headers and module-local tests; see the [module map and library boundaries](src/alps/README.md).
+- `src/apps/` and `src/tools/`: simulation applications, shared solver implementations and [command-line tools](src/tools/README.md).
+- `python/pyalps/`: Python sources, bindings, packaging and extension example.
+- `tutorials/`: [ordered tutorials and standalone library examples](tutorials/README.md).
+- `tests/`: cross-module integration, Python, SDK, CLI, build-helper and packaging tests.
+- `third_party/`: [Numeric Bindings headers](third_party/boost_numeric_bindings/README.md) and [XDR serialization](third_party/xdr/README.md).
+- `cmake/` and `.github/`: shared build configuration, generated-header templates, version file, CI and release helpers.
 
-Sources use `src/alps/<module>/{include,src,tests}` where applicable; the broad `common/` and `runtime/` source groups are removed. First-party public headers are listed explicitly in each owner's CMake `HEADERS` file set; add new exported headers there. Public `<alps/...>` and `<ietl/...>` include names are preserved independently of physical ownership. Generated headers live in `<build-dir>/generated/include/alps/`, with templates in `cmake/config/`.
-
-`ALPS::configuration`, `ALPS::containers`, `ALPS::numerics`, `ALPS::numeric_io` and `ALPS::solver_headers` are exported interface targets with their own header sets and declared dependencies. Foundation targets do not inherit the aggregate `ALPS::headers` interface. Numerical headers no longer depend on HDF5 or XML; archive adapters belong to `numeric_io`. The aggregate remains available for simulation modules, including the separate `expression`/`legacy_parameters` include cycle. Physical source ownership does not make every module an independent library.
-
-MaxEnt uses `src/apps/maxent/{src,cli,tests}`; `<alps/solvers.hpp>` lives in `src/alps/solvers/include/alps/` and is exported through `ALPS::solver_headers` because it also declares CT-QMC entry points. Keep subsystem tests beside their owner and cross-module compatibility tests in `tests/integration/`. Existing CMake options and test names are preserved; moving inactive fixtures does not enable them.
-
-`ALPS::utilities`, `ALPS::hdf5`, `ALPS::params`, `ALPS::osiris`, `ALPS::xml` and `ALPS::cli` are independently linkable libraries; `ALPS::alps` links them transitively and owns the params text/XML and older `Parameters` adapters in `src/alps/params/adapters/`. Their conversion headers live under `adapters/include/`, with unchanged public include names exposed through the aggregate interface. XML parsing/output belongs to `ALPS::xml`; file-to-parameter conversion still belongs to those adapters. `ALPS::cli` owns the unchanged `mcoptions` and `parseargs` implementations under their existing public header names.
-
-`ALPS::maxent` links the foundations, Osiris and numerical providers without `ALPS::alps`; its executable adds `ALPS::cli` for argument parsing and reads HDF5 params directly. These extractions preserve scientific algorithms and existing input grammars. Rebuild downstream binaries after the library splits. This cleanup prepares MaxEnt, HDF5 and params for ALPSCore reconciliation without importing Core implementations. See the [module boundaries and next steps](src/alps/README.md).
-
-CMake generates `alps-module-manifest.json` from module declarations and actual header/source lists. After configuration, check ownership and declared include dependencies with:
-
-```sh
-python .github/scripts/check_module_architecture.py \
-  --manifest _build/default/alps-module-manifest.json \
-  --write-report _build/default/alps-module-report.json
-```
-
-Update the owning module's CMake declarations when adding production files or dependencies. The checker reports existing cycles and nonliteral includes for review; it does not prove independent linkability or replace builds and scientific tests.
+Add exported headers to the owning target's CMake `HEADERS` file set. Public `<alps/...>` and `<ietl/...>` include names are independent of the physical source directory. Keep subsystem tests beside their owner and cross-module tests under `tests/`.
 
 ### Build options
 
@@ -251,7 +222,7 @@ find_package(ALPS CONFIG REQUIRED COMPONENTS numeric_io)
 target_link_libraries(my_simulation PRIVATE ALPS::numeric_io)
 ```
 
-`<alps/numeric/matrix.hpp>` no longer includes its HDF5 adapter. Diagonal/deprecated matrix/vector HDF5 `save`/`load` members and matrix XML output methods, unused in this repository, were removed without compatibility adapters. These API changes are separate from the byte-preserving header moves, and no scientific algorithms were changed or imported from ALPSCore. See the [migration notes](CHANGELOG.md#removed-and-migration).
+`<alps/numeric/matrix.hpp>` no longer includes its HDF5 adapter automatically. See the [migration notes](CHANGELOG.md#removed-and-migration) for this include requirement and the removal of matrix XML output methods in 3.0.
 
 An SDK built with applications also exports executable targets such as `ALPS::spinmc` and the solver libraries `ALPS::maxent`, `ALPS::cthyb` and `ALPS::ctint`. Require them with `find_package(ALPS CONFIG REQUIRED COMPONENTS applications solvers)`. The solver API is in `<alps/solvers.hpp>`. Python extensions that share ALPS objects with pyalps use its separate [downstream CMake package](python/pyalps/README.md#downstream-native-extensions).
 
@@ -275,7 +246,7 @@ Plot/extraction formats are `text`, `html`, `gnuplot`, `matplotlib` and `grace`;
 
 Pull requests report aggregate `Source CI` and `Packaging CI` checks. Every pull request targeting master, master push, and release tag runs the complete source and packaging matrices. The source matrix preserves the upstream compiler, Boost, macOS, and C++ standard sweeps; only Python 3.9/3.10 rows are removed because the bindings now require Python 3.11+. Installed-SDK and contributor checks validate the new build layout. Broader changes to CI tiers and path-based selection are deferred to [the separate CI coverage proposal](https://github.com/ALPSim/ALPS/issues/164). The [source workflow](.github/workflows/build.yml), [coverage matrix](.github/ci-matrix.json) and [packaging workflow](.github/workflows/build_wheels.yml) are the authoritative lists of tested configurations.
 
-Coverage includes Linux/macOS source builds, CMake 3.27, MPI/OpenMP, installed-SDK consumers, direct CMake/editable-pip contributor workflows and repaired wheels tested on fresh runners. Dependency providers in CI are runner configuration, not requirements to use that package manager locally. Wheel builds are per CPython interpreter; local editable tests do not replace wheel and source-distribution validation.
+Coverage includes Linux/macOS source builds, CMake 3.27, MPI/OpenMP, installed-SDK consumers, direct CMake/editable-pip contributor workflows and repaired wheels tested on fresh runners. Dependency providers in CI are runner configuration, not requirements to use that package manager locally. Packaging CI tests the CPython 3.11 and Python 3.12+ abi3 wheels and the source distribution; local editable tests do not replace that validation.
 
 ## Preparing a release
 

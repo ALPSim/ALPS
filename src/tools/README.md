@@ -17,10 +17,7 @@ group; executable names and installation components remain stable.
 | `launchers/` | None | Historical `alpspython` shell and Windows templates |
 | `installer/` | None | Historical macOS postflight template |
 
-All eleven C++ commands install in the `tools` component; `alps-xml` installs in
-the `xml` component. `pconfig` links `ALPS::utilities`; the other C++ commands
-continue to use `ALPS::alps`. Source ownership is registered for all C++ groups,
-including inactive files, without enabling additional programs or dependencies.
+C++ commands install in the `tools` component; `alps-xml` installs in the `xml` component. `pconfig` links `ALPS::utilities`; the other C++ commands use `ALPS::alps`.
 
 The parameter tools retain the older `alps::Parameters` grammar, job generation
 and seeding behavior. The result archive group is separate from the HDF5

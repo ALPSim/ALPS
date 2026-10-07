@@ -80,7 +80,7 @@ build = ["cp311-*", "cp312-*", "cp313-*", "cp314-*"]
 manylinux-x86_64-image = "manylinux_2_28"
 test-requires = ["pytest", "ninja>=1.12", "nanobind==2.15.0", "scikit-build-core>=1.0"]
 # An external watchdog can stop native code even while it holds Python's GIL.
-test-command = 'python {project}/.github/scripts/build_metrics.py run --timeout 900 "Wheel and downstream tests" python -m pytest -v -o faulthandler_timeout=300 "{project}/tests/pyalps" "{project}/tests/cmake"'
+test-command = 'python {project}/.github/scripts/run_with_timeout.py 900 python -m pytest -v -o faulthandler_timeout=300 "{project}/tests/pyalps" "{project}/tests/cmake"'
 
 # The ALPS C++ SDK is built once per platform in before-all via the distribution
 # CMake preset; ALPS_DIR points every wheel build at that install. The ccache
@@ -88,7 +88,6 @@ test-command = 'python {project}/.github/scripts/build_metrics.py run --timeout 
 [tool.cibuildwheel.environment]
 PIP_ONLY_BINARY = ":all:"
 ALPS_DIR = "$(pwd)/_build/distribution/install/share/alps"
-ALPS_CI_METRICS = "$(pwd)/_build/metrics"
 CMAKE_PREFIX_PATH = "$(pwd)/_build/boost-install"
 CCACHE_DIR = "$(pwd)/_build/ccache"
 CCACHE_NAMESPACE = "pyalps-wheel"
@@ -106,8 +105,9 @@ before-all = [
   "cd {project}",
   "ccache --zero-stats",
   "if command -v dnf >/dev/null 2>&1; then ALPS_BOOST_MPI=OFF python .github/scripts/prepare_dependencies.py boost-1.91.0 _build/boost-install; fi",
-  "python .github/scripts/build_metrics.py run 'SDK configure' cmake --preset distribution",
-  "python .github/scripts/build_metrics.py run 'SDK build and install' cmake --build --preset distribution -j4",
+  "cmake --preset distribution",
+  "cmake --build --preset distribution -j4",
+  "ccache --show-stats || true",
 ]
 repair-wheel-command = [
   "python -m pip install wheel",
@@ -124,8 +124,9 @@ before-all = [
   "cd {project}",
   "ccache --zero-stats",
   "ALPS_BOOST_MPI=OFF CXX=clang++ python .github/scripts/prepare_dependencies.py boost-1.91.0 _build/boost-install",
-  "python .github/scripts/build_metrics.py run 'SDK configure' cmake --preset distribution -DHDF5_ROOT=$(brew --prefix hdf5)",
-  "python .github/scripts/build_metrics.py run 'SDK build and install' cmake --build --preset distribution -j2",
+  "cmake --preset distribution -DHDF5_ROOT=$(brew --prefix hdf5)",
+  "cmake --build --preset distribution -j2",
+  "ccache --show-stats || true",
 ]
 repair-wheel-command = [
   "python -m pip install wheel",

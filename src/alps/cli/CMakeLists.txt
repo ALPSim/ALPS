@@ -26,9 +26,3 @@ target_sources(alps_cli PUBLIC
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
-
-alps_register_module(NAME cli HEADER_SET cli_headers
-  HEADER_TARGETS alps_cli
-  TARGETS alps_cli
-  DEPENDS utilities
-  GENERATED_HEADERS alps/cli_export.h)

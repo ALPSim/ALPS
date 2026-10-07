@@ -19,8 +19,3 @@ target_sources(alps_headers INTERFACE
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
-
-alps_register_module(NAME legacy_parameters HEADER_SET legacy_parameters_headers
-  TARGETS alps
-  DEPENDS configuration expression hdf5 osiris utilities xml
-)

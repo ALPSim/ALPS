@@ -15,6 +15,7 @@
 #define ALPS_DIAGONAL_MATRIX_HPP
 
 #include <vector>
+#include <cstddef>
 #include <algorithm>
 #include <functional>
 #include <cassert>
@@ -22,6 +23,7 @@
 #include <boost/lambda/lambda.hpp>
 #include <cmath>
 #include <alps/numeric/conj.hpp>
+#include <alps/numeric/real.hpp>
 #include <alps/numeric/matrix/matrix_interface.hpp>
 
 namespace alps {
@@ -157,8 +159,19 @@ namespace alps {
             assert(r == c);
             data_.resize(r, v);
         }
-        
-        
+
+        template <class Archive>
+        void save(Archive & ar) const
+        {
+            ar[""] << data_;
+        }
+
+        template <class Archive>
+        void load(Archive & ar)
+        {
+            ar[""] >> data_;
+        }
+
         template <class Archive>
         void serialize(Archive & ar, unsigned int version)
         {

@@ -106,9 +106,3 @@ target_sources(alps_numerics INTERFACE
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
-
-alps_register_module(NAME numerics HEADER_SET numerics_headers
-  HEADER_TARGETS alps_numerics
-  TARGETS alps
-  DEPENDS configuration containers utilities
-)

@@ -56,10 +56,3 @@ target_sources(alps_headers INTERFACE
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
-
-alps_register_module(NAME scheduler HEADER_SET scheduler_headers
-  TARGETS alps
-  DEPENDS numeric_io alea configuration expression hdf5 lattice legacy_parameters mc model numerics osiris params random utilities xml
-  PRIVATE_FILES
-    src/ngs/ulfm.cpp
-)

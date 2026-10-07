@@ -1,8 +1,7 @@
 """Prepare pinned CI dependencies using official sources and reusable caches.
 
-CI builds selected Boost releases when the OS package is too old;
-Windows uses vcpkg's binary cache and builds any
-missing packages. No project-owned GitHub release assets are required.
+CI builds selected Boost releases when the OS package is too old.
+No project-owned GitHub release assets are required.
 """
 from __future__ import annotations
 
@@ -12,7 +11,6 @@ import json
 import os
 from pathlib import Path
 import re
-import shutil
 import subprocess
 import tarfile
 import tempfile
@@ -50,40 +48,15 @@ def prepare_boost(version: str, destination: Path):
     stamp.write_text(fingerprint)
 
 
-def prepare_windows(architecture: str, destination: Path, *, environment=None):
-    if architecture not in {'x64', 'arm64'}:
-        raise ValueError(f'Unsupported architecture: {architecture}')
-    baseline = json.loads((ROOT / 'cmake/vcpkg/vcpkg.json').read_text())['builtin-baseline']
-    if not re.fullmatch('[a-f0-9]{40}', baseline):
-        raise ValueError('Invalid vcpkg baseline')
-    tool = destination / 'vcpkg.exe'
-    if not (destination / '.git').exists():
-        if destination.exists() and any(destination.iterdir()):
-            raise ValueError(f'Refusing to replace an existing directory: {destination}')
-        subprocess.run(['git', 'clone', '--filter=blob:none', '--no-checkout',
-                        'https://github.com/microsoft/vcpkg.git', str(destination)], check=True, env=environment)
-    subprocess.run(['git', '-C', str(destination), 'checkout', '--detach', baseline], check=True, env=environment)
-    subprocess.run([str(destination / 'bootstrap-vcpkg.bat'), '-disableMetrics'], check=True, env=environment)
-    subprocess.run([str(tool), 'install', f'--triplet={architecture}-windows',
-                    f'--x-manifest-root={ROOT / "cmake/vcpkg"}', f'--x-install-root={destination / "installed"}',
-                    '--x-feature=tests',
-                    *([f'--overlay-ports={ROOT / "cmake/vcpkg-arm64-overlay"}'] if architecture == 'arm64' else [])],
-                   check=True, env=environment)
-    return destination
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('package')
     parser.add_argument('destination', type=Path)
     args = parser.parse_args()
-    if args.package.startswith('windows-'):
-        prepare_windows(args.package.removeprefix('windows-'), args.destination.resolve())
-    else:
-        match = re.fullmatch(r'boost-(\d+\.\d+\.\d+)(?:-[a-z0-9-]+)?', args.package)
-        if not match:
-            parser.error('Expected boost-VERSION or windows-{x64,arm64}')
-        prepare_boost(match[1], args.destination.resolve())
+    match = re.fullmatch(r'boost-(\d+\.\d+\.\d+)(?:-[a-z0-9-]+)?', args.package)
+    if not match:
+        parser.error('Expected boost-VERSION')
+    prepare_boost(match[1], args.destination.resolve())
 
 
 if __name__ == '__main__':

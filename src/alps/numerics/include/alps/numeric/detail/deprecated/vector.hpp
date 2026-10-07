@@ -19,6 +19,7 @@
 #include "./blasheader.hpp"
 #include <iostream>
 #include <vector>
+#include <cstddef>
 #include <algorithm>
 #include <cassert>
 
@@ -195,6 +196,19 @@ namespace blas{
           resize(size_+1);
           std::vector<double>::iterator it = values_.begin();
           values_.insert(it+i,value);
+      }
+
+      template <class Archive>
+      void save(Archive & ar) const
+      {
+          ar.write("", values_.data(), std::vector<std::size_t>(1, size_));
+      }
+
+      template <class Archive>
+      void load(Archive & ar)
+      {
+          resize(ar.extent("")[0]);
+          ar.read("", values_.data(), std::vector<std::size_t>(1, size_));
       }
 
     private:

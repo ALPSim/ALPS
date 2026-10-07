@@ -8,6 +8,3 @@ target_sources(alps_numeric_io INTERFACE
   BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
   FILES include/alps/hdf5/matrix.hpp
         include/alps/hdf5/numeric_vector.hpp)
-alps_register_module(NAME numeric_io HEADER_SET numeric_io_headers
-  HEADER_TARGETS alps_numeric_io
-  DEPENDS numerics hdf5 utilities)

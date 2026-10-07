@@ -112,10 +112,3 @@ target_sources(alps_utilities PUBLIC
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
-
-alps_register_module(NAME utilities HEADER_SET utilities_headers
-  HEADER_TARGETS alps_utilities
-  TARGETS alps alps_utilities
-  DEPENDS configuration containers
-  GENERATED_HEADERS alps/utilities_export.h
-)

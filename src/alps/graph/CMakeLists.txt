@@ -22,9 +22,3 @@ target_sources(alps_headers INTERFACE
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
-
-alps_register_module(NAME graph HEADER_SET graph_headers
-  TARGETS alps
-  DEPENDS lattice numerics utilities
-  DEBT_FILE architecture-debt.json
-)

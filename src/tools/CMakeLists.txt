@@ -25,7 +25,3 @@ add_subdirectory(scheduler)
 add_subdirectory(parapack)
 add_subdirectory(diagnostics)
 add_subdirectory(xml)
-
-# Ownership inventory only: these historical programs remain unbuilt.
-add_subdirectory(result_archive)
-add_subdirectory(alea)

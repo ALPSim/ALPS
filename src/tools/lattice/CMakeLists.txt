@@ -7,6 +7,3 @@ install(TARGETS lattice2xml printgraph
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT tools)
 
 # pltgraph.py and the historical local fixtures remain source-only.
-alps_register_module(NAME tools_lattice
-  TARGETS lattice2xml printgraph
-  DEPENDS lattice xml)

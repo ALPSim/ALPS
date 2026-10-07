@@ -25,6 +25,7 @@
 #include <iostream>
 #include <sys/types.h> //on osx for uint
 #include <vector>
+#include <cstddef>
 #include <numeric>
 
 
@@ -516,6 +517,19 @@ namespace blas{
             for(int i=0;i<size_;++i){
                 dscal_(&size_, &diagonal_matrix(i), &values_[i], &size_);
             }
+        }
+
+        template <class Archive>
+        void save(Archive & ar) const
+        {
+            ar.write("", values_.data(), std::vector<std::size_t>(2, size_));
+        }
+
+        template <class Archive>
+        void load(Archive & ar)
+        {
+            resize(ar.extent("")[0]);
+            ar.read("", values_.data(), std::vector<std::size_t>(2, size_));
         }
 
     private:

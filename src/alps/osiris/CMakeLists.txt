@@ -66,17 +66,3 @@ target_sources(alps_osiris PUBLIC
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
-
-alps_register_module(NAME osiris HEADER_SET osiris_headers
-  HEADER_TARGETS alps_osiris
-  TARGETS alps alps_osiris
-  DEPENDS configuration
-  PRIVATE_FILES
-    src/osiris/xdrcore.C
-  EXTRA_FILES
-    "${PROJECT_SOURCE_DIR}/third_party/xdr/src/xdr.c"
-    "${PROJECT_SOURCE_DIR}/third_party/xdr/src/xdr_array.c"
-    "${PROJECT_SOURCE_DIR}/third_party/xdr/src/xdr_float.c"
-    "${PROJECT_SOURCE_DIR}/third_party/xdr/src/xdr_stdio.c"
-  GENERATED_HEADERS alps/osiris_export.h
-)

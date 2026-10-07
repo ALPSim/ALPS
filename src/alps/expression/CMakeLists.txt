@@ -21,8 +21,3 @@ target_sources(alps_headers INTERFACE
     include/alps/expression/symbol.h
     include/alps/expression/term.h
     include/alps/expression/traits.h)
-
-alps_register_module(NAME expression HEADER_SET expression_headers
-  TARGETS alps
-  DEPENDS configuration legacy_parameters numerics random utilities xml
-)

@@ -107,9 +107,6 @@ target_sources(alps_configuration INTERFACE
 
 # Filesystem ownership follows scientific responsibilities. Some modules still
 # contribute to libalps until their dependency cycles have been disentangled.
-include("${PROJECT_SOURCE_DIR}/cmake/ALPSModules.cmake")
-alps_register_module(NAME configuration ROOT "${PROJECT_SOURCE_DIR}/cmake/config"
-  GENERATED_HEADERS alps/config.h alps/version.h alps/export.h)
 foreach(module IN ITEMS containers utilities cli numerics ietl solvers xml plotting
                         legacy_parameters expression graph lattice model random
                         osiris hdf5 numeric_io params alea accumulators mc scheduler parapack fortran)

@@ -49,13 +49,3 @@ target_sources(alps_headers INTERFACE
     include/alps/ngs/accumulator/wrappers.hpp
     include/alps/ngs/mpi.hpp
     include/alps/ngs/result.hpp)
-
-alps_register_module(NAME accumulators HEADER_SET accumulators_headers
-  TARGETS alps
-  DEPENDS alea containers hdf5 numerics utilities
-  DEBT_FILE architecture-debt.json
-  PRIVATE_FILES
-    src/ngs/accumulator/accumulator.cpp
-    src/ngs/accumulator/deprecated/alea/accumulator_set.cpp
-    src/ngs/accumulator/deprecated/alea/result_set.cpp
-)

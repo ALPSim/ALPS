@@ -54,8 +54,3 @@ target_sources(alps_headers INTERFACE
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
-
-alps_register_module(NAME alea HEADER_SET alea_headers
-  TARGETS alps
-  DEPENDS configuration containers hdf5 numerics osiris utilities xml
-)

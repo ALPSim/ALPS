@@ -46,8 +46,3 @@ target_sources(alps_headers INTERFACE
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
-
-alps_register_module(NAME random HEADER_SET random_headers
-  TARGETS alps
-  DEPENDS configuration hdf5 utilities
-)

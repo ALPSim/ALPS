@@ -41,10 +41,3 @@ add_subdirectory(adapters)
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
-
-alps_register_module(NAME params HEADER_SET params_headers
-  HEADER_TARGETS alps_params alps_headers
-  TARGETS alps alps_params
-  DEPENDS configuration hdf5 legacy_parameters numerics utilities
-  GENERATED_HEADERS alps/params_export.h
-)

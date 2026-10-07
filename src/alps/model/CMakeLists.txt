@@ -38,8 +38,3 @@ target_sources(alps_headers INTERFACE
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)
 endif()
-
-alps_register_module(NAME model HEADER_SET model_headers
-  TARGETS alps
-  DEPENDS configuration containers expression lattice legacy_parameters numerics utilities xml
-)

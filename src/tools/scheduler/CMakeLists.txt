@@ -5,7 +5,3 @@ endforeach()
 install(TARGETS convert2xml compactrun snap2vtk
   RUNTIME_DEPENDENCY_SET alps_runtime
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT tools)
-
-alps_register_module(NAME tools_scheduler
-  TARGETS convert2xml compactrun snap2vtk
-  DEPENDS osiris scheduler utilities xml)

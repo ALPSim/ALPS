@@ -7,6 +7,3 @@ if(UNIX)
 endif()
 
 # txt2archive and the historical shell wrappers remain unbuilt/uninstalled.
-alps_register_module(NAME tools_xml
-  EXTRA_FILES txt2archive.C
-  DEPENDS xml)

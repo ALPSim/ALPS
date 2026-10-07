@@ -8,8 +8,3 @@ target_sources(alps_solver_headers INTERFACE
   BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
   FILES
     include/alps/solvers.hpp)
-
-alps_register_module(NAME solvers HEADER_SET solvers_headers
-  HEADER_TARGETS alps_solver_headers
-  TARGETS alps
-)

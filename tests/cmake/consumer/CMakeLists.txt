@@ -174,13 +174,3 @@ if(NOT ALPS_SOURCE)
     params_contract osiris_contract xml_contract cli_contract parameter_adapters_contract PROPERTIES ENVIRONMENT_MODIFICATION
     "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
 endif()
-
-if(ALPS_SOURCE)
-  set(component_includes "")
-  foreach(component IN ITEMS utilities hdf5 params osiris xml cli numeric numeric_io)
-    string(APPEND component_includes
-      "${component}=$<JOIN:$<TARGET_PROPERTY:${component}_contract,INCLUDE_DIRECTORIES>,|>\n")
-  endforeach()
-  file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/component-includes-$<CONFIG>.txt"
-    CONTENT "${component_includes}")
-endif()
