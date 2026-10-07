@@ -57,6 +57,14 @@ def test_gnuplot_plot_line():
     assert '1.0\t3.0' in gnuplot
 
 
+def test_grace_empty_dataset():
+    # An empty dataset must not make the next one reuse its set number.
+    grace = makeGracePlot([dataset([], []), dataset([1.0], [3.0])])
+    targets = [l for l in grace.splitlines() if l.startswith('@target')]
+    assert targets == ['@target G0.S0', '@target G0.S1']
+    assert data_lines(grace) == ['1.0\t3.0']
+
+
 def test_mismatched_lengths():
     # x and y of different lengths must raise instead of failing midway or dropping data.
     for x, y in [([1.0, 2.0, 3.0], [1.0, 2.0]), ([1.0, 2.0], [1.0, 2.0, 3.0]), ([1.0], [])]:
@@ -74,4 +82,5 @@ if __name__ == '__main__':
     test_grace_x_errors()
     test_gnuplot_errors_per_dataset()
     test_gnuplot_plot_line()
+    test_grace_empty_dataset()
     test_mismatched_lengths()

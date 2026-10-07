@@ -249,8 +249,9 @@ def makeGracePlot(data,title=None,xaxis=None,yaxis=None,legend=None):
                     for i in range(len(q.x)):
                         output += str(q.x[i].mean) + '\t' + str(q.y[i].mean) + '\t' + str(q.x[i].error) + '\t' + str(q.y[i].error) + '\n'
                 output += '&\n'
-                num+=1
-                     
+            # Count empty datasets too, so the next one gets its own set number.
+            num+=1
+
         return output
 
 def convert_to_grace(desc):
