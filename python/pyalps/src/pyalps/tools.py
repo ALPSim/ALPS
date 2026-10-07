@@ -20,6 +20,7 @@ import sys
 import glob
 from . import math
 import numpy as np
+import scipy.special
 import scipy.stats
 import copy
 
@@ -521,32 +522,91 @@ def getMeasurements(outfiles_, observable=None, includeLog=False):
   return measurements;
 
 def checkSteadyState(sets=None, outfile=None, observable=None, confidenceInterval=0.6827, includeLog=False):
+  """Check whether the fitted linear slope is compatible with zero.
+
+  ``confidenceInterval`` is a central normal confidence level strictly
+  between zero and one: the default 0.6827 gives approximately one sigma.
+  Higher levels widen the acceptance region, making a no-drift result
+  easier to obtain, not stronger evidence of equilibration.
+
+  The legacy statistic divides the least-squares slope by
+  ``std(series, ddof=1) * sqrt(12 / (N * (N**2 - 1)))``. This is an
+  independent-sample normal approximation, not an autocorrelation-aware
+  stationarity test. A passing result only means no linear drift was
+  detected; a stuck chain or nonlinear drift may pass as well.
+
+  The time series must contain at least two finite real scalar samples
+  exactly representable as float64, the precision used by the slope fit.
+  Constant series have slope and slope error zero and are assigned z=0.
+  Invalid inputs raise ValueError rather than returning a misleading flag.
+
+  With ``outfile`` and ``observable``, return a dictionary containing
+  ``value`` and, if ``includeLog`` is true, ``props`` and ``statistics``.
+  With ``sets``, annotate each flattened dataset's props in place under
+  ``checkSteadyState`` (always including the log) and return the flat list.
+
+  Earlier versions used the complementary confidence level for the cutoff;
+  correcting it can change the reported flags for the same time series.
+  """
+  try:
+    if not np.isscalar(confidenceInterval) or np.iscomplexobj(confidenceInterval):
+      raise ValueError
+    confidenceInterval = float(confidenceInterval)
+  except (TypeError, ValueError, OverflowError):
+    raise ValueError("confidenceInterval must be a finite scalar strictly between 0 and 1") from None
+  if not np.isfinite(confidenceInterval) or not 0. < confidenceInterval < 1.:
+    raise ValueError("confidenceInterval must be a finite scalar strictly between 0 and 1")
+
   if sets is not None:
     results = []
     for iset in flatten(sets):
-      iset.props['checkSteadyState'] = checkSteadyState(outfile=iset.props['filename'], observable=iset.props['observable'], confidenceInterval=confidenceInterval, includeLog=True);
-      results.append(iset); 
-    return results 
+      iset.props['checkSteadyState'] = checkSteadyState(
+        outfile=iset.props['filename'], observable=iset.props['observable'],
+        confidenceInterval=confidenceInterval, includeLog=True)
+      results.append(iset)
+    return results
 
+  ts = np.asarray(pyalps.loadTimeSeries(outfile, observable))
+  if (ts.ndim != 1 or ts.size < 2 or ts.dtype.kind not in "biuf"
+      or not np.all(np.isfinite(ts))):
+    raise ValueError("time series must contain at least two finite real scalar samples")
+  try:
+    with np.errstate(over='raise', invalid='raise'):
+      float_ts = ts.astype(float, copy=False)
+      # Compare in the original dtype: mixed integer/float equality can
+      # itself round large integers and hide a loss of sample variation.
+      if not np.array_equal(float_ts.astype(ts.dtype, copy=False), ts):
+        raise ValueError("time series samples must be exactly representable as float64")
+  except FloatingPointError:
+    raise ValueError("time series samples must be exactly representable as float64") from None
+  ts = float_ts
+  N = ts.size
+
+  if np.all(ts == ts[0]):
+    # Avoid a roundoff-sized fitted slope divided by zero for constants.
+    beta1 = beta1_std = z = 0.
   else:
-    ts  = pyalps.loadTimeSeries(outfile, observable);  ### y
-    N   = ts.size;
-    idx = np.linspace(1, N, N);                       ### x
+    idx = np.linspace(1, N, N)
+    beta1 = np.polyfit(idx, ts, 1)[0]
+    ts_std = np.std(ts, ddof=1)
+    beta1_std = ts_std * np.sqrt(12. / (N * (N*N - 1)))
+    if not np.isfinite(beta1) or not np.isfinite(beta1_std) or beta1_std <= 0.:
+      raise ValueError("time series must yield a finite slope and a finite positive slope error")
+    z = abs(beta1 / beta1_std)
 
-    beta1 = np.polyfit(idx, ts, 1)[0];                 ### slope
-    
-    ts_std    = np.std(ts, ddof=1);                          ### unbiased estimate of standard deviation in y
-    beta1_std = math.sqrt((12.*ts_std*ts_std)/(N * (N*N-1)));   ### unbiased estimate of standard deviation in slope
-
-    z  = abs(beta1/beta1_std);
-    z0 = scipy.stats.norm.ppf((1.-confidenceInterval) + 0.5*(confidenceInterval));   
-    
-    result = z < z0;
-
-    if not includeLog:
-      return {'value': result};
-    else:
-      return {'value': result, 'props':{ 'outfile': outfile, 'observable': observable}, 'statistics': {'beta1' : {'value' : beta1, 'std' : beta1_std}, 'confidenceInterval' : confidenceInterval, 'z' : z, 'z0' : z0}};
+  # erfinv avoids cancellation near zero; isf avoids rounding the
+  # equivalent upper-tail percentile to one near the other endpoint.
+  if confidenceInterval <= 0.5:
+    z0 = np.sqrt(2.) * scipy.special.erfinv(confidenceInterval)
+  else:
+    z0 = scipy.stats.norm.isf((1. - confidenceInterval) / 2.)
+  result = {'value': bool(z < z0)}
+  if includeLog:
+    result['props'] = {'outfile': outfile, 'observable': observable}
+    result['statistics'] = {
+      'beta1': {'value': beta1, 'std': beta1_std},
+      'confidenceInterval': confidenceInterval, 'z': z, 'z0': z0}
+  return result
 
 def checkConvergence(sets):
   results = []
