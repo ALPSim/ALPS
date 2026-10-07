@@ -133,13 +133,23 @@ jobs:
           path: _build/ccache
           key: ccache-source-${{ matrix.id }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: ccache-source-${{ matrix.id }}-
-      - name: Reset compiler cache counters
-        run: ccache --zero-stats
+      - name: Identify Boost toolchain and reset compiler cache counters
+        id: toolchain
+        run: |
+          ccache --zero-stats
+          {
+            echo "$ImageVersion"
+            "$CXX" --version
+            if [[ "$ALPS_BOOST_MPI" == ON ]]; then mpicxx --showme:version; mpicxx --showme; fi
+          } > "$RUNNER_TEMP/boost-toolchain"
+          hash=$(ccache --hash-file "$RUNNER_TEMP/boost-toolchain")
+          echo "hash=$hash" >> "$GITHUB_OUTPUT"
       - name: Restore pinned Boost build
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: _build/boost-install
-          key: boost-${{ matrix.id }}-${{ hashFiles('.github/ci-matrix.json', '.github/scripts/build-boost.sh', '.github/scripts/prepare_dependencies.py') }}
+          # Boost always uses C++17 and has no Python dependency.
+          key: boost-${{ matrix.os }}-${{ runner.arch }}-${{ matrix.cxx }}-${{ matrix.mpi }}-${{ matrix.boost_sha256 }}-${{ steps.toolchain.outputs.hash }}-${{ hashFiles('.github/scripts/build-boost.sh', '.github/scripts/prepare_dependencies.py') }}
       - name: Prepare pinned Boost
         timeout-minutes: 30
         run: python .github/scripts/build_metrics.py run 'Dependency preparation' python .github/scripts/prepare_dependencies.py "$DEPENDENCY" _build/boost-install
