@@ -15,8 +15,8 @@ pyalps.dwa.bandstructure, which was removed together with the DWA application.
 
 Usage, from this directory:
 
-    from bandstructure import hubbard_parameters
-    t, U = hubbard_parameters(V0, wlen, a, m, L)
+    import bandstructure
+    t, U = bandstructure.hubbard_parameters(V0, wlen, a, m, L)
 """
 
 import numpy as np
