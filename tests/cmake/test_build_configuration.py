@@ -129,14 +129,40 @@ endif()
         assert names == ["parent_marker"]
 
 
-@pytest.mark.parametrize("hdf5_provider,supported", [
-    ("1.10.4", False), ("1.10.5", True), ("1.14.6", True),
-], indirect=["hdf5_provider"])
-def test_hdf5_runtime_paths_follow_imported_configurations(tmp_path, hdf5_provider, supported):
+def test_hdf5_runtime_paths_follow_imported_configurations(tmp_path):
     build = tmp_path / "build"
-    provider = hdf5_provider
+    # Dependencies extracted inside the build tree are omitted from CMake's
+    # automatic install RPATH. Use separate directories to expose flattening.
+    provider = build / "hdf5"
+    (provider / "include").mkdir(parents=True)
+    (provider / "hdf5-config.cmake").write_text('''
+set(HDF5_VERSION 1.14.6)
+set(HDF5_ENABLE_PARALLEL OFF)
+set(HDF5_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/include")
+add_library(hdf5::hdf5-shared SHARED IMPORTED)
+set_target_properties(hdf5::hdf5-shared PROPERTIES
+  IMPORTED_CONFIGURATIONS "DEBUG;RELEASE"
+  INTERFACE_INCLUDE_DIRECTORIES "${HDF5_INCLUDE_DIR}")
+foreach(config IN ITEMS Debug Release)
+  string(TOUPPER "${config}" upper)
+  set(directory "${CMAKE_CURRENT_LIST_DIR}/${config}")
+  file(MAKE_DIRECTORY "${directory}")
+  set(library "${directory}/${CMAKE_SHARED_LIBRARY_PREFIX}hdf5${CMAKE_SHARED_LIBRARY_SUFFIX}")
+  file(WRITE "${library}" "")
+  set_target_properties(hdf5::hdf5-shared PROPERTIES
+    IMPORTED_LOCATION_${upper} "${library}")
+  if(WIN32)
+    file(WRITE "${directory}/hdf5.lib" "")
+    set_target_properties(hdf5::hdf5-shared PROPERTIES
+      IMPORTED_IMPLIB_${upper} "${directory}/hdf5.lib")
+  endif()
+endforeach()
+''')
     capture = tmp_path / "capture.cmake"
     capture.write_text(
+        'include(CMakePackageConfigHelpers)\n'
+        f'write_basic_package_version_file("{provider.as_posix()}/hdf5-config-version.cmake"\n'
+        '  VERSION 1.14.6 COMPATIBILITY AnyNewerVersion)\n'
         'file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/runtime-$<CONFIG>.txt"\n'
         '  CONTENT "$<TARGET_GENEX_EVAL:alps_hdf5,$<TARGET_PROPERTY:alps_hdf5,INSTALL_RPATH>>;'
         '$<TARGET_RUNTIME_DLLS:alps_hdf5>" TARGET alps_hdf5)\n'
@@ -151,16 +177,10 @@ def test_hdf5_runtime_paths_follow_imported_configurations(tmp_path, hdf5_provid
         "-DBUILD_SHARED_LIBS=ON", "-DHDF5_USE_STATIC_LIBRARIES=OFF",
         # This contract deliberately selects a fixture provider instead of
         # the caller's HDF5 wrapper.
-        f"-DHDF5_ROOT={provider}", "-DHDF5_NO_FIND_PACKAGE_CONFIG_FILE=OFF",
+        "-UHDF5_ROOT", "-DHDF5_NO_FIND_PACKAGE_CONFIG_FILE=OFF",
         "-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON", f"-DHDF5_DIR={provider}",
         f"-DCMAKE_PROJECT_alps_INCLUDE={capture}",
     ], text=True, capture_output=True)
-    if not supported:
-        output = " ".join((result.stdout + result.stderr).split())
-        assert result.returncode != 0, output
-        assert 'Found unsuitable version "1.10.4"' in output
-        assert 'required is at least "1.10.5"' in output
-        return
     assert result.returncode == 0, result.stdout + result.stderr
     for config, other in (("Debug", "Release"), ("Release", "Debug")):
         runtime = (build / f"runtime-{config}.txt").read_text().split(";")

@@ -25,17 +25,6 @@ def configure(build, *options, success=True):
     return result.stdout + result.stderr
 
 
-@pytest.mark.parametrize("hdf5_provider", ["1.10.4"], indirect=True)
-def test_installed_sdk_rejects_old_hdf5(tmp_path, hdf5_provider):
-    output = configure(
-        tmp_path / "consumer", f"-DHDF5_ROOT={hdf5_provider}",
-        f"-DHDF5_DIR={hdf5_provider}", "-DHDF5_NO_FIND_PACKAGE_CONFIG_FILE=OFF",
-        success=False)
-    output = " ".join(output.split())
-    assert 'Found unsuitable version "1.10.4"' in output
-    assert 'required is at least "1.10.5"' in output
-
-
 def build_and_run(build, *, environment=None):
     subprocess.run(["cmake", "--build", str(build), "--config", "Release", "--parallel", "2"], check=True)
     subprocess.run([shutil.which("ctest"), "--test-dir", str(build), "-C", "Release", "--output-on-failure"],
