@@ -51,3 +51,5 @@ ctest --test-dir <build-dir> --output-on-failure -L '^(utility|hdf5|params|osiri
 ```
 
 The installed-SDK consumers in `tests/cmake/` check aggregate/component links, shared/static builds, header ownership, relocation and downstream extension interoperability. CLI and MaxEnt regressions check existing input behavior and scientific results. See [CONTRIBUTING.md](../../CONTRIBUTING.md#run-the-tests) for the complete development workflow.
+
+The disconnected `legacy_alea` and `legacy_accumulator` prototype tests have been removed. For ALPSCore consolidation, use the chosen upstream backend's tests for its accumulator semantics and add integration checks against the supported public APIs for correlated-sample error propagation and ALPS checkpoint compatibility. The removed `ngs_alea_compare.cpp` compared two in-tree implementations and round-tripped only its own checkpoint format; it did not establish ALPSCore compatibility. Existing Alea and Python regression tests continue to cover the shipped APIs.

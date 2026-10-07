@@ -23,6 +23,8 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 The old build interfaces are removed without compatibility aliases. Reconfigure existing build scripts and downstream projects using [CONTRIBUTING.md](CONTRIBUTING.md#getting-started-with-the-code).
 
+Remove the unused, incomplete headers under `<alps/ngs/accumulator/deprecated/>` and their unbuilt sources. The active `<alps/ngs/accumulator.hpp>` API remains available. Also remove the disconnected prototype accumulator tests, orphan Boost inspection tools, obsolete line-count script and unused IETL configuration template. The historical `<alps/ngs/scheduler/proto/tcpserver.hpp>` include now forwards to the canonical scheduler header.
+
 Numerical matrix/vector persistence now requires an explicit adapter: include `<alps/hdf5/matrix.hpp>` or `<alps/hdf5/numeric_vector.hpp>` and link `ALPS::numeric_io`. The matrix umbrella `<alps/numeric/matrix.hpp>` no longer includes HDF5 automatically. Diagonal matrices and deprecated BLAS matrix/vector classes retain their archive `save`/`load` members without requiring HDF5 headers in the numerical interfaces. Numerical matrix `write_xml` and XML insertion overloads are removed in 3.0 to keep numerical interfaces independent of XML; callers must handle XML output explicitly. Header ownership moves preserve public include spellings, but the explicit adapter requirement and XML method removals are source API changes.
 
 | Previous interface or location | Replacement |
