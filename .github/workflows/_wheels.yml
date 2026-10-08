@@ -17,8 +17,10 @@ jobs:
       with:
         python-version: '3.13'
         cache: pip
-        cache-dependency-path: .github/workflows/_wheels.yml
-    - run: python -m pip install packaging pytest lxml "scikit-build-core>=1.0" "cmake>=3.27" ninja
+        cache-dependency-path: |
+          .github/workflows/_wheels.yml
+          .github/scripts/citations/requirements.txt
+    - run: python -m pip install packaging pytest lxml "scikit-build-core>=1.0" "cmake>=3.27" ninja -r .github/scripts/citations/requirements.txt
     - name: Test release validation
       run: python -m pytest tests/packaging -q --junitxml=packaging-tests.xml
     - name: Check package, SDK, and tag versions

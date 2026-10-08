@@ -49,9 +49,13 @@ class MaxEntCLIContract(unittest.TestCase):
     def test_help_without_input(self):
         self.assert_help(self.run_cli("--help"))
 
-    def test_help_does_not_load_requested_input(self):
+    def test_information_queries_reject_input_before_loading(self):
         missing = self.directory / "not present.in.h5"
-        self.assert_help(self.run_cli("--help", "--input-file", missing))
+        for query in ("--help", "--license", "--citations"):
+            with self.subTest(query=query):
+                result = self.run_cli(query, "--input-file", missing)
+                self.assert_failure(result, "without calculation arguments")
+                self.assertNotIn("Recommended citations for ", result.stdout)
 
     def test_missing_input(self):
         self.assert_failure(self.run_cli(), "No job file specified")

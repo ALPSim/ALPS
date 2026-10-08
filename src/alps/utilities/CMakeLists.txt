@@ -1,6 +1,7 @@
 # Utilities have no link dependency on the simulation or archive runtime.
 add_library(alps_utilities
   src/copyright.cpp
+  src/citations.cpp
   src/encode.cpp
   src/os.cpp
   src/short_print.cpp
@@ -43,6 +44,7 @@ if(WIN32)
   target_link_libraries(alps_utilities PRIVATE ws2_32 mswsock)
 endif()
 alps_configure_component(alps_utilities utilities)
+target_include_directories(alps_utilities PRIVATE "${PROJECT_BINARY_DIR}/generated/include")
 target_sources(alps_utilities PUBLIC
   FILE_SET utilities_headers TYPE HEADERS
   BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
@@ -81,6 +83,7 @@ target_sources(alps_utilities PUBLIC
     include/alps/utility/assign.hpp
     include/alps/utility/bitops.hpp
     include/alps/utility/copyright.hpp
+    include/alps/utility/citations.hpp
     include/alps/utility/data.hpp
     include/alps/utility/encode.hpp
     include/alps/utility/factory.hpp

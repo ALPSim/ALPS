@@ -58,10 +58,9 @@ __pycache__/
 *.out
 *.app
 
-# Local contributor environments and agent instructions
+# Local contributor environments
 /.pixi/
 /.venv/
-/AGENTS.md
 
 # Python distribution artifacts
 /wheelhouse/

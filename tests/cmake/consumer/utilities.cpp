@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 #include <alps/utility/copyright.hpp>
+#include <alps/utility/citations.hpp>
 #include <alps/utility/encode.hpp>
 #include <alps/utility/os.hpp>
 #include <alps/utility/temporary_filename.hpp>
@@ -29,6 +30,12 @@ int main(int argc, char** argv) {
     if (world.rank() == 0 && total != std::vector<int>{world.size(), 2 * world.size()})
         throw std::runtime_error("Utility MPI reduction failed");
 #endif
+    std::ostringstream banner;
+    alps::print_copyright(banner, "hybridization");
+    if (alps::citation_text("hybridization").empty()
+        || alps::citation_details("interaction").find("10.1103/PhysRevB.72.035122") == std::string::npos
+        || banner.str().find("copyright (c)") == std::string::npos)
+        throw std::runtime_error("Utilities citation exports failed");
     const std::string name = "a/path with spaces";
     if (alps::hdf5_name_decode(alps::hdf5_name_encode(name)) != name
         || alps::version().empty() || alps::hostname().empty()

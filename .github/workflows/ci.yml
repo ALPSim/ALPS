@@ -144,6 +144,9 @@ jobs:
     - name: Test CI helpers
       run: |
         python -m pip install pytest packaging lxml numpy 'scikit-build-core>=1.0' 'cmake>=3.27' ninja
+        python -m pip install -r .github/scripts/citations/requirements.txt
+        python .github/scripts/generate_citations.py --check
+        python -m pytest tests/packaging/test_citations.py -q
         python -m compileall -q .github/scripts python/pyalps/_build_support
         python -m pytest tests/ci tests/tutorials -q --junitxml=ci-tests.xml
     - name: Summarize helper tests
@@ -255,7 +258,7 @@ jobs:
         cmake --preset mpi -B _build/ci \
           -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
           -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DMPIEXEC_PREFLAGS=--oversubscribe
-        cmake --build _build/ci --target observableset_mpi parameters_mpi scheduler_sum_mpi comm_mpi filelock_mpi halt_mpi info_test_mpi process_mpi collect_mpi scheduler_sum_single param_checkpoint osiris_dump_serialization
+        cmake --build _build/ci --target observableset_mpi parameters_mpi scheduler_sum_mpi comm_mpi filelock_mpi halt_mpi info_test_mpi process_mpi collect_mpi scheduler_sum_single param_checkpoint osiris_dump_serialization citation_runtime
     - name: Test two- and three-rank MPI
       run: ctest --test-dir _build/ci -L '^mpi$' --output-on-failure --output-junit mpi.xml --no-tests=error
     - name: Test serial behavior with MPI enabled

@@ -23,7 +23,7 @@ void SSE::print_copyright(std::ostream& out)
       << "  copyright (c) 2001-2005 by Fabien Alet <alet@comp-phys.org>,\n"
       << "                             Synge Todo <wistaria@comp-phys.org>,\n"
       << "                             and Matthias Troyer <troyer@comp-phys.org>\n"
-      << "  see F. Alet, S. Wessel and M. Troyer, Phys. Rev. E 71, 036706 (2005) for details.\n\n";
+      << "\n";
 }
 
 SSE::SSE(const alps::ProcessList& w, const alps::Parameters& myparms,int n)
@@ -130,7 +130,7 @@ int main(int argc, char** argv)
 #ifndef BOOST_NO_EXCEPTIONS
   try {
 #endif
-   return alps::scheduler::start(argc,argv,alps::scheduler::SimpleMCFactory<SSE>());
+   return alps::scheduler::start(argc,argv,alps::scheduler::SimpleMCFactory<SSE>(), "dirloop_sse");
 #ifndef BOOST_NO_EXCEPTIONS
   }
   catch (std::exception& exc) {

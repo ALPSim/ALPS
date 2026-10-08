@@ -57,6 +57,7 @@ endif()
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
+include(cmake/ALPSCitations.cmake)
 
 # A local default must not change later add_library() calls in a parent project.
 if(NOT DEFINED BUILD_SHARED_LIBS)
@@ -183,7 +184,7 @@ install(
   DESTINATION ${CMAKE_INSTALL_DATADIR}/alps
   COMPONENT build)
 install(
-  FILES CHANGELOG.md CITATION.md CONTRIBUTING.md LICENSE.txt README.md
+  FILES CHANGELOG.md CONTRIBUTING.md LICENSE.txt README.md
   DESTINATION ${CMAKE_INSTALL_DATADIR}/alps
   COMPONENT libraries)
 

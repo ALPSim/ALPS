@@ -32,3 +32,8 @@ alps_add_gtest(ngs_hash COMPONENT utilities)
 add_executable(foundation_headers foundation_headers.cpp)
 target_link_libraries(foundation_headers PRIVATE ALPS::utilities)
 alps_add_gtest(foundation_headers COMPONENT utilities LABELS architecture)
+
+# Link only the owning foundation: no aggregate library may hide missing symbols.
+add_executable(citations citations.cpp)
+target_link_libraries(citations PRIVATE ALPS::utilities)
+alps_add_gtest(citations COMPONENT utilities LABELS citations)

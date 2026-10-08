@@ -16,17 +16,22 @@
 
 #include <alps/config.h>
 #include <alps/utility/copyright.hpp>
+#include <alps/utility/citations.hpp>
 #include <alps/version.h>
 
 void alps::print_copyright(std::ostream& out) {
+  print_copyright(out, "framework");
+}
+
+void alps::print_copyright(std::ostream& out, const std::string& citation_component) {
   out << "based on the ALPS libraries version " << ALPS_VERSION << "\n";
   out << "  available from https://alps.comp-phys.org/\n";
   out << "  copyright (c) 1994-" << ALPS_YEAR
       << " by the ALPS collaboration.\n";
   out << "  Licensed under the MIT License.\n";
   out << "  License text: https://github.com/ALPSim/ALPS/blob/master/LICENSE.txt\n";
-  out << "  For details see the publication: \n"
-      << "  B. Bauer et al., J. Stat. Mech. (2011) P05001.\n\n";
+  out << "\n";
+  print_citations(out, citation_component);
 }
 
 void alps::print_license(std::ostream& out) {

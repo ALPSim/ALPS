@@ -22,3 +22,5 @@ add_subdirectory(portability)
 if(ALPS_BUILD_APPLICATIONS)
   add_subdirectory(cli)
 endif()
+
+include(cli/citations.cmake)

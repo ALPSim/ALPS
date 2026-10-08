@@ -27,7 +27,7 @@ int main(int argc, char** argv)
 #ifndef BOOST_NO_EXCEPTIONS
   try {
 #endif
-   return alps::scheduler::start(argc,argv,SpinFactory());
+   return alps::scheduler::start(argc,argv,SpinFactory(), "spinmc");
 #ifndef BOOST_NO_EXCEPTIONS
   }
   catch (std::exception& exc) {

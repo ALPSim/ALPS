@@ -47,6 +47,7 @@ public:
   bool write_xml;             // shall we write the results to XML?
 
   NoJobfileOptions(int argc, char** argv);
+  NoJobfileOptions(int argc, char** argv, const std::string& citation_component);
   NoJobfileOptions();
 };
 
@@ -56,6 +57,7 @@ public:
   boost::filesystem::path jobfilename;      // name of the jobfile
 
   Options(int argc, char** argv);
+  Options(int argc, char** argv, const std::string& citation_component);
   Options();
 };
 
@@ -63,4 +65,3 @@ public:
 } // end namespace
 
 #endif
-

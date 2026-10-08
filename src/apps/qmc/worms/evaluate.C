@@ -12,6 +12,8 @@
 
 /* $Id$ */
 
+#include <alps/utility/cli.hpp>
+#include <alps/utility/copyright.hpp>
 #include <alps/scheduler.h>
 #include <alps/alea.h>
 #include <fstream>
@@ -87,6 +89,9 @@ int main(int argc, char** argv)
 #ifndef BOOST_NO_EXCEPTIONS
 try {
 #endif
+  if (alps::handle_cli_information(argc, argv, "worm", [&] {
+    std::cout << "Usage: " << argv[0] << " [--write-xml] inputfile [inputfile ...]\n";
+  })) return 0;
   alps::scheduler::SimpleMCFactory<alps::scheduler::DummyMCRun> factory;
   alps::scheduler::init(factory);
   if (argc < 2) {
@@ -101,6 +106,10 @@ try {
    write_xml=false;
    i=1;
   }
+
+  if (i >= argc) throw std::invalid_argument("Expected an input file");
+  alps::cli_mpi_guard mpi(argc, argv);
+  if (alps::cli_is_master()) alps::print_copyright(std::cout, "worm");
 
   for(; i<argc; i++)
    {

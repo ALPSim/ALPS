@@ -8,6 +8,8 @@ These changes are for a future release after 3.0; the version and date are not y
 
 ### Changed
 
+- Centralize scientific references in `CITATION.cff` and `CITATIONS.yaml`. Applications support standalone `--citations` queries and compact startup notices; `ALPS_NO_CITATIONS=1` suppresses automatic notices. The utilities and CLI components expose the query helpers, and Python packages include the catalog from their linked SDK. See [citation maintenance](.github/scripts/citations/README.md).
+
 - Standardize native runtime tests on GoogleTest with individually discoverable
   CTest cases, isolated fixtures, numerical assertions, and preserved historical
   serialization contracts. Add development, MPI, extensive, and sanitizer test

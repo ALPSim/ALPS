@@ -269,6 +269,26 @@ class Repository(unittest.TestCase):
         with mock.patch.object(fp, "tree_entries", return_value=list(reversed(entries))):
             self.assertEqual(expected, self.keys())
 
+    def test_citation_inputs_invalidate_every_area(self):
+        # Native configure checks raw checksums, including generated Markdown
+        # and comments. Cached passes must not hide stale citation snapshots.
+        self.config = fp.Config.load(os.path.join(ROOT, "ci", "areas.json"))
+        for path in ("CITATION.cff", "CITATIONS.yaml", "CITATION.md",
+                     ".github/scripts/generate_citations.py",
+                     ".github/scripts/citations/policy.schema.json",
+                     ".github/scripts/citations/generated/citations_data.inc",
+                     ".github/scripts/citations/generated/snapshots.cmake"):
+            with self.subTest(path=path):
+                self.write(path, "# original\n")
+                base = self.commit()
+                before = self.keys()
+                self.write(path, "# changed\n")
+                self.commit()
+                self.assertTrue(all(self.detect(base).values()))
+                after = self.keys()
+                for area in self.config.areas:
+                    self.assertNotEqual(before[area], after[area], area)
+
 
 class Workflow(unittest.TestCase):
     def test_ci_workflow_matches_areas(self):

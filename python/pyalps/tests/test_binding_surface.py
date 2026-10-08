@@ -237,7 +237,7 @@ def test_optional_application_extension_surface():
     assert callable(cthyb.solve)
     assert callable(ctint.solve)
 
-def test_ctqmc_solvers_restore_python_signal_handlers(tmp_path, monkeypatch):
+def test_ctqmc_solvers_restore_python_signal_handlers(tmp_path, monkeypatch, capfd):
     # MPI-enabled SDK solvers require caller initialization, including when
     # this test is selected without collecting the MPI adapter tests.
     if importlib.util.find_spec("mpi4py") is not None:
@@ -295,9 +295,18 @@ def test_ctqmc_solvers_restore_python_signal_handlers(tmp_path, monkeypatch):
     try:
         # Run each solver twice: restoration alone is not enough if ALPS' own
         # handlers are not reinstalled for the next embedded call.
-        for solver, params in ((cthyb, cthyb_params), (ctint, ctint_params)):
-            for _ in range(2):
+        for solver, params, component in ((cthyb, cthyb_params, "ALPS CT-HYB impurity solver"),
+                                           (ctint, ctint_params, "ALPS CT-INT impurity solver")):
+            for disabled in (False, True):
+                if disabled:
+                    monkeypatch.setenv("ALPS_NO_CITATIONS", "1")
+                else:
+                    monkeypatch.delenv("ALPS_NO_CITATIONS", raising=False)
+                capfd.readouterr()
                 solver.solve(params)
+                output = capfd.readouterr().out
+                assert output.count("Recommended citations for " + component) == (0 if disabled else 1)
+                assert "Recommended citation in scientific publications" not in output
                 assert signal.getsignal(signal.SIGINT) is python_sigint_handler
                 signal.raise_signal(signal.SIGINT)
                 assert calls[-1][0] == signal.SIGINT
