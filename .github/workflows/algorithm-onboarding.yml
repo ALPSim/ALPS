@@ -1,0 +1,50 @@
+name: Algorithm Onboarding
+
+# Runs when a contributor drops a new algorithm header into test/onboarding/.
+# The harness files are watched too, so a change to the judge is checked as well.
+on:
+  push:
+    paths:
+      - 'test/onboarding/**'
+      - '.github/workflows/algorithm-onboarding.yml'
+  pull_request:
+    paths:
+      - 'test/onboarding/**'
+      - '.github/workflows/algorithm-onboarding.yml'
+  workflow_dispatch:
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build
+        run: make -C test/onboarding algorithm_test
+
+      - name: Evaluate algorithm
+        run: |
+          # The harness exit code is ignored on purpose: the gate here is the
+          # pass rate, not whether every case passed. N/A rows (problems the
+          # method cannot take) do not count either way.
+          ./test/onboarding/algorithm_test | tee result.txt || true
+
+          rows=$(grep -c -E '^\[(PASS|FAIL)\]' result.txt || true)
+          pass=$(grep -c '^\[PASS\]' result.txt || true)
+
+          if [ "$rows" -eq 0 ]; then
+            echo "::error::No judged rows found — the harness produced no output."
+            exit 1
+          fi
+
+          pct=$(( pass * 100 / rows ))
+          echo "Contributed algorithm passed $pass of $rows cases (${pct}%)."
+
+          if [ "$pct" -lt 50 ]; then
+            echo "::error::Pass rate ${pct}% is below the 50% threshold — upload rejected."
+            exit 1
+          fi
+
+          echo "Pass rate ${pct}% meets the 50% threshold — accepted."
