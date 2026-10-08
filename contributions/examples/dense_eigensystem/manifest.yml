@@ -1,7 +1,0 @@
-name: jacobi_eigensystem
-description: Jacobi diagonalization returning eigenvectors, so the harness can check correlation functions too.
-contract: dense_eigensystem
-entry: jacobi_eigensystem
-models: [tight-binding]
-geometry: [1d, 2d]
-quantities: [energy, correlation]

@@ -1,6 +1,0 @@
-name: power_method
-description: Power iteration with a hand-written wrapper; only one-particle cases can pass.
-contract: custom
-models: [tight-binding]
-geometry: [1d, 2d]
-quantities: [energy]
