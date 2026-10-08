@@ -1,0 +1,250 @@
+name: CI
+'on':
+  pull_request:
+    branches:
+    - master
+  push:
+    branches:
+    - master
+  workflow_dispatch: null
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  static:
+    name: Static and helper checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+      with:
+        python-version: '3.12'
+    - name: Lint workflows and shell helpers
+      run: |
+        curl --fail --location --retry 3 --connect-timeout 30 --max-time 300 \
+          https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz \
+          -o "$RUNNER_TEMP/actionlint.tar.gz"
+        echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  $RUNNER_TEMP/actionlint.tar.gz" | sha256sum --check
+        tar -xzf "$RUNNER_TEMP/actionlint.tar.gz" -C "$RUNNER_TEMP" actionlint
+        "$RUNNER_TEMP/actionlint" -color
+        shellcheck .github/scripts/*.sh
+    - name: Test CI helpers
+      run: |
+        python -m pip install pytest packaging lxml numpy 'scikit-build-core>=1.0' 'cmake>=3.27' ninja
+        python -m compileall -q .github/scripts python/pyalps/_build_support
+        python -m pytest tests/ci tests/packaging tests/tutorials -q --junitxml=ci-tests.xml
+    - name: Summarize helper tests
+      if: always()
+      run: python .github/scripts/junit_summary.py ci-tests.xml
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+      if: always()
+      with:
+        name: ci-helper-tests
+        path: ci-tests.xml
+  linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      CC: gcc
+      CXX: g++
+      CMAKE_C_COMPILER_LAUNCHER: ccache
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
+      CCACHE_DIR: ${{ github.workspace }}/_build/ccache
+      CCACHE_MAXSIZE: 256M
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
+    - uses: ./.github/actions/setup-native
+    - name: Install compiler cache
+      run: sudo apt-get install -y ccache
+    - name: Identify compiler and dependency ABI
+      id: toolchain
+      run: |
+        { "$CXX" --version; dpkg-query -W 'libboost*' 'libhdf5*'; } > "$RUNNER_TEMP/toolchain"
+        echo "key=$(sha256sum "$RUNNER_TEMP/toolchain" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
+    - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+      id: cache
+      with:
+        path: _build/ccache
+        key: native-${{ runner.os }}-${{ runner.arch }}-${{ steps.toolchain.outputs.key }}-${{ github.run_id }}-${{
+          github.run_attempt }}
+        restore-keys: native-${{ runner.os }}-${{ runner.arch }}-${{ steps.toolchain.outputs.key }}-
+    - name: Build and test native code
+      run: |
+        cmake --preset dev -B _build/ci \
+          -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
+          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_BUILD_APPLICATIONS=ON -DALPS_ENABLE_MPI=OFF
+        cmake --build _build/ci
+        ctest --test-dir _build/ci --output-on-failure --output-junit ctest.xml --no-tests=error
+        cmake --install _build/ci
+    - name: Test editable bindings and installed SDK
+      run: bash .github/scripts/test-editable-bindings.sh
+    - name: Compiler cache statistics
+      if: always()
+      run: ccache --show-stats --verbose
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+      if: '!cancelled() && steps.cache.outcome == ''success'' && (github.event_name != ''pull_request'' || github.event.pull_request.head.repo.full_name
+        == github.repository)'
+      with:
+        path: _build/ccache
+        key: ${{ steps.cache.outputs.cache-primary-key }}
+    - name: Summarize tests
+      run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
+      if: always()
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+      if: always()
+      with:
+        name: native-linux
+        path: |
+          _build/ci/*.xml
+          _build/mpi/*.xml
+          _build/ci/Testing/Temporary/**
+  mpi:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      CC: clang-18
+      CXX: clang++-18
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
+    - uses: ./.github/actions/setup-native
+    - name: Install MPI and Clang
+      run: sudo apt-get install -y clang-18 libopenmpi-dev openmpi-bin
+    - name: Build MPI integration and representative serial tests
+      run: |
+        cmake --preset mpi -B _build/ci \
+          -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
+          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DMPIEXEC_PREFLAGS=--oversubscribe
+        cmake --build _build/ci --target observableset_mpi parameters_mpi scheduler_sum_mpi comm_mpi filelock_mpi halt_mpi info_test_mpi process_mpi collect_mpi scheduler_sum_single param_checkpoint osiris_dump_serialization
+    - name: Test two- and three-rank MPI
+      run: ctest --test-dir _build/ci -L '^mpi$' --output-on-failure --output-junit mpi.xml --no-tests=error
+    - name: Test serial behavior with MPI enabled
+      run: ctest --test-dir _build/ci -R '^[^.]+\.(scheduler_sum_single|param_checkpoint|osiris_dump_serialization)\.'
+        --output-on-failure --output-junit ctest.xml --no-tests=error
+    - name: Summarize tests
+      run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
+      if: always()
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+      if: always()
+      with:
+        name: native-mpi
+        path: |
+          _build/ci/*.xml
+          _build/mpi/*.xml
+          _build/ci/Testing/Temporary/**
+  macos:
+    runs-on: macos-15
+    timeout-minutes: 90
+    env:
+      CMAKE_BUILD_PARALLEL_LEVEL: 2
+      CC: clang
+      CXX: clang++
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
+    - uses: ./.github/actions/setup-native
+    - name: Build and validate the installed SDK
+      run: |
+        cmake --preset sdk -B _build/ci \
+          -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
+          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF
+        cmake --build _build/ci
+        cmake --install _build/ci
+        python -m pytest tests/cmake/test_sdk_contracts.py -q \
+          -k 'installed_sdk_preserves_parent_settings or relocated_sdk' --junitxml=_build/ci/sdk.xml
+    - name: Summarize tests
+      run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
+      if: always()
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+      if: always()
+      with:
+        name: native-macos
+        path: |
+          _build/ci/*.xml
+          _build/mpi/*.xml
+          _build/ci/Testing/Temporary/**
+  sanitizers:
+    name: Native address and undefined behavior sanitizers
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      CC: clang-18
+      CXX: clang++-18
+      CMAKE_BUILD_PARALLEL_LEVEL: 2
+      ASAN_OPTIONS: detect_leaks=1:strict_string_checks=1
+      UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
+    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+      with:
+        python-version: '3.12'
+    - name: Install native prerequisites
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-18 llvm-18 libboost-all-dev libgtest-dev libhdf5-dev libblas-dev liblapack-dev
+        python -m pip install 'cmake>=3.27' ninja pytest numpy h5py
+    - name: Build instrumented components and tests
+      run: |
+        cmake --preset sanitizers -B _build/sanitizers \
+          -DCMAKE_INSTALL_PREFIX="$PWD/_build/sanitizers/install" \
+          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF
+        cmake --build _build/sanitizers --target hdf5_memory hdf5_valgrind hdf5_multi_array hdf5_exceptions hdf5_fortran_string observableset_hdf5 testobservableset param_checkpoint osiris_dump_serialization scheduler_sum_single
+    - name: Run instrumented native tests
+      run: ctest --test-dir _build/sanitizers -R '^[^.]+\.(hdf5_memory|hdf5_valgrind|hdf5_multi_array|hdf5_exceptions|hdf5_fortran_string|observableset_hdf5|testobservableset|param_checkpoint|osiris_dump_serialization|scheduler_sum_single)\.'
+        --output-on-failure --output-junit ctest.xml --no-tests=error
+    - name: Summarize sanitizer tests
+      if: always()
+      run: python .github/scripts/junit_summary.py _build/sanitizers/ctest.xml
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+      if: always()
+      with:
+        name: native-sanitizer-reports
+        path: |
+          _build/sanitizers/ctest.xml
+          _build/sanitizers/Testing/Temporary/**
+          _build/sanitizers/**/*.actual
+          _build/sanitizers/CMakeFiles/CMakeConfigureLog.yaml
+  packaging:
+    uses: ./.github/workflows/_wheels.yml
+  status:
+    name: CI
+    if: always()
+    needs:
+    - static
+    - linux
+    - mpi
+    - macos
+    - sanitizers
+    - packaging
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+    - env:
+        RESULTS: ${{ toJSON(needs) }}
+      run: |
+        python - <<'CODE'
+        import json, os
+        results = json.loads(os.environ['RESULTS'])
+        assert all(job['result'] == 'success' for job in results.values()), results
+        CODE
+defaults:
+  run:
+    shell: bash
+env:
+  CMAKE_BUILD_PARALLEL_LEVEL: 4
+  CTEST_PARALLEL_LEVEL: 2
+  CMAKE_GENERATOR: Ninja
+  ALPS_DIR: ${{ github.workspace }}/_build/ci/install/share/alps
+  PIP_ONLY_BINARY: ':all:'

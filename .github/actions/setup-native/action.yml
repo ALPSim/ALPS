@@ -1,0 +1,33 @@
+name: Install native build prerequisites
+description: Use binary Linux/macOS dependencies and prebuilt Python build tools.
+inputs:
+  python:
+    description: Python interpreter
+    default: '3.12'
+  cmake:
+    description: CMake package requirement
+    default: cmake>=3.27
+runs:
+  using: composite
+  steps:
+  - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+    with:
+      python-version: ${{ inputs.python }}
+  - name: Install Linux libraries
+    run: |
+      sudo apt-get update
+      sudo apt-get install -y libboost-all-dev libgtest-dev libhdf5-dev libblas-dev liblapack-dev
+    shell: bash
+    if: runner.os == 'Linux'
+  - name: Install macOS libraries
+    run: |
+      brew install --force-bottle boost googletest hdf5 openblas
+      echo "CMAKE_PREFIX_PATH=$(brew --prefix boost):$(brew --prefix hdf5):$(brew --prefix openblas)" >> "$GITHUB_ENV"
+    shell: bash
+    if: runner.os == 'macOS'
+  - name: Install build tools
+    run: |
+      python -m pip install "$CMAKE_REQUIREMENT" ninja pytest numpy h5py
+    shell: bash
+    env:
+      CMAKE_REQUIREMENT: ${{ inputs.cmake }}
