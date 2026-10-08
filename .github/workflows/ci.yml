@@ -6,25 +6,132 @@ name: CI
   push:
     branches:
     - master
-  workflow_dispatch: null
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Run every area even if its fingerprint already passed
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  static:
-    name: Static and helper checks
+  changes:
+    name: Select affected areas
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    outputs:
+      static_run: ${{ steps.decide.outputs.static_run }}
+      static_key: ${{ steps.fp.outputs.static_key }}
+      linux_run: ${{ steps.decide.outputs.linux_run }}
+      linux_key: ${{ steps.fp.outputs.linux_key }}
+      mpi_run: ${{ steps.decide.outputs.mpi_run }}
+      mpi_key: ${{ steps.fp.outputs.mpi_key }}
+      macos_run: ${{ steps.decide.outputs.macos_run }}
+      macos_key: ${{ steps.fp.outputs.macos_key }}
+      sanitizers_run: ${{ steps.decide.outputs.sanitizers_run }}
+      sanitizers_key: ${{ steps.fp.outputs.sanitizers_key }}
+      packaging_run: ${{ steps.decide.outputs.packaging_run }}
+      packaging_key: ${{ steps.fp.outputs.packaging_key }}
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
         fetch-depth: 0
-    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+    - name: Test change detection and check areas.json against this workflow
+      run: |
+        python3 -m unittest ci/test_fingerprint.py
+        python3 ci/fingerprint.py --check-workflow .github/workflows/ci.yml
+    - id: fp
+      name: Detect changes and fingerprint areas
+      env:
+        BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+      run: |
+        export TOOLCHAIN="$RUNNER_OS-$RUNNER_ARCH-${ImageOS:-}-${ImageVersion:-}"
+        python3 ci/fingerprint.py --base "$BASE" --head HEAD >> "$GITHUB_OUTPUT"
+    - id: pass_static
+      if: steps.fp.outputs.static_key != ''
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .ci-passed
+        key: pass-static-${{ steps.fp.outputs.static_key }}
+        lookup-only: true
+    - id: pass_linux
+      if: steps.fp.outputs.linux_key != ''
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .ci-passed
+        key: pass-linux-${{ steps.fp.outputs.linux_key }}
+        lookup-only: true
+    - id: pass_mpi
+      if: steps.fp.outputs.mpi_key != ''
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .ci-passed
+        key: pass-mpi-${{ steps.fp.outputs.mpi_key }}
+        lookup-only: true
+    - id: pass_macos
+      if: steps.fp.outputs.macos_key != ''
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .ci-passed
+        key: pass-macos-${{ steps.fp.outputs.macos_key }}
+        lookup-only: true
+    - id: pass_sanitizers
+      if: steps.fp.outputs.sanitizers_key != ''
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .ci-passed
+        key: pass-sanitizers-${{ steps.fp.outputs.sanitizers_key }}
+        lookup-only: true
+    - id: pass_packaging
+      if: steps.fp.outputs.packaging_key != ''
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .ci-passed
+        key: pass-packaging-${{ steps.fp.outputs.packaging_key }}
+        lookup-only: true
+    - id: decide
+      name: Skip areas whose fingerprint already passed
+      env:
+        FORCE: ${{ inputs.force }}
+        AFFECTED_STATIC: ${{ steps.fp.outputs.static_affected }}
+        KEY_STATIC: ${{ steps.fp.outputs.static_key }}
+        HIT_STATIC: ${{ steps.pass_static.outputs.cache-hit }}
+        AFFECTED_LINUX: ${{ steps.fp.outputs.linux_affected }}
+        KEY_LINUX: ${{ steps.fp.outputs.linux_key }}
+        HIT_LINUX: ${{ steps.pass_linux.outputs.cache-hit }}
+        AFFECTED_MPI: ${{ steps.fp.outputs.mpi_affected }}
+        KEY_MPI: ${{ steps.fp.outputs.mpi_key }}
+        HIT_MPI: ${{ steps.pass_mpi.outputs.cache-hit }}
+        AFFECTED_MACOS: ${{ steps.fp.outputs.macos_affected }}
+        KEY_MACOS: ${{ steps.fp.outputs.macos_key }}
+        HIT_MACOS: ${{ steps.pass_macos.outputs.cache-hit }}
+        AFFECTED_SANITIZERS: ${{ steps.fp.outputs.sanitizers_affected }}
+        KEY_SANITIZERS: ${{ steps.fp.outputs.sanitizers_key }}
+        HIT_SANITIZERS: ${{ steps.pass_sanitizers.outputs.cache-hit }}
+        AFFECTED_PACKAGING: ${{ steps.fp.outputs.packaging_affected }}
+        KEY_PACKAGING: ${{ steps.fp.outputs.packaging_key }}
+        HIT_PACKAGING: ${{ steps.pass_packaging.outputs.cache-hit }}
+      run: python3 ci/fingerprint.py --decide >> "$GITHUB_OUTPUT"
+  static:
+    name: Static and helper checks
+    needs: changes
+    if: needs.changes.outputs.static_run == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: '3.12'
+        cache: pip
+        cache-dependency-path: .github/workflows/ci.yml
     - name: Lint workflows and shell helpers
       run: |
         curl --fail --location --retry 3 --connect-timeout 30 --max-time 300 \
@@ -42,12 +149,24 @@ jobs:
     - name: Summarize helper tests
       if: always()
       run: python .github/scripts/junit_summary.py ci-tests.xml
-    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: always()
       with:
         name: ci-helper-tests
         path: ci-tests.xml
+    - name: Record pass marker
+      if: needs.changes.outputs.static_key != ''
+      run: mkdir -p .ci-passed && echo "$KEY" > .ci-passed/key
+      env:
+        KEY: ${{ needs.changes.outputs.static_key }}
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      if: needs.changes.outputs.static_key != ''
+      with:
+        path: .ci-passed
+        key: pass-static-${{ needs.changes.outputs.static_key }}
   linux:
+    needs: changes
+    if: needs.changes.outputs.linux_run == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
@@ -58,7 +177,7 @@ jobs:
       CCACHE_DIR: ${{ github.workspace }}/_build/ccache
       CCACHE_MAXSIZE: 256M
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - uses: ./.github/actions/setup-native
@@ -69,7 +188,7 @@ jobs:
       run: |
         { "$CXX" --version; dpkg-query -W 'libboost*' 'libhdf5*'; } > "$RUNNER_TEMP/toolchain"
         echo "key=$(sha256sum "$RUNNER_TEMP/toolchain" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
-    - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+    - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       id: cache
       with:
         path: _build/ccache
@@ -89,7 +208,7 @@ jobs:
     - name: Compiler cache statistics
       if: always()
       run: ccache --show-stats --verbose
-    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       if: '!cancelled() && steps.cache.outcome == ''success'' && (github.event_name != ''pull_request'' || github.event.pull_request.head.repo.full_name
         == github.repository)'
       with:
@@ -98,7 +217,7 @@ jobs:
     - name: Summarize tests
       run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
       if: always()
-    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: always()
       with:
         name: native-linux
@@ -106,14 +225,26 @@ jobs:
           _build/ci/*.xml
           _build/mpi/*.xml
           _build/ci/Testing/Temporary/**
+    - name: Record pass marker
+      if: needs.changes.outputs.linux_key != ''
+      run: mkdir -p .ci-passed && echo "$KEY" > .ci-passed/key
+      env:
+        KEY: ${{ needs.changes.outputs.linux_key }}
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      if: needs.changes.outputs.linux_key != ''
+      with:
+        path: .ci-passed
+        key: pass-linux-${{ needs.changes.outputs.linux_key }}
   mpi:
+    needs: changes
+    if: needs.changes.outputs.mpi_run == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
       CC: clang-18
       CXX: clang++-18
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - uses: ./.github/actions/setup-native
@@ -133,7 +264,7 @@ jobs:
     - name: Summarize tests
       run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
       if: always()
-    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: always()
       with:
         name: native-mpi
@@ -141,7 +272,19 @@ jobs:
           _build/ci/*.xml
           _build/mpi/*.xml
           _build/ci/Testing/Temporary/**
+    - name: Record pass marker
+      if: needs.changes.outputs.mpi_key != ''
+      run: mkdir -p .ci-passed && echo "$KEY" > .ci-passed/key
+      env:
+        KEY: ${{ needs.changes.outputs.mpi_key }}
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      if: needs.changes.outputs.mpi_key != ''
+      with:
+        path: .ci-passed
+        key: pass-mpi-${{ needs.changes.outputs.mpi_key }}
   macos:
+    needs: changes
+    if: needs.changes.outputs.macos_run == 'true'
     runs-on: macos-15
     timeout-minutes: 90
     env:
@@ -149,7 +292,7 @@ jobs:
       CC: clang
       CXX: clang++
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - uses: ./.github/actions/setup-native
@@ -165,7 +308,7 @@ jobs:
     - name: Summarize tests
       run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
       if: always()
-    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: always()
       with:
         name: native-macos
@@ -173,8 +316,20 @@ jobs:
           _build/ci/*.xml
           _build/mpi/*.xml
           _build/ci/Testing/Temporary/**
+    - name: Record pass marker
+      if: needs.changes.outputs.macos_key != ''
+      run: mkdir -p .ci-passed && echo "$KEY" > .ci-passed/key
+      env:
+        KEY: ${{ needs.changes.outputs.macos_key }}
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      if: needs.changes.outputs.macos_key != ''
+      with:
+        path: .ci-passed
+        key: pass-macos-${{ needs.changes.outputs.macos_key }}
   sanitizers:
     name: Native address and undefined behavior sanitizers
+    needs: changes
+    if: needs.changes.outputs.sanitizers_run == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
@@ -184,12 +339,14 @@ jobs:
       ASAN_OPTIONS: detect_leaks=1:strict_string_checks=1
       UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
-    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: '3.12'
+        cache: pip
+        cache-dependency-path: .github/workflows/ci.yml
     - name: Install native prerequisites
       run: |
         sudo apt-get update
@@ -207,7 +364,7 @@ jobs:
     - name: Summarize sanitizer tests
       if: always()
       run: python .github/scripts/junit_summary.py _build/sanitizers/ctest.xml
-    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: always()
       with:
         name: native-sanitizer-reports
@@ -216,12 +373,43 @@ jobs:
           _build/sanitizers/Testing/Temporary/**
           _build/sanitizers/**/*.actual
           _build/sanitizers/CMakeFiles/CMakeConfigureLog.yaml
+    - name: Record pass marker
+      if: needs.changes.outputs.sanitizers_key != ''
+      run: mkdir -p .ci-passed && echo "$KEY" > .ci-passed/key
+      env:
+        KEY: ${{ needs.changes.outputs.sanitizers_key }}
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      if: needs.changes.outputs.sanitizers_key != ''
+      with:
+        path: .ci-passed
+        key: pass-sanitizers-${{ needs.changes.outputs.sanitizers_key }}
   packaging:
+    needs: changes
+    if: needs.changes.outputs.packaging_run == 'true'
     uses: ./.github/workflows/_wheels.yml
+  packaging_pass:
+    name: Record packaging pass
+    needs:
+    - changes
+    - packaging
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+    - name: Record pass marker
+      if: needs.changes.outputs.packaging_key != ''
+      run: mkdir -p .ci-passed && echo "$KEY" > .ci-passed/key
+      env:
+        KEY: ${{ needs.changes.outputs.packaging_key }}
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      if: needs.changes.outputs.packaging_key != ''
+      with:
+        path: .ci-passed
+        key: pass-packaging-${{ needs.changes.outputs.packaging_key }}
   status:
     name: CI
     if: always()
     needs:
+    - changes
     - static
     - linux
     - mpi
@@ -237,7 +425,8 @@ jobs:
         python - <<'CODE'
         import json, os
         results = json.loads(os.environ['RESULTS'])
-        assert all(job['result'] == 'success' for job in results.values()), results
+        assert results.pop('changes')['result'] == 'success', 'change detection failed'
+        assert all(job['result'] in ('success', 'skipped') for job in results.values()), results
         CODE
 defaults:
   run:

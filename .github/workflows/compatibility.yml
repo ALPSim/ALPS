@@ -14,7 +14,7 @@ jobs:
       CC: gcc-11
       CXX: g++-11
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - uses: ./.github/actions/setup-native
@@ -42,7 +42,7 @@ jobs:
     - name: Summarize tests
       run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
       if: always()
-    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: always()
       with:
         name: native-minimum
@@ -58,7 +58,7 @@ jobs:
       CC: gcc-14
       CXX: g++-14
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - uses: ./.github/actions/setup-native
@@ -103,7 +103,7 @@ jobs:
     - name: Summarize tests
       run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
       if: always()
-    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: always()
       with:
         name: native-extensive
@@ -118,7 +118,7 @@ jobs:
       CC: gcc-14
       CXX: g++-14
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - uses: ./.github/actions/setup-native
@@ -134,7 +134,7 @@ jobs:
     - name: Summarize tests
       run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
       if: always()
-    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: always()
       with:
         name: native-cxx23
@@ -149,7 +149,7 @@ jobs:
       CC: clang-18
       CXX: clang++-18
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - uses: ./.github/actions/setup-native
@@ -176,7 +176,7 @@ jobs:
     - name: Summarize tests
       run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
       if: always()
-    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: always()
       with:
         name: native-mpi-python
@@ -192,7 +192,7 @@ jobs:
       CC: clang
       CXX: clang++
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - uses: ./.github/actions/setup-native
@@ -208,7 +208,7 @@ jobs:
     - name: Summarize tests
       run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
       if: always()
-    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: always()
       with:
         name: native-${{ matrix.os }}

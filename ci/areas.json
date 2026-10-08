@@ -1,0 +1,103 @@
+{
+  "global": [
+    ".github/workflows/ci.yml",
+    ".github/actions/**",
+    ".github/scripts/junit_summary.py",
+    "ci/**",
+    "CMakeLists.txt",
+    "CMakePresets.json",
+    "cmake/**",
+    "pytest.ini"
+  ],
+  "ignore": [
+    "*.md",
+    "LICENSE.txt",
+    ".gitignore",
+    "src/**/*.md",
+    "tests/**/*.md",
+    "tutorials/**/*.md",
+    ".github/**/*.md",
+    ".github/ISSUE_TEMPLATE/**",
+    ".github/workflows/issue-triage.yml"
+  ],
+  "areas": {
+    "static": {
+      "paths": [
+        ".github/**",
+        "tests/ci/**",
+        "tests/packaging/**",
+        "tests/tutorials/**",
+        "tutorials/**",
+        "python/pyalps/_build_support/**",
+        "python/pyalps/pyproject.toml"
+      ],
+      "strip_comments": false
+    },
+    "linux": {
+      "paths": [
+        "src/**",
+        "third_party/**",
+        "tutorials/**",
+        "tests/**",
+        "python/**",
+        ".github/scripts/test-editable-bindings.sh"
+      ],
+      "strip_comments": true
+    },
+    "mpi": {
+      "paths": [
+        "src/**",
+        "third_party/**",
+        "tutorials/**",
+        "tests/CMakeLists.txt",
+        "tests/cli/**",
+        "tests/cmake/**",
+        "tests/integration/**",
+        "tests/portability/**",
+        "tests/support/**"
+      ],
+      "strip_comments": true
+    },
+    "sanitizers": {
+      "paths": [
+        "src/**",
+        "third_party/**",
+        "tutorials/**",
+        "tests/CMakeLists.txt",
+        "tests/cli/**",
+        "tests/cmake/**",
+        "tests/integration/**",
+        "tests/portability/**",
+        "tests/support/**"
+      ],
+      "strip_comments": true
+    },
+    "macos": {
+      "paths": [
+        "src/**",
+        "third_party/**",
+        "tutorials/**",
+        "tests/CMakeLists.txt",
+        "tests/cli/**",
+        "tests/cmake/**",
+        "tests/integration/**",
+        "tests/portability/**",
+        "tests/support/**"
+      ],
+      "strip_comments": true
+    },
+    "packaging": {
+      "paths": [
+        "python/**",
+        "src/**",
+        "third_party/**",
+        "tests/pyalps/**",
+        "tests/packaging/**",
+        ".github/scripts/**",
+        ".github/dependencies.json",
+        ".github/workflows/_wheels.yml"
+      ],
+      "strip_comments": true
+    }
+  }
+}
