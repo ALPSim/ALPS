@@ -535,6 +535,26 @@ references:
     value: gull2011cpc
     description: ALPS reference key
 - type: article
+  title: Efficient implementation of the continuous-time hybridization expansion quantum impurity solver
+  authors:
+  - family-names: Hafermann
+    given-names: H.
+  - family-names: Werner
+    given-names: P.
+  - family-names: Gull
+    given-names: E.
+  year: 2013
+  journal: Computer Physics Communications
+  volume: '184'
+  issue: '4'
+  doi: 10.1016/j.cpc.2012.12.013
+  start: '1280'
+  end: '1286'
+  identifiers:
+  - type: other
+    value: hafermann2013
+    description: ALPS reference key
+- type: article
   title: Monte Carlo Method for Magnetic Impurities in Metals
   authors:
   - family-names: Hirsch

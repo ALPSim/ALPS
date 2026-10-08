@@ -72,7 +72,7 @@ components:
   hybridization:
     name: ALPS CT-HYB impurity solver
     algorithm: [werner2006, gull2011]
-    implementation: [gull2011cpc]
+    implementation: [gull2011cpc, hafermann2013]
   hirschfye:
     name: ALPS Hirsch-Fye impurity solver
     algorithm: [hirschfye1986]

@@ -77,15 +77,21 @@ is provenance, not a dependency of the build.
   algorithm references, with the release 3.0 paper as implementation and framework.
 - The aggregate DMFT table row is split into the driver, CT-INT, CT-HYB, and
   Hirsch–Fye, using the manuscript's solver discussion. The driver asks users to
-  cite their chosen solver as well. Arbitrary external solvers cannot be inferred.
+  cite their chosen solver as well and prints the solver notice for its built-in
+  Hirsch–Fye and CT-INT solvers; the standalone solver programs print their own.
+  Arbitrary external solvers cannot be inferred.
 - Scheduler-dependent applications also credit the scheduler implementation listed
   in the paper. Parapack/looper is not assumed to be the same scheduler.
 - The release 3.0 preferred citation is the arXiv preprint (arXiv:2610.03884),
   recorded with its arXiv DOI and `status: preprint`; its author list matches the
   arXiv listing. Replace it with the journal record once published.
-- Existing runtime references absent from the paper (for example the extra CT-HYB
-  PRB 84 reference) were not carried over automatically. Additional scientific
-  requirements should be reviewed and added explicitly to the authorities.
+- Emanuel Gull confirmed the DMFT split and solver references on 2026-10-08.
+  CT-HYB also credits Hafermann, Werner, and Gull, CPC 184, 1280 (2013), alongside
+  CPC 182, 1078 (2011), as implementation references. The shipped solver's manual
+  (`applications/dmft/qmc/hybridization/Documentation/hybdoc.tex`) identifies the
+  2013 paper with this version of the code. Boehnke et al., PRB 84, 075145 (2011),
+  remains in the manual; CT-INT cites the 2005 PRB rather than the 2004 JETP letter.
+  The improved-estimator paper's existing manual-only treatment is unchanged.
 
 Recommendations are application-level; parameter-dependent algorithm selection is
 not inferred.

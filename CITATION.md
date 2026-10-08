@@ -32,7 +32,7 @@ The framework paper applies to every component. A paper serving several roles is
 | `dmrg` | [white1992](#white1992), [white1993](#white1993), [schollwock2005](#schollwock2005), [hallberg2006](#hallberg2006) | [feiguin2013](#feiguin2013) | scheduler |
 | `dmft` | [metzner1989](#metzner1989), [georges1992](#georges1992), [georges1996](#georges1996) | [gull2011cpc](#gull2011cpc) | — |
 | `interaction` | [rubtsov2005](#rubtsov2005), [gull2011](#gull2011) | [gull2011cpc](#gull2011cpc) | — |
-| `hybridization` | [werner2006](#werner2006), [gull2011](#gull2011) | [gull2011cpc](#gull2011cpc) | — |
+| `hybridization` | [werner2006](#werner2006), [gull2011](#gull2011) | [gull2011cpc](#gull2011cpc), [hafermann2013](#hafermann2013) | — |
 | `hirschfye` | [hirschfye1986](#hirschfye1986) | [gull2011cpc](#gull2011cpc) | — |
 
 Cite the relevant impurity-solver references as well when using a solver through the DMFT driver.
@@ -142,6 +142,10 @@ E. Gull et al., "Continuous-Time Monte Carlo Methods for Quantum Impurity Models
 ### gull2011cpc
 
 E. Gull et al., "Continuous-Time Quantum Monte Carlo Impurity Solvers." Computer Physics Communications 182, 1078–1082 (2011). https://doi.org/10.1016/j.cpc.2010.12.050
+
+### hafermann2013
+
+H. Hafermann, P. Werner, E. Gull, "Efficient implementation of the continuous-time hybridization expansion quantum impurity solver." Computer Physics Communications 184, 1280–1286 (2013). https://doi.org/10.1016/j.cpc.2012.12.013
 
 ### hirschfye1986
 

@@ -44,6 +44,12 @@ class CitationTests(unittest.TestCase):
                     "hirschfye": ["hirschfye1986"]}
         for component, algorithms in expected.items():
             self.assertEqual(generator.select_references(self.policy, self.framework, component)["algorithm"], algorithms)
+        for component in ("dmft", "interaction", "hybridization", "hirschfye"):
+            implementations = ["gull2011cpc"]
+            if component == "hybridization":
+                implementations.append("hafermann2013")
+            self.assertEqual(generator.select_references(self.policy, self.framework, component)["implementation"],
+                             implementations)
 
     def test_framework_deduplicated_but_both_roles_retained(self):
         text = generator.detailed_notice(self.policy, self.references, self.framework, "qwl")

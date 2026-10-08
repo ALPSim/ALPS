@@ -26,6 +26,7 @@
 
 #include <alps/parameter.h>
 #include <alps/utility/copyright.hpp>
+#include <alps/utility/citations.hpp>
 #include <alps/utility/cli.hpp>
 
 #include <iostream>
@@ -92,6 +93,8 @@ int main(int argc, char** argv)
           // we need a factory to create Hirsch-Fye simulations
           alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;  
           solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
+          // Built-in solvers print no notice of their own; external solvers do.
+          if (alps::cli_is_master()) alps::print_citations(std::cout, "hirschfye");
           selfconsistency_loop(parms, *solver_ptr, transform);
         }
         else if (parms["SOLVER"]=="Hybridization") {
@@ -149,6 +152,7 @@ int main(int argc, char** argv)
               throw std::runtime_error("DMFT Interaction Expansion: unsupported (FLAVORS, SITES) "
                                        "combination; set FLAVORS=2 (single site) or SITES=1 (multiband).");
           }
+          if (alps::cli_is_master()) alps::print_citations(std::cout, "interaction");
         }
         else if (parms["SOLVER"]=="Hybridization") {
           throw std::invalid_argument("The internal hybridization solver has been replaced by a standalone hybridzation solver.\nPlease use the \'hybridization\' program");
