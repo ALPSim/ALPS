@@ -3,6 +3,7 @@ name: CI
   pull_request:
     branches:
     - master
+    - ci/selective-ci
   push:
     branches:
     - master
