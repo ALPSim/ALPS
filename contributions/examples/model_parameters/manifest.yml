@@ -1,8 +1,0 @@
-name: open_chain_formula
-description: Closed-form energy for open chains only; every other lattice is N/A.
-contract: model_parameters
-entry: open_chain_energy
-inputs: [L, t, N]
-models: [tight-binding]
-geometry: [1d]
-lattices: [open chain lattice]
