@@ -9,7 +9,7 @@ license: MIT
 url: https://alps.comp-phys.org/
 repository-code: https://github.com/ALPSim/ALPS
 preferred-citation:
-  type: unpublished
+  type: article
   title: 'The ALPS project release 3.0: open source software for strongly correlated systems'
   authors:
   - family-names: Alet
@@ -50,8 +50,10 @@ preferred-citation:
     given-names: P.
   - family-names: Wolf
     given-names: T. M. R.
-  status: in-preparation
-  notes: Release 3.0 manuscript; publication details are not yet assigned.
+  status: preprint
+  year: 2026
+  doi: 10.48550/arXiv.2610.03884
+  url: https://arxiv.org/abs/2610.03884
   identifiers:
   - type: other
     value: alps30
@@ -554,11 +556,11 @@ references:
   title: Correlated Lattice Fermions in d=∞ Dimensions
   authors:
   - family-names: Metzner
-    given-names: Walter
+    given-names: W.
   - family-names: Vollhardt
-    given-names: Dieter
+    given-names: D.
   year: 1989
-  journal: Phys. Rev. Lett.
+  journal: Physical Review Letters
   volume: '62'
   issue: '3'
   doi: 10.1103/PhysRevLett.62.324
@@ -574,11 +576,11 @@ references:
   title: Hubbard model in infinite dimensions
   authors:
   - family-names: Georges
-    given-names: Antoine
+    given-names: A.
   - family-names: Kotliar
-    given-names: Gabriel
+    given-names: G.
   year: 1992
-  journal: Phys. Rev. B
+  journal: Physical Review B
   volume: '45'
   doi: 10.1103/PhysRevB.45.6479
   publisher:

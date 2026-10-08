@@ -80,10 +80,9 @@ is provenance, not a dependency of the build.
   cite their chosen solver as well. Arbitrary external solvers cannot be inferred.
 - Scheduler-dependent applications also credit the scheduler implementation listed
   in the paper. Parapack/looper is not assumed to be the same scheduler.
-- The release 3.0 preferred citation is explicitly an unpublished manuscript.
-  No publication year, journal, DOI, or preprint identifier has been invented.
-  Update this record when publication metadata is assigned. The current draft
-  author list is transcribed from the manuscript and should be checked at release.
+- The release 3.0 preferred citation is the arXiv preprint (arXiv:2610.03884),
+  recorded with its arXiv DOI and `status: preprint`; its author list matches the
+  arXiv listing. Replace it with the journal record once published.
 - Existing runtime references absent from the paper (for example the extra CT-HYB
   PRB 84 reference) were not carried over automatically. Additional scientific
   requirements should be reviewed and added explicitly to the authorities.
@@ -99,9 +98,9 @@ write the startup notice to stderr to preserve their numerical stdout format.
 Multiple tasks in one invocation share the notice. The framework paper is always
 reference [1], followed by algorithm and implementation references, with each paper
 listed once. Startup uses short authors and publication coordinates; unpublished
-papers retain their title and status. Up to three authors are listed; longer lists
-use the first author followed by "et al.". Complete titles and DOI links appear
-in the detailed guidance.
+papers retain their title and status, and preprints also show their arXiv
+identifier. Up to three authors are listed; longer lists use the first author
+followed by "et al.". Complete titles and DOI links appear in the detailed guidance.
 
 Set `ALPS_NO_CITATIONS=1` to suppress automatic compact citation notices in batch
 runs. Only the literal value `1` disables them: unset, empty, `0`, and other values

@@ -76,6 +76,12 @@ class CitationTests(unittest.TestCase):
               "status": "in-preparation"},
              'F. Alet et al., "Release manuscript." In preparation.',
              "F. Alet et al., Release manuscript; in preparation."),
+            ({"title": "Release paper", "authors": [
+                {"given-names": "F.", "family-names": "Alet"},
+                {"family-names": "Chen"}, {"family-names": "Feiguin"}, {"family-names": "Wolf"}],
+              "year": 2026, "status": "preprint", "doi": "10.48550/arXiv.2610.03884"},
+             'F. Alet et al., "Release paper." arXiv:2610.03884 (2026). Preprint. https://doi.org/10.48550/arXiv.2610.03884',
+             "F. Alet et al., Release paper, arXiv:2610.03884 (2026); preprint."),
             ({"title": "Undated paper", "authors": [{"name": "ALPS collaboration"}],
               "journal": "Physics Journal", "volume": "5", "start": "7"},
              'ALPS collaboration, "Undated paper." Physics Journal 5, 7.',
@@ -171,6 +177,7 @@ class CitationTests(unittest.TestCase):
         old = copy.deepcopy(preferred)
         preferred["identifiers"][0]["value"] = "future_release"
         preferred["title"] = "A future release"
+        preferred.pop("doi", None)  # a new release paper has its own DOI
         self.cff["references"].append(old)
         self.save()
         _, policy, references, framework = generator.load_catalog(self.root)

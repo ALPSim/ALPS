@@ -134,9 +134,18 @@ def citation_authors(reference):
     return authors[0] + " et al." if len(authors) > 3 else ", ".join(authors)
 
 
+def arxiv_id(reference):
+    """arXiv identifier of a preprint recorded with its arXiv DOI, else None."""
+    doi = reference.get("doi", "")
+    prefix = "10.48550/arxiv."
+    return doi[len(prefix):] if doi.lower().startswith(prefix) else None
+
+
 def citation(reference):
     text = citation_authors(reference) + ', "' + reference["title"] + '."'
     venue = reference.get("journal") or reference.get("collection-title")
+    if not venue and arxiv_id(reference):
+        venue = "arXiv:" + arxiv_id(reference)
     if venue:
         text += " " + venue
         if "volume" in reference:
@@ -181,7 +190,10 @@ def detailed_notice(policy, references, framework, component):
 
 
 def compact_citation(reference):
-    """Short authors and publication coordinates, or unpublished title/status."""
+    """Short authors and publication coordinates, or unpublished title/status.
+
+    Preprints keep their title and add the arXiv identifier.
+    """
     venue = reference.get("journal") or reference.get("collection-title")
     text = citation_authors(reference) + ", " + (venue or reference["title"])
     if venue:
@@ -189,6 +201,8 @@ def compact_citation(reference):
             text += " " + str(reference["volume"])
         if "start" in reference:
             text += ", " + str(reference["start"])
+    elif arxiv_id(reference):
+        text += ", arXiv:" + arxiv_id(reference)
     if "year" in reference:
         text += " (" + str(reference["year"]) + ")"
     if "status" in reference:

@@ -13,7 +13,7 @@ This is a request for scientific credit, separate from the MIT license terms.
 
 ## Framework paper
 
-F. Alet et al., "The ALPS project release 3.0: open source software for strongly correlated systems." In preparation. Release 3.0 manuscript; publication details are not yet assigned.
+F. Alet et al., "The ALPS project release 3.0: open source software for strongly correlated systems." arXiv:2610.03884 (2026). Preprint. https://doi.org/10.48550/arXiv.2610.03884
 
 ## Application citation matrix
 
@@ -41,7 +41,7 @@ Cite the relevant impurity-solver references as well when using a solver through
 
 ### alps30
 
-F. Alet et al., "The ALPS project release 3.0: open source software for strongly correlated systems." In preparation. Release 3.0 manuscript; publication details are not yet assigned.
+F. Alet et al., "The ALPS project release 3.0: open source software for strongly correlated systems." arXiv:2610.03884 (2026). Preprint. https://doi.org/10.48550/arXiv.2610.03884
 
 ### troyer1998scheduler
 
@@ -149,11 +149,11 @@ J. E. Hirsch, R. M. Fye, "Monte Carlo Method for Magnetic Impurities in Metals."
 
 ### metzner1989
 
-Walter Metzner, Dieter Vollhardt, "Correlated Lattice Fermions in d=∞ Dimensions." Phys. Rev. Lett. 62, 324–327 (1989). https://doi.org/10.1103/PhysRevLett.62.324
+W. Metzner, D. Vollhardt, "Correlated Lattice Fermions in d=∞ Dimensions." Physical Review Letters 62, 324–327 (1989). https://doi.org/10.1103/PhysRevLett.62.324
 
 ### georges1992
 
-Antoine Georges, Gabriel Kotliar, "Hubbard model in infinite dimensions." Phys. Rev. B 45, 6479–6483 (1992). https://doi.org/10.1103/PhysRevB.45.6479
+A. Georges, G. Kotliar, "Hubbard model in infinite dimensions." Physical Review B 45, 6479–6483 (1992). https://doi.org/10.1103/PhysRevB.45.6479
 
 ### georges1996
 
