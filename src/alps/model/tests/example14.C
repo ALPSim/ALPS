@@ -1,0 +1,46 @@
+#include <alps/testing/stream_fixture.hpp>
+/*****************************************************************************
+*
+* ALPS Project: Algorithms and Libraries for Physics Simulations
+*
+* ALPS Libraries
+*
+* Copyright (C) 2003-2004 by Matthias Troyer <troyer@itp.phys.ethz.ch>
+*
+* ALPS Project: https://alps.comp-phys.org/
+* SPDX-License-Identifier: MIT
+*
+*****************************************************************************/
+
+/* $Id$ */
+
+#include <alps/model.h>
+#include <alps/numeric/round.hpp>
+#include <alps/model/blochbasisstates.h>
+#include <iostream>
+
+TEST(ModelSerialization, Example14) {
+  alps::testing::StreamFixture transcript(ALPS_TEST_SOURCE_DIR "/example14.input");
+  { // Flush serialization objects before checking the captured stream.
+    alps::Parameters parms;
+    std::cin >> parms;
+    alps::ModelLibrary models(parms);
+    alps::graph_helper<> lattices(parms);
+    alps::HamiltonianDescriptor<short> ham(models.get_hamiltonian(parms["MODEL"]));
+    parms.copy_undefined(ham.default_parameters());
+    ham.set_parameters(parms);
+    alps::basis_states_descriptor<short> basis(ham.basis(),lattices.graph());
+    std::vector<double> k(2,0.);
+    std::vector<std::pair<std::complex<double>,std::vector<std::size_t> > > trans = lattices.translations(k);
+    for (int i=0;i<trans.size();++i) {
+      std::cout << "Translation " << i << " with phase "
+                << alps::numeric::round<1>(trans[i].first) << " maps ";
+      for (int j=0;j<trans[i].second.size();++j)
+        std::cout << j << "->" << trans[i].second[j] << " ";
+      std::cout << "\n";
+    }
+    alps::bloch_basis_states<short> states(basis,trans);
+    std::cout << "Built states:\n" << states << std::endl;
+  }
+  transcript.expect_output(ALPS_TEST_SOURCE_DIR "/example14.output");
+}

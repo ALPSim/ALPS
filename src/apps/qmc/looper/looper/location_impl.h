@@ -1,0 +1,149 @@
+/*****************************************************************************
+*
+* ALPS Project Applications
+*
+* Copyright (C) 1997-2007 by Synge Todo <wistaria@comp-phys.org>
+*
+* ALPS Project: https://alps.comp-phys.org/
+* SPDX-License-Identifier: MIT
+*
+*****************************************************************************/
+
+#ifndef LOOPER_LOCATION_IMPL_H
+#define LOOPER_LOCATION_IMPL_H
+
+#include "location.h"
+#include <alps/osiris.h>
+#include <boost/throw_exception.hpp>
+#include <stdexcept>
+
+namespace looper {
+
+class location {
+public:
+  location(int pos = 0, bool is_bond = true) : loc_(pos << 1 | (is_bond ? 1 : 0)) {}
+  int pos() const { return loc_ >> 1; }
+  bool is_bond() const { return loc_ & 1; }
+  bool is_site() const { return !is_bond(); }
+  bool operator==(const location& rhs) const { return loc_ == rhs.loc_; }
+  bool operator!=(const location& rhs) const { return !operator==(rhs); }
+  void save(alps::ODump& dump) const { dump << loc_; }
+  void load(alps::IDump& dump) { dump >> loc_; }
+  static location bond_location(int pos) { return location(pos, true); }
+  static location site_location(int pos) { return location(pos, false); }
+private:
+  int loc_;
+};
+
+inline int pos(const location& loc) { return loc.pos(); }
+inline bool is_bond(const location& loc) { return loc.is_bond(); }
+inline bool is_site(const location& loc) { return loc.is_site(); }
+
+} // end namespace looper
+
+namespace looper {
+
+inline alps::ODump& operator<<(alps::ODump& dump, const looper::location& loc) {
+  loc.save(dump); return dump;
+}
+
+inline alps::IDump& operator>>(alps::IDump& dump, looper::location& loc) {
+  loc.load(dump); return dump;
+}
+
+} // end namespace looper
+
+
+namespace looper {
+
+// optimized version for models with bond terms only
+
+class location_bond {
+public:
+  location_bond(int pos = 0, bool is_bond = true) : loc_(pos) {
+    if (!is_bond) boost::throw_exception(std::invalid_argument("location_bond"));
+  }
+  int pos() const { return loc_; }
+  static bool is_bond() { return true; }
+  static bool is_site() { return false; }
+  bool operator==(const location_bond& rhs) const { return loc_ == rhs.loc_; }
+  bool operator!=(const location_bond& rhs) const { return !operator==(rhs); }
+  static location_bond bond_location(int pos) { return location_bond(pos); }
+  static location_bond site_location(int) {
+    boost::throw_exception(std::logic_error("location_bond"));
+    return location_bond();
+  }
+  void save(alps::ODump& dump) const { dump << loc_; }
+  void load(alps::IDump& dump) { dump >> loc_; }
+private:
+  int loc_;
+};
+
+inline int pos(const location_bond& loc) { return loc.pos(); }
+inline bool is_bond(const location_bond&) { return true; }
+inline bool is_site(const location_bond&) { return false; }
+
+} // end namespace looper
+
+namespace looper {
+
+inline alps::ODump& operator<<(alps::ODump& dump, const looper::location_bond& loc) {
+  loc.save(dump); return dump;
+}
+
+inline alps::IDump& operator>>(alps::IDump& dump, looper::location_bond& loc) {
+  loc.load(dump); return dump;
+}
+
+} // end namespace looper
+
+
+namespace looper {
+
+// for long-range models
+
+class location_longrange {
+public:
+  location_longrange(int pos = 0) : source_(pos << 1) {}
+  location_longrange(int source, int target) : source_(source << 1 | 1), target_(target) {}
+  int pos() const { return source_ >> 1; }
+  int source() const { return source_ >> 1; }
+  int target() const { return target_; }
+  bool is_bond() const { return source_ & 1; }
+  bool is_site() const { return !is_bond(); }
+  bool operator==(const location_longrange& rhs) const {
+    return source_ == rhs.source_ && target_ == rhs.target_;
+  }
+  bool operator!=(const location_longrange& rhs) const { return !operator==(rhs); }
+  void save(alps::ODump& dump) const { dump << source_ << target_; }
+  void load(alps::IDump& dump) { dump >> source_ >> target_; }
+  static location_longrange bond_location(int source, int target) {
+    return location_longrange(source, target);
+  }
+  static location_longrange site_location(int pos) { return location_longrange(pos); }
+private:
+  int source_;
+  int target_;
+};
+
+inline int pos(const location_longrange& loc) { return loc.pos(); }
+inline int source(const location_longrange& loc) { return loc.source(); }
+inline int target(const location_longrange& loc) { return loc.target(); }
+inline bool is_bond(const location_longrange&) { return true; }
+inline bool is_site(const location_longrange&) { return false; }
+
+} // end namespace looper
+
+namespace looper {
+
+inline alps::ODump& operator<<(alps::ODump& dump, const looper::location_longrange& loc) {
+  loc.save(dump); return dump;
+}
+
+inline alps::IDump& operator>>(alps::IDump& dump, looper::location_longrange& loc) {
+  loc.load(dump); return dump;
+}
+
+} // end namespace looper
+
+#endif // LOOPER_LOCATION_IMPL_H

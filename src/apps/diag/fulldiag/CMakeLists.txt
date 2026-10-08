@@ -1,0 +1,41 @@
+#  Copyright Matthias Troyer 2009 - 2010.
+#   Permission is hereby granted, free of charge, to any person obtaining
+#   a copy of this software and associated documentation files (the “Software”),
+#   to deal in the Software without restriction, including without limitation
+#   the rights to use, copy, modify, merge, publish, distribute, sublicense,
+#   and/or sell copies of the Software, and to permit persons to whom the
+#   Software is furnished to do so, subject to the following conditions:
+#
+#   The above copyright notice and this permission notice shall be included
+#   in all copies or substantial portions of the Software.
+#
+#   THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS
+#   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+#   DEALINGS IN THE SOFTWARE.
+
+add_library(fulldiag_impl STATIC factory.C)
+target_link_libraries(fulldiag_impl PUBLIC ALPS::alps)
+
+add_executable(fulldiag fulldiag.C)
+add_executable(fulldiag_evaluate fulldiag_evaluate.C)
+target_link_libraries(fulldiag PRIVATE fulldiag_impl)
+target_link_libraries(fulldiag_evaluate PRIVATE fulldiag_impl)
+
+if(ALPS_BUILD_TESTING)
+  add_test(NAME fulldiag_evaluate_help COMMAND fulldiag_evaluate --help)
+  set_tests_properties(fulldiag_evaluate_help PROPERTIES PASS_REGULAR_EXPRESSION "Usage:")
+  add_test(NAME fulldiag_evaluate_license COMMAND fulldiag_evaluate --license)
+  set_tests_properties(fulldiag_evaluate_license PROPERTIES PASS_REGULAR_EXPRESSION
+                                                            "Licensed under the MIT License")
+  add_test(NAME fulldiag_evaluate_no_arguments COMMAND fulldiag_evaluate)
+  set_tests_properties(fulldiag_evaluate_no_arguments PROPERTIES WILL_FAIL TRUE)
+  set_tests_properties(fulldiag_evaluate_help fulldiag_evaluate_license
+    fulldiag_evaluate_no_arguments PROPERTIES LABELS "fulldiag;cli" TIMEOUT 60
+    ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")
+endif()
+
+alps_install_applications(fulldiag fulldiag_evaluate)

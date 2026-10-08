@@ -1,0 +1,498 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *                                                                                 *
+ * ALPS Project: Algorithms and Libraries for Physics Simulations                  *
+ *                                                                                 *
+ * ALPS Libraries                                                                  *
+ *                                                                                 *
+ * Copyright (C) 2013 by Andreas Hehn <hehn@phys.ethz.ch>                          *
+ *                                                                                 *
+ * ALPS Project: https://alps.comp-phys.org/                                       *
+ * SPDX-License-Identifier: MIT                                                    *
+ *                                                                                 *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#include <gtest/gtest.h>
+#include "graph_assertions.hpp"
+#include <alps/graph/canonical_properties.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <iostream>
+
+typedef boost::property<alps::edge_type_t,unsigned int> edge_props;
+typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, boost::no_property, edge_props> graph_type;
+typedef boost::graph_traits<graph_type>::edge_descriptor edge_descriptor;
+typedef boost::graph_traits<graph_type>::edge_iterator edge_iterator;
+typedef boost::property_map<graph_type,alps::edge_type_t>::type edge_color_map_type;
+
+
+
+
+TEST(GraphColorSymmetry, colored_edges_with_color_symmetry_test1) {
+    typedef alps::graph::graph_label<graph_type>::type label_type;
+    using alps::graph::canonical_properties;
+
+    // g: O---O+++O+++O
+    graph_type g(4);
+    {
+        edge_color_map_type edge_color = get(alps::edge_type_t(),g);
+        edge_descriptor e;
+        e = add_edge(0, 1, g).first;
+        edge_color[e] = 0;
+        e = add_edge(1, 2, g).first;
+        edge_color[e] = 1;
+        e = add_edge(2, 3, g).first;
+        edge_color[e] = 1;
+    }
+
+    // h: O+++O---O---O
+    graph_type h(g);
+    {
+        unsigned int const map[] = {1,0};
+        edge_iterator it,end;
+        for(boost::tie(it,end) = edges(h); it != end; ++it)
+            get(alps::edge_type_t(),h)[*it] = map[get(alps::edge_type_t(),h)[*it]];
+    }
+
+    // i: O---O+++O---O
+    graph_type i(g);
+    {
+        edge_descriptor e = edge(2,3,i).first;
+        get(alps::edge_type_t(),i)[e] = 0;
+    }
+
+    // j: O+++O---O---O
+    graph_type j(i);
+    {
+        unsigned int const map[] = {1,0};
+        edge_iterator it,end;
+        for(boost::tie(it,end) = edges(j); it != end; ++it)
+            get(alps::edge_type_t(),j)[*it] = map[get(alps::edge_type_t(),j)[*it]];
+    }
+
+
+    alps::graph::color_partition<graph_type>::type color_symmetry;
+    color_symmetry[0] = 0;
+    color_symmetry[1] = 0;
+
+    label_type lg(get<1>(canonical_properties(g)));
+    label_type lh(get<1>(canonical_properties(h)));
+    label_type li(get<1>(canonical_properties(i)));
+    label_type lj(get<1>(canonical_properties(j)));
+
+
+    label_type lg_with_sym(get<1>(canonical_properties(g,color_symmetry)));
+    label_type lh_with_sym(get<1>(canonical_properties(h,color_symmetry)));
+    label_type li_with_sym(get<1>(canonical_properties(i,color_symmetry)));
+    label_type lj_with_sym(get<1>(canonical_properties(j,color_symmetry)));
+
+    expect_label_encoding(lg, "(0100101000 101010 (0 1))");
+    expect_label_encoding(lh, "(0100101000 001110 (0 1))");
+    expect_label_encoding(li, "(0100101000 100011 (0 1))");
+    expect_label_encoding(lj, "(0100101000 011100 (0 1))");
+    expect_label_encoding(lg_with_sym, "(0100101000 010101 (0 1))");
+    expect_label_encoding(lh_with_sym, "(0100101000 010101 (0 1))");
+    expect_label_encoding(li_with_sym, "(0100101000 100011 (0 1))");
+    expect_label_encoding(lj_with_sym, "(0100101000 100011 (0 1))");
+
+    // False statements
+    EXPECT_FALSE((lg == lh));
+    EXPECT_FALSE((lg == li));
+    EXPECT_FALSE((lg == lj));
+    EXPECT_FALSE((lh == li));
+    EXPECT_FALSE((lh == lj));
+    EXPECT_FALSE((li == lj));
+
+    // True statements
+    EXPECT_TRUE((lg_with_sym == lh_with_sym));
+    EXPECT_TRUE((li_with_sym == lj_with_sym));
+
+    // False statements
+    EXPECT_FALSE((lg_with_sym == li_with_sym));
+
+
+}
+
+TEST(GraphColorSymmetry, colored_edges_with_color_symmetry_test2) {
+    typedef alps::graph::graph_label<graph_type>::type label_type;
+    using alps::graph::canonical_properties;
+
+    // g:
+    //       4              c0 ---
+    //       +              c1 +++
+    //   1---0+++2          c2 ===
+    //   \\ /
+    //     3
+    graph_type g(5);
+    {
+        edge_color_map_type edge_color = get(alps::edge_type_t(),g);
+        edge_descriptor e;
+        e = add_edge(0,1,g).first;
+        edge_color[e] = 0;
+        e = add_edge(0,2,g).first;
+        edge_color[e] = 1;
+        e = add_edge(0,3,g).first;
+        edge_color[e] = 0;
+        e = add_edge(0,4,g).first;
+        edge_color[e] = 1;
+        e = add_edge(1,3,g).first;
+        edge_color[e] = 2;
+    }
+
+    // h:
+    //       4              c0 ---
+    //       +              c1 +++
+    //   1===0+++2          c2 ===
+    //    \ //
+    //     3
+    graph_type h(g);
+    {
+        unsigned int const map[] = {2,1,0};
+        edge_iterator it,end;
+        for(boost::tie(it,end) = edges(h); it != end; ++it)
+            get(alps::edge_type_t(),h)[*it] = map[get(alps::edge_type_t(),h)[*it]];
+    }
+
+
+    // i:
+    //       4              c0 ---
+    //       ||             c1 +++
+    //   1---0===2          c2 ===
+    //    + /
+    //     3
+    graph_type i(g);
+    {
+        unsigned int const map[] = {0,2,1};
+        edge_iterator it,end;
+        for(boost::tie(it,end) = edges(i); it != end; ++it)
+            get(alps::edge_type_t(),i)[*it] = map[get(alps::edge_type_t(),i)[*it]];
+    }
+
+
+    // color   grp0  grp1
+    // colors (0,2)  (1)
+    alps::graph::color_partition<graph_type>::type color_symmetry;
+    color_symmetry[0] = 0;
+    color_symmetry[1] = 1;
+    color_symmetry[2] = 0;
+
+    label_type lg(get<1>(canonical_properties(g)));
+    label_type lh(get<1>(canonical_properties(h)));
+    label_type li(get<1>(canonical_properties(i)));
+
+    label_type lg_with_sym(get<1>(canonical_properties(g,color_symmetry)));
+    label_type lh_with_sym(get<1>(canonical_properties(h,color_symmetry)));
+    label_type li_with_sym(get<1>(canonical_properties(i,color_symmetry)));
+
+    expect_label_encoding(lg, "(010110100010000 001000001111000 (0 1 2))");
+    expect_label_encoding(lh, "(010110100010000 110000001100100 (0 1 2))");
+    expect_label_encoding(li, "(010110100010000 000110010011000 (0 1 2))");
+    expect_label_encoding(lg_with_sym, "(010110100010000 110000001100100 (0 1 2))");
+    expect_label_encoding(lh_with_sym, "(010110100010000 110000001100100 (0 1 2))");
+    expect_label_encoding(li_with_sym, "(010110100010000 110000010000011 (0 1 2))");
+
+    // False statements
+    EXPECT_FALSE((lg == lh));
+    EXPECT_FALSE((lg == li));
+    EXPECT_FALSE((lh == li));
+
+    // True statements
+    EXPECT_TRUE((lg_with_sym == lh_with_sym));
+
+    // False statements
+    EXPECT_FALSE((lg_with_sym == li_with_sym));
+
+
+}
+
+TEST(GraphColorSymmetry, colored_edges_with_color_symmetry_test3) {
+    typedef alps::graph::graph_label<graph_type>::type label_type;
+    using alps::graph::canonical_properties;
+
+    // g: O---O---O---O
+    graph_type g(4);
+    {
+        edge_color_map_type edge_color = get(alps::edge_type_t(),g);
+        edge_descriptor e;
+        e = add_edge(0, 1, g).first;
+        edge_color[e] = 0;
+        e = add_edge(1, 2, g).first;
+        edge_color[e] = 0;
+        e = add_edge(2, 3, g).first;
+        edge_color[e] = 0;
+    }
+
+    // h: O+++O+++O+++O
+    graph_type h(g);
+    {
+        unsigned int const map[] = {1,0};
+        edge_iterator it,end;
+        for(boost::tie(it,end) = edges(h); it != end; ++it)
+            get(alps::edge_type_t(),h)[*it] = map[get(alps::edge_type_t(),h)[*it]];
+    }
+
+    alps::graph::color_partition<graph_type>::type color_symmetry;
+    color_symmetry[0] = 0;
+    color_symmetry[1] = 0;
+
+    label_type lg(get<1>(canonical_properties(g)));
+    label_type lh(get<1>(canonical_properties(h)));
+
+    label_type lg_with_sym(get<1>(canonical_properties(g,color_symmetry)));
+    label_type lh_with_sym(get<1>(canonical_properties(h,color_symmetry)));
+
+    expect_label_encoding(lg, "(0100101000 111 (0))");
+    expect_label_encoding(lh, "(0100101000 111 (1))");
+    expect_label_encoding(lg_with_sym, "(0100101000 000111 (0 1))");
+    expect_label_encoding(lh_with_sym, "(0100101000 000111 (0 1))");
+
+    // False statements
+    EXPECT_FALSE((lg == lh));
+
+    // True statements
+    EXPECT_TRUE((lg_with_sym == lh_with_sym));
+
+}
+
+TEST(GraphColorSymmetry, colored_edges_with_color_symmetry_test4) {
+    typedef alps::graph::graph_label<graph_type>::type label_type;
+    using alps::graph::canonical_properties;
+
+    // g:
+    //   2++++4     c0 +++
+    //  /    /      c1 ---
+    // 0++++1       c2 ...
+    //  .
+    //   3
+    graph_type g(4);
+    {
+        edge_color_map_type edge_color = get(alps::edge_type_t(),g);
+        edge_descriptor e;
+        e = add_edge(0, 1, g).first;
+        edge_color[e] = 0;
+        e = add_edge(0, 2, g).first;
+        edge_color[e] = 1;
+        e = add_edge(0, 3, g).first;
+        edge_color[e] = 2;
+        e = add_edge(1, 4, g).first;
+        edge_color[e] = 1;
+        e = add_edge(2, 4, g).first;
+        edge_color[e] = 0;
+    }
+
+    // h:
+    //        2++++4     c0 +++
+    //       /    /      c1 ---
+    //      0++++1       c2 ...
+    //     /
+    //    3
+    graph_type h(g);
+    {
+        unsigned int const map[] = {0,1,0};
+        edge_iterator it,end;
+        for(boost::tie(it,end) = edges(h); it != end; ++it)
+            get(alps::edge_type_t(),h)[*it] = map[get(alps::edge_type_t(),h)[*it]];
+    }
+
+    // i:
+    //        2++++4     c0 +++
+    //       /    /      c1 ---
+    // 3++++0++++1       c2 ...
+    //
+    graph_type i(g);
+    {
+        unsigned int const map[] = {0,1,1};
+        edge_iterator it,end;
+        for(boost::tie(it,end) = edges(i); it != end; ++it)
+            get(alps::edge_type_t(),i)[*it] = map[get(alps::edge_type_t(),i)[*it]];
+    }
+    // color   grp0
+    // colors (0,1,2)
+    alps::graph::color_partition<graph_type>::type color_symmetry;
+    color_symmetry[0] = 0;
+    color_symmetry[1] = 0;
+    color_symmetry[2] = 0;
+
+    label_type lg(get<1>(canonical_properties(g)));
+    label_type lh(get<1>(canonical_properties(h)));
+    label_type li(get<1>(canonical_properties(i)));
+
+    label_type lg_with_sym(get<1>(canonical_properties(g,color_symmetry)));
+    label_type lh_with_sym(get<1>(canonical_properties(h,color_symmetry)));
+    label_type li_with_sym(get<1>(canonical_properties(i,color_symmetry)));
+
+    expect_label_encoding(lg, "(000110110010000 000010110010010 (0 1 2))");
+    expect_label_encoding(lh, "(000110110010000 0110010011 (0 1))");
+    expect_label_encoding(li, "(000110110010000 0110110010 (0 1))");
+    expect_label_encoding(lg_with_sym, "(000110110010000 011001001000001 (0 1 2))");
+    expect_label_encoding(lh_with_sym, "(000110110010000 000000110010011 (0 1 2))");
+    expect_label_encoding(li_with_sym, "(000110110010000 000000110010011 (0 1 2))");
+
+    // False statements
+    EXPECT_FALSE((lg == lh));
+    EXPECT_FALSE((lg == li));
+    EXPECT_FALSE((lh == li));
+
+    // True statements
+    EXPECT_TRUE((lh_with_sym == li_with_sym));
+
+    // False statements
+    EXPECT_FALSE((lg_with_sym == lh_with_sym));
+}
+
+TEST(GraphColorSymmetry, colored_edges_with_color_symmetry_test5) {
+    typedef alps::graph::graph_label<graph_type>::type label_type;
+    typedef boost::container::flat_map<alps::type_type, alps::type_type> color_map_type;
+    using alps::graph::canonical_properties;
+
+    // g:
+    //     3        c0 +++
+    //     |        c1 ---
+    // 2+++1+++0
+    //
+    graph_type g(4);
+    {
+        edge_color_map_type edge_color = get(alps::edge_type_t(),g);
+        edge_descriptor e;
+        e = add_edge(0, 1, g).first;
+        edge_color[e] = 0;
+        e = add_edge(1, 2, g).first;
+        edge_color[e] = 0;
+        e = add_edge(1, 3, g).first;
+        edge_color[e] = 1;
+    }
+
+    // h:
+    //     1        c0 +++
+    //     +        c1 ---
+    // 2---0---3
+    //
+    graph_type h(4);
+    {
+        edge_color_map_type edge_color = get(alps::edge_type_t(),h);
+        edge_descriptor e;
+        e = add_edge(0, 1, h).first;
+        edge_color[e] = 0;
+        e = add_edge(0, 2, h).first;
+        edge_color[e] = 1;
+        e = add_edge(0, 3, h).first;
+        edge_color[e] = 1;
+    }
+
+    // color   grp0
+    // colors (0,1)
+    alps::graph::color_partition<graph_type>::type color_symmetry;
+    color_symmetry[0] = 0;
+    color_symmetry[1] = 0;
+
+    label_type lg(get<1>(canonical_properties(g)));
+    label_type lh(get<1>(canonical_properties(h)));
+
+    color_map_type lg_colormap;
+    color_map_type lh_colormap;
+    label_type lg_with_sym(get<1>(canonical_properties(g, color_symmetry, &lg_colormap)));
+    label_type lh_with_sym(get<1>(canonical_properties(h, color_symmetry, &lh_colormap)));
+
+    expect_label_encoding(lg, "(0101001000 001110 (0 1))");
+    expect_label_encoding(lh, "(0101001000 011100 (0 1))");
+    expect_label_encoding(lg_with_sym, "(0101001000 010101 (0 1))");
+    expect_color_mapping(lg_colormap, {{0, 0}, {1, 1}});
+    expect_label_encoding(lh_with_sym, "(0101001000 010101 (0 1))");
+    expect_color_mapping(lh_colormap, {{0, 1}, {1, 0}});
+
+    // False statements
+    EXPECT_FALSE((lg == lh));
+
+    // True statements
+    EXPECT_TRUE((lg_with_sym == lh_with_sym));
+}
+
+TEST(GraphColorSymmetry, colored_edges_with_color_symmetry_test6) {
+    typedef alps::graph::graph_label<graph_type>::type label_type;
+    typedef boost::container::flat_map<alps::type_type, alps::type_type> color_map_type;
+    using alps::graph::canonical_properties;
+
+    // g:
+    //              c0 +++
+    //              c2 ...
+    // 1+++0...2
+    //
+    graph_type g(3);
+    {
+        edge_color_map_type edge_color = get(alps::edge_type_t(),g);
+        edge_descriptor e;
+        e = add_edge(0, 1, g).first;
+        edge_color[e] = 0;
+        e = add_edge(0, 2, g).first;
+        edge_color[e] = 2;
+    }
+
+    // color   grp0
+    // colors (0,1,2)
+    alps::graph::color_partition<graph_type>::type color_symmetry;
+    color_symmetry[0] = 0;
+    color_symmetry[1] = 0;
+    color_symmetry[2] = 0;
+
+    label_type lg(get<1>(canonical_properties(g)));
+
+    color_map_type lg_colormap;
+    label_type lg_with_sym(get<1>(canonical_properties(g, color_symmetry, &lg_colormap)));
+
+    expect_label_encoding(lg, "(010100 0110 (0 2))");
+    expect_label_encoding(lg_with_sym, "(010100 001001 (0 1 2))");
+    expect_color_mapping(lg_colormap, {{0, 0}, {1, 2}, {2, 1}});
+}
+
+TEST(GraphColorSymmetry, colored_edges_with_color_symmetry_test7) {
+    typedef alps::graph::graph_label<graph_type>::type label_type;
+    typedef boost::container::flat_map<alps::type_type, alps::type_type> color_map_type;
+    using alps::graph::canonical_properties;
+    graph_type g(8);
+    {
+        edge_descriptor e;
+        edge_color_map_type edge_color = get(alps::edge_type_t(),g);
+        e = add_edge(0, 1, g).first; edge_color[e] = 1;
+        e = add_edge(2, 1, g).first; edge_color[e] = 1;
+        e = add_edge(3, 1, g).first; edge_color[e] = 0;
+        e = add_edge(4, 0, g).first; edge_color[e] = 0;
+        e = add_edge(2, 0, g).first; edge_color[e] = 0;
+        e = add_edge(5, 3, g).first; edge_color[e] = 0;
+        e = add_edge(2, 3, g).first; edge_color[e] = 1;
+        e = add_edge(6, 0, g).first; edge_color[e] = 1;
+        e = add_edge(7, 3, g).first; edge_color[e] = 1;
+    }
+    graph_type h(8);
+    {
+        edge_descriptor e;
+        edge_color_map_type edge_color = get(alps::edge_type_t(), h);
+        e = add_edge(4, 7, h).first; edge_color[e] = 1;
+        e = add_edge(4, 5, h).first; edge_color[e] = 1;
+        e = add_edge(4, 6, h).first; edge_color[e] = 0;
+        e = add_edge(0, 7, h).first; edge_color[e] = 0;
+        e = add_edge(5, 7, h).first; edge_color[e] = 0;
+        e = add_edge(3, 6, h).first; edge_color[e] = 0;
+        e = add_edge(5, 6, h).first; edge_color[e] = 1;
+        e = add_edge(1, 7, h).first; edge_color[e] = 1;
+        e = add_edge(2, 6, h).first; edge_color[e] = 1;
+    }
+
+    alps::graph::color_partition<graph_type>::type color_symmetry;
+    color_symmetry[0] = 0;
+    color_symmetry[1] = 0;
+
+    color_map_type lg_colormap;
+    label_type lg(get<1>(canonical_properties(g)));
+    label_type lg_with_sym(get<1>(canonical_properties(g, color_symmetry, &lg_colormap)));
+
+    color_map_type lh_colormap;
+    label_type lh(get<1>(canonical_properties(h)));
+    label_type lh_with_sym(get<1>(canonical_properties(h, color_symmetry, &lh_colormap)));
+    // True statements
+    EXPECT_TRUE((lg == lh));
+    EXPECT_TRUE((lg_with_sym == lh_with_sym));
+    expect_label_encoding(lg, "(000110111001000010000100000010000000 011010101100101010 (0 1))");
+    expect_label_encoding(lg_with_sym, "(000110111001000010000100000010000000 011000110100111001 (0 1))");
+    expect_color_mapping(lg_colormap, {{0, 1}, {1, 0}});
+    expect_label_encoding(lh, "(000110111001000010000100000010000000 011010101100101010 (0 1))");
+    expect_label_encoding(lh_with_sym, "(000110111001000010000100000010000000 011000110100111001 (0 1))");
+    expect_color_mapping(lh_colormap, {{0, 1}, {1, 0}});
+}
