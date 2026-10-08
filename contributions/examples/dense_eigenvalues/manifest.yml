@@ -1,0 +1,6 @@
+name: jacobi_ed
+description: Dense exact diagonalization of the single-particle matrix by cyclic Jacobi rotations.
+contract: dense_eigenvalues
+entry: jacobi_eigenvalues
+models: [tight-binding]
+geometry: [1d, 2d]
