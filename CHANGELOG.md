@@ -1,31 +1,30 @@
 # Changelog
 
-User-facing changes and migration notes are recorded here, starting with the build modernization. Earlier releases are not yet catalogued in this file.
+User-facing changes and migration notes are recorded here, starting with the build modernization after the released 3.0. Earlier releases are not yet catalogued in this file.
 
 ## Unreleased
 
+These changes are for a future release after 3.0; the version and date are not yet assigned. The SDK changes require downstream rebuilds and some source/build-script migration.
+
 ### Changed
 
-- Fix defects exposed by sanitizer coverage: reclaim scalar HDF5 variable-length
-  strings, release owned observables when clearing an observable set, and handle
-  empty vector/valarray conversions without indexing nonexistent elements.
 - Standardize native runtime tests on GoogleTest with individually discoverable
   CTest cases, isolated fixtures, numerical assertions, and preserved historical
   serialization contracts. Add development, MPI, extensive, and sanitizer test
   presets; see [the testing guide](tests/README.md). GoogleTest is required only
   when building tests and is never installed with the SDK.
 - Run standalone NumPy tutorial checks independently of native builds. Use
-  representative PR configurations and the full supported matrix for shared
-  build changes, scheduled validation and releases; retain installed-artifact,
+  focused PR configurations and the full compatibility matrix for weekly,
+  manual and release validation; retain installed-artifact,
   multi-rank MPI and sanitizer checks with machine-readable test reports.
 
 - Require HDF5 1.10.5 or newer for source builds and installed SDK consumers, retaining compatibility with the system package used by the manylinux_2_28 wheel build.
 - Require Python 3.11 or newer for pyalps. Keep a separate CPython 3.11 wheel and use one `cp312-abi3` wheel for Python 3.12 and newer. Downstream nanobind extensions must pass `STABLE_ABI` to share pyalps types on Python 3.12+.
-- Export `ALPS::configuration`, `ALPS::containers`, `ALPS::numerics`, `ALPS::numeric_io`, `ALPS::numeric_xml` and `ALPS::solver_headers` as interface targets with their own header sets and dependencies. Separate container storage, numerical algorithms and persistence adapters; foundations no longer inherit aggregate `ALPS::headers`. Numerical algorithms and public include names are preserved.
+- Export `ALPS::configuration`, `ALPS::containers`, `ALPS::numerics`, `ALPS::numeric_io`, `ALPS::numeric_xml` and `ALPS::solver_headers` as interface targets with their own header sets and dependencies. Separate container storage, numerical algorithms and persistence adapters; foundations no longer inherit aggregate `ALPS::headers`. Retained numerical interfaces keep their algorithms and public include names; removed interfaces are listed below.
 - Organize `src/alps/` by responsibility, with module-local headers, sources and tests. Configuration templates live in `cmake/config/`, and generated headers use `<build-dir>/generated/include/alps/`. Explicit header file sets preserve public include names. See the [module layout](src/alps/README.md).
-- Export independently linkable runtime components `ALPS::utilities`, `ALPS::hdf5`, `ALPS::params`, `ALPS::osiris`, `ALPS::xml` and `ALPS::cli`. `ALPS::alps` links them transitively; Python packages carry one copy of each component. Params text/XML and older `Parameters` conversion adapters remain in `ALPS::alps`; legacy text loading is an explicit free-function adapter. Archive formats and existing parsing behavior are preserved. Rebuild downstream binaries after the library splits.
+- Export independently linkable runtime components `ALPS::utilities`, `ALPS::hdf5`, `ALPS::params`, `ALPS::osiris`, `ALPS::xml` and `ALPS::cli`. `ALPS::alps` links them transitively; Python packages carry one copy of each component. Params text/XML and older `Parameters` conversion adapters remain in `ALPS::alps`; legacy text loading is an explicit free-function adapter. The library split retains the existing serializers and parsing grammar; parameter decoding fixes and Python compatibility limits are documented below. Rebuild downstream binaries after the library splits. CMake package discovery still checks the complete SDK dependency set.
 - MaxEnt's solver and executable link the foundation components without `ALPS::alps`. The executable uses `ALPS::cli` and reads typed params directly from HDF5. Scientific calculations and stop-callback behavior are preserved.
-- Group `src/tools/` commands by responsibility. Remove inactive sources; executable names and installation components are preserved. `pconfig` now links only utilities.
+- Group `src/tools/` commands by responsibility. Retained native tools keep their executable names and installation components; legacy XML shell commands are replaced by `alps-xml` as listed below. `pconfig` now links only utilities.
 - Require CMake 3.27 or newer and an externally installed Boost 1.76 or newer with CMake packages. The SDK requires C++17/C11 compilers, HDF5's C library, and LP64 BLAS/LAPACK; bundled Boost builds and alternate numerical integer/symbol ABIs are no longer supported.
 - Export CMake targets for the installed SDK, applications and solver libraries. Downstream C++ projects link `ALPS::alps`; Python extensions sharing pyalps objects use `pyalps::runtime`. MaxEnt, CT-HYB and CT-INT Python wrappers link the SDK's solver libraries instead of compiling their implementations again.
 - Make MPI opt-in with `ALPS_ENABLE_MPI=ON`. Standalone builds enable applications and native tests by default; embedded `add_subdirectory` builds default to the library alone. The default SDK uses shared libraries, as required by the Python bindings.
@@ -44,11 +43,14 @@ Remove the obsolete numerical containers under `<alps/numeric/deprecated/>` and 
 
 Numerical matrix/vector persistence now requires an explicit adapter: include `<alps/hdf5/matrix.hpp>` or `<alps/hdf5/numeric_vector.hpp>` and link `ALPS::numeric_io`. The matrix umbrella `<alps/numeric/matrix.hpp>` no longer includes HDF5 automatically. Diagonal matrices retain their archive `save`/`load` members without requiring HDF5 headers in the numerical interfaces. Numerical matrix `write_xml` and XML insertion remain available through `<alps/xml/matrix.hpp>` and `ALPS::numeric_xml`, preserving the historical XML representation without requiring XML in numerical interfaces. Header ownership moves preserve public include spellings, but consumers must now include the explicit adapters.
 
+Python compatibility limits: free-threaded CPython is unsupported; extensions sharing pyalps types must match the SDK revision, nanobind ABI and C++ standard library. Legacy signed-byte HDF5 datasets without type metadata are interpreted as booleans; use a typed reader such as h5py for integer data in that format. See the [Python compatibility guide](python/pyalps/README.md#compatibility).
+
 | Previous interface or location | Replacement |
 | --- | --- |
 | `wheel-deps` preset | `distribution` preset; update `ALPS_DIR` to the new installation |
 | `ALPS_BUILD_TESTS` | `ALPS_BUILD_TESTING`; a parent's `BUILD_TESTING` does not control ALPS tests |
 | `ALPS_BUILD_LIBS_ONLY=ON` | `ALPS_BUILD_APPLICATIONS=OFF`; the `sdk` preset also disables tests |
+| `ALPS_BUILD_PYTHON`, `NOT_ALPS_BUILD_PYTHON` | Build/install the C++ SDK first, then build `python/pyalps` with pip against it; Python bindings are no longer part of the SDK CMake build |
 | `ALPS_BUILD_EXAMPLES` | Build the standalone projects in `tutorials/00-examples/` against an installed SDK |
 | `ALPS_BUILD_FORTRAN` | The SDK always includes `ALPS::fortran`; build Fortran examples separately with a Fortran compiler |
 | `ALPS_INSTALL_HEADERS` | SDK headers are always installed |
@@ -62,7 +64,7 @@ Numerical matrix/vector persistence now requires an explicit adapter: include `<
 | `UseALPS.cmake`, `include.mk`, `alpsvars` scripts | Imported SDK targets and explicit installation paths; add the installed `bin` directory to `PATH` |
 | `UsePyALPS.cmake`, `<alps/ngs/detail/export_sim_to_python.hpp>` | [pyalps downstream CMake package](python/pyalps/README.md#downstream-native-extensions) and `<pyalps/export_simulation.hpp>` |
 | `plot2*`, `convert2html`, `convert2text`, `extract*` shell tools | `alps-xml plot`, `alps-xml convert`, `alps-xml extract`; see [XML tools](CONTRIBUTING.md#xml-resources-and-tools) for formats and dependencies |
-| Top-level `import mpi` compatibility module | `import pyalps.mpi`; install the `mpi` extra for mpi4py |
+| Top-level `import mpi` compatibility module | `import pyalps.mpi`; install the `mpi` extra for mpi4py. Its serialization protocol is incompatible with Boost.MPI; communicators are not dictionary keys |
 | `applications/`, `tool/`, `test/`, `example/` | `src/apps/`, `src/tools/`, `tests/`, `tutorials/00-examples/` |
 | Loose subsystem trees and transitional `src/alps/{common,runtime}/` | Semantic `src/alps/<module>/{include,src,tests}` ownership; see the [module map](src/alps/README.md#source-ownership) |
 | `src/ietl/` | `src/alps/ietl/include/ietl/`; public `<ietl/...>` includes are unchanged |
@@ -74,6 +76,10 @@ Numerical matrix/vector persistence now requires an explicit adapter: include `<
 
 ### Fixed
 
+- Initialize the Monte Carlo completion-check schedule before its first use.
+- Reclaim scalar HDF5 variable-length strings, release owned observables when clearing an observable set, and handle empty vector/valarray conversions without indexing nonexistent elements.
+- Use the requested y-axis name in `txt2archive`, skip blank rows and report missing/malformed input; report invalid master files from `xml2archive` with a normal error exit.
+- Escape matrix XML element text while retaining numeric output and the historical schema.
 - Negate scalar/vector `mcdata` means without changing the original value, preserve nonnegative uncertainties under negative scaling and reciprocals, and safely construct evaluators from empty histograms.
 - Accept HDF5 integer parameter storage widths with checked conversion to native `int`, including h5py's default 64-bit integers; reject overflow without changing existing values.
 - Skip Python-dependent MaxEnt tests when their interpreter or reference dependencies are unavailable, keeping native configuration usable.

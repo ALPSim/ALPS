@@ -59,7 +59,9 @@ In either mode, pass a full executable path to a Python helper to select a diffe
 - Legacy HDF5 signed-byte datasets without type metadata are read as booleans. Use a typed reader such as h5py when such a dataset contains integers.
 - `pyalps.mpi` uses mpi4py's protocol, which is incompatible with Boost.MPI serialization. Communicators cannot be used as dictionary keys.
 
-The package version comes from `cmake/ALPS_VERSION.txt`. For local prereleases, set `ALPS_VERSION_PRERELEASE` (for example, `beta.1`); release builds derive it from the Git tag.
+## Versioning
+
+The package version comes from `cmake/ALPS_VERSION.txt`. For local prereleases, set `ALPS_VERSION_PRERELEASE` (for example, `beta.1`); release builds derive it from the Git tag. The unreleased SDK changes follow the published 3.0 release; maintainers must select and update the next release version before tagging.
 
 ## Editable development
 
@@ -69,8 +71,8 @@ After installing the matching SDK and build dependencies, use `python -m pip ins
 
 ## Downstream native extensions
 
-The native component and solver interfaces are provisional pending the
-[3.0 SDK consolidation decisions](../../CONTRIBUTING.md#consuming-the-c-sdk).
+The native component and solver interfaces are changes for a future release
+after 3.0; see the [SDK boundaries and compatibility guidance](../../CONTRIBUTING.md#consuming-the-c-sdk).
 
 The C++ SDK supplies `ALPS::alps` for standalone programs. The installed Python package separately supplies `pyalps::runtime` for extensions that share ALPS objects or HDF5 handles with pyalps. A matching C++ SDK is still required for headers and compile settings.
 
@@ -94,6 +96,8 @@ target_link_libraries(my_module PRIVATE pyalps::runtime)
 `pyalps.get_cmake_dir()` exposes the same directory to Python tools. The C++ SDK neither installs this package nor discovers Python. The former SDK function `alps_target_link_pyalps` has been removed.
 
 The same target supplies `<pyalps/export_simulation.hpp>` for exporting a derived simulation through nanobind. This Python-owned header replaces the old SDK header `<alps/ngs/detail/export_sim_to_python.hpp>`; update that include when rebuilding a downstream extension.
+
+## Native runtime layout
 
 Wheel installation writes `pyalps/runtime.json`. After auditwheel or delocate repair, regenerate it with `python python/pyalps/_build_support/runtime_manifest.py --wheel path/to/pyalps.whl`. Cibuildwheel runs this automatically. The manifest records the final relative library paths; pyalps exposes these as imported CMake targets. On macOS, wheel finalization sets linkable `@rpath` library IDs and refreshes their signatures, so downstream builds need no binary-patching commands.
 

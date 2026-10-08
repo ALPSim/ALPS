@@ -249,10 +249,11 @@ An SDK built with applications also exports executable targets such as `ALPS::sp
 
 Installation follows `GNUInstallDirs`. Unix SDKs continue to need their external Boost, HDF5 and numerical libraries after relocation. Redistributable Python wheels need auditwheel/delocate repair, as described in the [Python runtime guide](python/pyalps/README.md#native-runtime-layout).
 
-The new component boundaries and `<alps/solvers.hpp>` API are provisional until
-ALPSCore HDF5 and parameter reconciliation is complete. `ALPS::params` currently
+The component reorganization and `<alps/solvers.hpp>` API are development changes
+for a future release after 3.0. ALPSCore HDF5 and parameter reconciliation remains
+separate work. `ALPS::params` currently
 provides NGS params, not ALPSCore params; the solver interface uses that type.
-Resolve these interfaces before declaring the 3.0 SDK stable. ALPS and ALPSCore
+Review downstream compatibility against the released 3.0. ALPS and ALPSCore
 have overlapping `alps/` headers and C++ symbols: use separate prefixes and
 processes while comparing implementations. A port must select one implementation
 per interface, starting with HDF5 format compatibility and then parameter types.
