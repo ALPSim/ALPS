@@ -296,6 +296,18 @@ class Workflow(unittest.TestCase):
         with open(os.path.join(ROOT, ".github", "workflows", "ci.yml")) as handle:
             self.assertEqual(fp.check_workflow(config, handle.read()), [])
 
+    def test_areas_cover_the_inputs_their_jobs_read(self):
+        # tests/ci/test_numeric_bindings.py (static) scans these trees, and
+        # run_wheel_tests.py (packaging) runs tests/cmake against the wheel.
+        config = fp.Config.load(os.path.join(ROOT, "ci", "areas.json"))
+        for area, path in (("static", "src/alps/ietl/include/ietl/jd.h"),
+                           ("static", "python/pyalps/cpp/pyalea.cpp"),
+                           ("static", "tests/integration/CMakeLists.txt"),
+                           ("static", "third_party/boost_numeric_bindings/README.md"),
+                           ("packaging", "tests/cmake/test_sdk_contracts.py")):
+            with self.subTest(area=area, path=path):
+                self.assertTrue(config.in_footprint(area, path))
+
     def test_decide_requires_a_real_key_for_a_marker_hit(self):
         env = {"AFFECTED_API": "true", "KEY_API": "", "HIT_API": "true",
                "AFFECTED_WEB": "true", "KEY_WEB": "a" * 64, "HIT_WEB": "true",

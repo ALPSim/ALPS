@@ -31,12 +31,11 @@
     "static": {
       "paths": [
         ".github/**",
-        "tests/ci/**",
-        "tests/packaging/**",
-        "tests/tutorials/**",
+        "src/**",
+        "tests/**",
         "tutorials/**",
-        "python/pyalps/_build_support/**",
-        "python/pyalps/pyproject.toml"
+        "python/**",
+        "third_party/boost_numeric_bindings/**"
       ],
       "strip_comments": false
     },
@@ -99,6 +98,7 @@
         "src/**",
         "third_party/**",
         "tests/packaging/**",
+        "tests/cmake/**",
         ".github/scripts/**",
         ".github/dependencies.json",
         ".github/workflows/_wheels.yml"

@@ -51,6 +51,13 @@ foreach(legacy IN ITEMS
     message(WARNING "${name} is no longer supported: ${hint}.")
   endif()
 endforeach()
+# ALPS 3.0 always cached ALPS_NGS_USE_NEW_ALEA and defaulted MPI to ON; a
+# reused build directory keeps that value although the default is now OFF.
+if(ALPS_ENABLE_MPI AND DEFINED CACHE{ALPS_NGS_USE_NEW_ALEA})
+  message(WARNING "This build directory was configured by ALPS 3.0, whose "
+          "ALPS_ENABLE_MPI default was ON; the cached value is still in effect. "
+          "Pass -DALPS_ENABLE_MPI=OFF or use a fresh build directory if you do not need MPI.")
+endif()
 if(NOT ALPS_ENABLE_MPI)
   message(STATUS "MPI is disabled; pass -DALPS_ENABLE_MPI=ON to enable it")
 endif()

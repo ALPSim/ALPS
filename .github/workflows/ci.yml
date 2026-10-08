@@ -14,9 +14,11 @@ name: CI
         default: false
 permissions:
   contents: read
+# Change detection on push diffs against github.event.before only, so a
+# cancelled master run would leave its commits untested. Cancel PR runs only.
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   changes:
     name: Select affected areas
