@@ -1,3 +1,5 @@
+# Keep this filename for the existing PyPI trusted publisher. Coordinate any
+# rename with the maintainers who control its publisher configuration.
 name: Release
 'on':
   push:

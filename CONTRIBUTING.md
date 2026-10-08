@@ -292,7 +292,7 @@ Use `archive --help` for its options. The SDK libraries do not depend on SQLite.
 
 The required checks are defined in [the PR workflow](.github/workflows/ci.yml).
 [Compatibility checks](.github/workflows/compatibility.yml) run weekly, manually,
-and as part of [release validation](.github/workflows/release.yml). Publication
+and as part of [release validation](.github/workflows/build_wheels.yml). Publication
 through the protected `pypi` environment requires those native checks and
 validation of the artifacts being published to pass. Consult these workflows for
 the current platform and dependency matrix.
@@ -300,6 +300,10 @@ the current platform and dependency matrix.
 ## Preparing a release
 
 For maintainers:
+
+Keep the publishing workflow at `.github/workflows/build_wheels.yml` to retain
+the configured PyPI trusted-publisher workflow name. Coordinate any rename with
+the maintainers who control that configuration.
 
 1. Review the Unreleased changelog and migration notes. Give the release section its version and date, then add a new Unreleased section.
 2. Update `cmake/ALPS_VERSION.txt`, shared by the SDK and Python package, to the numeric `X.Y.Z` release version. A final tag is `vX.Y.Z`; prereleases use `vX.Y.Z-alpha.N`, `-beta.N`, `-rc.N` or `-dev.N` while the file remains `X.Y.Z`. See [versioning](python/pyalps/README.md#versioning).
