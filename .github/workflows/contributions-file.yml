@@ -74,6 +74,9 @@ jobs:
           rm -rf "$dest"
           mkdir -p "$dest"
           find contributions/submission -maxdepth 1 -type f ! -name .gitkeep -exec cp {} "$dest"/ \;
+          # Keep the wrapper the harness generated from the contract, so the
+          # code can be re-judged later. (contract: custom ships its own.)
+          [ -f "$dest/algorithm.hpp" ] || cp "$RUNNER_TEMP/judge/generated/algorithm.hpp" "$dest/"
 
           {
             echo "# ${name} by @${AUTHOR}"

@@ -36,7 +36,7 @@ jobs:
 
           if ! echo "$changed" | grep -q '^contributions/submission/'; then
             echo "has_submission=false" >> "$GITHUB_OUTPUT"
-            echo "No submission in this change; nothing to judge."
+            echo "No submission in this change; judging the examples against the harness instead."
             exit 0
           fi
           echo "has_submission=true" >> "$GITHUB_OUTPUT"
@@ -59,4 +59,22 @@ jobs:
             { echo "## Contribution: $(cat "$RUNNER_TEMP/judge/name" 2>/dev/null)"; echo
               cat "$RUNNER_TEMP/judge/report.md"; } >> "$GITHUB_STEP_SUMMARY"
           fi
+          exit $status
+
+      # A change to the harness itself (no submission) must still accept every
+      # example, one per contract.
+      - name: Judge examples
+        if: steps.scope.outputs.has_submission == 'false'
+        run: |
+          status=0
+          for ex in contributions/examples/*/; do
+            out="$RUNNER_TEMP/examples/$(basename "$ex")"
+            if ! bash contributions/harness/judge.sh "$out" "$ex"; then
+              echo "::error::example $(basename "$ex") is no longer accepted"
+              status=1
+            fi
+            if [ -f "$out/report.md" ]; then
+              { echo "## Example: $(basename "$ex")"; echo; cat "$out/report.md"; echo; } >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
           exit $status
