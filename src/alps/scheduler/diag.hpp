@@ -22,6 +22,8 @@
 
 #include <alps/numeric/matrix/vector.hpp>
 #include <alps/hdf5/numeric_vector.hpp>
+#include <alps/hdf5/vector.hpp>
+#include <alps/hdf5/complex.hpp>
 
 namespace alps { namespace scheduler {
 
@@ -52,11 +54,19 @@ protected:
   std::vector<EigenvectorMeasurements<value_type> > measurements_;
 
   std::vector<std::vector<std::pair<std::string,std::string> > > quantumnumbervalues_;
+
+  // per sector, filled when SAVE_EIGENVECTORS is set: the basis states as
+  // row-major [state][site] local-state indices and the eigenvectors as
+  // row-major [eigenvector][state] coefficients
+  std::vector<std::vector<int> > basis_states_;
+  std::vector<std::vector<value_type> > eigenvectors_;
   
-  bool calc_vectors() const { return calc_averages() || print_vectors();}
+  bool calc_vectors() const { return calc_averages() || print_vectors() || save_vectors();}
   bool print_vectors() const { return print_vectors_;}
+  bool save_vectors() const { return save_vectors_;}
 private:
   bool print_vectors_;
+  bool save_vectors_;
   bool read_hdf5_;
 };
 
@@ -67,6 +77,7 @@ DiagTask<T,G>::DiagTask(const ProcessList& where , const boost::filesystem::path
     , model_helper<>(this->get_parameters())
     , MeasurementOperators(this->get_parameters())
     , print_vectors_(this->get_parameters().value_or_default("PRINT_EIGENVECTORS",false))
+    , save_vectors_(this->get_parameters().value_or_default("SAVE_EIGENVECTORS",false))
     , read_hdf5_(false)
 {
   if (!delay_construct)
@@ -103,6 +114,14 @@ void DiagTask<T,G>::load(hdf5::archive & ar) {
         }
         // read measurements
           ar >> make_pvp(sectorpath,measurements_[i]);
+
+        // read eigenvectors
+        if (ar.is_group(sectorpath+"/eigenvectors")) {
+          basis_states_.resize(i+1);
+          eigenvectors_.resize(i+1);
+          ar >> make_pvp(sectorpath+"/basis/values", basis_states_[i]);
+          ar >> make_pvp(sectorpath+"/eigenvectors/values", eigenvectors_[i]);
+        }
       }
   }
   std::cerr << eigenvalues_.size() << " sectors\n";
@@ -120,6 +139,34 @@ void DiagTask<T,G>::save(hdf5::archive & ar) const {
     ar << make_pvp(sectorpath + "/energies",eigenvalues_[i]);
     if (calc_averages() || this->parms.value_or_default("MEASURE_ENERGY",true))
       ar << make_pvp(sectorpath,measurements_[i]);
+    if (i < eigenvectors_.size()) {
+      std::vector<std::size_t> shape(2);
+      shape[1] = this->num_sites();
+      shape[0] = shape[1] ? basis_states_[i].size()/shape[1] : 0;
+      ar << make_pvp(sectorpath + "/basis/shape", shape);
+      ar << make_pvp(sectorpath + "/basis/values", basis_states_[i]);
+      shape[1] = shape[0];
+      shape[0] = shape[1] ? eigenvectors_[i].size()/shape[1] : 0;
+      ar << make_pvp(sectorpath + "/eigenvectors/shape", shape);
+      ar << make_pvp(sectorpath + "/eigenvectors/values", eigenvectors_[i]);
+    }
+  }
+  if (!eigenvectors_.empty()) {
+    // the local states that the basis indices refer to, as in the dmrg MPS output
+    std::vector<int> types;
+    for (unsigned s = 0; s < this->num_sites(); ++s)
+      types.push_back(this->site_type(s));
+    ar << make_pvp("/spectrum/site_type", types);
+    for (int type = 0; type <= alps::maximum_vertex_type(this->graph()); ++type) {
+      alps::site_basis<short> b(this->site_basis(type));
+      for (std::size_t q = 0; q < this->site_basis(type).size(); ++q) {
+        std::vector<double> values;
+        for (std::size_t s = 0; s < b.size(); ++s)
+          values.push_back(b[s][q].to_double());
+        ar << make_pvp("/spectrum/site_basis/" + boost::lexical_cast<std::string>(type) + "/"
+                       + hdf5_name_encode(this->site_basis(type)[q].name()), values);
+      }
+    }
   }
 }
 
