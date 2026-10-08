@@ -17,12 +17,22 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <string>
 #include <type_traits>
 #include <utility>
 #include <vector>
 namespace alps {
     namespace python {
         namespace nb_ = nanobind;
+        // Type attributes are available on every supported Python (3.11+).
+        // Builtins keep their short names; NumPy types retain their module prefix.
+        inline std::string type_name(nb_::handle value) {
+            nb_::handle type = value.type();
+            std::string name = nb_::cast<std::string>(type.attr("__name__"));
+            std::string module = nb_::cast<std::string>(type.attr("__module__"));
+            return (module == "builtins" ? "" : module + ".")
+                + name;
+        }
         // numpy dtype strings, indexed by the corresponding C++ type. Used by
         // as_contiguous() and by the integer arm of make_numpy_array, where
         // the dtype has to be named exactly (see the comment there).

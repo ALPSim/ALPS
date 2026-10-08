@@ -9,7 +9,7 @@ Python stack, which the native command-line applications do not need.
 
 import os
 from pathlib import Path
-import runpy
+import json
 import signal
 import sys
 
@@ -28,6 +28,16 @@ EXPORTERS = {
 }
 
 
+def runtime_directory():
+    """Locate CMake-installed resources without importing the scientific stack."""
+    package = Path(__file__).resolve().parent.parent / "pyalps"
+    if not (package / "runtime.json").is_file():
+        # Editable installs keep live Python sources apart from native resources.
+        from importlib.metadata import distribution
+        package = Path(distribution("pyalps").locate_file("pyalps"))
+    return package
+
+
 def resolve_executable(program):
     """Resolve an explicit path, a bundled program, or a bindings-only SDK tool.
 
@@ -38,12 +48,9 @@ def resolve_executable(program):
     if os.path.dirname(program):
         executable = Path(program).resolve()
     else:
-        package = Path(__file__).resolve().parent.parent / "pyalps"
-        config = package / "pyalps_config.py"
-        sdk_bin = (
-            runpy.run_path(str(config)).get("ALPS_BIN_INSTALL_DIR", "")
-            if config.is_file() else ""
-        )
+        package = runtime_directory()
+        metadata = json.loads((package / "runtime.json").read_text(encoding="utf-8"))
+        sdk_bin = metadata.get("sdk_bin", "")
         directory = (os.environ.get("ALPS_BIN_PATH") or sdk_bin) if sdk_bin else package / "bin"
         executable = Path(directory).resolve() / program
     if not executable.is_file():
@@ -57,7 +64,7 @@ def resolve_executable(program):
 
 
 def _run(program):
-    package = Path(__file__).resolve().parent.parent / "pyalps"
+    package = runtime_directory()
     try:
         executable = Path(resolve_executable(program))
     except RuntimeError as error:
@@ -94,7 +101,7 @@ def _transform(program, stylesheet):
     parser = argparse.ArgumentParser(prog=program, description="Export ALPS XML to stdout.")
     parser.add_argument("input", help="input XML file, or - for standard input")
     args = parser.parse_args()
-    package = Path(__file__).resolve().parent.parent / "pyalps"
+    package = runtime_directory()
     xml_dir = Path(os.environ.get("ALPS_XML_PATH", package / "xml"))
     # ALPS XML files can refer to a remote DTD; conversion needs only their
     # contents. Keep relative xsl:include resolution for helpers.xsl.
