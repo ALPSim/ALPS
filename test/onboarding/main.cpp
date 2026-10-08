@@ -35,21 +35,22 @@ template <> [[maybe_unused]] std::unique_ptr<const MatrixProblem> view<MatrixPro
 
 enum class Outcome { Pass, Fail, NotApplicable };
 
-// Judges one solver on one case and prints the row. Nothing here names a
-// lattice or a method: the label comes from Solver::name(), the answer from
-// the hidden catalog.
-Outcome judge(const Solver& s, const Problem& p, const TestCase& c) {
-    const auto t0 = std::chrono::steady_clock::now();
-    const std::optional<Estimate> e = s.groundStateEnergy();
-    const double ms = std::chrono::duration<double, std::milli>(
-                          std::chrono::steady_clock::now() - t0).count();
+using Clock = std::chrono::steady_clock;
 
+// Wall time spent inside the contributed code, summed over all cases.
+double totalUs = 0.0;
+
+// Judges one answer and prints the row. Nothing here names a lattice or a
+// method: the label comes from Solver::name(), the answer from the hidden
+// catalog.
+Outcome judge(const char* solver, const Problem& p, const TestCase& c,
+              const std::optional<Estimate>& e, double us) {
     const bool ok = e && std::abs(e->value - c.expected) < c.tol + 2.0 * e->error;
     std::printf("[%s]%s %-10s %-13s ", ok ? "PASS" : "FAIL", c.required ? " " : "*",
-                s.name(), p.name());
+                solver, p.name());
     if (e) std::printf("E0 = %+.10f +/- %.1e  ref %+.10f", e->value, e->error, c.expected);
     else   std::printf("no answer%34s", "");
-    std::printf("  %8.1f ms\n", ms);
+    std::printf("  %10.1f us\n", us);
     return ok ? Outcome::Pass : Outcome::Fail;
 }
 
@@ -65,7 +66,16 @@ Outcome runContributed(const TestCase& c) {
                     makeProblem(c.id)->name());
         return Outcome::NotApplicable;
     }
-    return judge(*makeAlgorithm(*p), *p, c);
+
+    // The clock covers construction as well as the solve: a method may do its
+    // real work in the constructor.
+    const auto t0 = Clock::now();
+    const auto solver = makeAlgorithm(*p);
+    const std::optional<Estimate> e = solver->groundStateEnergy();
+    const double us = std::chrono::duration<double, std::micro>(Clock::now() - t0).count();
+    totalUs += us;
+
+    return judge(solver->name(), *p, c, e, us);
 }
 
 } // namespace
@@ -78,7 +88,8 @@ int main() {
         if (runContributed<View>(c) == Outcome::Fail && c.required) ++failures;
     }
 
-    std::printf("\n%d required case(s) failed  (* = informational, N/A = not offered)\n",
+    std::printf("\nTotal time in contributed code: %.1f us\n", totalUs);
+    std::printf("%d required case(s) failed  (* = informational, N/A = not offered)\n",
                 failures);
     return failures == 0 ? 0 : 1;
 }
