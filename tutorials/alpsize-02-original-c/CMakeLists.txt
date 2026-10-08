@@ -1,9 +1,0 @@
-cmake_minimum_required(VERSION 3.22)
-project(alpsize NONE)
-
-# enable C and C++ compilers
-enable_language(C CXX)
-
-# rule for generating wolff program
-add_executable(wolff wolff.c)
-target_link_libraries(wolff m)
