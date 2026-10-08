@@ -1,0 +1,636 @@
+# Bibliographic authority. Application citation rules live in CITATIONS.yaml.
+cff-version: 1.2.0
+message: For application-specific citation guidance, see CITATIONS.yaml and the generated CITATION.md.
+title: 'ALPS: Algorithms and Libraries for Physics Simulations'
+authors:
+- name: ALPS collaboration
+type: software
+license: MIT
+url: https://alps.comp-phys.org/
+repository-code: https://github.com/ALPSim/ALPS
+preferred-citation:
+  type: article
+  title: 'The ALPS project release 3.0: open source software for strongly correlated systems'
+  authors:
+  - family-names: Alet
+    given-names: F.
+  - family-names: Chen
+    given-names: T.
+  - family-names: Feiguin
+    given-names: A.
+  - family-names: Gull
+    given-names: E.
+  - family-names: Iskakov
+    given-names: S.
+  - family-names: LeBlanc
+    given-names: J. P. F.
+  - family-names: Lin
+    given-names: F.
+  - family-names: Mirmira
+    given-names: A.
+  - family-names: Möller
+    given-names: G.
+  - family-names: Pollet
+    given-names: L.
+  - family-names: Rosales
+    given-names: M.
+  - family-names: Scarola
+    given-names: V. W.
+  - family-names: Shinaoka
+    given-names: H.
+  - family-names: Terletska
+    given-names: H.
+  - family-names: Todo
+    given-names: S.
+  - family-names: Troyer
+    given-names: M.
+  - family-names: Wallerberger
+    given-names: M.
+  - family-names: Werner
+    given-names: P.
+  - family-names: Wolf
+    given-names: T. M. R.
+  status: preprint
+  year: 2026
+  doi: 10.48550/arXiv.2610.03884
+  url: https://arxiv.org/abs/2610.03884
+  identifiers:
+  - type: other
+    value: alps30
+    description: ALPS reference key
+references:
+- type: conference-paper
+  title: Parallel Object Oriented Monte Carlo Simulations
+  authors:
+  - family-names: Troyer
+    given-names: M.
+  - family-names: Ammon
+    given-names: B.
+  - family-names: Heeb
+    given-names: E.
+  year: 1998
+  volume: '1505'
+  doi: 10.1007/3-540-49372-7_20
+  collection-title: Computing in Object-Oriented Parallel Environments
+  collection-type: proceedings
+  publisher:
+    name: Springer
+  start: '191'
+  end: '198'
+  identifiers:
+  - type: other
+    value: troyer1998scheduler
+    description: ALPS reference key
+  notes: Lecture Notes in Computer Science.
+- type: article
+  title: An Iteration Method for the Solution of the Eigenvalue Problem of Linear Differential and
+    Integral Operators
+  authors:
+  - family-names: Lanczos
+    given-names: C.
+  year: 1950
+  journal: Journal of Research of the National Bureau of Standards
+  volume: '45'
+  issue: '4'
+  doi: 10.6028/jres.045.026
+  start: '255'
+  end: '282'
+  identifiers:
+  - type: other
+    value: lanczos1950
+    description: ALPS reference key
+- type: article
+  title: Nonuniversal Critical Dynamics in Monte Carlo Simulations
+  authors:
+  - family-names: Swendsen
+    given-names: R. H.
+  - family-names: Wang
+    given-names: J.-S.
+  year: 1987
+  journal: Physical Review Letters
+  volume: '58'
+  issue: '2'
+  doi: 10.1103/PhysRevLett.58.86
+  start: '86'
+  end: '88'
+  identifiers:
+  - type: other
+    value: swendsenwang1987
+    description: ALPS reference key
+- type: article
+  title: Collective Monte Carlo Updating for Spin Systems
+  authors:
+  - family-names: Wolff
+    given-names: U.
+  year: 1989
+  journal: Physical Review Letters
+  volume: '62'
+  issue: '4'
+  doi: 10.1103/PhysRevLett.62.361
+  start: '361'
+  end: '364'
+  identifiers:
+  - type: other
+    value: wolff1989
+    description: ALPS reference key
+- type: article
+  title: Cluster Algorithm for Vertex Models
+  authors:
+  - family-names: Evertz
+    given-names: H. G.
+  - family-names: Lana
+    given-names: G.
+  - family-names: Marcu
+    given-names: M.
+  year: 1993
+  journal: Physical Review Letters
+  volume: '70'
+  issue: '7'
+  doi: 10.1103/PhysRevLett.70.875
+  start: '875'
+  end: '879'
+  identifiers:
+  - type: other
+    value: evertz1993
+    description: ALPS reference key
+- type: article
+  title: Simulations of Discrete Quantum Systems in Continuous Euclidean Time
+  authors:
+  - family-names: Beard
+    given-names: B. B.
+  - family-names: Wiese
+    given-names: U.-J.
+  year: 1996
+  journal: Physical Review Letters
+  volume: '77'
+  issue: '25'
+  doi: 10.1103/PhysRevLett.77.5130
+  start: '5130'
+  end: '5133'
+  identifiers:
+  - type: other
+    value: beard1996
+    description: ALPS reference key
+- type: article
+  title: The Loop Algorithm
+  authors:
+  - family-names: Evertz
+    given-names: H. G.
+  year: 2003
+  journal: Advances in Physics
+  volume: '52'
+  issue: '1'
+  doi: 10.1080/0001873021000049195
+  start: '1'
+  end: '66'
+  identifiers:
+  - type: other
+    value: evertz2003
+    description: ALPS reference key
+- type: article
+  title: Cluster Algorithms for General-S Quantum Spin Systems
+  authors:
+  - family-names: Todo
+    given-names: S.
+  - family-names: Kato
+    given-names: K.
+  year: 2001
+  journal: Physical Review Letters
+  volume: '87'
+  issue: '4'
+  doi: 10.1103/PhysRevLett.87.047203
+  start: '047203'
+  identifiers:
+  - type: other
+    value: todo2001
+    description: ALPS reference key
+- type: article
+  title: Stochastic Series Expansion Method with Operator-Loop Update
+  authors:
+  - family-names: Sandvik
+    given-names: A. W.
+  year: 1999
+  journal: Physical Review B
+  volume: '59'
+  issue: '22'
+  doi: 10.1103/PhysRevB.59.R14157
+  start: R14157
+  end: R14160
+  identifiers:
+  - type: other
+    value: sandvik1999
+    description: ALPS reference key
+- type: article
+  title: Quantum Monte Carlo with Directed Loops
+  authors:
+  - family-names: Syljuåsen
+    given-names: O. F.
+  - family-names: Sandvik
+    given-names: A. W.
+  year: 2002
+  journal: Physical Review E
+  volume: '66'
+  issue: '4'
+  doi: 10.1103/PhysRevE.66.046701
+  start: '046701'
+  identifiers:
+  - type: other
+    value: syljuasen2002
+    description: ALPS reference key
+- type: article
+  title: Generalized Directed Loop Method for Quantum Monte Carlo Simulations
+  authors:
+  - family-names: Alet
+    given-names: F.
+  - family-names: Wessel
+    given-names: S.
+  - family-names: Troyer
+    given-names: M.
+  year: 2005
+  journal: Physical Review E
+  volume: '71'
+  issue: '3'
+  doi: 10.1103/PhysRevE.71.036706
+  start: '036706'
+  identifiers:
+  - type: other
+    value: alet2005directed
+    description: ALPS reference key
+- type: article
+  title: '``Worm'''' Algorithm in Quantum Monte Carlo Simulations'
+  authors:
+  - family-names: Prokof'ev
+    given-names: N. V.
+  - family-names: Svistunov
+    given-names: B. V.
+  - family-names: Tupitsyn
+    given-names: I. S.
+  year: 1998
+  journal: Physics Letters A
+  volume: '238'
+  issue: 4–5
+  doi: 10.1016/S0375-9601(97)00957-2
+  start: '253'
+  end: '257'
+  identifiers:
+  - type: other
+    value: prokofev1998
+    description: ALPS reference key
+- type: article
+  title: Exact, complete, and universal continuous-time worldline Monte Carlo approach to the statistics
+    of discrete quantum systems
+  authors:
+  - family-names: Prokof'ev
+    given-names: N. V.
+  - family-names: Svistunov
+    given-names: B. V.
+  - family-names: Tupitsyn
+    given-names: I. S.
+  year: 1998
+  journal: Journal of Experimental and Theoretical Physics
+  volume: '87'
+  doi: 10.1134/1.558661
+  start: '310'
+  end: '321'
+  identifiers:
+  - type: other
+    value: Prokofev1998JETP
+    description: ALPS reference key
+- type: article
+  title: Efficient, Multiple-Range Random Walk Algorithm to Calculate the Density of States
+  authors:
+  - family-names: Wang
+    given-names: F.
+  - family-names: Landau
+    given-names: D. P.
+  year: 2001
+  journal: Physical Review Letters
+  volume: '86'
+  issue: '10'
+  doi: 10.1103/PhysRevLett.86.2050
+  start: '2050'
+  end: '2053'
+  identifiers:
+  - type: other
+    value: wang2001prl
+    description: ALPS reference key
+- type: article
+  title: 'Determining the Density of States for Classical Statistical Models: A Random Walk Algorithm
+    to Produce a Flat Histogram'
+  authors:
+  - family-names: Wang
+    given-names: F.
+  - family-names: Landau
+    given-names: D. P.
+  year: 2001
+  journal: Physical Review E
+  volume: '64'
+  issue: '5'
+  doi: 10.1103/PhysRevE.64.056101
+  start: '056101'
+  identifiers:
+  - type: other
+    value: wang2001pre
+    description: ALPS reference key
+- type: article
+  title: 'Flat-Histogram Methods for Quantum Systems: Algorithms to Overcome Tunneling Problems and
+    Calculate the Free Energy'
+  authors:
+  - family-names: Troyer
+    given-names: M.
+  - family-names: Wessel
+    given-names: S.
+  - family-names: Alet
+    given-names: F.
+  year: 2003
+  journal: Physical Review Letters
+  volume: '90'
+  issue: '12'
+  doi: 10.1103/PhysRevLett.90.120201
+  start: '120201'
+  identifiers:
+  - type: other
+    value: troyer2003qwl
+    description: ALPS reference key
+- type: article
+  title: Density Matrix Formulation for Quantum Renormalization Groups
+  authors:
+  - family-names: White
+    given-names: S. R.
+  year: 1992
+  journal: Physical Review Letters
+  volume: '69'
+  issue: '19'
+  doi: 10.1103/PhysRevLett.69.2863
+  start: '2863'
+  end: '2866'
+  identifiers:
+  - type: other
+    value: white1992
+    description: ALPS reference key
+- type: article
+  title: Density-Matrix Algorithms for Quantum Renormalization Groups
+  authors:
+  - family-names: White
+    given-names: S. R.
+  year: 1993
+  journal: Physical Review B
+  volume: '48'
+  issue: '14'
+  doi: 10.1103/PhysRevB.48.10345
+  start: '10345'
+  end: '10356'
+  identifiers:
+  - type: other
+    value: white1993
+    description: ALPS reference key
+- type: article
+  title: The Density-Matrix Renormalization Group
+  authors:
+  - family-names: Schollwöck
+    given-names: U.
+  year: 2005
+  journal: Reviews of Modern Physics
+  volume: '77'
+  issue: '1'
+  doi: 10.1103/RevModPhys.77.259
+  start: '259'
+  end: '315'
+  identifiers:
+  - type: other
+    value: schollwock2005
+    description: ALPS reference key
+- type: article
+  title: New Trends in Density Matrix Renormalization
+  authors:
+  - family-names: Hallberg
+    given-names: K. A.
+  year: 2006
+  journal: Advances in Physics
+  volume: '55'
+  issue: 5–6
+  doi: 10.1080/00018730600766432
+  start: '477'
+  end: '526'
+  identifiers:
+  - type: other
+    value: hallberg2006
+    description: ALPS reference key
+- type: book
+  title: The Density Matrix Renormalization Group
+  authors:
+  - family-names: Feiguin
+    given-names: A. E.
+  year: 2013
+  volume: '176'
+  doi: 10.1007/978-3-642-35106-8_2
+  collection-title: 'Strongly Correlated Systems: Numerical Methods'
+  collection-type: book
+  editors:
+  - family-names: Avella
+    given-names: A.
+  - family-names: Mancini
+    given-names: F.
+  publisher:
+    name: Springer
+  start: '31'
+  end: '65'
+  identifiers:
+  - type: other
+    value: feiguin2013
+    description: ALPS reference key
+  notes: Springer Series in Solid-State Sciences.
+- type: article
+  title: Continuous-Time Quantum Monte Carlo Method for Fermions
+  authors:
+  - family-names: Rubtsov
+    given-names: A. N.
+  - family-names: Savkin
+    given-names: V. V.
+  - family-names: Lichtenstein
+    given-names: A. I.
+  year: 2005
+  journal: Physical Review B
+  volume: '72'
+  issue: '3'
+  doi: 10.1103/PhysRevB.72.035122
+  start: '035122'
+  identifiers:
+  - type: other
+    value: rubtsov2005
+    description: ALPS reference key
+- type: article
+  title: Continuous-Time Solver for Quantum Impurity Models
+  authors:
+  - family-names: Werner
+    given-names: P.
+  - family-names: Comanac
+    given-names: A.
+  - family-names: de' Medici
+    given-names: L.
+  - family-names: Troyer
+    given-names: M.
+  - family-names: Millis
+    given-names: A. J.
+  year: 2006
+  journal: Physical Review Letters
+  volume: '97'
+  issue: '7'
+  doi: 10.1103/PhysRevLett.97.076405
+  start: '076405'
+  identifiers:
+  - type: other
+    value: werner2006
+    description: ALPS reference key
+- type: article
+  title: Continuous-Time Monte Carlo Methods for Quantum Impurity Models
+  authors:
+  - family-names: Gull
+    given-names: E.
+  - family-names: Millis
+    given-names: A. J.
+  - family-names: Lichtenstein
+    given-names: A. I.
+  - family-names: Rubtsov
+    given-names: A. N.
+  - family-names: Troyer
+    given-names: M.
+  - family-names: Werner
+    given-names: P.
+  year: 2011
+  journal: Reviews of Modern Physics
+  volume: '83'
+  issue: '2'
+  doi: 10.1103/RevModPhys.83.349
+  start: '349'
+  end: '404'
+  identifiers:
+  - type: other
+    value: gull2011
+    description: ALPS reference key
+- type: article
+  title: Continuous-Time Quantum Monte Carlo Impurity Solvers
+  authors:
+  - family-names: Gull
+    given-names: E.
+  - family-names: Werner
+    given-names: P.
+  - family-names: Fuchs
+    given-names: S.
+  - family-names: Surer
+    given-names: B.
+  - family-names: Pruschke
+    given-names: T.
+  - family-names: Troyer
+    given-names: M.
+  year: 2011
+  journal: Computer Physics Communications
+  volume: '182'
+  issue: '4'
+  doi: 10.1016/j.cpc.2010.12.050
+  start: '1078'
+  end: '1082'
+  identifiers:
+  - type: other
+    value: gull2011cpc
+    description: ALPS reference key
+- type: article
+  title: Efficient implementation of the continuous-time hybridization expansion quantum impurity solver
+  authors:
+  - family-names: Hafermann
+    given-names: H.
+  - family-names: Werner
+    given-names: P.
+  - family-names: Gull
+    given-names: E.
+  year: 2013
+  journal: Computer Physics Communications
+  volume: '184'
+  issue: '4'
+  doi: 10.1016/j.cpc.2012.12.013
+  start: '1280'
+  end: '1286'
+  identifiers:
+  - type: other
+    value: hafermann2013
+    description: ALPS reference key
+- type: article
+  title: Monte Carlo Method for Magnetic Impurities in Metals
+  authors:
+  - family-names: Hirsch
+    given-names: J. E.
+  - family-names: Fye
+    given-names: R. M.
+  year: 1986
+  journal: Physical Review Letters
+  volume: '56'
+  issue: '23'
+  doi: 10.1103/PhysRevLett.56.2521
+  start: '2521'
+  end: '2524'
+  identifiers:
+  - type: other
+    value: hirschfye1986
+    description: ALPS reference key
+- type: article
+  title: Correlated Lattice Fermions in d=∞ Dimensions
+  authors:
+  - family-names: Metzner
+    given-names: W.
+  - family-names: Vollhardt
+    given-names: D.
+  year: 1989
+  journal: Physical Review Letters
+  volume: '62'
+  issue: '3'
+  doi: 10.1103/PhysRevLett.62.324
+  publisher:
+    name: American Physical Society
+  start: '324'
+  end: '327'
+  identifiers:
+  - type: other
+    value: metzner1989
+    description: ALPS reference key
+- type: article
+  title: Hubbard model in infinite dimensions
+  authors:
+  - family-names: Georges
+    given-names: A.
+  - family-names: Kotliar
+    given-names: G.
+  year: 1992
+  journal: Physical Review B
+  volume: '45'
+  doi: 10.1103/PhysRevB.45.6479
+  publisher:
+    name: American Physical Society
+  start: '6479'
+  end: '6483'
+  identifiers:
+  - type: other
+    value: georges1992
+    description: ALPS reference key
+- type: article
+  title: Dynamical Mean-Field Theory of Strongly Correlated Fermion Systems and the Limit of Infinite
+    Dimensions
+  authors:
+  - family-names: Georges
+    given-names: A.
+  - family-names: Kotliar
+    given-names: G.
+  - family-names: Krauth
+    given-names: W.
+  - family-names: Rozenberg
+    given-names: M. J.
+  year: 1996
+  journal: Reviews of Modern Physics
+  volume: '68'
+  issue: '1'
+  doi: 10.1103/RevModPhys.68.13
+  start: '13'
+  end: '125'
+  identifiers:
+  - type: other
+    value: georges1996
+    description: ALPS reference key

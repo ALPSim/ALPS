@@ -31,6 +31,9 @@ namespace alps {
 /// \param out the output stream to which the copyright statement should be written
 ALPS_DECL void print_copyright(std::ostream& out);
 
+/// Print copyright and the generated citation notice for the given component.
+ALPS_DECL void print_copyright(std::ostream& out, const std::string& citation_component);
+
 /// print the ALPS license information
 /// \param out the output stream to which the license should be written
 ALPS_DECL void print_license(std::ostream& out);

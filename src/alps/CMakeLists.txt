@@ -29,6 +29,8 @@ set(ALPS_SOURCES
     # utility
     utility/encode.cpp utility/copyright.cpp utility/os.cpp utility/temporary_filename.cpp
     utility/vmusage.cpp
+    utility/citations.cpp
+    utility/cli.cpp
     # alea
     alea/nan.C alea/observable.C alea/observablefactory.C alea/observableset.C
     # expression

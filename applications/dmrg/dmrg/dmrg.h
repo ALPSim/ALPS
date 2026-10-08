@@ -39,19 +39,7 @@ inline void print_dmrg_copyright(std::ostream& os)
      << "  Density Matrix Renormalization Group algorithm\n"
      << "  for low-dimensional interacting systems.\n"
      << "  available from http://alps.comp-phys.org/\n"
-     << "  copyright (c) 2006-2013 by Adrian E. Feiguin\n\n"
-     << "********************************************************************\n"
-     << "* Recommended citation in scientific publications:                 *\n"
-     << "* This code used the ALPS [1] implementation [2] of DMRG [3-6].    *\n"
-     << "* [1] JSTAT (2011) P05001;                                         *\n"
-     << "* [2] A.E. Feiguin, The Density Matrix Renormalization Group. In:  *\n"
-     << "*     Strongly Correlated Systems. Springer Series in Solid-State  *\n"
-     << "*     Sciences, vol 176 (2013)                                     *\n"
-     << "* [3] Phys. Rev. Lett. 69, 2863 (1992)                             *\n"
-     << "* [4] Phys. Rev. B 48, 10345 (1993)                                *\n"
-     << "* [5] Rev. Mod. Phys. 77, 259 (2005)                               *\n"
-     << "* [6] Adv. Phys. 55, 477 (2006)                                    *\n"
-     << "********************************************************************\n\n";
+     << "  copyright (c) 2006-2013 by Adrian E. Feiguin\n\n";
 }
 
 #include <alps/hdf5.hpp>

@@ -37,6 +37,5 @@ void FullDiagFactory::print_copyright(std::ostream& out) const
       << "  available from http://alps.comp-phys.org/\n"
       << "  copyright (c) 2003-2007 by Matthias Troyer <troyer@comp-phys.org>\n"
       << "                          and Andreas Honecker <ahoneck@uni-goettingen.de>\n"
-      << " for details see the publication:\n"
-      << "  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).\n\n";
+      << "\n";
 }

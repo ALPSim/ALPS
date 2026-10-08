@@ -89,7 +89,16 @@ void simple_evaluator::evaluate(ObservableSet&) const {}
 // worker_factory
 //
 
-worker_factory::worker_factory() : copyright_string_(), version_string_() {}
+worker_factory::worker_factory() : copyright_string_(), version_string_(), citation_component_("framework") {}
+
+std::string worker_factory::citation_component() {
+  return instance()->citation_component_;
+}
+
+bool worker_factory::set_citation_component(std::string const& str) {
+  citation_component_ = str;
+  return true;
+}
 
 void worker_factory::print_copyright(std::ostream& out) {
   if (instance()->copyright_string_.size())

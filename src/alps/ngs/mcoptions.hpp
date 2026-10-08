@@ -27,6 +27,7 @@ namespace alps {
             typedef enum { SINGLE, THREADED, MPI, HYBRID } execution_types;
 
             mcoptions(int argc, char* argv[]);
+            mcoptions(int argc, char* argv[], const std::string& citation_component);
 
             bool valid;
             bool resume;

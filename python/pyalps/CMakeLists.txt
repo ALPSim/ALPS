@@ -211,6 +211,14 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/pyalps/"
   DESTINATION pyalps
   FILES_MATCHING PATTERN "*.py")
 
+# Bundle the catalog from the linked SDK so it matches the recommendations
+# embedded in libalps, including when building from a standalone pyalps sdist.
+install(FILES
+  "${ALPS_ROOT_DIR}/share/alps/CITATION.cff"
+  "${ALPS_ROOT_DIR}/share/alps/CITATIONS.yaml"
+  "${ALPS_ROOT_DIR}/share/alps/CITATION.md"
+  DESTINATION pyalps/share/alps)
+
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/pyalps_cli/"
   DESTINATION pyalps_cli
   FILES_MATCHING PATTERN "*.py")

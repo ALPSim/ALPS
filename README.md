@@ -18,4 +18,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development and contribution guidance
 
 ## License and citations
 
-ALPS is distributed under the terms in [LICENSE.txt](LICENSE.txt). See [CITATION.md](CITATION.md) for citation guidance.
+ALPS is distributed under the terms in [LICENSE.txt](LICENSE.txt). See [CITATION.md](CITATION.md) for citation guidance, generated from the bibliography in [CITATION.cff](CITATION.cff) and application policy in [CITATIONS.yaml](CITATIONS.yaml). Simulation applications print the relevant guidance at startup; use `--citations` to display it without input files. `--help` and `--license` show usage and legal terms separately.
