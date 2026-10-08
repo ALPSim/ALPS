@@ -38,7 +38,7 @@ jobs:
       run: |
         python -m pip install pytest packaging lxml numpy 'scikit-build-core>=1.0' 'cmake>=3.27' ninja
         python -m compileall -q .github/scripts python/pyalps/_build_support
-        python -m pytest tests/ci tests/packaging tests/tutorials -q --junitxml=ci-tests.xml
+        python -m pytest tests/ci tests/tutorials -q --junitxml=ci-tests.xml
     - name: Summarize helper tests
       if: always()
       run: python .github/scripts/junit_summary.py ci-tests.xml

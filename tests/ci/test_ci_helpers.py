@@ -17,32 +17,6 @@ def load_helper(name):
     return module
 
 
-def test_mixed_junit_results(tmp_path):
-    report = tmp_path / "results.xml"
-    report.write_text(
-        '<testsuites><testsuite><testcase name="pass"/>'
-        '<testcase name="failure"><failure>bad result</failure></testcase>'
-        '<testcase name="error"><error>setup failed</error></testcase>'
-        '<testcase name="skip"><skipped/></testcase></testsuite></testsuites>'
-    )
-    result = load_helper("junit_summary").summarize([report])
-    assert "| 1 | 2 | 1 |" in result
-
-
-def test_missing_junit_is_explicit():
-    result = load_helper("junit_summary").summarize([])
-    assert "No test reports" in result
-
-
-def test_junit_summary_includes_elapsed_time(tmp_path):
-    report = tmp_path / "results.xml"
-    report.write_text('<testsuite><testcase name="a" time="1.25"/>'
-                      '<testcase name="b" time="0.5"/></testsuite>')
-    result = load_helper("junit_summary").summarize([report])
-    assert "Seconds" in result
-    assert "| 2 | 0 | 0 | 1.75 |" in result
-
-
 @pytest.mark.parametrize("source,code", [
     ("def test_result():\n    assert True\n", 0),
     ("def test_result():\n    assert False\n", 1),

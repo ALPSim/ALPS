@@ -8,6 +8,8 @@
 #include <complex>
 #include <cstdio>
 #include <iostream>
+#include <limits>
+#include <type_traits>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -127,15 +129,55 @@ protected:
 };
 TEST_F(ParamsCheckpoint, SupportedValuesPreserveTypes) { supported_checkpoint(archive); }
 TEST_F(ParamsCheckpoint, RejectsUnsupportedFloatStorage) { unsupported_type(archive, "float", 1.25F); }
-TEST_F(ParamsCheckpoint, RejectsUnsupportedUnsignedStorage) { unsupported_type(archive, "unsigned", 42U); }
-TEST_F(ParamsCheckpoint, RejectsUnsupportedWideIntegerStorage) {
-    if (sizeof(long long) <= sizeof(int)) GTEST_SKIP() << "long long uses native int storage";
-    unsupported_type(archive, "wide_integer", 1099511627776LL);
+TEST_F(ParamsCheckpoint, IntegerWidthsLoadWithoutTruncation) {
+    const auto check = [&](auto value) {
+        using Integer = decltype(value);
+        archive["/integer"] << value;
+        if constexpr (std::is_same_v<Integer, signed char>)
+            archive["/integer/@__alps_type__"] << std::string("int8");
+        archive.set_context("/integer");
+        alps::detail::paramvalue scalar;
+        scalar.load(archive);
+        EXPECT_EQ(scalar.cast<int>(), static_cast<int>(value));
+        archive["/integers"] << std::vector<Integer>{0, value};
+        if constexpr (std::is_same_v<Integer, signed char>)
+            archive["/integers/@__alps_type__"] << std::string("int8");
+        archive.set_context("/integers");
+        alps::detail::paramvalue array;
+        array.load(archive);
+        EXPECT_EQ(array.cast<std::vector<int>>(), (std::vector<int>{0, static_cast<int>(value)}));
+    };
+    check(static_cast<signed char>(-123));
+    check(static_cast<unsigned char>(255));
+    check(static_cast<short>(-123));
+    check(static_cast<unsigned short>(123));
+    check(123U);
+    check(-123L);
+    check(123UL);
+    check(static_cast<long long>(std::numeric_limits<int>::min()));
+    check(static_cast<unsigned long long>(std::numeric_limits<int>::max()));
 }
-TEST_F(ParamsCheckpoint, RejectsUnsupportedLongStorage) {
-    // On LLP64, native long has int's storage and remains supported.
-    if (sizeof(long) <= sizeof(int)) GTEST_SKIP() << "long uses native int storage";
-    unsupported_type(archive, "native_long", static_cast<long>(1099511627776LL));
+TEST_F(ParamsCheckpoint, IntegerOverflowPreservesExistingValue) {
+    const auto check = [&](auto value) {
+        using Integer = decltype(value);
+        archive["/overflow"] << value;
+        archive.set_context("/overflow");
+        alps::detail::paramvalue existing(23);
+        try {
+            existing.load(archive);
+            FAIL() << "Out-of-range integer accepted";
+        } catch (std::overflow_error const& error) {
+            EXPECT_NE(std::string(error.what()).find("/overflow"), std::string::npos);
+        }
+        EXPECT_EQ(existing.cast<int>(), 23);
+        archive["/overflow_array"] << std::vector<Integer>{1, value};
+        archive.set_context("/overflow_array");
+        EXPECT_THROW(existing.load(archive), std::overflow_error);
+        EXPECT_EQ(existing.cast<int>(), 23);
+    };
+    check(static_cast<long long>(std::numeric_limits<int>::min()) - 1);
+    check(static_cast<unsigned long long>(std::numeric_limits<int>::max()) + 1);
+    check(std::numeric_limits<unsigned long long>::max());
 }
 TEST_F(ParamsCheckpoint, FailedReloadIsTransactional) { transactional_reload(archive); }
 TEST_F(ParamsCheckpoint, CustomReaderSurvivesReload) { custom_reader(archive); }

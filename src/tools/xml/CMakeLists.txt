@@ -5,5 +5,3 @@ if(UNIX)
   install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/alps-xml"
     DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT xml)
 endif()
-
-# txt2archive remains unbuilt/uninstalled.

@@ -183,9 +183,6 @@ template<typename T> struct test<boost::shared_array<T> > {
             EXPECT_TRUE(equal(write_3_value.get(), read_3_value.get(), size_3[0] * size_3[1] * size_3[2])) << "rank 3";
         }
     }
-    static void overwrite(std::string const & filename, boost::mpl::false_) {
-        GTEST_SKIP() << "Shared-array cross-type overwrite has no legacy scenario; pointer round trips are covered";
-    }
 };
 
 // TODO: this should be possible
@@ -261,6 +258,8 @@ TEST_P(Hdf5TypeContract, RoundTrip) {
     }
 }
 
+#cmakedefine01 HDF5_TEST_OVERWRITE
+#if HDF5_TEST_OVERWRITE
 TEST_P(Hdf5TypeContract, ScalarOverwriteWithConcurrentHandles) {
     SCOPED_TRACE("@HDF5_TEST_TYPE@");
     alps::hdf5::archive first(filename, szip_compress ? "ca" : "a");
@@ -272,6 +271,7 @@ TEST_P(Hdf5TypeContract, ScalarOverwriteWithConcurrentHandles) {
         if (HasFailure() || IsSkipped()) break;
     }
 }
+#endif
 
 INSTANTIATE_TEST_SUITE_P(StorageModes, Hdf5TypeContract,
     ::testing::Values("dataset", "attribute", "compressed"),

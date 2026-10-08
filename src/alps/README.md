@@ -34,11 +34,11 @@ Subsystem tests follow their source owner. Cross-module integration, SDK, Python
 
 `ALPS::configuration`, `ALPS::containers`, `ALPS::numerics`, `ALPS::numeric_io` and `ALPS::solver_headers` are interface targets. `ALPS::containers` supplies storage, while `ALPS::numerics` adds numerical algorithms and BLAS/LAPACK. Numerical archive adapters belong to `ALPS::numeric_io`, which combines numerics and HDF5. See the [SDK usage and migration instructions](../../CONTRIBUTING.md#consuming-the-c-sdk).
 
-Utilities, HDF5, typed params, Osiris, XML and command-line parsing are separate runtime libraries. `ALPS::alps` links them transitively. The params text/XML and older `Parameters` conversion adapters remain in `params/adapters/` and are compiled into `ALPS::alps`; their unchanged public header names are exposed through the aggregate interface.
+Utilities, HDF5, typed params, Osiris, XML and command-line parsing are separate runtime libraries. `ALPS::alps` links them transitively. The params text/XML and older `Parameters` conversion adapters remain in `params/adapters/` and are compiled into `ALPS::alps`; their headers are exposed through the aggregate interface.
 
 `ALPS::maxent` links the foundations, Osiris and numerical providers. Its executable adds `ALPS::cli` and reads HDF5 params directly. Both use the shared `<alps/solvers.hpp>` declarations and link without `ALPS::alps`.
 
-The remaining simulation modules contribute to `ALPS::alps` or its aggregate compile interface, `ALPS::headers`; physical ownership does not make each directory an independent library. Foundation targets declare their own dependencies without inheriting that aggregate interface. Package discovery currently checks the complete SDK dependency set.
+The remaining simulation modules contribute to `ALPS::alps` or its aggregate compile interface, `ALPS::headers`; physical ownership does not make each directory an independent library. Foundation targets declare their own dependencies without inheriting that aggregate interface. MPI-enabled SDKs propagate MPI and Boost.MPI through utilities for its public MPI helpers. Package discovery currently checks the complete SDK dependency set.
 
 Runtime libraries follow `BUILD_SHARED_LIBS` and have component-specific symbol exports. Python bindings require shared libraries and package one copy of each runtime component. Rebuild downstream binaries after changing the SDK or its dependency stack.
 
@@ -51,5 +51,3 @@ ctest --test-dir <build-dir> --output-on-failure -L '^(utility|hdf5|params|osiri
 ```
 
 The installed-SDK consumers in `tests/cmake/` check aggregate/component links, shared/static builds, header ownership, relocation and downstream extension interoperability. CLI and MaxEnt regressions check existing input behavior and scientific results. See [CONTRIBUTING.md](../../CONTRIBUTING.md#run-the-tests) for the complete development workflow.
-
-The disconnected `legacy_alea` and `legacy_accumulator` prototype tests have been removed. For ALPSCore consolidation, use the chosen upstream backend's tests for its accumulator semantics and add integration checks against the supported public APIs for correlated-sample error propagation and ALPS checkpoint compatibility. The removed `ngs_alea_compare.cpp` compared two in-tree implementations and round-tripped only its own checkpoint format; it did not establish ALPSCore compatibility. Existing Alea and Python regression tests continue to cover the shipped APIs.

@@ -269,6 +269,12 @@ if(ALPS_BUILD_EXTENSIVE_TESTS)
   # modes. Numbered filenames keep deeply nested Windows paths short.
   set(type_index 0)
   foreach(HDF5_TEST_TYPE IN LISTS ALPS_HDF5_DATA_TYPES)
+    # Shared-array coverage consists of round trips; no overwrite scenario exists.
+    if(HDF5_TEST_TYPE MATCHES "^boost::shared_array<")
+      set(HDF5_TEST_OVERWRITE OFF)
+    else()
+      set(HDF5_TEST_OVERWRITE ON)
+    endif()
     math(EXPR type_index "${type_index} + 1")
     set(target "hdf5_type_${type_index}")
     configure_file(type_check.cpp.in "${target}.cpp" @ONLY)

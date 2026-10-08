@@ -69,6 +69,9 @@ After installing the matching SDK and build dependencies, use `python -m pip ins
 
 ## Downstream native extensions
 
+The native component and solver interfaces are provisional pending the
+[3.0 SDK consolidation decisions](../../CONTRIBUTING.md#consuming-the-c-sdk).
+
 The C++ SDK supplies `ALPS::alps` for standalone programs. The installed Python package separately supplies `pyalps::runtime` for extensions that share ALPS objects or HDF5 handles with pyalps. A matching C++ SDK is still required for headers and compile settings.
 
 ```cmake

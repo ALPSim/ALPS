@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+#include <alps/ngs/params_from_file.hpp>
 #include <alps/ngs/make_deprecated_parameters.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 #include <gtest/gtest.h>
@@ -14,7 +15,7 @@ TEST(ParamsLegacyAdapters, TextGrammarAndLegacyConversion) {
         output << "// Existing ALPS parameter grammar\n"
                << "LATTICE=\"chain lattice\"; L=10; T=2.25;\n";
     }
-    alps::params parameters(text);
+    auto parameters = alps::params_from_file(text);
     EXPECT_TRUE(parameters.size() == 3 && parameters.begin()->first == "LATTICE");
     EXPECT_EQ(parameters["LATTICE"].cast<std::string>(), "chain lattice");
     EXPECT_TRUE(parameters["L"].cast<int>() == 10 && parameters["T"].cast<double>() == 2.25);
@@ -28,7 +29,7 @@ TEST(ParamsLegacyAdapters, TextGrammarAndLegacyConversion) {
         std::ofstream output(text.string());
         output << "L=10; garbage @\n";
     }
-    EXPECT_THROW({ alps::params invalid(text); }, std::runtime_error);
+    EXPECT_THROW({ alps::params_from_file(text); }, std::runtime_error);
     boost::filesystem::remove(text);
 
 }

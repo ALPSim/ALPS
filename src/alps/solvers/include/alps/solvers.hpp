@@ -7,6 +7,7 @@
 namespace alps {
 class params;
 
+// Provisional API pending HDF5/parameter reconciliation for 3.0.
 // Link the corresponding ALPS::maxent, ALPS::cthyb, or ALPS::ctint target.
 // Solvers run synchronously, write to output_file, and propagate exceptions.
 // With an MPI-enabled SDK, the caller must initialize MPI before CT-QMC calls;

@@ -27,7 +27,7 @@ of a value already represented in memory, not a numerical approximation.
 
 The generated type matrix reports unavailable SZIP encoding and unsupported
 attribute combinations as named GoogleTest skips. Shared-array overwrite had no
-legacy implementation and is also an explicit skip; shared-array round trips
+legacy implementation and is not registered; shared-array round trips
 still cover one-, two-, and three-dimensional storage. Scalar overwrite retains
 all 32 iterations and concurrent handles from the actual legacy execution. Nine
 unreachable cross-type transitions following its first `return` were removed.
@@ -43,12 +43,3 @@ changes, observable-set count/mean restoration, and all eleven Ising inverse
 temperatures from 0 to 1. Ising checks compare archived values and parameters to
 the simulation, verify finite uncertainties and exact physical bounds, and do
 not introduce probabilistic pass/fail thresholds.
-
-The initial migration was validated across 208 generated type families and all three
-storage modes: 1,248 cases, with 999 passes and 249 named skips (214 unsupported
-attribute cases and 35 shared-array overwrite cases). SZIP encoding was available
-on that validation build, so supported compressed cases all ran. Optional codec
-availability can change skip counts on other installations.
-
-Removing 12 duplicate default-allocator spellings subsequently reduced the matrix
-to 196 distinct type families and 1,176 cases without removing type coverage.

@@ -22,5 +22,9 @@ foreach(name fixed_capacity_deque fixed_capacity_traits fixed_capacity_vector te
   add_executable(${name} ${name}.C)
 
   target_link_libraries(${name} PRIVATE ALPS::alps)
-  alps_add_gtest(${name} COMPONENT fixed_capacity)
+  if(name STREQUAL "fixed_capacity_deque")
+    alps_add_gtest(${name} COMPONENT fixed_capacity LABELS legacy_semantics)
+  else()
+    alps_add_gtest(${name} COMPONENT fixed_capacity)
+  endif()
 endforeach()

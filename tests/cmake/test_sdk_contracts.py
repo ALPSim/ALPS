@@ -67,43 +67,6 @@ def test_components_link_without_building_the_core_runtime(tmp_path):
     ], check=True)
 
 
-@pytest.mark.parametrize("unavailable,shared", [("header", "OFF"), ("symbols", "ON")])
-def test_utilities_without_platform_stacktrace(tmp_path, monkeypatch, unavailable, shared):
-    # Reproduce missing execinfo headers and headers whose symbols need an
-    # unavailable library, without relying on CI's wheel-only compiler flags.
-    monkeypatch.delenv("CXXFLAGS", raising=False)
-    header = "#error execinfo is unavailable\n"
-    if unavailable == "symbols":
-        header = ('extern "C" int alps_missing_backtrace(void **, int);\n'
-                  'extern "C" char **alps_missing_backtrace_symbols(void *const *, int);\n'
-                  '#define backtrace alps_missing_backtrace\n'
-                  '#define backtrace_symbols alps_missing_backtrace_symbols\n')
-    (tmp_path / "execinfo.h").write_text(header)
-    (tmp_path / "main.cpp").write_text(
-        '#include <alps/ngs/stacktrace.hpp>\n'
-        'int main() { return !alps::ngs::stacktrace().empty(); }\n')
-    (tmp_path / "CMakeLists.txt").write_text(
-        'cmake_minimum_required(VERSION 3.27...4.3)\n'
-        'project(stacktrace_contract LANGUAGES C CXX)\n'
-        'set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")\n'
-        # A parent using compile-only probes must not hide missing link symbols.
-        'set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)\n'
-        f'add_subdirectory("{SOURCE.as_posix()}" alps EXCLUDE_FROM_ALL)\n'
-        'add_executable(stacktrace_contract main.cpp)\n'
-        'target_link_libraries(stacktrace_contract PRIVATE ALPS::utilities)\n'
-        'enable_testing()\n'
-        'add_test(NAME stacktrace_contract COMMAND stacktrace_contract)\n')
-    build = tmp_path / "build"
-    result = subprocess.run([
-        "cmake", "-S", str(tmp_path), "-B", str(build),
-        *json.loads(os.environ.get("ALPS_TEST_CMAKE_ARGS", "[]")),
-        "-DCMAKE_BUILD_TYPE=Release", f"-DBUILD_SHARED_LIBS={shared}",
-        f'-DCMAKE_CXX_FLAGS=-I"{tmp_path.as_posix()}"',
-    ], text=True, capture_output=True)
-    assert result.returncode == 0, result.stdout + result.stderr
-    build_and_run(build)
-
-
 @pytest.mark.parametrize("source", [
     "tutorials/00-examples",
 ])

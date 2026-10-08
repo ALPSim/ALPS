@@ -101,10 +101,10 @@ TEST(AleaVectorobseval, HistoricalNumericalScenarios)
   EXPECT_NEAR((1.3 * veceval0).tau()[0], 0.00800212, 5.00001e-09);
   EXPECT_NEAR((1.3 * veceval0).tau()[1], -0.0309996, 5.00001e-08);
   alps_test::expect_estimate(veceval0 * veceval1, {{0.252604, 0.00455558, 5.00001e-07, 5.00001e-09}, {2.25222, 0.0131702, 5.00001e-06, 5.00001e-08}}, "veceval0 * veceval1");
-  alps_test::expect_estimate(veceval0 * vec, {{1.50785, 0.0135976, 5.00001e-06, 5.00001e-08}, {-3.00149, -0.00877598, 5.00001e-06, 5.00001e-09}}, "veceval0 * vec");
+  alps_test::expect_estimate(veceval0 * vec, {{1.50785, 0.0135976, 5.00001e-06, 5.00001e-08}, {-3.00149, 0.00877598, 5.00001e-06, 5.00001e-09}}, "veceval0 * vec");
   EXPECT_NEAR((veceval0 * vec).tau()[0], 0.00800212, 5.00001e-09);
   EXPECT_NEAR((veceval0 * vec).tau()[1], -0.0309996, 5.00001e-08);
-  alps_test::expect_estimate(vec * veceval0, {{1.50785, 0.0135976, 5.00001e-06, 5.00001e-08}, {-3.00149, -0.00877598, 5.00001e-06, 5.00001e-09}}, "vec * veceval0");
+  alps_test::expect_estimate(vec * veceval0, {{1.50785, 0.0135976, 5.00001e-06, 5.00001e-08}, {-3.00149, 0.00877598, 5.00001e-06, 5.00001e-09}}, "vec * veceval0");
   EXPECT_NEAR((vec * veceval0).tau()[0], 0.00800212, 5.00001e-09);
   EXPECT_NEAR((vec * veceval0).tau()[1], -0.0309996, 5.00001e-08);
 
@@ -113,10 +113,10 @@ TEST(AleaVectorobseval, HistoricalNumericalScenarios)
   EXPECT_NEAR((veceval0 / 3.0).tau()[1], -0.0309996, 5.00001e-08);
   alps_test::expect_estimate(1.3 / veceval0, {{2.58646, 0.0233244, 5.00001e-06, 5.00001e-08}, {0.866237, 0.00253277, 5.00001e-07, 5.00001e-09}}, "1.3 / veceval0");
   alps_test::expect_estimate(veceval0 / veceval1, {{1, 0, 5.00001e-06, 0.}, {1, 0, 5.00001e-06, 0.}}, "veceval0 / veceval1");
-  alps_test::expect_estimate(veceval0 / vec, {{0.167539, 0.00151085, 5.00001e-07, 5.00001e-09}, {-0.750372, -0.002194, 5.00001e-07, 5.00001e-07}}, "veceval0 / vec");
+  alps_test::expect_estimate(veceval0 / vec, {{0.167539, 0.00151085, 5.00001e-07, 5.00001e-09}, {-0.750372, 0.002194, 5.00001e-07, 5.00001e-07}}, "veceval0 / vec");
   EXPECT_NEAR((veceval0 / vec).tau()[0], 0.00800212, 5.00001e-09);
   EXPECT_NEAR((veceval0 / vec).tau()[1], -0.0309996, 5.00001e-08);
-  alps_test::expect_estimate(vec / veceval0, {{5.96875, 0.0538255, 5.00001e-06, 5.00001e-08}, {-1.33267, -0.00389657, 5.00001e-06, 5.00001e-09}}, "vec / veceval0");
+  alps_test::expect_estimate(vec / veceval0, {{5.96875, 0.0538255, 5.00001e-06, 5.00001e-08}, {-1.33267, 0.00389657, 5.00001e-06, 5.00001e-09}}, "vec / veceval0");
 
   alps_test::expect_estimate(pow(veceval0, 2), {{0.252604, 0.00455558, 5.00001e-07, 5.00001e-09}, {2.25222, 0.0131702, 5.00001e-06, 5.00001e-08}}, "pow(veceval0, 2)");
 

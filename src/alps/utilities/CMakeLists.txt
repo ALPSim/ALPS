@@ -36,7 +36,8 @@ if(NOT ALPS_HAVE_STACKTRACE)
 endif()
 
 if(ALPS_ENABLE_MPI)
-  target_link_libraries(alps_utilities PUBLIC "$<COMPILE_ONLY:MPI::MPI_CXX;Boost::mpi>")
+  # The public boost_mpi.hpp templates call both runtimes in consumer code.
+  target_link_libraries(alps_utilities PUBLIC MPI::MPI_CXX Boost::mpi)
 endif()
 if(WIN32)
   target_link_libraries(alps_utilities PRIVATE ws2_32 mswsock)

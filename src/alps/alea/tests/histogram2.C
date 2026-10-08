@@ -22,7 +22,7 @@ TEST(Histogram, MergingEmptyObservablesPreservesRangeAndZeroCounts)
     first << alps::IntHistogramObservable("histogram", 0, 10);
     second << alps::IntHistogramObservable("histogram", 0, 10);
     first << second;
-    const auto& result = first.get<alps::IntHistogramObservable>("histogram");
+    const alps::IntHistogramObsevaluator result(first["histogram"]);
     EXPECT_EQ(result.count(), 0u);
     ASSERT_EQ(result.size(), 10u);
     EXPECT_EQ(result.min(), 0);

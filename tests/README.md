@@ -71,7 +71,8 @@ Group related cases in one executable when they share dependencies, labels and
 resource requirements. CTest still launches each discovered case independently.
 Keep separate targets for distinct MPI, stress-test or compiler requirements.
 Labels describe both ownership and purpose (`compatibility`, `integration`,
-`scientific`, `extensive`, `mpi`). GoogleTest execution alone does not imply a
+`scientific`, `extensive`, `mpi`). `legacy_semantics` marks characterization of
+known legacy behavior that must not constrain a replacement implementation. GoogleTest execution alone does not imply a
 test is a scientific validation.
 
 Use `alps::testing::TemporaryDirectory` for files. Cases in one executable may
@@ -134,7 +135,7 @@ historical behavior needing a consolidation decision:
 
 | Area | Contract and inventory |
 | --- | --- |
-| Numerics, containers, alea, legacy parameters, parapack | [Scenario and reference accounting](migration.md), including numerical quirks preserved for an explicit consolidation decision. |
+| Numerics, containers, alea, legacy parameters, parapack | [Compatibility references](migration.md), including numerical quirks preserved for an explicit consolidation decision. |
 | HDF5 | [Schema, fixtures, generated types and resource opt-ins](../src/alps/hdf5/tests/README.md). |
 | Params | [Typed access, persistence and adapter contracts](../src/alps/params/tests/README.md). |
 | Graph | [Canonicalization, embedding and extensive-test inventory](../src/alps/graph/tests/README.md). |
@@ -144,7 +145,7 @@ historical behavior needing a consolidation decision:
 | DMFT, DMRG, MaxEnt | Native regression tests use GoogleTest; executable behavior stays under CTest. MaxEnt's Python scientific oracle is shared with its binding tests. |
 | Monte Carlo runners | The formerly unregistered scalar/vector examples check completion, stopping, collection and HDF5 persistence. Test counters are initialized; MPI scheduling is deterministic. |
 
-The obsolete experimental accumulator prototypes were removed in #163.
+The obsolete experimental accumulator prototype tests have been removed.
 Benchmarks and remaining unregistered sources do not count toward executed coverage.
 
 Use named skips for unavailable optional capabilities or unsupported type

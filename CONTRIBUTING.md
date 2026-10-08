@@ -230,7 +230,7 @@ add_executable(my_simulation main.cpp)
 target_link_libraries(my_simulation PRIVATE ALPS::alps)
 ```
 
-The imported target carries headers, C++17 requirements, compile definitions and transitive dependencies. Use a compiler and configuration compatible with the SDK's ABI. `ALPS::headers` exposes the compile interface without linking; `ALPS::fortran` supplies the C++ Fortran bridge and its GNU Fortran compatibility flag. Programs using only utilities can request `find_package(ALPS CONFIG REQUIRED COMPONENTS utilities)` and link `ALPS::utilities`. Archive-only programs can similarly request the `hdf5` component and link `ALPS::hdf5`, which also owns archive signal cleanup. Typed parameter programs can request the `params` component and link `ALPS::params`. XML parsing/output and command-line parsing are available through the `xml` and `cli` components and targets `ALPS::xml` and `ALPS::cli`. The parameter-file constructor and text/XML conversion adapters still require `ALPS::alps`. Package discovery still checks the SDK's complete dependency set; component-specific configuration is future work.
+The imported target carries headers, C++17 requirements, compile definitions and transitive dependencies. Use a compiler and configuration compatible with the SDK's ABI. `ALPS::headers` exposes the compile interface without linking; `ALPS::fortran` supplies the C++ Fortran bridge and its GNU Fortran compatibility flag. Programs using only utilities can request `find_package(ALPS CONFIG REQUIRED COMPONENTS utilities)` and link `ALPS::utilities`; MPI-enabled SDKs also carry the runtime dependencies of `<alps/ngs/boost_mpi.hpp>`. Archive-only programs can similarly request the `hdf5` component and link `ALPS::hdf5`, which also owns archive signal cleanup. Typed parameter programs can request the `params` component and link `ALPS::params`. XML parsing/output and command-line parsing are available through the `xml` and `cli` components and targets `ALPS::xml` and `ALPS::cli`. Legacy text loading uses `alps::params_from_file(path)` from `<alps/ngs/params_from_file.hpp>`; this free function and the text/XML conversion adapters require `ALPS::alps`. Package discovery still checks the SDK's complete dependency set; component-specific configuration is future work.
 
 Use `ALPS::containers` for array storage and `ALPS::numerics` for matrix/vector algorithms and array mathematics, including the existing `<alps/multi_array.hpp>` umbrella. Numerical archive consumers link `ALPS::numeric_io` and explicitly include `<alps/hdf5/matrix.hpp>` or `<alps/hdf5/numeric_vector.hpp>`. For example:
 
@@ -244,6 +244,14 @@ target_link_libraries(my_simulation PRIVATE ALPS::numeric_io)
 An SDK built with applications also exports executable targets such as `ALPS::spinmc` and the solver libraries `ALPS::maxent`, `ALPS::cthyb` and `ALPS::ctint`. Require them with `find_package(ALPS CONFIG REQUIRED COMPONENTS applications solvers)`. The solver API is in `<alps/solvers.hpp>`. Python extensions that share ALPS objects with pyalps use its separate [downstream CMake package](python/pyalps/README.md#downstream-native-extensions).
 
 Installation follows `GNUInstallDirs`. Unix SDKs continue to need their external Boost, HDF5 and numerical libraries after relocation. Redistributable Python wheels need auditwheel/delocate repair, as described in the [Python runtime guide](python/pyalps/README.md#native-runtime-layout).
+
+The new component boundaries and `<alps/solvers.hpp>` API are provisional until
+ALPSCore HDF5 and parameter reconciliation is complete. `ALPS::params` currently
+provides NGS params, not ALPSCore params; the solver interface uses that type.
+Resolve these interfaces before declaring the 3.0 SDK stable. ALPS and ALPSCore
+have overlapping `alps/` headers and C++ symbols: use separate prefixes and
+processes while comparing implementations. A port must select one implementation
+per interface, starting with HDF5 format compatibility and then parameter types.
 
 ### XML resources and tools
 
@@ -261,13 +269,11 @@ Plot/extraction formats are `text`, `html`, `gnuplot`, `matplotlib` and `grace`;
 
 ## CI coverage
 
-The [PR workflow](.github/workflows/ci.yml) reports one required `CI` check. It always runs static/helper and numerical tutorial checks, a complete Linux C++17 build with editable Python and installed-SDK tests, targeted Clang/MPI tests, a macOS ARM64 SDK consumer build, ASan/UBSan, and manylinux wheel validation on Python 3.11, 3.12 and 3.14. The same checks run on master pushes. There is no path classifier or automatic expansion to a compatibility matrix.
-
-The [weekly compatibility workflow](.github/workflows/compatibility.yml) tests six native configurations: GCC 11 with CMake 3.27 and Boost 1.76; C++20 with extensive tests, OpenMP and installed C/C++/Fortran tutorials; C++23; MPI-enabled Python 3.14; newer macOS; and Intel macOS. It also validates manylinux, musllinux and macOS wheels on Python 3.11–3.14. The minimum job checks the standalone numerical tutorial with NumPy 1.26. Manual runs support pre-merge or release investigation.
-
-The [release workflow](.github/workflows/release.yml) runs full artifact validation from the tag, then publishes those exact artifacts through the protected `pypi` environment using trusted publishing. A manual run validates without publishing. Wheels are repaired, checked for runtime dependencies and installed on fresh runners; the source distribution is rebuilt outside the checkout against an installed SDK. The identical C++ SDK consumers are compiled once per platform on Python 3.12; full Python suites run on both distinct wheel ABIs (3.11 and 3.12); newer interpreters run binding, object-lifetime and package-loading checks against the reused abi3 artifact. Fresh-runner checks focus on bindings and package loading.
-
-Ordinary native CI uses APT/Homebrew dependencies, including installed GoogleTest where available. Source-built Boost is limited to its minimum-version check and the isolated manylinux builder. These providers are CI choices, not requirements for local builds. Persistent compiler caches are limited to the main Linux PR build and manylinux, with compiler/dependency identities and bounded cache sizes. Compatibility builds do not each receive a persistent compiler cache.
+The required checks are defined in [the PR workflow](.github/workflows/ci.yml).
+[Compatibility checks](.github/workflows/compatibility.yml) run weekly or manually;
+[release validation](.github/workflows/release.yml) tests the artifacts before
+publishing through the protected `pypi` environment. Consult these workflows for
+the current platform and dependency matrix.
 
 ## Preparing a release
 

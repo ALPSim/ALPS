@@ -13,24 +13,30 @@ target_link_libraries(maxent_api_contract PRIVATE ALPS::maxent)
 alps_add_test(maxent_api_contract)
 set_property(TEST maxent_api_contract PROPERTY LABELS "maxent;integration")
 
-find_package(Python 3.11 REQUIRED COMPONENTS Interpreter)
-execute_process(COMMAND "${Python_EXECUTABLE}" -c "import numpy, h5py"
-  RESULT_VARIABLE missing_reference_dependencies ERROR_QUIET)
-if(missing_reference_dependencies)
-  message(FATAL_ERROR "MaxEnt reference tests require NumPy and h5py for ${Python_EXECUTABLE}")
-endif()
-add_test(NAME maxent_reference
-  COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/reference.py" "$<TARGET_FILE:maxent>")
-set_tests_properties(maxent_reference PROPERTIES TIMEOUT 120 LABELS "maxent;scientific"
-  ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")
-
-add_test(NAME maxent_cli_contract
-  COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/cli_contract.py"
-    "$<TARGET_FILE:maxent>")
-set_tests_properties(maxent_cli_contract PROPERTIES TIMEOUT 60 LABELS "maxent;cli")
-if(WIN32)
-  foreach(directory IN LISTS ALPS_RUNTIME_LIBRARY_DIRS)
-    set_property(TEST maxent_cli_contract maxent_reference APPEND PROPERTY ENVIRONMENT_MODIFICATION
-      "PATH=path_list_prepend:${directory}")
-  endforeach()
+find_package(Python 3.11 QUIET COMPONENTS Interpreter)
+if(Python_Interpreter_FOUND)
+  add_test(NAME maxent_cli_contract
+    COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/cli_contract.py"
+      "$<TARGET_FILE:maxent>")
+  set_tests_properties(maxent_cli_contract PROPERTIES TIMEOUT 60 LABELS "maxent;cli")
+  set(maxent_python_tests maxent_cli_contract)
+  execute_process(COMMAND "${Python_EXECUTABLE}" -c "import numpy, h5py"
+    RESULT_VARIABLE missing_reference_dependencies ERROR_QUIET)
+  if(NOT missing_reference_dependencies)
+    add_test(NAME maxent_reference
+      COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/reference.py" "$<TARGET_FILE:maxent>")
+    set_tests_properties(maxent_reference PROPERTIES TIMEOUT 120 LABELS "maxent;scientific"
+      ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")
+    list(APPEND maxent_python_tests maxent_reference)
+  else()
+    message(STATUS "Skipping MaxEnt reference test: NumPy and h5py are unavailable for ${Python_EXECUTABLE}")
+  endif()
+  if(WIN32)
+    foreach(directory IN LISTS ALPS_RUNTIME_LIBRARY_DIRS)
+      set_property(TEST ${maxent_python_tests} APPEND PROPERTY ENVIRONMENT_MODIFICATION
+        "PATH=path_list_prepend:${directory}")
+    endforeach()
+  endif()
+else()
+  message(STATUS "Skipping MaxEnt Python tests: Python 3.11 or newer is unavailable")
 endif()

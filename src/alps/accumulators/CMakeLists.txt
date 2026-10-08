@@ -1,7 +1,4 @@
 # Accumulators source ownership.
-if(ALPS_NGS_USE_NEW_ALEA)
-  target_sources(alps PRIVATE src/ngs/accumulator/accumulator.cpp)
-endif()
 
 target_sources(alps_headers INTERFACE
   FILE_SET accumulators_headers TYPE HEADERS

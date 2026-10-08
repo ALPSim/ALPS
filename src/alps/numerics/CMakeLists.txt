@@ -13,9 +13,6 @@ target_sources(alps_numerics INTERFACE
     include/alps/multi_array/operators.hpp
     include/alps/functional.h
     include/alps/utility/numeric_cast.hpp
-    include/alps/boost/accumulators/numeric/functional.hpp
-    include/alps/boost/accumulators/numeric/functional/valarray.hpp
-    include/alps/boost/accumulators/numeric/functional/vector.hpp
     include/alps/ngs/numeric.hpp
     include/alps/ngs/numeric/array.hpp
     include/alps/ngs/numeric/detail.hpp

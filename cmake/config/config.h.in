@@ -15,7 +15,6 @@
 #ifndef ALPS_CONFIG_H
 #define ALPS_CONFIG_H
 
-#cmakedefine ALPS_NGS_USE_NEW_ALEA
 #cmakedefine ALPS_NGS_OPENMPI_ULFM
 
 //

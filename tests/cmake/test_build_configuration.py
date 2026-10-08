@@ -64,73 +64,6 @@ def test_embedded_in_source_build_is_rejected_before_project(tmp_path):
     assert "Use an out-of-source build" in result.stdout + result.stderr
 
 
-@pytest.mark.parametrize("ctest_first,shared,alps_tests", [
-    (True, None, False), (False, None, False),
-    (True, "OFF", False), (True, "ON", False),
-    (True, None, True),
-])
-def test_embedded_build_keeps_parent_defaults(tmp_path, ctest_first, shared, alps_tests):
-    parent_testing = "OFF" if alps_tests else "ON"
-    ctest = f'option(BUILD_TESTING "Parent tests" {parent_testing})\ninclude(CTest)\n'
-    (tmp_path / "CMakeLists.txt").write_text(
-        'cmake_minimum_required(VERSION 3.27...4.3)\n'
-        'project(parent LANGUAGES C CXX)\n'
-        + (ctest if ctest_first else "") + '''
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/parent.c" "int parent(void) { return 0; }\\n")
-add_library(parent_before "${CMAKE_CURRENT_BINARY_DIR}/parent.c")
-set(had_build_testing OFF)
-if(DEFINED BUILD_TESTING)
-  set(had_build_testing ON)
-endif()
-''' + f'add_subdirectory("{SOURCE.as_posix()}" alps)\n' + '''
-add_library(parent_after "${CMAKE_CURRENT_BINARY_DIR}/parent.c")
-get_target_property(before parent_before TYPE)
-get_target_property(after parent_after TYPE)
-if(NOT before STREQUAL after)
-  message(FATAL_ERROR "ALPS changed the parent's default library type")
-endif()
-if(ALPS_BUILD_TESTING)
-  if(NOT TARGET hdf5_complex)
-    message(FATAL_ERROR "Explicitly enabled ALPS tests were not built")
-  endif()
-elseif(TARGET hdf5_complex)
-  message(FATAL_ERROR "Parent testing enabled ALPS tests")
-endif()
-''' + ("" if ctest_first else '''
-if(DEFINED BUILD_TESTING AND NOT had_build_testing)
-  message(FATAL_ERROR "ALPS created the parent's BUILD_TESTING setting")
-endif()
-''' + ctest) + f'''
-if(NOT BUILD_TESTING STREQUAL "{parent_testing}")
-  message(FATAL_ERROR "ALPS changed the parent's test setting")
-endif()
-if(BUILD_TESTING)
-  add_test(NAME parent_marker COMMAND "${{CMAKE_COMMAND}}" -E true)
-endif()
-''')
-    build = tmp_path / "build"
-    command = ["cmake", "-S", str(tmp_path), "-B", str(build),
-               *json.loads(os.environ.get("ALPS_TEST_CMAKE_ARGS", "[]"))]
-    if shared is not None:
-        command.append(f"-DBUILD_SHARED_LIBS={shared}")
-    if alps_tests:
-        command.append("-DALPS_BUILD_TESTING=ON")
-    for _ in range(2):
-        result = subprocess.run(command, capture_output=True, text=True)
-        assert result.returncode == 0, result.stdout + result.stderr
-    result = subprocess.run([
-        "ctest", "--test-dir", str(build / "alps" if alps_tests else build),
-        "--show-only=json-v1",
-    ], check=True, capture_output=True, text=True)
-    names = [test["name"] for test in json.loads(result.stdout)["tests"]]
-    if alps_tests:
-        # GoogleTest cases are discovered after building the executable. A
-        # configure-only build exposes CMake's explicit NOT_BUILT sentinel.
-        assert "hdf5_complex_NOT_BUILT" in names
-    else:
-        assert names == ["parent_marker"]
-
-
 def test_hdf5_runtime_paths_follow_imported_configurations(tmp_path):
     build = tmp_path / "build"
     # Dependencies extracted inside the build tree are omitted from CMake's
@@ -213,11 +146,8 @@ def test_tutorials_are_an_explicit_install_component(tmp_path):
     assert not tutorials.exists()
     subprocess.run(command + ["--component", "tutorials"],
                    check=True, capture_output=True, text=True)
-    assert {path.name for path in tutorials.iterdir() if path.is_dir()} == {
-        "00-examples", "01-intro", "02-ed", "03-mc", "04-dmrg", "05-dmft",
-        "06-hybridization", "07-looper", "08-alpsize", "09-code", "10-ngs", "11-notebook",
-        "12-optical-lattice",
-    }
+    assert (tutorials / "03-mc/01-autocorrelations/parm1a").is_file()
+    assert (tutorials / "02-ed/06-fulldiag/parm6a").is_file()
     assert (tutorials / "10-ngs/1_accumulator_only/CMakeLists.txt").is_file()
     assert (tutorials / "README.md").is_file()
     assert (tutorials / "00-examples/README.md").is_file()

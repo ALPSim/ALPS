@@ -93,6 +93,14 @@ TEST(AleaSimpleobseval, HistoricalNumericalScenarios)
   EXPECT_EQ(obseval_a.bin_size(), 32u);
   EXPECT_EQ(obseval_a.bin_number(), 128u);
 
+  auto scaled = obseval_a;
+  scaled *= 2u;
+  EXPECT_DOUBLE_EQ(scaled.mean(), 2 * obseval_a.mean());
+  EXPECT_DOUBLE_EQ(scaled.error(), 2 * obseval_a.error());
+  scaled /= 2u;
+  EXPECT_DOUBLE_EQ(scaled.mean(), obseval_a.mean());
+  EXPECT_DOUBLE_EQ(scaled.error(), obseval_a.error());
+
   alps::RealObsevaluator obseval_b(obs_b);
   alps_test::expect_estimate(obseval_b, {{1.50455, 0.0047, 5.00001e-06, 5.00001e-05}}, "obseval_b");
   EXPECT_NEAR((obseval_b).tau(), 0.049, 0.000500001);

@@ -12,7 +12,9 @@ ctest --preset mpi -L '^mpi$' --output-junit mpi.xml
 Each executable runs at two and three ranks. These topologies fit the smallest
 supported CI runners and exercise both paired communication and participation by
 an additional rank. `comm_mpi` uses groups of two: its three-rank run keeps the
-controller outside the worker communicator. No oversubscription is required.
+controller outside the worker communicator. The launcher needs at least three
+slots; on smaller local allocations, configure `MPIEXEC_PREFLAGS=--oversubscribe`
+when using OpenMPI.
 
 ## Executed contracts
 
@@ -27,12 +29,6 @@ controller outside the worker communicator. No oversubscription is required.
 | `parapack / filelock_mpi` | Every rank acquires in turn; other ranks fail a bounded single lock attempt while it is held. Explicit release and destructor release both permit the next owner. |
 | `parapack / info_test_mpi` | Reproducible per-rank worker seeds, common disorder seed, rank-specific checkpoints, master-only phase/host metadata, and progress updates. |
 | `scheduler / scheduler_sum_mpi` | A deterministic completion schedule takes 128 scalar/vector Monte Carlo measurements per rank; global counts, independently summed means, result arithmetic, and HDF5 persistence agree. |
-
-The nine executables form 18 CTest launches. All 18 passed together after rebuilding
-against the final production fixes. The newly activated serial
-parameter-HDF5 case and nine process-identifier cases also passed. These results
-establish the exercised contracts on the validation configuration; CI supplies
-the broader compiler and platform coverage.
 
 ## Execution and reports
 
