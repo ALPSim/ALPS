@@ -15,6 +15,7 @@
 #define ALPS_TUTORIAL_ISING_HPP
 
 #include <alps/ngs.hpp>
+#include <alps/mcbase.hpp>
 
 #include <boost/function.hpp>
 #include <boost/filesystem/path.hpp>

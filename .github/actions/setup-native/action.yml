@@ -16,7 +16,7 @@ runs:
   - name: Install Linux libraries
     run: |
       sudo apt-get update
-      sudo apt-get install -y libboost-all-dev libgtest-dev libhdf5-dev libblas-dev liblapack-dev
+      sudo apt-get install -y libboost-all-dev libgtest-dev libhdf5-dev libblas-dev liblapack-dev libsqlite3-dev
     shell: bash
     if: runner.os == 'Linux'
   - name: Install macOS libraries

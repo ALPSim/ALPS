@@ -44,6 +44,7 @@
 
 
 namespace alps {
+    class oxstream;
     namespace numeric {
     /** A matrix template class
       *
@@ -388,6 +389,9 @@ namespace alps {
           * Swaps the rows i1 and i2
           */
         void swap_rows(size_type i1, size_type i2);
+
+        // Definition is supplied by the optional <alps/xml/matrix.hpp> adapter.
+        void write_xml(oxstream& xml) const;
 
         template<typename Archive>
         inline void serialize(Archive & ar, const unsigned int version);

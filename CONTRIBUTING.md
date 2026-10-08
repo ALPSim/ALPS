@@ -239,7 +239,11 @@ find_package(ALPS CONFIG REQUIRED COMPONENTS numeric_io)
 target_link_libraries(my_simulation PRIVATE ALPS::numeric_io)
 ```
 
-`<alps/numeric/matrix.hpp>` no longer includes its HDF5 adapter automatically. See the [migration notes](CHANGELOG.md#removed-and-migration) for this include requirement and the removal of matrix XML output methods in 3.0.
+`<alps/numeric/matrix.hpp>` no longer includes its HDF5 adapter automatically.
+For matrix XML output, include `<alps/xml/matrix.hpp>` and link
+`ALPS::numeric_xml` (component `numeric_xml`). Both `matrix.write_xml(xml)` and
+`xml << matrix` retain the historical `MATRIX`/`ROW`/`ELEMENT` representation.
+The numerical interfaces themselves do not depend on XML or HDF5.
 
 An SDK built with applications also exports executable targets such as `ALPS::spinmc` and the solver libraries `ALPS::maxent`, `ALPS::cthyb` and `ALPS::ctint`. Require them with `find_package(ALPS CONFIG REQUIRED COMPONENTS applications solvers)`. The solver API is in `<alps/solvers.hpp>`. Python extensions that share ALPS objects with pyalps use its separate [downstream CMake package](python/pyalps/README.md#downstream-native-extensions).
 
@@ -267,12 +271,29 @@ alps-xml extract text plot-definition.xml task*.out.xml --output measurements.tx
 
 Plot/extraction formats are `text`, `html`, `gnuplot`, `matplotlib` and `grace`; conversion supports `text` and `html`. The `xml` installation component includes the command and resources.
 
+Application builds also retain the archive-producing commands in the `tools`
+installation component:
+
+```sh
+txt2archive --xaxis T --yaxis Energy --with-error measurements.txt > results.archive.xml
+xml2archive simulation.in.xml > results.archive.xml
+```
+
+`txt2archive` reads x/y columns, with an optional third error column;
+`xml2archive` collects a master JOB XML file's task results. These operations
+produce archive XML rather than render it. If SQLite development headers and
+libraries are available at configure time, the `archive` tool is also built.
+It retains its existing SQLite schema and `install`, `append`, `rebuild`, `list`
+and `plot` commands; existing databases can be reopened without conversion.
+Use `archive --help` for its options. The SDK libraries do not depend on SQLite.
+
 ## CI coverage
 
 The required checks are defined in [the PR workflow](.github/workflows/ci.yml).
-[Compatibility checks](.github/workflows/compatibility.yml) run weekly or manually;
-[release validation](.github/workflows/release.yml) tests the artifacts before
-publishing through the protected `pypi` environment. Consult these workflows for
+[Compatibility checks](.github/workflows/compatibility.yml) run weekly, manually,
+and as part of [release validation](.github/workflows/release.yml). Publication
+through the protected `pypi` environment requires those native checks and
+validation of the artifacts being published to pass. Consult these workflows for
 the current platform and dependency matrix.
 
 ## Preparing a release

@@ -123,8 +123,11 @@ def test_inplace_operators_mutate_and_return_the_same_object():
     assert id(result) == identity
 
 
-def test_transcendental_functions_match_numpy():
-    result = feed("mean_accumulator", (0.25,)).result()
+@pytest.mark.parametrize("accumulator", ["mean_accumulator", "max_num_binning_accumulator"])
+def test_transcendental_functions_match_numpy(accumulator):
+    # The retired audit recorded these methods as intentional additions to the
+    # max-num-binning result. Constant bins give an independent analytic value.
+    result = feed(accumulator, [0.25] * 64).result()
 
     for name in ("sin", "cos", "tan", "sinh", "cosh", "tanh", "sqrt", "log", "abs"):
         expected = getattr(np, name if name != "abs" else "fabs")(0.25)

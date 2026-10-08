@@ -56,14 +56,14 @@ def test_components_link_without_building_the_core_runtime(tmp_path):
     subprocess.run([
         "cmake", "--build", str(tmp_path), "--config", "Release",
         "--target", "utilities_contract", "hdf5_contract", "params_contract", "osiris_contract",
-        "xml_contract", "cli_contract", "numeric_contract", "numeric_io_contract",
+        "xml_contract", "cli_contract", "numeric_contract", "numeric_io_contract", "numeric_xml_contract",
         "maxent_independent_contract", "maxent", "--parallel", "2",
     ], check=True)
     core_runtime = Path((tmp_path / "core-runtime-Release.txt").read_text().strip())
     assert not core_runtime.exists(), f"Extracted components built the core runtime: {core_runtime}"
     subprocess.run([
         "ctest", "--test-dir", str(tmp_path), "-C", "Release", "--output-on-failure",
-        "-R", "^(utilities|hdf5|params|osiris|xml|cli|numeric|numeric_io|maxent_independent)_contract$", "--no-tests=error",
+        "-R", "^(utilities|hdf5|params|osiris|xml|cli|numeric|numeric_io|numeric_xml|maxent_independent)_contract$", "--no-tests=error",
     ], check=True)
 
 
@@ -88,6 +88,33 @@ def test_standalone_examples_respect_build_testing(tmp_path, source, testing):
 def test_sdk_rejects_integer_abi_mismatch(tmp_path):
     output = configure(tmp_path, "-DBLA_SIZEOF_INTEGER=8", "-DEXPECT_ABI=ON", success=False)
     assert "requires BLA_SIZEOF_INTEGER=4" in output
+
+
+@pytest.mark.parametrize("tutorial,arguments", [
+    ("09-code/06-mcmain-c++", []),
+    ("10-ngs/1_accumulator_only", ["10"]),
+])
+def test_tutorial_text_parameters(tmp_path, tutorial, arguments):
+    """Build actual callers and verify text is not treated as an HDF5 archive."""
+    h5py = pytest.importorskip("h5py")
+    build = tmp_path / "build"
+    subprocess.run([
+        "cmake", "-S", str(SOURCE / "tutorials" / tutorial), "-B", str(build),
+        "-DCMAKE_BUILD_TYPE=Release", "-DALPS_DIR=" + os.environ["ALPS_DIR"],
+        *json.loads(os.environ.get("ALPS_TEST_CMAKE_ARGS", "[]")),
+    ], check=True)
+    subprocess.run(["cmake", "--build", str(build), "--config", "Release", "--parallel", "2"], check=True)
+    parameters = tmp_path / "input.txt"
+    parameters.write_text("L=4; T=2.0; THERMALIZATION=2; SWEEPS=16; SEED=42;\n")
+    executable = build / ("Release/ising.exe" if os.name == "nt" else "ising")
+    result = subprocess.run([str(executable), *arguments, str(parameters)],
+                            cwd=tmp_path, capture_output=True, text=True, timeout=30)
+    assert result.returncode == 0, result.stdout + result.stderr
+    with h5py.File(tmp_path / "input.out.h5") as archive:
+        # Legacy text parameters retain expression strings in their archives.
+        assert int(archive["parameters/L"][()]) == 4
+        assert float(archive["parameters/T"][()]) == 2.
+        assert archive["simulation/results/Energy/count"][()] > 0
 
 
 def test_sdk_preserves_missing_dependency_diagnostic(tmp_path):
