@@ -28,7 +28,7 @@ Sources use `include/`, `src/` and `tests/` where applicable. Public include spe
 
 Configuration templates live in `cmake/config/`; generated headers live under `<build-dir>/generated/include/alps/`. Each owner's explicit CMake `HEADERS` file set preserves installed `<alps/...>` and `<ietl/...>` include paths. Public template definitions are installed; private sources and tests are not.
 
-Subsystem tests follow their source owner. Cross-module integration, SDK, Python, CLI and packaging tests stay under root `tests/`. MaxEnt's implementation, CLI and tests live in `src/apps/maxent/{src,cli,tests}`. Tool groups are described in [src/tools/README.md](../tools/README.md).
+Subsystem tests follow their source owner. Python package tests live in `python/pyalps/tests/`; cross-module integration, SDK, CLI and packaging tests stay under root `tests/`. MaxEnt's implementation, CLI and tests live in `src/apps/maxent/{src,cli,tests}`. Tool groups are described in [src/tools/README.md](../tools/README.md).
 
 ## Library boundaries
 

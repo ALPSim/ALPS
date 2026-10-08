@@ -5,7 +5,9 @@ from pathlib import Path
 
 import pytest
 
-SOURCE = Path(__file__).resolve().parents[2] / "src/apps/maxent/tests/reference.py"
+SOURCE = Path(__file__).resolve().parents[3] / "src/apps/maxent/tests/reference.py"
+if not SOURCE.is_file():
+    pytest.skip("shared MaxEnt reference requires the ALPS checkout", allow_module_level=True)
 SPEC = importlib.util.spec_from_file_location("maxent_reference", SOURCE)
 reference = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(reference)

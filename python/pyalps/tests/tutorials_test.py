@@ -24,7 +24,7 @@ from pathlib import Path
 import pytest
 
 
-TUTORIALS = Path(__file__).resolve().parents[2] / "tutorials" / "10-ngs"
+TUTORIALS = Path(__file__).resolve().parents[3] / "tutorials" / "10-ngs"
 
 # 5_export_python is absent: its smoke test imports a compiled extension that
 # only exists after the downstream CMake build in compatibility.yml.

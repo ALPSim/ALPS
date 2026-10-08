@@ -129,7 +129,7 @@ After the editable install above, test Python and installed-SDK consumers too:
 ```sh
 python -m pip install "pytest>=8"
 PYALPS_TEST_DOWNSTREAM_EXPORT=1 CMAKE_BUILD_PARALLEL_LEVEL=2 \
-  python -m pytest tests/pyalps tests/cmake -q -rs
+  python -m pytest python/pyalps/tests tests/cmake -q -rs
 ```
 
 Keep `ALPS_DIR` and any dependency prefixes set. The downstream flag enables tests that compile Python extensions against the installed SDK and pyalps runtime. These checks compile additional small projects and take longer than import tests. `tests/cmake` assumes an MPI-disabled LP64 SDK for its consumer contracts; use the default SDK for this command. If custom toolchain arguments are needed by these temporary builds, `ALPS_TEST_CMAKE_ARGS` accepts a JSON array of CMake arguments.
@@ -152,7 +152,7 @@ python .github/scripts/validate_pyalps.py --output _build/validation --wheelhous
 
 The runner records test reports, logs, source and binary hashes, dependency versions and timings. Add `--packaging` for packaging checks, `--downstream` for compiled consumers (requires the matching SDK, CMake, a compiler and nanobind), or `--applications` for six installed solver smoke workflows. The exact-diagonalization cases check the four-site Heisenberg ground-state energy; the short Monte Carlo and DMRG runs check finite results, not convergence.
 
-Historical checkpoint loading runs in the regular Python suite using `tests/pyalps/fixtures/legacy_checkpoint.h5`. Its adjacent C++ source records the historical serializer revision and reproduction instructions. Keep this fixture frozen during ALPSCore consolidation: a checkpoint regenerated with the current SDK would lose the backward-compatibility check. The retired Boost.Python comparison scripts remain available in Git history.
+Historical checkpoint loading runs in the regular Python suite using `python/pyalps/tests/fixtures/legacy_checkpoint.h5`. Its adjacent C++ source records the historical serializer revision and reproduction instructions. Keep this fixture frozen during ALPSCore consolidation: a checkpoint regenerated with the current SDK would lose the backward-compatibility check. The retired Boost.Python comparison scripts remain available in Git history.
 
 ## Making a change
 

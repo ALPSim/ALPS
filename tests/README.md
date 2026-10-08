@@ -2,9 +2,10 @@
 
 ALPS uses GoogleTest for C++ runtime tests, CTest for native execution, and
 pytest for Python. Component tests live beside their implementation in
-`src/alps/<component>/tests`; cross-component and installed-package checks live
-here. The two language suites have independent entry points: passing CTest does
-not mean that the Python package was tested.
+`src/alps/<component>/tests` and `python/pyalps/tests`; repository-wide
+integration, SDK, packaging and CI checks live here. The two language suites
+have independent entry points: passing CTest does not mean that the Python
+package was tested.
 
 ## Local workflows
 
@@ -49,13 +50,13 @@ python -m pytest tests/tutorials -q
 After installing the SDK and pyalps as described in `CONTRIBUTING.md`:
 
 ```sh
-python -m pytest tests/pyalps -q -rs
+python -m pytest python/pyalps/tests -q -rs
 python -m pytest tests/cmake -q -rs
 python -m pytest tests/ci tests/packaging -q
 ```
 
 `tests/cmake` requires `ALPS_DIR`; it validates installed consumers, relocatability,
-build configuration and the testing harness. `ALPS_TEST_CMAKE_ARGS` supplies a
+and build configuration. `ALPS_TEST_CMAKE_ARGS` supplies a
 JSON array of dependency/toolchain arguments to its temporary projects. Keep
 the installed-SDK and Python checks pointed at the candidate build. Distribution
 CI additionally exercises repaired wheels and independently unpacked sdists.

@@ -22,13 +22,13 @@ def main():
     (reports / f"{identifier}-import.txt").write_text(f"Python: {sys.executable}\npyalps: {package}\n")
     # The C++ SDK is identical across wheel ABIs. Compile its consumers once
     # per platform; Python/downstream-extension tests still run on every ABI.
-    suites = [str(ROOT / 'tests/pyalps')]
+    suites = [str(ROOT / 'python/pyalps/tests')]
     if sys.version_info[:2] == (3, 12):
         suites.append(str(ROOT / 'tests/cmake'))
     elif sys.version_info[:2] > (3, 12):
         # Reused abi3 artifact: check interpreter-facing behavior, without
         # repeating its numerical regressions on every newer interpreter.
-        suites = [str(ROOT / 'tests/pyalps' / name) for name in (
+        suites = [str(ROOT / 'python/pyalps/tests' / name) for name in (
             'test_binding_surface.py', 'test_mapping_lifetimes.py', 'test_wheel_payload.py',
         )]
     with tempfile.TemporaryDirectory(prefix="alps-wheel-tests-") as work:

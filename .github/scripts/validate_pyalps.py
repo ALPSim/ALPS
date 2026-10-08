@@ -114,8 +114,8 @@ def main():
 
     success = False
     try:
-        tests = (["tests/pyalps/test_binding_surface.py", "tests/pyalps/test_wheel_payload.py"]
-                 if args.smoke else ["tests/pyalps"])
+        tests = (["python/pyalps/tests/test_binding_surface.py", "python/pyalps/tests/test_wheel_payload.py"]
+                 if args.smoke else ["python/pyalps/tests"])
         if args.packaging:
             tests.append("tests/packaging")
         run(

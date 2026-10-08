@@ -7,7 +7,7 @@
 // Reproduction (from the repository root, with Boost/HDF5/BLAS/LAPACK installed):
 //   mkdir -p /tmp/alps-legacy-source
 //   git archive f28d428017773f5794dc9896a544f95e8ef40443 | tar -x -C /tmp/alps-legacy-source
-//   cp tests/pyalps/fixtures/legacy_checkpoint.cpp /tmp/alps-legacy-source/
+//   cp python/pyalps/tests/fixtures/legacy_checkpoint.cpp /tmp/alps-legacy-source/
 // Append these two lines to that checkout's CMakeLists.txt:
 //   add_executable(legacy_checkpoint legacy_checkpoint.cpp)
 //   target_link_libraries(legacy_checkpoint alps)
@@ -18,7 +18,7 @@
 //     -DALPS_BUILD_EXAMPLES=OFF -DALPS_BUILD_FORTRAN=OFF \
 //     -DALPS_ENABLE_MPI=OFF -DALPS_ENABLE_OPENMP=OFF
 //   cmake --build /tmp/alps-legacy-build --target legacy_checkpoint --parallel 2
-//   /tmp/alps-legacy-build/legacy_checkpoint tests/pyalps/fixtures/legacy_checkpoint.h5
+//   /tmp/alps-legacy-build/legacy_checkpoint python/pyalps/tests/fixtures/legacy_checkpoint.h5
 // Original generation used GCC 15.3, Boost 1.85.0 and HDF5 1.14.6 on Linux.
 #include <alps/ngs/params.hpp>
 #include <alps/ngs/random01.hpp>

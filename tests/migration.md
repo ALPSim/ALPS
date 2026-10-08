@@ -19,8 +19,8 @@ and test conventions are in [the testing guide](README.md).
 
 Do not regenerate historical fixtures from a replacement implementation merely
 to make a test pass. The frozen Python checkpoint has its serializer revision
-and reproduction instructions beside it in `pyalps/fixtures/legacy_checkpoint.cpp`.
-Frozen scheduler and solver results in `pyalps/fixtures/application_results/`
+and reproduction instructions beside it in `../python/pyalps/tests/fixtures/legacy_checkpoint.cpp`.
+Frozen scheduler and solver results in `../python/pyalps/tests/fixtures/application_results/`
 also exercise the public loaders. These prove historical ALPS compatibility;
 they do not establish ALPSCore archive compatibility.
 
