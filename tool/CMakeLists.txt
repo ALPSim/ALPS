@@ -67,8 +67,8 @@ endif(SQLite_FOUND)
 #
 
   if(UNIX AND NOT WIN32)
-    install(PROGRAMS archivecat convert2html convert2text extractgp extracthtml 
-            extractmpl  extracttext extractxmgr plot2gp plot2html plot2mpl 
+    install(PROGRAMS archivecat convert2html convert2text extractgp extracthtml
+            extracttext extractxmgr plot2gp plot2html
             plot2text plot2xmgr use_local_stylesheet xslttransform 
             DESTINATION bin COMPONENT tools)
   else(UNIX AND NOT WIN32)

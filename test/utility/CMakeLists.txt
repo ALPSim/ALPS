@@ -45,3 +45,6 @@ if(ALPS_HAVE_MPI AND MPIEXEC_EXECUTABLE)
 endif()
 
 endif()
+
+# filelist unit test
+include(${CMAKE_CURRENT_SOURCE_DIR}/dmrg_filelist_tests.cmake)

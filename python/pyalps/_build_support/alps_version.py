@@ -1,7 +1,7 @@
 # Copyright (C) 2026 by the ALPS collaboration
 # SPDX-License-Identifier: MIT
 
-"""Derive the pyalps version from the repository, not from pyproject.toml.
+"""Derive the pyalps version and conditional wheel commands.
 
 ALPS_VERSION.txt at the repository root is the single source of truth for the
 release version; cmake/ALPSVersion.cmake reads the same file to set
@@ -24,16 +24,21 @@ vocabulary, translated to the PEP 440 spelling Python requires:
 Wired up in pyproject.toml as::
 
     [project]
-    dynamic = ["version"]
+    dynamic = ["version", "scripts"]
 
     [[tool.dynamic-metadata]]
     provider = { path = "_build_support", module = "alps_version" }
+
+Command entry points exist only for bundled wheels. PYALPS_BUNDLE_APPLICATIONS
+is shared with CMake so bindings-only installs cannot overwrite SDK commands.
 """
 
 from __future__ import annotations
 
 import os
 import re
+import runpy
+import sys
 from email.parser import BytesParser
 from pathlib import Path
 
@@ -144,15 +149,29 @@ def version(project_dir: Path | None = None, ref: str | None = None) -> str:
     return computed
 
 
+def bundle_applications() -> bool:
+    """One build setting for both CMake's payload and wheel entry points."""
+    value = os.environ.get("PYALPS_BUNDLE_APPLICATIONS", "ON").upper()
+    if value in {"1", "ON", "YES", "TRUE"}:
+        return True
+    if value in {"0", "OFF", "NO", "FALSE"}:
+        return False
+    raise ValueError("PYALPS_BUNDLE_APPLICATIONS must be ON or OFF")
+
+
 def dynamic_metadata(settings, project):  # noqa: ARG001 - provider protocol
     """scikit-build-core dynamic-metadata 0.3 hook."""
     if settings:
-        raise RuntimeError(
-            "The alps_version provider takes no settings; the version comes "
-            "from ALPS_VERSION.txt and ALPS_VERSION_PRERELEASE."
-        )
-    return {"version": version()}
+        raise RuntimeError("The alps_version provider takes no settings.")
+    scripts = {}
+    if bundle_applications():
+        cli = runpy.run_path(str(Path(__file__).resolve().parents[1] / "src/pyalps_cli/__init__.py"))
+        scripts = {name: "pyalps_cli:main" for name in (*cli["NATIVE_PROGRAMS"], *cli["EXPORTERS"])}
+    return {"version": version(), "scripts": scripts}
 
 
 if __name__ == "__main__":  # a convenience for the release process
-    print(version())
+    if sys.argv[1:] == ["--bundle-applications"]:
+        print("ON" if bundle_applications() else "OFF")
+    else:
+        print(version())
