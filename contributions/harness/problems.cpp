@@ -59,6 +59,17 @@ std::vector<Hopping> openSquare(int L, double t) {
     return b;
 }
 
+std::vector<Hopping> squareTorus(int L, double t) {
+    std::vector<Hopping> b;
+    for (int x = 0; x < L; ++x)
+        for (int y = 0; y < L; ++y) {
+            const int s = x + L * y;
+            b.push_back({s, (x + 1) % L + L * y, t});
+            b.push_back({s, x + L * ((y + 1) % L), t});
+        }
+    return b;
+}
+
 // The one place that knows the id -> Hamiltonian mapping.
 std::unique_ptr<TightBinding> create(ProblemId id) {
     switch (id) {
@@ -69,6 +80,10 @@ std::unique_ptr<TightBinding> create(ProblemId id) {
         case ProblemId::BiasedDimer:
             return std::make_unique<TightBinding>("biased dimer", 2, 1, chain(2, false, 1),
                                                   std::vector<double>{1.0, -1.0});
+        case ProblemId::OpenSquare3x3:
+            return std::make_unique<TightBinding>("open 3x3", 9, 1, openSquare(3, 1));
+        case ProblemId::HalfFilledTorus4x4:
+            return std::make_unique<TightBinding>("torus 4x4 N=8", 16, 8, squareTorus(4, 1));
         case ProblemId::OpenSquare4x4:
             return std::make_unique<TightBinding>("open 4x4", 16, 1, openSquare(4, 1));
     }
@@ -93,13 +108,17 @@ std::unique_ptr<const MatrixProblem> makeMatrixProblem(ProblemId id) {
 std::vector<TestCase> testCases() {
     return {
         // -2 cos(pi / 11)
-        {ProblemId::OpenChain10,      -1.918985947228995, 1e-8, true},
+        {ProblemId::OpenChain10,        "1d", -1.918985947228995, 1e-8, true},
         // -(2 + 4 cos(pi/5) + 4 cos(2 pi/5)): k = 0, +-1, +-2 filled
-        {ProblemId::HalfFilledRing10, -6.472135954999579, 1e-8, true},
+        {ProblemId::HalfFilledRing10,   "1d", -6.472135954999579, 1e-8, true},
         // -sqrt(eps^2 + t^2) with eps = 1
-        {ProblemId::BiasedDimer,      -1.414213562373095, 1e-8, true},
+        {ProblemId::BiasedDimer,        "1d", -1.414213562373095, 1e-8, true},
+        // -4 cos(pi / 4)
+        {ProblemId::OpenSquare3x3,      "2d", -2.828427124746190, 1e-8, true},
+        // levels -2(cos kx + cos ky): -4 once, -2 four times, then zeros
+        {ProblemId::HalfFilledTorus4x4, "2d", -12.0,              1e-8, true},
         // -4 cos(pi / 5)
-        {ProblemId::OpenSquare4x4,    -3.236067977499790, 1e-8, false},
+        {ProblemId::OpenSquare4x4,      "2d", -3.236067977499790, 1e-8, false},
     };
 }
 

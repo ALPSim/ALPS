@@ -38,6 +38,8 @@ enum class ProblemId {
     OpenChain10,
     HalfFilledRing10,
     BiasedDimer,
+    OpenSquare3x3,
+    HalfFilledTorus4x4,
     OpenSquare4x4,
 };
 
@@ -47,11 +49,13 @@ std::unique_ptr<const Problem> makeProblem(ProblemId id);
 // nullptr if the problem is too large to offer as a matrix.
 std::unique_ptr<const MatrixProblem> makeMatrixProblem(ProblemId id);
 
-// One judged case: the problem and the ground-state energy it has to land on.
-// Only `required` cases decide the exit code; the rest are reported for
-// information, because no single method handles every Hamiltonian.
+// One judged case: the problem, the ground-state energy it has to land on, and
+// the category it is reported under. Only `required` cases decide the exit
+// code; the rest are reported for information, because no single method
+// handles every Hamiltonian.
 struct TestCase {
     ProblemId id;
+    const char* category;
     double expected;
     double tol;
     bool required;
