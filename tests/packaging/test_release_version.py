@@ -12,7 +12,7 @@ import zipfile
 from packaging.version import Version
 import pytest
 
-SCRIPT = Path(__file__).resolve().parents[2] / "script" / "check_release_version.py"
+SCRIPT = Path(__file__).resolve().parents[2] / ".github/scripts" / "check_release_version.py"
 SPEC = importlib.util.spec_from_file_location("check_release_version", SCRIPT)
 release = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(release)
@@ -60,7 +60,7 @@ def test_dynamic_version_rejects_stale_tag_and_conflicting_label(versions, monke
 
 def test_prerelease_sdist_keeps_its_version_without_the_build_environment(tmp_path):
     """Exercise the backend: a user rebuild must keep the published version."""
-    repository = SCRIPT.parents[1]
+    repository = SCRIPT.parents[2]
     project = repository / "python/pyalps"
     core = (repository / "ALPS_VERSION.txt").read_text().strip()
     environment = {**os.environ, "GITHUB_REF": f"refs/tags/v{core}-beta.2"}
@@ -79,7 +79,7 @@ def test_prerelease_sdist_keeps_its_version_without_the_build_environment(tmp_pa
             "cpp/ngs/hdf5.cpp", "_vendor/src/tools/maxent.cpp",
             "_vendor/src/apps/dmft/qmc/hybridization/hybmain.cpp",
             "_vendor/src/apps/dmft/qmc/interaction_expansion2/main.cpp",
-            "_vendor/lib/xml/ALPS.xsl", "_vendor/lib/xml/models.xml.in",
+            "_vendor/src/alps/resources/ALPS.xsl", "_vendor/src/alps/resources/models.xml.in",
         }
         assert {prefix + name for name in required} <= set(archive.getnames())
         archive.extractall(tmp_path, filter="data")

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - WIP/sdk-source-layout
     tags:
       - 'v*'
   pull_request:
@@ -15,6 +16,18 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  citations:
+    name: Citation policy and generated notices
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r .github/scripts/citations/requirements.txt
+      - run: python .github/scripts/generate_citations.py --check
+      - run: python -m unittest discover -s tests/packaging -p '*citations.py' -v
+
   linux-build:
     name: >-
       ALPS / ${{ matrix.plat.os }} / ${{ matrix.plat.c_compiler }}-${{ matrix.plat.c_version }} /
@@ -96,7 +109,7 @@ jobs:
             | sudo tee /etc/apt/apt.conf.d/99ci-timeouts > /dev/null
           sudo apt-get update
           python -m pip install --upgrade pip
-          pip install "numpy>=1.26" "scipy>=1.13"
+          pip install "numpy>=1.26" "scipy>=1.13" -r .github/scripts/citations/requirements.txt
           sudo apt install liblapack-dev libblas-dev libopenmpi-dev libhdf5-serial-dev
           # Clang >= 19: not in Ubuntu's default apt repos; use apt.llvm.org.
           # GCC >= 15: not in Ubuntu's default apt repos; use ubuntu-toolchain-r PPA.
@@ -120,10 +133,11 @@ jobs:
           cmake -S $GITHUB_WORKSPACE -B build \
                 -DBoost_SRC_DIR="$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" \
                 -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/build/install" \
+                -DALPS_CITATION_PYTHON="$(command -v python)" \
                 -DCMAKE_CXX_STANDARD=${{ matrix.plat.cxx_standard || '17' }} \
                 -DCMAKE_CXX_FLAGS="-fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED"
           cmake --build build -j 2
-          cmake --build build -j 2 -t test
+          ctest --test-dir build --output-on-failure
 
       # Compile the public exporter as a downstream project, rather than only
       # checking that its compatibility header is present in the install.
@@ -167,7 +181,7 @@ jobs:
         timeout-minutes: 30
         run: |
           brew install python@${{ matrix.plat.py_version }} gfortran
-          pip${{ matrix.plat.py_version }} install "numpy>=1.26" "scipy>=1.13" --break-system-packages
+          pip${{ matrix.plat.py_version }} install "numpy>=1.26" "scipy>=1.13" -r .github/scripts/citations/requirements.txt --break-system-packages
           brew install openmpi hdf5
           if [[ -n "${{ matrix.plat.comp_pack }}" ]]; then
             brew install ${{ matrix.plat.comp_pack }}
@@ -186,13 +200,12 @@ jobs:
                 -DBoost_SRC_DIR="$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" \
                 -DCMAKE_CXX_STANDARD=17 \
                 -DCMAKE_CXX_FLAGS="${{ matrix.plat.cxx_stdlib }} -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED" \
-                -DPython_ROOT_DIR=`$(brew --prefix)/bin/python${{ matrix.plat.py_version }} -c "import sys, os; print(os.path.dirname(os.path.dirname(str(sys.executable))));"` \
+                -DALPS_CITATION_PYTHON="$(brew --prefix)/bin/python${{ matrix.plat.py_version }}" \
                 -DCMAKE_Fortran_COMPILER=gfortran
           cmake --build build -j $(sysctl -n hw.ncpu)
-          cmake --build build -t test
 
       - name: Run tests
-        run: cd build && ctest --output-on-failure --rerun-failed
+        run: ctest --test-dir build --output-on-failure
 
       - name: Upload test logs on failure
         if: failure()

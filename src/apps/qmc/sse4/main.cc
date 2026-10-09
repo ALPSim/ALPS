@@ -8,7 +8,7 @@ int main(int argc, char** argv)
 	try {
 #endif
 	return alps::scheduler::start(argc, argv, 
-							alps::scheduler::SimpleMCFactory<SSE_run>());
+							alps::scheduler::SimpleMCFactory<SSE_run>(), "dirloop_sse");
 #ifndef BOOST_NO_EXCEPTIONS
 	} catch (std::exception& e) {
 	    std::cerr << e.what() << "\n";

@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 try {
 #endif
 
-   return alps::scheduler::start(argc,argv,FullDiagFactory());
+   return alps::scheduler::start(argc,argv,FullDiagFactory(), "fulldiag");
 
 #ifndef BOOST_NO_EXCEPTIONS
 }

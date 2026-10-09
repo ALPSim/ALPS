@@ -13,7 +13,7 @@ import time
 import xml.etree.ElementTree as ET
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def sha256(path):
@@ -116,7 +116,7 @@ def main():
 
     success = False
     try:
-        tests = ["tests/pyalps"] + (["test/packaging"] if args.packaging else [])
+        tests = ["tests/pyalps"] + (["tests/packaging"] if args.packaging else [])
         run(
             "pytest",
             [

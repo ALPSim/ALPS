@@ -39,19 +39,7 @@ inline void print_dmrg_copyright(std::ostream& os)
      << "  Density Matrix Renormalization Group algorithm\n"
      << "  for low-dimensional interacting systems.\n"
      << "  available from http://alps.comp-phys.org/\n"
-     << "  copyright (c) 2006-2013 by Adrian E. Feiguin\n\n"
-     << "********************************************************************\n"
-     << "* Recommended citation in scientific publications:                 *\n"
-     << "* This code used the ALPS [1] implementation [2] of DMRG [3-6].    *\n"
-     << "* [1] JSTAT (2011) P05001;                                         *\n"
-     << "* [2] A.E. Feiguin, The Density Matrix Renormalization Group. In:  *\n"
-     << "*     Strongly Correlated Systems. Springer Series in Solid-State  *\n"
-     << "*     Sciences, vol 176 (2013)                                     *\n"
-     << "* [3] Phys. Rev. Lett. 69, 2863 (1992)                             *\n"
-     << "* [4] Phys. Rev. B 48, 10345 (1993)                                *\n"
-     << "* [5] Rev. Mod. Phys. 77, 259 (2005)                               *\n"
-     << "* [6] Adv. Phys. 55, 477 (2006)                                    *\n"
-     << "********************************************************************\n\n";
+     << "  copyright (c) 2006-2013 by Adrian E. Feiguin\n\n";
 }
 
 #include <alps/hdf5.hpp>
@@ -168,13 +156,6 @@ DMRGTask<value_type>::DMRGTask(const alps::ProcessList& w,const alps::Parameters
 template<class value_type>
 void DMRGTask<value_type>::init()
 {
-  if (parms.defined("TEMP_DIRECTORY")) {
-    std::string temp_dir = parms["TEMP_DIRECTORY"];
-    dmtk::tmp_files.set_temp_dir(temp_dir.c_str());
-  } else {
-    dmtk::tmp_files.set_temp_dir(alps::temp_directory_path().string().c_str());
-  }
-
   num_eigenvalues = this->parms.value_or_default("NUMBER_EIGENVALUES",1);
    
   typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
@@ -267,9 +248,18 @@ std::string simplify_name(const SiteOp &op)
 template<class value_type>
 void DMRGTask<value_type>::dostep() 
 {
-  if (finished()) 
+  if (finished())
     return;
-  
+
+  // Select scratch storage when this task runs; other tasks may have been
+  // constructed since init().
+  if (parms.defined("TEMP_DIRECTORY")) {
+    std::string temp_dir = parms["TEMP_DIRECTORY"];
+    dmtk::tmp_files.set_temp_dir(temp_dir.c_str());
+  } else {
+    dmtk::tmp_files.set_temp_dir(alps::temp_directory_path().string().c_str());
+  }
+
   dmtk::Lattice l(num_sites(),dmtk::OBC);
   hami = dmtk::Hami<value_type >(l);
   site_block.resize(alps::maximum_vertex_type(graph())+1);
@@ -495,6 +485,7 @@ void DMRGTask<value_type>::dostep()
   }
   this->average_values["Truncation error"].push_back(S.truncation_error());
   finish();
+  dmtk::tmp_files.cleanup();
 }
 
 

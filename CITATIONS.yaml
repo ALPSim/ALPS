@@ -1,0 +1,79 @@
+# Citation-policy authority. Bibliographic records live in CITATION.cff.
+# yaml-language-server: $schema=.github/scripts/citations/policy.schema.json
+# See .github/scripts/citations/README.md for the schema and maintenance commands.
+schema_version: 1
+source:
+  document: ALPS release 3.0 manuscript
+  revision: 943e903ee2334a440c1f64acf553e3a7244b5607
+  sections: Citation policy; application matrix (tab:apps); DMFT subsection
+policy:
+  request: If ALPS contributes to published research, please cite the relevant algorithm, implementation, and framework papers below.
+  license_note: This is a request for scientific credit, separate from the MIT license terms.
+  algorithm: Credit the original algorithms relevant to the calculation.
+  implementation: Credit the ALPS implementations and infrastructure used in the calculation.
+  framework: Cite the most recent ALPS release paper, recorded as preferred-citation in CITATION.cff.
+components:
+  framework:
+    name: ALPS libraries
+    algorithm: []
+    implementation: []
+  scheduler:
+    name: ALPS parallel Monte Carlo scheduler
+    algorithm: []
+    implementation: [troyer1998scheduler]
+  sparsediag:
+    name: ALPS sparse diagonalization
+    algorithm: [lanczos1950]
+    implementation: [alps30]
+    uses: [scheduler]
+  fulldiag:
+    name: ALPS full diagonalization
+    algorithm: []
+    implementation: [alps30]
+    uses: [scheduler]
+  spinmc:
+    name: ALPS classical Monte Carlo
+    algorithm: [swendsenwang1987, wolff1989]
+    implementation: [alps30]
+    uses: [scheduler]
+  looper:
+    name: ALPS loop-cluster quantum Monte Carlo
+    algorithm: [evertz1993, beard1996, evertz2003]
+    implementation: [todo2001]
+  dirloop_sse:
+    name: ALPS directed-loop stochastic series expansion
+    algorithm: [sandvik1999, syljuasen2002]
+    implementation: [alet2005directed]
+    uses: [scheduler]
+  worm:
+    name: ALPS worm-algorithm quantum Monte Carlo
+    algorithm: [prokofev1998, Prokofev1998JETP]
+    implementation: [alps30]
+    uses: [scheduler]
+  qwl:
+    name: ALPS quantum Wang-Landau
+    algorithm: [wang2001prl, wang2001pre, troyer2003qwl]
+    implementation: [alps30]
+    uses: [scheduler]
+  dmrg:
+    name: ALPS density matrix renormalization group
+    algorithm: [white1992, white1993, schollwock2005, hallberg2006]
+    implementation: [feiguin2013]
+    uses: [scheduler]
+  dmft:
+    name: ALPS dynamical mean-field framework
+    algorithm: [metzner1989, georges1992, georges1996]
+    implementation: [gull2011cpc]
+    note: Cite the relevant impurity-solver references as well when using a solver through the DMFT driver.
+  interaction:
+    name: ALPS CT-INT impurity solver
+    algorithm: [rubtsov2005, gull2011]
+    implementation: [gull2011cpc]
+  hybridization:
+    name: ALPS CT-HYB impurity solver
+    algorithm: [werner2006, gull2011]
+    implementation: [gull2011cpc, hafermann2013]
+  hirschfye:
+    name: ALPS Hirsch-Fye impurity solver
+    algorithm: [hirschfye1986]
+    implementation: [gull2011cpc]

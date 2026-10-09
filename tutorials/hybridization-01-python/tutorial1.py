@@ -20,8 +20,8 @@
  # epsilon=0 (Delta(tau)=-V**2/2=const.) . It can therefore be compared to the
  # exact result obtained by exact diagonalization (see subdirectory ED).
  #
- # Run this script as:
- # alpspython tutorial1.py
+ # Activate the Python environment containing pyalps, then run:
+ # python tutorial1.py
  #
 
 import pyalps.cthyb as cthyb # the solver module

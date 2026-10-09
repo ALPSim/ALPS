@@ -12,6 +12,7 @@
 
 /* $Id$ */
 
+#include <alps/utility/cli.hpp>
 #include "fitting_scheduler.h"
 
 #include <alps/scheduler/types.h>
@@ -22,21 +23,24 @@ namespace scheduler {
 
 int start_fitting(int argc, char** argv, const Factory& p) 
 {
+  if (alps::handle_cli_information(argc, argv, "spinmc", [&] {
+    std::cout << "Usage: " << argv[0] << " [scheduler options] fitting_file\n";
+  })) return 0;
   if (argc < 2)
     return -1;
+
+  NoJobfileOptions njfo(argc-1,argv,"spinmc");
+  if (!(njfo.valid)) {
+    std::cerr << "invalid options, returning \n";
+    return -1;
+  }
 
   comm_init(argc,argv);
 
   if ((is_master()) || (!runs_parallel())) {
     p.print_copyright(std::cout);
     alps::scheduler::print_copyright(std::cout);
-    alps::print_copyright(std::cout);
-  }
-
-  NoJobfileOptions njfo(argc-1,argv);
-  if (!(njfo.valid)) {
-    std::cerr << "invalid options, returning \n";
-    return -1;
+    alps::print_copyright(std::cout, "spinmc");
   }
 
   if (!runs_parallel()) 

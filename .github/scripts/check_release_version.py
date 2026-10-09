@@ -31,7 +31,7 @@ def check_version(root: Path, ref: str) -> Version:
     with (project_dir / "pyproject.toml").open("rb") as stream:
         project = tomllib.load(stream)["project"]
     if "version" in project.get("dynamic", []):
-        provider_path = Path(__file__).resolve().parents[1] / "python/pyalps/_build_support/alps_version.py"
+        provider_path = Path(__file__).resolve().parents[2] / "python/pyalps/_build_support/alps_version.py"
         spec = importlib.util.spec_from_file_location("alps_version", provider_path)
         provider = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(provider)
@@ -102,7 +102,7 @@ def check_distributions(directory: Path, expected: Version) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
+    parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[2])
     parser.add_argument("--ref", default=os.environ.get("GITHUB_REF", ""))
     parser.add_argument("--dist", type=Path)
     args = parser.parse_args()

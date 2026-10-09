@@ -11,6 +11,7 @@
 
 /* $Id$ */
 
+#include <alps/utility/cli.hpp>
 #include <alps/model.h>
 #include <alps/lattice.h>
 #include <alps/utility/copyright.hpp>
@@ -101,20 +102,17 @@ int main(int argc, char** argv)
   try {
 #endif
 
-  std::cout << "ALPS application to check for a sign problem in a quantum model\n"
-            << "  available from http://alps.comp-phys.org/\n"
-            << "  copyright (c) 2003-2007 by Matthias Troyer <troyer@comp-phys.org>\n\n";
-  alps::print_copyright(std::cout);
-  
-  if (argc<2) {
-    std::cerr << "Usage: " << argv[0] << " [-l] inputfile [inputfile ...]]\n";
-    std::exit(-1);
+  if (alps::handle_cli_information(argc, argv, "framework", [&] {
+    std::cout << "Usage: " << argv[0] << " inputfile [inputfile ...]\n";
+  })) return 0;
+  if (argc < 2) throw std::invalid_argument("Expected an input file");
+  alps::cli_mpi_guard mpi(argc, argv);
+  if (alps::cli_is_master()) {
+    std::cout << "ALPS application to check for a sign problem in a quantum model\n";
+    alps::print_copyright(std::cout);
   }
   for (int i=1;i<argc;++i) {   
-    if (!std::strcmp(argv[i],"-l")) {
-      alps::print_license(std::cout);
-      continue;
-    }
+
     char c;
     { // check for XML file
       std::ifstream in(argv[i]);

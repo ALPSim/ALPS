@@ -1,0 +1,8 @@
+# Keep checksummed source and generated files identical across Git platforms.
+/CITATION.cff text eol=lf
+/CITATIONS.yaml text eol=lf
+/CITATION.md text eol=lf
+/.github/scripts/generate_citations.py text eol=lf
+/.github/scripts/citations/*.json text eol=lf
+# Derived citation data is verified by CI; review the authority files instead.
+/.github/scripts/citations/generated/* text eol=lf linguist-generated=true
