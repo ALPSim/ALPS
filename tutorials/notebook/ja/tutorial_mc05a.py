@@ -46,6 +46,5 @@ rhos = pyalps.collectXY(data,x='t',y='Stiffness')
 plt.figure()
 pyalps.plot.plot(rhos)
 plt.xlabel('Hopping $t/U$')
-plt.ylabel('Superfluid density $\
-ho _s$')
+plt.ylabel('Superfluid density $\ho _s$')
 plt.show()

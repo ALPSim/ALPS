@@ -51,8 +51,7 @@ for s in rhos:
 plt.figure()
 pyalps.plot.plot(rhos)
 plt.xlabel('Hopping $t/U$')
-plt.ylabel('$\
-ho _sL$')
+plt.ylabel('$\ho _sL$')
 plt.legend()
 plt.title('Scaling plot for Bose-Hubbard model')
 plt.show()
