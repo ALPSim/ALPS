@@ -1,6 +1,6 @@
 # Citation-policy authority. Bibliographic records live in CITATION.cff.
-# yaml-language-server: $schema=script/citations/policy.schema.json
-# See script/citations/README.md for the schema and maintenance commands.
+# yaml-language-server: $schema=.github/scripts/citations/policy.schema.json
+# See .github/scripts/citations/README.md for the schema and maintenance commands.
 schema_version: 1
 source:
   document: ALPS release 3.0 manuscript
