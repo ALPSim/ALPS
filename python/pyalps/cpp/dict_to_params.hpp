@@ -36,7 +36,7 @@ inline bool is_bool_like(PyObject * raw) {
     // which does NOT subclass bool and would otherwise slip through
     // the numeric ladder as 0.0/1.0
     return PyBool_Check(raw)
-        || std::strncmp(Py_TYPE(raw)->tp_name, "numpy.bool", 10) == 0;
+        || alps::python::type_name(raw).compare(0, 10, "numpy.bool") == 0;
 }
 inline bool is_numpy_array(nb::handle value) {
     // isinstance, rather than an exact tp_name comparison, keeps ndarray
@@ -122,10 +122,7 @@ inline std::complex<double> complex_value(nb::handle value,
     scalar_kind const kind = classify_scalar(value);
     if (kind == scalar_kind::integer || kind == scalar_kind::real)
         return std::complex<double>(real_value(value, key), 0.0);
-    Py_complex const converted = PyComplex_AsCComplex(value.ptr());
-    if (PyErr_Occurred())
-        throw nb::python_error();
-    return std::complex<double>(converted.real, converted.imag);
+    return nb::cast<std::complex<double>>(value);
 }
 
 inline std::string string_value(nb::handle value) {

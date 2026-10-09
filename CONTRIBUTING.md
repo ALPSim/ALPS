@@ -1,62 +1,40 @@
 # Contributing to ALPS
 
-Thank you for your interest in ALPS (Algorithms and Libraries for Physics Simulations).
-ALPS is a community-driven, open-source ecosystem for numerical simulations of correlated quantum systems.
-Contributions at every level — from a one-line bug report to a new simulation method — are welcome and valued.
+Bug reports, documentation, tests and new simulation methods are welcome. To use ALPS without developing it, start with the [installation instructions](README.md#installation) and [tutorial guide](tutorials/README.md). See [CHANGELOG.md](CHANGELOG.md) for unreleased changes and migration guidance.
 
-## Table of contents
-
-- [Ways to contribute](#ways-to-contribute)
-- [Reporting bugs and requesting features](#reporting-bugs-and-requesting-features)
 - [Getting started with the code](#getting-started-with-the-code)
+- [Run the tests](#run-the-tests)
 - [Making a change](#making-a-change)
 - [Provenance and scientific credit](#provenance-and-scientific-credit)
-- [Submitting a pull request](#submitting-a-pull-request)
 - [Build reference](#build-reference)
+- [CI coverage](#ci-coverage)
 - [Preparing a release](#preparing-a-release)
-- [Review process](#review-process)
-- [Code style](#code-style)
-- [Recognition](#recognition)
-- [Getting help](#getting-help)
-
----
-
-## Ways to contribute
-
-Contributions fall into four broad levels. You do not need to start at the bottom — jump in wherever your skills fit.
-
-| Level | What this looks like |
-|---|---|
-| **1 — Feedback** | Install ALPS, try a tutorial, open an issue when something is unclear or broken |
-| **2 — Documentation & tutorials** | Improve or extend tutorials on the [ALPS website](https://alps.comp-phys.org), fix documentation errors, add examples |
-| **3 — Maintenance** | Fix bugs, improve tests, update dependencies, respond to community questions on Discord |
-| **4 — New code** | Contribute a new algorithm, library, or simulation application |
-
-All contributions require agreeing to release your work under the [MIT License](LICENSE.txt).
-For third-party material, also follow the [provenance guidance](#provenance-and-scientific-credit) below.
-
----
 
 ## Reporting bugs and requesting features
 
-Use the [GitHub issue tracker](https://github.com/ALPSim/ALPS/issues). Choose the template that best fits:
+Search the [issue tracker](https://github.com/ALPSim/ALPS/issues) before opening an issue. For a bug, include your ALPS commit or version, OS and architecture, compiler and dependency versions, exact commands, the error output, and a small reproducer. For incorrect simulation results, include the input parameters, expected result and its reference, and any relevant random seed.
 
-- **Bug report** — something is broken or produces wrong results
-- **Feature request** — you would like new functionality
-- **Simulation help** — you need help setting up a specific model, lattice, or method
-- **Website help** — problems with the alps.comp-phys.org website
-
-Before opening a new issue, please search existing issues to avoid duplicates.
-
----
+Small fixes can go directly to a pull request. Discuss a substantial new application, library or API change with the maintainers before implementing it; see the project's [contribution policy](https://alps.comp-phys.org/govern/contribute/). Contributions must be compatible with the [MIT License](LICENSE.txt).
 
 ## Getting started with the code
+
+Build and install the C++ SDK with CMake, then build the Python package against it with pip. The workflow below includes applications and tests, uses one SDK installation, and requires no environment manager. Run commands from the repository root unless stated otherwise.
+
+### Fork and clone
+
+Fork [ALPSim/ALPS](https://github.com/ALPSim/ALPS) on GitHub, replace `<your-username>` below, and clone your fork:
+
+```sh
+git clone https://github.com/<your-username>/ALPS.git
+cd ALPS
+git remote add upstream https://github.com/ALPSim/ALPS.git
+```
 
 ### Prerequisites
 
 - CMake ≥ 3.27, Ninja for the bundled presets, and C++17/C11 compilers such as GCC or Clang.
 - Boost ≥ 1.76 with its compiled libraries and CMake packages, HDF5 ≥ 1.10.5 (C library), and LP64 BLAS/LAPACK. Use serial HDF5 for the default MPI-disabled build; see [numerical libraries](#numerical-libraries).
-- For Python development: GIL-enabled CPython ≥ 3.10 in a writable Python environment. Pip installs NumPy, SciPy and Matplotlib with pyalps. Free-threaded Python is unsupported.
+- For Python development: GIL-enabled CPython ≥ 3.11 in a writable Python environment. Pip installs NumPy, SciPy and Matplotlib with pyalps. Free-threaded Python is unsupported.
 - Optional: MPI and Boost.MPI for `ALPS_ENABLE_MPI=ON`; an OpenMP runtime for `ALPS_ENABLE_OPENMP=ON`; a Fortran compiler for the Fortran examples.
 
 Use existing dependencies or your preferred package manager. Keep the compiler, architecture and native dependency stack consistent between the SDK, bindings and downstream extensions. Older website instructions for a combined Boost.Python build do not describe this checkout.
@@ -94,20 +72,7 @@ python -m pip install "cmake>=3.27" ninja numpy h5py
 
 Skip the first two lines if already using a suitable environment. On Debian/Ubuntu, creating a venv may first require `sudo apt-get install python3-venv`. Activate the same environment in each new terminal. Both CMake and CTest must be at least 3.27; use `command -v cmake` to check which installation your shell finds.
 
-CMake and Ninja can also come from system packages or [official CMake binaries](https://cmake.org/download/). A generator other than Ninja can be selected with a plain CMake invocation instead of a preset.
-
-### Fork and clone
-
-1. Fork the repository on GitHub.
-2. Clone your fork locally:
-   ```bash
-   git clone https://github.com/<your-username>/ALPS.git
-   cd ALPS
-   ```
-3. Add the upstream remote so you can stay up to date:
-   ```bash
-   git remote add upstream https://github.com/ALPSim/ALPS.git
-   ```
+Application tests require a Python ≥ 3.11 interpreter; MaxEnt reference tests also require NumPy and h5py. CMake and Ninja can also come from system packages or [official CMake binaries](https://cmake.org/download/). A generator other than Ninja can be selected with a plain CMake invocation instead of a preset.
 
 ### Build
 
@@ -124,9 +89,17 @@ export PATH="$PWD/_build/default/install/bin:$PATH"
 
 The preset selects Release and installs into `_build/default/install`, without administrator privileges. `ALPS_DIR` selects that SDK for Python and downstream CMake builds; it does not replace the dependency prefixes above. Keep these exports in each development shell. Two parallel compile jobs are a conservative starting point; adjust to your available memory.
 
-The Python bindings are a separate `scikit-build-core` project that builds
-against an installed ALPS C++ SDK; see the
-[`pyalps` build instructions](python/pyalps/README.md).
+For Python development, continue in your active Python environment:
+
+```sh
+python -m pip install "scikit-build-core>=1.0" "nanobind==2.15.0" \
+  "patchelf>=0.14; sys_platform == 'linux'"
+CMAKE_BUILD_PARALLEL_LEVEL=2 python -m pip install --no-build-isolation -e python/pyalps \
+  --config-setting "build-dir=$PWD/_build/python"
+python -c "import pyalps; print(pyalps.__file__)"
+```
+
+This editable installation reuses `_build/python` for binding builds. `--no-build-isolation` requires the build dependencies installed above; the nanobind pin must match the package's [build requirements](python/pyalps/pyproject.toml). The default bindings include solver modules and bundled programs, so they require a shared SDK with applications enabled, as built here. The [Python package guide](python/pyalps/README.md) covers wheels and smaller core-only builds; its `distribution` preset is an alternative SDK build, not an additional prerequisite for this workflow.
 
 ### Citation maintenance
 
@@ -134,48 +107,91 @@ Citation metadata and application rules live in `CITATION.cff` and `CITATIONS.ya
 
 Editing that data requires Python ≥ 3.9 with `PyYAML` and `jsonschema`: `python -m pip install -r .github/scripts/citations/requirements.txt`, then `python .github/scripts/generate_citations.py --regenerate`. Commit the generated files alongside the authorities; CI checks that they agree. For the optional citation tests, select an interpreter with `-DALPS_CITATION_PYTHON=/path/to/python`.
 
-### Run the tests
+### Edit, rebuild and rerun
 
-From the repository root:
+- **Python source:** edits take effect in a new interpreter without reinstalling.
+- **SDK or application C++:** rerun the SDK build and install commands, then the editable pip command if using Python. The Python installation contains copies of native runtime files.
+- **Binding C++, package resources or build configuration:** rerun the editable pip command.
+- **Compiler, SDK or dependency-provider change:** reconfigure the SDK deliberately and add `--config-setting cmake.args=--fresh` to the next editable install to clear stale binding discovery. Do not reuse objects from an incompatible toolchain.
+
+Reuse build directories for ordinary edits. Machine-specific CMake settings belong in an untracked `CMakeUserPresets.json`. For a focused native rebuild, use `cmake --build --preset default --target <target> --parallel 2`.
+
+## Run the tests
+
+Native MaxEnt reference tests require NumPy and h5py in the CMake-selected Python interpreter (`python -m pip install numpy h5py`). The executable and Python binding share the same scientific validation.
+
+See [the testing guide](tests/README.md) for native CTest commands and fixture locations.
+
+CTest runs the native suite only. After the SDK build, run:
+
 ```sh
 ctest --preset default
 ```
 
-All tests must pass before submitting a pull request.
+After the editable install above, test Python and installed-SDK consumers too:
 
----
+```sh
+python -m pip install "pytest>=8"
+PYALPS_TEST_DOWNSTREAM_EXPORT=1 CMAKE_BUILD_PARALLEL_LEVEL=2 \
+  python -m pytest python/pyalps/tests tests/cmake -q -rs
+```
+
+Keep `ALPS_DIR` and any dependency prefixes set. The downstream flag enables tests that compile Python extensions against the installed SDK and pyalps runtime. These checks compile additional small projects and take longer than import tests. `tests/cmake` assumes an MPI-disabled LP64 SDK for its consumer contracts; use the default SDK for this command. If custom toolchain arguments are needed by these temporary builds, `ALPS_TEST_CMAKE_ARGS` accepts a JSON array of CMake arguments.
+
+Read the skip reasons: MPI tests need additional MPI setup, and some wheel checks apply only to repaired distribution artifacts. A successful local run with skips does not exercise every CI configuration. For a quick iteration, select native tests with `ctest --preset default -R <pattern>` or Python tests with `python -m pytest <test-file> -q`.
+
+For XML CLI changes, install `xsltproc` (Ubuntu: `sudo apt-get install xsltproc`; Homebrew: `brew install libxslt` and add its `bin` directory to `PATH`), then run:
+
+```sh
+ALPS_XML_BUILD="$PWD/_build/default" python -m pytest tests/cli -q
+```
+
+These tests install and relocate the XML component before exercising transformations. Build/release helper changes also have tests under `tests/ci` and `tests/packaging`; release-version helpers require Python ≥ 3.11 and `packaging`. Run the tests relevant to your change, report failures or skipped coverage, and let CI validate the broader platform matrix.
+
+To retain installed-wheel validation evidence, run:
+
+```sh
+python .github/scripts/validate_pyalps.py --output _build/validation --wheelhouse wheelhouse
+```
+
+The runner records test reports, logs, source and binary hashes, dependency versions and timings. Add `--packaging` for packaging checks, `--downstream` for compiled consumers (requires the matching SDK, CMake, a compiler and nanobind), or `--applications` for six installed solver smoke workflows. The exact-diagonalization cases check the four-site Heisenberg ground-state energy; the short Monte Carlo and DMRG runs check finite results, not convergence.
+
+Historical checkpoint loading runs in the regular Python suite using `python/pyalps/tests/fixtures/legacy_checkpoint.h5`. Its adjacent C++ source records the historical serializer revision and reproduction instructions. Keep this fixture frozen during ALPSCore consolidation: a checkpoint regenerated with the current SDK would lose the backward-compatibility check. The retired Boost.Python comparison scripts remain available in Git history.
 
 ## Making a change
 
-1. **Sync with upstream** before starting work:
-   ```bash
-   git fetch upstream
-   git checkout master
-   git merge upstream/master
-   ```
+Start from an up-to-date local `master`, then create one topic branch:
 
-2. **Create a branch** named after what you are doing:
-   ```bash
-   git checkout -b fix/alea-overflow
-   git checkout -b feature/dmrg-excited-states
-   git checkout -b docs/tutorial-heisenberg
-   ```
+```sh
+git fetch upstream
+git switch master
+git merge --ff-only upstream/master
+git switch -c fix/alea-overflow
+```
 
-3. **Make your changes.** Keep commits focused and self-contained. Write commit messages in the imperative mood:
-   ```
-   fix: prevent integer overflow in alea accumulator
-   feat: add excited-state targeting to DMRG
-   docs: add Heisenberg chain tutorial
-   ```
+Replace `fix/alea-overflow` with your own branch name. If the fast-forward fails, resolve your local branch history before continuing; do not discard unrelated work.
 
-4. **Add or update tests** for any changed behaviour. New simulation methods should include at least one regression test comparing output against a known result.
+Keep commits focused. Add or update tests for changed behavior; scientific changes should include a small regression against a known result. Update documentation and the Unreleased section of [CHANGELOG.md](CHANGELOG.md) for user-facing features, fixes, removals or migration steps. Internal changes without a user-facing effect do not need changelog entries.
 
----
+### Code style
+
+Match the surrounding code. Target C++17, avoid undefined behavior, and check compiler warnings. Follow [PEP 8](https://peps.python.org/pep-0008/) for Python. CMake changes must work with 3.27 and express usage requirements on targets with explicit `PRIVATE`, `PUBLIC` or `INTERFACE` scope. In Markdown, keep each prose paragraph on one source line while preserving code blocks, tables and list structure.
+
+### Submitting a pull request
+
+Commit your changes and push the current topic branch to your fork:
+
+```sh
+git push -u origin HEAD
+```
+
+Open a pull request against `ALPSim/ALPS:master`. Explain the problem, resulting behavior, tests run and any limitations using the PR template. Respond to review comments and address relevant CI failures. Review, maintenance commitments and contributor recognition follow the published [contribution policy](https://alps.comp-phys.org/govern/contribute/) and [governance](https://alps.comp-phys.org/govern/).
+
+For development questions, use [Discord](https://discord.gg/JRNWnnva9g); reproducible bugs belong in the [issue tracker](https://github.com/ALPSim/ALPS/issues).
 
 ## Provenance and scientific credit
 
-These expectations apply to human and AI-assisted contributions alike. Record
-provenance while making the change, when the sources are known.
+These expectations apply to human and AI-assisted contributions alike. Record provenance while making the change, when the sources are known.
 
 - When copying, translating, or substantially adapting external code, add a
   comment near the affected code identifying the upstream project, source file,
@@ -196,28 +212,7 @@ provenance while making the change, when the sources are known.
 - Do not invent attribution or claim independent implementation without
   evidence. State what is known and flag gaps for review.
 
-Maintainers review provenance and citation changes as part of normal pull
-request review.
-
----
-
-## Submitting a pull request
-
-1. Push your branch to your fork:
-   ```bash
-   git push origin fix/alea-overflow
-   ```
-
-2. Open a pull request against the `master` branch of `ALPSim/ALPS`.
-
-3. Fill in the pull request template, including:
-   - What problem this solves and why
-   - How to test the change
-   - Any known limitations or follow-up work
-
-4. Ensure CI passes (build + tests on Linux and macOS).
-
-For substantial changes — new simulation applications, new libraries, significant API modifications — we encourage you to **open an issue or start a discussion first** to get early feedback before investing significant time.
+Maintainers review provenance and citation changes as part of normal pull request review.
 
 ---
 
@@ -241,7 +236,7 @@ Add exported headers to the owning target's CMake `HEADERS` file set. Public `<a
 | --- | --- | --- |
 | `ALPS_BUILD_TESTING` | `ON` | Build and register native ALPS tests, independently of a parent's `BUILD_TESTING` |
 | `ALPS_BUILD_APPLICATIONS` | `ON` | Build simulation applications, solver libraries and command-line tools |
-| `BUILD_SHARED_LIBS` | `ON` when unset | Build shared SDK libraries |
+| `BUILD_SHARED_LIBS` | `ON` when unset | Shared libraries; required for Python bindings |
 | `ALPS_ENABLE_MPI` | `OFF` | Enable MPI; requires matching MPI and Boost.MPI installations |
 | `ALPS_ENABLE_OPENMP` | `OFF` | Enable OpenMP, including worker scheduling |
 | `ALPS_BUILD_EXTENSIVE_TESTS` | `OFF` | Add expensive graph and HDF5 type-matrix tests when testing is enabled |
@@ -281,9 +276,9 @@ For matrix XML output, include `<alps/xml/matrix.hpp>` and link
 `xml << matrix` retain the historical `MATRIX`/`ROW`/`ELEMENT` representation.
 The numerical interfaces themselves do not depend on XML or HDF5.
 
-An SDK built with applications also exports executable targets such as `ALPS::spinmc` and the solver libraries `ALPS::maxent`, `ALPS::cthyb` and `ALPS::ctint`. Require them with `find_package(ALPS CONFIG REQUIRED COMPONENTS applications solvers)`. The solver API is in `<alps/solvers.hpp>`.
+An SDK built with applications also exports executable targets such as `ALPS::spinmc` and the solver libraries `ALPS::maxent`, `ALPS::cthyb` and `ALPS::ctint`. Require them with `find_package(ALPS CONFIG REQUIRED COMPONENTS applications solvers)`. The solver API is in `<alps/solvers.hpp>`. Python extensions that share ALPS objects with pyalps use its separate [downstream CMake package](python/pyalps/README.md#downstream-native-extensions).
 
-Installation follows `GNUInstallDirs`. Unix SDKs continue to need their external Boost, HDF5 and numerical libraries after relocation.
+Installation follows `GNUInstallDirs`. Unix SDKs continue to need their external Boost, HDF5 and numerical libraries after relocation. Redistributable Python wheels need auditwheel/delocate repair, as described in the [Python runtime guide](python/pyalps/README.md#native-runtime-layout).
 
 The component reorganization and `<alps/solvers.hpp>` API are development changes
 for a future release after 3.0. ALPSCore HDF5 and parameter reconciliation remains
@@ -324,87 +319,30 @@ It retains its existing SQLite schema and `install`, `append`, `rebuild`, `list`
 and `plot` commands; existing databases can be reopened without conversion.
 Use `archive --help` for its options. The SDK libraries do not depend on SQLite.
 
+## CI coverage
+
+The [native build workflow](.github/workflows/build.yml) checks the supported
+compiler and dependency matrix. The [Python packaging workflow](.github/workflows/build_wheels.yml)
+builds and tests wheels and source distributions, and validates release
+versions before publishing through the protected `pypi` environment.
+
 ## Preparing a release
 
-Keep `cmake/ALPS_VERSION.txt` (the C++ SDK version) and the root
-`ALPS_VERSION.txt` (the Python package version source) equal before creating
-a release tag. Both files contain the numeric `X.Y.Z` core. A final release
-uses the tag `vX.Y.Z`; prereleases use `vX.Y.Z-beta.N`, `-alpha.N`, `-rc.N`
-or `-dev.N`. Python packaging derives the corresponding PEP 440 version.
+For maintainers:
 
-Validate the intended tag locally using Python 3.11 or newer:
+Keep the publishing workflow at `.github/workflows/build_wheels.yml` to retain
+the configured PyPI trusted-publisher workflow name. Coordinate any rename with
+the maintainers who control that configuration.
 
-```bash
-python -m pip install packaging
-python .github/scripts/check_release_version.py --ref refs/tags/vX.Y.Z
-```
+1. Review the Unreleased changelog and migration notes. Give the release section its version and date, then add a new Unreleased section.
+2. Update `cmake/ALPS_VERSION.txt`, shared by the SDK and Python package, to the numeric `X.Y.Z` release version. A final tag is `vX.Y.Z`; prereleases use `vX.Y.Z-alpha.N`, `-beta.N`, `-rc.N` or `-dev.N` while the file remains `X.Y.Z`. See [versioning](python/pyalps/README.md#versioning).
+3. Validate the intended tag locally with Python ≥ 3.11, replacing `vX.Y.Z` below with the actual tag:
 
-The packaging workflow checks these versions before building and checks every
-wheel and source distribution, including its embedded metadata, before upload.
-Tag pushes publish the full release to PyPI, including CPython 3.10–3.14 wheels.
-Merge and validate the release commit before tagging it. Keep tags fixed once
-their release has been published.
+   ```sh
+   python -m pip install packaging
+   python .github/scripts/check_release_version.py --ref refs/tags/vX.Y.Z
+   ```
 
-If a published tag contains the wrong version, rerunning its workflow will
-rebuild the same incorrect artifacts. Correct both version files first. If
-the intended version has no distributions on PyPI, maintainers can approve
-resetting the tag to the validated correction and publishing that version.
-If the intended version already has distributions, prepare a new patch
-release instead: PyPI does not allow replacing uploaded filenames. Do not
-use `skip-existing` to hide a version mismatch.
+4. Merge and validate the release commit before tagging. Tag-triggered workflows validate wheels and the source distribution before the PyPI upload job. Publication also requires the repository's `pypi` environment and trusted-publisher configuration; a tag in an arbitrary fork is not sufficient. Manual validation runs do not publish.
 
----
-
-## Review process
-
-ALPS uses a consensus-based review model:
-
-- Pull requests are reviewed by **maintainers** (at least one per simulation code) and **core maintainers**.
-- A pull request is accepted if all active reviewers approve, or if no objections are raised within **six weeks** of submission.
-- Controversial changes can be escalated to the [Governing Council](https://alps.comp-phys.org/govern/).
-
-Core maintainers are responsible for validating that code compiles, tests pass, and results are physically correct. Please be responsive to review comments; PRs with no author activity for eight weeks may be closed.
-
-If you are contributing a new simulation application or library, the Governing Council will discuss a maintenance commitment with you — typically a few hours per month for bug fixes, dependency updates, and community support.
-
----
-
-## Code style
-
-### C++
-
-- Target C++17.
-- Match the style of the surrounding code. ALPS does not enforce a single formatter, but keeps consistent conventions within each subdirectory.
-- Avoid undefined behaviour and compiler warnings. New code should compile cleanly with `-Wall -Wextra` on GCC and Clang.
-- Prefer standard library and Boost facilities over hand-rolled implementations.
-
-### Python
-
-- Follow [PEP 8](https://peps.python.org/pep-0008/).
-- Type annotations are encouraged for new public functions.
-
-### CMake
-
-- CMake ≥ 3.27 features are acceptable.
-- Use target-based linking (`target_link_libraries`, `target_include_directories`) rather than directory-level commands.
-
----
-
-## Recognition
-
-ALPS releases are accompanied by a publication in a peer-reviewed journal. **Active contributors are added as co-authors.** The Governing Council decides the author list for each release, taking into account contributions to code, documentation, tutorials, testing, and community support.
-
-Contributing documentation, tutorials, or code (Level 2 — improving or extending tutorials and website documentation — or above) with sustained effort is the typical threshold for co-authorship consideration.
-
----
-
-## Getting help
-
-| Channel | Use it for |
-|---|---|
-| [Discord](https://discord.gg/JRNWnnva9g) | Questions about using ALPS, development discussion, meeting the community |
-| [GitHub Issues](https://github.com/ALPSim/ALPS/issues) | Bug reports, feature requests, concrete problems with the code |
-| [ALPS website](https://alps.comp-phys.org) | Documentation, tutorials, governance, events |
-| [Governing Council](https://alps.comp-phys.org/govern/) | Onboarding for new simulation codes, co-authorship, major contributions |
-
-We look forward to your contribution!
+Keep published tags fixed. If a published release is wrong, correct the source and prepare a new version; do not use `skip-existing` to conceal mismatched artifacts.

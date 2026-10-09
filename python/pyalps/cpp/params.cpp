@@ -1,9 +1,9 @@
-#include <alps/ngs/params_from_file.hpp>
 // Copyright (C) 2010 - 2011 by Lukas Gamper <gamperl@gmail.com>
 //               Matthias Troyer <troyer@comp-phys.org>
 //               2026       by the ALPS collaboration
 // Part of the ALPS Project — see LICENSE.txt for full license text.
 // SPDX-License-Identifier: MIT
+#include <alps/ngs/params_from_file.hpp>
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/complex.h>
 #include <nanobind/stl/string.h>

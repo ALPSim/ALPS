@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 """Exercise the public downstream simulation-export compatibility helper."""
 
+import faulthandler
 import os
 import tempfile
 import numpy as np
 
-# Importing the consumer first verifies its wheel-runtime rpath. Its module
-# initializer loads the owning pyalps bindings before registering C++ types.
+# Report the Python frame if a native callback or import stalls in CI.
+faulthandler.dump_traceback_later(30, exit=True)
+
+# Initialize the package's library search directories before loading a
+# downstream extension that shares its native runtime.
+import pyalps
 import ising_c
 import pyalps.hdf5 as hdf5
 import pyalps.ngs as ngs
@@ -92,4 +97,5 @@ with tempfile.TemporaryDirectory() as directory:
     assert any(entry.endswith("/checkpoint/sweeps") for entry in trees["setitem"]), \
         trees["setitem"]
 
+faulthandler.cancel_dump_traceback_later()
 print("downstream nanobind export: ok")

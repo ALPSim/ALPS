@@ -12,20 +12,23 @@ import zipfile
 from packaging.version import Version
 import pytest
 
-SCRIPT = Path(__file__).resolve().parents[2] / ".github" / "scripts" / "check_release_version.py"
+SCRIPT = Path(__file__).resolve().parents[2] / ".github/scripts" / "check_release_version.py"
 SPEC = importlib.util.spec_from_file_location("check_release_version", SCRIPT)
 release = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(release)
 
 
 @pytest.fixture
-def versions(tmp_path):
-    def write(core="3.0.0", python="3.0.0"):
-        (tmp_path / "ALPS_VERSION.txt").write_text(core + "\n")
+def versions(tmp_path, monkeypatch):
+    monkeypatch.delenv("ALPS_VERSION_PRERELEASE", raising=False)
+
+    def write(core="3.0.0"):
+        (tmp_path / "cmake").mkdir(exist_ok=True)
+        (tmp_path / "cmake/ALPS_VERSION.txt").write_text(core + "\n")
         project_dir = tmp_path / "python/pyalps"
         project_dir.mkdir(parents=True, exist_ok=True)
         (project_dir / "pyproject.toml").write_text(
-            f'[project]\nname = "pyalps"\nversion = "{python}"\n'
+            '[project]\nname = "pyalps"\ndynamic = ["version", "scripts"]\n'
         )
         return tmp_path
     return write
@@ -36,33 +39,28 @@ def versions(tmp_path):
     ("refs/tags/v3.0.0", "3.0.0"),
     ("refs/tags/v3.0.0-beta.2", "3.0.0b2"),
     ("refs/tags/v3.0.0-rc.1", "3.0.0rc1"),
+    ("refs/tags/v3.0.0-alpha.1", "3.0.0a1"),
+    ("refs/tags/v3.0.0-dev.4", "3.0.0.dev4"),
 ])
-def test_standalone_dynamic_version(versions, monkeypatch, ref, expected):
-    root = versions()
-    monkeypatch.delenv("ALPS_VERSION_PRERELEASE", raising=False)
-    (root / "python/pyalps/pyproject.toml").write_text(
-        '[project]\nname = "pyalps"\ndynamic = ["version"]\n'
-    )
-    assert release.check_version(root, ref) == Version(expected)
+def test_standalone_dynamic_version(versions, ref, expected):
+    assert release.check_version(versions(), ref) == Version(expected)
 
 
-def test_dynamic_version_rejects_stale_tag_and_conflicting_label(versions, monkeypatch):
+@pytest.mark.parametrize("tag", ["v3.0.0", "v3.0.0-beta.2"])
+def test_dynamic_version_rejects_stale_tag_and_conflicting_label(versions, monkeypatch, tag):
     root = versions()
-    (root / "python/pyalps/pyproject.toml").write_text(
-        '[project]\nname = "pyalps"\ndynamic = ["version"]\n'
-    )
     with pytest.raises(ValueError, match="disagrees with ALPS_VERSION.txt"):
         release.check_version(root, "refs/tags/v2.3.4")
     monkeypatch.setenv("ALPS_VERSION_PRERELEASE", "beta.1")
     with pytest.raises(ValueError, match="disagrees with ALPS_VERSION_PRERELEASE"):
-        release.check_version(root, "refs/tags/v3.0.0")
+        release.check_version(root, "refs/tags/" + tag)
 
 
 def test_prerelease_sdist_keeps_its_version_without_the_build_environment(tmp_path):
     """Exercise the backend: a user rebuild must keep the published version."""
     repository = SCRIPT.parents[2]
     project = repository / "python/pyalps"
-    core = (repository / "ALPS_VERSION.txt").read_text().strip()
+    core = (repository / "cmake/ALPS_VERSION.txt").read_text().strip()
     environment = {**os.environ, "GITHUB_REF": f"refs/tags/v{core}-beta.2"}
     environment.pop("ALPS_VERSION_PRERELEASE", None)
     subprocess.run(
@@ -77,9 +75,7 @@ def test_prerelease_sdist_keeps_its_version_without_the_build_environment(tmp_pa
             "ALPS_VERSION.txt", "LICENSE.txt", "CMakeLists.txt", "pyproject.toml",
             "_build_support/alps_version.py", "src/pyalps/__init__.py",
             "cpp/hdf5.cpp", "cpp/maxent_c.cpp", "cpp/cthyb.cpp", "cpp/ctint.cpp",
-            "_vendor/src/alps/resources/ALPS.xsl",
-            "_vendor/src/alps/resources/models.xml",
-            "_vendor/src/alps/resources/lattices.xml",
+            "_build_support/runtime_manifest.py", "_build_support/pyalpsConfig.cmake",
         }
         assert {prefix + name for name in required} <= set(archive.getnames())
         archive.extractall(tmp_path, filter="data")
@@ -103,38 +99,13 @@ def test_matching_versions(versions, ref):
 
 def test_ci_rejects_original_release_using_github_ref(versions):
     result = subprocess.run(
-        [sys.executable, release.__file__, "--root", str(versions("2.3.4", "2.3.4b1"))],
+        [sys.executable, release.__file__, "--root", str(versions("2.3.4"))],
         env={**os.environ, "GITHUB_REF": "refs/tags/v3.0.0"},
         capture_output=True,
         text=True,
     )
     assert result.returncode == 1
     assert "Release tag v3.0.0 disagrees" in result.stderr
-
-
-@pytest.mark.parametrize("ref", [
-    "", "refs/heads/master", "refs/pull/142/merge", "refs/tags/v3.0.0"
-])
-def test_sdk_and_python_must_agree_even_on_branches(versions, ref):
-    with pytest.raises(ValueError, match="disagrees with ALPS_VERSION.txt"):
-        release.check_version(versions("2.3.4", "3.0.0"), ref)
-
-
-@pytest.mark.parametrize("label,suffix", [
-    ("alpha.1", "a1"), ("beta.2", "b2"), ("rc.3", "rc3"), ("dev.4", ".dev4")
-])
-def test_prerelease_tags_match_pep440_versions(versions, label, suffix):
-    python = "3.0.0" + suffix
-    version = release.check_version(versions(python=python), "refs/tags/v3.0.0-" + label)
-    assert version == Version(python)
-
-
-@pytest.mark.parametrize("python,tag", [
-    ("3.0.0b1", "v3.0.0"), ("3.0.0", "v3.0.0-beta.1"), ("3.0.0b1", "v3.0.0-beta.2")
-])
-def test_prerelease_cannot_be_published_as_final_or_different_prerelease(versions, python, tag):
-    with pytest.raises(ValueError, match="disagrees with pyproject.toml"):
-        release.check_version(versions(python=python), "refs/tags/" + tag)
 
 
 @pytest.mark.parametrize("tag", [
@@ -147,7 +118,7 @@ def test_malformed_tags_fail_closed(versions, tag):
 
 @pytest.mark.parametrize("core", ["3.0", "v3.0.0", "3.0.0-beta.1", "3.0.0\n2.3.4", "03.0.0"])
 def test_invalid_numeric_core(versions, core):
-    with pytest.raises(ValueError, match="must contain MAJOR.MINOR.PATCH"):
+    with pytest.raises(RuntimeError, match="must contain exactly MAJOR.MINOR.PATCH"):
         release.check_version(versions(core=core), "")
 
 
