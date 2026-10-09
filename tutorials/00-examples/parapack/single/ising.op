@@ -1,5 +1,5 @@
 [input parameters]
-LATTICE_LIBRARY = ../../../src/alps/resources/lattices.xml;
+LATTICE_LIBRARY = lattices.xml;
 LATTICE = "chain lattice";
 L = 16;
 SEED = 2873;
@@ -52,7 +52,7 @@ Magnetization^4: 4697.92 +/- 223; tau = 0.437
 Number of Sites: 16 +/- 0
 Specific Heat: 0.195909 +/- 0.00455
 [input parameters]
-LATTICE_LIBRARY = ../../../src/alps/resources/lattices.xml;
+LATTICE_LIBRARY = lattices.xml;
 LATTICE = "chain lattice";
 L = 16;
 SEED = 2873;
@@ -105,7 +105,7 @@ Magnetization^4: 5388.82 +/- 282; tau = 0.727 WARNING: check error convergence
 Number of Sites: 16 +/- 0
 Specific Heat: 0.228534 +/- 0.00507
 [input parameters]
-LATTICE_LIBRARY = ../../../src/alps/resources/lattices.xml;
+LATTICE_LIBRARY = lattices.xml;
 LATTICE = "chain lattice";
 L = 16;
 SEED = 2873;
@@ -158,7 +158,7 @@ Magnetization^4: 7470.37 +/- 389; tau = 0.94 WARNING: check error convergence
 Number of Sites: 16 +/- 0
 Specific Heat: 0.274705 +/- 0.0066
 [input parameters]
-LATTICE_LIBRARY = ../../../src/alps/resources/lattices.xml;
+LATTICE_LIBRARY = lattices.xml;
 LATTICE = "chain lattice";
 L = 16;
 SEED = 2873;

@@ -293,7 +293,7 @@ if(PYALPS_BUNDLE_APPLICATIONS)
   if(_alps_missing_programs)
     message(FATAL_ERROR
       "PYALPS_BUNDLE_APPLICATIONS is ON but the wheel SDK is missing these "
-      "wheel src/apps/tools: ${_alps_missing_programs}. Build the ALPS "
+      "wheel applications/tools: ${_alps_missing_programs}. Build the ALPS "
       "SDK with the wheel-deps preset, or configure with "
       "the environment variable PYALPS_BUNDLE_APPLICATIONS=OFF for a bindings-only wheel that uses "
       "SDK executables instead.")

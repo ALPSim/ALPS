@@ -1,4 +1,4 @@
-LATTICE_LIBRARY = "../src/alps/resources/lattices.xml"
+LATTICE_LIBRARY = "lattices.xml"
 LATTICE = "frustrated square lattice"
 L = 4
 W = 4
