@@ -203,9 +203,3 @@ install(
   DESTINATION ${CMAKE_INSTALL_DATADIR}/alps/xml
   COMPONENT xml
   FILES_MATCHING PATTERN "*.xml" PATTERN "*.xsl")
-
-# Transitional compatibility surface; removals are reviewed separately.
-target_include_directories(alps_headers INTERFACE
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/compatibility/include>")
-install(DIRECTORY compatibility/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  COMPONENT headers)

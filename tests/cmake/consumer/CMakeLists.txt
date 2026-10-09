@@ -49,7 +49,10 @@ else()
   endif()
   set(sdk_mpi_enabled "${ALPS_MPI_ENABLED}")
   get_filename_component(expected_prefix "${ALPS_DIR}/../.." REALPATH)
-  # Python-owned compatibility headers remain until the pruning PR.
+  if(EXISTS "${expected_prefix}/include/alps/ngs/detail/export_sim_to_python.hpp"
+     OR EXISTS "${expected_prefix}/include/alps/python/save_observable_to_hdf5.hpp")
+    message(FATAL_ERROR "The C++ SDK still installs Python-owned headers")
+  endif()
   foreach(private_directory IN ITEMS alps/utilities alps/hdf5/include alps/hdf5/src
                                      alps/hdf5/tests alps/params alps/common alps/runtime
                                      alps/fortran/include alps/fortran/src alps/fortran/tests)
