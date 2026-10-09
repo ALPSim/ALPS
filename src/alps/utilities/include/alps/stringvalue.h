@@ -88,14 +88,7 @@ public:
   /// constructor from a character sequence
   template<class InputItr>
   lexical_cast_string(InputItr first, InputItr last) 
-#if BOOST_WORKAROUND(__IBMCPP__, <= 1200)
-  {
-    while (first!=last)
-      (*this) += *first++;
-  }
-#else
   : string_type(first, last) {}
-#endif
 
   /// constructor from arbitrary types implemented using boost::lexical_cast
   template <class T>
@@ -127,10 +120,8 @@ public:
   CONVERTIT(unsigned int)
   CONVERTIT(long)
   CONVERTIT(unsigned long)
-#ifndef BOOST_NO_LONG_LONG
   CONVERTIT(long long)
   CONVERTIT(unsigned long long)
-#endif
   /// convert the string to float
   CONVERTIT(float)
   /// convert the string to double

@@ -23,7 +23,7 @@
 #include <alps/ngs/mcobservables.hpp> // TODO: replace by new alea
 #include <alps/ngs/thread_exceptions.hpp>
 
-#include <alps/random/mersenne_twister.hpp>
+#include <boost/random/mersenne_twister.hpp>
 
 #include <boost/function.hpp>
 #include <boost/weak_ptr.hpp>
@@ -39,11 +39,7 @@ namespace alps {
 
     class mcbase_ng {
         public:
-            // #ifdef ALPS_NGS_USE_NEW_ALEA
-            //     typedef accumulator::accumulator_set observables_type;
-            // #else
-                typedef mcobservables observables_type;
-            // #endif
+            typedef mcobservables observables_type;
         private:
 
             struct lock_guard_impl : boost::noncopyable {

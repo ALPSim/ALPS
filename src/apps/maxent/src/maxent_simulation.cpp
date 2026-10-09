@@ -12,8 +12,12 @@
  *
  *****************************************************************************/
 
+#include <utility> // Boost.Math 1.76 includes this inside a namespace.
+#include <boost/math/constants/constants.hpp>
 #include "maxent.hpp"
 #include <alps/config.h> // needed to set up correct bindings
+#include <alps/hdf5/ublas/vector.hpp>
+#include <alps/ngs/signal.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/numeric/bindings/lapack/driver/gesv.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
@@ -25,7 +29,6 @@
 
 MaxEntSimulation::MaxEntSimulation(const alps::params &parms,const std::string &outfile)
 : MaxEntHelper(parms)
-, alps::mcbase(parms)
 , alpha((int)parms["N_ALPHA"])              //This is the # of \alpha parameters that should be tried.
 , norm(parms["NORM"]|1.0)                                             //The integral is normalized to NORM (use e.g. for self-energies
 , max_it(parms["MAX_IT"]|1000)                                       //The number of iterations done in the root finding procedure
@@ -36,6 +39,10 @@ MaxEntSimulation::MaxEntSimulation(const alps::params &parms,const std::string &
 , text_output(parms["TEXT_OUTPUT"]|false)
 , self(parms["SELF"]|false)
 {
+  // Preserve the seed conversion and archive signal setup previously supplied
+  // by mcbase, even though deterministic MaxEnt does not consume random values.
+  (void)static_cast<int>(parms["SEED"] | 42);
+  alps::ngs::signal::listen();
   if(norm != 1.) std::cerr<<"WARNING: Redefinition of parameter NORM: Input (and output) data are assumed to be normalized to NORM."<<std::endl;
   const double alpha_min = parms["ALPHA_MIN"];                                          //Smallest value of \alpha that is tried
   const double alpha_max = parms["ALPHA_MAX"];                                          //Largest  value of \alpha that is tried
@@ -49,6 +56,15 @@ MaxEntSimulation::~MaxEntSimulation()
 {
 }
 
+bool MaxEntSimulation::run(boost::function<bool()> const& stop_callback)
+{
+  // Keep mcbase's callback ordering: check before a step and once after it,
+  // even when the step finished. One step computes the complete alpha sweep.
+  bool stopped = false;
+  while (!(stopped = stop_callback()) && !finished)
+    dostep();
+  return !stopped;
+}
 
 
 
@@ -181,38 +197,38 @@ void MaxEntSimulation::dostep()
     vector_type spec(avspec.size());
     for (std::size_t  i=0; i<avspec.size(); ++i){ 
       //if(omega_coord(i)>=0.)
-      spec[i] = avspec[i]*omega_coord(i)*M_PI;
-      avspec_anom_str << omega_coord(i) << " " << avspec[i]*omega_coord(i)*M_PI<<std::endl;
+      spec[i] = avspec[i]*omega_coord(i)*boost::math::constants::pi<double>();
+      avspec_anom_str << omega_coord(i) << " " << avspec[i]*omega_coord(i)*boost::math::constants::pi<double>()<<std::endl;
     }
     ar << alps::make_pvp("/spectrum/anomalous/average",spec);
     for (std::size_t i=0; i<spectra[0].size(); ++i){
       //if(omega_coord(i)>=0.)
-      spec[i] = spectra[max_a][i]*norm*omega_coord(i)*M_PI;
-      maxspec_anom_str << omega_coord(i) << " " << spectra[max_a][i]*norm*omega_coord(i)*M_PI << std::endl;
+      spec[i] = spectra[max_a][i]*norm*omega_coord(i)*boost::math::constants::pi<double>();
+      maxspec_anom_str << omega_coord(i) << " " << spectra[max_a][i]*norm*omega_coord(i)*boost::math::constants::pi<double>() << std::endl;
     }
     ar << alps::make_pvp("/spectrum/anomalous/maximum",spec);
   }
   if(Kernel_type=="bosonic"){ //for the anomalous function: use A(Omega)=Im chi(Omega)/(pi Omega) (as for anomalous)
     vector_type spec(avspec.size());
     for (std::size_t  i=0; i<avspec.size(); ++i){
-      spec[i] = avspec[i]*omega_coord(i)*M_PI;
+      spec[i] = avspec[i]*omega_coord(i)*boost::math::constants::pi<double>();
     }
     if (text_output) {
       std::ofstream avspec_anom_str(boost::filesystem::absolute(name+"maxspec_bose.dat", dir).string().c_str());
       for (std::size_t  i=0; i<avspec.size(); ++i){
       //if(omega_coord(i)>=0.)
-        avspec_anom_str << omega_coord(i) << " " << avspec[i]*omega_coord(i)*M_PI<<std::endl;
+        avspec_anom_str << omega_coord(i) << " " << avspec[i]*omega_coord(i)*boost::math::constants::pi<double>()<<std::endl;
       }
     }
     ar << alps::make_pvp("/spectrum/bosonic/average",spec);
     for (std::size_t i=0; i<spectra[0].size(); ++i){
       //if(omega_coord(i)>=0.)
-      spec[i] = spectra[max_a][i]*norm*omega_coord(i)*M_PI;
+      spec[i] = spectra[max_a][i]*norm*omega_coord(i)*boost::math::constants::pi<double>();
     }
     if (text_output) {
       std::ofstream maxspec_anom_str (boost::filesystem::absolute(name+"avspec_bose.dat", dir).string().c_str());
       for (std::size_t i=0; i<spectra[0].size(); ++i){
-        maxspec_anom_str << omega_coord(i) << " " << spectra[max_a][i]*norm*omega_coord(i)*M_PI << std::endl;
+        maxspec_anom_str << omega_coord(i) << " " << spectra[max_a][i]*norm*omega_coord(i)*boost::math::constants::pi<double>() << std::endl;
       }
     }
     ar << alps::make_pvp("/spectrum/bosonic/maximum",spec);
@@ -230,10 +246,10 @@ void MaxEntSimulation::dostep()
     std::ofstream maxspec_self_str(boost::filesystem::absolute(name+"maxspec_self.dat", dir).string().c_str());
     std::ofstream avspec_self_str (boost::filesystem::absolute(name+"avspec_self.dat", dir).string().c_str());
     for (std::size_t  i=0; i<avspec.size(); ++i){ 
-      avspec_self_str << omega_coord(i) << " " << -avspec[i]*M_PI<<std::endl;
+      avspec_self_str << omega_coord(i) << " " << -avspec[i]*boost::math::constants::pi<double>()<<std::endl;
     }
     for (std::size_t i=0; i<spectra[0].size(); ++i){
-      maxspec_self_str << omega_coord(i) << " " << -spectra[max_a][i]*norm*M_PI << std::endl;
+      maxspec_self_str << omega_coord(i) << " " << -spectra[max_a][i]*norm*boost::math::constants::pi<double>() << std::endl;
     }
   }
  
@@ -300,18 +316,4 @@ MaxEntSimulation::vector_type MaxEntSimulation::iteration(vector_type u, const d
   ublas::vector<fortran_int_t> ipiv(b.size());
   bindings::lapack::gesv(M, ipiv, B);
   return ublas::matrix_column<matrix_type>(B, 0);
-}
-
-
-
-//this function is nonsensical. Why do we need it? It has zero content!
-void MaxEntSimulation::write_xml_body(alps::oxstream& out, const boost::filesystem::path&, bool write_all_xml) const
-{
-  if (write_all_xml) {
-    out << alps::start_tag("AVERAGES");
-    out << alps::start_tag("SCALAR_AVERAGE") << alps::attribute("name","Zeug") << alps::no_linebreak
-    << alps::start_tag("MEAN") << 42 << alps::end_tag("MEAN")
-    << alps::end_tag("SCALAR_AVERAGE");
-    out << alps::end_tag("AVERAGES");
-  }
 }

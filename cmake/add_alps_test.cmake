@@ -50,25 +50,25 @@ macro(add_alps_test)
       COMMAND ${CMAKE_COMMAND} -E copy ${EXE_NAME} ${PROJECT_BINARY_DIR}/bin)
   endif(MSVC)
 
-  if(RUN_TEST_DIR AND EXISTS ${RUN_TEST_DIR}/run_test.cmake)
-    set(RUN_TEST ${RUN_TEST_DIR}/run_test.cmake)
-  else(RUN_TEST_DIR AND EXISTS ${RUN_TEST_DIR}/run_test.cmake)
-    if(EXISTS ${PROJECT_SOURCE_DIR}/cmake/run_test.cmake)
-      set(RUN_TEST ${PROJECT_SOURCE_DIR}/cmake/run_test.cmake)
-    else(EXISTS ${PROJECT_SOURCE_DIR}/cmake/run_test.cmake)
-      if(EXISTS ${ALPS_ROOT_DIR}/share/alps/run_test.cmake)
-        set(RUN_TEST ${ALPS_ROOT_DIR}/share/alps/run_test.cmake)
-      else(EXISTS ${ALPS_ROOT_DIR}/share/alps/run_test.cmake)
-        set(RUN_TEST ${CMAKE_INSTALL_PREFIX}/share/alps/run_test.cmake)
-      endif(EXISTS ${ALPS_ROOT_DIR}/share/alps/run_test.cmake)
-    endif(EXISTS ${PROJECT_SOURCE_DIR}/cmake/run_test.cmake)
-  endif(RUN_TEST_DIR AND EXISTS ${RUN_TEST_DIR}/run_test.cmake)
+  if(RUN_TEST_DIR AND EXISTS ${RUN_TEST_DIR}/run_legacy_test.cmake)
+    set(RUN_TEST ${RUN_TEST_DIR}/run_legacy_test.cmake)
+  else(RUN_TEST_DIR AND EXISTS ${RUN_TEST_DIR}/run_legacy_test.cmake)
+    if(EXISTS ${PROJECT_SOURCE_DIR}/cmake/run_legacy_test.cmake)
+      set(RUN_TEST ${PROJECT_SOURCE_DIR}/cmake/run_legacy_test.cmake)
+    else(EXISTS ${PROJECT_SOURCE_DIR}/cmake/run_legacy_test.cmake)
+      if(EXISTS ${ALPS_ROOT_DIR}/share/alps/run_legacy_test.cmake)
+        set(RUN_TEST ${ALPS_ROOT_DIR}/share/alps/run_legacy_test.cmake)
+      else(EXISTS ${ALPS_ROOT_DIR}/share/alps/run_legacy_test.cmake)
+        set(RUN_TEST ${CMAKE_INSTALL_PREFIX}/share/alps/run_legacy_test.cmake)
+      endif(EXISTS ${ALPS_ROOT_DIR}/share/alps/run_legacy_test.cmake)
+    endif(EXISTS ${PROJECT_SOURCE_DIR}/cmake/run_legacy_test.cmake)
+  endif(RUN_TEST_DIR AND EXISTS ${RUN_TEST_DIR}/run_legacy_test.cmake)
     
   add_test(${name}
     ${CMAKE_COMMAND}
       -Dcmd=${cmd}
       -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
-      -Dxmlresources=${PROJECT_BINARY_DIR}/lib/xml
+      -Dxmlresources=${PROJECT_SOURCE_DIR}/src/alps/resources
       -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
       -Ddllexedir=${PROJECT_BINARY_DIR}/bin
       -Dinput=${input}
@@ -160,11 +160,12 @@ macro(add_alps_test_mpi)
       -Dmpiexec_preflags=${MPIEXEC_PREFLAGS}
       -Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}
       -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
-      -Dxmlresources=${PROJECT_BINARY_DIR}/lib/xml
+      -Dxmlresources=${PROJECT_SOURCE_DIR}/src/alps/resources
       -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
       -Ddllexedir=${PROJECT_BINARY_DIR}/bin
       -Dinput=${input}
       -Doutput=${output}
       -P ${RUN_TEST}
     )
+  set_tests_properties(${name}-np${procs} PROPERTIES LABELS "mpi" PROCESSORS ${procs})
 endmacro(add_alps_test_mpi)

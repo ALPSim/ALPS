@@ -23,6 +23,7 @@
   #define ALPS_WRITE_ALL_XML true
 #endif
 
+#include <alps/export.h>
 #include <alps/config.h>
 #include <alps/scheduler/worker.h>
 #include <alps/parameter.h>
@@ -210,7 +211,7 @@ private:
   mutable std::vector<CheckpointFiles> runfiles; 
 };
 
-class RemoteTask : public AbstractTask
+class ALPS_DECL RemoteTask : public AbstractTask
 {
 public:
   RemoteTask(const ProcessList&,const boost::filesystem::path&);
@@ -234,7 +235,7 @@ public:
 };
 
 
-class SlaveTask : public AbstractTask
+class ALPS_DECL SlaveTask : public AbstractTask
 {
 public:
   SlaveTask(const Process&);

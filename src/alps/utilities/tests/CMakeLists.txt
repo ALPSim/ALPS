@@ -36,12 +36,17 @@ add_test(NAME citation_runtime_serial
   COMMAND "${ALPS_CITATION_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/check_citation_runtime.py"
           "$<TARGET_FILE:citation_runtime>")
 set_property(TEST citation_runtime_serial PROPERTY LABELS citations)
-if(ALPS_HAVE_MPI AND MPIEXEC_EXECUTABLE)
+if(ALPS_ENABLE_MPI AND MPIEXEC_EXECUTABLE)
   add_test(NAME citation_runtime_mpi
     COMMAND "${ALPS_CITATION_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/check_citation_runtime.py"
             "$<TARGET_FILE:citation_runtime>"
             "${MPIEXEC_EXECUTABLE}" "${MPIEXEC_NUMPROC_FLAG}" "2" ${MPIEXEC_PREFLAGS})
-  set_tests_properties(citation_runtime_mpi PROPERTIES LABELS citations PROCESSORS 2)
+  set_tests_properties(citation_runtime_mpi PROPERTIES LABELS "citations;mpi" PROCESSORS 2)
+  add_test(NAME citation_runtime_mpi_3
+    COMMAND "${ALPS_CITATION_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/check_citation_runtime.py"
+            "$<TARGET_FILE:citation_runtime>"
+            "${MPIEXEC_EXECUTABLE}" "${MPIEXEC_NUMPROC_FLAG}" "3" ${MPIEXEC_PREFLAGS})
+  set_tests_properties(citation_runtime_mpi_3 PROPERTIES LABELS "citations;mpi" PROCESSORS 3)
 endif()
 
 endif()

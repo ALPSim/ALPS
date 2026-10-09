@@ -319,7 +319,7 @@
 2004-03-04  Synge Todo  <wistaria@comp-phys.org>
 
         * Adopted parameter and measurement names to the new 
-          ALPS/QMC standard.  (See src/apps/qmc/sse/conventions.txt)
+          ALPS/QMC standard.  (See applications/qmc/sse/conventions.txt)
         
 2004-02-29  Matthias Troyer <troyer@comp-phys.org>
 

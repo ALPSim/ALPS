@@ -11,6 +11,6 @@
 *
 *****************************************************************************/
 
-#include <alps/parapack/montecarlo.h>
-#include <alps/parapack/mc_worker.h>
-#include <alps/parapack/process.h>
+#include "montecarlo.h"
+#include "mc_worker.h"
+#include "process.h"

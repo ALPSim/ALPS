@@ -31,75 +31,36 @@
 /*
  * Rpc additions to <sys/types.h>
  */
-#ifndef _RPC_TYPES_H
-#define _RPC_TYPES_H 1
-
+#ifndef ALPS_OSIRIS_RPC_TYPES_H
+#define ALPS_OSIRIS_RPC_TYPES_H
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 typedef int bool_t;
 typedef int enum_t;
-/* This needs to be changed to uint32_t in the future */
-typedef unsigned long rpcprog_t;
-typedef unsigned long rpcvers_t;
-typedef unsigned long rpcproc_t;
-typedef unsigned long rpcprot_t;
-typedef unsigned long rpcport_t;
-
-#define        __dontcare__    -1
-
+typedef unsigned char alps_xdr_uchar;
+typedef unsigned short alps_xdr_ushort;
+typedef unsigned int alps_xdr_uint;
+typedef unsigned long alps_xdr_ulong;
+typedef int64_t alps_xdr_int64;
+typedef uint64_t alps_xdr_uint64;
+typedef char* alps_xdr_address;
 #ifndef FALSE
-#      define  FALSE   (0)
+#define FALSE 0
 #endif
-
 #ifndef TRUE
-#      define  TRUE    (1)
+#define TRUE 1
 #endif
-
-#ifndef NULL
-#      define  NULL 0
+#define __dontcare__ -1
+#define mem_alloc(size) malloc(size)
+#define mem_free(ptr, size) free(ptr)
+/* A network word is big endian regardless of host byte order. */
+static inline uint32_t alps_xdr_network_word(uint32_t word) {
+    const uint16_t marker = 1;
+    unsigned char first;
+    memcpy(&first, &marker, 1);
+    if (!first) return word;
+    return ((word & UINT32_C(0xff)) << 24) | ((word & UINT32_C(0xff00)) << 8)
+        | ((word >> 8) & UINT32_C(0xff00)) | (word >> 24);
+}
 #endif
-
-#include <stdlib.h>		/* For malloc decl.  */
-#define mem_alloc(bsize)	malloc(bsize)
-/*
- * XXX: This must not use the second argument, or code in xdr_array.c needs
- * to be modified.
- */
-#define mem_free(ptr, bsize)	free(ptr)
-
-#ifndef makedev /* ie, we haven't already included it */
-#include <sys/types.h>
-#endif
-
-#if defined __APPLE_CC__ || defined __FreeBSD__
-# define __u_char_defined
-# define __daddr_t_defined
-#endif
-
-#ifndef __u_char_defined
-typedef __u_char u_char;
-typedef __u_short u_short;
-typedef __u_int u_int;
-typedef __u_long u_long;
-typedef __quad_t quad_t;
-typedef __u_quad_t u_quad_t;
-typedef __fsid_t fsid_t;
-# define __u_char_defined
-#endif
-#ifndef __daddr_t_defined
-typedef __daddr_t daddr_t;
-typedef __caddr_t caddr_t;
-# define __daddr_t_defined
-#endif
-
-#include <sys/time.h>
-#include <sys/param.h>
-
-#include <netinet/in.h>
-
-#ifndef INADDR_LOOPBACK
-#define       INADDR_LOOPBACK         (u_long)0x7F000001
-#endif
-#ifndef MAXHOSTNAMELEN
-#define        MAXHOSTNAMELEN  64
-#endif
-
-#endif /* rpc/types.h */

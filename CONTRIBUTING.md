@@ -12,6 +12,7 @@ Contributions at every level — from a one-line bug report to a new simulation 
 - [Making a change](#making-a-change)
 - [Provenance and scientific credit](#provenance-and-scientific-credit)
 - [Submitting a pull request](#submitting-a-pull-request)
+- [Build reference](#build-reference)
 - [Preparing a release](#preparing-a-release)
 - [Review process](#review-process)
 - [Code style](#code-style)
@@ -53,13 +54,47 @@ Before opening a new issue, please search existing issues to avoid duplicates.
 
 ### Prerequisites
 
-- CMake ≥ 3.22
-- A C++17-capable compiler (GCC, Clang, Intel, or Fujitsu)
-- Boost (downloaded automatically during configuration; or use a system install with `-DALPS_USE_SYSTEM_BOOST=ON`)
-- For Fortran bindings: gfortran (or compatible Fortran compiler)
-- For Python bindings: Python ≥ 3.10, plus `numpy` and `scipy`
+- CMake ≥ 3.27, Ninja for the bundled presets, and C++17/C11 compilers such as GCC or Clang.
+- Boost ≥ 1.76 with its compiled libraries and CMake packages, HDF5 ≥ 1.10.5 (C library), and LP64 BLAS/LAPACK. Use serial HDF5 for the default MPI-disabled build; see [numerical libraries](#numerical-libraries).
+- For Python development: GIL-enabled CPython ≥ 3.10 in a writable Python environment. Pip installs NumPy, SciPy and Matplotlib with pyalps. Free-threaded Python is unsupported.
+- Optional: MPI and Boost.MPI for `ALPS_ENABLE_MPI=ON`; an OpenMP runtime for `ALPS_ENABLE_OPENMP=ON`; a Fortran compiler for the Fortran examples.
 
-See the [installation page](https://alps.comp-phys.org/install/) for full platform-specific instructions.
+Use existing dependencies or your preferred package manager. Keep the compiler, architecture and native dependency stack consistent between the SDK, bindings and downstream extensions. Older website instructions for a combined Boost.Python build do not describe this checkout.
+
+For example, on Ubuntu 24.04:
+
+```sh
+sudo apt-get update
+sudo apt-get install build-essential libboost-all-dev libhdf5-dev libblas-dev liblapack-dev
+```
+
+On macOS, install Apple's Command Line Tools with `xcode-select --install` if needed. If you use Homebrew:
+
+```sh
+brew install boost hdf5 openblas
+export CMAKE_PREFIX_PATH="$(brew --prefix boost):$(brew --prefix hdf5):$(brew --prefix openblas)"
+```
+
+These are optional provider examples. For another non-system installation, set the `CMAKE_PREFIX_PATH` environment variable to its dependency prefixes, separated by colons on Linux/macOS. Keep it set for both SDK and Python builds. The CMake command-line form instead uses semicolons: `-DCMAKE_PREFIX_PATH="/prefix/one;/prefix/two"`.
+
+### Windows users
+
+On Windows, use a Linux distribution inside WSL and follow the Linux instructions here.
+
+### Install CMake and Ninja
+
+Check `cmake --version`, `ctest --version` and `ninja --version`. Reuse suitable tools and an existing Python environment. If you need a Python environment and build tools, one option is:
+
+```sh
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install "cmake>=3.27" ninja numpy h5py
+```
+
+Skip the first two lines if already using a suitable environment. On Debian/Ubuntu, creating a venv may first require `sudo apt-get install python3-venv`. Activate the same environment in each new terminal. Both CMake and CTest must be at least 3.27; use `command -v cmake` to check which installation your shell finds.
+
+CMake and Ninja can also come from system packages or [official CMake binaries](https://cmake.org/download/). A generator other than Ninja can be selected with a plain CMake invocation instead of a preset.
 
 ### Fork and clone
 
@@ -76,36 +111,34 @@ See the [installation page](https://alps.comp-phys.org/install/) for full platfo
 
 ### Build
 
-Citation metadata and application rules live in `CITATION.cff` and `CITATIONS.yaml`.
-See [citation maintenance](.github/scripts/citations/README.md) for generation and validation.
-Native builds use checked-in generated citation data and do not require Python.
-Editing that data requires Python ≥ 3.9 with `PyYAML` and `jsonschema`:
-`python -m pip install -r .github/scripts/citations/requirements.txt`, then
-`python .github/scripts/generate_citations.py --regenerate`. Commit the generated files
-alongside the authorities; CI checks that they agree. For the optional citation
-tests, select an interpreter with `-DALPS_CITATION_PYTHON=/path/to/python`.
+Build, test and install the shared SDK and applications:
 
-```bash
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j$(nproc)
-```
-
-Alternatively, use the bundled CMake preset:
-```bash
+```sh
 cmake --preset default
-cmake --build --preset default
+cmake --build --preset default --parallel 2
+ctest --preset default
+cmake --install _build/default
+export ALPS_DIR="$PWD/_build/default/install/share/alps"
+export PATH="$PWD/_build/default/install/bin:$PATH"
 ```
+
+The preset selects Release and installs into `_build/default/install`, without administrator privileges. `ALPS_DIR` selects that SDK for Python and downstream CMake builds; it does not replace the dependency prefixes above. Keep these exports in each development shell. Two parallel compile jobs are a conservative starting point; adjust to your available memory.
 
 The Python bindings are a separate `scikit-build-core` project that builds
 against an installed ALPS C++ SDK; see the
 [`pyalps` build instructions](python/pyalps/README.md).
 
+### Citation maintenance
+
+Citation metadata and application rules live in `CITATION.cff` and `CITATIONS.yaml`. See [citation maintenance](.github/scripts/citations/README.md) for generation and validation. Native builds use checked-in generated citation data and do not require Python.
+
+Editing that data requires Python ≥ 3.9 with `PyYAML` and `jsonschema`: `python -m pip install -r .github/scripts/citations/requirements.txt`, then `python .github/scripts/generate_citations.py --regenerate`. Commit the generated files alongside the authorities; CI checks that they agree. For the optional citation tests, select an interpreter with `-DALPS_CITATION_PYTHON=/path/to/python`.
+
 ### Run the tests
 
-From the build directory:
-```bash
-ctest --output-on-failure
+From the repository root:
+```sh
+ctest --preset default
 ```
 
 All tests must pass before submitting a pull request.
@@ -188,13 +221,116 @@ For substantial changes — new simulation applications, new libraries, signific
 
 ---
 
+## Build reference
+
+### Repository layout
+
+- `src/alps/`: C++ components, public headers and module-local tests; see the [module map and library boundaries](src/alps/README.md).
+- `src/apps/` and `src/tools/`: simulation applications, shared solver implementations and [command-line tools](src/tools/README.md).
+- `python/pyalps/`: Python sources, bindings, packaging and extension example.
+- `tutorials/`: [ordered tutorials and standalone library examples](tutorials/README.md).
+- `tests/`: cross-module integration, Python, SDK, CLI, build-helper and packaging tests.
+- `third_party/`: [Numeric Bindings headers](third_party/boost_numeric_bindings/README.md) and [XDR serialization](third_party/xdr/README.md).
+- `cmake/` and `.github/`: shared build configuration, generated-header templates, version file, CI and release helpers.
+
+Add exported headers to the owning target's CMake `HEADERS` file set. Public `<alps/...>` and `<ietl/...>` include names are independent of the physical source directory. Keep subsystem tests beside their owner and cross-module tests under `tests/`.
+
+### Build options
+
+| Option | Default for a top-level build | Purpose |
+| --- | --- | --- |
+| `ALPS_BUILD_TESTING` | `ON` | Build and register native ALPS tests, independently of a parent's `BUILD_TESTING` |
+| `ALPS_BUILD_APPLICATIONS` | `ON` | Build simulation applications, solver libraries and command-line tools |
+| `BUILD_SHARED_LIBS` | `ON` when unset | Build shared SDK libraries |
+| `ALPS_ENABLE_MPI` | `OFF` | Enable MPI; requires matching MPI and Boost.MPI installations |
+| `ALPS_ENABLE_OPENMP` | `OFF` | Enable OpenMP, including worker scheduling |
+| `ALPS_BUILD_EXTENSIVE_TESTS` | `OFF` | Add expensive graph and HDF5 type-matrix tests when testing is enabled |
+
+For example, configure with `cmake --preset default -DALPS_ENABLE_OPENMP=ON`. The `sdk` preset disables applications and tests; `distribution` disables tests and its build preset installs automatically. When embedding ALPS with `add_subdirectory`, applications and tests default to `OFF`. MPI remains opt-in. Headers and the C++ Fortran bridge are always part of the SDK; building that bridge needs no Fortran compiler.
+
+Examples build separately against an installed SDK; see the [C++ and Fortran example instructions](tutorials/00-examples/README.md). Fortran tutorials that call OpenMP also need a Fortran OpenMP runtime. To install tutorial sources under `share/alps/tutorials`, run `cmake --install _build/default --component tutorials` after installing the SDK.
+
+### Numerical libraries
+
+Both BLAS and LAPACK are required, with LP64 (32-bit) integers and lowercase symbols ending in an underscore. ILP64 and alternate symbol spellings are unsupported. `BLA_VENDOR` and `BLA_STATIC` select a provider or static numerical libraries through CMake's finders. Keep this ABI consistent when building downstream consumers; installing the SDK does not supply the external numerical libraries.
+
+### Consuming the C++ SDK
+
+Use the installed `ALPS_DIR` from the build instructions, or add the SDK installation prefix to `CMAKE_PREFIX_PATH`, alongside dependency prefixes:
+
+```cmake
+cmake_minimum_required(VERSION 3.27)
+project(my_simulation LANGUAGES C CXX)
+find_package(ALPS CONFIG REQUIRED)
+add_executable(my_simulation main.cpp)
+target_link_libraries(my_simulation PRIVATE ALPS::alps)
+```
+
+The imported target carries headers, C++17 requirements, compile definitions and transitive dependencies. Use a compiler and configuration compatible with the SDK's ABI. `ALPS::headers` exposes the compile interface without linking; `ALPS::fortran` supplies the C++ Fortran bridge and its GNU Fortran compatibility flag. Programs using only utilities can request `find_package(ALPS CONFIG REQUIRED COMPONENTS utilities)` and link `ALPS::utilities`; MPI-enabled SDKs also carry the runtime dependencies of `<alps/ngs/boost_mpi.hpp>`. Archive-only programs can similarly request the `hdf5` component and link `ALPS::hdf5`, which also owns archive signal cleanup. Typed parameter programs can request the `params` component and link `ALPS::params`. XML parsing/output and command-line parsing are available through the `xml` and `cli` components and targets `ALPS::xml` and `ALPS::cli`. Legacy text loading uses `alps::params_from_file(path)` from `<alps/ngs/params_from_file.hpp>`; this free function and the text/XML conversion adapters require `ALPS::alps`. Package discovery still checks the SDK's complete dependency set; component-specific configuration is future work.
+
+Use `ALPS::containers` for array storage and `ALPS::numerics` for matrix/vector algorithms and array mathematics, including the existing `<alps/multi_array.hpp>` umbrella. Numerical archive consumers link `ALPS::numeric_io` and explicitly include `<alps/hdf5/matrix.hpp>` or `<alps/hdf5/numeric_vector.hpp>`. For example:
+
+```cmake
+find_package(ALPS CONFIG REQUIRED COMPONENTS numeric_io)
+target_link_libraries(my_simulation PRIVATE ALPS::numeric_io)
+```
+
+`<alps/numeric/matrix.hpp>` no longer includes its HDF5 adapter automatically.
+For matrix XML output, include `<alps/xml/matrix.hpp>` and link
+`ALPS::numeric_xml` (component `numeric_xml`). Both `matrix.write_xml(xml)` and
+`xml << matrix` retain the historical `MATRIX`/`ROW`/`ELEMENT` representation.
+The numerical interfaces themselves do not depend on XML or HDF5.
+
+An SDK built with applications also exports executable targets such as `ALPS::spinmc` and the solver libraries `ALPS::maxent`, `ALPS::cthyb` and `ALPS::ctint`. Require them with `find_package(ALPS CONFIG REQUIRED COMPONENTS applications solvers)`. The solver API is in `<alps/solvers.hpp>`.
+
+Installation follows `GNUInstallDirs`. Unix SDKs continue to need their external Boost, HDF5 and numerical libraries after relocation.
+
+The component reorganization and `<alps/solvers.hpp>` API are development changes
+for a future release after 3.0. ALPSCore HDF5 and parameter reconciliation remains
+separate work. `ALPS::params` currently
+provides NGS params, not ALPSCore params; the solver interface uses that type.
+Review downstream compatibility against the released 3.0. ALPS and ALPSCore
+have overlapping `alps/` headers and C++ symbols: use separate prefixes and
+processes while comparing implementations. A port must select one implementation
+per interface, starting with HDF5 format compatibility and then parameter types.
+
+### XML resources and tools
+
+Installed programs use `share/alps/xml`. CTest supplies the source resources automatically; when running an uninstalled native program directly, set `ALPS_XML_PATH` to the absolute path of `src/alps/resources/`.
+
+Unix application builds install `alps-xml`, which requires Python 3 and `xsltproc` on `PATH`. With the SDK's `bin` directory on `PATH`, use `alps-xml --help`, or, with your own result files:
+
+```sh
+alps-xml plot text results.plot.xml
+alps-xml convert html simulation.out.xml --output results.html
+alps-xml extract text plot-definition.xml task*.out.xml --output measurements.txt
+```
+
+Plot/extraction formats are `text`, `html`, `gnuplot`, `matplotlib` and `grace`; conversion supports `text` and `html`. The `xml` installation component includes the command and resources.
+
+Application builds also retain the archive-producing commands in the `tools`
+installation component:
+
+```sh
+txt2archive --xaxis T --yaxis Energy --with-error measurements.txt > results.archive.xml
+xml2archive simulation.in.xml > results.archive.xml
+```
+
+`txt2archive` reads x/y columns, with an optional third error column;
+`xml2archive` collects a master JOB XML file's task results. These operations
+produce archive XML rather than render it. If SQLite development headers and
+libraries are available at configure time, the `archive` tool is also built.
+It retains its existing SQLite schema and `install`, `append`, `rebuild`, `list`
+and `plot` commands; existing databases can be reopened without conversion.
+Use `archive --help` for its options. The SDK libraries do not depend on SQLite.
+
 ## Preparing a release
 
-Update both `ALPS_VERSION.txt` (the C++ SDK version) and `[project].version`
-in `pyproject.toml` before creating a release tag. For a final release, both
-must be `X.Y.Z` and the tag must be `vX.Y.Z`. For a prerelease such as
-`vX.Y.Z-beta.1`, keep the SDK core at `X.Y.Z` and use the Python version
-`X.Y.Zb1`. The other supported tag suffixes are `alpha.N`, `rc.N`, and `dev.N`.
+Keep `cmake/ALPS_VERSION.txt` (the C++ SDK version) and the root
+`ALPS_VERSION.txt` (the Python package version source) equal before creating
+a release tag. Both files contain the numeric `X.Y.Z` core. A final release
+uses the tag `vX.Y.Z`; prereleases use `vX.Y.Z-beta.N`, `-alpha.N`, `-rc.N`
+or `-dev.N`. Python packaging derives the corresponding PEP 440 version.
 
 Validate the intended tag locally using Python 3.11 or newer:
 
@@ -205,7 +341,7 @@ python .github/scripts/check_release_version.py --ref refs/tags/vX.Y.Z
 
 The packaging workflow checks these versions before building and checks every
 wheel and source distribution, including its embedded metadata, before upload.
-Tag pushes publish the full release to PyPI, including CPython 3.9–3.14 wheels.
+Tag pushes publish the full release to PyPI, including CPython 3.10–3.14 wheels.
 Merge and validate the release commit before tagging it. Keep tags fixed once
 their release has been published.
 
@@ -249,7 +385,7 @@ If you are contributing a new simulation application or library, the Governing C
 
 ### CMake
 
-- CMake ≥ 3.22 features are acceptable.
+- CMake ≥ 3.27 features are acceptable.
 - Use target-based linking (`target_link_libraries`, `target_include_directories`) rather than directory-level commands.
 
 ---

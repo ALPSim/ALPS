@@ -16,7 +16,7 @@
 
 #include <alps/hdf5/archive.hpp>
 
-#include <alps/multi_array.hpp>
+#include <alps/multi_array/multi_array.hpp>
 
 #include <boost/multi_array.hpp>
 

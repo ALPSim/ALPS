@@ -15,6 +15,7 @@
 #define ALPS_DIAGONAL_MATRIX_HPP
 
 #include <vector>
+#include <cstddef>
 #include <algorithm>
 #include <functional>
 #include <cassert>
@@ -22,11 +23,8 @@
 #include <boost/lambda/lambda.hpp>
 #include <cmath>
 #include <alps/numeric/conj.hpp>
+#include <alps/numeric/real.hpp>
 #include <alps/numeric/matrix/matrix_interface.hpp>
-
-#ifdef HALPS_HAVE_HDF5
-#include <alps/hdf5.hpp>
-#endif
 
 namespace alps {
     namespace numeric {
@@ -161,19 +159,19 @@ namespace alps {
             assert(r == c);
             data_.resize(r, v);
         }
-        
-#ifdef ALPS_HAVE_HDF5
-        void save(alps::hdf5::archive & ar) const
+
+        template <class Archive>
+        void save(Archive & ar) const
         {
-            ar << alps::make_pvp("", data_);
+            ar[""] << data_;
         }
 
-        void load(alps::hdf5::archive & ar)
+        template <class Archive>
+        void load(Archive & ar)
         {
-            ar >> alps::make_pvp("", data_);
+            ar[""] >> data_;
         }
-#endif
-        
+
         template <class Archive>
         void serialize(Archive & ar, unsigned int version)
         {

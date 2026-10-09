@@ -253,10 +253,8 @@ boost::shared_ptr<Factor<T> > Factor<T>::flatten_one_value()
 } // end namespace alps
 
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
 namespace expression {
-#endif
 
 template<class T>
 inline bool operator==(const alps::expression::Factor<T>& ex1, const alps::expression::Factor<T>& ex2)
@@ -296,9 +294,7 @@ inline bool operator<(const std::string& s, const alps::expression::Factor<T>& e
   return s < boost::lexical_cast<std::string>(ex);
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace expression
 } // end namespace alps
-#endif
 
 #endif

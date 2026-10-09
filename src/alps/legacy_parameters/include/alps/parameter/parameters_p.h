@@ -16,11 +16,12 @@
 #ifndef ALPS_PARAMETER_PARAMETERS_P_H
 #define ALPS_PARAMETER_PARAMETERS_P_H
 
-#include <alps/parameter/parameters.h>
-#include <alps/parameter/parameter_p.h>
-#include <boost/classic_spirit.hpp>
+#include "parameters.h"
+#include "parameter_p.h"
+#include <boost/spirit/include/classic_actor.hpp>
+#include <boost/spirit/include/classic_core.hpp>
 
-namespace bs = boost::spirit;
+namespace bs = boost::spirit::classic;
 
 namespace alps {
 

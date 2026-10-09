@@ -16,9 +16,9 @@
 #ifndef BLAS_MATRIX
 #define BLAS_MATRIX
 
-#include <alps/numeric/detail/deprecated/blasheader.hpp>
-#include <alps/numeric/detail/deprecated/vector.hpp>
-#include <alps/numeric/detail/deprecated/general_matrix.hpp>
+#include "./blasheader.hpp"
+#include "./vector.hpp"
+#include "./general_matrix.hpp"
 #include <cmath>
 #include <cassert>
 #include <algorithm>

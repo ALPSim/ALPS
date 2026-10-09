@@ -100,9 +100,7 @@ typedef std::map<std::string,GraphUnitCell> UnitCellMap;
 
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 inline alps::oxstream& operator<<(alps::oxstream& out, const alps::GraphUnitCell& u)
 {
@@ -117,8 +115,6 @@ inline std::ostream& operator<<(std::ostream& out, const alps::GraphUnitCell& u)
   return out;        
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // ALPS_LATTICE_UNITCELL_H

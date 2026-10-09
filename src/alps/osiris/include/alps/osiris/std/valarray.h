@@ -23,9 +23,7 @@
 #include <alps/osiris/std/impl.h>
 #include <valarray>
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 /// deserialize a std::valarray container
 template <class T>
@@ -46,8 +44,6 @@ inline alps::ODump& operator << (alps::ODump& dump,
   return dump;
 }          
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // OSIRIS_STD_VALARRAY_H

@@ -82,7 +82,7 @@ namespace alps {
                 }
             };
 
-            class ALPS_DECL error {
+            class ALPS_HDF5_DECL error {
 
                 public:
 
@@ -227,7 +227,7 @@ namespace alps {
                 return 0;
             }
 
-            struct ALPS_DECL archivecontext : boost::noncopyable {
+            struct ALPS_HDF5_DECL archivecontext : boost::noncopyable {
 
                 archivecontext(std::string const & filename, bool write, bool replace, bool compress, bool large, bool memory)
                     : compress_(compress)

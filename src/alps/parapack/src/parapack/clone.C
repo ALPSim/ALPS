@@ -10,7 +10,6 @@
 * SPDX-License-Identifier: MIT
 *
 *****************************************************************************/
-
 #include <alps/parapack/clone.h>
 #include <alps/parapack/logger.h>
 #include <boost/filesystem/operations.hpp>

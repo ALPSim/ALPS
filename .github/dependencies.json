@@ -1,0 +1,8 @@
+{
+  "manylinux_image": "quay.io/pypa/manylinux_2_28_x86_64@sha256:012f4a50472412f18bb2b450c1cce7158434cfae4ae878591c2748a13a30c2be",
+  "musllinux_image": "quay.io/pypa/musllinux_1_2_x86_64@sha256:f130bd3e3aebb39abcdec28a89f987f0d31b52d74bac5852318303698e9a5033",
+  "boost": {
+    "1.76.0": "7bd7ddceec1a1dfdcbdb3e609b60d01739c38390a5f956385a12f3122049f0ca",
+    "1.91.0": "5734305f40a76c30f951c9abd409a45a2a19fb546efe4162119250bbe4d3a463"
+  }
+}

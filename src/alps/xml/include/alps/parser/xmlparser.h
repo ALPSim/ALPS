@@ -18,22 +18,16 @@
 #define ALPS_XML_XMLPARSER_H
 
 #include <alps/config.h>
+#include <alps/xml_export.h>
 #include <alps/parser/xmlhandler.h>
 
 #include <boost/filesystem/path.hpp>
 #include <iosfwd>
 #include <string>
 
-#if defined(ALPS_HAVE_XERCES_PARSER)
-# include <xercesc/parsers/SAXParser.hpp>
-# include <xercesc/sax/HandlerBase.hpp>
-#elif defined(ALPS_HAVE_EXPAT_PARSER)
-# include <expat.h>
-#endif
-
 namespace alps {
 
-class ALPS_DECL XMLParser
+class ALPS_XML_DECL XMLParser
 {
 public:
   XMLParser(XMLHandlerBase&);
@@ -46,14 +40,7 @@ public:
 private:
   XMLParser();
 
-#if defined(ALPS_HAVE_XERCES_PARSER)
-  XERCES_CPP_NAMESPACE_QUALIFIER SAXParser* parser_;
-  XERCES_CPP_NAMESPACE_QUALIFIER HandlerBase* handler_;
-#elif defined(ALPS_HAVE_EXPAT_PARSER)
-  XML_Parser parser_;
-#else
   XMLHandlerBase& handler_;
-#endif
 };
 
 } // end namespace alps

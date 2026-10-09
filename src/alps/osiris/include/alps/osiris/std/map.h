@@ -24,9 +24,7 @@
 
 #include <map>
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 /// deserialize a std::map container
 template <class Key, class T, class Compare, class Allocator>
@@ -72,8 +70,6 @@ inline alps::ODump& operator << (alps::ODump& dump,
   return alps::detail::saveContainer(dump,x);
 }          
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // OSIRIS_std_MAP_H

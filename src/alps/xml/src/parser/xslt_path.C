@@ -50,13 +50,10 @@ std::string alps::search_xml_library_path(const std::string& file)
   else { 
     p = getenv("ALPS_ROOT");
     if (p != 0) 
-      path = boost::filesystem::path(p) / "lib" / "xml" / file;
+      path = boost::filesystem::path(p)
+           / boost::filesystem::path(ALPS_XML_DIR).lexically_relative(ALPS_PREFIX) / file;
     else {
       path = boost::filesystem::path(ALPS_XML_DIR) / file;
-    #ifdef ALPS_XML_ALTERNATE_DIR
-      if (!boost::filesystem::exists(path))
-        path = boost::filesystem::path(ALPS_XML_ALTERNATE_DIR) / file;
-    #endif
     }
   }
   if (!boost::filesystem::exists(path))
@@ -70,4 +67,3 @@ void alps::copy_stylesheet(boost::filesystem::path const& dir)
   if (! boost::filesystem::exists(dest))
     boost::filesystem::copy_file(search_xml_library_path("ALPS.xsl"),dest);
 }
-

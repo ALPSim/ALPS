@@ -38,11 +38,11 @@ public:
     for (std::size_t s = 0; s < num_sites(); ++s) sublat_[color[s]].push_back(s);
     // configuration
     spins_.resize(num_sites());
-    #ifdef ALPS_ENABLE_OPENMP_WORKER
+    #ifdef ALPS_ENABLE_OPENMP
     #pragma omp parallel
     #endif 
     {
-      #ifdef ALPS_ENABLE_OPENMP_WORKER
+      #ifdef ALPS_ENABLE_OPENMP
       int r = alps::thread_id();
       #pragma omp for
       #else
@@ -51,7 +51,7 @@ public:
       for (int s = 0; s < num_sites(); ++s) spins_[s] = (uniform_01(r) < 0.5 ? 1 : -1);
     }
     double ene = 0;
-    #ifdef ALPS_ENABLE_OPENMP_WORKER
+    #ifdef ALPS_ENABLE_OPENMP
     #pragma omp parallel for reduction(+: ene)
     #endif 
     for (int b = 0; b < num_bonds(); ++b) {
@@ -80,11 +80,11 @@ public:
     ++mcs_;
 
     for (std::size_t t = 0; t < sublat_.size(); ++t) {
-      #ifdef ALPS_ENABLE_OPENMP_WORKER
+      #ifdef ALPS_ENABLE_OPENMP
       #pragma omp parallel
       #endif 
       {
-        #ifdef ALPS_ENABLE_OPENMP_WORKER
+        #ifdef ALPS_ENABLE_OPENMP
         int r = alps::thread_id();
         #pragma omp for
         #else
@@ -105,12 +105,12 @@ public:
 
     // measurements
     double mag = 0;
-    #ifdef ALPS_ENABLE_OPENMP_WORKER
+    #ifdef ALPS_ENABLE_OPENMP
     #pragma omp parallel for reduction(+: mag)
     #endif 
     for (int s = 0; s < num_sites(); ++s) mag += spins_[s];
     double ene = 0;
-    #ifdef ALPS_ENABLE_OPENMP_WORKER
+    #ifdef ALPS_ENABLE_OPENMP
     #pragma omp parallel for reduction(+: ene)
     #endif 
     for (int b = 0; b < num_bonds(); ++b) {

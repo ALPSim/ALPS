@@ -35,9 +35,7 @@ typedef boost::adjacency_list<boost::vecS,boost::vecS,boost::undirectedS,
                                 boost::property<boost::edge_index_t,unsigned int,
                                    boost::property<boundary_crossing_t,boundary_crossing,
                                     boost::property<bond_vector_t,coordinate_type
-#if !BOOST_WORKAROUND(__IBMCPP__, <= 700)
                                        , boost::property<bond_vector_relative_t,coordinate_type>
-#endif
                               > > > >,
                               // graph property
                               boost::property<dimension_t,std::size_t,

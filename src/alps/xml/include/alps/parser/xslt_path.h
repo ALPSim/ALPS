@@ -21,6 +21,7 @@
 #define ALPS_PARSER_PATH_H
 
 #include <alps/config.h>
+#include <alps/xml_export.h>
 #include <boost/filesystem/path.hpp>
 #include <cstdlib>
 #include <string>
@@ -40,21 +41,21 @@ namespace alps {
 /// release of the library. E.g.  given the file name "ALPS.xsl" the
 /// returned string might be
 /// "http://xml.comp-phys.org/2004/10/ALPS.xsl".
-extern ALPS_DECL std::string xslt_path(const std::string& stylefile);
+extern ALPS_XML_DECL std::string xslt_path(const std::string& stylefile);
 
 /// \brief returns the full path to the specified XML file and checks whether the file exists.
 ///
 /// The function prepends the path to the ALPS XML/XSLT library
 /// directory to the specified filename.  \throw \c std::runtime_error
 /// if the file does not exist in the ALPS XML/XSLT library directory.
-extern ALPS_DECL std::string search_xml_library_path(const std::string& file);
+extern ALPS_XML_DECL std::string search_xml_library_path(const std::string& file);
   
 /// \brief copies the ALPS.xsl stylesheet to the specifeid directory
 ///
 /// This function copies the ALPS.xsl stylesheet to the specified directory.
 /// The function does not overwrite an already existing file with the name ALPS.xsl
 
-extern ALPS_DECL void copy_stylesheet(boost::filesystem::path const& dir);
+extern ALPS_XML_DECL void copy_stylesheet(boost::filesystem::path const& dir);
 
 } // end namespace alps
 

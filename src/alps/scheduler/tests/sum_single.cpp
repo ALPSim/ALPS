@@ -12,6 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <alps/ngs.hpp>
+#include <alps/ngs/params_from_file.hpp>
 #include <alps/mcbase.hpp>
 #include <alps/stop_callback.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
@@ -75,7 +76,7 @@ int main(int argc, char *argv[]) {
     else if (boost::filesystem::path(options.input_file).extension().string() == ".h5")
         alps::hdf5::archive(options.input_file)["/parameters"] >> params;
     else
-        params = alps::parameters_type<my_sim_type>::type(options.input_file);
+        params = alps::params_from_file(options.input_file);
 
     my_sim_type my_sim(params); // creat a simulation
     my_sim.run(alps::stop_callback(options.time_limit)); // run the simulation

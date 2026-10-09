@@ -83,8 +83,9 @@ jobs:
         run: |
           pipx run twine check dist/*.tar.gz
           tar -tzf dist/*.tar.gz > sdist-manifest.txt
-          for path in _vendor/src/alps/resources/ALPS.xsl _vendor/src/apps/maxent/cli/maxent.cpp \
-                      _vendor/src/apps/dmft/qmc \
+          for path in _vendor/src/alps/resources/ALPS.xsl \
+                      _vendor/src/alps/resources/models.xml \
+                      cpp/maxent_c.cpp cpp/cthyb.cpp cpp/ctint.cpp \
                       LICENSE.txt src/pyalps/__init__.py; do
             grep -q "$path" sdist-manifest.txt || { echo "missing $path in sdist"; exit 1; }
           done

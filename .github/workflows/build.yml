@@ -108,7 +108,7 @@ jobs:
             | sudo tee /etc/apt/apt.conf.d/99ci-timeouts > /dev/null
           sudo apt-get update
           python -m pip install --upgrade pip
-          pip install "numpy>=1.26" "scipy>=1.13" -r .github/scripts/citations/requirements.txt
+          pip install "cmake>=3.27" "numpy>=1.26" "scipy>=1.13" -r .github/scripts/citations/requirements.txt
           sudo apt install liblapack-dev libblas-dev libopenmpi-dev libhdf5-serial-dev
           # Clang >= 19: not in Ubuntu's default apt repos; use apt.llvm.org.
           # GCC >= 15: not in Ubuntu's default apt repos; use ubuntu-toolchain-r PPA.
@@ -129,12 +129,14 @@ jobs:
           CC:  ${{ matrix.plat.c_compiler }}-${{ matrix.plat.c_version }}
           CXX: ${{ matrix.plat.cxx_compiler }}-${{ matrix.plat.c_version }}
         run: |
+          ALPS_BOOST_MPI=ON CXX="${CXX:-${{ matrix.plat.cxx_compiler }}}" bash .github/scripts/build-boost.sh \
+            "$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" "$GITHUB_WORKSPACE/_build/boost-install"
           cmake -S $GITHUB_WORKSPACE -B build \
-                -DBoost_SRC_DIR="$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" \
+                -DBoost_ROOT="$GITHUB_WORKSPACE/_build/boost-install" \
                 -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/build/install" \
                 -DALPS_CITATION_PYTHON="$(command -v python)" \
                 -DCMAKE_CXX_STANDARD=${{ matrix.plat.cxx_standard || '17' }} \
-                -DCMAKE_CXX_FLAGS="-fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED"
+                -DCMAKE_CXX_FLAGS="-fpermissive"
           cmake --build build -j 2
           ctest --test-dir build --output-on-failure
 
@@ -180,7 +182,7 @@ jobs:
         timeout-minutes: 30
         run: |
           brew install python@${{ matrix.plat.py_version }} gfortran
-          pip${{ matrix.plat.py_version }} install "numpy>=1.26" "scipy>=1.13" -r .github/scripts/citations/requirements.txt --break-system-packages
+          pip${{ matrix.plat.py_version }} install "cmake>=3.27" "numpy>=1.26" "scipy>=1.13" -r .github/scripts/citations/requirements.txt --break-system-packages
           brew install openmpi hdf5
           if [[ -n "${{ matrix.plat.comp_pack }}" ]]; then
             brew install ${{ matrix.plat.comp_pack }}
@@ -193,12 +195,14 @@ jobs:
         env:
           FC: gfortran
         run: |
+          ALPS_BOOST_MPI=ON CXX="${CXX:-${{ matrix.plat.cxx_compiler }}}" bash .github/scripts/build-boost.sh \
+            "$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" "$GITHUB_WORKSPACE/_build/boost-install"
           cmake -S $GITHUB_WORKSPACE -B build \
                 -DCMAKE_C_COMPILER=${{ matrix.plat.c_compiler }} \
                 -DCMAKE_CXX_COMPILER=${{ matrix.plat.cxx_compiler }} \
-                -DBoost_SRC_DIR="$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" \
+                -DBoost_ROOT="$GITHUB_WORKSPACE/_build/boost-install" \
                 -DCMAKE_CXX_STANDARD=17 \
-                -DCMAKE_CXX_FLAGS="${{ matrix.plat.cxx_stdlib }} -fpermissive -DBOOST_NO_AUTO_PTR -DBOOST_FILESYSTEM_NO_CXX20_ATOMIC_REF -DBOOST_TIMER_ENABLE_DEPRECATED" \
+                -DCMAKE_CXX_FLAGS="${{ matrix.plat.cxx_stdlib }} -fpermissive" \
                 -DALPS_CITATION_PYTHON="$(brew --prefix)/bin/python${{ matrix.plat.py_version }}" \
                 -DCMAKE_Fortran_COMPILER=gfortran
           cmake --build build -j $(sysctl -n hw.ncpu)

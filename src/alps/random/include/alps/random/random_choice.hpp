@@ -40,7 +40,7 @@ inline bool check_table(WVEC const& weights,
   tol *= n;
   double norm = m / std::accumulate(weights.begin(), weights.end(), double(0));
   double nm = 1;
-  if (boost::is_integral<CutoffType>::value) nm /= std::numeric_limits<CutoffType>::max();
+  if (boost::is_integral<CutoffType>::value) nm /= (std::numeric_limits<CutoffType>::max)();
   for (IndexType i = 0; i < n; ++i) {
     double p = nm * table[i].first;
     for (IndexType j = 0; j < m; ++j)
@@ -140,7 +140,7 @@ inline void fill_ft2009(WVEC const& weights, std::vector<std::pair<CutoffType, I
   // Note: now `pos_p' is pointing the first non-negative element in the array.
 
   // Assign alias and cutoff values
-  double nm = std::numeric_limits<CutoffType>::max();
+  double nm = (std::numeric_limits<CutoffType>::max)();
   for (neg_p = array.begin(); neg_p != array.end(); ++neg_p) {
     if (pos_p != array.end()) {
       table[neg_p->second] = std::make_pair(CutoffType(nm * (1 + neg_p->first)), pos_p->second);
@@ -304,10 +304,8 @@ public:
   random_choice_bsearch(CONT const& weights) { init(weights); }
   template<class CONT>
   void init(CONT const& weights) {
-#ifndef BOOST_NO_LIMITS_COMPILE_TIME_CONSTANTS
     BOOST_STATIC_ASSERT(std::numeric_limits<IntType>::is_integer);
     BOOST_STATIC_ASSERT(!std::numeric_limits<RealType>::is_integer);
-#endif
     if (weights.size() == 0)
       boost::throw_exception(std::invalid_argument("random_choice_bsearch::init"));
     RealType norm = 0;
@@ -391,10 +389,8 @@ public:
   random_choice_lsearch(CONT const& weights) { init(weights); }
   template<class CONT>
   void init(CONT const& weights) {
-#ifndef BOOST_NO_LIMITS_COMPILE_TIME_CONSTANTS
     BOOST_STATIC_ASSERT(std::numeric_limits<IntType>::is_integer);
     BOOST_STATIC_ASSERT(!std::numeric_limits<RealType>::is_integer);
-#endif
     if (weights.size() == 0)
       boost::throw_exception(std::invalid_argument("random_choice_lsearch::init"));
     double norm = 0;

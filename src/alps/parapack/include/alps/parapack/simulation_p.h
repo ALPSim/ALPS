@@ -14,7 +14,7 @@
 #ifndef PARAPACK_SIMULATION_P_H
 #define PARAPACK_SIMULATION_P_H
 
-#include <alps/parapack/clone_info_p.h>
+#include "clone_info_p.h"
 
 #include <alps/parameter/parameters_p.h>
 #include <alps/alea/observableset_p.h>

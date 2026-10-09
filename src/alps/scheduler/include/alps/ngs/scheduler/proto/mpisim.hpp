@@ -45,7 +45,7 @@ namespace alps {
             mpisim_ng(typename alps::parameters_type<Impl>::type const & p, boost::mpi::communicator & c, double Tmin = 1, double Tmax = 600)
                 : Impl(p, c.rank())
                 , communicator(c)
-                , binnumber(p["binnumber"] | std::min(128, 2 * c.size()))
+                , binnumber(p["binnumber"] | (std::min)(128, 2 * c.size()))
                 , rank(c.rank())
                 , fraction(0.)
                 , min_check(Tmin)
@@ -136,13 +136,13 @@ namespace alps {
                                         double elapsed = boost::chrono::duration_cast<boost::chrono::duration<double> >(now_time_point - start_time_point).count();
                                         // TODO: save first fraction (if loaded from checkpoint ...)
                                         double start_fraction = 0;
-                                        next_check = std::max(
+                                        next_check = (std::max)(
                                               min_check
-                                            , std::min(
+                                            , (std::min)(
                                                   max_check
-                                                , std::min(
+                                                , (std::min)(
                                                       2 * next_check
-                                                    , std::max(
+                                                    , (std::max)(
                                                           next_check/ 2
                                                         , elapsed / 4. * (1 - fraction) / (fraction - start_fraction)
                                                       )

@@ -23,6 +23,8 @@
 // for callers passing equal-size square operands.
 
 #include <alps/numeric/matrix.hpp>
+#include <alps/hdf5/matrix.hpp>
+#include <alps/xml/matrix.hpp>
 #include <alps/numeric/matrix/algorithms.hpp>
 
 #include <cstdio>

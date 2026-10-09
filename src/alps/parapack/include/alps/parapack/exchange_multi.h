@@ -14,7 +14,7 @@
 #ifndef PARAPACK_EXCHANGE_MULTI_H
 #define PARAPACK_EXCHANGE_MULTI_H
 
-#include <alps/parapack/exchange.h>
+#include "exchange.h"
 
 namespace alps {
 namespace parapack {
@@ -102,7 +102,7 @@ public:
       nrep_max_ = 0;
       for (int p = 0; p < head_.size(); ++p) {
         boost::tie(nreps_[p], offsets_[p]) = calc_nrep(p);
-        nrep_max_ = std::max(nrep_max_, nreps_[p]);
+        nrep_max_ = (std::max)(nrep_max_, nreps_[p]);
       }
       std::cout << "EXMC: number of replicas = " << nrep << std::endl
                 << "EXMC: number of replicas on each process = "

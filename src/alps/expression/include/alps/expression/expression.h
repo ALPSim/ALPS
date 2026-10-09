@@ -372,10 +372,8 @@ boost::shared_ptr<Expression<T> > Expression<T>::flatten_one_expression()
 } // end namespace expression
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
 namespace expression {
-#endif
 
 template<class T>
 inline alps::expression::Expression<T> operator+(const alps::expression::Expression<T>& ex1, const alps::expression::Expression<T>& ex2)
@@ -451,9 +449,7 @@ inline bool operator<(const std::string& s, const alps::expression::Expression<T
   return s < boost::lexical_cast<std::string>(ex);
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace expression
 } // end namespace alps
-#endif
 
 #endif // ! ALPS_EXPRESSION_IMPL_H

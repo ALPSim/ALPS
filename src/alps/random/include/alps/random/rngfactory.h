@@ -19,6 +19,7 @@
 #ifndef ALPS_RANDOMFACTORY_H
 #define ALPS_RANDOMFACTORY_H
 
+#include <alps/export.h>
 #include <alps/random/buffered_rng.h>
 #include <alps/factory.h>
 #include <string>
@@ -27,7 +28,7 @@ namespace alps {
 
 /// a factory to create random number generators from their name
 // \sa rng_factory
-class RNGFactory : public factory<std::string,buffered_rng_base>
+class ALPS_DECL RNGFactory : public factory<std::string,buffered_rng_base>
 {
 public:
   RNGFactory();
@@ -41,7 +42,7 @@ public:
 /// currently the folloowing two boost generators can be created from their name
 /// - lagged_fibonacci607
 /// - mt19937
-extern RNGFactory rng_factory;
+extern ALPS_DECL RNGFactory rng_factory;
 
 } // end namespace
 

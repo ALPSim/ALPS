@@ -13,7 +13,6 @@
 *****************************************************************************/
 
 /* $Id$ */
-
 #include <alps/parameter/parameterlist.h>
 #include <alps/parameter/parameterlist_p.h>
 #include <alps/parser/parser.h>
@@ -23,7 +22,7 @@
 #include <iostream>
 #include <stdexcept>
 
-namespace bs = boost::spirit;
+namespace bs = boost::spirit::classic;
 
 namespace alps {
 

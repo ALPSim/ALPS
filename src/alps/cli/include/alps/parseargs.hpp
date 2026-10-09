@@ -15,12 +15,13 @@
 #define ALPS_NGS_SCHEDULER_PARSEARGS_HPP
 
 #include <alps/ngs/config.hpp>
+#include <alps/cli_export.h>
 
 #include <string>
 
 namespace alps {
 
-	struct ALPS_DECL parseargs {
+	struct ALPS_CLI_DECL parseargs {
 	    parseargs(int argc, char *argv[]);
 
 	    bool resume;

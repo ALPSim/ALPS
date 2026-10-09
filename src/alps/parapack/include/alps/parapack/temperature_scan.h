@@ -14,8 +14,8 @@
 #ifndef PARAPACK_TEMPERATURE_SCAN_H
 #define PARAPACK_TEMPERATURE_SCAN_H
 
-#include <alps/parapack/mc_worker.h>
-#include <alps/parapack/montecarlo.h>
+#include "mc_worker.h"
+#include "montecarlo.h"
 #include <alps/expression.h>
 #include <alps/osiris.h>
 #include <boost/shared_ptr.hpp>

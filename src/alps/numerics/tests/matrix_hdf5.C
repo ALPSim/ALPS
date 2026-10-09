@@ -11,6 +11,8 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <alps/hdf5/matrix.hpp>
+#include <alps/hdf5/numeric_vector.hpp>
 #include "matrix_unit_tests.hpp"
 
 using alps::numeric::matrix;

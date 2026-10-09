@@ -21,29 +21,6 @@
 namespace alps {
 namespace numeric {
     namespace impl {
-#if defined(__clang_major__) && __clang_major__ < 3 || (__clang_major__ == 3 && __clang_minor__ == 0) || defined(BOOST_MSVC)
-// Workaround for a compiler bug in clang 3.0 (and maybe earlier versions)
-    template <typename Vector1, typename Vector2>
-    void plus_assign_impl(Vector1& lhs, Vector2 const& rhs, tag::vector, tag::vector, boost::mpl::false_)
-    {
-        for(std::size_t i=0; i< lhs.size(); ++i)
-            lhs[i] += rhs[i];
-    }
-
-    template <typename Vector1, typename Vector2>
-    void minus_assign_impl(Vector1& lhs, Vector2 const& rhs, tag::vector, tag::vector, boost::mpl::false_)
-    {
-        for(std::size_t i=0; i< lhs.size(); ++i)
-            lhs[i] -= rhs[i];
-    }
-
-    template <typename Vector, typename T2>
-    void multiplies_assign_impl(Vector& lhs, T2 lambda, tag::vector tag1, tag::scalar tag2, boost::mpl::false_)
-    {
-        for(std::size_t i=0; i< lhs.size(); ++i)
-            lhs[i] *= lambda;
-    }
-#else // defined(__clang_major__) && __clang_major__ < 3 || (__clang_major__ == 3 && __clang_minor__ == 0)
     template <typename Vector1, typename Vector2>
     void plus_assign_impl(Vector1& lhs, Vector2 const& rhs, tag::vector, tag::vector, boost::mpl::false_)
     {
@@ -61,7 +38,7 @@ namespace numeric {
     {
         std::transform(lhs.begin(), lhs.end(), lhs.begin(), [&lambda](typename Vector::value_type t) { return t * lambda; });
     }
-#endif // defined(__clang_major__) && __clang_major__ < 3 || (__clang_major__ == 3 && __clang_minor__ == 0)
+
 
     // BLAS overloads
     template <typename Vector1, typename Vector2>

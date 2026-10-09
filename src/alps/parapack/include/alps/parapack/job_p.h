@@ -14,8 +14,8 @@
 #ifndef PARAPACK_JOB_P_H
 #define PARAPACK_JOB_P_H
 
-#include <alps/parapack/job.h>
-#include <alps/parapack/util.h>
+#include "job.h"
+#include "util.h"
 
 // some file (probably a python header) defines a tolower macro ...
 #undef tolower

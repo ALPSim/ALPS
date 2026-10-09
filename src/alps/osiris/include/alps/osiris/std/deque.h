@@ -24,9 +24,7 @@
 
 #include <deque>
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 /// deserialize a std::deque container
 template <class T, class Allocator>
@@ -44,8 +42,6 @@ inline alps::ODump& operator<<(alps::ODump& dump, const std::deque<T,Allocator>&
   return dump;
 }          
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // OSIRIS_STD_DEQUE_H

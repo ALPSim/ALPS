@@ -1,5 +1,5 @@
 /* heienberg.hpp
- * adapted from alps/tutorials/code-07-mcmain-mcbase/heisenberg.hpp
+ * adapted from alps/tutorials/09-code/07-mcmain-mcbase/heisenberg.hpp
  */
 
 #ifndef HEISENBERG_HPP
@@ -22,7 +22,7 @@
 
 typedef boost::array<double, 3> spintype;
 
-class ALPS_DECL heisenberg_sim : public alps::mcbase {
+class heisenberg_sim : public alps::mcbase {
 
     public:
 

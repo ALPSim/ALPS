@@ -18,6 +18,7 @@
 #define OSIRIS_XDRDUMP_H
 
 #include <alps/config.h>
+#include <alps/osiris_export.h>
 #include <alps/osiris/dump.h>
 #include <boost/filesystem/path.hpp>
 #include <boost/cstdint.hpp>
@@ -25,25 +26,13 @@
 #include <string>
 #include <stdio.h>
 
-#ifdef ALPS_HAVE_RPC_XDR_H
-#include <rpc/rpc.h>
-#else
 #include <alps/osiris/xdrcore.h>
-#endif
 // remove harmful 'enum_t' macro
 // (which conflicts with boost/detail/scoped_enum_emulation.hpp in Boost 1.41.0)
 #ifdef enum_t
 # undef enum_t
 #endif
 
-#ifdef BOOST_NO_STDC_NAMESPACE
-  namespace std {
-    using ::FILE;
-    using ::fopen;
-    using ::fclose;
-    using ::ftell;
-  }
-#endif
 
 namespace alps {
 
@@ -51,7 +40,7 @@ namespace alps {
     using the XDR stream library to write the architecture
     indepedent XDR format. */
 
-class ALPS_DECL OXDRDump : public ODump
+class ALPS_OSIRIS_DECL OXDRDump : public ODump
 {
 public:
   OXDRDump () : ODump(0) {}
@@ -97,7 +86,7 @@ protected:
     using the XDR stream library to read the architecture
     indepedent XDR format. */
 
-class ALPS_DECL IXDRDump : public IDump
+class ALPS_OSIRIS_DECL IXDRDump : public IDump
 {
 public:
   IXDRDump() : IDump(0) {}
@@ -141,7 +130,7 @@ protected:
 
 /** a dump for serializing objects into a file using the XDR format. */
 
-class ALPS_DECL OXDRFileDump: public OXDRDump
+class ALPS_OSIRIS_DECL OXDRFileDump: public OXDRDump
 {
 public:
   /// open a new dump file with the given name
@@ -162,7 +151,7 @@ private:
 
 /** a dump for deserializing objects from a file using the XDR format. */
 
-class ALPS_DECL IXDRFileDump: public IXDRDump
+class ALPS_OSIRIS_DECL IXDRFileDump: public IXDRDump
 {
 public:
   /** open a file.

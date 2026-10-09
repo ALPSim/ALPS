@@ -10,7 +10,6 @@
 * SPDX-License-Identifier: MIT
 *
 *****************************************************************************/
-
 #include <alps/parapack/logger.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/date_time.hpp>

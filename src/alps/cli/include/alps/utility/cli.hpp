@@ -2,6 +2,7 @@
 #ifndef ALPS_UTILITY_CLI_HPP
 #define ALPS_UTILITY_CLI_HPP
 
+#include <alps/cli_export.h>
 #include <alps/config.h>
 #include <functional>
 #include <string>
@@ -11,7 +12,7 @@ namespace alps {
 /// Own MPI initialization only when the caller has not already initialized it.
 /// Used by informational CLI queries and legacy drivers that print before their
 /// solver initializes MPI. Does not select a simulation's execution mode.
-class ALPS_DECL cli_mpi_guard {
+class ALPS_CLI_DECL cli_mpi_guard {
 public:
   cli_mpi_guard(int& argc, char**& argv);
   ~cli_mpi_guard();
@@ -22,12 +23,12 @@ private:
 };
 
 /// True for serial execution or MPI rank zero, independent of scheduler mode.
-ALPS_DECL bool cli_is_master();
+ALPS_CLI_DECL bool cli_is_master();
 
 /// Handle a standalone --help/-h, --license/-l, or --citations query on rank zero.
 /// An optional --mpi is accepted. Multiple queries or calculation arguments are
 /// rejected. Returns false for a calculation invocation (including after --).
-ALPS_DECL bool handle_cli_information(int argc, char** argv,
+ALPS_CLI_DECL bool handle_cli_information(int argc, char** argv,
     const std::string& component, const std::function<void()>& print_help);
 
 } // namespace alps

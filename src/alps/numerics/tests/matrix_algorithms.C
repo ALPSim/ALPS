@@ -32,6 +32,8 @@
 
 
 #include <alps/numeric/matrix.hpp>
+#include <alps/hdf5/matrix.hpp>
+#include <alps/xml/matrix.hpp>
 #include <alps/numeric/diagonal_matrix.hpp>
 #include <alps/numeric/matrix/algorithms.hpp>
 

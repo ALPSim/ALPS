@@ -16,10 +16,10 @@
 #ifndef ALPS_ALEA_OBSERVABLESET_P_H
 #define ALPS_ALEA_OBSERVABLESET_P_H
 
-#include <alps/alea/observableset.h>
-#include <alps/alea/simpleobseval.h>
-#include <alps/alea/simpleobsdata.h>
-#include <alps/alea/histogram.h>
+#include "observableset.h"
+#include "simpleobseval.h"
+#include "simpleobsdata.h"
+#include "histogram.h"
 #include <alps/parser/xmlhandler.h>
 
 namespace alps {

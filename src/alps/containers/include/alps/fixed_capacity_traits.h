@@ -61,7 +61,6 @@ template<class T, class C, class Cmp>
 struct fixed_capacity_traits<std::priority_queue<T, C, Cmp> >
   : public fixed_capacity_traits<C> {};
 
-#ifndef BOOST_NO_INCLASS_MEMBER_INITIALIZATION
 template <class C>
 const bool fixed_capacity_traits<C>::capacity_is_fixed;
 
@@ -76,7 +75,6 @@ const bool fixed_capacity_traits<fixed_capacity_deque<T, N, C> >::capacity_is_fi
 
 template<class T, std::size_t N, class C>
 const std::size_t fixed_capacity_traits<fixed_capacity_deque<T, N, C> >::static_max_size;
-#endif
 
 } // namespace alps
 

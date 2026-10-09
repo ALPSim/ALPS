@@ -22,6 +22,7 @@
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/complex.hpp>
 #include <alps/hdf5/valarray.hpp>
+#include <alps/hdf5/vector.hpp>
 
 #include <alps/alea/abstractsimpleobservable.h>
 

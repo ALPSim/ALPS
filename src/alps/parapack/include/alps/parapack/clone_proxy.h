@@ -14,7 +14,7 @@
 #ifndef PARAPACK_CLONE_PROXY_H
 #define PARAPACK_CLONE_PROXY_H
 
-#include <alps/parapack/clone.h>
+#include "clone.h"
 
 namespace alps {
 

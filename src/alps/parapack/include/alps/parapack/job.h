@@ -14,11 +14,11 @@
 #ifndef PARAPACK_JOB_H
 #define PARAPACK_JOB_H
 
-#include <alps/parapack/clone_info.h>
-#include <alps/parapack/integer_range.h>
-#include <alps/parapack/logger.h>
-#include <alps/parapack/option.h>
-#include <alps/parapack/types.h>
+#include "clone_info.h"
+#include "integer_range.h"
+#include "logger.h"
+#include "option.h"
+#include "types.h"
 #include <alps/parser/xmlstream.h>
 #include <alps/alea/observableset.h>
 #include <boost/optional.hpp>

@@ -34,7 +34,7 @@
 #ifdef ALPS_HAVE_MPI
 
 namespace alps {
-  int mpi_initialized=0;
+  ALPS_OSIRIS_DECL int mpi_initialized=0;
 }
 
 void alps::comm_init(int& argc, char**& argv, bool usempi)

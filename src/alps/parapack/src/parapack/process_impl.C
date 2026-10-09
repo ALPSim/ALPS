@@ -10,7 +10,6 @@
 * SPDX-License-Identifier: MIT
 *
 *****************************************************************************/
-
 #include <alps/parapack/process.h>
 #ifdef ALPS_HAVE_MPI
 #include <alps/parapack/staging.h>

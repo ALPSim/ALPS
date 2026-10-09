@@ -76,10 +76,10 @@ def test_prerelease_sdist_keeps_its_version_without_the_build_environment(tmp_pa
         required = {
             "ALPS_VERSION.txt", "LICENSE.txt", "CMakeLists.txt", "pyproject.toml",
             "_build_support/alps_version.py", "src/pyalps/__init__.py",
-            "cpp/hdf5.cpp", "_vendor/src/apps/maxent/cli/maxent.cpp",
-            "_vendor/src/apps/dmft/qmc/hybridization/hybmain.cpp",
-            "_vendor/src/apps/dmft/qmc/interaction_expansion2/main.cpp",
-            "_vendor/src/alps/resources/ALPS.xsl", "_vendor/src/alps/resources/models.xml.in",
+            "cpp/hdf5.cpp", "cpp/maxent_c.cpp", "cpp/cthyb.cpp", "cpp/ctint.cpp",
+            "_vendor/src/alps/resources/ALPS.xsl",
+            "_vendor/src/alps/resources/models.xml",
+            "_vendor/src/alps/resources/lattices.xml",
         }
         assert {prefix + name for name in required} <= set(archive.getnames())
         archive.extractall(tmp_path, filter="data")

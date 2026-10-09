@@ -132,19 +132,6 @@ public:
 
 #endif
 
-#ifdef BOOST_NO_OPERATORS_IN_NAMESPACE
-    
-  // Use a member function; Streamable concept not supported.
-  bool operator==(const ALPS_SPRNG_GENERATOR& rhs) const
-  {
-    detail::buffer buf1(sprng_ptr,&ALPS_SPRNG_CALL(pack_rng));
-    detail::buffer buf2(rhs.sprng_ptr,&ALPS_SPRNG_CALL(pack_rng));
-    return buf1 == buf2;
-  }
-  bool operator!=(const ALPS_SPRNG_GENERATOR& rhs) const
-  { return !(*this == rhs); }
-
-#else 
   friend bool operator==(const ALPS_SPRNG_GENERATOR& x,
                          const ALPS_SPRNG_GENERATOR& y)
   { 
@@ -157,7 +144,6 @@ public:
                          const ALPS_SPRNG_GENERATOR& y)
   { return !(x == y); }
     
-#if !defined(BOOST_NO_MEMBER_TEMPLATE_FRIENDS) && !BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x551))
   template<class CharT, class Traits>
   friend std::basic_ostream<CharT,Traits>&
   operator<<(std::basic_ostream<CharT,Traits>& os,
@@ -180,8 +166,6 @@ public:
   }
  
 private:
-#endif
-#endif
 
   void free()
   {
@@ -194,24 +178,6 @@ private:
 };
 
 
-#if defined(BOOST_NO_OPERATORS_IN_NAMESPACE) || defined(BOOST_NO_MEMBER_TEMPLATE_FRIENDS) || BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x551))
-template<class CharT, class Traits>
-std::basic_ostream<CharT,Traits>& operator<<(std::basic_ostream<CharT,Traits>& os, const ALPS_SPRNG_GENERATOR& lcg)
-{
-    detail::buffer buf(lcg.sprng_ptr,&ALPS_SPRNG_CALL(pack_rng));
-    buf.write(os);
-    return os;
-}
-
-template<class CharT, class Traits>
-std::basic_istream<CharT,Traits>& operator>>(std::basic_istream<CharT,Traits>& is, ALPS_SPRNG_GENERATOR& lcg)
-{
-    detail::buffer buf;
-    buf.read(is);
-    lcg.sprng_ptr = buf.unpack(&ALPS_SPRNG_CALL(unpack_rng));
-    return is;
-}
-#endif
 
 } } } // namespace alps::random::sprng
 

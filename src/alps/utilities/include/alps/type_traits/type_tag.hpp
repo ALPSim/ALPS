@@ -38,14 +38,10 @@ DEFINE_TYPE_TAG(std::complex<double>,4)
 DEFINE_TYPE_TAG(std::complex<long double>,5)
 DEFINE_TYPE_TAG(int16_t,6)
 DEFINE_TYPE_TAG(int32_t,7)
-#ifndef BOOST_NO_INT64_T
 DEFINE_TYPE_TAG(int64_t,8)
-#endif
 DEFINE_TYPE_TAG(uint16_t,9)
 DEFINE_TYPE_TAG(uint32_t,10)
-#ifndef BOOST_NO_INT64_T
 DEFINE_TYPE_TAG(uint64_t,11)
-#endif
 DEFINE_TYPE_TAG(int8_t,12)
 DEFINE_TYPE_TAG(uint8_t,13)
 DEFINE_TYPE_TAG(std::string,14)

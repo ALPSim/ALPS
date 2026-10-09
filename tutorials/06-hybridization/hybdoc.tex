@@ -56,7 +56,7 @@ Once ALPS and the hybridization code are installed in \verb#$ALPS_PREFIX/#\verb#
 terminate called after throwing\
  an instance of 'std::invalid_argument'
   what():  No job file specified
-In $ALPS_ROOT/src/alps/ngs/lib/mcoptions.cpp\
+In $ALPS_ROOT/src/alps/cli/src/mcoptions.cpp\
  on 62 in mcoptions
 \end{verbatim}
 
@@ -189,10 +189,10 @@ Note that on some platforms mpirun has to be replaced by a different command to 
 
 The above example and more advanced examples on how to use the Python framework can be found in the hybridization tutorials within the \verb#/tutorials# directory inside the ALPS installation directory:
 \begin{verbatim}
-/hybridization-01-python
-/hybridization-02-kondo
-/hybridization-03-retarded-interaction
-/hybridization-04-spinfreezing
+/hybridization/01-python
+/hybridization/02-kondo
+/hybridization/03-retarded-interaction
+/hybridization/04-spinfreezing
 \end{verbatim}
 
 These tutorials illustrate how to run calculations for multiple parameters within a single script, plotting results, implementing a selfconsistency scheme, using the hdf5 interface, performing calculations with retarded interactions and for multiorbital models as well as performing simple computations with the measured observables.
@@ -572,12 +572,11 @@ Some of them are included in the ALPS DMFT framework, but in general they are us
 
 The hybridization solver is used in several ALPS tutorials, which illustrate the use of the solver with the ALPS DMFT framework. This comprises the tutorials in the following directories:
 \begin{verbatim}
-dmft-01-intro
-dmft-02-hybridization
-dmft-04-mott
-dmft-05-osmt
-dmft-06-paramagnet/hyb
-dmft-08-lattices
+05-dmft/02-hybridization
+05-dmft/04-mott
+05-dmft/05-osmt
+05-dmft/06-paramagnet/hyb
+05-dmft/08-lattices
 \end{verbatim}
 within the \verb#tutorials# subdirectory in the ALPS installation directory.
 
@@ -587,11 +586,11 @@ Using Python together with the Python interface of the solver (the cthyb Python 
 The selfconsistency is thereby implemented within a Python script which can be executed on a parallel machine using MPI.
 Two examples are given in the ALPS tutorials, i.e in the directories
 \begin{verbatim}
-/hybridization-02-retarded-interaction
+06-hybridization/03-retarded-interaction
 \end{verbatim}
 and
 \begin{verbatim}
-/hybridization-03-spinfreezing
+06-hybridization/04-spinfreezing
 \end{verbatim}
 For how to run these tutorials, refer to Sec. \ref{pythoninterface}.
 

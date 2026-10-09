@@ -31,7 +31,7 @@
 #include <alps/parameter.h>
 #include <boost/array.hpp>
 #include <boost/random.hpp>
-#include <boost/timer.hpp>
+#include <chrono>
 #include <cmath>
 #include <iostream>
 #include <stack>
@@ -78,7 +78,7 @@ int main() {
   double m4 = 0;
 
   // timer
-  boost::timer tm;
+  auto const started = std::chrono::steady_clock::now();
 
   for (int mcs = 0; mcs < MCSTEP + MCTHRM; ++mcs) {
     int s = static_cast<int>(random_01() * N);
@@ -112,7 +112,7 @@ int main() {
   std::cout << "Magnetization^2 = " << m2 / MCSTEP << std::endl;
   std::cout << "Magnetization^4 = " << m4 / MCSTEP << std::endl;
   std::cout << "Binder Ratio of Magnetization = " << m2 * m2 / m4 / MCSTEP << std::endl;
-  std::cerr << "Elapsed time = " << tm.elapsed() << " sec\n";
+  std::cerr << "Elapsed time = " << std::chrono::duration<double>(std::chrono::steady_clock::now() - started).count() << " sec\n";
 
   return 0;
 }

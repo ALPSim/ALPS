@@ -18,6 +18,7 @@
 #ifndef NGS_PARAPACK_CLONE_H
 #define NGS_PARAPACK_CLONE_H
 
+#include <alps/export.h>
 #include <alps/ngs/parapack/worker_factory.h>
 #include <alps/ngs/parapack/clone_info.h>
 #include <alps/parapack/clone_timer.h>
@@ -43,7 +44,7 @@ public:
   virtual void suspend() = 0;
 };
 
-class clone : public abstract_clone {
+class ALPS_DECL clone : public abstract_clone {
 public:
   clone(boost::filesystem::path const& basedir, dump_policy_t dump_policy, 
     clone_timer::duration_t const& check_interval, tid_t tid, cid_t cid, alps::params const& p,
@@ -132,7 +133,7 @@ struct clone_halt_msg_t {
   void serialize(Archive & ar, const unsigned int) { ar & task_id & clone_id & group_id; }
 };
 
-class clone_mpi : public abstract_clone {
+class ALPS_DECL clone_mpi : public abstract_clone {
 public:
   clone_mpi(boost::mpi::communicator const& ctrl, boost::mpi::communicator const& work,
     boost::filesystem::path const& basedir, dump_policy_t dump_policy,

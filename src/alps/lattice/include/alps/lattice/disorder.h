@@ -17,6 +17,7 @@
 #ifndef ALPS_LATTICE_DISORDER_H
 #define ALPS_LATTICE_DISORDER_H
 
+#include <alps/export.h>
 #include <alps/config.h>
 #include <alps/parser/parser.h>
 #include <alps/parameter.h>
@@ -72,7 +73,7 @@ void disorder_sites(G& g, MAP& t)
 }
 
 namespace detail {
-class BasicVertexReference {
+class ALPS_DECL BasicVertexReference {
 public:
   typedef GraphUnitCell::offset_type offset_type;
   BasicVertexReference() {}
@@ -86,7 +87,7 @@ private:
   unsigned int vertex_;
 };
 
-class VertexReference : public BasicVertexReference {
+class ALPS_DECL VertexReference : public BasicVertexReference {
 public:
   VertexReference(XMLTag, std::istream&);
   type_type new_type() const { return new_type_;}
@@ -95,7 +96,7 @@ private:
 };
 
 
-class EdgeReference {
+class ALPS_DECL EdgeReference {
 public:
   EdgeReference(XMLTag, std::istream&);
   const BasicVertexReference& source() const { return source_;}
@@ -109,7 +110,7 @@ private:
 
 }
 
-class InhomogeneityDescriptor
+class ALPS_DECL InhomogeneityDescriptor
 {
 public:
   InhomogeneityDescriptor() : disorder_all_vertices_(false), disorder_all_edges_(false) {}
@@ -173,7 +174,7 @@ private:
   std::vector<type_type> inhomogeneous_edges_;
 };
 
-class DepletionDescriptor 
+class ALPS_DECL DepletionDescriptor
 {
 public:
   DepletionDescriptor() {}
@@ -204,9 +205,7 @@ private:
 
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 inline alps::oxstream& operator<< (alps::oxstream& out, const alps::InhomogeneityDescriptor& l)
 {
@@ -236,18 +235,14 @@ inline std::ostream& operator<< (std::ostream& out, const alps::DepletionDescrip
 }
 
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace detail {
-#endif
 
 alps::oxstream& operator<< (alps::oxstream&, const alps::detail::BasicVertexReference&);
 alps::oxstream& operator<< (alps::oxstream&, const alps::detail::VertexReference&);
 alps::oxstream& operator<< (alps::oxstream&, const alps::detail::EdgeReference&);
 
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace detail
 } // end namespace alps
-#endif
 
 #endif // ALPS_LATTICE_DISORDER_H
