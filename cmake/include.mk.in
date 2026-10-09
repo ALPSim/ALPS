@@ -2,8 +2,9 @@
 
 # path
 
-prefix = $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/../..)
-exec_prefix = $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/../..)
+# Capture this include location before another Makefile changes MAKEFILE_LIST.
+prefix := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/../..)
+exec_prefix = $(prefix)
 bindir = $(prefix)/@CMAKE_INSTALL_BINDIR@
 datadir = $(prefix)/@CMAKE_INSTALL_DATADIR@
 datarootdir = $(prefix)/@CMAKE_INSTALL_DATADIR@
@@ -74,4 +75,4 @@ CXXFLAGS = @CMAKE_CXX_FLAGS@ @CMAKE_CXX_FLAGS_RELEASE@
 
 CPPFLAGS = $(BASE_CPPFLAGS) $(XML_CPPFLAGS) $(LAPACK_CPPFLAGS) $(HDF5_CPPFLAGS) $(PYTHON_CPPFLAGS) $(BOOST_CPPFLAGS)  $(MPI_CPPFLAGS) -I$(includedir) 
 LDFLAGS = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) -L$(libdir) $(PYTHON_LDFLAGS) $(HDF5_LDFLAGS) $(LAPACK_LDFLAGS) $(XML_LDFLAGS) $(MPI_LDFLAGS)
-LIBS = -lalps $(BOOST_LIBS) $(PYTHON_LIBS) $(HDF5_LIBS) $(LAPACK_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
+LIBS = $(BASE_LIBS) $(BOOST_LIBS) $(PYTHON_LIBS) $(HDF5_LIBS) $(LAPACK_LIBS) $(XML_LIBS) $(MPI_LIBS)

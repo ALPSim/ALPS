@@ -200,10 +200,13 @@ def test_legacy_cmake_consumer(tmp_path):
 def test_legacy_make_consumer(tmp_path):
     prefix = Path(os.environ["ALPS_DIR"]).resolve().parents[1]
     (tmp_path / "main.cpp").write_text(
-        '#include <alps/utility/os.hpp>\nint main() { return alps::hostname().empty(); }\n')
+        '#include <alps/ngs/params.hpp>\n'
+        'int main() { alps::params p; p["count"] = 3; '
+        'return p["count"].cast<int>() != 3; }\n')
     (tmp_path / "Makefile").write_text(
-        'include $(ALPS_HOME)/share/alps/include.mk\n'
+        'include $(ALPS_HOME)/share/alps/include.mk\ninclude dependencies.mk\n'
         'consumer: main.cpp\n'
         '\t$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ $< $(LIBS)\n')
+    (tmp_path / "dependencies.mk").write_text("# Additional consumer rules.\n")
     subprocess.run(["make", "-C", str(tmp_path), f"ALPS_HOME={prefix}"], check=True)
     subprocess.run([str(tmp_path / "consumer")], check=True)
