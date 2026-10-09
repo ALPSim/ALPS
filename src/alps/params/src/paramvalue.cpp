@@ -17,6 +17,7 @@
 #include <alps/hdf5/pointer.hpp>
 #include <alps/ngs/detail/paramvalue.hpp>
 #include <alps/ngs/detail/type_wrapper.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 
 namespace alps {
     namespace detail {
@@ -24,6 +25,29 @@ namespace alps {
         paramvalue_source::~paramvalue_source() = default;
 
         namespace {
+            template<class Integer>
+            bool load_integer(hdf5::archive& ar, paramvalue& destination) {
+                if (!ar.is_datatype<Integer>("")) return false;
+                try {
+                    if (ar.is_scalar("")) {
+                        Integer value;
+                        ar[""] >> value;
+                        destination = boost::numeric_cast<int>(value);
+                    } else {
+                        std::vector<Integer> stored;
+                        ar[""] >> stored;
+                        std::vector<int> values;
+                        values.reserve(stored.size());
+                        for (auto value : stored)
+                            values.push_back(boost::numeric_cast<int>(value));
+                        destination = values;
+                    }
+                } catch (boost::numeric::bad_numeric_cast const&) {
+                    throw std::overflow_error("Parameter integer out of range at " + ar.complete_path(""));
+                }
+                return true;
+            }
+
             // Retain scalar types when a Python list checkpoint is resumed by
             // a native simulation. Reuse the existing value-provider contract
             // so conversion happens in the type requested by the consumer.
@@ -173,6 +197,22 @@ namespace alps {
                 *this = paramvalue(std::make_shared<checkpoint_list>(std::move(values)));
                 return;
             }
+            // int8 and legacy bool share a storage type. Honor Python's tag
+            // when an archive explicitly distinguishes signed bytes.
+            const auto type_tag = ar.complete_path("") + "/@__alps_type__";
+            if (ar.is_datatype<signed char>("") && ar.is_attribute(type_tag)) {
+                std::string kind;
+                ar[type_tag] >> kind;
+                if (kind == "int8" && load_integer<signed char>(ar, *this)) return;
+            }
+            // Read the stored width before narrowing: HDF5's own int conversion
+            // can silently saturate. Signed bytes retain the legacy bool encoding.
+            if (!ar.is_complex("") && (
+                load_integer<unsigned char>(ar, *this) || load_integer<short>(ar, *this)
+                || load_integer<unsigned short>(ar, *this) || load_integer<unsigned int>(ar, *this)
+                || load_integer<long>(ar, *this) || load_integer<unsigned long>(ar, *this)
+                || load_integer<long long>(ar, *this) || load_integer<unsigned long long>(ar, *this)))
+                return;
             #define ALPS_NGS_PARAMVALUE_LOAD_HDF5(T)                                \
                 {                                                                    \
                     T value;                                                        \
@@ -197,6 +237,9 @@ namespace alps {
                 ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK(int, int)
                 ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK(bool, bool)
                 ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK(std::string, std::string)
+                else
+                    throw std::runtime_error("Unsupported parameter scalar datatype at "
+                                             + ar.complete_path("") + ALPS_STACKTRACE);
             } else {
                 if (ar.is_complex(""))
                     ALPS_NGS_PARAMVALUE_LOAD_HDF5(
@@ -208,6 +251,9 @@ namespace alps {
                 ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK(
                     std::string, std::vector<std::string>
                 )
+                else
+                    throw std::runtime_error("Unsupported parameter array datatype at "
+                                             + ar.complete_path("") + ALPS_STACKTRACE);
             }
             #undef ALPS_NGS_PARAMVALUE_LOAD_HDF5
             #undef ALPS_NGS_PARAMVALUE_LOAD_HDF5_CHECK
