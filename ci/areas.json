@@ -1,0 +1,112 @@
+{
+  "global": [
+    ".github/workflows/ci.yml",
+    ".github/actions/**",
+    ".github/scripts/junit_summary.py",
+    ".github/scripts/generate_citations.py",
+    ".github/scripts/citations/*.json",
+    ".github/scripts/citations/generated/**",
+    ".github/scripts/citations/requirements.txt",
+    "CITATION.cff",
+    "CITATIONS.yaml",
+    "CITATION.md",
+    "ci/**",
+    "CMakeLists.txt",
+    "CMakePresets.json",
+    "cmake/**",
+    "pytest.ini"
+  ],
+  "ignore": [
+    "*.md",
+    "LICENSE.txt",
+    ".gitignore",
+    "src/**/*.md",
+    "tests/**/*.md",
+    "tutorials/**/*.md",
+    ".github/**/*.md",
+    ".github/ISSUE_TEMPLATE/**",
+    ".github/workflows/issue-triage.yml"
+  ],
+  "areas": {
+    "static": {
+      "paths": [
+        ".github/**",
+        "src/**",
+        "tests/**",
+        "tutorials/**",
+        "python/**",
+        "third_party/boost_numeric_bindings/**"
+      ],
+      "strip_comments": false
+    },
+    "linux": {
+      "paths": [
+        "src/**",
+        "third_party/**",
+        "tutorials/**",
+        "tests/**",
+        "python/**",
+        ".github/scripts/test-editable-bindings.sh"
+      ],
+      "strip_comments": true
+    },
+    "mpi": {
+      "paths": [
+        "src/**",
+        "third_party/**",
+        "tutorials/**",
+        "tests/CMakeLists.txt",
+        "tests/cli/**",
+        "tests/cmake/**",
+        "tests/integration/**",
+        "tests/portability/**",
+        "tests/support/**",
+        "tests/legacy/**"
+      ],
+      "strip_comments": true
+    },
+    "sanitizers": {
+      "paths": [
+        "src/**",
+        "third_party/**",
+        "tutorials/**",
+        "tests/CMakeLists.txt",
+        "tests/cli/**",
+        "tests/cmake/**",
+        "tests/integration/**",
+        "tests/portability/**",
+        "tests/support/**",
+        "tests/legacy/**"
+      ],
+      "strip_comments": true
+    },
+    "macos": {
+      "paths": [
+        "src/**",
+        "third_party/**",
+        "tutorials/**",
+        "tests/CMakeLists.txt",
+        "tests/cli/**",
+        "tests/cmake/**",
+        "tests/integration/**",
+        "tests/portability/**",
+        "tests/support/**",
+        "tests/legacy/**"
+      ],
+      "strip_comments": true
+    },
+    "packaging": {
+      "paths": [
+        "python/**",
+        "src/**",
+        "third_party/**",
+        "tests/packaging/**",
+        "tests/cmake/**",
+        ".github/scripts/**",
+        ".github/dependencies.json",
+        ".github/workflows/_wheels.yml"
+      ],
+      "strip_comments": true
+    }
+  }
+}

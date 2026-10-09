@@ -9,7 +9,7 @@ body:
       label: Tutorial help (if applicable)
       description: If your question relates to a specific tutorial, please provide details.
       placeholder: |
-        - Tutorial name: [e.g., "ed-01-sparsediag"]
+        - Tutorial name: [e.g., "ed/01-sparsediag"]
         - What was not understood or went wrong? [describe]
         - Is the result what you expected? [yes/no/not sure, and why]
     validations:

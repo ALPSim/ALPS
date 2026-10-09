@@ -321,10 +321,12 @@ Use `archive --help` for its options. The SDK libraries do not depend on SQLite.
 
 ## CI coverage
 
-The [native build workflow](.github/workflows/build.yml) checks the supported
-compiler and dependency matrix. The [Python packaging workflow](.github/workflows/build_wheels.yml)
-builds and tests wheels and source distributions, and validates release
-versions before publishing through the protected `pypi` environment.
+The required checks are defined in [the PR workflow](.github/workflows/ci.yml).
+[Compatibility checks](.github/workflows/compatibility.yml) run weekly, manually,
+and as part of [release validation](.github/workflows/build_wheels.yml). Publication
+through the protected `pypi` environment requires those native checks and
+validation of the artifacts being published to pass. Consult these workflows for
+the current platform and dependency matrix.
 
 ## Preparing a release
 
