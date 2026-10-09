@@ -1,2 +1,2 @@
-LATTICE_LIBRARY = "../../lib/xml/lattices.xml"
+LATTICE_LIBRARY = "../../src/alps/resources/lattices.xml"
 LATTICE = "chain lattice"

@@ -1,4 +1,4 @@
-LATTICE_LIBRARY = "../../lib/xml/lattices.xml"
+LATTICE_LIBRARY = "../../src/alps/resources/lattices.xml"
 LATTICE = "depleted square lattice"
 L = 6
 W = 6

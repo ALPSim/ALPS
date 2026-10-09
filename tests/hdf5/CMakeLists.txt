@@ -39,7 +39,7 @@ FOREACH (name hdf5_complex hdf5_copy hdf5_real_complex_vec hdf5_real_complex_mat
 ENDFOREACH(name)
 
 # Reads a reference .h5 file from the source tree; see the note in
-# test/numeric/CMakeLists.txt.
+# tests/numeric/CMakeLists.txt.
 target_compile_definitions(hdf5_fortran_string
                            PRIVATE ALPS_SRCDIR="${PROJECT_SOURCE_DIR}")
 
@@ -155,17 +155,17 @@ IF (ALPS_BUILD_HDF5_TESTS)
         set(HDF5_TEST_TYPE ${type})
         include_directories(.)
 
-        configure_file(type_check.cpp.in ${PROJECT_BINARY_DIR}/test/hdf5/h5d${test_name}.cpp)
-        add_executable(h5d${test_name} ${PROJECT_BINARY_DIR}/test/hdf5/h5d${test_name}.cpp)
+        configure_file(type_check.cpp.in ${PROJECT_BINARY_DIR}/tests/hdf5/h5d${test_name}.cpp)
+        add_executable(h5d${test_name} ${PROJECT_BINARY_DIR}/tests/hdf5/h5d${test_name}.cpp)
         
         if (SZIP_FOUND)
-            configure_file(type_check.cpp.in ${PROJECT_BINARY_DIR}/test/hdf5/h5dz${test_name}.cpp)
-            add_executable(h5dz${test_name} ${PROJECT_BINARY_DIR}/test/hdf5/h5dz${test_name}.cpp)
+            configure_file(type_check.cpp.in ${PROJECT_BINARY_DIR}/tests/hdf5/h5dz${test_name}.cpp)
+            add_executable(h5dz${test_name} ${PROJECT_BINARY_DIR}/tests/hdf5/h5dz${test_name}.cpp)
             SET_TARGET_PROPERTIES(h5dz${test_name} PROPERTIES COMPILE_FLAGS "-DSZIP_COMPRESS=true")
         endif (SZIP_FOUND)
 
-        configure_file(type_check.cpp.in ${PROJECT_BINARY_DIR}/test/hdf5/h5a${test_name}.cpp)
-        add_executable(h5a${test_name} ${PROJECT_BINARY_DIR}/test/hdf5/h5a${test_name}.cpp)
+        configure_file(type_check.cpp.in ${PROJECT_BINARY_DIR}/tests/hdf5/h5a${test_name}.cpp)
+        add_executable(h5a${test_name} ${PROJECT_BINARY_DIR}/tests/hdf5/h5a${test_name}.cpp)
         SET_TARGET_PROPERTIES(h5a${test_name} PROPERTIES COMPILE_FLAGS "-DIS_ATTRIBUTE=true")
 
         add_dependencies(h5d${test_name} alps)
