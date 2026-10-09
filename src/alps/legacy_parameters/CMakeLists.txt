@@ -16,3 +16,6 @@ target_sources(alps_headers INTERFACE
     include/alps/parameter/parameters.h
     include/alps/parameter/parameters_p.h)
 
+if(ALPS_BUILD_TESTING)
+  add_subdirectory(tests)
+endif()

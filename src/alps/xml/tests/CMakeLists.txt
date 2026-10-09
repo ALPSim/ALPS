@@ -17,15 +17,9 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-include_directories(${PROJECT_BINARY_DIR}/src)
-include_directories(${PROJECT_SOURCE_DIR}/src)
-include_directories(${Boost_ROOT_DIR})
-
-FOREACH (name xmlhandler xmlparser xmlstream)
+foreach(name xmlhandler xmlparser xmlstream)
   add_executable(${name} ${name}.C)
-  add_dependencies(${name} alps)
-  target_link_libraries(${name} alps)
-  set_property(TARGET ${name} PROPERTY LABELS parser)
-  add_alps_test(${name})
-  set_property(TEST ${name} PROPERTY LABELS parser)
-ENDFOREACH(name)
+
+  target_link_libraries(${name} PRIVATE ALPS::xml)
+  alps_add_gtest(${name} COMPONENT xml LABELS compatibility)
+endforeach()

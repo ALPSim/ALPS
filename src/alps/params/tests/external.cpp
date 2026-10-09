@@ -4,13 +4,11 @@
 #include <alps/hdf5/vector.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
-
-void require(bool value) {
-    if (!value) throw std::runtime_error("external parameter contract failed");
-}
 
 struct source final : alps::detail::paramvalue_source {
     std::vector<double> values{1., 2.};
@@ -20,15 +18,15 @@ struct source final : alps::detail::paramvalue_source {
     void * object(char const *) const override { return nullptr; }
 };
 
-int main() {
+TEST(ParamsExternal, SharedLifetimeAndNativeSerialization) {
     auto value = std::make_shared<source>();
     std::weak_ptr<source> lifetime = value;
     alps::params parameters;
     parameters["vector"] = alps::detail::paramvalue(value);
     alps::params copy(parameters);
     value->values[0] = 9.;
-    require(copy["vector"].cast<std::vector<double>>()[0] == 9.);
-    require(parameters.find("vector")->cast<std::vector<double>>()[0] == 9.);
+    EXPECT_EQ(copy["vector"].cast<std::vector<double>>()[0], 9.);
+    EXPECT_EQ(parameters.find("vector")->cast<std::vector<double>>()[0], 9.);
 
     // Boost serialization materializes native values instead of attempting
     // to serialize a language runtime pointer or callback.
@@ -36,37 +34,42 @@ int main() {
     { boost::archive::text_oarchive archive(buffer); archive << parameters; }
     alps::params restored;
     { boost::archive::text_iarchive archive(buffer); archive >> restored; }
-    require(restored["vector"].cast<std::vector<double>>() == value->values);
+    EXPECT_EQ(restored["vector"].cast<std::vector<double>>(), value->values);
 
     parameters["vector"] = 3;
-    require(parameters["vector"].cast<int>() == 3);
+    EXPECT_EQ(parameters["vector"].cast<int>(), 3);
     value.reset();
-    require(!lifetime.expired());
+    EXPECT_TRUE(!lifetime.expired());
     copy.erase("vector");
-    require(lifetime.expired());
+    EXPECT_TRUE(lifetime.expired());
 
+}
+
+TEST(ParamsConversion, IntegerOverflowAndStringLists) {
+    alps::params parameters;
     parameters["wide"] = std::string("9007199254740993");
-    require(parameters["wide"].cast<long long>() == 9007199254740993LL);
-    try {
-        parameters["wide"].cast<int>();
-        throw std::runtime_error("overflowing conversion unexpectedly succeeded");
-    } catch (std::out_of_range const &) {}
+    EXPECT_EQ(parameters["wide"].cast<long long>(), 9007199254740993LL);
+    EXPECT_THROW(parameters["wide"].cast<int>(), std::out_of_range);
 
     parameters["names"] = std::vector<std::string>{"Energy", "Stiffness"};
-    require(parameters["names"].cast<std::string>() == "Energy,Stiffness");
+    EXPECT_EQ(parameters["names"].cast<std::string>(), "Energy,Stiffness");
     parameters["names"] = std::vector<std::string>{"", "middle", ""};
-    require(parameters["names"].cast<std::string>() == ",middle,");
+    EXPECT_EQ(parameters["names"].cast<std::string>(), ",middle,");
 
-    alps::hdf5::archive archive("param_external_list.h5", "w");
+}
+
+TEST(ParamsExternal, HeterogeneousArchiveListMaterializesNativeValues) {
+    alps::testing::TemporaryDirectory temporary;
+    alps::hdf5::archive archive((temporary.path() / "external_list.h5").string(), "w");
     archive["/list/0"] << true;
     archive["/list/1"] << 2;
     archive["/list/2"] << 10.5;
     archive.set_context("/list");
     alps::detail::paramvalue list;
     list.load(archive);
-    require(list.cast<std::vector<double>>() == std::vector<double>({1., 2., 10.5}));
-    require(list.cast<std::vector<int>>() == std::vector<int>({1, 2, 10}));
+    EXPECT_EQ(list.cast<std::vector<double>>(), std::vector<double>({1., 2., 10.5}));
+    EXPECT_EQ(list.cast<std::vector<int>>(), std::vector<int>({1, 2, 10}));
     list.save(archive);
     list.load(archive);
-    require(list.cast<std::vector<int>>() == std::vector<int>({1, 2, 10}));
+    EXPECT_EQ(list.cast<std::vector<int>>(), std::vector<int>({1, 2, 10}));
 }

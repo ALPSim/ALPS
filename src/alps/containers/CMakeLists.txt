@@ -18,3 +18,6 @@ target_sources(alps_containers INTERFACE
     include/alps/multi_array/multi_array.hpp
     include/alps/multi_array/serialization.hpp)
 
+if(ALPS_BUILD_TESTING)
+  add_subdirectory(tests)
+endif()

@@ -12,16 +12,16 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <cstdlib>
-#include <string>
+#include <gtest/gtest.h>
+#include "graph_assertions.hpp"
+#include <alps/parser/xslt_path.h>
 #include <alps/graph/lattice_constant.hpp>
 
-#include <boost/progress.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
 #include <iostream>
 
-int main() {
+TEST(GraphLatticeConstants, lattice_constant_tri_test) {
     using boost::get;
     using alps::graph::canonical_properties;
 
@@ -31,7 +31,7 @@ int main() {
     alps::Parameters parm;
     unsigned int side_length = 40;
 
-    std::ifstream in((std::string(std::getenv("ALPS_XML_PATH")) + "/lattices.xml"));
+    std::ifstream in(alps::search_xml_library_path("lattices.xml"));
     parm["LATTICE"] = "triangular lattice";
     parm["L"] = side_length;
     alps::graph_helper<> lattice(in,parm);
@@ -140,9 +140,8 @@ int main() {
     add_edge(2, 6,g.back().first);
     add_edge(4, 7,g.back().first);
 
-    int success = 0;
+
     {
-        boost::progress_timer timer;
         for(std::vector<std::pair<graph_type,lc_type> >::iterator it= g.begin(); it != g.end(); ++it)
         {
             lc_type lc = alps::graph::lattice_constant(
@@ -151,13 +150,8 @@ int main() {
                 , lattice.lattice()
                 , alps::cell(std::vector<int>(2,side_length/2),lattice.lattice()) //side_length * side_length / 2 + side_length / 2 - 1
             );
-            if (lc != it->second) {
-                std::cerr<<"ERROR: lattice constant does not match!"<<std::endl;
-                std::cerr<<"Calculated: "<<lc<<"\tReference: "<<it->second<<std::endl<<std::endl;
-                success = -1;
-            } else
-                std::cerr<<"SUCCESS: "<<it->second<<std::endl;
+            EXPECT_EQ(lc, it->second) << "graph " << std::distance(g.begin(), it);
         }
     }
-    return success;
+
 }

@@ -120,7 +120,10 @@ Reuse build directories for ordinary edits. Machine-specific CMake settings belo
 
 Native MaxEnt reference tests require NumPy and h5py in the CMake-selected Python interpreter (`python -m pip install numpy h5py`). The executable and Python binding share the same scientific validation.
 
-See [the testing guide](tests/README.md) for native CTest commands and fixture locations.
+See [the testing guide](tests/README.md) for GoogleTest conventions, component
+selection, MPI, sanitizers, standalone tutorial checks, and CI coverage policy.
+For library-only iteration use the `dev` configure/build/test presets; the
+`default` preset below also builds applications.
 
 CTest runs the native suite only. After the SDK build, run:
 

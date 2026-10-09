@@ -1,3 +1,4 @@
+#include <alps/testing/stream_fixture.hpp>
 /*****************************************************************************
 *
 * ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -16,12 +17,9 @@
 #include <alps/model.h>
 #include <iostream>
 
-int main()
-{
-
-#ifndef BOOST_NO_EXCEPTIONS
-  try {
-#endif
+TEST(ModelSerialization, Example11) {
+  alps::testing::StreamFixture transcript(ALPS_TEST_SOURCE_DIR "/example11.input");
+  { // Flush serialization objects before checking the captured stream.
     alps::Parameters parms;
     std::cin >> parms;
     alps::ModelLibrary models(parms);
@@ -31,21 +29,8 @@ int main()
     ham.set_parameters(parms);
     alps::basis_states_descriptor<short> basis(ham.basis(),lattices.graph());
     for (int i=0;i<basis.get_basis().constraints().size();++i)
-      std::cout << "Constraint: " << basis.get_basis().constraints()[i].first << "=" 
+      std::cout << "Constraint: " << basis.get_basis().constraints()[i].first << "="
                 <<  basis.get_basis().constraints()[i].second << std::endl;
-
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& e)
-{
-  std::cerr << "Caught exception: " << e.what() << "\n";
-  exit(-1);
-}
-catch (...)
-{
-  std::cerr << "Caught unknown exception\n";
-  exit(-2);
-}
-#endif
-  return 0;
+  }
+  transcript.expect_output(ALPS_TEST_SOURCE_DIR "/example11.output");
 }

@@ -1,3 +1,5 @@
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
 // Copyright (C) 2026 ALPS Collaboration
 // Part of the ALPS Project — see LICENSE.txt for full license text.
 // SPDX-License-Identifier: MIT
@@ -21,6 +23,8 @@
 // off-diagonal input into G_tau instead of being zeroed. This test fails on
 // the pre-fix code and passes once the guard reads c1==0 && c2==0 && c3==0.
 
+#include <utility> // Boost.Math 1.76 includes this inside a namespace.
+#include <boost/math/constants/constants.hpp>
 #include "fouriertransform.h"
 
 #include <algorithm>
@@ -28,7 +32,7 @@
 #include <complex>
 #include <cstdio>
 
-int main() {
+TEST(DmftRegression, fouriertransform_offdiag_numeric) {
   const double   beta     = 10.0;
   const unsigned N_omega  = 200;   // Matsubara frequencies
   const unsigned N_tau    = 400;   // imaginary-time slices
@@ -41,7 +45,7 @@ int main() {
 
   matsubara_green_function_t G_omega(N_omega, n_site, n_flavor);
   for (unsigned k = 0; k < N_omega; ++k) {
-    const std::complex<double> iw(0.0, (2 * k + 1) * M_PI / beta);
+    const std::complex<double> iw(0.0, (2 * k + 1) * boost::math::constants::pi<double>() / beta);
     G_omega(k, 0, 0, 0) = 1.0 / (iw - 0.3);                  // real diagonal data
     G_omega(k, 1, 1, 0) = 1.0 / (iw + 0.3);
     G_omega(k, 0, 1, 0) = std::complex<double>(0.05, -0.02); // bogus off-diagonal
@@ -54,28 +58,16 @@ int main() {
   double max_offdiag = 0.0;
   double max_diag    = 0.0;
   for (unsigned i = 0; i <= N_tau; ++i) {
+    SCOPED_TRACE(i);
+    for (unsigned s1 = 0; s1 < n_site; ++s1)
+      for (unsigned s2 = 0; s2 < n_site; ++s2)
+        ASSERT_TRUE(std::isfinite(G_tau(i, s1, s2, 0)))
+            << "Nonfinite transform at sites " << s1 << ", " << s2;
     max_offdiag = std::max(max_offdiag, std::abs(G_tau(i, 0, 1, 0)));
     max_offdiag = std::max(max_offdiag, std::abs(G_tau(i, 1, 0, 0)));
     max_diag    = std::max(max_diag, std::abs(G_tau(i, 0, 0, 0)));
   }
 
-  bool ok = true;
-  if (max_offdiag > 1e-12) {
-    std::printf("FAIL: off-diagonal G_tau not zeroed (max=%g); the "
-                "c1==c2==c3==0 'nothing happening' guard did not fire.\n",
-                max_offdiag);
-    ok = false;
-  }
-  if (max_diag < 1e-6) {
-    std::printf("FAIL: diagonal G_tau is trivially zero (max=%g); the "
-                "transform did not run.\n",
-                max_diag);
-    ok = false;
-  }
-  if (ok) {
-    std::printf("OK: off-diagonal channel zeroed (max=%g), diagonal "
-                "non-trivial (max=%g)\n",
-                max_offdiag, max_diag);
-  }
-  return ok ? 0 : 1;
+  EXPECT_LE(max_offdiag, 1e-12) << "Zero-tail off-diagonal channel";
+  EXPECT_GE(max_diag, 1e-6) << "Diagonal transform must be nontrivial";
 }

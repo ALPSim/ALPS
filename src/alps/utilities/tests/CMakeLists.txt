@@ -17,39 +17,23 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-include_directories(${PROJECT_BINARY_DIR}/src)
-include_directories(${PROJECT_SOURCE_DIR}/src)
-include_directories(${Boost_ROOT_DIR})
-
-FOREACH(name vmusage bitops citations)
+foreach(name vmusage bitops)
   add_executable(${name} ${name}.cpp)
-  add_dependencies(${name} alps)
-  target_link_libraries(${name} alps)
-  add_alps_test(${name})
-  set_property(TEST ${name} PROPERTY LABELS utility)
-ENDFOREACH(name)
 
-if(ALPS_CITATION_PYTHON)
-add_executable(citation_runtime citation_runtime.cpp)
-target_link_libraries(citation_runtime alps)
-add_test(NAME citation_runtime_serial
-  COMMAND "${ALPS_CITATION_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/check_citation_runtime.py"
-          "$<TARGET_FILE:citation_runtime>")
-set_property(TEST citation_runtime_serial PROPERTY LABELS citations)
-if(ALPS_ENABLE_MPI AND MPIEXEC_EXECUTABLE)
-  add_test(NAME citation_runtime_mpi
-    COMMAND "${ALPS_CITATION_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/check_citation_runtime.py"
-            "$<TARGET_FILE:citation_runtime>"
-            "${MPIEXEC_EXECUTABLE}" "${MPIEXEC_NUMPROC_FLAG}" "2" ${MPIEXEC_PREFLAGS})
-  set_tests_properties(citation_runtime_mpi PROPERTIES LABELS "citations;mpi" PROCESSORS 2)
-  add_test(NAME citation_runtime_mpi_3
-    COMMAND "${ALPS_CITATION_PYTHON}" "${CMAKE_CURRENT_SOURCE_DIR}/check_citation_runtime.py"
-            "$<TARGET_FILE:citation_runtime>"
-            "${MPIEXEC_EXECUTABLE}" "${MPIEXEC_NUMPROC_FLAG}" "3" ${MPIEXEC_PREFLAGS})
-  set_tests_properties(citation_runtime_mpi_3 PROPERTIES LABELS "citations;mpi" PROCESSORS 3)
-endif()
+  target_link_libraries(${name} PRIVATE ALPS::utilities)
+  alps_add_gtest(${name} COMPONENT utilities)
+endforeach()
 
-endif()
+add_executable(ngs_hash ngs_hash.cpp)
+target_link_libraries(ngs_hash PRIVATE ALPS::utilities)
+alps_add_gtest(ngs_hash COMPONENT utilities)
 
-# filelist unit test
-include(${CMAKE_CURRENT_SOURCE_DIR}/dmrg_filelist_tests.cmake)
+# This consumer has no aggregate or numerical include roots.
+add_executable(foundation_headers foundation_headers.cpp)
+target_link_libraries(foundation_headers PRIVATE ALPS::utilities)
+alps_add_gtest(foundation_headers COMPONENT utilities LABELS architecture)
+
+# Link only the owning foundation: no aggregate library may hide missing symbols.
+add_executable(citations citations.cpp)
+target_link_libraries(citations PRIVATE ALPS::utilities)
+alps_add_gtest(citations COMPONENT utilities LABELS citations)

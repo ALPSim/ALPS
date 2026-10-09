@@ -1,3 +1,4 @@
+#include <alps/testing/stream_fixture.hpp>
 /*****************************************************************************
 *
 * ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -22,13 +23,9 @@
 using namespace alps;
 #endif
 
-int main()
-{
-
-#ifndef BOOST_NO_EXCEPTIONS
-  try {
-#endif
-
+TEST(LatticeSerialization, Example9) {
+  alps::testing::StreamFixture transcript(ALPS_TEST_SOURCE_DIR "/example9.input");
+  { // Flush serialization objects before checking the captured stream.
     // read parameters
     alps::Parameters parameters;
     std::cin >> parameters;
@@ -43,19 +40,6 @@ int main()
 
     // write the graph created from the input in XML
     std::cout << lattice.graph();
-
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& e)
-{
-  std::cerr << "Caught exception: " << e.what() << "\n";
-  exit(-1);
-}
-catch (...)
-{
-  std::cerr << "Caught unknown exception\n";
-  exit(-2);
-}
-#endif
-  return 0;
+  }
+  transcript.expect_output(ALPS_TEST_SOURCE_DIR "/example9.output");
 }

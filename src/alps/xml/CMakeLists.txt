@@ -22,3 +22,6 @@ target_sources(alps_xml PUBLIC
     include/alps/parser/xslt_path.h
     include/alps/xml.h)
 
+if(ALPS_BUILD_TESTING)
+  add_subdirectory(tests)
+endif()

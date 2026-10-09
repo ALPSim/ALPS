@@ -36,3 +36,6 @@ target_sources(alps_headers INTERFACE
     include/alps/lattice/simplelattice.h
     include/alps/lattice/unitcell.h)
 
+if(ALPS_BUILD_TESTING)
+  add_subdirectory(tests)
+endif()

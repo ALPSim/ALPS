@@ -1,3 +1,5 @@
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
 // Copyright (C) 2026 ALPS Collaboration
 // Part of the ALPS Project — see LICENSE.txt for full license text.
 // SPDX-License-Identifier: MIT
@@ -21,6 +23,8 @@
 // (2,3) untransformed, so its output differs from pair (0,1); the fixed
 // code is symmetric.
 
+#include <utility> // Boost.Math 1.76 includes this inside a namespace.
+#include <boost/math/constants/constants.hpp>
 #include "hilberttransformer.h"
 
 #include <alps/parameter.h>
@@ -33,12 +37,11 @@
 #include <fstream>
 #include <string>
 
-int main() {
+TEST(DmftRegression, hilberttransformer_afm_multiband_numeric) {
   // Temporary 2-band DOS file with identical bands. 11 points (odd, required
   // by the Simpson integration). Columns: eps0 dos0 eps1 dos1.
-  const std::string dosfile =
-      (boost::filesystem::temp_directory_path() /
-       "alps_dmft_afm_multiband_dos.dat").string();
+  alps::testing::TemporaryDirectory temporary;
+  const std::string dosfile = (temporary.path() / "dos.dat").string();
   {
     std::ofstream f(dosfile);
     const double es[11]  = {-2.0,-1.6,-1.2,-0.8,-0.4,0.0,0.4,0.8,1.2,1.6,2.0};
@@ -60,7 +63,7 @@ int main() {
   matsubara_green_function_t G_omega(nfreq, 1, 4);
   matsubara_green_function_t G0_omega(nfreq, 1, 4);
   for (unsigned w = 0; w < nfreq; ++w) {
-    const std::complex<double> iw(0.0, (2 * w + 1) * M_PI / beta);
+    const std::complex<double> iw(0.0, (2 * w + 1) * boost::math::constants::pi<double>() / beta);
     const std::complex<double> z_up = 1.0 / (iw + 0.3);
     const std::complex<double> z_dn = 1.0 / (iw - 0.3);
     const std::complex<double> g_up = 1.0 / (iw + 0.5);
@@ -79,27 +82,19 @@ int main() {
   double max_asym   = 0.0;  // |pair(2,3) - pair(0,1)|
   double max_change = 0.0;  // how far pair(0,1) moved from its input
   for (unsigned w = 0; w < nfreq; ++w) {
-    const std::complex<double> iw(0.0, (2 * w + 1) * M_PI / beta);
+    SCOPED_TRACE(w);
+    for (unsigned flavor = 0; flavor < 4; ++flavor) {
+      ASSERT_TRUE(std::isfinite(out(w, flavor).real()))
+          << "Nonfinite real part for flavor " << flavor;
+      ASSERT_TRUE(std::isfinite(out(w, flavor).imag()))
+          << "Nonfinite imaginary part for flavor " << flavor;
+    }
+    const std::complex<double> iw(0.0, (2 * w + 1) * boost::math::constants::pi<double>() / beta);
     max_asym   = std::max(max_asym, std::abs(out(w, 2) - out(w, 0)));
     max_asym   = std::max(max_asym, std::abs(out(w, 3) - out(w, 1)));
     max_change = std::max(max_change, std::abs(out(w, 0) - 1.0 / (iw + 0.5)));
   }
 
-  bool ok = true;
-  if (max_asym > 1e-10) {
-    std::printf("FAIL: AFM transform asymmetric across identical band pairs "
-                "(max|band(2,3)-band(0,1)|=%g); flavours >=2 were skipped.\n",
-                max_asym);
-    ok = false;
-  }
-  if (max_change < 1e-6) {
-    std::printf("FAIL: transform did not modify the channel (max_change=%g); "
-                "test is degenerate.\n", max_change);
-    ok = false;
-  }
-  if (ok) {
-    std::printf("OK: AFM transform symmetric across band pairs "
-                "(asym=%g, change=%g)\n", max_asym, max_change);
-  }
-  return ok ? 0 : 1;
+  EXPECT_LE(max_asym, 1e-10) << "Identical band pairs must agree";
+  EXPECT_GE(max_change, 1e-6) << "Transform must change its input";
 }

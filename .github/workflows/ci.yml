@@ -260,11 +260,11 @@ jobs:
         cmake --preset mpi -B _build/ci \
           -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
           -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DMPIEXEC_PREFLAGS=--oversubscribe
-        cmake --build _build/ci --target citation_runtime param_default xdrdump xdrdump2
+        cmake --build _build/ci --target observableset_mpi parameters_mpi scheduler_sum_mpi comm_mpi filelock_mpi halt_mpi info_test_mpi process_mpi collect_mpi scheduler_sum_single param_default osiris_dump_serialization citation_runtime
     - name: Test two- and three-rank MPI
       run: ctest --test-dir _build/ci -L '^mpi$' --output-on-failure --output-junit mpi.xml --no-tests=error
     - name: Test serial behavior with MPI enabled
-      run: ctest --test-dir _build/ci -R '^(param_default|xdrdump|xdrdump2)$'
+      run: ctest --test-dir _build/ci -R '^[^.]+\.(scheduler_sum_single|param_default|osiris_dump_serialization)\.'
         --output-on-failure --output-junit ctest.xml --no-tests=error
     - name: Summarize tests
       run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
@@ -355,16 +355,16 @@ jobs:
     - name: Install native prerequisites
       run: |
         sudo apt-get update
-        sudo apt-get install -y clang-18 llvm-18 libboost-all-dev libhdf5-dev libblas-dev liblapack-dev
+        sudo apt-get install -y clang-18 llvm-18 libboost-all-dev libgtest-dev libhdf5-dev libblas-dev liblapack-dev
         python -m pip install 'cmake>=3.27' ninja pytest numpy h5py
     - name: Build instrumented components and tests
       run: |
         cmake --preset sanitizers -B _build/sanitizers \
           -DCMAKE_INSTALL_PREFIX="$PWD/_build/sanitizers/install" \
           -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF
-        cmake --build _build/sanitizers --target hdf5_memory hdf5_multi_array hdf5_exceptions hdf5_fortran_string param_default xdrdump xdrdump2
+        cmake --build _build/sanitizers --target hdf5_memory hdf5_valgrind hdf5_multi_array hdf5_exceptions hdf5_fortran_string observableset_hdf5 testobservableset param_default osiris_dump_serialization scheduler_sum_single
     - name: Run instrumented native tests
-      run: ctest --test-dir _build/sanitizers -R '^(hdf5_memory|hdf5_multi_array|hdf5_exceptions|hdf5_fortran_string|param_default|xdrdump|xdrdump2)$'
+      run: ctest --test-dir _build/sanitizers -R '^[^.]+\.(hdf5_memory|hdf5_valgrind|hdf5_multi_array|hdf5_exceptions|hdf5_fortran_string|observableset_hdf5|testobservableset|param_default|osiris_dump_serialization|scheduler_sum_single)\.'
         --output-on-failure --output-junit ctest.xml --no-tests=error
     - name: Summarize sanitizer tests
       if: always()

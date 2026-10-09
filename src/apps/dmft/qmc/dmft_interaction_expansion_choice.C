@@ -1,3 +1,5 @@
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
 // Copyright (C) 2026 ALPS Collaboration
 // Part of the ALPS Project — see LICENSE.txt for full license text.
 // SPDX-License-Identifier: MIT
@@ -20,7 +22,7 @@
 
 #include <cstdio>
 
-int main() {
+TEST(DmftRegression, interaction_expansion_choice) {
   struct Case {
     int flavors;
     int sites;
@@ -36,19 +38,6 @@ int main() {
     {4, 3, interaction_expansion_choice::unsupported,         "FLAVORS=4,SITES=3 -> unsupported"},
   };
 
-  int fails = 0;
-  for (const auto& c : cases) {
-    const interaction_expansion_choice got =
-        select_interaction_expansion(c.flavors, c.sites);
-    if (got != c.expect) {
-      std::printf("FAIL: %s (got %d, expected %d)\n", c.desc,
-                  static_cast<int>(got), static_cast<int>(c.expect));
-      ++fails;
-    }
-  }
-  if (fails == 0) {
-    std::printf("OK: all %zu interaction-expansion selection cases\n",
-                sizeof(cases) / sizeof(cases[0]));
-  }
-  return fails ? 1 : 0;
+  for (const auto& c : cases)
+    EXPECT_EQ(select_interaction_expansion(c.flavors, c.sites), c.expect) << c.desc;
 }

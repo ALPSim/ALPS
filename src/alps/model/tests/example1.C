@@ -1,3 +1,4 @@
+#include <alps/testing/stream_fixture.hpp>
 /*****************************************************************************
 *
 * ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -13,36 +14,20 @@
 
 /* $Id$ */
 
-#include <cstdlib>
-#include <string>
+#include <alps/parser/xslt_path.h>
 #include <alps/model.h>
 #include <fstream>
 #include <iostream>
 
-int main()
-{
-
-#ifndef BOOST_NO_EXCEPTIONS
-  try {
-#endif
+TEST(ModelSerialization, Example1) {
+  alps::testing::StreamFixture transcript;
+  { // Flush serialization objects before checking the captured stream.
     // create the library from an XML file
-    std::ifstream in((std::string(std::getenv("ALPS_XML_PATH")) + "/models.xml"));
+    std::ifstream in(alps::search_xml_library_path("models.xml"));
     alps::ModelLibrary lib(in);
 
     // write the library in XML
     std::cout << lib;
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& e)
-{
-  std::cerr << "Caught exception: " << e.what() << "\n";
-  exit(-1);
-}
-catch (...)
-{
-  std::cerr << "Caught unknown exception\n";
-  exit(-2);
-}
-#endif
-  return 0;
+  }
+  transcript.expect_output(ALPS_TEST_SOURCE_DIR "/example1.output");
 }

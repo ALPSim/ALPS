@@ -29,3 +29,6 @@ target_sources(alps_hdf5 PUBLIC
     include/alps/hdf5/vector.hpp
     include/alps/ngs/signal.hpp)
 
+if(ALPS_BUILD_TESTING)
+  add_subdirectory(tests)
+endif()

@@ -22,3 +22,6 @@ target_sources(alps_params PUBLIC
 
 add_subdirectory(adapters)
 
+if(ALPS_BUILD_TESTING)
+  add_subdirectory(tests)
+endif()

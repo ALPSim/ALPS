@@ -60,8 +60,7 @@
         "tests/cmake/**",
         "tests/integration/**",
         "tests/portability/**",
-        "tests/support/**",
-        "tests/legacy/**"
+        "tests/support/**"
       ],
       "strip_comments": true
     },
@@ -75,8 +74,7 @@
         "tests/cmake/**",
         "tests/integration/**",
         "tests/portability/**",
-        "tests/support/**",
-        "tests/legacy/**"
+        "tests/support/**"
       ],
       "strip_comments": true
     },
@@ -90,8 +88,7 @@
         "tests/cmake/**",
         "tests/integration/**",
         "tests/portability/**",
-        "tests/support/**",
-        "tests/legacy/**"
+        "tests/support/**"
       ],
       "strip_comments": true
     },

@@ -12,54 +12,50 @@
 *****************************************************************************/
 
 #include <alps/parapack/filelock.h>
-#include <alps/parapack/process.h>
-#include <iostream>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/timer.hpp>
+#include <alps/testing/temporary_directory.hpp>
+#include <boost/mpi.hpp>
+#include <boost/serialization/string.hpp>
+#include <gtest/gtest.h>
+#include <memory>
+#include <stdexcept>
+#include <string>
 
-namespace mpi = boost::mpi;
-
-int main(int argc, char **argv) {
-  mpi::environment env(argc, argv);
-  mpi::communicator world;
-
-  if (world.size() < 2) {
-    std::cerr << "too little number of processes\n";
-    return -1;
+TEST(ParallelFileLock, ExcludesOtherRanksAndReleasesOnScopeExit) {
+  boost::mpi::communicator world;
+  ASSERT_GE(world.size(), 2);
+  alps::testing::TemporaryDirectory directory;
+  std::string filename = (directory.path() / "shared-checkpoint").string();
+  boost::mpi::broadcast(world, filename, 0);
+  const boost::filesystem::path path(filename);
+  for (int owner = 0; owner < world.size(); ++owner) {
+    SCOPED_TRACE("owner=" + std::to_string(owner));
+    auto lock = std::make_unique<alps::filelock>(path);
+    EXPECT_FALSE(lock->locking());
+    EXPECT_FALSE(lock->locked());
+    world.barrier();
+    if (world.rank() == owner) {
+      EXPECT_NO_THROW(lock->lock(0));
+      EXPECT_TRUE(lock->locking());
+    }
+    world.barrier();
+    EXPECT_TRUE(lock->locked());
+    if (world.rank() != owner) {
+      // One attempt only: a regression must fail rather than block indefinitely.
+      EXPECT_THROW(lock->lock(0), std::logic_error);
+      EXPECT_FALSE(lock->locking());
+    }
+    world.barrier();
+    // The next rank can acquire after either explicit or RAII release.
+    if (world.rank() == owner && owner % 2 == 0) {
+      EXPECT_NO_THROW(lock->release());
+      EXPECT_FALSE(lock->locking());
+    }
+    lock.reset();
+    world.barrier();
+    alps::filelock unlocked(path);
+    EXPECT_FALSE(unlocked.locked());
+    world.barrier();
   }
-
-  boost::filesystem::path file("filelock_mpi");
-  alps::filelock lock(file);
-
-  // serial lock
-  if (world.rank() == 0) {
-    lock.lock();
-    std::cerr << "process #0 lock acquired\n";
-    world.barrier();
-    sleep(2);
-    lock.release();
-    std::cerr << "process #0 lock released\n";
-  } else if (world.rank() == 1) {
-    world.barrier();
-    std::cerr << "process #1 lock trying\n";
-    lock.lock();
-    std::cerr << "process #1 lock acquired\n";
-    lock.release();
-    std::cerr << "process #1 lock released\n";
-  } else {
-    world.barrier();
-  }
-
+  // Keep the root-owned shared directory alive until all ranks have finished.
   world.barrier();
-
-  // random lock
-  {
-    std::cerr << "process #" << world.rank() << " lock trying\n";
-    alps::filelock lock2(file, true);
-    std::cerr << "process #" << world.rank() << " lock acquired\n";
-    sleep(1);
-    lock2.release();
-  }
-  std::cerr << "process #" << world.rank() << " lock released\n";
 }

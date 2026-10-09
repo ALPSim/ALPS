@@ -1,3 +1,4 @@
+#include <alps/testing/stream_fixture.hpp>
 /*****************************************************************************
 *
 * ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -23,12 +24,9 @@
 using namespace alps;
 #endif
 
-int main()
-{
-#ifndef BOOST_NO_EXCEPTIONS
-  try {
-#endif
-
+TEST(ModelSerialization, Example17) {
+  alps::testing::StreamFixture transcript(ALPS_TEST_SOURCE_DIR "/example17.input");
+  { // Flush serialization objects before checking the captured stream.
     alps::ParameterList parms;
     std::cin >> parms;
     for (int i=0;i<parms.size();++i) {
@@ -37,17 +35,6 @@ int main()
       alps::HamiltonianDescriptor<short> ham(models.get_hamiltonian(lattice,parms[i],true));
       std::cout << ham;
     }
-
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& exc) {
-  std::cerr << exc.what() << "\n";
-  return -1;
-}
-catch (...) {
-  std::cerr << "Fatal Error: Unknown Exception!\n";
-  return -2;
-}
-#endif
-  return 0;
+  }
+  transcript.expect_output(ALPS_TEST_SOURCE_DIR "/example17.output");
 }

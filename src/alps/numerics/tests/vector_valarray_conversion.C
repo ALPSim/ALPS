@@ -15,56 +15,35 @@
 /* $Id: nobinning.h 3520 2009-12-11 16:49:53Z gamperl $ */
 
 #include <alps/numeric/vector_valarray_conversion.hpp>
-#include <iostream>
-#include <iterator>
-#include <iomanip>
+#include <gtest/gtest.h>
 #include <valarray>
 #include <vector>
-#include <algorithm>
 
-
-int main(int argc, char** argv)
+TEST(VectorValarrayConversion, ValarrayToVectorPreservesSizeAndOrder)
 {
-  using namespace alps::numeric;
+    std::valarray<double> source(10);
+    for (std::size_t i = 0; i < source.size(); ++i) source[i] = i;
+    const auto result = alps::numeric::valarray2vector<double>(source);
+    ASSERT_EQ(result.size(), source.size());
+    for (std::size_t i = 0; i < source.size(); ++i)
+        EXPECT_EQ(result[i], double(i)) << "index " << i;
+}
 
-  std::valarray<double> valA;
-  std::vector<double>   vecA;
+TEST(VectorValarrayConversion, VectorToValarrayPreservesSizeAndOrder)
+{
+    std::vector<double> source;
+    for (int i = 0; i < 10; ++i) source.push_back(10 - i);
+    const auto result = alps::numeric::vector2valarray<double>(source);
+    ASSERT_EQ(result.size(), source.size());
+    for (std::size_t i = 0; i < source.size(); ++i)
+        EXPECT_EQ(result[i], 10. - i) << "index " << i;
+}
 
-  valA.resize(10);
-  for (int i=0; i < 10; ++i)  {  valA[i] = i;  }
-
-  vecA = valarray2vector<double>(valA);
-
-  std::cout << "Valarray -> Vector\n";
-  std::cout << "------------------\n";
-
-  std::cout << "valA:\t";
-  std::copy(&valA[0],&valA[0] + valA.size(),std::ostream_iterator<double>(std::cout,"\t"));
-  std::cout << "\n";
-
-  std::cout << "vecA:\t";
-  std::copy(vecA.begin(),vecA.end(),std::ostream_iterator<double>(std::cout,"\t"));
-  std::cout << "\n";
-
-
-  std::vector<double>   vecB;
-
-  for (int i=0; i < 10; ++i)  {  vecB.push_back(10-i);  }
-  
-  std::valarray<double> valB = vector2valarray<double>(vecB);
-
-  std::cout << "Vector -> Valarray\n";
-  std::cout << "------------------\n";
-
-  std::cout << "vecB:\t";
-  std::copy(vecB.begin(),vecB.end(),std::ostream_iterator<double>(std::cout,"\t"));
-  std::cout << "\n";
-
-  std::cout << "valB:\t";
-  std::copy(&valB[0],&valB[0] + valB.size(),std::ostream_iterator<double>(std::cout,"\t"));
-  std::cout << "\n";
-
-
-
-  return 0;
+TEST(VectorValarrayConversion, ConvertingElementTypePreservesSizeAndOrder)
+{
+    const std::vector<int> source{3, -5, 8};
+    const auto converted = alps::numeric::vector2valarray<int, double>(source);
+    ASSERT_EQ(converted.size(), source.size());
+    for (std::size_t i = 0; i < source.size(); ++i)
+        EXPECT_DOUBLE_EQ(converted[i], static_cast<double>(source[i]));
 }

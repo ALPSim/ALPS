@@ -93,3 +93,6 @@ target_sources(alps_numerics INTERFACE
     include/alps/numeric/vector_functions.hpp
     include/alps/numeric/vector_valarray_conversion.hpp)
 
+if(ALPS_BUILD_TESTING)
+  add_subdirectory(tests)
+endif()

@@ -1,5 +1,5 @@
 L=4
-MODEL_LIBRARY = "${ALPS_XML_PATH}/models.xml"
+MODEL_LIBRARY = "models.xml"
 MODEL = "spin"
-LATTICE_LIBRARY = "${ALPS_XML_PATH}/lattices.xml"
+LATTICE_LIBRARY = "lattices.xml"
 LATTICE = "chain lattice"

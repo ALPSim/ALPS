@@ -43,3 +43,6 @@ target_sources(alps_headers INTERFACE
     include/alps/random/sprng/pmlcg.hpp
     include/alps/random/uniform_on_sphere_n.h)
 
+if(ALPS_BUILD_TESTING)
+  add_subdirectory(tests)
+endif()

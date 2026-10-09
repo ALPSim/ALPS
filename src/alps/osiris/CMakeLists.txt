@@ -47,3 +47,6 @@ target_sources(alps_osiris PUBLIC
     "${PROJECT_SOURCE_DIR}/third_party/xdr/include/alps/osiris/rpc_types.h"
     "${PROJECT_SOURCE_DIR}/third_party/xdr/include/alps/osiris/xdrcore.h")
 
+if(ALPS_BUILD_TESTING)
+  add_subdirectory(tests)
+endif()

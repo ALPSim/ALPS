@@ -96,21 +96,27 @@ target_link_libraries(hirschfye PRIVATE dmft_qmc_impl)
 target_link_libraries(hybridization PRIVATE ALPS::cthyb)
 target_link_libraries(interaction PRIVATE ALPS::ctint)
 
-
 if(ALPS_BUILD_TESTING)
-  foreach(regression IN ITEMS
-      dmft_fouriertransform_offdiag_numeric
-      dmft_hilberttransformer_itime_throw
-      dmft_externalsolver_outfile_param
-      dmft_hilberttransformer_afm_multiband_numeric
-      dmft_interaction_expansion_choice)
-    add_executable(${regression} ${regression}.C)
-    target_link_libraries(${regression} PRIVATE dmft_qmc_impl)
-    alps_add_test(${regression})
-    set_property(TEST ${regression} APPEND PROPERTY LABELS "dmft;regression")
-    set_property(TEST ${regression} APPEND PROPERTY ENVIRONMENT_MODIFICATION
-      "TMPDIR=set:${CMAKE_CURRENT_BINARY_DIR}/test-work/${regression}")
-  endforeach()
+  # Regression tests for the shared DMFT QMC infrastructure.
+  add_executable(dmft_fouriertransform_offdiag_numeric dmft_fouriertransform_offdiag_numeric.C)
+  target_link_libraries(dmft_fouriertransform_offdiag_numeric PRIVATE dmft_qmc_impl)
+  alps_add_gtest(dmft_fouriertransform_offdiag_numeric COMPONENT dmft LABELS regression)
+
+  add_executable(dmft_hilberttransformer_itime_throw dmft_hilberttransformer_itime_throw.C)
+  target_link_libraries(dmft_hilberttransformer_itime_throw PRIVATE dmft_qmc_impl)
+  alps_add_gtest(dmft_hilberttransformer_itime_throw COMPONENT dmft LABELS regression)
+
+  add_executable(dmft_externalsolver_outfile_param dmft_externalsolver_outfile_param.C)
+  target_link_libraries(dmft_externalsolver_outfile_param PRIVATE dmft_qmc_impl)
+  alps_add_gtest(dmft_externalsolver_outfile_param COMPONENT dmft LABELS regression)
+
+  add_executable(dmft_hilberttransformer_afm_multiband_numeric
+                 dmft_hilberttransformer_afm_multiband_numeric.C)
+  target_link_libraries(dmft_hilberttransformer_afm_multiband_numeric PRIVATE dmft_qmc_impl)
+  alps_add_gtest(dmft_hilberttransformer_afm_multiband_numeric COMPONENT dmft LABELS regression)
+
+  add_executable(dmft_interaction_expansion_choice dmft_interaction_expansion_choice.C)
+  alps_add_gtest(dmft_interaction_expansion_choice COMPONENT dmft LABELS regression)
 endif()
 
 alps_install_applications(dmft hirschfye hybridization interaction)

@@ -97,3 +97,6 @@ target_sources(alps_utilities PUBLIC
     include/alps/utility/vectorio.hpp
     include/alps/utility/vmusage.hpp)
 
+if(ALPS_BUILD_TESTING)
+  add_subdirectory(tests)
+endif()

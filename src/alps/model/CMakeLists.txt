@@ -35,3 +35,6 @@ target_sources(alps_headers INTERFACE
     include/alps/model/siteterm.h
     include/alps/model/substitute.h)
 
+if(ALPS_BUILD_TESTING)
+  add_subdirectory(tests)
+endif()

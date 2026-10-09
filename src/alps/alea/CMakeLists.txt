@@ -51,3 +51,6 @@ target_sources(alps_headers INTERFACE
     include/alps/ngs/mcresults.hpp
     include/alps/ngs/observablewrappers.hpp)
 
+if(ALPS_BUILD_TESTING)
+  add_subdirectory(tests)
+endif()

@@ -17,25 +17,46 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-include_directories(${PROJECT_BINARY_DIR}/src)
-include_directories(${PROJECT_SOURCE_DIR}/src)
-include_directories(${Boost_ROOT_DIR})
+foreach(
+  name
+  complexobservable
+  detailedbinning
+  histogram
+  signed
+  simpleobseval
+  testobservableset
+  observableset_hdf5
+  observableset_xml
+  vectorobseval
+  mcdata
+  mcdata2
+  mcdata_transform_variance
+  mcanalyze
+  mergeobs_plus
+  mergeobs_plus2
+  mergeobs_times
+  mergeobs_times2
+  mergeobs_divide
+  mergeobs_log)
+  add_executable(${name} ${name}.C)
 
-IF(NOT ALPS_LLVM_WORKAROUND)
-  FOREACH (name complexobservable detailedbinning histogram histogram2 signed simpleobseval testobservableset observableset_hdf5 observableset_xml vectorobseval mcdata mcdata2 mcdata_transform_variance mcanalyze mergeobs_plus mergeobs_plus2 mergeobs_times mergeobs_times2 mergeobs_divide mergeobs_log)
-    add_executable(${name} ${name}.C)
-    add_dependencies(${name} alps)
-    target_link_libraries(${name} alps)
-    add_alps_test(${name})
-  ENDFOREACH(name)
-ENDIF(NOT ALPS_LLVM_WORKAROUND)
+  target_link_libraries(${name} PRIVATE ALPS::alps)
+  if(name MATCHES "^(histogram|signed|testobservableset|observableset_xml)$")
+    # Exact XML output is an external serialization/format contract.
+    alps_add_gtest(${name} COMPONENT alea LABELS compatibility xml)
+  elseif(name MATCHES "^(observableset_hdf5|mcanalyze)$")
+    alps_add_gtest(${name} COMPONENT alea LABELS integration hdf5)
+  else()
+    alps_add_gtest(${name} COMPONENT alea)
+  endif()
+endforeach()
 
 add_executable(dumpbench dumpbench.C)
-target_link_libraries(dumpbench alps ${HDF5_LIBRARIES})
-if(HDF5_DEFINITIONS)
-   foreach (_hdf5_def ${HDF5_DEFINITIONS})
-     string(REPLACE "-D" "" _escaped_def ${_hdf5_def})
-     list(APPEND ALPS_TEBD_DEFINITIONS ${_escaped_def})
-   endforeach(_hdf5_def)
-   set_target_properties(dumpbench PROPERTIES COMPILE_DEFINITIONS "${ALPS_TEBD_DEFINITIONS}")
-endif(HDF5_DEFINITIONS)
+target_link_libraries(dumpbench PRIVATE ALPS::alps)
+
+if(ALPS_ENABLE_MPI)
+  add_executable(observableset_mpi observableset_mpi.C)
+  target_link_libraries(observableset_mpi PRIVATE ALPS::alps)
+  alps_add_mpi_gtest(observableset_mpi COMPONENT alea RANKS 2)
+  alps_add_mpi_gtest(observableset_mpi COMPONENT alea RANKS 3)
+endif()

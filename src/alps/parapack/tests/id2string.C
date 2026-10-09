@@ -12,16 +12,26 @@
 *****************************************************************************/
 
 #include <alps/parapack/util.h>
-#include <iostream>
+#include <gtest/gtest.h>
+#include <ostream>
 
-int main() {
-  std::cout << alps::id2string(0) << std::endl
-            << alps::id2string(9) << std::endl
-            << alps::id2string(10) << std::endl
-            << alps::id2string(15) << std::endl
-            << alps::id2string(100) << std::endl
-            << alps::id2string(200) << std::endl
-            << alps::id2string(1000) << std::endl
-            << alps::id2string(1001) << std::endl
-            << alps::id2string(100000) << std::endl;
+namespace {
+struct IdentifierSpelling {
+  int id;
+  const char* spelling;
+};
+void PrintTo(const IdentifierSpelling& value, std::ostream* out) {
+  *out << value.id;
 }
+class ProcessIdentifier : public ::testing::TestWithParam<IdentifierSpelling> {};
+TEST_P(ProcessIdentifier, KeepsHistoricalSortableSpelling) {
+  EXPECT_EQ(alps::id2string(GetParam().id), GetParam().spelling);
+}
+INSTANTIATE_TEST_SUITE_P(
+    HistoricalValues, ProcessIdentifier,
+    ::testing::Values(IdentifierSpelling{0, "0"}, IdentifierSpelling{9, "9"},
+                      IdentifierSpelling{10, "_10"}, IdentifierSpelling{15, "_15"},
+                      IdentifierSpelling{100, "__100"}, IdentifierSpelling{200, "__200"},
+                      IdentifierSpelling{1000, "___1000"}, IdentifierSpelling{1001, "___1001"},
+                      IdentifierSpelling{100000, "_____100000"}));
+} // namespace

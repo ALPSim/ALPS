@@ -1,0 +1,12 @@
+add_executable(portability portability.cpp)
+target_link_libraries(portability PRIVATE ALPS::alps)
+alps_add_gtest(portability COMPONENT portability LABELS compatibility)
+add_executable(numerics numerics.cpp)
+target_link_libraries(numerics PRIVATE ALPS::alps)
+alps_add_gtest(numerics COMPONENT portability LABELS integration scientific)
+
+if(ALPS_ENABLE_OPENMP)
+  add_executable(openmp_worker openmp_worker.cpp)
+  target_link_libraries(openmp_worker PRIVATE ALPS::alps)
+  alps_add_gtest(openmp_worker COMPONENT portability LABELS openmp THREADS 2 TIMEOUT 30)
+endif()

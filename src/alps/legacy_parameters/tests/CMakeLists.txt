@@ -17,17 +17,27 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-include_directories(${PROJECT_BINARY_DIR}/src)
-include_directories(${PROJECT_SOURCE_DIR}/src)
-include_directories(${Boost_ROOT_DIR})
+foreach(name expression expression2 flatten parameter parameterlist parameters)
+  add_executable(${name} ${name}.C)
+  target_link_libraries(${name} PRIVATE ALPS::alps)
+  alps_add_gtest(${name} COMPONENT legacy_parameters
+    PROPERTIES ENVIRONMENT "DIR=/home/alps")
+endforeach()
 
-IF(NOT ALPS_LLVM_WORKAROUND)
-  FOREACH (name expression expression2 flatten parameter parameterlist parameterlist_xml parameters parameters_xml)
-    add_executable(${name} ${name}.C)
-    add_dependencies(${name} alps)
-    target_link_libraries(${name} alps)
-    set_property(TARGET ${name} PROPERTY LABELS parameter)
-    add_alps_test(${name})
-    set_property(TEST ${name} PROPERTY LABELS parameter)
-  ENDFOREACH(name)
-ENDIF(NOT ALPS_LLVM_WORKAROUND)
+# XML serialization spelling and ordering remain explicit format contracts.
+foreach(name parameterlist_xml parameters_xml)
+  add_executable(${name} ${name}.C)
+  target_link_libraries(${name} PRIVATE ALPS::alps)
+  alps_add_gtest(${name} COMPONENT legacy_parameters LABELS compatibility format)
+endforeach()
+
+add_executable(parameters_hdf5 parameters_hdf5.C)
+target_link_libraries(parameters_hdf5 PRIVATE ALPS::alps)
+alps_add_gtest(parameters_hdf5 COMPONENT legacy_parameters LABELS integration hdf5)
+
+if(ALPS_ENABLE_MPI)
+  add_executable(parameters_mpi parameters_mpi.C)
+  target_link_libraries(parameters_mpi PRIVATE ALPS::alps)
+  alps_add_mpi_gtest(parameters_mpi COMPONENT legacy_parameters RANKS 2)
+  alps_add_mpi_gtest(parameters_mpi COMPONENT legacy_parameters RANKS 3)
+endif()

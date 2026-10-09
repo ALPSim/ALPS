@@ -1,3 +1,4 @@
+#include <alps/testing/stream_fixture.hpp>
 /*****************************************************************************
 *
 * ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -13,17 +14,16 @@
 
 /* $Id$ */
 
+#include <utility> // Boost.Math 1.76 includes this inside a namespace.
+#include <boost/math/constants/constants.hpp>
 #include <alps/numeric/round.hpp>
 #include <alps/model.h>
 #include <alps/model/blochbasisstates.h>
 #include <iostream>
 
-int main()
-{
-
-#ifndef BOOST_NO_EXCEPTIONS
-  try {
-#endif
+TEST(ModelSerialization, Example13) {
+  alps::testing::StreamFixture transcript(ALPS_TEST_SOURCE_DIR "/example13.input");
+  { // Flush serialization objects before checking the captured stream.
     alps::Parameters parms;
     std::cin >> parms;
     alps::ModelLibrary models(parms);
@@ -33,31 +33,18 @@ int main()
     ham.set_parameters(parms);
     alps::basis_states_descriptor<short> basis(ham.basis(),lattices.graph());
     for (int ik=0;ik<lattices.num_sites();++ik) {
-      std::vector<double> k(1,2.*ik*M_PI/double(lattices.num_sites()));
+      std::vector<double> k(1,2.*ik*boost::math::constants::pi<double>()/double(lattices.num_sites()));
       std::vector<std::pair<std::complex<double>,std::vector<std::size_t> > > trans = lattices.translations(k);
       for (int i=0;i<trans.size();++i) {
         std::cout << "Translation " << i << " with phase "
                   << alps::numeric::round<1>(trans[i].first) << " maps ";
         for (int j=0;j<trans[i].second.size();++j)
-          std::cout << j << "->" << trans[i].second[j] << " "; 
+          std::cout << j << "->" << trans[i].second[j] << " ";
         std::cout << "\n";
       }
       alps::bloch_basis_states<short> states(basis,trans);
       std::cout << "Built states:\n" << states << std::endl;
     }
-
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& e)
-{
-  std::cerr << "Caught exception: " << e.what() << "\n";
-  exit(-1);
-}
-catch (...)
-{
-  std::cerr << "Caught unknown exception\n";
-  exit(-2);
-}
-#endif
-  return 0;
+  }
+  transcript.expect_output(ALPS_TEST_SOURCE_DIR "/example13.output");
 }

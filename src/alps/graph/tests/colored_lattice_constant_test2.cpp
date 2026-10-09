@@ -12,8 +12,9 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <cstdlib>
-#include <string>
+#include <gtest/gtest.h>
+#include "graph_assertions.hpp"
+#include <alps/parser/xslt_path.h>
 #include <alps/graph/lattice_constant.hpp>
 #include <alps/lattice/lattice.h>
 #include <boost/graph/adjacency_list.hpp>
@@ -28,7 +29,7 @@ typename alps::lattice_traits<AlpsLattice>::cell_descriptor get_middle_cell(Alps
     return cell(offset,lattice);
 }
 
-int main() {
+TEST(GraphLatticeConstants, colored_lattice_constant_test2) {
     using boost::get;
     using boost::put;
     using alps::graph::canonical_properties;
@@ -42,7 +43,7 @@ int main() {
     alps::Parameters parm;
     unsigned int side_length = 40;
 
-    std::ifstream in((std::string(std::getenv("ALPS_XML_PATH")) + "/lattices.xml"));
+    std::ifstream in(alps::search_xml_library_path("lattices.xml"));
     parm["LATTICE"] = "anisotropic square lattice";
     parm["L"] = side_length;
     alps::graph_helper<> lattice(in,parm);
@@ -51,7 +52,7 @@ int main() {
 
     // edge color 0 ...
     // edge color 1 ___
-    
+
     //
     //  0...1
     //  |   |
@@ -70,7 +71,7 @@ int main() {
         put(alps::edge_type_t(), g, e, 1);
         tests.push_back(std::make_pair(g, 1));
     }
-    
+
     //
     //  0...1
     //  .   |
@@ -104,7 +105,7 @@ int main() {
         put(alps::edge_type_t(), g, e, 0);
         tests.push_back(std::make_pair(g,1));
     }
-    
+
     //
     //  1...0___2
     //
@@ -174,7 +175,7 @@ int main() {
         tests.push_back(std::make_pair(g,1));
     }
 
-    int success = 0;
+
 
     for(std::vector<std::pair<graph_type, lc_type> >::iterator it = tests.begin(); it != tests.end(); ++it)
     {
@@ -184,12 +185,7 @@ int main() {
             , lattice.lattice()
             , get_middle_cell(lattice.lattice())
         );
-        if (lc != it->second)
-        {
-            std::cerr<<"ERROR: lattice constant does not match!"<<std::endl;
-            std::cerr<<"Graph:"<<std::distance(tests.begin(),it)<<" Calculated: "<<lc<<"\tReference: "<<it->second<<std::endl<<std::endl;
-            success = -1;
-        }
+        EXPECT_EQ(lc, it->second) << "graph " << std::distance(tests.begin(), it);
     }
-    return success;
+
 }

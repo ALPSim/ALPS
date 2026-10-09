@@ -14,8 +14,10 @@
 
 //#define USE_COMPRESSED_EMBEDDING2
 
-#include <cstdlib>
-#include <string>
+#include <gtest/gtest.h>
+#include <numeric>
+#include "graph_assertions.hpp"
+#include <alps/parser/xslt_path.h>
 #include <alps/graph/subgraph_generator.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <vector>
@@ -28,7 +30,7 @@ enum { test_graph_size = 10 };
 template <typename Graph>
 void subgraph_generator_test(unsigned int order_ )
 {
-    std::ifstream in((std::string(std::getenv("ALPS_XML_PATH")) + "/lattices.xml"));
+    std::ifstream in(alps::search_xml_library_path("lattices.xml"));
     alps::Parameters parm;
     parm["LATTICE"] = "square lattice";
     parm["L"] = 2*order_+1;
@@ -44,12 +46,19 @@ void subgraph_generator_test(unsigned int order_ )
 
     typename graph_gen_type::iterator it,end;
     boost::tie(it,end) = graph_gen.generate_up_to_n_edges(order_);
-    std::cout<<std::distance(it,end)<<std::endl;
+    std::vector<std::size_t> counts(order_ + 1, 0);
+    for (auto current = it; current != end; ++current) {
+        const auto edges = num_edges(current->first);
+        ASSERT_LE(edges, order_);
+        ++counts[edges];
+    }
+    EXPECT_EQ(counts, (std::vector<std::size_t>{1, 1, 1, 2, 4, 6, 14, 28, 68, 156, 399}));
+    EXPECT_EQ(std::accumulate(counts.begin(), counts.end(), std::size_t(0)), 680u);
 }
 
-int main()
+TEST(GraphSubgraphs, subgraph_generator_test)
 {
     typedef boost::adjacency_list<boost::vecS, boost::vecS,boost::undirectedS> graph_type;
     subgraph_generator_test<graph_type>(test_graph_size);
-    return 0;
+
 }

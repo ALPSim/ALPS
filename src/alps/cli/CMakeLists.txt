@@ -8,3 +8,6 @@ target_sources(alps_cli PUBLIC
   FILES include/alps/ngs/mcoptions.hpp include/alps/parseargs.hpp
         include/alps/utility/cli.hpp)
 
+if(ALPS_BUILD_TESTING)
+  add_subdirectory(tests)
+endif()

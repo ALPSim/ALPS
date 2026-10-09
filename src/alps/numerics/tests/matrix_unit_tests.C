@@ -12,32 +12,51 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "matrix_unit_tests.hpp"
+#include <new>
 
 using alps::numeric::matrix;
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( constructors_test, T, test_types )
+// Force allocation failures without asking the operating system for enormous
+// allocations (sanitizer allocators may abort instead of throwing).
+template<class T>
+struct failing_matrix_storage : std::vector<T> {
+    failing_matrix_storage() = default;
+    failing_matrix_storage(std::size_t size, T const& value)
+        : std::vector<T>(size, value) {}
+    explicit failing_matrix_storage(std::size_t) { throw std::bad_alloc(); }
+};
+
+template<class T> class Matrix : public ::testing::Test {};
+TYPED_TEST_SUITE(Matrix, test_types);
+
+template<class T> class MixedMatrix : public ::testing::Test {};
+TYPED_TEST_SUITE(MixedMatrix, test_type_pairs);
+
+TYPED_TEST(Matrix, constructors_test)
 {
+    using T = TypeParam;
     matrix<T> a;
-    BOOST_CHECK_EQUAL(num_rows(a), 0u );
-    BOOST_CHECK_EQUAL(num_cols(a), 0u );
+    EXPECT_EQ(num_rows(a), 0u );
+    EXPECT_EQ(num_cols(a), 0u );
 
     matrix<T> b(10,10);
-    BOOST_CHECK_EQUAL(num_rows(b), 10u );
-    BOOST_CHECK_EQUAL(num_cols(b), 10u );
+    EXPECT_EQ(num_rows(b), 10u );
+    EXPECT_EQ(num_cols(b), 10u );
     for(unsigned int i=0; i<10; ++i)
         for(unsigned int j=0; j<10; ++j)
-            BOOST_CHECK_EQUAL(b(i,j), T());
+            EXPECT_EQ(b(i,j), T());
 
     matrix<T> c(15,5,5);
-    BOOST_CHECK_EQUAL(num_rows(c), 15u );
-    BOOST_CHECK_EQUAL(num_cols(c), 5u );
+    EXPECT_EQ(num_rows(c), 15u );
+    EXPECT_EQ(num_cols(c), 5u );
     for(unsigned int i=0; i<15; ++i)
         for(unsigned int j=0; j<5; ++j)
-            BOOST_CHECK_EQUAL(c(i,j), T(5));
+            EXPECT_EQ(c(i,j), T(5));
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( column_constructors_test, T, test_types )
+TYPED_TEST(Matrix, column_constructors_test)
 {
+    using T = TypeParam;
     std::size_t num_of_cols = 20;
     std::size_t num_of_rows = 30;
     std::vector<std::vector<T> > original(num_of_cols,std::vector<T>(num_of_rows) );
@@ -54,32 +73,35 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( column_constructors_test, T, test_types )
 
     for(std::size_t j=0; j < num_of_cols; ++j)
         for(std::size_t i=0; i < num_of_rows; ++i)
-            BOOST_CHECK_EQUAL(a(i,j),original[j][i]);
+            EXPECT_EQ(a(i,j),original[j][i]);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( copy_swap_test, T, test_types )
+TYPED_TEST(Matrix, copy_swap_test)
 {
+    using T = TypeParam;
     matrix<T> a(10,10,1);
     matrix<T> b(1,1,0);
     matrix<T> c(a);
     matrix<T> d(b);
     swap(a,b);
-    BOOST_CHECK_EQUAL(a,d);
-    BOOST_CHECK_EQUAL(b,c);
+    EXPECT_EQ(a,d);
+    EXPECT_EQ(b,c);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( assignement_test, T, test_types )
+TYPED_TEST(Matrix, assignement_test)
 {
+    using T = TypeParam;
     matrix<T> a(10,10,1);
     matrix<T> b(1,1,0);
     b = a;
-    BOOST_CHECK_EQUAL(a,b);
+    EXPECT_EQ(a,b);
     b(0,0) = 5;
-    BOOST_CHECK_EQUAL(a(0,0) != b(0,0), true);
+    EXPECT_EQ(a(0,0) != b(0,0), true);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( row_iterator_test, T, test_types )
+TYPED_TEST(Matrix, row_iterator_test)
 {
+    using T = TypeParam;
     matrix<T> a(10,20);
     fill_matrix_with_numbers(a);
 
@@ -89,17 +111,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( row_iterator_test, T, test_types )
         unsigned int j=0;
         for(typename matrix<T>::const_row_element_iterator it(range.first); it != range.second; ++it)
         {
-            BOOST_CHECK_EQUAL(a(i,j), *it);
+            EXPECT_EQ(a(i,j), *it);
             ++j;
         }
     }
     for(unsigned int i=0; i<num_rows(a); ++i)
         for(unsigned int j=0; j<num_cols(a); ++j)
-            BOOST_CHECK_EQUAL(a(i,j),T(i+j));
+            EXPECT_EQ(a(i,j),T(i+j));
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( col_iterator_test, T, test_types )
+TYPED_TEST(Matrix, col_iterator_test)
 {
+    using T = TypeParam;
     matrix<T> a(10,20);
     fill_matrix_with_numbers(a);
     for(unsigned int j=0; j<num_cols(a); ++j)
@@ -108,17 +131,18 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( col_iterator_test, T, test_types )
         unsigned int i=0;
         for(typename matrix<T>::const_col_element_iterator it(range.first); it != range.second; ++it)
         {
-            BOOST_CHECK_EQUAL(a(i,j), *it);
+            EXPECT_EQ(a(i,j), *it);
             ++i;
         }
     }
     for(unsigned int i=0; i<num_rows(a); ++i)
         for(unsigned int j=0; j<num_cols(a); ++j)
-            BOOST_CHECK_EQUAL(a(i,j),T(i+j));
+            EXPECT_EQ(a(i,j),T(i+j));
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( diagonal_iterator_test, T, test_types )
+TYPED_TEST(Matrix, diagonal_iterator_test)
 {
+    using T = TypeParam;
     typedef typename matrix<T>::diagonal_iterator       diagonal_iterator;
     typedef typename matrix<T>::const_diagonal_iterator const_diagonal_iterator;
     using std::distance;
@@ -133,11 +157,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( diagonal_iterator_test, T, test_types )
         unsigned int k = 0;
         std::pair<diagonal_iterator,diagonal_iterator> r_a = diagonal(a);
         std::pair<const_diagonal_iterator,const_diagonal_iterator> r_b = diagonal(b);
-        BOOST_CHECK_EQUAL(distance(r_a.first,r_a.second), static_cast<std::ptrdiff_t>((std::min)(num_rows(a),num_cols(a))));
-        BOOST_CHECK_EQUAL(distance(r_b.first,r_b.second), static_cast<std::ptrdiff_t>((std::min)(num_rows(a),num_cols(a))));
+        EXPECT_EQ(distance(r_a.first,r_a.second), static_cast<std::ptrdiff_t>((std::min)(num_rows(a),num_cols(a))));
+        EXPECT_EQ(distance(r_b.first,r_b.second), static_cast<std::ptrdiff_t>((std::min)(num_rows(a),num_cols(a))));
         while(r_a.first != r_a.second) {
-            BOOST_CHECK_EQUAL(a(k,k), *r_a.first);
-            BOOST_CHECK_EQUAL(a(k,k), *r_b.first);
+            EXPECT_EQ(a(k,k), *r_a.first);
+            EXPECT_EQ(a(k,k), *r_b.first);
             ++r_a.first;
             ++r_b.first;
             ++k;
@@ -145,8 +169,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( diagonal_iterator_test, T, test_types )
     }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( element_iterator_test, T, test_types )
+TYPED_TEST(Matrix, element_iterator_test)
 {
+    using T = TypeParam;
     matrix<T> a(10,20);
     matrix<T> b(10,20);
     std::pair<typename matrix<T>::element_iterator,typename matrix<T>::element_iterator> range(elements(a));
@@ -163,18 +188,19 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( element_iterator_test, T, test_types )
         }
 
     T acc = std::accumulate(range.first, range.second,T(0));
-    BOOST_CHECK_EQUAL(acc,sum);
-    BOOST_CHECK_EQUAL(a,b);
+    EXPECT_EQ(acc,sum);
+    EXPECT_EQ(a,b);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( resize_test, T, test_types )
+TYPED_TEST(Matrix, resize_test)
 {
+    using T = TypeParam;
     matrix<T> a;
 
     // Check primitive enlargement
     resize(a,10,5);
-    BOOST_CHECK_EQUAL(num_rows(a),10u);
-    BOOST_CHECK_EQUAL(num_cols(a),5u);
+    EXPECT_EQ(num_rows(a),10u);
+    EXPECT_EQ(num_cols(a),5u);
     fill_matrix_with_numbers(a);
     matrix<T> b(a);
 
@@ -188,9 +214,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( resize_test, T, test_types )
         for(unsigned int j=0; j<num_cols(a); ++j)
         {
             if( i >=10 || j >= 5)
-                BOOST_CHECK_EQUAL(a(i,j),T(1));
+                EXPECT_EQ(a(i,j),T(1));
             else
-                BOOST_CHECK_EQUAL(a(i,j),T(i+j));
+                EXPECT_EQ(a(i,j),T(i+j));
         }
 
     // Resize case 2:
@@ -198,7 +224,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( resize_test, T, test_types )
     // size1 < reserved_size1
     // size1 < size1_ (-> shrinking)
     resize(a,10,5);
-    BOOST_CHECK_EQUAL(a,b);
+    EXPECT_EQ(a,b);
 
     // Resize case 3:
     // Enlargement within the already reserved range
@@ -208,94 +234,78 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( resize_test, T, test_types )
     for(unsigned int i=0; i<num_rows(a); ++i)
         for(unsigned int j=0; j<num_cols(a); ++j)
         {
-            if( i >= 10 || j >= 5) BOOST_CHECK_EQUAL(a(i,j),T(0));
-            else BOOST_CHECK_EQUAL(a(i,j), T(i+j));
+            if( i >= 10 || j >= 5) EXPECT_EQ(a(i,j),T(0));
+            else EXPECT_EQ(a(i,j), T(i+j));
         }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( resize_exception_test, T, test_types )
+TYPED_TEST(Matrix, resize_exception_test)
 {
-    matrix<T> a(22,18);
+    using T = TypeParam;
+    using test_matrix = matrix<T, failing_matrix_storage<T>>;
+    test_matrix a(22,18);
     fill_matrix_with_numbers(a);
 
     // What happens if an exception is thrown?
     // Remains the matrix unchanged if an exception is thrown during the resize process?
     // Case 1: size1 > reserved_size1_
-    matrix<T> ref(a);
-    matrix<T> c(a);
-    matrix<T> d(a);
-    std::vector<T> test;
-    std::size_t max_size = test.max_size();
-    try
-    {
-        resize(a,max_size+10,1);
-    }
-    catch(...)
-    {
-        BOOST_CHECK_EQUAL(a,ref);
-    }
+    test_matrix ref(a);
+    test_matrix c(a);
+    test_matrix d(a);
+    EXPECT_THROW(resize(a,32,18), std::bad_alloc);
+    EXPECT_EQ(a,ref);
 
     // Resize case 2:
     // Shrinking in one dimension
     // size1 < reserved_size1
     // size1 < size1_ (-> shrinking)
-    try
-    {
-        resize(c,1,max_size+10);
-    }
-    catch(...)
-    {
-        BOOST_CHECK_EQUAL(c,ref);
-    }
+    EXPECT_THROW(resize(c,1,28), std::bad_alloc);
+    EXPECT_EQ(c,ref);
 
     // Resize case 3:
     // Enlargement within the already reserved range
     // size1 < reserved_size1
     // size1 > size1_
     resize(d,2,5);
-    matrix<T> ref_d(d);
-    try
-    {
-        resize(d,4,max_size/2+5);
-    }
-    catch(...)
-    {
-        BOOST_CHECK_EQUAL(d,ref_d);
-    }
+    test_matrix ref_d(d);
+    EXPECT_THROW(resize(d,4,28), std::bad_alloc);
+    EXPECT_EQ(d,ref_d);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( reserve_test, T, test_types)
+TYPED_TEST(Matrix, reserve_test)
 {
+    using T = TypeParam;
     matrix<T> a(22,18);
     fill_matrix_with_numbers(a);
-    
+
     matrix<T> ref(a);
 
     // Case 1:
     // size1 > reserved_size1_
     a.reserve(30,30);
-    BOOST_CHECK_EQUAL(a,ref);
-    BOOST_CHECK_EQUAL(a.capacity().first >= 30 && a.capacity().second >= 30, true);
-    
+    EXPECT_EQ(a,ref);
+    EXPECT_EQ(a.capacity().first >= 30 && a.capacity().second >= 30, true);
+
     // Case 2:
     // size1 < reserved_size1_
     // reserved_size1_*size2 > values_.capacity
 
     a.reserve(20,40);
-    BOOST_CHECK_EQUAL(a,ref);
-    BOOST_CHECK_EQUAL(a.capacity().first >= 30 && a.capacity().second >= 40, true);
+    EXPECT_EQ(a,ref);
+    EXPECT_EQ(a.capacity().first >= 30 && a.capacity().second >= 40, true);
 
 
     // Case 3:
     // size1 < reserved_size1_
     // size2 < size2_
     a.reserve(10,10);
-    BOOST_CHECK_EQUAL(a,ref);
-    BOOST_CHECK_EQUAL(a.capacity().first >= 30 && a.capacity().second >= 40, true);
+    EXPECT_EQ(a,ref);
+    EXPECT_EQ(a.capacity().first >= 30 && a.capacity().second >= 40, true);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( append_rows_test, T, test_types)
+TYPED_TEST(Matrix, append_rows_test)
 {
+    using T = TypeParam;
     const unsigned int initsize = 20;
     matrix<T> a(initsize,initsize);
     fill_matrix_with_numbers(a);
@@ -313,9 +323,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( append_rows_test, T, test_types)
         for(unsigned int j=0; j<num_cols(a); ++j)
         {
             if( i != initsize)
-                BOOST_CHECK_EQUAL(a(i,j),b(i,j));
+                EXPECT_EQ(a(i,j),b(i,j));
             else
-                BOOST_CHECK_EQUAL(a(i,j),T(j));
+                EXPECT_EQ(a(i,j),T(j));
         }
     // Append multiple rows
     append_rows(a, std::make_pair(data_multiple.begin(),data_multiple.end()),3);
@@ -323,35 +333,36 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( append_rows_test, T, test_types)
         for(unsigned int j=0; j<num_cols(a); ++j)
         {
             if( i < initsize)
-                BOOST_CHECK_EQUAL(a(i,j),b(i,j));
+                EXPECT_EQ(a(i,j),b(i,j));
             else
             {
                 switch (i)
                 {
                     case initsize:
-                        BOOST_CHECK_EQUAL(a(i,j),T(j));
+                        EXPECT_EQ(a(i,j),T(j));
                         break;
                     case initsize+1:
-                        BOOST_CHECK_EQUAL(a(i,j),T(j+initsize));
+                        EXPECT_EQ(a(i,j),T(j+initsize));
                         break;
                     case initsize+2:
-                        BOOST_CHECK_EQUAL(a(i,j),T(j+2*initsize));
+                        EXPECT_EQ(a(i,j),T(j+2*initsize));
                         break;
                     case initsize+3:
-                        BOOST_CHECK_EQUAL(a(i,j),T(j+3*initsize));
+                        EXPECT_EQ(a(i,j),T(j+3*initsize));
                         break;
                     default:
                         // There should not be any other row
                         // Report an error
-                        BOOST_CHECK( true == false);
+                        EXPECT_TRUE( true == false);
                 }
             }
 
         }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( append_cols_test, T, test_types)
+TYPED_TEST(Matrix, append_cols_test)
 {
+    using T = TypeParam;
     const unsigned int initsize = 20;
     matrix<T> a(initsize,initsize);
     fill_matrix_with_numbers(a);
@@ -369,9 +380,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( append_cols_test, T, test_types)
         for(unsigned int j=0; j<num_cols(a); ++j)
         {
             if( j != initsize)
-                BOOST_CHECK_EQUAL(a(i,j),b(i,j));
+                EXPECT_EQ(a(i,j),b(i,j));
             else
-                BOOST_CHECK_EQUAL(a(i,j),T(i));
+                EXPECT_EQ(a(i,j),T(i));
         }
     // Append multiple rows
     append_cols(a, std::make_pair(data_multiple.begin(),data_multiple.end()),3);
@@ -379,34 +390,35 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( append_cols_test, T, test_types)
         for(unsigned int j=0; j<num_cols(a); ++j)
         {
             if( j < initsize)
-                BOOST_CHECK_EQUAL(a(i,j),b(i,j));
+                EXPECT_EQ(a(i,j),b(i,j));
             else
             {
                 switch (j)
                 {
                     case initsize:
-                        BOOST_CHECK_EQUAL(a(i,j),T(i));
+                        EXPECT_EQ(a(i,j),T(i));
                         break;
                     case initsize+1:
-                        BOOST_CHECK_EQUAL(a(i,j),T(i+initsize));
+                        EXPECT_EQ(a(i,j),T(i+initsize));
                         break;
                     case initsize+2:
-                        BOOST_CHECK_EQUAL(a(i,j),T(i+2*initsize));
+                        EXPECT_EQ(a(i,j),T(i+2*initsize));
                         break;
                     case initsize+3:
-                        BOOST_CHECK_EQUAL(a(i,j),T(i+3*initsize));
+                        EXPECT_EQ(a(i,j),T(i+3*initsize));
                         break;
                     default:
                         // There should not be any other column
                         // Report an error
-                        BOOST_CHECK( true == false);
+                        EXPECT_TRUE( true == false);
                 }
             }
         }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( remove_rows_test, T, test_types)
+TYPED_TEST(Matrix, remove_rows_test)
 {
+    using T = TypeParam;
     const unsigned int initsize = 20;
     matrix<T> a(initsize,initsize);
     fill_matrix_with_numbers(a);
@@ -420,25 +432,26 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( remove_rows_test, T, test_types)
     remove_rows(a,5);
     remove_rows(a,11,4);
 
-    BOOST_CHECK_EQUAL(num_rows(a),initsize-7);
+    EXPECT_EQ(num_rows(a),initsize-7);
 
     for(unsigned int i=0; i<num_rows(a); ++i)
         for(unsigned int j=0; j<num_cols(a); ++j)
         {
             if(i<5)
-                BOOST_CHECK_EQUAL(a(i,j),b(i+1,j));
+                EXPECT_EQ(a(i,j),b(i+1,j));
             else if (i < 11)
-                BOOST_CHECK_EQUAL(a(i,j),b(i+2,j));
+                EXPECT_EQ(a(i,j),b(i+2,j));
             else
-                BOOST_CHECK_EQUAL(a(i,j),b(i+6,j));
+                EXPECT_EQ(a(i,j),b(i+6,j));
         }
-    
+
     matrix<T> c(b);
 
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( remove_cols_test, T, test_types)
+TYPED_TEST(Matrix, remove_cols_test)
 {
+    using T = TypeParam;
     const unsigned int initsize = 20;
     matrix<T> a(initsize,initsize);
     fill_matrix_with_numbers(a);
@@ -452,25 +465,26 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( remove_cols_test, T, test_types)
     remove_cols(a,5);
     remove_cols(a,11,4);
 
-    BOOST_CHECK_EQUAL(num_cols(a),initsize-7);
+    EXPECT_EQ(num_cols(a),initsize-7);
 
     for(unsigned int i=0; i<num_rows(a); ++i)
         for(unsigned int j=0; j<num_cols(a); ++j)
         {
             if(j<5)
-                BOOST_CHECK_EQUAL(a(i,j),b(i,j+1));
+                EXPECT_EQ(a(i,j),b(i,j+1));
             else if (j < 11)
-                BOOST_CHECK_EQUAL(a(i,j),b(i,j+2));
+                EXPECT_EQ(a(i,j),b(i,j+2));
             else
-                BOOST_CHECK_EQUAL(a(i,j),b(i,j+6));
+                EXPECT_EQ(a(i,j),b(i,j+6));
         }
-    
+
     matrix<T> c(b);
 
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( insert_rows_test, T, test_types)
+TYPED_TEST(Matrix, insert_rows_test)
 {
+    using T = TypeParam;
     const unsigned int initsize = 20;
     matrix<T> a(initsize,initsize);
     fill_matrix_with_numbers(a);
@@ -495,26 +509,27 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( insert_rows_test, T, test_types)
                 case 0:
                 case 5:
                 case 25:
-                    BOOST_CHECK_EQUAL(a(i,j),T(j));
+                    EXPECT_EQ(a(i,j),T(j));
                     break;
                 case 8:
                 case 9:
                 case 10:
-                    BOOST_CHECK_EQUAL(a(i,j),T(j+(i-7)*initsize));
+                    EXPECT_EQ(a(i,j),T(j+(i-7)*initsize));
                     break;
                 default:
                     if( i>10 )
-                        BOOST_CHECK_EQUAL(a(i,j),b(i-5,j));
+                        EXPECT_EQ(a(i,j),b(i-5,j));
                     else if( i>5 )
-                        BOOST_CHECK_EQUAL(a(i,j),b(i-2,j));
+                        EXPECT_EQ(a(i,j),b(i-2,j));
                     else
-                        BOOST_CHECK_EQUAL(a(i,j),b(i-1,j));
+                        EXPECT_EQ(a(i,j),b(i-1,j));
             }
         }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( insert_cols_test, T, test_types)
-{ 
+TYPED_TEST(Matrix, insert_cols_test)
+{
+    using T = TypeParam;
     const unsigned int initsize = 20;
     matrix<T> a(initsize,initsize);
     fill_matrix_with_numbers(a);
@@ -525,7 +540,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( insert_cols_test, T, test_types)
     T iota(0);
     iota = fill_range_with_numbers(data_single.begin(),data_single.end(),iota);
     iota = fill_range_with_numbers(data_multiple.begin(),data_multiple.end(),iota);
-    
+
     // Insert a column in for the 0th line, the last line and in the middle
     insert_cols(a, initsize, std::make_pair(data_single.begin(), data_single.end()) );
     insert_cols(a, 0, std::make_pair(data_single.begin(), data_single.end()) );
@@ -539,96 +554,102 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( insert_cols_test, T, test_types)
                 case 0:
                 case 5:
                 case 25:
-                    BOOST_CHECK_EQUAL(a(i,j),T(i));
+                    EXPECT_EQ(a(i,j),T(i));
                     break;
                 case 8:
                 case 9:
                 case 10:
-                    BOOST_CHECK_EQUAL(a(i,j),T(i+(j-7)*initsize));
+                    EXPECT_EQ(a(i,j),T(i+(j-7)*initsize));
                     break;
                 default:
                     if( j>10 )
-                        BOOST_CHECK_EQUAL(a(i,j),b(i,j-5));
+                        EXPECT_EQ(a(i,j),b(i,j-5));
                     else if( j>5 )
-                        BOOST_CHECK_EQUAL(a(i,j),b(i,j-2));
+                        EXPECT_EQ(a(i,j),b(i,j-2));
                     else
-                        BOOST_CHECK_EQUAL(a(i,j),b(i,j-1));
+                        EXPECT_EQ(a(i,j),b(i,j-1));
             }
         }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( plus_assign_test, T, test_types)
+TYPED_TEST(Matrix, plus_assign_test)
 {
+    using T = TypeParam;
     matrix<T> a(20,30);
     fill_matrix_with_numbers(a);
     matrix<T> b(a);
-    
+
     a += b;
     for(unsigned int i=0; i<num_rows(a); ++i)
         for(unsigned int j=0; j<num_cols(a); ++j)
-            BOOST_CHECK_EQUAL( a(i,j), T((i+j)*2) );
+            EXPECT_EQ( a(i,j), T((i+j)*2) );
 
     a += a;
     for(unsigned int i=0; i<num_rows(a); ++i)
         for(unsigned int j=0; j<num_cols(a); ++j)
-            BOOST_CHECK_EQUAL( a(i,j), T((i+j)*4) );
+            EXPECT_EQ( a(i,j), T((i+j)*4) );
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( minus_assign_test, T, test_types)
+TYPED_TEST(Matrix, minus_assign_test)
 {
+    using T = TypeParam;
     matrix<T> a(20,30);
     matrix<T> zero(20,30,T(0));
     fill_matrix_with_numbers(a);
     matrix<T> b(a);
     a += b;
     a -= b;
-    BOOST_CHECK_EQUAL(a,b);
-    
+    EXPECT_EQ(a,b);
+
     a -= a;
-    BOOST_CHECK_EQUAL(a,zero);
+    EXPECT_EQ(a,zero);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( multiplies_assign_test, T, test_types)
+TYPED_TEST(Matrix, multiplies_assign_test)
 {
+    using T = TypeParam;
     matrix<T> a(20,30);
     matrix<T> zero(20,30,T(0));
     fill_matrix_with_numbers(a);
     matrix<T> b(a);
     a *= T(1);
-    BOOST_CHECK_EQUAL(a,b);
+    EXPECT_EQ(a,b);
     a *= T(0);
-    BOOST_CHECK_EQUAL(a,zero);
+    EXPECT_EQ(a,zero);
 
     fill_matrix_with_numbers(a);
     a *= T(2);
     for(unsigned int i=0; i<num_rows(a); ++i)
         for(unsigned int j=0; j<num_cols(a); ++j)
-            BOOST_CHECK_EQUAL( a(i,j), T(i+j)*T(2) );
+            EXPECT_EQ( a(i,j), T(i+j)*T(2) );
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( plus_test, T, test_types)
+TYPED_TEST(Matrix, plus_test)
 {
+    using T = TypeParam;
     matrix<T> a(20,30);
     fill_matrix_with_numbers(a);
     matrix<T> b(a);
 
     matrix<T> c = a + b;
     a +=b;
-    BOOST_CHECK_EQUAL(c,a);
+    EXPECT_EQ(c,a);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( minus_test, T, test_types)
+TYPED_TEST(Matrix, minus_test)
 {
+    using T = TypeParam;
     matrix<T> a(20,30);
     fill_matrix_with_numbers(a);
     matrix<T> b(a);
     a += b;
     matrix<T> c = a - b;
-    BOOST_CHECK_EQUAL(c,b);
+    EXPECT_EQ(c,b);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( multiplies_test, T, test_types)
+TYPED_TEST(Matrix, multiplies_test)
 {
+    using T = TypeParam;
     matrix<T> a(20,30);
     fill_matrix_with_numbers(a);
     matrix<T> b(a);
@@ -637,9 +658,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( multiplies_test, T, test_types)
     matrix<T> c = T(2) * b;
     //TODO Do we really want to assume commutative types?
     matrix<T> d = b * T(2);
-    BOOST_CHECK_EQUAL(c,a);
-    BOOST_CHECK_EQUAL(d,a);
-    BOOST_CHECK_EQUAL(b,ref_b);
+    EXPECT_EQ(c,a);
+    EXPECT_EQ(d,a);
+    EXPECT_EQ(b,ref_b);
 
     // Check whether or not it works with mixed types.
     // (value_type != T2 ) - at least for non integer types...
@@ -650,19 +671,20 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( multiplies_test, T, test_types)
         {
             typename matrix<T>::value_type tmp (e(i,j));
             tmp *= 5;
-            BOOST_CHECK_EQUAL(b(i,j),tmp);
+            EXPECT_EQ(b(i,j),tmp);
         }
     matrix<T> ref_e(e);
     matrix<T> f ( e * 5 );
     matrix<T> g ( 5 * e );
-    BOOST_CHECK_EQUAL(b,f);
-    BOOST_CHECK_EQUAL(b,g);
-    BOOST_CHECK_EQUAL(ref_e,e);
+    EXPECT_EQ(b,f);
+    EXPECT_EQ(b,g);
+    EXPECT_EQ(ref_e,e);
 
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( matrix_vector_multiply_test, T, test_types)
+TYPED_TEST(Matrix, matrix_vector_multiply_test)
 {
+    using T = TypeParam;
     alps::numeric::matrix<T> a(20,30);
     alps::numeric::vector<T> v(30);
     fill_matrix_with_numbers(a);
@@ -671,20 +693,21 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( matrix_vector_multiply_test, T, test_types)
     alps::numeric::vector<T> v_(v);
 
     alps::numeric::vector<T> result(a*v);
-    BOOST_CHECK_EQUAL(result.size(),num_rows(a));
-    BOOST_CHECK_EQUAL(a,a_);
-    BOOST_CHECK_EQUAL(v,v_);
+    EXPECT_EQ(result.size(),num_rows(a));
+    EXPECT_EQ(a,a_);
+    EXPECT_EQ(v,v_);
     for(unsigned int i=0; i<num_rows(a); ++i)
     {
         T row_result(0);
         for(unsigned int j=0; j<num_cols(a); ++j)
             row_result += a(i,j)*v(j);
-        BOOST_CHECK_EQUAL(result(i),row_result);
+        EXPECT_EQ(result(i),row_result);
     }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( gemv_test, T, test_types)
+TYPED_TEST(Matrix, gemv_test)
 {
+    using T = TypeParam;
     alps::numeric::matrix<T> a(20,30);
     alps::numeric::vector<T> v(30);
     alps::numeric::vector<T> r(20);
@@ -696,20 +719,21 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( gemv_test, T, test_types)
 
     gemv(a,v,r);
 
-    BOOST_CHECK_EQUAL(r.size(),num_rows(a));
-    BOOST_CHECK_EQUAL(a,a_);
-    BOOST_CHECK_EQUAL(v,v_);
+    EXPECT_EQ(r.size(),num_rows(a));
+    EXPECT_EQ(a,a_);
+    EXPECT_EQ(v,v_);
     for(unsigned int i=0; i<num_rows(a); ++i)
     {
         T row_result(0);
         for(unsigned int j=0; j<num_cols(a); ++j)
             row_result += a(i,j)*v(j);
-        BOOST_CHECK_EQUAL(r(i),row_result);
+        EXPECT_EQ(r(i),row_result);
     }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( matrix_vector_multiply_mixed_types_test, TPair, test_type_pairs)
+TYPED_TEST(MixedMatrix, matrix_vector_multiply_mixed_types_test)
 {
+    using TPair = TypeParam;
     // -alps::numeric::matrix<T> * std::vector<int>
     typedef typename TPair::first_type     first_type;
     typedef typename TPair::second_type    second_type;
@@ -723,20 +747,21 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( matrix_vector_multiply_mixed_types_test, TPair, t
     alps::numeric::vector<second_type> v_(v);
 
     alps::numeric::vector<result_type> result = a*v;
-    BOOST_CHECK_EQUAL(result.size(),num_rows(a));
-    BOOST_CHECK_EQUAL(a,a_);
-    BOOST_CHECK_EQUAL(v,v_);
+    EXPECT_EQ(result.size(),num_rows(a));
+    EXPECT_EQ(a,a_);
+    EXPECT_EQ(v,v_);
     for(unsigned int i=0; i<num_rows(a); ++i)
     {
         result_type row_result(0);
         for(unsigned int j=0; j<num_cols(a); ++j)
             row_result += a(i,j)*v(j);
-        BOOST_CHECK_EQUAL(result(i),row_result);
+        EXPECT_EQ(result(i),row_result);
     }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( matrix_matrix_multiply_test, T, test_types)
+TYPED_TEST(Matrix, matrix_matrix_multiply_test)
 {
+    using T = TypeParam;
     matrix<T> a(20,30);
     matrix<T> b(30,50);
     fill_matrix_with_numbers(a);
@@ -744,8 +769,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( matrix_matrix_multiply_test, T, test_types)
 
     matrix<T> c = a * b;
 
-    BOOST_CHECK_EQUAL(num_rows(c), num_rows(a));
-    BOOST_CHECK_EQUAL(num_cols(c), num_cols(b));
+    EXPECT_EQ(num_rows(c), num_rows(a));
+    EXPECT_EQ(num_cols(c), num_cols(b));
 
     for(unsigned int i=0; i<num_rows(c); ++i)
         for(unsigned int j=0; j<num_cols(c); ++j)
@@ -753,12 +778,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( matrix_matrix_multiply_test, T, test_types)
             T result(0);
             for(unsigned int k=0; k< num_cols(a); ++k)
                 result += a(i,k) * b(k,j);
-            BOOST_CHECK_EQUAL(c(i,j),result);
+            EXPECT_EQ(c(i,j),result);
         }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( gemm_test, T, test_types)
+TYPED_TEST(Matrix, gemm_test)
 {
+    using T = TypeParam;
     matrix<T> a(20,30);
     matrix<T> b(30,50);
     matrix<T> c(20,50);
@@ -768,8 +794,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( gemm_test, T, test_types)
 
     gemm(a,b,c);
 
-    BOOST_CHECK_EQUAL(num_rows(c), num_rows(a));
-    BOOST_CHECK_EQUAL(num_cols(c), num_cols(b));
+    EXPECT_EQ(num_rows(c), num_rows(a));
+    EXPECT_EQ(num_cols(c), num_cols(b));
 
     for(unsigned int i=0; i<num_rows(c); ++i)
         for(unsigned int j=0; j<num_cols(c); ++j)
@@ -777,12 +803,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( gemm_test, T, test_types)
             T result(0);
             for(unsigned int k=0; k< num_cols(a); ++k)
                 result += a(i,k) * b(k,j);
-            BOOST_CHECK_EQUAL(c(i,j),result);
+            EXPECT_EQ(c(i,j),result);
         }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( conjugate_test, T, test_types )
+TYPED_TEST(Matrix, conjugate_test)
 {
+    using T = TypeParam;
     using alps::numeric::conj;
     matrix<T> a(10,20);
     fill_matrix_with_numbers(a);
@@ -791,15 +818,16 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( conjugate_test, T, test_types )
     conj_inplace(a);
     for(unsigned int i=0; i<num_rows(a); ++i)
         for(unsigned int j=0; j<num_cols(a); ++j)
-            BOOST_CHECK_EQUAL(a(i,j),conj(b(i,j)));
+            EXPECT_EQ(a(i,j),conj(b(i,j)));
 
     matrix<T> c(conj(a));
 
-    BOOST_CHECK_EQUAL(c,b);
+    EXPECT_EQ(c,b);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( transpose_inplace_squared_test, T, test_types )
+TYPED_TEST(Matrix, transpose_inplace_squared_test)
 {
+    using T = TypeParam;
     matrix<T> a(30,30);
     fill_matrix_with_numbers(a);
 
@@ -809,11 +837,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( transpose_inplace_squared_test, T, test_types )
 
     for(unsigned int j=0; j < num_cols(a); ++j)
         for(unsigned int i=0; i < num_rows(a); ++i)
-            BOOST_CHECK_EQUAL(a(i,j),b(j,i));
+            EXPECT_EQ(a(i,j),b(j,i));
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( transpose_inplace_test, T, test_types )
+TYPED_TEST(Matrix, transpose_inplace_test)
 {
+    using T = TypeParam;
     matrix<T> a(30,10);
     fill_matrix_with_numbers(a);
 
@@ -823,7 +852,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( transpose_inplace_test, T, test_types )
 
     for(unsigned int j=0; j < num_cols(a); ++j)
         for(unsigned int i=0; i < num_rows(a); ++i)
-            BOOST_CHECK_EQUAL(a(i,j),b(j,i));
+            EXPECT_EQ(a(i,j),b(j,i));
 
     matrix<T> c(10,30);
     fill_matrix_with_numbers(c);
@@ -832,5 +861,5 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( transpose_inplace_test, T, test_types )
     transpose_inplace(d);
     for(unsigned int j=0; j < num_cols(c); ++j)
         for(unsigned int i=0; i < num_rows(c); ++i)
-            BOOST_CHECK_EQUAL(c(i,j),d(j,i));
+            EXPECT_EQ(c(i,j),d(j,i));
 }

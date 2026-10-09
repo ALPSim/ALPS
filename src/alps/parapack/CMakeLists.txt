@@ -70,3 +70,6 @@ target_sources(alps_headers INTERFACE
     include/alps/parapack/worker.h
     include/alps/parapack/worker_factory.h)
 
+if(ALPS_BUILD_TESTING)
+  add_subdirectory(tests)
+endif()

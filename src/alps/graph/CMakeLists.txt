@@ -19,3 +19,6 @@ target_sources(alps_headers INTERFACE
     include/alps/graph/utils.hpp
     include/alps/graph/vertices_of_cell.hpp)
 
+if(ALPS_BUILD_TESTING)
+  add_subdirectory(tests)
+endif()
