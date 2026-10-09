@@ -1,13 +1,18 @@
 # Build and generated directories
 /build/
 /_build/
+*.ppt
+*.pptx
+/doc/ALPSCore-reconciliation.md
 CMakeFiles/
 CMakeCache.txt
+CMakeUserPresets.json
+/CMakeUserFiles/
 cmake_install.cmake
 compile_commands.json
 
 # Lattice files the tutorials tell the reader to generate with build_lattice.py
-tutorials/dmrg-*/my_lattice.xml
+tutorials/04-dmrg/*/my_lattice.xml
 
 # Editors and operating systems
 .idea/
@@ -52,3 +57,17 @@ __pycache__/
 *.exe
 *.out
 *.app
+
+# Local contributor environments
+/.pixi/
+/.venv/
+
+# Python distribution artifacts
+/wheelhouse/
+/python/pyalps/dist/
+
+# Generated tutorial manual intermediates
+/tutorials/06-hybridization/hybdoc.aux
+/tutorials/06-hybridization/hybdoc.bbl
+/tutorials/06-hybridization/hybdoc.blg
+/tutorials/06-hybridization/hybdoc.log

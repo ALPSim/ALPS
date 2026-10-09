@@ -1,0 +1,258 @@
+name: Compatibility
+'on':
+  schedule:
+  - cron: 23 6 * * 1
+  workflow_dispatch: null
+  workflow_call: null
+permissions:
+  contents: read
+jobs:
+  minimum:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    env:
+      CC: gcc-11
+      CXX: g++-11
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: ./.github/actions/setup-native
+      with:
+        python: '3.11'
+        cmake: cmake==3.27.9
+    - name: Build the minimum supported Boost
+      env:
+        ALPS_BOOST_MPI: 'OFF'
+      run: |
+        python -m pip install numpy==1.26.0
+        python -m pytest tests/tutorials -q --junitxml=_build/ci/tutorial-floor.xml
+        python .github/scripts/prepare_dependencies.py boost-1.76.0 _build/boost-install
+        echo "CMAKE_PREFIX_PATH=$PWD/_build/boost-install" >> "$GITHUB_ENV"
+    - name: Build and test minimum supported dependencies
+      run: |
+        cmake --preset dev -B _build/ci \
+          -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
+          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF -DBoost_DIR="$PWD/_build/boost-install/lib/cmake/Boost-1.76.0"
+        cmake --build _build/ci
+        ctest --test-dir _build/ci --output-on-failure --output-junit ctest.xml --no-tests=error
+        cmake --install _build/ci
+        python -m pytest tests/cmake/test_sdk_contracts.py -q \
+          -k 'installed_sdk_preserves_parent_settings or relocated_sdk' --junitxml=_build/ci/sdk.xml
+    - name: Summarize tests
+      run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
+      if: always()
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      if: always()
+      with:
+        name: native-minimum
+        path: |
+          _build/ci/*.xml
+          _build/mpi/*.xml
+          _build/ci/Testing/Temporary/**
+  extensive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      CMAKE_BUILD_PARALLEL_LEVEL: 2
+      CC: gcc-14
+      CXX: g++-14
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: ./.github/actions/setup-native
+    - name: Install compatibility tools
+      run: sudo apt-get install -y gcc-14 g++-14 gfortran xsltproc
+    - name: Build and test extensive C++20 and OpenMP configuration
+      run: |
+        cmake --preset extensive -B _build/ci \
+          -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
+          -DCMAKE_CXX_STANDARD=20 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_OPENMP=ON -DALPS_ENABLE_MPI=OFF -DALPS_BUILD_APPLICATIONS=ON
+        cmake --build _build/ci
+        ctest --test-dir _build/ci --output-on-failure --output-junit ctest.xml --no-tests=error
+        cmake --install _build/ci
+    - name: Test editable bindings and installed SDK
+      run: bash .github/scripts/test-editable-bindings.sh
+    - name: Test installed XML tools after relocation
+      env:
+        ALPS_XML_BUILD: _build/ci
+      run: python -m pytest tests/cli -q --junitxml=_build/ci/cli.xml
+    - name: Build installed C, C++ and Fortran tutorials
+      run: |
+        cmake --install _build/ci
+        cmake --install _build/ci --component tutorials
+        tutorials="$PWD/_build/ci/install/share/alps/tutorials"
+        for source in "$tutorials/00-examples" "$tutorials/00-examples/fortran"; do
+          output="_build/consumers/${source#"$tutorials/"}"
+          cmake -S "$source" -B "$output" -G Ninja \
+            "-DALPS_DIR=$PWD/_build/ci/install/share/alps"
+          cmake --build "$output"
+          ctest --test-dir "$output" --output-on-failure --output-junit ctest.xml --no-tests=error
+        done
+        find "$tutorials" -mindepth 1 -path "$tutorials/00-examples" -prune -o -name CMakeLists.txt -print0 | while IFS= read -r -d '' file; do
+          source="${file%/CMakeLists.txt}"
+          # The root file installs tutorials; it is not a tutorial project.
+          if [[ "$source" == "$tutorials" ]]; then continue; fi
+          output="_build/consumers/${source#"$tutorials/"}"
+          cmake -S "$source" -B "$output" -G Ninja \
+            "-DALPS_DIR=$PWD/_build/ci/install/share/alps"
+          cmake --build "$output"
+          ctest --test-dir "$output" --output-on-failure --output-junit ctest.xml
+        done
+    - name: Summarize tests
+      run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
+      if: always()
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      if: always()
+      with:
+        name: native-extensive
+        path: |
+          _build/ci/*.xml
+          _build/mpi/*.xml
+          _build/ci/Testing/Temporary/**
+  cxx23:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      CC: gcc-14
+      CXX: g++-14
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: ./.github/actions/setup-native
+    - name: Install GCC 14
+      run: sudo apt-get install -y gcc-14 g++-14
+    - name: Build and test C++23
+      run: |
+        cmake --preset dev -B _build/ci \
+          -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
+          -DCMAKE_CXX_STANDARD=23 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF
+        cmake --build _build/ci
+        ctest --test-dir _build/ci --output-on-failure --output-junit ctest.xml --no-tests=error
+    - name: Summarize tests
+      run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
+      if: always()
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      if: always()
+      with:
+        name: native-cxx23
+        path: |
+          _build/ci/*.xml
+          _build/mpi/*.xml
+          _build/ci/Testing/Temporary/**
+  mpi-python:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      CC: clang-18
+      CXX: clang++-18
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: ./.github/actions/setup-native
+      with:
+        python: '3.14'
+    - name: Install MPI and Clang
+      run: |
+        sudo apt-get install -y clang-18 libopenmpi-dev openmpi-bin
+        python -m pip install mpi4py
+    - name: Build MPI-enabled SDK and applications
+      run: |
+        cmake --preset distribution -B _build/ci \
+          -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
+          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=ON
+        cmake --build _build/ci
+        cmake --install _build/ci
+    - name: Test editable bindings and installed SDK
+      run: bash .github/scripts/test-editable-bindings.sh
+    - name: Test Python MPI communication
+      run: |
+        python .github/scripts/run_with_timeout.py 300 mpiexec --oversubscribe -n 2 \
+          python .github/scripts/run_mpi_pytest.py --ranks 2 --output _build/mpi \
+          python/pyalps/tests/test_binding_surface.py::test_mpi4py_compatibility_surface python/pyalps/tests/test_mpi_requests.py
+    - name: Summarize tests
+      run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
+      if: always()
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      if: always()
+      with:
+        name: native-mpi-python
+        path: |
+          _build/ci/*.xml
+          _build/mpi/*.xml
+          _build/ci/Testing/Temporary/**
+  macos:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    env:
+      CMAKE_BUILD_PARALLEL_LEVEL: 2
+      CC: clang
+      CXX: clang++
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: ./.github/actions/setup-native
+    - name: Build and validate the installed SDK
+      run: |
+        cmake --preset sdk -B _build/ci \
+          -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
+          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF
+        cmake --build _build/ci
+        cmake --install _build/ci
+        python -m pytest tests/cmake/test_sdk_contracts.py -q \
+          -k 'installed_sdk_preserves_parent_settings or relocated_sdk' --junitxml=_build/ci/sdk.xml
+    - name: Summarize tests
+      run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
+      if: always()
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      if: always()
+      with:
+        name: native-${{ matrix.os }}
+        path: |
+          _build/ci/*.xml
+          _build/mpi/*.xml
+          _build/ci/Testing/Temporary/**
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+        - macos-26
+        - macos-15-intel
+  packaging:
+    uses: ./.github/workflows/_wheels.yml
+    with:
+      full: true
+  status:
+    name: Compatibility
+    if: always()
+    needs:
+    - minimum
+    - extensive
+    - cxx23
+    - mpi-python
+    - macos
+    - packaging
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+    - env:
+        RESULTS: ${{ toJSON(needs) }}
+      run: |
+        python - <<'CODE'
+        import json, os
+        results = json.loads(os.environ['RESULTS'])
+        assert all(job['result'] == 'success' for job in results.values()), results
+        CODE
+defaults:
+  run:
+    shell: bash
+env:
+  CMAKE_BUILD_PARALLEL_LEVEL: 4
+  CTEST_PARALLEL_LEVEL: 2
+  CMAKE_GENERATOR: Ninja
+  ALPS_DIR: ${{ github.workspace }}/_build/ci/install/share/alps
+  PIP_ONLY_BINARY: ':all:'

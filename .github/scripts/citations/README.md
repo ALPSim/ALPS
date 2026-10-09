@@ -49,7 +49,7 @@ derived files; stale data stops configuration with the regeneration command.
 A source change also triggers this check on the next incremental build. This
 prevents a modified catalog from silently compiling yesterday's recommendations.
 
-Generated C++ data is compiled into libalps; execution needs no data-file lookup
+Generated C++ data is compiled into the utilities component (`ALPS::utilities`); execution needs no data-file lookup
 or network access. Updating an installed catalog does not alter a binary.
 
 Python, PyYAML, and jsonschema are catalog-maintenance and validation tools, not
@@ -59,7 +59,7 @@ regeneration works offline. Optional citation tests use
 is absent. The generated directory is marked as derived for GitHub diff display,
 so scientific review can focus on the authority files and readable matrix.
 
-Native and library-only installations include the authorities and generated guidance
+Native and SDK-only installations include the authorities and generated guidance
 in `share/alps`; wheels include them in `pyalps/share/alps`. The standalone pyalps
 source distribution uses the catalog installed with its linked C++ SDK. Native ALPS source archives must retain the two authorities, generator,
 schemas, and generated directory. Website maintainers
@@ -126,7 +126,10 @@ is accepted; in MPI builds, rank zero prints the query result even when `--mpi` 
 omitted. Mixing queries or adding calculation arguments is rejected. `--` ends option
 recognition. Ordinary parsing failures do not print a citation notice.
 
-New entry points should use `alps::handle_cli_information` before reading input.
+New entry points should use `alps::handle_cli_information` from `ALPS::cli` before reading input.
+The query helpers retain the `<alps/utility/cli.hpp>` public include. CT-HYB and
+CT-INT choose their profiles in the CLI wrappers and print startup notices in the
+shared SDK solver implementations, so Python calls receive the same guidance.
 The helper owns MPI initialization only when needed and preserves MPI owned by its
 caller. The scheduler, mcoptions, and both parapack implementations use this helper.
 `start_single` also accepts an explicit component key; its original overload defaults

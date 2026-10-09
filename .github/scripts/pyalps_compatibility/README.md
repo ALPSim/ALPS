@@ -11,7 +11,7 @@ Install a wheel in an environment containing NumPy, SciPy, and pytest. From
 the repository root run:
 
 ```sh
-python .github/scripts/validate_pyalps.py --output _build/validation --wheelhouse wheelhouse
+python .github/scripts/pyalps_compatibility/validate_pyalps.py --output _build/validation --wheelhouse wheelhouse
 ```
 
 The output contains a JUnit report, test log, source revision and dirty-file
@@ -69,7 +69,7 @@ build is a one-time local prerequisite, not an additional CI job.
 Then run from the PR checkout, using the new-wheel environment's Python:
 
 ```sh
-python .github/scripts/validate_pyalps.py --output _build/compatibility \
+python .github/scripts/pyalps_compatibility/validate_pyalps.py --output _build/compatibility \
   --legacy-python "$LEGACY_PYTHON" \
   --legacy-modules "$LEGACY_BUILD/lib/pyalps"
 ```
@@ -134,9 +134,4 @@ mpiexec -n 2 python -m pytest -q \
   python/pyalps/tests/test_mpi_requests.py
 ```
 
-The native-only parameter loader still has an inherited limitation: unsupported
-numeric storage types such as a standalone int64 or float32 dataset can leave
-the default value at zero. Python-owned parameter loading uses a different
-decoder. The migration evidence must not be read as a blanket claim that every
-native checkpoint dtype is handled. This issue is separate from the repaired
-rectangular-table regression.
+The native checkpoint limitations recorded in the original audit are addressed by the separately extracted checkpoint-decoding change. Preserve the historical audit inputs when comparing old builds.
