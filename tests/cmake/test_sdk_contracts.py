@@ -172,3 +172,25 @@ def test_relocated_sdk(tmp_path):
     environment["PATH"] = (str(Path(os.environ["SystemRoot"]) / "System32")
                            if os.name == "nt" else "/usr/bin:/bin")
     build_and_run(build, environment=environment)
+
+
+def test_installed_sdk_preserves_public_headers():
+    prefix = Path(os.environ["ALPS_DIR"]).resolve().parents[1]
+    baseline = json.loads(Path(__file__).with_name("preserved_public_headers.json").read_text())
+    missing = [name for name in baseline["headers"] if not (prefix / "include" / name).is_file()]
+    assert not missing, f"Public headers lost from {baseline['source_commit']}: {missing}"
+
+
+def test_legacy_cmake_consumer(tmp_path):
+    (tmp_path / "main.cpp").write_text(
+        '#include <alps/utility/os.hpp>\nint main() { return alps::hostname().empty(); }\n')
+    (tmp_path / "CMakeLists.txt").write_text(
+        'cmake_minimum_required(VERSION 3.27)\nproject(legacy LANGUAGES C CXX)\n'
+        'find_package(ALPS CONFIG REQUIRED)\ninclude(${ALPS_USE_FILE})\n'
+        'add_executable(legacy main.cpp)\nenable_testing()\n'
+        'add_test(NAME legacy COMMAND legacy)\n')
+    build = tmp_path / "build"
+    subprocess.run(["cmake", "-S", str(tmp_path), "-B", str(build),
+        "-DCMAKE_BUILD_TYPE=Release", "-DALPS_DIR=" + os.environ["ALPS_DIR"],
+        *json.loads(os.environ.get("ALPS_TEST_CMAKE_ARGS", "[]"))], check=True)
+    build_and_run(build)

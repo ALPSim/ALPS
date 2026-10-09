@@ -65,6 +65,15 @@ function(alps_target_link_pyalps target)
     RESULT_VARIABLE _pyalps_location_result
     ERROR_QUIET)
 
+  # Editable installations keep runtime resources outside the live Python source.
+  execute_process(COMMAND "${PYALPS_PYTHON_EXECUTABLE}" -c
+    "from pyalps_cli import runtime_directory; print(runtime_directory())"
+    OUTPUT_VARIABLE _pyalps_runtime_dir OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE _pyalps_runtime_result ERROR_QUIET)
+  if(_pyalps_runtime_result EQUAL 0 AND EXISTS "${_pyalps_runtime_dir}/cmake/pyalpsConfig.cmake")
+    set(_pyalps_package_dir "${_pyalps_runtime_dir}")
+  endif()
+
   if(_pyalps_location_result EQUAL 0 AND _pyalps_package_dir)
     if(EXISTS "${_pyalps_package_dir}/cmake/pyalpsConfig.cmake")
       find_package(pyalps CONFIG REQUIRED PATHS "${_pyalps_package_dir}/cmake" NO_DEFAULT_PATH)
