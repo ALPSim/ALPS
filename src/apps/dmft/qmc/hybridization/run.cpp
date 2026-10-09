@@ -64,15 +64,8 @@ void alps::solvers::cthyb(alps::params const& parms, std::string const& output_f
   sim_type s(parms, c);
 #endif
   if (global_mpi_rank==0) {
-    alps::print_copyright(std::cout);
-    std::cout << "****************************************************************"<<std::endl;
-    std::cout << "* Recommended citation in scientific publications:             *"<<std::endl;
-    std::cout << "* We used the ALPS [1] implementation [2] of the `segment'     *"<<std::endl;
-    std::cout << "* CT-QMC solver [3,4,5].                                       *"<<std::endl;
-    std::cout << "* [1] JSTAT (2011) P05001; [2] CPC 182, 1078 (2011);           *"<<std::endl;
-    std::cout << "* [3] PRL 97, 076405 (2006); [4] RMP 83, 349 (2011);           *"<<std::endl;
-    std::cout << "* [5] PRB 84, 075145 (2011).                                   *"<<std::endl;
-    std::cout << "****************************************************************"<<std::endl;
+    alps::print_copyright(std::cout, "hybridization");
+    std::cout << std::flush;
   }
   //run the simulation
   s.run(boost::bind(&stop_requested, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds((int)parms["MAX_TIME"])));

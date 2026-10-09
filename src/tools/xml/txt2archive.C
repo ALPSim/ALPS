@@ -16,12 +16,14 @@
 #include <boost/program_options.hpp>
 #include <fstream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 namespace po = boost::program_options;
 using namespace alps;
 
 int main(int argc, char** argv) {
+  try {
 
   po::options_description desc("Required/allowed options");
   desc.add_options()
@@ -51,11 +53,12 @@ int main(int argc, char** argv) {
 
   // read from file
   std::ifstream is(vm["input-file"].as<std::string>().c_str());
+  if (!is) throw std::runtime_error("Cannot open input text file");
   bool with_error = vm.count("with-error");
 
   // output to Archive XML
   std::string xaxis = vm["xaxis"].as<std::string>();
-  std::string yaxis = vm["xaxis"].as<std::string>();
+  std::string yaxis = vm["yaxis"].as<std::string>();
 
   oxstream os(std::cout);
   os << header("UTF-8");
@@ -75,13 +78,14 @@ int main(int argc, char** argv) {
 
   std::string str;
   int id = 0;
-  while (std::getline(is, str) && str.size()) {
+  while (std::getline(is, str)) {
+    if (str.find_first_not_of(" \t\r") == std::string::npos) continue;
     std::istringstream iss(str);
     double x, y, dy;
     if (with_error) {
-      iss >> x >> y >> dy;
+      if (!(iss >> x >> y >> dy)) throw std::runtime_error("Expected x, y and error in input row");
     } else {
-      iss >> x >> y;
+      if (!(iss >> x >> y)) throw std::runtime_error("Expected x and y in input row");
     }
     os << start_tag("SIMULATION");
     os << attribute("id", ++id);
@@ -105,4 +109,8 @@ int main(int argc, char** argv) {
 
 
   os << end_tag("ARCHIVE");
+  } catch (std::exception const& error) {
+    std::cerr << "txt2archive: " << error.what() << '\n';
+    return 1;
+  }
 }

@@ -6,6 +6,7 @@
 #include <complex>
 #include <cstdio>
 #include <iostream>
+#include <limits>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -45,6 +46,41 @@ void unsupported_type(alps::hdf5::archive& archive, std::string const& name, T v
     archive.set_context(array_path);
     rejects_storage([&] { existing.load(archive); }, array_path, false);
     require(existing.cast<int>() == 23, "Failed array load changed the existing value");
+}
+
+template<class T>
+void integer_storage(alps::hdf5::archive& archive, std::string const& name) {
+    const std::string path = "/integers/" + name;
+    archive[path] << T(42);
+    archive.set_context(path);
+    alps::detail::paramvalue loaded;
+    loaded.load(archive);
+    require(loaded.cast<int>() == 42, "Stored integer width changed its value");
+    archive[path + "_array"] << std::vector<T>{T(0), T(42)};
+    archive.set_context(path + "_array");
+    loaded.load(archive);
+    require(loaded.cast<std::vector<int>>() == std::vector<int>({0, 42}),
+            "Stored integer array width changed its values");
+}
+
+void integer_overflow(alps::hdf5::archive& archive) {
+    for (bool array : {false, true}) {
+        const std::string path = array ? "/overflow/array" : "/overflow/scalar";
+        const auto too_large = static_cast<unsigned long long>(std::numeric_limits<int>::max()) + 1;
+        if (array) archive[path] << std::vector<unsigned long long>{42, too_large};
+        else archive[path] << too_large;
+        archive.set_context(path);
+        alps::detail::paramvalue existing(23);
+        bool rejected = false;
+        try { existing.load(archive); }
+        catch (std::overflow_error const& error) {
+            rejected = true;
+            require(std::string(error.what()).find(path) != std::string::npos,
+                    "Overflow diagnostic lost its dataset path");
+        }
+        require(rejected && existing.cast<int>() == 23,
+                "Overflow must reject the value without changing existing data");
+    }
 }
 
 template<class T>
@@ -135,12 +171,15 @@ int main() {
             alps::hdf5::archive archive(filename, "w");
             supported_checkpoint(archive);
             unsupported_type(archive, "float", 1.25F);
-            unsupported_type(archive, "unsigned", 42U);
-            if (sizeof(long long) > sizeof(int))
-                unsupported_type(archive, "wide_integer", 1099511627776LL);
-            // On LLP64 systems, native long has int's storage and remains supported.
-            if (sizeof(long) > sizeof(int))
-                unsupported_type(archive, "native_long", static_cast<long>(1099511627776LL));
+            integer_storage<unsigned char>(archive, "unsigned_byte");
+            integer_storage<short>(archive, "short");
+            integer_storage<unsigned short>(archive, "unsigned_short");
+            integer_storage<unsigned int>(archive, "unsigned");
+            integer_storage<long>(archive, "long");
+            integer_storage<unsigned long>(archive, "unsigned_long");
+            integer_storage<long long>(archive, "long_long");
+            integer_storage<unsigned long long>(archive, "unsigned_long_long");
+            integer_overflow(archive);
             transactional_reload(archive);
             custom_reader(archive);
         }

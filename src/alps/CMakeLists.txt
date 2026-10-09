@@ -128,14 +128,14 @@ target_sources(alps_configuration INTERFACE
 # contribute to libalps until their dependency cycles have been disentangled.
 foreach(module IN ITEMS containers utilities cli numerics ietl solvers xml plotting
                         legacy_parameters expression graph lattice model random
-                        osiris hdf5 numeric_io params alea accumulators mc scheduler parapack fortran)
+                        osiris hdf5 numeric_io numeric_xml params alea accumulators mc scheduler parapack fortran)
   add_subdirectory(${module})
 endforeach()
 target_link_libraries(alps PUBLIC ALPS::utilities ALPS::osiris ALPS::hdf5 ALPS::params
                                   ALPS::xml ALPS::cli)
 
 target_link_libraries(alps_headers INTERFACE alps_configuration
-  "$<COMPILE_ONLY:ALPS::utilities;ALPS::osiris;ALPS::hdf5;ALPS::params;ALPS::xml;ALPS::cli;ALPS::numerics;ALPS::numeric_io;ALPS::solver_headers>")
+  "$<COMPILE_ONLY:ALPS::utilities;ALPS::osiris;ALPS::hdf5;ALPS::params;ALPS::xml;ALPS::cli;ALPS::numerics;ALPS::numeric_io;ALPS::numeric_xml;ALPS::solver_headers>")
 if(ALPS_ENABLE_OPENMP)
   target_link_libraries(alps_headers INTERFACE "$<COMPILE_ONLY:OpenMP::OpenMP_CXX>")
 endif()
@@ -144,7 +144,7 @@ endif()
 # runtime targets from it, so adding a module here is the only edit needed.
 set(ALPS_SDK_TARGETS alps alps_utilities alps_hdf5 alps_params alps_osiris
                      alps_xml alps_cli alps_headers alps_configuration
-                     alps_containers alps_numerics alps_numeric_io alps_solver_headers)
+                     alps_containers alps_numerics alps_numeric_io alps_numeric_xml alps_solver_headers)
 set(sdk_components "")
 set(sdk_runtime_targets "")
 foreach(target IN LISTS ALPS_SDK_TARGETS ITEMS alps_fortran)

@@ -1,0 +1,37 @@
+#!/bin/sh
+
+DEVELOPER_SIGNATURE="@ALPS_DEVELOPER_ID@"
+PACKAGE_NAME="@CPACK_PACKAGE_FILE_NAME@"
+COMPONENTS_ALL="@CPACK_COMPONENTS_ALL_STR@"
+IDENTIFIER="@PACK_IDENTIFIER@"
+CPACK_TOPLEVEL_TAG="@CPACK_TOPLEVEL_TAG@"
+
+## Build all targets groupped by component
+cpack -V -G TGZ -D CPACK_COMPONENTS_GROUPING=IGNORE -D CPACK_ARCHIVE_COMPONENT_INSTALL=ON
+
+## Make .pkg for individual packages
+if [ -z "$COMPONENTS_ALL" ]; then
+    pkgbuild --root _CPack_Packages/$CPACK_TOPLEVEL_TAG/TGZ/$PACKAGE_NAME/$comp --identifier $IDENTIFIER $PACKAGE_NAME-default.pkg
+else
+    for comp in $COMPONENTS_ALL; do
+        pkgbuild --root _CPack_Packages/$CPACK_TOPLEVEL_TAG/TGZ/$PACKAGE_NAME/$comp --identifier $IDENTIFIER.$comp $PACKAGE_NAME-$comp.pkg
+    done
+fi
+
+## Make distribution package
+mkdir -p $PACKAGE_NAME
+if [ -z "$DEVELOPER_SIGNATURE" ]; then
+    productbuild --distribution ./Distribution.xml --package-path . \
+                 ./$PACKAGE_NAME/$PACKAGE_NAME.pkg
+else
+    productbuild --distribution ./Distribution.xml --package-path . \
+                 --sign "$DEVELOPER_SIGNATURE" \
+                 ./$PACKAGE_NAME/$PACKAGE_NAME.pkg
+fi
+
+## Prepare Disk image
+[ -f $PACKAGE_NAME.dmg ] && rm $PACKAGE_NAME.dmg
+hdiutil create $PACKAGE_NAME.dmg -volname "$PACKAGE_NAME" -srcfolder $PACKAGE_NAME
+# if [ ! -z "$DEVELOPER_SIGNATURE" ]; then
+#     codesign -s "$DEVELOPER_SIGNATURE" -v $PACKAGE_NAME.dmg
+# fi

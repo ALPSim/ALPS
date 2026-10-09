@@ -9,12 +9,12 @@ group; executable names and installation components remain stable.
 | `parameters/` | `parameter2xml`, `parameter2hdf5`, `p2h5` | None |
 | `lattice/` | `lattice2xml`, `printgraph` | `pltgraph.py` and historical local fixtures |
 | `scheduler/` | `convert2xml`, `compactrun`, `snap2vtk` | None |
-| `parapack/` | `pevaluate`, `poutput` | `xml2archive.C` |
+| `parapack/` | `pevaluate`, `poutput`, `xml2archive` | None |
 | `diagnostics/` | `pconfig` | None |
-| `xml/` | `alps-xml` on Unix | `txt2archive.C` and all historical shell wrappers |
-| `result_archive/` | None | SQLite-backed XML result indexing and plotting sources |
+| `xml/` | `alps-xml`, `txt2archive`, and historical shell wrappers | None |
+| `result_archive/` | Optional SQLite `archive` | None |
 | `alea/` | None | C++ and Python mean/variance analysis programs |
-| `launchers/` | None | Historical `alpspython` shell and Windows templates |
+| `launchers/` | `alpsvars.sh`, `alpsvars.csh`, Windows `msxsl.exe` | Historical `alpspython` templates |
 | `installer/` | None | Historical macOS postflight template |
 
 C++ commands install in the `tools` component; `alps-xml` installs in the `xml` component. `pconfig` links `ALPS::utilities`; the other C++ commands use `ALPS::alps`.

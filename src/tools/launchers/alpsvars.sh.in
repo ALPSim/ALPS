@@ -1,0 +1,26 @@
+#!/bin/sh
+#  Copyright Synge Todo 2013-2014.
+#  Distributed under the Boost Software License, Version 1.0.
+#    (See accompanying file LICENSE_1_0.txt or copy at
+#     http://www.boost.org/LICENSE_1_0.txt)
+
+ALPS_HOME="@CMAKE_INSTALL_PREFIX@"; export ALPS_HOME
+ALPS_ROOT="@CMAKE_INSTALL_PREFIX@"; export ALPS_ROOT
+
+if test -z "${PATH}"; then
+    PATH="${ALPS_HOME}/bin"; export PATH
+else
+    PATH="${ALPS_HOME}/bin:${PATH}"; export PATH
+fi
+
+if test -z "${LD_LIBRARY_PATH}"; then
+    LD_LIBRARY_PATH="${ALPS_HOME}/lib"; export LD_LIBRARY_PATH
+else
+    LD_LIBRARY_PATH="${ALPS_HOME}/lib:${LD_LIBRARY_PATH}"; export LD_LIBRARY_PATH
+fi
+
+if test -z "${PYTHONPATH}"; then
+    PYTHONPATH="${ALPS_HOME}/lib"; export PYTHONPATH
+else
+    PYTHONPATH="${ALPS_HOME}/lib:${PYTHONPATH}"; export PYTHONPATH
+fi

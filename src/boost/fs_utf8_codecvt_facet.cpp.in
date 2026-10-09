@@ -1,0 +1,7 @@
+#undef FS_UTF8_CODECVT_FACET_CPP
+
+#ifdef FS_UTF8_CODECVT_FACET_CPP
+# include FS_UTF8_CODECVT_FACET_CPP
+#else
+# error "FS_UTF8_CODECVT_FACET_CPP not defined"
+#endif

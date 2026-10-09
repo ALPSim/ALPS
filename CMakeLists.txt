@@ -57,6 +57,7 @@ include(cmake/ALPSBuildConcurrency.cmake)
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
+include(cmake/ALPSCitations.cmake)
 
 # A local default must not change later add_library() calls in a parent project.
 if(NOT DEFINED BUILD_SHARED_LIBS)
@@ -203,3 +204,9 @@ install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
   DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)
 install(DIRECTORY ${CMAKE_INSTALL_SYSTEM_RUNTIME_DIRECTORIES}
   DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)
+
+# Keep the legacy consumer helpers available; removal is a separate change.
+install(FILES cmake/UseALPS.cmake cmake/UsePyALPS.cmake
+              cmake/add_alps_test.cmake cmake/run_test.cmake cmake/run_test_mpi.cmake
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/alps COMPONENT build)
+include(cmake/ALPSLegacy.cmake)

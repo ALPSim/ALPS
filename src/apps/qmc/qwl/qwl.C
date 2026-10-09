@@ -19,7 +19,7 @@ int main(int argc, char** argv)
 #ifndef BOOST_NO_EXCEPTIONS
   try {
 #endif
-   return alps::scheduler::start(argc,argv,QWL_SSE_Factory());
+   return alps::scheduler::start(argc,argv,QWL_SSE_Factory(), "qwl");
 #ifndef BOOST_NO_EXCEPTIONS
   }
   catch (std::exception& exc) {

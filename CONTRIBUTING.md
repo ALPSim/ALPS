@@ -5,6 +5,7 @@ Bug reports, documentation, tests and new simulation methods are welcome. To use
 - [Getting started with the code](#getting-started-with-the-code)
 - [Run the tests](#run-the-tests)
 - [Making a change](#making-a-change)
+- [Provenance and scientific credit](#provenance-and-scientific-credit)
 - [Build reference](#build-reference)
 - [CI coverage](#ci-coverage)
 - [Preparing a release](#preparing-a-release)
@@ -74,6 +75,16 @@ Skip the first two lines if already using a suitable environment. On Debian/Ubun
 Application tests require a Python ≥ 3.10 interpreter; MaxEnt reference tests also require NumPy and h5py. CMake and Ninja can also come from system packages or [official CMake binaries](https://cmake.org/download/). A generator other than Ninja can be selected with a plain CMake invocation instead of a preset.
 
 ### Build
+
+Citation metadata and application rules live in `CITATION.cff` and `CITATIONS.yaml`.
+See [citation maintenance](.github/scripts/citations/README.md) for generation and validation.
+Native builds use checked-in generated citation data and do not require Python.
+Editing that data requires Python ≥ 3.9 with `PyYAML` and `jsonschema`:
+`python -m pip install -r .github/scripts/citations/requirements.txt`, then
+`python .github/scripts/generate_citations.py --regenerate`. Commit the generated files
+alongside the authorities; CI checks that they agree. For the optional citation
+tests, select an interpreter with `-DALPS_CITATION_PYTHON=/path/to/python`.
+
 
 Build, test and install the shared SDK and applications:
 
@@ -170,6 +181,35 @@ Open a pull request against `ALPSim/ALPS:master`. Explain the problem, resulting
 
 For development questions, use [Discord](https://discord.gg/JRNWnnva9g); reproducible bugs belong in the [issue tracker](https://github.com/ALPSim/ALPS/issues).
 
+## Provenance and scientific credit
+
+These expectations apply to human and AI-assisted contributions alike. Record
+provenance while making the change, when the sources are known.
+
+- When copying, translating, or substantially adapting external code, add a
+  comment near the affected code identifying the upstream project, source file,
+  and version or commit where available. Describe the relationship accurately
+  (for example, copied, translated, or adapted).
+- Preserve existing copyright and license notices, and include any required
+  upstream license text with third-party material. Identify that material and
+  its terms in the pull request for maintainer review. Flag uncertain provenance
+  or licensing before merge; do not assume that ALPS's MIT license replaces
+  upstream terms.
+- Credit the original method papers and upstream implementations that a new or
+  changed component builds on. Update bibliographic records in
+  [CITATION.cff](CITATION.cff) and the relevant component mappings in
+  [CITATIONS.yaml](CITATIONS.yaml) in the same pull request, following the
+  [citation maintenance instructions](.github/scripts/citations/README.md). Scientific
+  credit is separate from license compliance; references should be relevant to
+  the affected component.
+- Do not invent attribution or claim independent implementation without
+  evidence. State what is known and flag gaps for review.
+
+Maintainers review provenance and citation changes as part of normal pull
+request review.
+
+---
+
 ## Build reference
 
 ### Repository layout
@@ -224,7 +264,7 @@ find_package(ALPS CONFIG REQUIRED COMPONENTS numeric_io)
 target_link_libraries(my_simulation PRIVATE ALPS::numeric_io)
 ```
 
-`<alps/numeric/matrix.hpp>` no longer includes its HDF5 adapter automatically. See the [migration notes](CHANGELOG.md#removed-and-migration) for this include requirement and the removal of matrix XML output methods in 3.0.
+`<alps/numeric/matrix.hpp>` no longer includes its HDF5 adapter automatically. See the [migration notes](CHANGELOG.md#migration) for this include requirement and the `<alps/xml/matrix.hpp>` adapter retaining matrix XML output.
 
 An SDK built with applications also exports executable targets such as `ALPS::spinmc` and the solver libraries `ALPS::maxent`, `ALPS::cthyb` and `ALPS::ctint`. Require them with `find_package(ALPS CONFIG REQUIRED COMPONENTS applications solvers)`. The solver API is in `<alps/solvers.hpp>`. Python extensions that share ALPS objects with pyalps use its separate [downstream CMake package](python/pyalps/README.md#downstream-native-extensions).
 

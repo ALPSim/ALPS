@@ -19,11 +19,11 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - Support editable Python development against an installed SDK, with packaged native runtime resources and explicit downstream ABI checks. Redistributable wheels bundle native dependencies through platform repair and are tested after installation on fresh runners.
 - Organize tutorials into numbered topic directories, with introductory scripts directly in `tutorials/01-intro/`. `tutorials/00-examples/` is an independent API reference collection. Tutorial sources are installed only when the `tutorials` component is requested. See the [tutorial index](tutorials/README.md).
 
-### Removed and migration
+### Migration
 
-The old build interfaces are removed without compatibility aliases. Reconfigure existing build scripts and downstream projects using [CONTRIBUTING.md](CONTRIBUTING.md#getting-started-with-the-code).
+The existing native test framework, public and vendored headers, legacy helper sources, and differential audit tooling are retained. `UseALPS.cmake` remains an installed compatibility entry point backed by exported targets. Configure new downstream projects using [CONTRIBUTING.md](CONTRIBUTING.md#getting-started-with-the-code).
 
-Numerical matrix/vector persistence now requires an explicit adapter: include `<alps/hdf5/matrix.hpp>` or `<alps/hdf5/numeric_vector.hpp>` and link `ALPS::numeric_io`. The matrix umbrella `<alps/numeric/matrix.hpp>` no longer includes HDF5 automatically. Diagonal matrices and deprecated BLAS matrix/vector classes retain their archive `save`/`load` members without requiring HDF5 headers in the numerical interfaces. Numerical matrix `write_xml` and XML insertion overloads are removed in 3.0 to keep numerical interfaces independent of XML; callers must handle XML output explicitly. Header ownership moves preserve public include spellings, but the explicit adapter requirement and XML method removals are source API changes.
+Numerical matrix/vector persistence now requires an explicit adapter: include `<alps/hdf5/matrix.hpp>` or `<alps/hdf5/numeric_vector.hpp>` and link `ALPS::numeric_io`. The matrix umbrella `<alps/numeric/matrix.hpp>` no longer includes HDF5 automatically. Diagonal matrices and deprecated BLAS matrix/vector classes retain their archive `save`/`load` members without requiring HDF5 headers in the numerical interfaces. Numerical matrix `write_xml` and XML insertion remain available through `<alps/xml/matrix.hpp>` and `ALPS::numeric_xml`. Header ownership moves preserve public include spellings; consumers of persistence and XML output must include the corresponding adapters.
 
 | Previous interface or location | Replacement |
 | --- | --- |
@@ -38,9 +38,9 @@ Numerical matrix/vector persistence now requires an explicit adapter: include `<
 | `PYALPS_BUILD_APPLICATIONS` | `PYALPS_BUILD_SOLVERS`; `PYALPS_BUNDLE_APPLICATIONS` still controls bundled executables separately |
 | `ALPS_USE_SYSTEM_BOOST`, `Boost_ROOT_DIR` / bundled Boost discovery | External Boost packages are always required; locate them through `Boost_ROOT` or `CMAKE_PREFIX_PATH` |
 | `LAPACK_64_BIT`, alternate `BIND_FORTRAN_*` ABIs | Use LP64 BLAS/LAPACK with lowercase, trailing-underscore symbols |
-| `UseALPS.cmake`, `include.mk`, `alpsvars` scripts | Imported SDK targets and explicit installation paths; add the installed `bin` directory to `PATH` |
+| `UseALPS.cmake`, `include.mk`, `alpsvars` scripts | Retained; exported SDK targets are recommended for new CMake consumers |
 | `UsePyALPS.cmake`, `<alps/ngs/detail/export_sim_to_python.hpp>` | [pyalps downstream CMake package](python/pyalps/README.md#downstream-native-extensions) and `<pyalps/export_simulation.hpp>` |
-| `plot2*`, `convert2html`, `convert2text`, `extract*` shell tools | `alps-xml plot`, `alps-xml convert`, `alps-xml extract`; see [XML tools](CONTRIBUTING.md#xml-resources-and-tools) for formats and dependencies |
+| Historical XML shell tools | Retained alongside `alps-xml`; see [XML tools](CONTRIBUTING.md#xml-resources-and-tools) |
 | Top-level `import mpi` compatibility module | `import pyalps.mpi`; install the `mpi` extra for mpi4py |
 | `applications/`, `tool/`, `test/`, `example/` | `src/apps/`, `src/tools/`, `tests/`, `tutorials/00-examples/` |
 | Loose subsystem trees and transitional `src/alps/{common,runtime}/` | Semantic `src/alps/<module>/{include,src,tests}` ownership; see the [module map](src/alps/README.md#source-ownership) |
@@ -52,6 +52,10 @@ Numerical matrix/vector persistence now requires an explicit adapter: include `<
 | Root `ALPS_VERSION.txt` | `cmake/ALPS_VERSION.txt`, still shared by the SDK and Python package |
 
 ### Fixed
+
+- Initialize Monte Carlo completion scheduling before first use.
+- Read integer checkpoint parameters at their stored width and reject out-of-range conversion without changing existing values.
+- Preserve `txt2archive`, `xml2archive`, and the optional SQLite `archive` program; correct malformed-input handling.
 
 - Report MaxEnt CLI help and input errors with normal exit codes instead of continuing into an empty input or aborting on an exception. Valid scientific runs are unchanged.
 - Reject unsupported native C++ parameter checkpoint datatypes with the dataset path in the diagnostic, instead of silently substituting zero. Existing supported types and custom readers retain their decoding behavior; a failed parameter reload preserves the previous values.

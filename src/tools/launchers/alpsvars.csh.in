@@ -1,0 +1,26 @@
+#!/bin/tcsh
+#  Copyright Synge Todo 2013-2014.
+#  Distributed under the Boost Software License, Version 1.0.
+#    (See accompanying file LICENSE_1_0.txt or copy at
+#     http://www.boost.org/LICENSE_1_0.txt)
+
+setenv ALPS_HOME @CMAKE_INSTALL_PREFIX@
+setenv ALPS_ROOT @CMAKE_INSTALL_PREFIX@
+
+if !($?PATH) then
+    setenv PATH ${ALPS_HOME}/bin
+else
+    setenv PATH ${ALPS_HOME}/bin:${PATH}
+endif
+
+if !($?LD_LIBRARY_PATH) then
+    setenv LD_LIBRARY_PATH ${ALPS_HOME}/lib
+else
+    setenv LD_LIBRARY_PATH ${ALPS_HOME}/lib:${LD_LIBRARY_PATH}
+endif
+
+if !($?PYTHONPATH) then
+    setenv PYTHONPATH ${ALPS_HOME}/lib
+else
+    setenv PYTHONPATH ${ALPS_HOME}/lib:${PYTHONPATH}
+endif

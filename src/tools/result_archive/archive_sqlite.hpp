@@ -42,15 +42,15 @@ class SQLite {
 
                 /**
                  * Defaultconstructor
-                 * 
+                 *
                  * @param verbose If verbose ist true, the database says what's doing
                  */
                 SQLite(bool verbose = true): mDB(NULL), mCnt(0), mVerbose(verbose), timer(0) {}
 
                 /**
-                 * Constructor to initialize the database. If the Database given in filename not exist, a new database will 
+                 * Constructor to initialize the database. If the Database given in filename not exist, a new database will
                  * be created.
-                 * 
+                 *
                  * @param filename Path to the file that contains the database.
                  * @param verbose If verbose ist true, the database says what's doing
                  */
@@ -58,28 +58,28 @@ class SQLite {
 
                 /**
                  * Sets the verbosemode of the Database.
-                 * 
+                 *
                  * @param verbose If verbose ist true, the database says what's doing
                  */
                 void setVerbose(bool verbose = true) { mVerbose = verbose; }
 
                 /**
                  * Return the last Errormessage of the Database. If no Error accures a empty String will be returned.
-                 * 
+                 *
                  * @return Last errormsg of the database
                  */
                 std::string getErrorMsg();
 
                 /**
                  * Open the database and starts the transaction. If the File not exist, a new Database will be created.
-                 * 
+                 *
                  * @param filename Path to the database file.
                  */
             void open(fs::path filename);
 
                 /**
                  * Close the database and commit or rollback the transaction
-                 * 
+                 *
                  * @param commit Commit on true, rollback on false
                  */
             void close(bool commit);
@@ -97,7 +97,7 @@ class SQLite {
 
                 /**
                  * Replace all ' by &apos; to avoid problems in queries.
-                 * 
+                 *
                  * @param str String to Quote
                  * @return Quoted string
                  */
@@ -105,7 +105,7 @@ class SQLite {
 
                 /**
                  * Replace all &apos; by ' make results von database readable.
-                 * 
+                 *
                  * @param str String to be unquoted
                  * @return Unquoted string
                  */
@@ -113,7 +113,7 @@ class SQLite {
 
                 /**
                  * Send a Query to the database. The Result is saved as list<name => value>
-                 * 
+                 *
                  * @param query Query to send to the database
                  * @return Results of the query
                  */
@@ -122,7 +122,7 @@ class SQLite {
                 /**
                  * Send a Query to the database. The Result is saved as list<name => value>. If the Query fails,
                  * and throwError ist true an Error is thrown.
-                 * 
+                 *
                  * @param query Query to send to the database
                  * @param throwError days it an error should be thrown
                  * @return Results of the query

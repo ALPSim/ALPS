@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<installer-gui-script minSpecVersion="1.0">
+    <title>@CPACK_PACKAGE_NAME@</title>
+    <welcome file="@CPACK_RESOURCE_FILE_WELCOME@"/>
+    <readme file="@CPACK_RESOURCE_FILE_README@"/>
+    <license file="@CPACK_RESOURCE_FILE_LICENSE@"/>
+    <os-version min="@CPACK_OSX_PACKAGE_VERSION@" />
+    <options allow-external-scripts="no" customize="@PACK_CHOICE_OPTIONS@" rootVolumeOnly="true"></options>
+    <background file="@PACK_LOGO@" alignment="bottomleft" />
+
+<choices-outline>
+@CHOICES_OUTLINE@
+</choices-outline>
+
+@CHOICES@
+@PKGREFS@
+
+</installer-gui-script>
+

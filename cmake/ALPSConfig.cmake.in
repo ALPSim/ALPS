@@ -52,3 +52,12 @@ if("applications" IN_LIST ALPS_FIND_COMPONENTS AND @ALPS_BUILD_APPLICATIONS@
   set(ALPS_applications_FOUND TRUE)
 endif()
 check_required_components(ALPS)
+
+# Retain the legacy CMake entry points while consumers adopt exported targets.
+get_filename_component(ALPS_ROOT_DIR "${ALPS_DATA_DIR}/../.." ABSOLUTE)
+set(ALPS_USE_FILE "${CMAKE_CURRENT_LIST_DIR}/UseALPS.cmake")
+set(ALPS_PYTHON_USE_FILE "${CMAKE_CURRENT_LIST_DIR}/UsePyALPS.cmake")
+set(ALPS_LIBRARIES ALPS::alps)
+set(ALPS_FORTRAN_LIBRARIES ALPS::fortran)
+set(ALPS_INCLUDE_DIRS "${ALPS_ROOT_DIR}/@CMAKE_INSTALL_INCLUDEDIR@")
+set(ALPS_LIBRARY_DIRS "${ALPS_ROOT_DIR}/@CMAKE_INSTALL_LIBDIR@")

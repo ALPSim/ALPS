@@ -157,6 +157,10 @@ if(WIN32)
   install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION pyalps/bin)
 endif()
 
+# Bundle the catalog belonging to the linked SDK.
+install(FILES "${ALPS_DATA_DIR}/CITATION.cff" "${ALPS_DATA_DIR}/CITATIONS.yaml"
+              "${ALPS_DATA_DIR}/CITATION.md" DESTINATION pyalps/share/alps)
+
 # scikit-build owns Python sources. CMake owns native build and runtime resources.
 install(FILES _build_support/pyalpsConfig.cmake DESTINATION pyalps/cmake)
 install(FILES cpp/export_simulation.hpp DESTINATION pyalps/include/pyalps)

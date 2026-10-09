@@ -2,7 +2,7 @@ name: ALPS source CI
 
 on:
   push:
-    branches: [master]
+    branches: [master, WIP/sdk-python-preserve-legacy]
     tags: ['v*']
   pull_request:
     branches: [master]
@@ -43,11 +43,12 @@ jobs:
           echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  $RUNNER_TEMP/actionlint.tar.gz" | sha256sum --check
           tar -xzf "$RUNNER_TEMP/actionlint.tar.gz" -C "$RUNNER_TEMP" actionlint
           "$RUNNER_TEMP/actionlint" -color
-          shellcheck .github/scripts/*.sh
+          shellcheck .github/scripts/build-boost.sh
       - name: Test CI helpers
         run: |
-          python -m pip install pytest
-          python -m pytest tests/ci -q --junitxml=ci-tests.xml
+          python -m pip install -r .github/scripts/citations/requirements.txt pytest
+          python .github/scripts/generate_citations.py --check
+          python -m pytest tests/ci tests/packaging/test_citations.py -q --junitxml=ci-tests.xml
       - name: Summarize helper tests
         if: always()
         run: python .github/scripts/junit_summary.py ci-tests.xml
@@ -125,7 +126,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - name: Install CMake and test tools
-        run: python -m pip install "$CMAKE_REQUIREMENT" ninja pytest numpy h5py
+        run: python -m pip install "$CMAKE_REQUIREMENT" ninja pytest numpy h5py -r .github/scripts/citations/requirements.txt
       - name: Install Linux dependencies
         if: runner.os == 'Linux'
         timeout-minutes: 20
@@ -308,7 +309,7 @@ jobs:
           echo "CMAKE_PREFIX_PATH=$(brew --prefix boost):$(brew --prefix hdf5):$(brew --prefix openblas)" >> "$GITHUB_ENV"
       - name: Install Python build and test prerequisites
         run: |
-          python -m pip install 'cmake>=3.27' ninja 'scikit-build-core>=1.0' 'nanobind==2.15.0' build pytest numpy h5py
+          python -m pip install 'cmake>=3.27' ninja 'scikit-build-core>=1.0' 'nanobind==2.15.0' build pytest numpy h5py -r .github/scripts/citations/requirements.txt
           if [[ "$RUNNER_OS" == Linux ]]; then python -m pip install 'patchelf>=0.14'; fi
       - name: Build, test and install with CMake
         run: |

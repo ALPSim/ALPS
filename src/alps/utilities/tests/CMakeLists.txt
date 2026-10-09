@@ -17,7 +17,7 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-foreach(name vmusage bitops)
+foreach(name vmusage bitops citations)
   add_executable(${name} ${name}.cpp)
 
   target_link_libraries(${name} PRIVATE ALPS::utilities)

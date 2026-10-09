@@ -28,6 +28,8 @@ namespace alps {
         check_schedule(double tmin=60., double tmax=900.)
         :   min_check_(tmin)
         ,   max_check_(tmax)
+        ,   start_fraction_(0.)
+        ,   next_check_(duration::zero())
         {
         }
 
