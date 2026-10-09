@@ -15,6 +15,25 @@
 #include <gtest/gtest.h>
 #include <limits>
 
+// Includes signed and unsigned 32/64-bit domains from the original test.
+template <class T> class IntegerRangeBoundaries : public ::testing::Test {};
+using IntegerTypes = ::testing::Types<int, unsigned int, long long, unsigned long long>;
+TYPED_TEST_SUITE(IntegerRangeBoundaries, IntegerTypes);
+TYPED_TEST(IntegerRangeBoundaries, RejectsUnrepresentableSizeWithoutOverflow) {
+  using T = TypeParam;
+  const T low = (std::numeric_limits<T>::min)(), high = (std::numeric_limits<T>::max)();
+  const alps::integer_range<T> full(low, high), empty;
+  EXPECT_FALSE(full.empty());
+  EXPECT_TRUE(full.valid());
+  EXPECT_TRUE(empty.empty());
+  EXPECT_EQ(empty.size(), 0);
+  EXPECT_EQ(alps::integer_range<T>(low).size(), 1);
+  EXPECT_EQ(alps::integer_range<T>(high).size(), 1);
+  EXPECT_EQ(alps::integer_range<T>(0, high - 1).size(), high);
+  EXPECT_EQ(unify(full, full), full);
+  EXPECT_THROW(full.size(), std::overflow_error);
+}
+
 TEST(IntegerRange, ParsesSignedEndpointsAndExpressions) {
   alps::Parameters params;
   params["L"] = 4;

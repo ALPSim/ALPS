@@ -39,6 +39,14 @@ TEST(VectorValarrayConversion, VectorToValarrayPreservesSizeAndOrder)
         EXPECT_EQ(result[i], 10. - i) << "index " << i;
 }
 
+TEST(VectorValarrayConversion, EmptyContainersRemainEmpty)
+{
+    EXPECT_TRUE(alps::numeric::valarray2vector<double>(std::valarray<double>()).empty());
+    EXPECT_EQ(alps::numeric::vector2valarray<double>(std::vector<double>()).size(), 0u);
+    const auto converted = alps::numeric::vector2valarray<int, double>(std::vector<int>());
+    EXPECT_EQ(converted.size(), 0u);
+}
+
 TEST(VectorValarrayConversion, ConvertingElementTypePreservesSizeAndOrder)
 {
     const std::vector<int> source{3, -5, 8};

@@ -36,6 +36,7 @@ TEST(AleaMcdata2, HistoricalNumericalScenarios)
   alps_test::expect_estimate(c, {{4.5, 0.3, 5.00001e-10, 5.00001e-11}}, "c");
 
   alps_test::expect_estimate(+a, {{0.81, 0.1, 5.00001e-11, 5.00001e-11}}, "+a");
+  alps_test::expect_estimate(-a, {{-0.81, 0.1, 5.00001e-11, 5.00001e-11}}, "-a");
   alps_test::expect_estimate(abs(c), {{4.5, 0.3, 5.00001e-10, 5.00001e-11}}, "abs(c)");
 
   mcdata<double> e = a;
@@ -128,6 +129,7 @@ TEST(AleaMcdata2, VectorNumericalScenarios)
   std::vector<double> vec2(10,2.);
 
   alps_test::expect_uniform_estimate(+vecA, {0.81, 0.1, 5.00001e-11, 5.00001e-11}, "+vecA");
+  alps_test::expect_uniform_estimate((-vecA), {-0.81, 0.1, 5.00001e-11, 5.00001e-11}, "(-vecA)");
   alps_test::expect_uniform_estimate(abs(vecC), {4.5, 0.3, 5.00001e-10, 5.00001e-11}, "abs(vecC)");
 
   mcdata<std::vector<double> > vecE = vecA;

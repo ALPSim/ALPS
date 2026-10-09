@@ -23,6 +23,7 @@
 
 #include <hdf5.h>
 
+#include <memory>
 #include <sstream>
 #include <iostream>
 #include <typeinfo>
@@ -813,8 +814,8 @@ namespace alps {
                     } else if (H5Tget_class(native_id) == H5T_STRING) {                                                                                                 \
                         char * raw;                                                                                                                                     \
                         detail::check_error(H5Dread(data_id, native_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &raw));                                                          \
+                        std::unique_ptr<char, decltype(&H5free_memory)> raw_owner(raw, &H5free_memory);                                                                             \
                         value = cast< T >(std::string(raw));                                                                                                            \
-                        detail::check_error(H5Dvlen_reclaim(type_id, detail::space_type(H5Dget_space(data_id)), H5P_DEFAULT, &raw));                                    \
                         ALPS_NGS_HDF5_FOREACH_NATIVE_TYPE_INTEGRAL(ALPS_NGS_HDF5_READ_SCALAR_DATA_HELPER, T)                                                            \
                     } else                                                                                                                                              \
                         throw wrong_type("invalid type" + ALPS_STACKTRACE);                                                                                             \
@@ -838,6 +839,7 @@ namespace alps {
                     } else if (H5Tget_class(native_id) == H5T_STRING) {                                                                                                 \
                         char * raw;                                                                                                                                     \
                         detail::check_error(H5Aread(attribute_id, native_id, &raw));                                                                                    \
+                        std::unique_ptr<char, decltype(&H5free_memory)> raw_owner(raw, &H5free_memory);                                                                             \
                         value = cast< T >(std::string(raw));                                                                                                            \
                     ALPS_NGS_HDF5_FOREACH_NATIVE_TYPE_INTEGRAL(ALPS_NGS_HDF5_READ_SCALAR_ATTRIBUTE_HELPER, T)                                                           \
                     } else throw wrong_type("invalid type" + ALPS_STACKTRACE);                                                                                          \

@@ -23,6 +23,7 @@
 #include <vector>
 #include <valarray>
 #include <algorithm>
+#include <iterator>
 
 
 namespace alps {
@@ -59,7 +60,8 @@ namespace alps {
     {
       std::vector<T> to;
       to.reserve(from.size());
-      std::copy(alps::data(from),alps::data(from)+from.size(),std::back_inserter(to));
+      if (from.size() != 0)
+        std::copy(alps::data(from),alps::data(from)+from.size(),std::back_inserter(to));
       return to;
     }
 
@@ -72,7 +74,8 @@ namespace alps {
     std::valarray<T> vector2valarray(std::vector<T> const & from)
     {
       std::valarray<T> to(from.size());
-      std::copy(from.begin(),from.end(),alps::data(to));
+      if (!from.empty())
+        std::copy(from.begin(),from.end(),alps::data(to));
       return to;
     }
 
@@ -80,7 +83,8 @@ namespace alps {
     std::valarray<T2> vector2valarray(std::vector<T1> const & from)
     {
       std::valarray<T2> to(from.size());
-      std::copy(from.begin(),from.end(),alps::data(to));
+      if (!from.empty())
+        std::copy(from.begin(),from.end(),alps::data(to));
       return to;
     }
 

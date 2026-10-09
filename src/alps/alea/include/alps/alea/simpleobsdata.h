@@ -732,6 +732,7 @@ SimpleObservableData<T>& SimpleObservableData<T>::operator*=(X x)
 {
   if (count()) {
     error_ *= x;
+    error_ = std::abs(error_);
     if(has_variance_)
       variance_ *= x*x;
 
@@ -746,6 +747,7 @@ SimpleObservableData<T>& SimpleObservableData<T>::operator/=(X x)
 {
   if (count()) {
     error_ /= x;
+    error_ = std::abs(error_);
     if(has_variance_)
       variance_ /= x*x;
 
@@ -760,7 +762,7 @@ void SimpleObservableData<T>::divide(const X& x)
 {
   if (count()) {
     fill_jack();
-    error_ = x *error_/mean_/mean_;
+    error_ = std::abs(x *error_/mean_/mean_);
     has_variance_ = false;
     values2_.clear();
     has_tau_ = false;

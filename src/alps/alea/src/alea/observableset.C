@@ -334,6 +334,7 @@ void ObservableSet::read_xml(std::istream& infile, const XMLTag& intag)
 
 void ObservableSet::clear()
 {
+  do_for_all(detail::deleteit);
   base_type::clear();
   signs_.clear();
 }

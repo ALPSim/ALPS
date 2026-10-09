@@ -25,6 +25,7 @@
 #include <limits>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 
 namespace alps {
 
@@ -109,9 +110,16 @@ public:
 
   value_type min BOOST_PREVENT_MACRO_SUBSTITUTION () const { return mi_; }
   value_type max BOOST_PREVENT_MACRO_SUBSTITUTION () const { return ma_; }
-  value_type size() const { return 1 + ma_ - mi_; }
-  bool empty() const { return size() == 0; }
-  bool valid() const { return size() != 0; }
+  value_type size() const {
+    if (empty()) return 0;
+    using unsigned_type = typename std::make_unsigned<value_type>::type;
+    const unsigned_type span = static_cast<unsigned_type>(ma_) - static_cast<unsigned_type>(mi_);
+    if (span >= static_cast<unsigned_type>((std::numeric_limits<value_type>::max)()))
+      boost::throw_exception(std::overflow_error("integer_range: size is not representable"));
+    return static_cast<value_type>(span + 1);
+  }
+  bool empty() const { return mi_ > ma_; }
+  bool valid() const { return !empty(); }
   bool is_included(param_type v) const { return (v >= min BOOST_PREVENT_MACRO_SUBSTITUTION ()) && (v <= max BOOST_PREVENT_MACRO_SUBSTITUTION ()); }
 
   integer_range overlap(integer_range const& r) const {
@@ -184,7 +192,7 @@ integer_range<T> unify(integer_range<T> const& r0, integer_range<T> const& r1) {
   } else if (r1.empty()) {
     return r0;
   } else {
-    if (overlap(r0, r1).size() == 0)
+    if (overlap(r0, r1).empty())
       boost::throw_exception(std::range_error("no overlap"));
     integer_range<T> res = r0;
     res.include(r1);

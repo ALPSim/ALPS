@@ -22,6 +22,7 @@ foreach(
   complexobservable
   detailedbinning
   histogram
+  histogram2
   signed
   simpleobseval
   testobservableset

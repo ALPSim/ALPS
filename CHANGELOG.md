@@ -11,3 +11,5 @@
 - Select PR validation by affected components and dependency fingerprints. Consolidate installed-artifact checks, MPI and sanitizer jobs; run the broad compatibility matrix on scheduled, manual and release workflows.
 
 - Consolidate native tests with GoogleTest and semantic assertions, retaining explicit serialization fixtures and MPI test registration.
+
+- Correct runtime arithmetic, integer-range boundaries, empty-container handling and temporary-file permissions. Validate native parameter checkpoint conversions, reclaim HDF5 strings and improve archive command error handling.

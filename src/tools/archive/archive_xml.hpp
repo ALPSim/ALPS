@@ -25,29 +25,29 @@ namespace fs = boost::filesystem;
 #include "archive_node.hpp"
 
 /**
- * Function-object to parse xml-documents in an object-tree. The document is 
+ * Function-object to parse xml-documents in an object-tree. The document is
  * represented by a tree of node-objects. Each element is represented by a node.
- * 
+ *
  * @see Node
  */
 class XML {
         bool mVerbose;
     std::string readFile(fs::path filename);
-        
-        public:        
+
+        public:
                 /**
                  * Constructor of the Class
-                 * 
+                 *
                  * @param verbose Decides if the Actions should be printed out to std::cout
                  */
                 XML(bool verbose): mVerbose(verbose) {}
-                
+
                 /**
                  * Functionoperator to parse a file, specified by the path to a object tree
-                 * 
+                 *
                  * @param inFileName Path to the File, that should be parsed
                  */
                 Node operator()(fs::path inFileName, bool usePlotDTD);
-                
+
 };
 #endif //_XML_H_

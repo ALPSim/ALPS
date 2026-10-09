@@ -17,6 +17,19 @@
 #include <alps/check_schedule.hpp>
 #include <new>
 
+TEST(MonteCarloSchedule, ChecksImmediatelyAfterConstructionInReusedStorage) {
+    // A stale NaN interval prevented MPI runs from ever checking completion.
+    alignas(alps::check_schedule) unsigned char storage[sizeof(alps::check_schedule)];
+    volatile unsigned char* bytes = storage;
+    for (std::size_t i = 0; i < sizeof(storage); ++i) bytes[i] = 0xff;
+    auto* schedule = new (storage) alps::check_schedule;
+    EXPECT_DOUBLE_EQ(schedule->check_interval(), 0.);
+    EXPECT_TRUE(schedule->pending());
+    schedule->update(0.25);
+    EXPECT_DOUBLE_EQ(schedule->check_interval(), 60.);
+    EXPECT_FALSE(schedule->pending());
+    schedule->~check_schedule();
+}
 
 TEST(MonteCarloRunner, CompletesAndPersistsScalarAndVectorResults) {
     alps::params parameters;

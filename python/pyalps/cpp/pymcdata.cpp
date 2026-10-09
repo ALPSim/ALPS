@@ -172,7 +172,7 @@ NB_MODULE(pymcdata_c, m) {
         .def("__pow__", [](Scalar x, double e) { using alps::alea::pow; return pow(std::move(x), e); })
         // Copy for unary +, whose native overload returns a mutable reference.
         .def("__pos__", [](Scalar self) { return +self; })
-        .def("__neg__", [](Scalar self) { return -self; })
+        .def("__neg__", [](Scalar const& self) { return -self; })
         // In-place operators — modify self in place, return reference.
         .def("__iadd__", [](Scalar & s, Scalar const & o) -> Scalar & { return s += o; }, nb::is_operator())
         .def("__iadd__", [](Scalar & s, double o)         -> Scalar & { return s += o; }, nb::is_operator())
@@ -270,7 +270,7 @@ NB_MODULE(pymcdata_c, m) {
         .def("__abs__", [](Vector x) { using alps::alea::abs; return abs(std::move(x)); })
         .def("__pow__", [](Vector x, double e) { using alps::alea::pow; return pow(std::move(x), e); })
         .def("__pos__", [](Vector self) { return +self; })
-        .def("__neg__", [](Vector self) { return -self; })
+        .def("__neg__", [](Vector const& self) { return -self; })
         .def("__eq__",  [](Vector const & a, Vector const & b) { return a == b; }, nb::is_operator())
         // In-place operators.
         .def("__iadd__", [](Vector & s, Vector const & o)              -> Vector & { return s += o; }, nb::is_operator())

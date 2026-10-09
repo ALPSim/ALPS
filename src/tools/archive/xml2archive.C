@@ -15,6 +15,7 @@
 #include <boost/filesystem/operations.hpp>
 
 int main(int argc, char** argv) {
+  try {
   if (argc != 2) {
     std::cerr << "Error: " << argv[0] << " master_file\n";
     std::exit(-1);
@@ -24,10 +25,13 @@ int main(int argc, char** argv) {
   os << alps::header("UTF-8");
 
   boost::filesystem::path file(argv[1]);
+  if (!boost::filesystem::is_regular_file(file))
+    throw std::runtime_error("Cannot open master XML file");
   boost::filesystem::path basedir = file.parent_path();
   std::string file_in_str, file_out_str;
 
-  alps::parapack::load_filename(file, file_in_str, file_out_str);
+  if (alps::parapack::load_filename(file, file_in_str, file_out_str) != 1)
+    throw std::runtime_error("Expected master JOB XML");
 
   typedef std::pair<std::string, std::string> version_t;
   std::vector<version_t> versions;
@@ -59,4 +63,8 @@ int main(int argc, char** argv) {
   }
 
   os << alps::end_tag("ARCHIVE");
+  } catch (std::exception const& error) {
+    std::cerr << "xml2archive: " << error.what() << '\n';
+    return 1;
+  }
 }
