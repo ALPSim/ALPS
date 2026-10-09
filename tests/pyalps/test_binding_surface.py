@@ -635,7 +635,7 @@ def test_current_python_numpy_and_scipy_compatibility(monkeypatch):
                     reason="compiled consumer enabled once per platform in CI")
 def test_native_parameter_contracts(tmp_path):
     repository = Path(__file__).resolve().parents[2]
-    source = repository / "test" / "pyalps" / "native_params"
+    source = repository / "tests" / "pyalps" / "native_params"
     build = tmp_path / "native-params"
     subprocess.run([
         "cmake", "-S", str(source), "-B", str(build),
