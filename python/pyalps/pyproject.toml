@@ -75,7 +75,7 @@ ALPS_DIR = { env = "ALPS_DIR" }
 # cibuildwheel reuses the abi3 wheel while testing each newer interpreter.
 build = ["cp311-*", "cp312-*", "cp313-*", "cp314-*"]
 manylinux-x86_64-image = "manylinux_2_28"
-test-requires = ["pytest", "ninja>=1.12", "nanobind==2.15.0", "scikit-build-core>=1.0"]
+test-requires = ["pytest", "h5py", "ninja>=1.12", "nanobind==2.15.0", "scikit-build-core>=1.0"]
 # An external watchdog can stop native code even while it holds Python's GIL.
 test-command = 'python {project}/.github/scripts/run_with_timeout.py 900 python -m pytest -v -o faulthandler_timeout=300 "{project}/tests/pyalps" "{project}/tests/cmake"'
 

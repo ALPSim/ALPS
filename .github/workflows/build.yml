@@ -28,6 +28,8 @@ jobs:
     name: Validate CI helpers
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    outputs:
+      source-matrix: ${{ steps.matrix.outputs.source }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -49,6 +51,58 @@ jobs:
           python -m pip install -r .github/scripts/citations/requirements.txt pytest
           python .github/scripts/generate_citations.py --check
           python -m pytest tests/ci tests/packaging/test_citations.py -q --junitxml=ci-tests.xml
+      # Fork topic pushes use the agreed review gate. Upstream PRs, master,
+      # tags and manual runs retain the complete compatibility matrix.
+      - name: Select source configurations
+        id: matrix
+        env:
+          FOCUSED: ${{ github.repository == 'skilledwolf/ALPS' && github.event_name == 'push' && github.ref == 'refs/heads/WIP/sdk-python-preserve-legacy' }}
+          SOURCE_CONFIGURATIONS: >-
+            [
+              {"id": "ubuntu-2204-gcc-12-boost91-py314-cxx17", "os": "ubuntu-22.04", "cc": "gcc-12", "cxx": "g++-12", "packages": "gcc-12 g++-12", "boost": "1.91.0", "python": "3.14", "standard": 17, "focused": false},
+              {"id": "ubuntu-2404-gcc-14-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.14", "standard": 17, "extras": true, "focused": true},
+              {"id": "ubuntu-2204-clang-15-boost91-py314-cxx17", "os": "ubuntu-22.04", "cc": "clang-15", "cxx": "clang++-15", "packages": "clang-15", "boost": "1.91.0", "python": "3.14", "standard": 17, "focused": false},
+              {"id": "ubuntu-2404-clang-18-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-18", "cxx": "clang++-18", "packages": "clang-18", "boost": "1.91.0", "python": "3.14", "standard": 17, "focused": false},
+              {"id": "ubuntu-2204-gcc-11-boost91-py314-cxx17", "os": "ubuntu-22.04", "cc": "gcc-11", "cxx": "g++-11", "packages": "gcc-11 g++-11", "boost": "1.91.0", "python": "3.14", "standard": 17, "focused": true},
+              {"id": "ubuntu-2404-gcc-13-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-13", "cxx": "g++-13", "packages": "gcc-13 g++-13", "boost": "1.91.0", "python": "3.14", "standard": 17, "focused": false},
+              {"id": "ubuntu-2404-gcc-15-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-15", "cxx": "g++-15", "packages": "gcc-15 g++-15", "boost": "1.91.0", "python": "3.14", "standard": 17, "repository": "gcc", "focused": false},
+              {"id": "ubuntu-2204-clang-14-boost91-py314-cxx17", "os": "ubuntu-22.04", "cc": "clang-14", "cxx": "clang++-14", "packages": "clang-14", "boost": "1.91.0", "python": "3.14", "standard": 17, "focused": true},
+              {"id": "ubuntu-2404-clang-16-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-16", "cxx": "clang++-16", "packages": "clang-16", "boost": "1.91.0", "python": "3.14", "standard": 17, "focused": false},
+              {"id": "ubuntu-2404-clang-17-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-17", "cxx": "clang++-17", "packages": "clang-17", "boost": "1.91.0", "python": "3.14", "standard": 17, "focused": false},
+              {"id": "ubuntu-2404-clang-19-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-19", "cxx": "clang++-19", "packages": "clang-19", "boost": "1.91.0", "python": "3.14", "standard": 17, "repository": "llvm", "focused": false},
+              {"id": "ubuntu-2404-clang-20-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-20", "cxx": "clang++-20", "packages": "clang-20", "boost": "1.91.0", "python": "3.14", "standard": 17, "repository": "llvm", "focused": false},
+              {"id": "ubuntu-2404-clang-21-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-21", "cxx": "clang++-21", "packages": "clang-21", "boost": "1.91.0", "python": "3.14", "standard": 17, "repository": "llvm", "focused": false},
+              {"id": "ubuntu-2404-clang-22-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-22", "cxx": "clang++-22", "packages": "clang-22", "boost": "1.91.0", "python": "3.14", "standard": 17, "repository": "llvm", "focused": false},
+              {"id": "ubuntu-2404-gcc-14-boost76-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.76.0", "python": "3.14", "standard": 17, "focused": true},
+              {"id": "ubuntu-2404-gcc-14-boost81-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.81.0", "python": "3.14", "standard": 17, "focused": false},
+              {"id": "ubuntu-2404-gcc-14-boost86-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.86.0", "python": "3.14", "standard": 17, "focused": false},
+              {"id": "ubuntu-2404-gcc-14-boost87-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.87.0", "python": "3.14", "standard": 17, "focused": false},
+              {"id": "ubuntu-2404-gcc-14-boost88-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.88.0", "python": "3.14", "standard": 17, "focused": false},
+              {"id": "ubuntu-2404-gcc-14-boost89-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.89.0", "python": "3.14", "standard": 17, "focused": false},
+              {"id": "ubuntu-2404-gcc-14-boost90-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.90.0", "python": "3.14", "standard": 17, "focused": false},
+              {"id": "ubuntu-2404-gcc-14-boost91-py311-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.11", "standard": 17, "focused": true},
+              {"id": "ubuntu-2404-gcc-14-boost91-py312-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.12", "standard": 17, "focused": false},
+              {"id": "ubuntu-2404-gcc-14-boost91-py313-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.13", "standard": 17, "focused": false},
+              {"id": "ubuntu-2404-gcc-14-boost91-py314-cxx20", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.14", "standard": 20, "extensive": true, "focused": false},
+              {"id": "ubuntu-2404-gcc-14-boost91-py314-cxx23", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.14", "standard": 23, "focused": false},
+              {"id": "macos-14-clang-boost91-py314-cxx17", "os": "macos-14", "cc": "/usr/bin/clang", "cxx": "/usr/bin/clang++", "packages": "", "boost": "1.91.0", "python": "3.14", "standard": 17, "focused": true},
+              {"id": "macos-15-clang-boost91-py314-cxx17", "os": "macos-15", "cc": "/usr/bin/clang", "cxx": "/usr/bin/clang++", "packages": "", "boost": "1.91.0", "python": "3.14", "standard": 17, "focused": false},
+              {"id": "macos-15-intel-clang-boost91-py314-cxx17", "os": "macos-15-intel", "cc": "/usr/bin/clang", "cxx": "/usr/bin/clang++", "packages": "", "boost": "1.91.0", "python": "3.14", "standard": 17, "focused": false},
+              {"id": "macos-26-clang-boost91-py314-cxx17", "os": "macos-26", "cc": "/usr/bin/clang", "cxx": "/usr/bin/clang++", "packages": "", "boost": "1.91.0", "python": "3.14", "standard": 17, "focused": false},
+              {"id": "macos-15-gcc-13-boost91-py314-cxx17", "os": "macos-15", "cc": "gcc-13", "cxx": "g++-13", "packages": "gcc@13", "boost": "1.91.0", "python": "3.14", "standard": 17, "focused": false},
+              {"id": "macos-15-gcc-14-boost91-py314-cxx17", "os": "macos-15", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc@14", "boost": "1.91.0", "python": "3.14", "standard": 17, "focused": false}
+            ]
+        run: |
+          python - <<'PYTHON'
+          import json, os
+          rows = json.loads(os.environ["SOURCE_CONFIGURATIONS"])
+          focused = os.environ["FOCUSED"] == "true"
+          if focused:
+              rows = [row for row in rows if row["focused"]]
+              assert len(rows) == 6
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              print("source=" + json.dumps({"include": rows}), file=output)
+          PYTHON
       - name: Summarize helper tests
         if: always()
         run: python .github/scripts/junit_summary.py ci-tests.xml
@@ -65,40 +119,7 @@ jobs:
     timeout-minutes: 120
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - {"id": "ubuntu-2204-gcc-12-boost91-py314-cxx17", "os": "ubuntu-22.04", "cc": "gcc-12", "cxx": "g++-12", "packages": "gcc-12 g++-12", "boost": "1.91.0", "python": "3.14", "standard": 17}
-          - {"id": "ubuntu-2404-gcc-14-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.14", "standard": 17, "extras": true}
-          - {"id": "ubuntu-2204-clang-15-boost91-py314-cxx17", "os": "ubuntu-22.04", "cc": "clang-15", "cxx": "clang++-15", "packages": "clang-15", "boost": "1.91.0", "python": "3.14", "standard": 17}
-          - {"id": "ubuntu-2404-clang-18-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-18", "cxx": "clang++-18", "packages": "clang-18", "boost": "1.91.0", "python": "3.14", "standard": 17}
-          - {"id": "ubuntu-2204-gcc-11-boost91-py314-cxx17", "os": "ubuntu-22.04", "cc": "gcc-11", "cxx": "g++-11", "packages": "gcc-11 g++-11", "boost": "1.91.0", "python": "3.14", "standard": 17}
-          - {"id": "ubuntu-2404-gcc-13-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-13", "cxx": "g++-13", "packages": "gcc-13 g++-13", "boost": "1.91.0", "python": "3.14", "standard": 17}
-          - {"id": "ubuntu-2404-gcc-15-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-15", "cxx": "g++-15", "packages": "gcc-15 g++-15", "boost": "1.91.0", "python": "3.14", "standard": 17, "repository": "gcc"}
-          - {"id": "ubuntu-2204-clang-14-boost91-py314-cxx17", "os": "ubuntu-22.04", "cc": "clang-14", "cxx": "clang++-14", "packages": "clang-14", "boost": "1.91.0", "python": "3.14", "standard": 17}
-          - {"id": "ubuntu-2404-clang-16-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-16", "cxx": "clang++-16", "packages": "clang-16", "boost": "1.91.0", "python": "3.14", "standard": 17}
-          - {"id": "ubuntu-2404-clang-17-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-17", "cxx": "clang++-17", "packages": "clang-17", "boost": "1.91.0", "python": "3.14", "standard": 17}
-          - {"id": "ubuntu-2404-clang-19-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-19", "cxx": "clang++-19", "packages": "clang-19", "boost": "1.91.0", "python": "3.14", "standard": 17, "repository": "llvm"}
-          - {"id": "ubuntu-2404-clang-20-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-20", "cxx": "clang++-20", "packages": "clang-20", "boost": "1.91.0", "python": "3.14", "standard": 17, "repository": "llvm"}
-          - {"id": "ubuntu-2404-clang-21-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-21", "cxx": "clang++-21", "packages": "clang-21", "boost": "1.91.0", "python": "3.14", "standard": 17, "repository": "llvm"}
-          - {"id": "ubuntu-2404-clang-22-boost91-py314-cxx17", "os": "ubuntu-24.04", "cc": "clang-22", "cxx": "clang++-22", "packages": "clang-22", "boost": "1.91.0", "python": "3.14", "standard": 17, "repository": "llvm"}
-          - {"id": "ubuntu-2404-gcc-14-boost76-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.76.0", "python": "3.14", "standard": 17}
-          - {"id": "ubuntu-2404-gcc-14-boost81-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.81.0", "python": "3.14", "standard": 17}
-          - {"id": "ubuntu-2404-gcc-14-boost86-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.86.0", "python": "3.14", "standard": 17}
-          - {"id": "ubuntu-2404-gcc-14-boost87-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.87.0", "python": "3.14", "standard": 17}
-          - {"id": "ubuntu-2404-gcc-14-boost88-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.88.0", "python": "3.14", "standard": 17}
-          - {"id": "ubuntu-2404-gcc-14-boost89-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.89.0", "python": "3.14", "standard": 17}
-          - {"id": "ubuntu-2404-gcc-14-boost90-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.90.0", "python": "3.14", "standard": 17}
-          - {"id": "ubuntu-2404-gcc-14-boost91-py311-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.11", "standard": 17}
-          - {"id": "ubuntu-2404-gcc-14-boost91-py312-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.12", "standard": 17}
-          - {"id": "ubuntu-2404-gcc-14-boost91-py313-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.13", "standard": 17}
-          - {"id": "ubuntu-2404-gcc-14-boost91-py314-cxx20", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.14", "standard": 20, "extensive": true}
-          - {"id": "ubuntu-2404-gcc-14-boost91-py314-cxx23", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.14", "standard": 23}
-          - {"id": "macos-14-clang-boost91-py314-cxx17", "os": "macos-14", "cc": "/usr/bin/clang", "cxx": "/usr/bin/clang++", "packages": "", "boost": "1.91.0", "python": "3.14", "standard": 17}
-          - {"id": "macos-15-clang-boost91-py314-cxx17", "os": "macos-15", "cc": "/usr/bin/clang", "cxx": "/usr/bin/clang++", "packages": "", "boost": "1.91.0", "python": "3.14", "standard": 17}
-          - {"id": "macos-15-intel-clang-boost91-py314-cxx17", "os": "macos-15-intel", "cc": "/usr/bin/clang", "cxx": "/usr/bin/clang++", "packages": "", "boost": "1.91.0", "python": "3.14", "standard": 17}
-          - {"id": "macos-26-clang-boost91-py314-cxx17", "os": "macos-26", "cc": "/usr/bin/clang", "cxx": "/usr/bin/clang++", "packages": "", "boost": "1.91.0", "python": "3.14", "standard": 17}
-          - {"id": "macos-15-gcc-13-boost91-py314-cxx17", "os": "macos-15", "cc": "gcc-13", "cxx": "g++-13", "packages": "gcc@13", "boost": "1.91.0", "python": "3.14", "standard": 17}
-          - {"id": "macos-15-gcc-14-boost91-py314-cxx17", "os": "macos-15", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc@14", "boost": "1.91.0", "python": "3.14", "standard": 17}
+      matrix: ${{ fromJSON(needs.prepare.outputs.source-matrix) }}
     env:
       # Keep the small macOS runners and memory-heavy jobs at two compilers.
       CMAKE_BUILD_PARALLEL_LEVEL: ${{ (startsWith(matrix.os, 'macos-') || matrix.extensive) && '2' || '4' }}
@@ -215,12 +236,15 @@ jobs:
           PYALPS_TEST_DOWNSTREAM_EXPORT: '1'
         run: |
           cmake --install _build/ci
-          python -m pip install build 'nanobind==2.15.0' 'scikit-build-core>=1.0' numpy scipy matplotlib lxml h5py
+          python -m pip install build 'nanobind==2.15.0' 'scikit-build-core>=1.0' numpy scipy matplotlib lxml h5py mpi4py
           if [[ "$RUNNER_OS" == Linux ]]; then python -m pip install patchelf; fi
           python -m pip install --no-build-isolation --no-deps -e python/pyalps \
             --config-settings "build-dir=$PWD/_build/ci-python"
+          # The MPI-enabled CT-QMC entry points require caller-owned MPI.
+          # Initialize it before pytest reaches the solver binding tests.
           python .github/scripts/run_with_timeout.py 900 \
-            python -m pytest tests/pyalps -q --junitxml=_build/ci/python.xml
+            python -c 'from mpi4py import MPI; import pytest; raise SystemExit(pytest.main())' \
+            tests/pyalps -v --junitxml=_build/ci/python.xml
       - name: Test installed XML tools after relocation
         if: matrix.extras
         env:

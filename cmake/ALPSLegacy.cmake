@@ -25,7 +25,12 @@ block()
   set(Boost_INCLUDE_DIR_CONFIG "${Boost_INCLUDE_DIRS}")
   set(Boost_LIBS "")
   foreach(component IN LISTS ALPS_BOOST_COMPONENTS)
-    string(APPEND Boost_LIBS " $<TARGET_LINKER_FILE:Boost::${component}>")
+    # Some providers expose components such as regex as header-only targets.
+    # Those have no linker file to add to the historical Makefile interface.
+    get_target_property(component_type Boost::${component} TYPE)
+    if(NOT component_type STREQUAL "INTERFACE_LIBRARY")
+      string(APPEND Boost_LIBS " $<TARGET_LINKER_FILE:Boost::${component}>")
+    endif()
   endforeach()
   list(GET HDF5_INCLUDE_DIRS 0 HDF5_INCLUDE_DIR)
   string(JOIN " " HDF5_LIBS ${HDF5_LIBRARIES})

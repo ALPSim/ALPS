@@ -37,6 +37,35 @@ def test_missing_blas_is_a_configuration_error(tmp_path):
     assert "CMAKE_DISABLE_FIND_PACKAGE_BLAS" in result.stdout + result.stderr
 
 
+def test_legacy_make_supports_header_only_boost_components(tmp_path):
+    # Reproduce a provider exposing Boost::regex as INTERFACE_LIBRARY while
+    # other components still have real library files (as on Homebrew).
+    (tmp_path / "CMakeLists.txt").write_text(f'''
+cmake_minimum_required(VERSION 3.27)
+project(legacy_provider LANGUAGES NONE)
+set(PROJECT_SOURCE_DIR "{SOURCE.as_posix()}")
+set(CMAKE_INSTALL_DATADIR share)
+set(HDF5_INCLUDE_DIRS /provider/include)
+set(ALPS_SDK_RUNTIME_TARGETS ALPS::alps)
+add_library(ALPS::alps SHARED IMPORTED)
+set_target_properties(ALPS::alps PROPERTIES OUTPUT_NAME alps)
+set(ALPS_BOOST_COMPONENTS filesystem regex)
+add_library(Boost::filesystem SHARED IMPORTED)
+set_target_properties(Boost::filesystem PROPERTIES
+  IMPORTED_LOCATION /provider/lib/libboost_filesystem.so)
+add_library(Boost::regex INTERFACE IMPORTED)
+include("{SOURCE.as_posix()}/cmake/ALPSLegacy.cmake")
+''')
+    result = subprocess.run([
+        "cmake", "-S", str(tmp_path), "-B", str(tmp_path / "build"),
+        "-DCMAKE_BUILD_TYPE=Release",
+    ], text=True, capture_output=True)
+    assert result.returncode == 0, result.stdout + result.stderr
+    makefile = (tmp_path / "build/legacy/Release/include.mk").read_text()
+    assert "/provider/lib/libboost_filesystem.so" in makefile
+    assert "boost_regex" not in makefile
+
+
 @pytest.mark.parametrize("option, diagnostic", [
     ("BLA_SIZEOF_INTEGER=8", "requires BLA_SIZEOF_INTEGER=4"),
     ("BLA_SIZEOF_INTEGER=ANY", "requires BLA_SIZEOF_INTEGER=4"),
