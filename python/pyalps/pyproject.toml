@@ -89,6 +89,8 @@ test-command = "pytest -q {project}/python/pyalps/tests"
 # in _build/ccache spans the SDK and all wheel builds (cached across CI runs).
 [tool.cibuildwheel.environment]
 ALPS_DIR = "$(pwd)/_build/wheel-deps/install/share/alps"
+# Boost is built from source into this prefix in before-all.
+CMAKE_PREFIX_PATH = "$(pwd)/_build/boost-install"
 CCACHE_DIR = "$(pwd)/_build/ccache"
 CCACHE_NAMESPACE = "pyalps-wheel"
 CMAKE_ARGS = "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
@@ -111,7 +113,8 @@ repair-wheel-command = [
   # non-PIE executables when auditwheel grows their RPATH/dynamic sections.
   "python -m pip install --only-binary=:all: patchelf==0.19.1.0",
   "patchelf --version",
-  "auditwheel repair -w {dest_dir} {wheel}",
+  # Boost's transitive libraries need the same search path as its direct ones.
+  'LD_LIBRARY_PATH="$(pwd)/_build/boost-install/lib" auditwheel repair -w {dest_dir} {wheel}',
   "auditwheel show {dest_dir}/*.whl",
 ]
 

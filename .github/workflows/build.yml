@@ -132,6 +132,7 @@ jobs:
           ALPS_BOOST_MPI=ON CXX="${CXX:-${{ matrix.plat.cxx_compiler }}}" bash .github/scripts/build-boost.sh \
             "$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" "$GITHUB_WORKSPACE/_build/boost-install"
           cmake -S $GITHUB_WORKSPACE -B build \
+                -DCMAKE_BUILD_TYPE=Release \
                 -DBoost_ROOT="$GITHUB_WORKSPACE/_build/boost-install" \
                 -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/build/install" \
                 -DALPS_CITATION_PYTHON="$(command -v python)" \
@@ -198,6 +199,7 @@ jobs:
           ALPS_BOOST_MPI=ON CXX="${CXX:-${{ matrix.plat.cxx_compiler }}}" bash .github/scripts/build-boost.sh \
             "$GITHUB_WORKSPACE/boost_1_${{ matrix.plat.boost_version }}_0" "$GITHUB_WORKSPACE/_build/boost-install"
           cmake -S $GITHUB_WORKSPACE -B build \
+                -DCMAKE_BUILD_TYPE=Release \
                 -DCMAKE_C_COMPILER=${{ matrix.plat.c_compiler }} \
                 -DCMAKE_CXX_COMPILER=${{ matrix.plat.cxx_compiler }} \
                 -DBoost_ROOT="$GITHUB_WORKSPACE/_build/boost-install" \
