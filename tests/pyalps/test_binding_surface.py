@@ -12,6 +12,7 @@ import os
 import json
 from pathlib import Path
 import signal
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -571,10 +572,24 @@ assert mpi.finalized()
     os.environ.get("PYALPS_TEST_DOWNSTREAM_EXPORT") != "1",
     reason="enabled for one wheel per platform in packaging CI",
 )
-def test_downstream_nanobind_simulation_export(tmp_path):
+@pytest.mark.parametrize("legacy", [False, True], ids=["package", "legacy-helpers"])
+def test_downstream_nanobind_simulation_export(tmp_path, legacy):
     """Build and run a consumer extension against the installed ALPS SDK."""
     repository = Path(__file__).resolve().parents[2]
     tutorial = repository / "python/pyalps/examples/ising"
+    if legacy:
+        tutorial = Path(shutil.copytree(tutorial, tmp_path / "legacy-source"))
+        exporter = tutorial / "export2py.cpp"
+        exporter.write_text(exporter.read_text().replace(
+            "#include <pyalps/export_simulation.hpp>",
+            "#include <alps/ngs/detail/export_sim_to_python.hpp>\n"
+            "#include <alps/python/save_observable_to_hdf5.hpp>"))
+        cmake = tutorial / "CMakeLists.txt"
+        cmake.write_text(cmake.read_text().replace(
+            'find_package(pyalps CONFIG REQUIRED)',
+            'find_package(ALPS CONFIG REQUIRED)\ninclude(${ALPS_PYTHON_USE_FILE})').replace(
+            'target_link_libraries(ising_c PRIVATE pyalps::runtime)',
+            'alps_target_link_pyalps(ising_c)'))
     alps_dir = Path(os.environ["ALPS_DIR"])
     build = tmp_path / "export-python-build"
 

@@ -5,7 +5,7 @@ on:
     branches: [master, WIP/sdk-python-preserve-legacy]
     tags: ['v*']
   pull_request:
-    branches: [master]
+    branches: [master, WIP/sdk-source-layout]
   workflow_dispatch:
 
 permissions:
