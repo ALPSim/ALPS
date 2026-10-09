@@ -10,27 +10,33 @@ with the directed-loop SSE quantum Monte Carlo code and plots the local density
 <n_i>. U/t = 8.11 is the value optical-lattice-01-bandstructure gives for a
 V0 = 8 E_r lattice of 87Rb. This replaces the dwa-02-density-profile tutorial,
 which was removed together with the DWA application.
+
+The expected output is shown in density_profile.png. The lattice is kept small
+so the tutorial runs in a few minutes, which means it still sits inside the
+cloud: the density falls off toward the edges but does not quite vanish
+there. A bigger lattice (larger L) lets the density drop closer to zero at
+the edges.
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
 import pyalps
 
-L = 11
-K = 0.2                                         # trap curvature V_T = K r^2, in units of t
+L = 9
+K = 0.65                                        # trap curvature V_T = K r^2, in units of t
 c = (L - 1) / 2.
 
 parms = [{
     'LATTICE' : 'inhomogeneous simple cubic lattice',
     'L'       : L,
     'MODEL'   : 'boson Hubbard',
-    'Nmax'    : 5,
+    'Nmax'    : 4,
     't'       : 1.,
     'U'       : 8.11,
     'mu'      : '4.05 - %g*((x-%g)*(x-%g) + (y-%g)*(y-%g) + (z-%g)*(z-%g))' % ((K,) + (c,) * 6),
     'T'       : 1.,
-    'THERMALIZATION' : 2000,
-    'SWEEPS'         : 20000,
+    'THERMALIZATION' : 1000,
+    'SWEEPS'         : 5000,
     'MEASURE_LOCAL[Local Density]' : 'n',
 }]
 
