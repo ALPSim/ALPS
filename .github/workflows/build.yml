@@ -23,9 +23,9 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: '3.11'
-      - run: python -m pip install -r script/citations/requirements.txt
-      - run: python script/generate_citations.py --check
-      - run: python -m unittest discover -s test/packaging -p '*citations.py' -v
+      - run: python -m pip install -r .github/scripts/citations/requirements.txt
+      - run: python .github/scripts/generate_citations.py --check
+      - run: python -m unittest discover -s tests/packaging -p '*citations.py' -v
 
   linux-build:
     name: >-
@@ -108,7 +108,7 @@ jobs:
             | sudo tee /etc/apt/apt.conf.d/99ci-timeouts > /dev/null
           sudo apt-get update
           python -m pip install --upgrade pip
-          pip install "numpy>=1.26" "scipy>=1.13" -r script/citations/requirements.txt
+          pip install "numpy>=1.26" "scipy>=1.13" -r .github/scripts/citations/requirements.txt
           sudo apt install liblapack-dev libblas-dev libopenmpi-dev libhdf5-serial-dev
           # Clang >= 19: not in Ubuntu's default apt repos; use apt.llvm.org.
           # GCC >= 15: not in Ubuntu's default apt repos; use ubuntu-toolchain-r PPA.
@@ -145,7 +145,7 @@ jobs:
         run: |
           python -m pip install "nanobind>=2.10,<3"
           cmake --install build
-          cmake -S tutorials/ngs/5_export_python -B downstream-export-build \
+          cmake -S python/pyalps/examples/ising -B downstream-export-build \
                 -DALPS_DIR="$PWD/build/install/share/alps" \
                 -DPython_EXECUTABLE="$(command -v python)"
           cmake --build downstream-export-build -j 2
@@ -180,7 +180,7 @@ jobs:
         timeout-minutes: 30
         run: |
           brew install python@${{ matrix.plat.py_version }} gfortran
-          pip${{ matrix.plat.py_version }} install "numpy>=1.26" "scipy>=1.13" -r script/citations/requirements.txt --break-system-packages
+          pip${{ matrix.plat.py_version }} install "numpy>=1.26" "scipy>=1.13" -r .github/scripts/citations/requirements.txt --break-system-packages
           brew install openmpi hdf5
           if [[ -n "${{ matrix.plat.comp_pack }}" ]]; then
             brew install ${{ matrix.plat.comp_pack }}

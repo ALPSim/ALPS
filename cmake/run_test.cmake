@@ -1,3 +1,6 @@
+if(xmlresources)
+  set(ENV{ALPS_XML_PATH} "${xmlresources}")
+endif()
 #  Copyright Lukas Gamper and Synge Todo 2009 - 2010.
 #   Permission is hereby granted, free of charge, to any person obtaining
 #   a copy of this software and associated documentation files (the “Software”),
@@ -71,3 +74,4 @@ if(output_path)
 endif(output_path)
 
 file(REMOVE ${cmd}_${input}_output)
+

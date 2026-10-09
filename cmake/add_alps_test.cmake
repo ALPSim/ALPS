@@ -68,6 +68,7 @@ macro(add_alps_test)
     ${CMAKE_COMMAND}
       -Dcmd=${cmd}
       -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
+      -Dxmlresources=${PROJECT_BINARY_DIR}/lib/xml
       -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
       -Ddllexedir=${PROJECT_BINARY_DIR}/bin
       -Dinput=${input}
@@ -159,6 +160,7 @@ macro(add_alps_test_mpi)
       -Dmpiexec_preflags=${MPIEXEC_PREFLAGS}
       -Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}
       -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
+      -Dxmlresources=${PROJECT_BINARY_DIR}/lib/xml
       -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
       -Ddllexedir=${PROJECT_BINARY_DIR}/bin
       -Dinput=${input}

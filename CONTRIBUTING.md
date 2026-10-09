@@ -77,11 +77,11 @@ See the [installation page](https://alps.comp-phys.org/install/) for full platfo
 ### Build
 
 Citation metadata and application rules live in `CITATION.cff` and `CITATIONS.yaml`.
-See [citation maintenance](script/citations/README.md) for generation and validation.
+See [citation maintenance](.github/scripts/citations/README.md) for generation and validation.
 Native builds use checked-in generated citation data and do not require Python.
 Editing that data requires Python ≥ 3.9 with `PyYAML` and `jsonschema`:
-`python -m pip install -r script/citations/requirements.txt`, then
-`python script/generate_citations.py --regenerate`. Commit the generated files
+`python -m pip install -r .github/scripts/citations/requirements.txt`, then
+`python .github/scripts/generate_citations.py --regenerate`. Commit the generated files
 alongside the authorities; CI checks that they agree. For the optional citation
 tests, select an interpreter with `-DALPS_CITATION_PYTHON=/path/to/python`.
 
@@ -157,7 +157,7 @@ provenance while making the change, when the sources are known.
   changed component builds on. Update bibliographic records in
   [CITATION.cff](CITATION.cff) and the relevant component mappings in
   [CITATIONS.yaml](CITATIONS.yaml) in the same pull request, following the
-  [citation maintenance instructions](script/citations/README.md). Scientific
+  [citation maintenance instructions](.github/scripts/citations/README.md). Scientific
   credit is separate from license compliance; references should be relevant to
   the affected component.
 - Do not invent attribution or claim independent implementation without
@@ -200,7 +200,7 @@ Validate the intended tag locally using Python 3.11 or newer:
 
 ```bash
 python -m pip install packaging
-python script/check_release_version.py --ref refs/tags/vX.Y.Z
+python .github/scripts/check_release_version.py --ref refs/tags/vX.Y.Z
 ```
 
 The packaging workflow checks these versions before building and checks every

@@ -1,0 +1,7 @@
+L=2
+MODEL_LIBRARY = "${ALPS_XML_PATH}/models.xml"
+MODEL = "spin"
+LATTICE_LIBRARY = "${ALPS_XML_PATH}/lattices.xml"
+LATTICE = "square lattice"
+Sz_total = 0
+

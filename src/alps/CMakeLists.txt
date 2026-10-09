@@ -27,74 +27,74 @@ set(ALPS_STATIC_CPPFLAGS "")
 
 set(ALPS_SOURCES
     # utility
-    utility/encode.cpp utility/copyright.cpp utility/os.cpp utility/temporary_filename.cpp
-    utility/vmusage.cpp
-    utility/citations.cpp
-    utility/cli.cpp
+    utilities/src/encode.cpp utilities/src/copyright.cpp utilities/src/os.cpp utilities/src/temporary_filename.cpp
+    utilities/src/vmusage.cpp
+    utilities/src/citations.cpp
+    cli/src/cli.cpp
     # alea
-    alea/nan.C alea/observable.C alea/observablefactory.C alea/observableset.C
+    alea/src/alea/nan.C alea/src/alea/observable.C alea/src/alea/observablefactory.C alea/src/alea/observableset.C
     # expression
-    expression/evaluator.C
+    expression/src/expression/evaluator.C
     # lattice
-    lattice/disorder.C lattice/latticedescriptor.C lattice/latticegraphdescriptor.C
-    lattice/latticelibrary.C lattice/unitcell.C
+    lattice/src/lattice/disorder.C lattice/src/lattice/latticedescriptor.C lattice/src/lattice/latticegraphdescriptor.C
+    lattice/src/lattice/latticelibrary.C lattice/src/lattice/unitcell.C
     # model
-    model/bondterm.C model/globaloperator.C model/modellibrary.C model/siteterm.C
+    model/src/model/bondterm.C model/src/model/globaloperator.C model/src/model/modellibrary.C model/src/model/siteterm.C
     # osiris
-    osiris/buffer.C osiris/dump.C osiris/dumparchive.C osiris/process.C osiris/comm.C
-    osiris/mpdump.C osiris/xdrdump.C
+    osiris/src/osiris/buffer.C osiris/src/osiris/dump.C osiris/src/osiris/dumparchive.C osiris/src/osiris/process.C osiris/src/osiris/comm.C
+    osiris/src/osiris/mpdump.C osiris/src/osiris/xdrdump.C
     # parameter
-    parameter/parameter.C parameter/parameterlist.C parameter/parameters.C
+    legacy_parameters/src/parameter/parameter.C legacy_parameters/src/parameter/parameterlist.C legacy_parameters/src/parameter/parameters.C
     # parser
-    parser/parser.C parser/xmlattributes.C parser/xmlhandler.C parser/xmlparser.C
-    parser/xmlstream.C parser/xslt_path.C
+    xml/src/parser/parser.C xml/src/parser/xmlattributes.C xml/src/parser/xmlhandler.C xml/src/parser/xmlparser.C
+    xml/src/parser/xmlstream.C xml/src/parser/xslt_path.C
     #hdf5
-    hdf5/archive.cpp ngs/lib/signal.cpp ngs/lib/stacktrace.cpp
+    hdf5/src/archive.cpp hdf5/src/signal.cpp utilities/src/stacktrace.cpp
     # random
-    random/rngfactory.C random/parallel/get_prime.cpp random/parallel/primelist_64.cpp
+    random/src/random/rngfactory.C random/src/random/parallel/get_prime.cpp random/src/random/parallel/primelist_64.cpp
     # scheduler
-    scheduler/abstract_task.C scheduler/convertxdr.C scheduler/factory.C scheduler/info.C
-    scheduler/master_scheduler.C scheduler/measurement_operators.C
-    scheduler/montecarlo.C scheduler/mpp_scheduler.C scheduler/options.C
-    scheduler/remote_task.C scheduler/remote_worker.C scheduler/scheduler.C
-    scheduler/serial_scheduler.C scheduler/signal.C scheduler/single_scheduler.C
-    scheduler/slave_task.C scheduler/task.C scheduler/worker.C scheduler/workertask.C
+    scheduler/src/scheduler/abstract_task.C scheduler/src/scheduler/convertxdr.C scheduler/src/scheduler/factory.C scheduler/src/scheduler/info.C
+    scheduler/src/scheduler/master_scheduler.C scheduler/src/scheduler/measurement_operators.C
+    scheduler/src/scheduler/montecarlo.C scheduler/src/scheduler/mpp_scheduler.C scheduler/src/scheduler/options.C
+    scheduler/src/scheduler/remote_task.C scheduler/src/scheduler/remote_worker.C scheduler/src/scheduler/scheduler.C
+    scheduler/src/scheduler/serial_scheduler.C scheduler/src/scheduler/signal.C scheduler/src/scheduler/single_scheduler.C
+    scheduler/src/scheduler/slave_task.C scheduler/src/scheduler/task.C scheduler/src/scheduler/worker.C scheduler/src/scheduler/workertask.C
     # ngs sources
-    stop_callback.cpp ngs/lib/api.cpp ngs/lib/short_print.cpp ngs/lib/sleep.cpp
+    mc/src/stop_callback.cpp mc/src/ngs/api.cpp utilities/src/short_print.cpp utilities/src/sleep.cpp
     # alea
     # parameters
-    ngs/lib/paramvalue.cpp ngs/lib/paramproxy.cpp ngs/lib/params.cpp
+    params/src/paramvalue.cpp params/src/paramproxy.cpp params/src/params.cpp
     # scheduler
-    mcbase.cpp parseargs.cpp
+    mc/src/mcbase.cpp cli/src/parseargs.cpp
 #deprecated, TODO: replace by new alea
-    ngs/lib/mcoptions.cpp ngs/lib/observablewrappers.cpp ngs/lib/make_deprecated_parameters.cpp ngs/lib/make_parameters_from_xml.cpp
-    ngs/lib/mcresult.cpp ngs/lib/mcresults.cpp ngs/lib/mcobservables.cpp ngs/lib/mcobservable.cpp
+    cli/src/mcoptions.cpp alea/src/ngs/observablewrappers.cpp params/adapters/make_deprecated_parameters.cpp params/adapters/make_parameters_from_xml.cpp
+    alea/src/ngs/mcresult.cpp alea/src/ngs/mcresults.cpp alea/src/ngs/mcobservables.cpp alea/src/ngs/mcobservable.cpp
   )
 
   if (NOT ALPS_HAVE_RPC_XDR_H)
-    set(ALPS_SOURCES ${ALPS_SOURCES} osiris/xdr.c osiris/xdr_array.c osiris/xdr_float.c osiris/xdr_stdio.c)
+    set(ALPS_SOURCES ${ALPS_SOURCES} ../../third_party/xdr/src/xdr.c ../../third_party/xdr/src/xdr_array.c ../../third_party/xdr/src/xdr_float.c ../../third_party/xdr/src/xdr_stdio.c)
   endif (NOT ALPS_HAVE_RPC_XDR_H)
   
   # OpenMPI ULFM
   if (ALPS_NGS_OPENMPI_ULFM)
-    set(ALPS_SOURCES ${ALPS_SOURCES} ngs/lib/ulfm.cpp)
+    set(ALPS_SOURCES ${ALPS_SOURCES} scheduler/src/ngs/ulfm.cpp)
   endif (ALPS_NGS_OPENMPI_ULFM)
 
   # new alea
   if (ALPS_NGS_USE_NEW_ALEA)
 #    set(ALPS_SOURCES ${ALPS_SOURCES} ngs/lib/alea/accumulator_set.cpp ngs/lib/alea/result_set.cpp)
-    set(ALPS_SOURCES ${ALPS_SOURCES} ngs/accumulator/accumulator.cpp)
+    set(ALPS_SOURCES ${ALPS_SOURCES} compatibility/ngs/accumulator/accumulator.cpp)
   endif (ALPS_NGS_USE_NEW_ALEA)
 
 set(ALPS_SOURCES ${ALPS_SOURCES}
     # parapack
-    parapack/clone.C parapack/clone_info.C parapack/filelock.C parapack/logger.C
-    parapack/job.C parapack/mc_worker.C parapack/measurement.C parapack/process_impl.C
-    parapack/option.C parapack/parapack.C parapack/queue.C parapack/rng_helper.C
-    parapack/types.C parapack/util.C parapack/version.C parapack/worker_factory.C
-    parapack/staging.C
+    parapack/src/parapack/clone.C parapack/src/parapack/clone_info.C parapack/src/parapack/filelock.C parapack/src/parapack/logger.C
+    parapack/src/parapack/job.C parapack/src/parapack/mc_worker.C parapack/src/parapack/measurement.C parapack/src/parapack/process_impl.C
+    parapack/src/parapack/option.C parapack/src/parapack/parapack.C parapack/src/parapack/queue.C parapack/src/parapack/rng_helper.C
+    parapack/src/parapack/types.C parapack/src/parapack/util.C parapack/src/parapack/version.C parapack/src/parapack/worker_factory.C
+    parapack/src/parapack/staging.C
     # ngs-parapack
-    ngs/lib/clone.cpp ngs/lib/clone_info.cpp ngs/lib/job.cpp ngs/lib/parapack.cpp ngs/lib/worker_factory.cpp
+    parapack/src/ngs/clone.cpp parapack/src/ngs/clone_info.cpp parapack/src/ngs/job.cpp parapack/src/ngs/parapack.cpp parapack/src/ngs/worker_factory.cpp
 )
 
 add_library(alps ${ALPS_SOURCES})
@@ -102,7 +102,7 @@ add_library(alps ${ALPS_SOURCES})
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   # The legacy "lagged_fibonacci607" generator uses a 48-bit word with a 32-bit
   # result type, so max() truncates by design; keep it for stream compatibility.
-  set_source_files_properties(random/rngfactory.C PROPERTIES
+  set_source_files_properties(random/src/random/rngfactory.C PROPERTIES
     COMPILE_OPTIONS "-Wno-constant-conversion")
 endif()
 
@@ -157,7 +157,7 @@ if(NOT WIN32 AND NOT APPLE)
 endif(NOT WIN32 AND NOT APPLE)
 
 if(ALPS_BUILD_FORTRAN)
-  set(ALPS_FORTRAN_SOURCES fortran/fwrapper_impl.C)
+  set(ALPS_FORTRAN_SOURCES fortran/src/fwrapper_impl.C)
   add_library(alps_fortran STATIC ${ALPS_FORTRAN_SOURCES})
   target_link_libraries(alps_fortran ${CMAKE_Fortran_RUNTIME_LIBRARIES})
   set_target_properties(alps_fortran PROPERTIES COMPILE_DEFINITIONS "${ALPS_STATIC_CPPFLAGS}")

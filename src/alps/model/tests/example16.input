@@ -1,0 +1,5 @@
+L=4
+MODEL_LIBRARY = "${ALPS_XML_PATH}/models.xml"
+MODEL = "spinless fermions"
+LATTICE_LIBRARY = "${ALPS_XML_PATH}/lattices.xml"
+LATTICE = "chain lattice"

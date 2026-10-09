@@ -1,5 +1,0 @@
-LATTICE_LIBRARY = "../lib/xml/lattices.xml"
-LATTICE = "frustrated square lattice"
-L = 4
-W = 4
-UNROLL_BOUNDARY = 1

@@ -311,19 +311,48 @@ include(add_alps_test)
 
 set (BIND_FORTRAN_INTEGER_8 ${LAPACK_64_BIT})
 
-configure_file(src/alps/config.h.in ${PROJECT_BINARY_DIR}/src/alps/config.h)
-configure_file(src/alps/version.h.in ${PROJECT_BINARY_DIR}/src/alps/version.h)
+configure_file(cmake/config/config.h.in ${PROJECT_BINARY_DIR}/src/alps/config.h)
+configure_file(cmake/config/version.h.in ${PROJECT_BINARY_DIR}/src/alps/version.h)
 include(ALPSCitations)
 
-configure_file(lib/xml/lattices.xml.in ${PROJECT_BINARY_DIR}/lib/xml/lattices.xml)
-configure_file(lib/xml/models.xml.in ${PROJECT_BINARY_DIR}/lib/xml/models.xml)
+configure_file(src/alps/resources/lattices.xml.in ${PROJECT_BINARY_DIR}/lib/xml/lattices.xml)
+configure_file(src/alps/resources/models.xml.in ${PROJECT_BINARY_DIR}/lib/xml/models.xml)
 
 ######################################################################
 # include directories
 ######################################################################
 include_directories(${PROJECT_BINARY_DIR}/src)
-include_directories(src)
-include_directories(SYSTEM ${PROJECT_SOURCE_DIR}/bindings)
+include_directories(
+  "${PROJECT_SOURCE_DIR}/src/alps/accumulators/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/alea/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/cli/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/compatibility/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/containers/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/expression/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/fortran/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/graph/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/hdf5/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/ietl/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/lattice/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/legacy_parameters/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/mc/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/model/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/numeric_io/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/numerics/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/osiris/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/params/adapters/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/params/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/parapack/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/plotting/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/random/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/scheduler/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/utilities/include"
+  "${PROJECT_SOURCE_DIR}/src/alps/xml/include"
+  "${PROJECT_SOURCE_DIR}/third_party/boost_numeric_bindings/include"
+  "${PROJECT_SOURCE_DIR}/third_party/xdr/include"
+)
+include_directories("${PROJECT_SOURCE_DIR}/third_party")
+include_directories(SYSTEM ${PROJECT_SOURCE_DIR}/third_party/boost_numeric_bindings/include)
 
 # order the include directories so that directories which are in the
 # source or build tree always come before directories outside the project.
@@ -429,19 +458,38 @@ write_basic_package_version_file(
 include(InstallRequiredSystemLibraries)
 if (ALPS_INSTALL_HEADERS)
   set(ALPS_HEADER_DIR "include")
-  install(DIRECTORY src/alps src/boost src/ietl src/mocasito COMPONENT headers DESTINATION ${ALPS_HEADER_DIR}
-          FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
-         )
-  # ALPS' public headers include the vendored Boost.Numeric bindings.  Install
-  # them as part of the C++ SDK so downstream consumers do not need the ALPS
-  # source tree on their include path.
-  install(DIRECTORY bindings/boost COMPONENT headers DESTINATION ${ALPS_HEADER_DIR}
-          FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
-         )
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/accumulators/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/alea/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/cli/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/compatibility/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/containers/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/expression/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/fortran/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/graph/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/hdf5/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/ietl/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/lattice/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/legacy_parameters/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/mc/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/model/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/numeric_io/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/numerics/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/osiris/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/params/adapters/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/params/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/parapack/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/plotting/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/random/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/scheduler/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/utilities/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/alps/xml/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/third_party/boost_numeric_bindings/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/third_party/xdr/include/" DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp")
+  install(DIRECTORY third_party/boost DESTINATION ${ALPS_HEADER_DIR} COMPONENT headers FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h")
   install(FILES ${PROJECT_BINARY_DIR}/src/alps/config.h ${PROJECT_BINARY_DIR}/src/alps/version.h DESTINATION ${ALPS_HEADER_DIR}/alps COMPONENT headers)
 endif(ALPS_INSTALL_HEADERS)
 
-install(DIRECTORY lib/xml DESTINATION ${ALPS_XML_PATH} COMPONENT xml
+install(DIRECTORY src/alps/resources/ DESTINATION ${ALPS_XML_PATH}/xml COMPONENT xml
         FILES_MATCHING PATTERN "*.xsl"
        )
 
@@ -465,7 +513,7 @@ install(FILES LICENSE.txt README.md
 # libraries
 ######################################################################
 
-add_subdirectory(src/boost)
+add_subdirectory(third_party/boost)
 add_subdirectory(src/alps)
 
 
@@ -474,9 +522,9 @@ add_subdirectory(src/alps)
 ######################################################################
 
 if (NOT ALPS_BUILD_LIBS_ONLY)
-  add_subdirectory(tool)
+  add_subdirectory(src/tools)
   if (ALPS_BUILD_EXAMPLES)
-    add_subdirectory(example)
+    add_subdirectory(tutorials/00-examples)
   endif (ALPS_BUILD_EXAMPLES)
 endif (NOT ALPS_BUILD_LIBS_ONLY)
 
@@ -486,7 +534,7 @@ endif (NOT ALPS_BUILD_LIBS_ONLY)
 ######################################################################
 
 if (ALPS_BUILD_APPLICATIONS AND NOT ALPS_BUILD_LIBS_ONLY)
-  add_subdirectory(applications)
+  add_subdirectory(src/apps)
 endif (ALPS_BUILD_APPLICATIONS AND NOT ALPS_BUILD_LIBS_ONLY)
 
 if (ALPS_INCLUDE_TUTORIALS AND NOT ALPS_BUILD_LIBS_ONLY)
@@ -498,7 +546,7 @@ endif (ALPS_INCLUDE_TUTORIALS AND NOT ALPS_BUILD_LIBS_ONLY)
 ######################################################################
 
 if (ALPS_BUILD_DEVELOPER_TOOLS)
-  add_subdirectory(script)
+  add_subdirectory(.github/scripts)
 endif (ALPS_BUILD_DEVELOPER_TOOLS)
 
 ######################################################################
@@ -509,5 +557,5 @@ if (ALPS_BUILD_TESTS)
   include(ALPSBuildname)
   enable_testing()
   include(CTest)
-  add_subdirectory(test)
+  add_subdirectory(tests)
 endif (ALPS_BUILD_TESTS)

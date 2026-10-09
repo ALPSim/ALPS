@@ -1,0 +1,2 @@
+LATTICE_LIBRARY = "${ALPS_XML_PATH}/lattices.xml"
+LATTICE = "chain lattice"

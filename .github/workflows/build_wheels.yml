@@ -23,11 +23,11 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-      - run: python -m pip install packaging pytest lxml "scikit-build-core>=1.0" -r script/citations/requirements.txt
+      - run: python -m pip install packaging pytest lxml "scikit-build-core>=1.0" -r .github/scripts/citations/requirements.txt
       - name: Test release validation
-        run: python -m pytest test/packaging -q
+        run: python -m pytest tests/packaging -q
       - name: Check package, SDK, and tag versions
-        run: python script/check_release_version.py
+        run: python .github/scripts/check_release_version.py
 
   build_wheels:
     name: Build wheels on ${{ matrix.plat.os }}
@@ -46,7 +46,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: _build/ccache
-          key: pyalps-ccache-${{ runner.os }}-${{ matrix.plat.arch }}-${{ hashFiles('src/**', 'python/**', 'applications/**', 'tool/maxent*') }}
+          key: pyalps-ccache-${{ runner.os }}-${{ matrix.plat.arch }}-${{ hashFiles('src/**', 'python/**', 'third_party/**', 'cmake/**') }}
           restore-keys: pyalps-ccache-${{ runner.os }}-${{ matrix.plat.arch }}-
 
       - name: Build wheels
@@ -83,8 +83,8 @@ jobs:
         run: |
           pipx run twine check dist/*.tar.gz
           tar -tzf dist/*.tar.gz > sdist-manifest.txt
-          for path in _vendor/lib/xml/ALPS.xsl _vendor/tool/maxent.cpp \
-                      _vendor/applications/dmft/qmc \
+          for path in _vendor/src/alps/resources/ALPS.xsl _vendor/src/apps/maxent/cli/maxent.cpp \
+                      _vendor/src/apps/dmft/qmc \
                       LICENSE.txt src/pyalps/__init__.py; do
             grep -q "$path" sdist-manifest.txt || { echo "missing $path in sdist"; exit 1; }
           done
@@ -95,7 +95,7 @@ jobs:
           path: dist/*.tar.gz
 
 
-  # cibuildwheel already runs test/pyalps against every wheel inside the build
+  # cibuildwheel already runs python/pyalps/tests against every wheel inside the build
   # environment; this job checks the artifacts as they would reach PyPI: the
   # repaired, uploaded-and-downloaded wheel installed with pip on a clean
   # runner, at the oldest and newest supported Python.
@@ -134,7 +134,7 @@ jobs:
 
       - name: Import and run binding surface tests
         run: |
-          python script/validate_pyalps.py --output _build/validation --wheelhouse wheelhouse
+          python .github/scripts/validate_pyalps.py --output _build/validation --wheelhouse wheelhouse
 
       - name: Retain installed-wheel validation evidence
         if: always()
@@ -174,7 +174,7 @@ jobs:
           python -m pip install --no-index --find-links wheelhouse pyalps
 
       - name: Run two-rank compatibility surface
-        run: mpiexec -n 2 python -m pytest -q test/pyalps/test_binding_surface.py::test_mpi4py_compatibility_surface test/pyalps/test_mpi_requests.py
+        run: mpiexec -n 2 python -m pytest -q python/pyalps/tests/test_binding_surface.py::test_mpi4py_compatibility_surface python/pyalps/tests/test_mpi_requests.py
 
   upload_pypi:
     needs: [build_wheels, build_sdist, smoke_test, mpi_smoke]
@@ -197,6 +197,6 @@ jobs:
           merge-multiple: true
 
       - name: Check every distribution before publishing
-        run: python script/check_release_version.py --dist dist
+        run: python .github/scripts/check_release_version.py --dist dist
 
       - uses: pypa/gh-action-pypi-publish@release/v1
