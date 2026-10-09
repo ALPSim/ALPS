@@ -42,6 +42,7 @@ public:
   void do_subspace();
   void write_xml_body(alps::oxstream&, const boost::filesystem::path&, bool) const;
   void print_eigenvectors(std::ostream& os) const;
+  void append_eigenvectors(std::vector<value_type>& v) const;
 private:
   
   std::vector<value_type> calculate(operator_matrix_type const& m) const;
@@ -156,6 +157,13 @@ std::vector<T> SparseDiagMatrix<T>::calculate(operator_matrix_type const& m) con
   for(typename std::vector<vector_type>::const_iterator it = eigenvectors.begin();it!=eigenvectors.end();it++)
     av.push_back(inner_prod(boost::numeric::ublas::conj(*it),prod(m,*it)));
   return av;
+}
+
+template <class T>
+void SparseDiagMatrix<T>::append_eigenvectors(std::vector<value_type>& v) const
+{
+  for(typename std::vector<vector_type>::const_iterator it = eigenvectors.begin();it!=eigenvectors.end();it++)
+    std::copy(it->begin(), it->end(), std::back_inserter(v));
 }
 
 template <class T>

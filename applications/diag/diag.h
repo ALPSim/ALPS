@@ -67,6 +67,9 @@ private:
   
   void print() const;
   virtual void print_eigenvectors(std::ostream& os) const=0;
+  void save_eigenvectors();
+  // append the eigenvectors of the current sector, one after the other
+  virtual void append_eigenvectors(std::vector<value_type>& v) const=0;
 
   std::vector<unsigned int> multiplicities_;    
   QNRangeType ranges_;
@@ -189,12 +192,30 @@ void DiagMatrix<T,M>::print() const
 
 
 template <class T, class M>
+void DiagMatrix<T,M>::save_eigenvectors()
+{
+  if (this->uses_translation_invariance())
+    boost::throw_exception(std::runtime_error("SAVE_EIGENVECTORS does not support momentum sectors: "
+      "set TRANSLATION_SYMMETRY=false or use an open lattice"));
+  std::vector<int> basis;
+  typedef typename alps::hamiltonian_matrix<M>::basis_states_type::const_iterator state_iterator;
+  for (state_iterator it = this->states_vector().begin(); it != this->states_vector().end(); ++it)
+    std::copy(it->begin(), it->end(), std::back_inserter(basis));
+  this->basis_states_.push_back(basis);
+  this->eigenvectors_.push_back(std::vector<value_type>());
+  append_eigenvectors(this->eigenvectors_.back());
+}
+
+
+template <class T, class M>
 void DiagMatrix<T,M>::perform_measurements()
 {
   typedef std::pair<std::string,std::string> string_pair;
   
   if (this->print_vectors())
     print();
+  if (this->save_vectors())
+    save_eigenvectors();
   
   alps::EigenvectorMeasurements<value_type> meas(*this);
   if (this->calc_averages()) {

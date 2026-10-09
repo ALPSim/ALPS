@@ -183,6 +183,53 @@ class Hdf5Loader:
                 log(e)
                 log(traceback.format_exc())
         return sets
+
+    def ReadEigenvectorsFromFile(self,flist,proppath='/parameters',respath='/spectrum',verbose=False):
+        fs = self.GetFileNames(flist)
+        sets = []
+        for f in fs:
+            try:
+                fileset = []
+                self.h5f = h5.archive(f, 'r')
+                self.h5fname = f
+                if verbose: log("Loading from file " + f)
+                if not self.h5f.is_group(respath+'/site_basis'):
+                    log("no eigenvectors in " + f + " (run fulldiag or sparsediag with SAVE_EIGENVECTORS=1)")
+                    sets.append(fileset)
+                    continue
+                params = self.ReadParameters(proppath)
+                site_type = [int(t) for t in self.h5f[respath+'/site_type']]
+                site_basis = {}
+                for t in self.h5f.list_children(respath+'/site_basis'):
+                    tpath = respath+'/site_basis/'+t
+                    site_basis[int(t)] = dict(
+                        (pt.hdf5_name_decode(q), np.array(self.h5f[tpath+'/'+q]))
+                        for q in self.h5f.list_children(tpath))
+                for secnum in self.h5f.list_children(respath+'/sectors'):
+                    secpath = respath+'/sectors/'+secnum
+                    if not self.h5f.is_group(secpath+'/eigenvectors'):
+                        continue
+                    d = DataSet()
+                    d.props.update(params)
+                    d.props['hdf5_path'] = secpath
+                    d.props['observable'] = 'eigenvectors'
+                    try:
+                        d.props.update(self.ReadParameters(secpath+'/quantumnumbers'))
+                    except:
+                        if verbose: log("no quantumnumbers stored ")
+                    d.props['site_type'] = site_type
+                    d.props['site_basis'] = site_basis
+                    shape = tuple(int(n) for n in self.h5f[secpath+'/basis/shape'])
+                    d.props['basis'] = np.array(self.h5f[secpath+'/basis/values']).reshape(shape)
+                    shape = tuple(int(n) for n in self.h5f[secpath+'/eigenvectors/shape'])
+                    d.y = np.array(self.h5f[secpath+'/eigenvectors/values']).reshape(shape)
+                    d.x = np.array(self.h5f[secpath+'/energies'])[:shape[0]]
+                    fileset.append(d)
+                sets.append(fileset)
+            except Exception as e:
+                log(e)
+                log(traceback.format_exc())
+        return sets
         
     def GetIterations(self, current_path, params={}, measurements=None, index=None, verbose=False):
         iterationset=[]
@@ -605,6 +652,30 @@ def loadSpectra(files,verbose=False):
     """
     ll = Hdf5Loader()
     return ll.ReadSpectrumFromFile(files,verbose=verbose)
+
+def loadEigenvectors(files,verbose=False):
+    """ loads the eigenvectors written by the ALPS diagonalization applications
+
+        Run fulldiag or sparsediag with SAVE_EIGENVECTORS=1 to store the eigenvectors
+        of every quantum number sector in the result file. Momentum sectors are not
+        supported, so use an open lattice or set TRANSLATION_SYMMETRY=false.
+
+        Parameters:
+            files (list): ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
+            verbose (bool): optional argument that if set to True causes more output to be printed as the data is loaded.
+
+        Returns:
+            list of lists of DataSet objects: the outer list has one entry per file,
+            the inner list one DataSet per quantum number sector.
+            y is the array of eigenvectors indexed [eigenvector, basis state] and x the
+            corresponding energies. props['basis'] is the array of basis states indexed
+            [basis state, site], each entry the index of the local state on that site.
+            Local states are in the order of the ALPS site basis; props['site_basis'][t]
+            maps each quantum number name to its value for every local state of site type t,
+            and props['site_type'] gives the type of each site.
+    """
+    ll = Hdf5Loader()
+    return ll.ReadEigenvectorsFromFile(files,verbose=verbose)
 
 def loadDMFTIterations(files,observable='G_tau',measurements='0',verbose=False):
     """ loads ALPS measurements from ALPS HDF5 result files
