@@ -10,7 +10,6 @@
 * SPDX-License-Identifier: MIT
 *
 *****************************************************************************/
-
 #include <alps/parapack/worker_factory.h>
 #include <alps/parapack/version.h>
 

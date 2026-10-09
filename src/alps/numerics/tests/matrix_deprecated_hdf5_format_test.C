@@ -15,6 +15,8 @@
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <alps/numeric/matrix.hpp>
+#include <alps/hdf5/matrix.hpp>
+#include <alps/xml/matrix.hpp>
 #include <alps/version.h>
 #include <alps/hdf5.hpp>
 

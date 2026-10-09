@@ -1,3 +1,4 @@
+#include <alps/ngs/params_from_file.hpp>
 // Copyright (C) 2010 - 2011 by Lukas Gamper <gamperl@gmail.com>
 //               Matthias Troyer <troyer@comp-phys.org>
 //               2026       by the ALPS collaboration
@@ -121,7 +122,7 @@ NB_MODULE(pyngsparams_c, m) {
         // constructor of the Boost.Python module.
         .def("__init__",
              [](alps::params * self, std::string const & filename) {
-                 new (self) alps::params(boost::filesystem::path(filename));
+                 new (self) alps::params(alps::params_from_file(boost::filesystem::path(filename)));
                  pyalps::enable_python_param_reader(*self);
              },
              nb::arg("filename"))

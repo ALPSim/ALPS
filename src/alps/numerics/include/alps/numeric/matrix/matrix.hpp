@@ -31,7 +31,6 @@
 #include <alps/numeric/matrix/matrix_traits.hpp>
 #include <alps/numeric/matrix/matrix_interface.hpp>
 #include <alps/numeric/real.hpp>
-#include <alps/parser/xmlstream.h>
 
 #include <boost/lambda/lambda.hpp>
 #include <boost/numeric/bindings/blas/level1/axpy.hpp>
@@ -45,6 +44,7 @@
 
 
 namespace alps {
+    class oxstream;
     namespace numeric {
     /** A matrix template class
       *
@@ -390,7 +390,8 @@ namespace alps {
           */
         void swap_rows(size_type i1, size_type i2);
 
-        void write_xml(oxstream& ox) const;
+        // Definition is supplied by the optional <alps/xml/matrix.hpp> adapter.
+        void write_xml(oxstream& xml) const;
 
         template<typename Archive>
         inline void serialize(Archive & ar, const unsigned int version);
@@ -432,9 +433,6 @@ namespace alps {
 
     template <typename T, typename MemoryBlock>
     std::ostream& operator << (std::ostream& o, matrix<T,MemoryBlock> const& m);
-
-    template <typename T, typename MemoryBlock>
-    alps::oxstream& operator<<(alps::oxstream& xml, matrix<T,MemoryBlock> const& m);
 
     } // namespace numeric
 } // namespace alps

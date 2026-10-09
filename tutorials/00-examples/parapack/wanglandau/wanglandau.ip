@@ -1,6 +1,6 @@
 SEED = 3;
 
-LATTICE_LIBRARY = "../../../src/alps/resources/lattices.xml";
+LATTICE_LIBRARY = "lattices.xml";
 LATTICE = "square lattice";
 L = 6;
 COUPLING = 1;

@@ -26,14 +26,7 @@ namespace alps { namespace numeric {
 #undef isnan
 #endif
 
-#if defined(BOOST_MSVC)
-  template <class T>
-  bool isnan(T x) { return _isnan(x);}
-#elif (defined(__INTEL_COMPILER) && __cplusplus <= 199711L) || defined(_CRAYC) || defined(__FCC_VERSION)
-  using ::isnan;
-#else
-  using std::isnan;
-#endif
+using std::isnan;
 
 } } // end namespace
 

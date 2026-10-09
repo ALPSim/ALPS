@@ -19,17 +19,14 @@
 
 #include <alps/config.h>
 #include <alps/lattice/graphproperties.h>
-#include <boost/classic_spirit.hpp>
+#include <boost/spirit/include/classic_actor.hpp>
+#include <boost/spirit/include/classic_core.hpp>
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/undirected_dfs.hpp>
 #include <boost/graph/visitors.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/version.hpp>
-#if BOOST_VERSION < 104000
-# include <boost/vector_property_map.hpp>
-#else
 # include <boost/property_map/vector_property_map.hpp>
-#endif
 #include <boost/detail/workaround.hpp>
 #include <stdexcept>
 
@@ -41,16 +38,11 @@ struct parity_traits;
 template<class Graph>
 struct parity_traits<parity_t, Graph> {
   typedef typename has_property<parity_t, Graph>::type value_type;
-#if BOOST_WORKAROUND(__IBMCPP__, <= 700)
-  enum {white, black, undefined };
-#else
   BOOST_STATIC_CONSTANT(value_type, white = 0);
   BOOST_STATIC_CONSTANT(value_type, black = 1);
   BOOST_STATIC_CONSTANT(value_type, undefined = 2);
-#endif
 };
 
-#if !BOOST_WORKAROUND(__IBMCPP__, <= 800) && !defined(BOOST_NO_INCLASS_MEMBER_INITIALIZATION)
 template<class Graph>
 const typename parity_traits<parity_t, Graph>::value_type
   parity_traits<parity_t, Graph>::white;
@@ -60,7 +52,6 @@ const typename parity_traits<parity_t, Graph>::value_type
 template<class Graph>
 const typename parity_traits<parity_t, Graph>::value_type
   parity_traits<parity_t, Graph>::undefined;
-#endif
 
 
 namespace detail {
@@ -163,7 +154,7 @@ struct parity_helper<Graph, Parity, true>
 
 template<typename Graph, typename Parity>
 bool set_parity(Graph& g, alps::Parameters const& p, Parity) {
-  using namespace boost::spirit;
+  using namespace boost::spirit::classic;
   typedef detail::parity_helper<Graph, Parity,
     has_property<Parity, Graph>::vertex_property> parity_helper;
 

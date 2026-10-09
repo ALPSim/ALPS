@@ -16,8 +16,8 @@
 #ifndef GENBLAS_MATRIX
 #define GENBLAS_MATRIX
 
-#include <alps/numeric/detail/deprecated/blasheader.hpp>
-#include <alps/numeric/detail/deprecated/vector.hpp>
+#include "./blasheader.hpp"
+#include "./vector.hpp"
 #include <cmath>
 #include <cassert>
 #include <complex>

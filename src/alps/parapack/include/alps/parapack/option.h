@@ -14,14 +14,15 @@
 #ifndef PARAPACK_OPTION_H
 #define PARAPACK_OPTION_H
 
+#include <alps/export.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/program_options.hpp>
-#include <alps/parapack/types.h>
+#include "types.h"
 
 namespace alps {
 namespace parapack {
 
-struct option {
+struct ALPS_DECL option {
   option(int argc, char** argv, bool for_evaluate = false);
   boost::program_options::options_description desc;
   bool for_evaluate;

@@ -10,13 +10,12 @@
 * SPDX-License-Identifier: MIT
 *
 *****************************************************************************/
-
 #include <alps/parapack/rng_helper.h>
 
 namespace alps {
 
 rng_helper::rng_helper(const Parameters& p) {
-#ifdef ALPS_ENABLE_OPENMP_WORKER
+#ifdef ALPS_ENABLE_OPENMP
   int nr = max_threads();
   engines_.resize(nr);
   generators_.resize(nr);

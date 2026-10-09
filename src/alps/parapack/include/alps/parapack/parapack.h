@@ -15,9 +15,9 @@
 #define PARAPACK_SCHEDULER_H
 
 #include <alps/config.h>
-#include <alps/parapack/worker_factory.h>
-#include <alps/parapack/option.h>
-#include <alps/parapack/job.h>
+#include "worker_factory.h"
+#include "option.h"
+#include "job.h"
 #include <iostream>
 
 namespace alps {

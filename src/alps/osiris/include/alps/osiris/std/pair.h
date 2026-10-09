@@ -25,9 +25,7 @@
 // pair templates
 //-----------------------------------------------------------------------
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 template <class T1, class T2>
 inline alps::IDump& operator>>(alps::IDump& dump, std::pair<T1,T2>& x)
@@ -41,8 +39,6 @@ inline alps::ODump& operator<<(alps::ODump& dump, const std::pair<T1,T2>& x)
   return dump << x.first << x.second;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 #endif // OSIRIS_STD_PAIR_H

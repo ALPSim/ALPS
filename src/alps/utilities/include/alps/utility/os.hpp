@@ -21,6 +21,7 @@
 // This file includes low level functions which depend on the OS used
 //=======================================================================
 
+#include <alps/utilities_export.h>
 #include <alps/config.h>
 #include <boost/filesystem/path.hpp>
 #include <string>
@@ -28,19 +29,19 @@
 namespace alps {
 
 /// returns the hostname
-ALPS_DECL std::string hostname();
+ALPS_UTILITIES_DECL std::string hostname();
 
 /// returns the username
-ALPS_DECL std::string username();
+ALPS_UTILITIES_DECL std::string username();
 
 /// returns the username
-ALPS_DECL boost::filesystem::path temp_directory_path();
+ALPS_UTILITIES_DECL boost::filesystem::path temp_directory_path();
 
 /// returns the installation directory
-ALPS_DECL boost::filesystem::path installation_directory();
+ALPS_UTILITIES_DECL boost::filesystem::path installation_directory();
 
 /// returns the program directory
-ALPS_DECL boost::filesystem::path bin_directory();
+ALPS_UTILITIES_DECL boost::filesystem::path bin_directory();
 
 } // end namespace
 

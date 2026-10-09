@@ -10,7 +10,6 @@
 * SPDX-License-Identifier: MIT
 *
 *****************************************************************************/
-
 #include <alps/parapack/job.h>
 #include <alps/parapack/clone.h>
 #include <alps/parapack/filelock.h>

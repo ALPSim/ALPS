@@ -14,12 +14,13 @@
 #ifndef ALPS_NGS_SLEEP_HPP
 #define ALPS_NGS_SLEEP_HPP
 
+#include <alps/utilities_export.h>
 #include <alps/config.h>
 #include <cstddef>
 
 namespace alps {
 
-    void ALPS_DECL sleep(std::size_t nanoseconds);
+    void ALPS_UTILITIES_DECL sleep(std::size_t nanoseconds);
 
 }
 

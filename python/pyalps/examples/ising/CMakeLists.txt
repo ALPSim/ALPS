@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(alps_nanobind_export_example LANGUAGES CXX)
+project(alps_nanobind_export_example LANGUAGES C CXX)
 
 find_package(ALPS REQUIRED CONFIG)
 find_package(Python 3.10 REQUIRED COMPONENTS Interpreter Development.Module)

@@ -14,8 +14,8 @@
 #ifndef PARAPACK_CLONE_INFO_P_H
 #define PARAPACK_CLONE_INFO_P_H
 
-#include <alps/parapack/clone_info.h>
-#include <alps/parapack/util.h>
+#include "clone_info.h"
+#include "util.h"
 #include <alps/parser/xmlhandler.h>
 
 namespace alps {

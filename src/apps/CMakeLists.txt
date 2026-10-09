@@ -21,19 +21,25 @@
 # applications
 ######################################################################
 
-enable_testing()
+function(alps_install_applications)
+  install(
+    TARGETS ${ARGN}
+    EXPORT ALPSApplicationTargets
+    RUNTIME_DEPENDENCY_SET alps_runtime
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT applications)
+  list(TRANSFORM ARGN PREPEND "ALPS::")
+  set_property(TARGET alps APPEND PROPERTY ALPS_APPLICATION_TARGETS ${ARGN})
+endfunction()
 
-add_definitions(${LAPACK_DEFINITIONS})
 add_subdirectory(mc)
 add_subdirectory(qmc)
 add_subdirectory(diag)
 add_subdirectory(dmrg)
 add_subdirectory(dmft)
+add_subdirectory(maxent)
 
-
-######################################################################
-# GUI's
-######################################################################
-
-# add_subdirectory(gui/simulator)
-
+install(
+  EXPORT ALPSApplicationTargets
+  NAMESPACE ALPS::
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/alps
+  COMPONENT applications)

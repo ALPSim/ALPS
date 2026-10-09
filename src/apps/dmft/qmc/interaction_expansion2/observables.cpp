@@ -38,24 +38,15 @@ void InteractionExpansion::initialize_observables(void)
   if(measurements.has("Sign")){
     measurements.clear();
   }
-#ifdef ALPS_NGS_USE_NEW_ALEA
-  measurements << alps::accumulator::RealObservable("Sign");
-  measurements << alps::accumulator::RealVectorObservable("PertOrder");
-#else
   measurements << alps::ngs::RealObservable("Sign");
   measurements << alps::ngs::RealVectorObservable("PertOrder");
-#endif
   if(measurement_method==selfenergy_measurement_itime_rs) {
     for(unsigned int flavor=0;flavor<n_flavors;++flavor){
       for(unsigned int i=0;i<n_site;++i){
         for(unsigned int j=0;j<n_site;++j){
           std::stringstream obs_name;
           obs_name<<"W_"<<flavor<<"_"<<i<<"_"<<j;
-#ifndef ALPS_NGS_USE_NEW_ALEA
           measurements << alps::ngs::RealVectorObservable(obs_name.str().c_str());
-#else
-          throw std::runtime_error("alps::ngs::SignedRealVectorObservable is not implemented");
-#endif //ALPS_NGS_USE_NEW_ALEA
         }
       }
     }
@@ -66,34 +57,22 @@ void InteractionExpansion::initialize_observables(void)
         std::stringstream obs_name_real, obs_name_imag;
         obs_name_real<<"Wk_real_"<<flavor<<"_"<<k << "_" << k;
         obs_name_imag<<"Wk_imag_"<<flavor<<"_"<<k << "_" << k;
-#ifndef ALPS_NGS_USE_NEW_ALEA
         measurements << alps::ngs::RealVectorObservable(obs_name_real.str().c_str());
         measurements << alps::ngs::RealVectorObservable(obs_name_imag.str().c_str());
-#else
-        throw std::runtime_error("alps::ngs::SignedRealVectorObservable is not implemented");
-#endif //ALPS_NGS_USE_NEW_ALEA
       }
     }
   }
-#ifndef ALPS_NGS_USE_NEW_ALEA
   measurements << alps::ngs::RealVectorObservable("densities");
   for(unsigned int flavor=0;flavor<n_flavors;++flavor)
     measurements << alps::ngs::RealVectorObservable("densities_"+boost::lexical_cast<std::string>(flavor));
   measurements << alps::ngs::RealObservable("density_correlation");
   measurements << alps::ngs::RealVectorObservable("n_i n_j");
-#else
-  throw std::runtime_error("alps::ngs::SignedRealVectorObservable is not implemented");
-#endif //ALPS_NGS_USE_NEW_ALEA
   for(unsigned int flavor=0;flavor<n_flavors;++flavor){
     for(unsigned int i=0;i<n_site;++i){
       std::stringstream density_name, sz_name;
       density_name<<"density_"<<flavor;
       if (n_site>1) density_name<<"_"<<i;
-#ifndef ALPS_NGS_USE_NEW_ALEA
       measurements << alps::ngs::RealObservable(density_name.str().c_str());
-#else
-  throw std::runtime_error("alps::ngs::SignedRealVectorObservable is not implemented");
-#endif //ALPS_NGS_USE_NEW_ALEA
     }
   }
   for(unsigned int i=0;i<n_site;++i){
@@ -101,28 +80,16 @@ void InteractionExpansion::initialize_observables(void)
     sz_name<<"Sz_"<<i;
     sz2_name<<"Sz2_"<<i;
     sz0_szj_name<<"Sz0_Sz"<<i;
-#ifndef ALPS_NGS_USE_NEW_ALEA
     measurements << alps::ngs::SignedRealObservable(sz_name.str().c_str());
     measurements << alps::ngs::SignedRealObservable(sz2_name.str().c_str());
     measurements << alps::ngs::SignedRealObservable(sz0_szj_name.str().c_str());
-#else
-  throw std::runtime_error("alps::ngs::SignedRealVectorObservable is not implemented");
-#endif //ALPS_NGS_USE_NEW_ALEA
   }
   //acceptance probabilities
-#ifdef ALPS_NGS_USE_NEW_ALEA
-  measurements << alps::accumulator::RealObservable("VertexInsertion");
-  measurements << alps::accumulator::RealObservable("VertexRemoval");
-  measurements << alps::accumulator::RealObservable("MeasurementTime");
-  measurements << alps::accumulator::RealObservable("UpdateTime");
-  measurements << alps::accumulator::RealObservable("RecomputeTime");
-#else
   measurements << alps::ngs::RealObservable("VertexInsertion");
   measurements << alps::ngs::RealObservable("VertexRemoval");
   measurements << alps::ngs::RealObservable("MeasurementTime");
   measurements << alps::ngs::RealObservable("UpdateTime");
   measurements << alps::ngs::RealObservable("RecomputeTime");
-#endif
   measurements.reset(true);
 }
 

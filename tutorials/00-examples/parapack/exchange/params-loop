@@ -1,4 +1,4 @@
-SIMULATION_NAME = "tutorials/00-examples/exchange loop-1";
+SIMULATION_NAME = "example/exchange loop-1";
 
 WORKER = "loop exchange"
 

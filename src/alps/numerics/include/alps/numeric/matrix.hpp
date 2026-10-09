@@ -19,4 +19,3 @@
 #include <alps/numeric/matrix/transpose.hpp>
 #include <alps/numeric/matrix/column_view.hpp>
 #include <alps/numeric/matrix/scalar_product.hpp>
-#include <alps/hdf5/matrix.hpp>

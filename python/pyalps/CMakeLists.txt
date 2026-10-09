@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 cmake_minimum_required(VERSION 3.22)
-project(pyalps LANGUAGES CXX)
+project(pyalps LANGUAGES C CXX)
 
 option(PYALPS_BUILD_APPLICATIONS "Build optional ALPS application bindings" ON)
 
@@ -23,7 +23,7 @@ find_package(nanobind 2.10 CONFIG REQUIRED)
 
 get_filename_component(_repo_root "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
 set(_alps_source_root "${_repo_root}")
-if(NOT EXISTS "${_alps_source_root}/src/apps/maxent/cli/maxent.cpp")
+if(NOT EXISTS "${_alps_source_root}/src/alps/resources")
   set(_alps_source_root "${CMAKE_CURRENT_SOURCE_DIR}/_vendor")
 endif()
 set(_bindings "${CMAKE_CURRENT_SOURCE_DIR}/cpp")
@@ -37,7 +37,7 @@ endif()
 # Legacy ALPSConfig.cmake serializes the HDF5 imported target name into
 # ALPS_LIBRARIES.  Outside the original build tree that target no longer
 # exists, while the installed library keeps its conventional `hdf5` name.
-set(_pyalps_link_libraries ${ALPS_LIBRARIES})
+set(_pyalps_link_libraries ALPS::alps)
 list(TRANSFORM _pyalps_link_libraries REPLACE "^hdf5-shared$" "hdf5")
 separate_arguments(_pyalps_link_options NATIVE_COMMAND "${ALPS_EXTRA_LINKER_FLAGS}")
 
@@ -79,52 +79,16 @@ nanobind_add_module(pyngsrandom01_c ${_pyalps_nanobind_options} "${_bindings}/ra
 nanobind_add_module(pyngsaccumulator_c ${_pyalps_nanobind_options} "${_bindings}/accumulator.cpp")
 
 if(PYALPS_BUILD_APPLICATIONS)
-  if(NOT EXISTS "${_alps_source_root}/src/apps/maxent/cli/maxent.cpp")
-    message(FATAL_ERROR
-      "PYALPS_BUILD_APPLICATIONS requires an ALPS source checkout or pyalps sdist. "
-      "Configure with -DPYALPS_BUILD_APPLICATIONS=OFF for the core-only package.")
-  endif()
-
-  set(_dmft "${_alps_source_root}/src/apps/dmft/qmc")
-
-  nanobind_add_module(maxent_c ${_pyalps_nanobind_options}
-    "${_alps_source_root}/src/apps/maxent/cli/maxent.cpp"
-    "${_alps_source_root}/src/apps/maxent/src/maxent_helper.cpp"
-    "${_alps_source_root}/src/apps/maxent/src/maxent_simulation.cpp"
-    "${_alps_source_root}/src/apps/maxent/src/maxent_parms.cpp")
-
-  nanobind_add_module(cthyb ${_pyalps_nanobind_options}
-    "${_dmft}/hybridization/hybmain.cpp"
-    "${_dmft}/hybridization/hybsim.cpp"
-    "${_dmft}/hybridization/hyblocal.cpp"
-    "${_dmft}/hybridization/hybint.cpp"
-    "${_dmft}/hybridization/hybfun.cpp"
-    "${_dmft}/hybridization/hybretintfun.cpp"
-    "${_dmft}/hybridization/hybmatrix.cpp"
-    "${_dmft}/hybridization/hybmatrix_ft.cpp"
-    "${_dmft}/hybridization/hybconfig.cpp"
-    "${_dmft}/hybridization/hybupdates.cpp"
-    "${_dmft}/hybridization/hybevaluate.cpp"
-    "${_dmft}/hybridization/hybmeasurements.cpp")
-
-  nanobind_add_module(ctint ${_pyalps_nanobind_options}
-    "${_dmft}/interaction_expansion2/main.cpp"
-    "${_dmft}/fouriertransform.C"
-    "${_dmft}/interaction_expansion2/auxiliary.cpp"
-    "${_dmft}/interaction_expansion2/observables.cpp"
-    "${_dmft}/interaction_expansion2/fastupdate.cpp"
-    "${_dmft}/interaction_expansion2/selfenergy.cpp"
-    "${_dmft}/interaction_expansion2/solver.cpp"
-    "${_dmft}/interaction_expansion2/io.cpp"
-    "${_dmft}/interaction_expansion2/splines.cpp"
-    "${_dmft}/interaction_expansion2/interaction_expansion.cpp"
-    "${_dmft}/interaction_expansion2/measurements.cpp"
-    "${_dmft}/interaction_expansion2/model.cpp")
-
-  list(APPEND _pyalps_targets maxent_c cthyb ctint)
-  foreach(_target IN ITEMS maxent_c cthyb ctint)
-    target_compile_definitions(${_target} PRIVATE BUILD_PYTHON_MODULE)
-    target_include_directories(${_target} PRIVATE "${_bindings}" "${_dmft}")
+  find_package(ALPS REQUIRED CONFIG COMPONENTS solvers)
+  foreach(solver IN ITEMS maxent cthyb ctint)
+    if(solver STREQUAL "maxent")
+      set(module maxent_c)
+    else()
+      set(module ${solver})
+    endif()
+    nanobind_add_module(${module} ${_pyalps_nanobind_options} "${_bindings}/${module}.cpp")
+    target_link_libraries(${module} PRIVATE ALPS::${solver})
+    list(APPEND _pyalps_targets ${module})
   endforeach()
 endif()
 
@@ -302,36 +266,11 @@ if(PYALPS_BUNDLE_APPLICATIONS)
   message(STATUS "pyalps: bundling ${_alps_program_count} ALPS programs into pyalps/bin")
   install(PROGRAMS ${_alps_programs} DESTINATION pyalps/bin)
 
-  # The bundled programs resolve libalps and libboost through their ../lib
-  # RPATH, so the SDK's shared libraries have to travel with them -- each one
-  # exactly once. install(DIRECTORY) is the wrong tool here: it would copy the
-  # whole SONAME chain (libalps.so, libalps.so.2, libalps.so.2.3.4), and since
-  # a wheel cannot carry symlinks those arrive as three byte-identical 10 MB
-  # files. Install only the SONAME-named file, which is the name every
-  # DT_NEEDED / LC_LOAD_DYLIB entry actually asks for.
-  #
-  # src/alps/CMakeLists.txt gives libalps SOVERSION ${ALPS_VERSION_MAJOR} on
-  # ELF platforms and no version at all on APPLE, so "<name>.<major>" is the
-  # SONAME spelling wherever a versioned form exists. python/pyalps/tests guards both
-  # halves of this: that no library is bundled twice, and that every bundled
-  # program can still be loaded.
-  file(GLOB _alps_runtime_libs LIST_DIRECTORIES FALSE
-    "${ALPS_ROOT_DIR}/lib/*.so" "${ALPS_ROOT_DIR}/lib/*.dylib")
-  if(NOT _alps_runtime_libs)
-    message(FATAL_ERROR
-      "PYALPS_BUNDLE_APPLICATIONS is ON but no shared libraries were found in "
-      "${ALPS_ROOT_DIR}/lib. The bundled programs would ship without the "
-      "libalps they link against.")
-  endif()
-  foreach(_lib IN LISTS _alps_runtime_libs)
-    get_filename_component(_lib_name "${_lib}" NAME)
-    set(_lib_soname "${_lib_name}")
-    if(EXISTS "${_lib}.${ALPS_VERSION_MAJOR}")
-      set(_lib_soname "${_lib_name}.${ALPS_VERSION_MAJOR}")
-    endif()
-    get_filename_component(_lib_real "${_lib}" REALPATH)
-    install(PROGRAMS "${_lib_real}" DESTINATION pyalps/lib
-      RENAME "${_lib_soname}")
+  # Copy each exported runtime once using the loader's SONAME spelling. This
+  # also handles macOS versioned dylib symlink chains without duplicate copies.
+  foreach(runtime IN LISTS ALPS_RUNTIME_TARGETS)
+    install(FILES "$<TARGET_FILE:${runtime}>" DESTINATION pyalps/lib
+      RENAME "$<TARGET_SONAME_FILE_NAME:${runtime}>")
   endforeach()
 endif()
 
@@ -346,9 +285,9 @@ if(NOT EXISTS "${_alps_xml_source}/ALPS.xsl")
 endif()
 install(DIRECTORY "${_alps_xml_source}/" DESTINATION pyalps/xml
   FILES_MATCHING PATTERN "*.xsl")
-configure_file("${_alps_xml_source}/lattices.xml.in"
+configure_file("${_alps_xml_source}/lattices.xml"
   "${CMAKE_CURRENT_BINARY_DIR}/xml/lattices.xml" COPYONLY)
-configure_file("${_alps_xml_source}/models.xml.in"
+configure_file("${_alps_xml_source}/models.xml"
   "${CMAKE_CURRENT_BINARY_DIR}/xml/models.xml" COPYONLY)
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/xml/lattices.xml"

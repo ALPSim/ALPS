@@ -48,9 +48,7 @@ typedef DefaultTermDescriptor<BondTermDescriptor> DefaultBondTermDescriptor;
 
 } // namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 template <class TERM>
 inline alps::oxstream& operator<<(alps::oxstream& out, const alps::DefaultTermDescriptor<TERM>& q)
@@ -67,8 +65,6 @@ inline std::ostream& operator<<(std::ostream& out, const alps::DefaultTermDescri
   return out;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // namespace alps
-#endif
 
 #endif

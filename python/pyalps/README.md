@@ -28,14 +28,14 @@ For older tutorials, use `python` instead of the removed `alpspython` wrapper an
 
 ## Building from source
 
-Requires Python 3.10+, CMake 3.22+, Ninja, a C++17 compiler, BLAS/LAPACK, and HDF5. Reuse an installed ALPS C++ SDK, or build one with the `wheel-deps` preset. From the repository root, build the SDK and Python wheel with:
+Requires Python 3.10+, CMake 3.27+, Ninja, a C++17 compiler, external Boost 1.76+, LP64 BLAS/LAPACK, and HDF5 1.10.5+. Reuse an installed ALPS C++ SDK, or build one with the `distribution` preset. From the repository root, build the SDK and Python wheel with:
 
 ```sh
-cmake --preset wheel-deps
-cmake --build --preset wheel-deps
+cmake --preset distribution
+cmake --build --preset distribution
 
 python -m pip install build
-ALPS_DIR="$PWD/_build/wheel-deps/install/share/alps" \
+ALPS_DIR="$PWD/_build/distribution/install/share/alps" \
   python -m build --wheel python/pyalps
 ```
 

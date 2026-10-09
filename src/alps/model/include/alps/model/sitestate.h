@@ -142,9 +142,7 @@ bool is_fermionic(const SiteBasisDescriptor<I>& b, const S& s)
 
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 template <class I>
 std::ostream& operator<<(std::ostream& out, const alps::site_state<I>& s)
@@ -164,8 +162,6 @@ std::ostream& operator<<(std::ostream& out, const alps::single_qn_site_state<I>&
 }
 
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // namespace alps
-#endif
 
 #endif

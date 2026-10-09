@@ -76,8 +76,6 @@ ALPS_DIR = { env = "ALPS_DIR" }
 "../../LICENSE.txt" = "LICENSE.txt"
 # The version file, so an sdist build can still derive its own version.
 "../../ALPS_VERSION.txt" = "ALPS_VERSION.txt"
-"../../src/apps/dmft/qmc" = "_vendor/src/apps/dmft/qmc"
-"../../src/apps/maxent" = "_vendor/src/apps/maxent"
 "../../src/alps/resources" = "_vendor/src/alps/resources"
 
 [tool.cibuildwheel]
@@ -103,7 +101,9 @@ environment-pass = ["GITHUB_REF", "ALPS_VERSION_PRERELEASE"]
 before-all = [
   "if command -v dnf >/dev/null 2>&1; then dnf install -y ccache cmake hdf5-devel lapack-devel ninja-build; EXTRA=; else apk add --no-cache ccache ninja-is-really-ninja hdf5-dev lapack-dev libtirpc-dev; ln -sf /usr/include/tirpc/rpc /usr/include/rpc; ln -sf /usr/include/tirpc/netconfig.h /usr/include/netconfig.h; export CXXFLAGS=-DALPS_NGS_NO_STACKTRACE; EXTRA='-DALPS_HAVE_RPC_XDR_H=1 -DCMAKE_CXX_STANDARD_LIBRARIES=-ltirpc'; fi",
   "cd {project}",
-  "cmake --preset wheel-deps -DCMAKE_CXX_COMPILER_LAUNCHER=ccache $EXTRA",
+  "python -m pip install 'cmake>=3.27'",
+  "ALPS_BOOST_MPI=OFF python .github/scripts/prepare_dependencies.py boost-1.91.0 _build/boost-install",
+  "cmake --preset wheel-deps -DBoost_ROOT=$PWD/_build/boost-install -DCMAKE_CXX_COMPILER_LAUNCHER=ccache $EXTRA",
   "cmake --build --preset wheel-deps -j2",
 ]
 repair-wheel-command = [
@@ -119,7 +119,9 @@ repair-wheel-command = [
 before-all = [
   "brew install ccache cmake hdf5 ninja",
   "cd {project}",
-  "cmake --preset wheel-deps -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DHDF5_ROOT=$(brew --prefix hdf5)",
+  "python -m pip install 'cmake>=3.27'",
+  "ALPS_BOOST_MPI=OFF python .github/scripts/prepare_dependencies.py boost-1.91.0 _build/boost-install",
+  "cmake --preset wheel-deps -DBoost_ROOT=$PWD/_build/boost-install -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DHDF5_ROOT=$(brew --prefix hdf5)",
   "cmake --build --preset wheel-deps -j2",
 ]
 repair-wheel-command = [

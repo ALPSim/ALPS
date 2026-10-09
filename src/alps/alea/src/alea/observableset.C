@@ -13,7 +13,6 @@
 *****************************************************************************/
 
 /* $Id$ */
-
 #include <alps/alea/observableset.h>
 #include <alps/alea/observableset_p.h>
 #include <alps/utility/encode.hpp>
@@ -261,7 +260,7 @@ uint32_t ObservableSet::number_of_runs() const
 {
   uint32_t n=0;
   for (const_iterator it=begin(); it !=end(); ++it)
-    n = std::max(n, it->second->number_of_runs());
+    n = (std::max)(n, it->second->number_of_runs());
   return n;
 }
 

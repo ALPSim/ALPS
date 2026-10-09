@@ -121,9 +121,7 @@ private:
 
 } } // end namespace alps::numeric
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {  namespace numeric  {namespace detail {
-#endif
 
 /// \brief multiplication of an element_proxy with a scalar
 ///
@@ -148,8 +146,6 @@ alps::numeric::detail::element_proxy<M> operator*(T x, alps::numeric::detail::el
   return y *= x;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } } }
-#endif
 
 #endif // ALPS_NUMERIC_MATRIX_AS_VECTOR_HPP

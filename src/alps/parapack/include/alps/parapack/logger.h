@@ -14,6 +14,7 @@
 #ifndef PARAPACK_LOGGER_H
 #define PARAPACK_LOGGER_H
 
+#include <alps/export.h>
 #include <alps/parapack/process.h>
 #include <alps/parapack/types.h>
 #include <alps/utility/vmusage.hpp>
@@ -22,7 +23,7 @@
 
 namespace alps {
 
-struct logger {
+struct ALPS_DECL logger {
   static std::string header();
   static std::string task(alps::tid_t tid);
   static std::string clone(alps::tid_t tid, alps::cid_t cid);

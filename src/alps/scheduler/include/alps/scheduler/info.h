@@ -63,7 +63,7 @@ public:
   void load(hdf5::archive &);
 
   void save (ODump&) const;
-  ALPS_DUMMY_VOID write_xml(alps::oxstream&) const;
+  void write_xml(alps::oxstream&) const;
   void load (IDump& dump,int version=MCDump_worker_version);
 
   const boost::posix_time::ptime& start_time() const;
@@ -100,10 +100,8 @@ public:
 } // end namespace scheduler
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
 namespace scheduler {
-#endif
 
 inline alps::oxstream& operator<<(alps::oxstream& o,const alps::scheduler::Info& i)
 {
@@ -117,9 +115,7 @@ inline alps::oxstream& operator<<(alps::oxstream& o,const alps::scheduler::TaskI
   return o;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // namespace scheduler
 } // namespace alps
-#endif
 
 #endif

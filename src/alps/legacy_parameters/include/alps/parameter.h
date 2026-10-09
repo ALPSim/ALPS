@@ -17,8 +17,8 @@
 #ifndef ALPS_PARAMETER_H
 #define ALPS_PARAMETER_H
 
-#include <alps/parameter/parameter.h>
-#include <alps/parameter/parameters.h>
-#include <alps/parameter/parameterlist.h>
+#include "parameter/parameter.h"
+#include "parameter/parameters.h"
+#include "parameter/parameterlist.h"
 
 #endif // ALPS_PARAMETER_H

@@ -1,5 +1,5 @@
 /* heisenberg.cpp
- * adapted from alps/tutorials/code-07-mcmain-mcbase/heisenberg.cpp
+ * adapted from alps/tutorials/09-code/07-mcmain-mcbase/heisenberg.cpp
  * 1d grid, 3d spins
  */
 

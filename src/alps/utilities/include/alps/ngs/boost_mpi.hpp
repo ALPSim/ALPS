@@ -18,8 +18,11 @@
 
     #include <boost/mpi.hpp>
     #include <boost/array.hpp>
-    #include <alps/multi_array.hpp>
+    #include <alps/multi_array/multi_array.hpp>
+    #include <alps/multi_array/serialization.hpp>
 
+    #include <algorithm>
+    #include <numeric>
     #include <vector>
 
     namespace boost {

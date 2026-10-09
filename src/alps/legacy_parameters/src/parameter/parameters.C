@@ -13,7 +13,6 @@
 *****************************************************************************/
 
 /* $Id$ */
-
 #include <alps/parameter/parameters.h>
 #include <alps/parameter/parameters_p.h>
 #include <boost/foreach.hpp>
@@ -25,7 +24,7 @@
 
 #include <alps/hdf5.hpp>
 
-namespace bs = boost::spirit;
+namespace bs = boost::spirit::classic;
 
 namespace alps {
 
@@ -179,9 +178,7 @@ void ParametersXMLHandler::end_child(const std::string&, xml::tag_type type)
 } // namespace alps
 
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 std::ostream& operator<<(std::ostream& os, const alps::Parameters& p)
 {
@@ -199,6 +196,4 @@ std::ostream& operator<<(std::ostream& os, const alps::Parameters& p)
   return os;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif

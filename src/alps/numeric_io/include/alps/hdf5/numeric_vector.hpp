@@ -15,6 +15,8 @@
 #define ALPS_HDF5_NUMERIC_VECTOR_HPP
 
 #include <alps/hdf5/archive.hpp>
+#include <alps/hdf5/complex.hpp>
+#include <alps/hdf5/vector.hpp>
 #include <alps/numeric/matrix/vector.hpp>
 
 namespace alps {

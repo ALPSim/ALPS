@@ -14,10 +14,8 @@
 #ifndef ALPS_NGS_OBSERVABLEWRAPPERS_HPP
 #define ALPS_NGS_OBSERVABLEWRAPPERS_HPP
 
+#include <alps/export.h>
 #include <alps/ngs/mcobservables.hpp>
-// #ifdef ALPS_NGS_USE_NEW_ALEA
-//     #include <alps/ngs/alea/accumulator_set.hpp>
-// #endif
 
 #include <string>
 
@@ -27,7 +25,7 @@ namespace alps {
 
         namespace detail {
 
-            class ObservableWapper {
+            class ALPS_DECL ObservableWapper {
                 public:
 
                     ObservableWapper(std::string const & name, uint32_t binnum = 0): _name(name), _binnum(binnum) {}
@@ -41,7 +39,7 @@ namespace alps {
             };
 
 
-            class SignedObservableWapper : public ObservableWapper {
+            class ALPS_DECL SignedObservableWapper : public ObservableWapper {
                 public:
 
                     SignedObservableWapper(std::string const & name, std::string const & sign, uint32_t binnum = 0): ObservableWapper(name, binnum), _sign(sign) {}
@@ -58,30 +56,18 @@ namespace alps {
             public:
                 RealObservable(std::string const & name, uint32_t binnum = 0): ObservableWapper(name,binnum) {}
         };
-
-        // #ifdef ALPS_NGS_USE_NEW_ALEA
-        //     ALPS_DECL alps::accumulator::accumulator_set & operator<< (alps::accumulator::accumulator_set & set, RealObservable const & obs);
-        // #endif
         ALPS_DECL alps::mcobservables & operator<< (alps::mcobservables & set, RealObservable const & obs);
 
         class ALPS_DECL RealVectorObservable : public detail::ObservableWapper {
             public:
                 RealVectorObservable(std::string const & name, uint32_t binnum = 0): ObservableWapper(name,binnum) {}
         };
-
-        // #ifdef ALPS_NGS_USE_NEW_ALEA
-        //     ALPS_DECL alps::accumulator::accumulator_set & operator<< (alps::accumulator::accumulator_set & set, RealVectorObservable const & obs);
-        // #endif
         ALPS_DECL alps::mcobservables & operator<< (alps::mcobservables & set, RealVectorObservable const & obs);
 
         class ALPS_DECL SimpleRealObservable : public detail::ObservableWapper {
             public:
                 SimpleRealObservable(std::string const & name): ObservableWapper(name) {}
         };
-        
-        // #ifdef ALPS_NGS_USE_NEW_ALEA
-        //     ALPS_DECL alps::accumulator::accumulator_set & operator<< (alps::accumulator::accumulator_set & set, SimpleRealObservable const & obs);
-        // #endif
         ALPS_DECL alps::mcobservables & operator<< (alps::mcobservables & set, SimpleRealObservable const & obs);
 
 
@@ -89,10 +75,6 @@ namespace alps {
             public:
                 SimpleRealVectorObservable(std::string const & name): ObservableWapper(name) {}
         };
-
-        // #ifdef ALPS_NGS_USE_NEW_ALEA
-        //     ALPS_DECL alps::accumulator::accumulator_set & operator<< (alps::accumulator::accumulator_set & set, SimpleRealVectorObservable const & obs);
-        // #endif
         ALPS_DECL alps::mcobservables & operator<< (alps::mcobservables & set, SimpleRealVectorObservable const & obs);
 
         class ALPS_DECL SignedRealObservable : public detail::SignedObservableWapper {

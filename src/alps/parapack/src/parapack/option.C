@@ -10,7 +10,6 @@
 * SPDX-License-Identifier: MIT
 *
 *****************************************************************************/
-
 #include <alps/parapack/option.h>
 
 namespace alps {

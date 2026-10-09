@@ -15,12 +15,13 @@
 #define ALPS_NGS_MCOPTIONS_HPP
 
 #include <alps/ngs/config.hpp>
+#include <alps/cli_export.h>
 
 #include <string>
 
 namespace alps {
 
-      class ALPS_DECL mcoptions {
+      class ALPS_CLI_DECL mcoptions {
 
         public:
 

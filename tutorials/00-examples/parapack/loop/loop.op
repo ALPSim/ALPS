@@ -1,6 +1,6 @@
 [input parameters]
 ALGORITHM = loop;
-LATTICE_LIBRARY = ../../../src/alps/resources/lattices.xml;
+LATTICE_LIBRARY = lattices.xml;
 LATTICE = "chain lattice";
 L = 8;
 SEED = 23123;
@@ -45,7 +45,7 @@ Susceptibility: 0.0112915 +/- 0.0031; tau = 0.918 WARNING: ERRORS NOT CONVERGED!
 Volume: 8 +/- 0
 [input parameters]
 ALGORITHM = loop;
-LATTICE_LIBRARY = ../../../src/alps/resources/lattices.xml;
+LATTICE_LIBRARY = lattices.xml;
 LATTICE = "chain lattice";
 L = 8;
 SEED = 23123;
@@ -90,7 +90,7 @@ Susceptibility: 0.0804138 +/- 0.0051; tau = 0.92 WARNING: ERRORS NOT CONVERGED!!
 Volume: 8 +/- 0
 [input parameters]
 ALGORITHM = loop;
-LATTICE_LIBRARY = ../../../src/alps/resources/lattices.xml;
+LATTICE_LIBRARY = lattices.xml;
 LATTICE = "chain lattice";
 L = 8;
 SEED = 23123;
@@ -135,7 +135,7 @@ Susceptibility: 0.119832 +/- 0.00417; tau = 0.84 WARNING: ERRORS NOT CONVERGED!!
 Volume: 8 +/- 0
 [input parameters]
 ALGORITHM = loop;
-LATTICE_LIBRARY = ../../../src/alps/resources/lattices.xml;
+LATTICE_LIBRARY = lattices.xml;
 LATTICE = "chain lattice";
 L = 8;
 SEED = 23123;
@@ -180,7 +180,7 @@ Susceptibility: 0.134048 +/- 0.00342; tau = 0.751 WARNING: ERRORS NOT CONVERGED!
 Volume: 8 +/- 0
 [input parameters]
 ALGORITHM = loop;
-LATTICE_LIBRARY = ../../../src/alps/resources/lattices.xml;
+LATTICE_LIBRARY = lattices.xml;
 LATTICE = "chain lattice";
 L = 8;
 SEED = 23123;

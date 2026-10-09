@@ -17,7 +17,6 @@
  */
 
 #include <alps/parameter/parameters.h>
-
 #include <alps/fortran/fortran_wrapper.h>
 #include <alps/fortran/fwrapper_impl.h>
 

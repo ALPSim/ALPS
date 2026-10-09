@@ -1,3 +1,5 @@
+#include <chrono>
+#include <thread>
 /*****************************************************************************
 *
 * ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -17,11 +19,6 @@
 #include <alps/config.h>
 #include <alps/scheduler/scheduler.h>
 #include <alps/osiris/mpdump.h>
-#if defined(ALPS_HAVE_UNISTD_H)
-# include <unistd.h>
-#elif defined(ALPS_HAVE_WINDOWS_H)
-# include <windows.h>
-#endif
 
 namespace alps {
 namespace scheduler {
@@ -89,13 +86,7 @@ void SlaveTask::run()
   if(theWorker) {
     dynamic_cast<Worker&>(*theWorker).run();
   } else {
-#if defined(ALPS_HAVE_UNISTD_H)
-    sleep(1);    // sleep 1 Sec
-#elif defined(ALPS_HAVE_WINDOWS_H)
-    Sleep(1000); // sleep 1000 mSec
-#else
-# error "sleep not found"
-#endif
+    std::this_thread::sleep_for(std::chrono::seconds(1));
   }
 }
 

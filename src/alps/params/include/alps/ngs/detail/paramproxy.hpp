@@ -16,6 +16,7 @@
 
 #include <alps/hdf5/archive.hpp>
 #include <alps/ngs/config.hpp>
+#include <alps/params_export.h>
 #include <alps/ngs/detail/paramvalue.hpp>
 
 #include <boost/function.hpp>
@@ -28,7 +29,7 @@ namespace alps {
     
     namespace detail {
 
-        class ALPS_DECL paramproxy {
+        class ALPS_PARAMS_DECL paramproxy {
 
             public:
 
@@ -110,19 +111,19 @@ namespace alps {
                 boost::function<void(paramvalue)> setter;
         };
 
-        ALPS_DECL std::ostream & operator<<(std::ostream & os, paramproxy const &);
+        ALPS_PARAMS_DECL std::ostream & operator<<(std::ostream & os, paramproxy const &);
 
         #define ALPS_NGS_PARAMPROXY_ADD_OPERATOR_DECL(T)                                 \
-            ALPS_DECL T operator+(paramproxy const & p, T s);                            \
-            ALPS_DECL T operator+(T s, paramproxy const & p);
+            ALPS_PARAMS_DECL T operator+(paramproxy const & p, T s);                            \
+            ALPS_PARAMS_DECL T operator+(T s, paramproxy const & p);
         // vector<bool> is a native stored parameter type, but unlike the
         // historic numeric/string alternatives it has no meaningful or
         // portable element-wise operator+=.
         ALPS_NGS_FOREACH_PARAMETERVALUE_ADDABLE_TYPE(ALPS_NGS_PARAMPROXY_ADD_OPERATOR_DECL)
         #undef ALPS_NGS_PARAMPROXY_ADD_OPERATOR_DECL
 
-        ALPS_DECL std::string operator+(paramproxy const & p, char const * s);
-        ALPS_DECL std::string operator+(char const * s, paramproxy const & p);
+        ALPS_PARAMS_DECL std::string operator+(paramproxy const & p, char const * s);
+        ALPS_PARAMS_DECL std::string operator+(char const * s, paramproxy const & p);
 
     }
 }

@@ -112,10 +112,8 @@ template <class T> struct TypeDumpTraits {
 #define _HAS_ARRAY(T) template<> struct TypeDumpTraits< T > {\
   BOOST_STATIC_CONSTANT(bool, hasArrayFunction=true);};
   
-#ifndef BOOST_NO_INT64_T
 _HAS_ARRAY(int64_t)
 _HAS_ARRAY(uint64_t)
-#endif
 _HAS_ARRAY(int32_t)
 _HAS_ARRAY(int16_t)
 _HAS_ARRAY(int8_t)

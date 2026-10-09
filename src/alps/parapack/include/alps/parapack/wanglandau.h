@@ -14,10 +14,10 @@
 #ifndef PARAPACK_WANGLANDAU_H
 #define PARAPACK_WANGLANDAU_H
 
-#include <alps/parapack/exp_number.h>
-#include <alps/parapack/worker_factory.h>
-#include <alps/parapack/integer_range.h>
-#include <alps/parapack/montecarlo.h>
+#include "exp_number.h"
+#include "worker_factory.h"
+#include "integer_range.h"
+#include "montecarlo.h"
 #include <alps/alea.h>
 #include <alps/numeric/double2int.hpp>
 #include <alps/osiris.h>
@@ -286,9 +286,7 @@ private:
 
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 inline alps::ODump& operator<<(alps::ODump& dp, alps::wanglandau_weight const& hist) {
   hist.save(dp);
@@ -306,9 +304,7 @@ inline alps::ObservableSet& operator<<(alps::ObservableSet& obs,
   return obs;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 
 namespace alps {
@@ -359,7 +355,7 @@ public:
       if (hist[index] > 0) {
         ++num;
         mean += hist[index];
-        hist_min = (hist_min < 0) ? hist[index] : std::min(hist_min, 1.0 * hist[index]);
+        hist_min = (hist_min < 0) ? hist[index] : (std::min)(hist_min, 1.0 * hist[index]);
       }
     }
     if (num > 0) mean /= num;
@@ -437,9 +433,7 @@ public:
 
 } // end namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 template<typename WL_TYPE>
 alps::ODump& operator<<(alps::ODump& dp, alps::wanglandau_steps<WL_TYPE> const& mcs) {
@@ -453,9 +447,7 @@ alps::IDump& operator>>(alps::IDump& dp, alps::wanglandau_steps<WL_TYPE>& mcs) {
   return dp;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace alps
-#endif
 
 namespace alps {
 

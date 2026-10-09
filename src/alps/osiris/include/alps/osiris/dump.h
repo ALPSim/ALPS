@@ -18,9 +18,8 @@
 #define ALPS_OSIRIS_DUMP_H
 
 #include <alps/config.h>
-#ifdef ALPS_HAVE_STDARG_H
+#include <alps/osiris_export.h>
 # include <stdarg.h>
-#endif
 #include <boost/smart_ptr.hpp>
 #include <complex>
 #include <iostream>
@@ -32,7 +31,7 @@
 
 namespace alps {
 
-class ALPS_DECL ODump {
+class ALPS_OSIRIS_DECL ODump {
 public:
   ODump(uint32_t v = 0);
   virtual ~ODump() {}
@@ -120,7 +119,7 @@ ODump& operator<<(ODump& d, const T& x) {x.save(d); return d; }
 template<class T>
 ODump& operator<<(ODump& d, const std::complex<T>& x) { d.write_complex(x); return d; }
 
-class ALPS_DECL IDump {
+class ALPS_OSIRIS_DECL IDump {
 public:
   IDump(uint32_t v=0);
   virtual ~IDump() {}
@@ -232,6 +231,6 @@ IDump& operator>>(IDump& d, std::complex<T>& x) { d.read_complex(x); return d; }
 
 } // end namespace
 
-#include <alps/osiris/dumparchive.h>
+#include "dumparchive.h"
 
 #endif // OSIRIS_DUMP_H

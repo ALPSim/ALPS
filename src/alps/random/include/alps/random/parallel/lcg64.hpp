@@ -44,7 +44,6 @@
 #include <alps/random/parallel/detail/get_prime.hpp>
 #include <alps/random/parallel/detail/seed_macros.hpp>
 
-#if !defined(BOOST_NO_INT64_T) && !defined(BOOST_NO_INTEGRAL_INT64_T)
 
 namespace alps {
 namespace random {
@@ -61,7 +60,6 @@ class lcg64
 public:
   /// The result type is a 64-bit unsigned integer
   typedef uint64_t result_type;
-#ifndef BOOST_NO_INCLASS_MEMBER_INITIALIZATION
   /// @brief This generator has a fixed range
   static const bool has_fixed_range = true;
   /// @brief The minimum vaue is 0
@@ -70,10 +68,6 @@ public:
   static const result_type max_value =boost::integer_traits<uint64_t>::const_max;
   /// @brief The maximum number of streams is 146138719, the number of primes among all 64-bit unsigned integer values
   static const result_type max_streams = 146138719;
-#else
-  BOOST_STATIC_CONSTANT(bool, has_fixed_range = false);
-  BOOST_STATIC_CONSTANT(result_type, max_streams = 146138719);
-#endif
 
 /*
 // forward seeding functions with iterator buffers to named versions
@@ -130,7 +124,7 @@ BOOST_PP_REPEAT_FROM_TO(0, ALPS_RANDOM_MAXARITY, BOOST_LCG64_SEED_IT,~)
   ALPS_RANDOM_PARALLEL_ITERATOR_SEED_DEFAULT()
 
   result_type min BOOST_PREVENT_MACRO_SUBSTITUTION () const { return 0; }
-  result_type max BOOST_PREVENT_MACRO_SUBSTITUTION () const { return std::numeric_limits<result_type>::max(); }
+  result_type max BOOST_PREVENT_MACRO_SUBSTITUTION () const { return (std::numeric_limits<result_type>::max)(); }
 #endif
 
   /// @returns the next random number
@@ -145,15 +139,6 @@ BOOST_PP_REPEAT_FROM_TO(0, ALPS_RANDOM_MAXARITY, BOOST_LCG64_SEED_IT,~)
   /// The validation function checks whether the passed value is the 10'000-th integer generated from a default-seeded generator 
   static bool validation(uint64_t x) { return x==val; }
 
-#ifdef BOOST_NO_OPERATORS_IN_NAMESPACE
-    
-  // Use a member function; Streamable concept not supported.
-  bool operator==(const lcg64& rhs) const
-  { return _x == rhs._x && c==rhs.c; }
-  bool operator!=(const lcg64& rhs) const
-  { return !(*this == rhs); }
-
-#else 
   friend bool operator==(const lcg64& x,
                          const lcg64& y)
   { return x._x == y._x && x.c == y.c; }
@@ -161,7 +146,6 @@ BOOST_PP_REPEAT_FROM_TO(0, ALPS_RANDOM_MAXARITY, BOOST_LCG64_SEED_IT,~)
                          const lcg64& y)
   { return !(x == y && x.c == y.c); }
     
-#if !defined(BOOST_NO_MEMBER_TEMPLATE_FRIENDS) && !BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x551))
   template<class CharT, class Traits>
   friend std::basic_ostream<CharT,Traits>&
   operator<<(std::basic_ostream<CharT,Traits>& os,
@@ -179,32 +163,12 @@ BOOST_PP_REPEAT_FROM_TO(0, ALPS_RANDOM_MAXARITY, BOOST_LCG64_SEED_IT,~)
   }
  
 private:
-#endif
-#endif
     
   uint64_t _x;
   uint64_t c;
 };
 
-#if defined(BOOST_NO_OPERATORS_IN_NAMESPACE) || defined(BOOST_NO_MEMBER_TEMPLATE_FRIENDS) || BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x551))
-template<class CharT, class Traits, uint64_t a, unit64_t val>
-std::basic_ostream<CharT,Traits>&
-operator<<(std::basic_ostream<CharT,Traits>& os,
-           const lcg64<a,val>& lcg)
-{
-    return os << lcg._x << " " << lcg.c;
-}
 
-template<class CharT, class Traits, uint64_t a, unit64_t val>
-std::basic_istream<CharT,Traits>&
-operator>>(std::basic_istream<CharT,Traits>& is,
-           lcg64<a,val>& lcg)
-{
-    return is >> lcg._x >> lcg.c;
-}
-#endif
-
-#ifndef BOOST_NO_INCLASS_MEMBER_INITIALIZATION
 //  A definition is required even for integral static constants
 template<uint64_t a, uint64_t val>
 const bool lcg64<a,val>::has_fixed_range;
@@ -214,7 +178,6 @@ template<uint64_t a, uint64_t val>
 const uint64_t lcg64<a,val>::max_value;
 template<uint64_t a, uint64_t val>
 const uint64_t lcg64<a,val>::max_streams;
-#endif
 
 } } // namespace random::parallel
 
@@ -234,5 +197,4 @@ typedef random::parallel::lcg64<uint64_t(0x31a53f85U)|uint64_t(0x369dea0fU)<<32,
 
 } // namespace alps
 
-#endif // !BOOST_NO_INT64_T && !BOOST_NO_INTEGRAL_INT64_T
 #endif // ALPS_RANDOM_PARALLEL_LCG64_HPP

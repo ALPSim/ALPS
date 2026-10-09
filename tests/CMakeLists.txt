@@ -55,7 +55,7 @@ foreach(_app dmrg qwl dirloop_sse worm spinmc fulldiag sparsediag hirschfye loop
       COMMAND "${ALPS_CITATION_PYTHON}" "${PROJECT_SOURCE_DIR}/src/alps/utilities/tests/check_citation_notice.py"
               "$<TARGET_FILE:${_app}>" "${_component}")
     set_property(TEST citation_cli_${_app} PROPERTY LABELS citations)
-    if(ALPS_HAVE_MPI AND MPIEXEC_EXECUTABLE)
+    if(ALPS_ENABLE_MPI AND MPIEXEC_EXECUTABLE)
       add_test(NAME citation_cli_mpi_${_app}
         COMMAND "${ALPS_CITATION_PYTHON}" "${PROJECT_SOURCE_DIR}/src/alps/utilities/tests/check_citation_notice.py"
                 "$<TARGET_FILE:${_app}>" "${_component}"
@@ -68,7 +68,7 @@ endforeach()
 if(TARGET loop)
   add_test(NAME citation_calculation_loop
     COMMAND "${ALPS_CITATION_PYTHON}" "${PROJECT_SOURCE_DIR}/src/alps/utilities/tests/check_citation_startup.py"
-            "$<TARGET_FILE:loop>" "${PROJECT_BINARY_DIR}/lib/xml")
+            "$<TARGET_FILE:loop>" "${PROJECT_SOURCE_DIR}/src/alps/resources")
   set_property(TEST citation_calculation_loop PROPERTY LABELS citations)
 endif()
 

@@ -16,6 +16,7 @@
 
 #include <alps/hdf5/archive.hpp>
 #include <alps/ngs/config.hpp>
+#include <alps/params_export.h>
 #include <alps/ngs/detail/paramvalue.hpp>
 #include <alps/ngs/detail/paramproxy.hpp>
 #include <alps/ngs/detail/paramiterator.hpp>
@@ -36,7 +37,7 @@
 
 namespace alps {
 
-    class ALPS_DECL params {
+    class params {
 
         typedef std::map<std::string, detail::paramvalue>::value_type iterator_value_type;
 
@@ -57,34 +58,32 @@ namespace alps {
                 , value_reader_(arg.value_reader_)
             {}
 
-            params(hdf5::archive ar, std::string const & path = "/parameters");
+            ALPS_PARAMS_DECL params(hdf5::archive ar, std::string const & path = "/parameters");
 
-            params(boost::filesystem::path const &);
+            ALPS_PARAMS_DECL std::size_t size() const;
 
-            std::size_t size() const;
+            ALPS_PARAMS_DECL void erase(std::string const &);
 
-            void erase(std::string const &);
+            ALPS_PARAMS_DECL value_type operator[](std::string const &);
 
-            value_type operator[](std::string const &);
+            ALPS_PARAMS_DECL value_type const operator[](std::string const &) const;
 
-            value_type const operator[](std::string const &) const;
-
-            bool defined(std::string const &) const;
+            ALPS_PARAMS_DECL bool defined(std::string const &) const;
 
             // Direct native lookup for consumers that need to inspect the
             // stored variant. The returned pointer remains owned by params
             // and is null when the key is absent.
-            detail::paramvalue const * find(std::string const &) const;
+            ALPS_PARAMS_DECL detail::paramvalue const * find(std::string const &) const;
 
-            iterator begin();
-            const_iterator begin() const;
+            ALPS_PARAMS_DECL iterator begin();
+            ALPS_PARAMS_DECL const_iterator begin() const;
 
-            iterator end();
-            const_iterator end() const;
+            ALPS_PARAMS_DECL iterator end();
+            ALPS_PARAMS_DECL const_iterator end() const;
 
-            void save(hdf5::archive &) const;
+            ALPS_PARAMS_DECL void save(hdf5::archive &) const;
 
-            void load(hdf5::archive &);
+            ALPS_PARAMS_DECL void load(hdf5::archive &);
 
             // A binding-owned decoder, preserved when parameters are copied
             // into a native simulation. Native-only parameters need none.
@@ -92,7 +91,7 @@ namespace alps {
             void set_value_reader(value_reader reader) { value_reader_ = std::move(reader); }
 
             #ifdef ALPS_HAVE_MPI
-                void broadcast(boost::mpi::communicator const &, int = 0);
+                ALPS_PARAMS_DECL void broadcast(boost::mpi::communicator const &, int = 0);
             #endif
 
         private:
@@ -105,16 +104,16 @@ namespace alps {
                 ;
             }
 
-            void setter(std::string const &, detail::paramvalue const &);
+            ALPS_PARAMS_DECL void setter(std::string const &, detail::paramvalue const &);
 
-            detail::paramvalue getter(std::string const &);
+            ALPS_PARAMS_DECL detail::paramvalue getter(std::string const &);
 
             std::vector<std::string> keys;
             std::map<std::string, detail::paramvalue> values;
             value_reader value_reader_;
     };
 
-    ALPS_DECL std::ostream & operator<<(std::ostream & os, params const & arg);
+    ALPS_PARAMS_DECL std::ostream & operator<<(std::ostream & os, params const & arg);
 }
 
 #endif

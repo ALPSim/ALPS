@@ -11,8 +11,14 @@
  *
  *****************************************************************************/
 
+#include <utility> // Boost.Math 1.76 includes this inside a namespace.
+#include <boost/math/constants/constants.hpp>
 #include "maxent.hpp"
 #include <alps/config.h> // needed to set up correct bindings
+#include <alps/hdf5/vector.hpp>
+#include <boost/lexical_cast.hpp>
+#include <limits>
+#include <sstream>
 #include <boost/numeric/bindings/ublas.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/vector_expression.hpp>
@@ -22,7 +28,6 @@
 
 #define MAXIMUM(a,b) ((a>b) ? a : a)
 
-//ContiParameters::ContiParameters(const alps::Parameters& p) :
 ContiParameters::ContiParameters(const alps::params& p) :
 Default_(make_default_model(p, "DEFAULT_MODEL")),
 T_(p["T"]|1./static_cast<double>(p["BETA"])),
@@ -36,7 +41,7 @@ y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
     double cut = p["CUT"]|0.01;
     std::vector<double> temp(nfreq_+1);
     for (int i=0; i<nfreq_+1; ++i)
-      temp[i] = tan(M_PI * (double(i)/(nfreq_)*(1.-2*cut)+cut - 0.5));
+      temp[i] = tan(boost::math::constants::pi<double>() * (double(i)/(nfreq_)*(1.-2*cut)+cut - 0.5));
     for (int i=0; i<nfreq_+1; ++i) 
       t_array_[i] = (temp[i] - temp[0])/(temp[temp.size()-1] - temp[0]);
     //std::cout<<"debug: Lorentzian grid : "<<std::endl;
@@ -48,7 +53,7 @@ y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
     double cut = p["CUT"]|0.01;
     std::vector<double> temp(nfreq_+1);
     for (int i=0; i<nfreq_; ++i) 
-      temp[i] = tan(M_PI * (double(i+nfreq_)/(2*nfreq_-1)*(1.-2*cut)+cut - 0.5));
+      temp[i] = tan(boost::math::constants::pi<double>() * (double(i+nfreq_)/(2*nfreq_-1)*(1.-2*cut)+cut - 0.5));
     for (int i=0; i<nfreq_+1; ++i) 
       t_array_[i] = (temp[i] - temp[0])/(temp[temp.size()-1] - temp[0]);\
   }
@@ -236,7 +241,7 @@ void ContiParameters::setup_kernel(const alps::params& p, const int ntab, const 
            (p["PARTICLE_HOLE_SYMMETRY"]|false)) {
     std::cerr << "using particle hole symmetric kernel for fermionic data" << std::endl;
     for (int i=0; i<ndat(); ++i) {
-      double omegan = (2*i+1)*M_PI*T_;
+      double omegan = (2*i+1)*boost::math::constants::pi<double>()*T_;
       for (int j=0; j<ntab; ++j) {
         double omega = freq[j]; 
         K_(i,j) =  -omegan / (omegan*omegan + omega*omega);
@@ -250,7 +255,7 @@ void ContiParameters::setup_kernel(const alps::params& p, const int ntab, const 
     //std::cerr<<"freqs: "<<freq[0]<<" "<<freq[ntab-1]<<std::endl;
 
     for (int i=0; i<ndat(); ++i) {
-      double Omegan = (2*i)*M_PI*T_;
+      double Omegan = (2*i)*boost::math::constants::pi<double>()*T_;
       for (int j=0; j<ntab; ++j) {
         double Omega = freq[j]; 
         if(Omega ==0) throw std::runtime_error("Bosonic kernel is singular at frequency zero. Please use grid w/o evaluation at zero.");
@@ -269,7 +274,7 @@ void ContiParameters::setup_kernel(const alps::params& p, const int ntab, const 
            (p["PARTICLE_HOLE_SYMMETRY"]|false)) {
     std::cerr << "using particle hole symmetric kernel for anomalous fermionic data" << std::endl;
     for(int i=0;i<ndat();++i){
-      double omegan = (2*i+1)*M_PI*T_;
+      double omegan = (2*i+1)*boost::math::constants::pi<double>()*T_;
       for (int j=0; j<ntab; ++j) {
         double omega = freq[j]; 
         K_(i,j) =  omega*omega / (omegan*omegan + omega*omega);
@@ -284,7 +289,7 @@ void ContiParameters::setup_kernel(const alps::params& p, const int ntab, const 
       if (alps::is_master())
         std::cerr << "Using fermionic kernel" << std::endl;
       for (int i=0; i<ndat()/2; ++i) {
-        std::complex<double> iomegan(0, (2*i+1)*M_PI*T_);
+        std::complex<double> iomegan(0, (2*i+1)*boost::math::constants::pi<double>()*T_);
         for (int j=0; j<ntab; ++j) {
           double omega = freq[j]; 
           Kc(i,j) =  1. / (iomegan - omega);
@@ -295,7 +300,7 @@ void ContiParameters::setup_kernel(const alps::params& p, const int ntab, const 
       if (alps::is_master())
         std::cerr << "Using bosonic kernel" << std::endl;
       for (int i=0; i<ndat()/2; ++i) {
-        std::complex<double> iomegan(0, 2*i*M_PI*T_);
+        std::complex<double> iomegan(0, 2*i*boost::math::constants::pi<double>()*T_);
         for (int j=1; j<ntab; ++j) {
           double omega = freq[j]; 
           //Kc(i,j) =  -1. / (iomegan - omega);
@@ -306,7 +311,7 @@ void ContiParameters::setup_kernel(const alps::params& p, const int ntab, const 
     else if (p_kernel == "anomalous"){
       std::cerr<<"Using general anomalous kernel omega / (iomega_n - omega) for, e.g., omega*Delta"<<std::endl;
       for (int i=0; i<ndat()/2; ++i) {
-        std::complex<double> iomegan(0, (2*i+1)*M_PI*T_);
+        std::complex<double> iomegan(0, (2*i+1)*boost::math::constants::pi<double>()*T_);
         for (int j=1; j<ntab; ++j) {
           double omega = freq[j];
           Kc(i,j) =  -omega / (iomegan - omega);
@@ -420,7 +425,6 @@ void ContiParameters::setup_kernel(const alps::params& p, const int ntab, const 
 }
 
 
-//MaxEntParameters::MaxEntParameters(const alps::Parameters& p) :
 MaxEntParameters::MaxEntParameters(const alps::params& p) :
 ContiParameters(p),
 U_(ndat(), ndat()), Vt_(ndat(), nfreq()), Sigma_(ndat(), ndat()), 
@@ -486,7 +490,6 @@ omega_coord_(nfreq()), delta_omega_(nfreq()), ns_(0)
   double chi = ublas::norm_2(y_-y2);             //this measures the loss of precision when transforming to singular space and back.
   std::cout << "minimal chi2: " << chi*chi/y_.size() << std::endl;
 }
-
 
 
 

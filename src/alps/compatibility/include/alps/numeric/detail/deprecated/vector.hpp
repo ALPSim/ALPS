@@ -16,7 +16,7 @@
 #ifndef BLAS_VECTOR
 #define BLAS_VECTOR
 
-#include <alps/numeric/detail/deprecated/blasheader.hpp>
+#include "./blasheader.hpp"
 #include <iostream>
 #include <vector>
 #include <algorithm>

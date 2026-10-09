@@ -14,6 +14,7 @@
 #ifndef ALPS_NGS_DETAIL_PARAMVALUE_HPP
 #define ALPS_NGS_DETAIL_PARAMVALUE_HPP
 
+#include <alps/params_export.h>
 #include <alps/hdf5/archive.hpp>
 #include <alps/ngs/config.hpp>
 #include <alps/ngs/detail/remove_cvr.hpp>
@@ -95,7 +96,7 @@ namespace alps {
         // headers or runtime are required by the native library. A binding
         // can retain a mutable value and supply a checked native snapshot
         // only when a C++ consumer actually requests it.
-        struct ALPS_DECL paramvalue_source {
+        struct ALPS_PARAMS_DECL paramvalue_source {
             virtual ~paramvalue_source();
             virtual paramvalue native_value() const = 0;
             // A heterogeneous sequence must be converted element by element
@@ -198,8 +199,8 @@ namespace alps {
 
                 #define ALPS_NGS_PARAMVALUE_MEMBER_DECL(T)                          \
                     paramvalue( T const & v) : paramvalue_base(v) {}                \
-                    operator T () const;                                            \
-                    paramvalue & operator=( T const &);
+                    ALPS_PARAMS_DECL operator T () const;                                  \
+                    ALPS_PARAMS_DECL paramvalue & operator=( T const &);
                 ALPS_NGS_FOREACH_PARAMETERVALUE_TYPE(ALPS_NGS_PARAMVALUE_MEMBER_DECL)
                 #undef ALPS_NGS_PARAMVALUE_MEMBER_DECL
 
@@ -234,8 +235,8 @@ namespace alps {
                     return *this = std::string(value); 
                 }
 
-                void save(hdf5::archive &) const;
-                void load(hdf5::archive &);
+                ALPS_PARAMS_DECL void save(hdf5::archive &) const;
+                ALPS_PARAMS_DECL void load(hdf5::archive &);
                 
             private:
 
@@ -277,7 +278,7 @@ namespace alps {
                 BOOST_SERIALIZATION_SPLIT_MEMBER()
         };
 
-        ALPS_DECL std::ostream & operator<<(std::ostream & os, paramvalue const & arg);
+        ALPS_PARAMS_DECL std::ostream & operator<<(std::ostream & os, paramvalue const & arg);
 
         template<typename T> T extract_impl (paramvalue const & arg, T) {
             return arg.cast<T>();

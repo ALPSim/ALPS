@@ -140,9 +140,7 @@ void HamiltonianDescriptor<I>::write_xml(oxstream& os) const
 
 } // namespace alps
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace alps {
-#endif
 
 template <class I>
 inline alps::oxstream& operator<<(alps::oxstream& out, const alps::HamiltonianDescriptor<I>& q)
@@ -159,8 +157,6 @@ inline std::ostream& operator<<(std::ostream& out, const alps::HamiltonianDescri
   return out;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // namespace alps
-#endif
 
 #endif

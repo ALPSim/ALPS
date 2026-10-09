@@ -15,10 +15,20 @@
 #ifndef ALPS_TOOL_DEFAULT_MODEL_HPP
 #define ALPS_TOOL_DEFAULT_MODEL_HPP
 
+#include <utility> // Boost.Math 1.76 includes this inside a namespace.
+#include <boost/math/constants/constants.hpp>
 #include <math.h>
-#include <alps/parameter.h>
-#include <alps/ngs.hpp>
+#include <alps/ngs/params.hpp>
+#include <alps/osiris/comm.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/throw_exception.hpp>
+#include <algorithm>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 
 //Note the slightly crooked structure here:
@@ -29,7 +39,7 @@
 //  and GeneralDefaultModel contains a 'Model' object.
 
 //class Model
-// -> Gaussian : public Model 
+// -> Gaussian : public Model
 //    -> ShiftedGaussian : public Gaussian
 //      -> DoubleGaussian : public ShiftedGaussian
 //        -> GeneralDoubleGaussian : public ShiftedGaussian
@@ -37,7 +47,7 @@
 // ->  LinearRiseExpDecay : public Model
 // ->  QuadraticRiseExpDecay : public Model
 
-class DefaultModel 
+class DefaultModel
 {
 public:
 //  DefaultModel(const alps::Parameters& p) :
@@ -51,16 +61,16 @@ public:
   }
 
   virtual ~DefaultModel(){}
-  
+
   //omega returns a frequency point, given x between 0 and 1.
   virtual double omega(const double x) const = 0;
-  
+
   //D returns the derivative of the integrated default model
   virtual double D(const double omega) const = 0;
-  
+
   //returns the integrated default model
   virtual double x(const double t=0) const = 0;
-  
+
   //equidistant mapping from [0,1] to [omega_min, omega_max]
   double omega_of_t(const double t) const { return omega_min + (omega_max-omega_min)*t; }
   //equidistant mapping from [omega_min, omega_max] to [0,1]
@@ -107,14 +117,14 @@ public:
 
 
 
-class Gaussian : public Model 
+class Gaussian : public Model
 {
 public:
 //  Gaussian(const alps::Parameters& p) : sigma(static_cast<double>(p["SIGMA"])) {}
   Gaussian(const alps::params& p) : sigma(static_cast<double>(p["SIGMA"])) {}
-  
+
   virtual double operator()(const double omega) {
-    return std::exp(-omega*omega/2./sigma/sigma)/sqrt(2*M_PI)/sigma;
+    return std::exp(-omega*omega/2./sigma/sigma)/sqrt(2*boost::math::constants::pi<double>())/sigma;
   }
 
 private:
@@ -130,11 +140,11 @@ public:
     shift1(static_cast<double>(p["SHIFT1"]|0.0)),
     shift2(static_cast<double>(p["SHIFT2"])),
     norm1(static_cast<double>(p["NORM1"]|0.5)) {}
-    
+
     virtual double operator()(const double omega) {
-        return norm1*std::exp(-(omega-shift1)*(omega-shift1)/2./sigma1/sigma1)/sqrt(2*M_PI)/sigma1+(1.0-norm1)*std::exp(-(omega-shift2)*(omega-shift2)/2./sigma2/sigma2)/sqrt(2*M_PI)/sigma2;
+        return norm1*std::exp(-(omega-shift1)*(omega-shift1)/2./sigma1/sigma1)/sqrt(2*boost::math::constants::pi<double>())/sigma1+(1.0-norm1)*std::exp(-(omega-shift2)*(omega-shift2)/2./sigma2/sigma2)/sqrt(2*boost::math::constants::pi<double>())/sigma2;
     }
-    
+
 private:
     const double sigma1,sigma2,shift1,shift2,norm1;
 };
@@ -150,7 +160,7 @@ public:
   double operator()(const double omega) {
     return Gaussian::operator()(omega-shift);
   }
-  
+
 protected:
   const double shift;
 };
@@ -187,7 +197,7 @@ public:
   double operator()(const double omega) {
     return (lambda_*lambda_*lambda_)/2.*(omega*omega)*std::exp(-lambda_*omega);
   }
-  
+
 private:
   const double lambda_;
 };
@@ -198,16 +208,16 @@ public:
 //  GeneralDoubleGaussian(const alps::Parameters& p) :
   GeneralDoubleGaussian(const alps::params& p) :
     ShiftedGaussian(p), bnorm(static_cast<double>(p["BOSE_NORM"])) {}
-  
+
   double operator()(const double omega) {
     if (omega > 0)
       return Gaussian::operator()(omega);
     else
       return bnorm*Gaussian::operator()(omega+shift);
   }
-  
+
 private:
-  const double bnorm; 
+  const double bnorm;
 };
 
 
@@ -227,9 +237,9 @@ public:
       Def.push_back(D);
       defstream.ignore(1000,'\n'); // Anything beyond is considered as junk
     }
-    double omega_max = p["OMEGA_MAX"]; 
+    double omega_max = p["OMEGA_MAX"];
     double omega_min(static_cast<double>(p["OMEGA_MIN"]|-omega_max)); //we had a 0 here in the bosonic case. That's not a good idea if you're continuing symmetric functions like chi(omega)/omega. Change omega_min to zero manually if you need it.
-    //double omega_min = (p["KERNEL"] == "bosonic") ? 0. : 
+    //double omega_min = (p["KERNEL"] == "bosonic") ? 0. :
     //     static_cast<double>(p.value_or_default("OMEGA_MIN", -omega_max));
     if (Omega[0]!=omega_min || Omega[Omega.size()-1]!=omega_max){
       std::cout<<"Omega[ 0] "<<Omega[0]<<" omega min: "<<omega_min<<std::endl;
@@ -237,7 +247,7 @@ public:
 //      boost::throw_exception(std::invalid_argument("invalid omega range for default model"));
     }
   }
-  
+
   double operator()(const double omega) {
     std::vector<double>::const_iterator ub = std::upper_bound(Omega.begin(), Omega.end(), omega);
     int index = ub - Omega.begin();
@@ -247,9 +257,9 @@ public:
     double om2 = Omega[index];
     double D1 = Def[index-1];
     double D2 = Def[index];
-    return -(D2-D1)/(om2-om1)*(om2-omega)+D2;      
+    return -(D2-D1)/(om2-om1)*(om2-omega)+D2;
   }
-   
+
 private:
   std::vector<double> Omega;
   std::vector<double> Def;
@@ -260,13 +270,13 @@ private:
 class GeneralDefaultModel : public DefaultModel
 {
 public:
-  
+
 //  GeneralDefaultModel(const alps::Parameters& p, boost::shared_ptr<Model> mod)
   GeneralDefaultModel(const alps::params& p, boost::shared_ptr<Model> mod)
    : DefaultModel(p)
    , Mod(mod)
    , ntab(5001)
-   , xtab(ntab) 
+   , xtab(ntab)
   {
     double sum = 0;
     xtab[0] = 0.;
@@ -286,13 +296,13 @@ public:
       std::cout<<i<<" "<<xtab[i]<<std::endl;
     }
     std::cout<<"total sum is: "<<sum<<std::endl;*/
-    
+
     /*for(int N=0;N<=1000;++N){
       double d=1./1000.*N;
       std::cout<<omega(d)<<" "<<D(omega(d))<<" "<<x(d)<<" "<<d<<std::endl;
     }*/
   }
-  
+
   double omega(const double x) const {
     if(!(x<=blow_up() && x>=0.)) throw std::logic_error("parameter x is out of bounds!"); //DNDEBUG switches off debug assertions
     std::vector<double>::const_iterator ub = std::upper_bound(xtab.begin(), xtab.end(), x);
@@ -303,25 +313,25 @@ public:
     double om2 = omega_min + omega_index*(omega_max-omega_min)/(ntab-1);
     double x1 = xtab[omega_index-1];
     double x2 = xtab[omega_index];
-    return -(om2-om1)/(x2-x1)*(x2-x)+om2;      
+    return -(om2-om1)/(x2-x1)*(x2-x)+om2;
   }
-  
+
   //this returns the value of the model function at frequency omega
   double D(const double omega) const {
     return (*Mod)(omega);
   }
-  
+
   //I have no idea what this does.
   double x(const double t) const {
     if(t>1. || t<0.) throw std::logic_error("parameter t is out of bounds!");
     int od = (int)(t*(ntab-1));
-    if (od==(ntab-1)) 
+    if (od==(ntab-1))
       return blow_up();
     double x1 = xtab[od];
     double x2 = xtab[od+1];
-    return -(x2-x1)*(od+1-t*ntab)+x2;      
+    return -(x2-x1)*(od+1-t*ntab)+x2;
   }
-  
+
 private:
   boost::shared_ptr<Model> Mod;
   const int ntab;
@@ -381,7 +391,7 @@ inline boost::shared_ptr<DefaultModel> make_default_model(const alps::params& pa
     boost::shared_ptr<Model> Mod(new QuadraticRiseExpDecay(parms));
     return boost::shared_ptr<DefaultModel>(new GeneralDefaultModel(parms, Mod));
   }
-  else { 
+  else {
     if (alps::is_master())
       std::cerr << "Using tabulated default model" << std::endl;
     boost::shared_ptr<Model> Mod(new TabFunction(parms, name));

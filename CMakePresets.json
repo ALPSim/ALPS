@@ -1,41 +1,111 @@
 {
-  "version": 3,
+  "version": 7,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 22,
+    "minor": 27,
     "patch": 0
   },
   "configurePresets": [
     {
       "name": "default",
       "displayName": "Default release build",
-      "binaryDir": "${sourceDir}/_build/default",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/${presetName}/install"
+      },
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build/${presetName}"
+    },
+    {
+      "name": "sdk",
+      "displayName": "Library and installed C++ SDK",
+      "inherits": "default",
+      "cacheVariables": {
+        "ALPS_BUILD_TESTING": "OFF",
+        "ALPS_BUILD_APPLICATIONS": "OFF"
+      }
+    },
+    {
+      "name": "distribution",
+      "displayName": "Redistributable SDK and applications",
+      "cacheVariables": {
+        "ALPS_BUILD_APPLICATIONS": "ON",
+        "ALPS_BUILD_TESTING": "OFF"
+      },
+      "inherits": "default"
+    },
+    {
+      "name": "dev",
+      "inherits": "default",
+      "cacheVariables": {
+        "ALPS_BUILD_APPLICATIONS": "OFF",
+        "ALPS_BUILD_TESTING": "ON"
+      }
+    },
+    {
+      "name": "mpi",
+      "inherits": "default",
+      "cacheVariables": {
+        "ALPS_BUILD_APPLICATIONS": "OFF",
+        "ALPS_BUILD_TESTING": "ON",
+        "ALPS_ENABLE_MPI": "ON"
+      }
+    },
+    {
+      "name": "extensive",
+      "inherits": "default",
+      "cacheVariables": {
+        "ALPS_BUILD_APPLICATIONS": "OFF",
+        "ALPS_BUILD_TESTING": "ON",
+        "ALPS_BUILD_EXTENSIVE_TESTS": "ON"
+      }
+    },
+    {
+      "name": "sanitizers",
+      "inherits": "default",
+      "cacheVariables": {
+        "ALPS_BUILD_APPLICATIONS": "OFF",
+        "ALPS_BUILD_TESTING": "ON",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "ALPS_ENABLE_SANITIZERS": "ON"
       }
     },
     {
       "name": "wheel-deps",
-      "displayName": "ALPS C++ SDK for pyalps wheels",
-      "description": "SDK install that the standalone pyalps wheel build links against (ALPS_DIR=_build/wheel-deps/install/share/alps). Applications are built so the wheel can bundle them into pyalps/bin, as the legacy ALPS_PYTHON_WHEEL build did; MPI is off, matching that build.",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/_build/wheel-deps",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/wheel-deps/install",
-        "ALPS_BUILD_LIBS_ONLY": "OFF",
-        "ALPS_BUILD_TESTS": "OFF",
-        "ALPS_BUILD_EXAMPLES": "OFF",
-        "ALPS_BUILD_APPLICATIONS": "ON",
-        "ALPS_ENABLE_MPI": "OFF",
-        "ALPS_INCLUDE_TUTORIALS": "OFF"
-      }
+      "inherits": "distribution"
     }
   ],
   "buildPresets": [
     {
       "name": "default",
       "configurePreset": "default"
+    },
+    {
+      "name": "sdk",
+      "configurePreset": "sdk"
+    },
+    {
+      "name": "distribution",
+      "configurePreset": "distribution",
+      "targets": [
+        "install"
+      ]
+    },
+    {
+      "name": "dev",
+      "configurePreset": "dev"
+    },
+    {
+      "name": "mpi",
+      "configurePreset": "mpi"
+    },
+    {
+      "name": "extensive",
+      "configurePreset": "extensive"
+    },
+    {
+      "name": "sanitizers",
+      "configurePreset": "sanitizers"
     },
     {
       "name": "wheel-deps",
@@ -51,6 +121,49 @@
       "configurePreset": "default",
       "output": {
         "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      }
+    },
+    {
+      "name": "dev",
+      "configurePreset": "dev",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      }
+    },
+    {
+      "name": "mpi",
+      "configurePreset": "mpi",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      }
+    },
+    {
+      "name": "extensive",
+      "configurePreset": "extensive",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      }
+    },
+    {
+      "name": "sanitizers",
+      "configurePreset": "sanitizers",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
       }
     }
   ]

@@ -10,7 +10,6 @@
 * SPDX-License-Identifier: MIT
 *
 *****************************************************************************/
-
 #include <alps/parapack/mc_worker.h>
 
 namespace alps {

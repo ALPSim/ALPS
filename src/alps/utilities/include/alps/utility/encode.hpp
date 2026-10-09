@@ -6,12 +6,13 @@
 #ifndef ALPS_ESCAPE_HPP
 #define ALPS_ESCAPE_HPP
 
+#include <alps/utilities_export.h>
 #include <string>
 #include <boost/lexical_cast.hpp>
 #include <alps/config.h>
 
 namespace alps { 
-  ALPS_DECL std::string hdf5_name_encode(std::string const & s);
-  ALPS_DECL std::string hdf5_name_decode(std::string const & s);
+  ALPS_UTILITIES_DECL std::string hdf5_name_encode(std::string const & s);
+  ALPS_UTILITIES_DECL std::string hdf5_name_decode(std::string const & s);
 }
 #endif

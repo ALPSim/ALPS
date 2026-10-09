@@ -223,7 +223,7 @@ class CitationTests(unittest.TestCase):
         shutil.copyfile(ROOT / "CITATION.md", self.root / "CITATION.md")
         project = self.root / "CMakeLists.txt"
         project.write_text(
-            'cmake_minimum_required(VERSION 3.22)\nproject(citation_test LANGUAGES NONE)\n'
+            'cmake_minimum_required(VERSION 3.22)\nproject(citation_test LANGUAGES NONE)\nset(CMAKE_INSTALL_DATADIR share)\n'
             f'include("{ROOT.as_posix()}/cmake/ALPSCitations.cmake")\n', encoding="utf-8")
         build = self.root / "build"
         for mode in ("native", "libraries"):
@@ -231,16 +231,16 @@ class CitationTests(unittest.TestCase):
                 subprocess.run(["cmake", "-S", str(self.root), "-B", str(build),
                                 "-DALPS_CITATION_PYTHON=/nonexistent/python",
                                 "-DCMAKE_DISABLE_FIND_PACKAGE_Python3=ON",
-                                f"-DALPS_BUILD_LIBS_ONLY={'ON' if mode == 'libraries' else 'OFF'}"],
+                                f"-DALPS_BUILD_APPLICATIONS={'OFF' if mode == 'libraries' else 'ON'}"],
                                check=True, capture_output=True)
                 expected = generator.cpp_data(self.policy, self.references, self.framework)
-                self.assertEqual((build / "src/alps/utility/citations_data.inc").read_text(encoding="utf-8"), expected)
+                self.assertEqual((build / "generated/include/alps/utility/citations_data.inc").read_text(encoding="utf-8"), expected)
                 prefix = self.root / ("install-" + mode)
                 subprocess.run(["cmake", "--install", str(build), "--prefix", str(prefix), "--component", "libraries"],
                                check=True, capture_output=True)
                 for filename in ("CITATION.cff", "CITATIONS.yaml", "CITATION.md"):
                     self.assertTrue((prefix / "share/alps" / filename).is_file())
-        data = build / "src/alps/utility/citations_data.inc"
+        data = build / "generated/include/alps/utility/citations_data.inc"
         before = data.read_text(encoding="utf-8")
         self.cff["preferred-citation"]["title"] = "Changed using only the catalog @DO_NOT_REPLACE@"
         self.save()

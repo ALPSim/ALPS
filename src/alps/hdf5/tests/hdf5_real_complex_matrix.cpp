@@ -13,6 +13,8 @@
 
 #include <alps/hdf5/archive.hpp>
 #include <alps/numeric/matrix.hpp>
+#include <alps/hdf5/matrix.hpp>
+#include <alps/xml/matrix.hpp>
 
 #include <boost/filesystem.hpp>
 

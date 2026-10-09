@@ -10,7 +10,6 @@
 * SPDX-License-Identifier: MIT
 *
 *****************************************************************************/
-
 #include <alps/parapack/queue.h>
 
 namespace alps {

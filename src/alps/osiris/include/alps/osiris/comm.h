@@ -19,6 +19,7 @@
 
 #include <alps/osiris/process.h>
 #include <alps/config.h>
+#include <alps/osiris_export.h>
 
 namespace alps {
 
@@ -31,18 +32,18 @@ namespace alps {
 
 // initialize everything
 
-ALPS_DECL void comm_init(int& argc, char**& argv, bool=false);
+ALPS_OSIRIS_DECL void comm_init(int& argc, char**& argv, bool=false);
 
 
 // stop message passing
 // the bool parameter indicates if all slave processes should be killed
 
-ALPS_DECL void comm_exit(bool kill_slaves=false);
+ALPS_OSIRIS_DECL void comm_exit(bool kill_slaves=false);
 
 
 // do we actually run in parallel?
 
-ALPS_DECL bool runs_parallel();
+ALPS_OSIRIS_DECL bool runs_parallel();
 
 //=======================================================================
 // HOST/PROCESS ENQUIRIES
@@ -51,15 +52,15 @@ ALPS_DECL bool runs_parallel();
 //-----------------------------------------------------------------------
 
 namespace detail {
-int local_id(); // return the id of this Process
-int invalid_id(); // return an invalid id
+ALPS_OSIRIS_DECL int local_id(); // return the id of this Process
+ALPS_OSIRIS_DECL int invalid_id(); // return an invalid id
 }
 
-ALPS_DECL bool is_master(); // is this the master Process ?
+ALPS_OSIRIS_DECL bool is_master(); // is this the master Process ?
 
-Process local_process(); // make a descriptor of the local Process
-ProcessList all_processes(); // get a list of all running processes
-Process master_process(); // get the master Process
+ALPS_OSIRIS_DECL Process local_process(); // make a descriptor of the local Process
+ALPS_OSIRIS_DECL ProcessList all_processes(); // get a list of all running processes
+ALPS_OSIRIS_DECL Process master_process(); // get the master Process
 
 } // end namespace alps
 

@@ -16,7 +16,7 @@
  * @brief alps::fortran_wrapper クラス宣言
  */
 #include <alps/parapack/worker.h>
-#include <alps/fortran/fwrapper_impl.h>
+#include "fwrapper_impl.h"
 
 namespace alps
 {

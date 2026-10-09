@@ -6,10 +6,11 @@
 #ifndef ALPS_UTILITY_TEMPORARU_FILENAME_HPP
 #define ALPS_UTILITY_TEMPORARU_FILENAME_HPP
 
+#include <alps/utilities_export.h>
 #include <alps/config.h>
 #include <string>
 
 namespace alps { 
-  ALPS_DECL std::string temporary_filename(std::string prefix);
+  ALPS_UTILITIES_DECL std::string temporary_filename(std::string prefix);
 }
 #endif // ALPS_UTILITY_TEMPORARU_FILENAME_HPP

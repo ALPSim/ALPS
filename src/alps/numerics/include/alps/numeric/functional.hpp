@@ -18,8 +18,6 @@
 #define ALPS_NUMERIC_FUNCTIONAL_HPP
 
 #include <alps/numeric/vector_functions.hpp>
-#include <alps/boost/accumulators/numeric/functional.hpp>
-#include <alps/boost/accumulators/numeric/functional/vector.hpp>
 
 namespace alps { 
     namespace numeric {
