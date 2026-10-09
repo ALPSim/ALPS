@@ -32,7 +32,7 @@ if(ALPS_CITATION_PYTHON)
   execute_process(COMMAND "${ALPS_CITATION_PYTHON}" -c "import yaml, jsonschema"
     RESULT_VARIABLE _alps_citation_dependencies OUTPUT_QUIET ERROR_QUIET)
   if(NOT _alps_citation_dependencies EQUAL 0)
-    message(STATUS "Skipping citation wrapper tests: install script/citations/requirements.txt in ${ALPS_CITATION_PYTHON}")
+    message(STATUS "Skipping citation wrapper tests: install .github/scripts/citations/requirements.txt in ${ALPS_CITATION_PYTHON}")
     set(ALPS_CITATION_PYTHON "")
   endif()
 endif()

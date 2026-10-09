@@ -72,7 +72,7 @@ python -m pip install "cmake>=3.27" ninja numpy h5py
 
 Skip the first two lines if already using a suitable environment. On Debian/Ubuntu, creating a venv may first require `sudo apt-get install python3-venv`. Activate the same environment in each new terminal. Both CMake and CTest must be at least 3.27; use `command -v cmake` to check which installation your shell finds.
 
-Application tests require a Python ≥ 3.10 interpreter; MaxEnt reference tests also require NumPy and h5py. CMake and Ninja can also come from system packages or [official CMake binaries](https://cmake.org/download/). A generator other than Ninja can be selected with a plain CMake invocation instead of a preset.
+Application tests require a Python ≥ 3.11 interpreter; MaxEnt reference tests also require NumPy and h5py. CMake and Ninja can also come from system packages or [official CMake binaries](https://cmake.org/download/). A generator other than Ninja can be selected with a plain CMake invocation instead of a preset.
 
 ### Build
 

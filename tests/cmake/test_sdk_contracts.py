@@ -194,3 +194,16 @@ def test_legacy_cmake_consumer(tmp_path):
         "-DCMAKE_BUILD_TYPE=Release", "-DALPS_DIR=" + os.environ["ALPS_DIR"],
         *json.loads(os.environ.get("ALPS_TEST_CMAKE_ARGS", "[]"))], check=True)
     build_and_run(build)
+
+
+@pytest.mark.skipif(os.name == "nt" or not shutil.which("make"), reason="requires Unix make")
+def test_legacy_make_consumer(tmp_path):
+    prefix = Path(os.environ["ALPS_DIR"]).resolve().parents[1]
+    (tmp_path / "main.cpp").write_text(
+        '#include <alps/utility/os.hpp>\nint main() { return alps::hostname().empty(); }\n')
+    (tmp_path / "Makefile").write_text(
+        'include $(ALPS_HOME)/share/alps/include.mk\n'
+        'consumer: main.cpp\n'
+        '\t$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ $< $(LIBS)\n')
+    subprocess.run(["make", "-C", str(tmp_path), f"ALPS_HOME={prefix}"], check=True)
+    subprocess.run([str(tmp_path / "consumer")], check=True)
