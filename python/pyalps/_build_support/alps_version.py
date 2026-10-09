@@ -3,7 +3,7 @@
 
 """Derive the pyalps version and conditional wheel commands.
 
-ALPS_VERSION.txt at the repository root is the single source of truth for the
+cmake/ALPS_VERSION.txt in the repository is the single source of truth for the
 release version; cmake/ALPSVersion.cmake reads the same file to set
 ALPS_VERSION_CORE before ``project()``. This provider reads it for the Python
 package metadata, so a release bump is one edit rather than two that can drift.
@@ -66,7 +66,7 @@ _PRERELEASE = re.compile(r"^(?P<kind>[A-Za-z]+)[.\-_]?(?P<number>[0-9]+)?$")
 
 def _read_core(project_dir: Path) -> str:
     """Return MAJOR.MINOR.PATCH from ALPS_VERSION.txt."""
-    candidates = (project_dir / "ALPS_VERSION.txt", project_dir / "../../ALPS_VERSION.txt")
+    candidates = (project_dir / "ALPS_VERSION.txt", project_dir / "../../cmake/ALPS_VERSION.txt")
     for candidate in candidates:
         if not candidate.is_file():
             continue
@@ -85,7 +85,7 @@ def _read_core(project_dir: Path) -> str:
     raise RuntimeError(
         "Cannot find ALPS_VERSION.txt, which supplies the pyalps version. "
         f"Looked in: {tried} (relative to {Path.cwd()}). A build from the ALPS "
-        "repository finds it at the repository root; an sdist carries a copy, "
+        "repository finds it under cmake/; an sdist carries a copy at its root, "
         "placed there by the sdist.force-include entry in pyproject.toml."
     )
 
@@ -171,7 +171,12 @@ def dynamic_metadata(settings, project):  # noqa: ARG001 - provider protocol
 
 
 if __name__ == "__main__":  # a convenience for the release process
-    if sys.argv[1:] == ["--bundle-applications"]:
-        print("ON" if bundle_applications() else "OFF")
-    else:
-        print(version())
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--bundle-applications", action="store_true")
+    mode.add_argument("--core", action="store_true", help="print the numeric SDK version")
+    args = parser.parse_args()
+    print(("ON" if bundle_applications() else "OFF") if args.bundle_applications
+          else _read_core(Path(__file__).resolve().parents[1]) if args.core else version())

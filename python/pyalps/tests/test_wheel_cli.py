@@ -32,7 +32,8 @@ def test_import_preserves_binary_selection_environment(tmp_path, sdk_override):
 
 @pytest.fixture
 def wheel_cli(tmp_path):
-    package = Path(pyalps.__file__).resolve().parent
+    from pyalps._resources import runtime_directory
+    package = runtime_directory()
     if not (package / "bin").is_dir():
         pytest.skip("this installation does not bundle ALPS programs")
     scripts = Path(sysconfig.get_path("scripts"))

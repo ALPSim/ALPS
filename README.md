@@ -33,7 +33,7 @@ ctest --preset default
 cmake --install _build/default
 ```
 
-Then follow the [Python build instructions](python/pyalps/README.md#building-from-source), pointing `ALPS_DIR` at `_build/default/install/share/alps`.
+Then follow the [editable Python installation](python/pyalps/README.md#editable-development), pointing `ALPS_DIR` at `_build/default/install/share/alps`.
 
 ## Contributing
 

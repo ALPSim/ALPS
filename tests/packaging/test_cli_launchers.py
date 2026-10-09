@@ -23,6 +23,7 @@ def launcher(tmp_path):
     (package / "bin").mkdir(parents=True)
     (package / "xml").mkdir()
     (package / "__init__.py").write_text('raise AssertionError("pyalps must not be imported")\n')
+    (package / "runtime.json").write_text(json.dumps({"sdk_bin": ""}))
     executable = package / "bin/spinmc"
     env = os.environ.copy()
     for key in ("ALPS_XML_PATH", "ALPS_BIN_PATH", "PYTHONPATH", "PYTHONHOME"):
@@ -53,7 +54,7 @@ def test_exporter_without_pyalps_or_external_programs(launcher, tmp_path):
     stylesheets = Path(__file__).resolve().parents[2] / "src/alps/resources"
     shutil.copytree(stylesheets, package / "xml", dirs_exist_ok=True)
     source = tmp_path / "input with spaces.xml"
-    source.write_text('<!DOCTYPE plot SYSTEM "https://invalid.tutorials/00-examples/unavailable.dtd">\n'
+    source.write_text('<!DOCTYPE plot SYSTEM "https://invalid.example/unavailable.dtd">\n'
                       '<plot><set><point><x>1</x><y>2</y></point></set></plot>')
     result = run(program="plot2text", isolated=False, args=[str(source)])
     assert result.returncode == 0, result.stderr
@@ -111,7 +112,7 @@ def test_xml_override_does_not_select_another_binary_installation(launcher):
 
 def test_missing_bundled_binary_does_not_use_path_or_sdk(launcher):
     run, package, env = launcher
-    (package / "pyalps_config.py").write_text('ALPS_BIN_INSTALL_DIR = ""\n')
+    (package / "runtime.json").write_text(json.dumps({"sdk_bin": ""}))
     env["ALPS_BIN_PATH"] = env["PATH"]  # contains a working, conflicting spinmc
     result = run()
     assert result.returncode == 127
@@ -129,7 +130,7 @@ def test_bindings_only_sdk_selection(launcher, tmp_path, selection):
         executable = directory / "spinmc"
         executable.write_text('#!/bin/sh\nprintf "%s\\n" "$0"\n')
         executable.chmod(0o755)
-    (package / "pyalps_config.py").write_text(f"ALPS_BIN_INSTALL_DIR = {str(sdk)!r}\n")
+    (package / "runtime.json").write_text(json.dumps({"sdk_bin": str(sdk)}))
     selected = sdk if selection == "configured" else override
     if selection == "missing":
         selected = tmp_path / "missing SDK"

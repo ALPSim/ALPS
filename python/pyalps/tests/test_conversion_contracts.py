@@ -12,6 +12,20 @@ from pyalps import alea, ngs
 from pyalps.cxx.pyngsaccumulator_c import count_accumulator
 
 
+def test_timeseries_statistics_match_independent_references():
+    from pyalps.cxx import pyalea_c
+
+    samples = np.array([1., 2., 4., 9.])
+    series = pyalea_c.MCScalarTimeseries(samples)
+    assert pyalea_c.mean(series) == pytest.approx(4.)
+    assert pyalea_c.variance(series) == pytest.approx(38. / 3.)
+    assert pyalea_c.uncorrelated_error(series) == pytest.approx(np.sqrt(38. / 12.))
+    np.testing.assert_allclose(pyalea_c.running_mean(series).timeseries(),
+                               [1., 1.5, 7. / 3., 4.])
+    np.testing.assert_allclose(pyalea_c.reverse_running_mean(series).timeseries(),
+                               [4., 5., 6.5, 9.])
+
+
 def test_count_accumulator_accepts_non_scalar_samples():
     accumulator = count_accumulator()
     for sample in (np.ones((2, 3)), 1 + 2j, [1, 2], {"x": 1}, None):

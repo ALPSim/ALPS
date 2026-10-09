@@ -170,9 +170,7 @@ NB_MODULE(pymcdata_c, m) {
              })
         .def("__abs__", [](Scalar x) { using alps::alea::abs; return abs(std::move(x)); })
         .def("__pow__", [](Scalar x, double e) { using alps::alea::pow; return pow(std::move(x), e); })
-        // Unary - / + on mcdata produce new values; wrap manually
-        // because the library's operator+()/-() signatures aren't
-        // const-returning (which is what nb::self expects).
+        // Copy for unary +, whose native overload returns a mutable reference.
         .def("__pos__", [](Scalar self) { return +self; })
         .def("__neg__", [](Scalar self) { return -self; })
         // In-place operators — modify self in place, return reference.

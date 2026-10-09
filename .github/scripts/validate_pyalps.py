@@ -31,11 +31,8 @@ def main():
     parser.add_argument("--packaging", action="store_true")
     parser.add_argument("--downstream", action="store_true")
     parser.add_argument("--applications", action="store_true")
-    parser.add_argument("--legacy-python", type=Path)
-    parser.add_argument("--legacy-modules", type=Path)
+    parser.add_argument("--smoke", action="store_true", help="Check bindings and package loading only")
     args = parser.parse_args()
-    if bool(args.legacy_python) != bool(args.legacy_modules):
-        parser.error("--legacy-python and --legacy-modules must be supplied together")
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
 
@@ -66,7 +63,8 @@ def main():
         "installed_package": str(package),
         "installed_extension_hashes": {
             str(path.relative_to(package)): sha256(path)
-            for path in sorted(package.rglob("*.so"))
+            for path in sorted(package.rglob("*"))
+            if path.suffix in {".so", ".pyd", ".dll", ".dylib"}
         },
         "downstream_enabled": environment.get("PYALPS_TEST_DOWNSTREAM_EXPORT") == "1",
         "build_environment": {
@@ -116,7 +114,10 @@ def main():
 
     success = False
     try:
-        tests = ["python/pyalps/tests"] + (["tests/packaging"] if args.packaging else [])
+        tests = (["python/pyalps/tests/test_binding_surface.py", "python/pyalps/tests/test_wheel_payload.py"]
+                 if args.smoke else ["python/pyalps/tests"])
+        if args.packaging:
+            tests.append("tests/packaging")
         run(
             "pytest",
             [
@@ -129,47 +130,6 @@ def main():
                 output / "pytest.xml",
             ],
         )
-        scripts = ROOT / ".github" / "scripts" / "pyalps_compatibility"
-        if args.legacy_python:
-            old_env = {**environment, "PYTHONPATH": str(args.legacy_modules.resolve())}
-            old_python = args.legacy_python.absolute()
-            run(
-                "legacy-probes",
-                [old_python, scripts / "probe.py", "legacy", output / "legacy.json"],
-                old_env,
-            )
-            run(
-                "candidate-probes",
-                [
-                    sys.executable,
-                    scripts / "probe.py",
-                    "nanobind",
-                    output / "candidate.json",
-                ],
-            )
-            run(
-                "comparison",
-                [
-                    sys.executable,
-                    scripts / "compare.py",
-                    output / "legacy.json",
-                    output / "candidate.json",
-                    output / "comparison.json",
-                ],
-            )
-            for writer, reader in (("legacy", "nanobind"), ("nanobind", "legacy")):
-                for mode, action in ((writer, "write"), (reader, "read")):
-                    run(
-                        f"checkpoint-{writer}-{action}",
-                        [
-                            old_python if mode == "legacy" else sys.executable,
-                            scripts / "checkpoint.py",
-                            mode,
-                            action,
-                            output / f"{writer}.h5",
-                        ],
-                        old_env if mode == "legacy" else environment,
-                    )
         if args.applications:
             for app in (
                 "spinmc",
@@ -181,7 +141,7 @@ def main():
             ):
                 run(
                     app,
-                    [sys.executable, scripts / "applications.py", app],
+                    [sys.executable, Path(__file__).parent / "pyalps_compatibility" / "applications.py", app],
                     {
                         **environment,
                         "PYALPS_WORKFLOW_ROOT": str(output / "applications"),

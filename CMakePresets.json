@@ -69,10 +69,6 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "ALPS_ENABLE_SANITIZERS": "ON"
       }
-    },
-    {
-      "name": "wheel-deps",
-      "inherits": "distribution"
     }
   ],
   "buildPresets": [
@@ -106,13 +102,6 @@
     {
       "name": "sanitizers",
       "configurePreset": "sanitizers"
-    },
-    {
-      "name": "wheel-deps",
-      "configurePreset": "wheel-deps",
-      "targets": [
-        "install"
-      ]
     }
   ],
   "testPresets": [

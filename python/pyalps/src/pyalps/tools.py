@@ -43,7 +43,8 @@ from pyalps_cli import resolve_executable as _resolve_executable
 # XML resources are bundled in both build modes. Executable selection is
 # resolved per invocation and must not change the caller's ALPS_BIN_PATH.
 if "ALPS_XML_PATH" not in os.environ:
-    _xml_path = os.path.join(os.path.dirname(__file__), "xml")
+    from ._resources import runtime_directory
+    _xml_path = str(runtime_directory() / "xml")
     if os.path.isdir(_xml_path):
         os.environ["ALPS_XML_PATH"] = _xml_path
 
