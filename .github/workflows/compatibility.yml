@@ -82,14 +82,14 @@ jobs:
         cmake --install _build/ci
         cmake --install _build/ci --component tutorials
         tutorials="$PWD/_build/ci/install/share/alps/tutorials"
-        for source in "$tutorials/examples" "$tutorials/examples/fortran"; do
+        for source in "$tutorials/00-examples" "$tutorials/00-examples/fortran"; do
           output="_build/consumers/${source#"$tutorials/"}"
           cmake -S "$source" -B "$output" -G Ninja \
             "-DALPS_DIR=$PWD/_build/ci/install/share/alps"
           cmake --build "$output"
           ctest --test-dir "$output" --output-on-failure --output-junit ctest.xml --no-tests=error
         done
-        find "$tutorials" -mindepth 1 -path "$tutorials/examples" -prune -o -name CMakeLists.txt -print0 | while IFS= read -r -d '' file; do
+        find "$tutorials" -mindepth 1 -path "$tutorials/00-examples" -prune -o -name CMakeLists.txt -print0 | while IFS= read -r -d '' file; do
           source="${file%/CMakeLists.txt}"
           # The root file installs tutorials; it is not a tutorial project.
           if [[ "$source" == "$tutorials" ]]; then continue; fi
