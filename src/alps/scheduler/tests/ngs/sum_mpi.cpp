@@ -12,6 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <alps/ngs.hpp>
+#include <alps/ngs/params_from_file.hpp>
 #include <alps/mcbase.hpp>
 #include <alps/parseargs.hpp>
 #include <alps/mcmpiadapter.hpp>
@@ -62,9 +63,9 @@ class my_sim_type : public alps::mcbase {
         }
 
     private:
-        int count;
+        int count = 0;
         int total_count;
-        double value;
+        double value = 0;
 };
 
 int main(int argc, char *argv[]) {
@@ -83,7 +84,7 @@ int main(int argc, char *argv[]) {
         else if (boost::filesystem::path(options.input_file).extension().string() == ".h5")
             alps::hdf5::archive(options.input_file)["/parameters"] >> params;
         else
-            params = alps::parameters_type<my_sim_type>::type(options.input_file);
+            params = alps::params_from_file(options.input_file);
         broadcast(c, params);
 
         alps::mcmpiadapter<my_sim_type> my_sim(params, c, alps::check_schedule(options.tmin, options.tmax)); // creat a simulation
