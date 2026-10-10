@@ -1,6 +1,6 @@
 # Learn ALPS
 
-These tutorials are the starting point for learning ALPS: prepare a simulation, run it, inspect its results, and then explore a numerical method or build your own code. The [library examples](examples/README.md) provide smaller demonstrations of individual APIs.
+These tutorials are the starting point for learning ALPS: prepare a simulation, run it, inspect its results, and then explore a numerical method or build your own code. The [library examples](00-examples/README.md) provide smaller demonstrations of individual APIs.
 
 ## Getting started
 
@@ -25,7 +25,7 @@ The top-level numbers suggest a browsing order; each topic keeps its existing le
 
 | Directory | Purpose |
 | --- | --- |
-| `examples/` | Independent API examples to consult as needed |
+| `00-examples/` | Independent API examples to consult as needed |
 | `01-intro/` | Prepare, run and evaluate a first simulation |
 | `02-ed/` | Exact diagonalization and small-system calculations |
 | `03-mc/` | Classical and quantum Monte Carlo |
@@ -39,7 +39,7 @@ The top-level numbers suggest a browsing order; each topic keeps its existing le
 | `11-notebook/` | Interactive versions of lessons, usable alongside the other topics |
 | `12-optical-lattice/` | Band structure and Hubbard parameters for optical lattices |
 
-`examples` is a reference collection, not a prerequisite. For writing simulations, follow `08-alpsize` before using the templates in `09-code` and the interfaces in `10-ngs`. Notebooks provide an alternative presentation rather than a final advanced lesson.
+`00-examples` is a reference collection, not a prerequisite. For writing simulations, follow `08-alpsize` before using the templates in `09-code` and the interfaces in `10-ngs`. Notebooks provide an alternative presentation rather than a final advanced lesson.
 
 | Method or task | Suggested starting point | Continue with |
 | --- | --- | --- |
@@ -60,8 +60,8 @@ The top-level numbers suggest a browsing order; each topic keeps its existing le
 - Follow the [`08-alpsize/` sequence](08-alpsize/) from [the CMake introduction](08-alpsize/01-cmake/) through parameters, measurements, lattices, and scheduling.
 - Adapt the [Python simulation skeleton](09-code/01-python/) or [C++ simulation example](09-code/02-c++/).
 - Explore the [accumulator example](10-ngs/1_accumulator_only/) and the [native Python simulation](10-ngs/6_python_native/) for simulation interfaces.
-- Export a C++ simulation to Python with the [Ising extension example](../python/pyalps/examples/ising/README.md), built against the installed SDK and pyalps package.
-- Use the [library examples](examples/README.md) when you need a focused example of statistical analysis, HDF5, model construction, numerical methods, or Fortran integration.
+- Export a C++ simulation to Python with the [Ising extension example](../python/pyalps/00-examples/ising/README.md), built against the installed SDK and pyalps package.
+- Use the [library examples](00-examples/README.md) when you need a focused example of statistical analysis, HDF5, model construction, numerical methods, or Fortran integration.
 
 ## Using an installed tutorial collection
 
@@ -71,4 +71,4 @@ Source builds provide this collection as an optional installation component:
 cmake --install build --component tutorials
 ```
 
-It is installed under `share/alps/tutorials`. The library examples can also be built against an installed SDK; see their [build instructions](examples/README.md).
+It is installed under `share/alps/tutorials`. The library examples can also be built against an installed SDK; see their [build instructions](00-examples/README.md).

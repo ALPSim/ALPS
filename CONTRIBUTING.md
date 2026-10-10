@@ -124,6 +124,8 @@ Reuse build directories for ordinary edits. Machine-specific CMake settings belo
 
 Native MaxEnt reference tests require NumPy and h5py in the CMake-selected Python interpreter (`python -m pip install numpy h5py`). The executable and Python binding share the same scientific validation.
 
+See [the testing guide](tests/README.md) for GoogleTest conventions, component selection, MPI, sanitizers, standalone tutorial checks, and CI coverage policy. For library-only iteration use the `dev` configure/build/test presets; the `default` preset below also builds applications.
+
 CTest runs the native suite only. After the SDK build, run:
 
 ```sh
@@ -237,7 +239,7 @@ Add exported headers to the owning target's CMake `HEADERS` file set. Public `<a
 
 For example, configure with `cmake --preset default -DALPS_ENABLE_OPENMP=ON`. The `sdk` preset disables applications and tests; `distribution` disables tests and its build preset installs automatically. When embedding ALPS with `add_subdirectory`, applications and tests default to `OFF`. MPI remains opt-in. Headers and the C++ Fortran bridge are always part of the SDK; building that bridge needs no Fortran compiler.
 
-Examples build separately against an installed SDK; see the [C++ and Fortran example instructions](tutorials/examples/README.md). Fortran tutorials that call OpenMP also need a Fortran OpenMP runtime. To install tutorial sources under `share/alps/tutorials`, run `cmake --install _build/default --component tutorials` after installing the SDK.
+Examples build separately against an installed SDK; see the [C++ and Fortran example instructions](tutorials/00-examples/README.md). Fortran tutorials that call OpenMP also need a Fortran OpenMP runtime. To install tutorial sources under `share/alps/tutorials`, run `cmake --install _build/default --component tutorials` after installing the SDK.
 
 ### Numerical libraries
 

@@ -35,7 +35,7 @@ project(alps VERSION ${ALPS_VERSION_CORE} LANGUAGES C CXX)
 foreach(legacy IN ITEMS
     "ALPS_BUILD_TESTS|use ALPS_BUILD_TESTING"
     "ALPS_BUILD_LIBS_ONLY|use ALPS_BUILD_APPLICATIONS=OFF"
-    "ALPS_BUILD_EXAMPLES|build tutorials/examples against the installed SDK"
+    "ALPS_BUILD_EXAMPLES|build tutorials/00-examples against the installed SDK"
     "ALPS_BUILD_FORTRAN|ALPS::fortran is always built"
     "ALPS_INSTALL_HEADERS|headers are always installed"
     "ALPS_INCLUDE_TUTORIALS|use cmake --install <build> --component tutorials"
