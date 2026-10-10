@@ -19,12 +19,11 @@ python3 -m unittest ci/test_fingerprint.py
 python3 ci/fingerprint.py --check-workflow .github/workflows/ci.yml
 ```
 
-The `mpi` CMake preset registers retained MPI executables with CTest through
-`register_mpi_tests.cmake`. Fixtures retain their original stdin/golden-output
-files. Tests use separate working directories and the rank counts required
-by their algorithms; the process-group fixture requires eight ranks.
+The `mpi` preset registers GoogleTest executables through
+`alps_add_mpi_gtest` in `cmake/ALPSTesting.cmake`. Each executable runs at two
+and three ranks, with isolated working directories and per-rank reports.
+See [the MPI testing guide](../tests/mpi.md) for the tested contracts and limits.
 
 This pipeline is adapted from [skilledwolf's PR #166 branch](https://github.com/skilledwolf/ALPS/tree/b5e6f650408bafd8fba77a3dfcc04426f009f4fa).
-Test paths, MPI registration and sanitizer flags are adapted to the SDK branch's
-retained native test framework. Compatibility runs weekly, manually and before
-release publication; see [CI coverage](../CONTRIBUTING.md#ci-coverage).
+Compatibility runs weekly, manually and before release publication; see
+[CI coverage](../CONTRIBUTING.md#ci-coverage).
