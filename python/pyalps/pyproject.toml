@@ -77,7 +77,7 @@ build = ["cp311-*", "cp312-*", "cp313-*", "cp314-*"]
 manylinux-x86_64-image = "manylinux_2_28"
 test-requires = ["pytest", "h5py", "ninja>=1.12", "nanobind==2.15.0", "scikit-build-core>=1.0"]
 # An external watchdog can stop native code even while it holds Python's GIL.
-test-command = 'python {project}/.github/scripts/run_with_timeout.py 900 python -m pytest -v -o faulthandler_timeout=300 "{project}/tests/pyalps" "{project}/tests/cmake"'
+test-command = 'python {project}/.github/scripts/run_with_timeout.py 900 python "{project}/.github/scripts/run_wheel_tests.py"'
 
 # The ALPS C++ SDK is built once per platform in before-all via the distribution
 # CMake preset; ALPS_DIR points every wheel build at that install. The ccache
@@ -88,7 +88,7 @@ ALPS_DIR = "$(pwd)/_build/distribution/install/share/alps"
 CMAKE_PREFIX_PATH = "$(pwd)/_build/boost-install"
 CCACHE_DIR = "$(pwd)/_build/ccache"
 CCACHE_NAMESPACE = "pyalps-wheel"
-CCACHE_MAXSIZE = "1G"
+CCACHE_MAXSIZE = "256M"
 CMAKE_C_COMPILER_LAUNCHER = "ccache"
 CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
 PYALPS_TEST_DOWNSTREAM_EXPORT = "1"
@@ -119,18 +119,16 @@ repair-wheel-command = [
 
 [tool.cibuildwheel.macos]
 before-all = [
-  "brew install --force-bottle ccache cmake hdf5 ninja zstd xz",
+  "brew install --force-bottle boost ccache cmake hdf5 ninja",
   "cd {project}",
   "ccache --zero-stats",
-  "ALPS_BOOST_MPI=OFF CXX=clang++ python .github/scripts/prepare_dependencies.py boost-1.91.0 _build/boost-install",
-  "cmake --preset distribution -DHDF5_ROOT=$(brew --prefix hdf5)",
+  "cmake --preset distribution -DHDF5_ROOT=$(brew --prefix hdf5) -DBoost_ROOT=$(brew --prefix boost)",
   "cmake --build --preset distribution -j2",
   "ccache --show-stats || true",
 ]
 repair-wheel-command = [
   "python -m pip install wheel",
-  # Invoke the Python module directly: a shell shebang can strip DYLD variables.
-  'DYLD_LIBRARY_PATH="$(pwd)/_build/boost-install/lib" python -m delocate.cmd.delocate_wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}',
+  'python -m delocate.cmd.delocate_wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}',
   "python {project}/python/pyalps/_build_support/runtime_manifest.py --wheel {dest_dir}/*.whl",
   "delocate-listdeps --all {dest_dir}/*.whl",
 ]

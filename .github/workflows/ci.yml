@@ -1,0 +1,442 @@
+name: CI
+'on':
+  pull_request:
+  push:
+    branches:
+    - master
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Run every area even if its fingerprint already passed
+        type: boolean
+        default: false
+permissions:
+  contents: read
+# Change detection on push diffs against github.event.before only, so a
+# cancelled master run would leave its commits untested. Cancel PR runs only.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  changes:
+    name: Select affected areas
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      static_run: ${{ steps.decide.outputs.static_run }}
+      static_key: ${{ steps.fp.outputs.static_key }}
+      linux_run: ${{ steps.decide.outputs.linux_run }}
+      linux_key: ${{ steps.fp.outputs.linux_key }}
+      mpi_run: ${{ steps.decide.outputs.mpi_run }}
+      mpi_key: ${{ steps.fp.outputs.mpi_key }}
+      macos_run: ${{ steps.decide.outputs.macos_run }}
+      macos_key: ${{ steps.fp.outputs.macos_key }}
+      sanitizers_run: ${{ steps.decide.outputs.sanitizers_run }}
+      sanitizers_key: ${{ steps.fp.outputs.sanitizers_key }}
+      packaging_run: ${{ steps.decide.outputs.packaging_run }}
+      packaging_key: ${{ steps.fp.outputs.packaging_key }}
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+    - name: Test change detection and check areas.json against this workflow
+      run: |
+        python3 -m unittest ci/test_fingerprint.py
+        python3 ci/fingerprint.py --check-workflow .github/workflows/ci.yml
+    - id: fp
+      name: Detect changes and fingerprint areas
+      env:
+        BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+      run: |
+        export TOOLCHAIN="$RUNNER_OS-$RUNNER_ARCH-${ImageOS:-}-${ImageVersion:-}"
+        python3 ci/fingerprint.py --base "$BASE" --head HEAD >> "$GITHUB_OUTPUT"
+    - id: pass_static
+      if: steps.fp.outputs.static_key != ''
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .ci-passed
+        key: pass-static-${{ steps.fp.outputs.static_key }}
+        lookup-only: true
+    - id: pass_linux
+      if: steps.fp.outputs.linux_key != ''
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .ci-passed
+        key: pass-linux-${{ steps.fp.outputs.linux_key }}
+        lookup-only: true
+    - id: pass_mpi
+      if: steps.fp.outputs.mpi_key != ''
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .ci-passed
+        key: pass-mpi-${{ steps.fp.outputs.mpi_key }}
+        lookup-only: true
+    - id: pass_macos
+      if: steps.fp.outputs.macos_key != ''
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .ci-passed
+        key: pass-macos-${{ steps.fp.outputs.macos_key }}
+        lookup-only: true
+    - id: pass_sanitizers
+      if: steps.fp.outputs.sanitizers_key != ''
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .ci-passed
+        key: pass-sanitizers-${{ steps.fp.outputs.sanitizers_key }}
+        lookup-only: true
+    - id: pass_packaging
+      if: steps.fp.outputs.packaging_key != ''
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .ci-passed
+        key: pass-packaging-${{ steps.fp.outputs.packaging_key }}
+        lookup-only: true
+    - id: decide
+      name: Skip areas whose fingerprint already passed
+      env:
+        FORCE: ${{ inputs.force }}
+        AFFECTED_STATIC: ${{ steps.fp.outputs.static_affected }}
+        KEY_STATIC: ${{ steps.fp.outputs.static_key }}
+        HIT_STATIC: ${{ steps.pass_static.outputs.cache-hit }}
+        AFFECTED_LINUX: ${{ steps.fp.outputs.linux_affected }}
+        KEY_LINUX: ${{ steps.fp.outputs.linux_key }}
+        HIT_LINUX: ${{ steps.pass_linux.outputs.cache-hit }}
+        AFFECTED_MPI: ${{ steps.fp.outputs.mpi_affected }}
+        KEY_MPI: ${{ steps.fp.outputs.mpi_key }}
+        HIT_MPI: ${{ steps.pass_mpi.outputs.cache-hit }}
+        AFFECTED_MACOS: ${{ steps.fp.outputs.macos_affected }}
+        KEY_MACOS: ${{ steps.fp.outputs.macos_key }}
+        HIT_MACOS: ${{ steps.pass_macos.outputs.cache-hit }}
+        AFFECTED_SANITIZERS: ${{ steps.fp.outputs.sanitizers_affected }}
+        KEY_SANITIZERS: ${{ steps.fp.outputs.sanitizers_key }}
+        HIT_SANITIZERS: ${{ steps.pass_sanitizers.outputs.cache-hit }}
+        AFFECTED_PACKAGING: ${{ steps.fp.outputs.packaging_affected }}
+        KEY_PACKAGING: ${{ steps.fp.outputs.packaging_key }}
+        HIT_PACKAGING: ${{ steps.pass_packaging.outputs.cache-hit }}
+      run: python3 ci/fingerprint.py --decide >> "$GITHUB_OUTPUT"
+  static:
+    name: Static and helper checks
+    needs: changes
+    if: needs.changes.outputs.static_run == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: '3.12'
+        cache: pip
+        cache-dependency-path: .github/workflows/ci.yml
+    - name: Lint workflows and shell helpers
+      run: |
+        curl --fail --location --retry 3 --connect-timeout 30 --max-time 300 \
+          https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz \
+          -o "$RUNNER_TEMP/actionlint.tar.gz"
+        echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  $RUNNER_TEMP/actionlint.tar.gz" | sha256sum --check
+        tar -xzf "$RUNNER_TEMP/actionlint.tar.gz" -C "$RUNNER_TEMP" actionlint
+        "$RUNNER_TEMP/actionlint" -color
+        shellcheck .github/scripts/build-boost.sh .github/scripts/test-editable-bindings.sh
+    - name: Test CI helpers
+      run: |
+        python -m pip install pytest packaging lxml numpy 'scikit-build-core>=1.0' 'cmake>=3.27' ninja
+        python -m pip install -r .github/scripts/citations/requirements.txt
+        python .github/scripts/generate_citations.py --check
+        python -m pytest tests/packaging/test_citations.py -q
+        python -m compileall -q .github/scripts python/pyalps/_build_support
+        python -m pytest tests/ci -q --junitxml=ci-tests.xml
+    - name: Summarize helper tests
+      if: always()
+      run: python .github/scripts/junit_summary.py ci-tests.xml
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      if: always()
+      with:
+        name: ci-helper-tests
+        path: ci-tests.xml
+    - name: Record pass marker
+      if: needs.changes.outputs.static_key != ''
+      run: mkdir -p .ci-passed && echo "$KEY" > .ci-passed/key
+      env:
+        KEY: ${{ needs.changes.outputs.static_key }}
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      if: needs.changes.outputs.static_key != ''
+      with:
+        path: .ci-passed
+        key: pass-static-${{ needs.changes.outputs.static_key }}
+  linux:
+    needs: changes
+    if: needs.changes.outputs.linux_run == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      CC: gcc
+      CXX: g++
+      CMAKE_C_COMPILER_LAUNCHER: ccache
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
+      CCACHE_DIR: ${{ github.workspace }}/_build/ccache
+      CCACHE_MAXSIZE: 256M
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: ./.github/actions/setup-native
+    - name: Install compiler cache
+      run: sudo apt-get install -y ccache
+    - name: Identify compiler and dependency ABI
+      id: toolchain
+      run: |
+        { "$CXX" --version; dpkg-query -W 'libboost*' 'libhdf5*'; } > "$RUNNER_TEMP/toolchain"
+        echo "key=$(sha256sum "$RUNNER_TEMP/toolchain" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
+    - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      id: cache
+      with:
+        path: _build/ccache
+        key: native-${{ runner.os }}-${{ runner.arch }}-${{ steps.toolchain.outputs.key }}-${{ github.run_id }}-${{
+          github.run_attempt }}
+        restore-keys: native-${{ runner.os }}-${{ runner.arch }}-${{ steps.toolchain.outputs.key }}-
+    - name: Build and test native code
+      run: |
+        cmake --preset dev -B _build/ci \
+          -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
+          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_BUILD_APPLICATIONS=ON -DALPS_ENABLE_MPI=OFF
+        cmake --build _build/ci
+        ctest --test-dir _build/ci --output-on-failure --output-junit ctest.xml --no-tests=error
+        cmake --install _build/ci
+    - name: Test editable bindings and installed SDK
+      run: bash .github/scripts/test-editable-bindings.sh
+    - name: Compiler cache statistics
+      if: always()
+      run: ccache --show-stats --verbose
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      if: '!cancelled() && steps.cache.outcome == ''success'' && (github.event_name != ''pull_request'' || github.event.pull_request.head.repo.full_name
+        == github.repository)'
+      with:
+        path: _build/ccache
+        key: ${{ steps.cache.outputs.cache-primary-key }}
+    - name: Summarize tests
+      run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
+      if: always()
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      if: always()
+      with:
+        name: native-linux
+        path: |
+          _build/ci/*.xml
+          _build/mpi/*.xml
+          _build/ci/Testing/Temporary/**
+    - name: Record pass marker
+      if: needs.changes.outputs.linux_key != ''
+      run: mkdir -p .ci-passed && echo "$KEY" > .ci-passed/key
+      env:
+        KEY: ${{ needs.changes.outputs.linux_key }}
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      if: needs.changes.outputs.linux_key != ''
+      with:
+        path: .ci-passed
+        key: pass-linux-${{ needs.changes.outputs.linux_key }}
+  mpi:
+    needs: changes
+    if: needs.changes.outputs.mpi_run == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      CC: clang-18
+      CXX: clang++-18
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: ./.github/actions/setup-native
+    - name: Install MPI and Clang
+      run: sudo apt-get install -y clang-18 libopenmpi-dev openmpi-bin
+    - name: Build MPI integration and representative serial tests
+      run: |
+        cmake --preset mpi -B _build/ci \
+          -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
+          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DMPIEXEC_PREFLAGS=--oversubscribe
+        cmake --build _build/ci --target observableset_mpi parameters_mpi comm_mpi filelock_mpi halt_mpi info_test_mpi process_mpi collect_mpi testobservableset param_checkpoint boostdump xdrdump osiris_comm_contract
+    - name: Test MPI serialization, collectives, and process helpers
+      run: ctest --test-dir _build/ci -L '^mpi$' --output-on-failure --output-junit mpi.xml --no-tests=error
+    - name: Test serial behavior with MPI enabled
+      run: ctest --test-dir _build/ci -R '^(testobservableset|param_checkpoint|boostdump|xdrdump|osiris_comm_contract)$'
+        --output-on-failure --output-junit ctest.xml --no-tests=error
+    - name: Summarize tests
+      run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
+      if: always()
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      if: always()
+      with:
+        name: native-mpi
+        path: |
+          _build/ci/*.xml
+          _build/mpi/*.xml
+          _build/ci/Testing/Temporary/**
+    - name: Record pass marker
+      if: needs.changes.outputs.mpi_key != ''
+      run: mkdir -p .ci-passed && echo "$KEY" > .ci-passed/key
+      env:
+        KEY: ${{ needs.changes.outputs.mpi_key }}
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      if: needs.changes.outputs.mpi_key != ''
+      with:
+        path: .ci-passed
+        key: pass-mpi-${{ needs.changes.outputs.mpi_key }}
+  macos:
+    needs: changes
+    if: needs.changes.outputs.macos_run == 'true'
+    runs-on: macos-15
+    timeout-minutes: 90
+    env:
+      CMAKE_BUILD_PARALLEL_LEVEL: 2
+      CC: clang
+      CXX: clang++
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: ./.github/actions/setup-native
+    - name: Build and validate the installed SDK
+      run: |
+        cmake --preset sdk -B _build/ci \
+          -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
+          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF
+        cmake --build _build/ci
+        cmake --install _build/ci
+        python -m pytest tests/cmake/test_sdk_contracts.py -q \
+          -k 'installed_sdk_preserves_parent_settings or relocated_sdk' --junitxml=_build/ci/sdk.xml
+    - name: Summarize tests
+      run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
+      if: always()
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      if: always()
+      with:
+        name: native-macos
+        path: |
+          _build/ci/*.xml
+          _build/mpi/*.xml
+          _build/ci/Testing/Temporary/**
+    - name: Record pass marker
+      if: needs.changes.outputs.macos_key != ''
+      run: mkdir -p .ci-passed && echo "$KEY" > .ci-passed/key
+      env:
+        KEY: ${{ needs.changes.outputs.macos_key }}
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      if: needs.changes.outputs.macos_key != ''
+      with:
+        path: .ci-passed
+        key: pass-macos-${{ needs.changes.outputs.macos_key }}
+  sanitizers:
+    name: Native address and undefined behavior sanitizers
+    needs: changes
+    if: needs.changes.outputs.sanitizers_run == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      CC: clang-18
+      CXX: clang++-18
+      CMAKE_BUILD_PARALLEL_LEVEL: 2
+      ASAN_OPTIONS: detect_leaks=1:strict_string_checks=1
+      UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: '3.12'
+        cache: pip
+        cache-dependency-path: .github/workflows/ci.yml
+    - name: Install native prerequisites
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-18 llvm-18 libboost-all-dev libhdf5-dev libblas-dev liblapack-dev
+        python -m pip install 'cmake>=3.27' ninja pytest numpy h5py
+    - name: Build instrumented components and tests
+      run: |
+        cmake --preset sanitizers -B _build/sanitizers \
+          -DCMAKE_INSTALL_PREFIX="$PWD/_build/sanitizers/install" \
+          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF
+        cmake --build _build/sanitizers --target runtime_correctness hdf5_memory hdf5_valgrind hdf5_multi_array hdf5_exceptions hdf5_fortran_string observableset_hdf5 testobservableset param_checkpoint boostdump xdrdump osiris_comm_contract
+    - name: Run instrumented native tests
+      run: ctest --test-dir _build/sanitizers -R '^(runtime_correctness|hdf5_memory|hdf5_valgrind|hdf5_multi_array|hdf5_exceptions|hdf5_fortran_string|observableset_hdf5|testobservableset|param_checkpoint|boostdump|xdrdump|osiris_comm_contract)$'
+        --output-on-failure --output-junit ctest.xml --no-tests=error
+    - name: Summarize sanitizer tests
+      if: always()
+      run: python .github/scripts/junit_summary.py _build/sanitizers/ctest.xml
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      if: always()
+      with:
+        name: native-sanitizer-reports
+        path: |
+          _build/sanitizers/ctest.xml
+          _build/sanitizers/Testing/Temporary/**
+          _build/sanitizers/**/*.actual
+          _build/sanitizers/CMakeFiles/CMakeConfigureLog.yaml
+    - name: Record pass marker
+      if: needs.changes.outputs.sanitizers_key != ''
+      run: mkdir -p .ci-passed && echo "$KEY" > .ci-passed/key
+      env:
+        KEY: ${{ needs.changes.outputs.sanitizers_key }}
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      if: needs.changes.outputs.sanitizers_key != ''
+      with:
+        path: .ci-passed
+        key: pass-sanitizers-${{ needs.changes.outputs.sanitizers_key }}
+  packaging:
+    needs: changes
+    if: needs.changes.outputs.packaging_run == 'true'
+    uses: ./.github/workflows/_wheels.yml
+  packaging_pass:
+    name: Record packaging pass
+    needs:
+    - changes
+    - packaging
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+    - name: Record pass marker
+      if: needs.changes.outputs.packaging_key != ''
+      run: mkdir -p .ci-passed && echo "$KEY" > .ci-passed/key
+      env:
+        KEY: ${{ needs.changes.outputs.packaging_key }}
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      if: needs.changes.outputs.packaging_key != ''
+      with:
+        path: .ci-passed
+        key: pass-packaging-${{ needs.changes.outputs.packaging_key }}
+  status:
+    name: CI
+    if: always()
+    needs:
+    - changes
+    - static
+    - linux
+    - mpi
+    - macos
+    - sanitizers
+    - packaging
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+    - env:
+        RESULTS: ${{ toJSON(needs) }}
+      run: |
+        python - <<'CODE'
+        import json, os
+        results = json.loads(os.environ['RESULTS'])
+        assert results.pop('changes')['result'] == 'success', 'change detection failed'
+        assert all(job['result'] in ('success', 'skipped') for job in results.values()), results
+        CODE
+defaults:
+  run:
+    shell: bash
+env:
+  CMAKE_BUILD_PARALLEL_LEVEL: 4
+  CTEST_PARALLEL_LEVEL: 2
+  CMAKE_GENERATOR: Ninja
+  ALPS_DIR: ${{ github.workspace }}/_build/ci/install/share/alps
+  PIP_ONLY_BINARY: ':all:'
