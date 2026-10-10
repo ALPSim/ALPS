@@ -40,6 +40,10 @@ NB_MODULE(parameter_probe, module) {
     });
     module.def("load", [](alps::params & p, alps::hdf5::archive & ar) { p.load(ar); });
     module.def("save", [](alps::params const & p, alps::hdf5::archive & ar) { p.save(ar); });
+    module.def("append_archive", [](std::string const & filename) {
+        alps::hdf5::archive writer(filename, "a");
+        writer["/from_native"] << 42;
+    });
     module.def("threaded_vector", [](alps::params const & p) {
         std::vector<double> values;
         std::exception_ptr error;

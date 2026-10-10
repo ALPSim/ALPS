@@ -7,47 +7,77 @@ on:
     tags:
       - 'v*'
   pull_request:
-    branches:
-      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PIP_ONLY_BINARY: ':all:'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  group: packaging-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   check_version:
     name: Check release version
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: '3.13'
-      - run: python -m pip install packaging pytest lxml "scikit-build-core>=1.0" -r .github/scripts/citations/requirements.txt
+      - run: python -m pip install packaging pytest lxml "scikit-build-core>=1.0" "cmake>=3.27" ninja -r .github/scripts/citations/requirements.txt
       - name: Test release validation
         run: python -m pytest tests/packaging -q
       - name: Check package, SDK, and tag versions
         run: python .github/scripts/check_release_version.py
 
   build_wheels:
-    name: Build wheels on ${{ matrix.plat.os }}
-    needs: [check_version]
+    name: Build wheels / ${{ matrix.plat.family }}
+    needs: [check_version, build_sdist]
     runs-on: ${{ matrix.plat.os }}
+    timeout-minutes: 120
+    env:
+      CMAKE_BUILD_PARALLEL_LEVEL: ${{ matrix.plat.family == 'macos' && '2' || '4' }}
     strategy:
+      fail-fast: false
       matrix:
         plat:
-        - { os: ubuntu-latest, target: "", arch: x86_64 }
-        - { os: macos-15, target: "15.0" , arch: arm64 }
+          - {os: ubuntu-24.04, target: '', arch: x86_64, family: manylinux, build: 'cp3{11,12,13,14}-manylinux*'}
+          - {os: ubuntu-24.04, target: '', arch: x86_64, family: musllinux, build: 'cp3{11,12,13,14}-musllinux*'}
+          - {os: macos-15, target: '15.0', arch: arm64, family: macos, build: 'cp3{11,12,13,14}-macosx*'}
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
 
-      - name: Restore compiler cache
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+      - name: Select pinned Linux images
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          python -c 'import json, os; m=json.load(open(".github/dependencies.json")); f=open(os.environ["GITHUB_ENV"], "a"); print("CIBW_MANYLINUX_X86_64_IMAGE="+m["manylinux_image"], file=f); print("CIBW_MUSLLINUX_X86_64_IMAGE="+m["musllinux_image"], file=f)'
+      - name: Restore wheel Boost build
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
+          path: _build/boost-install
+          key: wheel-boost-${{ matrix.plat.family }}-${{ hashFiles('.github/dependencies.json', '.github/scripts/build-boost.sh', '.github/scripts/prepare_dependencies.py') }}
+
+      - name: Restore compiler cache
+        id: compiler-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
           path: _build/ccache
-          key: pyalps-ccache-${{ runner.os }}-${{ matrix.plat.arch }}-${{ hashFiles('src/**', 'python/**', 'src/apps/**', 'src/tools/maxent*') }}
-          restore-keys: pyalps-ccache-${{ runner.os }}-${{ matrix.plat.arch }}-
+          key: pyalps-ccache-${{ matrix.plat.family }}-${{ matrix.plat.arch }}-${{ hashFiles('CMakeLists.txt', 'CMakePresets.json', 'cmake/**', 'src/**', 'third_party/**', 'tests/**', 'python/pyalps/**', '.github/dependencies.json', '.github/scripts/build-boost.sh', '.github/scripts/prepare_dependencies.py', '.github/workflows/build_wheels.yml') }}
+          restore-keys: pyalps-ccache-${{ matrix.plat.family }}-${{ matrix.plat.arch }}-
 
       - name: Build wheels
         uses: pypa/cibuildwheel@1828c10ab37f080699c7b81cea34097c684a7074 # v4.2.0
@@ -55,14 +85,49 @@ jobs:
           package-dir: python/pyalps
         env:
           # The wheel build is configured in [tool.cibuildwheel] in
-          # python/pyalps/pyproject.toml and the wheel-deps preset in
+          # python/pyalps/pyproject.toml and the distribution preset in
           # CMakePresets.json; only matrix-derived values live here.
           CIBW_ARCHS: ${{ matrix.plat.arch }}
+          CIBW_BUILD: ${{ matrix.plat.build }}
+          # cibuildwheel copies /project; mount the compiler cache explicitly
+          # so Linux builds update the directory that Actions saves afterward.
+          CIBW_CONTAINER_ENGINE: 'docker; create_args: --volume "${{ github.workspace }}/_build/boost-install:/project/_build/boost-install" --volume "${{ github.workspace }}/_build/ccache:/project/_build/ccache"'
           MACOSX_DEPLOYMENT_TARGET: ${{ matrix.plat.target }}
 
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        if: runner.os == 'macOS'
         with:
-          name: cibw-wheels-${{ matrix.plat.os }}-${{ strategy.job-index }}
+          name: cibw-sdist
+          path: _build/release-sdist
+
+      - name: Rebuild and import the release sdist with the existing SDK
+        if: runner.os == 'macOS'
+        env:
+          ALPS_DIR: ${{ github.workspace }}/_build/distribution/install/share/alps
+          CMAKE_PREFIX_PATH: ${{ github.workspace }}/_build/boost-install
+          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.plat.target }}
+        run: |
+          python -m pip install build 'scikit-build-core>=1.0' 'nanobind==2.15.0' 'cmake>=3.27' ninja
+          archives=(_build/release-sdist/*.tar.gz)
+          test "${#archives[@]}" -eq 1
+          python .github/scripts/run_with_timeout.py 900 \
+            python .github/scripts/check_sdist.py "${archives[0]}" \
+            --config-setting "cmake.define.HDF5_ROOT=$(brew --prefix hdf5)"
+
+      - name: Show compiler cache statistics
+        if: ${{ always() && runner.os == 'macOS' }}
+        continue-on-error: true
+        run: ccache --show-stats
+      - name: Save compiler cache
+        if: ${{ !cancelled() && steps.compiler-cache.outcome == 'success' && steps.compiler-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: _build/ccache
+          key: ${{ steps.compiler-cache.outputs.cache-primary-key }}
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: cibw-wheels-${{ matrix.plat.family }}
           path: ./wheelhouse/*.whl
 
 
@@ -70,26 +135,35 @@ jobs:
     name: Build source distribution
     needs: [check_version]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
 
       - name: Build sdist
         run: pipx run build --sdist --outdir dist python/pyalps
 
       # The sdist must remain buildable outside the repository checkout:
-      # verify its metadata and that the vendored ALPS sources it needs
-      # (applications, tools, XML library) actually made it in.
+      # verify its metadata and Python-owned sources. Solver implementations
+      # belong to the installed C++ SDK and must not be vendored here.
       - name: Smoke check sdist
         run: |
           pipx run twine check dist/*.tar.gz
           tar -tzf dist/*.tar.gz > sdist-manifest.txt
-          for path in _vendor/src/alps/resources/ALPS.xsl _vendor/src/tools/maxent.cpp \
-                      _vendor/src/apps/dmft/qmc \
-                      LICENSE.txt src/pyalps/__init__.py; do
+          for path in cpp/maxent_c.cpp cpp/cthyb.cpp cpp/ctint.cpp \
+                      cpp/params.cpp cpp/hdf5.cpp cpp/extract_from_pyobject.hpp \
+                      LICENSE.txt src/pyalps/__init__.py src/pyalps/__main__.py \
+                      _build_support/pyalpsConfig.cmake \
+                      cpp/export_simulation.hpp; do
             grep -q "$path" sdist-manifest.txt || { echo "missing $path in sdist"; exit 1; }
           done
+          if grep -q '/_vendor/' sdist-manifest.txt; then
+            echo "sdist contains vendored C++ SDK sources"
+            exit 1
+          fi
 
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: cibw-sdist
           path: dist/*.tar.gz
@@ -98,39 +172,46 @@ jobs:
   # cibuildwheel already runs tests/pyalps against every wheel inside the build
   # environment; this job checks the artifacts as they would reach PyPI: the
   # repaired, uploaded-and-downloaded wheel installed with pip on a clean
-  # runner, at the oldest and newest supported Python.
+  # runner, using the wheel built for each supported Python version.
   smoke_test:
+    if: ${{ !cancelled() && needs.build_wheels.result == 'success' }}
     name: Smoke test wheels on ${{ matrix.plat.os }} / py${{ matrix.python }}
-    needs: [build_wheels]
+    needs: [check_version, build_wheels]
     runs-on: ${{ matrix.plat.os }}
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         plat:
-          - { os: ubuntu-latest, artifact_os: ubuntu-latest }
-          - { os: macos-15, artifact_os: macos-15 }
-          # The macOS 15 deployment target is forward-compatible; test that
-          # wheel on the newest runner rather than publishing a second copy.
-          - { os: macos-26, artifact_os: macos-15 }
-        python: ["3.10", "3.14"]
+          - {os: ubuntu-24.04, architecture: x64, artifact: cibw-wheels-manylinux}
+          - {os: macos-15, architecture: arm64, artifact: cibw-wheels-macos}
+          - {os: macos-26, architecture: arm64, artifact: cibw-wheels-macos}
+        python: ['3.11', '3.12', '3.13', '3.14']
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: ${{ matrix.python }}
+          architecture: ${{ matrix.plat.architecture }}
 
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
-          pattern: cibw-wheels-${{ matrix.plat.artifact_os }}-*
+          pattern: ${{ matrix.plat.artifact }}
           path: wheelhouse
           merge-multiple: true
 
+      - name: Install validation requirements
+        # Install every runtime dependency before the offline artifact install.
+        run: python -m pip install twine 'numpy>=1.26' 'scipy>=1.13' 'matplotlib>=3.8' 'lxml>=5' pytest h5py
+
+      - name: Check wheel metadata
+        run: python -m twine check wheelhouse/*.whl
+
       - name: Install wheel from artifacts
-        run: |
-          pipx run twine check wheelhouse/*.whl
-          python -m pip install numpy scipy matplotlib lxml pytest
-          python -m pip install --no-index --find-links wheelhouse pyalps
+        run: python -m pip install --no-index --find-links wheelhouse pyalps
 
       - name: Import and run binding surface tests
         run: |
@@ -138,28 +219,35 @@ jobs:
 
       - name: Retain installed-wheel validation evidence
         if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: pyalps-validation-${{ matrix.plat.os }}-py${{ matrix.python }}
           path: _build/validation
+
+      - name: Summarize wheel tests
+        if: always()
+        run: python .github/scripts/junit_summary.py _build/validation/pytest.xml
 
   # The ordinary wheel tests deliberately keep mpi4py optional. This job
   # installs one consistent Open MPI stack and verifies real inter-rank
   # collectives, requests and point-to-point traffic through pyalps.mpi.
   mpi_smoke:
     name: Smoke test MPI adapter with two ranks
-    needs: [build_wheels]
+    needs: [check_version, build_wheels]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.14"
 
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
-          pattern: cibw-wheels-ubuntu-latest-*
+          pattern: cibw-wheels-manylinux
           path: wheelhouse
           merge-multiple: true
 
@@ -170,27 +258,51 @@ jobs:
             | sudo tee /etc/apt/apt.conf.d/99ci-timeouts > /dev/null
           sudo apt-get update
           sudo apt-get install -y libopenmpi-dev openmpi-bin
-          python -m pip install numpy scipy matplotlib lxml pytest mpi4py
+          python -m pip install 'numpy>=1.26' 'scipy>=1.13' 'matplotlib>=3.8' 'lxml>=5' pytest mpi4py
           python -m pip install --no-index --find-links wheelhouse pyalps
 
       - name: Run two-rank compatibility surface
         run: mpiexec -n 2 python -m pytest -q tests/pyalps/test_binding_surface.py::test_mpi4py_compatibility_surface tests/pyalps/test_mpi_requests.py
 
+  packaging-status:
+    name: Packaging CI
+    if: always()
+    needs: [check_version, build_wheels, build_sdist, smoke_test, mpi_smoke]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require every selected packaging check
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python - <<'PY'
+          import json, os
+          jobs = json.loads(os.environ['RESULTS'])
+          assert jobs['check_version']['result'] == 'success', jobs
+          for name, job in jobs.items():
+              if name == 'check_version':
+                  continue
+              assert job['result'] == 'success', (name, job)
+          PY
+
   upload_pypi:
-    needs: [build_wheels, build_sdist, smoke_test, mpi_smoke]
+    needs: [packaging-status]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment: pypi
     permissions:
       contents: read
       id-token: write
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: '3.13'
       - run: python -m pip install packaging
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           pattern: cibw-*
           path: dist

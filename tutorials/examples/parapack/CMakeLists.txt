@@ -17,8 +17,6 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-enable_testing()
-
 add_subdirectory(single)
 add_subdirectory(ising)
 add_subdirectory(heisenberg)
@@ -26,6 +24,6 @@ add_subdirectory(loop)
 add_subdirectory(exchange)
 add_subdirectory(wanglandau)
 
-if(${ALPS_HAVE_MPI})
+if(ALPS_ENABLE_MPI)
   add_subdirectory(multiple)
-endif(${ALPS_HAVE_MPI})
+endif()

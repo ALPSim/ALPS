@@ -1,5 +1,5 @@
-LATTICE_LIBRARY = "../../../src/alps/resources/lattices.xml"
-MODEL_LIBRARY = "../../../src/alps/resources/models.xml"
+LATTICE_LIBRARY = "lattices.xml"
+MODEL_LIBRARY = "models.xml"
 LATTICE = "chain lattice"
 L       = 4
 MODEL   = "spin"

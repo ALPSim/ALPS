@@ -75,7 +75,7 @@ class tinyvector {
             ar >> alps::make_pvp("data", _data);
         }
     private:
-        data_type _data __attribute__((aligned( 16 * sizeof(T) )));
+        alignas(16 * sizeof(T)) data_type _data;
 };
 
 template <class T, int N, class Opt>
@@ -168,7 +168,8 @@ inline double sum(const tinyvector<T, N, Opt> &spin) {
 template <class T, int N, class Opt>
 inline double dot(const tinyvector<T, N, Opt> &left, const tinyvector<T, N, Opt> &right) {
     double result = 0.;
-    result = sum(left * left);
+    for (int i = 0; i < N; ++i)
+        result += left[i] * right[i];
     return result;
 }
 

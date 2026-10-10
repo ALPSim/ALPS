@@ -6,6 +6,7 @@ import importlib.metadata
 import math
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import sysconfig
@@ -32,7 +33,8 @@ def test_import_preserves_binary_selection_environment(tmp_path, sdk_override):
 
 @pytest.fixture
 def wheel_cli(tmp_path):
-    package = Path(pyalps.__file__).resolve().parent
+    from pyalps._resources import runtime_directory
+    package = runtime_directory()
     if not (package / "bin").is_dir():
         pytest.skip("this installation does not bundle ALPS programs")
     scripts = Path(sysconfig.get_path("scripts"))
@@ -40,7 +42,14 @@ def wheel_cli(tmp_path):
     for key in ("ALPS_XML_PATH", "ALPS_BIN_PATH", "ALPS_ROOT", "PYTHONPATH", "PYTHONHOME"):
         env.pop(key, None)
     # Exclude system xsltproc: exporters must work with pip dependencies alone.
-    env["PATH"] = str(scripts)
+    # MPI-enabled SDK executables still need Open MPI's launcher discovery to
+    # find ssh, even for singleton runs. Expose only that host runtime helper.
+    runtime_tools = tmp_path / "runtime-tools"
+    runtime_tools.mkdir()
+    ssh = shutil.which("ssh")
+    if ssh is not None:
+        (runtime_tools / "ssh").symlink_to(ssh)
+    env["PATH"] = os.pathsep.join((str(scripts), str(runtime_tools)))
 
     def run(command, *args, **kwargs):
         assert (scripts / command).is_file(), f"pip did not install {command}"

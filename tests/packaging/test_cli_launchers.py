@@ -23,6 +23,7 @@ def launcher(tmp_path):
     (package / "bin").mkdir(parents=True)
     (package / "xml").mkdir()
     (package / "__init__.py").write_text('raise AssertionError("pyalps must not be imported")\n')
+    (package / "runtime.json").write_text(json.dumps({"sdk_bin": ""}))
     executable = package / "bin/spinmc"
     env = os.environ.copy()
     for key in ("ALPS_XML_PATH", "ALPS_BIN_PATH", "PYTHONPATH", "PYTHONHOME"):
@@ -111,7 +112,7 @@ def test_xml_override_does_not_select_another_binary_installation(launcher):
 
 def test_missing_bundled_binary_does_not_use_path_or_sdk(launcher):
     run, package, env = launcher
-    (package / "pyalps_config.py").write_text('ALPS_BIN_INSTALL_DIR = ""\n')
+    (package / "runtime.json").write_text(json.dumps({"sdk_bin": ""}))
     env["ALPS_BIN_PATH"] = env["PATH"]  # contains a working, conflicting spinmc
     result = run()
     assert result.returncode == 127
@@ -129,7 +130,7 @@ def test_bindings_only_sdk_selection(launcher, tmp_path, selection):
         executable = directory / "spinmc"
         executable.write_text('#!/bin/sh\nprintf "%s\\n" "$0"\n')
         executable.chmod(0o755)
-    (package / "pyalps_config.py").write_text(f"ALPS_BIN_INSTALL_DIR = {str(sdk)!r}\n")
+    (package / "runtime.json").write_text(json.dumps({"sdk_bin": str(sdk)}))
     selected = sdk if selection == "configured" else override
     if selection == "missing":
         selected = tmp_path / "missing SDK"

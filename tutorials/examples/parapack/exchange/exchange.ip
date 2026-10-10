@@ -1,6 +1,6 @@
 ALGORITHM = "ising; exchange"
 
-LATTICE_LIBRARY = "../../../../src/alps/resources/lattices.xml";
+LATTICE_LIBRARY = "lattices.xml";
 LATTICE = "chain lattice"
 L = 16
 
@@ -27,7 +27,7 @@ RANDOM_EXCHANGE = 0
 
 ALGORITHM = "loop; exchange"
 
-LATTICE_LIBRARY = "../../../../src/alps/resources/lattices.xml";
+LATTICE_LIBRARY = "lattices.xml";
 LATTICE = "chain lattice"
 L = 8
 

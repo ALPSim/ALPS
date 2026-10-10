@@ -10,7 +10,7 @@ The ALPS software package aims to provide a set of well tested, robust, and stan
 
 ## Installation
 
-For current binary, source, and Spack installation instructions, see the [ALPS installation website](https://alps.comp-phys.org/install/).
+For binary and Spack installation instructions, see the [ALPS installation website](https://alps.comp-phys.org/install/). To build this repository's C++ SDK and Python package from source, follow the [development setup](CONTRIBUTING.md#getting-started-with-the-code); [CHANGELOG.md](CHANGELOG.md) lists the migration steps for existing source builds and downstream projects.
 
 ## Contributing
 

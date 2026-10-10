@@ -1,147 +1,27 @@
 # Copyright (C) 2026 by the ALPS collaboration
 # SPDX-License-Identifier: MIT
 
-cmake_minimum_required(VERSION 3.22)
-project(pyalps LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.27...4.3)
+# One dependency scan supplies the package's Windows DLL directory.
+set(VCPKG_APPLOCAL_DEPS OFF)
+project(pyalps LANGUAGES C CXX)
 
-option(PYALPS_BUILD_APPLICATIONS "Build optional ALPS application bindings" ON)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+option(PYALPS_BUILD_SOLVERS "Build the MaxEnt, CT-HYB, and CT-INT bindings" ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(ALPS REQUIRED CONFIG)
-find_package(Python 3.10 REQUIRED COMPONENTS Interpreter Development.Module)
-
+find_package(Python 3.11 REQUIRED COMPONENTS Interpreter Development.Module)
+if(NOT Python_INTERPRETER_ID STREQUAL "Python" OR Python_SOABI MATCHES "[0-9]t")
+  message(FATAL_ERROR "pyalps requires GIL-enabled CPython")
+endif()
+set(_pyalps_nanobind_runtime nanobind)
+if(Python_VERSION VERSION_GREATER_EQUAL 3.12)
+  find_package(Python REQUIRED COMPONENTS Development.SABIModule)
+  set(_pyalps_nanobind_runtime nanobind-abi3)
+endif()
 execute_process(
-  COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
-  OUTPUT_VARIABLE _nanobind_cmake_dir
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  COMMAND_ERROR_IS_FATAL ANY)
-list(PREPEND CMAKE_PREFIX_PATH "${_nanobind_cmake_dir}")
-find_package(nanobind 2.10 CONFIG REQUIRED)
-
-get_filename_component(_repo_root "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
-set(_alps_source_root "${_repo_root}")
-if(NOT EXISTS "${_alps_source_root}/src/tools/maxent.cpp")
-  set(_alps_source_root "${CMAKE_CURRENT_SOURCE_DIR}/_vendor")
-endif()
-set(_bindings "${CMAKE_CURRENT_SOURCE_DIR}/cpp")
-
-link_directories(${ALPS_LIBRARY_DIRS})
-if(ALPS_HDF5_INCLUDE_DIR)
-  get_filename_component(_alps_hdf5_prefix "${ALPS_HDF5_INCLUDE_DIR}" DIRECTORY)
-  link_directories("${_alps_hdf5_prefix}/lib")
-endif()
-
-# Legacy ALPSConfig.cmake serializes the HDF5 imported target name into
-# ALPS_LIBRARIES.  Outside the original build tree that target no longer
-# exists, while the installed library keeps its conventional `hdf5` name.
-set(_pyalps_link_libraries ${ALPS_LIBRARIES})
-list(TRANSFORM _pyalps_link_libraries REPLACE "^hdf5-shared$" "hdf5")
-separate_arguments(_pyalps_link_options NATIVE_COMMAND "${ALPS_EXTRA_LINKER_FLAGS}")
-
-set(_pyalps_targets
-  pyalea_c
-  pymcdata_c
-  pytools_c
-  pyngsparams_c
-  pyngshdf5_c
-  pyngsbase_c
-  pyngsobservable_c
-  pyngsobservables_c
-  pyngsresult_c
-  pyngsresults_c
-  pyngsapi_c
-  pyngsrandom01_c
-  pyngsaccumulator_c)
-
-# Do not add FREE_THREADED (libalps relies on the GIL as its lock around
-# shared state) and do not add STABLE_ABI without revisiting the wheel
-# matrix — per-version wheels are deliberate.
-# NB_STATIC keeps nanobind's core private to each extension. On musllinux,
-# MUSL_DYNAMIC_LIBCPP prevents nanobind from also embedding libstdc++ and
-# libgcc into every module; auditwheel vendors those shared runtimes once.
-set(_pyalps_nanobind_options NB_STATIC MUSL_DYNAMIC_LIBCPP)
-
-nanobind_add_module(pyalea_c ${_pyalps_nanobind_options} "${_bindings}/pyalea.cpp")
-nanobind_add_module(pymcdata_c ${_pyalps_nanobind_options} "${_bindings}/pymcdata.cpp")
-nanobind_add_module(pytools_c ${_pyalps_nanobind_options} "${_bindings}/pytools.cpp")
-nanobind_add_module(pyngsparams_c ${_pyalps_nanobind_options} "${_bindings}/ngs/params.cpp")
-nanobind_add_module(pyngshdf5_c ${_pyalps_nanobind_options} "${_bindings}/ngs/hdf5.cpp")
-nanobind_add_module(pyngsbase_c ${_pyalps_nanobind_options} "${_bindings}/ngs/mcbase.cpp")
-nanobind_add_module(pyngsobservable_c ${_pyalps_nanobind_options} "${_bindings}/ngs/observable.cpp")
-nanobind_add_module(pyngsobservables_c ${_pyalps_nanobind_options} "${_bindings}/ngs/observables.cpp")
-nanobind_add_module(pyngsresult_c ${_pyalps_nanobind_options} "${_bindings}/ngs/result.cpp")
-nanobind_add_module(pyngsresults_c ${_pyalps_nanobind_options} "${_bindings}/ngs/results.cpp")
-nanobind_add_module(pyngsapi_c ${_pyalps_nanobind_options} "${_bindings}/ngs/api.cpp")
-nanobind_add_module(pyngsrandom01_c ${_pyalps_nanobind_options} "${_bindings}/ngs/random01.cpp")
-nanobind_add_module(pyngsaccumulator_c ${_pyalps_nanobind_options} "${_bindings}/ngs/accumulator.cpp")
-
-if(PYALPS_BUILD_APPLICATIONS)
-  if(NOT EXISTS "${_alps_source_root}/src/tools/maxent.cpp")
-    message(FATAL_ERROR
-      "PYALPS_BUILD_APPLICATIONS requires an ALPS source checkout or pyalps sdist. "
-      "Configure with -DPYALPS_BUILD_APPLICATIONS=OFF for the core-only package.")
-  endif()
-
-  set(_dmft "${_alps_source_root}/src/apps/dmft/qmc")
-
-  nanobind_add_module(maxent_c ${_pyalps_nanobind_options}
-    "${_alps_source_root}/src/tools/maxent.cpp"
-    "${_alps_source_root}/src/tools/maxent_helper.cpp"
-    "${_alps_source_root}/src/tools/maxent_simulation.cpp"
-    "${_alps_source_root}/src/tools/maxent_parms.cpp")
-
-  nanobind_add_module(cthyb ${_pyalps_nanobind_options}
-    "${_dmft}/hybridization/hybmain.cpp"
-    "${_dmft}/hybridization/hybsim.cpp"
-    "${_dmft}/hybridization/hyblocal.cpp"
-    "${_dmft}/hybridization/hybint.cpp"
-    "${_dmft}/hybridization/hybfun.cpp"
-    "${_dmft}/hybridization/hybretintfun.cpp"
-    "${_dmft}/hybridization/hybmatrix.cpp"
-    "${_dmft}/hybridization/hybmatrix_ft.cpp"
-    "${_dmft}/hybridization/hybconfig.cpp"
-    "${_dmft}/hybridization/hybupdates.cpp"
-    "${_dmft}/hybridization/hybevaluate.cpp"
-    "${_dmft}/hybridization/hybmeasurements.cpp")
-
-  nanobind_add_module(ctint ${_pyalps_nanobind_options}
-    "${_dmft}/interaction_expansion2/main.cpp"
-    "${_dmft}/fouriertransform.C"
-    "${_dmft}/interaction_expansion2/auxiliary.cpp"
-    "${_dmft}/interaction_expansion2/observables.cpp"
-    "${_dmft}/interaction_expansion2/fastupdate.cpp"
-    "${_dmft}/interaction_expansion2/selfenergy.cpp"
-    "${_dmft}/interaction_expansion2/solver.cpp"
-    "${_dmft}/interaction_expansion2/io.cpp"
-    "${_dmft}/interaction_expansion2/splines.cpp"
-    "${_dmft}/interaction_expansion2/interaction_expansion.cpp"
-    "${_dmft}/interaction_expansion2/measurements.cpp"
-    "${_dmft}/interaction_expansion2/model.cpp")
-
-  list(APPEND _pyalps_targets maxent_c cthyb ctint)
-  foreach(_target IN ITEMS maxent_c cthyb ctint)
-    target_compile_definitions(${_target} PRIVATE BUILD_PYTHON_MODULE)
-    target_include_directories(${_target} PRIVATE "${_bindings}" "${_dmft}")
-  endforeach()
-endif()
-
-# Compile the bindings with the same preprocessor configuration the
-# ALPS SDK was built with (BOOST_NO_AUTO_PTR and friends), so the Boost
-# headers on both sides of the library boundary are configured
-# identically. The -D entries are lifted from the exported
-# ALPS_CMAKE_CXX_FLAGS rather than hand-copied from the root
-# CMakeLists, so a define added there cannot silently desync.
-separate_arguments(_alps_sdk_cxx_flags NATIVE_COMMAND "${ALPS_CMAKE_CXX_FLAGS}")
-set(_alps_sdk_definitions "")
-foreach(_flag IN LISTS _alps_sdk_cxx_flags)
-  if(_flag MATCHES "^-D(.+)$")
-    list(APPEND _alps_sdk_definitions "${CMAKE_MATCH_1}")
-  endif()
-endforeach()
-
+  COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/_build_support/alps_version.py" --core
+  OUTPUT_VARIABLE PYALPS_VERSION_CORE
+  OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)
 # Entry points are resolved before CMake runs. Use the same environment setting
 # for metadata and native payload, rather than a CMake-only option that could
 # leave bindings-only wheels with launchers that overwrite SDK executables.
@@ -163,194 +43,145 @@ endif()
 unset(PYALPS_BUNDLE_APPLICATIONS CACHE)
 set(PYALPS_BUNDLE_APPLICATIONS "${_pyalps_bundle_applications}")
 
-# Where the extension modules look for libalps at run time.
-#
-# When the ALPS libraries ship inside the package (the default), the *only*
-# route to libalps must be the in-package pyalps/lib copy -- the same one the
-# bundled programs load. Leaving the SDK's own library directory on the list
-# as well is not a harmless fallback: auditwheel/delocate resolve the first
-# match, find libalps outside the wheel, and vendor a second copy into
-# pyalps.libs (or pyalps/.dylibs), so the wheel carries the same 10 MB library
-# twice. HDF5 stays on the list precisely because it *should* be vendored.
-#
-# With PYALPS_BUNDLE_APPLICATIONS=OFF nothing installs libalps into the
-# package, so there the SDK directory is the only way for the repair tools to
-# find it at all.
+set(_alps_components utilities hdf5 params)
+if(PYALPS_BUILD_SOLVERS)
+  list(APPEND _alps_components solvers)
+endif()
+if(PYALPS_BUNDLE_APPLICATIONS)
+  list(APPEND _alps_components applications)
+endif()
+find_package(ALPS ${PYALPS_VERSION_CORE} EXACT REQUIRED CONFIG COMPONENTS ${_alps_components})
+if(NOT ALPS_VERSION VERSION_EQUAL PYALPS_VERSION_CORE)
+  message(FATAL_ERROR "pyalps ${PYALPS_VERSION_CORE} requires a matching ALPS SDK; found ${ALPS_VERSION}")
+endif()
+get_target_property(_alps_library_type ALPS::alps TYPE)
+if(NOT _alps_library_type STREQUAL "SHARED_LIBRARY")
+  message(FATAL_ERROR "pyalps requires a shared ALPS SDK so extensions share one ALPS runtime")
+endif()
+
+execute_process(
+  COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
+  OUTPUT_VARIABLE nanobind_ROOT
+  OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)
+find_package(nanobind 2.15.0 EXACT CONFIG REQUIRED)
+file(STRINGS "${NB_DIR}/src/nb_abi.h" _nb_abi_line
+  REGEX "^#[ \t]*define[ \t]+NB_INTERNALS_VERSION[ \t]+[0-9]+")
+string(REGEX MATCH "[0-9]+$" PYALPS_NANOBIND_ABI "${_nb_abi_line}")
+if(NOT PYALPS_NANOBIND_ABI)
+  message(FATAL_ERROR "Cannot determine the nanobind internals ABI")
+endif()
 if(APPLE)
-  set(_pyalps_in_package_libs "@loader_path/../lib")
+  set(_loader_origin "@loader_path")
+elseif(UNIX)
+  set(_loader_origin "$ORIGIN")
+endif()
+
+# nanobind uses abi3 from Python 3.12 onward and the CPython ABI on 3.11.
+function(pyalps_add_module target source)
+  nanobind_add_module(${target} STABLE_ABI NB_SHARED MUSL_DYNAMIC_LIBCPP ${source})
+  target_link_libraries(${target} PRIVATE ALPS::alps ${ARGN})
+  # CMake derives dependency locations from the resolved link interface.
+  # Wheel repair removes external paths; the packaged runtime always comes first.
+  set_target_properties(${target} PROPERTIES
+    INSTALL_RPATH "${_loader_origin}/../lib"
+    INSTALL_RPATH_USE_LINK_PATH TRUE)
+  install(TARGETS ${target} RUNTIME_DEPENDENCY_SET pyalps_runtime
+    LIBRARY DESTINATION pyalps/_ext
+    RUNTIME DESTINATION pyalps/_ext)
+endfunction()
+
+pyalps_add_module(pyalea_c cpp/pyalea.cpp)
+pyalps_add_module(pymcdata_c cpp/pymcdata.cpp)
+pyalps_add_module(pytools_c cpp/pytools.cpp)
+pyalps_add_module(pyngsparams_c cpp/params.cpp)
+pyalps_add_module(pyngshdf5_c cpp/hdf5.cpp)
+pyalps_add_module(pyngsbase_c cpp/mcbase.cpp)
+pyalps_add_module(pyngsobservable_c cpp/observable.cpp)
+pyalps_add_module(pyngsobservables_c cpp/observables.cpp)
+pyalps_add_module(pyngsresult_c cpp/result.cpp)
+pyalps_add_module(pyngsresults_c cpp/results.cpp)
+pyalps_add_module(pyngsapi_c cpp/api.cpp)
+pyalps_add_module(pyngsrandom01_c cpp/random01.cpp)
+pyalps_add_module(pyngsaccumulator_c cpp/accumulator.cpp)
+if(PYALPS_BUILD_SOLVERS)
+  pyalps_add_module(maxent_c cpp/maxent_c.cpp ALPS::maxent)
+  pyalps_add_module(cthyb cpp/cthyb.cpp ALPS::cthyb)
+  pyalps_add_module(ctint cpp/ctint.cpp ALPS::ctint)
+endif()
+
+# A package-specific name avoids DLL/SONAME collisions with other nanobind users.
+set_target_properties(${_pyalps_nanobind_runtime} PROPERTIES OUTPUT_NAME pyalps_nanobind
+  INSTALL_RPATH "${_loader_origin}" INSTALL_RPATH_USE_LINK_PATH TRUE)
+install(TARGETS ${_pyalps_nanobind_runtime} RUNTIME_DEPENDENCY_SET pyalps_runtime
+  LIBRARY DESTINATION pyalps/lib RUNTIME DESTINATION pyalps/bin)
+
+# Required libraries are bundled whether or not command-line programs are wanted.
+if(WIN32)
+  # An unused import library need not appear in an extension's PE imports.
+  # Install every component and include its dependencies in the DLL scan.
+  install(IMPORTED_RUNTIME_ARTIFACTS ${ALPS_RUNTIME_TARGETS}
+    RUNTIME_DEPENDENCY_SET pyalps_runtime RUNTIME DESTINATION pyalps/bin)
 else()
-  set(_pyalps_in_package_libs "$ORIGIN/../lib")
-endif()
-if(PYALPS_BUNDLE_APPLICATIONS)
-  set(_pyalps_install_rpath
-    "${_pyalps_in_package_libs};${_alps_hdf5_prefix}/lib")
-else()
-  set(_pyalps_install_rpath
-    "${ALPS_LIBRARY_DIRS};${_alps_hdf5_prefix}/lib")
-endif()
-
-foreach(_target IN LISTS _pyalps_targets)
-  if(_alps_sdk_definitions)
-    target_compile_definitions(${_target} PRIVATE ${_alps_sdk_definitions})
-  endif()
-  target_include_directories(${_target} PRIVATE
-    ${ALPS_INCLUDE_DIRS}
-    ${ALPS_EXTRA_INCLUDE_DIRS})
-  target_link_libraries(${_target} PRIVATE ${_pyalps_link_libraries})
-  target_link_options(${_target} PRIVATE ${_pyalps_link_options})
-  set_target_properties(${_target} PROPERTIES
-    INSTALL_RPATH "${_pyalps_install_rpath}")
-endforeach()
-
-set(_extension_dir "pyalps/_ext")
-install(TARGETS ${_pyalps_targets}
-  LIBRARY DESTINATION "${_extension_dir}"
-  RUNTIME DESTINATION "${_extension_dir}")
-
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/pyalps/"
-  DESTINATION pyalps
-  FILES_MATCHING PATTERN "*.py")
-
-# Bundle the catalog from the linked SDK so it matches the recommendations
-# embedded in libalps, including when building from a standalone pyalps sdist.
-install(FILES
-  "${ALPS_ROOT_DIR}/share/alps/CITATION.cff"
-  "${ALPS_ROOT_DIR}/share/alps/CITATIONS.yaml"
-  "${ALPS_ROOT_DIR}/share/alps/CITATION.md"
-  DESTINATION pyalps/share/alps)
-
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/pyalps_cli/"
-  DESTINATION pyalps_cli
-  FILES_MATCHING PATTERN "*.py")
-
-# Only bindings-only builds record the SDK's executable directory. Bundled
-# wheels must not contain paths to the SDK on the build machine.
-if(PYALPS_BUNDLE_APPLICATIONS)
-  set(PYALPS_ALPS_BIN_FALLBACK "")
-else()
-  set(PYALPS_ALPS_BIN_FALLBACK "${ALPS_ROOT_DIR}/bin")
-endif()
-# Record the nanobind ABI so alps_target_link_pyalps can reject downstream
-# modules that would not share pyalps types.
-include("${ALPS_PYTHON_USE_FILE}")
-set(PYALPS_NANOBIND_INTERNALS_VERSION "")
-if(COMMAND alps_nanobind_internals_version)  # absent from older SDKs
-  alps_nanobind_internals_version(PYALPS_NANOBIND_INTERNALS_VERSION)
-endif()
-set(PYALPS_NANOBIND_VERSION "${nanobind_VERSION}")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/pyalps/pyalps_config.py.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/pyalps_config.py" @ONLY)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pyalps_config.py" DESTINATION pyalps)
-
-# The ALPS application executables ship inside the package (pyalps/bin), as
-# the legacy ALPS_PYTHON_WHEEL build did. Keep this list explicit: the SDK's
-# bin directory also contains legacy conversion and plotting scripts whose
-# relative data paths assume a prefix install rather than the wheel layout.
-# Bundle the core tutorial tools too; pyalps_cli supplies their XML path.
-# Both the shell launchers and pyalps.runApplication() need these programs;
-# bundled wheels never fall back to paths on the SDK build machine.
-#
-# The programs are copied from the SDK rather than rebuilt here. The root
-# CMakeLists gives every installed target an RPATH of @loader_path/../lib
-# (APPLE) or $ORIGIN/../lib, so they resolve libalps out of pyalps/lib below
-# without any post-install patching -- the same directory the extension
-# modules point at, so one copy of each library serves both.
-if(PYALPS_BUNDLE_APPLICATIONS)
-  set(_alps_bin_dir "${ALPS_ROOT_DIR}/bin")
-  set(_alps_program_names
-    checksign
-    dirloop_sse
-    dmft
-    dmrg
-    fulldiag
-    fulldiag_evaluate
-    hirschfye
-    hybridization
-    interaction
-    loop
-    qwl
-    qwl_evaluate
-    simplemc
-    sparsediag
-    spinmc
-    spinmc_evaluate
-    worm
-    worm_evaluate
-    parameter2xml
-    printgraph
-    convert2xml
-    snap2vtk
-    maxent)
-  set(_alps_programs "")
-  set(_alps_missing_programs "")
-  foreach(_program IN LISTS _alps_program_names)
-    if(EXISTS "${_alps_bin_dir}/${_program}")
-      list(APPEND _alps_programs "${_alps_bin_dir}/${_program}")
-    else()
-      list(APPEND _alps_missing_programs "${_program}")
-    endif()
-  endforeach()
-  if(_alps_missing_programs)
-    message(FATAL_ERROR
-      "PYALPS_BUNDLE_APPLICATIONS is ON but the wheel SDK is missing these "
-      "wheel applications/tools: ${_alps_missing_programs}. Build the ALPS "
-      "SDK with the wheel-deps preset, or configure with "
-      "the environment variable PYALPS_BUNDLE_APPLICATIONS=OFF for a bindings-only wheel that uses "
-      "SDK executables instead.")
-  endif()
-  list(LENGTH _alps_programs _alps_program_count)
-  message(STATUS "pyalps: bundling ${_alps_program_count} ALPS programs into pyalps/bin")
-  install(PROGRAMS ${_alps_programs} DESTINATION pyalps/bin)
-
-  # The bundled programs resolve libalps and libboost through their ../lib
-  # RPATH, so the SDK's shared libraries have to travel with them -- each one
-  # exactly once. install(DIRECTORY) is the wrong tool here: it would copy the
-  # whole SONAME chain (libalps.so, libalps.so.2, libalps.so.2.3.4), and since
-  # a wheel cannot carry symlinks those arrive as three byte-identical 10 MB
-  # files. Install only the SONAME-named file, which is the name every
-  # DT_NEEDED / LC_LOAD_DYLIB entry actually asks for.
-  #
-  # src/alps/CMakeLists.txt gives libalps SOVERSION ${ALPS_VERSION_MAJOR} on
-  # ELF platforms and no version at all on APPLE, so "<name>.<major>" is the
-  # SONAME spelling wherever a versioned form exists. tests/pyalps guards both
-  # halves of this: that no library is bundled twice, and that every bundled
-  # program can still be loaded.
-  file(GLOB _alps_runtime_libs LIST_DIRECTORIES FALSE
-    "${ALPS_ROOT_DIR}/lib/*.so" "${ALPS_ROOT_DIR}/lib/*.dylib")
-  if(NOT _alps_runtime_libs)
-    message(FATAL_ERROR
-      "PYALPS_BUNDLE_APPLICATIONS is ON but no shared libraries were found in "
-      "${ALPS_ROOT_DIR}/lib. The bundled programs would ship without the "
-      "libalps they link against.")
-  endif()
-  foreach(_lib IN LISTS _alps_runtime_libs)
-    get_filename_component(_lib_name "${_lib}" NAME)
-    set(_lib_soname "${_lib_name}")
-    if(EXISTS "${_lib}.${ALPS_VERSION_MAJOR}")
-      set(_lib_soname "${_lib_name}.${ALPS_VERSION_MAJOR}")
-    endif()
-    get_filename_component(_lib_real "${_lib}" REALPATH)
-    install(PROGRAMS "${_lib_real}" DESTINATION pyalps/lib
-      RENAME "${_lib_soname}")
+  foreach(runtime IN LISTS ALPS_RUNTIME_TARGETS)
+    install(FILES "$<TARGET_FILE:${runtime}>" DESTINATION pyalps/lib
+      RENAME "$<TARGET_SONAME_FILE_NAME:${runtime}>")
   endforeach()
 endif()
-
-# The ALPS XML/XSL library ships inside the package (pyalps/xml), as the
-# legacy wheel build did: the stylesheets plus the lattice and model
-# libraries that parameter files reference by default.
-set(_alps_xml_source "${_alps_source_root}/src/alps/resources")
-if(NOT EXISTS "${_alps_xml_source}/ALPS.xsl")
-  message(FATAL_ERROR
-    "ALPS XML stylesheets not found at ${_alps_xml_source}. "
-    "They are required so the pyalps package can bundle pyalps/xml.")
+if(PYALPS_BUNDLE_APPLICATIONS)
+  install(IMPORTED_RUNTIME_ARTIFACTS ${ALPS_APPLICATION_TARGETS}
+    RUNTIME_DEPENDENCY_SET pyalps_runtime RUNTIME DESTINATION pyalps/bin)
+  if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_program(PYALPS_PATCHELF patchelf REQUIRED)
+    # Imported programs retain their SDK RPATH (which may name lib64 or a
+    # custom libdir). Resolve our bundled runtime before wheel repair scans them.
+    foreach(application IN LISTS ALPS_APPLICATION_TARGETS)
+      install(CODE "execute_process(COMMAND \"${PYALPS_PATCHELF}\"
+        --add-rpath \"\$ORIGIN/../lib\"
+        \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/pyalps/bin/$<TARGET_FILE_NAME:${application}>\"
+        COMMAND_ERROR_IS_FATAL ANY)")
+    endforeach()
+  endif()
 endif()
-install(DIRECTORY "${_alps_xml_source}/" DESTINATION pyalps/xml
-  FILES_MATCHING PATTERN "*.xsl")
-configure_file("${_alps_xml_source}/lattices.xml.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/xml/lattices.xml" COPYONLY)
-configure_file("${_alps_xml_source}/models.xml.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/xml/models.xml" COPYONLY)
-install(FILES
-  "${CMAKE_CURRENT_BINARY_DIR}/xml/lattices.xml"
-  "${CMAKE_CURRENT_BINARY_DIR}/xml/models.xml"
-  DESTINATION pyalps/xml)
+if(WIN32)
+  install(RUNTIME_DEPENDENCY_SET pyalps_runtime
+    DIRECTORIES "${ALPS_RUNTIME_LIBRARY_DIRS}"
+    PRE_EXCLUDE_REGEXES "api-ms-.*" "ext-ms-.*" "python[0-9]+.*\\.dll"
+    POST_EXCLUDE_REGEXES ".*[/\\\\][Ww][Ii][Nn][Dd][Oo][Ww][Ss][/\\\\].*"
+    RUNTIME DESTINATION pyalps/bin)
+  set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+  include(InstallRequiredSystemLibraries)
+  # The ARM64 redistributable directory also contains an ARM64EC-only DLL.
+  if(CMAKE_CXX_COMPILER_ARCHITECTURE_ID STREQUAL "ARM64")
+    list(FILTER CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS EXCLUDE REGEX "/vcruntime140_1d?\\.dll$")
+  endif()
+  install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION pyalps/bin)
+endif()
+
+# Bundle the catalog belonging to the linked SDK.
+install(FILES "${ALPS_DATA_DIR}/CITATION.cff" "${ALPS_DATA_DIR}/CITATIONS.yaml"
+              "${ALPS_DATA_DIR}/CITATION.md" DESTINATION pyalps/share/alps)
+
+# scikit-build owns Python sources. CMake owns native build and runtime resources.
+install(FILES _build_support/pyalpsConfig.cmake DESTINATION pyalps/cmake)
+install(FILES cpp/export_simulation.hpp cpp/save_observable_to_hdf5.hpp
+  DESTINATION pyalps/include/pyalps)
+if(NOT EXISTS "${ALPS_DATA_DIR}/xml/ALPS.xsl")
+  message(FATAL_ERROR "The ALPS SDK is missing its XML resources: ${ALPS_DATA_DIR}/xml")
+endif()
+install(DIRECTORY "${ALPS_DATA_DIR}/xml/" DESTINATION pyalps/xml
+  FILES_MATCHING PATTERN "*.xsl" PATTERN "*.xml")
+install(FILES "${ALPS_DATA_DIR}/licenses/xdr/LICENSE" DESTINATION pyalps/licenses/xdr)
+
+# Only bindings-only builds may fall back to their chosen SDK executables.
+set(_pyalps_sdk_bin "")
+if(NOT PYALPS_BUNDLE_APPLICATIONS)
+  set(_pyalps_sdk_bin "${ALPS_BIN_DIR}")
+endif()
+
+# Repair tools regenerate this manifest after changing library names and paths.
+install(CODE "execute_process(COMMAND \"${Python_EXECUTABLE}\"
+  \"${CMAKE_CURRENT_SOURCE_DIR}/_build_support/runtime_manifest.py\"
+  --tree \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\" --alps-version \"${ALPS_VERSION}\"
+  --sdk-bin \"${_pyalps_sdk_bin}\"
+  --nanobind-version \"${nanobind_VERSION}\" --nanobind-abi \"${PYALPS_NANOBIND_ABI}\"
+  COMMAND_ERROR_IS_FATAL ANY)")

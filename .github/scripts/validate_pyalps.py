@@ -66,7 +66,8 @@ def main():
         "installed_package": str(package),
         "installed_extension_hashes": {
             str(path.relative_to(package)): sha256(path)
-            for path in sorted(package.rglob("*.so"))
+            for path in sorted(package.rglob("*"))
+            if path.suffix in {".so", ".pyd", ".dll", ".dylib"}
         },
         "downstream_enabled": environment.get("PYALPS_TEST_DOWNSTREAM_EXPORT") == "1",
         "build_environment": {
@@ -129,7 +130,7 @@ def main():
                 output / "pytest.xml",
             ],
         )
-        scripts = ROOT / "script" / "pyalps_compatibility"
+        scripts = Path(__file__).resolve().parent / "pyalps_compatibility"
         if args.legacy_python:
             old_env = {**environment, "PYTHONPATH": str(args.legacy_modules.resolve())}
             old_python = args.legacy_python.absolute()

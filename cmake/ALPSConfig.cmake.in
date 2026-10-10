@@ -1,128 +1,54 @@
-#-----------------------------------------------------------------------------
-#
-# ALPSConfig.cmake - ALPS CMake configuration file for external projects.
-#
-# This file is configured by ALPS and used by the UseALPS.cmake module
-# to load ALPS's settings for an external project.
+# Copyright (C) 2026 ALPS collaboration. SPDX-License-Identifier: MIT
+@PACKAGE_INIT@
+# block() and the exported $<COMPILE_ONLY:...> interfaces need CMake 3.27.
+# Fail with a clear message instead of "Unknown CMake command block".
+if(CMAKE_VERSION VERSION_LESS 3.27)
+  set(ALPS_FOUND FALSE)
+  set(ALPS_NOT_FOUND_MESSAGE "ALPS requires CMake 3.27 or newer (found ${CMAKE_VERSION})")
+  return()
+endif()
+include(CMakeFindDependencyMacro)
+if(DEFINED BLA_SIZEOF_INTEGER AND NOT BLA_SIZEOF_INTEGER STREQUAL "4")
+  set(ALPS_FOUND FALSE)
+  set(ALPS_NOT_FOUND_MESSAGE "This ALPS SDK requires BLA_SIZEOF_INTEGER=4")
+  return()
+endif()
+# Keep dependency preferences local; preserve find_dependency failure diagnostics.
+block(SCOPE_FOR VARIABLES PROPAGATE ALPS_FOUND ALPS_NOT_FOUND_MESSAGE)
+  find_dependency(Threads)
+  find_dependency(Boost 1.76 CONFIG COMPONENTS @ALPS_BOOST_COMPONENTS@)
+  set(HDF5_USE_STATIC_LIBRARIES "@HDF5_USE_STATIC_LIBRARIES@")
+  find_dependency(HDF5 @ALPS_HDF5_MIN_VERSION@ MODULE COMPONENTS C)
+  if(@ALPS_ENABLE_MPI@)
+    find_dependency(MPI COMPONENTS CXX)
+  endif()
+  if(@ALPS_ENABLE_OPENMP@)
+    find_dependency(OpenMP COMPONENTS CXX)
+  endif()
+  set(BLA_SIZEOF_INTEGER 4)
+  set(BLA_VENDOR "@ALPS_BLA_VENDOR@")
+  set(BLA_STATIC "@ALPS_BLA_STATIC@")
+  find_dependency(@ALPS_BLAS_DEPENDENCY@)
+  find_dependency(@ALPS_LAPACK_DEPENDENCY@)
+endblock()
+include("${CMAKE_CURRENT_LIST_DIR}/ALPSTargets.cmake")
 
-# The ALPS root directory.
-set(ALPS_ROOT_DIR "@CMAKE_INSTALL_PREFIX@")
-
-# The ALPS include file directories.
-set(ALPS_INCLUDE_DIRS "@ALPS_INCLUDE_DIRS_CONFIG@")
-
-# The ALPS library directories.
-set(ALPS_LIBRARY_DIRS "@ALPS_LIBRARY_DIRS_CONFIG@")
-
-# The ALPS runtime library directories.  Note that if
-# ALPS_CONFIGURATION_TYPES is set (see below) then these directories
-# will be the parent directories under which there will be a directory
-# of runtime binaries for each configuration type.
-set(ALPS_RUNTIME_LIBRARY_DIRS "@ALPS_RUNTIME_LIBRARY_DIRS_CONFIG@")
-
-# The ALPS version number. ALPS_VERSION carries the prerelease label when there
-# is one; ALPS_VERSION_CORE is always plain MAJOR.MINOR.PATCH and is what
-# ALPSConfigVersion.cmake compares against.
-SET(ALPS_VERSION_MAJOR "@ALPS_VERSION_MAJOR@")
-SET(ALPS_VERSION_MINOR "@ALPS_VERSION_MINOR@")
-SET(ALPS_VERSION_PATCH "@ALPS_VERSION_PATCH@")
-SET(ALPS_VERSION_PRERELEASE "@ALPS_VERSION_PRERELEASE@")
-SET(ALPS_VERSION_CORE "@ALPS_VERSION_CORE@")
-SET(ALPS_VERSION "@ALPS_VERSION@")
-
-# The location of the UseALPS.cmake file.
-set(ALPS_USE_FILE "@ALPS_USE_FILE@")
-
-# Helper for nanobind extensions that exchange ALPS objects with pyalps.
-set(ALPS_PYTHON_USE_FILE "@ALPS_PYTHON_USE_FILE@")
-
-# The Boost Root Dir used by ALPS
-set(ALPS_Boost_ROOT_DIR "@Boost_ROOT_DIR@")
-set(ALPS_Boost_INCLUDE_DIR "@Boost_INCLUDE_DIR_CONFIG@")
-set(ALPS_Boost_LIBRARIES "@Boost_LIBRARIES@")
-set(ALPS_HAS_BOOST_TEST "@ALPS_INSTALL_BOOST_TEST@")
-set(ALPS_Boost_UNIT_TEST_FRAMEWORK_LIBRARY "@ALPS_Boost_UNIT_TEST_FRAMEWORK_LIBRARY@")
-
-# ALPS Configuration options.
-set(ALPS_BUILD_SHARED_LIBS "@BUILD_SHARED_LIBS@")
-set(ALPS_BUILD_TYPE @CMAKE_BUILD_TYPE@)
-
-# OpenMP
-set(ALPS_OpenMP_C_FLAGS "@OpenMP_C_FLAGS@")
-set(ALPS_OpenMP_CXX_FLAGS "@OpenMP_CXX_FLAGS@")
-
-# MPI
-set(ALPS_MPI_FOUND "@MPI_FOUND@")
-set(ALPS_MPI_DEFINITIONS "@MPI_DEFINITONS@")
-set(ALPS_MPI_INCLUDE_DIR "@MPI_INCLUDE_DIR@")
-set(ALPS_MPI_LINKER_FLAGS "@MPI_LINKER_FLAGS@")
-set(ALPS_MPI_LIBRARIES "@MPI_LIBRARIES@")
-set(ALPS_MPIEXEC "@MPIEXEC@")
-set(ALPS_MPIEXEC_NUMPROC_FLAG "@MPIEXEC_NUMPROC_FLAG@")
-
-# BLAS/LAPACK
-set(ALPS_LAPACK_FOUND "@LAPACK_FOUND@")
-set(ALPS_LAPACK_DEFINITIONS "@LAPACK_DEFINITIONS@")
-set(ALPS_LAPACK_LINKER_FLAGS "@LAPACK_LINKER_FLAGS@")
-set(ALPS_LAPACK_LIBRARIES "@LAPACK_LIBRARIES@")
-set(ALPS_LAPACK_LIBRARY "@LAPACK_LIBRARY@")
-set(ALPS_BLAS_LIBRARIES "@BLAS_LIBRARIES@")
-set(ALPS_BLAS_LIBRARY "@BLAS_LIBRARY@")
-set(ALPS_MKL_INCLUDE_DIR "@MKL_INCLUDE_DIR@")
-
-# FFTW
-set(ALPS_FFTW_LIBRARIES "@FFTW_LIBRARIES@")
-set(ALPS_FFTW_INCLUDE_DIR "@FFTW_INCLUDE_DIR@")
- 
-# SQLite
-set(ALPS_SQLite_FOUND "@SQLite_FOUND@")
-set(ALPS_SQLite_INCLUDE_DIR "@SQLite_INCLUDE_DIR@")
-set(ALPS_SQLite_LIBRARIES "@SQLite_LIBRARIES@")
-
-# LPSolve
-# set(ALPS_LPSolve_FOUND "@LPSolve_FOUND@")
-# set(ALPS_LPSolve_INCLUDE_DIR "@LPSolve_INCLUDE_DIR@")
-# set(ALPS_LPSolve_LIBRARIES "@LPSolve_LIBRARIES@")
-
-# HDF5
-set(ALPS_HDF5_FOUND "@HDF5_FOUND@")
-set(ALPS_HDF5_INCLUDE_DIR "@HDF5_INCLUDE_DIR@")
-set(ALPS_HDF5_LIBRARIES  "@HDF5_LIBRARIES@")
-set(ALPS_HDF5_DIFF_EXECUTABLE "@HDF5_DIFF_EXECUTABLE@")
-
-# Compilers
-set(ALPS_CMAKE_C_COMPILER "@CMAKE_C_COMPILER@")
-set(ALPS_CMAKE_CXX_COMPILER "@CMAKE_CXX_COMPILER@")
-set(ALPS_CMAKE_Fortran_COMPILER "@CMAKE_Fortran_COMPILER@")
-
-# Compiler flags
-set(ALPS_CMAKE_C_FLAGS "@CMAKE_C_FLAGS@")
-set(ALPS_CMAKE_C_FLAGS_RELEASE "@CMAKE_C_FLAGS_RELEASE@")
-set(ALPS_CMAKE_C_FLAGS_DEBUG "@CMAKE_C_FLAGS_DEBUG@")
-
-set(ALPS_CMAKE_CXX_FLAGS "@CMAKE_CXX_FLAGS@")
-set(ALPS_CMAKE_CXX_FLAGS_RELEASE "@CMAKE_CXX_FLAGS_RELEASE@")
-set(ALPS_CMAKE_CXX_FLAGS_DEBUG "@CMAKE_CXX_FLAGS_DEBUG@")
-
-set(ALPS_CMAKE_Fortran_FLAGS "@CMAKE_Fortran_FLAGS@")
-set(ALPS_CMAKE_Fortran_FLAGS_RELEASE "@CMAKE_Fortran_FLAGS_RELEASE@")
-set(ALPS_CMAKE_Fortran_FLAGS_DEBUG "@CMAKE_Fortran_FLAGS_DEBUG@")
-
-# Linker flags
-set(ALPS_CMAKE_EXE_LINKER_FLAGS "@CMAKE_EXE_LINKER_FLAGS@")
-set(ALPS_CMAKE_EXE_LINKER_FLAGS_RELEASE "@CMAKE_EXE_LINKER_FLAGS_RELEASE@")
-set(ALPS_CMAKE_EXE_LINKER_FLAGS_DEBUG "@CMAKE_EXE_LINKER_FLAGS_DEBUG@")
-
-set(ALPS_CMAKE_SHARED_LINKER_FLAGS "@CMAKE_SHARED_LINKER_FLAGS@")
-set(ALPS_CMAKE_SHARED_LINKER_FLAGS_RELEASE "@CMAKE_SHARED_LINKER_FLAGS_RELEASE@")
-set(ALPS_CMAKE_SHARED_LINKER_FLAGS_DEBUG "@CMAKE_SHARED_LINKER_FLAGS_DEBUG@")
-
-# extra header paths and libraries ALPS requries
-set(ALPS_EXTRA_DEFINITIONS "@ALPS_EXTRA_DEFINITIONS@")
-set(ALPS_EXTRA_INCLUDE_DIRS "@ALPS_EXTRA_INCLUDE_DIRS@")
-set(ALPS_EXTRA_LINKER_FLAGS "@ALPS_EXTRA_LINKER_FLAGS@")
-set(ALPS_EXTRA_LIBRARIES "@ALPS_EXTRA_LIBRARIES@")
-  
-# list of ALPS and dependent libraries
-set(ALPS_LIBRARIES alps ${ALPS_Boost_LIBRARIES} ${ALPS_EXTRA_LIBRARIES} CACHE STRING "List of ALPS and dependent libraries." FORCE)
-set(ALPS_FORTRAN_LIBRARIES alps_fortran CACHE STRING "List of ALPS-Fortran library." FORCE)
+set(ALPS_VERSION "@ALPS_VERSION@")
+set(ALPS_BIN_DIR "@PACKAGE_CMAKE_INSTALL_BINDIR@")
+set(ALPS_RUNTIME_LIBRARY_DIRS "@PACKAGE_CMAKE_INSTALL_BINDIR@")
+set(ALPS_RUNTIME_TARGETS "@ALPS_SDK_RUNTIME_TARGETS@")
+set(ALPS_DATA_DIR "@PACKAGE_CMAKE_INSTALL_DATADIR@/alps")
+set(ALPS_MPI_ENABLED "@ALPS_ENABLE_MPI@")
+# Generated from ALPS_SDK_TARGETS in src/alps/CMakeLists.txt.
+foreach(component IN ITEMS @ALPS_SDK_COMPONENTS@)
+  set(ALPS_${component}_FOUND TRUE)
+endforeach()
+set(ALPS_solvers_FOUND "@ALPS_BUILD_APPLICATIONS@")
+set(ALPS_applications_FOUND FALSE)
+if("applications" IN_LIST ALPS_FIND_COMPONENTS AND @ALPS_BUILD_APPLICATIONS@
+    AND EXISTS "${CMAKE_CURRENT_LIST_DIR}/ALPSApplicationTargets.cmake")
+  include("${CMAKE_CURRENT_LIST_DIR}/ALPSApplicationTargets.cmake")
+  set(ALPS_APPLICATION_TARGETS "@ALPS_APPLICATION_TARGETS@")
+  set(ALPS_applications_FOUND TRUE)
+endif()
+check_required_components(ALPS)

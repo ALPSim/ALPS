@@ -77,14 +77,10 @@ def test_mcdata_scalar():
     assert_scalar(a * 2.0, 2.4, 0.2)
     assert_scalar(a / 2.0, 0.6, 0.05)
     assert_scalar(2.0 / a, 1.666666666667, 0.138888888889)
+    assert_scalar(-2.0 / a, -1.666666666667, 0.138888888889)
 
-    # NOTE: documents a long-standing libalps bug, present in the old
-    # Boost.Python build too (the historic fixture also shows +1.2):
-    # mcdata<T>::operator-() (src/alps/alea/mcdata.hpp) negates a copy
-    # and returns *this unchanged, so unary minus is a no-op. When the
-    # C++ operator is fixed, flip these expectations to -1.2 / negated
-    # means.
-    assert_scalar(-a, 1.2, 0.1)
+    assert_scalar(-a, -1.2, 0.1)
+    assert_scalar(a, 1.2, 0.1)
     assert_scalar(abs(c), 1.5, 0.2)
 
     assert_scalar(pow(a, 2.71), 1.639008390308, 0.370142728145)
@@ -105,6 +101,8 @@ def test_mcdata_vector():
     Y = X + 1.0
 
     assert_vector(X, [2.3, 1.2, 0.7], [0.01] * 3)
+    # The retired Boost.Python comparison caught full slices returning empty data.
+    assert_vector(X[:], [2.3, 1.2, 0.7], [0.01] * 3)
     assert_vector(Y, [3.3, 2.2, 1.7], [0.01] * 3)
 
     assert_vector(X + Y, [5.6, 3.4, 2.4], [0.014142135624] * 3)
@@ -119,9 +117,11 @@ def test_mcdata_vector():
                   [0.869565217391, 1.666666666667, 2.857142857143],
                   [0.003780718336, 0.013888888889, 0.040816326531])
 
-    # unary minus is a no-op — same libalps mcdata bug as in the scalar
-    # test above; flip to negated means once the C++ operator is fixed
-    assert_vector(-X, [2.3, 1.2, 0.7], [0.01] * 3)
+    assert_vector(-2.0 / X,
+                  [-0.869565217391, -1.666666666667, -2.857142857143],
+                  [0.003780718336, 0.013888888889, 0.040816326531])
+    assert_vector(-X, [-2.3, -1.2, -0.7], [0.01] * 3)
+    assert_vector(X, [2.3, 1.2, 0.7], [0.01] * 3)
     assert_vector(abs(X), [2.3, 1.2, 0.7], [0.01] * 3)
 
     assert_vector(pow(X, 2.71),

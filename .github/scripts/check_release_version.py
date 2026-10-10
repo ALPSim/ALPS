@@ -23,7 +23,7 @@ TAG_PATTERN = rf"v{CORE_PATTERN}(?:-(?:alpha|beta|rc|dev)\.[0-9]+)?"
 
 
 def check_version(root: Path, ref: str) -> Version:
-    core = (root / "ALPS_VERSION.txt").read_text().strip()
+    core = (root / "cmake/ALPS_VERSION.txt").read_text().strip()
     if not re.fullmatch(CORE_PATTERN, core):
         raise ValueError("ALPS_VERSION.txt must contain MAJOR.MINOR.PATCH")
 

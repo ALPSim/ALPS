@@ -61,9 +61,8 @@ void ising_sim::measure() {
             for (int d = 0; d < length; ++d)
                 corr[d] += spins[i] * spins[( i + d ) % length ];
         }
-        // pull in operator/ for vectors
-        using alps::ngs::numeric::operator/;
-        corr = corr / double(length);
+        for (double& correlation : corr)
+            correlation /= length;
         ten /= length;
         tmag /= length;
         measurements["Energy"] << ten;

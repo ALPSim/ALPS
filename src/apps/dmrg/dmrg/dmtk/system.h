@@ -23,8 +23,6 @@
 #include <string>
 #include <iomanip>
 #include <math.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include "enums.h"
 #include "vector.h"
 #include "matrix.h"
@@ -42,12 +40,6 @@
 #include <pthread.h>
 #include <unistd.h>
 #endif // WITH_PTHREADS
-
-#include <sys/stat.h>
-
-#ifdef BOOST_MSVC
-#include <io.h>
-#endif
 
 #include <boost/filesystem/path.hpp>
 #include "filelist.h"

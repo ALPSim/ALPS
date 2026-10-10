@@ -25,7 +25,7 @@
 #include <vector>
 #include <string>
 
-class ALPS_DECL ising_sim : public alps::mcbase {
+class ising_sim : public alps::mcbase {
 
     public:
         

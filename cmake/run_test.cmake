@@ -17,57 +17,41 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-find_program(cmd_path ${cmd} ${binarydir} ${dllexedir} NO_SYSTEM_ENVIRONMENT_PATH)
-
-find_file(input_path ${input}.input ${binarydir} ${sourcedir})
-if(NOT input_path)
-  find_file(input_path ${input}.ip ${binarydir} ${sourcedir})
-endif(NOT input_path)
-
-find_file(output_path ${output}.output ${binarydir} ${sourcedir})
-if(NOT output_path)
-  find_file(output_path ${output}.op ${binarydir} ${sourcedir})
-endif(NOT output_path)
-
-set(ENV{OMP_NUM_THREADS} 1)
-
+if(NOT EXISTS "${cmd_path}")
+  message(FATAL_ERROR "Test executable does not exist: ${cmd_path}")
+endif()
+set(input_names "${input}.input" "${input}.ip")
+set(output_names "${output}.output" "${output}.op")
+find_file(
+  input_path
+  NAMES ${input_names}
+  PATHS "${binarydir}" "${sourcedir}"
+  NO_DEFAULT_PATH)
+find_file(
+  output_path
+  NAMES ${output_names}
+  PATHS "${binarydir}" "${sourcedir}"
+  NO_DEFAULT_PATH)
+set(input_args)
 if(input_path)
-  execute_process(
-    COMMAND ${cmd_path}
-    RESULT_VARIABLE not_successful
-    INPUT_FILE ${input_path}
-    OUTPUT_FILE ${cmd}_${input}_output
-    ERROR_VARIABLE err
-    TIMEOUT 600
-  )
-else(input_path)
-  execute_process(
-    COMMAND ${cmd_path}
-    RESULT_VARIABLE not_successful
-    OUTPUT_FILE ${cmd}_${input}_output
-    ERROR_VARIABLE err
-    TIMEOUT 600
-  )
-endif(input_path)
-
-if(not_successful)
-    message(SEND_ERROR "error runing test '${cmd}': ${err};shell output: ${not_successful}!")
-endif(not_successful)
-
+  list(APPEND input_args INPUT_FILE "${input_path}")
+endif()
+set(actual "${binarydir}/${name}.actual")
+set(ENV{OMP_NUM_THREADS} 1)
+execute_process(
+  COMMAND "${cmd_path}" ${input_args}
+  OUTPUT_FILE "${actual}"
+  ERROR_VARIABLE error
+  RESULT_VARIABLE result
+  TIMEOUT 600)
+if(NOT result STREQUAL "0")
+  message(FATAL_ERROR "${name} failed (${result}): ${error}; output: ${actual}")
+endif()
 if(output_path)
-  if(WIN32)
-    configure_file(${cmd}_${input}_output ${cmd}_${input}_output NEWLINE_STYLE LF)
-  endif(WIN32)
-  execute_process(
-    COMMAND ${CMAKE_COMMAND} -E compare_files ${output_path} ${cmd}_${input}_output
-    RESULT_VARIABLE not_successful
-    OUTPUT_VARIABLE out
-    ERROR_VARIABLE err
-    TIMEOUT 600
-  )
-  if(not_successful)
-    message(SEND_ERROR "output does not match for '${cmd}': ${err}; ${out}; shell output: ${not_successful}!")
-  endif(not_successful)
-endif(output_path)
-
-file(REMOVE ${cmd}_${input}_output)
+  execute_process(COMMAND "${CMAKE_COMMAND}" -E compare_files --ignore-eol "${output_path}"
+                          "${actual}" RESULT_VARIABLE mismatch)
+  if(mismatch)
+    message(FATAL_ERROR "${name}: ${actual} differs from ${output_path}")
+  endif()
+endif()
+file(REMOVE "${actual}")
