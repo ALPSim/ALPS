@@ -11,18 +11,20 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <alps/ngs/params.hpp>
+#include <alps/ngs/params_from_file.hpp>
 #include <alps/parameter.h>
 
 namespace alps {
 
-    params::params(boost::filesystem::path const & path) {
+    params params_from_file(boost::filesystem::path const & path) {
+        params result;
         boost::filesystem::ifstream ifs(path);
         Parameters par(ifs);
         for (Parameters::const_iterator it = par.begin(); it != par.end(); ++it) {
             detail::paramvalue val(it->value());
-            setter(it->key(), val);
+            result[it->key()] = val;
         }
+        return result;
     }
 
 }

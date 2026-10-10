@@ -13,6 +13,7 @@
 
 #include "ising.hpp"
 
+#include <alps/ngs/params_from_file.hpp>
 #include <alps/ngs.hpp>
 #include <alps/parseargs.hpp>
 #include <alps/stop_callback.hpp>
@@ -77,7 +78,7 @@ int main(int argc, char *argv[]) {
             else if (boost::filesystem::path(infile).extension().string() == ".h5")
                 alps::hdf5::archive(infile)["/parameters"] >> parameters;
             else
-                parameters = alps::parameters_type<ising_sim>::type(infile);
+                parameters = alps::params_from_file(infile);
             broadcast(comm_local, parameters);
 
             alps::mcmpiadapter<ising_sim> sim(parameters, comm_local, alps::check_schedule(options.tmin, options.tmax));

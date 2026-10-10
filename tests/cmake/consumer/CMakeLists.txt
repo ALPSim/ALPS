@@ -47,9 +47,9 @@ else()
     find_package(ALPS CONFIG REQUIRED COMPONENTS solvers)
   endif()
   get_filename_component(expected_prefix "${ALPS_DIR}/../.." REALPATH)
-  if(NOT EXISTS "${expected_prefix}/include/alps/ngs/detail/export_sim_to_python.hpp"
-     OR NOT EXISTS "${expected_prefix}/include/alps/python/save_observable_to_hdf5.hpp")
-    message(FATAL_ERROR "The SDK must retain public Python compatibility includes")
+  if(EXISTS "${expected_prefix}/include/alps/ngs/detail/export_sim_to_python.hpp"
+     OR EXISTS "${expected_prefix}/include/alps/python/save_observable_to_hdf5.hpp")
+    message(FATAL_ERROR "The SDK must not install retired Python compatibility includes")
   endif()
   foreach(private_directory IN ITEMS alps/utilities alps/hdf5/include alps/hdf5/src
                                      alps/hdf5/tests alps/params alps/common alps/runtime

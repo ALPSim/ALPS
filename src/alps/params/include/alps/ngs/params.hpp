@@ -37,8 +37,6 @@
 
 namespace alps {
 
-    // Export methods individually: typed operations belong to ALPS::params,
-    // while the parameter-file constructor belongs to the ALPS::alps adapter.
     class params {
 
         typedef std::map<std::string, detail::paramvalue>::value_type iterator_value_type;
@@ -61,9 +59,6 @@ namespace alps {
             {}
 
             ALPS_PARAMS_DECL params(hdf5::archive ar, std::string const & path = "/parameters");
-
-            // Requires ALPS::alps for the older text parameter grammar.
-            ALPS_DECL params(boost::filesystem::path const &);
 
             ALPS_PARAMS_DECL std::size_t size() const;
 

@@ -33,6 +33,7 @@ project(alps VERSION ${ALPS_VERSION_CORE} LANGUAGES C CXX)
 # Options removed in 3.0 are otherwise ignored with only CMake's generic
 # "Manually-specified variables were not used" warning. See CHANGELOG.md.
 foreach(legacy IN ITEMS
+    "ALPS_NGS_USE_NEW_ALEA|the experimental backend was removed"
     "ALPS_BUILD_TESTS|use ALPS_BUILD_TESTING"
     "ALPS_BUILD_LIBS_ONLY|use ALPS_BUILD_APPLICATIONS=OFF"
     "ALPS_BUILD_EXAMPLES|build tutorials/examples against the installed SDK"
@@ -50,6 +51,9 @@ foreach(legacy IN ITEMS
     message(WARNING "${name} is no longer supported: ${hint}.")
   endif()
 endforeach()
+if(ALPS_ENABLE_MPI AND DEFINED CACHE{ALPS_NGS_USE_NEW_ALEA})
+  message(WARNING "This build directory retains the ALPS 3.0 MPI default. Pass -DALPS_ENABLE_MPI=OFF or use a fresh build directory if MPI is not needed.")
+endif()
 if(NOT ALPS_ENABLE_MPI)
   message(STATUS "MPI is disabled (opt-in since 3.0); pass -DALPS_ENABLE_MPI=ON to enable it")
 endif()
@@ -63,9 +67,8 @@ include(cmake/ALPSCitations.cmake)
 if(NOT DEFINED BUILD_SHARED_LIBS)
   set(BUILD_SHARED_LIBS ON)
 endif()
-option(ALPS_NGS_USE_NEW_ALEA "Use the experimental NGS accumulator implementation" OFF)
 option(ALPS_NGS_OPENMPI_ULFM "Enable user-level failure mitigation with a compatible OpenMPI" OFF)
-mark_as_advanced(ALPS_NGS_USE_NEW_ALEA ALPS_NGS_OPENMPI_ULFM)
+mark_as_advanced(ALPS_NGS_OPENMPI_ULFM)
 option(ALPS_ENABLE_OPENMP "Enable OpenMP parallelization" OFF)
 option(ALPS_BUILD_EXTENSIVE_TESTS "Build expensive graph and HDF5 type-matrix tests" OFF)
 set(ALPS_VERSION_PRERELEASE "" CACHE STRING "Optional prerelease version label")
