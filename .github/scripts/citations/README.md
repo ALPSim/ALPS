@@ -88,7 +88,7 @@ is provenance, not a dependency of the build.
 - Emanuel Gull confirmed the DMFT split and solver references on 2026-10-08.
   CT-HYB also credits Hafermann, Werner, and Gull, CPC 184, 1280 (2013), alongside
   CPC 182, 1078 (2011), as implementation references. The shipped solver's manual
-  (`applications/dmft/qmc/hybridization/Documentation/hybdoc.tex`) identifies the
+  (`src/apps/dmft/qmc/hybridization/Documentation/hybdoc.tex`) identifies the
   2013 paper with this version of the code. Boehnke et al., PRB 84, 075145 (2011),
   remains in the manual; CT-INT cites the 2005 PRB rather than the 2004 JETP letter.
   The improved-estimator paper's existing manual-only treatment is unchanged.
