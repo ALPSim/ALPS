@@ -167,7 +167,7 @@ Keep commits focused. Add or update tests for changed behavior; scientific chang
 
 ### Code style
 
-Match the surrounding code. Target C++17, avoid undefined behavior, and check compiler warnings. Follow [PEP 8](https://peps.python.org/pep-0008/) for Python. CMake changes must work with 3.27 and express usage requirements on targets with explicit `PRIVATE`, `PUBLIC` or `INTERFACE` scope. In Markdown, keep each prose paragraph on one source line while preserving code blocks, tables and list structure.
+Match the surrounding code. Target C++17, avoid undefined behavior, and check compiler warnings. Follow [PEP 8](https://peps.python.org/pep-0008/) for Python. CMake changes must work with 3.27 and express usage requirements on targets with explicit `PRIVATE`, `PUBLIC` or `INTERFACE` scope. Let the CMake build configuration or caller select optimization flags; examples and tests must not impose custom optimization settings. In Markdown, keep each prose paragraph on one source line while preserving code blocks, tables and list structure.
 
 ### Submitting a pull request
 
