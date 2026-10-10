@@ -29,7 +29,7 @@ TEST(ParamsLegacyAdapters, TextGrammarAndLegacyConversion) {
         std::ofstream output(text.string());
         output << "L=10; garbage @\n";
     }
-    EXPECT_THROW({ alps::params(text); }, std::runtime_error);
+    EXPECT_THROW({ (void)alps::params(text); }, std::runtime_error);
     boost::filesystem::remove(text);
 
 }

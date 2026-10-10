@@ -30,7 +30,7 @@ int main() {
         output << "L=10; garbage @\n";
     }
     bool caught = false;
-    try { alps::params(text); }
+    try { (void)alps::params(text); }
     catch (const std::runtime_error&) { caught = true; }
     require(caught);
     boost::filesystem::remove(text);
