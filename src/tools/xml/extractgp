@@ -9,22 +9,22 @@ then
 fi 
 
 f=$1
-dir=`dirname $0`
+dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd) || exit 1
 
 # define xsl-settings from xml-plot input  
-$dir/xslttransform $1 $dir/../lib/xml/plot2xsl.xsl > /tmp/archive2plot$$.xsl 
+"$dir/xslttransform" "$1" "$dir/@ALPS_XML_FROM_BINDIR@/plot2xsl.xsl" > /tmp/archive2plot$$.xsl
 
 # generate xml-plot output from archive or list of task files
 if test $# -gt 2;
 then
-  $dir/archivecat `echo $* | cut -d' ' -f2-` > /tmp/archive$$
-  $dir/xslttransform /tmp/archive$$ /tmp/archive2plot$$.xsl > /tmp/plot$$
+  "$dir/archivecat" `echo $* | cut -d' ' -f2-` > /tmp/archive$$
+  "$dir/xslttransform" /tmp/archive$$ /tmp/archive2plot$$.xsl > /tmp/plot$$
   rm /tmp/archive$$
 else
-  $dir/xslttransform $2 /tmp/archive2plot$$.xsl > /tmp/plot$$  
+  "$dir/xslttransform" "$2" /tmp/archive2plot$$.xsl > /tmp/plot$$
 fi
 rm /tmp/archive2plot$$.xsl
 
 # generate gnuplot output from previously generated xml-plot
-$dir/xslttransform /tmp/plot$$ $dir/../lib/xml/plot2gp.xsl 
+"$dir/xslttransform" /tmp/plot$$ "$dir/@ALPS_XML_FROM_BINDIR@/plot2gp.xsl"
 rm /tmp/plot$$

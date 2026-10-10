@@ -1,13 +1,23 @@
 #!/bin/bash
 
-l=$*
-dir=`dirname $0`
+dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd) || exit 1
+xml_dir="$dir/@ALPS_XML_FROM_BINDIR@"
 
-for f in $l; do
-  if test -f $f; then
-    $dir/xslttransform $f $dir/../lib/xml/changestylesheet.xsl > /tmp/tmp$$
-    mv /tmp/tmp$$ $f
+# Install the referenced stylesheet before changing any input XML.
+cp "$xml_dir/ALPS.xsl" . || exit 1
+
+temporary=
+trap 'if test -n "$temporary"; then rm -f -- "$temporary"; fi' EXIT
+trap 'exit 1' HUP INT TERM
+for f in "$@"; do
+  # Keep option-like filenames safe for the transformer and file utilities.
+  case "$f" in /*) ;; *) f="./$f" ;; esac
+  if test -f "$f"; then
+    temporary=$(mktemp "${f}.XXXXXX") || exit 1
+    # Preserve permissions and stage beside the input for an atomic rename.
+    cp -p -- "$f" "$temporary" || exit 1
+    "$dir/xslttransform" "$f" "$xml_dir/changestylesheet.xsl" > "$temporary" || exit 1
+    mv -f -- "$temporary" "$f" || exit 1
+    temporary=
   fi
 done
-
-cp  $dir/../lib/xml/ALPS.xsl .

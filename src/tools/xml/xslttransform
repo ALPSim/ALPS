@@ -13,16 +13,16 @@ else
       transformer=$tryxalan
     else
       echo Could not find XSLT transformer. Please set the ALPS_XSLT_TRANSFORMER environment variable
-      exit -1
+      exit 1
     fi
   fi
 fi
 
 #is it Gnome xsltproc?
-if test `$transformer | grep xsltproc | wc -l` -eq 1; then
+if test `"$transformer" | grep xsltproc | wc -l` -eq 1; then
 #is xsltproc
-  $transformer $2 $1
+  "$transformer" "$2" "$1"
 else
 #is xalan
-  $transformer $1 $2
+  "$transformer" "$1" "$2"
 fi

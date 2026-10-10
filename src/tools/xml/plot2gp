@@ -8,6 +8,6 @@ then
 fi 
 
 f=$1
-dir=`dirname $0`
+dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd) || exit 1
 
-$dir/xslttransform $f $dir/../lib/xml/plot2gp.xsl 
+"$dir/xslttransform" "$f" "$dir/@ALPS_XML_FROM_BINDIR@/plot2gp.xsl"
