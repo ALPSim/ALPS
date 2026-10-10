@@ -24,14 +24,22 @@ block()
   endforeach()
   set(Boost_INCLUDE_DIR_CONFIG "${Boost_INCLUDE_DIRS}")
   set(Boost_LIBS "")
+  set(boost_runtime_directories "")
   foreach(component IN LISTS ALPS_BOOST_COMPONENTS)
     # Some providers expose components such as regex as header-only targets.
     # Those have no linker file to add to the historical Makefile interface.
     get_target_property(component_type Boost::${component} TYPE)
     if(NOT component_type STREQUAL "INTERFACE_LIBRARY")
       string(APPEND Boost_LIBS " $<TARGET_LINKER_FILE:Boost::${component}>")
+      list(APPEND boost_runtime_directories "$<TARGET_FILE_DIR:Boost::${component}>")
     endif()
   endforeach()
+  set(Boost_LDFLAGS "")
+  if(boost_runtime_directories)
+    # Absolute linker files do not tell ELF/dyld where to load their SONAMEs.
+    # Preserve the provider paths, including configuration-specific locations.
+    set(Boost_LDFLAGS "-Wl,-rpath,$<JOIN:$<REMOVE_DUPLICATES:${boost_runtime_directories}>, -Wl,-rpath,>")
+  endif()
   list(GET HDF5_INCLUDE_DIRS 0 HDF5_INCLUDE_DIR)
   string(JOIN " " HDF5_LIBS ${HDF5_LIBRARIES})
   set(LAPACK_LIBS "")

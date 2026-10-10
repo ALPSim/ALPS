@@ -75,6 +75,52 @@ include("{SOURCE.as_posix()}/cmake/ALPSLegacy.cmake")
     assert lapack_line.split("=", 1)[1].strip() == expected
 
 
+@pytest.mark.skipif(os.name == "nt" or not shutil.which("make"), reason="requires Unix make")
+def test_legacy_make_finds_non_system_boost_at_runtime(tmp_path, monkeypatch):
+    # A library outside the loader's default paths reproduces the private Boost
+    # installs used by manylinux and macOS wheels. No ALPS rebuild is needed.
+    (tmp_path / "provider.cpp").write_text(
+        'extern "C" int legacy_provider_answer() { return 42; }\n')
+    (tmp_path / "core.cpp").write_text(
+        'extern "C" int legacy_sdk_unused() { return 0; }\n')
+    (tmp_path / "main.cpp").write_text(
+        'extern "C" int legacy_provider_answer();\n'
+        'int main() { return legacy_provider_answer() != 42; }\n')
+    (tmp_path / "CMakeLists.txt").write_text(f'''
+cmake_minimum_required(VERSION 3.27)
+project(legacy_runtime LANGUAGES CXX)
+set(PROJECT_SOURCE_DIR "{SOURCE.as_posix()}")
+set(CMAKE_INSTALL_DATADIR share)
+set(CMAKE_INSTALL_LIBDIR lib)
+set(CMAKE_INSTALL_INCLUDEDIR include)
+set(HDF5_INCLUDE_DIRS "${{CMAKE_CURRENT_SOURCE_DIR}}")
+set(ALPS_SDK_RUNTIME_TARGETS ALPS::alps)
+add_library(alps_core SHARED core.cpp)
+set_target_properties(alps_core PROPERTIES OUTPUT_NAME alps
+  LIBRARY_OUTPUT_DIRECTORY "${{CMAKE_BINARY_DIR}}/lib")
+add_library(ALPS::alps ALIAS alps_core)
+set(ALPS_BOOST_COMPONENTS filesystem)
+add_library(private_boost SHARED provider.cpp)
+set_target_properties(private_boost PROPERTIES
+  OUTPUT_NAME alps_legacy_boost_fixture
+  LIBRARY_OUTPUT_DIRECTORY "${{CMAKE_BINARY_DIR}}/provider")
+add_library(Boost::filesystem ALIAS private_boost)
+include("{SOURCE.as_posix()}/cmake/ALPSLegacy.cmake")
+''')
+    build = tmp_path / "build"
+    subprocess.run(["cmake", "-S", str(tmp_path), "-B", str(build),
+                    "-DCMAKE_BUILD_TYPE=Release"], check=True)
+    subprocess.run(["cmake", "--build", str(build), "--parallel", "1"], check=True)
+    (tmp_path / "Makefile").write_text(
+        f'include {build.as_posix()}/legacy/Release/include.mk\n'
+        'consumer: main.cpp\n'
+        '\t$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ $< $(LIBS)\n')
+    subprocess.run(["make", "-C", str(tmp_path)], check=True)
+    monkeypatch.delenv("LD_LIBRARY_PATH", raising=False)
+    monkeypatch.delenv("DYLD_LIBRARY_PATH", raising=False)
+    subprocess.run([str(tmp_path / "consumer")], check=True)
+
+
 @pytest.mark.parametrize("option, diagnostic", [
     ("BLA_SIZEOF_INTEGER=8", "requires BLA_SIZEOF_INTEGER=4"),
     ("BLA_SIZEOF_INTEGER=ANY", "requires BLA_SIZEOF_INTEGER=4"),
