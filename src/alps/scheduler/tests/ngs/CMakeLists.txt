@@ -23,9 +23,12 @@ if(ALPS_ENABLE_MPI)
   add_executable(scheduler_sum_mpi sum_mpi.cpp)
 
   target_link_libraries(scheduler_sum_mpi PRIVATE ALPS::alps)
+  alps_add_mpi_gtest(scheduler_sum_mpi COMPONENT scheduler RANKS 2)
+  alps_add_mpi_gtest(scheduler_sum_mpi COMPONENT scheduler RANKS 3)
 
 endif(ALPS_ENABLE_MPI)
 
 add_executable(scheduler_sum_single sum_single.cpp)
 
 target_link_libraries(scheduler_sum_single PRIVATE ALPS::alps)
+alps_add_gtest(scheduler_sum_single COMPONENT scheduler LABELS integration)

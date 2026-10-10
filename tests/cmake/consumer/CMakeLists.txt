@@ -108,7 +108,7 @@ set(numerical_dependencies "[Bb][Ll][Aa][Ss]|[Ll][Aa][Pp][Aa][Cc][Kk]")
 add_component_contract(utilities utilities.cpp "ALPS::alps|HDF5::|MPI::|${numerical_dependencies}")
 add_component_contract(hdf5 hdf5.cpp "ALPS::alps|MPI::|${numerical_dependencies}")
 add_component_contract(params params.cpp "ALPS::alps|MPI::|${numerical_dependencies}")
-add_component_contract(osiris ../../../src/alps/osiris/tests/comm_contract.cpp
+add_component_contract(osiris osiris.cpp
   "ALPS::alps|HDF5::|${numerical_dependencies}")
 foreach(component IN ITEMS xml cli)
   add_component_contract(${component} ${component}.cpp
@@ -118,7 +118,7 @@ add_contract(sdk main.cpp ALPS::alps)
 add_contract(numeric numerics.cpp ALPS::numerics)
 add_contract(numeric_io numeric_io.cpp ALPS::numeric_io)
 add_contract(numeric_xml numeric_xml.cpp ALPS::numeric_xml)
-add_contract(parameter_adapters ../../integration/params/legacy_adapters.cpp ALPS::alps)
+add_contract(parameter_adapters parameter_adapters.cpp ALPS::alps)
 if(EXPECT_SOLVERS)
   get_target_property(maxent_links ALPS::maxent INTERFACE_LINK_LIBRARIES)
   if(maxent_links MATCHES "(^|;)ALPS::alps(;|$)")

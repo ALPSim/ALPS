@@ -25,10 +25,9 @@
 const std::size_t m = 10000; // number of trials
 const std::size_t n = 16;    // max elements
 
-int main() {
+TEST(FixedCapacityDeque, RandomizedOperationsMatchStandardContainer) {
   test_main<alps::fixed_capacity_deque<double, n>,
             alps::fixed_capacity_deque<non_pod<double>, n>,
             std::deque<double> >(m, n);
-  std::cout << "Test done successfully.\n";
-  return 0;
+  EXPECT_TRUE(non_pod<double>::live.empty()) << "all non-POD elements must be destroyed";
 }

@@ -5,14 +5,13 @@ add_executable(maxent_linear_grid_numeric linear_grid.cpp)
 target_include_directories(maxent_linear_grid_numeric PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/../src")
 target_link_libraries(maxent_linear_grid_numeric PRIVATE ALPS::maxent)
-alps_add_test(maxent_linear_grid_numeric)
-set_property(TEST maxent_linear_grid_numeric PROPERTY LABELS maxent)
+alps_add_gtest(maxent_linear_grid_numeric COMPONENT maxent LABELS scientific TIMEOUT 120)
 
 # Keep a native public-API/linkage probe alongside the shared scientific oracle.
 add_executable(maxent_api_contract "${PROJECT_SOURCE_DIR}/tests/cmake/consumer/maxent_independent.cpp")
 target_link_libraries(maxent_api_contract PRIVATE ALPS::maxent)
 alps_add_test(maxent_api_contract)
-set_property(TEST maxent_api_contract PROPERTY LABELS maxent)
+set_property(TEST maxent_api_contract PROPERTY LABELS "maxent;integration")
 
 find_package(Python 3.11 QUIET COMPONENTS Interpreter)
 if(Python_Interpreter_FOUND)

@@ -12,6 +12,8 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <gtest/gtest.h>
+#include "graph_assertions.hpp"
 #include <alps/parser/xslt_path.h>
 #include <alps/lattice.h>
 #include <alps/graph/lattice_constant.hpp>
@@ -20,7 +22,7 @@
 
 #include <iostream>
 
-int main() {
+TEST(GraphLatticeConstants, lattice_constant_matrix) {
     using boost::get;
     using boost::put;
     using alps::graph::canonical_properties;
@@ -30,14 +32,14 @@ int main() {
 
     alps::Parameters parm;
     unsigned int side_length = 40;
-    
+
     std::ifstream in(alps::search_xml_library_path("lattices.xml"));
     parm["LATTICE"] = "square lattice";
     parm["L"] = side_length;
     alps::graph_helper<>::vertex_descriptor center_vertex = side_length * side_length / 2 + side_length / 2;
 
     alps::graph_helper<> lattice(in,parm);
-    
+
     graph_type lattice_graph(num_vertices(lattice.graph()));
     boost::graph_traits<alps::graph_helper<>::graph_type>::edge_iterator it, et;
     for(boost::tie(it, et) = edges(lattice.graph()); it != et; ++it)
@@ -139,7 +141,7 @@ int main() {
         }
     }
 
-    int success = 0;
+
     for(std::vector<boost::tuple<graph_type, input_type, output_type> >::iterator it = test_graphs.begin(); it != test_graphs.end(); ++it) {
 
         alps::numeric::matrix<unsigned int> embedding_factors(num_vertices(lattice_graph), get<2>(get<1>(*it)).size());
@@ -156,19 +158,10 @@ int main() {
         );
         output += embedding_factors * get<2>(get<1>(*it));
         output_type ref = get<2>(*it);
-        if ( output != ref )
-        {
-            std::cerr<<"ERROR: lattice constant does not match!"<<std::endl;
-            std::cerr<<"Graph:"<<std::distance(test_graphs.begin(),it)<<":"<<std::endl;
-            std::cerr<<"Calculated <-> Reference"<<std::endl;
-            for(std::size_t i=0; i != output.size(); ++i)
-            {
-                if(output[i] != ref[i])
-                    std::cerr<<"vertex: "<<i<<":\t"<<output[i]-init[i]<<"\t<->\t"<<ref[i]-init[i]<<std::endl;
-            }
-            std::cerr<<std::endl;
-            success = -1;
-        }
+        SCOPED_TRACE(std::distance(test_graphs.begin(), it));
+        ASSERT_EQ(output.size(), ref.size());
+        for (std::size_t vertex = 0; vertex < output.size(); ++vertex)
+            EXPECT_EQ(output[vertex], ref[vertex]) << "vertex " << vertex;
     }
-    return success;
+
 }

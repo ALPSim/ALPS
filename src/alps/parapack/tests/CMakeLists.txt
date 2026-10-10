@@ -26,6 +26,7 @@ foreach(
   exp_number
   footprint
   info_test
+  id2string
   integer_range
   linear_regression
   merge
@@ -37,16 +38,19 @@ foreach(
   add_executable(${name} ${name}.C)
 
   target_link_libraries(${name} PRIVATE ALPS::alps)
-  alps_add_test(${name})
-  set_property(TEST ${name} PROPERTY LABELS parapack)
+  if(name MATCHES "^clone_(info|phase)$")
+    alps_add_gtest(${name} COMPONENT parapack LABELS compatibility format)
+  else()
+    alps_add_gtest(${name} COMPONENT parapack)
+  endif()
 endforeach()
 
 if(ALPS_ENABLE_MPI)
-  foreach(name collect_mpi comm_mpi filelock_mpi halt_mpi info_test_mpi process_mpi)
+  foreach(name comm_mpi filelock_mpi halt_mpi info_test_mpi process_mpi collect_mpi)
     add_executable(${name} ${name}.C)
 
     target_link_libraries(${name} PRIVATE ALPS::alps)
-    # alps_add_test(${name})
-    # set_property(TEST ${name} PROPERTY LABELS parapack)
+    alps_add_mpi_gtest(${name} COMPONENT parapack RANKS 2)
+    alps_add_mpi_gtest(${name} COMPONENT parapack RANKS 3)
   endforeach()
 endif()

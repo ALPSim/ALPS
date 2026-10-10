@@ -19,43 +19,41 @@
 #include <iostream>
 #include <cstdlib>
 
-int main()
-{
-#ifndef BOOST_NO_EXCEPTIONS
-try {
-#endif
+#include <alps/testing/stream_fixture.hpp>
+#include <alps/testing/temporary_directory.hpp>
+#include <gtest/gtest.h>
 
-  alps::Parameters parameters;
-  alps::ParametersXMLHandler handler(parameters);
-  
-  alps::XMLParser parser(handler);
-  parser.parse(std::cin);
-  
-  std::cout << parameters;
-
+TEST(Serialization, parameters_xml) {
+  alps::testing::StreamFixture transcript(ALPS_TEST_SOURCE_DIR "/parameters_xml.input");
+  alps::testing::TemporaryDirectory directory;
   {
-    alps::OXDRFileDump od(boost::filesystem::path("parameters.dump"));
-    od << parameters;
-  }
+    alps::Parameters parameters;
+    alps::ParametersXMLHandler handler(parameters);
 
-  parameters.clear();
-  
-  {
-    alps::IXDRFileDump id(boost::filesystem::path("parameters.dump"));
-    id >> parameters;
-  }
+    alps::XMLParser parser(handler);
+    parser.parse(std::cin);
 
-  std::cout << parameters;
+    std::cout << parameters;
 
-  alps::oxstream oxs;
-  oxs << parameters;
+    {
+      alps::OXDRFileDump od(
+          boost::filesystem::path((directory.path() / "parameters.dump").string()));
+      od << parameters;
+    }
 
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& exp) {
-  std::cerr << exp.what() << std::endl;
-  std::abort();
-}
-#endif
-  return 0;
+    parameters.clear();
+
+    {
+      alps::IXDRFileDump id(
+          boost::filesystem::path((directory.path() / "parameters.dump").string()));
+      id >> parameters;
+    }
+
+    std::cout << parameters;
+
+    alps::oxstream oxs;
+    oxs << parameters;
+
+  } // Flush oxstream before comparing its serialized bytes.
+  transcript.expect_output(ALPS_TEST_SOURCE_DIR "/parameters_xml.output");
 }

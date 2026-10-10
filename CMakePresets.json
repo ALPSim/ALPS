@@ -48,8 +48,7 @@
       "cacheVariables": {
         "ALPS_BUILD_APPLICATIONS": "OFF",
         "ALPS_BUILD_TESTING": "ON",
-        "ALPS_ENABLE_MPI": "ON",
-        "CMAKE_PROJECT_alps_INCLUDE": "${sourceDir}/ci/register_mpi_tests.cmake"
+        "ALPS_ENABLE_MPI": "ON"
       }
     },
     {
@@ -68,10 +67,7 @@
         "ALPS_BUILD_APPLICATIONS": "OFF",
         "ALPS_BUILD_TESTING": "ON",
         "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_C_FLAGS": "-fsanitize=address,undefined -fno-omit-frame-pointer",
-        "CMAKE_CXX_FLAGS": "-fsanitize=address,undefined -fno-omit-frame-pointer",
-        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined",
-        "CMAKE_SHARED_LINKER_FLAGS": "-fsanitize=address,undefined"
+        "ALPS_ENABLE_SANITIZERS": "ON"
       }
     }
   ],

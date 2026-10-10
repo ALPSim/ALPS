@@ -12,9 +12,9 @@
 *****************************************************************************/
 
 #include <alps/parapack/parapack.h>
-#include <iostream>
+#include <gtest/gtest.h>
+#include <regex>
 
-int main() {
-  std::cerr << alps::parapack::alps_version() << std::endl;
-  return 0;
+TEST(ParapackVersion, ReportsANumericRelease) {
+  EXPECT_TRUE(std::regex_search(alps::parapack::alps_version(), std::regex("[0-9]+\\.[0-9]+")));
 }

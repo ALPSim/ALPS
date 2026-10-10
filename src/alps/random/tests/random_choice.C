@@ -16,18 +16,12 @@
 #include <cmath>
 #include <vector>
 
-#define BOOST_TEST_SOURCE
-#define BOOST_TEST_MODULE random_choice
-#ifndef ALPS_LINK_BOOST_TEST
-#include <boost/test/included/unit_test.hpp>
-#else
-#include <boost/test/unit_test.hpp>
-#endif
+#include <gtest/gtest.h>
 
 static const unsigned int n = 9;
 static const unsigned int samples = 100000;
 
-BOOST_AUTO_TEST_CASE(random_choice) {
+TEST(RandomChoice, SeededWeightsAndFrequencies) {
   std::cout << "number of bins = " << n << std::endl;
   std::cout << "number of samples = " << samples << std::endl;
 
@@ -47,7 +41,7 @@ BOOST_AUTO_TEST_CASE(random_choice) {
   // double-base version
   {
     alps::random_choice<generator_type> dist(weights);
-    BOOST_CHECK(dist.check(weights));
+    EXPECT_TRUE(dist.check(weights));
 
     std::vector<double> accum(n, 0);
     for (unsigned int t = 0; t < samples; ++t) ++accum[dist(rng)];
@@ -59,14 +53,14 @@ BOOST_AUTO_TEST_CASE(random_choice) {
       std::cout << i << "\t" << (weights[i] / tw) << "    \t"
                 << (accum[i] / samples) << "    \t" << diff << "    \t"
                 << sigma << "    \t" << (diff / sigma) << std::endl;
-      BOOST_CHECK(diff < 3 * sigma);
+      EXPECT_LT(diff, 3 * sigma) << "seed=29411, bin=" << i;
     }
   }
 
   // integer-base version
   {
     alps::random_choice<engine_type> dist(weights);
-    BOOST_CHECK(dist.check(weights));
+    EXPECT_TRUE(dist.check(weights));
 
     std::vector<double> accum(n, 0);
     for (unsigned int t = 0; t < samples; ++t) ++accum[dist(eng)];
@@ -78,7 +72,7 @@ BOOST_AUTO_TEST_CASE(random_choice) {
       std::cout << i << "\t" << (weights[i] / tw) << "    \t"
                 << (accum[i] / samples) << "    \t" << diff << "    \t"
                 << sigma << "    \t" << (diff / sigma) << std::endl;
-      BOOST_CHECK(diff < 3 * sigma);
+      EXPECT_LT(diff, 3 * sigma) << "seed=29411, bin=" << i;
     }
   }
 }

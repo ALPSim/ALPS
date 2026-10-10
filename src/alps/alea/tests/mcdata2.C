@@ -16,293 +16,202 @@
 /* $Id: nobinning.h 3520 2009-12-11 16:49:53Z gamperl $ */
 
 #include <alps/alea/mcdata.hpp>
-#include <iostream>
+#include "observable_checks.hpp"
 #include <cmath>
 #include <vector>
 #include <iterator>
 #include <algorithm>
 
-
-int main(int argc, char** argv)
+TEST(AleaMcdata2, HistoricalNumericalScenarios)
 {
   using namespace alps::alea;
 
-  std::cout.precision(10);
-
-  // test: mcdata<double>
-
   mcdata<double> a(0.81,0.1);
-  std::cout << "\na: \t" << a << "\n";
+  alps_test::expect_estimate(a, {{0.81, 0.1, 5.00001e-11, 5.00001e-11}}, "a");
 
   mcdata<double> b = mcdata<double>(1.21,0.2);
-  std::cout << "\nb: \t" << b << "\n";
+  alps_test::expect_estimate(b, {{1.21, 0.2, 5.00001e-10, 5.00001e-11}}, "b");
 
   mcdata<double> c = mcdata<double>(4.5,0.3);
-  std::cout << "\nb: \t" << c << "\n";
+  alps_test::expect_estimate(c, {{4.5, 0.3, 5.00001e-10, 5.00001e-11}}, "c");
 
+  alps_test::expect_estimate(+a, {{0.81, 0.1, 5.00001e-11, 5.00001e-11}}, "+a");
+  alps_test::expect_estimate(-a, {{-0.81, 0.1, 5.00001e-11, 5.00001e-11}}, "-a");
+  alps_test::expect_estimate(abs(c), {{4.5, 0.3, 5.00001e-10, 5.00001e-11}}, "abs(c)");
 
-  // positivity, negtivity, absolute
-  std::cout << "\n +a: \t" << +a << "\n";
-  std::cout << "\n -a: \t" << -a << "\n";
-  std::cout << "\n abs(c): \t" << abs(c) << "\n";
-
-  // operation-assign
   mcdata<double> e = a;
 
   a = e;
   a += b;
-  std::cout << "\na += b: \t" << a << "\n";
+  alps_test::expect_estimate(a, {{2.02, 0.2236067977, 5.00001e-10, 5.00001e-11}}, "a");
 
   a = e;
   a -= b;
-  std::cout << "\na -= b: \t" << a << "\n";
+  alps_test::expect_estimate(a, {{-0.4, 0.2236067977, 5.00001e-11, 5.00001e-11}}, "a");
 
   a = e;
   a *= b;
-  std::cout << "\na *= b: \t" << a << "\n";
+  alps_test::expect_estimate(a, {{0.9801, 0.2022003956, 5.00001e-11, 5.00001e-11}}, "a");
 
   a = e;
   a /= b;
-  std::cout << "\na /= b: \t" << a << "\n";
+  alps_test::expect_estimate(a, {{0.6694214876, 0.1381055909, 5.00001e-11, 5.00001e-11}}, "a");
 
   a = e;
   a += 2.;
-  std::cout << "\na += 2.: \t" << a << "\n";
+  alps_test::expect_estimate(a, {{2.81, 0.1, 5.00001e-10, 5.00001e-11}}, "a");
 
   a = e;
   a -= 2.;
-  std::cout << "\na -= 2.: \t" << a << "\n";
+  alps_test::expect_estimate(a, {{-1.19, 0.1, 5.00001e-10, 5.00001e-11}}, "a");
 
   a = e;
   a *= 2.;
-  std::cout << "\na *= 2.: \t" << a << "\n";
+  alps_test::expect_estimate(a, {{1.62, 0.2, 5.00001e-10, 5.00001e-11}}, "a");
 
   a = e;
   a /= 2.;
-  std::cout << "\na /= 2.: \t" << a << "\n";
+  alps_test::expect_estimate(a, {{0.405, 0.05, 5.00001e-11, 5.00001e-12}}, "a");
 
   a = e;
 
+  alps_test::expect_estimate(a + b, {{2.02, 0.2236067977, 5.00001e-10, 5.00001e-11}}, "a + b");
+  alps_test::expect_estimate(a - b, {{-0.4, 0.2236067977, 5.00001e-11, 5.00001e-11}}, "a - b");
+  alps_test::expect_estimate(a * b, {{0.9801, 0.2022003956, 5.00001e-11, 5.00001e-11}}, "a * b");
+  alps_test::expect_estimate(a / b, {{0.6694214876, 0.1381055909, 5.00001e-11, 5.00001e-11}}, "a / b");
 
-  // operators
-  std::cout << "\na + b: \t" << a + b << "\n";
-  std::cout << "\na - b: \t" << a - b << "\n";
-  std::cout << "\na * b: \t" << a * b << "\n";
-  std::cout << "\na / b: \t" << a / b << "\n";
- 
-  std::cout << "\na + 2.: \t" << a + 2. << "\n";
-  std::cout << "\na - 2.: \t" << a - 2. << "\n";
-  std::cout << "\na * 2.: \t" << a * 2. << "\n";
-  std::cout << "\na / 2.: \t" << a / 2. << "\n";
+  alps_test::expect_estimate(a + 2., {{2.81, 0.1, 5.00001e-10, 5.00001e-11}}, "a + 2.");
+  alps_test::expect_estimate(a - 2., {{-1.19, 0.1, 5.00001e-10, 5.00001e-11}}, "a - 2.");
+  alps_test::expect_estimate(a * 2., {{1.62, 0.2, 5.00001e-10, 5.00001e-11}}, "a * 2.");
+  alps_test::expect_estimate(a / 2., {{0.405, 0.05, 5.00001e-11, 5.00001e-12}}, "a / 2.");
 
-  std::cout << "\n2 + a: \t" << 2. + a << "\n";
-  std::cout << "\n2 - a: \t" << 2. - a << "\n";
-  std::cout << "\n2 * a: \t" << 2. * a << "\n";
-  std::cout << "\n2 / a: \t" << 2. / a << "\n";  
-
-  // (pow, sq, sqrt, cb, cbrt, exp, log) operations
+  alps_test::expect_estimate(2. + a, {{2.81, 0.1, 5.00001e-10, 5.00001e-11}}, "2. + a");
+  alps_test::expect_estimate(2. - a, {{1.19, 0.1, 5.00001e-10, 5.00001e-11}}, "2. - a");
+  alps_test::expect_estimate(2. * a, {{1.62, 0.2, 5.00001e-10, 5.00001e-11}}, "2. * a");
+  alps_test::expect_estimate(2. / a, {{2.469135802, 0.3048315806, 5.00001e-10, 5.00001e-11}}, "2. / a");
 
   mcdata<double> res;
 
   res = pow(a,2.71);
-  std::cout << "\na^(2.71): \t";
-  std::cout << res << std::endl;
 
-  std::cout << "\nsq(a): \t" << sq(a) << "\n";
-  std::cout << "\ncb(a): \t" << cb(a) << "\n";
-  std::cout << "\nsqrt(a): \t" << sqrt(a) << "\n";
-  std::cout << "\ncbrt(a): \t" << cbrt(a) << "\n";
-  std::cout << "\nexp(a): \t" << exp(a) << "\n";
-  std::cout << "\nlog(a): \t" << log(a) << "\n";
+  alps_test::expect_estimate(res, {{0.5649296918, 0.1890073413, 5.00001e-11, 5.00001e-11}}, "res");
 
+  alps_test::expect_estimate(sq(a), {{0.6561, 0.162, 5.00001e-11, 5.00001e-11}}, "sq(a)");
+  alps_test::expect_estimate(cb(a), {{0.531441, 0.19683, 5.00001e-11, 5.00001e-11}}, "cb(a)");
+  alps_test::expect_estimate(sqrt(a), {{0.9, 0.05555555556, 5.00001e-11, 5.00001e-12}}, "sqrt(a)");
+  alps_test::expect_estimate(cbrt(a), {{0.9321697518, 0.03836089514, 5.00001e-11, 5.00001e-12}}, "cbrt(a)");
+  alps_test::expect_estimate(exp(a), {{2.247907987, 0.2247907987, 5.00001e-10, 5.00001e-11}}, "exp(a)");
+  alps_test::expect_estimate(log(a), {{-0.2107210313, 0.1234567901, 5.00001e-11, 5.00001e-11}}, "log(a)");
 
-  // (sin,...atanh) operations
-  std::cout << "\nsin(a): \t" << sin(a) << "\n";
-  std::cout << "\ncos(a): \t" << cos(a) << "\n";
-  std::cout << "\ntan(a): \t" << tan(a) << "\n";
-  // std::cout << "\nasin(a): \t" << asin(a) << "\n";
-  // std::cout << "\nacos(a): \t" << acos(a) << "\n";
-  // std::cout << "\natan(a): \t" << atan(a) << "\n";
-  std::cout << "\nsinh(a): \t" << sinh(a) << "\n";
-  std::cout << "\ncosh(a): \t" << cosh(a) << "\n";
-  std::cout << "\ntanh(a): \t" << tanh(a) << "\n";
-// asinh, aconsh and atanh are not part of C++03 standard
-//  std::cout << "\nasinh(a): \t" << asinh(a) << "\n";
-//  std::cout << "\nacosh(b): \t" << acosh(b) << "\n";
-//  std::cout << "\natanh(a): \t" << atanh(a) << "\n";
+  alps_test::expect_estimate(sin(a), {{0.7242871744, 0.0689498433, 5.00001e-11, 5.00001e-12}}, "sin(a)");
+  alps_test::expect_estimate(cos(a), {{0.689498433, 0.07242871744, 5.00001e-11, 5.00001e-12}}, "cos(a)");
+  alps_test::expect_estimate(tan(a), {{1.050455142, 0.2103456006, 5.00001e-10, 5.00001e-11}}, "tan(a)");
 
+  alps_test::expect_estimate(sinh(a), {{0.9015249602, 0.1346383026, 5.00001e-11, 5.00001e-11}}, "sinh(a)");
+  alps_test::expect_estimate(cosh(a), {{1.346383026, 0.09015249602, 5.00001e-10, 5.00001e-12}}, "cosh(a)");
+  alps_test::expect_estimate(tanh(a), {{0.6695902596, 0.05516488842, 5.00001e-11, 5.00001e-12}}, "tanh(a)");
 
-  // test: mcdata<std::vector<double> >
+}
+
+TEST(AleaMcdata2, VectorNumericalScenarios)
+{
+  using namespace alps::alea;
 
   mcdata<std::vector<double> > vecA(std::vector<double>(10,0.81),std::vector<double>(10,0.1));
-  std::cout << "\nA: \n" << vecA << "\n"; 
+  alps_test::expect_uniform_estimate(vecA, {0.81, 0.1, 5.00001e-11, 5.00001e-11}, "vecA");
 
   mcdata<std::vector<double> > vecB(std::vector<double>(10,1.21),std::vector<double>(10,0.2));
-  std::cout << "\nB: \n" << vecB << "\n";
+  alps_test::expect_uniform_estimate(vecB, {1.21, 0.2, 5.00001e-10, 5.00001e-11}, "vecB");
 
   mcdata<std::vector<double> > vecC(std::vector<double>(10,-4.5),std::vector<double>(10,0.3));
-  std::cout << "\nC: \n" << vecC << "\n";         
+  alps_test::expect_uniform_estimate(vecC, {-4.5, 0.3, 5.00001e-10, 5.00001e-11}, "vecC");
 
   std::vector<double> vec2(10,2.);
-  std::cout << "\nvec(2): \n";
-  std::copy(vec2.begin(),vec2.end(),std::ostream_iterator<double>(std::cout,"\n"));
 
+  alps_test::expect_uniform_estimate(+vecA, {0.81, 0.1, 5.00001e-11, 5.00001e-11}, "+vecA");
+  alps_test::expect_uniform_estimate((-vecA), {-0.81, 0.1, 5.00001e-11, 5.00001e-11}, "(-vecA)");
+  alps_test::expect_uniform_estimate(abs(vecC), {4.5, 0.3, 5.00001e-10, 5.00001e-11}, "abs(vecC)");
 
-  // positivity, negtivity, absolute
-  std::cout << "\n +A: \n" << +vecA << "\n";
-  std::cout << "\n -A: \n" << (-vecA) << "\n";
-  std::cout << "\n abs(C): \n" << abs(vecC) << "\n";
-
-
-  // operation-assign
   mcdata<std::vector<double> > vecE = vecA;
 
   vecA =  vecE;
   vecA += vecB;
-  std::cout << "\nA += B: \n" << vecA << "\n";
+  alps_test::expect_uniform_estimate(vecA, {2.02, 0.2236067977, 5.00001e-10, 5.00001e-11}, "vecA");
 
   vecA = vecE;
   vecA -= vecB;
-  std::cout << "\nA -= B: \n" << vecA << "\n";
+  alps_test::expect_uniform_estimate(vecA, {-0.4, 0.2236067977, 5.00001e-11, 5.00001e-11}, "vecA");
 
   vecA = vecE;
   vecA *= vecB;
-  std::cout << "\nA *= B: \n" << vecA << "\n";
+  alps_test::expect_uniform_estimate(vecA, {0.9801, 0.2022003956, 5.00001e-11, 5.00001e-11}, "vecA");
 
   vecA = vecE;
   vecA /= vecB;
-  std::cout << "\nA /= B: \n" << vecA << "\n";
+  alps_test::expect_uniform_estimate(vecA, {0.6694214876, 0.1381055909, 5.00001e-11, 5.00001e-11}, "vecA");
 
   vecA = vecE;
   vecA += vec2;
-  std::cout << "\nvecA += vec(2.): \n" << vecA << "\n";
+  alps_test::expect_uniform_estimate(vecA, {2.81, 0.1, 5.00001e-10, 5.00001e-11}, "vecA");
 
   vecA = vecE;
   vecA -= vec2;
-  std::cout << "\nvecA -= vec(2.): \n" << vecA << "\n";
+  alps_test::expect_uniform_estimate(vecA, {-1.19, 0.1, 5.00001e-10, 5.00001e-11}, "vecA");
 
   vecA = vecE;
   vecA *= vec2;
-  std::cout << "\nvecA *= vec(2.): \n" << vecA << "\n";
+  alps_test::expect_uniform_estimate(vecA, {1.62, 0.2, 5.00001e-10, 5.00001e-11}, "vecA");
 
   vecA = vecE;
   vecA /= vec2;
-  std::cout << "\nvecA /= vec(2.): \n" << vecA << "\n";
+  alps_test::expect_uniform_estimate(vecA, {0.405, 0.05, 5.00001e-11, 5.00001e-12}, "vecA");
 
   vecA = vecE;
 
-  // operators
-  std::cout << "\nA + B: \n" << vecA + vecB << "\n";
-  std::cout << "\nA - B: \n" << vecA - vecB << "\n";
-  std::cout << "\nA * B: \n" << vecA * vecB << "\n";
-  std::cout << "\nA / B: \n" << vecA / vecB << "\n";
- 
-  std::cout << "\nA + vec(2.): \n" << vecA + vec2 << "\n";
-  std::cout << "\nA - vec(2.): \n" << vecA - vec2 << "\n";
-  std::cout << "\nA * vec(2.): \n" << vecA * vec2 << "\n";
-  std::cout << "\nA / vec(2.): \n" << vecA / vec2 << "\n";
+  alps_test::expect_uniform_estimate(vecA + vecB, {2.02, 0.2236067977, 5.00001e-10, 5.00001e-11}, "vecA + vecB");
+  alps_test::expect_uniform_estimate(vecA - vecB, {-0.4, 0.2236067977, 5.00001e-11, 5.00001e-11}, "vecA - vecB");
+  alps_test::expect_uniform_estimate(vecA * vecB, {0.9801, 0.2022003956, 5.00001e-11, 5.00001e-11}, "vecA * vecB");
+  alps_test::expect_uniform_estimate(vecA / vecB, {0.6694214876, 0.1381055909, 5.00001e-11, 5.00001e-11}, "vecA / vecB");
 
-  std::cout << "\nvec(2.) + A: \n" << vec2 + vecA << "\n";
-  std::cout << "\nvec(2.) - A: \n" << vec2 - vecA << "\n";
-  std::cout << "\nvec(2.) * A: \n" << vec2 * vecA << "\n";
-  std::cout << "\nvec(2.) / A: \n" << vec2 / vecA << "\n";
+  alps_test::expect_uniform_estimate(vecA + vec2, {2.81, 0.1, 5.00001e-10, 5.00001e-11}, "vecA + vec2");
+  alps_test::expect_uniform_estimate(vecA - vec2, {-1.19, 0.1, 5.00001e-10, 5.00001e-11}, "vecA - vec2");
+  alps_test::expect_uniform_estimate(vecA * vec2, {1.62, 0.2, 5.00001e-10, 5.00001e-11}, "vecA * vec2");
+  alps_test::expect_uniform_estimate(vecA / vec2, {0.405, 0.05, 5.00001e-11, 5.00001e-12}, "vecA / vec2");
 
-  std::cout << "\nA + 2.: \n" << vecA + 2. << "\n";
-  std::cout << "\nA - 2.: \n" << vecA - 2. << "\n";
-  std::cout << "\nA * 2.: \n" << vecA * 2. << "\n";
-  std::cout << "\nA / 2.: \n" << vecA / 2. << "\n";
+  alps_test::expect_uniform_estimate(vec2 + vecA, {2.81, 0.1, 5.00001e-10, 5.00001e-11}, "vec2 + vecA");
+  alps_test::expect_uniform_estimate(vec2 - vecA, {1.19, 0.1, 5.00001e-10, 5.00001e-11}, "vec2 - vecA");
+  alps_test::expect_uniform_estimate(vec2 * vecA, {1.62, 0.2, 5.00001e-10, 5.00001e-11}, "vec2 * vecA");
+  alps_test::expect_uniform_estimate(vec2 / vecA, {2.469135802, 0.3048315806, 5.00001e-10, 5.00001e-11}, "vec2 / vecA");
 
-  std::cout << "\n2. + A: \n" << 2. + vecA << "\n";
-  std::cout << "\n2. - A: \n" << 2. - vecA << "\n";
-  std::cout << "\n2. * A: \n" << 2. * vecA << "\n";
-  std::cout << "\n2. / A: \n" << 2. / vecA << "\n";
+  alps_test::expect_uniform_estimate(vecA + 2., {2.81, 0.1, 5.00001e-10, 5.00001e-11}, "vecA + 2.");
+  alps_test::expect_uniform_estimate(vecA - 2., {-1.19, 0.1, 5.00001e-10, 5.00001e-11}, "vecA - 2.");
+  alps_test::expect_uniform_estimate(vecA * 2., {1.62, 0.2, 5.00001e-10, 5.00001e-11}, "vecA * 2.");
+  alps_test::expect_uniform_estimate(vecA / 2., {0.405, 0.05, 5.00001e-11, 5.00001e-12}, "vecA / 2.");
 
-  // (pow, sq, sqrt, cb, cbrt, exp, log) operations
+  alps_test::expect_uniform_estimate(2. + vecA, {2.81, 0.1, 5.00001e-10, 5.00001e-11}, "2. + vecA");
+  alps_test::expect_uniform_estimate(2. - vecA, {1.19, 0.1, 5.00001e-10, 5.00001e-11}, "2. - vecA");
+  alps_test::expect_uniform_estimate(2. * vecA, {1.62, 0.2, 5.00001e-10, 5.00001e-11}, "2. * vecA");
+  alps_test::expect_uniform_estimate(2. / vecA, {2.469135802, 0.3048315806, 5.00001e-10, 5.00001e-11}, "2. / vecA");
 
   mcdata<std::vector<double> > resV;
 
   resV = pow(vecA,2.71);
-  std::cout << "\nA^(2.71): \n";
-  std::cout << resV << std::endl;
 
-  std::cout << "\nsq(A): \t" << sq(vecA) << "\n";
-  std::cout << "\ncb(A): \t" << cb(vecA) << "\n";
-  std::cout << "\nsqrt(A): \t" << sqrt(vecA) << "\n";
-  std::cout << "\ncbrt(A): \t" << cbrt(vecA) << "\n";
-  std::cout << "\nexp(A): \t" << exp(vecA) << "\n";
-  std::cout << "\nlog(A): \t" << log(vecA) << "\n";
+  alps_test::expect_uniform_estimate(resV, {0.5649296918, 0.1890073413, 5.00001e-11, 5.00001e-11}, "resV");
 
+  alps_test::expect_uniform_estimate(sq(vecA), {0.6561, 0.162, 5.00001e-11, 5.00001e-11}, "sq(vecA)");
+  alps_test::expect_uniform_estimate(cb(vecA), {0.531441, 0.19683, 5.00001e-11, 5.00001e-11}, "cb(vecA)");
+  alps_test::expect_uniform_estimate(sqrt(vecA), {0.9, 0.05555555556, 5.00001e-11, 5.00001e-12}, "sqrt(vecA)");
+  alps_test::expect_uniform_estimate(cbrt(vecA), {0.9321697518, 0.03836089514, 5.00001e-11, 5.00001e-12}, "cbrt(vecA)");
+  alps_test::expect_uniform_estimate(exp(vecA), {2.247907987, 0.2247907987, 5.00001e-10, 5.00001e-11}, "exp(vecA)");
+  alps_test::expect_uniform_estimate(log(vecA), {-0.2107210313, 0.1234567901, 5.00001e-11, 5.00001e-11}, "log(vecA)");
 
-  // (sin,...atanh) operations
-  std::cout << "\nsin(A): \t" << sin(vecA) << "\n";
-  std::cout << "\ncos(A): \t" << cos(vecA) << "\n";
-  std::cout << "\ntan(A): \t" << tan(vecA) << "\n";
-  // std::cout << "\nasin(A): \t" << asin(vecA) << "\n";
-  // std::cout << "\nacos(A): \t" << acos(vecA) << "\n";
-  // std::cout << "\natan(A): \t" << atan(vecA) << "\n";
-  std::cout << "\nsinh(A): \t" << sinh(vecA) << "\n";
-  std::cout << "\ncosh(A): \t" << cosh(vecA) << "\n";
-  std::cout << "\ntanh(A): \t" << tanh(vecA) << "\n";
-// asinh, aconsh and atanh are not part of C++03 standard
-//  std::cout << "\nasinh(A): \t" << asinh(vecA) << "\n";
-//  std::cout << "\nacosh(B): \t" << acosh(vecB) << "\n";
-//  std::cout << "\natanh(A): \t" << atanh(vecA) << "\n";
+  alps_test::expect_uniform_estimate(sin(vecA), {0.7242871744, 0.0689498433, 5.00001e-11, 5.00001e-12}, "sin(vecA)");
+  alps_test::expect_uniform_estimate(cos(vecA), {0.689498433, 0.07242871744, 5.00001e-11, 5.00001e-12}, "cos(vecA)");
+  alps_test::expect_uniform_estimate(tan(vecA), {1.050455142, 0.2103456006, 5.00001e-10, 5.00001e-11}, "tan(vecA)");
 
+  alps_test::expect_uniform_estimate(sinh(vecA), {0.9015249602, 0.1346383026, 5.00001e-11, 5.00001e-11}, "sinh(vecA)");
+  alps_test::expect_uniform_estimate(cosh(vecA), {1.346383026, 0.09015249602, 5.00001e-10, 5.00001e-12}, "cosh(vecA)");
+  alps_test::expect_uniform_estimate(tanh(vecA), {0.6695902596, 0.05516488842, 5.00001e-11, 5.00001e-12}, "tanh(vecA)");
 
-  // TODO: do we need that?
-  // testing vector support (non-STL)
- /*
-  vecA.push_back(b);
-  std::cout << "\nvecA.push_back(b)\n";
-  std::cout << "\n(A): \t" << vecA << "\n";
-
-  vecA.pop_back();
-  std::cout << "\nvecA.pop_back() \n";
-  std::cout << "\n(A): \t" << vecA << "\n";
-
-  vecA.clear();
-  std::cout << "\nvecA.clear() \n";
-  std::cout << "\n(A): \t" << vecA << "\n";
-  
-  mcdata<std::vector<double> > vecX;
-  vecX.push_back(a);
-  vecX.push_back(b);
-  vecX.push_back(c);
-  vecX.push_back(a);
-  vecX.push_back(b);
-  vecX.push_back(c);
-  std::cout << "\nvecX: \n" << vecX << "\n";
-
-  vecX.at(4);
-  std::cout << "\nvecX.at(4): \t" << vecX.at(4) << "\n";
-
-  vecX.insert(2,c);
-  std::cout << "\nvecX.insert(2,c): \n:" << vecX << "\n";
-
-  vecX.erase(0);
-  std::cout << "\nvecX.erase(0): \n:" << vecX << "\n";
-
-
-  // testing interface interchange
-  std::vector<mcdata<double> > vec_of_vwe;
-  mcdata<std::vector<double> > vec_with_error;
-
-  vec_with_error = vecX;
-  vec_of_vwe = obtain_vector_of_mcdata_from_vector_with_error<double>(vec_with_error);
-
-  std::cout << "\nSuccessful converting from vec_with_error: \n" << vec_with_error << "to vec_of_vwe: \n";
-  std::copy(vec_of_vwe.begin(),vec_of_vwe.end(),std::ostream_iterator<mcdata<double> >(std::cout,"\n"));
-
-  std::cout << std::endl;
-
-  vec_with_error.clear();
-  vec_with_error = obtain_vector_with_error_from_vector_of_mcdata(vec_of_vwe);
-
-  std::cout << "\nSuccessful converting from vec_of_vwe: \n";
-  std::copy(vec_of_vwe.begin(),vec_of_vwe.end(),std::ostream_iterator<mcdata<double> >(std::cout,"\n"));
-  std::cout << "to vec_with_error:\n" << vec_with_error;
-*/  
-
-  return 0;
 }
-

@@ -12,6 +12,8 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
 #include <alps/scheduler/montecarlo.h>
 #include <alps/alea.h>
 #include <boost/random.hpp>
@@ -64,20 +66,48 @@ public:
             step();
             measure();
         }
-        
-        //save the observables 
+
+        //save the observables
         save(filename_);
-        
-        // Print observables
-        std::cout << abs_magnetization_;
-        std::cout << energy_.name() << ":\t" << energy_.mean()
-            << " +- " << energy_.error() << ";\ttau = " << energy_.tau() 
-            << ";\tconverged: " << alps::convergence_to_text(energy_.converged_errors()) 
-            << std::endl;
-        std::cout << magnetization_.name() << ":\t" << magnetization_.mean()
-            << " +- " << magnetization_.error() << ";\ttau = " << magnetization_.tau() 
-            << ";\tconverged: " << alps::convergence_to_text(magnetization_.converged_errors())
-            << std::endl;
+
+    }
+
+    void verify_archive() const {
+        alps::hdf5::archive archive(filename_, "r");
+        std::size_t lattice = 0, sweeps = 0, thermalization = 0;
+        double beta = -1.;
+        archive["/parameters/L"] >> lattice;
+        archive["/parameters/BETA"] >> beta;
+        archive["/parameters/SWEEPS"] >> sweeps;
+        archive["/parameters/THERMALIZATION"] >> thermalization;
+        EXPECT_EQ(lattice, L_);
+        EXPECT_EQ(beta, beta_);
+        EXPECT_EQ(sweeps, sweeps_);
+        EXPECT_EQ(thermalization, thermalization_);
+        for (const auto* observable : {&energy_, &magnetization_, &abs_magnetization_, &m2_, &m4_}) {
+            SCOPED_TRACE(observable->name());
+            const auto path = "/simulation/results/" + observable->representation();
+            unsigned long long count = 0;
+            double mean = 0., error = 0.;
+            archive[path + "/count"] >> count;
+            archive[path + "/mean/value"] >> mean;
+            archive[path + "/mean/error"] >> error;
+            EXPECT_EQ(count, sweeps_);
+            EXPECT_EQ(mean, observable->mean());
+            EXPECT_EQ(error, observable->error());
+            EXPECT_TRUE(std::isfinite(mean));
+            EXPECT_TRUE(std::isfinite(error));
+            EXPECT_GE(error, 0.);
+        }
+        // Exact physical bounds; no probability of rejecting a valid sample.
+        EXPECT_GE(energy_.mean(), -2.);
+        EXPECT_LE(energy_.mean(), 2.);
+        EXPECT_GE(magnetization_.mean(), -1.);
+        EXPECT_LE(magnetization_.mean(), 1.);
+        EXPECT_GE(abs_magnetization_.mean(), 0.);
+        EXPECT_LE(abs_magnetization_.mean(), 1.);
+        EXPECT_LE(m4_.mean(), m2_.mean());
+        EXPECT_LE(m2_.mean(), abs_magnetization_.mean());
     }
     void step()
     {
@@ -86,12 +116,12 @@ public:
             // Pick random site k=(i,j)
             int i = randint(L_);
             int j = randint(L_);
-            
+
             // Measure local energy e = -s_k * sum_{l nn k} s_l
             int e = spins_[(i-1+L_)%L_][j] + spins_[(i+1)%L_][j] +
             spins_[i][(j-1+L_)%L_] + spins_[i][(j+1)%L_];
             e *= -spins_[i][j];
-            
+
             // Flip s_k with probability exp(2 beta e)
             if(e > 1 || rng_() < exp_table_[e])
                 spins_[i][j] = -spins_[i][j];
@@ -109,7 +139,7 @@ public:
                 M += spins_[i][j];
             }
         }
-        
+
         // Add sample to observables
         energy_ << E/double(L_*L_);
         double m = M/double(L_*L_);
@@ -118,7 +148,7 @@ public:
         m2_ << m*m;
         m4_ << m*m*m*m;
     }
-    
+
     void save(std::string const & filename){
         alps::hdf5::archive ar(filename, "wm");
         ar << alps::make_pvp("/simulation/results/"+energy_.representation(), energy_);
@@ -131,7 +161,7 @@ public:
         ar << alps::make_pvp("/parameters/SWEEPS", sweeps_);
         ar << alps::make_pvp("/parameters/THERMALIZATION", thermalization_);
     }
-    
+
     protected:
     // Random int from the interval [0,max)
     int randint(int max) const
@@ -159,28 +189,19 @@ private:
     alps::RealObservable abs_magnetization_;
     alps::RealObservable m2_;
     alps::RealObservable m4_;
-    
+
     std::string filename_;
 };
 
 
-int main(int,char**)
-{
-    size_t L = 16;    // Linear lattice size
-    size_t N = 5000;    // # of simulation steps
-
-    std::cout << "# L: " << L << " N: " << N << std::endl;
-
-    // Scan beta range [0,1] in steps of 0.1
-    for(double beta = 0.; beta <= 1.; beta += .1)
-    {
-        std::cout << "----------" << std::endl;
-        std::cout << "beta = " << beta << std::endl;
-        std::stringstream output_name;
-        output_name << "ising.L_" << L << "beta_" << beta <<".h5";
-        Simulation sim(beta,L, output_name.str());
-        sim.run(N/2,N);
-    }
-
-    return 0;
+class Hdf5Ising : public ::testing::TestWithParam<int> {};
+TEST_P(Hdf5Ising, SimulationArchivePreservesObservablesAndParameters) {
+    alps::testing::TemporaryDirectory temporary;
+    constexpr std::size_t lattice = 16;
+    constexpr std::size_t sweeps = 5000;
+    const double beta = GetParam() / 10.;
+    Simulation simulation(beta, lattice, (temporary.path() / "ising.h5").string());
+    simulation.run(sweeps / 2, sweeps);
+    simulation.verify_archive();
 }
+INSTANTIATE_TEST_SUITE_P(InverseTemperatures, Hdf5Ising, ::testing::Range(0, 11));

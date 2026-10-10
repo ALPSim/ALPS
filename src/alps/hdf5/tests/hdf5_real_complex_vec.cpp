@@ -11,6 +11,9 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
+
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/vector.hpp>
 #include <alps/hdf5/complex.hpp>
@@ -29,44 +32,11 @@ std::ostream& operator<<(std::ostream& os, std::vector<T> const& v)
 	return os;
 }
 
-int main() {
-
-    if (boost::filesystem::exists("real_complex_vec.h5") && boost::filesystem::is_regular_file("real_complex_vec.h5"))
-        boost::filesystem::remove("real_complex_vec.h5");
-
-    try {
-        const int size = 6;
-
-        std::vector<double> v(size, 3.2);
-
-        std::cout << "v: " << v << std::endl;
-
-        {
-            alps::hdf5::archive ar("real_complex_vec.h5", "w");
-            ar["/vec"] << v;
-        }
-
-        std::vector<std::complex<double> > w;
-        {
-            alps::hdf5::archive ar("real_complex_vec.h5", "r");
-            ar["/vec"] >> w;
-        }
-
-        std::cout << "w: " << w << std::endl;
-        
-        boost::filesystem::remove("real_complex_vec.h5");
-        
-		bool passed = true;
-		for (int i=0; passed && i<size; ++i)
-			passed = (v[i] == w[i]);
-
-        std::cout << "Test status checked element by element." << std::endl;
-        return (passed) ? EXIT_SUCCESS : EXIT_FAILURE;
-
-    } catch (alps::hdf5::archive_error) {
-        boost::filesystem::remove("real_complex_vec.h5");
-        std::cout << "Test passed because Exception was thrown." << std::endl;
-        return EXIT_SUCCESS;
-    }
-
+TEST(Hdf5, RealComplexVecRejectsMissingComplexMetadata) {
+    alps::testing::TemporaryDirectory temporary;
+    std::vector<double> source(6, 3.2);
+    { alps::hdf5::archive archive((temporary.path() / "real_complex.h5").string(), "w"); archive["/vec"] << source; }
+    alps::hdf5::archive archive((temporary.path() / "real_complex.h5").string(), "r");
+    std::vector<std::complex<double>> destination;
+    EXPECT_THROW(archive["/vec"] >> destination, alps::hdf5::archive_error);
 }

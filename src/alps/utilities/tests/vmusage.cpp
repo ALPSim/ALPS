@@ -17,12 +17,17 @@
 #include <boost/foreach.hpp>
 #include <iostream>
 
-int main(int argc, char** argv) {
-  int pid = (argc == 1) ? -1 : boost::lexical_cast<int>(argv[1]);
-  BOOST_FOREACH(alps::vmusage_type::value_type v, alps::vmusage(pid)) {
-    std::cerr << v.first << " = " << v.second << "\n";
-  }
-  return 0;
-}
+#include <gtest/gtest.h>
 
-  
+TEST(VirtualMemory, QueryReportsNamedMetrics) {
+  const auto metrics = alps::vmusage();
+  // Platforms without /proc still expose the same keys with zero memory data.
+  ASSERT_EQ(metrics.size(), 5u);
+  for (const auto* name : {"Pid", "VmPeak", "VmSize", "VmHWM", "VmRSS"})
+    ASSERT_EQ(metrics.count(name), 1u) << name;
+  EXPECT_GE(metrics.at("VmPeak"), metrics.at("VmSize"));
+  EXPECT_GE(metrics.at("VmHWM"), metrics.at("VmRSS"));
+  const auto invalid = alps::vmusage(-2);
+  ASSERT_EQ(invalid.size(), metrics.size());
+  for (const auto& metric : invalid) EXPECT_EQ(metric.second, 0ul) << metric.first;
+}

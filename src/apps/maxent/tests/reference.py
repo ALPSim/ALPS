@@ -70,9 +70,8 @@ def prepare(defaults, case, directory):
                 diagonal[-1] = 0
             archive["/Covariance"] = np.diag(diagonal).ravel()
             parameters["COVARIANCE_MATRIX"] = "HDF5"
-        # Native params store integers as C++ int, not h5py's default int64.
         for name, value in parameters.items():
-            archive["/parameters/" + name] = np.int32(value) if isinstance(value, int) else value
+            archive["/parameters/" + name] = value
     return parameters, points, values, errors
 
 

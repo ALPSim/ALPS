@@ -14,35 +14,19 @@
 // test for merging two empty histogram observables
 
 #include <alps/alea.h>
+#include <gtest/gtest.h>
 
-int main() {
-#ifndef BOOST_NO_EXCEPTIONS
-try {
-#endif
-
-  alps::oxstream oxs;
-
-  alps::ObservableSet obs1;
-  obs1 << alps::HistogramObservable<alps::int32_t>("histogram 1", 0, 10);
-  obs1.write_xml(oxs);
-
-  alps::ObservableSet obs2;
-  obs2 << alps::HistogramObservable<alps::int32_t>("histogram 1", 0, 10);
-  obs2.write_xml(oxs);
-
-  obs1 << obs2;
-  obs1.write_xml(oxs);
-
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& exc) {
-  std::cerr << exc.what() << "\n";
-  return -1;
-}
-catch (...) {
-  std::cerr << "Fatal Error: Unknown Exception!\n";
-  return -2;
-}
-#endif
-  return 0;
+TEST(Histogram, MergingEmptyObservablesPreservesRangeAndZeroCounts)
+{
+    alps::ObservableSet first, second;
+    first << alps::IntHistogramObservable("histogram", 0, 10);
+    second << alps::IntHistogramObservable("histogram", 0, 10);
+    first << second;
+    const alps::IntHistogramObsevaluator result(first["histogram"]);
+    EXPECT_EQ(result.count(), 0u);
+    ASSERT_EQ(result.size(), 10u);
+    EXPECT_EQ(result.min(), 0);
+    EXPECT_EQ(result.max(), 10);
+    EXPECT_EQ(result.stepsize(), 1);
+    for (std::size_t i = 0; i < result.size(); ++i) EXPECT_EQ(result[i], 0u);
 }

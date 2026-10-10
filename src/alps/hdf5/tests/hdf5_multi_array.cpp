@@ -11,6 +11,9 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
+
 #include <alps/hdf5/archive.hpp>
 #include <iostream>
 #include <alps/hdf5/vector.hpp>
@@ -24,17 +27,20 @@
 using namespace std;
 using boost::multi_array;
 
-int main()
+TEST(Hdf5, MultiArray)
 {
-    if (boost::filesystem::exists(boost::filesystem::path("test_hdf5_multi_array.h5")))
-        boost::filesystem::remove(boost::filesystem::path("test_hdf5_multi_array.h5"));
+    alps::testing::TemporaryDirectory temporary;
+    if (boost::filesystem::exists(boost::filesystem::path((temporary.path() / "test_hdf5_multi_array.h5").string())))
+        boost::filesystem::remove(boost::filesystem::path((temporary.path() / "test_hdf5_multi_array.h5").string()));
 
     multi_array<double,2> a( boost::extents[3][3] );
     multi_array<double,2> b( boost::extents[4][4] );
 
+    std::fill(a.data(), a.data() + a.num_elements(), 1.25);
+    std::fill(b.data(), b.data() + b.num_elements(), -2.5);
     // Write
     {
-        alps::hdf5::archive ar("test_hdf5_multi_array.h5","a");
+        alps::hdf5::archive ar((temporary.path() / "test_hdf5_multi_array.h5").string(),"a");
         vector< multi_array<double,2> > v(2,a);
         ar << alps::make_pvp("uniform",v);
         v.push_back(b);
@@ -43,15 +49,20 @@ int main()
 
     // Read
     {
-        alps::hdf5::archive ar("test_hdf5_multi_array.h5","r");
+        alps::hdf5::archive ar((temporary.path() / "test_hdf5_multi_array.h5").string(),"r");
         vector< multi_array<double,2> > w;
         ar >> alps::make_pvp("nonuniform",w);
-        cout << "read nonuniform" << endl;
-        ar >> alps::make_pvp("uniform",w); // throws runtime_error
-        cout << "read uniform" << endl;
+        ASSERT_EQ(w.size(), 3u);
+        EXPECT_EQ(w[0], a);
+        EXPECT_EQ(w[1], a);
+        EXPECT_EQ(w[2], b);
+        ar >> alps::make_pvp("uniform",w);
+        ASSERT_EQ(w.size(), 2u);
+        EXPECT_EQ(w[0], a);
+        EXPECT_EQ(w[1], a);
     }
-    
-    if (boost::filesystem::exists(boost::filesystem::path("test_hdf5_multi_array.h5")))
-        boost::filesystem::remove(boost::filesystem::path("test_hdf5_multi_array.h5"));
-    return 0;
+
+    if (boost::filesystem::exists(boost::filesystem::path((temporary.path() / "test_hdf5_multi_array.h5").string())))
+        boost::filesystem::remove(boost::filesystem::path((temporary.path() / "test_hdf5_multi_array.h5").string()));
+
 }

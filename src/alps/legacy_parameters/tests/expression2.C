@@ -15,40 +15,26 @@
 /* $Id$ */
 
 #include <alps/expression.h>
+#include <gtest/gtest.h>
+#include <sstream>
 
-#include <boost/throw_exception.hpp>
-#include <iostream>
-#include <stdexcept>
-
-void print_simplified(const std::string& e)
-{
-    alps::Expression x(e);
-    x.simplify();
-    std::cout << x << "\n";
-}
-
-int main()
-{
-#ifndef BOOST_NO_EXCEPTIONS
-  try {
-#endif
-
-    print_simplified("3*(a*b)*2+5*(x*y)^2*x*3");
-    print_simplified("3*a*b+5*a-3*a*b+2.5*a");
-    print_simplified("3*a*b+5*a+3*a*b+2.5*a");
-
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& e)
-{
-  std::cerr << "Caught exception: " << e.what() << "\n";
-  exit(-1);
-}
-catch (...)
-{
-  std::cerr << "Caught unknown exception\n";
-  exit(-2);
-}
-#endif
-  return 0;
+TEST(ExpressionSimplification, CombinesLikeTermsAndPreservesValues) {
+  const char *input[] = {"3*(a*b)*2+5*(x*y)^2*x*3", "3*a*b+5*a-3*a*b+2.5*a",
+                         "3*a*b+5*a+3*a*b+2.5*a"};
+  const char *canonical[] = {"15 * (x * y)^2 * x + 6 * a * b", "7.5 * a", "7.5 * a + 6 * a * b"};
+  alps::Parameters params;
+  params["a"] = 2;
+  params["b"] = 3;
+  params["x"] = 4;
+  params["y"] = 5;
+  for (int i = 0; i < 3; ++i) {
+    SCOPED_TRACE(input[i]);
+    alps::Expression expression(input[i]);
+    const auto before = alps::evaluate<double>(expression, alps::ParameterEvaluator(params));
+    expression.simplify();
+    EXPECT_DOUBLE_EQ(alps::evaluate<double>(expression, alps::ParameterEvaluator(params)), before);
+    std::ostringstream rendered;
+    rendered << expression;
+    EXPECT_EQ(rendered.str(), canonical[i]);
+  }
 }

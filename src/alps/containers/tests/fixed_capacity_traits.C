@@ -15,82 +15,37 @@
 
 #include <alps/fixed_capacity_traits.h>
 #include <alps/fixed_capacity_vector.h>
-
-#include <iostream>
+#include <alps/fixed_capacity_deque.h>
+#include <gtest/gtest.h>
 #include <list>
 #include <queue>
 #include <stack>
 #include <vector>
 
-template<class T>
-class capacity_checker
+template<class T> class DynamicCapacityTraits : public ::testing::Test {};
+using DynamicTypes = ::testing::Types<std::vector<int>, std::list<int>,
+    std::stack<int>, std::queue<int>, std::priority_queue<int>, double>;
+TYPED_TEST_SUITE(DynamicCapacityTraits, DynamicTypes);
+TYPED_TEST(DynamicCapacityTraits, CapacityIsNotFixed)
 {
-public:
-  capacity_checker() {
-    output<T, alps::fixed_capacity_traits<T>::capacity_is_fixed>();
-  }
+    EXPECT_FALSE(alps::fixed_capacity_traits<TypeParam>::capacity_is_fixed);
+}
 
-private:
-  template<class U, bool B> struct output;
-  template<class U> struct output<U, true> {
-    output() {
-      std::cout << "capacity is fixed (static_max_size = "
-                << alps::fixed_capacity_traits<U>::static_max_size << ")\n";
-    }
-  };
-  template<class U> struct output<U, false> {
-    output() { std::cout << "capacity is not fixed\n"; }
-  };
-
-}; // capacity_checker
-
-
-int main()
+template<class Container, std::size_t Capacity> struct FixedCase {
+    using container_type = Container;
+    static constexpr std::size_t capacity = Capacity;
+};
+using FixedTypes = ::testing::Types<
+    FixedCase<alps::fixed_capacity_vector<int, 8>, 8>,
+    FixedCase<alps::fixed_capacity_deque<int, 8>, 8>,
+    FixedCase<std::stack<int, alps::fixed_capacity_vector<int, 4>>, 4>,
+    FixedCase<std::queue<int, alps::fixed_capacity_deque<int, 6>>, 6>,
+    FixedCase<std::priority_queue<int, alps::fixed_capacity_vector<int, 16>>, 16>>;
+template<class T> class FixedCapacityTraits : public ::testing::Test {};
+TYPED_TEST_SUITE(FixedCapacityTraits, FixedTypes);
+TYPED_TEST(FixedCapacityTraits, ExposesFixedMaximum)
 {
-  std::cout << "T = std::vector<int>\n";
-  capacity_checker<std::vector<int> >();
-  std::cout << std::endl;
-
-  std::cout << "T = std::list<int>\n";
-  capacity_checker<std::list<int> >();
-  std::cout << std::endl;
-
-  std::cout << "T = alps::fixed_capacity_vector<int,8>\n";
-  capacity_checker<alps::fixed_capacity_vector<int,8> >();
-  std::cout << std::endl;
-
-  std::cout << "T = alps::fixed_capacity_deque<int,8>\n";
-  capacity_checker<alps::fixed_capacity_deque<int,8> >();
-  std::cout << std::endl;
-
-  std::cout << "T = std::stack<int, alps::fixed_capacity_vector<int,4> >\n";
-  capacity_checker<std::stack<int, alps::fixed_capacity_vector<int,4> > >();
-  std::cout << std::endl;
-
-  std::cout << "T = std::stack<int>\n";
-  capacity_checker<std::stack<int> >();
-  std::cout << std::endl;
-
-  std::cout << "T = std::queue<int, alps::fixed_capacity_deque<int,6> >\n";
-  capacity_checker<std::queue<int, alps::fixed_capacity_deque<int,6> > >();
-  std::cout << std::endl;
-
-  std::cout << "T = std::queue<int>\n";
-  capacity_checker<std::queue<int> >();
-  std::cout << std::endl;
-
-  std::cout 
-    << "T = std::priority_queue<int, alps::fixed_capacity_vector<int,16> >\n";
-  capacity_checker<std::priority_queue<int, 
-    alps::fixed_capacity_vector<int,16> > >();
-  std::cout << std::endl;
-
-  std::cout << "T = std::priority_queue<int>\n";
-  capacity_checker<std::priority_queue<int> >();
-  std::cout << std::endl;
-
-  std::cout << "T = double\n";
-  capacity_checker<double>();
-
-  return 0;
+    using Traits = alps::fixed_capacity_traits<typename TypeParam::container_type>;
+    EXPECT_TRUE(Traits::capacity_is_fixed);
+    EXPECT_EQ(Traits::static_max_size, TypeParam::capacity);
 }

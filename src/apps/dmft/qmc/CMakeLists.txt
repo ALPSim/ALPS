@@ -100,28 +100,23 @@ if(ALPS_BUILD_TESTING)
   # Regression tests for the shared DMFT QMC infrastructure.
   add_executable(dmft_fouriertransform_offdiag_numeric dmft_fouriertransform_offdiag_numeric.C)
   target_link_libraries(dmft_fouriertransform_offdiag_numeric PRIVATE dmft_qmc_impl)
-  alps_add_test(dmft_fouriertransform_offdiag_numeric)
-  set_property(TEST dmft_fouriertransform_offdiag_numeric PROPERTY LABELS dmft)
+  alps_add_gtest(dmft_fouriertransform_offdiag_numeric COMPONENT dmft LABELS regression)
 
   add_executable(dmft_hilberttransformer_itime_throw dmft_hilberttransformer_itime_throw.C)
   target_link_libraries(dmft_hilberttransformer_itime_throw PRIVATE dmft_qmc_impl)
-  alps_add_test(dmft_hilberttransformer_itime_throw)
-  set_property(TEST dmft_hilberttransformer_itime_throw PROPERTY LABELS dmft)
+  alps_add_gtest(dmft_hilberttransformer_itime_throw COMPONENT dmft LABELS regression)
 
   add_executable(dmft_externalsolver_outfile_param dmft_externalsolver_outfile_param.C)
   target_link_libraries(dmft_externalsolver_outfile_param PRIVATE dmft_qmc_impl)
-  alps_add_test(dmft_externalsolver_outfile_param)
-  set_property(TEST dmft_externalsolver_outfile_param PROPERTY LABELS dmft)
+  alps_add_gtest(dmft_externalsolver_outfile_param COMPONENT dmft LABELS regression)
 
   add_executable(dmft_hilberttransformer_afm_multiband_numeric
                  dmft_hilberttransformer_afm_multiband_numeric.C)
   target_link_libraries(dmft_hilberttransformer_afm_multiband_numeric PRIVATE dmft_qmc_impl)
-  alps_add_test(dmft_hilberttransformer_afm_multiband_numeric)
-  set_property(TEST dmft_hilberttransformer_afm_multiband_numeric PROPERTY LABELS dmft)
+  alps_add_gtest(dmft_hilberttransformer_afm_multiband_numeric COMPONENT dmft LABELS regression)
 
   add_executable(dmft_interaction_expansion_choice dmft_interaction_expansion_choice.C)
-  alps_add_test(dmft_interaction_expansion_choice)
-  set_property(TEST dmft_interaction_expansion_choice PROPERTY LABELS dmft)
+  alps_add_gtest(dmft_interaction_expansion_choice COMPONENT dmft LABELS regression)
 endif()
 
 alps_install_applications(dmft hirschfye hybridization interaction)

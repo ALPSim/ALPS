@@ -11,6 +11,8 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <gtest/gtest.h>
+#include "graph_assertions.hpp"
 #include <alps/graph/canonical_properties.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <iostream>
@@ -22,16 +24,9 @@ typedef boost::graph_traits<graph_type>::edge_iterator edge_iterator;
 typedef boost::property_map<graph_type,alps::edge_type_t>::type edge_color_map_type;
 
 
-template <typename Map>
-void print_colormap(Map const& m)
-{
-    for(typename Map::const_iterator it(m.begin()), end(m.end()); it != end; ++it)
-        std::cout << it->first << "->" << it->second << " ";
-    std::cout << std::endl;
-}
 
-bool colored_edges_with_color_symmetry_test1() {
-    std::cout << "colored_edges_with_color_symmetry_test1()" << std::endl;
+
+TEST(GraphColorSymmetry, colored_edges_with_color_symmetry_test1) {
     typedef alps::graph::graph_label<graph_type>::type label_type;
     using alps::graph::canonical_properties;
 
@@ -89,35 +84,34 @@ bool colored_edges_with_color_symmetry_test1() {
     label_type li_with_sym(get<1>(canonical_properties(i,color_symmetry)));
     label_type lj_with_sym(get<1>(canonical_properties(j,color_symmetry)));
 
-    std::cout << lg << std::endl;
-    std::cout << lh << std::endl;
-    std::cout << li << std::endl;
-    std::cout << lj << std::endl;
-    std::cout << lg_with_sym << std::endl;
-    std::cout << lh_with_sym << std::endl;
-    std::cout << li_with_sym << std::endl;
-    std::cout << lj_with_sym << std::endl;
+    expect_label_encoding(lg, "(0100101000 101010 (0 1))");
+    expect_label_encoding(lh, "(0100101000 001110 (0 1))");
+    expect_label_encoding(li, "(0100101000 100011 (0 1))");
+    expect_label_encoding(lj, "(0100101000 011100 (0 1))");
+    expect_label_encoding(lg_with_sym, "(0100101000 010101 (0 1))");
+    expect_label_encoding(lh_with_sym, "(0100101000 010101 (0 1))");
+    expect_label_encoding(li_with_sym, "(0100101000 100011 (0 1))");
+    expect_label_encoding(lj_with_sym, "(0100101000 100011 (0 1))");
 
     // False statements
-    std::cout << std::boolalpha
-        << (lg == lh) << (lg == li) << (lg == lj)
-        << (lh == li) << (lh == lj)
-        << (li == lj) << std::endl;
+    EXPECT_FALSE((lg == lh));
+    EXPECT_FALSE((lg == li));
+    EXPECT_FALSE((lg == lj));
+    EXPECT_FALSE((lh == li));
+    EXPECT_FALSE((lh == lj));
+    EXPECT_FALSE((li == lj));
 
     // True statements
-    std::cout << std::boolalpha
-        << (lg_with_sym == lh_with_sym)
-        << (li_with_sym == lj_with_sym) << std::endl;
+    EXPECT_TRUE((lg_with_sym == lh_with_sym));
+    EXPECT_TRUE((li_with_sym == lj_with_sym));
 
     // False statements
-    std::cout << std::boolalpha
-        << (lg_with_sym == li_with_sym) << std::endl;
+    EXPECT_FALSE((lg_with_sym == li_with_sym));
 
-    return true;
+
 }
 
-bool colored_edges_with_color_symmetry_test2() {
-    std::cout << "colored_edges_with_color_symmetry_test2()" << std::endl;
+TEST(GraphColorSymmetry, colored_edges_with_color_symmetry_test2) {
     typedef alps::graph::graph_label<graph_type>::type label_type;
     using alps::graph::canonical_properties;
 
@@ -125,7 +119,7 @@ bool colored_edges_with_color_symmetry_test2() {
     //       4              c0 ---
     //       +              c1 +++
     //   1---0+++2          c2 ===
-    //   \\ / 
+    //   \\ /
     //     3
     graph_type g(5);
     {
@@ -147,7 +141,7 @@ bool colored_edges_with_color_symmetry_test2() {
     //       4              c0 ---
     //       +              c1 +++
     //   1===0+++2          c2 ===
-    //    \ // 
+    //    \ //
     //     3
     graph_type h(g);
     {
@@ -162,7 +156,7 @@ bool colored_edges_with_color_symmetry_test2() {
     //       4              c0 ---
     //       ||             c1 +++
     //   1---0===2          c2 ===
-    //    + / 
+    //    + /
     //     3
     graph_type i(g);
     {
@@ -188,31 +182,28 @@ bool colored_edges_with_color_symmetry_test2() {
     label_type lh_with_sym(get<1>(canonical_properties(h,color_symmetry)));
     label_type li_with_sym(get<1>(canonical_properties(i,color_symmetry)));
 
-    std::cout << lg << std::endl;
-    std::cout << lh << std::endl;
-    std::cout << li << std::endl;
-    std::cout << lg_with_sym << std::endl;
-    std::cout << lh_with_sym << std::endl;
-    std::cout << li_with_sym << std::endl;
+    expect_label_encoding(lg, "(010110100010000 001000001111000 (0 1 2))");
+    expect_label_encoding(lh, "(010110100010000 110000001100100 (0 1 2))");
+    expect_label_encoding(li, "(010110100010000 000110010011000 (0 1 2))");
+    expect_label_encoding(lg_with_sym, "(010110100010000 110000001100100 (0 1 2))");
+    expect_label_encoding(lh_with_sym, "(010110100010000 110000001100100 (0 1 2))");
+    expect_label_encoding(li_with_sym, "(010110100010000 110000010000011 (0 1 2))");
 
     // False statements
-    std::cout << std::boolalpha
-        << (lg == lh) << (lg == li)
-        << (lh == li) << std::endl;
+    EXPECT_FALSE((lg == lh));
+    EXPECT_FALSE((lg == li));
+    EXPECT_FALSE((lh == li));
 
     // True statements
-    std::cout << std::boolalpha
-        << (lg_with_sym == lh_with_sym) << std::endl;
+    EXPECT_TRUE((lg_with_sym == lh_with_sym));
 
     // False statements
-    std::cout << std::boolalpha
-        << (lg_with_sym == li_with_sym) << std::endl;
+    EXPECT_FALSE((lg_with_sym == li_with_sym));
 
-    return true;
+
 }
 
-bool colored_edges_with_color_symmetry_test3() {
-    std::cout << "colored_edges_with_color_symmetry_test3()" << std::endl;
+TEST(GraphColorSymmetry, colored_edges_with_color_symmetry_test3) {
     typedef alps::graph::graph_label<graph_type>::type label_type;
     using alps::graph::canonical_properties;
 
@@ -248,23 +239,20 @@ bool colored_edges_with_color_symmetry_test3() {
     label_type lg_with_sym(get<1>(canonical_properties(g,color_symmetry)));
     label_type lh_with_sym(get<1>(canonical_properties(h,color_symmetry)));
 
-    std::cout << lg << std::endl;
-    std::cout << lh << std::endl;
-    std::cout << lg_with_sym << std::endl;
-    std::cout << lh_with_sym << std::endl;
+    expect_label_encoding(lg, "(0100101000 111 (0))");
+    expect_label_encoding(lh, "(0100101000 111 (1))");
+    expect_label_encoding(lg_with_sym, "(0100101000 000111 (0 1))");
+    expect_label_encoding(lh_with_sym, "(0100101000 000111 (0 1))");
 
     // False statements
-    std::cout << std::boolalpha
-        << (lg == lh) << std::endl;
+    EXPECT_FALSE((lg == lh));
 
     // True statements
-    std::cout << std::boolalpha
-        << (lg_with_sym == lh_with_sym) << std::endl;
-    return true;
+    EXPECT_TRUE((lg_with_sym == lh_with_sym));
+
 }
 
-void colored_edges_with_color_symmetry_test4() {
-    std::cout << "colored_edges_with_color_symmetry_test4()" << std::endl;
+TEST(GraphColorSymmetry, colored_edges_with_color_symmetry_test4) {
     typedef alps::graph::graph_label<graph_type>::type label_type;
     using alps::graph::canonical_properties;
 
@@ -272,7 +260,7 @@ void colored_edges_with_color_symmetry_test4() {
     //   2++++4     c0 +++
     //  /    /      c1 ---
     // 0++++1       c2 ...
-    //  . 
+    //  .
     //   3
     graph_type g(4);
     {
@@ -331,29 +319,26 @@ void colored_edges_with_color_symmetry_test4() {
     label_type lh_with_sym(get<1>(canonical_properties(h,color_symmetry)));
     label_type li_with_sym(get<1>(canonical_properties(i,color_symmetry)));
 
-    std::cout << lg << std::endl;
-    std::cout << lh << std::endl;
-    std::cout << li << std::endl;
-    std::cout << lg_with_sym << std::endl;
-    std::cout << lh_with_sym << std::endl;
-    std::cout << li_with_sym << std::endl;
+    expect_label_encoding(lg, "(000110110010000 000010110010010 (0 1 2))");
+    expect_label_encoding(lh, "(000110110010000 0110010011 (0 1))");
+    expect_label_encoding(li, "(000110110010000 0110110010 (0 1))");
+    expect_label_encoding(lg_with_sym, "(000110110010000 011001001000001 (0 1 2))");
+    expect_label_encoding(lh_with_sym, "(000110110010000 000000110010011 (0 1 2))");
+    expect_label_encoding(li_with_sym, "(000110110010000 000000110010011 (0 1 2))");
 
     // False statements
-    std::cout << std::boolalpha
-        << (lg == lh) << (lg == li)
-        << (lh == li) << std::endl;
+    EXPECT_FALSE((lg == lh));
+    EXPECT_FALSE((lg == li));
+    EXPECT_FALSE((lh == li));
 
     // True statements
-    std::cout << std::boolalpha
-        << (lh_with_sym == li_with_sym) << std::endl;
+    EXPECT_TRUE((lh_with_sym == li_with_sym));
 
     // False statements
-    std::cout << std::boolalpha
-        << (lg_with_sym == lh_with_sym) << std::endl;
+    EXPECT_FALSE((lg_with_sym == lh_with_sym));
 }
 
-void colored_edges_with_color_symmetry_test5() {
-    std::cout << "colored_edges_with_color_symmetry_test5()" << std::endl;
+TEST(GraphColorSymmetry, colored_edges_with_color_symmetry_test5) {
     typedef alps::graph::graph_label<graph_type>::type label_type;
     typedef boost::container::flat_map<alps::type_type, alps::type_type> color_map_type;
     using alps::graph::canonical_properties;
@@ -406,24 +391,21 @@ void colored_edges_with_color_symmetry_test5() {
     label_type lg_with_sym(get<1>(canonical_properties(g, color_symmetry, &lg_colormap)));
     label_type lh_with_sym(get<1>(canonical_properties(h, color_symmetry, &lh_colormap)));
 
-    std::cout << lg << std::endl;
-    std::cout << lh << std::endl;
-    std::cout << lg_with_sym << std::endl;
-    print_colormap(lg_colormap);
-    std::cout << lh_with_sym << std::endl;
-    print_colormap(lh_colormap);
+    expect_label_encoding(lg, "(0101001000 001110 (0 1))");
+    expect_label_encoding(lh, "(0101001000 011100 (0 1))");
+    expect_label_encoding(lg_with_sym, "(0101001000 010101 (0 1))");
+    expect_color_mapping(lg_colormap, {{0, 0}, {1, 1}});
+    expect_label_encoding(lh_with_sym, "(0101001000 010101 (0 1))");
+    expect_color_mapping(lh_colormap, {{0, 1}, {1, 0}});
 
     // False statements
-    std::cout << std::boolalpha
-        << (lg == lh) << std::endl;
+    EXPECT_FALSE((lg == lh));
 
     // True statements
-    std::cout << std::boolalpha
-        << (lg_with_sym == lh_with_sym) << std::endl;
+    EXPECT_TRUE((lg_with_sym == lh_with_sym));
 }
 
-void colored_edges_with_color_symmetry_test6() {
-    std::cout << "colored_edges_with_color_symmetry_test6()" << std::endl;
+TEST(GraphColorSymmetry, colored_edges_with_color_symmetry_test6) {
     typedef alps::graph::graph_label<graph_type>::type label_type;
     typedef boost::container::flat_map<alps::type_type, alps::type_type> color_map_type;
     using alps::graph::canonical_properties;
@@ -446,7 +428,7 @@ void colored_edges_with_color_symmetry_test6() {
     // color   grp0
     // colors (0,1,2)
     alps::graph::color_partition<graph_type>::type color_symmetry;
-    color_symmetry[0] = 0; 
+    color_symmetry[0] = 0;
     color_symmetry[1] = 0;
     color_symmetry[2] = 0;
 
@@ -455,13 +437,12 @@ void colored_edges_with_color_symmetry_test6() {
     color_map_type lg_colormap;
     label_type lg_with_sym(get<1>(canonical_properties(g, color_symmetry, &lg_colormap)));
 
-    std::cout << lg << std::endl;
-    std::cout << lg_with_sym << std::endl;
-    print_colormap(lg_colormap);
+    expect_label_encoding(lg, "(010100 0110 (0 2))");
+    expect_label_encoding(lg_with_sym, "(010100 001001 (0 1 2))");
+    expect_color_mapping(lg_colormap, {{0, 0}, {1, 2}, {2, 1}});
 }
 
-void colored_edges_with_color_symmetry_test7() {
-    std::cout << "colored_edges_with_color_symmetry_test7()" << std::endl;
+TEST(GraphColorSymmetry, colored_edges_with_color_symmetry_test7) {
     typedef alps::graph::graph_label<graph_type>::type label_type;
     typedef boost::container::flat_map<alps::type_type, alps::type_type> color_map_type;
     using alps::graph::canonical_properties;
@@ -495,7 +476,7 @@ void colored_edges_with_color_symmetry_test7() {
     }
 
     alps::graph::color_partition<graph_type>::type color_symmetry;
-    color_symmetry[0] = 0; 
+    color_symmetry[0] = 0;
     color_symmetry[1] = 0;
 
     color_map_type lg_colormap;
@@ -506,24 +487,12 @@ void colored_edges_with_color_symmetry_test7() {
     label_type lh(get<1>(canonical_properties(h)));
     label_type lh_with_sym(get<1>(canonical_properties(h, color_symmetry, &lh_colormap)));
     // True statements
-    std::cout << std::boolalpha
-        << (lg == lh)
-        << (lg_with_sym == lh_with_sym) << std::endl;
-    std::cout << lg << std::endl;
-    std::cout << lg_with_sym << std::endl;
-    print_colormap(lg_colormap);
-    std::cout << lh << std::endl;
-    std::cout << lh_with_sym << std::endl;
-    print_colormap(lh_colormap);
-}
-
-int main() {
-    colored_edges_with_color_symmetry_test1();
-    colored_edges_with_color_symmetry_test2();
-    colored_edges_with_color_symmetry_test3();
-    colored_edges_with_color_symmetry_test4();
-    colored_edges_with_color_symmetry_test5();
-    colored_edges_with_color_symmetry_test6();
-    colored_edges_with_color_symmetry_test7();
-    return 0;
+    EXPECT_TRUE((lg == lh));
+    EXPECT_TRUE((lg_with_sym == lh_with_sym));
+    expect_label_encoding(lg, "(000110111001000010000100000010000000 011010101100101010 (0 1))");
+    expect_label_encoding(lg_with_sym, "(000110111001000010000100000010000000 011000110100111001 (0 1))");
+    expect_color_mapping(lg_colormap, {{0, 1}, {1, 0}});
+    expect_label_encoding(lh, "(000110111001000010000100000010000000 011010101100101010 (0 1))");
+    expect_label_encoding(lh_with_sym, "(000110111001000010000100000010000000 011000110100111001 (0 1))");
+    expect_color_mapping(lh_colormap, {{0, 1}, {1, 0}});
 }

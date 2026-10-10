@@ -14,16 +14,7 @@
 #ifndef MATRIX_UNIT_TESTS_HPP
 #define MATRIX_UNIT_TESTS_HPP
 
-#define BOOST_TEST_SOURCE
-#define BOOST_TEST_MODULE alps::numeric::matrix
-
-#ifndef ALPS_LINK_BOOST_TEST
-#include <boost/test/included/unit_test.hpp>
-#else
-#include <boost/test/unit_test.hpp>
-#endif
-#include <boost/filesystem.hpp>
-#include <boost/mpl/list.hpp>
+#include <gtest/gtest.h>
 
 #include <boost/lambda/lambda.hpp>
 #include <complex>
@@ -37,7 +28,7 @@
 //
 // List of types T for which the matrix<T> is tested
 //
-typedef boost::mpl::list<
+typedef ::testing::Types<
       float
     , double
     , int
@@ -83,7 +74,7 @@ struct DoubleInt
 //
 // List of type pairs <T,U> for which the mixed type matrix std::vector multiplication is tested.
 //
-typedef boost::mpl::list<type_pairs::IntDouble, type_pairs::DoubleInt, type_pairs::DoubleDComplex, type_pairs::DComplexDouble> test_type_pairs;
+typedef ::testing::Types<type_pairs::IntDouble, type_pairs::DoubleInt, type_pairs::DoubleDComplex, type_pairs::DComplexDouble> test_type_pairs;
 
 template <typename OutputIterator, typename T>
 T fill_range_with_numbers(OutputIterator begin, OutputIterator end, T iota)
