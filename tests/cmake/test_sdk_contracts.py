@@ -181,32 +181,38 @@ def test_installed_sdk_preserves_public_headers():
     assert not missing, f"Public headers lost from {baseline['source_commit']}: {missing}"
 
 
-def test_legacy_cmake_consumer(tmp_path):
-    (tmp_path / "main.cpp").write_text(
-        '#include <alps/utility/os.hpp>\nint main() { return alps::hostname().empty(); }\n')
-    (tmp_path / "CMakeLists.txt").write_text(
-        'cmake_minimum_required(VERSION 3.27)\nproject(legacy LANGUAGES C CXX)\n'
-        'find_package(ALPS CONFIG REQUIRED)\ninclude(${ALPS_USE_FILE})\n'
-        'add_executable(legacy main.cpp)\nenable_testing()\n'
-        'add_test(NAME legacy COMMAND legacy)\n')
+@pytest.mark.parametrize("tutorial,target", [
+    ("08-alpsize/01-cmake", "hello"),
+    ("09-code/02-c++", "ising"),
+])
+def test_tutorials_build_against_exported_sdk(tmp_path, tutorial, target):
+    """Build the actual tutorial consumers through their documented CMake path."""
     build = tmp_path / "build"
-    subprocess.run(["cmake", "-S", str(tmp_path), "-B", str(build),
+    subprocess.run([
+        "cmake", "-S", str(SOURCE / "tutorials" / tutorial), "-B", str(build),
         "-DCMAKE_BUILD_TYPE=Release", "-DALPS_DIR=" + os.environ["ALPS_DIR"],
-        *json.loads(os.environ.get("ALPS_TEST_CMAKE_ARGS", "[]"))], check=True)
-    build_and_run(build)
+        *json.loads(os.environ.get("ALPS_TEST_CMAKE_ARGS", "[]")),
+    ], check=True)
+    subprocess.run(["cmake", "--build", str(build), "--config", "Release",
+                    "--target", target, "--parallel", "2"], check=True)
+    executable = build / (f"Release/{target}.exe" if os.name == "nt" else target)
+    assert executable.is_file()
+    if target == "hello":
+        result = subprocess.run([str(executable)], check=True, capture_output=True, text=True)
+        assert result.stdout.strip() == "hello, world"
 
 
 @pytest.mark.skipif(os.name == "nt" or not shutil.which("make"), reason="requires Unix make")
-def test_legacy_make_consumer(tmp_path):
-    prefix = Path(os.environ["ALPS_DIR"]).resolve().parents[1]
-    (tmp_path / "main.cpp").write_text(
-        '#include <alps/ngs/params.hpp>\n'
-        'int main() { alps::params p; p["count"] = 3; '
-        'return p["count"].cast<int>() != 3; }\n')
-    (tmp_path / "Makefile").write_text(
-        'include $(ALPS_HOME)/share/alps/include.mk\ninclude dependencies.mk\n'
-        'consumer: main.cpp\n'
-        '\t$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ $< $(LIBS)\n')
-    (tmp_path / "dependencies.mk").write_text("# Additional consumer rules.\n")
-    subprocess.run(["make", "-C", str(tmp_path), f"ALPS_HOME={prefix}"], check=True)
-    subprocess.run([str(tmp_path / "consumer")], check=True)
+def test_make_intro_builds_without_sdk(tmp_path):
+    # This lesson is ordinary hello-world C++, preceding ALPS integration.
+    source = SOURCE / "tutorials/08-alpsize/00-make"
+    for name in ("hello.C", "Makefile"):
+        shutil.copy2(source / name, tmp_path / name)
+    environment = os.environ.copy()
+    for name in ("ALPS_HOME", "ALPS_ROOT", "ALPS_DIR", "CMAKE_PREFIX_PATH",
+                 "CPPFLAGS", "LDFLAGS", "LDLIBS"):
+        environment.pop(name, None)
+    subprocess.run(["make", "-C", str(tmp_path)], check=True, env=environment)
+    result = subprocess.run([str(tmp_path / "hello")], check=True,
+                            capture_output=True, text=True, env=environment)
+    assert result.stdout.strip() == "hello, world"
