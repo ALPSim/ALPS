@@ -26,6 +26,7 @@ jobs:
         ALPS_BOOST_MPI: 'OFF'
       run: |
         python -m pip install numpy==1.26.0
+        python -m pytest tests/tutorials -q --junitxml=_build/ci/tutorial-floor.xml
         python .github/scripts/prepare_dependencies.py boost-1.76.0 _build/boost-install
         echo "CMAKE_PREFIX_PATH=$PWD/_build/boost-install" >> "$GITHUB_ENV"
     - name: Build and test minimum supported dependencies
@@ -172,7 +173,7 @@ jobs:
       run: |
         python .github/scripts/run_with_timeout.py 300 mpiexec --oversubscribe -n 2 \
           python .github/scripts/run_mpi_pytest.py --ranks 2 --output _build/mpi \
-          tests/pyalps/test_binding_surface.py::test_mpi4py_compatibility_surface tests/pyalps/test_mpi_requests.py
+          python/pyalps/tests/test_binding_surface.py::test_mpi4py_compatibility_surface python/pyalps/tests/test_mpi_requests.py
     - name: Summarize tests
       run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
       if: always()

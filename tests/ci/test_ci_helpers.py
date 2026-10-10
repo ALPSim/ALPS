@@ -26,11 +26,11 @@ def load_helper(name):
 def test_wheel_runner_preserves_test_failures_and_empty_collection(tmp_path, monkeypatch, source, code, version):
     import types
     root = tmp_path / "checkout"
-    for suite in ("tests/pyalps", "tests/cmake"):
+    for suite in ("python/pyalps/tests", "tests/cmake"):
         (root / suite).mkdir(parents=True)
-    (root / "tests/pyalps/test_binding_surface.py").write_text(source)
-    (root / "tests/pyalps/test_mapping_lifetimes.py").touch()
-    (root / "tests/pyalps/test_wheel_payload.py").touch()
+    (root / "python/pyalps/tests/test_binding_surface.py").write_text(source)
+    (root / "python/pyalps/tests/test_mapping_lifetimes.py").touch()
+    (root / "python/pyalps/tests/test_wheel_payload.py").touch()
     helper = load_helper("run_wheel_tests")
     monkeypatch.setattr(helper, "sys", types.SimpleNamespace(version_info=version, executable=sys.executable))
     monkeypatch.setattr(helper, "ROOT", root)
