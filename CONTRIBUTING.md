@@ -286,9 +286,13 @@ Plot/extraction formats are `text`, `html`, `gnuplot`, `matplotlib` and `grace`;
 
 ## CI coverage
 
-Pull requests report aggregate `Source CI` and `Packaging CI` checks. Every pull request targeting master, master push, and release tag runs the complete source and packaging matrices. The source matrix preserves the upstream compiler, Boost, macOS, and C++ standard sweeps; only Python 3.9/3.10 rows are removed because the bindings now require Python 3.11+. Installed-SDK and contributor checks validate the new build layout. Broader changes to CI tiers and path-based selection are deferred to [the separate CI coverage proposal](https://github.com/ALPSim/ALPS/issues/164). The [source workflow](.github/workflows/build.yml) and [packaging workflow](.github/workflows/build_wheels.yml) are the authoritative lists of tested configurations.
+Pull requests and master pushes report an aggregate `CI` check. The [PR workflow](.github/workflows/ci.yml) selects affected areas: static/helper checks, Linux native and editable Python tests, MPI integration, macOS SDK consumers, native sanitizers, and Linux wheel packaging. It uses binary dependency packages where available and compiler caches to reduce repeated builds.
 
-Coverage includes Linux/macOS source builds, CMake 3.27, MPI/OpenMP, installed-SDK consumers, direct CMake/editable-pip contributor workflows and repaired wheels tested on fresh runners. Dependency providers in CI are runner configuration, not requirements to use that package manager locally. Packaging CI tests the CPython 3.11 and Python 3.12+ abi3 wheels and the source distribution; local editable tests do not replace that validation.
+Each area fingerprints its source, tests, build configuration and runner image. A successful matching fingerprint can skip a repeated check; missing history, unknown paths or uncertain parsing cause checks to run. Citation metadata and generated snapshots invalidate all areas. Use the workflow's manual `force` input to run every area regardless of recorded passes. See [change detection](ci/README.md) for details.
+
+The [Compatibility workflow](.github/workflows/compatibility.yml) runs weekly and on demand. It checks minimum supported dependencies, extensive C++20/OpenMP tests, C++23, MPI-enabled Python, additional macOS platforms, installed tutorials, and the full manylinux/musllinux/macOS wheel matrix on CPython 3.11–3.14. PR packaging builds manylinux wheels and tests Python 3.11, 3.12 and 3.14; SDK consumers compile once per wheel platform, while newer interpreters check the reused abi3 artifact. Fresh-runner wheel imports and two-rank MPI adapter tests remain separate checks.
+
+Release tags run Compatibility before publication through the [release workflow](.github/workflows/build_wheels.yml). Its existing filename is retained for the PyPI trusted publisher. Manual release validation does not publish. Local editable tests do not replace repaired-wheel or platform validation.
 
 ## Preparing a release
 
