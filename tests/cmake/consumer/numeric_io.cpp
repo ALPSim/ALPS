@@ -2,6 +2,7 @@
 #include <alps/hdf5/matrix.hpp>
 #include <alps/hdf5/numeric_vector.hpp>
 #include <alps/numeric/diagonal_matrix.hpp>
+#include <alps/numeric/detail/deprecated/matrix.hpp>
 #include <complex>
 #include <cstdio>
 #include <stdexcept>
@@ -17,21 +18,33 @@ int main() {
     vector[0] = {1., -2.}; vector[1] = {3., 4.};
     alps::numeric::diagonal_matrix<Complex> diagonal(2, Complex{});
     diagonal[0] = {5., -6.}; diagonal[1] = {7., 8.};
+    blas::matrix legacy_matrix(2);
+    legacy_matrix(0, 0) = 1.; legacy_matrix(0, 1) = 2.;
+    legacy_matrix(1, 0) = 3.; legacy_matrix(1, 1) = 4.;
+    blas::vector legacy_vector(3);
+    for (int i = 0; i != 3; ++i)
+        legacy_vector(i) = 2. * (i + 1);
     char const* filename = "numeric_io_contract.h5";
     {
         alps::hdf5::archive archive(filename, "w");
         archive["matrix"] << source;
         archive["vector"] << vector;
         archive["diagonal"] << diagonal;
+        archive["legacy_matrix"] << legacy_matrix;
+        archive["legacy_vector"] << legacy_vector;
     }
     {
         alps::hdf5::archive archive(filename, "r");
         alps::numeric::matrix<Complex> result;
         alps::numeric::vector<Complex> restored;
         alps::numeric::diagonal_matrix<Complex> restored_diagonal;
+        blas::matrix restored_legacy_matrix;
+        blas::vector restored_legacy_vector;
         archive["matrix"] >> result;
         archive["vector"] >> restored;
         archive["diagonal"] >> restored_diagonal;
+        archive["legacy_matrix"] >> restored_legacy_matrix;
+        archive["legacy_vector"] >> restored_legacy_vector;
         if (result.num_rows() != 2 || result.num_cols() != 3 || restored.size() != 2
             || !archive.is_complex("matrix") || !archive.is_complex("vector"))
             throw std::runtime_error("Numeric archive shape/type changed");
@@ -43,8 +56,13 @@ int main() {
             throw std::runtime_error("Numeric archive vector value changed");
         if (archive.extent("diagonal") != std::vector<std::size_t>{2, 2}
             || !archive.is_complex("diagonal")
-            || restored_diagonal.get_values() != diagonal.get_values())
-            throw std::runtime_error("Diagonal numeric archive shape/value changed");
+            || restored_diagonal.get_values() != diagonal.get_values()
+            || archive.extent("legacy_matrix") != std::vector<std::size_t>{2, 2}
+            || restored_legacy_matrix.size() != legacy_matrix.size()
+            || restored_legacy_matrix.values() != legacy_matrix.values()
+            || archive.extent("legacy_vector") != std::vector<std::size_t>{3}
+            || restored_legacy_vector != legacy_vector)
+            throw std::runtime_error("Legacy numeric archive shape/value changed");
     }
     std::remove(filename);
 }
