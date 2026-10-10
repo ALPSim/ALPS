@@ -1,6 +1,6 @@
 # Library examples
 
-These small programs demonstrate individual ALPS APIs. For complete simulation workflows and a recommended learning sequence, start with the [tutorial guide](../README.md).
+These small programs demonstrate individual ALPS APIs. For complete simulation workflows and a recommended learning sequence, see the [ALPS tutorials](https://alps.comp-phys.org/tutorials/).
 
 | Directory | Subject |
 | --- | --- |

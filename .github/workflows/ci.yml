@@ -1,10 +1,6 @@
 name: CI
 'on':
   pull_request:
-    branches:
-    - master
-    - WIP/sdk-python-preserve-legacy
-    - WIP/sdk-ci-followup
   push:
     branches:
     - master

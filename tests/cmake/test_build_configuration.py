@@ -211,20 +211,17 @@ def test_tutorials_are_an_explicit_install_component(tmp_path):
     assert not tutorials.exists()
     subprocess.run(command + ["--component", "tutorials"],
                    check=True, capture_output=True, text=True)
+    sources = SOURCE / "tutorials"
     assert {path.name for path in tutorials.iterdir() if path.is_dir()} == {
-        "00-examples", "01-intro", "02-ed", "03-mc", "04-dmrg", "05-dmft",
-        "06-hybridization", "07-looper", "08-alpsize", "09-code", "10-ngs", "11-notebook",
-        "12-optical-lattice",
-    }
-    assert (tutorials / "10-ngs/1_accumulator_only/CMakeLists.txt").is_file()
-    assert (tutorials / "README.md").is_file()
-    assert (tutorials / "00-examples/README.md").is_file()
-    assert (tutorials / "00-examples/CMakeLists.txt").is_file()
-    assert (tutorials / "00-examples/alea/testfile.h5").is_file()
-    assert (tutorials / "00-examples/parapack/exchange/params-ising").is_file()
-    assert (tutorials / "00-examples/parapack/loop/params_disorder").is_file()
-    assert (tutorials / "00-examples/parapack/wanglandau/params_learn").is_file()
-    assert (tutorials / "00-examples/parapack/multiple/ising.op-2").is_file()
+        path.name for path in sources.iterdir() if path.is_dir()}
+    assert (tutorials / "ngs/1_accumulator_only/CMakeLists.txt").is_file()
+    assert (tutorials / "examples/README.md").is_file()
+    assert (tutorials / "examples/CMakeLists.txt").is_file()
+    assert (tutorials / "examples/alea/testfile.h5").is_file()
+    assert (tutorials / "examples/parapack/exchange/params-ising").is_file()
+    assert (tutorials / "examples/parapack/loop/params_disorder").is_file()
+    assert (tutorials / "examples/parapack/wanglandau/params_learn").is_file()
+    assert (tutorials / "examples/parapack/multiple/ising.op-2").is_file()
     assert (install / "share/alps/cmake/ALPSTesting.cmake").is_file()
     assert (install / "share/alps/cmake/run_test.cmake").is_file()
-    assert not (tutorials / "10-ngs/5_export_python").exists()
+    assert not (tutorials / "ngs/5_export_python").exists()

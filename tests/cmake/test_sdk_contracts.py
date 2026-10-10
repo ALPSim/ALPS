@@ -105,7 +105,7 @@ def test_utilities_without_platform_stacktrace(tmp_path, monkeypatch, unavailabl
 
 
 @pytest.mark.parametrize("source", [
-    "tutorials/00-examples",
+    "tutorials/examples",
 ])
 @pytest.mark.parametrize("testing", ["ON", "OFF"])
 def test_standalone_examples_respect_build_testing(tmp_path, source, testing):
@@ -182,8 +182,8 @@ def test_installed_sdk_preserves_public_headers():
 
 
 @pytest.mark.parametrize("tutorial,target", [
-    ("08-alpsize/01-cmake", "hello"),
-    ("09-code/02-c++", "ising"),
+    ("alpsize-01-cmake", "hello"),
+    ("code-02-c++", "ising"),
 ])
 def test_tutorials_build_against_exported_sdk(tmp_path, tutorial, target):
     """Build the actual tutorial consumers through their documented CMake path."""
@@ -205,7 +205,7 @@ def test_tutorials_build_against_exported_sdk(tmp_path, tutorial, target):
 @pytest.mark.skipif(os.name == "nt" or not shutil.which("make"), reason="requires Unix make")
 def test_make_intro_builds_without_sdk(tmp_path):
     # This lesson is ordinary hello-world C++, preceding ALPS integration.
-    source = SOURCE / "tutorials/08-alpsize/00-make"
+    source = SOURCE / "tutorials/alpsize-00-make"
     for name in ("hello.C", "Makefile"):
         shutil.copy2(source / name, tmp_path / name)
     environment = os.environ.copy()
@@ -219,8 +219,8 @@ def test_make_intro_builds_without_sdk(tmp_path):
 
 
 @pytest.mark.parametrize("tutorial,arguments", [
-    ("09-code/06-mcmain-c++", []),
-    ("10-ngs/1_accumulator_only", ["10"]),
+    ("code-06-mcmain-c++", []),
+    ("ngs/1_accumulator_only", ["10"]),
 ])
 def test_tutorial_text_parameters(tmp_path, tutorial, arguments):
     """Build actual callers and verify text is not treated as an HDF5 archive."""

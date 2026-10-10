@@ -66,6 +66,6 @@ install(
   COMPONENT tutorials EXCLUDE_FROM_ALL)
 # This is a fixed example input, unlike generated tutorial result archives.
 install(
-  FILES 00-examples/alea/testfile.h5
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/alps/tutorials/00-examples/alea
+  FILES examples/alea/testfile.h5
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/alps/tutorials/examples/alea
   COMPONENT tutorials EXCLUDE_FROM_ALL)
