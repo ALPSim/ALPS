@@ -1,5 +1,5 @@
 /* heienberg.hpp
- * adapted from alps/tutorials/09-code/07-mcmain-mcbase/heisenberg.hpp
+ * adapted from alps/tutorials/code-07-mcmain-mcbase/heisenberg.hpp
  */
 
 #ifndef HEISENBERG_HPP

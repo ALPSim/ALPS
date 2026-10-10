@@ -12,7 +12,7 @@ cmake_install.cmake
 compile_commands.json
 
 # Lattice files the tutorials tell the reader to generate with build_lattice.py
-tutorials/04-dmrg/*/my_lattice.xml
+tutorials/dmrg-*/my_lattice.xml
 
 # Editors and operating systems
 .idea/
@@ -58,17 +58,16 @@ __pycache__/
 *.out
 *.app
 
-# Local contributor environments and agent instructions
+# Local contributor environments
 /.pixi/
 /.venv/
-/AGENTS.md
 
 # Python distribution artifacts
 /wheelhouse/
 /python/pyalps/dist/
 
-# Generated tutorial manual intermediates
-/tutorials/06-hybridization/hybdoc.aux
-/tutorials/06-hybridization/hybdoc.bbl
-/tutorials/06-hybridization/hybdoc.blg
-/tutorials/06-hybridization/hybdoc.log
+# Generated CT-HYB manual intermediates
+/src/apps/dmft/qmc/hybridization/Documentation/hybdoc.aux
+/src/apps/dmft/qmc/hybridization/Documentation/hybdoc.bbl
+/src/apps/dmft/qmc/hybridization/Documentation/hybdoc.blg
+/src/apps/dmft/qmc/hybridization/Documentation/hybdoc.log
