@@ -216,3 +216,30 @@ def test_make_intro_builds_without_sdk(tmp_path):
     result = subprocess.run([str(tmp_path / "hello")], check=True,
                             capture_output=True, text=True, env=environment)
     assert result.stdout.strip() == "hello, world"
+
+
+@pytest.mark.parametrize("tutorial,arguments", [
+    ("09-code/06-mcmain-c++", []),
+    ("10-ngs/1_accumulator_only", ["10"]),
+])
+def test_tutorial_text_parameters(tmp_path, tutorial, arguments):
+    """Build actual callers and verify text is not treated as an HDF5 archive."""
+    h5py = pytest.importorskip("h5py")
+    build = tmp_path / "build"
+    subprocess.run([
+        "cmake", "-S", str(SOURCE / "tutorials" / tutorial), "-B", str(build),
+        "-DCMAKE_BUILD_TYPE=Release", "-DALPS_DIR=" + os.environ["ALPS_DIR"],
+        *json.loads(os.environ.get("ALPS_TEST_CMAKE_ARGS", "[]")),
+    ], check=True)
+    subprocess.run(["cmake", "--build", str(build), "--config", "Release", "--parallel", "2"], check=True)
+    parameters = tmp_path / "input.txt"
+    parameters.write_text("L=4; T=2.0; THERMALIZATION=2; SWEEPS=16; SEED=42;\n")
+    executable = build / ("Release/ising.exe" if os.name == "nt" else "ising")
+    result = subprocess.run([str(executable), *arguments, str(parameters)],
+                            cwd=tmp_path, capture_output=True, text=True, timeout=30)
+    assert result.returncode == 0, result.stdout + result.stderr
+    with h5py.File(tmp_path / "input.out.h5") as archive:
+        # Legacy text parameters retain expression strings in their archives.
+        assert int(archive["parameters/L"][()]) == 4
+        assert float(archive["parameters/T"][()]) == 2.
+        assert archive["simulation/results/Energy/count"][()] > 0
