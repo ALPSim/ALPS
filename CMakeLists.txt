@@ -30,7 +30,7 @@ option(ALPS_BUILD_APPLICATIONS "Build simulation applications and command-line t
        ${_alps_top_level})
 project(alps VERSION ${ALPS_VERSION_CORE} LANGUAGES C CXX)
 
-# Options removed in 3.0 are otherwise ignored with only CMake's generic
+# Removed legacy options are otherwise ignored with only CMake's generic
 # "Manually-specified variables were not used" warning. See CHANGELOG.md.
 foreach(legacy IN ITEMS
     "ALPS_NGS_USE_NEW_ALEA|the experimental backend was removed"
@@ -55,7 +55,7 @@ if(ALPS_ENABLE_MPI AND DEFINED CACHE{ALPS_NGS_USE_NEW_ALEA})
   message(WARNING "This build directory retains the ALPS 3.0 MPI default. Pass -DALPS_ENABLE_MPI=OFF or use a fresh build directory if MPI is not needed.")
 endif()
 if(NOT ALPS_ENABLE_MPI)
-  message(STATUS "MPI is disabled (opt-in since 3.0); pass -DALPS_ENABLE_MPI=ON to enable it")
+  message(STATUS "MPI is disabled; pass -DALPS_ENABLE_MPI=ON to enable it")
 endif()
 include(cmake/ALPSBuildConcurrency.cmake)
 
