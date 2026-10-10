@@ -23,7 +23,7 @@ find_package(nanobind 2.10 CONFIG REQUIRED)
 
 get_filename_component(_repo_root "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
 set(_alps_source_root "${_repo_root}")
-if(NOT EXISTS "${_alps_source_root}/tool/maxent.cpp")
+if(NOT EXISTS "${_alps_source_root}/src/tools/maxent.cpp")
   set(_alps_source_root "${CMAKE_CURRENT_SOURCE_DIR}/_vendor")
 endif()
 set(_bindings "${CMAKE_CURRENT_SOURCE_DIR}/cpp")
@@ -79,19 +79,19 @@ nanobind_add_module(pyngsrandom01_c ${_pyalps_nanobind_options} "${_bindings}/ng
 nanobind_add_module(pyngsaccumulator_c ${_pyalps_nanobind_options} "${_bindings}/ngs/accumulator.cpp")
 
 if(PYALPS_BUILD_APPLICATIONS)
-  if(NOT EXISTS "${_alps_source_root}/tool/maxent.cpp")
+  if(NOT EXISTS "${_alps_source_root}/src/tools/maxent.cpp")
     message(FATAL_ERROR
       "PYALPS_BUILD_APPLICATIONS requires an ALPS source checkout or pyalps sdist. "
       "Configure with -DPYALPS_BUILD_APPLICATIONS=OFF for the core-only package.")
   endif()
 
-  set(_dmft "${_alps_source_root}/applications/dmft/qmc")
+  set(_dmft "${_alps_source_root}/src/apps/dmft/qmc")
 
   nanobind_add_module(maxent_c ${_pyalps_nanobind_options}
-    "${_alps_source_root}/tool/maxent.cpp"
-    "${_alps_source_root}/tool/maxent_helper.cpp"
-    "${_alps_source_root}/tool/maxent_simulation.cpp"
-    "${_alps_source_root}/tool/maxent_parms.cpp")
+    "${_alps_source_root}/src/tools/maxent.cpp"
+    "${_alps_source_root}/src/tools/maxent_helper.cpp"
+    "${_alps_source_root}/src/tools/maxent_simulation.cpp"
+    "${_alps_source_root}/src/tools/maxent_parms.cpp")
 
   nanobind_add_module(cthyb ${_pyalps_nanobind_options}
     "${_dmft}/hybridization/hybmain.cpp"
@@ -312,7 +312,7 @@ if(PYALPS_BUNDLE_APPLICATIONS)
   #
   # src/alps/CMakeLists.txt gives libalps SOVERSION ${ALPS_VERSION_MAJOR} on
   # ELF platforms and no version at all on APPLE, so "<name>.<major>" is the
-  # SONAME spelling wherever a versioned form exists. test/pyalps guards both
+  # SONAME spelling wherever a versioned form exists. tests/pyalps guards both
   # halves of this: that no library is bundled twice, and that every bundled
   # program can still be loaded.
   file(GLOB _alps_runtime_libs LIST_DIRECTORIES FALSE
@@ -338,7 +338,7 @@ endif()
 # The ALPS XML/XSL library ships inside the package (pyalps/xml), as the
 # legacy wheel build did: the stylesheets plus the lattice and model
 # libraries that parameter files reference by default.
-set(_alps_xml_source "${_alps_source_root}/lib/xml")
+set(_alps_xml_source "${_alps_source_root}/src/alps/resources")
 if(NOT EXISTS "${_alps_xml_source}/ALPS.xsl")
   message(FATAL_ERROR
     "ALPS XML stylesheets not found at ${_alps_xml_source}. "

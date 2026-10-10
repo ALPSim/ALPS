@@ -76,15 +76,15 @@ ALPS_DIR = { env = "ALPS_DIR" }
 "../../LICENSE.txt" = "LICENSE.txt"
 # The version file, so an sdist build can still derive its own version.
 "../../ALPS_VERSION.txt" = "ALPS_VERSION.txt"
-"../../applications/dmft/qmc" = "_vendor/applications/dmft/qmc"
-"../../tool" = "_vendor/tool"
-"../../lib/xml" = "_vendor/lib/xml"
+"../../src/apps/dmft/qmc" = "_vendor/src/apps/dmft/qmc"
+"../../src/tools" = "_vendor/src/tools"
+"../../src/alps/resources" = "_vendor/src/alps/resources"
 
 [tool.cibuildwheel]
 build = ["cp310-*", "cp311-*", "cp312-*", "cp313-*", "cp314-*"]
 manylinux-x86_64-image = "manylinux_2_28"
 test-requires = ["pytest"]
-test-command = "pytest -q {project}/test/pyalps"
+test-command = "pytest -q {project}/tests/pyalps"
 
 # The ALPS C++ SDK is built once per platform in before-all via the wheel-deps
 # CMake preset; ALPS_DIR points every wheel build at that install. The ccache

@@ -10,5 +10,5 @@ for maintainer review. Do not invent attribution or claim independence
 without evidence.
 
 For scientific credit changes, update `CITATION.cff` and `CITATIONS.yaml`
-using [the citation maintenance instructions](script/citations/README.md).
+using [the citation maintenance instructions](.github/scripts/citations/README.md).
 `CITATION.md` is generated; do not edit it directly.

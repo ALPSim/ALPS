@@ -19,15 +19,15 @@ jobs:
     name: Check release version
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.13'
-      - run: python -m pip install packaging pytest lxml "scikit-build-core>=1.0" -r script/citations/requirements.txt
+      - run: python -m pip install packaging pytest lxml "scikit-build-core>=1.0" -r .github/scripts/citations/requirements.txt
       - name: Test release validation
-        run: python -m pytest test/packaging -q
+        run: python -m pytest tests/packaging -q
       - name: Check package, SDK, and tag versions
-        run: python script/check_release_version.py
+        run: python .github/scripts/check_release_version.py
 
   build_wheels:
     name: Build wheels on ${{ matrix.plat.os }}
@@ -40,17 +40,17 @@ jobs:
         - { os: macos-15, target: "15.0" , arch: arm64 }
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Restore compiler cache
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: _build/ccache
-          key: pyalps-ccache-${{ runner.os }}-${{ matrix.plat.arch }}-${{ hashFiles('src/**', 'python/**', 'applications/**', 'tool/maxent*') }}
+          key: pyalps-ccache-${{ runner.os }}-${{ matrix.plat.arch }}-${{ hashFiles('src/**', 'python/**', 'src/apps/**', 'src/tools/maxent*') }}
           restore-keys: pyalps-ccache-${{ runner.os }}-${{ matrix.plat.arch }}-
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v4.2.0
+        uses: pypa/cibuildwheel@1828c10ab37f080699c7b81cea34097c684a7074 # v4.2.0
         with:
           package-dir: python/pyalps
         env:
@@ -60,7 +60,7 @@ jobs:
           CIBW_ARCHS: ${{ matrix.plat.arch }}
           MACOSX_DEPLOYMENT_TARGET: ${{ matrix.plat.target }}
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: cibw-wheels-${{ matrix.plat.os }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
@@ -71,7 +71,7 @@ jobs:
     needs: [check_version]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Build sdist
         run: pipx run build --sdist --outdir dist python/pyalps
@@ -83,19 +83,19 @@ jobs:
         run: |
           pipx run twine check dist/*.tar.gz
           tar -tzf dist/*.tar.gz > sdist-manifest.txt
-          for path in _vendor/lib/xml/ALPS.xsl _vendor/tool/maxent.cpp \
-                      _vendor/applications/dmft/qmc \
+          for path in _vendor/src/alps/resources/ALPS.xsl _vendor/src/tools/maxent.cpp \
+                      _vendor/src/apps/dmft/qmc \
                       LICENSE.txt src/pyalps/__init__.py; do
             grep -q "$path" sdist-manifest.txt || { echo "missing $path in sdist"; exit 1; }
           done
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: cibw-sdist
           path: dist/*.tar.gz
 
 
-  # cibuildwheel already runs test/pyalps against every wheel inside the build
+  # cibuildwheel already runs tests/pyalps against every wheel inside the build
   # environment; this job checks the artifacts as they would reach PyPI: the
   # repaired, uploaded-and-downloaded wheel installed with pip on a clean
   # runner, at the oldest and newest supported Python.
@@ -114,13 +114,13 @@ jobs:
           - { os: macos-26, artifact_os: macos-15 }
         python: ["3.10", "3.14"]
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: ${{ matrix.python }}
 
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           pattern: cibw-wheels-${{ matrix.plat.artifact_os }}-*
           path: wheelhouse
@@ -134,11 +134,11 @@ jobs:
 
       - name: Import and run binding surface tests
         run: |
-          python script/validate_pyalps.py --output _build/validation --wheelhouse wheelhouse
+          python .github/scripts/validate_pyalps.py --output _build/validation --wheelhouse wheelhouse
 
       - name: Retain installed-wheel validation evidence
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: pyalps-validation-${{ matrix.plat.os }}-py${{ matrix.python }}
           path: _build/validation
@@ -151,13 +151,13 @@ jobs:
     needs: [build_wheels]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.14"
 
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           pattern: cibw-wheels-ubuntu-latest-*
           path: wheelhouse
@@ -174,7 +174,7 @@ jobs:
           python -m pip install --no-index --find-links wheelhouse pyalps
 
       - name: Run two-rank compatibility surface
-        run: mpiexec -n 2 python -m pytest -q test/pyalps/test_binding_surface.py::test_mpi4py_compatibility_surface test/pyalps/test_mpi_requests.py
+        run: mpiexec -n 2 python -m pytest -q tests/pyalps/test_binding_surface.py::test_mpi4py_compatibility_surface tests/pyalps/test_mpi_requests.py
 
   upload_pypi:
     needs: [build_wheels, build_sdist, smoke_test, mpi_smoke]
@@ -185,18 +185,18 @@ jobs:
       id-token: write
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.13'
       - run: python -m pip install packaging
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           pattern: cibw-*
           path: dist
           merge-multiple: true
 
       - name: Check every distribution before publishing
-        run: python script/check_release_version.py --dist dist
+        run: python .github/scripts/check_release_version.py --dist dist
 
-      - uses: pypa/gh-action-pypi-publish@release/v1
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # release/v1

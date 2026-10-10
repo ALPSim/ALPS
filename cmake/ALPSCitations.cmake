@@ -1,5 +1,5 @@
 # Native builds consume checked-in, validated data and need no Python parser.
-set(_alps_citation_generated "${PROJECT_SOURCE_DIR}/script/citations/generated")
+set(_alps_citation_generated "${PROJECT_SOURCE_DIR}/.github/scripts/citations/generated")
 include("${_alps_citation_generated}/snapshots.cmake")
 if(NOT _alps_citation_generated_format EQUAL 1)
   message(FATAL_ERROR "Unsupported generated ALPS citation format")
@@ -13,7 +13,7 @@ foreach(_index RANGE ${_alps_citation_last})
   file(SHA256 "${PROJECT_SOURCE_DIR}/${_file}" _actual)
   if(NOT _actual STREQUAL _expected)
     message(FATAL_ERROR "Generated citation data is stale (${_file}).\n"
-      "After editing citation sources, run: python script/generate_citations.py --regenerate\n"
+      "After editing citation sources, run: python .github/scripts/generate_citations.py --regenerate\n"
       "Python with PyYAML/jsonschema is a maintainer tool, not a native build requirement.")
   endif()
 endforeach()
