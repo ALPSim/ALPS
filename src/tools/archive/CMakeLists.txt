@@ -1,11 +1,6 @@
 # Historical archive workflows remain available independently of alps-xml.
 foreach(program IN ITEMS txt2archive xml2archive)
-  if(program STREQUAL "txt2archive")
-    set(source ../xml/txt2archive.C)
-  else()
-    set(source ../parapack/xml2archive.C)
-  endif()
-  add_executable(${program} ${source})
+  add_executable(${program} ${program}.C)
   target_link_libraries(${program} PRIVATE ALPS::alps)
 endforeach()
 set(archive_tools txt2archive xml2archive)

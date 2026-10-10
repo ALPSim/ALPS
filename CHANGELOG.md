@@ -11,6 +11,8 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Changed
 
+- Remove obsolete build, dependency-bootstrap and installer scripts. Replace historical XML shell wrappers with `alps-xml plot`, `alps-xml convert` and `alps-xml extract`, and update notebook commands. Keep installed `txt2archive`, `xml2archive` and the optional SQLite archive tool under `src/tools/archive`.
+
 - Require HDF5 1.10.5 or newer for source builds and installed SDK consumers, retaining compatibility with the system package used by the manylinux_2_28 wheel build.
 - Require Python 3.11 or newer for pyalps. Keep a separate CPython 3.11 wheel and use one `cp312-abi3` wheel for Python 3.12 and newer. Downstream nanobind extensions must pass `STABLE_ABI` to share pyalps types on Python 3.12+.
 - Export `ALPS::configuration`, `ALPS::containers`, `ALPS::numerics`, `ALPS::numeric_io` and `ALPS::solver_headers` as interface targets with their own header sets and dependencies. Separate container storage, numerical algorithms and HDF5 adapters; foundations no longer inherit aggregate `ALPS::headers`. Numerical algorithms and public include names are preserved.
