@@ -14,7 +14,7 @@ group; executable names and installation components remain stable.
 | `xml/` | `alps-xml`, `txt2archive`, and historical shell wrappers | None |
 | `result_archive/` | Optional SQLite `archive` | None |
 | `alea/` | None | C++ and Python mean/variance analysis programs |
-| `launchers/` | `alpsvars.sh`, `alpsvars.csh`, Windows `msxsl.exe` | Historical `alpspython` templates |
+| `launchers/` | `alpsvars.sh`, `alpsvars.csh`, Windows `msxsl.exe` | None |
 | `installer/` | None | Historical macOS postflight template |
 
 C++ commands install in the `tools` component; `alps-xml` installs in the `xml` component. `pconfig` links `ALPS::utilities`; the other C++ commands use `ALPS::alps`.
