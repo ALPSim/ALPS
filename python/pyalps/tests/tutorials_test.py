@@ -4,16 +4,17 @@
 
 """Run the pure-Python ngs tutorials as part of the wheel test suite.
 
-tutorials/10-ngs/5_export_python is covered by compatibility.yml, which compiles it as a
-downstream CMake project. Its two pure-Python siblings needed no compiler and so
-had no coverage at all -- and both were broken in ways only running them shows:
+The compiled export example, python/pyalps/examples/ising, is covered by
+test_binding_surface.py, which builds it as a downstream CMake project. The two
+pure-Python ngs tutorials needed no compiler and so had no coverage at all --
+and both were broken in ways only running them shows:
 6_python_native could not store an ngs.params or its measurements dict through
 `archive[path] = ...`, and neither one's load() had ever executed (one wrote to
 the archive instead of reading from it, both called double()).
 
-Running them here rather than in compatibility.yml is deliberate: they need an installed
-pyalps, which is what this suite already has, so cibuildwheel exercises them
-against every wheel it builds.
+Running them here rather than in a separate CI job is deliberate: they need an
+installed pyalps, which is what this suite already has, so cibuildwheel
+exercises them against every wheel it builds.
 """
 
 import os
@@ -24,10 +25,10 @@ from pathlib import Path
 import pytest
 
 
-TUTORIALS = Path(__file__).resolve().parents[3] / "tutorials" / "10-ngs"
+TUTORIALS = Path(__file__).resolve().parents[3] / "tutorials" / "ngs"
 
-# 5_export_python is absent: its smoke test imports a compiled extension that
-# only exists after the downstream CMake build in compatibility.yml.
+# The export example is absent: its smoke test imports a compiled extension that
+# only exists after the downstream CMake build in test_binding_surface.py.
 PURE_PYTHON_TUTORIALS = ["6_python_native", "7_python_extend"]
 
 
@@ -64,7 +65,7 @@ def test_tutorial_smoke_test(tutorial, tmp_path):
 def test_every_pure_python_tutorial_has_a_smoke_test():
     """A new pure-Python tutorial should not be able to arrive untested."""
     if not TUTORIALS.is_dir():
-        pytest.skip("tutorials/10-ngs is not present in this tree")
+        pytest.skip("tutorials/ngs is not present in this tree")
 
     untested = []
     for directory in sorted(TUTORIALS.iterdir()):
