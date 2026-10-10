@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+#include <alps/ngs/params_from_file.hpp>
 #include <alps/ngs/make_deprecated_parameters.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 #include <fstream>
@@ -15,7 +16,7 @@ int main() {
         output << "// Existing ALPS parameter grammar\n"
                << "LATTICE=\"chain lattice\"; L=10; T=2.25;\n";
     }
-    alps::params parameters(text);
+    auto parameters = alps::params_from_file(text);
     require(parameters.size() == 3 && parameters.begin()->first == "LATTICE");
     require(parameters["LATTICE"].cast<std::string>() == "chain lattice");
     require(parameters["L"].cast<int>() == 10 && parameters["T"].cast<double>() == 2.25);
@@ -29,7 +30,7 @@ int main() {
         output << "L=10; garbage @\n";
     }
     bool caught = false;
-    try { alps::params invalid(text); }
+    try { auto invalid = alps::params_from_file(text); }
     catch (const std::runtime_error&) { caught = true; }
     require(caught);
     boost::filesystem::remove(text);

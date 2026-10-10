@@ -51,3 +51,5 @@ ctest --test-dir <build-dir> --output-on-failure -L '^(utility|hdf5|params|osiri
 ```
 
 The installed-SDK consumers in `tests/cmake/` check aggregate/component links, shared/static builds, header ownership, relocation and downstream extension interoperability. CLI and MaxEnt regressions check existing input behavior and scientific results. See [CONTRIBUTING.md](../../CONTRIBUTING.md#run-the-tests) for the complete development workflow.
+
+Legacy text parameter loading is explicit: include `<alps/ngs/params_from_file.hpp>` and call `alps::params_from_file(path)` while linking `ALPS::alps`. The foundation `ALPS::params` supplies typed values and HDF5 persistence without the legacy text parser.
