@@ -14,7 +14,7 @@
 #ifndef HYB_BLAS_MATRIX
 #define HYB_BLAS_MATRIX
 #include <boost/numeric/bindings/blas.hpp>
-#include <boost/numeric/bindings/lapack.hpp>
+#include <boost/numeric/bindings/lapack/detail/lapack.h>
 
 //This is the resizable square matrix class. Whoever adapted the version in ALPS f*ed it up badly: this matrix needs to have a memory size DIFFERENT from the current size, or we'll be asking for memory all the time!
 

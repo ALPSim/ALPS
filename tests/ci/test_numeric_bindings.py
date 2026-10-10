@@ -1,4 +1,4 @@
-"""Keep the vendored headers closed under all conditional include branches."""
+"""Keep the vendored subset closed under all conditional include branches."""
 from pathlib import Path
 import re
 import subprocess
@@ -42,5 +42,4 @@ def test_numeric_bindings_include_closure():
 
     headers = {path.relative_to(INCLUDE).as_posix()
                for path in (INCLUDE / PREFIX).rglob("*") if path.is_file()}
-    assert visited <= headers
-    # Unreferenced public vendor headers remain available for downstream users.
+    assert headers == visited, f"Unreferenced vendored headers: {sorted(headers - visited)}"

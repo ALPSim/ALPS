@@ -13,9 +13,6 @@ target_sources(alps_numerics INTERFACE
     include/alps/multi_array/operators.hpp
     include/alps/functional.h
     include/alps/utility/numeric_cast.hpp
-    include/alps/boost/accumulators/numeric/functional.hpp
-    include/alps/boost/accumulators/numeric/functional/valarray.hpp
-    include/alps/boost/accumulators/numeric/functional/vector.hpp
     include/alps/ngs/numeric.hpp
     include/alps/ngs/numeric/array.hpp
     include/alps/ngs/numeric/detail.hpp
@@ -27,12 +24,6 @@ target_sources(alps_numerics INTERFACE
     include/alps/numeric/binomial.hpp
     include/alps/numeric/checked_divide.hpp
     include/alps/numeric/conj.hpp
-    include/alps/numeric/deprecated/vector.hpp
-    include/alps/numeric/detail/deprecated/blasheader.hpp
-    include/alps/numeric/detail/deprecated/blasmacros.h
-    include/alps/numeric/detail/deprecated/general_matrix.hpp
-    include/alps/numeric/detail/deprecated/matrix.hpp
-    include/alps/numeric/detail/deprecated/vector.hpp
     include/alps/numeric/diagonal_matrix.hpp
     include/alps/numeric/double2int.hpp
     include/alps/numeric/fourier.hpp
@@ -92,7 +83,6 @@ target_sources(alps_numerics INTERFACE
     include/alps/numeric/polynomial.hpp
     include/alps/numeric/real.hpp
     include/alps/numeric/regression.hpp
-    include/alps/numeric/resizeable_vector.h
     include/alps/numeric/round.hpp
     include/alps/numeric/scalar_product.hpp
     include/alps/numeric/sequence_comparisons.hpp
