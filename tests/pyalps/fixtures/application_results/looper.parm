@@ -1,0 +1,11 @@
+LATTICE="chain lattice"
+MODEL="spin"
+ALGORITHM="loop"
+local_S=0.5
+L=4
+T=1
+J=1
+THERMALIZATION=32
+SWEEPS=256
+SEED=42
+{}

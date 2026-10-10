@@ -34,6 +34,9 @@ foreach(
 
   target_link_libraries(${name} PRIVATE ALPS::osiris)
   alps_add_test(${name})
+  # Several dump fixtures use the same filename; parallel runs need separate directories.
+  file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${name}.work")
+  set_property(TEST ${name} PROPERTY WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${name}.work")
   set_property(TEST ${name} PROPERTY LABELS osiris)
 endforeach()
 

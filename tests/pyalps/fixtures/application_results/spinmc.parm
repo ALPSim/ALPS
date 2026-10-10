@@ -1,0 +1,10 @@
+LATTICE="chain lattice"
+MODEL="Ising"
+L=4
+T=2
+J=1
+THERMALIZATION=32
+SWEEPS=256
+SEED=42
+UPDATE="local"
+{}

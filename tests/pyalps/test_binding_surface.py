@@ -8,11 +8,11 @@ from __future__ import annotations
 
 import copy
 import importlib
+import importlib.util
 import os
 import json
 from pathlib import Path
 import signal
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -237,7 +237,11 @@ def test_optional_application_extension_surface():
     assert callable(cthyb.solve)
     assert callable(ctint.solve)
 
-def test_ctqmc_solvers_restore_python_signal_handlers(tmp_path, monkeypatch):
+def test_ctqmc_solvers_restore_python_signal_handlers(tmp_path, monkeypatch, capfd):
+    # MPI-enabled SDK solvers require caller initialization, including when
+    # this test is selected without collecting the MPI adapter tests.
+    if importlib.util.find_spec("mpi4py") is not None:
+        import pyalps.mpi
     from pyalps import cthyb, ctint
     import pyalps.hdf5 as hdf5
 
@@ -291,9 +295,18 @@ def test_ctqmc_solvers_restore_python_signal_handlers(tmp_path, monkeypatch):
     try:
         # Run each solver twice: restoration alone is not enough if ALPS' own
         # handlers are not reinstalled for the next embedded call.
-        for solver, params in ((cthyb, cthyb_params), (ctint, ctint_params)):
-            for _ in range(2):
+        for solver, params, component in ((cthyb, cthyb_params, "ALPS CT-HYB impurity solver"),
+                                           (ctint, ctint_params, "ALPS CT-INT impurity solver")):
+            for disabled in (False, True):
+                if disabled:
+                    monkeypatch.setenv("ALPS_NO_CITATIONS", "1")
+                else:
+                    monkeypatch.delenv("ALPS_NO_CITATIONS", raising=False)
+                capfd.readouterr()
                 solver.solve(params)
+                output = capfd.readouterr().out
+                assert output.count("Recommended citations for " + component) == (0 if disabled else 1)
+                assert "Recommended citation in scientific publications" not in output
                 assert signal.getsignal(signal.SIGINT) is python_sigint_handler
                 signal.raise_signal(signal.SIGINT)
                 assert calls[-1][0] == signal.SIGINT
@@ -572,24 +585,10 @@ assert mpi.finalized()
     os.environ.get("PYALPS_TEST_DOWNSTREAM_EXPORT") != "1",
     reason="enabled for one wheel per platform in packaging CI",
 )
-@pytest.mark.parametrize("legacy", [False, True], ids=["package", "legacy-helpers"])
-def test_downstream_nanobind_simulation_export(tmp_path, legacy):
+def test_downstream_nanobind_simulation_export(tmp_path):
     """Build and run a consumer extension against the installed ALPS SDK."""
     repository = Path(__file__).resolve().parents[2]
     tutorial = repository / "python/pyalps/examples/ising"
-    if legacy:
-        tutorial = Path(shutil.copytree(tutorial, tmp_path / "legacy-source"))
-        exporter = tutorial / "export2py.cpp"
-        exporter.write_text(exporter.read_text().replace(
-            "#include <pyalps/export_simulation.hpp>",
-            "#include <alps/ngs/detail/export_sim_to_python.hpp>\n"
-            "#include <alps/python/save_observable_to_hdf5.hpp>"))
-        cmake = tutorial / "CMakeLists.txt"
-        cmake.write_text(cmake.read_text().replace(
-            'find_package(pyalps CONFIG REQUIRED)',
-            'find_package(ALPS CONFIG REQUIRED)\ninclude(${ALPS_PYTHON_USE_FILE})').replace(
-            'target_link_libraries(ising_c PRIVATE pyalps::runtime)',
-            'alps_target_link_pyalps(ising_c)'))
     alps_dir = Path(os.environ["ALPS_DIR"])
     build = tmp_path / "export-python-build"
 

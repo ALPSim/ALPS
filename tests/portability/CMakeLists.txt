@@ -5,6 +5,10 @@ add_executable(numerics numerics.cpp)
 target_link_libraries(numerics PRIVATE ALPS::alps)
 add_test(NAME numerics COMMAND numerics)
 
+add_executable(runtime_correctness runtime_correctness.cpp)
+target_link_libraries(runtime_correctness PRIVATE ALPS::alps)
+add_test(NAME runtime_correctness COMMAND runtime_correctness)
+
 if(ALPS_ENABLE_OPENMP)
   add_executable(openmp_worker openmp_worker.cpp)
   target_link_libraries(openmp_worker PRIVATE ALPS::alps)

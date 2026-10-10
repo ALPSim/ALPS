@@ -693,10 +693,10 @@ namespace alps {
                     return *this;
                 }
 
-                mcdata<T> & operator-() {
+                mcdata<T> operator-() const {
                     mcdata<T> result(*this);
                     result.transform_linear(alps::numeric::unary_minus<T>(), error_, variance_opt_);
-                    return *this;
+                    return result;
                 }
 
                 template <typename X> void subtract_from(X const & x) {
@@ -705,9 +705,11 @@ namespace alps {
                 }
 
                 template <typename X> void divide(X const & x) {
+                    using std::abs;
+                    using alps::numeric::abs;
                     using boost::numeric::operators::operator*;
                     using boost::numeric::operators::operator/;
-                    error_ = x * error_ / mean_ / mean_;
+                    error_ = abs(x * error_ / mean_ / mean_);
                     fill_jack();
                     cannot_rebin_ = true;
                     mean_ = x / mean_;
