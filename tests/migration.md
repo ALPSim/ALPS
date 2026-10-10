@@ -71,4 +71,3 @@ manual MPI drivers and restart gaps are described in [the MPI guide](mpi.md).
 Component guides record [HDF5 schema/type coverage](../src/alps/hdf5/tests/README.md),
 [parameter contracts](../src/alps/params/tests/README.md) and
 [graph coverage](../src/alps/graph/tests/README.md).
-
