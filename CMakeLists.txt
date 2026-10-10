@@ -30,6 +30,13 @@ option(ALPS_BUILD_APPLICATIONS "Build simulation applications and command-line t
        ${_alps_top_level})
 project(alps VERSION ${ALPS_VERSION_CORE} LANGUAGES C CXX)
 
+# Keep the Release default for direct single-configuration builds. Embedding
+# projects and explicit -DCMAKE_BUILD_TYPE values keep their own choice.
+get_property(_alps_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(_alps_top_level AND NOT _alps_multi_config AND NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
+
 # Options removed in 3.0 are otherwise ignored with only CMake's generic
 # "Manually-specified variables were not used" warning. See CHANGELOG.md.
 foreach(legacy IN ITEMS
