@@ -1,4 +1,4 @@
-[![Build](https://github.com/ALPSim/ALPS/actions/workflows/build.yml/badge.svg)](https://github.com/ALPSim/ALPS/actions/workflows/build.yml) [![Python wheels](https://github.com/ALPSim/ALPS/actions/workflows/build_wheels.yml/badge.svg)](https://github.com/ALPSim/ALPS/actions/workflows/build_wheels.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.txt)
+[![Build](https://github.com/ALPSim/ALPS/actions/workflows/ci.yml/badge.svg)](https://github.com/ALPSim/ALPS/actions/workflows/ci.yml) [![Compatibility](https://github.com/ALPSim/ALPS/actions/workflows/compatibility.yml/badge.svg)](https://github.com/ALPSim/ALPS/actions/workflows/compatibility.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.txt)
 
 # ALPS — Algorithms and Libraries for Physics Simulations
 

@@ -284,6 +284,22 @@ alps-xml extract text plot-definition.xml task*.out.xml --output measurements.tx
 
 Plot/extraction formats are `text`, `html`, `gnuplot`, `matplotlib` and `grace`; conversion supports `text` and `html`. The `xml` installation component includes the command and resources.
 
+Application builds also retain the archive-producing commands in the `tools`
+installation component:
+
+```sh
+txt2archive --xaxis T --yaxis Energy --with-error measurements.txt > results.archive.xml
+xml2archive simulation.in.xml > results.archive.xml
+```
+
+`txt2archive` reads x/y columns, with an optional third error column;
+`xml2archive` collects a master JOB XML file's task results. These operations
+produce archive XML rather than render it. If SQLite development headers and
+libraries are available at configure time, the `archive` tool is also built.
+It retains its existing SQLite schema and `install`, `append`, `rebuild`, `list`
+and `plot` commands; existing databases can be reopened without conversion.
+Use `archive --help` for its options. The SDK libraries do not depend on SQLite.
+
 ## CI coverage
 
 Pull requests and master pushes report an aggregate `CI` check. The [PR workflow](.github/workflows/ci.yml) selects affected areas: static/helper checks, Linux native and editable Python tests, MPI integration, macOS SDK consumers, native sanitizers, and Linux wheel packaging. It uses binary dependency packages where available and compiler caches to reduce repeated builds.

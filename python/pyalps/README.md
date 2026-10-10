@@ -59,6 +59,8 @@ In either mode, pass a full executable path to a Python helper to select a diffe
 - Legacy HDF5 signed-byte datasets without type metadata are read as booleans. Use a typed reader such as h5py when such a dataset contains integers.
 - `pyalps.mpi` uses mpi4py's protocol, which is incompatible with Boost.MPI serialization. Communicators cannot be used as dictionary keys.
 
+## Versioning
+
 The package version comes from `cmake/ALPS_VERSION.txt`. For local prereleases, set `ALPS_VERSION_PRERELEASE` (for example, `beta.1`); release builds derive it from the Git tag.
 
 ## Editable development
@@ -91,6 +93,8 @@ target_link_libraries(my_module PRIVATE pyalps::runtime)
 `pyalps.get_cmake_dir()` exposes the same directory to Python tools. The C++ SDK neither installs this package nor discovers Python. The former SDK function `alps_target_link_pyalps` has been removed.
 
 The same target supplies `<pyalps/export_simulation.hpp>` for exporting a derived simulation through nanobind. The historical SDK include `<alps/ngs/detail/export_sim_to_python.hpp>` forwards to this Python-owned header and remains available.
+
+## Native runtime layout
 
 Wheel installation writes `pyalps/runtime.json`. After auditwheel or delocate repair, regenerate it with `python python/pyalps/_build_support/runtime_manifest.py --wheel path/to/pyalps.whl`. Cibuildwheel runs this automatically. The manifest records the final relative library paths; pyalps exposes these as imported CMake targets. On macOS, wheel finalization sets linkable `@rpath` library IDs and refreshes their signatures, so downstream builds need no binary-patching commands.
 
