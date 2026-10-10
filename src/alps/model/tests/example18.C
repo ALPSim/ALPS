@@ -1,3 +1,4 @@
+#include <alps/testing/stream_fixture.hpp>
 /*****************************************************************************
 *
 * ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -41,29 +42,12 @@ void test(std::string const& name)
 }
 
 
-int main()
-{
-
-#ifndef BOOST_NO_EXCEPTIONS
-  try {
-#endif
-
-  test("spin");
-  test("spinless fermions");
-  test("fermion Hubbard");
-
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& e)
-{
-  std::cerr << "Caught exception: " << e.what() << "\n";
-  exit(-1);
-}
-catch (...)
-{
-  std::cerr << "Caught unknown exception\n";
-  exit(-2);
-}
-#endif
-  return 0;
+TEST(ModelSerialization, Example18) {
+  alps::testing::StreamFixture transcript;
+  { // Flush serialization objects before checking the captured stream.
+    test("spin");
+    test("spinless fermions");
+    test("fermion Hubbard");
+  }
+  transcript.expect_output(ALPS_TEST_SOURCE_DIR "/example18.output");
 }

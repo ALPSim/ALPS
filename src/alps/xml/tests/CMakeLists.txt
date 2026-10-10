@@ -21,6 +21,5 @@ foreach(name xmlhandler xmlparser xmlstream)
   add_executable(${name} ${name}.C)
 
   target_link_libraries(${name} PRIVATE ALPS::xml)
-  alps_add_test(${name})
-  set_property(TEST ${name} PROPERTY LABELS parser)
+  alps_add_gtest(${name} COMPONENT xml LABELS compatibility)
 endforeach()

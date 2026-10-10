@@ -11,7 +11,7 @@ case "$compiler" in
   *) toolset=gcc ;;
 esac
 cd "$source_dir"
-libraries=filesystem,serialization,program_options,regex,thread,date_time,chrono,test
+libraries=filesystem,serialization,program_options,regex,thread,date_time,chrono
 if [[ "${ALPS_BOOST_MPI:-ON}" == ON ]]; then libraries+=,mpi; fi
 ./bootstrap.sh --with-toolset="$toolset" \
   --with-libraries="$libraries"

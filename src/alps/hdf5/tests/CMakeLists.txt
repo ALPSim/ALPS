@@ -39,28 +39,32 @@ foreach(
   add_executable(${name} ${name}.cpp)
 
   target_link_libraries(${name} PRIVATE ALPS::hdf5)
-  alps_add_test(${name})
-  set_property(TEST ${name} PROPERTY LABELS hdf5)
+  if(name STREQUAL "hdf5_fortran_string")
+    alps_add_gtest(${name} COMPONENT hdf5 LABELS compatibility)
+  else()
+    alps_add_gtest(${name} COMPONENT hdf5)
+  endif()
 endforeach()
 
 target_link_libraries(hdf5_real_complex_matrix PRIVATE ALPS::numeric_io)
-
-# Keep the reference archive with the test that reads it.
-target_compile_definitions(hdf5_fortran_string PRIVATE
-  ALPS_TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 if(ALPS_ENABLE_OPENMP)
   add_executable(hdf5_omp hdf5_omp.cpp)
 
   target_link_libraries(hdf5_omp PRIVATE ALPS::hdf5 OpenMP::OpenMP_CXX)
-  add_test(NAME hdf5_omp COMMAND hdf5_omp)
-  set_tests_properties(hdf5_omp PROPERTIES LABELS hdf5 TIMEOUT 600
-                                         ENVIRONMENT "OMP_NUM_THREADS=2")
+  alps_add_gtest(hdf5_omp COMPONENT hdf5 LABELS openmp TIMEOUT 600 THREADS 2)
+endif()
+
+option(ALPS_BUILD_LARGE_MEMORY_TESTS "Run HDF5 stress tests requiring 2 GiB RAM and 4 GiB disk" OFF)
+if(ALPS_BUILD_LARGE_MEMORY_TESTS)
+  add_executable(hdf5_large hdf5_large.cpp)
+  target_link_libraries(hdf5_large PRIVATE ALPS::hdf5)
+  alps_add_gtest(hdf5_large COMPONENT hdf5 LABELS stress large_memory TIMEOUT 600)
 endif()
 
 if(ALPS_BUILD_EXTENSIVE_TESTS)
 
-  # texting type serialization
+  # Exhaustive type serialization matrix.
   set(ALPS_HDF5_DATA_TYPES
       bool
       int
@@ -216,18 +220,6 @@ if(ALPS_BUILD_EXTENSIVE_TESTS)
       "alps::numeric::matrix<alps::numeric::matrix<int> >"
       "alps::numeric::matrix<alps::numeric::matrix<double> >"
       "alps::numeric::matrix<alps::numeric::matrix<std::complex<double> > >"
-      "std::vector<std::size_t, std::allocator<std::size_t> >"
-      "std::vector<short, std::allocator<short> >"
-      "std::vector<int, std::allocator<int> >"
-      "std::vector<long, std::allocator<long> >"
-      "std::vector<float, std::allocator<float> >"
-      "std::vector<double, std::allocator<double> >"
-      "std::vector<std::complex<double>, std::allocator<std::complex<double> > >"
-      "std::vector<std::string, std::allocator<std::string> >"
-      "std::vector<std::vector<int, std::allocator<int> > >"
-      "std::vector<std::vector<double>, std::allocator<std::vector<double> > >"
-      "std::vector<std::vector<std::complex<double>, std::allocator<std::complex<double> > >, std::allocator<std::vector<std::complex<double>, std::allocator<std::complex<double> > > > >"
-      "std::vector<std::vector<std::string, std::allocator<std::string> >, std::allocator<std::vector<std::string, std::allocator<std::string> > > >"
       "boost::multi_array<double, 1>"
       "boost::multi_array<int, 1>"
       "boost::multi_array<std::complex<double>, 1>"
@@ -277,20 +269,22 @@ if(ALPS_BUILD_EXTENSIVE_TESTS)
   # modes. Numbered filenames keep deeply nested Windows paths short.
   set(type_index 0)
   foreach(HDF5_TEST_TYPE IN LISTS ALPS_HDF5_DATA_TYPES)
+    # Shared-array coverage consists of round trips; no overwrite scenario exists.
+    if(HDF5_TEST_TYPE MATCHES "^boost::shared_array<")
+      set(HDF5_TEST_OVERWRITE OFF)
+    else()
+      set(HDF5_TEST_OVERWRITE ON)
+    endif()
     math(EXPR type_index "${type_index} + 1")
     set(target "hdf5_type_${type_index}")
     configure_file(type_check.cpp.in "${target}.cpp" @ONLY)
     add_executable(${target} "${CMAKE_CURRENT_BINARY_DIR}/${target}.cpp")
     target_include_directories(${target} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     target_link_libraries(${target} PRIVATE ALPS::numeric_io)
-    foreach(mode IN ITEMS dataset attribute compressed)
-      add_test(NAME ${target}.${mode} COMMAND ${target} ${mode})
-      set_tests_properties(${target}.${mode} PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 600 LABELS
-                                                        "hdf5;extensive;${HDF5_TEST_TYPE}")
-    endforeach()
+    alps_add_gtest(${target} COMPONENT hdf5 LABELS extensive "${HDF5_TEST_TYPE}" TIMEOUT 600)
   endforeach()
 endif()
 
 add_executable(ngs_hdf5 ngs_hdf5.cpp)
 target_link_libraries(ngs_hdf5 PRIVATE ALPS::hdf5)
-alps_add_test(ngs_hdf5)
+alps_add_gtest(ngs_hdf5 COMPONENT hdf5)

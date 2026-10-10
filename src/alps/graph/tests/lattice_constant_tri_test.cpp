@@ -12,6 +12,8 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <gtest/gtest.h>
+#include "graph_assertions.hpp"
 #include <alps/parser/xslt_path.h>
 #include <alps/graph/lattice_constant.hpp>
 
@@ -19,7 +21,7 @@
 
 #include <iostream>
 
-int main() {
+TEST(GraphLatticeConstants, lattice_constant_tri_test) {
     using boost::get;
     using alps::graph::canonical_properties;
 
@@ -138,7 +140,7 @@ int main() {
     add_edge(2, 6,g.back().first);
     add_edge(4, 7,g.back().first);
 
-    int success = 0;
+
     {
         for(std::vector<std::pair<graph_type,lc_type> >::iterator it= g.begin(); it != g.end(); ++it)
         {
@@ -148,13 +150,8 @@ int main() {
                 , lattice.lattice()
                 , alps::cell(std::vector<int>(2,side_length/2),lattice.lattice()) //side_length * side_length / 2 + side_length / 2 - 1
             );
-            if (lc != it->second) {
-                std::cerr<<"ERROR: lattice constant does not match!"<<std::endl;
-                std::cerr<<"Calculated: "<<lc<<"\tReference: "<<it->second<<std::endl<<std::endl;
-                success = -1;
-            } else
-                std::cerr<<"SUCCESS: "<<it->second<<std::endl;
+            EXPECT_EQ(lc, it->second) << "graph " << std::distance(g.begin(), it);
         }
     }
-    return success;
+
 }

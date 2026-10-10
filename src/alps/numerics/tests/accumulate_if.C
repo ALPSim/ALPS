@@ -14,64 +14,39 @@
 
 /* $Id: nobinning.h 3520 2009-12-11 16:49:53Z gamperl $ */
 
-#include <alps/numeric/special_functions.hpp>
 #include <alps/numeric/accumulate_if.hpp>
-
-#include <iostream>
-#include <cmath>
+#include <gtest/gtest.h>
+#include <numeric>
 #include <vector>
-#include <iterator>
-#include <algorithm>
-#include <functional>
 
-#include <boost/bind.hpp>
-#include <boost/iterator/counting_iterator.hpp>
-#include <boost/lambda/lambda.hpp>
-
-
-int main(int argc, char** argv)
+TEST(AccumulateIf, PredicateSelectsElements)
 {
-  std::vector<double> A;
-  std::transform(boost::counting_iterator<int>(0), boost::counting_iterator<int>(30), std::back_inserter(A), 0.1 * boost::lambda::_1);
-
-  std::cout << "\nA: \t";
-  std::copy(A.begin(),A.end(),std::ostream_iterator<double>(std::cout,"\t"));
-  std::cout << "\n";
-
-  double conditional_sum = alps::numeric::accumulate_if
-                                            ( A.begin()
-                                            , A.end()
-                                            , double()
-                                            , boost::bind
-                                               ( std::less_equal<double>()
-                                               , boost::lambda::_1
-                                               , 2.
-                                               )
-                                            );
-  std::cout << "\nSum of all elements in A if <= 2. :\t " << conditional_sum << "\n";
-
-
-  double conditional_sum_sq = alps::numeric::accumulate_if
-                                                ( A.begin()
-                                                , A.end()
-                                                , double()
-                                                , boost::bind
-                                                   ( std::plus<double>()
-                                                   , boost::lambda::_1
-                                                   , boost::bind
-                                                       ( static_cast<double (*)(double)>(&alps::numeric::sq)
-                                                       , boost::lambda::_2
-                                                       )
-                                                   )
-                                                , boost::bind
-                                                   ( std::greater<double>()
-                                                   , boost::lambda::_1
-                                                   , 1.
-                                                   )
-                                                );
-
-  std::cout << "\nSum of the square of all elements in A if > 1. :\t" << conditional_sum_sq << "\n";
-
-  return 0;
+    std::vector<double> values(30);
+    for (std::size_t i = 0; i < values.size(); ++i) values[i] = 0.1 * i;
+    const auto result = alps::numeric::accumulate_if(
+        values.begin(), values.end(), 0., [](double value) { return value <= 2.; });
+    // Arithmetic series 0 + 0.1 + ... + 2.0; allow accumulated rounding.
+    EXPECT_NEAR(result, 21., 1e-13);
 }
 
+TEST(AccumulateIf, CustomOperationAccumulatesSquares)
+{
+    std::vector<double> values(30);
+    for (std::size_t i = 0; i < values.size(); ++i) values[i] = 0.1 * i;
+    const auto result = alps::numeric::accumulate_if(
+        values.begin(), values.end(), 0.,
+        [](double sum, double value) { return sum + value * value; },
+        [](double value) { return value > 1.; });
+    // sum(k^2, k=11..29) / 100 = (29*30*59 - 10*11*21) / 600.
+    EXPECT_NEAR(result, 81.7, 1e-12);
+}
+
+TEST(AccumulateIf, EmptyAndRejectedRangesPreserveInitialValue)
+{
+    const std::vector<double> empty;
+    EXPECT_EQ(alps::numeric::accumulate_if(empty.begin(), empty.end(), 7.,
+        [](double) { return true; }), 7.);
+    const std::vector<double> values{1., 2.};
+    EXPECT_EQ(alps::numeric::accumulate_if(values.begin(), values.end(), 7.,
+        [](double) { return false; }), 7.);
+}

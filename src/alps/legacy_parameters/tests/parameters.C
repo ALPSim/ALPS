@@ -14,50 +14,47 @@
 /* $Id$ */
 
 #include <alps/parameter/parameters.h>
-#include <boost/throw_exception.hpp>
-#include <stdlib.h>
-#include <iostream>
-#include <stdexcept>
+#include <gtest/gtest.h>
+#include <sstream>
 #include <string>
+#include <vector>
 
-int main()
-{
-#ifndef BOOST_NO_EXCEPTIONS
-  try {
-#endif
+TEST(LegacyParameters, ParsesCommentsPreservesOrderAndSupportsMutation) {
+  std::istringstream input(R"PARAMS(L=10; M= 1,
 
-#ifndef BOOST_MSVC
-  setenv("DIR", "/home/alps", 1);
-#else
-  _putenv("DIR=/home/alps");
-#endif
+T=0.1;
+beta="1/T"; // comment
+dir = "${DIR}/lib/xml", a0 = "abc def ";
+a0 = 'abc def '
+a[test 2] = 3, /* comment */  a[ test 3 ] = 3;
+b = sqrt(4)+2*Pi/L-X^5;
 
-  alps::Parameters params(std::cin);
-  std::cout << params;
 
-  // replace test
+)PARAMS");
+  alps::Parameters params(input);
+  const std::vector<std::pair<std::string, std::string>> expected{{"L", "10"},
+                                                                  {"M", "1"},
+                                                                  {"T", "0.1"},
+                                                                  {"beta", "1/T"},
+                                                                  {"dir", "/home/alps/lib/xml"},
+                                                                  {"a0", "abc def "},
+                                                                  {"a[test 2]", "3"},
+                                                                  {"a[ test 3 ]", "3"},
+                                                                  {"b", "sqrt(4)+2*Pi/L-X^5"}};
+  ASSERT_EQ(params.size(), expected.size());
+  auto actual = params.begin();
+  for (const auto &entry : expected) {
+    EXPECT_EQ(actual->key(), entry.first);
+    EXPECT_EQ(std::string(actual->value().c_str()), entry.second);
+    ++actual;
+  }
   params["L"] = 3;
-  std::cout << "L = " << params["L"] << std::endl;
-
-  // erase test
+  EXPECT_EQ(std::string(params["L"].c_str()), "3");
   params.erase("a0");
-  std::cout << params;
-
-  // test of copy constructor and copying a parameter from itself
-  alps::Parameters params2(params);
-  params2["N"] = params2["L"];
-  std::cout << "N = " << params2["N"] << std::endl;
-
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& e) {
-  std::cerr << "Caught exception: " << e.what() << "\n";
-  exit(-1);
-}
-catch (...) {
-  std::cerr << "Caught unknown exception\n";
-  exit(-2);
-}
-#endif
-  return 0;
+  EXPECT_FALSE(params.defined("a0"));
+  EXPECT_EQ(params.size(), expected.size() - 1);
+  alps::Parameters copy(params);
+  copy["N"] = copy["L"];
+  EXPECT_EQ(std::string(copy["N"].c_str()), "3");
+  EXPECT_FALSE(params.defined("N"));
 }

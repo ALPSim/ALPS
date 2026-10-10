@@ -17,19 +17,13 @@
 #include <vector>
 #include <alps/numeric/real.hpp>
 
-#define BOOST_TEST_SOURCE
-#define BOOST_TEST_MODULE alps::numeric::real
-#ifndef ALPS_LINK_BOOST_TEST
-#include <boost/test/included/unit_test.hpp>
-#else
-#include <boost/test/unit_test.hpp>
-#endif
-#include <boost/mpl/list.hpp>
+#include <gtest/gtest.h>
+#include <algorithm>
 
 //
 // List of types T for which the real(T) is tested
 //
-typedef boost::mpl::list<
+typedef ::testing::Types<
       float
     , double
     , std::complex<float>
@@ -43,28 +37,6 @@ typedef boost::mpl::list<
     , std::vector<std::vector<std::complex<float> > >
     , std::vector<std::vector<std::complex<double> > >
 > test_types;
-
-
-//
-// ostream overloads
-//
-// template <typename T>
-// std::ostream& operator<< (std::ostream& os, std::vector<T const&> vec)
-// {
-//     os << "[";
-//     std::copy(vec.begin(), vec.end(), std::ostream_iterator<T const&>(os," "));
-//     os << "]";
-//     return os;
-// }
-template <typename T>
-std::ostream& operator<< (std::ostream& os, std::vector<T> const & vec)
-{
-    os << "[";
-    for (std::size_t i=0; i<vec.size(); ++i)
-        os << (i ? " " : "") << vec[i];
-    os << "]";
-    return os;
-}
 
 
 //
@@ -92,22 +64,35 @@ void fill (std::vector<T> & v)
 
 
 
-//
-// Test with full namespaces
-//
-BOOST_AUTO_TEST_CASE_TEMPLATE( real_with_namespace, T, test_types )
+// Independent scalar/recursive reference, including nested vectors.
+template<class T> T reference_real(const T& value) { return value; }
+template<class T> T reference_real(const std::complex<T>& value) { return value.real(); }
+template<class T>
+auto reference_real(const std::vector<T>& values)
 {
-    T val; fill(val);
-    std::cout << "real( " << val << " ) = " << alps::numeric::real(val) << std::endl;
+    using result_type = decltype(reference_real(T{}));
+    std::vector<result_type> result;
+    for (const auto& value : values) result.push_back(reference_real(value));
+    return result;
 }
 
-//
-// Test letting the compiler resolve the overloads
-//
-BOOST_AUTO_TEST_CASE_TEMPLATE( real_without_namespace, T, test_types )
+template<class T> class Real : public ::testing::Test {
+protected:
+    void SetUp() override { fill_val = 1; }
+};
+TYPED_TEST_SUITE(Real, test_types);
+
+TYPED_TEST(Real, QualifiedLookup)
 {
-    T val; fill(val);
+    TypeParam value;
+    fill(value);
+    EXPECT_EQ(alps::numeric::real(value), reference_real(value));
+}
+
+TYPED_TEST(Real, UnqualifiedLookup)
+{
+    TypeParam value;
+    fill(value);
     using alps::numeric::real;
-    std::cout << "real( " << val << " ) = " << real(val) << std::endl;
+    EXPECT_EQ(real(value), reference_real(value));
 }
-

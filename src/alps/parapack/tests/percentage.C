@@ -12,17 +12,12 @@
 *****************************************************************************/
 
 #include <alps/parapack/util.h>
-#include <iostream>
+#include <gtest/gtest.h>
 
-void test(std::string const& str) {
-  std::cout << '\"' << str << "\" is parsed as " << alps::parse_percentage(str) << std::endl;
-}
-
-int main() {
-  test("10%");
-  test("10 %");
-  test(" 10%");
-  test(" 10 %  ");
-  test("0.1%");
-  return 0;
+TEST(Percentage, AcceptsWhitespaceAroundPercentSign) {
+  for (const auto *input : {"10%", "10 %", " 10%", " 10 %  "}) {
+    SCOPED_TRACE(input);
+    EXPECT_DOUBLE_EQ(alps::parse_percentage(input), .1);
+  }
+  EXPECT_DOUBLE_EQ(alps::parse_percentage("0.1%"), .001);
 }

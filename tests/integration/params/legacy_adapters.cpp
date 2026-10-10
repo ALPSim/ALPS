@@ -1,40 +1,42 @@
 // SPDX-License-Identifier: MIT
+#include <alps/ngs/params.hpp>
 #include <alps/ngs/make_deprecated_parameters.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
 #include <fstream>
 #include <stdexcept>
 
-void require(bool condition) {
-    if (!condition) throw std::runtime_error("Legacy parameter adapter contract failed");
-}
-
-int main() {
-    const boost::filesystem::path text("legacy-params-contract.parm");
+TEST(ParamsLegacyAdapters, TextGrammarAndLegacyConversion) {
+    alps::testing::TemporaryDirectory temporary;
+    const boost::filesystem::path text((temporary.path() / "legacy-params-contract.parm").string());
     {
         std::ofstream output(text.string());
         output << "// Existing ALPS parameter grammar\n"
                << "LATTICE=\"chain lattice\"; L=10; T=2.25;\n";
     }
-    alps::params parameters(text);
-    require(parameters.size() == 3 && parameters.begin()->first == "LATTICE");
-    require(parameters["LATTICE"].cast<std::string>() == "chain lattice");
-    require(parameters["L"].cast<int>() == 10 && parameters["T"].cast<double>() == 2.25);
+    auto parameters = alps::params(text);
+    EXPECT_TRUE(parameters.size() == 3 && parameters.begin()->first == "LATTICE");
+    EXPECT_EQ(parameters["LATTICE"].cast<std::string>(), "chain lattice");
+    EXPECT_TRUE(parameters["L"].cast<int>() == 10 && parameters["T"].cast<double>() == 2.25);
     // File input stores text values; conversion preserves their existing form.
-    require(parameters.find("L")->which() == alps::detail::paramvalue_index<std::string>::value);
+    EXPECT_EQ(parameters.find("L")->which(), alps::detail::paramvalue_index<std::string>::value);
     auto legacy = alps::make_deprecated_parameters(parameters);
-    require(legacy.defined("L") && std::string(legacy["L"]) == "10");
-    require(std::string(legacy["LATTICE"]) == "chain lattice");
+    EXPECT_TRUE(legacy.defined("L"));
+    EXPECT_EQ(std::string(legacy["L"]), "10");
+    EXPECT_EQ(std::string(legacy["LATTICE"]), "chain lattice");
     {
         std::ofstream output(text.string());
         output << "L=10; garbage @\n";
     }
-    bool caught = false;
-    try { alps::params invalid(text); }
-    catch (const std::runtime_error&) { caught = true; }
-    require(caught);
+    EXPECT_THROW({ (void)alps::params(text); }, std::runtime_error);
     boost::filesystem::remove(text);
 
-    const boost::filesystem::path xml("legacy-params-contract.xml");
+}
+
+TEST(ParamsLegacyAdapters, XmlSeedDefaultsAndExplicitValues) {
+    alps::testing::TemporaryDirectory temporary;
+    const boost::filesystem::path xml((temporary.path() / "legacy-params-contract.xml").string());
     for (bool explicit_seed : {false, true}) {
         {
             std::ofstream output(xml.string());
@@ -44,8 +46,8 @@ int main() {
             output << "</PARAMETERS></SIMULATION>\n";
         }
         const auto from_xml = alps::make_parameters_from_xml(xml);
-        require(from_xml["L"].cast<int>() == 12);
-        require(from_xml["SEED"].cast<int>() == (explicit_seed ? 23 : 0));
+        EXPECT_EQ(from_xml["L"].cast<int>(), 12);
+        EXPECT_EQ(from_xml["SEED"].cast<int>(), (explicit_seed ? 23 : 0));
     }
     boost::filesystem::remove(xml);
 }

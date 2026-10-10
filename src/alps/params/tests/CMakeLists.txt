@@ -22,6 +22,5 @@ foreach(name default ordering stream assign not_found external checkpoint)
   add_executable(param_${name} ${name}.cpp)
 
   target_link_libraries(param_${name} PRIVATE ALPS::params)
-  alps_add_test(param_${name})
-  set_property(TEST param_${name} PROPERTY LABELS params)
+  alps_add_gtest(param_${name} COMPONENT params)
 endforeach()

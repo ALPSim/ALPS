@@ -39,32 +39,16 @@ class rng {
         boost::uint64_t state;
 };
 
-int main() {
-    rng gen(42);
-/*    boost::uint64_t i = 0, last = 0, next = gen();
-    for (; last != next && i < boost::uint64_t(-1); last = next, next = gen(), ++i)
-        if ((i & 0xFFFFFFULL) == 0ULL && i > 0) {
-            using std::log;
-            std::cout << log(i) / log(2) << std::endl;
-        }
-    if (last != next)
-        std::cout << "pass!" << std::endl;
-    else
-        std::cout << "fail: " << i << " " << last << std::endl;
-/*/
-//    FILE * pFile = fopen("rng.bin", "wb");
-    for (std::size_t i = 0; i < 100000; ++i) {
-        boost::uint64_t value = gen();
-        std::cout << value << std::endl;
-//        fwrite(&value, sizeof(boost::uint64_t), 1, pFile);
-    }
-//    fclose(pFile);
-/*
-    hash<double> hasher;
-    std::size_t h = hasher(1.);
-    std::cout << h << " ";
-    hash_combine(h, 4);
-    std::cout << h << std::endl;
-*/
-    return 0;
+#include <gtest/gtest.h>
+
+TEST(HashGenerator, SeedAndSequenceAreReproducible) {
+    EXPECT_THROW(rng(0), std::runtime_error);
+    rng gen(42), repeated(42);
+    for (std::size_t i = 0; i < 100000; ++i)
+        ASSERT_EQ(gen(), repeated()) << "sequence index=" << i;
+}
+
+TEST(Hash, ZeroAndDistinctInputs) {
+    EXPECT_EQ(alps::hash_value(boost::uint64_t(0)), 0u);
+    EXPECT_NE(alps::hash_value(boost::uint64_t(1)), alps::hash_value(boost::uint64_t(2)));
 }

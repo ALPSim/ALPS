@@ -18,31 +18,27 @@
 #include <iostream>
 #include <cstdlib>
 
-int main()
-{
-#ifndef BOOST_NO_EXCEPTIONS
-try {
-#endif
+#include <alps/testing/stream_fixture.hpp>
+#include <alps/testing/temporary_directory.hpp>
+#include <gtest/gtest.h>
 
-  alps::ParameterList parameterlist;
-  alps::ParameterListXMLHandler handler(parameterlist);
-  
-  alps::XMLParser parser(handler);
-  parser.parse(std::cin);
-  
-  std::cout << "[Output to std::cout]\n";
-  std::cout << parameterlist;
-  
-  std::cout << "\n[Output to alps::oxstream]\n";
-  alps::oxstream oxs;
-  oxs << parameterlist;
+TEST(Serialization, parameterlist_xml) {
+  alps::testing::StreamFixture transcript(ALPS_TEST_SOURCE_DIR "/parameterlist_xml.input");
+  alps::testing::TemporaryDirectory directory;
+  {
+    alps::ParameterList parameterlist;
+    alps::ParameterListXMLHandler handler(parameterlist);
 
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& exp) {
-  std::cerr << exp.what() << std::endl;
-  std::abort();
-}
-#endif
-  return 0;
+    alps::XMLParser parser(handler);
+    parser.parse(std::cin);
+
+    std::cout << "[Output to std::cout]\n";
+    std::cout << parameterlist;
+
+    std::cout << "\n[Output to alps::oxstream]\n";
+    alps::oxstream oxs;
+    oxs << parameterlist;
+
+  } // Flush oxstream before comparing its serialized bytes.
+  transcript.expect_output(ALPS_TEST_SOURCE_DIR "/parameterlist_xml.output");
 }

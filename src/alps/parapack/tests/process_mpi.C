@@ -12,47 +12,40 @@
 *****************************************************************************/
 
 #include <alps/parapack/process.h>
-#include <iostream>
+#include "process_mpi_checks.hpp"
+#include <stdexcept>
+#include <vector>
 
-namespace mpi = boost::mpi;
-
-int main(int argc, char** argv) {
-  mpi::environment env(argc, argv);
-  mpi::communicator world;
-
-  alps::process_helper_mpi process(world, 4);
-
+TEST(ParallelProcessGroups, AllocatesExhaustsRecyclesAndReleasesGroups) {
+  boost::mpi::communicator world;
+  ASSERT_GE(world.size(), 2);
+  alps::process_helper_mpi process(world, 1);
   if (world.rank() == 0) {
-    alps::process_group g1 = process.allocate();
-    for (int i = 0; i < g1.process_list.size(); ++i)
-      std::cout << g1.process_list[i] << ' ';
-    std::cout << std::endl;
-    std::cout << process.num_groups() << ' ' << process.num_free() << std::endl;
-
-    alps::process_group g2 = process.allocate();
-    for (int i = 0; i < g2.process_list.size(); ++i)
-      std::cout << g2.process_list[i] << ' ';
-    std::cout << std::endl;
-    std::cout << process.num_groups() << ' ' << process.num_free() << std::endl;
-
-    process.release(g1);
-    std::cout << process.num_groups() << ' ' << process.num_free() << std::endl;
-
-    g1 = process.allocate();
-    for (int i = 0; i < g1.process_list.size(); ++i)
-      std::cout << g1.process_list[i] << ' ';
-    std::cout << std::endl;
-    std::cout << process.num_groups() << ' ' << process.num_free() << std::endl;
-
-    process.release(g2);
-    std::cout << process.num_groups() << ' ' << process.num_free() << std::endl;
-
-    process.release(g1);
-    std::cout << process.num_groups() << ' ' << process.num_free() << std::endl;
+    EXPECT_EQ(process.num_groups(), world.size());
+    EXPECT_EQ(process.num_free(), world.size());
+    EXPECT_EQ(process.num_allocated(), 0);
+    std::vector<alps::process_group> groups;
+    for (int rank = 0; rank < world.size(); ++rank) {
+      groups.push_back(process.allocate());
+      EXPECT_EQ(groups.back().group_id, rank);
+      EXPECT_EQ(groups.back().process_list, alps::ProcessList{alps::Process(rank)});
+      EXPECT_EQ(int(groups.back().master()), rank);
+      EXPECT_EQ(process.num_free(), world.size() - rank - 1);
+      EXPECT_EQ(process.num_allocated(), rank + 1);
+    }
+    EXPECT_THROW(process.allocate(), std::logic_error);
+    process.release(groups.front());
+    EXPECT_EQ(process.num_free(), 1);
+    const auto recycled = process.allocate();
+    EXPECT_EQ(recycled.group_id, groups.front().group_id);
+    EXPECT_EQ(recycled.process_list, groups.front().process_list);
+    EXPECT_EQ(process.num_free(), 0);
+    for (std::size_t i = 1; i < groups.size(); ++i)
+      process.release(groups[i]);
+    process.release(recycled);
+    EXPECT_EQ(process.num_free(), world.size());
+    EXPECT_EQ(process.num_allocated(), 0);
+    EXPECT_THROW(process.release(recycled), std::logic_error);
   }
-
-  process.halt();
-  while (true) {
-    if (process.check_halted()) break;
-  }
+  alps_test::expect_halted(process, world);
 }

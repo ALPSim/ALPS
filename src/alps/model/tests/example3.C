@@ -1,3 +1,4 @@
+#include <alps/testing/stream_fixture.hpp>
 /*****************************************************************************
 *
 * ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -18,13 +19,9 @@
 #include <fstream>
 #include <iostream>
 
-int main()
-{
-
-#ifndef BOOST_NO_EXCEPTIONS
-  try {
-#endif
-
+TEST(ModelSerialization, Example3) {
+  alps::testing::StreamFixture transcript;
+  { // Flush serialization objects before checking the captured stream.
     typedef alps::Expression Expression_;
 
     // create the library from an XML file
@@ -48,7 +45,7 @@ int main()
                  lib.get_hamiltonian("spin").basis().site_basis(),lib.get_hamiltonian("spin").basis().site_basis()) << "\n";
 
      alps::Parameters parms;
-     parms["Nmax"]=2; 
+     parms["Nmax"]=2;
      alps::HamiltonianDescriptor<short> ham = lib.get_hamiltonian("boson Hubbard",parms,true);
      //ham.set_parameters(parms);
      std::cout << "HBosonSite =\n"
@@ -56,19 +53,6 @@ int main()
      std::cout << "HBosonBond =\n"
                << alps::get_matrix(Expression_(),ham.bond_term(),
                   ham.basis().site_basis(),ham.basis().site_basis()) << "\n";
-
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& e)
-{
-  std::cerr << "Caught exception: " << e.what() << "\n";
-  exit(-1);
-}
-catch (...)
-{
-  std::cerr << "Caught unknown exception\n";
-  exit(-2);
-}
-#endif
-  return 0;
+  }
+  transcript.expect_output(ALPS_TEST_SOURCE_DIR "/example3.output");
 }

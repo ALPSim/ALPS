@@ -2,11 +2,12 @@
 #include <alps/utility/citations.hpp>
 #include <alps/utility/copyright.hpp>
 #include <cstdlib>
+#include <gtest/gtest.h>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 
-int main() {
+TEST(Citations, NoticesAndSuppression) {
   auto set_no_citations = [](const char* value) {
 #ifdef _WIN32
     _putenv_s("ALPS_NO_CITATIONS", value ? value : "");
@@ -53,10 +54,5 @@ int main() {
     throw std::runtime_error("CT-INT algorithm reference missing");
   if (alps::citation_details("hybridization").find("10.1103/PhysRevB.72.035122") != std::string::npos)
     throw std::runtime_error("CT-HYB incorrectly recommends CT-INT");
-  try {
-    alps::citation_text("unknown-component");
-  } catch (const std::invalid_argument&) {
-    return 0;
-  }
-  throw std::runtime_error("Unknown citation component was silently accepted");
+  EXPECT_THROW(alps::citation_text("unknown-component"), std::invalid_argument);
 }

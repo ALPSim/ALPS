@@ -12,6 +12,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
+
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/pair.hpp>
 #include <iostream>
@@ -55,12 +58,12 @@ public:
         void load(alps::hdf5::archive& ar) { ar >> make_pvp("b",b) >> make_pvp("c",c); }
         void save(alps::hdf5::archive& ar) const { ar << make_pvp("b",b) << make_pvp("c",c); }
 
-    struct B { 
-        bool b; std::pair<unsigned,unsigned> p; E e; 
+    struct B {
+        bool b; std::pair<unsigned,unsigned> p; E e;
         void load(alps::hdf5::archive& ar) { ar >> make_pvp("b",b) >> make_pvp("p",p) >> make_pvp("e",e); }
         void save(alps::hdf5::archive& ar) const { ar << make_pvp("b",b) << make_pvp("p",p) << make_pvp("e",e); }
     };
-    struct C { 
+    struct C {
         bool b; unsigned u;
         void load(alps::hdf5::archive& ar) { ar >> make_pvp("b",b) >> make_pvp("u",u); };
         void save(alps::hdf5::archive& ar) const { ar << make_pvp("b",b) << make_pvp("u",u); };
@@ -70,30 +73,36 @@ public:
     C c;
 };
 
-int main()
+TEST(Hdf5, Bool)
 {
+    alps::testing::TemporaryDirectory temporary;
     A a;
     a.b.b = true; a.b.p = std::make_pair(3,4); a.b.e = E1;
     a.c.b = false; a.c.u = 1;
     {
-        hdf5::archive ar("test_hdf5_bool.h5",1);
+        hdf5::archive ar((temporary.path() / "test_hdf5_bool.h5").string(),1);
         ar << make_pvp("/true",true);
         ar << make_pvp("/false",false);
         ar << make_pvp("/a",a);
     }
     {
-        hdf5::archive ar("test_hdf5_bool.h5", 0);
+        hdf5::archive ar((temporary.path() / "test_hdf5_bool.h5").string(), 0);
         bool bb, bc, bt, bf;
-        ar 
-            >> make_pvp("/a/b/b",bb) 
-            >> make_pvp("/a/c/b",bc) 
-            >> make_pvp("/true",bt) 
+        ar
+            >> make_pvp("/a/b/b",bb)
+            >> make_pvp("/a/c/b",bc)
+            >> make_pvp("/true",bt)
             >> make_pvp("/false",bf)
         ;
-        std::cout << "Read bb=" << bb << ", should be " << a.b.b << endl;
-        std::cout << "Read bc=" << bc << ", should be " << a.c.b << endl;
-        std::cout << "Read bt=" << bt << ", should be " << true << endl;
-        std:: cout << "Read bf=" << bf << ", should be " << false << endl;
+        EXPECT_EQ(bb, a.b.b);
+        EXPECT_EQ(bc, a.c.b);
+        EXPECT_TRUE(bt);
+        EXPECT_FALSE(bf);
+        A restored;
+        ar >> make_pvp("/a", restored);
+        EXPECT_EQ(restored.b.p, a.b.p);
+        EXPECT_EQ(restored.b.e, a.b.e);
+        EXPECT_EQ(restored.c.u, a.c.u);
     }
-    return 0;
+
 }

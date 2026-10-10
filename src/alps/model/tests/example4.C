@@ -1,3 +1,4 @@
+#include <alps/testing/stream_fixture.hpp>
 /*****************************************************************************
 *
 * ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -50,19 +51,16 @@ alps::multi_array<alps::Expression,2> bondmatrix(const alps::ModelLibrary lib, c
   return bondmatrix;
 }
 
-int main()
-{
-
-#ifndef BOOST_NO_EXCEPTIONS
-  try {
-#endif
+TEST(ModelSerialization, Example4) {
+  alps::testing::StreamFixture transcript;
+  { // Flush serialization objects before checking the captured stream.
     // create the library from an XML file
     std::ifstream in(alps::search_xml_library_path("models.xml"));
     alps::ModelLibrary lib(in);
 
-    // calculate bond matrices 
+    // calculate bond matrices
     alps::Parameters parms;
-    
+
     std::cout << "HHardcoreBoson = \n" << bondmatrix(lib,"hardcore boson") << "\n\n";
     parms["Nmax"]=2;
     std::cout << "HBoson = \n" << bondmatrix(lib,"boson Hubbard",parms)  << "\n\n";
@@ -70,20 +68,6 @@ int main()
     std::cout << "HSpinHalf = \n" << bondmatrix(lib,"spin")  << "\n\n";
     parms["local_S"]=1;
     std::cout << "HSpinOne = \n" << bondmatrix(lib,"spin",parms)  << "\n\n";
-    
-
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& e)
-{
-  std::cerr << "Caught exception: " << e.what() << "\n";
-  exit(-1);
-}
-catch (...)
-{
-  std::cerr << "Caught unknown exception\n";
-  exit(-2);
-}
-#endif
-  return 0;
+  }
+  transcript.expect_output(ALPS_TEST_SOURCE_DIR "/example4.output");
 }

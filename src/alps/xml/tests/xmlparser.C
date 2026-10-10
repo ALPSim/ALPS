@@ -1,3 +1,4 @@
+#include <alps/testing/stream_fixture.hpp>
 /*****************************************************************************
 *
 * ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -18,23 +19,13 @@
 #include <iostream>
 #include <cstdlib>
 
-int main()
-{
-#ifndef BOOST_NO_EXCEPTIONS
-try {
-#endif
+TEST(XmlSerialization, Xmlparser) {
+  alps::testing::StreamFixture transcript(ALPS_TEST_SOURCE_DIR "/xmlparser.input");
+  { // Flush serialization objects before checking the captured stream.
+    alps::PrintXMLHandler handler;
+    alps::XMLParser parser(handler);
 
-  alps::PrintXMLHandler handler;
-  alps::XMLParser parser(handler);
-  
-  parser.parse(std::cin);
-
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& exp) {
-  std::cerr << exp.what() << std::endl;
-  std::abort();
-}
-#endif
-  return 0;
+    parser.parse(std::cin);
+  }
+  transcript.expect_output(ALPS_TEST_SOURCE_DIR "/xmlparser.output");
 }

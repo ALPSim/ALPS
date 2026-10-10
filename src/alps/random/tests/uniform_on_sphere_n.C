@@ -17,13 +17,17 @@
 #include <iostream>
 #include <vector>
 
-int main() {
-  static const int dim = 3;
-  boost::mt19937 eng;
-  alps::uniform_on_sphere_n<dim, double, std::vector<double> > dist;
+#include <gtest/gtest.h>
+#include <numeric>
+
+TEST(UniformOnSphere, SamplesHaveUnitNorm) {
+  boost::mt19937 eng(5489);
+  alps::uniform_on_sphere_n<3, double, std::vector<double>> dist;
   for (int i = 0; i < 100; ++i) {
-    std::vector<double> r = dist(eng);
-    std::cout << '(' << alps::write_vector(r, ",", 3) << ')' << std::endl;
+    const auto r = dist(eng);
+    ASSERT_EQ(r.size(), 3u);
+    // Squared norm accumulates three rounded products; 1e-12 allows roundoff.
+    EXPECT_NEAR(std::inner_product(r.begin(), r.end(), r.begin(), 0.), 1., 1e-12)
+      << "seed=5489, sample=" << i;
   }
-  return 0;
 }

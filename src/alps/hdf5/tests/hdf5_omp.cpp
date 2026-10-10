@@ -11,31 +11,30 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
+
 #include <iostream>
 #include <alps/hdf5.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 
-int main () {
-    bool result = false;
-    try {
+TEST(Hdf5OpenMP, ConcurrentArchivesRetainEachWorkersValue) {
+    alps::testing::TemporaryDirectory temporary;
+    std::vector<std::string> failures(10);
 #pragma omp parallel for
-        for (int i=0; i<10; ++i) {
-            std::string filename = "omp." + boost::lexical_cast<std::string>(i) + ".h5";
-            alps::hdf5::archive ar(filename, "w");
-            ar["/value"] << i;
+    for (int i = 0; i < 10; ++i) {
+        try {
+            const auto filename = (temporary.path() / ("omp." + std::to_string(i) + ".h5")).string();
+            { alps::hdf5::archive archive(filename, "w"); archive["/value"] << i; }
+            alps::hdf5::archive archive(filename, "r");
+            int restored = -1;
+            archive["/value"] >> restored;
+            if (restored != i) failures[i] = "Restored value differs from worker index";
+        } catch (const std::exception& error) {
+            failures[i] = error.what();
         }
-        result = true;
-    } catch (std::exception & e) {
-        std::cerr << "Exception thrown:" << std::endl;
-        std::cerr << e.what() << std::endl;
     }
-    for (unsigned i=0; i<10; ++i) {
-        std::string filename = "omp." + boost::lexical_cast<std::string>(i) + ".h5";
-        if (boost::filesystem::exists(boost::filesystem::path(filename)))
-            boost::filesystem::remove(boost::filesystem::path(filename));
-    }
-
-    return result ? EXIT_SUCCESS : EXIT_FAILURE;    
+    for (int i = 0; i < 10; ++i) EXPECT_TRUE(failures[i].empty()) << "Worker " << i << ": " << failures[i];
 }

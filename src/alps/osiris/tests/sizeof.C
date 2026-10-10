@@ -1,3 +1,4 @@
+#include <gtest/gtest.h>
 /*****************************************************************************
 *
 * ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -17,28 +18,10 @@
 #include <cstddef>
 #include <iostream>
 
-int main() {
-
-#define DO_TYPE(T) \
-  std::cout << "size of "#T" is " << sizeof(T) << std::endl;
-
-  DO_TYPE(bool)
-  DO_TYPE(char)
-  DO_TYPE(short)
-  DO_TYPE(int)
-  DO_TYPE(long)
-  DO_TYPE(long long)
-  DO_TYPE(float)
-  DO_TYPE(double)
-  DO_TYPE(long double)
-
-  DO_TYPE(alps::int8_t)
-  DO_TYPE(alps::int16_t)
-  DO_TYPE(alps::int32_t)
-  DO_TYPE(alps::int64_t)
-
-  DO_TYPE(std::size_t)
-  DO_TYPE(std::ptrdiff_t)
-
-  return 0;
+TEST(PlatformTypes, FixedWidthIntegersMatchWireSizes) {
+  EXPECT_EQ(sizeof(alps::int8_t), 1u);
+  EXPECT_EQ(sizeof(alps::int16_t), 2u);
+  EXPECT_EQ(sizeof(alps::int32_t), 4u);
+  EXPECT_EQ(sizeof(alps::int64_t), 8u);
+  EXPECT_GE(sizeof(std::size_t), 4u);
 }

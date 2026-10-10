@@ -75,6 +75,14 @@ option(ALPS_NGS_OPENMPI_ULFM "Enable user-level failure mitigation with a compat
 mark_as_advanced(ALPS_NGS_USE_NEW_ALEA ALPS_NGS_OPENMPI_ULFM)
 option(ALPS_ENABLE_OPENMP "Enable OpenMP parallelization" OFF)
 option(ALPS_BUILD_EXTENSIVE_TESTS "Build expensive graph and HDF5 type-matrix tests" OFF)
+option(ALPS_ENABLE_SANITIZERS "Instrument ALPS and tests with address/undefined sanitizers" OFF)
+if(ALPS_ENABLE_SANITIZERS)
+  if(NOT CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" OR MSVC)
+    message(FATAL_ERROR "ALPS_ENABLE_SANITIZERS requires GCC or Clang with a Unix-style driver")
+  endif()
+  add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
+  add_link_options(-fsanitize=address,undefined)
+endif()
 set(ALPS_VERSION_PRERELEASE "" CACHE STRING "Optional prerelease version label")
 
 # Language requirements belong to ALPS::headers and propagate to every consumer.

@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
+#include <gtest/gtest.h>
 #include <alps/parapack/rng_helper.h>
 #include <array>
 #include <stdexcept>
 #include <omp.h>
 
-int main() {
+TEST(OpenMPWorkers, IndependentRandomEngines) {
+    omp_set_dynamic(0);
     alps::Parameters parameters;
     parameters["WORKER_SEED"] = 42;
     parameters["DISORDER_SEED"] = 0;
@@ -14,11 +16,13 @@ int main() {
 #pragma omp parallel reduction(+:workers)
     {
         ++workers;
-        samples[omp_get_thread_num()] = random.random_01(omp_get_thread_num());
+        if (omp_get_thread_num() < 2)
+            samples[omp_get_thread_num()] = random.random_01(omp_get_thread_num());
     }
-    if (workers != 2 || &random.engine(0) == &random.engine(1))
-        throw std::runtime_error("OpenMP workers need independent random engines");
-    for (double sample : samples)
-        if (!(sample >= 0.0 && sample < 1.0))
-            throw std::runtime_error("Invalid worker random sample");
+    ASSERT_EQ(workers, 2);
+    EXPECT_NE(&random.engine(0), &random.engine(1));
+    for (double sample : samples) {
+        EXPECT_GE(sample, 0.0);
+        EXPECT_LT(sample, 1.0);
+    }
 }

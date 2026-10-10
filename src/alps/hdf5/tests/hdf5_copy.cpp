@@ -12,6 +12,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
+
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/pair.hpp>
 #include <alps/hdf5/complex.hpp>
@@ -69,28 +72,38 @@ void copy(alps::hdf5::archive & tar, std::string const & tpath, alps::hdf5::arch
     sar.set_context(scontext);
 }
 
-int main() {
-    try {
+TEST(Hdf5, Copy) {
+    alps::testing::TemporaryDirectory temporary;
+    {
         std::vector<std::vector<int> > a(4);
         a[0] = std::vector<int>(1, 2);
         a[1] = std::vector<int>(3, 4);
         a[2] = std::vector<int>(5, 6);
 
         {
-            alps::hdf5::archive ar("test_hdf5_copy.h5", "w");
+            alps::hdf5::archive ar((temporary.path() / "test_hdf5_copy.h5").string(), "w");
             ar["/dat/vec"] = a;
             ar["/dat/vec/@foo"] = 10;
             ar["/dat/cpx"] = std::complex<double>(1., 1.);
             ar["/int"] = 2;
         }
         {
-            alps::hdf5::archive tar("test_hdf5_copy2.h5", "w");
-            alps::hdf5::archive sar("test_hdf5_copy.h5", "r");
+            alps::hdf5::archive tar((temporary.path() / "test_hdf5_copy2.h5").string(), "w");
+            alps::hdf5::archive sar((temporary.path() / "test_hdf5_copy.h5").string(), "r");
             copy(tar, "/cpy", sar, "/dat");
+            EXPECT_EQ(tar.get_context(), "/");
+            EXPECT_EQ(sar.get_context(), "/");
+            std::vector<std::vector<int>> restored;
+            tar["/cpy/vec"] >> restored;
+            EXPECT_EQ(restored, a);
+            int attribute = 0;
+            tar["/cpy/vec/@foo"] >> attribute;
+            EXPECT_EQ(attribute, 10);
+            std::complex<double> complex_value;
+            tar["/cpy/cpx"] >> complex_value;
+            EXPECT_EQ(complex_value, std::complex<double>(1., 1.));
+            EXPECT_FALSE(tar.is_data("/int"));
         }
-    } catch (std::runtime_error e) {
-        std::cerr << "Exception: " << e.what() << std::endl;
-        std::abort();
     }
-    return 0;
+
  }

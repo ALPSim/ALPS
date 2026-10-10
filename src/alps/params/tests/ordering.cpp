@@ -12,38 +12,28 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <alps/hdf5/archive.hpp>
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
 #include <alps/ngs/params.hpp>
+#include <vector>
 
-int main() {
-    std::string const filename = "odering";
-    if (boost::filesystem::exists(boost::filesystem::path(filename)))
-        boost::filesystem::remove(boost::filesystem::path(filename));
-    {
-        alps::params parms;
-        parms["a"] = 6;
-        parms["x"] = 2;
-        parms["b"] = 3;
-        parms["w"] = 1;
-        
-        for (alps::params::const_iterator it = parms.begin(); it != parms.end(); ++it)
-            std::cout << it->first << " " << it->second << std::endl;
-
-        alps::hdf5::archive oar(filename, "w");
-        oar["/parameters"] << parms;
-    }
-    std::cout << "= = = = =" << std::endl;
-    {
-        alps::params parms;
-        alps::hdf5::archive iar(filename, "r");
-        iar["/parameters"] >> parms;
-
-        alps::params::const_iterator it = parms.begin();
-        assert((it++)->first == "a");
-        assert((it++)->first == "x");
-        assert((it++)->first == "b");
-        assert((it++)->first == "w");
-    }
-    boost::filesystem::remove(boost::filesystem::path(filename));
-    return 0;
+TEST(ParamsOrdering, CheckpointPreservesInsertionOrderAndValues) {
+    alps::testing::TemporaryDirectory temporary;
+    const auto filename = (temporary.path() / "ordering.h5").string();
+    alps::params expected;
+    expected["a"] = 6;
+    expected["x"] = 2;
+    expected["b"] = 3;
+    expected["w"] = 1;
+    const std::vector<std::string> keys{"a", "x", "b", "w"};
+    std::vector<std::string> before;
+    for (const auto& entry : expected) before.push_back(entry.first);
+    EXPECT_EQ(before, keys);
+    { alps::hdf5::archive archive(filename, "w"); archive["/parameters"] << expected; }
+    alps::params actual;
+    { alps::hdf5::archive archive(filename, "r"); archive["/parameters"] >> actual; }
+    std::vector<std::string> after;
+    for (const auto& entry : actual) after.push_back(entry.first);
+    ASSERT_EQ(after, keys);
+    for (const auto& key : keys) EXPECT_EQ(actual[key].cast<int>(), expected[key].cast<int>()) << key;
 }

@@ -17,19 +17,27 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-foreach(
-  name
-  expression
-  expression2
-  flatten
-  parameter
-  parameterlist
-  parameterlist_xml
-  parameters
-  parameters_xml)
+foreach(name expression expression2 flatten parameter parameterlist parameters)
   add_executable(${name} ${name}.C)
-
   target_link_libraries(${name} PRIVATE ALPS::alps)
-  alps_add_test(${name})
-  set_property(TEST ${name} PROPERTY LABELS parameter)
+  alps_add_gtest(${name} COMPONENT legacy_parameters
+    PROPERTIES ENVIRONMENT "DIR=/home/alps")
 endforeach()
+
+# XML serialization spelling and ordering remain explicit format contracts.
+foreach(name parameterlist_xml parameters_xml)
+  add_executable(${name} ${name}.C)
+  target_link_libraries(${name} PRIVATE ALPS::alps)
+  alps_add_gtest(${name} COMPONENT legacy_parameters LABELS compatibility format)
+endforeach()
+
+add_executable(parameters_hdf5 parameters_hdf5.C)
+target_link_libraries(parameters_hdf5 PRIVATE ALPS::alps)
+alps_add_gtest(parameters_hdf5 COMPONENT legacy_parameters LABELS integration hdf5)
+
+if(ALPS_ENABLE_MPI)
+  add_executable(parameters_mpi parameters_mpi.C)
+  target_link_libraries(parameters_mpi PRIVATE ALPS::alps)
+  alps_add_mpi_gtest(parameters_mpi COMPONENT legacy_parameters RANKS 2)
+  alps_add_mpi_gtest(parameters_mpi COMPONENT legacy_parameters RANKS 3)
+endif()
