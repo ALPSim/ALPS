@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: MIT
 #include <alps/numeric/diagonal_matrix.hpp>
-#include <alps/numeric/detail/deprecated/matrix.hpp>
-#include <alps/numeric/detail/deprecated/vector.hpp>
 #include <alps/numeric/matrix.hpp>
 #include <alps/numeric/matrix/algorithms.hpp>
 #include <alps/numeric/matrix/gemm.hpp>
