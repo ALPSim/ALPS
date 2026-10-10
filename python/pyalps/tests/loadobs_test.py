@@ -17,7 +17,7 @@
 # loadobs.h5 that neither of them created and that no longer ships anywhere in
 # the tree, so both had been dead for years -- the Python half was additionally
 # uncollectable by pytest, and the C++ half was orphaned when
-# tests/pyalps/CMakeLists.txt was removed with the in-tree bindings build.
+# its CMake registration was removed with the in-tree bindings build.
 #
 # The surface they meant to cover is real: walk /simulation/results in an
 # archive, decide scalar vs vector from the shape of mean/value, and load each

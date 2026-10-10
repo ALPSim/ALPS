@@ -273,7 +273,7 @@ def test_version_is_inherited_from_the_repository():
     """
     import pyalps
 
-    version_file = Path(__file__).resolve().parents[2] / "cmake/ALPS_VERSION.txt"
+    version_file = Path(__file__).resolve().parents[3] / "cmake/ALPS_VERSION.txt"
     if not version_file.is_file():
         pytest.skip("not running from an ALPS checkout")
 

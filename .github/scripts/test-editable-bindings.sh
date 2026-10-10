@@ -3,7 +3,7 @@ set -euo pipefail
 python -m pip install build 'nanobind==2.15.0' 'scikit-build-core>=1.0' numpy scipy matplotlib lxml h5py
 if [[ "$RUNNER_OS" == Linux ]]; then python -m pip install patchelf; fi
 python -m pip install --no-build-isolation --no-deps -e python/pyalps --config-settings "build-dir=$PWD/_build/python"
-suites=(tests/pyalps)
+suites=(python/pyalps/tests)
 runner=(python -m pytest)
 if [[ "${ALPS_CI_MPI:-0}" == 1 ]]; then
   # Initialize MPI before native bindings load the MPI-enabled runtime.

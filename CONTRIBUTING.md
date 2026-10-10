@@ -135,7 +135,7 @@ After the editable install above, test Python and installed-SDK consumers too:
 ```sh
 python -m pip install "pytest>=8"
 PYALPS_TEST_DOWNSTREAM_EXPORT=1 CMAKE_BUILD_PARALLEL_LEVEL=2 \
-  python -m pytest tests/pyalps tests/cmake -q -rs
+  python -m pytest python/pyalps/tests tests/cmake -q -rs
 ```
 
 Keep `ALPS_DIR` and any dependency prefixes set. The downstream flag enables tests that compile Python extensions against the installed SDK and pyalps runtime. These checks compile additional small projects and take longer than import tests. `tests/cmake` assumes an MPI-disabled LP64 SDK for its consumer contracts; use the default SDK for this command. If custom toolchain arguments are needed by these temporary builds, `ALPS_TEST_CMAKE_ARGS` accepts a JSON array of CMake arguments.

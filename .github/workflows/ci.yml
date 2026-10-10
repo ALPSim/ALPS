@@ -151,7 +151,7 @@ jobs:
         python .github/scripts/generate_citations.py --check
         python -m pytest tests/packaging/test_citations.py -q
         python -m compileall -q .github/scripts python/pyalps/_build_support
-        python -m pytest tests/ci -q --junitxml=ci-tests.xml
+        python -m pytest tests/ci tests/tutorials -q --junitxml=ci-tests.xml
     - name: Summarize helper tests
       if: always()
       run: python .github/scripts/junit_summary.py ci-tests.xml

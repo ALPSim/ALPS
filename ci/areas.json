@@ -103,7 +103,7 @@
         ".github/scripts/**",
         ".github/dependencies.json",
         ".github/workflows/_wheels.yml",
-        "tests/pyalps/**"
+        "python/pyalps/tests/**"
       ],
       "strip_comments": true
     }

@@ -305,7 +305,7 @@ class Workflow(unittest.TestCase):
                            ("static", "tests/integration/CMakeLists.txt"),
                            ("static", "third_party/boost_numeric_bindings/README.md"),
                            ("packaging", "tests/cmake/test_sdk_contracts.py"),
-                           ("packaging", "tests/pyalps/test_binding_surface.py"),
+                           ("packaging", "python/pyalps/tests/test_binding_surface.py"),
                            ("linux", ".github/scripts/run_with_timeout.py"),
                            ("mpi", "src/alps/parapack/tests/collect_mpi.op-3"),
                            ("mpi", "ci/run_mpi_test.cmake")):

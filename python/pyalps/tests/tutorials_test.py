@@ -4,14 +4,14 @@
 
 """Run the pure-Python ngs tutorials as part of the wheel test suite.
 
-tutorials/10-ngs/5_export_python is covered by build.yml, which compiles it as a
+tutorials/10-ngs/5_export_python is covered by compatibility.yml, which compiles it as a
 downstream CMake project. Its two pure-Python siblings needed no compiler and so
 had no coverage at all -- and both were broken in ways only running them shows:
 6_python_native could not store an ngs.params or its measurements dict through
 `archive[path] = ...`, and neither one's load() had ever executed (one wrote to
 the archive instead of reading from it, both called double()).
 
-Running them here rather than in build.yml is deliberate: they need an installed
+Running them here rather than in compatibility.yml is deliberate: they need an installed
 pyalps, which is what this suite already has, so cibuildwheel exercises them
 against every wheel it builds.
 """
@@ -24,10 +24,10 @@ from pathlib import Path
 import pytest
 
 
-TUTORIALS = Path(__file__).resolve().parents[2] / "tutorials" / "10-ngs"
+TUTORIALS = Path(__file__).resolve().parents[3] / "tutorials" / "10-ngs"
 
 # 5_export_python is absent: its smoke test imports a compiled extension that
-# only exists after the downstream CMake build in build.yml.
+# only exists after the downstream CMake build in compatibility.yml.
 PURE_PYTHON_TUTORIALS = ["6_python_native", "7_python_extend"]
 
 
@@ -71,7 +71,7 @@ def test_every_pure_python_tutorial_has_a_smoke_test():
         if not directory.is_dir() or not list(directory.glob("*.py")):
             continue
         if list(directory.glob("*.cpp")):
-            continue        # compiled tutorials are covered by build.yml
+            continue        # compiled tutorials are covered by compatibility.yml
         if not (directory / "smoke_test.py").is_file():
             untested.append(directory.name)
 
