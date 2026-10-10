@@ -8,7 +8,7 @@ The ALPS software package aims to provide a set of well tested, robust, and stan
 
 ## Learn ALPS
 
-Start with the [tutorial guide](tutorials/README.md): run your first simulation, choose a numerical method, or learn to develop with the ALPS libraries. It includes recommended learning paths, notebooks, and focused API examples.
+Start with the [tutorials](https://alps.comp-phys.org/tutorials/): run your first simulation, choose a numerical method, or learn to develop with the ALPS libraries. It includes recommended learning paths, notebooks, and focused API examples.
 
 ## Installation
 

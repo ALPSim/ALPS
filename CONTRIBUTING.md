@@ -1,6 +1,6 @@
 # Contributing to ALPS
 
-Bug reports, documentation, tests and new simulation methods are welcome. To use ALPS without developing it, start with the [installation instructions](README.md#installation) and [tutorial guide](tutorials/README.md). See [CHANGELOG.md](CHANGELOG.md) for unreleased changes and migration guidance.
+Bug reports, documentation, tests and new simulation methods are welcome. To use ALPS without developing it, start with the [installation instructions](README.md#installation) and [tutorials](https://alps.comp-phys.org/tutorials/). See [CHANGELOG.md](CHANGELOG.md) for unreleased changes and migration guidance.
 
 - [Getting started with the code](#getting-started-with-the-code)
 - [Run the tests](#run-the-tests)
@@ -217,7 +217,7 @@ request review.
 - `src/alps/`: C++ components, public headers and module-local tests; see the [module map and library boundaries](src/alps/README.md).
 - `src/apps/` and `src/tools/`: simulation applications, shared solver implementations and [command-line tools](src/tools/README.md).
 - `python/pyalps/`: Python sources, bindings, packaging and extension example.
-- `tutorials/`: [ordered tutorials and standalone library examples](tutorials/README.md).
+- `tutorials/`: tutorials and [standalone library examples](tutorials/examples/README.md).
 - `tests/`: cross-module integration, Python, SDK, CLI, build-helper and packaging tests.
 - `third_party/`: [Numeric Bindings headers](third_party/boost_numeric_bindings/README.md) and [XDR serialization](third_party/xdr/README.md).
 - `cmake/` and `.github/`: shared build configuration, generated-header templates, version file, CI and release helpers.
