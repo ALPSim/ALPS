@@ -1,5 +1,3 @@
-CXXFLAGS ?= -O2
-
 .PHONY: clean distclean
 
 hello: hello.C
