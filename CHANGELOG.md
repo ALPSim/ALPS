@@ -29,6 +29,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - Require CMake 3.27 or newer and an externally installed Boost 1.76 or newer with CMake packages. The SDK requires C++17/C11 compilers, HDF5's C library, and LP64 BLAS/LAPACK; bundled Boost builds and alternate numerical integer/symbol ABIs are no longer supported.
 - Export CMake targets for the installed SDK, applications and solver libraries. Downstream C++ projects link `ALPS::alps`; Python extensions sharing pyalps objects use `pyalps::runtime`. MaxEnt, CT-HYB and CT-INT Python wrappers link the SDK's solver libraries instead of compiling their implementations again.
 - Make MPI opt-in with `ALPS_ENABLE_MPI=ON`. Standalone builds enable applications and native tests by default; embedded `add_subdirectory` builds default to the library alone. The default SDK uses shared libraries, as required by the Python bindings.
+- Top-level single-configuration builds still default to `CMAKE_BUILD_TYPE=Release`; embedded builds leave the build type to the parent project.
 - Support editable Python development against an installed SDK, with packaged native runtime resources and explicit downstream ABI checks. Redistributable wheels bundle native dependencies through platform repair and are tested after installation on fresh runners.
 - Build the C++ and Fortran examples in `tutorials/examples/` as standalone projects against an installed SDK. Tutorial sources are installed only when the `tutorials` component is requested.
 
