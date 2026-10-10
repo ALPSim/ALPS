@@ -28,7 +28,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Migration
 
-The existing native test framework, public and vendored headers, and differential audit tooling are retained. Tutorial consumers use the exported SDK targets; the obsolete Makefile and CMake consumer interfaces are removed. Configure downstream projects using [CONTRIBUTING.md](CONTRIBUTING.md#getting-started-with-the-code).
+Tutorial consumers use the exported SDK targets; the obsolete Makefile and CMake consumer interfaces are removed. Configure downstream projects using [CONTRIBUTING.md](CONTRIBUTING.md#getting-started-with-the-code).
 
 Numerical matrix/vector persistence now requires an explicit adapter: include `<alps/hdf5/matrix.hpp>` or `<alps/hdf5/numeric_vector.hpp>` and link `ALPS::numeric_io`. The matrix umbrella `<alps/numeric/matrix.hpp>` no longer includes HDF5 automatically. Diagonal matrices and deprecated BLAS matrix/vector classes retain their archive `save`/`load` members without requiring HDF5 headers in the numerical interfaces. Numerical matrix `write_xml` and XML insertion remain available through `<alps/xml/matrix.hpp>` and `ALPS::numeric_xml`. Header ownership moves preserve public include spellings; consumers of persistence and XML output must include the corresponding adapters.
 
