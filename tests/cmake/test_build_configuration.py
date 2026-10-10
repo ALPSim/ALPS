@@ -80,7 +80,10 @@ def test_legacy_make_finds_non_system_boost_at_runtime(tmp_path, monkeypatch):
     # A library outside the loader's default paths reproduces the private Boost
     # installs used by manylinux and macOS wheels. No ALPS rebuild is needed.
     (tmp_path / "provider.cpp").write_text(
-        'extern "C" int legacy_provider_answer() { return 42; }\n')
+        'extern "C" int legacy_atomic_answer();\n'
+        'extern "C" int legacy_provider_answer() { return legacy_atomic_answer(); }\n')
+    (tmp_path / "atomic.cpp").write_text(
+        'extern "C" int legacy_atomic_answer() { return 42; }\n')
     (tmp_path / "core.cpp").write_text(
         'extern "C" int legacy_sdk_unused() { return 0; }\n')
     (tmp_path / "main.cpp").write_text(
@@ -100,10 +103,17 @@ set_target_properties(alps_core PROPERTIES OUTPUT_NAME alps
   LIBRARY_OUTPUT_DIRECTORY "${{CMAKE_BINARY_DIR}}/lib")
 add_library(ALPS::alps ALIAS alps_core)
 set(ALPS_BOOST_COMPONENTS filesystem)
+add_library(private_atomic SHARED atomic.cpp)
+set_target_properties(private_atomic PROPERTIES
+  OUTPUT_NAME alps_legacy_atomic_fixture
+  LIBRARY_OUTPUT_DIRECTORY "${{CMAKE_BINARY_DIR}}/provider")
+add_library(Boost::atomic ALIAS private_atomic)
 add_library(private_boost SHARED provider.cpp)
 set_target_properties(private_boost PROPERTIES
   OUTPUT_NAME alps_legacy_boost_fixture
+  SKIP_BUILD_RPATH TRUE
   LIBRARY_OUTPUT_DIRECTORY "${{CMAKE_BINARY_DIR}}/provider")
+target_link_libraries(private_boost PUBLIC Boost::atomic)
 add_library(Boost::filesystem ALIAS private_boost)
 include("{SOURCE.as_posix()}/cmake/ALPSLegacy.cmake")
 ''')
