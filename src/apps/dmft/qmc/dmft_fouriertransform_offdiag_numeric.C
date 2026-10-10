@@ -21,6 +21,7 @@
 // off-diagonal input into G_tau instead of being zeroed. This test fails on
 // the pre-fix code and passes once the guard reads c1==0 && c2==0 && c3==0.
 
+#include <utility> // Boost.Math 1.76 includes this inside a namespace.
 #include <boost/math/constants/constants.hpp>
 #include "fouriertransform.h"
 

@@ -17,6 +17,7 @@
 
 
 
+#include <utility> // Boost.Math 1.76 includes this inside a namespace.
 #include <boost/math/constants/constants.hpp>
 #include "hilberttransformer.h"
 #include <functional>

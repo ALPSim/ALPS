@@ -18,6 +18,7 @@
 /// @file externalsolver.C
 /// @brief implements the external solver
 /// @sa ExternalSolver
+#include <utility> // Boost.Math 1.76 includes this inside a namespace.
 #include <boost/math/constants/constants.hpp>
 #include "externalsolver.h"
 #include "fouriertransform.h"

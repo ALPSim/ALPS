@@ -14,6 +14,7 @@
  *****************************************************************************/
 #ifndef HYB_EVALUATE
 #define HYB_EVALUATE
+#include <utility> // Boost.Math 1.76 includes this inside a namespace.
 #include <boost/math/constants/constants.hpp>
 #include <boost/math/special_functions/bessel.hpp>
 

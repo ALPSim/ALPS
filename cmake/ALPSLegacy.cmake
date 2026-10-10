@@ -34,7 +34,20 @@ block()
   endforeach()
   list(GET HDF5_INCLUDE_DIRS 0 HDF5_INCLUDE_DIR)
   string(JOIN " " HDF5_LIBS ${HDF5_LIBRARIES})
-  string(JOIN " " LAPACK_LIBS ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
+  set(LAPACK_LIBS "")
+  foreach(library IN LISTS LAPACK_LIBRARIES BLAS_LIBRARIES)
+    # CMake accepts bare library names (as returned by Alpine's provider),
+    # whereas the Makefile invokes the compiler driver directly.
+    if(library MATCHES "^(.*)/([^/]+)\\.framework$")
+      # CMake also accepts framework directories; a compiler driver needs
+      # the corresponding framework search directory and name instead.
+      string(APPEND LAPACK_LIBS " -F\"${CMAKE_MATCH_1}\" -framework \"${CMAKE_MATCH_2}\"")
+    elseif(IS_ABSOLUTE "${library}" OR library MATCHES "^-")
+      string(APPEND LAPACK_LIBS " ${library}")
+    else()
+      string(APPEND LAPACK_LIBS " -l${library}")
+    endif()
+  endforeach()
   if(ALPS_ENABLE_MPI)
     string(JOIN " " MPI_LIBS ${MPI_CXX_LIBRARIES})
     set(MPIEXEC "${MPIEXEC_EXECUTABLE}")

@@ -37,7 +37,13 @@ def test_missing_blas_is_a_configuration_error(tmp_path):
     assert "CMAKE_DISABLE_FIND_PACKAGE_BLAS" in result.stdout + result.stderr
 
 
-def test_legacy_make_supports_header_only_boost_components(tmp_path):
+@pytest.mark.parametrize("lapack,expected", [
+    ("/provider/lib/liblapack.so;-lm", "/provider/lib/liblapack.so -lm"),
+    ("blas;lapack;/provider/lib/libblas.so", "-lblas -llapack /provider/lib/libblas.so"),
+    ("/SDK/System/Library/Frameworks/Accelerate.framework;-lm;-ldl",
+     '-F"/SDK/System/Library/Frameworks" -framework "Accelerate" -lm -ldl'),
+])
+def test_legacy_make_supports_header_only_boost_components(tmp_path, lapack, expected):
     # Reproduce a provider exposing Boost::regex as INTERFACE_LIBRARY while
     # other components still have real library files (as on Homebrew).
     (tmp_path / "CMakeLists.txt").write_text(f'''
@@ -46,6 +52,7 @@ project(legacy_provider LANGUAGES NONE)
 set(PROJECT_SOURCE_DIR "{SOURCE.as_posix()}")
 set(CMAKE_INSTALL_DATADIR share)
 set(HDF5_INCLUDE_DIRS /provider/include)
+set(LAPACK_LIBRARIES "{lapack}")
 set(ALPS_SDK_RUNTIME_TARGETS ALPS::alps)
 add_library(ALPS::alps SHARED IMPORTED)
 set_target_properties(ALPS::alps PROPERTIES OUTPUT_NAME alps)
@@ -64,6 +71,8 @@ include("{SOURCE.as_posix()}/cmake/ALPSLegacy.cmake")
     makefile = (tmp_path / "build/legacy/Release/include.mk").read_text()
     assert "/provider/lib/libboost_filesystem.so" in makefile
     assert "boost_regex" not in makefile
+    lapack_line = next(line for line in makefile.splitlines() if line.startswith("LAPACK_LIBS ="))
+    assert lapack_line.split("=", 1)[1].strip() == expected
 
 
 @pytest.mark.parametrize("option, diagnostic", [

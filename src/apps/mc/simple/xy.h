@@ -19,6 +19,7 @@
 #ifndef ALPS_SIMPLE_MC_XY_H
 #define ALPS_SIMPLE_MC_XY_H
 
+#include <utility> // Boost.Math 1.76 includes this inside a namespace.
 #include <boost/math/constants/constants.hpp>
 #include <alps/parapack/worker.h>
 #include <alps/parapack/util.h> // for alps::id2string

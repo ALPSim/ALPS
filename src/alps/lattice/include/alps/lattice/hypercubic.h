@@ -17,6 +17,7 @@
 #ifndef ALPS_LATTICE_HYPERCUBIC_H
 #define ALPS_LATTICE_HYPERCUBIC_H
 
+#include <utility> // Boost.Math 1.76 includes this inside a namespace.
 #include <boost/math/constants/constants.hpp>
 #include <alps/config.h>
 #include <alps/lattice/lattice.h>

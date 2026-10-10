@@ -15,6 +15,7 @@
 #ifndef ALPS_TOOL_DEFAULT_MODEL_HPP
 #define ALPS_TOOL_DEFAULT_MODEL_HPP
 
+#include <utility> // Boost.Math 1.76 includes this inside a namespace.
 #include <boost/math/constants/constants.hpp>
 #include <math.h>
 #include <alps/ngs/params.hpp>

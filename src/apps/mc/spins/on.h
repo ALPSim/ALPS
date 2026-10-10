@@ -13,6 +13,7 @@
 #ifndef ALPS_APPLICATIONS_MC_SPIN_ON_H_2
 #define ALPS_APPLICATIONS_MC_SPIN_ON_H_2
 
+#include <utility> // Boost.Math 1.76 includes this inside a namespace.
 #include <boost/math/constants/constants.hpp>
 #include "tinyvec.h"
 #include "matrices.h"

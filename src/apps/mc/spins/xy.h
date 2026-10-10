@@ -13,6 +13,7 @@
 
 #ifndef ALPS_APPLICATIONS_MC_SPIN_XY_H_
 #define ALPS_APPLICATIONS_MC_SPIN_XY_H_
+#include <utility> // Boost.Math 1.76 includes this inside a namespace.
 #include <boost/math/constants/constants.hpp>
 #include <cmath>
 

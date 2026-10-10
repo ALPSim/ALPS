@@ -21,6 +21,7 @@
 // (2,3) untransformed, so its output differs from pair (0,1); the fixed
 // code is symmetric.
 
+#include <utility> // Boost.Math 1.76 includes this inside a namespace.
 #include <boost/math/constants/constants.hpp>
 #include "hilberttransformer.h"
 

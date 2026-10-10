@@ -16,6 +16,7 @@
 #ifndef ALPS_APPLICATIONS_QMC_NGS_H
 #define ALPS_APPLICATIONS_QMC_NGS_H
 
+#include <utility> // Boost.Math 1.76 includes this inside a namespace.
 #include <boost/math/constants/constants.hpp>
 #include <boost/optional.hpp>
 

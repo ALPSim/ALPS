@@ -20,6 +20,7 @@
 //   coordinate_of_site3(vector of double)  state_of_site3(vector of double)
 //   ...
 
+#include <utility> // Boost.Math 1.76 includes this inside a namespace.
 #include <boost/math/constants/constants.hpp>
 #include <alps/osiris.h>
 #include <alps/scheduler/types.h>
