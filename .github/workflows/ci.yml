@@ -363,9 +363,9 @@ jobs:
         cmake --preset sanitizers -B _build/sanitizers \
           -DCMAKE_INSTALL_PREFIX="$PWD/_build/sanitizers/install" \
           -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF
-        cmake --build _build/sanitizers --target hdf5_memory hdf5_valgrind hdf5_multi_array hdf5_exceptions hdf5_fortran_string observableset_hdf5 testobservableset param_checkpoint boostdump xdrdump osiris_comm_contract
+        cmake --build _build/sanitizers --target runtime_correctness hdf5_memory hdf5_valgrind hdf5_multi_array hdf5_exceptions hdf5_fortran_string observableset_hdf5 testobservableset param_checkpoint boostdump xdrdump osiris_comm_contract
     - name: Run instrumented native tests
-      run: ctest --test-dir _build/sanitizers -R '^(hdf5_memory|hdf5_valgrind|hdf5_multi_array|hdf5_exceptions|hdf5_fortran_string|observableset_hdf5|testobservableset|param_checkpoint|boostdump|xdrdump|osiris_comm_contract)$'
+      run: ctest --test-dir _build/sanitizers -R '^(runtime_correctness|hdf5_memory|hdf5_valgrind|hdf5_multi_array|hdf5_exceptions|hdf5_fortran_string|observableset_hdf5|testobservableset|param_checkpoint|boostdump|xdrdump|osiris_comm_contract)$'
         --output-on-failure --output-junit ctest.xml --no-tests=error
     - name: Summarize sanitizer tests
       if: always()
