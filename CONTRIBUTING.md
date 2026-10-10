@@ -345,7 +345,7 @@ Plot/extraction formats are `text`, `html`, `gnuplot`, `matplotlib` and `grace`;
 
 ## CI coverage
 
-Pull requests report aggregate `Source CI` and `Packaging CI` checks. Pull requests targeting master, master pushes and release tags run the complete source and packaging matrices. The [source workflow](.github/workflows/build.yml) and [packaging workflow](.github/workflows/build_wheels.yml) are the authoritative lists of tested configurations.
+Pull requests report aggregate `Source CI` and `Packaging CI` checks. Pull requests, master pushes and release tags run the complete source and packaging matrices. The [source workflow](.github/workflows/build.yml) and [packaging workflow](.github/workflows/build_wheels.yml) are the authoritative lists of tested configurations.
 
 Coverage includes Linux/macOS source builds, CMake 3.27, MPI/OpenMP, installed-SDK consumers, direct CMake/editable-pip contributor workflows and repaired wheels tested on fresh runners. Dependency providers in CI are runner configuration, not requirements to use that package manager locally. Packaging CI tests the CPython 3.11 and Python 3.12+ abi3 wheels and the source distribution; local editable tests do not replace that validation.
 

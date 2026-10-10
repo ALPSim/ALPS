@@ -4,11 +4,9 @@ on:
   push:
     branches:
       - master
-      - WIP/sdk-python-preserve-legacy
     tags:
       - 'v*'
   pull_request:
-    branches: [master, WIP/sdk-source-layout]
   workflow_dispatch:
 
 permissions:
