@@ -116,6 +116,10 @@ void DiagMatrix<T,M>::dostep()
     if (this->alps::scheduler::Task::parms.defined("TOTAL_MOMENTUM") && loop_momenta)
       qns.push_back(std::make_pair(std::string("TOTAL_MOMENTUM"),momenta[ik]));
     this->set_parameters(this->alps::scheduler::Task::parms);
+    // check before the first sector is diagonalized
+    if (this->save_vectors() && this->uses_translation_invariance())
+      boost::throw_exception(std::runtime_error("SAVE_EIGENVECTORS does not support momentum sectors: "
+        "set TRANSLATION_SYMMETRY=false or use an open lattice"));
     if (this->dimension()) {
       this->quantumnumbervalues_.push_back(qns);
       // get spectrum
@@ -194,9 +198,6 @@ void DiagMatrix<T,M>::print() const
 template <class T, class M>
 void DiagMatrix<T,M>::save_eigenvectors()
 {
-  if (this->uses_translation_invariance())
-    boost::throw_exception(std::runtime_error("SAVE_EIGENVECTORS does not support momentum sectors: "
-      "set TRANSLATION_SYMMETRY=false or use an open lattice"));
   std::vector<int> basis;
   typedef typename alps::hamiltonian_matrix<M>::basis_states_type::const_iterator state_iterator;
   for (state_iterator it = this->states_vector().begin(); it != this->states_vector().end(); ++it)
