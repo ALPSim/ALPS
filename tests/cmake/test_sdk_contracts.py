@@ -224,8 +224,9 @@ def test_legacy_include_mk(tmp_path):
     for name in ("CPPFLAGS", "CXXFLAGS", "LDFLAGS", "LIBS", "LDLIBS"):
         environment.pop(name, None)
     subprocess.run(["make", "-C", str(tmp_path)], check=True, env=environment)
-    result = subprocess.run([str(tmp_path / "legacy")], cwd=tmp_path, check=True,
+    result = subprocess.run([str(tmp_path / "legacy")], cwd=tmp_path,
                             capture_output=True, text=True)
+    assert result.returncode == 0, result.stdout + result.stderr
     assert result.stdout.strip() == "L = 4"
 
 
