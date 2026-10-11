@@ -202,6 +202,33 @@ def test_tutorials_build_against_exported_sdk(tmp_path, tutorial, target):
         assert result.stdout.strip() == "hello, world"
 
 
+def test_legacy_use_file(tmp_path):
+    # ALPS 2.x projects: find_package by prefix, include(${ALPS_USE_FILE}), ${ALPS_LIBRARIES}.
+    prefix = Path(os.environ["ALPS_DIR"]).resolve().parents[1]
+    build = tmp_path / "build"
+    subprocess.run([
+        "cmake", "-S", str(Path(__file__).with_name("legacy")), "-B", str(build),
+        "-DCMAKE_BUILD_TYPE=Release", f"-DCMAKE_PREFIX_PATH={prefix}",
+        *json.loads(os.environ.get("ALPS_TEST_CMAKE_ARGS", "[]")),
+    ], check=True)
+    build_and_run(build)
+
+
+@pytest.mark.skipif(os.name == "nt" or not shutil.which("make"), reason="requires Unix make")
+def test_legacy_include_mk(tmp_path):
+    prefix = Path(os.environ["ALPS_DIR"]).resolve().parents[1]
+    for name in ("legacy.cpp", "Makefile"):
+        shutil.copy2(Path(__file__).with_name("legacy") / name, tmp_path / name)
+    environment = os.environ.copy()
+    environment["ALPS_ROOT"] = str(prefix)
+    for name in ("CPPFLAGS", "CXXFLAGS", "LDFLAGS", "LIBS", "LDLIBS"):
+        environment.pop(name, None)
+    subprocess.run(["make", "-C", str(tmp_path)], check=True, env=environment)
+    result = subprocess.run([str(tmp_path / "legacy")], cwd=tmp_path, check=True,
+                            capture_output=True, text=True)
+    assert result.stdout.strip() == "L = 4"
+
+
 @pytest.mark.skipif(os.name == "nt" or not shutil.which("make"), reason="requires Unix make")
 def test_make_intro_builds_without_sdk(tmp_path):
     # This lesson is ordinary hello-world C++, preceding ALPS integration.

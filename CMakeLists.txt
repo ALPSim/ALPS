@@ -183,6 +183,7 @@ install(
         "${PROJECT_BINARY_DIR}/cmake/ALPSConfigVersion.cmake"
   DESTINATION ${CMAKE_INSTALL_DATADIR}/alps
   COMPONENT build)
+include(cmake/legacy/ALPSLegacyInterfaces.cmake)
 install(
   FILES CHANGELOG.md CITATION.md CONTRIBUTING.md LICENSE.txt README.md
   DESTINATION ${CMAKE_INSTALL_DATADIR}/alps

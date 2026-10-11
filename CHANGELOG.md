@@ -35,7 +35,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Migration
 
-The existing native test framework, public and vendored headers, and differential audit tooling are retained. Tutorial consumers use the exported SDK targets; the obsolete Makefile and CMake consumer interfaces are removed. Configure downstream projects using [CONTRIBUTING.md](CONTRIBUTING.md#getting-started-with-the-code).
+The existing native test framework, public and vendored headers, and differential audit tooling are retained. Tutorial consumers use the exported SDK targets. The ALPS 2.x consumer interfaces `UseALPS.cmake`, `UsePyALPS.cmake` and `include.mk` remain installed as deprecated compatibility layers over those targets. Configure downstream projects using [CONTRIBUTING.md](CONTRIBUTING.md#getting-started-with-the-code).
 
 Numerical matrix/vector persistence now requires an explicit adapter: include `<alps/hdf5/matrix.hpp>` or `<alps/hdf5/numeric_vector.hpp>` and link `ALPS::numeric_io`. The matrix umbrella `<alps/numeric/matrix.hpp>` no longer includes HDF5 automatically. Diagonal matrices and deprecated BLAS matrix/vector classes retain their archive `save`/`load` members without requiring HDF5 headers in the numerical interfaces. Numerical matrix `write_xml` and XML insertion remain available through `<alps/xml/matrix.hpp>` and `ALPS::numeric_xml`. Header ownership moves preserve public include spellings; consumers of persistence and XML output must include the corresponding adapters.
 
@@ -52,8 +52,8 @@ Numerical matrix/vector persistence now requires an explicit adapter: include `<
 | `PYALPS_BUILD_APPLICATIONS` | `PYALPS_BUILD_SOLVERS`; `PYALPS_BUNDLE_APPLICATIONS` still controls bundled executables separately |
 | `ALPS_USE_SYSTEM_BOOST`, `Boost_ROOT_DIR` / bundled Boost discovery | External Boost packages are always required; locate them through `Boost_ROOT` or `CMAKE_PREFIX_PATH` |
 | `LAPACK_64_BIT`, alternate `BIND_FORTRAN_*` ABIs | Use LP64 BLAS/LAPACK with lowercase, trailing-underscore symbols |
-| `UseALPS.cmake`, `include.mk` | Imported SDK targets and explicit installation paths; add the installed `bin` directory to `PATH` |
-| `UsePyALPS.cmake` | [pyalps downstream CMake package](python/pyalps/README.md#downstream-native-extensions) |
+| `UseALPS.cmake`, `include.mk` | Imported SDK targets and explicit installation paths; add the installed `bin` directory to `PATH`. Both remain installed, deprecated: `${ALPS_LIBRARIES}` is `ALPS::alps`, and `UseALPS.cmake` no longer sets compilers, global flags or cache entries |
+| `UsePyALPS.cmake` | [pyalps downstream CMake package](python/pyalps/README.md#downstream-native-extensions); the deprecated `alps_target_link_pyalps` links `pyalps::runtime` |
 | `<alps/ngs/detail/export_sim_to_python.hpp>` | `<pyalps/export_simulation.hpp>`; the old header forwards to it |
 | Historical XML shell tools | Retained alongside `alps-xml`; see [XML tools](CONTRIBUTING.md#xml-resources-and-tools) |
 | Top-level `import mpi` compatibility module | `import pyalps.mpi`; install the `mpi` extra for mpi4py |

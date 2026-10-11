@@ -88,7 +88,7 @@ nanobind_add_module(my_module STABLE_ABI NB_STATIC my_module.cpp)
 target_link_libraries(my_module PRIVATE pyalps::runtime)
 ```
 
-`pyalps.get_cmake_dir()` exposes the same directory to Python tools. The C++ SDK neither installs this package nor discovers Python. The former SDK function `alps_target_link_pyalps` has been removed.
+`pyalps.get_cmake_dir()` exposes the same directory to Python tools. The C++ SDK neither installs this package nor discovers Python. The former SDK function `alps_target_link_pyalps` remains available, deprecated, from `include(${ALPS_PYTHON_USE_FILE})`; it requires `find_package(nanobind)` first and links `pyalps::runtime`.
 
 The same target supplies `<pyalps/export_simulation.hpp>` for exporting a derived simulation through nanobind. The historical SDK include `<alps/ngs/detail/export_sim_to_python.hpp>` forwards to this Python-owned header and remains available.
 
