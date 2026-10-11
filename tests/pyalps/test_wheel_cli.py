@@ -11,6 +11,7 @@ import sys
 import sysconfig
 import xml.etree.ElementTree as ET
 
+import numpy as np
 import pytest
 import pyalps
 
@@ -186,6 +187,38 @@ J=1
     assert all(math.isfinite(value) for row in values for value in row)
     assert "set xlabel" in run("plot2gp", source).stdout
     assert "# Grace project file" in run("plot2xmgr", source).stdout
+
+
+def test_fulldiag_saved_eigenvectors(wheel_cli, tmp_path):
+    run, _, _ = wheel_cli
+    parameters = tmp_path / "eigenvectors"
+    parameters.write_text('''LATTICE="open chain lattice"
+MODEL="spin"
+local_S=1
+J=1
+CONSERVED_QUANTUMNUMBERS="Sz"
+SAVE_EIGENVECTORS=1
+{L=3}
+''')
+    run("parameter2xml", parameters.name)
+    run("fulldiag", parameters.name + ".in.xml")
+    result = str(tmp_path / (parameters.name + ".task1.out.h5"))
+    [sectors] = pyalps.loadEigenvectors([result])
+    energies = {d.props["hdf5_path"]: d.y for d in pyalps.loadSpectra([result])[0]}
+    assert len(sectors) == 7
+    for d in sectors:
+        # translation symmetry is on by default, so the run is complex
+        assert np.iscomplexobj(d.y)
+        basis = d.props["basis"]
+        assert d.y.shape == (len(basis), len(basis))
+        assert basis.shape[1] == 3
+        sz = d.props["site_basis"][0]["Sz"]
+        np.testing.assert_allclose(sz[basis].sum(axis=1), d.props["Sz"])
+        np.testing.assert_allclose(d.y.conj() @ d.y.T, np.eye(len(basis)), atol=1e-12)
+        np.testing.assert_allclose(d.x, energies[d.props["hdf5_path"]])
+    # fulldiag_evaluate reads the file through a real-valued task
+    run("fulldiag_evaluate", "--T_MIN", "0.5", "--T_MAX", "2", "--DELTA_T", "0.5",
+        parameters.name + ".task1.out.xml")
 
 
 def test_simplemc_snapshot_to_vtk(wheel_cli, tmp_path):

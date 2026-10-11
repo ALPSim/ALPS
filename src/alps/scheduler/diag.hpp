@@ -24,6 +24,7 @@
 #include <alps/hdf5/numeric_vector.hpp>
 #include <alps/hdf5/vector.hpp>
 #include <alps/hdf5/complex.hpp>
+#include <alps/type_traits/is_complex.hpp>
 
 namespace alps { namespace scheduler {
 
@@ -67,6 +68,7 @@ protected:
 private:
   bool print_vectors_;
   bool save_vectors_;
+  bool skipped_vectors_;
   bool read_hdf5_;
 };
 
@@ -78,6 +80,7 @@ DiagTask<T,G>::DiagTask(const ProcessList& where , const boost::filesystem::path
     , MeasurementOperators(this->get_parameters())
     , print_vectors_(this->get_parameters().value_or_default("PRINT_EIGENVECTORS",false))
     , save_vectors_(this->get_parameters().value_or_default("SAVE_EIGENVECTORS",false))
+    , skipped_vectors_(false)
     , read_hdf5_(false)
 {
   if (!delay_construct)
@@ -115,12 +118,17 @@ void DiagTask<T,G>::load(hdf5::archive & ar) {
         // read measurements
           ar >> make_pvp(sectorpath,measurements_[i]);
 
-        // read eigenvectors
+        // read eigenvectors; readers that always use double (fulldiag_evaluate,
+        // convert2xml) skip the vectors of a complex run instead of failing
         if (ar.is_group(sectorpath+"/eigenvectors")) {
-          basis_states_.resize(i+1);
-          eigenvectors_.resize(i+1);
-          ar >> make_pvp(sectorpath+"/basis/values", basis_states_[i]);
-          ar >> make_pvp(sectorpath+"/eigenvectors/values", eigenvectors_[i]);
+          if (ar.is_complex(sectorpath+"/eigenvectors/values") == is_complex<value_type>::value) {
+            basis_states_.resize(i+1);
+            eigenvectors_.resize(i+1);
+            ar >> make_pvp(sectorpath+"/basis/values", basis_states_[i]);
+            ar >> make_pvp(sectorpath+"/eigenvectors/values", eigenvectors_[i]);
+          }
+          else
+            skipped_vectors_ = true;
         }
       }
   }
@@ -130,6 +138,9 @@ void DiagTask<T,G>::load(hdf5::archive & ar) {
 
 template <class T, class G>
 void DiagTask<T,G>::save(hdf5::archive & ar) const {
+  if (skipped_vectors_)
+    boost::throw_exception(std::runtime_error("the eigenvectors in this result file are not of this task's "
+      "type (real or complex); rewriting the file would drop them"));
   scheduler::Task::save(ar);
   for (unsigned  i=0;i<eigenvalues_.size();++i) {
     std::string sectorpath = "/spectrum/sectors/" + boost::lexical_cast<std::string>(i);
