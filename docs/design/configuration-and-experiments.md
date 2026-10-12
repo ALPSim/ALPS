@@ -13,7 +13,7 @@ adapters. HDF5 remains the result format and the target for migrated checkpoints
 
 **The experiment model defines what should run; the execution backend owns its
 progress.** Existing parameter containers become compatibility boundaries. The
-first milestone must migrate one solver to typed configuration, provisionally
+first usable release must migrate one solver to typed configuration, provisionally
 `spinmc`, and demonstrate sweeps, analysis, and restart through its existing backend.
 
 I recommend `toml++`, retaining the current expression engine and HDF5 wrapper
@@ -63,6 +63,7 @@ capabilities explicitly.
 | Component | Owns |
 | --- | --- |
 | Configuration core and solver schemas | Typed values, defaults, conversions, constraints, and source locations |
+| Optional historical-input importer | Old syntax, historical names/conversions/defaults, and conversion to canonical run definitions |
 | Experiment planner | Parameter points, run IDs, coordinates, replica definitions, task seeds, and output destinations |
 | Scientific initialization | Context-dependent defaults and checks; final immutable `RunConfig` |
 | Existing execution backend | Scheduling, progress, completion, retries, and continuation |
@@ -89,7 +90,19 @@ schema default.
 Each migrated field has one owner for defaults and checks. Adapters may translate
 settings for remaining legacy dependencies, but must have a migration path: the new
 model should replace the existing parameter APIs progressively. A TOML-to-legacy
-converter alone does not complete the first milestone.
+converter alone does not complete the first usable release.
+
+Input compatibility lives in a separate target under `compat/legacy_input/`, which
+depends on the canonical model; the core never depends on the importer. Historical
+defaults become explicit imported values where possible. Deferred scientific
+resolution belongs to a supported resolver, so converted plans can execute without
+the importer. No general `legacy_mode` flag crosses into solver logic.
+
+Shared expression/model/lattice code, backend serialization, and historical archive
+readers have separate lifetimes. Existing `Parameters` consumers remain behind
+adapters until migrated. Disabling the user-input importer does not remove shared
+XML codecs or backend checkpoint readers. The [implementation roadmap](configuration-migration-roadmap.md)
+specifies the dependency boundaries and their removal tests.
 
 Python uses the same native preparation rules and receives owned snapshots; later
 dictionary/array mutations cannot change prepared runs. Existing mutable
@@ -155,7 +168,9 @@ remain accessible through references.
 
 Keep scientific symbols such as `J` and `L`. Document legacy mappings such as
 `monte_carlo.temperature` -> `T` and `monte_carlo.sweeps` -> `SWEEPS`, including
-analysis metadata. Reject ambiguous mappings; do not flatten away namespaces.
+analysis metadata. Historical input aliases belong to the importer; backend and
+output projections must work independently of it. Reject ambiguous mappings; do
+not flatten away namespaces.
 
 The value profile must specify:
 
@@ -169,7 +184,7 @@ The value profile must specify:
 
 I recommend C++ field descriptors plus named scientific validators. A descriptor
 declares the path/type, whether required, literal or computed default, bounds/shapes,
-meaning/units, aliases, owning component, resolution stage, and restart policy.
+meaning/units, owning component, resolution stage, and restart policy.
 Common and solver-specific schemas compose; generated documentation/editor schemas
 can follow. External structural schemas remain an alternative, but would need a
 specified dialect and default policy plus the same scientific validators.
@@ -387,27 +402,32 @@ writes must not be described as already transactional.
 
 ## Migration and acceptance
 
-I propose this sequence:
+I propose dependency-gated milestones, detailed in the
+[implementation roadmap](configuration-migration-roadmap.md). Each has source-level
+scope, completion checks, and a specific next capability it enables.
 
-1. Capture legacy parameter, expression, seed, Python, result, and restart fixtures.
-2. Implement the typed core, schemas, staged validators, and TOML reader.
-3. Migrate one solver's configuration consumption and field ownership; keep adapters
-   for unmigrated scientific dependencies and compatibility callers.
-4. Add sweeps, persisted definitions, an existing-backend adapter, effective output,
-   and artifact-aware loading. Expose preparation/loading through Python.
-5. Migrate further solvers and checkpoint backends with a capability/compatibility
-   matrix; agree on deprecations after coverage is established.
+| Milestone | Unlocks |
+| --- | --- |
+| M0: Capture existing behavior and dependencies | Refactoring against a reproducible compatibility baseline |
+| M1: Introduce the independent typed core | Configuration work outside the monolithic library |
+| M2: Add TOML and isolate historical input | Both formats produce canonical definitions |
+| M3: Separate scientific resolution from construction | Shared validation and initialization without simulation steps |
+| M4: Migrate one solver and its task/worker boundary | A typed single run on the existing backend |
+| M5: Persist definitions, results, and restart decisions | Replay/resume without the input importer |
+| M6: Add experiments and Python integration | The first usable release: sweeps, analysis, and restart |
+| M7: Extend solver/backend coverage | Evidence for broader compatibility and parallel/disorder support |
+| M8: Retire historical input separately | Remove its target without changing migrated solver logic |
 
-`spinmc` exercises scheduler integration, but its
-[factory](../../src/apps/mc/spins/spinmc_factory.C) dispatches classical models
-directly. Add a focused general-model expression/parameter fixture, then migrate a
-general-model solver before claiming broad XML Hamiltonian coverage.
+M0–M5 are independently reviewable foundations; M6 is the first complete user
+workflow. General-model coverage and retirement require their own later gates.
 
 Legacy conversion must preserve evolving parameter-list defaults and materialize
 explicit runs when no faithful sweep exists. Report ambiguous/unsupported cases;
-do not change existing text semantics or choose formats by parser-failure fallback.
+retain their existing execution path until supported. Keep existing invocations
+working; do not choose formats by parser-failure fallback. A conversion command
+reuses the importer and reports changes without rewriting the original file.
 
-The first milestone is accepted when:
+The first usable release (M6) is accepted when:
 
 | Area | Required evidence |
 | --- | --- |
@@ -416,7 +436,7 @@ The first milestone is accepted when:
 | Sweeps | Product/zip counts and errors are correct; IDs/task seeds persist across execution order and permitted resume changes; repeats have distinct IDs; replica/backend mapping and unsupported disorder/topologies are explicit |
 | Persistence | Prepared and effective settings are recorded; destinations are unique; results have role/coordinate/replica metadata; new discovery excludes checkpoints |
 | Execution | The chosen backend executes/resumes an experiment without duplicate submission or a second progress database; a deterministic restart fixture preserves supported scientific behavior and rejects incompatible settings before state loading |
-| Compatibility | Representative legacy/TOML results agree under the same conditions; existing per-file readers and Python contracts pass; recovery limits are documented |
+| Compatibility | Historical invocations and representative legacy/TOML results agree; existing per-file readers and Python contracts pass; converted plans execute with the input importer disabled; recovery limits and supported features are documented |
 
 Reuse existing parameter, native/Python checkpoint, and HDF5 suites. Add multi-rank
 failure/restart tests as parallel adapters migrate. Python's file and mapping entry
@@ -465,7 +485,7 @@ implementations nor citation ownership.
 
 ## Short issue text
 
-**Title:** Proposal: Modernize ALPS configuration, validation, and parameter sweeps
+**Title:** Proposal: TOML configuration, shared validation, and parameter sweeps
 
 ALPS distributes parameter parsing, defaults, validation, expressions, and
 persistence across several APIs and solvers. I propose structured TOML, one typed
