@@ -37,6 +37,10 @@ set(ALPS_EXTRA_INCLUDE_DIRS "")
 set(ALPS_EXTRA_LIBRARIES "")
 set(ALPS_EXTRA_LINKER_FLAGS "")
 
+# Enable testing in the including directory; function scope does not generate
+# CTestTestfile.cmake for legacy projects that rely on add_alps_test alone.
+enable_testing()
+
 # add_alps_test(name), (name io), (name input output) or (name cmd input output):
 # run <cmd> with <input>.input on stdin and compare stdout with <output>.output.
 function(add_alps_test name)
@@ -54,7 +58,6 @@ function(add_alps_test name)
     set(input "${ARGV2}")
     set(output "${ARGV3}")
   endif()
-  enable_testing()
   add_test(
     NAME "${name}"
     COMMAND

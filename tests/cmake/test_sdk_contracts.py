@@ -211,6 +211,10 @@ def test_legacy_use_file(tmp_path):
         "-DCMAKE_BUILD_TYPE=Release", f"-DCMAKE_PREFIX_PATH={prefix}",
         *json.loads(os.environ.get("ALPS_TEST_CMAKE_ARGS", "[]")),
     ], check=True)
+    result = subprocess.run([
+        "ctest", "--test-dir", str(build), "-C", "Release", "--show-only=json-v1",
+    ], check=True, capture_output=True, text=True)
+    assert [test["name"] for test in json.loads(result.stdout)["tests"]] == ["legacy"]
     build_and_run(build)
 
 
