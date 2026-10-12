@@ -20,7 +20,7 @@ endif()
 
 endif()
 
-find_package(Python 3.11 QUIET COMPONENTS Interpreter)
+find_package(Python 3.10 QUIET COMPONENTS Interpreter)
 if(Python_Interpreter_FOUND)
   set(archive_arguments "$<TARGET_FILE:txt2archive>" "$<TARGET_FILE:xml2archive>")
   if(TARGET archive)

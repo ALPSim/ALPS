@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.27...4.3)
 project(alps_nanobind_export_example LANGUAGES C CXX)
 
-find_package(Python 3.11 REQUIRED COMPONENTS Interpreter Development.Module
+find_package(Python 3.10 REQUIRED COMPONENTS Interpreter Development.Module
   OPTIONAL_COMPONENTS Development.SABIModule)
 
 execute_process(

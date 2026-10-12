@@ -48,9 +48,9 @@ jobs:
       fail-fast: false
       matrix:
         plat:
-          - {os: ubuntu-24.04, target: '', arch: x86_64, family: manylinux, build: 'cp3{11,12,13,14}-manylinux*'}
-          - {os: ubuntu-24.04, target: '', arch: x86_64, family: musllinux, build: 'cp3{11,12,13,14}-musllinux*'}
-          - {os: macos-15, target: '15.0', arch: arm64, family: macos, build: 'cp3{11,12,13,14}-macosx*'}
+          - {os: ubuntu-24.04, target: '', arch: x86_64, family: manylinux, build: 'cp3{10,11,12,13,14}-manylinux*'}
+          - {os: ubuntu-24.04, target: '', arch: x86_64, family: musllinux, build: 'cp3{10,11,12,13,14}-musllinux*'}
+          - {os: macos-15, target: '15.0', arch: arm64, family: macos, build: 'cp3{10,11,12,13,14}-macosx*'}
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -186,7 +186,7 @@ jobs:
           - {os: ubuntu-24.04, architecture: x64, artifact: cibw-wheels-manylinux}
           - {os: macos-15, architecture: arm64, artifact: cibw-wheels-macos}
           - {os: macos-26, architecture: arm64, artifact: cibw-wheels-macos}
-        python: ['3.11', '3.12', '3.13', '3.14']
+        python: ['3.10', '3.11', '3.12', '3.13', '3.14']
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:

@@ -76,7 +76,8 @@ jobs:
               {"id": "ubuntu-2404-gcc-14-boost88-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.88.0", "python": "3.14", "standard": 17},
               {"id": "ubuntu-2404-gcc-14-boost89-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.89.0", "python": "3.14", "standard": 17},
               {"id": "ubuntu-2404-gcc-14-boost90-py314-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.90.0", "python": "3.14", "standard": 17},
-              {"id": "ubuntu-2404-gcc-14-boost91-py311-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.11", "standard": 17},
+              {"id": "ubuntu-2404-gcc-14-boost91-py310-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.10", "standard": 17},
+              {"id": "ubuntu-2404-gcc-14-boost91-py311-cxx17-openmp", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.11", "standard": 17, "preset": "openmp"},
               {"id": "ubuntu-2404-gcc-14-boost91-py312-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.12", "standard": 17},
               {"id": "ubuntu-2404-gcc-14-boost91-py313-cxx17", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.13", "standard": 17},
               {"id": "ubuntu-2404-gcc-14-boost91-py314-cxx20", "os": "ubuntu-24.04", "cc": "gcc-14", "cxx": "g++-14", "packages": "gcc-14 g++-14", "boost": "1.91.0", "python": "3.14", "standard": 20, "extensive": true},
@@ -121,7 +122,8 @@ jobs:
       CCACHE_MAXSIZE: 1G
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}
-      ALPS_BOOST_MPI: 'ON'
+      ALPS_BOOST_MPI: ${{ matrix.preset == 'openmp' && 'OFF' || 'ON' }}
+      BUILD_PRESET: ${{ matrix.preset || (matrix.extras && 'mpi-openmp' || 'mpi') }}
       DEPENDENCY: boost-${{ matrix.boost }}
       BOOST_VERSION: ${{ matrix.boost }}
       COMPILER_PACKAGES: ${{ matrix.packages }}
@@ -206,13 +208,9 @@ jobs:
       - name: Configure SDK
         run: |
           extra_args=()
-          if [[ "$EXTRAS" == true ]]; then
-            extra_args+=(-DALPS_ENABLE_OPENMP=ON)
-          fi
           if [[ "$EXTENSIVE" == true ]]; then extra_args+=(-DALPS_BUILD_EXTENSIVE_TESTS=ON); fi
-          cmake -S . -B _build/ci -G Ninja \
+          cmake --preset "$BUILD_PRESET" -B _build/ci \
             -DCMAKE_BUILD_TYPE=Release -DALPS_BUILD_TESTING=ON \
-            "-DALPS_ENABLE_MPI=$ALPS_BOOST_MPI" \
             "-DCMAKE_PREFIX_PATH=$PWD/_build/boost-install" \
             "-DCMAKE_INSTALL_PREFIX=$PWD/_build/ci/install" \
             "-DCMAKE_CXX_STANDARD=$CXX_STANDARD" "${extra_args[@]}"

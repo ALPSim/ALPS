@@ -72,7 +72,7 @@ Build and install the C++ SDK with CMake, then build the Python package against 
 
 - CMake ≥ 3.27, Ninja for the bundled presets, and C++17/C11 compilers such as GCC or Clang.
 - Boost ≥ 1.76 with its compiled libraries and CMake packages, HDF5 ≥ 1.10.5 (C library), and LP64 BLAS/LAPACK. Use serial HDF5 for the default MPI-disabled build; see [numerical libraries](#numerical-libraries).
-- For Python development: GIL-enabled CPython ≥ 3.11 in a writable Python environment. Pip installs NumPy, SciPy and Matplotlib with pyalps. Free-threaded Python is unsupported.
+- For Python development: GIL-enabled CPython ≥ 3.10 in a writable Python environment. Pip installs NumPy, SciPy and Matplotlib with pyalps. Free-threaded Python is unsupported.
 - Optional: MPI and Boost.MPI for `ALPS_ENABLE_MPI=ON`; an OpenMP runtime for `ALPS_ENABLE_OPENMP=ON`; a Fortran compiler for the Fortran examples.
 
 Use existing dependencies or your preferred package manager. Keep the compiler, architecture and native dependency stack consistent between the SDK, bindings and downstream extensions.
@@ -110,7 +110,7 @@ python -m pip install "cmake>=3.27" ninja numpy h5py
 
 Skip the first two lines if already using a suitable environment. On Debian/Ubuntu, creating a venv may first require `sudo apt-get install python3-venv`. Activate the same environment in each new terminal. Both CMake and CTest must be at least 3.27; use `command -v cmake` to check which installation your shell finds.
 
-Application tests require a Python ≥ 3.11 interpreter; MaxEnt reference tests also require NumPy and h5py. CMake and Ninja can also come from system packages or [official CMake binaries](https://cmake.org/download/). A generator other than Ninja can be selected with a plain CMake invocation instead of a preset.
+Application tests require a Python ≥ 3.10 interpreter; MaxEnt reference tests also require NumPy and h5py. CMake and Ninja can also come from system packages or [official CMake binaries](https://cmake.org/download/). A generator other than Ninja can be selected with a plain CMake invocation instead of a preset.
 
 ### Build
 
@@ -292,7 +292,32 @@ Add exported headers to the owning target's CMake `HEADERS` file set. Public `<a
 | `ALPS_ENABLE_OPENMP` | `OFF` | Enable OpenMP, including worker scheduling |
 | `ALPS_BUILD_EXTENSIVE_TESTS` | `OFF` | Add expensive graph and HDF5 type-matrix tests when testing is enabled |
 
-For example, configure with `cmake --preset default -DALPS_ENABLE_OPENMP=ON`. The `sdk` preset disables applications and tests; `distribution` disables tests and its build preset installs automatically. When embedding ALPS with `add_subdirectory`, applications and tests default to `OFF`. MPI remains opt-in. Headers and the C++ Fortran bridge are always part of the SDK; building that bridge needs no Fortran compiler.
+Choose a release preset for the parallel capabilities you need:
+
+| Preset | MPI | OpenMP |
+| --- | --- | --- |
+| `default` | OFF | OFF |
+| `mpi` | ON | OFF |
+| `openmp` | OFF | ON |
+| `mpi-openmp` | ON | ON |
+
+Each has matching configure, build and test presets and its own build and install
+directories. For example:
+
+```sh
+cmake --preset mpi-openmp
+cmake --build --preset mpi-openmp --parallel 2
+ctest --preset mpi-openmp
+cmake --install _build/mpi-openmp
+export ALPS_DIR="$PWD/_build/mpi-openmp/install/share/alps"
+```
+
+MPI presets require MPI and a matching Boost.MPI installation; OpenMP presets
+require compiler/runtime support for OpenMP. These options enable capabilities
+in supported applications. Choose MPI ranks and OpenMP threads when running
+the application; `--parallel` above controls compilation jobs only.
+
+The `sdk` preset disables applications and tests; `distribution` disables tests and its build preset installs automatically. Both inherit the MPI/OpenMP-disabled default. When embedding ALPS with `add_subdirectory`, applications and tests default to `OFF`. MPI remains opt-in. Headers and the C++ Fortran bridge are always part of the SDK; building that bridge needs no Fortran compiler.
 
 Examples build separately against an installed SDK; see the [C++ and Fortran example instructions](tutorials/examples/README.md). Fortran tutorials that call OpenMP also need a Fortran OpenMP runtime. To install tutorial sources under `share/alps/tutorials`, run `cmake --install _build/default --component tutorials` after installing the SDK.
 
@@ -347,7 +372,7 @@ Plot/extraction formats are `text`, `html`, `gnuplot`, `matplotlib` and `grace`;
 
 Pull requests report aggregate `Source CI` and `Packaging CI` checks. Pull requests, master pushes and release tags run the complete source and packaging matrices. The [source workflow](.github/workflows/build.yml) and [packaging workflow](.github/workflows/build_wheels.yml) are the authoritative lists of tested configurations.
 
-Coverage includes Linux/macOS source builds, CMake 3.27, MPI/OpenMP, installed-SDK consumers, direct CMake/editable-pip contributor workflows and repaired wheels tested on fresh runners. Dependency providers in CI are runner configuration, not requirements to use that package manager locally. Packaging CI tests the CPython 3.11 and Python 3.12+ abi3 wheels and the source distribution; local editable tests do not replace that validation.
+Coverage includes Linux/macOS source builds, CMake 3.27, MPI/OpenMP, installed-SDK consumers, direct CMake/editable-pip contributor workflows and repaired wheels tested on fresh runners. Dependency providers in CI are runner configuration, not requirements to use that package manager locally. Packaging CI tests the CPython 3.10/3.11 and Python 3.12+ abi3 wheels and the source distribution; local editable tests do not replace that validation.
 
 ---
 
@@ -370,7 +395,7 @@ python .github/scripts/check_release_version.py --ref refs/tags/vX.Y.Z
 
 The packaging workflow checks these versions before building and checks every
 wheel and source distribution, including its embedded metadata, before upload.
-Tag pushes publish the full release to PyPI, including the CPython 3.11 and
+Tag pushes publish the full release to PyPI, including the CPython 3.10/3.11 and
 3.12+ abi3 wheels. Publication also requires the repository's `pypi`
 environment and trusted-publisher configuration; manual validation runs do not
 publish. Merge and validate the release commit before tagging it. Keep tags

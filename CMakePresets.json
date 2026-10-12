@@ -11,10 +11,39 @@
       "displayName": "Default release build",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/${presetName}/install"
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/_build/${presetName}/install",
+        "ALPS_ENABLE_MPI": "OFF",
+        "ALPS_ENABLE_OPENMP": "OFF"
       },
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/_build/${presetName}"
+    },
+    {
+      "name": "mpi",
+      "displayName": "MPI release build",
+      "inherits": "default",
+      "cacheVariables": {
+        "ALPS_ENABLE_MPI": "ON",
+        "ALPS_ENABLE_OPENMP": "OFF"
+      }
+    },
+    {
+      "name": "openmp",
+      "displayName": "OpenMP release build",
+      "inherits": "default",
+      "cacheVariables": {
+        "ALPS_ENABLE_MPI": "OFF",
+        "ALPS_ENABLE_OPENMP": "ON"
+      }
+    },
+    {
+      "name": "mpi-openmp",
+      "displayName": "MPI and OpenMP release build",
+      "inherits": "default",
+      "cacheVariables": {
+        "ALPS_ENABLE_MPI": "ON",
+        "ALPS_ENABLE_OPENMP": "ON"
+      }
     },
     {
       "name": "sdk",
@@ -50,6 +79,18 @@
       "targets": [
         "install"
       ]
+    },
+    {
+      "name": "mpi",
+      "configurePreset": "mpi"
+    },
+    {
+      "name": "openmp",
+      "configurePreset": "openmp"
+    },
+    {
+      "name": "mpi-openmp",
+      "configurePreset": "mpi-openmp"
     }
   ],
   "testPresets": [
@@ -62,6 +103,21 @@
       "execution": {
         "noTestsAction": "error"
       }
+    },
+    {
+      "name": "mpi",
+      "inherits": "default",
+      "configurePreset": "mpi"
+    },
+    {
+      "name": "openmp",
+      "inherits": "default",
+      "configurePreset": "openmp"
+    },
+    {
+      "name": "mpi-openmp",
+      "inherits": "default",
+      "configurePreset": "mpi-openmp"
     }
   ]
 }

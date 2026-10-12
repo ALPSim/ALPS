@@ -9,7 +9,7 @@ project(pyalps LANGUAGES C CXX)
 option(PYALPS_BUILD_SOLVERS "Build the MaxEnt, CT-HYB, and CT-INT bindings" ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(Python 3.11 REQUIRED COMPONENTS Interpreter Development.Module)
+find_package(Python 3.10 REQUIRED COMPONENTS Interpreter Development.Module)
 if(NOT Python_INTERPRETER_ID STREQUAL "Python" OR Python_SOABI MATCHES "[0-9]t")
   message(FATAL_ERROR "pyalps requires GIL-enabled CPython")
 endif()
@@ -76,7 +76,7 @@ elseif(UNIX)
   set(_loader_origin "$ORIGIN")
 endif()
 
-# nanobind uses abi3 from Python 3.12 onward and the CPython ABI on 3.11.
+# nanobind uses abi3 from Python 3.12 onward and the CPython ABI on 3.10 and 3.11.
 function(pyalps_add_module target source)
   nanobind_add_module(${target} STABLE_ABI NB_SHARED MUSL_DYNAMIC_LIBCPP ${source})
   target_link_libraries(${target} PRIVATE ALPS::alps ${ARGN})

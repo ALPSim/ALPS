@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.27...4.3)
 project(pyalps_parameter_contracts LANGUAGES C CXX)
-find_package(Python 3.11 REQUIRED COMPONENTS Interpreter Development.Module
+find_package(Python 3.10 REQUIRED COMPONENTS Interpreter Development.Module
   OPTIONAL_COMPONENTS Development.SABIModule)
 execute_process(
   COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir

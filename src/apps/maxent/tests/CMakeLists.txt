@@ -14,7 +14,7 @@ target_link_libraries(maxent_api_contract PRIVATE ALPS::maxent)
 alps_add_test(maxent_api_contract)
 set_property(TEST maxent_api_contract PROPERTY LABELS maxent)
 
-find_package(Python 3.11 QUIET COMPONENTS Interpreter)
+find_package(Python 3.10 QUIET COMPONENTS Interpreter)
 if(Python_Interpreter_FOUND)
   add_test(NAME maxent_cli_contract
     COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/cli_contract.py"
@@ -39,5 +39,5 @@ if(Python_Interpreter_FOUND)
     endforeach()
   endif()
 else()
-  message(STATUS "Skipping MaxEnt Python tests: Python 3.11 or newer is unavailable")
+  message(STATUS "Skipping MaxEnt Python tests: Python 3.10 or newer is unavailable")
 endif()

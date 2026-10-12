@@ -28,7 +28,7 @@ For older tutorials, use `python` instead of the removed `alpspython` wrapper an
 
 ## Building from source
 
-Requires GIL-enabled CPython 3.11+, CMake 3.27+, Ninja, a C++17 compiler, external Boost 1.76+, LP64 BLAS/LAPACK, and HDF5 1.10.5+. Reuse an installed ALPS C++ SDK, or build one with the `distribution` preset. From the repository root, build the SDK and Python wheel with:
+Requires GIL-enabled CPython 3.10+, CMake 3.27+, Ninja, a C++17 compiler, external Boost 1.76+, LP64 BLAS/LAPACK, and HDF5 1.10.5+. Reuse an installed ALPS C++ SDK, or build one with the `distribution` preset. From the repository root, build the SDK and Python wheel with:
 
 ```sh
 cmake --preset distribution
@@ -54,7 +54,7 @@ In either mode, pass a full executable path to a Python helper to select a diffe
 
 ## Compatibility
 
-- Python 3.11 has a separate `cp311` wheel; Python 3.12+ shares a `cp312-abi3` wheel. Free-threaded Python is unsupported.
+- Python 3.10 and 3.11 have separate `cp310` and `cp311` wheels; Python 3.12+ shares a `cp312-abi3` wheel. Free-threaded Python is unsupported.
 - Rebuild downstream C++ extensions against the same SDK revision, nanobind internals ABI, and C++ standard library as the wheel. Nanobind is pinned to 2.15.0; its version and internals ABI are recorded in the installed `pyalps/runtime.json`.
 - Legacy HDF5 signed-byte datasets without type metadata are read as booleans. Use a typed reader such as h5py when such a dataset contains integers.
 - `pyalps.mpi` uses mpi4py's protocol, which is incompatible with Boost.MPI serialization. Communicators cannot be used as dictionary keys.
@@ -72,7 +72,7 @@ After installing the matching SDK and build dependencies, use `python -m pip ins
 The C++ SDK supplies `ALPS::alps` for standalone programs. The installed Python package separately supplies `pyalps::runtime` for extensions that share ALPS objects or HDF5 handles with pyalps. A matching C++ SDK is still required for headers and compile settings.
 
 ```cmake
-find_package(Python 3.11 REQUIRED COMPONENTS Interpreter Development.Module
+find_package(Python 3.10 REQUIRED COMPONENTS Interpreter Development.Module
   OPTIONAL_COMPONENTS Development.SABIModule)
 execute_process(
   COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir

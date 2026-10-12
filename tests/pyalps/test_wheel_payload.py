@@ -68,10 +68,11 @@ def _package_dir() -> Path:
 
 def test_wheel_uses_the_supported_python_abi():
     installed = distribution("pyalps")
-    assert installed.metadata["Requires-Python"] == ">=3.11"
+    assert installed.metadata["Requires-Python"] == ">=3.10"
     tags = [line.removeprefix("Tag: ") for line in installed.read_text("WHEEL").splitlines()
             if line.startswith("Tag: ")]
-    expected = "cp311-cp311-" if sys.version_info < (3, 12) else "cp312-abi3-"
+    python_tag = f"cp{sys.version_info.major}{sys.version_info.minor}"
+    expected = f"{python_tag}-{python_tag}-" if sys.version_info < (3, 12) else "cp312-abi3-"
     assert tags and all(tag.startswith(expected) for tag in tags)
     extensions = list((_package_dir() / "_ext").glob("*.so"))
     if sys.platform != "win32" and sys.version_info >= (3, 12):
