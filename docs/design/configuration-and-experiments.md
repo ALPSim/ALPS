@@ -702,7 +702,7 @@ I propose a shared configuration pipeline using TOML, typed and validated run
 configurations, explicit parameter-sweep planning, and versioned HDF5 result and
 checkpoint contracts.
 
-**[Read the full proposal](https://github.com/skilledwolf/ALPS/blob/WIP/configuration-experiments-proposal/docs/design/configuration-and-experiments.md).**
+**[Read the full proposal](https://github.com/ALPSim/ALPS/blob/WIP/configuration-experiments-proposal/docs/design/configuration-and-experiments.md).**
 
 Before implementation, I would like feedback on the architecture, compatibility
 commitments, sweep semantics, and scope of the first solver prototype.
