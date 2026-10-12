@@ -67,6 +67,7 @@ public:
   FullDiagMatrix (const alps::ProcessList& where , const boost::filesystem::path& p);
   void evaluate(const alps::Parameters&, const std::string&) const;
   void print_eigenvectors(std::ostream& os) const;
+  void append_eigenvectors(std::vector<value_type>& v) const;
 private:
   magnitude_type groundstate_energy() const;
   void do_subspace();
@@ -484,6 +485,14 @@ std::vector<T> FullDiagMatrix<T>::calculate(operator_matrix_type const& m) const
   return av;
 }
 
+
+template <class T>
+void FullDiagMatrix<T>::append_eigenvectors(std::vector<value_type>& v) const
+{
+  for (unsigned i=0;i<num_cols(this->matrix());++i)
+    for (unsigned j=0;j<num_rows(this->matrix());++j)
+      v.push_back(this->matrix()(j,i));
+}
 
 template <class T>
 void FullDiagMatrix<T>::print_eigenvectors(std::ostream& os) const
