@@ -28,6 +28,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--wheelhouse", type=Path)
+    parser.add_argument("--smoke", action="store_true", help="Check bindings and package loading only")
     parser.add_argument("--packaging", action="store_true")
     parser.add_argument("--downstream", action="store_true")
     parser.add_argument("--applications", action="store_true")
@@ -117,7 +118,10 @@ def main():
 
     success = False
     try:
-        tests = ["tests/pyalps"] + (["tests/packaging"] if args.packaging else [])
+        tests = (["tests/pyalps/test_binding_surface.py", "tests/pyalps/test_wheel_payload.py"]
+                 if args.smoke else ["tests/pyalps"])
+        if args.packaging:
+            tests.append("tests/packaging")
         run(
             "pytest",
             [

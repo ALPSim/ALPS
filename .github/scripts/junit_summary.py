@@ -9,14 +9,15 @@ import xml.etree.ElementTree as ET
 
 
 def summarize(paths):
-    lines = ["| Report | Passed | Failed | Skipped |", "| --- | ---: | ---: | ---: |"]
+    lines = ["| Report | Passed | Failed | Skipped | Seconds |", "| --- | ---: | ---: | ---: | ---: |"]
     found = False
     for path in paths:
         cases = list(ET.parse(path).getroot().iter("testcase"))
         failed = sum(case.find("failure") is not None or case.find("error") is not None for case in cases)
         skipped = sum(case.find("skipped") is not None for case in cases)
+        seconds = sum(float(case.get("time", "0")) for case in cases)
         label = html.escape(Path(path).as_posix()).replace("|", "&#124;")
-        lines.append(f"| {label} | {len(cases) - failed - skipped} | {failed} | {skipped} |")
+        lines.append(f"| {label} | {len(cases) - failed - skipped} | {failed} | {skipped} | {seconds:.2f} |")
         found = True
     return "\n".join(lines) + "\n" if found else "No test reports were produced; check the preceding steps.\n"
 
