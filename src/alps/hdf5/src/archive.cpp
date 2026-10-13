@@ -401,6 +401,9 @@ namespace alps {
         }
 
         archive::archive(std::string const & filename, int props) { // TODO: remove that!
+            // Unknown property bits used to be ignored (as ALPSCore's int mode).
+            if (props & ~(WRITE | REPLACE | COMPRESS | LARGE | MEMORY))
+                throw wrong_mode("Incorrect mode " + std::to_string(props) + " opening file '" + filename + "'" + ALPS_STACKTRACE);
             construct(filename, props);
         }
 
