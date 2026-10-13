@@ -39,6 +39,7 @@ foreach(
   hdf5_exceptions
   hdf5_multiarchive
   hdf5_native_type
+  hdf5_open_intmode
   hdf5_open_strmode
   hdf5_fortran_string
   hdf5_vecvecdbl)
