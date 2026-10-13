@@ -25,9 +25,9 @@
 #include "interaction_expansion_choice.h"
 
 #include <alps/parameter.h>
-#include <alps/utility/copyright.hpp>
-#include <alps/utility/citations.hpp>
-#include <alps/utility/cli.hpp>
+#include <alps/utilities/copyright.hpp>
+#include <alps/utilities/citations.hpp>
+#include <alps/cli.hpp>
 
 #include <iostream>
 #include <fstream>

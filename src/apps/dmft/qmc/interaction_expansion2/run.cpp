@@ -13,7 +13,7 @@
 #include <alps/solvers.hpp>
 #include "interaction_expansion.hpp"
 #include "fouriertransform.h"
-#include <alps/utility/copyright.hpp>
+#include <alps/utilities/copyright.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #ifdef ALPS_HAVE_MPI
 #include <alps/mcmpiadapter.hpp>

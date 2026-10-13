@@ -25,6 +25,9 @@
 #ifndef ALPS_UTILITY_BITOPS_HPP
 #define ALPS_UTILITY_BITOPS_HPP
 
+// Deprecated with the legacy layer (ALPS_LEGACY_API); removed in ALPS 4.0.
+#pragma message("<alps/utility/bitops.hpp> is deprecated: use C++20 <bit> or compiler builtins")
+
 #include <alps/config.h>
 
 #ifdef cray

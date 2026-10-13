@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-#include <alps/utility/copyright.hpp>
-#include <alps/utility/citations.hpp>
-#include <alps/utility/encode.hpp>
-#include <alps/utility/os.hpp>
+#include <alps/utilities/copyright.hpp>
+#include <alps/utilities/citations.hpp>
+#include <alps/utilities/encode.hpp>
+#include <alps/utilities/os.hpp>
 #include <alps/utilities/temporary_filename.hpp>
-#include <alps/utility/vectorio.hpp>
-#include <alps/utility/vmusage.hpp>
+#include <alps/utilities/vectorio.hpp>
+#include <alps/utilities/vmusage.hpp>
 #include <alps/utilities/cast.hpp>
 #include <alps/utilities/short_print.hpp>
 #include <alps/ngs/sleep.hpp>

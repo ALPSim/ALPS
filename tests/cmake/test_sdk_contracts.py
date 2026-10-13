@@ -177,8 +177,18 @@ def test_relocated_sdk(tmp_path):
 def test_installed_sdk_preserves_public_headers():
     prefix = Path(os.environ["ALPS_DIR"]).resolve().parents[1]
     baseline = json.loads(Path(__file__).with_name("preserved_public_headers.json").read_text())
-    missing = [name for name in baseline["headers"] if not (prefix / "include" / name).is_file()]
+    # Retired headers are listed with the reason; none of them may come back.
+    retired = baseline.get("retired", {})
+    # An SDK built with ALPS_LEGACY_API=OFF has no deprecated spellings.
+    legacy = SOURCE / "legacy" / "include"
+    legacy_only = set() if (Path(os.environ["ALPS_DIR"]) / "ALPSLegacyConfig.cmake").is_file() else {
+        path.relative_to(legacy).as_posix() for path in legacy.rglob("*") if path.is_file()}
+    missing = [name for name in baseline["headers"]
+               if name not in retired and name not in legacy_only
+               and not (prefix / "include" / name).is_file()]
     assert not missing, f"Public headers lost from {baseline['source_commit']}: {missing}"
+    returned = [name for name in retired if (prefix / "include" / name).is_file()]
+    assert not returned, f"Retired headers installed again: {returned}"
 
 
 @pytest.mark.parametrize("tutorial,target", [

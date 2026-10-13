@@ -14,8 +14,8 @@
 /* $Id$ */
 
 #include <alps/scheduler/options.h>
-#include <alps/utility/copyright.hpp>
-#include <alps/utility/cli.hpp>
+#include <alps/utilities/copyright.hpp>
+#include <alps/cli.hpp>
 #include <boost/limits.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/program_options.hpp>

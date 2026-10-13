@@ -9,8 +9,8 @@
 *
 *****************************************************************************/
 
-#include <alps/utility/cli.hpp>
-#include <alps/utility/copyright.hpp>
+#include <alps/cli.hpp>
+#include <alps/utilities/copyright.hpp>
 #include <alps/config.h>
 #include <alps/alea.h>
 #include <alps/scheduler.h>

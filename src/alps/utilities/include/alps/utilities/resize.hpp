@@ -22,22 +22,20 @@
 #include <alps/type_traits/is_sequence.hpp>
 #include <alps/multi_array/multi_array.hpp>
 
-#include <boost/mpl/or.hpp>
-#include <boost/mpl/and.hpp>
-#include <boost/utility/enable_if.hpp>
 #include <boost/array.hpp>
 
 #include <algorithm>
+#include <type_traits>
 #include <vector>
 
 namespace alps {
 
 template <class X, class Y> 
-inline typename boost::disable_if<boost::mpl::or_<is_sequence<X>,is_sequence<Y> >,void>::type
+inline typename std::enable_if<!(is_sequence<X>::value || is_sequence<Y>::value)>::type
 resize_same_as(X&, const Y&) {}
 
 template <class X, class Y> 
-inline typename boost::enable_if<boost::mpl::and_<is_sequence<X>,is_sequence<Y> >,void>::type
+inline typename std::enable_if<is_sequence<X>::value && is_sequence<Y>::value>::type
 resize_same_as(X& a, const Y& y) 
 {
   a.resize(y.size());

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-#include <alps/utility/cli.hpp>
-#include <alps/utility/citations.hpp>
-#include <alps/utility/copyright.hpp>
+#include <alps/cli.hpp>
+#include <alps/utilities/citations.hpp>
+#include <alps/utilities/copyright.hpp>
 #include <iostream>
 #include <stdexcept>
 #ifdef ALPS_HAVE_MPI

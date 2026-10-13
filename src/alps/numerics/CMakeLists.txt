@@ -12,7 +12,6 @@ target_sources(alps_numerics INTERFACE
     include/alps/multi_array/functions.hpp
     include/alps/multi_array/operators.hpp
     include/alps/functional.h
-    include/alps/utility/numeric_cast.hpp
     include/alps/boost/accumulators/numeric/functional.hpp
     include/alps/boost/accumulators/numeric/functional/valarray.hpp
     include/alps/boost/accumulators/numeric/functional/vector.hpp
@@ -88,6 +87,7 @@ target_sources(alps_numerics INTERFACE
     include/alps/numeric/matrix/vector.hpp
     include/alps/numeric/matrix/vector_interface.hpp
     include/alps/numeric/matrix_as_vector.hpp
+    include/alps/numeric/numeric_cast.hpp
     include/alps/numeric/outer_product.hpp
     include/alps/numeric/polynomial.hpp
     include/alps/numeric/real.hpp
