@@ -212,10 +212,22 @@ namespace alps {
                 mark_signed_byte(ar, path, std::string("int8"));
             }
 
+            // The object an attribute path belongs to. ALPS spells attribute
+            // paths "/group/@name" and ALPSCore "/group@name"; both name
+            // "/group", and "/@name" names the root. Adapted from ALPSCore
+            // c7c64ca0, which dropped an off-by-one "- 1" that cut the last
+            // character of the owner unless a slash preceded the "@".
+            inline std::string attribute_owner(std::string const & path) {
+                std::string owner = path.substr(0, path.find_last_of('@'));
+                if (owner.size() > 1 && owner[owner.size() - 1] == '/')
+                    owner.erase(owner.size() - 1);
+                return owner.empty() ? std::string("/") : owner;
+            }
+
             hid_t open_attribute(archive const & ar, hid_t file_id, std::string path) {
                 if ((path = ar.complete_path(path)).find_last_of('@') == std::string::npos)
                     throw invalid_path("no attribute path: " + path + ALPS_STACKTRACE);
-                return H5Aopen_by_name(file_id, path.substr(0, path.find_last_of('@') - 1).c_str(), path.substr(path.find_last_of('@') + 1).c_str(), H5P_DEFAULT, H5P_DEFAULT);
+                return H5Aopen_by_name(file_id, detail::attribute_owner(path).c_str(), path.substr(path.find_last_of('@') + 1).c_str(), H5P_DEFAULT, H5P_DEFAULT);
             }
 
             herr_t list_children_visitor(hid_t, char const * n, const H5L_info_t *, void * d) {
@@ -537,7 +549,7 @@ namespace alps {
             if ((path = complete_path(path)).find_last_of('@') == std::string::npos)
                 return false;
             ALPS_HDF5_FAKE_THREADSAFETY
-            return detail::check_error(H5Aexists_by_name(context_->file_id_, path.substr(0, path.find_last_of('@') - 1).c_str(), path.substr(path.find_last_of('@') + 1).c_str(), H5P_DEFAULT));
+            return detail::check_error(H5Aexists_by_name(context_->file_id_, detail::attribute_owner(path).c_str(), path.substr(path.find_last_of('@') + 1).c_str(), H5P_DEFAULT));
         }
     
         bool archive::is_group(std::string path) const {
@@ -745,13 +757,10 @@ namespace alps {
             if ((path = complete_path(path)).find_last_of('@') == std::string::npos)
                 throw invalid_path("no attribute path: " + path + ALPS_STACKTRACE);
             ALPS_HDF5_FAKE_THREADSAFETY
-            if (is_attribute(path)) {
-                auto at = path.find_last_of('@');
-                std::string parent = path.substr(0, at - 1);
-                if (parent.empty()) parent = "/";
+            if (is_attribute(path))
                 detail::check_error(H5Adelete_by_name(context_->file_id_,
-                    parent.c_str(), path.substr(at + 1).c_str(), H5P_DEFAULT));
-            }
+                    detail::attribute_owner(path).c_str(),
+                    path.substr(path.find_last_of('@') + 1).c_str(), H5P_DEFAULT));
         }
     
         void archive::set_complex(std::string path) {
@@ -829,7 +838,7 @@ namespace alps {
                         throw wrong_type("scalar - vector conflict in path: " + path + ALPS_STACKTRACE);                                                                \
                     detail::attribute_type attribute_id(H5Aopen_by_name(                                                                                                \
                           context_->file_id_                                                                                                                            \
-                        , path.substr(0, path.find_last_of('@') - 1).c_str()                                                                                            \
+                        , detail::attribute_owner(path).c_str()                                                                                            \
                         , path.substr(path.find_last_of('@') + 1).c_str()                                                                                               \
                         , H5P_DEFAULT, H5P_DEFAULT                                                                                                                      \
                     ));                                                                                                                                                 \
@@ -943,12 +952,12 @@ namespace alps {
                         if (is_scalar(path))                                                                                                                            \
                             throw wrong_type("scalar - vector conflict in path: " + path + ALPS_STACKTRACE);                                                            \
                         hid_t parent_id;                                                                                                                                \
-                        if (is_group(path.substr(0, path.find_last_of('@') - 1)))                                                                                       \
-                            parent_id = detail::check_error(H5Gopen2(context_->file_id_, path.substr(0, path.find_last_of('@') - 1).c_str(), H5P_DEFAULT));             \
-                        else if (is_data(path.substr(0, path.find_last_of('@') - 1)))                                                                                   \
-                            parent_id = detail::check_error(H5Dopen2(context_->file_id_, path.substr(0, path.find_last_of('@') - 1).c_str(), H5P_DEFAULT));             \
+                        if (is_group(detail::attribute_owner(path)))                                                                                       \
+                            parent_id = detail::check_error(H5Gopen2(context_->file_id_, detail::attribute_owner(path).c_str(), H5P_DEFAULT));             \
+                        else if (is_data(detail::attribute_owner(path)))                                                                                   \
+                            parent_id = detail::check_error(H5Dopen2(context_->file_id_, detail::attribute_owner(path).c_str(), H5P_DEFAULT));             \
                         else                                                                                                                                            \
-                            throw path_not_found("unknown path: " + path.substr(0, path.find_last_of('@') - 1) + ALPS_STACKTRACE);                                      \
+                            throw path_not_found("unknown path: " + detail::attribute_owner(path) + ALPS_STACKTRACE);                                      \
                         detail::attribute_type attribute_id(H5Aopen(parent_id, path.substr(path.find_last_of('@') + 1).c_str(), H5P_DEFAULT));                          \
                         detail::type_type type_id(H5Aget_type(attribute_id));                                                                                           \
                         detail::type_type native_id(H5Tget_native_type(type_id, H5T_DIR_ASCEND));                                                                       \
@@ -971,7 +980,7 @@ namespace alps {
                             throw std::logic_error("multidimensional dataset of variable len string datas is not implemented (" + path + ")" + ALPS_STACKTRACE);        \
                         ALPS_NGS_HDF5_FOREACH_NATIVE_TYPE_INTEGRAL(ALPS_NGS_HDF5_READ_VECTOR_ATTRIBUTE_HELPER, T)                                                       \
                         } else throw wrong_type("invalid type" + ALPS_STACKTRACE);                                                                                      \
-                        if (is_group(path.substr(0, path.find_last_of('@') - 1)))                                                                                       \
+                        if (is_group(detail::attribute_owner(path)))                                                                                       \
                             detail::check_group(parent_id);                                                                                                             \
                         else                                                                                                                                            \
                             detail::check_data(parent_id);                                                                                                              \
@@ -1032,12 +1041,12 @@ namespace alps {
                     detail::check_data(data_id);                                                                                                                        \
                 } else {                                                                                                                                                \
                     hid_t parent_id;                                                                                                                                    \
-                    if (is_group(path.substr(0, path.find_last_of('@') - 1)))                                                                                           \
-                        parent_id = detail::check_error(H5Gopen2(context_->file_id_, path.substr(0, path.find_last_of('@') - 1).c_str(), H5P_DEFAULT));                 \
-                    else if (is_data(path.substr(0, path.find_last_of('@') - 1)))                                                                                       \
-                        parent_id = detail::check_error(H5Dopen2(context_->file_id_, path.substr(0, path.find_last_of('@') - 1).c_str(), H5P_DEFAULT));                 \
+                    if (is_group(detail::attribute_owner(path)))                                                                                           \
+                        parent_id = detail::check_error(H5Gopen2(context_->file_id_, detail::attribute_owner(path).c_str(), H5P_DEFAULT));                 \
+                    else if (is_data(detail::attribute_owner(path)))                                                                                       \
+                        parent_id = detail::check_error(H5Dopen2(context_->file_id_, detail::attribute_owner(path).c_str(), H5P_DEFAULT));                 \
                     else                                                                                                                                                \
-                        throw path_not_found("unknown path: " + path.substr(0, path.find_last_of('@') - 1) + ALPS_STACKTRACE);                                          \
+                        throw path_not_found("unknown path: " + detail::attribute_owner(path) + ALPS_STACKTRACE);                                          \
                     hid_t data_id = H5Aopen(parent_id, path.substr(path.find_last_of('@') + 1).c_str(), H5P_DEFAULT);                                                   \
                     if (data_id >= 0) {                                                                                                                                 \
                         H5S_class_t class_type;                                                                                                                         \
@@ -1064,7 +1073,7 @@ namespace alps {
                     detail::native_ptr_converter<boost::remove_cv<boost::remove_reference<T>::type>::type> converter(1);                                                \
                     detail::check_error(H5Awrite(data_id, type_id, converter.apply(&value)));                                                                           \
                     detail::attribute_type attr_id(data_id);                                                                                                            \
-                    if (is_group(path.substr(0, path.find_last_of('@') - 1)))                                                                                           \
+                    if (is_group(detail::attribute_owner(path)))                                                                                           \
                         detail::check_group(parent_id);                                                                                                                 \
                     else                                                                                                                                                \
                         detail::check_data(parent_id);                                                                                                                  \
@@ -1197,12 +1206,12 @@ namespace alps {
                     }                                                                                                                                                   \
                 } else {                                                                                                                                                \
                     hid_t parent_id;                                                                                                                                    \
-                    if (is_group(path.substr(0, path.find_last_of('@') - 1)))                                                                                           \
-                        parent_id = detail::check_error(H5Gopen2(context_->file_id_, path.substr(0, path.find_last_of('@') - 1).c_str(), H5P_DEFAULT));                 \
-                    else if (is_data(path.substr(0, path.find_last_of('@') - 1)))                                                                                       \
-                        parent_id = detail::check_error(H5Dopen2(context_->file_id_, path.substr(0, path.find_last_of('@') - 1).c_str(), H5P_DEFAULT));                 \
+                    if (is_group(detail::attribute_owner(path)))                                                                                           \
+                        parent_id = detail::check_error(H5Gopen2(context_->file_id_, detail::attribute_owner(path).c_str(), H5P_DEFAULT));                 \
+                    else if (is_data(detail::attribute_owner(path)))                                                                                       \
+                        parent_id = detail::check_error(H5Dopen2(context_->file_id_, detail::attribute_owner(path).c_str(), H5P_DEFAULT));                 \
                     else                                                                                                                                                \
-                        throw path_not_found("unknown path: " + path.substr(0, path.find_last_of('@') - 1) + ALPS_STACKTRACE);                                          \
+                        throw path_not_found("unknown path: " + detail::attribute_owner(path) + ALPS_STACKTRACE);                                          \
                     hid_t data_id = H5Aopen(parent_id, path.substr(path.find_last_of('@') + 1).c_str(), H5P_DEFAULT);                                                   \
                     if (data_id >= 0) {                                                                                                                                 \
                         H5S_class_t class_type;                                                                                                                         \
@@ -1253,7 +1262,7 @@ namespace alps {
                                 throw std::logic_error("Not Implemented, path: " + path + ALPS_STACKTRACE);                                                             \
                         }                                                                                                                                               \
                     }                                                                                                                                                   \
-                    if (is_group(path.substr(0, path.find_last_of('@') - 1)))                                                                                           \
+                    if (is_group(detail::attribute_owner(path)))                                                                                           \
                         detail::check_group(parent_id);                                                                                                                 \
                     else                                                                                                                                                \
                         detail::check_data(parent_id);                                                                                                                  \

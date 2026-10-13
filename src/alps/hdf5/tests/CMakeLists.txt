@@ -19,6 +19,7 @@
 
 foreach(
   name
+  hdf5_attributes
   hdf5_complex
   hdf5_copy
   hdf5_real_complex_vec
