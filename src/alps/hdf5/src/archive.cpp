@@ -424,7 +424,20 @@ namespace alps {
             );
         }
 
-        archive::archive(boost::filesystem::path const & filename, std::string mode) {
+        archive::archive()
+            : current_("/")
+            , context_(NULL)
+        {}
+
+        archive::archive(boost::filesystem::path const & filename, std::string mode)
+            : context_(NULL)
+        {
+            open(filename, mode);
+        }
+
+        void archive::open(boost::filesystem::path const & filename, std::string const & mode) {
+            if (context_ != NULL)
+                throw archive_opened("the archive '" + filename.string() + "' is already opened" + ALPS_STACKTRACE);
             // Unknown letters used to be ignored (validation from ALPSCore
             // 33e26902; ALPS also keeps "l").
             if (mode.find_first_not_of("rwaclm") != std::string::npos)

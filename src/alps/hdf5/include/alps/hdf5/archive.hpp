@@ -108,11 +108,16 @@ namespace alps {
                     MEMORY = 0x10 
                 } properties;
 
+                /// A closed archive; open() attaches it to a file (from ALPSCore 38e49c73).
+                archive();
                 archive(boost::filesystem::path const & filename, std::string mode = "r");
                 explicit archive(std::string const & filename, int props); // TODO: remove that!
                 explicit archive(std::string const & filename, char prop); // TODO: remove that!
                 explicit archive(std::string const & filename, char signed prop); // TODO: remove that!
                 archive(archive const & arg);
+                /// Copies share the file through a counted context; assigning one
+                /// would not count it (deleted as in ALPSCore 892bff78).
+                archive & operator=(archive const &) = delete;
 
                 virtual ~archive();
                 static void abort();
@@ -126,6 +131,10 @@ namespace alps {
                 void set_context(std::string const & context);
                 std::string complete_path(std::string path) const;
 
+                /// Opens a file in a closed archive, also after close(). Throws
+                /// archive_opened if the archive is open and wrong_mode for
+                /// letters other than "rwaclm".
+                void open(boost::filesystem::path const & filename, std::string const & mode = "r");
                 void close();
                 bool is_open();
 
