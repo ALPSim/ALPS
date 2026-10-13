@@ -234,13 +234,13 @@ class CitationTests(unittest.TestCase):
                                 f"-DALPS_BUILD_APPLICATIONS={'OFF' if mode == 'libraries' else 'ON'}"],
                                check=True, capture_output=True)
                 expected = generator.cpp_data(self.policy, self.references, self.framework)
-                self.assertEqual((build / "generated/include/alps/utility/citations_data.inc").read_text(encoding="utf-8"), expected)
+                self.assertEqual((build / "generated/include/alps/utilities/citations_data.inc").read_text(encoding="utf-8"), expected)
                 prefix = self.root / ("install-" + mode)
                 subprocess.run(["cmake", "--install", str(build), "--prefix", str(prefix), "--component", "libraries"],
                                check=True, capture_output=True)
                 for filename in ("CITATION.cff", "CITATIONS.yaml", "CITATION.md"):
                     self.assertTrue((prefix / "share/alps" / filename).is_file())
-        data = build / "generated/include/alps/utility/citations_data.inc"
+        data = build / "generated/include/alps/utilities/citations_data.inc"
         before = data.read_text(encoding="utf-8")
         self.cff["preferred-citation"]["title"] = "Changed using only the catalog @DO_NOT_REPLACE@"
         self.save()

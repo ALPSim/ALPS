@@ -17,9 +17,9 @@
 
 #include "hirschfyesim.h"
 #include <alps/parameter.h>
-#include <alps/utility/copyright.hpp>
-#include <alps/utility/cli.hpp>
-#include <alps/utility/vectorio.hpp>
+#include <alps/utilities/copyright.hpp>
+#include <alps/cli.hpp>
+#include <alps/utilities/vectorio.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/program_options.hpp>
 

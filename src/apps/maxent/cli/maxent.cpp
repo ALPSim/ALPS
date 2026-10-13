@@ -12,8 +12,8 @@
 *****************************************************************************/
 
 #include <alps/solvers.hpp>
-#include <alps/utility/cli.hpp>
-#include <alps/utility/copyright.hpp>
+#include <alps/cli.hpp>
+#include <alps/utilities/copyright.hpp>
 #include <alps/ngs/mcoptions.hpp>
 #include <alps/ngs/params.hpp>
 #include <boost/lexical_cast.hpp>

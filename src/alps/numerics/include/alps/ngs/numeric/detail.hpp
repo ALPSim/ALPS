@@ -16,7 +16,7 @@
 #define ALPS_NGS_NUMERIC_DETAIL_HEADER
 
 #include <alps/utilities/stacktrace.hpp>
-#include <alps/utility/resize.hpp>
+#include <alps/utilities/resize.hpp>
 
 #include <alps/multi_array.hpp>
 

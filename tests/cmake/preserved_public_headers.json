@@ -934,5 +934,8 @@
     "boost/numeric/bindings/value_type.hpp",
     "boost/numeric/bindings/vector_view.hpp",
     "boost/numeric/bindings/views.hpp"
-  ]
+  ],
+  "retired": {
+    "alps/utility/factory.hpp": "did not compile in 3.0.0 (a syntax error in factory::register_type), so no consumer could use it"
+  }
 }

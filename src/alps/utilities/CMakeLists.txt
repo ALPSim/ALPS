@@ -77,29 +77,24 @@ target_sources(alps_utilities PUBLIC
     include/alps/type_traits/real_type.hpp
     include/alps/type_traits/slice.hpp
     include/alps/type_traits/type_tag.hpp
-    include/alps/utility/assign.hpp
-    include/alps/utility/bitops.hpp
-    include/alps/utility/copyright.hpp
-    include/alps/utility/citations.hpp
-    include/alps/utility/data.hpp
-    include/alps/utility/encode.hpp
-    include/alps/utility/factory.hpp
-    include/alps/utility/generator.hpp
-    include/alps/utility/os.hpp
-    include/alps/utility/resize.hpp
-    include/alps/utility/set_zero.hpp
-    include/alps/utility/vectorio.hpp
-    include/alps/utility/vmusage.hpp
     include/alps/utilities/cast.hpp
+    include/alps/utilities/citations.hpp
+    include/alps/utilities/copyright.hpp
+    include/alps/utilities/data.hpp
+    include/alps/utilities/encode.hpp
     include/alps/utilities/make_copy.hpp
+    include/alps/utilities/os.hpp
     include/alps/utilities/remove_cvr.hpp
+    include/alps/utilities/resize.hpp
     include/alps/utilities/short_print.hpp
     include/alps/utilities/signal.hpp
     include/alps/utilities/size.hpp
     include/alps/utilities/stacktrace.hpp
     include/alps/utilities/stringify.hpp
     include/alps/utilities/temporary_filename.hpp
-    include/alps/utilities/type_wrapper.hpp)
+    include/alps/utilities/type_wrapper.hpp
+    include/alps/utilities/vectorio.hpp
+    include/alps/utilities/vmusage.hpp)
 
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)

@@ -14,10 +14,10 @@
 
 /* $Id$ */
 
-#include <alps/utility/cli.hpp>
+#include <alps/cli.hpp>
 #include <alps/scheduler/scheduler.h>
 #include <boost/assert.hpp>
-#include <alps/utility/copyright.hpp>
+#include <alps/utilities/copyright.hpp>
 #include <alps/osiris/comm.h>
 
 namespace alps {

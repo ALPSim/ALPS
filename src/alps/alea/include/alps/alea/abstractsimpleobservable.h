@@ -28,7 +28,7 @@
 #include <alps/type_traits/change_value_type.hpp>
 #include <alps/type_traits/average_type.hpp>
 #include <alps/type_traits/slice.hpp>
-#include <alps/utility/resize.hpp>
+#include <alps/utilities/resize.hpp>
 #include <alps/utilities/size.hpp>
 #include <alps/utility/assign.hpp>
 

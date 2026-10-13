@@ -53,7 +53,9 @@ else()
      OR NOT EXISTS "${expected_prefix}/include/alps/python/save_observable_to_hdf5.hpp")
     message(FATAL_ERROR "The SDK must retain public Python compatibility includes")
   endif()
-  foreach(private_directory IN ITEMS alps/utilities alps/hdf5/include alps/hdf5/src
+  # alps/utilities/ itself is a public prefix (ALPSCore's spelling).
+  foreach(private_directory IN ITEMS alps/utilities/include alps/utilities/src
+                                     alps/utilities/tests alps/hdf5/include alps/hdf5/src
                                      alps/hdf5/tests alps/params alps/common alps/runtime
                                      alps/fortran/include alps/fortran/src alps/fortran/tests)
     if(EXISTS "${expected_prefix}/include/${private_directory}")
@@ -137,6 +139,10 @@ add_contract(numeric numerics.cpp ALPS::numerics)
 add_contract(numeric_io numeric_io.cpp ALPS::numeric_io)
 add_contract(numeric_xml numeric_xml.cpp ALPS::numeric_xml)
 add_contract(parameter_adapters parameter_adapters.cpp ALPS::alps)
+# Code written against 3.0.0 builds unchanged while the legacy layer is installed.
+if(ALPS_LEGACY_API)
+  add_contract(legacy_spellings legacy_spellings.cpp "ALPS::utilities;ALPS::cli;ALPS::numerics")
+endif()
 if(EXPECT_SOLVERS)
   get_target_property(maxent_links ALPS::maxent INTERFACE_LINK_LIBRARIES)
   if(maxent_links MATCHES "(^|;)ALPS::alps(;|$)")
@@ -155,4 +161,8 @@ if(NOT ALPS_SOURCE)
   set_tests_properties(sdk_contract sdk_resources numeric_contract numeric_io_contract numeric_xml_contract utilities_contract hdf5_contract
     params_contract osiris_contract xml_contract cli_contract parameter_adapters_contract PROPERTIES ENVIRONMENT_MODIFICATION
     "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
+  if(ALPS_LEGACY_API)
+    set_tests_properties(legacy_spellings_contract PROPERTIES ENVIRONMENT_MODIFICATION
+      "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
+  endif()
 endif()

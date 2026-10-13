@@ -28,11 +28,11 @@
 #include <fstream>
 #include "boost/tuple/tuple.hpp"
 #include "alps/parser/parser.h"
-#include "alps/utility/vectorio.hpp"
+#include "alps/utilities/vectorio.hpp"
 #include "alps/utilities/temporary_filename.hpp"
 #include "alps/numeric/isnan.hpp"
 #include "alps/numeric/isinf.hpp"
-#include <alps/utility/os.hpp>
+#include <alps/utilities/os.hpp>
 
 ExternalSolver::ExternalSolver(const boost::filesystem::path& executable)
 : exe_(boost::filesystem::absolute(executable,alps::bin_directory()))
