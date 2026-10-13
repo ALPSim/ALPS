@@ -24,6 +24,10 @@ target_sources(alps_numerics INTERFACE
     include/alps/numeric/binomial.hpp
     include/alps/numeric/checked_divide.hpp
     include/alps/numeric/conj.hpp
+    include/alps/numeric/detail/deprecated/blasheader.hpp
+    include/alps/numeric/detail/deprecated/general_matrix.hpp
+    include/alps/numeric/detail/deprecated/matrix.hpp
+    include/alps/numeric/detail/deprecated/vector.hpp
     include/alps/numeric/diagonal_matrix.hpp
     include/alps/numeric/double2int.hpp
     include/alps/numeric/fourier.hpp
