@@ -12,8 +12,6 @@
     "CITATION.md",
     ".github/scripts/ci/**",
     "tests/ci/test_fingerprint.py",
-    "tests/cmake/register_mpi_tests.cmake",
-    "tests/cmake/run_mpi_test.cmake",
     "CMakeLists.txt",
     "CMakePresets.json",
     "cmake/**",

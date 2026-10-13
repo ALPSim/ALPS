@@ -11,6 +11,8 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <gtest/gtest.h>
+#include "graph_assertions.hpp"
 #include <alps/parser/xslt_path.h>
 #include <alps/graph/is_embeddable.hpp>
 #include <alps/graph/utils.hpp>
@@ -27,9 +29,7 @@ typedef boost::property_map<graph_type,alps::edge_type_t>::type edge_color_map_t
 typedef alps::graph::graph_label<graph_type>::type label_type;
 typedef alps::graph::canonical_properties_type<graph_type>::type canonical_properties_type;
 
-void is_embeddable_with_color_symmetries_test()
-{
-    std::cout << "is_embeddable_with_color_symmetries_test()" << std::endl;
+TEST(GraphEmbeddability, is_embeddable_with_color_symmetries_test) {
     using alps::graph::canonical_properties;
     using alps::graph::is_embeddable;
 
@@ -93,14 +93,12 @@ void is_embeddable_with_color_symmetries_test()
     }
     canonical_properties_type jp = canonical_properties(j,color_symmetry);
 
-    std::cout << std::boolalpha << is_embeddable(h,g,get<alps::graph::partition>(hp),color_symmetry) << std::endl;
-    std::cout << std::boolalpha << is_embeddable(i,g,get<alps::graph::partition>(ip),color_symmetry) << std::endl;
-    std::cout << std::boolalpha << is_embeddable(j,g,get<alps::graph::partition>(jp),color_symmetry) << std::endl;
+    EXPECT_TRUE((is_embeddable(h,g,get<alps::graph::partition>(hp),color_symmetry)));
+    EXPECT_TRUE((is_embeddable(i,g,get<alps::graph::partition>(ip),color_symmetry)));
+    EXPECT_FALSE((is_embeddable(j,g,get<alps::graph::partition>(jp),color_symmetry)));
 }
 
-void is_embeddable_with_color_symmetries_test2()
-{
-    std::cout << "is_embeddable_with_color_symmetries_test2()" << std::endl;
+TEST(GraphEmbeddability, is_embeddable_with_color_symmetries_test2) {
     using alps::graph::canonical_properties;
     using alps::graph::is_embeddable;
 
@@ -150,12 +148,10 @@ void is_embeddable_with_color_symmetries_test2()
         edge_color[e] = 2;
     }
     canonical_properties_type hp = canonical_properties(h,color_symmetry);
-    std::cout << std::boolalpha << is_embeddable(h,g,get<alps::graph::partition>(hp),color_symmetry) << std::endl;
+    EXPECT_FALSE((is_embeddable(h,g,get<alps::graph::partition>(hp),color_symmetry)));
 }
 
-void is_embeddable_with_color_symmetries_test3()
-{
-    std::cout << "is_embeddable_with_color_symmetries_test3()" << std::endl;
+TEST(GraphEmbeddability, is_embeddable_with_color_symmetries_test3) {
     using alps::graph::canonical_properties;
     using alps::graph::is_embeddable;
 
@@ -180,7 +176,7 @@ void is_embeddable_with_color_symmetries_test3()
     //     |    +++ c0
     //     0    --- c1
     //    / +
-    //   2+++1    
+    //   2+++1
     graph_type h(4);
     {
         edge_color_map_type edge_color = get(alps::edge_type_t(),h);
@@ -196,13 +192,11 @@ void is_embeddable_with_color_symmetries_test3()
     }
     canonical_properties_type hp = canonical_properties(h,color_symmetry);
     std::vector<vertex_descriptor> pin(1, (2*5*2*5+1)/2);
-    std::cout << std::boolalpha << is_embeddable(h, g, pin, get<alps::graph::partition>(hp)) << std::endl;
-    std::cout << std::boolalpha << is_embeddable(h, g, pin, get<alps::graph::partition>(hp), color_symmetry) << std::endl;
+    EXPECT_FALSE((is_embeddable(h, g, pin, get<alps::graph::partition>(hp))));
+    EXPECT_TRUE((is_embeddable(h, g, pin, get<alps::graph::partition>(hp), color_symmetry)));
 }
 
-void is_embeddable_with_color_symmetries_test4()
-{
-    std::cout << "is_embeddable_with_color_symmetries_test4()" << std::endl;
+TEST(GraphEmbeddability, is_embeddable_with_color_symmetries_test4) {
     using alps::graph::canonical_properties;
     using alps::graph::is_embeddable;
 
@@ -213,7 +207,7 @@ void is_embeddable_with_color_symmetries_test4()
     // g:
     //     2        +++ c0
     //    / \       --- c1
-    //   O+++1+++4 
+    //   O+++1+++4
     //    \ /
     //     3
     graph_type g(5);
@@ -240,7 +234,7 @@ void is_embeddable_with_color_symmetries_test4()
     //     |    +++ c0
     //     0    --- c1
     //    / +
-    //   2+++1    
+    //   2+++1
     graph_type h(4);
     {
         edge_color_map_type edge_color = get(alps::edge_type_t(),h);
@@ -256,15 +250,6 @@ void is_embeddable_with_color_symmetries_test4()
     }
     canonical_properties_type hp = canonical_properties(h,color_symmetry);
     std::vector<vertex_descriptor> pin(1, 1);
-    std::cout << std::boolalpha << is_embeddable(h,g,pin,get<alps::graph::partition>(hp)) << std::endl;
-    std::cout << std::boolalpha << is_embeddable(h,g,pin,get<alps::graph::partition>(hp),color_symmetry) << std::endl;
-}
-
-int main()
-{
-    is_embeddable_with_color_symmetries_test();
-    is_embeddable_with_color_symmetries_test2();
-    is_embeddable_with_color_symmetries_test3();
-    is_embeddable_with_color_symmetries_test4();
-    return 0;
+    EXPECT_FALSE((is_embeddable(h,g,pin,get<alps::graph::partition>(hp))));
+    EXPECT_TRUE((is_embeddable(h,g,pin,get<alps::graph::partition>(hp),color_symmetry)));
 }

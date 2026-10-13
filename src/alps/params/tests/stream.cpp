@@ -12,15 +12,15 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
 #include <alps/ngs/params.hpp>
+#include <sstream>
 
-// TODO: make an in-file for all types!
-// TODO: make reference output file!
-
-int main() {
-
-    alps::params parms;
-    parms["string_value"] = "test";
-    std::cout << parms["string_value"] << std::endl;
-    return 0;
+TEST(ParamsStream, StringValuePreservesText) {
+    alps::params parameters;
+    parameters["string_value"] = "test";
+    std::ostringstream output;
+    output << parameters["string_value"];
+    EXPECT_EQ(output.str(), "test");
 }

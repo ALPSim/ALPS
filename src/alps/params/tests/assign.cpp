@@ -14,10 +14,10 @@
 
 #include <alps/ngs/params.hpp>
 
-#include <cassert>
+#include <gtest/gtest.h>
 #include <vector>
 
-int main() {
+TEST(ParamsAssignment, NativeTypesAndNonInsertingLookup) {
 
     alps::params parms;
     parms["char"] = static_cast<char>(1);
@@ -39,11 +39,15 @@ int main() {
     parms["std::vector<bool>"] = bool_vector;
     parms["std::string"] = std::string("asdf");
 
-    assert(parms["std::vector<bool>"].cast<std::vector<bool> >() == bool_vector);
-    assert(parms.find("int") != nullptr);
-    assert(parms.find("int")->cast<int>() == 1);
-    assert(parms.find("missing") == nullptr);
+    EXPECT_EQ(parms["std::vector<bool>"].cast<std::vector<bool> >(), bool_vector);
+    ASSERT_NE(parms.find("int"), nullptr);
+    EXPECT_EQ(parms.find("int")->cast<int>(), 1);
+    EXPECT_EQ(parms.find("missing"), nullptr);
 
-    std::cout << parms << std::endl;
-    return 0;
+    for (const auto& name : {"char", "signed char", "unsigned char", "short", "unsigned short",
+                             "int", "unsigned", "long", "unsigned long", "long long",
+                             "unsigned long long", "float", "double", "long double", "bool"}) {
+        EXPECT_EQ(parms[name].cast<int>(), 1) << name;
+    }
+    EXPECT_EQ(parms["std::string"].cast<std::string>(), "asdf");
 }

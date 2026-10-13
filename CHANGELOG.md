@@ -19,6 +19,8 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Changed
 
+- Consolidate native runtime tests under GoogleTest with individual CTest cases, historical numerical and serialization references, isolated temporary files, and explicit MPI/sanitizer registration. GoogleTest is a test-only dependency; builds with tests disabled do not acquire or install it.
+
 - Require HDF5 1.10.5 or newer for source builds and installed SDK consumers, retaining compatibility with the system package used by the manylinux_2_28 wheel build.
 - Support Python 3.10 or newer for pyalps. Keep separate CPython 3.10 and 3.11 wheels and use one `cp312-abi3` wheel for Python 3.12 and newer. Downstream nanobind extensions must pass `STABLE_ABI` to share pyalps types on Python 3.12+.
 - Add `mpi`, `openmp`, and `mpi-openmp` configure/build/test presets with separate build and install directories. The default build keeps MPI and OpenMP disabled.
@@ -36,7 +38,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Migration
 
-The existing native test framework, public and vendored headers, and differential audit tooling are retained. Tutorial consumers use the exported SDK targets. The ALPS 2.x consumer interfaces `UseALPS.cmake`, `UsePyALPS.cmake` and `include.mk` remain installed as deprecated compatibility layers over those targets. Configure downstream projects using [CONTRIBUTING.md](CONTRIBUTING.md#getting-started-with-the-code).
+Public and vendored headers and differential audit tooling are retained. Tutorial consumers use the exported SDK targets. The ALPS 2.x consumer interfaces `UseALPS.cmake`, `UsePyALPS.cmake` and `include.mk` remain installed as deprecated compatibility layers over those targets. Configure downstream projects using [CONTRIBUTING.md](CONTRIBUTING.md#getting-started-with-the-code).
 
 Numerical matrix/vector persistence now requires an explicit adapter: include `<alps/hdf5/matrix.hpp>` or `<alps/hdf5/numeric_vector.hpp>` and link `ALPS::numeric_io`. The matrix umbrella `<alps/numeric/matrix.hpp>` no longer includes HDF5 automatically. Diagonal matrices and deprecated BLAS matrix/vector classes retain their archive `save`/`load` members without requiring HDF5 headers in the numerical interfaces. Numerical matrix `write_xml` and XML insertion remain available through `<alps/xml/matrix.hpp>` and `ALPS::numeric_xml`. Header ownership moves preserve public include spellings; consumers of persistence and XML output must include the corresponding adapters.
 

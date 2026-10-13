@@ -17,38 +17,45 @@ using alps::numeric::matrix;
 using alps::numeric::vector;
 using alps::numeric::column_view;
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( size_test, T, test_types )
+template<class T> class MatrixColumnView : public ::testing::Test {};
+TYPED_TEST_SUITE(MatrixColumnView, test_types);
+
+TYPED_TEST(MatrixColumnView, size_test)
 {
+    using T = TypeParam;
     matrix<T> c(15,5);
     column_view<matrix<T> > cv(c,3);
-    BOOST_CHECK_EQUAL(cv.size(),15u);
+    EXPECT_EQ(cv.size(),15u);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( const_element_access, T, test_types )
+TYPED_TEST(MatrixColumnView, const_element_access)
 {
+    using T = TypeParam;
     using std::distance;
     matrix<T> c(15,20);
     fill_matrix_with_numbers(c);
     column_view<matrix<T> > const cv(c,3);
     for(std::size_t i = 0; i < num_rows(c); ++i)
     {
-        BOOST_CHECK_EQUAL( c(i,3), cv(i));
-        BOOST_CHECK_EQUAL( c(i,3), cv[i]);
+        EXPECT_EQ( c(i,3), cv(i));
+        EXPECT_EQ( c(i,3), cv[i]);
     }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( const_iterator_test, T, test_types )
+TYPED_TEST(MatrixColumnView, const_iterator_test)
 {
+    using T = TypeParam;
     using std::distance;
     matrix<T> c(15,20);
     fill_matrix_with_numbers(c);
     column_view<matrix<T> > const cv(c,3);
     for(typename column_view<matrix<T> >::const_iterator it = cv.begin(); it != cv.end(); ++it)
-        BOOST_CHECK_EQUAL( c(distance(cv.begin(),it),3), *it);
+        EXPECT_EQ( c(distance(cv.begin(),it),3), *it);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_test, T, test_types )
+TYPED_TEST(MatrixColumnView, iterator_test)
 {
+    using T = TypeParam;
     using std::distance;
     matrix<T> c(15,20);
     fill_matrix_with_numbers(c);
@@ -57,18 +64,19 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_test, T, test_types )
     for(typename column_view<matrix<T> >::iterator it = cv.begin(); it != cv.end(); ++it)
         *it = 100*distance(cv.begin(),it);
     for(std::size_t i = 0; i < num_rows(c); ++i)
-        BOOST_CHECK_EQUAL(c(i,5),T(100*i));
+        EXPECT_EQ(c(i,5),T(100*i));
 
     for(std::size_t j=0; j < num_cols(c); ++j)
     {
         if(j != 5)
             for(std::size_t i = 0; i < num_rows(c); ++i)
-                BOOST_CHECK_EQUAL(d(i,j),c(i,j));
+                EXPECT_EQ(d(i,j),c(i,j));
     }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( element_assign_test, T, test_types )
+TYPED_TEST(MatrixColumnView, element_assign_test)
 {
+    using T = TypeParam;
     using std::distance;
     matrix<T> c(15,20);
     fill_matrix_with_numbers(c);
@@ -78,37 +86,39 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( element_assign_test, T, test_types )
         cv(i) = 100*i;
 
     for(std::size_t i = 0; i < num_rows(c); ++i)
-        BOOST_CHECK_EQUAL(c(i,5),T(100*i));
+        EXPECT_EQ(c(i,5),T(100*i));
 
     for(std::size_t i = 0; i < num_rows(c); ++i)
         cv[i] = 1000*i;
 
     for(std::size_t i = 0; i < num_rows(c); ++i)
-        BOOST_CHECK_EQUAL(c(i,5),T(1000*i));
+        EXPECT_EQ(c(i,5),T(1000*i));
 
     for(std::size_t j=0; j < num_cols(c); ++j)
     {
         if(j != 5)
             for(std::size_t i = 0; i < num_rows(c); ++i)
-                BOOST_CHECK_EQUAL(d(i,j),c(i,j));
+                EXPECT_EQ(d(i,j),c(i,j));
     }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( conversion_to_vector, T, test_types)
+TYPED_TEST(MatrixColumnView, conversion_to_vector)
 {
+    using T = TypeParam;
     matrix<T> c(15,20);
     fill_matrix_with_numbers(c);
     matrix<T> d(c);
     column_view<matrix<T> > cv(c,5);
     vector<T> v(cv);
-    BOOST_CHECK_EQUAL(num_rows(c),v.size());
+    EXPECT_EQ(num_rows(c),v.size());
     for(std::size_t i = 0; i < num_rows(c); ++i)
-        BOOST_CHECK_EQUAL(c(i,5),v(i));
-    BOOST_CHECK_EQUAL(c,d);
+        EXPECT_EQ(c(i,5),v(i));
+    EXPECT_EQ(c,d);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( plus_assign, T, test_types)
+TYPED_TEST(MatrixColumnView, plus_assign)
 {
+    using T = TypeParam;
     matrix<T> c(15,20);
     fill_matrix_with_numbers(c);
     matrix<T> d(c);
@@ -117,23 +127,24 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( plus_assign, T, test_types)
     fill_range_with_numbers(v.begin(),v.end(),0);
     cv += v;
     for(std::size_t i = 0; i < num_rows(c); ++i)
-        BOOST_CHECK_EQUAL( c(i,5), d(i,5)+v[i]);
+        EXPECT_EQ( c(i,5), d(i,5)+v[i]);
 
     for(std::size_t j=0; j < num_cols(c); ++j)
     {
         if(j != 5)
             for(std::size_t i = 0; i < num_rows(c); ++i)
-                BOOST_CHECK_EQUAL(d(i,j),c(i,j));
+                EXPECT_EQ(d(i,j),c(i,j));
     }
 
     cv += cv;
 
     for(std::size_t i = 0; i < num_rows(c); ++i)
-        BOOST_CHECK_EQUAL( c(i,5), T(2)*(d(i,5)+v[i]));
+        EXPECT_EQ( c(i,5), T(2)*(d(i,5)+v[i]));
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( minus_assign, T, test_types)
+TYPED_TEST(MatrixColumnView, minus_assign)
 {
+    using T = TypeParam;
     matrix<T> c(15,20);
     fill_matrix_with_numbers(c);
     matrix<T> d(c);
@@ -142,23 +153,24 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( minus_assign, T, test_types)
     fill_range_with_numbers(v.begin(),v.end(),0);
     cv -= v;
     for(std::size_t i = 0; i < num_rows(c); ++i)
-        BOOST_CHECK_EQUAL( c(i,5), d(i,5)-v[i]);
+        EXPECT_EQ( c(i,5), d(i,5)-v[i]);
 
     for(std::size_t j=0; j < num_cols(c); ++j)
     {
         if(j != 5)
             for(std::size_t i = 0; i < num_rows(c); ++i)
-                BOOST_CHECK_EQUAL(d(i,j),c(i,j));
+                EXPECT_EQ(d(i,j),c(i,j));
     }
 
     cv -= cv;
 
     for(std::size_t i = 0; i < num_rows(c); ++i)
-        BOOST_CHECK_EQUAL( c(i,5), T(0));
+        EXPECT_EQ( c(i,5), T(0));
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( multiply_assign, T, test_types)
+TYPED_TEST(MatrixColumnView, multiply_assign)
 {
+    using T = TypeParam;
     matrix<T> c(15,20);
     fill_matrix_with_numbers(c);
     matrix<T> d(c);
@@ -167,24 +179,25 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( multiply_assign, T, test_types)
     cv *= T(5);
 
     for(std::size_t i=0; i < num_rows(c); ++i)
-        BOOST_CHECK_EQUAL(c(i,19), T(5)*d(i,19));
+        EXPECT_EQ(c(i,19), T(5)*d(i,19));
 
     for(std::size_t j=0; j < num_cols(c); ++j)
     {
         if(j != 19)
             for(std::size_t i = 0; i < num_rows(c); ++i)
-                BOOST_CHECK_EQUAL(c(i,j),d(i,j));
+                EXPECT_EQ(c(i,j),d(i,j));
         else
             for(std::size_t i=0; i < num_rows(c); ++i)
-                BOOST_CHECK_EQUAL(c(i,19), T(5)*d(i,19));
+                EXPECT_EQ(c(i,19), T(5)*d(i,19));
     }
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( scalar_product_column_view_vector, T, test_types)
+TYPED_TEST(MatrixColumnView, scalar_product_column_view_vector)
 {
+    using T = TypeParam;
     using alps::numeric::conj;
     // We assume conj works properly
-    assert( conj(std::complex<double>(1,2)) == std::complex<double>(1,-2) );
+    ASSERT_EQ(conj(std::complex<double>(1,2)), std::complex<double>(1,-2));
     matrix<T> c(15,20);
     fill_matrix_with_numbers(c);
     matrix<T> d(c);
@@ -199,19 +212,20 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( scalar_product_column_view_vector, T, test_types)
     for(std::size_t i=0; i < v.size(); ++i)
         ref += conj(d(i,5))*v[i];
 
-    BOOST_CHECK_EQUAL(ref, r);
+    EXPECT_EQ(ref, r);
 
     T r2 = scalar_product(v, cv);
 
-    BOOST_CHECK_EQUAL(conj(ref) , r2);
-    BOOST_CHECK_EQUAL(d,c);
+    EXPECT_EQ(conj(ref) , r2);
+    EXPECT_EQ(d,c);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( scalar_product_column_view_column_view, T, test_types)
+TYPED_TEST(MatrixColumnView, scalar_product_column_view_column_view)
 {
+    using T = TypeParam;
     using alps::numeric::conj;
     // We assume conj works properly
-    assert( conj(std::complex<double>(1,2)) == std::complex<double>(1,-2) );
+    ASSERT_EQ(conj(std::complex<double>(1,2)), std::complex<double>(1,-2));
     matrix<T> c(15,20);
     fill_matrix_with_numbers(c);
     matrix<T> d(c);
@@ -226,7 +240,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( scalar_product_column_view_column_view, T, test_t
     for(std::size_t i=0; i < v.size(); ++i)
         ref += conj(d(i,5))*d(i,5);
 
-    BOOST_CHECK_EQUAL(ref, r);
-    BOOST_CHECK_EQUAL(d,c);
+    EXPECT_EQ(ref, r);
+    EXPECT_EQ(d,c);
 }
-

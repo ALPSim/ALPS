@@ -1,3 +1,5 @@
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
 // Copyright (C) 2026 ALPS Collaboration
 // Part of the ALPS Project — see LICENSE.txt for full license text.
 // SPDX-License-Identifier: MIT
@@ -26,7 +28,7 @@
 #include <cstdio>
 #include <stdexcept>
 
-int main() {
+TEST(DmftRegression, hilberttransformer_itime_throw) {
   alps::Parameters parms;
   parms["FLAVORS"] = 2;
   parms["t"]       = 1.0;
@@ -37,22 +39,5 @@ int main() {
   // must report before touching them.
   itime_green_function_t G_tau(/*ntime*/ 11, /*nsite*/ 1, /*nflavor*/ 2);
 
-  bool threw_logic_error = false;
-  try {
-    (void)transform(G_tau, /*mu*/ 0.0, /*h*/ 0.0, /*beta*/ 10.0);
-  } catch (const std::logic_error&) {
-    threw_logic_error = true;
-  } catch (...) {
-    std::printf("FAIL: operator() threw a non-logic_error exception\n");
-    return 1;
-  }
-
-  if (!threw_logic_error) {
-    std::printf("FAIL: SemicircleHilbertTransformer::operator() did not throw "
-                "std::logic_error for the unimplemented itime path\n");
-    return 1;
-  }
-  std::printf("OK: unimplemented itime Hilbert transform reports via "
-              "std::logic_error\n");
-  return 0;
+  EXPECT_THROW(transform(G_tau, 0.0, 0.0, 10.0), std::logic_error);
 }

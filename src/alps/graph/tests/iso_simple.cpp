@@ -11,6 +11,8 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <gtest/gtest.h>
+#include "graph_assertions.hpp"
 #include <alps/graph/subgraphs.hpp>
 #include <alps/graph/canonical_properties.hpp>
 
@@ -46,12 +48,12 @@ template<typename Stream> Stream & operator<< (Stream & os, partition_type<color
     return os;
 }
 
-int main() {
+TEST(GraphIsomorphism, HandConstructedGraphsAndAutomorphisms) {
     {
         enum { A, B, C, D, N };
 
         colored_graph_type g(N), h(N);
-        
+
         /*
             A - B       A   B
             | / |  vs.  | X |
@@ -81,7 +83,7 @@ int main() {
         h_vertex_name[B] = 0;
         h_vertex_name[C] = 1;
         h_vertex_name[D] = 1;
-        
+
         boost::graph_traits<colored_graph_type>::edge_iterator it, end;
 
         boost::property_map<colored_graph_type, alps::edge_type_t>::type g_edge_name = get(alps::edge_type_t(), g);
@@ -96,29 +98,17 @@ int main() {
         graph_label<colored_graph_type>::type g_label, h_label;
         partition_type<colored_graph_type>::type g_orbit, h_orbit;
         boost::tie(g_ordering, g_label, g_orbit) = canonical_properties(g);
+        expect_vertex_permutation(g_ordering, num_vertices(g));
         boost::tie(h_ordering, h_label, h_orbit) = canonical_properties(h);
-
-        for (std::vector<boost::graph_traits<colored_graph_type>::vertex_descriptor>::const_iterator it = g_ordering.begin(); it != g_ordering.end(); ++it)
-            std::cout << (it != g_ordering.begin() ? " " : "(") << *it;
-        std::cout << ")" << std::endl;
-        for (std::vector<boost::graph_traits<colored_graph_type>::vertex_descriptor>::const_iterator it = h_ordering.begin(); it != h_ordering.end(); ++it)
-            std::cout << (it != h_ordering.begin() ? " " : "(") << *it;
-        std::cout << ")" << std::endl;
-
-        std::cout << g_orbit << std::endl;
-        std::cout << h_orbit << std::endl;
-    
-        std::cout << g_label << std::endl;
-        std::cout << h_label << std::endl;
+        expect_vertex_permutation(h_ordering, num_vertices(h));
+        EXPECT_EQ(g_label, h_label);
     }
-
-    std::cout << std::endl;
 
     {
         enum {A, B, C, D, E, F, G, H, I, N};
 
         graph_type g(N);
-        
+
         /*
             A - B - C
             |   |   |
@@ -129,18 +119,18 @@ int main() {
 
         add_edge(A, B, g);
         add_edge(B, C, g);
-        
+
         add_edge(A, D, g);
         add_edge(B, E, g);
         add_edge(C, F, g);
-        
+
         add_edge(D, E, g);
         add_edge(E, F, g);
-        
+
         add_edge(D, G, g);
         add_edge(E, H, g);
         add_edge(F, I, g);
-        
+
         add_edge(G, H, g);
         add_edge(H, I, g);
 
@@ -148,28 +138,20 @@ int main() {
         graph_label<graph_type>::type g_label;
         partition_type<graph_type>::type g_orbit;
         boost::tie(g_ordering, g_label, g_orbit) = canonical_properties(g);
-        
-        for (std::vector<boost::graph_traits<graph_type>::vertex_descriptor>::const_iterator it = g_ordering.begin(); it != g_ordering.end(); ++it)
-            std::cout << (it != g_ordering.begin() ? " " : "(") << *it;
-        std::cout << ")" << std::endl;
-
-        std::cout << g_orbit << std::endl;
-        std::cout << g_label << std::endl;
+        expect_vertex_permutation(g_ordering, num_vertices(g));
     }
-
-    std::cout << std::endl;
 
     {
         enum { A, B, C, D, N };
 
         graph_type g(N), h(N);
-        
+
         /*
             A - B       A   B
             | / |  vs.  | X |
             C - D       C - D
         */
-        
+
         add_edge(A, B, g);
         add_edge(A, C, g);
         add_edge(B, C, g);
@@ -186,23 +168,11 @@ int main() {
         graph_label<graph_type>::type g_label, h_label;
         partition_type<graph_type>::type g_orbit, h_orbit;
         boost::tie(g_ordering, g_label, g_orbit) = canonical_properties(g);
+        expect_vertex_permutation(g_ordering, num_vertices(g));
         boost::tie(h_ordering, h_label, h_orbit) = canonical_properties(h);
-
-        for (std::vector<boost::graph_traits<graph_type>::vertex_descriptor>::const_iterator it = g_ordering.begin(); it != g_ordering.end(); ++it)
-            std::cout << (it != g_ordering.begin() ? " " : "(") << *it;
-        std::cout << ")" << std::endl;
-        for (std::vector<boost::graph_traits<graph_type>::vertex_descriptor>::const_iterator it = h_ordering.begin(); it != h_ordering.end(); ++it)
-            std::cout << (it != h_ordering.begin() ? " " : "(") << *it;
-        std::cout << ")" << std::endl;
-
-        std::cout << g_orbit << std::endl;
-        std::cout << h_orbit << std::endl;
-        
-        std::cout << g_label << std::endl;
-        std::cout << h_label << std::endl;
+        expect_vertex_permutation(h_ordering, num_vertices(h));
+        EXPECT_EQ(g_label, h_label);
     }
-
-    std::cout << std::endl;
 
     {
         /*
@@ -247,55 +217,40 @@ int main() {
         add_edge(B,D,i);
         add_edge(B,E,i);
         add_edge(C,F,i);
-        
+
         std::vector<boost::graph_traits<graph_type>::vertex_descriptor> g_ordering, h_ordering, i_ordering;
         graph_label<graph_type>::type g_label, h_label, i_label;
         partition_type<graph_type>::type g_orbit, h_orbit, i_orbit;
         boost::tie(g_ordering, g_label, g_orbit) = canonical_properties(g);
+        expect_vertex_permutation(g_ordering, num_vertices(g));
         boost::tie(h_ordering, h_label, h_orbit) = canonical_properties(h);
+        expect_vertex_permutation(h_ordering, num_vertices(h));
         boost::tie(i_ordering, i_label, i_orbit) = canonical_properties(i);
-
-        for (std::vector<boost::graph_traits<graph_type>::vertex_descriptor>::const_iterator it = g_ordering.begin(); it != g_ordering.end(); ++it)
-            std::cout << (it != g_ordering.begin() ? " " : "(") << *it;
-        std::cout << ")" << std::endl;
-        for (std::vector<boost::graph_traits<graph_type>::vertex_descriptor>::const_iterator it = h_ordering.begin(); it != h_ordering.end(); ++it)
-            std::cout << (it != h_ordering.begin() ? " " : "(") << *it;
-        std::cout << ")" << std::endl;
-        for (std::vector<boost::graph_traits<graph_type>::vertex_descriptor>::const_iterator it = i_ordering.begin(); it != i_ordering.end(); ++it)
-            std::cout << (it != i_ordering.begin() ? " " : "(") << *it;
-        std::cout << ")" << std::endl;
-
-        std::cout << g_orbit << std::endl;
-        std::cout << h_orbit << std::endl;
-        std::cout << i_orbit << std::endl;
-        
-        std::cout << g_label << std::endl;
-        std::cout << h_label << std::endl;
-        std::cout << i_label << std::endl;
+        expect_vertex_permutation(i_ordering, num_vertices(i));
+        EXPECT_NE(g_label, h_label);
+        EXPECT_NE(g_label, i_label);
+        EXPECT_NE(h_label, i_label);
     }
-
-    std::cout << std::endl;
 
     {
         enum { A, B, C, N };
 
         graph_type g(N);
         std::set<boost::dynamic_bitset<> > g_sub;
-        
+
         /*
             A - B
             | /
             C
         */
-        
+
         add_edge(A, B, g);
         add_edge(A, C, g);
         add_edge(B, C, g);
-        
+
         subgraphs(g_sub, g);
 
-        for (std::set<boost::dynamic_bitset<> >::const_iterator it = g_sub.begin(); it != g_sub.end(); ++it)
-            std::cout << *it << std::endl;
+        EXPECT_FALSE(g_sub.empty());
     }
 
     {
@@ -327,10 +282,7 @@ int main() {
         add_edge(9,3,g);
         add_edge(9,4,g);
         add_edge(9,8,g);
-
-        std::cout << get<alps::graph::label>(canonical_properties(g)) << std::endl;
-
-        std::cout << get<alps::graph::partition>(canonical_properties(g)) << std::endl;
+        const auto properties = canonical_properties(g);
+        expect_vertex_permutation(get<0>(properties), num_vertices(g));
     }
-    return EXIT_SUCCESS;
-}
+    }

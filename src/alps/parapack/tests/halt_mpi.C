@@ -12,25 +12,28 @@
 *****************************************************************************/
 
 #include <alps/parapack/process.h>
-#include <iostream>
-#include <chrono>
-#include <thread>
+#include "process_mpi_checks.hpp"
 
-namespace mpi = boost::mpi;
-
-int main(int argc, char** argv) {
-  mpi::environment mpi(argc, argv);
-  mpi::communicator world;
+TEST(ParallelHalt, WaitsForActiveGroupsThenAcknowledgesEveryRank) {
+  boost::mpi::communicator world;
+  ASSERT_GE(world.size(), 2);
   alps::process_helper_mpi process(world, 1);
-  if (world.rank() == 0) std::this_thread::sleep_for(std::chrono::seconds(1));
-  process.halt();
-  while (true) {
-    if (process.check_halted()) {
-      std::cerr << "process " << world.rank() << " is halted\n";
-      break;
-    } else {
-      std::cerr << "process " << world.rank() << " is not halted yet\n";
-      std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
+  alps::process_group active;
+  EXPECT_FALSE(process.is_halting());
+  if (world.rank() == 0) {
+    active = process.allocate();
+    process.halt();
+    EXPECT_TRUE(process.is_halting());
   }
+  world.barrier();
+  // The scheduler cannot send shutdown while a worker group is active.
+  EXPECT_FALSE(process.check_halted());
+  world.barrier();
+  if (world.rank() == 0)
+    process.release(active);
+  alps_test::expect_halted(process, world);
+  EXPECT_TRUE(process.is_halting());
+  EXPECT_TRUE(process.check_halted());
+  process.halt();
+  EXPECT_TRUE(process.check_halted());
 }

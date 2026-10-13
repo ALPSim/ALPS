@@ -1,3 +1,4 @@
+#include <alps/testing/stream_fixture.hpp>
 /*****************************************************************************
 *
 * ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -181,7 +182,7 @@ void IterateOverCells(const LatticeType& lattice)
      std::cout << ", offset=" << PrintVector(Offset);
 
      // We can also obtain the cell_descriptor corresponding to an offset
-     assert(Offset == offset(cell(Offset, lattice), lattice));
+     EXPECT_TRUE(Offset == offset(cell(Offset, lattice), lattice));
 
      // the coordinates of the center of the unit cell
      vector_type CellOrigin(unit_cell(lattice).dimension(), 0);
@@ -194,36 +195,19 @@ void IterateOverCells(const LatticeType& lattice)
   std::cout << std::endl;
 }
 
-int main()
-{
+TEST(LatticeSerialization, Example7) {
+  alps::testing::StreamFixture transcript(ALPS_TEST_SOURCE_DIR "/example7.input");
+  { // Flush serialization objects before checking the captured stream.
+    // read parameters
+    alps::ParameterList plist(std::cin);
+    BOOST_FOREACH(alps::Parameters const& p, plist) {
+      // create a graph factory with default graph type
+      alps::graph_helper<> lattice(p);
 
-#ifndef BOOST_NO_EXCEPTIONS
-  try {
-#endif
+      ShowUnitCell(lattice.unit_cell());
 
-  // read parameters
-  alps::ParameterList plist(std::cin);
-  BOOST_FOREACH(alps::Parameters const& p, plist) {
-    // create a graph factory with default graph type
-    alps::graph_helper<> lattice(p);
-
-    ShowUnitCell(lattice.unit_cell());
-
-    IterateOverCells(lattice.lattice());
+      IterateOverCells(lattice.lattice());
+    }
   }
-
-#ifndef BOOST_NO_EXCEPTIONS
-  }
-  catch (std::exception& e)
-  {
-    std::cerr << "Caught exception: " << e.what() << "\n";
-    exit(-1);
-  }
-  catch (...)
-  {
-    std::cerr << "Caught unknown exception\n";
-    exit(-2);
-  }
-#endif
-  return 0;
+  transcript.expect_output(ALPS_TEST_SOURCE_DIR "/example7.output");
 }

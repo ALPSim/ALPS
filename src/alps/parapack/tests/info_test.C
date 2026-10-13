@@ -12,32 +12,31 @@
 *****************************************************************************/
 
 #include <alps/parapack/clone_info.h>
-#include <alps/osiris/comm.h>
-#include <chrono>
-#include <thread>
+#include <gtest/gtest.h>
 
-int main(int argc, char **argv) {
-  alps::comm_init(argc, argv);
+TEST(CloneInfo, TracksPhasesSeedAndProgress) {
   alps::Parameters params;
   params["SEED"] = 29832;
   alps::clone_info info(0, params, "info_test");
+  EXPECT_EQ(info.clone_id(), 0);
+  EXPECT_TRUE(info.has_seed());
+  alps::clone_info same_clone(0, params, "same"), other_clone(1, params, "other");
+  EXPECT_EQ(info.worker_seed(), same_clone.worker_seed());
+  EXPECT_NE(info.worker_seed(), other_clone.worker_seed());
+  EXPECT_DOUBLE_EQ(info.progress(), 0);
   info.start("test 1");
-  std::this_thread::sleep_for(std::chrono::seconds(1));
+  EXPECT_EQ(info.phase(), "test 1");
   info.stop();
-  std::this_thread::sleep_for(std::chrono::seconds(1));
   info.start("test 2");
-  std::this_thread::sleep_for(std::chrono::seconds(1));
+  EXPECT_EQ(info.phase(), "test 2");
   info.stop();
-  info.set_progress(0.593483);
-  if (alps::is_master()) {
-    alps::oxstream oxs;
-    oxs << info;
-  }
+  ASSERT_EQ(info.phases().size(), 2);
+  EXPECT_GE(info.elapsed().total_microseconds(), 0);
+  info.set_progress(.593483);
+  EXPECT_DOUBLE_EQ(info.progress(), .593483);
   info.set_progress(1);
-  if (alps::is_master()) {
-    alps::oxstream oxs;
-    oxs << info;
-  }
-  alps::comm_exit();
-  return 0;
+  EXPECT_DOUBLE_EQ(info.progress(), 1);
+  EXPECT_EQ(info.dumpfile(), "info_test.clone1");
+  EXPECT_EQ(info.dumpfile_h5(), "info_test.clone1.h5");
+  EXPECT_EQ(info.dumpfile_xdr(), "info_test.clone1.xdr");
 }

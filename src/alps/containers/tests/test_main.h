@@ -19,92 +19,41 @@
 #include <iostream>
 #include <vector>
 
+#include <gtest/gtest.h>
+#include <unordered_set>
+
+// Track lifetime outside object storage: reading init_ before construction in
+// the old test double was undefined and made sanitizer results unreliable.
 template<class T>
 struct non_pod {
-  BOOST_STATIC_CONSTANT(int, magic = -1190884);
-
-  non_pod() {
-    if (init_ == magic) throw std::logic_error("non_pod 0");
-    init_ = magic;
-    data_ = 0;
-  }
-  non_pod(const non_pod& x) {
-    if (init_ == magic) throw std::logic_error("non_pod 1");
-    init_ = magic;
-    data_ = x.data_;
-  }
-  non_pod(const T& x) {
-    // if (init_ == magic) throw std::logic_error("non_pod 2");
-    init_ = magic;
-    data_ = x;
-  }
-  ~non_pod() {
-    int init = init_;
-    T data = data_;
-    init_ = 0;
-    data_ = -1.0;
-    // if (init != magic) throw std::logic_error("non_pod 3");
-    if (data < 0) std::cerr << "warning\n";
-  }
-  non_pod& operator=(const non_pod& x) {
-    if (init_ != magic) throw std::logic_error("non_pod 4");
-    data_ = x.data_;
-    return *this;
-  }
-  non_pod& operator=(const T& x) {
-    if (init_ != magic) throw std::logic_error("non_pod 5");
-    data_ = x;
-    return *this;
-  }
-  
-  bool operator==(const non_pod& x) const {
-    if (init_ != magic || x.init_ != magic) throw std::logic_error("non_pod 6");
-    return data_ == x.data_;
-  }
-  bool operator!=(const non_pod& x) const { return !operator==(x); }
-  
-  // Compare data_ directly: delegating to (y == x) selects this same
-  // operator as a C++20 reversed candidate and recurses infinitely.
-  friend bool operator==(T x, const non_pod& y) {
-    if (y.init_ != magic) throw std::logic_error("non_pod 6");
-    return y.data_ == x;
-  }
-  friend bool operator!=(T x, const non_pod& y) { return !(x == y); }
-  friend std::ostream& operator<<(std::ostream& os, const non_pod& x) {
-    os << x.data_;
-    return os;
-  }
-  
+  inline static std::unordered_set<const non_pod*> live;
   T data_;
-  int init_;
-};
-
-#ifndef BOOST_NO_INCLASS_MEMBER_INITIALIZATION
-template <class T>
-const int non_pod<T>::magic;
-#endif
-
-template<class S, class T, class U>
-bool check(const S& s, const T& t, const U& u) {
-  bool check = true;
-  if (s.size() != t.size() || s.size() != u.size()) return false;
-  typename T::const_iterator t_iter = t.begin();
-  typename U::const_iterator u_iter = u.begin();
-  for (typename S::const_iterator iter = s.begin(); iter != s.end();
-       ++iter) {
-#ifdef VERBOSE    
-    std::cout << "(" << *iter << "," << *t_iter << "," << *u_iter << ") ";
-#endif
-    if (*iter != *t_iter || *iter != *u_iter) check = false;
-    ++t_iter;
-    ++u_iter;
+  non_pod() : data_(0) { EXPECT_TRUE(live.insert(this).second); }
+  non_pod(const T& value) : data_(value) { EXPECT_TRUE(live.insert(this).second); }
+  non_pod(const non_pod& other) : data_(other.data_) {
+    EXPECT_EQ(live.count(&other), 1u);
+    EXPECT_TRUE(live.insert(this).second);
   }
-#ifdef VERBOSE    
-  std::cout << std::endl;
-#endif
-  return check;
-}
-
+  ~non_pod() { EXPECT_EQ(live.erase(this), 1u); }
+  non_pod& operator=(const non_pod& other) {
+    EXPECT_EQ(live.count(this), 1u);
+    EXPECT_EQ(live.count(&other), 1u);
+    data_ = other.data_;
+    return *this;
+  }
+  non_pod& operator=(const T& value) {
+    EXPECT_EQ(live.count(this), 1u);
+    data_ = value;
+    return *this;
+  }
+  bool operator==(const non_pod& other) const { return data_ == other.data_; }
+  bool operator!=(const non_pod& other) const { return !(*this == other); }
+  friend bool operator==(T value, const non_pod& other) { return value == other.data_; }
+  friend bool operator!=(T value, const non_pod& other) { return !(value == other); }
+  friend std::ostream& operator<<(std::ostream& os, const non_pod& value) {
+    return os << value.data_;
+  }
+};
 
 template<class Vec, class RNG>
 void make_array(Vec& vec, RNG& rng, std::size_t n) {
@@ -117,10 +66,10 @@ void test_main(std::size_t m, std::size_t n) {
   S s;
   T t;
   U u;
-    
+
   std::vector<double> v;
-  boost::lagged_fibonacci607 rng;
-  
+  boost::lagged_fibonacci607 rng(331u); // Preserve the historical default seed.
+
   for (std::size_t i = 0; i < m; ++i) {
 #ifdef VERBOSE
     std::cout << i << ' ';
@@ -180,7 +129,7 @@ void test_main(std::size_t m, std::size_t n) {
         std::cout << std::endl;
 #endif
       }
-#ifdef DEQUE      
+#ifdef DEQUE
     } else if (r < 0.35) {
       // pop_front
       if (!s.empty()) {
@@ -253,13 +202,16 @@ void test_main(std::size_t m, std::size_t n) {
         t.erase(t.begin() + p);
         u.erase(u.begin() + p);
       }
-    } 
-    
-    if (!check(s, t, u)) {
-      std::cout << "Error occured!\n";
-      std::exit(-1);
+    }
+
+    SCOPED_TRACE(::testing::Message() << "seed 331, operation " << i << ", draw " << r);
+    ASSERT_EQ(s.size(), u.size());
+    ASSERT_EQ(t.size(), u.size());
+    for (std::size_t index = 0; index < u.size(); ++index) {
+      EXPECT_EQ(s[index], u[index]) << "index " << index;
+      EXPECT_EQ(t[index].data_, u[index]) << "non-POD index " << index;
     }
   }
-  
+
   return;
 }

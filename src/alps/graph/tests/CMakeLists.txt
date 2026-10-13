@@ -41,7 +41,6 @@ if(ALPS_BUILD_EXTENSIVE_TESTS)
     add_executable(${name} ${name}.cpp)
 
     target_link_libraries(${name} PRIVATE ALPS::alps)
-    alps_add_test(${name})
-    set_property(TEST ${name} PROPERTY LABELS "graph;extensive")
+    alps_add_gtest(${name} COMPONENT graph LABELS extensive TIMEOUT 600)
   endforeach()
 endif()

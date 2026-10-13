@@ -2,8 +2,12 @@
 #include <alps/numeric/matrix/ublas_sparse_functions.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( sparse_matrix_vector_multiply, T ,test_types)
+template<class T> class SparseMatrix : public ::testing::Test {};
+TYPED_TEST_SUITE(SparseMatrix, test_types);
+
+TYPED_TEST(SparseMatrix, sparse_matrix_vector_multiply)
 {
+    using T = TypeParam;
     namespace ublas = boost::numeric::ublas;
     alps::numeric::vector<T> v(10);
     fill_range_with_numbers(v.begin(),v.end(),0);
@@ -21,7 +25,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( sparse_matrix_vector_multiply, T ,test_types)
     std::cout << r << std::endl;
     for(int i=0; i < 9; ++i)
     {
-        BOOST_CHECK_EQUAL(r(2*i+1), T(0));
-        BOOST_CHECK_EQUAL(r(2*i),T(10*i)*v(i)+T(100*i)*v(i+1));
+        EXPECT_EQ(r(2*i+1), T(0));
+        EXPECT_EQ(r(2*i),T(10*i)*v(i)+T(100*i)*v(i+1));
     }
 }

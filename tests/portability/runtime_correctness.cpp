@@ -1,7 +1,8 @@
 // Copyright (C) 2026 by the ALPS collaboration
 // SPDX-License-Identifier: MIT
 // Runtime regressions adapted from ALPS PR 166 at 519d4bd0d.
-// Keep these checks independent of the native test-framework migration.
+// Preserve the SDK follow-up regression coverage during test consolidation.
+#include <gtest/gtest.h>
 #include <alps/alea.h>
 #include <alps/alea/mcdata.hpp>
 #include <alps/check_schedule.hpp>
@@ -20,7 +21,7 @@ void require(bool valid, const char* message) {
     if (!valid) throw std::runtime_error(message);
 }
 
-int main() {
+TEST(RuntimeCorrectness, PreservesSDKRegressions) {
     const alps::integer_range<int> full((std::numeric_limits<int>::min)(),
                                         (std::numeric_limits<int>::max)());
     require(!full.empty() && unify(full, full) == full, "full-width range union");

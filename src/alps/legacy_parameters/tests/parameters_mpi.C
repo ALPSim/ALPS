@@ -14,41 +14,34 @@
 /* $Id: parameters.C 2853 2008-06-17 13:59:59Z wistaria $ */
 
 #include <alps/parameter/parameters.h>
-#include <boost/config.hpp>
 #include <boost/mpi.hpp>
-#include <iostream>
-#include <stdexcept>
-#include <stdlib.h>
+#include <gtest/gtest.h>
+#include <sstream>
+#include <string>
+#include <utility>
+#include <vector>
 
-int main(int argc, char* argv[])
-{
-#ifndef BOOST_NO_EXCEPTIONS
-try {
-#endif
-
-  boost::mpi::environment env(argc, argv);
+TEST(ParallelLegacyParameters, PreservesKeysValuesExpressionsAndOrder) {
   boost::mpi::communicator world;
-
-  if (world.size() >= 2) {
-    if (world.rank() == 0) {
-      alps::Parameters params(std::cin);
-      world.send(1, 0, params);
-    } else if (world.rank() == 1) {
-      alps::Parameters params;
-      world.recv(0, 0, params);
-      std::cout << params;
-    }
+  ASSERT_GE(world.size(), 2);
+  std::istringstream input("L=10; M=1; T=0.1; beta=\"1/T\";");
+  const alps::Parameters original(input);
+  alps::Parameters restored;
+  if (world.rank() == 0) {
+    world.send(1, 0, original);
+    world.recv(world.size() - 1, 0, restored);
+  } else {
+    world.recv(world.rank() - 1, 0, restored);
+    world.send((world.rank() + 1) % world.size(), 0, restored);
   }
-
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& e) {
-  std::cerr << "Caught exception: " << e.what() << "\n";
-  exit(-1);
-}
-catch (...) {
-  std::cerr << "Caught unknown exception\n";
-  exit(-2);
-}
-#endif
+  const std::vector<std::pair<std::string, std::string>> expected{
+      {"L", "10"}, {"M", "1"}, {"T", "0.1"}, {"beta", "1/T"}};
+  ASSERT_EQ(restored.size(), expected.size());
+  auto actual = restored.begin();
+  for (const auto &entry : expected) {
+    SCOPED_TRACE("rank=" + std::to_string(world.rank()) + " key=" + entry.first);
+    EXPECT_EQ(actual->key(), entry.first);
+    EXPECT_EQ(std::string(actual->value().c_str()), entry.second);
+    ++actual;
+  }
 }

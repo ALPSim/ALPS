@@ -12,6 +12,8 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <gtest/gtest.h>
+#include "graph_assertions.hpp"
 #include <alps/parser/xslt_path.h>
 #include <alps/graph/lattice_constant.hpp>
 
@@ -19,7 +21,7 @@
 
 #include <iostream>
 
-int main() {
+TEST(GraphLatticeConstants, lattice_constant_square_test) {
     using boost::get;
     using alps::graph::canonical_properties;
 
@@ -167,9 +169,9 @@ int main() {
 //    g.push_back(std::make_pair(graph_type(15), 1187222));
 //    g.push_back(std::make_pair(graph_type(16), 3208298)); // 0.13 GB
     g.push_back(std::make_pair(graph_type(17), 8622666)); // 0.26 GB
-//    g.push_back(std::make_pair(graph_type(18), 23233338)); // 0.64 GB 
+//    g.push_back(std::make_pair(graph_type(18), 23233338)); // 0.64 GB
 //    g.push_back(std::make_pair(graph_type(19), 62329366)); // 2.13
-//    g.push_back(std::make_pair(graph_type(20), 0)); // 
+//    g.push_back(std::make_pair(graph_type(20), 0)); //
     add_edge( 0,  1, g.back().first);
     add_edge( 1,  2, g.back().first);
     add_edge( 2,  3, g.back().first);
@@ -190,7 +192,7 @@ int main() {
 //    add_edge(17, 18, g.back().first);
 //    add_edge(18, 19, g.back().first);
 
-    int success = 0;
+
     {
         for(std::vector<std::pair<graph_type,lc_type> >::iterator it= g.begin(); it != g.end(); ++it)
         {
@@ -200,13 +202,8 @@ int main() {
                 , lattice.lattice()
                 , alps::cell(std::vector<int>(2,side_length/2),lattice.lattice())
             );
-            if (lc != it->second) {
-                std::cerr<<"ERROR: lattice constant does not match!"<<std::endl;
-                std::cerr<<"Calculated: "<<lc<<"\tReference: "<<it->second<<std::endl<<std::endl;
-                success = -1;
-            } else
-                std::cerr<<"SUCCESS: "<<it->second<<std::endl;
+            EXPECT_EQ(lc, it->second) << "graph " << std::distance(g.begin(), it);
         }
     }
-    return success;
+
 }

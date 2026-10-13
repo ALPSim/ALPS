@@ -14,6 +14,7 @@
 
 /* $Id$ */
 
+#include <alps/testing/stream_fixture.hpp>
 #include <iostream>
 #include <alps/alea.h>
 #include <alps/parameter.h> 
@@ -21,17 +22,16 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/random.hpp> 
 
-int main()
+TEST(AleaXml, testobservableset)
 {
-#ifndef BOOST_NO_EXCEPTIONS
-try {
-#endif
+  alps::testing::StreamFixture transcript(std::string(ALPS_TEST_SOURCE_DIR) + "/testobservableset.input");
+  { // Finish XML stream destruction before comparing the transcript.
 
   //DEFINE RANDOM NUMBER GENERATOR
   //------------------------------
   typedef boost::minstd_rand0 random_base_type;
   typedef boost::uniform_01<random_base_type> random_type;
-  random_base_type random_int;
+  random_base_type random_int(1u); // Preserve the historical default seed.
   random_type random(random_int);
 
   //DEFINE OBSERVABLES
@@ -93,16 +93,6 @@ try {
 
   boost::filesystem::remove(boost::filesystem::path("observableset.dump"));
 
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& exc) {
-  std::cerr << exc.what() << "\n";
-  return -1;
-}
-catch (...) {
-  std::cerr << "Fatal Error: Unknown Exception!\n";
-  return -2;
-}
-#endif
-  return 0;
+  }
+  transcript.expect_output(std::string(ALPS_TEST_SOURCE_DIR) + "/testobservableset.output");
 }

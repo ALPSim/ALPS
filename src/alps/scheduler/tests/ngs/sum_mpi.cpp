@@ -11,108 +11,52 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <alps/ngs.hpp>
-#include <alps/mcbase.hpp>
-#include <alps/parseargs.hpp>
+#include "sum_simulation.hpp"
 #include <alps/mcmpiadapter.hpp>
-#include <alps/stop_callback.hpp>
-#include <alps/ngs/make_parameters_from_xml.hpp>
+#include <alps/testing/temporary_directory.hpp>
+#include <gtest/gtest.h>
+#include <boost/mpi/collectives.hpp>
+#include <functional>
 
-#include <boost/lambda/lambda.hpp>
-
-// Simulation to measure e^(-x*x)
-class my_sim_type : public alps::mcbase {
-
-    public:
-
-        my_sim_type(parameters_type const & params, std::size_t seed_offset = 42)
-            : alps::mcbase(params, seed_offset)
-            , total_count(params["COUNT"])
-
-        {
-            measurements << alps::accumulator::RealObservable("SValue")
-                         << alps::accumulator::RealVectorObservable("VValue");
-        }
-
-        // if not compiled with mpi boost::mpi::communicator does not exists, 
-        // so template the function
-        template <typename Arg> my_sim_type(parameters_type const & params, Arg comm)
-            : alps::mcbase(params, comm)
-            , total_count(params["COUNT"])
-        {
-            measurements << alps::accumulator::RealObservable("SValue")
-                         << alps::accumulator::RealVectorObservable("VValue");
-        }
-
-        // do the calculation in this function
-        void update() {
-            double x = random();
-            value = exp(-x * x);
-        };
-
-        // do the measurements here
-        void measure() {
-            ++count;
-            measurements["SValue"] << value;
-            measurements["VValue"] << std::vector<double>(3, value);
-        };
-
-        double fraction_completed() const {
-            return count / double(total_count);
-        }
-
-    private:
-        int count;
-        int total_count;
-        double value;
+// Make completion checks deterministic instead of depending on wall time.
+struct every_step {
+    bool pending() const { return true; }
+    void update(double) {}
 };
 
-int main(int argc, char *argv[]) {
-
-    try {
-
-        alps::parseargs options(argc, argv);
-        boost::mpi::environment env(argc, argv);
-        boost::mpi::communicator c;
-
-        alps::parameters_type<my_sim_type>::type params;
-        if (c.rank() > 0)
-          /* do nothing*/ ;
-        else if (boost::filesystem::path(options.input_file).extension().string() == ".xml")
-            params = alps::make_parameters_from_xml(options.input_file);
-        else if (boost::filesystem::path(options.input_file).extension().string() == ".h5")
-            alps::hdf5::archive(options.input_file)["/parameters"] >> params;
-        else
-            params = alps::parameters_type<my_sim_type>::type(options.input_file);
-        broadcast(c, params);
-
-        alps::mcmpiadapter<my_sim_type> my_sim(params, c, alps::check_schedule(options.tmin, options.tmax)); // creat a simulation
-
-        my_sim.run(alps::stop_callback(c, options.timelimit)); // run the simulation
-
-        using alps::collect_results;
-
-        if (c.rank() == 0) { // print the results and save it to hdf5
-            alps::results_type<alps::mcmpiadapter<my_sim_type> >::type results = collect_results(my_sim);
-            std::cout << "e^(-x*x): " << results["SValue"] << std::endl;
-            std::cout << "e^(-x*x): " << results["VValue"] << std::endl;
-            using std::sin;
-            std::cout << results["SValue"] + 1 << std::endl;
-            std::cout << results["SValue"] + results["SValue"] << std::endl;
-            // std::cout << results["SValue"] << " " << results["SValue"] * results["SValue"] << sin(results["SValue"]) << std::endl;
-            // std::cout << results["SValue"] * results["SValue"] << std::endl;
-            // std::cout << << 2. * results["SValue"] / 2. << std::endl;
-            // std::cout << sin(results["SValue"]) << std::endl;
-            // std::cout << results["VValue"] << " " << 2. * results["VValue"] / 2. << sin(results["SValue"]) << std::endl;
-            save_results(results, params, options.output_file, "/simulation/results");
-        } else
-            collect_results(my_sim);
-
-    } catch(std::exception & ex) {
-        std::cerr << ex.what() << std::endl;
-        return -1;
-    } catch(...) {
-        std::cerr << "Fatal Error: Unknown Exception!\n";
-        return -2;
+TEST(ParallelMonteCarloRunner, CollectsAllRanksAndPersistsResults) {
+    boost::mpi::communicator world;
+    ASSERT_GE(world.size(), 2);
+    alps::params parameters;
+    if (world.rank() == 0) {
+        parameters["COUNT"] = 128 * world.size();
+        parameters["SEED"] = 42;
+    }
+    alps::broadcast(world, parameters);
+    alps::mcmpiadapter<sum_simulation, every_step> simulation(parameters, world);
+    EXPECT_TRUE(simulation.run([] { return false; }));
+    EXPECT_EQ(simulation.count, 128);
+    EXPECT_DOUBLE_EQ(simulation.fraction_completed(), 1.);
+    const double sum = boost::mpi::all_reduce(world, simulation.sum, std::plus<double>());
+    const auto results = alps::collect_results(simulation);
+    // Every rank must finish the collectives before rank-specific assertions.
+    if (world.rank() == 0) {
+        const double expected = sum / (128 * world.size());
+        EXPECT_EQ(results["SValue"].count(), 128u * world.size());
+        EXPECT_NEAR(results["SValue"].mean<double>(), expected, 1e-12);
+        EXPECT_TRUE(std::isfinite(results["SValue"].error<double>()));
+        const auto vector = results["VValue"].mean<std::vector<double>>();
+        ASSERT_EQ(vector.size(), 3u);
+        for (double value : vector) EXPECT_NEAR(value, expected, 1e-12);
+        EXPECT_NEAR((results["SValue"] + 1.).mean<double>(), expected + 1., 1e-12);
+        EXPECT_NEAR((results["SValue"] + results["SValue"]).mean<double>(), 2. * expected, 1e-12);
+        alps::testing::TemporaryDirectory directory;
+        const auto filename = (directory.path() / "results.h5").string();
+        alps::save_results(results, parameters, filename, "/simulation/results");
+        alps::hdf5::archive archive(filename);
+        alps::mcresults restored;
+        archive["/simulation/results"] >> restored;
+        EXPECT_DOUBLE_EQ(restored["SValue"].mean<double>(), results["SValue"].mean<double>());
+        EXPECT_EQ(restored["VValue"].mean<std::vector<double>>(), vector);
     }
 }

@@ -284,8 +284,7 @@ class Repository(unittest.TestCase):
                      ".github/scripts/ci/fingerprint.py",
                      ".github/scripts/ci/areas.json",
                      "tests/ci/test_fingerprint.py",
-                     "tests/cmake/register_mpi_tests.cmake",
-                     "tests/cmake/run_mpi_test.cmake"):
+                     "cmake/ALPSTesting.cmake"):
             with self.subTest(path=path):
                 self.write(path, "# original\n")
                 base = self.commit()
@@ -316,7 +315,7 @@ class Workflow(unittest.TestCase):
                            ("packaging", "tests/pyalps/test_binding_surface.py"),
                            ("linux", ".github/scripts/run_with_timeout.py"),
                            ("mpi", "src/alps/parapack/tests/collect_mpi.op-3"),
-                           ("mpi", "tests/cmake/run_mpi_test.cmake")):
+                           ("mpi", "cmake/ALPSTesting.cmake")):
             with self.subTest(area=area, path=path):
                 self.assertTrue(config.in_footprint(area, path))
 

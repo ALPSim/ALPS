@@ -14,175 +14,75 @@
 /* $Id$ */
 
 #include <alps/fixed_capacity_vector.h>
-
-#include <iostream>
+#include <gtest/gtest.h>
 #include <list>
 #include <vector>
 
-#ifdef BOOST_NO_ARGUMENT_DEPENDENT_LOOKUP
-using namespace alps;
-#endif
-
-int main()
+namespace {
+using Container = alps::fixed_capacity_vector<float, 6>;
+std::vector<float> elements(const Container& value)
 {
-  typedef alps::fixed_capacity_vector<float, 6> array_type;
+    return {value.begin(), value.end()};
+}
+}
 
-  std::cout << "initialize fixed_capacity_vector of size = 3\n";
-  array_type a(3);
+TEST(FixedCapacityVector, ModifiersAndCapacity)
+{
+    Container a(3);
+    EXPECT_EQ(a.size(), 3u);
+    a.assign(2);
+    EXPECT_EQ(elements(a), (std::vector<float>{2, 2, 2}));
+    a.push_back(4);
+    a.erase(a.begin() + 1);
+    a.insert(a.begin() + 2, 5);
+    a.insert(a.begin() + 1, 2, 6);
+    a.pop_back();
+    EXPECT_EQ(a.size(), 5u);
+    EXPECT_FALSE(a.empty());
+    EXPECT_EQ(a.max_size(), 6u);
+    EXPECT_EQ(a.capacity(), 6u);
+    EXPECT_EQ(a.front(), 2);
+    EXPECT_EQ(a.back(), 5);
+    EXPECT_EQ(elements(a), (std::vector<float>{2, 6, 6, 2, 5}));
+    a.erase(a.begin(), a.end());
+    EXPECT_TRUE(a.empty());
+    EXPECT_EQ(a.begin(), a.end());
+    a.resize(2, 1);
+    const std::vector<float> vector{2, 3, 4, 5};
+    a.insert(a.begin() + 1, vector.begin(), vector.end());
+    EXPECT_EQ(elements(a), (std::vector<float>{1, 2, 3, 4, 5, 1}));
+    a.erase(a.begin() + 3, a.begin() + 6);
+    const std::list<float> list{6, 7, 8};
+    a.insert(a.begin(), list.begin(), list.end());
+    EXPECT_EQ(elements(a), (std::vector<float>{6, 7, 8, 1, 2, 3}));
+    EXPECT_EQ((std::vector<float>{a.rbegin(), a.rend()}),
+              (std::vector<float>{3, 2, 1, 8, 7, 6}));
+}
 
-  std::cout << "assign(2)\n";
-  a.assign(2);
-  
-  std::cout << "push_back(4)\n";
-  a.push_back(4);
-  
-  std::cout << "a.erase(a.begin() + 1)\n";
-  a.erase(a.begin() + 1);
-
-  std::cout << "a.insert(a.begin() + 2, 5)\n";
-  a.insert(a.begin() + 2, 5);
-  
-  std::cout << "a.insert(a.begin() + 1, 2, 6)\n";
-  a.insert(a.begin() + 1, 2, 6);
-  
-  std::cout << "a.pop_back()\n";
-  a.pop_back();
-  
-  std::cout << "size:     " << a.size() << std::endl;
-  std::cout << "empty:    " << (a.empty() ? "true" : "false") << std::endl;
-  std::cout << "max_size: " << a.max_size() << std::endl;
-  std::cout << "capacity: " << a.capacity() << std::endl;
-  std::cout << "front:    " << a.front() << std::endl;
-  std::cout << "back:     " << a.back() << std::endl;
-
-  std::cout << "elems:    ";
-  for (array_type::const_iterator pos = a.begin(); pos != a.end(); ++pos) {
-    std::cout << *pos << ' ';
-  }
-  std::cout << std::endl;
-  
-  std::cout << "a.erase(a.begin(), a.end())\n";
-  a.erase(a.begin(), a.end());
-
-  std::cout << "elems:    ";
-  for (array_type::const_iterator pos = a.begin(); pos != a.end(); ++pos) {
-    std::cout << *pos << ' ';
-  }
-  std::cout << std::endl;
-
-  std::cout << "resize(2,1)\n";
-  a.resize(2, 1);
-
-  // insert from std::vector
-  std::cout << "insert of std::vector (2,3,4,5) at begin() + 1\n";
-  std::vector<float> vec;
-  vec.push_back(2);
-  vec.push_back(3);
-  vec.push_back(4);
-  vec.push_back(5);
-  a.insert(a.begin() + 1, vec.begin(), vec.end());
-  
-  std::cout << "elems:    ";
-  for (array_type::const_iterator pos = a.begin(); pos != a.end(); ++pos) {
-    std::cout << *pos << ' ';
-  }
-  std::cout << std::endl;
-
-  std::cout << "erase(begin()+3, begin()+6)\n";
-  a.erase(a.begin()+3, a.begin()+6);
-
-  // insert from std::list
-  std::cout << "insert of std::list (6,7,8) at begin()\n";
-  std::list<float> lst;
-  lst.push_back(7);
-  lst.push_back(8);
-  lst.push_front(6);
-  a.insert(a.begin(), lst.begin(), lst.end());
-  
-  std::cout << "elems:    ";
-  for (array_type::const_iterator pos = a.begin(); pos != a.end(); ++pos) {
-    std::cout << *pos << ' ';
-  }
-  std::cout << std::endl;
-
-  // check copy constructor and assignment operator
-  array_type b(a);
-  array_type c;
-  c = a;
-  if (a==b && a==c) {
-    std::cout << "copy construction and copy assignment are OK"
-              << std::endl;
-  }
-  else {
-    std::cout << "copy construction and copy assignment FAILED"
-              << std::endl;
-  }
-  
-  // check copy constructor and assignment operator
-  array_type d(a);
-  array_type e;
-  e = a;
-  if (a == d && a==e) {
-    std::cout << "copy construction and copy assignment for different size are OK\n";
-  }
-  else {
-    std::cout << "copy construction and copy assignment for different size FAILED\n";
-  }
-  
-  std::cout << "elems in reverse order:    ";
-  array_type::const_reverse_iterator iter_e = a.rend();
-  for (array_type::const_reverse_iterator pos = a.rbegin();
-       pos != iter_e; ++pos) {
-    std::cout << *pos << ' ';
-  }
-  std::cout << std::endl;
-
-  b.clear();
-  b.push_back(10);
-  b.push_back(11);
-  b.push_back(12);
-
-  std::cout << "a elems:    ";
-  for (array_type::const_iterator pos = a.begin(); pos != a.end(); ++pos) {
-    std::cout << *pos << ' ';
-  }
-  std::cout << std::endl;
-
-  std::cout << "b elems:    ";
-  for (array_type::const_iterator pos = b.begin(); pos != b.end(); ++pos) {
-    std::cout << *pos << ' ';
-  }
-  std::cout << std::endl;
-
-  std::cout << "swap a and b\n";
-  swap(a,b);
-
-  std::cout << "a elems:    ";
-  for (array_type::const_iterator pos = a.begin(); pos != a.end(); ++pos) {
-    std::cout << *pos << ' ';
-  }
-  std::cout << std::endl;
-
-  std::cout << "b elems:    ";
-  for (array_type::const_iterator pos = b.begin(); pos != b.end(); ++pos) {
-    std::cout << *pos << ' ';
-  }
-  std::cout << std::endl;
-
-  std::cout << "swap again\n";
-  swap(a,b);
-    
-  std::cout << "a elems:    ";
-  for (array_type::const_iterator pos = a.begin(); pos != a.end(); ++pos) {
-    std::cout << *pos << ' ';
-  }
-  std::cout << std::endl;
-
-  std::cout << "b elems:    ";
-  for (array_type::const_iterator pos = b.begin(); pos != b.end(); ++pos) {
-    std::cout << *pos << ' ';
-  }
-  std::cout << std::endl;
-
-  return 0;
+TEST(FixedCapacityVector, CopiesAndSwapsDifferentSizes)
+{
+    const std::vector<float> values{6, 7, 8, 1, 2, 3};
+    Container a(values.begin(), values.end());
+    Container b(a);
+    Container c;
+    c = a;
+    EXPECT_EQ(a, b);
+    EXPECT_EQ(a, c);
+    Container d(a);
+    Container e(2);
+    e = a;
+    EXPECT_EQ(a, d);
+    EXPECT_EQ(a, e);
+    b.clear();
+    b.push_back(10);
+    b.push_back(11);
+    b.push_back(12);
+    EXPECT_EQ(elements(a), values);
+    EXPECT_EQ(elements(b), (std::vector<float>{10, 11, 12}));
+    swap(a, b);
+    EXPECT_EQ(elements(a), (std::vector<float>{10, 11, 12}));
+    EXPECT_EQ(elements(b), values);
+    swap(a, b);
+    EXPECT_EQ(elements(a), values);
+    EXPECT_EQ(elements(b), (std::vector<float>{10, 11, 12}));
 }

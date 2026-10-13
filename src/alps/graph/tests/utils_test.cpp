@@ -10,15 +10,18 @@
  * SPDX-License-Identifier: MIT                                                    *
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#include <gtest/gtest.h>
+#include "graph_assertions.hpp"
 #include <boost/graph/adjacency_list.hpp>
 #include <iostream>
+#include <set>
 #include <alps/graph/utils.hpp>
 #include <boost/container/flat_map.hpp>
 
 typedef boost::property<alps::edge_type_t,unsigned int> edge_props;
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, boost::no_property, edge_props> graph_type;
 
-bool get_all_color_mappings_from_color_partition_test()
+TEST(GraphUtilities, EnumeratesAllColorPermutations)
 {
     typedef std::vector< std::vector<alps::type_type> > color_mapping_type;
 
@@ -33,23 +36,16 @@ bool get_all_color_mappings_from_color_partition_test()
     color_symmetry[6] = 2;
     color_symmetry[7] = 0;
     color_symmetry[8] = 0;
-    
+
     color_mapping_type color_mappings(alps::graph::get_all_color_mappings_from_color_partition(g, color_symmetry));
 
-    for(color_mapping_type::const_iterator it = color_mappings.begin(); it != color_mappings.end(); ++it)
-    {
-        for(std::size_t c = 0; c < it->size(); ++c)
-            std::cout << c << "->" << (*it)[c] << ", ";
-        std::cout << std::endl;
+    EXPECT_EQ(color_mappings.size(), 720u); // 5! * 3! * 1!
+    const std::set<std::vector<alps::type_type>> unique(color_mappings.begin(), color_mappings.end());
+    EXPECT_EQ(unique.size(), color_mappings.size());
+    for (const auto& mapping : color_mappings) {
+        ASSERT_EQ(mapping.size(), color_symmetry.size());
+        expect_vertex_permutation(mapping, color_symmetry.size());
+        for (std::size_t color = 0; color < mapping.size(); ++color)
+            EXPECT_EQ(color_symmetry[color], color_symmetry[mapping[color]]);
     }
-    std::cout << "Num. of color_mappings: " << color_mappings.size() << std::endl;
-    return color_mappings.size() == 720; //= 5! * 3! * 1!
-}
-
-int main()
-{
-    bool ok = get_all_color_mappings_from_color_partition_test();
-    if(!ok)
-        std::cout << "get_all_color_mappings_from_color_partition_test FAILED" << std::endl;
-    return ok ? 0 : 1;
 }

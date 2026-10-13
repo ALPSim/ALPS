@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+#include <gtest/gtest.h>
 #include <alps/utility/temporary_filename.hpp>
 #include <alps/utility/os.hpp>
 #include <alps/parapack/filelock.h>
@@ -23,9 +24,6 @@
 #include <iostream>
 
 namespace {
-void require(bool condition, const char* message) {
-    if (!condition) throw std::runtime_error(message);
-}
 struct temporary_file {
     std::string path = alps::temporary_filename(
         (alps::temp_directory_path() / "alps-portability-").string());
@@ -33,73 +31,70 @@ struct temporary_file {
 };
 }
 
-int main() try {
+TEST(Portability, RuntimeAndWireContracts) {
     alps::lcg64a parallel_rng, same_seed;
     for (int i = 0; i < 100; ++i)
-        require(parallel_rng() == same_seed(), "parallel RNG seeding must be reproducible");
+        ASSERT_TRUE((parallel_rng() == same_seed())) << "parallel RNG seeding must be reproducible";
     std::unique_ptr<alps::buffered_rng_base> rng(alps::rng_factory.create("mt19937"));
     std::unique_ptr<alps::buffered_rng_base> matching(alps::rng_factory.create("mt19937"));
     rng->seed(42);
     matching->seed(42);
-    require((*rng)() == (*matching)(), "factory RNG initial seeding must be reproducible");
+    ASSERT_TRUE(((*rng)() == (*matching)())) << "factory RNG initial seeding must be reproducible";
     std::istringstream text("value;");
-    require(alps::read_until(text, ';') == "value", "SDK parser API must be usable by consumers");
-    require(alps::precision(std::numeric_limits<double>::signaling_NaN(), 6) == "nan",
-            "XML must use portable NaN spelling");
-    require(alps::precision(-std::numeric_limits<double>::infinity(), 6) == "-inf",
-            "XML must preserve infinity sign");
+    ASSERT_TRUE((alps::read_until(text, ';') == "value")) << "SDK parser API must be usable by consumers";
+    ASSERT_TRUE((alps::precision(std::numeric_limits<double>::signaling_NaN(), 6) == "nan")) << "XML must use portable NaN spelling";
+    ASSERT_TRUE((alps::precision(-std::numeric_limits<double>::infinity(), 6) == "-inf")) << "XML must preserve infinity sign";
     temporary_file first, second;
-    require(first.path != second.path, "temporary names must be distinct");
-    require(boost::filesystem::is_regular_file(first.path), "temporary_filename must reserve a file");
+    ASSERT_TRUE((first.path != second.path)) << "temporary names must be distinct";
+    ASSERT_TRUE((boost::filesystem::is_regular_file(first.path))) << "temporary_filename must reserve a file";
     alps::filelock owner(first.path, true, 0);
     alps::filelock competitor(first.path);
-    require(competitor.locked(), "a second owner must see the lock");
+    ASSERT_TRUE((competitor.locked())) << "a second owner must see the lock";
     bool refused = false;
     try { competitor.lock(0); } catch (const std::logic_error&) { refused = true; }
-    require(refused, "exclusive lock must reject a second owner");
+    ASSERT_TRUE((refused)) << "exclusive lock must reject a second owner";
     owner.release();
     competitor.lock(0);
     competitor.release();
-    require(!competitor.locked(), "release must remove the lock");
+    ASSERT_TRUE((!competitor.locked())) << "release must remove the lock";
 
     auto start = std::chrono::steady_clock::now();
     alps::sleep(20000000);
-    require(std::chrono::steady_clock::now() - start >= std::chrono::milliseconds(5),
-            "portable sleep must wait");
+    ASSERT_TRUE((std::chrono::steady_clock::now() - start >= std::chrono::milliseconds(5))) << "portable sleep must wait";
 
     std::unique_ptr<std::FILE, decltype(&std::fclose)> file(
         std::fopen(first.path.c_str(), "w+b"), &std::fclose);
-    require(bool(file), "open XDR fixture");
+    ASSERT_TRUE((bool(file))) << "open XDR fixture";
     XDR stream;
     xdrstdio_create(&stream, file.get(), XDR_ENCODE);
     int32_t signed_value = -2;
     uint32_t unsigned_value = UINT32_C(0xfedcba98);
     float single = 1.0f;
     double real = -2.5;
-    require(xdr_int32_t(&stream, &signed_value) && xdr_uint32_t(&stream, &unsigned_value)
-            && xdr_float(&stream, &single) && xdr_double(&stream, &real), "encode XDR fixture");
+    ASSERT_TRUE((xdr_int32_t(&stream, &signed_value) && xdr_uint32_t(&stream, &unsigned_value)
+            && xdr_float(&stream, &single) && xdr_double(&stream, &real))) << "encode XDR fixture";
     xdr_destroy(&stream);
     const std::array<unsigned char, 20> expected = {{
         0xff,0xff,0xff,0xfe, 0xfe,0xdc,0xba,0x98,
         0x3f,0x80,0x00,0x00, 0xc0,0x04,0x00,0x00,0x00,0x00,0x00,0x00}};
     std::array<unsigned char, 20> actual{};
     std::rewind(file.get());
-    require(std::fread(actual.data(), 1, actual.size(), file.get()) == actual.size(), "read XDR bytes");
-    require(actual == expected, "XDR must use standard big-endian wire bytes");
+    ASSERT_TRUE((std::fread(actual.data(), 1, actual.size(), file.get()) == actual.size())) << "read XDR bytes";
+    ASSERT_TRUE((actual == expected)) << "XDR must use standard big-endian wire bytes";
     std::rewind(file.get());
     xdrstdio_create(&stream, file.get(), XDR_DECODE);
     signed_value = 0; unsigned_value = 0; single = 0; real = 0;
-    require(xdr_int32_t(&stream, &signed_value) && xdr_uint32_t(&stream, &unsigned_value)
-            && xdr_float(&stream, &single) && xdr_double(&stream, &real), "decode XDR fixture");
-    require(signed_value == -2 && unsigned_value == UINT32_C(0xfedcba98)
-            && single == 1.0f && real == -2.5, "XDR round trip");
+    ASSERT_TRUE((xdr_int32_t(&stream, &signed_value) && xdr_uint32_t(&stream, &unsigned_value)
+            && xdr_float(&stream, &single) && xdr_double(&stream, &real))) << "decode XDR fixture";
+    ASSERT_TRUE((signed_value == -2 && unsigned_value == UINT32_C(0xfedcba98)
+            && single == 1.0f && real == -2.5)) << "XDR round trip";
     xdr_destroy(&stream);
 
     // A 32-bit negative XDR long must sign-extend on LP64 and LLP64 alike.
     std::rewind(file.get());
     xdrstdio_create(&stream, file.get(), XDR_DECODE);
     long wide = 0;
-    require(xdr_long(&stream, &wide) && wide == -2, "XDR long sign extension");
+    ASSERT_TRUE((xdr_long(&stream, &wide) && wide == -2)) << "XDR long sign extension";
     xdr_destroy(&stream);
 
     // The high bit must survive on both LP64 and Windows LLP64. This also
@@ -116,9 +111,6 @@ int main() try {
         long long decoded_min = 0;
         unsigned long long decoded_max = 0;
         dump >> decoded_min >> decoded_max;
-        require(decoded_min == minimum && decoded_max == maximum, "XDR 64-bit limits");
+        ASSERT_TRUE((decoded_min == minimum && decoded_max == maximum)) << "XDR 64-bit limits";
     }
-} catch (const std::exception& error) {
-    std::cerr << error.what() << '\n';
-    return 1;
 }

@@ -12,27 +12,26 @@
 *****************************************************************************/
 
 #include <alps/parapack/footprint.h>
-#include <iostream>
+#include <gtest/gtest.h>
 
-class myclass
-{
+class CustomObject {
 public:
-  std::size_t footprint() const { (void)a; (void)b; return sizeof(*this); }
-private:
-  int a;
-  double b;
-};
+  CustomObject() : integer_(0), value_(0) {}
+  std::size_t footprint() const { return sizeof(*this); }
 
-int main() {
-  int a = 0;
-  std::cerr << "footprint of int is " << alps::footprint(a) << std::endl;
-  std::vector<int> b(30);
-  std::cerr << "footprint of std::vector<int> is " << alps::footprint(b) << std::endl;
-  std::string c("my string");
-  std::cerr << "footprint of std::string is " << alps::footprint(c) << std::endl;
-  myclass d;
-  std::cerr << "footprint of myclass is " << alps::footprint(d) << std::endl;
-  double* ptr = nullptr;
-  std::cerr << "footprint of double* is " << alps::footprint(ptr) << std::endl;
-  return 0;
+private:
+  int integer_;
+  double value_;
+};
+TEST(Footprint, AccountsForValuesPointersAndAllocatedCapacity) {
+  int value = 0;
+  EXPECT_EQ(alps::footprint(value), sizeof(value));
+  std::vector<int> vector(30);
+  EXPECT_EQ(alps::footprint(vector), sizeof(vector) + vector.capacity() * sizeof(int));
+  std::string text = "my string";
+  EXPECT_EQ(alps::footprint(text), sizeof(text) + text.capacity());
+  CustomObject object;
+  EXPECT_EQ(alps::footprint(object), sizeof(object));
+  double *pointer = nullptr;
+  EXPECT_EQ(alps::footprint(pointer), sizeof(pointer));
 }

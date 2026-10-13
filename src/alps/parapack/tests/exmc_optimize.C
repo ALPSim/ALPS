@@ -12,86 +12,54 @@
 *****************************************************************************/
 
 #include <alps/parapack/exchange.h>
-#include <iomanip>
-#include <iostream>
+#include <gtest/gtest.h>
 #include <boost/random.hpp>
+#include <algorithm>
+#include <vector>
 
-struct dummy {
-  typedef double weight_parameter_type;
-  static double log_weight(weight_parameter_type gw, double beta) {
-    return beta * gw;
-  }
+struct WeightModel {
+  using weight_parameter_type = double;
+  static double log_weight(double weight, double beta) { return beta * weight; }
 };
-
-int main() {
-#ifndef BOOST_NO_EXCEPTIONS
-try {
-#endif
-
-  std::cout << std::setprecision(4);
-
-  int n = 10;
-
-  boost::mt19937 eng;
-  boost::variate_generator<boost::mt19937&, boost::uniform_real<> >
-    rng(eng, boost::uniform_real<>());
-
+TEST(ExchangeOptimization, PreservesBoundsAndHistoricalOptimizedLadder) {
+  boost::mt19937 engine;
+  boost::variate_generator<boost::mt19937 &, boost::uniform_real<>> random(engine,
+                                                                           boost::uniform_real<>());
   alps::Parameters params;
   params["BETA_MAX"] = 5;
   params["BETA_MIN"] = 1;
-  params["NUM_REPLICAS"] = n;
-
-  alps::parapack::exmc::inverse_temperature_set beta_set(params);
-
-  std::vector<double> beta(n);
-  std::vector<dummy::weight_parameter_type> gw(n);
-  for (int i = 0; i < n; ++i) {
-    beta[i] = beta_set[i];
-    gw[i] = rng();
+  params["NUM_REPLICAS"] = 10;
+  alps::parapack::exmc::inverse_temperature_set ladder(params);
+  std::vector<double> original(10), weights(10);
+  for (int i = 0; i < 10; ++i) {
+    original[i] = ladder[i];
+    weights[i] = random();
   }
-  std::sort(gw.begin(), gw.end());
-
-  std::cout << "[before optimization]\n";
-  std::cout << "beta\tenergy\tC\n";
-  std::cout << beta_set[0] << '\t' << gw[0] << std::endl;
-  for (int i = 1; i < n; ++i)
-    std::cout << beta_set[i] << '\t' << gw[i] << '\t'
-              << ((dummy::log_weight(gw[i-1], beta_set[i-1]) +
-                   dummy::log_weight(gw[i], beta_set[i])) -
-                  (dummy::log_weight(gw[i], beta_set[i-1]) +
-                   dummy::log_weight(gw[i-1], beta_set[i])))
-              << std::endl;
-
-  std::cout << "Wg[2.33] = " << beta_set.interpolate<dummy>(beta, gw, 2.33) << std::endl;
-  std::cout << "Wg[3.52] = " << beta_set.interpolate<dummy>(beta, gw, 3.52) << std::endl;
-
-  beta_set.optimize_h1999<dummy>(gw);
-
-  std::cout << "[after optimization]\n";
-  std::cout << "beta\tenergy\tC\n";
-  std::cout << beta_set[0] << '\t' << gw[0] << std::endl;
-  for (int i = 1; i < n; ++i) {
-    double w0 = beta_set.interpolate<dummy>(beta, gw, beta_set[i-1]);
-    double w1 = beta_set.interpolate<dummy>(beta, gw, beta_set[i]);
-
-    std::cout << beta_set[i] << '\t' << gw[i] << '\t'
-              << ((dummy::log_weight(w0, beta_set[i-1]) +
-                   dummy::log_weight(w1, beta_set[i])) -
-                  (dummy::log_weight(w1, beta_set[i-1]) +
-                   dummy::log_weight(w0, beta_set[i])))
-              << std::endl;
+  std::sort(weights.begin(), weights.end());
+  for (int i = 0; i < 10; ++i)
+    EXPECT_NEAR(original[i], 1 + i * 4. / 9, 1e-14);
+  EXPECT_NEAR(ladder.interpolate<WeightModel>(original, weights, 2.33), .3075, 5e-5);
+  EXPECT_NEAR(ladder.interpolate<WeightModel>(original, weights, 3.52), .8283, 5e-5);
+  ladder.optimize_h1999<WeightModel>(weights);
+  // Four-significant-digit references from the established optimization
+  // fixture, independent of stream formatting and native floating precision.
+  const double expected[] = {1, 1.670, 2.097, 2.422, 2.641, 2.884, 3.173, 3.780, 4.396, 5};
+  const double expected_cost[] = {.03476, .03548, .03599, .03496, .03477,
+                                  .03441, .03546, .03552, .03515};
+  EXPECT_DOUBLE_EQ(ladder[0], 1);
+  EXPECT_DOUBLE_EQ(ladder[9], 5);
+  for (int i = 0; i < 10; ++i) {
+    SCOPED_TRACE(i);
+    EXPECT_NEAR(ladder[i], expected[i], 5e-4);
+    if (i == 0)
+      continue;
+    EXPECT_GT(ladder[i], ladder[i - 1]);
+    const auto before = ladder.interpolate<WeightModel>(original, weights, ladder[i - 1]);
+    const auto after = ladder.interpolate<WeightModel>(original, weights, ladder[i]);
+    const auto cost = (WeightModel::log_weight(before, ladder[i - 1]) +
+                       WeightModel::log_weight(after, ladder[i])) -
+                      (WeightModel::log_weight(after, ladder[i - 1]) +
+                       WeightModel::log_weight(before, ladder[i]));
+    EXPECT_NEAR(cost, expected_cost[i - 1], 5e-6);
   }
-
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& exc) {
-  std::cerr << exc.what() << "\n";
-  return -1;
-}
-catch (...) {
-  std::cerr << "Fatal Error: Unknown Exception!\n";
-  return -2;
-}
-#endif
-  return 0;
 }
