@@ -9,6 +9,10 @@ import pytest
 
 SOURCE = Path(__file__).resolve().parents[2]
 CONSUMER = Path(__file__).with_name("consumer")
+# Installed by legacy/ALPSLegacy.cmake when ALPS_LEGACY_API is on.
+requires_legacy = pytest.mark.skipif(
+    not (Path(os.environ.get("ALPS_DIR", "")) / "ALPSLegacyConfig.cmake").is_file(),
+    reason="SDK built without the deprecated interfaces (ALPS_LEGACY_API=OFF)")
 pytestmark = pytest.mark.skipif(not os.environ.get("ALPS_DIR"), reason="requires an installed SDK")
 
 
@@ -36,6 +40,22 @@ def test_installed_sdk_preserves_parent_settings(tmp_path, standard):
     configure(tmp_path, f"-DCMAKE_CXX_STANDARD={standard}",
               "-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON")
     build_and_run(tmp_path)
+
+
+@requires_legacy
+def test_parameter_file_constructor_deprecation(tmp_path):
+    # The compatibility calls also run in the ordinary SDK contracts. Here
+    # require their migration diagnostic using the selected compiler's flags.
+    configure(tmp_path, "-DCMAKE_COMPILE_WARNING_AS_ERROR=ON")
+    result = subprocess.run([
+        "cmake", "--build", str(tmp_path), "--config", "Release",
+        "--target", "legacy_params_contract", "--parallel", "2",
+    ], capture_output=True, text=True)
+    output = result.stdout + result.stderr
+    assert result.returncode != 0, output
+    assert any(marker in output for marker in
+               ("deprecated-declarations", "is deprecated", "C4996")), output
+    assert "use alps::params_from_file(path)" in output, output
 
 
 def test_embedded_defaults_and_mpi_isolation(tmp_path):
@@ -202,6 +222,7 @@ def test_tutorials_build_against_exported_sdk(tmp_path, tutorial, target):
         assert result.stdout.strip() == "hello, world"
 
 
+@requires_legacy
 def test_legacy_use_file(tmp_path):
     # ALPS 2.x projects: find_package by prefix, include(${ALPS_USE_FILE}), ${ALPS_LIBRARIES}.
     prefix = Path(os.environ["ALPS_DIR"]).resolve().parents[1]
@@ -218,6 +239,7 @@ def test_legacy_use_file(tmp_path):
     build_and_run(build)
 
 
+@requires_legacy
 @pytest.mark.skipif(os.name == "nt" or not shutil.which("make"), reason="requires Unix make")
 def test_legacy_include_mk(tmp_path):
     prefix = Path(os.environ["ALPS_DIR"]).resolve().parents[1]
@@ -248,3 +270,30 @@ def test_make_intro_builds_without_sdk(tmp_path):
     result = subprocess.run([str(tmp_path / "hello")], check=True,
                             capture_output=True, text=True, env=environment)
     assert result.stdout.strip() == "hello, world"
+
+
+@pytest.mark.parametrize("tutorial,arguments", [
+    ("code-06-mcmain-c++", []),
+    ("ngs/1_accumulator_only", ["10"]),
+])
+def test_tutorial_text_parameters(tmp_path, tutorial, arguments):
+    """Build actual callers and verify text is not treated as an HDF5 archive."""
+    h5py = pytest.importorskip("h5py")
+    build = tmp_path / "build"
+    subprocess.run([
+        "cmake", "-S", str(SOURCE / "tutorials" / tutorial), "-B", str(build),
+        "-DCMAKE_BUILD_TYPE=Release", "-DALPS_DIR=" + os.environ["ALPS_DIR"],
+        *json.loads(os.environ.get("ALPS_TEST_CMAKE_ARGS", "[]")),
+    ], check=True)
+    subprocess.run(["cmake", "--build", str(build), "--config", "Release", "--parallel", "2"], check=True)
+    parameters = tmp_path / "input.txt"
+    parameters.write_text("L=4; T=2.0; THERMALIZATION=2; SWEEPS=16; SEED=42;\n")
+    executable = build / ("Release/ising.exe" if os.name == "nt" else "ising")
+    result = subprocess.run([str(executable), *arguments, str(parameters)],
+                            cwd=tmp_path, capture_output=True, text=True, timeout=30)
+    assert result.returncode == 0, result.stdout + result.stderr
+    with h5py.File(tmp_path / "input.out.h5") as archive:
+        # Legacy text parameters retain expression strings in their archives.
+        assert int(archive["parameters/L"][()]) == 4
+        assert float(archive["parameters/T"][()]) == 2.
+        assert archive["simulation/results/Energy/count"][()] > 0

@@ -1,0 +1,441 @@
+diff --git a/cmake/config/config.h.in b/cmake/config/config.h.in
+index 0bd413d69..0ff96e44b 100644
+--- a/cmake/config/config.h.in
++++ b/cmake/config/config.h.in
+@@ -15,6 +15,7 @@
+ #ifndef ALPS_CONFIG_H
+ #define ALPS_CONFIG_H
+ 
++#cmakedefine ALPS_NGS_USE_NEW_ALEA
+ #cmakedefine ALPS_NGS_OPENMPI_ULFM
+ 
+ //
+@@ -115,7 +116,7 @@ using boost::uint_fast64_t;
+ #include <alps/export.h>
+ 
+ //
+-// Enable HDF5 checkpoints: no ALPS checkpoint data is written into XDR files
++// Enable HDF5 checkpoints: no ALPS checkpoint data is written into XDR files 
+ // anymore, but they can still be read
+ //
+ #ifdef ALPS_HAVE_HDF5
+diff --git a/src/alps/accumulators/CMakeLists.txt b/src/alps/accumulators/CMakeLists.txt
+index bdfbf4a9d..1f6037520 100644
+--- a/src/alps/accumulators/CMakeLists.txt
++++ b/src/alps/accumulators/CMakeLists.txt
+@@ -1,4 +1,7 @@
+ # Accumulators source ownership.
++if(ALPS_NGS_USE_NEW_ALEA)
++  target_sources(alps PRIVATE src/ngs/accumulator/accumulator.cpp)
++endif()
+ 
+ target_sources(alps_headers INTERFACE
+   FILE_SET accumulators_headers TYPE HEADERS
+@@ -6,6 +9,34 @@ target_sources(alps_headers INTERFACE
+   FILES
+     include/alps/ngs/accumulator.hpp
+     include/alps/ngs/accumulator/accumulator.hpp
++    include/alps/ngs/accumulator/deprecated/accumulator.hpp
++    include/alps/ngs/accumulator/deprecated/accumulator/accumulator_impl.hpp
++    include/alps/ngs/accumulator/deprecated/accumulator/arguments.hpp
++    include/alps/ngs/accumulator/deprecated/accumulator_set.hpp
++    include/alps/ngs/accumulator/deprecated/alea.hpp
++    include/alps/ngs/accumulator/deprecated/feature/autocorrelation.hpp
++    include/alps/ngs/accumulator/deprecated/feature/converged.hpp
++    include/alps/ngs/accumulator/deprecated/feature/error.hpp
++    include/alps/ngs/accumulator/deprecated/feature/feature_traits.hpp
++    include/alps/ngs/accumulator/deprecated/feature/features.hpp
++    include/alps/ngs/accumulator/deprecated/feature/fixed_size_binning.hpp
++    include/alps/ngs/accumulator/deprecated/feature/generate_property.hpp
++    include/alps/ngs/accumulator/deprecated/feature/histogram.hpp
++    include/alps/ngs/accumulator/deprecated/feature/log_binning.hpp
++    include/alps/ngs/accumulator/deprecated/feature/max_num_binning.hpp
++    include/alps/ngs/accumulator/deprecated/feature/mean.hpp
++    include/alps/ngs/accumulator/deprecated/feature/tags.hpp
++    include/alps/ngs/accumulator/deprecated/feature/tau.hpp
++    include/alps/ngs/accumulator/deprecated/feature/value_type.hpp
++    include/alps/ngs/accumulator/deprecated/feature/weight.hpp
++    include/alps/ngs/accumulator/deprecated/features.hpp
++    include/alps/ngs/accumulator/deprecated/result.hpp
++    include/alps/ngs/accumulator/deprecated/result_set.hpp
++    include/alps/ngs/accumulator/deprecated/wrapper/accumulator_wrapper.hpp
++    include/alps/ngs/accumulator/deprecated/wrapper/base_wrapper.hpp
++    include/alps/ngs/accumulator/deprecated/wrapper/derived_wrapper.hpp
++    include/alps/ngs/accumulator/deprecated/wrapper/result_type_wrapper.hpp
++    include/alps/ngs/accumulator/deprecated/wrapper/result_wrapper.hpp
+     include/alps/ngs/accumulator/feature.hpp
+     include/alps/ngs/accumulator/feature/binning_analysis.hpp
+     include/alps/ngs/accumulator/feature/count.hpp
+diff --git a/src/alps/alea/include/alps/alea/mcdata.hpp b/src/alps/alea/include/alps/alea/mcdata.hpp
+index 7c20e347c..119b9c520 100644
+--- a/src/alps/alea/include/alps/alea/mcdata.hpp
++++ b/src/alps/alea/include/alps/alea/mcdata.hpp
+@@ -44,6 +44,9 @@
+ #include <alps/numeric/vector_valarray_conversion.hpp>
+ #include <alps/utility/data.hpp>
+ 
++// #ifdef ALPS_NGS_USE_NEW_ALEA
++//     #include <alps/ngs/alea/wrapper/accumulator_wrapper.hpp>
++// #endif
+ #include <alps/ngs/numeric/array.hpp>
+ 
+ #include <boost/config.hpp>
+@@ -193,6 +196,28 @@ namespace alps {
+                             jack_.push_back(result_type(it->begin() + from, it->begin() + to));
+                 }
+                 
++                // #ifdef ALPS_NGS_USE_NEW_ALEA
++                
++                // //------------------- for RealObservable and RealVectorObservable -------------------
++                // mcdata(alps::accumulator::detail::result_type_accumulator_wrapper<T> & acc) // TODO: do not use a detail class
++                //     : count_(acc.count())
++                //     , data_is_analyzed_(true)
++                //     , jacknife_bins_valid_(false)
++                //     , cannot_rebin_(false)
++                //     //~ , mean_(acc.has_mean() ? acc.mean() : T())
++                // {
++                //     if(acc.has_mean())
++                //         mean_ = acc.mean();
++                    
++                //     if(acc.has_error())
++                //         error_ = acc.error();
++                    
++                //     if(acc.has_max_num_binning())
++                //         binsize_ = acc.max_num_binning().bin_number();
++                //     else
++                //         binsize_ = 0;
++                // }
++                // #endif
+                 
+                 template <typename X> mcdata(AbstractSimpleObservable<X> const & obs)
+                     : count_(obs.count())
+diff --git a/src/alps/alea/include/alps/ngs/lib/mcresult_impl_derived.ipp b/src/alps/alea/include/alps/ngs/lib/mcresult_impl_derived.ipp
+index 0349a4ecc..09d2e477f 100644
+--- a/src/alps/alea/include/alps/ngs/lib/mcresult_impl_derived.ipp
++++ b/src/alps/alea/include/alps/ngs/lib/mcresult_impl_derived.ipp
+@@ -21,6 +21,9 @@
+ 
+ #include <alps/alea/mcdata.hpp>
+ 
++// #ifdef ALPS_NGS_USE_NEW_ALEA
++//     #include <alps/ngs/alea.hpp>
++// #endif
+ 
+ #ifdef ALPS_HAVE_MPI
+     #include <boost/mpi.hpp>
+@@ -45,6 +48,13 @@ namespace alps {
+                     : alea::mcdata<T>(obs) 
+                 {}
+                 
++                // #ifdef ALPS_NGS_USE_NEW_ALEA
++                // //TODO4 just pass the result_type wrapper to mcdata<..>..
++                // mcresult_impl_derived(accumulator::detail::accumulator_wrapper const & acc_wrapper)
++                //     : alea::mcdata<T>(acc_wrapper.get<T>())
++                // {
++                // }
++                // #endif
+                 
+                 mcresult_impl_derived(alea::mcdata<T> const & data)
+                     : alea::mcdata<T>(data) 
+diff --git a/src/alps/alea/include/alps/ngs/mcresult.hpp b/src/alps/alea/include/alps/ngs/mcresult.hpp
+index bc3b228c0..9fd5573ae 100644
+--- a/src/alps/alea/include/alps/ngs/mcresult.hpp
++++ b/src/alps/alea/include/alps/ngs/mcresult.hpp
+@@ -18,6 +18,9 @@
+ #include <alps/ngs/config.hpp>
+ #include <alps/ngs/mcobservable.hpp>
+ 
++// #ifdef ALPS_NGS_USE_NEW_ALEA
++//     #include <alps/ngs/alea/accumulator_set.hpp>
++// #endif
+ #include <alps/alea/observable_fwd.hpp>
+ #include <alps/type_traits/covariance_type.hpp>
+ 
+@@ -118,6 +121,9 @@ namespace alps {
+ 
+             mcresult();
+             mcresult(Observable const * obs);
++            // #ifdef ALPS_NGS_USE_NEW_ALEA
++            //     mcresult(alps::accumulator::detail::accumulator_wrapper const & acc_wrapper);
++            // #endif
+             mcresult(mcresult const & rhs);
+             mcresult(mcobservable const & rhs);
+ 
+diff --git a/src/alps/alea/src/ngs/mcresult.cpp b/src/alps/alea/src/ngs/mcresult.cpp
+index 1717548a6..b338c192f 100644
+--- a/src/alps/alea/src/ngs/mcresult.cpp
++++ b/src/alps/alea/src/ngs/mcresult.cpp
+@@ -18,6 +18,9 @@
+ #include <alps/ngs/lib/mcresult_impl_base.ipp>
+ #include <alps/ngs/lib/mcresult_impl_derived.ipp>
+ 
++// #ifdef ALPS_NGS_USE_NEW_ALEA
++//     #include <alps/ngs/alea/accumulator_set.hpp>
++// #endif
+ 
+ #include <alps/alea/observable.h>
+ #include <alps/alea/abstractsimpleobservable.h>
+@@ -43,6 +46,31 @@ namespace alps {
+         construct(obs);
+     }
+     
++// #ifdef ALPS_NGS_USE_NEW_ALEA
++//     template<typename T> bool has_cast(alps::accumulator::detail::accumulator_wrapper const & acc_wrapper) { 
++//         try { 
++//             acc_wrapper.get<T>();
++//             return true;
++//         }  catch(std::bad_cast)  { 
++//             return false;
++//         }
++//     }
++    
++//     mcresult::mcresult(alps::accumulator::detail::accumulator_wrapper const & acc_wrapper) {
++//         //------------------- find out value_type  -------------------
++//         if(has_cast<double>(acc_wrapper))
++//             impl_ = new detail::mcresult_impl_derived<detail::mcresult_impl_base, double>(acc_wrapper);
++//         else if(has_cast<std::vector<double> >(acc_wrapper))
++//            impl_ = new detail::mcresult_impl_derived<detail::mcresult_impl_base, std::vector<double> >(acc_wrapper);
++// /*
++//         else if(has_cast<boost::array<double, 3> >(acc_wrapper))
++//             impl_ = new detail::mcresult_impl_derived<detail::mcresult_impl_base, boost::array<double, 3> >(acc_wrapper);
++// */
++//         else
++//             throw std::runtime_error("type not supported in mcresult-constructor" + ALPS_STACKTRACE);
++//         ref_cnt_[impl_] = 1;
++//     }
++// #endif
+ 
+     mcresult::mcresult(mcresult const & rhs) {
+         impl_ = rhs.impl_;
+diff --git a/src/alps/alea/src/ngs/observablewrappers.cpp b/src/alps/alea/src/ngs/observablewrappers.cpp
+index 7926d0e31..bb0248c68 100644
+--- a/src/alps/alea/src/ngs/observablewrappers.cpp
++++ b/src/alps/alea/src/ngs/observablewrappers.cpp
+@@ -12,6 +12,9 @@
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+ 
+ #include <alps/ngs/observablewrappers.hpp>
++// #ifdef ALPS_NGS_USE_NEW_ALEA
++//     #include <alps/ngs/alea.hpp>
++// #endif
+ 
+ namespace alps {
+ 
+@@ -39,6 +42,51 @@ namespace alps {
+             return set;
+         }
+ 
++        // #ifdef ALPS_NGS_USE_NEW_ALEA
++        //     alps::accumulator::accumulator_set & operator<< (alps::accumulator::accumulator_set & set, RealObservable const & obs) {
++        //         using namespace alps::accumulator::tag;
++                
++        //         typedef accumulator::accumulator<double, accumulator::features<mean, error, max_num_binning> > accum_type;
++        //         typedef accumulator::detail::accumulator_wrapper wrapper_type;
++                
++        //         set.insert(obs.getName(), boost::shared_ptr<wrapper_type>(new wrapper_type(accum_type(accumulator::bin_num = obs.getBinnum()))));
++
++        //         return set;
++        //     }
++            
++        //     alps::accumulator::accumulator_set & operator<< (alps::accumulator::accumulator_set & set, RealVectorObservable const & obs) {
++        //         using namespace alps::accumulator::tag;
++                
++        //         typedef accumulator::accumulator<std::vector<double>, accumulator::features<mean, error, max_num_binning> > accum_type;
++        //         typedef accumulator::detail::accumulator_wrapper wrapper_type;
++                
++        //         set.insert(obs.getName(), boost::shared_ptr<wrapper_type>(new wrapper_type(accum_type(accumulator::bin_num = obs.getBinnum()))));
++
++        //         return set;
++        //     }
++            
++        //     alps::accumulator::accumulator_set & operator<< (alps::accumulator::accumulator_set & set, SimpleRealObservable const & obs) {
++        //         using namespace alps::accumulator::tag;
++                
++        //         typedef accumulator::accumulator<double, accumulator::features<mean, error> > accum_type;
++        //         typedef accumulator::detail::accumulator_wrapper wrapper_type;
++                
++        //         set.insert(obs.getName(), boost::shared_ptr<wrapper_type>(new wrapper_type(accum_type(accumulator::bin_num = obs.getBinnum()))));
++                
++        //         return set;
++        //     }
++            
++        //     alps::accumulator::accumulator_set & operator<< (alps::accumulator::accumulator_set & set, SimpleRealVectorObservable const & obs) {
++        //         using namespace alps::accumulator::tag;
++                
++        //         typedef accumulator::accumulator<std::vector<double>, accumulator::features<mean, error> > accum_type;
++        //         typedef accumulator::detail::accumulator_wrapper wrapper_type;
++                
++        //         set.insert(obs.getName(), boost::shared_ptr<wrapper_type>(new wrapper_type(accum_type(accumulator::bin_num = obs.getBinnum()))));
++                
++        //         return set;
++        //     }
++        // #endif        
+ 
+         alps::mcobservables & operator<< (alps::mcobservables & set, RealVectorObservable const & obs) {
+             set.create_RealVectorObservable(obs.getName(), obs.getBinnum());
+diff --git a/src/alps/mc/include/alps/mcbase.hpp b/src/alps/mc/include/alps/mcbase.hpp
+index cc5df7c7a..225e7f909 100644
+--- a/src/alps/mc/include/alps/mcbase.hpp
++++ b/src/alps/mc/include/alps/mcbase.hpp
+@@ -28,12 +28,20 @@ namespace alps {
+ 
+         public:
+ 
+-            typedef alps::mcobservables observable_collection_type;
++            #ifdef ALPS_NGS_USE_NEW_ALEA
++                typedef alps::accumulator::accumulator_set observable_collection_type;
++            #else
++                typedef alps::mcobservables observable_collection_type;
++            #endif
+ 
+             typedef alps::params parameters_type;
+             typedef std::vector<std::string> result_names_type;
+ 
+-            typedef alps::mcresults results_type;
++            #ifdef ALPS_NGS_USE_NEW_ALEA
++                typedef alps::accumulator::result_set results_type;
++            #else
++                typedef alps::mcresults results_type;
++            #endif
+ 
+             mcbase(parameters_type const & parms, std::size_t seed_offset = 0);
+             virtual ~mcbase();
+diff --git a/src/alps/mc/include/alps/mcmpiadapter.hpp b/src/alps/mc/include/alps/mcmpiadapter.hpp
+index 7f5ba1029..5ef93e687 100644
+--- a/src/alps/mc/include/alps/mcmpiadapter.hpp
++++ b/src/alps/mc/include/alps/mcmpiadapter.hpp
+@@ -35,7 +35,9 @@ namespace alps {
+                 , communicator(comm)
+                 , schedule_checker(check)
+                 , clone(comm.rank())
++#ifndef ALPS_NGS_USE_NEW_ALEA
+                 , binnumber(parameters["BINNUMBER"] | 128)
++#endif
+             {}
+ 
+             double fraction_completed() const {
+@@ -64,11 +66,23 @@ namespace alps {
+             typename Base::results_type collect_results(typename Base::result_names_type const & names) const {
+                 typename Base::results_type partial_results;
+                 for(typename Base::result_names_type::const_iterator it = names.begin(); it != names.end(); ++it) {
+-                    alps::mcresult result(this->measurements[*it]); // TODO: use Base::collect_results
+-                    if (result.count())
+-                        partial_results.insert(*it, result.reduce(communicator, binnumber));
+-                    else
+-                        partial_results.insert(*it, result);
++                    #ifdef ALPS_NGS_USE_NEW_ALEA
++                        if (communicator.rank() == 0) {
++                            if (this->measurements[*it].count()) {
++                                typename Base::observable_collection_type::value_type merged = this->measurements[*it];
++                                merged.collective_merge(communicator, 0);
++                                partial_results.insert(*it, merged.result());
++                            } else
++                                partial_results.insert(*it, this->measurements[*it].result());
++                        } else if (this->measurements[*it].count())
++                            this->measurements[*it].collective_merge(communicator, 0);
++                    #else
++                        alps::mcresult result(this->measurements[*it]); // TODO: use Base::collect_results
++                        if (result.count())
++                            partial_results.insert(*it, result.reduce(communicator, binnumber));
++                        else
++                            partial_results.insert(*it, result);
++                    #endif
+                 }
+                 return partial_results;
+             }
+@@ -80,7 +94,9 @@ namespace alps {
+             ScheduleChecker schedule_checker;
+             double fraction;
+             int clone;
++#ifndef ALPS_NGS_USE_NEW_ALEA
+             std::size_t binnumber;
++#endif
+     };
+ }
+ 
+diff --git a/src/alps/mc/include/alps/ngs.hpp b/src/alps/mc/include/alps/ngs.hpp
+index 88f5a8ab1..f810498a7 100644
+--- a/src/alps/mc/include/alps/ngs.hpp
++++ b/src/alps/mc/include/alps/ngs.hpp
+@@ -32,6 +32,9 @@
+ #include <alps/ngs/thread_exceptions.hpp>
+ #include <alps/ngs/observablewrappers.hpp> // TODO: remove!
+ 
++#ifdef ALPS_NGS_USE_NEW_ALEA
++	#include <alps/ngs/accumulator.hpp>
++#else
+ 	namespace alps {
+ 		namespace accumulator {
+ 
+@@ -48,6 +51,7 @@
+ 			typedef ::alps::ngs::SignedSimpleRealVectorObservable SignedSimpleRealVectorObservable;
+ 		}
+ 	}
++#endif
+ 
+ // #include <alps/mcbase.hpp>
+ // #include <alps/parseargs.hpp>
+diff --git a/src/alps/mc/include/alps/ngs/api.hpp b/src/alps/mc/include/alps/ngs/api.hpp
+index 3c1bfad3b..ecb965440 100644
+--- a/src/alps/mc/include/alps/ngs/api.hpp
++++ b/src/alps/mc/include/alps/ngs/api.hpp
+@@ -19,6 +19,9 @@
+ #include <alps/ngs/mcresults.hpp>
+ #include <alps/ngs/mcobservables.hpp>
+ 
++#ifdef ALPS_NGS_USE_NEW_ALEA
++    #include <alps/ngs/accumulator.hpp>
++#endif
+ 
+ #include <boost/filesystem/path.hpp>
+ 
+@@ -62,6 +65,10 @@ namespace alps {
+         return s.fraction_completed();
+     }
+ 
++    #ifdef ALPS_NGS_USE_NEW_ALEA
++        ALPS_DECL void save_results(alps::accumulator::accumulator_set const & observables, params const & params, boost::filesystem::path const & filename, std::string const & path);
++        ALPS_DECL void save_results(alps::accumulator::result_set const & results, params const & params, boost::filesystem::path const & filename, std::string const & path);
++    #endif
+ 
+     ALPS_DECL void save_results(mcresults const & results, params const & params, boost::filesystem::path const & filename, std::string const & path);
+ 
+diff --git a/src/alps/mc/src/mcbase.cpp b/src/alps/mc/src/mcbase.cpp
+index b07dc64e1..0bbecbb4e 100644
+--- a/src/alps/mc/src/mcbase.cpp
++++ b/src/alps/mc/src/mcbase.cpp
+@@ -64,7 +64,11 @@ namespace alps {
+     mcbase::results_type mcbase::collect_results(result_names_type const & names) const {
+         results_type partial_results;
+         for(result_names_type::const_iterator it = names.begin(); it != names.end(); ++it)
+-            partial_results.insert(*it, alps::mcresult(measurements[*it]));
++            #ifdef ALPS_NGS_USE_NEW_ALEA
++                partial_results.insert(*it, measurements[*it].result());
++            #else
++                partial_results.insert(*it, alps::mcresult(measurements[*it]));
++            #endif
+         return partial_results;
+     }
+ 
+diff --git a/src/alps/mc/src/ngs/api.cpp b/src/alps/mc/src/ngs/api.cpp
+index 156ba1e28..f66458a4c 100644
+--- a/src/alps/mc/src/ngs/api.cpp
++++ b/src/alps/mc/src/ngs/api.cpp
+@@ -28,6 +28,17 @@ namespace alps {
+         }
+     }
+ 
++    #ifdef ALPS_NGS_USE_NEW_ALEA
++
++        void save_results(alps::accumulator::result_set const & results, params const & params, boost::filesystem::path const & filename, std::string const & path) {
++            detail::save_results_impl(results, params, filename, path);
++        }
++
++        void save_results(alps::accumulator::accumulator_set const & observables, params const & params, boost::filesystem::path const & filename, std::string const & path) {
++            detail::save_results_impl(observables, params, filename, path);
++        }
++
++    #endif
+ 
+     void save_results(mcresults const & results, params const & params, boost::filesystem::path const & filename, std::string const & path) {
+         detail::save_results_impl(results, params, filename, path);

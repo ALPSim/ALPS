@@ -21,6 +21,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 - Consolidate native runtime tests under GoogleTest with individual CTest cases, historical numerical and serialization references, isolated temporary files, and explicit MPI/sanitizer registration. GoogleTest is a test-only dependency; builds with tests disabled do not acquire or install it.
 - Keep Python tests and fixtures alongside pyalps and run standalone numerical tutorial tests independently. Retire the optional Boost.Python differential build audit after retaining application checks and focused regressions; see [the coverage assessment](tests/python-migration.md) for historical compatibility limits.
+- Deprecate the C++ `alps::params(path)` constructor in favor of `alps::params_from_file(path)` from `<alps/ngs/params_from_file.hpp>`, linked through `ALPS::alps`. The old constructor forwards to the same text parser during the deprecation period; it is part of the legacy layer selected by `ALPS_LEGACY_API` (default `ON`). Python filename construction is unchanged. Remove the unsupported `ALPS_NGS_USE_NEW_ALEA` backend and its deprecated accumulator prototypes while retaining the active accumulator API. Retain deprecated SDK Python-export headers in the legacy layer; migrate to `<pyalps/export_simulation.hpp>` and `pyalps::runtime`; use `pyalps.mpi` instead of the source-only top-level `mpi` module. The historical scheduler proto header forwards to the canonical implementation.
 
 - Require HDF5 1.10.5 or newer for source builds and installed SDK consumers, retaining compatibility with the system package used by the manylinux_2_28 wheel build.
 - Support Python 3.10 or newer for pyalps. Keep separate CPython 3.10 and 3.11 wheels and use one `cp312-abi3` wheel for Python 3.12 and newer. Downstream nanobind extensions must pass `STABLE_ABI` to share pyalps types on Python 3.12+.
@@ -39,9 +40,11 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Migration
 
-Public and vendored headers are retained. Tutorial consumers use the exported SDK targets. The ALPS 2.x consumer interfaces `UseALPS.cmake`, `UsePyALPS.cmake` and `include.mk` remain installed as deprecated compatibility layers over those targets. Configure downstream projects using [CONTRIBUTING.md](CONTRIBUTING.md#getting-started-with-the-code).
+Tutorial consumers use the exported SDK targets. The ALPS 2.x consumer interfaces `UseALPS.cmake`, `UsePyALPS.cmake` and `include.mk` remain installed as deprecated compatibility layers over those targets. Configure downstream projects using [CONTRIBUTING.md](CONTRIBUTING.md#getting-started-with-the-code).
 
 Numerical matrix/vector persistence now requires an explicit adapter: include `<alps/hdf5/matrix.hpp>` or `<alps/hdf5/numeric_vector.hpp>` and link `ALPS::numeric_io`. The matrix umbrella `<alps/numeric/matrix.hpp>` no longer includes HDF5 automatically. Diagonal matrices and deprecated BLAS matrix/vector classes retain their archive `save`/`load` members without requiring HDF5 headers in the numerical interfaces. Numerical matrix `write_xml` and XML insertion remain available through `<alps/xml/matrix.hpp>` and `ALPS::numeric_xml`. Header ownership moves preserve public include spellings; consumers of persistence and XML output must include the corresponding adapters.
+
+Existing C++ `alps::params(path)` calls continue to parse text parameter files through `ALPS::alps`, but now emit a deprecation warning. Migrate to `auto parameters = alps::params_from_file(path);` and include `<alps/ngs/params_from_file.hpp>`. With `-DALPS_LEGACY_API=OFF`, or once `legacy/` is removed, the overload is deleted, so old calls fail to compile instead of opening the text file through the HDF5 archive constructor. HDF5 input still uses `alps::params(alps::hdf5::archive(path))`.
 
 | Previous interface or location | Replacement |
 | --- | --- |
@@ -58,7 +61,7 @@ Numerical matrix/vector persistence now requires an explicit adapter: include `<
 | `LAPACK_64_BIT`, alternate `BIND_FORTRAN_*` ABIs | Use LP64 BLAS/LAPACK with lowercase, trailing-underscore symbols |
 | `UseALPS.cmake`, `include.mk` | Imported SDK targets and explicit installation paths; add the installed `bin` directory to `PATH`. Both remain installed, deprecated: `${ALPS_LIBRARIES}` is `ALPS::alps`, and `UseALPS.cmake` no longer sets compilers, global flags or cache entries |
 | `UsePyALPS.cmake` | [pyalps downstream CMake package](python/pyalps/README.md#downstream-native-extensions); the deprecated `alps_target_link_pyalps` links `pyalps::runtime` |
-| `<alps/ngs/detail/export_sim_to_python.hpp>` | `<pyalps/export_simulation.hpp>`; the old header forwards to it |
+| `<alps/ngs/detail/export_sim_to_python.hpp>` | `<pyalps/export_simulation.hpp>`; the old header forwards to it when `ALPS_LEGACY_API` is on |
 | Historical XML shell tools | Retained alongside `alps-xml`; see [XML tools](CONTRIBUTING.md#xml-resources-and-tools) |
 | Top-level `import mpi` compatibility module | `import pyalps.mpi`; install the `mpi` extra for mpi4py |
 | `applications/`, `tool/`, `test/`, `example/` | `src/apps/`, `src/tools/`, `tests/`, `tutorials/examples/` |
