@@ -288,7 +288,7 @@ For substantial changes — new simulation applications, new libraries, signific
 - `python/pyalps/`: Python sources, bindings, packaging and extension example.
 - `tutorials/`: tutorials and [standalone library examples](tutorials/examples/README.md).
 - `tests/`: cross-module integration, Python, SDK, CLI, build-helper and packaging tests.
-- `third_party/`: [Numeric Bindings headers](third_party/boost_numeric_bindings/README.md) and [XDR serialization](third_party/xdr/README.md).
+- `third_party/`: [Numeric Bindings headers](third_party/boost_numeric_bindings/README.md) and [XDR serialization](third_party/xdr/README.md). [ALEA](src/alps/alea/README.md), copied from ALPSCore, lives in `src/alps/alea/` with its license.
 - `cmake/` and `.github/`: shared build configuration, generated-header templates, version file, CI and release helpers.
 
 Add exported headers to the owning target's CMake `HEADERS` file set. Public `<alps/...>` and `<ietl/...>` include names are independent of the physical source directory. Keep subsystem tests beside their owner and cross-module tests under `tests/`.

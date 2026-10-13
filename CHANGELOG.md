@@ -44,6 +44,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - Default-construct `alps::hdf5::archive` and attach a file later with `open(path, mode)`, also after `close()`; opening an open archive throws `alps::hdf5::archive_opened`. Copy assignment is deleted: it shared the file without counting the reference, so closing either archive could close the other's file. Copy construction is unchanged.
 - Add `alps::hdf5::is_native_type<T>` and HDF5 storage for `boost::optional` in `<alps/hdf5/boost_optional.hpp>`, both from ALPSCore. An empty optional stores a default value with the attribute `alps_hdf5_optional_empty`, as ALPSCore does.
 - Move the legacy ALEA sources from `src/alps/alea/` to `src/alps/legacy_alea/`, freeing `alea/` for ALPSCore's ALEA. Its include spellings (`<alps/alea.h>`, `<alps/alea/*.h>`, `<alps/ngs/mcobservables.hpp>` and the others) are unchanged; its CTest cases are now named `legacy_alea.*`.
+- Add `ALPS::alea`, the ALEA library of the ALPS Core Libraries, copied from ALPSCore with its tests (`<alps/alea.hpp>`, `<alps/alea/*.hpp>`). It requires Eigen 3.3 or newer and is built only when Eigen is found; installed SDK consumers request it with `find_package(ALPS COMPONENTS alea)`. Legacy ALEA is unchanged and can be used in the same program. See [its README](src/alps/alea/README.md) for provenance and license.
 
 ### Migration
 
