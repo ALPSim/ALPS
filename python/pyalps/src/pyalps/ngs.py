@@ -69,7 +69,7 @@ for _mapping_type in (params, observables, results):
 #
 # alps::params compounds this: its __getitem__ returns None for an undefined
 # key rather than raising KeyError (inherited from the Boost.Python module and
-# pinned by tests/pyalps/pyparams_test.py), so get() ignored its default and
+# pinned by python/pyalps/tests/pyparams_test.py), so get() ignored its default and
 # setdefault() returned None while storing nothing.
 _MAPPING_POP_MARKER = object()
 

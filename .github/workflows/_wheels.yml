@@ -252,8 +252,8 @@ jobs:
         python .github/scripts/run_with_timeout.py 300 \
           mpiexec -n 2 python .github/scripts/run_mpi_pytest.py \
           --ranks 2 --output _build/mpi \
-          tests/pyalps/test_binding_surface.py::test_mpi4py_compatibility_surface \
-          tests/pyalps/test_mpi_requests.py
+          python/pyalps/tests/test_binding_surface.py::test_mpi4py_compatibility_surface \
+          python/pyalps/tests/test_mpi_requests.py
     - name: Summarize per-rank MPI tests
       if: always()
       run: python .github/scripts/junit_summary.py '_build/mpi/*.xml'
