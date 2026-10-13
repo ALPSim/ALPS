@@ -42,6 +42,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - Retire the `alps/utility/` prefix. Its remaining shared helpers move to `<alps/utilities/...>`; `numeric_cast.hpp` moves to `<alps/numeric/numeric_cast.hpp>` and `cli.hpp` to `<alps/cli.hpp>`. `assign.hpp` and `set_zero.hpp` keep their spelling and now belong to the legacy ALEA headers that use them. The unused `bitops.hpp`, `factory.hpp` and `generator.hpp` are deprecated and installed only with the legacy layer. See the [utilities status table](src/alps/utilities/README.md).
 - Reject HDF5 archive modes containing letters other than `r`, `w`, `a`, `c`, `l` and `m` with `alps::hdf5::wrong_mode`. Unknown letters, such as a mistyped `"wx"`, used to be ignored.
 - Default-construct `alps::hdf5::archive` and attach a file later with `open(path, mode)`, also after `close()`; opening an open archive throws `alps::hdf5::archive_opened`. Copy assignment is deleted: it shared the file without counting the reference, so closing either archive could close the other's file. Copy construction is unchanged.
+- Add `alps::hdf5::is_native_type<T>` and HDF5 storage for `boost::optional` in `<alps/hdf5/boost_optional.hpp>`, both from ALPSCore. An empty optional stores a default value with the attribute `alps_hdf5_optional_empty`, as ALPSCore does.
 
 ### Migration
 

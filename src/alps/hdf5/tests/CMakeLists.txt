@@ -25,6 +25,7 @@ foreach(
   hdf5_real_complex_vec
   hdf5_real_complex_matrix
   hdf5_bool
+  hdf5_boost_optional
   hdf5_replace
   hdf5_pair
   hdf5_family
@@ -37,6 +38,7 @@ foreach(
   hdf5_vecveccplx
   hdf5_exceptions
   hdf5_multiarchive
+  hdf5_native_type
   hdf5_open_strmode
   hdf5_fortran_string
   hdf5_vecvecdbl)

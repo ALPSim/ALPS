@@ -14,6 +14,7 @@ target_sources(alps_hdf5 PUBLIC
     include/alps/hdf5.hpp
     include/alps/hdf5/archive.hpp
     include/alps/hdf5/array.hpp
+    include/alps/hdf5/boost_optional.hpp
     include/alps/hdf5/complex.hpp
     include/alps/hdf5/errors.hpp
     include/alps/hdf5/map.hpp
