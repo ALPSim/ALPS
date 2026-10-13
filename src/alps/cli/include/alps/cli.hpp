@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-#ifndef ALPS_UTILITY_CLI_HPP
-#define ALPS_UTILITY_CLI_HPP
+#ifndef ALPS_CLI_HPP
+#define ALPS_CLI_HPP
 
 #include <alps/cli_export.h>
 #include <alps/config.h>

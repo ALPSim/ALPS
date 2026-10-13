@@ -3,6 +3,9 @@
 //                        Bela Bauer <bauerb -at- phys.ethz.ch>
 //  Use, modification, and distribution are subject to the Boost Software 
 //  License, Version 1.0. (See at <http://www.boost.org/LICENSE_1_0.txt>.)
+
+// Deprecated with the legacy layer (ALPS_LEGACY_API); removed in ALPS 4.0.
+#pragma message("<alps/utility/generator.hpp> is deprecated: no replacement; it has no users")
 #include <vector>
 #include <algorithm>
 #include <boost/function.hpp>

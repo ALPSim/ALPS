@@ -12,9 +12,17 @@
 #include <alps/ngs/signal.hpp>
 #include <alps/ngs/stacktrace.hpp>
 #include <alps/ngs/stringify.hpp>
+#include <alps/utility/citations.hpp>
+#include <alps/utility/copyright.hpp>
+#include <alps/utility/data.hpp>
+#include <alps/utility/encode.hpp>
 #include <alps/utility/make_copy.hpp>
+#include <alps/utility/os.hpp>
+#include <alps/utility/resize.hpp>
 #include <alps/utility/size.hpp>
 #include <alps/utility/temporary_filename.hpp>
+#include <alps/utility/vectorio.hpp>
+#include <alps/utility/vmusage.hpp>
 
 #include <cstring>
 #include <sstream>
@@ -43,6 +51,19 @@ TEST(LegacyUtilitiesSpellings, UtilityHeadersForwardToUtilities)
     EXPECT_EQ(alps::size(std::vector<int>(4)), 4u);
     EXPECT_EQ(alps::size(1.5), 1u);
     EXPECT_FALSE(alps::temporary_filename("legacy_spelling_").empty());
+    EXPECT_FALSE(alps::citation_text().empty());
+    EXPECT_FALSE(alps::version().empty());
+    std::vector<int> storage{5, 6};
+    EXPECT_EQ(alps::data(storage), storage.data());
+    EXPECT_EQ(alps::hdf5_name_decode(alps::hdf5_name_encode("a/b")), "a/b");
+    EXPECT_FALSE(alps::temp_directory_path().empty());
+    std::vector<double> resized;
+    alps::resize_same_as(resized, storage);
+    EXPECT_EQ(resized.size(), 2u);
+    std::vector<int> parsed;
+    alps::read_vector_resize(std::string("1 2 3"), parsed);
+    EXPECT_EQ(parsed, (std::vector<int>{1, 2, 3}));
+    (void)alps::vmusage();
 }
 
 TEST(LegacyUtilitiesSpellings, NgsNamesReferToCanonicalEntities)

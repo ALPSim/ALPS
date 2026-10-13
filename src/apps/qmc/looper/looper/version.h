@@ -27,8 +27,8 @@
   "  available from http://wistaria.comp-phys.org/alps-looper/\n" \
   "  copyright (c) 1997-2010 by Synge Todo <wistaria@comp-phys.org>\n\n"
 
-#include <alps/utility/copyright.hpp>
-#include <alps/utility/citations.hpp>
+#include <alps/utilities/copyright.hpp>
+#include <alps/utilities/citations.hpp>
 #include <iostream>
 
 namespace looper {

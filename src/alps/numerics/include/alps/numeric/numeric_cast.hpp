@@ -16,8 +16,8 @@
 
 /* $Id$ */
 
-#ifndef ALPS_UTILITY_NUMERIC_CAST_HPP
-#define ALPS_UTILITY_NUMERIC_CAST_HPP
+#ifndef ALPS_NUMERIC_NUMERIC_CAST_HPP
+#define ALPS_NUMERIC_NUMERIC_CAST_HPP
 
 #include <alps/numeric/real.hpp>
 #include <vector>
@@ -123,4 +123,4 @@ inline typename detail::numeric_cast<T,U>::return_type numeric_cast(U const& u)
 
 } // end namespace alps
 
-#endif // ALPS_UTILITY_NUMERIC_CAST_HPP
+#endif // ALPS_NUMERIC_NUMERIC_CAST_HPP

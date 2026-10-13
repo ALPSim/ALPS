@@ -8,7 +8,9 @@ With the option off, none of these files are on the include path or installed.
 | Path | What it keeps working | Replacement |
 | --- | --- | --- |
 | `include/alps/ngs/{cast,stacktrace,signal,stringify,short_print}.hpp`, `include/alps/ngs/detail/{remove_cvr,type_wrapper}.hpp` | the old include spellings | `<alps/utilities/...>` with the same file name |
-| `include/alps/utility/{size,temporary_filename,make_copy}.hpp` | the old include spellings | `<alps/utilities/...>` with the same file name |
+| `include/alps/utility/{size,temporary_filename,make_copy}.hpp`, `include/alps/utility/{copyright,citations,os,vmusage,vectorio,encode,resize,data}.hpp` | the old include spellings | `<alps/utilities/...>` with the same file name |
+| `include/alps/utility/numeric_cast.hpp`, `include/alps/utility/cli.hpp` | the old include spellings | `<alps/numeric/numeric_cast.hpp>` (`ALPS::numerics`), `<alps/cli.hpp>` (`ALPS::cli`) |
+| `include/alps/utility/{bitops,factory,generator}.hpp` | the headers themselves, which have no users left | none; `bitops` is superseded by C++20 `<bit>`. `factory.hpp` is kept byte-for-byte but does not compile, as in 3.0.0 |
 | `include/alps/legacy/ngs_{signal,stacktrace,stringify}.hpp` | `alps::ngs::signal`, `alps::ngs::stacktrace()`, `ALPS_NGS_STRINGIFY` | `alps::signal`, `alps::stacktrace()`, `ALPS_STRINGIFY` |
 
 Each forwarding header prints a `#pragma message` naming its replacement. The

@@ -49,7 +49,9 @@ target_sources(alps_headers INTERFACE
     include/alps/ngs/mcobservables.hpp
     include/alps/ngs/mcresult.hpp
     include/alps/ngs/mcresults.hpp
-    include/alps/ngs/observablewrappers.hpp)
+    include/alps/ngs/observablewrappers.hpp
+    include/alps/utility/assign.hpp
+    include/alps/utility/set_zero.hpp)
 
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)

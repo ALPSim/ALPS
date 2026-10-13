@@ -15,7 +15,7 @@
 /* $Id$ */
 #include <alps/alea/observableset.h>
 #include <alps/alea/observableset_p.h>
-#include <alps/utility/encode.hpp>
+#include <alps/utilities/encode.hpp>
 #include <alps/multi_array.hpp>
 #include <boost/lexical_cast.hpp>
 #include <set>

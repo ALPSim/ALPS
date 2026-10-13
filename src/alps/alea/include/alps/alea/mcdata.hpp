@@ -28,12 +28,12 @@
 #include <alps/config.h>
 #include <alps/alea/nan.h>
 #include <alps/parser/parser.h>
-#include <alps/utility/resize.hpp>
+#include <alps/utilities/resize.hpp>
 #include <alps/hdf5/vector.hpp>
 #include <alps/utility/set_zero.hpp>
 #include <alps/numeric/functional.hpp>
 #include <alps/alea/simpleobservable.h>
-#include <alps/utility/numeric_cast.hpp>
+#include <alps/numeric/numeric_cast.hpp>
 #include <alps/numeric/outer_product.hpp>
 #include <alps/type_traits/param_type.hpp>
 #include <alps/type_traits/average_type.hpp>
@@ -42,7 +42,7 @@
 #include <alps/type_traits/covariance_type.hpp>
 #include <alps/type_traits/change_value_type.hpp>
 #include <alps/numeric/vector_valarray_conversion.hpp>
-#include <alps/utility/data.hpp>
+#include <alps/utilities/data.hpp>
 
 // #ifdef ALPS_NGS_USE_NEW_ALEA
 //     #include <alps/ngs/alea/wrapper/accumulator_wrapper.hpp>

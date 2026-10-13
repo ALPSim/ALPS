@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-#include <alps/utility/citations.hpp>
-#include <alps/utility/copyright.hpp>
+#include <alps/utilities/citations.hpp>
+#include <alps/utilities/copyright.hpp>
 #include <cstdlib>
 #include <gtest/gtest.h>
 #include <sstream>
