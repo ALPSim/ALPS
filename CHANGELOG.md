@@ -29,7 +29,8 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - Organize `src/alps/` by responsibility, with module-local headers, sources and tests. Configuration templates live in `cmake/config/`, and generated headers use `<build-dir>/generated/include/alps/`. Explicit header file sets preserve public include names. See the [module layout](src/alps/README.md).
 - Export independently linkable runtime components `ALPS::utilities`, `ALPS::hdf5`, `ALPS::params`, `ALPS::osiris`, `ALPS::xml` and `ALPS::cli`. `ALPS::alps` links them transitively; Python packages carry one copy of each component. Params text/XML and older `Parameters` conversion adapters remain in `ALPS::alps`, with unchanged public header names. Archive formats and existing parsing behavior are preserved. Rebuild downstream binaries after the library splits.
 - MaxEnt's solver and executable link the foundation components without `ALPS::alps`. The executable uses `ALPS::cli` and reads typed params directly from HDF5. Scientific calculations and stop-callback behavior are preserved.
-- Group `src/tools/` commands by responsibility. Keep historical inactive sources without enabling them; executable names and installation components are preserved. `pconfig` now links only utilities.
+- Group `src/tools/` commands by responsibility. Retire inactive sources and obsolete shell wrappers; keep the supported command-line tools. `pconfig` now links only utilities.
+- Remove obsolete build, dependency-bootstrap and installer scripts. Replace historical XML shell wrappers with `alps-xml plot`, `alps-xml convert` and `alps-xml extract`, and update notebook commands. Keep installed `txt2archive`, `xml2archive` and the optional SQLite archive tool under `src/tools/archive`.
 - Require CMake 3.27 or newer and an externally installed Boost 1.76 or newer with CMake packages. The SDK requires C++17/C11 compilers, HDF5's C library, and LP64 BLAS/LAPACK; bundled Boost builds and alternate numerical integer/symbol ABIs are no longer supported.
 - Export CMake targets for the installed SDK, applications and solver libraries. Downstream C++ projects link `ALPS::alps`; Python extensions sharing pyalps objects use `pyalps::runtime`. MaxEnt, CT-HYB and CT-INT Python wrappers link the SDK's solver libraries instead of compiling their implementations again.
 - Make MPI opt-in with `ALPS_ENABLE_MPI=ON`. Standalone builds enable applications and native tests by default; embedded `add_subdirectory` builds default to the library alone. The default SDK uses shared libraries, as required by the Python bindings.
@@ -58,8 +59,9 @@ Numerical matrix/vector persistence now requires an explicit adapter: include `<
 | `LAPACK_64_BIT`, alternate `BIND_FORTRAN_*` ABIs | Use LP64 BLAS/LAPACK with lowercase, trailing-underscore symbols |
 | `UseALPS.cmake`, `include.mk` | Imported SDK targets and explicit installation paths; add the installed `bin` directory to `PATH`. Both remain installed, deprecated: `${ALPS_LIBRARIES}` is `ALPS::alps`, and `UseALPS.cmake` no longer sets compilers, global flags or cache entries |
 | `UsePyALPS.cmake` | [pyalps downstream CMake package](python/pyalps/README.md#downstream-native-extensions); the deprecated `alps_target_link_pyalps` links `pyalps::runtime` |
+| `alpsvars` scripts | Add the SDK installation’s `bin` directory to `PATH` and set `ALPS_DIR` explicitly |
 | `<alps/ngs/detail/export_sim_to_python.hpp>` | `<pyalps/export_simulation.hpp>`; the old header forwards to it |
-| Historical XML shell tools | Retained alongside `alps-xml`; see [XML tools](CONTRIBUTING.md#xml-resources-and-tools) |
+| Historical XML shell tools | Use `alps-xml`; see [XML tools](CONTRIBUTING.md#xml-resources-and-tools) |
 | Top-level `import mpi` compatibility module | `import pyalps.mpi`; install the `mpi` extra for mpi4py |
 | `applications/`, `tool/`, `test/`, `example/` | `src/apps/`, `src/tools/`, `tests/`, `tutorials/examples/` |
 | Loose subsystem trees and transitional `src/alps/{common,runtime}/` | Semantic `src/alps/<module>/{include,src,tests}` ownership; see the [module map](src/alps/README.md#source-ownership) |
