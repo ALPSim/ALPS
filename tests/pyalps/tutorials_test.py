@@ -12,9 +12,9 @@ and both were broken in ways only running them shows:
 `archive[path] = ...`, and neither one's load() had ever executed (one wrote to
 the archive instead of reading from it, both called double()).
 
-Running them here rather than in build.yml is deliberate: they need an installed
-pyalps, which is what this suite already has, so cibuildwheel exercises them
-against every wheel it builds.
+Running them here rather than in a separate CI job is deliberate: they need an
+installed pyalps, which is what this suite already has, so cibuildwheel
+exercises them against every wheel it builds.
 """
 
 import os
@@ -72,7 +72,7 @@ def test_every_pure_python_tutorial_has_a_smoke_test():
         if not directory.is_dir() or not list(directory.glob("*.py")):
             continue
         if list(directory.glob("*.cpp")):
-            continue        # compiled tutorials are covered by build.yml
+            continue        # compiled tutorials are covered by compatibility.yml
         if not (directory / "smoke_test.py").is_file():
             untested.append(directory.name)
 
