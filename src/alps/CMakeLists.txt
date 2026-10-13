@@ -128,7 +128,7 @@ target_sources(alps_configuration INTERFACE
 # contribute to libalps until their dependency cycles have been disentangled.
 foreach(module IN ITEMS containers utilities cli numerics ietl solvers xml plotting
                         legacy_parameters expression graph lattice model random
-                        osiris hdf5 numeric_io numeric_xml params alea accumulators mc scheduler parapack fortran)
+                        osiris hdf5 numeric_io numeric_xml params legacy_alea accumulators mc scheduler parapack fortran)
   add_subdirectory(${module})
 endforeach()
 target_link_libraries(alps PUBLIC ALPS::utilities ALPS::osiris ALPS::hdf5 ALPS::params

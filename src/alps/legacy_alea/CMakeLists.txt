@@ -1,4 +1,4 @@
-# Alea source ownership.
+# Legacy ALEA source ownership. The modern ALEA library is ALPS::alea.
 target_sources(alps PRIVATE
   src/alea/nan.C
   src/alea/observable.C

@@ -43,6 +43,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - Reject HDF5 archive modes containing letters other than `r`, `w`, `a`, `c`, `l` and `m` with `alps::hdf5::wrong_mode`. Unknown letters, such as a mistyped `"wx"`, used to be ignored. The integer-property constructor likewise rejects bits other than `READ`, `WRITE`, `REPLACE`, `COMPRESS`, `LARGE` and `MEMORY`.
 - Default-construct `alps::hdf5::archive` and attach a file later with `open(path, mode)`, also after `close()`; opening an open archive throws `alps::hdf5::archive_opened`. Copy assignment is deleted: it shared the file without counting the reference, so closing either archive could close the other's file. Copy construction is unchanged.
 - Add `alps::hdf5::is_native_type<T>` and HDF5 storage for `boost::optional` in `<alps/hdf5/boost_optional.hpp>`, both from ALPSCore. An empty optional stores a default value with the attribute `alps_hdf5_optional_empty`, as ALPSCore does.
+- Move the legacy ALEA sources from `src/alps/alea/` to `src/alps/legacy_alea/`, freeing `alea/` for ALPSCore's ALEA. Its include spellings (`<alps/alea.h>`, `<alps/alea/*.h>`, `<alps/ngs/mcobservables.hpp>` and the others) are unchanged; its CTest cases are now named `legacy_alea.*`.
 
 ### Migration
 

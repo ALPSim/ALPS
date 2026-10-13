@@ -1,6 +1,6 @@
 # C++ module layout
 
-Sources use `include/`, `src/` and `tests/` where applicable. Public include spellings describe the API independently of the physical owner: NGS measurement headers live in `alea/include/alps/ngs/`, while typed parameters live in `params/include/alps/ngs/`.
+Sources use `include/`, `src/` and `tests/` where applicable. Public include spellings describe the API independently of the physical owner: NGS measurement headers live in `legacy_alea/include/alps/ngs/`, while typed parameters live in `params/include/alps/ngs/`.
 
 ## Source ownership
 
@@ -20,7 +20,7 @@ Sources use `include/`, `src/` and `tests/` where applicable. Public include spe
 | `legacy_parameters/`, `expression/` | Older `alps::Parameters` and expression evaluation | `ALPS::alps` |
 | `graph/`, `lattice/`, `model/` | Graph helpers, lattice definitions and physical models | `ALPS::headers`, `ALPS::alps` |
 | `random/` | Random generators and their factories | `ALPS::alps` |
-| `alea/`, `accumulators/` | Observable/result facilities and accumulator implementations | `ALPS::alps` |
+| `legacy_alea/`, `accumulators/` | Legacy ALEA observables and results (`<alps/alea.h>`, `<alps/alea/*.h>`), and accumulator implementations | `ALPS::alps` |
 | `mc/`, `scheduler/`, `parapack/` | Simulation API, execution and scheduling | `ALPS::alps` |
 | `fortran/` | C++ bridge with public headers in `include/alps/fortran/` | `ALPS::fortran` |
 | `solvers/` | Shared `<alps/solvers.hpp>` declarations for MaxEnt and CT-QMC | `ALPS::solver_headers` |
