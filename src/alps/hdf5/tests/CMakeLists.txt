@@ -28,6 +28,7 @@ foreach(
   hdf5_replace
   hdf5_pair
   hdf5_family
+  hdf5_map
   hdf5_valgrind
   hdf5_multi_array
   hdf5_memory
