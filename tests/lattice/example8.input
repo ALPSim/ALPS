@@ -1,3 +1,0 @@
-LATTICE_LIBRARY = "../../src/alps/resources/lattices.xml"
-UNITCELL = "2band1d"
-L = 5

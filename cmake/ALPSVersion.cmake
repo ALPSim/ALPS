@@ -19,23 +19,15 @@
 # This file is included by full path before project(), so it cannot rely on
 # CMAKE_MODULE_PATH or PROJECT_SOURCE_DIR.
 
-set(_alps_version_file "${CMAKE_CURRENT_LIST_DIR}/../ALPS_VERSION.txt")
-
-if(NOT EXISTS "${_alps_version_file}")
-  message(FATAL_ERROR "Cannot read the ALPS version file: ${_alps_version_file}")
-endif()
-
-file(STRINGS "${_alps_version_file}" ALPS_VERSION_CORE LIMIT_COUNT 1)
+set(_alps_version_file "${CMAKE_CURRENT_LIST_DIR}/ALPS_VERSION.txt")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_alps_version_file}")
+file(READ "${_alps_version_file}" ALPS_VERSION_CORE)
 string(STRIP "${ALPS_VERSION_CORE}" ALPS_VERSION_CORE)
-
-# Fail loudly here rather than letting project() emit "VERSION format invalid",
-# which gives no hint about which file is at fault.
-if(NOT ALPS_VERSION_CORE MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+$")
+if(NOT ALPS_VERSION_CORE MATCHES "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$")
   message(FATAL_ERROR
     "${_alps_version_file} must contain exactly MAJOR.MINOR.PATCH, but reads "
     "'${ALPS_VERSION_CORE}'. Prerelease labels belong in "
     "ALPS_VERSION_PRERELEASE, and the leading 'v' of a release tag is not "
     "part of the version.")
 endif()
-
 unset(_alps_version_file)

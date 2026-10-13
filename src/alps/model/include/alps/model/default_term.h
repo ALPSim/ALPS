@@ -1,0 +1,70 @@
+/*****************************************************************************
+*
+* ALPS Project: Algorithms and Libraries for Physics Simulations
+*
+* ALPS Libraries
+*
+* Copyright (C) 2003-2005 by Matthias Troyer <troyer@comp-phys.org>,
+*                            Synge Todo <wistaria@comp-phys.org>
+*
+* ALPS Project: https://alps.comp-phys.org/
+* SPDX-License-Identifier: MIT
+*
+*****************************************************************************/
+
+/* $Id$ */
+
+#ifndef ALPS_MODEL_DEFAULTTERM_H
+#define ALPS_MODEL_DEFAULTTERM_H
+
+#include <alps/model/siteterm.h>
+#include <alps/model/bondterm.h>
+#include <alps/model/substitute.h>
+
+namespace alps {
+
+template <class TERM>
+class DefaultTermDescriptor : public TERM
+{
+public:
+  typedef TERM term_type;
+  DefaultTermDescriptor() {}
+  DefaultTermDescriptor(const XMLTag& tag, std::istream& in) : term_type(tag,in) {}
+  // operator term_type() const { return static_cast<term_type const&>(*this);}
+  term_type get(unsigned int type) const;
+  Parameters parms(unsigned int type) const { return substitute(TERM::parms(),type); }
+};
+
+template <class TERM>
+TERM DefaultTermDescriptor<TERM>::get(unsigned int type) const
+{
+  return term_type(*this,substitute(this->term(),type),Parameters(),type);
+}
+
+typedef DefaultTermDescriptor<SiteTermDescriptor> DefaultSiteTermDescriptor;
+typedef DefaultTermDescriptor<BondTermDescriptor> DefaultBondTermDescriptor;
+
+
+
+} // namespace alps
+
+namespace alps {
+
+template <class TERM>
+inline alps::oxstream& operator<<(alps::oxstream& out, const alps::DefaultTermDescriptor<TERM>& q)
+{
+  q.write_xml(out);
+  return out;
+}
+
+template <class TERM>
+inline std::ostream& operator<<(std::ostream& out, const alps::DefaultTermDescriptor<TERM>& q)
+{
+  alps::oxstream xml(out);
+  xml << q;
+  return out;
+}
+
+} // namespace alps
+
+#endif

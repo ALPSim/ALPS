@@ -4,8 +4,9 @@ import tempfile
 import weakref
 
 import numpy as np
-import parameter_probe as native
+# Initialize the package DLL directory before importing a native consumer.
 from pyalps import hdf5, ngs
+import parameter_probe as native
 
 empty = native.empty_vectors()
 for key, kind in {"integer": "i", "real": "f", "complex": "c", "boolean": "b"}.items():
@@ -92,6 +93,16 @@ for value, expected in (
 assert native.native_text() == ",middle,"
 
 with tempfile.TemporaryDirectory() as directory:
+    filename = directory + "/shared-archive.h5"
+    with hdf5.archive(filename, "w") as archive:
+        archive["initial"] = 1
+    with hdf5.archive(filename, "r") as archive:
+        # Opening a writer upgrades the existing read-only archive context.
+        # A second SDK runtime copy has a separate registry and cannot do this.
+        native.append_archive(filename)
+        assert archive["initial"] == 1
+        assert archive["from_native"] == 42
+
     with hdf5.archive(directory + "/parameters.h5", "w") as archive:
         archive["value"] = np.array([2.0, 4.0])
         archive["metadata"] = {"label": "test", "matrix": np.ones((2, 3))}

@@ -21,158 +21,185 @@
 # libalps
 #
 
-set(ALPS_SOURCES "")
-set(ALPS_SHARED_CPPFLAGS ALPS_EXPORTS=1)
-set(ALPS_STATIC_CPPFLAGS "")
+add_library(alps)
+add_library(ALPS::alps ALIAS alps)
+add_library(alps_headers INTERFACE)
+add_library(ALPS::headers ALIAS alps_headers)
+set_target_properties(alps_headers PROPERTIES EXPORT_NAME headers)
+# Foundations own their compile interfaces. The aggregate below is for the
+# remaining simulation modules and for callers explicitly requesting all headers.
+add_library(alps_configuration INTERFACE)
+add_library(ALPS::configuration ALIAS alps_configuration)
+set_target_properties(alps_configuration PROPERTIES EXPORT_NAME configuration)
+target_compile_features(alps_configuration INTERFACE cxx_std_17)
+target_compile_features(alps PRIVATE c_std_11)
+target_link_libraries(alps_configuration INTERFACE Boost::headers)
+target_include_directories(alps_configuration INTERFACE
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/third_party/boost_numeric_bindings/include>)
+target_link_libraries(alps PUBLIC alps_headers HDF5::HDF5 Threads::Threads
+                                  ${ALPS_BLAS_TARGET} ${ALPS_LAPACK_TARGET})
+foreach(component IN LISTS ALPS_BOOST_COMPONENTS)
+  target_link_libraries(alps PUBLIC Boost::${component})
+endforeach()
+if(ALPS_ENABLE_MPI)
+  target_link_libraries(alps PUBLIC MPI::MPI_CXX)
+endif()
+if(ALPS_ENABLE_OPENMP)
+  target_link_libraries(alps PUBLIC OpenMP::OpenMP_CXX)
+endif()
+include(GenerateExportHeader)
+generate_export_header(alps EXPORT_MACRO_NAME ALPS_DECL EXPORT_FILE_NAME
+                       "${PROJECT_BINARY_DIR}/generated/include/alps/export.h")
+if(NOT BUILD_SHARED_LIBS)
+  target_compile_definitions(alps_configuration INTERFACE ALPS_STATIC_DEFINE)
+endif()
+set_target_properties(
+  alps
+  PROPERTIES VERSION ${PROJECT_VERSION}
+             SOVERSION ${PROJECT_VERSION_MAJOR}
+             INSTALL_RPATH "${ALPS_LOADER_ORIGIN}")
 
-set(ALPS_SOURCES
-    # utility
-    utility/encode.cpp utility/copyright.cpp utility/os.cpp utility/temporary_filename.cpp
-    utility/vmusage.cpp
-    utility/citations.cpp
-    utility/cli.cpp
-    # alea
-    alea/nan.C alea/observable.C alea/observablefactory.C alea/observableset.C
-    # expression
-    expression/evaluator.C
-    # lattice
-    lattice/disorder.C lattice/latticedescriptor.C lattice/latticegraphdescriptor.C
-    lattice/latticelibrary.C lattice/unitcell.C
-    # model
-    model/bondterm.C model/globaloperator.C model/modellibrary.C model/siteterm.C
-    # osiris
-    osiris/buffer.C osiris/dump.C osiris/dumparchive.C osiris/process.C osiris/comm.C
-    osiris/mpdump.C osiris/xdrdump.C
-    # parameter
-    parameter/parameter.C parameter/parameterlist.C parameter/parameters.C
-    # parser
-    parser/parser.C parser/xmlattributes.C parser/xmlhandler.C parser/xmlparser.C
-    parser/xmlstream.C parser/xslt_path.C
-    #hdf5
-    hdf5/archive.cpp ngs/lib/signal.cpp ngs/lib/stacktrace.cpp
-    # random
-    random/rngfactory.C random/parallel/get_prime.cpp random/parallel/primelist_64.cpp
-    # scheduler
-    scheduler/abstract_task.C scheduler/convertxdr.C scheduler/factory.C scheduler/info.C
-    scheduler/master_scheduler.C scheduler/measurement_operators.C
-    scheduler/montecarlo.C scheduler/mpp_scheduler.C scheduler/options.C
-    scheduler/remote_task.C scheduler/remote_worker.C scheduler/scheduler.C
-    scheduler/serial_scheduler.C scheduler/signal.C scheduler/single_scheduler.C
-    scheduler/slave_task.C scheduler/task.C scheduler/worker.C scheduler/workertask.C
-    # ngs sources
-    stop_callback.cpp ngs/lib/api.cpp ngs/lib/short_print.cpp ngs/lib/sleep.cpp
-    # alea
-    # parameters
-    ngs/lib/paramvalue.cpp ngs/lib/paramproxy.cpp ngs/lib/params.cpp
-    # scheduler
-    mcbase.cpp parseargs.cpp
-#deprecated, TODO: replace by new alea
-    ngs/lib/mcoptions.cpp ngs/lib/observablewrappers.cpp ngs/lib/make_deprecated_parameters.cpp ngs/lib/make_parameters_from_xml.cpp
-    ngs/lib/mcresult.cpp ngs/lib/mcresults.cpp ngs/lib/mcobservables.cpp ngs/lib/mcobservable.cpp
-  )
+function(alps_dependency_rpath target)
+  if(NOT ALPS_LOADER_ORIGIN)
+    return()
+  endif()
+  # CMake's automatic install RPATH omits dependency prefixes inside the source
+  # or build tree. Imported shared libraries still need to be found after the
+  # SDK is installed, including when CI extracts its dependencies in _build/.
+  get_target_property(dependencies ${target} LINK_LIBRARIES)
+  list(APPEND dependencies ${ARGN})
+  foreach(dependency IN LISTS dependencies)
+    if(TARGET "${dependency}")
+      get_target_property(dependency_type "${dependency}" TYPE)
+      get_target_property(dependency_imported "${dependency}" IMPORTED)
+      if(dependency_imported AND dependency_type MATCHES "^(SHARED|UNKNOWN)_LIBRARY$")
+        set_property(TARGET ${target} APPEND PROPERTY INSTALL_RPATH "$<TARGET_FILE_DIR:${dependency}>")
+      endif()
+    elseif(IS_ABSOLUTE "${dependency}")
+      get_filename_component(dependency_directory "${dependency}" DIRECTORY)
+      set_property(TARGET ${target} APPEND PROPERTY INSTALL_RPATH "${dependency_directory}")
+    endif()
+  endforeach()
+endfunction()
+# Keep paths for transitive libraries present on the core/program link lines.
+get_target_property(hdf5_dependencies HDF5::HDF5 INTERFACE_LINK_LIBRARIES)
+alps_dependency_rpath(alps ${hdf5_dependencies})
 
-  if (NOT ALPS_HAVE_RPC_XDR_H)
-    set(ALPS_SOURCES ${ALPS_SOURCES} osiris/xdr.c osiris/xdr_array.c osiris/xdr_float.c osiris/xdr_stdio.c)
-  endif (NOT ALPS_HAVE_RPC_XDR_H)
-  
-  # OpenMPI ULFM
-  if (ALPS_NGS_OPENMPI_ULFM)
-    set(ALPS_SOURCES ${ALPS_SOURCES} ngs/lib/ulfm.cpp)
-  endif (ALPS_NGS_OPENMPI_ULFM)
+function(alps_copy_runtime_dependencies target)
+  if(WIN32 AND BUILD_SHARED_LIBS)
+    # Follow imported configurations: a Debug consumer may use a Release C-ABI
+    # dependency that vcpkg's configuration-specific DLL search does not find.
+    set(runtime_copy_script "${CMAKE_CURRENT_BINARY_DIR}/copy-runtime-$<CONFIG>.cmake")
+    file(GENERATE OUTPUT "${runtime_copy_script}" CONTENT
+      "set(dlls \"$<TARGET_RUNTIME_DLLS:${target}>\")\nif(dlls)\nfile(COPY \${dlls} DESTINATION \"$<TARGET_FILE_DIR:${target}>\")\nendif()\n")
+    add_custom_command(TARGET ${target} POST_BUILD
+      COMMAND "${CMAKE_COMMAND}" -P "${runtime_copy_script}"
+      VERBATIM)
+  endif()
+endfunction()
+alps_copy_runtime_dependencies(alps)
 
-  # new alea
-  if (ALPS_NGS_USE_NEW_ALEA)
-#    set(ALPS_SOURCES ${ALPS_SOURCES} ngs/lib/alea/accumulator_set.cpp ngs/lib/alea/result_set.cpp)
-    set(ALPS_SOURCES ${ALPS_SOURCES} ngs/accumulator/accumulator.cpp)
-  endif (ALPS_NGS_USE_NEW_ALEA)
+# Shared export/install policy; sources and dependencies stay with each component.
+function(alps_configure_component target component)
+  add_library(ALPS::${component} ALIAS ${target})
+  set_target_properties(${target} PROPERTIES
+    EXPORT_NAME ${component} VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR} INSTALL_RPATH "${ALPS_LOADER_ORIGIN}")
+  alps_dependency_rpath(${target} ${ARGN})
+  alps_copy_runtime_dependencies(${target})
+  string(TOUPPER "${component}" upper)
+  set(export_header "${PROJECT_BINARY_DIR}/generated/include/alps/${component}_export.h")
+  generate_export_header(${target} EXPORT_MACRO_NAME ALPS_${upper}_DECL
+    EXPORT_FILE_NAME "${export_header}")
+  if(NOT BUILD_SHARED_LIBS)
+    target_compile_definitions(${target} PUBLIC ALPS_${upper}_STATIC_DEFINE)
+  endif()
+  target_sources(${target} PUBLIC FILE_SET HEADERS
+    BASE_DIRS "${PROJECT_BINARY_DIR}/generated/include" FILES "${export_header}")
+endfunction()
+target_sources(alps_configuration INTERFACE
+  FILE_SET HEADERS
+  BASE_DIRS "${PROJECT_BINARY_DIR}/generated/include"
+  FILES "${PROJECT_BINARY_DIR}/generated/include/alps/config.h"
+        "${PROJECT_BINARY_DIR}/generated/include/alps/version.h"
+        "${PROJECT_BINARY_DIR}/generated/include/alps/export.h")
 
-set(ALPS_SOURCES ${ALPS_SOURCES}
-    # parapack
-    parapack/clone.C parapack/clone_info.C parapack/filelock.C parapack/logger.C
-    parapack/job.C parapack/mc_worker.C parapack/measurement.C parapack/process_impl.C
-    parapack/option.C parapack/parapack.C parapack/queue.C parapack/rng_helper.C
-    parapack/types.C parapack/util.C parapack/version.C parapack/worker_factory.C
-    parapack/staging.C
-    # ngs-parapack
-    ngs/lib/clone.cpp ngs/lib/clone_info.cpp ngs/lib/job.cpp ngs/lib/parapack.cpp ngs/lib/worker_factory.cpp
-)
+# Filesystem ownership follows scientific responsibilities. Some modules still
+# contribute to libalps until their dependency cycles have been disentangled.
+foreach(module IN ITEMS containers utilities cli numerics ietl solvers xml plotting
+                        legacy_parameters expression graph lattice model random
+                        osiris hdf5 numeric_io numeric_xml params alea accumulators mc scheduler parapack fortran)
+  add_subdirectory(${module})
+endforeach()
+target_link_libraries(alps PUBLIC ALPS::utilities ALPS::osiris ALPS::hdf5 ALPS::params
+                                  ALPS::xml ALPS::cli)
 
-add_library(alps ${ALPS_SOURCES})
-
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  # The legacy "lagged_fibonacci607" generator uses a 48-bit word with a 32-bit
-  # result type, so max() truncates by design; keep it for stream compatibility.
-  set_source_files_properties(random/rngfactory.C PROPERTIES
-    COMPILE_OPTIONS "-Wno-constant-conversion")
+target_link_libraries(alps_headers INTERFACE alps_configuration
+  "$<COMPILE_ONLY:ALPS::utilities;ALPS::osiris;ALPS::hdf5;ALPS::params;ALPS::xml;ALPS::cli;ALPS::numerics;ALPS::numeric_io;ALPS::numeric_xml;ALPS::solver_headers>")
+if(ALPS_ENABLE_OPENMP)
+  target_link_libraries(alps_headers INTERFACE "$<COMPILE_ONLY:OpenMP::OpenMP_CXX>")
 endif()
 
-find_package(HDF5)
-if (Boost_FOUND)
-  # link to ${Boost_LIBRARIES} when precompiled Boost libraries found
-  set(ALPS_LINK_LIBS ${Boost_LIBRARIES} ${HDF5_LIBRARIES}) # ${SZIP_LIBRARIES})
-  if(MPI_FOUND)
-    set(ALPS_LINK_LIBS ${ALPS_LINK_LIBS} ${MPI_LIBRARIES})
-    if(MPI_EXTRA_LIBRARY)
-      set(ALPS_LINK_LIBS ${ALPS_LINK_LIBS} ${MPI_EXTRA_LIBRARY})
-    endif(MPI_EXTRA_LIBRARY)
-  endif(MPI_FOUND)
-  target_link_libraries(alps ${ALPS_LINK_LIBS})
-else (Boost_FOUND)
-  # "boost" target available when Boost libraries are built from source
-  target_link_libraries(alps ${ALPS_BOOST_LIBRARY_NAME} ${HDF5_LIBRARIES}) # ${SZIP_LIBRARIES})
-endif (Boost_FOUND)
+# The one list of SDK targets. ALPSConfig.cmake derives its component names and
+# runtime targets from it, so adding a module here is the only edit needed.
+set(ALPS_SDK_TARGETS alps alps_utilities alps_hdf5 alps_params alps_osiris
+                     alps_xml alps_cli alps_headers alps_configuration
+                     alps_containers alps_numerics alps_numeric_io alps_numeric_xml alps_solver_headers)
+set(sdk_components "")
+set(sdk_runtime_targets "")
+foreach(target IN LISTS ALPS_SDK_TARGETS ITEMS alps_fortran)
+  get_target_property(component ${target} EXPORT_NAME)
+  if(NOT component)
+    set(component ${target})
+  endif()
+  list(APPEND sdk_components ${component})
+  get_target_property(type ${target} TYPE)
+  if(NOT type STREQUAL "INTERFACE_LIBRARY" AND NOT target STREQUAL "alps_fortran")
+    list(APPEND sdk_runtime_targets ALPS::${component})
+  endif()
+endforeach()
+set_property(GLOBAL PROPERTY ALPS_SDK_COMPONENTS ${sdk_components})
+set_property(GLOBAL PROPERTY ALPS_SDK_RUNTIME_TARGETS ${sdk_runtime_targets})
 
-if(BUILD_SHARED_LIBS)
-  if(HDF5_DEFINITIONS)
-    foreach (_hdf5_def ${HDF5_DEFINITIONS})
-      string(REPLACE "-D" "" _escaped_def ${_hdf5_def})
-      list(APPEND ALPS_SHARED_CPPFLAGS ${_escaped_def})
-    endforeach(_hdf5_def)
-  endif(HDF5_DEFINITIONS)
-  
-  set_target_properties(alps PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
-else(BUILD_SHARED_LIBS)
-  set_target_properties(alps PROPERTIES COMPILE_DEFINITIONS "${ALPS_STATIC_CPPFLAGS}")
-endif(BUILD_SHARED_LIBS)
+# Install each target's actual public file sets, including generated exports.
+# This keeps header installation policy identical for runtimes and interfaces.
+foreach(target IN LISTS ALPS_SDK_TARGETS)
+  get_target_property(header_sets ${target} INTERFACE_HEADER_SETS)
+  set(header_install_args "")
+  if(header_sets)
+    foreach(header_set IN LISTS header_sets)
+      list(APPEND header_install_args FILE_SET ${header_set}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers)
+    endforeach()
+  endif()
+  install(TARGETS ${target} EXPORT ALPSTargets
+    RUNTIME_DEPENDENCY_SET alps_runtime
+    COMPONENT libraries
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    ${header_install_args})
+endforeach()
 
+install(
+  DIRECTORY "${PROJECT_SOURCE_DIR}/third_party/boost_numeric_bindings/include/boost"
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  COMPONENT headers
+  FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
+  PATTERN "resources" EXCLUDE)
 
-if(MSVC)
-  get_target_property(LIB_NAME alps LOCATION)
-  add_custom_command(TARGET alps POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${LIB_NAME} ${PROJECT_BINARY_DIR}/bin)
-endif(MSVC)
+install(
+  FILES "${PROJECT_SOURCE_DIR}/third_party/xdr/LICENSE"
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/alps/licenses/xdr
+  COMPONENT libraries)
 
-# Set soversion for library
-if(NOT WIN32 AND NOT APPLE)
-  set_target_properties(alps
-    PROPERTIES
-    SOVERSION "${ALPS_VERSION_MAJOR}"
-    VERSION "${ALPS_VERSION_MAJOR}.${ALPS_VERSION_MINOR}.${ALPS_VERSION_PATCH}" )
-endif(NOT WIN32 AND NOT APPLE)
+install(
+  FILES "${PROJECT_SOURCE_DIR}/third_party/boost_numeric_bindings/LICENSE_1_0.txt"
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/alps/licenses/boost_numeric_bindings
+  COMPONENT headers)
 
-
-#boost librt linking
-if(NOT WIN32 AND NOT APPLE)
-    set(ALPS_LINK_LIBS ${ALPS_LINK_LIBS} rt)
-endif(NOT WIN32 AND NOT APPLE)
-
-if(ALPS_BUILD_FORTRAN)
-  set(ALPS_FORTRAN_SOURCES fortran/fwrapper_impl.C)
-  add_library(alps_fortran STATIC ${ALPS_FORTRAN_SOURCES})
-  target_link_libraries(alps_fortran ${CMAKE_Fortran_RUNTIME_LIBRARIES})
-  set_target_properties(alps_fortran PROPERTIES COMPILE_DEFINITIONS "${ALPS_STATIC_CPPFLAGS}")
-endif()
-#######################################################################
-# install
-#######################################################################
-install(TARGETS alps COMPONENT libraries
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin)
-
-if(ALPS_BUILD_FORTRAN)
-  install(TARGETS alps_fortran COMPONENT libraries
-          ARCHIVE DESTINATION lib
-          LIBRARY DESTINATION lib
-          RUNTIME DESTINATION bin)
-endif(ALPS_BUILD_FORTRAN)
+install(
+  DIRECTORY resources/
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/alps/xml
+  COMPONENT xml
+  FILES_MATCHING PATTERN "*.xml" PATTERN "*.xsl")

@@ -22,7 +22,7 @@ Outputs belong in an ignored build directory or outside the checkout.
 
 Use `--packaging` to include release/packaging tests (requires Python 3.11 or
 newer, packaging, and scikit-build-core). Use `--downstream` to enable the two compiled consumers;
-this requires the matching SDK installed at `_build/wheel-deps/install`, a
+this requires the matching SDK installed at `_build/distribution/install`, a
 C++ compiler, CMake, and nanobind. Check the reported skips: a standard wheel
 smoke run does not exercise these opt-in consumers or MPI without mpi4py.
 
@@ -110,7 +110,7 @@ metadata or all native parameter dtypes.
 
 ## Local sdist rebuild and additional checks
 
-Build the matching native SDK using the documented `wheel-deps` preset. Set
+Build the matching native SDK using the documented `distribution` preset. Set
 `ALPS_DIR` to its installed `share/alps` directory. Then, outside the checkout:
 
 ```sh

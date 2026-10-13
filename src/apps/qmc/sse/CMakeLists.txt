@@ -17,6 +17,10 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
+# INACTIVE: src/apps/qmc/CMakeLists.txt does not add this directory (also
+# disabled on master). It predates the target-based build: nothing defines
+# LPSolve_FOUND any more, so dirloop_sse_v1 would silently never build.
+# Port to find_package()/ALPS::alps before re-enabling.
 if(LPSolve_FOUND AND NOT MSVC)
   include_directories(${LPSolve_INCLUDE_DIR})
   add_executable(dirloop_sse_v1

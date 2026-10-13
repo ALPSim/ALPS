@@ -16,13 +16,12 @@
 #   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
- 
 add_library(worm_impl STATIC WModel.C WRun.C Wcheck.C Wdostep.C Winit.C Wmeas.C)
-target_link_libraries(worm_impl alps)
+target_link_libraries(worm_impl PUBLIC ALPS::alps)
 
 add_executable(worm main.C)
 add_executable(worm_evaluate evaluate.C)
 
-target_link_libraries(worm worm_impl)
-target_link_libraries(worm_evaluate worm_impl)
-install(TARGETS worm worm_evaluate RUNTIME DESTINATION bin COMPONENT applications)
+target_link_libraries(worm PRIVATE worm_impl)
+target_link_libraries(worm_evaluate PRIVATE worm_impl)
+alps_install_applications(worm worm_evaluate)

@@ -5,10 +5,10 @@
 #   the rights to use, copy, modify, merge, publish, distribute, sublicense,
 #   and/or sell copies of the Software, and to permit persons to whom the
 #   Software is furnished to do so, subject to the following conditions:
-#  
+#
 #   The above copyright notice and this permission notice shall be included
 #   in all copies or substantial portions of the Software.
-#  
+#
 #   THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS
 #   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 #   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,14 +19,11 @@
 
 #
 # examples using the hdf5 library
-# 
+#
 
-if (ALPS_BUILD_EXAMPLES)
-    foreach(program enum_as_class enum_vectorizable pair_int_vectorizable)
-      add_executable(${program} ${program}.cpp)
-      add_dependencies(${program} alps)
-      target_link_libraries(${program} alps)
-      add_alps_test(${program})
-    endforeach(program)
-endif (ALPS_BUILD_EXAMPLES)
+foreach(program enum_as_class enum_vectorizable pair_int_vectorizable)
+  add_executable(${program} ${program}.cpp)
 
+  target_link_libraries(${program} PRIVATE ALPS::alps)
+  alps_add_test(${program})
+endforeach()

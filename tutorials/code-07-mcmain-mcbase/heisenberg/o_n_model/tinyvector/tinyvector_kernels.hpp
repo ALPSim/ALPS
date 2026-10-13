@@ -1,7 +1,9 @@
 #ifndef TINYVECTOR_KERNELS_HPP
 #define TINYVECTOR_KERNELS_HPP
 
+#if defined(__SSE2__) || defined(__AVX__)
 #include <immintrin.h>
+#endif
 #include "tinyvector_default.hpp"
 
 struct INTRIN_OPT {};

@@ -1,7 +1,7 @@
-include $(ALPS_HOME)/share/alps/include.mk
+.PHONY: clean distclean
 
 hello: hello.C
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o hello hello.C $(LIBS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ $< $(LDLIBS)
 
 clean distclean:
 	$(RM) hello

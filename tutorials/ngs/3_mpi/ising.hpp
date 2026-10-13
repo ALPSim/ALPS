@@ -15,6 +15,7 @@
 #define ALPS_TUTORIAL_ISING_HPP
 
 #include <alps/ngs.hpp>
+#include <alps/mcbase.hpp>
 
 #include <boost/function.hpp>
 #include <boost/filesystem/path.hpp>
@@ -23,7 +24,7 @@
 #include <string>
 
 // TODO: merge 2-... into 2 and avoid copying ising*
-class ALPS_DECL ising_sim : public alps::mcbase {
+class ising_sim : public alps::mcbase {
 
     public:
         

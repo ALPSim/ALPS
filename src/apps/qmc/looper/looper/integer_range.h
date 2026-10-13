@@ -15,7 +15,8 @@
 #include <alps/expression.h>
 #include <alps/osiris.h>
 #include <boost/call_traits.hpp>
-#include <boost/spirit/core.hpp>
+#include <boost/spirit/include/classic_actor.hpp>
+#include <boost/spirit/include/classic_core.hpp>
 #include <boost/throw_exception.hpp>
 #include <iosfwd>
 #include <limits>
@@ -91,7 +92,7 @@ public:
 
 protected:
   void init(std::string const& str, alps::Parameters const& p) {
-    using namespace boost::spirit;
+    using namespace boost::spirit::classic;
     std::string mi_str, ma_str;
     if (!parse(
       str.c_str(),
@@ -137,9 +138,7 @@ private:
 
 } // end namespace looper
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 namespace looper {
-#endif
 
 template<typename T, typename U>
 looper::integer_range<T> operator*(looper::integer_range<T> const& t, U x) {
@@ -171,8 +170,6 @@ alps::IDump& operator>>(alps::IDump& dp, looper::integer_range<T>& ir) {
   return dp;
 }
 
-#ifndef BOOST_NO_OPERATORS_IN_NAMESPACE
 } // end namespace looper
-#endif
 
 #endif // LOOPER_INTEGER_RANGE_H

@@ -16,6 +16,10 @@
 #   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
+add_subdirectory(integration/hdf5)
+add_subdirectory(integration/params)
+add_subdirectory(portability)
+
 # Python is optional for native builds, including builds of C++ tests. These
 # catalog/CLI tests run when an interpreter and the maintainer dependencies are available.
 if(NOT ALPS_CITATION_PYTHON)
@@ -52,12 +56,12 @@ foreach(_app dmrg qwl dirloop_sse worm spinmc fulldiag sparsediag hirschfye loop
       set(_component "framework")
     endif()
     add_test(NAME citation_cli_${_app}
-      COMMAND "${ALPS_CITATION_PYTHON}" "${PROJECT_SOURCE_DIR}/tests/utility/check_citation_notice.py"
+      COMMAND "${ALPS_CITATION_PYTHON}" "${PROJECT_SOURCE_DIR}/tests/cli/check_citation_notice.py"
               "$<TARGET_FILE:${_app}>" "${_component}")
     set_property(TEST citation_cli_${_app} PROPERTY LABELS citations)
     if(ALPS_HAVE_MPI AND MPIEXEC_EXECUTABLE)
       add_test(NAME citation_cli_mpi_${_app}
-        COMMAND "${ALPS_CITATION_PYTHON}" "${PROJECT_SOURCE_DIR}/tests/utility/check_citation_notice.py"
+        COMMAND "${ALPS_CITATION_PYTHON}" "${PROJECT_SOURCE_DIR}/tests/cli/check_citation_notice.py"
                 "$<TARGET_FILE:${_app}>" "${_component}"
                 "${MPIEXEC_EXECUTABLE}" "${MPIEXEC_NUMPROC_FLAG}" "2" ${MPIEXEC_PREFLAGS})
       set_tests_properties(citation_cli_mpi_${_app} PROPERTIES LABELS citations PROCESSORS 2)
@@ -67,8 +71,8 @@ endforeach()
 
 if(TARGET loop)
   add_test(NAME citation_calculation_loop
-    COMMAND "${ALPS_CITATION_PYTHON}" "${PROJECT_SOURCE_DIR}/tests/utility/check_citation_startup.py"
-            "$<TARGET_FILE:loop>" "${PROJECT_BINARY_DIR}/src/alps/resources")
+    COMMAND "${ALPS_CITATION_PYTHON}" "${PROJECT_SOURCE_DIR}/tests/cli/check_citation_startup.py"
+            "$<TARGET_FILE:loop>" "${PROJECT_SOURCE_DIR}/src/alps/resources")
   set_property(TEST citation_calculation_loop PROPERTY LABELS citations)
 endif()
 
@@ -76,20 +80,6 @@ else()
   message(STATUS "Python citation dependencies unavailable: skipping catalog and CLI wrapper tests")
 endif()
 
-if(NOT ALPS_BUILD_LIBS_ONLY)
-add_subdirectory(accumulator)
-add_subdirectory(alea)
-add_subdirectory(fixed_capacity)
-add_subdirectory(graph)
-add_subdirectory(hdf5)
-add_subdirectory(lattice)
-add_subdirectory(model)
-add_subdirectory(ngs)
-add_subdirectory(numeric)
-add_subdirectory(osiris)
-add_subdirectory(parameter)
-add_subdirectory(parapack)
-add_subdirectory(parser)
-add_subdirectory(random)
-add_subdirectory(utility)
+if(ALPS_BUILD_APPLICATIONS)
+  add_subdirectory(cli)
 endif()

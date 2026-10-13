@@ -1,0 +1,24 @@
+{
+  "defaults": {
+    "beta": 6,
+    "ndat": 24,
+    "nfreq": 128,
+    "n_alpha": 12,
+    "alpha_min": 0.05,
+    "alpha_max": 50,
+    "max_it": 120,
+    "omega_min": -5,
+    "omega_max": 5,
+    "sigma": 0.001
+  },
+  "cases": [
+    {"name": "time_linear", "dataspace": "time", "kernel": "fermionic", "grid": "linear", "norm": 1, "poles": [[-1, 0.65], [1.5, 0.35]], "covariance": false, "omit_last": false, "singular_last": false},
+    {"name": "time_lorentzian", "dataspace": "time", "kernel": "fermionic", "grid": "Lorentzian", "norm": 1, "poles": [[-1, 0.65], [1.5, 0.35]], "covariance": false, "omit_last": false, "singular_last": false},
+    {"name": "fermion_frequency", "dataspace": "frequency", "kernel": "fermionic", "grid": "linear", "norm": 1, "poles": [[-1.3, 0.5], [1.3, 0.5]], "covariance": false, "omit_last": false, "singular_last": false},
+    {"name": "boson_frequency", "dataspace": "frequency", "kernel": "bosonic", "grid": "linear", "norm": 1, "poles": [[-1.3, 0.5], [1.3, 0.5]], "covariance": false, "omit_last": false, "singular_last": false},
+    {"name": "time_scaled", "dataspace": "time", "kernel": "fermionic", "grid": "linear", "norm": 3.5, "poles": [[-1, 0.65], [1.5, 0.35]], "covariance": false, "omit_last": false, "singular_last": false},
+    {"name": "time_covariance", "dataspace": "time", "kernel": "fermionic", "grid": "linear", "norm": 1, "poles": [[-1, 0.65], [1.5, 0.35]], "covariance": true, "omit_last": false, "singular_last": false},
+    {"name": "time_covariance_singular", "dataspace": "time", "kernel": "fermionic", "grid": "linear", "norm": 1, "poles": [[-1, 0.65], [1.5, 0.35]], "covariance": true, "omit_last": false, "singular_last": true},
+    {"name": "time_omitted", "dataspace": "time", "kernel": "fermionic", "grid": "linear", "norm": 1, "poles": [[-1, 0.65], [1.5, 0.35]], "covariance": false, "omit_last": true, "singular_last": false}
+  ]
+}

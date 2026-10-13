@@ -1,0 +1,124 @@
+<GRAPH>
+  <VERTEX id="1" type="0"><COORDINATE>0 0</COORDINATE></VERTEX>
+  <VERTEX id="2" type="0"><COORDINATE>0 1</COORDINATE></VERTEX>
+  <VERTEX id="3" type="0"><COORDINATE>0 2</COORDINATE></VERTEX>
+  <VERTEX id="4" type="0"><COORDINATE>0 3</COORDINATE></VERTEX>
+  <VERTEX id="5" type="0"><COORDINATE>1 0</COORDINATE></VERTEX>
+  <VERTEX id="6" type="0"><COORDINATE>1 1</COORDINATE></VERTEX>
+  <VERTEX id="7" type="0"><COORDINATE>1 2</COORDINATE></VERTEX>
+  <VERTEX id="8" type="0"><COORDINATE>1 3</COORDINATE></VERTEX>
+  <VERTEX id="9" type="0"><COORDINATE>2 0</COORDINATE></VERTEX>
+  <VERTEX id="10" type="0"><COORDINATE>2 1</COORDINATE></VERTEX>
+  <VERTEX id="11" type="0"><COORDINATE>2 2</COORDINATE></VERTEX>
+  <VERTEX id="12" type="0"><COORDINATE>2 3</COORDINATE></VERTEX>
+  <VERTEX id="13" type="0"><COORDINATE>3 0</COORDINATE></VERTEX>
+  <VERTEX id="14" type="0"><COORDINATE>3 1</COORDINATE></VERTEX>
+  <VERTEX id="15" type="0"><COORDINATE>3 2</COORDINATE></VERTEX>
+  <VERTEX id="16" type="0"><COORDINATE>3 3</COORDINATE></VERTEX>
+  <VERTEX id="17" original_id="1" type="0" outside="1"><COORDINATE>0 4</COORDINATE></VERTEX>
+  <VERTEX id="18" original_id="8" type="0" outside="1"><COORDINATE>1 -1</COORDINATE></VERTEX>
+  <VERTEX id="19" original_id="4" type="0" outside="1"><COORDINATE>0 -1</COORDINATE></VERTEX>
+  <VERTEX id="20" original_id="5" type="0" outside="1"><COORDINATE>1 4</COORDINATE></VERTEX>
+  <VERTEX id="21" original_id="12" type="0" outside="1"><COORDINATE>2 -1</COORDINATE></VERTEX>
+  <VERTEX id="22" original_id="9" type="0" outside="1"><COORDINATE>2 4</COORDINATE></VERTEX>
+  <VERTEX id="23" original_id="16" type="0" outside="1"><COORDINATE>3 -1</COORDINATE></VERTEX>
+  <VERTEX id="24" original_id="13" type="0" outside="1"><COORDINATE>3 4</COORDINATE></VERTEX>
+  <VERTEX id="25" original_id="13" type="0" outside="1"><COORDINATE>-1 0</COORDINATE></VERTEX>
+  <VERTEX id="26" original_id="1" type="0" outside="1"><COORDINATE>4 0</COORDINATE></VERTEX>
+  <VERTEX id="27" original_id="2" type="0" outside="1"><COORDINATE>4 1</COORDINATE></VERTEX>
+  <VERTEX id="28" original_id="13" type="0" outside="1"><COORDINATE>-1 4</COORDINATE></VERTEX>
+  <VERTEX id="29" original_id="4" type="0" outside="1"><COORDINATE>4 -1</COORDINATE></VERTEX>
+  <VERTEX id="30" original_id="14" type="0" outside="1"><COORDINATE>-1 1</COORDINATE></VERTEX>
+  <VERTEX id="31" original_id="3" type="0" outside="1"><COORDINATE>4 2</COORDINATE></VERTEX>
+  <VERTEX id="32" original_id="15" type="0" outside="1"><COORDINATE>-1 2</COORDINATE></VERTEX>
+  <VERTEX id="33" original_id="4" type="0" outside="1"><COORDINATE>4 3</COORDINATE></VERTEX>
+  <VERTEX id="34" original_id="16" type="0" outside="1"><COORDINATE>-1 3</COORDINATE></VERTEX>
+  <VERTEX id="35" original_id="16" type="0" outside="1"><COORDINATE>-1 -1</COORDINATE></VERTEX>
+  <VERTEX id="36" original_id="1" type="0" outside="1"><COORDINATE>4 4</COORDINATE></VERTEX>
+  <EDGE source="1" target="2" id="1" original_id="1" type="0" vector="0 1"/>
+  <EDGE source="1" target="5" id="2" original_id="2" type="0" vector="1 0"/>
+  <EDGE source="1" target="6" id="3" original_id="3" type="1" vector="1 1"/>
+  <EDGE source="2" target="3" id="4" original_id="5" type="0" vector="0 1"/>
+  <EDGE source="2" target="6" id="5" original_id="6" type="0" vector="1 0"/>
+  <EDGE source="2" target="7" id="6" original_id="7" type="1" vector="1 1"/>
+  <EDGE source="2" target="5" id="7" original_id="8" type="1" vector="1 -1"/>
+  <EDGE source="3" target="4" id="8" original_id="9" type="0" vector="0 1"/>
+  <EDGE source="3" target="7" id="9" original_id="10" type="0" vector="1 0"/>
+  <EDGE source="3" target="8" id="10" original_id="11" type="1" vector="1 1"/>
+  <EDGE source="3" target="6" id="11" original_id="12" type="1" vector="1 -1"/>
+  <EDGE source="4" target="8" id="12" original_id="14" type="0" vector="1 0"/>
+  <EDGE source="4" target="7" id="13" original_id="16" type="1" vector="1 -1"/>
+  <EDGE source="5" target="6" id="14" original_id="17" type="0" vector="0 1"/>
+  <EDGE source="5" target="9" id="15" original_id="18" type="0" vector="1 0"/>
+  <EDGE source="5" target="10" id="16" original_id="19" type="1" vector="1 1"/>
+  <EDGE source="6" target="7" id="17" original_id="21" type="0" vector="0 1"/>
+  <EDGE source="6" target="10" id="18" original_id="22" type="0" vector="1 0"/>
+  <EDGE source="6" target="11" id="19" original_id="23" type="1" vector="1 1"/>
+  <EDGE source="6" target="9" id="20" original_id="24" type="1" vector="1 -1"/>
+  <EDGE source="7" target="8" id="21" original_id="25" type="0" vector="0 1"/>
+  <EDGE source="7" target="11" id="22" original_id="26" type="0" vector="1 0"/>
+  <EDGE source="7" target="12" id="23" original_id="27" type="1" vector="1 1"/>
+  <EDGE source="7" target="10" id="24" original_id="28" type="1" vector="1 -1"/>
+  <EDGE source="8" target="12" id="25" original_id="30" type="0" vector="1 0"/>
+  <EDGE source="8" target="11" id="26" original_id="32" type="1" vector="1 -1"/>
+  <EDGE source="9" target="10" id="27" original_id="33" type="0" vector="0 1"/>
+  <EDGE source="9" target="13" id="28" original_id="34" type="0" vector="1 0"/>
+  <EDGE source="9" target="14" id="29" original_id="35" type="1" vector="1 1"/>
+  <EDGE source="10" target="11" id="30" original_id="37" type="0" vector="0 1"/>
+  <EDGE source="10" target="14" id="31" original_id="38" type="0" vector="1 0"/>
+  <EDGE source="10" target="15" id="32" original_id="39" type="1" vector="1 1"/>
+  <EDGE source="10" target="13" id="33" original_id="40" type="1" vector="1 -1"/>
+  <EDGE source="11" target="12" id="34" original_id="41" type="0" vector="0 1"/>
+  <EDGE source="11" target="15" id="35" original_id="42" type="0" vector="1 0"/>
+  <EDGE source="11" target="16" id="36" original_id="43" type="1" vector="1 1"/>
+  <EDGE source="11" target="14" id="37" original_id="44" type="1" vector="1 -1"/>
+  <EDGE source="12" target="16" id="38" original_id="46" type="0" vector="1 0"/>
+  <EDGE source="12" target="15" id="39" original_id="48" type="1" vector="1 -1"/>
+  <EDGE source="13" target="14" id="40" original_id="49" type="0" vector="0 1"/>
+  <EDGE source="14" target="15" id="41" original_id="53" type="0" vector="0 1"/>
+  <EDGE source="15" target="16" id="42" original_id="57" type="0" vector="0 1"/>
+  <EDGE source="17" target="8" id="43" original_id="4" type="1" outside="1" vector="1 -1"/>
+  <EDGE source="1" target="18" id="44" original_id="4" type="1" outside="1" vector="1 -1"/>
+  <EDGE source="19" target="1" id="45" original_id="13" type="0" outside="1" vector="0 1"/>
+  <EDGE source="4" target="17" id="46" original_id="13" type="0" outside="1" vector="0 1"/>
+  <EDGE source="19" target="5" id="47" original_id="15" type="1" outside="1" vector="1 1"/>
+  <EDGE source="4" target="20" id="48" original_id="15" type="1" outside="1" vector="1 1"/>
+  <EDGE source="20" target="12" id="49" original_id="20" type="1" outside="1" vector="1 -1"/>
+  <EDGE source="5" target="21" id="50" original_id="20" type="1" outside="1" vector="1 -1"/>
+  <EDGE source="18" target="5" id="51" original_id="29" type="0" outside="1" vector="0 1"/>
+  <EDGE source="8" target="20" id="52" original_id="29" type="0" outside="1" vector="0 1"/>
+  <EDGE source="18" target="9" id="53" original_id="31" type="1" outside="1" vector="1 1"/>
+  <EDGE source="8" target="22" id="54" original_id="31" type="1" outside="1" vector="1 1"/>
+  <EDGE source="22" target="16" id="55" original_id="36" type="1" outside="1" vector="1 -1"/>
+  <EDGE source="9" target="23" id="56" original_id="36" type="1" outside="1" vector="1 -1"/>
+  <EDGE source="21" target="9" id="57" original_id="45" type="0" outside="1" vector="0 1"/>
+  <EDGE source="12" target="22" id="58" original_id="45" type="0" outside="1" vector="0 1"/>
+  <EDGE source="21" target="13" id="59" original_id="47" type="1" outside="1" vector="1 1"/>
+  <EDGE source="12" target="24" id="60" original_id="47" type="1" outside="1" vector="1 1"/>
+  <EDGE source="25" target="1" id="61" original_id="50" type="0" outside="1" vector="1 0"/>
+  <EDGE source="13" target="26" id="62" original_id="50" type="0" outside="1" vector="1 0"/>
+  <EDGE source="25" target="2" id="63" original_id="51" type="1" outside="1" vector="1 1"/>
+  <EDGE source="13" target="27" id="64" original_id="51" type="1" outside="1" vector="1 1"/>
+  <EDGE source="28" target="4" id="65" original_id="52" type="1" outside="1" vector="1 -1"/>
+  <EDGE source="13" target="29" id="66" original_id="52" type="1" outside="1" vector="1 -1"/>
+  <EDGE source="30" target="2" id="67" original_id="54" type="0" outside="1" vector="1 0"/>
+  <EDGE source="14" target="27" id="68" original_id="54" type="0" outside="1" vector="1 0"/>
+  <EDGE source="30" target="3" id="69" original_id="55" type="1" outside="1" vector="1 1"/>
+  <EDGE source="14" target="31" id="70" original_id="55" type="1" outside="1" vector="1 1"/>
+  <EDGE source="30" target="1" id="71" original_id="56" type="1" outside="1" vector="1 -1"/>
+  <EDGE source="14" target="26" id="72" original_id="56" type="1" outside="1" vector="1 -1"/>
+  <EDGE source="32" target="3" id="73" original_id="58" type="0" outside="1" vector="1 0"/>
+  <EDGE source="15" target="31" id="74" original_id="58" type="0" outside="1" vector="1 0"/>
+  <EDGE source="32" target="4" id="75" original_id="59" type="1" outside="1" vector="1 1"/>
+  <EDGE source="15" target="33" id="76" original_id="59" type="1" outside="1" vector="1 1"/>
+  <EDGE source="32" target="2" id="77" original_id="60" type="1" outside="1" vector="1 -1"/>
+  <EDGE source="15" target="27" id="78" original_id="60" type="1" outside="1" vector="1 -1"/>
+  <EDGE source="23" target="13" id="79" original_id="61" type="0" outside="1" vector="0 1"/>
+  <EDGE source="16" target="24" id="80" original_id="61" type="0" outside="1" vector="0 1"/>
+  <EDGE source="34" target="4" id="81" original_id="62" type="0" outside="1" vector="1 0"/>
+  <EDGE source="16" target="33" id="82" original_id="62" type="0" outside="1" vector="1 0"/>
+  <EDGE source="35" target="1" id="83" original_id="63" type="1" outside="1" vector="1 1"/>
+  <EDGE source="16" target="36" id="84" original_id="63" type="1" outside="1" vector="1 1"/>
+  <EDGE source="34" target="3" id="85" original_id="64" type="1" outside="1" vector="1 -1"/>
+  <EDGE source="16" target="31" id="86" original_id="64" type="1" outside="1" vector="1 -1"/>
+</GRAPH>

@@ -1,0 +1,49 @@
+/*****************************************************************************
+*
+* ALPS Project: Algorithms and Libraries for Physics Simulations
+*
+* ALPS Libraries
+*
+* Copyright (C) 2003-2005 by Matthias Troyer <troyer@itp.phys.ethz.ch>
+*
+* ALPS Project: https://alps.comp-phys.org/
+* SPDX-License-Identifier: MIT
+*
+*****************************************************************************/
+
+/* $Id$ */
+
+/// \file rngfactory.h
+/// \brief a factory to create random number generators from their name
+
+#ifndef ALPS_RANDOMFACTORY_H
+#define ALPS_RANDOMFACTORY_H
+
+#include <alps/export.h>
+#include <alps/random/buffered_rng.h>
+#include <alps/factory.h>
+#include <string>
+
+namespace alps {
+
+/// a factory to create random number generators from their name
+// \sa rng_factory
+class ALPS_DECL RNGFactory : public factory<std::string,buffered_rng_base>
+{
+public:
+  RNGFactory();
+  template <class RNG> void register_rng(const std::string& name) 
+  { register_type<buffered_rng<RNG> >(name);}
+};
+
+
+/// \brief a factory to create random number generators from their name
+/// 
+/// currently the folloowing two boost generators can be created from their name
+/// - lagged_fibonacci607
+/// - mt19937
+extern ALPS_DECL RNGFactory rng_factory;
+
+} // end namespace
+
+#endif // ALPS_RANDOMFACTORY_H

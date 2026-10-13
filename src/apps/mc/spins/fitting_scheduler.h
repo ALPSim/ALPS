@@ -26,6 +26,7 @@
 #include <alps/plot.h>
 
 #include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 
@@ -316,18 +317,31 @@ protected:
    */
   void make_and_show(const alps::plot::Plot<double>& plot,
                const char xml_name[], const char xmgr_name[], bool show) const {
-    alps::oxstream out(xml_name);
-    out << plot;
-                                                                                
-    char make_plot[128];
-    snprintf(make_plot, sizeof(make_plot), "plot2xmgr %s > %s", xml_name, xmgr_name);
-    system(make_plot);
-                                                                                
-    if (show) {
-      char show_plot[64];
-      snprintf(show_plot, sizeof(show_plot), "xmgrace %s &", xmgr_name);
-      system(show_plot);
+    {
+      alps::oxstream out(xml_name);
+      out << plot;
+    } // Flush and close the XML before the renderer opens it.
+#ifndef _WIN32
+    const auto quote = [](const char* argument) {
+      std::string result = "'";
+      for (char c : std::string(argument)) {
+        if (c == '\'') result += "'\\''";
+        else result += c;
+      }
+      return result + "'";
+    };
+    const std::string make_plot = "alps-xml plot grace " + quote(xml_name)
+                               + " --output " + quote(xmgr_name);
+    if (std::system(make_plot.c_str()) != 0) {
+      std::cerr << "Could not render " << xml_name << " with alps-xml\n";
+      return;
     }
+    if (show) {
+      const std::string show_plot = "xmgrace " + quote(xmgr_name) + " &";
+      if (std::system(show_plot.c_str()) != 0)
+        std::cerr << "Could not launch xmgrace for " << xmgr_name << '\n';
+    }
+#endif
   }
                                                                                 
   /** 

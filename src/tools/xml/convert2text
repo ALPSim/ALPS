@@ -1,0 +1,10 @@
+#! /bin/sh
+
+f=$1
+dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd) || exit 1
+temporary=$(mktemp "${TMPDIR:-/tmp}/alps-convert.XXXXXX") || exit 1
+trap 'rm -f -- "$temporary"' 0
+trap 'exit 1' HUP INT TERM
+printf '%s\n' '<?xml version="1.0" encoding="UTF-8"?>' > "$temporary"
+tail -n +3 "$f" >> "$temporary" || exit 1
+"$dir/xslttransform" "$temporary" "$dir/@ALPS_XML_FROM_BINDIR@/QMCXML2text.xsl"

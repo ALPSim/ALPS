@@ -21,7 +21,8 @@ SPEC.loader.exec_module(release)
 @pytest.fixture
 def versions(tmp_path):
     def write(core="3.0.0", python="3.0.0"):
-        (tmp_path / "ALPS_VERSION.txt").write_text(core + "\n")
+        (tmp_path / "cmake").mkdir(exist_ok=True)
+        (tmp_path / "cmake/ALPS_VERSION.txt").write_text(core + "\n")
         project_dir = tmp_path / "python/pyalps"
         project_dir.mkdir(parents=True, exist_ok=True)
         (project_dir / "pyproject.toml").write_text(
@@ -62,7 +63,7 @@ def test_prerelease_sdist_keeps_its_version_without_the_build_environment(tmp_pa
     """Exercise the backend: a user rebuild must keep the published version."""
     repository = SCRIPT.parents[2]
     project = repository / "python/pyalps"
-    core = (repository / "ALPS_VERSION.txt").read_text().strip()
+    core = (repository / "cmake/ALPS_VERSION.txt").read_text().strip()
     environment = {**os.environ, "GITHUB_REF": f"refs/tags/v{core}-beta.2"}
     environment.pop("ALPS_VERSION_PRERELEASE", None)
     subprocess.run(
@@ -76,10 +77,8 @@ def test_prerelease_sdist_keeps_its_version_without_the_build_environment(tmp_pa
         required = {
             "ALPS_VERSION.txt", "LICENSE.txt", "CMakeLists.txt", "pyproject.toml",
             "_build_support/alps_version.py", "src/pyalps/__init__.py",
-            "cpp/ngs/hdf5.cpp", "_vendor/src/tools/maxent.cpp",
-            "_vendor/src/apps/dmft/qmc/hybridization/hybmain.cpp",
-            "_vendor/src/apps/dmft/qmc/interaction_expansion2/main.cpp",
-            "_vendor/src/alps/resources/ALPS.xsl", "_vendor/src/alps/resources/models.xml.in",
+            "cpp/hdf5.cpp", "cpp/maxent_c.cpp", "cpp/cthyb.cpp", "cpp/ctint.cpp",
+            "_build_support/runtime_manifest.py", "_build_support/pyalpsConfig.cmake",
         }
         assert {prefix + name for name in required} <= set(archive.getnames())
         archive.extractall(tmp_path, filter="data")

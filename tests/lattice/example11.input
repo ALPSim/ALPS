@@ -1,2 +1,0 @@
-LATTICE_LIBRARY = "../../src/alps/resources/lattices.xml"
-LATTICE = "chain lattice"

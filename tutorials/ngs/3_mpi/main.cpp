@@ -14,6 +14,8 @@
 #include "ising.hpp"
 
 #include <alps/ngs.hpp>
+#include <alps/parseargs.hpp>
+#include <alps/stop_callback.hpp>
 #include <alps/mcmpiadapter.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 

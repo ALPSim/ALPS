@@ -1,0 +1,21 @@
+# The ALPS 2.x consumer pattern, served by the deprecated UseALPS.cmake.
+cmake_minimum_required(VERSION 3.27...4.3)
+project(alps_legacy_consumer LANGUAGES C CXX)
+
+set(saved_flags "${CMAKE_CXX_FLAGS}")
+find_package(ALPS REQUIRED)
+if(COMMAND add_alps_test OR DEFINED ALPS_LIBRARIES)
+  message(FATAL_ERROR "find_package(ALPS) must not load the legacy interface")
+endif()
+include(${ALPS_USE_FILE})
+include(${ALPS_PYTHON_USE_FILE})
+if(NOT COMMAND alps_target_link_pyalps)
+  message(FATAL_ERROR "UsePyALPS.cmake did not define alps_target_link_pyalps")
+endif()
+if(NOT CMAKE_CXX_FLAGS STREQUAL saved_flags)
+  message(FATAL_ERROR "UseALPS.cmake changed the parent's compiler flags")
+endif()
+
+add_executable(legacy legacy.cpp)
+target_link_libraries(legacy ${ALPS_LIBRARIES})
+add_alps_test(legacy)

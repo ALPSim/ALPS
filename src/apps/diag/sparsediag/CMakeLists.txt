@@ -17,12 +17,6 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-if(LAPACK_FOUND)
-  add_definitions(${LAPACK_DEFINITIONS})
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
-  add_executable(sparsediag sparsediag.C factory.C)
-  target_link_libraries(sparsediag alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
-  install(TARGETS sparsediag RUNTIME DESTINATION bin COMPONENT applications)
-else(LAPACK_FOUND)
-  message(STATUS "sparsediag will not be built since lapack library is not found")
-endif(LAPACK_FOUND)
+add_executable(sparsediag sparsediag.C factory.C)
+target_link_libraries(sparsediag PRIVATE ALPS::alps)
+alps_install_applications(sparsediag)

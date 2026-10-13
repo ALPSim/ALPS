@@ -18,5 +18,5 @@
 #   DEALINGS IN THE SOFTWARE.
 
 add_executable(checksign checksign.C)
-target_link_libraries(checksign alps)
-install(TARGETS checksign RUNTIME DESTINATION bin COMPONENT applications)
+target_link_libraries(checksign PRIVATE ALPS::alps)
+alps_install_applications(checksign)

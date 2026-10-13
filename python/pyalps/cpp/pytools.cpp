@@ -10,7 +10,7 @@
 #include <alps/utility/encode.hpp>
 #include <alps/random.h>
 #include <alps/parser/xslt_path.h>
-#include <alps/random/mersenne_twister.hpp>
+#include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
 #include <boost/random/variate_generator.hpp>
 namespace nb = nanobind;

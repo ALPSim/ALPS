@@ -18,4 +18,4 @@
 #   DEALINGS IN THE SOFTWARE.
 
 add_executable(ising_multiple main.C ising.C)
-target_link_libraries(ising_multiple alps)
+target_link_libraries(ising_multiple PRIVATE ALPS::alps)
