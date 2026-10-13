@@ -405,6 +405,9 @@ namespace alps {
         }
 
         archive::archive(std::string const & filename, char prop) { // TODO: remove that!
+            // Unknown letters used to open read-only, as open() used to.
+            if (std::string("rwaclm").find(static_cast<char>(prop)) == std::string::npos)
+                throw wrong_mode("Incorrect mode '" + std::string(1, static_cast<char>(prop)) + "' opening file '" + filename + "'" + ALPS_STACKTRACE);
             construct(filename,
                   ('w' == prop ? WRITE | REPLACE : 0)
                 | ('a' == prop ? WRITE : 0)
@@ -415,6 +418,9 @@ namespace alps {
         }
 
         archive::archive(std::string const & filename, char signed prop) { // TODO: remove that!
+            // Unknown letters used to open read-only, as open() used to.
+            if (std::string("rwaclm").find(static_cast<char>(prop)) == std::string::npos)
+                throw wrong_mode("Incorrect mode '" + std::string(1, static_cast<char>(prop)) + "' opening file '" + filename + "'" + ALPS_STACKTRACE);
             construct(filename,
                   ('w' == prop ? WRITE | REPLACE : 0)
                 | ('a' == prop ? WRITE : 0)
@@ -425,6 +431,10 @@ namespace alps {
         }
 
         archive::archive(boost::filesystem::path const & filename, std::string mode) {
+            // Unknown letters used to be ignored (validation from ALPSCore
+            // 33e26902; ALPS also keeps "l").
+            if (mode.find_first_not_of("rwaclm") != std::string::npos)
+                throw wrong_mode("Incorrect mode '" + mode + "' opening file '" + filename.string() + "'" + ALPS_STACKTRACE);
             construct(filename.string(),
                   (mode.find_last_of('w') == std::string::npos ? 0 : WRITE | REPLACE)
                 | (mode.find_last_of('a') == std::string::npos ? 0 : WRITE)

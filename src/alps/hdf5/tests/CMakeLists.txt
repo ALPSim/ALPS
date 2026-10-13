@@ -36,6 +36,7 @@ foreach(
   hdf5_vecveccplx
   hdf5_exceptions
   hdf5_multiarchive
+  hdf5_open_strmode
   hdf5_fortran_string
   hdf5_vecvecdbl)
   add_executable(${name} ${name}.cpp)
