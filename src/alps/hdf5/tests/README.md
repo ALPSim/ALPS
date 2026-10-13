@@ -56,4 +56,4 @@ arXiv:1811.08331.
 | Test | Source | ALPS changes |
 | --- | --- | --- |
 | `hdf5_attributes` | `hdf5/test/hdf5_attributes.cpp` (with fix c7c64ca0) | ALPS temporary directory; cases for ALPS's `path/@name` spelling and a root-context attribute |
-
+| `hdf5_open_strmode` | `hdf5/test/hdf5_open_strmode.cpp` (with fix 33e26902) | ALPS temporary directory; `"wl"` is valid in ALPS, so `"wx"` and `"R"` are the invalid modes; a case for combined letters |

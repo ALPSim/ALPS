@@ -425,6 +425,10 @@ namespace alps {
         }
 
         archive::archive(boost::filesystem::path const & filename, std::string mode) {
+            // Unknown letters used to be ignored (validation from ALPSCore
+            // 33e26902; ALPS also keeps "l").
+            if (mode.find_first_not_of("rwaclm") != std::string::npos)
+                throw wrong_mode("Incorrect mode '" + mode + "' opening file '" + filename.string() + "'" + ALPS_STACKTRACE);
             construct(filename.string(),
                   (mode.find_last_of('w') == std::string::npos ? 0 : WRITE | REPLACE)
                 | (mode.find_last_of('a') == std::string::npos ? 0 : WRITE)
