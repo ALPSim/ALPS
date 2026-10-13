@@ -38,6 +38,7 @@
 #include <vector>
 #include <string>
 #include <numeric>
+#include <type_traits>
 
 #define ALPS_NGS_FOREACH_NATIVE_HDF5_TYPE(CALLBACK)                                                                                            \
     CALLBACK(char)                                                                                                                             \
@@ -59,6 +60,15 @@
 
 namespace alps {
     namespace hdf5 {
+
+        /// Inherits from `true_type` if `T` is a native type, from `false_type` otherwise
+        /// (from ALPSCore 4daa2da2).
+        template <typename T>
+        struct is_native_type : public std::false_type {};
+#define ALPS_HDF5_IS_NATIVE_TYPE_CALLER(__type__)    \
+        template <> struct is_native_type<__type__> : public std::true_type {};
+        ALPS_NGS_FOREACH_NATIVE_HDF5_TYPE(ALPS_HDF5_IS_NATIVE_TYPE_CALLER)
+#undef ALPS_HDF5_IS_NATIVE_TYPE_CALLER
 
         namespace detail {
             struct archivecontext;

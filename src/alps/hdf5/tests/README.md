@@ -57,3 +57,5 @@ arXiv:1811.08331.
 | --- | --- | --- |
 | `hdf5_attributes` | `hdf5/test/hdf5_attributes.cpp` (with fix c7c64ca0) | ALPS temporary directory; cases for ALPS's `path/@name` spelling and a root-context attribute |
 | `hdf5_open_strmode` | `hdf5/test/hdf5_open_strmode.cpp` (with fix 33e26902) | ALPS temporary directory; `"wl"` is valid in ALPS, so `"wx"` and `"R"` are the invalid modes; a case for combined letters |
+| `hdf5_native_type` | `hdf5/test/hdf5_native_type.cpp` (with 4daa2da2) | none |
+| `hdf5_boost_optional` | `hdf5/test/hdf5_boost_optional.cpp` (with 7b5b7be5) | ALPS temporary directory; fixed values instead of ALPSCore's `testing::datapoint`; `TYPED_TEST_SUITE`; a case reading into an empty optional |
