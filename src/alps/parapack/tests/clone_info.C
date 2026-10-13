@@ -16,56 +16,52 @@
 #include <boost/filesystem/operations.hpp>
 #include <iostream>
 
-int main()
-{
-#ifndef BOOST_NO_EXCEPTIONS
-try {
-#endif
+#include <alps/testing/stream_fixture.hpp>
+#include <alps/testing/temporary_directory.hpp>
+#include <gtest/gtest.h>
 
-  alps::clone_info info;
-  alps::clone_info_xml_handler handler(info);
-
-  alps::XMLParser parser(handler);
-  parser.parse(std::cin);
-
-  alps::oxstream ox(std::cout);
-
-  ox << info;
-
-  boost::filesystem::path xdrpath("clone_info.xdr");
+TEST(Serialization, clone_info) {
+  alps::testing::StreamFixture transcript(ALPS_TEST_SOURCE_DIR "/clone_info.ip");
+  alps::testing::TemporaryDirectory directory;
   {
-    alps::OXDRFileDump dp(xdrpath);
-    dp << info;
-  }
-  info = alps::clone_info();
-  {
-    alps::IXDRFileDump dp(xdrpath);
-    dp >> info;
-  }
-  ox << info;
-  boost::filesystem::remove(xdrpath);
+    alps::clone_info info;
+    alps::clone_info_xml_handler handler(info);
 
-  boost::filesystem::path h5path("clone_info.h5");
-  #pragma omp critical (hdf5io)
-  {
-    alps::hdf5::archive ar(h5path.string(), "a");
-    ar["/info"] << info;
-  }
-  info = alps::clone_info();
-  #pragma omp critical (hdf5io)
-  {
-    alps::hdf5::archive ar(h5path.string());
-    ar["/info"] >> info;
-  }
-  ox << info;
-  boost::filesystem::remove(h5path);
+    alps::XMLParser parser(handler);
+    parser.parse(std::cin);
 
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& exp) {
-  std::cerr << exp.what() << std::endl;
-  std::abort();
-}
-#endif
-  return 0;
+    alps::oxstream ox(std::cout);
+
+    ox << info;
+
+    boost::filesystem::path xdrpath((directory.path() / "clone_info.xdr").string());
+    {
+      alps::OXDRFileDump dp(xdrpath);
+      dp << info;
+    }
+    info = alps::clone_info();
+    {
+      alps::IXDRFileDump dp(xdrpath);
+      dp >> info;
+    }
+    ox << info;
+    boost::filesystem::remove(xdrpath);
+
+    boost::filesystem::path h5path((directory.path() / "clone_info.h5").string());
+#pragma omp critical(hdf5io)
+    {
+      alps::hdf5::archive ar(h5path.string(), "a");
+      ar["/info"] << info;
+    }
+    info = alps::clone_info();
+#pragma omp critical(hdf5io)
+    {
+      alps::hdf5::archive ar(h5path.string());
+      ar["/info"] >> info;
+    }
+    ox << info;
+    boost::filesystem::remove(h5path);
+
+  } // Flush oxstream before comparing its serialized bytes.
+  transcript.expect_output(ALPS_TEST_SOURCE_DIR "/clone_info.op");
 }

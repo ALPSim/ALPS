@@ -124,7 +124,7 @@ endif()
     ], check=True, capture_output=True, text=True)
     names = [test["name"] for test in json.loads(result.stdout)["tests"]]
     if alps_tests:
-        assert "hdf5_complex" in names
+        assert "hdf5_complex_NOT_BUILT" in names
     else:
         assert names == ["parent_marker"]
 

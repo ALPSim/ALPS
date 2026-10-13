@@ -17,32 +17,19 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-configure_file(xdrdump2.input.cmake ${CMAKE_CURRENT_BINARY_DIR}/boostdump2.input)
-configure_file(xdrdump2.input.cmake ${CMAKE_CURRENT_BINARY_DIR}/xdrdump2.input)
-
-foreach(
-  name
-  os
-  sizeof
-  xdrdump
-  xdrdump2
-  boostdump
-  boostdump2
-  boostdump3
-  boostdump4)
+foreach(name os sizeof)
   add_executable(${name} ${name}.C)
 
   target_link_libraries(${name} PRIVATE ALPS::osiris)
-  alps_add_test(${name})
-  # Several dump fixtures use the same filename; parallel runs need separate directories.
-  file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${name}.work")
-  set_property(TEST ${name} PROPERTY WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${name}.work")
-  set_property(TEST ${name} PROPERTY LABELS osiris)
+  alps_add_gtest(${name} COMPONENT osiris LABELS compatibility)
 endforeach()
 
 target_link_libraries(os PRIVATE ALPS::utilities)
 
 add_executable(osiris_comm_contract comm_contract.cpp)
 target_link_libraries(osiris_comm_contract PRIVATE ALPS::osiris)
-alps_add_test(osiris_comm_contract)
-set_property(TEST osiris_comm_contract PROPERTY LABELS osiris)
+alps_add_gtest(osiris_comm_contract COMPONENT osiris LABELS compatibility)
+
+add_executable(osiris_dump_serialization dump_serialization.cpp)
+target_link_libraries(osiris_dump_serialization PRIVATE ALPS::osiris)
+alps_add_gtest(osiris_dump_serialization COMPONENT osiris LABELS compatibility)

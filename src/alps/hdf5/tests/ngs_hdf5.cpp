@@ -12,6 +12,9 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
+
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/vector.hpp>
 #include <alps/hdf5/complex.hpp>
@@ -22,9 +25,10 @@
 
 using namespace alps;
 
-int main() {
+TEST(Hdf5, NgsHdf5) {
+    alps::testing::TemporaryDirectory temporary;
 
-    std::string const filename = "ngs.h5";
+    std::string const filename = (temporary.path() / "ngs.h5").string();
     if (boost::filesystem::exists(boost::filesystem::path(filename)))
         boost::filesystem::remove(boost::filesystem::path(filename));
     {
@@ -35,7 +39,7 @@ int main() {
         hdf5::archive ar(filename, "r");
         double value;
         ar >> make_pvp("/to/to", value);
-        std::cout << value << std::endl;
+        EXPECT_EQ(value, 3.14159);
     }
 
     {
@@ -46,7 +50,7 @@ int main() {
         hdf5::archive ar(filename, "r");
         std::vector<unsigned> value;
         ar >> make_pvp("/to/my/vec/in/a/very/deep/path", value);
-        std::cout << value[0] << std::endl;
+        EXPECT_EQ(value, std::vector<unsigned>(17, 15));
     }
 
     {
@@ -57,7 +61,7 @@ int main() {
         hdf5::archive ar(filename, "r");
         std::complex<double> value;
         ar >> make_pvp("/to/to", value);
-        std::cout << value.real() << " " << value.imag() << std::endl;
+        EXPECT_EQ(value, std::complex<double>(3.14159, 12.34));
     }
 
     {
@@ -68,7 +72,7 @@ int main() {
         hdf5::archive ar(filename, "r");
         std::string value;
         ar >> make_pvp("/to/str", value);
-        std::cout << value << std::endl;
+        EXPECT_EQ(value, "asdf");
     }
 
     {
@@ -79,12 +83,12 @@ int main() {
         hdf5::archive ar(filename, "r");
         std::string value;
         ar >> make_pvp("/to/char", value);
-        std::cout << value << std::endl;
+        EXPECT_EQ(value, "asdf");
     }
     {
         hdf5::archive ar(filename, "r");
-        std::cout << (ar.is_datatype<double>("/to/to") ? "true" : "false") << std::endl;
+        EXPECT_TRUE(ar.is_datatype<double>("/to/to"));
     }
     boost::filesystem::remove(boost::filesystem::path(filename));
-    return 0;
+
 }

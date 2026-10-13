@@ -1,3 +1,5 @@
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
 // Copyright (C) 2026 ALPS Collaboration
 // Part of the ALPS Project — see LICENSE.txt for full license text.
 // SPDX-License-Identifier: MIT
@@ -31,10 +33,9 @@
 #include <stdexcept>
 #include <string>
 
-int main() {
-  const std::string tmpbase =
-      (boost::filesystem::temp_directory_path() /
-       "alps_dmft_extsolver_outfile_param_lock").string();
+TEST(DmftRegression, externalsolver_outfile_param) {
+  alps::testing::TemporaryDirectory temporary;
+  const std::string tmpbase = (temporary.path() / "solver").string();
   const std::string infile  = tmpbase + ".in.h5";
   const std::string outfile = tmpbase + ".out.h5";
   boost::system::error_code ec;
@@ -55,21 +56,8 @@ int main() {
   // call() throws after writing (but before deleting) the input archive.
   ExternalSolver solver(
       boost::filesystem::path("alps_nonexistent_solver_outfile_param_lock"));
-  bool solve_threw = false;
-  try {
-    solver.solve(G0, parms);
-  } catch (const std::exception&) {
-    solve_threw = true;  // expected (bogus solver exe)
-  }
-  if (!solve_threw) {
-    std::printf("FAIL: solve() unexpectedly succeeded with a bogus solver exe\n");
-    return 1;
-  }
-  if (!boost::filesystem::exists(infile)) {
-    std::printf("FAIL: input archive %s not preserved for inspection\n",
-                infile.c_str());
-    return 1;
-  }
+  EXPECT_THROW(solver.solve(G0, parms), std::exception);
+  ASSERT_TRUE(boost::filesystem::exists(infile));
 
   alps::Parameters written;
   {
@@ -79,13 +67,5 @@ int main() {
   boost::filesystem::remove(infile, ec);
 
   const std::string got = written["OUTFILE"];
-  if (got != outfile) {
-    std::printf("FAIL: persisted /parameters/OUTFILE = '%s', expected '%s' "
-                "(itime solve() must set OUTFILE to the output filename, "
-                "matching solve_omega())\n",
-                got.c_str(), outfile.c_str());
-    return 1;
-  }
-  std::printf("OK: persisted /parameters/OUTFILE = '%s'\n", got.c_str());
-  return 0;
+  EXPECT_EQ(got, outfile);
 }

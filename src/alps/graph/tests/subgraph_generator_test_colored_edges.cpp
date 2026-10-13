@@ -14,6 +14,9 @@
 
 //#define USE_COMPRESSED_EMBEDDING2
 
+#include <gtest/gtest.h>
+#include <numeric>
+#include "graph_assertions.hpp"
 #include <alps/parser/xslt_path.h>
 #include <alps/graph/subgraph_generator.hpp>
 #include <alps/graph/utils.hpp>
@@ -48,12 +51,19 @@ void subgraph_generator_test(unsigned int order_ )
 
     typename graph_gen_type::iterator it,end;
     boost::tie(it,end) = graph_gen.generate_up_to_n_edges(order_);
-    std::cout<<std::distance(it,end)<<std::endl;
+    std::vector<std::size_t> counts(order_ + 1, 0);
+    for (auto current = it; current != end; ++current) {
+        const auto edges = num_edges(current->first);
+        ASSERT_LE(edges, order_);
+        ++counts[edges];
+    }
+    EXPECT_EQ(counts, (std::vector<std::size_t>{1, 2, 2, 6, 13, 35, 100, 309}));
+    EXPECT_EQ(std::accumulate(counts.begin(), counts.end(), std::size_t(0)), 468u);
 }
 
-int main()
+TEST(GraphSubgraphs, subgraph_generator_test_colored_edges)
 {
     typedef boost::adjacency_list<boost::vecS, boost::vecS,boost::undirectedS, boost::no_property, boost::property<alps::edge_type_t,alps::type_type> > graph_type;
     subgraph_generator_test<graph_type>(test_graph_size);
-    return 0;
+
 }

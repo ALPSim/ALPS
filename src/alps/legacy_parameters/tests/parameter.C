@@ -14,56 +14,34 @@
 /* $Id$ */
 
 #include <alps/parameter/parameter.h>
-#include <boost/throw_exception.hpp>
-#include <cstdlib>
-#include <iostream>
-#include <stdexcept>
+#include <gtest/gtest.h>
 #include <string>
 
-int main()
-{
-#ifndef BOOST_NO_EXCEPTIONS
-  try {
-#endif
-
-#ifndef BOOST_MSVC
-  setenv("DIR", "/home/alps", 1);
-#else
-  _putenv("DIR=/home/alps");
-#endif
-
-  std::string str;
-  alps::Parameter p;
-  while (std::getline(std::cin, str)) {
-#ifndef BOOST_NO_EXCEPTIONS
-    try {
-#endif
-    p.parse(str);
-    str = p.value().c_str();
-    std::cout << p.key() << " = ";
-    if (str.find(' ') != std::string::npos)
-      std::cout << '"' << str << '"';
-    else
-      std::cout << str;
-    std::cout << ";\n";
-#ifndef BOOST_NO_EXCEPTIONS
-    }
-    catch (std::exception& e) {
-      std::cout << "Caught exception: " << e.what() << "\n";
-    }
-#endif
-  }
-
-#ifndef BOOST_NO_EXCEPTIONS
+struct Assignment {
+  const char *input;
+  const char *key;
+  const char *value;
+};
+void PrintTo(const Assignment &sample, std::ostream *output) { *output << sample.key; }
+class LegacyParameter : public ::testing::TestWithParam<Assignment> {};
+TEST_P(LegacyParameter, ParsesKeysValuesQuotesAndEnvironment) {
+  const auto sample = GetParam();
+  SCOPED_TRACE(sample.input);
+  alps::Parameter parameter;
+  ASSERT_NO_THROW(parameter.parse(sample.input));
+  EXPECT_EQ(parameter.key(), sample.key);
+  EXPECT_EQ(std::string(parameter.value().c_str()), sample.value);
 }
-catch (std::exception& e) {
-  std::cerr << "Caught exception: " << e.what() << "\n";
-  exit(-1);
-}
-catch (...) {
-  std::cerr << "Caught unknown exception\n";
-  exit(-2);
-}
-#endif
-  return 0;
-}
+INSTANTIATE_TEST_SUITE_P(
+    HistoricalInputs, LegacyParameter,
+    ::testing::Values(Assignment{"L=10 ; ", "L", "10"}, Assignment{"M=1 ", "M", "1"},
+                      Assignment{"N =", "N", ""}, Assignment{"O = ;", "O", ""},
+                      Assignment{"T=0.1 ;", "T", "0.1"}, Assignment{"beta='1/T';", "beta", "1/T"},
+                      Assignment{"a0 = \"abc def \";", "a0", "abc def "},
+                      Assignment{"a# = 'abc def '", "a#", "abc def "},
+                      Assignment{"a[test 2] = 3;", "a[test 2]", "3"},
+                      Assignment{"a[ test 3 ] = 3;", "a[ test 3 ]", "3"},
+                      Assignment{"dir = \"${DIR}/lib/xml${ DIR}\"", "dir",
+                                 "/home/alps/lib/xml${ DIR}"},
+                      Assignment{"b = sqrt(4)+2*Pi/L-X^5", "b", "sqrt(4)+2*Pi/L-X^5"},
+                      Assignment{"c = 'a - b[4]'", "c", "a - b[4]"}));

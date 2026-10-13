@@ -16,56 +16,52 @@
 #include <boost/filesystem/operations.hpp>
 #include <iostream>
 
-int main()
-{
-#ifndef BOOST_NO_EXCEPTIONS
-try {
-#endif
+#include <alps/testing/stream_fixture.hpp>
+#include <alps/testing/temporary_directory.hpp>
+#include <gtest/gtest.h>
 
-  alps::clone_phase phase;
-  alps::clone_phase_xml_handler handler(phase);
-
-  alps::XMLParser parser(handler);
-  parser.parse(std::cin);
-
-  alps::oxstream ox(std::cout);
-
-  ox << phase;
-
-  boost::filesystem::path xdrpath("clone_phase.xdr");
+TEST(Serialization, clone_phase) {
+  alps::testing::StreamFixture transcript(ALPS_TEST_SOURCE_DIR "/clone_phase.ip");
+  alps::testing::TemporaryDirectory directory;
   {
-    alps::OXDRFileDump dp(xdrpath);
-    dp << phase;
-  }
-  phase = alps::clone_phase();
-  {
-    alps::IXDRFileDump dp(xdrpath);
-    dp >> phase;
-  }
-  ox << phase;
-  boost::filesystem::remove(xdrpath);
+    alps::clone_phase phase;
+    alps::clone_phase_xml_handler handler(phase);
 
-  boost::filesystem::path h5path("clone_phase.h5");
-  #pragma omp critical (hdf5io)
-  {
-    alps::hdf5::archive ar(h5path.string(), "a");
-    ar["/phase"] << phase;
-  }
-  phase = alps::clone_phase();
-  #pragma omp critical (hdf5io)
-  {
-    alps::hdf5::archive ar(h5path.string());
-    ar["/phase"] >> phase;
-  }
-  ox << phase;
-  boost::filesystem::remove(h5path);
+    alps::XMLParser parser(handler);
+    parser.parse(std::cin);
 
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& exp) {
-  std::cerr << exp.what() << std::endl;
-  std::abort();
-}
-#endif
-  return 0;
+    alps::oxstream ox(std::cout);
+
+    ox << phase;
+
+    boost::filesystem::path xdrpath((directory.path() / "clone_phase.xdr").string());
+    {
+      alps::OXDRFileDump dp(xdrpath);
+      dp << phase;
+    }
+    phase = alps::clone_phase();
+    {
+      alps::IXDRFileDump dp(xdrpath);
+      dp >> phase;
+    }
+    ox << phase;
+    boost::filesystem::remove(xdrpath);
+
+    boost::filesystem::path h5path((directory.path() / "clone_phase.h5").string());
+#pragma omp critical(hdf5io)
+    {
+      alps::hdf5::archive ar(h5path.string(), "a");
+      ar["/phase"] << phase;
+    }
+    phase = alps::clone_phase();
+#pragma omp critical(hdf5io)
+    {
+      alps::hdf5::archive ar(h5path.string());
+      ar["/phase"] >> phase;
+    }
+    ox << phase;
+    boost::filesystem::remove(h5path);
+
+  } // Flush oxstream before comparing its serialized bytes.
+  transcript.expect_output(ALPS_TEST_SOURCE_DIR "/clone_phase.op");
 }

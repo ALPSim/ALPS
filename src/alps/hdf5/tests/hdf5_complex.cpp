@@ -11,6 +11,9 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
+
 #include <complex>
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/complex.hpp>
@@ -28,10 +31,10 @@ std::ostream& operator<<(std::ostream& os, std::vector<T> const & v)
 
 
 struct foo {
-  
+
     std::complex<double> scalar;
     std::vector<std::complex<double> > vec;
-    
+
     void load(alps::hdf5::archive & ar)
     {
         ar >> alps::make_pvp("scalar", scalar);
@@ -42,28 +45,27 @@ struct foo {
         ar << alps::make_pvp("scalar", scalar);
         ar << alps::make_pvp("vector", vec);
     }
-    
+
 };
-int main () {
-    
+TEST(Hdf5, Complex) {
+    alps::testing::TemporaryDirectory temporary;
+
     foo b;
     b.scalar = std::complex<double>(3,4);
     b.vec = std::vector<std::complex<double> >(5, std::complex<double>(0,7));
     {
-        alps::hdf5::archive ar("test_hdf5_complex.h5", "w");
+        alps::hdf5::archive ar((temporary.path() / "test_hdf5_complex.h5").string(), "w");
         ar << alps::make_pvp("/test/foo", b);
     }
-    
+
     // check
     {
         foo t_b;
-        alps::hdf5::archive ar("test_hdf5_complex.h5", "r");
+        alps::hdf5::archive ar((temporary.path() / "test_hdf5_complex.h5").string(), "r");
         ar >> alps::make_pvp("/test/foo", t_b);
-        std::cout << "scalar (write): " << b.scalar << std::endl;
-        std::cout << "scalar (read): " << t_b.scalar << std::endl;
-        std::cout << "vector (write): " << b.vec << std::endl;
-        std::cout << "vector (read): " << t_b.vec << std::endl;
+        EXPECT_EQ(t_b.scalar, b.scalar);
+        EXPECT_EQ(t_b.vec, b.vec);
     }
-    
-    return 0;
+
+
 }

@@ -14,14 +14,18 @@
 #include <alps/hdf5/matrix.hpp>
 #include <alps/hdf5/numeric_vector.hpp>
 #include "matrix_unit_tests.hpp"
+#include <alps/testing/temporary_directory.hpp>
 
 using alps::numeric::matrix;
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( hdf5, T, test_types )
+template<class T> class MatrixHdf5 : public ::testing::Test {};
+TYPED_TEST_SUITE(MatrixHdf5, test_types);
+
+TYPED_TEST(MatrixHdf5, hdf5)
 {
-    std::string const filename = "alps_matrix_test.h5";
-    if (boost::filesystem::exists(boost::filesystem::path(filename)))
-        boost::filesystem::remove(boost::filesystem::path(filename));
+    using T = TypeParam;
+    alps::testing::TemporaryDirectory temporary;
+    const auto filename = (temporary.path() / "alps_matrix_test.h5").string();
 
     {
         matrix<T> a(10,20);
@@ -32,32 +36,31 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( hdf5, T, test_types )
         b.shrink_to_fit();
 
 
-        BOOST_CHECK_EQUAL(a.capacity() > b.capacity(), true); // maybe this should be an assert instead
+        EXPECT_EQ(a.capacity() > b.capacity(), true); // maybe this should be an assert instead
 
         {
             alps::hdf5::archive ar(filename, alps::hdf5::archive::WRITE | alps::hdf5::archive::REPLACE);
             ar["/matrix"] << a;
         }
 
-        BOOST_CHECK_EQUAL(a,b);
+        EXPECT_EQ(a,b);
         matrix<T> c;
         alps::hdf5::archive ar2(filename);
         ar2["/matrix"] >> c;
 
-        BOOST_CHECK_EQUAL(a,c);
-        BOOST_CHECK_EQUAL(b,c);
+        EXPECT_EQ(a,c);
+        EXPECT_EQ(b,c);
     }
 
-    boost::filesystem::remove(boost::filesystem::path(filename));
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( hdf5_matrix_matrix, T, test_types )
+TYPED_TEST(MatrixHdf5, hdf5_matrix_matrix)
 {
+    using T = TypeParam;
     typedef typename matrix<matrix<T> >::col_element_iterator col_iterator;
 
-    std::string const filename = "alps_matrix_test.h5";
-    if (boost::filesystem::exists(boost::filesystem::path(filename)))
-        boost::filesystem::remove(boost::filesystem::path(filename));
+    alps::testing::TemporaryDirectory temporary;
+    const auto filename = (temporary.path() / "alps_matrix_test.h5").string();
 
     {
         matrix<matrix<T> > a(10,20);
@@ -78,28 +81,28 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( hdf5_matrix_matrix, T, test_types )
         matrix<matrix<T> > b(a);
         b.shrink_to_fit();
 
-        BOOST_CHECK_EQUAL(a.capacity() > b.capacity(), true); // maybe this should be an assert instead
+        EXPECT_EQ(a.capacity() > b.capacity(), true); // maybe this should be an assert instead
 
         {
             alps::hdf5::archive ar(filename, alps::hdf5::archive::WRITE | alps::hdf5::archive::REPLACE);
             ar["/matrix"] << a;
         }
 
-        BOOST_CHECK_EQUAL(a,b);
+        EXPECT_EQ(a,b);
         matrix<matrix<T> > c;
         alps::hdf5::archive ar2(filename);
         ar2["/matrix"] >> c;
 
-        BOOST_CHECK_EQUAL(a,c);
-        BOOST_CHECK_EQUAL(b,c);
+        EXPECT_EQ(a,c);
+        EXPECT_EQ(b,c);
     }
 
-    boost::filesystem::remove(boost::filesystem::path(filename));
 }
 
-BOOST_AUTO_TEST_CASE(explicit_adapter_storage_layout)
+TEST(MatrixHdf5Storage, explicit_adapter_storage_layout)
 {
-    std::string const filename = "alps_numeric_adapter_test.h5";
+    alps::testing::TemporaryDirectory temporary;
+    const auto filename = (temporary.path() / "alps_numeric_adapter_test.h5").string();
     matrix<double> dense(2, 3);
     dense.reserve(7, 5);
     for (std::size_t row = 0; row != 2; ++row)
@@ -116,23 +119,22 @@ BOOST_AUTO_TEST_CASE(explicit_adapter_storage_layout)
     {
         alps::hdf5::archive archive(filename, "r");
         // The on-disk axes stay [columns, rows], independent of reserved storage.
-        BOOST_CHECK(archive.extent("/dense") == std::vector<std::size_t>({3, 2}));
+        EXPECT_TRUE(archive.extent("/dense") == std::vector<std::size_t>({3, 2}));
         std::vector<double> raw(6);
         archive.read("/dense", raw.data(), {3, 2});
-        BOOST_CHECK(raw == std::vector<double>({0.5, 10.5, 1.5, 11.5, 2.5, 12.5}));
+        EXPECT_TRUE(raw == std::vector<double>({0.5, 10.5, 1.5, 11.5, 2.5, 12.5}));
         matrix<double> restored;
         archive["/dense"] >> restored;
-        BOOST_CHECK_EQUAL(restored, dense);
+        EXPECT_EQ(restored, dense);
 
-        BOOST_CHECK(archive.is_complex("/vector"));
-        BOOST_CHECK(archive.extent("/vector") == std::vector<std::size_t>({2, 2}));
+        EXPECT_TRUE(archive.is_complex("/vector"));
+        EXPECT_TRUE(archive.extent("/vector") == std::vector<std::size_t>({2, 2}));
         alps::numeric::vector<std::complex<double>> restored_vector;
         archive["/vector"] >> restored_vector;
-        BOOST_CHECK(std::equal(values.begin(), values.end(), restored_vector.begin(), restored_vector.end()));
+        EXPECT_TRUE(std::equal(values.begin(), values.end(), restored_vector.begin(), restored_vector.end()));
         matrix<double> empty(2, 3);
         archive["/empty"] >> empty;
-        BOOST_CHECK_EQUAL(empty.num_rows(), 0);
-        BOOST_CHECK_EQUAL(empty.num_cols(), 0);
+        EXPECT_EQ(empty.num_rows(), 0);
+        EXPECT_EQ(empty.num_cols(), 0);
     }
-    boost::filesystem::remove(filename);
 }

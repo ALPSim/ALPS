@@ -1,4 +1,3 @@
 add_executable(cli_contract cli_contract.cpp)
 target_link_libraries(cli_contract PRIVATE ALPS::cli)
-alps_add_test(cli_contract)
-set_property(TEST cli_contract PROPERTY LABELS cli)
+alps_add_gtest(cli_contract COMPONENT cli LABELS compatibility)

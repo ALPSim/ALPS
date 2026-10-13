@@ -1,4 +1,4 @@
-#include <iostream>
+#include "observable_checks.hpp"
 #include <string>
 #include <vector>
 #include <alps/alea.h>
@@ -6,21 +6,14 @@
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 
-#define make_obs(form) \
-  do{ \
-    alps::RealObsevaluator o( #form ); \
-    o = form; \
-    obs.addObservable(o); \
-  } while (false)
-
-int main(int argc, char **argv) {
+TEST(AleaMerge, times2) {
   typedef boost::minstd_rand0 random_base_type;
   typedef boost::uniform_01<random_base_type> random_type;
-  random_base_type random_int;
+  random_base_type random_int(1u); // Preserve the historical default seed.
   random_type random(random_int);
 
   const int MCS = 128;
-  const int nsets = (argc > 1) ? boost::lexical_cast<int>(argv[1]) : 2;
+  const int nsets = 2;
 
   std::vector<alps::ObservableSet> obssets(nsets);
   BOOST_FOREACH(alps::ObservableSet &obs, obssets){
@@ -39,8 +32,20 @@ int main(int argc, char **argv) {
 
   alps::RealObsevaluator one = obs["one"];
   alps::RealObsevaluator two = obs["two"];
-  make_obs(one * two);
-  std::cout << obs;
+  alps::RealObsevaluator result("one * two");
+  result = one * two;
+  obs.addObservable(result);
+  alps_test::expect_estimate(one, {{0.994702, 0.00945, 5.00001e-07, 5.00001e-06}}, "one");
+  EXPECT_EQ(one.count(), 256u);
+  EXPECT_EQ(one.converged_errors(), alps::MAYBE_CONVERGED);
+  EXPECT_NEAR(one.tau(), -0.0936, 5.00001e-05);
+  alps_test::expect_estimate(result, {{1.98735, 0.0266, 5.00001e-06, 5.00001e-05}}, "one * two");
+  EXPECT_EQ(result.count(), 256u);
+  EXPECT_EQ(result.converged_errors(), alps::MAYBE_CONVERGED);
+  alps_test::expect_estimate(two, {{1.99794, 0.018, 5.00001e-06, 0.000500001}}, "two");
+  EXPECT_EQ(two.count(), 256u);
+  EXPECT_EQ(two.converged_errors(), alps::MAYBE_CONVERGED);
+  EXPECT_NEAR(two.tau(), 0.000365, 5.00001e-07);
 
-  return 0;
+
 }

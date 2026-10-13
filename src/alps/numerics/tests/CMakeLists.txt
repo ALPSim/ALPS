@@ -35,8 +35,15 @@ foreach(
 
   target_link_libraries(${name} PRIVATE ALPS::numerics)
   target_compile_definitions(${name} PRIVATE ALPS_DISABLE_MATRIX_ELEMENT_ITERATOR_WARNING)
-  alps_add_test(${name})
-  set_property(TEST ${name} PROPERTY LABELS numeric)
+  if(name STREQUAL "matrix_deprecated_hdf5_format_test")
+    alps_add_gtest(${name} COMPONENT numeric LABELS compatibility hdf5)
+  elseif(name STREQUAL "matrix_hdf5")
+    alps_add_gtest(${name} COMPONENT numeric LABELS integration hdf5)
+  elseif(name STREQUAL "matrix_algorithms")
+    alps_add_gtest(${name} COMPONENT numeric LABELS scientific)
+  else()
+    alps_add_gtest(${name} COMPONENT numeric)
+  endif()
 endforeach()
 
 # This test reads a reference .h5 file from the source tree. That path is a

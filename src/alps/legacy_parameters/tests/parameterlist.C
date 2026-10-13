@@ -16,56 +16,75 @@
 
 #include <alps/parameter/parameterlist.h>
 #include <alps/osiris/xdrdump.h>
-#include <boost/filesystem/operations.hpp>
-#include <boost/throw_exception.hpp>
-#include <stdlib.h>
-#include <iostream>
-#include <stdexcept>
+#include <alps/testing/temporary_directory.hpp>
+#include <gtest/gtest.h>
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
 
-int main()
-{
-#ifndef BOOST_NO_EXCEPTIONS
-  try {
-#endif
-
-#ifndef BOOST_MSVC
-  setenv("DIR", "/home/alps", 1);
-#else
-  _putenv("DIR=/home/alps");
-#endif
-
-  boost::filesystem::path path("parameterlist.dump");
-
-  alps::ParameterList params(std::cin);
-  std::cout << params;
-
-  {
-    alps::OXDRFileDump od(path);
-    od << params;
+namespace {
+using ParameterMap = std::map<std::string, std::string>;
+const std::vector<ParameterMap> expected{
+    {{"A", "0.1"}, {"B", "0.2"}, {"C", "200"}},
+    {{"A", "0.1"}, {"D", "0.2"}, {"dir", "/home/alps/lib/xml"}, {"E", "0.2"}, {"F", "100"}},
+    {{"A", "0.1"}, {"D", "0.2"}, {"dir", "/home/alps/lib/xml"}, {"G", "0.5"}, {"H", "100"}},
+    {{"A", "0.1"}, {"D", "0.2"}, {"dir", "/home/alps/lib/xml"}},
+    {{"G", "0.4"}, {"H", "200"}},
+    {{"H", "300"}}};
+void expect_parameters(const alps::ParameterList &params) {
+  ASSERT_EQ(params.size(), expected.size());
+  for (std::size_t i = 0; i < params.size(); ++i) {
+    SCOPED_TRACE(i);
+    ParameterMap values;
+    for (const auto &value : params[i])
+      values.emplace(value.key(), value.value().c_str());
+    EXPECT_EQ(values, expected[i]);
   }
+}
+} // namespace
+TEST(LegacyParameterList, GlobalInheritanceClearStopAndXdrRoundTrip) {
+  std::istringstream input(R"PARAMS(/* C-style comment */
 
+// C++-style comments are also accepted
+
+A=0.1;
+{ B=0.2; C=200; }
+
+D=0.2;
+dir = "${DIR}/lib/xml"
+
+{
+
+E=0.2, F=100
+}
+
+{ G=0.5; H=100}
+
+{}
+
+#clear // clear global parameters
+
+{ G=0.4; H=200 }
+
+{ /* G=0.2; */ H=300; }
+
+#stop // stop reading here
+
+{ G=0.3; H=400; }
+)PARAMS");
+  alps::ParameterList params(input);
+  expect_parameters(params);
+  alps::testing::TemporaryDirectory directory;
+  const boost::filesystem::path dump((directory.path() / "parameters.xdr").string());
+  {
+    alps::OXDRFileDump output(dump);
+    output << params;
+  }
   params.clear();
-
   {
-    alps::IXDRFileDump id(path);
-    id >> params;
+    alps::IXDRFileDump input(dump);
+    input >> params;
   }
-
-  std::cout << params;
-  boost::filesystem::remove(path);
-
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& e)
-{
-  std::cerr << "Caught exception: " << e.what() << "\n";
-  exit(-1);
-}
-catch (...)
-{
-  std::cerr << "Caught unknown exception\n";
-  exit(-2);
-}
-#endif
-  return 0;
+  expect_parameters(params);
 }

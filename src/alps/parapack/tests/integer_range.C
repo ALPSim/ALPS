@@ -12,93 +12,82 @@
 *****************************************************************************/
 
 #include <alps/parapack/integer_range.h>
-#include <cstdlib>
-#include <iostream>
-#include <string>
+#include <gtest/gtest.h>
+#include <limits>
 
-template<class T>
-void check_range_boundaries() {
-  const T lo = (std::numeric_limits<T>::min)();
-  const T hi = (std::numeric_limits<T>::max)();
-  const alps::integer_range<T> full(lo, hi), empty;
-  if (full.empty() || !full.valid() || !empty.empty() || empty.size() != 0 ||
-      alps::integer_range<T>(lo).size() != 1 || alps::integer_range<T>(hi).size() != 1 ||
-      alps::integer_range<T>(0, hi - 1).size() != hi ||
-      unify(full, full) != full)
-    throw std::runtime_error("integer_range boundary check failed");
-  try {
-    full.size();
-  } catch (std::overflow_error const&) {
-    return;
-  }
-  throw std::runtime_error("integer_range failed to reject an unrepresentable size");
+// Includes signed and unsigned 32/64-bit domains from the original test.
+template <class T> class IntegerRangeBoundaries : public ::testing::Test {};
+using IntegerTypes = ::testing::Types<int, unsigned int, long long, unsigned long long>;
+TYPED_TEST_SUITE(IntegerRangeBoundaries, IntegerTypes);
+TYPED_TEST(IntegerRangeBoundaries, RejectsUnrepresentableSizeWithoutOverflow) {
+  using T = TypeParam;
+  const T low = (std::numeric_limits<T>::min)(), high = (std::numeric_limits<T>::max)();
+  const alps::integer_range<T> full(low, high), empty;
+  EXPECT_FALSE(full.empty());
+  EXPECT_TRUE(full.valid());
+  EXPECT_TRUE(empty.empty());
+  EXPECT_EQ(empty.size(), 0);
+  EXPECT_EQ(alps::integer_range<T>(low).size(), 1);
+  EXPECT_EQ(alps::integer_range<T>(high).size(), 1);
+  EXPECT_EQ(alps::integer_range<T>(0, high - 1).size(), high);
+  EXPECT_EQ(unify(full, full), full);
+  EXPECT_THROW(full.size(), std::overflow_error);
 }
 
-int main()
-{
-  check_range_boundaries<int>();
-  check_range_boundaries<unsigned int>();
-  check_range_boundaries<long long>();
-  check_range_boundaries<unsigned long long>();
-  std::string str;
+TEST(IntegerRange, ParsesSignedEndpointsAndExpressions) {
   alps::Parameters params;
-  while (std::getline(std::cin, str) && str.size())
-    params << alps::Parameter(str);
-  std::cout << "Parameters:\n" << params;
-
-  std::cout << "Test for integer_range<int>:\n";
-  while (std::getline(std::cin, str)) {
-    if (str.size() == 0 || str[0] == '\0') break;
-    std::cout << "parse " << str << ": ";
-    try {
-      alps::integer_range<int> r(str, params);
-      std::cout << "result " << r << std::endl;
-    }
-    catch (std::exception& exp) {
-      std::cout << exp.what() << std::endl;
-    }
+  params["L"] = 4;
+  params["T"] = .5;
+  const int low = (std::numeric_limits<int>::min)(), high = (std::numeric_limits<int>::max)();
+  struct Sample {
+    const char *input;
+    int first, last;
+  };
+  const Sample samples[] = {{"[0:3]", 0, 3},      {"[3:9]", 3, 9}, {"[:3]", low, 3},
+                            {"[-1:]", -1, high},  {"[3]", 3, 3},   {"6", 6, 6},
+                            {"[1/T:L^2]", 2, 16}, {"[1/T]", 2, 2}, {"[L:]", 4, high},
+                            {"[:L]", low, 4},     {"[2*L]", 8, 8}, {"exp(L)", 54, 54}};
+  for (const auto &sample : samples) {
+    SCOPED_TRACE(sample.input);
+    const alps::integer_range<int> range(sample.input, params);
+    EXPECT_EQ(range.min(), sample.first);
+    EXPECT_EQ(range.max(), sample.last);
   }
-  std::cout << "Test for integer_range<unsigned int>:\n";
-  while (std::getline(std::cin, str)) {
-    if (!std::cin || str[0] == '\0') break;
-    std::cout << "parse " << str << ": ";
-    try {
-      alps::integer_range<unsigned int> r(str, params);
-      std::cout << "result " << r << std::endl;
-    }
-    catch (std::exception& exp) {
-      std::cout << exp.what() << std::endl;
-    }
-  }
-
-  alps::integer_range<int> r(0, 5);
-  std::cout << "initial: " << r << std::endl;
-  std::cout << "7 is included? " << r.is_included(7) << std::endl;
-  r = 3;
-  std::cout << "3 is assigned: " << r << std::endl;
-  r.include(8);
-  std::cout << "8 is included: " << r << std::endl;
-  std::cout << "7 is included? " << r.is_included(7) << std::endl;
-
-  alps::integer_range<int> s("[3:]");
-  std::cout << "initial: " << s << std::endl;
-  std::cout << "multiplied by 3.5: " << 3.5 * s << std::endl;
-  std::cout << "multiplied by 2000000000: " << s * 2000000000 << std::endl;
-  s *= 0.1;
-  std::cout << "multiplied by 0.1: " << s << std::endl;
-
-  alps::integer_range<int> t(0, 5);
-  alps::integer_range<int> u(-2, 3);
-  alps::integer_range<int> v(-2, 10);
-  alps::integer_range<int> w(7, 10);
-  std::cout << "initial: " << t << std::endl;
-  std::cout << "overlap with " << u << ": " << overlap(t, u) << std::endl;
-  std::cout << "union with " << u << ": " << unify(t, u) << std::endl;
-  std::cout << "overlap with " << v << ": " << overlap(t, v) << std::endl;
-  std::cout << "union with " << v << ": " << unify(t, v) << std::endl;
-  std::cout << "overlap with " << w << ": " << overlap(t, w) << std::endl;
-  std::cout << "union with " << w << ": ";
-  try { std::cout << unify(t, w) << std::endl; }
-  catch (std::exception& exp) { std::cout << exp.what() << std::endl; }
-  return 0;
+  EXPECT_TRUE(alps::integer_range<int>("[]", params).empty());
+  EXPECT_THROW(alps::integer_range<int>("[3:9:0]", params), std::exception);
+}
+TEST(IntegerRange, ParsesUnsignedEndpointsAndRejectsNegativeBounds) {
+  using Range = alps::integer_range<unsigned int>;
+  EXPECT_EQ(Range("[0:3]"), Range(0, 3));
+  EXPECT_EQ(Range("[3:9]"), Range(3, 9));
+  EXPECT_EQ(Range("[:3]"), Range(0, 3));
+  EXPECT_EQ(Range("[1:]"), Range(1, (std::numeric_limits<unsigned int>::max)()));
+  EXPECT_EQ(Range("6"), Range(6));
+  EXPECT_THROW(Range("[-3:9]"), std::exception);
+}
+TEST(IntegerRange, AssignmentInclusionAndSaturatingScaling) {
+  using Range = alps::integer_range<int>;
+  Range range(0, 5);
+  EXPECT_FALSE(range.is_included(7));
+  range = 3;
+  EXPECT_EQ(range, Range(3));
+  range.include(8);
+  EXPECT_EQ(range, Range(3, 8));
+  EXPECT_TRUE(range.is_included(7));
+  Range unbounded("[3:]");
+  const int high = (std::numeric_limits<int>::max)();
+  EXPECT_EQ(3.5 * unbounded, Range(10, high));
+  EXPECT_EQ(unbounded * 2000000000, Range(high, high));
+  unbounded *= .1;
+  EXPECT_EQ(unbounded, Range(0, static_cast<int>(high * .1)));
+}
+TEST(IntegerRange, OverlapAndUnion) {
+  using Range = alps::integer_range<int>;
+  const Range range(0, 5), partial(-2, 3), full(-2, 10), disjoint(7, 10);
+  EXPECT_EQ(overlap(range, partial), Range(0, 3));
+  EXPECT_EQ(unify(range, partial), Range(-2, 5));
+  EXPECT_EQ(overlap(range, full), range);
+  EXPECT_EQ(unify(range, full), full);
+  EXPECT_TRUE(overlap(range, disjoint).empty());
+  EXPECT_THROW(unify(range, disjoint), std::exception);
 }

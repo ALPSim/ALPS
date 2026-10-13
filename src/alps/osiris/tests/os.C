@@ -1,3 +1,4 @@
+#include <gtest/gtest.h>
 /*****************************************************************************
 *
 * ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -15,10 +16,7 @@
 #include <alps/version.h>
 #include <iostream>
 
-int main() {
-  std::cerr << "cofig hostname = " << ALPS_CONFIG_HOST << std::endl
-            << "config username = " << ALPS_CONFIG_USER << std::endl
-            << "exec hostname = " << alps::hostname() << std::endl
-            << "exec username = " << alps::username() << std::endl;
-  return 0;
+TEST(OperatingSystem, QueriesAreAvailable) {
+  EXPECT_FALSE(alps::hostname().empty());
+  EXPECT_FALSE(alps::username().empty());
 }

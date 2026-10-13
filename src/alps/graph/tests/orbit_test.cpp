@@ -11,6 +11,8 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <gtest/gtest.h>
+#include "graph_assertions.hpp"
 #include <alps/lattice.h> // for cout << graph
 #include "generate_random_graph.hpp"
 #include <alps/graph/canonical_properties.hpp>
@@ -27,21 +29,9 @@ typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, boos
 typedef boost::graph_traits<graph_type>::edge_descriptor edge_descriptor;
 typedef boost::property_map<graph_type,alps::edge_type_t>::type edge_color_map_type;
 
-template <typename Partition>
-void dump_partition(std::ostream& os, Partition const& partition)
-{
-    os << "(";
-    for (typename Partition::const_iterator it = partition.begin(); it != partition.end(); ++it) {
-        os << "(";
-        for (typename Partition::value_type::const_iterator jt = it->begin(); jt != it->end(); ++jt)
-            os << (jt == it->begin() ? "" : " ") << *jt;
-        os << ")";
-    }
-    os << ")";
-}
 
-void orbit_test1()
-{
+
+TEST(GraphOrbits, orbit_test1) {
     // 0---3
     // |   *
     // 1***2
@@ -67,14 +57,11 @@ void orbit_test1()
 
     alps::graph::canonical_properties_type<graph_type>::type gp_with_sym(canonical_properties(g,color_symmetry));
 
-    dump_partition(std::cout, get<alps::graph::partition>(gp));
-    std::cout << std::endl;
-    dump_partition(std::cout, get<alps::graph::partition>(gp_with_sym));
-    std::cout << std::endl;
+    expect_partition(get<alps::graph::partition>(gp), {{0}, {1, 3}, {2}});
+    expect_partition(get<alps::graph::partition>(gp_with_sym), {{0}, {1, 3}, {2}});
 }
 
-void orbit_test2()
-{
+TEST(GraphOrbits, orbit_test2) {
     //    2
     //  /  .
     // 0++++1
@@ -105,18 +92,15 @@ void orbit_test2()
 
     alps::graph::canonical_properties_type<graph_type>::type gp_with_sym(canonical_properties(g,color_symmetry));
 
-    dump_partition(std::cout, get<alps::graph::partition>(gp));
-    std::cout << std::endl;
-    dump_partition(std::cout, get<alps::graph::partition>(gp_with_sym));
-    std::cout << std::endl;
+    expect_partition(get<alps::graph::partition>(gp), {{0, 1}, {2, 3}});
+    expect_partition(get<alps::graph::partition>(gp_with_sym), {{0, 1}, {2, 3}});
 }
 
-void orbit_test3()
-{
+TEST(GraphOrbits, orbit_test3) {
     //    2+++4
     //  /    /
     // 0++++1
-    //  . 
+    //  .
     //   3
     graph_type g(4);
     {
@@ -143,14 +127,11 @@ void orbit_test3()
 
     alps::graph::canonical_properties_type<graph_type>::type gp_with_sym(canonical_properties(g,color_symmetry));
 
-    dump_partition(std::cout, get<alps::graph::partition>(gp));
-    std::cout << std::endl;
-    dump_partition(std::cout, get<alps::graph::partition>(gp_with_sym));
-    std::cout << std::endl;
+    expect_partition(get<alps::graph::partition>(gp), {{0}, {1}, {2}, {3}, {4}});
+    expect_partition(get<alps::graph::partition>(gp_with_sym), {{0}, {1}, {2}, {3}, {4}});
 }
 
-void orbit_test4()
-{
+TEST(GraphOrbits, orbit_test4) {
     {
         //     2
         //     |
@@ -171,8 +152,7 @@ void orbit_test4()
         edge_color[e] = 0;
 
         alps::graph::canonical_properties_type<graph_type>::type gp(canonical_properties(g));
-        dump_partition(std::cout, get<alps::graph::partition>(gp));
-        std::cout << std::endl;
+        expect_partition(get<alps::graph::partition>(gp), {{0}, {1, 2, 4}, {3}});
     }
 
     {
@@ -194,13 +174,11 @@ void orbit_test4()
         edge_color[e] = 1;
 
         alps::graph::canonical_properties_type<graph_type>::type gp(canonical_properties(g));
-        dump_partition(std::cout, get<alps::graph::partition>(gp));
-        std::cout << std::endl;
+        expect_partition(get<alps::graph::partition>(gp), {{0}, {1, 2}, {3, 4}});
     }
 }
 
-void orbit_test5()
-{
+TEST(GraphOrbits, orbit_test5) {
     //
     //  7---0---6---2       // c0 ---
     //  +           +       // c1 +++
@@ -228,8 +206,7 @@ void orbit_test5()
         edge_color[e] = 1;
 
         alps::graph::canonical_properties_type<graph_type>::type gp(canonical_properties(g));
-        dump_partition(std::cout, get<alps::graph::partition>(gp));
-        std::cout << std::endl;
+        expect_partition(get<alps::graph::partition>(gp), {{0, 3, 5, 6}, {1, 2, 4, 7}});
     }
 
     //
@@ -259,15 +236,6 @@ void orbit_test5()
         edge_color[e] = 0;
 
         alps::graph::canonical_properties_type<graph_type>::type gp(canonical_properties(g));
-        dump_partition(std::cout, get<alps::graph::partition>(gp));
-        std::cout << std::endl;
+        expect_partition(get<alps::graph::partition>(gp), {{0, 3, 5, 6}, {1, 2, 4, 7}});
     }
-}
-int main() {
-    orbit_test1();
-    orbit_test2();
-    orbit_test3();
-    orbit_test4();
-    orbit_test5();
-    return 0;
 }

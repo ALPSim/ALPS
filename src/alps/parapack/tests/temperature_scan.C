@@ -12,47 +12,45 @@
 *****************************************************************************/
 
 #include <alps/parapack/temperature_scan.h>
-#include <iomanip>
-#include <iostream>
+#include <gtest/gtest.h>
+#include <vector>
 
-class my_worker {
+class RecordingWorker {
 public:
-  my_worker(alps::Parameters const&) {}
-  void init_observables(alps::Parameters const&, alps::ObservableSet const&) {}
-  void run(alps::ObservableSet const&) {}
-  void set_beta(double beta) { std::cout << "T = " << 1/beta; }
-  void save(alps::ODump&) const {}
-  void load(alps::IDump&) {}
+  inline static std::vector<double> temperatures;
+  RecordingWorker(const alps::Parameters &) {}
+  void init_observables(const alps::Parameters &, const alps::ObservableSet &) {}
+  void run(const alps::ObservableSet &) {}
+  void set_beta(double beta) { temperatures.push_back(1 / beta); }
+  void save(alps::ODump &) const {}
+  void load(alps::IDump &) {}
 };
-
-int main() {
-#ifndef BOOST_NO_EXCEPTIONS
-try {
-#endif
-  std::cout << std::setprecision(3);
-
-  alps::Parameters params(std::cin);
-  std::vector<alps::ObservableSet> obs;
-  alps::parapack::temperature_scan_adaptor<my_worker> worker(params);
-  worker.init_observables(params, obs);
-
-  int count = 0;
-  while (worker.progress() < 1) {
-    std::cout << count++ << ", ";
-    worker.run(obs);
-    std::cout << ", progress = " << worker.progress() << std::endl;
+TEST(TemperatureScan, UsesInitialThermalizationThenVisitsEveryTemperature) {
+  alps::Parameters params;
+  params["THERMALIZATION"] = 3;
+  params["SWEEPS"] = 5;
+  params["NUM_TEMPERATURES"] = 5;
+  params["INITIAL_TEMPERATURE"] = .1;
+  params["DIFF_TEMPERATURE"] = .1;
+  params["INITIAL_THERMALIZATION"] = 10;
+  RecordingWorker::temperatures.clear();
+  std::vector<alps::ObservableSet> observables;
+  alps::parapack::temperature_scan_adaptor<RecordingWorker> worker(params);
+  worker.init_observables(params, observables);
+  ASSERT_EQ(observables.size(), 5);
+  EXPECT_DOUBLE_EQ(worker.progress(), 0);
+  for (int step = 0; step < 47; ++step) {
+    ASSERT_LT(worker.progress(), 1);
+    worker.run(observables);
+    const double expected = step < 15 ? (step + 1) / 75. : .2 + (step - 14) / 40.;
+    EXPECT_NEAR(worker.progress(), expected, 1e-14) << "step " << step;
   }
-
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& exc) {
-  std::cerr << exc.what() << "\n";
-  return -1;
-}
-catch (...) {
-  std::cerr << "Fatal Error: Unknown Exception!\n";
-  return -2;
-}
-#endif
-  return 0;
+  EXPECT_DOUBLE_EQ(worker.progress(), 1);
+  ASSERT_EQ(RecordingWorker::temperatures.size(), 47);
+  for (int step = 0; step < 47; ++step) {
+    const double expected = step < 15 ? .1 : .2 + ((step - 15) / 8) * .1;
+    EXPECT_NEAR(RecordingWorker::temperatures[step], expected, 1e-14) << "step " << step;
+  }
+  worker.run(observables);
+  EXPECT_EQ(RecordingWorker::temperatures.size(), 47);
 }

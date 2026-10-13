@@ -12,55 +12,37 @@
 *****************************************************************************/
 
 #include <alps/parapack/measurement.h>
-#include <iomanip>
-#include <iostream>
+#include <gtest/gtest.h>
 
-int main() {
-#ifndef BOOST_NO_EXCEPTIONS
-try {
-#endif
-
-  std::cout << std::setprecision(3);
-
-  alps::RealObservable obs_1("obs_1");
+TEST(MeasurementMerge, PreservesHistoricalMeansAndBinningErrors) {
+  alps::RealObservable single("single");
   for (int i = 0; i < 100; ++i)
-    obs_1 << (double)i;
-  std::cout << obs_1.mean() << " +/- " << obs_1.error() << std::endl;
-
-  alps::ObservableSet obs_2;
+    single << static_cast<double>(i);
+  EXPECT_DOUBLE_EQ(single.mean(), 49.5);
+  // Legacy output rounded errors to three significant digits. Preserve that
+  // uncertainty contract without coupling the test to ostream formatting.
+  EXPECT_NEAR(single.error(), 2.92, .005);
+  alps::ObservableSet merged, random_clone;
   for (int i = 0; i < 100; ++i) {
-    alps::ObservableSet obs;
-    obs << alps::RealObservable("obs",10000);
-    obs.reset(true);
+    alps::ObservableSet bin;
+    bin << alps::RealObservable("obs", 10000);
+    bin.reset(true);
     for (int j = 0; j < 100; ++j)
-      obs["obs"] << (double)i;
-    obs_2 << obs;
-  }
-  std::cout << dynamic_cast<alps::RealObsevaluator&>(obs_2["obs"]).mean() << " +/- "
-            << dynamic_cast<alps::RealObsevaluator&>(obs_2["obs"]).error() << std::endl;
-    
-
-  alps::ObservableSet obs_3;
-  for (int i = 0; i < 100; ++i) {
-    alps::ObservableSet obs;
-    obs << alps::RealObservable("obs");
-    obs.reset(true);
+      bin["obs"] << static_cast<double>(i);
+    merged << bin;
+    alps::ObservableSet clone;
+    clone << alps::RealObservable("obs");
+    clone.reset(true);
     for (int j = 0; j < 100; ++j)
-      obs["obs"] << (double)i;
-    alps::merge_random_clone(obs_3, obs);
+      clone["obs"] << static_cast<double>(i);
+    alps::merge_random_clone(random_clone, clone);
   }
-  std::cout << dynamic_cast<alps::RealObservable&>(obs_3["obs"]).mean() << " +/- "
-            << dynamic_cast<alps::RealObservable&>(obs_3["obs"]).error() << std::endl;
-  return 0;
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& exc) {
-  std::cerr << exc.what() << "\n";
-  return -1;
-}
-catch (...) {
-  std::cerr << "Fatal Error: Unknown Exception!\n";
-  return -2;
-}
-#endif
+  const auto &merged_result = dynamic_cast<const alps::RealObsevaluator &>(merged["obs"]);
+  // The evaluator combines 10,000 samples through jackknife arithmetic;
+  // allow accumulated roundoff while tightening the old 0.05 output bound.
+  EXPECT_NEAR(merged_result.mean(), 49.5, 1e-8);
+  EXPECT_NEAR(merged_result.error(), .289, .0005);
+  const auto &clone_result = dynamic_cast<const alps::RealObservable &>(random_clone["obs"]);
+  EXPECT_DOUBLE_EQ(clone_result.mean(), single.mean());
+  EXPECT_DOUBLE_EQ(clone_result.error(), single.error());
 }

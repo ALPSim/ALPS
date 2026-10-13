@@ -15,38 +15,27 @@
 /* $Id$ */
 
 #include <alps/expression.h>
+#include <gtest/gtest.h>
+#include <sstream>
 
-#include <boost/throw_exception.hpp>
-#include <iostream>
-#include <stdexcept>
-
-int main()
-{
-#ifndef BOOST_NO_EXCEPTIONS
-  try {
-#endif
-  while (std::cin) {
-    alps::Expression expr(std::cin);
-    std::cout << "The flattened expression [" << expr << "] is \n";
-    expr.flatten();
-    std::cout << expr << std::endl;
-    char c;
-    std::cin >> c;
-    if (c!=',')
-      break;
+TEST(ExpressionFlattening, DistributesProductsAndPreservesValues) {
+  const char *input[] = {"(a+b)*(c+d)", "(-a+b)/(c+d)", "sin(5*(x+y))", "(a+b)^2*(c+d)*(e+f)"};
+  const char *canonical[] = {"(a) * (c) + (a) * (d) + (b) * (c) + (b) * (d)",
+                             "( - a) / (c + d) + (b) / (c + d)", "sin(5 * (x) + 5 * (y))",
+                             "(a + b)^2 * (c) * (e) + (a + b)^2 * (c) * (f) + (a + b)^2 * (d) * "
+                             "(e) + (a + b)^2 * (d) * (f)"};
+  alps::Parameters params;
+  for (const auto *key : {"a", "b", "c", "d", "e", "f", "x", "y"})
+    params[key] = 2;
+  for (int i = 0; i < 4; ++i) {
+    SCOPED_TRACE(input[i]);
+    alps::Expression expression(input[i]);
+    const auto before = alps::evaluate<double>(expression, alps::ParameterEvaluator(params));
+    expression.flatten();
+    EXPECT_NEAR(alps::evaluate<double>(expression, alps::ParameterEvaluator(params)), before,
+                1e-12);
+    std::ostringstream rendered;
+    rendered << expression;
+    EXPECT_EQ(rendered.str(), canonical[i]);
   }
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& e)
-{
-  std::cerr << "Caught exception: " << e.what() << "\n";
-  exit(-1);
-}
-catch (...)
-{
-  std::cerr << "Caught unknown exception\n";
-  exit(-2);
-}
-#endif
-  return 0;
 }

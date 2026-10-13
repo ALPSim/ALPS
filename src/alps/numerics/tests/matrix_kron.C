@@ -25,86 +25,34 @@
 #include <alps/numeric/matrix.hpp>
 #include <alps/numeric/matrix/algorithms.hpp>
 
-#include <cstdio>
+#include <gtest/gtest.h>
+#include <array>
 #include <cstddef>
 
-namespace {
+class KroneckerLayout : public ::testing::TestWithParam<std::array<std::size_t, 4>> {};
 
-int failures = 0;
-
-// deterministic, position-dependent fill so misplaced entries can't
-// accidentally match
-double fill(std::size_t i, std::size_t j, double salt)
+TEST_P(KroneckerLayout, InnerFactorStridesOutput)
 {
-    return salt + 10.0 * static_cast<double>(i) + static_cast<double>(j);
-}
-
-void run_case(std::size_t ar, std::size_t ac, std::size_t br, std::size_t bc,
-              const char* label)
-{
-    typedef alps::numeric::matrix<double> matrix_type;
-    matrix_type A(ar, ac), B(br, bc);
+    const auto [ar, ac, br, bc] = GetParam();
+    alps::numeric::matrix<double> a(ar, ac), b(br, bc);
     for (std::size_t i = 0; i < ar; ++i)
-        for (std::size_t j = 0; j < ac; ++j) A(i, j) = fill(i, j, 1.25);
+        for (std::size_t j = 0; j < ac; ++j) a(i, j) = 1.25 + 10. * i + j;
     for (std::size_t i = 0; i < br; ++i)
-        for (std::size_t j = 0; j < bc; ++j) B(i, j) = fill(i, j, -3.5);
+        for (std::size_t j = 0; j < bc; ++j) b(i, j) = -3.5 + 10. * i + j;
 
-    matrix_type MM = alps::numeric::kron(A, B);
-
-    if (num_rows(MM) != ar * br || num_cols(MM) != ac * bc) {
-        std::fprintf(stderr,
-                     "FAIL %s: result is %lux%lu, expected %lux%lu\n", label,
-                     static_cast<unsigned long>(num_rows(MM)),
-                     static_cast<unsigned long>(num_cols(MM)),
-                     static_cast<unsigned long>(ar * br),
-                     static_cast<unsigned long>(ac * bc));
-        ++failures;
-        return;
-    }
-
+    const auto result = alps::numeric::kron(a, b);
+    ASSERT_EQ(num_rows(result), ar * br);
+    ASSERT_EQ(num_cols(result), ac * bc);
     for (std::size_t i1 = 0; i1 < ar; ++i1)
         for (std::size_t j1 = 0; j1 < ac; ++j1)
             for (std::size_t i2 = 0; i2 < br; ++i2)
-                for (std::size_t j2 = 0; j2 < bc; ++j2) {
-                    const double expected = A(i1, j1) * B(i2, j2);
-                    const double actual = MM(i1 * br + i2, j1 * bc + j2);
-                    if (expected != actual) {
-                        std::fprintf(stderr,
-                                     "FAIL %s: (A kron B)(%lu,%lu) = %.17g, "
-                                     "expected A(%lu,%lu)*B(%lu,%lu) = %.17g\n",
-                                     label,
-                                     static_cast<unsigned long>(i1 * br + i2),
-                                     static_cast<unsigned long>(j1 * bc + j2),
-                                     actual,
-                                     static_cast<unsigned long>(i1),
-                                     static_cast<unsigned long>(j1),
-                                     static_cast<unsigned long>(i2),
-                                     static_cast<unsigned long>(j2),
-                                     expected);
-                        ++failures;
-                        return; // one report per case is enough
-                    }
-                }
+                for (std::size_t j2 = 0; j2 < bc; ++j2)
+                    EXPECT_EQ(result(i1 * br + i2, j1 * bc + j2), a(i1, j1) * b(i2, j2))
+                        << "output row " << i1 * br + i2 << ", column " << j1 * bc + j2;
 }
 
-} // namespace
-
-int main()
-{
-    // Equal square operands: old and new index formulas coincide here, so
-    // this arm characterizes that existing equal-size callers see no change.
-    run_case(3, 3, 3, 3, "kron 3x3 (x) 3x3 (equal-size, current callers)");
-
-    // Unequal shapes: pin the standard Kronecker layout (inner factor B
-    // strides the output). These fail on the historical A-dims formula.
-    run_case(2, 3, 4, 2, "kron 2x3 (x) 4x2");
-    run_case(4, 2, 2, 5, "kron 4x2 (x) 2x5");
-    run_case(1, 1, 3, 2, "kron 1x1 (x) 3x2");
-
-    if (failures) {
-        std::fprintf(stderr, "matrix_kron: %d failure(s)\n", failures);
-        return 1;
-    }
-    std::printf("matrix_kron: PASS\n");
-    return 0;
-}
+INSTANTIATE_TEST_SUITE_P(RectangularAndSquare, KroneckerLayout, ::testing::Values(
+    std::array<std::size_t, 4>{3, 3, 3, 3},
+    std::array<std::size_t, 4>{2, 3, 4, 2},
+    std::array<std::size_t, 4>{4, 2, 2, 5},
+    std::array<std::size_t, 4>{1, 1, 3, 2}));

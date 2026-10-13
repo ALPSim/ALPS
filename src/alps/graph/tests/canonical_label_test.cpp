@@ -12,6 +12,8 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <gtest/gtest.h>
+#include "graph_assertions.hpp"
 #include <alps/graph/canonical_properties.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <iostream>
@@ -21,8 +23,7 @@ using boost::get;
 using alps::graph::canonical_properties;
 
 
-bool colored_edges_test() {
-    std::cout << "colored_edges_test()" << std::endl;
+TEST(GraphCanonicalLabel, colored_edges_test) {
     typedef boost::property<alps::edge_type_t,unsigned int> edge_props;
     typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, boost::no_property, edge_props> graph_type;
     typedef boost::graph_traits<graph_type>::edge_descriptor edge_descriptor;
@@ -80,22 +81,21 @@ bool colored_edges_test() {
     alps::graph::graph_label<graph_type>::type label_j(get<1>(canonical_properties(j)));
     alps::graph::graph_label<graph_type>::type label_k(get<1>(canonical_properties(k)));
 
-    std::cout<<label_g<<std::endl;
-    std::cout<<label_h<<std::endl;
-    std::cout<<label_i<<std::endl;
-    std::cout<<label_j<<std::endl;
-    std::cout<<label_k<<std::endl;
+    expect_label_encoding(label_g, "(0001101100 1111 (0))");
+    expect_label_encoding(label_h, "(0001101100 00011110 (0 1))");
+    expect_label_encoding(label_i, "(0001101100 00011110 (0 2))");
+    expect_label_encoding(label_j, "(0001101100 00011110 (0 1))");
+    expect_label_encoding(label_k, "(0001101100 1111 (1))");
 
-    std::cout<<std::boolalpha<<(label_g == label_h)<<std::endl;
-    std::cout<<std::boolalpha<<(label_h == label_i)<<std::endl;
-    std::cout<<std::boolalpha<<(label_h == label_j)<<std::endl;
-    std::cout<<std::boolalpha<<(label_g == label_k)<<std::endl;
+    EXPECT_FALSE((label_g == label_h));
+    EXPECT_FALSE((label_h == label_i));
+    EXPECT_TRUE((label_h == label_j));
+    EXPECT_FALSE((label_g == label_k));
 
-    return true;
+
 }
 
-void colored_edges_test2() {
-    std::cout << "colored_edges_test2()" << std::endl;
+TEST(GraphCanonicalLabel, colored_edges_test2) {
     typedef boost::property<alps::edge_type_t,unsigned int> edge_props;
     typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, boost::no_property, edge_props> graph_type;
     typedef boost::graph_traits<graph_type>::edge_descriptor edge_descriptor;
@@ -139,20 +139,19 @@ void colored_edges_test2() {
     alps::graph::graph_label<graph_type>::type label_j(get<1>(canonical_properties(j)));
     alps::graph::graph_label<graph_type>::type label_k(get<1>(canonical_properties(k)));
 
-    std::cout<<label_g<<std::endl;
-    std::cout<<label_h<<std::endl;
-    std::cout<<label_i<<std::endl;
-    std::cout<<label_j<<std::endl;
-    std::cout<<label_k<<std::endl;
+    expect_label_encoding(label_g, "(010100 11 (0))");
+    expect_label_encoding(label_h, "(010100 11 (1))");
+    expect_label_encoding(label_i, "(010100 11 (3))");
+    expect_label_encoding(label_j, "(010100 0110 (1 3))");
+    expect_label_encoding(label_k, "(010100 0110 (0 1))");
 
-    std::cout<<std::boolalpha<<(label_g == label_h)<<std::endl;
-    std::cout<<std::boolalpha<<(label_h == label_i)<<std::endl;
-    std::cout<<std::boolalpha<<(label_h == label_j)<<std::endl;
-    std::cout<<std::boolalpha<<(label_g == label_k)<<std::endl;
+    EXPECT_FALSE((label_g == label_h));
+    EXPECT_FALSE((label_h == label_i));
+    EXPECT_FALSE((label_h == label_j));
+    EXPECT_FALSE((label_g == label_k));
 }
 
-bool simple_test() {
-    std::cout << "simple_label_test()" << std::endl;
+TEST(GraphCanonicalLabel, simple_test) {
     typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> graph_type;
     graph_type g;
     add_edge(0, 1,g);
@@ -162,13 +161,6 @@ bool simple_test() {
 
     alps::graph::graph_label<graph_type>::type label(get<1>(canonical_properties(g)));
 
-    std::cout << label << std::endl;
-    return true;
-}
+    expect_label_encoding(label, "(0101101000)");
 
-int main() {
-    simple_test();
-    colored_edges_test();
-    colored_edges_test2();
-    return 0;
 }

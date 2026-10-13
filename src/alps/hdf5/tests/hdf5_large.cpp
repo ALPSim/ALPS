@@ -12,29 +12,26 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <alps/hdf5/archive.hpp>
-
-#include <boost/filesystem.hpp>
-
+#include <alps/hdf5/vector.hpp>
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
 #include <vector>
 
-using namespace std;
-using namespace alps;
-
-int main () {
-
-    for (std::size_t i = 0; i < 100; ++i)
-        if (boost::filesystem::exists(boost::filesystem::path("large" + alps::cast<std::string>(i) + ".h5")))
-            boost::filesystem::remove(boost::filesystem::path("large" + alps::cast<std::string>(i) + ".h5"));
-
-    hdf5::archive ar("large%d.h5", "al");
-    for (unsigned long long s = 1; s < (1ULL << 29); s <<= 1) {
-        std::cout << s << std::endl;
-        vector<double> vec(s, 10.);
-        ar << make_pvp("/" + cast<std::string>(s), vec);
+// Explicit opt-in: the largest allocation is 2 GiB and the family uses about
+// 4 GiB of disk. Ordinary extensive type tests do not enable this stress test.
+TEST(Hdf5LargeArchive, FamilyRetainsLargeDatasets) {
+    alps::testing::TemporaryDirectory temporary;
+    alps::hdf5::archive archive((temporary.path() / "large%d.h5").string(), "al");
+    for (std::size_t size = 1; size < (1ULL << 29); size <<= 1) {
+        SCOPED_TRACE(size);
+        const auto path = "/" + std::to_string(size);
+        const std::vector<double> values(size, 10.);
+        archive[path] << values;
+        EXPECT_EQ(archive.extent(path), std::vector<std::size_t>({size}));
+        double first = 0., last = 0.;
+        archive.read(path, &first, std::vector<std::size_t>{1}, std::vector<std::size_t>{0});
+        archive.read(path, &last, std::vector<std::size_t>{1}, std::vector<std::size_t>{size - 1});
+        EXPECT_EQ(first, 10.);
+        EXPECT_EQ(last, 10.);
     }
-
-    for (std::size_t i = 0; i < 100; ++i)
-        if (boost::filesystem::exists(boost::filesystem::path("large" + alps::cast<std::string>(i) + ".h5")))
-            boost::filesystem::remove(boost::filesystem::path("large" + alps::cast<std::string>(i) + ".h5"));
-    return 0;
 }

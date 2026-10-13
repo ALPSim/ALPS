@@ -1,26 +1,25 @@
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
 #include <alps/ngs/params.hpp>
-#include <iostream>
+#include <sstream>
 
-int main(int argc, char** argv){
-    alps::params parms;
-    parms["hello"]="world";
-
+namespace {
+template<class Parameters> void expect_missing(Parameters& parameters) {
+    std::ostringstream output;
     try {
-        std::cout<<parms["hello"]<<std::endl;
-        std::cout<<parms["not_in_parms"]<<std::endl;
-    } catch (std::exception const & e) {
-        std::string w = e.what();
-        std::cout << w.substr(0, w.find_first_of('\n')) << std::endl;
+        output << parameters["not_in_parms"];
+        FAIL() << "Missing parameter did not throw";
+    } catch (const std::exception& error) {
+        const std::string diagnostic(error.what());
+        EXPECT_EQ(diagnostic.substr(0, diagnostic.find('\n')), "No parameter 'not_in_parms' available");
     }
-    
-    const alps::params p(parms);
-
-    try {
-        std::cout<<p["not_in_parms"]<<std::endl;
-    } catch (std::exception const & e) {
-        std::string w = e.what();
-        std::cout << w.substr(0, w.find_first_of('\n')) << std::endl;
-    }
-
-    return 0;
+}
+}
+TEST(ParamsLookup, MissingMutableAndConstValuesReportTheirKey) {
+    alps::params parameters;
+    parameters["hello"] = "world";
+    EXPECT_EQ(parameters["hello"].cast<std::string>(), "world");
+    expect_missing(parameters);
+    const alps::params copy(parameters);
+    expect_missing(copy);
 }

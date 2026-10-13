@@ -11,6 +11,9 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
+
 #include <iostream>
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/vector.hpp>
@@ -23,23 +26,25 @@
 
 using namespace std;
 
-int main()
+TEST(Hdf5, Vecvecdbl)
 {
-    if (boost::filesystem::exists(boost::filesystem::path("vvdbl.h5")))
-        boost::filesystem::remove(boost::filesystem::path("vvdbl.h5"));
+    alps::testing::TemporaryDirectory temporary;
+    if (boost::filesystem::exists(boost::filesystem::path((temporary.path() / "vvdbl.h5").string())))
+        boost::filesystem::remove(boost::filesystem::path((temporary.path() / "vvdbl.h5").string()));
     {
         vector<vector<double> > v;
         for(int i = 0; i < 3; ++i)
             v.push_back(vector<double>(i+1, 2*i));
-        alps::hdf5::archive ar("vvdbl.h5", "w");
+        alps::hdf5::archive ar((temporary.path() / "vvdbl.h5").string(), "w");
         ar["/spectrum/sectors/5/results/cdag-c/mean/value"] = v;
-        std::cout << v.size() << std::endl;
+
     }
 	 {
         vector<vector<double> > v;
-        alps::hdf5::archive ar("vvdbl.h5", "r");
+        alps::hdf5::archive ar((temporary.path() / "vvdbl.h5").string(), "r");
         ar["/spectrum/sectors/5/results/cdag-c/mean/value"] >> v;
-        std::cout << v.size() << std::endl;
+        ASSERT_EQ(v.size(), 3u);
+        for (int i = 0; i < 3; ++i) EXPECT_EQ(v[i], vector<double>(i + 1, 2 * i));
     }
-    boost::filesystem::remove(boost::filesystem::path("vvdbl.h5"));
+    boost::filesystem::remove(boost::filesystem::path((temporary.path() / "vvdbl.h5").string()));
 }

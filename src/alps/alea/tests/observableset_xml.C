@@ -14,14 +14,14 @@
 
 /* $Id$ */
 
+#include <alps/testing/stream_fixture.hpp>
 #include <iostream>
 #include <alps/alea/observableset_p.h>
 
-int main()
+TEST(AleaXml, observableset_xml)
 {
-#ifndef BOOST_NO_EXCEPTIONS
-try {
-#endif
+  alps::testing::StreamFixture transcript(std::string(ALPS_TEST_SOURCE_DIR) + "/observableset_xml.input");
+  { // Finish XML stream destruction before comparing the transcript.
 
   alps::ObservableSet obs;
   alps::ObservableSetXMLHandler handler(obs);
@@ -31,16 +31,6 @@ try {
   alps::oxstream oxs;
   obs.write_xml(oxs);
 
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& exc) {
-  std::cerr << exc.what() << "\n";
-  return -1;
-}
-catch (...) {
-  std::cerr << "Fatal Error: Unknown Exception!\n";
-  return -2;
-}
-#endif
-  return 0;
+  }
+  transcript.expect_output(std::string(ALPS_TEST_SOURCE_DIR) + "/observableset_xml.output");
 }

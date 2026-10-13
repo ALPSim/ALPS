@@ -11,6 +11,8 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <gtest/gtest.h>
+#include "graph_assertions.hpp"
 #include <alps/parser/xslt_path.h>
 #include <alps/graph/subgraph_generator.hpp>
 #include <alps/graph/utils.hpp>
@@ -58,7 +60,7 @@ std::map<typename alps::graph::graph_label<Graph>::type,Graph> generate_graphs_w
 }
 
 template <typename Graph, typename LatticeGraph>
-bool test_lattice(LatticeGraph const& lattice_graph, typename alps::graph::color_partition<Graph>::type const& edge_color_symmetries, unsigned int order)
+void test_lattice(LatticeGraph const& lattice_graph, typename alps::graph::color_partition<Graph>::type const& edge_color_symmetries, unsigned int order)
 {
     typedef Graph graph_type;
     typedef typename alps::graph::graph_label<graph_type>::type label;
@@ -94,14 +96,14 @@ bool test_lattice(LatticeGraph const& lattice_graph, typename alps::graph::color
             std::cout<< "w_sym:"<< g << std::endl;
         }
     }
-    return difference.empty();
+    EXPECT_EQ(r1, r2) << "Canonical subgraph sets differ with color-symmetry optimization";
 }
 
-bool test_lattices(unsigned int order)
+void test_lattices(unsigned int order)
 {
     typedef boost::adjacency_list<boost::vecS, boost::vecS,boost::undirectedS, boost::no_property, boost::property<alps::edge_type_t,alps::type_type> > graph_type;
     typedef alps::coordinate_graph_type lattice_graph_type;
-    bool ok = true;
+
     {
         std::cout << "----------------------------------------------" << std::endl;
         std::cout << "anisotropic tirangular lattice - 3 couplings: " << std::endl;
@@ -118,7 +120,7 @@ bool test_lattices(unsigned int order)
         color_sym_group[1] = 0;
         color_sym_group[2] = 0;
 
-        ok = ok && test_lattice<graph_type>(lattice_graph, color_sym_group, order);
+        test_lattice<graph_type>(lattice_graph, color_sym_group, order);
     }
 
     {
@@ -140,13 +142,13 @@ bool test_lattices(unsigned int order)
         color_sym_group[0] = 0;
         color_sym_group[1] = 0;
 
-        ok = ok && test_lattice<graph_type>(lattice_graph, color_sym_group, order);
+        test_lattice<graph_type>(lattice_graph, color_sym_group, order);
     }
-    return ok;
+
 }
 
-int main()
+TEST(GraphSubgraphs, SymmetryOptimizationPreservesCanonicalSet)
 {
-    bool ok = test_lattices(test_graph_size);
-    return ok ? 0 : 1;
+    test_lattices(test_graph_size);
+
 }

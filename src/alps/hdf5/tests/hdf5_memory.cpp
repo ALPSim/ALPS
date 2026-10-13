@@ -11,6 +11,9 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
+
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/complex.hpp>
 #include <alps/hdf5/vector.hpp>
@@ -20,31 +23,24 @@
 #include <iostream>
 using namespace std;
 
-int main()
+TEST(Hdf5, Memory)
 {
-    if (boost::filesystem::exists(boost::filesystem::path("test_hdf5_memory.h5")))
-        boost::filesystem::remove(boost::filesystem::path("test_hdf5_memory.h5"));
+    alps::testing::TemporaryDirectory temporary;
+    if (boost::filesystem::exists(boost::filesystem::path((temporary.path() / "test_hdf5_memory.h5").string())))
+        boost::filesystem::remove(boost::filesystem::path((temporary.path() / "test_hdf5_memory.h5").string()));
     {
-        alps::hdf5::archive oa("test_hdf5_memory.h5", "w");
+        alps::hdf5::archive oa((temporary.path() / "test_hdf5_memory.h5").string(), "w");
         std::vector<std::complex<double> > foo(3);
         std::vector<double> foo2(3);
         oa << alps::make_pvp("/foo", foo);
         oa << alps::make_pvp("/foo2", foo2);
     }
-    
+
     {
- 
-        std::vector<double> foo, foo2;
-        try {
-			alps::hdf5::archive ia("test_hdf5_memory.h5");
-            ia >> alps::make_pvp("/foo", foo);
-            ia >> alps::make_pvp("/foo2", foo2);
-        } catch (exception e) {
-            cout << "Exception caught: no complex value" << endl;
-            boost::filesystem::remove(boost::filesystem::path("test_hdf5_memory.h5"));
-            return EXIT_SUCCESS;
-        }
+        alps::hdf5::archive archive((temporary.path() / "test_hdf5_memory.h5").string());
+        std::vector<double> real;
+        EXPECT_THROW(archive["/foo"] >> real, alps::hdf5::archive_error);
+        archive["/foo2"] >> real;
+        EXPECT_EQ(real, std::vector<double>(3, 0.));
     }
-    boost::filesystem::remove(boost::filesystem::path("test_hdf5_memory.h5"));
-    return EXIT_SUCCESS;
 }

@@ -13,17 +13,18 @@
 
 /* $Id: vectorobseval.C 2190 2006-08-30 09:28:03Z wistaria $ */
 
+#include <alps/testing/stream_fixture.hpp>
 #include <alps/alea.h>
 #include <boost/random.hpp> 
 
-int main() {
-#ifndef BOOST_NO_EXCEPTIONS
-try {
-#endif
+TEST(AleaXml, histogram)
+{
+  alps::testing::StreamFixture transcript;
+  { // Finish XML stream destruction before comparing the transcript.
 
   typedef boost::minstd_rand0 random_base_type;
   typedef boost::uniform_01<random_base_type> random_type; 
-  random_base_type random_int;
+  random_base_type random_int(1u); // Preserve the historical default seed.
   random_type random(random_int); 
 
   alps::ObservableSet obs1;
@@ -58,16 +59,6 @@ try {
   obs1 << obs2;
   obs1.write_xml(oxs);
 
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& exc) {
-  std::cerr << exc.what() << "\n";
-  return -1;
-}
-catch (...) {
-  std::cerr << "Fatal Error: Unknown Exception!\n";
-  return -2;
-}
-#endif
-  return 0;
+  }
+  transcript.expect_output(std::string(ALPS_TEST_SOURCE_DIR) + "/histogram.output");
 }

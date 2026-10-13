@@ -11,78 +11,65 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <alps/ngs.hpp>
-#include <alps/mcbase.hpp>
-#include <alps/stop_callback.hpp>
-#include <alps/ngs/make_parameters_from_xml.hpp>
+#include "sum_simulation.hpp"
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
+#include <alps/check_schedule.hpp>
+#include <new>
 
-#include <boost/lambda/lambda.hpp>
+TEST(MonteCarloSchedule, ChecksImmediatelyAfterConstructionInReusedStorage) {
+    // A stale NaN interval prevented MPI runs from ever checking completion.
+    alignas(alps::check_schedule) unsigned char storage[sizeof(alps::check_schedule)];
+    volatile unsigned char* bytes = storage;
+    for (std::size_t i = 0; i < sizeof(storage); ++i) bytes[i] = 0xff;
+    auto* schedule = new (storage) alps::check_schedule;
+    EXPECT_DOUBLE_EQ(schedule->check_interval(), 0.);
+    EXPECT_TRUE(schedule->pending());
+    schedule->update(0.25);
+    EXPECT_DOUBLE_EQ(schedule->check_interval(), 60.);
+    EXPECT_FALSE(schedule->pending());
+    schedule->~check_schedule();
+}
 
-// Simulation to measure e^(-x*x)
-class my_sim_type : public alps::mcbase {
+TEST(MonteCarloRunner, CompletesAndPersistsScalarAndVectorResults) {
+    alps::params parameters;
+    parameters["COUNT"] = 256;
+    parameters["SEED"] = 42;
+    sum_simulation simulation(parameters);
+    EXPECT_DOUBLE_EQ(simulation.fraction_completed(), 0.);
+    ASSERT_TRUE(simulation.run([] { return false; }));
+    EXPECT_EQ(simulation.count, 256);
+    EXPECT_DOUBLE_EQ(simulation.fraction_completed(), 1.);
+    const auto results = alps::collect_results(simulation);
+    const double expected = simulation.sum / simulation.count;
+    EXPECT_EQ(results["SValue"].count(), 256u);
+    // Only floating-point accumulation order differs from the explicit sum.
+    EXPECT_NEAR(results["SValue"].mean<double>(), expected, 1e-12);
+    EXPECT_TRUE(std::isfinite(results["SValue"].error<double>()));
+    const auto vector = results["VValue"].mean<std::vector<double>>();
+    ASSERT_EQ(vector.size(), 3u);
+    for (double value : vector) EXPECT_NEAR(value, expected, 1e-12);
+    EXPECT_GE(expected, std::exp(-1.));
+    EXPECT_LE(expected, 1.);
 
-    public:
+    alps::testing::TemporaryDirectory directory;
+    const auto filename = (directory.path() / "results.h5").string();
+    alps::save_results(results, parameters, filename, "/simulation/results");
+    alps::hdf5::archive archive(filename);
+    alps::mcresults restored;
+    archive["/simulation/results"] >> restored;
+    EXPECT_EQ(restored["SValue"].count(), results["SValue"].count());
+    EXPECT_DOUBLE_EQ(restored["SValue"].mean<double>(), results["SValue"].mean<double>());
+    EXPECT_EQ(restored["VValue"].mean<std::vector<double>>(), vector);
+}
 
-        my_sim_type(parameters_type const & params, std::size_t seed_offset = 42)
-            : alps::mcbase(params, seed_offset)
-            , total_count(params["COUNT"])
-
-        {
-            measurements << alps::accumulator::RealObservable("SValue")
-                         << alps::accumulator::RealVectorObservable("VValue");
-        }
-
-        // if not compiled with mpi boost::mpi::communicator does not exists, 
-        // so template the function
-        template <typename Arg> my_sim_type(parameters_type const & params, Arg comm)
-            : alps::mcbase(params, comm)
-            , total_count(params["COUNT"])
-        {
-            measurements << alps::accumulator::RealObservable("SValue")
-                         << alps::accumulator::RealVectorObservable("VValue");
-        }
-
-        // do the calculation in this function
-        void update() {
-            double x = random();
-            value = exp(-x * x);
-        };
-
-        // do the measurements here
-        void measure() {
-            ++count;
-            measurements["SValue"] << value;
-            measurements["VValue"] << std::vector<double>(3, value);
-        };
-
-        double fraction_completed() const {
-            return count / double(total_count);
-        }
-
-    private:
-        int count;
-        int total_count;
-        double value;
-};
-
-int main(int argc, char *argv[]) {
-
-    alps::mcoptions options(argc, argv);
-
-    alps::parameters_type<my_sim_type>::type params;
-    if (boost::filesystem::path(options.input_file).extension().string() == ".xml")
-        params = alps::make_parameters_from_xml(options.input_file);
-    else if (boost::filesystem::path(options.input_file).extension().string() == ".h5")
-        alps::hdf5::archive(options.input_file)["/parameters"] >> params;
-    else
-        params = alps::parameters_type<my_sim_type>::type(options.input_file);
-
-    my_sim_type my_sim(params); // creat a simulation
-    my_sim.run(alps::stop_callback(options.time_limit)); // run the simulation
-
-    alps::results_type<my_sim_type>::type results = collect_results(my_sim); // collect the results
-
-    std::cout << "e^(-x*x): " << results["SValue"] << std::endl;
-    std::cout << "e^(-x*x): " << results["VValue"] << std::endl;
-    save_results(results, params, options.output_file, "/simulation/results");
+TEST(MonteCarloRunner, StopCallbackPreventsFurtherMeasurements) {
+    alps::params parameters;
+    parameters["COUNT"] = 256;
+    parameters["SEED"] = 42;
+    sum_simulation simulation(parameters);
+    EXPECT_FALSE(simulation.run([&] { return simulation.count == 32; }));
+    EXPECT_EQ(simulation.count, 32);
+    EXPECT_DOUBLE_EQ(simulation.fraction_completed(), 0.125);
+    EXPECT_EQ(alps::collect_results(simulation)["SValue"].count(), 32u);
 }

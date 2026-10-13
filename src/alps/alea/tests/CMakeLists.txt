@@ -42,8 +42,22 @@ foreach(
   add_executable(${name} ${name}.C)
 
   target_link_libraries(${name} PRIVATE ALPS::alps)
-  alps_add_test(${name})
+  if(name MATCHES "^(histogram|signed|testobservableset|observableset_xml)$")
+    # Exact XML output is an external serialization/format contract.
+    alps_add_gtest(${name} COMPONENT alea LABELS compatibility xml)
+  elseif(name MATCHES "^(observableset_hdf5|mcanalyze)$")
+    alps_add_gtest(${name} COMPONENT alea LABELS integration hdf5)
+  else()
+    alps_add_gtest(${name} COMPONENT alea)
+  endif()
 endforeach()
 
 add_executable(dumpbench dumpbench.C)
 target_link_libraries(dumpbench PRIVATE ALPS::alps)
+
+if(ALPS_ENABLE_MPI)
+  add_executable(observableset_mpi observableset_mpi.C)
+  target_link_libraries(observableset_mpi PRIVATE ALPS::alps)
+  alps_add_mpi_gtest(observableset_mpi COMPONENT alea RANKS 2)
+  alps_add_mpi_gtest(observableset_mpi COMPONENT alea RANKS 3)
+endif()

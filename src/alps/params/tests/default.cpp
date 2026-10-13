@@ -12,15 +12,15 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <gtest/gtest.h>
+#include <alps/testing/temporary_directory.hpp>
 #include <alps/ngs/params.hpp>
 
-// TODO: make an in-file for all types!
-// TODO: make reference output file!
-
-int main() {
-
-    alps::params parms;
-    std::string strg = parms["non_existent_parameter"] | "substitution_string";
-    std::cout << strg << std::endl;
-    return 0;
+TEST(ParamsDefault, MissingValueUsesFallbackWithoutInserting) {
+    alps::params parameters;
+    EXPECT_EQ(std::string(parameters["missing"] | "substitution_string"), "substitution_string");
+    EXPECT_EQ(parameters["missing"] | 42, 42);
+    EXPECT_FALSE(parameters.defined("missing"));
+    parameters["present"] = 7;
+    EXPECT_EQ(parameters["present"] | 42, 7);
 }
