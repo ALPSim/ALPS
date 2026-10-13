@@ -43,3 +43,17 @@ changes, observable-set count/mean restoration, and all eleven Ising inverse
 temperatures from 0 to 1. Ising checks compare archived values and parameters to
 the simulation, verify finite uncertainties and exact physical bounds, and do
 not introduce probabilistic pass/fail thresholds.
+
+## ALPSCore conformance
+
+Tests ported from ALPSCore 7146b9e1 keep ALPSCore's copyright header and name
+their source and every change in a comment at the top. ALPSCore is MIT
+licensed; its copyright lines are
+"Copyright (C) 2012-18 University of Michigan" and "Copyright (C) 1998-14 ETH
+Zurich", and it asks publications to cite Wallerberger et al.,
+arXiv:1811.08331.
+
+| Test | Source | ALPS changes |
+| --- | --- | --- |
+| `hdf5_attributes` | `hdf5/test/hdf5_attributes.cpp` (with fix c7c64ca0) | ALPS temporary directory; cases for ALPS's `path/@name` spelling and a root-context attribute |
+
