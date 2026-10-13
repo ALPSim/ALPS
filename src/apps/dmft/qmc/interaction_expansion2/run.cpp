@@ -29,7 +29,7 @@ void compute_greens_functions(const alps::results_type<HubbardInteractionExpansi
 namespace {
 bool stop_requested(boost::posix_time::ptime const & end_time) {
 //stops the simulation if time > end_time or if signals received.
-  static alps::ngs::signal signal;
+  static alps::signal signal;
   return !signal.empty() || boost::posix_time::second_clock::local_time() > end_time;
 }
 }

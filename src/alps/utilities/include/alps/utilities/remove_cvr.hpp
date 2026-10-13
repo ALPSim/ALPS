@@ -11,30 +11,28 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_NGS_STACKTRACE_HPP
-#define ALPS_NGS_STACKTRACE_HPP
-
-#include <alps/utilities_export.h>
-#include <alps/ngs/config.hpp>
-#include <alps/ngs/stringify.hpp>
-
-#include <string>
-
-// TODO: check for gcc and use __PRETTY_FUNCTION__
-
-#define ALPS_STACKTRACE (                                                          \
-      std::string("\nIn ") + __FILE__                                              \
-    + " on " + ALPS_NGS_STRINGIFY(__LINE__)                                        \
-    + " in " + __FUNCTION__ + "\n"                                          	   \
-    + ::alps::ngs::stacktrace()                                                    \
-)
+#ifndef ALPS_DETAIL_REMOVE_CVR_HPP
+#define ALPS_DETAIL_REMOVE_CVR_HPP
 
 namespace alps {
-    namespace ngs {
+    namespace detail {
 
-        ALPS_UTILITIES_DECL std::string stacktrace();
+        template<typename T> struct remove_cvr {
+            typedef T type;
+        };
+    
+        template<typename T> struct remove_cvr<T const> {
+            typedef typename remove_cvr<T>::type type;
+        };
+    
+        template<typename T> struct remove_cvr<T volatile> {
+            typedef typename remove_cvr<T>::type type;
+        };
+    
+        template<typename T> struct remove_cvr<T &> {
+            typedef typename remove_cvr<T>::type type;
+        };
 
     }
 }
-
 #endif

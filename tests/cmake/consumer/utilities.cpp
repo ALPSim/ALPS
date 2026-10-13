@@ -3,11 +3,11 @@
 #include <alps/utility/citations.hpp>
 #include <alps/utility/encode.hpp>
 #include <alps/utility/os.hpp>
-#include <alps/utility/temporary_filename.hpp>
+#include <alps/utilities/temporary_filename.hpp>
 #include <alps/utility/vectorio.hpp>
 #include <alps/utility/vmusage.hpp>
-#include <alps/ngs/cast.hpp>
-#include <alps/ngs/short_print.hpp>
+#include <alps/utilities/cast.hpp>
+#include <alps/utilities/short_print.hpp>
 #include <alps/ngs/sleep.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <sstream>

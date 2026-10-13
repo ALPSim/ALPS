@@ -11,8 +11,8 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_NGS_SHORT_PRINT_HPP
-#define ALPS_NGS_SHORT_PRINT_HPP
+#ifndef ALPS_SHORT_PRINT_HPP
+#define ALPS_SHORT_PRINT_HPP
 
 #include <vector>
 #include <boost/array.hpp>

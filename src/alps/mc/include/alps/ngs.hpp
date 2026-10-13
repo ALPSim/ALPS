@@ -23,12 +23,12 @@
 #include <alps/hdf5/complex.hpp>
 
 #include <alps/ngs/api.hpp>
-#include <alps/ngs/cast.hpp>
+#include <alps/utilities/cast.hpp>
 #include <alps/ngs/sleep.hpp>
-#include <alps/ngs/signal.hpp>
+#include <alps/utilities/signal.hpp>
 #include <alps/ngs/random01.hpp>
 #include <alps/ngs/boost_mpi.hpp>
-#include <alps/ngs/short_print.hpp>
+#include <alps/utilities/short_print.hpp>
 #include <alps/ngs/thread_exceptions.hpp>
 #include <alps/ngs/observablewrappers.hpp> // TODO: remove!
 

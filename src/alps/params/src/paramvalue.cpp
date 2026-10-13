@@ -11,12 +11,12 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <alps/ngs/short_print.hpp>
+#include <alps/utilities/short_print.hpp>
 #include <alps/hdf5/vector.hpp>
 #include <alps/hdf5/complex.hpp>
 #include <alps/hdf5/pointer.hpp>
 #include <alps/ngs/detail/paramvalue.hpp>
-#include <alps/ngs/detail/type_wrapper.hpp>
+#include <alps/utilities/type_wrapper.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 
 namespace alps {

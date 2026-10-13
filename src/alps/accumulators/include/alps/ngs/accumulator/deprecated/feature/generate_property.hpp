@@ -15,7 +15,7 @@
 #ifndef ALPS_NGS_ALEA_DETAIL_GENERATE_PROPERTY
 #define ALPS_NGS_ALEA_DETAIL_GENERATE_PROPERTY
 
-#include <alps/ngs/stacktrace.hpp>
+#include <alps/utilities/stacktrace.hpp>
 
 #include <alps/ngs/alea/feature/value_type.hpp>
 

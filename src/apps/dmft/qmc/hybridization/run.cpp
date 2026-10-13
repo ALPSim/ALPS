@@ -30,7 +30,7 @@ int global_mpi_rank;
 
 namespace {
 bool stop_requested(boost::posix_time::ptime const & end_time) {
-  static alps::ngs::signal signal;
+  static alps::signal signal;
   return !signal.empty() || boost::posix_time::second_clock::local_time() > end_time;
 }
 void master_final_tasks(const alps::results_type<hybridization>::type &results,

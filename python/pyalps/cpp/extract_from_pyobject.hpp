@@ -10,7 +10,7 @@
 #ifndef PYALPS_NGS_EXTRACT_FROM_PYOBJECT_HPP
 #define PYALPS_NGS_EXTRACT_FROM_PYOBJECT_HPP
     #include "numpy_compat.hpp"
-    #include <alps/ngs/cast.hpp>
+    #include <alps/utilities/cast.hpp>
     #include <alps/ngs/config.hpp>
     #include <nanobind/nanobind.h>
     #include <nanobind/ndarray.h>

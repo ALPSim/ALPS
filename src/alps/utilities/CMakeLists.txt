@@ -5,6 +5,7 @@ add_library(alps_utilities
   src/encode.cpp
   src/os.cpp
   src/short_print.cpp
+  src/signal.cpp
   src/sleep.cpp
   src/stacktrace.cpp
   src/temporary_filename.cpp
@@ -55,16 +56,10 @@ target_sources(alps_utilities PUBLIC
     include/alps/factory.h
     include/alps/lambda.hpp
     include/alps/ngs/boost_mpi.hpp
-    include/alps/ngs/cast.hpp
     include/alps/ngs/config.hpp
-    include/alps/ngs/detail/remove_cvr.hpp
-    include/alps/ngs/detail/type_wrapper.hpp
     include/alps/ngs/hash.hpp
     include/alps/ngs/mutex.hpp
-    include/alps/ngs/short_print.hpp
     include/alps/ngs/sleep.hpp
-    include/alps/ngs/stacktrace.hpp
-    include/alps/ngs/stringify.hpp
     include/alps/ngs/thread_exceptions.hpp
     include/alps/stringvalue.h
     include/alps/type_traits/average_type.hpp
@@ -90,14 +85,21 @@ target_sources(alps_utilities PUBLIC
     include/alps/utility/encode.hpp
     include/alps/utility/factory.hpp
     include/alps/utility/generator.hpp
-    include/alps/utility/make_copy.hpp
     include/alps/utility/os.hpp
     include/alps/utility/resize.hpp
     include/alps/utility/set_zero.hpp
-    include/alps/utility/size.hpp
-    include/alps/utility/temporary_filename.hpp
     include/alps/utility/vectorio.hpp
-    include/alps/utility/vmusage.hpp)
+    include/alps/utility/vmusage.hpp
+    include/alps/utilities/cast.hpp
+    include/alps/utilities/make_copy.hpp
+    include/alps/utilities/remove_cvr.hpp
+    include/alps/utilities/short_print.hpp
+    include/alps/utilities/signal.hpp
+    include/alps/utilities/size.hpp
+    include/alps/utilities/stacktrace.hpp
+    include/alps/utilities/stringify.hpp
+    include/alps/utilities/temporary_filename.hpp
+    include/alps/utilities/type_wrapper.hpp)
 
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)

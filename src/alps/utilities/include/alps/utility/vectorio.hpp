@@ -25,7 +25,7 @@
 #define ALPS_VECTORIO_H
 
 #include <alps/config.h>
-#include <alps/utility/size.hpp>
+#include <alps/utilities/size.hpp>
 #include <alps/type_traits/element_type.hpp>
 
 #include <boost/throw_exception.hpp>

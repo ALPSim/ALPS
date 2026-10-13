@@ -80,8 +80,8 @@ def test_utilities_without_platform_stacktrace(tmp_path, monkeypatch, unavailabl
                   '#define backtrace_symbols alps_missing_backtrace_symbols\n')
     (tmp_path / "execinfo.h").write_text(header)
     (tmp_path / "main.cpp").write_text(
-        '#include <alps/ngs/stacktrace.hpp>\n'
-        'int main() { return !alps::ngs::stacktrace().empty(); }\n')
+        '#include <alps/utilities/stacktrace.hpp>\n'
+        'int main() { return !alps::stacktrace().empty(); }\n')
     (tmp_path / "CMakeLists.txt").write_text(
         'cmake_minimum_required(VERSION 3.27...4.3)\n'
         'project(stacktrace_contract LANGUAGES C CXX)\n'

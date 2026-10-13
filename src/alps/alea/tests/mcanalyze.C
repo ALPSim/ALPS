@@ -13,7 +13,7 @@
 
 #include <alps/alea.h>
 #include <alps/alea/mcanalyze.hpp>
-#include <alps/utility/size.hpp>
+#include <alps/utilities/size.hpp>
 #include <alps/hdf5.hpp>
 #include <alps/testing/temporary_directory.hpp>
 #include <boost/random.hpp>
