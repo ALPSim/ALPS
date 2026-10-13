@@ -17,6 +17,10 @@ components:
     name: ALPS libraries
     algorithm: []
     implementation: []
+  alea:
+    name: ALPS Core Libraries ALEA statistics
+    algorithm: []
+    implementation: [wallerberger2018alpscore]
   scheduler:
     name: ALPS parallel Monte Carlo scheduler
     algorithm: []
