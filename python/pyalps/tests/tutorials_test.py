@@ -25,7 +25,7 @@ from pathlib import Path
 import pytest
 
 
-TUTORIALS = Path(__file__).resolve().parents[2] / "tutorials" / "ngs"
+TUTORIALS = Path(__file__).resolve().parents[3] / "tutorials" / "ngs"
 
 # The export example is absent: its smoke test imports a compiled extension that
 # only exists after the downstream CMake build in test_binding_surface.py.

@@ -2,7 +2,7 @@
 
 ALPS uses GoogleTest for C++ runtime tests, CTest for native execution, and
 pytest for Python. Native component tests live beside their implementation in
-`src/alps/<component>/tests`; Python tests remain in `tests/pyalps`. Repository-wide
+`src/alps/<component>/tests`; Python tests live in `python/pyalps/tests`. Repository-wide
 integration, SDK, packaging and CI checks live here. The two language suites
 have independent entry points: passing CTest does not mean that the Python
 package was tested.
@@ -44,13 +44,13 @@ Standalone numerical tutorials need no SDK or wheel:
 
 ```sh
 python -m pip install numpy pytest
-python -m pytest tests/pyalps/bandstructure_tutorial_test.py -q
+python -m pytest tests/tutorials/test_bandstructure.py -q
 ```
 
 After installing the SDK and pyalps as described in `CONTRIBUTING.md`:
 
 ```sh
-python -m pytest tests/pyalps -q -rs
+python -m pytest python/pyalps/tests -q -rs
 python -m pytest tests/cmake -q -rs
 python -m pytest tests/ci tests/packaging -q
 ```
@@ -119,7 +119,7 @@ The remaining CMake process runner is for executable/CLI/tutorial contracts.
 
 Every PR runs a fixed set of checks: static/packaging helpers and numerical tutorial references, Linux serial native and editable-Python tests, Clang MPI integration, macOS SDK consumers, native ASan/UBSan, and manylinux packaging. The stable aggregate `CI` check requires every job to succeed; select it in branch protection. No workflow-level path filters can leave that required check pending.
 
-Weekly compatibility checks cover compiler/dependency boundaries, C++20/C++23, extensive HDF5 tests, OpenMP, installed tutorials, MPI-enabled Python, Intel/newer macOS, and all three wheel families. Release tags run the same compatibility workflow, including distribution artifact validation, before publishing those exact files. Python 3.11 and 3.12 exercise distinct wheel ABIs; newer interpreters test reuse of the abi3 wheel through binding, object-lifetime and package-loading checks. Fresh-runner smoke checks cover bindings and package loading. The identical C++ SDK consumers run once per wheel platform on Python 3.12. JUnit, CTest and per-rank MPI reports remain available as workflow artifacts. See [CI coverage](../CONTRIBUTING.md#ci-coverage) for the workflow entry points.
+Weekly compatibility checks cover compiler/dependency boundaries, C++20/C++23, extensive HDF5 tests, OpenMP, installed tutorials, MPI-enabled Python, Intel/newer macOS, and all three wheel families. Release tags run the same compatibility workflow, including distribution artifact validation, before publishing those exact files. Python 3.10, 3.11 and 3.12 exercise distinct wheel ABIs; newer interpreters test reuse of the abi3 wheel through binding, object-lifetime and package-loading checks. Fresh-runner smoke checks cover bindings and package loading. The identical C++ SDK consumers run once per wheel platform on Python 3.12. JUnit, CTest and per-rank MPI reports remain available as workflow artifacts. See [CI coverage](../CONTRIBUTING.md#ci-coverage) for the workflow entry points.
 
 Benchmarks remain separate from correctness gates. Existing timing programs
 are not claims of performance coverage. Introduce baselines only with a defined
