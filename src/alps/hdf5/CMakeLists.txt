@@ -1,7 +1,7 @@
-# Archive state and its signal cleanup handler share one runtime owner.
+# Archive state owns its signal cleanup: it registers archive::abort with
+# alps::signal (ALPS::utilities) when the first archive opens.
 add_library(alps_hdf5
-  src/archive.cpp
-  src/signal.cpp)
+  src/archive.cpp)
 target_link_libraries(alps_hdf5 PUBLIC ALPS::configuration ALPS::containers ALPS::utilities
   HDF5::HDF5 Boost::filesystem Boost::thread Threads::Threads)
 # FindHDF5 may expose provider targets or absolute paths through its aggregate.
@@ -26,8 +26,7 @@ target_sources(alps_hdf5 PUBLIC
     include/alps/hdf5/ublas/matrix.hpp
     include/alps/hdf5/ublas/vector.hpp
     include/alps/hdf5/valarray.hpp
-    include/alps/hdf5/vector.hpp
-    include/alps/ngs/signal.hpp)
+    include/alps/hdf5/vector.hpp)
 
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)

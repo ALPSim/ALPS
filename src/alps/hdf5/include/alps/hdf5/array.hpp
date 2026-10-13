@@ -15,7 +15,7 @@
 #define ALPS_NGS_HDF5_BOOST_ARRAY_HPP
 
 #include <alps/hdf5/archive.hpp>
-#include <alps/ngs/cast.hpp>
+#include <alps/utilities/cast.hpp>
 
 #include <boost/array.hpp>
 

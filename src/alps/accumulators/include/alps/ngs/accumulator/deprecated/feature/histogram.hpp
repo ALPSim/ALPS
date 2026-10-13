@@ -18,7 +18,7 @@
 #include <alps/ngs/alea/feature/feature_traits.hpp>
 #include <alps/ngs/alea/feature/generate_property.hpp>
 
-#include <alps/ngs/stacktrace.hpp>
+#include <alps/utilities/stacktrace.hpp>
 
 #include <boost/cstdint.hpp>
 #include <boost/utility.hpp>

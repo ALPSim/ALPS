@@ -11,11 +11,17 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_NGS_STRINGIFY_HPP
-#define ALPS_NGS_STRINGIFY_HPP
+#ifndef ALPS_DETAIL_TYPE_WRAPPER_HPP
+#define ALPS_DETAIL_TYPE_WRAPPER_HPP
 
-#define ALPS_NGS_STRINGIFY(arg) ALPS_NGS_STRINGIFY_HELPER(arg)
+namespace alps {
 
-#define ALPS_NGS_STRINGIFY_HELPER(arg) #arg
+    namespace detail {
 
+        template<typename T> struct type_wrapper {
+            typedef T type;
+        };
+
+    }
+}
 #endif

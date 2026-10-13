@@ -15,7 +15,7 @@
 #ifndef ALPS_GRAPH_DETAIL_LATTICE_CONSTANT_IMPL_HPP
 #define ALPS_GRAPH_DETAIL_LATTICE_CONSTANT_IMPL_HPP
 
-#include <alps/ngs/stacktrace.hpp>
+#include <alps/utilities/stacktrace.hpp>
 
 #include <alps/lattice.h>
 #include <alps/numeric/vector_functions.hpp>

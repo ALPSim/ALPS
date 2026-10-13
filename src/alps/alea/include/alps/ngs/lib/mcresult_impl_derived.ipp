@@ -16,8 +16,8 @@
 
 #include <alps/hdf5/archive.hpp>
 #include <alps/ngs/boost_mpi.hpp>
-#include <alps/ngs/stacktrace.hpp>
-#include <alps/ngs/short_print.hpp>
+#include <alps/utilities/stacktrace.hpp>
+#include <alps/utilities/short_print.hpp>
 
 #include <alps/alea/mcdata.hpp>
 

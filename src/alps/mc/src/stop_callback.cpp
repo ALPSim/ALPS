@@ -12,7 +12,7 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <alps/ngs/signal.hpp>
+#include <alps/utilities/signal.hpp>
 #include <alps/ngs/boost_mpi.hpp>
 #include <alps/stop_callback.hpp>
 

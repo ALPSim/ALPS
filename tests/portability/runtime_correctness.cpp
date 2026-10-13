@@ -9,7 +9,7 @@
 #include <alps/parapack/integer_range.h>
 #include <limits>
 #include <alps/numeric/vector_valarray_conversion.hpp>
-#include <alps/utility/temporary_filename.hpp>
+#include <alps/utilities/temporary_filename.hpp>
 #include <cmath>
 #include <cstdio>
 #include <stdexcept>

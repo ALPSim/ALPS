@@ -41,6 +41,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - Top-level single-configuration builds still default to `CMAKE_BUILD_TYPE=Release`; embedded builds leave the build type to the parent project.
 - Support editable Python development against an installed SDK, with packaged native runtime resources and explicit downstream ABI checks. Redistributable wheels bundle native dependencies through platform repair and are tested after installation on fresh runners.
 - Build the C++ and Fortran examples in `tutorials/examples/` as standalone projects against an installed SDK. Tutorial sources are installed only when the `tutorials` component is requested.
+- Adopt ALPSCore's `<alps/utilities/...>` include spellings for `cast`, `stacktrace`, `signal`, `stringify`, `short_print`, `remove_cvr`, `type_wrapper`, `size`, `temporary_filename` and `make_copy`. `alps::ngs::signal` and `alps::ngs::stacktrace()` become `alps::signal` and `alps::stacktrace()`, and `ALPS_NGS_STRINGIFY` becomes `ALPS_STRINGIFY`. `alps::signal` moves from `ALPS::hdf5` to `ALPS::utilities`; open archives still close on a segmentation fault. The old spellings and names remain, deprecated, while `ALPS_LEGACY_API` is on (the default); see [the legacy layer](legacy/README.md). Rebuild downstream binaries.
 
 ### Migration
 
@@ -64,6 +65,8 @@ Numerical matrix/vector persistence now requires an explicit adapter: include `<
 | `UseALPS.cmake`, `include.mk` | Imported SDK targets and explicit installation paths; add the installed `bin` directory to `PATH`. Both remain installed, deprecated: `${ALPS_LIBRARIES}` is `ALPS::alps`, and `UseALPS.cmake` no longer sets compilers, global flags or cache entries |
 | `UsePyALPS.cmake` | [pyalps downstream CMake package](python/pyalps/README.md#downstream-native-extensions); the deprecated `alps_target_link_pyalps` links `pyalps::runtime` |
 | `<alps/ngs/detail/export_sim_to_python.hpp>` | `<pyalps/export_simulation.hpp>`; the old header forwards to it |
+| `<alps/ngs/{cast,stacktrace,signal,stringify,short_print}.hpp>`, `<alps/ngs/detail/{remove_cvr,type_wrapper}.hpp>`, `<alps/utility/{size,temporary_filename,make_copy}.hpp>` | `<alps/utilities/...>` with the same file name; the old headers forward to them while `ALPS_LEGACY_API` is on |
+| `alps::ngs::signal`, `alps::ngs::stacktrace()`, `ALPS_NGS_STRINGIFY` | `alps::signal`, `alps::stacktrace()`, `ALPS_STRINGIFY`; deprecated aliases remain while `ALPS_LEGACY_API` is on |
 | Historical XML shell tools | Retained alongside `alps-xml`; see [XML tools](CONTRIBUTING.md#xml-resources-and-tools) |
 | Top-level `import mpi` compatibility module | `import pyalps.mpi`; install the `mpi` extra for mpi4py |
 | `applications/`, `tool/`, `test/`, `example/` | `src/apps/`, `src/tools/`, `tests/`, `tutorials/examples/` |

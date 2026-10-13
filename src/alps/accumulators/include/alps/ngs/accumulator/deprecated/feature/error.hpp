@@ -19,7 +19,7 @@
 #include <alps/ngs/alea/feature/feature_traits.hpp>
 #include <alps/ngs/alea/feature/generate_property.hpp>
 
-#include <alps/ngs/short_print.hpp>
+#include <alps/utilities/short_print.hpp>
 #include <alps/ngs/numeric/array.hpp>
 #include <alps/ngs/numeric/detail.hpp>
 #include <alps/ngs/numeric/vector.hpp>
