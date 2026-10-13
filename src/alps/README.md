@@ -6,7 +6,7 @@ Sources use `include/`, `src/` and `tests/` where applicable. Public include spe
 
 | Source module under `src/alps/` | Responsibility | Binary or compile owner |
 | --- | --- | --- |
-| `utilities/` | Utility functions, general helpers, type traits and NGS configuration helpers | `ALPS::utilities` |
+| `utilities/` | Utility functions, general helpers, signal handling, type traits and NGS configuration helpers | `ALPS::utilities` |
 | `containers/` | Fixed-capacity containers, ALPS multi-array storage and Boost serialization | `ALPS::containers` |
 | `numerics/` | Numerical helpers, array mathematics and matrix/vector interfaces | `ALPS::numerics` |
 | `numeric_io/` | HDF5 adapters for numerical matrices and vectors | `ALPS::numeric_io` |

@@ -29,7 +29,7 @@
 #include "boost/tuple/tuple.hpp"
 #include "alps/parser/parser.h"
 #include "alps/utility/vectorio.hpp"
-#include "alps/utility/temporary_filename.hpp"
+#include "alps/utilities/temporary_filename.hpp"
 #include "alps/numeric/isnan.hpp"
 #include "alps/numeric/isinf.hpp"
 #include <alps/utility/os.hpp>

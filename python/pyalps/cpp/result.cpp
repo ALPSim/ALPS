@@ -8,10 +8,10 @@
 #include <nanobind/ndarray.h>
 #include <nanobind/stl/string.h>
 #include <alps/hdf5/archive.hpp>
-#include <alps/ngs/cast.hpp>
+#include <alps/utilities/cast.hpp>
 #include <alps/ngs/mcresult.hpp>
 #include <alps/ngs/mcobservable.hpp>
-#include <alps/ngs/stacktrace.hpp>
+#include <alps/utilities/stacktrace.hpp>
 #include <cmath>
 #include <cstddef>
 #include <cstring>

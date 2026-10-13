@@ -11,28 +11,35 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_NGS_DETAIL_REMOVE_CVR_HPP
-#define ALPS_NGS_DETAIL_REMOVE_CVR_HPP
+#ifndef ALPS_STACKTRACE_HPP
+#define ALPS_STACKTRACE_HPP
+
+#include <alps/utilities_export.h>
+#include <alps/ngs/config.hpp>
+#include <alps/utilities/stringify.hpp>
+
+#include <string>
+
+// TODO: check for gcc and use __PRETTY_FUNCTION__
+
+#define ALPS_STACKTRACE (                                                          \
+      std::string("\nIn ") + __FILE__                                              \
+    + " on " + ALPS_STRINGIFY(__LINE__)                                            \
+    + " in " + __FUNCTION__ + "\n"                                          	   \
+    + ::alps::stacktrace()                                                         \
+)
 
 namespace alps {
-    namespace detail {
 
-        template<typename T> struct remove_cvr {
-            typedef T type;
-        };
-    
-        template<typename T> struct remove_cvr<T const> {
-            typedef typename remove_cvr<T>::type type;
-        };
-    
-        template<typename T> struct remove_cvr<T volatile> {
-            typedef typename remove_cvr<T>::type type;
-        };
-    
-        template<typename T> struct remove_cvr<T &> {
-            typedef typename remove_cvr<T>::type type;
-        };
+    ALPS_UTILITIES_DECL std::string stacktrace();
 
-    }
 }
+
+// Deprecated ALPS 2.x names, present only with the legacy layer (ALPS_LEGACY_API).
+#if defined(__has_include)
+#  if __has_include(<alps/legacy/ngs_stacktrace.hpp>)
+#    include <alps/legacy/ngs_stacktrace.hpp>
+#  endif
+#endif
+
 #endif

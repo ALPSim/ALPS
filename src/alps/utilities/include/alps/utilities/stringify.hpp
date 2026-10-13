@@ -11,17 +11,18 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_NGS_DETAIL_TYPE_WRAPPER_HPP
-#define ALPS_NGS_DETAIL_TYPE_WRAPPER_HPP
+#ifndef ALPS_STRINGIFY_HPP
+#define ALPS_STRINGIFY_HPP
 
-namespace alps {
+#define ALPS_STRINGIFY(arg) ALPS_STRINGIFY_HELPER(arg)
 
-    namespace detail {
+#define ALPS_STRINGIFY_HELPER(arg) #arg
 
-        template<typename T> struct type_wrapper {
-            typedef T type;
-        };
+// Deprecated ALPS 2.x names, present only with the legacy layer (ALPS_LEGACY_API).
+#if defined(__has_include)
+#  if __has_include(<alps/legacy/ngs_stringify.hpp>)
+#    include <alps/legacy/ngs_stringify.hpp>
+#  endif
+#endif
 
-    }
-}
 #endif

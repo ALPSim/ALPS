@@ -192,6 +192,9 @@ install(
   DESTINATION ${CMAKE_INSTALL_DATADIR}/alps
   COMPONENT build)
 include(cmake/legacy/ALPSLegacyInterfaces.cmake)
+# Deprecated C++ interfaces. Everything in legacy/ is wired in that one file;
+# deleting the legacy/ directory removes it without further edits.
+include(legacy/ALPSLegacy.cmake OPTIONAL)
 install(
   FILES CHANGELOG.md CITATION.md CONTRIBUTING.md LICENSE.txt README.md
   DESTINATION ${CMAKE_INSTALL_DATADIR}/alps

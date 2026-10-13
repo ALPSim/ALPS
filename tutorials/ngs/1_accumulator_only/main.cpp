@@ -35,7 +35,7 @@ struct stop_callback {
     }
 
     boost::chrono::duration<std::size_t> limit;
-    alps::ngs::signal signals;
+    alps::signal signals;
     boost::chrono::high_resolution_clock::time_point start;
 };
 

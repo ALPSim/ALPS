@@ -11,20 +11,19 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_NGS_SIGNAL_HPP
-#define ALPS_NGS_SIGNAL_HPP
+#ifndef ALPS_SIGNAL_HPP
+#define ALPS_SIGNAL_HPP
 
 #include <alps/ngs/config.hpp>
-#include <alps/hdf5_export.h>
+#include <alps/utilities_export.h>
 
 #include <boost/array.hpp>
 
 #include <vector>
 
 namespace alps {
-  namespace ngs {
 
-    class ALPS_HDF5_DECL signal{
+    class ALPS_UTILITIES_DECL signal{
 
     public:
 
@@ -66,13 +65,27 @@ archives are closed before it exits.
 
       static void segfault(int signal);
 
+      /*!
+Registers a function that segfault() calls before printing the stacktrace,
+or clears it with nullptr. ALPS::hdf5 registers the cleanup that closes all
+open archives when it opens the first one. ALPS extension; ALPSCore's signal
+has no such hook.
+      */
+      static void set_fatal_cleanup(void (*cleanup)());
+
     private:
 
       static std::size_t begin_;
       static std::size_t end_;
       static boost::array<int, 0x20> signals_;
     };
-  }
 }
+
+// Deprecated ALPS 2.x names, present only with the legacy layer (ALPS_LEGACY_API).
+#if defined(__has_include)
+#  if __has_include(<alps/legacy/ngs_signal.hpp>)
+#    include <alps/legacy/ngs_signal.hpp>
+#  endif
+#endif
 
 #endif

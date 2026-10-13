@@ -23,7 +23,7 @@
 #ifndef ALPS_ALEA_MCDATA_HPP
 #define ALPS_ALEA_MCDATA_HPP
 
-#include <alps/ngs/short_print.hpp>
+#include <alps/utilities/short_print.hpp>
 
 #include <alps/config.h>
 #include <alps/alea/nan.h>

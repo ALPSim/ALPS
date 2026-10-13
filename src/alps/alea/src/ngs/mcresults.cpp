@@ -13,7 +13,7 @@
 
 #include <alps/hdf5/archive.hpp>
 #include <alps/ngs/mcresults.hpp>
-#include <alps/ngs/stacktrace.hpp>
+#include <alps/utilities/stacktrace.hpp>
 
 #include <alps/alea/observableset.h>
 

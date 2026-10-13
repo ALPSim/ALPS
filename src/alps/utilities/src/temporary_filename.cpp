@@ -4,7 +4,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 
-#include <alps/utility/temporary_filename.hpp>
+#include <alps/utilities/temporary_filename.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <cerrno>
 #include <cstdio>

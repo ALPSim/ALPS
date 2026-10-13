@@ -12,10 +12,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <alps/hdf5/archive.hpp>
-#include <alps/ngs/cast.hpp>
+#include <alps/utilities/cast.hpp>
 #include <alps/ngs/config.hpp>
-#include <alps/ngs/signal.hpp>
-#include <alps/ngs/stacktrace.hpp>
+#include <alps/utilities/signal.hpp>
+#include <alps/utilities/stacktrace.hpp>
 
 #include <boost/scoped_array.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -126,7 +126,7 @@ namespace alps {
                             std::cerr << "Error in " 
                                       << __FILE__ 
                                       << " on " 
-                                      << ALPS_NGS_STRINGIFY(__LINE__) 
+                                      << ALPS_STRINGIFY(__LINE__) 
                                       << " in " 
                                       << __FUNCTION__ // TODO: check for gcc and use __PRETTY_FUNCTION__ 
                                       << ":" 
@@ -266,7 +266,9 @@ namespace alps {
                 private:
 
                     void construct() {
-                        alps::ngs::signal::listen();
+                        // A segfault closes every open archive before aborting.
+                        alps::signal::set_fatal_cleanup(&archive::abort);
+                        alps::signal::listen();
                         if (memory_ && large_)
                             throw archive_error("either memory or large file system can be used!" + ALPS_STACKTRACE);
                         else if (memory_) {
@@ -362,7 +364,7 @@ namespace alps {
                                 std::cerr << "Error in " 
                                           << __FILE__ 
                                           << " on " 
-                                          << ALPS_NGS_STRINGIFY(__LINE__) 
+                                          << ALPS_STRINGIFY(__LINE__) 
                                           << " in " 
                                           << __FUNCTION__ // TODO: check for gcc and use __PRETTY_FUNCTION__  
                                           << ":" 

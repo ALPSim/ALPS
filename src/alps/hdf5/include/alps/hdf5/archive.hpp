@@ -16,10 +16,10 @@
 
 #include <alps/ngs/config.hpp>
 #include <alps/hdf5_export.h>
-#include <alps/ngs/stacktrace.hpp>
+#include <alps/utilities/stacktrace.hpp>
 #include <alps/hdf5/errors.hpp>
-#include <alps/ngs/detail/remove_cvr.hpp>
-#include <alps/ngs/detail/type_wrapper.hpp>
+#include <alps/utilities/remove_cvr.hpp>
+#include <alps/utilities/type_wrapper.hpp>
 
 #include <boost/mpl/and.hpp>
 #include <boost/filesystem/path.hpp>

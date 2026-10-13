@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 #include <gtest/gtest.h>
-#include <alps/utility/temporary_filename.hpp>
+#include <alps/utilities/temporary_filename.hpp>
 #include <alps/utility/os.hpp>
 #include <alps/parapack/filelock.h>
 #include <alps/ngs/sleep.hpp>

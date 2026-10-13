@@ -11,7 +11,7 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <alps/ngs/short_print.hpp>
+#include <alps/utilities/short_print.hpp>
 #include <alps/multi_array.hpp>
 
 #include <iostream>

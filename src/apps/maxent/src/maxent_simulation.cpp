@@ -17,7 +17,7 @@
 #include "maxent.hpp"
 #include <alps/config.h> // needed to set up correct bindings
 #include <alps/hdf5/ublas/vector.hpp>
-#include <alps/ngs/signal.hpp>
+#include <alps/utilities/signal.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/numeric/bindings/lapack/driver/gesv.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
@@ -42,7 +42,7 @@ MaxEntSimulation::MaxEntSimulation(const alps::params &parms,const std::string &
   // Preserve the seed conversion and archive signal setup previously supplied
   // by mcbase, even though deterministic MaxEnt does not consume random values.
   (void)static_cast<int>(parms["SEED"] | 42);
-  alps::ngs::signal::listen();
+  alps::signal::listen();
   if(norm != 1.) std::cerr<<"WARNING: Redefinition of parameter NORM: Input (and output) data are assumed to be normalized to NORM."<<std::endl;
   const double alpha_min = parms["ALPHA_MIN"];                                          //Smallest value of \alpha that is tried
   const double alpha_max = parms["ALPHA_MAX"];                                          //Largest  value of \alpha that is tried
