@@ -23,6 +23,11 @@ installed; the feature itself is the code under `src/alps/lattice` and
     a particle-number-changing term in the full Fock space.
   - `alps_checks/t5_interleaved.py`: random two-body terms on 2- and 3-site
     plaquettes vs a dense Jordan-Wigner matrix.
+  - `alps_checks/t6_moore_read.py`: bosonic Moore-Read state from a 3-body
+    (6-operator) contact interaction in the lowest Landau level on a sphere.
+    Full spectrum vs a dense reference; zero-mode counts vs the
+    (2,2)-admissible patterns, with the unique Moore-Read ground state at
+    2S = N - 2. Takes about 7 minutes.
   - `results/`: output of the runs above.
 
 Running: build ALPS with applications (`cmake --preset default
