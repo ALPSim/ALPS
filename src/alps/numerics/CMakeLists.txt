@@ -37,6 +37,7 @@ target_sources(alps_numerics INTERFACE
     include/alps/numeric/fourier.hpp
     include/alps/numeric/functional.hpp
     include/alps/numeric/imag.hpp
+    include/alps/numeric/inf.hpp
     include/alps/numeric/is_equal.hpp
     include/alps/numeric/is_negative.hpp
     include/alps/numeric/is_nonzero.hpp
