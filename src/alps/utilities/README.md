@@ -27,6 +27,7 @@ means it was moved as it was, and the note says what modernization remains.
 | `size.hpp` | `alps::size()` for scalars and sequences | current; ALPSCore name |
 | `temporary_filename.hpp` | Private temporary file names | current; ALPSCore name. ALPS keeps its by-value signature |
 | `make_copy.hpp` | `alps::make_copy()` | current; ALPSCore name |
+| `mpi.hpp` | `alps::mpi`: ALPSCore's MPI communicator, environment, broadcast and reductions | current; copied unchanged from ALPSCore, MPI builds only |
 | `copyright.hpp` | Program banners, version and license text | current |
 | `citations.hpp` | Citation notices from the generated catalog | current |
 | `os.hpp` | Host, user and directory queries | carried over; returns `boost::filesystem::path` |
@@ -43,3 +44,29 @@ stays where it is: ALPSCore's header of the same name is a different API.
 
 Old spellings of the moved headers forward from the [legacy layer](../../../legacy/README.md)
 while `ALPS_LEGACY_API` is on.
+
+## ALPSCore's MPI wrapper
+
+`mpi.hpp` is copied unchanged from ALPSCore commit
+`7146b9e1f017938a94e5dae35d88467cc5ba7969`
+(`utilities/include/alps/utilities/mpi.hpp`). Its notice refers to ALPSCore's
+top-level
+[`COPYRIGHT.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f017938a94e5dae35d88467cc5ba7969/COPYRIGHT.TXT),
+[`LICENSE.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f017938a94e5dae35d88467cc5ba7969/LICENSE.TXT)
+and
+[`ACKNOWLEDGE.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f017938a94e5dae35d88467cc5ba7969/ACKNOWLEDGE.TXT).
+It includes `<mpi.h>`, so only MPI builds install it. In ALPSCore, ALEA, the
+Green's functions, parameters and Monte Carlo code all use it, so it lives here
+rather than with one module.
+
+Its names share namespace `alps::mpi` with ALPS's `<alps/ngs/mpi.hpp>`, without
+overlapping; `utilities_mpi_coexistence` uses both in one program. Its
+`environment`, like Boost.MPI's, leaves MPI alone if something else initialized
+it.
+
+`tests/` holds ALPSCore's tests of the header (`utilities/test/`):
+`mpi_utils_env`, `mpi_utils_comm`, `mpi_utils_bcast`, `mpi_utils_reduce` and the
+two `mpi_utils_env_exceptions`, with `mpi_test_support.{cpp,hpp}` and
+`test_utils.hpp`, all unchanged. They run on 2 and 3 ranks; ALPSCore ran them on
+`ALPS_TEST_MPI_NPROC` ranks, 1 by default. `mpi_utils_bcast_optional` is not
+ported, since it tests `mpi_optional.hpp`, which ALPS does not have.
