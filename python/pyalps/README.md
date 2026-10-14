@@ -14,17 +14,19 @@ Install `pyalps[mpi]` for the mpi4py-backed `pyalps.mpi` interface. Bundled appl
 
 ## Command-line tools
 
-Wheels include commands for the bundled applications, including `spinmc`, `loop`, `worm`, `dmrg`, and `sparsediag`, plus the tutorial tools `parameter2xml`, `printgraph`, `convert2xml`, `convert2text`, `plot2text`, `plot2gp`, `plot2xmgr`, `snap2vtk`, and `maxent`. For example:
+Wheels include commands for the bundled applications, including `spinmc`, `loop`, `worm`, `dmrg`, and `sparsediag`, plus the tutorial tools `parameter2xml`, `printgraph`, `convert2xml`, `alps-xml`, `snap2vtk`, and `maxent`. For example:
 
 ```sh
 parameter2xml simulation.in
 spinmc --write-xml simulation.in.in.xml
-convert2text simulation.in.task1.out.xml > results.txt
+alps-xml convert text simulation.in.task1.out.xml > results.txt
 ```
+
+The wheel's `alps-xml` accepts the same commands as the SDK's (see [XML tools](../../CONTRIBUTING.md#xml-resources-and-tools)), but uses lxml instead of an external `xsltproc`. The older names `convert2text`, `plot2text`, `plot2gp`, and `plot2xmgr` remain as aliases of `alps-xml convert text`, `alps-xml plot text`, `alps-xml plot gnuplot`, and `alps-xml plot grace`.
 
 Download inputs from the [ALPS tutorials](https://alps.comp-phys.org/tutorials/); they are not included in wheels. Set `ALPS_XML_PATH` only to override the bundled XML resources.
 
-For older tutorials, use `python` instead of the removed `alpspython` wrapper and `pyalps.plot` instead of `plot2mpl` or `extractmpl`.
+For older tutorials, use `python` instead of the removed `alpspython` wrapper, and `pyalps.plot` or `alps-xml plot matplotlib` instead of `plot2mpl` or `extractmpl`.
 
 ## Building from source
 
