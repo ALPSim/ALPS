@@ -17,6 +17,14 @@ components:
     name: ALPS libraries
     algorithm: []
     implementation: []
+  aleav2:
+    name: ALPS Core Libraries ALEA statistics
+    algorithm: []
+    implementation: [wallerberger2018alpscore]
+  accumulators:
+    name: ALPS Core Libraries accumulators
+    algorithm: []
+    implementation: [wallerberger2018alpscore]
   scheduler:
     name: ALPS parallel Monte Carlo scheduler
     algorithm: []
