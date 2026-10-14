@@ -631,27 +631,23 @@ DMRGTask<value_type>::extract_mps()
     boost::throw_exception(std::runtime_error(std::string("SAVE_MPS: could not read ") + file));
   dmtk::VectorState<value_type > gs;
   gs.read(in);
+  // read() rebuilds the subspaces only when a quantum number is conserved,
+  // but the values are stored by subspace in either case (cf. System::read_gs)
+  gs.resize(gs.qn_mask());
   std::size_t da = shapes[n-1][2], ds = alps_index[n].size(), dt = alps_index[n+1].size(), db = shapes[n+2][0];
   if (gs.b1().dim() != da || gs.b2().dim() != ds || gs.b3().dim() != dt || gs.b4().dim() != db)
     boost::throw_exception(std::runtime_error(std::string("SAVE_MPS: ") + file + " does not match the blocks of the final sweep"));
   std::vector<value_type> psi(da*ds*dt*db, value_type(0));
-  for (std::size_t a = 0; a < da; ++a)
-    for (std::size_t s = 0; s < ds; ++s)
-      for (std::size_t t = 0; t < dt; ++t)
-        for (std::size_t b = 0; b < db; ++b)
-          if (!gs.constrained())
-            psi[((a*ds + alps_index[n][s])*dt + alps_index[n+1][t])*db + b] = gs(a, s, t, b);
-  if (gs.constrained())
-    for (typename dmtk::VectorState<value_type>::const_iterator sp = gs.subspace_begin(); sp != gs.subspace_end(); ++sp) {
-      const dmtk::StateSpace &ss = *sp;
-      std::size_t idx = ss.start();
-      dmtk::SubSpace r1 = ss[1], r2 = ss[2], r3 = ss[3], r4 = ss[4];
-      for (std::size_t a = r1.begin(); a < r1.begin() + r1.dim(); ++a)
-        for (std::size_t s = r2.begin(); s < r2.begin() + r2.dim(); ++s)
-          for (std::size_t t = r3.begin(); t < r3.begin() + r3.dim(); ++t)
-            for (std::size_t b = r4.begin(); b < r4.begin() + r4.dim(); ++b)
-              psi[((a*ds + alps_index[n][s])*dt + alps_index[n+1][t])*db + b] = gs[idx++];
-    }
+  for (typename dmtk::VectorState<value_type>::const_iterator sp = gs.subspace_begin(); sp != gs.subspace_end(); ++sp) {
+    const dmtk::StateSpace &ss = *sp;
+    std::size_t idx = ss.start();
+    dmtk::SubSpace r1 = ss[1], r2 = ss[2], r3 = ss[3], r4 = ss[4];
+    for (std::size_t a = r1.begin(); a < r1.begin() + r1.dim(); ++a)
+      for (std::size_t s = r2.begin(); s < r2.begin() + r2.dim(); ++s)
+        for (std::size_t t = r3.begin(); t < r3.begin() + r3.dim(); ++t)
+          for (std::size_t b = r4.begin(); b < r4.begin() + r4.dim(); ++b)
+            psi[((a*ds + alps_index[n][s])*dt + alps_index[n+1][t])*db + b] = gs[idx++];
+  }
   dmrg_mps::split_two_site(psi, da, ds, dt, db, tensors[n], shapes[n], tensors[n+1], shapes[n+1]);
 
   mps_tensors.swap(tensors);
