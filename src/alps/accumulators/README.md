@@ -50,7 +50,7 @@ ALPSCore's top-level files, copied unchanged. The SDK installs them under
 | ALPSCore path | Here | Relationship |
 | --- | --- | --- |
 | `accumulators/include/alps/accumulators.hpp` | `include/alps/accumulators.hpp` | Copied unchanged |
-| `accumulators/include/alps/accumulators/**` | `include/alps/accumulators/**` | Copied unchanged |
+| `accumulators/include/alps/accumulators/**` | `include/alps/accumulators/**` | Copied unchanged, except that `convergence.hpp` and `feature/binning_analysis.hpp` gain includes (see below) |
 | `accumulators/src/*.cpp`, `accumulators/src/feature/*.cpp` (11 files) | `src/`, `src/feature/` | Copied unchanged |
 | `accumulators/test/*.cpp` (31 files), `accumulators/test/accumulator_generator.hpp` | `tests/` | Copied unchanged, except two include lines (see below) |
 | `utilities/test/vector_comparison_predicates.hpp` | `tests/vector_comparison_predicates.hpp` | Copied unchanged |
@@ -71,6 +71,17 @@ The headers the accumulators need from ALPSCore's utilities module are in
 READMEs. The CMake files and this README are ALPS's own.
 
 ### Local changes
+
+Two imported headers relied on their includers for some declarations. Each now
+includes what it needs, so it compiles on its own, and a comment marks the
+addition:
+
+- `alps/accumulators/convergence.hpp` includes `<boost/throw_exception.hpp>`
+  and `<stdexcept>`.
+- `alps/accumulators/feature/binning_analysis.hpp` includes
+  `feature/error.hpp`, whose `error_type` it uses.
+
+One test change:
 
 - `tests/save_load.cpp` and `tests/mean_err_count.cpp` include
   `vector_comparison_predicates.hpp` from their own directory. ALPSCore names it

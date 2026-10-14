@@ -10,6 +10,10 @@
 
 #include <alps/config.hpp>
 #include <string>
+// ALPS: for boost::throw_exception and std::logic_error, so that this header
+// compiles on its own.
+#include <boost/throw_exception.hpp>
+#include <stdexcept>
 
 namespace alps {
 
