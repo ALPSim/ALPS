@@ -64,12 +64,8 @@ references.
 
 ## License and scientific credit
 
-CQMP/Maxent's maintainers agreed to MIT licensing for this reintegration, as
-confirmed by the reintegration requester on 2026-10-14. `LICENSE.TXT` records
-those MIT terms. The pinned upstream tree still contains its earlier GPL text;
-the MIT terms here rely on that maintainer agreement. The original source
-copyright notices and `ACKNOWLEDGE.TXT` are preserved. This agreement covers
-Maxent; external dependencies retain their own licenses.
+The imported code is under the MIT license in [LICENSE.TXT](LICENSE.TXT). Its
+copyright notices and `ACKNOWLEDGE.TXT` are preserved.
 
 The citation catalog credits Levy, LeBlanc and Gull's 2017 implementation and
 the Bryan and Jarrell–Gubernatis method references. ALPS supplies the current
