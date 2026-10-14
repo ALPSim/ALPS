@@ -73,7 +73,7 @@ Build and install the C++ SDK with CMake, then build the Python package against 
 - CMake ≥ 3.27, Ninja for the bundled presets, and C++17/C11 compilers such as GCC or Clang.
 - Boost ≥ 1.76 with its compiled libraries and CMake packages, HDF5 ≥ 1.10.5 (C library), and LP64 BLAS/LAPACK. Use serial HDF5 for the default MPI-disabled build; see [numerical libraries](#numerical-libraries).
 - For Python development: GIL-enabled CPython ≥ 3.10 in a writable Python environment. Pip installs NumPy, SciPy and Matplotlib with pyalps. Free-threaded Python is unsupported.
-- For applications: Eigen >= 3.3 for the MaxEnt solver.
+- Eigen ≥ 3.3 for the applications, which need it for MaxEnt. Library-only builds (`ALPS_BUILD_APPLICATIONS=OFF`) can do without it; they then leave out the components copied from ALPSCore that need it, such as [ALEA v2](src/alps/aleav2/README.md).
 - Optional: MPI and Boost.MPI for `ALPS_ENABLE_MPI=ON`; an OpenMP runtime for `ALPS_ENABLE_OPENMP=ON`; a Fortran compiler for the Fortran examples.
 
 Use existing dependencies or your preferred package manager. Keep the compiler, architecture and native dependency stack consistent between the SDK, bindings and downstream extensions.
