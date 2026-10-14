@@ -10,7 +10,7 @@
 #include "maxent.hpp"
 #include <alps/config.h> // needed to set up correct bindings
 
-///This class contains necessities to analytically continue a
+///This class contains necessities to analytically continue a 
 //real function to the imaginary axis
 class Backcont{
   public:

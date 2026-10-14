@@ -85,27 +85,27 @@ vector_type MaxEntHelper::transform_into_real_space(vector_type u) const
     u[i] = exp(u[i]);
     u[i] *= Default(i);
   }
-  return u;
+  return u; 
 }
 
 
 vector_type MaxEntHelper::get_spectrum(const vector_type& u) const
 {
   vector_type A = transform_into_real_space(u);
-  for (unsigned int i=0; i<A.size(); ++i)
+  for (unsigned int i=0; i<A.size(); ++i) 
     A[i] /= delta_omega(i);
   return A;
 }
 
 
 //'left side' is defined as Sigma*(V^T*RealSpace(u)*V)*Sigma
-//see Bryan's paper near Eq. 11
+//see Bryan's paper near Eq. 11 
 matrix_type MaxEntHelper::left_side(const vector_type& u) const
 {
   vector_type A = transform_into_real_space(u);
   matrix_type M = Vt().transpose();
-  for (unsigned int i=0; i<M.rows(); ++i)
-    for (unsigned int j=0; j<M.cols(); ++j)
+  for (unsigned int i=0; i<M.rows(); ++i) 
+    for (unsigned int j=0; j<M.cols(); ++j) 
       M(i,j) *= A[i];
   M = maxent_prec_prod(Vt(), M);
   M = maxent_prec_prod(Sigma() ,M);
@@ -127,25 +127,25 @@ vector_type MaxEntHelper::right_side(const vector_type& u) const
 }
 
 //this function constructs delta \dot (V^T*RealSpace(u)*V)
-double MaxEntHelper::step_length(const vector_type& delta, const vector_type& u) const
+double MaxEntHelper::step_length(const vector_type& delta, const vector_type& u) const 
 {
   vector_type A = transform_into_real_space(u);
   matrix_type L = Vt().transpose();
-  for (unsigned int i=0; i<L.rows(); ++i)
-    for (unsigned int j=0; j<L.cols(); ++j)
+  for (unsigned int i=0; i<L.rows(); ++i) 
+    for (unsigned int j=0; j<L.cols(); ++j) 
       L(i,j) *= A[i];
   L = maxent_prec_prod(Vt(), L);
   return delta.dot(maxent_prec_prod(L, delta));
 }
 
 //Bryan's paper section 2.3 (or after eq 22)
-double MaxEntHelper::convergence(const vector_type& u, const double alpha) const
+double MaxEntHelper::convergence(const vector_type& u, const double alpha) const 
 {
   //using namespace boost::numeric::ublas;
   vector_type A = transform_into_real_space(u);
   matrix_type L = Vt().transpose();
-  for (unsigned int i=0; i<L.rows(); ++i)
-    for (unsigned int j=0; j<L.cols(); ++j)
+  for (unsigned int i=0; i<L.rows(); ++i) 
+    for (unsigned int j=0; j<L.cols(); ++j) 
       L(i,j) *= A[i];
   L = maxent_prec_prod(Vt(), L);
   vector_type alpha_dSdu = -alpha*maxent_prec_prod(L, u);
@@ -166,20 +166,20 @@ double MaxEntHelper::log_prob(const vector_type& u, const double alpha) const
   for (unsigned int i=0; i<L.rows(); ++i)
     L(i,i) += alpha;
   //boost::numeric::bindings::lapack::potrf(boost::numeric::bindings::lower(L));
-
+  
   //LAPACK does potrf in place, while Eigen does not
   Eigen::LLT<matrix_type,Eigen::Lower> lltofL(L);
   L=lltofL.matrixL();
 
   double log_det = 0.;
-  for (unsigned int i=0; i<L.rows(); ++i)
+  for (unsigned int i=0; i<L.rows(); ++i) 
     log_det  += log(L(i,i)*L(i,i));
   return 0.5*( (nfreq())*log(alpha) - log_det ) - Q(u, alpha);
 }
 
 double MaxEntHelper::chi_scale_factor(vector_type A, const double chi_sq, const double alpha) const
 {
-  for (unsigned int i=0; i<A.size(); ++i)
+  for (unsigned int i=0; i<A.size(); ++i) 
     A[i] *= delta_omega(i);
 
   matrix_type L = maxent_prec_prod_trans(K(), K());
@@ -192,7 +192,7 @@ double MaxEntHelper::chi_scale_factor(vector_type A, const double chi_sq, const 
   lambda = es.eigenvalues();
   double Ng = 0.;
   for (unsigned int i=0; i<lambda.size(); ++i) {
-    if (lambda[i]>=0)
+    if (lambda[i]>=0) 
       Ng += lambda[i]/(lambda[i]+alpha);
   }
   std::cerr << "Ng: " << Ng << std::endl;
@@ -201,22 +201,22 @@ double MaxEntHelper::chi_scale_factor(vector_type A, const double chi_sq, const 
 }
 
 //This function computes chi^2 as in equation D.6 in Sebastian's thesis
-double MaxEntHelper::chi2(const vector_type& A) const
+double MaxEntHelper::chi2(const vector_type& A) const 
 {
   vector_type del_G = maxent_prec_prod(K(), A) - y();
-
+  
   /*std::cout<<"in computation of chi2:"<<std::endl;
    for(int i=0;i<y().size();++i){
    std::cout<<i<<" "<<maxent_prec_prod(K(), A)[i]<<" "<<y()[i]<<std::endl;
    }*/
-
+  
   double c = 0;
-  for (unsigned int i=0; i<del_G.size(); ++i)
+  for (unsigned int i=0; i<del_G.size(); ++i) 
     c += del_G[i]*del_G[i];
   return c;
 }
 
-void MaxEntHelper::print_chi2(const vector_type& A, std::ostream &os) const
+void MaxEntHelper::print_chi2(const vector_type& A, std::ostream &os) const 
 {
   vector_type backcont=maxent_prec_prod(K(), A);
   vector_type defaultm=maxent_prec_prod(K(), Default());
@@ -229,7 +229,7 @@ void MaxEntHelper::print_chi2(const vector_type& A, std::ostream &os) const
 
 //This function computes the entropy as in Eq. D.7 in Sebastian's thesis
 //Really eq 3.17 from Jarrell and Gubernatis
-double MaxEntHelper::entropy(const vector_type& A) const
+double MaxEntHelper::entropy(const vector_type& A) const 
 {
   double S = 0;
   for (unsigned int i=0; i<A.size(); ++i) {
@@ -265,7 +265,7 @@ void MaxEntHelper::backcontinue(ofstream_ &os, const vector_type &A_in,const dou
     Backcont bc(pp);
     vector_type G = bc.backcontinue(A);
     kernel_type k_type = pp->getKernelType();
-
+    
     double beta = 1/(pp->T());
     bool ph_sym = true;
     if(k_type == frequency_fermionic_kernel ||
@@ -291,11 +291,11 @@ void MaxEntHelper::backcontinue(ofstream_ &os, const vector_type &A_in,const dou
     for(int i=0;i<y_scaled.size();i++){
       y_scaled(i) *= sigma(i);
     }
-    double max_err = bc.max_error(G,y_scaled);
+    double max_err = bc.max_error(G,y_scaled); 
 
     //A is missing delta_omega value, add back in for chi2
     vector_type A_chi = A;
-    for (unsigned int i=0; i<A_chi.size(); ++i)
+    for (unsigned int i=0; i<A_chi.size(); ++i) 
       A_chi[i] *= delta_omega(i);
 
     double chi_sq = chi2(A_chi);
@@ -316,7 +316,7 @@ void determineVariance(std::vector<vector_type> &in,vector_type &mean, vector_ty
     it++;
   }
   mean /= in.size();
-  //compute stddev
+  //compute stddev  
   for(int i=0;i<mean.size();i++){
     double stddev =0;
     double mean_i = mean(i);
@@ -324,7 +324,7 @@ void determineVariance(std::vector<vector_type> &in,vector_type &mean, vector_ty
       double val = in[v](i);
       stddev+= (val-mean_i)*(val-mean_i);
     }
-    std_dev(i) = sqrt(stddev)/sqrt(in.size()-1);
+    std_dev(i) = sqrt(stddev)/sqrt(in.size()-1);  
   }
 };
 
@@ -346,7 +346,7 @@ matrix_type MaxEntHelper::constructGamma(const vector_type& A, const double alph
   //Gamma = alpha*I + Lambda
   for (int i=0;i<nfreq();i++)
     Lambda(i,i) += alpha;
-
+  
   return Lambda;
 }
 
@@ -392,11 +392,11 @@ void MaxEntHelper::generateCovariantErr(const vector_type& A, const double alpha
       A_noise = u.transpose()*A_noise;
       noise_vecs.push_back(A_noise);
     }
-    std::cout << "Finished generating A*u + Gaussian Noise" << std::endl;
+    std::cout << "Finished generating A*u + Gaussian Noise" << std::endl; 
     vector_type std_err(nfreq());
     vector_type mean = vector_type::Zero(nfreq());
 
-    determineVariance(noise_vecs,mean,std_err);
+    determineVariance(noise_vecs,mean,std_err); 
 
     //save file
     os << "#omega A A_mean approx_err" <<std::endl;
@@ -407,13 +407,13 @@ void MaxEntHelper::generateCovariantErr(const vector_type& A, const double alpha
 }
 
 vector_type MaxEntHelper::generateGaussNoise(vector_type data, vector_type err,boost::mt19937 &rng){
-
+    
     typedef boost::variate_generator<boost::mt19937&,boost::normal_distribution<> > ran_gen;
     //notice the & in the first template argument and function rng argument.
     //If we omit this, it will compile and run
     //however, the numbers will be less(/not) random b/c it will copy the generator
     //each time, outputting the mean with some noise, rather than truly random
-
+    
     const int N = data.size();
     vector_type data_noise(N);
     for(int i=0;i<N;i++){

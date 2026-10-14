@@ -39,7 +39,7 @@
 //  and GeneralDefaultModel contains a 'Model' object.
 
 //class Model
-// -> Gaussian : public Model
+// -> Gaussian : public Model 
 //    -> ShiftedGaussian : public Gaussian
 //      -> DoubleGaussian : public ShiftedGaussian
 //        -> GeneralDoubleGaussian : public ShiftedGaussian
@@ -47,7 +47,7 @@
 // ->  LinearRiseExpDecay : public Model
 // ->  QuadraticRiseExpDecay : public Model
 
-class DefaultModel
+class DefaultModel 
 {
 public:
   DefaultModel(const alps::params& p) :
@@ -117,7 +117,7 @@ public:
 ///
 /// \f$\sigma\f$ has to be specified as a parameter SIGMA.
 /// This is one of the standard model functions you should always try.
-class Gaussian : public Model
+class Gaussian : public Model 
 {
 public:
   Gaussian(const alps::params& p) : sigma_(static_cast<double>(p["SIGMA"])) {}
@@ -213,7 +213,7 @@ private:
 class ShiftedLorentzian : public Lorentzian
 {
 public:
-  ShiftedLorentzian(const alps::params& p):
+  ShiftedLorentzian(const alps::params& p): 
   Lorentzian(p), shift_(static_cast<double>(p["SHIFT"])) {}
 
   double operator()(const double omega){
@@ -298,7 +298,7 @@ public:
   }
 
 private:
-  const double bnorm_;
+  const double bnorm_; 
 };
 
 ///This class deals with tabulated model functions

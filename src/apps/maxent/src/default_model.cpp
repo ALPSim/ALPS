@@ -195,7 +195,7 @@ boost::shared_ptr<DefaultModel> make_default_model(const alps::params& parms, st
     boost::shared_ptr<Model> Mod(new DoubleLorentzian(parms));
     return boost::shared_ptr<DefaultModel>(new GeneralDefaultModel(parms, Mod));
   }
-  else {
+  else { 
     std::cout << "Using tabulated default model" << std::endl;
     boost::shared_ptr<Model> Mod(new TabFunction(parms, name));
     return boost::shared_ptr<DefaultModel>(new GeneralDefaultModel(parms, Mod));

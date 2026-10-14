@@ -39,14 +39,14 @@ struct ofstream_ : std::ofstream{
 
 class MaxEntHelper : private MaxEntParameters
 {
-public :
+public : 
 
   MaxEntHelper(alps::params& p);
 
   double omega_coord(const int i) const { return MaxEntParameters::omega_coord(i); }
 
   ///getter function for the discretized default model
-  double Default(const int i) const { return def_[i]; }
+  double Default(const int i) const { return def_[i]; }  
   ///getter function for the discretized default model
   const vector_type& Default() const { return def_; }
 
@@ -154,7 +154,7 @@ public:
   ///getter for avspec, the averaged spectrum
   const vector_type getAvspec() const{return avspec;}
    ///getter for chispec, the spectrum with the best chi^2
-  const vector_type getChispec() const{return chispec;}
+  const vector_type getChispec() const{return chispec;} 
   ///getter for maxspec, the most probable spectrum
   const vector_type getMaxspec() const{return maxspec;}
   ///getter for avspec_back, the averaged spectrum back-continued
@@ -162,17 +162,17 @@ public:
   ///getter for maxspec_back, the back-continued maxspec
   const vector_type getMaxspecBack() const{return maxspec_back;}
    ///getter for chispec_back, the spectrum chispec back-contonued
-  const vector_type getChispecBack() const{return chispec_back;}
-  ///getter for the grid of omega points used in determining
+  const vector_type getChispecBack() const{return chispec_back;} 
+  ///getter for the grid of omega points used in determining 
   ///the spectral function A(omega)
   const vector_type getOmegaGrid() const{return omegaGrid;}
   ///getter for the posterior probability of the default model
   double getPostProb() const{return postprobdef;}
   ///getter for alpha values
-  const vector_type getAlphaGrid() const{return alpha;}
+  const vector_type getAlphaGrid() const{return alpha;} 
   ///getter for vector of Q value per alpha iteration
   const vector_type getQvec() const{return qvec;}
-};
+}; 
 
 ///calculates the varience of a std::vector of eigen3 vectors
 //note: mean,std_dev must be initialized to Zeros(nfreq())

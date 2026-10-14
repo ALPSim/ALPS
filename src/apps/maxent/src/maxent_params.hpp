@@ -35,10 +35,10 @@
 class ContiParameters {
 
 public:
-
+  
   ///constructs the kernel and grid from the parameters p. Also reads in the data.
   ContiParameters(alps::params& p);
-
+  
   ///value of the Matsubara data at index i
   double y(const int i) const { return y_[i]; }
   ///value of the Matsubara data
@@ -103,7 +103,7 @@ class MaxEntParameters : public ContiParameters
 public:
   ///constructs the maxent specific parameters out of parameters p
   MaxEntParameters(alps::params& p);
-
+  
   const matrix_type& U() const { return U_; }
   const matrix_type& Vt() const { return Vt_; }
   const matrix_type& Sigma() const { return Sigma_; }

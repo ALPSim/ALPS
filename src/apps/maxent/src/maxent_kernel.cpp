@@ -25,7 +25,7 @@
 // see ../README.md for provenance and licensing.
 #include "maxent_kernel.hpp"
 #include <cmath>
-#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string.hpp>    
 #include <boost/lexical_cast.hpp>
 #include <boost/math/special_functions/legendre.hpp>    //for Legendre kernel
 #include <boost/math/special_functions/factorials.hpp>  //for Legendre kernel
@@ -60,7 +60,7 @@ K_(ndat_,nfreq_)
     }
     inputGrid = tau_points_;
   }
-
+    
   if(ktype_==legendre_fermionic_kernel || ktype_==legendre_bosonic_kernel){
       setup_legendre_kernel(p,freq,ndat_);
   }else if(ktype_==time_fermionic_kernel){
@@ -187,7 +187,7 @@ void kernel::set_kernel_type(const std::string &dataspace_name, const std::strin
                              bool ph_symmetry){
   if(dataspace_name=="time"){
     dtype_=time_dataspace;
-
+     
   }else if(dataspace_name=="frequency"){
     dtype_=frequency_dataspace;
   }else if(dataspace_name=="legendre"){
@@ -241,8 +241,8 @@ void kernel::set_kernel_type(const std::string &dataspace_name, const std::strin
 }
 void kernel::setup_legendre_kernel(const alps::params &, const vector_type& freq, const int lmax) {
   if (lmax > boost::math::max_factorial<double>::value)
-    throw std::runtime_error("lmax is greater than boost factorial precision");
-
+        throw std::runtime_error("lmax is greater than boost factorial precision");
+    
   const double beta = 1. / T_;
   for (int l = 0; l < lmax; ++l) {
     for (int j = 0; j < nfreq_; ++j) {
@@ -253,7 +253,7 @@ void kernel::setup_legendre_kernel(const alps::params &, const vector_type& freq
       if (z == 0.) {
         K_(l,j) = l == 0 ? -beta / 2. : 0.;
         continue;
-      }
+            }
       const auto integrand = [l, z](double t) {
         const double weight = z >= 0.
             ? std::exp(-t*z) / (1. + std::exp(-z))
@@ -263,6 +263,6 @@ void kernel::setup_legendre_kernel(const alps::params &, const vector_type& freq
       const double integral = bmth::quadrature::gauss_kronrod<double, 61>::integrate(
           integrand, 0., 1., 10, 1.49e-8);
       K_(l,j) = -std::sqrt(2.*l+1.) * beta * integral;
+        }
     }
-  }
 }

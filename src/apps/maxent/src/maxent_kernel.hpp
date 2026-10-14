@@ -47,7 +47,7 @@ public:
   dataspace_type getDataspaceType() const{return dtype_;}
 	///getter function for tau_points
 	const vector_type getTauPoints() const{return tau_points_;}
-
+    
 private:
   ///figure out which kernel is to be used
   void set_kernel_type(const std::string &dataspace_name, const std::string &kernel_name,

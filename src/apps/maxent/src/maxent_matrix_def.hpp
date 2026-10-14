@@ -18,19 +18,19 @@ typedef Eigen::VectorXd vector_type;
 typedef Eigen::MatrixXcd complex_vector_type;
 typedef std::pair<vector_type, complex_vector_type> omega_complex_type;
 
-///matrix-vector multiplication.
+///matrix-vector multiplication. 
 inline vector_type maxent_prec_prod(const matrix_type &p, const vector_type &q) {
 	return p*q;
 }
-///matrix-vector multiplication of transpose of matrix.
+///matrix-vector multiplication of transpose of matrix. 
 inline vector_type maxent_prec_prod_trans(const matrix_type &p, const vector_type &q) {
 	return p.transpose()*q;
 }
-///matrix-matrix multiplication.
+///matrix-matrix multiplication. 
 inline matrix_type maxent_prec_prod(const matrix_type &p, const matrix_type &q) {
 	return p*q;
 }
-///matrix-matrix multiplication of transpose(p) with q.
+///matrix-matrix multiplication of transpose(p) with q. 
 inline matrix_type maxent_prec_prod_trans(const matrix_type &p, const matrix_type &q) {
-	return p.transpose()*q;
+	return p.transpose()*q; 
 }

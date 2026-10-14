@@ -55,8 +55,8 @@ void ContiParameters::read_data_from_text_file(const alps::params& p) {
       y_(index) = value / norm;
       sigma_(index) = error / norm;
       loaded[index] = true;
-    }
   }
+      }
   if (!datstream.eof())
     throw std::invalid_argument("expected data rows: index value error in " + fname);
   if (std::find(loaded.begin(), loaded.end(), false) != loaded.end())
@@ -130,7 +130,7 @@ T_(p["T"] | (1/p["BETA"].cast<double>())),ndat_(p["NDAT"]), nfreq_(p["NFREQ"]),
 y_(ndat_),sigma_(ndat_),K_(),grid_(p),inputGrid_(ndat_)
 {
   //note: T_=1/beta now taken care of elsewhere
-  if (ndat_<4)
+  if (ndat_<4) 
     boost::throw_exception(std::invalid_argument("NDAT too small"));
 
 
@@ -150,8 +150,8 @@ y_(ndat_),sigma_(ndat_),K_(),grid_(p),inputGrid_(ndat_)
 }
 
 void ContiParameters::scale_data_with_error(const int ntab) {
-  //Look around Eq. D.5 in Sebastian's thesis. We have sigma_ = sqrt(eigenvalues of covariance matrix) or,
-  //in case of a diagonal covariance matrix, we have sigma_=SIGMA_X.
+  //Look around Eq. D.5 in Sebastian's thesis. We have sigma_ = sqrt(eigenvalues of covariance matrix) or, 
+  //in case of a diagonal covariance matrix, we have sigma_=SIGMA_X. 
   //Then define y := \bar{G}/sigma_ and K := (1/sigma_)\tilde{K}
   for (int i = 0; i < ndat(); i++) {
     y_[i] /= sigma_[i];
@@ -185,7 +185,7 @@ void ContiParameters::read_covariance_matrix_from_text_file(
 
 void ContiParameters::decompose_covariance_matrix(const alps::params& p){
     vector_type var(ndat());
-    //bindings::lapack::syev('V', bindings::upper(cov_) , var, bindings::lapack::optimal_workspace());
+    //bindings::lapack::syev('V', bindings::upper(cov_) , var, bindings::lapack::optimal_workspace()); 
     //TODO: check if this truly implements lapack's expected overwrite of cov_
     // ALPS's LAPACK covariance decomposition uses the upper triangle.
     Eigen::SelfAdjointEigenSolver<matrix_type> es(cov_.selfadjointView<Eigen::Upper>());
@@ -203,7 +203,7 @@ void ContiParameters::decompose_covariance_matrix(const alps::params& p){
     std::cout << "Cutoff for singular eigenvalues of the covariance: " << cutoff << "\n";
     int new_ndat_,old_ndat_=ndat();
     for (new_ndat_ =0;new_ndat_<ndat();new_ndat_++)
-      if (var[new_ndat_]>cutoff) break;
+      if (var[new_ndat_]>cutoff) break; 
     // This is the number of good data
     ndat_ = old_ndat_ - new_ndat_;
     if (new_ndat_ ==0)
@@ -267,7 +267,7 @@ void MaxEntParameters::singular_value_decompose_kernel(bool verbose,
   //svd.setThreshold(threshold);
   S=svd.singularValues();
   U_=svd.matrixU();
-  Vt_=svd.matrixV().transpose();
+  Vt_=svd.matrixV().transpose(); 
 #endif
   if (verbose)
     std::cout << "# Singular values of the Kernel:\n";
@@ -287,20 +287,20 @@ void MaxEntParameters::singular_value_decompose_kernel(bool verbose,
   if (ns() == 0)
     boost::throw_exception(
         std::logic_error("all singular values smaller than the precision"));
-
+  
 }
 void MaxEntParameters::check_high_frequency_limit(const vector_type& y,const kernel_type kt){
     //TODO: expand check into time/bosonic domain
     //we know that the limit of a green's function is ~ -1/iw_{n}
     //this checks that we have a good high frequency limit
     //within the tolerance of the error bar
-
+    
     int n=0;
     if (kt==frequency_fermionic_kernel)
         n = (ndat()-2)/2; //this is the real n; due to weird vector structure
     if (kt==frequency_fermionic_ph_kernel)
         n=ndat()-1;
-
+    
     if(n!=0){
         //limit = G(iwn)*iwn
         std::complex<double> iwn(0,(2*n+1)*M_PI*T());
@@ -350,11 +350,11 @@ MaxEntParameters::MaxEntParameters(alps::params& p) :
   //scale lhs and rhs according to errors, etc.
   if (p["COVARIANCE_MATRIX"].cast<std::string>()!="")
     decompose_covariance_matrix(p);
-
+    
     check_high_frequency_limit(y(),k_type);
 
-  //Look around Eq. D.5 in Sebastian's thesis. We have sigma_ = sqrt(eigenvalues of covariance matrix) or,
-  //in case of a diagonal covariance matrix, we have sigma_=SIGMA_X.
+  //Look around Eq. D.5 in Sebastian's thesis. We have sigma_ = sqrt(eigenvalues of covariance matrix) or, 
+  //in case of a diagonal covariance matrix, we have sigma_=SIGMA_X. 
   //The then define y := \bar{G}/sigma_ and K := (1/sigma_)\tilde{K}
   scale_data_with_error(nfreq());
 
@@ -376,6 +376,6 @@ MaxEntParameters::MaxEntParameters(alps::params& p) :
   //truncate all matrix to singular space
   truncate_to_singular_space(S);
 
-  //compute Ut and
+  //compute Ut and 
   compute_minimal_chi2();
 }

@@ -25,7 +25,7 @@
 // see ../README.md for provenance and licensing.
 #include "maxent_grid.hpp"
 #include<cmath>
-#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string.hpp>    
 
 grid::grid(const alps::params &p):
 nfreq_(p["NFREQ"]),
