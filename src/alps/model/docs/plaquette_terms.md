@@ -55,6 +55,29 @@ in order.
   the sector set by `CONSERVED_QUANTUMNUMBERS`, the run stops with an error
   instead of dropping the matrix element.
 
+## Bosons and cutoffs
+
+Boson site bases work as well; there is no sign. The local range is the site
+basis's own `0 <= N <= Nmax`. `Nmax` must be set: with its default of
+`infinity` the basis cannot be built and the run stops.
+
+Each operator is truncated: `bdag` on `N = Nmax` gives zero, so a matrix
+element that would take a site above `Nmax`, even in an intermediate step, is
+dropped. For example `b(i)*bdag(i)` on `N = Nmax` gives 0, not `Nmax+1`.
+
+If a plaquette term changes a quantum number whose range is set by such a
+cutoff parameter (e.g. `K*(bdag(i)*bdag(k) + b(k)*b(i))` changes `N`), the
+results depend on the cutoff, and ALPS prints a warning once:
+
+```
+Warning: a <PLAQUETTETERM> changes the total N, whose local range is cut off at
+N <= Nmax = 2. ... check convergence in Nmax.
+```
+
+Leave `N` out of `CONSERVED_QUANTUMNUMBERS` for such terms. Fixed ranges
+(fermions, hard-core bosons) and ranges set by another quantum number (`Sz` in
+`-S..S`) are not cutoffs and give no warning.
+
 A worked example (one 2x2 plaquette followed through the local table and the
 matrix fill), the benchmarks against QDK CASCI and exact results, and the
 scripts that produced them are in [`n_body_terms/`](n_body_terms/README.md).

@@ -28,6 +28,7 @@
 
 #include <cmath>
 #include <cstddef>
+#include <iostream>
 #include <map>
 #include <sstream>
 #include <vector>
@@ -226,6 +227,7 @@ public:
 protected:
   void build() const;
   void build_basis() const;
+  void warn_if_cutoff(const nsite_matrix<value_type>& mat, const plaquette& p) const;
 
   mutable basis_states_type states;
   mutable bloch_basis_states_type bloch_states;
@@ -234,6 +236,7 @@ private:
   Parameters parms;
   mutable bool built_matrix_;
   mutable bool built_basis_;
+  mutable bool warned_cutoff_;
   mutable matrix_type matrix_;
   mutable basis_states_descriptor<short> basis_;
   graph_helper<G> graph_;
@@ -247,6 +250,7 @@ hamiltonian_matrix<M,G>::hamiltonian_matrix(Parameters const& p)
   : parms(p)
   ,  built_matrix_(false)
   ,  built_basis_(false)
+  ,  warned_cutoff_(false)
   ,  graph_(p)
   ,  model_(graph_,p,is_symbolic<value_type>::type::value,true)
 {}    
@@ -293,6 +297,39 @@ nsite_matrix<typename hamiltonian_matrix<M,G>::value_type> hamiltonian_matrix<M,
   for (std::size_t r=0;r<p.sites.size();++r)
     bases.push_back(model_.model().basis().site_basis(graph_.site_type(p.sites[r])));
   return op.template matrix<value_type>(bases,parms);
+}
+
+// A term that changes a quantum number whose range is capped by a parameter
+// (e.g. a boson N with max="Nmax") gives results that depend on that cutoff:
+// entries that would leave the range are dropped. Say so once. Fixed ranges
+// (fermion 0..1) and ranges set by another quantum number (Sz in -S..S) are
+// physical, not a cutoff.
+template <class M, class G>
+void hamiltonian_matrix<M,G>::warn_if_cutoff(const nsite_matrix<value_type>& mat, const plaquette& p) const
+{
+  if (warned_cutoff_ || mat.nonconserved.empty())
+    return;
+  for (std::size_t r=0;r<p.sites.size();++r) {
+    SiteBasisDescriptor<short> b = model_.model().basis().site_basis(graph_.site_type(p.sites[r]));
+    b.set_parameters(parms);
+    for (std::size_t q=0;q<b.size();++q) {
+      if (!mat.nonconserved.count(b[q].name()) || can_evaluate(b[q].max_expression()))
+        continue;
+      bool set_by_quantumnumber=false;
+      for (std::size_t o=0;o<b.size();++o)
+        if (o!=q && b[q].depends_on(b[o].name()))
+          set_by_quantumnumber=true;
+      if (set_by_quantumnumber)
+        continue;
+      std::cerr << "Warning: a <PLAQUETTETERM> changes the total " << b[q].name()
+                << ", whose local range is cut off at " << b[q].name() << " <= "
+                << b[q].max_expression() << " = " << b[q].max() << ". Matrix elements "
+                << "that would exceed the cutoff are dropped, so results depend on it; "
+                << "check convergence in " << b[q].max_expression() << ".\n";
+      warned_cutoff_=true;
+      return;
+    }
+  }
 }
 
 // Fill one n-site term on plaquette p. The local table (see nsiteoperator.h)
@@ -512,8 +549,10 @@ void hamiltonian_matrix<M,G>::apply_operator(const GlobalOperator& op, const V& 
     if (it==cache.end()) {
       NSiteOperator term = op.plaquette_term(p.type);
       nsite_matrix<value_type> mat;
-      if (!term.term().empty())
+      if (!term.term().empty()) {
         mat = local_matrix(term,p);
+        warn_if_cutoff(mat,p);
+      }
       it = cache.insert(std::make_pair(key,mat)).first;
     }
     if (it->second.size())

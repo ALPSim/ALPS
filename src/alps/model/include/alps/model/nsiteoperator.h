@@ -43,6 +43,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/throw_exception.hpp>
 #include <map>
+#include <set>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -62,6 +63,8 @@ struct nsite_matrix
   typedef std::vector<std::pair<std::size_t, T> > row_type;
   std::vector<std::size_t> dims;
   std::vector<row_type> rows;
+  // quantum numbers whose sum over the sites some nonzero entry changes
+  std::set<std::string> nonconserved;
 
   std::size_t size() const { return rows.size(); }
 
@@ -302,8 +305,18 @@ nsite_matrix<T> NSiteOperator::matrix(const std::vector<SiteBasisDescriptor<I> >
       simplify(entry);
     }
     for (typename std::map<std::size_t, T>::const_iterator it = row.begin(); it != row.end(); ++it)
-      if (numeric::is_nonzero(it->second))
+      if (numeric::is_nonzero(it->second)) {
         mat.rows[i].push_back(*it);
+        // record quantum numbers (by name, summed over the roles) it changes
+        mat.decode(it->first, out);
+        std::map<std::string, half_integer<I> > change;
+        for (std::size_t r = 0; r < n; ++r)
+          for (std::size_t q = 0; q < bases[r].size(); ++q)
+            change[bases[r][q].name()] += get_quantumnumber(states[r][out[r]], q) - get_quantumnumber(instates[r], q);
+        for (typename std::map<std::string, half_integer<I> >::const_iterator c = change.begin(); c != change.end(); ++c)
+          if (c->second != half_integer<I>(0))
+            mat.nonconserved.insert(c->first);
+      }
   }
   return mat;
 }

@@ -354,3 +354,164 @@ TEST(NSiteHamiltonian, ApplicationsWithoutSupportRefuse) {
   EXPECT_THROW(alps::model_helper<> m(g, p), std::runtime_error);
   EXPECT_NO_THROW(alps::model_helper<> m(g, p, false, true));
 }
+
+// Bosons: no Jordan-Wigner sign, local range N = 0..Nmax. A term that would
+// take a site above Nmax has that matrix element dropped. The reference below
+// builds H densely on all (Nmax+1)^4 occupations of a 4-site ring.
+namespace {
+
+const char* boson_ring =
+  "<GRAPH name=\"ring\" vertices=\"4\">"
+  "<EDGE source=\"1\" target=\"2\"/><EDGE source=\"2\" target=\"3\"/>"
+  "<EDGE source=\"3\" target=\"4\"/><EDGE source=\"4\" target=\"1\"/>"
+  "<PLAQUETTE><SITE id=\"1\"/><SITE id=\"2\"/><SITE id=\"3\"/><SITE id=\"4\"/></PLAQUETTE>"
+  "</GRAPH>";
+
+std::string boson_model(const std::string& name, const std::string& plaquette_term,
+                        const std::string& sites = "i j k l") {
+  return "<SITEBASIS name=\"boson\"><PARAMETER name=\"Nmax\" default=\"infinity\"/>"
+         "<QUANTUMNUMBER name=\"N\" min=\"0\" max=\"Nmax\"/>"
+         "<OPERATOR name=\"bdag\" matrixelement=\"sqrt(N+1)\"><CHANGE quantumnumber=\"N\" change=\"1\"/></OPERATOR>"
+         "<OPERATOR name=\"b\" matrixelement=\"sqrt(N)\"><CHANGE quantumnumber=\"N\" change=\"-1\"/></OPERATOR>"
+         "<OPERATOR name=\"n\" matrixelement=\"N\"/></SITEBASIS>"
+         "<BASIS name=\"boson\"><SITEBASIS ref=\"boson\"/><CONSTRAINT quantumnumber=\"N\" value=\"N_total\"/></BASIS>"
+         "<HAMILTONIAN name=\"" + name + "\">"
+         "<PARAMETER name=\"t\" default=\"1\"/><PARAMETER name=\"U\" default=\"0\"/>"
+         "<PARAMETER name=\"K\" default=\"0\"/><BASIS ref=\"boson\"/>"
+         "<SITETERM site=\"i\">U/2*n(i)*(n(i)-1)</SITETERM>"
+         "<BONDTERM source=\"i\" target=\"j\">-t*(bdag(i)*b(j)+bdag(j)*b(i))</BONDTERM>"
+         "<PLAQUETTETERM sites=\"" + sites + "\">" + plaquette_term + "</PLAQUETTETERM></HAMILTONIAN>";
+}
+
+// One product of boson operators: (site, +1 for bdag / -1 for b), leftmost first.
+typedef std::vector<std::pair<int, int> > boson_product;
+
+// Dense H of a 4-site ring on occupations 0..nmax, restricted to total N
+// = n_total (all states if n_total < 0). Sorted eigenvalues.
+std::vector<double> boson_reference(int nmax, int n_total, double t, double u, double k,
+                                    const std::vector<boson_product>& plaquette) {
+  const int L = 4, d = nmax + 1;
+  std::vector<std::vector<int> > states;
+  for (int s = 0; s < d * d * d * d; ++s) {
+    std::vector<int> occ(L);
+    int n = 0;
+    for (int r = 0, x = s; r < L; ++r, x /= d)
+      n += occ[r] = x % d;
+    if (n_total < 0 || n == n_total)
+      states.push_back(occ);
+  }
+  std::vector<std::vector<double> > h(states.size(), std::vector<double>(states.size()));
+  auto add = [&](std::size_t col, double coef, const boson_product& ops) {
+    std::vector<int> occ = states[col];
+    double amp = coef;
+    for (std::size_t o = ops.size(); o-- > 0;) {
+      int& m = occ[ops[o].first];
+      amp *= ops[o].second > 0 ? std::sqrt(m + 1.0) : std::sqrt(double(m));
+      m += ops[o].second;
+      if (m < 0)
+        return;
+    }
+    for (int m : occ)
+      if (m > nmax)  // outside the truncated basis
+        return;
+    std::size_t row = std::find(states.begin(), states.end(), occ) - states.begin();
+    ASSERT_LT(row, states.size()) << "reference term leaves the sector";
+    h[row][col] += amp;
+  };
+  for (std::size_t c = 0; c < states.size(); ++c) {
+    for (int s = 0; s < L; ++s)
+      h[c][c] += u / 2 * states[c][s] * (states[c][s] - 1);
+    for (int s = 0; s < L; ++s) {
+      add(c, -t, {{s, 1}, {(s + 1) % L, -1}});
+      add(c, -t, {{(s + 1) % L, 1}, {s, -1}});
+    }
+    for (const boson_product& ops : plaquette)
+      add(c, k, ops);
+  }
+  return eigenvalues(h);
+}
+
+alps::Parameters boson_parms(const Files& f, int nmax) {
+  alps::Parameters p = f.parms();
+  p["GRAPH"] = "ring"; p["MODEL"] = "m";
+  p["Nmax"] = nmax; p["t"] = 1.0; p["U"] = 2.0; p["K"] = 0.7;
+  return p;
+}
+
+} // namespace
+
+TEST(NSiteBoson, ConservingTermMatchesReference) {
+  // Correlated pair hopping (i,j) <-> (k,l); conserves N, so no cutoff warning.
+  Files f(boson_ring, boson_model("m", "K*(bdag(i)*bdag(j)*b(k)*b(l) + bdag(l)*bdag(k)*b(j)*b(i))"));
+  const std::vector<boson_product> term = {{{0, 1}, {1, 1}, {2, -1}, {3, -1}},
+                                           {{3, 1}, {2, 1}, {1, -1}, {0, -1}}};
+  for (int n_total = 2; n_total <= 4; ++n_total) {
+    alps::Parameters p = boson_parms(f, 2);
+    p["CONSERVED_QUANTUMNUMBERS"] = "N";
+    p["N_total"] = n_total;
+    testing::internal::CaptureStderr();
+    std::vector<double> e = spectrum(p);
+    EXPECT_EQ(testing::internal::GetCapturedStderr(), "");
+    std::vector<double> expected = boson_reference(2, n_total, 1.0, 2.0, 0.7, term);
+    ASSERT_EQ(e.size(), expected.size()) << "N_total " << n_total;
+    for (std::size_t i = 0; i < e.size(); ++i)
+      EXPECT_NEAR(e[i], expected[i], 1e-10) << "N_total " << n_total << " level " << i;
+  }
+}
+
+TEST(NSiteBoson, NonConservingTermIsTruncatedAtNmaxAndWarns) {
+  // Pair creation/annihilation on (i,k); the basis is all occupations 0..Nmax.
+  Files f(boson_ring, boson_model("m", "K*(bdag(i)*bdag(k) + b(k)*b(i))"));
+  const std::vector<boson_product> term = {{{0, 1}, {2, 1}}, {{2, -1}, {0, -1}}};
+  for (int nmax = 1; nmax <= 3; ++nmax) {
+    alps::Parameters p = boson_parms(f, nmax);
+    testing::internal::CaptureStderr();
+    std::vector<double> e = spectrum(p);
+    std::string warning = testing::internal::GetCapturedStderr();
+    EXPECT_NE(warning.find("Warning: a <PLAQUETTETERM> changes the total N"), std::string::npos) << warning;
+    EXPECT_NE(warning.find("N <= Nmax = " + std::to_string(nmax)), std::string::npos) << warning;
+    std::vector<double> expected = boson_reference(nmax, -1, 1.0, 2.0, 0.7, term);
+    ASSERT_EQ(e.size(), expected.size()) << "Nmax " << nmax;
+    for (std::size_t i = 0; i < e.size(); ++i)
+      EXPECT_NEAR(e[i], expected[i], 1e-10) << "Nmax " << nmax << " level " << i;
+  }
+  // Conserving N is impossible with this term.
+  alps::Parameters p = boson_parms(f, 2);
+  p["CONSERVED_QUANTUMNUMBERS"] = "N";
+  p["N_total"] = 2;
+  EXPECT_THROW(spectrum(p), std::runtime_error);
+}
+
+TEST(NSiteBoson, EachOperatorIsTruncated) {
+  // bdag on N = Nmax is zero, so b*bdag there is 0, not Nmax+1.
+  Files f("<GRAPH name=\"ring\" vertices=\"1\"><PLAQUETTE><SITE id=\"1\"/></PLAQUETTE></GRAPH>",
+          boson_model("m", "K*b(i)*bdag(i)", "i"));
+  alps::Parameters p = boson_parms(f, 1);
+  p["K"] = 1.0;
+  testing::internal::CaptureStderr();
+  std::vector<double> e = spectrum(p);
+  EXPECT_EQ(testing::internal::GetCapturedStderr(), "");
+  ASSERT_EQ(e.size(), 2u);
+  EXPECT_NEAR(e[0], 0.0, 1e-14);  // N = 1 = Nmax
+  EXPECT_NEAR(e[1], 1.0, 1e-14);  // N = 0: b*bdag = 1
+}
+
+TEST(NSiteBoson, NmaxUnsetIsAnError) {
+  Files f(boson_ring, boson_model("m", "K*(bdag(i)*bdag(k) + b(k)*b(i))"));
+  alps::Parameters p = f.parms();
+  p["GRAPH"] = "ring"; p["MODEL"] = "m";
+  EXPECT_THROW(spectrum(p), std::runtime_error);
+}
+
+TEST(NSiteBoson, NoCutoffWarningForFermions) {
+  // Fermion occupations are bounded by Pauli, not by a cutoff parameter.
+  Files f("<GRAPH name=\"g\" vertices=\"4\"><PLAQUETTE><SITE id=\"1\"/><SITE id=\"2\"/><SITE id=\"3\"/><SITE id=\"4\"/></PLAQUETTE></GRAPH>",
+          "<HAMILTONIAN name=\"pairing\"><BASIS ref=\"fermion\"/><PLAQUETTETERM sites=\"i j k l\">"
+          "cdag_up(i)*cdag_down(j)*cdag_up(k)*cdag_down(l) + c_down(l)*c_up(k)*c_down(j)*c_up(i)"
+          "</PLAQUETTETERM></HAMILTONIAN>");
+  alps::Parameters p = f.parms();
+  p["GRAPH"] = "g"; p["MODEL"] = "pairing";
+  testing::internal::CaptureStderr();
+  spectrum(p);
+  EXPECT_EQ(testing::internal::GetCapturedStderr(), "");
+}

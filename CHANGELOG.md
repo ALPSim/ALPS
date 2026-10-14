@@ -6,7 +6,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Added
 
-- n-site Hamiltonian terms for exact diagonalization (`fulldiag`, `sparsediag`). A `<PLAQUETTE>` in a `<UNITCELL>` or `<GRAPH>` lists an ordered group of sites; a `<PLAQUETTETERM sites="i j k l">` in a `<HAMILTONIAN>` is applied to every plaquette of its type, with arbitrary operator strings, any number of sites, and fermion signs handled. Terms that leave the `CONSERVED_QUANTUMNUMBERS` sector are refused. Other applications refuse models that combine plaquette terms with plaquettes instead of ignoring them. See [the syntax](src/alps/model/docs/plaquette_terms.md).
+- n-site Hamiltonian terms for exact diagonalization (`fulldiag`, `sparsediag`). A `<PLAQUETTE>` in a `<UNITCELL>` or `<GRAPH>` lists an ordered group of sites; a `<PLAQUETTETERM sites="i j k l">` in a `<HAMILTONIAN>` is applied to every plaquette of its type, with arbitrary operator strings, any number of sites, and fermion signs handled. Terms that leave the `CONSERVED_QUANTUMNUMBERS` sector are refused. A term that changes a quantum number capped by a cutoff parameter, such as a boson `N <= Nmax`, prints a warning that the results depend on the cutoff. Other applications refuse models that combine plaquette terms with plaquettes instead of ignoring them. See [the syntax](src/alps/model/docs/plaquette_terms.md).
 
 ### Fixed
 
