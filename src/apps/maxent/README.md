@@ -78,9 +78,9 @@ copyright notices and `ACKNOWLEDGE.TXT` are preserved.
 
 The citation catalog credits Levy, LeBlanc and Gull's 2017 implementation and
 the Bryan and Jarrell–Gubernatis method references. ALPS supplies the current
-framework citation; `ACKNOWLEDGE.TXT`, kept from the 2018 import (upstream now
-has `CITATION.md` with the same requests), also records its historical
-ALPS/ALPSCore requests. Run `maxent --citations` for the current
+framework citation; `ACKNOWLEDGE.TXT`, kept from the 2018 import, also records
+its historical ALPS/ALPSCore requests. Upstream has since replaced it by
+`CITATION.md`, which asks for the ALPSCore paper only for ALPSCore builds. Run `maxent --citations` for the current
 application guidance. Installed SDKs and Python packages include the MaxEnt
 license and acknowledgment files.
 

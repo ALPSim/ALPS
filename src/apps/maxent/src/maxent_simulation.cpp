@@ -82,7 +82,7 @@ alps::params& MaxEntSimulation::define_parameters(alps::params& p) {
   if (!p.defined("BACKCONTINUE")) p["BACKCONTINUE"] = false;
   if (!p.defined("GENERATE_ERR")) p["GENERATE_ERR"] = false;
   // Seeds the GENERATE_ERR bootstrap. ALPS keeps mcbase's SEED default of 42
-  // instead of upstream's 0; pyalps job files set SEED per task.
+  // instead of upstream's 0.
   if (!p.defined("SEED")) p["SEED"] = 42;
   if (!p.defined("DATA")) p["DATA"] = std::string("");
   if (!p.defined("COVARIANCE_MATRIX")) p["COVARIANCE_MATRIX"] = std::string("");

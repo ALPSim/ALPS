@@ -148,7 +148,7 @@ TEST(MaxEntGrid, LogarithmicBoundsAndSymmetry) {
 }
 
 // Exact zeroth Legendre moment and parity identities independently check the
-// Legendre quadrature kernel, including its regular limit at zero frequency.
+// closed-form Legendre kernel, including its regular limit at zero frequency.
 TEST(MaxEntKernel, FermionicLegendreMoments) {
   constexpr double beta = 2.5;
   alps::params parameters;
