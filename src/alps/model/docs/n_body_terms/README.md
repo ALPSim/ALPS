@@ -27,7 +27,7 @@ installed; the feature itself is the code under `src/alps/lattice` and
     (6-operator) contact interaction in the lowest Landau level on a sphere.
     Full spectrum vs a dense reference; zero-mode counts vs the
     (2,2)-admissible patterns, with the unique Moore-Read ground state at
-    2S = N - 2. Takes about 7 minutes.
+    2S = N - 2. N = 4, 6, 8; takes about 15 seconds.
   - `results/`: output of the runs above.
 
 Running: build ALPS with applications (`cmake --preset default

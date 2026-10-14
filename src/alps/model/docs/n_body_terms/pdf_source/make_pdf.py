@@ -363,11 +363,14 @@ story += [
     PageBreak(),
     Paragraph("Step 5 — The plaquette's local table (NSiteOperator::matrix)", H1),
     Paragraph(
-        "ALPS first turns the term string into a table on the 4 plaquette sites alone. It evaluates the "
-        "expression on every tuple of local states in role order (i, j, k, l): 4<super>4</super> = 256 input "
-        f"tuples. The table is stored sparsely, and only <b>{n_entries}</b> (input, output) pairs are nonzero. "
-        "The site operators act right to left; each odd (fermionic) operator is moved into role order "
-        "O<sub>i</sub> O<sub>j</sub> O<sub>k</sub> O<sub>l</sub>, with one sign for each odd operator it passes. "
+        "ALPS first turns the term string into a table on the 4 plaquette sites alone, indexed by tuples of "
+        "local states in role order (i, j, k, l): 4<super>4</super> = 256 input tuples. Each product in the term "
+        "is split once into a number times one operator string per role, "
+        "O<sub>i</sub> O<sub>j</sub> O<sub>k</sub> O<sub>l</sub>: the site operators are read right to left, and "
+        "each odd (fermionic) operator moved into role order gives one sign for each odd operator it passes. "
+        "Each O<sub>r</sub> becomes a 4×4 single-site matrix. A row of the table is the product of these, "
+        "assembled the first time the fill (Step 6) asks for it, so only rows that basis states reach are built. "
+        f"Of the 256 × 256 entries only <b>{n_entries}</b> are nonzero. "
         "Signs between the plaquette and the rest of the lattice are <i>not</i> in the table; they are added in "
         "Step 6, as for bond terms. The table depends only on the plaquette type and its site types, so it is "
         "built once and reused on every plaquette of the lattice.", P),
@@ -482,10 +485,25 @@ story += [
         "<b>(d) Random two-body terms</b> on 2- and 3-site plaquettes, all index patterns, with interleaved site "
         f"orders, vs a dense Jordan–Wigner matrix: {last_line('t5_interleaved.txt')}.", P),
     Paragraph(
-        "<b>(e) Unit tests.</b> src/alps/model/tests/nsite_terms.cpp (GoogleTest): unit-cell plaquettes at open and "
+        "<b>(e) Bosonic Moore–Read state: a 3-body term, 6 operators.</b> Bosons in the lowest Landau level on a "
+        "sphere with 2S flux; the orbitals are the sites. The 3-body contact interaction "
+        "H = Σ<sub>M</sub> T<sub>M</sub><super>†</super> T<sub>M</sub> projects every triple onto total angular "
+        "momentum 3S, and is written as one PLAQUETTETERM over all orbitals (strings like "
+        "b†<sub>0</sub>b†<sub>0</sub>b†<sub>2</sub>b<sub>1</sub>b<sub>1</sub>b<sub>1</sub>). The spectrum is "
+        "compared with a dense reference; the number of zero modes with the number of patterns with at most 2 bosons "
+        "in any 2 neighbouring orbitals (Bernevig–Haldane). At 2S = N − 2 the zero mode is unique: the Moore–Read "
+        f"ground state. {last_line('t6_moore_read.txt')}.", P),
+    table([["N", "2S", "dim", "max|ΔE| vs dense", "zero modes", "admissible", "gap"]]
+          + [l.split()[:5] + [l.split()[5], l.split()[7]] for l in read(res, "t6_moore_read.txt").splitlines()
+             if re.match(r"\s*\d+\s+\d+\s+\d+", l)],
+          widths=[0.4 * inch, 0.4 * inch, 0.6 * inch, 1.2 * inch, 0.85 * inch, 0.85 * inch, 0.8 * inch], fs=7),
+    Spacer(1, 6),
+    Paragraph(
+        "<b>(f) Unit tests.</b> src/alps/model/tests/nsite_terms.cpp (GoogleTest): unit-cell plaquettes at open and "
         "periodic boundaries, GRAPH plaquettes, invalid plaquettes, ladder reference energies, K = 0 equals the "
-        "plain model, the analytic case above, sector violation, typed and # terms, parameter precision, and the "
-        "refusal in other applications. Full ctest: 931/931 pass.", P),
+        "plain model, the analytic case above, sector violation, typed and # terms, parameter precision, the "
+        "refusal in other applications, and bosons: N-conserving and non-conserving terms vs a dense reference, "
+        "truncation at Nmax and its warning. Full ctest: 936/936 pass.", P),
     Paragraph("Raw output and the scripts are in <font face='Mono'>benchmarks/</font>.", SMALL),
 ]
 
@@ -499,7 +517,7 @@ story += [
         ["lattice/unitcell.h/.C", "UNITCELL accepts <PLAQUETTE> (vertex + offset), and writes it back"],
         ["lattice/latticegraph.h", "unit-cell plaquettes repeated over the lattice, same boundary rules as edges"],
         ["lattice/graph_helper.h", "plaquettes(), num_plaquettes()"],
-        ["model/nsiteoperator.h (new)", "NSiteOperator, its sign-correct evaluator, sparse local table"],
+        ["model/nsiteoperator.h (new)", "NSiteOperator, the splitter into per-site operators with the sign, the local table"],
         ["model/nsiteterm.C (new)", "read/write <PLAQUETTETERM>"],
         ["model/globaloperator.h/.C, default_term.h", "HAMILTONIAN holds plaquette terms (typed and #)"],
         ["model/hamiltonian_matrix.hpp", "plaquette loop: local table per type, Jordan–Wigner fill, sector check"],
@@ -517,8 +535,7 @@ story += [
         "results; longer values are now used exactly as given.", P),
     Paragraph(
         "<b>Limits.</b> Only exact diagonalization supports plaquette terms for now; DMRG and the QMC codes "
-        "refuse them. Building the local table goes through ALPS's expression evaluator, which is slow for large "
-        "molecular terms (~30 s for H6) but is done once per plaquette type. Plaquettes in a &lt;GRAPH&gt; are not "
+        "refuse them. Plaquettes in a &lt;GRAPH&gt; are not "
         "yet written back out when ALPS writes a lattice library to XML.", P),
 ]
 

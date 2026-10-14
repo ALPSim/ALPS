@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
     std::size_t nnz = 0;
     std::vector<std::size_t> in(4), out(4);
     for (std::size_t i = 0; i < t.size(); ++i)
-      for (auto& e : t.rows[i]) {
+      for (auto& e : t.row(i)) {
         ++nnz; t.decode(i, in); t.decode(e.first, out);
         std::cout << "ENTRY " << in[0] << in[1] << in[2] << in[3] << " " << out[0] << out[1] << out[2] << out[3]
                   << " " << std::setprecision(17) << e.second << "\n";

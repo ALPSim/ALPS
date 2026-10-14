@@ -398,9 +398,10 @@ def to_alps(ham, outdir: str, name: str = "qdk-graph", extra: dict | None = None
         # A MODEL_LIBRARY replaces models.xml wholesale, so the emitted model's
         # <BASIS ref="fermion"/> would dangle. Carry the stock library's body
         # across and append the new Hamiltonian to it.
-        base = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            "data", "models.xml.in")
+        # the repository's stock library; this file is
+        # src/alps/model/docs/n_body_terms/benchmarks/casci/qdk2alps.py
+        base = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                            *[".."] * 7, "src", "alps", "resources", "models.xml")
         with open(base) as fh:
             body = fh.read()
         body = body[body.index("<MODELS>") + len("<MODELS>"):body.rindex("</MODELS>")]

@@ -355,7 +355,7 @@ void hamiltonian_matrix<M,G>::apply_operator(const STATES& states, const nsite_m
     state_type state=states[i];
     for (std::size_t r=0;r<n;++r)
       in[r]=state[p.sites[r]];
-    const typename nsite_matrix<value_type>::row_type& row = mat.rows[mat.index(in)];
+    const typename nsite_matrix<value_type>::row_type& row = mat.row(mat.index(in));
     if (row.empty())
       continue;
     prefix[0]=false;                                // parity of sites < s

@@ -107,9 +107,7 @@ def main():
     ok = True
     print(f"{'N':>2} {'2S':>3} {'dim':>5} {'max|E_alps-E_ref|':>18} {'zero modes':>11} "
           f"{'admissible':>11} {'E_0':>10} {'gap':>10}")
-    # The local table enumerates (Nmax+1)^(2S+1) input tuples, so this grows
-    # fast: (6, 4) takes about 5 minutes, (6, 5) would take about 40.
-    for n, two_s in [(4, 2), (4, 3), (4, 4), (6, 4)]:
+    for n, two_s in [(4, 2), (4, 3), (4, 4), (6, 4), (6, 5), (6, 6), (8, 6)]:
         e = np.array(alps_spectrum(n, two_s))
         ref = reference_spectrum(n, two_s)
         diff = np.max(np.abs(e - ref)) if len(e) == len(ref) else float("inf")

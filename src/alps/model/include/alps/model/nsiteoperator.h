@@ -19,7 +19,7 @@
 //   </PLAQUETTETERM>
 //
 // applied to every <PLAQUETTE> of the lattice. Modeled on BondOperator /
-// BondOperatorEvaluator (bondoperator.h, bondterm.h), with the pair of sites
+// BondOperatorSplitter (bondoperator.h, bondterm.h), with the pair of sites
 // replaced by an ordered list of roles.
 //
 // Fermion convention of the local table. Each product of operators in the term
@@ -46,6 +46,7 @@
 #include <set>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -53,20 +54,63 @@ namespace alps {
 
 class ModelLibrary;
 
-// Sparse local matrix of an n-site term: for each input tuple of local states
-// the nonzero (output tuple, value) pairs. Tuples are mixed-radix indices,
-// role 0 most significant. A dense [dim]^(2n) array would be mostly zeros
-// (n=4, dim=4: 65536 entries).
+// Local table of an n-site term: for each input tuple of local states the
+// nonzero (output tuple, value) pairs. Tuples are mixed-radix indices, role 0
+// most significant.
+//
+// The table is stored factorized: the term is a sum of products
+// coef * O_0 * O_1 * ... * O_{n-1}, one single-site operator per role (or the
+// identity). A row is assembled from these the first time it is asked for, so
+// only the rows that basis states actually reach are built; the full table
+// has prod(dims) rows, which for large plaquettes or boson cutoffs is far more
+// than any one sector uses. Not thread safe.
 template <class T>
 struct nsite_matrix
 {
   typedef std::vector<std::pair<std::size_t, T> > row_type;
+  // a single-site operator: for each input local state, the (output, value) pairs
+  typedef std::vector<row_type> local_type;
+  struct product_type
+  {
+    T coef;
+    std::vector<int> ops;   // per role: index into locals, or -1 for the identity
+  };
+
   std::vector<std::size_t> dims;
-  std::vector<row_type> rows;
-  // quantum numbers whose sum over the sites some nonzero entry changes
+  std::vector<local_type> locals;
+  std::vector<product_type> products;
+  // quantum numbers whose sum over the sites some product changes
   std::set<std::string> nonconserved;
 
-  std::size_t size() const { return rows.size(); }
+  // number of rows (input tuples); 0 if the term has no nonzero product
+  std::size_t size() const
+  {
+    if (products.empty())
+      return 0;
+    std::size_t total = 1;
+    for (std::size_t r = 0; r < dims.size(); ++r)
+      total *= dims[r];
+    return total;
+  }
+
+  const row_type& row(std::size_t idx) const
+  {
+    typename std::unordered_map<std::size_t, row_type>::const_iterator it = rows_.find(idx);
+    if (it != rows_.end())
+      return it->second;
+    std::vector<std::size_t> in(dims.size()), out(dims.size());
+    decode(idx, in);
+    std::map<std::size_t, T> acc;
+    for (std::size_t p = 0; p < products.size(); ++p)
+      expand(products[p], 0, products[p].coef, in, out, acc);
+    row_type& result = rows_[idx];
+    for (typename std::map<std::size_t, T>::iterator e = acc.begin(); e != acc.end(); ++e) {
+      simplify(e->second);
+      if (numeric::is_nonzero(e->second))
+        result.push_back(*e);
+    }
+    return result;
+  }
 
   template <class V>
   std::size_t index(const V& local) const
@@ -85,87 +129,102 @@ struct nsite_matrix
       idx /= dims[r];
     }
   }
+
+private:
+  void expand(const product_type& p, std::size_t r, const T& value, const std::vector<std::size_t>& in,
+              std::vector<std::size_t>& out, std::map<std::size_t, T>& acc) const
+  {
+    if (r == dims.size()) {
+      acc[index(out)] += value;
+      return;
+    }
+    if (p.ops[r] < 0) {
+      out[r] = in[r];
+      expand(p, r + 1, value, in, out, acc);
+      return;
+    }
+    const row_type& column = locals[p.ops[r]][in[r]];
+    for (std::size_t e = 0; e < column.size(); ++e) {
+      out[r] = column[e].first;
+      expand(p, r + 1, value * column[e].second, in, out, acc);
+    }
+  }
+
+  mutable std::unordered_map<std::size_t, row_type> rows_;
 };
 
 
-template <class I, class T = std::complex<double>, class STATE = site_state<I> >
-class NSiteOperatorEvaluator : public OperatorEvaluator<T>
+// Splits one product term of an n-site operator into a coefficient and one
+// string of site operators per role, like BondOperatorSplitter for two sites.
+template <class I, class T = std::complex<double> >
+class NSiteOperatorSplitter : public OperatorEvaluator<T>
 {
 private:
   typedef OperatorEvaluator<T> super_type;
-  typedef NSiteOperatorEvaluator<I, T, STATE> SELF_;
 
 public:
-  NSiteOperatorEvaluator(const std::vector<STATE>& states,
-                         const std::vector<SiteBasisDescriptor<I> >& bases,
-                         const std::vector<std::string>& sites,
-                         const Parameters& p)
-    : super_type(p)
-  {
-    for (std::size_t r = 0; r < sites.size(); ++r)
-      site_.push_back(SiteOperatorEvaluator<I, T, STATE>(states[r], bases[r], p, sites[r]));
-  }
+  NSiteOperatorSplitter(const std::vector<SiteBasisDescriptor<I> >& bases,
+                        const std::vector<std::string>& sites,
+                        const Parameters& p)
+    : super_type(p), bases_(bases), sites_(sites), ops_(sites.size()),
+      used_(sites.size(), false), odd_(sites.size(), false) {}
 
-  bool can_evaluate_function(const std::string&, const expression::Expression<T>&, bool = false) const;
+  bool can_evaluate_function(const std::string& name, const expression::Expression<T>& arg, bool isarg = false) const
+  {
+    return role(arg) >= 0 || expression::ParameterEvaluator<T>::can_evaluate_function(name, arg, isarg);
+  }
   expression::Expression<T> partial_evaluate_function(const std::string& name,
                                                       const expression::Expression<T>& argument, bool = false) const;
 
-  std::size_t size() const { return site_.size(); }
-  const STATE& state(std::size_t r) const { return site_[r].state(); }
-  // parity of the number of fermionic operators applied on role r
-  bool fermionic(std::size_t r) const { return site_[r].fermionic(); }
-
-  bool has_operator(const std::string& name, const expression::Expression<T>& arg) const
+  // the operators of the term on role r, in their original order
+  const expression::Term<T>& site_operators(std::size_t r) const { return ops_[r]; }
+  bool used(std::size_t r) const { return used_[r]; }
+  // the term has an odd number of fermionic operators
+  bool odd() const
   {
-    int r = role(arg);
-    return r >= 0 && site_[r].has_operator(name);
+    bool f = false;
+    for (std::size_t r = 0; r < odd_.size(); ++r)
+      if (odd_[r])
+        f = !f;
+    return f;
   }
 
 private:
   int role(const expression::Expression<T>& arg) const
   {
-    for (std::size_t r = 0; r < site_.size(); ++r)
-      if (arg == site_[r].site())
+    for (std::size_t r = 0; r < sites_.size(); ++r)
+      if (arg == sites_[r])
         return r;
     return -1;
   }
 
-  std::vector<SiteOperatorEvaluator<I, T, STATE> > site_;
+  const std::vector<SiteBasisDescriptor<I> >& bases_;
+  const std::vector<std::string>& sites_;
+  mutable std::vector<expression::Term<T> > ops_;
+  mutable std::vector<bool> used_;
+  mutable std::vector<bool> odd_;   // parity of the fermionic operators seen on each role
 };
 
-
-template <class I, class T, class STATE>
-bool NSiteOperatorEvaluator<I, T, STATE>::can_evaluate_function(const std::string& name, const expression::Expression<T>& arg, bool isarg) const
-{
-  if (has_operator(name, arg)) {
-    SELF_ eval(*this);
-    return eval.partial_evaluate_function(name, arg, isarg).can_evaluate(expression::ParameterEvaluator<T>(*this), isarg);
-  }
-  else
-    return expression::ParameterEvaluator<T>::can_evaluate_function(name, arg, isarg);
-}
-
 // Operators are applied right to left (OperatorEvaluator::direction), so all
-// operators already applied stand to the right of the current one. Moving the
+// operators already seen stand to the right of the current one. Moving the
 // current operator on role r into role order means moving it right past the
-// already-applied operators on roles q < r: one sign per odd one among them.
-// For n = 2 this is BondOperatorEvaluator's rule with the roles swapped.
-template <class I, class T, class STATE>
-expression::Expression<T> NSiteOperatorEvaluator<I, T, STATE>::partial_evaluate_function(const std::string& name, const expression::Expression<T>& arg, bool isarg) const
+// already-seen operators on roles q < r: one sign per odd one among them.
+// For n = 2 this is BondOperatorSplitter's rule with the roles swapped.
+template <class I, class T>
+expression::Expression<T> NSiteOperatorSplitter<I, T>::partial_evaluate_function(const std::string& name, const expression::Expression<T>& arg, bool isarg) const
 {
-  if (has_operator(name, arg)) {
-    int r = role(arg);
-    bool f = site_[r].fermionic();
-    expression::Expression<T> e = site_[r].partial_evaluate_function(name, site_[r].site(), isarg);
-    if (f != site_[r].fermionic() && numeric::is_nonzero(e)) {
-      bool odd = false;
+  int r = role(arg);
+  if (r >= 0) {
+    ops_[r] = expression::Function<T>(name, arg) * ops_[r];
+    used_[r] = true;
+    double sign = 1.;
+    if (bases_[r].is_fermionic(name)) {
       for (int q = 0; q < r; ++q)
-        if (site_[q].fermionic())
-          odd = !odd;
-      if (odd)
-        e.negate();
+        if (odd_[q])
+          sign = -sign;
+      odd_[r] = !odd_[r];
     }
-    return e;
+    return expression::Expression<T>(sign);
   }
   return expression::ParameterEvaluator<T>(*this).partial_evaluate_function(name, arg, isarg);
 }
@@ -248,75 +307,73 @@ nsite_matrix<T> NSiteOperator::matrix(const std::vector<SiteBasisDescriptor<I> >
 
   std::vector<site_basis<I> > states;
   nsite_matrix<T> mat;
-  std::size_t total = 1;
   for (std::size_t r = 0; r < n; ++r) {
     states.push_back(site_basis<I>(bases[r]));
     mat.dims.push_back(states[r].size());
-    total *= states[r].size();
   }
-  mat.rows.resize(total);
 
   // parse expression and store it as sum of terms
   expression::Expression<value_type> ex(term());
   ex.flatten();
   ex.simplify();
 
-  std::vector<std::size_t> in(n);
-  std::vector<std::size_t> out(n);
-  std::vector<site_state<I> > instates(n);
-  for (std::size_t i = 0; i < total; ++i) {
-    mat.decode(i, in);
-    for (std::size_t r = 0; r < n; ++r)
-      instates[r] = states[r][in[r]];
-    std::map<std::size_t, T> row;
-    for (typename expression::Expression<value_type>::term_iterator tit = ex.terms().first; tit != ex.terms().second; ++tit) {
-      NSiteOperatorEvaluator<I, value_type> evaluator(instates, bases, sites(), parms);
-      expression::Term<value_type> term(*tit);
-      term.partial_evaluate(evaluator);
-      if (!numeric::is_nonzero(term))
+  // single-site operators already built, by (role, operator string)
+  std::map<std::pair<std::size_t, std::string>, int> built;
+  for (typename expression::Expression<value_type>::term_iterator tit = ex.terms().first; tit != ex.terms().second; ++tit) {
+    NSiteOperatorSplitter<I, value_type> splitter(bases, sites(), parms);
+    expression::Term<value_type> term(*tit);
+    term.partial_evaluate(splitter);
+    term.simplify();
+    if (!numeric::is_nonzero(term))
+      continue;
+    if (boost::is_arithmetic<T>::value || is_complex<T>::value)
+      if (!can_evaluate(boost::lexical_cast<std::string>(term)))
+        boost::throw_exception(std::runtime_error("Cannot evaluate expression " + boost::lexical_cast<std::string>(term)));
+    typename nsite_matrix<T>::product_type prod;
+    prod.coef = evaluate<T>(term);
+    if (!numeric::is_nonzero(prod.coef))
+      continue;
+
+    bool zero = false;
+    std::map<std::string, half_integer<I> > change;
+    for (std::size_t r = 0; r < n && !zero; ++r) {
+      if (!splitter.used(r)) {
+        prod.ops.push_back(-1);
         continue;
-      bool valid = true;
-      for (std::size_t r = 0; r < n; ++r) {
-        out[r] = states[r].index(evaluator.state(r));
-        if (out[r] >= mat.dims[r])
-          valid = false;
       }
-      if (!valid)
-        continue;
-      if (boost::is_arithmetic<T>::value || is_complex<T>::value)
-        if (!can_evaluate(boost::lexical_cast<std::string>(term)))
-          boost::throw_exception(std::runtime_error("Cannot evaluate expression " + boost::lexical_cast<std::string>(term)));
-      T value = evaluate<T>(term);
-      // An operator that annihilates the state leaves a zero factor which
-      // partial_evaluate does not always fold away ("1 * (0)"), and a later
-      // operator can make the state valid again (c then cdag on an empty
-      // mode). Drop such zeros before looking at the fermion parity.
-      if (!numeric::is_nonzero(value))
-        continue;
-      bool odd = false;
-      for (std::size_t r = 0; r < n; ++r)
-        if (evaluator.fermionic(r))
-          odd = !odd;
-      if (odd)
-        boost::throw_exception(std::runtime_error("n-site term contains an odd number of fermion operators: "
-                                                  + boost::lexical_cast<std::string>(*tit)));
-      T& entry = row[mat.index(out)];
-      entry += value;
-      simplify(entry);
-    }
-    for (typename std::map<std::size_t, T>::const_iterator it = row.begin(); it != row.end(); ++it)
-      if (numeric::is_nonzero(it->second)) {
-        mat.rows[i].push_back(*it);
-        // record quantum numbers (by name, summed over the roles) it changes
-        mat.decode(it->first, out);
-        std::map<std::string, half_integer<I> > change;
-        for (std::size_t r = 0; r < n; ++r)
+      std::pair<std::size_t, std::string> key(r, boost::lexical_cast<std::string>(splitter.site_operators(r)));
+      std::map<std::pair<std::size_t, std::string>, int>::const_iterator it = built.find(key);
+      if (it == built.end()) {
+        multi_array<std::pair<T, bool>, 2> m = SiteOperator(key.second, sites()[r]).template matrix<T, I>(bases[r], parms);
+        typename nsite_matrix<T>::local_type local(mat.dims[r]);
+        for (std::size_t i = 0; i < mat.dims[r]; ++i)
+          for (std::size_t j = 0; j < mat.dims[r]; ++j)
+            if (numeric::is_nonzero(m[i][j].first))
+              local[i].push_back(std::make_pair(j, m[i][j].first));
+        mat.locals.push_back(local);
+        it = built.insert(std::make_pair(key, int(mat.locals.size()) - 1)).first;
+      }
+      prod.ops.push_back(it->second);
+      // the change of each quantum number on this role, read off one nonzero element
+      const typename nsite_matrix<T>::local_type& local = mat.locals[it->second];
+      zero = true;
+      for (std::size_t i = 0; i < local.size() && zero; ++i)
+        if (!local[i].empty()) {
+          zero = false;
           for (std::size_t q = 0; q < bases[r].size(); ++q)
-            change[bases[r][q].name()] += get_quantumnumber(states[r][out[r]], q) - get_quantumnumber(instates[r], q);
-        for (typename std::map<std::string, half_integer<I> >::const_iterator c = change.begin(); c != change.end(); ++c)
-          if (c->second != half_integer<I>(0))
-            mat.nonconserved.insert(c->first);
-      }
+            change[bases[r][q].name()] += get_quantumnumber(states[r][local[i][0].first], q)
+                                          - get_quantumnumber(states[r][i], q);
+        }
+    }
+    if (zero)
+      continue;
+    if (splitter.odd())
+      boost::throw_exception(std::runtime_error("n-site term contains an odd number of fermion operators: "
+                                                + boost::lexical_cast<std::string>(*tit)));
+    for (typename std::map<std::string, half_integer<I> >::const_iterator c = change.begin(); c != change.end(); ++c)
+      if (c->second != half_integer<I>(0))
+        mat.nonconserved.insert(c->first);
+    mat.products.push_back(prod);
   }
   return mat;
 }
