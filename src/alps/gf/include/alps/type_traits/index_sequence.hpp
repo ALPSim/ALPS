@@ -8,6 +8,8 @@
 #define ALPSCORE_INDEX_SEQUENCE_HPP
 
 #include <type_traits>
+// Added in ALPS: ALPSCore 7146b9e1 relied on its includers for size_t.
+#include <cstddef>
 
 namespace alps{
   /// C++11 implementation of C++14 index sequence

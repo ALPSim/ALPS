@@ -25,11 +25,7 @@ target_link_libraries(app PRIVATE ALPS::gf)
 
 Include `<alps/gf/gf.hpp>`, or a header beside it such as
 `<alps/gf/mesh.hpp>`. As in ALPSCore, `<alps/gf/mesh/*.hpp>` and
-`<alps/gf/mpi_bcast.hpp>` are parts of those and do not compile alone. Neither
-do two of the type traits: `<alps/type_traits/index_sequence.hpp>` uses `size_t`
-without declaring it, and `<alps/type_traits/tuple_traits.hpp>` uses
-`alps::index_sequence` without including it. GF's headers include them after
-what they need.
+`<alps/gf/mpi_bcast.hpp>` are parts of those and do not compile alone.
 
 GF stores Green's functions through ALPS's `alps::hdf5::archive`. In an MPI
 build, `ALPS::gf` links `ALPS::utilities` and MPI, and installs
@@ -73,7 +69,7 @@ ALPSCore's top-level files, copied unchanged. The SDK installs them under
 | `gf/src/mesh.cpp` | `src/mesh.cpp` | Copied unchanged |
 | `gf/test/*.cpp`, `gf/test/*.hpp` (30 files) | `tests/` | Copied unchanged |
 | `utilities/include/alps/numeric/tensors.hpp`, `utilities/include/alps/numeric/tensors/*.hpp` (4 headers) | `include/alps/numeric/` | Copied unchanged |
-| `utilities/include/alps/type_traits/{are_all_integrals,common,index_sequence,tuple_traits}.hpp` | `include/alps/type_traits/` | Copied unchanged |
+| `utilities/include/alps/type_traits/{are_all_integrals,common,index_sequence,tuple_traits}.hpp` | `include/alps/type_traits/` | Copied unchanged, except that `index_sequence.hpp` and `tuple_traits.hpp` gain an include (see below) |
 | `hdf5/include/alps/hdf5/tensor.hpp` | `include/alps/hdf5/tensor.hpp` | Copied unchanged |
 | `utilities/include/alps/testing/unique_file.hpp` | `tests/support/alps/testing/unique_file.hpp` | Copied unchanged |
 | `utilities/src/unique_file.cpp` | `tests/support/src/unique_file.cpp` | Copied unchanged |
@@ -92,7 +88,15 @@ The tests also use ALPSCore's `near.hpp`, its MPI test helpers and the
 
 ### Local changes
 
-No imported file is changed. The test registration differs:
+Two imported type traits relied on their includers for some declarations. Each
+now includes what it needs, so it compiles on its own, and a comment marks the
+addition:
+
+- `alps/type_traits/index_sequence.hpp` includes `<cstddef>` for `size_t`.
+- `alps/type_traits/tuple_traits.hpp` includes `index_sequence.hpp`, whose
+  `alps::index_sequence` it uses.
+
+The test registration also differs:
 
 - ALPS runs each GoogleTest case as its own CTest test. The cases that write a
   fixed file name each use their own, so they run in parallel.

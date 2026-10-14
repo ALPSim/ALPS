@@ -10,6 +10,8 @@
 #include <tuple>
 
 #include <alps/type_traits/common.hpp>
+// Added in ALPS: ALPSCore 7146b9e1 relied on its includers for index_sequence.
+#include <alps/type_traits/index_sequence.hpp>
 
 namespace alps {
   template <size_t Cut, typename... T, size_t... I>

@@ -202,11 +202,8 @@ if(TARGET ALPS::gf)
   # As src/alps/gf/README.md advises; alps/gf/flagcheck.hpp warns otherwise.
   target_compile_definitions(gf_contract PRIVATE
     "$<IF:$<CONFIG:Debug>,ALPS_GF_DEBUG,BOOST_DISABLE_ASSERTS>")
-  # As in ALPSCore, the mesh/ headers and mpi_bcast.hpp are parts of others,
-  # index_sequence.hpp needs size_t declared first, and tuple_traits.hpp needs
-  # index_sequence.hpp first.
-  add_header_contract(gf EXCLUDE
-    "^alps/(gf/(mesh/|mpi_bcast\\.hpp$)|type_traits/(index_sequence|tuple_traits)\\.hpp$)")
+  # As in ALPSCore, the mesh/ headers and mpi_bcast.hpp are parts of others.
+  add_header_contract(gf EXCLUDE "^alps/gf/(mesh/|mpi_bcast\\.hpp$)")
   target_compile_definitions(gf_header_contract PRIVATE
     "$<IF:$<CONFIG:Debug>,ALPS_GF_DEBUG,BOOST_DISABLE_ASSERTS>")
 endif()
