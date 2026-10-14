@@ -8,6 +8,7 @@
 // a3992534228b0de732e033ae23154969724814be: combine the odd/even cases,
 // supply ALPS parameters directly, and check finite, ordered grid points.
 #include "maxent.hpp"
+#include "eigen_lapack.hpp"
 #include "maxent_grid.hpp"
 #include "maxent_kernel.hpp"
 
@@ -18,10 +19,6 @@
 #include <limits>
 #include <stdexcept>
 #include <string>
-
-// Exercise the linked solver's LAPACK wrapper without including its definition
-// a second time from eigen_lapack.hpp.
-void lapack_svd(matrix_type&, vector_type&, matrix_type&, matrix_type&);
 
 TEST(MaxEntDefaultModel, TabulatedInterpolationAndExtrapolation) {
   alps::testing::TemporaryDirectory temporary;

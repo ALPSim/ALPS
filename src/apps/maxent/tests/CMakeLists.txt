@@ -9,7 +9,9 @@ alps_add_gtest(maxent_linear_grid_numeric COMPONENT maxent LABELS scientific TIM
 
 add_executable(maxent_grid_kernel grid_kernel.cpp)
 target_include_directories(maxent_grid_kernel PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../src")
-target_link_libraries(maxent_grid_kernel PRIVATE ALPS::maxent Eigen3::Eigen)
+# The SVD check calls the header's inline LAPACK wrapper directly.
+target_compile_definitions(maxent_grid_kernel PRIVATE HAVE_LAPACK)
+target_link_libraries(maxent_grid_kernel PRIVATE ALPS::maxent Eigen3::Eigen ${ALPS_LAPACK_TARGET})
 alps_add_gtest(maxent_grid_kernel COMPONENT maxent LABELS scientific TIMEOUT 30)
 
 # Keep a native public-API/linkage probe alongside the shared scientific oracle.

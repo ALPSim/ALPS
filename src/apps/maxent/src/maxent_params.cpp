@@ -1,8 +1,13 @@
-/*
- * Copyright (C) 1998-2018 ALPS Collaboration.
- * All rights reserved. Use is subject to license terms. See LICENSE.TXT
- * For use in publications, see ACKNOWLEDGE.TXT
- */
+/*****************************************************************************
+*
+* ALPS Project Applications
+*
+* Copyright (C) 1998-2018 ALPS Collaboration
+*
+* ALPS Project: https://alps.comp-phys.org/
+* SPDX-License-Identifier: MIT
+*
+*****************************************************************************/
 
 // Legacy ALPS data and covariance handling from src/apps/maxent/src/maxent_parms.cpp
 // at d4533fd30c65656cf5ab7fa448dd6b921b39aa6f; original notice:
@@ -20,20 +25,16 @@
  *****************************************************************************/
 
 // Adapted from CQMP/Maxent src/maxent_params.cpp, revision
-// a3992534228b0de732e033ae23154969724814be, on 2026-10-14.
+// e727650a1f0a427e95efebc409d907b4c84011ec, on 2026-10-14.
 // Uses ALPS parameter APIs and retains ALPS input/output conventions;
 // see ../README.md for provenance and licensing.
 
 #include "maxent.hpp"
 #include "eigen_lapack.hpp"
-#include <alps/config.h> // needed to set up correct bindings
 #include <Eigen/SVD>
 #include <Eigen/Eigenvalues>
 #include <alps/hdf5/vector.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/math/special_functions/legendre.hpp> //needed for Legendre transform
-namespace bmth = boost::math;
+#include "maxent_string.hpp"
 
 // ALPS text data consists of indexed rows: index value error. Complex
 // frequency data uses alternating real and imaginary rows. Imaginary times
@@ -80,13 +81,13 @@ void ContiParameters::read_data_from_hdf5_file(const alps::params& p) {
   std::stringstream path;
   path << "/Data";
   ar >> alps::make_pvp(path.str(), tmp);
-  for (std::size_t i = 0; i < ndat(); i++)
+  for (int i = 0; i < ndat(); i++)
     y_(i) = tmp[i] / static_cast<double>(p["NORM"]);
   path.str("");
   if (p["COVARIANCE_MATRIX"].cast<std::string>()=="") {
     path << "/Error";
     ar >> alps::make_pvp(path.str(), tmp);
-    for (std::size_t i = 0; i < ndat(); i++)
+    for (int i = 0; i < ndat(); i++)
       sigma_(i) = tmp[i] / static_cast<double>(p["NORM"]);
   } else {
     path << "/Covariance";
@@ -94,8 +95,8 @@ void ContiParameters::read_data_from_hdf5_file(const alps::params& p) {
     tmp.clear();
     tmp.resize(ndat() * ndat());
     ar >> alps::make_pvp(path.str(), tmp);
-    for (std::size_t i = 0; i < ndat(); i++)
-      for (std::size_t j = 0; j < ndat(); j++)
+    for (int i = 0; i < ndat(); i++)
+      for (int j = 0; j < ndat(); j++)
         cov_(i, j) = tmp[i * ndat() + j];
   }
 }
@@ -108,18 +109,18 @@ void ContiParameters::read_data_from_param_file(const alps::params& p) {
         << std::endl;
 
   for (int i = 0; i < ndat(); ++i) {
-    if (!p.defined("X_" + boost::lexical_cast<std::string>(i))) {
-      throw std::runtime_error("parameter X_"+ boost::lexical_cast<std::string>(i)+ " missing!");
+    if (!p.defined("X_" + std::to_string(i))) {
+      throw std::runtime_error("parameter X_"+ std::to_string(i)+ " missing!");
     }
-    y_(i) = static_cast<double>(p["X_" + boost::lexical_cast<std::string>(i)])
+    y_(i) = static_cast<double>(p["X_" + std::to_string(i)])
         / static_cast<double>(p["NORM"]);
     if (p["COVARIANCE_MATRIX"].cast<std::string>()=="") {
-      if (!p.defined("SIGMA_" + boost::lexical_cast<std::string>(i))) {
+      if (!p.defined("SIGMA_" + std::to_string(i))) {
         throw std::runtime_error(
-            std::string("parameter SIGMA_"+boost::lexical_cast<std::string>(i)+ " missing! "));
+            std::string("parameter SIGMA_"+std::to_string(i)+ " missing! "));
       }
       sigma_(i) = static_cast<double>(p["SIGMA_"
-          + boost::lexical_cast<std::string>(i)])
+          + std::to_string(i)])
           / static_cast<double>(p["NORM"]);
     }
   }
@@ -131,7 +132,7 @@ y_(ndat_),sigma_(ndat_),K_(),grid_(p),inputGrid_(ndat_)
 {
   //note: T_=1/beta now taken care of elsewhere
   if (ndat_<4) 
-    boost::throw_exception(std::invalid_argument("NDAT too small"));
+    throw std::invalid_argument("NDAT too small");
 
 
   if (p.defined("DATA") && p["DATA"].cast<std::string>() != "") {
@@ -167,9 +168,8 @@ void ContiParameters::read_covariance_matrix_from_text_file(
   std::cerr << "Reading covariance matrix\n";
   std::ifstream covstream(fname.c_str());
   if (!covstream)
-    boost::throw_exception(
-        std::invalid_argument(
-            "could not open covariance matrix file: " + fname));
+    throw std::invalid_argument(
+            "could not open covariance matrix file: " + fname);
 
   int i, j;
   double covariance;
@@ -185,7 +185,6 @@ void ContiParameters::read_covariance_matrix_from_text_file(
 
 void ContiParameters::decompose_covariance_matrix(const alps::params& p){
     vector_type var(ndat());
-    //bindings::lapack::syev('V', bindings::upper(cov_) , var, bindings::lapack::optimal_workspace()); 
     //TODO: check if this truly implements lapack's expected overwrite of cov_
     // ALPS's LAPACK covariance decomposition uses the upper triangle.
     Eigen::SelfAdjointEigenSolver<matrix_type> es(cov_.selfadjointView<Eigen::Upper>());
@@ -252,17 +251,12 @@ void MaxEntParameters::truncate_to_singular_space(const vector_type& S) {
 
 void MaxEntParameters::singular_value_decompose_kernel(bool verbose,
     vector_type& S) {
-  /*boost::numeric::bindings::lapack::gesvd('S', 'S', Kt, S, U_, Vt_);
-  */
-
 #ifdef HAVE_LAPACK
 
   matrix_type Kt = K_; // gesvd destroys K!
   lapack_svd(Kt,S, Vt_,U_);
 
 #else
-  const double threshold = std::sqrt(std::numeric_limits<double>::epsilon())
-      * nfreq();
   Eigen::JacobiSVD<matrix_type> svd(K_,Eigen::ComputeThinU | Eigen::ComputeThinV);
   //svd.setThreshold(threshold);
   S=svd.singularValues();
@@ -278,15 +272,14 @@ void MaxEntParameters::singular_value_decompose_kernel(bool verbose,
     std::cout << "# eps = " << sqrt(std::numeric_limits<double>::epsilon())
         << std::endl << "# prec = " << prec << std::endl;
 
-  for (unsigned int s = 0; s < S.size(); ++s) {
+  for (Eigen::Index s = 0; s < S.size(); ++s) {
     if (verbose)
       std::cout << "# " << s << "\t" << S[s] << "\n";
 
     ns_ = (S[s] >= prec) ? s + 1 : ns_;
   }
   if (ns() == 0)
-    boost::throw_exception(
-        std::logic_error("all singular values smaller than the precision"));
+    throw std::logic_error("all singular values smaller than the precision");
   
 }
 void MaxEntParameters::check_high_frequency_limit(const vector_type& y,const kernel_type kt){
@@ -348,10 +341,12 @@ MaxEntParameters::MaxEntParameters(alps::params& p) :
   k_type = ker.getKernelType();
 
   //scale lhs and rhs according to errors, etc.
-  if (p["COVARIANCE_MATRIX"].cast<std::string>()!="")
+  if (p["COVARIANCE_MATRIX"].cast<std::string>()!="") {
     decompose_covariance_matrix(p);
-    
-    check_high_frequency_limit(y(),k_type);
+  }
+
+  // This diagnostic applies to both diagonal errors and covariance input.
+  check_high_frequency_limit(y(),k_type);
 
   //Look around Eq. D.5 in Sebastian's thesis. We have sigma_ = sqrt(eigenvalues of covariance matrix) or, 
   //in case of a diagonal covariance matrix, we have sigma_=SIGMA_X. 

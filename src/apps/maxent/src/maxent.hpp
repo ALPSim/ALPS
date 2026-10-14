@@ -1,8 +1,13 @@
-/*
- * Copyright (C) 1998-2018 ALPS Collaboration.
- * All rights reserved. Use is subject to license terms. See LICENSE.TXT
- * For use in publications, see ACKNOWLEDGE.TXT
- */
+/*****************************************************************************
+*
+* ALPS Project Applications
+*
+* Copyright (C) 1998-2018 ALPS Collaboration
+*
+* ALPS Project: https://alps.comp-phys.org/
+* SPDX-License-Identifier: MIT
+*
+*****************************************************************************/
 
 // Legacy ALPS solver declarations from src/apps/maxent/src/maxent.hpp
 // at d4533fd30c65656cf5ab7fa448dd6b921b39aa6f; original notice:
@@ -21,7 +26,7 @@
 *****************************************************************************/
 
 // Adapted from CQMP/Maxent src/maxent.hpp at
-// a3992534228b0de732e033ae23154969724814be; see ../README.md.
+// e727650a1f0a427e95efebc409d907b4c84011ec; see ../README.md.
 
 #pragma once
 
@@ -29,7 +34,7 @@
 #include <boost/function.hpp>
 #include "maxent_matrix_def.hpp"
 #include "maxent_params.hpp"
-#include <boost/random/mersenne_twister.hpp>
+#include <random>
 
 struct ofstream_ : std::ofstream{
     explicit ofstream_(std::streamsize precision=10){
@@ -85,11 +90,12 @@ public :
   void generateCovariantErr(const vector_type& A_in, const double alpha, ofstream_ &os);
 
 private:
+  std::mt19937::result_type bootstrap_seed_;
   ///discretized and normalized version of the default model.
   vector_type def_;
   ///check that the default model is non-zero
   void checkDefaultModel(const vector_type &D) const;
-  vector_type generateGaussNoise(vector_type data, vector_type err,boost::mt19937 &rng);
+  vector_type generateGaussNoise(vector_type data, vector_type err,std::mt19937 &rng);
 protected:
   bool text_output;
 };

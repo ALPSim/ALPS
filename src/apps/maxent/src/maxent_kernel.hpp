@@ -1,11 +1,16 @@
-/*
- * Copyright (C) 1998-2018 ALPS Collaboration.
- * All rights reserved. Use is subject to license terms. See LICENSE.TXT
- * For use in publications, see ACKNOWLEDGE.TXT
- */
+/*****************************************************************************
+*
+* ALPS Project Applications
+*
+* Copyright (C) 1998-2018 ALPS Collaboration
+*
+* ALPS Project: https://alps.comp-phys.org/
+* SPDX-License-Identifier: MIT
+*
+*****************************************************************************/
 
 // Adapted from CQMP/Maxent src/maxent_kernel.hpp, revision
-// a3992534228b0de732e033ae23154969724814be, on 2026-10-14.
+// e727650a1f0a427e95efebc409d907b4c84011ec, on 2026-10-14.
 // Uses ALPS parameter APIs and retains ALPS input/output conventions;
 // see ../README.md for provenance and licensing.
 #pragma once

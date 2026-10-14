@@ -1,8 +1,13 @@
-/*
- * Copyright (C) 1998-2018 ALPS Collaboration.
- * All rights reserved. Use is subject to license terms. See LICENSE.TXT
- * For use in publications, see ACKNOWLEDGE.TXT
- */
+/*****************************************************************************
+*
+* ALPS Project Applications
+*
+* Copyright (C) 1998-2018 ALPS Collaboration
+*
+* ALPS Project: https://alps.comp-phys.org/
+* SPDX-License-Identifier: MIT
+*
+*****************************************************************************/
 
 // Legacy ALPS parameter declarations from src/apps/maxent/src/maxent_parms.hpp
 // at d4533fd30c65656cf5ab7fa448dd6b921b39aa6f; original notice:
@@ -20,7 +25,7 @@
 *****************************************************************************/
 
 // Adapted from CQMP/Maxent src/maxent_params.hpp, revision
-// a3992534228b0de732e033ae23154969724814be, on 2026-10-14.
+// e727650a1f0a427e95efebc409d907b4c84011ec, on 2026-10-14.
 // Uses ALPS parameter APIs and retains ALPS input/output conventions;
 // see ../README.md for provenance and licensing.
 
@@ -121,7 +126,7 @@ public:
 
 private:
   ///The default model
-  boost::shared_ptr<DefaultModel> Default_;
+  std::shared_ptr<DefaultModel> Default_;
   matrix_type U_;
   matrix_type Vt_;
   matrix_type Sigma_;

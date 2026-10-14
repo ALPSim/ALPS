@@ -1,11 +1,16 @@
-/*
- * Copyright (C) 1998-2018 ALPS Collaboration.
- * All rights reserved. Use is subject to license terms. See LICENSE.TXT
- * For use in publications, see ACKNOWLEDGE.TXT
- */
+/*****************************************************************************
+*
+* ALPS Project Applications
+*
+* Copyright (C) 1998-2018 ALPS Collaboration
+*
+* ALPS Project: https://alps.comp-phys.org/
+* SPDX-License-Identifier: MIT
+*
+*****************************************************************************/
 
 // Adapted from CQMP/Maxent src/eigen_lapack.hpp at
-// a3992534228b0de732e033ae23154969724814be; see ../README.md.
+// e727650a1f0a427e95efebc409d907b4c84011ec; see ../README.md.
 // Updated 2026-10-14 to size thin factors and report LAPACK errors.
 #pragma once
 
@@ -23,9 +28,7 @@ extern "C" void dgesvd_( const char* jobu, const char* jobvt,
 ///performs a SVD on input matrix K
 /// returns K =  U (S) V^T where S is a vector of the diagonal values of
 /// matrix Sigma
-void lapack_svd(matrix_type &K, vector_type &S, matrix_type &Vt, matrix_type &U){
-
-   /*boost::numeric::bindings::lapack::gesvd('S', 'S', Kt, S, U_, Vt_);*/
+inline void lapack_svd(matrix_type &K, vector_type &S, matrix_type &Vt, matrix_type &U){
   //use 'S' for thin U,Vt matrices
   char jobu = 'S';
   char jobvt = 'S';

@@ -1,11 +1,16 @@
-/*
- * Copyright (C) 1998-2018 ALPS Collaboration.
- * All rights reserved. Use is subject to license terms. See LICENSE.TXT
- * For use in publications, see ACKNOWLEDGE.TXT
- */
+/*****************************************************************************
+*
+* ALPS Project Applications
+*
+* Copyright (C) 1998-2018 ALPS Collaboration
+*
+* ALPS Project: https://alps.comp-phys.org/
+* SPDX-License-Identifier: MIT
+*
+*****************************************************************************/
 
 // Adapted from CQMP/Maxent src/maxent_backcont.cpp at
-// a3992534228b0de732e033ae23154969724814be; see ../README.md.
+// e727650a1f0a427e95efebc409d907b4c84011ec; see ../README.md.
 #include "maxent_backcont.hpp"
 
 Backcont::Backcont(const MaxEntParameters *param_in) :
@@ -36,12 +41,10 @@ vector_type Backcont::backcontinue(const vector_type &A){
 }
 double Backcont::max_error(const vector_type &y1, const vector_type &y2){
   double max_err = 0.0;
-#ifdef NDEBUG
   if(y1.size() != y2.size()){
     throw std::runtime_error("backcont vector size mismatch!");
   }
-#endif
-  for(int i=0;i<y1.size();i++){
+  for(Eigen::Index i=0;i<y1.size();i++){
     double delta = std::abs(y1(i)-y2(i));
     if(delta>max_err){
       max_err = delta;

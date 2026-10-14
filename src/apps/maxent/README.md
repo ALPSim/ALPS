@@ -2,7 +2,10 @@
 
 The implementation in `src/` is adapted from
 [CQMP/Maxent](https://github.com/CQMP/Maxent) at commit
-[`a3992534228b0de732e033ae23154969724814be`](https://github.com/CQMP/Maxent/commit/a3992534228b0de732e033ae23154969724814be).
+[`e727650a1f0a427e95efebc409d907b4c84011ec`](https://github.com/CQMP/Maxent/commit/e727650a1f0a427e95efebc409d907b4c84011ec)
+on its `modernize/step2` branch. Upstream `master` is still at the 2018 commit
+`a3992534228b0de732e033ae23154969724814be`; the later commits fix kernels,
+grids and bootstrap seeding and replace GSL and most Boost utilities.
 It replaces the older ALPS MaxEnt implementation. The ALPS executable, Python
 `AnalyticContinuation` binding and `alps::solvers::maxent(params, output_file)`
 entry point continue to use the same interface.
@@ -29,10 +32,8 @@ The adaptations are confined to this application:
 - Use ALPS's existing typed parameters and HDF5 archive instead of requiring a
   separate ALPSCore installation. Parameter defaults are supplied locally.
 - Use Eigen for matrix operations and ALPS's existing LP64 LAPACK for the SVD.
-  Application builds additionally require Eigen >= 3.3. The Legendre kernel
-  uses the existing Boost.Math Gauss-Kronrod quadrature instead of upstream's
-  GSL call, with an equivalent integrand that avoids exponential overflow.
-  Library-only builds do not require Eigen.
+  Application builds additionally require Eigen >= 3.3. Library-only builds do
+  not require Eigen.
 - Preserve the explicit output filename, stop callbacks and signal setup of
   the ALPS solver. Text output and backcontinuation remain opt-in; set
   `BACKCONTINUE=1` to enable the latter. Backcontinuation with a covariance
@@ -48,16 +49,24 @@ The adaptations are confined to this application:
   extrapolation beyond tabulated default-model endpoints. For HDF5 input,
   specifying `COVARIANCE_MATRIX`, even with an empty value, selects
   `/Covariance`; omitting it selects `/Error`.
+- Evaluate the imaginary-time bosonic kernel at |omega|, where it is even and
+  no exponential overflows. Upstream maps the overflow's NaN to zero, which is
+  wrong near tau = 0 and beta once beta * |omega| exceeds about 709.
+- Seed `GENERATE_ERR` bootstrap errors with `SEED`, default 42 as in ALPS's
+  `mcbase`, rather than upstream's 0. The normal variates come from the
+  C++ standard library, so seeded errors are reproducible for a given standard
+  library, not across platforms.
 - Size the LAPACK SVD buffers for rectangular kernels and report failed
   decompositions; initialize omitted text covariance entries to zero.
 - Keep odd logarithmic grids within the requested frequency endpoints and
-  half-Lorentzian grids away from the tangent pole at coarse resolutions.
+  half-Lorentzian grids away from the tangent pole at coarse resolutions. Both
+  defects remain upstream.
   Include the first frequency bin in complex kernels, correcting its omission
   in the legacy solver; complex spectra can therefore differ numerically.
 
 The replacement also brings CQMP's fermionic Legendre kernel, additional default
 models, and spectrum backcontinuation. Bosonic Legendre input is rejected because
-the imported quadrature implements only the fermionic kernel. CQMP's standalone
+upstream applies its fermionic Legendre kernel to bosonic data. CQMP's standalone
 parameter-file CLI and `MODEL_RUNS` loop are not part of the ALPS entry point.
 Scientific output paths and `NORM` scaling are covered by the shared native/Python
 references.
@@ -69,8 +78,9 @@ copyright notices and `ACKNOWLEDGE.TXT` are preserved.
 
 The citation catalog credits Levy, LeBlanc and Gull's 2017 implementation and
 the Bryan and Jarrell–Gubernatis method references. ALPS supplies the current
-framework citation; the preserved upstream acknowledgment file also records
-its historical ALPS/ALPSCore requests. Run `maxent --citations` for the current
+framework citation; `ACKNOWLEDGE.TXT`, kept from the 2018 import (upstream now
+has `CITATION.md` with the same requests), also records its historical
+ALPS/ALPSCore requests. Run `maxent --citations` for the current
 application guidance. Installed SDKs and Python packages include the MaxEnt
 license and acknowledgment files.
 

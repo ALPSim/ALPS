@@ -1,11 +1,16 @@
-/*
- * Copyright (C) 1998-2018 ALPS Collaboration.
- * All rights reserved. Use is subject to license terms. See LICENSE.TXT
- * For use in publications, see ACKNOWLEDGE.TXT
- */
+/*****************************************************************************
+*
+* ALPS Project Applications
+*
+* Copyright (C) 1998-2018 ALPS Collaboration
+*
+* ALPS Project: https://alps.comp-phys.org/
+* SPDX-License-Identifier: MIT
+*
+*****************************************************************************/
 
 // Adapted from CQMP/Maxent src/eigen_hdf5.hpp at
-// a3992534228b0de732e033ae23154969724814be; see ../README.md.
+// e727650a1f0a427e95efebc409d907b4c84011ec; see ../README.md.
 
 #pragma once
 #include <alps/hdf5/archive.hpp>
@@ -29,7 +34,7 @@ namespace alps {
                       if (value.size()) {
                           std::vector<std::size_t> first(get_extent(value[0]));
                           if (true)
-                              for(std::size_t i=1;i<value.size();i++) {
+                              for(Eigen::Index i=1;i<value.size();i++) {
                                   std::vector<std::size_t> size(get_extent(value[i]));
                                   if (
                                          first.size() != size.size()
@@ -43,7 +48,7 @@ namespace alps {
                   }
           };
         }
-        void save(
+        inline void save(
             archive &ar
           , std::string const & path
           , Eigen::VectorXd &value
