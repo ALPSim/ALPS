@@ -10,3 +10,9 @@ seeding. CLI integration tests and fixtures live in `tests/cli/`.
 `archive/` owns `txt2archive`, `xml2archive` and the optional SQLite `archive`
 command. `xml/` provides `alps-xml` for plotting, conversion and extraction;
 see the [command examples](../../CONTRIBUTING.md#xml-resources-and-tools).
+
+`xml/` also installs the historical command names as aliases of `alps-xml`,
+generated from `xml/legacy-alias.in`. It also installs three deprecated helpers
+without an `alps-xml` equivalent: `archivecat`, `xslttransform` and
+`use_local_stylesheet`. They warn on standard error; remove them once the
+deprecation period ends.
