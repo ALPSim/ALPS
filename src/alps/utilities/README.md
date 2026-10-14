@@ -28,6 +28,7 @@ means it was moved as it was, and the note says what modernization remains.
 | `temporary_filename.hpp` | Private temporary file names | current; ALPSCore name. ALPS keeps its by-value signature |
 | `make_copy.hpp` | `alps::make_copy()` | current; ALPSCore name |
 | `mpi.hpp` | `alps::mpi`: ALPSCore's MPI communicator, environment, broadcast and reductions | current; copied from ALPSCore with local adaptations, MPI builds only |
+| `boost_mpi.hpp` | `alps::mpi::reduce` for `std::vector`, on ALPSCore's communicator; despite the name, no Boost.MPI | current; copied from ALPSCore, MPI builds only |
 | `copyright.hpp` | Program banners, version and license text | current |
 | `citations.hpp` | Citation notices from the generated catalog | current |
 | `os.hpp` | Host, user and directory queries | carried over; returns `boost::filesystem::path` |
@@ -40,7 +41,7 @@ means it was moved as it was, and the note says what modernization remains.
 Not yet moved: `alps/ngs/{config,hash,mutex,sleep,thread_exceptions}.hpp`, the
 top-level `alps/cctype.h`, `alps/factory.h`, `alps/lambda.hpp` and
 `alps/stringvalue.h`, and the type traits ALPSCore lacks. `alps/ngs/boost_mpi.hpp`
-stays where it is: ALPSCore's header of the same name is a different API.
+stays where it is: ALPSCore's `alps/utilities/boost_mpi.hpp` is a different API.
 
 Old spellings of the moved headers forward from the [legacy layer](../../../legacy/README.md)
 while `ALPS_LEGACY_API` is on.
@@ -59,7 +60,8 @@ Its notice refers to ALPSCore's top-level
 Publication pointers in imported comments have been removed.
 It includes `<mpi.h>`, so only MPI builds install it. In ALPSCore, ALEA, the
 Green's functions, parameters and Monte Carlo code all use it, so it lives here
-rather than with one module.
+rather than with one module. `boost_mpi.hpp`, from the same commit and copied
+unchanged, adds its `std::vector` reductions, which ALPSCore's accumulators use.
 
 Its names share namespace `alps::mpi` with ALPS's `<alps/ngs/mpi.hpp>`, without
 overlapping; `utilities_mpi_coexistence` uses both in one program. Its

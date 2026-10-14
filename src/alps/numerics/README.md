@@ -16,8 +16,15 @@ and
 
 | Header | Relationship |
 | --- | --- |
+| `boost_array_functions.hpp` | Copied unchanged |
+| `check_size.hpp` | Copied unchanged |
 | `inf.hpp` | Copied; one line changed for C++20 (see below) |
+| `rectangularize.hpp` | Copied unchanged |
+| `scalar.hpp` | Copied unchanged |
 | `vector_functions.hpp` | ALPSCore's version, which replaced ALPS's; ALPS additions at the end (see below) |
+
+ALPSCore's accumulators use all of them. `boost_array_functions.hpp` gives
+`boost::array` the arithmetic `vector_functions.hpp` gives `std::vector`.
 
 ### `inf.hpp`
 

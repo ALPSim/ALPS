@@ -24,6 +24,8 @@ target_sources(alps_numerics INTERFACE
     include/alps/numeric/abs2.hpp
     include/alps/numeric/accumulate_if.hpp
     include/alps/numeric/binomial.hpp
+    include/alps/numeric/boost_array_functions.hpp
+    include/alps/numeric/check_size.hpp
     include/alps/numeric/checked_divide.hpp
     include/alps/numeric/conj.hpp
     include/alps/numeric/deprecated/vector.hpp
@@ -92,9 +94,11 @@ target_sources(alps_numerics INTERFACE
     include/alps/numeric/outer_product.hpp
     include/alps/numeric/polynomial.hpp
     include/alps/numeric/real.hpp
+    include/alps/numeric/rectangularize.hpp
     include/alps/numeric/regression.hpp
     include/alps/numeric/resizeable_vector.h
     include/alps/numeric/round.hpp
+    include/alps/numeric/scalar.hpp
     include/alps/numeric/scalar_product.hpp
     include/alps/numeric/sequence_comparisons.hpp
     include/alps/numeric/set_negative_0.hpp
