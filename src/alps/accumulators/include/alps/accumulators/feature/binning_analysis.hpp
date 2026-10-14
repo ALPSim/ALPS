@@ -12,6 +12,9 @@
 #include <alps/accumulators/parameter.hpp>
 #include <alps/accumulators/feature/mean.hpp>
 #include <alps/accumulators/feature/count.hpp>
+// ALPS: binning analysis builds on the error feature; include it so that this
+// header compiles on its own.
+#include <alps/accumulators/feature/error.hpp>
 
 #include <alps/hdf5/archive.hpp>
 #include <alps/utilities/stacktrace.hpp>
