@@ -11,6 +11,10 @@
 #include <complex>
 #include <vector>
 
+// Added in ALPS: ALPSCore 7146b9e1 relied on its includers for the fixed-width
+// integer types.
+#include <cstdint>
+
 #include <alps/common/view.hpp>
 
 // Forward declarations

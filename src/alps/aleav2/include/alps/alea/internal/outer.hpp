@@ -5,6 +5,9 @@
  */
 #pragma once
 
+// Added in ALPS: ALPSCore 7146b9e1 relied on its includer for assert.
+#include <cassert>
+
 #include <Eigen/Core>
 
 #include <alps/alea/complex_op.hpp>

@@ -51,10 +51,10 @@ notices when modifying these files.
 | ALPSCore path | Here | Relationship |
 | --- | --- | --- |
 | `alea/include/alps/alea.hpp` | `include/alps/alea.hpp` | Copied unchanged |
-| `alea/include/alps/alea/**` | `include/alps/alea/**` | Copied unchanged; `mpi.hpp` is installed only by MPI builds |
+| `alea/include/alps/alea/**` | `include/alps/alea/**` | Copied unchanged, except that `convert.hpp` and `internal/outer.hpp` gain includes (see below); `mpi.hpp` is installed only by MPI builds |
 | `alea/src/*.cpp` (13 files) | `src/` | Copied unchanged |
 | `utilities/include/alps/common/view.hpp` | `include/alps/common/view.hpp` | Copied unchanged |
-| `utilities/include/alps/serialization/{core,eigen,util}.hpp` | `include/alps/serialization/` | Copied unchanged |
+| `utilities/include/alps/serialization/{core,eigen,util}.hpp` | `include/alps/serialization/` | Copied unchanged, except that `core.hpp` gains an include (see below) |
 | `alea/test/*.cpp` (10 files), `alea/test/dataset.hpp` | `tests/` | Copied unchanged |
 | `utilities/include/alps/testing/near.hpp` | `tests/support/alps/testing/near.hpp` in the repository root | Copied unchanged; shared test support |
 | `COPYRIGHT.TXT`, `LICENSE.TXT`, `ACKNOWLEDGE.TXT` | here | Copied unchanged |
@@ -67,7 +67,18 @@ The CMake files, `tests/coexistence.cpp` and this README are ALPS's own.
 
 ### Local changes
 
-No imported file is changed. The test registration differs:
+Three imported headers relied on their includers for some declarations. Each
+now includes what it needs, so it compiles on its own, and a comment marks the
+addition:
+
+- `alps/alea/convert.hpp` includes `mean.hpp`, `variance.hpp`, `covariance.hpp`
+  and `batch.hpp`. They define the results it joins and give `var_result` and
+  `cov_result` their default strategy arguments.
+- `alps/alea/internal/outer.hpp` includes `<cassert>`; GCC rejects it otherwise.
+- `alps/serialization/core.hpp` includes `<cstdint>`. On Linux, nothing else it
+  includes declares `uint32_t` and `uint64_t`.
+
+The test registration also differs:
 
 - ALPS runs each GoogleTest case as its own CTest test, so the `twogauss` cases,
   which all write `twogauss.hdf5`, share a CTest resource lock.

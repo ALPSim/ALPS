@@ -10,6 +10,14 @@
 #include <alps/alea/internal/util.hpp>
 #include <alps/alea/internal/joined.hpp>
 
+// Added in ALPS: ALPSCore 7146b9e1 relied on its includers for these. They
+// define the results joined below and give var_result and cov_result their
+// default strategy arguments.
+#include <alps/alea/mean.hpp>
+#include <alps/alea/variance.hpp>
+#include <alps/alea/covariance.hpp>
+#include <alps/alea/batch.hpp>
+
 // Forward
 
 namespace alps { namespace alea {
