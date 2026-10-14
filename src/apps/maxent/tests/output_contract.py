@@ -1,4 +1,4 @@
-"""Check the established MaxEnt text columns against its scientific HDF5 output."""
+"""Check MaxEnt text columns against its scientific HDF5 output, and bootstrap seeding."""
 
 import argparse
 from pathlib import Path
@@ -9,8 +9,11 @@ import h5py
 import numpy as np
 
 
-def check(executable, directory):
-    beta, count, frequencies, alphas, norm = 4.0, 16, 48, 6, 2.5
+BETA, COUNT, FREQUENCIES, ALPHAS, NORM = 4.0, 16, 48, 6, 2.5
+
+
+def solve(executable, directory, **overrides):
+    beta, count, frequencies, alphas, norm = BETA, COUNT, FREQUENCIES, ALPHAS, NORM
     tau = np.linspace(0.0, beta, count)
     poles = np.array([-1.0, 1.0])
     data = -np.exp(-np.outer(tau, poles)) / (1.0 + np.exp(-beta * poles))
@@ -26,6 +29,7 @@ def check(executable, directory):
         "PARTICLE_HOLE_SYMMETRY": 0, "TEXT_OUTPUT": 1, "SELF": 1,
         "DATA_IN_HDF5": 1, "DATA": str(source),
         "BASENAME": str(directory / "result"),
+        **overrides,
     }
     with h5py.File(source, "w") as archive:
         archive["Data"] = norm * data
@@ -35,6 +39,11 @@ def check(executable, directory):
     completed = subprocess.run([str(executable), str(source)], cwd=directory,
                                capture_output=True, text=True, timeout=60)
     assert completed.returncode == 0, completed.stdout + completed.stderr
+
+
+def check(executable, directory):
+    count, frequencies, alphas, norm = COUNT, FREQUENCIES, ALPHAS, NORM
+    solve(executable, directory)
 
     def table(name, rows, columns):
         values = np.loadtxt(directory / name, ndmin=2)
@@ -70,6 +79,24 @@ def check(executable, directory):
     table("result.fits.dat", alphas * count, 4)
 
 
+def check_bootstrap_seed(executable, directory):
+    # GENERATE_ERR draws from SEED (default 42), so equal seeds reproduce the
+    # bootstrap columns and a different seed changes them.
+    errors = {}
+    for label, seed in (("default", None), ("42", 42), ("7", 7)):
+        run = directory / ("seed-" + label)
+        run.mkdir()
+        overrides = {"GENERATE_ERR": 1, "TEXT_OUTPUT": 0, "SELF": 0}
+        if seed is not None:
+            overrides["SEED"] = seed
+        solve(executable, run, **overrides)
+        errors[label] = np.loadtxt(run / "result.booterr.dat", ndmin=2)
+        assert errors[label].shape == (FREQUENCIES, 4) and np.all(np.isfinite(errors[label]))
+    np.testing.assert_array_equal(errors["default"], errors["42"])
+    np.testing.assert_array_equal(errors["7"][:, :2], errors["42"][:, :2])
+    assert np.any(errors["7"][:, 2:] != errors["42"][:, 2:])
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("executable", type=Path)
@@ -77,4 +104,5 @@ if __name__ == "__main__":
     executable = arguments.executable.resolve(strict=True)
     with tempfile.TemporaryDirectory(prefix="alps-maxent-output-") as temporary:
         check(executable, Path(temporary))
+        check_bootstrap_seed(executable, Path(temporary))
     print("MaxEnt text and self-energy output checks passed")

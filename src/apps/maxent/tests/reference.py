@@ -27,6 +27,13 @@ def working_directory(directory):
 
 
 def kernel(case, beta, points, omega):
+    if case["dataspace"] == "time" and case["kernel"] == "bosonic":
+        # Even in omega; evaluated at |omega| so that no exponential overflows.
+        tau, frequency = points[:, None], np.abs(omega)[None, :]
+        with np.errstate(divide="ignore", invalid="ignore"):
+            values = 0.5 * frequency * (np.exp(-frequency * tau) + np.exp(-frequency * (beta - tau)))
+            values /= -np.expm1(-frequency * beta)
+        return np.where(frequency == 0, 1 / beta, values)
     if case["dataspace"] == "time":
         return -np.exp(-np.outer(points, omega)) / (1 + np.exp(-beta * omega))
     frequency = (2 * points + (case["kernel"] != "bosonic")) * np.pi / beta
@@ -68,6 +75,9 @@ def prepare(defaults, case, directory):
         "DATA_IN_HDF5": 1, "DATA": str(directory / "input.h5"),
         "BASENAME": str(directory / "result"),
     }
+    # Without TAU_i, ALPS assumes a uniform tau grid for every input path.
+    # Upstream CQMP/Maxent leaves the HDF5 path's grid unset; Marcus Rosales
+    # found its wrong sum rule (commit 0070b980a on marcusr2ML/ALPS).
     if case["dataspace"] == "time" and case.get("explicit_tau", True):
         parameters.update({f"TAU_{index}": float(point) for index, point in enumerate(points)})
     source = case.get("data_source", "hdf5")
@@ -164,11 +174,13 @@ def run_cases(root, solve):
     for case in definitions["cases"]:
         directory = root / case["name"]
         directory.mkdir()
-        parameters, points, values, errors = prepare(definitions["defaults"], case, directory)
+        # A case may override the shared temperature and frequency grid.
+        settings = {**definitions["defaults"], **case.get("settings", {})}
+        parameters, points, values, errors = prepare(settings, case, directory)
         with working_directory(directory):
             solve(parameters)
         result = read_result(directory / "result.out.h5", case)
-        validate(definitions["defaults"], case, result, points, values, errors)
+        validate(settings, case, result, points, values, errors)
         runs[case["name"]] = result
     compare_results(runs["time_covariance"], runs["time_linear"])
     compare_results(runs["time_covariance_singular"], runs["time_omitted"])

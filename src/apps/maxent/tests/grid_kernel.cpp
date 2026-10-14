@@ -91,7 +91,8 @@ TEST(MaxEntSVD, RectangularThinFactors) {
 
 TEST(MaxEntGrid, EndpointsAndOrdering) {
   for (int count : {5, 31, 128, 129, 2000, 2001}) {
-    for (const char* name : {"Lorentzian", "half lorentzian", "Quadratic", "log", "linear"}) {
+    for (const char* name : {"Lorentzian", "half lorentzian", "half-lorentzian", "Quadratic",
+                             "log", "linear"}) {
       SCOPED_TRACE(std::string(name) + ": " + std::to_string(count));
       alps::params parameters;
       parameters["NFREQ"] = count;
@@ -107,7 +108,7 @@ TEST(MaxEntGrid, EndpointsAndOrdering) {
         ASSERT_TRUE(std::isfinite(points(index)));
         ASSERT_GT(points(index), points(index - 1));
       }
-      if (count % 2 == 0 && std::string(name) != "half lorentzian")
+      if (count % 2 == 0 && std::string(name).rfind("half", 0) != 0)
         EXPECT_NEAR(points(count / 2), 0.5, 1e-10);
     }
   }
@@ -173,6 +174,47 @@ TEST(MaxEntKernel, FermionicLegendreMoments) {
   for (int order = 1; order < 4; ++order) {
     EXPECT_NEAR(values(order, 1), 0.0, 1e-10);
     EXPECT_NEAR(values(order, 0), (order % 2 ? -1.0 : 1.0) * values(order, 2), 1e-10);
+  }
+}
+
+// The time-bosonic kernel is even in omega, tends to T at omega = 0 and to
+// |omega|/2 * coth(beta*|omega|/2) at tau = 0 and beta. Upstream's form
+// overflows there for beta*omega < -709 and replaces the NaN by 0.
+TEST(MaxEntKernel, TimeBosonicLimitsWithoutOverflow) {
+  constexpr double beta = 100.0;
+  constexpr int count = 5;
+  alps::params parameters;
+  parameters["NDAT"] = count;
+  parameters["NFREQ"] = 7;
+  parameters["BETA"] = beta;
+  parameters["DATASPACE"] = std::string("time");
+  parameters["KERNEL"] = std::string("bosonic");
+  parameters["PARTICLE_HOLE_SYMMETRY"] = false;
+  vector_type frequencies(7);
+  frequencies << -10.0, -1.0, -1e-12, 0.0, 1e-12, 1.0, 10.0;
+  vector_type input_grid = vector_type::Zero(count);
+  kernel continuation(parameters, frequencies, input_grid);
+  ASSERT_EQ(continuation.getKernelType(), time_bosonic_kernel);
+  const auto& values = continuation();
+  ASSERT_TRUE(values.allFinite());
+  for (int i = 0; i < count; ++i) {
+    SCOPED_TRACE(i);
+    // Without TAU_i the imaginary times are uniform from 0 to beta.
+    const double tau = i * beta / (count - 1);
+    EXPECT_DOUBLE_EQ(input_grid(i), tau);
+    EXPECT_EQ(values(i, 3), 1.0 / beta);
+    EXPECT_NEAR(values(i, 2), 1.0 / beta, 1e-12 / beta);
+    for (int j = 0; j < 3; ++j)
+      EXPECT_EQ(values(i, j), values(i, 6 - j));
+    const double omega = 1.0;
+    const double expected = 0.5 * omega * (std::exp(-omega * tau) + std::exp(-omega * (beta - tau)))
+        / (1.0 - std::exp(-omega * beta));
+    EXPECT_NEAR(values(i, 5), expected, 1e-14 * expected + 1e-300);
+  }
+  const double endpoint = 5.0 / std::tanh(beta * 10.0 / 2.0);
+  for (int i : {0, count - 1}) {
+    EXPECT_NEAR(values(i, 0), endpoint, 1e-14 * endpoint);
+    EXPECT_NEAR(values(i, 6), endpoint, 1e-14 * endpoint);
   }
 }
 
