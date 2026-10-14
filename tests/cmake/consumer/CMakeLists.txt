@@ -47,16 +47,22 @@ else()
   if(EXPECT_SOLVERS)
     find_package(ALPS CONFIG REQUIRED COMPONENTS solvers)
   endif()
+  # ALEA v2 is built only with Eigen; an SDK that installed it must also provide it.
+  if(EXISTS "${ALPS_DIR}/ALPSAleav2Targets.cmake")
+    find_package(ALPS CONFIG REQUIRED COMPONENTS aleav2)
+  endif()
   set(sdk_mpi_enabled "${ALPS_MPI_ENABLED}")
   get_filename_component(expected_prefix "${ALPS_DIR}/../.." REALPATH)
   if(NOT EXISTS "${expected_prefix}/include/alps/ngs/detail/export_sim_to_python.hpp"
      OR NOT EXISTS "${expected_prefix}/include/alps/python/save_observable_to_hdf5.hpp")
     message(FATAL_ERROR "The SDK must retain public Python compatibility includes")
   endif()
-  # alps/utilities/ itself is a public prefix (ALPSCore's spelling).
+  # alps/utilities/ and alps/common/ are public prefixes (ALPSCore's spellings).
   foreach(private_directory IN ITEMS alps/utilities/include alps/utilities/src
                                      alps/utilities/tests alps/hdf5/include alps/hdf5/src
-                                     alps/hdf5/tests alps/params alps/common alps/runtime
+                                     alps/hdf5/tests alps/params alps/common/include
+                                     alps/common/src alps/common/tests alps/runtime
+                                     alps/aleav2/include alps/aleav2/src alps/aleav2/tests
                                      alps/fortran/include alps/fortran/src alps/fortran/tests)
     if(EXISTS "${expected_prefix}/include/${private_directory}")
       message(FATAL_ERROR "The SDK installs a module's private layout: ${private_directory}")
@@ -139,6 +145,9 @@ add_contract(numeric numerics.cpp ALPS::numerics)
 add_contract(numeric_io numeric_io.cpp ALPS::numeric_io)
 add_contract(numeric_xml numeric_xml.cpp ALPS::numeric_xml)
 add_contract(parameter_adapters parameter_adapters.cpp ALPS::alps)
+if(TARGET ALPS::aleav2)
+  add_component_contract(aleav2 aleav2.cpp "ALPS::alps|${numerical_dependencies}")
+endif()
 # Code written against 3.0.0 builds unchanged while the legacy layer is installed.
 if(ALPS_LEGACY_API)
   add_contract(legacy_spellings legacy_spellings.cpp "ALPS::utilities;ALPS::cli;ALPS::numerics")
@@ -163,6 +172,10 @@ if(NOT ALPS_SOURCE)
     "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
   if(ALPS_LEGACY_API)
     set_tests_properties(legacy_spellings_contract PROPERTIES ENVIRONMENT_MODIFICATION
+      "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
+  endif()
+  if(TARGET ALPS::aleav2)
+    set_tests_properties(aleav2_contract PROPERTIES ENVIRONMENT_MODIFICATION
       "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
   endif()
 endif()
