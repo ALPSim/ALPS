@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 1998-2018 ALPS Collaboration.
+ * All rights reserved. Use is subject to license terms. See LICENSE.TXT
+ * For use in publications, see ACKNOWLEDGE.TXT
+ */
+
+// Legacy ALPS model declarations and functions from src/apps/maxent/src/default_model.hpp
+// at d4533fd30c65656cf5ab7fa448dd6b921b39aa6f; original notice:
 /*****************************************************************************
 *
 * ALPS Project Applications
@@ -11,24 +19,16 @@
 *
 *****************************************************************************/
 
+// Adapted from CQMP/Maxent src/default_model.hpp at
+// a3992534228b0de732e033ae23154969724814be; see ../README.md.
 
-#ifndef ALPS_TOOL_DEFAULT_MODEL_HPP
-#define ALPS_TOOL_DEFAULT_MODEL_HPP
 
-#include <utility> // Boost.Math 1.76 includes this inside a namespace.
-#include <boost/math/constants/constants.hpp>
+#pragma once
+
 #include <math.h>
-#include <alps/params.hpp>
-#include <alps/osiris/comm.h>
-#include <boost/shared_ptr.hpp>
-#include <boost/throw_exception.hpp>
-#include <algorithm>
-#include <fstream>
-#include <iomanip>
+#include <alps/ngs/params.hpp>
 #include <iostream>
-#include <stdexcept>
-#include <string>
-#include <vector>
+#include <boost/shared_ptr.hpp>
 
 
 //Note the slightly crooked structure here:
@@ -50,37 +50,33 @@
 class DefaultModel
 {
 public:
-//  DefaultModel(const alps::Parameters& p) :
   DefaultModel(const alps::params& p) :
     omega_max(p["OMEGA_MAX"]),
-    omega_min(static_cast<double>(p["OMEGA_MIN"])), //we had a 0 here in the bosonic case. That's not a good idea if you're continuing symmetric functions like chi(omega)/omega. Change omega_min to zero manually if you need it.
-    blow_up_(p["BLOW_UP"])
-  { //std::cout<<"found omega_min: "<<omega_min<<std::endl;
-    //std::cout<<"found omega_max: "<<omega_max<<std::endl;
-    //std::cout<<"found blowup:    "<<blow_up_<<std::endl;
+    omega_min( p.defined("OMEGA_MIN") ? p["OMEGA_MIN"].cast<double>() : -omega_max){ //we had a 0 here in the bosonic case. That's not a good idea if you're continuing symmetric functions like chi(omega)/omega. Change omega_min to zero manually if you need it.
   }
 
   virtual ~DefaultModel(){}
 
-  //omega returns a frequency point, given x between 0 and 1.
+  ///omega returns a frequency point, given x between 0 and 1.
   virtual double omega(const double x) const = 0;
 
-  //D returns the derivative of the integrated default model
+  ///D returns the derivative of the integrated default model
   virtual double D(const double omega) const = 0;
 
-  //returns the integrated default model
+  ///returns the integrated default model
   virtual double x(const double t=0) const = 0;
 
-  //equidistant mapping from [0,1] to [omega_min, omega_max]
+  ///equidistant mapping from [0,1] to [omega_min, omega_max]
   double omega_of_t(const double t) const { return omega_min + (omega_max-omega_min)*t; }
-  //equidistant mapping from [omega_min, omega_max] to [0,1]
+
+  ///equidistant mapping from [omega_min, omega_max] to [0,1]
   double t_of_omega(const double omega) const { return (omega-omega_min)/(omega_max-omega_min); }
-  double blow_up() const { return blow_up_; }
 
 protected:
+  ///highest frequency of grid
   const double omega_max;
+  ///lowest frequency of grid
   const double omega_min;
-  const double blow_up_;
 };
 
 
@@ -89,11 +85,11 @@ class FlatDefaultModel : public DefaultModel
 {
 public:
 
-//    FlatDefaultModel(const alps::Parameters& p) : DefaultModel(p) {}
+  ///construct a default model that is constant (value 1/(omega_max-omega_min) ) everywhere
   FlatDefaultModel(const alps::params& p) : DefaultModel(p) {}
 
   double omega(const double x) const {
-    return x/blow_up()*(omega_max-omega_min) + omega_min;
+    return x*(omega_max-omega_min) + omega_min;
   }
 
   double D(const double) const {
@@ -101,13 +97,13 @@ public:
   }
 
   double x(const double t) const {
-    return t*blow_up();
+    return t;
   }
 
 };
 
 
-
+///general class for a model function. Implements operator() which, given a frequency omega, will give back the value of the default model at that frequency.
 class Model
 {
 public:
@@ -116,71 +112,158 @@ public:
 };
 
 
-
+///a model function that implements a Gaussian, i.e.
+/// \f$D(\omega)= \frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{\omega^2}{2\sigma^2}} \f$.
+///
+/// \f$\sigma\f$ has to be specified as a parameter SIGMA.
+/// This is one of the standard model functions you should always try.
 class Gaussian : public Model
 {
 public:
-//  Gaussian(const alps::Parameters& p) : sigma(static_cast<double>(p["SIGMA"])) {}
-  Gaussian(const alps::params& p) : sigma(static_cast<double>(p["SIGMA"])) {}
+  Gaussian(const alps::params& p) : sigma_(static_cast<double>(p["SIGMA"])) {}
 
   virtual double operator()(const double omega) {
-    return std::exp(-omega*omega/2./sigma/sigma)/sqrt(2*boost::math::constants::pi<double>())/sigma;
+    return std::exp(-omega*omega/2./sigma_/sigma_)/sqrt(2*M_PI)/sigma_;
   }
 
 private:
-  const double sigma;
+  const double sigma_;
 };
+
+///a model function that implements two Gaussians with arbitrary relative norms and arbitrary points around which they are centered.
+///
+/// \f$\sigma\f$ has to be specified as a parameter SIGMA1 and SIGMA2 for the two gaussians.
+/// shift has to be defined as SHIFT1 and SHIFT2 for each Gaussian.
+/// NORM1 has to be defined to specify the relative weight of the two spectral functions.
+///
+/// \f$D(\omega)=\frac{norm1}{\sqrt{2\pi}\sigma1}e^{-\frac{(\omega-shift1)^2}{2\sigma1^2}}+ \frac{(1-norm1)}{\sqrt{2\pi}\sigma2}e^{-\frac{(\omega-shift2)^2}{2\sigma2^2}}\f$
 
 class TwoGaussians : public Model
 {
 public:
-//    TwoGaussians(const alps::Parameters& p) : sigma1(static_cast<double>(p["SIGMA1"])),
-    TwoGaussians(const alps::params& p) : sigma1(static_cast<double>(p["SIGMA1"])),
-    sigma2(static_cast<double>(p["SIGMA2"])),
-    shift1(static_cast<double>(p["SHIFT1"])),
-    shift2(static_cast<double>(p["SHIFT2"])),
-    norm1(static_cast<double>(p["NORM1"])) {}
+  TwoGaussians(const alps::params& p) : sigma1(static_cast<double>(p["SIGMA1"])),
+  sigma2(p["SIGMA2"].cast<double>()),
+  shift1(p["SHIFT1"].cast<double>()), //0.0
+  shift2(p["SHIFT2"].cast<double>()),
+  norm1(p["NORM1"].cast<double>()) {} //0.5
 
-    virtual double operator()(const double omega) {
-        return norm1*std::exp(-(omega-shift1)*(omega-shift1)/2./sigma1/sigma1)/sqrt(2*boost::math::constants::pi<double>())/sigma1+(1.0-norm1)*std::exp(-(omega-shift2)*(omega-shift2)/2./sigma2/sigma2)/sqrt(2*boost::math::constants::pi<double>())/sigma2;
-    }
+  virtual double operator()(const double omega) {
+    return norm1*std::exp(-(omega-shift1)*(omega-shift1)/2./sigma1/sigma1)/sqrt(2*M_PI)/sigma1+(1.0-norm1)*std::exp(-(omega-shift2)*(omega-shift2)/2./sigma2/sigma2)/sqrt(2*M_PI)/sigma2;
+  }
 
 private:
-    const double sigma1,sigma2,shift1,shift2,norm1;
+  const double sigma1,sigma2,shift1,shift2,norm1;
 };
 
 
+///a model function that implements a Gaussian that is not centered at zero but at some other frequency, i.e.
+/// \f$D(\omega)= \frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{(\omega-shift)^2}{2\sigma^2}} \f$.
+///
+/// \f$\sigma\f$ has to be specified as a parameter SIGMA, and shift has to be specified as parameter SHIFT.
 class ShiftedGaussian : public Gaussian
 {
 public:
-//  ShiftedGaussian(const alps::Parameters& p) :
   ShiftedGaussian(const alps::params& p) :
-    Gaussian(p), shift(static_cast<double>(p["SHIFT"])){}
+    Gaussian(p), shift_(static_cast<double>(p["SHIFT"])){}
 
   double operator()(const double omega) {
-    return Gaussian::operator()(omega-shift);
+    return Gaussian::operator()(omega-shift_);
   }
 
 protected:
-  const double shift;
+  const double shift_;
 };
 
 
+///a model function that implements a sum of two Gaussians, each of them shifted by +/- shift.
+/// \f$D(\omega)=\frac{1}{2} \left( \frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{(\omega-shift)^2}{2\sigma^2}}+ \frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{(\omega+shift)^2}{2\sigma^2}}\right)\f$
+/// \f$\sigma\f$ has to be specified as a parameter SIGMA, and \f$shift\f$ has to be specified as parameter SHIFT.
+/// Try this to try to model a system with 'side peaks'.
 class DoubleGaussian : public ShiftedGaussian
 {
 public:
-//  DoubleGaussian(const alps::Parameters& p) :
   DoubleGaussian(const alps::params& p) :
     ShiftedGaussian(p){}
 
   double operator()(const double omega) {
-    return 0.5*(Gaussian::operator()(omega-shift) + Gaussian::operator()(omega+shift));
+    return 0.5*(Gaussian::operator()(omega-shift_) + Gaussian::operator()(omega+shift_));
+  }
+};
+///a model function that implements a Lorentzian, i.e.
+/// \f$D(\omega)=\dfrac{1}{\pi\gamma\left[1+\left(\frac{\omega}{\gamma}\right)^{2}\right]}\f$
+///
+/// \f$\gamma\f$ is specified as a parameter GAMMA
+/// This is another helpful function to try if the Gaussian decays too quickly
+class Lorentzian : public Model
+{
+public:
+  Lorentzian(const alps::params& p): gamma_(static_cast<double>(p["GAMMA"])) {}
+
+  virtual double operator()(const double omega){
+    return 1/(M_PI*gamma_) * 1.0/(1+(omega/gamma_)*(omega/gamma_));
+  }
+private:
+  const double gamma_;
+};
+
+///a model function that implements a Lorentzian centered at some SHIFT, i.e.
+/// \f$D(\omega)=\dfrac{1}{\pi\gamma\left[1+\left(\frac{\omega-shift}{\gamma}\right)^{2}\right]}\f$
+///
+/// \f$\gamma\f$ is specified as a parameter GAMMA, and shift has to be specified as parameter SHIFT
+class ShiftedLorentzian : public Lorentzian
+{
+public:
+  ShiftedLorentzian(const alps::params& p):
+  Lorentzian(p), shift_(static_cast<double>(p["SHIFT"])) {}
+
+  double operator()(const double omega){
+    return Lorentzian::operator()(omega-shift_);
+  }
+protected:
+  const double shift_;
+};
+
+///a model function that implements two Lorentzians with arbitrary relative norms and arbitrary points around which they are centered.
+///
+/// \f$\gamma\f$ has to be specified as a parameter GAMMA1 and GAMMA2 for the two Lorentzians.
+/// shift has to be defined as SHIFT1 and SHIFT2 for each Lorentzian.
+///
+/// \f$2D(\omega)=\dfrac{1}{\pi\gamma_{1}\left[1+\left(\frac{\omega-shift1}{\gamma_{1}}\right)^{2}\right]}+\dfrac{1}{\pi\gamma_{2}\left[1+\left(\frac{\omega-shift2}{\gamma_{2}}\right)^{2}\right]}\f$
+
+class TwoLorentzians : public Model
+{
+public:
+  TwoLorentzians(const alps::params& p) : gamma1_(static_cast<double>(p["GAMMA1"])),
+  gamma2_(static_cast<double>(p["GAMMA2"])),
+  shift1(static_cast<double>(p["SHIFT1"])), //0.0
+  shift2(static_cast<double>(p["SHIFT2"])) {}
+
+  virtual double operator()(const double omega) {
+    return 1.0/(2*M_PI*gamma1_) * 1.0/(1+((omega-shift1)*(omega-shift1)/gamma1_/gamma1_))+1.0/(2*M_PI*gamma2_) * 1.0/(1+((omega-shift2)*(omega-shift2)/gamma2_/gamma2_));
+  }
+
+private:
+  const double gamma1_,gamma2_,shift1,shift2;
+};
+
+
+///a model function that implements a sum of two Lorentzians, each of them shifted by +/- shift.
+/// \f$2D(\omega)=\dfrac{1}{\pi\gamma\left[1+\left(\frac{\omega-shift}{\gamma}\right)^{2}\right]}+\dfrac{1}{\pi\gamma\left[1+\left(\frac{\omega+shift}{\gamma}\right)^{2}\right]}\f$
+/// \f$\gamma\f$ has to be specified as a parameter GAMMA, and \f$shift\f$ has to be specified as parameter SHIFT.
+/// Try this to try to model a system with 'side peaks', along with DoubleGaussian
+class DoubleLorentzian : public ShiftedLorentzian
+{
+public:
+  DoubleLorentzian(const alps::params& p) :
+    ShiftedLorentzian(p){}
+
+  double operator()(const double omega) {
+    return 0.5*(Lorentzian::operator()(omega-shift_) + Lorentzian::operator()(omega+shift_));
   }
 };
 
 class LinearRiseExpDecay : public Model{
 public:
-//  LinearRiseExpDecay(const alps::Parameters &p): lambda_(p["LAMBDA"]){}
   LinearRiseExpDecay(const alps::params &p): lambda_(p["LAMBDA"]){}
   double operator()(const double omega) {
     return lambda_*lambda_*omega*std::exp(-lambda_*omega);
@@ -192,7 +275,6 @@ private:
 
 class QuadraticRiseExpDecay : public Model{
 public:
-//  QuadraticRiseExpDecay(const alps::Parameters &p): lambda_(p["LAMBDA"]){}
   QuadraticRiseExpDecay(const alps::params &p): lambda_(p["LAMBDA"]){}
   double operator()(const double omega) {
     return (lambda_*lambda_*lambda_)/2.*(omega*omega)*std::exp(-lambda_*omega);
@@ -205,64 +287,38 @@ private:
 class GeneralDoubleGaussian : public ShiftedGaussian
 {
 public:
-//  GeneralDoubleGaussian(const alps::Parameters& p) :
   GeneralDoubleGaussian(const alps::params& p) :
-    ShiftedGaussian(p), bnorm(static_cast<double>(p["BOSE_NORM"])) {}
+    ShiftedGaussian(p), bnorm_(static_cast<double>(p["BOSE_NORM"])) {}
 
   double operator()(const double omega) {
     if (omega > 0)
       return Gaussian::operator()(omega);
     else
-      return bnorm*Gaussian::operator()(omega+shift);
+      return bnorm_*Gaussian::operator()(omega+shift_);
   }
 
 private:
-  const double bnorm;
+  const double bnorm_;
 };
 
-
+///This class deals with tabulated model functions
 class TabFunction : public Model
 {
 public:
-//  TabFunction(const alps::Parameters& p, std::string const& name) //: index(0)
-  TabFunction(const alps::params& p, std::string const& name) //: index(0)
-  {
-    std::string p_name = p[name].as<std::string>();
-    std::ifstream defstream(p_name.c_str());
-    if (!defstream)
-      boost::throw_exception(std::invalid_argument("could not open default model file: "+p_name));
-    double om, D;
-    while (defstream >> om >> D) {
-      Omega.push_back(om);
-      Def.push_back(D);
-      defstream.ignore(1000,'\n'); // Anything beyond is considered as junk
-    }
-    double omega_max = p["OMEGA_MAX"];
-    double omega_min(static_cast<double>(p["OMEGA_MIN"])); //we had a 0 here in the bosonic case. That's not a good idea if you're continuing symmetric functions like chi(omega)/omega. Change omega_min to zero manually if you need it.
-    //double omega_min = (p["KERNEL"] == "bosonic") ? 0. :
-    //     static_cast<double>(p.value_or_default("OMEGA_MIN", -omega_max));
-    if (Omega[0]!=omega_min || Omega[Omega.size()-1]!=omega_max){
-      std::cout<<"Omega[ 0] "<<Omega[0]<<" omega min: "<<omega_min<<std::endl;
-      std::cout<<"Omega[-1] "<<Omega[Omega.size()-1]<<" omega max: "<<omega_max<<std::endl;
-//      boost::throw_exception(std::invalid_argument("invalid omega range for default model"));
-    }
-  }
+  ///constructor will read in a default model from a file. File format is:
+  /// First column: frequency
+  /// Second column: value of default model
+  /// anything after that: ignored.
+  TabFunction(const alps::params& p, std::string const& name);
 
-  double operator()(const double omega) {
-    std::vector<double>::const_iterator ub = std::upper_bound(Omega.begin(), Omega.end(), omega);
-    int index = ub - Omega.begin();
-    if (ub==Omega.end())
-      index = Omega.end()-Omega.begin()-1;
-    double om1 = Omega[index-1];
-    double om2 = Omega[index];
-    double D1 = Def[index-1];
-    double D2 = Def[index];
-    return -(D2-D1)/(om2-om1)*(om2-omega)+D2;
-  }
+  ///return value of default model. If INSIDE interval we have data in: return linearly interpolated data. Otherwise: return zero.
+  double operator()(const double omega);
 
 private:
-  std::vector<double> Omega;
-  std::vector<double> Def;
+  ///private variable to store the frequency grid
+  std::vector<double> Omega_;
+  ///private variable to store the tabulated value of the default model at a frequency belonging to Omega_
+  std::vector<double> Def_;
 };
 
 
@@ -271,134 +327,26 @@ class GeneralDefaultModel : public DefaultModel
 {
 public:
 
-//  GeneralDefaultModel(const alps::Parameters& p, boost::shared_ptr<Model> mod)
-  GeneralDefaultModel(const alps::params& p, boost::shared_ptr<Model> mod)
-   : DefaultModel(p)
-   , Mod(mod)
-   , ntab(5001)
-   , xtab(ntab)
-  {
-    double sum = 0;
-    xtab[0] = 0.;
-    //this is an evaluation on an equidistant grid; sum integrated by trapezoidal rule
-    double delta_omega = (omega_max-omega_min)/(ntab-1);
-    for (int o=1; o<ntab; ++o) {
-      double omega1 = omega_min + (o-1)*delta_omega;
-      double omega2 = omega_min + o*delta_omega;
-      sum += ((*Mod)(omega1)+(*Mod)(omega2))/2.*delta_omega;
-      xtab[o] = sum;
-    }
-    for (int o=0; o<ntab; ++o) {
-      xtab[o] *= blow_up()/sum;
-    }
-    /*std::cout<<std::setprecision(14)<<"tabulated a model, these are the values: "<<std::endl;
-    for(int i=0;i<ntab;++i){
-      std::cout<<i<<" "<<xtab[i]<<std::endl;
-    }
-    std::cout<<"total sum is: "<<sum<<std::endl;*/
+  GeneralDefaultModel(const alps::params& p, boost::shared_ptr<Model> mod);
 
-    /*for(int N=0;N<=1000;++N){
-      double d=1./1000.*N;
-      std::cout<<omega(d)<<" "<<D(omega(d))<<" "<<x(d)<<" "<<d<<std::endl;
-    }*/
-  }
+  ///given a number x between 0 and 1, find the frequency omega belonging to x.
+  double omega(const double x) const;
 
-  double omega(const double x) const {
-    if(!(x<=blow_up() && x>=0.)) throw std::logic_error("parameter x is out of bounds!"); //DNDEBUG switches off debug assertions
-    std::vector<double>::const_iterator ub = std::upper_bound(xtab.begin(), xtab.end(), x);
-    int omega_index = ub - xtab.begin();
-    if (ub==xtab.end())
-      omega_index = xtab.end() - xtab.begin() - 1;
-    double om1 = omega_min + (omega_index-1)*(omega_max-omega_min)/(ntab-1);
-    double om2 = omega_min + omega_index*(omega_max-omega_min)/(ntab-1);
-    double x1 = xtab[omega_index-1];
-    double x2 = xtab[omega_index];
-    return -(om2-om1)/(x2-x1)*(x2-x)+om2;
-  }
+  ///D returns the derivative of the integrated default model
+  ///i.e. just the value of the model function at frequency omega
+  double D(const double omega) const;
 
-  //this returns the value of the model function at frequency omega
-  double D(const double omega) const {
-    return (*Mod)(omega);
-  }
-
-  //I have no idea what this does.
-  double x(const double t) const {
-    if(t>1. || t<0.) throw std::logic_error("parameter t is out of bounds!");
-    int od = (int)(t*(ntab-1));
-    if (od==(ntab-1))
-      return blow_up();
-    double x1 = xtab[od];
-    double x2 = xtab[od+1];
-    return -(x2-x1)*(od+1-t*ntab)+x2;
-  }
+  ///returns the integrated default model
+  double x(const double t) const;
 
 private:
   boost::shared_ptr<Model> Mod;
   const int ntab;
   std::vector<double> xtab; //xtab has an equidistantly tabulated discretized model function
+
+  double norm();
 };
 
 
 
-//inline boost::shared_ptr<DefaultModel> make_default_model(const alps::Parameters& parms, std::string const& name)
-inline boost::shared_ptr<DefaultModel> make_default_model(const alps::params& parms, std::string const& name)
-{
-    std::string p_name = parms[name].as<std::string>();
-  if (p_name == "flat") {
-    if (alps::is_master())
-      std::cerr << "Using flat default model" << std::endl;
-    return boost::shared_ptr<DefaultModel>(new FlatDefaultModel(parms));
-  }
-  else if (p_name == "gaussian") {
-    if (alps::is_master())
-      std::cerr << "Using Gaussian default model" << std::endl;
-    boost::shared_ptr<Model> Mod(new Gaussian(parms));
-    return boost::shared_ptr<DefaultModel>(new GeneralDefaultModel(parms, Mod));
-  }
-  else if (p_name == "twogaussians") {
-      if (alps::is_master())
-          std::cerr << "Using sum of two Gaussians default model" << std::endl;
-      boost::shared_ptr<Model> Mod(new TwoGaussians(parms));
-      return boost::shared_ptr<DefaultModel>(new GeneralDefaultModel(parms, Mod));
-  }
-  else if (p_name == "shifted gaussian") {
-    if (alps::is_master())
-      std::cerr << "Using shifted Gaussian default model" << std::endl;
-    boost::shared_ptr<Model> Mod(new ShiftedGaussian(parms));
-    return boost::shared_ptr<DefaultModel>(new GeneralDefaultModel(parms, Mod));
-  }
-  else if (p_name == "double gaussian") {
-    if (alps::is_master())
-      std::cerr << "Using double Gaussian default model" << std::endl;
-    boost::shared_ptr<Model> Mod(new DoubleGaussian(parms));
-    return boost::shared_ptr<DefaultModel>(new GeneralDefaultModel(parms, Mod));
-  }
-  else if (p_name == "general double gaussian") {
-    if (alps::is_master())
-      std::cerr << "Using general double Gaussian default model" << std::endl;
-    boost::shared_ptr<Model> Mod(new GeneralDoubleGaussian(parms));
-    return boost::shared_ptr<DefaultModel>(new GeneralDefaultModel(parms, Mod));
-  }
-  else if (p_name == "linear rise exp decay") {
-    if (alps::is_master())
-      std::cerr << "Using linear rise exponential decay default model" << std::endl;
-    boost::shared_ptr<Model> Mod(new LinearRiseExpDecay(parms));
-    return boost::shared_ptr<DefaultModel>(new GeneralDefaultModel(parms, Mod));
-  }
-  else if (p_name == "quadratic rise exp decay") {
-    if (alps::is_master())
-      std::cerr << "Using quadratic rise exponential decay default model" << std::endl;
-    boost::shared_ptr<Model> Mod(new QuadraticRiseExpDecay(parms));
-    return boost::shared_ptr<DefaultModel>(new GeneralDefaultModel(parms, Mod));
-  }
-  else {
-    if (alps::is_master())
-      std::cerr << "Using tabulated default model" << std::endl;
-    boost::shared_ptr<Model> Mod(new TabFunction(parms, name));
-    return boost::shared_ptr<DefaultModel>(new GeneralDefaultModel(parms, Mod));
-  }
-}
-
-
-
-#endif
+boost::shared_ptr<DefaultModel> make_default_model(const alps::params& parms, std::string const& name);

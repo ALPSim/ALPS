@@ -23,7 +23,7 @@
 
 int main(int argc, char** argv) {
   try {
-    alps::mcoptions options(argc, argv);
+    alps::mcoptions options(argc, argv, "maxent");
     if (!options.valid) return 0;
     alps::params parms;
     {
@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
     parms.define<std::string>("BASENAME", options.output_file, "base name of the output file");
     std::string output_file = parms["BASENAME"].as<std::string>() + ".out.h5";
     alps::cli_mpi_guard mpi(argc, argv);
-    if (alps::cli_is_master()) alps::print_copyright(std::cout);
+    if (alps::cli_is_master()) alps::print_copyright(std::cout, "maxent");
     alps::solvers::maxent(parms, output_file);
     return 0;
   } catch (std::exception const& error) {

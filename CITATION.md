@@ -37,6 +37,7 @@ The framework paper applies to every component. A paper serving several roles is
 | `interaction` | [rubtsov2005](#rubtsov2005), [gull2011](#gull2011) | [gull2011cpc](#gull2011cpc) | — |
 | `hybridization` | [werner2006](#werner2006), [gull2011](#gull2011) | [gull2011cpc](#gull2011cpc), [hafermann2013](#hafermann2013) | — |
 | `hirschfye` | [hirschfye1986](#hirschfye1986) | [gull2011cpc](#gull2011cpc) | — |
+| `maxent` | [bryan1990](#bryan1990), [jarrell1996](#jarrell1996) | [levy2017maxent](#levy2017maxent) | — |
 
 Cite the relevant impurity-solver references as well when using a solver through the DMFT driver.
 
@@ -169,6 +170,18 @@ A. Georges et al., "Dynamical Mean-Field Theory of Strongly Correlated Fermion S
 ### wallerberger2018alpscore
 
 M. Wallerberger et al., "Updated Core Libraries of the ALPS Project." arXiv:1811.08331 (2018). Preprint. https://doi.org/10.48550/arXiv.1811.08331
+
+### bryan1990
+
+R. K. Bryan, "Maximum entropy analysis of oversampled data problems." European Biophysics Journal 18, 165–174 (1990). https://doi.org/10.1007/BF02427376
+
+### jarrell1996
+
+M. Jarrell, J. E. Gubernatis, "Bayesian inference and the analytic continuation of imaginary-time quantum Monte Carlo data." Physics Reports 269, 133–195 (1996). https://doi.org/10.1016/0370-1573(95)00074-7
+
+### levy2017maxent
+
+R. Levy, J. P. F. LeBlanc, E. Gull, "Implementation of the maximum entropy method for analytic continuation." Computer Physics Communications 215, 149–155 (2017). https://doi.org/10.1016/j.cpc.2017.01.018
 
 ## Policy provenance
 

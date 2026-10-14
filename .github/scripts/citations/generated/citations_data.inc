@@ -371,6 +371,42 @@ static const citation_entry citation_entries[] = {
    "This is a request for scientific credit, separate from the MIT license terms.\n"
    "\n",
   },
+  {"maxent",
+   "********************************************************************************\n"
+   "* Recommended citations for ALPS maximum entropy analytic continuation         *\n"
+   "* (CQMP/Maxent):                                                               *\n"
+   "* Framework: [1]; Algorithm: [2], [3]; Implementation: [4]                     *\n"
+   "* [1] F. Alet et al., The ALPS project release 3.0: open source software for   *\n"
+   "*     strongly correlated systems, arXiv:2610.03884 (2026); preprint.          *\n"
+   "* [2] R. K. Bryan, European Biophysics Journal 18, 165 (1990).                 *\n"
+   "* [3] M. Jarrell, J. E. Gubernatis, Physics Reports 269, 133 (1996).           *\n"
+   "* [4] R. Levy, J. P. F. LeBlanc, E. Gull, Computer Physics Communications 215, *\n"
+   "*     149 (2017).                                                              *\n"
+   "* This is a request for scientific credit, separate from the MIT license       *\n"
+   "* terms.                                                                       *\n"
+   "* Full references: --citations                                                 *\n"
+   "********************************************************************************\n"
+   "\n",
+   "Recommended citations for ALPS maximum entropy analytic continuation (CQMP/Maxent):\n"
+   "If ALPS contributes to published research, please cite the relevant algorithm,\n"
+   "implementation, and framework papers below.\n"
+   "  Framework: [1]\n"
+   "  Algorithm: [2], [3]\n"
+   "  Implementation: [4]\n"
+   "  [1] F. Alet et al., \"The ALPS project release 3.0: open source software for strongly\n"
+   "      correlated systems.\" arXiv:2610.03884 (2026). Preprint.\n"
+   "      https://doi.org/10.48550/arXiv.2610.03884\n"
+   "  [2] R. K. Bryan, \"Maximum entropy analysis of oversampled data problems.\" European\n"
+   "      Biophysics Journal 18, 165–174 (1990). https://doi.org/10.1007/BF02427376\n"
+   "  [3] M. Jarrell, J. E. Gubernatis, \"Bayesian inference and the analytic continuation of\n"
+   "      imaginary-time quantum Monte Carlo data.\" Physics Reports 269, 133–195 (1996).\n"
+   "      https://doi.org/10.1016/0370-1573(95)00074-7\n"
+   "  [4] R. Levy, J. P. F. LeBlanc, E. Gull, \"Implementation of the maximum entropy method\n"
+   "      for analytic continuation.\" Computer Physics Communications 215, 149–155 (2017).\n"
+   "      https://doi.org/10.1016/j.cpc.2017.01.018\n"
+   "This is a request for scientific credit, separate from the MIT license terms.\n"
+   "\n",
+  },
   {"params",
    "********************************************************************************\n"
    "* Recommended citations for ALPS Core Libraries parameters:                    *\n"

@@ -19,6 +19,13 @@
     {"name": "time_scaled", "dataspace": "time", "kernel": "fermionic", "grid": "linear", "norm": 3.5, "poles": [[-1, 0.65], [1.5, 0.35]], "covariance": false, "omit_last": false, "singular_last": false},
     {"name": "time_covariance", "dataspace": "time", "kernel": "fermionic", "grid": "linear", "norm": 1, "poles": [[-1, 0.65], [1.5, 0.35]], "covariance": true, "omit_last": false, "singular_last": false},
     {"name": "time_covariance_singular", "dataspace": "time", "kernel": "fermionic", "grid": "linear", "norm": 1, "poles": [[-1, 0.65], [1.5, 0.35]], "covariance": true, "omit_last": false, "singular_last": true},
-    {"name": "time_omitted", "dataspace": "time", "kernel": "fermionic", "grid": "linear", "norm": 1, "poles": [[-1, 0.65], [1.5, 0.35]], "covariance": false, "omit_last": true, "singular_last": false}
+    {"name": "time_omitted", "dataspace": "time", "kernel": "fermionic", "grid": "linear", "norm": 1, "poles": [[-1, 0.65], [1.5, 0.35]], "covariance": false, "omit_last": true, "singular_last": false},
+    {"name": "time_inline", "dataspace": "time", "kernel": "fermionic", "grid": "linear", "poles": [[-1, 0.65], [1.5, 0.35]], "data_source": "inline", "explicit_tau": false, "compare_with": "time_linear"},
+    {"name": "time_indexed_text", "dataspace": "time", "kernel": "fermionic", "grid": "linear", "poles": [[-1, 0.65], [1.5, 0.35]], "data_source": "indexed_text", "explicit_tau": false, "compare_with": "time_inline"},
+    {"name": "fermion_complex_inline", "dataspace": "frequency", "kernel": "fermionic", "grid": "linear", "poles": [[-1, 0.65], [1.5, 0.35]], "particle_hole_symmetry": false, "data_source": "inline", "sigma": 0.0001},
+    {"name": "fermion_complex_indexed_text", "dataspace": "frequency", "kernel": "fermionic", "grid": "linear", "poles": [[-1, 0.65], [1.5, 0.35]], "particle_hole_symmetry": false, "data_source": "indexed_text", "sigma": 0.0001, "compare_with": "fermion_complex_inline"},
+    {"name": "boson_complex_frequency", "dataspace": "frequency", "kernel": "bosonic", "grid": "linear", "poles": [[-1, 0.65], [1.5, 0.35]], "particle_hole_symmetry": false, "sigma": 0.0001},
+    {"name": "anomalous_complex_frequency", "dataspace": "frequency", "kernel": "anomalous", "grid": "linear", "poles": [[-1, 0.65], [1.5, 0.35]], "particle_hole_symmetry": false, "sigma": 0.0001},
+    {"name": "time_covariance_empty_marker", "dataspace": "time", "kernel": "fermionic", "grid": "linear", "poles": [[-1, 0.65], [1.5, 0.35]], "covariance": true, "covariance_marker": "", "omit_errors": true, "compare_with": "time_covariance"}
   ]
 }

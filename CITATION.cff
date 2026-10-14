@@ -677,3 +677,55 @@ references:
   - type: other
     value: wallerberger2018alpscore
     description: ALPS reference key
+- type: article
+  title: Maximum entropy analysis of oversampled data problems
+  authors:
+  - family-names: Bryan
+    given-names: R. K.
+  year: 1990
+  journal: European Biophysics Journal
+  volume: '18'
+  doi: 10.1007/BF02427376
+  start: '165'
+  end: '174'
+  identifiers:
+  - type: other
+    value: bryan1990
+    description: ALPS reference key
+- type: article
+  title: Bayesian inference and the analytic continuation of imaginary-time quantum Monte Carlo data
+  authors:
+  - family-names: Jarrell
+    given-names: M.
+  - family-names: Gubernatis
+    given-names: J. E.
+  year: 1996
+  journal: Physics Reports
+  volume: '269'
+  issue: '3'
+  doi: 10.1016/0370-1573(95)00074-7
+  start: '133'
+  end: '195'
+  identifiers:
+  - type: other
+    value: jarrell1996
+    description: ALPS reference key
+- type: article
+  title: Implementation of the maximum entropy method for analytic continuation
+  authors:
+  - family-names: Levy
+    given-names: R.
+  - family-names: LeBlanc
+    given-names: J. P. F.
+  - family-names: Gull
+    given-names: E.
+  year: 2017
+  journal: Computer Physics Communications
+  volume: '215'
+  doi: 10.1016/j.cpc.2017.01.018
+  start: '149'
+  end: '155'
+  identifiers:
+  - type: other
+    value: levy2017maxent
+    description: ALPS reference key
