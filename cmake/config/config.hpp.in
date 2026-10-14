@@ -13,3 +13,14 @@
 // ALPSCore modules this SDK provides
 #define ALPS_HAVE_ALPS_UTILITIES
 #define ALPS_HAVE_ALPS_HDF5
+#define ALPS_HAVE_ALPS_ACCUMULATORS
+
+// == Accumulator value types ==
+
+// Default accumulator types always defined:
+
+#define ALPS_ACCUMULATOR_BASIC_VALUE_TYPES float, double, long double, std::vector<float>, std::vector<double>, std::vector<long double>
+#define ALPS_ACCUMULATOR_BASIC_VALUE_TYPES_SIZE 6
+
+#define ALPS_ACCUMULATOR_VALUE_TYPES ALPS_ACCUMULATOR_BASIC_VALUE_TYPES
+#define ALPS_ACCUMULATOR_VALUE_TYPES_SIZE ALPS_ACCUMULATOR_BASIC_VALUE_TYPES_SIZE
