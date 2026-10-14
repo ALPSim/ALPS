@@ -16,6 +16,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - Generate XML plotting scripts compatible with Python 3 through the `alps-xml` CLI.
 - Correct the Heisenberg tutorial's vector dot product and allow its vector implementation to compile without x86 SIMD support.
 - Remove undefined behavior in XDR callbacks and integer-range boundary checks exposed by sanitizers.
+- Keep full double precision for parameter values substituted into `SITETERM` and `BONDTERM` expressions. They were rounded to 6 significant digits, so for example `mu=0.123456789123` acted as `0.123457`. Inputs whose parameters have at most 6 significant digits are unchanged.
 
 ### Changed
 
