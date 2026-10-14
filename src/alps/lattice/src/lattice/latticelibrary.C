@@ -65,8 +65,14 @@ void LatticeLibrary::read_xml(const XMLTag& intag, std::istream& p)
       latticegraphs_[tag.attributes["name"]]=
         LatticeGraphDescriptor(tag,p,lattices_,finitelattices_,unitcells_);
     else if (tag.name=="GRAPH") {
-      graphs_[tag.attributes["name"]]=coordinate_graph_type();
-      read_graph_xml(tag,p,graphs_[tag.attributes["name"]]);
+      std::string name = tag.attributes["name"];
+      graphs_[name]=coordinate_graph_type();
+      plaquette_list plaquettes;
+      read_graph_xml(tag,p,graphs_[name],&plaquettes);
+      if (plaquettes.empty())
+        graph_plaquettes_.erase(name);
+      else
+        graph_plaquettes_[name]=plaquettes;
     }
     else
       boost::throw_exception(std::runtime_error("encountered unknown tag <" + tag.name+ "> while parsing <LATTICES>"));
@@ -122,6 +128,13 @@ const coordinate_graph_type& LatticeLibrary::graph(const std::string& name) cons
   if (!has_graph(name))
     boost::throw_exception(std::runtime_error("No graph named '" +name+"' found in lattice library"));
   return graphs_.find(name)->second;
+}
+
+const plaquette_list& LatticeLibrary::graph_plaquettes(const std::string& name) const
+{
+  static const plaquette_list none;
+  PlaquetteMap::const_iterator it = graph_plaquettes_.find(name);
+  return it == graph_plaquettes_.end() ? none : it->second;
 }
 
 void LatticeLibrary::make_all_graphs()

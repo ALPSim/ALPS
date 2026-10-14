@@ -28,6 +28,9 @@
 
 #include <cmath>
 #include <cstddef>
+#include <map>
+#include <sstream>
+#include <vector>
 
 namespace alps {
 
@@ -130,6 +133,23 @@ public:
   template <class STATES, class V, class W>
   void apply_operator(const STATES&, const boost::multi_array<std::pair<value_type,bool>,4>& mat, site_descriptor s1, site_descriptor s2, const V& x, W& y) const;
 
+  // n-site term on one plaquette (an ordered tuple of sites)
+  template <class V, class W>
+  void apply_operator(const NSiteOperator& op, const plaquette& p, const V& x, W& y) const
+  { apply_operator(local_matrix(op,p),p,x,y); }
+
+  template <class V, class W>
+  void apply_operator(const nsite_matrix<value_type>& mat, const plaquette& p, const V& x, W& y) const
+  {
+    if (uses_translation_invariance())
+      apply_operator(bloch_states,mat,p,x,y);
+    else
+      apply_operator(states,mat,p,x,y);
+  }
+
+  template <class STATES, class V, class W>
+  void apply_operator(const STATES&, const nsite_matrix<value_type>& mat, const plaquette& p, const V& x, W& y) const;
+
   template <class V, class W> 
   void apply_operator(const SiteOperator& op, const V&, W&) const;
   
@@ -189,6 +209,7 @@ public:
   multi_array<value_type,2> local_matrix(const SiteOperator& op, site_descriptor s) const;
   multi_array<std::pair<value_type,bool>,4> local_matrix(const BondOperator& op, const bond_descriptor& b) const;
   multi_array<std::pair<value_type,bool>,4> local_matrix(const BondOperator& op, const site_descriptor& s1, const site_descriptor& s2) const;
+  nsite_matrix<value_type> local_matrix(const NSiteOperator& op, const plaquette& p) const;
 
   template <class V, class W> 
   void apply_operator(const std::string& name, bond_descriptor b, const V& x, W& y) const
@@ -227,7 +248,7 @@ hamiltonian_matrix<M,G>::hamiltonian_matrix(Parameters const& p)
   ,  built_matrix_(false)
   ,  built_basis_(false)
   ,  graph_(p)
-  ,  model_(graph_,p,is_symbolic<value_type>::type::value)
+  ,  model_(graph_,p,is_symbolic<value_type>::type::value,true)
 {}    
 
 
@@ -263,6 +284,86 @@ multi_array<std::pair<typename hamiltonian_matrix<M,G>::value_type,bool>,4> hami
   unsigned int stype2 = graph_.site_type(s2);
   return get_fermionic_matrix(typename hamiltonian_matrix<M,G>::value_type(),op,model_.model().basis().site_basis(stype1),
                                       model_.model().basis().site_basis(stype2),parms);  
+}
+
+template <class M, class G>
+nsite_matrix<typename hamiltonian_matrix<M,G>::value_type> hamiltonian_matrix<M,G>::local_matrix(const NSiteOperator& op, const plaquette& p) const
+{
+  std::vector<SiteBasisDescriptor<short> > bases;
+  for (std::size_t r=0;r<p.sites.size();++r)
+    bases.push_back(model_.model().basis().site_basis(graph_.site_type(p.sites[r])));
+  return op.template matrix<value_type>(bases,parms);
+}
+
+// Fill one n-site term on plaquette p. The local table (see nsiteoperator.h)
+// stores each product reordered as O_0 O_1 ... O_{n-1} (role order). Acting on
+// a basis state, O_{n-1} is applied first; each odd O_r picks up the
+// Jordan-Wigner sign (-1)^(number of fermions on sites before p.sites[r]),
+// counted in the state as modified by the operators already applied. This is
+// the rule the bond fill below encodes in closed form for n = 2.
+template <class M, class G> template <class STATES, class V, class W>
+void hamiltonian_matrix<M,G>::apply_operator(const STATES& states, const nsite_matrix<value_type>& mat, const plaquette& p, const V& x, W& y) const
+{
+  const std::size_t n = p.sites.size();
+  const std::size_t nsites = graph_.num_sites();
+  // fermion parity of every local state of every site
+  std::vector<std::vector<bool> > parity(nsites);
+  for (std::size_t s=0;s<nsites;++s)
+    for (std::size_t k=0;k<basis_[s].size();++k)
+      parity[s].push_back(is_fermionic(model_.model().basis().site_basis(graph_.site_type(s)),basis_[s][k]));
+
+  std::vector<std::size_t> in(n), out(n);
+  std::vector<bool> prefix(nsites+1);
+  for (std::size_t i=0;i<dimension();++i) {         // loop over source states
+    state_type state=states[i];
+    for (std::size_t r=0;r<n;++r)
+      in[r]=state[p.sites[r]];
+    const typename nsite_matrix<value_type>::row_type& row = mat.rows[mat.index(in)];
+    if (row.empty())
+      continue;
+    prefix[0]=false;                                // parity of sites < s
+    for (std::size_t s=0;s<nsites;++s)
+      prefix[s+1] = prefix[s] != parity[s][state[s]];
+    for (std::size_t e=0;e<row.size();++e) {
+      mat.decode(row[e].first,out);
+      state_type newstate=state;
+      for (std::size_t r=0;r<n;++r)
+        newstate[p.sites[r]]=out[r];
+      std::complex<double> phase;
+      std::size_t j;
+      boost::tie(j,phase) = states.index_and_phase(newstate);
+      if (j>=dimension()) {
+        if (uses_translation_invariance())
+          continue;
+        std::ostringstream msg;
+        msg << "<PLAQUETTETERM> on plaquette of type " << p.type << " (sites";
+        for (std::size_t r=0;r<n;++r)
+          msg << " " << p.sites[r];
+        msg << ") maps a basis state out of the basis: the term does not conserve "
+               "the quantum numbers in CONSERVED_QUANTUMNUMBERS. Remove them from "
+               "CONSERVED_QUANTUMNUMBERS or fix the term.";
+        boost::throw_exception(std::runtime_error(msg.str()));
+      }
+      bool f=false;
+      for (std::size_t r=n;r-->0;) {
+        std::size_t s=p.sites[r];
+        if (parity[s][in[r]]!=parity[s][out[r]]) {  // O_r is odd
+          bool before=prefix[s];
+          for (std::size_t q=r+1;q<n;++q)           // already applied O_q
+            if (p.sites[q]<s && parity[p.sites[q]][in[q]]!=parity[p.sites[q]][out[q]])
+              before=!before;
+          if (before)
+            f=!f;
+        }
+      }
+      value_type val=row[e].second;
+      if (f)
+        val=-val;
+      val *= numeric_cast<value_type>(phase * states.normalization(j)/states.normalization(i));
+      y[i] += val*x[j];                   // set matrix element
+      simplify(y[i]);               // optionally simplify a symbolic expression
+    }
+  }
 }
 
 template <class M, class G> template <class STATES, class V, class W>
@@ -394,6 +495,30 @@ void hamiltonian_matrix<M,G>::apply_operator(const GlobalOperator& op, const V& 
   // loop over bonds
   for (bond_iterator it=graph_.bonds().first; it!=graph_.bonds().second ; ++it) 
       apply_operator(op.bond_term(graph_.bond_type(*it)),*it,x,y);
+
+  // loop over plaquettes (n-site terms). The local table depends only on the
+  // plaquette type and the site types, so build it once per combination: the
+  // expression evaluator is slow.
+  if (graph_.plaquettes().empty() || !op.has_plaquette_terms())
+    return;
+  typedef std::pair<unsigned int,std::vector<unsigned int> > key_type;
+  std::map<key_type,nsite_matrix<value_type> > cache;
+  for (std::size_t q=0;q<graph_.plaquettes().size();++q) {
+    const plaquette& p = graph_.plaquettes()[q];
+    key_type key(p.type,std::vector<unsigned int>());
+    for (std::size_t r=0;r<p.sites.size();++r)
+      key.second.push_back(graph_.site_type(p.sites[r]));
+    typename std::map<key_type,nsite_matrix<value_type> >::iterator it = cache.find(key);
+    if (it==cache.end()) {
+      NSiteOperator term = op.plaquette_term(p.type);
+      nsite_matrix<value_type> mat;
+      if (!term.term().empty())
+        mat = local_matrix(term,p);
+      it = cache.insert(std::make_pair(key,mat)).first;
+    }
+    if (it->second.size())
+      apply_operator(it->second,p,x,y);
+  }
 }
 
 

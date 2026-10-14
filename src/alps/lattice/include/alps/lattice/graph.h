@@ -25,6 +25,7 @@
 #include <alps/lattice/coordinate_traits.h>
 #include <alps/lattice/propertymap.h>
 #include <alps/utility/vectorio.hpp>
+#include <alps/lattice/plaquette.h>
 
 #include <boost/pending/property.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -117,8 +118,11 @@ inline std::string read_graph_xml(std::istream& in, GRAPH& g)
   return read_graph_xml(tag,in,g);
 }
 
+// If `plaquettes` is given, <PLAQUETTE> elements are read into it; otherwise
+// they are rejected like any other unknown element.
 template <class GRAPH>
-inline std::string read_graph_xml(const XMLTag& intag, std::istream& p, GRAPH& g)
+inline std::string read_graph_xml(const XMLTag& intag, std::istream& p, GRAPH& g,
+                                  plaquette_list* plaquettes = 0)
 {
   typedef GRAPH graph_type;
 
@@ -216,9 +220,16 @@ inline std::string read_graph_xml(const XMLTag& intag, std::istream& p, GRAPH& g
       edgetype[edge]=t;
       edgeindex[edge]=num_edges-1;
     }
+    else if (tag.name=="PLAQUETTE" && plaquettes)
+      plaquettes->push_back(read_graph_plaquette_xml(tag,p));
     else
       boost::throw_exception(std::runtime_error("illegal element <" + tag.name + "> in <GRAPH>"));
   }
+  if (plaquettes)
+    for (std::size_t i=0;i<plaquettes->size();++i)
+      for (std::size_t j=0;j<(*plaquettes)[i].sites.size();++j)
+        if ((*plaquettes)[i].sites[j]>=boost::num_vertices(g))
+          boost::throw_exception(std::runtime_error("<PLAQUETTE> refers to a vertex that is not in <GRAPH>"));
   return name;
 }
 

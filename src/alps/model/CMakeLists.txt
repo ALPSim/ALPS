@@ -3,6 +3,7 @@ target_sources(alps PRIVATE
   src/model/bondterm.C
   src/model/globaloperator.C
   src/model/modellibrary.C
+  src/model/nsiteterm.C
   src/model/siteterm.C)
 
 target_sources(alps_headers INTERFACE
@@ -23,6 +24,7 @@ target_sources(alps_headers INTERFACE
     include/alps/model/integer_state.h
     include/alps/model/model_helper.h
     include/alps/model/modellibrary.h
+    include/alps/model/nsiteoperator.h
     include/alps/model/operator.h
     include/alps/model/operatordescriptor.h
     include/alps/model/operatorsubstitution.h

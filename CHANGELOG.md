@@ -4,8 +4,13 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ## Unreleased
 
+### Added
+
+- n-site Hamiltonian terms for exact diagonalization (`fulldiag`, `sparsediag`). A `<PLAQUETTE>` in a `<UNITCELL>` or `<GRAPH>` lists an ordered group of sites; a `<PLAQUETTETERM sites="i j k l">` in a `<HAMILTONIAN>` is applied to every plaquette of its type, with arbitrary operator strings, any number of sites, and fermion signs handled. Terms that leave the `CONSERVED_QUANTUMNUMBERS` sector are refused. Other applications refuse models that combine plaquette terms with plaquettes instead of ignoring them. See [the syntax](src/alps/model/docs/plaquette_terms.md).
+
 ### Fixed
 
+- Keep full precision of parameter values and numeric coefficients substituted into `SITETERM`, `BONDTERM` and `PLAQUETTETERM` expressions; they were rounded to 6 significant digits (e.g. `t0=0.123456789` acted as `0.123457`).
 - Release HDF5 scalar string buffers after reads, including failed conversions, and owned observables when clearing an `ObservableSet`.
 - Correct scalar/vector Monte Carlo result negation and keep uncertainties nonnegative under negative scaling or reciprocal arithmetic. Preserve empty histogram ranges, avoid invalid access during empty vector/valarray conversions, and create private temporary files on Unix independently of the caller's umask.
 - Initialize Monte Carlo completion scheduling before first use.

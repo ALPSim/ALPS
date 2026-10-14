@@ -15,6 +15,8 @@
 
 #include <alps/model/bondterm.h>
 #include <alps/model/operatorsubstitution.h>
+#include <limits>
+#include <sstream>
 
 #ifndef ALPS_WITHOUT_XML
 
@@ -57,7 +59,12 @@ void alps::BondOperator::substitute_operators(const ModelLibrary& m, const Param
   Expression e(term());
   e.partial_evaluate(subs);
   e.simplify();
-  term_=boost::lexical_cast<std::string>(e);
+  // Full precision: lexical_cast prints 6 significant digits, which truncated
+  // parameter values substituted into the term (e.g. t0=0.123456789 -> 0.123457).
+  std::ostringstream os;
+  os.precision(std::numeric_limits<double>::max_digits10);
+  os << e;
+  term_=os.str();
 }
 
 alps::BondTermDescriptor::BondTermDescriptor(const XMLTag& intag, std::istream& is)

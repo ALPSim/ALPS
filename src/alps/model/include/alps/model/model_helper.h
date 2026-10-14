@@ -38,12 +38,23 @@ public:
     model_ = model_library_.get_hamiltonian(p,issymbolic);
   }
 
+  // allow_plaquette_terms: only codes that apply n-site <PLAQUETTETERM>s
+  // (hamiltonian_matrix, i.e. exact diagonalization) pass true. Everyone else
+  // builds the Hamiltonian from site and bond terms and would silently drop
+  // them, so a model with plaquette terms on a lattice with plaquettes is
+  // refused.
   template <class G>
-  model_helper(alps::graph_helper<G> const& g, alps::Parameters const& p, bool issymbolic=false)
+  model_helper(alps::graph_helper<G> const& g, alps::Parameters const& p, bool issymbolic=false,
+               bool allow_plaquette_terms=false)
    : model_library_(p), 
      parms_(p) 
   {
     model_ = model_library_.get_hamiltonian(g,p,issymbolic);
+    if (!allow_plaquette_terms && model_.has_plaquette_terms() && g.num_plaquettes())
+      boost::throw_exception(std::runtime_error(
+        "The model has <PLAQUETTETERM>s (n-site terms) and the lattice has <PLAQUETTE>s, "
+        "but this application supports only site and bond terms. "
+        "n-site terms are currently supported by exact diagonalization (fulldiag, sparsediag)."));
   }
 
   const ModelLibrary& model_library() const { return model_library_; }  

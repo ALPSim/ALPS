@@ -1,0 +1,31 @@
+<MODELS>
+  <SITEBASIS name="fermion">
+    <QUANTUMNUMBER name="Nup"   min="0" max="1" type="fermionic"/>
+    <QUANTUMNUMBER name="Ndown" min="0" max="1" type="fermionic"/>
+    <OPERATOR name="c_up"      matrixelement="1"><CHANGE quantumnumber="Nup"   change="-1"/></OPERATOR>
+    <OPERATOR name="cdag_up"   matrixelement="1"><CHANGE quantumnumber="Nup"   change="1"/></OPERATOR>
+    <OPERATOR name="c_down"    matrixelement="1"><CHANGE quantumnumber="Ndown" change="-1"/></OPERATOR>
+    <OPERATOR name="cdag_down" matrixelement="1"><CHANGE quantumnumber="Ndown" change="1"/></OPERATOR>
+    <OPERATOR name="n_up"   matrixelement="Nup"/>
+    <OPERATOR name="n_down" matrixelement="Ndown"/>
+  </SITEBASIS>
+  <BASIS name="fermion">
+    <SITEBASIS ref="fermion"/>
+    <CONSTRAINT quantumnumber="Nup"   value="Nup_total"/>
+    <CONSTRAINT quantumnumber="Ndown" value="Ndown_total"/>
+  </BASIS>
+  <HAMILTONIAN name="Hubbard with pair hopping">
+    <PARAMETER name="t" default="1"/>
+    <PARAMETER name="U" default="0"/>
+    <PARAMETER name="K" default="0"/>
+    <BASIS ref="fermion"/>
+    <SITETERM site="i">U*n_up(i)*n_down(i)</SITETERM>
+    <BONDTERM source="i" target="j">
+      -t*(cdag_up(i)*c_up(j) + cdag_up(j)*c_up(i) + cdag_down(i)*c_down(j) + cdag_down(j)*c_down(i))
+    </BONDTERM>
+    <!-- new: one term on four sites -->
+    <PLAQUETTETERM sites="i j k l">
+      K*(cdag_up(l)*cdag_down(k)*c_down(j)*c_up(i) + cdag_up(i)*cdag_down(j)*c_down(k)*c_up(l))
+    </PLAQUETTETERM>
+  </HAMILTONIAN>
+</MODELS>
