@@ -121,6 +121,7 @@ target_sources(alps_configuration INTERFACE
   FILE_SET HEADERS
   BASE_DIRS "${PROJECT_BINARY_DIR}/generated/include"
   FILES "${PROJECT_BINARY_DIR}/generated/include/alps/config.h"
+        "${PROJECT_BINARY_DIR}/generated/include/alps/config.hpp"
         "${PROJECT_BINARY_DIR}/generated/include/alps/version.h"
         "${PROJECT_BINARY_DIR}/generated/include/alps/export.h")
 

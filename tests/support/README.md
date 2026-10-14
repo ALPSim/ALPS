@@ -24,5 +24,5 @@ and [`ACKNOWLEDGE.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f01793
 | `utilities/include/alps/testing/near.hpp` | `alps/testing/near.hpp`, used by the ALEA tests |
 
 `alps_add_mpi_gtest(... OWN_MAIN)` links `gtest_par_xml_output`, which ALPSCore's
-MPI tests call from their `main()`. `alps/config.hpp` is ALPS's own: it stands in
-for ALPSCore's generated configuration header by including `<alps/config.h>`.
+MPI tests call from their `main()`. They include `<alps/config.hpp>`, which
+`ALPS::configuration` provides.
