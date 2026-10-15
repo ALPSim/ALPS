@@ -48,10 +48,10 @@ public:
   chemical_potential(const alps::params &p){
     extern int global_mpi_rank;
     val_.resize(p["N_ORBITALS"], p["MU"]|0.);
-    if(p.defined("MU_VECTOR")){
+    if(!p["MU_VECTOR"].cast<std::string>().empty()){
       if(p.defined("MU") && !global_mpi_rank){ std::cout << "Warning::parameter MU_VECTOR defined, ignoring parameter MU" << std::flush << std::endl; };
       std::string mufilename=p["MU_VECTOR"].cast<std::string>();
-      if(p.defined("MU_IN_HDF5") && p["MU_IN_HDF5"].cast<bool>()){//attempt to read from h5 archive
+      if(p["MU_IN_HDF5"].cast<bool>()){//attempt to read from h5 archive
         alps::hdf5::archive ar(mufilename, alps::hdf5::archive::READ);
         ar>>alps::make_pvp("/MUvector",val_);
       }
