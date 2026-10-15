@@ -1,8 +1,8 @@
 # Typed parameters have no link dependency on the legacy parameter/parser runtime.
 add_library(alps_params
-  src/paramproxy.cpp
-  src/params.cpp
-  src/paramvalue.cpp)
+  src/ngs/paramproxy.cpp
+  src/ngs/params.cpp
+  src/ngs/paramvalue.cpp)
 target_link_libraries(alps_params PUBLIC ALPS::configuration ALPS::hdf5 Boost::serialization
   PRIVATE "$<COMPILE_ONLY:ALPS::numerics>")
 if(ALPS_ENABLE_MPI)
