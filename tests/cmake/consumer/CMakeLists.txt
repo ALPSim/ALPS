@@ -138,6 +138,14 @@ add_component_contract(models models.cpp
 add_component_contract(ed ed.cpp
   "ALPS::alps|ALPS::params|ALPS::hdf5|ALPS::xml|HDF5::|MPI::")
 add_contract(sdk main.cpp ALPS::alps)
+# The header-only catalog importer joins the legacy runtime with ALPS::ed and
+# reads the installed XML catalogs.
+add_contract(catalog catalog.cpp "ALPS::alps;ALPS::ed")
+if(ALPS_SOURCE)
+  set(catalog_xml "${ALPS_SOURCE}/src/alps/resources")
+else()
+  set(catalog_xml "${ALPS_DATA_DIR}/xml")
+endif()
 add_contract(numeric numerics.cpp ALPS::numerics)
 add_contract(numeric_io numeric_io.cpp ALPS::numeric_io)
 add_contract(numeric_xml numeric_xml.cpp ALPS::numeric_xml)
@@ -158,6 +166,8 @@ if(NOT ALPS_SOURCE)
 endif()
 if(NOT ALPS_SOURCE)
   set_tests_properties(sdk_contract sdk_resources numeric_contract numeric_io_contract numeric_xml_contract utilities_contract hdf5_contract
-    params_contract osiris_contract xml_contract cli_contract models_contract ed_contract parameter_adapters_contract PROPERTIES ENVIRONMENT_MODIFICATION
+    params_contract osiris_contract xml_contract cli_contract models_contract ed_contract catalog_contract parameter_adapters_contract PROPERTIES ENVIRONMENT_MODIFICATION
     "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
 endif()
+set_property(TEST catalog_contract APPEND PROPERTY ENVIRONMENT_MODIFICATION
+  "ALPS_XML_PATH=set:${catalog_xml}")

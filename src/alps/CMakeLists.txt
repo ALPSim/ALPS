@@ -134,8 +134,10 @@ endforeach()
 target_link_libraries(alps PUBLIC ALPS::utilities ALPS::osiris ALPS::hdf5 ALPS::params
                                   ALPS::xml ALPS::cli)
 
+# ALPS::models supplies the compiled-operator types that the catalog importer
+# header (<alps/model/catalog.hpp>) emits; the importer is header-only.
 target_link_libraries(alps_headers INTERFACE alps_configuration
-  "$<COMPILE_ONLY:ALPS::utilities;ALPS::osiris;ALPS::hdf5;ALPS::params;ALPS::xml;ALPS::cli;ALPS::numerics;ALPS::numeric_io;ALPS::numeric_xml;ALPS::solver_headers>")
+  "$<COMPILE_ONLY:ALPS::utilities;ALPS::osiris;ALPS::hdf5;ALPS::params;ALPS::xml;ALPS::cli;ALPS::numerics;ALPS::numeric_io;ALPS::numeric_xml;ALPS::solver_headers;ALPS::models>")
 if(ALPS_ENABLE_OPENMP)
   target_link_libraries(alps_headers INTERFACE "$<COMPILE_ONLY:OpenMP::OpenMP_CXX>")
 endif()

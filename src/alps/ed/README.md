@@ -114,8 +114,43 @@ dense solver uses LAPACK only (alpsx used Eigen for small blocks and
 `zheevr`), the Lanczos driver is new (alpsx used Spectra over Eigen,
 which this tree does not vendor), projected blocks are held as canonical
 CSR instead of Eigen sparse matrices, and the finite-group closure and
-projector ranges use small local dense helpers (alpsx used Eigen). Not
-ported yet: the catalog (XML) problem adapters and HDF5 persistence.
+projector ranges use small local dense helpers (alpsx used Eigen). The
+catalog importer (`<alps/model/catalog.hpp>`, in the legacy model module)
+supplies compiled operators, parities and charges of XML catalog models; see
+"Catalog models" below. Not ported: the alpsx diag runtime's catalog problem
+adapters and HDF5 persistence.
+
+## Catalog models
+
+`alps::models::CatalogModel<>` (header `<alps/model/catalog.hpp>`, library
+`ALPS::alps`) resolves `MODEL`/`LATTICE` parameters through the XML catalogs
+and compiles the Hamiltonian, or any catalog operator, into a
+`CompiledOperator`. Its `local_parity()`, `conserved_quantum_numbers()`,
+`local_charge(name)` and `sector()` fill a `ProjectedSpaces` and a sector for
+`prepare_projected`, `model_spectrum`, `prepare_finite` and the CSR entry
+points, so a catalog model and a kit `Hamiltonian` share every solver:
+
+```cpp
+alps::models::CatalogModel<> model(parameters);   // MODEL, LATTICE, L, Sz_total, ...
+auto const op = model.compile_hamiltonian();
+alps::ed::ProjectedSpaces spaces;
+spaces.charges = model.conserved_quantum_numbers();
+auto const parity = model.local_parity();
+for (std::size_t site = 0; site < parity.size(); ++site) {
+    alps::ed::SpectrumLocalSpace space;
+    space.parity = parity[site];
+    for (auto const& name : spaces.charges) space.quantum_numbers.push_back(model.local_charge(name)[site]);
+    spaces.local_spaces.push_back(space);
+}
+alps::ed::ProjectedOptions options;
+options.sector = model.sector();
+auto const problem = alps::ed::prepare_projected(op, spaces, {}, options);
+```
+
+The legacy module's tests lock the importer against the kit factories
+(`catalog_model_parity`), against `hamiltonian_matrix` element by element on
+the same catalog basis (`ed_vs_hamiltonian_matrix`), and the kit lattices
+against the catalog graphs (`lattice_catalog_structure`).
 
 ## Tests
 
