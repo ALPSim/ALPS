@@ -51,7 +51,7 @@ ALPSCore's top-level files, copied unchanged. The SDK installs them under
 | --- | --- | --- |
 | `accumulators/include/alps/accumulators.hpp` | `include/alps/accumulators.hpp` | Copied unchanged |
 | `accumulators/include/alps/accumulators/**` | `include/alps/accumulators/**` | Copied unchanged, except that `convergence.hpp` and `feature/binning_analysis.hpp` gain includes (see below) |
-| `accumulators/src/*.cpp`, `accumulators/src/feature/*.cpp` (11 files) | `src/`, `src/feature/` | Copied unchanged |
+| `accumulators/src/*.cpp`, `accumulators/src/feature/*.cpp` (11 files) | `src/`, `src/feature/` | Copied unchanged, except `mpi.cpp` (see below) |
 | `accumulators/test/*.cpp` (31 files), `accumulators/test/accumulator_generator.hpp` | `tests/` | Copied unchanged, except two include lines (see below) |
 | `utilities/test/vector_comparison_predicates.hpp` | `tests/vector_comparison_predicates.hpp` | Copied unchanged |
 | `utilities/include/alps/testing/unique_file.hpp`, `utilities/src/unique_file.cpp` | `tests/support/` in the repository root | Copied unchanged; shared test support |
@@ -80,6 +80,14 @@ addition:
   and `<stdexcept>`.
 - `alps/accumulators/feature/binning_analysis.hpp` includes
   `feature/error.hpp`, whose `error_type` it uses.
+
+One source change, for MPI builds:
+
+- `src/mpi.cpp` dispatches its reduction helpers on
+  `std::integral_constant<bool, hdf5::is_content_continuous<T>::value>`, and
+  likewise for `is_continuous`, instead of on the traits' own `::type`. ALPS's
+  `alps::hdf5` traits derive from `boost::true_type` and `boost::false_type`,
+  ALPSCore's from the `std::` types the helpers take.
 
 One test change:
 
