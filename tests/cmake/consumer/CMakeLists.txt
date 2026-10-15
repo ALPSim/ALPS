@@ -57,11 +57,13 @@ else()
      OR NOT EXISTS "${expected_prefix}/include/alps/python/save_observable_to_hdf5.hpp")
     message(FATAL_ERROR "The SDK must retain public Python compatibility includes")
   endif()
-  # alps/utilities/ and alps/common/ are public prefixes (ALPSCore's spellings).
+  # alps/utilities/, alps/common/ and alps/params/ are public prefixes (ALPSCore's spellings).
   foreach(private_directory IN ITEMS alps/utilities/include alps/utilities/src
                                      alps/utilities/tests alps/hdf5/include alps/hdf5/src
-                                     alps/hdf5/tests alps/params alps/common/include
-                                     alps/common/src alps/common/tests alps/runtime
+                                     alps/hdf5/tests alps/params/include alps/params/src
+                                     alps/params/tests alps/params/adapters alps/params/iniparser
+                                     alps/common/include alps/common/src alps/common/tests
+                                     alps/runtime
                                      alps/aleav2/include alps/aleav2/src alps/aleav2/tests
                                      alps/accumulators/include alps/accumulators/src
                                      alps/accumulators/tests

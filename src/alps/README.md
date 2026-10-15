@@ -12,7 +12,7 @@ Sources use `include/`, `src/` and `tests/` where applicable. Public include spe
 | `numeric_io/` | HDF5 adapters for numerical matrices and vectors | `ALPS::numeric_io` |
 | `ietl/` | Iterative eigensolver headers under `include/ietl/` | `ALPS::headers` |
 | `hdf5/` | Archive API, container adapters, shared context registry and signal cleanup | `ALPS::hdf5` |
-| `params/` | Typed values, lookup/proxies, iteration and HDF5 checkpoints | `ALPS::params`; `adapters/` contributes to `ALPS::alps` |
+| `params/` | ALPSCore's parameters (`<alps/params.hpp>`, `<alps/dictionary.hpp>`, `<alps/params/*.hpp>`), and the NGS parameters (`<alps/ngs/params.hpp>`): typed values, lookup/proxies, iteration and HDF5 checkpoints. See [its README](params/README.md) | `ALPS::params`; `adapters/` contributes to `ALPS::alps` |
 | `osiris/` | Dump serialization, process/communication state and XDR implementation | `ALPS::osiris` |
 | `xml/` | XML parsing, handlers, attributes and output streams | `ALPS::xml` |
 | `cli/` | Existing `mcoptions` and `parseargs` command-line grammars | `ALPS::cli` |
