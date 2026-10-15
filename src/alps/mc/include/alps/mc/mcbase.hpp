@@ -32,6 +32,9 @@ namespace alps {
             typedef alps::accumulators::result_set results_type;
 
             mcbase(parameters_type const & parms, std::size_t seed_offset = 0);
+            // ALPS addition: simulations, including Python subclasses bound
+            // through nanobind trampolines, are destroyed through mcbase.
+            virtual ~mcbase() = default;
 
             static parameters_type& define_parameters(parameters_type & parameters);
 

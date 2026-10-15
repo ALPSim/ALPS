@@ -29,7 +29,7 @@ these files.
 
 | ALPSCore path | Here | Relationship |
 | --- | --- | --- |
-| `mc/include/alps/mc/*.hpp` (6 files) | `include/alps/mc/` | Copied unchanged |
+| `mc/include/alps/mc/*.hpp` (6 files) | `include/alps/mc/` | Copied unchanged, except that `mcbase.hpp` gains a virtual destructor (see below) |
 | `mc/src/*.cpp` (3 files) | `src/` | Copied unchanged |
 | `mc/test/*.cpp` (9 files) | `tests/` | Copied unchanged |
 | `COPYRIGHT.TXT`, `LICENSE.TXT`, `ACKNOWLEDGE.TXT` | here | Copied unchanged |
@@ -40,3 +40,11 @@ this README are ALPS's own.
 The tests run as one CTest test per GoogleTest case, and the MPI tests on 2
 and 3 ranks. `reduce` and `signed_obs` have no GoogleTest cases; their exit
 status is the check.
+
+### Local changes
+
+`alps::mcbase` has virtual member functions but, in ALPSCore, no virtual
+destructor. `mcbase.hpp` declares one, marked with a comment, so a simulation
+can be destroyed through a pointer to `mcbase`. pyalps relies on this: a
+Python simulation is a nanobind trampoline derived from `mcbase`, and nanobind
+destroys it as an `mcbase`.
