@@ -199,7 +199,10 @@ add_header_contract(hdf5 ONLY "^alps/hdf5/boost_optional\\.hpp$")
 add_header_contract(numerics
   ONLY "^alps/numeric/(boost_array_functions|check_size|inf|rectangularize|scalar|vector_functions)\\.hpp$")
 if(sdk_mpi_enabled)
-  add_header_contract(utilities ONLY "^alps/utilities/(boost_)?mpi\\.hpp$")
+  add_header_contract(utilities
+    ONLY "^alps/(utilities/((boost_)?mpi|mpi_(map|pair|vector)|deprecated|fs/[a-z_]+)|testing/fp_compare)\\.hpp$")
+else()
+  add_header_contract(utilities ONLY "^alps/(utilities/(deprecated|fs/[a-z_]+)|testing/fp_compare)\\.hpp$")
 endif()
 # Code written against 3.0.0 builds unchanged while the legacy layer is installed.
 if(ALPS_LEGACY_API)
