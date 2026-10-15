@@ -103,6 +103,33 @@ def test_alias_matches_alps_xml(legacy_install, tmp_path, command):
     assert result.stderr == ""
 
 
+@pytest.mark.parametrize("command", [name for name in ALIASES
+                                     if not name.startswith("extract")])
+def test_alias_reads_stdin(legacy_install, tmp_path, command):
+    content = PLOT if command.startswith("plot") else simulation(1, 3)
+    source = tmp_path / "input.xml"
+    source.write_text(content)
+    expected = run(legacy_install, command, source)
+    assert expected.returncode == 0, expected.stderr
+    assert expected.stdout.strip()
+    for name, arguments in ((command, []), ("alps-xml", ALIASES[command].split())):
+        result = run(legacy_install, name, *arguments, "-", input=content)
+        assert result.returncode == 0, result.stderr
+        assert result.stdout == expected.stdout
+        assert result.stderr == ""
+
+
+def test_malformed_stdin_preserves_output(legacy_install, tmp_path):
+    output = tmp_path / "existing.txt"
+    output.write_text("previous result")
+    result = run(legacy_install, "plot2text", "-", "--output", output,
+                 input="<broken")
+    assert result.returncode != 0
+    assert "xsltproc failed" in result.stderr
+    assert result.stdout == ""
+    assert output.read_text() == "previous result"
+
+
 def test_deprecated_helpers_warn_and_still_work(legacy_install, tmp_path):
     # archivecat is unchanged: it splits names on spaces and expects the task
     # file layout ALPS writes, with <PARAMETERS> on its own line.
