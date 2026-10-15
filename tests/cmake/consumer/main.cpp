@@ -7,27 +7,20 @@
 #include <alps/hdf5/vector.hpp>
 #include <alps/params.hpp>
 #include <alps/utilities/encode.hpp>
-#include <alps/ngs/accumulator/feature/binning_analysis.hpp>
-#include <alps/ngs/accumulator/feature/max_num_binning.hpp>
+#include <alps/accumulators.hpp>
 #include <alps/parser/xslt_path.h>
 #include <alps/osiris/xdrdump.h>
 #include <alps/numeric/functional.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <vector>
 
-using namespace alps::accumulator;
-using Count = impl::Accumulator<double, count_tag, impl::AccumulatorBase<double>>;
-using Mean = impl::Accumulator<double, mean_tag, Count>;
-using Error = impl::Accumulator<double, error_tag, Mean>;
-using Binning = impl::Accumulator<double, binning_analysis_tag, Error>;
-using MaxBinning = impl::Accumulator<double, max_num_binning_tag, Error>;
-
 template<class Accumulator> bool check_accumulator() {
-    Accumulator accumulator;
-    accumulator(1.0);
-    accumulator(2.0);
-    accumulator(3.0);
-    return accumulator.count() == 3 && accumulator.mean() == 2.0;
+    alps::accumulators::accumulator_set measurements;
+    measurements << Accumulator("x");
+    for (double value : {1.0, 2.0, 3.0})
+        measurements["x"] << value;
+    const alps::accumulators::result_set results(measurements);
+    return results["x"].count() == 3 && results["x"].mean<double>() == 2.0;
 }
 
 int main(int argc, char** argv) {
@@ -64,6 +57,8 @@ int main(int argc, char** argv) {
     input["/values"] >> actual;
     return actual == expected && checkpoint_value == 42 && int(parameters["count"]) == 3
         && (range.min)() == 2 && (range.max)() == 5
-        && check_accumulator<Mean>() && check_accumulator<Error>()
-        && check_accumulator<Binning>() && check_accumulator<MaxBinning>() ? 0 : 1;
+        && check_accumulator<alps::accumulators::MeanAccumulator<double>>()
+        && check_accumulator<alps::accumulators::NoBinningAccumulator<double>>()
+        && check_accumulator<alps::accumulators::LogBinningAccumulator<double>>()
+        && check_accumulator<alps::accumulators::FullBinningAccumulator<double>>() ? 0 : 1;
 }
