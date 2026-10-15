@@ -86,6 +86,29 @@ tests them:
 - `params::supplied_text()` returns the supplied text of every supplied
   parameter, by name, including parameters the program never defines.
 
+`params::load()` also reads HDF5 groups without ALPSCore's attributes, as
+pyalps, `alps::Parameters::save` and the NGS parameters wrote `/parameters`. It
+supplies each value as text, as an INI file would, so `define<T>()` parses it
+with the type the program declares; a typed load would instead fail on the
+first value stored with another type, such as a Python integer for a `double`.
+ALPSCore's own groups, recognized by their `@status` attribute, load as
+before. The text comes from `<alps/params/text_values.hpp>`
+(`src/text_values.cpp`), which is ALPS's own, and `tests/params_plain_group.cpp`
+tests it:
+
+| Stored value | Supplied text |
+| --- | --- |
+| Integer of any width | Decimal: `1000` |
+| Boolean, stored as `int8` | `1` or `0`, which parse as `bool` and as integers |
+| Floating-point number | Integral values without a fraction: `24`, `1000000`; others with the digits they need to read back unchanged: `0.123456789` |
+| String | Unchanged |
+| One-dimensional array, or a group of scalars `0`, `1`, ... (a Python list) | Elements separated by commas: `4,4` |
+| Complex number, multidimensional array or other group | An error naming the parameter |
+
+An integer parameter therefore accepts `24.0` and `1e6` stored as numbers,
+but not `2.7`, nor the strings `"4.0"` or `"1e6"`: these are errors naming the
+parameter.
+
 ### Test registration
 
 - ALPS runs each GoogleTest case as its own CTest test, labelled `params`. A

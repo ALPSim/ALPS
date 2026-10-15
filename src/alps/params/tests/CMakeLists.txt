@@ -47,7 +47,7 @@ foreach(name serialize_variant dictionary params dots_in_keys params_default_vec
 endforeach()
 
 # ALPS's own tests of its additions to ALPSCore's params.
-foreach(name params_supply)
+foreach(name params_supply params_plain_group)
   add_executable(${name} ${name}.cpp "${PROJECT_SOURCE_DIR}/tests/support/src/unique_file.cpp")
   target_link_libraries(${name} PRIVATE ALPS::params)
   alps_add_gtest(${name} COMPONENT params)
