@@ -29,6 +29,10 @@ components:
     name: ALPS Core Libraries parameters
     algorithm: []
     implementation: [wallerberger2018alpscore]
+  mc:
+    name: ALPS Core Libraries Monte Carlo simulation base
+    algorithm: []
+    implementation: [wallerberger2018alpscore]
   scheduler:
     name: ALPS parallel Monte Carlo scheduler
     algorithm: []
