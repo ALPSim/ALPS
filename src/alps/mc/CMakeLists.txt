@@ -1,8 +1,8 @@
 # Mc source ownership.
 target_sources(alps PRIVATE
-  src/mcbase.cpp
   src/ngs/api.cpp
-  src/stop_callback.cpp)
+  src/ngs/mcbase.cpp
+  src/ngs/stop_callback.cpp)
 
 target_sources(alps_headers INTERFACE
   FILE_SET mc_headers TYPE HEADERS
