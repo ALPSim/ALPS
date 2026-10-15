@@ -31,7 +31,7 @@ means it was moved as it was, and the note says what modernization remains.
 | `boost_mpi.hpp` | `alps::mpi::reduce` for `std::vector`, on ALPSCore's communicator; despite the name, no Boost.MPI | current; copied from ALPSCore, MPI builds only |
 | `mpi_vector.hpp`, `mpi_pair.hpp`, `mpi_map.hpp` | `alps::mpi::broadcast` for `std::vector`, `std::pair` and `std::map` | current; copied unchanged from ALPSCore, MPI builds only |
 | `fs/get_basename.hpp`, `fs/get_dirname.hpp`, `fs/get_extension.hpp`, `fs/remove_extensions.hpp` | File-name operations on strings | current; copied unchanged from ALPSCore with `src/filename_operations.cpp` |
-| `deprecated.hpp` | `ALPS_DEPRECATED` | current; copied unchanged from ALPSCore |
+| `deprecated.hpp` | `ALPS_DEPRECATED` | current; copied from ALPSCore, and defines the macro only if ALPS's `<alps/export.h>` has not |
 | `copyright.hpp` | Program banners, version and license text | current |
 | `citations.hpp` | Citation notices from the generated catalog | current |
 | `os.hpp` | Host, user and directory queries | carried over; returns `boost::filesystem::path` |
