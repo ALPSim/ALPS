@@ -28,6 +28,10 @@ installed; the feature itself is the code under `src/alps/lattice` and
     Full spectrum vs a dense reference; zero-mode counts vs the
     (2,2)-admissible patterns, with the unique Moore-Read ground state at
     2S = N - 2. N = 4, 6, 8; takes about 15 seconds.
+  - `alps_checks/t7_pairing.py`: pairing terms as site, bond and plaquette
+    terms on an open graph and a periodic ladder (with and without momentum
+    sectors), full spectrum vs a dense Jordan-Wigner matrix; with Nup, Ndown
+    conserved every one of them is refused.
   - `results/`: output of the runs above.
 
 Running: build ALPS with applications (`cmake --preset default
