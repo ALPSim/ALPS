@@ -34,7 +34,9 @@ bool stop_requested(boost::posix_time::ptime const & end_time) {
 }
 }
 
-void alps::solvers::ctint(alps::params const& parms, std::string const& output_file) {
+void alps::solvers::ctint(alps::params const& input, std::string const& output_file) {
+  alps::params parms(input);
+  InteractionExpansion::define_parameters(parms);
   int rank;
 #ifndef ALPS_HAVE_MPI
   rank=0;
