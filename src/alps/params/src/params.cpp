@@ -26,7 +26,7 @@
 #ifdef ALPS_HAVE_ALPS_HDF5
 #include <alps/hdf5/map.hpp>
 #include <alps/hdf5/vector.hpp>
-#include <alps/params/text_values.hpp> // ALPS: for params::load()
+#include <alps/params/text_values.hpp> // ALPS: for params::save() and load()
 #endif
 
 
@@ -392,6 +392,16 @@ namespace alps {
         void params::save(alps::hdf5::archive& ar) const {
             dictionary::save(ar);
             const std::string context=ar.get_context();
+            // ALPS: a parameter that is supplied but not defined is written as
+            // a value too, as ALPS's other writers do, and marked so that
+            // load() keeps it as text.
+            for(const strmap::value_type& kv: raw_kv_content_) {
+                if (exists(kv.first)) continue;
+                ar[kv.first] << supplied_value(kv.first, kv.second);
+                ar[kv.first+"@supplied_only"] << true;
+            }
+            // ALPS: params with no values still get their group
+            if (!ar.is_group(context)) ar.create_group(context);
             // Convert the inifile map to vectors of keys, values
             std::vector<std::string> raw_keys, raw_vals;
             raw_keys.reserve(raw_kv_content_.size());
@@ -430,6 +440,10 @@ namespace alps {
             newpar.dictionary::load(ar);
 
             const std::string context=ar.get_context();
+            // ALPS: values save() wrote for parameters only supplied stay text
+            for(const std::string& key: ar.list_children(context)) {
+                if (ar.is_attribute(key+"@supplied_only")) newpar.erase(key);
+            }
 
             ar[context+"@status"] >> newpar.err_status_;
             ar[context+"@origins"]  >> newpar.origins_.data();

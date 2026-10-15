@@ -10,6 +10,7 @@
 #include <alps/testing/unique_file.hpp>
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <complex>
 #include <cstdint>
 #include <limits>
@@ -147,4 +148,61 @@ TEST_F(ParamsPlainGroup, ALPSCoreGroupsLoadAsBefore) {
     EXPECT_TRUE(p == saved);
     EXPECT_TRUE(p.defined("BETA"));
     EXPECT_TRUE(p.defaulted("BETA"));
+}
+
+TEST(ParamsSuppliedValue, NumbersListsAndText) {
+    using alps::params_ns::supplied_value;
+    EXPECT_EQ(10L, supplied_value("N", "10").as<long>());
+    EXPECT_EQ(-3L, supplied_value("N", "-3").as<long>());
+    EXPECT_EQ(2.25, supplied_value("T", "2.25").as<double>());
+    EXPECT_EQ(1e6, supplied_value("T", "1e6").as<double>());
+    EXPECT_EQ(std::vector<long>({4, 4}), supplied_value("L", "4,4").as<std::vector<long> >());
+    EXPECT_EQ(std::vector<double>({1.0, 2.5}), supplied_value("X", "1,2.5").as<std::vector<double> >());
+    for (const char* text : {"", "chain lattice", "0x10", "1,a", "1,,2", "5 ", "true"}) {
+        EXPECT_EQ(text, supplied_value("S", text).as<std::string>()) << text;
+    }
+}
+
+// Supplied parameters the program never defines are datasets too, as ALPS's
+// other writers left them, and load back as text.
+TEST_F(ParamsPlainGroup, SuppliedOnlyValuesAreWrittenAndStayText) {
+    alps::params saved;
+    saved.supply("L", "10").supply("T", "2.25").supply("LATTICE", "chain").supply("X", "1,2.5")
+         .supply("N", "3");
+    saved.define<int>("N", "a size");
+    {
+        alps::hdf5::archive ar(file.name(), "w");
+        ar["/parameters"] << saved;
+    }
+    {
+        alps::hdf5::archive ar(file.name(), "r");
+        std::vector<std::string> children = ar.list_children("/parameters");
+        std::sort(children.begin(), children.end());
+        EXPECT_EQ(std::vector<std::string>({"L", "LATTICE", "N", "T", "X"}), children);
+        long length = 0;
+        ar["/parameters/L"] >> length;
+        EXPECT_EQ(10, length);
+        EXPECT_TRUE(ar.is_datatype<long>("/parameters/L"));
+        EXPECT_TRUE(ar.is_datatype<double>("/parameters/T"));
+        std::vector<double> x;
+        ar["/parameters/X"] >> x;
+        EXPECT_EQ(std::vector<double>({1.0, 2.5}), x);
+    }
+    alps::params p = load(file.name());
+    EXPECT_TRUE(p == saved);
+    EXPECT_FALSE(p.exists("L"));
+    // An integer-looking value parses as the type the program declares
+    p.define<double>("L", "length").define<std::string>("T", "text");
+    ASSERT_TRUE(p.ok()) << missing_message(p);
+    EXPECT_EQ(10.0, p["L"].as<double>());
+    EXPECT_EQ("2.25", p["T"].as<std::string>());
+}
+
+TEST_F(ParamsPlainGroup, EmptyParamsRoundTrip) {
+    alps::params saved;
+    {
+        alps::hdf5::archive ar(file.name(), "w");
+        ar["/parameters"] << saved;
+    }
+    EXPECT_TRUE(load(file.name()) == saved);
 }

@@ -19,9 +19,13 @@ namespace alps {
     mcbase::mcbase(parameters_type const & parms, std::size_t seed_offset)
         : parameters(parms)
         , params(parameters) // TODO: remove, deprecated!
-        , random((parameters["SEED"] | 42) + seed_offset)
+        , random(std::size_t(parameters["SEED"]) + seed_offset)
     {
         alps::signal::listen();
+    }
+
+    mcbase::parameters_type & mcbase::define_parameters(parameters_type & parameters) {
+        return parameters.define<long>("SEED", 42, "PRNG seed");
     }
 
     mcbase::~mcbase() = default;

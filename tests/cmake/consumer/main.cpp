@@ -5,7 +5,7 @@
 #include <alps/parapack/integer_range.h>
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/vector.hpp>
-#include <alps/ngs/params.hpp>
+#include <alps/params.hpp>
 #include <alps/utilities/encode.hpp>
 #include <alps/ngs/accumulator/feature/binning_analysis.hpp>
 #include <alps/ngs/accumulator/feature/max_num_binning.hpp>

@@ -26,6 +26,10 @@ public:
         measurements << alps::accumulator::RealObservable("SValue")
                      << alps::accumulator::RealVectorObservable("VValue");
     }
+    static parameters_type& define_parameters(parameters_type& parameters) {
+        return alps::mcbase::define_parameters(parameters)
+            .define<int>("COUNT", "number of samples");
+    }
     void update() override {
         const double x = random();
         value_ = std::exp(-x * x);

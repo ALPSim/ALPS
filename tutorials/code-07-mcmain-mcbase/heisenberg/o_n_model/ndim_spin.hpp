@@ -35,6 +35,15 @@ class ALPS_DECL ndim_spin_sim : public alps::mcbase {
         typedef tinyvector<double, N, INTRIN_OPT> spintype;
         ndim_spin_sim(parameters_type const & parms, std::size_t seed_offset = 0);
 
+        // The parameters the simulation reads; LATTICE, L and the lattice's
+        // other parameters reach the lattice as supplied.
+        static parameters_type & define_parameters(parameters_type & parameters) {
+            return alps::mcbase::define_parameters(parameters)
+                .define<int>("THERMALIZATION", "number of thermalization sweeps")
+                .define<int>("SWEEPS", "number of measurement sweeps")
+                .define<double>("T", "temperature");
+        }
+
         virtual void update();
         virtual void measure();
         virtual double fraction_completed() const;

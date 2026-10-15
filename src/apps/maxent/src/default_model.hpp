@@ -18,7 +18,7 @@
 #include <utility> // Boost.Math 1.76 includes this inside a namespace.
 #include <boost/math/constants/constants.hpp>
 #include <math.h>
-#include <alps/ngs/params.hpp>
+#include <alps/params.hpp>
 #include <alps/osiris/comm.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/throw_exception.hpp>
@@ -227,10 +227,10 @@ public:
 //  TabFunction(const alps::Parameters& p, std::string const& name) //: index(0)
   TabFunction(const alps::params& p, std::string const& name) //: index(0)
   {
-    std::string p_name = p[name].cast<std::string>();
+    std::string p_name = p[name].as<std::string>();
     std::ifstream defstream(p_name.c_str());
     if (!defstream)
-      boost::throw_exception(std::invalid_argument("could not open default model file: "+p[name]));
+      boost::throw_exception(std::invalid_argument("could not open default model file: "+p_name));
     double om, D;
     while (defstream >> om >> D) {
       Omega.push_back(om);
@@ -343,7 +343,7 @@ private:
 //inline boost::shared_ptr<DefaultModel> make_default_model(const alps::Parameters& parms, std::string const& name)
 inline boost::shared_ptr<DefaultModel> make_default_model(const alps::params& parms, std::string const& name)
 {
-    std::string p_name = parms[name].cast<std::string>();
+    std::string p_name = parms[name].as<std::string>();
   if (p_name == "flat") {
     if (alps::is_master())
       std::cerr << "Using flat default model" << std::endl;

@@ -15,6 +15,9 @@
 #include "fouriertransform.h"
 #include <alps/utilities/copyright.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
 #ifdef ALPS_HAVE_MPI
 #include <alps/mcmpiadapter.hpp>
 using sim_type = alps::mcmpiadapter<HubbardInteractionExpansion>;
@@ -36,7 +39,10 @@ bool stop_requested(boost::posix_time::ptime const & end_time) {
 
 void alps::solvers::ctint(alps::params const& input, std::string const& output_file) {
   alps::params parms(input);
-  InteractionExpansion::define_parameters(parms);
+  sim_type::define_parameters(parms);
+  std::ostringstream missing;
+  if (parms.has_missing(missing))
+    throw std::invalid_argument("interaction: " + missing.str());
   int rank;
 #ifndef ALPS_HAVE_MPI
   rank=0;
@@ -50,6 +56,7 @@ void alps::solvers::ctint(alps::params const& input, std::string const& output_f
   if (rank==0) {
     alps::print_copyright(std::cout, "interaction");
     std::cout << std::flush;
+    parms.has_unused(std::cerr);
   }
   //run the simulation
   s.run(boost::bind(&stop_requested, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds((int)parms["MAX_TIME"])));
