@@ -22,7 +22,7 @@
 #include <sstream>
 #include <stdexcept>
 #ifdef ALPS_HAVE_MPI
-#include <alps/mcmpiadapter.hpp>
+#include <alps/mc/mpiadapter.hpp>
 using sim_type = alps::mcmpiadapter<hybridization>;
 #else
 using sim_type = hybridization;
@@ -66,7 +66,7 @@ void alps::solvers::cthyb(alps::params const& input, std::string const& output_f
   global_mpi_rank=0;
   sim_type s(parms,global_mpi_rank);
 #else
-  boost::mpi::communicator c;
+  alps::mpi::communicator c;
   c.barrier();
   global_mpi_rank=c.rank();
   sim_type s(parms, c);

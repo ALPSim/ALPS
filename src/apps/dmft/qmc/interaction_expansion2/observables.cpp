@@ -38,15 +38,16 @@ void InteractionExpansion::initialize_observables(void)
   if(measurements.has("Sign")){
     measurements.clear();
   }
-  measurements << alps::ngs::RealObservable("Sign");
-  measurements << alps::ngs::RealVectorObservable("PertOrder");
+  using alps::accumulators::FullBinningAccumulator;
+  measurements << FullBinningAccumulator<double>("Sign");
+  measurements << FullBinningAccumulator<std::vector<double> >("PertOrder");
   if(measurement_method==selfenergy_measurement_itime_rs) {
     for(unsigned int flavor=0;flavor<n_flavors;++flavor){
       for(unsigned int i=0;i<n_site;++i){
         for(unsigned int j=0;j<n_site;++j){
           std::stringstream obs_name;
           obs_name<<"W_"<<flavor<<"_"<<i<<"_"<<j;
-          measurements << alps::ngs::RealVectorObservable(obs_name.str().c_str());
+          measurements << FullBinningAccumulator<std::vector<double> >(obs_name.str().c_str());
         }
       }
     }
@@ -57,22 +58,22 @@ void InteractionExpansion::initialize_observables(void)
         std::stringstream obs_name_real, obs_name_imag;
         obs_name_real<<"Wk_real_"<<flavor<<"_"<<k << "_" << k;
         obs_name_imag<<"Wk_imag_"<<flavor<<"_"<<k << "_" << k;
-        measurements << alps::ngs::RealVectorObservable(obs_name_real.str().c_str());
-        measurements << alps::ngs::RealVectorObservable(obs_name_imag.str().c_str());
+        measurements << FullBinningAccumulator<std::vector<double> >(obs_name_real.str().c_str());
+        measurements << FullBinningAccumulator<std::vector<double> >(obs_name_imag.str().c_str());
       }
     }
   }
-  measurements << alps::ngs::RealVectorObservable("densities");
+  measurements << FullBinningAccumulator<std::vector<double> >("densities");
   for(unsigned int flavor=0;flavor<n_flavors;++flavor)
-    measurements << alps::ngs::RealVectorObservable("densities_"+boost::lexical_cast<std::string>(flavor));
-  measurements << alps::ngs::RealObservable("density_correlation");
-  measurements << alps::ngs::RealVectorObservable("n_i n_j");
+    measurements << FullBinningAccumulator<std::vector<double> >("densities_"+boost::lexical_cast<std::string>(flavor));
+  measurements << FullBinningAccumulator<double>("density_correlation");
+  measurements << FullBinningAccumulator<std::vector<double> >("n_i n_j");
   for(unsigned int flavor=0;flavor<n_flavors;++flavor){
     for(unsigned int i=0;i<n_site;++i){
       std::stringstream density_name, sz_name;
       density_name<<"density_"<<flavor;
       if (n_site>1) density_name<<"_"<<i;
-      measurements << alps::ngs::RealObservable(density_name.str().c_str());
+      measurements << FullBinningAccumulator<double>(density_name.str().c_str());
     }
   }
   for(unsigned int i=0;i<n_site;++i){
@@ -80,17 +81,20 @@ void InteractionExpansion::initialize_observables(void)
     sz_name<<"Sz_"<<i;
     sz2_name<<"Sz2_"<<i;
     sz0_szj_name<<"Sz0_Sz"<<i;
-    measurements << alps::ngs::SignedRealObservable(sz_name.str().c_str());
-    measurements << alps::ngs::SignedRealObservable(sz2_name.str().c_str());
-    measurements << alps::ngs::SignedRealObservable(sz0_szj_name.str().c_str());
+    // Measured as value times sign. NGS's signed observables divided their
+    // mean by the mean sign; evaluate_selfenergy_measurement_itime_rs divides
+    // the Sz_i results by the "Sign" result instead.
+    measurements << FullBinningAccumulator<double>(sz_name.str().c_str());
+    measurements << FullBinningAccumulator<double>(sz2_name.str().c_str());
+    measurements << FullBinningAccumulator<double>(sz0_szj_name.str().c_str());
   }
   //acceptance probabilities
-  measurements << alps::ngs::RealObservable("VertexInsertion");
-  measurements << alps::ngs::RealObservable("VertexRemoval");
-  measurements << alps::ngs::RealObservable("MeasurementTime");
-  measurements << alps::ngs::RealObservable("UpdateTime");
-  measurements << alps::ngs::RealObservable("RecomputeTime");
-  measurements.reset(true);
+  measurements << FullBinningAccumulator<double>("VertexInsertion");
+  measurements << FullBinningAccumulator<double>("VertexRemoval");
+  measurements << FullBinningAccumulator<double>("MeasurementTime");
+  measurements << FullBinningAccumulator<double>("UpdateTime");
+  measurements << FullBinningAccumulator<double>("RecomputeTime");
+  measurements.reset();
 }
 
 
@@ -111,5 +115,5 @@ void InteractionExpansion::measure_observables(void)
       assert(num_rows(M[i].matrix()) == num_cols(M[i].matrix()));
     pert_order[i]=num_rows(M[i].matrix());
   }
-  measurements["PertOrder"] << pert_order;
+  measurements["PertOrder"] << alps::numeric::valarray2vector(pert_order);
 }

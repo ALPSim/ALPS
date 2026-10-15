@@ -4,7 +4,7 @@
 #ifndef ALPS_TUTORIAL_EXPORTED_ISING_HPP
 #define ALPS_TUTORIAL_EXPORTED_ISING_HPP
 
-#include <alps/mcbase.hpp>
+#include <alps/mc/mcbase.hpp>
 
 #include <cstddef>
 

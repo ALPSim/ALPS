@@ -5,7 +5,7 @@
 #ifndef HEISENBERG_HPP
 #define HEISENBERG_HPP
 
-#include <alps/mcbase.hpp>
+#include <alps/mc/mcbase.hpp>
 #include <alps/ngs/numeric.hpp>
 #include <alps/random/uniform_on_sphere_n.h>
 #include <alps/lattice.h>

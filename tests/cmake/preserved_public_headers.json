@@ -957,6 +957,13 @@
     "alps/ngs/scheduler/proto/mcbase.hpp": "header-only prototype of an NGS Monte Carlo scheduler on the NGS parameters and mcbase; nothing used it",
     "alps/ngs/scheduler/proto/mpisim.hpp": "header-only prototype of an NGS Monte Carlo scheduler on the NGS parameters and mcbase; nothing used it",
     "alps/ngs/scheduler/proto/mpisim_ulfm.hpp": "header-only prototype of an NGS Monte Carlo scheduler on the NGS parameters and mcbase; nothing used it",
-    "alps/ngs/scheduler/proto/tcpserver.hpp": "header-only prototype of an NGS Monte Carlo scheduler on the NGS parameters and mcbase; nothing used it"
+    "alps/ngs/scheduler/proto/tcpserver.hpp": "header-only prototype of an NGS Monte Carlo scheduler on the NGS parameters and mcbase; nothing used it",
+    "alps/check_schedule.hpp": "the NGS Monte Carlo simulation base, which ALPSCore's in <alps/mc/check_schedule.hpp> replaces",
+    "alps/mcbase.hpp": "the NGS Monte Carlo simulation base, which ALPSCore's in <alps/mc/mcbase.hpp> replaces",
+    "alps/mcmpiadapter.hpp": "the NGS Monte Carlo simulation base, which ALPSCore's in <alps/mc/mpiadapter.hpp> replaces",
+    "alps/ngs.hpp": "umbrella header of the NGS Monte Carlo simulation base and observables; include <alps/mc/api.hpp>, <alps/mc/mcbase.hpp> and <alps/accumulators.hpp> instead",
+    "alps/ngs/api.hpp": "the NGS Monte Carlo simulation base, which ALPSCore's in <alps/mc/api.hpp> replaces",
+    "alps/ngs/random01.hpp": "the NGS Monte Carlo simulation base, which ALPSCore's in <alps/mc/random01.hpp> replaces",
+    "alps/stop_callback.hpp": "the NGS Monte Carlo simulation base, which ALPSCore's in <alps/mc/stop_callback.hpp> replaces"
   }
 }
