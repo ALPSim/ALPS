@@ -86,6 +86,8 @@ Numerical matrix/vector persistence now requires an explicit adapter: include `<
 | `<alps/utility/numeric_cast.hpp>`, `<alps/utility/cli.hpp>` | `<alps/numeric/numeric_cast.hpp>`, `<alps/cli.hpp>`; the old headers forward to them while `ALPS_LEGACY_API` is on |
 | `<alps/utility/{bitops,generator}.hpp>` | No replacement; installed, deprecated, while `ALPS_LEGACY_API` is on. Use C++20 `<bit>` instead of `bitops` |
 | `<alps/utility/factory.hpp>` | Removed. It did not compile in 3.0.0, so no code can depend on it |
+| `<alps/ngs/parapack/*.h>` | Removed with their five sources: a parapack front end on the NGS parameters, which nothing used. The parapack scheduler `<alps/parapack/*.h>` is unchanged |
+| `<alps/ngs/scheduler/proto/*.hpp>` | Removed: an unused prototype scheduler on the NGS parameters and `mcbase`. Use `alps::mcbase` with `<alps/mcmpiadapter.hpp>` |
 | `alps::ngs::signal`, `alps::ngs::stacktrace()`, `ALPS_NGS_STRINGIFY` | `alps::signal`, `alps::stacktrace()`, `ALPS_STRINGIFY`; deprecated aliases remain while `ALPS_LEGACY_API` is on |
 | Historical XML shell tools | Retained alongside `alps-xml`; see [XML tools](CONTRIBUTING.md#xml-resources-and-tools) |
 | Top-level `import mpi` compatibility module | `import pyalps.mpi`; install the `mpi` extra for mpi4py |
