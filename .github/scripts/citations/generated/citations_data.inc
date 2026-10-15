@@ -371,6 +371,32 @@ static const citation_entry citation_entries[] = {
    "This is a request for scientific credit, separate from the MIT license terms.\n"
    "\n",
   },
+  {"params",
+   "********************************************************************************\n"
+   "* Recommended citations for ALPS Core Libraries parameters:                    *\n"
+   "* Framework: [1]; Implementation: [2]                                          *\n"
+   "* [1] F. Alet et al., The ALPS project release 3.0: open source software for   *\n"
+   "*     strongly correlated systems, arXiv:2610.03884 (2026); preprint.          *\n"
+   "* [2] M. Wallerberger et al., Updated Core Libraries of the ALPS Project,      *\n"
+   "*     arXiv:1811.08331 (2018); preprint.                                       *\n"
+   "* This is a request for scientific credit, separate from the MIT license       *\n"
+   "* terms.                                                                       *\n"
+   "* Full references: --citations                                                 *\n"
+   "********************************************************************************\n"
+   "\n",
+   "Recommended citations for ALPS Core Libraries parameters:\n"
+   "If ALPS contributes to published research, please cite the relevant algorithm,\n"
+   "implementation, and framework papers below.\n"
+   "  Framework: [1]\n"
+   "  Implementation: [2]\n"
+   "  [1] F. Alet et al., \"The ALPS project release 3.0: open source software for strongly\n"
+   "      correlated systems.\" arXiv:2610.03884 (2026). Preprint.\n"
+   "      https://doi.org/10.48550/arXiv.2610.03884\n"
+   "  [2] M. Wallerberger et al., \"Updated Core Libraries of the ALPS Project.\"\n"
+   "      arXiv:1811.08331 (2018). Preprint. https://doi.org/10.48550/arXiv.1811.08331\n"
+   "This is a request for scientific credit, separate from the MIT license terms.\n"
+   "\n",
+  },
   {"qwl",
    "********************************************************************************\n"
    "* Recommended citations for ALPS quantum Wang-Landau:                          *\n"
