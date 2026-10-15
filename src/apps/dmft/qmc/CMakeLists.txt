@@ -117,6 +117,10 @@ if(ALPS_BUILD_TESTING)
 
   add_executable(dmft_interaction_expansion_choice dmft_interaction_expansion_choice.C)
   alps_add_gtest(dmft_interaction_expansion_choice COMPONENT dmft LABELS regression)
+
+  add_executable(dmft_ctint_sz_results dmft_ctint_sz_results.C)
+  target_link_libraries(dmft_ctint_sz_results PRIVATE ALPS::ctint)
+  alps_add_gtest(dmft_ctint_sz_results COMPONENT dmft LABELS regression)
 endif()
 
 alps_install_applications(dmft hirschfye hybridization interaction)
