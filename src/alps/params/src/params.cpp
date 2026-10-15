@@ -26,6 +26,7 @@
 #ifdef ALPS_HAVE_ALPS_HDF5
 #include <alps/hdf5/map.hpp>
 #include <alps/hdf5/vector.hpp>
+#include <alps/params/text_values.hpp> // ALPS: for params::load()
 #endif
 
 
@@ -417,6 +418,14 @@ namespace alps {
         }
 
         void params::load(alps::hdf5::archive& ar) {
+            // ALPS: a group without ALPSCore's attributes, as ALPS's other
+            // writers leave it, supplies its values as text.
+            if (!ar.is_attribute(ar.get_context()+"@status")) {
+                params plain;
+                supply_plain_group(ar, plain);
+                swap(*this, plain);
+                return;
+            }
             params newpar;
             newpar.dictionary::load(ar);
 

@@ -21,6 +21,7 @@ target_sources(alps_params PRIVATE
   src/dictionary.cpp
   src/iniparser_interface.cpp
   src/params.cpp
+  src/text_values.cpp
   $<TARGET_OBJECTS:alps_params_iniparser>)
 target_include_directories(alps_params PRIVATE iniparser/src)
 target_link_libraries(alps_params PUBLIC ALPS::utilities)
@@ -40,7 +41,9 @@ target_sources(alps_params PUBLIC
     include/alps/params/hdf5_variant.hpp
     include/alps/params/iniparser_interface.hpp
     include/alps/params/params_impl.hpp
-    include/alps/params/serialize_variant.hpp)
+    include/alps/params/serialize_variant.hpp
+    # ALPS's addition
+    include/alps/params/text_values.hpp)
 if(ALPS_ENABLE_MPI)
   # It broadcasts through <alps/utilities/mpi_vector.hpp>, an MPI-only header.
   target_sources(alps_params PUBLIC FILE_SET alpscore_params_headers FILES
