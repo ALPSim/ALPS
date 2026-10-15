@@ -8,17 +8,22 @@ foreach(name IN ITEMS
     local_transitions
     product_basis
     streamed_local_operator
-    term_accumulation)
+    term_accumulation
+    thermodynamics)
   add_executable(ed_${name} ${name}.cpp)
   target_link_libraries(ed_${name} PRIVATE ALPS::ed)
   alps_add_gtest(ed_${name} COMPONENT ed LABELS "ed;unit")
 endforeach()
 
 foreach(name IN ITEMS
+    conserved_sectors
     dense_eigensystem
     lanczos_csr
     models_fixture_e0
+    momentum_compiled
     product_problem
+    projected_basis
+    projected_problem
     sparse_from_local_lock)
   add_executable(ed_${name} ${name}.cpp)
   target_link_libraries(ed_${name} PRIVATE ALPS::ed ${ALPS_LAPACK_TARGET} ${ALPS_BLAS_TARGET})

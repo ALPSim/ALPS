@@ -10,7 +10,9 @@
 #include <alps/ed/eigensolver.hpp>
 #include <algorithm>
 #include <cstddef>
+#include <optional>
 #include <stdexcept>
+#include <string>
 
 namespace alps::ed::detail {
 
@@ -45,6 +47,22 @@ inline SolvePlan eigenstate_plan(EigenstateOptions const& options, std::size_t d
         && !(options.method == EigenstateMethod::automatic && options.which == "SM");
     plan.tolerance = options.tolerance.value_or(0.);
     plan.max_iterations = options.max_iterations.value_or(0);
+    return plan;
+}
+
+// Eigenvalue-only symmetry-block spectra have no method control: a block is
+// solved iteratively under the automatic policy (dimension above 1000 and
+// above 8*count + 200, never for SM) with the driver defaults otherwise.
+// alpsx used Lanczos above dimension 32 when fewer than half the states were
+// selected, with tolerance 1e-10 and at most min(10*dimension, 1000) steps;
+// the driver defaults here are the same controls.
+inline SolvePlan spectrum_plan(std::size_t dimension, int count, std::string const& which,
+                               std::optional<double> tolerance, std::optional<int> max_iterations) {
+    SolvePlan plan;
+    plan.count = std::min(dimension, static_cast<std::size_t>(count));
+    plan.iterative = dimension > 1000 && dimension > 8 * plan.count + 200 && which != "SM";
+    plan.tolerance = tolerance.value_or(0.);
+    plan.max_iterations = max_iterations.value_or(0);
     return plan;
 }
 

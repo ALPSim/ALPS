@@ -2,10 +2,12 @@
 
 Exact diagonalization for models built with [`ALPS::models`](../models/README.md).
 The component takes a `CompiledOperator`/`CompiledModel` (numeric local
-factors with Jordan–Wigner strings), enumerates a product basis or a charge
-sector, assembles the sparse matrix and solves it densely (LAPACK) or
-iteratively (Lanczos over the in-tree IETL). It does not depend on the XML
-catalog, legacy parameters, HDF5 or the simulation runtime.
+factors with Jordan–Wigner strings), enumerates a product basis, a charge
+sector or a charge-and-momentum-projected basis, assembles the sparse matrix
+and solves it densely (LAPACK) or iteratively (Lanczos over the in-tree
+IETL). Spectra can be resolved by every conserved charge and lattice momentum
+at once, and thermodynamic averages follow from the levels. It does not
+depend on the XML catalog, legacy parameters, HDF5 or the simulation runtime.
 
 ```c++
 #include <alps/ed.hpp>
@@ -19,6 +21,14 @@ alps::ed::EigenstateOptions request; request.count = 3;
 auto const result = problem.eigenstates(request);           // Lanczos above dim 1000
 double const e0 = result.eigenvalues[0];
 auto const sz_sq = alps::ed::expectation_values(result, model.operator_decomposition(my_observable).op);
+
+// The same sector at momentum pi (about 800 states), with eigenvectors in
+// the projected basis, and the full charge/momentum-resolved spectrum.
+alps::ed::ProjectedOptions at_pi; at_pi.sector = {{"Sz", 0.}}; at_pi.momentum = {std::acos(-1.)};
+auto const block = alps::ed::prepare_projected(model, at_pi).eigenstates(request);
+alps::ed::ModelSpectrumOptions all; all.all_momenta = true; all.count = 4;
+auto const spectrum = alps::ed::model_spectrum(model, all);   // blocks labelled by Sz and k
+auto const thermal = alps::ed::thermal_surface(levels, charges, temperatures, fields);
 ```
 
 ## Headers (`<alps/ed/...>`, namespace `alps::ed`)
@@ -31,6 +41,10 @@ auto const sz_sq = alps::ed::expectation_values(result, model.operator_decomposi
 | `eigensolver.hpp` | `EigenstateOptions`, `dense_eigensystem` (LAPACK `dsyevd`/`zheevd`), `select_eigenvalues` |
 | `lanczos.hpp` | `lanczos_csr`: the deflated IETL Lanczos driver (real symmetric and complex Hermitian CSR) |
 | `product_problem.hpp` | `prepare_product` (`Hamiltonian` or `TermSum` + sites), `ProductProblem::eigenstates`, `operator_matrix`, `expectation_values` |
+| `spectrum.hpp` | `SpectrumLocalSpace`, `SpectrumTranslation`, `SpectrumBlock`; `symmetry_spectrum`: charge- and momentum-resolved eigenvalues of a product-basis CSR matrix |
+| `projected_basis.hpp` | `ProjectedBasis`/`make_projected_basis` (orbit representatives of a charge sector under commuting translations at one momentum), `projected_operator`, `projected_sparse_operator`, `apply_projected_operator`, `expect_projected_operator`, `expand_projected_state`, `symmetry_spectrum_from_local` |
+| `projected_problem.hpp` | `select_momentum`, `projected_spaces`, `prepare_projected` (`Hamiltonian`, `TermSum` + sites, or a compiled operator on `ProjectedSpaces` or an explicit basis), `ProjectedProblem::eigenstates`/`hamiltonian`, `model_spectrum` |
+| `thermodynamics.hpp` | header-only `thermal_weights` and `thermal_surface` (energy, free energy, entropy, specific heat, charge and susceptibility on a temperature × field grid, signed temperatures), `ThermalAccumulator` |
 | `ed.hpp` | umbrella |
 
 ## Conventions
@@ -38,18 +52,32 @@ auto const sz_sq = alps::ed::expectation_values(result, model.operator_decomposi
 - Matrices are stored with row = output state and column = input state;
   `canonical_csr` sorts columns within a row, sums duplicates and drops
   exact zeros.
-- `enumerate_product_basis` and `ProductProblem` use site 0 as the most
-  significant digit; `build_sparse_from_local` keeps the kit's
+- `enumerate_product_basis`, `ProductProblem` and `ProjectedBasis` use site 0
+  as the most significant digit; `build_sparse_from_local` keeps the kit's
   least-significant-first mixed-radix codes (its states are returned).
 - Fermionic terms carry their Jordan–Wigner string sites; the parity
   diagonal of each site's basis supplies the signs, exactly as in the
   kit's dense reference assembly (`src/alps/models/tests/dense_e0.hpp`).
+  Translations of graded local spaces pick up the permutation sign of the
+  occupied odd states.
 - Eigenvalues are ascending; eigenvectors are column-major
-  (`vectors[column * dimension + row]`).
+  (`vectors[column * dimension + row]`). Projected eigenvectors are complex
+  for every momentum.
+- Translations map source site to translated site and must commute; a
+  momentum is a row of the Cartesian grid `k_d = 2π j_d / L_d` (last
+  direction fastest), the translation eigenvalue is `exp(+i k)`, and
+  `select_momentum` snaps a wavevector in radians onto that grid. A
+  `Hamiltonian` supplies the generators of its periodic lattice directions.
+- Operators on a projected basis are validated before assembly: Hermiticity,
+  conservation of every declared charge (forbidden amplitudes are summed
+  exactly in rational arithmetic, so cancellations between huge terms are
+  neither trusted nor fabricated) and invariance under the translations.
 - `eigenstates` chooses Lanczos automatically above dimension 1000 and
   only when the dimension exceeds `8*count + 200`; `which` is `SA`, `LA`,
   `LM` or `SM` (dense only). Requested Lanczos solves on smaller spaces are
-  dense and say so in `ProductEigenResult::method`.
+  dense and say so in the result. Spectrum blocks (`symmetry_spectrum`,
+  `symmetry_spectrum_from_local`, `model_spectrum`) follow the same automatic
+  policy and report the method per block.
 
 ## The Lanczos driver
 
@@ -71,16 +99,24 @@ Ported from the private skilledwolf/alpsx fork (branch
 (no `std::span`, defaulted comparisons, templated lambdas or designated
 initializers), `<alps/ed/...>` include names, `ALPS_ED_DECL` exports; the
 dense solver uses LAPACK only (alpsx used Eigen for small blocks and
-`zheevr`) and the Lanczos driver is new (alpsx used Spectra over Eigen,
-which this tree does not vendor). Not ported yet: momentum/point-group
-projected bases and spectra, thermodynamics, the catalog (XML) problem
-adapters and HDF5 persistence.
+`zheevr`), the Lanczos driver is new (alpsx used Spectra over Eigen,
+which this tree does not vendor) and projected blocks are held as canonical
+CSR instead of Eigen sparse matrices. Not ported yet: the finite point-group
+bases and spectra (`make_finite_group_basis`, `prepare_finite`,
+`finite_spectrum`; their projector construction used Eigen dense algebra),
+the catalog (XML) problem adapters and HDF5 persistence.
 
 ## Tests
 
 `ctest -L ed`: ported unit tests (basis enumeration, local transitions,
-streamed operators, canonical CSR, term accumulation), the sparse-assembly
-lock against the dense Kronecker reference, dense and Lanczos solver locks
-(analytic chains, degenerate multiplets, selection and validation), product
-problems with observables, and the end-to-end lock reproducing the ground
-state energies of the 14 frozen model fixtures.
+streamed operators, canonical CSR, term accumulation, thermodynamics), the
+sparse-assembly lock against the dense Kronecker reference, dense and Lanczos
+solver locks (analytic chains, degenerate multiplets, selection and
+validation), product problems with observables, the end-to-end lock
+reproducing the ground state energies of the 14 frozen model fixtures, and
+the projected-basis suite: fermionic rings against analytic dispersions,
+reflection and two-direction translation groups, conserved-sector escape
+detection (exact cancellation versus hidden residues), momentum-resolved
+spectra of the CSR and local-operator paths against each other and against
+the unprojected sector, lattice-generator agreement for honeycomb and ladder
+geometries, and the dispatch policy of the IETL driver.
