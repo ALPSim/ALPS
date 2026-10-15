@@ -21,6 +21,7 @@ Sources use `include/`, `src/` and `tests/` where applicable. Public include spe
 | `graph/`, `lattice/`, `model/` | Graph helpers, lattice definitions and physical models; `model/catalog.hpp` compiles XML catalog models into `ALPS::models` operators for `ALPS::ed` | `ALPS::headers`, `ALPS::alps` |
 | `models/` | Programmatic lattices, local Hilbert spaces, operator algebra and compiled Hamiltonians (`<alps/models.hpp>`); independent of the XML catalog. See [its README](models/README.md) | `ALPS::models` |
 | `ed/` | Exact diagonalization of compiled operators: product-basis sectors, charge-, momentum- and point-group-projected bases and spectra, thermodynamic averages, sparse assembly, dense LAPACK and deflated IETL Lanczos eigensolvers (`<alps/ed.hpp>`). See [its README](ed/README.md) | `ALPS::ed` |
+| `classic_dmrg/` | Classic finite-system DMRG of compiled operators with the dmtk engine (`<alps/dmrg/classic.hpp>`); Eigen is a private build dependency, switched with `ALPS_ENABLE_CLASSIC_DMRG`. See [its README](classic_dmrg/README.md) | `ALPS::classic_dmrg` |
 | `random/` | Random generators and their factories | `ALPS::alps` |
 | `alea/`, `accumulators/` | Observable/result facilities and accumulator implementations | `ALPS::alps` |
 | `mc/`, `scheduler/`, `parapack/` | Simulation API, execution and scheduling | `ALPS::alps` |

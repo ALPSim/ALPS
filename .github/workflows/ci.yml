@@ -354,7 +354,7 @@ jobs:
     - name: Install native prerequisites
       run: |
         sudo apt-get update
-        sudo apt-get install -y clang-18 llvm-18 libboost-all-dev libgtest-dev libhdf5-dev libblas-dev liblapack-dev
+        sudo apt-get install -y clang-18 llvm-18 libboost-all-dev libgtest-dev libhdf5-dev libblas-dev liblapack-dev libeigen3-dev
         python -m pip install 'cmake>=3.27' ninja pytest numpy h5py
     - name: Build instrumented components and tests
       run: |

@@ -131,6 +131,9 @@ foreach(module IN ITEMS containers utilities cli numerics ietl solvers models ed
                         osiris hdf5 numeric_io numeric_xml params alea accumulators mc scheduler parapack fortran)
   add_subdirectory(${module})
 endforeach()
+if(ALPS_ENABLE_CLASSIC_DMRG)
+  add_subdirectory(classic_dmrg)
+endif()
 target_link_libraries(alps PUBLIC ALPS::utilities ALPS::osiris ALPS::hdf5 ALPS::params
                                   ALPS::xml ALPS::cli)
 
@@ -148,6 +151,9 @@ set(ALPS_SDK_TARGETS alps alps_utilities alps_hdf5 alps_params alps_osiris
                      alps_xml alps_cli alps_headers alps_configuration
                      alps_containers alps_numerics alps_numeric_io alps_numeric_xml alps_solver_headers
                      alps_models alps_ed)
+if(ALPS_ENABLE_CLASSIC_DMRG)
+  list(APPEND ALPS_SDK_TARGETS alps_classic_dmrg)
+endif()
 set(sdk_components "")
 set(sdk_runtime_targets "")
 foreach(target IN LISTS ALPS_SDK_TARGETS ITEMS alps_fortran)

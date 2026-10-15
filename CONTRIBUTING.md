@@ -81,14 +81,14 @@ For example, on Ubuntu 24.04:
 
 ```sh
 sudo apt-get update
-sudo apt-get install build-essential libboost-all-dev libhdf5-dev libblas-dev liblapack-dev
+sudo apt-get install build-essential libboost-all-dev libhdf5-dev libblas-dev liblapack-dev libeigen3-dev
 ```
 
 On macOS, install Apple's Command Line Tools with `xcode-select --install` if needed. If you use Homebrew:
 
 ```sh
-brew install boost hdf5 openblas
-export CMAKE_PREFIX_PATH="$(brew --prefix boost):$(brew --prefix hdf5):$(brew --prefix openblas)"
+brew install boost hdf5 openblas eigen
+export CMAKE_PREFIX_PATH="$(brew --prefix boost):$(brew --prefix hdf5):$(brew --prefix openblas):$(brew --prefix eigen)"
 ```
 
 These are optional provider examples. For another non-system installation, set the `CMAKE_PREFIX_PATH` environment variable to its dependency prefixes, separated by colons on Linux/macOS. Keep it set for both SDK and Python builds. The CMake command-line form instead uses semicolons: `-DCMAKE_PREFIX_PATH="/prefix/one;/prefix/two"`.

@@ -131,6 +131,19 @@ endif()
 
 include(cmake/ALPSNumerics.cmake)
 
+# The classic DMRG component (ALPS::classic_dmrg) uses Eigen privately; the
+# installed SDK and its consumers do not need Eigen.
+option(ALPS_ENABLE_CLASSIC_DMRG "Build the classic DMRG solver component (requires Eigen 3.3 or newer)" ON)
+if(ALPS_ENABLE_CLASSIC_DMRG)
+  # Eigen's package version file accepts one major version only; Eigen 3.3+
+  # and 5 are both supported, so check the version after finding it.
+  find_package(Eigen3 CONFIG)
+  if(NOT Eigen3_FOUND OR Eigen3_VERSION VERSION_LESS 3.3)
+    message(FATAL_ERROR "ALPS_ENABLE_CLASSIC_DMRG requires Eigen 3.3 or newer (Eigen3Config.cmake); "
+                        "install Eigen or configure with -DALPS_ENABLE_CLASSIC_DMRG=OFF")
+  endif()
+endif()
+
 # The bundled XDR implementation is portable and preserves the legacy format.
 # Using it consistently avoids incompatible platform RPC typedefs and ABIs.
 configure_file(cmake/config/config.h.in generated/include/alps/config.h)

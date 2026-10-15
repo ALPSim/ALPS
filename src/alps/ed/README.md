@@ -147,6 +147,10 @@ options.sector = model.sector();
 auto const problem = alps::ed::prepare_projected(op, spaces, {}, options);
 ```
 
+The same compiled operators and physical bases drive the classic DMRG
+solver ([`ALPS::classic_dmrg`](../classic_dmrg/README.md)) for chains and
+ladders beyond the reach of exact diagonalization.
+
 The legacy module's tests lock the importer against the kit factories
 (`catalog_model_parity`), against `hamiltonian_matrix` element by element on
 the same catalog basis (`ed_vs_hamiltonian_matrix`), and the kit lattices
