@@ -29,9 +29,14 @@
 #include <cmath>
 #include <cstddef>
 #include <iostream>
+#include <limits>
 #include <map>
 #include <sstream>
+#include <stdexcept>
+#include <string>
 #include <vector>
+#include <boost/lexical_cast.hpp>
+#include <boost/throw_exception.hpp>
 
 namespace alps {
 
@@ -64,6 +69,12 @@ namespace detail {
     template <typename T, typename MemoryBlock>
     alps::numeric::matrix<T,MemoryBlock> initialized_matrix(alps::numeric::matrix<T,MemoryBlock> const&, std::size_t const rows, std::size_t const cols)
     {
+        // the dense storage has rows*cols elements; a wrapped product would
+        // allocate too little
+        if (cols && rows > std::numeric_limits<std::size_t>::max() / cols)
+          boost::throw_exception(std::runtime_error("Hilbert space dimension "
+            + boost::lexical_cast<std::string>(rows) + ": a dense " + boost::lexical_cast<std::string>(rows)
+            + " x " + boost::lexical_cast<std::string>(cols) + " matrix has more elements than a std::size_t can count."));
         return alps::numeric::matrix<T,MemoryBlock>(rows,cols);
     }
 } // end namespace detail

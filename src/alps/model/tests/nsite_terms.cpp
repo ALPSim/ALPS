@@ -394,6 +394,32 @@ TEST(SectorCheck, MeasuringANonConservingOperatorGivesZero) {
       EXPECT_EQ(m(i, j), 0.);
 }
 
+TEST(NSiteHamiltonian, TableIndexOverflowThrows) {
+  // The local table keys each configuration of the plaquette's sites by one
+  // std::size_t; with 32 fermion sites (4^32 = 2^64) it would wrap.
+  Files f("", "");
+  alps::ModelLibrary lib(f.parms());
+  for (int n : {31, 32}) {
+    std::vector<std::string> roles;
+    for (int r = 0; r < n; ++r)
+      roles.push_back("r" + std::to_string(r));
+    const std::string last = roles.back();
+    alps::NSiteOperator op("cdag_up(r0)*c_up(" + last + ") + cdag_up(" + last + ")*c_up(r0)", roles);
+    std::vector<alps::SiteBasisDescriptor<short> > bases(n, lib.get_site_basis("fermion"));
+    if (n == 31)
+      EXPECT_NO_THROW(op.matrix<double>(bases, f.parms()));
+    else
+      EXPECT_THROW(op.matrix<double>(bases, f.parms()), std::runtime_error);
+  }
+}
+
+TEST(NSiteHamiltonian, DenseMatrixSizeOverflowThrows) {
+  // 2^33 x 2^33 = 2^66 wraps to 0 in a std::size_t
+  const std::size_t d = std::size_t(1) << 33;
+  EXPECT_THROW(alps::detail::initialized_matrix(alps::numeric::matrix<double>(), d, d), std::runtime_error);
+  EXPECT_EQ(num_rows(alps::detail::initialized_matrix(alps::numeric::matrix<double>(), 3, 3)), 3u);
+}
+
 TEST(NSiteHamiltonian, TypedAndDefaultTerms) {
   // Two plaquette types; '#' in the untyped term resolves per type.
   Files f("<GRAPH name=\"g\" vertices=\"3\">"

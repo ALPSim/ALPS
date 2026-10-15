@@ -42,6 +42,7 @@
 #include <alps/parameter.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/throw_exception.hpp>
+#include <limits>
 #include <map>
 #include <set>
 #include <stdexcept>
@@ -310,6 +311,21 @@ nsite_matrix<T> NSiteOperator::matrix(const std::vector<SiteBasisDescriptor<I> >
   for (std::size_t r = 0; r < n; ++r) {
     states.push_back(site_basis<I>(bases[r]));
     mat.dims.push_back(states[r].size());
+  }
+  // rows are keyed by the mixed-radix index of the local states (and size()
+  // is its range), so prod(dims) must fit in a std::size_t
+  std::size_t configurations = 1;
+  for (std::size_t r = 0; r < n; ++r) {
+    if (mat.dims[r] && configurations > std::numeric_limits<std::size_t>::max() / mat.dims[r]) {
+      std::string d;
+      for (std::size_t q = 0; q < n; ++q)
+        d += (q ? " x " : "") + boost::lexical_cast<std::string>(mat.dims[q]);
+      boost::throw_exception(std::runtime_error("n-site term on " + boost::lexical_cast<std::string>(n)
+        + " sites: the number of local configurations (" + d + ") does not fit in a "
+        + boost::lexical_cast<std::string>(std::numeric_limits<std::size_t>::digits)
+        + "-bit index. Write the term on plaquettes with fewer sites."));
+    }
+    configurations *= mat.dims[r];
   }
 
   // parse expression and store it as sum of terms
