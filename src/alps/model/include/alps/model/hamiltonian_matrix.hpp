@@ -228,6 +228,8 @@ protected:
   void build() const;
   void build_basis() const;
   void warn_if_cutoff(const nsite_matrix<value_type>& mat, const plaquette& p) const;
+  void check_sector(const state_type& state, const state_type& newstate,
+                    const std::string& term, const std::vector<std::size_t>& sites) const;
 
   mutable basis_states_type states;
   mutable bloch_basis_states_type bloch_states;
@@ -237,6 +239,9 @@ private:
   mutable bool built_matrix_;
   mutable bool built_basis_;
   mutable bool warned_cutoff_;
+  // true while build() fills the Hamiltonian; operator_matrix() for
+  // measurements leaves it false
+  mutable bool building_hamiltonian_;
   mutable matrix_type matrix_;
   mutable basis_states_descriptor<short> basis_;
   graph_helper<G> graph_;
@@ -251,6 +256,7 @@ hamiltonian_matrix<M,G>::hamiltonian_matrix(Parameters const& p)
   ,  built_matrix_(false)
   ,  built_basis_(false)
   ,  warned_cutoff_(false)
+  ,  building_hamiltonian_(false)
   ,  graph_(p)
   ,  model_(graph_,p,is_symbolic<value_type>::type::value,true)
 {}    
@@ -332,6 +338,44 @@ void hamiltonian_matrix<M,G>::warn_if_cutoff(const nsite_matrix<value_type>& mat
   }
 }
 
+// A term of the Hamiltonian took a basis state to a state that is not in the
+// basis. With momentum sectors this also happens for states whose orbit has
+// zero norm in the sector; those elements are dropped. If instead the term
+// changes a quantum number that the basis fixes (CONSERVED_QUANTUMNUMBERS or a
+// <QN>_total parameter), dropping them would change the spectrum: stop.
+template <class M, class G>
+void hamiltonian_matrix<M,G>::check_sector(const state_type& state, const state_type& newstate,
+                                           const std::string& term, const std::vector<std::size_t>& sites) const
+{
+  const typename basis_descriptor_type::constraints_type& constraints = basis_.get_basis().constraints();
+  for (std::size_t c=0;c<constraints.size();++c) {
+    half_integer<short> change;
+    for (std::size_t r=0;r<sites.size();++r) {
+      const std::size_t s=sites[r];
+      const std::size_t k=get_quantumnumber_index(constraints[c].first,basis_.get_site_basis(s));
+      if (k==basis_.get_site_basis(s).size())
+        continue;
+      change += get_quantumnumber(basis_[s][newstate[s]],k) - get_quantumnumber(basis_[s][state[s]],k);
+    }
+    if (change!=half_integer<short>(0)) {
+      const std::string& qn=constraints[c].first;
+      std::string value;   // the <CONSTRAINT value=...> of the basis, e.g. Nup_total
+      const typename basis_descriptor_type::unevaluated_constraints_type& all = basis_.get_basis().all_constraints();
+      for (std::size_t a=0;a<all.size();++a)
+        if (all[a].first==qn)
+          value=boost::lexical_cast<std::string>(all[a].second);
+      std::ostringstream msg;
+      msg << term << " on site" << (sites.size()>1 ? "s" : "");
+      for (std::size_t r=0;r<sites.size();++r)
+        msg << " " << sites[r];
+      msg << " changes " << qn << ", which the basis fixes in this sector (" << qn << " = "
+          << value << " = " << constraints[c].second << "). Remove " << qn
+          << " from CONSERVED_QUANTUMNUMBERS and leave " << value << " undefined.";
+      boost::throw_exception(std::runtime_error(msg.str()));
+    }
+  }
+}
+
 // Fill one n-site term on plaquette p. The local table (see nsiteoperator.h)
 // stores each product reordered as O_0 O_1 ... O_{n-1} (role order). Acting on
 // a basis state, O_{n-1} is applied first; each odd O_r picks up the
@@ -370,16 +414,9 @@ void hamiltonian_matrix<M,G>::apply_operator(const STATES& states, const nsite_m
       std::size_t j;
       boost::tie(j,phase) = states.index_and_phase(newstate);
       if (j>=dimension()) {
-        if (uses_translation_invariance())
-          continue;
-        std::ostringstream msg;
-        msg << "<PLAQUETTETERM> on plaquette of type " << p.type << " (sites";
-        for (std::size_t r=0;r<n;++r)
-          msg << " " << p.sites[r];
-        msg << ") maps a basis state out of the basis: the term does not conserve "
-               "the quantum numbers in CONSERVED_QUANTUMNUMBERS. Remove them from "
-               "CONSERVED_QUANTUMNUMBERS or fix the term.";
-        boost::throw_exception(std::runtime_error(msg.str()));
+        if (building_hamiltonian_)
+          check_sector(state,newstate,"<PLAQUETTETERM> of type "+boost::lexical_cast<std::string>(p.type),p.sites);
+        continue;
       }
       bool f=false;
       for (std::size_t r=n;r-->0;) {
@@ -423,6 +460,8 @@ void hamiltonian_matrix<M,G>::apply_operator(const STATES& states, const SiteOpe
           y[i] += val*x[j];                   // set matrix element
           simplify(y[i]);               // optionally simplify a symbolic expression
        }
+        else if (building_hamiltonian_)
+          check_sector(state,newstate,"<SITETERM>",std::vector<std::size_t>(1,s));
       }
     }
   }
@@ -475,6 +514,12 @@ void hamiltonian_matrix<M,G>::apply_operator(const STATES& states, const boost::
             val *= numeric_cast<value_type>(phase * states.normalization(j)/states.normalization(i));
             y[i] += val*x[j];                   // set matrix element
             simplify(y[i]);               // optionally simplify a symbolic expression
+          }
+          else if (building_hamiltonian_) {
+            std::vector<std::size_t> sites;
+            sites.push_back(s1);
+            sites.push_back(s2);
+            check_sector(state,newstate,"<BONDTERM>",sites);
           }
         }
       }
@@ -592,7 +637,16 @@ void hamiltonian_matrix<M,G>::build() const
   Disorder::seed(parms.value_or_default("DISORDER_SEED",0));
   matrix_ = detail::initialized_matrix(matrix_type(),dimension(),dimension());
   built_matrix_ = true;
-  add_operator_matrix(matrix_,model_.model());
+  building_hamiltonian_ = true;
+  try {
+    add_operator_matrix(matrix_,model_.model());
+  }
+  catch (...) {
+    building_hamiltonian_ = false;
+    built_matrix_ = false;
+    throw;
+  }
+  building_hamiltonian_ = false;
 
   //std::cerr << "Time to build matrix: " << t.elapsed() << "\n";
 /*

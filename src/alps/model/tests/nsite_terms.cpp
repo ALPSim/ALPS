@@ -316,6 +316,84 @@ TEST(NSiteHamiltonian, TermLeavingTheSectorThrows) {
   EXPECT_THROW(spectrum(q), std::runtime_error);
 }
 
+// Site, bond and plaquette terms that change a quantum number fixed by the
+// sector stop the run, with or without momentum sectors. Elements leaving the
+// sector used to be dropped silently, which removed the pairing from the
+// spectrum.
+std::string build_error(const alps::Parameters& p) {
+  try {
+    alps::hamiltonian_matrix<alps::numeric::matrix<std::complex<double> > > h(p);
+    h.matrix();
+  } catch (std::runtime_error& e) {
+    return e.what();
+  }
+  return "";
+}
+
+const char* chain4 = "<GRAPH name=\"chain4\" vertices=\"4\"><EDGE source=\"1\" target=\"2\"/>"
+                     "<EDGE source=\"2\" target=\"3\"/><EDGE source=\"3\" target=\"4\"/></GRAPH>";
+
+TEST(SectorCheck, NonConservingBondTermThrows) {
+  Files f(chain4, "<HAMILTONIAN name=\"bond pairing\"><BASIS ref=\"fermion\"/>"
+          "<BONDTERM source=\"i\" target=\"j\">-fermion_hop(i,j)"
+          " + 0.7*(cdag_up(i)*cdag_down(j) + c_down(j)*c_up(i))</BONDTERM></HAMILTONIAN>");
+  alps::Parameters p = f.parms();
+  p["GRAPH"] = "chain4"; p["MODEL"] = "bond pairing";
+  EXPECT_EQ(spectrum(p).size(), 256u);
+  std::string e = build_error(sector(p, 1, 1));
+  EXPECT_NE(e.find("<BONDTERM>"), std::string::npos) << e;
+  EXPECT_NE(e.find("Nup_total"), std::string::npos) << e;
+}
+
+TEST(SectorCheck, NonConservingSiteTermThrows) {
+  Files f(chain4, "<HAMILTONIAN name=\"site pairing\"><BASIS ref=\"fermion\"/>"
+          "<SITETERM site=\"i\">0.3*(cdag_up(i)*cdag_down(i) + c_down(i)*c_up(i))</SITETERM>"
+          "<BONDTERM source=\"i\" target=\"j\">-fermion_hop(i,j)</BONDTERM></HAMILTONIAN>");
+  alps::Parameters p = f.parms();
+  p["GRAPH"] = "chain4"; p["MODEL"] = "site pairing";
+  EXPECT_EQ(spectrum(p).size(), 256u);
+  EXPECT_NE(build_error(sector(p, 2, 1)).find("<SITETERM>"), std::string::npos);
+}
+
+TEST(SectorCheck, NonConservingPlaquetteTermThrowsInMomentumSectors) {
+  Files f(ladder_cell, hubbard_model("plaquette pairing", "<PLAQUETTETERM sites=\"i j k l\">"
+          "0.25*(cdag_up(i)*cdag_down(k)*cdag_up(l)*c_up(j) + cdag_up(j)*c_up(l)*c_down(k)*c_up(i))"
+          "</PLAQUETTETERM>"));
+  alps::Parameters p = sector(f.parms(), 3, 3);
+  p["LATTICE"] = "periodic ladder"; p["L"] = 3; p["MODEL"] = "plaquette pairing";
+  for (const char* k : {"0", "2.0943951023931953"}) {
+    p["TOTAL_MOMENTUM"] = k;
+    EXPECT_NE(build_error(p).find("<PLAQUETTETERM>"), std::string::npos) << "k=" << k;
+  }
+}
+
+TEST(SectorCheck, ConservingTermsInMomentumSectorsDoNotThrow) {
+  // momentum sectors drop states whose orbit has zero norm; that is not an error
+  Files f(ladder_cell, hubbard_model("pair hopping",
+          "<PLAQUETTETERM sites=\"i j k l\">" + std::string(pair_hop) + "</PLAQUETTETERM>"));
+  alps::Parameters p = sector(f.parms(), 3, 2);
+  p["LATTICE"] = "periodic ladder"; p["L"] = 3; p["MODEL"] = "pair hopping";
+  p["U"] = 8.0; p["K"] = 0.9;
+  for (const char* k : {"0", "2.0943951023931953", "-2.0943951023931953"}) {
+    p["TOTAL_MOMENTUM"] = k;
+    EXPECT_EQ(build_error(p), "") << "k=" << k;
+  }
+}
+
+TEST(SectorCheck, MeasuringANonConservingOperatorGivesZero) {
+  // operator_matrix (measurements) keeps dropping elements that leave the sector
+  Files f(chain4, "<HAMILTONIAN name=\"hop\"><BASIS ref=\"fermion\"/>"
+          "<BONDTERM source=\"i\" target=\"j\">-fermion_hop(i,j)</BONDTERM></HAMILTONIAN>");
+  alps::Parameters p = sector(f.parms(), 1, 1);
+  p["GRAPH"] = "chain4"; p["MODEL"] = "hop";
+  typedef alps::numeric::matrix<double> matrix;
+  alps::hamiltonian_matrix<matrix> h(p);
+  matrix m = h.operator_matrix<matrix>(alps::SiteOperator("cdag_up(i)*cdag_down(i)", "i"), 1);
+  for (std::size_t i = 0; i < h.dimension(); ++i)
+    for (std::size_t j = 0; j < h.dimension(); ++j)
+      EXPECT_EQ(m(i, j), 0.);
+}
+
 TEST(NSiteHamiltonian, TypedAndDefaultTerms) {
   // Two plaquette types; '#' in the untyped term resolves per type.
   Files f("<GRAPH name=\"g\" vertices=\"3\">"
