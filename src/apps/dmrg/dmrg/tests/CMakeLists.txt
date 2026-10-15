@@ -23,6 +23,15 @@ if(TARGET dmrg AND TARGET parameter2xml)
       "-Dtest_dir=${CMAKE_CURRENT_BINARY_DIR}/dmrg-checkpoint"
       -P "${CMAKE_CURRENT_SOURCE_DIR}/dmrg_checkpoint_cache.cmake")
   set_tests_properties(dmrg_checkpoint_cache PROPERTIES LABELS "dmrg" TIMEOUT 300)
+
+  add_test(NAME dmrg_nsite_terms
+    COMMAND ${CMAKE_COMMAND}
+      "-Ddmrg=$<TARGET_FILE:dmrg>"
+      "-Dparameter2xml=$<TARGET_FILE:parameter2xml>"
+      "-Dxml_dir=${PROJECT_SOURCE_DIR}/src/alps/resources"
+      "-Dtest_dir=${CMAKE_CURRENT_BINARY_DIR}/dmrg-nsite"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/dmrg_nsite_terms.cmake")
+  set_tests_properties(dmrg_nsite_terms PROPERTIES LABELS "dmrg" TIMEOUT 120)
 endif()
 
 add_executable(dmrg_parameters dmrg_parameters.cpp)
