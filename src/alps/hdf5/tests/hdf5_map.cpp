@@ -43,6 +43,20 @@ TEST_F(Hdf5Map, RoundTripsRelativeToTheContext) {
     EXPECT_EQ(restored, values);
 }
 
+// Loading through an empty path, as a class's load(archive&) does inside its
+// own context, reads the entries below that context, not below the root.
+TEST_F(Hdf5Map, LoadsThroughAnEmptyPathInsideTheContext) {
+    std::map<std::string, double> values{{"a", 1.0}, {"b", 2.0}}, restored;
+    {
+        alps::hdf5::archive ar(file_, "w");
+        ar["/simulation/values"] << values;
+    }
+    alps::hdf5::archive ar(file_, "r");
+    ar.set_context("/simulation/values");
+    ar[""] >> restored;
+    EXPECT_EQ(restored, values);
+}
+
 // An empty map writes its group (ALPSCore 99e8fa59), so it reads back as
 // empty instead of a missing path.
 TEST_F(Hdf5Map, EmptyMapRoundTrips) {
