@@ -12,6 +12,7 @@
 
 #include <alps/solvers.hpp>
 #include "interaction_expansion.hpp"
+#include "sz_results.hpp"
 #include "fouriertransform.h"
 #include <alps/utilities/copyright.hpp>
 #include <alps/utilities/signal.hpp>
@@ -65,6 +66,8 @@ void alps::solvers::ctint(alps::params const& input, std::string const& output_f
   //on the master: collect MC results and store them in file, then postprocess
   if (rank==0){
     alps::results_type<HubbardInteractionExpansion>::type results = collect_results(s);
+    unsigned int n_site(parms["SITES"]);
+    divide_sz_results_by_sign(results, n_site);
     save_results(results, parms, output_file, "/simulation/results");
     //compute the output Green's function and Fourier transform it, store in the right path
     compute_greens_functions(results, parms, output_file);

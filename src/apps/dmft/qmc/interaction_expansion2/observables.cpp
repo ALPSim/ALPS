@@ -14,6 +14,7 @@
 *****************************************************************************/
 
 #include "interaction_expansion.hpp"
+#include "sz_results.hpp"
 #include <complex>
 #include <alps/alea.h>
 #include <alps/alea/simpleobseval.h>
@@ -82,8 +83,8 @@ void InteractionExpansion::initialize_observables(void)
     sz2_name<<"Sz2_"<<i;
     sz0_szj_name<<"Sz0_Sz"<<i;
     // Measured as value times sign. NGS's signed observables divided their
-    // mean by the mean sign; evaluate_selfenergy_measurement_itime_rs divides
-    // the Sz_i results by the "Sign" result instead.
+    // mean by the mean sign; alps::solvers::ctint divides the results by the
+    // "Sign" result with divide_sz_results_by_sign before saving them.
     measurements << FullBinningAccumulator<double>(sz_name.str().c_str());
     measurements << FullBinningAccumulator<double>(sz2_name.str().c_str());
     measurements << FullBinningAccumulator<double>(sz0_szj_name.str().c_str());
@@ -95,6 +96,27 @@ void InteractionExpansion::initialize_observables(void)
   measurements << FullBinningAccumulator<double>("UpdateTime");
   measurements << FullBinningAccumulator<double>("RecomputeTime");
   measurements.reset();
+}
+
+
+void divide_sz_results_by_sign(alps::accumulators::result_set & results, unsigned int n_site)
+{
+  if(!results.has("Sign"))
+    return;
+  // A copy, since dividing by a result adds jackknife bins to it.
+  alps::accumulators::result_wrapper const sign(results["Sign"]);
+  for(unsigned int i=0;i<n_site;++i){
+    std::stringstream sz_name, sz2_name, sz0_szj_name;
+    sz_name<<"Sz_"<<i;
+    sz2_name<<"Sz2_"<<i;
+    sz0_szj_name<<"Sz0_Sz"<<i;
+    std::string const names[] = {sz_name.str(), sz2_name.str(), sz0_szj_name.str()};
+    // Only the imaginary-time measurement fills them, and the MPI adapter
+    // leaves out observables that no rank measured.
+    for(std::string const & name : names)
+      if(results.has(name) && results[name].count())
+        results[name] /= sign;
+  }
 }
 
 

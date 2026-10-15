@@ -375,13 +375,13 @@ void evaluate_selfenergy_measurement_itime_rs(const alps::results_type<HubbardIn
     }
   }
   if(n_flavors==2){  
-    double Sz_obs = (results["Sz_0"] / results["Sign"]).mean<double>();
-    double Sz_err = (results["Sz_0"] / results["Sign"]).error<double>();
+    double Sz_obs = results["Sz_0"].mean<double>();
+    double Sz_err = results["Sz_0"].error<double>();
     for(int i=1;i<n_site;i++) {
       std::stringstream Sz_name;
       Sz_name << "Sz_" << i;
-      double Sz_i_obs = (results[Sz_name.str().c_str()] / results["Sign"]).mean<double>();
-      double Sz_i_err = (results[Sz_name.str().c_str()] / results["Sign"]).error<double>();
+      double Sz_i_obs = results[Sz_name.str().c_str()].mean<double>();
+      double Sz_i_err = results[Sz_name.str().c_str()].error<double>();
       Sz_i_obs *= ((i%2==0) ? 1 : -1);
       Sz_obs += Sz_i_obs;
       Sz_err += Sz_i_err;
