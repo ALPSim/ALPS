@@ -1,23 +1,30 @@
 # Monte Carlo simulation base
 
-This directory holds two implementations of the Monte Carlo simulation base
-class `alps::mcbase`, its MPI adapter `alps::mcmpiadapter`, the schedule and
-stop callbacks, and `alps::random01`.
+`ALPS::mc` is the Monte Carlo module of the
+[ALPS Core Libraries](https://github.com/ALPSCore/ALPSCore): the simulation
+base class `alps::mcbase`, its MPI adapter `alps::mcmpiadapter`,
+`alps::check_schedule`, `alps::stop_callback`, `alps::random01` and the
+functions of `<alps/mc/api.hpp>`, in `<alps/mc/*.hpp>`, with sources in `src/`
+and tests in `tests/`. Its observables are ALPSCore's accumulators. It is
+copied from ALPSCore at commit `7146b9e1f017938a94e5dae35d88467cc5ba7969`
+(2026-09-25). `ALPS::alps` links it, and the SDK installs it.
 
-- The NGS implementation, ALPS's own: `<alps/mcbase.hpp>`,
-  `<alps/mcmpiadapter.hpp>`, `<alps/check_schedule.hpp>`,
-  `<alps/stop_callback.hpp>`, `<alps/progress_callback.hpp>` and
-  `<alps/ngs/api.hpp>`, with sources in `src/ngs/`. Its observables are
-  ALEA's `alps::mcobservables`. It is compiled into `ALPS::alps`.
-- `ALPS::mc`, the Monte Carlo module of the
-  [ALPS Core Libraries](https://github.com/ALPSCore/ALPSCore):
-  `<alps/mc/*.hpp>`, with sources in `src/` and tests in `tests/`. Its
-  observables are ALPSCore's accumulators. It is copied from ALPSCore at commit
-  `7146b9e1f017938a94e5dae35d88467cc5ba7969` (2026-09-25).
+It replaces ALPS's own implementation of the same classes, the NGS one
+(`<alps/mcbase.hpp>`, `<alps/mcmpiadapter.hpp>`, `<alps/check_schedule.hpp>`,
+`<alps/stop_callback.hpp>`, `<alps/ngs/api.hpp>`, `<alps/ngs/random01.hpp>`),
+whose observables were ALEA's `alps::mcobservables`. The
+[changelog](../../../CHANGELOG.md) lists what a simulation changes.
 
-Both define the same classes in namespace `alps`, so a program uses one or the
-other. For now `ALPS::mc` is built and tested in the source tree only; it is
-not part of `ALPS::alps` or the installed SDK.
+ALPS's own files here:
+
+- `<alps/progress_callback.hpp>`, which prints the completed fraction of a
+  simulation. It keeps the schedule of the NGS `alps::check_schedule`, which
+  could report the time to the next check.
+- `tests/runner*.cpp`, tests of a simulation run, checkpointed and resumed, on
+  one process and over MPI. They were the NGS scheduler's tests.
+- `<alps/ngs/detail/export_sim_to_python.hpp>` and
+  `<alps/python/save_observable_to_hdf5.hpp>`, which forward to pyalps's
+  headers for older Python exports.
 
 ## Provenance
 
@@ -39,7 +46,8 @@ this README are ALPS's own.
 
 The tests run as one CTest test per GoogleTest case, and the MPI tests on 2
 and 3 ranks. `reduce` and `signed_obs` have no GoogleTest cases; their exit
-status is the check.
+status is the check. The MPI tests are listed in the MPI job of
+`.github/workflows/ci.yml`, which builds only the targets it names.
 
 ### Local changes
 

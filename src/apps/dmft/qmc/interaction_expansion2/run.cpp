@@ -14,12 +14,13 @@
 #include "interaction_expansion.hpp"
 #include "fouriertransform.h"
 #include <alps/utilities/copyright.hpp>
+#include <alps/utilities/signal.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
 #ifdef ALPS_HAVE_MPI
-#include <alps/mcmpiadapter.hpp>
+#include <alps/mc/mpiadapter.hpp>
 using sim_type = alps::mcmpiadapter<HubbardInteractionExpansion>;
 #else
 using sim_type = HubbardInteractionExpansion;
@@ -48,7 +49,7 @@ void alps::solvers::ctint(alps::params const& input, std::string const& output_f
   rank=0;
   sim_type s(parms,rank);
 #else
-  boost::mpi::communicator c;
+  alps::mpi::communicator c;
   c.barrier();
   rank=c.rank();
   sim_type s(parms, c);

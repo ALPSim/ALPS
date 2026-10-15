@@ -47,7 +47,3 @@ target_sources(alps_headers INTERFACE
     include/alps/scheduler/task.h
     include/alps/scheduler/types.h
     include/alps/scheduler/worker.h)
-
-if(ALPS_BUILD_TESTING)
-  add_subdirectory(tests)
-endif()

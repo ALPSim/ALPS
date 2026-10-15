@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: MIT
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>
-#include <alps/ngs/random01.hpp>
+#include <alps/mc/random01.hpp>
 #include "archive_savable.hpp"
 #include <alps/hdf5/archive.hpp>
 namespace nb = nanobind;

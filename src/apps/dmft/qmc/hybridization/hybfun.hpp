@@ -12,7 +12,9 @@
  *
  *****************************************************************************/
 
-#include <alps/ngs.hpp>
+#include <alps/params.hpp>
+#include <alps/hdf5/archive.hpp>
+#include <alps/hdf5/vector.hpp>
 #include <fstream>
 #include "../green_function.h"
 #ifndef HYB_FUN_HPP

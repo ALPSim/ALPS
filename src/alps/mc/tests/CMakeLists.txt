@@ -11,7 +11,17 @@ endforeach()
 # ALPSCore's alps::testing::unique_file, from tests/support.
 target_sources(mc_sum_single PRIVATE "${PROJECT_SOURCE_DIR}/tests/support/src/unique_file.cpp")
 
+# ALPS's own tests of the simulation runner.
+add_executable(mc_runner runner.cpp)
+target_link_libraries(mc_runner PRIVATE ALPS::mc)
+alps_add_gtest(mc_runner COMPONENT mc LABELS integration)
+
 if(ALPS_ENABLE_MPI)
+  add_executable(mc_runner_mpi runner_mpi.cpp)
+  target_link_libraries(mc_runner_mpi PRIVATE ALPS::mc)
+  alps_add_mpi_gtest(mc_runner_mpi COMPONENT mc RANKS 2)
+  alps_add_mpi_gtest(mc_runner_mpi COMPONENT mc RANKS 3)
+
   # They define main() themselves, as ALPSCore's MPI tests do. reduce and
   # signed_obs have no GoogleTest cases; their exit status is the check.
   foreach(name sum_mpi reduce signed_obs custom_scheduler reduce_unavailable_results)
