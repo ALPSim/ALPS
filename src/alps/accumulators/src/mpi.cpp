@@ -15,6 +15,10 @@
         namespace alps_mpi {
             namespace detail {
 
+                // ALPS: ALPS's hdf5 traits derive from boost::true_type and
+                // boost::false_type, which do not convert to the std:: tags the
+                // overloads below take, so the calls dispatch on the traits' values.
+
                 /// MPI_Reduce() with argument checking.
                 /** @todo FIXME: Should be replaced with alps::mpi::reduce()
                                  once implemented properly, with error checking */
@@ -77,7 +81,7 @@
                 template<typename T, typename S> std::size_t copy_to_buffer(T const & values, std::vector<S> & buffer, std::size_t offset, std::false_type) {
                     /// FIXME!! BUG: if `T` is not vectorizable it may not have `begin()` and `end()` methods nor `const_iterator` type. This function won't be called --- but it gives compilation error!
                     for(typename T::const_iterator it = values.begin(); it != values.end(); ++it)
-                        offset = copy_to_buffer(*it, buffer, offset, typename hdf5::is_continuous<typename T::value_type>::type());
+                        offset = copy_to_buffer(*it, buffer, offset, std::integral_constant<bool, hdf5::is_continuous<typename T::value_type>::value>());
                     return offset;
                 }
 
@@ -130,7 +134,7 @@
                  */
                 template<typename T, typename S> std::size_t copy_from_buffer(T const & values, std::vector<S> & buffer, std::size_t offset, std::false_type) {
                     for(typename T::const_iterator it = values.begin(); it != values.end(); ++it)
-                        offset = copy_from_buffer(*it, buffer, offset, typename hdf5::is_continuous<typename T::value_type>::type());
+                        offset = copy_from_buffer(*it, buffer, offset, std::integral_constant<bool, hdf5::is_continuous<typename T::value_type>::value>());
                     return offset;
                 }
 
@@ -204,7 +208,7 @@
                         std::vector<std::size_t> extent(get_extent(in_values));
 			std::vector<scalar_type> in_buffer(std::accumulate(extent.begin(), extent.end(), 1, std::multiplies<std::size_t>()));
                         using detail::copy_to_buffer;
-                        copy_to_buffer(in_values, in_buffer, 0, typename hdf5::is_content_continuous<T>::type());
+                        copy_to_buffer(in_values, in_buffer, 0, std::integral_constant<bool, hdf5::is_content_continuous<T>::value>());
 
                         // using boost::mpi::reduce;
                         // reduce(comm, &in_buffer.front(), in_buffer.size(), op, root);
@@ -226,7 +230,7 @@
                         std::vector<scalar_type> in_buffer(std::accumulate(extent.begin(), extent.end(), 1, std::multiplies<std::size_t>()));
                         std::vector<scalar_type> out_buffer(in_buffer);
                         using detail::copy_to_buffer;
-                        copy_to_buffer(in_values, in_buffer, 0, typename hdf5::is_content_continuous<T>::type());
+                        copy_to_buffer(in_values, in_buffer, 0, std::integral_constant<bool, hdf5::is_content_continuous<T>::value>());
 
                         // using boost::mpi::reduce;
                         // reduce(comm, &in_buffer.front(), in_buffer.size(), &out_buffer.front(), op, root);
@@ -239,7 +243,7 @@
                         using alps::hdf5::set_extent;
                         set_extent(out_values, std::vector<std::size_t>(extent.begin(), extent.end()));
                         using detail::copy_from_buffer;
-                        copy_from_buffer(out_values, out_buffer, 0, typename hdf5::is_content_continuous<T>::type());
+                        copy_from_buffer(out_values, out_buffer, 0, std::integral_constant<bool, hdf5::is_content_continuous<T>::value>());
                     } else
                         throw std::logic_error("No alps::mpi::reduce available for this type " + std::string(typeid(T).name()) + ALPS_STACKTRACE);
                 }
@@ -247,12 +251,12 @@
 
             template<typename T, typename Op> void reduce(const alps::mpi::communicator & comm, T const & in_values, Op op, int root) {
                 using detail::reduce_impl;
-                reduce_impl(comm, in_values, op, root, typename std::is_scalar<T>::type(), typename hdf5::is_content_continuous<T>::type());
+                reduce_impl(comm, in_values, op, root, typename std::is_scalar<T>::type(), std::integral_constant<bool, hdf5::is_content_continuous<T>::value>());
             }
 
             template<typename T, typename Op> void reduce(const alps::mpi::communicator & comm, T const & in_values, T & out_values, Op op, int root) {
                 using detail::reduce_impl;
-                reduce_impl(comm, in_values, out_values, op, root, typename std::is_scalar<T>::type(), typename hdf5::is_content_continuous<T>::type());
+                reduce_impl(comm, in_values, out_values, op, root, typename std::is_scalar<T>::type(), std::integral_constant<bool, hdf5::is_content_continuous<T>::value>());
             }
 
             using alps::mpi::communicator;
