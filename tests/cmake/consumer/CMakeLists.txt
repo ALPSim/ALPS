@@ -198,6 +198,8 @@ endif()
 add_header_contract(accumulators)
 add_header_contract(configuration ONLY "^alps/config\\.hpp$")
 add_header_contract(hdf5 ONLY "^alps/hdf5/boost_optional\\.hpp$")
+add_header_contract(params ONLY "^alps/(params|dictionary|params/[a-z_]+)\\.hpp$"
+  EXCLUDE "^alps/params/(dict_value|params)_impl\\.hpp$")
 add_header_contract(numerics
   ONLY "^alps/numeric/(boost_array_functions|check_size|inf|rectangularize|scalar|vector_functions)\\.hpp$")
 if(sdk_mpi_enabled)

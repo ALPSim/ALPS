@@ -46,7 +46,7 @@ notices when modifying these files.
 | ALPSCore path | Here | Relationship |
 | --- | --- | --- |
 | `params/include/alps/params.hpp`, `params/include/alps/dictionary.hpp` | `include/alps/` | Copied unchanged |
-| `params/include/alps/params/*.hpp` (10 files) | `include/alps/params/` | Copied unchanged |
+| `params/include/alps/params/*.hpp` (10 files) | `include/alps/params/` | Copied unchanged, except that three headers gain includes (see below) |
 | `params/src/*.cpp` (4 files) | `src/` | Copied unchanged |
 | `params/test/*.cpp` (22 files), `params_test_support.hpp`, `dict_values_test.hpp` | `tests/` | Copied unchanged |
 | `common/deps/iniparser/` | `iniparser/` | Copied unchanged, without its `CMakeLists.txt` |
@@ -60,6 +60,21 @@ The utilities ALPSCore's parameters use are in `ALPS::utilities`; see the
 [utilities README](../utilities/README.md). ALPSCore's `alps::testing::unique_file`,
 which the tests use, is in [test support](../../../tests/support/README.md). The
 CMake files and this README are ALPS's own.
+
+### Local changes
+
+Three imported headers relied on their includers for some declarations. Each
+now includes what it needs, so it compiles on its own, and a comment marks the
+addition:
+
+- `alps/params/dict_exceptions.hpp` includes `<stdexcept>` and `<string>`.
+- `alps/params/hdf5_variant.hpp` and `alps/params/mpi_variant.hpp` include
+  `alps/params/dict_types.hpp`, which declares the value types they serialize.
+
+`alps/params/dict_value_impl.hpp` and `alps/params/params_impl.hpp` are the
+second halves of `dict_value.hpp` and `params.hpp`, which include them at
+their end; they are not meant to be included on their own. The SDK header
+contracts check the other headers.
 
 ### Test registration
 

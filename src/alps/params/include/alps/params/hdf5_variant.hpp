@@ -19,6 +19,9 @@
 #include <alps/hdf5/pair.hpp>
 
 #include <alps/params/serialize_variant.hpp>
+// ALPS: for alps::params_ns::detail::dict_all_types, so that this header
+// compiles on its own.
+#include <alps/params/dict_types.hpp>
 
 #include <cassert>
 
