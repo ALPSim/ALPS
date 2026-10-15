@@ -9,6 +9,11 @@
 #ifndef ALPS_PARAMS_DICT_EXCEPTIONS_HPP_046b246d331b4e54bedf6bfef6e54a71
 #define ALPS_PARAMS_DICT_EXCEPTIONS_HPP_046b246d331b4e54bedf6bfef6e54a71
 
+// ALPS: for std::runtime_error and std::string, so that this header compiles
+// on its own.
+#include <stdexcept>
+#include <string>
+
 namespace alps {
     namespace params_ns {
 
