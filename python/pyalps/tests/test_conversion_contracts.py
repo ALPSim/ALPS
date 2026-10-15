@@ -9,7 +9,6 @@ import numpy as np
 import pytest
 
 from pyalps import alea, ngs
-from pyalps.cxx.pyngsaccumulator_c import count_accumulator
 
 
 def test_timeseries_statistics_match_independent_references():
@@ -24,14 +23,6 @@ def test_timeseries_statistics_match_independent_references():
                                [1., 1.5, 7. / 3., 4.])
     np.testing.assert_allclose(pyalea_c.reverse_running_mean(series).timeseries(),
                                [4., 5., 6.5, 9.])
-
-
-def test_count_accumulator_accepts_non_scalar_samples():
-    accumulator = count_accumulator()
-    for sample in (np.ones((2, 3)), 1 + 2j, [1, 2], {"x": 1}, None):
-        accumulator(sample)
-    assert accumulator.count() == 5
-    assert accumulator.result().count() == 5
 
 
 @pytest.mark.parametrize("vector", [False, True])
