@@ -84,3 +84,19 @@ TEST_F(Hdf5Map, EmptyMapReplacesAStoredMap) {
     ar["/values"] >> restored;
     EXPECT_TRUE(restored.empty());
 }
+
+// The root group cannot be deleted; a map saved there writes its entries
+// beside what the root already holds.
+TEST_F(Hdf5Map, SavesAtTheRoot) {
+    std::map<std::string, double> values{{"a", 1.0}, {"b", 2.0}}, restored;
+    {
+        alps::hdf5::archive ar(file_, "w");
+        ar["/other"] << 5.0;
+        ar["/a"] << 7.0;
+        ar["/"] << values;
+    }
+    alps::hdf5::archive ar(file_, "r");
+    ar["/"] >> restored;
+    const std::map<std::string, double> expected{{"a", 1.0}, {"b", 2.0}, {"other", 5.0}};
+    EXPECT_EQ(restored, expected);
+}

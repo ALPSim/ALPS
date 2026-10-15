@@ -24,6 +24,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - Remove undefined behavior in XDR callbacks and integer-range boundary checks exposed by sanitizers.
 - Keep full double precision for parameter values substituted into `SITETERM`, `BONDTERM` and `NSITETERM` expressions. They were rounded to 6 significant digits, so for example `mu=0.123456789123` acted as `0.123457`. Inputs whose parameters have at most 6 significant digits are unchanged.
 - Loading a `std::map` from HDF5 through an empty path inside an archive context, as a class's `load(archive&)` does, read the entries below the root instead of below the context. Entry paths are now completed against the context, as saving already did and as ALPSCore does.
+- Saving a `std::map` at an HDF5 archive's root tried to delete the root group and failed. It now writes its entries beside the root's other children.
 
 ### Changed
 
