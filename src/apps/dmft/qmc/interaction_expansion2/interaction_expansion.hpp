@@ -215,7 +215,7 @@ public:
 
   InteractionExpansion(const alps::params& p, int rank);
   ~InteractionExpansion() {}
-  bool is_thermalized() const {return true;} //thermalization is done in the constructor. It's not a big deal here.
+  bool is_thermalized() const {return thermalized;} //set by update() once step exceeds THERMALIZATION
   void update();
   void measure();
   double fraction_completed() const;

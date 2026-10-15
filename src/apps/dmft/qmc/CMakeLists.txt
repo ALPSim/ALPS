@@ -117,6 +117,14 @@ if(ALPS_BUILD_TESTING)
 
   add_executable(dmft_interaction_expansion_choice dmft_interaction_expansion_choice.C)
   alps_add_gtest(dmft_interaction_expansion_choice COMPONENT dmft LABELS regression)
+
+  # Counts the serial solver's measurements; the MPI adapter stops at its
+  # scheduled checks instead.
+  if(NOT ALPS_ENABLE_MPI)
+    add_executable(dmft_ctint_thermalization dmft_ctint_thermalization.C)
+    target_link_libraries(dmft_ctint_thermalization PRIVATE ALPS::ctint)
+    alps_add_gtest(dmft_ctint_thermalization COMPONENT dmft LABELS regression)
+  endif()
 endif()
 
 alps_install_applications(dmft hirschfye hybridization interaction)
