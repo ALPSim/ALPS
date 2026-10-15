@@ -32,6 +32,12 @@ installed; the feature itself is the code under `src/alps/lattice` and
     terms on an open graph and a periodic ladder (with and without momentum
     sectors), full spectrum vs a dense Jordan-Wigner matrix; with Nup, Ndown
     conserved every one of them is refused.
+  - `alps_checks/t9_fcidump.py`: `alps2fcidump` (ALPS model -> FCIDUMP, see
+    [`../nsite_terms.md`](../nsite_terms.md)). Hubbard chains,
+    ladders with a 4-site correlated-hopping n-site term and random
+    3- and 4-site (pq|rs) n-site groups: ALPS `fulldiag` vs PySCF FCI on the
+    exported FCIDUMP. Models FCIDUMP cannot hold must be refused. Needs
+    `pyscf`; takes about a minute.
   - `results/`: output of the runs above.
 
 Running: build ALPS with applications (`cmake --preset default

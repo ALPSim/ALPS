@@ -81,6 +81,35 @@ Leave `N` out of `CONSERVED_QUANTUMNUMBERS` for such terms. Fixed ranges
 (fermions, hard-core bosons) and ranges set by another quantum number (`Sz` in
 `-S..S`) are not cutoffs and give no warning.
 
+## Export to FCIDUMP
+
+`alps2fcidump` writes a fermion model (one spin-1/2 orbital per site, e.g.
+`BASIS "fermion"`) with its site, bond and n-site terms as an FCIDUMP file,
+the integral format read by quantum chemistry ED, CI and DMRG codes (PySCF,
+Molpro, Block2, Dice, NECI, ...):
+
+```
+alps2fcidump parm FCIDUMP
+```
+
+`parm` is an ordinary ALPS parameter file (`LATTICE`/`GRAPH`, `MODEL`,
+couplings, libraries). `Nup_total` and `Ndown_total` give `NELEC` and `MS2`;
+without them, half filling is written.
+
+The integrals are read off the matrix ALPS builds, in the sectors with at most
+one up and one down electron, so they follow ALPS's operator definitions and
+fermion signs. Orbital `p` is site `p` (ALPS order, 1-based). A constant term
+of the model becomes `E_core`. ORBSYM is all 1.
+
+FCIDUMP holds only a spin-independent two-body Hamiltonian whose (pq|rs) has
+the 8-fold symmetry of real orbitals. The tool rebuilds every sector with up
+to four electrons (`--check N`) from the integrals and compares it with
+ALPS's matrix; if they differ, or a symmetry fails, it writes nothing and
+says why. Refused, for example: spin models, a Zeeman field, terms such as the
+walkthrough's `K` term that act on up and down electrons differently,
+three-body terms, and singlet pair hopping between bonds, which is
+spin-independent but has (pq|rs) != (qp|rs).
+
 A worked example (one 2x2 plaquette followed through the local table and the
 matrix fill), the benchmarks against QDK CASCI and exact results, and the
 scripts that produced them are in [`n_body_terms/`](n_body_terms/README.md).
