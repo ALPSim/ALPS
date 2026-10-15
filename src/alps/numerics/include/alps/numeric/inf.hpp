@@ -20,7 +20,8 @@ namespace alps {
         /** @brief Class convertible to infinity of type T */           \
         template<> struct inf< T > {                                    \
             /** @brief Unused argument, to adhere to the concept specifications */ \
-            inf<T>(const T&) {}                                         \
+            /* ALPS: declared as inf, not inf<T>, which C++20 rejects */ \
+            inf(const T&) {}                                            \
                                                                         \
             /** @brief Returns infinity value */                        \
             operator T () const {                                       \

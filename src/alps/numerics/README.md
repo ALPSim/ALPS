@@ -16,8 +16,15 @@ and
 
 | Header | Relationship |
 | --- | --- |
-| `inf.hpp` | Copied unchanged |
+| `inf.hpp` | Copied; one line changed for C++20 (see below) |
 | `vector_functions.hpp` | ALPSCore's version, which replaced ALPS's; ALPS additions at the end (see below) |
+
+### `inf.hpp`
+
+ALPSCore declares the constructor of each `inf<T>` specialization as
+`inf<T>(const T&)`. C++20 no longer allows a template-id there, and GCC rejects
+it in C++20 mode, so ALPS declares it as `inf(const T&)`. The meaning is the
+same.
 
 ### `vector_functions.hpp`
 
