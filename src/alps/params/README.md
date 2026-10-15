@@ -45,9 +45,9 @@ notices when modifying these files.
 
 | ALPSCore path | Here | Relationship |
 | --- | --- | --- |
-| `params/include/alps/params.hpp`, `params/include/alps/dictionary.hpp` | `include/alps/` | Copied unchanged |
+| `params/include/alps/params.hpp`, `params/include/alps/dictionary.hpp` | `include/alps/` | Copied unchanged, except that `params.hpp` gains two members (see below) |
 | `params/include/alps/params/*.hpp` (10 files) | `include/alps/params/` | Copied unchanged, except that three headers gain includes (see below) |
-| `params/src/*.cpp` (4 files) | `src/` | Copied unchanged |
+| `params/src/*.cpp` (4 files) | `src/` | Copied unchanged, except `params.cpp` (see below) |
 | `params/test/*.cpp` (22 files), `params_test_support.hpp`, `dict_values_test.hpp` | `tests/` | Copied unchanged |
 | `common/deps/iniparser/` | `iniparser/` | Copied unchanged, without its `CMakeLists.txt` |
 | `COPYRIGHT.TXT`, `LICENSE.TXT`, `ACKNOWLEDGE.TXT` | here | Copied unchanged |
@@ -75,6 +75,16 @@ addition:
 second halves of `dict_value.hpp` and `params.hpp`, which include them at
 their end; they are not meant to be included on their own. The SDK header
 contracts check the other headers.
+
+Two additions let other sources supply values the way INI files and the
+command line do, and let programs read what was supplied. Comments marked
+`ALPS:` in `params.hpp` and `params.cpp` mark them, and `tests/params_supply.cpp`
+tests them:
+
+- `params::supply(name, text)` stores text for a parameter that is not yet
+  defined. `define<T>()` parses it as it parses a value from a file.
+- `params::supplied_text()` returns the supplied text of every supplied
+  parameter, by name, including parameters the program never defines.
 
 ### Test registration
 

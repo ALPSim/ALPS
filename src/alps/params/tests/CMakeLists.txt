@@ -46,6 +46,13 @@ foreach(name serialize_variant dictionary params dots_in_keys params_default_vec
   alps_add_gtest(${target} COMPONENT params)
 endforeach()
 
+# ALPS's own tests of its additions to ALPSCore's params.
+foreach(name params_supply)
+  add_executable(${name} ${name}.cpp "${PROJECT_SOURCE_DIR}/tests/support/src/unique_file.cpp")
+  target_link_libraries(${name} PRIVATE ALPS::params)
+  alps_add_gtest(${name} COMPONENT params)
+endforeach()
+
 if(ALPS_ENABLE_MPI)
   # They define main() themselves, as ALPSCore's MPI tests do.
   foreach(name serialize_variant_mpi dictionary_bcast_mpi params_bcast_mpi)
