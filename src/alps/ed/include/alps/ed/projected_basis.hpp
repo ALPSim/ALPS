@@ -5,10 +5,10 @@
 // Ported from skilledwolf/alpsx (private repository), branch
 // agent/v3-execution-and-api-audit at f8ee6e98b, file src/solvers/diag/include/alps/diag/projected_basis.hpp.
 // Adaptation: C++17 (no std::span), <alps/ed/...> include names, ALPS_ED_DECL
-// exports, namespace alps::ed; the finite point-group bases
-// (make_finite_group_basis, finite_spectrum_from_local) are not ported.
+// exports, namespace alps::ed.
 #pragma once
 
+#include <alps/ed/finite_group.hpp>
 #include <alps/ed/product_basis.hpp>
 #include <alps/ed/sparse_from_local.hpp>
 #include <alps/ed/sparse_matrix.hpp>
@@ -49,6 +49,9 @@ public:
     /// Row-major [dimension, num_sites] orbit representatives.
     std::vector<std::int32_t> const& representatives() const;
     std::vector<std::size_t> const& orbit_sizes() const;
+    // Null for the translation fast path. Finite bases retain every irrep row;
+    // orbit representatives/sizes can repeat for independent vectors in an orbit.
+    FiniteGroupIrrep const* finite_group() const;
 
 private:
     explicit ProjectedBasis(std::shared_ptr<const detail::ProjectedData> data);
@@ -66,6 +69,22 @@ ALPS_ED_DECL ProjectedBasis make_projected_basis(
     std::vector<SpectrumTranslation> const& translations,
     std::vector<std::optional<double>> const& charge_targets = {},
     std::size_t momentum_index = 0);
+
+// Full isotypic component of one finite irrep, including all multiplicities and
+// irrep rows. Central-projector range construction is local to each orbit;
+// workspace scales with orbit_size^2, not parent_dimension^2. Stored sparse
+// basis coefficients can cost O(parent_dimension * group_order). Site actions
+// must preserve identical ordered local spaces. Irrep vectors use deterministic
+// twice-reorthogonalized columns with rank/projector checks (1e-9 tolerance).
+ALPS_ED_DECL ProjectedBasis make_finite_group_basis(std::vector<SpectrumLocalSpace> const& local_spaces,
+    FiniteGroupIrrep const& irrep, std::vector<std::optional<double>> const& charge_targets = {});
+
+// Complete finite-irrep family and all unfixed declared charges. Physical
+// multiplet components remain explicit; no additional degeneracy weight applies.
+ALPS_ED_DECL std::vector<SpectrumBlock> finite_spectrum_from_local(models::CompiledOperator const& input,
+    std::vector<SpectrumLocalSpace> const& local_spaces, std::vector<FiniteGroupIrrep> const& irreps,
+    std::vector<std::optional<double>> const& charge_targets, int count, std::string const& which = "SA",
+    std::optional<double> tolerance = {}, std::optional<int> max_iterations = {});
 
 // Rectangular P_target^dagger O P_source. No symmetry or Hermiticity is
 // required of O: local, momentum-changing and charge-changing observables are

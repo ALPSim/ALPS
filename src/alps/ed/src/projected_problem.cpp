@@ -5,8 +5,7 @@
 // Ported from skilledwolf/alpsx (private repository), branch
 // agent/v3-execution-and-api-audit at f8ee6e98b, file src/solvers/diag/src/runtime/projected_problem.cpp.
 // Adaptation: C++17 (no std::span or std::numbers), <alps/ed/...> and
-// <alps/models/...> include names, namespace alps::ed; the finite point-group
-// entry points are not ported.
+// <alps/models/...> include names, namespace alps::ed.
 #include <alps/ed/projected_problem.hpp>
 #include <alps/models/physical_basis.hpp>
 #include <alps/models/site.hpp>
@@ -273,6 +272,63 @@ ModelSpectrum model_spectrum(models::Hamiltonian const& model, ModelSpectrumOpti
                                  translations, options);
     if (!translations.empty()) result.directions = model.lat().periodic_directions();
     return result;
+}
+
+ProjectedProblem prepare_finite(models::CompiledOperator const& op, ProjectedSpaces const& spaces,
+    FiniteGroupIrrep const& irrep, std::map<std::string, double> const& sector) {
+    auto targets = charge_targets(spaces, sector);
+    validate_compiled_model(op, spaces);
+    return ProjectedProblem::prepare(op, make_finite_group_basis(spaces.local_spaces, irrep, targets), spaces.charges);
+}
+ProjectedProblem prepare_finite(models::TermSum const& terms, std::vector<models::SiteBasisPtr> const& sites,
+    std::vector<std::string> const& conserved, models::FermionConvention convention, FiniteGroupIrrep const& irrep,
+    std::map<std::string, double> const& sector) {
+    auto model = prepare_model(terms, sites, conserved, convention, sector);
+    return ProjectedProblem::prepare(model.op, make_finite_group_basis(model.spaces.local_spaces, irrep, model.targets),
+                                     std::move(model.spaces.charges));
+}
+ProjectedProblem prepare_finite(models::Hamiltonian const& model, FiniteGroupIrrep const& irrep,
+                                std::map<std::string, double> const& sector) {
+    return prepare_finite(model.expand(), model_sites(model), model.conserved_qns(), model.fermion_convention(), irrep,
+                          sector);
+}
+
+namespace {
+void finite_controls(FiniteSpectrumOptions const& options) {
+    validate_eigensolver_controls(options.which, options.tolerance, options.max_iterations);
+    if (options.count && *options.count <= 0) throw std::invalid_argument("eigenvalue count must be positive");
+}
+ModelSpectrum finite_result(models::CompiledOperator const& op, ProjectedSpaces const& spaces,
+    std::vector<FiniteGroupIrrep> const& irreps, std::vector<std::optional<double>> const& targets,
+    FiniteSpectrumOptions const& options) {
+    ModelSpectrum result;
+    result.charges = spaces.charges;
+    result.sector = options.sector;
+    result.blocks = finite_spectrum_from_local(op, spaces.local_spaces, irreps, targets,
+        options.count.value_or(std::numeric_limits<int>::max()), options.which, options.tolerance,
+        options.max_iterations);
+    return result;
+}
+} // namespace
+
+ModelSpectrum finite_spectrum(models::CompiledOperator const& op, ProjectedSpaces const& spaces,
+    std::vector<FiniteGroupIrrep> const& irreps, FiniteSpectrumOptions const& options) {
+    finite_controls(options);
+    auto targets = charge_targets(spaces, options.sector);
+    validate_compiled_model(op, spaces);
+    return finite_result(op, spaces, irreps, targets, options);
+}
+ModelSpectrum finite_spectrum(models::TermSum const& terms, std::vector<models::SiteBasisPtr> const& sites,
+    std::vector<std::string> const& conserved, models::FermionConvention convention,
+    std::vector<FiniteGroupIrrep> const& irreps, FiniteSpectrumOptions const& options) {
+    finite_controls(options);
+    auto model = prepare_model(terms, sites, conserved, convention, options.sector);
+    return finite_result(model.op, model.spaces, irreps, model.targets, options);
+}
+ModelSpectrum finite_spectrum(models::Hamiltonian const& model, std::vector<FiniteGroupIrrep> const& irreps,
+                              FiniteSpectrumOptions const& options) {
+    return finite_spectrum(model.expand(), model_sites(model), model.conserved_qns(), model.fermion_convention(), irreps,
+                           options);
 }
 
 } // namespace alps::ed

@@ -5,8 +5,7 @@
 // Ported from skilledwolf/alpsx (private repository), branch
 // agent/v3-execution-and-api-audit at f8ee6e98b, file src/solvers/diag/include/alps/diag/projected_problem.hpp.
 // Adaptation: C++17 (no std::span), <alps/ed/...> include names, ALPS_ED_DECL
-// exports, namespace alps::ed; the finite point-group entry points
-// (prepare_finite, finite_spectrum) are not ported.
+// exports, namespace alps::ed.
 #pragma once
 
 #include <alps/ed/eigensolver.hpp>
@@ -98,6 +97,11 @@ private:
     friend ALPS_ED_DECL ProjectedProblem prepare_projected(models::TermSum const&,
         std::vector<models::SiteBasisPtr> const&, std::vector<std::string> const&,
         models::FermionConvention, std::vector<SpectrumTranslation> const&, ProjectedOptions const&);
+    friend ALPS_ED_DECL ProjectedProblem prepare_finite(models::CompiledOperator const&, ProjectedSpaces const&,
+        FiniteGroupIrrep const&, std::map<std::string, double> const&);
+    friend ALPS_ED_DECL ProjectedProblem prepare_finite(models::TermSum const&,
+        std::vector<models::SiteBasisPtr> const&, std::vector<std::string> const&, models::FermionConvention,
+        FiniteGroupIrrep const&, std::map<std::string, double> const&);
 };
 
 struct ProjectedEigenResult {
@@ -186,5 +190,35 @@ ALPS_ED_DECL ModelSpectrum model_spectrum(models::Hamiltonian const&,
 ALPS_ED_DECL ModelSpectrum model_spectrum(models::CompiledOperator const&,
     ProjectedSpaces const&, std::vector<SpectrumTranslation> const&,
     ModelSpectrumOptions const& = {});
+
+// Finite point/space groups described by faithful site permutations. All irrep
+// rows are retained. Full-model Hermiticity and declared-charge validation
+// precede projection, including empty sectors, as for prepare_projected.
+// Finite-group commutators on the selected parent sector must cancel exactly
+// in the supplied binary coefficients; scalar offsets cannot relax this check.
+ALPS_ED_DECL ProjectedProblem prepare_finite(models::CompiledOperator const&, ProjectedSpaces const&,
+    FiniteGroupIrrep const&, std::map<std::string, double> const& sector = {});
+ALPS_ED_DECL ProjectedProblem prepare_finite(models::TermSum const&, std::vector<models::SiteBasisPtr> const&,
+    std::vector<std::string> const& conserved, models::FermionConvention, FiniteGroupIrrep const&,
+    std::map<std::string, double> const& sector = {});
+ALPS_ED_DECL ProjectedProblem prepare_finite(models::Hamiltonian const&, FiniteGroupIrrep const&,
+    std::map<std::string, double> const& sector = {});
+
+struct FiniteSpectrumOptions {
+    std::map<std::string, double> sector;
+    std::optional<int> count;
+    std::string which = "SA";
+    std::optional<double> tolerance;
+    std::optional<int> max_iterations;
+};
+// Spectrum resolved by every irrep of a complete family and every declared
+// charge; blocks carry the irrep label, dimension and group order.
+ALPS_ED_DECL ModelSpectrum finite_spectrum(models::CompiledOperator const&, ProjectedSpaces const&,
+    std::vector<FiniteGroupIrrep> const&, FiniteSpectrumOptions const& = {});
+ALPS_ED_DECL ModelSpectrum finite_spectrum(models::TermSum const&, std::vector<models::SiteBasisPtr> const&,
+    std::vector<std::string> const&, models::FermionConvention, std::vector<FiniteGroupIrrep> const&,
+    FiniteSpectrumOptions const& = {});
+ALPS_ED_DECL ModelSpectrum finite_spectrum(models::Hamiltonian const&, std::vector<FiniteGroupIrrep> const&,
+    FiniteSpectrumOptions const& = {});
 
 } // namespace alps::ed

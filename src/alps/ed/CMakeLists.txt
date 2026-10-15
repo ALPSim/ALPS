@@ -7,6 +7,7 @@
 # the library sources.
 add_library(alps_ed
   src/eigensolver.cpp
+  src/finite_group.cpp
   src/lanczos.cpp
   src/product_basis.cpp
   src/product_problem.cpp
@@ -26,6 +27,7 @@ target_sources(alps_ed PUBLIC
   FILES
     include/alps/ed.hpp
     include/alps/ed/eigensolver.hpp
+    include/alps/ed/finite_group.hpp
     include/alps/ed/lanczos.hpp
     include/alps/ed/product_basis.hpp
     include/alps/ed/product_problem.hpp

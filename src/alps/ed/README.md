@@ -41,9 +41,10 @@ auto const thermal = alps::ed::thermal_surface(levels, charges, temperatures, fi
 | `eigensolver.hpp` | `EigenstateOptions`, `dense_eigensystem` (LAPACK `dsyevd`/`zheevd`), `select_eigenvalues` |
 | `lanczos.hpp` | `lanczos_csr`: the deflated IETL Lanczos driver (real symmetric and complex Hermitian CSR) |
 | `product_problem.hpp` | `prepare_product` (`Hamiltonian` or `TermSum` + sites), `ProductProblem::eigenstates`, `operator_matrix`, `expectation_values` |
-| `spectrum.hpp` | `SpectrumLocalSpace`, `SpectrumTranslation`, `SpectrumBlock`; `symmetry_spectrum`: charge- and momentum-resolved eigenvalues of a product-basis CSR matrix |
-| `projected_basis.hpp` | `ProjectedBasis`/`make_projected_basis` (orbit representatives of a charge sector under commuting translations at one momentum), `projected_operator`, `projected_sparse_operator`, `apply_projected_operator`, `expect_projected_operator`, `expand_projected_state`, `symmetry_spectrum_from_local` |
-| `projected_problem.hpp` | `select_momentum`, `projected_spaces`, `prepare_projected` (`Hamiltonian`, `TermSum` + sites, or a compiled operator on `ProjectedSpaces` or an explicit basis), `ProjectedProblem::eigenstates`/`hamiltonian`, `model_spectrum` |
+| `spectrum.hpp` | `SpectrumLocalSpace`, `SpectrumTranslation`, `SpectrumBlock` (momentum, charges, method and, for point-group blocks, the irrep label, dimension and group order); `symmetry_spectrum`: charge- and momentum-resolved eigenvalues of a product-basis CSR matrix |
+| `finite_group.hpp` | `FiniteGroupIrrep`: the closure of a faithful site-permutation group with one unitary irrep, checked for generator relations, unitarity and irreducibility; `dihedral_irrep` (D_n on a ring), `validate_irrep_family` (complete, inequivalent family of one group) |
+| `projected_basis.hpp` | `ProjectedBasis`/`make_projected_basis` (orbit representatives of a charge sector under commuting translations at one momentum), `make_finite_group_basis` (the full isotypic component of one irrep), `projected_operator`, `projected_sparse_operator`, `apply_projected_operator`, `expect_projected_operator`, `expand_projected_state`, `symmetry_spectrum_from_local`, `finite_spectrum_from_local` |
+| `projected_problem.hpp` | `select_momentum`, `projected_spaces`, `prepare_projected` and `prepare_finite` (`Hamiltonian`, `TermSum` + sites, or a compiled operator on `ProjectedSpaces` or an explicit basis), `ProjectedProblem::eigenstates`/`hamiltonian`, `model_spectrum`, `finite_spectrum` |
 | `thermodynamics.hpp` | header-only `thermal_weights` and `thermal_surface` (energy, free energy, entropy, specific heat, charge and susceptibility on a temperature × field grid, signed temperatures), `ThermalAccumulator` |
 | `ed.hpp` | umbrella |
 
@@ -72,6 +73,17 @@ auto const thermal = alps::ed::thermal_surface(levels, charges, temperatures, fi
   conservation of every declared charge (forbidden amplitudes are summed
   exactly in rational arithmetic, so cancellations between huge terms are
   neither trusted nor fabricated) and invariance under the translations.
+- A finite point group is given by faithful site permutations (source site
+  to image site) and one unitary irrep whose row-major matrices satisfy
+  `D(gh) = D(g) D(h)`; `FiniteGroupIrrep` closes the group and checks the
+  relations, unitarity and the character norm. `make_finite_group_basis`
+  keeps every row of the isotypic component (an orbit-local central
+  projector, its range resolved by twice-reorthogonalized Gram–Schmidt), so
+  multiplets stay explicit and `finite_spectrum` over a complete family
+  (`validate_irrep_family`) reproduces the whole sector. Invariance under the
+  generators is checked exactly in rational arithmetic: a scalar offset or a
+  cancellation between huge coefficients cannot hide a symmetry-breaking
+  term.
 - `eigenstates` chooses Lanczos automatically above dimension 1000 and
   only when the dimension exceeds `8*count + 200`; `which` is `SA`, `LA`,
   `LM` or `SM` (dense only). Requested Lanczos solves on smaller spaces are
@@ -100,11 +112,10 @@ Ported from the private skilledwolf/alpsx fork (branch
 initializers), `<alps/ed/...>` include names, `ALPS_ED_DECL` exports; the
 dense solver uses LAPACK only (alpsx used Eigen for small blocks and
 `zheevr`), the Lanczos driver is new (alpsx used Spectra over Eigen,
-which this tree does not vendor) and projected blocks are held as canonical
-CSR instead of Eigen sparse matrices. Not ported yet: the finite point-group
-bases and spectra (`make_finite_group_basis`, `prepare_finite`,
-`finite_spectrum`; their projector construction used Eigen dense algebra),
-the catalog (XML) problem adapters and HDF5 persistence.
+which this tree does not vendor), projected blocks are held as canonical
+CSR instead of Eigen sparse matrices, and the finite-group closure and
+projector ranges use small local dense helpers (alpsx used Eigen). Not
+ported yet: the catalog (XML) problem adapters and HDF5 persistence.
 
 ## Tests
 
@@ -119,4 +130,8 @@ reflection and two-direction translation groups, conserved-sector escape
 detection (exact cancellation versus hidden residues), momentum-resolved
 spectra of the CSR and local-operator paths against each other and against
 the unprojected sector, lattice-generator agreement for honeycomb and ladder
-geometries, and the dispatch policy of the IETL driver.
+geometries, and the dispatch policy of the IETL driver; and the finite-group
+suite: dihedral, cyclic and tetrahedral irreps against independent central
+projectors, complete families reproducing the unprojected spectra,
+cross-irrep observables, exact rejection of broken symmetries and a
+polarized 100-site sector.

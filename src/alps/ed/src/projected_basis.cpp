@@ -8,7 +8,8 @@
 // map::contains, std::ranges or std::numbers), <alps/ed/...> include names,
 // namespace alps::ed; blocks are held as canonical CSR (alpsx used Eigen
 // sparse matrices) and solved by block_solver.hpp over the LAPACK and IETL
-// drivers; the finite point-group basis is not ported.
+// drivers; the finite-group projector range is built with local dense
+// helpers (alpsx used Eigen).
 #include <alps/ed/projected_basis.hpp>
 #include <alps/ed/projected_problem.hpp>
 #include <alps/ed/eigensolver.hpp>
@@ -27,6 +28,7 @@
 #include <set>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <utility>
 
 namespace alps::ed {
@@ -48,6 +50,12 @@ struct ProjectedData {
     std::map<State, std::size_t> indices;
     std::vector<std::vector<double>> charge_anchors;
     bool graded = false;
+    // Finite-group bases: the irrep, its generators as site actions, and the
+    // sparse basis vectors by column (orbit states -> coefficient) and by row.
+    std::optional<FiniteGroupIrrep> finite;
+    std::vector<SpectrumTranslation> finite_actions;
+    std::vector<std::map<State, Complex>> finite_columns;
+    std::map<State, std::vector<std::pair<std::size_t, Complex>>> finite_rows;
 };
 struct ProjectedAccess {
     static ProjectedData const& get(ProjectedBasis const& basis) { return *basis.data_; }
@@ -141,7 +149,14 @@ State row(ProjectedData const& d, std::size_t index) {
     auto const first = d.representatives.begin() + static_cast<std::ptrdiff_t>(index * d.dims.size());
     return State(first, first + static_cast<std::ptrdiff_t>(d.dims.size()));
 }
+// Charge cluster label of every basis row.
+std::vector<std::vector<std::size_t>> row_labels(ProjectedData const& d) {
+    std::vector<std::vector<std::size_t>> labels;
+    for (std::size_t i = 0; i < d.sizes.size(); ++i) labels.push_back(charge_labels(d, charges(d, row(d, i))));
+    return labels;
+}
 std::map<State, Complex> orbit(ProjectedData const& d, std::size_t index) {
+    if (d.finite) return d.finite_columns[index];
     auto const rep = row(d, index);
     std::map<State, Complex> result;
     State scratch;
@@ -153,7 +168,11 @@ std::map<State, Complex> orbit(ProjectedData const& d, std::size_t index) {
 }
 template<class Emit>
 void project_components(ProjectedData const& d, State const& state, Emit&& emit) {
-    if (auto p = project(d, state)) emit(p->first, p->second);
+    if (d.finite) {
+        auto found = d.finite_rows.find(state);
+        if (found != d.finite_rows.end())
+            for (auto const& item : found->second) emit(item.first, item.second);
+    } else if (auto p = project(d, state)) emit(p->first, p->second);
 }
 
 std::shared_ptr<ProjectedData> metadata(std::vector<SpectrumLocalSpace> const& spaces,
@@ -422,10 +441,11 @@ Action action(Operator const& op, ProjectedData const& d, State const& state, bo
     return result;
 }
 using TensorKey = std::vector<std::pair<int, std::vector<double>>>;
-std::map<TensorKey, Complex> tensor_sum(Operator const& op, ProjectedData const& d,
-                                        std::vector<std::size_t> const* permutation = nullptr,
-                                        bool dagger = false) {
-    std::map<TensorKey, Complex> out;
+template<class Scalar = Complex>
+std::map<TensorKey, Scalar> tensor_sum(Operator const& op, ProjectedData const& d,
+                                       std::vector<std::size_t> const* permutation = nullptr,
+                                       bool dagger = false) {
+    std::map<TensorKey, Scalar> out;
     for (auto const& term : op.tensors.terms) {
         TensorKey key;
         for (auto const& factor : term.factors) {
@@ -446,18 +466,31 @@ std::map<TensorKey, Complex> tensor_sum(Operator const& op, ProjectedData const&
                                  std::move(values));
         }
         std::sort(key.begin(), key.end());
-        out[std::move(key)] += dagger ? std::conj(term.coefficient) : term.coefficient;
+        out[std::move(key)] += Scalar(dagger ? std::conj(term.coefficient) : term.coefficient);
     }
-    for (auto it = out.begin(); it != out.end();)
-        it = it->second == Complex{} ? out.erase(it) : std::next(it);
+    for (auto it = out.begin(); it != out.end();) {
+        bool zero;
+        if constexpr (std::is_same_v<Scalar, Complex>) zero = it->second == Complex{};
+        else zero = it->second.zero();
+        it = zero ? out.erase(it) : std::next(it);
+    }
     return out;
+}
+template<class Scalar>
+bool tensor_certificate(Operator const& op, ProjectedData const& d) {
+    auto const original = tensor_sum<Scalar>(op, d);
+    if (original != tensor_sum<Scalar>(op, d, nullptr, true)) return false;
+    for (auto const& t : d.finite ? d.finite_actions : d.translations)
+        if (original != tensor_sum<Scalar>(op, d, &t.sites)) return false;
+    return true;
 }
 bool certified(Operator const& op, ProjectedData const& d) {
     if (d.graded) return false;
-    auto const original = tensor_sum(op, d);
-    if (original != tensor_sum(op, d, nullptr, true)) return false;
-    for (auto const& t : d.translations)
-        if (original != tensor_sum(op, d, &t.sites)) return false;
+    // Finite groups require exact commutator cancellation. In particular, a
+    // large identity or cancellation between large coefficients cannot hide
+    // a small symmetry-breaking term. Retain the translation lock's arithmetic.
+    if (d.finite ? !tensor_certificate<detail::ExactComplex>(op, d) : !tensor_certificate<Complex>(op, d))
+        return false;
     // Fixed exact charge deltas prove conservation termwise. Unusual floating
     // charges and mixed-delta matrices use the general action check instead.
     for (std::size_t q = 0; q < d.targets.size(); ++q) {
@@ -505,6 +538,17 @@ double difference(Action const& a, Action const& b) {
         if (a.find(state) == a.end()) result = std::max(result, std::abs(value));
     return result;
 }
+using ExactAction = std::map<State, detail::ExactComplex>;
+ExactAction exact_action(Operator const& op, State const& source) {
+    ExactAction result;
+    SingleState basis{source};
+    for (std::size_t t = 0; t < op.terms.size(); ++t)
+        detail::apply_term_state(op.terms[t], basis, op.no_parity, 0, [&](State const& target, Complex) {
+            result[target] += exact_amplitude(op, t, source, target, false);
+        });
+    for (auto it = result.begin(); it != result.end();) it = it->second.zero() ? result.erase(it) : std::next(it);
+    return result;
+}
 void validate(Operator const& op, ProjectedData const& d) {
     if (certified(op, d)) return;
     double scale = 0., hermitian = 0., translation_error = 0.;
@@ -516,11 +560,31 @@ void validate(Operator const& op, ProjectedData const& d) {
             for (auto const& entry : actual)
                 scale = std::max({scale, std::abs(entry.second.real()), std::abs(entry.second.imag())});
             hermitian = std::max(hermitian, difference(actual, dagger));
-            for (auto const& t : d.translations) {
+            std::optional<ExactAction> exact;
+            if (d.finite) exact = exact_action(op, state);
+            for (auto const& t : d.finite ? d.finite_actions : d.translations) {
                 State shifted;
                 double const input_sign = translate(d, state, t.sites, shifted);
                 charge_translation_mismatch =
                     charge_translation_mismatch || charge_labels(d, charges(d, shifted)) != source_labels;
+                if (d.finite) {
+                    // Exact comparison: g H g^-1 |s'> must reproduce H |s'> amplitude
+                    // by amplitude, including transitions whose doubles underflow.
+                    auto const shifted_exact = exact_action(op, shifted);
+                    ExactAction expected;
+                    State image;
+                    for (auto const& item : *exact) {
+                        double const sign = input_sign * translate(d, item.first, t.sites, image);
+                        auto amplitude = item.second;
+                        if (sign < 0) {
+                            amplitude.real = -amplitude.real;
+                            amplitude.imag = -amplitude.imag;
+                        }
+                        expected.emplace(image, std::move(amplitude));
+                    }
+                    if (shifted_exact != expected) invalid("Hamiltonian is not invariant under the finite group");
+                    continue;
+                }
                 auto const shifted_action = action(op, d, shifted);
                 Action expected;
                 for (auto const& entry : actual) {
@@ -533,7 +597,9 @@ void validate(Operator const& op, ProjectedData const& d) {
     double const tolerance = 1e-11 * scale;
     if (hermitian > tolerance) invalid("Hamiltonian must be Hermitian");
     if (charge_translation_mismatch) invalid("translation changes a conserved charge cluster");
-    if (translation_error > tolerance) invalid("Hamiltonian is not invariant under the lattice translations");
+    if (translation_error > tolerance)
+        invalid(d.finite ? "Hamiltonian is not invariant under the finite group"
+                         : "Hamiltonian is not invariant under the lattice translations");
 }
 struct Transition {
     std::size_t row, col, group;
@@ -619,6 +685,7 @@ std::vector<std::optional<double>> const& ProjectedBasis::charge_targets() const
 std::vector<double> const& ProjectedBasis::momentum() const { return data_->momentum; }
 std::vector<std::int32_t> const& ProjectedBasis::representatives() const { return data_->representatives; }
 std::vector<std::size_t> const& ProjectedBasis::orbit_sizes() const { return data_->sizes; }
+FiniteGroupIrrep const* ProjectedBasis::finite_group() const { return data_->finite ? &*data_->finite : nullptr; }
 
 ProjectedBasis make_projected_basis(std::vector<SpectrumLocalSpace> const& spaces,
                                     std::vector<SpectrumTranslation> const& translations,
@@ -627,6 +694,105 @@ ProjectedBasis make_projected_basis(std::vector<SpectrumLocalSpace> const& space
     auto data = metadata(spaces, translations, targets, momentum_index);
     fill_basis(*data);
     return ProjectedAccess::make(std::move(data));
+}
+
+ProjectedBasis make_finite_group_basis(std::vector<SpectrumLocalSpace> const& spaces, FiniteGroupIrrep const& irrep,
+                                       std::vector<std::optional<double>> const& targets) {
+    auto d = metadata(spaces, {}, targets, 0);
+    if (irrep.num_sites() != spaces.size()) invalid("finite group site count mismatch");
+    d->finite = irrep;
+    d->permutations = irrep.permutations();
+    d->characters.assign(irrep.order(), 1.); // fill_basis(all_orbits) ignores selection.
+    for (auto const& permutation : d->permutations)
+        for (std::size_t i = 0; i < spaces.size(); ++i)
+            if (spaces[i].parity != spaces[permutation[i]].parity
+                || spaces[i].quantum_numbers != spaces[permutation[i]].quantum_numbers)
+                invalid("finite group must preserve ordered local spaces");
+    // Commutation with the validated generators implies commutation with the
+    // entire closed group, avoiding repeated exact action checks for each word.
+    for (auto const& generator : irrep.generators()) d->finite_actions.push_back({generator, 0});
+    fill_basis(*d, true);
+    auto const representatives = d->representatives;
+    auto const orbit_count = d->sizes.size();
+    d->representatives.clear();
+    d->sizes.clear();
+    d->indices.clear();
+    constexpr double projector_tolerance = 1e-9;
+    auto const weight = static_cast<double>(irrep.dimension()) / static_cast<double>(irrep.order());
+    for (std::size_t o = 0; o < orbit_count; ++o) {
+        State const rep(representatives.begin() + static_cast<std::ptrdiff_t>(o * d->dims.size()),
+                        representatives.begin() + static_cast<std::ptrdiff_t>((o + 1) * d->dims.size()));
+        State scratch;
+        std::map<State, std::size_t> members;
+        for (auto const& p : d->permutations) {
+            translate(*d, rep, p, scratch);
+            members.emplace(scratch, 0);
+        }
+        std::size_t next = 0;
+        for (auto& item : members) item.second = next++;
+        auto const n = members.size();
+        if (n > static_cast<std::size_t>(std::numeric_limits<int>::max()) || n > std::vector<Complex>().max_size() / n)
+            invalid("finite orbit is too large");
+        // The central projector of the irrep on the orbit span, row-major n x n.
+        std::vector<Complex> projector(n * n);
+        for (auto const& member : members)
+            for (std::size_t g = 0; g < irrep.order(); ++g) {
+                double const sign = translate(*d, member.first, d->permutations[g], scratch);
+                projector[members.at(scratch) * n + member.second] += sign * std::conj(irrep.characters()[g]) * weight;
+            }
+        double trace = 0., adjoint_error = 0.;
+        for (std::size_t r = 0; r < n; ++r) {
+            trace += projector[r * n + r].real();
+            for (std::size_t c = 0; c < n; ++c)
+                adjoint_error = std::max(adjoint_error, std::abs(projector[r * n + c] - std::conj(projector[c * n + r])));
+        }
+        auto const rank = static_cast<std::size_t>(std::max(0., std::round(trace)));
+        if (rank > n || std::abs(trace - static_cast<double>(rank)) > projector_tolerance
+            || rank % irrep.dimension() || adjoint_error > projector_tolerance)
+            invalid("finite projector has an inconsistent rank or adjoint");
+        // Orthonormal columns spanning the projector range: twice-reorthogonalized
+        // Gram-Schmidt over the projector columns in order.
+        std::vector<std::vector<Complex>> q;
+        for (std::size_t c = 0; c < n && q.size() < rank; ++c) {
+            std::vector<Complex> v(n);
+            for (std::size_t r = 0; r < n; ++r) v[r] = projector[r * n + c];
+            for (int pass = 0; pass < 2; ++pass)
+                for (auto const& column : q) {
+                    Complex dot{};
+                    for (std::size_t i = 0; i < n; ++i) dot += std::conj(column[i]) * v[i];
+                    for (std::size_t i = 0; i < n; ++i) v[i] -= dot * column[i];
+                }
+            double norm = 0.;
+            for (auto z : v) norm += std::norm(z);
+            norm = std::sqrt(norm);
+            if (norm > projector_tolerance) {
+                for (auto& z : v) z /= norm;
+                q.push_back(std::move(v));
+            }
+        }
+        double range_error = 0.;
+        if (q.size() == rank)
+            for (std::size_t r = 0; r < n; ++r)
+                for (std::size_t c = 0; c < n; ++c) {
+                    Complex sum{};
+                    for (auto const& column : q) sum += column[r] * std::conj(column[c]);
+                    range_error = std::max(range_error, std::abs(sum - projector[r * n + c]));
+                }
+        if (q.size() != rank || range_error > projector_tolerance)
+            invalid("finite projector range is numerically unresolved");
+        for (std::size_t c = 0; c < rank; ++c) {
+            auto const column = d->sizes.size();
+            d->sizes.push_back(n);
+            d->representatives.insert(d->representatives.end(), rep.begin(), rep.end());
+            auto& values = d->finite_columns.emplace_back();
+            for (auto const& member : members)
+                if (q[c][member.second] != Complex{}) {
+                    values.emplace(member.first, q[c][member.second]);
+                    d->finite_rows[member.first].emplace_back(column, q[c][member.second]);
+                }
+        }
+    }
+    return ProjectedAccess::make(std::move(d));
 }
 
 CooFromLocal projected_operator(models::CompiledOperator const& input, ProjectedBasis const& source,
@@ -698,7 +864,29 @@ ProjectedProblem ProjectedProblem::prepare(models::CompiledOperator const& input
     auto const& d = ProjectedAccess::get(basis);
     auto const op = prepare_operator(input, d);
     validate(op, d);
-    auto matrix = assemble_hamiltonian(transitions(op, d), d);
+    Matrix matrix;
+    if (d.finite) {
+        if (d.sizes.size() > static_cast<std::size_t>(std::numeric_limits<int>::max()))
+            invalid("block exceeds sparse index range");
+        auto const labels = row_labels(d);
+        CooFromLocal entries;
+        operator_entries(op, d, d, [&](std::size_t r, std::size_t c, Complex z) {
+            // Exact conservation was checked before assembly, as on the
+            // translation path. Do not retain rounded cross-charge residues.
+            if (labels[r] == labels[c]) {
+                entries.rows.push_back(static_cast<std::int64_t>(r));
+                entries.cols.push_back(static_cast<std::int64_t>(c));
+                entries.data.push_back(z);
+            }
+        });
+        try {
+            matrix = canonical_csr<Complex>(entries, d.sizes.size(), d.sizes.size());
+        } catch (std::invalid_argument const&) {
+            invalid("projected matrix overflowed");
+        }
+    } else {
+        matrix = assemble_hamiltonian(transitions(op, d), d);
+    }
     return ProjectedProblem(std::make_shared<const Data>(Data{basis, std::move(charge_names), std::move(matrix)}));
 }
 ProjectedProblem prepare_projected(models::CompiledOperator const& input, ProjectedBasis const& basis) {
@@ -710,6 +898,11 @@ ProjectedEigenResult ProjectedProblem::eigenstates(EigenstateOptions const& opti
     auto const plan = detail::eigenstate_plan(options, dimension());
     auto solved = detail::solve_block(source.matrix, options.which, plan, true);
     solved.spectrum.momentum = source.basis.momentum();
+    if (auto const* irrep = source.basis.finite_group()) {
+        solved.spectrum.irrep = irrep->label();
+        solved.spectrum.irrep_dimension = irrep->dimension();
+        solved.spectrum.group_order = irrep->order();
+    }
     return {*this, std::move(solved.spectrum), std::move(solved.vectors), std::move(solved.residuals),
             detail::lanczos_requested(options.method, dimension())};
 }
@@ -788,6 +981,55 @@ std::vector<SpectrumBlock> symmetry_spectrum_from_local(
     }
     if (momenta.size() == prototype->permutations.size() && projected_dimension != prototype->parent_dimension)
         throw std::runtime_error("projected ED: momentum bases do not span the selected product sector");
+    return result;
+}
+
+std::vector<SpectrumBlock> finite_spectrum_from_local(models::CompiledOperator const& input,
+    std::vector<SpectrumLocalSpace> const& spaces, std::vector<FiniteGroupIrrep> const& irreps,
+    std::vector<std::optional<double>> const& targets, int count, std::string const& which,
+    std::optional<double> tolerance, std::optional<int> max_iterations) {
+    validate_eigensolver_controls(which, tolerance, max_iterations);
+    if (count <= 0) invalid("eigenvalue count must be positive");
+    validate_irrep_family(irreps);
+    std::vector<SpectrumBlock> result;
+    std::size_t total = 0, parent = 0;
+    for (auto const& irrep : irreps) {
+        auto const basis = make_finite_group_basis(spaces, irrep, targets);
+        auto const& d = ProjectedAccess::get(basis);
+        parent = basis.parent_dimension();
+        if (basis.dimension() > parent - total) invalid("finite irrep dimensions exceed parent dimension");
+        total += basis.dimension();
+        auto const problem = prepare_projected(input, basis);
+        auto const& matrix = problem.hamiltonian();
+        std::map<std::vector<std::size_t>, std::vector<std::size_t>> groups;
+        auto const labels = row_labels(d);
+        for (std::size_t r = 0; r < basis.dimension(); ++r) groups[labels[r]].push_back(r);
+        for (auto const& group : groups) {
+            auto const& label = group.first;
+            auto const& members = group.second;
+            std::vector<int> indices(basis.dimension(), -1);
+            for (std::size_t i = 0; i < members.size(); ++i) indices[members[i]] = static_cast<int>(i);
+            CooFromLocal entries;
+            for (auto r : members)
+                for (auto p = matrix.offsets[r]; p < matrix.offsets[r + 1]; ++p) {
+                    auto const column = static_cast<std::size_t>(matrix.indices[static_cast<std::size_t>(p)]);
+                    if (indices[column] < 0) continue;
+                    entries.rows.push_back(indices[r]);
+                    entries.cols.push_back(indices[column]);
+                    entries.data.push_back(matrix.values[static_cast<std::size_t>(p)]);
+                }
+            auto const block = canonical_csr<Complex>(entries, members.size(), members.size());
+            auto solved = detail::solve_block(block, which,
+                detail::spectrum_plan(members.size(), count, which, tolerance, max_iterations), false);
+            solved.spectrum.irrep = irrep.label();
+            solved.spectrum.irrep_dimension = irrep.dimension();
+            solved.spectrum.group_order = irrep.order();
+            for (std::size_t q = 0; q < label.size(); ++q)
+                solved.spectrum.quantum_numbers.push_back(d.charge_anchors[q][label[q]]);
+            result.push_back(std::move(solved.spectrum));
+        }
+    }
+    if (total != parent) invalid("finite irrep bases do not span the parent sector");
     return result;
 }
 } // namespace alps::ed

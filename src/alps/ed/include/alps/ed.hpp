@@ -8,6 +8,7 @@
 #pragma once
 
 #include <alps/ed/eigensolver.hpp>
+#include <alps/ed/finite_group.hpp>
 #include <alps/ed/lanczos.hpp>
 #include <alps/ed/product_basis.hpp>
 #include <alps/ed/product_problem.hpp>

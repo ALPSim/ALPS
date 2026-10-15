@@ -8,8 +8,9 @@
 // The ed component diagonalizes a compiled model without the XML catalog,
 // legacy parameters, HDF5 or the simulation runtime: an open 4-site
 // Heisenberg chain in the Sz=0 sector (dimension 6) densely, the sparse
-// assembly entry point on the same model, the momentum-resolved spectrum of
-// the periodic chain and a thermodynamic average over its levels.
+// assembly entry point on the same model, the momentum-resolved and the
+// point-group-resolved spectra of the periodic chain and a thermodynamic
+// average over its levels.
 int main() {
     namespace lat = alps::lattice;
     namespace mdl = alps::models;
@@ -51,5 +52,23 @@ int main() {
     auto const thermal = alps::ed::thermal_surface(levels, {}, {1.0}, {0.0});
     if (thermal.size() != 1 || !(thermal[0].entropy > 0.) || !(thermal[0].energy > -2.0))
         throw std::runtime_error("ed component thermodynamic average is off");
+
+    // The complete D4 irrep family of the ring resolves the same six levels.
+    std::vector<alps::ed::FiniteGroupIrrep> const family{
+        alps::ed::dihedral_irrep(4, 0, 1), alps::ed::dihedral_irrep(4, 0, -1), alps::ed::dihedral_irrep(4, 1),
+        alps::ed::dihedral_irrep(4, 2, 1), alps::ed::dihedral_irrep(4, 2, -1)};
+    alps::ed::FiniteSpectrumOptions finite;
+    finite.sector = {{"Sz", 0.}};
+    auto const by_irrep = alps::ed::finite_spectrum(ring, family, finite);
+    std::size_t resolved_states = 0;
+    double lowest = 0.;
+    for (auto const& block : by_irrep.blocks) {
+        if (block.group_order != 8 || block.irrep.empty())
+            throw std::runtime_error("ed component finite-group block is unlabelled");
+        resolved_states += block.eigenvalues.size();
+        lowest = std::min(lowest, block.eigenvalues.front());
+    }
+    if (resolved_states != 6 || std::abs(lowest + 2.0) > 1e-10)
+        throw std::runtime_error("ed component finite-group resolution failed");
     return 0;
 }

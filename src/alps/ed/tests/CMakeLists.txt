@@ -18,6 +18,7 @@ endforeach()
 foreach(name IN ITEMS
     conserved_sectors
     dense_eigensystem
+    finite_group
     lanczos_csr
     models_fixture_e0
     momentum_compiled

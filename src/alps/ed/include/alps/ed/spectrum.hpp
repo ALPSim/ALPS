@@ -5,8 +5,8 @@
 // Ported from skilledwolf/alpsx (private repository), branch
 // agent/v3-execution-and-api-audit at f8ee6e98b, file src/solvers/diag/include/alps/diag/spectrum.hpp.
 // Adaptation: C++17 (no std::span), <alps/ed/...> include names, ALPS_ED_DECL
-// exports, namespace alps::ed; the finite point-group block labels are not
-// ported; block dispatch follows the IETL-based Lanczos driver's policy.
+// exports, namespace alps::ed; block dispatch follows the IETL-based Lanczos
+// driver's policy.
 #pragma once
 
 #include <alps/ed_export.h>
@@ -48,6 +48,11 @@ struct SpectrumBlock {
     std::optional<int> max_iterations;
     std::optional<int> iterations;
     int nconv = 0;
+    // Set only for finite-group blocks. All irrep rows are explicitly retained:
+    // eigenvalues count physical states, not one representative per multiplet.
+    std::string irrep;
+    std::size_t irrep_dimension = 0;
+    std::size_t group_order = 0;
 };
 
 // Resolve a Hermitian product-basis CSR matrix into joint conserved-charge
