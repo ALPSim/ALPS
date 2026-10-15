@@ -364,7 +364,7 @@ nsite_matrix<T> NSiteOperator::matrix(const std::vector<SiteBasisDescriptor<I> >
       continue;
 
     bool zero = false;
-    std::map<std::string, half_integer<I> > change;
+    std::map<std::string, half_integer<int> > change;   // total over the roles
     for (std::size_t r = 0; r < n && !zero; ++r) {
       if (!splitter.used(r)) {
         prod.ops.push_back(-1);
@@ -399,8 +399,8 @@ nsite_matrix<T> NSiteOperator::matrix(const std::vector<SiteBasisDescriptor<I> >
     if (splitter.odd())
       boost::throw_exception(std::runtime_error("n-site term contains an odd number of fermion operators: "
                                                 + boost::lexical_cast<std::string>(*tit)));
-    for (typename std::map<std::string, half_integer<I> >::const_iterator c = change.begin(); c != change.end(); ++c)
-      if (c->second != half_integer<I>(0))
+    for (std::map<std::string, half_integer<int> >::const_iterator c = change.begin(); c != change.end(); ++c)
+      if (c->second != half_integer<int>(0))
         mat.nonconserved.insert(c->first);
     mat.products.push_back(prod);
   }

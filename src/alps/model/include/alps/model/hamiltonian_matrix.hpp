@@ -360,7 +360,7 @@ void hamiltonian_matrix<M,G>::check_sector(const state_type& state, const state_
 {
   const typename basis_descriptor_type::constraints_type& constraints = basis_.get_basis().constraints();
   for (std::size_t c=0;c<constraints.size();++c) {
-    half_integer<short> change;
+    typename basis_descriptor_type::total_type change;
     for (std::size_t r=0;r<sites.size();++r) {
       const std::size_t s=sites[r];
       const std::size_t k=get_quantumnumber_index(constraints[c].first,basis_.get_site_basis(s));
@@ -368,7 +368,7 @@ void hamiltonian_matrix<M,G>::check_sector(const state_type& state, const state_
         continue;
       change += get_quantumnumber(basis_[s][newstate[s]],k) - get_quantumnumber(basis_[s][state[s]],k);
     }
-    if (change!=half_integer<short>(0)) {
+    if (change!=typename basis_descriptor_type::total_type(0)) {
       const std::string& qn=constraints[c].first;
       std::string value;   // the <CONSTRAINT value=...> of the basis, e.g. Nup_total
       const typename basis_descriptor_type::unevaluated_constraints_type& all = basis_.get_basis().all_constraints();

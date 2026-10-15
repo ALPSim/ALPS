@@ -677,6 +677,58 @@ TEST(NSiteBoson, NmaxUnsetIsAnError) {
   EXPECT_THROW(spectrum(p), std::runtime_error);
 }
 
+// Totals over all sites are half_integer<int>; they used to be
+// half_integer<short> (|total| <= 16383) and wrapped silently. Building these
+// bases also needs the enumeration to prune every infeasible value of a site,
+// not just one.
+std::size_t basis_dimension(const alps::Parameters& p) {
+  alps::hamiltonian_matrix<alps::numeric::matrix<double> > h(p);
+  return h.dimension();
+}
+
+TEST(NSiteBoson, TotalsBeyondShortRange) {
+  // 4 sites x Nmax 5000: totals up to 20000
+  Files f(boson_ring, boson_model("m", "K*n(i)*n(j)"));
+  alps::Parameters p = f.parms();
+  p["GRAPH"] = "ring"; p["MODEL"] = "m"; p["Nmax"] = 5000;
+  p["CONSERVED_QUANTUMNUMBERS"] = "N";
+  p["N_total"] = 2;
+  EXPECT_EQ(basis_dimension(p), 10u);       // C(5,3)
+  p["N_total"] = 19999;
+  EXPECT_EQ(basis_dimension(p), 4u);        // one site at 4999
+  p["N_total"] = 20000;
+  EXPECT_EQ(basis_dimension(p), 1u);        // all at Nmax
+  p["N_total"] = 20001;
+  EXPECT_EQ(basis_dimension(p), 0u);
+}
+
+TEST(NSiteBoson, LargeSiteRangeWarns) {
+  // a single site's range cannot be widened: warn
+  Files f(boson_ring, boson_model("m", "K*n(i)*n(j)"));
+  alps::Parameters p = f.parms();
+  p["GRAPH"] = "ring"; p["MODEL"] = "m"; p["Nmax"] = 20000;
+  p["CONSERVED_QUANTUMNUMBERS"] = "N"; p["N_total"] = 1;
+  testing::internal::CaptureStderr();
+  try { basis_dimension(p); } catch (std::exception&) {}
+  std::string err = testing::internal::GetCapturedStderr();
+  EXPECT_NE(err.find("maximum of quantum number N"), std::string::npos) << err;
+}
+
+TEST(NSiteHamiltonian, SparseSectorOnManySitesIsFast) {
+  // 31 sites, one or three fermions: the enumeration used to walk ~4^31 states
+  std::ostringstream graph;
+  graph << "<GRAPH name=\"chain31\" vertices=\"31\">";
+  for (int i = 1; i < 31; ++i)
+    graph << "<EDGE source=\"" << i << "\" target=\"" << i + 1 << "\"/>";
+  graph << "</GRAPH>";
+  Files f(graph.str(), "<HAMILTONIAN name=\"hop\"><BASIS ref=\"fermion\"/>"
+          "<BONDTERM source=\"i\" target=\"j\">-fermion_hop(i,j)</BONDTERM></HAMILTONIAN>");
+  alps::Parameters p = f.parms();
+  p["GRAPH"] = "chain31"; p["MODEL"] = "hop";
+  EXPECT_EQ(basis_dimension(sector(p, 1, 0)), 31u);
+  EXPECT_EQ(basis_dimension(sector(p, 2, 1)), 465u * 31u);
+}
+
 TEST(NSiteBoson, NoCutoffWarningForFermions) {
   // Fermion occupations are bounded by Pauli, not by a cutoff parameter.
   Files f("<GRAPH name=\"g\" vertices=\"4\"><PLAQUETTE><SITE id=\"1\"/><SITE id=\"2\"/><SITE id=\"3\"/><SITE id=\"4\"/></PLAQUETTE></GRAPH>",
