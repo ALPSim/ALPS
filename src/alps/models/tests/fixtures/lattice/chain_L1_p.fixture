@@ -1,0 +1,33 @@
+case chain_L1_p
+dimension 1
+extent 1
+boundary periodic
+alps_name chain lattice
+num_sites 1
+num_bonds 0
+site 0 0 0 0
+param L 1
+param LATTICE chain lattice
+param bc1 periodic
+momentum 0
+toml-begin
+[[lattice]]
+name = "alps_custom_lattice base"
+dimension = 1
+basis = [["1"]]
+
+[[unitcell]]
+name = "alps_custom_lattice cell"
+dimension = 1
+vertex = [
+  { type = 0, coordinate = ["0"] },
+]
+edge = [
+  { type = 0, source = { vertex = 1, offset = [0] }, target = { vertex = 1, offset = [1] } },
+]
+
+[[latticegraph]]
+name = "alps_custom_lattice"
+finitelattice = { lattice = "alps_custom_lattice base", extent = ["1"], boundary = ["periodic"] }
+unitcell = "alps_custom_lattice cell"
+toml-end

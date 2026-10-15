@@ -1,0 +1,58 @@
+case ladder_L4_p
+dimension 2
+extent 4 2
+boundary periodic open
+alps_name ladder
+num_sites 8
+num_bonds 12
+site 0 0 0 0 0
+site 1 0 0 0 1
+site 2 0 0 1 0
+site 3 0 0 1 1
+site 4 0 0 2 0
+site 5 0 0 2 1
+site 6 0 0 3 0
+site 7 0 0 3 1
+bond 0 2 0 0 1 0
+bond 0 1 1 0 0 1
+bond 1 3 0 0 1 0
+bond 2 4 0 0 1 0
+bond 2 3 1 0 0 1
+bond 3 5 0 0 1 0
+bond 4 6 0 0 1 0
+bond 4 5 1 0 0 1
+bond 5 7 0 0 1 0
+bond 6 0 0 1 -3 0
+bond 6 7 1 0 0 1
+bond 7 1 0 1 -3 0
+param L 4
+param LATTICE ladder
+param W 2
+param bc1 periodic
+param bc2 open
+momentum 0
+momentum 1.5707963267948966
+momentum 3.1415926535897931
+momentum 4.7123889803846897
+toml-begin
+[[lattice]]
+name = "alps_custom_lattice base"
+dimension = 2
+basis = [["1", "0"], ["0", "1"]]
+
+[[unitcell]]
+name = "alps_custom_lattice cell"
+dimension = 2
+vertex = [
+  { type = 0, coordinate = ["0", "0"] },
+]
+edge = [
+  { type = 0, source = { vertex = 1, offset = [0, 0] }, target = { vertex = 1, offset = [1, 0] } },
+  { type = 1, source = { vertex = 1, offset = [0, 0] }, target = { vertex = 1, offset = [0, 1] } },
+]
+
+[[latticegraph]]
+name = "alps_custom_lattice"
+finitelattice = { lattice = "alps_custom_lattice base", extent = ["4", "2"], boundary = ["periodic", "open"] }
+unitcell = "alps_custom_lattice cell"
+toml-end

@@ -1,0 +1,48 @@
+case honeycomb_2x2_o
+dimension 2
+extent 2 2
+boundary open open
+alps_name honeycomb lattice
+num_sites 8
+num_bonds 7
+site 0 0 0 0 0
+site 1 1 1 0 0.57735026918962573
+site 2 0 0 0.5 0.8660254037844386
+site 3 1 1 0.5 1.4433756729740643
+site 4 0 0 1 0
+site 5 1 1 1 0.57735026918962573
+site 6 0 0 1.5 0.8660254037844386
+site 7 1 1 1.5 1.4433756729740643
+bond 0 1 0 0 0 0.57735026918962573
+bond 1 2 1 0 0.5 0.28867513459481287
+bond 2 3 0 0 0 0.57735026918962573
+bond 2 5 2 0 0.5 -0.28867513459481287
+bond 4 5 0 0 0 0.57735026918962573
+bond 5 6 1 0 0.5 0.28867513459481287
+bond 6 7 0 0 0 0.57735026918962573
+param LATTICE alps_custom_lattice_a3bc31b5a39959e4
+momentum 
+toml-begin
+[[lattice]]
+name = "alps_custom_lattice base"
+dimension = 2
+basis = [["1", "0"], ["0.5", "0.8660254038"]]
+
+[[unitcell]]
+name = "alps_custom_lattice cell"
+dimension = 2
+vertex = [
+  { type = 0, coordinate = ["0", "0"] },
+  { type = 1, coordinate = ["-0.3333333333", "0.6666666667"] },
+]
+edge = [
+  { type = 0, source = { vertex = 1, offset = [0, 0] }, target = { vertex = 2, offset = [0, 0] } },
+  { type = 1, source = { vertex = 2, offset = [0, 0] }, target = { vertex = 1, offset = [0, 1] } },
+  { type = 2, source = { vertex = 1, offset = [0, 0] }, target = { vertex = 2, offset = [1, -1] } },
+]
+
+[[latticegraph]]
+name = "alps_custom_lattice"
+finitelattice = { lattice = "alps_custom_lattice base", extent = ["2", "2"], boundary = ["open", "open"] }
+unitcell = "alps_custom_lattice cell"
+toml-end

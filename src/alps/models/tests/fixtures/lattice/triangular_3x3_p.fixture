@@ -1,0 +1,80 @@
+case triangular_3x3_p
+dimension 2
+extent 3 3
+boundary periodic periodic
+alps_name triangular lattice
+num_sites 9
+num_bonds 27
+site 0 0 0 0 0
+site 1 0 0 0.5 0.8660254037844386
+site 2 0 0 1 1.7320508075688772
+site 3 0 0 1 0
+site 4 0 0 1.5 0.8660254037844386
+site 5 0 0 2 1.7320508075688772
+site 6 0 0 2 0
+site 7 0 0 2.5 0.8660254037844386
+site 8 0 0 3 1.7320508075688772
+bond 0 3 0 0 1 0
+bond 0 1 0 0 0.5 0.8660254037844386
+bond 0 7 0 1 2.5 0.8660254037844386
+bond 1 4 0 0 1 0
+bond 1 2 0 0 0.5 0.8660254037844386
+bond 1 8 0 1 2.5 0.8660254037844386
+bond 2 5 0 0 1 0
+bond 2 0 0 1 -1 -1.7320508075688772
+bond 2 6 0 1 1 -1.7320508075688772
+bond 3 6 0 0 1 0
+bond 3 4 0 0 0.5 0.8660254037844386
+bond 3 1 0 0 -0.5 0.8660254037844386
+bond 4 7 0 0 1 0
+bond 4 5 0 0 0.5 0.8660254037844386
+bond 4 2 0 0 -0.5 0.8660254037844386
+bond 5 8 0 0 1 0
+bond 5 3 0 1 -1 -1.7320508075688772
+bond 5 0 0 1 -2 -1.7320508075688772
+bond 6 0 0 1 -2 0
+bond 6 7 0 0 0.5 0.8660254037844386
+bond 6 4 0 0 -0.5 0.8660254037844386
+bond 7 1 0 1 -2 0
+bond 7 8 0 0 0.5 0.8660254037844386
+bond 7 5 0 0 -0.5 0.8660254037844386
+bond 8 2 0 1 -2 0
+bond 8 6 0 1 -1 -1.7320508075688772
+bond 8 3 0 1 -2 -1.7320508075688772
+param L 3
+param LATTICE triangular lattice
+param W 3
+param bc1 periodic
+param bc2 periodic
+momentum 0 0
+momentum 0 2.0943951023931953
+momentum 0 4.1887902047863905
+momentum 2.0943951023931953 0
+momentum 2.0943951023931953 2.0943951023931953
+momentum 2.0943951023931953 4.1887902047863905
+momentum 4.1887902047863905 0
+momentum 4.1887902047863905 2.0943951023931953
+momentum 4.1887902047863905 4.1887902047863905
+toml-begin
+[[lattice]]
+name = "alps_custom_lattice base"
+dimension = 2
+basis = [["1", "0"], ["0.5", "0.8660254038"]]
+
+[[unitcell]]
+name = "alps_custom_lattice cell"
+dimension = 2
+vertex = [
+  { type = 0, coordinate = ["0", "0"] },
+]
+edge = [
+  { type = 0, source = { vertex = 1, offset = [0, 0] }, target = { vertex = 1, offset = [1, 0] } },
+  { type = 0, source = { vertex = 1, offset = [0, 0] }, target = { vertex = 1, offset = [0, 1] } },
+  { type = 0, source = { vertex = 1, offset = [0, 0] }, target = { vertex = 1, offset = [-1, 1] } },
+]
+
+[[latticegraph]]
+name = "alps_custom_lattice"
+finitelattice = { lattice = "alps_custom_lattice base", extent = ["3", "3"], boundary = ["periodic", "periodic"] }
+unitcell = "alps_custom_lattice cell"
+toml-end

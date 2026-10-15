@@ -1,0 +1,72 @@
+case honeycomb_2x3_p
+dimension 2
+extent 2 3
+boundary periodic periodic
+alps_name honeycomb lattice
+num_sites 12
+num_bonds 18
+site 0 0 0 0 0
+site 1 1 1 0 0.57735026918962573
+site 2 0 0 0.5 0.8660254037844386
+site 3 1 1 0.5 1.4433756729740643
+site 4 0 0 1 1.7320508075688772
+site 5 1 1 1 2.3094010767585029
+site 6 0 0 1 0
+site 7 1 1 1 0.57735026918962573
+site 8 0 0 1.5 0.8660254037844386
+site 9 1 1 1.5 1.4433756729740643
+site 10 0 0 2 1.7320508075688772
+site 11 1 1 2 2.3094010767585029
+bond 0 1 0 0 0 0.57735026918962573
+bond 1 2 1 0 0.5 0.28867513459481287
+bond 0 11 2 1 2 2.3094010767585029
+bond 2 3 0 0 0 0.57735026918962573
+bond 3 4 1 0 0.5 0.28867513459481287
+bond 2 7 2 0 0.5 -0.28867513459481287
+bond 4 5 0 0 0 0.57735026918962573
+bond 5 0 1 1 -1 -2.3094010767585029
+bond 4 9 2 0 0.5 -0.28867513459481287
+bond 6 7 0 0 0 0.57735026918962573
+bond 7 8 1 0 0.5 0.28867513459481287
+bond 6 5 2 1 0 2.3094010767585029
+bond 8 9 0 0 0 0.57735026918962573
+bond 9 10 1 0 0.5 0.28867513459481287
+bond 8 1 2 1 -1.5 -0.28867513459481287
+bond 10 11 0 0 0 0.57735026918962573
+bond 11 6 1 1 -1 -2.3094010767585029
+bond 10 3 2 1 -1.5 -0.28867513459481287
+param L 2
+param LATTICE honeycomb lattice
+param W 3
+param bc1 periodic
+param bc2 periodic
+momentum 0 0
+momentum 0 2.0943951023931953
+momentum 0 4.1887902047863905
+momentum 3.1415926535897931 0
+momentum 3.1415926535897931 2.0943951023931953
+momentum 3.1415926535897931 4.1887902047863905
+toml-begin
+[[lattice]]
+name = "alps_custom_lattice base"
+dimension = 2
+basis = [["1", "0"], ["0.5", "0.8660254038"]]
+
+[[unitcell]]
+name = "alps_custom_lattice cell"
+dimension = 2
+vertex = [
+  { type = 0, coordinate = ["0", "0"] },
+  { type = 1, coordinate = ["-0.3333333333", "0.6666666667"] },
+]
+edge = [
+  { type = 0, source = { vertex = 1, offset = [0, 0] }, target = { vertex = 2, offset = [0, 0] } },
+  { type = 1, source = { vertex = 2, offset = [0, 0] }, target = { vertex = 1, offset = [0, 1] } },
+  { type = 2, source = { vertex = 1, offset = [0, 0] }, target = { vertex = 2, offset = [1, -1] } },
+]
+
+[[latticegraph]]
+name = "alps_custom_lattice"
+finitelattice = { lattice = "alps_custom_lattice base", extent = ["2", "3"], boundary = ["periodic", "periodic"] }
+unitcell = "alps_custom_lattice cell"
+toml-end

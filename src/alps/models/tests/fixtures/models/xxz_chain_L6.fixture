@@ -1,0 +1,61 @@
+case xxz_chain_L6
+num_sites 6
+site_dims 2 2 2 2 2 2
+site_types 0 0 0 0 0 0
+conserved Sz
+num_terms 18
+term 0.5 0 sites 2 0 1 jw 0 
+op 2 0 0 1 0 0 0 0 0
+op 2 0 0 0 0 1 0 0 0
+term 0.5 0 sites 2 0 1 jw 0 
+op 2 0 0 0 0 1 0 0 0
+op 2 0 0 1 0 0 0 0 0
+term 0.5 0 sites 2 1 2 jw 0 
+op 2 0 0 1 0 0 0 0 0
+op 2 0 0 0 0 1 0 0 0
+term 0.5 0 sites 2 1 2 jw 0 
+op 2 0 0 0 0 1 0 0 0
+op 2 0 0 1 0 0 0 0 0
+term 0.5 0 sites 2 2 3 jw 0 
+op 2 0 0 1 0 0 0 0 0
+op 2 0 0 0 0 1 0 0 0
+term 0.5 0 sites 2 2 3 jw 0 
+op 2 0 0 0 0 1 0 0 0
+op 2 0 0 1 0 0 0 0 0
+term 0.5 0 sites 2 3 4 jw 0 
+op 2 0 0 1 0 0 0 0 0
+op 2 0 0 0 0 1 0 0 0
+term 0.5 0 sites 2 3 4 jw 0 
+op 2 0 0 0 0 1 0 0 0
+op 2 0 0 1 0 0 0 0 0
+term 0.5 0 sites 2 4 5 jw 0 
+op 2 0 0 1 0 0 0 0 0
+op 2 0 0 0 0 1 0 0 0
+term 0.5 0 sites 2 4 5 jw 0 
+op 2 0 0 0 0 1 0 0 0
+op 2 0 0 1 0 0 0 0 0
+term 0.5 0 sites 2 0 5 jw 0 
+op 2 0 0 0 0 1 0 0 0
+op 2 0 0 1 0 0 0 0 0
+term 0.5 0 sites 2 0 5 jw 0 
+op 2 0 0 1 0 0 0 0 0
+op 2 0 0 0 0 1 0 0 0
+term 0.5 0 sites 2 0 1 jw 0 
+op 2 0.5 0 0 0 0 0 -0.5 0
+op 2 0.5 0 0 0 0 0 -0.5 0
+term 0.5 0 sites 2 1 2 jw 0 
+op 2 0.5 0 0 0 0 0 -0.5 0
+op 2 0.5 0 0 0 0 0 -0.5 0
+term 0.5 0 sites 2 2 3 jw 0 
+op 2 0.5 0 0 0 0 0 -0.5 0
+op 2 0.5 0 0 0 0 0 -0.5 0
+term 0.5 0 sites 2 3 4 jw 0 
+op 2 0.5 0 0 0 0 0 -0.5 0
+op 2 0.5 0 0 0 0 0 -0.5 0
+term 0.5 0 sites 2 4 5 jw 0 
+op 2 0.5 0 0 0 0 0 -0.5 0
+op 2 0.5 0 0 0 0 0 -0.5 0
+term 0.5 0 sites 2 0 5 jw 0 
+op 2 0.5 0 0 0 0 0 -0.5 0
+op 2 0.5 0 0 0 0 0 -0.5 0
+e0 -2.368033988749894

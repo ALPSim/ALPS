@@ -1,0 +1,77 @@
+case tetragonal_2x2x2_c15_p
+dimension 3
+extent 2 2 2
+boundary periodic periodic periodic
+alps_name tetragonal lattice
+num_sites 8
+num_bonds 24
+site 0 0 0 0 0 0
+site 1 0 0 0 0 1.5
+site 2 0 0 0 1 0
+site 3 0 0 0 1 1.5
+site 4 0 0 1 0 0
+site 5 0 0 1 0 1.5
+site 6 0 0 1 1 0
+site 7 0 0 1 1 1.5
+bond 0 4 0 0 1 0 0
+bond 0 2 0 0 0 1 0
+bond 0 1 0 0 0 0 1.5
+bond 1 5 0 0 1 0 0
+bond 1 3 0 0 0 1 0
+bond 1 0 0 1 0 0 -1.5
+bond 2 6 0 0 1 0 0
+bond 2 0 0 1 0 -1 0
+bond 2 3 0 0 0 0 1.5
+bond 3 7 0 0 1 0 0
+bond 3 1 0 1 0 -1 0
+bond 3 2 0 1 0 0 -1.5
+bond 4 0 0 1 -1 0 0
+bond 4 6 0 0 0 1 0
+bond 4 5 0 0 0 0 1.5
+bond 5 1 0 1 -1 0 0
+bond 5 7 0 0 0 1 0
+bond 5 4 0 1 0 0 -1.5
+bond 6 2 0 1 -1 0 0
+bond 6 4 0 1 0 -1 0
+bond 6 7 0 0 0 0 1.5
+bond 7 3 0 1 -1 0 0
+bond 7 5 0 1 0 -1 0
+bond 7 6 0 1 0 0 -1.5
+param H 2
+param L 2
+param LATTICE tetragonal lattice
+param W 2
+param bc1 periodic
+param bc2 periodic
+param bc3 periodic
+momentum 0 0 0
+momentum 0 0 3.1415926535897931
+momentum 0 3.1415926535897931 0
+momentum 0 3.1415926535897931 3.1415926535897931
+momentum 3.1415926535897931 0 0
+momentum 3.1415926535897931 0 3.1415926535897931
+momentum 3.1415926535897931 3.1415926535897931 0
+momentum 3.1415926535897931 3.1415926535897931 3.1415926535897931
+toml-begin
+[[lattice]]
+name = "alps_custom_lattice base"
+dimension = 3
+basis = [["1", "0", "0"], ["0", "1", "0"], ["0", "0", "1.5"]]
+
+[[unitcell]]
+name = "alps_custom_lattice cell"
+dimension = 3
+vertex = [
+  { type = 0, coordinate = ["0", "0", "0"] },
+]
+edge = [
+  { type = 0, source = { vertex = 1, offset = [0, 0, 0] }, target = { vertex = 1, offset = [1, 0, 0] } },
+  { type = 0, source = { vertex = 1, offset = [0, 0, 0] }, target = { vertex = 1, offset = [0, 1, 0] } },
+  { type = 0, source = { vertex = 1, offset = [0, 0, 0] }, target = { vertex = 1, offset = [0, 0, 1] } },
+]
+
+[[latticegraph]]
+name = "alps_custom_lattice"
+finitelattice = { lattice = "alps_custom_lattice base", extent = ["2", "2", "2"], boundary = ["periodic", "periodic", "periodic"] }
+unitcell = "alps_custom_lattice cell"
+toml-end
