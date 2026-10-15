@@ -53,7 +53,9 @@ void master_final_tasks(const alps::results_type<hybridization>::type &results,
 
 }
 
-void alps::solvers::cthyb(alps::params const& parms, std::string const& output_file) {
+void alps::solvers::cthyb(alps::params const& input, std::string const& output_file) {
+  alps::params parms(input);
+  hybridization::define_parameters(parms);
 #ifndef ALPS_HAVE_MPI
   global_mpi_rank=0;
   sim_type s(parms,global_mpi_rank);
@@ -73,7 +75,7 @@ void alps::solvers::cthyb(alps::params const& parms, std::string const& output_f
   //on the master: collect MC results and store them in file, then postprocess
   if (global_mpi_rank==0){
     alps::results_type<hybridization>::type results = collect_results(s);
-    std::string output_path = boost::lexical_cast<std::string>(parms["BASEPATH"]|"")+"/simulation/results";
+    std::string output_path = parms["BASEPATH"].cast<std::string>()+"/simulation/results";
     save_results(results, parms, output_file, output_path); //"/simulation/results");
     master_final_tasks(results, parms, output_file);
   }
