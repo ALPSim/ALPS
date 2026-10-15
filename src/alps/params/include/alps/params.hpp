@@ -251,6 +251,21 @@ namespace alps {
             /// True if the parameter is supplied via file or cmdline
             bool supplied(const std::string& name) const;
 
+            // ALPS: supply() and supplied_text() give programs the text that
+            // files and the command line supply, so other sources (HDF5 groups
+            // without ALPSCore's attributes, Python dicts) can supply values
+            // too, and the text can be handed on (alps::Parameters).
+
+            /// Supplies a value as text, as an INI file or the command line would
+            /** `define<T>()` parses the text as a `T`, as it parses a value
+                from a file. A parameter that is already defined cannot be
+                supplied.
+                @throws std::logic_error if `name` is already defined
+             **/
+            params& supply(const std::string& name, const std::string& text);
+            /// The supplied text of every supplied parameter, by name
+            const std::map<std::string, std::string>& supplied_text() const { return raw_kv_content_; }
+
             /// True if there are parameters supplied but not defined; prints them out
             bool has_unused(std::ostream& out) const;
 

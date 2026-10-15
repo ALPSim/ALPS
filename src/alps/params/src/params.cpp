@@ -156,6 +156,16 @@ namespace alps {
             return *this;
         }
 
+        // ALPS: see params.hpp
+        params& params::supply(const std::string& name, const std::string& text)
+        {
+            if (td_map_.count(name)!=0) {
+                throw std::logic_error("params::supply(): parameter '"+name+"' is already defined");
+            }
+            raw_kv_content_[name]=text;
+            return *this;
+        }
+
         bool params::has_unused_(std::ostream& out, const std::string* prefix_ptr) const
         {
             strvec unused;
