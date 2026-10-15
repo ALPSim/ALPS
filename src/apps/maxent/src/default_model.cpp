@@ -39,10 +39,10 @@
 
 ///This class deals with tabulated model functions
 TabFunction::TabFunction(const alps::params& p, std::string const& name){
-  std::string p_name = p[name].cast<std::string>();
+  std::string p_name = p[name].as<std::string>();
   std::ifstream defstream(p_name.c_str());
   if (!defstream)
-    throw std::invalid_argument("could not open default model file: "+p[name].cast<std::string>());
+    throw std::invalid_argument("could not open default model file: "+p[name].as<std::string>());
   std::string line;
   while (getline(defstream, line)) {
     std::stringstream linestream(line);
@@ -61,7 +61,7 @@ TabFunction::TabFunction(const alps::params& p, std::string const& name){
   if (Omega_.size() < 2)
     throw std::invalid_argument("default-model table needs at least two rows: " + p_name);
   double omega_max = p["OMEGA_MAX"];
-  double omega_min = p.defined("OMEGA_MIN") ? p["OMEGA_MIN"].cast<double>() : -omega_max; //we had a 0 here in the bosonic case. That's not a good idea if you're continuing symmetric functions like chi(omega)/omega. Change omega_min to zero manually if you need it.
+  double omega_min = p.exists("OMEGA_MIN") ? p["OMEGA_MIN"] : -omega_max; //we had a 0 here in the bosonic case. That's not a good idea if you're continuing symmetric functions like chi(omega)/omega. Change omega_min to zero manually if you need it.
   if (Omega_[0]!=omega_min || Omega_.back()!=omega_max){
     std::cout<<"Omega[ 0] "<<Omega_[0]<<" omega min: "<<omega_min<<std::endl;
     std::cout<<"Omega[-1] "<<Omega_.back()<<" omega max: "<<omega_max<<std::endl;
@@ -142,7 +142,7 @@ double GeneralDefaultModel::norm() {
 }
 
 std::shared_ptr<DefaultModel> make_default_model(const alps::params& parms, std::string const& name){
-  std::string p_name = parms[name].cast<std::string>();
+  std::string p_name = parms[name].as<std::string>();
   to_lower(p_name);
   if (p_name == "flat") {
     std::cout << "Using flat default model" << std::endl;

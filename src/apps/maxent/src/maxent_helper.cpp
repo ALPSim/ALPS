@@ -40,7 +40,7 @@
 
 MaxEntHelper::MaxEntHelper(alps::params& p) :
 MaxEntParameters(p),
-bootstrap_seed_(static_cast<std::mt19937::result_type>(p["SEED"].cast<int>())),
+bootstrap_seed_(p["SEED"].as<std::mt19937::result_type>()),
 def_(nfreq()), text_output(p["TEXT_OUTPUT"])
 {
     for (int i=0; i<nfreq(); ++i)

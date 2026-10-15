@@ -26,7 +26,7 @@
 
 // Adapted from CQMP/Maxent src/maxent_kernel.cpp, revision
 // e727650a1f0a427e95efebc409d907b4c84011ec, on 2026-10-14.
-// Uses ALPS parameter APIs and retains ALPS input/output conventions;
+// Uses ALPS's HDF5 archive and retains ALPS input/output conventions;
 // see ../README.md for provenance and licensing.
 #include "maxent_kernel.hpp"
 #include <cmath>
@@ -36,7 +36,7 @@
 kernel::kernel(alps::params &p, const vector_type& freq, vector_type &inputGrid):
 ndat_(p["NDAT"]),
 nfreq_(p["NFREQ"]),
-T_(p["T"] | (1./static_cast<double>(p["BETA"]))),
+T_(1./static_cast<double>(p["BETA"])),
 K_(ndat_,nfreq_)
 {
   //K_.clear();
@@ -55,8 +55,9 @@ K_(ndat_,nfreq_)
     tau_points_.resize(ndat_);
     for (int i=0; i<ndat_; ++i) {
       const std::string key = "TAU_" + std::to_string(i);
-      // Retain ALPS's per-point overrides and uniform default for all inputs.
-      tau_points_[i] = p[key] | (i / ((ndat_-1)*T_));
+      // ALPS: TAU_i override a uniform grid, point by point, for every input.
+      if (!p.defined(key) && p.supplied(key)) p.define<double>(key, "");
+      tau_points_[i] = p.exists(key) ? p[key].as<double>() : i / ((ndat_-1)*T_);
     }
     inputGrid = tau_points_;
   }

@@ -26,7 +26,7 @@
 
 // Adapted from CQMP/Maxent src/maxent_params.cpp, revision
 // e727650a1f0a427e95efebc409d907b4c84011ec, on 2026-10-14.
-// Uses ALPS parameter APIs and retains ALPS input/output conventions;
+// Uses ALPS's HDF5 archive and retains ALPS input/output conventions;
 // see ../README.md for provenance and licensing.
 
 #include "maxent.hpp"
@@ -40,7 +40,7 @@
 // frequency data uses alternating real and imaginary rows. Imaginary times
 // come from TAU_i parameters or the uniform grid, independently of the index.
 void ContiParameters::read_data_from_text_file(const alps::params& p) {
-  const std::string fname = p["DATA"].cast<std::string>();
+  std::string fname = p["DATA"];
   std::ifstream datstream(fname.c_str());
   if (!datstream)
     throw std::invalid_argument("could not open data text file: " + fname);
@@ -63,8 +63,10 @@ void ContiParameters::read_data_from_text_file(const alps::params& p) {
   if (std::find(loaded.begin(), loaded.end(), false) != loaded.end())
     throw std::invalid_argument("data file has fewer than NDAT indexed values: " + fname);
 
-  if (!p["COVARIANCE_MATRIX"].cast<std::string>().empty())
-    read_covariance_matrix_from_text_file(p["COVARIANCE_MATRIX"].cast<std::string>());
+  if(p["COVARIANCE_MATRIX"]!="") {
+    std::string fname = p["COVARIANCE_MATRIX"];
+    read_covariance_matrix_from_text_file(fname);
+  }
 }
 
 ///Read data from a hdf5 file, with filename given by p["DATA"] in the parameters.
@@ -84,7 +86,7 @@ void ContiParameters::read_data_from_hdf5_file(const alps::params& p) {
   for (int i = 0; i < ndat(); i++)
     y_(i) = tmp[i] / static_cast<double>(p["NORM"]);
   path.str("");
-  if (p["COVARIANCE_MATRIX"].cast<std::string>()=="") {
+  if (p["COVARIANCE_MATRIX"]=="") {
     path << "/Error";
     ar >> alps::make_pvp(path.str(), tmp);
     for (int i = 0; i < ndat(); i++)
@@ -109,13 +111,13 @@ void ContiParameters::read_data_from_param_file(const alps::params& p) {
         << std::endl;
 
   for (int i = 0; i < ndat(); ++i) {
-    if (!p.defined("X_" + std::to_string(i))) {
+    if (!p.exists("X_" + std::to_string(i))) {
       throw std::runtime_error("parameter X_"+ std::to_string(i)+ " missing!");
     }
     y_(i) = static_cast<double>(p["X_" + std::to_string(i)])
         / static_cast<double>(p["NORM"]);
-    if (p["COVARIANCE_MATRIX"].cast<std::string>()=="") {
-      if (!p.defined("SIGMA_" + std::to_string(i))) {
+    if (p["COVARIANCE_MATRIX"]=="") {
+      if (!p.exists("SIGMA_" + std::to_string(i))) {
         throw std::runtime_error(
             std::string("parameter SIGMA_"+std::to_string(i)+ " missing! "));
       }
@@ -127,7 +129,7 @@ void ContiParameters::read_data_from_param_file(const alps::params& p) {
 }
 
 ContiParameters::ContiParameters(alps::params& p) :
-T_(p["T"] | (1/p["BETA"].cast<double>())),ndat_(p["NDAT"]), nfreq_(p["NFREQ"]),
+T_(1/p["BETA"].as<double>()),ndat_(p["NDAT"]), nfreq_(p["NFREQ"]),
 y_(ndat_),sigma_(ndat_),K_(),grid_(p),inputGrid_(ndat_)
 {
   //note: T_=1/beta now taken care of elsewhere
@@ -135,7 +137,7 @@ y_(ndat_),sigma_(ndat_),K_(),grid_(p),inputGrid_(ndat_)
     throw std::invalid_argument("NDAT too small");
 
 
-  if (p.defined("DATA") && p["DATA"].cast<std::string>() != "") {
+  if (p.defined("DATA") && p["DATA"].as<std::string>() != "") {
     if(p.defined("DATA_IN_HDF5") && (p["DATA_IN_HDF5"])) {
       //attempt to read from h5 archive
       read_data_from_hdf5_file(p);
@@ -143,10 +145,19 @@ y_(ndat_),sigma_(ndat_),K_(),grid_(p),inputGrid_(ndat_)
       read_data_from_text_file(p);
     }
   } else {
-    // ALPS parameters already contain the typed X_i and SIGMA_i values.
+      //if using input file with X_i, need to define them first
+      for (int i = 1; i < ndat(); ++i) {
+        //first check for explictly assigned
+        std::string x_str = "X_"+std::to_string(i);
+        if(!p.defined(x_str)){
+          p.define<double>(x_str,"");
+          p.define<double>("SIGMA_"+std::to_string(i),"");
+        }
+      }
     read_data_from_param_file(p);
-    if (p["COVARIANCE_MATRIX"].cast<std::string>() != "")
-      read_covariance_matrix_from_text_file(p["COVARIANCE_MATRIX"].cast<std::string>());
+    // ALPS also takes a covariance matrix file with inline data.
+    if (p["COVARIANCE_MATRIX"]!="")
+      read_covariance_matrix_from_text_file(p["COVARIANCE_MATRIX"]);
   }
 }
 
@@ -341,7 +352,7 @@ MaxEntParameters::MaxEntParameters(alps::params& p) :
   k_type = ker.getKernelType();
 
   //scale lhs and rhs according to errors, etc.
-  if (p["COVARIANCE_MATRIX"].cast<std::string>()!="") {
+  if (p["COVARIANCE_MATRIX"]!="") {
     decompose_covariance_matrix(p);
   }
 
@@ -354,8 +365,8 @@ MaxEntParameters::MaxEntParameters(alps::params& p) :
   scale_data_with_error(nfreq());
 
   // Preserve ALPS's optional normalization constraint on the final data row.
-  if (p["ENFORCE_NORMALIZATION"] | false) {
-    const double sigma = p["SIGMA_NORMALIZATION"].cast<double>() / p["NORM"].cast<double>();
+  if (p["ENFORCE_NORMALIZATION"].as<bool>()) {
+    const double sigma = p["SIGMA_NORMALIZATION"].as<double>() / p["NORM"].as<double>();
     for (int j=0; j<nfreq(); ++j)
       K_(ndat()-1,j) = 1. / sigma;
     y_[ndat()-1] = 1. / sigma;

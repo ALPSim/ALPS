@@ -11,11 +11,11 @@
 
 // Adapted from CQMP/Maxent src/maxent_kernel.hpp, revision
 // e727650a1f0a427e95efebc409d907b4c84011ec, on 2026-10-14.
-// Uses ALPS parameter APIs and retains ALPS input/output conventions;
+// Uses ALPS's HDF5 archive and retains ALPS input/output conventions;
 // see ../README.md for provenance and licensing.
 #pragma once
 #include<vector>
-#include<alps/ngs/params.hpp>
+#include <alps/params.hpp>
 #include<iostream>
 #include"maxent_matrix_def.hpp"
 ///enum that enumerates if we're in time or in frequency

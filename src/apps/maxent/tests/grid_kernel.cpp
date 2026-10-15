@@ -258,7 +258,11 @@ TEST(MaxEntParameters, RejectUnsupportedContinuations) {
   parameters["COVARIANCE_MATRIX"] = std::string("HDF5");
   EXPECT_THROW(MaxEntSimulation::define_parameters(parameters), std::invalid_argument);
 
-  parameters["DATA_IN_HDF5"] = true;
-  parameters["COVARIANCE_MATRIX"] = std::string("");
-  EXPECT_THROW(MaxEntSimulation::define_parameters(parameters), std::invalid_argument);
+  // An input file that names COVARIANCE_MATRIX, even empty, selects HDF5
+  // covariance input; supplied text is how files and dicts reach params.
+  alps::params from_file;
+  from_file.supply("BACKCONTINUE", "1");
+  from_file.supply("DATA_IN_HDF5", "1");
+  from_file.supply("COVARIANCE_MATRIX", "");
+  EXPECT_THROW(MaxEntSimulation::define_parameters(from_file), std::invalid_argument);
 }

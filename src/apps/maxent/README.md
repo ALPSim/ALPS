@@ -29,8 +29,15 @@ and `default_model.cpp`.
 
 The adaptations are confined to this application:
 
-- Use ALPS's existing typed parameters and HDF5 archive instead of requiring a
-  separate ALPSCore installation. Parameter defaults are supplied locally.
+- Use ALPS's parameters, which are ALPSCore's, and its HDF5 archive, so the
+  upstream parameter definitions and reads apply as written. ALPS keeps the
+  defaults of its earlier solver where they differ: `TEXT_OUTPUT` and
+  `BACKCONTINUE` are off, `SEED` is 42 and `FREQUENCY_GRID` is linear. `T` may
+  be given instead of `BETA`; `MAX_TIME` and `ENFORCE_NORMALIZATION` are ALPS's
+  own. Parameters upstream defines without a default (`X_0`, `SIGMA_0`,
+  `TAU_0`, `OMEGA_MIN` and the default-model widths and shifts) are defined
+  only when given, because the ALPS entry point rejects missing parameters,
+  and `MODEL_RUNS` is not read.
 - Use Eigen for matrix operations and ALPS's existing LP64 LAPACK for the SVD.
   Application builds additionally require Eigen >= 3.3. Library-only builds do
   not require Eigen.

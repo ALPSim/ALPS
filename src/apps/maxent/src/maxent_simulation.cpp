@@ -42,12 +42,12 @@ MaxEntSimulation::MaxEntSimulation(alps::params parms, const std::string& outfil
 , norm(parms["NORM"])                                             //The integral is normalized to NORM (use e.g. for self-energies
 , max_it(parms["MAX_IT"])                                       //The number of iterations done in the root finding procedure
 , output_file(outfile)
-, Kernel_type(parms["KERNEL"].cast<std::string>())
+, Kernel_type(parms["KERNEL"].as<std::string>())
 , verbose(parms["VERBOSE"])
 , self(parms["SELF"])
 , make_back(parms["BACKCONTINUE"])
 , gen_err(parms["GENERATE_ERR"])
-, nfreq(parms["NFREQ"].cast<int>())
+, nfreq(parms["NFREQ"].as<int>())
 , qvec((int)parms["N_ALPHA"])
 {
   // Preserve ALPS's explicit HDF5 destination and diagnostic filename prefix.
@@ -62,48 +62,110 @@ MaxEntSimulation::MaxEntSimulation(alps::params parms, const std::string& outfil
   for (Eigen::Index a=1; a<alpha.size(); ++a)                                            //These are all the alpa values on a log grid
     alpha[a] =  alpha[a-1] * std::pow(alpha_min/alpha_max, 1./double(alpha.size()-1));
 }
-// ALPS stores typed parameters directly; install only missing upstream defaults.
-// Keep text/backcontinuation output opt-in, as in the existing ALPS solver.
-alps::params& MaxEntSimulation::define_parameters(alps::params& p) {
-  if (!p.defined("DATA_IN_HDF5")) p["DATA_IN_HDF5"] = false;
-  // In ALPS HDF5 input, specifying this parameter selects /Covariance even
-  // when its value is empty; an absent parameter selects /Error instead.
-  if (p["DATA_IN_HDF5"].cast<bool>() && p.defined("COVARIANCE_MATRIX")
-      && p["COVARIANCE_MATRIX"].cast<std::string>().empty())
+namespace {
+// Whether a parameter was given: supplied as text, or assigned a value.
+bool given(const alps::params& p, const std::string& name) {
+  return p.supplied(name) || p.exists(name);
+}
+// Upstream defines these without a default, since only some inputs and
+// default models read them. ALPS rejects missing parameters before a run, so
+// they are defined only when given.
+void define_optional(alps::params& p, const std::string& name, const std::string& descr) {
+  if (given(p, name)) p.define<double>(name, descr);
+}
+}
+
+///define parameter defaults
+alps::params& MaxEntSimulation::define_parameters(alps::params &p){
+  p.description("Maxent - a utility for " 
+    "performing analytic continuation \n \t using the method of Maximum Entropy\n");
+  //---------------------------------
+  //    General
+  //---------------------------------
+  p.define<bool>("DATA_IN_HDF5",false,"true if data is in HDF5 format");
+  // ALPS: text output and backcontinuation stay opt-in, as in its earlier solver.
+  p.define<bool>("TEXT_OUTPUT",false,"true if results should be output to text files");
+  p.define<bool>("VERBOSE",false,"true to print verbose output");
+  p.define<bool>("SELF",false,"input is a self energy");
+  p.define<int>("MAX_IT",1000,"Maximum Iterations for the fitting routine");
+  p.define<int>("N_ALPHA",60,"Number of alpha samples");
+  p.define<double>("ALPHA_MIN",0.01,"Minimum alpha");
+  p.define<double>("ALPHA_MAX",20,"Maximum alpha");
+  p.define<double>("NORM",1.0,"NORM");
+  p.define<bool>("BACKCONTINUE",false,"Output A(omega) back to imaginary axis");
+  p.define<bool>("GENERATE_ERR",false,"Generate a bootstrap approximation for error bars");
+  // ALPS: mcbase's SEED default of 42 instead of upstream's 0.
+  p.define<unsigned int>("SEED",42,"Seed for reproducible bootstrap error bars");
+  //*********************************
+  // ALPS: T may be given instead of BETA.
+  if (given(p, "T")) p.define<double>("T","temperature; BETA = 1/T unless BETA is given");
+  if (given(p, "T") && !given(p, "BETA"))
+    p.define<double>("BETA",1./p["T"].as<double>(),"beta, inverse temperature");
+  else
+    p.define<double>("BETA","beta, inverse temperature");
+  p.define<int>("NDAT","# of input points");
+  p.define<std::string>("DATA","","data file input");
+  p.define<std::string>("COVARIANCE_MATRIX","","name of covariance matrix file");
+  p.define<double>("CM_EIGENVALUE_CUTOFF",1e-10, "Cutoff for eigenvalues of the covariance matrix");
+  p.define<std::string>("BASENAME","","Specified output name (generated if not given)");
+  // ALPS: no MODEL_RUNS; the entry point runs one default model.
+  define_optional(p, "X_0","G input for param file entry");
+  define_optional(p, "SIGMA_0","G error input for param file entry");
+  define_optional(p, "TAU_0","Used for input tau points");
+  // ALPS: the run's time limit and its normalization constraint.
+  p.define<int>("MAX_TIME",60,"time limit in seconds");
+  p.define<bool>("ENFORCE_NORMALIZATION",false,"add the normalization as a data point with error SIGMA_NORMALIZATION");
+  if (p["ENFORCE_NORMALIZATION"].as<bool>())
+    p.define<double>("SIGMA_NORMALIZATION","error of the normalization data point");
+
+
+  //---------------------------------
+  //      Default Model
+  //---------------------------------
+  p.define<double>("OMEGA_MAX",10,"Maximum frequency for A(omega) grid");
+  define_optional(p, "OMEGA_MIN","Minimum frequency, or =-OMEGA_MAX");
+  p.define<std::string>("DEFAULT_MODEL","flat","Default model for entropy");
+  p.define<double>("NORM1",0.5,"for Two Gaussians model");
+  p.define<double>("SHIFT",0.0,"shift of a model");
+  p.define<double>("SHIFT1",0.0,"for Two Gaussians model");
+  define_optional(p, "SHIFT2","for Two Gaussians model");
+  define_optional(p, "SIGMA1","for Two Gaussians model");
+  define_optional(p, "SIGMA2","for Two Gaussians model");
+  define_optional(p, "SIGMA","stddev - For Gaussian models");
+  define_optional(p, "GAMMA","width of Lorentzian model"); 
+  define_optional(p, "GAMMA1","for Two Lorentzian models");
+  define_optional(p, "GAMMA2","for Two Lorentzian models");
+
+  define_optional(p, "LAMBDA","for ___ExpDecay models");
+  define_optional(p, "BOSE_NORM","General Double Gaussian Norm");
+  
+  //---------------------------------
+  //    Grid
+  //---------------------------------
+  p.define<double>("CUT",0.01,"cut for lorentzian grids");
+  p.define<double>("SPREAD",4,"spread for quadratic grid");
+  p.define<double>("LOG_MIN",1.0e-4,"log_min for log grid");
+  p.define<int>("NFREQ",1000,"Number of A(omega) frequencies");
+  // ALPS: the default grid stays linear, as in its earlier solver.
+  p.define<std::string>("FREQUENCY_GRID","linear","Type of frequency grid");
+
+  //---------------------------------
+  //    Kernel
+  //---------------------------------
+  p.define<std::string>("DATASPACE","time","Time or Frequency space");
+  p.define<std::string>("KERNEL","fermionic","Type of kernel: Fermionic,Bosonic,TZero,Legendre"); 
+  p.define<bool>("PARTICLE_HOLE_SYMMETRY",false,"Set =true if particle hole symmetric"); 
+
+  // In ALPS HDF5 input, supplying this parameter selects /Covariance even
+  // when its value is empty; an absent parameter selects /Error instead. Only
+  // supplied text can tell the two apart once the default is in place, and
+  // every call re-derives the marker, since define() re-reads that text.
+  if (p["DATA_IN_HDF5"].as<bool>() && p.supplied("COVARIANCE_MATRIX")
+      && p["COVARIANCE_MATRIX"].as<std::string>().empty())
     p["COVARIANCE_MATRIX"] = std::string("HDF5");
-  if (!p.defined("TEXT_OUTPUT")) p["TEXT_OUTPUT"] = false;
-  if (!p.defined("VERBOSE")) p["VERBOSE"] = false;
-  if (!p.defined("SELF")) p["SELF"] = false;
-  if (!p.defined("MAX_IT")) p["MAX_IT"] = 1000;
-  if (!p.defined("N_ALPHA")) p["N_ALPHA"] = 60;
-  if (!p.defined("ALPHA_MIN")) p["ALPHA_MIN"] = 0.01;
-  if (!p.defined("ALPHA_MAX")) p["ALPHA_MAX"] = 20;
-  if (!p.defined("NORM")) p["NORM"] = 1.0;
-  if (!p.defined("BACKCONTINUE")) p["BACKCONTINUE"] = false;
-  if (!p.defined("GENERATE_ERR")) p["GENERATE_ERR"] = false;
-  // Seeds the GENERATE_ERR bootstrap. ALPS keeps mcbase's SEED default of 42
-  // instead of upstream's 0.
-  if (!p.defined("SEED")) p["SEED"] = 42;
-  if (!p.defined("DATA")) p["DATA"] = std::string("");
-  if (!p.defined("COVARIANCE_MATRIX")) p["COVARIANCE_MATRIX"] = std::string("");
-  if (!p.defined("CM_EIGENVALUE_CUTOFF")) p["CM_EIGENVALUE_CUTOFF"] = 1e-10;
-  if (!p.defined("BASENAME")) p["BASENAME"] = std::string("");
-  if (!p.defined("OMEGA_MAX")) p["OMEGA_MAX"] = 10;
-  if (!p.defined("DEFAULT_MODEL")) p["DEFAULT_MODEL"] = std::string("flat");
-  if (!p.defined("NORM1")) p["NORM1"] = 0.5;
-  if (!p.defined("SHIFT")) p["SHIFT"] = 0.0;
-  if (!p.defined("SHIFT1")) p["SHIFT1"] = 0.0;
-  if (!p.defined("CUT")) p["CUT"] = 0.01;
-  if (!p.defined("SPREAD")) p["SPREAD"] = 4;
-  if (!p.defined("LOG_MIN")) p["LOG_MIN"] = 1.0e-4;
-  if (!p.defined("NFREQ")) p["NFREQ"] = 1000;
-  if (!p.defined("FREQUENCY_GRID")) p["FREQUENCY_GRID"] = std::string("linear");
-  if (!p.defined("DATASPACE")) p["DATASPACE"] = std::string("time");
-  if (!p.defined("KERNEL")) p["KERNEL"] = std::string("fermionic");
-  if (!p.defined("PARTICLE_HOLE_SYMMETRY")) p["PARTICLE_HOLE_SYMMETRY"] = false;
   // The upstream backcontinuation uses the error-scaled kernel. After a
   // covariance rotation its rows no longer label the original input grid.
-  if (p["BACKCONTINUE"].cast<bool>() && !p["COVARIANCE_MATRIX"].cast<std::string>().empty())
+  if (p["BACKCONTINUE"].as<bool>() && !p["COVARIANCE_MATRIX"].as<std::string>().empty())
     throw std::invalid_argument("BACKCONTINUE with COVARIANCE_MATRIX is not supported");
   return p;
 }

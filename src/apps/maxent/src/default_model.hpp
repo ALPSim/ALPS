@@ -31,7 +31,7 @@
 #pragma once
 
 #include <math.h>
-#include <alps/ngs/params.hpp>
+#include <alps/params.hpp>
 #include <iostream>
 #include <memory>
 
@@ -57,7 +57,7 @@ class DefaultModel
 public:
   DefaultModel(const alps::params& p) :
     omega_max(p["OMEGA_MAX"]),
-    omega_min( p.defined("OMEGA_MIN") ? p["OMEGA_MIN"].cast<double>() : -omega_max){ //we had a 0 here in the bosonic case. That's not a good idea if you're continuing symmetric functions like chi(omega)/omega. Change omega_min to zero manually if you need it.
+    omega_min( p.exists("OMEGA_MIN") ? p["OMEGA_MIN"] : -omega_max){ //we had a 0 here in the bosonic case. That's not a good idea if you're continuing symmetric functions like chi(omega)/omega. Change omega_min to zero manually if you need it.
   }
 
   virtual ~DefaultModel(){}
@@ -147,10 +147,10 @@ class TwoGaussians : public Model
 {
 public:
   TwoGaussians(const alps::params& p) : sigma1(static_cast<double>(p["SIGMA1"])),
-  sigma2(p["SIGMA2"].cast<double>()),
-  shift1(p["SHIFT1"].cast<double>()), //0.0
-  shift2(p["SHIFT2"].cast<double>()),
-  norm1(p["NORM1"].cast<double>()) {} //0.5
+  sigma2(p["SIGMA2"].as<double>()),
+  shift1(p["SHIFT1"].as<double>()), //0.0
+  shift2(p["SHIFT2"].as<double>()),
+  norm1(p["NORM1"].as<double>()) {} //0.5
 
   virtual double operator()(const double omega) {
     return norm1*std::exp(-(omega-shift1)*(omega-shift1)/2./sigma1/sigma1)/sqrt(2*M_PI)/sigma1+(1.0-norm1)*std::exp(-(omega-shift2)*(omega-shift2)/2./sigma2/sigma2)/sqrt(2*M_PI)/sigma2;
