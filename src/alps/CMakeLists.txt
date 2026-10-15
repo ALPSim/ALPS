@@ -126,7 +126,7 @@ target_sources(alps_configuration INTERFACE
 
 # Filesystem ownership follows scientific responsibilities. Some modules still
 # contribute to libalps until their dependency cycles have been disentangled.
-foreach(module IN ITEMS containers utilities cli numerics ietl solvers models xml plotting
+foreach(module IN ITEMS containers utilities cli numerics ietl solvers models ed xml plotting
                         legacy_parameters expression graph lattice model random
                         osiris hdf5 numeric_io numeric_xml params alea accumulators mc scheduler parapack fortran)
   add_subdirectory(${module})
@@ -145,7 +145,7 @@ endif()
 set(ALPS_SDK_TARGETS alps alps_utilities alps_hdf5 alps_params alps_osiris
                      alps_xml alps_cli alps_headers alps_configuration
                      alps_containers alps_numerics alps_numeric_io alps_numeric_xml alps_solver_headers
-                     alps_models)
+                     alps_models alps_ed)
 set(sdk_components "")
 set(sdk_runtime_targets "")
 foreach(target IN LISTS ALPS_SDK_TARGETS ITEMS alps_fortran)

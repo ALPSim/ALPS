@@ -20,6 +20,7 @@ Sources use `include/`, `src/` and `tests/` where applicable. Public include spe
 | `legacy_parameters/`, `expression/` | Older `alps::Parameters` and expression evaluation | `ALPS::alps` |
 | `graph/`, `lattice/`, `model/` | Graph helpers, lattice definitions and physical models | `ALPS::headers`, `ALPS::alps` |
 | `models/` | Programmatic lattices, local Hilbert spaces, operator algebra and compiled Hamiltonians (`<alps/models.hpp>`); independent of the XML catalog. See [its README](models/README.md) | `ALPS::models` |
+| `ed/` | Exact diagonalization of compiled operators: product-basis sectors, sparse assembly, dense LAPACK and deflated IETL Lanczos eigensolvers (`<alps/ed.hpp>`). See [its README](ed/README.md) | `ALPS::ed` |
 | `random/` | Random generators and their factories | `ALPS::alps` |
 | `alea/`, `accumulators/` | Observable/result facilities and accumulator implementations | `ALPS::alps` |
 | `mc/`, `scheduler/`, `parapack/` | Simulation API, execution and scheduling | `ALPS::alps` |

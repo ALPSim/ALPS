@@ -34,7 +34,7 @@ else()
     return()
   endif()
   if(EXPECT_APPLICATIONS)
-    find_package(ALPS CONFIG REQUIRED COMPONENTS applications utilities hdf5 params osiris xml cli models)
+    find_package(ALPS CONFIG REQUIRED COMPONENTS applications utilities hdf5 params osiris xml cli models ed)
     set(application_paths "")
     foreach(application IN LISTS ALPS_APPLICATION_TARGETS)
       string(APPEND application_paths "$<TARGET_FILE:${application}>\n")
@@ -42,7 +42,7 @@ else()
     file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/applications-$<CONFIG>.txt"
       CONTENT "${application_paths}")
   else()
-    find_package(ALPS CONFIG REQUIRED COMPONENTS utilities hdf5 params osiris xml cli numerics numeric_io numeric_xml models)
+    find_package(ALPS CONFIG REQUIRED COMPONENTS utilities hdf5 params osiris xml cli numerics numeric_io numeric_xml models ed)
   endif()
   if(EXPECT_SOLVERS)
     find_package(ALPS CONFIG REQUIRED COMPONENTS solvers)
@@ -134,6 +134,9 @@ foreach(component IN ITEMS xml cli)
 endforeach()
 add_component_contract(models models.cpp
   "ALPS::alps|ALPS::params|ALPS::hdf5|ALPS::xml|HDF5::|MPI::|${numerical_dependencies}")
+# The ed component links LAPACK privately; it must not expose the runtime.
+add_component_contract(ed ed.cpp
+  "ALPS::alps|ALPS::params|ALPS::hdf5|ALPS::xml|HDF5::|MPI::")
 add_contract(sdk main.cpp ALPS::alps)
 add_contract(numeric numerics.cpp ALPS::numerics)
 add_contract(numeric_io numeric_io.cpp ALPS::numeric_io)
@@ -155,6 +158,6 @@ if(NOT ALPS_SOURCE)
 endif()
 if(NOT ALPS_SOURCE)
   set_tests_properties(sdk_contract sdk_resources numeric_contract numeric_io_contract numeric_xml_contract utilities_contract hdf5_contract
-    params_contract osiris_contract xml_contract cli_contract models_contract parameter_adapters_contract PROPERTIES ENVIRONMENT_MODIFICATION
+    params_contract osiris_contract xml_contract cli_contract models_contract ed_contract parameter_adapters_contract PROPERTIES ENVIRONMENT_MODIFICATION
     "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
 endif()
