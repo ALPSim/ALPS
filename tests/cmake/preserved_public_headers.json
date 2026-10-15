@@ -937,6 +937,12 @@
   ],
   "retired": {
     "alps/utility/factory.hpp": "did not compile in 3.0.0 (a syntax error in factory::register_type), so no consumer could use it",
+    "alps/ngs/detail/paramiterator.hpp": "internal header of the NGS parameters, which ALPSCore's parameters in <alps/params.hpp> replace",
+    "alps/ngs/detail/paramproxy.hpp": "internal header of the NGS parameters, which ALPSCore's parameters in <alps/params.hpp> replace",
+    "alps/ngs/detail/params_impl_base.hpp": "internal header of the NGS parameters, which ALPSCore's parameters in <alps/params.hpp> replace",
+    "alps/ngs/detail/paramvalue.hpp": "internal header of the NGS parameters, which ALPSCore's parameters in <alps/params.hpp> replace",
+    "alps/ngs/detail/paramvalue_reader.hpp": "internal header of the NGS parameters, which ALPSCore's parameters in <alps/params.hpp> replace",
+    "alps/ngs/params.hpp": "the NGS parameters, which ALPSCore's parameters in <alps/params.hpp> replace",
     "alps/ngs/parapack/clone.h": "NGS bridge from parapack to the NGS parameters, which ALPSCore's parameters replace; nothing used it",
     "alps/ngs/parapack/clone_info.h": "NGS bridge from parapack to the NGS parameters, which ALPSCore's parameters replace; nothing used it",
     "alps/ngs/parapack/clone_info_p.h": "NGS bridge from parapack to the NGS parameters, which ALPSCore's parameters replace; nothing used it",

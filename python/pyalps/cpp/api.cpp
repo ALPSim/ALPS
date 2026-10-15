@@ -11,7 +11,7 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>
 #include <alps/ngs/mcresults.hpp>
-#include <alps/ngs/params.hpp>
+#include <alps/params.hpp>
 #include <alps/hdf5/archive.hpp>
 #include <alps/mcbase.hpp>
 namespace nb = nanobind;

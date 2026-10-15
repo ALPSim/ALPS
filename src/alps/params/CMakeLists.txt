@@ -1,22 +1,9 @@
-# Typed parameters have no link dependency on the legacy parameter/parser runtime.
-add_library(alps_params
-  src/ngs/paramproxy.cpp
-  src/ngs/params.cpp
-  src/ngs/paramvalue.cpp)
-target_link_libraries(alps_params PUBLIC ALPS::configuration ALPS::hdf5 Boost::serialization
-  PRIVATE "$<COMPILE_ONLY:ALPS::numerics>")
-if(ALPS_ENABLE_MPI)
-  target_link_libraries(alps_params PUBLIC MPI::MPI_CXX Boost::mpi)
-endif()
-alps_configure_component(alps_params params)
-
-# ALPSCore's parameters, alps::params_ns::params in <alps/params.hpp>, copied
-# from ALPSCore. They read INI files with the bundled iniparser C library.
-# Their names do not collide with the NGS class above; only a translation
-# unit including both <alps/params.hpp> and <alps/ngs/params.hpp> fails.
+# ALPSCore's parameters, alps::params in <alps/params.hpp>, copied from
+# ALPSCore; see the README. They read INI files with the bundled iniparser C
+# library, and have no link dependency on the legacy parameter/parser runtime.
 add_library(alps_params_iniparser OBJECT iniparser/src/dictionary.c iniparser/src/iniparser.c)
 set_target_properties(alps_params_iniparser PROPERTIES POSITION_INDEPENDENT_CODE ON)
-target_sources(alps_params PRIVATE
+add_library(alps_params
   src/dict_value.cpp
   src/dictionary.cpp
   src/iniparser_interface.cpp
@@ -24,7 +11,11 @@ target_sources(alps_params PRIVATE
   src/text_values.cpp
   $<TARGET_OBJECTS:alps_params_iniparser>)
 target_include_directories(alps_params PRIVATE iniparser/src)
-target_link_libraries(alps_params PUBLIC ALPS::utilities)
+target_link_libraries(alps_params PUBLIC ALPS::configuration ALPS::utilities ALPS::hdf5)
+if(ALPS_ENABLE_MPI)
+  target_link_libraries(alps_params PUBLIC MPI::MPI_CXX)
+endif()
+alps_configure_component(alps_params params)
 # ALPSCore's sources have no export macros; export everything as ALPSCore did.
 set_target_properties(alps_params PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 target_sources(alps_params PUBLIC
@@ -53,17 +44,6 @@ install(FILES ACKNOWLEDGE.TXT COPYRIGHT.TXT LICENSE.TXT
   DESTINATION "${CMAKE_INSTALL_DATADIR}/alps/licenses/params" COMPONENT libraries)
 install(FILES iniparser/LICENSE iniparser/AUTHORS
   DESTINATION "${CMAKE_INSTALL_DATADIR}/alps/licenses/params/iniparser" COMPONENT libraries)
-target_sources(alps_params PUBLIC
-  FILE_SET params_headers TYPE HEADERS
-  BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
-  FILES
-    include/alps/ngs/detail/paramiterator.hpp
-    include/alps/ngs/detail/paramproxy.hpp
-    include/alps/ngs/detail/params_impl_base.hpp
-    include/alps/ngs/detail/paramvalue.hpp
-    include/alps/ngs/detail/paramvalue_reader.hpp
-    include/alps/ngs/params.hpp)
-
 add_subdirectory(adapters)
 
 if(ALPS_BUILD_TESTING)

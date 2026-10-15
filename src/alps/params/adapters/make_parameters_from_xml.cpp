@@ -40,7 +40,7 @@ namespace alps {
         
         params res;
         for (Parameters::const_iterator it = par.begin(); it != par.end(); ++it)
-            res[it->key()] = it->value();
+            res.supply(it->key(), it->value());
         return res;
     }
 }

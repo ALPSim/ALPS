@@ -6,6 +6,7 @@
 
 #include <alps/hdf5/vector.hpp>
 
+#include <cerrno>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -25,6 +26,60 @@ namespace alps {
                 if (!std::isfinite(value) || std::strtod(buffer, nullptr) == value) break;
             }
             return buffer;
+        }
+
+        namespace {
+
+            // 1 for an integer that fits in a long, 2 for another number, 0 for
+            // text that is not a number as a whole (hexadecimal is not one)
+            int parse_number(const std::string& text, long& integer, double& real) {
+                if (text.empty() || text.find_first_of("xX") != std::string::npos) return 0;
+                const char* begin = text.c_str();
+                char* end = nullptr;
+                errno = 0;
+                integer = std::strtol(begin, &end, 10);
+                if (*end == '\0' && errno == 0) {
+                    real = static_cast<double>(integer);
+                    return 1;
+                }
+                real = std::strtod(begin, &end);
+                return *end == '\0' ? 2 : 0;
+            }
+
+        } // namespace
+
+        dict_value supplied_value(const std::string& name, const std::string& text) {
+            dict_value value(name);
+            long integer = 0;
+            double real = 0.0;
+            if (text.find(',') == std::string::npos) {
+                switch (parse_number(text, integer, real)) {
+                case 1: value = integer; break;
+                case 2: value = real; break;
+                default: value = text;
+                }
+                return value;
+            }
+            std::vector<long> integers;
+            std::vector<double> reals;
+            bool all_integers = true;
+            for (std::string::size_type start = 0;;) {
+                const std::string::size_type comma = text.find(',', start);
+                const int kind = parse_number(
+                    text.substr(start, comma == std::string::npos ? comma : comma - start), integer, real);
+                if (kind == 0) {
+                    value = text;
+                    return value;
+                }
+                all_integers = all_integers && kind == 1;
+                integers.push_back(integer);
+                reals.push_back(real);
+                if (comma == std::string::npos) break;
+                start = comma + 1;
+            }
+            if (all_integers) value = integers;
+            else value = reals;
+            return value;
         }
 
         namespace {

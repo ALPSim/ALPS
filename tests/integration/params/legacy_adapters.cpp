@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: MIT
-#include <alps/ngs/params.hpp>
+#include <alps/params.hpp>
 #include <alps/ngs/make_deprecated_parameters.hpp>
+#include <alps/ngs/make_parameters_from_file.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 #include <gtest/gtest.h>
 #include <alps/testing/temporary_directory.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <fstream>
+#include <map>
 #include <stdexcept>
 
 TEST(ParamsLegacyAdapters, TextGrammarAndLegacyConversion) {
@@ -15,12 +18,17 @@ TEST(ParamsLegacyAdapters, TextGrammarAndLegacyConversion) {
         output << "// Existing ALPS parameter grammar\n"
                << "LATTICE=\"chain lattice\"; L=10; T=2.25;\n";
     }
-    auto parameters = alps::params(text);
-    EXPECT_TRUE(parameters.size() == 3 && parameters.begin()->first == "LATTICE");
-    EXPECT_EQ(parameters["LATTICE"].cast<std::string>(), "chain lattice");
-    EXPECT_TRUE(parameters["L"].cast<int>() == 10 && parameters["T"].cast<double>() == 2.25);
-    // File input stores text values; conversion preserves their existing form.
-    EXPECT_EQ(parameters.find("L")->which(), alps::detail::paramvalue_index<std::string>::value);
+    // File input supplies text; the program's definitions give the types.
+    auto parameters = alps::make_parameters_from_file(text);
+    const std::map<std::string, std::string> supplied = {
+        {"L", "10"}, {"LATTICE", "chain lattice"}, {"T", "2.25"}};
+    EXPECT_EQ(parameters.supplied_text(), supplied);
+    parameters.define<std::string>("LATTICE", "lattice")
+              .define<int>("L", "length")
+              .define<double>("T", "temperature");
+    ASSERT_TRUE(parameters.ok());
+    EXPECT_EQ(parameters["LATTICE"].as<std::string>(), "chain lattice");
+    EXPECT_TRUE(parameters["L"].as<int>() == 10 && parameters["T"].as<double>() == 2.25);
     auto legacy = alps::make_deprecated_parameters(parameters);
     EXPECT_TRUE(legacy.defined("L"));
     EXPECT_EQ(std::string(legacy["L"]), "10");
@@ -29,9 +37,22 @@ TEST(ParamsLegacyAdapters, TextGrammarAndLegacyConversion) {
         std::ofstream output(text.string());
         output << "L=10; garbage @\n";
     }
-    EXPECT_THROW({ (void)alps::params(text); }, std::runtime_error);
+    EXPECT_THROW({ (void)alps::make_parameters_from_file(text); }, std::runtime_error);
     boost::filesystem::remove(text);
+}
 
+// The bridge passes on what was supplied, as text, and leaves defaults to the
+// code that reads the alps::Parameters.
+TEST(ParamsLegacyAdapters, BridgePassesSuppliedTextOnly) {
+    alps::params parameters;
+    parameters.supply("U", "2").supply("H", "0.123456789").supply("FLAVORS", "4");
+    parameters.define<double>("U", "interaction").define<int>("SITES", 1, "sites");
+    const auto legacy = alps::make_deprecated_parameters(parameters);
+    EXPECT_EQ(std::string(legacy["U"]), "2");
+    EXPECT_EQ(std::string(legacy["H"]), "0.123456789");
+    EXPECT_EQ(std::string(legacy["FLAVORS"]), "4");
+    EXPECT_FALSE(legacy.defined("SITES"));
+    EXPECT_EQ(legacy.size(), 3u);
 }
 
 TEST(ParamsLegacyAdapters, XmlSeedDefaultsAndExplicitValues) {
@@ -45,9 +66,11 @@ TEST(ParamsLegacyAdapters, XmlSeedDefaultsAndExplicitValues) {
             if (explicit_seed) output << "<PARAMETER name=\"SEED\">23</PARAMETER>";
             output << "</PARAMETERS></SIMULATION>\n";
         }
-        const auto from_xml = alps::make_parameters_from_xml(xml);
-        EXPECT_EQ(from_xml["L"].cast<int>(), 12);
-        EXPECT_EQ(from_xml["SEED"].cast<int>(), (explicit_seed ? 23 : 0));
+        auto from_xml = alps::make_parameters_from_xml(xml);
+        from_xml.define<int>("L", "length").define<int>("SEED", "seed");
+        ASSERT_TRUE(from_xml.ok());
+        EXPECT_EQ(from_xml["L"].as<int>(), 12);
+        EXPECT_EQ(from_xml["SEED"].as<int>(), (explicit_seed ? 23 : 0));
     }
     boost::filesystem::remove(xml);
 }

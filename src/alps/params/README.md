@@ -1,21 +1,14 @@
 # Parameters
 
-`ALPS::params` holds two parameter classes.
-
-- ALPSCore's parameters, `alps::params_ns::params` and the `alps::params_ns::dictionary`
-  it derives from, also named `alps::params` and `alps::dictionary`, in
-  `<alps/params.hpp>`, `<alps/dictionary.hpp>` and `<alps/params/*.hpp>`. They
-  are copied from the [ALPS Core Libraries](https://github.com/ALPSCore/ALPSCore)
-  at commit `7146b9e1f017938a94e5dae35d88467cc5ba7969` (2026-09-25). They read
-  INI files and command lines with the iniparser C library in `iniparser/`.
-- The NGS parameters, `alps::params` in `<alps/ngs/params.hpp>`, with
-  `<alps/ngs/detail/*.hpp>` and `src/ngs/`, are ALPS's own. The text/XML and
-  older `Parameters` conversion adapters in `adapters/` belong to them and are
-  compiled into `ALPS::alps`.
-
-Both define `alps::params`, so a translation unit can include
-`<alps/params.hpp>` or `<alps/ngs/params.hpp>`, not both. A program can use
-both classes from separate translation units.
+`ALPS::params` holds ALPSCore's parameters, `alps::params_ns::params` and the
+`alps::params_ns::dictionary` it derives from, also named `alps::params` and
+`alps::dictionary`, in `<alps/params.hpp>`, `<alps/dictionary.hpp>` and
+`<alps/params/*.hpp>`. They are copied from the
+[ALPS Core Libraries](https://github.com/ALPSCore/ALPSCore) at commit
+`7146b9e1f017938a94e5dae35d88467cc5ba7969` (2026-09-25), and read INI files and
+command lines with the iniparser C library in `iniparser/`. ALPS's programs,
+solvers and pyalps use them. They replace the NGS parameters of
+`<alps/ngs/params.hpp>`, which are removed.
 
 ## Building and linking
 
@@ -29,6 +22,73 @@ ALPSCore's parameters are stored through ALPS's `alps::hdf5::archive`, and in
 MPI builds they are broadcast over ALPSCore's `<alps/utilities/mpi.hpp>`
 communicator. iniparser is compiled into `ALPS::params`; its headers are not
 installed.
+
+## Using them
+
+A program defines each parameter it reads, with its type, a description and,
+where one applies, a default. It then checks that every parameter without a
+default was given and parses:
+
+```cpp
+alps::params parameters = alps::make_parameters_from_file("param.txt");
+parameters.define<int>("L", "number of sites")
+          .define<double>("T", 1.0, "temperature");
+if (parameters.has_missing(std::cerr))
+    return EXIT_FAILURE;
+const int length = parameters["L"].as<int>();
+```
+
+Reading a parameter that is not defined throws. `has_unused(std::ostream&)`
+lists the parameters that were supplied but never defined; the solvers print
+them as a warning. A Monte Carlo simulation puts its definitions in a static
+`define_parameters()` that calls its base's: `alps::mcbase::define_parameters()`
+defines `SEED` (default 42), and `alps::mcmpiadapter` adds `BINNUMBER` (default
+128). The solvers and pyalps's simulation bindings call it before constructing a
+simulation. In MPI programs, `alps::broadcast(communicator, parameters)` from
+`<alps/ngs/api.hpp>` takes a Boost.MPI communicator.
+
+## Where values come from
+
+Each source supplies text, as an INI file does, and `define<T>()` parses it with
+the declared type. A value that does not parse is an error naming the
+parameter, reported by `has_missing()`; so is a non-integral number for an
+integer parameter.
+
+| Source | Read with |
+| --- | --- |
+| INI file, command line | ALPSCore's constructors, `alps::params(argc, argv)` and `alps::params(filename)` |
+| ALPS parameter file (`L=10; T=2.25;`) | `alps::make_parameters_from_file(path)`, `<alps/ngs/make_parameters_from_file.hpp>` |
+| XML job file (`<PARAMETERS>`) | `alps::make_parameters_from_xml(path)`, `<alps/ngs/make_parameters_from_xml.hpp>`; `SEED` is `0` unless the file sets it |
+| HDF5 group | `archive["/parameters"] >> parameters`; see the HDF5 local change below |
+| Python dict | `pyalps.ngs.params(dict)` and the solver bindings; see [Python](#python) |
+
+`alps::make_deprecated_parameters(parameters)`, in
+`<alps/ngs/make_deprecated_parameters.hpp>`, converts to the legacy
+`alps::Parameters` that the lattice and model libraries read. It passes the
+supplied text of every parameter, including those the program never defines,
+and leaves defaults to the code that reads `alps::Parameters`. The NGS
+parameters passed numbers with six significant digits; the text is now passed
+as supplied.
+
+These three adapters, in `adapters/`, are ALPS's own and are compiled into
+`ALPS::alps`.
+
+## Python
+
+`pyalps.ngs.params` wraps the same class. A value is converted to text when it
+is stored, so the params keep no reference to the Python object. Booleans
+become `1` and `0`, integers keep every digit, and sequences become
+comma-separated lists. `None`, complex numbers, multidimensional arrays, nested
+sequences and dicts, and list elements containing a comma are a `TypeError`
+naming the parameter.
+
+A parameter that a program has defined reads back with its type. One that is
+only supplied reads back from its text, as `supplied_value()` in
+`<alps/params/text_values.hpp>` reads it: an integer, a float, a NumPy array of
+numbers, or else the string. Until a program defines them, `"42"` reads back as
+`42`, `2.0` as `2`, `[5]` as `5` and `[True, False]` as `array([1, 0])`. Keys
+iterate in sorted order. `del parameters[key]` rebuilds the params from their
+values, which drops every definition.
 
 ## Provenance
 
@@ -108,6 +168,18 @@ tests it:
 An integer parameter therefore accepts `24.0` and `1e6` stored as numbers,
 but not `2.7`, nor the strings `"4.0"` or `"1e6"`: these are errors naming the
 parameter.
+
+`params::save()` writes a parameter that is supplied but not defined as a
+value too, so `/parameters` keeps every parameter as a dataset, as ALPS's
+other writers left it, and pyalps's readers, which list the group's children,
+find them. ALPSCore's `save()` keeps such a parameter only in the group's
+`@ini_values` attribute. The value is `supplied_value()` of the text, from
+`<alps/params/text_values.hpp>`: an integer that fits in a `long`, another
+number as a `double`, a list of numbers as a vector, or else the string. Each
+carries an `@supplied_only` attribute, and `load()` drops these values, so
+the parameter stays supplied text that `define<T>()` parses with the
+program's type. `save()` also creates the group when there is nothing to
+write, where ALPSCore's failed writing its attributes.
 
 ### Test registration
 

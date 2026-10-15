@@ -15,7 +15,7 @@
 #define ALPS_NGS_API_HPP
 
 #include <alps/ngs/config.hpp>
-#include <alps/ngs/params.hpp>
+#include <alps/params.hpp>
 #include <alps/ngs/mcresults.hpp>
 #include <alps/ngs/mcobservables.hpp>
 
@@ -24,6 +24,10 @@
 #endif
 
 #include <boost/filesystem/path.hpp>
+#ifdef ALPS_HAVE_MPI
+    #include <alps/utilities/mpi.hpp>
+    #include <boost/mpi/communicator.hpp>
+#endif
 
 #include <string>
 
@@ -77,6 +81,13 @@ namespace alps {
     template<typename C, typename P> void broadcast(C const & c, P & p, int r = 0) {
         p.broadcast(c, r);
     }
+
+    #ifdef ALPS_HAVE_MPI
+        // ALPSCore's params broadcast over ALPSCore's communicator.
+        inline void broadcast(boost::mpi::communicator const & c, params & p, int r = 0) {
+            p.broadcast(alps::mpi::communicator(MPI_Comm(c), alps::mpi::comm_attach), r);
+        }
+    #endif
 
 }
 

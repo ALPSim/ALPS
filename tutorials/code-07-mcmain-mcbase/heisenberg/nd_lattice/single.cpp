@@ -15,6 +15,7 @@
 
 #include <alps/parseargs.hpp>
 #include <alps/stop_callback.hpp>
+#include <alps/ngs/make_parameters_from_file.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 
 #include <boost/chrono.hpp>
@@ -40,11 +41,15 @@ int main(int argc, char *argv[]) {
             alps::hdf5::archive(options.input_file)["/parameters"] >> parameters;
         }
         else {
-            parameters = alps::parameters_type<heisenberg_sim>::type(options.input_file);
+            parameters = alps::make_parameters_from_file(options.input_file);
         }
         //~ alps::Parameters old_parameters = alps::make_deprecated_parameters(parameters);
 
         //~ heisenberg_sim sim(parameters, old_parameters);
+        heisenberg_sim::define_parameters(parameters);
+        if (parameters.has_missing(std::cerr))
+            return EXIT_FAILURE;
+
         heisenberg_sim sim(parameters);
 
         if (options.resume)

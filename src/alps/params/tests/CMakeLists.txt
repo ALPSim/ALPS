@@ -18,13 +18,6 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-foreach(name default ordering stream assign not_found external checkpoint)
-  add_executable(param_${name} ${name}.cpp)
-
-  target_link_libraries(param_${name} PRIVATE ALPS::params)
-  alps_add_gtest(param_${name} COMPONENT params)
-endforeach()
-
 # ALPSCore's params tests, copied unchanged.
 foreach(name serialize_variant dictionary params dots_in_keys params_default_vectors
              params_string_vectors params_formats params_cmdline params_defaulted

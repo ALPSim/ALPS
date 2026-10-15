@@ -43,6 +43,14 @@ namespace alps {
             return text;
         }
 
+        /// What supplied text reads as when no definition gives its type
+        /** An integer that fits in a long, another number as a double,
+            numbers separated by commas as a vector of long if each is such
+            an integer and as a vector of double otherwise, or else the text
+            itself. params::save() writes parameters that are supplied but
+            not defined as these values, and pyalps reads them so. */
+        dict_value supplied_value(const std::string& name, const std::string& text);
+
         /// Supplies each child of the archive's current group as text
         /** Scalars and one-dimensional arrays of numbers, booleans and
             strings are supplied with `to_text()`, and so are groups of

@@ -11,46 +11,20 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_NGS_DETAIL_PARAMS_IMPL_BASE_HPP
-#define ALPS_NGS_DETAIL_PARAMS_IMPL_BASE_HPP
+#include <alps/ngs/make_parameters_from_file.hpp>
+#include <alps/parameter.h>
 
-#warning this file is deprecated
-
-#include <string>
+#include <boost/filesystem/fstream.hpp>
 
 namespace alps {
 
-    namespace detail {
-
-        class params_impl_base {
-
-            public:
-                
-                virtual ~params_impl_base() {};
-            
-                virtual std::size_t size() const = 0;
-
-                virtual std::vector<std::string> keys() const = 0;
-
-                virtual param operator[](std::string const &) = 0;
-
-                virtual param const operator[](std::string const &) const = 0;
-
-                virtual bool defined(std::string const &) const = 0;
-
-                virtual void save(hdf5::archive &) const = 0;
-
-                virtual void load(hdf5::archive &) = 0;
-                
-                virtual params_impl_base * clone() = 0;
-
-                #ifdef ALPS_HAVE_MPI
-                    virtual void broadcast(int root) = 0;
-                #endif
-
-        };
-
+    params make_parameters_from_file(boost::filesystem::path const & path) {
+        boost::filesystem::ifstream ifs(path);
+        Parameters par(ifs);
+        params res;
+        for (Parameters::const_iterator it = par.begin(); it != par.end(); ++it)
+            res.supply(it->key(), it->value());
+        return res;
     }
-}
 
-#endif
+}
