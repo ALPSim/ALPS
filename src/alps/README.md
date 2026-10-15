@@ -23,7 +23,8 @@ Sources use `include/`, `src/` and `tests/` where applicable. Public include spe
 | `aleav2/` | ALEA v2, ALPSCore's ALEA: accumulators and results (`<alps/alea.hpp>`, `<alps/alea/*.hpp>`); built when Eigen is found. See [its README](aleav2/README.md) | `ALPS::aleav2` |
 | `accumulators/` | ALPSCore's accumulators (`<alps/accumulators.hpp>`, `<alps/accumulators/*.hpp>`), and the NGS accumulators (`<alps/ngs/accumulator/*.hpp>`). See [its README](accumulators/README.md) | `ALPS::accumulators`; NGS: `ALPS::alps` |
 | `alea/` | ALEA observables and results (`<alps/alea.h>`, `<alps/alea/*.h>`) | `ALPS::alps` |
-| `mc/`, `scheduler/`, `parapack/` | Simulation API, execution and scheduling | `ALPS::alps` |
+| `mc/` | Monte Carlo simulation base: NGS's (`<alps/mcbase.hpp>`), and ALPSCore's (`<alps/mc/*.hpp>`), built and tested in the tree only. See [its README](mc/README.md) | `ALPS::alps` |
+| `scheduler/`, `parapack/` | Execution and scheduling | `ALPS::alps` |
 | `fortran/` | C++ bridge with public headers in `include/alps/fortran/` | `ALPS::fortran` |
 | `solvers/` | Shared `<alps/solvers.hpp>` declarations for MaxEnt and CT-QMC | `ALPS::solver_headers` |
 | `resources/` | XML definitions and stylesheets | Installed data component |
