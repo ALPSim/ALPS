@@ -15,6 +15,7 @@
 #include "dmtk/output.hpp"
 #include <iostream>
 #include <vector>
+#include <type_traits>
 #include <iosfwd>
 #include "dmtk/conj.hpp"
 #include "dmtk/slice_iter.hpp"
@@ -296,6 +297,9 @@ std::ostream& operator << (std::ostream& s, const Vector<T>& v)
 }
 
 
+// The element bytes go out in one stream call (same file layout as the
+// per-element loop this replaces, which cost one stream call per scalar on
+// every Krylov vector and block operator the engine files).
 template<class T>
 void
 Vector<T>::write(std::ostream &s) const
@@ -303,8 +307,14 @@ Vector<T>::write(std::ostream &s) const
   size_t n = this->size();
   s.write(reinterpret_cast<const char*>(&n), sizeof(size_t));
 
-  for (T const & x : *this)
-    s.write(reinterpret_cast<const char*>(&x), sizeof(T));
+  if constexpr (std::is_trivially_copyable<T>::value) {
+    if(n > 0)
+      s.write(reinterpret_cast<const char*>(this->data()),
+              static_cast<std::streamsize>(n * sizeof(T)));
+  } else {
+    for (T const & x : *this)
+      s.write(reinterpret_cast<const char*>(&x), sizeof(T));
+  }
 }
 
 template<class T>
@@ -315,8 +325,14 @@ Vector<T>::read(std::istream &s)
   s.read(reinterpret_cast<char*>(&n), sizeof(size_t));
   resize(n);
 
-  for (T & x : *this)
-    s.read(reinterpret_cast<char*>(&x), sizeof(T));
+  if constexpr (std::is_trivially_copyable<T>::value) {
+    if(n > 0)
+      s.read(reinterpret_cast<char*>(this->data()),
+             static_cast<std::streamsize>(n * sizeof(T)));
+  } else {
+    for (T & x : *this)
+      s.read(reinterpret_cast<char*>(&x), sizeof(T));
+  }
 }
 
 

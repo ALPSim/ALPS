@@ -256,15 +256,25 @@ void lanczos(A& m,
              Vector<double>& ener, int nvectors,
              dmtk::Vector<double>& a, dmtk::Vector<double>& b, 
              int &maxiter, double tol,
-             bool use_seed, bool calc_gs, const char* vectors_file, bool force_maxiter = false,
-             bool reorthogonalize = false)
+             bool use_seed, bool calc_gs, const char* vectors_file, bool force_maxiter,
+             bool reorthogonalize, double residual_tol)
 {  
+  // Stop rule (written for this tree; the legacy engine stopped once the
+  // lowest Ritz energy had changed by at most tol, the alpsx rework once
+  // every requested Ritz residual was at most tol, about twice the
+  // iterations): the Krylov space is accepted once every one of the nvectors
+  // lowest Ritz energies has changed by at most tol since the previous
+  // iteration and, when residual_tol >= 0, every one of their residuals
+  // |b(iter) z(n, iter-1)| is at most residual_tol. The caller chooses the
+  // residual bound per solve: sqrt(tol) for the solves that only feed a
+  // density matrix, tol for the solves whose states are measured.
   B x1(gs(0)), x2(gs(0)), aux(gs(0));
   dmtk::Vector<double> d(101), e(101), xc(101);
   dmtk::Matrix<double> z(101,101);
+  dmtk::Vector<double> previous(std::max(nvectors, 1));
   uint j, col, iter = 0;
   // uint i;
-  double eini, e0;
+  double e0;
   int control_max = maxiter;
   maxiter = 0;
 
@@ -282,14 +292,11 @@ void lanczos(A& m,
     basis.exceptions(std::ios::failbit | std::ios::badbit);
     basis.open(vectors_file, std::ios::in | std::ios::binary);
   }
-  // Every Krylov vector has the same basis metadata. The reorthogonalized
-  // invocation stores only its numerical values in this temporary file,
-  // avoiding repeated reconstruction of constrained spaces on every pass.
+  // Every Krylov vector has the same basis metadata, so the temporary file
+  // stores only the numerical values of each one (alpsx did so for the
+  // reorthogonalized solves; here for every solve): no basis metadata is
+  // filed per iteration, and no constrained space is reconstructed per read.
   const auto read_basis = [&](B& value, std::istream& input) {
-    if(!reorthogonalize) {
-      value.read(input);
-      return;
-    }
     size_t dimension = 0;
     input.read(reinterpret_cast<char*>(&dimension), sizeof(dimension));
     if(dimension != value.size())
@@ -298,18 +305,24 @@ void lanczos(A& m,
                static_cast<std::streamsize>(dimension * sizeof(T)));
   };
   const auto write_basis = [&](const B& value) {
-    if(!reorthogonalize) {
-      value.write(outputfile);
-      return;
-    }
     const size_t dimension = value.size();
     outputfile.write(reinterpret_cast<const char*>(&dimension), sizeof(dimension));
     outputfile.write(reinterpret_cast<const char*>(value.array()),
                      static_cast<std::streamsize>(dimension * sizeof(T)));
   };
 #endif
+  // The recurrence runs in place on the raw arrays: the materializing
+  // VectorState operators would copy the vector and its basis metadata for
+  // every temporary of every iteration.
+  const size_t dimension = x1.size();
+  const auto axpy = [dimension](const T alpha, const B& x, B& y) {
+    const T* px = x.array();
+    T* py = y.array();
+    for(size_t c = 0; c < dimension; ++c) py[c] += alpha*px[c];
+  };
  
   e0 = std::numeric_limits<double>::infinity();
+  previous = std::numeric_limits<double>::infinity();
   x1 = x2 = aux = T(0);
 
   while(true) // Two iterations: 1) calculate energy 2) build gs
@@ -331,7 +344,7 @@ void lanczos(A& m,
     iter = 0;
 
     b(0) = sqrt(real(dot_product(x1,x1)));
-    x1 = x1 / T(b(0));
+    x1 /= T(b(0));
     x2 = T(0);
     b(0) = 1.;
 
@@ -339,25 +352,29 @@ void lanczos(A& m,
     uint nmax = std::min(99, static_cast<int>(gs(0).size()));
     bool previous_candidate_rejected = false;
     for(iter = 1; iter <= nmax; iter++){ // Lanczos iteration
-      eini = e0;
 
       if(b(iter - 1) != 0.){
-        aux = x1;
-        x1 = -T(b(iter-1)) * x2;
-        x2 = aux / T(b(iter-1));
+        // (x1, x2) <- (-b x2, x1 / b)
+        const T beta = T(b(iter-1));
+        T* p1 = x1.array();
+        T* p2 = x2.array();
+        for(size_t c = 0; c < dimension; ++c) {
+          const T previous_x1 = p1[c];
+          p1[c] = -beta*p2[c];
+          p2[c] = previous_x1/beta;
+        }
       }
 
       aux = product(m,x2);
-      x1 = x1 + aux;
+      axpy(T(1), aux, x1);
       T xa = dot_product(x1, x2);
       a(iter) = real(xa);
-      x1 = x1 - x2*T(a(iter));
+      axpy(-T(a(iter)), x2, x1);
       // Cancellation near an eigenvector can leave a tiny parallel component
       // which division by the small next beta would amplify. Project once more
       // locally; retain its real diagonal correction in the recurrence.
       const T correction = dot_product(x2, x1);
-      for(size_t component = 0; component < x1.size(); ++component)
-        x1[component] -= x2[component]*correction;
+      axpy(-correction, x2, x1);
       a(iter) += real(correction);
 #ifndef USE_LANCZOS_VECTORS
       if(reorthogonalize && iter > 1) {
@@ -369,12 +386,10 @@ void lanczos(A& m,
           for(uint previous = 1; previous < iter; ++previous) {
             read_basis(aux, basis);
             const T overlap = dot_product(aux, x1);
-            for(size_t component = 0; component < x1.size(); ++component)
-              x1[component] -= aux[component]*overlap;
+            axpy(-overlap, aux, x1);
           }
           const T parallel = dot_product(x2, x1);
-          for(size_t component = 0; component < x1.size(); ++component)
-            x1[component] -= x2[component]*parallel;
+          axpy(-parallel, x2, x1);
           a(iter) += real(parallel);
         }
       }
@@ -402,9 +417,10 @@ void lanczos(A& m,
         if(iter >= 2 || exhausted || breakdown){
           d(Range(0,iter-1)) = a(Range(1,iter));
           e(Range(0,iter-1)) = b(Range(1,iter));
-          // Once energy has settled, residual checks usually need vectors on
-          // consecutive iterations. Compute them once at that point, and at
-          // mandatory reconstruction stops, rather than solving twice.
+          // Once the energies have settled, residual checks usually need
+          // vectors on consecutive iterations. Compute them once at that
+          // point, and at mandatory reconstruction stops, rather than
+          // solving twice.
           bool ritz_vectors_ready = previous_candidate_rejected ||
               (calc_gs && (exhausted || breakdown));
           tqli(d, e, iter, z, ritz_vectors_ready);
@@ -421,12 +437,17 @@ void lanczos(A& m,
 #ifdef DMTK_DEBUG
           dmtk::out() << setprecision(12) << "Iter = " << iter << "  Ener = " << e0 << endl;
 #endif // DMTK_DEBUG
-          bool converged = !force_maxiter && iter >= nvectors && fabs(eini-e0) <= tol;
+          // tqli returns ascending eigenvalues, so d(n) is the n-th target.
+          bool converged = !force_maxiter && iter >= static_cast<uint>(nvectors);
+          for(int n = 0; n < nvectors && n < static_cast<int>(iter); ++n) {
+            if(converged && !(fabs(previous(n)-d(n)) <= tol)) converged = false;
+            previous(n) = d(n);
+          }
           previous_candidate_rejected = false;
-          if(converged && !exhausted && !breakdown) {
-            // A stable Ritz energy alone does not certify its state. Compute
-            // vectors only at candidate stops and check every requested Ritz
-            // residual. tqli returns ascending eigenvalues and z(column,row).
+          if(converged && residual_tol >= 0. && !exhausted && !breakdown) {
+            // Settled Ritz energies alone do not certify their states.
+            // Compute vectors only at candidate stops and check every
+            // requested Ritz residual; z(column,row) holds the vectors.
             if(!ritz_vectors_ready) {
               d(Range(0,iter-1)) = a(Range(1,iter));
               e(Range(0,iter-1)) = b(Range(1,iter));
@@ -434,7 +455,7 @@ void lanczos(A& m,
               ritz_vectors_ready = true;
             }
             for(int n = 0; n < nvectors; ++n) {
-              if(!(fabs(b(iter)*z(n,iter-1)) <= tol)) {
+              if(!(fabs(b(iter)*z(n,iter-1)) <= residual_tol)) {
                 converged = false;
                 break;
               }
@@ -487,7 +508,7 @@ void lanczos(A& m,
 //               cout << n << " " << ener(n) << endl;
                for(int i = 0; i < maxiter; i++){
                  read_basis(x2, inputfile);
-                 gs(n) += T(z(indx(n),i)) * x2;
+                 axpy(T(z(indx(n),i)), x2, gs(n));
                }
                inputfile.close();
 

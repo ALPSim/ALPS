@@ -457,11 +457,12 @@ Matrix<T>::write(std::ostream &s) const
   s.write((const char *)&num_rows, sizeof(size_t));
   s.write((const char *)&num_cols, sizeof(size_t));
 
-  for(uint col = 0; col < cols(); col++) 
-    for(uint row = 0; row < rows(); row++){ 
-      T v = operator()(col,row);
-      s.write((const char *)&v, sizeof(T));
-    }
+  // Column-major storage: one stream call writes the elements in the order
+  // of the per-element loop this replaces (same file layout).
+  const size_t n = rows() * cols();
+  if(n > 0)
+    s.write(reinterpret_cast<const char*>(array()),
+            static_cast<std::streamsize>(n * sizeof(T)));
 }
 
 template<class T>
@@ -473,11 +474,10 @@ Matrix<T>::read(std::istream &s)
   s.read((char *)&nc, sizeof(size_t));
   resize(nc,nr);
 
-  for(uint col = 0; col < cols(); col++) 
-    for(uint row = 0; row < rows(); row++){ 
-      T& v = operator()(col,row);
-      s.read((char *)&v, sizeof(T));
-    }
+  const size_t n = rows() * cols();
+  if(n > 0)
+    s.read(reinterpret_cast<char*>(array()),
+           static_cast<std::streamsize>(n * sizeof(T)));
 }
 
 } // namespace dmtk 

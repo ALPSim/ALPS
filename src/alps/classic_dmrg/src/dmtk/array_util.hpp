@@ -35,29 +35,17 @@ dot_product(const int& n,
   return a.dot(b);
 }
 
+// conj(v1) . v2, as Eigen's dot conjugates its first argument.
 inline complex<double>
 dot_product(const int& n,
             const complex<double> *v1, const int& stride1,
             const complex<double> *v2, const int& stride2)
 {
-  complex<double> sum(0.f,0.f);
-  const complex<double> *pi = v1;
-  const complex<double> *pj = v2;
-
-//  sum = zdotc_(n, v1, stride1, v2, stride2);
-//  return sum;
-
-  if(stride1 == 1 && stride2 == 1)
-    for(int k = 0; k < n; k++)
-      sum += std::conj(*pi++)*(*pj++);
-  else
-    for(int k = 0; k < n; k++){
-      sum += std::conj(*pi)*(*pj);
-      pi += stride1;
-      pj += stride2;
-    }
-
-  return sum;
+  using EVec = Eigen::Matrix<complex<double>, Eigen::Dynamic, 1>;
+  using StridedMap = Eigen::Map<const EVec, 0, Eigen::InnerStride<>>;
+  StridedMap a(v1, n, Eigen::InnerStride<>(stride1));
+  StridedMap b(v2, n, Eigen::InnerStride<>(stride2));
+  return a.dot(b);
 }
 
 

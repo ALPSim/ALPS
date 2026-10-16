@@ -7,15 +7,18 @@
 // src/solvers/tensor_network/src/classic_dmrg/dmtk/util.hpp, the Eigen-based
 // rework of src/apps/dmrg/dmrg/dmtk in this tree (Adrian Feiguin's dmtk).
 // Adaptation: "dmtk/" include paths; dmtk::half_integer and dmtk/support.hpp
-// replace the ALPS model and utility headers.
+// replace the ALPS model and utility headers; the dense products call the
+// platform BLAS (dmtk/blas.hpp) again, as the legacy engine did, instead of
+// the rework's Eigen views.
 
 #ifndef __DMTK_LA_UTIL_H__
 #define __DMTK_LA_UTIL_H__
 
+#include <algorithm>
 #include <complex>
+#include <cstddef>
 #include "dmtk/conj.hpp"
-
-#include <Eigen/Core>
+#include "dmtk/blas.hpp"
 
 namespace dmtk
 {
@@ -26,74 +29,46 @@ using namespace std;
 namespace detail {
 
 // gemm-like operation: res := coefa * op1(a) * op2(b) + coefb * res,
-// where op{1,2} is selected by the Fortran-style 'N'/'T'/'C' char.
-//
-// Replaces the old cblas_gemm dispatch with Eigen Map views over the
-// raw column-major arrays. The product is materialised into a
-// temporary EMat (cheap for the small DMRG blocks involved) so that
-// aliasing between res and a/b stays safe.
+// where op{1,2} is selected by the Fortran-style 'N'/'T'/'C' char, through
+// the platform BLAS (dmtk/blas.hpp), as the legacy engine did. The alpsx
+// rework had routed this through Eigen Map views, materialising op(a),
+// op(b) and the product in temporaries; the platform BLAS is several times
+// faster on the engine's block sizes and needs no copies. Empty extents are
+// handled here because BLAS rejects a leading dimension of zero.
 template <class T>
 inline void gemm_op(char c1, char c2, int m, int n, int k, T coefa,
                     const T* a, int lda, const T* b, int ldb, T coefb,
                     T* res, int ldc) {
-    using EMat = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
-    using ConstMap = Eigen::Map<const EMat, 0, Eigen::OuterStride<>>;
-    using Map = Eigen::Map<EMat, 0, Eigen::OuterStride<>>;
-
-    // a is (lda × k') with k' = (c1 == 'N' ? k : m) physical cols.
-    int a_rows = (c1 == 'N') ? m : k;
-    int a_cols = (c1 == 'N') ? k : m;
-    int b_rows = (c2 == 'N') ? k : n;
-    int b_cols = (c2 == 'N') ? n : k;
-
-    ConstMap A(a, a_rows, a_cols, Eigen::OuterStride<>(lda));
-    ConstMap B(b, b_rows, b_cols, Eigen::OuterStride<>(ldb));
-    Map      C(res, m, n, Eigen::OuterStride<>(ldc));
-
-    auto op_a = [&]() -> EMat {
-        if (c1 == 'C') return A.adjoint();
-        if (c1 == 'T') return A.transpose();
-        return A;
-    };
-    auto op_b = [&]() -> EMat {
-        if (c2 == 'C') return B.adjoint();
-        if (c2 == 'T') return B.transpose();
-        return B;
-    };
-
-    EMat const product = op_a() * op_b();
-    if (coefb == T(0))
-        C = coefa * product;
-    else
-        C = coefa * product + coefb * C;
+    if (m <= 0 || n <= 0) return;
+    if (k <= 0) {
+        for (int j = 0; j < n; ++j) {
+            T* column = res + static_cast<std::ptrdiff_t>(j) * ldc;
+            if (coefb == T(0))
+                std::fill_n(column, m, T(0));
+            else
+                for (int i = 0; i < m; ++i) column[i] *= coefb;
+        }
+        return;
+    }
+    blas::gemm(c1, c2, m, n, k, coefa, a, blas::leading(lda), b, blas::leading(ldb),
+               coefb, res, blas::leading(ldc));
 }
 
-// gemv-like operation: res := coefa * op(a) * v + coefb * res.
+// gemv-like operation: res := coefa * op(a) * v + coefb * res, where a is
+// m × n with leading dimension lda.
 template <class T>
 inline void gemv_op(char c, int m, int n, T coefa,
                     const T* a, int lda, const T* v, T coefb, T* res) {
-    using EMat = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
-    using EVec = Eigen::Matrix<T, Eigen::Dynamic, 1>;
-    using ConstMatMap = Eigen::Map<const EMat, 0, Eigen::OuterStride<>>;
-    using ConstVecMap = Eigen::Map<const EVec>;
-    using VecMap = Eigen::Map<EVec>;
-
-    ConstMatMap A(a, m, n, Eigen::OuterStride<>(lda));
-
-    int vec_in_size  = (c == 'N') ? n : m;
-    int vec_out_size = (c == 'N') ? m : n;
-    ConstVecMap V(v, vec_in_size);
-    VecMap      R(res, vec_out_size);
-
-    EVec const product = [&]() -> EVec {
-        if (c == 'C') return A.adjoint() * V;
-        if (c == 'T') return A.transpose() * V;
-        return A * V;
-    }();
-    if (coefb == T(0))
-        R = coefa * product;
-    else
-        R = coefa * product + coefb * R;
+    int const out = (c == 'N') ? m : n;
+    if (out <= 0) return;
+    if (m <= 0 || n <= 0) {
+        if (coefb == T(0))
+            std::fill_n(res, out, T(0));
+        else
+            for (int i = 0; i < out; ++i) res[i] *= coefb;
+        return;
+    }
+    blas::gemv(c, m, n, coefa, a, blas::leading(lda), v, coefb, res);
 }
 
 } // namespace detail

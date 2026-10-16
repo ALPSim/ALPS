@@ -7,9 +7,10 @@ driven by the numeric local terms of a `CompiledOperator` on its
 ([below](#the-dmrg-application)). The engine warms up, sweeps with a
 kept-state schedule, targets one or several lowest states of one conserved
 sector and measures compiled operators on them. The component depends on
-`ALPS::models` and, privately, on Eigen; it does not use the XML catalog,
-legacy parameters, HDF5, LAPACK or the simulation runtime, and consumers of
-the installed SDK need neither Eigen nor LAPACK.
+`ALPS::models` and, privately, on Eigen (dense eigensolvers) and the platform
+BLAS (block products); it does not use the XML catalog, legacy parameters,
+HDF5, LAPACK or the simulation runtime, and consumers of the installed SDK
+need neither Eigen nor BLAS headers.
 The Python package binds it as `pyalps.classic_dmrg` when the SDK has the
 component ([pyalps README](../../../python/pyalps/README.md#models-exact-diagonalization-and-classic-dmrg)).
 
@@ -36,7 +37,7 @@ auto const& density = result.measurements.at("n").values[0];  // row = target st
 
 | name | content |
 | --- | --- |
-| `Options` | `sweeps` (`fixed_sweeps`, `ramped_sweeps` or an explicit `SweepStates` list; the right-to-left half sweep runs first), `warmup_states`, `num_eigenvalues`, optional `truncation_error` with `truncation_max_states`, optional `lanczos_tolerance`, `arithmetic` (real or complex), `sector` (name → total of a declared conserved charge), `scratch_parent`, `log`, `verbose` |
+| `Options` | `sweeps` (`fixed_sweeps`, `ramped_sweeps` or an explicit `SweepStates` list; the right-to-left half sweep runs first), `warmup_states`, `num_eigenvalues`, optional `truncation_error` with `truncation_max_states`, optional `lanczos_tolerance` ([below](#the-lanczos-stop-rule)), `arithmetic` (real or complex), `sector` (name → total of a declared conserved charge), `scratch_parent`, `log`, `verbose` |
 | `Measurements` | `expectation`: name → operator, one value `<ψ\|O\|ψ>`; `terms`: name → operator, one value per term (one column per site, pair, …) |
 | `site_terms(model, op)`, `pair_terms(model, a, b)` | builders over a model's local operator names: one term per site, one term per ordered site pair (i-major, on-site product at i = j); no two columns are ever combined |
 | `solve(op, basis, options, measurements, callback)` | the engine on a compiled operator and its physical basis |
@@ -113,9 +114,32 @@ copy of the engine:
   to a private directory below `TEMP_DIRECTORY` that is removed afterwards.
 - Lattices of fewer than four sites, more than four tracked charges and
   measurement terms of odd fermion parity are rejected with a message.
-- Runs take longer at large kept-state numbers: the engine's Lanczos stops
-  when every Ritz residual is below its tolerance and multiplies with Eigen
-  instead of the platform BLAS.
+- Energies come out equal or lower than the old code's, which stopped its
+  Lanczos solves on an energy stall: the solves of the final sweep now
+  certify their states ([below](#the-lanczos-stop-rule)). Runs take about as
+  long: on an Apple M-series laptop, a spin-1 chain of 64 sites at
+  `MAXSTATES=300` takes 17.5 s against 15.8 s for the old code (the certified
+  final sweep is the difference), a Hubbard chain of 32 sites at
+  `MAXSTATES=400` 6.4 s against 7.5 s, and the dmrg-06 tutorial at 32 sites
+  with correlations 3.2 s against 3.1 s.
+
+## The Lanczos stop rule
+
+`Options::lanczos_tolerance` (engine default 1e-7) bounds two quantities of a
+solve. Every solve ends once each targeted Ritz energy has changed by at most
+the tolerance since the previous Lanczos iteration, as the legacy engine
+stopped, and once each targeted residual `|b_k z_k(n)|` is below the square
+root of the tolerance, the accuracy a settled energy implies and the guard
+against a stalled energy. The solves of the final sweep, whose states are
+measured and whose last state's energy is reported, drive every residual
+down to the tolerance itself. During the regular sweeps the transformed seed
+of the previous iteration is usually accepted after the minimum of three
+Lanczos iterations; the certified solves of the final sweep take ten to
+seventy at 300 kept states. Certifying every solve (the alpsx rework's rule)
+doubled the Lanczos iterations of a run for energies within the tolerance of
+these; the legacy stall rule alone left the spin-1 benchmark above 9e-6
+above them. A Krylov space exhausted at 99 vectors or broken down ends the
+solve as before.
 
 ## Origin and provenance
 
@@ -140,6 +164,17 @@ a set of fermionic carrier charges, factors in either order, the
 normalization and combination of terms, the dense Hermiticity check and
 the component-wise measurement. The `dmrg` application's own copy of dmtk
 was removed when the application moved onto this component.
+
+Engine changes made here, each marked in the affected file: the dense block
+products call the platform BLAS through `dmtk/blas.hpp` (Fortran LP64 ABI,
+as `ALPS::ed` calls LAPACK) in place of the rework's Eigen views, as the
+legacy engine did through the Boost bindings; the Lanczos stop rule
+([above](#the-lanczos-stop-rule)); the Lanczos recurrence runs in place and
+files only the values of its Krylov vectors (the rework did so for the
+reorthogonalized solves); `Vector` and `Matrix` stream their elements in one
+call instead of one per scalar (same file layout); and `VectorState::condense`
+keeps the merge permutations of the layouts it last saw instead of
+rebuilding them for every product.
 
 ## Tests
 

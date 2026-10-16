@@ -218,6 +218,7 @@ class System
 
     double _lanczos_tol;
     int _lanczos_maxiter;
+    bool _lanczos_certify; // measured states: Ritz residuals down to the tolerance
 
     virtual void init_iteration(const B&b1, const B&b2, const B&b3, const B&b4, bool use_seed = false, bool create_composite = true);
     void rotate_hami(int position, Block<T> &b, Basis &basis, Basis &rho_basis, const Hami<T> *this_hami = nullptr);
@@ -338,6 +339,7 @@ class System
     , _numsweeps(0)
     , _lanczos_tol(1.e-7)
     , _lanczos_maxiter(-1)
+    , _lanczos_certify(false)
     , qnt(0)
     , _ntargets(1)
     , _nstates(1)
@@ -375,6 +377,7 @@ class System
      , _numsweeps(0)
      , _lanczos_tol(1.e-7)
      , _lanczos_maxiter(-1)
+     , _lanczos_certify(false)
      , qnt(0)
      , _ntargets(1)
      , _nstates(1)
@@ -551,6 +554,14 @@ class System
     double lanczos_tolerance() const { return _lanczos_tol; }
     void set_lanczos_maxiter(int n) { _lanczos_maxiter = n; }
     int lanczos_maxiter() { return _lanczos_maxiter; }
+    // Residual bound of the current solve (written for this tree). States
+    // that only feed a density matrix are accepted once their Ritz energies
+    // have settled to the tolerance and their residuals are below its square
+    // root, the accuracy an energy settled to tol implies; the final sweep,
+    // whose states are measured, certifies every residual down to the
+    // tolerance itself. A negative bound disables the residual check.
+    double lanczos_residual_tolerance() const
+      { return _lanczos_certify ? _lanczos_tol : std::sqrt(_lanczos_tol); }
     double truncation_error() const { return _truncation_error; }
     double entropy() const { return _entropy; }
 
@@ -1312,6 +1323,9 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
 
   int ls = lattice().ls();
   _in_warmup = false;
+  // The states of this sweep are measured: certify their Lanczos residuals.
+  const bool save_certify = _lanczos_certify;
+  _lanczos_certify = true;
 
   char file[255];
   snprintf(file, sizeof(file), "iter_%s.dat",_name);
@@ -1452,6 +1466,7 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
     }
   }
   signal_emit(SYSTEM_SIGNAL_END_ITER);
+  _lanczos_certify = save_certify;
   
   outputfile.close();
 }
@@ -1741,7 +1756,7 @@ System<T>::diagonalize(bool use_seed)
 
   if(gs.size() > 1) {
 //    verif_hamiltonian<T, System<T>, VectorState<T> >(*this, _state[0]);
-    lanczos<T, System<T>, VectorState<T> >(*this, _state, seed, e, _nstates, a, b, n, tol, use_seed, true, tmp_files.get_filename(file));
+    lanczos<T, System<T>, VectorState<T> >(*this, _state, seed, e, _nstates, a, b, n, tol, use_seed, true, tmp_files.get_filename(file), false, false, lanczos_residual_tolerance());
     gs = _state[0];
   } else {
     gs = T(1);
@@ -1877,7 +1892,7 @@ System<T>::build_target_states(int /*pos*/)
     for(int j = 0; j <= i; j++) _project_states[j] = &_target[j];
 
     lanczos<T, System<T>, VectorState<T> >(*this, _state, seed, e, 1, a, b, n, tol,
-        use_seed, true, tmp_files.get_filename(file), false, true);
+        use_seed, true, tmp_files.get_filename(file), false, true, lanczos_residual_tolerance());
     _target[i+1] = _state[0];
 
     _project = false;

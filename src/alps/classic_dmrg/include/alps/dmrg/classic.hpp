@@ -60,6 +60,11 @@ struct Options {
     // scheduled counts.
     std::optional<double> truncation_error;
     std::optional<std::size_t> truncation_max_states;
+    // Lanczos stop rule (engine default 1e-7): a solve ends once every
+    // targeted Ritz energy has changed by at most this between iterations
+    // and every targeted residual is below its square root; the solves of
+    // the final sweep, whose states are measured, drive every residual down
+    // to the tolerance itself.
     std::optional<double> lanczos_tolerance;
     Arithmetic arithmetic = Arithmetic::real;
     // Fixed totals of declared conserved charges (name -> value); every

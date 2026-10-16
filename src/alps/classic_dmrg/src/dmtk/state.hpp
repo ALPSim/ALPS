@@ -443,6 +443,9 @@ class VectorState: public Vector<T>
 
     VectorState condense(int mask) const;
     VectorState decondense(int mask, const VectorState<T> &orig) const;
+  private:
+    VectorState condense_layout(int mask) const;
+  public:
 
 //  Streams
 
@@ -1686,9 +1689,64 @@ VectorState<T>::condense1 (int mask) const
 // condense:
 // this function builds a new state vector merging two blocks.
 ////////////////////////////////////////////////////////////////////
+namespace detail {
+inline bool same_layout(const PackedBasis& a, const PackedBasis& b)
+{
+  if(a.size() != b.size()) return false;
+  for(size_t i = 0; i < a.size(); ++i)
+    if(a[i].begin() != b[i].begin() || a[i].end() != b[i].end() || a[i].qn() != b[i].qn())
+      return false;
+  return true;
+}
+} // namespace detail
+
+// Written for this tree: the condensed layout and the merge permutation
+// depend only on the four block bases, the quantum-number constraint and the
+// mask, none of which changes between the Lanczos iterations of one solve.
+// Rebuilding them (a sort of the merged basis and per-element index
+// arithmetic, three times per Hamiltonian product) cost about a quarter of
+// every product; the last layouts seen are kept with their permutations and
+// the state is gathered through them. The engine's state is process-global
+// and its solves are serialized, so the cache is too.
 template<class T>
 VectorState<T>
 VectorState<T>::condense (int mask) const
+{
+  struct Entry {
+    int mask;
+    size_t size;
+    int constrained;
+    QN qn;
+    PackedBasis b1, b2, b3, b4;
+    VectorState<T> prototype; // condensed metadata and permutation, no data
+  };
+  static std::vector<Entry> cache;
+  const size_t n = Vector<T>::size();
+
+  for(Entry& e : cache) {
+    if(e.mask != mask || e.size != n || e.constrained != qn_constrained || e.qn != _qn ||
+       !detail::same_layout(e.b1, _b1) || !detail::same_layout(e.b2, _b2) ||
+       !detail::same_layout(e.b3, _b3) || !detail::same_layout(e.b4, _b4))
+      continue;
+    VectorState<T> aux(e.prototype);
+    aux.Vector<T>::resize(n);
+    const T* source = Vector<T>::array();
+    T* destination = aux.array();
+    const size_t* permutation = aux.index.array();
+    for(size_t i = 0; i < n; ++i) destination[permutation[i]] = source[i];
+    return aux;
+  }
+
+  VectorState<T> aux = condense_layout(mask);
+  if(cache.size() >= 16) cache.erase(cache.begin());
+  cache.push_back(Entry{mask, n, qn_constrained, _qn, _b1, _b2, _b3, _b4, aux});
+  cache.back().prototype.Vector<T>::resize(0);
+  return aux;
+}
+
+template<class T>
+VectorState<T>
+VectorState<T>::condense_layout (int mask) const
 {
   typename VectorState<T>::const_iterator siter;
 
