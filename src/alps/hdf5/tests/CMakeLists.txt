@@ -19,14 +19,19 @@
 
 foreach(
   name
+  hdf5_alpscore_fixture
+  hdf5_attributes
   hdf5_complex
   hdf5_copy
   hdf5_real_complex_vec
   hdf5_real_complex_matrix
   hdf5_bool
+  hdf5_boost_optional
   hdf5_replace
   hdf5_pair
   hdf5_family
+  hdf5_lifecycle
+  hdf5_map
   hdf5_valgrind
   hdf5_multi_array
   hdf5_memory
@@ -34,12 +39,15 @@ foreach(
   hdf5_vecveccplx
   hdf5_exceptions
   hdf5_multiarchive
+  hdf5_native_type
+  hdf5_open_intmode
+  hdf5_open_strmode
   hdf5_fortran_string
   hdf5_vecvecdbl)
   add_executable(${name} ${name}.cpp)
 
   target_link_libraries(${name} PRIVATE ALPS::hdf5)
-  if(name STREQUAL "hdf5_fortran_string")
+  if(name MATCHES "^hdf5_(fortran_string|alpscore_fixture)$")
     alps_add_gtest(${name} COMPONENT hdf5 LABELS compatibility)
   else()
     alps_add_gtest(${name} COMPONENT hdf5)
@@ -55,11 +63,14 @@ if(ALPS_ENABLE_OPENMP)
   alps_add_gtest(hdf5_omp COMPONENT hdf5 LABELS openmp TIMEOUT 600 THREADS 2)
 endif()
 
-option(ALPS_BUILD_LARGE_MEMORY_TESTS "Run HDF5 stress tests requiring 2 GiB RAM and 4 GiB disk" OFF)
+option(ALPS_BUILD_LARGE_MEMORY_TESTS "Run HDF5 stress tests requiring 4 GiB RAM and 4 GiB disk" OFF)
 if(ALPS_BUILD_LARGE_MEMORY_TESTS)
   add_executable(hdf5_large hdf5_large.cpp)
   target_link_libraries(hdf5_large PRIVATE ALPS::hdf5)
   alps_add_gtest(hdf5_large COMPONENT hdf5 LABELS stress large_memory TIMEOUT 600)
+  add_executable(hdf5_large_array hdf5_large_array.cpp)
+  target_link_libraries(hdf5_large_array PRIVATE ALPS::hdf5)
+  alps_add_gtest(hdf5_large_array COMPONENT hdf5 LABELS stress large_memory TIMEOUT 600)
 endif()
 
 if(ALPS_BUILD_EXTENSIVE_TESTS)

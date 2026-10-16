@@ -6,7 +6,7 @@ Sources use `include/`, `src/` and `tests/` where applicable. Public include spe
 
 | Source module under `src/alps/` | Responsibility | Binary or compile owner |
 | --- | --- | --- |
-| `utilities/` | Utility functions, general helpers, type traits and NGS configuration helpers | `ALPS::utilities` |
+| `utilities/` | Utility functions, general helpers, signal handling, type traits and NGS configuration helpers | `ALPS::utilities` |
 | `containers/` | Fixed-capacity containers, ALPS multi-array storage and Boost serialization | `ALPS::containers` |
 | `numerics/` | Numerical helpers, array mathematics and matrix/vector interfaces | `ALPS::numerics` |
 | `numeric_io/` | HDF5 adapters for numerical matrices and vectors | `ALPS::numeric_io` |
@@ -20,6 +20,7 @@ Sources use `include/`, `src/` and `tests/` where applicable. Public include spe
 | `legacy_parameters/`, `expression/` | Older `alps::Parameters` and expression evaluation | `ALPS::alps` |
 | `graph/`, `lattice/`, `model/` | Graph helpers, lattice definitions and physical models | `ALPS::headers`, `ALPS::alps` |
 | `random/` | Random generators and their factories | `ALPS::alps` |
+| `aleav2/` | ALEA v2, ALPSCore's ALEA: accumulators and results (`<alps/alea.hpp>`, `<alps/alea/*.hpp>`); built when Eigen is found. See [its README](aleav2/README.md) | `ALPS::aleav2` |
 | `alea/`, `accumulators/` | Observable/result facilities and accumulator implementations | `ALPS::alps` |
 | `mc/`, `scheduler/`, `parapack/` | Simulation API, execution and scheduling | `ALPS::alps` |
 | `fortran/` | C++ bridge with public headers in `include/alps/fortran/` | `ALPS::fortran` |

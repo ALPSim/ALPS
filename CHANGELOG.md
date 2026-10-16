@@ -6,6 +6,8 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Fixed
 
+- Store an empty `std::map` in an HDF5 archive as an empty group, so it reads back as an empty map instead of a missing path. Older readers load such files as empty maps too.
+- Resolve HDF5 attribute paths written as `path@name` (ALPSCore's spelling) and attributes of the root group (`/@name`, or `@name` in the root context). These used to drop the character before `@` or fail; ALPS's `path/@name` spelling names the same object as before.
 - Release HDF5 scalar string buffers after reads, including failed conversions, and owned observables when clearing an `ObservableSet`.
 - Correct scalar/vector Monte Carlo result negation and keep uncertainties nonnegative under negative scaling or reciprocal arithmetic. Preserve empty histogram ranges, avoid invalid access during empty vector/valarray conversions, and create private temporary files on Unix independently of the caller's umask.
 - Initialize Monte Carlo completion scheduling before first use.
@@ -37,6 +39,13 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - Top-level single-configuration builds still default to `CMAKE_BUILD_TYPE=Release`; embedded builds leave the build type to the parent project.
 - Support editable Python development against an installed SDK, with packaged native runtime resources and explicit downstream ABI checks. Redistributable wheels bundle native dependencies through platform repair and are tested after installation on fresh runners.
 - Build the C++ and Fortran examples in `tutorials/examples/` as standalone projects against an installed SDK. Tutorial sources are installed only when the `tutorials` component is requested.
+- Adopt ALPSCore's `<alps/utilities/...>` include spellings for `cast`, `stacktrace`, `signal`, `stringify`, `short_print`, `remove_cvr`, `type_wrapper`, `size`, `temporary_filename` and `make_copy`. `alps::ngs::signal` and `alps::ngs::stacktrace()` become `alps::signal` and `alps::stacktrace()`, and `ALPS_NGS_STRINGIFY` becomes `ALPS_STRINGIFY`. `alps::signal` moves from `ALPS::hdf5` to `ALPS::utilities`; open archives still close on a segmentation fault. The old spellings and names remain, deprecated, while `ALPS_LEGACY_API` is on (the default); see [the legacy layer](legacy/README.md). Rebuild downstream binaries.
+- Retire the `alps/utility/` prefix. Its remaining shared helpers move to `<alps/utilities/...>`; `numeric_cast.hpp` moves to `<alps/numeric/numeric_cast.hpp>` and `cli.hpp` to `<alps/cli.hpp>`. `assign.hpp` and `set_zero.hpp` keep their spelling and now belong to the ALEA headers that use them. The unused `bitops.hpp` and `generator.hpp` are deprecated and installed only with the legacy layer. `factory.hpp` is removed: it has not compiled since before 3.0.0. See the [utilities status table](src/alps/utilities/README.md).
+- Add ALPSCore's MPI wrapper `<alps/utilities/mpi.hpp>` (`alps::mpi::communicator`, `environment`, `broadcast`, `all_reduce`, `all_gather`) to `ALPS::utilities` in MPI builds, with its tests. It shares the namespace `alps::mpi` with `<alps/ngs/mpi.hpp>` without overlapping, and both can be used in one program.
+- Reject HDF5 archive modes containing letters other than `r`, `w`, `a`, `c`, `l` and `m` with `alps::hdf5::wrong_mode`. Unknown letters, such as a mistyped `"wx"`, used to be ignored. The integer-property constructor likewise rejects bits other than `READ`, `WRITE`, `REPLACE`, `COMPRESS`, `LARGE` and `MEMORY`.
+- Default-construct `alps::hdf5::archive` and attach a file later with `open(path, mode)`, also after `close()`; opening an open archive throws `alps::hdf5::archive_opened`. Copy assignment is deleted: it shared the file without counting the reference, so closing either archive could close the other's file. Copy construction is unchanged.
+- Add `alps::hdf5::is_native_type<T>` and HDF5 storage for `boost::optional` in `<alps/hdf5/boost_optional.hpp>`, both from ALPSCore. An empty optional stores a default value with the attribute `alps_hdf5_optional_empty`, as ALPSCore does.
+- Add `ALPS::aleav2`, ALEA v2: the ALEA library of the ALPS Core Libraries, copied from ALPSCore with its tests. It keeps ALPSCore's include spellings and namespace (`<alps/alea.hpp>`, `<alps/alea/*.hpp>`, `alps::alea`). It requires Eigen 3.3 or newer and is built only when Eigen is found; installed SDK consumers request it with `find_package(ALPS COMPONENTS aleav2)`. In MPI builds it includes ALPSCore's `alps::alea::mpi_reducer`. ALPS's own ALEA (`<alps/alea.h>`) remains the default: it is unchanged and not deprecated, and both can be used in the same program. Nothing in ALPS uses ALEA v2 yet; the two will be swapped only after a conformance suite passes on both. The citation catalog's new `aleav2` component credits the ALPS Core Libraries paper (Wallerberger et al., arXiv:1811.08331). See [its README](src/alps/aleav2/README.md) for provenance and license.
 
 ### Migration
 
@@ -60,6 +69,12 @@ Numerical matrix/vector persistence now requires an explicit adapter: include `<
 | `UseALPS.cmake`, `include.mk` | Imported SDK targets and explicit installation paths; add the installed `bin` directory to `PATH`. Both remain installed, deprecated: `${ALPS_LIBRARIES}` is `ALPS::alps`, and `UseALPS.cmake` no longer sets compilers, global flags or cache entries |
 | `UsePyALPS.cmake` | [pyalps downstream CMake package](python/pyalps/README.md#downstream-native-extensions); the deprecated `alps_target_link_pyalps` links `pyalps::runtime` |
 | `<alps/ngs/detail/export_sim_to_python.hpp>` | `<pyalps/export_simulation.hpp>`; the old header forwards to it |
+| `<alps/ngs/{cast,stacktrace,signal,stringify,short_print}.hpp>`, `<alps/ngs/detail/{remove_cvr,type_wrapper}.hpp>`, `<alps/utility/{size,temporary_filename,make_copy}.hpp>` | `<alps/utilities/...>` with the same file name; the old headers forward to them while `ALPS_LEGACY_API` is on |
+| `<alps/utility/{copyright,citations,os,vmusage,vectorio,encode,resize,data}.hpp>` | `<alps/utilities/...>` with the same file name; the old headers forward to them while `ALPS_LEGACY_API` is on |
+| `<alps/utility/numeric_cast.hpp>`, `<alps/utility/cli.hpp>` | `<alps/numeric/numeric_cast.hpp>`, `<alps/cli.hpp>`; the old headers forward to them while `ALPS_LEGACY_API` is on |
+| `<alps/utility/{bitops,generator}.hpp>` | No replacement; installed, deprecated, while `ALPS_LEGACY_API` is on. Use C++20 `<bit>` instead of `bitops` |
+| `<alps/utility/factory.hpp>` | Removed. It did not compile in 3.0.0, so no code can depend on it |
+| `alps::ngs::signal`, `alps::ngs::stacktrace()`, `ALPS_NGS_STRINGIFY` | `alps::signal`, `alps::stacktrace()`, `ALPS_STRINGIFY`; deprecated aliases remain while `ALPS_LEGACY_API` is on |
 | Historical XML shell tools | Retained alongside `alps-xml`; see [XML tools](CONTRIBUTING.md#xml-resources-and-tools) |
 | Top-level `import mpi` compatibility module | `import pyalps.mpi`; install the `mpi` extra for mpi4py |
 | `applications/`, `tool/`, `test/`, `example/` | `src/apps/`, `src/tools/`, `tests/`, `tutorials/examples/` |

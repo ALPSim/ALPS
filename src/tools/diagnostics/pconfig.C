@@ -11,9 +11,9 @@
 *
 *****************************************************************************/
 
-#include <alps/utility/copyright.hpp>
+#include <alps/utilities/copyright.hpp>
 #include <alps/version.h>
-#include <alps/utility/os.hpp>
+#include <alps/utilities/os.hpp>
 #include <boost/version.hpp>
 #include <iostream>
 

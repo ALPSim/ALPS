@@ -15,7 +15,7 @@
 #ifndef ALPS_NGS_ALEA_ACCUMULATOR_WRAPPER_HPP
 #define ALPS_NGS_ALEA_ACCUMULATOR_WRAPPER_HPP
 
-#include <alps/ngs/stacktrace.hpp>
+#include <alps/utilities/stacktrace.hpp>
 #include <alps/ngs/alea/accumulator.hpp>
 #include <alps/ngs/alea/wrapper/base_wrapper.hpp>
 #include <alps/ngs/alea/wrapper/result_wrapper.hpp>

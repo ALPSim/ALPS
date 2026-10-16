@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-#include <alps/utility/citations.hpp>
+#include <alps/utilities/citations.hpp>
 #include <cstdlib>
 #include <ostream>
 #include <stdexcept>
@@ -11,7 +11,7 @@ struct citation_entry {
   const char* details;
 };
 
-#include <alps/utility/citations_data.inc>
+#include <alps/utilities/citations_data.inc>
 } // namespace
 
 std::string alps::citation_text(const std::string& component) {

@@ -14,7 +14,7 @@
 #ifndef ALPS_NGS_DETAIL_PARAMVALUE_READER_HPP
 #define ALPS_NGS_DETAIL_PARAMVALUE_READER_HPP
 
-#include <alps/ngs/cast.hpp>
+#include <alps/utilities/cast.hpp>
 #include <alps/ngs/config.hpp>
 
 #include <boost/variant.hpp>

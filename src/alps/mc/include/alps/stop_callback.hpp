@@ -16,7 +16,7 @@
 #define ALPS_NGS_CALLBACK_HPP
 
 #include <alps/ngs/config.hpp>
-#include <alps/ngs/signal.hpp>
+#include <alps/utilities/signal.hpp>
 
 #include <boost/chrono.hpp>
 #ifdef ALPS_HAVE_MPI
@@ -34,7 +34,7 @@ namespace alps {
 		    bool operator()();
 		private:
 		    boost::chrono::duration<std::size_t> limit;
-		    alps::ngs::signal signals;
+		    alps::signal signals;
 		    boost::chrono::high_resolution_clock::time_point start;
 #ifdef ALPS_HAVE_MPI
 	        boost::optional<boost::mpi::communicator> comm;
@@ -50,7 +50,7 @@ namespace alps {
         private:
           boost::mpi::communicator comm;
           boost::chrono::duration<std::size_t> limit;
-          alps::ngs::signal signals;
+          alps::signal signals;
           boost::chrono::high_resolution_clock::time_point start;
 	};
 #endif

@@ -12,8 +12,8 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <alps/ngs/mcoptions.hpp>
-#include <alps/utility/cli.hpp>
-#include <alps/ngs/stacktrace.hpp>
+#include <alps/cli.hpp>
+#include <alps/utilities/stacktrace.hpp>
 
 #include <boost/program_options.hpp>
 

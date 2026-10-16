@@ -80,8 +80,8 @@ def test_utilities_without_platform_stacktrace(tmp_path, monkeypatch, unavailabl
                   '#define backtrace_symbols alps_missing_backtrace_symbols\n')
     (tmp_path / "execinfo.h").write_text(header)
     (tmp_path / "main.cpp").write_text(
-        '#include <alps/ngs/stacktrace.hpp>\n'
-        'int main() { return !alps::ngs::stacktrace().empty(); }\n')
+        '#include <alps/utilities/stacktrace.hpp>\n'
+        'int main() { return !alps::stacktrace().empty(); }\n')
     (tmp_path / "CMakeLists.txt").write_text(
         'cmake_minimum_required(VERSION 3.27...4.3)\n'
         'project(stacktrace_contract LANGUAGES C CXX)\n'
@@ -177,8 +177,18 @@ def test_relocated_sdk(tmp_path):
 def test_installed_sdk_preserves_public_headers():
     prefix = Path(os.environ["ALPS_DIR"]).resolve().parents[1]
     baseline = json.loads(Path(__file__).with_name("preserved_public_headers.json").read_text())
-    missing = [name for name in baseline["headers"] if not (prefix / "include" / name).is_file()]
+    # Retired headers are listed with the reason; none of them may come back.
+    retired = baseline.get("retired", {})
+    # An SDK built with ALPS_LEGACY_API=OFF has no deprecated spellings.
+    legacy = SOURCE / "legacy" / "include"
+    legacy_only = set() if (Path(os.environ["ALPS_DIR"]) / "ALPSLegacyConfig.cmake").is_file() else {
+        path.relative_to(legacy).as_posix() for path in legacy.rglob("*") if path.is_file()}
+    missing = [name for name in baseline["headers"]
+               if name not in retired and name not in legacy_only
+               and not (prefix / "include" / name).is_file()]
     assert not missing, f"Public headers lost from {baseline['source_commit']}: {missing}"
+    returned = [name for name in retired if (prefix / "include" / name).is_file()]
+    assert not returned, f"Retired headers installed again: {returned}"
 
 
 @pytest.mark.parametrize("tutorial,target", [

@@ -16,10 +16,10 @@
 
 #include <alps/ngs/config.hpp>
 #include <alps/hdf5_export.h>
-#include <alps/ngs/stacktrace.hpp>
+#include <alps/utilities/stacktrace.hpp>
 #include <alps/hdf5/errors.hpp>
-#include <alps/ngs/detail/remove_cvr.hpp>
-#include <alps/ngs/detail/type_wrapper.hpp>
+#include <alps/utilities/remove_cvr.hpp>
+#include <alps/utilities/type_wrapper.hpp>
 
 #include <boost/mpl/and.hpp>
 #include <boost/filesystem/path.hpp>
@@ -38,6 +38,7 @@
 #include <vector>
 #include <string>
 #include <numeric>
+#include <type_traits>
 
 #define ALPS_NGS_FOREACH_NATIVE_HDF5_TYPE(CALLBACK)                                                                                            \
     CALLBACK(char)                                                                                                                             \
@@ -59,6 +60,15 @@
 
 namespace alps {
     namespace hdf5 {
+
+        /// Inherits from `true_type` if `T` is a native type, from `false_type` otherwise
+        /// (from ALPSCore 4daa2da2).
+        template <typename T>
+        struct is_native_type : public std::false_type {};
+#define ALPS_HDF5_IS_NATIVE_TYPE_CALLER(__type__)    \
+        template <> struct is_native_type<__type__> : public std::true_type {};
+        ALPS_NGS_FOREACH_NATIVE_HDF5_TYPE(ALPS_HDF5_IS_NATIVE_TYPE_CALLER)
+#undef ALPS_HDF5_IS_NATIVE_TYPE_CALLER
 
         namespace detail {
             struct archivecontext;
@@ -108,11 +118,16 @@ namespace alps {
                     MEMORY = 0x10 
                 } properties;
 
+                /// A closed archive; open() attaches it to a file (from ALPSCore 38e49c73).
+                archive();
                 archive(boost::filesystem::path const & filename, std::string mode = "r");
                 explicit archive(std::string const & filename, int props); // TODO: remove that!
                 explicit archive(std::string const & filename, char prop); // TODO: remove that!
                 explicit archive(std::string const & filename, char signed prop); // TODO: remove that!
                 archive(archive const & arg);
+                /// Copies share the file through a counted context; assigning one
+                /// would not count it (deleted as in ALPSCore 892bff78).
+                archive & operator=(archive const &) = delete;
 
                 virtual ~archive();
                 static void abort();
@@ -126,6 +141,10 @@ namespace alps {
                 void set_context(std::string const & context);
                 std::string complete_path(std::string path) const;
 
+                /// Opens a file in a closed archive, also after close(). Throws
+                /// archive_opened if the archive is open and wrong_mode for
+                /// letters other than "rwaclm".
+                void open(boost::filesystem::path const & filename, std::string const & mode = "r");
                 void close();
                 bool is_open();
 

@@ -22,7 +22,7 @@
 #include <alps/hdf5/pointer.hpp>
 #include <alps/hdf5/vector.hpp>
 #include <alps/hdf5/complex.hpp>
-#include <alps/ngs/stacktrace.hpp>
+#include <alps/utilities/stacktrace.hpp>
 #include "extract_from_pyobject.hpp"
 #include "archive_savable.hpp"
 #include "numpy_compat.hpp"

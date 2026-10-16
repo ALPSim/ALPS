@@ -17,7 +17,7 @@
 #include <alps/hdf5/archive.hpp>
 #include <alps/ngs/mutex.hpp>
 #include <alps/ngs/config.hpp>
-#include <alps/ngs/signal.hpp>
+#include <alps/utilities/signal.hpp>
 #include <alps/ngs/params.hpp>
 #include <alps/ngs/mcresults.hpp> // TODO: replace by new alea
 #include <alps/ngs/mcobservables.hpp> // TODO: replace by new alea
@@ -81,7 +81,7 @@ namespace alps {
                 , result_mutex(new noop_lockable())
                 , m_status(initialized)
             {
-                alps::ngs::signal::listen();
+                alps::signal::listen();
             }
 
             virtual ~mcbase_ng() {}
