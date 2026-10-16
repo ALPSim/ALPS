@@ -30,10 +30,13 @@
 #include <stdexcept>
 #include <typeinfo>
 
+// ALPS local change: ALPSCore names this macro EXCEPTION_CATCH and leaves it
+// defined. It is prefixed and undefined at the end of this file, so it cannot
+// leak into, or clash with, an includer's macros. See src/alps/utilities/README.md.
 #if __cpp_lib_uncaught_exceptions >= 201411L
-  #define EXCEPTION_CATCH std::uncaught_exceptions()>0
+  #define ALPS_MPI_EXCEPTION_CATCH std::uncaught_exceptions()>0
 #else 
-  #define EXCEPTION_CATCH std::uncaught_exception()
+  #define ALPS_MPI_EXCEPTION_CATCH std::uncaught_exception()
 #endif
 
 
@@ -251,7 +254,7 @@ namespace alps {
             {
                 if (!initialized_) return; // we are not in control, don't mess up other's logic.
                 if (finalized()) return; // MPI is finalized --- don't touch it.
-                if (abort_on_exception_ && (EXCEPTION_CATCH)) {
+                if (abort_on_exception_ && (ALPS_MPI_EXCEPTION_CATCH)) {
                     this->abort(255); // FIXME: make the return code configurable?
                 }
                 MPI_Finalize();
@@ -403,5 +406,7 @@ namespace alps {
     } // mpi::
 } // alps::
 
+// ALPS local change; see ALPS_MPI_EXCEPTION_CATCH's definition.
+#undef ALPS_MPI_EXCEPTION_CATCH
 
 #endif /* ALPS_UTILITIES_MPI_HPP_INCLUDED_90206380262d48f0bcbe98fd16edd65d */

@@ -27,7 +27,7 @@ means it was moved as it was, and the note says what modernization remains.
 | `size.hpp` | `alps::size()` for scalars and sequences | current; ALPSCore name |
 | `temporary_filename.hpp` | Private temporary file names | current; ALPSCore name. ALPS keeps its by-value signature |
 | `make_copy.hpp` | `alps::make_copy()` | current; ALPSCore name |
-| `mpi.hpp` | `alps::mpi`: ALPSCore's MPI communicator, environment, broadcast and reductions | current; copied unchanged from ALPSCore, MPI builds only |
+| `mpi.hpp` | `alps::mpi`: ALPSCore's MPI communicator, environment, broadcast and reductions | current; copied from ALPSCore with one local change, MPI builds only |
 | `copyright.hpp` | Program banners, version and license text | current |
 | `citations.hpp` | Citation notices from the generated catalog | current |
 | `os.hpp` | Host, user and directory queries | carried over; returns `boost::filesystem::path` |
@@ -47,10 +47,13 @@ while `ALPS_LEGACY_API` is on.
 
 ## ALPSCore's MPI wrapper
 
-`mpi.hpp` is copied unchanged from ALPSCore commit
+`mpi.hpp` is copied from ALPSCore commit
 `7146b9e1f017938a94e5dae35d88467cc5ba7969`
-(`utilities/include/alps/utilities/mpi.hpp`). Its notice refers to ALPSCore's
-top-level
+(`utilities/include/alps/utilities/mpi.hpp`) with one local change, marked by
+comments: ALPSCore's unprefixed macro `EXCEPTION_CATCH` is renamed
+`ALPS_MPI_EXCEPTION_CATCH` and undefined at the end of the header, so it no
+longer leaks into every file that includes it, directly or through ALEA v2.
+Its notice refers to ALPSCore's top-level
 [`COPYRIGHT.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f017938a94e5dae35d88467cc5ba7969/COPYRIGHT.TXT),
 [`LICENSE.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f017938a94e5dae35d88467cc5ba7969/LICENSE.TXT)
 and
