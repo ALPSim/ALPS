@@ -34,10 +34,10 @@ alps::oxstream& operator<<(alps::oxstream& out,
 alps::oxstream& operator<<(alps::oxstream& out,
                            const alps::detail::VertexReference& d)
 {
-  out << start_tag("CELL")
-      << static_cast<const alps::detail::BasicVertexReference&>(d) 
+  out << start_tag("VERTEX")
+      << static_cast<const alps::detail::BasicVertexReference&>(d)
       << attribute("type", d.new_type())
-      << end_tag("CELL");
+      << end_tag("VERTEX");
   return out;
 }
 
@@ -72,7 +72,8 @@ BasicVertexReference::BasicVertexReference(XMLTag tag)
 
 
 VertexReference::VertexReference(XMLTag tag, std::istream& in)
-{  
+ : BasicVertexReference(tag)
+{
   if(tag.attributes["type"]=="")
     boost::throw_exception(std::runtime_error("type attribute missing in changed vertex element"));
   new_type_=boost::lexical_cast<type_type>(tag.attributes["type"]);
@@ -100,7 +101,7 @@ EdgeReference::EdgeReference(XMLTag tag, std::istream& in)
   tag=parse_tag(in);
   if (tag.name!="TARGET")
     boost::throw_exception(std::runtime_error("<TARGET> element missing in changed edge"));
-  source_ = BasicVertexReference(tag);
+  target_ = BasicVertexReference(tag);
   if (tag.type!=XMLTag::SINGLE) {
     tag=parse_tag(in);
     if(tag.name!="/TARGET")

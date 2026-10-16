@@ -36,7 +36,7 @@ foreach(
   target_link_libraries(lattice_${name} PRIVATE ALPS::alps)
   alps_add_gtest(lattice_${name} COMPONENT lattice LABELS compatibility)
 endforeach()
-foreach(name coloring parity)
+foreach(name coloring disorder parity)
   add_executable(${name} ${name}.C)
 
   target_link_libraries(${name} PRIVATE ALPS::alps)
