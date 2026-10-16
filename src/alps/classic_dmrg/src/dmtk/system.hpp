@@ -1786,13 +1786,7 @@ template <class T>
 void
 System<T>::init_hamiltonian(bool create_composite)
 {
-#ifndef USE_PRODUCT_DEFAULT
-  if(create_composite && _rotate_terms){
-    create_interactions(create_composite);
-    init_terms_composite(*this, this->gs);
-  }
-#endif
-
+  // Changed here: removed a duplicate of these two calls that rebuilt the same terms.
   create_interactions(create_composite);
   init_terms_composite(*this, this->gs);
 }

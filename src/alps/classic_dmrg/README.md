@@ -312,8 +312,12 @@ files only the values of its Krylov vectors (the rework did so for the
 reorthogonalized solves); `Vector` and `Matrix` stream their elements in one
 call instead of one per scalar (same file layout); `VectorState::condense`
 keeps the merge permutations of the layouts it last saw instead of
-rebuilding them for every product; and the per-step bookkeeping of
-`System` (`build_composite_operators`, `hint`, `rotate_terms`) finds block
+rebuilding them for every product; `System::init_iteration` (through its
+default `init_hamiltonian`) builds the interaction and composite terms once
+per step instead of twice (a guarded
+copy of the same calls ran first on the same inputs, as in the legacy
+engine); and the per-step bookkeeping of `System` (`build_composite_operators`,
+`hint`, `rotate_terms`) finds block
 operators through an index built once per call instead of a list scan per
 lookup, sorts a term's factors into blocks before copying any of them, and
 groups the terms whose block operators are summed into one composite
