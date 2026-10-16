@@ -42,10 +42,11 @@ Reading a parameter that is not defined throws. `has_unused(std::ostream&)`
 lists the parameters that were supplied but never defined; the solvers print
 them as a warning. A Monte Carlo simulation puts its definitions in a static
 `define_parameters()` that calls its base's: `alps::mcbase::define_parameters()`
-defines `SEED` (default 42), and `alps::mcmpiadapter` adds `BINNUMBER` (default
-128). The solvers and pyalps's simulation bindings call it before constructing a
-simulation. In MPI programs, `alps::broadcast(communicator, parameters)` from
-`<alps/ngs/api.hpp>` takes a Boost.MPI communicator.
+defines `SEED` (default 42), and `alps::mcmpiadapter` adds `Tmin` and `Tmax`
+(defaults 1 and 600), the bounds in seconds between its checks of the completed
+fraction. The solvers and pyalps's simulation bindings call it before
+constructing a simulation. In MPI programs, `alps::broadcast(communicator,
+parameters)` from `<alps/mc/api.hpp>` takes an `alps::mpi::communicator`.
 
 ## Where values come from
 

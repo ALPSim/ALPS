@@ -12,19 +12,20 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #pragma once
-#include <alps/ngs.hpp>
-#include <alps/mcbase.hpp>
+#include <alps/mc/api.hpp>
+#include <alps/mc/mcbase.hpp>
 #include <cmath>
 #include <vector>
 
 // Retain the original exp(-x*x) scalar/vector simulation, with defined state.
 // Record the sample sum independently of the observable implementation.
+// ALPS's own test, ported from the NGS mcbase to ALPSCore's.
 class sum_simulation : public alps::mcbase {
 public:
     sum_simulation(parameters_type const& parameters, std::size_t seed_offset = 42)
         : alps::mcbase(parameters, seed_offset), total_(parameters["COUNT"]) {
-        measurements << alps::accumulator::RealObservable("SValue")
-                     << alps::accumulator::RealVectorObservable("VValue");
+        measurements << alps::accumulators::FullBinningAccumulator<double>("SValue")
+                     << alps::accumulators::FullBinningAccumulator<std::vector<double>>("VValue");
     }
     static parameters_type& define_parameters(parameters_type& parameters) {
         return alps::mcbase::define_parameters(parameters)

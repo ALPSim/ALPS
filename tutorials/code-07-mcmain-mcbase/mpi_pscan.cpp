@@ -13,9 +13,10 @@
 
 #include "ising.hpp"
 
+#include <alps/mc/api.hpp>
 #include <alps/parseargs.hpp>
-#include <alps/mcmpiadapter.hpp>
-#include <alps/stop_callback.hpp>
+#include <alps/mc/mpiadapter.hpp>
+#include <alps/mc/stop_callback.hpp>
 #include <alps/ngs/make_parameters_from_file.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 
@@ -38,8 +39,8 @@ typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 int main(int argc, char *argv[]) {
 
     try {
-        boost::mpi::environment env(argc, argv);
-        boost::mpi::communicator comm_world;
+        alps::mpi::environment env(argc, argv);
+        alps::mpi::communicator comm_world;
 
         // TODO: accept space sparated input files, not comma
         alps::parseargs options(argc, argv);
@@ -62,7 +63,11 @@ int main(int argc, char *argv[]) {
 
             std::cout << color << std::endl;
 
-            boost::mpi::communicator comm_local = comm_world.split(color);
+            // alps::mpi::communicator has no split(); split the MPI
+            // communicator and let comm_local own the result.
+            MPI_Comm split_comm;
+            MPI_Comm_split(comm_world, int(color), comm_world.rank(), &split_comm);
+            alps::mpi::communicator comm_local(split_comm, alps::mpi::take_ownership);
             if (color >= input_files.size())
                 break;
 

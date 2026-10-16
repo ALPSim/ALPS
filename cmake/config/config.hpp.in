@@ -15,6 +15,7 @@
 #define ALPS_HAVE_ALPS_HDF5
 #define ALPS_HAVE_ALPS_PARAMS
 #define ALPS_HAVE_ALPS_ACCUMULATORS
+#define ALPS_HAVE_ALPS_MC
 
 // == Accumulator value types ==
 

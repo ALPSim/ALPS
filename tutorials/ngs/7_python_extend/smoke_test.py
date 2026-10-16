@@ -73,7 +73,8 @@ with tempfile.TemporaryDirectory() as directory:
         assert sorted(archive.list_children("/parameters")) == [
             "L", "SEED", "SWEEPS", "T", "THERMALIZATION"]
         assert sorted(archive.list_children("/measurements")) == OBSERVABLES
-        assert archive.is_group("/checkpoint/engine")
+        # The random number generator's state, saved as one string.
+        assert archive.is_data("/checkpoint/engine")
         assert int(archive[CLONE + "/checkpoint/sweeps"]) == simulation.sweeps
         np.testing.assert_array_equal(
             archive[CLONE + "/checkpoint/spins"], simulation.spins)

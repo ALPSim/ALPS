@@ -16,8 +16,10 @@
 #ifndef DMFT_QMC_WEAK_COUPLING_H
 #define DMFT_QMC_WEAK_COUPLING_H
 
-#include <alps/ngs.hpp>
-#include <alps/mcbase.hpp>
+#include <alps/mc/api.hpp>
+#include <alps/mc/mcbase.hpp>
+#include <alps/hdf5/vector.hpp>
+#include <alps/numeric/vector_valarray_conversion.hpp>
 
 #include <alps/alea.h>
 #include <cmath>

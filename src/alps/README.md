@@ -23,7 +23,8 @@ Sources use `include/`, `src/` and `tests/` where applicable. Public include spe
 | `aleav2/` | ALEA v2, ALPSCore's ALEA: accumulators and results (`<alps/alea.hpp>`, `<alps/alea/*.hpp>`); built when Eigen is found. See [its README](aleav2/README.md) | `ALPS::aleav2` |
 | `accumulators/` | ALPSCore's accumulators (`<alps/accumulators.hpp>`, `<alps/accumulators/*.hpp>`), and the NGS accumulators (`<alps/ngs/accumulator/*.hpp>`). See [its README](accumulators/README.md) | `ALPS::accumulators`; NGS: `ALPS::alps` |
 | `alea/` | ALEA observables and results (`<alps/alea.h>`, `<alps/alea/*.h>`) | `ALPS::alps` |
-| `mc/`, `scheduler/`, `parapack/` | Simulation API, execution and scheduling | `ALPS::alps` |
+| `mc/` | ALPSCore's Monte Carlo simulation base (`<alps/mc/*.hpp>`) and ALPS's `<alps/progress_callback.hpp>`. See [its README](mc/README.md) | `ALPS::mc` |
+| `scheduler/`, `parapack/` | Execution and scheduling | `ALPS::alps` |
 | `fortran/` | C++ bridge with public headers in `include/alps/fortran/` | `ALPS::fortran` |
 | `solvers/` | Shared `<alps/solvers.hpp>` declarations for MaxEnt and CT-QMC | `ALPS::solver_headers` |
 | `resources/` | XML definitions and stylesheets | Installed data component |
@@ -36,7 +37,7 @@ Subsystem tests follow their source owner. Python package tests live in `python/
 
 `ALPS::configuration`, `ALPS::containers`, `ALPS::numerics`, `ALPS::numeric_io` and `ALPS::solver_headers` are interface targets. `ALPS::containers` supplies storage, while `ALPS::numerics` adds numerical algorithms and BLAS/LAPACK. Numerical archive adapters belong to `ALPS::numeric_io`, which combines numerics and HDF5. See the [SDK usage and migration instructions](../../CONTRIBUTING.md#consuming-the-c-sdk).
 
-Utilities, HDF5, typed params, ALPSCore's accumulators, Osiris, XML and command-line parsing are separate runtime libraries. `ALPS::alps` links them transitively. The params adapters from parameter and XML files and to the older `Parameters` remain in `params/adapters/` and are compiled into `ALPS::alps`; their `<alps/ngs/make_*.hpp>` headers are exposed through the aggregate interface.
+Utilities, HDF5, typed params, ALPSCore's accumulators and Monte Carlo simulation base, Osiris, XML and command-line parsing are separate runtime libraries. `ALPS::alps` links them transitively. The params adapters from parameter and XML files and to the older `Parameters` remain in `params/adapters/` and are compiled into `ALPS::alps`; their `<alps/ngs/make_*.hpp>` headers are exposed through the aggregate interface.
 
 `ALPS::maxent` links the foundations, Osiris and numerical providers. Its executable adds `ALPS::cli` and reads HDF5 params directly. Both use the shared `<alps/solvers.hpp>` declarations and link without `ALPS::alps`.
 

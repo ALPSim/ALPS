@@ -84,12 +84,18 @@ assert mean(mapping['x']) == 4.0
 """)
 
 
-def test_observable_merge_still_updates_the_container():
+def test_observable_merge_failure_leaves_the_container_intact():
+    # ALPSCore cannot merge full-binning accumulators, the kind pyalps creates.
     _run('observables', """
 other = ngs.createRealObservable('x')
 other << 7.0 << 9.0
-mapping['x'].merge(other)
-assert mean(mapping['x']) == 5.0
+try:
+    mapping['x'].merge(other)
+except RuntimeError as error:
+    assert 'not yet implemented' in str(error)
+else:
+    raise AssertionError('merge of full-binning accumulators succeeded')
+assert mean(mapping['x']) == 2.0
 """)
 
 
