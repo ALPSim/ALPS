@@ -69,9 +69,10 @@ class AlpsClassicDmrgCalculator(MultiConfigurationCalculator):
     2.2.1 does not); the state-vector path works with released builds. The
     ``StateVectorContainer`` carries the run's RDMs unless
     ``ci_coefficient_cutoff`` trims the vector, whose RDMs then differ.
-    Every integral is a separate engine term, so the cost grows quickly with
-    the orbital count, and the CI vector grows combinatorially: use it for
-    small active spaces.
+    The engine keeps complementary block operators, but the CI vector grows
+    combinatorially: past about 12 orbitals at half filling, building the
+    ``StateVectorContainer`` costs more than the solve, and ``"rdm"`` avoids
+    it.
 
     :meth:`make_rdms`, :meth:`measure_local`, :meth:`measure_correlations`
     and :meth:`spin_spin_correlations` read the last run. Other operators are

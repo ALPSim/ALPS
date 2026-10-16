@@ -123,9 +123,10 @@ the final state from the stored block rotations and the final wavefunction:
 ordered by alpha then beta word, in ALPS mode order (orbitals ascending,
 the down mode before the up mode of an orbital), normalized, with the
 largest amplitude positive. Its 1-/2-RDMs are those of the run, truncated or
-not. The sector grows as `C(n, n_α) C(n, n_β)` (63504 determinants at 10
-orbitals and half filling, where the reconstruction adds about a second to
-a 30 s run); it is limited to 64 orbitals.
+not. The sector grows as `C(n, n_α) C(n, n_β)`: at half filling with 32
+kept states and two sweeps, the reconstruction adds 0.03 s to a 1.4 s run
+at 10 orbitals (63504 determinants) and 0.35 s to a 2.5 s run at 12
+(853776). It is limited to 64 orbitals.
 
 The solver is meant for small and medium active spaces and for checking
 other codes. Its engine, `dmtk::MolecularSystem`
