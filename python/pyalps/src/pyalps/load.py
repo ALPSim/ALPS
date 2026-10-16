@@ -400,26 +400,35 @@ class Hdf5Loader:
                 for m in obslist:
                     try:
                         d = DataSet()
-                        if "timeseries" in  self.h5f.list_children(respath+'/'+m):
-                            k = self.h5f.list_children(respath+'/'+m+'/timeseries')
-                            if "logbinning" in k and "logbinning2" in k and "logbinning_counts" in k:
-                                if verbose: log("Loading"+ m)
-                                bins = self.h5f[respath+'/'+m+'/timeseries/logbinning'][0:-7]
-                                bins2 = self.h5f[respath+'/'+m+'/timeseries/logbinning2'][0:-7]
-                                counts = self.h5f[respath+'/'+m+'/timeseries/logbinning_counts'][0:-7]
-                                scale = 1
-                                for i in range(len(counts)):
-                                    mean = bins[i]/(counts[i]*scale)
-                                    mean2 = bins2[i]/counts[i]
-                                    bins2[i] = np.sqrt((mean2-mean*mean)/counts[i])
-                                    scale *=2
-                                d.y = bins2
-                                d.x = np.arange(0,len(d.y))
-                                d.props['hdf5_path'] = respath + m
-                                d.props['observable'] = 'binning analysis of ' + pt.hdf5_name_decode(m)
-                                d.props.update(params)
-                                if verbose: log( '  loaded binnig analysis for '+m)
-                                fileset.append(d)
+                        path = respath+'/'+m
+                        children = self.h5f.list_children(path)
+                        if "timeseries" in children and all(
+                                name in self.h5f.list_children(path+'/timeseries')
+                                for name in ("logbinning", "logbinning2", "logbinning_counts")):
+                            if verbose: log("Loading"+ m)
+                            bins = self.h5f[path+'/timeseries/logbinning'][0:-7]
+                            bins2 = self.h5f[path+'/timeseries/logbinning2'][0:-7]
+                            counts = self.h5f[path+'/timeseries/logbinning_counts'][0:-7]
+                            scale = 1
+                            for i in range(len(counts)):
+                                mean = bins[i]/(counts[i]*scale)
+                                mean2 = bins2[i]/counts[i]
+                                bins2[i] = np.sqrt((mean2-mean*mean)/counts[i])
+                                scale *=2
+                            d.y = bins2
+                        elif "error_bins" in children:
+                            # ALPSCore's accumulators store the analysis itself: the
+                            # error estimate at each binning level, from bins of one sample.
+                            if verbose: log("Loading"+ m)
+                            d.y = np.array(self.h5f[path+'/error_bins'])
+                        else:
+                            continue
+                        d.x = np.arange(0,len(d.y))
+                        d.props['hdf5_path'] = path
+                        d.props['observable'] = 'binning analysis of ' + pt.hdf5_name_decode(m)
+                        d.props.update(params)
+                        if verbose: log( '  loaded binnig analysis for '+m)
+                        fileset.append(d)
                     except AttributeError:
                         log( "Could not create DataSet")
                 sets.append(fileset)

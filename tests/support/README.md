@@ -22,7 +22,8 @@ and [`ACKNOWLEDGE.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f01793
 | `utilities/include/alps/utilities/fs/{get_basename,get_dirname,get_extension,remove_extensions}.hpp` | `alps/utilities/fs/` |
 | `utilities/src/{gtest_par_xml_output,filename_operations}.cpp` | `src/` |
 | `utilities/include/alps/testing/near.hpp` | `alps/testing/near.hpp`, used by the ALEA tests |
+| `utilities/include/alps/testing/unique_file.hpp`, `utilities/src/unique_file.cpp` | `alps/testing/unique_file.hpp`, `src/unique_file.cpp`, used by the accumulators tests |
 
 `alps_add_mpi_gtest(... OWN_MAIN)` links `gtest_par_xml_output`, which ALPSCore's
-MPI tests call from their `main()`. `alps/config.hpp` is ALPS's own: it stands in
-for ALPSCore's generated configuration header by including `<alps/config.h>`.
+MPI tests call from their `main()`. They include `<alps/config.hpp>`, which
+`ALPS::configuration` provides.
