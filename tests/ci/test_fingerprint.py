@@ -315,7 +315,9 @@ class Workflow(unittest.TestCase):
                            ("packaging", "python/pyalps/tests/test_binding_surface.py"),
                            ("linux", ".github/scripts/run_with_timeout.py"),
                            ("mpi", "src/alps/parapack/tests/collect_mpi.op-3"),
-                           ("mpi", "cmake/ALPSTesting.cmake")):
+                           ("mpi", "cmake/ALPSTesting.cmake"),
+                           ("linux", "legacy/src/params_path_constructor.cpp"),
+                           ("packaging", "legacy/cmake/UseALPS.cmake")):
             with self.subTest(area=area, path=path):
                 self.assertTrue(config.in_footprint(area, path))
 

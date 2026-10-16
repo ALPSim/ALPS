@@ -15,7 +15,8 @@
     "CMakeLists.txt",
     "CMakePresets.json",
     "cmake/**",
-    "pytest.ini"
+    "pytest.ini",
+    "legacy/**"
   ],
   "ignore": [
     "*.md",

@@ -3,6 +3,7 @@
 //               2026       by the ALPS collaboration
 // Part of the ALPS Project — see LICENSE.txt for full license text.
 // SPDX-License-Identifier: MIT
+#include <alps/ngs/params_from_file.hpp>
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/complex.h>
 #include <nanobind/stl/string.h>
@@ -121,7 +122,7 @@ NB_MODULE(pyngsparams_c, m) {
         // constructor of the Boost.Python module.
         .def("__init__",
              [](alps::params * self, std::string const & filename) {
-                 new (self) alps::params(boost::filesystem::path(filename));
+                 new (self) alps::params(alps::params_from_file(boost::filesystem::path(filename)));
                  pyalps::enable_python_param_reader(*self);
              },
              nb::arg("filename"))
