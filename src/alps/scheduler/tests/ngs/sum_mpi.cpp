@@ -92,5 +92,7 @@ TEST(ParallelMonteCarloRunner, CollectsEmptyResultsWhenNoRankMeasured) {
     alps::broadcast(world, parameters);
     alps::mcmpiadapter<sum_simulation, every_step> simulation(parameters, world);
     const auto results = alps::collect_results(simulation);
-    EXPECT_EQ(results["SValue"].count(), 0u);
+    // With ALPS_NGS_USE_NEW_ALEA only rank 0 receives the results.
+    if (world.rank() == 0)
+        EXPECT_EQ(results["SValue"].count(), 0u);
 }
