@@ -1,0 +1,74 @@
+# Adapted from skilledwolf/alpsx (private repository), branch
+# agent/v3-execution-and-api-audit at d37e51227,
+# python/qdk-chemistry-alps/pyproject.toml: the backends run on pyalps, the
+# MPS DMRG backend and its markers are gone, and the documentation, example
+# and proof-of-concept extras are not carried over.
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qdk-chemistry-alps"
+version = "0.2.0.dev0"
+description = "ALPS solver backends (exact diagonalization and classic DMRG) for Microsoft's qdk-chemistry"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+authors = [{ name = "Tobias Wolf" }]
+keywords = [
+    "quantum-chemistry",
+    "dmrg",
+    "exact-diagonalization",
+    "lattice-models",
+    "alps",
+    "qdk-chemistry",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
+    "numpy>=1.22",
+    "scipy>=1.8",  # rcm_ordering (sparse csgraph)
+    "qdk-chemistry>=2.1",
+    # pyalps is deliberately not declared: the backends need its models, ed
+    # and classic_dmrg bindings, which a pyalps built from this repository
+    # against an installed SDK provides and a resolver could not choose. The
+    # import fails with build guidance instead (see README.md).
+]
+
+[project.urls]
+Repository = "https://github.com/ALPSim/ALPS"
+Issues = "https://github.com/ALPSim/ALPS/issues"
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+dev = ["pytest>=7", "ruff>=0.6"]
+
+[project.entry-points."qdk_chemistry.plugins"]
+alps = "qdk_chemistry_alps.plugin:AlpsPlugin"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "pyscf: needs the pyscf package for a reference value",
+    "local_qdk: needs a qdk-chemistry build providing RdmContainer (unreleased as of 2.2.1)",
+    "classic_dmrg: needs pyalps built with the classic_dmrg bindings",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+# E501: long lines here are prose in docstrings and convention comments.
+ignore = ["E501"]
