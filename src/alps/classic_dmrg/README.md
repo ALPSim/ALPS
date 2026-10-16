@@ -93,18 +93,37 @@ in chemist notation,
 `H = Σ h[p,q] c†[p,σ] c[q,σ] + ½ Σ (pq|rs) c†[p,σ] c†[r,τ] c[s,τ] c[q,σ] + core_energy`,
 with one spinful-fermion site per orbital in input order and `alpha_electrons`
 and `beta_electrons` fixing the sector. It returns the energy (including
-`core_energy`), the spin-resolved one-particle reduced density matrices and the
-spin-summed two-particle one in the PySCF convention
+`core_energy`), the spin-resolved one-particle reduced density matrices, the
+two-particle ones in the PySCF convention
 (`dm1[p,q] = <c†[q] c[p]>`, `dm2[p,q,r,s] = Σ <c†[p,σ] c†[r,τ] c[s,τ] c[q,σ]>`),
-the iterations and the final truncation error. Every integral becomes an
-engine term of up to four sites, which `solve()` does not accept for compiled
+spin-summed (`two_rdm`) and by spin block (`two_rdm_aa`, `two_rdm_ab` with
+σ = α and τ = β, `two_rdm_bb`; `two_rdm` is `aa + ab + ab.transpose(2,3,0,1)
++ bb` to rounding, and QDK's `aaaa`, `aabb` and `bbbb` blocks are these), the
+iterations and the final truncation error. Every integral becomes an engine
+term of up to four sites, which `solve()` does not accept for compiled
 models, and every RDM element is a measured term. The sweep, truncation,
 Lanczos, scratch and callback options are those of `solve()`; `sector` must be
 empty, `num_eigenvalues` one and arithmetic real. The integrals must be finite
 and have the real-orbital symmetries (`h` symmetric, `(pq|rs)` eightfold) after
 `integral_cutoff` drops entries of smaller magnitude. Fewer than four orbitals
-are padded with one-dimensional neutral sites, which add no states. The result
-holds no wavefunction: no MPS, no CI coefficients, no checkpoint.
+are padded with one-dimensional neutral sites, which add no states.
+
+The result keeps no MPS and no checkpoint, so everything is measured in the
+final sweep. Besides the RDMs, `MolecularInput::observables` names
+`models::TermSum`s on `spinful_fermion()` sites (site `i` is orbital `i`)
+with real coefficients and at most four sites per product; each comes back
+in `MolecularResult::observables` as its expectation value, and products
+that change N or Sz are zero without being measured. With
+`MolecularInput::ci_vector`, the solver also reconstructs the CI vector of
+the final state from the stored block rotations and the final wavefunction:
+`ci_alpha`, `ci_beta` (occupation words, bit `p` for orbital `p`) and
+`ci_coefficients` list every determinant of the sector, zeros included,
+ordered by alpha then beta word, in ALPS mode order (orbitals ascending,
+the down mode before the up mode of an orbital), normalized, with the
+largest amplitude positive. Its 1-/2-RDMs are those of the run, truncated or
+not. The sector grows as `C(n, n_α) C(n, n_β)` (63504 determinants at 10
+orbitals and half filling, where the reconstruction adds about a second to
+a 30 s run); it is limited to 64 orbitals.
 
 The solver is meant for small active spaces and for checking other codes. The
 terms reach the engine one by one, about `n⁴` of them, and the RDM
@@ -205,7 +224,9 @@ alpsx branch `WIP/classic-dmrg-chemistry`, commit d4384a7f8; its files name
 the adaptations, which concern the headers, the callback and the charge
 registration. Its tests are adapted from the same branch
 (`tests/dmrg/classic_molecular.cpp`) and from alpsx commit 95cf817d6
-(`tests/dmrg/classic_multisite_fermion_lock.cpp`).
+(`tests/dmrg/classic_multisite_fermion_lock.cpp`). Written here, not in
+alpsx: the spin blocks of the two-particle RDM, the observables and the CI
+reconstruction, and their tests.
 
 Engine changes made here, each marked in the affected file: the dense block
 products call the platform BLAS through `dmtk/blas.hpp` (Fortran LP64 ABI,
@@ -248,7 +269,10 @@ The molecular solver (`classic_dmrg_molecular`, also labelled `chemistry`)
 is checked against an occupation-number exact diagonalization for one to five
 orbitals, with and without padding, energies and every RDM element; against
 the same integrals written as an `ALPS::models` Hamiltonian and solved by
-`ALPS::ed`; under truncation (variational energy, RDM traces); for callback
+`ALPS::ed`; the spin blocks, observables of one to four sites and the CI
+vector, sign by sign, against the same diagonalization for one to six
+orbitals; under truncation (variational energy, RDM traces, the CI vector's
+norm and 1-RDMs against the run's); for callback
 observation and abort with the scratch directory removed; and for the rejected
 inputs. `classic_dmrg_multisite` locks the engine's long-range hopping and
 four-site fermion products, which the molecular solver relies on, against an

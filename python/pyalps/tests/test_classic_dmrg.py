@@ -156,6 +156,22 @@ def symmetric_integrals(n, seed):
 
 def fock_reference(h1, eri, n_alpha, n_beta):
     """Full CI on the Jordan-Wigner Fock space: energy and spin-resolved RDMs."""
+    energy, _, expect, n = fock_ground_state(h1, eri, n_alpha, n_beta)
+    one = [np.array([[expect(("+", q, s), ("-", p, s)) for q in range(n)] for p in range(n)]) for s in (0, 1)]
+    two = np.zeros((n, n, n, n))
+    for p, q, r, t in itertools.product(range(n), repeat=4):
+        two[p, q, r, t] = sum(expect(("+", p, s1), ("+", r, s2), ("-", t, s2), ("-", q, s1))
+                              for s1, s2 in itertools.product((0, 1), repeat=2))
+    return energy, one[0], one[1], two
+
+
+def fock_ground_state(h1, eri, n_alpha, n_beta):
+    """The ground state on the Jordan-Wigner Fock space of modes 2p + spin (spin 0 = alpha).
+
+    Returns the energy, psi over all 2**(2n) occupation states (mode 0 the
+    most significant bit), expect(*ladder) for ladder factors ("+"/"-", p,
+    spin) applied right to left, and n.
+    """
     from scipy import sparse
 
     n = h1.shape[0]
@@ -184,15 +200,10 @@ def fock_reference(h1, eri, n_alpha, n_beta):
     psi[keep] = vectors[:, 0]
     def expect(*ops):  # <psi| ops[0] ops[1] ... |psi>, applied right to left
         phi = psi
-        for op in reversed(ops):
-            phi = op @ phi
+        for kind, p, s in reversed(ops):
+            phi = (cd if kind == "+" else c)[2 * p + s] @ phi
         return psi @ phi
-    one = [np.array([[expect(cd[2 * q + s], c[2 * p + s]) for q in range(n)] for p in range(n)]) for s in (0, 1)]
-    two = np.zeros((n, n, n, n))
-    for p, q, r, t in itertools.product(range(n), repeat=4):
-        two[p, q, r, t] = sum(expect(cd[2 * p + s1], cd[2 * r + s2], c[2 * t + s2], c[2 * q + s1])
-                              for s1, s2 in itertools.product((0, 1), repeat=2))
-    return values[0], one[0], one[1], two
+    return values[0], psi, expect, n
 
 
 @pytest.mark.parametrize("n, n_alpha, n_beta", [(2, 1, 1), (3, 2, 1), (4, 2, 2)])
@@ -213,6 +224,90 @@ def test_solve_molecular_energy_and_rdms_match_full_ci(n, n_alpha, n_beta):
     rdm_energy = 0.25 + np.einsum("pq,qp", h1, result.one_rdm) + 0.5 * np.einsum("pqrs,pqrs", eri, result.two_rdm)
     assert rdm_energy == pytest.approx(result.energy, abs=1e-9)
     assert len(seen) == len(result.iterations) and result.iteration_energies.shape == (len(seen),)
+
+
+def test_solve_molecular_spin_blocks_observables_and_ci_vector_match_full_ci():
+    n, n_alpha, n_beta = 4, 2, 1
+    h1, eri = symmetric_integrals(n, seed=11)
+    _, psi, expect, _ = fock_ground_state(h1, eri, n_alpha, n_beta)
+    fs = models.spinful_fermion()
+    def at(op, i):
+        return models.located(fs, op, i)
+    observables = {"doublon pair": at("n_updn", 0) * at("n_updn", 2), "spin flip": at("Sp", 0) * at("Sm", 3),
+                   "four sites": at("n_up", 0) * at("c_dag_dn", 1) * at("n", 2) * at("c_dn", 3)}
+    result = dmrg.solve_molecular(h1, eri, n_alpha, n_beta, sweeps=dmrg.fixed_sweeps(4, 128), warmup_states=128,
+                                  lanczos_tolerance=1e-12, observables=observables, ci_vector=True)
+    blocks = {"aa": (0, 0), "ab": (0, 1), "bb": (1, 1)}
+    for name, (s1, s2) in blocks.items():
+        expected = np.zeros((n,) * 4)
+        for p, q, r, t in itertools.product(range(n), repeat=4):
+            expected[p, q, r, t] = expect(("+", p, s1), ("+", r, s2), ("-", t, s2), ("-", q, s1))
+        np.testing.assert_allclose(getattr(result, "two_rdm_" + name), expected, atol=1e-8)
+    np.testing.assert_allclose(result.two_rdm_aa + result.two_rdm_ab + result.two_rdm_ab.transpose(2, 3, 0, 1)
+                               + result.two_rdm_bb, result.two_rdm, atol=1e-12)
+    number = lambda p, s: (("+", p, s), ("-", p, s))
+    assert result.observables["doublon pair"] == pytest.approx(
+        expect(*number(0, 0), *number(0, 1), *number(2, 0), *number(2, 1)), abs=1e-8)
+    assert result.observables["spin flip"] == pytest.approx(
+        expect(("+", 0, 0), ("-", 0, 1), ("+", 3, 1), ("-", 3, 0)), abs=1e-8)
+    assert result.observables["four sites"] == pytest.approx(
+        sum(expect(*number(0, 0), ("+", 1, 1), *number(2, s), ("-", 3, 1)) for s in (0, 1)), abs=1e-8)
+    # CI: the reference orders an orbital's alpha mode before its beta mode,
+    # ALPS the down (beta) mode first, so a doubly occupied orbital flips the
+    # sign; the global sign makes the largest amplitude positive.
+    alpha, beta = dmrg.ci_occupations(result)
+    assert alpha.shape == beta.shape == (len(result.ci_coefficients), n) == (6 * 4, n)
+    assert (alpha.sum(axis=1) == n_alpha).all() and (beta.sum(axis=1) == n_beta).all()
+    modes = 2 * n
+    index = [sum(int(alpha[k, p]) << (modes - 1 - 2 * p) | int(beta[k, p]) << (modes - 2 - 2 * p) for p in range(n))
+             for k in range(len(alpha))]
+    reference = psi[index] * (-1.0) ** (alpha & beta).sum(axis=1)
+    reference *= np.sign(reference[np.argmax(np.abs(reference))])
+    np.testing.assert_allclose(result.ci_coefficients, reference, atol=1e-8)
+    assert np.linalg.norm(result.ci_coefficients) == pytest.approx(1.0, abs=1e-12)
+
+
+def test_molecular_correlations_from_rdms_match_measured_observables():
+    n = 4
+    h1, eri = symmetric_integrals(n, seed=5)
+    fs = models.spinful_fermion()
+    names = {"n": "n", "n_up": "n_up", "n_dn": "n_dn", "Sz": "Sz"}
+    observables = {}
+    for i, j in itertools.product(range(n), repeat=2):
+        for a, b in (("n", "Sz"), ("Sz", "Sz"), ("n_up", "n_dn")):
+            observables[f"{a} {b} {i} {j}"] = models.located(fs, names[a], i) * models.located(fs, names[b], j)
+        observables[f"Sp {i} {j}"] = models.located(fs, "Sm", i) * models.located(fs, "Sp", j)
+        observables[f"Sm {i} {j}"] = models.located(fs, "Sp", i) * models.located(fs, "Sm", j)
+        observables[f"c_up {i} {j}"] = models.located(fs, "c_dag_up", i) * models.located(fs, "c_up", j)
+    result = dmrg.solve_molecular(h1, eri, 2, 2, sweeps=dmrg.fixed_sweeps(4, 64), warmup_states=64,
+                                  lanczos_tolerance=1e-12, observables=observables)
+    for a, b in (("n", "Sz"), ("Sz", "Sz"), ("n_up", "n_dn")):
+        measured = np.array([[result.observables[f"{a} {b} {i} {j}"] for j in range(n)] for i in range(n)])
+        np.testing.assert_allclose(dmrg.correlation_matrix(result, a, b), measured, atol=1e-10)
+    for op in ("Sp", "Sm", "c_up"):
+        measured = np.array([[result.observables[f"{op} {i} {j}"] for j in range(n)] for i in range(n)])
+        np.testing.assert_allclose(dmrg.correlation_matrix(result, op), measured, atol=1e-10)
+    np.testing.assert_allclose(dmrg.local_expectations(result, "n"), np.diag(result.one_rdm), atol=1e-12)
+    np.testing.assert_allclose(dmrg.local_expectations(result, "n_updn"),
+                               np.diag(dmrg.correlation_matrix(result, "n_up", "n_dn")), atol=1e-12)
+    # A singlet: <S^2> = 0.
+    assert dmrg.spin_spin_correlations(result).sum() == pytest.approx(0.0, abs=1e-8)
+    with pytest.raises(ValueError, match="observables"):
+        dmrg.correlation_matrix(result, "c_up", "n")
+    with pytest.raises(ValueError, match="observables"):
+        dmrg.local_expectations(result, "Sx")
+
+
+def test_solve_molecular_rejects_invalid_observables():
+    h1, eri = symmetric_integrals(5, seed=3)
+    fs = models.spinful_fermion()
+    for observable in (models.located(fs, "n", 5),
+                       models.located(fs, "n", 0) * models.located(fs, "n", 1) * models.located(fs, "n", 2)
+                       * models.located(fs, "n", 3) * models.located(fs, "n", 4),
+                       models.located(fs, "Sy", 0),
+                       models.located(models.spin(0.5), "Sz", 0)):
+        with pytest.raises(ValueError):
+            dmrg.solve_molecular(h1, eri, 2, 2, sweeps=dmrg.fixed_sweeps(1, 16), observables={"bad": observable})
 
 
 def test_solve_molecular_rejects_invalid_requests():

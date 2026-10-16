@@ -201,7 +201,135 @@ void expect_exact(int n, int na, int nb) {
     EXPECT_FALSE(result.iterations.empty());
 }
 
+// Added here: the spin blocks of the 2-RDM, the caller's observables and the
+// CI vector against the same exact reference. Modes are 2p (down) and 2p+1
+// (up), the ALPS order the CI vector is documented in.
+void expect_parity(int n, int na, int nb) {
+    auto input = input_for(n, na, nb);
+    auto const fs = mdl::spinful_fermion();
+    auto L = [&](char const* name, int site) { return mdl::TermSum::located(fs, name, site); };
+    int const last = n - 1;
+    input.observables["szsz"] = L("Sz", 0) * L("Sz", last);
+    input.observables["doublons"] = L("n_updn", 0) * L("n_updn", last) * 2.;
+    input.observables["hopping"] = L("c_dag_up", 0) * L("c_up", last) + L("c_dag_up", last) * L("c_up", 0);
+    input.observables["charge_changing"] = L("c_dag_up", 0);
+    if (n >= 4) input.observables["four_sites"] = L("n_up", 0) * L("n_dn", 1) * L("Sp", 2) * L("Sm", 3);
+    input.ci_vector = true;
+    BitReference const reference(input);
+    auto const result = cd::solve_molecular(input, exact(128));
+    auto at = [](std::vector<double> const& v, int index) { return v[static_cast<std::size_t>(index)]; };
+    double blocks = 0.;
+    for (int p = 0; p < n; ++p)
+        for (int q = 0; q < n; ++q)
+            for (int r = 0; r < n; ++r)
+                for (int s = 0; s < n; ++s) {
+                    int const index = ((p * n + q) * n + r) * n + s;
+                    auto element = [&](int a, int b) {
+                        return reference.expectation({1., {{2 * p + a, true}, {2 * r + b, true}, {2 * s + b, false}, {2 * q + a, false}}});
+                    };
+                    blocks = std::max({blocks, std::abs(element(1, 1) - at(result.two_rdm_aa, index)),
+                                       std::abs(element(1, 0) - at(result.two_rdm_ab, index)),
+                                       std::abs(element(0, 0) - at(result.two_rdm_bb, index)),
+                                       std::abs(at(result.two_rdm_aa, index) + at(result.two_rdm_ab, index) +
+                                                at(result.two_rdm_ab, ((r * n + s) * n + p) * n + q) +
+                                                at(result.two_rdm_bb, index) - at(result.two_rdm, index))});
+                }
+    EXPECT_LT(blocks, 1e-8) << n << " orbitals (" << na << "," << nb << ")";
+    auto number = [](int mode) { return std::vector<Op>{{mode, true}, {mode, false}}; };
+    auto product = [](std::vector<std::vector<Op>> const& parts, double coefficient) {
+        Monomial term{coefficient, {}};
+        for (auto const& part : parts) term.factors.insert(term.factors.end(), part.begin(), part.end());
+        return term;
+    };
+    double szsz = 0.;
+    for (int a = 0; a < 2; ++a)
+        for (int b = 0; b < 2; ++b)
+            szsz += reference.expectation(product({number(2 * 0 + a), number(2 * last + b)}, .25 * (a ? 1 : -1) * (b ? 1 : -1)));
+    EXPECT_NEAR(result.observables.at("szsz"), szsz, 1e-8);
+    EXPECT_NEAR(result.observables.at("doublons"),
+                reference.expectation(product({number(1), number(0), number(2 * last + 1), number(2 * last)}, 2.)), 1e-8);
+    EXPECT_NEAR(result.observables.at("hopping"),
+                reference.expectation({1., {{1, true}, {2 * last + 1, false}}}) +
+                    reference.expectation({1., {{2 * last + 1, true}, {1, false}}}), 1e-8);
+    EXPECT_EQ(result.observables.at("charge_changing"), 0.);
+    if (n >= 4)
+        EXPECT_NEAR(result.observables.at("four_sites"),
+                    reference.expectation(product({number(1), number(2), {{5, true}, {4, false}}, {{6, true}, {7, false}}}, 1.)),
+                    1e-8);
+    // The CI vector, sign by sign, up to the reference's global sign.
+    ASSERT_EQ(result.ci_coefficients.size(), reference.states.size());
+    int largest = 0;
+    for (int i = 0; i < static_cast<int>(reference.psi.size()); ++i)
+        if (std::abs(reference.psi[i]) > std::abs(reference.psi[largest])) largest = i;
+    double const sign = reference.psi[largest] < 0. ? -1. : 1.;
+    double ci = 0.;
+    for (std::size_t k = 0; k < result.ci_coefficients.size(); ++k) {
+        unsigned bits = 0;
+        for (int p = 0; p < n; ++p)
+            bits |= static_cast<unsigned>(((result.ci_alpha[k] >> p) & 1u) << (2 * p + 1)) |
+                    static_cast<unsigned>(((result.ci_beta[k] >> p) & 1u) << (2 * p));
+        if (k) EXPECT_TRUE(result.ci_alpha[k - 1] < result.ci_alpha[k] ||
+                           (result.ci_alpha[k - 1] == result.ci_alpha[k] && result.ci_beta[k - 1] < result.ci_beta[k]));
+        ci = std::max(ci, std::abs(result.ci_coefficients[k] - sign * reference.psi[reference.indices.at(bits)]));
+    }
+    EXPECT_LT(ci, 1e-8) << n << " orbitals (" << na << "," << nb << ")";
+}
+
 } // namespace
+
+TEST(ClassicMolecular, SpinBlocksObservablesAndCiVectorMatchExactDiagonalization) {
+    expect_parity(1, 1, 0);
+    expect_parity(2, 1, 1);
+    expect_parity(3, 2, 1);
+    expect_parity(4, 2, 2);
+    expect_parity(5, 3, 2);
+    expect_parity(6, 3, 3);
+}
+
+TEST(ClassicMolecular, TruncatedCiVectorCarriesTheRunsOwnRdms) {
+    // With 8 kept states the state differs from the exact one; the CI vector
+    // must still be the state the RDMs were measured on.
+    auto input = input_for(6, 3, 2);
+    input.ci_vector = true;
+    BitReference reference(input);
+    double const exact_energy = reference.energy;
+    auto const result = cd::solve_molecular(input, exact(8));
+    EXPECT_GT(result.energy - exact_energy, 1e-6);
+    ASSERT_EQ(result.ci_coefficients.size(), reference.states.size());
+    double norm = 0.;
+    for (std::size_t k = 0; k < result.ci_coefficients.size(); ++k) {
+        unsigned bits = 0;
+        for (int p = 0; p < 6; ++p)
+            bits |= static_cast<unsigned>(((result.ci_alpha[k] >> p) & 1u) << (2 * p + 1)) |
+                    static_cast<unsigned>(((result.ci_beta[k] >> p) & 1u) << (2 * p));
+        reference.psi[reference.indices.at(bits)] = result.ci_coefficients[k];
+        norm += result.ci_coefficients[k] * result.ci_coefficients[k];
+    }
+    EXPECT_NEAR(norm, 1., 1e-12);
+    double error = 0.;
+    for (int p = 0; p < 6; ++p)
+        for (int q = 0; q < 6; ++q) {
+            error = std::max(error, std::abs(reference.expectation({1., {{2 * q + 1, true}, {2 * p + 1, false}}}) -
+                                             result.one_rdm_alpha[static_cast<std::size_t>(p * 6 + q)]));
+            error = std::max(error, std::abs(reference.expectation({1., {{2 * q, true}, {2 * p, false}}}) -
+                                             result.one_rdm_beta[static_cast<std::size_t>(p * 6 + q)]));
+        }
+    EXPECT_LT(error, 1e-8);
+}
+
+TEST(ClassicMolecular, RejectedObservables) {
+    auto const fs = mdl::spinful_fermion();
+    auto L = [&](char const* name, int site) { return mdl::TermSum::located(fs, name, site); };
+    auto rejects = [](mdl::TermSum const& observable) {
+        auto input = input_for(5, 2, 2);
+        input.observables["bad"] = observable;
+        EXPECT_THROW(cd::solve_molecular(input, exact(16)), std::invalid_argument);
+    };
+    rejects(L("n", 5));                                                      // outside the orbitals
+    rejects(L("n", 0) * L("n", 1) * L("n", 2) * L("n", 3) * L("n", 4));      // five sites
+    rejects(L("n", 0) * std::complex<double>(0., 1.));                      // complex coefficient
+    rejects(mdl::TermSum::located(mdl::spin(0.5), "Sz", 0));                // foreign local basis
+}
 
 TEST(ClassicMolecular, OneOrbitalWithPadding) {
     expect_exact(1, 1, 1);

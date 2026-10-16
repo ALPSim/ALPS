@@ -13,7 +13,8 @@
 // d37e51227) took catalog models and returned dictionaries; its callback and
 // GIL handling are kept. solve_molecular follows alpsx's binding of the same
 // name (branch WIP/classic-dmrg-chemistry at d4384a7f8), returning a
-// MolecularResult object with NumPy arrays instead of a dictionary.
+// MolecularResult object with NumPy arrays instead of a dictionary; its
+// observables, ci_vector, spin blocks and CI fields are added here.
 #include "kit_support.hpp"
 
 #include <alps/dmrg/classic.hpp>
@@ -30,6 +31,7 @@
 #include <nanobind/stl/vector.h>
 
 #include <cstddef>
+#include <cstdint>
 #include <fstream>
 #include <map>
 #include <optional>
@@ -94,8 +96,10 @@ using Integrals2 = nb::ndarray<nb::numpy, double const, nb::ndim<2>, nb::c_conti
 using Integrals4 = nb::ndarray<nb::numpy, double const, nb::ndim<4>, nb::c_contig>;
 
 classic::MolecularResult run_molecular(Integrals2 one, Integrals4 two, std::size_t n_alpha, std::size_t n_beta,
-                                       double core_energy, double integral_cutoff, classic::Options options,
-                                       nb::object callback, std::optional<std::string> const& log_file) {
+                                       double core_energy, double integral_cutoff,
+                                       std::map<std::string, mdl::TermSum> observables, bool ci_vector,
+                                       classic::Options options, nb::object callback,
+                                       std::optional<std::string> const& log_file) {
     auto const n = one.shape(0);
     if (one.shape(1) != n || two.shape(0) != n || two.shape(1) != n || two.shape(2) != n || two.shape(3) != n)
         throw std::invalid_argument("molecular integral shapes must be (n, n) and (n, n, n, n)");
@@ -107,6 +111,8 @@ classic::MolecularResult run_molecular(Integrals2 one, Integrals4 two, std::size
     input.beta_electrons = n_beta;
     input.core_energy = core_energy;
     input.integral_cutoff = integral_cutoff;
+    input.observables = std::move(observables);
+    input.ci_vector = ci_vector;
     if (one.size()) input.one_body.assign(one.data(), one.data() + one.size());
     if (two.size()) input.two_body.assign(two.data(), two.data() + two.size());
     std::ofstream log;
@@ -293,6 +299,30 @@ NB_MODULE(classic_dmrg_c, m) {
             auto const n = r.orbitals;
             return alps::python::make_numpy_array<double>(std::vector<double>(r.two_rdm), {n, n, n, n});
         }, "dm2[p, q, r, s] = sum_ab <c+[p, a] c+[r, b] c[s, b] c[q, a]> (PySCF make_rdm12).")
+        .def_prop_ro("two_rdm_aa", [](classic::MolecularResult const& r) {
+            auto const n = r.orbitals;
+            return alps::python::make_numpy_array<double>(std::vector<double>(r.two_rdm_aa), {n, n, n, n});
+        }, "dm2aa[p, q, r, s] = <a+[p] a+[r] a[s] a[q]> (PySCF make_rdm12s).")
+        .def_prop_ro("two_rdm_ab", [](classic::MolecularResult const& r) {
+            auto const n = r.orbitals;
+            return alps::python::make_numpy_array<double>(std::vector<double>(r.two_rdm_ab), {n, n, n, n});
+        }, "dm2ab[p, q, r, s] = <a+[p] b+[r] b[s] a[q]> (PySCF make_rdm12s).")
+        .def_prop_ro("two_rdm_bb", [](classic::MolecularResult const& r) {
+            auto const n = r.orbitals;
+            return alps::python::make_numpy_array<double>(std::vector<double>(r.two_rdm_bb), {n, n, n, n});
+        }, "dm2bb[p, q, r, s] = <b+[p] b+[r] b[s] b[q]> (PySCF make_rdm12s).")
+        .def_ro("observables", &classic::MolecularResult::observables,
+                "The requested observables' final-state expectation values, by name.")
+        .def_prop_ro("ci_alpha", [](classic::MolecularResult const& r) {
+            return vector_to_numpy(std::vector<std::uint64_t>(r.ci_alpha));
+        }, "Alpha occupation word of each CI entry (bit p = orbital p); empty unless ci_vector was requested.")
+        .def_prop_ro("ci_beta", [](classic::MolecularResult const& r) {
+            return vector_to_numpy(std::vector<std::uint64_t>(r.ci_beta));
+        }, "Beta occupation word of each CI entry.")
+        .def_prop_ro("ci_coefficients", [](classic::MolecularResult const& r) {
+            return vector_to_numpy(std::vector<double>(r.ci_coefficients));
+        }, "CI amplitudes in the ALPS mode order (orbitals ascending, down before up), sorted by alpha then beta "
+           "word, largest amplitude positive.")
         .def_ro("iterations", &classic::MolecularResult::iterations)
         .def_ro("final_truncation_error", &classic::MolecularResult::final_truncation_error)
         .def_prop_ro("iteration_energies", [](classic::MolecularResult const& r) {
@@ -306,6 +336,7 @@ NB_MODULE(classic_dmrg_c, m) {
         });
     m.def("solve_molecular", &run_molecular, nb::arg("one_body").noconvert(), nb::arg("two_body").noconvert(),
           nb::arg("n_alpha"), nb::arg("n_beta"), nb::arg("core_energy") = 0., nb::arg("integral_cutoff") = 0.,
+          nb::arg("observables") = std::map<std::string, mdl::TermSum>{}, nb::arg("ci_vector") = false,
           nb::arg("options") = classic::Options{}, nb::arg("callback") = nb::none(), nb::arg("log_file") = nb::none(),
           "Classic block DMRG of a restricted real molecular Hamiltonian (chemist-notation integrals with the "
           "real-orbital symmetries) in the sector of n_alpha and n_beta electrons; returns a MolecularResult.");

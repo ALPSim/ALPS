@@ -26,6 +26,7 @@
 #include <initializer_list>
 #include <limits>
 #include <map>
+#include <set>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -211,6 +212,199 @@ struct Observer {
     }
 };
 
+// Written for this tree, not in alpsx: the observables' checks and the CI
+// vector.
+
+// Products of the caller's observables must sit on orbital sites of the
+// solver's own local basis, with real coefficients.
+void validate_observable(std::string const& name, models::Term const& term, models::SiteBasisPtr const& source,
+                         std::size_t orbitals) {
+    if (term.coeff.imag() != 0. || !std::isfinite(term.coeff.real()))
+        throw std::invalid_argument("classic molecular observable " + name + " needs real, finite coefficients");
+    for (auto const& factor : term.factors) {
+        if (factor.site < 0 || static_cast<std::size_t>(factor.site) >= orbitals)
+            throw std::invalid_argument("classic molecular observable " + name + " acts outside the orbitals");
+        if (!factor.basis || factor.basis->dim != source->dim ||
+            factor.basis->quantum_numbers != source->quantum_numbers)
+            throw std::invalid_argument("classic molecular observable " + name +
+                                        " must use spinful_fermion() sites");
+    }
+}
+
+using QNKey = std::vector<short>;
+
+QNKey key_of(dmtk::QN const& q) {
+    QNKey key;
+    for (int i = 0; i < static_cast<int>(dmtk::QN::QN_LAST); ++i)
+        if (dmtk::QN::get_qn_mask() & (1 << i)) key.push_back(q[i].get_twice());
+    return key;
+}
+
+// The final state's amplitude on every determinant of the sector. The final
+// left-to-right half sweep stores, for each left block of m sites, the
+// rotation from (block of m-1 sites) x (site m-1) to the kept states: kept
+// state c of charge Q is sum over product rows r of rho_Q(c, r) |r>, as
+// new_seed (dmtk/state.hpp) reads it. Its last step leaves the superblock
+// state on (left block of length-3 sites) x site x site x (last site). A
+// determinant's amplitude is the product of its rotation rows contracted
+// with that state; a walk over the orbitals shares the prefixes. Each site
+// state is fixed by its charge (N, Sz), as every subspace of a site is
+// one-dimensional.
+struct CiWalk {
+    struct Rows { std::vector<std::pair<std::size_t, std::size_t>> entries; }; // (row, old local index)
+    struct Rotation {
+        dmtk::BMatrix<double> rho;
+        dmtk::Basis basis;
+        // new charge -> (old charge, site charge) -> rows
+        std::map<QNKey, std::map<std::pair<QNKey, QNKey>, Rows>> rows;
+    };
+    struct Entry { std::uint64_t alpha, beta; double amplitude; };
+
+    dmtk::System<double>& system;
+    std::size_t orbitals, length, n_index, sz_index;
+    std::vector<Rotation> rotations; // rotations[m] for the left block of m sites
+    std::map<std::array<QNKey, 4>, dmtk::StateSpace> spaces;
+    std::vector<Entry> entries;
+
+    dmtk::QN charge(int a, int b) const {
+        dmtk::QN q;
+        q[static_cast<int>(n_index)] = static_cast<double>(a + b);
+        q[static_cast<int>(sz_index)] = .5 * static_cast<double>(a - b);
+        return q;
+    }
+
+    CiWalk(dmtk::System<double>& s, std::size_t n, std::size_t l, std::size_t ni, std::size_t si)
+        : system(s), orbitals(n), length(l), n_index(ni), sz_index(si), rotations(l) {
+        for (std::size_t m = 2; m + 3 <= length; ++m) {
+            auto& rotation = rotations[m];
+            system.read_rho(rotation.rho, rotation.basis, static_cast<int>(m), dmtk::LEFT);
+            std::map<QNKey, std::size_t> begin; // first index of each charge in the old block
+            for (std::size_t i = 0; i < rotation.basis.size(); ++i) {
+                auto const& state = rotation.basis[i];
+                auto const old = key_of(state.qn1());
+                auto found = begin.find(old);
+                if (found == begin.end()) begin.emplace(old, state.i1);
+                else found->second = std::min(found->second, static_cast<std::size_t>(state.i1));
+            }
+            for (auto const& block : rotation.rho) {
+                auto& by_charge = rotation.rows[key_of(block.qn())];
+                auto const rows = block.row_range();
+                for (int row = rows.begin(); row <= rows.end(); ++row) {
+                    auto const& state = rotation.basis(row);
+                    auto const old = key_of(state.qn1());
+                    by_charge[{old, key_of(state.qn2())}].entries.emplace_back(
+                        static_cast<std::size_t>(row - rows.begin()), state.i1 - begin.at(old));
+                }
+            }
+        }
+        for (auto it = system.gs.subspace_begin(); it != system.gs.subspace_end(); ++it) {
+            dmtk::StateSpace const& space = *it;
+            spaces.emplace(std::array<QNKey, 4>{key_of(space[1].qn()), key_of(space[2].qn()),
+                                                key_of(space[3].qn()), key_of(space[4].qn())}, space);
+        }
+    }
+
+    // Occupations a site may take: an orbital any, a padding site none.
+    std::vector<std::pair<int, int>> occupations(std::size_t site) const {
+        if (site >= orbitals) return {{0, 0}};
+        return {{0, 0}, {1, 0}, {0, 1}, {1, 1}};
+    }
+
+    // amplitude[c] = <prefix of m sites | left block state c of charge q>.
+    void walk(std::size_t m, dmtk::QN const& q, std::vector<double> const& amplitude, std::uint64_t alpha,
+              std::uint64_t beta, int alpha_left, int beta_left) {
+        auto const remaining = static_cast<int>(orbitals > m ? orbitals - m : 0);
+        if (alpha_left < 0 || beta_left < 0 || alpha_left > remaining || beta_left > remaining) return;
+        if (m + 3 == length) return finish(q, amplitude, alpha, beta, alpha_left, beta_left);
+        auto const& rotation = rotations[m + 1];
+        for (auto const& [a, b] : occupations(m)) {
+            auto const site = charge(a, b);
+            auto const next = q + site;
+            auto const* block = rotation.rho.block(next);
+            if (!block) continue;
+            auto const by_charge = rotation.rows.find(key_of(next));
+            if (by_charge == rotation.rows.end()) continue;
+            auto const rows = by_charge->second.find({key_of(q), key_of(site)});
+            if (rows == by_charge->second.end()) continue;
+            auto const columns = block->col_range();
+            std::vector<double> out(static_cast<std::size_t>(columns.size()), 0.);
+            for (auto const& [row, old] : rows->second.entries) {
+                double const x = amplitude[old];
+                if (x == 0.) continue;
+                for (std::size_t c = 0; c < out.size(); ++c) out[c] += (*block)(static_cast<int>(c), static_cast<int>(row)) * x;
+            }
+            walk(m + 1, next, out, alpha | (std::uint64_t(a) << m), beta | (std::uint64_t(b) << m),
+                 alpha_left - a, beta_left - b);
+        }
+    }
+
+    void finish(dmtk::QN const& q, std::vector<double> const& amplitude, std::uint64_t alpha, std::uint64_t beta,
+                int alpha_left, int beta_left) {
+        auto const s = length - 3;
+        for (auto const& [a2, b2] : occupations(s))
+            for (auto const& [a3, b3] : occupations(s + 1))
+                for (auto const& [a4, b4] : occupations(s + 2)) {
+                    if (a2 + a3 + a4 != alpha_left || b2 + b3 + b4 != beta_left) continue;
+                    double value = 0.;
+                    auto const found = spaces.find({key_of(q), key_of(charge(a2, b2)), key_of(charge(a3, b3)),
+                                                    key_of(charge(a4, b4))});
+                    if (found != spaces.end()) {
+                        auto slice = system.gs(found->second);
+                        for (std::size_t c = 0; c < amplitude.size(); ++c) value += amplitude[c] * slice(c, 0, 0, 0);
+                    }
+                    entries.push_back({alpha | (std::uint64_t(a2) << s) | (std::uint64_t(a3) << (s + 1)) |
+                                           (std::uint64_t(a4) << (s + 2)),
+                                       beta | (std::uint64_t(b2) << s) | (std::uint64_t(b3) << (s + 1)) |
+                                           (std::uint64_t(b4) << (s + 2)),
+                                       value});
+                }
+    }
+
+    // Occupation words of k electrons in the orbitals, ascending.
+    std::vector<std::uint64_t> words(int k) const {
+        std::vector<std::uint64_t> out;
+        auto choose = [&](auto&& self, std::size_t from, int left, std::uint64_t word) -> void {
+            if (!left) { out.push_back(word); return; }
+            for (std::size_t p = from; p + static_cast<std::size_t>(left) <= orbitals; ++p)
+                self(self, p + 1, left - 1, word | (std::uint64_t(1) << p));
+        };
+        choose(choose, 0, k, 0);
+        std::sort(out.begin(), out.end());
+        return out;
+    }
+
+    // A prefix whose block charge the truncation dropped has no amplitude;
+    // every determinant of the sector is reported, zeros included.
+    void run(MolecularResult& result, int alpha, int beta) {
+        for (auto const& [a, b] : occupations(0))
+            walk(1, charge(a, b), {1.}, std::uint64_t(a), std::uint64_t(b), alpha - a, beta - b);
+        std::map<std::pair<std::uint64_t, std::uint64_t>, double> amplitudes;
+        for (auto const& entry : entries) amplitudes[{entry.alpha, entry.beta}] = entry.amplitude;
+        auto const alphas = words(alpha), betas = words(beta);
+        double norm = 0., largest = 0.;
+        for (auto const& entry : entries) {
+            norm += entry.amplitude * entry.amplitude;
+            if (std::abs(entry.amplitude) > std::abs(largest)) largest = entry.amplitude;
+        }
+        if (!(norm > 0.) || !std::isfinite(norm))
+            throw std::runtime_error("classic molecular CI reconstruction produced no amplitude");
+        double const scale = (largest < 0. ? -1. : 1.) / std::sqrt(norm);
+        auto const size = product_size(alphas.size(), betas.size());
+        result.ci_alpha.reserve(size);
+        result.ci_beta.reserve(size);
+        result.ci_coefficients.reserve(size);
+        for (auto const a : alphas)
+            for (auto const b : betas) {
+                auto const found = amplitudes.find({a, b});
+                result.ci_alpha.push_back(a);
+                result.ci_beta.push_back(b);
+                result.ci_coefficients.push_back(found == amplitudes.end() ? 0. : found->second * scale);
+            }
+        if (amplitudes.size() > size)
+            throw std::logic_error("classic molecular CI reconstruction left the sector");
+    }
+};
+
 } // namespace molecular_detail
 
 MolecularResult solve_molecular(MolecularInput const& input, Options const& options, IterationCallback callback) {
@@ -298,8 +492,32 @@ MolecularResult solve_molecular(MolecularInput const& input, Options const& opti
                     for (int a = 0; a < 2; ++a)
                         for (int b = 0; b < 2; ++b)
                             request(expression(source, {{p, create[a]}, {r, create[b]},
-                                {s, destroy[b]}, {q, destroy[a]}}), 2 * n2 + ((p * n + q) * n + r) * n + s);
+                                {s, destroy[b]}, {q, destroy[a]}}),
+                                2 * n2 + static_cast<std::size_t>(2 * a + b) * n4 + ((p * n + q) * n + r) * n + s);
         }
+    // Added here: each spin block of the 2-RDM keeps its own destination (aa,
+    // ab, ba, bb), and the caller's observables follow; a product that
+    // changes N or Sz has no expectation in the sector and is not measured.
+    std::size_t const observable_base = 2 * n2 + 4 * n4;
+    std::vector<std::string> observable_names;
+    for (auto const& [name, sum] : input.observables) {
+        auto const destination = observable_base + observable_names.size();
+        observable_names.push_back(name);
+        for (auto const& term : sum.terms()) {
+            validate_observable(name, term, source, n);
+            auto native = lower(term, orbitals);
+            std::set<int> sites;
+            dmtk::QN change;
+            for (auto const& [site, id] : native.word) {
+                sites.insert(site);
+                change += orbitals.operators[id].dqn;
+            }
+            if (sites.size() > 4)
+                throw std::invalid_argument("classic molecular observable " + name + " acts on more than four sites");
+            if (native.term.coef() == 0. || !(change == dmtk::QN())) continue;
+            request(term, destination);
+        }
+    }
     MolecularResult result;
     result.orbitals = n;
     Observer observer{result, callback};
@@ -333,12 +551,16 @@ MolecularResult solve_molecular(MolecularInput const& input, Options const& opti
     // A missing measurement is an error, never an implicit zero RDM element.
     for (auto& term : system.corr) term.set_value(std::numeric_limits<double>::quiet_NaN());
     system.measure();
-    std::vector<double> values(2 * n2 + n4, 0.);
+    std::vector<double> values(observable_base + observable_names.size(), 0.);
     for (auto const& item : contributions) {
         auto const measured = system.corr[item.slot].value();
         if (!std::isfinite(measured))
             throw std::runtime_error("classic molecular engine did not evaluate a required RDM element");
         values[item.destination] += item.weight * measured;
+    }
+    if (input.ci_vector) {
+        if (n > 64) throw std::invalid_argument("classic molecular CI vectors are limited to 64 orbitals");
+        CiWalk(system, n, length, n_index, sz_index).run(result, static_cast<int>(alpha), static_cast<int>(beta));
     }
     result.energy = system.energy[0] + core;
     if (!std::isfinite(result.energy))
@@ -346,7 +568,17 @@ MolecularResult solve_molecular(MolecularInput const& input, Options const& opti
     result.final_truncation_error = system.truncation_error();
     result.one_rdm_alpha.assign(values.begin(), values.begin() + static_cast<std::ptrdiff_t>(n2));
     result.one_rdm_beta.assign(values.begin() + static_cast<std::ptrdiff_t>(n2), values.begin() + static_cast<std::ptrdiff_t>(2 * n2));
-    result.two_rdm.assign(values.begin() + static_cast<std::ptrdiff_t>(2 * n2), values.end());
+    // The spin-summed 2-RDM adds the blocks in the order the single
+    // destination of alpsx accumulated them.
+    auto block = [&](int index) { return values.begin() + static_cast<std::ptrdiff_t>(2 * n2 + index * n4); };
+    result.two_rdm.assign(n4, 0.);
+    for (int index = 0; index < 4; ++index)
+        for (std::size_t i = 0; i < n4; ++i) result.two_rdm[i] += block(index)[static_cast<std::ptrdiff_t>(i)];
+    result.two_rdm_aa.assign(block(0), block(1));
+    result.two_rdm_ab.assign(block(1), block(2));
+    result.two_rdm_bb.assign(block(3), block(4));
+    for (std::size_t k = 0; k < observable_names.size(); ++k)
+        result.observables[observable_names[k]] = values[observable_base + k];
     return result;
 }
 
