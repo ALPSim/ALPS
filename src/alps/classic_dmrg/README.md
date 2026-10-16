@@ -100,7 +100,8 @@ spin-summed (`two_rdm`) and by spin block (`two_rdm_aa`, `two_rdm_ab` with
 σ = α and τ = β, `two_rdm_bb`; `two_rdm` is `aa + ab + ab.transpose(2,3,0,1)
 + bb` to rounding, and QDK's `aaaa`, `aabb` and `bbbb` blocks are these), the
 iterations and the final truncation error. The engine works from the
-integrals themselves (below), and every RDM element is a measured term. The
+integrals themselves, and the RDMs are read from the final state by a walk
+over the chain, not measured as engine terms (both below). The
 sweep, truncation, Lanczos, scratch and callback options are those of
 `solve()`; `sector` must be empty, `num_eigenvalues` one and arithmetic real.
 The integrals must be finite and have the real-orbital symmetries (`h`
@@ -108,8 +109,9 @@ symmetric, `(pq|rs)` eightfold) after `integral_cutoff` drops entries of
 smaller magnitude. Fewer than four orbitals
 are padded with one-dimensional neutral sites, which add no states.
 
-The result keeps no MPS and no checkpoint, so everything is measured in the
-final sweep. Besides the RDMs, `MolecularInput::observables` names
+The result keeps no MPS and no checkpoint, so everything is measured from
+the final sweep's state and the block rotations and operators it leaves in
+the scratch directory. Besides the RDMs, `MolecularInput::observables` names
 `models::TermSum`s on `spinful_fermion()` sites (site `i` is orbital `i`)
 with real coefficients and at most four sites per product; each comes back
 in `MolecularResult::observables` as its expectation value, and products
@@ -139,33 +141,46 @@ these for the two enlarged blocks from the stored ones and the new site's,
 applies the Hamiltonian as about `2n²` products of one left and one right
 operator, and rotates the grown block's operators into the kept states;
 the generic engine path rebuilt sums of the `n⁴` integral terms at every
-step. The RDM measurement still adds `n⁴` measured terms, and the final
-sweep and the measurement now take most of a run. With 32 kept states and
-two sweeps on dense random integrals at half filling, an Apple M-series
-laptop shared with other jobs takes 0.3 s for 6 orbitals, 1.3 s for 8, 3.7 s
-for 10, 8.1 s for 12, 17 s for 14 and 32 s for 16, where the generic path
-took 1.8, 10, 36 and 128 s for 6 to 12 orbitals and 10.5 minutes for 14 in
-the same runs; at 64 states 14 orbitals take 30 s and 16 take 57 s, with a
-peak of 3.8 GB of memory. The block operators kept between steps are a few
-percent of the scratch directory: 45 MB for 16 orbitals at 64 states and
-140 MB for 10 orbitals at 340 states with three electrons. The rest comes
-from the final sweep's measurement. Every block grown there stores the
-products of the RDM terms' operators that lie inside it, and these grow as
-the fourth power of the block's length and the square of the number of kept
-states.
-The final sweep now keeps only the products the closing measurement reads
-([engine changes](#origin-and-provenance)). That lowered the peak scratch
-from 2.8 GB to 0.35 GB for 16 orbitals at 64 states. Measured back to back,
-that run went from 60 s to 36 s and from 3.8 GB to 2.8 GB of memory. For 10
-orbitals at 340 states with three electrons the peak went from 5.4 GB to
-1.0 GB and the run from 22 s to 8 s. The left block of the closing configuration still
-holds all of its products, on disk and in memory. Twelve orbitals at half
-filling and 256 states peak at 0.9 GB of scratch, 0.76 GB of it that block,
-and since it grows as `n⁴m²`, converged runs on larger active spaces stay
-bound by disk and memory. alpsx's LiH case (six orbitals, two electrons
-per spin) at 128 states and six sweeps takes 0.4 s against 2.8 s on the
+step. With 32 kept states and two sweeps on dense random integrals at half
+filling, an Apple M-series laptop shared with other jobs took 0.3 s for 6
+orbitals, 1.3 s for 8, 3.7 s for 10, 8.1 s for 12, 17 s for 14 and 32 s for
+16, where the generic path took 1.8, 10, 36 and 128 s for 6 to 12 orbitals
+and 10.5 minutes for 14 in the same runs; at 64 states 14 orbitals took 30 s
+and 16 took 57 s, with a peak of 3.8 GB of memory. Both paths then measured
+the RDMs as engine terms.
+
+They no longer do. A measured term stores, in every block the final sweep
+grows, the products of its operators that lie inside the block, and for the
+RDMs these grow as `n⁴m²`. Even after the final sweep kept only the closing
+configuration's left block ([engine changes](#origin-and-provenance)), that
+block held 0.76 GB of the 0.9 GB scratch peak of 12 orbitals at 256 states.
+Instead, `dmtk::MolecularSystem::measure_products` walks the wavefunction
+centre from the final sweep's closing configuration to the left end of the
+chain. At each site the left block is the one the final left-to-right half
+grew, whose `a`, `a†` and pair operators the engine filed then; the right
+block is built on the way, as an orthonormal basis of the state's rows over
+the site and the previous right block (Householder QR, nothing truncated, so
+the walk carries the final state exactly), together with its annihilators.
+Each RDM element is read where the centre sits on its third-lowest orbital,
+so the left block holds at most two of its operators and the right block at
+most one. The walk keeps one left block's filed operators, the right block's
+annihilators and the centre at a time, and costs about one sweep's rotation
+of single operators. The caller's observables remain engine terms. Measured
+back to back on random integrals at half filling, 12 orbitals at 256 states
+and four sweeps went from 99 s to 83 s, from 3.6 GB to 0.88 GB of memory and
+from 0.86 GB to 0.18 GB of scratch, and the measurement after the last
+iteration from 1.9 s to 0.26 s; 16 orbitals at 64 states and two sweeps
+went from 38 s to 19 s, from 2.8 GB to 0.19 GB of memory, from 0.32 GB to
+0.04 GB of scratch and from 3.1 s to 0.1 s. What is left is the engine's own block
+operators, which grow as `n²m²`: 12 orbitals (a hydrogen chain) at 512
+states peak at 2.4 GB of memory and 0.73 GB of scratch with a 0.8 s
+measurement, 16 orbitals at 256 states and two sweeps at 1.8 GB and 0.49 GB
+(0.8 s), and 10 orbitals with all 1024 states at 3.9 GB and
+1.1 GB. alpsx's LiH case (six orbitals, two electrons
+per spin) at 128 states and six sweeps took 0.4 s against 2.8 s on the
 generic path; alpsx's version of the solver took 3.0 s when the generic
-path took 2.3 s.
+path took 2.3 s. With the walk it takes 0.16 s, against 0.26 s with the
+RDMs as engine terms in the same runs.
 
 Converged runs agree with the generic path to rounding. With every state
 kept, the energies agree with PySCF's full CI to 2e-14 and the RDMs to 5e-13
@@ -178,6 +193,25 @@ convergence land elsewhere, as the generic path's own do when the integrals
 change at 1e-13. The engine uses the integrals averaged over the eightfold
 symmetry that `solve_molecular` checks to 1e-12, which makes the operator
 exactly Hermitian.
+
+The RDM walk reads the same state as the measured terms it replaced, so
+the two agree to rounding however far the run is from convergence: run side
+by side in one process, every element of the 1-RDMs and of the four 2-RDM
+spin blocks agreed to 3e-15, from 1 to 10 orbitals, with more alpha than
+beta electrons, more beta than alpha or equal numbers, and from 4 to 400
+kept states. Against the measured terms of the previous build the RDMs
+agree to 2e-14, up to 16 orbitals and 256 states and including the
+converged twelve-atom hydrogen chain below, with the spin blocks compared
+up to 16 orbitals; the energies and observables are bit for bit unchanged,
+and so are the CI vectors (up to 12 orbitals, 853776 determinants). With every state kept and a Lanczos
+tolerance of 1e-13, the energies agree with dense full CI to 1e-14 and the
+RDMs to 9e-14 (6 and 8 orbitals at half filling, 7 with four and three
+electrons). For a hydrogen chain of 10 atoms (STO-3G, 1 Å, all 1024 states)
+the RDMs agree with PySCF's full CI to 3e-10, the accuracy of that reference
+vector (its residual is 6e-10). Twelve atoms in Löwdin-orthogonalized
+atomic orbitals at 256 states and six sweeps come within 1.3e-10 of the
+full-CI energy, with the RDMs within 7e-7. In the canonical RHF orbitals,
+which are delocalized, the same chain at 512 states stays 3.6e-4 above it.
 
 ## The `dmrg` application
 
@@ -290,23 +324,25 @@ over the term after each one it merged): converged runs agree with the old
 code to rounding, and a run far from convergence can land elsewhere, as
 the old code's own does when the integrals change at 1e-13 (at 8 and 10
 orbitals with 32 states and two sweeps, by 1e-3 and 1e-2 in the energy).
-The molecular solver adds its RDM terms for the final sweep only, instead
-of rotating them through every step. With stored products and a full sweep
+The molecular solver adds its measured terms (now only the caller's
+observables) for the final sweep only, instead of rotating them through
+every step. With stored products and a full sweep
 (the molecular solver, and the `dmrg` application with several targets and
 two-site measurements), `final_sweep` builds measurement operators only
 where the closing measurement reads them. It skips the right blocks of its
 right-to-left half and the left block grown at its last step, and it
 removes each left block's file once the next step has read it; `read_block`
 then refuses that block. Measured values are bit for bit the same: the
-molecular energies and RDMs at 10, 12 and 16 orbitals, and the `dmrg`
+molecular energies and RDMs at 10, 12 and 16 orbitals (the RDMs were then
+measured terms), and the `dmrg`
 application's XML output for a 12-site spin chain with two targets and
 correlations.
 `System` takes its Hamiltonian through three virtual hooks,
 `init_hamiltonian` (the end of `init_iteration`), `hamiltonian_product` (the
 product of the Lanczos and one-state solves) and `rotate_hamiltonian` (in
 `rotate`), whose defaults are the code that stood there; the molecular
-solver's `dmtk::MolecularSystem` overrides them and is written here, not
-taken from alpsx or the legacy engine. `rotate_corr` and `measure` also find
+solver's `dmtk::MolecularSystem` overrides them and is written here, as is
+its RDM walk `measure_products`, not taken from alpsx or the legacy engine. `rotate_corr` and `measure` also find
 block operators through the per-call index, and `rotate_corr` answers
 whether the new block already holds an operator from a key set instead of a
 scan of its list, which was quadratic in the number of measured terms.
@@ -331,7 +367,7 @@ the same integrals written as an `ALPS::models` Hamiltonian and solved by
 `ALPS::ed`; the spin blocks, observables of one to four sites and the CI
 vector, sign by sign, against the same diagonalization for one to six
 orbitals; under truncation (variational energy, RDM traces, the CI vector's
-norm and 1-RDMs against the run's); for callback
+norm, and its 1-RDMs and 2-RDM spin blocks against the run's); for callback
 observation and abort with the scratch directory removed; and for the rejected
 inputs. `classic_dmrg_multisite` locks the engine's long-range hopping and
 four-site fermion products, which the molecular solver used before it had

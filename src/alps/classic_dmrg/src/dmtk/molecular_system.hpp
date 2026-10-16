@@ -41,16 +41,42 @@
 // a block and its new site inside an enlarged block and the two enlarged
 // blocks of the superblock; the normal operators sit on the side with fewer
 // spin orbitals.
+//
+// Measurement (measure_products). Products of at most four single-mode
+// factors, such as the RDM elements, are read from the final state of
+// final_sweep() by a walk of the wavefunction centre from the closing
+// configuration to the left end, instead of as dmtk measurement terms (whose
+// stored in-block pieces grow as n^4 m^2). At centre site k the state is
+// sum C[l,s,r] |l>|s>|r>: l a state of the left block of k sites (the final
+// left-to-right half's block, whose a, a+, A and B were filed when it grew),
+// s a state of site k, r a state of a right block built here: an
+// orthonormal basis of the span of the centre's rows over (site, right
+// block), by Householder QR without truncation, so the walk never
+// approximates the state. A product is measured at k = its third-lowest site
+// (second for two factors), clamped to [1, ls-3]: the left block then holds at
+// most two of its factors (a stored normal product; at k = 1 the block is site
+// 0 itself), the right block at most one (a single rotated here; at k = ls-3
+// the right block is the last two sites, exact). Grouped by part, with the
+// permutation sign, a product is the plain tensor product
+// (O_L S_L^pl) x (O_D S_D^pr) x O_R on dmtk's product basis, O the part's
+// normal product, S a part's parity and pl, pr the parities of the left and
+// right factors, and its value is
+//   sum_{s,s'} O_D S_D^pr[s,s'] <O_L S_L^pl, C_s O_R C_s'^T>,
+// <,> the Frobenius product on the left block.
 
 #ifndef DMTK_MOLECULAR_SYSTEM_H_
 #define DMTK_MOLECULAR_SYSTEM_H_
 
 #include "dmtk/system.hpp"
 
+#include <Eigen/Dense>
+
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <deque>
 #include <fstream>
+#include <map>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -362,6 +388,80 @@ struct Set
     }
 };
 
+// One factor of a measured product: a+ (dagger) or a of a spin orbital.
+struct Factor { int mode; bool dagger; };
+
+// A charge sector of a block basis.
+struct Sector { QN qn; int begin, dim; };
+
+inline std::vector<Sector> sectors(const PackedBasis& b)
+{
+  std::vector<Sector> out;
+  for(const SubSpace& s : b) out.push_back({s.qn(), int(s.begin()), int(s.dim())});
+  return out;
+}
+
+inline int sector_of(const std::vector<Sector>& v, const QN& q)
+{
+  for(size_t i = 0; i < v.size(); i++) if(v[i].qn == q) return int(i);
+  return -1;
+}
+
+// The sector holding state i.
+inline int containing(const std::vector<Sector>& v, int i)
+{
+  for(size_t k = 0; k < v.size(); k++) if(i >= v[k].begin && i < v[k].begin + v[k].dim) return int(k);
+  return -1;
+}
+
+using Mat = Eigen::MatrixXd;
+
+inline Eigen::Map<const Mat> view(const Sub& b)
+  { return Eigen::Map<const Mat>(b.array(), Eigen::Index(b.rows()), Eigen::Index(b.cols())); }
+
+// The final state with the centre on one site (see the file comment):
+// m[a * d + s] holds C[l,s,r] for l in left sector a, r in right sector
+// rs[a * d + s] (-1: no state of that charge).
+struct Centre
+{
+  std::vector<Sector> left, right;
+  std::vector<QN> site;  // charge of each site state
+  int d = 0;
+  std::vector<Mat> m;
+  std::vector<int> rs;
+
+  Centre(std::vector<Sector> l, std::vector<Sector> r, const Basis& sb, const QN& target)
+    : left(std::move(l)), right(std::move(r)), d(int(sb.size()))
+    {
+      for(int s = 0; s < d; s++) site.push_back(sb[s].qn());
+      m.resize(left.size() * d);
+      rs.assign(left.size() * d, -1);
+      for(size_t a = 0; a < left.size(); a++)
+        for(int s = 0; s < d; s++){
+          int const x = sector_of(right, target - left[a].qn - site[s]);
+          rs[a * d + s] = x;
+          if(x >= 0) m[a * d + s] = Mat::Zero(left[a].dim, right[x].dim);
+        }
+    }
+  Mat& at(int a, int s) { return m[a * d + s]; }
+  const Mat& at(int a, int s) const { return m[a * d + s]; }
+};
+
+// An operator's blocks with their sector indices (bra, ket).
+struct Blocks
+{
+  struct Ref { const Sub* b; int bra, ket; };
+  std::vector<Ref> refs;
+  Blocks(const Op& op, const std::vector<Sector>& v)
+    {
+      for(const Sub& b : op){
+        int const ket = containing(v, b.col_range().begin()), bra = containing(v, b.row_range().begin());
+        if(ket < 0 || bra < 0) throw std::logic_error("molecular dmtk: operator block outside its basis");
+        refs.push_back({&b, bra, ket});
+      }
+    }
+};
+
 } // namespace molecular
 
 class MolecularSystem: public System<double>
@@ -389,6 +489,11 @@ class MolecularSystem: public System<double>
         _sites.resize(lattice.size());
       }
 
+    // Expectations of products of two or four single-mode factors, in
+    // operator order, in the final state of final_sweep() (full sweep): read
+    // at its closing configuration from the left rotations and left block
+    // operators of its left-to-right half (see the file comment).
+    std::vector<double> measure_products(const std::vector<std::vector<molecular::Factor> >& products);
 
   protected:
     MolecularIntegrals _ints;
@@ -807,6 +912,22 @@ class MolecularSystem: public System<double>
         return r12.decondense(MASK_BLOCK1|MASK_BLOCK2, vv);
       }
 
+    // The parity of a charge.
+    static bool odd(const QN& q) { return q.fermion_sign() == -1; }
+
+    // The normal product of factors on one site, as a dense matrix.
+    Dense dense(const std::vector<molecular::Factor>& f, QN& dq) const
+      {
+        Dense m;
+        for(int i = 0; i < 4; i++) m(i, i) = 1.;
+        dq = QN();
+        for(const molecular::Factor& x : f){
+          m = molecular::mul(m, x.dagger ? cd(x.mode) : c(x.mode));
+          dq += x.dagger ? _dq_cd[x.mode & 1] : _dq_c[x.mode & 1];
+        }
+        return m;
+      }
+
     // Changed here (hook of System::rotate): the grown block's operators
     // rotated into the kept states and filed for the later steps.
     void rotate_hamiltonian(int position, Block<double>& b, Basis&, Basis& rho_basis) override
@@ -828,6 +949,345 @@ class MolecularSystem: public System<double>
         save(N, position, int(b.lattice().size()));
       }
 };
+
+inline std::vector<double>
+MolecularSystem::measure_products(const std::vector<std::vector<molecular::Factor> >& products)
+{
+  using namespace molecular;
+  int const ls = int(lattice().size()), last = ls - 3;
+  if(int(_b1->lattice().size()) != last || int(_b4->lattice().size()) != 1)
+    throw std::logic_error("molecular dmtk: products are measured at the closing configuration of final_sweep");
+  if(gs.subspace_begin() == gs.subspace_end())
+    throw std::logic_error("molecular dmtk: no final state to measure");
+  const StateSpace& first = *gs.subspace_begin();
+  QN const target = first[1].qn() + first[2].qn() + first[3].qn() + first[4].qn();
+
+  // The position of each product: its third-lowest site (second for two
+  // factors), clamped to [1, ls-3].
+  std::vector<double> value(products.size(), 0.);
+  std::vector<std::vector<size_t> > at(ls);
+  for(size_t i = 0; i < products.size(); i++){
+    const std::vector<Factor>& f = products[i];
+    if(f.size() != 2 && f.size() != 4)
+      throw std::invalid_argument("molecular dmtk: a measured product has two or four factors");
+    std::vector<int> s;
+    for(const Factor& x : f){
+      if(x.mode < 0 || x.mode >= _nso) throw std::invalid_argument("molecular dmtk: factor outside the spin orbitals");
+      s.push_back(x.mode >> 1);
+    }
+    std::sort(s.begin(), s.end());
+    at[std::min(std::max(s[std::min<size_t>(2, s.size() - 1)], 1), last)].push_back(i);
+  }
+
+  // The closing configuration: left block of ls-3 sites, site ls-3 and the
+  // last two sites as the right block.
+  Enlarged e2(h.get_site(ls - 2).basis(), h.get_site(ls - 1).basis());
+  Basis rbasis = e2.basis;
+  Centre C(sectors(_b1->basis().subspaces()), sectors(rbasis.subspaces()), h.get_site(last).basis(), target);
+  for(auto it = gs.subspace_begin(); it != gs.subspace_end(); ++it){
+    const StateSpace& sp = *it;
+    if(sp.start() == -1) continue;
+    int const a = containing(C.left, sp[1].begin()), s = sp[2].begin();
+    int const r = e2.pos[sp[3].begin() * e2.d2 + sp[4].begin()];
+    int const x = a < 0 ? -1 : C.rs[a * C.d + s];
+    if(x < 0 || C.left[a].begin != sp[1].begin() || C.left[a].dim != int(sp[1].dim()) || containing(C.right, r) != x)
+      throw std::logic_error("molecular dmtk: final state outside the closing configuration");
+    auto slice = gs(sp);
+    for(int l = 0; l < C.left[a].dim; l++) C.at(a, s)(l, r - C.right[x].begin) = slice(l, 0, 0, 0);
+  }
+  // Annihilators of the right block's spin orbitals (a+ is the transpose).
+  std::vector<Op> rsing(_nso);
+  for(int site = ls - 2; site < ls; site++){
+    const Set& D = site_set(site);
+    for(int I = D.lo; I < D.hi; I++){
+      Op E = make_op(rbasis.subspaces(), _dq_c[I & 1]);
+      if(site == ls - 2) embed_first(E, D.a_(I), 1., e2);
+      else embed_second(E, D.a_(I), 1., e2);
+      prune(E);
+      rsing[I] = E;
+    }
+  }
+
+  for(int k = last; k >= 1; k--){
+    Set X;
+    if(k >= 2) load(X, LEFT, k);
+    std::deque<Op> owned; // products built here: the left block's at k = 1, the right's at k = ls-3
+    std::map<std::vector<int>, const Op*> built;
+    struct RightOp { const Op* op; bool t; };
+    struct Job { size_t product; const Op* op; bool t, parity; Dense dot; double sign; };
+    std::vector<RightOp> rights;
+    std::vector<std::vector<Job> > jobs;
+    std::map<std::vector<int>, size_t> right_index;
+    auto code = [](const std::vector<Factor>& f) {
+      std::vector<int> c;
+      for(const Factor& x : f) c.push_back(2 * x.mode + int(x.dagger));
+      return c;
+    };
+
+    for(size_t i : at[k]){
+      const std::vector<Factor>& f = products[i];
+      // Group the factors by part (left block, site k, right block); the
+      // reordering's sign counts the factors that move past each other.
+      std::vector<Factor> fl, fd, fr;
+      int moved = 0;
+      for(const Factor& x : f){
+        int const site = x.mode >> 1;
+        if(site < k){ fl.push_back(x); moved += int(fd.size() + fr.size()); }
+        else if(site == k){ fd.push_back(x); moved += int(fr.size()); }
+        else fr.push_back(x);
+      }
+      double sign = moved % 2 ? -1. : 1.;
+      if((k >= 2 && fl.size() > 2) || (k < last && fr.size() > 1))
+        throw std::logic_error("molecular dmtk: product does not fit its position");
+
+      QN dq;
+      Dense dot = dense(fd, dq);
+      if(fr.size() % 2)
+        for(int r = 0; r < 4; r++)
+          for(int s = 0; s < C.d; s++) if(odd(C.site[s])) dot(r, s) = -dot(r, s);
+      bool nonzero = false;
+      for(int r = 0; r < C.d; r++) for(int s = 0; s < C.d; s++) if(dot(r, s) != 0.) nonzero = true;
+      if(!nonzero) continue;
+
+      // Left block: its normal product of fl.
+      const Op* lop = nullptr;
+      bool lt = false;
+      if(!fl.empty() && k == 1){
+        auto key = code(fl);
+        auto found = built.find(key);
+        if(found == built.end()){
+          QN q;
+          Dense m = dense(fl, q);
+          owned.push_back(site_op(m, q, 0));
+          found = built.emplace(key, &owned.back()).first;
+        }
+        lop = found->second;
+      } else if(fl.size() == 1){
+        lop = fl[0].dagger ? &X.ad_(fl[0].mode) : &X.a_(fl[0].mode);
+      } else if(fl.size() == 2){
+        int const I = fl[0].mode, J = fl[1].mode;
+        bool const dI = fl[0].dagger, dJ = fl[1].dagger;
+        if(I == J && dI == dJ) continue; // a+ a+ or a a on one mode
+        if(dI && dJ){        // a+_I a+_J
+          lop = I < J ? &X.A_(I, J) : &X.A_(J, I);
+          if(I > J) sign = -sign;
+        } else if(dI){       // a+_I a_J
+          lop = I <= J ? &X.B_(I, J) : &X.B_(J, I);
+          lt = I > J;
+        } else if(!dJ){      // a_I a_J = (a+_J a+_I)^T
+          lop = J < I ? &X.A_(J, I) : &X.A_(I, J);
+          lt = true;
+          if(I < J) sign = -sign;
+        } else {             // a_I a+_J = -a+_J a_I
+          if(I == J) throw std::logic_error("molecular dmtk: a a+ on one mode is not a stored block operator");
+          lop = J <= I ? &X.B_(J, I) : &X.B_(I, J);
+          lt = J > I;
+          sign = -sign;
+        }
+      }
+
+      // Right block: its normal product of fr.
+      auto key = code(fr);
+      auto found = right_index.find(key);
+      if(found == right_index.end()){
+        RightOp R{nullptr, false};
+        if(fr.empty()) {}
+        else if(k < last) R = {&rsing[fr[0].mode], fr[0].dagger};
+        else {
+          // Exact on the last two sites: site ls-2's factors, then ls-1's.
+          std::vector<Factor> f2, f1;
+          int swaps = 0;
+          for(const Factor& x : fr){
+            if((x.mode >> 1) == ls - 2){ f2.push_back(x); swaps += int(f1.size()); }
+            else f1.push_back(x);
+          }
+          QN q2, q1;
+          Dense const d2 = dense(f2, q2), d1 = dense(f1, q1);
+          double const sg = swaps % 2 ? -1. : 1.;
+          Op o = make_op(rbasis.subspaces(), q2 + q1);
+          if(!f2.empty() && !f1.empty()) kron(o, site_op(d2, q2, ls - 2), site_op(d1, q1, ls - 1), sg, e2);
+          else if(!f2.empty()) embed_first(o, site_op(d2, q2, ls - 2), sg, e2);
+          else embed_second(o, site_op(d1, q1, ls - 1), sg, e2);
+          prune(o);
+          owned.push_back(o);
+          R = {&owned.back(), false};
+        }
+        found = right_index.emplace(key, rights.size()).first;
+        rights.push_back(R);
+        jobs.emplace_back();
+      }
+      jobs[found->second].push_back({i, lop, lt, fl.size() % 2 == 1, dot, sign});
+    }
+
+    // Each right operator once: Z = O_R C_s'^T per left sector, Y = C_s Z,
+    // then every product's Frobenius products with Y.
+    int const d = C.d, nl = int(C.left.size());
+    std::map<const Op*, Blocks> lblocks;
+    using Part = std::pair<int, Mat>; // (sector of the bra, block)
+    for(size_t w = 0; w < rights.size(); w++){
+      const RightOp& R = rights[w];
+      bool need[4][4] = {};
+      bool needp[4] = {};
+      for(const Job& j : jobs[w])
+        for(int s = 0; s < d; s++)
+          for(int sp = 0; sp < d; sp++) if(j.dot(s, sp) != 0.) need[s][sp] = needp[sp] = true;
+      std::vector<std::vector<Part> > Z(d);
+      std::vector<Blocks::Ref> rrefs;
+      if(R.op) rrefs = Blocks(*R.op, C.right).refs;
+      for(int sp = 0; sp < d; sp++){
+        if(!needp[sp]) continue;
+        Z[sp].assign(nl, Part(-1, Mat()));
+        for(int a = 0; a < nl; a++){
+          int const x = C.rs[a * d + sp];
+          if(x < 0) continue;
+          const Mat& B = C.at(a, sp);
+          if(!R.op){ Z[sp][a] = Part(x, B.transpose()); continue; }
+          for(const Blocks::Ref& ref : rrefs){
+            if(!R.t && ref.ket == x){ Z[sp][a] = Part(ref.bra, view(*ref.b) * B.transpose()); break; }
+            if(R.t && ref.bra == x){ Z[sp][a] = Part(ref.ket, view(*ref.b).transpose() * B.transpose()); break; }
+          }
+        }
+      }
+      std::vector<std::vector<std::vector<Part> > > Y(d, std::vector<std::vector<Part> >(d));
+      for(int s = 0; s < d; s++)
+        for(int sp = 0; sp < d; sp++){
+          if(!need[s][sp]) continue;
+          Y[s][sp].assign(nl, Part(-1, Mat()));
+          for(int ap = 0; ap < nl; ap++){
+            const Part& z = Z[sp][ap];
+            if(z.first < 0) continue;
+            int const a = sector_of(C.left, target - C.right[z.first].qn - C.site[s]);
+            if(a < 0 || C.rs[a * d + s] != z.first) continue;
+            Y[s][sp][ap] = Part(a, C.at(a, s) * z.second);
+          }
+        }
+      for(const Job& j : jobs[w]){
+        const Blocks* lb = nullptr;
+        if(j.op){
+          auto it = lblocks.find(j.op);
+          if(it == lblocks.end()) it = lblocks.emplace(j.op, Blocks(*j.op, C.left)).first;
+          lb = &it->second;
+        }
+        double v = 0.;
+        for(int s = 0; s < d; s++)
+          for(int sp = 0; sp < d; sp++){
+            double const x = j.dot(s, sp);
+            if(x == 0.) continue;
+            const std::vector<Part>& y = Y[s][sp];
+            double t = 0.;
+            if(!lb){
+              for(int a = 0; a < nl; a++) if(y[a].first == a) t += y[a].second.trace();
+            } else for(const Blocks::Ref& ref : lb->refs){
+              int const ket = j.t ? ref.bra : ref.ket, bra = j.t ? ref.ket : ref.bra;
+              if(y[ket].first != bra) continue;
+              double u = j.t ? (view(*ref.b).transpose().array() * y[ket].second.array()).sum()
+                             : (view(*ref.b).array() * y[ket].second.array()).sum();
+              if(j.parity && odd(C.left[ket].qn)) u = -u;
+              t += u;
+            }
+            v += x * t;
+          }
+        value[j.product] += j.sign * v;
+      }
+    }
+    if(k == 1) break;
+
+    // Move the centre to site k-1. The right block of sites k..ls-1 gets an
+    // orthonormal basis of the centre's rows over (site k, right block), one
+    // left sector (one charge) at a time: C = L Q^T by Householder QR, all
+    // min(rows, cols) columns of Q kept.
+    Enlarged en(h.get_site(k).basis(), rbasis);
+    std::vector<Sector> const es = sectors(en.basis.subspaces());
+    std::vector<std::pair<int, int> > order; // (enlarged sector, left sector)
+    for(int a = 0; a < nl; a++){
+      int const e = sector_of(es, target - C.left[a].qn);
+      if(e >= 0) order.push_back({e, a});
+    }
+    std::sort(order.begin(), order.end());
+    BMatrix<double> rot;
+    std::vector<State> states;
+    std::vector<Mat> L(nl);
+    std::vector<int> nsec(nl, -1);
+    int nsectors = 0;
+    for(const auto& [e, a] : order){
+      Mat M = Mat::Zero(C.left[a].dim, es[e].dim);
+      bool any = false;
+      for(int s = 0; s < d; s++){
+        int const x = C.rs[a * d + s];
+        if(x < 0) continue;
+        any = true;
+        const Mat& B = C.at(a, s);
+        for(int r = 0; r < C.right[x].dim; r++)
+          M.col(en.pos[s * en.d2 + C.right[x].begin + r] - es[e].begin) = B.col(r);
+      }
+      if(!any) continue;
+      Eigen::Index const p = std::min(M.rows(), M.cols());
+      Eigen::HouseholderQR<Mat> qr(M.transpose());
+      Mat const V = qr.householderQ() * Mat::Identity(M.cols(), p);
+      Mat const R = qr.matrixQR().topRows(p).triangularView<Eigen::Upper>();
+      L[a] = R.transpose();
+      int const begin = int(states.size());
+      SubMatrix<double> blk(es[e].qn, SubSpace(es[e].qn, begin, begin + int(p) - 1),
+                            SubSpace(es[e].qn, es[e].begin, es[e].begin + es[e].dim - 1));
+      for(Eigen::Index i = 0; i < p; i++)
+        for(Eigen::Index j = 0; j < V.rows(); j++) blk(size_t(i), size_t(j)) = V(j, i);
+      rot.push_back(blk);
+      for(Eigen::Index i = 0; i < p; i++) states.push_back(State(size_t(begin + i), es[e].qn));
+      nsec[a] = nsectors++;
+    }
+    if(states.empty()) throw std::logic_error("molecular dmtk: the final state has no amplitude");
+    Basis nb(states.size());
+    for(size_t i = 0; i < states.size(); i++) nb[i] = states[i];
+    nb.pack();
+    rot.repack(nb);
+    const Set& D = site_set(k);
+    std::vector<Op> ns(_nso);
+    for(int I = lo_of(k); I < _nso; I++){
+      Op E = make_op(en.basis.subspaces(), _dq_c[I & 1]);
+      if(D.inside(I)) embed_first(E, D.a_(I), 1., en);
+      else embed_second(E, rsing[I], 1., en);
+      prune(E);
+      ns[I] = molecular::rotate(E, rot, nb.subspaces());
+    }
+    rsing.swap(ns);
+    rbasis = nb;
+
+    // The left block of k sites is (block of k-1 sites) x (site k-1) under
+    // the final rotation U: C'[(l', s'), r] = sum_l U[(l', s'), l] L[l, r].
+    BMatrix<double> U;
+    Basis ub;
+    read_rho(U, ub, k, LEFT);
+    std::vector<Sector> lsec;
+    for(size_t i = 0; i < ub.size(); i++){
+      State const st = ub[i];
+      int const x = sector_of(lsec, st.qn1());
+      if(x < 0){ lsec.push_back({st.qn1(), int(st.i1), 1}); continue; }
+      int const lo = std::min(lsec[x].begin, int(st.i1));
+      int const hi = std::max(lsec[x].begin + lsec[x].dim - 1, int(st.i1));
+      lsec[x].begin = lo;
+      lsec[x].dim = hi - lo + 1;
+    }
+    std::sort(lsec.begin(), lsec.end(), [](const Sector& u, const Sector& v) { return u.begin < v.begin; });
+    Centre N(lsec, sectors(nb.subspaces()), h.get_site(k - 1).basis(), target);
+    for(int a = 0; a < nl; a++){
+      if(nsec[a] < 0) continue;
+      const SubMatrix<double>* u = U.block(C.left[a].qn);
+      if(!u || u->col_range().begin() != C.left[a].begin || int(u->cols()) != C.left[a].dim)
+        throw std::logic_error("molecular dmtk: rotation does not match the left block");
+      Mat const G = view(*u) * L[a];
+      int const r0 = u->row_range().begin();
+      for(Eigen::Index j = 0; j < G.rows(); j++){
+        State const st = ub[size_t(r0 + j)];
+        int const ap = containing(N.left, int(st.i1)), sp = int(st.i2);
+        if(ap < 0 || N.rs[ap * N.d + sp] != nsec[a])
+          throw std::logic_error("molecular dmtk: rotation rows do not match the centre");
+        N.at(ap, sp).row(int(st.i1) - N.left[ap].begin) = G.row(j);
+      }
+    }
+    C = std::move(N);
+  }
+  return value;
+}
 
 } // namespace dmtk
 

@@ -214,16 +214,6 @@ Lowered lower(models::Term const& input, Site& site) {
     return output;
 }
 
-models::Term expression(models::SiteBasisPtr const& site,
-                        std::initializer_list<std::pair<std::size_t, char const*>> factors,
-                        double coefficient = 1.) {
-    models::Term term;
-    term.coeff = coefficient;
-    for (auto const& [position, name] : factors)
-        term.factors.push_back({static_cast<int>(position), site->op(name), site});
-    return term;
-}
-
 struct Observer {
     MolecularResult& result;
     IterationCallback const& callback;
@@ -441,8 +431,6 @@ MolecularResult solve_molecular(MolecularInput const& input, Options const& opti
     validate(input, controls);
     auto const n = input.orbitals, n2 = n * n, n4 = n2 * n2;
     auto source = models::spinful_fermion();
-    std::array<char const*, 2> create = {"c_dag_up", "c_dag_dn"};
-    std::array<char const*, 2> destroy = {"c_up", "c_dn"};
     // Changed here: the Hamiltonian reaches the engine as its integrals,
     // which dmtk::MolecularSystem keeps as normal and complementary block
     // operators, instead of one engine term per integral entry. The
@@ -489,21 +477,51 @@ MolecularResult solve_molecular(MolecularInput const& input, Options const& opti
         }
         contributions.push_back({entry->second, destination, weight});
     };
+    // Changed here: the RDM elements are not engine terms, whose stored
+    // in-block pieces grow as n^4 m^2, but products that
+    // dmtk::MolecularSystem::measure_products reads from the final state by
+    // a walk over the chain (see molecular_system.hpp). Each product fills the
+    // destinations equal to it as an operator, with their signs: the ba block
+    // is the ab block with its pairs exchanged, and a same-spin block is
+    // antisymmetric in its creators and in its annihilators, so its products
+    // need p < r and q < s (the others are zero).
+    using Factor = dmtk::molecular::Factor;
+    std::vector<std::vector<Factor>> products;
+    struct Share { std::size_t product, destination; double weight; };
+    std::vector<Share> shares;
+    auto mode = [](std::size_t orbital, int spin) { return static_cast<int>(2 * orbital) + spin; };
+    auto rdm = [&](int a, int b, std::size_t p, std::size_t q, std::size_t r, std::size_t s) {
+        return 2 * n2 + static_cast<std::size_t>(2 * a + b) * n4 + ((p * n + q) * n + r) * n + s;
+    };
+    for (int a = 0; a < 2; ++a)
+        for (std::size_t p = 0; p < n; ++p)
+            for (std::size_t q = 0; q < n; ++q) {
+                shares.push_back({products.size(), static_cast<std::size_t>(a) * n2 + p * n + q, 1.});
+                products.push_back({{mode(q, a), true}, {mode(p, a), false}});
+            }
     for (std::size_t p = 0; p < n; ++p)
-        for (std::size_t q = 0; q < n; ++q) {
-            for (int a = 0; a < 2; ++a)
-                request(expression(source, {{q, create[a]}, {p, destroy[a]}}), static_cast<std::size_t>(a) * n2 + p * n + q);
+        for (std::size_t q = 0; q < n; ++q)
             for (std::size_t r = 0; r < n; ++r)
-                for (std::size_t s = 0; s < n; ++s)
-                    for (int a = 0; a < 2; ++a)
-                        for (int b = 0; b < 2; ++b)
-                            request(expression(source, {{p, create[a]}, {r, create[b]},
-                                {s, destroy[b]}, {q, destroy[a]}}),
-                                2 * n2 + static_cast<std::size_t>(2 * a + b) * n4 + ((p * n + q) * n + r) * n + s);
-        }
+                for (std::size_t s = 0; s < n; ++s) {
+                    shares.push_back({products.size(), rdm(0, 1, p, q, r, s), 1.});
+                    shares.push_back({products.size(), rdm(1, 0, r, s, p, q), 1.});
+                    products.push_back({{mode(p, 0), true}, {mode(r, 1), true}, {mode(s, 1), false}, {mode(q, 0), false}});
+                }
+    for (int a = 0; a < 2; ++a)
+        for (std::size_t p = 0; p < n; ++p)
+            for (std::size_t r = p + 1; r < n; ++r)
+                for (std::size_t q = 0; q < n; ++q)
+                    for (std::size_t s = q + 1; s < n; ++s) {
+                        shares.push_back({products.size(), rdm(a, a, p, q, r, s), 1.});
+                        shares.push_back({products.size(), rdm(a, a, r, s, p, q), 1.});
+                        shares.push_back({products.size(), rdm(a, a, r, q, p, s), -1.});
+                        shares.push_back({products.size(), rdm(a, a, p, s, r, q), -1.});
+                        products.push_back({{mode(p, a), true}, {mode(r, a), true}, {mode(s, a), false}, {mode(q, a), false}});
+                    }
     // Added here: each spin block of the 2-RDM keeps its own destination (aa,
-    // ab, ba, bb), and the caller's observables follow; a product that
-    // changes N or Sz has no expectation in the sector and is not measured.
+    // ab, ba, bb), and the caller's observables follow as engine terms; a
+    // product that changes N or Sz has no expectation in the sector and is
+    // not measured.
     std::size_t const observable_base = 2 * n2 + 4 * n4;
     std::vector<std::string> observable_names;
     for (auto const& [name, sum] : input.observables) {
@@ -545,25 +563,34 @@ MolecularResult solve_molecular(MolecularInput const& input, Options const& opti
     }
     system.start(controls.sweeps.size(), schedule);
     system.run(static_cast<int>(controls.warmup_states));
-    // Changed here: alpsx set the measurements before start(), which
-    // rotated them through every step, about a fifth of the run time at 10
-    // orbitals. The final sweep runs over the whole chain in both directions
-    // and rebuilds both blocks from single sites, so the products it
-    // measures never came from those earlier rotations: the values are bit
-    // for bit the same.
+    // Changed here: alpsx set the measurements (then the RDM terms too)
+    // before start(), which rotated them through every step, about a fifth
+    // of the run time at 10 orbitals. The final sweep runs over the whole
+    // chain in both directions and rebuilds both blocks from single sites,
+    // so the products it measures never came from those earlier rotations:
+    // the values are bit for bit the same.
     system.corr = measurements;
     system.set_full_sweep(true);
     system.final_sweep(controls.sweeps.back().left_to_right, dmtk::RIGHT2LEFT, 1, true);
-    // Read every expectation from the same final state and retained products.
-    // A missing measurement is an error, never an implicit zero RDM element.
-    for (auto& term : system.corr) term.set_value(std::numeric_limits<double>::quiet_NaN());
-    system.measure();
+    // Read every expectation from the same final state: the observables
+    // from the products the final sweep retained, the RDMs by the walk. A
+    // missing measurement is an error, never an implicit zero RDM element.
     std::vector<double> values(observable_base + observable_names.size(), 0.);
-    for (auto const& item : contributions) {
-        auto const measured = system.corr[item.slot].value();
-        if (!std::isfinite(measured))
+    if (measurements.size()) {
+        for (auto& term : system.corr) term.set_value(std::numeric_limits<double>::quiet_NaN());
+        system.measure();
+        for (auto const& item : contributions) {
+            auto const measured = system.corr[item.slot].value();
+            if (!std::isfinite(measured))
+                throw std::runtime_error("classic molecular engine did not evaluate a required observable");
+            values[item.destination] += item.weight * measured;
+        }
+    }
+    auto const measured = system.measure_products(products);
+    for (auto const& share : shares) {
+        if (!std::isfinite(measured[share.product]))
             throw std::runtime_error("classic molecular engine did not evaluate a required RDM element");
-        values[item.destination] += item.weight * measured;
+        values[share.destination] += share.weight * measured[share.product];
     }
     if (input.ci_vector) {
         if (n > 64) throw std::invalid_argument("classic molecular CI vectors are limited to 64 orbitals");

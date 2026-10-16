@@ -288,7 +288,8 @@ TEST(ClassicMolecular, SpinBlocksObservablesAndCiVectorMatchExactDiagonalization
 
 TEST(ClassicMolecular, TruncatedCiVectorCarriesTheRunsOwnRdms) {
     // With 8 kept states the state differs from the exact one; the CI vector
-    // must still be the state the RDMs were measured on.
+    // must still be the state the RDMs were measured on: the 1-RDMs and the
+    // 2-RDM's spin blocks, which the walk over the final state reads.
     auto input = input_for(6, 3, 2);
     input.ci_vector = true;
     BitReference reference(input);
@@ -313,6 +314,16 @@ TEST(ClassicMolecular, TruncatedCiVectorCarriesTheRunsOwnRdms) {
                                              result.one_rdm_alpha[static_cast<std::size_t>(p * 6 + q)]));
             error = std::max(error, std::abs(reference.expectation({1., {{2 * q, true}, {2 * p, false}}}) -
                                              result.one_rdm_beta[static_cast<std::size_t>(p * 6 + q)]));
+            for (int r = 0; r < 6; ++r)
+                for (int s = 0; s < 6; ++s) {
+                    auto const index = static_cast<std::size_t>(((p * 6 + q) * 6 + r) * 6 + s);
+                    auto element = [&](int a, int b) {
+                        return reference.expectation({1., {{2 * p + a, true}, {2 * r + b, true}, {2 * s + b, false}, {2 * q + a, false}}});
+                    };
+                    error = std::max({error, std::abs(element(1, 1) - result.two_rdm_aa[index]),
+                                      std::abs(element(1, 0) - result.two_rdm_ab[index]),
+                                      std::abs(element(0, 0) - result.two_rdm_bb[index])});
+                }
         }
     EXPECT_LT(error, 1e-8);
 }
