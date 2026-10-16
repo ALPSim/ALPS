@@ -468,9 +468,9 @@ class System
     // Written for this tree: lookup tables over the four blocks with the
     // match of operator()(op) (block by site, then name, site and internal
     // site, first match in list order), built once per call of hint(),
-    // rotate_terms() or build_composite_operators() instead of a list scan
-    // per lookup. Valid only while the four blocks are unchanged, i.e.
-    // within that call.
+    // rotate_terms(), build_composite_operators(), rotate_corr() or
+    // measure() instead of a list scan per lookup. Valid only while the four
+    // blocks are unchanged, i.e. within that call.
     using OpKey = std::tuple<std::string, int, int>;
     struct OpIndex {
       std::array<std::map<OpKey, const BasicOp<T>*>, 4> ops;
@@ -547,6 +547,17 @@ class System
 
     void hint(int _mask, bool add_local_h = true, const Hami<T> *_h = NULL);
     void build_composite_operators(const Hami<T> *_h = NULL);
+
+    // Changed here: three hooks through which a derived system supplies its
+    // own Hamiltonian (the molecular solver's normal/complementary operator
+    // path, dmtk/molecular_system.hpp). init_hamiltonian ends init_iteration,
+    // hamiltonian_product is the product the Lanczos solver and the one-state
+    // diagonalization call, rotate_hamiltonian carries the Hamiltonian's
+    // operators into a new block in rotate(). The defaults are the code that
+    // stood at those places.
+    virtual void init_hamiltonian(bool create_composite);
+    virtual VectorState<T> hamiltonian_product(const VectorState<T>& vv);
+    virtual void rotate_hamiltonian(int position, Block<T>& b, Basis& basis, Basis& rho_basis);
 
     System<T>& set_calc_gap(int b)
       {
@@ -1723,6 +1734,13 @@ System<T>::init_iteration(const B&b1, const B&b2, const B&b3, const B&b4, bool u
 
   gs.set_qn_mask(qn, _grand_canonical);
   gs.resize(_b1->_basis,_b2->_basis,_b3->_basis,_b4->_basis);
+  init_hamiltonian(create_composite);
+}
+
+template <class T>
+void
+System<T>::init_hamiltonian(bool create_composite)
+{
 #ifndef USE_PRODUCT_DEFAULT
   if(create_composite && _rotate_terms){
     create_interactions(create_composite);
@@ -2649,23 +2667,7 @@ System<T>::rotate(int position, Block<T>& b)
 //    block = I<T>(); 
 //  }
 //
-// ***************************************************************************
-// Hamiltonian terms for interactions between blocks
-// ***************************************************************************
-  rotate_terms(position, b, basis, rho_basis, nullptr);
-// ***************************************************************************
-// Local Hamiltonian
-// ***************************************************************************
-  if(verbose() > 0)
-    dmtk::out() << "NEW BLOCK: HAMILTONIAN TERMS: " << this->h.name() << endl;
-  rotate_hami(position, b, basis, rho_basis, nullptr); 
-// ***************************************************************************
-// Other Hamiltonians 
-// ***************************************************************************
-  for (Hami<T> & h : hs) {
-    rotate_terms(position, b, basis, rho_basis, &h);
-    rotate_hami(position, b, basis, rho_basis, &h);
-  }
+  rotate_hamiltonian(position, b, basis, rho_basis);
 // ***************************************************************************
 // Correlations
 // ***************************************************************************
@@ -2685,6 +2687,29 @@ System<T>::rotate(int position, Block<T>& b)
 
   outputfile << "Rotation time: " << dmtk::format_elapsed(clock.elapsed()) << endl;
   outputfile.close();
+}
+
+template<class T>
+void
+System<T>::rotate_hamiltonian(int position, Block<T>& b, Basis& basis, Basis& rho_basis)
+{
+// ***************************************************************************
+// Hamiltonian terms for interactions between blocks
+// ***************************************************************************
+  rotate_terms(position, b, basis, rho_basis, nullptr);
+// ***************************************************************************
+// Local Hamiltonian
+// ***************************************************************************
+  if(verbose() > 0)
+    dmtk::out() << "NEW BLOCK: HAMILTONIAN TERMS: " << this->h.name() << endl;
+  rotate_hami(position, b, basis, rho_basis, nullptr); 
+// ***************************************************************************
+// Other Hamiltonians 
+// ***************************************************************************
+  for (Hami<T> & h : hs) {
+    rotate_terms(position, b, basis, rho_basis, &h);
+    rotate_hami(position, b, basis, rho_basis, &h);
+  }
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -2964,6 +2989,29 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
   const Hami<T> &_h = *ph;
   typename Hami<T>::const_iterator titer;
 
+  // Changed here: as in rotate_terms, operators are found through a per-call
+  // index over the four blocks (see OpIndex) and whether the new block b
+  // already holds an operator is answered from a key set kept next to it,
+  // rather than a scan of the block lists per lookup; with the O(n^4)
+  // measurement terms of the molecular solver those scans made the final
+  // sweep quadratic in the number of operators. The nested calls below add
+  // to b, so they drop the set.
+  OpIndex index;
+  std::set<OpKey> in_b;
+  bool in_b_valid = false;
+  auto b_contains = [&](const BasicOp<T> &op) {
+    if(!in_b_valid){
+      in_b.clear();
+      for(const BasicOp<T> &o : b) in_b.emplace(o.name(), o.site(), o.internal_site());
+      in_b_valid = true;
+    }
+    return in_b.count(OpKey(op.name(), op.site(), op.internal_site())) != 0;
+  };
+  auto b_push = [&](const BasicOp<T> &op) {
+    b.push_back(op);
+    if(in_b_valid) in_b.emplace(op.name(), op.site(), op.internal_site());
+  };
+
 // 1a-Look for operators in S.ops involving the other blocks and site block 
 // We also rotate individual operators
 
@@ -3001,7 +3049,7 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
         else
           top1 = aux_term; // the piece contains more than one operator
   
-        const BasicOp<T>* _op = operator()(top1);
+        const BasicOp<T>* _op = indexed_op(top1, index);
   
         if(!_op) {
           dmtk::out() << "ERROR 1a: Operator " << top1.description() << " not found\n";
@@ -3010,7 +3058,7 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
   
         BasicOp<T> real_op(top1); 
         real_op.dqn = _op->dqn;
-        bool add = b.contains(real_op);
+        bool add = b_contains(real_op);
   
         if(!add && _op){ // If we haven't added it yet, we do it now
           real_op.resize(rho_basis);
@@ -3021,7 +3069,7 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
   
           new_operator(real_op, *_op, rho, basis, 1-position);
 //          real_op.set_name(t.name().c_str());
-          b.push_back(real_op);
+          b_push(real_op);
           if(verbose() > 0)
             dmtk::out() << "Lap: " << dmtk::format_elapsed(clock.lap_elapsed()) << endl;
         }
@@ -3050,6 +3098,7 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
       } else {
         rotate_terms(position, b, basis, rho_basis, &op.hami());
         rotate_hami(position, b, basis, rho_basis, &op.hami());
+        in_b_valid = false;
         continue;
       }
     }
@@ -3074,7 +3123,7 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
       else
         top1 = aux_term; // the piece contains more than one operator
 
-      const BasicOp<T>* _op = operator()(top1);
+      const BasicOp<T>* _op = indexed_op(top1, index);
 
       if(!_op) {
         dmtk::out() << "ERROR 1b: Operator " << top1.description() << " not found\n";
@@ -3083,7 +3132,7 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
 
       BasicOp<T> real_op(top1); 
       real_op.dqn = _op->dqn;
-      bool add = b.contains(real_op);
+      bool add = b_contains(real_op);
 
       if(!add && _op){ // If we haven't added it yet, we do it now
         real_op.resize(rho_basis);
@@ -3094,7 +3143,7 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
 
         new_operator(real_op, *_op, rho, basis, 1-position);
 
-        b.push_back(real_op);
+        b_push(real_op);
         if(verbose() > 0)
           dmtk::out() << "Lap: " << dmtk::format_elapsed(clock.lap_elapsed()) << endl;
       }
@@ -3140,7 +3189,7 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
         else
           top1 = aux_term; // the piece contains more than one operator
   
-        const BasicOp<T>* _op = operator()(top1);
+        const BasicOp<T>* _op = indexed_op(top1, index);
   
         if(!_op) {
           dmtk::out() << "ERROR 2a: Operator " << top1.description() << " not found\n";
@@ -3149,7 +3198,7 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
   
         BasicOp<T> new_op(top1); 
         new_op.dqn = _op->dqn;
-        bool add = b.contains(new_op);
+        bool add = b_contains(new_op);
   
         if(!add && _op){
           new_op.resize(rho_basis);
@@ -3162,7 +3211,7 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
 //          new_op.set_name(t.name().c_str());
           if(verbose() > 0)
             dmtk::out() << "NEW MEAS. OPERATOR " << t.name() << " " << new_op.name() << endl;
-          b.push_back(new_op);
+          b_push(new_op);
           if(verbose() > 0)
             dmtk::out() << "Lap: " << dmtk::format_elapsed(clock.lap_elapsed()) << endl;
         }
@@ -3206,7 +3255,7 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
       else
         top1 = aux_term; // the piece contains more than one operator
 
-      const BasicOp<T>* _op = operator()(top1);
+      const BasicOp<T>* _op = indexed_op(top1, index);
 
       if(!_op) {
         if(_store_products) dmtk::out() << "ERROR 2b: Operator " << top1.description() << " not found\n";
@@ -3215,7 +3264,7 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
 
       BasicOp<T> new_op(top1); 
       new_op.dqn = _op->dqn;
-      bool add = b.contains(new_op);
+      bool add = b_contains(new_op);
 
       if(!add && _op){
         new_op.resize(rho_basis);
@@ -3226,7 +3275,7 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
         new_op = T(0);
         new_operator(new_op, *_op, rho, basis, position);
 //        new_op.set_name(t.name().c_str());
-        b.push_back(new_op);
+        b_push(new_op);
         if(verbose() > 0)
           dmtk::out() << "Lap: " << dmtk::format_elapsed(clock.lap_elapsed()) << endl;
       }
@@ -3261,8 +3310,8 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
             top2 = aux_term2[0];
           else
             top2 = aux_term2; // the piece contains more than one operator
-          const BasicOp<T>* op1 = operator()(top1);
-          const BasicOp<T>* op2 = operator()(top2);
+          const BasicOp<T>* op1 = indexed_op(top1, index);
+          const BasicOp<T>* op2 = indexed_op(top2, index);
   
           if(!op1) {
             dmtk::out() << "ERROR 3: Operator " << top1.description() << " not found\n";
@@ -3283,7 +3332,7 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
 
           BasicOp<T> new_op(new_term); 
           new_op.dqn = op1->dqn + op2->dqn;
-          bool add = b.contains(new_op);
+          bool add = b_contains(new_op);
   
           if(!add && op1 && op2){
             new_op.resize(rho_basis);
@@ -3295,7 +3344,7 @@ System<T>::rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis
             new_operator(new_op, *op1, *op2, pos1, pos2, rho, basis, T(1));
 //            new_op.set_name(new_term.name().c_str());
   
-            b.push_back(new_op);
+            b_push(new_op);
             if(verbose() > 0)
               dmtk::out() << "Lap: " << dmtk::format_elapsed(clock.lap_elapsed()) << endl;
           }
@@ -3541,6 +3590,11 @@ System<T>::measure(const VectorState<T> *v)
   T x = product(*pv,*pv);
   T x0 = product(*pv,*pv);
 
+  // Changed here: the measured terms' operators are found through a per-call
+  // index over the four blocks (see OpIndex), which do not change during the
+  // measurement, rather than a scan of the block lists per lookup.
+  OpIndex index;
+
 
 //////////////////////////////////////////////////////////////////////////
   for (Term<T> & real_t : corr) {
@@ -3576,8 +3630,8 @@ System<T>::measure(const VectorState<T> *v)
       if(ib1 != BLOCK_NONE && ib2 != BLOCK_NONE){
         if(ib1 != ib2){
             
-          const BasicOp<T>* op1 = operator()(top1);
-          const BasicOp<T>* op2 = operator()(top2);
+          const BasicOp<T>* op1 = indexed_op(top1, index);
+          const BasicOp<T>* op2 = indexed_op(top2, index);
  
           if(op1 && op2){
             if(op1->name() != top1.name() || op2->name() != top2.name()) 
@@ -3602,7 +3656,7 @@ System<T>::measure(const VectorState<T> *v)
         } else {
 
           BasicOp<T> aux_op(t);
-          const BasicOp<T>* op = operator()(aux_op);
+          const BasicOp<T>* op = indexed_op(aux_op, index);
 
  
           if(op){
@@ -3659,7 +3713,7 @@ System<T>::measure(const VectorState<T> *v)
           else
             top = aux_term[ib];
 
-          aux_op[ib] = operator()(top);
+          aux_op[ib] = indexed_op(top, index);
           if(!aux_op[ib]){ // && _verbose >= 0) {
             dmtk::out() << "ERROR : Operator " << top.description() << " not found\n";
             found = false;
@@ -4032,6 +4086,13 @@ product(const System<T>& ss, const VectorState<T>& vv)
   }
 
   return res;
+}
+
+template<class T>
+VectorState<T>
+System<T>::hamiltonian_product(const VectorState<T>& vv)
+{
+  return product(static_cast<const System<T>&>(*this), vv);
 }
 #else // USE_PRODUCT_DEFAULT
 ////////////////////////////////////////////////////////////////////////
@@ -4476,7 +4537,14 @@ product(System<T>& ss, const VectorState<T>& vv)
     dmtk::out() << "WARNING: product not possible (rotate_terms == FALSE)\n";
     return vv;
   }
-  return product_composite(ss, vv);
+  return ss.hamiltonian_product(vv);
+}
+
+template<class T>
+VectorState<T>
+System<T>::hamiltonian_product(const VectorState<T>& vv)
+{
+  return product_composite(*this, vv);
 }
 
 #endif //USE_PRODUCT_DEFAULT

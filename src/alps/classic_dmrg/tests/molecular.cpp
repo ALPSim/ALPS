@@ -344,6 +344,10 @@ TEST(ClassicMolecular, SmallSpacesMatchExactDiagonalization) {
 
 TEST(ClassicMolecular, FiveOrbitalsMatchExactDiagonalization) { expect_exact(5, 2, 2); }
 
+// Added here: blocks of up to four orbitals, stored and rotated between steps
+// (the normal/complementary operator engine, src/dmtk/molecular_system.hpp).
+TEST(ClassicMolecular, SevenOrbitalsMatchExactDiagonalization) { expect_exact(7, 3, 2); }
+
 TEST(ClassicMolecular, TruncatedRunStaysVariationalAndConsistent) {
     auto const input = input_for(5, 2, 2);
     BitReference const reference(input);

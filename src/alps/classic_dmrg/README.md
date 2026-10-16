@@ -99,13 +99,13 @@ two-particle ones in the PySCF convention
 spin-summed (`two_rdm`) and by spin block (`two_rdm_aa`, `two_rdm_ab` with
 σ = α and τ = β, `two_rdm_bb`; `two_rdm` is `aa + ab + ab.transpose(2,3,0,1)
 + bb` to rounding, and QDK's `aaaa`, `aabb` and `bbbb` blocks are these), the
-iterations and the final truncation error. Every integral becomes an engine
-term of up to four sites, which `solve()` does not accept for compiled
-models, and every RDM element is a measured term. The sweep, truncation,
-Lanczos, scratch and callback options are those of `solve()`; `sector` must be
-empty, `num_eigenvalues` one and arithmetic real. The integrals must be finite
-and have the real-orbital symmetries (`h` symmetric, `(pq|rs)` eightfold) after
-`integral_cutoff` drops entries of smaller magnitude. Fewer than four orbitals
+iterations and the final truncation error. The engine works from the
+integrals themselves (below), and every RDM element is a measured term. The
+sweep, truncation, Lanczos, scratch and callback options are those of
+`solve()`; `sector` must be empty, `num_eigenvalues` one and arithmetic real.
+The integrals must be finite and have the real-orbital symmetries (`h`
+symmetric, `(pq|rs)` eightfold) after `integral_cutoff` drops entries of
+smaller magnitude. Fewer than four orbitals
 are padded with one-dimensional neutral sites, which add no states.
 
 The result keeps no MPS and no checkpoint, so everything is measured in the
@@ -125,18 +125,47 @@ not. The sector grows as `C(n, n_α) C(n, n_β)` (63504 determinants at 10
 orbitals and half filling, where the reconstruction adds about a second to
 a 30 s run); it is limited to 64 orbitals.
 
-The solver is meant for small active spaces and for checking other codes. The
-terms reach the engine one by one, about `n⁴` of them, and the RDM
-measurement adds `n⁴` more. At each step the engine adds up the terms that
-differ only in their operator on one block, but it rebuilds these sums from
-the terms every time instead of keeping the normal and complementary
-operators of quantum-chemistry DMRG codes. With 32 kept states and two
-sweeps on dense random integrals at half filling, an Apple M-series laptop
-takes 1.5 s for 6 orbitals, 9 s for 8, 30 s for 10 and 98 s for 12, almost
-all of it in the sweeps (2.0, 16, 71 and 295 s before the bookkeeping
-changes listed under [Origin and provenance](#origin-and-provenance)).
-alpsx's LiH case (six orbitals, two electrons per spin) at 128 states and
-six sweeps takes 2.3 s, against 3.0 s for alpsx's version of the solver.
+The solver is meant for small and medium active spaces and for checking
+other codes. Its engine, `dmtk::MolecularSystem`
+(`src/dmtk/molecular_system.hpp`), keeps for every block the normal and
+complementary operators of quantum-chemistry DMRG (S. R. White and
+R. L. Martin, J. Chem. Phys. 110, 4127 (1999); the operator classes follow
+G. K.-L. Chan and M. Head-Gordon, J. Chem. Phys. 116, 4462 (2002)): the
+block Hamiltonian, the creation and annihilation operators of the block's
+spin orbitals and their pair products, and for every spin orbital outside
+the block the pair operators `P` and `Q` and the three-operator sums `S`
+that contract the integrals with the block's own operators. A step builds
+these for the two enlarged blocks from the stored ones and the new site's,
+applies the Hamiltonian as about `2n²` products of one left and one right
+operator, and rotates the grown block's operators into the kept states;
+the generic engine path rebuilt sums of the `n⁴` integral terms at every
+step. The RDM measurement still adds `n⁴` measured terms, and the final
+sweep and the measurement now take most of a run. With 32 kept states and
+two sweeps on dense random integrals at half filling, an Apple M-series
+laptop shared with other jobs takes 0.3 s for 6 orbitals, 1.3 s for 8, 3.7 s
+for 10, 8.1 s for 12, 17 s for 14 and 32 s for 16, where the generic path
+took 1.8, 10, 36 and 128 s for 6 to 12 orbitals and 10.5 minutes for 14 in
+the same runs; at 64 states 14 orbitals take 30 s and 16 take 57 s, with a
+peak of 3.8 GB of memory. The scratch directory holds every block's
+operators, which grow with the square of the number of orbitals and of kept
+states: 2.8 GB for 16 orbitals at 64 states and 4.9 GB for 10 orbitals at
+340 states with three electrons, so converged runs of more than about ten
+orbitals are bound by disk. alpsx's LiH case (six orbitals, two electrons
+per spin) at 128 states and six sweeps takes 0.4 s against 2.8 s on the
+generic path; alpsx's version of the solver took 3.0 s when the generic
+path took 2.3 s.
+
+Converged runs agree with the generic path to rounding. With every state
+kept, the energies agree with PySCF's full CI to 2e-14 and the RDMs to 5e-13
+(6 and 8 orbitals at half filling, 10 orbitals with two electrons of one
+spin and one of the other), and with the generic path's to 6e-15 and 8e-14
+(8 and 10 orbitals); while the engine was written, every Hamiltonian product
+agreed with the generic path's to 4e-15, from 1 to 10 orbitals and through
+warmup, sweeps and final sweep. Runs far from
+convergence land elsewhere, as the generic path's own do when the integrals
+change at 1e-13. The engine uses the integrals averaged over the eightfold
+symmetry that `solve_molecular` checks to 1e-12, which makes the operator
+exactly Hermitian.
 
 ## The `dmrg` application
 
@@ -251,6 +280,15 @@ the old code's own does when the integrals change at 1e-13 (at 8 and 10
 orbitals with 32 states and two sweeps, by 1e-3 and 1e-2 in the energy).
 The molecular solver adds its RDM terms for the final sweep only, which
 builds them in both blocks, instead of rotating them through every step.
+`System` takes its Hamiltonian through three virtual hooks,
+`init_hamiltonian` (the end of `init_iteration`), `hamiltonian_product` (the
+product of the Lanczos and one-state solves) and `rotate_hamiltonian` (in
+`rotate`), whose defaults are the code that stood there; the molecular
+solver's `dmtk::MolecularSystem` overrides them and is written here, not
+taken from alpsx or the legacy engine. `rotate_corr` and `measure` also find
+block operators through the per-call index, and `rotate_corr` answers
+whether the new block already holds an operator from a key set instead of a
+scan of its list, which was quadratic in the number of measured terms.
 
 ## Tests
 
@@ -267,7 +305,7 @@ the matrices, projector-form terms, `Nup` and `Ndown` as fermionic charges);
 the private scratch directory; and the rejected inputs.
 The molecular solver (`classic_dmrg_molecular`, also labelled `chemistry`)
 is checked against an occupation-number exact diagonalization for one to five
-orbitals, with and without padding, energies and every RDM element; against
+and for seven orbitals, with and without padding, energies and every RDM element; against
 the same integrals written as an `ALPS::models` Hamiltonian and solved by
 `ALPS::ed`; the spin blocks, observables of one to four sites and the CI
 vector, sign by sign, against the same diagonalization for one to six
@@ -275,8 +313,9 @@ orbitals; under truncation (variational energy, RDM traces, the CI vector's
 norm and 1-RDMs against the run's); for callback
 observation and abort with the scratch directory removed; and for the rejected
 inputs. `classic_dmrg_multisite` locks the engine's long-range hopping and
-four-site fermion products, which the molecular solver relies on, against an
-exact diagonalization for 4, 6 and 8 sites.
+four-site fermion products, which the molecular solver used before it had
+its own operator engine, against an exact diagonalization for 4, 6 and 8
+sites.
 The label also covers XML catalog models solved against `ALPS::ed` (wrap
 bonds, spin 1, ladders, spinless fermion rings, Hubbard chains, rings and
 ladders, the t-J chain, correlations in both site orders). The SDK consumer

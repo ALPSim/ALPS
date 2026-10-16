@@ -20,6 +20,8 @@
 #include <alps/models/site.hpp>
 #include <alps/models/terms.hpp>
 
+#include "dmtk/molecular_system.hpp"
+
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -96,6 +98,31 @@ void validate(MolecularInput const& input, Options const& options) {
         if (!options.truncation_error)
             throw std::invalid_argument("classic molecular truncation_max_states requires truncation_error");
     }
+}
+
+// The integrals the engine works with: entries below the cutoff dropped,
+// then averaged over the real-orbital symmetries.
+dmtk::MolecularIntegrals symmetrized_integrals(MolecularInput const& input) {
+    auto const n = input.orbitals;
+    dmtk::MolecularIntegrals out;
+    out.n = static_cast<int>(n);
+    auto keep = [cutoff = input.integral_cutoff](double x) { return std::abs(x) < cutoff ? 0. : x; };
+    out.h.assign(n * n, 0.);
+    for (std::size_t p = 0; p < n; ++p)
+        for (std::size_t q = 0; q < n; ++q)
+            out.h[p * n + q] = .5 * (keep(input.one_body[p * n + q]) + keep(input.one_body[q * n + p]));
+    out.eri.assign(n * n * n * n, 0.);
+    auto at = [&](std::size_t p, std::size_t q, std::size_t r, std::size_t s) {
+        return keep(input.two_body[((p * n + q) * n + r) * n + s]);
+    };
+    for (std::size_t p = 0; p < n; ++p)
+        for (std::size_t q = 0; q < n; ++q)
+            for (std::size_t r = 0; r < n; ++r)
+                for (std::size_t s = 0; s < n; ++s)
+                    out.eri[((p * n + q) * n + r) * n + s] =
+                        .125 * (at(p, q, r, s) + at(q, p, r, s) + at(p, q, s, r) + at(q, p, s, r) +
+                                at(r, s, p, q) + at(s, r, p, q) + at(r, s, q, p) + at(s, r, q, p));
+    return out;
 }
 
 struct Site {
@@ -414,27 +441,15 @@ MolecularResult solve_molecular(MolecularInput const& input, Options const& opti
     validate(input, controls);
     auto const n = input.orbitals, n2 = n * n, n4 = n2 * n2;
     auto source = models::spinful_fermion();
-    std::vector<models::Term> terms;
     std::array<char const*, 2> create = {"c_dag_up", "c_dag_dn"};
     std::array<char const*, 2> destroy = {"c_up", "c_dn"};
-    for (std::size_t p = 0; p < n; ++p)
-        for (std::size_t q = 0; q < n; ++q) {
-            double h = input.one_body[p * n + q];
-            if (h != 0. && std::abs(h) >= input.integral_cutoff)
-                for (int a = 0; a < 2; ++a)
-                    terms.push_back(expression(source, {{p, create[a]}, {q, destroy[a]}}, h));
-            for (std::size_t r = 0; r < n; ++r)
-                for (std::size_t s = 0; s < n; ++s) {
-                    double v = input.two_body[((p * n + q) * n + r) * n + s];
-                    if (v == 0. || std::abs(v) < input.integral_cutoff) continue;
-                    for (int a = 0; a < 2; ++a)
-                        for (int b = 0; b < 2; ++b)
-                            terms.push_back(expression(source, {{p, create[a]}, {r, create[b]},
-                                {s, destroy[b]}, {q, destroy[a]}}, .5 * v));
-                }
-        }
-    auto canonical = models::TermSum(std::move(terms)).canonicalise(true, 0.);
-    models::validate_hermiticity(canonical, std::vector<models::SiteBasisPtr>(n, source));
+    // Changed here: the Hamiltonian reaches the engine as its integrals,
+    // which dmtk::MolecularSystem keeps as normal and complementary block
+    // operators, instead of one engine term per integral entry. The
+    // integrals are the ones the terms were built from: entries below
+    // integral_cutoff dropped, then averaged over the symmetries validate()
+    // checked to 1e-12, so that the operator is exactly Hermitian.
+    dmtk::MolecularIntegrals integrals = symmetrized_integrals(input);
     // Input tensors are no longer used after construction; a callback cannot
     // change the running Hamiltonian, charge target or scalar energy offset.
     auto const alpha = input.alpha_electrons, beta = input.beta_electrons;
@@ -446,6 +461,7 @@ MolecularResult solve_molecular(MolecularInput const& input, Options const& opti
     int const mask = (1 << n_index) | (1 << sz_index);
     dmtk::QN::set_qn_mask(mask);
     molecular_detail::Site orbitals(source, n_index, sz_index);
+    auto const c_up = orbitals.intern(source->op("c_up")), c_dn = orbitals.intern(source->op("c_dn"));
     models::SiteBasis neutral;
     neutral.dim = 1;
     neutral.quantum_numbers = {{"N", {0.}}, {"Sz", {0.}}};
@@ -456,16 +472,6 @@ MolecularResult solve_molecular(MolecularInput const& input, Options const& opti
     dmtk::Hami<double> h(lattice);
     for (std::size_t i = 0; i < length; ++i)
         h.sites(i) = i < n ? &orbitals.block : &padding.block;
-    for (auto const& term : canonical.terms()) {
-        auto native = lower(term, orbitals);
-        if (native.term.coef() != 0.) h += native.term;
-    }
-    // Even a zero Hamiltonian needs a concrete local operator and term.
-    if (h.empty()) {
-        auto zero = lower(models::Term{}, orbitals).term;
-        zero.coef() = 0.;
-        h += zero;
-    }
 
     struct Contribution { std::size_t slot, destination; double weight; };
     std::vector<Contribution> contributions;
@@ -521,7 +527,8 @@ MolecularResult solve_molecular(MolecularInput const& input, Options const& opti
     MolecularResult result;
     result.orbitals = n;
     Observer observer{result, callback};
-    dmtk::System<double> system(h, lattice, "ALPS_molecular");
+    dmtk::MolecularSystem system(h, lattice, "ALPS_molecular", std::move(integrals),
+                                 orbitals.operators[c_up], orbitals.operators[c_dn]);
     system.set_store_products(true).set_use_hc(false).set_grow_symmetric(false).set_verbose(0);
     system.signal_connect(Observer::observe, dmtk::SYSTEM_SIGNAL_END_ITER, &observer);
     system.qnt[static_cast<int>(n_index)] = static_cast<double>(alpha + beta);
