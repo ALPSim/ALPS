@@ -1,23 +1,15 @@
 # Accumulators
 
-This directory holds two accumulator libraries.
+`ALPS::accumulators` is the accumulators library of the
+[ALPS Core Libraries](https://github.com/ALPSCore/ALPSCore): `alps::accumulators`
+with `<alps/accumulators.hpp>` and `<alps/accumulators/*.hpp>`. It is copied
+from ALPSCore at commit `7146b9e1f017938a94e5dae35d88467cc5ba7969`
+(2026-09-25).
 
-- `ALPS::accumulators` is the accumulators library of the
-  [ALPS Core Libraries](https://github.com/ALPSCore/ALPSCore): `alps::accumulators`
-  with `<alps/accumulators.hpp>` and `<alps/accumulators/*.hpp>`. It is copied
-  from ALPSCore at commit `7146b9e1f017938a94e5dae35d88467cc5ba7969`
-  (2026-09-25).
-- The NGS accumulators, `alps::accumulator` with
-  `<alps/ngs/accumulator/*.hpp>`, are ALPS's own. They are compiled into
-  `ALPS::alps` only with `ALPS_NGS_USE_NEW_ALEA=ON`, and their tests in
-  `tests/legacy_alea/` and `tests/legacy_accumulator/` are not built.
-
-The two use different namespaces and include paths, with one overlap: both
-read the macro `ALPS_ACCUMULATOR_VALUE_TYPES`. `<alps/config.hpp>` defines it as
-ALPSCore's list, and the NGS headers define their own list only if it is not
-yet defined. A translation unit that includes both therefore gives the NGS
-accumulators ALPSCore's list, or, if the NGS headers come first, a macro
-redefinition warning.
+It replaces ALPS's own NGS accumulators (`alps::accumulator`,
+`<alps/ngs/accumulator/*.hpp>`) and the NGS observables over ALEA
+(`alps::mcobservables`, `<alps/ngs/mcobservables.hpp>`). ALEA itself,
+`<alps/alea.h>` in `alea/`, is unchanged.
 
 ## Building and linking
 
