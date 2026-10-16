@@ -21,9 +21,9 @@ entry-point discovery, registration happens automatically at
     energy, wavefunction = calc.run(hamiltonian, n_alpha, n_beta)
 
 The registered names are ``alps_ed`` (exact diagonalization, returning the
-CI vector) and ``alps_classic_dmrg`` (classic block DMRG, returning reduced
-density matrices; registered when pyalps has its ``classic_dmrg``
-bindings). :mod:`~qdk_chemistry_alps.interop` converts between qdk-chemistry
+CI vector) and ``alps_classic_dmrg`` (classic block DMRG, returning the CI
+vector with the reduced density matrices, or the latter alone for larger
+active spaces; registered when pyalps has its ``classic_dmrg`` bindings). :mod:`~qdk_chemistry_alps.interop` converts between qdk-chemistry
 and ALPS representations of lattices, spin models and fermionic
 Hamiltonians.
 

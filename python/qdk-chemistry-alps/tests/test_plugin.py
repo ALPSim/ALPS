@@ -5,7 +5,8 @@
 # WIP/classic-dmrg-chemistry at d4384a7f8,
 # python/qdk-chemistry-alps/tests/test_plugin.py. Changes: the registered
 # names are alps_ed and alps_classic_dmrg (alps_dmrg is not ported); the
-# entry-point plugin is also registered through a stand-in registrar.
+# entry-point plugin is also registered through a stand-in registrar. The
+# check of alps_classic_dmrg on a build without RdmContainer is written here.
 """Registration of the ALPS backends with qdk-chemistry.
 
 Two registration paths coexist (import-time and the ``qdk_chemistry.plugins``
@@ -88,11 +89,14 @@ def test_calculators_resolve_through_the_registry():
 
 
 @pytest.mark.classic_dmrg
-def test_classic_calculator_without_rdm_container_says_so(hubbard_qdk):
+@pytest.mark.parametrize("settings", [{"wavefunction_container": "rdm"}, {"ci_memory_limit_gb": 1e-9}],
+                         ids=["rdm", "auto_beyond_the_limit"])
+def test_classic_calculator_without_rdm_container_says_so(hubbard_qdk, settings):
     """Released qdk-chemistry (2.2.1 and earlier) has no RdmContainer.
 
-    alps_classic_dmrg registers there all the same, so running it has to
-    name the missing class rather than fail inside the calculator.
+    alps_classic_dmrg returns a state vector there; when the settings call
+    for an RDM-only container instead, it names the missing class before
+    solving rather than fail inside the calculator.
     """
     try:
         from qdk_chemistry.data import RdmContainer  # noqa: F401
@@ -104,9 +108,10 @@ def test_classic_calculator_without_rdm_container_says_so(hubbard_qdk):
 
     import qdk_chemistry_alps  # noqa: F401  (registers the backends)
 
-    calculator = create("multi_configuration_calculator", "alps_classic_dmrg")
+    calculator = create("multi_configuration_calculator", "alps_classic_dmrg", **settings)
     with pytest.raises(RuntimeError, match="RdmContainer"):
         calculator.run(hubbard_qdk(2), 1, 1)
+    assert calculator.last_result is None
 
 
 def test_entry_point_plugin_class_is_exposed_lazily():
