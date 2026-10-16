@@ -17,9 +17,11 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
+# The task compiles catalog models with <alps/model/catalog.hpp> and solves
+# them with the classic DMRG component (the dmtk engine).
 add_executable(dmrg dmrg.C factory.C)
 target_include_directories(dmrg PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_libraries(dmrg PRIVATE ALPS::alps)
+target_link_libraries(dmrg PRIVATE ALPS::alps ALPS::classic_dmrg)
 alps_install_applications(dmrg)
 
 if(ALPS_BUILD_TESTING)

@@ -13,6 +13,12 @@
 // definite-charge components and like terms merged before dmtk sees them;
 // measurements are compiled operators; no HDF5, parameters or catalog
 // snapshot. The dmtk calls themselves follow the alpsx driver line by line.
+// Written here, not taken from alpsx (it drove dmtk from catalog operators
+// through model_helper): the search for a set of fermionic carrier charges,
+// accepting two-site factors in either order, normalizing factor matrices,
+// combining terms that differ by a scale or by their projector expansion
+// (simplify), the dense Hermiticity check, and measuring every component of
+// a column on its own instead of applying the summed operator.
 #include <alps/dmrg/classic.hpp>
 #include "invocation.hpp"
 
@@ -35,12 +41,16 @@ namespace alps::dmrg::classic {
 namespace {
 
 using Complex = std::complex<double>;
-using Key = std::vector<std::pair<double, double>>; // exact matrix entries, orderable
+// Matrix entries on a grid of 2^-40, orderable. Keys identify normalized
+// factors (largest entry one), so entries that differ by rounding share a key;
+// a key that misses only keeps two equal terms apart.
+using Key = std::vector<std::pair<long long, long long>>;
 
 Key key_of(std::vector<Complex> const& matrix) {
+    constexpr double grid = 1099511627776.; // 2^40
     Key key;
     key.reserve(matrix.size());
-    for (auto const& v : matrix) key.emplace_back(v.real(), v.imag());
+    for (auto const& v : matrix) key.emplace_back(std::llround(v.real() * grid), std::llround(v.imag() * grid));
     return key;
 }
 
@@ -109,9 +119,10 @@ struct Site {
 // One definite-charge, definite-parity component of a local factor.
 struct Factor {
     int site = 0;
-    std::vector<Complex> matrix; // row-major, row = output state
+    std::vector<Complex> matrix; // row-major, row = output state; leading entry one
     std::vector<long> delta;     // [charge]: twice (output - input)
     bool odd = false;
+    Complex scale{1.};           // taken out of the matrix into the term coefficient
 };
 
 struct ReadyTerm {
@@ -157,33 +168,80 @@ std::vector<Charge> select_charges(models::PhysicalBasis const& basis, Options c
         for (auto const& site : basis.sites)
             for (double p : site.parity) fermionic = fermionic || p < 0.;
     if (!fermionic) return charges;
-    // The engine derives fermion signs from integer quantum numbers flagged
-    // fermionic: find one whose parity is the state parity everywhere.
-    std::vector<std::string> candidates{"N"};
+    // The engine derives fermion signs from the integer quantum numbers it
+    // flags fermionic: the parity of their sum is the sign. Use one charge
+    // whose parity is the state parity everywhere ("N" first), else the
+    // smallest set of charges whose summed parity is (the catalog's fermion
+    // basis carries Nup and Ndown and no N); the dmrg application registered
+    // every fermionic catalog quantum number this way.
+    std::vector<std::string> names{"N"};
     for (auto const& site : basis.sites)
         for (auto const& [name, values] : site.quantum_numbers)
-            if (std::find(candidates.begin(), candidates.end(), name) == candidates.end()) candidates.push_back(name);
-    for (auto const& name : candidates) {
-        bool valid = false;
-        bool ok = true;
+            if (std::find(names.begin(), names.end(), name) == names.end()) names.push_back(name);
+    std::vector<std::string> candidates;
+    for (auto const& name : names) {
+        bool present = false, integral = true;
         for (auto const& site : basis.sites) {
             auto found = site.quantum_numbers.find(name);
-            for (std::size_t state = 0; state < site.parity.size() && ok; ++state) {
-                double const q = found == site.quantum_numbers.end() ? 0. : found->second.at(state);
-                if (!std::isfinite(q) || std::abs(q - std::round(q)) > 1e-9) ok = false;
-                else if (is_odd_integer(q) != (site.parity[state] < 0.)) ok = false;
-                else valid = true;
-            }
-            if (!ok) break;
+            if (found == site.quantum_numbers.end()) continue;
+            present = true;
+            for (double q : found->second)
+                if (!std::isfinite(q) || std::abs(q - std::round(q)) > 1e-9) integral = false;
         }
-        if (!ok || !valid) continue;
-        auto existing = std::find_if(charges.begin(), charges.end(), [&](Charge const& c) { return c.name == name; });
-        if (existing != charges.end()) existing->fermionic = true;
-        else charges.push_back(Charge{name, true, false, 0});
-        return charges;
+        if (present && integral) candidates.push_back(name);
     }
-    throw std::invalid_argument("classic DMRG needs an integer charge whose parity equals the fermion parity "
-                                "on every site (for example the particle number N)");
+    auto carries_parity = [&](std::vector<std::size_t> const& chosen) {
+        for (auto const& site : basis.sites)
+            for (std::size_t state = 0; state < site.parity.size(); ++state) {
+                long long sum = 0;
+                for (auto c : chosen) {
+                    auto found = site.quantum_numbers.find(candidates[c]);
+                    if (found != site.quantum_numbers.end()) sum += std::llround(found->second.at(state));
+                }
+                if ((sum % 2 != 0) != (site.parity[state] < 0.)) return false;
+            }
+        return true;
+    };
+    std::size_t const limit = std::min<std::size_t>(candidates.size(), QN_MAX_SIZE);
+    for (std::size_t size = 1; size <= limit; ++size) {
+        // Combinations of `size` candidates in lexicographic order.
+        std::vector<std::size_t> chosen(size);
+        for (std::size_t k = 0; k < size; ++k) chosen[k] = k;
+        while (true) {
+            if (carries_parity(chosen)) {
+                for (auto c : chosen) {
+                    auto const& name = candidates[c];
+                    auto existing = std::find_if(charges.begin(), charges.end(), [&](Charge const& q) { return q.name == name; });
+                    if (existing != charges.end()) existing->fermionic = true;
+                    else charges.push_back(Charge{name, true, false, 0});
+                }
+                return charges;
+            }
+            std::size_t k = size;
+            while (k > 0 && chosen[k - 1] == candidates.size() - size + k - 1) --k;
+            if (k == 0) break;
+            ++chosen[k - 1];
+            for (std::size_t m = k; m < size; ++m) chosen[m] = chosen[m - 1] + 1;
+        }
+    }
+    throw std::invalid_argument("classic DMRG needs integer charges whose summed parity equals the fermion parity "
+                                "on every site (for example the particle number N, or Nup and Ndown)");
+}
+
+// Scale a matrix so its leading entry (the first, in row-major order, whose
+// magnitude reaches the largest) is one, and return the scale. Proportional
+// factors then share one matrix however a producer distributes scalars
+// between coefficients and factors (the catalog keeps fermion signs in the
+// factor matrices, ALPS::models in the coefficients).
+Complex normalize(std::vector<Complex>& matrix) {
+    double largest = 0.;
+    for (auto const& v : matrix) largest = std::max(largest, std::abs(v));
+    if (largest == 0.) return Complex{};
+    Complex pivot;
+    for (auto const& v : matrix)
+        if (std::abs(v) >= largest * (1. - 1e-12)) { pivot = v; break; }
+    for (auto& v : matrix) v /= pivot;
+    return pivot;
 }
 
 // Components of one local factor with definite charge deltas and parity change.
@@ -206,8 +264,10 @@ std::vector<Factor> split(models::LocalFactor const& factor, Site const& site, s
             matrix[static_cast<std::size_t>(out) * dim + in] = v;
         }
     std::vector<Factor> components;
-    for (auto& [key, matrix] : groups)
-        components.push_back(Factor{factor.site, std::move(matrix), key.first, key.second < 0});
+    for (auto& [key, matrix] : groups) {
+        Complex const scale = normalize(matrix);
+        components.push_back(Factor{factor.site, std::move(matrix), key.first, key.second < 0, scale});
+    }
     return components;
 }
 
@@ -224,16 +284,21 @@ void expand(models::LocalTerm const& term, Problem const& problem, std::vector<R
     if (term.factors.size() > 2)
         throw std::invalid_argument(std::string("classic DMRG ") + what
                                     + " terms may act on at most two sites; got " + std::to_string(term.factors.size()));
-    for (std::size_t k = 0; k < term.factors.size(); ++k) {
-        int const site = term.factors[k].site;
-        if (site < 0 || site >= problem.num_sites)
-            throw std::invalid_argument(std::string("classic DMRG ") + what + " factor site is out of range");
-        if (k && site <= term.factors[k - 1].site)
-            throw std::invalid_argument(std::string("classic DMRG ") + what + " factors must be on distinct ascending sites");
-    }
-    std::vector<std::vector<Factor>> components;
+    // Local factors on distinct sites form a tensor product: their order in the
+    // term carries no sign (the parity string is read from the input state),
+    // so take them in ascending site order, as the engine needs them.
+    std::vector<models::LocalFactor const*> ordered;
     for (auto const& factor : term.factors) {
-        components.push_back(split(factor, problem.sites[problem.site_index[factor.site]], problem.charges.size()));
+        if (factor.site < 0 || factor.site >= problem.num_sites)
+            throw std::invalid_argument(std::string("classic DMRG ") + what + " factor site is out of range");
+        ordered.push_back(&factor);
+    }
+    std::sort(ordered.begin(), ordered.end(), [](auto const* a, auto const* b) { return a->site < b->site; });
+    if (ordered.size() == 2 && ordered[0]->site == ordered[1]->site)
+        throw std::invalid_argument(std::string("classic DMRG ") + what + " factors must be on distinct sites");
+    std::vector<std::vector<Factor>> components;
+    for (auto const* factor : ordered) {
+        components.push_back(split(*factor, problem.sites[problem.site_index[factor->site]], problem.charges.size()));
         if (components.back().empty()) return; // an exactly zero factor
     }
     auto emit = [&](std::vector<Factor> factors) {
@@ -249,7 +314,12 @@ void expand(models::LocalTerm const& term, Problem const& problem, std::vector<R
             throw std::invalid_argument(std::string("classic DMRG ") + what
                                         + " term carries a Jordan-Wigner string other than the strict convention's [i, j) "
                                           "between two odd factors");
-        out.push_back(ReadyTerm{term.coefficient, std::move(factors)});
+        Complex coefficient = term.coefficient;
+        for (auto& f : factors) {
+            coefficient *= f.scale;
+            f.scale = 1.;
+        }
+        out.push_back(ReadyTerm{coefficient, std::move(factors)});
     };
     for (auto const& first : components[0]) {
         if (components.size() == 1) emit({first});
@@ -266,21 +336,135 @@ TermKey term_key(ReadyTerm const& term) {
     return key;
 }
 
-// Sum like components, drop the vanished ones, then require that every
-// surviving term conserves the sector's charges and that the sum is Hermitian.
-std::vector<ReadyTerm> merge_hamiltonian(std::vector<ReadyTerm> const& terms, Problem const& problem) {
-    std::vector<ReadyTerm> merged;
-    std::map<TermKey, std::size_t> index;
-    for (auto const& term : terms) {
-        auto [pos, inserted] = index.emplace(term_key(term), merged.size());
-        if (inserted) merged.push_back(term);
-        else merged[pos->second].coefficient += term.coefficient;
+// Sum like terms, then combine terms that share one factor (or, on one site,
+// a charge change): c1 A1 x B + c2 A2 x B = (c1 A1 + c2 A2) x B when A1 and A2
+// change the charges and the parity alike. Catalog operators arrive as one
+// term per local matrix element of the first site (projector times matrix);
+// this restores their compact form, so the engine applies as many terms as
+// the operator's natural decomposition has.
+std::vector<ReadyTerm> simplify(std::vector<ReadyTerm> const& terms) {
+    std::vector<ReadyTerm> current;
+    {
+        std::map<TermKey, std::size_t> index;
+        for (auto const& term : terms) {
+            auto [pos, inserted] = index.emplace(term_key(term), current.size());
+            if (inserted) current.push_back(term);
+            else current[pos->second].coefficient += term.coefficient;
+        }
     }
+    using Bucket = std::tuple<std::vector<int>, Key, std::vector<long>, bool>;
+    // Combine within buckets that share everything but the summed factor.
+    auto combine = [](std::vector<ReadyTerm> const& input, auto bucket_of, std::size_t summed) {
+        std::vector<ReadyTerm> output;
+        std::map<Bucket, std::size_t> index;
+        std::vector<std::vector<std::size_t>> members;
+        for (std::size_t t = 0; t < input.size(); ++t) {
+            auto [pos, inserted] = index.emplace(bucket_of(input[t]), members.size());
+            if (inserted) members.emplace_back();
+            members[pos->second].push_back(t);
+        }
+        for (auto const& group : members) {
+            ReadyTerm const& first = input[group.front()];
+            if (group.size() == 1) { output.push_back(first); continue; }
+            ReadyTerm merged = first;
+            auto& matrix = merged.factors[summed].matrix;
+            std::fill(matrix.begin(), matrix.end(), Complex{});
+            double magnitude = 0.;
+            for (auto t : group) {
+                auto const& term = input[t];
+                magnitude = std::max(magnitude, std::abs(term.coefficient));
+                auto const& other = term.factors[summed].matrix;
+                for (std::size_t e = 0; e < matrix.size(); ++e) matrix[e] += term.coefficient * other[e];
+            }
+            double largest = 0.;
+            for (auto const& v : matrix) largest = std::max(largest, std::abs(v));
+            if (largest <= 1e-14 * magnitude) continue; // the members cancel
+            merged.coefficient = normalize(matrix);
+            output.push_back(std::move(merged));
+        }
+        return output;
+    };
+    for (int pass = 0; pass < 8; ++pass) {
+        std::size_t const before = current.size();
+        auto sites_of = [](ReadyTerm const& t) {
+            std::vector<int> sites;
+            for (auto const& f : t.factors) sites.push_back(f.site);
+            return sites;
+        };
+        std::vector<ReadyTerm> singles, pairs;
+        for (auto& t : current) (t.factors.size() == 2 ? pairs : singles).push_back(std::move(t));
+        // On one site: sum every component with the same charge change.
+        singles = combine(singles, [&](ReadyTerm const& t) {
+            return Bucket{sites_of(t), Key{}, t.factors[0].delta, t.factors[0].odd};
+        }, 0);
+        // On two sites: sum the factors that multiply one shared factor.
+        for (std::size_t shared : {std::size_t{1}, std::size_t{0}}) {
+            std::size_t const summed = 1 - shared;
+            pairs = combine(pairs, [&](ReadyTerm const& t) {
+                return Bucket{sites_of(t), key_of(t.factors[shared].matrix), t.factors[summed].delta, t.factors[summed].odd};
+            }, summed);
+        }
+        current = std::move(singles);
+        current.insert(current.end(), std::make_move_iterator(pairs.begin()), std::make_move_iterator(pairs.end()));
+        if (current.size() == before) break;
+    }
+    std::vector<ReadyTerm> kept;
+    for (auto& term : current)
+        if (term.coefficient != Complex{}) kept.push_back(std::move(term));
+    return kept;
+}
+
+// Hermiticity, checked numerically on every site and site pair: the even part
+// of the operator must equal its adjoint and the odd-odd part its negated
+// adjoint (the adjoint of c F_i F_j with a string over [i, j) is
+// -conj(c) F_i^+ F_j^+ with the same string).
+void check_hermitian(std::vector<ReadyTerm> const& terms, Problem const& problem, double scale) {
+    std::map<std::vector<int>, std::vector<ReadyTerm const*>> groups;
+    for (auto const& term : terms) {
+        std::vector<int> sites;
+        for (auto const& f : term.factors) sites.push_back(f.site);
+        groups[sites].push_back(&term);
+    }
+    for (auto const& [sites, members] : groups) {
+        std::vector<std::size_t> dims;
+        for (int s : sites) dims.push_back(static_cast<std::size_t>(problem.sites[problem.site_index[s]].dim));
+        std::size_t const second = dims.size() == 2 ? dims[1] : 1;
+        std::size_t const dim = dims[0] * second;
+        std::vector<Complex> even(dim * dim), odd(dim * dim);
+        for (auto const* term : members) {
+            auto& target = term->factors.size() == 2 && term->factors[0].odd ? odd : even;
+            auto const& a = term->factors[0].matrix;
+            for (std::size_t o1 = 0; o1 < dims[0]; ++o1)
+                for (std::size_t i1 = 0; i1 < dims[0]; ++i1) {
+                    Complex const x = term->coefficient * a[o1 * dims[0] + i1];
+                    if (x == Complex{}) continue;
+                    if (dims.size() == 1) { target[o1 * dim + i1] += x; continue; }
+                    auto const& b = term->factors[1].matrix;
+                    for (std::size_t o2 = 0; o2 < second; ++o2)
+                        for (std::size_t i2 = 0; i2 < second; ++i2)
+                            target[(o1 * second + o2) * dim + (i1 * second + i2)] += x * b[o2 * second + i2];
+                }
+        }
+        for (std::size_t r = 0; r < dim; ++r)
+            for (std::size_t c = 0; c < dim; ++c)
+                if (std::abs(even[r * dim + c] - std::conj(even[c * dim + r])) > 1e-10 * scale
+                    || std::abs(odd[r * dim + c] + std::conj(odd[c * dim + r])) > 1e-10 * scale) {
+                    std::string where;
+                    for (int s : sites) where += (where.empty() ? "" : ", ") + std::to_string(s);
+                    throw std::invalid_argument("classic DMRG Hamiltonian is not Hermitian (term on sites " + where + ")");
+                }
+    }
+}
+
+// Simplify the expanded terms, require that every surviving term conserves
+// the sector's charges and that the sum is Hermitian.
+std::vector<ReadyTerm> merge_hamiltonian(std::vector<ReadyTerm> const& terms, Problem const& problem) {
+    auto merged = simplify(terms);
     double scale = 0.;
     for (auto const& term : merged) scale = std::max(scale, std::abs(term.coefficient));
     std::vector<ReadyTerm> kept;
     for (auto& term : merged) {
-        if (term.coefficient == Complex{}) continue;
+        if (std::abs(term.coefficient) <= 1e-14 * scale) continue;
         for (std::size_t c = 0; c < problem.charges.size(); ++c) {
             if (!problem.charges[c].conserved) continue;
             long delta = 0;
@@ -293,30 +477,7 @@ std::vector<ReadyTerm> merge_hamiltonian(std::vector<ReadyTerm> const& terms, Pr
         if (term.coefficient != Complex{}) kept.push_back(std::move(term));
     }
     if (kept.empty()) throw std::invalid_argument("classic DMRG Hamiltonian has no term");
-    // Hermiticity: the adjoint of c * F_i F_j is conj(c) * F_j^+ F_i^+, which in
-    // ascending site order is -conj(c) * F_i^+ F_j^+ for two odd factors.
-    index.clear();
-    for (std::size_t i = 0; i < kept.size(); ++i) index.emplace(term_key(kept[i]), i);
-    for (auto const& term : kept) {
-        ReadyTerm adjoint = term;
-        adjoint.coefficient = std::conj(term.coefficient);
-        if (term.factors.size() == 2 && term.factors[0].odd && term.factors[1].odd) adjoint.coefficient = -adjoint.coefficient;
-        for (auto& f : adjoint.factors) {
-            int const dim = problem.sites[problem.site_index[f.site]].dim;
-            std::vector<Complex> dagger(f.matrix.size());
-            for (int out = 0; out < dim; ++out)
-                for (int in = 0; in < dim; ++in)
-                    dagger[static_cast<std::size_t>(out) * dim + in] = std::conj(f.matrix[static_cast<std::size_t>(in) * dim + out]);
-            f.matrix = std::move(dagger);
-        }
-        auto found = index.find(term_key(adjoint));
-        Complex const present = found == index.end() ? Complex{} : kept[found->second].coefficient;
-        if (std::abs(present - adjoint.coefficient) > 1e-10 * scale) {
-            std::string where;
-            for (auto const& f : term.factors) where += (where.empty() ? "" : ", ") + std::to_string(f.site);
-            throw std::invalid_argument("classic DMRG Hamiltonian is not Hermitian (term on sites " + where + ")");
-        }
-    }
+    check_hermitian(kept, problem, scale);
     return kept;
 }
 
@@ -393,6 +554,7 @@ Problem prepare(models::CompiledOperator const& hamiltonian, models::PhysicalBas
                     }
                     if (!leaves_sector) col.components.push_back(std::move(component));
                 }
+                col.components = simplify(col.components); // the column reports their sum
                 entry.columns.push_back(std::move(col));
             };
             if (kind == MeasurementKind::expectation) {
@@ -638,28 +800,19 @@ struct Engine {
             auto const& plan = problem.measurements[p];
             layout[p].resize(plan.columns.size());
             for (std::size_t c = 0; c < plan.columns.size(); ++c) {
-                auto const& column = plan.columns[c];
-                if (plan.kind == MeasurementKind::terms) {
-                    for (auto const& component : column.components) {
-                        dmtk::Term<T> term = make_term(component);
-                        // On-site terms are measured as weighted terms, two-site
-                        // products as composite operators (alpsx dmrg.hpp).
-                        if (component.factors.size() == 1) {
-                            measured += term;
-                        } else {
-                            measured += dmtk::BasicOp<T>(term);
-                            two_site_measurements = true;
-                        }
-                        layout[p][c].push_back(measured.size() - 1);
+                // Every component is measured on its own and the column reports
+                // their sum: on-site terms as weighted terms, two-site products
+                // as composite operators (alpsx dmrg.hpp). A composite built
+                // from a whole sum would be applied to the state at every
+                // measurement, as the engine applies a Hamiltonian.
+                for (auto const& component : plan.columns[c].components) {
+                    dmtk::Term<T> term = make_term(component);
+                    if (component.factors.size() == 1) {
+                        measured += term;
+                    } else {
+                        measured += dmtk::BasicOp<T>(term);
+                        two_site_measurements = true;
                     }
-                } else if (!column.components.empty()) {
-                    dmtk::Hami<T> sum;
-                    for (auto const& component : column.components) {
-                        sum += make_term(component);
-                        two_site_measurements = two_site_measurements || component.factors.size() == 2;
-                    }
-                    sum.set_name(("m" + std::to_string(p)).c_str());
-                    measured += dmtk::BasicOp<T>(sum);
                     layout[p][c].push_back(measured.size() - 1);
                 }
             }

@@ -17,4 +17,9 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-add_subdirectory(dmrg)
+# The application runs on the classic DMRG component, which needs Eigen.
+if(ALPS_ENABLE_CLASSIC_DMRG)
+  add_subdirectory(dmrg)
+else()
+  message(STATUS "dmrg application not built: ALPS_ENABLE_CLASSIC_DMRG is OFF")
+endif()

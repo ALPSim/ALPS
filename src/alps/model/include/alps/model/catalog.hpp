@@ -20,6 +20,7 @@
 #include <alps/models/compiled.hpp>
 #include <alps/models/lattice.hpp>
 #include <alps/models/lattice_xml.hpp>
+#include <alps/models/physical_basis.hpp>
 #include <alps/multi_array.hpp>
 #include <alps/numeric/is_nonzero.hpp>
 #include <alps/type_traits/is_symbolic.hpp>
@@ -27,6 +28,7 @@
 #include <algorithm>
 #include <complex>
 #include <cstddef>
+#include <cstdio>
 #include <map>
 #include <set>
 #include <sstream>
@@ -118,6 +120,15 @@ public:
   std::map<std::string, double> sector() const;
   /// Per site, per local state value of one quantum number, in basis() order.
   std::vector<std::vector<double>> local_charge(std::string const& name) const;
+  /// The local states as a PhysicalBasis for ALPS::ed and ALPS::classic_dmrg:
+  /// per site every quantum number of its site basis (labels "S=0.5 Sz=-0.5"),
+  /// the fermion parity of local_parity() and, as conserved, the given charges
+  /// (sorted; a site whose basis lacks one carries zeros), under the strict
+  /// fermion convention the compiled operators use. Header-only: the
+  /// PhysicalBasis is plain data, unvalidated until a solver receives it.
+  PhysicalBasis physical_basis(std::vector<std::string> conserved) const;
+  /// physical_basis(conserved_quantum_numbers()).
+  PhysicalBasis physical_basis() const { return physical_basis(conserved_quantum_numbers()); }
 
   multi_array<value_type,2> local_matrix(SiteOperator const&, site_descriptor) const;
   multi_array<std::pair<value_type,bool>,4> local_matrix(BondOperator const&, bond_descriptor const&) const;
@@ -373,6 +384,43 @@ std::vector<std::vector<double>> CatalogModel<Scalar,G>::local_charge(std::strin
     for (auto const& state : local_basis[site]) rows[site].push_back(to_double(get_quantumnumber(state, index)));
   }
   return rows;
+}
+
+template <class Scalar, class G>
+PhysicalBasis CatalogModel<Scalar,G>::physical_basis(std::vector<std::string> conserved) const
+{
+  std::sort(conserved.begin(), conserved.end());
+  conserved.erase(std::unique(conserved.begin(), conserved.end()), conserved.end());
+  auto const& local_basis = basis();
+  auto const parity = local_parity();
+  PhysicalBasis result;
+  result.conserved_quantum_numbers = conserved;
+  result.fermion_convention = FermionConvention::strict;
+  for (std::size_t site = 0; site < local_basis.size(); ++site) {
+    LocalBasis local;
+    auto const& descriptor = local_basis.get_site_basis(static_cast<int>(site));
+    std::vector<std::string> names;
+    for (auto const& quantum_number : descriptor) names.push_back(quantum_number.name());
+    for (auto const& name : names) local.quantum_numbers[name] = local_charge(name)[site];
+    for (auto const& name : conserved)
+      if (!local.quantum_numbers.count(name))
+        local.quantum_numbers[name] = std::vector<double>(local_basis[site].size(), 0.);
+    for (std::size_t state = 0; state < local_basis[site].size(); ++state) {
+      std::string label;
+      for (auto const& name : names) {
+        char buffer[32];
+        std::snprintf(buffer, sizeof(buffer), "%g", local.quantum_numbers[name][state]);
+        label += (label.empty() ? "" : " ") + name + "=" + buffer;
+      }
+      local.labels.push_back(label.empty() ? std::to_string(state) : label);
+    }
+    local.parity = parity[site];
+    local.statistics = Statistics::bosonic;
+    for (double p : local.parity)
+      if (p < 0.) local.statistics = Statistics::fermionic;
+    result.sites.push_back(std::move(local));
+  }
+  return result;
 }
 
 } // namespace alps::models

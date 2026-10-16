@@ -1,9 +1,5 @@
-# DMRG scratch-file tests, owned by the solver.
-
-add_executable(dmrg_temporary_files dmrg_temporary_files.cpp)
-target_include_directories(dmrg_temporary_files PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/..")
-target_link_libraries(dmrg_temporary_files PRIVATE ALPS::utilities)
-alps_add_gtest(dmrg_temporary_files COMPONENT dmrg LABELS utilities compatibility)
+# DMRG scratch-file test of the application. The solver's own scratch
+# directory is tested with the classic DMRG component.
 
 if(TARGET dmrg AND TARGET parameter2xml)
   add_test(NAME dmrg_scratch_cleanup

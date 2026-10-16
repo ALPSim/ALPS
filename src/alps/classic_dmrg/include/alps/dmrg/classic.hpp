@@ -77,8 +77,9 @@ struct Options {
 // Operators measured on every targeted state. `expectation` reports one value
 // per operator, <psi|O|psi>; `terms` reports the expectation value of every
 // term of the operator separately (one column per term, in term order), for
-// example one column per site or per site pair. Every operator must be
-// Hermitian, carry at most two sites per term and have even fermion parity.
+// example one column per site or per site pair. Every term must act on at
+// most two sites and have even fermion parity. Values are real parts, so a
+// non-Hermitian operator such as c+_i c_j reports Re <psi|O|psi>.
 struct Measurements {
     std::map<std::string, models::CompiledOperator> expectation;
     std::map<std::string, models::CompiledOperator> terms;
@@ -131,13 +132,17 @@ using IterationCallback = std::function<void(Iteration const&)>;
 
 // Solve a compiled Hermitian operator on its physical basis. The basis must
 // list every site of the operator with its charges and parities; a fermionic
-// basis (any odd-parity state under the strict convention) must carry an
-// integer charge whose parity is the fermion parity on every site, such as
-// the particle number N, which becomes the engine's fermionic quantum number.
-// Terms are products of at most two local factors on distinct sites, with the
-// Jordan-Wigner strings ALPS::models emits; at most four quantum numbers (the
-// sector's charges plus that fermionic charge) can be tracked. At least four
-// sites are needed. Real arithmetic requires real coefficients and factors.
+// basis (any odd-parity state under the strict convention) must carry integer
+// charges whose summed parity is the fermion parity on every site: the
+// particle number N, or else the smallest such set (the XML catalog's Nup and
+// Ndown), which become the engine's fermionic quantum numbers. Terms are
+// products of at most two local factors on distinct sites, in either site
+// order, with the Jordan-Wigner strings ALPS::models emits; like terms are
+// combined (also terms that differ only by a scale moved between coefficient
+// and factor matrices) and the sum must be Hermitian, which is checked on the
+// dense site-pair matrices. At most four quantum numbers (the sector's charges
+// plus the fermionic ones) can be tracked. At least four sites are needed.
+// Real arithmetic requires real coefficients and factors.
 ALPS_CLASSIC_DMRG_DECL Result solve(models::CompiledOperator const& hamiltonian,
     models::PhysicalBasis const& basis, Options const& options = {},
     Measurements const& measurements = {}, IterationCallback callback = {});

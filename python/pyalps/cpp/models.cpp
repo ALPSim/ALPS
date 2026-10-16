@@ -952,40 +952,6 @@ void bind_qubits(nb::module_& m) {
 
 using Catalog = mdl::CatalogModel<>;
 
-mdl::PhysicalBasis catalog_physical_basis(Catalog const& model) {
-    auto const& local_basis = model.basis();
-    auto const parity = model.local_parity();
-    auto const conserved = model.conserved_quantum_numbers();
-    mdl::PhysicalBasis basis;
-    basis.conserved_quantum_numbers = conserved;
-    basis.fermion_convention = mdl::FermionConvention::strict;
-    for (std::size_t site = 0; site < local_basis.size(); ++site) {
-        mdl::LocalBasis local;
-        auto const& descriptor = local_basis.get_site_basis(static_cast<int>(site));
-        std::vector<std::string> names;
-        for (auto const& quantum_number : descriptor) names.push_back(quantum_number.name());
-        for (auto const& name : names) local.quantum_numbers[name] = model.local_charge(name)[site];
-        for (auto const& name : conserved)
-            if (!local.quantum_numbers.count(name))
-                local.quantum_numbers[name] = std::vector<double>(local_basis[site].size(), 0.);
-        for (std::size_t state = 0; state < local_basis[site].size(); ++state) {
-            std::string label;
-            for (auto const& name : names) {
-                char buffer[32];
-                std::snprintf(buffer, sizeof(buffer), "%g", local.quantum_numbers[name][state]);
-                label += (label.empty() ? "" : " ") + name + "=" + buffer;
-            }
-            local.labels.push_back(label.empty() ? std::to_string(state) : label);
-        }
-        local.parity = parity[site];
-        local.statistics = mdl::Statistics::bosonic;
-        for (double p : local.parity)
-            if (p < 0.) local.statistics = mdl::Statistics::fermionic;
-        basis.sites.push_back(std::move(local));
-    }
-    return basis;
-}
-
 void bind_catalog(nb::module_& m) {
     nb::class_<Catalog>(m, "CatalogModel",
         "An XML catalog model (MODEL, LATTICE and their parameters) resolved through the legacy lattice and "
@@ -1060,8 +1026,11 @@ void bind_catalog(nb::module_& m) {
              "CONSERVED_QUANTUMNUMBERS plus every constrained total (Sz_total, N_total, ...), sorted.")
         .def("sector", &Catalog::sector, "The evaluated constraints as totals keyed by quantum number.")
         .def("local_charge", &Catalog::local_charge, nb::arg("name"), "Per site, per local state values of a quantum number.")
-        .def("physical_basis", &catalog_physical_basis,
-             "The catalog's local spaces, parities and conserved charges as a PhysicalBasis (strict convention).")
+        .def("physical_basis", [](Catalog const& model, std::optional<std::vector<std::string>> conserved) {
+            return conserved ? model.physical_basis(*conserved) : model.physical_basis();
+        }, nb::arg("conserved_quantum_numbers") = nb::none(),
+           "The catalog's local spaces, parities and charges as a PhysicalBasis (strict convention); the "
+           "conserved charges default to conserved_quantum_numbers().")
         .def_prop_ro("parameters", [](Catalog const& model) { return dict_from_parameters(model.parameters()); })
         .def("set_parameters", [](Catalog& model, nb::dict const& parameters) {
             model.set_parameters(parameters_from_dict(parameters));

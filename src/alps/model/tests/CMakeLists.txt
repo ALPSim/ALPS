@@ -57,3 +57,11 @@ foreach(name catalog_model_parity ed_vs_hamiltonian_matrix lattice_xml_bridge)
   target_link_libraries(model_${name} PRIVATE ALPS::alps ALPS::ed ALPS::models)
   alps_add_gtest(model_${name} COMPONENT model LABELS "catalog;numeric" TIMEOUT 300)
 endforeach()
+
+# Catalog operators through the classic DMRG component against ALPS::ed: the
+# operators the dmrg application solves.
+if(ALPS_ENABLE_CLASSIC_DMRG)
+  add_executable(model_catalog_classic_dmrg catalog_classic_dmrg.cpp)
+  target_link_libraries(model_catalog_classic_dmrg PRIVATE ALPS::alps ALPS::ed ALPS::classic_dmrg)
+  alps_add_gtest(model_catalog_classic_dmrg COMPONENT model LABELS "catalog;classic_dmrg;numeric" TIMEOUT 600)
+endif()

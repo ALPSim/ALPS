@@ -111,3 +111,31 @@ def test_abort_and_invalid_requests():
     assert dmrg.ramped_sweeps(2, 8) == [dmrg.SweepStates(2, 4), dmrg.SweepStates(6, 8)]
     with pytest.raises(ValueError):
         dmrg.ramped_sweeps(4, 1)
+
+
+def catalog_reference(op, basis, sector, count):
+    problem = ed.prepare_projected(op, ed.projected_spaces(basis), sector=sector)
+    return problem.eigenstates(count=count).eigenvalues
+
+
+def test_catalog_models_solve_like_exact_diagonalization():
+    # The operators the XML dmrg application solves. The catalog's fermion
+    # Hubbard basis has Nup and Ndown but no N, so both carry the fermion
+    # parity; the periodic chain's wrap bond arrives in descending site order.
+    exact_sweeps = {"sweeps": dmrg.fixed_sweeps(4, 200), "warmup_states": 200, "lanczos_tolerance": 1e-13}
+    hubbard = models.CatalogModel({"MODEL": "fermion Hubbard", "LATTICE": "open chain lattice", "L": 6,
+                                   "t": 1.0, "U": 4.0})
+    op = hubbard.compile_hamiltonian()
+    basis = hubbard.physical_basis(conserved_quantum_numbers=["Nup", "Ndown"])
+    assert basis.conserved_quantum_numbers == ["Ndown", "Nup"]
+    assert hubbard.physical_basis().conserved_quantum_numbers == hubbard.conserved_quantum_numbers()
+    sector = {"Nup": 3.0, "Ndown": 3.0}
+    result = dmrg.solve(op, basis, sector=sector, num_eigenvalues=2, **exact_sweeps)
+    np.testing.assert_allclose(result.energies, catalog_reference(op, basis, sector, 2), atol=1e-8)
+
+    ring = models.CatalogModel({"MODEL": "spin", "LATTICE": "chain lattice", "L": 8, "J": 1.0, "local_S": 0.5,
+                                "CONSERVED_QUANTUMNUMBERS": "Sz"})
+    op = ring.compile_hamiltonian()
+    basis = ring.physical_basis()
+    result = dmrg.solve(op, basis, sector={"Sz": 0.0}, **exact_sweeps)
+    assert result.energy == pytest.approx(catalog_reference(op, basis, {"Sz": 0.0}, 1)[0], abs=1e-8)

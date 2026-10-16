@@ -3,6 +3,7 @@
 * ALPS Project Applications
 *
 * Copyright (C) 1994-2006 by Matthias Troyer <troyer@comp-phys.org>
+* Copyright (C) 2026 by the ALPS collaboration
 *
 * ALPS Project: https://alps.comp-phys.org/
 * SPDX-License-Identifier: MIT
@@ -11,24 +12,39 @@
 
 /* $Id: dmrg.h 2552 2007-09-10 18:53:03Z afeiguin $ */
 
-#define WITH_LAPACK
-//#define WITH_WARNINGS
+// The dmrg application's task: parameters, measurement definitions and
+// output as before, solved by ALPS::classic_dmrg, which runs Adrian
+// Feiguin's dmtk engine (formerly copied into this directory) on numeric
+// operators. The XML catalog Hamiltonian and the measured operators are
+// compiled with alps::models::CatalogModel (<alps/model/catalog.hpp>), the
+// evaluator ALPS::ed is checked against, instead of being translated term by
+// term into dmtk operators here. Parameters, measurement names and the output
+// layout are those of the earlier task in this file; the routing itself was
+// written in ALPS for this change and is not taken from alpsx.
 
-#include "dmtk/dmtk.h"
+#include <alps/dmrg/classic.hpp>
+#include <alps/model/catalog.hpp>
 
 #include <alps/model.h>
 #include <alps/lattice.h>
 #include <alps/scheduler.h>
 #include <alps/scheduler/measurement_operators.h>
 #include <alps/numeric/real.hpp>
+#include <alps/type_traits/is_complex.hpp>
 #include <alps/utility/os.hpp>
-#include <alps/scheduler.h>
+#include <alps/hdf5.hpp>
 
 #include <boost/tokenizer.hpp>
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/archive/tmpdir.hpp>
 #include <boost/foreach.hpp>
 
+#include <cstddef>
+#include <iostream>
+#include <map>
+#include <set>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
 #define DMRG_VERSION "1.0.0"
 #define DMRG_DATE "2006/10/02"
@@ -42,23 +58,20 @@ inline void print_dmrg_copyright(std::ostream& os)
      << "  copyright (c) 2006-2013 by Adrian E. Feiguin\n\n";
 }
 
-#include <alps/hdf5.hpp>
-
 template<class value_type>
-class DMRGTask 
+class DMRGTask
  : public alps::scheduler::Task
  , public alps::graph_helper<>
  , public alps::model_helper<>
  , protected alps::EigenvectorMeasurements<value_type >
 {
-public:  
-  typedef alps::half_integer<short> half_integer_type;
+public:
   DMRGTask<value_type>(const alps::ProcessList& , const boost::filesystem::path& );
   DMRGTask<value_type>(const alps::ProcessList& w, const alps::Parameters& p);
   void dostep();
   void write_xml_body(alps::oxstream&, const boost::filesystem::path&,bool) const;
 
-  static void print_copyright(std::ostream& os = std::cout) 
+  static void print_copyright(std::ostream& os = std::cout)
   {
     print_dmrg_copyright(os);
   }
@@ -69,6 +82,7 @@ public:
   std::map<std::string,std::vector<double> > iteration_measurements;
 
 private:
+  typedef alps::models::CatalogModel<value_type> catalog_type;
 
   alps::SiteOperator make_site_term(std::string x)
   {
@@ -78,64 +92,27 @@ private:
     substitute_operators(op,parms);
     return op;
   }
-  
-  
+
   void init();
-  dmtk::BasicOp<value_type > create_site_operator(std::string const& name, alps::SiteOperator const& siteop, int type);
-  void build_site_operator(alps::SiteOperator const& siteop, int site, dmtk::Hami<value_type > &);
-  void build_bond_operator(alps::BondOperator const& bondop, bond_descriptor const& b, dmtk::Hami<value_type > &this_hami);  
-  void build_2site_operator(std::pair<alps::SiteOperator,alps::SiteOperator> const& siteops, 
-                            std::pair<int,int> sites, dmtk::Hami<value_type > &this_hami);
- 
-  void save_results(); 
-  
-  int num_sweeps;
-  std::vector<int> num_states;
-  std::vector<std::string> quantumnumber_names;
-  std::vector<bool> conserved_quantumnumber;
-  std::vector<half_integer_type> conserved_quantumnumber_value;
-  int qnmask;
+  alps::dmrg::classic::Measurements requests(catalog_type const& model);
+  void store(alps::dmrg::classic::Result const& result);
 
-  dmtk::System<value_type > system;
-  dmtk::Hami<value_type > hami;
-  dmtk::Lattice lattice;
-  std::vector<dmtk::Block<value_type > > site_block;
-  
   int num_eigenvalues;
-  int verbose;
-  int nwarmup;
-  int maxstates;
-  double error;
-  double lanczos_tol;
-
-  // For resuming a previous run
-  int start_sweep;
-  int start_dir;
-  int start_iter;
-
+  // Conserved charges: those of CONSERVED_QUANTUMNUMBERS with a <name>_total.
+  std::vector<std::string> conserved;
+  alps::dmrg::classic::Options options;
 };
 
-
-
-template<class value_type>
-bool
-handler(dmtk::System<value_type>& S, size_t signal_id, void *data)
+// Measurement request names: the expression kind, its name and the location.
+inline std::string dmrg_request(char kind, std::string const& name, std::size_t first = 0, std::size_t second = 0)
 {
-  DMRGTask<value_type> &task = * (DMRGTask<value_type> *)data;
-  if(signal_id == dmtk::SYSTEM_SIGNAL_END_ITER){
-    task.iteration_measurements["Direction"].push_back(S.get_dir());
-    task.iteration_measurements["Iteration"].push_back(S.get_iter());
-    task.iteration_measurements["Energy"].push_back(S.energy[0]);
-    task.iteration_measurements["Truncation Error"].push_back(S.truncation_error());
-    task.iteration_measurements["Entropy"].push_back(S.entropy());
-  }
-  return false;
+  return std::string(1, kind) + '\x1f' + name + '\x1f' + std::to_string(first) + '\x1f' + std::to_string(second);
 }
 
 template<class value_type>
 DMRGTask<value_type>::DMRGTask(const alps::ProcessList& w,const boost::filesystem::path& fn)
   : alps::scheduler::Task(w,fn)
-  , alps::graph_helper<>(parms) 
+  , alps::graph_helper<>(parms)
   , alps::model_helper<>(*this,parms)
   , alps::EigenvectorMeasurements<value_type >(*this)
 {
@@ -144,8 +121,8 @@ DMRGTask<value_type>::DMRGTask(const alps::ProcessList& w,const boost::filesyste
 
 template<class value_type>
 DMRGTask<value_type>::DMRGTask(const alps::ProcessList& w,const alps::Parameters& p)
-  : alps::scheduler::Task(w,p) 
-  , alps::graph_helper<>(parms) 
+  : alps::scheduler::Task(w,p)
+  , alps::graph_helper<>(parms)
   , alps::model_helper<>(*this,parms)
   , alps::EigenvectorMeasurements<value_type >(*this)
 {
@@ -156,36 +133,36 @@ DMRGTask<value_type>::DMRGTask(const alps::ProcessList& w,const alps::Parameters
 template<class value_type>
 void DMRGTask<value_type>::init()
 {
+  namespace classic = alps::dmrg::classic;
   num_eigenvalues = this->parms.value_or_default("NUMBER_EIGENVALUES",1);
-   
+
   typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
   boost::char_separator<char> sep(" ,");
 
-  dmtk::QN::init();
   // read number of sweeps
-  num_sweeps = parms.value_or_default("SWEEPS",4);
-  start_sweep = parms.value_or_default("START_SWEEP",0);
-  start_dir = parms.value_or_default("START_DIR",0);
-  if(start_dir != 0 && start_dir != 1){
-    boost::throw_exception(std::runtime_error("START_DIR can assume the values 0 (left-to-right) or 1 (right-to-left)"));
-  }
-  start_iter = parms.value_or_default("START_ITER",1);
-  verbose = parms.value_or_default("VERBOSE",0);
+  int const num_sweeps = parms.value_or_default("SWEEPS",4);
+  // Resuming from the scratch files of an interrupted run is gone with the
+  // application's private engine: the solver owns its scratch directory.
+  if (static_cast<int>(parms.value_or_default("START_SWEEP",0)) != 0)
+    boost::throw_exception(std::runtime_error("START_SWEEP (with START_DIR and START_ITER) is no longer supported: "
+                                              "the dmrg application cannot resume an interrupted run"));
+  int const verbose = parms.value_or_default("VERBOSE",0);
 
   // read number of states
-  nwarmup = 20;
+  int nwarmup = 20;
   if (parms.defined("NUM_WARMUP_STATES")) {
     nwarmup = static_cast<int>(parms["NUM_WARMUP_STATES"]);
   }
-  error = -1.;
+  double error = -1.;
   if (parms.defined("TRUNCATION_ERROR")) {
     error = static_cast<double>(parms["TRUNCATION_ERROR"]);
   }
-  lanczos_tol = -1.;
+  double lanczos_tol = -1.;
   if (parms.defined("LANCZOS_TOLERANCE")) {
     lanczos_tol = static_cast<double>(parms["LANCZOS_TOLERANCE"]);
   }
-  maxstates = -1;
+  int maxstates = -1;
+  std::vector<int> num_states;
   if (parms.defined("STATES")) {
     std::string states_string = parms["STATES"];
     tokenizer state_tokens(states_string, sep);
@@ -204,332 +181,191 @@ void DMRGTask<value_type>::init()
     for (int i=0; i< 2*num_sweeps; ++i)
       num_states.push_back(maxstates);
   }
-  else 
+  else
     boost::throw_exception(std::runtime_error("Need to specify either 2*SWEEPS different values in STATES, or one MAXSTATES value"));
-  
-  // get all quantum numbers
+  if (num_sweeps < 1)
+    boost::throw_exception(std::runtime_error("SWEEPS must be positive"));
+  for (int i = 0; i < 2*num_sweeps; ++i)
+    if (num_states[i] < 1)
+      boost::throw_exception(std::runtime_error("Every half sweep must keep at least one state; increase MAXSTATES or STATES"));
+
+  // the quantum numbers of every site type
   std::set<std::string> qns;
   for (site_iterator it = sites().first ; it != sites().second ; ++it) {
     std::set<std::string> newqns = quantum_numbers(site_type(*it));
     qns.insert(newqns.begin(),newqns.end());
   }
 
-  
-  // read quantum numbers and their total values
-  std::copy(qns.begin(),qns.end(),std::back_inserter(quantumnumber_names));
-  conserved_quantumnumber.resize(quantumnumber_names.size(),false);
-  conserved_quantumnumber_value.resize(quantumnumber_names.size());
+  // Only the listed quantum numbers given a <name>_total are conserved; the
+  // other names of CONSERVED_QUANTUMNUMBERS are ignored, as they always were
+  // ("N,Sz" for the spin model).
   if (parms.defined("CONSERVED_QUANTUMNUMBERS")) {
     std::string qn_string = parms["CONSERVED_QUANTUMNUMBERS"];
     tokenizer qn_tokens(qn_string, sep);
-    std::vector<std::string> conserved_quantumnumber_names;
-    std::copy(qn_tokens.begin(),qn_tokens.end(),std::back_inserter(conserved_quantumnumber_names));
-    for (int i=0; i<conserved_quantumnumber_names.size(); i++) {
-      if (parms.defined(conserved_quantumnumber_names[i]+"_total")) {
-        int j = std::find(quantumnumber_names.begin(),quantumnumber_names.end(),conserved_quantumnumber_names[i])-quantumnumber_names.begin();
-        if (j >= quantumnumber_names.size())
-          boost::throw_exception(std::runtime_error("Quantum number " + conserved_quantumnumber_names[i] + " is not defined in the model" ));
-        conserved_quantumnumber[j] = true;
-        conserved_quantumnumber_value[j] = alps::evaluate<double>(static_cast<std::string>(parms[conserved_quantumnumber_names[i]+"_total"]),parms);
-      }
+    for (tokenizer::const_iterator it = qn_tokens.begin(); it != qn_tokens.end(); ++it) {
+      std::string const name = *it;
+      if (!parms.defined(name+"_total") || options.sector.count(name))
+        continue;
+      if (!qns.count(name))
+        boost::throw_exception(std::runtime_error("Quantum number " + name + " is not defined in the model" ));
+      options.sector[name] = alps::evaluate<double>(static_cast<std::string>(parms[name+"_total"]),parms);
+      conserved.push_back(name);
     }
   }
+
+  options.sweeps.clear();
+  for (int i = 0; i < num_sweeps; ++i)
+    options.sweeps.push_back(classic::SweepStates{static_cast<std::size_t>(num_states[2*i]),
+                                                  static_cast<std::size_t>(num_states[2*i+1])});
+  options.warmup_states = nwarmup > 0 ? static_cast<std::size_t>(nwarmup) : 20;
+  options.num_eigenvalues = num_eigenvalues > 0 ? static_cast<std::size_t>(num_eigenvalues) : 1;
+  if (error > 0.) {
+    options.truncation_error = error;
+    if (maxstates > 0)
+      options.truncation_max_states = static_cast<std::size_t>(maxstates);
+  }
+  if (lanczos_tol > 0.)
+    options.lanczos_tolerance = lanczos_tol;
+  options.arithmetic = alps::is_complex<value_type>::value ? classic::Arithmetic::complex : classic::Arithmetic::real;
+  options.verbose = verbose > 0 ? verbose : 0;
+  options.log = &std::cout;
 }
 
-template <class SiteOp>
-std::string simplify_name(const SiteOp &op)
+// One expectation value per site or bond (local), per expression (average)
+// and per ordered site pair (correlations), compiled by the catalog model.
+template<class value_type>
+alps::dmrg::classic::Measurements
+DMRGTask<value_type>::requests(catalog_type const& model)
 {
-  std::string term = op.term();
-  std::string arg = "("+op.site()+")";
-  boost::algorithm::replace_all(term,arg,"");
-  return term;
+  typedef std::pair<std::string,std::string> string_pair;
+  typedef std::pair<std::string,std::pair<std::string,std::string> > string_string_pair_pair;
+  typedef typename catalog_type::site_descriptor catalog_site;
+  alps::dmrg::classic::Measurements result;
+  auto& expectation = result.expectation;
+
+  BOOST_FOREACH (string_pair const& ex, this->local_expressions) {
+    if (has_bond_operator(ex.second)) {
+      alps::BondOperator const op = this->get_bond_operator(ex.second,parms);
+      std::size_t i = 0;
+      for (auto it = model.graph().bonds().first; it != model.graph().bonds().second; ++it, ++i)
+        expectation[dmrg_request('L', ex.first, i)] = model.compile_operator(op, *it);
+    }
+    else {
+      alps::SiteOperator const op = make_site_term(ex.second);
+      for (auto it = model.graph().sites().first; it != model.graph().sites().second; ++it)
+        expectation[dmrg_request('L', ex.first, *it)] = model.compile_operator(op, *it);
+    }
+  }
+
+  BOOST_FOREACH (string_pair const& ex, this->average_expressions) {
+    if (has_bond_operator(ex.second))
+      expectation[dmrg_request('A', ex.first)] = model.compile_operator(this->get_bond_operator(ex.second,parms));
+    else
+      expectation[dmrg_request('A', ex.first)] = model.compile_operator(make_site_term(ex.second));
+  }
+
+  BOOST_FOREACH (string_string_pair_pair const& ex, this->correlation_expressions) {
+    alps::SiteOperator const onsite = make_site_term(ex.second.first+"(i)*"+ex.second.second+"(i)");
+    alps::BondOperator pair(ex.second.first+"(i)*"+ex.second.second+"(j)","i","j");
+    substitute_operators(pair,parms);
+    // The pair tensor depends on the two site types only; evaluate it once per type pair.
+    std::map<std::pair<int,int>, alps::multi_array<std::pair<value_type,bool>,4> > tensors;
+    for (site_iterator s1 = sites().first; s1 != sites().second; ++s1)
+      for (site_iterator s2 = sites().first; s2 != sites().second; ++s2) {
+        catalog_site const first = static_cast<catalog_site>(*s1), second = static_cast<catalog_site>(*s2);
+        std::string const name = dmrg_request('C', ex.first, *s1, *s2);
+        if (*s1 == *s2) {
+          expectation[name] = model.compile_operator(onsite, first);
+          continue;
+        }
+        std::pair<int,int> const types(site_type(*s1), site_type(*s2));
+        auto found = tensors.find(types);
+        if (found == tensors.end())
+          found = tensors.emplace(types, model.local_matrix(pair, first, second)).first;
+        expectation[name] = model.compile_operator(found->second, first, second);
+      }
+  }
+  return result;
 }
 
 template<class value_type>
-void DMRGTask<value_type>::dostep() 
+void DMRGTask<value_type>::dostep()
 {
   if (finished())
     return;
 
   // Select scratch storage when this task runs; other tasks may have been
-  // constructed since init().
-  if (parms.defined("TEMP_DIRECTORY")) {
-    std::string temp_dir = parms["TEMP_DIRECTORY"];
-    dmtk::tmp_files.set_temp_dir(temp_dir.c_str());
-  } else {
-    dmtk::tmp_files.set_temp_dir(alps::temp_directory_path().string().c_str());
-  }
+  // constructed since init(). The solver works in a private directory below
+  // it and removes that directory when it returns.
+  if (parms.defined("TEMP_DIRECTORY"))
+    options.scratch_parent = static_cast<std::string>(parms["TEMP_DIRECTORY"]);
+  else
+    options.scratch_parent = alps::temp_directory_path().string();
 
-  dmtk::Lattice l(num_sites(),dmtk::OBC);
-  hami = dmtk::Hami<value_type >(l);
-  site_block.resize(alps::maximum_vertex_type(graph())+1);
+  // The scheduler seeded the disorder generator before this task built its
+  // lattice; seed it again so the catalog model builds the same graph.
+  alps::Disorder::seed(parms.value_or_default("DISORDERSEED",0));
+  catalog_type const model(parms);
+  if (model.graph().num_sites() != num_sites())
+    boost::throw_exception(std::logic_error("dmrg: the catalog model and the task disagree on the lattice"));
+  alps::models::CompiledOperator const hamiltonian = model.compile_hamiltonian();
+  alps::models::PhysicalBasis const basis = model.physical_basis(conserved);
 
-// define quantum numbers first: we need to know which are conserved before we build operators
-
-  qnmask = 0;
-  for (int type  = 0 ; type < alps::maximum_vertex_type(graph())+1 ; ++type) {
-    // create quantum numbers for this site block
-    /*if(conserved_quantumnumber.size() > 0)*/ {
-      for (int qn = 0 ; qn < site_basis(type).size(); ++qn) {
-        int idx = dmtk::QN::add_qn_index(site_basis(type)[qn].name(),site_basis(type)[qn].fermionic()); 
-        qnmask |= (1 << qn);
-      }
-    }
-  }
-  dmtk::QN::set_qn_mask(qnmask);
-
-  dmtk::QN qn;
-  qnmask = 0;
-  for(int i = 0; i < quantumnumber_names.size(); i++) {
-    if(conserved_quantumnumber[i]){
-      qn[quantumnumber_names[i]] = conserved_quantumnumber_value[i];
-      qnmask |= (1 << (dmtk::QN::get_qn_index(quantumnumber_names[i])));
-    }
-  }
-
-//  Iterating over sites: create site blocks
-  for (site_iterator it = sites().first ; it != sites().second ; ++it) {
-    hami.sites(*it) = &site_block[site_type(*it)];
-    site_block[site_type(*it)].clear();
-  }
-
-  // iterate over all ste types
-  for (int type  = 0 ; type < alps::maximum_vertex_type(graph())+1 ; ++type) {
-    // create quantum numbers for this site block
-    /*if(conserved_quantumnumber.size() > 0)*/ {
-      for (int qn = 0 ; qn < site_basis(type).size(); ++qn) {
-        int idx = dmtk::QN::add_qn_index(site_basis(type)[qn].name(),site_basis(type)[qn].fermionic()); 
-      }
-    }
-
-    // create site basis for this block
-    alps::site_basis<short> b(site_basis(type));
-    dmtk::Basis basis(b.size());
-    // iterate over basis states s
-    for (int s=0 ; s<b.size();++s) {
-      dmtk::QN real_qn;
-      // extract values of the quantum numbers
-      for (int qn = 0 ; qn < site_basis(type).size() ; ++qn){
-        if (verbose)
-          std::cout << site_basis(type)[qn].name() << "=" << b[s][qn] << "  ";
-        int idx = dmtk::QN::get_qn_index(site_basis(type)[qn].name()); 
-        if (idx < QN_MAX_SIZE)
-          real_qn[idx] = b[s][qn];
-      }
-      // create the basis state for this block
-      basis[s] = dmtk::State(s,real_qn);
-    }
-    basis.reorder();
-    site_block[type].resize(basis);
-    site_block[type].set_lattice(dmtk::Lattice(1,dmtk::OBC));
-  }
-
-  // create site terms
-  for (site_iterator it = sites().first ; it != sites().second ; ++it)
-    build_site_operator(site_term(site_type(*it)),*it, hami);
-
-  // create bond terms
-  for (bond_iterator it = bonds().first ; it != bonds().second ; ++it)
-    build_bond_operator(bond_term(bond_type(*it)),*it, hami);
-
-//-------------------------------------------------------------
-
-  if (verbose)
-    std::cout << hami.description() << endl;
-
-  // set up measurements
-  
-  typedef std::pair<std::string,std::string> string_pair;
- 
-  dmtk::Hami<value_type > meas_terms(hami);
-  meas_terms.clear();
-
-  // calculate local measurements
-  BOOST_FOREACH (string_pair const& ex, this->local_expressions) {
-    if (has_bond_operator(ex.second)) {
-      int i=0;
-      for (bond_iterator bit=bonds().first; bit!=bonds().second;++bit,++i) {
-        dmtk::Hami<value_type > meas;
-        build_bond_operator(get_bond_operator(ex.second,parms),*bit,meas);
-        dmtk::Term<value_type > tmeas = meas[0];
-//        tmeas.set_name((ex.first+"["+boost::lexical_cast<std::string>(i)+"]").c_str());
-//        meas_terms += dmtk::BasicOp<value_type >(tmeas);
-        meas_terms += tmeas;
-      }
-    }
-    else {
-      for (site_iterator sit=sites().first; sit!=sites().second;++sit) {
-        dmtk::Hami<value_type > meas;
-        build_site_operator(make_site_term(ex.second),*sit,meas);
-        dmtk::Term<value_type > tmeas = meas[0];
-//        tmeas.set_name((ex.first+"["+boost::lexical_cast<std::string>(*sit)+"]").c_str());
-//        meas_terms += dmtk::BasicOp<value_type >(tmeas);
-        meas_terms += tmeas[0];
-      }
-    }
-  }
-  
-  // average measurements will be identical loops, but all terms added instead of stored separately
-
-   BOOST_FOREACH (string_pair const& ex, this->average_expressions) {
-    dmtk::Hami<value_type > meas;
-    if (has_bond_operator(ex.second)) {
-      for (bond_iterator bit=bonds().first; bit!=bonds().second;++bit)
-        build_bond_operator(get_bond_operator(ex.second,parms),*bit,meas);
-      meas.set_name(ex.first.c_str());
-//meas.set_name(meas.description().c_str());
-      meas_terms += dmtk::BasicOp<value_type >(meas);
-    }
-    else {
-      for (site_iterator sit=sites().first; sit!=sites().second;++sit)
-        build_site_operator(make_site_term(ex.second),*sit,meas);
-      meas.set_name(ex.first.c_str());
-//meas.set_name(meas.description().c_str());
-//      meas_terms += dmtk::BasicOp<value_type >(meas);
-      meas_terms += dmtk::BasicOp<value_type >(meas);
-    }
-    // store into average_values instead of local_values
-    // local_values[ex.first].push_back(av);
-  }
-  
-  // correlations
-
-  std::vector<unsigned int> distance_mult = distance_multiplicities();
-  
-  // calculate correlations
-  typedef std::pair<std::string,std::pair<std::string,std::string> > string_string_pair_pair;
-  BOOST_FOREACH (string_string_pair_pair const& ex, this->correlation_expressions) {
-    alps::SiteOperator ops1 = make_site_term(ex.second.first+"(i)");
-    alps::SiteOperator ops2 = make_site_term(ex.second.second+"(i)");
-    alps::SiteOperator ops = make_site_term(ex.second.first+"(i)*"+ex.second.second+"(i)");
-
-    // use num_distances() for retrieval
-    for (site_iterator sit1=this->sites().first; sit1!=this->sites().second ; ++sit1)
-      for (site_iterator sit2=this->sites().first; sit2!=this->sites().second ; ++sit2) {
-        std::size_t d = distance(*sit1,*sit2);
-        // loop over all terms in ops1 and ops2 as above where we loop over all terms in ops
-        // build terms like above
-        if (*sit1 == *sit2) {
-          // create matrices for combined term
-          // use ops
-          dmtk::Hami<value_type > meas;
-          build_site_operator(ops,*sit1,meas);
-          dmtk::Term<value_type > tmeas = meas[0];
-          tmeas *= 1./double(distance_mult[d]);
-//          tmeas.set_name((ex.first+"["+boost::lexical_cast<std::string>(d)+"]").c_str());
-          meas_terms += tmeas[0];
-        }
-        else {
-          // use ops1 and ops2
-          dmtk::Hami<value_type > meas;
-          build_2site_operator(std::make_pair(ops1,ops2),std::pair<int,int>(*sit1,*sit2),meas);
-          dmtk::Term<value_type > tmeas = meas[0];
-          tmeas *= 1./double(distance_mult[d]);
-//          tmeas.set_name((ex.first+"["+boost::lexical_cast<std::string>(d)+"]").c_str());
-          meas_terms += dmtk::BasicOp<value_type >(tmeas);
-        }
-    }
-  }
-  typename dmtk::Hami<value_type>::iterator iter;
-  if (verbose) {
-    for(iter = meas_terms.begin(); iter != meas_terms.end(); iter++)
-      cout << iter->name() << " " << iter->description() << endl;
-
-    std::cout << meas_terms.description() << "\n";
-  }
-  
-///////////////////////////////////////////////////////////////
-// Simulation
-///////////////////////////////////////////////////////////////
-  hami = hami.reorder_terms();
-  if(verbose)
-    cout << hami.description() << endl;
-  this->system = dmtk::System<value_type >(hami,l,"ALPS");
-  dmtk::System<value_type > &S = this->system;
-  S.set_store_products(false);
-  S.signal_connect(handler, dmtk::SYSTEM_SIGNAL_END_ITER, this);
-  if(error > 0.0) S.set_error(error, maxstates);
-  if(lanczos_tol > 0.0) S.set_lanczos_tolerance(lanczos_tol);
-  
-  S.set_calc_gap(num_eigenvalues-1); 
-  dmtk::Matrix<size_t> nstates(2,num_sweeps);
-
-  S.qnt = qn;
-  S.set_qn_mask(qnmask);
-  S.set_use_hc(false);
-//  S.set_store_products(false);
-  S.set_grow_symmetric(false);
-  S.set_verbose(verbose);
-  for(int i = 0; i < num_sweeps; i++)
-    for(int j = 0; j < 2; j++) {
-      nstates(j,i) = num_states[i*2+j];
-    }
-  S.start(num_sweeps, nstates); 
-  if(start_sweep != 0) {
-    S.resume(start_sweep, start_dir, start_iter);
-  } else {
-    S.run(nwarmup);
-  }
-  if(S.store_products()) S.set_full_sweep(true);
-  S.corr += meas_terms;
-  S.final_sweep(num_states[num_states.size()-1], dmtk::RIGHT2LEFT, 1, true); 
-  if(!S.store_products()) S.measure();
-  save_results();
-  for(int i = 1; i < S._target.size(); i++){
-    S.gs = S._target[i];
-    S.measure();
-    save_results();
-  }
-  for(int i = 0; i < S.energy.size(); i++) {
-    this->average_values["Energy"].push_back(S.energy[i]);
-  }
-  this->average_values["Truncation error"].push_back(S.truncation_error());
+  alps::dmrg::classic::Result const result =
+    alps::dmrg::classic::solve(hamiltonian, basis, options, requests(model));
+  store(result);
   finish();
-  dmtk::tmp_files.cleanup();
 }
 
 
 template<class value_type>
 void
-DMRGTask<value_type>::save_results()
+DMRGTask<value_type>::store(alps::dmrg::classic::Result const& result)
 {
-  dmtk::System<value_type > &S = this->system;
-  typename dmtk::Hami<value_type>::iterator iter = S.corr.begin();
   typedef std::pair<std::string,std::string> string_pair;
   typedef std::pair<std::string,std::pair<std::string,std::string> > string_string_pair_pair;
-  using alps::numeric::real;
-  
-  // store local measurements
-  BOOST_FOREACH (string_pair const& ex, this->local_expressions) {
-    std::vector<value_type> av;
-    for (int i=0; i< (has_bond_operator(ex.second) ? num_bonds() : num_sites());++i){
-      cout << iter->name() << " " << iter->description() << " " << iter->value() << endl;
-      av.push_back(real(iter++->value()));   
-    }
-    this->local_values[ex.first].push_back(av);
-  }
-  
-  // average measurements will be identical loops, but all terms added instead of stored separately
+  auto value = [&](std::string const& name, std::size_t target) {
+    return result.measurements.at(name).values.at(target).at(0);
+  };
+  std::size_t const targets = result.energies.size();
 
-   BOOST_FOREACH (string_pair const& ex, this->average_expressions) {
-    cout << iter->name() << " " << iter->description() << " " << iter->value() << endl;
-    this->average_values[ex.first].push_back(real(iter++->value()));
-  }
-  
-  // correlations
-  BOOST_FOREACH (string_string_pair_pair const& ex, this->correlation_expressions) {
-    std::vector<value_type> av;
-    for (int i=0; i<num_distances();++i){
-      cout << iter->name() << " " << iter->description() << " " << iter->value() << endl;
-      av.push_back(real(iter++->value()));   
-    }
-    this->correlation_values[ex.first].push_back(av);
+  for (auto const& iteration : result.iterations) {
+    // dmtk's LEFT2RIGHT is 0 and RIGHT2LEFT is 1.
+    iteration_measurements["Direction"].push_back(
+      iteration.direction == alps::dmrg::classic::Direction::right_to_left ? 1. : 0.);
+    iteration_measurements["Iteration"].push_back(static_cast<double>(iteration.index));
+    iteration_measurements["Energy"].push_back(iteration.energy);
+    iteration_measurements["Truncation Error"].push_back(iteration.truncation_error);
+    iteration_measurements["Entropy"].push_back(iteration.entropy);
   }
 
-  if (iter != S.corr.end())
-    std::cerr << "Did not get right number of measurements\n";
+  std::vector<unsigned int> const multiplicity = distance_multiplicities();
+  for (std::size_t target = 0; target < targets; ++target) {
+    BOOST_FOREACH (string_pair const& ex, this->local_expressions) {
+      std::vector<value_type> values;
+      std::size_t const count = has_bond_operator(ex.second) ? num_bonds() : num_sites();
+      for (std::size_t i = 0; i < count; ++i)
+        values.push_back(value(dmrg_request('L', ex.first, i), target));
+      this->local_values[ex.first].push_back(values);
+    }
+    BOOST_FOREACH (string_pair const& ex, this->average_expressions)
+      this->average_values[ex.first].push_back(value(dmrg_request('A', ex.first), target));
+    // The average over the site pairs at each distance.
+    BOOST_FOREACH (string_string_pair_pair const& ex, this->correlation_expressions) {
+      std::vector<value_type> values(num_distances(), value_type(0.));
+      for (site_iterator s1 = sites().first; s1 != sites().second; ++s1)
+        for (site_iterator s2 = sites().first; s2 != sites().second; ++s2) {
+          std::size_t const d = distance(*s1,*s2);
+          values[d] += value(dmrg_request('C', ex.first, *s1, *s2), target) / static_cast<double>(multiplicity[d]);
+        }
+      this->correlation_values[ex.first].push_back(values);
+    }
+  }
+  for (std::size_t i = 0; i < targets; ++i)
+    this->average_values["Energy"].push_back(result.energies[i]);
+  this->average_values["Truncation error"].push_back(result.final_truncation_error);
 }
-    
+
 #ifdef ALPS_HAVE_HDF5
 template<class value_type>
 void DMRGTask<value_type>::save(alps::hdf5::archive & ar) const
@@ -541,13 +377,11 @@ void DMRGTask<value_type>::save(alps::hdf5::archive & ar) const
     std::vector<double> energies = real(it->second);
     ar["spectrum/energies"] << energies;
   }
-  
+
   std::string context = ar.get_context();
   ar.set_context(ar.complete_path("spectrum"));
   alps::EigenvectorMeasurements<value_type>::save(ar);
   ar.set_context(context);
-  
-//  ar["spectrum"] << static_cast<const alps::EigenvectorMeasurements<value_type >&>(*this);
 
   typedef typename std::map<std::string,std::vector<double> >::const_iterator IT;
   for (IT it=iteration_measurements.begin(); it != iteration_measurements.end();++it)
@@ -563,124 +397,8 @@ void DMRGTask<value_type>::write_xml_body(alps::oxstream& out, const boost::file
     for (int j=0;j<num_eigenvalues;++j) {
       out << alps::start_tag("EIGENSTATE") << alps::attribute("number",j);
       this->write_xml_one_vector(out,p,j);
-      out << alps::end_tag("EIGENSTATE");   
+      out << alps::end_tag("EIGENSTATE");
     }
     out << alps::end_tag("EIGENSTATES");
   }
 }
-
-
-template<class value_type>
-dmtk::BasicOp<value_type > 
-DMRGTask<value_type>::create_site_operator(std::string const& name, alps::SiteOperator const& siteop, int type)
-{ 
-  dmtk::Block<value_type > &block = site_block[type];
-  dmtk::BasicOp<value_type > *op = block(name.c_str(),0);
-  if(!op) {
-    // we add new operator to single-site block 
-    boost::multi_array<value_type,2> orig = alps::get_matrix(value_type(),siteop,site_basis(type),parms,true);
-    dmtk::Matrix<value_type > dest(orig.shape()[0],orig.shape()[1]);
-    dmtk::QN dqn;
-    bool first = true;
-    for(size_t i = 0; i < orig.shape()[0]; i++){
-      for(size_t j = 0; j < orig.shape()[1]; j++){
-        dest[j][i] = orig[i][j];
-        if(abs(dest[j][i]) > 1.e-10){
-          dmtk::QN new_dqn;
-          new_dqn = block.basis()[j].qn() - block.basis()[i].qn();      
-          if(!first && new_dqn != dqn) 
-            boost::throw_exception(std::runtime_error("Matrix elements are inconsistent with change in quantum numbers"));
-          dqn = new_dqn;
-          first = false;
-        } 
-      }
-    }
-    dmtk::BasicOp<value_type > new_op(name.c_str(),0);
-    new_op.dqn = dqn;
-    new_op.resize(block.basis());
-    new_op = dest;
-    new_op.set_fermion(dqn.fermion_sign() == -1);
-    block.push_back(new_op);
-    return new_op;
-  }
-
-  return *op;
-}
-    
-    
-template<class value_type>
-void
-DMRGTask<value_type>::build_site_operator(alps::SiteOperator const& siteop, int site, dmtk::Hami<value_type > &this_hami)
-{
-  typedef std::vector<boost::tuple<alps::expression::Term<value_type>,alps::SiteOperator> > V;
-  V  ops = siteop.template templated_split<value_type>();
-  int type = site_type(site);
-  alps::expression::ParameterEvaluator<value_type> coords(coordinate_as_parameter(site));
-  for (typename V::iterator it=ops.begin(); it!=ops.end();++it) {
-    std::string name = simplify_name(it->template get<1>());
-    dmtk::BasicOp<value_type> op1(name.c_str(),site);
-    op1 = create_site_operator(name,it->template get<1>(),type);
-    op1.set_site(site);
-    dmtk::Term<value_type> real_t = op1;
-    it->template get<0>().partial_evaluate(coords);
-    real_t.coef() = it->template get<0>().value();
-    this_hami += real_t;
-  }
-}
-
-template<class value_type>
-void
-DMRGTask<value_type>::build_2site_operator(std::pair<alps::SiteOperator,alps::SiteOperator> const& siteops, 
-                            std::pair<int,int> sites, dmtk::Hami<value_type > &this_hami)
-{
-  typedef std::vector<boost::tuple<alps::expression::Term<value_type>,alps::SiteOperator> > V;
-  V  ops1 = siteops.first.template templated_split<value_type>();
-  V  ops2 = siteops.second.template templated_split<value_type>();
-  for (typename V::const_iterator tit1=ops1.begin(); tit1!=ops1.end();++tit1)
-    for (typename V::const_iterator tit2=ops2.begin(); tit2!=ops2.end();++tit2) {
-      std::string s_name1 = simplify_name(tit1->template get<1>());
-      std::string s_name2 = simplify_name(tit2->template get<1>());
-      dmtk::BasicOp<value_type > op1(s_name1.c_str(),sites.first); 
-      dmtk::BasicOp<value_type > op2(s_name2.c_str(),sites.second); 
-      op1 = create_site_operator(s_name1,tit1->template get<1>(),site_type(sites.first));
-      op2 = create_site_operator(s_name2,tit2->template get<1>(),site_type(sites.second));
-      op1.set_site(sites.first);
-      op2.set_site(sites.second);
-      dmtk::Term<value_type > real_t = op1*op2;
-      real_t.coef() = tit1->template get<0>().value()*tit2->template get<0>().value();
-      this_hami += real_t;
-   }
-}
-
-
-template<class value_type>
-void
-DMRGTask<value_type>::build_bond_operator(alps::BondOperator const& bondop, bond_descriptor const& b, dmtk::Hami<value_type > &this_hami)
-{
-  typedef std::vector<boost::tuple<alps::expression::Term<value_type>,alps::SiteOperator,alps::SiteOperator > > V;
-  alps::expression::ParameterEvaluator<value_type> coords(coordinate_as_parameter(b));
-  alps::SiteBasisDescriptor<short> b1 = basis().site_basis(site_type(source(b)));
-  alps::SiteBasisDescriptor<short> b2 = basis().site_basis(site_type(target(b)));
-  
-  V  ops = bondop.template templated_split<value_type>(b1,b2);
-  for (typename V::iterator tit=ops.begin(); tit!=ops.end();++tit) {
-    std::string s_name1 = simplify_name(tit->template get<1>());
-    std::string s_name2 = simplify_name(tit->template get<2>());
-    dmtk::BasicOp<value_type > op1(s_name1.c_str(),source(b)); 
-    dmtk::BasicOp<value_type > op2(s_name2.c_str(),target(b)); 
-    op1 = create_site_operator(s_name1,tit->template get<1>(),site_type(source(b)));
-    op2 = create_site_operator(s_name2,tit->template get<2>(),site_type(target(b)));
-    op1.set_site(source(b));
-    op2.set_site(target(b));
-    tit->template get<0>().partial_evaluate(coords);
-    dmtk::Term<value_type > real_t = op1*op2;
-    if (s_name1=="0")    
-      real_t = op2;
-    else if (s_name2=="0")
-      real_t = op1;
-    real_t.coef() = tit->template get<0>().value();
-    this_hami += real_t;
-  }
-}
-
-
