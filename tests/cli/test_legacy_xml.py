@@ -1,13 +1,14 @@
-"""Install legacy XML wrappers without requiring the compiled SDK dependencies."""
+"""Install historical XML command names without requiring the compiled SDK dependencies."""
 import os
 from pathlib import Path
 import shutil
 import stat
 import subprocess
+import xml.etree.ElementTree as ET
 
 import pytest
 
-from test_xml import PLOT, simulation
+from test_xml import PLOT, SPECIFICATION, simulation
 
 
 SOURCE = Path(__file__).resolve().parents[2]
@@ -52,6 +53,16 @@ def run(installation, command, *args, **kwargs):
                           capture_output=True, text=True, **kwargs)
 
 
+ALIASES = {
+    "plot2text": "plot text", "plot2html": "plot html", "plot2gp": "plot gnuplot",
+    "plot2mpl": "plot matplotlib", "plot2xmgr": "plot grace",
+    "convert2text": "convert text", "convert2html": "convert html",
+    "extracttext": "extract text", "extracthtml": "extract html",
+    "extractgp": "extract gnuplot", "extractmpl": "extract matplotlib",
+    "extractxmgr": "extract grace",
+}
+
+
 @pytest.mark.parametrize("command, marker", [
     ("plot2text", "1\t3\t0.1"), ("plot2html", "<html"),
     ("plot2gp", 'set title "Energy"'), ("plot2xmgr", "@"),
@@ -68,6 +79,76 @@ def test_legacy_conversion_after_relocation(legacy_install, tmp_path, command, m
     assert marker in result.stdout
 
 
+@pytest.mark.parametrize("command", ALIASES)
+def test_alias_matches_alps_xml(legacy_install, tmp_path, command):
+    kind = ALIASES[command].split()[0]
+    if kind == "extract":
+        specification = tmp_path / "plot specification.xml"
+        specification.write_text(SPECIFICATION)
+        inputs = [tmp_path / "task one.xml", tmp_path / "task two.xml"]
+        for path, x, y in zip(inputs, (2, 1), (4, 3)):
+            path.write_text(simulation(x, y))
+        arguments = [specification, *inputs]
+    else:
+        source = tmp_path / "input.xml"
+        source.write_text(PLOT if kind == "plot" else simulation(1, 3))
+        arguments = [source]
+    expected = run(legacy_install, "alps-xml", *ALIASES[command].split(), *arguments)
+    assert expected.returncode == 0, expected.stderr
+    result = run(legacy_install, command, *arguments)
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == expected.stdout
+    # The shell extract wrappers used to exit successfully with no output.
+    assert result.stdout.strip()
+    assert result.stderr == ""
+
+
+@pytest.mark.parametrize("command", [name for name in ALIASES
+                                     if not name.startswith("extract")])
+def test_alias_reads_stdin(legacy_install, tmp_path, command):
+    content = PLOT if command.startswith("plot") else simulation(1, 3)
+    source = tmp_path / "input.xml"
+    source.write_text(content)
+    expected = run(legacy_install, command, source)
+    assert expected.returncode == 0, expected.stderr
+    assert expected.stdout.strip()
+    for name, arguments in ((command, []), ("alps-xml", ALIASES[command].split())):
+        result = run(legacy_install, name, *arguments, "-", input=content)
+        assert result.returncode == 0, result.stderr
+        assert result.stdout == expected.stdout
+        assert result.stderr == ""
+
+
+def test_malformed_stdin_preserves_output(legacy_install, tmp_path):
+    output = tmp_path / "existing.txt"
+    output.write_text("previous result")
+    result = run(legacy_install, "plot2text", "-", "--output", output,
+                 input="<broken")
+    assert result.returncode != 0
+    assert "xsltproc failed" in result.stderr
+    assert result.stdout == ""
+    assert output.read_text() == "previous result"
+
+
+def test_deprecated_helpers_warn_and_still_work(legacy_install, tmp_path):
+    # archivecat is unchanged: it splits names on spaces and expects the task
+    # file layout ALPS writes, with <PARAMETERS> on its own line.
+    tasks = [tmp_path / "task1.xml", tmp_path / "task2.xml"]
+    for path, x in zip(tasks, (1, 2)):
+        path.write_text('<?xml version="1.0"?>\n<SIMULATION>\n'
+                        + simulation(x, 3).removeprefix("<SIMULATION>"))
+    archive = run(legacy_install, "archivecat", *tasks)
+    assert archive.returncode == 0, archive.stderr
+    assert "archivecat is deprecated" in archive.stderr
+    assert archive.stdout.count("<SIMULATION>") == 2
+    assert ET.fromstring(archive.stdout.encode()).tag == "ARCHIVE"
+    stylesheet = legacy_install[1] / "QMCXML2text.xsl"
+    transform = run(legacy_install, "xslttransform", tasks[0], stylesheet)
+    assert transform.returncode == 0, transform.stderr
+    assert "xslttransform is deprecated" in transform.stderr
+    assert "Energy" in transform.stdout
+
+
 def test_local_stylesheet_preserves_files_and_permissions(legacy_install, tmp_path):
     sources = [tmp_path / "input 'quoted'; data.xml", tmp_path / "-second.xml"]
     for source in sources:
@@ -76,6 +157,9 @@ def test_local_stylesheet_preserves_files_and_permissions(legacy_install, tmp_pa
     result = run(legacy_install, "use_local_stylesheet",
                  *(source.name for source in sources), cwd=tmp_path)
     assert result.returncode == 0, result.stderr
+    # One warning, not one more per file from the nested xslttransform.
+    assert result.stderr.count("deprecated") == 1
+    assert "use_local_stylesheet is deprecated" in result.stderr
     for source in sources:
         assert 'href="ALPS.xsl"' in source.read_text()
         assert '<MEAN>3</MEAN>' in source.read_text()

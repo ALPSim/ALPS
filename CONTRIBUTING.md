@@ -376,7 +376,41 @@ alps-xml convert html simulation.out.xml --output results.html
 alps-xml extract text plot-definition.xml task*.out.xml --output measurements.txt
 ```
 
-Plot/extraction formats are `text`, `html`, `gnuplot`, `matplotlib` and `grace`; conversion supports `text` and `html`. The `xml` installation component includes the command and resources.
+Plot/extraction formats are `text`, `html`, `gnuplot`, `matplotlib` and `grace`; conversion supports `text` and `html`. The `xml` installation component includes the command and resources. Python wheels provide the same `alps-xml` command without requiring `xsltproc`.
+
+The historical command names remain installed in the `tools` component as aliases of `alps-xml`, with identical output. New scripts and documentation should use `alps-xml`.
+
+| Historical name | `alps-xml` command |
+| --- | --- |
+| `plot2text`, `plot2html`, `plot2gp`, `plot2mpl`, `plot2xmgr` | `alps-xml plot text`, `html`, `gnuplot`, `matplotlib`, `grace` |
+| `convert2text`, `convert2html` | `alps-xml convert text`, `html` |
+| `extracttext`, `extracthtml`, `extractgp`, `extractmpl`, `extractxmgr` | `alps-xml extract text`, `html`, `gnuplot`, `matplotlib`, `grace`. The earlier shell versions of these exited successfully with empty output |
+
+Wheels install `plot2text`, `plot2gp`, `plot2xmgr` and `convert2text` as aliases in the same way.
+
+Three shell helpers have no `alps-xml` equivalent. They still work, but each prints a deprecation warning, and they will be removed in a future release:
+
+| Deprecated helper | Replacement |
+| --- | --- |
+| `archivecat` | `alps-xml extract` reads task files directly |
+| `xslttransform` | `xsltproc stylesheet.xsl input.xml` |
+| `use_local_stylesheet` | `alps-xml convert html` writes viewable HTML. Default task output already refers to a local `ALPS.xsl` |
+
+Application builds also retain the archive-producing commands in the `tools`
+installation component:
+
+```sh
+txt2archive --xaxis T --yaxis Energy --with-error measurements.txt > results.archive.xml
+xml2archive simulation.in.xml > results.archive.xml
+```
+
+`txt2archive` reads x/y columns, with an optional third error column;
+`xml2archive` collects a master JOB XML file's task results. These operations
+produce archive XML rather than render it. If SQLite development headers and
+libraries are available at configure time, the `archive` tool is also built.
+It retains its existing SQLite schema and `install`, `append`, `rebuild`, `list`
+and `plot` commands; existing databases can be reopened without conversion.
+Use `archive --help` for its options. The SDK libraries do not depend on SQLite.
 
 ---
 

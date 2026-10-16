@@ -1,5 +1,10 @@
 #!/bin/bash
 
+echo "use_local_stylesheet is deprecated and will be removed in a future ALPS release;" \
+  "use 'alps-xml convert html' to view results." >&2
+ALPS_DEPRECATION_WARNED=1
+export ALPS_DEPRECATION_WARNED
+
 dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd) || exit 1
 xml_dir="$dir/@ALPS_XML_FROM_BINDIR@"
 
