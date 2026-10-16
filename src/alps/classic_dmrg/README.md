@@ -146,11 +146,23 @@ laptop shared with other jobs takes 0.3 s for 6 orbitals, 1.3 s for 8, 3.7 s
 for 10, 8.1 s for 12, 17 s for 14 and 32 s for 16, where the generic path
 took 1.8, 10, 36 and 128 s for 6 to 12 orbitals and 10.5 minutes for 14 in
 the same runs; at 64 states 14 orbitals take 30 s and 16 take 57 s, with a
-peak of 3.8 GB of memory. The scratch directory holds every block's
-operators, which grow with the square of the number of orbitals and of kept
-states: 2.8 GB for 16 orbitals at 64 states and 4.9 GB for 10 orbitals at
-340 states with three electrons, so converged runs of more than about ten
-orbitals are bound by disk. alpsx's LiH case (six orbitals, two electrons
+peak of 3.8 GB of memory. The block operators kept between steps are a few
+percent of the scratch directory: 45 MB for 16 orbitals at 64 states and
+140 MB for 10 orbitals at 340 states with three electrons. The rest comes
+from the final sweep's measurement. Every block grown there stores the
+products of the RDM terms' operators that lie inside it, and these grow as
+the fourth power of the block's length and the square of the number of kept
+states.
+The final sweep now keeps only the products the closing measurement reads
+([engine changes](#origin-and-provenance)). That lowered the peak scratch
+from 2.8 GB to 0.35 GB for 16 orbitals at 64 states. Measured back to back,
+that run went from 60 s to 36 s and from 3.8 GB to 2.8 GB of memory. For 10
+orbitals at 340 states with three electrons the peak went from 5.4 GB to
+1.0 GB and the run from 22 s to 8 s. The left block of the closing configuration still
+holds all of its products, on disk and in memory. Twelve orbitals at half
+filling and 256 states peak at 0.9 GB of scratch, 0.76 GB of it that block,
+and since it grows as `n⁴m²`, converged runs on larger active spaces stay
+bound by disk and memory. alpsx's LiH case (six orbitals, two electrons
 per spin) at 128 states and six sweeps takes 0.4 s against 2.8 s on the
 generic path; alpsx's version of the solver took 3.0 s when the generic
 path took 2.3 s.
@@ -278,8 +290,17 @@ over the term after each one it merged): converged runs agree with the old
 code to rounding, and a run far from convergence can land elsewhere, as
 the old code's own does when the integrals change at 1e-13 (at 8 and 10
 orbitals with 32 states and two sweeps, by 1e-3 and 1e-2 in the energy).
-The molecular solver adds its RDM terms for the final sweep only, which
-builds them in both blocks, instead of rotating them through every step.
+The molecular solver adds its RDM terms for the final sweep only, instead
+of rotating them through every step. With stored products and a full sweep
+(the molecular solver, and the `dmrg` application with several targets and
+two-site measurements), `final_sweep` builds measurement operators only
+where the closing measurement reads them. It skips the right blocks of its
+right-to-left half and the left block grown at its last step, and it
+removes each left block's file once the next step has read it; `read_block`
+then refuses that block. Measured values are bit for bit the same: the
+molecular energies and RDMs at 10, 12 and 16 orbitals, and the `dmrg`
+application's XML output for a 12-site spin chain with two targets and
+correlations.
 `System` takes its Hamiltonian through three virtual hooks,
 `init_hamiltonian` (the end of `init_iteration`), `hamiltonian_product` (the
 product of the Lanczos and one-state solves) and `rotate_hamiltonian` (in

@@ -225,6 +225,13 @@ class System
     int _lanczos_maxiter;
     bool _lanczos_certify; // measured states: Ritz residuals down to the tolerance
 
+    // Changed here: final_sweep's trims of what no measurement reads (see
+    // there). rotate() carries the measurement operators into the new block
+    // only while _rotate_corr is set; read_block refuses a block file that
+    // final_sweep removed and nothing has written since.
+    bool _rotate_corr = true;
+    mutable std::set<std::string> _discarded_blocks;
+
     virtual void init_iteration(const B&b1, const B&b2, const B&b3, const B&b4, bool use_seed = false, bool create_composite = true);
     void rotate_hami(int position, Block<T> &b, Basis &basis, Basis &rho_basis, const Hami<T> *this_hami = nullptr);
     void rotate_terms(int position, Block<T> &b, Basis &basis, Basis &rho_basis, const Hami<T> *this_hami = nullptr);
@@ -850,6 +857,7 @@ class System
 #ifdef DMTK_DEBUG
       dmtk::out() << "SAVING BLOCK " << file << '\n';
 #endif // DMTK_DEBUG
+      _discarded_blocks.erase(file); // Changed here (see final_sweep)
       ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::binary);
       if(!outputfile) 
         dmtk::err() << "*** ERROR: Could not open file " << file << '\n';
@@ -878,6 +886,10 @@ class System
 #ifdef DMTK_DEBUG
       dmtk::out() << "READING BLOCK " << file << '\n';
 #endif // DMTK_DEBUG
+      // Changed here (see final_sweep): a block final_sweep removed is gone,
+      // not stale; refuse it rather than keep the block already in b.
+      if(_discarded_blocks.count(file))
+        throw std::logic_error(std::string("dmtk: ") + file + " was removed by final_sweep");
       ifstream inputfile(tmp_files.get_filename(file),std::ios::in|std::ios::binary);
       if(!inputfile) 
         dmtk::err() << "*** ERROR: Could not open file " << file << '\n';
@@ -885,6 +897,21 @@ class System
         b.read(inputfile);
         inputfile.close();
       }
+    }
+
+    // Changed here (written for this tree, see final_sweep): removes the
+    // file of block n on the given side; read_block refuses it until the
+    // block is written again.
+    void discard_block(int n, int position)
+    {
+      char file[255];
+      if(position == LEFT)
+        snprintf(file, sizeof(file), "block_%s_%i_l.dat",_name,n);
+      else
+        snprintf(file, sizeof(file), "block_%s_%i_r.dat",_name,n);
+      std::error_code ec;
+      std::filesystem::remove(tmp_files.get_filename(file), ec);
+      _discarded_blocks.insert(file);
     }
 
 
@@ -1375,6 +1402,19 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
   dir = _dir;
   int sweep_max = full_sweep() ? ls-2 : ls-3;
 
+  // Changed here: with stored products and a full sweep, nothing is measured
+  // during the sweep, and the measure() that follows it reads the closing
+  // configuration only: the left block of ls-3 sites, two sites and the last
+  // site, a site block. Measurement operators rotated into the right blocks
+  // of the right-to-left half, or into the left block grown at the last step,
+  // never reach a measurement, so they are not built. Each left block of the
+  // left-to-right half is read once, by the next step, so its file is removed
+  // once read. A block's stored products of two-body terms grow as the fourth
+  // power of its size (the molecular solver's RDMs), and these blocks were
+  // most of the scratch. Measured values are bit for bit the same. The left
+  // blocks are not on disk after this sweep; read_block refuses them.
+  bool const trim = _store_products && full_sweep();
+
   if(dir == RIGHT2LEFT){
     for(iter = _start; iter < sweep_max; iter++) // ls/2-1; iter++);
     {
@@ -1403,7 +1443,9 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
       m4 = std::min(m4*m3,m);
   
       truncate(RIGHT, m4);
+      _rotate_corr = !trim; // Changed here (see above)
       rotate(RIGHT, newblock);
+      _rotate_corr = true;
       write_iter(RIGHT);
       if(!_store_products){
         if (signal_emit(SYSTEM_SIGNAL_MEASURE)) measure();
@@ -1430,6 +1472,7 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
     signal_emit(SYSTEM_SIGNAL_START_ITER);
     read_block(rightblock, ls-iter-2, RIGHT);
     read_block(leftblock, iter, LEFT);
+    if(trim && iter > 1) discard_block(iter, LEFT); // Changed here (see above)
     const Block<T>& site1 = h.get_site(iter);
     const Block<T>& site2 = h.get_site(iter+1);
 
@@ -1452,7 +1495,9 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
     m1 = std::min(m1*m2,m);
 
     truncate(LEFT, m1);
+    _rotate_corr = !(trim && iter == sweep_max-1); // Changed here (see above)
     rotate(LEFT, newblock);
+    _rotate_corr = true;
     write_iter(LEFT);
     if(!_store_products){
       if (signal_emit(SYSTEM_SIGNAL_MEASURE)) measure();
@@ -2671,7 +2716,8 @@ System<T>::rotate(int position, Block<T>& b)
 // ***************************************************************************
 // Correlations
 // ***************************************************************************
-  rotate_corr(position, b, basis, rho_basis, &corr); 
+  // Changed here: skipped where final_sweep knows no measurement reads them.
+  if(_rotate_corr) rotate_corr(position, b, basis, rho_basis, &corr);
 // ***************************************************************************
   rho_basis = basis;
 
