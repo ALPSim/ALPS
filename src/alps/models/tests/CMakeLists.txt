@@ -7,14 +7,15 @@ foreach(name IN ITEMS
     hermiticity
     heterogeneous_physical_basis
     operator_decomposition
+    qubit_encoding
     translation_generators)
   add_executable(models_${name} ${name}.cpp)
   target_link_libraries(models_${name} PRIVATE ALPS::models)
   alps_add_gtest(models_${name} COMPONENT models LABELS "models;unit")
 endforeach()
 
-# The parity locks assemble dense Hamiltonians and call LAPACK directly.
-foreach(name IN ITEMS lattice_kit_parity models_kit_parity)
+# The parity and Pauli locks assemble dense Hamiltonians and call LAPACK directly.
+foreach(name IN ITEMS lattice_kit_parity models_kit_parity pauli_export pauli_fermions)
   add_executable(models_${name} ${name}.cpp)
   target_link_libraries(models_${name} PRIVATE ALPS::models ${ALPS_LAPACK_TARGET} ${ALPS_BLAS_TARGET})
   target_compile_definitions(models_${name} PRIVATE ALPS_MODELS_FIXTURES="${models_fixtures}")

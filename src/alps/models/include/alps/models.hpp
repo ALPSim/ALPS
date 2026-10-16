@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 //
 // Umbrella header for ALPS::models: programmatic lattices, local Hilbert
-// spaces, operator algebra and Hamiltonians compiled to numeric local terms.
+// spaces, operator algebra, Hamiltonians compiled to numeric local terms and
+// their sparse Pauli (qubit) export.
 
 #ifndef ALPS_MODELS_HPP
 #define ALPS_MODELS_HPP
@@ -15,5 +16,7 @@
 #include <alps/models/compiled.hpp>
 #include <alps/models/hamiltonian.hpp>
 #include <alps/models/builtin.hpp>
+#include <alps/models/qubit_encoding.hpp>
+#include <alps/models/pauli.hpp>
 
 #endif
