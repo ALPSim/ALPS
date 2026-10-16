@@ -6,6 +6,7 @@ foreach(name IN ITEMS
     finite_graph
     hermiticity
     heterogeneous_physical_basis
+    lattice_xml
     operator_decomposition
     qubit_encoding
     translation_generators)

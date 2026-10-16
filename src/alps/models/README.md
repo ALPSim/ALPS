@@ -25,6 +25,7 @@ mdl::CompiledModel compiled = mdl::compile_hamiltonian(model);
 | `alps/models/compiled.hpp` | `CompiledOperator` (dense local factors with Jordan–Wigner strings) and `CompiledModel` (operator plus lattice metadata) |
 | `alps/models/hamiltonian.hpp` | `Hamiltonian` (lattice + site bases + bond/site/global term templates), `compile_hamiltonian`, `compile_operator`, `validate_hermiticity` |
 | `alps/models/builtin.hpp` | 14 named model factories, from `heisenberg` to `bose_hubbard` and `kondo_lattice` |
+| `alps/models/lattice_xml.hpp` | `to_latticegraph_xml`, `to_graph_xml`: the ALPS lattice-library XML of a kit lattice (unit cell with vertex coordinates, extent, boundary); `custom_lattice_name`, `catalog_graph_name` |
 | `alps/models/qubit_encoding.hpp` | `QubitEncoding`: the qubit register of a `PhysicalBasis` (binary or Gray code words per site), bit/state-index and statevector interchange |
 | `alps/models/pauli.hpp` | `PauliOperator`, `PauliExportOptions`, `export_pauli` (sparse Pauli strings of a `CompiledOperator` or `Hamiltonian`), `local_valid_projector`, `invalid_state_penalty` |
 
@@ -74,6 +75,24 @@ auto const c = mdl::export_pauli(model.operator_decomposition(mdl::TermSum::loca
   pruning. `max_terms` and `max_local_matrix_bytes` bound the expansion and
   the per-site dense transform (O(k 4^k) for k qubits, cached per export).
 
+## Legacy XML bridge
+
+`to_latticegraph_xml(lattice, name)` writes a kit lattice as a `<LATTICES>`
+document of the ALPS lattice library: the basis, a unit cell whose typed
+vertices carry their fractional `<COORDINATE>` and whose edges carry their
+cell offsets, and a `<LATTICEGRAPH>` baking the extent and boundary. The
+legacy expansion reproduces the kit's sites, types, coordinates and ordered
+bonds. `custom_lattice_name` is a content-addressed name for such documents
+and `catalog_graph_name` the catalog graph a factory lattice's boundary
+selects. The legacy lattice module's `<alps/lattice/kit.hpp>` builds on these
+(and links `ALPS::models`): `resolve_lattice` selects the catalog graph only
+when the catalog has it and expands it to the identical structure (the typed
+honeycomb and kagome cells, the rectangular and non-cubic 3-D lattices and
+custom cells take the custom document), `make_graph_helper` builds the legacy
+`graph_helper` in process, `write_lattice_library` writes the document for an
+XML application's `LATTICE_LIBRARY`, and `CatalogModel(lattice, parameters)`
+runs an XML catalog model on a kit lattice.
+
 ## Origin
 
 The code is a port of the lattice and model kit of the experimental
@@ -86,4 +105,6 @@ tests compare the C++ kit against them.
 Not ported: the TOML catalog readers and emitters, the bridge to legacy
 `alps::Parameters`, the in-process lattice registry and the MPO compiler. The
 Pauli/qubit export (`qubit_encoding.hpp`, `pauli.hpp`) follows the fork's,
-taking compiled operators instead of raw terms.
+taking compiled operators instead of raw terms; the XML emitters
+(`lattice_xml.hpp`) follow the fork's last XML revision and add the vertex
+coordinates, with the parameter bridge in the legacy lattice module.

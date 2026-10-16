@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 #include <alps/ed.hpp>
+#include <alps/lattice/kit.hpp>
 #include <alps/model/catalog.hpp>
+#include <alps/models/lattice.hpp>
 #include <cmath>
 #include <stdexcept>
 #include <vector>
@@ -42,5 +44,18 @@ int main() {
     auto const result = problem.eigenstates(solve);
     if (std::abs(result.spectrum.eigenvalues.at(0) + 2.0) > 1e-10)
         throw std::runtime_error("catalog importer ground state energy is off");
+    // The kit-lattice bridge: the periodic square resolves to its catalog
+    // graph, the open ladder drives the importer from memory.
+    namespace lat = alps::lattice;
+    auto const resolved = lat::resolve_lattice(lat::square(2, 2));
+    if (!resolved.from_catalog() || resolved.graph != "square lattice")
+        throw std::runtime_error("kit-lattice bridge did not find the catalog square lattice");
+    alps::Parameters q;
+    q["MODEL"] = "spin";
+    q["J0"] = 1.0;
+    q["J1"] = 1.0;
+    alps::models::CatalogModel<> kit(lat::ladder(2, 1.0, lat::Boundary::open), q);
+    if (kit.graph().num_sites() != 4 || kit.graph().num_bonds() != 4 || kit.compile_hamiltonian().terms.empty())
+        throw std::runtime_error("kit-lattice bridge lost the ladder");
     return 0;
 }

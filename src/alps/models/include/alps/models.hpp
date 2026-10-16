@@ -9,6 +9,7 @@
 #define ALPS_MODELS_HPP
 
 #include <alps/models/lattice.hpp>
+#include <alps/models/lattice_xml.hpp>
 #include <alps/models/finite_graph.hpp>
 #include <alps/models/site.hpp>
 #include <alps/models/terms.hpp>

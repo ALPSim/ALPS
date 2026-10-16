@@ -18,6 +18,8 @@
 #include <alps/model.h>
 #include <alps/lattice.h>
 #include <alps/models/compiled.hpp>
+#include <alps/models/lattice.hpp>
+#include <alps/models/lattice_xml.hpp>
 #include <alps/multi_array.hpp>
 #include <alps/numeric/is_nonzero.hpp>
 #include <alps/type_traits/is_symbolic.hpp>
@@ -27,6 +29,7 @@
 #include <cstddef>
 #include <map>
 #include <set>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
@@ -56,6 +59,15 @@ public:
   explicit CatalogModel(Parameters const& parameters)
     : parms(parameters), graph_(parameters),
       model_(graph_, parameters, is_symbolic<Scalar>::type::value) {}
+  /// A kit lattice in place of the catalog's: its own sites, types, bonds and
+  /// coordinates, parsed from memory as the custom <LATTICEGRAPH> document of
+  /// <alps/models/lattice_xml.hpp> (LATTICE is set to its content-addressed
+  /// name; L/W/H and bc parameters are not consulted). The model parameters
+  /// address the kit's site and bond types (local_S0, J1, ...). Users of this
+  /// constructor link ALPS::models.
+  CatalogModel(lattice::Lattice const& lattice, Parameters const& parameters)
+    : CatalogModel(kit_parameters(lattice, parameters),
+                   std::istringstream(lattice::to_latticegraph_xml(lattice, lattice::custom_lattice_name(lattice)))) {}
   // graph_helper retains internal property-map references. Transfer the
   // compiled values, rather than copying or relocating the evaluator.
   CatalogModel(CatalogModel const&) = delete;
@@ -112,6 +124,13 @@ public:
   multi_array<std::pair<value_type,bool>,4> local_matrix(BondOperator const&, site_descriptor const&, site_descriptor const&) const;
 
 private:
+  CatalogModel(Parameters const& parameters, std::istringstream&& library)
+    : parms(parameters), graph_(library, parameters),
+      model_(graph_, parameters, is_symbolic<Scalar>::type::value) {}
+  static Parameters kit_parameters(lattice::Lattice const& lattice, Parameters p) {
+    p["LATTICE"] = lattice::custom_lattice_name(lattice);
+    return p;
+  }
   void append_operator(CompiledOperator&, SiteOperator const&, site_descriptor) const;
   void append_operator(CompiledOperator&, BondOperator const&, bond_descriptor) const;
   void append_operator(CompiledOperator&, BondOperator const&, site_descriptor, site_descriptor) const;

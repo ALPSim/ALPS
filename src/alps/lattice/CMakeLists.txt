@@ -24,6 +24,7 @@ target_sources(alps_headers INTERFACE
     include/alps/lattice/graph_traits.h
     include/alps/lattice/graphproperties.h
     include/alps/lattice/hypercubic.h
+    include/alps/lattice/kit.hpp
     include/alps/lattice/lattice.h
     include/alps/lattice/latticedescriptor.h
     include/alps/lattice/latticegraph.h

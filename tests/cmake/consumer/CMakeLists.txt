@@ -147,8 +147,8 @@ if(ALPS_classic_dmrg_FOUND)
 endif()
 add_contract(sdk main.cpp ALPS::alps)
 # The header-only catalog importer joins the legacy runtime with ALPS::ed and
-# reads the installed XML catalogs.
-add_contract(catalog catalog.cpp "ALPS::alps;ALPS::ed")
+# reads the installed XML catalogs; the kit-lattice bridge adds ALPS::models.
+add_contract(catalog catalog.cpp "ALPS::alps;ALPS::ed;ALPS::models")
 if(ALPS_SOURCE)
   set(catalog_xml "${ALPS_SOURCE}/src/alps/resources")
 else()

@@ -44,14 +44,15 @@ foreach(name site_basis basis_states bloch_basis_states)
 endforeach()
 
 # The catalog importer (<alps/model/catalog.hpp>): XML models compiled to
-# ALPS::models operators, the kit factories against the catalog graphs, and
-# the ALPS::ed assembly against hamiltonian_matrix on the same inputs.
+# ALPS::models operators, the kit factories against the catalog graphs, the
+# ALPS::ed assembly against hamiltonian_matrix on the same inputs, and the
+# kit-lattice bridge (<alps/lattice/kit.hpp>) through the legacy reader.
 foreach(name catalog_compiler lattice_catalog_structure)
   add_executable(model_${name} ${name}.cpp)
   target_link_libraries(model_${name} PRIVATE ALPS::alps ALPS::models)
   alps_add_gtest(model_${name} COMPONENT model LABELS catalog)
 endforeach()
-foreach(name catalog_model_parity ed_vs_hamiltonian_matrix)
+foreach(name catalog_model_parity ed_vs_hamiltonian_matrix lattice_xml_bridge)
   add_executable(model_${name} ${name}.cpp)
   target_link_libraries(model_${name} PRIVATE ALPS::alps ALPS::ed ALPS::models)
   alps_add_gtest(model_${name} COMPONENT model LABELS "catalog;numeric" TIMEOUT 300)

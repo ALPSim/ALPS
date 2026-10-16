@@ -149,7 +149,10 @@ auto const problem = alps::ed::prepare_projected(op, spaces, {}, options);
 
 The same compiled operators and physical bases drive the classic DMRG
 solver ([`ALPS::classic_dmrg`](../classic_dmrg/README.md)) for chains and
-ladders beyond the reach of exact diagonalization.
+ladders beyond the reach of exact diagonalization. A catalog model can also
+run on a kit lattice: `CatalogModel<>(lattice, parameters)` takes an
+`alps::lattice::Lattice` in place of the catalog's `LATTICE`
+(`<alps/lattice/kit.hpp>` describes the bridge).
 
 The legacy module's tests lock the importer against the kit factories
 (`catalog_model_parity`), against `hamiltonian_matrix` element by element on
