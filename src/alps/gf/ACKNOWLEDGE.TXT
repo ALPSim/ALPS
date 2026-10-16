@@ -1,0 +1,13 @@
+Whenever scientific publications result from a program based on ALPS Core Libraries we kindly ask for an acknowledgment of ALPS and ALPS Core Libraries and citations to:
+
+1) The most current ALPS Core Libraries paper:
+
+Wallerberger, Markus, et al. "Updated Core Libraries of the ALPS Project." 
+arXiv preprint arXiv:1811.08331 (2018).
+https://arxiv.org/abs/1811.08331
+
+2) The most current ALPS paper:
+
+B. Bauer et al., J. Stat. Mech. (2011) P05001.
+http://iopscience.iop.org/1742-5468/2011/05/P05001/
+http://dx.doi.org/10.1088/1742-5468/2011/05/P05001

@@ -22,6 +22,7 @@ The framework paper applies to every component. A paper serving several roles is
 | Component | Algorithm | Implementation | Uses |
 | --- | --- | --- | --- |
 | `aleav2` | N/A | [wallerberger2018alpscore](#wallerberger2018alpscore) | — |
+| `gf` | N/A | [wallerberger2018alpscore](#wallerberger2018alpscore) | — |
 | `scheduler` | N/A | [troyer1998scheduler](#troyer1998scheduler) | — |
 | `sparsediag` | [lanczos1950](#lanczos1950) | [alps30](#alps30) | scheduler |
 | `fulldiag` | N/A | [alps30](#alps30) | scheduler |

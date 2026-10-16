@@ -21,6 +21,7 @@ Sources use `include/`, `src/` and `tests/` where applicable. Public include spe
 | `graph/`, `lattice/`, `model/` | Graph helpers, lattice definitions and physical models | `ALPS::headers`, `ALPS::alps` |
 | `random/` | Random generators and their factories | `ALPS::alps` |
 | `aleav2/` | ALEA v2, ALPSCore's ALEA: accumulators and results (`<alps/alea.hpp>`, `<alps/alea/*.hpp>`); built when Eigen is found. See [its README](aleav2/README.md) | `ALPS::aleav2` |
+| `gf/` | ALPSCore's Green's functions on frequency, time and index meshes (`<alps/gf/*.hpp>`), with the tensors they use (`<alps/numeric/tensors.hpp>`); built when Eigen is found. See [its README](gf/README.md) | `ALPS::gf` |
 | `alea/`, `accumulators/` | Observable/result facilities and accumulator implementations | `ALPS::alps` |
 | `mc/`, `scheduler/`, `parapack/` | Simulation API, execution and scheduling | `ALPS::alps` |
 | `fortran/` | C++ bridge with public headers in `include/alps/fortran/` | `ALPS::fortran` |
