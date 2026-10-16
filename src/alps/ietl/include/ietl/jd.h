@@ -37,7 +37,8 @@
 #include <boost/numeric/bindings/lapack/driver/heev.hpp>
 #include <boost/numeric/bindings/lapack/driver/syev.hpp>
 //for lapack::getrs
-#include <boost/numeric/bindings/lapack/computational.hpp>
+#include <boost/numeric/bindings/lapack/computational/getrf.hpp>
+#include <boost/numeric/bindings/lapack/computational/getrs.hpp>
 //#include <boost/numeric/bindings/detail/config/fortran.hpp>
 #include <boost/numeric/bindings/ublas/matrix.hpp>
 #include <boost/numeric/bindings/ublas/vector.hpp>

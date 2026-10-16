@@ -26,7 +26,11 @@
 #include <iostream>
 #include <sys/types.h>
 #include <vector>
-
+// Internal uses stay quiet; downstream uses of the deprecated types still warn.
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 
 #ifdef USE_MATRIX_DISPATCH //use dispatch to tiny matrix functions for small matrices
 #undef __APPLE_CC__
@@ -91,7 +95,7 @@ namespace blas{
   //contains size 1 and size 2 that do not have to be the same.
   //std::ostream &operator<<(std::ostream &os, const general_matrix &M); //forward declaration
     template<typename T>
-    class general_matrix{
+    class [[deprecated("blas::general_matrix<T> will be removed in the next ALPS release; use alps::numeric::matrix<T>")]] general_matrix{
     public:
         typedef T value_type;
         general_matrix(int size1, int size2)
@@ -561,4 +565,7 @@ namespace blas{
     typedef general_matrix<std::complex< double> > complex_double_matrix;
 } //namespace
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 #endif
