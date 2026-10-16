@@ -981,3 +981,6 @@ models::CompiledOperator pair_terms(models::Hamiltonian const& model, std::strin
 }
 
 } // namespace alps::dmrg::classic
+
+// The molecular solver shares this translation unit's engine helpers.
+#include "molecular.ipp"

@@ -92,6 +92,8 @@ result = dmrg.solve(chain, sweeps=dmrg.ramped_sweeps(4, 200), sector={"N": 16, "
                     measurements={"n": dmrg.site_terms(chain, "n")})
 ```
 
+`dmrg.solve_molecular(h1, eri, n_alpha, n_beta, core_energy=..., sweeps=...)` runs the same engine on restricted real molecular integrals (chemist notation) and returns the energy with the one- and two-particle reduced density matrices in the PySCF convention; it suits small active spaces (see the [component README](../../src/alps/classic_dmrg/README.md#molecular-hamiltonians-alpsdmrgmolecularhpp)).
+
 Matrices and spectra come back as NumPy arrays (eigenvectors column-major; sparse matrices convert with `to_scipy()`), and the compile and solve calls release the GIL. The module docstrings and `help()` describe the Python surface; the C++ READMEs document the conventions (fermion sign conventions, momentum labels, kept-state schedules). Bond and site specifications are Python callables, called once per bond or site when added.
 
 `PYALPS_BUILD_MODELS=OFF` (`--config-setting cmake.define.PYALPS_BUILD_MODELS=OFF`) skips these bindings. `pyalps.models` and `pyalps.ed` need only the always-built `models` and `ed` SDK components; `pyalps.classic_dmrg` is present when the SDK was built with `ALPS_ENABLE_CLASSIC_DMRG` (the default, which needs Eigen) and raises `ImportError` otherwise.

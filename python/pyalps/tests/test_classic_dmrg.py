@@ -4,6 +4,8 @@
 """pyalps.classic_dmrg against pyalps.ed: energies, measurements, targets,
 iteration observation and the option surface."""
 
+import itertools
+
 import numpy as np
 import pytest
 
@@ -139,3 +141,93 @@ def test_catalog_models_solve_like_exact_diagonalization():
     basis = ring.physical_basis()
     result = dmrg.solve(op, basis, sector={"Sz": 0.0}, **exact_sweeps)
     assert result.energy == pytest.approx(catalog_reference(op, basis, {"Sz": 0.0}, 1)[0], abs=1e-8)
+
+
+def symmetric_integrals(n, seed):
+    rng = np.random.default_rng(seed)
+    h1 = rng.normal(size=(n, n))
+    h1 = 0.5 * (h1 + h1.T)
+    eri = 0.3 * rng.normal(size=(n, n, n, n))
+    eri = (eri + eri.transpose(1, 0, 2, 3)) / 2
+    eri = (eri + eri.transpose(0, 1, 3, 2)) / 2
+    eri = (eri + eri.transpose(2, 3, 0, 1)) / 2
+    return h1, eri
+
+
+def fock_reference(h1, eri, n_alpha, n_beta):
+    """Full CI on the Jordan-Wigner Fock space: energy and spin-resolved RDMs."""
+    from scipy import sparse
+
+    n = h1.shape[0]
+    modes = 2 * n  # mode 2p + spin, spin 0 = alpha; mode 0 is the leading tensor factor
+    z, a = sparse.diags([1.0, -1.0]), sparse.csr_matrix([[0.0, 1.0], [0.0, 0.0]])
+    def annihilate(m):
+        out = sparse.identity(1, format="csr")
+        for k in range(modes):
+            out = sparse.kron(out, z if k < m else a if k == m else sparse.identity(2), format="csr")
+        return out
+    c = [annihilate(m) for m in range(modes)]
+    cd = [x.T.tocsr() for x in c]
+    occupied = lambda i, m: (i >> (modes - 1 - m)) & 1
+    keep = [i for i in range(2 ** modes)
+            if sum(occupied(i, 2 * p) for p in range(n)) == n_alpha
+            and sum(occupied(i, 2 * p + 1) for p in range(n)) == n_beta]
+    H = sparse.csr_matrix((2 ** modes, 2 ** modes))
+    for p, q in itertools.product(range(n), repeat=2):
+        for s in (0, 1):
+            H = H + h1[p, q] * (cd[2 * p + s] @ c[2 * q + s])
+    for p, q, r, t in itertools.product(range(n), repeat=4):
+        for s1, s2 in itertools.product((0, 1), repeat=2):
+            H = H + 0.5 * eri[p, q, r, t] * (cd[2 * p + s1] @ cd[2 * r + s2] @ c[2 * t + s2] @ c[2 * q + s1])
+    values, vectors = np.linalg.eigh(H.toarray()[np.ix_(keep, keep)])
+    psi = np.zeros(2 ** modes)
+    psi[keep] = vectors[:, 0]
+    def expect(*ops):  # <psi| ops[0] ops[1] ... |psi>, applied right to left
+        phi = psi
+        for op in reversed(ops):
+            phi = op @ phi
+        return psi @ phi
+    one = [np.array([[expect(cd[2 * q + s], c[2 * p + s]) for q in range(n)] for p in range(n)]) for s in (0, 1)]
+    two = np.zeros((n, n, n, n))
+    for p, q, r, t in itertools.product(range(n), repeat=4):
+        two[p, q, r, t] = sum(expect(cd[2 * p + s1], cd[2 * r + s2], c[2 * t + s2], c[2 * q + s1])
+                              for s1, s2 in itertools.product((0, 1), repeat=2))
+    return values[0], one[0], one[1], two
+
+
+@pytest.mark.parametrize("n, n_alpha, n_beta", [(2, 1, 1), (3, 2, 1), (4, 2, 2)])
+def test_solve_molecular_energy_and_rdms_match_full_ci(n, n_alpha, n_beta):
+    h1, eri = symmetric_integrals(n, seed=n)
+    energy, alpha, beta, two = fock_reference(h1, eri, n_alpha, n_beta)
+    seen = []
+    result = dmrg.solve_molecular(h1, eri, n_alpha, n_beta, core_energy=0.25, sweeps=dmrg.fixed_sweeps(4, 128),
+                                  warmup_states=128, lanczos_tolerance=1e-12, callback=seen.append)
+    assert isinstance(result, dmrg.MolecularResult) and result.orbitals == n
+    assert result.energy == pytest.approx(energy + 0.25, abs=1e-9)
+    np.testing.assert_allclose(result.one_rdm_alpha, alpha, atol=1e-8)
+    np.testing.assert_allclose(result.one_rdm_beta, beta, atol=1e-8)
+    np.testing.assert_allclose(result.one_rdm, alpha + beta, atol=1e-8)
+    assert result.two_rdm.shape == (n,) * 4
+    np.testing.assert_allclose(result.two_rdm, two, atol=1e-8)
+    # The RDMs reproduce the energy (PySCF make_rdm12 contraction).
+    rdm_energy = 0.25 + np.einsum("pq,qp", h1, result.one_rdm) + 0.5 * np.einsum("pqrs,pqrs", eri, result.two_rdm)
+    assert rdm_energy == pytest.approx(result.energy, abs=1e-9)
+    assert len(seen) == len(result.iterations) and result.iteration_energies.shape == (len(seen),)
+
+
+def test_solve_molecular_rejects_invalid_requests():
+    h1, eri = symmetric_integrals(3, seed=7)
+    with pytest.raises(ValueError):
+        dmrg.solve_molecular(h1, eri[0], 1, 1)  # rank
+    with pytest.raises(TypeError):
+        dmrg.solve_molecular(h1.astype(complex), eri, 1, 1)
+    broken = eri.copy()
+    broken[0, 1, 2, 2] += 1e-3
+    with pytest.raises(ValueError):
+        dmrg.solve_molecular(h1, broken, 1, 1)  # symmetry
+    with pytest.raises(ValueError):
+        dmrg.solve_molecular(h1, eri, 1, 1, sector={"N": 2.0})
+    with pytest.raises(ValueError):
+        dmrg.solve_molecular(h1, eri, 4, 1)  # more electrons than orbitals
+    with pytest.raises(TypeError):
+        dmrg.solve_molecular(h1, eri, 1, 1, callback=42)

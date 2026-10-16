@@ -11,10 +11,13 @@
 // The surface follows src/alps/classic_dmrg/include/alps/dmrg/classic.hpp;
 // the skilledwolf/alpsx binding (python/alps/cpp/classic_dmrg_bindings.cpp at
 // d37e51227) took catalog models and returned dictionaries; its callback and
-// GIL handling are kept.
+// GIL handling are kept. solve_molecular follows alpsx's binding of the same
+// name (branch WIP/classic-dmrg-chemistry at d4384a7f8), returning a
+// MolecularResult object with NumPy arrays instead of a dictionary.
 #include "kit_support.hpp"
 
 #include <alps/dmrg/classic.hpp>
+#include <alps/dmrg/molecular.hpp>
 #include <alps/models.hpp>
 
 #include <nanobind/nanobind.h>
@@ -85,6 +88,40 @@ classic::Result run(mdl::CompiledOperator const* op, mdl::PhysicalBasis const* b
     nb::gil_scoped_release release;
     if (model) return classic::solve(*model, options, measurements, observe);
     return classic::solve(*op, *basis, options, measurements, observe);
+}
+
+using Integrals2 = nb::ndarray<nb::numpy, double const, nb::ndim<2>, nb::c_contig>;
+using Integrals4 = nb::ndarray<nb::numpy, double const, nb::ndim<4>, nb::c_contig>;
+
+classic::MolecularResult run_molecular(Integrals2 one, Integrals4 two, std::size_t n_alpha, std::size_t n_beta,
+                                       double core_energy, double integral_cutoff, classic::Options options,
+                                       nb::object callback, std::optional<std::string> const& log_file) {
+    auto const n = one.shape(0);
+    if (one.shape(1) != n || two.shape(0) != n || two.shape(1) != n || two.shape(2) != n || two.shape(3) != n)
+        throw std::invalid_argument("molecular integral shapes must be (n, n) and (n, n, n, n)");
+    if (!callback.is_none() && !PyCallable_Check(callback.ptr()))
+        throw nb::type_error("callback must be callable or None");
+    classic::MolecularInput input;
+    input.orbitals = n;
+    input.alpha_electrons = n_alpha;
+    input.beta_electrons = n_beta;
+    input.core_energy = core_energy;
+    input.integral_cutoff = integral_cutoff;
+    if (one.size()) input.one_body.assign(one.data(), one.data() + one.size());
+    if (two.size()) input.two_body.assign(two.data(), two.data() + two.size());
+    std::ofstream log;
+    if (log_file) {
+        log.open(*log_file);
+        if (!log) throw std::runtime_error("cannot open the DMRG log file " + *log_file);
+        options.log = &log;
+    }
+    classic::IterationCallback observe = [&](classic::Iteration const& iteration) {
+        nb::gil_scoped_acquire acquire;
+        if (PyErr_CheckSignals() != 0) throw nb::python_error();
+        if (!callback.is_none()) callback(iteration);
+    };
+    nb::gil_scoped_release release;
+    return classic::solve_molecular(input, options, observe);
 }
 
 } // namespace
@@ -236,6 +273,42 @@ NB_MODULE(classic_dmrg_c, m) {
     }, nb::arg("hamiltonian"), nb::arg("basis"), nb::arg("options") = classic::Options{},
        nb::arg("measurements") = classic::Measurements{}, nb::arg("callback") = nb::none(), nb::arg("log_file") = nb::none(),
        "Solve a compiled Hermitian operator on its physical basis.");
+    nb::class_<classic::MolecularResult>(m, "MolecularResult",
+        "A finished molecular solve: the energy (with the core energy), the final-state RDMs in the PySCF "
+        "convention and the iterations observed.")
+        .def_ro("orbitals", &classic::MolecularResult::orbitals)
+        .def_ro("energy", &classic::MolecularResult::energy)
+        .def_prop_ro("one_rdm_alpha", [](classic::MolecularResult const& r) {
+            return matrix_to_numpy(std::vector<double>(r.one_rdm_alpha), r.orbitals, r.orbitals);
+        }, "dm1[p, q] = <c+[q, alpha] c[p, alpha]>.")
+        .def_prop_ro("one_rdm_beta", [](classic::MolecularResult const& r) {
+            return matrix_to_numpy(std::vector<double>(r.one_rdm_beta), r.orbitals, r.orbitals);
+        }, "dm1[p, q] = <c+[q, beta] c[p, beta]>.")
+        .def_prop_ro("one_rdm", [](classic::MolecularResult const& r) {
+            std::vector<double> sum(r.one_rdm_alpha);
+            for (std::size_t i = 0; i < sum.size(); ++i) sum[i] += r.one_rdm_beta[i];
+            return matrix_to_numpy(std::move(sum), r.orbitals, r.orbitals);
+        }, "The spin-summed one-particle density matrix.")
+        .def_prop_ro("two_rdm", [](classic::MolecularResult const& r) {
+            auto const n = r.orbitals;
+            return alps::python::make_numpy_array<double>(std::vector<double>(r.two_rdm), {n, n, n, n});
+        }, "dm2[p, q, r, s] = sum_ab <c+[p, a] c+[r, b] c[s, b] c[q, a]> (PySCF make_rdm12).")
+        .def_ro("iterations", &classic::MolecularResult::iterations)
+        .def_ro("final_truncation_error", &classic::MolecularResult::final_truncation_error)
+        .def_prop_ro("iteration_energies", [](classic::MolecularResult const& r) {
+            std::vector<double> values;
+            for (auto const& it : r.iterations) values.push_back(it.energy);
+            return vector_to_numpy(std::move(values));
+        }, "Electronic energies of the iterations (without the core energy).")
+        .def("__repr__", [](classic::MolecularResult const& r) {
+            return "MolecularResult(energy=" + std::to_string(r.energy) + ", " + std::to_string(r.orbitals)
+                 + " orbitals, " + std::to_string(r.iterations.size()) + " iterations)";
+        });
+    m.def("solve_molecular", &run_molecular, nb::arg("one_body").noconvert(), nb::arg("two_body").noconvert(),
+          nb::arg("n_alpha"), nb::arg("n_beta"), nb::arg("core_energy") = 0., nb::arg("integral_cutoff") = 0.,
+          nb::arg("options") = classic::Options{}, nb::arg("callback") = nb::none(), nb::arg("log_file") = nb::none(),
+          "Classic block DMRG of a restricted real molecular Hamiltonian (chemist-notation integrals with the "
+          "real-orbital symmetries) in the sector of n_alpha and n_beta electrons; returns a MolecularResult.");
     m.def("site_terms", &classic::site_terms, nb::arg("model"), nb::arg("op"),
           "One term per site carrying the operator `op`, in site order (one measurement column per site).");
     m.def("pair_terms", &classic::pair_terms, nb::arg("model"), nb::arg("first"), nb::arg("second"),

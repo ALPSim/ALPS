@@ -16,7 +16,8 @@ target_sources(alps_classic_dmrg PUBLIC
   FILE_SET classic_dmrg_headers TYPE HEADERS
   BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
   FILES
-    include/alps/dmrg/classic.hpp)
+    include/alps/dmrg/classic.hpp
+    include/alps/dmrg/molecular.hpp)
 
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)

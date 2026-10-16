@@ -85,6 +85,36 @@ auto const& density = result.measurements.at("n").values[0];  // row = target st
   when it returns, and restores the engine's state afterwards, including
   after an exception.
 
+## Molecular Hamiltonians (`<alps/dmrg/molecular.hpp>`)
+
+`solve_molecular(MolecularInput, options, callback)` runs the engine on a
+restricted, real ab initio Hamiltonian given by its spatial-orbital integrals
+in chemist notation,
+`H = Σ h[p,q] c†[p,σ] c[q,σ] + ½ Σ (pq|rs) c†[p,σ] c†[r,τ] c[s,τ] c[q,σ] + core_energy`,
+with one spinful-fermion site per orbital in input order and `alpha_electrons`
+and `beta_electrons` fixing the sector. It returns the energy (including
+`core_energy`), the spin-resolved one-particle reduced density matrices and the
+spin-summed two-particle one in the PySCF convention
+(`dm1[p,q] = <c†[q] c[p]>`, `dm2[p,q,r,s] = Σ <c†[p,σ] c†[r,τ] c[s,τ] c[q,σ]>`),
+the iterations and the final truncation error. Every integral becomes an
+engine term of up to four sites, which `solve()` does not accept for compiled
+models, and every RDM element is a measured term. The sweep, truncation,
+Lanczos, scratch and callback options are those of `solve()`; `sector` must be
+empty, `num_eigenvalues` one and arithmetic real. The integrals must be finite
+and have the real-orbital symmetries (`h` symmetric, `(pq|rs)` eightfold) after
+`integral_cutoff` drops entries of smaller magnitude. Fewer than four orbitals
+are padded with one-dimensional neutral sites, which add no states. The result
+holds no wavefunction: no MPS, no CI coefficients, no checkpoint.
+
+The solver is meant for small active spaces and for checking other codes. The
+terms reach the engine one by one, about `n⁴` of them, with no
+complementary-operator construction of quantum-chemistry DMRG codes, and the
+RDM measurement adds `n⁴` more. With 32 kept states and two sweeps on dense
+random integrals at half filling, an Apple M-series laptop takes 2.0 s for 6
+orbitals, 16 s for 8, 75 s for 10 and 310 s for 12, almost all of it in the
+sweeps. alpsx's LiH case (six orbitals, two electrons per spin) at 128 states
+and six sweeps takes 3.4 s, against 3.0 s for alpsx's version of the solver.
+
 ## The `dmrg` application
 
 The XML application `dmrg` (`src/apps/dmrg/dmrg`) reads its parameters,
@@ -165,6 +195,14 @@ normalization and combination of terms, the dense Hermiticity check and
 the component-wise measurement. The `dmrg` application's own copy of dmtk
 was removed when the application moved onto this component.
 
+The molecular solver (`include/alps/dmrg/molecular.hpp`,
+`src/molecular.ipp`, included at the end of `src/classic.cpp`) is ported from
+alpsx branch `WIP/classic-dmrg-chemistry`, commit d4384a7f8; its files name
+the adaptations, which concern the headers, the callback and the charge
+registration. Its tests are adapted from the same branch
+(`tests/dmrg/classic_molecular.cpp`) and from alpsx commit 95cf817d6
+(`tests/dmrg/classic_multisite_fermion_lock.cpp`).
+
 Engine changes made here, each marked in the affected file: the dense block
 products call the platform BLAS through `dmtk/blas.hpp` (Fortran LP64 ABI,
 as `ALPS::ed` calls LAPACK) in place of the rework's Eigen views, as the
@@ -189,6 +227,15 @@ densities and hopping correlations, split charge components, scalar terms,
 one row per target); equivalent operator forms (reversed factors, scales in
 the matrices, projector-form terms, `Nup` and `Ndown` as fermionic charges);
 the private scratch directory; and the rejected inputs.
+The molecular solver (`classic_dmrg_molecular`, also labelled `chemistry`)
+is checked against an occupation-number exact diagonalization for one to five
+orbitals, with and without padding, energies and every RDM element; against
+the same integrals written as an `ALPS::models` Hamiltonian and solved by
+`ALPS::ed`; under truncation (variational energy, RDM traces); for callback
+observation and abort with the scratch directory removed; and for the rejected
+inputs. `classic_dmrg_multisite` locks the engine's long-range hopping and
+four-site fermion products, which the molecular solver relies on, against an
+exact diagonalization for 4, 6 and 8 sites.
 The label also covers XML catalog models solved against `ALPS::ed` (wrap
 bonds, spin 1, ladders, spinless fermion rings, Hubbard chains, rings and
 ladders, the t-J chain, correlations in both site orders). The SDK consumer

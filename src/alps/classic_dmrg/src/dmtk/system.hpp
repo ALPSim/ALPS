@@ -7,7 +7,8 @@
 // src/solvers/tensor_network/src/classic_dmrg/dmtk/system.hpp, the Eigen-based
 // rework of src/apps/dmrg/dmrg/dmtk in this tree (Adrian Feiguin's dmtk).
 // Adaptation: "dmtk/" include paths; dmtk::half_integer and dmtk/support.hpp
-// replace the ALPS model and utility headers.
+// replace the ALPS model and utility headers; the header includes <map>,
+// which it uses (the engine tests include it without a prior <map>).
 
 #ifndef DMTK_SYSTEM_H_
 #define DMTK_SYSTEM_H_
@@ -22,6 +23,7 @@
 #include <iostream>
 #include <iosfwd>
 #include <list>
+#include <map>
 #include <string>
 #include <iomanip>
 #include <cmath>
