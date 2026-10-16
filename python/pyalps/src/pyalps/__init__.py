@@ -71,8 +71,11 @@ for _extension_name in (
     globals()[_extension_name] = _extension
     sys.modules[__name__ + "." + _extension_name] = _extension
 
-# Optional solver modules are present when PYALPS_BUILD_SOLVERS is enabled.
-for _extension_name in ("maxent_c", "cthyb", "ctint"):
+# Optional solver modules are present when PYALPS_BUILD_SOLVERS is enabled;
+# the model, exact diagonalization and classic DMRG modules when
+# PYALPS_BUILD_MODELS is enabled and the SDK has the components (the Python
+# packages pyalps.models, pyalps.ed and pyalps.classic_dmrg wrap them).
+for _extension_name in ("maxent_c", "cthyb", "ctint", "models_c", "ed_c", "classic_dmrg_c"):
     try:
         _extension = __import__(
             __name__ + "._ext." + _extension_name, fromlist=[_extension_name]

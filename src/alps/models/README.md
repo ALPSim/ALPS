@@ -3,6 +3,8 @@
 `<alps/models.hpp>` builds a many-body model in code and compiles it to
 numeric local terms. It needs neither the XML catalog nor `alps::Parameters`;
 the module depends only on the standard library and Boost headers.
+The Python package binds it as `pyalps.models`, with the lattices under
+`pyalps.models.lattice` ([pyalps README](../../../python/pyalps/README.md#models-exact-diagonalization-and-classic-dmrg)).
 
 ```cpp
 #include <alps/models.hpp>

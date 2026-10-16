@@ -7,6 +7,8 @@ set(VCPKG_APPLOCAL_DEPS OFF)
 project(pyalps LANGUAGES C CXX)
 
 option(PYALPS_BUILD_SOLVERS "Build the MaxEnt, CT-HYB, and CT-INT bindings" ON)
+option(PYALPS_BUILD_MODELS
+  "Build the programmatic model, exact diagonalization and classic DMRG bindings" ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(Python 3.10 REQUIRED COMPONENTS Interpreter Development.Module)
@@ -50,7 +52,14 @@ endif()
 if(PYALPS_BUNDLE_APPLICATIONS)
   list(APPEND _alps_components applications)
 endif()
-find_package(ALPS ${PYALPS_VERSION_CORE} EXACT REQUIRED CONFIG COMPONENTS ${_alps_components})
+set(_alps_optional_components "")
+if(PYALPS_BUILD_MODELS)
+  # The classic DMRG component is optional in the SDK (ALPS_ENABLE_CLASSIC_DMRG).
+  list(APPEND _alps_components models ed)
+  list(APPEND _alps_optional_components classic_dmrg)
+endif()
+find_package(ALPS ${PYALPS_VERSION_CORE} EXACT REQUIRED CONFIG COMPONENTS ${_alps_components}
+  OPTIONAL_COMPONENTS ${_alps_optional_components})
 if(NOT ALPS_VERSION VERSION_EQUAL PYALPS_VERSION_CORE)
   message(FATAL_ERROR "pyalps ${PYALPS_VERSION_CORE} requires a matching ALPS SDK; found ${ALPS_VERSION}")
 endif()
@@ -107,6 +116,17 @@ if(PYALPS_BUILD_SOLVERS)
   pyalps_add_module(maxent_c cpp/maxent_c.cpp ALPS::maxent)
   pyalps_add_module(cthyb cpp/cthyb.cpp ALPS::cthyb)
   pyalps_add_module(ctint cpp/ctint.cpp ALPS::ctint)
+endif()
+if(PYALPS_BUILD_MODELS)
+  # models_c also binds the XML catalog importer and the lattice bridge of
+  # ALPS::alps; the three modules share one nanobind type registry.
+  pyalps_add_module(models_c cpp/models.cpp ALPS::models)
+  pyalps_add_module(ed_c cpp/ed.cpp ALPS::ed ALPS::models)
+  if(TARGET ALPS::classic_dmrg)
+    pyalps_add_module(classic_dmrg_c cpp/classic_dmrg.cpp ALPS::classic_dmrg ALPS::models)
+  else()
+    message(STATUS "pyalps: the SDK has no classic_dmrg component; classic_dmrg_c is not built")
+  endif()
 endif()
 
 # A package-specific name avoids DLL/SONAME collisions with other nanobind users.

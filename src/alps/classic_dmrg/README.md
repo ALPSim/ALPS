@@ -9,6 +9,8 @@ sector and measures compiled operators on them. The component depends on
 `ALPS::models` and, privately, on Eigen; it does not use the XML catalog,
 legacy parameters, HDF5, LAPACK or the simulation runtime, and consumers of
 the installed SDK need neither Eigen nor LAPACK.
+The Python package binds it as `pyalps.classic_dmrg` when the SDK has the
+component ([pyalps README](../../../python/pyalps/README.md#models-exact-diagonalization-and-classic-dmrg)).
 
 ```c++
 #include <alps/dmrg/classic.hpp>

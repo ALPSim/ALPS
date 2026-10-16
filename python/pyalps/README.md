@@ -67,6 +67,35 @@ After installing the matching SDK and build dependencies, use `python -m pip ins
 
 `PYALPS_BUILD_SOLVERS=OFF` disables MaxEnt, CT-HYB and CT-INT bindings independently of bundling executables. Pass it as `--config-setting cmake.define.PYALPS_BUILD_SOLVERS=OFF`; use the `PYALPS_BUNDLE_APPLICATIONS=OFF` environment setting when building against an SDK without applications. Solver bindings otherwise link the installed SDK libraries without recompiling their implementations.
 
+## Models, exact diagonalization and classic DMRG
+
+`pyalps.models`, `pyalps.ed` and `pyalps.classic_dmrg` bind the SDK components [`ALPS::models`](../../src/alps/models/README.md), [`ALPS::ed`](../../src/alps/ed/README.md) and [`ALPS::classic_dmrg`](../../src/alps/classic_dmrg/README.md): lattices and models built in Python or imported from the XML catalog, compiled to numeric local terms, and solved by exact diagonalization or DMRG without the XML applications.
+
+```python
+from pyalps import models, ed, classic_dmrg as dmrg
+lat = models.lattice
+
+model = models.heisenberg(lat.chain(8))                    # periodic ring, J = 1
+problem = ed.prepare_product(model, sector={"Sz": 0})      # one charge sector, 70 states
+energies = problem.eigenstates(count=2).eigenvalues        # dense or Lanczos by block size
+spectrum = ed.model_spectrum(model, all_momenta=True)      # every (Sz, k) block
+
+spin = models.spin()
+custom = models.Hamiltonian(lat.square(4, 4), spin, conserved_quantum_numbers=["Sz"])
+custom.add_bond(1.0, lambda i, j: models.located(spin, "Sz", i) * models.located(spin, "Sz", j))
+
+pauli = models.export_pauli(model)                         # Pauli strings for qubit simulators
+catalog = models.CatalogModel({"MODEL": "spin", "LATTICE": "chain lattice", "L": 8, "J": 1})
+
+chain = models.hubbard(lat.chain(16, bc="open"), t=1.0, U=4.0)
+result = dmrg.solve(chain, sweeps=dmrg.ramped_sweeps(4, 200), sector={"N": 16, "Sz": 0},
+                    measurements={"n": dmrg.site_terms(chain, "n")})
+```
+
+Matrices and spectra come back as NumPy arrays (eigenvectors column-major; sparse matrices convert with `to_scipy()`), and the compile and solve calls release the GIL. The module docstrings and `help()` describe the Python surface; the C++ READMEs document the conventions (fermion sign conventions, momentum labels, kept-state schedules). Bond and site specifications are Python callables, called once per bond or site when added.
+
+`PYALPS_BUILD_MODELS=OFF` (`--config-setting cmake.define.PYALPS_BUILD_MODELS=OFF`) skips these bindings. `pyalps.models` and `pyalps.ed` need only the always-built `models` and `ed` SDK components; `pyalps.classic_dmrg` is present when the SDK was built with `ALPS_ENABLE_CLASSIC_DMRG` (the default, which needs Eigen) and raises `ImportError` otherwise.
+
 ## Downstream native extensions
 
 The C++ SDK supplies `ALPS::alps` for standalone programs. The installed Python package separately supplies `pyalps::runtime` for extensions that share ALPS objects or HDF5 handles with pyalps. A matching C++ SDK is still required for headers and compile settings.

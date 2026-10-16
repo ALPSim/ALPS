@@ -8,6 +8,8 @@ and solves it densely (LAPACK) or iteratively (Lanczos over the in-tree
 IETL). Spectra can be resolved by every conserved charge and lattice momentum
 at once, and thermodynamic averages follow from the levels. It does not
 depend on the XML catalog, legacy parameters, HDF5 or the simulation runtime.
+The Python package binds it as `pyalps.ed`, with NumPy and SciPy views of
+the results ([pyalps README](../../../python/pyalps/README.md#models-exact-diagonalization-and-classic-dmrg)).
 
 ```c++
 #include <alps/ed.hpp>
