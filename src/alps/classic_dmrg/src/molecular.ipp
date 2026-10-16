@@ -13,7 +13,8 @@
 // indices they receive; the site basis is built from its N and Sz values
 // only; the solver names molecular_detail::Site, since classic.cpp has a
 // Site of its own. The validation, Hamiltonian lowering, measurement plan
-// and engine calls follow alpsx line by line.
+// and engine calls follow alpsx line by line, except that the measurements
+// are handed to the engine after the regular sweeps (marked below).
 #include <alps/dmrg/molecular.hpp>
 #include <alps/models/hamiltonian.hpp>
 #include <alps/models/site.hpp>
@@ -317,9 +318,15 @@ MolecularResult solve_molecular(MolecularInput const& input, Options const& opti
         schedule(0, i) = controls.sweeps[i].right_to_left;
         schedule(1, i) = controls.sweeps[i].left_to_right;
     }
-    system.corr = measurements;
     system.start(controls.sweeps.size(), schedule);
     system.run(static_cast<int>(controls.warmup_states));
+    // Changed here: alpsx set the measurements before start(), which
+    // rotated them through every step, about a fifth of the run time at 10
+    // orbitals. The final sweep runs over the whole chain in both directions
+    // and rebuilds both blocks from single sites, so the products it
+    // measures never came from those earlier rotations: the values are bit
+    // for bit the same.
+    system.corr = measurements;
     system.set_full_sweep(true);
     system.final_sweep(controls.sweeps.back().left_to_right, dmtk::RIGHT2LEFT, 1, true);
     // Read every expectation from the same final state and retained products.

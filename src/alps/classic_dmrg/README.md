@@ -107,13 +107,17 @@ are padded with one-dimensional neutral sites, which add no states. The result
 holds no wavefunction: no MPS, no CI coefficients, no checkpoint.
 
 The solver is meant for small active spaces and for checking other codes. The
-terms reach the engine one by one, about `n⁴` of them, with no
-complementary-operator construction of quantum-chemistry DMRG codes, and the
-RDM measurement adds `n⁴` more. With 32 kept states and two sweeps on dense
-random integrals at half filling, an Apple M-series laptop takes 2.0 s for 6
-orbitals, 16 s for 8, 75 s for 10 and 310 s for 12, almost all of it in the
-sweeps. alpsx's LiH case (six orbitals, two electrons per spin) at 128 states
-and six sweeps takes 3.4 s, against 3.0 s for alpsx's version of the solver.
+terms reach the engine one by one, about `n⁴` of them, and the RDM
+measurement adds `n⁴` more. At each step the engine adds up the terms that
+differ only in their operator on one block, but it rebuilds these sums from
+the terms every time instead of keeping the normal and complementary
+operators of quantum-chemistry DMRG codes. With 32 kept states and two
+sweeps on dense random integrals at half filling, an Apple M-series laptop
+takes 1.5 s for 6 orbitals, 9 s for 8, 30 s for 10 and 98 s for 12, almost
+all of it in the sweeps (2.0, 16, 71 and 295 s before the bookkeeping
+changes listed under [Origin and provenance](#origin-and-provenance)).
+alpsx's LiH case (six orbitals, two electrons per spin) at 128 states and
+six sweeps takes 2.3 s, against 3.0 s for alpsx's version of the solver.
 
 ## The `dmrg` application
 
@@ -148,10 +152,10 @@ copy of the engine:
   Lanczos solves on an energy stall: the solves of the final sweep now
   certify their states ([below](#the-lanczos-stop-rule)). Runs take about as
   long: on an Apple M-series laptop, a spin-1 chain of 64 sites at
-  `MAXSTATES=300` takes 17.5 s against 15.8 s for the old code (the certified
+  `MAXSTATES=300` takes 16.6 s against 15.8 s for the old code (the certified
   final sweep is the difference), a Hubbard chain of 32 sites at
-  `MAXSTATES=400` 6.4 s against 7.5 s, and the dmrg-06 tutorial at 32 sites
-  with correlations 3.2 s against 3.1 s.
+  `MAXSTATES=400` 6.1 s against 7.5 s, and the dmrg-06 tutorial at 32 sites
+  with correlations 2.9 s against 3.1 s.
 
 ## The Lanczos stop rule
 
@@ -210,9 +214,22 @@ legacy engine did through the Boost bindings; the Lanczos stop rule
 ([above](#the-lanczos-stop-rule)); the Lanczos recurrence runs in place and
 files only the values of its Krylov vectors (the rework did so for the
 reorthogonalized solves); `Vector` and `Matrix` stream their elements in one
-call instead of one per scalar (same file layout); and `VectorState::condense`
+call instead of one per scalar (same file layout); `VectorState::condense`
 keeps the merge permutations of the layouts it last saw instead of
-rebuilding them for every product.
+rebuilding them for every product; and the per-step bookkeeping of
+`System` (`build_composite_operators`, `hint`, `rotate_terms`) finds block
+operators through an index built once per call instead of a list scan per
+lookup, sorts a term's factors into blocks before copying any of them, and
+groups the terms whose block operators are summed into one composite
+operator through a table instead of comparing every pair of terms, which
+was quadratic in the number of terms. The grouping keeps the summed
+operator but can sum it in a different order (the replaced scan stepped
+over the term after each one it merged): converged runs agree with the old
+code to rounding, and a run far from convergence can land elsewhere, as
+the old code's own does when the integrals change at 1e-13 (at 8 and 10
+orbitals with 32 states and two sweeps, by 1e-3 and 1e-2 in the energy).
+The molecular solver adds its RDM terms for the final sweep only, which
+builds them in both blocks, instead of rotating them through every step.
 
 ## Tests
 

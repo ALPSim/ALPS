@@ -19,12 +19,15 @@
 //*******************************************************************
  
 #include "dmtk/output.hpp"
+#include <array>
 #include <functional>
 #include <iostream>
 #include <iosfwd>
 #include <list>
 #include <map>
+#include <set>
 #include <string>
+#include <tuple>
 #include <iomanip>
 #include <cmath>
 #include "dmtk/enums.hpp"
@@ -457,6 +460,23 @@ class System
     size_t block(int site) const;
 
     const BasicOp<T>* operator()(const BasicOp<T>& op) const;
+
+    // Written for this tree: the block (0-3) that holds a site and the
+    // site's index as that block stores it, the resolution block() and
+    // operator()(op) share; -1 when no block holds the site.
+    int locate(int site, int &local_site) const;
+    // Written for this tree: lookup tables over the four blocks with the
+    // match of operator()(op) (block by site, then name, site and internal
+    // site, first match in list order), built once per call of hint(),
+    // rotate_terms() or build_composite_operators() instead of a list scan
+    // per lookup. Valid only while the four blocks are unchanged, i.e.
+    // within that call.
+    using OpKey = std::tuple<std::string, int, int>;
+    struct OpIndex {
+      std::array<std::map<OpKey, const BasicOp<T>*>, 4> ops;
+      std::array<bool, 4> built{};
+    };
+    const BasicOp<T>* indexed_op(const BasicOp<T>& op, OpIndex &index) const;
     const Block<T>& operator[](size_t pos) const 
       { 
         const Block<T> *b;
@@ -2304,6 +2324,11 @@ System<T>::hint(int _mask, bool add_local_h, const Hami<T> *_h)
 //   cout << "Lap: " << dmtk::format_elapsed(clock.lap_elapsed()) << endl;
   }
 
+  // Changed here: operators are found through a per-call index (see
+  // OpIndex) rather than a scan of the block lists per lookup, and a term's
+  // factors are sorted into blocks before anything is copied, so the terms
+  // that do not couple these two blocks, most of them, cost no copies.
+  OpIndex index;
   typename Hami<T>::const_iterator hiter;
   for(hiter = this_hami.begin(); hiter != this_hami.end(); hiter++){
     const Term<T>& t = (*hiter);
@@ -2317,7 +2342,7 @@ System<T>::hint(int _mask, bool add_local_h, const Hami<T> *_h)
 
         bool calc_hc = this_hami.use_hc();
 
-        const BasicOp<T>* op= operator()(top);
+        const BasicOp<T>* op= indexed_op(top, index);
         if(op){
           if (op->is_diagonal()) calc_hc = false;
 
@@ -2349,23 +2374,22 @@ System<T>::hint(int _mask, bool add_local_h, const Hami<T> *_h)
       Term<T> aux_term1, aux_term2;
       int bmask = 0;
       for(int i = 0; i < t.size(); i++){
-        BasicOp<T> top = t[i].internals();
-        bmask |= mask(block(top.site()));
+        size_t const ib = block(t[i].site());
+        bmask |= mask(ib);
 //        cout << top.description() << " " << pos1 << " " << pos2 << " " << block(top.site()) << endl;
-        if(block(top.site()) == pos1){
-          aux_term1 *= top;
-          found1 = true;
-        }
-        if(block(top.site()) == pos2){
-          aux_term2 *= top;
-          found2 = true;
-        }
-        if(block(top.site()) == BLOCK_NONE){
+        if(ib == pos1) found1 = true;
+        if(ib == pos2) found2 = true;
+        if(ib == BLOCK_NONE){
           found = false;
           break;
         }
       }
       if(found && (bmask & _mask) == bmask && found1 && found2){ // we have a new composite operator
+        for(int i = 0; i < t.size(); i++){
+          size_t const ib = block(t[i].site());
+          if(ib == pos1) aux_term1 *= t[i].internals();
+          if(ib == pos2) aux_term2 *= t[i].internals();
+        }
 
         BasicOp<T> top1, top2;
         if(aux_term1.size() == 1) // the piece contains a single operator
@@ -2376,8 +2400,8 @@ System<T>::hint(int _mask, bool add_local_h, const Hami<T> *_h)
           top2 = aux_term2[0].internals();
         else
           top2 = aux_term2; // the piece contains more than one operator
-        const BasicOp<T>* op1 = operator()(top1);
-        const BasicOp<T>* op2 = operator()(top2);
+        const BasicOp<T>* op1 = indexed_op(top1, index);
+        const BasicOp<T>* op2 = indexed_op(top2, index);
 
         if(!op1) {
           dmtk::out() << "ERROR : Operator " << top1.description() << " in term " << t.description() << " not found\n";
@@ -2691,6 +2715,27 @@ System<T>::rotate_terms(int position, Block<T> &b, Basis &basis, Basis &rho_basi
   dmtk::Stopwatch clock;
   clock.restart();
 
+  // Changed here: operators are found through a per-call index over the
+  // four blocks (see OpIndex), whether the new block b already holds an
+  // operator is answered from a key set kept next to it rather than a scan
+  // of its list, and a term's factors are sorted into blocks before any of
+  // them is copied. The nested calls below add to b, so they drop the set.
+  OpIndex index;
+  std::set<OpKey> in_b;
+  bool in_b_valid = false;
+  auto b_contains = [&](const BasicOp<T> &op) {
+    if(!in_b_valid){
+      in_b.clear();
+      for(const BasicOp<T> &o : b) in_b.emplace(o.name(), o.site(), o.internal_site());
+      in_b_valid = true;
+    }
+    return in_b.count(OpKey(op.name(), op.site(), op.internal_site())) != 0;
+  };
+  auto b_push = [&](const BasicOp<T> &op) {
+    b.push_back(op);
+    if(in_b_valid) in_b.emplace(op.name(), op.site(), op.internal_site());
+  };
+
 //********************************************************************
 //                   NEW BLOCK
 //********************************************************************
@@ -2718,6 +2763,7 @@ System<T>::rotate_terms(int position, Block<T> &b, Basis &basis, Basis &rho_basi
       if (op.is_hami()) {
         rotate_hami(position, b, basis, rho_basis, &op.hami());
         rotate_terms(position, b, basis, rho_basis, &op.hami());
+        in_b_valid = false;
       } else {
         bmask |= mask(block(op.site()));
       }
@@ -2732,14 +2778,14 @@ System<T>::rotate_terms(int position, Block<T> &b, Basis &basis, Basis &rho_basi
       BasicOp<T> real_op;
       for (BasicOp<T> const & op : t) {
         if (block(op.site()) == site_block && !op.is_hami()) {
-          _op = operator()(op);
+          _op = indexed_op(op, index);
           if (!_op) dmtk::out() << "WARNING : Operator " << op.description() << " not found\n";
           real_op = op;
           real_op.dqn = _op->dqn;
           break;
         }
       }
-      bool add = b.contains(real_op);
+      bool add = b_contains(real_op);
 
       if(!add && _op){ // If we haven't added it yet, we do it now
         real_op.resize(rho_basis);
@@ -2749,7 +2795,7 @@ System<T>::rotate_terms(int position, Block<T> &b, Basis &basis, Basis &rho_basi
         clock.mark();
 
         new_operator(real_op, *_op, rho, basis, 1-position);
-        b.push_back(real_op);
+        b_push(real_op);
         if(verbose() > 0)
           dmtk::out() << "Lap: " << dmtk::format_elapsed(clock.lap_elapsed()) << endl;
       }
@@ -2767,15 +2813,11 @@ System<T>::rotate_terms(int position, Block<T> &b, Basis &basis, Basis &rho_basi
     bool found = false;
     if((t.type() == TermType::TERM_PRODUCT && t.size() >= 2) || t.type() == TermType::TERM_LOCAL || t.type() == TermType::TERM_EXTERN){
       Term<T> aux_term;
-      BasicOp<T> top2;
       int bmask = 0;
       for(int i = 0; i < t.size(); i++){
-        BasicOp<T> top = t[i];
-        if(block(top.site()) == the_block){
-          aux_term *= top;
-          found = true;
-        }
-        bmask |= mask(block(top.site()));
+        size_t const ib = block(t[i].site());
+        if(ib == the_block) found = true;
+        bmask |= mask(ib);
       }
 
       bool doit = false;
@@ -2785,13 +2827,15 @@ System<T>::rotate_terms(int position, Block<T> &b, Basis &basis, Basis &rho_basi
          doit = true;
 
       if(doit){ // we found a piece of a composite operator
+        for(int i = 0; i < t.size(); i++)
+          if(block(t[i].site()) == the_block) aux_term *= t[i];
         BasicOp<T> top1;
         if(aux_term.size() == 1) // the piece contains a single operator
           top1 = aux_term[0];
         else
           top1 = aux_term; // the piece contains more than one operator
 
-        const BasicOp<T>* op1 = operator()(top1);
+        const BasicOp<T>* op1 = indexed_op(top1, index);
 
         if(!op1) {
           dmtk::out() << "ERROR 1: Operator " << top1.description() << " not found\n";
@@ -2800,7 +2844,7 @@ System<T>::rotate_terms(int position, Block<T> &b, Basis &basis, Basis &rho_basi
 
         BasicOp<T> new_op(top1); 
         new_op.dqn = op1->dqn;
-        bool add = b.contains(new_op);
+        bool add = b_contains(new_op);
 
         if(!add && op1){
           new_op.resize(rho_basis);
@@ -2810,7 +2854,7 @@ System<T>::rotate_terms(int position, Block<T> &b, Basis &basis, Basis &rho_basi
             dmtk::out() << "NEW OPERATOR " << new_op.description() << endl;
           new_op = T(0);
           new_operator(new_op, *op1, rho, basis, position);
-          b.push_back(new_op);
+          b_push(new_op);
           if(verbose() > 0)
             dmtk::out() << "Lap: " << dmtk::format_elapsed(clock.lap_elapsed()) << endl;
         }
@@ -2828,29 +2872,28 @@ System<T>::rotate_terms(int position, Block<T> &b, Basis &basis, Basis &rho_basi
       Term<T> aux_term1, aux_term2;
       int bmask = 0;
       for(int i = 0; i < t.size(); i++){
-        BasicOp<T> top = t[i];
-        bmask |= mask(block(top.site()));
+        size_t const ib = block(t[i].site());
+        bmask |= mask(ib);
         
-        if(block(top.site()) == pos1){
-          aux_term1 *= top;
-          found1 = true;
-        }
-        if(block(top.site()) == pos2){
-          aux_term2 *= top;
-          found2 = true;
-        }
+        if(ib == pos1) found1 = true;
+        if(ib == pos2) found2 = true;
       }
 //    if bmask == _mask, this term will go into the Hamiltonian
 //    unless it is TermType::TERM_EXTERN
       if(((bmask != _mask) || (bmask == _mask && t.type() == TermType::TERM_EXTERN)) && found1 && found2){ // we have a new composite operator
+        for(int i = 0; i < t.size(); i++){
+          size_t const ib = block(t[i].site());
+          if(ib == pos1) aux_term1 *= t[i];
+          if(ib == pos2) aux_term2 *= t[i];
+        }
         BasicOp<T> top1(aux_term1);
         if(aux_term1.size() == 1)
           top1 = aux_term1[0];
         BasicOp<T> top2(aux_term2);
         if(aux_term2.size() == 1)
           top2 = aux_term2[0];
-        const BasicOp<T>* op1 = operator()(top1);
-        const BasicOp<T>* op2 = operator()(top2);
+        const BasicOp<T>* op1 = indexed_op(top1, index);
+        const BasicOp<T>* op2 = indexed_op(top2, index);
 
         if(!op1) {
           dmtk::out() << "ERROR 2: Operator " << top1.description() << " in term " << t.description() << " not found\n";
@@ -2863,14 +2906,14 @@ System<T>::rotate_terms(int position, Block<T> &b, Basis &basis, Basis &rho_basi
 
         Term<T> new_term; 
         for(int i = 0; i < t.size(); i++){
-          BasicOp<T> top = t[i];
-          if(block(top.site()) == pos1 || block(top.site()) == pos2){
-            new_term *= top;
+          size_t const ib = block(t[i].site());
+          if(ib == pos1 || ib == pos2){
+            new_term *= t[i];
           }
         }
         BasicOp<T> new_op(new_term); 
         new_op.dqn = op1->dqn + op2->dqn;
-        bool add = b.contains(new_op);
+        bool add = b_contains(new_op);
 
         if(!add && op1 && op2){
           new_op.resize(rho_basis);
@@ -2880,7 +2923,7 @@ System<T>::rotate_terms(int position, Block<T> &b, Basis &basis, Basis &rho_basi
             dmtk::out() << "ADDING NEW OPERATOR " << new_op.description() << endl;
           new_op = T(0);
           new_operator(new_op, *op1, *op2, pos1, pos2, rho, basis, T(1));
-          b.push_back(new_op);
+          b_push(new_op);
           if(verbose() > 0)
             dmtk::out() << "Lap: " << dmtk::format_elapsed(clock.lap_elapsed()) << endl;
         }
@@ -4007,9 +4050,17 @@ System<T>::build_composite_operators(const Hami<T> *this_hami)
   if(this_hami) ph = this_hami;
   const Hami<T> &_h = *ph;
 
+  // Changed here: operators are found through a per-call index rather than
+  // a scan of the block lists per lookup, terms are read by reference and
+  // moved into aux_terms, and each factor's block is resolved once, before
+  // the AuxTerm is built, so that the terms the mask test below drops are
+  // never copied.
+  OpIndex index;
+  std::vector<size_t> where;
+
   typename Hami<T>::const_iterator hiter;
   for(hiter = _h.begin(); hiter != _h.end(); hiter++){
-    const Term<T> t = *hiter;
+    const Term<T> &t = *hiter;
     if(_use_coef_tol && fabs(dmtk::real(t.coef())) <= _coef_tol) continue;
 
     if(t.size() == 1 && t[0].is_hami()) {
@@ -4017,25 +4068,26 @@ System<T>::build_composite_operators(const Hami<T> *this_hami)
     }
 
     if(t.size() >= 2 && ((apply_hami() && t.type() == TERM_PRODUCT) || (apply_extern() && t.type() == TERM_EXTERN))){
-      AuxTerm<T> new_term;
-      new_term.t = (*hiter);
-
       int bmask = 0;
       bool found = true;
+      where.assign(t.size(), BLOCK_NONE);
       for(int i = 0; i < t.size(); i++){
-        const BasicOp<T> top = t[i].internals();
-        if(block(top.site()) == BLOCK_NONE){
+        where[i] = block(t[i].site());
+        if(where[i] == BLOCK_NONE){
           found = false;
 //          cout << "WARNING: *** Operator " << top.description() << " " << top.site() << " not found\n";
           break;
         }
-        for(int ib = 1; ib <= 4; ib++){
-          if(block(top.site()) == (size_t)ib){
-            new_term.cterm[ib-1] *= top;
-            new_term.pos[ib-1] = i;
-            bmask |= mask((size_t)ib);
-          }
-        }
+        bmask |= mask(where[i]);
+      }
+      if(!(found && bmask != MASK_BLOCK1 && bmask != MASK_BLOCK2 && bmask != MASK_BLOCK3 && bmask != MASK_BLOCK4 && ((t.type() != TERM_EXTERN && bmask != (MASK_BLOCK1|MASK_BLOCK2) && bmask != (MASK_BLOCK2|MASK_BLOCK3) && bmask != (MASK_BLOCK3|MASK_BLOCK4)) || t.type() == TERM_EXTERN || this_hami != NULL))) continue;
+
+      AuxTerm<T> new_term;
+      new_term.t = (*hiter);
+      for(int i = 0; i < t.size(); i++){
+        const BasicOp<T> top = t[i].internals();
+        new_term.cterm[where[i]-1] *= top;
+        new_term.pos[where[i]-1] = i;
       }
       new_term.mask = bmask;
       new_term.nblocks = 0;
@@ -4048,7 +4100,7 @@ if(bmask == (MASK_BLOCK1|MASK_BLOCK2|MASK_BLOCK4) || bmask == (MASK_BLOCK1|MASK_
 if(bmask == (MASK_BLOCK1|MASK_BLOCK2|MASK_BLOCK3) || bmask == (MASK_BLOCK4|MASK_BLOCK3|MASK_BLOCK2)) new_term.nblocks = 3;
 
       bool found_op = true;
-      if(found && bmask != MASK_BLOCK1 && bmask != MASK_BLOCK2 && bmask != MASK_BLOCK3 && bmask != MASK_BLOCK4 && ((t.type() != TERM_EXTERN && bmask != (MASK_BLOCK1|MASK_BLOCK2) && bmask != (MASK_BLOCK2|MASK_BLOCK3) && bmask != (MASK_BLOCK3|MASK_BLOCK4)) || t.type() == TERM_EXTERN || this_hami != NULL)){
+      { // the mask test that guarded this block is the continue above
         for(int ib = 3; ib >= 0 ; ib--){
           if(new_term.cterm[ib].size() != 0){
             if(new_term.cterm[ib].size() == 1)
@@ -4056,7 +4108,7 @@ if(bmask == (MASK_BLOCK1|MASK_BLOCK2|MASK_BLOCK3) || bmask == (MASK_BLOCK4|MASK_
             else
               new_term.top[ib] = new_term.cterm[ib];
 
-            new_term.op[ib] = operator()(new_term.top[ib]);
+            new_term.op[ib] = indexed_op(new_term.top[ib], index);
             if(!new_term.op[ib]) {
               dmtk::out() << "ERROR : Operator " << new_term.top[ib].description() << " not found\n";
               found_op = false;
@@ -4064,17 +4116,70 @@ if(bmask == (MASK_BLOCK1|MASK_BLOCK2|MASK_BLOCK3) || bmask == (MASK_BLOCK4|MASK_
           }
         }
 
-        if(found_op) aux_terms.push_back(new_term);
+        if(found_op) aux_terms.push_back(std::move(new_term));
       }
     }
   }
+
+  // Changed here: a leader collects the terms it can be summed with from a
+  // table keyed on what the match below compares (mask, diagonality, total
+  // charge change, and the operators in the leader's blocks b1 and b3)
+  // instead of comparing it with every later term, which made each
+  // iteration quadratic in the number of terms (n^4 for molecular
+  // Hamiltonians). A term enters the table once for each (b1, b3) choice a
+  // leader with its mask can make. Every matching later term joins its first
+  // leader in list order. The scan this replaces erased each term it merged
+  // and then stepped over the one after it, which was left to a later leader
+  // or to a group of its own; when the merged term was the last one, the
+  // step went past the end of the list, which libc++ and libstdc++ turn into
+  // a second pass from the front. The summed operator is unchanged; only the
+  // grouping, and so the rounding of the sums, can differ. Runs far from
+  // convergence can amplify that: at 8 and 10 orbitals with 32 states and
+  // two sweeps, the energy moves by 1e-3 and 1e-2, no more than the old
+  // code moves when the integrals change by 1e-13.
+  using QNKey = std::vector<short>;
+  auto qn_key = [](const QN &q) {
+    QNKey key;
+    for(int i = 0; i < int(QN::QN_LAST); i++)
+      if(QN::get_qn_mask() & (1 << i)) key.push_back(q[i].get_twice());
+    return key;
+  };
+  using OpId = std::tuple<QNKey, std::string, int, int, int>;
+  auto op_id = [&](const BasicOp<T> *op) {
+    return OpId(qn_key(op->dqn), op->name(), op->site(), op->internal_site(), op->label());
+  };
+  using GroupKey = std::tuple<int, bool, QNKey, size_t, size_t, OpId, OpId>;
+  auto variants = [](int m) -> std::vector<std::pair<size_t, size_t> > {
+    switch(m){
+      case (MASK_BLOCK1|MASK_BLOCK4): return {{BLOCK4, BLOCK_NONE}, {BLOCK1, BLOCK_NONE}};
+      case (MASK_BLOCK2|MASK_BLOCK4): return {{BLOCK2, BLOCK_NONE}};
+      case (MASK_BLOCK1|MASK_BLOCK3): return {{BLOCK3, BLOCK_NONE}};
+      case (MASK_BLOCK1|MASK_BLOCK2): return {{BLOCK2, BLOCK_NONE}};
+      case (MASK_BLOCK3|MASK_BLOCK4): return {{BLOCK3, BLOCK_NONE}};
+      case (MASK_BLOCK2|MASK_BLOCK3): return {{BLOCK2, BLOCK_NONE}};
+      case (MASK_BLOCK1|MASK_BLOCK2|MASK_BLOCK3): return {{BLOCK2, BLOCK3}};
+      case (MASK_BLOCK4|MASK_BLOCK2|MASK_BLOCK3): return {{BLOCK2, BLOCK3}};
+      case (MASK_BLOCK1|MASK_BLOCK2|MASK_BLOCK4): return {{BLOCK2, BLOCK4}, {BLOCK2, BLOCK1}};
+      case (MASK_BLOCK1|MASK_BLOCK3|MASK_BLOCK4): return {{BLOCK3, BLOCK4}, {BLOCK3, BLOCK1}};
+    }
+    return {};
+  };
+  auto group_key = [&](const AuxTerm<T> &a, size_t b1, size_t b3) {
+    return GroupKey(a.mask, a.t.is_diagonal(), qn_key(a.t.dqn()), b1, b3, op_id(a.op[int(b1)-1]),
+                    b3 == BLOCK_NONE ? OpId() : op_id(a.op[int(b3)-1]));
+  };
+  typedef typename std::list<AuxTerm<T> >::iterator aux_iterator;
+  std::map<GroupKey, std::vector<aux_iterator> > groups;
+  if(use_composite())
+    for(aux_iterator a = aux_terms.begin(); a != aux_terms.end(); a++)
+      if(!a->done)
+        for(auto const &v : variants(a->mask))
+          groups[group_key(*a, v.first, v.second)].push_back(a);
 
 //  cout << "COMPOSITE TERMS: " << aux_terms.size() << endl;
   typename std::list<AuxTerm<T> >::iterator titer;
   for(titer = aux_terms.begin(); titer != aux_terms.end(); titer++){
     AuxTerm<T>& auxt = (*titer);
-    const Term<T>& t = (auxt.t);
-//    T sign = T(1);
 
     if(!auxt.done){
 
@@ -4123,83 +4228,74 @@ if(bmask == (MASK_BLOCK1|MASK_BLOCK2|MASK_BLOCK3) || bmask == (MASK_BLOCK4|MASK_
       auxt.sum_op = *(auxt.op[int(auxt.b2)-1]);
       if(auxt.nblocks >= 3) auxt.ref_op[1] = (auxt.op[int(auxt.b3)-1]);
 
-//      if(auxt.pos[auxt.b1-1] < auxt.pos[auxt.b2-1] && auxt.b1 > auxt.b2 && (auxt.ref_op[0]->fermion() || auxt.sum_op.fermion())) sign = T(-1);
-
       typename BMatrix<T>::iterator biter;
       for(biter = auxt.sum_op.begin(); biter != auxt.sum_op.end(); biter++){
         SubMatrix<T> &sm = (*biter);
-        sm *= t.coef();
+        sm *= auxt.t.coef();
       }
       auxt.done = true;
 
 //      if(verbose() > 0)
       {
-//        cout << "COMPOSITE TERM " << auxt.t.description() << " " << auxt.nblocks << " " << auxt.ref_op[0]->description();
         if(auxt.nblocks >=3 ) dmtk::out() << " " << auxt.ref_op[1]->description();
         dmtk::out() << endl;
       }
 
+      auto const group = groups.find(group_key(auxt, auxt.b1, auxt.nblocks >= 3 ? auxt.b3 : BLOCK_NONE));
+      if(group == groups.end()) continue;
       int nterm = 1;
-      typename std::list<AuxTerm<T> >::iterator titer2;
-      for(titer2 = titer; titer2 != aux_terms.end(); titer2++){
+      for(aux_iterator titer2 : group->second){
         AuxTerm<T>& auxt2 = (*titer2);
+        if(auxt2.done) continue;
         const Term<T>& t2 = auxt2.t;
-//        sign = T(1);
-// FIXME
-        if(!auxt2.done && auxt2.mask == auxt.mask && auxt.t.is_diagonal() == auxt2.t.is_diagonal() && auxt.t.dqn() == auxt2.t.dqn() && ( (auxt.nblocks == 2 && auxt2.op[int(auxt.b1)-1]->dqn == auxt.ref_op[0]->dqn && auxt2.op[int(auxt.b1)-1]->internals() == auxt.ref_op[0]->internals()) || (auxt.nblocks == 3 && auxt2.op[int(auxt.b1)-1]->dqn == auxt.ref_op[0]->dqn && auxt2.op[int(auxt.b3)-1]->dqn == auxt.ref_op[1]->dqn && auxt2.op[int(auxt.b1)-1]->internals() == auxt.ref_op[0]->internals() && auxt2.op[int(auxt.b3)-1]->internals() == auxt.ref_op[1]->internals()))){
-//        if(!auxt2.done && auxt2.mask == auxt.mask && auxt.t.dqn() == auxt2.t.dqn() && (auxt2.op[int(auxt.b1)-1]->internals() == auxt.ref_op[0]->internals() && auxt.nblocks == 2)) {
-          auxt2.done = true;
-//          if(verbose() > 0)
-//            cout << "COMPOSITE TERM SUM " << auxt2.t.description() << " " << auxt2.t.dqn() << endl;
-          auxt2.mask = 0;
-//          if(auxt2.pos[auxt.b1-1] < auxt2.pos[auxt.b2-1] && auxt2.b1 > auxt2.b2 && (auxt.ref_op[0]->fermion() || auxt.sum_op.fermion())) sign = T(-1);
-          typename BMatrix<T>::iterator biter1;
-          const BMatrix<T>& bm2 = *auxt2.op[int(auxt.b2)-1];
+        auxt2.done = true;
+        auxt2.mask = 0;
+        const BMatrix<T>& bm2 = *auxt2.op[int(auxt.b2)-1];
 
 //////////////////////////////////////////////
 // If this is the second term in the sum,
 // initialize sum_op to include all the blocks
 //////////////////////////////////////////////
-          if(nterm == 1){
-            BasicOp<T> aux_sum;
-            aux_sum = auxt.sum_op.internals();
-            const Block<T> *_block;
-            valarray<const Block<T>* > b(4);
-            b[0] = _b1;
-            b[1] = _b2;
-            b[2] = _b3;
-            b[3] = _b4;
-            _block = b[int(auxt.b2)-1];
-            aux_sum.resize(_block->basis().subspaces());
-            for(biter1 = auxt.sum_op.begin(); biter1 != auxt.sum_op.end(); biter1++){
-              SubMatrix<T> &_sm1 = (*biter1);
-              SubMatrix<T> *_sm2 = aux_sum.block(_sm1.qn());
-              *_sm2 = _sm1;
-            }
-            auxt.sum_op = aux_sum;
+        if(nterm == 1){
+          BasicOp<T> aux_sum;
+          aux_sum = auxt.sum_op.internals();
+          const Block<T> *_block;
+          valarray<const Block<T>* > b(4);
+          b[0] = _b1;
+          b[1] = _b2;
+          b[2] = _b3;
+          b[3] = _b4;
+          _block = b[int(auxt.b2)-1];
+          aux_sum.resize(_block->basis().subspaces());
+          typename BMatrix<T>::iterator biter1;
+          for(biter1 = auxt.sum_op.begin(); biter1 != auxt.sum_op.end(); biter1++){
+            SubMatrix<T> &_sm1 = (*biter1);
+            SubMatrix<T> *_sm2 = aux_sum.block(_sm1.qn());
+            *_sm2 = _sm1;
           }
+          auxt.sum_op = aux_sum;
+        }
 //////////////////////////////////////////////
 
-          nterm++;
-          typename BMatrix<T>::const_iterator biter2;
-          for(biter2 = bm2.begin(); biter2 != bm2.end(); biter2++){
-            const SubMatrix<T> &_sm2 = (*biter2);
-            SubMatrix<T> *_sm1 = auxt.sum_op.block(_sm2.qn());
-            if(_sm1){
-              Matrix<T> sm2 = _sm2;
-              Matrix<T> &sm1 = *_sm1;
-              sm2 *= t2.coef();
-              sm1 += sm2;
-            } else {
-              dmtk::out() << "WARNING: Block not found " << auxt.t.description() << " " << auxt2.t.description() << endl;
-;
-            }
+        nterm++;
+        typename BMatrix<T>::const_iterator biter2;
+        for(biter2 = bm2.begin(); biter2 != bm2.end(); biter2++){
+          const SubMatrix<T> &_sm2 = (*biter2);
+          SubMatrix<T> *_sm1 = auxt.sum_op.block(_sm2.qn());
+          if(_sm1){
+            Matrix<T> sm2 = _sm2;
+            Matrix<T> &sm1 = *_sm1;
+            sm2 *= t2.coef();
+            sm1 += sm2;
+          } else {
+            dmtk::out() << "WARNING: Block not found " << auxt.t.description() << " " << auxt2.t.description() << endl;
           }
-          if(titer2 != titer) titer2 = aux_terms.erase(titer2);
         }
       }
     }
   }
+  // The merged terms leave the list once no table entry refers to them.
+  aux_terms.remove_if([](const AuxTerm<T> &a) { return a.done && a.mask == 0; });
 //  cout << "COMPOSITE TERMS: " << aux_terms.size() << endl;
 //  cout << "Build composite time: " << dmtk::format_elapsed(aux_timer.elapsed()) << endl;
 }
@@ -4477,16 +4573,15 @@ init_term_composite(System<T> &ss, const AuxTerm<T> &auxt, const Term<T> &t, con
 }
 
 
+// locate() keeps the block offsets that block() and operator()(op) each
+// computed in two heap-allocated vectors per call; the first block whose
+// sites contain `site` wins, as in the per-site scan it replaces.
 template <class T>
-size_t
-System<T>::block(int site) const
+int
+System<T>::locate(int site, int &local_site) const
 {
-  std::vector<const Block<T>* > b(4);
-  std::vector<int> offset(4);
-  b[0] = _b1;
-  b[1] = _b2;
-  b[2] = _b3;
-  b[3] = _b4;
+  std::array<const Block<T>*, 4> const b = {_b1, _b2, _b3, _b4};
+  std::array<int, 4> offset;
   offset[0] = _in_warmup && _grow_symmetric && _grow_outward && size() < h.lattice().size() ? h.lattice().size()/2 - _b1->lattice().size() - _b2->lattice().size() : 0;
   offset[1] = _in_warmup && _grow_symmetric && _grow_outward && size() < h.lattice().size() ? offset[0] + _b1->lattice().size() : _b1->lattice().size();
   offset[2] = offset[1] + _b2->lattice().size();
@@ -4497,45 +4592,53 @@ System<T>::block(int site) const
     offset[2] = offset[3] - _b3->lattice().size();
   }
 
-  for(size_t i = 0; i < 4; i++){
-    const Lattice &l = b[i]->lattice();
-    for (size_t n = 0; n < l.size(); ++n) {
-      if (int(n) + offset[i] == site) return i + 1;
+  for(int i = 0; i < 4; i++){
+    int const sites = int(b[i]->lattice().size());
+    if (site >= offset[i] && site < offset[i] + sites) {
+      local_site = b[i]->single_site() ? site - offset[i] : site;
+      return i;
     }
   }
-  return BLOCK_NONE;
+  return -1;
+}
+
+template <class T>
+size_t
+System<T>::block(int site) const
+{
+  int local_site;
+  int const i = locate(site, local_site);
+  return i < 0 ? BLOCK_NONE : size_t(i + 1);
 }
 
 template<class T>
 const BasicOp<T>*
 System<T>::operator()(const BasicOp<T>& op) const
 {
-  std::vector<const Block<T>* > b(4);
-  std::vector<int> offset(4);
-  b[0] = _b1;
-  b[1] = _b2;
-  b[2] = _b3;
-  b[3] = _b4;
-  offset[0] = _in_warmup && _grow_symmetric && _grow_outward && size() < h.lattice().size() ? h.lattice().size()/2 - _b1->lattice().size() - _b2->lattice().size() : 0;
-  offset[1] = _in_warmup && _grow_symmetric && _grow_outward && size() < h.lattice().size() ? offset[0] + _b1->lattice().size() : _b1->lattice().size();
-  offset[2] = offset[1] + _b2->lattice().size();
-  offset[3] = offset[2] + _b3->lattice().size();
+  int local_site;
+  int const i = locate(op.site(), local_site);
+  if (i < 0) return 0;
+  std::array<const Block<T>*, 4> const b = {_b1, _b2, _b3, _b4};
+  BasicOp<T> _op(op);
+  _op.set_site(local_site);
+  return (b[i]->operator()(_op));
+}
 
-  if(_in_warmup && _grow_symmetric && size() < h.lattice().size() && !_grow_outward){
-    offset[3] = h.lattice().size() - _b4->lattice().size();
-    offset[2] = offset[3] - _b3->lattice().size();
+template<class T>
+const BasicOp<T>*
+System<T>::indexed_op(const BasicOp<T>& op, OpIndex &index) const
+{
+  int local_site;
+  int const i = locate(op.site(), local_site);
+  if (i < 0) return 0;
+  if (!index.built[i]) {
+    std::array<const Block<T>*, 4> const b = {_b1, _b2, _b3, _b4};
+    for (BasicOp<T> const & o : *b[i])
+      index.ops[i].emplace(OpKey(o.name(), o.site(), o.internal_site()), &o);
+    index.built[i] = true;
   }
-  for(int i = 0; i < 4; i++){
-    const Lattice &l = b[i]->lattice();
-    for (size_t n = 0; n < l.size(); ++n) {
-      if (int(n) + offset[i] == op.site()) {
-        BasicOp<T> _op(op);
-        if (b[i]->single_site()) _op.set_site(op.site() - offset[i]);
-        return (b[i]->operator()(_op));
-      }
-    }
-  }
-  return 0;
+  auto const found = index.ops[i].find(OpKey(op.name(), local_site, op.internal_site()));
+  return found == index.ops[i].end() ? 0 : found->second;
 }
 
 //////////////////////////////////////////////////////////////////
