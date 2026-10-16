@@ -25,6 +25,10 @@ components:
     name: ALPS Core Libraries accumulators
     algorithm: []
     implementation: [wallerberger2018alpscore]
+  params:
+    name: ALPS Core Libraries parameters
+    algorithm: []
+    implementation: [wallerberger2018alpscore]
   scheduler:
     name: ALPS parallel Monte Carlo scheduler
     algorithm: []

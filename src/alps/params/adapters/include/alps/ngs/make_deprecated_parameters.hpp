@@ -15,12 +15,16 @@
 #ifndef ALPS_NGS_MADE_DEPRECATED_PARAMETERS_HPP
 #define ALPS_NGS_MADE_DEPRECATED_PARAMETERS_HPP
 
-#include <alps/ngs/params.hpp>
+#include <alps/params.hpp>
 #include <alps/config.h>
 #include <alps/parameter.h>
 
 namespace alps {
 
+    /// The supplied parameters as an alps::Parameters, for code that uses it
+    /** Each supplied parameter (params::supplied_text()) is passed on as
+        its text, whether or not the program defined it. Defaults are not
+        passed on: code reading the result applies its own. */
     ALPS_DECL Parameters make_deprecated_parameters(params const & arg);
 
 }

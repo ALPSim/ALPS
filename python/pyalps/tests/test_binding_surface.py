@@ -685,27 +685,49 @@ def test_params_mapping_equality_and_value_ladder():
     except TypeError:
         pass
 
-    # Python values must retain their user-visible behavior. Native C++
-    # conversion is tested by the downstream parameter probe, not by forcing
-    # Python lookups to adopt the restricted native variant's types.
-    values = [
-        None, 2 ** 40, [2 ** 53 + 1], [True, False], [True, 1],
-        np.bool_(True), np.int64(8), np.float32(1.25), np.longdouble("1.125"),
-        np.complex64(1 + 2j), np.clongdouble(3 + 4j), np.bytes_(b"native"),
-        [np.int64(1), np.int64(2)], np.array([1, 2], dtype=np.int64),
-        np.ma.array([1, 2], mask=False), np.array([1.5, 2.5], dtype=np.float32),
+    # Python values are supplied as text, which a program parses with the
+    # type it defines (the downstream parameter probe tests that). Until one
+    # does, a value reads back from its text: an integer, a float, an array
+    # of numbers, or else the text. Booleans are supplied as 1 and 0, and a
+    # list of one number reads back as that number.
+    readback = [
+        (2 ** 40, 2 ** 40), (np.bool_(True), 1), (np.int64(8), 8),
+        (np.float32(1.25), 1.25), (np.longdouble("1.125"), 1.125),
+        (np.bytes_(b"native"), "native"), (np.array(7, dtype=np.int64), 7),
+        ("chain lattice", "chain lattice"), ("2.5", 2.5),
+        ([2 ** 53 + 1], 2 ** 53 + 1), ([True, False], np.array([1, 0])),
+        ([True, 1], np.array([1, 1])), ([np.int64(1), np.int64(2)], np.array([1, 2])),
+        (np.array([1, 2], dtype=np.int64), np.array([1, 2])),
+        (np.ma.array([1, 2], mask=False), np.array([1, 2])),
+        (np.array([1.5, 2.5], dtype=np.float32), np.array([1.5, 2.5])),
+        ([np.int64(2 ** 40)], 2 ** 40), ([1, 2, 3], np.array([1, 2, 3])),
+        ([1.5, 2.5], np.array([1.5, 2.5])), ([1, 2.5], np.array([1.0, 2.5])),
+        ((1, 2), np.array([1, 2])), (np.array([], dtype=np.bool_), ""),
+        (["a", "b"], "a,b"), (np.array(["a", "b"]), "a,b"),
+        (np.array([b"a", b"b"], dtype="S1"), "a,b"),
+    ]
+    p = ngs.params({})
+    for index, (value, expected) in enumerate(readback):
+        p[str(index)] = value
+        if isinstance(expected, np.ndarray):
+            assert isinstance(p[str(index)], np.ndarray), (value, p[str(index)])
+            assert p[str(index)].dtype.kind == expected.dtype.kind, (value, p[str(index)])
+            np.testing.assert_array_equal(p[str(index)], expected)
+        else:
+            assert type(p[str(index)]) is type(expected), (value, p[str(index)])
+            assert p[str(index)] == expected, (value, p[str(index)])
+    # params holds no null, complex, multidimensional or nested values; each
+    # is a TypeError naming the parameter.
+    for value in (
+        None, np.complex64(1 + 2j), np.clongdouble(3 + 4j), 1 + 2j,
         np.array([1 + 2j, 3 + 4j], dtype=np.complex64),
         np.array([1 + 2j, 3 + 4j], dtype=np.clongdouble),
         [np.complex64(5 + 6j), np.clongdouble(7 + 8j)],
-        np.array(["a", "b"]), np.array([b"a", b"b"], dtype="S1"),
-        np.array(7, dtype=np.int64), np.array([], dtype=np.bool_),
-        np.ones((2, 2)), [np.int64(2 ** 40)], [1, 2, 3], [1.5, 2.5],
-        ["a", "b"], [1, 2.5], 1 + 2j, {"nested": 1}, object(), (1, 2),
-    ]
-    p = ngs.params({})
-    for index, value in enumerate(values):
-        p[str(index)] = value
-        assert p[str(index)] is value
+        np.ones((2, 2)), [[1, 2]], {"nested": 1}, object(), ["a,b"],
+    ):
+        with pytest.raises(TypeError, match="'rejected'"):
+            p["rejected"] = value
+        assert "rejected" not in p
 
 
 def test_params_mapping_mixins_handle_none_getitem():
@@ -776,29 +798,24 @@ def test_archive_errors_use_the_typed_hierarchy(tmp_path):
         assert issubclass(cls, hdf5.ArchiveError)
 
 
-def test_complex_params_hdf5_roundtrip(tmp_path):
-    """Complex parameters must survive a checkpoint.
+def test_complex_params_are_an_error_naming_them(tmp_path):
+    """params holds no complex numbers.
 
-    Two separate defects made this fail. archive::set_complex() did not
-    resolve its path against the current context, so the marker attribute for
-    a value written at the empty path landed on the root group; and
-    paramvalue::load() sent complex scalars into the vector branch, because a
-    complex scalar has is_scalar() == false (it is stored as a trailing
-    dimension of two reals). Rank distinguishes them: 1 for a scalar, 2 for a
-    vector of any length.
+    ALPSCore's params has no complex type, so a complex Python value is a
+    TypeError naming the parameter, and so is a complex value in an HDF5
+    group the params load (a RuntimeError, from C++).
     """
     from pyalps import ngs
 
-    cases = {"scalar": 1 + 2j, "vector": [1 + 2j, 3 + 4j], "one": [5 + 6j]}
-    for name, value in cases.items():
-        path = str(tmp_path / ("complex-%s.h5" % name))
-        with hdf5_archive(path, "w") as archive:
-            ngs.params({name: value}).save(archive)
-        loaded = ngs.params()
-        with hdf5_archive(path, "r") as archive:
-            loaded.load(archive, "/")
-        got = list(loaded[name]) if isinstance(value, list) else loaded[name]
-        assert got == value, "%s: %r != %r" % (name, got, value)
+    for value in (1 + 2j, [1 + 2j, 3 + 4j], [5 + 6j]):
+        with pytest.raises(TypeError, match="'z'"):
+            ngs.params({"z": value})
+    path = str(tmp_path / "complex.h5")
+    with hdf5_archive(path, "w") as archive:
+        archive["/parameters/z"] = 1 + 2j
+    with hdf5_archive(path, "r") as archive:
+        with pytest.raises(RuntimeError, match="'z'"):
+            ngs.params(archive, "/parameters")
 
 
 def test_mcbase_base_save_is_not_virtual(tmp_path):
@@ -852,7 +869,10 @@ def test_params_native_bool_vector_hdf5_roundtrip(tmp_path):
         original.save(archive)
     with hdf5.archive(filename, "r") as archive:
         loaded = ngs.params(archive, "/")
-    assert loaded["flags"] == [True, False, True]
+    # Booleans are supplied as 1 and 0 and read back as integers until a
+    # program defines the parameter.
+    assert loaded["flags"].dtype.kind == "i"
+    assert loaded["flags"].tolist() == [1, 0, 1]
 
 
 def test_observable_lshift_chains():

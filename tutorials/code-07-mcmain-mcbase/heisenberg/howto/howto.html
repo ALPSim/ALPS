@@ -46,11 +46,16 @@ This program reads parameters from a text input file with the structure <code>pa
 <span class="cp">#include &quot;my_mc_sim.hpp&quot;</span>
 <span class="cp">#include &lt;alps/parseargs.hpp&gt;</span>
 <span class="cp">#include &lt;alps/stop_callback.hpp&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;alps/ngs/make_parameters_from_file.hpp&gt;</span>
 
 <span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
     <span class="c1">// get commandline options and parameters</span>
     <span class="n">alps</span><span class="o">::</span><span class="n">parseargs</span> <span class="n">options</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">);</span>
-    <span class="n">parameters</span> <span class="o">=</span> <span class="n">alps</span><span class="o">::</span><span class="n">parameters_type</span><span class="o">&lt;</span> <span class="n">sim_type</span> <span class="o">&gt;::</span><span class="n">type</span><span class="p">(</span><span class="n">options</span><span class="p">.</span><span class="n">input_file</span><span class="p">);</span>
+<span class="w">    </span><span class="n">alps</span><span class="o">::</span><span class="n">params</span><span class="w"> </span><span class="n">parameters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">alps</span><span class="o">::</span><span class="n">make_parameters_from_file</span><span class="p">(</span><span class="n">options</span><span class="p">.</span><span class="n">input_file</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// define the parameters the simulation reads; stop if one is missing</span>
+<span class="w">    </span><span class="n">my_mc_sim</span><span class="o">::</span><span class="n">define_parameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">parameters</span><span class="p">.</span><span class="n">has_missing</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cerr</span><span class="p">))</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>
 
     <span class="c1">// create and run the simulation</span>
 <span class="hll">    <span class="n">my_mc_sim</span> <span class="n">sim</span><span class="p">(</span><span class="n">parameters</span><span class="p">);</span>
@@ -90,6 +95,7 @@ Take a look at an empty definition of a simulation class which you might use as 
 
 <span class="k">public</span><span class="o">:</span>
     <span class="n">my_mc_sim</span><span class="p">(</span><span class="n">parameters_type</span> <span class="k">const</span> <span class="o">&amp;</span> <span class="n">parms</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">seed_offset</span> <span class="o">=</span> <span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">parameters_type</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nf">define_parameters</span><span class="p">(</span><span class="n">parameters_type</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">parameters</span><span class="p">);</span><span class="w"> </span><span class="c1">// declares the parameters</span>
 
 <span class="hll">    <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">update</span><span class="p">();</span> <span class="c1">// this will execute the MC update</span>
 </span><span class="hll">    <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">measure</span><span class="p">();</span> <span class="c1">// this will perform measurements</span>
@@ -161,6 +167,24 @@ The same function is also used to create a random starting configuration.</p>
 <p>The <code>sweeps</code> variable will be used as a counter by the base class to determine together with <code>total_sweeps</code> (read in from the <code>SWEEPS</code> parameter) when to stop the simulation loop.
 We use it in <code>measure() &gt; thermalization_sweeps</code> to avoid measuring during thermalization and in <code>fraction_completed()</code> to determine how far the simulation has progressed.</p>
 <p>The last two variables can easily be calculated from parameters but are kept around because they're used often.</p>
+<h3>The parameters</h3>
+<p>The simulation reads its parameters as typed values, so it declares them first.
+<code>define_parameters()</code> names each parameter with its type, a description and, where one makes sense, a default;
+<code>main()</code> calls it before constructing the simulation.
+<code>has_missing()</code> then reports by name each parameter that has no default and is not in the input file,
+and each value that does not parse as the declared type.
+The lattice's own parameters, such as <code>LATTICE</code> and <code>L</code>, are not declared here:
+<code>alps::make_deprecated_parameters</code> passes everything the input file supplied on to the lattice.</p>
+<div class="codehilite"><pre><span class="c1">// declared in the class</span>
+<span class="k">static</span><span class="w"> </span><span class="n">parameters_type</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nf">define_parameters</span><span class="p">(</span><span class="n">parameters_type</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">parameters</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">alps</span><span class="o">::</span><span class="n">mcbase</span><span class="o">::</span><span class="n">define_parameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span><span class="w"> </span><span class="c1">// SEED</span>
+<span class="w">        </span><span class="p">.</span><span class="n">define</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="s">"THERMALIZATION"</span><span class="p">,</span><span class="w"> </span><span class="s">"number of thermalization sweeps"</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">define</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="s">"SWEEPS"</span><span class="p">,</span><span class="w"> </span><span class="s">"number of measurement sweeps"</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">define</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="s">"T"</span><span class="p">,</span><span class="w"> </span><span class="s">"temperature"</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+
 <h3>The constructor</h3>
 <p>Next we need to make sure we are initializing everything properly, the place to do that is the constructor.
 The constructor itself takes the same arguments as the constructor of mcbase, one of which has type <code>parameters_type</code>. 

@@ -36,9 +36,18 @@ namespace alps {
                 , schedule_checker(check)
                 , clone(comm.rank())
 #ifndef ALPS_NGS_USE_NEW_ALEA
-                , binnumber(parameters["BINNUMBER"] | 128)
+                , binnumber(parameters["BINNUMBER"])
 #endif
             {}
+
+            /// Defines the parameters of Base and BINNUMBER, 128 by default
+            static typename Base::parameters_type & define_parameters(typename Base::parameters_type & parameters) {
+                Base::define_parameters(parameters);
+#ifndef ALPS_NGS_USE_NEW_ALEA
+                parameters.template define<int>("BINNUMBER", 128, "number of bins kept when reducing observables over MPI");
+#endif
+                return parameters;
+            }
 
             double fraction_completed() const {
                 return fraction;

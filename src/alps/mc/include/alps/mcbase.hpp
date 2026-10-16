@@ -43,8 +43,14 @@ namespace alps {
                 typedef alps::mcresults results_type;
             #endif
 
+            /// Constructs the simulation; `define_parameters` must have defined `parms`
             mcbase(parameters_type const & parms, std::size_t seed_offset = 0);
             virtual ~mcbase();
+
+            /// Defines the parameters mcbase reads: SEED, 42 by default
+            /** A simulation's own `define_parameters` calls this first, as
+                in ALPSCore. */
+            static parameters_type & define_parameters(parameters_type & parameters);
 
             virtual void update() = 0;
             virtual void measure() = 0;

@@ -13,6 +13,7 @@
 // ALPSCore modules this SDK provides
 #define ALPS_HAVE_ALPS_UTILITIES
 #define ALPS_HAVE_ALPS_HDF5
+#define ALPS_HAVE_ALPS_PARAMS
 #define ALPS_HAVE_ALPS_ACCUMULATORS
 
 // == Accumulator value types ==

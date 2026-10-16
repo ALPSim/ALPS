@@ -226,7 +226,7 @@ class InteractionExpansion: public alps::mcbase
 public:
 
   InteractionExpansion(const alps::params& p, int rank);
-  static void define_parameters(alps::params &p); //supply defaults for the parameters the input leaves out
+  static void define_parameters(alps::params &p); //define the parameters the solver reads, with their defaults
   ~InteractionExpansion() {}
   bool is_thermalized() const {return true;} //thermalization is done in the constructor. It's not a big deal here.
   void update();

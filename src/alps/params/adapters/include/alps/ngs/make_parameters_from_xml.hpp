@@ -14,13 +14,16 @@
 #ifndef ALPS_NGS_MAKE_PARAMETERS_FROM_XML_HPP
 #define ALPS_NGS_MAKE_PARAMETERS_FROM_XML_HPP
 
-#include <alps/ngs/params.hpp>
+#include <alps/params.hpp>
+#include <boost/filesystem/path.hpp>
 
 #include <alps/parameter.h>
 #include <alps/config.h>
 
 namespace alps {
 
+    /// Parameters supplied as text from the <PARAMETERS> of an XML job file
+    /** SEED is supplied as 0 if the file does not set it. */
     ALPS_DECL params make_parameters_from_xml(boost::filesystem::path const & filename);
 
 }

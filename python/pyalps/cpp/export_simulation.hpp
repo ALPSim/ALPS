@@ -18,6 +18,7 @@
 #include <nanobind/stl/vector.h>
 
 #include <cstddef>
+#include <sstream>
 #include <string>
 
 namespace alps {
@@ -34,7 +35,19 @@ public:
 
     explicit exported_simulation(parameters_type const & parameters,
                                  std::size_t seed_offset = 0)
-        : Simulation(parameters, seed_offset) {}
+        : Simulation(defined(parameters), seed_offset) {}
+
+    // A copy defined by Simulation::define_parameters, which mcbase supplies
+    // if the simulation has none; missing or malformed parameters are a
+    // ValueError naming them.
+    static parameters_type defined(parameters_type const & parameters) {
+        parameters_type copy(parameters);
+        Simulation::define_parameters(copy);
+        std::ostringstream missing;
+        if (copy.has_missing(missing))
+            throw nb::value_error(missing.str().c_str());
+        return copy;
+    }
 
     ~exported_simulation() override = default;
 

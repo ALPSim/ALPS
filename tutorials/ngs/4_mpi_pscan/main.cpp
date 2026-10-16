@@ -17,6 +17,7 @@
 #include <alps/parseargs.hpp>
 #include <alps/stop_callback.hpp>
 #include <alps/mcmpiadapter.hpp>
+#include <alps/ngs/make_parameters_from_file.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 
 #include <boost/chrono.hpp>
@@ -77,8 +78,14 @@ int main(int argc, char *argv[]) {
             else if (boost::filesystem::path(infile).extension().string() == ".h5")
                 alps::hdf5::archive(infile)["/parameters"] >> parameters;
             else
-                parameters = alps::parameters_type<ising_sim>::type(infile);
-            broadcast(comm_local, parameters);
+                parameters = alps::make_parameters_from_file(infile);
+            alps::broadcast(comm_local, parameters);
+            alps::mcmpiadapter<ising_sim>::define_parameters(parameters);
+            if (parameters.has_missing()) {
+                if (comm_local.rank() == 0)
+                    parameters.has_missing(std::cerr);
+                return EXIT_FAILURE;
+            }
 
             alps::mcmpiadapter<ising_sim> sim(parameters, comm_local, alps::check_schedule(options.tmin, options.tmax));
 

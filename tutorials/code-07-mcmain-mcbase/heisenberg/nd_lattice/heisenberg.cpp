@@ -10,6 +10,17 @@
 
 #include <boost/lambda/lambda.hpp>
 
+// Defines the parameters the simulation reads; main() calls it before
+// constructing the simulation and reports missing ones.
+// LATTICE and the lattice's other parameters reach the lattice as supplied.
+heisenberg_sim::parameters_type & heisenberg_sim::define_parameters(parameters_type & parameters) {
+    return alps::mcbase::define_parameters(parameters)
+        .define<int>("L", "linear lattice size")
+        .define<int>("THERMALIZATION", "number of thermalization sweeps")
+        .define<int>("SWEEPS", "number of measurement sweeps")
+        .define<double>("T", "temperature");
+}
+
 heisenberg_sim::heisenberg_sim(parameters_type const & parms, std::size_t seed_offset)
     : alps::mcbase(parms, seed_offset)
     , length(parameters["L"])
