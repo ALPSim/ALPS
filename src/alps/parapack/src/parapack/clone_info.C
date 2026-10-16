@@ -13,7 +13,7 @@
 #include <alps/parapack/clone_info.h>
 #include <alps/parapack/util.h>
 
-#include <alps/utility/os.hpp>
+#include <alps/utilities/os.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/foreach.hpp>
 

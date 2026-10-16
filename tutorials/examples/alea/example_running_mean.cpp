@@ -13,7 +13,7 @@
 
 #include <alps/alea.h>
 #include <alps/alea/mcanalyze.hpp>
-#include <alps/utility/encode.hpp>
+#include <alps/utilities/encode.hpp>
 
 #include <alps/hdf5.hpp>
 

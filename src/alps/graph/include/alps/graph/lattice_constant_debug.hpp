@@ -19,7 +19,7 @@
 #ifndef ALPS_GRAPH_LATTICE_CONSTANT
 #define ALPS_GRAPH_LATTICE_CONSTANT
 
-#include <alps/ngs/stacktrace.hpp>
+#include <alps/utilities/stacktrace.hpp>
 
 #include <alps/lattice/graph_helper.h>
 #include <alps/lattice/graphproperties.h>

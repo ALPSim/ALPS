@@ -17,7 +17,7 @@
 *
 *****************************************************************************/
 
-#include <alps/utility/cli.hpp>
+#include <alps/cli.hpp>
 #include <alps/ngs/parapack/parapack.h>
 #include <alps/ngs/parapack/clone.h>
 #include <alps/ngs/parapack/clone_proxy.h>
@@ -30,8 +30,8 @@
 
 #include <alps/config.h>
 #include <alps/stop_callback.hpp>
-#include <alps/utility/copyright.hpp>
-#include <alps/utility/os.hpp>
+#include <alps/utilities/copyright.hpp>
+#include <alps/utilities/os.hpp>
 #include <alps/osiris/comm.h>
 
 // some file (probably a python header) defines a tolower macro ...

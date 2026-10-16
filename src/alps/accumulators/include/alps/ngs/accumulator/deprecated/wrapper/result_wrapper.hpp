@@ -14,7 +14,7 @@
 #ifndef ALPS_NGS_ALEA_RESULT_WRAPPER_HPP
 #define ALPS_NGS_ALEA_RESULT_WRAPPER_HPP
 
-#include <alps/ngs/stacktrace.hpp>
+#include <alps/utilities/stacktrace.hpp>
 #include <alps/ngs/alea/result.hpp>
 #include <alps/ngs/alea/wrapper/base_wrapper.hpp>
 #include <alps/ngs/alea/wrapper/derived_wrapper.hpp>

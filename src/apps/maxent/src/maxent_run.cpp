@@ -12,14 +12,14 @@
 *****************************************************************************/
 
 #include "maxent.hpp"
-#include <alps/ngs/signal.hpp>
+#include <alps/utilities/signal.hpp>
 #include <alps/solvers.hpp>
 #include <boost/bind/bind.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace {
 bool stop_requested(boost::posix_time::ptime const& end_time) {
-  static alps::ngs::signal signal;
+  static alps::signal signal;
   return !signal.empty() || boost::posix_time::second_clock::local_time() > end_time;
 }
 }

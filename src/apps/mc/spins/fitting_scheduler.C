@@ -12,7 +12,7 @@
 
 /* $Id$ */
 
-#include <alps/utility/cli.hpp>
+#include <alps/cli.hpp>
 #include "fitting_scheduler.h"
 
 #include <alps/scheduler/types.h>

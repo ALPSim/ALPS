@@ -20,7 +20,7 @@
 #if !defined(ALPS_NGS_SCHEDULER_MPISIM_NG_HPP) && defined(ALPS_HAVE_MPI)
 #define ALPS_NGS_SCHEDULER_MPISIM_NG_HPP
 
-#include <alps/ngs/stacktrace.hpp>
+#include <alps/utilities/stacktrace.hpp>
 #include <alps/ngs/boost_mpi.hpp>
 #include <alps/ngs/ulfm.hpp>
 

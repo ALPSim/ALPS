@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-#include <alps/utility/cli.hpp>
+#include <alps/cli.hpp>
 #include <alps/parapack/parapack.h>
 #include <alps/parapack/worker_factory.h>
 #include <alps/scheduler.h>

@@ -11,7 +11,7 @@
 *
 *****************************************************************************/
 #include <alps/parapack/version.h>
-#include <alps/utility/copyright.hpp>
+#include <alps/utilities/copyright.hpp>
 
 std::string alps::parapack_copyright() {
   return "ALPS/parapack scheduler\n" \

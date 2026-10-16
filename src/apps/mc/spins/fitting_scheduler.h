@@ -15,7 +15,7 @@
 #ifndef ALPS_APPLICATIONS_FITTINGSCHEDULERS_H
 #define ALPS_APPLICATIONS_FITTINGSCHEDULERS_H
 
-#include <alps/utility/copyright.hpp>
+#include <alps/utilities/copyright.hpp>
 #include <alps/scheduler.h>
 #include <alps/scheduler/factory.h>
 #include <alps/scheduler/options.h>
