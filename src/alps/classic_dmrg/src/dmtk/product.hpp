@@ -1,3 +1,9 @@
+// Ported unchanged from skilledwolf/alpsx (private repository), branch
+// agent/v3-execution-and-api-audit at f8ee6e98b, file
+// src/solvers/tensor_network/src/classic_dmrg/dmtk/product.hpp, itself identical to
+// src/apps/dmrg/dmrg/dmtk/product.h on master (Adrian Feiguin's dmtk), which
+// carries no notice of its own.
+
 #ifndef __DMTK_PRODUCT_H__
 #define __DMTK_PRODUCT_H__
 

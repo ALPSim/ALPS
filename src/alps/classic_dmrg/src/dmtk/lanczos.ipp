@@ -23,6 +23,13 @@
 *
 *****************************************************************************/
 
+// Ported from skilledwolf/alpsx (private repository), branch
+// agent/v3-execution-and-api-audit at f8ee6e98b, file
+// src/solvers/tensor_network/src/classic_dmrg/dmtk/lanczos.ipp, the Eigen-based
+// rework of src/apps/dmrg/dmrg/dmtk/lanczos.cc on master (Adrian Feiguin's
+// dmtk). Adaptation: "dmtk/" include paths. The changes made here are marked
+// where they occur.
+
 #ifndef __DMTK_LANCZOS_CC__
 #define __DMTK_LANCZOS_CC__
 
