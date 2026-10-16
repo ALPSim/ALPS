@@ -48,7 +48,7 @@ pyalps is not a declared dependency: the backends need its `models`, `ed` and `c
 python -m pip install -e python/qdk-chemistry-alps
 ```
 
-Without pyalps the import fails with this guidance. `alps_classic_dmrg` needs a qdk-chemistry build providing `RdmContainer`, which alpsx's compatibility notes list as missing from released versions up to 2.2.1, and raises `RuntimeError` without it; `alps_ed` and `interop` do not use it. This port was tested only with a local qdk-chemistry 2.1.0 build that has `RdmContainer`. Import registers the backends; qdk-chemistry builds with plugin discovery also load the `qdk_chemistry.plugins` entry point, and both paths are idempotent.
+Without pyalps the import fails with this guidance. `alps_classic_dmrg` needs a qdk-chemistry build providing `RdmContainer`, which the released 2.2.1 lacks (alpsx's compatibility notes report the same for earlier releases). It registers there all the same and raises `RuntimeError` naming the class when run; `alps_ed` and `interop` do not use it. The suite passes with qdk-chemistry 2.2.1 from PyPI on Python 3.13, where the `alps_classic_dmrg` tests skip, and in full with a local 2.1.0 build that has `RdmContainer`. Import registers the backends; qdk-chemistry builds with plugin discovery, 2.2.1 among them, also load the `qdk_chemistry.plugins` entry point, and both paths are idempotent.
 
 ## Tests
 

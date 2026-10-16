@@ -87,6 +87,28 @@ def test_calculators_resolve_through_the_registry():
         assert create("multi_configuration_calculator", name).name() == name
 
 
+@pytest.mark.classic_dmrg
+def test_classic_calculator_without_rdm_container_says_so(hubbard_qdk):
+    """Released qdk-chemistry (2.2.1 and earlier) has no RdmContainer.
+
+    alps_classic_dmrg registers there all the same, so running it has to
+    name the missing class rather than fail inside the calculator.
+    """
+    try:
+        from qdk_chemistry.data import RdmContainer  # noqa: F401
+    except ImportError:
+        pass
+    else:
+        pytest.skip("this qdk-chemistry provides RdmContainer")
+    from qdk_chemistry.algorithms import create
+
+    import qdk_chemistry_alps  # noqa: F401  (registers the backends)
+
+    calculator = create("multi_configuration_calculator", "alps_classic_dmrg")
+    with pytest.raises(RuntimeError, match="RdmContainer"):
+        calculator.run(hubbard_qdk(2), 1, 1)
+
+
 def test_entry_point_plugin_class_is_exposed_lazily():
     """AlpsPlugin materializes on attribute access, not at module import.
 
