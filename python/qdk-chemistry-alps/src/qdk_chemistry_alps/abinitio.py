@@ -8,8 +8,9 @@
 # zero integrals are always skipped; solve_ground_state returns the
 # pyalps.ed eigenstates (eigenvalues, eigenvectors, problem.states) and has
 # no engine selector, whose names all meant the one native solver. The
-# determinant helpers are unchanged; pyalps's spinful_fermion() has alpsx's
-# local basis and matrices.
+# determinant helpers are unchanged, except that interleaved_to_blocked_parity
+# also takes stacked rows (written here); pyalps's spinful_fermion() has
+# alpsx's local basis and matrices.
 """Ab initio Hamiltonians on the pyalps operator algebra.
 
 Builds a :class:`pyalps.models.Hamiltonian` from molecular integrals
@@ -143,8 +144,11 @@ def alps_state_to_occupations(
     return _LOCAL_UP[local].astype(np.int8), _LOCAL_DN[local].astype(np.int8)
 
 
-def interleaved_to_blocked_parity(alpha_occ: np.ndarray, beta_occ: np.ndarray) -> int:
+def interleaved_to_blocked_parity(alpha_occ: np.ndarray, beta_occ: np.ndarray) -> int | np.ndarray:
     """Sign relating the interleaved mode ordering to PySCF's blocked ordering.
+
+    One determinant (1-D occupations) gives an int; stacked determinants
+    (occupations of shape ``(..., n)``) give an int64 array of signs.
 
     Reordering the creation-operator string from
       d(0) u(0) d(1) u(1) ...   (ALPS/JW order, occupied modes only)
@@ -154,9 +158,11 @@ def interleaved_to_blocked_parity(alpha_occ: np.ndarray, beta_occ: np.ndarray) -
     on orbital q >= p) pair: cross-site pairs with q > p, plus one pair per
     doubly-occupied orbital from the dn-before-up site-local convention.
     """
-    alpha_occ = np.asarray(alpha_occ)
-    beta_occ = np.asarray(beta_occ)
+    alpha_occ = np.asarray(alpha_occ, dtype=np.int64)
+    beta_occ = np.asarray(beta_occ, dtype=np.int64)
     # inclusive suffix count of alpha electrons at orbitals q >= p
-    alpha_from = np.cumsum(alpha_occ[::-1])[::-1]
-    swaps = int(np.dot(beta_occ, alpha_from))
-    return -1 if swaps % 2 else 1
+    alpha_from = np.cumsum(alpha_occ[..., ::-1], axis=-1)[..., ::-1]
+    swaps = (beta_occ * alpha_from).sum(axis=-1)
+    if np.ndim(swaps) == 0:
+        return -1 if int(swaps) % 2 else 1
+    return 1 - 2 * (swaps % 2)

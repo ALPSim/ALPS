@@ -116,6 +116,15 @@ def test_parity_matches_a_brute_force_permutation_count():
         )
 
 
+def test_parity_of_stacked_determinants_is_the_parity_of_each():
+    rng = np.random.default_rng(1)
+    alpha = rng.integers(0, 2, size=(300, 6), dtype=np.int8)
+    beta = rng.integers(0, 2, size=(300, 6), dtype=np.int8)
+    signs = interleaved_to_blocked_parity(alpha, beta)
+    assert signs.shape == (300,)
+    assert signs.tolist() == [_brute_force_parity(a.tolist(), b.tolist()) for a, b in zip(alpha, beta)]
+
+
 # --- Hamiltonian construction ---------------------------------------------
 
 def test_builder_validates_shapes():

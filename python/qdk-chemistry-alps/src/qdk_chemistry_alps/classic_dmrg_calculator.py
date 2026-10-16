@@ -40,7 +40,8 @@ from .abinitio import interleaved_to_blocked_parity
 
 __all__ = ["AlpsClassicDmrgCalculator"]
 
-_STATE_CHAR = {(0, 0): "0", (1, 0): "u", (0, 1): "d", (1, 1): "2"}
+# Spin-half string characters by alpha + 2 * beta occupation.
+_STATE_CHAR = np.array(["0", "u", "d", "2"])
 _MODES = ("auto", "statevector", "rdm")
 # Peak memory of a CI vector, per determinant: about 460 bytes measured for
 # the QDK Configuration objects and container, plus the engine's
@@ -70,9 +71,9 @@ class AlpsClassicDmrgCalculator(MultiConfigurationCalculator):
     ``StateVectorContainer`` carries the run's RDMs unless
     ``ci_coefficient_cutoff`` trims the vector, whose RDMs then differ.
     The engine keeps complementary block operators, but the CI vector grows
-    combinatorially: past about 12 orbitals at half filling, building the
-    ``StateVectorContainer`` costs more than the solve, and ``"rdm"`` avoids
-    it.
+    combinatorially: at 12 orbitals and half filling, building the
+    ``StateVectorContainer`` takes about as long as the solve, and ``"rdm"``
+    avoids it.
 
     :meth:`make_rdms`, :meth:`measure_local`, :meth:`measure_correlations`
     and :meth:`spin_spin_correlations` read the last run. Other operators are
@@ -261,19 +262,20 @@ class AlpsClassicDmrgCalculator(MultiConfigurationCalculator):
         """The run's CI vector, in QDK's determinant order and signs."""
         from pyalps import classic_dmrg
 
+        # Changed from alpsx's per-determinant loop: the signs and the
+        # spin-half strings are formed for all kept determinants at once,
+        # which took most of the time at 12 orbitals (853776 determinants).
         alpha, beta = classic_dmrg.ci_occupations(result)
         amplitudes = np.asarray(result.ci_coefficients)
         cutoff = float(self._settings.get("ci_coefficient_cutoff"))
-        coefficients, determinants = [], []
-        for i in np.argsort(-np.abs(amplitudes), kind="stable"):
-            c = float(amplitudes[i])
-            if cutoff > 0.0 and abs(c) < cutoff:
-                break
-            c *= interleaved_to_blocked_parity(alpha[i], beta[i])
-            s = "".join(_STATE_CHAR[(int(a), int(b))] for a, b in zip(alpha[i], beta[i], strict=True))
-            determinants.append(Configuration.from_spin_half_string(s))
-            coefficients.append(c)
-        coefficients = np.asarray(coefficients)
+        order = np.argsort(-np.abs(amplitudes), kind="stable")
+        if cutoff > 0.0:
+            order = order[np.abs(amplitudes[order]) >= cutoff]
+        alpha, beta = alpha[order], beta[order]
+        coefficients = amplitudes[order] * interleaved_to_blocked_parity(alpha, beta)
+        # Joining a row of one-character strings is a view as one string per row.
+        strings = np.ascontiguousarray(_STATE_CHAR[alpha + 2 * beta]).view(f"<U{alpha.shape[1]}").ravel()
+        determinants = [Configuration.from_spin_half_string(s) for s in strings.tolist()]
         trimmed = len(coefficients) < len(amplitudes)
         coefficients /= np.linalg.norm(coefficients)
         if trimmed:
