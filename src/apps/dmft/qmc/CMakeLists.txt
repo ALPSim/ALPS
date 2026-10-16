@@ -118,12 +118,16 @@ if(ALPS_BUILD_TESTING)
   add_executable(dmft_interaction_expansion_choice dmft_interaction_expansion_choice.C)
   alps_add_gtest(dmft_interaction_expansion_choice COMPONENT dmft LABELS regression)
 
-  # Counts the serial solver's measurements; the MPI adapter stops at its
-  # scheduled checks instead.
+  # The serial solver stops after SWEEPS; under MPI it stops at the adapter's
+  # scheduled checks, where a rank can still be thermalizing.
   if(NOT ALPS_ENABLE_MPI)
     add_executable(dmft_ctint_thermalization dmft_ctint_thermalization.C)
     target_link_libraries(dmft_ctint_thermalization PRIVATE ALPS::ctint)
     alps_add_gtest(dmft_ctint_thermalization COMPONENT dmft LABELS regression)
+  else()
+    add_executable(dmft_ctint_thermalization_mpi dmft_ctint_thermalization_mpi.C)
+    target_link_libraries(dmft_ctint_thermalization_mpi PRIVATE ALPS::ctint)
+    alps_add_mpi_gtest(dmft_ctint_thermalization_mpi COMPONENT dmft RANKS 2 LABELS regression)
   endif()
 endif()
 
