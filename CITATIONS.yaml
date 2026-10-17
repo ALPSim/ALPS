@@ -60,6 +60,10 @@ components:
     algorithm: [white1992, white1993, schollwock2005, hallberg2006]
     implementation: [feiguin2013]
     uses: [scheduler]
+  classic_dmrg:
+    name: ALPS classic DMRG
+    algorithm: [white1992, white1993, schollwock2005, hallberg2006]
+    implementation: [feiguin2013]
   classic_dmrg_evolution:
     name: ALPS classic DMRG time evolution
     algorithm: [white1992, white1993, white2004]

@@ -20,7 +20,7 @@ TEST(Citations, NoticesAndSuppression) {
   for (const char* component : {"framework", "scheduler", "dmrg", "qwl", "fulldiag",
                                "sparsediag", "spinmc", "worm", "dirloop_sse", "looper",
                                "dmft", "interaction", "hybridization", "hirschfye",
-                               "classic_dmrg_evolution"}) {
+                               "classic_dmrg", "classic_dmrg_evolution"}) {
     const std::string notice = alps::citation_text(component);
     const std::string details = alps::citation_details(component);
     const auto first = notice.find(title);

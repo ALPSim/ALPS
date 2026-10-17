@@ -446,6 +446,15 @@ these; the legacy stall rule alone left the spin-1 benchmark above 9e-6
 above them. A Krylov space exhausted at 99 vectors or broken down ends the
 solve as before.
 
+## Citing
+
+The citation catalog ([CITATIONS.yaml](../../../CITATIONS.yaml), rendered in
+[CITATION.md](../../../CITATION.md)) has two components for this library:
+`classic_dmrg` for ground states (`solve()`, with the same references as the
+`dmrg` application) and `classic_dmrg_evolution` for `evolve()`.
+`alps::print_citation_details(out, "classic_dmrg")` (`<alps/utility/citations.hpp>`) prints the complete
+references.
+
 ## Origin and provenance
 
 The engine is `src/alps/classic_dmrg/src/dmtk/`, the Eigen-based rework of
