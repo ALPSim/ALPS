@@ -158,6 +158,7 @@ struct Problem {
     // charges, and the index in `measurements` of the final Hamiltonian's
     // expectation value, which is reported as the energy.
     std::vector<ReadyTerm> final_hamiltonian;
+    Complex final_scalar; // the final Hamiltonian's identity part (a phase in real time)
     std::vector<std::vector<ReadyTerm>> drives;
     std::optional<std::size_t> energy_plan;
 };
@@ -720,6 +721,14 @@ void validate_evolution(Evolution const& evolution, Options const& options) {
             if (!std::isfinite(c))
                 throw std::invalid_argument("classic DMRG drive " + std::to_string(k) + " has a nonfinite coefficient");
     }
+    if (evolution.method != EvolutionMethod::trotter && evolution.method != EvolutionMethod::targeting)
+        throw std::invalid_argument("unknown classic DMRG evolution method");
+    if (evolution.method == EvolutionMethod::targeting) {
+        bounded_count(evolution.half_sweeps, "half_sweeps");
+        if (!evolution.drives.empty())
+            throw std::invalid_argument("classic DMRG time-step targeting takes no drives (its block Hamiltonians "
+                                        "are built once); use the Trotter method");
+    }
     if (options.num_eigenvalues != 1)
         throw std::invalid_argument("classic DMRG time evolution evolves one state: num_eigenvalues must be one");
     if (options.keep_mps)
@@ -727,7 +736,7 @@ void validate_evolution(Evolution const& evolution, Options const& options) {
                                     "not Options::keep_mps");
 }
 
-// Gates act on neighbouring sites in chain order only.
+// Trotter gates act on neighbouring sites in chain order only.
 void require_bonds(std::vector<ReadyTerm> const& terms, std::string const& what) {
     for (auto const& term : terms)
         if (term.factors.size() == 2 && term.factors[1].site != term.factors[0].site + 1)
@@ -741,19 +750,21 @@ void require_bonds(std::vector<ReadyTerm> const& terms, std::string const& what)
 // and add the final Hamiltonian's expectation value as the last measurement.
 void prepare_evolution(Problem& problem, models::CompiledOperator const& final_hamiltonian,
                        Evolution const& evolution, std::vector<int> const& site_dims) {
-    auto merged = [&](models::CompiledOperator const& op, std::string const& what) {
+    auto merged = [&](models::CompiledOperator const& op, std::string const& what, Complex& scalar) {
         if (op.site_dims != site_dims)
             throw std::invalid_argument("classic DMRG " + what + " is not on the initial Hamiltonian's sites");
         std::vector<ReadyTerm> expanded;
-        Complex scalar; // a phase in real time; no state's energy
         for (auto const& term : op.terms) expand(term, problem, expanded, scalar, what.c_str());
         auto terms = merge_hamiltonian(expanded, problem, what, true);
-        require_bonds(terms, what);
+        if (evolution.method == EvolutionMethod::trotter) require_bonds(terms, what);
         return terms;
     };
-    problem.final_hamiltonian = merged(final_hamiltonian, "final Hamiltonian");
-    for (std::size_t k = 0; k < evolution.drives.size(); ++k)
-        problem.drives.push_back(merged(evolution.drives[k].op, "drive " + std::to_string(k)));
+    // The identity parts are a phase in real time; neither method applies them.
+    problem.final_hamiltonian = merged(final_hamiltonian, "final Hamiltonian", problem.final_scalar);
+    for (std::size_t k = 0; k < evolution.drives.size(); ++k) {
+        Complex scalar;
+        problem.drives.push_back(merged(evolution.drives[k].op, "drive " + std::to_string(k), scalar));
+    }
     problem.energy_plan = problem.measurements.size();
     problem.measurements.push_back(
         lower_plan("energy", final_hamiltonian, MeasurementKind::expectation, problem, site_dims));
@@ -837,6 +848,7 @@ struct Engine {
     std::vector<dmtk::Block<T>> blocks;
     dmtk::Hami<T> hami;
     dmtk::Hami<T> measured;
+    dmtk::Hami<T> final_hami; // time-step targeting's final Hamiltonian
     std::vector<std::size_t> qn_index; // per charge
     int conserved_mask = 0;
     std::map<std::pair<int, Key>, std::string> operator_names;
@@ -848,7 +860,9 @@ struct Engine {
         : problem(p), options(o), callback(std::move(cb)), lattice(p.num_sites, dmtk::OBC), hami(lattice) {}
 
     void observe(dmtk::System<T> const& s) {
-        double const energy = evolving ? std::numeric_limits<double>::quiet_NaN() : s.energy[0];
+        // An evolution's iterations report the final Hamiltonian's energy
+        // where time-step targeting computes it, else NaN.
+        double const energy = evolving ? s.energy[0] + problem.final_scalar.real() : s.energy[0];
         Iteration row{s.get_dir() == dmtk::RIGHT2LEFT ? Direction::right_to_left : Direction::left_to_right,
                       static_cast<std::size_t>(s.get_iter()), energy, s.truncation_error(), s.entropy()};
         rows.push_back(row);
@@ -1147,6 +1161,16 @@ struct Engine {
         build_blocks();
         build_hamiltonian();
         build_measurements();
+        bool const targeting = evolution.method == EvolutionMethod::targeting;
+        if (targeting) {
+            // Named apart from the initial Hamiltonian ("H"), whose block
+            // Hamiltonians the preparation leaves in the blocks.
+            final_hami = dmtk::Hami<T>(hami);
+            final_hami.clear();
+            final_hami.set_name("HF");
+            for (auto const& term : problem.final_hamiltonian) final_hami += make_term(term);
+            final_hami.reorder_terms();
+        }
 
         detail::EvolvingSystem<T> S(hami, lattice);
         configure(S, false);
@@ -1165,10 +1189,15 @@ struct Engine {
 
         S.corr += measured;
         S.init_correlations();
-        S.begin_evolution(evolution.states, evolution.truncation_error);
+        if (targeting)
+            S.begin_targeting(final_hami, evolution.time_step, evolution.imaginary, evolution.states,
+                              evolution.truncation_error);
+        else
+            S.begin_evolution(evolution.states, evolution.truncation_error);
         evolving = true;
 
-        // The bond Hamiltonians of the final Hamiltonian and of every drive.
+        // The Trotter method's bond Hamiltonians of the final Hamiltonian and
+        // of every drive.
         int const length = problem.num_sites;
         std::size_t const bonds = static_cast<std::size_t>(length - 1);
         auto sorted = [&](std::vector<ReadyTerm> const& terms) {
@@ -1176,9 +1205,12 @@ struct Engine {
             for (std::size_t b = 0; b < bonds; ++b) kit[b] = sorted_bond(kit[b], static_cast<int>(b));
             return kit;
         };
-        auto const final_bonds = sorted(problem.final_hamiltonian);
+        std::vector<std::vector<Complex>> final_bonds;
         std::vector<std::vector<std::vector<Complex>>> drive_bonds;
-        for (auto const& drive : problem.drives) drive_bonds.push_back(sorted(drive));
+        if (!targeting) {
+            final_bonds = sorted(problem.final_hamiltonian);
+            for (auto const& drive : problem.drives) drive_bonds.push_back(sorted(drive));
+        }
         auto dim = [&](int site) {
             return static_cast<std::size_t>(problem.sites[static_cast<std::size_t>(problem.site_index[static_cast<std::size_t>(site)])].dim);
         };
@@ -1253,35 +1285,62 @@ struct Engine {
             for (std::size_t n = 0; n <= evolution.steps; ++n) measured_steps.insert(n);
         double const dt = evolution.time_step;
         result.truncation_errors.assign(evolution.steps + 1, 0.);
-        if (measured_steps.count(0)) {
-            // The left blocks of the preparation hold no measured operator;
-            // a first half sweep rebuilds the right blocks with them and the
-            // measuring one the left blocks.
-            double discarded = sweep(identity, false);
-            discarded += sweep(identity, true);
-            result.truncation_errors[0] = discarded;
-            record(0);
-        }
-        Gates pending; // the closing even half step of the previous step, not yet applied
-        for (std::size_t n = 0; n < evolution.steps; ++n) {
-            Gates half = gates(n, 0.5 * dt, 0);
-            if (pending.empty()) {
-                result.truncation_errors[n + 1] += sweep(half, false);
-            } else {
-                Gates merged(bonds);
-                for (std::size_t b = 0; b < bonds; ++b) merged[b] = detail::compose(half[b], pending[b]);
-                result.truncation_errors[n] += sweep(merged, false);
+        if (targeting) {
+            auto targeted = [&](bool advance, bool measure) {
+                if (measure)
+                    for (auto& term : S.corr) term.set_value(T(std::numeric_limits<double>::quiet_NaN()));
+                double const lost = S.targeting_half_sweep(direction, advance, measure);
+                direction = direction == dmtk::RIGHT2LEFT ? dmtk::LEFT2RIGHT : dmtk::RIGHT2LEFT;
+                return lost;
+            };
+            // Two half sweeps build the blocks of the final Hamiltonian and of
+            // the measured operators, one side each; the second measures the
+            // initial state.
+            bool const initial_measured = measured_steps.count(0) != 0;
+            double lost = targeted(false, false);
+            lost += targeted(false, initial_measured);
+            result.truncation_errors[0] = lost;
+            if (initial_measured) record(0);
+            for (std::size_t n = 0; n < evolution.steps; ++n) {
+                lost = 0.;
+                for (std::size_t h = 0; h < evolution.half_sweeps; ++h)
+                    lost += targeted(h + 1 == evolution.half_sweeps, false);
+                bool const measure = measured_steps.count(n + 1) != 0;
+                if (measure) lost += targeted(false, true);
+                result.truncation_errors[n + 1] = lost;
+                if (measure) record(n + 1);
             }
-            double discarded = sweep(gates(n, dt, 1), false);
-            pending = std::move(half);
-            bool const measure = measured_steps.count(n + 1) != 0;
-            if (measure || n + 1 == evolution.steps) {
-                discarded += sweep(pending, false);
-                pending.clear();
+        } else {
+            if (measured_steps.count(0)) {
+                // The left blocks of the preparation hold no measured operator;
+                // a first half sweep rebuilds the right blocks with them and the
+                // measuring one the left blocks.
+                double discarded = sweep(identity, false);
+                discarded += sweep(identity, true);
+                result.truncation_errors[0] = discarded;
+                record(0);
             }
-            if (measure) discarded += sweep(identity, true);
-            result.truncation_errors[n + 1] += discarded;
-            if (measure) record(n + 1);
+            Gates pending; // the closing even half step of the previous step, not yet applied
+            for (std::size_t n = 0; n < evolution.steps; ++n) {
+                Gates half = gates(n, 0.5 * dt, 0);
+                if (pending.empty()) {
+                    result.truncation_errors[n + 1] += sweep(half, false);
+                } else {
+                    Gates merged(bonds);
+                    for (std::size_t b = 0; b < bonds; ++b) merged[b] = detail::compose(half[b], pending[b]);
+                    result.truncation_errors[n] += sweep(merged, false);
+                }
+                double discarded = sweep(gates(n, dt, 1), false);
+                pending = std::move(half);
+                bool const measure = measured_steps.count(n + 1) != 0;
+                if (measure || n + 1 == evolution.steps) {
+                    discarded += sweep(pending, false);
+                    pending.clear();
+                }
+                if (measure) discarded += sweep(identity, true);
+                result.truncation_errors[n + 1] += discarded;
+                if (measure) record(n + 1);
+            }
         }
         for (std::size_t p = 0; p < problem.measurements.size(); ++p) {
             if (p == problem.energy_plan) continue;

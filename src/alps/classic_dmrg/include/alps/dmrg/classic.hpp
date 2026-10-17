@@ -222,6 +222,23 @@ ALPS_CLASSIC_DMRG_DECL Result solve(models::Hamiltonian const& model, Options co
 // steps share a half sweep unless the state between them is measured, which
 // takes one more half sweep with identity gates. h_b is the bond's two-site
 // terms plus each site's one-site terms divided among its bonds.
+//
+// Time-step targeting (A. E. Feiguin and S. R. White, Phys. Rev. B 72,
+// 020404(R) (2005)) instead keeps the final Hamiltonian's block operators,
+// as the ground-state sweeps keep the initial one's, and applies it to the
+// superblock state. Every truncation targets the states at t, t + dt/3,
+// t + 2dt/3 and t + dt with weights 1/3, 1/6, 1/6 and 1/3; the intermediate
+// states come from a Runge-Kutta step of the final Hamiltonian at that
+// configuration. The last configuration of each step's half sweeps advances
+// the state by a Krylov exponential of the final Hamiltonian there. Two
+// half sweeps first build the final Hamiltonian's block operators. With
+// enough states there is no time-step error, and the final Hamiltonian may
+// couple any two sites, as the initial one may; drives are not supported.
+
+enum class EvolutionMethod {
+    trotter,   // second-order Trotter bond gates
+    targeting, // time-step targeting with a Krylov step
+};
 
 // A time-dependent term: coefficients[n] * op is added to the final
 // Hamiltonian during step n (from time n dt to (n + 1) dt). Sampling a
@@ -249,6 +266,10 @@ struct Evolution {
     std::vector<Drive> drives;
     // Also return the state at every measured step (EvolutionResult::mps).
     bool keep_mps = false;
+    EvolutionMethod method = EvolutionMethod::trotter;
+    // Time-step targeting only: the half sweeps that adapt the basis in each
+    // step, the last one ending in the Krylov step.
+    std::size_t half_sweeps = 2;
 };
 
 struct EvolutionResult {
@@ -276,16 +297,20 @@ struct EvolutionResult {
 };
 
 // Evolve the ground state of `initial` (in options.sector) under `final`.
-// The final Hamiltonian and every drive must be Hermitian, conserve the
-// sector's charges and couple only sites i and i + 1 (chain order); the
-// initial Hamiltonian is anything solve() takes. `options` controls the
+// The final Hamiltonian and every drive must be Hermitian and conserve the
+// sector's charges. With the Trotter method they couple only sites i and
+// i + 1 (chain order); with time-step targeting the final Hamiltonian is
+// anything solve() takes, and there are no drives. The initial Hamiltonian
+// is anything solve() takes. `options` controls the
 // initial state's DMRG (its last sweep certifies the Lanczos residuals);
 // real-time evolution always runs in complex arithmetic, imaginary time in
 // options.arithmetic. num_eigenvalues must be one and keep_mps unset
 // (Evolution::keep_mps keeps the evolved states). Measurements are taken at
 // the measured steps as solve() takes them. The callback observes every
-// iteration of the preparation and of the evolution; the evolution's
-// iterations carry no energy (NaN).
+// iteration of the preparation and of the evolution. The Trotter method's
+// iterations carry no energy (NaN). Time-step targeting's carry the final
+// Hamiltonian's <psi|H|psi> at their configuration, except those of the
+// first half sweep, which builds its block operators.
 ALPS_CLASSIC_DMRG_DECL EvolutionResult evolve(models::CompiledOperator const& initial,
     models::CompiledOperator const& final_hamiltonian, models::PhysicalBasis const& basis,
     Evolution const& evolution, Options const& options = {}, Measurements const& measurements = {},

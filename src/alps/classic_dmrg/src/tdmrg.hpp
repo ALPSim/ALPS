@@ -33,6 +33,25 @@
 // applied, so its block operators are neither built nor rotated while the
 // system evolves; the operators measured (dmtk's corr) still are.
 //
+// Time-step targeting, the method of A. E. Feiguin and S. R. White, Phys.
+// Rev. B 72, 020404(R) (2005), written for this tree from the paper: the
+// final Hamiltonian replaces the System's Hamiltonian, and its block
+// operators are built by the same hooks the ground-state sweeps use. Its
+// block Hamiltonians carry their own name, so a block left from the
+// preparation holds none. The first half sweep rebuilds the blocks on one
+// side and the second those on the other; from then on dmtk's superblock
+// product is the final Hamiltonian. At every configuration the state psi is
+// carried there as above, and four Runge-Kutta vectors of
+// k = c H (c = -i dt in real time, -dt in imaginary time) give the
+// approximations
+//   psi(t + dt/3)  = psi + (31 k1 + 14 k2 + 14 k3 - 5 k4) / 162,
+//   psi(t + 2dt/3) = psi + (16 k1 + 20 k2 + 20 k3 - 2 k4) / 81,
+//   psi(t + dt)    = psi + (k1 + 2 k2 + 2 k3 + k4) / 6
+// of the paper. The density matrix targets psi and these three with weights
+// 1/3, 1/6, 1/6 and 1/3. At the last configuration of a step, psi becomes
+// exp(c H) psi by a Lanczos (Krylov) exponential, which replaces the
+// Runge-Kutta psi(t + dt) among the targets.
+//
 // This private header is included only by classic.cpp.
 #pragma once
 
@@ -355,6 +374,7 @@ public:
             if (!(norm > 0.) || !std::isfinite(norm))
                 throw std::runtime_error("classic DMRG time evolution: the state vanished");
             this->gs /= T(norm);
+            this->energy[0] = std::numeric_limits<double>::quiet_NaN();
             this->m = states_;
             if (right_to_left) {
                 this->m4 = std::min(this->m4 * this->m3, this->m);
@@ -377,20 +397,233 @@ public:
         return discarded;
     }
 
+    // Time-step targeting from here on: `final_hamiltonian` (named apart
+    // from the initial one) becomes the System's Hamiltonian, and the hooks
+    // build and rotate its block operators. The Trotter method's
+    // begin_evolution turns off the interaction terms (rotate_terms) that
+    // dmtk's superblock product needs, so they are turned on again here.
+    void begin_targeting(dmtk::Hami<T> const& final_hamiltonian, double time_step, bool imaginary,
+                         std::size_t states, std::optional<double> truncation_error) {
+        begin_evolution(states, truncation_error);
+        targeting_ = true;
+        this->set_rotate_terms(true);
+        this->h = final_hamiltonian;
+        imaginary_ = imaginary;
+        time_step_ = time_step;
+        built_ = 0;
+    }
+
+    // One half sweep of time-step targeting in `direction`. Until a half
+    // sweep has built one side's blocks of the final Hamiltonian, the
+    // truncations target the state alone and the iterations carry no energy
+    // (NaN). After that every configuration targets the four states and
+    // reports <psi|H|psi> as its energy, and with `advance` the last one
+    // takes the Krylov step. `measure` measures corr at every configuration.
+    // Returns the squared norm the state lost in the half sweep's
+    // truncations.
+    double targeting_half_sweep(std::size_t direction, bool advance, bool measure) {
+        if (!targeting_) throw std::logic_error("classic DMRG time-step targeting has not begun");
+        int const ls = this->lattice().ls();
+        bool const built = built_ > 0;
+        if (advance && !built)
+            throw std::logic_error("classic DMRG time-step targeting advanced before its Hamiltonian was built");
+        this->_in_warmup = false;
+        this->_custom_qns = false;
+        this->qn = this->qnt;
+        this->dir = direction;
+        bool const right_to_left = direction == dmtk::RIGHT2LEFT;
+        double lost = 0.;
+        for (int step = 1; step < ls - 2; ++step) {
+            this->iter = step;
+            this->signal_emit(dmtk::SYSTEM_SIGNAL_START_ITER);
+            int const left_sites = right_to_left ? ls - step - 2 : step;
+            int const right_sites = ls - left_sites - 2;
+            this->read_block(this->leftblock, left_sites, dmtk::LEFT);
+            this->read_block(this->rightblock, right_sites, dmtk::RIGHT);
+            dmtk::Block<T> const& site1 = this->h.get_site(left_sites);
+            dmtk::Block<T> const& site2 = this->h.get_site(left_sites + 1);
+            this->m1 = static_cast<int>(this->leftblock.dim());
+            this->m4 = static_cast<int>(this->rightblock.dim());
+            this->m2 = static_cast<int>(site1.dim());
+            this->m3 = static_cast<int>(site2.dim());
+            if (step == 1 && continued_) {
+                dmtk::VectorState<T> const previous = this->gs;
+                this->init_iteration(this->leftblock, site1, site2, this->rightblock, false);
+                this->gs = previous;
+            } else {
+                this->init_iteration(this->leftblock, site1, site2, this->rightblock, true);
+                this->gs = this->seed;
+                // The weight of the state the previous truncation kept.
+                lost += std::max(0., 1. - std::real(product(this->gs, this->gs)));
+            }
+            double const norm = std::sqrt(std::real(product(this->gs, this->gs)));
+            if (!(norm > 0.) || !std::isfinite(norm))
+                throw std::runtime_error("classic DMRG time evolution: the state vanished");
+            this->gs /= T(norm);
+            use_targets_ = built;
+            this->energy[0] = std::numeric_limits<double>::quiet_NaN();
+            if (built) {
+                rk_targets();
+                if (advance && step == ls - 3) {
+                    this->gs = krylov_step(this->gs);
+                    double const evolved = std::sqrt(std::real(product(this->gs, this->gs)));
+                    if (!(evolved > 0.) || !std::isfinite(evolved))
+                        throw std::runtime_error("classic DMRG time evolution: the state vanished");
+                    this->gs /= T(evolved);
+                    targets_[3] = this->gs;
+                }
+            }
+            this->m = states_;
+            if (right_to_left) {
+                this->m4 = std::min(this->m4 * this->m3, this->m);
+                this->truncate(dmtk::RIGHT, this->m4);
+                this->rotate(dmtk::RIGHT, this->newblock);
+                this->write_iter(dmtk::RIGHT);
+            } else {
+                this->m1 = std::min(this->m1 * this->m2, this->m);
+                this->truncate(dmtk::LEFT, this->m1);
+                this->rotate(dmtk::LEFT, this->newblock);
+                this->write_iter(dmtk::LEFT);
+            }
+            use_targets_ = false;
+            if (measure) this->measure();
+            this->signal_emit(dmtk::SYSTEM_SIGNAL_END_ITER);
+        }
+        ++built_;
+        continued_ = true;
+        return lost;
+    }
+
+    // The truncation's targets: the state alone, or during time-step
+    // targeting the four states of rk_targets.
+    void build_target_states(int position) override {
+        if (!use_targets_) {
+            this->_target.resize(1);
+            this->_target_weight.resize(1);
+            Base::build_target_states(position);
+            return;
+        }
+        static constexpr double weights[4] = {1. / 3., 1. / 6., 1. / 6., 1. / 3.};
+        this->_target.resize(4);
+        this->_target_weight.resize(4);
+        for (std::size_t k = 0; k < 4; ++k) {
+            this->_target[k] = targets_[k];
+            this->_target_weight[k] = weights[k];
+        }
+    }
+
     // The Lanczos product's terms and the block operators of the Hamiltonian
-    // are built only before the evolution begins.
+    // are built before the evolution begins, and again during time-step
+    // targeting (for the final Hamiltonian).
     void init_hamiltonian(bool create_composite) override {
-        if (!evolving_) Base::init_hamiltonian(create_composite);
+        if (!evolving_ || targeting_) Base::init_hamiltonian(create_composite);
     }
     void rotate_hamiltonian(int position, dmtk::Block<T>& b, dmtk::Basis& basis, dmtk::Basis& rho_basis) override {
-        if (!evolving_) Base::rotate_hamiltonian(position, b, basis, rho_basis);
+        if (!evolving_ || targeting_) Base::rotate_hamiltonian(position, b, basis, rho_basis);
     }
 
 private:
+    // c = -i dt in real time, -dt in imaginary time (real arithmetic then).
+    T step_factor() const {
+        if constexpr (std::is_same_v<T, double>) {
+            return -time_step_;
+        } else {
+            return imaginary_ ? T(-time_step_) : T(0., -time_step_);
+        }
+    }
+
+    dmtk::VectorState<T> apply(dmtk::VectorState<T> const& v) { return dmtk::product(static_cast<Base&>(*this), v); }
+
+    // psi and its Runge-Kutta states at t + dt/3, t + 2dt/3 and t + dt (the
+    // formulas in the header comment); the energy <psi|H|psi> on the way.
+    void rk_targets() {
+        auto const& psi = this->gs;
+        T const c = step_factor();
+        dmtk::VectorState<T> const h_psi = apply(psi);
+        this->energy[0] = std::real(product(psi, h_psi));
+        dmtk::VectorState<T> const k1 = c * h_psi;
+        dmtk::VectorState<T> stage = psi;
+        stage += T(0.5) * k1;
+        dmtk::VectorState<T> const k2 = c * apply(stage);
+        stage = psi;
+        stage += T(0.5) * k2;
+        dmtk::VectorState<T> const k3 = c * apply(stage);
+        stage = psi;
+        stage += k3;
+        dmtk::VectorState<T> const k4 = c * apply(stage);
+        auto combine = [&](double a1, double a2, double a3, double a4) {
+            dmtk::VectorState<T> out = psi;
+            out += T(a1) * k1;
+            out += T(a2) * k2;
+            out += T(a3) * k3;
+            out += T(a4) * k4;
+            return out;
+        };
+        targets_[0] = psi;
+        targets_[1] = combine(31. / 162., 14. / 162., 14. / 162., -5. / 162.);
+        targets_[2] = combine(16. / 81., 20. / 81., 20. / 81., -2. / 81.);
+        targets_[3] = combine(1. / 6., 2. / 6., 2. / 6., 1. / 6.);
+    }
+
+    // exp(c H) psi in the Krylov space of H and psi (Lanczos with full
+    // reorthogonalization), grown until the coefficient of its newest vector
+    // is below 1e-13 or the space closes.
+    dmtk::VectorState<T> krylov_step(dmtk::VectorState<T> const& psi) {
+        constexpr std::size_t max_dimension = 40;
+        T const c = step_factor();
+        double const norm = std::sqrt(std::real(product(psi, psi)));
+        std::vector<dmtk::VectorState<T>> basis;
+        basis.push_back(psi);
+        basis.back() /= T(norm);
+        std::vector<double> alpha, beta;
+        std::vector<T> coefficients;
+        for (std::size_t j = 0;; ++j) {
+            dmtk::VectorState<T> w = apply(basis[j]);
+            alpha.push_back(std::real(product(basis[j], w)));
+            for (int pass = 0; pass < 2; ++pass)
+                for (auto const& v : basis) w -= product(v, w) * v;
+            double const b = std::sqrt(std::real(product(w, w)));
+            std::size_t const n = alpha.size();
+            Eigen::MatrixXd tridiagonal = Eigen::MatrixXd::Zero(static_cast<Eigen::Index>(n), static_cast<Eigen::Index>(n));
+            for (std::size_t i = 0; i < n; ++i) {
+                tridiagonal(static_cast<Eigen::Index>(i), static_cast<Eigen::Index>(i)) = alpha[i];
+                if (i + 1 < n)
+                    tridiagonal(static_cast<Eigen::Index>(i), static_cast<Eigen::Index>(i + 1)) =
+                        tridiagonal(static_cast<Eigen::Index>(i + 1), static_cast<Eigen::Index>(i)) = beta[i];
+            }
+            Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> const solver(tridiagonal);
+            coefficients.assign(n, T(0));
+            for (std::size_t i = 0; i < n; ++i)
+                for (std::size_t e = 0; e < n; ++e) {
+                    auto const ei = static_cast<Eigen::Index>(e);
+                    coefficients[i] += solver.eigenvectors()(static_cast<Eigen::Index>(i), ei)
+                                       * std::exp(c * solver.eigenvalues()(ei)) * solver.eigenvectors()(0, ei);
+                }
+            bool const closed = b <= 1e-12 * std::max(1., std::abs(alpha.back()));
+            if (closed || (n > 1 && std::abs(coefficients.back()) < 1e-13)) break;
+            if (n == max_dimension)
+                throw std::runtime_error("classic DMRG time-step targeting: the Krylov step did not converge in "
+                                         + std::to_string(max_dimension) + " vectors; use a smaller time_step");
+            beta.push_back(b);
+            w /= T(b);
+            basis.push_back(std::move(w));
+        }
+        dmtk::VectorState<T> out = basis[0];
+        out *= T(norm) * coefficients[0];
+        for (std::size_t i = 1; i < coefficients.size(); ++i) out += (T(norm) * coefficients[i]) * basis[i];
+        return out;
+    }
+
     bool evolving_ = false;
+    bool targeting_ = false;
+    bool imaginary_ = false;
+    bool use_targets_ = false; // the next truncation targets targets_
+    double time_step_ = 0.;
+    int built_ = 0;            // targeting half sweeps since begin_targeting
     bool continued_ = false; // the state is at the configuration a half sweep starts from
     int states_ = 0;
     std::vector<int> visits_;
+    std::array<dmtk::VectorState<T>, 4> targets_;
 };
 
 } // namespace alps::dmrg::classic::detail

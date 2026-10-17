@@ -19,6 +19,7 @@
 
 #include <Eigen/Dense>
 
+#include <algorithm>
 #include <cmath>
 #include <complex>
 #include <cstddef>
@@ -648,4 +649,193 @@ TEST(ClassicDmrgEvolution, RejectsWhatTheGatesCannotApply) {
     Model const twisted(complex_hopping(8, 0.4));
     expect_message([&] { cd::evolve(fermions.op, twisted.op, fermions.basis, imaginary, real); },
                    "complex arithmetic");
+}
+
+// ------------------------------------------------------- time-step targeting
+
+namespace {
+
+cd::Evolution targeting(double dt, std::size_t steps, std::size_t states, bool imaginary = false) {
+    auto evolution = real_time(dt, steps, states);
+    evolution.method = cd::EvolutionMethod::targeting;
+    evolution.imaginary = imaginary;
+    return evolution;
+}
+
+// The final Hamiltonian without its identity part, which neither method
+// applies (a phase in real time).
+mdl::CompiledOperator without_phase(mdl::CompiledOperator op) {
+    op.terms.erase(std::remove_if(op.terms.begin(), op.terms.end(), [](auto const& t) { return t.factors.empty(); }),
+                   op.terms.end());
+    return op;
+}
+
+// Evolve by time-step targeting with every step measured and the states
+// kept, and compare each step with exp(-i t H) psi(0) (or the normalized
+// exp(-t H) psi(0)) on the ED basis. There is no time-step error, so
+// `tolerance` bounds the Krylov and truncation errors. In real time every
+// iteration after the first half sweep reports <H_final>, which is
+// conserved; the first half sweep's report NaN.
+void expect_exact_targeting(Model const& initial, Model const& final_model, Sector const& sector,
+                            cd::Measurements const& requests, cd::Evolution evolution, cd::Options const& options,
+                            double tolerance) {
+    evolution.keep_mps = true;
+    std::vector<double> energies;
+    auto const result = cd::evolve(initial.op, final_model.op, initial.basis, evolution, options, requests,
+                                   [&](cd::Iteration const& row) { energies.push_back(row.energy); });
+    Reference const reference(initial.op, initial.basis, sector);
+    Dense const h = reference.matrix(without_phase(final_model.op));
+    ASSERT_EQ(result.steps.size(), evolution.steps + 1);
+    ASSERT_EQ(result.mps.size(), evolution.steps + 1);
+    EXPECT_NEAR(result.initial.energies.at(0), reference.states.eigenvalues.at(0), 1e-9);
+    Vector const start = reference.vector(result.mps[0]);
+    for (std::size_t k = 0; k <= evolution.steps; ++k) {
+        SCOPED_TRACE("step " + std::to_string(k));
+        double const t = evolution.time_step * static_cast<double>(k);
+        Vector exact = exponential(h, evolution.imaginary ? Complex(-t) : Complex(0., -t)) * reference.initial;
+        exact /= exact.norm();
+        Vector const state = reference.vector(result.mps[k]);
+        EXPECT_NEAR(state.norm(), 1., 1e-10);
+        EXPECT_LT(distance_up_to_phase(exact, state), tolerance);
+        if (!evolution.imaginary) {
+            Complex const amplitude = start.dot(state), expected = reference.initial.dot(exact);
+            EXPECT_LT(std::abs(amplitude - expected), tolerance);
+        }
+        EXPECT_NEAR(result.energies[k], reference.value(exact, final_model.op), tolerance);
+        for (auto const& [name, op] : requests.terms) {
+            auto const values = reference.values(exact, op);
+            auto const& row = result.measurements.at(name).values.at(k);
+            ASSERT_EQ(row.size(), values.size());
+            for (std::size_t c = 0; c < values.size(); ++c)
+                EXPECT_NEAR(row[c], values[c], tolerance) << name << " column " << c;
+        }
+    }
+    // The preparation's iterations come first; the first half sweep of the
+    // evolution (length - 3 iterations) builds the final Hamiltonian.
+    std::size_t const half = static_cast<std::size_t>(reference.states.problem.site_dims().size()) - 3;
+    std::size_t const first = result.initial.iterations.size();
+    ASSERT_GT(energies.size(), first + half);
+    double const conserved = reference.value(reference.initial, final_model.op);
+    for (std::size_t i = first; i < energies.size(); ++i) {
+        if (i < first + half) {
+            EXPECT_TRUE(std::isnan(energies[i])) << "iteration " << i;
+        } else {
+            ASSERT_TRUE(std::isfinite(energies[i])) << "iteration " << i;
+            if (!evolution.imaginary) EXPECT_NEAR(energies[i], conserved, 1e-9) << "iteration " << i;
+        }
+    }
+}
+
+} // namespace
+
+TEST(ClassicDmrgTargeting, FieldsToTheXxChainAreTheExactEvolution) {
+    // The initial Hamiltonian has no S+ or S-: every block operator of the
+    // final one is built by the evolution's first two half sweeps.
+    int const length = 8;
+    auto const xx = chain_xxz(length, 1.0, 0.0);
+    auto field = cd::site_terms(xx, "Sz");
+    for (auto& term : field.terms) term.coefficient *= term.factors[0].site < length / 2 ? -1. : 1.;
+    Model initial(xx);
+    initial.op = field;
+    cd::Measurements requests;
+    requests.terms["Sz"] = cd::site_terms(xx, "Sz");
+    expect_exact_targeting(initial, Model(xx), {{"Sz", 0.}}, requests, targeting(0.1, 10, 64),
+                           options_for(64, {{"Sz", 0.}}), 1e-9);
+}
+
+TEST(ClassicDmrgTargeting, LongRangeAndPeriodicFinalHamiltonians) {
+    Model const initial(chain_xxz(8, 1.0, 0.5));
+    cd::Measurements requests;
+    requests.terms["SzSz"] = cd::pair_terms(chain_xxz(8, 1.0, 0.5), "Sz", "Sz");
+    Model const frustrated(mdl::heisenberg(lat::nnn_chain(8, 1.0, lat::Boundary::open), 1.0));
+    expect_exact_targeting(initial, frustrated, {{"Sz", 0.}}, requests, targeting(0.1, 8, 64),
+                           options_for(64, {{"Sz", 0.}}), 1e-9);
+    Model const ring(mdl::xxz(lat::chain(8, 1.0, lat::Boundary::periodic), 1.0, 2.0));
+    expect_exact_targeting(initial, ring, {{"Sz", 0.}}, requests, targeting(0.1, 8, 64),
+                           options_for(64, {{"Sz", 0.}}), 1e-9);
+}
+
+TEST(ClassicDmrgTargeting, HubbardQuenchKeepsTheFermionSigns) {
+    auto const lattice = lat::chain(6, 1.0, lat::Boundary::open);
+    auto const free = mdl::hubbard(lattice, 1.0, 0.0);
+    cd::Measurements requests;
+    requests.terms["n"] = cd::site_terms(free, "n");
+    requests.terms["hop_up"] = cd::pair_terms(free, "c_dag_up", "c_up");
+    Sector const sector{{"N", 6.}, {"Sz", 0.}};
+    expect_exact_targeting(Model(free), Model(mdl::hubbard(lattice, 1.0, 4.0, 0.2)), sector, requests,
+                           targeting(0.1, 6, 64), options_for(64, sector), 1e-9);
+}
+
+TEST(ClassicDmrgTargeting, ComplexHoppingAndFourSites) {
+    auto const lattice = lat::chain(8, 1.0, lat::Boundary::open);
+    auto const free = mdl::spinless_fermion_model(lattice, 1.0, 0.0, 0.0);
+    auto potential = cd::site_terms(free, "n");
+    for (auto& term : potential.terms) term.coefficient *= 0.3 * term.factors[0].site;
+    Model initial(free);
+    initial.op = sum(initial.op, potential);
+    cd::Measurements requests;
+    requests.terms["hop"] = cd::pair_terms(free, "c_dag", "c");
+    expect_exact_targeting(initial, Model(complex_hopping(8, 0.4)), {{"N", 4.}}, requests, targeting(0.1, 6, 64),
+                           options_for(64, {{"N", 4.}}), 1e-9);
+    Model const four(chain_xxz(4, 1.0, 0.0));
+    expect_exact_targeting(four, Model(chain_xxz(4, 1.0, 2.0, 0.3)), {{"Sz", 0.}}, {}, targeting(0.1, 6, 16),
+                           options_for(16, {{"Sz", 0.}}), 1e-9);
+}
+
+TEST(ClassicDmrgTargeting, ImaginaryTimeIsTheNormalizedExactProjection) {
+    Model const initial(chain_xxz(8, 1.0, 0.0));
+    Model const final_model(chain_xxz(8, 1.0, 1.0));
+    expect_exact_targeting(initial, final_model, {{"Sz", 0.}}, {}, targeting(0.2, 10, 64, true),
+                           options_for(64, {{"Sz", 0.}}), 1e-9);
+    // In real arithmetic as well.
+    auto options = options_for(64, {{"Sz", 0.}});
+    options.arithmetic = cd::Arithmetic::real;
+    expect_exact_targeting(initial, final_model, {{"Sz", 0.}}, {}, targeting(0.2, 10, 64, true), options, 1e-9);
+}
+
+TEST(ClassicDmrgTargeting, LargeStepsCarryNoTrotterError) {
+    // dt = 0.4: the Krylov step is exact where the Trotter product is not.
+    Model const initial(chain_xxz(8, 1.0, 0.0));
+    Model const final_model(chain_xxz(8, 1.0, 2.0, 0.3));
+    expect_exact_targeting(initial, final_model, {{"Sz", 0.}}, {}, targeting(0.4, 5, 64),
+                           options_for(64, {{"Sz", 0.}}), 1e-9);
+    auto trotter = real_time(0.4, 5, 64);
+    trotter.keep_mps = true;
+    auto const result = cd::evolve(initial.op, final_model.op, initial.basis, trotter, options_for(64, {{"Sz", 0.}}));
+    Reference const reference(initial.op, initial.basis, {{"Sz", 0.}});
+    Vector const exact = exponential(reference.matrix(final_model.op), Complex(0., -2.0)) * reference.initial;
+    EXPECT_GT(distance_up_to_phase(exact, reference.vector(result.mps.back())), 1e-2);
+}
+
+TEST(ClassicDmrgTargeting, TargetsCarryAProductStateIntoTheEvolvedBasis) {
+    // A domain wall is a product state: its density matrices have rank one,
+    // so a truncation that targeted the state alone would keep one state per
+    // block, and the Krylov step could move spins only on the two explicit
+    // sites. The intermediate states of the step give the blocks the
+    // directions the wall melts into.
+    int const length = 10;
+    auto const xx = chain_xxz(length, 1.0, 0.0);
+    auto field = cd::site_terms(xx, "Sz");
+    for (auto& term : field.terms) term.coefficient *= term.factors[0].site < length / 2 ? -1. : 1.;
+    Model initial(xx);
+    initial.op = field;
+    auto options = options_for(64, {{"Sz", 0.}});
+    options.warmup_configuration.assign(static_cast<std::size_t>(length), 1);
+    for (int i = 0; i < length / 2; ++i) options.warmup_configuration[static_cast<std::size_t>(i)] = 0;
+    auto evolution = targeting(0.05, 20, 64);
+    evolution.truncation_error = 1e-12;
+    cd::Measurements requests;
+    requests.terms["Sz"] = cd::site_terms(xx, "Sz");
+    expect_exact_targeting(initial, Model(xx), {{"Sz", 0.}}, requests, evolution, options, 1e-4);
+}
+
+TEST(ClassicDmrgTargeting, RejectsDrivesAndEmptySchedules) {
+    Model const initial(chain_xxz(8, 1.0, 0.0));
+    auto const options = options_for(32, {{"Sz", 0.}});
+    auto evolution = targeting(0.1, 2, 32);
+    evolution.drives.push_back(cd::Drive{cd::site_terms(chain_xxz(8, 1.0, 0.0), "Sz"), {1., 1.}});
+    EXPECT_THROW(cd::evolve(initial.op, initial.op, initial.basis, evolution, options), std::invalid_argument);
+    evolution = targeting(0.1, 2, 32);
+    evolution.half_sweeps = 0;
+    EXPECT_THROW(cd::evolve(initial.op, initial.op, initial.basis, evolution, options), std::invalid_argument);
 }
