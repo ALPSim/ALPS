@@ -23,6 +23,7 @@
 
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
+#include <nanobind/operators.h>
 #include <nanobind/stl/complex.h>
 #include <nanobind/stl/map.h>
 #include <nanobind/stl/optional.h>
@@ -521,6 +522,10 @@ void bind_terms(nb::module_& m) {
         .def("__len__", [](mdl::TermSum const& s) { return s.terms().size(); })
         .def("__add__", [](mdl::TermSum const& a, mdl::TermSum const& b) { return a + b; }, nb::is_operator())
         .def("__sub__", [](mdl::TermSum const& a, mdl::TermSum const& b) { return a - b; }, nb::is_operator())
+        // In place: `H += term` appends without copying H, so accumulating many terms is linear.
+        // Like list +=, this changes the object every other name bound to it sees.
+        .def(nb::self += nb::self)
+        .def(nb::self -= nb::self)
         .def("__neg__", [](mdl::TermSum const& a) { return -a; })
         .def("__mul__", [](mdl::TermSum const& a, mdl::TermSum const& b) { return a * b; }, nb::is_operator())
         .def("__mul__", [](mdl::TermSum const& a, Complex scalar) { return a * scalar; }, nb::is_operator())

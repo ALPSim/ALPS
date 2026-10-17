@@ -75,6 +75,11 @@ public:
 
     // -- algebra (mirrors OpSum arithmetic) --
     TermSum operator+(TermSum const& other) const;
+    // In-place sums append the other operand's terms, in order, without copying
+    // this sum's terms; accumulating N terms is linear. `s += s` is safe.
+    TermSum& operator+=(TermSum const& other);
+    TermSum& operator+=(TermSum&& other);
+    TermSum& operator-=(TermSum const& other);
     TermSum operator-(TermSum const& other) const;
     TermSum operator-() const;
     TermSum operator*(TermSum const& other) const;   // distributive concat

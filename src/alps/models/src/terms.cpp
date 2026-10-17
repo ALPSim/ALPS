@@ -14,6 +14,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iterator>
 #include <optional>
 #include <stdexcept>
 #include <unordered_map>
@@ -266,6 +267,31 @@ TermSum TermSum::operator+(TermSum const& other) const {
     terms.insert(terms.end(), other.terms_.begin(), other.terms_.end());
     return TermSum(std::move(terms));
 }
+
+TermSum& TermSum::operator+=(TermSum const& other) {
+    if (&other == this) {
+        // Appending a range to itself: reserve first so the source stays valid.
+        auto const n = terms_.size();
+        terms_.reserve(2 * n);
+        for (std::size_t i = 0; i < n; ++i) terms_.push_back(terms_[i]);
+        return *this;
+    }
+    terms_.insert(terms_.end(), other.terms_.begin(), other.terms_.end());
+    return *this;
+}
+
+TermSum& TermSum::operator+=(TermSum&& other) {
+    if (&other == this) return *this += static_cast<TermSum const&>(other);
+    if (terms_.empty()) {
+        terms_ = std::move(other.terms_);
+        return *this;
+    }
+    terms_.insert(terms_.end(), std::make_move_iterator(other.terms_.begin()),
+                  std::make_move_iterator(other.terms_.end()));
+    return *this;
+}
+
+TermSum& TermSum::operator-=(TermSum const& other) { return *this += -other; }
 
 TermSum TermSum::operator-() const {
     std::vector<Term> terms = terms_;

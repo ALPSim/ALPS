@@ -22,7 +22,7 @@ mdl::CompiledModel compiled = mdl::compile_hamiltonian(model);
 | `alps/models/lattice.hpp` | `alps::lattice`: `UnitCell`, `Lattice` (tiling, neighbours, momenta, translation generators) and 15 named lattices |
 | `alps/models/finite_graph.hpp`, `geometry.hpp` | `FiniteGraph` and `LatticeGeometry`: owned graph and unit-cell descriptions without a tiler |
 | `alps/models/site.hpp` | `LocalOp`, `SiteBasis`, `finalize_site`, built-in spin, boson, hard-core boson, spinless and spinful fermion sites |
-| `alps/models/terms.hpp` | `Term`, `TermSum`: operator algebra with fermionic swap signs, Hermitian conjugation, canonicalisation and charge analysis |
+| `alps/models/terms.hpp` | `Term`, `TermSum`: operator algebra with fermionic swap signs, Hermitian conjugation, canonicalisation and charge analysis; `+=`/`-=` append in place, so accumulating many terms is linear |
 | `alps/models/physical_basis.hpp` | `LocalBasis`, `PhysicalBasis`: ordered local spaces, quantum numbers and parities, independent of any Hamiltonian |
 | `alps/models/compiled.hpp` | `CompiledOperator` (dense local factors with Jordan–Wigner strings) and `CompiledModel` (operator plus lattice metadata) |
 | `alps/models/hamiltonian.hpp` | `Hamiltonian` (lattice + site bases + bond/site/global term templates), `compile_hamiltonian`, `compile_operator`, `validate_hermiticity` |

@@ -200,6 +200,23 @@ def test_term_algebra_and_compilation():
     assert op == models.CompiledOperator([2, 2], [term]) and op != compiled
 
 
+def test_in_place_sums_append_in_order_and_change_the_object():
+    spin = models.spin()
+    a = 0.5 * models.located(spin, "Sp", 0) * models.located(spin, "Sm", 1)
+    b = models.located(spin, "Sz", 0) - 2j * models.located(spin, "Sz", 1)
+    reference = a + b
+    alias = total = models.TermSum() + a
+    total += b
+    assert total is alias and len(total) == len(reference) == 3
+    assert [t.effective_coeff for t in total.terms] == [t.effective_coeff for t in reference.terms]
+    assert [[f.op.name for f in t.factors] for t in total.terms] == [["Sp", "Sm"], ["Sz"], ["Sz"]]
+    assert len(a) == 1  # the right operand is untouched
+    total -= b
+    assert (total - a).canonicalise().empty
+    total += total
+    assert len(total) == 10
+
+
 def test_hamiltonian_templates_reproduce_the_built_in_model():
     spin = models.spin()
     chain = lat.chain(4)

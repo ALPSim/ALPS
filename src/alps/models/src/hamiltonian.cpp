@@ -77,28 +77,29 @@ std::vector<int> Hamiltonian::site_dims() const {
     return out;
 }
 
+// Accumulated in place: rebuilding the sum per added term (total = total + t)
+// copied every earlier term each time, quadratic in the term count.
 TermSum Hamiltonian::expand() const {
     TermSum total;
     for (BondTemplate const& tpl : bond_templates_) {
         for (auto const& bond : lattice_.bonds()) {
             if (tpl.bond_type && bond.bond_type != *tpl.bond_type) continue;
             TermSum contribution = tpl.spec(bond.source, bond.target) * tpl.coeff;
-            if (tpl.add_hc) contribution = contribution + contribution.dag();
-            total = total + contribution;
+            if (tpl.add_hc) contribution += contribution.dag();
+            total += std::move(contribution);
         }
     }
     for (SiteTemplate const& tpl : site_templates_) {
         for (auto const& site : lattice_.sites()) {
             if (tpl.site_type && site.site_type != *tpl.site_type) continue;
             TermSum contribution = tpl.spec(site.index) * tpl.coeff;
-            if (tpl.add_hc) contribution = contribution + contribution.dag();
-            total = total + contribution;
+            if (tpl.add_hc) contribution += contribution.dag();
+            total += std::move(contribution);
         }
     }
     for (GlobalTerm const& g : global_terms_) {
-        TermSum term = g.op;
-        if (g.add_hc) term = term + term.dag();
-        total = total + term;
+        total += g.op;
+        if (g.add_hc) total += g.op.dag();
     }
     return total;
 }

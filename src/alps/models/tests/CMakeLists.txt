@@ -9,6 +9,7 @@ foreach(name IN ITEMS
     lattice_xml
     operator_decomposition
     qubit_encoding
+    term_sum
     translation_generators)
   add_executable(models_${name} ${name}.cpp)
   target_link_libraries(models_${name} PRIVATE ALPS::models)
