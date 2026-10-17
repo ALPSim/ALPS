@@ -65,6 +65,8 @@ private:
     friend ALPS_ED_DECL ProductProblem prepare_product(models::TermSum const&,
         std::vector<models::SiteBasisPtr> const&, std::vector<std::string> const&,
         models::FermionConvention, ProductOptions const&);
+    friend ALPS_ED_DECL ProductProblem prepare_product(models::CompiledOperator const&,
+        models::PhysicalBasis const&, ProductOptions const&);
 };
 
 struct ProductEigenResult {
@@ -90,6 +92,13 @@ ALPS_ED_DECL ProductProblem prepare_product(models::TermSum const&,
     models::FermionConvention = models::FermionConvention::strict,
     ProductOptions const& = {});
 ALPS_ED_DECL ProductProblem prepare_product(models::Hamiltonian const&, ProductOptions const& = {});
+/// A compiled operator (its Jordan-Wigner strings included, e.g. from an XML
+/// catalog model) on the local spaces of `physical`: the same policy as the
+/// located-term overload. Hermiticity is always validated; selecting a charge
+/// validates the conservation of every declared one. Strings use the basis's
+/// parities under the strict convention and none under the lattice one.
+ALPS_ED_DECL ProductProblem prepare_product(models::CompiledOperator const&,
+    models::PhysicalBasis const& physical, ProductOptions const& = {});
 
 /// <psi_i|O|psi_i> for every eigenvector column of the result, with O
 /// assembled by ProductProblem::operator_matrix.

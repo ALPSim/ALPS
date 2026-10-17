@@ -189,6 +189,62 @@ def test_dihedral_family_reproduces_the_sector():
         ed.FiniteGroupIrrep([[1, 0]], [[[2.0]]], 1, "bad")
 
 
+
+def test_catalog_models_take_the_model_entry_points():
+    # An XML ring in its Sz_total sector: every entry point against the kit chain.
+    n = 6
+    ring = models.CatalogModel({"MODEL": "spin", "LATTICE": "chain lattice", "L": n, "J": 1.0, "local_S": 0.5,
+                                "CONSERVED_QUANTUMNUMBERS": "Sz", "Sz_total": 0})
+    kit = models.heisenberg(lat.chain(n))
+    sector_levels = ed.prepare_product(kit, {"Sz": 0.0}).eigenstates(count=20, method="dense").eigenvalues
+    product = ed.prepare_product(ring)
+    assert product.dimension == 20 and product.sector == {"Sz": 0.0}
+    np.testing.assert_allclose(product.eigenstates(count=20, method="dense").eigenvalues, sector_levels, atol=1e-12)
+    assert ed.prepare_product(ring, sector={}).dimension == 64
+    assert ed.prepare_product(ring, {"Sz": 1.0}, 100).dimension == 15
+    projected = ed.prepare_projected(ring)
+    assert projected.dimension == 20
+    assert projected.eigenstates(count=1).eigenvalues[0] == pytest.approx(sector_levels[0], abs=1e-12)
+
+    whole = ed.model_spectrum(ring, sector={})
+    assert whole.charges == ["Sz"] and sum(block.block_dimension for block in whole.blocks) == 64
+    np.testing.assert_allclose(whole.eigenvalues, ed.model_spectrum(kit).eigenvalues, atol=1e-10)
+    translation = ed.SpectrumTranslation([(i + 1) % n for i in range(n)], n)
+    momenta = ed.model_spectrum(ring, all_momenta=True, translations=[translation])
+    np.testing.assert_allclose(momenta.eigenvalues, sector_levels, atol=1e-10)
+    at_pi = ed.prepare_projected(ring, momentum=[np.pi], translations=[translation])
+    kit_pi = ed.prepare_projected(kit, sector={"Sz": 0.0}, momentum=[np.pi])
+    np.testing.assert_allclose(at_pi.eigenstates(count=2).eigenvalues, kit_pi.eigenstates(count=2).eigenvalues, atol=1e-10)
+    with pytest.raises(ValueError, match="translations"):
+        ed.prepare_projected(ring, momentum=[np.pi])
+    with pytest.raises(ValueError, match="translations"):
+        ed.model_spectrum(ring, all_momenta=True)
+
+    family = [ed.dihedral_irrep(n, 0, reflection=1), ed.dihedral_irrep(n, 0, reflection=-1),
+              ed.dihedral_irrep(n, 3, reflection=1), ed.dihedral_irrep(n, 3, reflection=-1),
+              ed.dihedral_irrep(n, 1), ed.dihedral_irrep(n, 2)]
+    np.testing.assert_allclose(ed.finite_spectrum(ring, family).eigenvalues, sector_levels, atol=1e-10)
+    np.testing.assert_allclose(ed.prepare_finite(ring, family[4]).eigenstates(count=2).eigenvalues,
+                               ed.prepare_finite(kit, family[4], sector={"Sz": 0.0}).eigenstates(count=2).eigenvalues,
+                               atol=1e-10)
+
+    # Fermions: the catalog Hubbard basis conserves Nup and Ndown, with the Jordan-Wigner strings compiled in.
+    hubbard = models.CatalogModel({"MODEL": "fermion Hubbard", "LATTICE": "open chain lattice", "L": 4, "t": 1.0,
+                                   "U": 4.0, "CONSERVED_QUANTUMNUMBERS": "Nup,Ndown", "Nup_total": 2, "Ndown_total": 2})
+    kit_hubbard = models.hubbard(lat.chain(4, bc="open"), t=1.0, U=4.0)
+    fermions = ed.prepare_product(hubbard)
+    assert fermions.dimension == 36 and fermions.sector == {"Ndown": 2.0, "Nup": 2.0}
+    np.testing.assert_allclose(fermions.eigenstates(count=4).eigenvalues,
+                               ed.prepare_product(kit_hubbard, sector={"N": 4.0, "Sz": 0.0}).eigenstates(count=4).eigenvalues,
+                               atol=1e-10)
+    with pytest.raises(ValueError):
+        ed.prepare_product(hubbard, sector={"N": 4.0})  # not a charge of this basis
+
+    assert "CatalogModel" in ed.prepare_product.__doc__ and "located terms" in ed.prepare_product.__doc__
+    compiled = models.compile_hamiltonian(ring)
+    assert isinstance(compiled, models.CompiledModel) and len(compiled.op) == len(ring.compile_hamiltonian())
+    assert compiled.site_types == ring.site_types and len(compiled.edges) == ring.num_bonds
+
 def test_sparse_assembly_matches_kronecker_products():
     spin = models.spin()
     sz, sp, sm = (spin.op(name).matrix for name in ("Sz", "Sp", "Sm"))

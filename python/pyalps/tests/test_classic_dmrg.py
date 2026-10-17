@@ -142,6 +142,15 @@ def test_catalog_models_solve_like_exact_diagonalization():
     result = dmrg.solve(op, basis, sector={"Sz": 0.0}, **exact_sweeps)
     assert result.energy == pytest.approx(catalog_reference(op, basis, {"Sz": 0.0}, 1)[0], abs=1e-8)
 
+    # The catalog itself: its compiled Hamiltonian and basis, in its Sz_total sector unless told otherwise.
+    ring.set_parameters({"Sz_total": 1})
+    direct = dmrg.solve(ring, **exact_sweeps)
+    assert direct.options.sector == {"Sz": 1.0}
+    assert direct.energy == pytest.approx(catalog_reference(op, basis, {"Sz": 1.0}, 1)[0], abs=1e-8)
+    assert dmrg.solve(ring, sector={"Sz": 0.0}, **exact_sweeps).energy == pytest.approx(result.energy, abs=1e-8)
+    with pytest.raises(TypeError):
+        dmrg.solve(ring, basis)
+
 
 def symmetric_integrals(n, seed):
     rng = np.random.default_rng(seed)

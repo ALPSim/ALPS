@@ -1060,6 +1060,22 @@ void bind_catalog(nb::module_& m) {
                  + "', LATTICE='" + model.parameters().value_or_default("LATTICE", "") + "', sites="
                  + std::to_string(model.graph().num_sites()) + ")";
         });
+    m.def("compile_hamiltonian", [](Catalog const& model) {
+        mdl::CompiledModel compiled;
+        {
+            nb::gil_scoped_release release;
+            compiled.op = model.compile_hamiltonian();
+        }
+        auto const& graph = model.graph();
+        for (auto it = graph.sites().first; it != graph.sites().second; ++it)
+            compiled.site_types.push_back(static_cast<int>(graph.site_type(*it)));
+        for (auto it = graph.bonds().first; it != graph.bonds().second; ++it)
+            compiled.edges.push_back({static_cast<int>(graph.source(*it)), static_cast<int>(graph.target(*it)),
+                                      static_cast<int>(graph.bond_type(*it))});
+        return compiled;
+    }, nb::arg("model"),
+       "A catalog model as a CompiledModel: op, site_types and edges (no basis tables; no Hermiticity or "
+       "conservation check, as CatalogModel.compile_hamiltonian).");
 }
 
 } // namespace

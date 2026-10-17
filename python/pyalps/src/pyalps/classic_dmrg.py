@@ -9,8 +9,10 @@
 ...                     measurements={"n": dmrg.site_terms(model, "n")})
 >>> result.energies[0], result.measurements["n"].values[0]      # doctest: +SKIP
 
-``solve`` takes a ``Hamiltonian`` (or a ``CompiledOperator`` with its
-``PhysicalBasis``), an ``Options`` object or its fields as keywords, and
+``solve`` takes a ``Hamiltonian``, an XML catalog model (``CatalogModel``,
+in the sector of its ``*_total`` parameters unless ``sector=`` or ``options``
+says otherwise) or a ``CompiledOperator`` with its ``PhysicalBasis``, an
+``Options`` object or its fields as keywords, and
 measurements as a ``Measurements`` object or a dict of named operators
 (measured term by term; use ``expectation=`` for one value per operator).
 Every completed iteration reaches ``callback(iteration)``, which may raise to
@@ -73,7 +75,14 @@ def make_measurements(measurements=None, expectation=None):
 
 def solve(model, basis=None, *, options=None, measurements=None, expectation=None, callback=None,
           log_file=None, **fields):
-    """Run the DMRG on a ``Hamiltonian`` or on a ``CompiledOperator`` with its ``PhysicalBasis``."""
+    """Run the DMRG on a ``Hamiltonian``, a ``CatalogModel`` or a ``CompiledOperator`` with its ``PhysicalBasis``."""
+    catalog = getattr(_models, "CatalogModel", None)
+    if catalog is not None and isinstance(model, catalog):
+        if basis is not None:
+            raise TypeError("a CatalogModel brings its own physical basis")
+        if options is None and "sector" not in fields:
+            fields["sector"] = model.sector()
+        model, basis = model.compile_hamiltonian(), model.physical_basis()
     resolved = make_options(options, **fields)
     requests = make_measurements(measurements, expectation)
     if basis is None:

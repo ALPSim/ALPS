@@ -7,6 +7,7 @@
 // Adaptation: C++17 (no std::span or std::numbers), <alps/ed/...> and
 // <alps/models/...> include names, namespace alps::ed.
 #include <alps/ed/projected_problem.hpp>
+#include "compiled_validation.hpp"
 #include <alps/models/physical_basis.hpp>
 #include <alps/models/site.hpp>
 #include <alps/models/terms.hpp>
@@ -89,12 +90,14 @@ struct PreparedModel {
     std::vector<std::optional<double>> targets;
 };
 
+} // namespace
+
 // A compiled operator already carries its Jordan-Wigner strings. Materialize
 // those as ordinary diagonal factors for the shared model validators, using
 // ungraded local spaces so no second exchange sign/string can be introduced.
 // This is a local-tensor conversion, never a Hilbert-space enumeration. Keep
 // the original compiled operator for assembly and its accumulation order.
-void validate_compiled_model(models::CompiledOperator const& op, ProjectedSpaces const& spaces) {
+void detail::validate_compiled_model(models::CompiledOperator const& op, ProjectedSpaces const& spaces) {
     if (!std::is_sorted(spaces.charges.begin(), spaces.charges.end())
         || std::adjacent_find(spaces.charges.begin(), spaces.charges.end()) != spaces.charges.end())
         throw std::invalid_argument("compiled ED charge names must be sorted and unique");
@@ -146,6 +149,9 @@ void validate_compiled_model(models::CompiledOperator const& op, ProjectedSpaces
     models::validate_hermiticity(input, sites, models::FermionConvention::lattice);
     (void)models::compile_hamiltonian(input, sites, spaces.charges, models::FermionConvention::lattice);
 }
+
+namespace {
+using detail::validate_compiled_model;
 
 std::vector<std::optional<double>> charge_targets(ProjectedSpaces const& spaces,
                                                   std::map<std::string, double> const& sector) {

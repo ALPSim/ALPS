@@ -435,6 +435,16 @@ void bind_product(nb::module_& m) {
        nb::arg("fermion_convention") = "strict", nb::arg("sector") = std::map<std::string, double>{},
        nb::arg("max_full_dimension") = std::size_t{10'000'000},
        "The same for located terms on ordered sites.");
+    m.def("prepare_product", [](mdl::CompiledOperator const& op, mdl::PhysicalBasis const& physical,
+                                std::map<std::string, double> sector, std::size_t max_full_dimension) {
+        ed::ProductOptions options;
+        options.sector = std::move(sector);
+        options.max_full_dimension = max_full_dimension;
+        nb::gil_scoped_release release;
+        return ed::prepare_product(op, physical, options);
+    }, nb::arg("op"), nb::arg("physical_basis"), nb::arg("sector") = std::map<std::string, double>{},
+       nb::arg("max_full_dimension") = std::size_t{10'000'000},
+       "The same for a compiled operator (Jordan-Wigner strings included) on the local spaces of a PhysicalBasis.");
 }
 
 // -- symmetry spectra, finite groups, projected bases ------------------------------------

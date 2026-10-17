@@ -4,13 +4,15 @@
 // Ported from skilledwolf/alpsx (private repository), branch
 // agent/v3-execution-and-api-audit at f8ee6e98b, file src/solvers/diag/src/runtime/product_problem.cpp.
 // Adaptation: C++17 (no std::span or templated lambdas), <alps/ed/...>
-// include names, namespace alps::ed; observable assembly and expectation
-// values added.
+// include names, namespace alps::ed; observable assembly, expectation
+// values and the compiled-operator (catalog) overload added.
 #include <alps/ed/product_problem.hpp>
 #include <alps/ed/lanczos.hpp>
 #include <alps/ed/product_basis.hpp>
 #include <alps/ed/sparse_from_local.hpp>
 #include <alps/ed/sparse_matrix.hpp>
+#include <alps/ed/projected_problem.hpp>
+#include "compiled_validation.hpp"
 #include "eigenstate_policy.hpp"
 
 #include <algorithm>
@@ -78,6 +80,47 @@ ProductProblem prepare_product(models::TermSum const& terms,
     }, build_canonical_csr(compiled, states, result->basis.dimension, result->parity));
     return ProductProblem(std::move(result));
 }
+ProductProblem prepare_product(models::CompiledOperator const& op, models::PhysicalBasis const& physical,
+                               ProductOptions const& options) {
+    auto const& conserved = physical.conserved_quantum_numbers;
+    for (auto const& [name, target] : options.sector) {
+        if (std::find(conserved.begin(), conserved.end(), name) == conserved.end())
+            throw std::invalid_argument("sector contains a charge not declared conserved: " + name);
+        if (!std::isfinite(target)) throw std::invalid_argument("sector totals must be finite");
+    }
+    auto spaces = projected_spaces(physical);
+    if (op.site_dims.size() != spaces.local_spaces.size())
+        throw std::invalid_argument("prepare_product: the operator and the physical basis have different site counts");
+    // As for located terms: without a selected charge, only Hermiticity matters.
+    auto validation = spaces;
+    if (options.sector.empty()) {
+        validation.charges.clear();
+        for (auto& local : validation.local_spaces) local.quantum_numbers.clear();
+    }
+    detail::validate_compiled_model(op, validation);
+    std::vector<BasisConstraint> constraints;
+    for (auto const& [name, target] : options.sector) {
+        auto& constraint = constraints.emplace_back();
+        constraint.target = target;
+        for (auto const& site : physical.sites) constraint.values.push_back(site.quantum_numbers.at(name));
+    }
+    auto result = std::make_shared<ProductProblem::Data>();
+    result->physical = physical;
+    result->sector = options.sector;
+    result->dims = op.site_dims;
+    result->basis = enumerate_product_basis(result->dims, constraints, options.max_full_dimension);
+    if (result->basis.dimension > static_cast<std::size_t>(std::numeric_limits<int>::max()))
+        throw std::length_error("product problem exceeds the eigensolver dimension limit");
+    for (auto const& local : spaces.local_spaces) result->parity.push_back(local.parity);
+    std::vector<std::int64_t> const states(result->basis.states.begin(), result->basis.states.end());
+    std::visit([&](auto&& matrix) {
+        result->offsets = std::move(matrix.offsets);
+        result->columns = std::move(matrix.indices);
+        result->values = std::move(matrix.values);
+    }, build_canonical_csr(op, states, result->basis.dimension, result->parity));
+    return ProductProblem(std::move(result));
+}
+
 ProductProblem prepare_product(models::Hamiltonian const& model, ProductOptions const& options) {
     std::vector<models::SiteBasisPtr> sites;
     for (int site = 0; site < model.num_sites(); ++site) sites.push_back(model.site_for(site));

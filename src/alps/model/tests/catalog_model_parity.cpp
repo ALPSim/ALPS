@@ -20,13 +20,17 @@
 #include <alps/ed/eigensolver.hpp>
 #include <alps/ed/product_basis.hpp>
 #include <alps/ed/product_problem.hpp>
+#include <alps/ed/projected_problem.hpp>
 #include <alps/ed/sparse_matrix.hpp>
 #include <alps/model/catalog.hpp>
 #include <alps/models/builtin.hpp>
 #include <gtest/gtest.h>
 
+#include <cmath>
 #include <complex>
 #include <cstdint>
+#include <map>
+#include <stdexcept>
 #include <functional>
 #include <string>
 #include <utility>
@@ -162,4 +166,74 @@ TEST(CatalogModelParity, TypedCouplingsSelectDistinctLegAndRungInteractions) {
     p["Gamma"] = 0.0;
     p["D"] = 0.0;
     EXPECT_NEAR(catalog_e0(p), kit_e0(model), 1e-9);
+}
+
+namespace {
+std::vector<double> all_levels(alps::ed::ProductProblem const& problem) {
+    alps::ed::EigenstateOptions options;
+    options.count = static_cast<int>(problem.dimension());
+    options.method = alps::ed::EigenstateMethod::dense;
+    return problem.eigenstates(options).eigenvalues;
+}
+std::vector<double> all_levels(alps::ed::ProjectedProblem const& problem) {
+    alps::ed::EigenstateOptions options;
+    options.count = static_cast<int>(problem.dimension());
+    options.method = alps::ed::EigenstateMethod::dense;
+    return problem.eigenstates(options).spectrum.eigenvalues;
+}
+void expect_same_levels(std::vector<double> const& a, std::vector<double> const& b) {
+    ASSERT_EQ(a.size(), b.size());
+    for (std::size_t i = 0; i < a.size(); ++i) EXPECT_NEAR(a[i], b[i], 1e-10) << "level " << i;
+}
+} // namespace
+
+// A compiled catalog operator (Jordan-Wigner strings included) in a charge
+// sector: the product path, the projected path without translations and, for
+// the Hubbard chain, the kit model in the same sector give one spectrum.
+TEST(CatalogModelParity, CompiledCatalogSectorsAgreeAcrossProductProjectedAndKit) {
+    struct Item { Params params; std::map<std::string, double> sector; };
+    std::vector<Item> const items = {
+        {{{"MODEL", "fermion Hubbard"}, {"LATTICE", "chain lattice"}, {"L", "4"}, {"t", "1"}, {"U", "4"},
+          {"CONSERVED_QUANTUMNUMBERS", "Nup,Ndown"}, {"Nup_total", "2"}, {"Ndown_total", "2"}}, {{"Ndown", 2.}, {"Nup", 2.}}},
+        {{{"MODEL", "t-J"}, {"LATTICE", "open chain lattice"}, {"L", "5"}, {"t", "1"}, {"J", "0.4"},
+          {"CONSERVED_QUANTUMNUMBERS", "N,Sz"}, {"N_total", "3"}, {"Sz_total", "0.5"}}, {{"N", 3.}, {"Sz", 0.5}}},
+    };
+    for (auto const& item : items) {
+        alps::Parameters p;
+        for (auto const& [key, value] : item.params) p[key] = value;
+        SCOPED_TRACE(static_cast<std::string>(p["MODEL"]));
+        mdl::CatalogModel<> model(p);
+        auto const op = model.compile_hamiltonian();
+        auto const physical = model.physical_basis();
+        auto const sector = model.sector();
+        ASSERT_EQ(sector, item.sector);
+        alps::ed::ProductOptions product;
+        product.sector = sector;
+        auto const levels = all_levels(alps::ed::prepare_product(op, physical, product));
+        alps::ed::ProjectedOptions projected;
+        projected.sector = sector;
+        expect_same_levels(levels, all_levels(alps::ed::prepare_projected(op, alps::ed::projected_spaces(physical), {}, projected)));
+        // The full space with no selected charge needs Hermiticity only.
+        auto const full = alps::ed::prepare_product(op, physical);
+        EXPECT_EQ(full.dimension(), static_cast<std::size_t>(std::pow(op.site_dims.front(), op.site_dims.size())));
+    }
+    // The kit Hubbard chain in N = 4, Sz = 0.
+    mdl::CatalogModel<> catalog([] {
+        alps::Parameters p;
+        p["MODEL"] = "fermion Hubbard"; p["LATTICE"] = "chain lattice"; p["L"] = 4; p["t"] = 1; p["U"] = 4;
+        p["CONSERVED_QUANTUMNUMBERS"] = "Nup,Ndown"; p["Nup_total"] = 2; p["Ndown_total"] = 2;
+        return p;
+    }());
+    alps::ed::ProductOptions catalog_sector, kit_sector;
+    catalog_sector.sector = catalog.sector();
+    kit_sector.sector = {{"N", 4.}, {"Sz", 0.}};
+    expect_same_levels(all_levels(alps::ed::prepare_product(catalog.compile_hamiltonian(), catalog.physical_basis(), catalog_sector)),
+                       all_levels(alps::ed::prepare_product(mdl::hubbard(lat::chain(4), 1., 4.), kit_sector)));
+    // Undeclared charges and mismatched site counts are rejected.
+    alps::ed::ProductOptions wrong;
+    wrong.sector = {{"Sz", 0.}};
+    EXPECT_THROW(alps::ed::prepare_product(catalog.compile_hamiltonian(), catalog.physical_basis(), wrong), std::invalid_argument);
+    auto shorter = catalog.compile_hamiltonian();
+    shorter.site_dims.pop_back();
+    EXPECT_THROW(alps::ed::prepare_product(shorter, catalog.physical_basis()), std::invalid_argument);
 }

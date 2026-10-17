@@ -42,7 +42,7 @@ auto const thermal = alps::ed::thermal_surface(levels, charges, temperatures, fi
 | `sparse_matrix.hpp` | `SparseMatrix<Scalar>`, `canonical_csr` (sorted, summed, zero-free CSR), `build_csr_from_local`, `build_canonical_csr` (the same CSR assembled row by row from the operator's adjoint, without the uncombined COO list; product problems use it) |
 | `eigensolver.hpp` | `EigenstateOptions`, `dense_eigensystem` (LAPACK `dsyevd`/`zheevd`), `select_eigenvalues` |
 | `lanczos.hpp` | `lanczos_csr`: the deflated IETL Lanczos driver (real symmetric and complex Hermitian CSR) |
-| `product_problem.hpp` | `prepare_product` (`Hamiltonian` or `TermSum` + sites), `ProductProblem::eigenstates`, `operator_matrix`, `expectation_values` |
+| `product_problem.hpp` | `prepare_product` (`Hamiltonian`, `TermSum` + sites, or `CompiledOperator` + `PhysicalBasis`), `ProductProblem::eigenstates`, `operator_matrix`, `expectation_values` |
 | `spectrum.hpp` | `SpectrumLocalSpace`, `SpectrumTranslation`, `SpectrumBlock` (momentum, charges, method and, for point-group blocks, the irrep label, dimension and group order); `symmetry_spectrum`: charge- and momentum-resolved eigenvalues of a product-basis CSR matrix |
 | `finite_group.hpp` | `FiniteGroupIrrep`: the closure of a faithful site-permutation group with one unitary irrep, checked for generator relations, unitarity and irreducibility; `dihedral_irrep` (D_n on a ring), `validate_irrep_family` (complete, inequivalent family of one group) |
 | `projected_basis.hpp` | `ProjectedBasis`/`make_projected_basis` (orbit representatives of a charge sector under commuting translations at one momentum), `make_finite_group_basis` (the full isotypic component of one irrep), `projected_operator`, `projected_sparse_operator`, `apply_projected_operator`, `expect_projected_operator`, `expand_projected_state`, `symmetry_spectrum_from_local`, `finite_spectrum_from_local` |
@@ -128,27 +128,28 @@ adapters and HDF5 persistence.
 `alps::models::CatalogModel<>` (header `<alps/model/catalog.hpp>`, library
 `ALPS::alps`) resolves `MODEL`/`LATTICE` parameters through the XML catalogs
 and compiles the Hamiltonian, or any catalog operator, into a
-`CompiledOperator`. Its `local_parity()`, `conserved_quantum_numbers()`,
-`local_charge(name)` and `sector()` fill a `ProjectedSpaces` and a sector for
-`prepare_projected`, `model_spectrum`, `prepare_finite` and the CSR entry
-points, so a catalog model and a kit `Hamiltonian` share every solver:
+`CompiledOperator`. Its `physical_basis()` (local spaces, parities and the
+charges of `conserved_quantum_numbers()`) and `sector()` (the `*_total`
+parameters) feed `prepare_product`, and through `projected_spaces` the
+projected, symmetry-resolved and CSR entry points, so a catalog model and a
+kit `Hamiltonian` share every solver:
 
 ```cpp
 alps::models::CatalogModel<> model(parameters);   // MODEL, LATTICE, L, Sz_total, ...
 auto const op = model.compile_hamiltonian();
-alps::ed::ProjectedSpaces spaces;
-spaces.charges = model.conserved_quantum_numbers();
-auto const parity = model.local_parity();
-for (std::size_t site = 0; site < parity.size(); ++site) {
-    alps::ed::SpectrumLocalSpace space;
-    space.parity = parity[site];
-    for (auto const& name : spaces.charges) space.quantum_numbers.push_back(model.local_charge(name)[site]);
-    spaces.local_spaces.push_back(space);
-}
+auto const physical = model.physical_basis();
+alps::ed::ProductOptions product;
+product.sector = model.sector();
+auto const plain = alps::ed::prepare_product(op, physical, product);
 alps::ed::ProjectedOptions options;
 options.sector = model.sector();
-auto const problem = alps::ed::prepare_projected(op, spaces, {}, options);
+auto const problem = alps::ed::prepare_projected(op, alps::ed::projected_spaces(physical), {}, options);
 ```
+
+The sector names must be charges of the physical basis (the `t-J` basis has
+`N` and `Sz`, the `fermion` basis `Nup` and `Ndown`). In Python the
+`pyalps.ed` entry points and `classic_dmrg.solve` take the `CatalogModel`
+itself and default to its sector.
 
 The same compiled operators and physical bases drive the classic DMRG
 solver ([`ALPS::classic_dmrg`](../classic_dmrg/README.md)) for chains and
@@ -158,7 +159,9 @@ run on a kit lattice: `CatalogModel<>(lattice, parameters)` takes an
 (`<alps/lattice/kit.hpp>` describes the bridge).
 
 The legacy module's tests lock the importer against the kit factories
-(`catalog_model_parity`), against `hamiltonian_matrix` element by element on
+(`catalog_model_parity`, which also checks the product, projected and kit
+paths against each other on catalog Hubbard and t-J sectors), against
+`hamiltonian_matrix` element by element on
 the same catalog basis (`ed_vs_hamiltonian_matrix`), and the kit lattices
 against the catalog graphs (`lattice_catalog_structure`).
 
