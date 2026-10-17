@@ -32,7 +32,9 @@
 #include <cstdlib>
 #include <iostream>
 #include <limits>
+#include <sstream>
 #include <stdexcept>
+#include <string>
 
 namespace alps {
 
@@ -168,9 +170,30 @@ private:
 };
 
 template <class I>
-inline double to_double(const half_integer<I>& x) 
-{ 
+inline double to_double(const half_integer<I>& x)
+{
   return x.to_double();
+}
+
+// Largest |value| a half_integer<I> holds (16383 for short). It stores twice
+// the value in an I, and max()/min() (twice = +-numeric_limits<I>::max()) stand
+// for +-infinity. Larger values wrap silently.
+template <class I>
+inline double half_integer_limit()
+{
+  return 0.5*(std::numeric_limits<I>::max BOOST_PREVENT_MACRO_SUBSTITUTION () - 1);
+}
+
+// Warn if x does not fit in a half_integer<I>; returns false then.
+template <class I>
+inline bool warn_if_outside_half_integer_range(double x, const std::string& what)
+{
+  if (std::abs(x) <= half_integer_limit<I>())
+    return true;
+  std::cerr << "Warning: " << what << " = " << x << " is outside the range -" << half_integer_limit<I>()
+            << ".." << half_integer_limit<I>() << " that ALPS stores it in; the value wraps and "
+            << "results that depend on it are wrong.\n";
+  return false;
 }
 
 template <class I>

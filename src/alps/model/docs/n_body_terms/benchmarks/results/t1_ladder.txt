@@ -1,0 +1,12 @@
+2x2 plaquette demo K=0.5     E0 ALPS   -3.3597011665  proto   -3.3597011665  levels   16  max|dE| 8.0e-15  vs plan 4.9e-11
+2x2 plaquette demo K=0       E0 ALPS   -3.4185507189  proto   -3.4185507189  levels   16  max|dE| 2.7e-15  vs plan 2.6e-11
+2x3 open, U=8, K=0.7         E0 ALPS   -5.3669606044  proto   -5.3669606044  levels  200  max|dE| 4.4e-14  vs plan 4.3e-11
+2x3 open, U=8, K=-1.3        E0 ALPS   -5.0797988157  proto   -5.0797988157  levels  200  max|dE| 7.4e-14  vs plan 2.8e-11
+2x3 periodic, U=8, K=0.9     E0 ALPS   -5.0117188128  proto   -5.0117188128  levels  200  max|dE| 3.9e-14  vs plan 2.8e-11
+2x4 open, U=8, K=0           E0 ALPS   -5.7500660284  proto   -5.7500660284  levels  200  max|dE| 4.1e-13  vs plan 3.6e-11
+2x2 demo K=0.5 (2,1)         E0 ALPS   -2.7694772620  proto   -2.7694772620  levels   24  max|dE| 1.1e-14
+2x3 open K=0.7 (2,1)         E0 ALPS   -5.3387941499  proto   -5.3387941499  levels   90  max|dE| 1.2e-14
+2x3 open K=0.7 (3,2)         E0 ALPS   -3.4189803903  proto   -3.4189803903  levels  200  max|dE| 3.6e-14
+2x3 periodic K=0.9 (2,2)     E0 ALPS   -5.2836922787  proto   -5.2836922787  levels  200  max|dE| 1.2e-14
+2x4 open K=1.1 (3,2)         E0 ALPS   -7.8586086456  proto   -7.8586086456  levels  200  max|dE| 1.4e-13
+ALL OK

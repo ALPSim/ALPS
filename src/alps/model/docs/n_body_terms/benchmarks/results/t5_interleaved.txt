@@ -1,0 +1,5 @@
+m=2 roles at [0, 1]: levels 16  max|dE| 4.4e-15
+m=2 roles at [1, 0]: levels 16  max|dE| 7.1e-15
+m=3 roles at [0, 1, 2]: levels 64  max|dE| 1.1e-13
+m=3 roles at [2, 0, 1]: levels 64  max|dE| 4.1e-14
+ALL OK
