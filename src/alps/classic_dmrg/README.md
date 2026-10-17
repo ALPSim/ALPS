@@ -253,16 +253,21 @@ applies `final` itself to the superblock state:
   the first of them targets the state alone. `final` may couple any two
   sites, as the initial Hamiltonian may (next-nearest neighbours, a
   periodic chain).
-- At every configuration four Runge-Kutta vectors of `c H`, with
-  `c = -i dt` (or `-dt` in imaginary time), give the states at `t + dt/3`,
-  `t + 2dt/3` and `t + dt` (the paper's formulas, in `src/tdmrg.hpp`). The
-  density matrix targets them and the state with weights 1/3, 1/6, 1/6 and
-  1/3, so the kept basis holds the whole interval of the step.
+- At every configuration four Runge-Kutta vectors of `c (H - E)`, with
+  `c = -i dt` (or `-dt` in imaginary time) and `E = <psi|H|psi>`, give the
+  states at `t + dt/3`, `t + 2dt/3` and `t + dt` (the paper's formulas, in
+  `src/tdmrg.hpp`). The shift `E` changes the exact states only by a phase
+  or a norm. The density matrix targets them and the state, each
+  normalized, with weights 1/3, 1/6, 1/6 and 1/3, so the kept basis holds
+  the whole interval of the step.
 - Each step is `half_sweeps` half sweeps (default 2). At the last
   configuration of the last one, a Krylov exponential of `final` (Lanczos
   with full reorthogonalization, up to 40 vectors) advances the state.
   With enough states this is exact, so a large `dt` costs only the Krylov
-  vectors. Imaginary time renormalizes after the step.
+  vectors. The exponential is taken of `c (H - E)` as well, and real time
+  multiplies the phase `exp(c E)` back: in imaginary time `exp(-dt E)`
+  would overflow or underflow when `E` is large, as under a field that is
+  constant in the sector. Imaginary time renormalizes after the step.
 - A measured step is measured in one more half sweep. That half sweep
   keeps the four targets and does not advance. Step 0 is measured in the
   second of the two building half sweeps.
@@ -639,7 +644,10 @@ and every iteration's energy with the conserved `<H_final>`:
 - a Hubbard quench;
 - complex hopping;
 - four sites;
-- imaginary time in real and complex arithmetic.
+- imaginary time in real and complex arithmetic;
+- energies near 50 of either sign from a field that is constant in the
+  sector, in both times, where an unshifted exponential overflows or ends
+  early.
 
 Two further tests check the method's distinguishing properties. At
 `dt = 0.4`, targeting is exact where the Trotter product misses by more

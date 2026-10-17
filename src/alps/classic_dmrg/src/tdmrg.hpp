@@ -42,15 +42,20 @@
 // side and the second those on the other; from then on dmtk's superblock
 // product is the final Hamiltonian. At every configuration the state psi is
 // carried there as above, and four Runge-Kutta vectors of
-// k = c H (c = -i dt in real time, -dt in imaginary time) give the
-// approximations
+// k = c (H - E) (c = -i dt in real time, -dt in imaginary time, E the
+// state's energy <psi|H|psi>: the shift moves the exact states only by a
+// phase or a norm, which the density matrix's normalization of each target
+// drops, and keeps the steps small) give the approximations
 //   psi(t + dt/3)  = psi + (31 k1 + 14 k2 + 14 k3 - 5 k4) / 162,
 //   psi(t + 2dt/3) = psi + (16 k1 + 20 k2 + 20 k3 - 2 k4) / 81,
 //   psi(t + dt)    = psi + (k1 + 2 k2 + 2 k3 + k4) / 6
 // of the paper. The density matrix targets psi and these three with weights
 // 1/3, 1/6, 1/6 and 1/3. At the last configuration of a step, psi becomes
 // exp(c H) psi by a Lanczos (Krylov) exponential, which replaces the
-// Runge-Kutta psi(t + dt) among the targets.
+// Runge-Kutta psi(t + dt) among the targets. The exponential is taken of
+// c (H - E) too, and in real time the phase exp(c E) is restored: in
+// imaginary time exp(-dt E) alone would overflow or underflow for a large
+// energy, such as a field that is constant in the sector.
 //
 // This private header is included only by classic.cpp.
 #pragma once
@@ -534,23 +539,33 @@ private:
 
     dmtk::VectorState<T> apply(dmtk::VectorState<T> const& v) { return dmtk::product(static_cast<Base&>(*this), v); }
 
+    // (H - shift) v.
+    dmtk::VectorState<T> apply(dmtk::VectorState<T> const& v, double shift) {
+        dmtk::VectorState<T> out = apply(v);
+        out -= T(shift) * v;
+        return out;
+    }
+
     // psi and its Runge-Kutta states at t + dt/3, t + 2dt/3 and t + dt (the
-    // formulas in the header comment); the energy <psi|H|psi> on the way.
+    // formulas in the header comment, of H less the state's energy); the
+    // energy on the way.
     void rk_targets() {
         auto const& psi = this->gs;
         T const c = step_factor();
-        dmtk::VectorState<T> const h_psi = apply(psi);
-        this->energy[0] = std::real(product(psi, h_psi));
+        dmtk::VectorState<T> h_psi = apply(psi);
+        double const energy = std::real(product(psi, h_psi));
+        this->energy[0] = energy;
+        h_psi -= T(energy) * psi;
         dmtk::VectorState<T> const k1 = c * h_psi;
         dmtk::VectorState<T> stage = psi;
         stage += T(0.5) * k1;
-        dmtk::VectorState<T> const k2 = c * apply(stage);
+        dmtk::VectorState<T> const k2 = c * apply(stage, energy);
         stage = psi;
         stage += T(0.5) * k2;
-        dmtk::VectorState<T> const k3 = c * apply(stage);
+        dmtk::VectorState<T> const k3 = c * apply(stage, energy);
         stage = psi;
         stage += k3;
-        dmtk::VectorState<T> const k4 = c * apply(stage);
+        dmtk::VectorState<T> const k4 = c * apply(stage, energy);
         auto combine = [&](double a1, double a2, double a3, double a4) {
             dmtk::VectorState<T> out = psi;
             out += T(a1) * k1;
@@ -567,7 +582,9 @@ private:
 
     // exp(c H) psi in the Krylov space of H and psi (Lanczos with full
     // reorthogonalization), grown until the coefficient of its newest vector
-    // is below 1e-13 or the space closes.
+    // is below 1e-13 of the result or the space closes. The exponent is
+    // c (H - E) with E = <psi|H|psi> / <psi|psi>; real time multiplies the
+    // phase exp(c E) back, and imaginary time renormalizes afterwards.
     dmtk::VectorState<T> krylov_step(dmtk::VectorState<T> const& psi) {
         constexpr std::size_t max_dimension = 40;
         T const c = step_factor();
@@ -592,15 +609,23 @@ private:
                         tridiagonal(static_cast<Eigen::Index>(i + 1), static_cast<Eigen::Index>(i)) = beta[i];
             }
             Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> const solver(tridiagonal);
+            double const shift = alpha[0];
             coefficients.assign(n, T(0));
             for (std::size_t i = 0; i < n; ++i)
                 for (std::size_t e = 0; e < n; ++e) {
                     auto const ei = static_cast<Eigen::Index>(e);
                     coefficients[i] += solver.eigenvectors()(static_cast<Eigen::Index>(i), ei)
-                                       * std::exp(c * solver.eigenvalues()(ei)) * solver.eigenvectors()(0, ei);
+                                       * std::exp(c * (solver.eigenvalues()(ei) - shift))
+                                       * solver.eigenvectors()(0, ei);
                 }
+            double size = 0.;
+            for (auto const& x : coefficients) size += std::norm(x);
             bool const closed = b <= 1e-12 * std::max(1., std::abs(alpha.back()));
-            if (closed || (n > 1 && std::abs(coefficients.back()) < 1e-13)) break;
+            if (closed || (n > 1 && std::abs(coefficients.back()) < 1e-13 * std::sqrt(size))) {
+                if (!imaginary_)
+                    for (auto& x : coefficients) x *= std::exp(c * shift);
+                break;
+            }
             if (n == max_dimension)
                 throw std::runtime_error("classic DMRG time-step targeting: the Krylov step did not converge in "
                                          + std::to_string(max_dimension) + " vectors; use a smaller time_step");

@@ -839,3 +839,33 @@ TEST(ClassicDmrgTargeting, RejectsDrivesAndEmptySchedules) {
     evolution.half_sweeps = 0;
     EXPECT_THROW(cd::evolve(initial.op, initial.op, initial.basis, evolution, options), std::invalid_argument);
 }
+
+TEST(ClassicDmrgTargeting, LargeEnergiesInImaginaryTime) {
+    // A uniform field is a constant in a sector: at Sz = 1 a field of 50
+    // moves every energy by 50, one way or the other, and exp(-dt E) at
+    // dt = 0.5 is near e^{+-25}. The Krylov step must take the exponential
+    // relative to the state's energy. A field gradient in the initial
+    // Hamiltonian breaks the reflection symmetry, so that the Krylov space in
+    // the 56 states of the sector does not close within the 40 vectors a step
+    // may use; 64 states keep every block of the chain whole.
+    auto initial_for = [](double h) {
+        Model initial(chain_xxz(8, 1.0, 0.0, h));
+        auto gradient = cd::site_terms(chain_xxz(8, 1.0, 0.0), "Sz");
+        for (auto& term : gradient.terms) term.coefficient *= 0.2 * term.factors[0].site;
+        initial.op = sum(initial.op, gradient);
+        return initial;
+    };
+    Sector const sector{{"Sz", 1.}};
+    for (double h : {50.0, -50.0}) {
+        SCOPED_TRACE("field " + std::to_string(h));
+        expect_exact_targeting(initial_for(h), Model(chain_xxz(8, 1.0, 1.0, h)), sector, {},
+                               targeting(0.5, 4, 64, true), options_for(64, sector), 1e-9);
+    }
+    auto real = options_for(64, sector);
+    real.arithmetic = cd::Arithmetic::real;
+    expect_exact_targeting(initial_for(50.0), Model(chain_xxz(8, 1.0, 1.0, 50.0)), sector, {},
+                           targeting(0.5, 4, 64, true), real, 1e-9);
+    // Real time keeps the phase exp(-i dt E) of the large energy.
+    expect_exact_targeting(initial_for(50.0), Model(chain_xxz(8, 1.0, 1.0, 50.0)), sector, {},
+                           targeting(0.5, 4, 64), options_for(64, sector), 1e-9);
+}
