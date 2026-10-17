@@ -240,6 +240,84 @@ def test_sign_problem_check():
     with pytest.raises(ValueError, match="Jordan-Wigner"):
         models.has_sign_problem(models.hubbard(lat.chain(4, bc="open")))
 
+
+def test_symbolic_coefficients_and_parametric_models():
+    J, h = models.symbols("J", "h")
+    spin = models.spin()
+    bond = spin.Sz(0) * spin.Sz(1)
+    for symbolic in (J * bond, bond * J, 2 * J * bond, J * h * bond, bond * np.float64(0.5) * J):
+        assert isinstance(symbolic, models.SymbolicTermSum)
+    assert isinstance(bond * np.int64(2), models.TermSum)  # numbers keep the bound type
+    accumulated = spin.Sz(0)
+    accumulated += J * spin.Sz(1)                          # rebinds to the symbolic sum
+    assert isinstance(accumulated, models.SymbolicTermSum) and accumulated.free_symbols() == {J}
+    bound = accumulated.bind(J=2.0)
+    assert isinstance(bound, models.TermSum) and [t.coeff for t in bound.terms] == [1, 2]
+    partial = (J * h * bond).bind({J: 3.0})
+    assert isinstance(partial, models.SymbolicTermSum) and partial.free_symbols() == {h}
+    np.testing.assert_allclose([t.coeff for t in partial.bind(h=0.5).terms], [1.5])
+    hop = (1j * J * spin.Sp(0) * spin.Sm(1)).add_hc().bind(J=1.0)
+    assert [t.coeff for t in hop.terms] == [1j, -1j]
+    assert repr(2 * J - h) in ("2*J - h", "-h + 2*J") and (J ** 2).bind(J=3) == 9
+    with pytest.raises(TypeError):
+        float(J)
+    with pytest.raises(TypeError):
+        J.bind(J="one")
+
+    model = models.ParametricHamiltonian(lat.chain(8), spin, conserved_quantum_numbers=["Sz"])
+    model.add_bond(J, lambda i, j: spin.Sz(i) * spin.Sz(j) + 0.5 * (spin.Sp(i) * spin.Sm(j)).add_hc())
+    model.add_site(1.0, lambda i: -h * spin.Sz(i))           # a symbolic specification
+    model.add(0.0 * J * spin.Sz(0))
+    assert {s.name for s in model.free_symbols()} == {"J", "h"} and model.num_sites == 8
+    half = model.bind(J=1.0)
+    assert isinstance(half, models.ParametricHamiltonian) and half.free_symbols() == {h}
+    numeric = half.bind(h=0.0)
+    assert isinstance(numeric, models.Hamiltonian)
+    assert ground_energy(numeric, Sz=0.0) == pytest.approx(ground_energy(models.heisenberg(lat.chain(8)), Sz=0.0), abs=1e-12)
+    for solver in (lambda: ed.prepare_product(model), lambda: ed.ground_state(half),
+                   lambda: models.compile_observable(model, "Sz")):
+        with pytest.raises(TypeError, match="bind"):
+            solver()
+
+
+def test_validation_reports_every_diagnostic():
+    spin = models.spin()
+    codes = lambda model, target=None: [d.code for d in models.validate(model, target)]
+    clean = models.heisenberg(lat.chain(8, bc="open"))
+    report = models.validate(clean, "ed")
+    assert report.ok and bool(report) and len(report) == 0 and codes(clean) == []
+    report.raise_for_errors()
+    assert codes(clean, "sse") == ["unknown_target"]
+    assert codes(models.Hamiltonian(lat.chain(4), spin)) == ["empty"]
+
+    broken = models.Hamiltonian(lat.chain(4), spin, conserved_quantum_numbers=["Sz"])
+    broken.add_site(1.0, lambda i: spin.Sx(i))
+    report = models.validate(broken)
+    assert codes(broken) == ["conservation_broken"] and not report.ok and report.errors[0].suggestion
+    with pytest.raises(ValueError, match="conservation_broken"):
+        report.raise_for_errors()
+    malformed = models.Hamiltonian(lat.chain(4), spin)
+    malformed.add(float("nan") * spin.Sz(0))
+    assert codes(malformed) == ["compile_failed"]
+
+    one_way = models.Hamiltonian(lat.chain(4, bc="open"), spin, conserved_quantum_numbers=["Sz"])
+    one_way.add_bond(1.0, lambda i, j: spin.Sp(i) * spin.Sm(j))
+    assert codes(one_way) == [] and codes(one_way, "ed") == ["not_hermitian"]
+    huge = models.heisenberg(lat.chain(40000, bc="open"))
+    huge.add((1 + 1e-13j) * spin.Sz(0))  # not exactly Hermitian, and too many words to compare
+    assert codes(huge, "ed") == ["hermiticity_unchecked", "ed.large_space"]
+
+    assert codes(models.heisenberg(lat.chain(20)), "ed") == ["ed.large_space"]
+    assert codes(models.heisenberg(lat.chain(8)), "dmrg") == ["dmrg.periodic", "dmrg.sector_required"]
+    assert models.heisenberg(lat.square(4, 4)).validate("dmrg").warnings[0].code == "dmrg.dimension"
+    J = models.Symbol("J")
+    parametric = models.ParametricHamiltonian(lat.chain(4), spin).add_bond(J, lambda i, j: spin.Sz(i) * spin.Sz(j))
+    assert codes(parametric, "ed") == ["unbound_parameters"]
+    assert parametric.validate().errors[0].code == "unbound_parameters"
+    assert models.validate(parametric.bind(J=1.0), "ed").ok
+    with pytest.raises(TypeError):
+        models.validate(models.CatalogModel({"MODEL": "spin", "LATTICE": "chain lattice", "L": 4}))
+
 def test_term_algebra_and_compilation():
     spin = models.spin()
     sites = [spin, spin]

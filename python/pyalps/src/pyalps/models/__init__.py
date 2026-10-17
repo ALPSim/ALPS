@@ -6,7 +6,9 @@
 ``pyalps.models.lattice`` holds the unit cells, the named lattices and the
 legacy XML bridge; this module holds the local bases, the operator algebra,
 ``Hamiltonian`` with the built-in model factories, compiled operators, physical
-bases, the qubit/Pauli export and the XML catalog importer ``CatalogModel``.
+bases, the qubit/Pauli export and the XML catalog importer ``CatalogModel``;
+symbolic coefficients (``Symbol``, ``ParametricHamiltonian``), ``validate``
+and the ``has_sign_problem`` check.
 
 >>> from pyalps import models
 >>> lat = models.lattice
@@ -88,6 +90,7 @@ def compile_observable(model, observable):
     rejected), or an operator name summed over every site that defines it
     (on a catalog model, ``CatalogModel.compile_operator(name)``).
     """
+    require_bound(model)
     if isinstance(observable, CompiledOperator):
         return observable
     if isinstance(observable, TermSum):
@@ -135,4 +138,15 @@ for _model_type in (Hamiltonian, _CatalogModel):
         _model_type.to_dense_matrix = _to_dense_matrix
 del _model_type
 
-__all__ = [name for name in dir(_models_c) if not name.startswith("_")] + ["LocatedOperator", "compile_observable"]
+# -- symbolic coefficients and validation ---------------------------------------------
+
+from .symbols import Expr, Symbol, symbols  # noqa: E402
+from .parametric import ParametricHamiltonian, SymbolicTermSum, require_bound  # noqa: E402
+from .validate import Diagnostic, ValidationReport, validate  # noqa: E402
+
+Hamiltonian.validate = lambda self, target=None: validate(self, target)
+ParametricHamiltonian.validate = lambda self, target=None: validate(self, target)
+
+__all__ = [name for name in dir(_models_c) if not name.startswith("_")] + [
+    "LocatedOperator", "compile_observable", "Symbol", "Expr", "symbols", "SymbolicTermSum",
+    "ParametricHamiltonian", "Diagnostic", "ValidationReport", "validate"]

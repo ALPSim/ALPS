@@ -92,6 +92,7 @@ def make_measurements(measurements=None, expectation=None, model=None):
 def solve(model, basis=None, *, options=None, measurements=None, expectation=None, callback=None,
           log_file=None, **fields):
     """Run the DMRG on a ``Hamiltonian``, a ``CatalogModel`` or a ``CompiledOperator`` with its ``PhysicalBasis``."""
+    _models.require_bound(model)
     catalog = getattr(_models, "CatalogModel", None)
     requests = make_measurements(measurements, expectation, model if basis is None else basis)
     if catalog is not None and isinstance(model, catalog):

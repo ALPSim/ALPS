@@ -95,6 +95,7 @@ def _accepting_catalogs(name, catalog_form, signature):
     native = getattr(_ed_c, name)
 
     def dispatch(model, *args, **kwargs):
+        _models.require_bound(model)
         if _is_catalog(model):
             return catalog_form(model, *args, **kwargs)
         return native(model, *args, **kwargs)
@@ -157,6 +158,7 @@ def ground_state(model, *, sector=None, momentum=None, translations=(), observab
     momentum they must preserve the symmetry sector. ``method`` and the
     Lanczos controls are those of ``eigenstates``.
     """
+    _models.require_bound(model)
     sector_args = {} if sector is None else {"sector": sector}
     if momentum is None:
         problem = prepare_product(model, **sector_args)
