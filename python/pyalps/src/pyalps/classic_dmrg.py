@@ -72,8 +72,9 @@ except ImportError as error:  # pragma: no cover - SDK without classic_dmrg
 
 from ._ext.classic_dmrg_c import *  # noqa: F401,F403
 
-_OPTION_FIELDS = ("sweeps", "warmup_states", "num_eigenvalues", "truncation_error", "truncation_max_states",
-                  "lanczos_tolerance", "arithmetic", "sector", "scratch_parent", "verbose", "keep_mps")
+_OPTION_FIELDS = ("sweeps", "warmup_states", "warmup_configuration", "num_eigenvalues", "truncation_error",
+                  "truncation_max_states", "lanczos_tolerance", "arithmetic", "sector", "scratch_parent", "verbose",
+                  "keep_mps")
 
 
 def make_options(options=None, **fields):

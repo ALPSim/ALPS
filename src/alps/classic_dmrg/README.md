@@ -38,7 +38,7 @@ auto const& density = result.measurements.at("n").values[0];  // row = target st
 
 | name | content |
 | --- | --- |
-| `Options` | `sweeps` (`fixed_sweeps`, `ramped_sweeps` or an explicit `SweepStates` list; the right-to-left half sweep runs first), `warmup_states`, `num_eigenvalues`, optional `truncation_error` with `truncation_max_states`, optional `lanczos_tolerance` ([below](#the-lanczos-stop-rule)), `arithmetic` (real or complex), `sector` (name → total of a declared conserved charge), `scratch_parent`, `log`, `verbose`, `keep_mps` ([below](#matrix-product-states)) |
+| `Options` | `sweeps` (`fixed_sweeps`, `ramped_sweeps` or an explicit `SweepStates` list; the right-to-left half sweep runs first), `warmup_states`, `warmup_configuration` ([below](#unevenly-distributed-ground-states)), `num_eigenvalues`, optional `truncation_error` with `truncation_max_states`, optional `lanczos_tolerance` ([below](#the-lanczos-stop-rule)), `arithmetic` (real or complex), `sector` (name → total of a declared conserved charge), `scratch_parent`, `log`, `verbose`, `keep_mps` ([below](#matrix-product-states)) |
 | `Measurements` | `expectation`: name → operator, one value `<ψ\|O\|ψ>`; `terms`: name → operator, one value per term (one column per site, pair, …) |
 | `site_terms(model, op)`, `pair_terms(model, a, b)` | builders over a model's local operator names: one term per site, one term per ordered site pair (i-major, on-site product at i = j); no two columns are ever combined |
 | `solve(op, basis, options, measurements, callback)` | the engine on a compiled operator and its physical basis |
@@ -90,6 +90,52 @@ auto const& density = result.measurements.at("n").values[0];  // row = target st
   `scratch_parent` (default: the system temporary directory) that is removed
   when it returns, and restores the engine's state afterwards, including
   after an exception.
+
+## Unevenly distributed ground states
+
+The warm-up grows the chain from the left, one site at a time, with a
+one-site environment on the right. Each partial chain of `k` sites targets
+the share `k / L` of the sector, rounded to the nearest reachable charge.
+When the ground state distributes its charges unevenly (a domain wall,
+random fields, a trap), those uniform shares misplace them.
+The sweeps then move charge only across the cut between the two blocks,
+so they correct a misplaced charge only where an exchange across the cut
+lowers the energy. With fields alone nothing moves, and the solve keeps an
+excited product state. Weak hopping moves charges slowly: with 1e-3 of the
+exchange, 24 sweeps still leave three spin pairs misplaced on the wall
+below (-18.006 instead of -24). Nothing warns about either case. Measured on 48 sites with fields `-1`
+left of site 12 and `+1` from it on (`Sz = -12`), four sweeps of 32 states:
+
+| initial Hamiltonian | default warm-up | with `warmup_configuration` | exact |
+| --- | --- | --- | --- |
+| fields alone | -8 | -24 | -24 |
+| fields and XX exchange `J = 0.1` | -18.557 (-24.00125 after 12 sweeps) | -24.0012508 | -24.0012508 (free fermions) |
+
+`Options::warmup_configuration` names a product configuration instead,
+as one local-state index per site, indexing that site's states in the
+physical basis. For spin 1/2, state 0 is up and state 1 is down. The
+partial chain of `k` sites then targets the charges of the
+configuration's first `k` sites. This uses the engine's own custom-target
+warm-up (`System::warmup_loop` with a target per length), so no engine
+file changes. The configuration only places the charges: the sweeps still
+optimize the state, and any configuration with the right charge profile
+works. It needs one state per site, and its conserved charges must add up
+to the sector; `solve()` and `evolve()` reject anything else. The
+`evolve()` preparation uses it too. `ResolvedOptions` reports it.
+
+Without a configuration the default stays the uniform warm-up. The
+alternatives the engine already offers each fail elsewhere:
+
+- growing from both ends (`set_grow_symmetric`) finds the centred wall
+  but not the one at site 12;
+- the warm-up over all charge subspaces (`set_target_subspaces`, random
+  states in every subspace) finds both walls but loses random fields;
+- random Lanczos starts in every sweep still stop at `E = -14` for the
+  48-site centred wall.
+
+A weak coupling added to fields alone does not fix it either: 1e-3 of
+the exchange gives -14.009 instead of -24 on the centred 48-site wall
+with four sweeps.
 
 ## Matrix product states
 
@@ -175,11 +221,11 @@ two half sweeps, a measured one four.
   iteration of the evolution, which carry no energy (NaN) but their
   truncation error and entropy.
 
-A product initial state (the ground state of fields alone, such as a domain
-wall) gives the preparation density matrices of rank one; the warm-up of
-the classic DMRG can then lose the charge sectors it needs and converge to
-an excited product state. A weak coupling in the initial Hamiltonian (1e-3
-of the exchange in the domain-wall tutorial) avoids that.
+A product initial state, such as a domain wall prepared as the ground
+state of fields alone, needs `Options::warmup_configuration`. Without it,
+the preparation can return an excited product state
+([above](#unevenly-distributed-ground-states)). The domain-wall tutorial
+passes the wall as its configuration.
 
 The tests below compare every step with the dense Trotter product and the
 exact evolution on the ED sector basis; with enough kept states the states
@@ -543,6 +589,12 @@ it checks an identity and an eigenstate evolution, the `dt^2` shrinking of
 the Trotter error, energy conservation, imaginary time in real and complex
 arithmetic (against the Trotter product and the ED ground energy), drives,
 the measured-step bookkeeping, the reported truncation and the rejections.
+`classic_dmrg_warmup` solves 48-site chains whose uniform warm-up
+misplaces charges with the default four sweeps, each failing without its
+warm-up configuration: field-only walls at the centre and at a quarter
+(energy and every `Sz`), irregular fields (against the sorted optimum),
+the XX chain in a wall and in irregular fields (against free fermions),
+a Hubbard potential step with two charges, and an `evolve()` preparation.
 The molecular solver (`classic_dmrg_molecular`, also labelled `chemistry`)
 is checked against an occupation-number exact diagonalization for one to five
 and for seven orbitals, with and without padding, energies and every RDM element; against

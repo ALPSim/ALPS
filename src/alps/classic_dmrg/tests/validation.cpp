@@ -9,6 +9,7 @@
 #include <gtest/gtest.h>
 
 #include <stdexcept>
+#include <string>
 
 using namespace classic_test;
 
@@ -62,6 +63,27 @@ TEST(ClassicDmrgValidation, SectorsMustBeDeclaredRepresentableAndNonempty) {
     EXPECT_THROW(cd::solve(chain(4), exact_options(8, {{"Sz", 0.}}, 100)), std::invalid_argument);
     EXPECT_THROW(cd::solve(chain(4), exact_options(8, {}, 100)), std::invalid_argument);
     EXPECT_THROW(cd::solve(chain(3), exact_options(8, {{"Sz", 0.5}})), std::invalid_argument);
+}
+
+TEST(ClassicDmrgValidation, WarmupConfigurationsMustFitTheChainAndTheSector) {
+    auto options = exact_options(8, {{"Sz", 0.}});
+    options.warmup_configuration = {0, 1, 0, 1, 0};
+    EXPECT_THROW(cd::solve(chain(), options), std::invalid_argument); // five states for six sites
+    options.warmup_configuration = {0, 1, 0, 1, 0, 2};
+    EXPECT_THROW(cd::solve(chain(), options), std::invalid_argument); // spin 1/2 has two states
+    options.warmup_configuration = {0, 0, 0, 1, 0, 1};
+    try {
+        cd::solve(chain(), options);
+        ADD_FAILURE() << "a configuration with Sz = 1 was accepted for the sector Sz = 0";
+    } catch (std::invalid_argument const& error) {
+        EXPECT_NE(std::string(error.what()).find("Sz = 1, but the sector asks for 0"), std::string::npos)
+            << error.what();
+    }
+    cd::Evolution evolution;
+    evolution.steps = 1;
+    EXPECT_THROW(cd::evolve(chain(), chain(), evolution, options), std::invalid_argument);
+    options.warmup_configuration = {0, 1, 0, 1, 0, 1};
+    EXPECT_NO_THROW(cd::solve(chain(), options));
 }
 
 TEST(ClassicDmrgValidation, TermShapesTheEngineCannotRepresentAreRejected) {

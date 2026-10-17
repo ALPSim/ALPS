@@ -596,6 +596,35 @@ Problem prepare(models::CompiledOperator const& hamiltonian, models::PhysicalBas
     return problem;
 }
 
+// A warm-up configuration names a state of every site, and its conserved
+// charges add up to the sector.
+void check_warmup_configuration(Problem const& problem, Options const& options) {
+    auto const& configuration = options.warmup_configuration;
+    if (configuration.empty()) return;
+    if (configuration.size() != static_cast<std::size_t>(problem.num_sites))
+        throw std::invalid_argument("classic DMRG warmup_configuration needs one state per site: "
+                                    + std::to_string(configuration.size()) + " for "
+                                    + std::to_string(problem.num_sites) + " sites");
+    std::vector<long> sum(problem.charges.size(), 0);
+    for (int i = 0; i < problem.num_sites; ++i) {
+        auto const& site = problem.sites[static_cast<std::size_t>(problem.site_index[static_cast<std::size_t>(i)])];
+        auto const state = configuration[static_cast<std::size_t>(i)];
+        if (state >= static_cast<std::size_t>(site.dim))
+            throw std::invalid_argument("classic DMRG warmup_configuration names state " + std::to_string(state)
+                                        + " of site " + std::to_string(i) + ", which has "
+                                        + std::to_string(site.dim) + " states");
+        for (std::size_t c = 0; c < problem.charges.size(); ++c) sum[c] += site.twice[c][state];
+    }
+    auto half = [](long doubled) {
+        return doubled % 2 == 0 ? std::to_string(doubled / 2) : std::to_string(doubled) + "/2";
+    };
+    for (std::size_t c = 0; c < problem.charges.size(); ++c)
+        if (problem.charges[c].conserved && sum[c] != problem.charges[c].target)
+            throw std::invalid_argument("classic DMRG warmup_configuration has " + problem.charges[c].name + " = "
+                                        + half(sum[c]) + ", but the sector asks for "
+                                        + half(problem.charges[c].target));
+}
+
 // Count product states in the requested sector, stopping at the number of
 // targets, without constructing the product basis (alpsx validate_owned_sector).
 void check_sector(Problem const& problem, std::size_t targets) {
@@ -988,10 +1017,28 @@ struct Engine {
         S.start(sweeps, nstates);
     }
 
+    // The warm-up targets of Options::warmup_configuration: entry k holds the
+    // charges of its first k sites (System::warmup_loop reads entry k for
+    // its k-site chain).
+    dmtk::Vector<dmtk::QN> warmup_sectors() const {
+        dmtk::Vector<dmtk::QN> sectors(static_cast<std::size_t>(problem.num_sites) + 1);
+        std::vector<long> sum(problem.charges.size(), 0);
+        for (int i = 0; i < problem.num_sites; ++i) {
+            auto const& site = problem.sites[static_cast<std::size_t>(problem.site_index[static_cast<std::size_t>(i)])];
+            auto const state = options.warmup_configuration[static_cast<std::size_t>(i)];
+            for (std::size_t c = 0; c < problem.charges.size(); ++c) {
+                sum[c] += site.twice[c][state];
+                sectors[static_cast<std::size_t>(i) + 1][static_cast<int>(qn_index[c])].set_half(static_cast<short>(sum[c]));
+            }
+        }
+        return sectors;
+    }
+
     ResolvedOptions resolved(dmtk::System<T> const& S) const {
         ResolvedOptions out;
         out.sweeps = options.sweeps;
         out.warmup_states = options.warmup_states;
+        out.warmup_configuration = options.warmup_configuration;
         out.num_eigenvalues = options.num_eigenvalues;
         out.truncation_error = options.truncation_error;
         out.truncation_max_states = options.truncation_max_states;
@@ -1013,7 +1060,14 @@ struct Engine {
         // the one taken when the pair was central, during the ground-state
         // sweep. Keep the lighter unstored path when it is correct.
         configure(S, options.num_eigenvalues > 1 && two_site_measurements);
-        S.run(static_cast<int>(options.warmup_states));
+        if (options.warmup_configuration.empty()) {
+            S.run(static_cast<int>(options.warmup_states));
+        } else {
+            // System::run on the configuration's prefix charges: a new System
+            // reads custom warm-up targets.
+            S.warmup_loop(options.warmup_states, warmup_sectors());
+            S.resume(1, dmtk::RIGHT2LEFT, 1);
+        }
         if (S.store_products()) S.set_full_sweep(true);
         S.corr += measured;
         S.final_sweep(options.sweeps.back().left_to_right, dmtk::RIGHT2LEFT, 1, true);
@@ -1096,7 +1150,10 @@ struct Engine {
 
         detail::EvolvingSystem<T> S(hami, lattice);
         configure(S, false);
-        S.prepare(static_cast<int>(options.warmup_states));
+        if (options.warmup_configuration.empty())
+            S.prepare(static_cast<int>(options.warmup_states));
+        else
+            S.prepare(static_cast<int>(options.warmup_states), warmup_sectors());
 
         EvolutionResult result;
         auto& initial = result.initial;
@@ -1267,6 +1324,7 @@ Result solve(models::CompiledOperator const& hamiltonian, models::PhysicalBasis 
     validate_options(options);
     Problem const problem = prepare(hamiltonian, basis, options, measurements);
     check_sector(problem, options.num_eigenvalues);
+    check_warmup_configuration(problem, options);
     dmtk::InvocationGuard invocation(options.scratch_parent, options.log);
     // Every engine object is destroyed before the guard restores the engine state.
     if (options.arithmetic == Arithmetic::complex) {
@@ -1292,6 +1350,7 @@ EvolutionResult evolve(models::CompiledOperator const& initial, models::Compiled
     Problem problem = prepare(initial, basis, options, measurements);
     prepare_evolution(problem, final_hamiltonian, evolution, initial.site_dims);
     check_sector(problem, 1);
+    check_warmup_configuration(problem, options);
     dmtk::InvocationGuard invocation(options.scratch_parent, options.log);
     // Every engine object is destroyed before the guard restores the engine state.
     if (evolution.imaginary && options.arithmetic == Arithmetic::real) {

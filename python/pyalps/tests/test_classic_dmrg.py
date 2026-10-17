@@ -120,6 +120,28 @@ def catalog_reference(op, basis, sector, count):
     return problem.eigenstates(count=count).eigenvalues
 
 
+def test_warmup_configuration_places_an_unevenly_distributed_ground_state():
+    # Fields alone, up spins on the first quarter of 32 sites: the uniform
+    # warm-up misplaces spins the sweeps cannot move back; the configuration
+    # (local state 0 up, 1 down) gives the exact wall.
+    L, wall = 32, 8
+    xx = models.xxz(lat.chain(L, bc="open"), Jxy=1.0, Jz=0.0)
+    site = xx.site_for(0)
+    fields = models.TermSum()
+    for i in range(L):
+        fields += (-1.0 if i < wall else 1.0) * site.Sz(i)
+    op = models.compile_observable(xx, fields)
+    configuration = [0] * wall + [1] * (L - wall)
+    result = dmrg.solve(op, xx.physical_basis(), sector={"Sz": wall - L / 2}, sweeps=dmrg.fixed_sweeps(4, 32),
+                        warmup_configuration=configuration)
+    assert result.energy == pytest.approx(-0.5 * L, abs=1e-10)  # only the wall reaches -L/2
+    assert list(result.options.warmup_configuration) == configuration
+    with pytest.raises(ValueError, match="warmup_configuration has Sz = -8, but the sector asks for 0"):
+        dmrg.solve(op, xx.physical_basis(), sector={"Sz": 0}, warmup_configuration=configuration)
+    with pytest.raises(ValueError, match="one state per site"):
+        dmrg.solve(op, xx.physical_basis(), sector={"Sz": 0}, warmup_configuration=[0, 1])
+
+
 def test_catalog_models_solve_like_exact_diagonalization():
     # The operators the XML dmrg application solves. The catalog's fermion
     # Hubbard basis has Nup and Ndown but no N, so both carry the fermion
@@ -470,21 +492,19 @@ def test_evolve_melts_the_xx_domain_wall_as_the_bessel_solution():
     L, half = 16, 8
     xx = models.xxz(lat.chain(L, bc="open"), Jxy=1.0, Jz=0.0)
     site = xx.site_for(0)
-    # Up spins left, down spins right; a weak exchange lets the DMRG find
-    # this product ground state of the fields.
+    # Up spins left, down spins right: the product ground state of the
+    # fields, which the warm-up configuration places.
     wall = models.TermSum()
     for i in range(L):
         wall += (-1.0 if i < half else 1.0) * site.Sz(i)
-    for i in range(L - 1):
-        wall += 0.5e-3 * (site.Sp(i) * site.Sm(i + 1) + site.Sm(i) * site.Sp(i + 1))
     run = dmrg.evolve(wall, xx, time_step=0.05, steps=60, states=40, truncation_error=1e-10, sector={"Sz": 0},
-                      measure_steps=5, measurements={"Sz": "Sz"})
-    assert run.initial.energy == pytest.approx(-0.5 * L, abs=1e-5)
+                      warmup_configuration=[0] * half + [1] * half, measure_steps=5, measurements={"Sz": "Sz"})
+    assert run.initial.energy == pytest.approx(-0.5 * L, abs=1e-10)
     np.testing.assert_allclose(run.steps, np.arange(0, 61, 5))
     np.testing.assert_allclose(run.times, 0.05 * run.steps)
     profiles = run.measurements["Sz"].values
     assert profiles.shape == (13, L)
-    np.testing.assert_allclose(profiles[0], [0.5] * half + [-0.5] * half, atol=1e-5)
+    np.testing.assert_allclose(profiles[0], [0.5] * half + [-0.5] * half, atol=1e-10)
     np.testing.assert_allclose(profiles.sum(axis=1), 0.0, atol=1e-10)
     for k, t in enumerate(run.times):
         for n in (1, 2, 3):

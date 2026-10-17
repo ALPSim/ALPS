@@ -54,6 +54,17 @@ ALPS_CLASSIC_DMRG_DECL std::vector<SweepStates> ramped_sweeps(std::size_t sweeps
 struct Options {
     std::vector<SweepStates> sweeps = fixed_sweeps(4, 40);
     std::size_t warmup_states = 20;
+    // A product configuration, one local-state index per site (into that
+    // site's states in the physical basis), whose prefix charges the warm-up
+    // targets: its growing chain of k sites takes the charges of the
+    // configuration's first k sites instead of the uniform share of the
+    // sector. Give it when the charges of the ground state are distributed
+    // unevenly (domain walls, random fields, traps). The
+    // uniform warm-up misplaces them there, and the sweeps move charge only
+    // across the cut: a Hamiltonian of fields alone keeps the misplaced
+    // product state, and weak hopping corrects it slowly.
+    // Its conserved charges must add up to the sector. Empty: uniform shares.
+    std::vector<std::size_t> warmup_configuration;
     // Lowest states targeted together; the ground state is always the first.
     std::size_t num_eigenvalues = 1;
     // Keep as many states as this truncation error needs, up to
@@ -148,6 +159,7 @@ struct Iteration {
 struct ResolvedOptions {
     std::vector<SweepStates> sweeps;
     std::size_t warmup_states = 0;
+    std::vector<std::size_t> warmup_configuration;
     std::size_t num_eigenvalues = 0;
     std::optional<double> truncation_error;
     std::optional<std::size_t> truncation_max_states;

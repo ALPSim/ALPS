@@ -362,7 +362,7 @@ TEST(ClassicDmrgEvolution, OddChainAndFourSites) {
 }
 
 TEST(ClassicDmrgEvolution, XxDomainWallMeltsAsTheExactEvolution) {
-    // |up..up down..down>, the ground state of a staggered field, under the XX chain.
+    // |up..up down..down>, the ground state of opposite fields on the two halves, under the XX chain.
     int const length = 10;
     auto const xx = chain_xxz(length, 1.0, 0.0);
     Model const final_model(xx);

@@ -190,6 +190,10 @@ NB_MODULE(classic_dmrg_c, m) {
                      [](classic::Options& o, nb::handle value) { o.sweeps = sweeps_of(value); },
                      "A list of SweepStates or (right_to_left, left_to_right) pairs; see fixed_sweeps and ramped_sweeps.")
         .def_rw("warmup_states", &classic::Options::warmup_states)
+        .def_rw("warmup_configuration", &classic::Options::warmup_configuration,
+                "One local-state index per site: the warm-up targets this product configuration's prefix charges "
+                "instead of uniform shares of the sector (for unevenly distributed ground states). [] keeps "
+                "the uniform shares.")
         .def_rw("num_eigenvalues", &classic::Options::num_eigenvalues, "Lowest states targeted together.")
         .def_rw("truncation_error", &classic::Options::truncation_error)
         .def_rw("truncation_max_states", &classic::Options::truncation_max_states)
@@ -258,6 +262,7 @@ NB_MODULE(classic_dmrg_c, m) {
     nb::class_<classic::ResolvedOptions>(m, "ResolvedOptions", "The scientific controls that took effect.")
         .def_ro("sweeps", &classic::ResolvedOptions::sweeps)
         .def_ro("warmup_states", &classic::ResolvedOptions::warmup_states)
+        .def_ro("warmup_configuration", &classic::ResolvedOptions::warmup_configuration)
         .def_ro("num_eigenvalues", &classic::ResolvedOptions::num_eigenvalues)
         .def_ro("truncation_error", &classic::ResolvedOptions::truncation_error)
         .def_ro("truncation_max_states", &classic::ResolvedOptions::truncation_max_states)

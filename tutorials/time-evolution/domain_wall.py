@@ -20,7 +20,7 @@
 # ALPS TEBD-02 "kink" tutorial), which evolved a product state by TEBD.
 # Adaptation: rewritten for pyalps.classic_dmrg.evolve; the domain wall is
 # prepared as the DMRG ground state of opposite fields on the two halves
-# (with a weak exchange, see below); the exact references, chain length,
+# (its warm-up told where the wall is, see below); the exact references, chain length,
 # time window and checks follow the alpsx script, the plots are condensed.
 
 # %% [markdown]
@@ -64,10 +64,13 @@ half = L // 2
 # ## Prepare the domain wall
 #
 # The wall is the ground state of fields $\mp S^z_i$ on the left and right
-# halves. Its DMRG density matrices would have rank one, and the warm-up of
-# the classic DMRG can then lose the charge sectors it needs, so a weak
-# exchange ($10^{-3}$) is added: it changes the local magnetization by
-# about $10^{-7}$ and lets the sweeps find the wall.
+# halves. The DMRG warm-up grows the chain from the left, and for each
+# partial chain it targets the uniform share of the total $S^z = 0$. That
+# places half of the left spins down, and with fields alone the sweeps
+# cannot move them back. `warmup_configuration` names the wall instead:
+# one local state per site, 0 for up and 1 for down
+# (`model.physical_basis().sites[i]` lists them). The warm-up then targets
+# the wall's own partial magnetizations.
 
 # %%
 lattice = models.lattice.chain(L, bc="open")
@@ -76,8 +79,7 @@ site = model.site_for(0)
 wall = models.TermSum()
 for i in range(L):
     wall += (-1.0 if i < half else 1.0) * site.Sz(i)
-for i in range(L - 1):
-    wall += 0.5e-3 * (site.Sp(i) * site.Sm(i + 1) + site.Sm(i) * site.Sp(i + 1))
+up_down = [0] * half + [1] * half
 
 # %% [markdown]
 # ## Evolve under the XX chain
@@ -88,7 +90,7 @@ for i in range(L - 1):
 
 # %%
 run = dmrg.evolve(wall, model, time_step=DT, steps=STEPS, states=40, truncation_error=1e-10,
-                  sector={"Sz": 0}, measure_steps=4, measurements={"Sz": "Sz"})
+                  sector={"Sz": 0}, warmup_configuration=up_down, measure_steps=4, measurements={"Sz": "Sz"})
 ts = run.times
 profiles = run.measurements["Sz"].values
 print(f"measured {len(ts)} times up to t = {ts[-1]:.1f}; discarded weight {run.truncation_errors.sum():.1e}")
@@ -124,7 +126,7 @@ front = np.array([np.max(np.nonzero(p[half:] > -0.4)[0], initial=-1) + 1 for p i
 # Trotter error, $O(dt^2)$) and approaches the scaling form.
 
 # %%
-assert np.allclose(profiles[0, :half], 0.5, atol=1e-4) and np.allclose(profiles[0, half:], -0.5, atol=1e-4)
+assert np.allclose(profiles[0, :half], 0.5, atol=1e-10) and np.allclose(profiles[0, half:], -0.5, atol=1e-10)
 assert np.all(np.abs(profiles.sum(axis=1)) < 1e-8), "total Sz must stay zero"
 assert abs(profiles[-1, half]) < abs(profiles[0, half]) - 0.2, "the centre must melt"
 assert abs(profiles[-1, 0]) > 0.45 and abs(profiles[-1, -1]) > 0.45, "the ends must be untouched"

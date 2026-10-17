@@ -12,6 +12,12 @@ add_executable(classic_dmrg_evolution evolution.cpp)
 target_link_libraries(classic_dmrg_evolution PRIVATE ALPS::classic_dmrg ALPS::ed Eigen3::Eigen)
 alps_add_gtest(classic_dmrg_evolution COMPONENT classic_dmrg LABELS "classic_dmrg;numeric" TIMEOUT 600)
 
+# Unevenly distributed ground states from a warm-up configuration against
+# sorted fields and free fermions (Eigen's dense solver).
+add_executable(classic_dmrg_warmup warmup.cpp)
+target_link_libraries(classic_dmrg_warmup PRIVATE ALPS::classic_dmrg ALPS::ed Eigen3::Eigen)
+alps_add_gtest(classic_dmrg_warmup COMPONENT classic_dmrg LABELS "classic_dmrg;numeric" TIMEOUT 600)
+
 # Classic molecular DMRG against an occupation-bit exact diagonalization
 # (Eigen's dense solver) and against ALPS::ed.
 add_executable(classic_dmrg_molecular molecular.cpp)

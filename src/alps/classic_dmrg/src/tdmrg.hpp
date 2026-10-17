@@ -258,10 +258,16 @@ public:
     // The warm-up and the scheduled sweeps of System::run, the Lanczos
     // residuals of the last sweep certified down to the tolerance (as
     // final_sweep certifies the states it measures). A four-site chain fits
-    // no sweep step: its single configuration is solved directly.
-    void prepare(int warmup) {
+    // no sweep step: its single configuration is solved directly. With
+    // `sectors`, the warm-up's k-site chain targets sectors[k].
+    void prepare(int warmup, std::optional<dmtk::Vector<dmtk::QN>> const& sectors = std::nullopt) {
         int const ls = this->lattice().ls();
-        if (warmup > 0) this->warmup_loop(static_cast<std::size_t>(warmup));
+        if (warmup > 0 && sectors) {
+            this->_custom_qns = true;
+            this->warmup_loop(static_cast<std::size_t>(warmup), *sectors);
+        } else if (warmup > 0) {
+            this->warmup_loop(static_cast<std::size_t>(warmup));
+        }
         for (std::size_t s = 1; s <= this->_numsweeps; ++s) {
             this->_lanczos_certify = s == this->_numsweeps;
             dmtk::out() << "NEW SWEEP " << s << " " << this->_sweeps(0, s - 1) << " " << this->_sweeps(1, s - 1) << '\n';
