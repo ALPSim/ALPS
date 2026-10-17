@@ -308,7 +308,8 @@ iterations and the final truncation error. The engine works from the
 integrals themselves, and the RDMs are read from the final state by a walk
 over the chain, not measured as engine terms (both below). The
 sweep, truncation, Lanczos, scratch and callback options are those of
-`solve()`; `sector` must be empty, `num_eigenvalues` one and arithmetic real.
+`solve()`; `sector` and `warmup_configuration` must be empty,
+`num_eigenvalues` one and arithmetic real.
 The integrals must be finite and have the real-orbital symmetries (`h`
 symmetric, `(pq|rs)` eightfold) after `integral_cutoff` drops entries of
 smaller magnitude. Fewer than four orbitals

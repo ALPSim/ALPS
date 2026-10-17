@@ -366,6 +366,8 @@ def test_solve_molecular_rejects_invalid_requests():
     with pytest.raises(ValueError):
         dmrg.solve_molecular(h1, eri, 1, 1, sector={"N": 2.0})
     with pytest.raises(ValueError):
+        dmrg.solve_molecular(h1, eri, 1, 1, warmup_configuration=[0, 3, 0])
+    with pytest.raises(ValueError):
         dmrg.solve_molecular(h1, eri, 4, 1)  # more electrons than orbitals
     with pytest.raises(TypeError):
         dmrg.solve_molecular(h1, eri, 1, 1, callback=42)

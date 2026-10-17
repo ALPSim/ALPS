@@ -505,6 +505,9 @@ TEST(ClassicMolecular, RejectedInputs) {
     options = exact(16);
     options.truncation_max_states = 8;
     rejects(good, options);
+    options = exact(16);
+    options.warmup_configuration = {0, 3, 0};
+    rejects(good, options);
     // An asymmetric roundoff entry is rejected unless the explicit cutoff
     // prunes it.
     input = good;

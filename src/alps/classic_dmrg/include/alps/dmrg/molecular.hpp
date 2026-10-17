@@ -85,8 +85,8 @@ struct MolecularResult {
 
 // Ground-state classic block DMRG and native 1-/2-RDM measurements, with the
 // sweep, truncation, Lanczos, scratch and callback contract of solve(). The
-// input fixes N and Sz: options.sector must be empty, num_eigenvalues one and
-// arithmetic real. The integrals must have the real-orbital symmetries after
+// input fixes N and Sz: options.sector and options.warmup_configuration
+// must be empty, num_eigenvalues one and arithmetic real. The integrals must have the real-orbital symmetries after
 // the explicit cutoff. Fewer than four orbitals are padded with
 // one-dimensional neutral sites to meet the engine's four-site layout, without
 // adding states. Returns detached RDMs and values, optionally the CI vector
