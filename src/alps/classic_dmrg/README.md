@@ -37,12 +37,13 @@ auto const& density = result.measurements.at("n").values[0];  // row = target st
 
 | name | content |
 | --- | --- |
-| `Options` | `sweeps` (`fixed_sweeps`, `ramped_sweeps` or an explicit `SweepStates` list; the right-to-left half sweep runs first), `warmup_states`, `num_eigenvalues`, optional `truncation_error` with `truncation_max_states`, optional `lanczos_tolerance` ([below](#the-lanczos-stop-rule)), `arithmetic` (real or complex), `sector` (name → total of a declared conserved charge), `scratch_parent`, `log`, `verbose` |
+| `Options` | `sweeps` (`fixed_sweeps`, `ramped_sweeps` or an explicit `SweepStates` list; the right-to-left half sweep runs first), `warmup_states`, `num_eigenvalues`, optional `truncation_error` with `truncation_max_states`, optional `lanczos_tolerance` ([below](#the-lanczos-stop-rule)), `arithmetic` (real or complex), `sector` (name → total of a declared conserved charge), `scratch_parent`, `log`, `verbose`, `keep_mps` ([below](#matrix-product-states)) |
 | `Measurements` | `expectation`: name → operator, one value `<ψ\|O\|ψ>`; `terms`: name → operator, one value per term (one column per site, pair, …) |
 | `site_terms(model, op)`, `pair_terms(model, a, b)` | builders over a model's local operator names: one term per site, one term per ordered site pair (i-major, on-site product at i = j); no two columns are ever combined |
 | `solve(op, basis, options, measurements, callback)` | the engine on a compiled operator and its physical basis |
 | `solve(model, …)` | validates Hermiticity, compiles the `Hamiltonian` under its declared charges and convention, solves on `physical_basis(model)` |
-| `Result` | ascending `energies`, `measurements` (rows follow the targets, columns the terms with their factor `sites`), the `iterations` observed (direction, index, energy, truncation error, entropy), `final_truncation_error`, the resolved `options` |
+| `Result` | ascending `energies`, `measurements` (rows follow the targets, columns the terms with their factor `sites`), the `iterations` observed (direction, index, energy, truncation error, entropy), `final_truncation_error`, the resolved `options`, with `keep_mps` the `mps` of every target |
+| `MatrixProductState`, `MpsTensor` | a targeted state's site tensors (`[left bond][local state][right bond]`, row-major, `real` or `complex` entries) and its `center` |
 | `IterationCallback` | observes every completed iteration; may throw to abort the solve |
 
 ## What the engine accepts
@@ -84,6 +85,29 @@ auto const& density = result.measurements.at("n").values[0];  // row = target st
   `scratch_parent` (default: the system temporary directory) that is removed
   when it returns, and restores the engine's state afterwards, including
   after an exception.
+
+## Matrix product states
+
+With `Options::keep_mps`, `Result::mps` holds every targeted state as a
+`MatrixProductState`, in energy order. Nothing is approximated beyond the
+DMRG itself: finite-system DMRG builds each block from the previous one and
+a site through a stored rotation, so the rotations of the final sweep are the
+tensors up to its closing configuration, whose two-site wave function an SVD
+splits into the remaining two (singular values below 1e-14 of the largest are
+dropped). They are read from the scratch files and the engine's wave
+functions before the solve returns. The state is mixed canonical with its
+norm, one, at `center`: the middle (`L/2`) when the final sweep ends there,
+and `L-2` when the engine stores products and sweeps the whole chain
+(several targets with two-site measurements). The targets share every tensor
+but the two split ones. Local states follow each site's `PhysicalBasis`
+order, mapped from the engine's charge-sorted bases; with fermions a product
+state is the product of creators in site order applied to the vacuum, the
+convention of `ALPS::ed`, so the MPS contracted to a vector is the `ALPS::ed`
+eigenvector up to a phase. `solve_molecular` honours `keep_mps` too and
+returns the state on the orbitals (padding sites folded into the last one).
+pyalps returns the tensors as NumPy arrays, with `to_dense`, `amplitude`,
+`overlap` and `norm`. Time evolution and measurements after the solve are
+not part of the engine.
 
 ## Molecular Hamiltonians (`<alps/dmrg/molecular.hpp>`)
 
@@ -224,7 +248,7 @@ only when `ALPS_ENABLE_CLASSIC_DMRG` is on. Parameters and output keep their
 names and layout: `SWEEPS`, `STATES` (2 × `SWEEPS` values) or `MAXSTATES`
 (ramped) or `NUMSTATES` (fixed), `NUM_WARMUP_STATES`, `TRUNCATION_ERROR`,
 `LANCZOS_TOLERANCE`, `NUMBER_EIGENVALUES`, `VERBOSE`, `COMPLEX`,
-`TEMP_DIRECTORY`, `DISORDERSEED` and the `MEASURE_*` definitions. A charge is
+`TEMP_DIRECTORY`, `DISORDERSEED`, `SAVE_MPS` and the `MEASURE_*` definitions. A charge is
 conserved when `CONSERVED_QUANTUMNUMBERS` names it and `<name>_total` is set;
 names the model lacks are ignored. Compared with the application's former
 copy of the engine:
@@ -239,6 +263,12 @@ copy of the engine:
   own labels.
 - Two-site values of excited targets are corrected. Energies are equal or
   lower, and the iteration count can differ by one.
+- `SAVE_MPS=1` writes the ground state's `MatrixProductState` to `/mps` of
+  the HDF5 result, in the layout of master's
+  [ALPSim/ALPS#216](https://redirect.github.com/ALPSim/ALPS/pull/216), which
+  `pyalps.loadMPS` reads: `length`, `center`, `tensors/<i>/{shape,values}`,
+  `site_type` and the local quantum numbers under `site_basis`. `center` is
+  where the final sweep ended (above), not always `L/2`.
 - `START_SWEEP` (resuming an interrupted run) is rejected. Scratch files go
   to a private directory below `TEMP_DIRECTORY` that is removed afterwards.
 - Lattices of fewer than four sites, more than four tracked charges and
@@ -347,7 +377,21 @@ correlations.
 product of the Lanczos and one-state solves) and `rotate_hamiltonian` (in
 `rotate`), whose defaults are the code that stood there; the molecular
 solver's `dmtk::MolecularSystem` overrides them and is written here, as is
-its RDM walk `measure_products`, not taken from alpsx or the legacy engine. `rotate_corr` and `measure` also find
+its RDM walk `measure_products`, not taken from alpsx or the legacy engine.
+`System::signal_emit(std::string)` returns `true` for an unknown signal
+instead of falling off its end, the fix of
+[ALPSim/ALPS#232](https://redirect.github.com/ALPSim/ALPS/pull/232) to the
+legacy engine.
+
+The MPS export (`src/mps.hpp`) is adapted from master's SAVE_MPS
+([ALPSim/ALPS#216](https://redirect.github.com/ALPSim/ALPS/pull/216), Marcus
+Rosales, commits 46c76b1d2 and 35cea33e7): `DMRGTask::extract_mps` and
+`split_two_site` of the legacy application, which assembled its ground state
+from the same rotations. Here it reads the closing configuration and every
+target from the engine in memory instead of the ground-state file at `L/2`,
+splits with Eigen's SVD instead of LAPACK, and maps local states through the
+engine's sorted bases as the molecular CI walk does. The application's
+`/mps` output keeps #216's layout, and `pyalps.loadMPS` is #216's. `rotate_corr` and `measure` also find
 block operators through the per-call index, and `rotate_corr` answers
 whether the new block already holds an operator from a key set instead of a
 scan of its list, which was quadratic in the number of measured terms.
@@ -364,7 +408,12 @@ abort); measurements against `ALPS::ed` (site and pair spin terms, fermion
 densities and hopping correlations, split charge components, scalar terms,
 one row per target); equivalent operator forms (reversed factors, scales in
 the matrices, projector-form terms, `Nup` and `Ndown` as fermionic charges);
-the private scratch directory; and the rejected inputs.
+the private scratch directory; the rejected inputs; and the kept MPS
+(`classic_dmrg_mps`), contracted to a vector and compared with the
+`ALPS::ed` eigenvector of each target for spin-1/2 and spin-1 chains, an odd
+length, four sites, an unrestricted solve, the Hubbard chain, frustrated
+spinless fermions, complex hopping phases, excited targets and stored
+products, with its canonical form checked, also under truncation.
 The molecular solver (`classic_dmrg_molecular`, also labelled `chemistry`)
 is checked against an occupation-number exact diagonalization for one to five
 and for seven orbitals, with and without padding, energies and every RDM element; against
@@ -374,10 +423,14 @@ vector, sign by sign, against the same diagonalization for one to six
 orbitals; under truncation (variational energy, RDM traces, the CI vector's
 norm, and its 1-RDMs and 2-RDM spin blocks against the run's); for callback
 observation and abort with the scratch directory removed; and for the rejected
-inputs. `classic_dmrg_multisite` locks the engine's long-range hopping and
+inputs; and its kept MPS against the CI vector of the same run on every
+determinant, padded, exact and truncated. `classic_dmrg_multisite` locks the engine's long-range hopping and
 four-site fermion products, which the molecular solver used before it had
 its own operator engine, against an exact diagonalization for 4, 6 and 8
-sites.
+sites. With the `dmrg` application built, `ctest -L dmrg` also runs
+`dmrg_save_mps`, which reads back the `/mps` of a spin chain and of a
+Hubbard chain with two targets and correlations: shapes, canonical form,
+norm, the charge total of every product state with weight, and the centre.
 The label also covers XML catalog models solved against `ALPS::ed` (wrap
 bonds, spin 1, ladders, spinless fermion rings, Hubbard chains, rings and
 ladders, the t-J chain, correlations in both site orders). The SDK consumer

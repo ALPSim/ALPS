@@ -347,3 +347,102 @@ def test_solve_molecular_rejects_invalid_requests():
         dmrg.solve_molecular(h1, eri, 4, 1)  # more electrons than orbitals
     with pytest.raises(TypeError):
         dmrg.solve_molecular(h1, eri, 1, 1, callback=42)
+
+
+# -- keep_mps: the final states as matrix product states ----------------------------
+
+EXACT = {"sweeps": dmrg.fixed_sweeps(4, 128), "warmup_states": 128, "lanczos_tolerance": 1e-13}
+
+
+def assert_is_eigenvector(mps, reference, column):
+    """The MPS on the ED sector states is the ED eigenvector up to a phase, with no weight elsewhere."""
+    problem = reference.problem
+    amplitudes = mps.amplitude(problem.states)
+    assert np.linalg.norm(amplitudes) == pytest.approx(1.0, abs=1e-10)
+    assert abs(np.vdot(reference.eigenvectors[:, column], amplitudes)) == pytest.approx(1.0, abs=1e-8)
+    assert mps.norm() == pytest.approx(1.0, abs=1e-10)
+
+
+def test_kept_mps_of_kit_models_are_the_exact_states():
+    model = models.hubbard(lat.chain(8, bc="open"), t=1.0, U=4.0, mu=0.3)
+    sector = {"N": 7.0, "Sz": 0.5}
+    result = dmrg.solve(model, sector=sector, num_eigenvalues=2, keep_mps=True, **EXACT)
+    reference = exact(model, count=2, **sector)
+    assert len(result.mps) == 2
+    first, second = result.mps
+    assert isinstance(first, dmrg.MatrixProductState) and len(first) == 8
+    assert first.center == 4 and first.local_dimensions == [4] * 8 and not first.is_complex
+    tensors = first.tensors
+    assert [t.shape[0] for t in tensors[1:]] == first.bond_dimensions
+    assert tensors[0].shape[0] == 1 and tensors[-1].shape[2] == 1 and tensors[0].dtype == np.float64
+    for column, mps in enumerate(result.mps):
+        assert_is_eigenvector(mps, reference, column)
+    assert abs(first.overlap(second)) < 1e-8
+    dense = first.to_dense()
+    assert dense.shape == (4 ** 8,)
+    assert np.vdot(dense, dense).real == pytest.approx(1.0, abs=1e-10)
+    np.testing.assert_allclose(first.amplitude(reference.problem.states[0]), first.amplitude(reference.problem.states[:1])[0])
+    with pytest.raises(ValueError, match="local index"):
+        first.amplitude([4] * 8)
+    with pytest.raises(ValueError, match="max_dimension"):
+        first.to_dense(max_dimension=100)
+    assert dmrg.solve(model, sector=sector, **EXACT).mps == []
+
+
+def test_kept_mps_in_complex_arithmetic_and_with_stored_products():
+    site = models.spinless_fermion()
+    model = models.Hamiltonian(lat.nnn_chain(8, bc="open"), site, conserved_quantum_numbers=["N"])
+    hop = lambda i, j: models.located(site, "c_dag", i) * models.located(site, "c", j)  # noqa: E731
+    model.add_bond(-np.exp(0.4j), hop, bond_type=0, add_hc=True)
+    model.add_bond(-0.5, hop, bond_type=1, add_hc=True)
+    result = dmrg.solve(model, sector={"N": 3.0}, arithmetic="complex", keep_mps=True, **EXACT)
+    (mps,) = result.mps
+    assert mps.is_complex and mps.tensors[0].dtype == np.complex128
+    assert_is_eigenvector(mps, exact(model, N=3.0), 0)
+    # Two targets with a two-site measurement store products: the final sweep closes at the right end.
+    chain = models.heisenberg(lat.chain(8, bc="open"))
+    stored = dmrg.solve(chain, sector={"Sz": 0.0}, num_eigenvalues=2, keep_mps=True,
+                        measurements={"SzSz": dmrg.pair_terms(chain, "Sz", "Sz")}, **EXACT)
+    reference = exact(chain, count=2, Sz=0.0)
+    assert [m.center for m in stored.mps] == [6, 6]
+    for column, kept in enumerate(stored.mps):
+        assert_is_eigenvector(kept, reference, column)
+
+
+def test_kept_mps_of_catalog_models_use_the_catalog_basis():
+    spin = models.CatalogModel({"MODEL": "spin", "LATTICE": "open chain lattice", "L": 8, "J": 1.0,
+                                "local_S": 1.0, "Sz_total": 1, "CONSERVED_QUANTUMNUMBERS": "Sz"})
+    result = dmrg.solve(spin, keep_mps=True, **EXACT)
+    assert result.mps[0].local_dimensions == [3] * 8
+    assert_is_eigenvector(result.mps[0], ed.prepare_product(spin).eigenstates(count=1), 0)
+    hubbard = models.CatalogModel({"MODEL": "fermion Hubbard", "LATTICE": "open chain lattice", "L": 6,
+                                   "t": 1.0, "U": 4.0, "Nup_total": 3, "Ndown_total": 2,
+                                   "CONSERVED_QUANTUMNUMBERS": "Nup,Ndown"})
+    result = dmrg.solve(hubbard, keep_mps=True, **EXACT)
+    assert_is_eigenvector(result.mps[0], ed.prepare_product(hubbard).eigenstates(count=1), 0)
+
+
+def test_kept_mps_of_a_truncated_run_is_its_own_state():
+    model = models.heisenberg(lat.chain(16, bc="open"))
+    result = dmrg.solve(model, sector={"Sz": 0.0}, sweeps=dmrg.fixed_sweeps(3, 12), warmup_states=12, keep_mps=True)
+    (mps,) = result.mps
+    assert mps.center == 8 and max(mps.bond_dimensions) <= 24
+    assert mps.norm() == pytest.approx(1.0, abs=1e-10)
+    # Its energy is the run's: <psi|H|psi> on the dense vector.
+    psi = mps.to_dense()
+    H = model.to_sparse_matrix()
+    assert np.vdot(psi, H @ psi).real == pytest.approx(result.energy, abs=1e-8)
+
+
+@pytest.mark.parametrize("n, n_alpha, n_beta, kept", [(2, 1, 1, 128), (5, 3, 2, 128), (6, 3, 3, 8)])
+def test_kept_molecular_mps_is_the_ci_vector(n, n_alpha, n_beta, kept):
+    h1, eri = symmetric_integrals(n, seed=5)
+    result = dmrg.solve_molecular(h1, eri, n_alpha, n_beta, sweeps=dmrg.fixed_sweeps(4, kept), warmup_states=kept,
+                                  lanczos_tolerance=1e-12, ci_vector=True, keep_mps=True)
+    (mps,) = result.mps
+    assert len(mps) == n and mps.local_dimensions == [4] * n
+    alpha, beta = dmrg.ci_occupations(result)
+    amplitudes = mps.amplitude(alpha + 2 * beta)  # spinful_fermion states 0, up, down, up-down
+    sign = np.sign(np.vdot(amplitudes, result.ci_coefficients))
+    np.testing.assert_allclose(sign * amplitudes, result.ci_coefficients, atol=1e-10)
+    assert mps.norm() == pytest.approx(1.0, abs=1e-10)

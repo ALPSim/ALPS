@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <bitset>
 #include <cmath>
+#include <cstdint>
 #include <filesystem>
 #include <limits>
 #include <map>
@@ -284,6 +285,57 @@ TEST(ClassicMolecular, SpinBlocksObservablesAndCiVectorMatchExactDiagonalization
     expect_parity(4, 2, 2);
     expect_parity(5, 3, 2);
     expect_parity(6, 3, 3);
+}
+
+// Options::keep_mps against the CI vector of the same run: the amplitude of
+// every determinant, the product of its tensor slices (spinful_fermion
+// states 0, up, down, up-down), is the CI coefficient up to the global sign.
+void expect_mps_is_ci_vector(int n, int na, int nb, int kept) {
+    SCOPED_TRACE(n);
+    auto input = input_for(n, na, nb);
+    input.ci_vector = true;
+    auto options = exact(kept);
+    options.keep_mps = true;
+    auto const result = cd::solve_molecular(input, options);
+    ASSERT_EQ(result.mps.size(), 1u);
+    auto const& mps = result.mps.front();
+    ASSERT_EQ(mps.sites.size(), static_cast<std::size_t>(n));
+    EXPECT_LT(mps.center, static_cast<std::size_t>(n));
+    EXPECT_EQ(mps.sites.front().left, 1u);
+    EXPECT_EQ(mps.sites.back().right, 1u);
+    auto amplitude = [&](std::uint64_t alpha, std::uint64_t beta) {
+        std::vector<double> row{1.};
+        for (int p = 0; p < n; ++p) {
+            auto const& site = mps.sites[static_cast<std::size_t>(p)];
+            EXPECT_EQ(site.local, 4u);
+            std::size_t const s = ((alpha >> p) & 1u) + 2 * ((beta >> p) & 1u);
+            std::vector<double> next(site.right, 0.);
+            for (std::size_t l = 0; l < site.left; ++l)
+                for (std::size_t r = 0; r < site.right; ++r) next[r] += row[l] * site.real[(l * 4 + s) * site.right + r];
+            row = std::move(next);
+        }
+        return row.at(0);
+    };
+    double sign = 0., weight = 0., worst = 0.;
+    for (std::size_t k = 0; k < result.ci_coefficients.size(); ++k) {
+        double const value = amplitude(result.ci_alpha[k], result.ci_beta[k]);
+        if (sign == 0. && std::abs(result.ci_coefficients[k]) > .1) sign = value * result.ci_coefficients[k] > 0. ? 1. : -1.;
+        weight += value * value;
+    }
+    ASSERT_NE(sign, 0.);
+    for (std::size_t k = 0; k < result.ci_coefficients.size(); ++k)
+        worst = std::max(worst, std::abs(sign * amplitude(result.ci_alpha[k], result.ci_beta[k]) - result.ci_coefficients[k]));
+    EXPECT_NEAR(weight, 1., 1e-10);
+    EXPECT_LT(worst, 1e-10);
+}
+
+TEST(ClassicMolecular, KeptMpsIsTheCiVector) {
+    expect_mps_is_ci_vector(1, 1, 0, 128); // padded to four sites
+    expect_mps_is_ci_vector(2, 1, 1, 128);
+    expect_mps_is_ci_vector(3, 2, 1, 128);
+    expect_mps_is_ci_vector(4, 2, 2, 128);
+    expect_mps_is_ci_vector(6, 3, 2, 128);
+    expect_mps_is_ci_vector(6, 3, 3, 8); // truncated: the run's own state
 }
 
 TEST(ClassicMolecular, TruncatedCiVectorCarriesTheRunsOwnRdms) {

@@ -77,6 +77,10 @@ struct MolecularResult {
     std::vector<double> ci_coefficients;
     std::vector<Iteration> iterations;
     double final_truncation_error = 0.;
+    // With Options::keep_mps: the final state as one MatrixProductState over
+    // the orbitals, on models::spinful_fermion() sites in the ALPS mode order
+    // above.
+    std::vector<MatrixProductState> mps;
 };
 
 // Ground-state classic block DMRG and native 1-/2-RDM measurements, with the
@@ -85,8 +89,9 @@ struct MolecularResult {
 // arithmetic real. The integrals must have the real-orbital symmetries after
 // the explicit cutoff. Fewer than four orbitals are padded with
 // one-dimensional neutral sites to meet the engine's four-site layout, without
-// adding states. Returns detached RDMs and values, optionally the CI vector,
-// but no MPS or checkpoint: nothing can be measured after the call. RDM
+// adding states. Returns detached RDMs and values, optionally the CI vector
+// and the final MPS (Options::keep_mps), but no checkpoint: the engine cannot
+// measure after the call. RDM
 // storage and operator preparation scale with the fourth power of the
 // orbital count.
 ALPS_CLASSIC_DMRG_DECL MolecularResult solve_molecular(MolecularInput const& input, Options const& options = {},

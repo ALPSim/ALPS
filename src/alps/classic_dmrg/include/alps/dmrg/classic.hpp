@@ -21,6 +21,7 @@
 #include <alps/models/hamiltonian.hpp>
 #include <alps/models/physical_basis.hpp>
 
+#include <complex>
 #include <cstddef>
 #include <filesystem>
 #include <functional>
@@ -77,6 +78,37 @@ struct Options {
     // Engine diagnostics; nullptr discards them. The caller keeps ownership.
     std::ostream* log = nullptr;
     int verbose = 0;
+    // Also return every targeted state as a matrix product state (Result::mps).
+    bool keep_mps = false;
+};
+
+// One site tensor of a matrix product state: entry (l, s, r) is at
+// (l * local + s) * right + r, for left bond l, local state s in the site's
+// PhysicalBasis order and right bond r. The outer bonds of the chain have
+// dimension one. `real` holds the entries in real arithmetic, `complex` in
+// complex arithmetic; the other is empty.
+struct MpsTensor {
+    std::size_t left = 0;
+    std::size_t local = 0;
+    std::size_t right = 0;
+    std::vector<double> real;
+    std::vector<std::complex<double>> complex;
+};
+
+// A targeted state as the engine holds it after the final sweep, which is
+// no approximation of it: the block rotations of that sweep are the tensors
+// up to its closing configuration, and the closing two-site wave function is
+// split by an SVD, which drops singular values below 1e-14 of the largest.
+// Mixed canonical with the norm, one, at `center`: the tensors before it are
+// left-orthonormal, those after it right-orthonormal. The centre is where the
+// final sweep ends, at site L/2, or at site L-2 when the engine stores
+// products (several targets with two-site measurements). The amplitude of a
+// product state is the product of its tensor slices; with fermions, the
+// product state is the product of creators in site order applied to the
+// vacuum, as in ALPS::ed.
+struct MatrixProductState {
+    std::vector<MpsTensor> sites;
+    std::size_t center = 0;
 };
 
 // Operators measured on every targeted state. `expectation` reports one value
@@ -129,6 +161,10 @@ struct Result {
     std::vector<Iteration> iterations;
     double final_truncation_error = 0.;
     ResolvedOptions options;
+    // With Options::keep_mps: one per targeted state, in energy order. The
+    // targets share the tensors outside the two sites split at the closing
+    // configuration.
+    std::vector<MatrixProductState> mps;
 };
 
 // Observes every completed DMRG iteration and may throw to abort the solve.

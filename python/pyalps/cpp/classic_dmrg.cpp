@@ -30,6 +30,7 @@
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <fstream>
@@ -176,6 +177,8 @@ NB_MODULE(classic_dmrg_c, m) {
                      [](classic::Options& o, std::string const& path) { o.scratch_parent = path; },
                      "Parent of the private scratch directory ('' selects the system temporary directory).")
         .def_rw("verbose", &classic::Options::verbose)
+        .def_rw("keep_mps", &classic::Options::keep_mps,
+                "Also return every targeted state as a MatrixProductState (Result.mps).")
         .def("__repr__", [](classic::Options const& o) {
             return "Options(" + std::to_string(o.sweeps.size()) + " sweeps, warmup_states=" + std::to_string(o.warmup_states)
                  + ", num_eigenvalues=" + std::to_string(o.num_eigenvalues)
@@ -237,6 +240,44 @@ NB_MODULE(classic_dmrg_c, m) {
         .def_ro("arithmetic", &classic::ResolvedOptions::arithmetic)
         .def_ro("sector", &classic::ResolvedOptions::sector);
 
+    nb::class_<classic::MatrixProductState>(m, "MatrixProductState",
+        "A targeted state after the final sweep as the engine holds it: site tensors indexed "
+        "[left bond, local state, right bond], local states in each site's PhysicalBasis order, mixed "
+        "canonical with the norm at `center` (left-orthonormal before it, right-orthonormal after it). "
+        "With fermions the product states are creators in site order applied to the vacuum, as in pyalps.ed.")
+        .def_prop_ro("tensors", [](classic::MatrixProductState const& mps) {
+            nb::list out;
+            for (auto const& site : mps.sites) {
+                std::vector<std::size_t> shape{site.left, site.local, site.right};
+                if (site.complex.empty())
+                    out.append(alps::python::make_numpy_array<double>(std::vector<double>(site.real), shape));
+                else
+                    out.append(alps::python::make_numpy_array<Complex>(std::vector<Complex>(site.complex), shape));
+            }
+            return out;
+        }, "The site tensors as NumPy arrays (float64 in real arithmetic, complex128 in complex), copied on access.")
+        .def_ro("center", &classic::MatrixProductState::center)
+        .def_prop_ro("bond_dimensions", [](classic::MatrixProductState const& mps) {
+            std::vector<std::size_t> out;
+            for (std::size_t i = 0; i + 1 < mps.sites.size(); ++i) out.push_back(mps.sites[i].right);
+            return out;
+        }, "The dimension of each inner bond, between sites i and i + 1.")
+        .def_prop_ro("local_dimensions", [](classic::MatrixProductState const& mps) {
+            std::vector<std::size_t> out;
+            for (auto const& site : mps.sites) out.push_back(site.local);
+            return out;
+        })
+        .def_prop_ro("is_complex", [](classic::MatrixProductState const& mps) {
+            return !mps.sites.empty() && !mps.sites.front().complex.empty();
+        })
+        .def("__len__", [](classic::MatrixProductState const& mps) { return mps.sites.size(); })
+        .def("__repr__", [](classic::MatrixProductState const& mps) {
+            std::size_t largest = 1;
+            for (auto const& site : mps.sites) largest = std::max(largest, site.right);
+            return "MatrixProductState(" + std::to_string(mps.sites.size()) + " sites, max bond "
+                 + std::to_string(largest) + ", center " + std::to_string(mps.center) + ")";
+        });
+
     nb::class_<classic::Result>(m, "Result", "A finished solve: energies, measurements, the iterations observed and the options.")
         .def_prop_ro("energies", [](classic::Result const& r) { return vector_to_numpy(std::vector<double>(r.energies)); },
                      "Ascending energies of the targeted states.")
@@ -244,6 +285,8 @@ NB_MODULE(classic_dmrg_c, m) {
         .def_ro("iterations", &classic::Result::iterations)
         .def_ro("final_truncation_error", &classic::Result::final_truncation_error)
         .def_ro("options", &classic::Result::options)
+        .def_ro("mps", &classic::Result::mps,
+                "With keep_mps: one MatrixProductState per targeted state, in energy order; otherwise empty.")
         .def_prop_ro("energy", [](classic::Result const& r) { return r.energies.empty() ? 0. : r.energies.front(); },
                      "The ground-state energy.")
         .def_prop_ro("iteration_energies", [](classic::Result const& r) {
@@ -325,6 +368,9 @@ NB_MODULE(classic_dmrg_c, m) {
            "word, largest amplitude positive.")
         .def_ro("iterations", &classic::MolecularResult::iterations)
         .def_ro("final_truncation_error", &classic::MolecularResult::final_truncation_error)
+        .def_ro("mps", &classic::MolecularResult::mps,
+                "With keep_mps: the final state as one MatrixProductState over the orbitals, on spinful_fermion "
+                "sites (states 0, up, down, up-down); otherwise empty.")
         .def_prop_ro("iteration_energies", [](classic::MolecularResult const& r) {
             std::vector<double> values;
             for (auto const& it : r.iterations) values.push_back(it.energy);

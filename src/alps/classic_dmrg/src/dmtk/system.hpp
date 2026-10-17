@@ -956,7 +956,10 @@ class System
     bool signal_emit(std::string signal_id)
       {
          int n = this->get_signal_id(signal_id);
-         if(n >= 0) return this->signal_emit(n);
+         // Changed here, as ALPSim/ALPS PR 232: an unknown signal returned
+         // nothing; it vetoes nothing.
+         if(n < 0) return true;
+         return this->signal_emit(static_cast<size_t>(n));
       }
     std::string signal_description(size_t signal_id)
       {

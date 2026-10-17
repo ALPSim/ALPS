@@ -22,6 +22,18 @@ Every completed iteration reaches ``callback(iteration)``, which may raise to
 abort. The engine is serialized process-wide. The bindings are present when
 pyalps was built against an SDK with the ``classic_dmrg`` component.
 
+``keep_mps=True`` also returns every targeted state as a
+``MatrixProductState`` in ``result.mps``: the engine's block rotations of
+the final sweep and its closing wave function, exactly the state the
+energies and measurements belong to. Its ``tensors`` are NumPy arrays
+``[left bond, local state, right bond]`` with local states in the
+``PhysicalBasis`` order of each site; ``to_dense``, ``amplitude``,
+``overlap`` and ``norm`` contract them.
+
+>>> result = dmrg.solve(model, sweeps=dmrg.ramped_sweeps(4, 200), sector={"N": 16, "Sz": 0},
+...                     keep_mps=True)                       # doctest: +SKIP
+>>> mps = result.mps[0]; mps.bond_dimensions, mps.norm()   # doctest: +SKIP
+
 ``solve_molecular(h1, eri, n_alpha, n_beta)`` runs the same engine on a
 restricted real molecular Hamiltonian (chemist-notation integrals) and
 returns the energy with the final-state one- and two-particle density
@@ -44,7 +56,7 @@ except ImportError as error:  # pragma: no cover - SDK without classic_dmrg
 from ._ext.classic_dmrg_c import *  # noqa: F401,F403
 
 _OPTION_FIELDS = ("sweeps", "warmup_states", "num_eigenvalues", "truncation_error", "truncation_max_states",
-                  "lanczos_tolerance", "arithmetic", "sector", "scratch_parent", "verbose")
+                  "lanczos_tolerance", "arithmetic", "sector", "scratch_parent", "verbose", "keep_mps")
 
 
 def make_options(options=None, **fields):
@@ -130,6 +142,10 @@ def solve_molecular(one_body, two_body, n_alpha, n_beta, *, core_energy=0.0, int
     the final state with the RDMs and returned in ``result.observables``.
     Nothing can be measured after the call, as the engine keeps no state.
 
+    ``keep_mps=True`` returns the final state as a ``MatrixProductState``
+    over the orbitals in ``result.mps[0]``, on ``spinful_fermion()`` sites
+    (local states 0, up, down, up-down) in the same mode order.
+
     ``ci_vector=True`` also returns the final state on every determinant of
     the sector (``ci_alpha``, ``ci_beta``, ``ci_coefficients``; see
     :func:`ci_occupations`), contracted from the engine's stored rotations.
@@ -150,6 +166,68 @@ def solve_molecular(one_body, two_body, n_alpha, n_beta, *, core_energy=0.0, int
     resolved = make_options(options, **fields)
     return _classic_dmrg_c.solve_molecular(*arrays, n_alpha, n_beta, float(core_energy), float(integral_cutoff),
                                            dict(observables or {}), bool(ci_vector), resolved, callback, log_file)
+
+
+# -- matrix product states ------------------------------------------------------------
+
+def _mps_to_dense(self, max_dimension=1 << 24):
+    """The state on the whole product basis, site 0 most significant (the order of ``pyalps.ed`` states)."""
+    import math
+
+    dimension = math.prod(self.local_dimensions)
+    if dimension > max_dimension:
+        raise ValueError(f"the product basis has {dimension} states, above max_dimension={max_dimension}; "
+                         "use amplitude() on chosen product states")
+    tensors = self.tensors
+    out = tensors[0].reshape(-1, tensors[0].shape[2])
+    for tensor in tensors[1:]:
+        out = (out @ tensor.reshape(tensor.shape[0], -1)).reshape(-1, tensor.shape[2])
+    return out.reshape(-1)
+
+
+def _mps_amplitude(self, states):
+    """<s|psi> for one product state (a sequence of local indices) or for each row of an (n, L) array."""
+    import numpy as np
+
+    configurations = np.asarray(states, dtype=np.int64)
+    single = configurations.ndim == 1
+    configurations = np.atleast_2d(configurations)
+    tensors = self.tensors
+    if configurations.shape[1] != len(tensors):
+        raise ValueError(f"a product state of this MPS has {len(tensors)} local indices")
+    carry = np.ones((configurations.shape[0], 1), dtype=np.result_type(*tensors))
+    for site, tensor in enumerate(tensors):
+        local = configurations[:, site]
+        if local.min(initial=0) < 0 or local.max(initial=0) >= tensor.shape[1]:
+            raise ValueError(f"a local index at site {site} is outside 0..{tensor.shape[1] - 1}")
+        carry = np.einsum("nl,lnr->nr", carry, tensor[:, local, :])
+    values = carry[:, 0]
+    return values[0] if single else values
+
+
+def _mps_overlap(self, other):
+    """<self|other>, contracted site by site; both must have the same local dimensions."""
+    import numpy as np
+
+    if list(self.local_dimensions) != list(other.local_dimensions):
+        raise ValueError("the matrix product states have different local dimensions")
+    environment = np.ones((1, 1))
+    for a, b in zip(self.tensors, other.tensors):
+        environment = np.einsum("xy,xsl,ysr->lr", environment, a.conj(), b)
+    return environment[0, 0]
+
+
+def _mps_norm(self):
+    """sqrt(<psi|psi>); one for a state from the solver."""
+    import numpy as np
+
+    return float(np.sqrt(abs(_mps_overlap(self, self))))
+
+
+_classic_dmrg_c.MatrixProductState.to_dense = _mps_to_dense
+_classic_dmrg_c.MatrixProductState.amplitude = _mps_amplitude
+_classic_dmrg_c.MatrixProductState.overlap = _mps_overlap
+_classic_dmrg_c.MatrixProductState.norm = _mps_norm
 
 
 # Orbital-resolved quantities of a MolecularResult, derived from its RDMs.

@@ -37,6 +37,7 @@
 #include <boost/tokenizer.hpp>
 #include <boost/foreach.hpp>
 
+#include <complex>
 #include <cstddef>
 #include <iostream>
 #include <map>
@@ -101,6 +102,8 @@ private:
   // Conserved charges: those of CONSERVED_QUANTUMNUMBERS with a <name>_total.
   std::vector<std::string> conserved;
   alps::dmrg::classic::Options options;
+  // SAVE_MPS: the ground state of the final sweep.
+  alps::dmrg::classic::MatrixProductState mps;
 };
 
 // Measurement request names: the expression kind, its name and the location.
@@ -229,6 +232,8 @@ void DMRGTask<value_type>::init()
   options.arithmetic = alps::is_complex<value_type>::value ? classic::Arithmetic::complex : classic::Arithmetic::real;
   options.verbose = verbose > 0 ? verbose : 0;
   options.log = &std::cout;
+  // SAVE_MPS (ALPSim/ALPS PR 216): write the final ground state as /mps.
+  options.keep_mps = static_cast<bool>(parms.value_or_default("SAVE_MPS",false));
 }
 
 // One expectation value per site or bond (local), per expression (average)
@@ -364,6 +369,8 @@ DMRGTask<value_type>::store(alps::dmrg::classic::Result const& result)
   for (std::size_t i = 0; i < targets; ++i)
     this->average_values["Energy"].push_back(result.energies[i]);
   this->average_values["Truncation error"].push_back(result.final_truncation_error);
+  if (!result.mps.empty())
+    mps = result.mps.front();
 }
 
 #ifdef ALPS_HAVE_HDF5
@@ -386,6 +393,40 @@ void DMRGTask<value_type>::save(alps::hdf5::archive & ar) const
   typedef typename std::map<std::string,std::vector<double> >::const_iterator IT;
   for (IT it=iteration_measurements.begin(); it != iteration_measurements.end();++it)
       ar["simulation/results/Iteration "+alps::hdf5_name_encode(it->first)+"/mean/value"] << it->second;
+
+  // SAVE_MPS, in the layout of ALPSim/ALPS PR 216 (Marcus Rosales), whose
+  // assembly from the engine's rotations now lives in ALPS::classic_dmrg:
+  // tensors row-major [left bond][local state][right bond], local states in
+  // the ALPS site-basis order (the catalog model's physical basis), the norm
+  // at mps/center, which is where the final sweep ended.
+  if (!mps.sites.empty()) {
+    ar["mps/length"] << int(mps.sites.size());
+    ar["mps/center"] << int(mps.center);
+    std::vector<int> types;
+    for (std::size_t i = 0; i < mps.sites.size(); ++i) {
+      alps::dmrg::classic::MpsTensor const& site = mps.sites[i];
+      std::string const path = "mps/tensors/" + boost::lexical_cast<std::string>(i);
+      std::vector<std::size_t> const shape{site.left, site.local, site.right};
+      ar[path + "/shape"] << shape;
+      if constexpr (alps::is_complex<value_type>::value)
+        ar[path + "/values"] << site.complex;
+      else
+        ar[path + "/values"] << site.real;
+      types.push_back(site_type(i));
+    }
+    ar["mps/site_type"] << types;
+    // quantum numbers of the local states, in the order of the ALPS site basis
+    for (int type = 0; type <= alps::maximum_vertex_type(graph()); ++type) {
+      alps::site_basis<short> b(site_basis(type));
+      for (std::size_t q = 0; q < site_basis(type).size(); ++q) {
+        std::vector<double> values;
+        for (std::size_t s = 0; s < b.size(); ++s)
+          values.push_back(b[s][q].to_double());
+        ar["mps/site_basis/" + boost::lexical_cast<std::string>(type) + "/"
+           + alps::hdf5_name_encode(site_basis(type)[q].name())] << values;
+      }
+    }
+  }
 }
 #endif
 

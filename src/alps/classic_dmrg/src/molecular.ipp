@@ -422,6 +422,37 @@ struct CiWalk {
     }
 };
 
+// Fewer than four orbitals are padded with one-dimensional sites at the end
+// of the chain. Their tensors are contracted into the last orbital's, which
+// becomes the centre if the centre lay on the padding; a tail of
+// right-orthonormal tensors is an isometry, so the canonical form holds.
+inline void absorb_padding(MatrixProductState& mps, std::size_t orbitals) {
+    if (mps.sites.size() <= orbitals) return;
+    auto& last = mps.sites[orbitals - 1];
+    std::size_t width = last.right;
+    std::vector<double> tail(width * width, 0.); // [last orbital's right bond][current bond]
+    for (std::size_t x = 0; x < width; ++x) tail[x * width + x] = 1.;
+    for (std::size_t i = orbitals; i < mps.sites.size(); ++i) {
+        auto const& pad = mps.sites[i];
+        if (pad.local != 1 || pad.left != width)
+            throw std::logic_error("classic molecular MPS: a padding site is not one-dimensional");
+        std::vector<double> next(last.right * pad.right, 0.);
+        for (std::size_t x = 0; x < last.right; ++x)
+            for (std::size_t y = 0; y < width; ++y)
+                for (std::size_t z = 0; z < pad.right; ++z) next[x * pad.right + z] += tail[x * width + y] * pad.real[y * pad.right + z];
+        tail = std::move(next);
+        width = pad.right;
+    }
+    std::vector<double> merged(last.left * last.local * width, 0.);
+    for (std::size_t ls = 0; ls < last.left * last.local; ++ls)
+        for (std::size_t x = 0; x < last.right; ++x)
+            for (std::size_t z = 0; z < width; ++z) merged[ls * width + z] += last.real[ls * last.right + x] * tail[x * width + z];
+    last.real = std::move(merged);
+    last.right = width;
+    mps.sites.resize(orbitals);
+    if (mps.center >= orbitals) mps.center = orbitals - 1;
+}
+
 } // namespace molecular_detail
 
 MolecularResult solve_molecular(MolecularInput const& input, Options const& options, IterationCallback callback) {
@@ -595,6 +626,13 @@ MolecularResult solve_molecular(MolecularInput const& input, Options const& opti
     if (input.ci_vector) {
         if (n > 64) throw std::invalid_argument("classic molecular CI vectors are limited to 64 orbitals");
         CiWalk(system, n, length, n_index, sz_index).run(result, static_cast<int>(alpha), static_cast<int>(beta));
+    }
+    // Added here: the final state as a matrix product state (mps.hpp), on
+    // the orbitals only.
+    if (controls.keep_mps) {
+        auto mps = detail::MpsExport<double>(system).state(system.gs);
+        molecular_detail::absorb_padding(mps, n);
+        result.mps.push_back(std::move(mps));
     }
     result.energy = system.energy[0] + core;
     if (!std::isfinite(result.energy))

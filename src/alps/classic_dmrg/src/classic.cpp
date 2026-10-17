@@ -21,6 +21,7 @@
 // a column on its own instead of applying the summed operator.
 #include <alps/dmrg/classic.hpp>
 #include "invocation.hpp"
+#include "mps.hpp"
 
 #include <alps/models/terms.hpp>
 
@@ -863,6 +864,14 @@ struct Engine {
         S.measure();
 
         Result result;
+        // The tensors come from the scratch files, which the invocation
+        // removes when the solve returns, and from the closing wave
+        // functions, before the reading below overwrites S.gs.
+        if (options.keep_mps) {
+            detail::MpsExport<T> const exporter(S);
+            result.mps.push_back(exporter.state(S.gs));
+            for (std::size_t i = 1; i < S._target.size(); ++i) result.mps.push_back(exporter.state(S._target[i]));
+        }
         for (auto const& plan : problem.measurements)
             result.measurements.emplace(plan.name, Measurement{plan.kind, {}, {}});
         auto read = [&]() {
