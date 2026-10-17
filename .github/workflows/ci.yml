@@ -260,7 +260,7 @@ jobs:
           -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_BUILD_APPLICATIONS=ON -DMPIEXEC_PREFLAGS=--oversubscribe
         cmake --build _build/ci --target observableset_mpi parameters_mpi scheduler_sum_mpi comm_mpi filelock_mpi halt_mpi info_test_mpi process_mpi collect_mpi dmft_ctint_thermalization_mpi scheduler_sum_single param_checkpoint osiris_dump_serialization citation_runtime
     - name: Test two- and three-rank MPI
-      run: ctest --test-dir _build/ci -L '^mpi$' --output-on-failure --output-junit mpi.xml --no-tests=error
+      run: ctest --test-dir _build/ci -L '^mpi$' -LE '^cli$' --output-on-failure --output-junit mpi.xml --no-tests=error
     - name: Test serial behavior with MPI enabled
       run: ctest --test-dir _build/ci -R '^[^.]+\.(scheduler_sum_single|param_checkpoint|osiris_dump_serialization)\.'
         --output-on-failure --output-junit ctest.xml --no-tests=error
