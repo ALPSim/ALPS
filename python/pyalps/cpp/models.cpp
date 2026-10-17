@@ -749,6 +749,17 @@ void bind_hamiltonian(nb::module_& m) {
         return mdl::compile_operator(terms, sites, conv);
     }, nb::arg("terms"), nb::arg("sites"), nb::arg("fermion_convention") = "strict",
        "Lower an arbitrary observable without Hamiltonian symmetry requirements.");
+    m.def("has_sign_problem", [](mdl::Hamiltonian const& model) {
+        nb::gil_scoped_release release;
+        return mdl::has_sign_problem(model);
+    }, nb::arg("model"),
+       "The legacy algebraic QMC sign check (sublattice-sign rule and frustration test) on the summed one- and "
+       "two-site terms per site and per site pair; raises ValueError for Jordan-Wigner strings, terms on more "
+       "than two sites and imaginary matrix elements.");
+    m.def("has_sign_problem", [](mdl::CompiledOperator const& op) {
+        nb::gil_scoped_release release;
+        return mdl::has_sign_problem(op);
+    }, nb::arg("op"), "The same for a compiled operator.");
     m.def("compile_operator", [](mdl::TermSum const& terms, mdl::PhysicalBasis const& physical) {
         nb::gil_scoped_release release;
         return mdl::compile_operator(terms, physical);
@@ -1075,6 +1086,10 @@ void bind_catalog(nb::module_& m) {
                  + "', LATTICE='" + model.parameters().value_or_default("LATTICE", "") + "', sites="
                  + std::to_string(model.graph().num_sites()) + ")";
         });
+    m.def("has_sign_problem", [](Catalog const& model) {
+        nb::gil_scoped_release release;
+        return mdl::has_sign_problem(model.compile_hamiltonian());
+    }, nb::arg("model"), "The same for a catalog model's compiled Hamiltonian.");
     m.def("compile_hamiltonian", [](Catalog const& model) {
         mdl::CompiledModel compiled;
         {

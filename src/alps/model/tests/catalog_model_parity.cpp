@@ -23,7 +23,9 @@
 #include <alps/ed/projected_problem.hpp>
 #include <alps/ed/sparse_matrix.hpp>
 #include <alps/model/catalog.hpp>
+#include <alps/model/sign.h>
 #include <alps/models/builtin.hpp>
+#include <alps/models/sign.hpp>
 #include <gtest/gtest.h>
 
 #include <cmath>
@@ -280,4 +282,35 @@ TEST(CatalogModelParity, KitOperatorNamesResolveToCatalogOperators) {
     EXPECT_ANY_THROW(fermions.compile_operator(std::string("cdag_up"), fermions.graph().site(1)));
     EXPECT_ANY_THROW(fermions.compile_operator(std::string("c_dag_up"), fermions.graph().site(1)));
     EXPECT_ANY_THROW(fermions.compile_operator(std::string("no_such_operator")));
+}
+
+// The kit's sign check on compiled catalog operators against the legacy
+// alps::has_sign_problem, on the scenarios of the legacy example8 test.
+TEST(CatalogModelParity, SignChecksAgreeWithTheLegacyRule) {
+    struct Scenario { char const* lattice; int exchange; char const* diagonal; char const* field; bool expected; };
+    for (auto const& scenario : std::vector<Scenario>{
+             {"square lattice", 1, nullptr, nullptr, false},
+             {"frustrated square lattice", 1, nullptr, nullptr, false},
+             {"frustrated square lattice", 1, "1", nullptr, true},
+             {"frustrated square lattice", 1, "-1", nullptr, false},
+             {"triangular lattice", 1, nullptr, nullptr, true},
+             {"chain lattice", 1, nullptr, nullptr, false},
+             {"chain lattice", 1, nullptr, "1", true},
+             {"chain lattice", -1, nullptr, "1", false}}) {
+        alps::Parameters p;
+        p["MODEL"] = "spin";
+        p["LATTICE"] = scenario.lattice;
+        p["L"] = 4;
+        p["J"] = scenario.exchange;
+        if (scenario.diagonal) p["J'"] = scenario.diagonal;
+        if (scenario.field) p["Gamma"] = scenario.field;
+        SCOPED_TRACE(std::string(scenario.lattice) + " J=" + std::to_string(scenario.exchange)
+                     + (scenario.diagonal ? std::string(" J'=") + scenario.diagonal : "")
+                     + (scenario.field ? std::string(" Gamma=") + scenario.field : ""));
+        mdl::CatalogModel<> model(p);
+        auto parameters = p;
+        parameters.copy_undefined(model.model().model().default_parameters());
+        EXPECT_EQ(alps::has_sign_problem(model.model().model(), model.graph(), parameters), scenario.expected);
+        EXPECT_EQ(mdl::has_sign_problem(model.compile_hamiltonian()), scenario.expected);
+    }
 }

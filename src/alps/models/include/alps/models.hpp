@@ -20,5 +20,6 @@
 #include <alps/models/builtin.hpp>
 #include <alps/models/qubit_encoding.hpp>
 #include <alps/models/pauli.hpp>
+#include <alps/models/sign.hpp>
 
 #endif

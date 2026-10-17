@@ -229,6 +229,17 @@ def test_site_operator_sugar_observables_and_matrices():
     np.testing.assert_allclose(np.linalg.eigvalsh(catalog.to_dense_matrix()), np.linalg.eigvalsh(dense), atol=1e-12)
     assert len(models.compile_observable(catalog, "Sz")) == 6
 
+
+def test_sign_problem_check():
+    assert not models.has_sign_problem(models.heisenberg(lat.chain(8)))
+    assert models.has_sign_problem(models.heisenberg(lat.chain(7)))  # odd ring
+    assert models.has_sign_problem(models.heisenberg(lat.triangular(3, 3)))
+    assert not models.has_sign_problem(models.compile_hamiltonian(models.heisenberg(lat.square(4, 4))).op)
+    in_field = models.CatalogModel({"MODEL": "spin", "LATTICE": "chain lattice", "L": 4, "J": 1.0, "Gamma": 1.0})
+    assert models.has_sign_problem(in_field)  # the legacy rule: site and bond signs disagree
+    with pytest.raises(ValueError, match="Jordan-Wigner"):
+        models.has_sign_problem(models.hubbard(lat.chain(4, bc="open")))
+
 def test_term_algebra_and_compilation():
     spin = models.spin()
     sites = [spin, spin]

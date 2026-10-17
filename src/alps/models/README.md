@@ -30,6 +30,7 @@ mdl::CompiledModel compiled = mdl::compile_hamiltonian(model);
 | `alps/models/builtin.hpp` | 14 named model factories, from `heisenberg` to `bose_hubbard` and `kondo_lattice`, and `ab_initio(h1, eri, n, tol)`: the molecular Hamiltonian of real one- and two-electron integrals (chemist's notation) on `spinful_fermion()` sites |
 | `alps/models/lattice_xml.hpp` | `to_latticegraph_xml`, `to_graph_xml`: the ALPS lattice-library XML of a kit lattice (unit cell with vertex coordinates, extent, boundary); `custom_lattice_name`, `catalog_graph_name` |
 | `alps/models/qubit_encoding.hpp` | `QubitEncoding`: the qubit register of a `PhysicalBasis` (binary or Gray code words per site), bit/state-index and statevector interchange |
+| `alps/models/sign.hpp` | `has_sign_problem`: the legacy algebraic QMC sign check (`<alps/model/sign.h>`: one sign per site and per bond matrix, then the frustration test) on the summed one- and two-site terms of a `CompiledOperator` or `Hamiltonian`, per site and per site pair, so inhomogeneous couplings take part; strings, three-site terms and imaginary elements throw |
 | `alps/models/pauli.hpp` | `PauliOperator`, `PauliExportOptions`, `export_pauli` (sparse Pauli strings of a `CompiledOperator` or `Hamiltonian`), `local_valid_projector`, `invalid_state_penalty` |
 
 Conventions that consumers rely on:

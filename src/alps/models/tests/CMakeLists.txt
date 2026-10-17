@@ -12,6 +12,7 @@ foreach(name IN ITEMS
     operator_decomposition
     operator_names
     qubit_encoding
+    sign
     term_sum
     translation_generators)
   add_executable(models_${name} ${name}.cpp)

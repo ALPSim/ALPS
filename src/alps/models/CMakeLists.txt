@@ -12,6 +12,7 @@ add_library(alps_models
   src/pauli.cpp
   src/physical_basis.cpp
   src/qubit_encoding.cpp
+  src/sign.cpp
   src/site.cpp
   src/terms.cpp)
 target_link_libraries(alps_models PUBLIC ALPS::configuration)
@@ -32,6 +33,7 @@ target_sources(alps_models PUBLIC
     include/alps/models/pauli.hpp
     include/alps/models/physical_basis.hpp
     include/alps/models/qubit_encoding.hpp
+    include/alps/models/sign.hpp
     include/alps/models/site.hpp
     include/alps/models/terms.hpp)
 

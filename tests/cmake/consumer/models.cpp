@@ -20,6 +20,8 @@ int main() {
     if (compiled.op.terms.empty() || !(weight > 0.))
         throw std::runtime_error("models component compiled no terms");
     mdl::validate_hermiticity(model);
+    if (mdl::has_sign_problem(model) || !mdl::has_sign_problem(mdl::heisenberg(lat::chain(3), 1.0)))
+        throw std::runtime_error("models component sign check misclassified a chain");
     auto const basis = mdl::physical_basis(model);
     if (basis.sites.size() != 4 || basis.conserved_quantum_numbers != std::vector<std::string>{"Sz"})
         throw std::runtime_error("models component physical basis is incomplete");
