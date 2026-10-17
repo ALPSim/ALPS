@@ -1,4 +1,4 @@
-"""ALPS (new PLAQUETTETERM) vs the independent Python prototype, ladder cases."""
+"""ALPS (new NSITETERM) vs the independent Python prototype, ladder cases."""
 import os
 import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -16,7 +16,7 @@ def ham(kterm):
   <BASIS ref="fermion"/>
   <SITETERM site="i">U*n_up(i)*n_down(i)</SITETERM>
   <BONDTERM source="i" target="j">{HOP}</BONDTERM>
-  <PLAQUETTETERM sites="i j k l">{kterm}</PLAQUETTETERM>
+  <NSITETERM sites="i j k l">{kterm}</NSITETERM>
 </HAMILTONIAN>"""
 
 def proto(L, boundary, U, K, kterm, nup, ndn):
@@ -25,7 +25,7 @@ def proto(L, boundary, U, K, kterm, nup, ndn):
          "parameters": {"t": 1.0, "U": U, "K": K},
          "term": [{"on": "site", "sites": ["i"], "expr": "U*n_up(i)*n_down(i)"},
                   {"on": "bond", "sites": ["i", "j"], "expr": HOP},
-                  {"on": "plaquette", "sites": ["i", "j", "k", "l"], "expr": kterm}]}
+                  {"on": "nsite_group", "sites": ["i", "j", "k", "l"], "expr": kterm}]}
     return ed.solve(m, n_levels=200, verbose=False)["energies"]
 
 cases = [  # label, L, boundary, U, K, kterm, nup, ndn, reference E0 from the plan

@@ -1,12 +1,12 @@
 """Pairing (particle-number-changing) terms, and terms that leave a fixed sector.
 
-1. No fixed sector: pairing as a PLAQUETTETERM (2-site singlet, reversed role
+1. No fixed sector: pairing as an NSITETERM (2-site singlet, reversed role
    order, on-site pair, a 4-site N+2 product, interleaved roles) and as a
    BONDTERM, on an open 4-site graph and a periodic ladder (L=3), with and
    without momentum sectors. Full spectrum vs a dense Jordan-Wigner matrix.
-2. Nup,Ndown conserved: every non-conserving term (site, bond, plaquette; with
+2. Nup,Ndown conserved: every non-conserving term (site, bond, n-site group; with
    and without momentum sectors) must be refused, not silently projected.
-3. Control: a conserving plaquette term with Nup,Ndown and momentum sectors;
+3. Control: a conserving n-site term with Nup,Ndown and momentum sectors;
    the union over all sectors must equal the full dense spectrum.
 """
 import os
@@ -31,7 +31,7 @@ def with_hc(products):
     return " + ".join(out)
 
 
-PLAQ_PAIRING = with_hc([
+NSITE_PAIRING = with_hc([
     (0.7,   [("cdag_up", "i"), ("cdag_down", "j")]),
     (-0.7,  [("cdag_down", "i"), ("cdag_up", "j")]),
     (-0.45, [("cdag_down", "k"), ("cdag_up", "i")]),                                   # reversed role order
@@ -39,7 +39,7 @@ PLAQ_PAIRING = with_hc([
     (0.25,  [("cdag_up", "i"), ("cdag_down", "k"), ("cdag_up", "l"), ("c_up", "j")]),  # N+2 on 4 sites
     (0.15,  [("cdag_up", "i"), ("c_up", "j"), ("cdag_down", "i"), ("cdag_down", "k")]),  # interleaved roles
 ])
-PLAQ_4SITE = with_hc([(0.25, [("cdag_up", "i"), ("cdag_down", "k"), ("cdag_up", "l"), ("c_up", "j")])])
+NSITE_4SITE = with_hc([(0.25, [("cdag_up", "i"), ("cdag_down", "k"), ("cdag_up", "l"), ("c_up", "j")])])
 BOND_PAIRING = with_hc([(0.7, [("cdag_up", "i"), ("cdag_down", "j")]),
                         (-0.7, [("cdag_down", "i"), ("cdag_up", "j")])])
 SITE_PAIRING = with_hc([(0.3, [("cdag_up", "i"), ("cdag_down", "i")])])
@@ -49,19 +49,19 @@ PAIR_HOP = ("-0.9*( (cdag_up(l)*cdag_down(k) - cdag_down(l)*cdag_up(k)) * (c_dow
 T, U = 1.0, 2.0
 
 
-def ham(bond="", plaq="", site=""):
+def ham(bond="", group="", site=""):
     return (f'<HAMILTONIAN name="pairing"><PARAMETER name="t" default="1"/><PARAMETER name="U" default="0"/>'
             f'<BASIS ref="fermion"/>'
             f'<SITETERM site="i">U*n_up(i)*n_down(i){" + " + site if site else ""}</SITETERM>'
             f'<BONDTERM source="i" target="j">{HOP}{" + " + bond if bond else ""}</BONDTERM>'
-            + (f'<PLAQUETTETERM sites="i j k l">{plaq}</PLAQUETTETERM>' if plaq else "")
+            + (f'<NSITETERM sites="i j k l">{group}</NSITETERM>' if group else "")
             + "</HAMILTONIAN>")
 
 
-# geometries: (lattice xml, ALPS parameters, nsites, bonds, plaquettes)
+# geometries: (lattice xml, ALPS parameters, nsites, bonds, n-site groups)
 OPEN4 = ('<LATTICES><GRAPH name="g4" vertices="4">'
          + "".join(f'<EDGE source="{i + 1}" target="{i + 2}"/>' for i in range(3))
-         + '<PLAQUETTE><SITE id="1"/><SITE id="2"/><SITE id="3"/><SITE id="4"/></PLAQUETTE></GRAPH></LATTICES>',
+         + '<NSITE><SITE id="1"/><SITE id="2"/><SITE id="3"/><SITE id="4"/></NSITE></GRAPH></LATTICES>',
          {"GRAPH": "g4"}, 4, [(0, 1), (1, 2), (2, 3)], [(0, 1, 2, 3)])
 L = 3
 s = lambda v, x: 2 * (x % L) + v
@@ -73,9 +73,9 @@ LADDER = (alpsrun.ladder_lattice(boundary="periodic"), {"LATTICE": "ms-ladder", 
 ONSITE_U = "U*cdag_up(i)*c_up(i)*cdag_down(i)*c_down(i)"
 
 
-def dense_full(geo, bond="", plaq="", site=""):
+def dense_full(geo, bond="", group="", site=""):
     """refjw's dense Jordan-Wigner matrix, with site terms added."""
-    _, _, n, bonds, plaqs = geo
+    _, _, n, bonds, groups = geo
     params = {"t": T, "U": U}
     ops = fock_ops(n)
     H = Op(np.zeros((1 << 2 * n,) * 2))
@@ -85,9 +85,9 @@ def dense_full(geo, bond="", plaq="", site=""):
         H = H + eval(site_expr, {}, {**ops, **params, "i": i})
     for i, j in bonds:
         H = H + eval(bond_expr, {}, {**ops, **params, "i": i, "j": j})
-    if plaq:
-        for sites in plaqs:
-            H = H + eval(plaq, {}, {**ops, **params, **dict(zip("ijkl", sites))})
+    if group:
+        for sites in groups:
+            H = H + eval(group, {}, {**ops, **params, **dict(zip("ijkl", sites))})
     assert np.allclose(H.m, H.m.T)
     return np.linalg.eigvalsh(H.m)
 
@@ -120,7 +120,7 @@ NOTRANS = {"TRANSLATION_SYMMETRY": "false"}
 for name, geo, extra in (("open 4-site graph", OPEN4, {}),
                          ("periodic ladder, momentum sectors", LADDER, {}),
                          ("periodic ladder, no translation", LADDER, NOTRANS)):
-    for kind, terms in (("PLAQUETTETERM pairing", {"plaq": PLAQ_PAIRING}),
+    for kind, terms in (("NSITETERM pairing", {"group": NSITE_PAIRING}),
                         ("BONDTERM pairing", {"bond": BOND_PAIRING}),
                         ("SITETERM pairing", {"site": SITE_PAIRING})):
         a = alpsrun.run(geo[0], ham(**terms), {**geo[1], "MODEL": "pairing", "t": T, "U": U,
@@ -131,14 +131,14 @@ for name, geo, extra in (("open 4-site graph", OPEN4, {}),
 for name, geo, extra in (("open 4-site graph", OPEN4, {}),
                          ("periodic ladder, momentum sectors", LADDER, {}),
                          ("periodic ladder, no translation", LADDER, NOTRANS)):
-    refused(f"PLAQUETTETERM pairing, Nup,Ndown, {name}", geo, extra, "<PLAQUETTETERM>", plaq=PLAQ_PAIRING)
-    refused(f"PLAQUETTETERM 4-site N+2 only, Nup,Ndown, {name}", geo, extra, "<PLAQUETTETERM>", plaq=PLAQ_4SITE)
+    refused(f"NSITETERM pairing, Nup,Ndown, {name}", geo, extra, "<NSITETERM>", group=NSITE_PAIRING)
+    refused(f"NSITETERM 4-site N+2 only, Nup,Ndown, {name}", geo, extra, "<NSITETERM>", group=NSITE_4SITE)
     refused(f"BONDTERM pairing, Nup,Ndown, {name}", geo, extra, "<BONDTERM>", bond=BOND_PAIRING)
     refused(f"SITETERM pairing, Nup,Ndown, {name}", geo, extra, "<SITETERM>", site=SITE_PAIRING)
 
 # 3. conserving control: all sectors and momenta together give the full spectrum
-a = alpsrun.run(LADDER[0], ham(plaq=PAIR_HOP), {**LADDER[1], "MODEL": "pairing", "t": T, "U": U,
+a = alpsrun.run(LADDER[0], ham(group=PAIR_HOP), {**LADDER[1], "MODEL": "pairing", "t": T, "U": U,
                                                 "CONSERVED_QUANTUMNUMBERS": "Nup,Ndown"})
-report("conserving pair hopping, all Nup,Ndown and momentum sectors", a, dense_full(LADDER, plaq=PAIR_HOP))
+report("conserving pair hopping, all Nup,Ndown and momentum sectors", a, dense_full(LADDER, group=PAIR_HOP))
 
 print("ALL OK" if not bad else f"{bad} FAILED")

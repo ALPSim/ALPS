@@ -6,7 +6,7 @@ Pipeline:
       -> fill Fock-space H          -> sparse D x D matrix in an (Nup, Ndown) sector
       -> diagonalize                -> energies, ground state, observables
 
-A term is attached to a class of hyperedges ("site", "bond", "plaquette", ...),
+A term is attached to a class of hyperedges ("site", "bond", "nsite_group", ...),
 each an ordered tuple of sites, so 1-, 2- and 4-site terms are handled by the
 same code. Modes are numbered 2*site + spin (up = 0, down = 1); Jordan-Wigner
 signs follow that order.
@@ -184,8 +184,8 @@ def hypergraph(lattice):
         edges["rung"] = [(s(x, 0), s(x, 1)) for x in range(L)]
         edges["leg"] = [(s(x, y), s(x + 1, y)) for x in xs for y in (0, 1)]
         edges["bond"] = edges["rung"] + edges["leg"]
-        # plaquette roles (i, j, k, l): rung x = (i, j), rung x+1 = (l, k)
-        edges["plaquette"] = [(s(x, 0), s(x, 1), s(x + 1, 1), s(x + 1, 0)) for x in xs]
+        # n-site group roles (i, j, k, l): rung x = (i, j), rung x+1 = (l, k)
+        edges["nsite_group"] = [(s(x, 0), s(x, 1), s(x + 1, 1), s(x + 1, 0)) for x in xs]
     elif kind == "custom":
         n = lattice["sites"]
     else:

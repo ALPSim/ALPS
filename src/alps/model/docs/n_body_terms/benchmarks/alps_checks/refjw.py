@@ -30,13 +30,13 @@ def fock_ops(nsites):
     return ops
 
 
-def dense(nsites, bonds, plaquettes, bond_expr, plaq_expr, roles, params):
+def dense(nsites, bonds, groups, bond_expr, group_expr, roles, params):
     ops = fock_ops(nsites)
     H = Op(np.zeros((1 << 2 * nsites,) * 2))
     for i, j in bonds:
         H = H + eval(bond_expr, {}, {**ops, **params, "i": i, "j": j})
-    for sites in plaquettes:
-        H = H + eval(plaq_expr, {}, {**ops, **params, **dict(zip(roles, sites))})
+    for sites in groups:
+        H = H + eval(group_expr, {}, {**ops, **params, **dict(zip(roles, sites))})
     assert np.allclose(H.m, H.m.T)
     return np.linalg.eigvalsh(H.m)
 

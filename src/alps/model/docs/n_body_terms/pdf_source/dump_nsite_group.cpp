@@ -1,4 +1,4 @@
-// Scratch: print ALPS's basis, plaquette table and H for the 2x2 plaquette walkthrough.
+// Scratch: print ALPS's basis, n-site group table and H for the 2x2 plaquette walkthrough.
 #include <alps/lattice.h>
 #include <alps/model.h>
 #include <alps/model/hamiltonian_matrix.hpp>
@@ -26,11 +26,11 @@ int main(int argc, char** argv) {
       for (std::size_t q = 0; q < sb[k].size(); ++q) std::cout << sb[k][q] << (q + 1 < sb[k].size() ? "," : "");
     }
     std::cout << "\n";
-    const alps::plaquette& pl = g.plaquettes()[0];
-    std::cout << "PLAQ";
+    const alps::nsite_group& pl = g.nsite_groups()[0];
+    std::cout << "GROUP";
     for (auto s : pl.sites) std::cout << " " << s;
     std::cout << "\n";
-    alps::NSiteOperator term = mh.model().plaquette_term(pl.type);
+    alps::NSiteOperator term = mh.model().nsite_term(pl.type);
     std::cout << "TERM " << term.term() << "\n";
     alps::nsite_matrix<double> t = h.local_matrix(term, pl);
     std::size_t nnz = 0;

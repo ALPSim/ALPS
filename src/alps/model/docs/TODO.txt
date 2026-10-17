@@ -13,7 +13,7 @@
 09/03
 
 * multisite (n-site) terms in Hamiltonian: done for exact diagonalization
-  (<PLAQUETTE>, <PLAQUETTETERM>); DMRG and QMC still to do
+  (<NSITE>, <NSITETERM>); DMRG and QMC still to do
 
 * start with limited basis set, add basis states (AG/ST)
 

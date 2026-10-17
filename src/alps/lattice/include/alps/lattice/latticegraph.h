@@ -169,22 +169,22 @@ inline void make_graph_from_lattice(GRAPH& g,const LATTICE& l,
 
 namespace detail {
 
-// Only GraphUnitCell can carry plaquettes; other unit cells have none.
+// Only GraphUnitCell can carry n-site groups; other unit cells have none.
 template <class UNITCELL>
-inline std::vector<unitcell_plaquette> unit_cell_plaquettes(const UNITCELL&)
-{ return std::vector<unitcell_plaquette>(); }
+inline std::vector<unitcell_nsite_group> unit_cell_nsite_groups(const UNITCELL&)
+{ return std::vector<unitcell_nsite_group>(); }
 
-inline std::vector<unitcell_plaquette> unit_cell_plaquettes(const GraphUnitCell& c)
-{ return c.plaquettes(); }
+inline std::vector<unitcell_nsite_group> unit_cell_nsite_groups(const GraphUnitCell& c)
+{ return c.nsite_groups(); }
 
 } // end namespace detail
 
-// Expand the unit-cell plaquettes over the lattice, using the same offset,
+// Expand the unit-cell n-site groups over the lattice, using the same offset,
 // boundary and depletion rules as make_graph_from_lattice uses for edges:
-// a plaquette is dropped if any of its sites is off the lattice (open
+// an n-site group is dropped if any of its sites is off the lattice (open
 // boundaries) or depleted.
 template <class LATTICE>
-inline plaquette_list make_plaquettes_from_lattice(const LATTICE& l,
+inline nsite_group_list make_nsite_groups_from_lattice(const LATTICE& l,
     DepletionDescriptor depl_desc = DepletionDescriptor ())
 {
   typedef typename lattice_traits<LATTICE>::unit_cell_type unit_cell_type;
@@ -192,8 +192,8 @@ inline plaquette_list make_plaquettes_from_lattice(const LATTICE& l,
   typedef typename lattice_traits<LATTICE>::cell_iterator cell_iterator;
   typedef typename lattice_traits<LATTICE>::offset_type offset_type;
 
-  plaquette_list result;
-  std::vector<unitcell_plaquette> up = detail::unit_cell_plaquettes(unit_cell(l));
+  nsite_group_list result;
+  std::vector<unitcell_nsite_group> up = detail::unit_cell_nsite_groups(unit_cell(l));
   if (up.empty())
     return result;
 
@@ -204,7 +204,7 @@ inline plaquette_list make_plaquettes_from_lattice(const LATTICE& l,
   cell_iterator cit,cend;
   for (boost::tie(cit,cend)=cells(l); cit != cend ; ++cit) {
     for (std::size_t q=0;q<up.size();++q) {
-      plaquette p;
+      nsite_group p;
       p.type = up[q].type;
       bool keep = true;
       for (std::size_t r=0;r<up[q].sites.size() && keep;++r) {
@@ -256,7 +256,7 @@ public:
 
   const graph_type& graph() const { return graph_;}
   graph_type& graph() { return graph_;}
-  const plaquette_list& plaquettes() const { return plaquettes_;}
+  const nsite_group_list& nsite_groups() const { return nsite_groups_;}
 
   template<class H>
   typename H::graph_type& graph(H& g) const
@@ -335,7 +335,7 @@ public:
 
 private:
   GRAPH graph_;        
-  plaquette_list plaquettes_;
+  nsite_group_list nsite_groups_;
 };
 
 template <class LATTICE, class GRAPH>
@@ -344,7 +344,7 @@ inline lattice_graph<LATTICE,GRAPH>::lattice_graph(const L2& d)
  : LATTICE(d)
 {
   make_graph_from_lattice(graph_,*this,d.depletion());
-  plaquettes_ = make_plaquettes_from_lattice(*this,d.depletion());
+  nsite_groups_ = make_nsite_groups_from_lattice(*this,d.depletion());
 }
 
 template <class L, class G>

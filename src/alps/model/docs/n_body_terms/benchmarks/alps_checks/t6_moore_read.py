@@ -1,4 +1,4 @@
-"""Bosonic Moore-Read state from a 3-body (6-operator) PLAQUETTETERM.
+"""Bosonic Moore-Read state from a 3-body (6-operator) NSITETERM.
 
 Bosons in the lowest Landau level on a sphere with 2S flux quanta. The orbitals
 m = -S..S are the ALPS sites. The 3-body contact interaction projects every
@@ -8,7 +8,7 @@ triple of bosons onto total angular momentum 3S (all three at one point):
     T_M = sum_{m1+m2+m3=M} <S m1; S m2; S m3 | 3S M> b_m1 b_m2 b_m3,
     <S m1; S m2; S m3 | 3S M> = sqrt(C(2S,S+m1) C(2S,S+m2) C(2S,S+m3) / C(6S,3S+M)).
 
-The whole Hamiltonian is one PLAQUETTETERM on one plaquette holding every
+The whole Hamiltonian is one NSITETERM on one n-site group holding every
 orbital; ALPS expands the products of sums into strings of 6 boson operators,
 several of which can act on the same orbital.
 
@@ -51,7 +51,7 @@ def triples(two_s):
     return out
 
 
-def plaquette_term(two_s):
+def nsite_term(two_s):
     terms = []
     for big_m, tr in sorted(triples(two_s).items()):
         ann = " + ".join(f"{w!r}*b(o{a})*b(o{b})*b(o{c})" for (a, b, c), w in tr.items())
@@ -64,10 +64,10 @@ def alps_spectrum(n, two_s):
     norb = two_s + 1
     sites = "".join(f'<SITE id="{k + 1}"/>' for k in range(norb))
     lattice = (f'<LATTICES><GRAPH name="LLL sphere" vertices="{norb}">'
-               f'<PLAQUETTE type="0">{sites}</PLAQUETTE></GRAPH></LATTICES>')
+               f'<NSITE type="0">{sites}</NSITE></GRAPH></LATTICES>')
     roles = " ".join(f"o{k}" for k in range(norb))
     ham = (f'<HAMILTONIAN name="3-body contact"><BASIS ref="boson"/>'
-           f'<PLAQUETTETERM sites="{roles}">{plaquette_term(two_s)}</PLAQUETTETERM></HAMILTONIAN>')
+           f'<NSITETERM sites="{roles}">{nsite_term(two_s)}</NSITETERM></HAMILTONIAN>')
     return alpsrun.run(lattice, ham, {"GRAPH": "LLL sphere", "MODEL": "3-body contact",
                                       "Nmax": n, "CONSERVED_QUANTUMNUMBERS": "N", "N_total": n})
 

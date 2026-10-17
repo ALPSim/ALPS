@@ -30,7 +30,7 @@ target_sources(alps_headers INTERFACE
     include/alps/lattice/latticegraphdescriptor.h
     include/alps/lattice/latticelibrary.h
     include/alps/lattice/parity.h
-    include/alps/lattice/plaquette.h
+    include/alps/lattice/nsite_group.h
     include/alps/lattice/point_traits.h
     include/alps/lattice/propertymap.h
     include/alps/lattice/simplecell.h

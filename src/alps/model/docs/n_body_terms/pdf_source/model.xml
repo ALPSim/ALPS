@@ -24,8 +24,8 @@
       -t*(cdag_up(i)*c_up(j) + cdag_up(j)*c_up(i) + cdag_down(i)*c_down(j) + cdag_down(j)*c_down(i))
     </BONDTERM>
     <!-- new: one term on four sites -->
-    <PLAQUETTETERM sites="i j k l">
+    <NSITETERM sites="i j k l">
       K*(cdag_up(l)*cdag_down(k)*c_down(j)*c_up(i) + cdag_up(i)*cdag_down(j)*c_down(k)*c_up(l))
-    </PLAQUETTETERM>
+    </NSITETERM>
   </HAMILTONIAN>
 </MODELS>

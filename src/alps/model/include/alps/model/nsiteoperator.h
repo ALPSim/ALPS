@@ -12,13 +12,13 @@
 #ifndef ALPS_MODEL_NSITEOPERATOR_H
 #define ALPS_MODEL_NSITEOPERATOR_H
 
-// Terms acting on n sites (n arbitrary), e.g. a 4-site plaquette term
+// Terms acting on n sites (n arbitrary), e.g. a 4-site term
 //
-//   <PLAQUETTETERM type="0" sites="i j k l">
+//   <NSITETERM type="0" sites="i j k l">
 //     K*(cdag_up(l)*cdag_down(k)*c_down(j)*c_up(i) + h.c.)
-//   </PLAQUETTETERM>
+//   </NSITETERM>
 //
-// applied to every <PLAQUETTE> of the lattice. Modeled on BondOperator /
+// applied to every <NSITE> of the lattice. Modeled on BondOperator /
 // BondOperatorSplitter (bondoperator.h, bondterm.h), with the pair of sites
 // replaced by an ordered list of roles.
 //
@@ -63,7 +63,7 @@ class ModelLibrary;
 // coef * O_0 * O_1 * ... * O_{n-1}, one single-site operator per role (or the
 // identity). A row is assembled from these the first time it is asked for, so
 // only the rows that basis states actually reach are built; the full table
-// has prod(dims) rows, which for large plaquettes or boson cutoffs is far more
+// has prod(dims) rows, which for large n-site groups or boson cutoffs is far more
 // than any one sector uses. Not thread safe.
 template <class T>
 struct nsite_matrix
@@ -328,7 +328,7 @@ nsite_matrix<T> NSiteOperator::matrix(const std::vector<SiteBasisDescriptor<I> >
       boost::throw_exception(std::runtime_error("n-site term on " + boost::lexical_cast<std::string>(n)
         + " sites: the number of local configurations (" + d + ") does not fit in a "
         + boost::lexical_cast<std::string>(std::numeric_limits<std::size_t>::digits)
-        + "-bit index. Write the term on plaquettes with fewer sites."));
+        + "-bit index. Write the term on n-site groups with fewer sites."));
     }
     configurations *= mat.dims[r];
   }

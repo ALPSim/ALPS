@@ -145,13 +145,13 @@ public:
   template <class STATES, class V, class W>
   void apply_operator(const STATES&, const boost::multi_array<std::pair<value_type,bool>,4>& mat, site_descriptor s1, site_descriptor s2, const V& x, W& y) const;
 
-  // n-site term on one plaquette (an ordered tuple of sites)
+  // n-site term on one n-site group (an ordered tuple of sites)
   template <class V, class W>
-  void apply_operator(const NSiteOperator& op, const plaquette& p, const V& x, W& y) const
+  void apply_operator(const NSiteOperator& op, const nsite_group& p, const V& x, W& y) const
   { apply_operator(local_matrix(op,p),p,x,y); }
 
   template <class V, class W>
-  void apply_operator(const nsite_matrix<value_type>& mat, const plaquette& p, const V& x, W& y) const
+  void apply_operator(const nsite_matrix<value_type>& mat, const nsite_group& p, const V& x, W& y) const
   {
     if (uses_translation_invariance())
       apply_operator(bloch_states,mat,p,x,y);
@@ -160,7 +160,7 @@ public:
   }
 
   template <class STATES, class V, class W>
-  void apply_operator(const STATES&, const nsite_matrix<value_type>& mat, const plaquette& p, const V& x, W& y) const;
+  void apply_operator(const STATES&, const nsite_matrix<value_type>& mat, const nsite_group& p, const V& x, W& y) const;
 
   template <class V, class W> 
   void apply_operator(const SiteOperator& op, const V&, W&) const;
@@ -221,7 +221,7 @@ public:
   multi_array<value_type,2> local_matrix(const SiteOperator& op, site_descriptor s) const;
   multi_array<std::pair<value_type,bool>,4> local_matrix(const BondOperator& op, const bond_descriptor& b) const;
   multi_array<std::pair<value_type,bool>,4> local_matrix(const BondOperator& op, const site_descriptor& s1, const site_descriptor& s2) const;
-  nsite_matrix<value_type> local_matrix(const NSiteOperator& op, const plaquette& p) const;
+  nsite_matrix<value_type> local_matrix(const NSiteOperator& op, const nsite_group& p) const;
 
   template <class V, class W> 
   void apply_operator(const std::string& name, bond_descriptor b, const V& x, W& y) const
@@ -238,7 +238,7 @@ public:
 protected:
   void build() const;
   void build_basis() const;
-  void warn_if_cutoff(const nsite_matrix<value_type>& mat, const plaquette& p) const;
+  void warn_if_cutoff(const nsite_matrix<value_type>& mat, const nsite_group& p) const;
   void check_sector(const state_type& state, const state_type& newstate,
                     const std::string& term, const std::vector<std::size_t>& sites) const;
 
@@ -308,7 +308,7 @@ multi_array<std::pair<typename hamiltonian_matrix<M,G>::value_type,bool>,4> hami
 }
 
 template <class M, class G>
-nsite_matrix<typename hamiltonian_matrix<M,G>::value_type> hamiltonian_matrix<M,G>::local_matrix(const NSiteOperator& op, const plaquette& p) const
+nsite_matrix<typename hamiltonian_matrix<M,G>::value_type> hamiltonian_matrix<M,G>::local_matrix(const NSiteOperator& op, const nsite_group& p) const
 {
   std::vector<SiteBasisDescriptor<short> > bases;
   for (std::size_t r=0;r<p.sites.size();++r)
@@ -322,7 +322,7 @@ nsite_matrix<typename hamiltonian_matrix<M,G>::value_type> hamiltonian_matrix<M,
 // (fermion 0..1) and ranges set by another quantum number (Sz in -S..S) are
 // physical, not a cutoff.
 template <class M, class G>
-void hamiltonian_matrix<M,G>::warn_if_cutoff(const nsite_matrix<value_type>& mat, const plaquette& p) const
+void hamiltonian_matrix<M,G>::warn_if_cutoff(const nsite_matrix<value_type>& mat, const nsite_group& p) const
 {
   if (warned_cutoff_ || mat.nonconserved.empty())
     return;
@@ -338,7 +338,7 @@ void hamiltonian_matrix<M,G>::warn_if_cutoff(const nsite_matrix<value_type>& mat
           set_by_quantumnumber=true;
       if (set_by_quantumnumber)
         continue;
-      std::cerr << "Warning: a <PLAQUETTETERM> changes the total " << b[q].name()
+      std::cerr << "Warning: an <NSITETERM> changes the total " << b[q].name()
                 << ", whose local range is cut off at " << b[q].name() << " <= "
                 << b[q].max_expression() << " = " << b[q].max() << ". Matrix elements "
                 << "that would exceed the cutoff are dropped, so results depend on it; "
@@ -387,14 +387,14 @@ void hamiltonian_matrix<M,G>::check_sector(const state_type& state, const state_
   }
 }
 
-// Fill one n-site term on plaquette p. The local table (see nsiteoperator.h)
+// Fill one n-site term on n-site group p. The local table (see nsiteoperator.h)
 // stores each product reordered as O_0 O_1 ... O_{n-1} (role order). Acting on
 // a basis state, O_{n-1} is applied first; each odd O_r picks up the
 // Jordan-Wigner sign (-1)^(number of fermions on sites before p.sites[r]),
 // counted in the state as modified by the operators already applied. This is
 // the rule the bond fill below encodes in closed form for n = 2.
 template <class M, class G> template <class STATES, class V, class W>
-void hamiltonian_matrix<M,G>::apply_operator(const STATES& states, const nsite_matrix<value_type>& mat, const plaquette& p, const V& x, W& y) const
+void hamiltonian_matrix<M,G>::apply_operator(const STATES& states, const nsite_matrix<value_type>& mat, const nsite_group& p, const V& x, W& y) const
 {
   if (!built_basis_)                     // the parity table below reads basis_
     build_basis();
@@ -428,7 +428,7 @@ void hamiltonian_matrix<M,G>::apply_operator(const STATES& states, const nsite_m
       boost::tie(j,phase) = states.index_and_phase(newstate);
       if (j>=dimension()) {
         if (building_hamiltonian_)
-          check_sector(state,newstate,"<PLAQUETTETERM> of type "+boost::lexical_cast<std::string>(p.type),p.sites);
+          check_sector(state,newstate,"<NSITETERM> of type "+boost::lexical_cast<std::string>(p.type),p.sites);
         continue;
       }
       bool f=false;
@@ -591,21 +591,21 @@ void hamiltonian_matrix<M,G>::apply_operator(const GlobalOperator& op, const V& 
   for (bond_iterator it=graph_.bonds().first; it!=graph_.bonds().second ; ++it) 
       apply_operator(op.bond_term(graph_.bond_type(*it)),*it,x,y);
 
-  // loop over plaquettes (n-site terms). The local table depends only on the
-  // plaquette type and the site types, so build it once per combination: the
+  // loop over n-site groups (n-site terms). The local table depends only on the
+  // n-site group type and the site types, so build it once per combination: the
   // expression evaluator is slow.
-  if (graph_.plaquettes().empty() || !op.has_plaquette_terms())
+  if (graph_.nsite_groups().empty() || !op.has_nsite_terms())
     return;
   typedef std::pair<unsigned int,std::vector<unsigned int> > key_type;
   std::map<key_type,nsite_matrix<value_type> > cache;
-  for (std::size_t q=0;q<graph_.plaquettes().size();++q) {
-    const plaquette& p = graph_.plaquettes()[q];
+  for (std::size_t q=0;q<graph_.nsite_groups().size();++q) {
+    const nsite_group& p = graph_.nsite_groups()[q];
     key_type key(p.type,std::vector<unsigned int>());
     for (std::size_t r=0;r<p.sites.size();++r)
       key.second.push_back(graph_.site_type(p.sites[r]));
     typename std::map<key_type,nsite_matrix<value_type> >::iterator it = cache.find(key);
     if (it==cache.end()) {
-      NSiteOperator term = op.plaquette_term(p.type);
+      NSiteOperator term = op.nsite_term(p.type);
       nsite_matrix<value_type> mat;
       if (!term.term().empty()) {
         mat = local_matrix(term,p);

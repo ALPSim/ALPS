@@ -47,7 +47,7 @@ alps::BondOperator alps::GlobalOperator::bond_term(unsigned int type) const
   return default_bondterm_.get(type).bond_operator();
 }
 
-alps::NSiteOperator alps::GlobalOperator::plaquette_term(unsigned int type) const
+alps::NSiteOperator alps::GlobalOperator::nsite_term(unsigned int type) const
 {
   for (std::vector<NSiteTermDescriptor>::const_iterator it =nsiteterms_.begin();it!=nsiteterms_.end();++it)
     if (it->match_type(type))
@@ -57,7 +57,7 @@ alps::NSiteOperator alps::GlobalOperator::plaquette_term(unsigned int type) cons
   return default_nsiteterm_.get(type).nsite_operator();
 }
 
-boost::optional<alps::Parameters> alps::GlobalOperator::create_plaquette_term(unsigned int type)
+boost::optional<alps::Parameters> alps::GlobalOperator::create_nsite_term(unsigned int type)
 {
   // A typed term's own <PARAMETER> defaults must reach the Hamiltonian
   // parameters as well, or a parameter declared only there cannot be evaluated.
@@ -70,11 +70,11 @@ boost::optional<alps::Parameters> alps::GlobalOperator::create_plaquette_term(un
   return default_nsiteterm_.parms(type);
 }
 
-alps::Parameters alps::GlobalOperator::create_plaquette_terms(std::set<unsigned int> const& types)
+alps::Parameters alps::GlobalOperator::create_nsite_terms(std::set<unsigned int> const& types)
 {
   Parameters p;
   BOOST_FOREACH(unsigned int const& t, types) {
-    boost::optional<Parameters> newp = create_plaquette_term(t);
+    boost::optional<Parameters> newp = create_nsite_term(t);
     if (newp)
       p << newp.get();
   }
@@ -152,7 +152,7 @@ alps::XMLTag alps::GlobalOperator::read_xml(const XMLTag& intag, std::istream& i
       else
         bondterms_.push_back(BondTermDescriptor(tag,is));
     }
-    else if (tag.name=="PLAQUETTETERM") {
+    else if (tag.name=="NSITETERM") {
       if (tag.attributes["type"]=="")
         default_nsiteterm_=DefaultNSiteTermDescriptor(tag,is);
       else

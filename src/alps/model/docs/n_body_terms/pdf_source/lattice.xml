@@ -8,8 +8,8 @@
     <EDGE source="1" target="3"/>
     <EDGE source="2" target="4"/>
     <!-- new: an ordered group of sites; the order fixes the roles i j k l -->
-    <PLAQUETTE type="0">
+    <NSITE type="0">
       <SITE id="1"/><SITE id="2"/><SITE id="4"/><SITE id="3"/>
-    </PLAQUETTE>
+    </NSITE>
   </GRAPH>
 </LATTICES>

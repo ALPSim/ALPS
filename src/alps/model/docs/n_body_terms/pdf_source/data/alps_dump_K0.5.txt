@@ -1,5 +1,5 @@
 LOCAL 0:0,0 1:0,1 2:1,0 3:1,1
-PLAQ 0 1 3 2
+GROUP 0 1 3 2
 TERM 0.5 * (cdag_up(l) * cdag_down(k) * c_down(j) * c_up(i) + cdag_up(i) * cdag_down(j) * c_down(k) * c_up(l))
 ENTRY 0012 2100 0.5
 ENTRY 0013 2101 0.5

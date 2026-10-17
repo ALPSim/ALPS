@@ -1,11 +1,11 @@
-"""Analytic and independent-reference checks of ALPS PLAQUETTETERM.
+"""Analytic and independent-reference checks of ALPS NSITETERM.
 
 1. Analytic: open 4-site chain, H = -t sum hop + U n_{a,up} n_{a,dn}, where
    a = sum_i phi_i c_i is the k-th hopping eigenmode. Written in the site basis
    the U term is a single 4-site term (ALPS expands the product of sums), with
    pieces on 1, 2, 3 and 4 distinct sites. Exact spectrum:
        E = sum_{occupied up modes} eps + sum_{occupied dn modes} eps + U [a up and dn occupied]
-   Run with the plaquette's roles in site order and in a scrambled order.
+   Run with the n-site group's roles in site order and in a scrambled order.
 2. Non-conserving 4-site term (changes N by 4) with CONSERVED_QUANTUMNUMBERS=""
    against a dense Jordan-Wigner matrix of the same strings, and with Nup,Ndown
    conserved, which must be refused.
@@ -25,17 +25,17 @@ HOP = "-t*(cdag_up(i)*c_up(j) + cdag_up(j)*c_up(i) + cdag_down(i)*c_down(j) + cd
 
 def graph(order, name="g4"):
     edges = "".join(f'<EDGE type="0" source="{i + 1}" target="{i + 2}"/>' for i in range(L - 1))
-    plaq = "".join(f'<SITE id="{s + 1}"/>' for s in order)
+    group = "".join(f'<SITE id="{s + 1}"/>' for s in order)
     return (f'<LATTICES><GRAPH name="{name}" vertices="{L}">{edges}'
-            f'<PLAQUETTE type="0">{plaq}</PLAQUETTE></GRAPH></LATTICES>')
+            f'<NSITE type="0">{group}</NSITE></GRAPH></LATTICES>')
 
 
-def ham(plaq_term, roles="i j k l"):
+def ham(group_term, roles="i j k l"):
     return f"""<HAMILTONIAN name="ms analytic">
   <PARAMETER name="t" default="1"/><PARAMETER name="U" default="0"/>
   <BASIS ref="fermion"/>
   <BONDTERM source="i" target="j">{HOP}</BONDTERM>
-  <PLAQUETTETERM sites="{roles}">{plaq_term}</PLAQUETTETERM>
+  <NSITETERM sites="{roles}">{group_term}</NSITETERM>
 </HAMILTONIAN>"""
 
 
@@ -97,7 +97,7 @@ try:
                  "CONSERVED_QUANTUMNUMBERS": "Nup,Ndown", "Nup_total": 1, "Ndown_total": 1})
     print("non-conserving with Nup,Ndown conserved: accepted  <-- FAIL"); bad += 1
 except RuntimeError as e:
-    msg = [l for l in str(e).splitlines() if "PLAQUETTETERM" in l]
+    msg = [l for l in str(e).splitlines() if "NSITETERM" in l]
     ok = bool(msg)
     bad += not ok
     print("non-conserving with Nup,Ndown conserved: refused" + (f": {msg[0].strip()[:110]}..." if ok else f"  <-- wrong error: {e}"))

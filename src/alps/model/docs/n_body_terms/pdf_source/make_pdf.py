@@ -1,9 +1,9 @@
-"""Build ../ALPS_n_body_terms.pdf: n-body (plaquette) terms in ALPS, step by step.
+"""Build ../ALPS_n_body_terms.pdf: n-body (n-site) terms in ALPS, step by step.
 
 Inputs (all in this folder):
     lattice.xml, model.xml, parm         the example, as a user would write it
-    data/alps_dump_K*.txt                basis, plaquette table and H printed by
-                                         ALPS itself (dump_plaquette.cpp)
+    data/alps_dump_K*.txt                basis, n-site group table and H printed by
+                                         ALPS itself (dump_nsite_group.cpp)
     data/fulldiag_runs.txt               fulldiag / dmrg runs on the example
     ../benchmarks/results/*.txt          benchmark output
 
@@ -94,8 +94,8 @@ def load_dump(name):
         tag, _, rest = line.partition(" ")
         if tag == "LOCAL":
             out["local"] = {int(k): tuple(map(int, v.split(","))) for k, v in (w.split(":") for w in rest.split())}
-        elif tag == "PLAQ":
-            out["plaq"] = list(map(int, rest.split()))
+        elif tag == "GROUP":
+            out["group"] = list(map(int, rest.split()))
         elif tag == "TERM":
             out["term"] = rest
         elif tag == "ENTRY":
@@ -113,7 +113,7 @@ d5 = load_dump("alps_dump_K0.5.txt")
 d0 = load_dump("alps_dump_K0.txt")
 K, U, T_HOP = 0.5, 4.0, 1.0
 H5, H0m = d5["H"], d0["H"]
-STATES, PLAQ, LOCAL = d5["states"], d5["plaq"], d5["local"]
+STATES, GROUP, LOCAL = d5["states"], d5["group"], d5["local"]
 INDEX = {s: i for i, s in enumerate(STATES)}
 NS = len(STATES[0])
 ODD = {k: (sum(v) % 2 == 1) for k, v in LOCAL.items()}          # fermion parity of a local state
@@ -122,7 +122,7 @@ LOC = {k: LABEL[v] for k, v in LOCAL.items()}
 
 
 def picture(s):
-    """Plaquette drawn as 'sites 2 3 / sites 0 1', as in quartic_ED_walkthrough.pdf."""
+    """N-site group drawn as 'sites 2 3 / sites 0 1', as in quartic_ED_walkthrough.pdf."""
     return f"{LOC[s[2]]} {LOC[s[3]]} / {LOC[s[0]]} {LOC[s[1]]}"
 
 
@@ -147,9 +147,9 @@ def ket(s):
 def fill(entries, trace_col=None):
     Pm = np.zeros_like(H5)
     trace = []
-    n = len(PLAQ)
+    n = len(GROUP)
     for col, st in enumerate(STATES):
-        tin = tuple(st[p] for p in PLAQ)
+        tin = tuple(st[p] for p in GROUP)
         prefix = [False]
         for s in range(NS):
             prefix.append(prefix[-1] != ODD[st[s]])
@@ -158,15 +158,15 @@ def fill(entries, trace_col=None):
                 continue
             new = list(st)
             for r in range(n):
-                new[PLAQ[r]] = b[r]
+                new[GROUP[r]] = b[r]
             row = INDEX[tuple(new)]
             f = False
             lines = []
             for r in reversed(range(n)):
-                s = PLAQ[r]
+                s = GROUP[r]
                 if ODD[a[r]] != ODD[b[r]]:
                     before = prefix[s]
-                    fixes = [PLAQ[q] for q in range(r + 1, n) if PLAQ[q] < s and ODD[a[q]] != ODD[b[q]]]
+                    fixes = [GROUP[q] for q in range(r + 1, n) if GROUP[q] < s and ODD[a[q]] != ODD[b[q]]]
                     if len(fixes) % 2:
                         before = not before
                     f ^= before
@@ -191,7 +191,7 @@ proto = {"lattice": {"kind": "ladder", "L": 2, "boundary": "open"},
          "term": [{"on": "bond", "sites": ["i", "j"],
                    "expr": "-t*(cdag_up(i)*c_up(j) + cdag_up(j)*c_up(i) + cdag_down(i)*c_down(j) + cdag_down(j)*c_down(i))"},
                   {"on": "site", "sites": ["i"], "expr": "U*n_up(i)*n_down(i)"},
-                  {"on": "plaquette", "sites": ["i", "j", "k", "l"],
+                  {"on": "nsite_group", "sites": ["i", "j", "k", "l"],
                    "expr": "K*(cdag_up(l)*cdag_down(k)*c_down(j)*c_up(i) + cdag_up(i)*cdag_down(j)*c_down(k)*c_up(l))"}]}
 Hp = hyper_ed.solve(proto, verbose=False)["H"].toarray().real
 _, pidx = hyper_ed.sector_basis(4, 1, 1)
@@ -212,7 +212,7 @@ for line in RUNS:
         FD[m.group(1)] = np.array(sorted(map(float, m.group(2).split())))
 assert np.abs(FD["0.5"] - E5).max() < 1e-12 and np.abs(FD["0"] - E0).max() < 1e-12
 STOCK = [l for l in RUNS if l.startswith("stock")][0].split("E0 = ")[1]
-NOPLAQ = [l for l in RUNS if l.startswith("K=0.5 model")][0].split("E0 = ")[1]
+NO_NSITE = [l for l in RUNS if l.startswith("K=0.5 model")][0].split("E0 = ")[1]
 DMRG = [l for l in RUNS if l.startswith("dmrg")][0].split(": ", 1)[1]
 
 
@@ -239,16 +239,16 @@ def matrix_table(M, marks=(), fs=6.4, cw=27):
 # ------------------------------------------------------------------- story
 story = []
 story += [
-    Paragraph("n-body (plaquette) terms in ALPS, step by step", H0),
+    Paragraph("n-body (n-site) terms in ALPS, step by step", H0),
     Paragraph(
         "ALPS models had two kinds of terms: <b>SITETERM</b> (one site) and <b>BONDTERM</b> (two sites). "
-        "This branch adds a third, <b>PLAQUETTETERM</b>: one operator expression on an ordered group of any number "
-        "of sites, attached to a new <b>&lt;PLAQUETTE&gt;</b> element of the lattice. A molecular Hamiltonian's "
+        "This branch adds a third, <b>NSITETERM</b>: one operator expression on an ordered group of any number "
+        "of sites, attached to a new <b>&lt;NSITE&gt;</b> element of the lattice. A molecular Hamiltonian's "
         "(pq|rs), a ring exchange or a correlated pair hop can now be written down exactly, with nothing "
         "truncated. The terms are used by exact diagonalization (<font face='Mono'>fulldiag</font>, "
         "<font face='Mono'>sparsediag</font>).", P),
     Paragraph(
-        "This document follows one small problem through ALPS: the input files, the plaquette's local table, "
+        "This document follows one small problem through ALPS: the input files, the n-site group's local table, "
         "the fill of the many-body matrix, and the eigenvalues. It is the same system as "
         "<i>quartic_ED_walkthrough.pdf</i> (one 2×2 plaquette, t = 1, U = 4, K = 0.5, one ↑ and one ↓ electron). "
         "Every matrix and number below was printed by ALPS itself (<font face='Mono'>pdf_source/</font>).", P),
@@ -256,13 +256,13 @@ story += [
     Paragraph("Optional: nothing changes unless the input asks for it", H1),
     Paragraph(
         "There is no switch to turn on and nothing to change in existing inputs. The new code runs only when the "
-        "lattice contains a &lt;PLAQUETTE&gt; <i>and</i> the model contains a &lt;PLAQUETTETERM&gt;:", P),
+        "lattice contains an &lt;NSITE&gt; <i>and</i> the model contains an &lt;NSITETERM&gt;:", P),
     table([
-        ["lattice has\n<PLAQUETTE>", "model has\n<PLAQUETTETERM>", "what happens", "checked"],
+        ["lattice has\n<NSITE>", "model has\n<NSITETERM>", "what happens", "checked"],
         ["no", "no", "exactly as before", "stock models: master vs branch bit-identical;\nfull ctest 931/931"],
-        ["yes", "no", "plaquettes are ignored", f"stock 'fermion Hubbard' on this lattice:\nE0 = {float(STOCK):.10f}"],
+        ["yes", "no", "n-site groups are ignored", f"stock 'fermion Hubbard' on this lattice:\nE0 = {float(STOCK):.10f}"],
         ["no", "yes", "term has nothing to act on\n(like a BONDTERM on a graph without edges)",
-         f"K = 0.5 model, plaquette removed:\nE0 = {float(NOPLAQ):.10f} (= the K = 0 value)"],
+         f"K = 0.5 model, n-site group removed:\nE0 = {float(NO_NSITE):.10f} (= the K = 0 value)"],
         ["yes", "yes", "fulldiag / sparsediag add the term;\nDMRG and QMC codes stop with a message",
          "this document; dmrg refuses (below)"],
     ], widths=[1.15 * inch, 1.3 * inch, 2.25 * inch, 2.4 * inch], fs=7.5),
@@ -272,34 +272,34 @@ story += [
 
 # ---- Step 1 lattice
 story += [
-    Paragraph("Step 1 — Lattice: a &lt;PLAQUETTE&gt; is an ordered group of sites", H1),
+    Paragraph("Step 1 — Lattice: an &lt;NSITE&gt; is an ordered group of sites", H1),
     Paragraph(
-        "A &lt;GRAPH&gt; gets plaquette elements next to its edges. Each &lt;SITE id&gt; is a vertex id (1-based, "
+        "A &lt;GRAPH&gt; gets n-site group elements next to its edges. Each &lt;SITE id&gt; is a vertex id (1-based, "
         "like EDGE source/target). The <b>order</b> of the sites is what the model's role names bind to: here "
         "i, j, k, l = vertices 1, 2, 4, 3, i.e. ALPS sites 0, 1, 3, 2 going round the square. "
-        "The plaquette is stored in its own list beside the graph; it adds no bonds.", P),
+        "The n-site group is stored in its own list beside the graph; it adds no bonds.", P),
 ]
 lat = read(HERE, "lattice.xml")
 story += [Table([[code(lat, MONO_S), code(
     "ALPS builds:\n\n"
     "  sites      0 1 2 3\n"
     "  bonds      (0,1) (2,3) (0,2) (1,3)\n"
-    f"  plaquettes type 0: ({', '.join(map(str, PLAQ))})\n\n"
+    f"  n-site groups type 0: ({', '.join(map(str, GROUP))})\n\n"
     "     2 ----- 3\n"
     "     |   K   |\n"
     "     0 ----- 1\n\n"
     "  roles  i=0  j=1  k=3  l=2")]], colWidths=[4.2 * inch, 2.8 * inch],
     style=[("VALIGN", (0, 0), (-1, -1), "TOP")])]
 story += [Paragraph(
-    "For a periodic lattice the plaquette goes in the &lt;UNITCELL&gt;, with each site given as vertex + cell offset "
+    "For a periodic lattice the n-site group goes in the &lt;UNITCELL&gt;, with each site given as vertex + cell offset "
     "exactly like an EDGE's SOURCE/TARGET. ALPS repeats it over the lattice, wraps it at periodic boundaries and drops "
     "it where a site would fall off an open boundary:", P),
     code('<UNITCELL name="ladder cell" dimension="1" vertices="2">\n'
          '  ...edges as usual...\n'
-         '  <PLAQUETTE type="0">\n'
+         '  <NSITE type="0">\n'
          '    <SITE vertex="1" offset="0"/> <SITE vertex="2" offset="0"/>\n'
          '    <SITE vertex="2" offset="1"/> <SITE vertex="1" offset="1"/>\n'
-         '  </PLAQUETTE>\n'
+         '  </NSITE>\n'
          '</UNITCELL>')]
 
 # ---- Step 2 model
@@ -307,11 +307,11 @@ mod = read(HERE, "model.xml")
 ham = mod[mod.index("  <HAMILTONIAN"):mod.index("</MODELS>")]
 story += [
     PageBreak(),
-    Paragraph("Step 2 — Model: a &lt;PLAQUETTETERM&gt; is written like a BONDTERM", H1),
+    Paragraph("Step 2 — Model: an &lt;NSITETERM&gt; is written like a BONDTERM", H1),
     Paragraph(
         "<font face='Mono'>sites=\"i j k l\"</font> names the roles; the term is any expression in the site "
-        "operators (and library operators), on as many roles as the plaquette has sites. As for bond terms, "
-        "<font face='Mono'>type=\"…\"</font> restricts a term to one plaquette type, and without it "
+        "operators (and library operators), on as many roles as the n-site group has sites. As for bond terms, "
+        "<font face='Mono'>type=\"…\"</font> restricts a term to one n-site group type, and without it "
         "<font face='Mono'>#</font> in parameter names is replaced by the type (K# → K0, K1, …). Fermion signs "
         "follow the operator order as written. The SITEBASIS and BASIS at the top of model.xml are the usual "
         "fermion ones; only the HAMILTONIAN is shown.", P),
@@ -361,9 +361,9 @@ story += [table(rows, widths=[0.7 * inch, 1.6 * inch, 1.0 * inch, 1.1 * inch, 1.
 n_entries = len(d5["entries"])
 story += [
     PageBreak(),
-    Paragraph("Step 5 — The plaquette's local table (NSiteOperator::matrix)", H1),
+    Paragraph("Step 5 — The n-site group's local table (NSiteOperator::matrix)", H1),
     Paragraph(
-        "ALPS first turns the term string into a table on the 4 plaquette sites alone, indexed by tuples of "
+        "ALPS first turns the term string into a table on the 4 n-site group sites alone, indexed by tuples of "
         "local states in role order (i, j, k, l): 4<super>4</super> = 256 input tuples. Each product in the term "
         "is split once into a number times one operator string per role, "
         "O<sub>i</sub> O<sub>j</sub> O<sub>k</sub> O<sub>l</sub>: the site operators are read right to left, and "
@@ -371,9 +371,9 @@ story += [
         "Each O<sub>r</sub> becomes a 4×4 single-site matrix. A row of the table is the product of these, "
         "assembled the first time the fill (Step 6) asks for it, so only rows that basis states reach are built. "
         f"Of the 256 × 256 entries only <b>{n_entries}</b> are nonzero. "
-        "Signs between the plaquette and the rest of the lattice are <i>not</i> in the table; they are added in "
-        "Step 6, as for bond terms. The table depends only on the plaquette type and its site types, so it is "
-        "built once and reused on every plaquette of the lattice.", P),
+        "Signs between the n-site group and the rest of the lattice are <i>not</i> in the table; they are added in "
+        "Step 6, as for bond terms. The table depends only on the n-site group type and its site types, so it is "
+        "built once and reused on every n-site group of the lattice.", P),
     Paragraph(
         "Below: the 16 entries for the first half, K c†<sub>l↑</sub> c†<sub>k↓</sub> c<sub>j↓</sub> "
         "c<sub>i↑</sub>, in units of K. The other 16 (the Hermitian conjugate) are the same with input and "
@@ -393,12 +393,12 @@ story += [table(rows, widths=[0.8 * inch, 0.9 * inch, 0.85 * inch, 0.9 * inch, 0
 col = INDEX[(2, 1, 0, 0)]
 row, v, val, lines, b = TRACE[0]
 assert row == INDEX[(0, 0, 2, 1)] and abs(H5[row, col] - K * val) < 1e-14
-trace = [f"column {col} = {ket(STATES[col])}  (picture {picture(STATES[col])}),  plaquette tuple (i j k l) = "
-         f"{' '.join(str(STATES[col][p]) for p in PLAQ)}",
+trace = [f"column {col} = {ket(STATES[col])}  (picture {picture(STATES[col])}),  n-site group tuple (i j k l) = "
+         f"{' '.join(str(STATES[col][p]) for p in GROUP)}",
          f"table entry -> output tuple {' '.join(map(str, b))}, value {v:+g} K",
          "operators in role order, applied last role first:"]
 for r, s, li, lo, nb, fixes, before in lines:
-    fx = "".join(f" (+1: role {'ijkl'[PLAQ.index(x)]} already applied on site {x})" for x in fixes)
+    fx = "".join(f" (+1: role {'ijkl'[GROUP.index(x)]} already applied on site {x})" for x in fixes)
     trace.append(f"  role {'ijkl'[r]} = site {s}: {li} -> {lo}   fermions on sites < {s}: {nb}{fx}"
                  f"  -> {'odd, -1' if before else 'even, +1'}")
 trace.append(f"result: sign {'-' if val * v < 0 else '+'}1, row {row} = {ket(STATES[row])},  "
@@ -406,7 +406,7 @@ trace.append(f"result: sign {'-' if val * v < 0 else '+'}1, row {row} = {ket(STA
 story += [
     Paragraph("Step 6 — Fill the many-body matrix (hamiltonian_matrix::apply_operator)", H1),
     Paragraph(
-        "For every basis state, ALPS reads the local states on the plaquette's sites (in role order), looks up "
+        "For every basis state, ALPS reads the local states on the n-site group's sites (in role order), looks up "
         "that row of the table, and writes each output tuple back into the state to get the target basis state. "
         "The only extra ingredient is the Jordan–Wigner sign of each odd operator O<sub>r</sub>: "
         "(−1)<super>n</super>, where n is the number of fermions on sites before site(r), counted in the state as "
@@ -429,7 +429,7 @@ story += [
     Paragraph("Step 7 — The full 16 × 16 Hamiltonian, as ALPS builds it", H1),
     Paragraph(
         "Rows and columns use the ALPS basis of Step 4. Yellow: U on doubly occupied sites (site terms). "
-        "Orange: the K term (plaquette term). Everything else: hopping (bond terms), whose ± sign comes from "
+        "Orange: the K term (n-site term). Everything else: hopping (bond terms), whose ± sign comes from "
         "the same Jordan–Wigner rule.", P),
     matrix_table(H5, marks),
     Spacer(1, 6),
@@ -443,7 +443,7 @@ story += [
 # ---- Step 8 benchmarks
 res = os.path.join(DOCS, "benchmarks", "results")
 casci = read(res, "casci_vs_alps.txt").splitlines()
-crow = [["molecule", "sector\n(N↑,N↓)", "plaquettes\n2/3/4-site", "QDK CASCI", "ALPS ED", "|ΔE|", "spectrum\nvs dense JW"]]
+crow = [["molecule", "sector\n(N↑,N↓)", "n-site groups\n2/3/4-site", "QDK CASCI", "ALPS ED", "|ΔE|", "spectrum\nvs dense JW"]]
 for line in casci:
     m = re.match(r"(.{30})\s*(\(\d,\d\))\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)", line)
     if m:
@@ -464,8 +464,8 @@ story += [
     Paragraph(
         "<b>(a) Molecules: ALPS ED vs QDK CASCI, full (pq|rs).</b> A molecular Hamiltonian's two-body part "
         "touches 3 and 4 distinct orbitals, so before this change it could not be written for ALPS without "
-        "truncation. Now every orbital set touched by a nonzero (pq|rs) becomes a &lt;PLAQUETTE&gt; with its own "
-        "&lt;PLAQUETTETERM&gt;. All orbitals active, STO-3G. The last column compares the whole spectrum with a "
+        "truncation. Now every orbital set touched by a nonzero (pq|rs) becomes an &lt;NSITE&gt; with its own "
+        "&lt;NSITETERM&gt;. All orbitals active, STO-3G. The last column compares the whole spectrum with a "
         "dense Jordan–Wigner diagonalization of the same integrals (numpy, independent of both codes). "
         f"Result: <b>{verdict}</b>.", P),
     table(crow, widths=[1.55 * inch, 0.6 * inch, 0.75 * inch, 1.0 * inch, 1.0 * inch, 0.55 * inch, 0.75 * inch], fs=7),
@@ -473,22 +473,22 @@ story += [
     Paragraph(
         "<b>(b) Exact answer on 4 sites.</b> Open 4-site chain plus U on one delocalized "
         "hopping eigenmode a = Σ φ<sub>i</sub> c<sub>i</sub>: H = −t Σ hop + U n<sub>a↑</sub> n<sub>a↓</sub>. "
-        "Written in the site basis, the U term is one PLAQUETTETERM with 1-, 2-, 3- and 4-site pieces. The "
+        "Written in the site basis, the U term is one NSITETERM with 1-, 2-, 3- and 4-site pieces. The "
         "spectrum is known exactly: Σ ε<sub>occupied</sub> + U·[mode a doubly occupied]. Checked for two modes, "
         "three role orderings and five sectors. A term that changes N by 4 is checked in the full 256-state space "
         "against a dense matrix, and with N↑, N↓ conserved it is refused. "
         f"{count('t2_analytic.txt', 'max.dE')} runs; {last_line('t2_analytic.txt')}.", P),
     Paragraph(
-        "<b>(c) Ladders vs the prototype.</b> 2×L Hubbard ladders with a pair-hopping plaquette term, open and "
+        "<b>(c) Ladders vs the prototype.</b> 2×L Hubbard ladders with a pair-hopping n-site term, open and "
         f"periodic, several sectors: {last_line('t1_ladder.txt')}.", P),
     Paragraph(
-        "<b>(d) Random two-body terms</b> on 2- and 3-site plaquettes, all index patterns, with interleaved site "
+        "<b>(d) Random two-body terms</b> on 2- and 3-site groups, all index patterns, with interleaved site "
         f"orders, vs a dense Jordan–Wigner matrix: {last_line('t5_interleaved.txt')}.", P),
     Paragraph(
         "<b>(e) Bosonic Moore–Read state: a 3-body term, 6 operators.</b> Bosons in the lowest Landau level on a "
         "sphere with 2S flux; the orbitals are the sites. The 3-body contact interaction "
         "H = Σ<sub>M</sub> T<sub>M</sub><super>†</super> T<sub>M</sub> projects every triple onto total angular "
-        "momentum 3S, and is written as one PLAQUETTETERM over all orbitals (strings like "
+        "momentum 3S, and is written as one NSITETERM over all orbitals (strings like "
         "b†<sub>0</sub>b†<sub>0</sub>b†<sub>2</sub>b<sub>1</sub>b<sub>1</sub>b<sub>1</sub>). The spectrum is "
         "compared with a dense reference; the number of zero modes with the number of patterns with at most 2 bosons "
         "in any 2 neighbouring orbitals (Bernevig–Haldane). At 2S = N − 2 the zero mode is unique: the Moore–Read "
@@ -499,8 +499,8 @@ story += [
           widths=[0.4 * inch, 0.4 * inch, 0.6 * inch, 1.2 * inch, 0.85 * inch, 0.85 * inch, 0.8 * inch], fs=7),
     Spacer(1, 6),
     Paragraph(
-        "<b>(f) Unit tests.</b> src/alps/model/tests/nsite_terms.cpp (GoogleTest): unit-cell plaquettes at open and "
-        "periodic boundaries, GRAPH plaquettes, invalid plaquettes, ladder reference energies, K = 0 equals the "
+        "<b>(f) Unit tests.</b> src/alps/model/tests/nsite_terms.cpp (GoogleTest): unit-cell n-site groups at open and "
+        "periodic boundaries, GRAPH n-site groups, invalid n-site groups, ladder reference energies, K = 0 equals the "
         "plain model, the analytic case above, sector violation, typed and # terms, parameter precision, the "
         "refusal in other applications, and bosons: N-conserving and non-conserving terms vs a dense reference, "
         "truncation at Nmax and its warning. Full ctest: 936/936 pass.", P),
@@ -512,19 +512,19 @@ story += [
     Paragraph("Step 9 — What changed in ALPS", H1),
     table([
         ["file", "change"],
-        ["lattice/plaquette.h (new)", "plaquette {type, sites}; reading <PLAQUETTE> in GRAPH and UNITCELL"],
-        ["lattice/graph.h, latticelibrary.h/.C", "GRAPH accepts <PLAQUETTE>; the library keeps them per graph"],
-        ["lattice/unitcell.h/.C", "UNITCELL accepts <PLAQUETTE> (vertex + offset), and writes it back"],
-        ["lattice/latticegraph.h", "unit-cell plaquettes repeated over the lattice, same boundary rules as edges"],
-        ["lattice/graph_helper.h", "plaquettes(), num_plaquettes()"],
+        ["lattice/nsite_group.h (new)", "n-site group {type, sites}; reading <NSITE> in GRAPH and UNITCELL"],
+        ["lattice/graph.h, latticelibrary.h/.C", "GRAPH accepts <NSITE>; the library keeps them per graph"],
+        ["lattice/unitcell.h/.C", "UNITCELL accepts <NSITE> (vertex + offset), and writes it back"],
+        ["lattice/latticegraph.h", "unit-cell n-site groups repeated over the lattice, same boundary rules as edges"],
+        ["lattice/graph_helper.h", "nsite_groups(), num_nsite_groups()"],
         ["model/nsiteoperator.h (new)", "NSiteOperator, the splitter into per-site operators with the sign, the local table"],
-        ["model/nsiteterm.C (new)", "read/write <PLAQUETTETERM>"],
-        ["model/globaloperator.h/.C, default_term.h", "HAMILTONIAN holds plaquette terms (typed and #)"],
-        ["model/hamiltonian_matrix.hpp", "plaquette loop: local table per type, Jordan–Wigner fill, sector check"],
-        ["model/model_helper.h", "applications without support refuse plaquette terms instead of dropping them"],
+        ["model/nsiteterm.C (new)", "read/write <NSITETERM>"],
+        ["model/globaloperator.h/.C, default_term.h", "HAMILTONIAN holds n-site terms (typed and #)"],
+        ["model/hamiltonian_matrix.hpp", "n-site group loop: local table per type, Jordan–Wigner fill, sector check"],
+        ["model/model_helper.h", "applications without support refuse n-site terms instead of dropping them"],
         ["model/siteterm.C, bondterm.C", "fix: parameters were rounded to 6 digits (see below)"],
         ["model/tests/nsite_terms.cpp (new)", "unit tests"],
-        ["CHANGELOG.md, model/docs/", "changelog entry, syntax reference (plaquette_terms.md), this folder"],
+        ["CHANGELOG.md, model/docs/", "changelog entry, syntax reference (nsite_terms.md), this folder"],
     ], widths=[2.4 * inch, 4.6 * inch], fs=7.5, align="LEFT"),
     Spacer(1, 6),
     Paragraph(
@@ -534,14 +534,14 @@ story += [
         "with full double precision. Inputs with short parameter values (t = 1, U = 4, …) give bit-identical "
         "results; longer values are now used exactly as given.", P),
     Paragraph(
-        "<b>Limits.</b> Only exact diagonalization supports plaquette terms for now; DMRG and the QMC codes "
-        "refuse them. Plaquettes in a &lt;GRAPH&gt; are not "
+        "<b>Limits.</b> Only exact diagonalization supports n-site terms for now; DMRG and the QMC codes "
+        "refuse them. N-site groups in a &lt;GRAPH&gt; are not "
         "yet written back out when ALPS writes a lattice library to XML.", P),
 ]
 
 # ---- appendix
 src = read(REPO, "src/alps/model/include/alps/model/hamiltonian_matrix.hpp")
-a = src.index("// Fill one n-site term on plaquette p.")
+a = src.index("// Fill one n-site term on n-site group p.")
 b = src.index("template <class M, class G> template <class STATES, class V, class W>\nvoid hamiltonian_matrix<M,G>::apply_operator(const STATES& states, const SiteOperator& op")
 story += [
     PageBreak(),
@@ -571,6 +571,6 @@ def footer(canvas, doc):
 out = os.path.join(DOCS, "ALPS_n_body_terms.pdf")
 SimpleDocTemplate(out, pagesize=letter, leftMargin=0.6 * inch, rightMargin=0.6 * inch,
                   topMargin=0.55 * inch, bottomMargin=0.65 * inch,
-                  title="n-body (plaquette) terms in ALPS, step by step").build(
+                  title="n-body (n-site) terms in ALPS, step by step").build(
     story, onFirstPage=footer, onLaterPages=footer)
 print("wrote", out)

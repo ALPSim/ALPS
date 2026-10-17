@@ -5,8 +5,8 @@
 
 compare_ed.py covers lattice models, whose two-body part fits SITETERM and
 BONDTERM. A molecular Hamiltonian does not: its (pq|rs) touches 3 and 4
-distinct orbitals. qdk2alps now emits those as <PLAQUETTE>s plus
-<PLAQUETTETERM>s, with nothing dropped, so ALPS ED must reproduce CASCI.
+distinct orbitals. qdk2alps now emits those as <NSITE>s plus
+<NSITETERM>s, with nothing dropped, so ALPS ED must reproduce CASCI.
 
 Each case: SCF -> MO integrals (all orbitals active) -> one Hamiltonian ->
 QDK macis_cas and ALPS fulldiag. A third column diagonalises the same
@@ -23,7 +23,7 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import qdk_alps_ed                                    # noqa: E402,F401  registers alps_ed
-from qdk2alps import GENERAL_MODEL, former_for, plaquette_groups  # noqa: E402
+from qdk2alps import GENERAL_MODEL, former_for, nsite_groups  # noqa: E402
 from qdk_chemistry.algorithms import create            # noqa: E402
 from qdk_chemistry.data import Element, Structure      # noqa: E402
 
@@ -108,7 +108,7 @@ def main():
     for label, ham, sectors in cases():
         h1 = np.asarray(ham.get_one_body_integrals()[0])
         model, _ = former_for(ham, h1)
-        groups = plaquette_groups(ham, h1.shape[0])
+        groups = nsite_groups(ham, h1.shape[0])
         sizes = [sum(len(k) == m for k in groups) for m in (2, 3, 4)]
         for na, nb in sectors:
             e_qdk, _ = casci.run(ham, na, nb)

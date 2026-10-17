@@ -9,7 +9,7 @@
 *
 *****************************************************************************/
 
-// n-site terms: <PLAQUETTE> in lattices, <PLAQUETTETERM> in models, and their
+// n-site terms: <NSITE> in lattices, <NSITETERM> in models, and their
 // contribution to hamiltonian_matrix.
 //
 // Reference energies: the ladder values come from an independent Python
@@ -66,10 +66,10 @@ const char* ladder_cell = R"(
   <EDGE type="1"><SOURCE vertex="1" offset="0"/><TARGET vertex="2" offset="0"/></EDGE>
   <EDGE type="0"><SOURCE vertex="1" offset="0"/><TARGET vertex="1" offset="1"/></EDGE>
   <EDGE type="0"><SOURCE vertex="2" offset="0"/><TARGET vertex="2" offset="1"/></EDGE>
-  <PLAQUETTE type="0">
+  <NSITE type="0">
     <SITE vertex="1" offset="0"/><SITE vertex="2" offset="0"/>
     <SITE vertex="2" offset="1"/><SITE vertex="1" offset="1"/>
-  </PLAQUETTE>
+  </NSITE>
 </UNITCELL>
 <LATTICEGRAPH name="open ladder">
   <FINITELATTICE><LATTICE ref="chain lattice"/><EXTENT dimension="1" size="L"/>
@@ -107,13 +107,13 @@ struct Files {
   }
 };
 
-std::string hubbard_model(const std::string& name, const std::string& plaquette_term) {
+std::string hubbard_model(const std::string& name, const std::string& nsite_term) {
   return "<HAMILTONIAN name=\"" + name + "\">"
          "<PARAMETER name=\"t\" default=\"1\"/><PARAMETER name=\"U\" default=\"0\"/>"
          "<PARAMETER name=\"K\" default=\"0\"/><BASIS ref=\"fermion\"/>"
          "<SITETERM site=\"i\">U*n_up(i)*n_down(i)</SITETERM>"
          "<BONDTERM source=\"i\" target=\"j\">" + std::string(hop) + "</BONDTERM>"
-         + plaquette_term + "</HAMILTONIAN>";
+         + nsite_term + "</HAMILTONIAN>";
 }
 
 // Eigenvalues of a small real symmetric matrix (cyclic Jacobi).
@@ -174,23 +174,23 @@ alps::Parameters sector(alps::Parameters p, int nup, int ndown) {
 
 } // namespace
 
-TEST(NSiteLattice, UnitCellPlaquettesFollowBoundaries) {
+TEST(NSiteLattice, UnitCellNSiteGroupsFollowBoundaries) {
   Files f(ladder_cell, "");
   alps::Parameters p = f.parms();
   p["L"] = 3;
   p["LATTICE"] = "open ladder";
   alps::graph_helper<> open(p);
-  ASSERT_EQ(open.num_plaquettes(), 2u);   // the plaquette leaving the lattice is dropped
-  EXPECT_EQ(open.plaquettes()[0].sites, (std::vector<std::size_t>{0, 1, 3, 2}));
-  EXPECT_EQ(open.plaquettes()[1].sites, (std::vector<std::size_t>{2, 3, 5, 4}));
+  ASSERT_EQ(open.num_nsite_groups(), 2u);   // the n-site group leaving the lattice is dropped
+  EXPECT_EQ(open.nsite_groups()[0].sites, (std::vector<std::size_t>{0, 1, 3, 2}));
+  EXPECT_EQ(open.nsite_groups()[1].sites, (std::vector<std::size_t>{2, 3, 5, 4}));
   p["LATTICE"] = "periodic ladder";
   alps::graph_helper<> periodic(p);
-  ASSERT_EQ(periodic.num_plaquettes(), 3u);
-  EXPECT_EQ(periodic.plaquettes()[2].sites, (std::vector<std::size_t>{4, 5, 1, 0}));
+  ASSERT_EQ(periodic.num_nsite_groups(), 3u);
+  EXPECT_EQ(periodic.nsite_groups()[2].sites, (std::vector<std::size_t>{4, 5, 1, 0}));
   EXPECT_EQ(periodic.num_bonds(), 9u);    // the bonds are unchanged
 }
 
-TEST(NSiteLattice, PeriodicPlaquetteOnTooSmallLatticeThrows) {
+TEST(NSiteLattice, PeriodicNSiteGroupOnTooSmallLatticeThrows) {
   Files f(ladder_cell, "");
   alps::Parameters p = f.parms();
   p["L"] = 1;
@@ -198,21 +198,21 @@ TEST(NSiteLattice, PeriodicPlaquetteOnTooSmallLatticeThrows) {
   EXPECT_THROW(alps::graph_helper<> g(p), std::runtime_error);
 }
 
-TEST(NSiteLattice, GraphPlaquettes) {
+TEST(NSiteLattice, GraphNSiteGroups) {
   Files f("<GRAPH name=\"g\" vertices=\"3\"><EDGE source=\"1\" target=\"2\"/>"
-          "<PLAQUETTE type=\"2\"><SITE id=\"3\"/><SITE id=\"1\"/><SITE id=\"2\"/></PLAQUETTE></GRAPH>", "");
+          "<NSITE type=\"2\"><SITE id=\"3\"/><SITE id=\"1\"/><SITE id=\"2\"/></NSITE></GRAPH>", "");
   alps::Parameters p = f.parms();
   p["GRAPH"] = "g";
   alps::graph_helper<> g(p);
-  ASSERT_EQ(g.num_plaquettes(), 1u);
-  EXPECT_EQ(g.plaquettes()[0].type, 2u);
-  EXPECT_EQ(g.plaquettes()[0].sites, (std::vector<std::size_t>{2, 0, 1}));
+  ASSERT_EQ(g.num_nsite_groups(), 1u);
+  EXPECT_EQ(g.nsite_groups()[0].type, 2u);
+  EXPECT_EQ(g.nsite_groups()[0].sites, (std::vector<std::size_t>{2, 0, 1}));
 }
 
-TEST(NSiteLattice, GraphPlaquettesSurviveLibraryRoundTrip) {
+TEST(NSiteLattice, GraphNSiteGroupsSurviveLibraryRoundTrip) {
   Files f("<GRAPH name=\"g\" vertices=\"3\"><EDGE source=\"1\" target=\"2\"/>"
-          "<PLAQUETTE type=\"2\"><SITE id=\"3\"/><SITE id=\"1\"/><SITE id=\"2\"/></PLAQUETTE>"
-          "<PLAQUETTE><SITE id=\"2\"/><SITE id=\"3\"/></PLAQUETTE></GRAPH>", "");
+          "<NSITE type=\"2\"><SITE id=\"3\"/><SITE id=\"1\"/><SITE id=\"2\"/></NSITE>"
+          "<NSITE><SITE id=\"2\"/><SITE id=\"3\"/></NSITE></GRAPH>", "");
   alps::LatticeLibrary lib(f.parms());
   std::ostringstream out;
   {
@@ -222,7 +222,7 @@ TEST(NSiteLattice, GraphPlaquettesSurviveLibraryRoundTrip) {
   std::istringstream in(out.str());
   alps::LatticeLibrary reread;
   reread.read_xml(in);
-  const alps::plaquette_list& p = reread.graph_plaquettes("g");
+  const alps::nsite_group_list& p = reread.graph_nsite_groups("g");
   ASSERT_EQ(p.size(), 2u);
   EXPECT_EQ(p[0].type, 2u);
   EXPECT_EQ(p[0].sites, (std::vector<std::size_t>{2, 0, 1}));
@@ -230,8 +230,8 @@ TEST(NSiteLattice, GraphPlaquettesSurviveLibraryRoundTrip) {
   EXPECT_EQ(p[1].sites, (std::vector<std::size_t>{1, 2}));
 }
 
-TEST(NSiteLattice, GraphPlaquetteWithRepeatedSiteThrows) {
-  Files f("<GRAPH name=\"bad\" vertices=\"2\"><PLAQUETTE><SITE id=\"1\"/><SITE id=\"1\"/></PLAQUETTE></GRAPH>", "");
+TEST(NSiteLattice, GraphNSiteGroupWithRepeatedSiteThrows) {
+  Files f("<GRAPH name=\"bad\" vertices=\"2\"><NSITE><SITE id=\"1\"/><SITE id=\"1\"/></NSITE></GRAPH>", "");
   alps::Parameters p = f.parms();
   p["GRAPH"] = "bad";
   EXPECT_THROW(alps::graph_helper<> g(p), std::runtime_error);
@@ -245,7 +245,7 @@ TEST(NSiteHamiltonian, LadderPairHoppingMatchesReference) {
     {"periodic ladder", 3, 0.9, 3, 2, -5.0117188128},
   };
   Files f(ladder_cell, hubbard_model("pair hopping",
-          "<PLAQUETTETERM sites=\"i j k l\">" + std::string(pair_hop) + "</PLAQUETTETERM>"));
+          "<NSITETERM sites=\"i j k l\">" + std::string(pair_hop) + "</NSITETERM>"));
   for (const Case& c : cases) {
     alps::Parameters p = sector(f.parms(), c.nup, c.ndown);
     p["LATTICE"] = c.lattice; p["L"] = c.L; p["MODEL"] = "pair hopping";
@@ -255,7 +255,7 @@ TEST(NSiteHamiltonian, LadderPairHoppingMatchesReference) {
 }
 
 TEST(NSiteHamiltonian, ZeroCouplingReproducesSiteAndBondModel) {
-  Files f(ladder_cell, hubbard_model("with K", "<PLAQUETTETERM sites=\"i j k l\">" + std::string(pair_hop) + "</PLAQUETTETERM>")
+  Files f(ladder_cell, hubbard_model("with K", "<NSITETERM sites=\"i j k l\">" + std::string(pair_hop) + "</NSITETERM>")
                        + hubbard_model("without K", ""));
   alps::Parameters p = sector(f.parms(), 2, 1);
   p["LATTICE"] = "open ladder"; p["L"] = 3; p["U"] = 4.0; p["K"] = 0.0;
@@ -272,7 +272,7 @@ TEST(NSiteHamiltonian, ZeroCouplingReproducesSiteAndBondModel) {
 // a = sum_i phi_i c_i. In the site basis this is one 4-site term with pieces on
 // 1, 2, 3 and 4 distinct sites; the spectrum is
 //   sum of occupied mode energies + U [mode a occupied by both spins].
-// The plaquette lists the sites in a scrambled order to exercise the signs.
+// The n-site group lists the sites in a scrambled order to exercise the signs.
 TEST(NSiteHamiltonian, InteractionOnDelocalizedModeIsAnalytic) {
   const int L = 4, ka = 1;
   const double U = 3.7, pi = std::acos(-1.0);
@@ -295,14 +295,14 @@ TEST(NSiteHamiltonian, InteractionOnDelocalizedModeIsAnalytic) {
   graph << "<GRAPH name=\"chain4\" vertices=\"4\">";
   for (int i = 1; i < L; ++i)
     graph << "<EDGE source=\"" << i << "\" target=\"" << i + 1 << "\"/>";
-  graph << "<PLAQUETTE>";
+  graph << "<NSITE>";
   for (int s : order)
     graph << "<SITE id=\"" << s + 1 << "\"/>";
-  graph << "</PLAQUETTE></GRAPH>";
+  graph << "</NSITE></GRAPH>";
   Files f(graph.str(), "<HAMILTONIAN name=\"mode U\"><PARAMETER name=\"t\" default=\"1\"/>"
           "<PARAMETER name=\"U\" default=\"0\"/><BASIS ref=\"fermion\"/>"
           "<BONDTERM source=\"i\" target=\"j\">" + std::string(hop) + "</BONDTERM>"
-          "<PLAQUETTETERM sites=\"i j k l\">" + term + "</PLAQUETTETERM></HAMILTONIAN>");
+          "<NSITETERM sites=\"i j k l\">" + term + "</NSITETERM></HAMILTONIAN>");
   for (auto [nup, ndown] : std::vector<std::pair<int, int> >{{2, 1}, {3, 2}}) {
     std::vector<double> expected;
     for (int up = 0; up < (1 << L); ++up)
@@ -325,10 +325,10 @@ TEST(NSiteHamiltonian, InteractionOnDelocalizedModeIsAnalytic) {
 }
 
 TEST(NSiteHamiltonian, TermLeavingTheSectorThrows) {
-  Files f("<GRAPH name=\"g\" vertices=\"4\"><PLAQUETTE><SITE id=\"1\"/><SITE id=\"2\"/><SITE id=\"3\"/><SITE id=\"4\"/></PLAQUETTE></GRAPH>",
-          "<HAMILTONIAN name=\"pairing\"><BASIS ref=\"fermion\"/><PLAQUETTETERM sites=\"i j k l\">"
+  Files f("<GRAPH name=\"g\" vertices=\"4\"><NSITE><SITE id=\"1\"/><SITE id=\"2\"/><SITE id=\"3\"/><SITE id=\"4\"/></NSITE></GRAPH>",
+          "<HAMILTONIAN name=\"pairing\"><BASIS ref=\"fermion\"/><NSITETERM sites=\"i j k l\">"
           "cdag_up(i)*cdag_down(j)*cdag_up(k)*cdag_down(l) + c_down(l)*c_up(k)*c_down(j)*c_up(i)"
-          "</PLAQUETTETERM></HAMILTONIAN>");
+          "</NSITETERM></HAMILTONIAN>");
   alps::Parameters p = f.parms();
   p["GRAPH"] = "g"; p["MODEL"] = "pairing";
   p["CONSERVED_QUANTUMNUMBERS"] = "";
@@ -337,7 +337,7 @@ TEST(NSiteHamiltonian, TermLeavingTheSectorThrows) {
   EXPECT_THROW(spectrum(q), std::runtime_error);
 }
 
-// Site, bond and plaquette terms that change a quantum number fixed by the
+// Site, bond and n-site terms that change a quantum number fixed by the
 // sector stop the run, with or without momentum sectors. Elements leaving the
 // sector used to be dropped silently, which removed the pairing from the
 // spectrum.
@@ -376,22 +376,22 @@ TEST(SectorCheck, NonConservingSiteTermThrows) {
   EXPECT_NE(build_error(sector(p, 2, 1)).find("<SITETERM>"), std::string::npos);
 }
 
-TEST(SectorCheck, NonConservingPlaquetteTermThrowsInMomentumSectors) {
-  Files f(ladder_cell, hubbard_model("plaquette pairing", "<PLAQUETTETERM sites=\"i j k l\">"
+TEST(SectorCheck, NonConservingNSiteTermThrowsInMomentumSectors) {
+  Files f(ladder_cell, hubbard_model("n-site pairing", "<NSITETERM sites=\"i j k l\">"
           "0.25*(cdag_up(i)*cdag_down(k)*cdag_up(l)*c_up(j) + cdag_up(j)*c_up(l)*c_down(k)*c_up(i))"
-          "</PLAQUETTETERM>"));
+          "</NSITETERM>"));
   alps::Parameters p = sector(f.parms(), 3, 3);
-  p["LATTICE"] = "periodic ladder"; p["L"] = 3; p["MODEL"] = "plaquette pairing";
+  p["LATTICE"] = "periodic ladder"; p["L"] = 3; p["MODEL"] = "n-site pairing";
   for (const char* k : {"0", "2.0943951023931953"}) {
     p["TOTAL_MOMENTUM"] = k;
-    EXPECT_NE(build_error(p).find("<PLAQUETTETERM>"), std::string::npos) << "k=" << k;
+    EXPECT_NE(build_error(p).find("<NSITETERM>"), std::string::npos) << "k=" << k;
   }
 }
 
 TEST(SectorCheck, ConservingTermsInMomentumSectorsDoNotThrow) {
   // momentum sectors drop states whose orbit has zero norm; that is not an error
   Files f(ladder_cell, hubbard_model("pair hopping",
-          "<PLAQUETTETERM sites=\"i j k l\">" + std::string(pair_hop) + "</PLAQUETTETERM>"));
+          "<NSITETERM sites=\"i j k l\">" + std::string(pair_hop) + "</NSITETERM>"));
   alps::Parameters p = sector(f.parms(), 3, 2);
   p["LATTICE"] = "periodic ladder"; p["L"] = 3; p["MODEL"] = "pair hopping";
   p["U"] = 8.0; p["K"] = 0.9;
@@ -416,7 +416,7 @@ TEST(SectorCheck, MeasuringANonConservingOperatorGivesZero) {
 }
 
 TEST(NSiteHamiltonian, TableIndexOverflowThrows) {
-  // The local table keys each configuration of the plaquette's sites by one
+  // The local table keys each configuration of the n-site group's sites by one
   // std::size_t; with 32 fermion sites (4^32 = 2^64) it would wrap.
   Files f("", "");
   alps::ModelLibrary lib(f.parms());
@@ -442,12 +442,12 @@ TEST(NSiteHamiltonian, DenseMatrixSizeOverflowThrows) {
 }
 
 TEST(NSiteHamiltonian, TypedAndDefaultTerms) {
-  // Two plaquette types; '#' in the untyped term resolves per type.
+  // Two n-site group types; '#' in the untyped term resolves per type.
   Files f("<GRAPH name=\"g\" vertices=\"3\">"
-          "<PLAQUETTE type=\"0\"><SITE id=\"1\"/><SITE id=\"2\"/></PLAQUETTE>"
-          "<PLAQUETTE type=\"1\"><SITE id=\"2\"/><SITE id=\"3\"/></PLAQUETTE></GRAPH>",
+          "<NSITE type=\"0\"><SITE id=\"1\"/><SITE id=\"2\"/></NSITE>"
+          "<NSITE type=\"1\"><SITE id=\"2\"/><SITE id=\"3\"/></NSITE></GRAPH>",
           "<HAMILTONIAN name=\"typed\"><BASIS ref=\"fermion\"/>"
-          "<PLAQUETTETERM sites=\"a b\"><PARAMETER name=\"V#\" default=\"0\"/>V#*n(a)*n(b)</PLAQUETTETERM>"
+          "<NSITETERM sites=\"a b\"><PARAMETER name=\"V#\" default=\"0\"/>V#*n(a)*n(b)</NSITETERM>"
           "</HAMILTONIAN>");
   alps::Parameters p = sector(f.parms(), 3, 0);
   p["GRAPH"] = "g"; p["MODEL"] = "typed"; p["V0"] = 0.25; p["V1"] = 2.0;
@@ -457,9 +457,9 @@ TEST(NSiteHamiltonian, TypedAndDefaultTerms) {
 }
 
 TEST(NSiteHamiltonian, TypedTermKeepsItsParameterDefaults) {
-  Files f("<GRAPH name=\"g\" vertices=\"2\"><PLAQUETTE><SITE id=\"1\"/><SITE id=\"2\"/></PLAQUETTE></GRAPH>",
+  Files f("<GRAPH name=\"g\" vertices=\"2\"><NSITE><SITE id=\"1\"/><SITE id=\"2\"/></NSITE></GRAPH>",
           "<HAMILTONIAN name=\"typed\"><BASIS ref=\"fermion\"/>"
-          "<PLAQUETTETERM type=\"0\" sites=\"a b\"><PARAMETER name=\"K\" default=\"0.7\"/>K*n(a)*n(b)</PLAQUETTETERM>"
+          "<NSITETERM type=\"0\" sites=\"a b\"><PARAMETER name=\"K\" default=\"0.7\"/>K*n(a)*n(b)</NSITETERM>"
           "</HAMILTONIAN>");
   alps::Parameters p = sector(f.parms(), 2, 0);
   p["GRAPH"] = "g"; p["MODEL"] = "typed";
@@ -471,13 +471,13 @@ TEST(NSiteHamiltonian, TypedTermKeepsItsParameterDefaults) {
 // The splitter replaces each site operator by a sign, so n(a)^2 used to act
 // as n(a), and sqrt(n(a)) as n(a).
 TEST(NSiteHamiltonian, PowersAndFunctionsOfSiteOperatorsThrow) {
-  const char* g = "<GRAPH name=\"g\" vertices=\"2\"><PLAQUETTE><SITE id=\"1\"/><SITE id=\"2\"/></PLAQUETTE></GRAPH>";
+  const char* g = "<GRAPH name=\"g\" vertices=\"2\"><NSITE><SITE id=\"1\"/><SITE id=\"2\"/></NSITE></GRAPH>";
   Files f(g, "<HAMILTONIAN name=\"product\"><BASIS ref=\"fermion\"/>"
-             "<PLAQUETTETERM sites=\"a b\">n(a)*n(a)*n(b)</PLAQUETTETERM></HAMILTONIAN>"
+             "<NSITETERM sites=\"a b\">n(a)*n(a)*n(b)</NSITETERM></HAMILTONIAN>"
              "<HAMILTONIAN name=\"power\"><BASIS ref=\"fermion\"/>"
-             "<PLAQUETTETERM sites=\"a b\">n(a)^2*n(b)</PLAQUETTETERM></HAMILTONIAN>"
+             "<NSITETERM sites=\"a b\">n(a)^2*n(b)</NSITETERM></HAMILTONIAN>"
              "<HAMILTONIAN name=\"function\"><BASIS ref=\"fermion\"/>"
-             "<PLAQUETTETERM sites=\"a b\">sqrt(n(a))*n(b)</PLAQUETTETERM></HAMILTONIAN>");
+             "<NSITETERM sites=\"a b\">sqrt(n(a))*n(b)</NSITETERM></HAMILTONIAN>");
   alps::Parameters p = sector(f.parms(), 2, 1);   // occupations (2,1) and (1,2)
   p["GRAPH"] = "g"; p["MODEL"] = "product";
   std::vector<double> e = spectrum(p);
@@ -491,16 +491,16 @@ TEST(NSiteHamiltonian, PowersAndFunctionsOfSiteOperatorsThrow) {
 }
 
 TEST(NSiteHamiltonian, ApplyOperatorBuildsTheBasis) {
-  Files f("<GRAPH name=\"g\" vertices=\"2\"><PLAQUETTE><SITE id=\"1\"/><SITE id=\"2\"/></PLAQUETTE></GRAPH>",
+  Files f("<GRAPH name=\"g\" vertices=\"2\"><NSITE><SITE id=\"1\"/><SITE id=\"2\"/></NSITE></GRAPH>",
           "<HAMILTONIAN name=\"m\"><BASIS ref=\"fermion\"/>"
-          "<PLAQUETTETERM sites=\"a b\">n(a)*n(b)</PLAQUETTETERM></HAMILTONIAN>");
+          "<NSITETERM sites=\"a b\">n(a)*n(b)</NSITETERM></HAMILTONIAN>");
   alps::Parameters p = sector(f.parms(), 2, 0);   // one state, n = 1 on both sites
   p["GRAPH"] = "g"; p["MODEL"] = "m";
   alps::hamiltonian_matrix<alps::numeric::matrix<double> > h(p);
-  alps::plaquette plaq;
-  plaq.sites = {0, 1};
+  alps::nsite_group group;
+  group.sites = {0, 1};
   std::vector<double> x(1, 1.), y(1, 0.);
-  h.apply_operator(alps::NSiteOperator("n(a)*n(b)", {"a", "b"}), plaq, x, y);
+  h.apply_operator(alps::NSiteOperator("n(a)*n(b)", {"a", "b"}), group, x, y);
   ASSERT_EQ(h.dimension(), 1u);
   EXPECT_NEAR(y[0], 1., 1e-14);
 }
@@ -508,10 +508,10 @@ TEST(NSiteHamiltonian, ApplyOperatorBuildsTheBasis) {
 TEST(NSiteHamiltonian, ParametersKeepFullPrecision) {
   // Substituted parameters used to be printed with 6 significant digits.
   Files f("<GRAPH name=\"g\" vertices=\"2\"><EDGE source=\"1\" target=\"2\"/>"
-          "<PLAQUETTE><SITE id=\"1\"/><SITE id=\"2\"/></PLAQUETTE></GRAPH>",
+          "<NSITE><SITE id=\"1\"/><SITE id=\"2\"/></NSITE></GRAPH>",
           "<HAMILTONIAN name=\"m\"><PARAMETER name=\"t\" default=\"0\"/><PARAMETER name=\"V\" default=\"0\"/>"
           "<BASIS ref=\"fermion\"/><BONDTERM source=\"i\" target=\"j\">-t*fermion_hop(i,j)</BONDTERM>"
-          "<PLAQUETTETERM sites=\"a b\">V*n(a)*n(b) + 0.123456789123*n_up(a)</PLAQUETTETERM></HAMILTONIAN>");
+          "<NSITETERM sites=\"a b\">V*n(a)*n(b) + 0.123456789123*n_up(a)</NSITETERM></HAMILTONIAN>");
   alps::Parameters p = sector(f.parms(), 1, 0);
   p["GRAPH"] = "g"; p["MODEL"] = "m"; p["t"] = 0.987654321987;
   std::vector<double> e = spectrum(p);
@@ -521,7 +521,7 @@ TEST(NSiteHamiltonian, ParametersKeepFullPrecision) {
 
 TEST(NSiteHamiltonian, ApplicationsWithoutSupportRefuse) {
   Files f(ladder_cell, hubbard_model("pair hopping",
-          "<PLAQUETTETERM sites=\"i j k l\">" + std::string(pair_hop) + "</PLAQUETTETERM>"));
+          "<NSITETERM sites=\"i j k l\">" + std::string(pair_hop) + "</NSITETERM>"));
   alps::Parameters p = f.parms();
   p["LATTICE"] = "open ladder"; p["L"] = 2; p["MODEL"] = "pair hopping";
   alps::graph_helper<> g(p);
@@ -538,10 +538,10 @@ const char* boson_ring =
   "<GRAPH name=\"ring\" vertices=\"4\">"
   "<EDGE source=\"1\" target=\"2\"/><EDGE source=\"2\" target=\"3\"/>"
   "<EDGE source=\"3\" target=\"4\"/><EDGE source=\"4\" target=\"1\"/>"
-  "<PLAQUETTE><SITE id=\"1\"/><SITE id=\"2\"/><SITE id=\"3\"/><SITE id=\"4\"/></PLAQUETTE>"
+  "<NSITE><SITE id=\"1\"/><SITE id=\"2\"/><SITE id=\"3\"/><SITE id=\"4\"/></NSITE>"
   "</GRAPH>";
 
-std::string boson_model(const std::string& name, const std::string& plaquette_term,
+std::string boson_model(const std::string& name, const std::string& nsite_term,
                         const std::string& sites = "i j k l") {
   return "<SITEBASIS name=\"boson\"><PARAMETER name=\"Nmax\" default=\"infinity\"/>"
          "<QUANTUMNUMBER name=\"N\" min=\"0\" max=\"Nmax\"/>"
@@ -554,7 +554,7 @@ std::string boson_model(const std::string& name, const std::string& plaquette_te
          "<PARAMETER name=\"K\" default=\"0\"/><BASIS ref=\"boson\"/>"
          "<SITETERM site=\"i\">U/2*n(i)*(n(i)-1)</SITETERM>"
          "<BONDTERM source=\"i\" target=\"j\">-t*(bdag(i)*b(j)+bdag(j)*b(i))</BONDTERM>"
-         "<PLAQUETTETERM sites=\"" + sites + "\">" + plaquette_term + "</PLAQUETTETERM></HAMILTONIAN>";
+         "<NSITETERM sites=\"" + sites + "\">" + nsite_term + "</NSITETERM></HAMILTONIAN>";
 }
 
 // One product of boson operators: (site, +1 for bdag / -1 for b), leftmost first.
@@ -563,7 +563,7 @@ typedef std::vector<std::pair<int, int> > boson_product;
 // Dense H of a 4-site ring on occupations 0..nmax, restricted to total N
 // = n_total (all states if n_total < 0). Sorted eigenvalues.
 std::vector<double> boson_reference(int nmax, int n_total, double t, double u, double k,
-                                    const std::vector<boson_product>& plaquette) {
+                                    const std::vector<boson_product>& group) {
   const int L = 4, d = nmax + 1;
   std::vector<std::vector<int> > states;
   for (int s = 0; s < d * d * d * d; ++s) {
@@ -599,7 +599,7 @@ std::vector<double> boson_reference(int nmax, int n_total, double t, double u, d
       add(c, -t, {{s, 1}, {(s + 1) % L, -1}});
       add(c, -t, {{(s + 1) % L, 1}, {s, -1}});
     }
-    for (const boson_product& ops : plaquette)
+    for (const boson_product& ops : group)
       add(c, k, ops);
   }
   return eigenvalues(h);
@@ -642,7 +642,7 @@ TEST(NSiteBoson, NonConservingTermIsTruncatedAtNmaxAndWarns) {
     testing::internal::CaptureStderr();
     std::vector<double> e = spectrum(p);
     std::string warning = testing::internal::GetCapturedStderr();
-    EXPECT_NE(warning.find("Warning: a <PLAQUETTETERM> changes the total N"), std::string::npos) << warning;
+    EXPECT_NE(warning.find("Warning: an <NSITETERM> changes the total N"), std::string::npos) << warning;
     EXPECT_NE(warning.find("N <= Nmax = " + std::to_string(nmax)), std::string::npos) << warning;
     std::vector<double> expected = boson_reference(nmax, -1, 1.0, 2.0, 0.7, term);
     ASSERT_EQ(e.size(), expected.size()) << "Nmax " << nmax;
@@ -658,7 +658,7 @@ TEST(NSiteBoson, NonConservingTermIsTruncatedAtNmaxAndWarns) {
 
 TEST(NSiteBoson, EachOperatorIsTruncated) {
   // bdag on N = Nmax is zero, so b*bdag there is 0, not Nmax+1.
-  Files f("<GRAPH name=\"ring\" vertices=\"1\"><PLAQUETTE><SITE id=\"1\"/></PLAQUETTE></GRAPH>",
+  Files f("<GRAPH name=\"ring\" vertices=\"1\"><NSITE><SITE id=\"1\"/></NSITE></GRAPH>",
           boson_model("m", "K*b(i)*bdag(i)", "i"));
   alps::Parameters p = boson_parms(f, 1);
   p["K"] = 1.0;
@@ -731,10 +731,10 @@ TEST(NSiteHamiltonian, SparseSectorOnManySitesIsFast) {
 
 TEST(NSiteBoson, NoCutoffWarningForFermions) {
   // Fermion occupations are bounded by Pauli, not by a cutoff parameter.
-  Files f("<GRAPH name=\"g\" vertices=\"4\"><PLAQUETTE><SITE id=\"1\"/><SITE id=\"2\"/><SITE id=\"3\"/><SITE id=\"4\"/></PLAQUETTE></GRAPH>",
-          "<HAMILTONIAN name=\"pairing\"><BASIS ref=\"fermion\"/><PLAQUETTETERM sites=\"i j k l\">"
+  Files f("<GRAPH name=\"g\" vertices=\"4\"><NSITE><SITE id=\"1\"/><SITE id=\"2\"/><SITE id=\"3\"/><SITE id=\"4\"/></NSITE></GRAPH>",
+          "<HAMILTONIAN name=\"pairing\"><BASIS ref=\"fermion\"/><NSITETERM sites=\"i j k l\">"
           "cdag_up(i)*cdag_down(j)*cdag_up(k)*cdag_down(l) + c_down(l)*c_up(k)*c_down(j)*c_up(i)"
-          "</PLAQUETTETERM></HAMILTONIAN>");
+          "</NSITETERM></HAMILTONIAN>");
   alps::Parameters p = f.parms();
   p["GRAPH"] = "g"; p["MODEL"] = "pairing";
   testing::internal::CaptureStderr();

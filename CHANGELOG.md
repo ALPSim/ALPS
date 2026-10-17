@@ -6,7 +6,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Added
 
-- n-site Hamiltonian terms for exact diagonalization (`fulldiag`, `sparsediag`). A `<PLAQUETTE>` in a `<UNITCELL>` or `<GRAPH>` lists an ordered group of sites; a `<PLAQUETTETERM sites="i j k l">` in a `<HAMILTONIAN>` is applied to every plaquette of its type, with arbitrary operator strings, any number of sites, and fermion signs handled. Terms that leave the `CONSERVED_QUANTUMNUMBERS` sector are refused. A term that changes a quantum number capped by a cutoff parameter, such as a boson `N <= Nmax`, prints a warning that the results depend on the cutoff. Other applications refuse models that combine plaquette terms with plaquettes instead of ignoring them. See [the syntax](src/alps/model/docs/plaquette_terms.md).
+- n-site Hamiltonian terms for exact diagonalization (`fulldiag`, `sparsediag`). An `<NSITE>` in a `<UNITCELL>` or `<GRAPH>` lists an ordered group of sites; an `<NSITETERM sites="i j k l">` in a `<HAMILTONIAN>` is applied to every n-site group of its type, with arbitrary operator strings, any number of sites, and fermion signs handled. Terms that leave the `CONSERVED_QUANTUMNUMBERS` sector are refused. A term that changes a quantum number capped by a cutoff parameter, such as a boson `N <= Nmax`, prints a warning that the results depend on the cutoff. Other applications refuse models that combine n-site terms with n-site groups instead of ignoring them. See [the syntax](src/alps/model/docs/nsite_terms.md).
 
 ### Fixed
 
@@ -20,7 +20,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - Generate XML plotting scripts compatible with Python 3 through the `alps-xml` CLI.
 - Correct the Heisenberg tutorial's vector dot product and allow its vector implementation to compile without x86 SIMD support.
 - Remove undefined behavior in XDR callbacks and integer-range boundary checks exposed by sanitizers.
-- Keep full double precision for parameter values substituted into `SITETERM`, `BONDTERM` and `PLAQUETTETERM` expressions. They were rounded to 6 significant digits, so for example `mu=0.123456789123` acted as `0.123457`. Inputs whose parameters have at most 6 significant digits are unchanged.
+- Keep full double precision for parameter values substituted into `SITETERM`, `BONDTERM` and `NSITETERM` expressions. They were rounded to 6 significant digits, so for example `mu=0.123456789123` acted as `0.123457`. Inputs whose parameters have at most 6 significant digits are unchanged.
 
 ### Changed
 

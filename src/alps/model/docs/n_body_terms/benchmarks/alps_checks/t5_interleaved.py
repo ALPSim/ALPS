@@ -1,4 +1,4 @@
-"""Random Hermitian two-body terms on 2- and 3-site plaquettes, all index patterns."""
+"""Random Hermitian two-body terms on 2- and 3-site groups, all index patterns."""
 import itertools, os, sys
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -18,8 +18,8 @@ for m, order in ((2, [0, 1]), (2, [1, 0]), (3, [0, 1, 2]), (3, [2, 0, 1])):
                 out.append(f"({float(0.5 * g[p, q, r, s])!r})*cdag_{a}({roles[p]})*cdag_{b}({roles[r]})*c_{b}({roles[s]})*c_{a}({roles[q]})")
     expr = " + ".join(out)
     lat = (f'<LATTICES><GRAPH name="gm" vertices="{m}">'
-           f'<PLAQUETTE type="0">{"".join(f"<SITE id={chr(34)}{s + 1}{chr(34)}/>" for s in order)}</PLAQUETTE></GRAPH></LATTICES>')
-    ham = f'<HAMILTONIAN name="x"><BASIS ref="fermion"/><PLAQUETTETERM sites="{" ".join(roles)}">{expr}</PLAQUETTETERM></HAMILTONIAN>'
+           f'<NSITE type="0">{"".join(f"<SITE id={chr(34)}{s + 1}{chr(34)}/>" for s in order)}</NSITE></GRAPH></LATTICES>')
+    ham = f'<HAMILTONIAN name="x"><BASIS ref="fermion"/><NSITETERM sites="{" ".join(roles)}">{expr}</NSITETERM></HAMILTONIAN>'
     a = alpsrun.run(lat, ham, {"GRAPH": "gm", "MODEL": "x", "CONSERVED_QUANTUMNUMBERS": ""})
     ref = dense(m, [], [order], "0", expr, roles, {})
     d = np.max(np.abs(np.array(a) - ref))

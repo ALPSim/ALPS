@@ -24,9 +24,9 @@ Scope: lattice-shaped Hamiltonians -- Hubbard, Huckel, PPP -- go through
 SITETERM/BONDTERM as before.  Anything else (a molecular Hamiltonian's dense
 (pq|rs), pair hopping, correlated hopping, 3- and 4-orbital elements) goes
 through ALPS's n-site terms: every set of >= 2 distinct orbitals touched by a
-nonzero (pq|rs) becomes a <PLAQUETTE> of the graph with its own type, and the
-model gets one <PLAQUETTETERM> per type holding those elements with numeric
-coefficients.  Nothing is truncated.  Needs an ALPS build with PLAQUETTETERM.
+nonzero (pq|rs) becomes an <NSITE> of the graph with its own type, and the
+model gets one <NSITETERM> per type holding those elements with numeric
+coefficients.  Nothing is truncated.  Needs an ALPS build with NSITETERM.
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ from __future__ import annotations
 import numpy as np
 
 __all__ = ["assign_types", "lattice_xml", "model_xml", "general_model_xml",
-           "plaquette_groups", "parm_text", "to_alps"]
+           "nsite_groups", "parm_text", "to_alps"]
 
 TOL = 1e-10
 
@@ -79,7 +79,7 @@ def edge_couplings(ham, h1: np.ndarray, tol: float = TOL):
     t = -h_pq        (ALPS writes hopping as -t)
     V = (pp|qq)      density-density
 
-    Exchange (pq|qp) is not read here; former_for sends it to plaquettes.
+    Exchange (pq|qp) is not read here; former_for sends it to n-site groups.
     """
     n = h1.shape[0]
     g = None
@@ -127,7 +127,7 @@ def lattice_xml(ham, h1: np.ndarray, name: str = "qdk-graph", tol: float = TOL,
     edges = edge_couplings(ham, h1, tol)
     if groups is not None:
         # General mode: every two-body element over >= 2 sites lives in a
-        # plaquette, so the edges carry the hopping only.
+        # n-site group, so the edges carry the hopping only.
         edges = [(p, q, t, 0.0) for p, q, t, _ in edges if abs(t) > tol]
     etypes, evals = assign_types([(t, V) for _, _, t, V in edges], tol)
     vtypes, vvals = assign_types(site_couplings(ham, h1), tol)
@@ -140,10 +140,10 @@ def lattice_xml(ham, h1: np.ndarray, name: str = "qdk-graph", tol: float = TOL,
             lines.append(f'  <VERTEX id="{p + 1}" type="{vtypes[p]}"/>')
     for (p, q, _, _), et in zip(edges, etypes):
         lines.append(f'  <EDGE type="{et}" source="{p + 1}" target="{q + 1}"/>')
-    # One plaquette type per orbital set: its coefficients are its own.
+    # One n-site group type per orbital set: its coefficients are its own.
     for k, sites in enumerate(groups or {}):
-        lines.append(f'  <PLAQUETTE type="{k}">'
-                     + "".join(f'<SITE id="{s + 1}"/>' for s in sites) + "</PLAQUETTE>")
+        lines.append(f'  <NSITE type="{k}">'
+                     + "".join(f'<SITE id="{s + 1}"/>' for s in sites) + "</NSITE>")
     lines.append("</GRAPH>")
 
     params: dict = {}
@@ -206,14 +206,14 @@ def former_for(ham, h1: np.ndarray):
     # is 2.  So the only question about a (pq|rs) element is how many *distinct*
     # sites it touches -- not which pattern it matches.  Density-density
     # (p,p,q,q) touches 2 and is a BONDTERM; anything else goes into
-    # plaquettes.
+    # n-site groups.
     idx = np.array(np.nonzero(np.abs(g) > TOL)).T
     needs_nsite = False
     for row in idx:
         p, q, r, s = (int(x) for x in row)
         sites = {p, q, r, s}
 
-        # Arity: 3 or 4 distinct sites need ALPS's n-site PLAQUETTETERM.
+        # Arity: 3 or 4 distinct sites need ALPS's NSITETERM.
         if len(sites) > 2:
             needs_nsite = True
             continue
@@ -223,7 +223,7 @@ def former_for(ham, h1: np.ndarray):
         # Two sites is necessary but not sufficient: the bond model has only
         # density-density (pp|qq). Exchange (pq|qp) is not ALPS's
         # exchange(i,j), which is S_i.S_j and lacks the density part, so it
-        # goes into 2-site plaquettes with pair hopping (pq|pq) and correlated
+        # goes into 2-site groups with pair hopping (pq|pq) and correlated
         # hopping (pp|pq).
         if not (p == q and r == s):
             needs_nsite = True
@@ -263,7 +263,7 @@ def model_xml(name: str = "qdk fermion Hubbard") -> str:
 </HAMILTONIAN>"""
 
 
-def plaquette_groups(ham, n: int, tol: float = TOL) -> dict:
+def nsite_groups(ham, n: int, tol: float = TOL) -> dict:
     """Two-body elements grouped by the orbitals they touch.
 
     Returns {sorted tuple of >= 2 distinct sites: [(p, q, r, s, (pq|rs)), ...]}
@@ -281,12 +281,12 @@ def plaquette_groups(ham, n: int, tol: float = TOL) -> dict:
     return groups
 
 
-def _plaquette_term(sites: tuple, elements: list) -> str:
+def _nsite_term(sites: tuple, elements: list) -> str:
     """The elements of one orbital set as an ALPS term string.
 
     Chemist's notation, as everywhere in this module:
         H2 = 1/2 sum (pq|rs) c+_{p,sigma} c+_{r,tau} c_{s,tau} c_{q,sigma}.
-    Roles r0, r1, ... name the plaquette's sites in order.
+    Roles r0, r1, ... name the n-site group's sites in order.
     """
     role = {s: f"r{k}" for k, s in enumerate(sites)}
     out = []
@@ -304,14 +304,14 @@ def _plaquette_term(sites: tuple, elements: list) -> str:
 
 
 def general_model_xml(groups: dict, name: str = GENERAL_MODEL) -> str:
-    """Hamiltonian former with SITETERM, BONDTERM and one PLAQUETTETERM per
-    plaquette type (= per orbital set in ``groups``, in the same order as
-    lattice_xml emits the plaquettes)."""
+    """Hamiltonian former with SITETERM, BONDTERM and one NSITETERM per
+    n-site group type (= per orbital set in ``groups``, in the same order as
+    lattice_xml emits the n-site groups)."""
     terms = []
     for k, (sites, elements) in enumerate(groups.items()):
         roles = " ".join(f"r{j}" for j in range(len(sites)))
-        terms.append(f'  <PLAQUETTETERM type="{k}" sites="{roles}">\n    '
-                     + _plaquette_term(sites, elements) + "\n  </PLAQUETTETERM>")
+        terms.append(f'  <NSITETERM type="{k}" sites="{roles}">\n    '
+                     + _nsite_term(sites, elements) + "\n  </NSITETERM>")
     return f"""<HAMILTONIAN name="{name}">
   <PARAMETER name="mu" default="0"/>
   <PARAMETER name="t" default="1"/>
@@ -366,7 +366,7 @@ def to_alps(ham, outdir: str, name: str = "qdk-graph", extra: dict | None = None
     n = h1.shape[0]
 
     model, custom = former_for(ham, h1)
-    groups = plaquette_groups(ham, n) if model == GENERAL_MODEL else None
+    groups = nsite_groups(ham, n) if model == GENERAL_MODEL else None
     graph, params = lattice_xml(ham, h1, name, groups=groups)
 
     # mu and U are emitted by lattice_xml, typed jointly per site.

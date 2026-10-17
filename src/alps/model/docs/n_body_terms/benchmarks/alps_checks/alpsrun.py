@@ -16,14 +16,14 @@ os.environ.setdefault("ALPS_XML_PATH", f"{ALPS}/src/alps/resources")
 _E = re.compile(r'<SCALAR_AVERAGE name="Energy"><MEAN>([^<]+)</MEAN>')
 
 
-def ladder_lattice(name="ms-ladder", plaquette=True, boundary="open"):
-    plaq = """
-    <PLAQUETTE type="0">
+def ladder_lattice(name="ms-ladder", nsite_group=True, boundary="open"):
+    group = """
+    <NSITE type="0">
       <SITE vertex="1" offset="0"/>
       <SITE vertex="2" offset="0"/>
       <SITE vertex="2" offset="1"/>
       <SITE vertex="1" offset="1"/>
-    </PLAQUETTE>""" if plaquette else ""
+    </NSITE>""" if nsite_group else ""
     return f"""<LATTICES>
   <LATTICE name="chain lattice" dimension="1">
     <PARAMETER name="a" default="1"/>
@@ -35,7 +35,7 @@ def ladder_lattice(name="ms-ladder", plaquette=True, boundary="open"):
     <VERTEX id="2"><COORDINATE>0.5</COORDINATE></VERTEX>
     <EDGE type="1"><SOURCE vertex="1" offset="0"/><TARGET vertex="2" offset="0"/></EDGE>
     <EDGE type="0"><SOURCE vertex="1" offset="0"/><TARGET vertex="1" offset="1"/></EDGE>
-    <EDGE type="0"><SOURCE vertex="2" offset="0"/><TARGET vertex="2" offset="1"/></EDGE>{plaq}
+    <EDGE type="0"><SOURCE vertex="2" offset="0"/><TARGET vertex="2" offset="1"/></EDGE>{group}
   </UNITCELL>
   <LATTICEGRAPH name="{name}">
     <FINITELATTICE>

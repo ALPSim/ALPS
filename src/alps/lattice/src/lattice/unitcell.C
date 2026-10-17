@@ -139,51 +139,51 @@ GraphUnitCell::GraphUnitCell(const XMLTag& intag, std::istream& p)
       boost::put(source_offset_t(),graph_,edge,source_offset);
       boost::put(target_offset_t(),graph_,edge,target_offset);
     }
-    else if (tag.name=="PLAQUETTE")
-      read_plaquette_xml(tag,p);
+    else if (tag.name=="NSITE")
+      read_nsite_group_xml(tag,p);
     else
       boost::throw_exception(std::runtime_error("encountered illegal tag <" + tag.name + "> in UNITCELL"));
   }
-  for (std::size_t i=0;i<plaquettes_.size();++i)
-    for (std::size_t j=0;j<plaquettes_[i].sites.size();++j)
-      if (plaquettes_[i].sites[j].first>=boost::num_vertices(graph_))
-        boost::throw_exception(std::runtime_error("<PLAQUETTE> refers to a vertex that is not in <UNITCELL>"));
+  for (std::size_t i=0;i<nsite_groups_.size();++i)
+    for (std::size_t j=0;j<nsite_groups_[i].sites.size();++j)
+      if (nsite_groups_[i].sites[j].first>=boost::num_vertices(graph_))
+        boost::throw_exception(std::runtime_error("<NSITE> refers to a vertex that is not in <UNITCELL>"));
   update_bond_vectors();
 }
 
-// <PLAQUETTE type="t"> <SITE vertex="v" offset="..."/> ... </PLAQUETTE>
+// <NSITE type="t"> <SITE vertex="v" offset="..."/> ... </NSITE>
 // generalizes <EDGE>: an ordered list of sites, each a unit-cell vertex plus a
 // cell offset. The order of the SITEs is the order of the roles in the term.
-void GraphUnitCell::read_plaquette_xml(const XMLTag& intag, std::istream& p)
+void GraphUnitCell::read_nsite_group_xml(const XMLTag& intag, std::istream& p)
 {
   XMLTag tag(intag);
-  unitcell_plaquette plaq;
-  plaq.type = tag.attributes["type"]=="" ? boost::lexical_cast<type_type>(0)
+  unitcell_nsite_group group;
+  group.type = tag.attributes["type"]=="" ? boost::lexical_cast<type_type>(0)
     : boost::lexical_cast<type_type>(tag.attributes["type"]);
   if (tag.type!=XMLTag::SINGLE) while (true) {
     tag = parse_tag(p);
-    if (tag.name=="/PLAQUETTE")
+    if (tag.name=="/NSITE")
       break;
     if (tag.name!="SITE")
-      boost::throw_exception(std::runtime_error("illegal element <" + tag.name + "> in <PLAQUETTE>"));
+      boost::throw_exception(std::runtime_error("illegal element <" + tag.name + "> in <NSITE>"));
     if (tag.attributes["vertex"]=="")
-      boost::throw_exception(std::runtime_error("<SITE> in a <UNITCELL> <PLAQUETTE> needs a vertex attribute"));
+      boost::throw_exception(std::runtime_error("<SITE> in a <UNITCELL> <NSITE> needs a vertex attribute"));
     int v = boost::lexical_cast<int,std::string>(tag.attributes["vertex"]);
     if (v<1)
-      boost::throw_exception(std::runtime_error("illegal vertex " + tag.attributes["vertex"] + " in <PLAQUETTE>"));
+      boost::throw_exception(std::runtime_error("illegal vertex " + tag.attributes["vertex"] + " in <NSITE>"));
     offset_type offset(dimension());
     if (tag.attributes["offset"].size())
       read_vector(tag.attributes["offset"],offset);
-    plaq.sites.push_back(std::make_pair(std::size_t(v-1),offset));
+    group.sites.push_back(std::make_pair(std::size_t(v-1),offset));
     if (tag.type!=XMLTag::SINGLE) {
       tag = parse_tag(p);
       if (tag.name!="/SITE")
-        boost::throw_exception(std::runtime_error("</SITE> tag missing in <PLAQUETTE>"));
+        boost::throw_exception(std::runtime_error("</SITE> tag missing in <NSITE>"));
     }
   }
-  if (plaq.sites.empty())
-    boost::throw_exception(std::runtime_error("empty <PLAQUETTE> in <UNITCELL>"));
-  plaquettes_.push_back(plaq);
+  if (group.sites.empty())
+    boost::throw_exception(std::runtime_error("empty <NSITE> in <UNITCELL>"));
+  nsite_groups_.push_back(group);
 }
 
 void GraphUnitCell::update_bond_vectors()
@@ -260,15 +260,15 @@ void GraphUnitCell::write_xml(oxstream& xml) const
     xml << end_tag("TARGET");
     xml << end_tag("EDGE");
   }
-  for (std::size_t i=0;i<plaquettes_.size();++i) {
-    xml << start_tag("PLAQUETTE") << attribute("type", plaquettes_[i].type);
-    for (std::size_t j=0;j<plaquettes_[i].sites.size();++j) {
-      xml << start_tag("SITE") << attribute("vertex", plaquettes_[i].sites[j].first+1);
-      if (plaquettes_[i].sites[j].second.size())
-        xml << attribute("offset", write_vector(plaquettes_[i].sites[j].second));
+  for (std::size_t i=0;i<nsite_groups_.size();++i) {
+    xml << start_tag("NSITE") << attribute("type", nsite_groups_[i].type);
+    for (std::size_t j=0;j<nsite_groups_[i].sites.size();++j) {
+      xml << start_tag("SITE") << attribute("vertex", nsite_groups_[i].sites[j].first+1);
+      if (nsite_groups_[i].sites[j].second.size())
+        xml << attribute("offset", write_vector(nsite_groups_[i].sites[j].second));
       xml << end_tag("SITE");
     }
-    xml << end_tag("PLAQUETTE");
+    xml << end_tag("NSITE");
   }
   xml << end_tag("UNITCELL");
 }

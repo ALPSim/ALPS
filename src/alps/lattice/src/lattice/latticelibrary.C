@@ -67,12 +67,12 @@ void LatticeLibrary::read_xml(const XMLTag& intag, std::istream& p)
     else if (tag.name=="GRAPH") {
       std::string name = tag.attributes["name"];
       graphs_[name]=coordinate_graph_type();
-      plaquette_list plaquettes;
-      read_graph_xml(tag,p,graphs_[name],&plaquettes);
-      if (plaquettes.empty())
-        graph_plaquettes_.erase(name);
+      nsite_group_list nsite_groups;
+      read_graph_xml(tag,p,graphs_[name],&nsite_groups);
+      if (nsite_groups.empty())
+        graph_nsite_groups_.erase(name);
       else
-        graph_plaquettes_[name]=plaquettes;
+        graph_nsite_groups_[name]=nsite_groups;
     }
     else
       boost::throw_exception(std::runtime_error("encountered unknown tag <" + tag.name+ "> while parsing <LATTICES>"));
@@ -91,7 +91,7 @@ void LatticeLibrary::write_xml(oxstream& out) const
   for (LatticeGraphMap::const_iterator it=latticegraphs_.begin();it!=latticegraphs_.end();++it)
     out << it->second;
   for (GraphMap::const_iterator it=graphs_.begin();it!=graphs_.end();++it)
-    write_graph_xml(out,it->second,it->first,&graph_plaquettes(it->first));
+    write_graph_xml(out,it->second,it->first,&graph_nsite_groups(it->first));
   out << end_tag("LATTICES");
 }
 
@@ -130,11 +130,11 @@ const coordinate_graph_type& LatticeLibrary::graph(const std::string& name) cons
   return graphs_.find(name)->second;
 }
 
-const plaquette_list& LatticeLibrary::graph_plaquettes(const std::string& name) const
+const nsite_group_list& LatticeLibrary::graph_nsite_groups(const std::string& name) const
 {
-  static const plaquette_list none;
-  PlaquetteMap::const_iterator it = graph_plaquettes_.find(name);
-  return it == graph_plaquettes_.end() ? none : it->second;
+  static const nsite_group_list none;
+  NSiteGroupMap::const_iterator it = graph_nsite_groups_.find(name);
+  return it == graph_nsite_groups_.end() ? none : it->second;
 }
 
 void LatticeLibrary::make_all_graphs()

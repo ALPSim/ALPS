@@ -23,7 +23,7 @@
 #include <alps/lattice/graph.h>
 #include <alps/lattice/graphproperties.h>
 #include <alps/lattice/dimensional_traits.h>
-#include <alps/lattice/plaquette.h>
+#include <alps/lattice/nsite_group.h>
 #include <boost/graph/adjacency_list.hpp>
 
 namespace alps {
@@ -76,12 +76,12 @@ public:
                        uint32_t ti, const offset_type& to);
 
   // n-site groups, kept next to the graph (which has only 2-site edges)
-  const std::vector<unitcell_plaquette>& plaquettes() const { return plaquettes_;}
+  const std::vector<unitcell_nsite_group>& nsite_groups() const { return nsite_groups_;}
 
 private:        
   void update_bond_vectors();
-  void read_plaquette_xml(const XMLTag&, std::istream&);
-  std::vector<unitcell_plaquette> plaquettes_;
+  void read_nsite_group_xml(const XMLTag&, std::istream&);
+  std::vector<unitcell_nsite_group> nsite_groups_;
   graph_type graph_;
   std::size_t dim_;
   std::string name_;

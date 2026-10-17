@@ -94,7 +94,7 @@ alps::NSiteTermDescriptor::NSiteTermDescriptor(const XMLTag& intag, std::istream
 
 void alps::NSiteOperator::write_xml(oxstream& os) const
 {
-  os << start_tag("PLAQUETTEOPERATOR");
+  os << start_tag("NSITEOPERATOR");
   if (!name().empty())
     os << attribute("name", name());
   os << attribute("sites", sites_string());
@@ -102,12 +102,12 @@ void alps::NSiteOperator::write_xml(oxstream& os) const
     os << start_tag("PARAMETER") << attribute("name", it->key())
        << attribute("default", it->value()) << end_tag("PARAMETER");
   os << term();
-  os << end_tag("PLAQUETTEOPERATOR");
+  os << end_tag("NSITEOPERATOR");
 }
 
 void alps::NSiteTermDescriptor::write_xml(oxstream& os) const
 {
-  os << start_tag("PLAQUETTETERM");
+  os << start_tag("NSITETERM");
   if (type_ >= 0)
     os << attribute("type", type_);
   os << attribute("sites", sites_string());
@@ -115,7 +115,7 @@ void alps::NSiteTermDescriptor::write_xml(oxstream& os) const
     os << start_tag("PARAMETER") << attribute("name", it->key())
        << attribute("default", it->value()) << end_tag("PARAMETER");
   os << term();
-  os << end_tag("PLAQUETTETERM");
+  os << end_tag("NSITETERM");
 }
 
 #endif
