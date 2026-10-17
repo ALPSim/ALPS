@@ -10,7 +10,8 @@
 # no engine selector, whose names all meant the one native solver. The
 # determinant helpers are unchanged, except that interleaved_to_blocked_parity
 # also takes stacked rows (written here); pyalps's spinful_fermion() has
-# alpsx's local basis and matrices.
+# alpsx's local basis and matrices. The term loops now run natively in
+# pyalps.models.ab_initio (same terms, order and coefficients; written here).
 """Ab initio Hamiltonians on the pyalps operator algebra.
 
 Builds a :class:`pyalps.models.Hamiltonian` from molecular integrals
@@ -37,8 +38,6 @@ checking a sign convention independently.
 
 from __future__ import annotations
 
-import itertools
-
 import numpy as np
 from pyalps import ed, models
 
@@ -48,10 +47,6 @@ __all__ = [
     "interleaved_to_blocked_parity",
     "solve_ground_state",
 ]
-
-_CREATE = {"u": "c_dag_up", "d": "c_dag_dn"}
-_ANNIHILATE = {"u": "c_up", "d": "c_dn"}
-
 
 def build_abinitio_hamiltonian(
     h1: np.ndarray,
@@ -74,39 +69,9 @@ def build_abinitio_hamiltonian(
     eri = np.asarray(eri, dtype=float)
     if eri.shape != (n, n, n, n):
         raise ValueError(f"eri must be ({n},)*4, got {eri.shape}")
-
-    site = models.spinful_fermion()
-    H = models.Hamiltonian(
-        models.lattice.chain(n, bc="open"), site, "strict", ["N", "Sz"]
-    )
-
-    def op(name: str, i: int):
-        return models.located(site, name, i)
-
-    def kept(value: float) -> bool:
-        return value != 0.0 and abs(value) >= tol
-
-    # --- one-body: sum_{pq,s} h_pq c^+_{ps} c_{qs}
-    for p, q in itertools.product(range(n), repeat=2):
-        if kept(h1[p, q]):
-            for s in "ud":
-                H.add(h1[p, q] * (op(_CREATE[s], p) * op(_ANNIHILATE[s], q)))
-
-    # --- two-body: 1/2 sum_{pqrs,st} (pq|rs) c^+_{ps} c^+_{rt} c_{st} c_{qs}
-    for p, q, r, s_orb in itertools.product(range(n), repeat=4):
-        v = eri[p, q, r, s_orb]
-        if not kept(v):
-            continue
-        for s1, s2 in itertools.product("ud", repeat=2):
-            term = (
-                op(_CREATE[s1], p)
-                * op(_CREATE[s2], r)
-                * op(_ANNIHILATE[s2], s_orb)
-                * op(_ANNIHILATE[s1], q)
-            )
-            H.add(0.5 * v * term)
-
-    return H
+    # One-body: sum_{pq,s} h_pq c^+_{ps} c_{qs}; two-body: 1/2 sum_{pqrs,st}
+    # (pq|rs) c^+_{ps} c^+_{rt} c_{st} c_{qs}, both built natively.
+    return models.ab_initio(h1, eri, tol=tol)
 
 
 def solve_ground_state(H: models.Hamiltonian, n_alpha: int, n_beta: int, *, k: int = 1):

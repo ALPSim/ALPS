@@ -2,6 +2,7 @@
 set(models_fixtures "${CMAKE_CURRENT_SOURCE_DIR}/fixtures")
 
 foreach(name IN ITEMS
+    ab_initio
     compile_hamiltonian
     finite_graph
     hermiticity

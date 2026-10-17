@@ -63,5 +63,16 @@ ALPS_MODELS_DECL Hamiltonian bose_hubbard(lattice::Lattice const& lat, double t 
                          double mu = 0.0, double V = 0.0, int n_max = 3,
                          std::optional<int> bond_type = std::nullopt);
 
+// -- molecular Hamiltonians --
+// H = sum_{pq,s} h_pq c+_{ps} c_{qs} + 1/2 sum_{pqrs,st} (pq|rs) c+_{ps} c+_{rt} c_{st} c_{qs}
+// on one spinful_fermion() site per spatial orbital of an open chain (strict
+// convention, N and Sz conserved). h1 is the n x n one-electron matrix and eri
+// the n^4 two-electron integrals in chemist's notation, both row-major.
+// Integrals that are zero or smaller in magnitude than `tol` are dropped. The
+// terms, their order and their coefficients are those of
+// qdk_chemistry_alps.abinitio.build_abinitio_hamiltonian, as one added sum.
+ALPS_MODELS_DECL Hamiltonian ab_initio(std::vector<double> const& h1, std::vector<double> const& eri,
+                                       int n_orbitals, double tol = 1e-12);
+
 } // namespace models
 } // namespace alps

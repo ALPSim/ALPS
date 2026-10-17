@@ -820,6 +820,21 @@ void bind_hamiltonian(nb::module_& m) {
         return mdl::bose_hubbard(l, t, U, mu, V, n_max, bond_type);
     }, nb::arg("lattice"), nb::arg("t") = 1.0, nb::arg("U") = 1.0, nb::arg("mu") = 0.0, nb::arg("V") = 0.0,
        nb::arg("n_max") = 3, nb::arg("bond_type") = nb::none());
+    m.def("ab_initio", [](nb::handle h1, nb::handle eri, double tol) {
+        auto const one = alps::python::as_contiguous<double>(h1);
+        auto const two = alps::python::as_contiguous<double>(eri);
+        if (one.ndim() != 2 || one.shape(0) != one.shape(1))
+            throw nb::value_error("h1 must be a square two-dimensional array");
+        std::size_t const n = one.shape(0);
+        if (two.ndim() != 4 || two.shape(0) != n || two.shape(1) != n || two.shape(2) != n || two.shape(3) != n)
+            throw nb::value_error("eri must be an (n, n, n, n) array matching h1");
+        std::vector<double> h(one.data(), one.data() + n * n), g(two.data(), two.data() + n * n * n * n);
+        nb::gil_scoped_release release;
+        return mdl::ab_initio(h, g, static_cast<int>(n), tol);
+    }, nb::arg("h1"), nb::arg("eri"), nb::arg("tol") = 1e-12,
+       "The molecular Hamiltonian of real one- and two-electron integrals (chemist's notation): one "
+       "spinful_fermion() site per orbital, strict convention, N and Sz conserved; integrals that are zero or "
+       "below `tol` in magnitude are dropped.");
 }
 
 // -- qubits and Pauli strings -------------------------------------------------------

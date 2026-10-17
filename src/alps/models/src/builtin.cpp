@@ -289,5 +289,40 @@ Hamiltonian bose_hubbard(lattice::Lattice const& lat, double t, double U, double
     return H;
 }
 
+Hamiltonian ab_initio(std::vector<double> const& h1, std::vector<double> const& eri, int n, double tol) {
+    if (n < 1) throw std::invalid_argument("ab_initio: the orbital count must be positive");
+    auto const m = static_cast<std::size_t>(n);
+    if (h1.size() != m * m) throw std::invalid_argument("ab_initio: h1 must hold n x n values");
+    if (eri.size() != m * m * m * m) throw std::invalid_argument("ab_initio: eri must hold n^4 values");
+    if (!(tol >= 0.)) throw std::invalid_argument("ab_initio: the integral cutoff must be nonnegative");
+    SiteBasisPtr site = spinful_fermion();
+    Hamiltonian H(lattice::chain(n, 1.0, lattice::Boundary::open), site, FermionConvention::strict, {"N", "Sz"});
+    auto const kept = [tol](double value) { return value != 0.0 && std::abs(value) >= tol; };
+    char const* const create[] = {"c_dag_up", "c_dag_dn"};
+    char const* const annihilate[] = {"c_up", "c_dn"};
+    TermSum total;
+    // One body: sum_{pq,s} h_pq c+_{ps} c_{qs}.
+    for (int p = 0; p < n; ++p)
+        for (int q = 0; q < n; ++q) {
+            double const value = h1[std::size_t(p) * m + std::size_t(q)];
+            if (!kept(value)) continue;
+            for (int s = 0; s < 2; ++s) total += Complex(value) * (L(site, create[s], p) * L(site, annihilate[s], q));
+        }
+    // Two body: 1/2 sum_{pqrs,st} (pq|rs) c+_{ps} c+_{rt} c_{st} c_{qs}.
+    for (int p = 0; p < n; ++p)
+        for (int q = 0; q < n; ++q)
+            for (int r = 0; r < n; ++r)
+                for (int o = 0; o < n; ++o) {
+                    double const value = eri[((std::size_t(p) * m + std::size_t(q)) * m + std::size_t(r)) * m + std::size_t(o)];
+                    if (!kept(value)) continue;
+                    for (int s1 = 0; s1 < 2; ++s1)
+                        for (int s2 = 0; s2 < 2; ++s2)
+                            total += Complex(0.5 * value) * (L(site, create[s1], p) * L(site, create[s2], r)
+                                                             * L(site, annihilate[s2], o) * L(site, annihilate[s1], q));
+                }
+    H.add(std::move(total));
+    return H;
+}
+
 } // namespace models
 } // namespace alps

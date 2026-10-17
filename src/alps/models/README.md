@@ -26,7 +26,7 @@ mdl::CompiledModel compiled = mdl::compile_hamiltonian(model);
 | `alps/models/physical_basis.hpp` | `LocalBasis`, `PhysicalBasis`: ordered local spaces, quantum numbers and parities, independent of any Hamiltonian |
 | `alps/models/compiled.hpp` | `CompiledOperator` (dense local factors with Jordan–Wigner strings) and `CompiledModel` (operator plus lattice metadata) |
 | `alps/models/hamiltonian.hpp` | `Hamiltonian` (lattice + site bases + bond/site/global term templates), `compile_hamiltonian`, `compile_operator`, `validate_hermiticity` |
-| `alps/models/builtin.hpp` | 14 named model factories, from `heisenberg` to `bose_hubbard` and `kondo_lattice` |
+| `alps/models/builtin.hpp` | 14 named model factories, from `heisenberg` to `bose_hubbard` and `kondo_lattice`, and `ab_initio(h1, eri, n, tol)`: the molecular Hamiltonian of real one- and two-electron integrals (chemist's notation) on `spinful_fermion()` sites |
 | `alps/models/lattice_xml.hpp` | `to_latticegraph_xml`, `to_graph_xml`: the ALPS lattice-library XML of a kit lattice (unit cell with vertex coordinates, extent, boundary); `custom_lattice_name`, `catalog_graph_name` |
 | `alps/models/qubit_encoding.hpp` | `QubitEncoding`: the qubit register of a `PhysicalBasis` (binary or Gray code words per site), bit/state-index and statevector interchange |
 | `alps/models/pauli.hpp` | `PauliOperator`, `PauliExportOptions`, `export_pauli` (sparse Pauli strings of a `CompiledOperator` or `Hamiltonian`), `local_valid_projector`, `invalid_state_penalty` |

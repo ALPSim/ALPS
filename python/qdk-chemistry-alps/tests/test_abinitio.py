@@ -127,6 +127,57 @@ def test_parity_of_stacked_determinants_is_the_parity_of_each():
 
 # --- Hamiltonian construction ---------------------------------------------
 
+def _python_builder(h1, eri, tol=1e-12):
+    """The former pure-Python term loops, kept as the reference for the native builder."""
+    from pyalps import models
+
+    n = h1.shape[0]
+    site = models.spinful_fermion()
+    H = models.Hamiltonian(models.lattice.chain(n, bc="open"), site, "strict", ["N", "Sz"])
+    create, annihilate = {"u": "c_dag_up", "d": "c_dag_dn"}, {"u": "c_up", "d": "c_dn"}
+
+    def op(name, i):
+        return models.located(site, name, i)
+
+    def kept(value):
+        return value != 0.0 and abs(value) >= tol
+
+    for p in range(n):
+        for q in range(n):
+            if kept(h1[p, q]):
+                for s in "ud":
+                    H.add(h1[p, q] * (op(create[s], p) * op(annihilate[s], q)))
+    for p in range(n):
+        for q in range(n):
+            for r in range(n):
+                for o in range(n):
+                    v = eri[p, q, r, o]
+                    if kept(v):
+                        for s1 in "ud":
+                            for s2 in "ud":
+                                term = op(create[s1], p) * op(create[s2], r) * op(annihilate[s2], o) * op(annihilate[s1], q)
+                                H.add(0.5 * v * term)
+    return H
+
+
+def test_native_builder_reproduces_the_python_term_loops(integrals):
+    from pyalps import models
+
+    h1, eri = integrals(3)
+    eri = eri.copy()
+    eri[0, 1, 2, 1] = 0.0          # an exact zero and one below the cutoff are dropped
+    eri[1, 0, 1, 2] = 1e-14
+    for tol in (1e-12, 0.05):
+        native, reference = build_abinitio_hamiltonian(h1, eri, tol=tol), _python_builder(h1, eri, tol)
+        a, b = native.expand(), reference.expand()
+        assert len(a) == len(b)
+        assert [t.effective_coeff for t in a.terms] == [t.effective_coeff for t in b.terms]
+        assert [[(f.site, f.op.name) for f in t.factors] for t in a.terms] == [
+            [(f.site, f.op.name) for f in t.factors] for t in b.terms]
+        assert models.compile_hamiltonian(native).op == models.compile_hamiltonian(reference).op
+        assert native.conserved_quantum_numbers == ["N", "Sz"] and native.num_sites == 3
+
+
 def test_builder_validates_shapes():
     with pytest.raises(ValueError, match="h1 must be square"):
         build_abinitio_hamiltonian(np.zeros((2, 3)), np.zeros((2, 2, 2, 2)))
