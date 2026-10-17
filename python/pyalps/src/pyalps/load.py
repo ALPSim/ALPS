@@ -230,6 +230,41 @@ class Hdf5Loader:
                 log(e)
                 log(traceback.format_exc())
         return sets
+
+    def ReadMPSFromFile(self,flist,proppath='/parameters',respath='/mps',verbose=False):
+        fs = self.GetFileNames(flist)
+        sets = []
+        for f in fs:
+            try:
+                self.h5f = h5.archive(f, 'r')
+                self.h5fname = f
+                if verbose: log("Loading from file " + f)
+                if not self.h5f.is_group(respath):
+                    log("no MPS in " + f + " (run dmrg with SAVE_MPS=1)")
+                    continue
+                d = DataSet()
+                d.props.update(self.ReadParameters(proppath))
+                d.props['hdf5_path'] = respath
+                d.props['observable'] = 'MPS'
+                d.props['center'] = int(self.h5f[respath+'/center'])
+                d.props['site_type'] = [int(t) for t in self.h5f[respath+'/site_type']]
+                d.props['site_basis'] = {}
+                for t in self.h5f.list_children(respath+'/site_basis'):
+                    tpath = respath+'/site_basis/'+t
+                    d.props['site_basis'][int(t)] = dict(
+                        (pt.hdf5_name_decode(q), np.array(self.h5f[tpath+'/'+q]))
+                        for q in self.h5f.list_children(tpath))
+                d.y = []
+                for i in range(int(self.h5f[respath+'/length'])):
+                    tpath = respath+'/tensors/'+str(i)
+                    shape = tuple(int(n) for n in self.h5f[tpath+'/shape'])
+                    d.y.append(np.array(self.h5f[tpath+'/values']).reshape(shape))
+                d.x = range(len(d.y))
+                sets.append(d)
+            except Exception as e:
+                log(e)
+                log(traceback.format_exc())
+        return sets
         
     def GetIterations(self, current_path, params={}, measurements=None, index=None, verbose=False):
         iterationset=[]
@@ -676,6 +711,29 @@ def loadEigenvectors(files,verbose=False):
     """
     ll = Hdf5Loader()
     return ll.ReadEigenvectorsFromFile(files,verbose=verbose)
+
+def loadMPS(files,verbose=False):
+    """ loads the matrix product state written by the ALPS dmrg application
+
+        Run dmrg with SAVE_MPS=1 to store its final ground state in the
+        result file. The left tensors are left orthonormal, the right ones
+        right orthonormal, and the norm is carried by the tensor at
+        props['center'] (site L/2).
+
+        Parameters:
+            files (list): ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
+            verbose (bool): optional argument that if set to True causes more output to be printed as the data is loaded.
+
+        Returns:
+            list of DataSet objects: one per file that holds an MPS.
+            y is the list of site tensors, numpy arrays indexed [left bond, local state, right bond].
+            Local states are in the order of the ALPS site basis; props['site_basis'][t]
+            maps each quantum number name to its value for every local state of site type t,
+            and props['site_type'] gives the type of each site. Fermionic models use
+            ALPS's operator ordering, sites in lattice order.
+    """
+    ll = Hdf5Loader()
+    return ll.ReadMPSFromFile(files,verbose=verbose)
 
 def loadDMFTIterations(files,observable='G_tau',measurements='0',verbose=False):
     """ loads ALPS measurements from ALPS HDF5 result files

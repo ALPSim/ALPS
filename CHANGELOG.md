@@ -10,7 +10,6 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Fixed
 
-- Keep full precision of parameter values and numeric coefficients substituted into `SITETERM`, `BONDTERM` and `PLAQUETTETERM` expressions; they were rounded to 6 significant digits (e.g. `t0=0.123456789` acted as `0.123457`).
 - Release HDF5 scalar string buffers after reads, including failed conversions, and owned observables when clearing an `ObservableSet`.
 - Correct scalar/vector Monte Carlo result negation and keep uncertainties nonnegative under negative scaling or reciprocal arithmetic. Preserve empty histogram ranges, avoid invalid access during empty vector/valarray conversions, and create private temporary files on Unix independently of the caller's umask.
 - Initialize Monte Carlo completion scheduling before first use.
@@ -21,6 +20,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - Generate XML plotting scripts compatible with Python 3 through the `alps-xml` CLI.
 - Correct the Heisenberg tutorial's vector dot product and allow its vector implementation to compile without x86 SIMD support.
 - Remove undefined behavior in XDR callbacks and integer-range boundary checks exposed by sanitizers.
+- Keep full double precision for parameter values substituted into `SITETERM`, `BONDTERM` and `PLAQUETTETERM` expressions. They were rounded to 6 significant digits, so for example `mu=0.123456789123` acted as `0.123457`. Inputs whose parameters have at most 6 significant digits are unchanged.
 
 ### Changed
 
