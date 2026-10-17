@@ -60,6 +60,10 @@ components:
     algorithm: [white1992, white1993, schollwock2005, hallberg2006]
     implementation: [feiguin2013]
     uses: [scheduler]
+  classic_dmrg_evolution:
+    name: ALPS classic DMRG time evolution
+    algorithm: [white1992, white1993, white2004]
+    implementation: [feiguin2013]
   dmft:
     name: ALPS dynamical mean-field framework
     algorithm: [metzner1989, georges1992, georges1996]

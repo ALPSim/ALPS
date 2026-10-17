@@ -6,7 +6,8 @@ driven by the numeric local terms of a `CompiledOperator` on its
 `PhysicalBasis`. The XML `dmrg` application runs on this component
 ([below](#the-dmrg-application)). The engine warms up, sweeps with a
 kept-state schedule, targets one or several lowest states of one conserved
-sector and measures compiled operators on them. The component depends on
+sector and measures compiled operators on them, or evolves the ground state
+in real or imaginary time ([below](#time-evolution)). The component depends on
 `ALPS::models` and, privately, on Eigen (dense eigensolvers) and the platform
 BLAS (block products); it does not use the XML catalog, legacy parameters,
 HDF5, LAPACK or the simulation runtime, and consumers of the installed SDK
@@ -44,6 +45,10 @@ auto const& density = result.measurements.at("n").values[0];  // row = target st
 | `solve(model, …)` | validates Hermiticity, compiles the `Hamiltonian` under its declared charges and convention, solves on `physical_basis(model)` |
 | `Result` | ascending `energies`, `measurements` (rows follow the targets, columns the terms with their factor `sites`), the `iterations` observed (direction, index, energy, truncation error, entropy), `final_truncation_error`, the resolved `options`, with `keep_mps` the `mps` of every target |
 | `MatrixProductState`, `MpsTensor` | a targeted state's site tensors (`[left bond][local state][right bond]`, row-major, `real` or `complex` entries) and its `center` |
+| `evolve(initial, final, basis, evolution, options, measurements, callback)`, `evolve(initial_model, final_model, …)` | time evolution of the ground state of `initial` under `final` ([below](#time-evolution)) |
+| `Evolution` | `time_step`, `steps`, `imaginary`, `states`, optional `truncation_error`, `measure_steps`, `drives`, `keep_mps` |
+| `Drive` | a time-dependent term: `coefficients[n] * op` during step `n` |
+| `EvolutionResult` | `initial` (the preparing solve's `Result`), the measured `steps`, their `times`, `energies` (`<H_final>`) and `measurements` (one row per measured step), the `truncation_errors` of every step, with `keep_mps` the `mps` of every measured step |
 | `IterationCallback` | observes every completed iteration; may throw to abort the solve |
 
 ## What the engine accepts
@@ -106,8 +111,103 @@ convention of `ALPS::ed`, so the MPS contracted to a vector is the `ALPS::ed`
 eigenvector up to a phase. `solve_molecular` honours `keep_mps` too and
 returns the state on the orbitals (padding sites folded into the last one).
 pyalps returns the tensors as NumPy arrays, with `to_dense`, `amplitude`,
-`overlap` and `norm`. Time evolution and measurements after the solve are
-not part of the engine.
+`overlap` and `norm`. Measurements after the solve are not part of the
+engine; a time evolution keeps its states through `Evolution::keep_mps`
+([below](#time-evolution)).
+
+## Time evolution
+
+`evolve(initial, final, basis, evolution, options, measurements, callback)`
+prepares the ground state of `initial` in `options.sector` by the usual
+warm-up and sweeps (the last sweep certifies its Lanczos residuals) and
+evolves it under `final` by adaptive time-dependent DMRG (S. R. White and
+A. E. Feiguin, Phys. Rev. Lett. 93, 076401 (2004)). Every step is the
+second-order Trotter product `exp(-dt A/2) exp(-dt B) exp(-dt A/2)`, with
+`A` the bonds `(b, b + 1)` of even `b` and `B` the odd ones, and `dt`
+imaginary in real time. Each factor is one half sweep over the whole chain
+that applies the factor's bond gates where both sites of a bond are
+explicit, the central bond and, while a block is a single site, the edge
+bond, so every bond is visited once. The state is carried from step to
+step by White's wave-function transformation, no Lanczos solve runs, and
+the density matrix of the evolved state chooses the kept states, so the
+basis follows the state. Two adjacent `A` half steps are merged into one
+half sweep of their gate products, which is exact (drives included); a
+measured step closes its `A` half step and is measured in a half sweep of
+identity gates (and step 0 in two, which first bring the measured
+operators into the blocks the preparation left). A step therefore costs
+two half sweeps, a measured one four.
+
+- The gates are built from the compiled terms: a bond's matrix is its
+  two-site terms plus the one-site terms of its two sites, each site's
+  divided evenly between its bonds (an end site's go wholly to its one
+  bond). A product of two odd factors carries the parity of the bond's
+  left site in the input state, the strict convention's string as
+  `ALPS::ed` applies it. The exponential is taken with Eigen on every
+  connected block of the bond matrix, so the gates conserve every charge
+  exactly. `final` and every drive must be Hermitian, conserve the
+  sector's charges and couple only sites `i` and `i + 1`; a coupling of
+  other sites (a periodic chain's closing bond, next-nearest neighbours) is
+  rejected with a message naming the sites.
+- Real time runs in complex arithmetic; imaginary time (`imaginary`) runs in
+  `options.arithmetic`, applies `exp(-tau H)` and renormalizes after every
+  gate, approaching the lowest state of `final` that the initial state
+  overlaps, `O(dt^2)` above it in energy (the fixed point of the
+  Trotterized propagator).
+- `states` caps every truncation of the evolution; with `truncation_error`
+  a truncation keeps as many states as that discarded weight needs, up to
+  the cap (dmtk adds a tenth). `options` controls the preparation only;
+  `num_eigenvalues` must be one, and `Options::keep_mps` is replaced by
+  `Evolution::keep_mps`.
+- `measure_steps` lists the measured steps, 0 being the initial state;
+  empty measures every step. Every measured step reports its time
+  (`steps * time_step`), `<H_final>` without the drives, the requested
+  measurements as `solve()` takes them, and with `keep_mps` the state as a
+  `MatrixProductState` whose centre is where the measuring half sweep
+  ended (site 2 or `L - 2`).
+- `truncation_errors[n]` is the weight discarded in the half sweeps of step
+  `n` (the shared half sweep of two merged half steps counts for the
+  earlier step; entry 0 covers the initial measurement); the squared norm
+  the state has lost is about their sum.
+- A `Drive` adds `coefficients[n] * op` to `final` during step `n`; pyalps
+  samples a function of time at the step midpoints `(n + 1/2) dt`, which
+  keeps the scheme second order.
+- The callback observes the preparation's iterations and then every
+  iteration of the evolution, which carry no energy (NaN) but their
+  truncation error and entropy.
+
+A product initial state (the ground state of fields alone, such as a domain
+wall) gives the preparation density matrices of rank one; the warm-up of
+the classic DMRG can then lose the charge sectors it needs and converge to
+an excited product state. A weak coupling in the initial Hamiltonian (1e-3
+of the exchange in the domain-wall tutorial) avoids that.
+
+The tests below compare every step with the dense Trotter product and the
+exact evolution on the ED sector basis; with enough kept states the states
+agree with the Trotter product to 1e-9. The XX domain wall of 24 sites
+follows the exact Bessel solution to 5e-5 up to `t = 4` at `dt = 0.05`,
+120 steps with up to 40 states in about 3 s on an Apple M-series laptop.
+pyalps binds it as `classic_dmrg.evolve`, with `overlaps` and
+`loschmidt_echo`; [tutorials/time-evolution](../../../tutorials/time-evolution/README.md)
+has four worked examples.
+
+### Time-step targeting (not implemented)
+
+The Trotter gates restrict `final` to nearest neighbours in chain order and
+carry a Trotter error. Time-step targeting (A. E. Feiguin and S. R. White,
+Phys. Rev. B 72, 020404(R) (2005)) has neither: at every configuration the
+density matrix targets the state at `t`, `t + dt/3`, `t + 2dt/3` and
+`t + dt` with weights 1/3, 1/6, 1/6 and 1/3, the intermediate states
+computed in the superblock by a Runge-Kutta or Krylov step of `H`, and a
+few half sweeps per step advance the state by `dt` once the basis has
+converged. On this engine it would be a second mode of
+`detail::EvolvingSystem`: keep the Hamiltonian's block operators (the hooks
+`init_hamiltonian` and `rotate_hamiltonian` it now disables), apply
+`hamiltonian_product` for the Runge-Kutta stages, fill `_target` and
+`_target_weight` with the four states (`build_target_states` already sums
+weighted targets into the density matrix) and advance by a Krylov
+exponential at the last half sweep of a step. That needs the Hamiltonian
+rotated at every step, four targets in every truncation and tests of its
+own, so it is left for later.
 
 ## Molecular Hamiltonians (`<alps/dmrg/molecular.hpp>`)
 
@@ -383,6 +483,25 @@ instead of falling off its end, the fix of
 [ALPSim/ALPS#232](https://redirect.github.com/ALPSim/ALPS/pull/232) to the
 legacy engine.
 
+The time evolution is written here: the bond matrices, the schedule and
+the result in `src/classic.cpp`, and the engine side, `detail::BondGate`,
+the gate exponentials and their application to the engine's
+charge-sorted wave functions, and `detail::EvolvingSystem`, in
+`src/tdmrg.hpp`. It is the method of White and Feiguin (PRL 93, 076401);
+the sweep schedule (even bonds `dt/2`, odd bonds `dt`, even bonds `dt/2`,
+a measuring half sweep of identity gates; gates on the central bond and on
+an edge bond whose block is one site; no Lanczos solve) was read from
+Adrian Feiguin's teaching program
+[afeiguin/dmrg-tutorials](https://github.com/afeiguin/dmrg-tutorials)
+(`06-heischain_time/heischain_time.cc`), a dense spin-1/2 Heisenberg code
+without quantum numbers. That repository has no license, so it served as a
+description of the algorithm only and no code was copied or translated
+from it; maintainers may want to confirm that this use needs no
+permission. No dmtk file changed: `EvolvingSystem` derives from
+`dmtk::System`, runs its warm-up and sweeps, and disables its two
+Hamiltonian hooks while the state evolves, so the evolution builds and
+rotates only the measured operators.
+
 The MPS export (`src/mps.hpp`) is adapted from master's SAVE_MPS
 ([ALPSim/ALPS#216](https://redirect.github.com/ALPSim/ALPS/pull/216), Marcus
 Rosales, commits 46c76b1d2 and 35cea33e7): `DMRGTask::extract_mps` and
@@ -414,6 +533,16 @@ the private scratch directory; the rejected inputs; and the kept MPS
 length, four sites, an unrestricted solve, the Hubbard chain, frustrated
 spinless fermions, complex hopping phases, excited targets and stored
 products, with its canonical form checked, also under truncation.
+The time evolution (`classic_dmrg_evolution`) compares every measured step
+with the dense Trotter product and the exact `exp(-iHt)` on the `ALPS::ed`
+sector basis: an XXZ quench in a field, odd and four-site chains, the XX
+domain wall, a Hubbard quench, interacting spinless fermions and complex
+hopping phases (the gates' parity strings and phases), with energies,
+site and pair measurements, the kept states and the Loschmidt amplitude;
+it checks an identity and an eigenstate evolution, the `dt^2` shrinking of
+the Trotter error, energy conservation, imaginary time in real and complex
+arithmetic (against the Trotter product and the ED ground energy), drives,
+the measured-step bookkeeping, the reported truncation and the rejections.
 The molecular solver (`classic_dmrg_molecular`, also labelled `chemistry`)
 is checked against an occupation-number exact diagonalization for one to five
 and for seven orbitals, with and without padding, energies and every RDM element; against

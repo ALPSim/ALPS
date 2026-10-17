@@ -385,6 +385,23 @@ references:
     value: white1993
     description: ALPS reference key
 - type: article
+  title: Real-Time Evolution Using the Density Matrix Renormalization Group
+  authors:
+  - family-names: White
+    given-names: S. R.
+  - family-names: Feiguin
+    given-names: A. E.
+  year: 2004
+  journal: Physical Review Letters
+  volume: '93'
+  issue: '7'
+  doi: 10.1103/PhysRevLett.93.076401
+  start: '076401'
+  identifiers:
+  - type: other
+    value: white2004
+    description: ALPS reference key
+- type: article
   title: The Density-Matrix Renormalization Group
   authors:
   - family-names: Schollwöck

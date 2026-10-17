@@ -14,7 +14,9 @@
 // GIL handling are kept. solve_molecular follows alpsx's binding of the same
 // name (branch WIP/classic-dmrg-chemistry at d4384a7f8), returning a
 // MolecularResult object with NumPy arrays instead of a dictionary; its
-// observables, ci_vector, spin blocks and CI fields are added here.
+// observables, ci_vector, spin blocks and CI fields are added here. evolve
+// (time-dependent DMRG) has no alpsx counterpart on this engine; it is bound
+// as solve is.
 #include "kit_support.hpp"
 
 #include <alps/dmrg/classic.hpp>
@@ -91,6 +93,29 @@ classic::Result run(mdl::CompiledOperator const* op, mdl::PhysicalBasis const* b
     nb::gil_scoped_release release;
     if (model) return classic::solve(*model, options, measurements, observe);
     return classic::solve(*op, *basis, options, measurements, observe);
+}
+
+classic::EvolutionResult run_evolution(mdl::CompiledOperator const* initial, mdl::CompiledOperator const* final_op,
+                                       mdl::PhysicalBasis const* basis, mdl::Hamiltonian const* initial_model,
+                                       mdl::Hamiltonian const* final_model, classic::Evolution const& evolution,
+                                       classic::Options options, classic::Measurements const& measurements,
+                                       nb::object callback, std::optional<std::string> const& log_file) {
+    if (!callback.is_none() && !PyCallable_Check(callback.ptr()))
+        throw nb::type_error("callback must be callable or None");
+    std::ofstream log;
+    if (log_file) {
+        log.open(*log_file);
+        if (!log) throw std::runtime_error("cannot open the DMRG log file " + *log_file);
+        options.log = &log;
+    }
+    classic::IterationCallback observe = [&](classic::Iteration const& iteration) {
+        nb::gil_scoped_acquire acquire;
+        if (PyErr_CheckSignals() != 0) throw nb::python_error();
+        if (!callback.is_none()) callback(iteration);
+    };
+    nb::gil_scoped_release release;
+    if (initial_model) return classic::evolve(*initial_model, *final_model, evolution, options, measurements, observe);
+    return classic::evolve(*initial, *final_op, *basis, evolution, options, measurements, observe);
 }
 
 using Integrals2 = nb::ndarray<nb::numpy, double const, nb::ndim<2>, nb::c_contig>;
@@ -386,6 +411,73 @@ NB_MODULE(classic_dmrg_c, m) {
           nb::arg("options") = classic::Options{}, nb::arg("callback") = nb::none(), nb::arg("log_file") = nb::none(),
           "Classic block DMRG of a restricted real molecular Hamiltonian (chemist-notation integrals with the "
           "real-orbital symmetries) in the sector of n_alpha and n_beta electrons; returns a MolecularResult.");
+    nb::class_<classic::Drive>(m, "Drive",
+        "A time-dependent term of the final Hamiltonian: coefficients[n] * op during step n.")
+        .def("__init__", [](classic::Drive* self, mdl::CompiledOperator op, std::vector<double> coefficients) {
+            new (self) classic::Drive{std::move(op), std::move(coefficients)};
+        }, nb::arg("op"), nb::arg("coefficients"))
+        .def_rw("op", &classic::Drive::op)
+        .def_rw("coefficients", &classic::Drive::coefficients, "One coefficient per step.");
+    nb::class_<classic::Evolution>(m, "Evolution",
+        "Controls of a time evolution: the step, the step count, real or imaginary time, the kept states or "
+        "truncation error, the measured steps, the drives and whether to keep the states.")
+        .def(nb::init<>())
+        .def_rw("time_step", &classic::Evolution::time_step)
+        .def_rw("steps", &classic::Evolution::steps)
+        .def_rw("imaginary", &classic::Evolution::imaginary, "exp(-tau H), renormalized, instead of exp(-i t H).")
+        .def_rw("states", &classic::Evolution::states, "The most states a truncation keeps.")
+        .def_rw("truncation_error", &classic::Evolution::truncation_error,
+                "Keep as many states as this discarded weight needs, up to `states`.")
+        .def_rw("measure_steps", &classic::Evolution::measure_steps, "Measured steps (0 is the initial state); empty: all.")
+        .def_rw("drives", &classic::Evolution::drives)
+        .def_rw("keep_mps", &classic::Evolution::keep_mps, "Also return the state at every measured step.")
+        .def("__repr__", [](classic::Evolution const& e) {
+            return "Evolution(time_step=" + std::to_string(e.time_step) + ", steps=" + std::to_string(e.steps)
+                 + (e.imaginary ? ", imaginary" : ", real") + " time, states=" + std::to_string(e.states) + ")";
+        });
+    nb::class_<classic::EvolutionResult>(m, "EvolutionResult",
+        "A finished time evolution: the preparation's Result, then per measured step its time, the final "
+        "Hamiltonian's energy, the measurements and the kept states; per step the discarded weight.")
+        .def_ro("initial", &classic::EvolutionResult::initial,
+                "The DMRG that prepared the initial state (energy, iterations, resolved options).")
+        .def_prop_ro("steps", [](classic::EvolutionResult const& r) {
+            return vector_to_numpy(std::vector<std::uint64_t>(r.steps.begin(), r.steps.end()));
+        }, "The measured steps, ascending.")
+        .def_prop_ro("times", [](classic::EvolutionResult const& r) { return vector_to_numpy(std::vector<double>(r.times)); },
+                     "steps * time_step (tau in imaginary time).")
+        .def_prop_ro("energies", [](classic::EvolutionResult const& r) {
+            return vector_to_numpy(std::vector<double>(r.energies));
+        }, "<psi|H_final|psi> at the measured steps, without the drives.")
+        .def_ro("measurements", &classic::EvolutionResult::measurements, "One row per measured step.")
+        .def_prop_ro("truncation_errors", [](classic::EvolutionResult const& r) {
+            return vector_to_numpy(std::vector<double>(r.truncation_errors));
+        }, "Discarded weight of each step, steps + 1 entries (entry 0: the initial state's measurement).")
+        .def_ro("mps", &classic::EvolutionResult::mps, "With keep_mps: the state at every measured step.")
+        .def("__repr__", [](classic::EvolutionResult const& r) {
+            return "EvolutionResult(" + std::to_string(r.steps.size()) + " measured steps, "
+                 + std::to_string(r.truncation_errors.empty() ? 0 : r.truncation_errors.size() - 1) + " steps)";
+        });
+    m.def("evolve", [](mdl::Hamiltonian const& initial, mdl::Hamiltonian const& final_model,
+                       classic::Evolution const& evolution, classic::Options const& options,
+                       classic::Measurements const& measurements, nb::object callback,
+                       std::optional<std::string> const& log_file) {
+        return run_evolution(nullptr, nullptr, nullptr, &initial, &final_model, evolution, options, measurements,
+                             std::move(callback), log_file);
+    }, nb::arg("initial"), nb::arg("final"), nb::arg("evolution"), nb::arg("options") = classic::Options{},
+       nb::arg("measurements") = classic::Measurements{}, nb::arg("callback") = nb::none(),
+       nb::arg("log_file") = nb::none(),
+       "Evolve the DMRG ground state of `initial` (in options.sector) under `final`, two models on one physical "
+       "basis; returns an EvolutionResult.");
+    m.def("evolve", [](mdl::CompiledOperator const& initial, mdl::CompiledOperator const& final_op,
+                       mdl::PhysicalBasis const& basis, classic::Evolution const& evolution,
+                       classic::Options const& options, classic::Measurements const& measurements,
+                       nb::object callback, std::optional<std::string> const& log_file) {
+        return run_evolution(&initial, &final_op, &basis, nullptr, nullptr, evolution, options, measurements,
+                             std::move(callback), log_file);
+    }, nb::arg("initial"), nb::arg("final"), nb::arg("basis"), nb::arg("evolution"),
+       nb::arg("options") = classic::Options{}, nb::arg("measurements") = classic::Measurements{},
+       nb::arg("callback") = nb::none(), nb::arg("log_file") = nb::none(),
+       "Evolve under a compiled final Hamiltonian, both operators on `basis`.");
     m.def("site_terms", &classic::site_terms, nb::arg("model"), nb::arg("op"),
           "One term per site carrying the operator `op`, in site order (one measurement column per site).");
     m.def("pair_terms", &classic::pair_terms, nb::arg("model"), nb::arg("first"), nb::arg("second"),

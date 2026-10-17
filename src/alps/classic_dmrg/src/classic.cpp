@@ -13,6 +13,8 @@
 // definite-charge components and like terms merged before dmtk sees them;
 // measurements are compiled operators; no HDF5, parameters or catalog
 // snapshot. The dmtk calls themselves follow the alpsx driver line by line.
+// The time evolution (evolve, Engine::evolve and the bond matrices) is
+// written here; its engine side is src/tdmrg.hpp.
 // Written here, not taken from alpsx (it drove dmtk from catalog operators
 // through model_helper): the search for a set of fermionic carrier charges,
 // accepting two-site factors in either order, normalizing factor matrices,
@@ -22,6 +24,7 @@
 #include <alps/dmrg/classic.hpp>
 #include "invocation.hpp"
 #include "mps.hpp"
+#include "tdmrg.hpp"
 
 #include <alps/models/terms.hpp>
 
@@ -151,6 +154,12 @@ struct Problem {
     std::vector<ReadyTerm> hamiltonian;
     Complex scalar; // identity part of the Hamiltonian
     std::vector<Plan> measurements;
+    // Time evolution: the final Hamiltonian and the drives, merged on the same
+    // charges, and the index in `measurements` of the final Hamiltonian's
+    // expectation value, which is reported as the energy.
+    std::vector<ReadyTerm> final_hamiltonian;
+    std::vector<std::vector<ReadyTerm>> drives;
+    std::optional<std::size_t> energy_plan;
 };
 
 bool is_odd_integer(double value) { return std::llround(value) % 2 != 0; }
@@ -419,7 +428,8 @@ std::vector<ReadyTerm> simplify(std::vector<ReadyTerm> const& terms) {
 // of the operator must equal its adjoint and the odd-odd part its negated
 // adjoint (the adjoint of c F_i F_j with a string over [i, j) is
 // -conj(c) F_i^+ F_j^+ with the same string).
-void check_hermitian(std::vector<ReadyTerm> const& terms, Problem const& problem, double scale) {
+void check_hermitian(std::vector<ReadyTerm> const& terms, Problem const& problem, double scale,
+                     std::string const& what) {
     std::map<std::vector<int>, std::vector<ReadyTerm const*>> groups;
     for (auto const& term : terms) {
         std::vector<int> sites;
@@ -452,14 +462,16 @@ void check_hermitian(std::vector<ReadyTerm> const& terms, Problem const& problem
                     || std::abs(odd[r * dim + c] + std::conj(odd[c * dim + r])) > 1e-10 * scale) {
                     std::string where;
                     for (int s : sites) where += (where.empty() ? "" : ", ") + std::to_string(s);
-                    throw std::invalid_argument("classic DMRG Hamiltonian is not Hermitian (term on sites " + where + ")");
+                    throw std::invalid_argument("classic DMRG " + what + " is not Hermitian (term on sites " + where + ")");
                 }
     }
 }
 
 // Simplify the expanded terms, require that every surviving term conserves
-// the sector's charges and that the sum is Hermitian.
-std::vector<ReadyTerm> merge_hamiltonian(std::vector<ReadyTerm> const& terms, Problem const& problem) {
+// the sector's charges and that the sum is Hermitian. `what` names the
+// operator in errors; a time evolution's operators may have no term.
+std::vector<ReadyTerm> merge_hamiltonian(std::vector<ReadyTerm> const& terms, Problem const& problem,
+                                         std::string const& what = "Hamiltonian", bool allow_empty = false) {
     auto merged = simplify(terms);
     double scale = 0.;
     for (auto const& term : merged) scale = std::max(scale, std::abs(term.coefficient));
@@ -471,15 +483,54 @@ std::vector<ReadyTerm> merge_hamiltonian(std::vector<ReadyTerm> const& terms, Pr
             long delta = 0;
             for (auto const& f : term.factors) delta += f.delta[c];
             if (delta != 0 && std::abs(term.coefficient) > 1e-12 * scale)
-                throw std::invalid_argument("classic DMRG Hamiltonian does not conserve the requested charge: "
+                throw std::invalid_argument("classic DMRG " + what + " does not conserve the requested charge: "
                                             + problem.charges[c].name);
             if (delta != 0) { term.coefficient = Complex{}; break; }
         }
         if (term.coefficient != Complex{}) kept.push_back(std::move(term));
     }
-    if (kept.empty()) throw std::invalid_argument("classic DMRG Hamiltonian has no term");
-    check_hermitian(kept, problem, scale);
+    if (kept.empty() && !allow_empty) throw std::invalid_argument("classic DMRG " + what + " has no term");
+    check_hermitian(kept, problem, scale, what);
     return kept;
+}
+
+// One requested operator as measurement columns: the whole operator in one
+// column (expectation) or one column per term (terms).
+Plan lower_plan(std::string const& name, models::CompiledOperator const& op, MeasurementKind kind,
+                Problem const& problem, std::vector<int> const& site_dims) {
+    if (op.site_dims != site_dims)
+        throw std::invalid_argument("classic DMRG measurement operator is not on the Hamiltonian's sites: " + name);
+    Plan entry{name, kind, {}};
+    std::string const what = "measurement " + name;
+    auto column = [&](std::vector<models::LocalTerm const*> const& terms, std::vector<int> sites) {
+        Column col{std::move(sites), {}, Complex{}};
+        std::vector<ReadyTerm> components;
+        for (auto const* term : terms) expand(*term, problem, components, col.scalar, what.c_str());
+        for (auto& component : components) {
+            bool leaves_sector = false;
+            for (std::size_t c = 0; c < problem.charges.size() && !leaves_sector; ++c) {
+                if (!problem.charges[c].conserved) continue;
+                long delta = 0;
+                for (auto const& f : component.factors) delta += f.delta[c];
+                leaves_sector = delta != 0; // zero expectation value in a definite sector
+            }
+            if (!leaves_sector) col.components.push_back(std::move(component));
+        }
+        col.components = simplify(col.components); // the column reports their sum
+        entry.columns.push_back(std::move(col));
+    };
+    if (kind == MeasurementKind::expectation) {
+        std::vector<models::LocalTerm const*> all;
+        for (auto const& term : op.terms) all.push_back(&term);
+        column(all, {});
+    } else {
+        for (auto const& term : op.terms) {
+            std::vector<int> sites;
+            for (auto const& f : term.factors) sites.push_back(f.site);
+            column({&term}, std::move(sites));
+        }
+    }
+    return entry;
 }
 
 Problem prepare(models::CompiledOperator const& hamiltonian, models::PhysicalBasis const& basis,
@@ -537,39 +588,7 @@ Problem prepare(models::CompiledOperator const& hamiltonian, models::PhysicalBas
     auto plan = [&](std::map<std::string, models::CompiledOperator> const& entries, MeasurementKind kind) {
         for (auto const& [name, op] : entries) {
             if (name.empty()) throw std::invalid_argument("classic DMRG measurement names must be nonempty");
-            if (op.site_dims != hamiltonian.site_dims)
-                throw std::invalid_argument("classic DMRG measurement operator is not on the Hamiltonian's sites: " + name);
-            Plan entry{name, kind, {}};
-            std::string const what = "measurement " + name;
-            auto column = [&](std::vector<models::LocalTerm const*> const& terms, std::vector<int> sites) {
-                Column col{std::move(sites), {}, Complex{}};
-                std::vector<ReadyTerm> components;
-                for (auto const* term : terms) expand(*term, problem, components, col.scalar, what.c_str());
-                for (auto& component : components) {
-                    bool leaves_sector = false;
-                    for (std::size_t c = 0; c < problem.charges.size() && !leaves_sector; ++c) {
-                        if (!problem.charges[c].conserved) continue;
-                        long delta = 0;
-                        for (auto const& f : component.factors) delta += f.delta[c];
-                        leaves_sector = delta != 0; // zero expectation value in a definite sector
-                    }
-                    if (!leaves_sector) col.components.push_back(std::move(component));
-                }
-                col.components = simplify(col.components); // the column reports their sum
-                entry.columns.push_back(std::move(col));
-            };
-            if (kind == MeasurementKind::expectation) {
-                std::vector<models::LocalTerm const*> all;
-                for (auto const& term : op.terms) all.push_back(&term);
-                column(all, {});
-            } else {
-                for (auto const& term : op.terms) {
-                    std::vector<int> sites;
-                    for (auto const& f : term.factors) sites.push_back(f.site);
-                    column({&term}, std::move(sites));
-                }
-            }
-            problem.measurements.push_back(std::move(entry));
+            problem.measurements.push_back(lower_plan(name, op, kind, problem, hamiltonian.site_dims));
         }
     };
     plan(measurements.expectation, MeasurementKind::expectation);
@@ -650,6 +669,125 @@ void check_sector(Problem const& problem, std::size_t targets) {
     if (dimension < targets) throw std::invalid_argument("classic DMRG target count exceeds the selected-sector dimension");
 }
 
+// ----------------------------------------------------------- time evolution
+
+void validate_evolution(Evolution const& evolution, Options const& options) {
+    if (!std::isfinite(evolution.time_step) || evolution.time_step <= 0.)
+        throw std::invalid_argument("classic DMRG time_step must be finite and positive");
+    if (evolution.steps > static_cast<std::size_t>(std::numeric_limits<int>::max()))
+        throw std::invalid_argument("classic DMRG time evolution step count exceeds the integer limit");
+    bounded_count(evolution.states, "evolution states");
+    if (evolution.truncation_error && (!std::isfinite(*evolution.truncation_error)
+                                       || *evolution.truncation_error <= 0. || *evolution.truncation_error >= 1.))
+        throw std::invalid_argument("classic DMRG evolution truncation_error must be finite and between zero and one");
+    for (auto step : evolution.measure_steps)
+        if (step > evolution.steps)
+            throw std::invalid_argument("classic DMRG measure step " + std::to_string(step) + " is after the last step");
+    for (std::size_t k = 0; k < evolution.drives.size(); ++k) {
+        auto const& coefficients = evolution.drives[k].coefficients;
+        if (coefficients.size() != evolution.steps)
+            throw std::invalid_argument("classic DMRG drive " + std::to_string(k) + " needs one coefficient per step");
+        for (double c : coefficients)
+            if (!std::isfinite(c))
+                throw std::invalid_argument("classic DMRG drive " + std::to_string(k) + " has a nonfinite coefficient");
+    }
+    if (options.num_eigenvalues != 1)
+        throw std::invalid_argument("classic DMRG time evolution evolves one state: num_eigenvalues must be one");
+    if (options.keep_mps)
+        throw std::invalid_argument("classic DMRG time evolution keeps its states through Evolution::keep_mps, "
+                                    "not Options::keep_mps");
+}
+
+// Gates act on neighbouring sites in chain order only.
+void require_bonds(std::vector<ReadyTerm> const& terms, std::string const& what) {
+    for (auto const& term : terms)
+        if (term.factors.size() == 2 && term.factors[1].site != term.factors[0].site + 1)
+            throw std::invalid_argument("classic DMRG time evolution applies nearest-neighbour bond gates in chain "
+                                        "order; the " + what + " couples sites " + std::to_string(term.factors[0].site)
+                                        + " and " + std::to_string(term.factors[1].site));
+}
+
+// Merge the final Hamiltonian and the drives on the initial problem's
+// charges (each must conserve the sector and be Hermitian, and may be empty)
+// and add the final Hamiltonian's expectation value as the last measurement.
+void prepare_evolution(Problem& problem, models::CompiledOperator const& final_hamiltonian,
+                       Evolution const& evolution, std::vector<int> const& site_dims) {
+    auto merged = [&](models::CompiledOperator const& op, std::string const& what) {
+        if (op.site_dims != site_dims)
+            throw std::invalid_argument("classic DMRG " + what + " is not on the initial Hamiltonian's sites");
+        std::vector<ReadyTerm> expanded;
+        Complex scalar; // a phase in real time; no state's energy
+        for (auto const& term : op.terms) expand(term, problem, expanded, scalar, what.c_str());
+        auto terms = merge_hamiltonian(expanded, problem, what, true);
+        require_bonds(terms, what);
+        return terms;
+    };
+    problem.final_hamiltonian = merged(final_hamiltonian, "final Hamiltonian");
+    for (std::size_t k = 0; k < evolution.drives.size(); ++k)
+        problem.drives.push_back(merged(evolution.drives[k].op, "drive " + std::to_string(k)));
+    problem.energy_plan = problem.measurements.size();
+    problem.measurements.push_back(
+        lower_plan("energy", final_hamiltonian, MeasurementKind::expectation, problem, site_dims));
+}
+
+// The two-site matrix of every bond (b, b + 1) in the physical basis order,
+// [out][in] with the pair index s * d(b + 1) + t: the bond's two-site terms
+// plus each site's one-site terms divided evenly among its bonds (an end
+// site's go wholly to its one bond). A product of two odd factors carries
+// the parity of site b in the input state, the strict convention's string
+// over [b, b + 1), as ALPS::ed applies it.
+std::vector<std::vector<Complex>> bond_matrices(std::vector<ReadyTerm> const& terms, Problem const& problem) {
+    int const length = problem.num_sites;
+    auto dim = [&](int site) {
+        return static_cast<std::size_t>(problem.sites[static_cast<std::size_t>(problem.site_index[static_cast<std::size_t>(site)])].dim);
+    };
+    std::vector<std::vector<Complex>> bonds(static_cast<std::size_t>(length - 1));
+    for (int b = 0; b + 1 < length; ++b) {
+        std::size_t const n = dim(b) * dim(b + 1);
+        bonds[static_cast<std::size_t>(b)].assign(n * n, Complex{});
+    }
+    for (auto const& term : terms) {
+        int const i = term.factors[0].site;
+        auto const& a = term.factors[0].matrix;
+        if (term.factors.size() == 1) {
+            std::vector<int> touching;
+            if (i > 0) touching.push_back(i - 1);
+            if (i + 1 < length) touching.push_back(i);
+            Complex const weight = term.coefficient / static_cast<double>(touching.size());
+            for (int b : touching) {
+                std::size_t const d1 = dim(b), d2 = dim(b + 1), n = d1 * d2;
+                auto& m = bonds[static_cast<std::size_t>(b)];
+                for (std::size_t s = 0; s < d1; ++s)
+                    for (std::size_t t = 0; t < d2; ++t)
+                        if (b == i) {
+                            for (std::size_t out = 0; out < d1; ++out)
+                                m[(out * d2 + t) * n + s * d2 + t] += weight * a[out * d1 + s];
+                        } else {
+                            for (std::size_t out = 0; out < d2; ++out)
+                                m[(s * d2 + out) * n + s * d2 + t] += weight * a[out * d2 + t];
+                        }
+            }
+            continue;
+        }
+        auto const& c = term.factors[1].matrix;
+        std::size_t const d1 = dim(i), d2 = dim(i + 1), n = d1 * d2;
+        auto const& parity = problem.sites[static_cast<std::size_t>(problem.site_index[static_cast<std::size_t>(i)])].parity;
+        bool const string = term.factors[0].odd && term.factors[1].odd;
+        auto& m = bonds[static_cast<std::size_t>(i)];
+        for (std::size_t s = 0; s < d1; ++s)
+            for (std::size_t t = 0; t < d2; ++t) {
+                Complex const sign = term.coefficient * (string ? parity[s] : 1.);
+                for (std::size_t s_out = 0; s_out < d1; ++s_out) {
+                    Complex const x = sign * a[s_out * d1 + s];
+                    if (x == Complex{}) continue;
+                    for (std::size_t t_out = 0; t_out < d2; ++t_out)
+                        m[(s_out * d2 + t_out) * n + s * d2 + t] += x * c[t_out * d2 + t];
+                }
+            }
+    }
+    return bonds;
+}
+
 // ------------------------------------------------------------------- engine
 
 template<class T> struct Engine;
@@ -675,13 +813,15 @@ struct Engine {
     std::map<std::pair<int, Key>, std::string> operator_names;
     std::vector<std::vector<std::vector<std::size_t>>> layout; // [plan][column] -> measured term indices
     bool two_site_measurements = false;
+    bool evolving = false; // the time evolution's iterations solve nothing
 
     Engine(Problem const& p, Options const& o, IterationCallback cb)
         : problem(p), options(o), callback(std::move(cb)), lattice(p.num_sites, dmtk::OBC), hami(lattice) {}
 
     void observe(dmtk::System<T> const& s) {
+        double const energy = evolving ? std::numeric_limits<double>::quiet_NaN() : s.energy[0];
         Iteration row{s.get_dir() == dmtk::RIGHT2LEFT ? Direction::right_to_left : Direction::left_to_right,
-                      static_cast<std::size_t>(s.get_iter()), s.energy[0], s.truncation_error(), s.entropy()};
+                      static_cast<std::size_t>(s.get_iter()), energy, s.truncation_error(), s.entropy()};
         rows.push_back(row);
         if (callback) callback(row);
     }
@@ -820,18 +960,10 @@ struct Engine {
         }
     }
 
-    Result run() {
-        register_charges();
-        build_blocks();
-        build_hamiltonian();
-        build_measurements();
-
-        dmtk::System<T> S(hami, lattice, "ALPS");
-        // A two-site product inside one block is re-measured for a second
-        // target only from a stored block operator; otherwise its value stays
-        // the one taken when the pair was central, during the ground-state
-        // sweep. Keep the lighter unstored path when it is correct.
-        S.set_store_products(options.num_eigenvalues > 1 && two_site_measurements);
+    // The controls of the initial DMRG, up to the system's start (shared by
+    // solve and evolve).
+    void configure(dmtk::System<T>& S, bool store_products) {
+        S.set_store_products(store_products);
         S.signal_connect(&end_iteration<T>, dmtk::SYSTEM_SIGNAL_END_ITER, this);
         if (options.truncation_error)
             S.set_error(*options.truncation_error,
@@ -854,6 +986,33 @@ struct Engine {
             nstates(1, i) = options.sweeps[i].left_to_right;
         }
         S.start(sweeps, nstates);
+    }
+
+    ResolvedOptions resolved(dmtk::System<T> const& S) const {
+        ResolvedOptions out;
+        out.sweeps = options.sweeps;
+        out.warmup_states = options.warmup_states;
+        out.num_eigenvalues = options.num_eigenvalues;
+        out.truncation_error = options.truncation_error;
+        out.truncation_max_states = options.truncation_max_states;
+        out.lanczos_tolerance = S.lanczos_tolerance();
+        out.arithmetic = std::is_same_v<T, double> ? Arithmetic::real : Arithmetic::complex;
+        out.sector = options.sector;
+        return out;
+    }
+
+    Result run() {
+        register_charges();
+        build_blocks();
+        build_hamiltonian();
+        build_measurements();
+
+        dmtk::System<T> S(hami, lattice, "ALPS");
+        // A two-site product inside one block is re-measured for a second
+        // target only from a stored block operator; otherwise its value stays
+        // the one taken when the pair was central, during the ground-state
+        // sweep. Keep the lighter unstored path when it is correct.
+        configure(S, options.num_eigenvalues > 1 && two_site_measurements);
         S.run(static_cast<int>(options.warmup_states));
         if (S.store_products()) S.set_full_sweep(true);
         S.corr += measured;
@@ -900,15 +1059,178 @@ struct Engine {
         for (std::size_t i = 0; i < S.energy.size(); ++i) result.energies.push_back(S.energy[i] + problem.scalar.real());
         result.iterations = std::move(rows);
         result.final_truncation_error = S.truncation_error();
-        auto& resolved = result.options;
-        resolved.sweeps = options.sweeps;
-        resolved.warmup_states = options.warmup_states;
-        resolved.num_eigenvalues = options.num_eigenvalues;
-        resolved.truncation_error = options.truncation_error;
-        resolved.truncation_max_states = options.truncation_max_states;
-        resolved.lanczos_tolerance = S.lanczos_tolerance();
-        resolved.arithmetic = options.arithmetic;
-        resolved.sector = options.sector;
+        result.options = resolved(S);
+        return result;
+    }
+
+    // A bond matrix of bond_matrices() in the engine's charge-sorted site
+    // bases (State::i1 is the kit index of a sorted state, as in
+    // local_operator), real when the engine is.
+    std::vector<Complex> sorted_bond(std::vector<Complex> const& kit, int b) const {
+        auto const& first = blocks[static_cast<std::size_t>(problem.site_index[static_cast<std::size_t>(b)])].basis();
+        auto const& second = blocks[static_cast<std::size_t>(problem.site_index[static_cast<std::size_t>(b + 1)])].basis();
+        std::size_t const d1 = first.size(), d2 = second.size(), n = d1 * d2;
+        std::vector<Complex> out(n * n);
+        for (std::size_t po = 0; po < d1; ++po)
+            for (std::size_t qo = 0; qo < d2; ++qo)
+                for (std::size_t pi = 0; pi < d1; ++pi)
+                    for (std::size_t qi = 0; qi < d2; ++qi) {
+                        Complex const v = kit[(first[po].i1 * d2 + second[qo].i1) * n + first[pi].i1 * d2 + second[qi].i1];
+                        out[(po * d2 + qo) * n + pi * d2 + qi] = scalar(v, "evolution Hamiltonian");
+                    }
+        return out;
+    }
+
+    // Prepare the ground state of the initial Hamiltonian, then apply the
+    // second-order Trotter steps exp(-dt A/2) exp(-dt B) exp(-dt A/2) (A the
+    // even bonds, B the odd ones; dt imaginary in real time) as half sweeps
+    // of bond gates (detail::EvolvingSystem). Adjacent half steps of A are
+    // merged into one half sweep of their gate products, which is exact,
+    // drives included; a measured step closes its A half step and measures
+    // in an identity half sweep.
+    EvolutionResult evolve(Evolution const& evolution) {
+        register_charges();
+        build_blocks();
+        build_hamiltonian();
+        build_measurements();
+
+        detail::EvolvingSystem<T> S(hami, lattice);
+        configure(S, false);
+        S.prepare(static_cast<int>(options.warmup_states));
+
+        EvolutionResult result;
+        auto& initial = result.initial;
+        for (std::size_t i = 0; i < S.energy.size(); ++i) initial.energies.push_back(S.energy[i] + problem.scalar.real());
+        initial.iterations = std::move(rows);
+        rows.clear();
+        initial.final_truncation_error = S.truncation_error();
+        initial.options = resolved(S);
+
+        S.corr += measured;
+        S.init_correlations();
+        S.begin_evolution(evolution.states, evolution.truncation_error);
+        evolving = true;
+
+        // The bond Hamiltonians of the final Hamiltonian and of every drive.
+        int const length = problem.num_sites;
+        std::size_t const bonds = static_cast<std::size_t>(length - 1);
+        auto sorted = [&](std::vector<ReadyTerm> const& terms) {
+            auto kit = bond_matrices(terms, problem);
+            for (std::size_t b = 0; b < bonds; ++b) kit[b] = sorted_bond(kit[b], static_cast<int>(b));
+            return kit;
+        };
+        auto const final_bonds = sorted(problem.final_hamiltonian);
+        std::vector<std::vector<std::vector<Complex>>> drive_bonds;
+        for (auto const& drive : problem.drives) drive_bonds.push_back(sorted(drive));
+        auto dim = [&](int site) {
+            return static_cast<std::size_t>(problem.sites[static_cast<std::size_t>(problem.site_index[static_cast<std::size_t>(site)])].dim);
+        };
+        using Gates = std::vector<detail::BondGate<T>>; // one per bond; empty is the identity
+        // The gates of step `step` over a time t on the bonds b with b % 2 == parity.
+        std::map<std::pair<double, int>, Gates> cache; // without drives every step has the same gates
+        auto gates = [&](std::size_t step, double t, int parity) {
+            if (drive_bonds.empty()) {
+                auto found = cache.find({t, parity});
+                if (found != cache.end()) return found->second;
+            }
+            Gates out(bonds);
+            for (std::size_t b = static_cast<std::size_t>(parity); b < bonds; b += 2) {
+                auto h = final_bonds[b];
+                for (std::size_t k = 0; k < drive_bonds.size(); ++k) {
+                    double const c = evolution.drives[k].coefficients[step];
+                    for (std::size_t x = 0; x < h.size(); ++x) h[x] += c * drive_bonds[k][b][x];
+                }
+                out[b] = detail::exponential<T>(h, dim(static_cast<int>(b)), dim(static_cast<int>(b) + 1), t,
+                                                evolution.imaginary);
+            }
+            if (drive_bonds.empty()) cache.emplace(std::make_pair(t, parity), out);
+            return out;
+        };
+        Gates const identity(bonds);
+
+        std::size_t direction = dmtk::RIGHT2LEFT;
+        auto sweep = [&](Gates const& g, bool measure) {
+            std::vector<detail::BondGate<T> const*> pointers;
+            for (auto const& gate : g) pointers.push_back(gate.identity() ? nullptr : &gate);
+            if (measure) // every value must be taken again in this half sweep
+                for (auto& term : S.corr) term.set_value(T(std::numeric_limits<double>::quiet_NaN()));
+            double const discarded = S.half_sweep(direction, pointers, measure);
+            direction = direction == dmtk::RIGHT2LEFT ? dmtk::LEFT2RIGHT : dmtk::RIGHT2LEFT;
+            return discarded;
+        };
+
+        for (std::size_t p = 0; p < problem.measurements.size(); ++p)
+            if (p != problem.energy_plan)
+                result.measurements.emplace(problem.measurements[p].name,
+                                            Measurement{problem.measurements[p].kind, {}, {}});
+        auto record = [&](std::size_t step) {
+            result.steps.push_back(step);
+            result.times.push_back(static_cast<double>(step) * evolution.time_step);
+            for (std::size_t p = 0; p < problem.measurements.size(); ++p) {
+                auto const& plan = problem.measurements[p];
+                std::vector<double> row;
+                for (std::size_t c = 0; c < plan.columns.size(); ++c) {
+                    double value = plan.columns[c].scalar.real();
+                    for (auto index : layout[p][c]) {
+                        T const v = S.corr[index].value();
+                        if (!std::isfinite(std::real(v)) || !std::isfinite(std::imag(v)))
+                            throw std::logic_error("classic DMRG time evolution did not measure " + plan.name
+                                                   + " in its measuring half sweep");
+                        value += std::real(v);
+                    }
+                    row.push_back(value);
+                }
+                if (p == problem.energy_plan) result.energies.push_back(row.at(0));
+                else result.measurements.at(plan.name).values.push_back(std::move(row));
+            }
+            // The tensors come from this half sweep's rotations, on disk until
+            // the invocation returns, and from the closing wave function.
+            if (evolution.keep_mps) {
+                detail::MpsExport<T> const exporter(S);
+                result.mps.push_back(exporter.state(S.gs));
+            }
+        };
+
+        std::set<std::size_t> measured_steps(evolution.measure_steps.begin(), evolution.measure_steps.end());
+        if (measured_steps.empty())
+            for (std::size_t n = 0; n <= evolution.steps; ++n) measured_steps.insert(n);
+        double const dt = evolution.time_step;
+        result.truncation_errors.assign(evolution.steps + 1, 0.);
+        if (measured_steps.count(0)) {
+            // The left blocks of the preparation hold no measured operator;
+            // a first half sweep rebuilds the right blocks with them and the
+            // measuring one the left blocks.
+            double discarded = sweep(identity, false);
+            discarded += sweep(identity, true);
+            result.truncation_errors[0] = discarded;
+            record(0);
+        }
+        Gates pending; // the closing even half step of the previous step, not yet applied
+        for (std::size_t n = 0; n < evolution.steps; ++n) {
+            Gates half = gates(n, 0.5 * dt, 0);
+            if (pending.empty()) {
+                result.truncation_errors[n + 1] += sweep(half, false);
+            } else {
+                Gates merged(bonds);
+                for (std::size_t b = 0; b < bonds; ++b) merged[b] = detail::compose(half[b], pending[b]);
+                result.truncation_errors[n] += sweep(merged, false);
+            }
+            double discarded = sweep(gates(n, dt, 1), false);
+            pending = std::move(half);
+            bool const measure = measured_steps.count(n + 1) != 0;
+            if (measure || n + 1 == evolution.steps) {
+                discarded += sweep(pending, false);
+                pending.clear();
+            }
+            if (measure) discarded += sweep(identity, true);
+            result.truncation_errors[n + 1] += discarded;
+            if (measure) record(n + 1);
+        }
+        for (std::size_t p = 0; p < problem.measurements.size(); ++p) {
+            if (p == problem.energy_plan) continue;
+            auto& measurement = result.measurements.at(problem.measurements[p].name);
+            for (auto const& column : problem.measurements[p].columns) measurement.sites.push_back(column.sites);
+        }
         return result;
     }
 };
@@ -960,6 +1282,36 @@ Result solve(models::Hamiltonian const& model, Options const& options, Measureme
     models::validate_hermiticity(model);
     auto const compiled = models::compile_hamiltonian(model);
     return solve(compiled.op, models::physical_basis(model), options, measurements, std::move(callback));
+}
+
+EvolutionResult evolve(models::CompiledOperator const& initial, models::CompiledOperator const& final_hamiltonian,
+                       models::PhysicalBasis const& basis, Evolution const& evolution, Options const& options,
+                       Measurements const& measurements, IterationCallback callback) {
+    validate_options(options);
+    validate_evolution(evolution, options);
+    Problem problem = prepare(initial, basis, options, measurements);
+    prepare_evolution(problem, final_hamiltonian, evolution, initial.site_dims);
+    check_sector(problem, 1);
+    dmtk::InvocationGuard invocation(options.scratch_parent, options.log);
+    // Every engine object is destroyed before the guard restores the engine state.
+    if (evolution.imaginary && options.arithmetic == Arithmetic::real) {
+        Engine<double> engine(problem, options, std::move(callback));
+        return engine.evolve(evolution);
+    }
+    Engine<Complex> engine(problem, options, std::move(callback));
+    return engine.evolve(evolution);
+}
+
+EvolutionResult evolve(models::Hamiltonian const& initial, models::Hamiltonian const& final_hamiltonian,
+                       Evolution const& evolution, Options const& options, Measurements const& measurements,
+                       IterationCallback callback) {
+    models::validate_hermiticity(initial);
+    models::validate_hermiticity(final_hamiltonian);
+    auto const basis = models::physical_basis(initial);
+    models::require_same_basis(models::physical_basis(final_hamiltonian), basis);
+    auto const first = models::compile_hamiltonian(initial);
+    auto const second = models::compile_hamiltonian(final_hamiltonian);
+    return evolve(first.op, second.op, basis, evolution, options, measurements, std::move(callback));
 }
 
 models::CompiledOperator site_terms(models::Hamiltonian const& model, std::string const& op) {

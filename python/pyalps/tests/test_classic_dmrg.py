@@ -446,3 +446,203 @@ def test_kept_molecular_mps_is_the_ci_vector(n, n_alpha, n_beta, kept):
     sign = np.sign(np.vdot(amplitudes, result.ci_coefficients))
     np.testing.assert_allclose(sign * amplitudes, result.ci_coefficients, atol=1e-10)
     assert mps.norm() == pytest.approx(1.0, abs=1e-10)
+
+
+# -- evolve: adaptive time-dependent DMRG ---------------------------------------------
+
+def exact_evolution(initial, final, times, **sector):
+    """The ED ground state of ``initial`` and exp(-i H_final t) applied to it, on the sector basis."""
+    reference = exact(initial, **sector)
+    psi0 = reference.eigenvectors[:, 0]
+    energies, vectors = np.linalg.eigh(final.to_dense_matrix(sector))
+    coefficients = vectors.conj().T @ psi0
+    return reference, [vectors @ (np.exp(-1j * energies * t) * coefficients) for t in times]
+
+
+def wall_magnetization(n, t):
+    """<Sz> a distance n right of an XX domain wall on the infinite chain (Antal et al., PRE 59, 4912)."""
+    from scipy.special import jv
+
+    return -0.5 * sum(jv(i, t) ** 2 for i in range(1 - n, n))
+
+
+def test_evolve_melts_the_xx_domain_wall_as_the_bessel_solution():
+    L, half = 16, 8
+    xx = models.xxz(lat.chain(L, bc="open"), Jxy=1.0, Jz=0.0)
+    site = xx.site_for(0)
+    # Up spins left, down spins right; a weak exchange lets the DMRG find
+    # this product ground state of the fields.
+    wall = models.TermSum()
+    for i in range(L):
+        wall += (-1.0 if i < half else 1.0) * site.Sz(i)
+    for i in range(L - 1):
+        wall += 0.5e-3 * (site.Sp(i) * site.Sm(i + 1) + site.Sm(i) * site.Sp(i + 1))
+    run = dmrg.evolve(wall, xx, time_step=0.05, steps=60, states=40, truncation_error=1e-10, sector={"Sz": 0},
+                      measure_steps=5, measurements={"Sz": "Sz"})
+    assert run.initial.energy == pytest.approx(-0.5 * L, abs=1e-5)
+    np.testing.assert_allclose(run.steps, np.arange(0, 61, 5))
+    np.testing.assert_allclose(run.times, 0.05 * run.steps)
+    profiles = run.measurements["Sz"].values
+    assert profiles.shape == (13, L)
+    np.testing.assert_allclose(profiles[0], [0.5] * half + [-0.5] * half, atol=1e-5)
+    np.testing.assert_allclose(profiles.sum(axis=1), 0.0, atol=1e-10)
+    for k, t in enumerate(run.times):
+        for n in (1, 2, 3):
+            assert profiles[k, half + n - 1] == pytest.approx(wall_magnetization(n, t), abs=5e-4), (t, n)
+    # The front has not reached the ends at t = 3; the energy is conserved.
+    assert abs(profiles[-1, 0]) > 0.499 and abs(profiles[-1, -1]) > 0.499
+    np.testing.assert_allclose(run.energies, run.energies[0], atol=1e-4)
+    assert run.truncation_errors.shape == (61,) and run.truncation_errors.sum() < 1e-6
+
+
+def test_evolve_states_and_loschmidt_echo_match_exact_evolution():
+    chain = lat.chain(8, bc="open")
+    initial, final = models.xxz(chain, Jxy=1.0, Jz=0.0), models.xxz(chain, Jxy=1.0, Jz=2.0, h=0.2)
+    run = dmrg.evolve(initial, final, time_step=0.02, steps=60, states=64, sector={"Sz": 0.0}, measure_steps=6,
+                      keep_mps=True, **EXACT)
+    reference, states = exact_evolution(initial, final, run.times, Sz=0.0)
+    psi0 = reference.eigenvectors[:, 0]
+    assert run.initial.energy == pytest.approx(reference.eigenvalues[0], abs=1e-9)
+    assert len(run.mps) == len(run.times) == 11 and run.mps[0].is_complex
+    amplitudes = [mps.amplitude(reference.problem.states) for mps in run.mps]
+    for psi, kept in zip(states, amplitudes):
+        assert abs(np.vdot(psi, kept)) == pytest.approx(1.0, abs=1e-4)
+    # <psi(0)|psi(t)> is free of the initial state's phase.
+    expected = np.array([np.vdot(psi0, psi) for psi in states])
+    np.testing.assert_allclose(dmrg.overlaps(run), expected, atol=2e-4)
+    np.testing.assert_allclose(dmrg.loschmidt_echo(run), np.abs(expected) ** 2, atol=2e-4)
+    assert dmrg.loschmidt_echo(run)[0] == pytest.approx(1.0, abs=1e-12)
+    H = final.to_dense_matrix({"Sz": 0.0})
+    assert run.energies[0] == pytest.approx(np.vdot(psi0, H @ psi0).real, abs=1e-9)
+    np.testing.assert_allclose(run.energies, run.energies[0], atol=1e-4)
+    # Overlaps with another state on the same sites.
+    ground = dmrg.solve(final, sector={"Sz": 0.0}, keep_mps=True, **EXACT).mps[0]
+    final_ground = exact(final, Sz=0.0).eigenvectors[:, 0]
+    np.testing.assert_allclose(np.abs(dmrg.overlaps(run, ground)),
+                               [abs(np.vdot(final_ground, psi)) for psi in states], atol=2e-4)
+
+
+def test_evolve_trotter_error_scales_as_the_step_squared():
+    chain = lat.chain(8, bc="open")
+    initial, final = models.xxz(chain, Jxy=1.0, Jz=0.0), models.xxz(chain, Jxy=1.0, Jz=1.0, h=0.2)
+    reference, (target,) = exact_evolution(initial, final, [1.0], Sz=0.0)
+    errors = []
+    for dt in (0.2, 0.1, 0.05):
+        steps = round(1.0 / dt)
+        run = dmrg.evolve(initial, final, time_step=dt, steps=steps, measure_steps=[steps], keep_mps=True, states=64,
+                          sector={"Sz": 0.0}, **EXACT)
+        psi = run.mps[0].amplitude(reference.problem.states)
+        overlap = np.vdot(psi, target)
+        errors.append(np.linalg.norm(target - overlap / abs(overlap) * psi))
+    ratios = np.array(errors[:-1]) / np.array(errors[1:])
+    assert np.all((ratios > 3.5) & (ratios < 4.5)), errors
+
+
+def test_evolve_in_imaginary_time_reaches_the_ground_state():
+    chain = lat.chain(8, bc="open")
+    initial, final = models.xxz(chain, Jxy=1.0, Jz=0.0), models.heisenberg(chain)
+    e0 = exact(final, Sz=0.0).eigenvalues[0]
+    run = dmrg.evolve(initial, final, time_step=0.05, steps=200, imaginary=True, measure_steps=50, states=64,
+                      sector={"Sz": 0.0}, keep_mps=True, **EXACT)
+    # Down to the Trotter operator's fixed point, whose energy lies O(dt^2) above E0.
+    assert np.all(np.diff(run.energies) < 1e-8)
+    assert run.energies[-1] == pytest.approx(e0, abs=2e-3)
+    assert run.times[-1] == pytest.approx(10.0)
+    # Imaginary time keeps the options' (real) arithmetic.
+    assert run.initial.options.arithmetic == dmrg.Arithmetic.real and not run.mps[-1].is_complex
+    complex_run = dmrg.evolve(initial, final, time_step=0.05, steps=200, imaginary=True, measure_steps=[200],
+                              states=64, sector={"Sz": 0.0}, arithmetic="complex", **EXACT)
+    assert complex_run.energies[0] == pytest.approx(run.energies[-1], abs=1e-9)
+
+
+def test_evolve_drives_are_sampled_at_the_step_midpoints():
+    chain = lat.chain(8, bc="open")
+    model = models.xxz(chain, Jxy=1.0, Jz=0.5)
+    site = model.site_for(0)
+    staggered = models.TermSum()
+    for i in range(8):
+        staggered += (-1.0) ** i * site.Sz(i)
+    dt, steps = 0.05, 12
+
+    def field(t):
+        return 0.5 * np.sin(2.0 * t)
+
+    common = dict(time_step=dt, steps=steps, states=64, sector={"Sz": 0.0}, measurements={"Sz": "Sz"},
+                  keep_mps=True, **EXACT)
+    by_function = dmrg.evolve(model, model, drives=[(staggered, field)], **common)
+    samples = [field((n + 0.5) * dt) for n in range(steps)]
+    by_values = dmrg.evolve(model, model, drives=[dmrg.Drive(models.compile_observable(model, staggered), samples)],
+                            **common)
+    np.testing.assert_allclose(by_function.measurements["Sz"].values, by_values.measurements["Sz"].values, atol=1e-12)
+    # The ground state stays put without the drive and responds to it.
+    static = dmrg.evolve(model, model, **common)
+    np.testing.assert_allclose(static.measurements["Sz"].values, 0.0, atol=1e-8)
+    assert np.abs(by_function.measurements["Sz"].values[-1]).max() > 1e-3
+    # A piecewise-constant exact evolution with the same samples.
+    reference = exact(model, Sz=0.0)
+    psi = reference.eigenvectors[:, 0].astype(complex)
+    H = model.to_dense_matrix({"Sz": 0.0})
+    D = reference.problem.operator_matrix(staggered).toarray()
+    for n in range(steps):
+        energies, vectors = np.linalg.eigh(H + samples[n] * D)
+        psi = vectors @ (np.exp(-1j * energies * dt) * (vectors.conj().T @ psi))
+    kept = by_function.mps[-1].amplitude(reference.problem.states)
+    assert abs(np.vdot(psi, kept)) == pytest.approx(1.0, abs=1e-4)
+    # The energies are the final Hamiltonian's, without the drive.
+    assert by_function.energies[-1] == pytest.approx(np.vdot(kept, H @ kept).real, abs=1e-9)
+
+
+def test_evolve_on_catalog_models_and_compiled_operators():
+    params = {"MODEL": "spin", "LATTICE": "open chain lattice", "L": 8, "J": 1.0, "Sz_total": 0,
+              "CONSERVED_QUANTUMNUMBERS": "Sz"}
+    initial = models.CatalogModel(params)
+    halved = models.CatalogModel({**params, "J": 0.5})
+    # An eigenstate of H is one of H / 2: the energy halves and the echo stays one.
+    run = dmrg.evolve(initial, halved, time_step=0.1, steps=5, keep_mps=True, states=64, **EXACT)
+    assert run.initial.options.sector == {"Sz": 0.0}
+    np.testing.assert_allclose(run.energies, 0.5 * run.initial.energy, atol=1e-6)
+    np.testing.assert_allclose(dmrg.loschmidt_echo(run), 1.0, atol=1e-6)
+    # Compiled operators on an explicit basis.
+    chain = lat.chain(8, bc="open")
+    a, b = models.xxz(chain, Jxy=1.0, Jz=0.0), models.xxz(chain, Jxy=1.0, Jz=2.0)
+    compiled = dmrg.evolve(models.compile_hamiltonian(a).op, models.compile_hamiltonian(b).op, a.physical_basis(),
+                           time_step=0.05, steps=4, states=64, sector={"Sz": 0.0}, **EXACT)
+    direct = dmrg.evolve(a, b, time_step=0.05, steps=4, states=64, sector={"Sz": 0.0}, **EXACT)
+    np.testing.assert_allclose(compiled.energies, direct.energies, atol=1e-10)
+    evolution = dmrg.make_evolution(time_step=0.05, steps=4, states=64)
+    assert dmrg.evolve(a, b, evolution=evolution, sector={"Sz": 0.0}, **EXACT).energies == pytest.approx(direct.energies)
+
+
+def test_evolve_rejects_invalid_requests():
+    chain = lat.chain(8, bc="open")
+    model = models.xxz(chain, Jxy=1.0, Jz=0.0)
+    with pytest.raises(TypeError, match="time_step"):
+        dmrg.evolve(model, model, steps=3)
+    with pytest.raises(TypeError, match="unknown evolution field"):
+        dmrg.make_evolution(time_step=0.1, stpes=3)
+    with pytest.raises(TypeError, match="basis"):
+        dmrg.evolve(models.compile_hamiltonian(model).op, models.compile_hamiltonian(model).op, time_step=0.1, steps=1)
+    with pytest.raises(ValueError, match="nearest-neighbour"):
+        dmrg.evolve(model, models.heisenberg(lat.nnn_chain(8, bc="open")), time_step=0.1, steps=1, sector={"Sz": 0.0})
+    with pytest.raises(ValueError, match="measure_steps"):
+        dmrg.evolve(model, model, time_step=0.1, steps=2, measure_steps=0)
+    with pytest.raises(ValueError, match="after the last step"):
+        dmrg.evolve(model, model, time_step=0.1, steps=2, measure_steps=[3], sector={"Sz": 0.0})
+    with pytest.raises(ValueError):
+        dmrg.evolve(model, models.heisenberg(lat.chain(8, bc="open"), S=1.0), time_step=0.1, steps=1)
+    run = dmrg.evolve(model, model, time_step=0.1, steps=2, measure_steps=[1, 2], sector={"Sz": 0.0}, keep_mps=True)
+    with pytest.raises(ValueError, match="measure step 0"):
+        dmrg.loschmidt_echo(run)
+    assert dmrg.loschmidt_echo(run, run.mps[0]) == pytest.approx([1.0, 1.0], abs=1e-6)
+    with pytest.raises(ValueError, match="keep_mps"):
+        dmrg.overlaps(dmrg.evolve(model, model, time_step=0.1, steps=1, sector={"Sz": 0.0}))
+
+    class Stop(Exception):
+        pass
+
+    def abort(iteration):
+        if np.isnan(iteration.energy):  # the evolution's iterations carry no energy
+            raise Stop
+
+    with pytest.raises(Stop):
+        dmrg.evolve(model, model, time_step=0.1, steps=3, sector={"Sz": 0.0}, callback=abort)

@@ -102,7 +102,9 @@ struct MpsTensor {
 // Mixed canonical with the norm, one, at `center`: the tensors before it are
 // left-orthonormal, those after it right-orthonormal. The centre is where the
 // final sweep ends, at site L/2, or at site L-2 when the engine stores
-// products (several targets with two-site measurements). The amplitude of a
+// products (several targets with two-site measurements); a time evolution's
+// states (EvolutionResult::mps) are taken where its measuring sweep ends, at
+// site 2 or site L-2. The amplitude of a
 // product state is the product of its tensor slices; with fermions, the
 // product state is the product of creators in site order applied to the
 // vacuum, as in ALPS::ed.
@@ -191,6 +193,96 @@ ALPS_CLASSIC_DMRG_DECL Result solve(models::CompiledOperator const& hamiltonian,
 // Validate Hermiticity, compile the model under its declared charges and
 // fermion convention, and solve it on its physical basis.
 ALPS_CLASSIC_DMRG_DECL Result solve(models::Hamiltonian const& model, Options const& options = {},
+    Measurements const& measurements = {}, IterationCallback callback = {});
+
+// ------------------------------------------------------------ time evolution
+//
+// Adaptive time-dependent DMRG (S. R. White and A. E. Feiguin, Phys. Rev.
+// Lett. 93, 076401 (2004)) on the same engine: the initial state is the DMRG
+// ground state of an initial Hamiltonian in a sector, and it evolves under a
+// final Hamiltonian on the same sites by a second-order Trotter
+// decomposition into nearest-neighbour bond gates, exp(-i dt h_b) in real
+// time or exp(-dt h_b) in imaginary time, each applied where both sites of
+// its bond are explicit in the sweeping configuration while the block bases
+// adapt to the evolved state (no Lanczos solve). One step is the gates of the even bonds for
+// dt/2, of the odd bonds for dt and of the even bonds for dt/2, each set in
+// one half sweep; the closing and opening even half steps of consecutive
+// steps share a half sweep unless the state between them is measured, which
+// takes one more half sweep with identity gates. h_b is the bond's two-site
+// terms plus each site's one-site terms divided among its bonds.
+
+// A time-dependent term: coefficients[n] * op is added to the final
+// Hamiltonian during step n (from time n dt to (n + 1) dt). Sampling a
+// protocol f at the step midpoints, f((n + 1/2) dt), keeps the scheme second
+// order. The operator follows the final Hamiltonian's rules.
+struct Drive {
+    models::CompiledOperator op;
+    std::vector<double> coefficients;
+};
+
+struct Evolution {
+    double time_step = 0.05;
+    std::size_t steps = 0;
+    // exp(-tau H), the state renormalized after every gate: it approaches
+    // the lowest state of the final Hamiltonian in the initial state's
+    // sector that the initial state overlaps.
+    bool imaginary = false;
+    // The most states any truncation keeps; with truncation_error, as many
+    // as that discarded weight needs (dmtk adds a tenth), up to this.
+    std::size_t states = 100;
+    std::optional<double> truncation_error;
+    // Steps after which the state is measured, 0 being the initial state;
+    // empty measures every step from 0 to `steps`.
+    std::vector<std::size_t> measure_steps;
+    std::vector<Drive> drives;
+    // Also return the state at every measured step (EvolutionResult::mps).
+    bool keep_mps = false;
+};
+
+struct EvolutionResult {
+    // The DMRG of the initial Hamiltonian that prepared the initial state:
+    // its energy, iterations and resolved options (with the arithmetic the
+    // whole run used). Its measurements and mps are empty: measure step 0
+    // for the initial state's.
+    Result initial;
+    // The measured steps, ascending, and their times (steps * time_step;
+    // the imaginary time tau in imaginary time).
+    std::vector<std::size_t> steps;
+    std::vector<double> times;
+    // <psi|H_final|psi> at the measured steps, without the drives.
+    std::vector<double> energies;
+    // One row per measured step (Measurement::values[row][column]).
+    std::map<std::string, Measurement> measurements;
+    // The weight discarded in preparing each step's state, summed over its
+    // truncations: entry 0 covers the transformation of the initial state
+    // and its measurement, entry n the half sweeps that apply step n (the
+    // shared half sweep goes to the earlier step) and measure it. The
+    // squared norm the state has lost is about their sum.
+    std::vector<double> truncation_errors;
+    // With Evolution::keep_mps: the state at every measured step.
+    std::vector<MatrixProductState> mps;
+};
+
+// Evolve the ground state of `initial` (in options.sector) under `final`.
+// The final Hamiltonian and every drive must be Hermitian, conserve the
+// sector's charges and couple only sites i and i + 1 (chain order); the
+// initial Hamiltonian is anything solve() takes. `options` controls the
+// initial state's DMRG (its last sweep certifies the Lanczos residuals);
+// real-time evolution always runs in complex arithmetic, imaginary time in
+// options.arithmetic. num_eigenvalues must be one and keep_mps unset
+// (Evolution::keep_mps keeps the evolved states). Measurements are taken at
+// the measured steps as solve() takes them. The callback observes every
+// iteration of the preparation and of the evolution; the evolution's
+// iterations carry no energy (NaN).
+ALPS_CLASSIC_DMRG_DECL EvolutionResult evolve(models::CompiledOperator const& initial,
+    models::CompiledOperator const& final_hamiltonian, models::PhysicalBasis const& basis,
+    Evolution const& evolution, Options const& options = {}, Measurements const& measurements = {},
+    IterationCallback callback = {});
+
+// The same for two models on one physical basis, each validated as solve()
+// validates it.
+ALPS_CLASSIC_DMRG_DECL EvolutionResult evolve(models::Hamiltonian const& initial,
+    models::Hamiltonian const& final_hamiltonian, Evolution const& evolution, Options const& options = {},
     Measurements const& measurements = {}, IterationCallback callback = {});
 
 // Measurement builders over a model's local operator names. `site_terms`

@@ -6,6 +6,12 @@ foreach(name IN ITEMS energies measurements validation operator_forms scratch mp
   alps_add_gtest(classic_dmrg_${name} COMPONENT classic_dmrg LABELS "classic_dmrg;numeric" TIMEOUT 600)
 endforeach()
 
+# Time evolution against dense Trotter products and exact evolution on the
+# ED sector basis (Eigen's dense solver).
+add_executable(classic_dmrg_evolution evolution.cpp)
+target_link_libraries(classic_dmrg_evolution PRIVATE ALPS::classic_dmrg ALPS::ed Eigen3::Eigen)
+alps_add_gtest(classic_dmrg_evolution COMPONENT classic_dmrg LABELS "classic_dmrg;numeric" TIMEOUT 600)
+
 # Classic molecular DMRG against an occupation-bit exact diagonalization
 # (Eigen's dense solver) and against ALPS::ed.
 add_executable(classic_dmrg_molecular molecular.cpp)

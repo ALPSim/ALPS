@@ -30,6 +30,7 @@ The framework paper applies to every component. A paper serving several roles is
 | `worm` | [prokofev1998](#prokofev1998), [Prokofev1998JETP](#prokofev1998jetp) | [alps30](#alps30) | scheduler |
 | `qwl` | [wang2001prl](#wang2001prl), [wang2001pre](#wang2001pre), [troyer2003qwl](#troyer2003qwl) | [alps30](#alps30) | scheduler |
 | `dmrg` | [white1992](#white1992), [white1993](#white1993), [schollwock2005](#schollwock2005), [hallberg2006](#hallberg2006) | [feiguin2013](#feiguin2013) | scheduler |
+| `classic_dmrg_evolution` | [white1992](#white1992), [white1993](#white1993), [white2004](#white2004) | [feiguin2013](#feiguin2013) | — |
 | `dmft` | [metzner1989](#metzner1989), [georges1992](#georges1992), [georges1996](#georges1996) | [gull2011cpc](#gull2011cpc) | — |
 | `interaction` | [rubtsov2005](#rubtsov2005), [gull2011](#gull2011) | [gull2011cpc](#gull2011cpc) | — |
 | `hybridization` | [werner2006](#werner2006), [gull2011](#gull2011) | [gull2011cpc](#gull2011cpc), [hafermann2013](#hafermann2013) | — |
@@ -114,6 +115,10 @@ S. R. White, "Density Matrix Formulation for Quantum Renormalization Groups." Ph
 ### white1993
 
 S. R. White, "Density-Matrix Algorithms for Quantum Renormalization Groups." Physical Review B 48, 10345–10356 (1993). https://doi.org/10.1103/PhysRevB.48.10345
+
+### white2004
+
+S. R. White, A. E. Feiguin, "Real-Time Evolution Using the Density Matrix Renormalization Group." Physical Review Letters 93, 076401 (2004). https://doi.org/10.1103/PhysRevLett.93.076401
 
 ### schollwock2005
 
