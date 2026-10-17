@@ -542,6 +542,33 @@ def test_evolve_states_and_loschmidt_echo_match_exact_evolution():
                                [abs(np.vdot(final_ground, psi)) for psi in states], atol=2e-4)
 
 
+def test_evolve_by_time_step_targeting_under_next_nearest_neighbours():
+    # The frustrated final Hamiltonian couples sites i and i + 2, which the
+    # Trotter gates reject; targeting has no time-step error, so a large
+    # step matches the exact evolution.
+    chain = lat.chain(8, bc="open")
+    initial, final = models.xxz(chain, Jxy=1.0, Jz=0.0), models.heisenberg(lat.nnn_chain(8, bc="open"))
+    energies = []
+    run = dmrg.evolve(initial, final, time_step=0.25, steps=8, states=64, sector={"Sz": 0.0}, method="targeting",
+                      keep_mps=True, callback=lambda row: energies.append(row.energy), **EXACT)
+    reference, states = exact_evolution(initial, final, run.times, Sz=0.0)
+    psi0 = reference.eigenvectors[:, 0]
+    expected = np.array([np.vdot(psi0, psi) for psi in states])
+    np.testing.assert_allclose(dmrg.overlaps(run), expected, atol=1e-9)
+    H = final.to_dense_matrix({"Sz": 0.0})
+    np.testing.assert_allclose(run.energies, np.vdot(psi0, H @ psi0).real, atol=1e-9)
+    # The evolution's iterations after its first half sweep carry <H_final>.
+    evolved = np.array(energies[len(run.initial.iterations):])
+    assert np.isnan(evolved[:5]).all() and np.isfinite(evolved[5:]).all()
+    np.testing.assert_allclose(evolved[5:], run.energies[0], atol=1e-9)
+    assert dmrg.make_evolution(time_step=0.1, steps=1, method="targeting", half_sweeps=3).half_sweeps == 3
+    with pytest.raises(ValueError, match="drives"):
+        dmrg.evolve(initial, final, time_step=0.1, steps=2, sector={"Sz": 0.0}, method="targeting",
+                    drives=[(initial, [1.0, 1.0])])
+    with pytest.raises(TypeError, match="evolution method"):
+        dmrg.make_evolution(time_step=0.1, steps=1, method="rk4")
+
+
 def test_evolve_trotter_error_scales_as_the_step_squared():
     chain = lat.chain(8, bc="open")
     initial, final = models.xxz(chain, Jxy=1.0, Jz=0.0), models.xxz(chain, Jxy=1.0, Jz=1.0, h=0.2)

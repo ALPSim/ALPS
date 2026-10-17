@@ -402,6 +402,23 @@ references:
     value: white2004
     description: ALPS reference key
 - type: article
+  title: Time-Step Targeting Methods for Real-Time Dynamics Using the Density Matrix Renormalization Group
+  authors:
+  - family-names: Feiguin
+    given-names: A. E.
+  - family-names: White
+    given-names: S. R.
+  year: 2005
+  journal: Physical Review B
+  volume: '72'
+  issue: '2'
+  doi: 10.1103/PhysRevB.72.020404
+  start: '020404'
+  identifiers:
+  - type: other
+    value: feiguin2005
+    description: ALPS reference key
+- type: article
   title: The Density-Matrix Renormalization Group
   authors:
   - family-names: Schollwöck

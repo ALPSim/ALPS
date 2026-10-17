@@ -39,15 +39,21 @@ state of ``initial`` under ``final`` by adaptive time-dependent DMRG
 (White and Feiguin): second-order Trotter gates on the bonds, applied while
 sweeping, the kept basis following the state. Real time runs in complex
 arithmetic; ``imaginary=True`` applies ``exp(-tau H)`` and renormalizes.
-The final Hamiltonian couples only neighbouring sites in chain order;
-``drives`` add time-dependent terms. Every measured step reports its time,
-the final Hamiltonian's energy, the measurements and, with ``keep_mps``,
-its state; ``overlaps`` and ``loschmidt_echo`` contract the kept states.
+With the Trotter gates the final Hamiltonian couples only neighbouring
+sites in chain order; ``drives`` add time-dependent terms.
+``method="targeting"`` uses time-step targeting (Feiguin and White) with a
+Krylov step instead: any final Hamiltonian, no time-step error, no drives.
+Every measured step reports its time, the final Hamiltonian's energy, the
+measurements and, with ``keep_mps``, its state; ``overlaps`` and
+``loschmidt_echo`` contract the kept states. A product initial state, such
+as this domain wall of fields alone, needs ``warmup_configuration`` (one
+local state per site; 0 is up).
 
 >>> xx = models.xxz(models.lattice.chain(20, bc="open"), Jxy=1.0, Jz=0.0)
 >>> site = xx.site_for(0)
 >>> wall = sum(((-1.0 if i < 10 else 1.0) * site.Sz(i) for i in range(20)), models.TermSum())
 >>> run = dmrg.evolve(wall, xx, time_step=0.05, steps=60, states=64, sector={"Sz": 0},
+...                   warmup_configuration=[0] * 10 + [1] * 10,
 ...                   measure_steps=10, measurements={"Sz": "Sz"})          # doctest: +SKIP
 >>> run.times, run.measurements["Sz"].values                                 # doctest: +SKIP
 
@@ -189,7 +195,7 @@ def solve_molecular(one_body, two_body, n_alpha, n_beta, *, core_energy=0.0, int
 # -- time evolution -------------------------------------------------------------------
 
 _EVOLUTION_FIELDS = ("time_step", "steps", "imaginary", "states", "truncation_error", "measure_steps", "drives",
-                     "keep_mps")
+                     "keep_mps", "method", "half_sweeps")
 
 
 def _is_model(value):
@@ -270,7 +276,7 @@ def make_evolution(evolution=None, *, context=None, **fields):
     unknown = set(fields) - set(_EVOLUTION_FIELDS)
     if unknown:
         raise TypeError(f"unknown evolution field {sorted(unknown)[0]!r}; the fields are {', '.join(_EVOLUTION_FIELDS)}")
-    for name in ("time_step", "steps", "imaginary", "states", "truncation_error", "keep_mps"):
+    for name in ("time_step", "steps", "imaginary", "states", "truncation_error", "keep_mps", "method", "half_sweeps"):
         if name in fields:
             setattr(result, name, fields[name])
     if "measure_steps" in fields:
@@ -292,10 +298,15 @@ def evolve(initial, final, basis=None, *, evolution=None, options=None, measurem
     solved under ``options`` or the DMRG option fields as for
     :func:`solve`. The evolution fields (``time_step``, ``steps``,
     ``imaginary``, ``states``, ``truncation_error``, ``measure_steps``,
-    ``drives``, ``keep_mps``; see :func:`make_evolution`) or an
-    ``evolution`` object control the run. ``final`` and the drives must be
-    Hermitian, conserve the sector's charges and couple only sites ``i``
-    and ``i + 1``. Measurements are named operators as for :func:`solve`.
+    ``drives``, ``keep_mps``, ``method``, ``half_sweeps``; see
+    :func:`make_evolution`) or an ``evolution`` object control the run.
+    ``final`` and the drives must be Hermitian and conserve the sector's
+    charges. ``method="trotter"`` (the default) applies second-order Trotter
+    gates, so ``final`` and the drives may couple only sites ``i`` and
+    ``i + 1``. ``method="targeting"`` is time-step targeting with a Krylov
+    step: ``final`` may couple any sites, there is no time-step error and
+    there are no drives; each step takes ``half_sweeps`` half sweeps (2).
+    Measurements are named operators as for :func:`solve`.
 
     Returns an ``EvolutionResult``: ``initial`` (the preparing solve),
     ``steps``, ``times`` and ``energies`` (``<H_final>``) of the measured

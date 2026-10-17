@@ -36,7 +36,9 @@
 #
 # The initial state is always the DMRG ground state of an *initial*
 # Hamiltonian (in a charge sector); it evolves under a *final* Hamiltonian
-# on the same sites, which may couple only neighbouring sites in chain order.
+# on the same sites, which the Trotter gates restrict to neighbouring sites
+# in chain order. (`method="targeting"` lifts that restriction and the
+# Trotter error, by time-step targeting with a Krylov step.)
 # There are two regimes:
 #
 # * **imaginary time** (`imaginary=True`) applies $e^{-\tau H}$ and

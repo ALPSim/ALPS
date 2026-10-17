@@ -55,6 +55,12 @@ classic::Arithmetic arithmetic_of(nb::handle value) {
                                                      {"complex", classic::Arithmetic::complex}}, "arithmetic");
 }
 
+classic::EvolutionMethod method_of(nb::handle value) {
+    return enum_or_name<classic::EvolutionMethod>(value, {{"trotter", classic::EvolutionMethod::trotter},
+                                                          {"targeting", classic::EvolutionMethod::targeting}},
+                                                  "evolution method");
+}
+
 char const* direction_name(classic::Direction value) {
     return value == classic::Direction::left_to_right ? "left_to_right" : "right_to_left";
 }
@@ -164,6 +170,9 @@ NB_MODULE(classic_dmrg_c, m) {
     nb::enum_<classic::Arithmetic>(m, "Arithmetic")
         .value("real", classic::Arithmetic::real)
         .value("complex", classic::Arithmetic::complex);
+    nb::enum_<classic::EvolutionMethod>(m, "EvolutionMethod")
+        .value("trotter", classic::EvolutionMethod::trotter)
+        .value("targeting", classic::EvolutionMethod::targeting);
     nb::enum_<classic::Direction>(m, "Direction")
         .value("left_to_right", classic::Direction::left_to_right)
         .value("right_to_left", classic::Direction::right_to_left);
@@ -425,7 +434,7 @@ NB_MODULE(classic_dmrg_c, m) {
         .def_rw("coefficients", &classic::Drive::coefficients, "One coefficient per step.");
     nb::class_<classic::Evolution>(m, "Evolution",
         "Controls of a time evolution: the step, the step count, real or imaginary time, the kept states or "
-        "truncation error, the measured steps, the drives and whether to keep the states.")
+        "truncation error, the measured steps, the drives, whether to keep the states and the method.")
         .def(nb::init<>())
         .def_rw("time_step", &classic::Evolution::time_step)
         .def_rw("steps", &classic::Evolution::steps)
@@ -436,9 +445,16 @@ NB_MODULE(classic_dmrg_c, m) {
         .def_rw("measure_steps", &classic::Evolution::measure_steps, "Measured steps (0 is the initial state); empty: all.")
         .def_rw("drives", &classic::Evolution::drives)
         .def_rw("keep_mps", &classic::Evolution::keep_mps, "Also return the state at every measured step.")
+        .def_prop_rw("method", [](classic::Evolution const& e) { return e.method; },
+                     [](classic::Evolution& e, nb::handle value) { e.method = method_of(value); },
+                     "'trotter' (second-order bond gates, nearest neighbours, drives) or 'targeting' (time-step "
+                     "targeting with a Krylov step: any final Hamiltonian, no time-step error, no drives).")
+        .def_rw("half_sweeps", &classic::Evolution::half_sweeps,
+                "Time-step targeting: the half sweeps of each step, the last one ending in the Krylov step.")
         .def("__repr__", [](classic::Evolution const& e) {
             return "Evolution(time_step=" + std::to_string(e.time_step) + ", steps=" + std::to_string(e.steps)
-                 + (e.imaginary ? ", imaginary" : ", real") + " time, states=" + std::to_string(e.states) + ")";
+                 + (e.imaginary ? ", imaginary" : ", real") + " time, states=" + std::to_string(e.states)
+                 + (e.method == classic::EvolutionMethod::targeting ? ", targeting)" : ", trotter)");
         });
     nb::class_<classic::EvolutionResult>(m, "EvolutionResult",
         "A finished time evolution: the preparation's Result, then per measured step its time, the final "

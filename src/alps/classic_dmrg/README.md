@@ -46,7 +46,7 @@ auto const& density = result.measurements.at("n").values[0];  // row = target st
 | `Result` | ascending `energies`, `measurements` (rows follow the targets, columns the terms with their factor `sites`), the `iterations` observed (direction, index, energy, truncation error, entropy), `final_truncation_error`, the resolved `options`, with `keep_mps` the `mps` of every target |
 | `MatrixProductState`, `MpsTensor` | a targeted state's site tensors (`[left bond][local state][right bond]`, row-major, `real` or `complex` entries) and its `center` |
 | `evolve(initial, final, basis, evolution, options, measurements, callback)`, `evolve(initial_model, final_model, …)` | time evolution of the ground state of `initial` under `final` ([below](#time-evolution)) |
-| `Evolution` | `time_step`, `steps`, `imaginary`, `states`, optional `truncation_error`, `measure_steps`, `drives`, `keep_mps` |
+| `Evolution` | `time_step`, `steps`, `imaginary`, `states`, optional `truncation_error`, `measure_steps`, `drives`, `keep_mps`, `method` (`EvolutionMethod::trotter` or `targeting`, [below](#time-step-targeting)), `half_sweeps` |
 | `Drive` | a time-dependent term: `coefficients[n] * op` during step `n` |
 | `EvolutionResult` | `initial` (the preparing solve's `Result`), the measured `steps`, their `times`, `energies` (`<H_final>`) and `measurements` (one row per measured step), the `truncation_errors` of every step, with `keep_mps` the `mps` of every measured step |
 | `IterationCallback` | observes every completed iteration; may throw to abort the solve |
@@ -167,7 +167,9 @@ engine; a time evolution keeps its states through `Evolution::keep_mps`
 prepares the ground state of `initial` in `options.sector` by the usual
 warm-up and sweeps (the last sweep certifies its Lanczos residuals) and
 evolves it under `final` by adaptive time-dependent DMRG (S. R. White and
-A. E. Feiguin, Phys. Rev. Lett. 93, 076401 (2004)). Every step is the
+A. E. Feiguin, Phys. Rev. Lett. 93, 076401 (2004)). This section describes
+the default method, `EvolutionMethod::trotter`; time-step targeting
+([below](#time-step-targeting)) is the other. Every step is the
 second-order Trotter product `exp(-dt A/2) exp(-dt B) exp(-dt A/2)`, with
 `A` the bonds `(b, b + 1)` of even `b` and `B` the odd ones, and `dt`
 imaginary in real time. Each factor is one half sweep over the whole chain
@@ -191,9 +193,10 @@ two half sweeps, a measured one four.
   `ALPS::ed` applies it. The exponential is taken with Eigen on every
   connected block of the bond matrix, so the gates conserve every charge
   exactly. `final` and every drive must be Hermitian, conserve the
-  sector's charges and couple only sites `i` and `i + 1`; a coupling of
-  other sites (a periodic chain's closing bond, next-nearest neighbours) is
-  rejected with a message naming the sites.
+  sector's charges and, for the Trotter method, couple only sites `i` and
+  `i + 1`; a coupling of other sites (a periodic chain's closing bond,
+  next-nearest neighbours) is rejected with a message naming the sites.
+  Time-step targeting takes them.
 - Real time runs in complex arithmetic; imaginary time (`imaginary`) runs in
   `options.arithmetic`, applies `exp(-tau H)` and renormalizes after every
   gate, approaching the lowest state of `final` that the initial state
@@ -236,24 +239,51 @@ pyalps binds it as `classic_dmrg.evolve`, with `overlaps` and
 `loschmidt_echo`; [tutorials/time-evolution](../../../tutorials/time-evolution/README.md)
 has four worked examples.
 
-### Time-step targeting (not implemented)
+### Time-step targeting
 
-The Trotter gates restrict `final` to nearest neighbours in chain order and
-carry a Trotter error. Time-step targeting (A. E. Feiguin and S. R. White,
-Phys. Rev. B 72, 020404(R) (2005)) has neither: at every configuration the
-density matrix targets the state at `t`, `t + dt/3`, `t + 2dt/3` and
-`t + dt` with weights 1/3, 1/6, 1/6 and 1/3, the intermediate states
-computed in the superblock by a Runge-Kutta or Krylov step of `H`, and a
-few half sweeps per step advance the state by `dt` once the basis has
-converged. On this engine it would be a second mode of
-`detail::EvolvingSystem`: keep the Hamiltonian's block operators (the hooks
-`init_hamiltonian` and `rotate_hamiltonian` it now disables), apply
-`hamiltonian_product` for the Runge-Kutta stages, fill `_target` and
-`_target_weight` with the four states (`build_target_states` already sums
-weighted targets into the density matrix) and advance by a Krylov
-exponential at the last half sweep of a step. That needs the Hamiltonian
-rotated at every step, four targets in every truncation and tests of its
-own, so it is left for later.
+`Evolution::method = EvolutionMethod::targeting` (pyalps
+`method="targeting"`) evolves by time-step targeting (A. E. Feiguin and
+S. R. White, Phys. Rev. B 72, 020404(R) (2005)). It has neither the
+nearest-neighbour restriction nor a time-step error. Instead of gates, it
+applies `final` itself to the superblock state:
+
+- `final` replaces the system's Hamiltonian under its own name, and the
+  hooks that build the ground state's block operators build its block
+  operators. Two half sweeps do this, one side each, before the first step;
+  the first of them targets the state alone. `final` may couple any two
+  sites, as the initial Hamiltonian may (next-nearest neighbours, a
+  periodic chain).
+- At every configuration four Runge-Kutta vectors of `c H`, with
+  `c = -i dt` (or `-dt` in imaginary time), give the states at `t + dt/3`,
+  `t + 2dt/3` and `t + dt` (the paper's formulas, in `src/tdmrg.hpp`). The
+  density matrix targets them and the state with weights 1/3, 1/6, 1/6 and
+  1/3, so the kept basis holds the whole interval of the step.
+- Each step is `half_sweeps` half sweeps (default 2). At the last
+  configuration of the last one, a Krylov exponential of `final` (Lanczos
+  with full reorthogonalization, up to 40 vectors) advances the state.
+  With enough states this is exact, so a large `dt` costs only the Krylov
+  vectors. Imaginary time renormalizes after the step.
+- A measured step is measured in one more half sweep. That half sweep
+  keeps the four targets and does not advance. Step 0 is measured in the
+  second of the two building half sweeps.
+- Drives are rejected: the block Hamiltonians hold `final`'s coefficients,
+  built once. `truncation_errors[n]` is the squared norm the state itself
+  lost in step `n` (the four targets share the kept states, so a
+  truncation keeps more states than the state alone would need). The
+  iterations report `<psi|H_final|psi>` at their configuration, except the
+  first building half sweep's, which report NaN.
+
+Each configuration costs four products with `H`, and the last one of a step
+also costs the Krylov vectors. The mixed density matrix keeps more states
+than one state needs. The 24-site domain wall of the tutorial, with up to 40 states
+and a truncation error of 1e-10, follows the Bessel solution up to `t = 4`
+as follows (Apple M-series laptop):
+
+| method | `dt` | steps | time | max deviation |
+| --- | --- | --- | --- | --- |
+| Trotter | 0.05 | 120 | 2.4 s | 4.8e-5 |
+| targeting | 0.05 | 120 | 3.6 s | 2.1e-5 |
+| targeting | 0.2 | 30 | 1.4 s | 3.2e-5 |
 
 ## Molecular Hamiltonians (`<alps/dmrg/molecular.hpp>`)
 
@@ -552,10 +582,14 @@ Adrian Feiguin's teaching program
 without quantum numbers. That repository has no license, so it served as a
 description of the algorithm only and no code was copied or translated
 from it; maintainers may want to confirm that this use needs no
-permission. No dmtk file changed: `EvolvingSystem` derives from
-`dmtk::System`, runs its warm-up and sweeps, and disables its two
-Hamiltonian hooks while the state evolves, so the evolution builds and
-rotates only the measured operators.
+permission. Time-step targeting in the same file was written from the
+paper (Feiguin and White, PRB 72, 020404(R)), with its Runge-Kutta targets
+and weights; the Krylov step is a textbook Lanczos exponential. No dmtk
+file changed: `EvolvingSystem` derives from `dmtk::System` and runs its
+warm-up and sweeps. For the Trotter method it disables the two Hamiltonian
+hooks while the state evolves, so only the measured operators are built
+and rotated. For time-step targeting it keeps them and replaces the
+system's Hamiltonian by the final one.
 
 The MPS export (`src/mps.hpp`) is adapted from master's SAVE_MPS
 ([ALPSim/ALPS#216](https://redirect.github.com/ALPSim/ALPS/pull/216), Marcus
@@ -598,6 +632,20 @@ it checks an identity and an eigenstate evolution, the `dt^2` shrinking of
 the Trotter error, energy conservation, imaginary time in real and complex
 arithmetic (against the Trotter product and the ED ground energy), drives,
 the measured-step bookkeeping, the reported truncation and the rejections.
+Its time-step targeting tests compare every step with `exp(-iHt)` to 1e-9,
+and every iteration's energy with the conserved `<H_final>`:
+- fields to the XX chain, whose block operators the evolution builds;
+- next-nearest-neighbour and periodic final Hamiltonians;
+- a Hubbard quench;
+- complex hopping;
+- four sites;
+- imaginary time in real and complex arithmetic.
+
+Two further tests check the method's distinguishing properties. At
+`dt = 0.4`, targeting is exact where the Trotter product misses by more
+than 1e-2. A truncated product-state domain wall stays within 1e-4 of the
+exact state, where targeting the state alone misses by 0.025 after one
+step.
 `classic_dmrg_warmup` solves 48-site chains whose uniform warm-up
 misplaces charges with the default four sweeps, each failing without its
 warm-up configuration: field-only walls at the centre and at a quarter
