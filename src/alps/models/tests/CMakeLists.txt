@@ -9,6 +9,7 @@ foreach(name IN ITEMS
     heterogeneous_physical_basis
     lattice_xml
     operator_decomposition
+    operator_names
     qubit_encoding
     term_sum
     translation_generators)

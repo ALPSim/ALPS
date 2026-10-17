@@ -11,7 +11,8 @@
 // <alps/lattice.h> headers, alps::multi_array instead of alpsx's mdarray,
 // <alps/models/compiled.hpp> operators; conserved_quantum_numbers, sector
 // and local_charge follow the charge derivation of alpsx's
-// src/solvers/diag/src/runtime/catalog_problem.cpp.
+// src/solvers/diag/src/runtime/catalog_problem.cpp. Added here: kit operator
+// names resolve through <alps/models/operator_names.hpp>.
 #ifndef ALPS_MODEL_CATALOG_HPP
 #define ALPS_MODEL_CATALOG_HPP
 
@@ -20,6 +21,7 @@
 #include <alps/models/compiled.hpp>
 #include <alps/models/lattice.hpp>
 #include <alps/models/lattice_xml.hpp>
+#include <alps/models/operator_names.hpp>
 #include <alps/models/physical_basis.hpp>
 #include <alps/multi_array.hpp>
 #include <alps/numeric/is_nonzero.hpp>
@@ -99,6 +101,7 @@ public:
   /// Does not reseed the expression RNG; callers control their Disorder context.
   /// Site, bond, global, named and explicit two-site tensor operators share this
   /// compiler. Optional locations select a site, bond, or ordered pair of sites.
+  /// A site operator name may use the kit's spelling (Sp, c_dag_up, n_dn).
   template <class Op, class... Location>
   CompiledOperator compile_operator(Op const& op, Location... location) const {
     static_assert(std::is_same_v<Scalar, double> || std::is_same_v<Scalar, std::complex<double>>,
@@ -149,6 +152,9 @@ private:
   void append_operator(CompiledOperator&, SiteOperator const&) const;
   void append_operator(CompiledOperator&, BondOperator const&) const;
   void append_operator(CompiledOperator&, GlobalOperator const&) const;
+  // A kit spelling (Sp, c_dag_up, n_dn, ...) of an operator the site bases
+  // spell differently; any name the catalog defines is kept.
+  std::string catalog_operator_name(std::string const&) const;
   void append_operator(CompiledOperator&, std::string const&) const;
   void append_operator(CompiledOperator&, std::string const&, site_descriptor) const;
   void append_operator(CompiledOperator&, std::string const&, bond_descriptor) const;
@@ -307,11 +313,30 @@ void CatalogModel<Scalar,G>::append_operator(CompiledOperator& result, const Glo
 }
 
 template <class Scalar, class G>
+std::string CatalogModel<Scalar,G>::catalog_operator_name(std::string const& name) const
+{
+  if (model_.has_site_operator(name) || model_.has_bond_operator(name) || model_.has_global_operator(name))
+    return name;
+  std::set<int> types;
+  for (auto it = graph_.sites().first; it != graph_.sites().second; ++it)
+    types.insert(static_cast<int>(graph_.site_type(*it)));
+  auto const defined = [&](std::string const& candidate) {
+    for (int type : types)
+      if (model_.model().basis().site_basis(type).has_operator(candidate)) return true;
+    return false;
+  };
+  if (defined(name)) return name;
+  for (auto const& [kit, catalog] : catalog_operator_names)
+    if (kit == name && defined(std::string(catalog))) return std::string(catalog);
+  return name;
+}
+
+template <class Scalar, class G>
 void CatalogModel<Scalar,G>::append_operator(CompiledOperator& result,
                                          const std::string& name, site_descriptor site) const
 {
   if (model_.has_site_operator(name)) append_operator(result, model_.get_site_operator(name), site);
-  else append_operator(result, SiteOperator(name+"(i)","i"), site);
+  else append_operator(result, SiteOperator(catalog_operator_name(name)+"(i)","i"), site);
 }
 
 template <class Scalar, class G>
@@ -327,7 +352,7 @@ void CatalogModel<Scalar,G>::append_operator(CompiledOperator& result, const std
   if (model_.has_site_operator(name)) append_operator(result, model_.get_site_operator(name));
   else if (model_.has_bond_operator(name)) append_operator(result, model_.get_bond_operator(name));
   else if (model_.has_global_operator(name)) append_operator(result, model_.get_global_operator(name));
-  else append_operator(result, SiteOperator(name+"(i)","i"));
+  else append_operator(result, SiteOperator(catalog_operator_name(name)+"(i)","i"));
 }
 
 template <class Scalar, class G>

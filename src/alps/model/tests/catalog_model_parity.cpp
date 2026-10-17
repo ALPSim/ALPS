@@ -237,3 +237,47 @@ TEST(CatalogModelParity, CompiledCatalogSectorsAgreeAcrossProductProjectedAndKit
     shorter.site_dims.pop_back();
     EXPECT_THROW(alps::ed::prepare_product(shorter, catalog.physical_basis()), std::invalid_argument);
 }
+
+// Kit spellings reach the catalog's operators; names the catalog defines win.
+TEST(CatalogModelParity, KitOperatorNamesResolveToCatalogOperators) {
+    auto const same = [](mdl::CompiledOperator const& a, mdl::CompiledOperator const& b) {
+        ASSERT_EQ(a.site_dims, b.site_dims);
+        ASSERT_EQ(a.terms.size(), b.terms.size());
+        for (std::size_t t = 0; t < a.terms.size(); ++t) {
+            EXPECT_EQ(a.terms[t].coefficient, b.terms[t].coefficient);
+            EXPECT_EQ(a.terms[t].jordan_wigner, b.terms[t].jordan_wigner);
+            ASSERT_EQ(a.terms[t].factors.size(), b.terms[t].factors.size());
+            for (std::size_t f = 0; f < a.terms[t].factors.size(); ++f) {
+                EXPECT_EQ(a.terms[t].factors[f].site, b.terms[t].factors[f].site);
+                EXPECT_EQ(a.terms[t].factors[f].matrix, b.terms[t].factors[f].matrix);
+            }
+        }
+    };
+    alps::Parameters spin;
+    spin["MODEL"] = "spin";
+    spin["LATTICE"] = "chain lattice";
+    spin["L"] = 4;
+    spin["J"] = 1;
+    mdl::CatalogModel<> chain(spin);
+    same(chain.compile_operator(std::string("Sp")), chain.compile_operator(std::string("Splus")));
+    same(chain.compile_operator(std::string("Sm"), chain.graph().site(2)),
+         chain.compile_operator(std::string("Sminus"), chain.graph().site(2)));
+    EXPECT_EQ(chain.compile_operator(std::string("Sp")).terms.size(), 4u);
+    alps::Parameters hubbard;
+    hubbard["MODEL"] = "fermion Hubbard";
+    hubbard["LATTICE"] = "open chain lattice";
+    hubbard["L"] = 3;
+    hubbard["t"] = 1;
+    hubbard["U"] = 4;
+    mdl::CatalogModel<> fermions(hubbard);
+    for (auto const& [kit, catalog] : std::vector<std::pair<std::string, std::string>>{
+             {"n_dn", "n_down"}, {"n_updn", "double_occupancy"}}) {
+        SCOPED_TRACE(kit);
+        same(fermions.compile_operator(kit, fermions.graph().site(1)),
+             fermions.compile_operator(catalog, fermions.graph().site(1)));
+    }
+    // A lone fermionic site operator is not a catalog site matrix under either spelling.
+    EXPECT_ANY_THROW(fermions.compile_operator(std::string("cdag_up"), fermions.graph().site(1)));
+    EXPECT_ANY_THROW(fermions.compile_operator(std::string("c_dag_up"), fermions.graph().site(1)));
+    EXPECT_ANY_THROW(fermions.compile_operator(std::string("no_such_operator")));
+}

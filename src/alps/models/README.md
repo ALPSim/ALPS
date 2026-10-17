@@ -21,8 +21,9 @@ mdl::CompiledModel compiled = mdl::compile_hamiltonian(model);
 | --- | --- |
 | `alps/models/lattice.hpp` | `alps::lattice`: `UnitCell`, `Lattice` (tiling, neighbours, momenta, translation generators) and 15 named lattices |
 | `alps/models/finite_graph.hpp`, `geometry.hpp` | `FiniteGraph` and `LatticeGeometry`: owned graph and unit-cell descriptions without a tiler |
-| `alps/models/site.hpp` | `LocalOp`, `SiteBasis`, `finalize_site`, built-in spin, boson, hard-core boson, spinless and spinful fermion sites |
-| `alps/models/terms.hpp` | `Term`, `TermSum`: operator algebra with fermionic swap signs, Hermitian conjugation, canonicalisation and charge analysis; `+=`/`-=` append in place, so accumulating many terms is linear |
+| `alps/models/site.hpp` | `LocalOp`, `SiteBasis` (`op` also takes the XML catalog's spellings; `adjoint` names a conjugate as the site does, `Sp` → `Sm`), `finalize_site`, built-in spin, boson, hard-core boson, spinless and spinful fermion sites |
+| `alps/models/operator_names.hpp` | `catalog_operator_names`: the kit names of built-in operators and the catalog's (`Sp`/`Splus`, `c_dag_up`/`cdag_up`, `n_dn`/`n_down`, `n_updn`/`double_occupancy`, ...), used by `SiteBasis::op` and `CatalogModel::compile_operator` |
+| `alps/models/terms.hpp` | `Term`, `TermSum`: operator algebra with fermionic swap signs, Hermitian conjugation (factors named by `SiteBasis::adjoint`), canonicalisation and charge analysis; `+=`/`-=` append in place, so accumulating many terms is linear |
 | `alps/models/physical_basis.hpp` | `LocalBasis`, `PhysicalBasis`: ordered local spaces, quantum numbers and parities, independent of any Hamiltonian |
 | `alps/models/compiled.hpp` | `CompiledOperator` (dense local factors with Jordan–Wigner strings) and `CompiledModel` (operator plus lattice metadata) |
 | `alps/models/hamiltonian.hpp` | `Hamiltonian` (lattice + site bases + bond/site/global term templates), `compile_hamiltonian`, `compile_operator`, `validate_hermiticity` |

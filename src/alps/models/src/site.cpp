@@ -11,6 +11,7 @@
 // src/model/tests/models/models_kit_parity.cpp.
 
 #include <alps/models/site.hpp>
+#include <alps/models/operator_names.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include <algorithm>
@@ -164,11 +165,45 @@ std::vector<LocalOp> LocalOp::split_by_qn_delta(
     return out;
 }
 
+namespace {
+
+LocalOp const* find_op(SiteBasis const& site, std::string const& name) {
+    auto it = site.operators.find(name);
+    if (it != site.operators.end()) return &it->second;
+    for (auto const& [kit, catalog] : catalog_operator_names) {
+        if (catalog != name) continue;
+        auto alias = site.operators.find(std::string(kit));
+        if (alias != site.operators.end()) return &alias->second;
+    }
+    return nullptr;
+}
+
+} // namespace
+
 LocalOp const& SiteBasis::op(std::string const& name) const {
-    auto it = operators.find(name);
-    if (it == operators.end())
-        throw std::out_of_range("SiteBasis has no operator '" + name + "'");
-    return it->second;
+    if (auto const* found = find_op(*this, name)) return *found;
+    throw std::out_of_range("SiteBasis has no operator '" + name + "'");
+}
+
+bool SiteBasis::has_op(std::string const& name) const { return find_op(*this, name) != nullptr; }
+
+LocalOp SiteBasis::adjoint(LocalOp const& op) const {
+    LocalOp out = op.dag();
+    auto const same = [&](LocalOp const& candidate) {
+        return candidate.dim == out.dim && candidate.parity == out.parity && candidate.matrix == out.matrix;
+    };
+    auto const suffix = operators.find(out.name);
+    if (suffix != operators.end() && same(suffix->second)) return out;
+    if (op.matrix == out.matrix) {
+        out.name = op.name;
+        return out;
+    }
+    for (auto const& [name, candidate] : operators)
+        if (same(candidate)) {
+            out.name = name;
+            return out;
+        }
+    return out;
 }
 
 SiteBasisPtr finalize_site(SiteBasis site) {

@@ -87,8 +87,16 @@ struct ALPS_MODELS_DECL SiteBasis {
     // qubit encodings use ordinal labels; quantum numbers still define order.
     std::vector<std::string> basis_labels;
 
-    LocalOp const& op(std::string const& name) const;   // throws on miss
-    bool has_op(std::string const& name) const { return operators.count(name) != 0; }
+    // By name, or by the XML catalog's spelling of a built-in name ("Splus",
+    // "cdag_up", "n_down"; see operator_names.hpp). Throws on a miss.
+    LocalOp const& op(std::string const& name) const;
+    bool has_op(std::string const& name) const;
+    // op.dag() under this basis's own name for it: the operator the "_dag"
+    // suffix rule names when it has the adjoint's matrix, the operator itself
+    // when Hermitian, else the first operator (by name) with the adjoint's
+    // matrix and parity, so Sp.dag() is "Sm" and c_up.dag() "c_dag_up". An
+    // adjoint the basis does not define keeps the suffix-rule name.
+    LocalOp adjoint(LocalOp const& op) const;
 };
 
 // Shared-ownership handle: Term factors reference their SiteBasis.

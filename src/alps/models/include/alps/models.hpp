@@ -12,6 +12,7 @@
 #include <alps/models/lattice_xml.hpp>
 #include <alps/models/finite_graph.hpp>
 #include <alps/models/site.hpp>
+#include <alps/models/operator_names.hpp>
 #include <alps/models/terms.hpp>
 #include <alps/models/physical_basis.hpp>
 #include <alps/models/compiled.hpp>

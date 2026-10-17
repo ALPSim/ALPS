@@ -167,6 +167,30 @@ def test_built_in_sites_and_custom_sites():
         models.SiteBasis(2, {"X": np.eye(3)})
 
 
+
+def test_catalog_spellings_and_named_adjoints():
+    spin, fermion = models.spin(), models.spinful_fermion()
+    assert models.catalog_operator_names["Sp"] == "Splus" and models.catalog_operator_names["n_dn"] == "n_down"
+    assert spin.op("Splus").name == "Sp" and spin.has_op("Sminus") and not spin.has_op("cdag_up")
+    assert fermion.op("cdag_up").name == "c_dag_up" and fermion.op("double_occupancy").name == "n_updn"
+    assert models.located(fermion, "c_down", 1).terms[0].factors[0].op.name == "c_dn"
+    assert spin.adjoint(spin.op("Sp")).name == "Sm" and spin.adjoint(spin.op("Sz")).name == "Sz"
+    assert fermion.adjoint(fermion.op("c_up")).name == "c_dag_up"
+    hop = (models.located(fermion, "c_dag_up", 0) * models.located(fermion, "c_up", 2)).dag()
+    assert [(f.op.name, f.site) for f in hop.terms[0].factors] == [("c_dag_up", 2), ("c_up", 0)]
+    flip = (models.located(spin, "Sp", 0) * models.located(spin, "Sm", 1)).add_hc()
+    assert [f.op.name for f in flip.terms[1].factors] == ["Sp", "Sm"]
+    with pytest.raises(IndexError):
+        spin.op("cdag_up")
+
+    # The other direction: kit names on a catalog model.
+    chain = models.CatalogModel({"MODEL": "spin", "LATTICE": "chain lattice", "L": 4, "J": 1.0})
+    np.testing.assert_array_equal(chain.compile_operator("Sp", site=2).terms[0].factors[0].matrix,
+                                  chain.compile_operator("Splus", site=2).terms[0].factors[0].matrix)
+    hubbard = models.CatalogModel({"MODEL": "fermion Hubbard", "LATTICE": "open chain lattice", "L": 3,
+                                   "t": 1.0, "U": 4.0})
+    assert len(hubbard.compile_operator("n_updn")) == len(hubbard.compile_operator("double_occupancy")) == 3
+
 def test_term_algebra_and_compilation():
     spin = models.spin()
     sites = [spin, spin]

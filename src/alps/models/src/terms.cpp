@@ -334,7 +334,7 @@ TermSum TermSum::dag() const {
         for (auto it = t.factors.rbegin(); it != t.factors.rend(); ++it) {
             Factor f;
             f.site = it->site;
-            f.op = it->op.dag();
+            f.op = it->basis ? it->basis->adjoint(it->op) : it->op.dag();
             f.basis = it->basis;
             d.factors.push_back(std::move(f));
         }

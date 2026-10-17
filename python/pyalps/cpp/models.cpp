@@ -403,8 +403,12 @@ void bind_sites(nb::module_& m) {
         .def_ro("quantum_numbers", &mdl::SiteBasis::quantum_numbers)
         .def_ro("parity_operator", &mdl::SiteBasis::parity_operator)
         .def_ro("basis_labels", &mdl::SiteBasis::basis_labels)
-        .def("op", &mdl::SiteBasis::op, nb::arg("name"))
+        .def("op", &mdl::SiteBasis::op, nb::arg("name"),
+             "The operator `name`, or the built-in one the XML catalog spells `name` (Splus, cdag_up, n_down).")
         .def("has_op", &mdl::SiteBasis::has_op, nb::arg("name"))
+        .def("adjoint", &mdl::SiteBasis::adjoint, nb::arg("op"),
+             "op.dag() under this site's name for it (Sp -> Sm, c_up -> c_dag_up, Sz -> Sz); "
+             "TermSum.dag() names its factors this way.")
         .def("__repr__", [](mdl::SiteBasis const& site) {
             std::string names;
             for (auto const& item : site.quantum_numbers) names += (names.empty() ? "" : ", ") + item.first;
@@ -413,6 +417,12 @@ void bind_sites(nb::module_& m) {
                  + ", quantum_numbers=[" + names + "])";
         });
     m.def("finalize_site", [](mdl::SiteBasis site) { return mdl::finalize_site(std::move(site)); }, nb::arg("site"));
+    {
+        nb::dict names;
+        for (auto const& [kit, catalog] : mdl::catalog_operator_names)
+            names[nb::str(kit.data(), kit.size())] = nb::str(catalog.data(), catalog.size());
+        m.attr("catalog_operator_names") = names;  // kit name -> XML catalog name, accepted either way
+    }
     m.def("spin", &mdl::spin, nb::arg("S") = 0.5, "Spin S: Sz, Sp, Sm, Sx, Sy, S2; charge Sz; m from +S down.");
     m.def("boson", &mdl::boson, nb::arg("n_max") = 3, "Truncated boson: a, a_dag, n (b aliases); charge N.");
     m.def("hardcore_boson", &mdl::hardcore_boson, "Hard-core boson: a, a_dag, n; charge N.");

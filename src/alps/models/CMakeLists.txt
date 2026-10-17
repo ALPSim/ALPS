@@ -28,6 +28,7 @@ target_sources(alps_models PUBLIC
     include/alps/models/hamiltonian.hpp
     include/alps/models/lattice.hpp
     include/alps/models/lattice_xml.hpp
+    include/alps/models/operator_names.hpp
     include/alps/models/pauli.hpp
     include/alps/models/physical_basis.hpp
     include/alps/models/qubit_encoding.hpp
