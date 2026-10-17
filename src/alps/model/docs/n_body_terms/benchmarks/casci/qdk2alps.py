@@ -48,7 +48,7 @@ def assign_types(values, tol: float = TOL):
     """Fold near-equal values onto ALPS type indices.
 
     Values may be scalars or tuples.  Tuples matter: a bond type carries *all*
-    of its couplings at once (t#, V#, J#), so two bonds share a type only when
+    of its couplings at once (t#, V#), so two bonds share a type only when
     every coupling agrees.  Clustering t alone would silently merge bonds that
     differ in V.
 
@@ -74,11 +74,12 @@ def assign_types(values, tol: float = TOL):
 
 
 def edge_couplings(ham, h1: np.ndarray, tol: float = TOL):
-    """Per-edge (p, q, t, V, J) read off the integrals.
+    """Per-edge (p, q, t, V) read off the integrals.
 
     t = -h_pq        (ALPS writes hopping as -t)
     V = (pp|qq)      density-density
-    J = (pq|qp)      exchange
+
+    Exchange (pq|qp) is not read here; former_for sends it to plaquettes.
     """
     n = h1.shape[0]
     g = None
@@ -90,9 +91,8 @@ def edge_couplings(ham, h1: np.ndarray, tol: float = TOL):
         for q in range(p + 1, n):
             t = -float(h1[p, q])
             V = float(g[p, p, q, q]) if g is not None else 0.0
-            J = float(g[p, q, q, p]) if g is not None else 0.0
-            if abs(t) > tol or abs(V) > tol or abs(J) > tol:
-                out.append((p, q, t, V, J))
+            if abs(t) > tol or abs(V) > tol:
+                out.append((p, q, t, V))
     return out
 
 
@@ -115,7 +115,7 @@ def lattice_xml(ham, h1: np.ndarray, name: str = "qdk-graph", tol: float = TOL,
                 groups: dict | None = None) -> tuple[str, dict]:
     """Integrals -> an ALPS <GRAPH>, plus the parameters its types imply.
 
-    A bond carries (t, V, J) and is typed on all three together; a site carries
+    A bond carries (t, V) and is typed on both together; a site carries
     (mu, U) and is likewise typed on both.  Typing a site on mu alone is a bug:
     a lattice with uniform on-site energy but per-site U then emits no <VERTEX>
     elements, every site defaults to type 0, ALPS resolves U# to U0 everywhere
@@ -128,8 +128,8 @@ def lattice_xml(ham, h1: np.ndarray, name: str = "qdk-graph", tol: float = TOL,
     if groups is not None:
         # General mode: every two-body element over >= 2 sites lives in a
         # plaquette, so the edges carry the hopping only.
-        edges = [(p, q, t, 0.0, 0.0) for p, q, t, _, _ in edges if abs(t) > tol]
-    etypes, evals = assign_types([(t, V, J) for _, _, t, V, J in edges], tol)
+        edges = [(p, q, t, 0.0) for p, q, t, _ in edges if abs(t) > tol]
+    etypes, evals = assign_types([(t, V) for _, _, t, V in edges], tol)
     vtypes, vvals = assign_types(site_couplings(ham, h1), tol)
 
     lines = [f'<GRAPH name="{name}" vertices="{n}">']
@@ -138,7 +138,7 @@ def lattice_xml(ham, h1: np.ndarray, name: str = "qdk-graph", tol: float = TOL,
     if len(vvals) > 1:
         for p in range(n):
             lines.append(f'  <VERTEX id="{p + 1}" type="{vtypes[p]}"/>')
-    for (p, q, _, _, _), et in zip(edges, etypes):
+    for (p, q, _, _), et in zip(edges, etypes):
         lines.append(f'  <EDGE type="{et}" source="{p + 1}" target="{q + 1}"/>')
     # One plaquette type per orbital set: its coefficients are its own.
     for k, sites in enumerate(groups or {}):
@@ -147,12 +147,10 @@ def lattice_xml(ham, h1: np.ndarray, name: str = "qdk-graph", tol: float = TOL,
     lines.append("</GRAPH>")
 
     params: dict = {}
-    for k, (t, V, J) in enumerate(evals):
+    for k, (t, V) in enumerate(evals):
         params[f"t{k}"] = t
         if abs(V) > tol:
             params[f"V{k}"] = V
-        if abs(J) > tol:
-            params[f"J{k}"] = J
     if len(vvals) > 1:
         for k, (mu, U) in enumerate(vvals):
             if abs(mu) > tol:
@@ -207,10 +205,9 @@ def former_for(ham, h1: np.ndarray):
     # What ALPS can name is fixed by term arity: SITETERM is 1 site, BONDTERM
     # is 2.  So the only question about a (pq|rs) element is how many *distinct*
     # sites it touches -- not which pattern it matches.  Density-density
-    # (p,p,q,q) and exchange (p,q,q,p) both touch 2 and are both expressible;
-    # anything touching 3 or 4 is not.
+    # (p,p,q,q) touches 2 and is a BONDTERM; anything else goes into
+    # plaquettes.
     idx = np.array(np.nonzero(np.abs(g) > TOL)).T
-    has_exchange = False
     needs_nsite = False
     for row in idx:
         p, q, r, s = (int(x) for x in row)
@@ -223,26 +220,20 @@ def former_for(ham, h1: np.ndarray):
         if len(sites) == 1:
             continue                                   # on-site U, read by _onsite_u
 
-        # Two sites is necessary but not sufficient: edge_couplings reads only
-        # the density-density (pp|qq) and exchange (pq|qp) patterns. Pair
-        # hopping (pq|pq) and correlated hopping (pp|pq) are equally two-site
-        # and equally expressible as BONDTERMs, but nothing here emits them --
-        # so refuse rather than drop them silently.
-        density = (p == q and r == s)
-        exchange = (p == s and q == r)
-        # Pair hopping (pq|pq) and correlated hopping (pp|pq) are two-site but
-        # not read by edge_couplings; they go into 2-site plaquettes.
-        if not (density or exchange):
+        # Two sites is necessary but not sufficient: the bond model has only
+        # density-density (pp|qq). Exchange (pq|qp) is not ALPS's
+        # exchange(i,j), which is S_i.S_j and lacks the density part, so it
+        # goes into 2-site plaquettes with pair hopping (pq|pq) and correlated
+        # hopping (pp|pq).
+        if not (p == q and r == s):
             needs_nsite = True
-        if exchange and not density:
-            has_exchange = True
 
     if needs_nsite:
         return GENERAL_MODEL, True
 
     _, uvals = assign_types(u)
     # ALPS's stock `fermion Hubbard` covers a single uniform U and nothing else.
-    if has_exchange or len(uvals) > 1:
+    if len(uvals) > 1:
         return "qdk fermion Hubbard", True
     return "fermion Hubbard", False
 
@@ -267,8 +258,7 @@ def model_xml(name: str = "qdk fermion Hubbard") -> str:
   <BONDTERM source="i" target="j">
     <PARAMETER name="t#" default="0"/>
     <PARAMETER name="V#" default="0"/>
-    <PARAMETER name="J#" default="0"/>
-    -t#*fermion_hop(i,j) + V#*n(i)*n(j) + J#*exchange(i,j)
+    -t#*fermion_hop(i,j) + V#*n(i)*n(j)
   </BONDTERM>
 </HAMILTONIAN>"""
 
