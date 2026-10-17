@@ -12,6 +12,8 @@
 // wall), the Hubbard chain and spinless fermions (the gates' parity
 // strings), drives, imaginary time, the exported states (overlaps and the
 // Loschmidt amplitude), the schedule's bookkeeping and the rejections.
+// Evolutions from product configurations, by both methods, start from the
+// configuration with amplitude one and follow the same references.
 #include "support.hpp"
 #include <gtest/gtest.h>
 
@@ -102,6 +104,23 @@ struct Reference {
         std::visit([&](auto const& values) {
             for (std::size_t i = 0; i < dim; ++i) initial[static_cast<Eigen::Index>(i)] = values[i];
         }, states.eigenvectors);
+    }
+
+    // The product state of `configuration` on the sector basis of `h` (whose
+    // eigenstates are not used), amplitude one.
+    Reference(mdl::CompiledOperator const& h, mdl::PhysicalBasis const& basis, Sector const& sector,
+              std::vector<std::size_t> const& configuration)
+        : states(prepare(h, basis, sector)) {
+        std::size_t const dim = states.problem.dimension(), length = configuration.size();
+        auto const& configurations = states.problem.states();
+        initial = Vector::Zero(static_cast<Eigen::Index>(dim));
+        for (std::size_t k = 0; k < dim; ++k) {
+            bool same = true;
+            for (std::size_t i = 0; i < length; ++i)
+                same = same && static_cast<std::size_t>(configurations[k * length + i]) == configuration[i];
+            if (same) initial[static_cast<Eigen::Index>(k)] = 1.;
+        }
+        EXPECT_EQ(initial.norm(), 1.) << "the configuration is not in the sector";
     }
 
     static alps::ed::ProductEigenResult prepare(mdl::CompiledOperator const& h0, mdl::PhysicalBasis const& basis,
@@ -227,22 +246,55 @@ double distance_up_to_phase(Vector const& a, Vector const& b) {
     return (a - phase * b).norm();
 }
 
+// The evolution from the ground state of `initial` or, with a
+// configuration, from that product state (on the final model's basis), and
+// its dense reference. A product state's preparation solves nothing (its
+// energy is NaN), and the state starts with amplitude one on the
+// configuration.
+struct Run {
+    cd::EvolutionResult result;
+    Reference reference;
+
+    Run(Model const& initial, Model const& final_model, Sector const& sector, cd::Measurements const& requests,
+        cd::Evolution const& evolution, cd::Options const& options, std::vector<std::size_t> const& configuration,
+        cd::IterationCallback callback = {})
+        : result(configuration.empty()
+                     ? cd::evolve(initial.op, final_model.op, initial.basis, evolution, options, requests, callback)
+                     : cd::evolve(configuration, final_model.op, final_model.basis, evolution, options, requests,
+                                  callback)),
+          reference(configuration.empty() ? Reference(initial.op, initial.basis, sector)
+                                          : Reference(final_model.op, final_model.basis, sector, configuration)) {
+        if (configuration.empty()) {
+            EXPECT_NEAR(result.initial.energies.at(0), reference.states.eigenvalues.at(0), 1e-9);
+            return;
+        }
+        EXPECT_EQ(result.initial.energies.size(), 1u);
+        EXPECT_TRUE(result.initial.energies.size() == 1 && std::isnan(result.initial.energies[0]));
+        EXPECT_EQ(result.initial.options.warmup_configuration, configuration);
+        EXPECT_TRUE(result.initial.options.sweeps.empty());
+        for (auto const& row : result.initial.iterations) EXPECT_TRUE(std::isnan(row.energy));
+        if (!result.mps.empty() && !result.steps.empty() && result.steps[0] == 0)
+            EXPECT_LT((reference.vector(result.mps[0]) - reference.initial).norm(), 1e-12);
+    }
+};
+
 // Evolve with every step measured and the states kept, and compare each step
 // with the Trotter product (to `trotter_tolerance`) and the exact evolution
-// (to `exact_tolerance`).
+// (to `exact_tolerance`). With a configuration, from that product state.
 void expect_trotter_and_exact(Model const& initial, Model const& final_model, Sector const& sector,
                               cd::Measurements const& requests, cd::Evolution evolution, std::size_t prepare_states,
-                              double trotter_tolerance, double exact_tolerance) {
+                              double trotter_tolerance, double exact_tolerance,
+                              std::vector<std::size_t> const& configuration = {}) {
     evolution.keep_mps = true;
-    auto const result = cd::evolve(initial.op, final_model.op, initial.basis, evolution,
-                                   options_for(prepare_states, sector), requests);
-    Reference const reference(initial.op, initial.basis, sector);
+    Run const run(initial, final_model, sector, requests, evolution, options_for(prepare_states, sector),
+                  configuration);
+    auto const& result = run.result;
+    Reference const& reference = run.reference;
     Trotter const trotter(reference, final_model.op, evolution.time_step);
     Dense const h = reference.matrix(final_model.op);
     ASSERT_EQ(result.steps.size(), evolution.steps + 1);
     ASSERT_EQ(result.mps.size(), evolution.steps + 1);
     ASSERT_EQ(result.truncation_errors.size(), evolution.steps + 1);
-    EXPECT_NEAR(result.initial.energies.at(0), reference.states.eigenvalues.at(0), 1e-9);
     Vector psi = reference.initial;
     Vector const start = reference.vector(result.mps[0]);
     for (std::size_t k = 0; k <= evolution.steps; ++k) {
@@ -374,6 +426,158 @@ TEST(ClassicDmrgEvolution, XxDomainWallMeltsAsTheExactEvolution) {
     Model initial(xx);
     initial.op = field;
     expect_trotter_and_exact(initial, final_model, {{"Sz", 0.}}, requests, real_time(0.05, 30, 32), 32, 1e-9, 2e-2);
+}
+
+// ------------------------------------------------- product initial states
+
+namespace {
+
+// Up (local state 0) on the left half, down on the right.
+std::vector<std::size_t> wall_configuration(int length) {
+    std::vector<std::size_t> wall(static_cast<std::size_t>(length), 1);
+    std::fill(wall.begin(), wall.begin() + length / 2, std::size_t{0});
+    return wall;
+}
+
+// The Ising chain Sz Sz in a transverse field 0.7 Sx.
+Model ising_quench(int length) {
+    auto const ising = chain_xxz(length, 0.0, 1.0);
+    auto field = cd::site_terms(ising, "Sx");
+    for (auto& term : field.terms) term.coefficient *= 0.7;
+    Model quench(ising);
+    quench.op = sum(quench.op, field);
+    return quench;
+}
+
+} // namespace
+
+TEST(ClassicDmrgEvolution, ProductConfigurationIsTheInitialState) {
+    // The domain wall of the test above from its configuration alone: no
+    // field Hamiltonian, no warm-up configuration, no Lanczos solve.
+    int const length = 10;
+    auto const xx = chain_xxz(length, 1.0, 0.0);
+    Model const final_model(xx);
+    cd::Measurements requests;
+    requests.terms["Sz"] = cd::site_terms(xx, "Sz");
+    expect_trotter_and_exact(final_model, final_model, {{"Sz", 0.}}, requests, real_time(0.05, 30, 32), 32, 1e-9,
+                             2e-2, wall_configuration(length));
+}
+
+TEST(ClassicDmrgEvolution, ProductConfigurationsOfFermions) {
+    // A Hubbard configuration with doublons, a hole and opposite spins, and
+    // the charge-density wave of spinless fermions: the preparation fixes
+    // the sign of the creators in site order, and the gates' parity strings
+    // act on it.
+    auto const lattice = lat::chain(6, 1.0, lat::Boundary::open);
+    auto const free = mdl::hubbard(lattice, 1.0, 0.0);
+    Model const hubbard(mdl::hubbard(lattice, 1.0, 4.0, 0.2));
+    cd::Measurements requests;
+    requests.terms["n"] = cd::site_terms(free, "n");
+    requests.terms["hop_up"] = cd::pair_terms(free, "c_dag_up", "c_up");
+    expect_trotter_and_exact(hubbard, hubbard, {{"N", 6.}, {"Sz", 0.}}, requests, real_time(0.05, 12, 64), 64, 1e-9,
+                             2e-2, {3, 0, 1, 2, 3, 0});
+    auto const chain = lat::chain(8, 1.0, lat::Boundary::open);
+    auto const spinless = mdl::spinless_fermion_model(chain, 1.0, 0.0, 0.0);
+    Model const interacting(mdl::spinless_fermion_model(chain, 1.0, 0.0, 1.5));
+    cd::Measurements density;
+    density.terms["n"] = cd::site_terms(spinless, "n");
+    density.terms["hop"] = cd::pair_terms(spinless, "c_dag", "c");
+    expect_trotter_and_exact(interacting, interacting, {{"N", 4.}}, density, real_time(0.05, 12, 32), 32, 1e-9, 2e-2,
+                             {1, 0, 1, 0, 1, 0, 1, 0});
+}
+
+TEST(ClassicDmrgEvolution, ProductConfigurationsOnOddAndFourSiteChains) {
+    // The warm-up of an odd chain, and the four-site chain, which has no
+    // warm-up step and takes its one configuration directly.
+    Model const seven(chain_xxz(7, 0.8, 1.5, -0.2));
+    expect_trotter_and_exact(seven, seven, {{"Sz", 0.5}}, {}, real_time(0.05, 8, 64), 64, 1e-9, 1e-2,
+                             {0, 1, 0, 1, 0, 1, 0});
+    Model const four(chain_xxz(4, 0.8, 1.5, -0.2));
+    expect_trotter_and_exact(four, four, {{"Sz", 0.}}, {}, real_time(0.05, 8, 64), 64, 1e-9, 1e-2, {0, 0, 1, 1});
+}
+
+TEST(ClassicDmrgEvolution, ProductConfigurationWithoutConservedCharges) {
+    // All spins up under the transverse-field Ising chain, which conserves no
+    // charge: the blocks span every sector, and the warm-up's first step also
+    // builds a right block.
+    cd::Measurements requests;
+    requests.terms["Sz"] = cd::site_terms(chain_xxz(8, 0.0, 1.0), "Sz");
+    expect_trotter_and_exact(ising_quench(8), ising_quench(8), {}, requests, real_time(0.05, 12, 64), 64, 1e-9, 2e-2,
+                             std::vector<std::size_t>(8, 0));
+}
+
+TEST(ClassicDmrgEvolution, ProductConfigurationUnderAVanishingHamiltonian) {
+    // No term at all: the preparation's system Hamiltonian is empty, and the
+    // identity gates keep the product state, with amplitude one, at every step.
+    auto const xx = chain_xxz(8, 1.0, 0.0);
+    mdl::PhysicalBasis const basis = mdl::physical_basis(xx);
+    mdl::CompiledOperator const nothing{mdl::compile_hamiltonian(xx).op.site_dims, {}};
+    std::vector<std::size_t> const configuration{0, 1, 1, 0, 1, 0, 0, 1};
+    cd::Measurements requests;
+    requests.terms["Sz"] = cd::site_terms(xx, "Sz");
+    auto evolution = real_time(0.1, 3, 16);
+    evolution.keep_mps = true;
+    auto const result = cd::evolve(configuration, nothing, basis, evolution, options_for(16, {{"Sz", 0.}}), requests);
+    ASSERT_EQ(result.mps.size(), 4u);
+    std::size_t index = 0;
+    for (auto state : configuration) index = 2 * index + state;
+    for (std::size_t k = 0; k < result.mps.size(); ++k) {
+        SCOPED_TRACE(k);
+        auto const full = contract(result.mps[k]);
+        EXPECT_LT(std::abs(full[index] - 1.), 1e-12);
+        EXPECT_NEAR(result.energies[k], 0., 1e-12);
+        for (std::size_t i = 0; i < configuration.size(); ++i)
+            EXPECT_NEAR(result.measurements.at("Sz").values[k][i], configuration[i] ? -0.5 : 0.5, 1e-12);
+    }
+}
+
+TEST(ClassicDmrgEvolution, RejectsInvalidProductConfigurations) {
+    auto const xx = chain_xxz(8, 1.0, 0.0);
+    Model const model(xx);
+    auto const options = options_for(32, {{"Sz", 0.}});
+    auto const evolution = real_time(0.1, 1, 32);
+    std::vector<std::size_t> const wall = wall_configuration(8);
+    auto expect_message = [](std::function<void()> const& call, std::string const& fragment) {
+        try {
+            call();
+            ADD_FAILURE() << "no exception; expected " << fragment;
+        } catch (std::invalid_argument const& e) {
+            EXPECT_NE(std::string(e.what()).find(fragment), std::string::npos) << e.what();
+        }
+    };
+    expect_message([&] { cd::evolve(std::vector<std::size_t>(7, 0), model.op, model.basis, evolution, options); },
+                   "initial configuration needs one state per site: 7 for 8 sites");
+    auto beyond = wall;
+    beyond[3] = 2;
+    expect_message([&] { cd::evolve(beyond, model.op, model.basis, evolution, options); },
+                   "initial configuration names state 2 of site 3, which has 2 states");
+    expect_message([&] { cd::evolve(std::vector<std::size_t>(8, 0), model.op, model.basis, evolution, options); },
+                   "initial configuration has Sz = 4, but the sector asks for 0");
+    auto warmed = options;
+    warmed.warmup_configuration = wall;
+    expect_message([&] { cd::evolve(wall, model.op, model.basis, evolution, warmed); }, "warmup_configuration");
+    auto two = options;
+    two.num_eigenvalues = 2;
+    expect_message([&] { cd::evolve(wall, model.op, model.basis, evolution, two); }, "num_eigenvalues");
+    Model const frustrated(mdl::heisenberg(lat::nnn_chain(8, 1.0, lat::Boundary::open), 1.0));
+    expect_message([&] { cd::evolve(wall, frustrated.op, frustrated.basis, evolution, options); },
+                   "the final Hamiltonian couples sites 0 and 2");
+    auto raising = cd::site_terms(xx, "Sz");
+    raising.terms[0].coefficient = Complex(0., 1.);
+    expect_message([&] { cd::evolve(wall, raising, model.basis, evolution, options); },
+                   "final Hamiltonian is not Hermitian");
+    // The model overload compiles and solves the same problem.
+    cd::Measurements requests;
+    requests.terms["Sz"] = cd::site_terms(xx, "Sz");
+    auto const by_model = cd::evolve(wall, xx, real_time(0.1, 4, 32), options, requests);
+    auto const by_operator = cd::evolve(wall, model.op, model.basis, real_time(0.1, 4, 32), options, requests);
+    ASSERT_EQ(by_model.energies.size(), by_operator.energies.size());
+    for (std::size_t k = 0; k < by_model.energies.size(); ++k) {
+        EXPECT_NEAR(by_model.energies[k], by_operator.energies[k], 1e-12);
+        for (std::size_t i = 0; i < 8; ++i)
+            EXPECT_NEAR(by_model.measurements.at("Sz").values[k][i], by_operator.measurements.at("Sz").values[k][i],
+                        1e-12);
+    }
 }
 
 TEST(ClassicDmrgEvolution, HubbardQuenchKeepsTheFermionSigns) {
@@ -678,16 +882,16 @@ mdl::CompiledOperator without_phase(mdl::CompiledOperator op) {
 // conserved; the first half sweep's report NaN.
 void expect_exact_targeting(Model const& initial, Model const& final_model, Sector const& sector,
                             cd::Measurements const& requests, cd::Evolution evolution, cd::Options const& options,
-                            double tolerance) {
+                            double tolerance, std::vector<std::size_t> const& configuration = {}) {
     evolution.keep_mps = true;
     std::vector<double> energies;
-    auto const result = cd::evolve(initial.op, final_model.op, initial.basis, evolution, options, requests,
-                                   [&](cd::Iteration const& row) { energies.push_back(row.energy); });
-    Reference const reference(initial.op, initial.basis, sector);
+    Run const run(initial, final_model, sector, requests, evolution, options, configuration,
+                  [&](cd::Iteration const& row) { energies.push_back(row.energy); });
+    auto const& result = run.result;
+    Reference const& reference = run.reference;
     Dense const h = reference.matrix(without_phase(final_model.op));
     ASSERT_EQ(result.steps.size(), evolution.steps + 1);
     ASSERT_EQ(result.mps.size(), evolution.steps + 1);
-    EXPECT_NEAR(result.initial.energies.at(0), reference.states.eigenvalues.at(0), 1e-9);
     Vector const start = reference.vector(result.mps[0]);
     for (std::size_t k = 0; k <= evolution.steps; ++k) {
         SCOPED_TRACE("step " + std::to_string(k));
@@ -827,6 +1031,51 @@ TEST(ClassicDmrgTargeting, TargetsCarryAProductStateIntoTheEvolvedBasis) {
     cd::Measurements requests;
     requests.terms["Sz"] = cd::site_terms(xx, "Sz");
     expect_exact_targeting(initial, Model(xx), {{"Sz", 0.}}, requests, evolution, options, 1e-4);
+}
+
+TEST(ClassicDmrgTargeting, ProductConfigurationsAreTheExactEvolution) {
+    // From configurations alone: the XX domain wall, a Hubbard configuration
+    // and, in imaginary time and real arithmetic, the Neel state under the
+    // Heisenberg chain. 64 states keep every block of eight sites whole.
+    int const length = 8;
+    auto const xx = chain_xxz(length, 1.0, 0.0);
+    cd::Measurements requests;
+    requests.terms["Sz"] = cd::site_terms(xx, "Sz");
+    expect_exact_targeting(Model(xx), Model(xx), {{"Sz", 0.}}, requests, targeting(0.1, 10, 64),
+                           options_for(64, {{"Sz", 0.}}), 1e-9, wall_configuration(length));
+    auto const lattice = lat::chain(6, 1.0, lat::Boundary::open);
+    Model const hubbard(mdl::hubbard(lattice, 1.0, 4.0, 0.2));
+    cd::Measurements hopping;
+    hopping.terms["hop_up"] = cd::pair_terms(mdl::hubbard(lattice, 1.0, 0.0), "c_dag_up", "c_up");
+    Sector const sector{{"N", 6.}, {"Sz", 0.}};
+    expect_exact_targeting(hubbard, hubbard, sector, hopping, targeting(0.1, 6, 64), options_for(64, sector), 1e-9,
+                           {3, 0, 1, 2, 3, 0});
+    Model const heisenberg(chain_xxz(length, 1.0, 1.0));
+    auto real = options_for(64, {{"Sz", 0.}});
+    real.arithmetic = cd::Arithmetic::real;
+    expect_exact_targeting(heisenberg, heisenberg, {{"Sz", 0.}}, {}, targeting(0.2, 10, 64, true), real, 1e-9,
+                           {0, 1, 0, 1, 0, 1, 0, 1});
+}
+
+TEST(ClassicDmrgTargeting, ProductConfigurationWithoutConservedCharges) {
+    // 256 states keep every block of the unrestricted eight-site chain whole.
+    cd::Measurements requests;
+    requests.terms["Sz"] = cd::site_terms(chain_xxz(8, 0.0, 1.0), "Sz");
+    expect_exact_targeting(ising_quench(8), ising_quench(8), {}, requests, targeting(0.1, 6, 256),
+                           options_for(256, {}), 1e-9, std::vector<std::size_t>(8, 0));
+}
+
+TEST(ClassicDmrgTargeting, TargetsCarryAConfigurationIntoTheEvolvedBasis) {
+    // The truncated product-state wall of the test above from its
+    // configuration: the blocks start with one state each.
+    int const length = 10;
+    auto const xx = chain_xxz(length, 1.0, 0.0);
+    auto evolution = targeting(0.05, 20, 64);
+    evolution.truncation_error = 1e-12;
+    cd::Measurements requests;
+    requests.terms["Sz"] = cd::site_terms(xx, "Sz");
+    expect_exact_targeting(Model(xx), Model(xx), {{"Sz", 0.}}, requests, evolution, options_for(64, {{"Sz", 0.}}),
+                           1e-4, wall_configuration(length));
 }
 
 TEST(ClassicDmrgTargeting, RejectsDrivesAndEmptySchedules) {

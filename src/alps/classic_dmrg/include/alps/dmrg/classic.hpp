@@ -211,7 +211,8 @@ ALPS_CLASSIC_DMRG_DECL Result solve(models::Hamiltonian const& model, Options co
 //
 // Adaptive time-dependent DMRG (S. R. White and A. E. Feiguin, Phys. Rev.
 // Lett. 93, 076401 (2004)) on the same engine: the initial state is the DMRG
-// ground state of an initial Hamiltonian in a sector, and it evolves under a
+// ground state of an initial Hamiltonian in a sector, or a product
+// configuration, and it evolves under a
 // final Hamiltonian on the same sites by a second-order Trotter
 // decomposition into nearest-neighbour bond gates, exp(-i dt h_b) in real
 // time or exp(-dt h_b) in imaginary time, each applied where both sites of
@@ -319,6 +320,35 @@ ALPS_CLASSIC_DMRG_DECL EvolutionResult evolve(models::CompiledOperator const& in
 // The same for two models on one physical basis, each validated as solve()
 // validates it.
 ALPS_CLASSIC_DMRG_DECL EvolutionResult evolve(models::Hamiltonian const& initial,
+    models::Hamiltonian const& final_hamiltonian, Evolution const& evolution, Options const& options = {},
+    Measurements const& measurements = {}, IterationCallback callback = {});
+
+// Evolve a product state under `final`: `configuration` holds one
+// local-state index per site, into that site's states in the physical basis
+// (for spin 1/2, 0 is up), as Options::warmup_configuration does. Its
+// conserved charges must add up to options.sector, whose charges are the
+// conserved ones; charges the sector omits remain mixed, as in solve().
+// Nothing is solved: the warm-up builds every block with the
+// configuration's prefix charges and keeps one state, the product state's
+// part, and the superblock state is the product state instead of a
+// Lanczos ground state. The initial state is the configuration with
+// amplitude one (with fermions, the creators in site order applied to the
+// vacuum, as in ALPS::ed). The evolution, the measurements and the
+// callback are as above. Of the options, only arithmetic (imaginary time),
+// sector, scratch_parent, log and verbose apply; num_eigenvalues must be
+// one, keep_mps unset and warmup_configuration empty. EvolutionResult::initial
+// then reports the warm-up that built the blocks: one energy, NaN, as nothing
+// was solved, its iterations (energy NaN), and resolved options without
+// sweeps, with one warm-up state and the configuration as
+// warmup_configuration.
+ALPS_CLASSIC_DMRG_DECL EvolutionResult evolve(std::vector<std::size_t> const& configuration,
+    models::CompiledOperator const& final_hamiltonian, models::PhysicalBasis const& basis,
+    Evolution const& evolution, Options const& options = {}, Measurements const& measurements = {},
+    IterationCallback callback = {});
+
+// The same under a model, validated as solve() validates it, on its
+// physical basis.
+ALPS_CLASSIC_DMRG_DECL EvolutionResult evolve(std::vector<std::size_t> const& configuration,
     models::Hamiltonian const& final_hamiltonian, Evolution const& evolution, Options const& options = {},
     Measurements const& measurements = {}, IterationCallback callback = {});
 

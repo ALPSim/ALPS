@@ -517,6 +517,70 @@ def test_evolve_melts_the_xx_domain_wall_as_the_bessel_solution():
     assert run.truncation_errors.shape == (61,) and run.truncation_errors.sum() < 1e-6
 
 
+@pytest.mark.parametrize("method, tolerance", [("trotter", 2e-3), ("targeting", 1e-9)])
+def test_evolve_from_a_product_configuration_matches_exact_evolution(method, tolerance):
+    # The domain wall from its configuration alone: no field Hamiltonian, no
+    # solve; the initial state is the configuration with amplitude one.
+    chain = lat.chain(8, bc="open")
+    final = models.xxz(chain, Jxy=1.0, Jz=0.5)
+    wall = [0] * 4 + [1] * 4
+    run = dmrg.evolve(wall, final, time_step=0.05, steps=20, states=64, sector={"Sz": 0}, measure_steps=4,
+                      keep_mps=True, method=method, measurements={"Sz": "Sz"})
+    assert run.initial.energies.shape == (1,) and np.isnan(run.initial.energy)
+    assert run.initial.options.warmup_configuration == wall and run.initial.options.sweeps == []
+    assert run.initial.options.warmup_states == 1
+    assert all(np.isnan(row.energy) for row in run.initial.iterations)
+    assert run.mps[0].amplitude(wall) == pytest.approx(1.0, abs=1e-12)
+    np.testing.assert_allclose(run.measurements["Sz"].values[0], [0.5] * 4 + [-0.5] * 4, atol=1e-12)
+    basis = ed.prepare_product(final, sector={"Sz": 0.0}).states
+    psi0 = np.all(basis == wall, axis=1).astype(complex)
+    assert psi0.sum() == 1
+    energies, vectors = np.linalg.eigh(final.to_dense_matrix({"Sz": 0.0}))
+    for t, mps in zip(run.times, run.mps):
+        psi = vectors @ (np.exp(-1j * energies * t) * (vectors.conj().T @ psi0))
+        assert abs(np.vdot(psi, mps.amplitude(basis))) == pytest.approx(1.0, abs=tolerance), t
+    expected = [abs(np.vdot(psi0, vectors @ (np.exp(-1j * energies * t) * (vectors.conj().T @ psi0)))) ** 2
+                for t in run.times]
+    np.testing.assert_allclose(dmrg.loschmidt_echo(run), expected, atol=tolerance)
+    H = final.to_dense_matrix({"Sz": 0.0})
+    np.testing.assert_allclose(run.energies, np.vdot(psi0, H @ psi0).real, atol=max(tolerance, 1e-6))
+
+
+def test_evolve_from_a_configuration_on_operators_and_catalog_models():
+    chain = lat.chain(8, bc="open")
+    model = models.xxz(chain, Jxy=1.0, Jz=0.0)
+    neel = np.array([0, 1] * 4)
+    # A basis resolves no operator names: measure a compiled operator.
+    common = dict(time_step=0.05, steps=4, states=32, sector={"Sz": 0},
+                  measurements={"Sz": dmrg.site_terms(model, "Sz")})
+    direct = dmrg.evolve(neel, model, **common)
+    compiled = dmrg.evolve(neel.tolist(), models.compile_hamiltonian(model).op, basis=model.physical_basis(),
+                           **common)
+    np.testing.assert_allclose(compiled.measurements["Sz"].values, direct.measurements["Sz"].values, atol=1e-12)
+    assert np.abs(direct.measurements["Sz"].values[-1]).max() < 0.5 - 1e-3  # the exchange moved the spins
+    # A catalog model's *_total parameters give the sector.
+    params = {"MODEL": "spin", "LATTICE": "open chain lattice", "L": 8, "J": 1.0, "Sz_total": 0,
+              "CONSERVED_QUANTUMNUMBERS": "Sz"}
+    run = dmrg.evolve(tuple(neel), models.CatalogModel(params), time_step=0.05, steps=4, states=32)
+    assert run.initial.options.sector == {"Sz": 0.0} and len(run.energies) == 5
+
+
+def test_evolve_rejects_invalid_configurations():
+    model = models.xxz(lat.chain(8, bc="open"), Jxy=1.0, Jz=0.0)
+    wall = [0] * 4 + [1] * 4
+    common = dict(time_step=0.1, steps=1, sector={"Sz": 0})
+    with pytest.raises(ValueError, match="one state per site: 7 for 8 sites"):
+        dmrg.evolve(wall[:-1], model, **common)
+    with pytest.raises(ValueError, match="Sz = 4, but the sector asks for 0"):
+        dmrg.evolve([0] * 8, model, **common)
+    with pytest.raises(ValueError, match="not negative"):
+        dmrg.evolve([-1] + wall[1:], model, **common)
+    with pytest.raises(ValueError, match="warmup_configuration"):
+        dmrg.evolve(wall, model, warmup_configuration=wall, **common)
+    with pytest.raises(TypeError, match="final Hamiltonian"):
+        dmrg.evolve(wall, models.compile_hamiltonian(model).op, **common)
+
+
 def test_evolve_states_and_loschmidt_echo_match_exact_evolution():
     chain = lat.chain(8, bc="open")
     initial, final = models.xxz(chain, Jxy=1.0, Jz=0.0), models.xxz(chain, Jxy=1.0, Jz=2.0, h=0.2)

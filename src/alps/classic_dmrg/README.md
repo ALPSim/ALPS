@@ -46,9 +46,10 @@ auto const& density = result.measurements.at("n").values[0];  // row = target st
 | `Result` | ascending `energies`, `measurements` (rows follow the targets, columns the terms with their factor `sites`), the `iterations` observed (direction, index, energy, truncation error, entropy), `final_truncation_error`, the resolved `options`, with `keep_mps` the `mps` of every target |
 | `MatrixProductState`, `MpsTensor` | a targeted state's site tensors (`[left bond][local state][right bond]`, row-major, `real` or `complex` entries) and its `center` |
 | `evolve(initial, final, basis, evolution, options, measurements, callback)`, `evolve(initial_model, final_model, …)` | time evolution of the ground state of `initial` under `final` ([below](#time-evolution)) |
+| `evolve(configuration, final, basis, …)`, `evolve(configuration, final_model, …)` | time evolution of a product state, one local-state index per site, under `final` ([below](#product-initial-states)) |
 | `Evolution` | `time_step`, `steps`, `imaginary`, `states`, optional `truncation_error`, `measure_steps`, `drives`, `keep_mps`, `method` (`EvolutionMethod::trotter` or `targeting`, [below](#time-step-targeting)), `half_sweeps` |
 | `Drive` | a time-dependent term: `coefficients[n] * op` during step `n` |
-| `EvolutionResult` | `initial` (the preparing solve's `Result`), the measured `steps`, their `times`, `energies` (`<H_final>`) and `measurements` (one row per measured step), the `truncation_errors` of every step, with `keep_mps` the `mps` of every measured step |
+| `EvolutionResult` | `initial` (the preparing solve's `Result`; energy NaN from a product configuration), the measured `steps`, their `times`, `energies` (`<H_final>`) and `measurements` (one row per measured step), the `truncation_errors` of every step, with `keep_mps` the `mps` of every measured step |
 | `IterationCallback` | observes every completed iteration; may throw to abort the solve |
 
 ## What the engine accepts
@@ -238,6 +239,51 @@ follows the exact Bessel solution to 5e-5 up to `t = 4` at `dt = 0.05`,
 pyalps binds it as `classic_dmrg.evolve`, with `overlaps` and
 `loschmidt_echo`; [tutorials/time-evolution](../../../tutorials/time-evolution/README.md)
 has four worked examples.
+
+### Product initial states
+
+`evolve(configuration, final, basis, evolution, options, measurements,
+callback)` (and `evolve(configuration, final_model, …)`) evolves a product
+state instead of a ground state. `configuration` holds one local-state index
+per site, into that site's states in the physical basis (for spin 1/2, 0 is
+up), as `Options::warmup_configuration` does. Its conserved charges must add
+up to `options.sector`, whose charges are the conserved ones; charges the
+sector omits remain mixed, as in `solve()`.
+
+Nothing is solved. The engine's own custom-target warm-up
+(`System::warmup_loop`) runs with the configuration's prefix charges as
+targets and one kept state, and `detail::EvolvingSystem` overrides
+`System::diagonalize` (a virtual) to set the superblock state to the product
+state at each configuration instead of solving. A product state's density
+matrices have rank one, so every block holds exactly the product state's
+part of its sites, and the state is exact at every configuration. No sweep
+follows, and no dmtk file changes. The driver then reads the prepared state
+back through the MPS export and fixes its phase, so the initial state has
+amplitude one on the configuration (with fermions, the creators in site
+order applied to the vacuum, as in `ALPS::ed`). Any other amplitude would
+mean a broken preparation, and is an error. The first half sweeps of the
+evolution grow the blocks from one state, as far as the evolved state needs
+and `Evolution::states` allows.
+
+- Both methods take it. The Trotter gates and the targets need nothing from
+  a ground state; the final Hamiltonian is also the system's Hamiltonian
+  while the blocks are built, and it may have no term at all.
+- Of the options only `arithmetic` (imaginary time), `sector`,
+  `scratch_parent`, `log` and `verbose` apply. `num_eigenvalues` must be
+  one, `keep_mps` unset, and `warmup_configuration` empty.
+- `EvolutionResult::initial` has one energy, NaN, as nothing was solved.
+  Its iterations are the warm-up's, also with energy NaN. Its options hold
+  no sweeps, one warm-up state and the configuration as
+  `warmup_configuration`.
+
+pyalps takes a sequence of integers (a list, a tuple or a NumPy array) as
+the initial state: `dmrg.evolve([0] * 12 + [1] * 12, xx, time_step=0.05,
+steps=120, sector={"Sz": 0})`. The domain-wall tutorial starts from its
+configuration this way. The ground state of fields with
+`warmup_configuration` gives the same evolution, but only after a solve:
+on the tutorial's 24-site wall both starts follow the Bessel solution with
+the deviations of the table [below](#time-step-targeting), for both
+methods.
 
 ### Time-step targeting
 
@@ -595,7 +641,10 @@ file changed: `EvolvingSystem` derives from `dmtk::System` and runs its
 warm-up and sweeps. For the Trotter method it disables the two Hamiltonian
 hooks while the state evolves, so only the measured operators are built
 and rotated. For time-step targeting it keeps them and replaces the
-system's Hamiltonian by the final one.
+system's Hamiltonian by the final one. A product initial state is written
+here too: the warm-up runs with the configuration's prefix charges, and
+`EvolvingSystem` overrides the virtual `System::diagonalize` with the
+product state.
 
 The MPS export (`src/mps.hpp`) is adapted from master's SAVE_MPS
 ([ALPSim/ALPS#216](https://redirect.github.com/ALPSim/ALPS/pull/216), Marcus
@@ -655,6 +704,21 @@ Two further tests check the method's distinguishing properties. At
 than 1e-2. A truncated product-state domain wall stays within 1e-4 of the
 exact state, where targeting the state alone misses by 0.025 after one
 step.
+Evolutions from product configurations (`evolve(configuration, …)`) are
+compared with the dense Trotter product (to 1e-9) and `exp(-iHt)`. They
+cover the XX domain wall, a Hubbard configuration with doublons and a
+hole, a spinless-fermion charge-density wave, an odd and a four-site
+chain, a transverse-field Ising quench without conserved charges, and a
+final Hamiltonian without terms. Each initial state must be
+the configuration with amplitude one to 1e-12, and the preparation reports
+the energy NaN. Time-step targeting from configurations is exact to 1e-9 for
+the domain wall, the Hubbard configuration, the Ising quench and the Néel
+state in imaginary time and real arithmetic. The truncated domain wall, started from its
+configuration with blocks of one state, stays within 1e-4. Rejected
+inputs: configurations of the wrong length, with a local state out of
+range, or with charges off the sector; a warm-up configuration; several
+targets; terms the gates cannot apply; a non-Hermitian final Hamiltonian.
+The model overload reproduces the compiled one.
 `classic_dmrg_warmup` solves 48-site chains whose uniform warm-up
 misplaces charges with the default four sweeps, each failing without its
 warm-up configuration: field-only walls at the centre and at a quarter

@@ -57,6 +57,14 @@
 // imaginary time exp(-dt E) alone would overflow or underflow for a large
 // energy, such as a field that is constant in the sector.
 //
+// A product initial state, also written for this tree, needs no solve: the
+// warm-up (System::warmup_loop) runs with the configuration's prefix charges
+// as its targets and one kept state, and every Lanczos solve is replaced by
+// the product state at that configuration (EvolvingSystem::diagonalize, a
+// virtual of dmtk::System). Each density matrix then has rank one, so each
+// block holds exactly the product state's part of its sites, and the state
+// is exact at every configuration. No dmtk file changed for it.
+//
 // This private header is included only by classic.cpp.
 #pragma once
 
@@ -271,7 +279,8 @@ void apply_gate(dmtk::VectorState<T>& state, int first, BondGate<T> const& gate)
 }
 
 // The dmtk system of a time evolution: the ground state of its Hamiltonian
-// by the usual warm-up and sweeps, then half sweeps that apply bond gates.
+// by the usual warm-up and sweeps, or a product state by the warm-up alone,
+// then half sweeps that apply bond gates or targets.
 template<class T>
 class EvolvingSystem : public dmtk::System<T> {
     using Base = dmtk::System<T>;
@@ -300,17 +309,77 @@ public:
         continued_ = false;
         if (ls == 4) {
             this->_lanczos_certify = true;
-            this->_in_warmup = false;
-            this->dir = dmtk::RIGHT2LEFT;
-            this->iter = 1;
-            this->qn = this->qnt;
-            this->read_block(this->leftblock, 1, dmtk::LEFT);
-            this->read_block(this->rightblock, 1, dmtk::RIGHT);
-            this->init_iteration(this->leftblock, this->h.get_site(1), this->h.get_site(2), this->rightblock, false);
-            this->diagonalize(false);
-            continued_ = true; // the first half sweep starts at this configuration
+            four_sites();
         }
         this->_lanczos_certify = false;
+    }
+
+    // The product state of `product` (one charge-sorted local index per
+    // site) instead of a ground state: System::warmup_loop with the prefix
+    // charges `sectors` and one kept state, every solve replaced by the
+    // product state (diagonalize below). The density matrix of a product
+    // state has rank one, so each block keeps exactly the product state's
+    // part of its sites; no sweep follows. A four-site chain has no warm-up
+    // step and takes its one configuration directly.
+    void prepare_product(std::vector<std::size_t> product, dmtk::Vector<dmtk::QN> const& sectors) {
+        product_ = std::move(product);
+        this->_custom_qns = true;
+        this->warmup_loop(1, sectors);
+        continued_ = false;
+        if (this->lattice().ls() == 4) four_sites();
+        product_.clear();
+    }
+
+    // While a product state is prepared: that state at the current
+    // configuration, with amplitude one. A block of one site holds the
+    // site's states; a longer block holds the one state the warm-up kept.
+    // The blocks' phases are the driver's to fix. Otherwise Lanczos.
+    void diagonalize(bool use_seed) override {
+        if (product_.empty()) {
+            Base::diagonalize(use_seed);
+            return;
+        }
+        std::array<dmtk::Block<T> const*, 4> const blocks{this->_b1, this->_b2, this->_b3, this->_b4};
+        int const left_sites = this->_b1->lattice().ls();
+        std::array<int, 4> const first{0, left_sites, left_sites + 1, left_sites + 2};
+        std::array<std::size_t, 4> local{};
+        for (std::size_t k = 0; k < 4; ++k) {
+            if (blocks[k]->lattice().ls() == 1) {
+                local[k] = product_.at(static_cast<std::size_t>(first[k]));
+            } else if (blocks[k]->dim() == 1) {
+                local[k] = 0;
+            } else {
+                throw std::logic_error("classic DMRG product-state preparation: a block holds more than one state");
+            }
+        }
+        dmtk::VectorState<T> state;
+        state.set_qn_mask(this->qn, this->_grand_canonical);
+        state.resize(this->_b1->basis(), this->_b2->basis(), this->_b3->basis(), this->_b4->basis());
+        state = T(0);
+        bool placed = false;
+        for (auto it = state.subspace_begin(); it != state.subspace_end() && !placed; ++it) {
+            dmtk::StateSpace const& space = *it;
+            std::size_t offset = 0;
+            bool inside = true;
+            for (std::size_t k = 0; k < 4; ++k) {
+                auto const begin = static_cast<std::size_t>(space[k + 1].begin());
+                std::size_t const dim = space[k + 1].dim();
+                inside = inside && local[k] >= begin && local[k] < begin + dim;
+                offset = offset * dim + (local[k] - begin);
+            }
+            if (!inside) continue;
+            state[static_cast<std::size_t>(space.start()) + offset] = T(1);
+            placed = true;
+        }
+        if (!placed)
+            throw std::logic_error("classic DMRG product-state preparation: the configuration is outside the "
+                                   "targeted charges");
+        this->gs = state;
+        this->_state.resize(this->_nstates);
+        for (std::size_t i = 0; i < this->_nstates; ++i) this->_state[i] = state;
+        this->energy.resize(this->_calc_gap + 1);
+        this->energy[0] = std::numeric_limits<double>::quiet_NaN();
+        this->signal_emit(dmtk::SYSTEM_SIGNAL_GS);
     }
 
     // From here on no Lanczos solve runs: the Hamiltonian's block operators
@@ -528,6 +597,21 @@ public:
     }
 
 private:
+    // The one configuration of a four-site chain, which no sweep step fits:
+    // solved (or set to the product state) directly; the first half sweep
+    // starts there.
+    void four_sites() {
+        this->_in_warmup = false;
+        this->dir = dmtk::RIGHT2LEFT;
+        this->iter = 1;
+        this->qn = this->qnt;
+        this->read_block(this->leftblock, 1, dmtk::LEFT);
+        this->read_block(this->rightblock, 1, dmtk::RIGHT);
+        this->init_iteration(this->leftblock, this->h.get_site(1), this->h.get_site(2), this->rightblock, false);
+        this->diagonalize(false);
+        continued_ = true;
+    }
+
     // c = -i dt in real time, -dt in imaginary time (real arithmetic then).
     T step_factor() const {
         if constexpr (std::is_same_v<T, double>) {
@@ -648,6 +732,7 @@ private:
     bool continued_ = false; // the state is at the configuration a half sweep starts from
     int states_ = 0;
     std::vector<int> visits_;
+    std::vector<std::size_t> product_; // while prepare_product runs: the configuration, charge-sorted
     std::array<dmtk::VectorState<T>, 4> targets_;
 };
 

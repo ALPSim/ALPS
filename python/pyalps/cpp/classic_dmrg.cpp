@@ -101,11 +101,14 @@ classic::Result run(mdl::CompiledOperator const* op, mdl::PhysicalBasis const* b
     return classic::solve(*op, *basis, options, measurements, observe);
 }
 
+// From the ground state of `initial` or `initial_model`, or from the product
+// state `configuration` when it is given.
 classic::EvolutionResult run_evolution(mdl::CompiledOperator const* initial, mdl::CompiledOperator const* final_op,
                                        mdl::PhysicalBasis const* basis, mdl::Hamiltonian const* initial_model,
                                        mdl::Hamiltonian const* final_model, classic::Evolution const& evolution,
                                        classic::Options options, classic::Measurements const& measurements,
-                                       nb::object callback, std::optional<std::string> const& log_file) {
+                                       nb::object callback, std::optional<std::string> const& log_file,
+                                       std::vector<std::size_t> const* configuration = nullptr) {
     if (!callback.is_none() && !PyCallable_Check(callback.ptr()))
         throw nb::type_error("callback must be callable or None");
     std::ofstream log;
@@ -120,6 +123,9 @@ classic::EvolutionResult run_evolution(mdl::CompiledOperator const* initial, mdl
         if (!callback.is_none()) callback(iteration);
     };
     nb::gil_scoped_release release;
+    if (configuration && final_model)
+        return classic::evolve(*configuration, *final_model, evolution, options, measurements, observe);
+    if (configuration) return classic::evolve(*configuration, *final_op, *basis, evolution, options, measurements, observe);
     if (initial_model) return classic::evolve(*initial_model, *final_model, evolution, options, measurements, observe);
     return classic::evolve(*initial, *final_op, *basis, evolution, options, measurements, observe);
 }
@@ -460,7 +466,8 @@ NB_MODULE(classic_dmrg_c, m) {
         "A finished time evolution: the preparation's Result, then per measured step its time, the final "
         "Hamiltonian's energy, the measurements and the kept states; per step the discarded weight.")
         .def_ro("initial", &classic::EvolutionResult::initial,
-                "The DMRG that prepared the initial state (energy, iterations, resolved options).")
+                "The DMRG that prepared the initial state (energy, iterations, resolved options); from a product "
+                "configuration, the warm-up that built its blocks, with the energy NaN.")
         .def_prop_ro("steps", [](classic::EvolutionResult const& r) {
             return vector_to_numpy(std::vector<std::uint64_t>(r.steps.begin(), r.steps.end()));
         }, "The measured steps, ascending.")
@@ -499,6 +506,27 @@ NB_MODULE(classic_dmrg_c, m) {
        nb::arg("options") = classic::Options{}, nb::arg("measurements") = classic::Measurements{},
        nb::arg("callback") = nb::none(), nb::arg("log_file") = nb::none(),
        "Evolve under a compiled final Hamiltonian, both operators on `basis`.");
+    m.def("evolve", [](std::vector<std::size_t> const& configuration, mdl::Hamiltonian const& final_model,
+                       classic::Evolution const& evolution, classic::Options const& options,
+                       classic::Measurements const& measurements, nb::object callback,
+                       std::optional<std::string> const& log_file) {
+        return run_evolution(nullptr, nullptr, nullptr, nullptr, &final_model, evolution, options, measurements,
+                             std::move(callback), log_file, &configuration);
+    }, nb::arg("configuration"), nb::arg("final"), nb::arg("evolution"), nb::arg("options") = classic::Options{},
+       nb::arg("measurements") = classic::Measurements{}, nb::arg("callback") = nb::none(),
+       nb::arg("log_file") = nb::none(),
+       "Evolve the product state `configuration` (one local-state index per site) under `final`; nothing is "
+       "solved first. Returns an EvolutionResult.");
+    m.def("evolve", [](std::vector<std::size_t> const& configuration, mdl::CompiledOperator const& final_op,
+                       mdl::PhysicalBasis const& basis, classic::Evolution const& evolution,
+                       classic::Options const& options, classic::Measurements const& measurements,
+                       nb::object callback, std::optional<std::string> const& log_file) {
+        return run_evolution(nullptr, &final_op, &basis, nullptr, nullptr, evolution, options, measurements,
+                             std::move(callback), log_file, &configuration);
+    }, nb::arg("configuration"), nb::arg("final"), nb::arg("basis"), nb::arg("evolution"),
+       nb::arg("options") = classic::Options{}, nb::arg("measurements") = classic::Measurements{},
+       nb::arg("callback") = nb::none(), nb::arg("log_file") = nb::none(),
+       "Evolve the product state `configuration` under a compiled final Hamiltonian on `basis`.");
     m.def("site_terms", &classic::site_terms, nb::arg("model"), nb::arg("op"),
           "One term per site carrying the operator `op`, in site order (one measurement column per site).");
     m.def("pair_terms", &classic::pair_terms, nb::arg("model"), nb::arg("first"), nb::arg("second"),

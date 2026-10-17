@@ -57,6 +57,12 @@ local state per site; 0 is up).
 ...                   measure_steps=10, measurements={"Sz": "Sz"})          # doctest: +SKIP
 >>> run.times, run.measurements["Sz"].values                                 # doctest: +SKIP
 
+The product state can also be the initial state itself: pass its
+configuration in place of ``initial``, and nothing is solved first.
+
+>>> run = dmrg.evolve([0] * 10 + [1] * 10, xx, time_step=0.05, steps=60, states=64, sector={"Sz": 0},
+...                   measure_steps=10, measurements={"Sz": "Sz"})          # doctest: +SKIP
+
 ``solve_molecular(h1, eri, n_alpha, n_beta)`` runs the same engine on a
 restricted real molecular Hamiltonian (chemist-notation integrals) and
 returns the energy with the final-state one- and two-particle density
@@ -286,9 +292,28 @@ def make_evolution(evolution=None, *, context=None, **fields):
     return result
 
 
+def _configuration(value):
+    """The product configuration ``value`` names (a sequence of local-state indices), or None."""
+    import numbers
+
+    import numpy as np
+
+    if isinstance(value, np.ndarray):
+        if value.ndim != 1 or not np.issubdtype(value.dtype, np.integer):
+            return None
+    elif not isinstance(value, (list, tuple, range)):
+        return None
+    if not all(isinstance(state, numbers.Integral) for state in value):
+        return None
+    configuration = [int(state) for state in value]
+    if any(state < 0 for state in configuration):
+        raise ValueError("a product configuration holds local-state indices, which are not negative")
+    return configuration
+
+
 def evolve(initial, final, basis=None, *, evolution=None, options=None, measurements=None, expectation=None,
            callback=None, log_file=None, **fields):
-    """Time-evolve the DMRG ground state of ``initial`` under ``final``.
+    """Time-evolve the DMRG ground state of ``initial``, or a product configuration, under ``final``.
 
     ``initial`` and ``final`` are ``Hamiltonian`` or ``CatalogModel``
     objects on the same physical basis; either may instead be an operator
@@ -296,7 +321,15 @@ def evolve(initial, final, basis=None, *, evolution=None, options=None, measurem
     other's basis or on ``basis``. The initial state is the ground state of ``initial`` in
     the sector (``sector=``, or a catalog model's ``*_total`` parameters),
     solved under ``options`` or the DMRG option fields as for
-    :func:`solve`. The evolution fields (``time_step``, ``steps``,
+    :func:`solve`. ``initial`` may instead be a product configuration, a
+    sequence of local-state indices with one per site (into each site's
+    ``PhysicalBasis`` states; for spin 1/2, 0 is up): that product state,
+    with amplitude one, is the initial state and nothing is solved. Its
+    charges must add up to the sector (``sector=``, or a final catalog
+    model's ``*_total`` parameters), whose charges are the conserved ones
+    (charges it omits remain mixed); of the DMRG options only ``sector``,
+    ``arithmetic``, ``scratch_parent`` and ``verbose`` apply then, and
+    ``result.initial.energy`` is NaN. The evolution fields (``time_step``, ``steps``,
     ``imaginary``, ``states``, ``truncation_error``, ``measure_steps``,
     ``drives``, ``keep_mps``, ``method``, ``half_sweeps``; see
     :func:`make_evolution`) or an ``evolution`` object control the run.
@@ -315,6 +348,10 @@ def evolve(initial, final, basis=None, *, evolution=None, options=None, measurem
     ``keep_mps=True``, the state of every measured step in ``mps``.
     """
     catalog = getattr(_models, "CatalogModel", None)
+    configuration = _configuration(initial)
+    if configuration is not None:
+        return _evolve_configuration(configuration, final, basis, evolution, options, measurements, expectation,
+                                     callback, log_file, fields)
     both_models = all(isinstance(m, _models.Hamiltonian) for m in (initial, final))
     # Operator names (measurements, drives) resolve on a model where there is one.
     context = next((m for m in (initial, final) if _is_model(m)), None)
@@ -340,6 +377,32 @@ def evolve(initial, final, basis=None, *, evolution=None, options=None, measurem
     if both_models and basis is None:
         return _classic_dmrg_c.evolve(initial, final, resolved_evolution, resolved, requests, callback, log_file)
     return _classic_dmrg_c.evolve(initial_op, final_op, initial_basis, resolved_evolution, resolved, requests,
+                                  callback, log_file)
+
+
+def _evolve_configuration(configuration, final, basis, evolution, options, measurements, expectation, callback,
+                          log_file, fields):
+    catalog = getattr(_models, "CatalogModel", None)
+    if not _is_model(final) and basis is None:
+        raise TypeError("a product configuration needs a model as the final Hamiltonian, or its PhysicalBasis "
+                        "as basis=")
+    context = final if _is_model(final) else basis
+    if catalog is not None and isinstance(final, catalog) and options is None and "sector" not in fields:
+        fields["sector"] = final.sector()
+    evolution_fields = {name: fields.pop(name) for name in _EVOLUTION_FIELDS if name in fields}
+    if evolution is None and ("time_step" not in evolution_fields or "steps" not in evolution_fields):
+        raise TypeError("evolve needs time_step= and steps= (or an Evolution object)")
+    resolved_evolution = make_evolution(evolution, context=context, **evolution_fields)
+    requests = make_measurements(measurements, expectation, context)
+    resolved = make_options(options, **fields)
+    if isinstance(final, _models.Hamiltonian) and basis is None:
+        _models.require_bound(final)
+        return _classic_dmrg_c.evolve(configuration, final, resolved_evolution, resolved, requests, callback,
+                                      log_file)
+    final_op, final_basis = _compiled_with_basis(final, basis, "final")
+    if basis is not None:
+        _models.require_same_basis(final_basis, basis)
+    return _classic_dmrg_c.evolve(configuration, final_op, final_basis, resolved_evolution, resolved, requests,
                                   callback, log_file)
 
 

@@ -2,8 +2,9 @@
 
 Real- and imaginary-time evolution with `pyalps.classic_dmrg.evolve`:
 quenches, a melting domain wall, ramped drives and Loschmidt echoes. The
-initial state of every run is the DMRG ground state of an initial
-Hamiltonian; it evolves under a final Hamiltonian by second-order Trotter
+initial state of a run is the DMRG ground state of an initial Hamiltonian,
+or a product configuration (the domain wall); it evolves under a final
+Hamiltonian by second-order Trotter
 gates applied while sweeping (White and Feiguin, Phys. Rev. Lett. 93,
 076401 (2004)). `method="targeting"` evolves by time-step targeting
 instead (Feiguin and White, Phys. Rev. B 72, 020404(R) (2005)), for final

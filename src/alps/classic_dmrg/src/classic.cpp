@@ -534,8 +534,11 @@ Plan lower_plan(std::string const& name, models::CompiledOperator const& op, Mea
     return entry;
 }
 
+// `what` names the Hamiltonian in errors; a final Hamiltonian that prepares
+// a product-state evolution may have no term.
 Problem prepare(models::CompiledOperator const& hamiltonian, models::PhysicalBasis const& basis,
-                Options const& options, Measurements const& measurements) {
+                Options const& options, Measurements const& measurements,
+                std::string const& what = "Hamiltonian", bool allow_empty = false) {
     models::validate_basis(basis);
     Problem problem;
     problem.num_sites = static_cast<int>(basis.sites.size());
@@ -584,8 +587,8 @@ Problem prepare(models::CompiledOperator const& hamiltonian, models::PhysicalBas
                                         + problem.charges[c].name);
     }
     std::vector<ReadyTerm> expanded;
-    for (auto const& term : hamiltonian.terms) expand(term, problem, expanded, problem.scalar, "Hamiltonian");
-    problem.hamiltonian = merge_hamiltonian(expanded, problem);
+    for (auto const& term : hamiltonian.terms) expand(term, problem, expanded, problem.scalar, what.c_str());
+    problem.hamiltonian = merge_hamiltonian(expanded, problem, what, allow_empty);
     auto plan = [&](std::map<std::string, models::CompiledOperator> const& entries, MeasurementKind kind) {
         for (auto const& [name, op] : entries) {
             if (name.empty()) throw std::invalid_argument("classic DMRG measurement names must be nonempty");
@@ -597,13 +600,13 @@ Problem prepare(models::CompiledOperator const& hamiltonian, models::PhysicalBas
     return problem;
 }
 
-// A warm-up configuration names a state of every site, and its conserved
+// A product configuration (a warm-up configuration or an initial state,
+// named `what` in errors) names a state of every site, and its conserved
 // charges add up to the sector.
-void check_warmup_configuration(Problem const& problem, Options const& options) {
-    auto const& configuration = options.warmup_configuration;
-    if (configuration.empty()) return;
+void check_configuration(Problem const& problem, std::vector<std::size_t> const& configuration,
+                         std::string const& what) {
     if (configuration.size() != static_cast<std::size_t>(problem.num_sites))
-        throw std::invalid_argument("classic DMRG warmup_configuration needs one state per site: "
+        throw std::invalid_argument("classic DMRG " + what + " needs one state per site: "
                                     + std::to_string(configuration.size()) + " for "
                                     + std::to_string(problem.num_sites) + " sites");
     std::vector<long> sum(problem.charges.size(), 0);
@@ -611,7 +614,7 @@ void check_warmup_configuration(Problem const& problem, Options const& options) 
         auto const& site = problem.sites[static_cast<std::size_t>(problem.site_index[static_cast<std::size_t>(i)])];
         auto const state = configuration[static_cast<std::size_t>(i)];
         if (state >= static_cast<std::size_t>(site.dim))
-            throw std::invalid_argument("classic DMRG warmup_configuration names state " + std::to_string(state)
+            throw std::invalid_argument("classic DMRG " + what + " names state " + std::to_string(state)
                                         + " of site " + std::to_string(i) + ", which has "
                                         + std::to_string(site.dim) + " states");
         for (std::size_t c = 0; c < problem.charges.size(); ++c) sum[c] += site.twice[c][state];
@@ -621,9 +624,14 @@ void check_warmup_configuration(Problem const& problem, Options const& options) 
     };
     for (std::size_t c = 0; c < problem.charges.size(); ++c)
         if (problem.charges[c].conserved && sum[c] != problem.charges[c].target)
-            throw std::invalid_argument("classic DMRG warmup_configuration has " + problem.charges[c].name + " = "
+            throw std::invalid_argument("classic DMRG " + what + " has " + problem.charges[c].name + " = "
                                         + half(sum[c]) + ", but the sector asks for "
                                         + half(problem.charges[c].target));
+}
+
+void check_warmup_configuration(Problem const& problem, Options const& options) {
+    if (!options.warmup_configuration.empty())
+        check_configuration(problem, options.warmup_configuration, "warmup_configuration");
 }
 
 // Count product states in the requested sector, stopping at the number of
@@ -855,6 +863,8 @@ struct Engine {
     std::vector<std::vector<std::vector<std::size_t>>> layout; // [plan][column] -> measured term indices
     bool two_site_measurements = false;
     bool evolving = false; // the time evolution's iterations solve nothing
+    // evolve() from this product configuration instead of a ground state.
+    std::vector<std::size_t> const* initial_configuration = nullptr;
 
     Engine(Problem const& p, Options const& o, IterationCallback cb)
         : problem(p), options(o), callback(std::move(cb)), lattice(p.num_sites, dmtk::OBC), hami(lattice) {}
@@ -1031,15 +1041,15 @@ struct Engine {
         S.start(sweeps, nstates);
     }
 
-    // The warm-up targets of Options::warmup_configuration: entry k holds the
-    // charges of its first k sites (System::warmup_loop reads entry k for
-    // its k-site chain).
-    dmtk::Vector<dmtk::QN> warmup_sectors() const {
+    // The warm-up targets of a product configuration (Options::warmup_configuration
+    // or a product initial state): entry k holds the charges of its first k
+    // sites (System::warmup_loop reads entry k for its k-site chain).
+    dmtk::Vector<dmtk::QN> warmup_sectors(std::vector<std::size_t> const& configuration) const {
         dmtk::Vector<dmtk::QN> sectors(static_cast<std::size_t>(problem.num_sites) + 1);
         std::vector<long> sum(problem.charges.size(), 0);
         for (int i = 0; i < problem.num_sites; ++i) {
             auto const& site = problem.sites[static_cast<std::size_t>(problem.site_index[static_cast<std::size_t>(i)])];
-            auto const state = options.warmup_configuration[static_cast<std::size_t>(i)];
+            auto const state = configuration[static_cast<std::size_t>(i)];
             for (std::size_t c = 0; c < problem.charges.size(); ++c) {
                 sum[c] += site.twice[c][state];
                 sectors[static_cast<std::size_t>(i) + 1][static_cast<int>(qn_index[c])].set_half(static_cast<short>(sum[c]));
@@ -1059,6 +1069,13 @@ struct Engine {
         out.lanczos_tolerance = S.lanczos_tolerance();
         out.arithmetic = std::is_same_v<T, double> ? Arithmetic::real : Arithmetic::complex;
         out.sector = options.sector;
+        if (initial_configuration) { // the warm-up alone, of one state
+            out.sweeps.clear();
+            out.warmup_states = 1;
+            out.warmup_configuration = *initial_configuration;
+            out.truncation_error.reset();
+            out.truncation_max_states.reset();
+        }
         return out;
     }
 
@@ -1079,7 +1096,7 @@ struct Engine {
         } else {
             // System::run on the configuration's prefix charges: a new System
             // reads custom warm-up targets.
-            S.warmup_loop(options.warmup_states, warmup_sectors());
+            S.warmup_loop(options.warmup_states, warmup_sectors(options.warmup_configuration));
             S.resume(1, dmtk::RIGHT2LEFT, 1);
         }
         if (S.store_products()) S.set_full_sweep(true);
@@ -1149,6 +1166,45 @@ struct Engine {
         return out;
     }
 
+    // The charge-sorted index of every site's state in `configuration`
+    // (State::i1 is the kit index of a sorted state, as in local_operator).
+    std::vector<std::size_t> sorted_configuration(std::vector<std::size_t> const& configuration) const {
+        std::vector<std::size_t> sorted;
+        for (int i = 0; i < problem.num_sites; ++i) {
+            auto const& basis = blocks[static_cast<std::size_t>(problem.site_index[static_cast<std::size_t>(i)])].basis();
+            std::size_t p = 0;
+            while (p < basis.size() && basis[p].i1 != configuration[static_cast<std::size_t>(i)]) ++p;
+            if (p == basis.size()) throw std::logic_error("classic DMRG lost a local state of the configuration");
+            sorted.push_back(p);
+        }
+        return sorted;
+    }
+
+    // Make the prepared product state's amplitude on `configuration` one:
+    // each block kept the product state's part up to a phase (the sign or
+    // phase of a density-matrix eigenvector), which the exported state
+    // shows. Anything but a unit amplitude means the preparation failed.
+    void fix_product_phase(detail::EvolvingSystem<T>& S, std::vector<std::size_t> const& configuration) const {
+        auto const mps = detail::MpsExport<T>(S).state(S.gs);
+        std::vector<Complex> carry{1.};
+        for (std::size_t i = 0; i < mps.sites.size(); ++i) {
+            auto const& site = mps.sites[i];
+            std::vector<Complex> next(site.right);
+            for (std::size_t l = 0; l < site.left; ++l)
+                for (std::size_t r = 0; r < site.right; ++r) {
+                    std::size_t const at = (l * site.local + configuration[i]) * site.right + r;
+                    next[r] += carry[l] * (site.real.empty() ? site.complex[at] : Complex(site.real[at]));
+                }
+            carry = std::move(next);
+        }
+        Complex const amplitude = carry.at(0);
+        if (std::abs(std::abs(amplitude) - 1.) > 1e-10)
+            throw std::logic_error("classic DMRG product-state preparation did not produce the configuration");
+        Complex const phase = std::conj(amplitude) / std::abs(amplitude);
+        if constexpr (std::is_same_v<T, double>) S.gs *= phase.real() < 0. ? -1. : 1.;
+        else S.gs *= phase;
+    }
+
     // Prepare the ground state of the initial Hamiltonian, then apply the
     // second-order Trotter steps exp(-dt A/2) exp(-dt B) exp(-dt A/2) (A the
     // even bonds, B the odd ones; dt imaginary in real time) as half sweeps
@@ -1174,10 +1230,14 @@ struct Engine {
 
         detail::EvolvingSystem<T> S(hami, lattice);
         configure(S, false);
-        if (options.warmup_configuration.empty())
+        if (initial_configuration) { // the product state (EvolvingSystem::prepare_product)
+            S.prepare_product(sorted_configuration(*initial_configuration), warmup_sectors(*initial_configuration));
+            fix_product_phase(S, *initial_configuration);
+        } else if (options.warmup_configuration.empty()) {
             S.prepare(static_cast<int>(options.warmup_states));
-        else
-            S.prepare(static_cast<int>(options.warmup_states), warmup_sectors());
+        } else {
+            S.prepare(static_cast<int>(options.warmup_states), warmup_sectors(options.warmup_configuration));
+        }
 
         EvolutionResult result;
         auto& initial = result.initial;
@@ -1430,6 +1490,42 @@ EvolutionResult evolve(models::Hamiltonian const& initial, models::Hamiltonian c
     auto const first = models::compile_hamiltonian(initial);
     auto const second = models::compile_hamiltonian(final_hamiltonian);
     return evolve(first.op, second.op, basis, evolution, options, measurements, std::move(callback));
+}
+
+// The final Hamiltonian is also the system's Hamiltonian while the product
+// state is prepared; nothing solves it there. The configuration itself shows
+// that the sector is not empty.
+EvolutionResult evolve(std::vector<std::size_t> const& configuration,
+                       models::CompiledOperator const& final_hamiltonian, models::PhysicalBasis const& basis,
+                       Evolution const& evolution, Options const& options, Measurements const& measurements,
+                       IterationCallback callback) {
+    validate_options(options);
+    validate_evolution(evolution, options);
+    if (!options.warmup_configuration.empty())
+        throw std::invalid_argument("classic DMRG evolve from a product configuration has nothing to warm up: "
+                                    "leave warmup_configuration empty");
+    Problem problem = prepare(final_hamiltonian, basis, options, measurements, "final Hamiltonian", true);
+    prepare_evolution(problem, final_hamiltonian, evolution, final_hamiltonian.site_dims);
+    check_configuration(problem, configuration, "initial configuration");
+    dmtk::InvocationGuard invocation(options.scratch_parent, options.log);
+    // Every engine object is destroyed before the guard restores the engine state.
+    if (evolution.imaginary && options.arithmetic == Arithmetic::real) {
+        Engine<double> engine(problem, options, std::move(callback));
+        engine.initial_configuration = &configuration;
+        return engine.evolve(evolution);
+    }
+    Engine<Complex> engine(problem, options, std::move(callback));
+    engine.initial_configuration = &configuration;
+    return engine.evolve(evolution);
+}
+
+EvolutionResult evolve(std::vector<std::size_t> const& configuration, models::Hamiltonian const& final_hamiltonian,
+                       Evolution const& evolution, Options const& options, Measurements const& measurements,
+                       IterationCallback callback) {
+    models::validate_hermiticity(final_hamiltonian);
+    auto const compiled = models::compile_hamiltonian(final_hamiltonian);
+    return evolve(configuration, compiled.op, models::physical_basis(final_hamiltonian), evolution, options,
+                  measurements, std::move(callback));
 }
 
 models::CompiledOperator site_terms(models::Hamiltonian const& model, std::string const& op) {

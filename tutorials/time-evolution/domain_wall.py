@@ -18,10 +18,10 @@
 # agent/v3-execution-and-api-audit at d37e51227, file
 # docs/tutorials/time_evolution/domain_wall.py (itself a port of the legacy
 # ALPS TEBD-02 "kink" tutorial), which evolved a product state by TEBD.
-# Adaptation: rewritten for pyalps.classic_dmrg.evolve; the domain wall is
-# prepared as the DMRG ground state of opposite fields on the two halves
-# (its warm-up told where the wall is, see below); the exact references, chain length,
-# time window and checks follow the alpsx script, the plots are condensed.
+# Adaptation: rewritten for pyalps.classic_dmrg.evolve, which starts from the
+# wall's product configuration as the alpsx script did; the exact references,
+# chain length, time window and checks follow the alpsx script, the plots are
+# condensed.
 
 # %% [markdown]
 # # Domain-wall ("kink") dynamics of an XX spin-1/2 chain
@@ -61,24 +61,23 @@ L, DT, STEPS = 24, 0.05, 120  # t <= 6: the front stays away from the open ends
 half = L // 2
 
 # %% [markdown]
-# ## Prepare the domain wall
+# ## The domain wall
 #
-# The wall is the ground state of fields $\mp S^z_i$ on the left and right
-# halves. The DMRG warm-up grows the chain from the left, and for each
-# partial chain it targets the uniform share of the total $S^z = 0$. That
-# places half of the left spins down, and with fields alone the sweeps
-# cannot move them back. `warmup_configuration` names the wall instead:
-# one local state per site, 0 for up and 1 for down
-# (`model.physical_basis().sites[i]` lists them). The warm-up then targets
-# the wall's own partial magnetizations.
+# The wall is a product state, given as its configuration: one local state
+# per site, 0 for up and 1 for down (`model.physical_basis().sites[i]` lists
+# them). `evolve` starts from it with amplitude one; nothing is solved
+# first, so `run.initial.energy` is NaN.
+#
+# The same wall is the ground state of fields $\mp S^z_i$ on the two halves.
+# Prepared that way (`dmrg.evolve(fields, model, ...)`), it needs the
+# configuration anyway, as `warmup_configuration`: the DMRG warm-up grows the
+# chain from the left and targets the uniform share of the total $S^z = 0$
+# on each partial chain, which places half of the left spins down, and with
+# fields alone the sweeps cannot move them back.
 
 # %%
 lattice = models.lattice.chain(L, bc="open")
 model = models.xxz(lattice, Jxy=1.0, Jz=0.0)
-site = model.site_for(0)
-wall = models.TermSum()
-for i in range(L):
-    wall += (-1.0 if i < half else 1.0) * site.Sz(i)
 up_down = [0] * half + [1] * half
 
 # %% [markdown]
@@ -89,8 +88,8 @@ up_down = [0] * half + [1] * half
 # $10^{-10}$, up to 40 states.
 
 # %%
-run = dmrg.evolve(wall, model, time_step=DT, steps=STEPS, states=40, truncation_error=1e-10,
-                  sector={"Sz": 0}, warmup_configuration=up_down, measure_steps=4, measurements={"Sz": "Sz"})
+run = dmrg.evolve(up_down, model, time_step=DT, steps=STEPS, states=40, truncation_error=1e-10,
+                  sector={"Sz": 0}, measure_steps=4, measurements={"Sz": "Sz"})
 ts = run.times
 profiles = run.measurements["Sz"].values
 print(f"measured {len(ts)} times up to t = {ts[-1]:.1f}; discarded weight {run.truncation_errors.sum():.1e}")
