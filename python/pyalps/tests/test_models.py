@@ -191,6 +191,44 @@ def test_catalog_spellings_and_named_adjoints():
                                    "t": 1.0, "U": 4.0})
     assert len(hubbard.compile_operator("n_updn")) == len(hubbard.compile_operator("double_occupancy")) == 3
 
+
+def test_site_operator_sugar_observables_and_matrices():
+    spin, fermion = models.spin(), models.spinful_fermion()
+    assert isinstance(spin.Sz, models.LocatedOperator) and spin.Sz.name == "Sz"
+    for built in (spin.Sp(2), spin["Sp"](2), spin.Splus(2)):
+        factor = built.terms[0].factors[0]
+        assert (factor.op.name, factor.site) == ("Sp", 2)
+    assert fermion.c_dag_up(1).terms[0].factors[0].op.name == "c_dag_up"
+    assert spin.dim == 2  # attributes still win over operator names
+    with pytest.raises(AttributeError):
+        spin.cdag_up
+    with pytest.raises(KeyError):
+        spin["no_such_operator"]
+
+    model = models.heisenberg(lat.chain(6))
+    compiled = models.compile_hamiltonian(model).op
+    assert models.compile_observable(model, compiled) is compiled
+    total = models.compile_observable(model, "Sz")
+    assert len(total) == 6 and [term.factors[0].site for term in total.terms] == list(range(6))
+    pair = models.compile_observable(model, spin.Sz(0) * spin.Sz(3))
+    assert len(pair) == 1 and pair.site_dims == [2] * 6
+    assert len(models.compile_observable(models.physical_basis(model), spin.Sz(1))) == 1
+    with pytest.raises(ValueError):
+        models.compile_observable(model, "c_up")
+    with pytest.raises(ValueError):
+        models.compile_observable(model, models.spin(1.0).Sz(0))  # another local space
+    with pytest.raises(TypeError):
+        models.compile_observable(models.physical_basis(model), "Sz")
+
+    dense = model.to_dense_matrix(sector={"Sz": 0.0})
+    assert dense.shape == (20, 20)
+    np.testing.assert_allclose(np.linalg.eigvalsh(dense)[0], ground_energy(model, Sz=0.0), atol=1e-12)
+    assert model.to_sparse_matrix().shape == (64, 64)
+    catalog = models.CatalogModel({"MODEL": "spin", "LATTICE": "chain lattice", "L": 6, "J": 1.0,
+                                   "CONSERVED_QUANTUMNUMBERS": "Sz", "Sz_total": 0})
+    np.testing.assert_allclose(np.linalg.eigvalsh(catalog.to_dense_matrix()), np.linalg.eigvalsh(dense), atol=1e-12)
+    assert len(models.compile_observable(catalog, "Sz")) == 6
+
 def test_term_algebra_and_compilation():
     spin = models.spin()
     sites = [spin, spin]

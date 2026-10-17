@@ -15,6 +15,9 @@ says otherwise) or a ``CompiledOperator`` with its ``PhysicalBasis``, an
 ``Options`` object or its fields as keywords, and
 measurements as a ``Measurements`` object or a dict of named operators
 (measured term by term; use ``expectation=`` for one value per operator).
+The operators are anything ``models.compile_observable`` accepts: compiled
+operators, located terms or, on a model, operator names (``{"n": "n"}``
+measures ``n`` on every site).
 Every completed iteration reaches ``callback(iteration)``, which may raise to
 abort. The engine is serialized process-wide. The bindings are present when
 pyalps was built against an SDK with the ``classic_dmrg`` component.
@@ -57,19 +60,32 @@ def make_options(options=None, **fields):
     return result
 
 
-def make_measurements(measurements=None, expectation=None):
-    """A ``Measurements`` value from dicts of named compiled operators.
+def make_measurements(measurements=None, expectation=None, model=None):
+    """A ``Measurements`` value from dicts of named operators.
 
     ``measurements`` are reported term by term (one column per term);
-    ``expectation`` operators give one value each.
+    ``expectation`` operators give one value each. Values other than
+    compiled operators are compiled on ``model`` (a ``Hamiltonian``,
+    ``CatalogModel`` or ``PhysicalBasis``) by ``models.compile_observable``.
     """
     if isinstance(measurements, _classic_dmrg_c.Measurements):
         if expectation:
             raise TypeError("pass either a Measurements object or dicts, not both")
         return measurements
+
+    def compiled(operators):
+        out = {}
+        for name, value in (operators or {}).items():
+            if not isinstance(value, _models.CompiledOperator):
+                if model is None:
+                    raise TypeError(f"measurement {name!r} needs a model to compile it; pass a CompiledOperator")
+                value = _models.compile_observable(model, value)
+            out[name] = value
+        return out
+
     result = _classic_dmrg_c.Measurements()
-    result.terms = dict(measurements or {})
-    result.expectation = dict(expectation or {})
+    result.terms = compiled(measurements)
+    result.expectation = compiled(expectation)
     return result
 
 
@@ -77,6 +93,7 @@ def solve(model, basis=None, *, options=None, measurements=None, expectation=Non
           log_file=None, **fields):
     """Run the DMRG on a ``Hamiltonian``, a ``CatalogModel`` or a ``CompiledOperator`` with its ``PhysicalBasis``."""
     catalog = getattr(_models, "CatalogModel", None)
+    requests = make_measurements(measurements, expectation, model if basis is None else basis)
     if catalog is not None and isinstance(model, catalog):
         if basis is not None:
             raise TypeError("a CatalogModel brings its own physical basis")
@@ -84,7 +101,6 @@ def solve(model, basis=None, *, options=None, measurements=None, expectation=Non
             fields["sector"] = model.sector()
         model, basis = model.compile_hamiltonian(), model.physical_basis()
     resolved = make_options(options, **fields)
-    requests = make_measurements(measurements, expectation)
     if basis is None:
         return _classic_dmrg_c.solve(model, resolved, requests, callback, log_file)
     return _classic_dmrg_c.solve(model, basis, resolved, requests, callback, log_file)

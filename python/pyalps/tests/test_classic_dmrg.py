@@ -150,6 +150,18 @@ def test_catalog_models_solve_like_exact_diagonalization():
     assert dmrg.solve(ring, sector={"Sz": 0.0}, **exact_sweeps).energy == pytest.approx(result.energy, abs=1e-8)
     with pytest.raises(TypeError):
         dmrg.solve(ring, basis)
+    # Operator names and located terms as measurements, on catalog and kit models alike.
+    named = dmrg.solve(ring, sector={"Sz": 0.0}, measurements={"Sz": "Sz"}, **exact_sweeps)
+    np.testing.assert_allclose(named.measurements["Sz"].values[0], 0.0, atol=1e-8)
+    assert len(named.measurements["Sz"].values[0]) == 8
+    spin = models.spin()
+    kit = models.heisenberg(models.lattice.chain(8))
+    located = dmrg.solve(kit, sector={"Sz": 0.0}, expectation={"SzSz": spin.Sz(0) * spin.Sz(1)}, **exact_sweeps)
+    ground = ed.ground_state(kit, sector={"Sz": 0.0}, observables={"SzSz": spin.Sz(0) * spin.Sz(1)})
+    assert located.energy == pytest.approx(ground.energy, abs=1e-8)
+    assert located.measurements["SzSz"].values[0, 0] == pytest.approx(ground.observables["SzSz"], abs=1e-7)
+    with pytest.raises(TypeError, match="needs a model"):
+        dmrg.make_measurements({"Sz": "Sz"})
 
 
 def symmetric_integrals(n, seed):

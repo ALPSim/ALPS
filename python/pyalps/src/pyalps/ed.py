@@ -10,6 +10,10 @@
 >>> result.eigenvalues[0]                                        # doctest: +SKIP
 -5.387390917445...
 >>> spectrum = ed.model_spectrum(model, all_momenta=True, count=2)  # Sz and k resolved
+>>> spin = models.spin()
+>>> ground = ed.ground_state(model, sector={"Sz": 0.0},
+...                          observables={"SzSz": spin.Sz(0) * spin.Sz(1), "Sz": "Sz"})
+>>> ground.energy, ground.observables["SzSz"]                    # doctest: +SKIP
 
 ``prepare_product``, ``prepare_projected``, ``prepare_finite``,
 ``model_spectrum`` and ``finite_spectrum`` also take an XML catalog model
@@ -115,6 +119,57 @@ finite_spectrum = _accepting_catalogs(
     "(catalog, irreps, sector=None, count=None, which='SA', tolerance=None, max_iterations=None)")
 
 
+class GroundState:
+    """The lowest eigenpair of a model and the observables measured on it.
+
+    ``energy``, ``vector`` (in the basis of ``problem``), ``observables``
+    (name -> expectation value: a float when the imaginary part vanishes to
+    rounding, else complex), and the full ``result`` and its ``problem``.
+    """
+
+    __slots__ = ("energy", "vector", "observables", "result")
+
+    def __init__(self, energy, vector, observables, result):
+        self.energy, self.vector, self.observables, self.result = energy, vector, observables, result
+
+    @property
+    def problem(self):
+        return self.result.problem
+
+    def __repr__(self):
+        return f"GroundState(energy={self.energy!r}, dimension={len(self.vector)}, observables={sorted(self.observables)})"
+
+
+def _value(z):
+    z = complex(z)
+    return z.real if abs(z.imag) <= 1e-12 * max(1.0, abs(z.real)) else z
+
+
+def ground_state(model, *, sector=None, momentum=None, translations=(), observables=None, method="auto",
+                 tolerance=None, max_iterations=None):
+    """The ground state of a ``Hamiltonian`` or ``CatalogModel`` in one call.
+
+    ``sector`` selects charges (default: the whole space, or a catalog's
+    ``*_total`` sector); ``momentum`` selects a translation-projected basis
+    (a catalog also needs ``translations=``). ``observables`` maps names to
+    anything ``models.compile_observable`` accepts (located terms, operator
+    names, compiled operators), measured on the ground state; under a
+    momentum they must preserve the symmetry sector. ``method`` and the
+    Lanczos controls are those of ``eigenstates``.
+    """
+    sector_args = {} if sector is None else {"sector": sector}
+    if momentum is None:
+        problem = prepare_product(model, **sector_args)
+    elif _is_catalog(model):
+        problem = prepare_projected(model, momentum=list(momentum), translations=translations, **sector_args)
+    else:
+        problem = prepare_projected(model, momentum=list(momentum), **sector_args)
+    result = problem.eigenstates(count=1, method=method, tolerance=tolerance, max_iterations=max_iterations)
+    measured = {name: _value(result.expectation_values(_models.compile_observable(model, observable))[0])
+                for name, observable in (observables or {}).items()}
+    return GroundState(float(result.eigenvalues[0]), result.eigenvectors[:, 0], measured, result)
+
+
 def lanczos(matrix, count=1, which="SA", tolerance=0.0, max_iterations=0, want_vectors=True):
     """Deflated Lanczos on a scipy sparse matrix (real symmetric or complex Hermitian).
 
@@ -131,4 +186,4 @@ def lanczos(matrix, count=1, which="SA", tolerance=0.0, max_iterations=0, want_v
                              tolerance, max_iterations, want_vectors)
 
 
-__all__ = [name for name in dir(_ed_c) if not name.startswith("_")] + ["lanczos"]
+__all__ = [name for name in dir(_ed_c) if not name.startswith("_")] + ["GroundState", "ground_state", "lanczos"]

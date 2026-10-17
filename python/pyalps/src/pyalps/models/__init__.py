@@ -37,4 +37,102 @@ lattice = _models_c.lattice
 # need a sys.modules entry; the attribute alone would not serve them.
 _sys.modules[__name__ + ".lattice"] = lattice
 
-__all__ = [name for name in dir(_models_c) if not name.startswith("_")]
+_CatalogModel = getattr(_models_c, "CatalogModel", None)  # absent without the legacy model library
+
+
+# -- operator sugar -------------------------------------------------------------------
+# Adapted from skilledwolf/alpsx (private repository), branch
+# agent/v3-execution-and-api-audit at d37e51227: Site.__getattr__ and
+# OpFactory of python/alps/src/alps/models/{sites,operators}.py, here over
+# the bound SiteBasis and TermSum.located; site["name"] added.
+
+class LocatedOperator:
+    """``site.Sz`` or ``site["Sz"]``: called with a site index, ``located(site, "Sz", i)``."""
+
+    __slots__ = ("basis", "name")
+
+    def __init__(self, basis, name):
+        self.basis, self.name = basis, name
+
+    def __call__(self, site):
+        return TermSum.located(self.basis, self.name, site)
+
+    def __repr__(self):
+        return f"LocatedOperator({self.name!r}, {self.basis!r})"
+
+
+def _site_getattr(self, name):
+    # Reached only when normal attribute lookup misses.
+    if name.startswith("_") or not self.has_op(name):
+        raise AttributeError(f"SiteBasis has no attribute or operator {name!r}")
+    return LocatedOperator(self, name)
+
+
+def _site_getitem(self, name):
+    if not isinstance(name, str) or not self.has_op(name):
+        raise KeyError(name)
+    return LocatedOperator(self, name)
+
+
+SiteBasis.__getattr__ = _site_getattr
+SiteBasis.__getitem__ = _site_getitem
+
+
+def compile_observable(model, observable):
+    """``observable`` as a ``CompiledOperator`` on the sites of ``model``.
+
+    ``model`` is a ``Hamiltonian``, a ``CatalogModel`` or a ``PhysicalBasis``.
+    ``observable`` is a ``CompiledOperator`` (returned unchanged), a
+    ``TermSum`` of located terms (each factor's site basis must match the
+    model's at its site, so terms built on another local state order are
+    rejected), or an operator name summed over every site that defines it
+    (on a catalog model, ``CatalogModel.compile_operator(name)``).
+    """
+    if isinstance(observable, CompiledOperator):
+        return observable
+    if isinstance(observable, TermSum):
+        basis = model if isinstance(model, PhysicalBasis) else model.physical_basis()
+        return compile_operator(observable, basis)
+    if isinstance(observable, str):
+        if _CatalogModel is not None and isinstance(model, _CatalogModel):
+            return model.compile_operator(observable)
+        if isinstance(model, Hamiltonian):
+            total = TermSum()
+            for site in range(model.num_sites):
+                basis = model.site_for(site)
+                if basis.has_op(observable):
+                    total += TermSum.located(basis, observable, site)
+            if total.empty:
+                raise ValueError(f"no site of the model defines an operator {observable!r}")
+            return compile_operator(total, model.physical_basis())
+        raise TypeError("an operator name needs a Hamiltonian or CatalogModel to resolve it")
+    raise TypeError(f"cannot compile an observable of type {type(observable).__name__}")
+
+
+# -- matrices -------------------------------------------------------------------------
+
+def _to_sparse_matrix(self, sector=None):
+    """The Hamiltonian as a scipy CSR matrix on its product basis or one charge sector.
+
+    Rows and columns follow ``pyalps.ed.prepare_product(model, sector).states``;
+    ``sector=None`` is the whole space for a ``Hamiltonian`` and the
+    ``*_total`` sector for a ``CatalogModel``.
+    """
+    from .. import ed
+
+    problem = ed.prepare_product(self) if sector is None else ed.prepare_product(self, sector=sector)
+    return problem.hamiltonian.to_scipy()
+
+
+def _to_dense_matrix(self, sector=None):
+    """The same as a dense NumPy array (see ``to_sparse_matrix``)."""
+    return _to_sparse_matrix(self, sector).toarray()
+
+
+for _model_type in (Hamiltonian, _CatalogModel):
+    if _model_type is not None:
+        _model_type.to_sparse_matrix = _to_sparse_matrix
+        _model_type.to_dense_matrix = _to_dense_matrix
+del _model_type
+
+__all__ = [name for name in dir(_models_c) if not name.startswith("_")] + ["LocatedOperator", "compile_observable"]

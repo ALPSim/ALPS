@@ -75,6 +75,12 @@ ALPS_MODELS_DECL CompiledOperator compile_operator(
     TermSum const& terms, std::vector<SiteBasisPtr> const& sites,
     FermionConvention convention = FermionConvention::strict);
 
+// The same on a complete physical basis whose site bases are not at hand (a
+// solver's problem, a catalog model's): each factor's site basis must match
+// the physical basis at its site (require_compatible_sites), so terms built on
+// another local state order are rejected; the basis's convention applies.
+ALPS_MODELS_DECL CompiledOperator compile_operator(TermSum const& terms, PhysicalBasis const& physical);
+
 // Validate the full numeric operator before a model Hermitian eigensolve.
 // Does not impose charge declarations or change arbitrary operator compilation.
 // Canonicalization precedes adjunction, including graded swap signs. Subject to

@@ -4,6 +4,7 @@ set(models_fixtures "${CMAKE_CURRENT_SOURCE_DIR}/fixtures")
 foreach(name IN ITEMS
     ab_initio
     compile_hamiltonian
+    compile_on_physical_basis
     finite_graph
     hermiticity
     heterogeneous_physical_basis

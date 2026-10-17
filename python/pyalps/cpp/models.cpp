@@ -749,6 +749,11 @@ void bind_hamiltonian(nb::module_& m) {
         return mdl::compile_operator(terms, sites, conv);
     }, nb::arg("terms"), nb::arg("sites"), nb::arg("fermion_convention") = "strict",
        "Lower an arbitrary observable without Hamiltonian symmetry requirements.");
+    m.def("compile_operator", [](mdl::TermSum const& terms, mdl::PhysicalBasis const& physical) {
+        nb::gil_scoped_release release;
+        return mdl::compile_operator(terms, physical);
+    }, nb::arg("terms"), nb::arg("physical_basis"),
+       "The same on a complete PhysicalBasis (a problem's, a catalog model's): each factor's site must match it.");
     m.def("compile_local_terms", [](mdl::TermSum const& terms, std::vector<mdl::SiteBasisPtr> const& sites,
                                     std::vector<std::string> const& conserved, nb::handle convention) {
         auto const conv = convention_of(convention);

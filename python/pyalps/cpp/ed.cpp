@@ -378,6 +378,10 @@ void bind_product(nb::module_& m) {
             nb::gil_scoped_release release;
             return p.operator_matrix(op);
         }, nb::arg("op"), "Any operator on the problem's local spaces, assembled on its basis (projected to the sector).")
+        .def("operator_matrix", [](ed::ProductProblem const& p, mdl::TermSum const& terms) {
+            nb::gil_scoped_release release;
+            return p.operator_matrix(mdl::compile_operator(terms, p.physical_basis()));
+        }, nb::arg("terms"), "The same for located terms on the problem's own site bases.")
         .def("__repr__", [](ed::ProductProblem const& p) { return "ProductProblem(dimension=" + std::to_string(p.dimension()) + ")"; });
 
     nb::class_<ed::ProductEigenResult>(m, "ProductEigenResult", "Eigenpairs of a ProductProblem.")
@@ -400,6 +404,14 @@ void bind_product(nb::module_& m) {
             }
             return vector_to_numpy(std::move(values));
         }, nb::arg("op"), "<psi_i|O|psi_i> for every eigenvector, O assembled on the problem's basis.")
+        .def("expectation_values", [](ed::ProductEigenResult const& r, mdl::TermSum const& terms) {
+            std::vector<Complex> values;
+            {
+                nb::gil_scoped_release release;
+                values = ed::expectation_values(r, mdl::compile_operator(terms, r.problem.physical_basis()));
+            }
+            return vector_to_numpy(std::move(values));
+        }, nb::arg("terms"), "The same for located terms on the problem's own site bases.")
         .def("__len__", [](ed::ProductEigenResult const& r) { return r.eigenvalues.size(); })
         .def("__repr__", [](ed::ProductEigenResult const& r) {
             return "ProductEigenResult(" + std::to_string(r.eigenvalues.size()) + " states, " + method_name(r.method) + ")";
@@ -412,6 +424,14 @@ void bind_product(nb::module_& m) {
         }
         return vector_to_numpy(std::move(values));
     }, nb::arg("result"), nb::arg("op"), "<psi_i|O|psi_i> for every eigenvector of a product result.");
+    m.def("expectation_values", [](ed::ProductEigenResult const& r, mdl::TermSum const& terms) {
+        std::vector<Complex> values;
+        {
+            nb::gil_scoped_release release;
+            values = ed::expectation_values(r, mdl::compile_operator(terms, r.problem.physical_basis()));
+        }
+        return vector_to_numpy(std::move(values));
+    }, nb::arg("result"), nb::arg("terms"), "The same for located terms on the problem's own site bases.");
 
     m.def("prepare_product", [](mdl::Hamiltonian const& model, std::map<std::string, double> sector, std::size_t max_full_dimension) {
         ed::ProductOptions options;

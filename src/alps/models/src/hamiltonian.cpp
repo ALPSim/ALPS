@@ -548,6 +548,34 @@ CompiledOperator compile_operator(TermSum const& terms,
     return out;
 }
 
+CompiledOperator compile_operator(TermSum const& terms, PhysicalBasis const& physical) {
+    std::vector<SiteBasisPtr> sites(physical.sites.size());
+    std::vector<std::pair<std::size_t, SiteBasisPtr>> used;
+    for (auto const& term : terms.terms())
+        for (auto const& factor : term.factors) {
+            if (factor.site < 0 || std::size_t(factor.site) >= sites.size())
+                throw std::invalid_argument("operator site is outside the physical basis");
+            auto& slot = sites[std::size_t(factor.site)];
+            if (slot == factor.basis) continue;
+            if (!slot) slot = factor.basis;
+            used.emplace_back(std::size_t(factor.site), factor.basis);
+        }
+    require_compatible_sites(physical, used);
+    // Sites no factor touches only lend their dimension and parity.
+    for (std::size_t i = 0; i < sites.size(); ++i) {
+        if (sites[i]) continue;
+        auto const& local = physical.sites[i];
+        SiteBasis site;
+        site.dim = static_cast<int>(local.labels.size());
+        site.statistics = local.statistics;
+        site.quantum_numbers = local.quantum_numbers;
+        site.parity_operator = local.parity;
+        site.basis_labels = local.labels;
+        sites[i] = finalize_site(std::move(site));
+    }
+    return compile_operator(terms, sites, physical.fermion_convention);
+}
+
 CompiledModel compile_hamiltonian(Hamiltonian const& model) {
     std::vector<SiteBasisPtr> sites;
     sites.reserve(std::size_t(model.num_sites()));

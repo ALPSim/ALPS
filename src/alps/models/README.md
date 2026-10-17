@@ -26,7 +26,7 @@ mdl::CompiledModel compiled = mdl::compile_hamiltonian(model);
 | `alps/models/terms.hpp` | `Term`, `TermSum`: operator algebra with fermionic swap signs, Hermitian conjugation (factors named by `SiteBasis::adjoint`), canonicalisation and charge analysis; `+=`/`-=` append in place, so accumulating many terms is linear |
 | `alps/models/physical_basis.hpp` | `LocalBasis`, `PhysicalBasis`: ordered local spaces, quantum numbers and parities, independent of any Hamiltonian |
 | `alps/models/compiled.hpp` | `CompiledOperator` (dense local factors with Jordan–Wigner strings) and `CompiledModel` (operator plus lattice metadata) |
-| `alps/models/hamiltonian.hpp` | `Hamiltonian` (lattice + site bases + bond/site/global term templates), `compile_hamiltonian`, `compile_operator`, `validate_hermiticity` |
+| `alps/models/hamiltonian.hpp` | `Hamiltonian` (lattice + site bases + bond/site/global term templates), `compile_hamiltonian`, `compile_operator` (on site bases, or on a `PhysicalBasis` whose sites the terms must match), `validate_hermiticity` |
 | `alps/models/builtin.hpp` | 14 named model factories, from `heisenberg` to `bose_hubbard` and `kondo_lattice`, and `ab_initio(h1, eri, n, tol)`: the molecular Hamiltonian of real one- and two-electron integrals (chemist's notation) on `spinful_fermion()` sites |
 | `alps/models/lattice_xml.hpp` | `to_latticegraph_xml`, `to_graph_xml`: the ALPS lattice-library XML of a kit lattice (unit cell with vertex coordinates, extent, boundary); `custom_lattice_name`, `catalog_graph_name` |
 | `alps/models/qubit_encoding.hpp` | `QubitEncoding`: the qubit register of a `PhysicalBasis` (binary or Gray code words per site), bit/state-index and statevector interchange |

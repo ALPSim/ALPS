@@ -245,6 +245,38 @@ def test_catalog_models_take_the_model_entry_points():
     assert isinstance(compiled, models.CompiledModel) and len(compiled.op) == len(ring.compile_hamiltonian())
     assert compiled.site_types == ring.site_types and len(compiled.edges) == ring.num_bonds
 
+
+def test_ground_state_and_located_observables():
+    spin = models.spin()
+    model = models.heisenberg(lat.chain(8))
+    ground = ed.ground_state(model, sector={"Sz": 0.0},
+                             observables={"SzSz": spin.Sz(0) * spin.Sz(1), "flip": spin.Sp(0) * spin.Sm(1), "Sz": "Sz"})
+    assert ground.energy == pytest.approx(CHAIN_8_GROUND_ENERGY, abs=1e-12)
+    assert ground.vector.shape == (70,) and ground.problem.dimension == 70
+    assert isinstance(ground.observables["SzSz"], float)
+    assert ground.observables["SzSz"] == pytest.approx(CHAIN_8_GROUND_ENERGY / 24, abs=1e-12)  # 8 bonds, 3 components
+    assert ground.observables["flip"] == pytest.approx(2 * ground.observables["SzSz"], abs=1e-12)
+    assert ground.observables["Sz"] == pytest.approx(0.0, abs=1e-12)
+    at_zero = ed.ground_state(model, sector={"Sz": 0.0}, momentum=[0.0], observables={"SzSz": spin.Sz(0) * spin.Sz(1)})
+    assert at_zero.energy == pytest.approx(CHAIN_8_GROUND_ENERGY, abs=1e-10)
+    assert at_zero.observables["SzSz"] == pytest.approx(ground.observables["SzSz"], abs=1e-10)
+
+    # Located terms where compiled operators go, on the problem's own sites.
+    problem = ed.prepare_product(model, sector={"Sz": 0.0})
+    result = problem.eigenstates(count=2)
+    terms = spin.Sz(2) * spin.Sz(5)
+    compiled = models.compile_observable(model, terms)
+    np.testing.assert_allclose(result.expectation_values(terms), result.expectation_values(compiled), atol=1e-14)
+    np.testing.assert_allclose(ed.expectation_values(result, terms), result.expectation_values(compiled), atol=1e-14)
+    np.testing.assert_allclose(problem.operator_matrix(terms).toarray(), problem.operator_matrix(compiled).toarray(), atol=1e-14)
+
+    catalog = models.CatalogModel({"MODEL": "spin", "LATTICE": "chain lattice", "L": 8, "J": 1.0,
+                                   "CONSERVED_QUANTUMNUMBERS": "Sz", "Sz_total": 0})
+    from_catalog = ed.ground_state(catalog, observables={"Sz": "Sz"})
+    assert from_catalog.energy == pytest.approx(CHAIN_8_GROUND_ENERGY, abs=1e-12)
+    with pytest.raises(ValueError, match="different physical basis"):
+        ed.ground_state(catalog, observables={"kit": spin.Sz(0)})  # the catalog orders Sz upwards
+
 def test_sparse_assembly_matches_kronecker_products():
     spin = models.spin()
     sz, sp, sm = (spin.op(name).matrix for name in ("Sz", "Sp", "Sm"))

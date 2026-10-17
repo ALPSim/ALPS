@@ -82,7 +82,10 @@ spectrum = ed.model_spectrum(model, all_momenta=True)      # every (Sz, k) block
 
 spin = models.spin()
 custom = models.Hamiltonian(lat.square(4, 4), spin, conserved_quantum_numbers=["Sz"])
-custom.add_bond(1.0, lambda i, j: models.located(spin, "Sz", i) * models.located(spin, "Sz", j))
+custom.add_bond(1.0, lambda i, j: spin.Sz(i) * spin.Sz(j))     # spin.Sz(i) is models.located(spin, "Sz", i)
+ground = ed.ground_state(model, sector={"Sz": 0},
+                         observables={"SzSz": spin.Sz(0) * spin.Sz(1), "Sz": "Sz"})
+dense = model.to_dense_matrix(sector={"Sz": 0})             # or to_sparse_matrix() for scipy CSR
 
 pauli = models.export_pauli(model)                         # Pauli strings for qubit simulators
 catalog = models.CatalogModel({"MODEL": "spin", "LATTICE": "chain lattice", "L": 8, "J": 1,
@@ -94,7 +97,7 @@ result = dmrg.solve(chain, sweeps=dmrg.ramped_sweeps(4, 200), sector={"N": 16, "
                     measurements={"n": dmrg.site_terms(chain, "n")})
 ```
 
-The `ed` entry points (`prepare_product`, `prepare_projected`, `prepare_finite`, `model_spectrum`, `finite_spectrum`) and `dmrg.solve` take a kit `Hamiltonian` or an XML `CatalogModel` alike; a catalog runs in the sector of its `*_total` parameters unless `sector=` says otherwise, and resolves momenta only with explicit `translations=`.
+The `ed` entry points (`prepare_product`, `prepare_projected`, `prepare_finite`, `model_spectrum`, `finite_spectrum`, `ground_state`) and `dmrg.solve` take a kit `Hamiltonian` or an XML `CatalogModel` alike; a catalog runs in the sector of its `*_total` parameters unless `sector=` says otherwise, and resolves momenta only with explicit `translations=`. Observables (`ed.ground_state(observables=...)`, product results' `expectation_values`, `dmrg.solve(measurements=..., expectation=...)`) may be compiled operators, located terms or operator names; `models.compile_observable` does the compiling and rejects terms built on another local basis, such as kit spins on a catalog model, whose Sz states run the other way. Site operators answer to either the kit's or the XML catalog's names (`Sp`/`Splus`, `c_dag_up`/`cdag_up`, `n_dn`/`n_down`; `models.catalog_operator_names`), and `TermSum.dag()` names conjugates as the site does (`Sp` → `Sm`).
 
 `dmrg.solve_molecular(h1, eri, n_alpha, n_beta, core_energy=..., sweeps=...)` runs the same engine on restricted real molecular integrals (chemist notation) and returns the energy with the one- and two-particle reduced density matrices in the PySCF convention, spin-summed and by spin block. Everything is measured in the final sweep: `observables={name: TermSum}` adds operators of up to four orbitals (`models.located(models.spinful_fermion(), op, orbital)` products), and `ci_vector=True` reconstructs the sector's CI vector (`dmrg.ci_occupations(result)` gives its alpha and beta occupations). `dmrg.local_expectations`, `dmrg.correlation_matrix` and `dmrg.spin_spin_correlations` derive densities, number, spin and hopping correlations from the RDMs. The solver suits small and medium active spaces, up to about 16 orbitals (see the [component README](../../src/alps/classic_dmrg/README.md#molecular-hamiltonians-alpsdmrgmolecularhpp)). [`qdk-chemistry-alps`](../qdk-chemistry-alps/README.md) registers exact diagonalization and this solver as qdk-chemistry calculators.
 
