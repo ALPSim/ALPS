@@ -70,15 +70,12 @@ ProductProblem prepare_product(models::TermSum const& terms,
         throw std::length_error("product problem exceeds the eigensolver dimension limit");
     for (auto const& site : sites) result->parity.push_back(site->parity_operator);
     std::vector<std::int64_t> const states(result->basis.states.begin(), result->basis.states.end());
-    auto const coo = build_coo_from_local(compiled, states, result->basis.dimension, result->parity);
-    auto const assign_matrix = [&](auto scalar) {
-        auto matrix = canonical_csr<decltype(scalar)>(coo, result->basis.dimension, result->basis.dimension);
+    // Row by row: the uncombined contribution list of a sector is never held.
+    std::visit([&](auto&& matrix) {
         result->offsets = std::move(matrix.offsets);
         result->columns = std::move(matrix.indices);
         result->values = std::move(matrix.values);
-    };
-    if (coo.is_complex) assign_matrix(std::complex<double>{});
-    else assign_matrix(double{});
+    }, build_canonical_csr(compiled, states, result->basis.dimension, result->parity));
     return ProductProblem(std::move(result));
 }
 ProductProblem prepare_product(models::Hamiltonian const& model, ProductOptions const& options) {
@@ -129,7 +126,8 @@ SparseMatrix<std::complex<double>> ProductProblem::operator_matrix(models::Compi
     if (op.site_dims != source.dims)
         throw std::invalid_argument("ProductProblem::operator_matrix: the operator's local dimensions differ from the problem's");
     std::vector<std::int64_t> const states(source.basis.states.begin(), source.basis.states.end());
-    return build_csr_from_local<std::complex<double>>(op, states, source.basis.dimension, source.parity);
+    return std::get<SparseMatrix<std::complex<double>>>(
+        build_canonical_csr(op, states, source.basis.dimension, source.parity, true));
 }
 
 std::vector<std::complex<double>> expectation_values(ProductEigenResult const& result,

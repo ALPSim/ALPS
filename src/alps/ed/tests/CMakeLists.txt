@@ -7,6 +7,7 @@ foreach(name IN ITEMS
     canonical_csr
     local_transitions
     product_basis
+    row_csr
     streamed_local_operator
     term_accumulation
     thermodynamics)

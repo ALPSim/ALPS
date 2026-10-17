@@ -18,6 +18,7 @@
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
+#include <variant>
 #include <vector>
 
 namespace alps::ed {
@@ -65,6 +66,7 @@ template<class Scalar> Scalar matrix_add(Scalar a, Scalar b) {
 } // namespace detail
 
 /// Combine rectangular COO contributions in row-bucket/column-sort order.
+/// Duplicates of one entry are summed in their COO order (the sort is stable).
 /// Reject malformed indices and nonfinite input or floating-point results.
 /// Real scalars require every contribution's imaginary part to be exactly zero,
 /// even if those parts would cancel. Integer conversion truncates and wraps
@@ -95,7 +97,7 @@ SparseMatrix<Scalar> canonical_csr(CooFromLocal const& coo, std::size_t rows, st
     }
     for (std::size_t row = 0; row < rows; ++row) {
         auto first = entries.begin() + result.offsets[row], last = entries.begin() + result.offsets[row + 1];
-        std::sort(first, last, [](auto const& a, auto const& b) { return a.first < b.first; });
+        std::stable_sort(first, last, [](auto const& a, auto const& b) { return a.first < b.first; });
         next[row] = static_cast<std::int64_t>(result.values.size());
         while (first != last) {
             auto column = first->first;
@@ -119,5 +121,20 @@ SparseMatrix<Scalar> build_csr_from_local(models::CompiledOperator const& input,
     std::vector<std::vector<double>> const& parity = {}) {
     return canonical_csr<Scalar>(build_coo_from_local(input, states, count, parity), count, count);
 }
+
+using CanonicalCsr = std::variant<SparseMatrix<double>, SparseMatrix<std::complex<double>>>;
+
+/// The canonical CSR of build_coo_from_local's contributions, assembled one
+/// output row at a time: offsets, indices and values equal
+/// canonical_csr<S>(build_coo_from_local(input, states, count, parity)), with S
+/// real exactly when the COO's is_complex flag is false (or complex when
+/// `complex_values`). Each row comes from the operator's adjoint applied to
+/// that row's state (conjugated coefficients, conjugate-transposed factors,
+/// factor-site string signs folded in; all exact), so the uncombined
+/// contribution list is never held: peak memory is the result plus one row.
+/// Same validation and exceptions as the COO path.
+ALPS_ED_DECL CanonicalCsr build_canonical_csr(models::CompiledOperator const& input,
+    std::vector<std::int64_t> const& states, std::size_t count,
+    std::vector<std::vector<double>> const& parity = {}, bool complex_values = false);
 
 } // namespace alps::ed

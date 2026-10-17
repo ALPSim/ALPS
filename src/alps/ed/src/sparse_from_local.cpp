@@ -10,6 +10,7 @@
 // the locked conventions).
 
 #include <alps/ed/sparse_from_local.hpp>
+#include <alps/ed/sparse_matrix.hpp>
 #include "local_action.hpp"
 
 #include <algorithm>
@@ -290,6 +291,164 @@ CooFromLocal build_coo_from_local(
             out.data.push_back(value);
         }, parity_values);
     return out;
+}
+
+namespace {
+
+// Row r of A is the conjugate of column r of A^dagger, so applying the adjoint
+// to one basis state yields one output row of A. The adjoint conjugates each
+// coefficient and conjugate-transposes each factor. A string sign F_s(in_s) on
+// a factor site depends on A's input, which is the adjoint's output: it moves
+// into the factor's rows. Strings on other sites see an unchanged digit and
+// stay. Conjugation and +-1 factors are exact, so every contribution is the
+// exact conjugate of the one the column-wise kernel emits.
+models::CompiledOperator row_operator(models::CompiledOperator const& input,
+                                      std::vector<std::vector<double>> const& parity) {
+    auto const n = input.site_dims.size();
+    models::CompiledOperator out;
+    out.site_dims = input.site_dims;
+    out.terms.reserve(input.terms.size());
+    for (auto const& term : input.terms) {
+        models::LocalTerm adjoint;
+        adjoint.coefficient = std::conj(term.coefficient);
+        std::vector<int> folded;
+        for (auto const& factor : term.factors) {
+            if (factor.site < 0 || static_cast<std::size_t>(factor.site) >= n)
+                throw std::invalid_argument("sparse assembly: factor site out of range");
+            auto const d = static_cast<std::size_t>(input.site_dims[static_cast<std::size_t>(factor.site)]);
+            if (d > std::numeric_limits<std::size_t>::max() / d || factor.matrix.size() != d * d)
+                throw std::invalid_argument("sparse assembly: operator size != site dim^2");
+            auto const strings = parity.empty() ? 0 : std::count(term.jordan_wigner.begin(),
+                                                                 term.jordan_wigner.end(), factor.site);
+            if (strings) folded.push_back(factor.site);
+            models::LocalFactor dagger{factor.site, std::vector<std::complex<double>>(d * d)};
+            for (std::size_t a = 0; a < d; ++a)
+                for (std::size_t b = 0; b < d; ++b) {
+                    auto value = std::conj(factor.matrix[b * d + a]);
+                    if (strings % 2) value *= parity[static_cast<std::size_t>(factor.site)][a];
+                    dagger.matrix[a * d + b] = value;
+                }
+            adjoint.factors.push_back(std::move(dagger));
+        }
+        for (int site : term.jordan_wigner)
+            if (std::find(folded.begin(), folded.end(), site) == folded.end()) adjoint.jordan_wigner.push_back(site);
+        out.terms.push_back(std::move(adjoint));
+    }
+    return out;
+}
+
+bool has_complex_entries(models::CompiledOperator const& input) {
+    for (auto const& term : input.terms) {
+        if (term.coefficient.imag() != 0.) return true;
+        for (auto const& factor : term.factors)
+            for (auto value : factor.matrix)
+                if (value.imag() != 0.) return true;
+    }
+    return false;
+}
+
+// One row's contributions sorted stably by column (term order within a
+// column, as canonical_csr's stable sort keeps COO order), then reduced.
+template <typename Scalar>
+void append_row(std::vector<std::pair<std::int64_t, std::complex<double>>>& entries, SparseMatrix<Scalar>& result) {
+    std::stable_sort(entries.begin(), entries.end(), [](auto const& a, auto const& b) { return a.first < b.first; });
+    auto first = entries.begin();
+    while (first != entries.end()) {
+        auto const column = first->first;
+        Scalar value = detail::matrix_cast<Scalar>(first++->second);
+        while (first != entries.end() && first->first == column)
+            value = detail::matrix_add(value, detail::matrix_cast<Scalar>(first++->second));
+        if (!detail::finite_scalar(value)) throw std::invalid_argument("sparse matrix accumulation overflowed");
+        if (value != Scalar{}) { result.indices.push_back(column); result.values.push_back(value); }
+    }
+    result.offsets.push_back(static_cast<std::int64_t>(result.values.size()));
+}
+
+template <typename Scalar, typename Basis>
+bool assemble_rows(std::vector<PreparedTerm<std::complex<double>>> const& terms, Basis const& basis,
+                   std::size_t count, std::vector<std::vector<double> const*> const& parity,
+                   SparseMatrix<Scalar>& result) {
+    bool is_complex = false;
+    result.rows = result.columns = count;
+    result.offsets.reserve(count + 1);
+    result.offsets.push_back(0);
+    std::vector<std::pair<std::int64_t, std::complex<double>>> entries;
+    for (std::size_t row = 0; row < count; ++row) {
+        entries.clear();
+        for (auto const& term : terms) {
+            if (term.coeff == std::complex<double>{}) continue;
+            apply_term(term, basis, parity, row, [&](std::int64_t column, std::complex<double> value) {
+                if (value == std::complex<double>{}) return;
+                if (!detail::finite_scalar(value)) throw std::invalid_argument("sparse matrix contribution must be finite");
+                entries.emplace_back(column, std::conj(value));
+                is_complex = is_complex || term.coeff.imag() != 0. || value.imag() != 0.;
+            });
+        }
+        append_row(entries, result);
+    }
+    return is_complex;
+}
+
+template <typename Scalar>
+bool assemble_operator(models::CompiledOperator const& adjoint, std::vector<std::int64_t> const& states,
+                       std::size_t count, OperatorShape const& shape, SparseMatrix<Scalar>& result) {
+    auto const n = adjoint.site_dims.size();
+    auto const terms = prepare_terms<std::complex<double>>(
+        adjoint, [](auto value, char const*) { return value; }, true);
+    if (shape.encodable) {
+        std::vector<std::uint64_t> codes(count, 0);
+        for (std::size_t row = 0; row < count; ++row)
+            for (std::size_t site = 0; site < n; ++site)
+                codes[row] += static_cast<std::uint64_t>(states[row * n + site]) * shape.strides[site];
+        CodeIndex const indices(codes);
+        return assemble_rows(terms, EncodedBasis{adjoint.site_dims, shape.strides, codes, indices.lookup(), states.data()},
+                             count, shape.parity, result);
+    }
+    ExplicitBasis basis{states.data(), n, std::vector<std::size_t>(count)};
+    std::iota(basis.order.begin(), basis.order.end(), 0);
+    std::sort(basis.order.begin(), basis.order.end(), [&](auto i, auto j) {
+        auto const a = basis.row(i), b = basis.row(j);
+        return std::lexicographical_compare(a, a + n, b, b + n);
+    });
+    for (std::size_t i = 1; i < count; ++i) {
+        auto const a = basis.row(basis.order[i - 1]), b = basis.row(basis.order[i]);
+        if (std::equal(a, a + n, b)) throw std::invalid_argument("sparse assembly: basis states must be distinct");
+    }
+    return assemble_rows(terms, basis, count, shape.parity, result);
+}
+
+} // namespace
+
+CanonicalCsr build_canonical_csr(models::CompiledOperator const& input,
+    std::vector<std::int64_t> const& states, std::size_t count,
+    std::vector<std::vector<double>> const& parity_values, bool complex_values) {
+    auto const n = input.site_dims.size();
+    if (count >= static_cast<std::size_t>(std::numeric_limits<std::int64_t>::max()) ||
+        (n && count > std::numeric_limits<std::size_t>::max() / n) || states.size() != count * n)
+        throw std::invalid_argument("sparse assembly: basis shape does not match site count");
+    auto const shape = prepare_shape(input, parity_values);
+    for (std::size_t row = 0; row < count; ++row)
+        for (std::size_t site = 0; site < n; ++site) {
+            auto const local = states[row * n + site];
+            if (local < 0 || local >= input.site_dims[site])
+                throw std::invalid_argument("sparse assembly: basis local state out of range");
+        }
+    auto const adjoint = row_operator(input, parity_values);
+    // A real operator emits only real contributions: hold real values from the start.
+    if (!complex_values && !has_complex_entries(input)) {
+        SparseMatrix<double> result;
+        assemble_operator(adjoint, states, count, shape, result);
+        return result;
+    }
+    SparseMatrix<std::complex<double>> result;
+    bool const is_complex = assemble_operator(adjoint, states, count, shape, result);
+    if (complex_values || is_complex) return result;
+    // Complex entries that never contributed (outside the basis, or zero
+    // products): the COO path calls this real, so return the real parts.
+    SparseMatrix<double> real{result.rows, result.columns, std::move(result.offsets), std::move(result.indices), {}};
+    real.values.reserve(result.values.size());
+    for (auto value : result.values) real.values.push_back(value.real());
+    return real;
 }
 
 SparseFromLocal build_sparse_from_local(

@@ -39,7 +39,7 @@ auto const thermal = alps::ed::thermal_surface(levels, charges, temperatures, fi
 | --- | --- |
 | `product_basis.hpp` | `enumerate_product_basis(site_dims, constraints)`: full product basis or a charge sector, enumerated with pruning; site 0 is the most significant digit |
 | `sparse_from_local.hpp` | `visit_local_transitions`, `visit_local_operator`, `build_coo_from_local` (any operator on an explicit basis, complex COO) and `build_sparse_from_local` (real CSR from a `CompiledModel` with QN constraints) |
-| `sparse_matrix.hpp` | `SparseMatrix<Scalar>`, `canonical_csr` (sorted, summed, zero-free CSR), `build_csr_from_local` |
+| `sparse_matrix.hpp` | `SparseMatrix<Scalar>`, `canonical_csr` (sorted, summed, zero-free CSR), `build_csr_from_local`, `build_canonical_csr` (the same CSR assembled row by row from the operator's adjoint, without the uncombined COO list; product problems use it) |
 | `eigensolver.hpp` | `EigenstateOptions`, `dense_eigensystem` (LAPACK `dsyevd`/`zheevd`), `select_eigenvalues` |
 | `lanczos.hpp` | `lanczos_csr`: the deflated IETL Lanczos driver (real symmetric and complex Hermitian CSR) |
 | `product_problem.hpp` | `prepare_product` (`Hamiltonian` or `TermSum` + sites), `ProductProblem::eigenstates`, `operator_matrix`, `expectation_values` |
@@ -53,8 +53,9 @@ auto const thermal = alps::ed::thermal_surface(levels, charges, temperatures, fi
 ## Conventions
 
 - Matrices are stored with row = output state and column = input state;
-  `canonical_csr` sorts columns within a row, sums duplicates and drops
-  exact zeros.
+  `canonical_csr` sorts columns within a row, sums duplicates in their
+  contribution (term) order and drops exact zeros; `build_canonical_csr`
+  gives bit-identical offsets, indices and values.
 - `enumerate_product_basis`, `ProductProblem` and `ProjectedBasis` use site 0
   as the most significant digit; `build_sparse_from_local` keeps the kit's
   least-significant-first mixed-radix codes (its states are returned).
