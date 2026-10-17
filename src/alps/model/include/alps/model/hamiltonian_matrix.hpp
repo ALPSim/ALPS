@@ -396,6 +396,8 @@ void hamiltonian_matrix<M,G>::check_sector(const state_type& state, const state_
 template <class M, class G> template <class STATES, class V, class W>
 void hamiltonian_matrix<M,G>::apply_operator(const STATES& states, const nsite_matrix<value_type>& mat, const plaquette& p, const V& x, W& y) const
 {
+  if (!built_basis_)                     // the parity table below reads basis_
+    build_basis();
   const std::size_t n = p.sites.size();
   const std::size_t nsites = graph_.num_sites();
   // fermion parity of every local state of every site

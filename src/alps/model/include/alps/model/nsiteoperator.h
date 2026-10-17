@@ -216,6 +216,11 @@ expression::Expression<T> NSiteOperatorSplitter<I, T>::partial_evaluate_function
 {
   int r = role(arg);
   if (r >= 0) {
+    // Replaced by its sign, an operator inside another function such as
+    // sqrt(n(i)) would enter the table as n(i) itself.
+    if (isarg)
+      boost::throw_exception(std::runtime_error("n-site term: the site operator " + name + "("
+        + boost::lexical_cast<std::string>(arg) + ") is the argument of another function, which is not supported"));
     ops_[r] = expression::Function<T>(name, arg) * ops_[r];
     used_[r] = true;
     double sign = 1.;
@@ -338,6 +343,14 @@ nsite_matrix<T> NSiteOperator::matrix(const std::vector<SiteBasisDescriptor<I> >
   for (typename expression::Expression<value_type>::term_iterator tit = ex.terms().first; tit != ex.terms().second; ++tit) {
     NSiteOperatorSplitter<I, value_type> splitter(bases, sites(), parms);
     expression::Term<value_type> term(*tit);
+    // The splitter replaces each site operator by a sign, so under a power
+    // the operator would be applied once and only the sign raised.
+    for (typename expression::Term<value_type>::factor_iterator f = term.factors().first; f != term.factors().second; ++f)
+      if (!f->unit_power())
+        for (std::size_t r = 0; r < n; ++r)
+          if (f->depends_on(sites()[r]))
+            boost::throw_exception(std::runtime_error("n-site term: powers of site operators are not supported in "
+              + boost::lexical_cast<std::string>(*f) + "; write the product out, e.g. n(i)*n(i) for n(i)^2"));
     term.partial_evaluate(splitter);
     term.simplify();
     if (!numeric::is_nonzero(term))

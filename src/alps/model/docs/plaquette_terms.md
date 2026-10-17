@@ -45,6 +45,9 @@ in order.
 - The term is any operator expression over the site basis operators and the
   bond/site operators of the library, like a `BONDTERM`. The number of roles
   must match the plaquette size. Plaquettes may have 2, 3, 4 or more sites.
+- Site operators may not be raised to a power or used as the argument of a
+  function: write `n(i)*n(i)` rather than `n(i)^2`. Such terms are refused
+  with an error.
 - Without a `type` attribute the term applies to every plaquette type, and `#`
   is replaced by the type, as for site and bond terms. A plaquette type with no
   matching term contributes nothing.

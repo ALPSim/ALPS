@@ -91,7 +91,7 @@ void LatticeLibrary::write_xml(oxstream& out) const
   for (LatticeGraphMap::const_iterator it=latticegraphs_.begin();it!=latticegraphs_.end();++it)
     out << it->second;
   for (GraphMap::const_iterator it=graphs_.begin();it!=graphs_.end();++it)
-    write_graph_xml(out,it->second,it->first);
+    write_graph_xml(out,it->second,it->first,&graph_plaquettes(it->first));
   out << end_tag("LATTICES");
 }
 

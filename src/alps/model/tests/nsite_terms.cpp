@@ -209,6 +209,27 @@ TEST(NSiteLattice, GraphPlaquettes) {
   EXPECT_EQ(g.plaquettes()[0].sites, (std::vector<std::size_t>{2, 0, 1}));
 }
 
+TEST(NSiteLattice, GraphPlaquettesSurviveLibraryRoundTrip) {
+  Files f("<GRAPH name=\"g\" vertices=\"3\"><EDGE source=\"1\" target=\"2\"/>"
+          "<PLAQUETTE type=\"2\"><SITE id=\"3\"/><SITE id=\"1\"/><SITE id=\"2\"/></PLAQUETTE>"
+          "<PLAQUETTE><SITE id=\"2\"/><SITE id=\"3\"/></PLAQUETTE></GRAPH>", "");
+  alps::LatticeLibrary lib(f.parms());
+  std::ostringstream out;
+  {
+    alps::oxstream xml(out);
+    lib.write_xml(xml);
+  }
+  std::istringstream in(out.str());
+  alps::LatticeLibrary reread;
+  reread.read_xml(in);
+  const alps::plaquette_list& p = reread.graph_plaquettes("g");
+  ASSERT_EQ(p.size(), 2u);
+  EXPECT_EQ(p[0].type, 2u);
+  EXPECT_EQ(p[0].sites, (std::vector<std::size_t>{2, 0, 1}));
+  EXPECT_EQ(p[1].type, 0u);
+  EXPECT_EQ(p[1].sites, (std::vector<std::size_t>{1, 2}));
+}
+
 TEST(NSiteLattice, GraphPlaquetteWithRepeatedSiteThrows) {
   Files f("<GRAPH name=\"bad\" vertices=\"2\"><PLAQUETTE><SITE id=\"1\"/><SITE id=\"1\"/></PLAQUETTE></GRAPH>", "");
   alps::Parameters p = f.parms();
@@ -433,6 +454,55 @@ TEST(NSiteHamiltonian, TypedAndDefaultTerms) {
   std::vector<double> e = spectrum(p);
   ASSERT_EQ(e.size(), 1u);
   EXPECT_NEAR(e[0], 2.25, 1e-14);
+}
+
+TEST(NSiteHamiltonian, TypedTermKeepsItsParameterDefaults) {
+  Files f("<GRAPH name=\"g\" vertices=\"2\"><PLAQUETTE><SITE id=\"1\"/><SITE id=\"2\"/></PLAQUETTE></GRAPH>",
+          "<HAMILTONIAN name=\"typed\"><BASIS ref=\"fermion\"/>"
+          "<PLAQUETTETERM type=\"0\" sites=\"a b\"><PARAMETER name=\"K\" default=\"0.7\"/>K*n(a)*n(b)</PLAQUETTETERM>"
+          "</HAMILTONIAN>");
+  alps::Parameters p = sector(f.parms(), 2, 0);
+  p["GRAPH"] = "g"; p["MODEL"] = "typed";
+  EXPECT_NEAR(spectrum(p)[0], 0.7, 1e-14);
+  p["K"] = 2.0;                           // a given parameter wins over the default
+  EXPECT_NEAR(spectrum(p)[0], 2.0, 1e-14);
+}
+
+// The splitter replaces each site operator by a sign, so n(a)^2 used to act
+// as n(a), and sqrt(n(a)) as n(a).
+TEST(NSiteHamiltonian, PowersAndFunctionsOfSiteOperatorsThrow) {
+  const char* g = "<GRAPH name=\"g\" vertices=\"2\"><PLAQUETTE><SITE id=\"1\"/><SITE id=\"2\"/></PLAQUETTE></GRAPH>";
+  Files f(g, "<HAMILTONIAN name=\"product\"><BASIS ref=\"fermion\"/>"
+             "<PLAQUETTETERM sites=\"a b\">n(a)*n(a)*n(b)</PLAQUETTETERM></HAMILTONIAN>"
+             "<HAMILTONIAN name=\"power\"><BASIS ref=\"fermion\"/>"
+             "<PLAQUETTETERM sites=\"a b\">n(a)^2*n(b)</PLAQUETTETERM></HAMILTONIAN>"
+             "<HAMILTONIAN name=\"function\"><BASIS ref=\"fermion\"/>"
+             "<PLAQUETTETERM sites=\"a b\">sqrt(n(a))*n(b)</PLAQUETTETERM></HAMILTONIAN>");
+  alps::Parameters p = sector(f.parms(), 2, 1);   // occupations (2,1) and (1,2)
+  p["GRAPH"] = "g"; p["MODEL"] = "product";
+  std::vector<double> e = spectrum(p);
+  ASSERT_EQ(e.size(), 2u);
+  EXPECT_NEAR(e[0], 2., 1e-14);
+  EXPECT_NEAR(e[1], 4., 1e-14);
+  for (const char* m : {"power", "function"}) {
+    p["MODEL"] = m;
+    EXPECT_THROW(spectrum(p), std::runtime_error) << m;
+  }
+}
+
+TEST(NSiteHamiltonian, ApplyOperatorBuildsTheBasis) {
+  Files f("<GRAPH name=\"g\" vertices=\"2\"><PLAQUETTE><SITE id=\"1\"/><SITE id=\"2\"/></PLAQUETTE></GRAPH>",
+          "<HAMILTONIAN name=\"m\"><BASIS ref=\"fermion\"/>"
+          "<PLAQUETTETERM sites=\"a b\">n(a)*n(b)</PLAQUETTETERM></HAMILTONIAN>");
+  alps::Parameters p = sector(f.parms(), 2, 0);   // one state, n = 1 on both sites
+  p["GRAPH"] = "g"; p["MODEL"] = "m";
+  alps::hamiltonian_matrix<alps::numeric::matrix<double> > h(p);
+  alps::plaquette plaq;
+  plaq.sites = {0, 1};
+  std::vector<double> x(1, 1.), y(1, 0.);
+  h.apply_operator(alps::NSiteOperator("n(a)*n(b)", {"a", "b"}), plaq, x, y);
+  ASSERT_EQ(h.dimension(), 1u);
+  EXPECT_NEAR(y[0], 1., 1e-14);
 }
 
 TEST(NSiteHamiltonian, ParametersKeepFullPrecision) {

@@ -59,9 +59,11 @@ alps::NSiteOperator alps::GlobalOperator::plaquette_term(unsigned int type) cons
 
 boost::optional<alps::Parameters> alps::GlobalOperator::create_plaquette_term(unsigned int type)
 {
+  // A typed term's own <PARAMETER> defaults must reach the Hamiltonian
+  // parameters as well, or a parameter declared only there cannot be evaluated.
   for (std::vector<NSiteTermDescriptor>::const_iterator it =nsiteterms_.begin();it!=nsiteterms_.end();++it)
     if (it->match_type(type))
-      return boost::optional<Parameters>();
+      return it->parms().empty() ? boost::optional<Parameters>() : boost::optional<Parameters>(it->parms());
   if (default_nsiteterm_.term().empty())
     return boost::optional<Parameters>();
   nsiteterms_.push_back(default_nsiteterm_.get(type));

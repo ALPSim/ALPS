@@ -37,8 +37,11 @@ namespace alps {
 
 // XML I/O for graphs
 
+// If `plaquettes` is given, they are written as <PLAQUETTE> elements in the
+// form read_graph_xml reads back.
 template <class GRAPH>
-inline void write_graph_xml(oxstream& out, const GRAPH& g, const std::string& n="")
+inline void write_graph_xml(oxstream& out, const GRAPH& g, const std::string& n="",
+                            const plaquette_list* plaquettes = 0)
 {
   typedef GRAPH graph_type;
   typedef typename boost::graph_traits<graph_type>::vertex_iterator vertex_iterator;
@@ -106,6 +109,13 @@ inline void write_graph_xml(oxstream& out, const GRAPH& g, const std::string& n=
       out << attribute("vector", write_vector(edgevector[*it]));
     out << end_tag("EDGE");
   }
+  if (plaquettes)
+    for (std::size_t i=0;i<plaquettes->size();++i) {
+      out << start_tag("PLAQUETTE") << attribute("type", (*plaquettes)[i].type);
+      for (std::size_t j=0;j<(*plaquettes)[i].sites.size();++j)
+        out << start_tag("SITE") << attribute("id", (*plaquettes)[i].sites[j]+1) << end_tag("SITE");
+      out << end_tag("PLAQUETTE");
+    }
   out << end_tag("GRAPH");
 }
 
