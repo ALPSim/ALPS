@@ -135,9 +135,12 @@ void InteractionExpansion::update()
     if(step % recalc_period ==0)
       reset_perturbation_series();
   }
+  if(step>therm_steps)
+    thermalized=true;
 }
 void InteractionExpansion::measure(){
-  measure_observables();
+  if(thermalized)
+    measure_observables();
 }
 
 

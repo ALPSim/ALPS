@@ -17,6 +17,8 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - Correct the Heisenberg tutorial's vector dot product and allow its vector implementation to compile without x86 SIMD support.
 - Remove undefined behavior in XDR callbacks and integer-range boundary checks exposed by sanitizers.
 - Keep full double precision for parameter values substituted into `SITETERM` and `BONDTERM` expressions. They were rounded to 6 significant digits, so for example `mu=0.123456789123` acted as `0.123457`. Inputs whose parameters have at most 6 significant digits are unchanged.
+- End thermalization in the interaction-expansion solver (`interaction`, `alps::solvers::ctint`) after `THERMALIZATION` steps. It never ended, so a run with `THERMALIZATION` > 0 went on until `MAX_TIME` and measured from the first step. Such runs now discard the thermalization steps and stop `SWEEPS` steps later, so their results change; one whose `MAX_TIME` ends during thermalization stops with "No measurements available." Under MPI, a run that ends while any rank is still thermalizing stops with an error on every rank. Runs with `THERMALIZATION=0` are unchanged.
+- Under MPI, `collect_results()` now throws on every rank when an observable was measured on some ranks but not others, for example when `MAX_TIME` ends while some ranks are still thermalizing. It used to skip the collective reduction only on the empty ranks, which could hang the run.
 
 ### Changed
 
