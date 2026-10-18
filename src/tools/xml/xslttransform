@@ -1,5 +1,11 @@
 #! /bin/sh
 
+# use_local_stylesheet has already warned when it calls this script.
+if test -z "${ALPS_DEPRECATION_WARNED:-}"; then
+  echo "xslttransform is deprecated and will be removed in a future ALPS release;" \
+    "run xsltproc directly instead." >&2
+fi
+
 # find the transformer
 if test "x$ALPS_XSLT_TRANSFORMER" !=  x; then
   transformer=$ALPS_XSLT_TRANSFORMER

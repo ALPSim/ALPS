@@ -15,6 +15,5 @@ To remove them, delete this directory and `tests/cmake/legacy/`, the
 `cmake/ALPSConfig.cmake.in`, and the `test_legacy_*` tests in
 `tests/cmake/test_sdk_contracts.py`.
 
-`unused/` holds helpers from the ALPS 2.x build that the current build does not
-include, install or reference: find modules, the old test macros, Boost build
-helpers and installer scripts. They are kept for reference only.
+Unused ALPS 2.x find modules, test macros, Boost build helpers and installer
+scripts have been removed. The consumer interfaces described above remain.
