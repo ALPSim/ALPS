@@ -43,6 +43,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - Quote parameter values in text output whenever the unquoted form would not parse back, such as values containing `:`, `,` or `"`, and write empty values instead of omitting them.
 - Rewrite an existing parameter file in its own format, so a text file named `.h5` is no longer replaced by HDF5, and drop parameters that are no longer set from rewritten HDF5 files. Writing parameter text fails, before the file is touched, for values that cannot be read back as text.
 - Run `dmft` with its parameter file in another directory (`dmft runs/parm`). It previously changed into that directory and then failed to create `runs/runs/parm.h5`.
+- Run `SOLVER = interaction` from `dmft`; the solver previously looked for a standalone-format G0 and stopped. Run the built-in `SOLVER = Hirsch-Fye` in the Matsubara loop (`OMEGA_LOOP = 1`), where it previously was handed to the shell as an external program. With `OMEGA_LOOP = 0`, Hirsch-Fye and interaction-expansion solvers, which read G0 only in Matsubara frequencies, are rejected with a message instead of failing during the first iteration.
 
 ### Changed
 
