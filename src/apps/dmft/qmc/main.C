@@ -25,6 +25,7 @@
 #include "interaction_expansion_choice.h"
 
 #include <alps/parameter.h>
+#include <alps/parameter_input.hpp>
 #include <alps/utilities/copyright.hpp>
 #include <alps/utilities/citations.hpp>
 #include <alps/cli.hpp>
@@ -65,13 +66,8 @@ int main(int argc, char** argv)
     })) return 0;
     if (argc != 2) throw std::invalid_argument("Expected one parameter file");
     alps::cli_mpi_guard mpi(argc, argv);
-    alps::Parameters parms;
-    {
-      std::ifstream is(argv[1]);
-      if (!is.is_open()) throw std::runtime_error(std::string("Cannot open parameter file: ") + argv[1]);
-      is>>parms;
-      parms["BASENAME"]=std::string(argv[1]);
-    }
+    alps::Parameters parms = alps::read_parameter_file(argv[1]);
+    parms["BASENAME"]=std::string(argv[1]);
     if (alps::cli_is_master()) {
       std::cout << "ALPS DMFT framework for the single site impurity problem.\n\n";
       alps::print_copyright(std::cout, "dmft");
@@ -91,7 +87,7 @@ int main(int argc, char** argv)
           std::cout<<"solving Hirsch Fye"<<std::endl;
           // we need a factory to create Hirsch-Fye simulations
           alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;  
-          solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
+          solver_ptr.reset(new alps::ImpuritySolver(factory,parms,argc,argv));
           // Built-in solvers print no notice of their own; external solvers do.
           if (alps::cli_is_master()) alps::print_citations(std::cout, "hirschfye");
           selfconsistency_loop(parms, *solver_ptr, transform);
@@ -141,11 +137,11 @@ int main(int argc, char** argv)
           switch (select_interaction_expansion(flavors, sites)) {
             case interaction_expansion_choice::single_site_hubbard:
               std::cout<<"using single site Hubbard solver"<<std::endl;
-              solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_ss,argc,argv));
+              solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_ss,parms,argc,argv));
               break;
             case interaction_expansion_choice::multiband_density:
               std::cout<<"using multiband Hubbard solver"<<std::endl;
-              solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_mbd,argc,argv));
+              solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_mbd,parms,argc,argv));
               break;
             case interaction_expansion_choice::unsupported:
               throw std::runtime_error("DMFT Interaction Expansion: unsupported (FLAVORS, SITES) "
@@ -168,15 +164,8 @@ int main(int argc, char** argv)
     else { //CLUSTER_LOOP
       throw std::logic_error("you should use the cluster framework for a cluster calculation.");
     }    
-    {
-      std::ofstream os(argv[1]);
-      os<<parms;
-      os.close();
-    }
-    {
-      alps::hdf5::archive os(std::string(argv[1])+".h5", "a");
-      os<<alps::make_pvp("/parameters",parms);
-    }
+    alps::write_parameter_file(argv[1], parms);
+    alps::write_parameter_file(std::string(argv[1])+".h5", parms);
 #ifndef BOOST_NO_EXCEPTIONS
   }
   catch (std::exception& exc) {

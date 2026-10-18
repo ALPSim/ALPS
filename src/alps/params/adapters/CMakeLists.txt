@@ -5,7 +5,8 @@ target_sources(alps PRIVATE
   make_parameters_from_file.cpp
   make_deprecated_parameters.cpp
   make_parameters_from_deprecated.cpp
-  make_parameters_from_xml.cpp)
+  make_parameters_from_xml.cpp
+  parameter_input.cpp)
 
 target_sources(alps_headers INTERFACE
   FILE_SET params_headers TYPE HEADERS
@@ -13,4 +14,5 @@ target_sources(alps_headers INTERFACE
   FILES include/alps/ngs/make_deprecated_parameters.hpp
         include/alps/ngs/make_parameters_from_deprecated.hpp
         include/alps/ngs/make_parameters_from_file.hpp
-        include/alps/ngs/make_parameters_from_xml.hpp)
+        include/alps/ngs/make_parameters_from_xml.hpp
+        include/alps/parameter_input.hpp)
