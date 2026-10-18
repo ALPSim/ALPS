@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <complex>
 #include <cstdio>
 #include <filesystem>
 #include <fstream>
@@ -399,6 +400,89 @@ TEST(SectorCheck, ConservingTermsInMomentumSectorsDoNotThrow) {
     p["TOTAL_MOMENTUM"] = k;
     EXPECT_EQ(build_error(p), "") << "k=" << k;
   }
+}
+
+// A 3-site term on a periodic spinless-fermion chain wraps around the
+// boundary, where translations pick up fermion signs. The momentum sectors
+// together must give the spectrum without translation symmetry.
+const char* spinless_chain = R"(
+<LATTICE name="line" dimension="1"><BASIS><VECTOR>1</VECTOR></BASIS></LATTICE>
+<UNITCELL name="three-site cell" dimension="1" vertices="1">
+  <VERTEX id="1"/>
+  <EDGE><SOURCE vertex="1" offset="0"/><TARGET vertex="1" offset="1"/></EDGE>
+  <NSITE><SITE vertex="1" offset="0"/><SITE vertex="1" offset="1"/><SITE vertex="1" offset="2"/></NSITE>
+</UNITCELL>
+<LATTICEGRAPH name="periodic three-site chain">
+  <FINITELATTICE><LATTICE ref="line"/><EXTENT dimension="1" size="L"/>
+    <BOUNDARY type="periodic"/></FINITELATTICE>
+  <UNITCELL ref="three-site cell"/>
+</LATTICEGRAPH>
+)";
+
+const char* spinless_model = R"(
+<SITEBASIS name="spinless">
+  <QUANTUMNUMBER name="N" min="0" max="1" type="fermionic"/>
+  <OPERATOR name="c" matrixelement="1"><CHANGE quantumnumber="N" change="-1"/></OPERATOR>
+  <OPERATOR name="cdag" matrixelement="1"><CHANGE quantumnumber="N" change="1"/></OPERATOR>
+  <OPERATOR name="n" matrixelement="N"/>
+</SITEBASIS>
+<BASIS name="spinless">
+  <SITEBASIS ref="spinless"/>
+  <CONSTRAINT quantumnumber="N" value="N_total"/>
+</BASIS>
+<HAMILTONIAN name="three-site hopping">
+  <PARAMETER name="t" default="1"/><PARAMETER name="K" default="0"/><PARAMETER name="V" default="0"/>
+  <BASIS ref="spinless"/>
+  <BONDTERM source="i" target="j">-t*(cdag(i)*c(j)+cdag(j)*c(i))</BONDTERM>
+  <NSITETERM sites="i j k">K*(cdag(i)*n(j)*c(k)+cdag(k)*n(j)*c(i)) + V*n(i)*n(j)*n(k)</NSITETERM>
+</HAMILTONIAN>
+)";
+
+// Eigenvalues of a Hermitian matrix, from the real symmetric matrix
+// [[Re, -Im], [Im, Re]], which has each eigenvalue twice.
+std::vector<double> hermitian_spectrum(const alps::Parameters& p) {
+  alps::hamiltonian_matrix<alps::numeric::matrix<std::complex<double> > > h(p);
+  const alps::numeric::matrix<std::complex<double> >& m = h.matrix();
+  const std::size_t n = h.dimension();
+  std::vector<std::vector<double> > a(2 * n, std::vector<double>(2 * n));
+  for (std::size_t i = 0; i < n; ++i)
+    for (std::size_t j = 0; j < n; ++j) {
+      EXPECT_NEAR(std::abs(m(i, j) - std::conj(m(j, i))), 0., 1e-12) << "Hamiltonian not Hermitian";
+      a[i][j] = a[n + i][n + j] = m(i, j).real();
+      a[n + i][j] = m(i, j).imag();
+      a[i][n + j] = -m(i, j).imag();
+    }
+  std::vector<double> doubled = eigenvalues(a), e;
+  for (std::size_t i = 0; i < doubled.size(); i += 2)
+    e.push_back(doubled[i]);
+  return e;
+}
+
+TEST(SectorCheck, MomentumSectorsTogetherGiveTheFullSpectrum) {
+  Files f(spinless_chain, spinless_model);
+  for (int L : {5, 6})
+    for (int N : {2, 3}) {
+      alps::Parameters p = f.parms();
+      p["LATTICE"] = "periodic three-site chain"; p["L"] = L;
+      p["MODEL"] = "three-site hopping"; p["t"] = 1.0; p["K"] = 0.7; p["V"] = 1.3;
+      p["CONSERVED_QUANTUMNUMBERS"] = "N"; p["N_total"] = N;
+      std::vector<double> full = hermitian_spectrum(p);
+
+      std::vector<double> sectors;
+      std::size_t nonempty = 0;
+      for (const auto& k : alps::graph_helper<>(p).translation_momenta()) {
+        alps::Parameters q = p;
+        q["TOTAL_MOMENTUM"] = alps::write_vector(k);
+        std::vector<double> e = hermitian_spectrum(q);
+        nonempty += !e.empty();
+        sectors.insert(sectors.end(), e.begin(), e.end());
+      }
+      std::sort(sectors.begin(), sectors.end());
+      EXPECT_EQ(nonempty, static_cast<std::size_t>(L)) << "L=" << L << " N=" << N;
+      ASSERT_EQ(sectors.size(), full.size()) << "L=" << L << " N=" << N;
+      for (std::size_t i = 0; i < full.size(); ++i)
+        EXPECT_NEAR(sectors[i], full[i], 1e-10) << "L=" << L << " N=" << N << " level " << i;
+    }
 }
 
 TEST(SectorCheck, MeasuringANonConservingOperatorGivesZero) {
