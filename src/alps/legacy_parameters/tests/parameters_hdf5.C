@@ -52,3 +52,72 @@ g= ....5
     EXPECT_EQ(std::string(restored[entry.first].c_str()), entry.second);
   }
 }
+
+TEST(LegacyParametersHdf5, StoresUnevaluableValuesAsWritten) {
+  std::istringstream input(R"PARAMS(SOLVER = "Hirsch-Fye"
+U_MATRIX = "u-matrix.dat"
+SHIFT = "U/2+JH"
+PHASE = "x*cos(2*pi)"
+EMPTY = ""
+BLANK = "  "
+U = 3
+)PARAMS");
+  const alps::Parameters original(input);
+  alps::testing::TemporaryDirectory directory;
+  const auto filename = (directory.path() / "parameters.h5").string();
+  {
+    alps::hdf5::archive archive(filename, "w");
+    archive["/parameters"] << original;
+  }
+  alps::hdf5::archive archive(filename, "r");
+  for (const char *key : {"SOLVER", "U_MATRIX", "SHIFT", "PHASE", "EMPTY", "BLANK"}) {
+    SCOPED_TRACE(key);
+    const std::string path = std::string("/parameters/") + key;
+    ASSERT_TRUE(archive.is_datatype<std::string>(path));
+    std::string stored;
+    archive[path] >> stored;
+    EXPECT_EQ(stored, std::string(original[key].c_str()));
+  }
+}
+
+TEST(LegacyParametersHdf5, StoresEvaluableValuesAsNumbers) {
+  std::istringstream input(R"PARAMS(L = 16
+NEGATIVE = -3
+N = 2*L
+t = 0.707106781186547
+THIRD = 1/3
+MU = U/2
+U = 3
+INT_MAX = 2147483647
+SEED = 4294967295
+HUGE = -1e300
+)PARAMS");
+  const alps::Parameters original(input);
+  alps::testing::TemporaryDirectory directory;
+  const auto filename = (directory.path() / "parameters.h5").string();
+  {
+    alps::hdf5::archive archive(filename, "w");
+    archive["/parameters"] << original;
+  }
+  alps::hdf5::archive archive(filename, "r");
+  const std::vector<std::pair<std::string, int>> integers{
+      {"L", 16}, {"NEGATIVE", -3}, {"N", 32}, {"U", 3}, {"INT_MAX", 2147483647}};
+  for (const auto &entry : integers) {
+    SCOPED_TRACE(entry.first);
+    ASSERT_TRUE(archive.is_datatype<int>("/parameters/" + entry.first));
+    int stored = 0;
+    archive["/parameters/" + entry.first] >> stored;
+    EXPECT_EQ(stored, entry.second);
+  }
+  // Integral values outside the int range keep full precision as doubles.
+  const std::vector<std::pair<std::string, double>> reals{
+      {"t", 0.707106781186547}, {"THIRD", 1. / 3.}, {"MU", 1.5},
+      {"SEED", 4294967295.}, {"HUGE", -1e300}};
+  for (const auto &entry : reals) {
+    SCOPED_TRACE(entry.first);
+    ASSERT_TRUE(archive.is_datatype<double>("/parameters/" + entry.first));
+    double stored = 0;
+    archive["/parameters/" + entry.first] >> stored;
+    EXPECT_EQ(stored, entry.second);
+  }
+}
