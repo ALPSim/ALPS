@@ -105,6 +105,28 @@ The test registration also differs:
   ran them on `ALPS_TEST_MPI_NPROC` ranks, 1 by default.
 - The tests' `TYPED_TEST_CASE` deprecation warnings are silenced.
 
+`tests/ar1_calibration.cpp` is ALPS's own. It checks the errors and
+autocorrelation times against the exact values of an AR(1) process.
+
+## Known limitations
+
+These are properties of the imported ALPSCore code; ALEA's observables share
+the first.
+
+- The variance is accumulated as the sum of squares minus the squared sum.
+  It loses precision when the mean is large compared with the spread: for
+  unit-variance noise on an offset of 10⁶, the log-binning error is about 25%
+  too small, and from about 10⁷ it is NaN. Constant data often gives a NaN
+  error for the same reason.
+- `LogBinningAccumulator` reports an infinite error below 256 samples.
+  `FullBinningAccumulator` reports the unbinned error there.
+- Arithmetic on `NoBinningAccumulator` and `LogBinningAccumulator` results
+  propagates errors as if the operands were uncorrelated. For correlated
+  observables, such as ⟨m⁴⟩/⟨m²⟩², use `FullBinningAccumulator`, whose results
+  use the jackknife.
+- `float` accumulators lose the mean and error after about 10⁶ samples.
+- `FullBinningAccumulator`s cannot be merged.
+
 ## Citing
 
 ALPSCore's [ACKNOWLEDGE.TXT](ACKNOWLEDGE.TXT) asks publications that use the ALPS

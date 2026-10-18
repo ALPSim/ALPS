@@ -1,11 +1,13 @@
 # Copyright (C) 2026 ALPS collaboration. SPDX-License-Identifier: MIT
-# ALPSCore's accumulators tests, copied unchanged. The legacy_alea/ and
-# legacy_accumulator/ directories hold older NGS tests and are not built.
+# ALPSCore's accumulators tests, copied unchanged, and ALPS's own
+# ar1_calibration. The legacy_alea/ and legacy_accumulator/ directories hold
+# older NGS tests and are not built.
 foreach(name testharness assign_acc get_results add_accumulators count divide_accumulators
              unary_ops mean merge mult_by_constant weighted nonexistent acc_count_test
              mean_err_count save_load save_load2 vec_const_binop_simple binop_with_constant
              binop_with_scalar binop_mixed binop_mixed_faildemo single_accumulator
-             autocorrelation concurrent_access print scalar_result_type negative_error)
+             autocorrelation concurrent_access print scalar_result_type negative_error
+             ar1_calibration)
   add_executable(accumulators_${name} ${name}.cpp)
   target_link_libraries(accumulators_${name} PRIVATE ALPS::accumulators)
   # The copies keep ALPSCore's TYPED_TEST_CASE, which GoogleTest 1.10 deprecated.
