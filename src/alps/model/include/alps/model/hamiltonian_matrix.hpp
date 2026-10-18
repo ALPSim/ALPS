@@ -28,6 +28,15 @@
 
 #include <cmath>
 #include <cstddef>
+#include <iostream>
+#include <limits>
+#include <map>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
+#include <boost/lexical_cast.hpp>
+#include <boost/throw_exception.hpp>
 
 namespace alps {
 
@@ -60,6 +69,12 @@ namespace detail {
     template <typename T, typename MemoryBlock>
     alps::numeric::matrix<T,MemoryBlock> initialized_matrix(alps::numeric::matrix<T,MemoryBlock> const&, std::size_t const rows, std::size_t const cols)
     {
+        // the dense storage has rows*cols elements; a wrapped product would
+        // allocate too little
+        if (cols && rows > std::numeric_limits<std::size_t>::max() / cols)
+          boost::throw_exception(std::runtime_error("Hilbert space dimension "
+            + boost::lexical_cast<std::string>(rows) + ": a dense " + boost::lexical_cast<std::string>(rows)
+            + " x " + boost::lexical_cast<std::string>(cols) + " matrix has more elements than a std::size_t can count."));
         return alps::numeric::matrix<T,MemoryBlock>(rows,cols);
     }
 } // end namespace detail
@@ -130,6 +145,23 @@ public:
   template <class STATES, class V, class W>
   void apply_operator(const STATES&, const boost::multi_array<std::pair<value_type,bool>,4>& mat, site_descriptor s1, site_descriptor s2, const V& x, W& y) const;
 
+  // n-site term on one n-site group (an ordered tuple of sites)
+  template <class V, class W>
+  void apply_operator(const NSiteOperator& op, const nsite_group& p, const V& x, W& y) const
+  { apply_operator(local_matrix(op,p),p,x,y); }
+
+  template <class V, class W>
+  void apply_operator(const nsite_matrix<value_type>& mat, const nsite_group& p, const V& x, W& y) const
+  {
+    if (uses_translation_invariance())
+      apply_operator(bloch_states,mat,p,x,y);
+    else
+      apply_operator(states,mat,p,x,y);
+  }
+
+  template <class STATES, class V, class W>
+  void apply_operator(const STATES&, const nsite_matrix<value_type>& mat, const nsite_group& p, const V& x, W& y) const;
+
   template <class V, class W> 
   void apply_operator(const SiteOperator& op, const V&, W&) const;
   
@@ -189,6 +221,7 @@ public:
   multi_array<value_type,2> local_matrix(const SiteOperator& op, site_descriptor s) const;
   multi_array<std::pair<value_type,bool>,4> local_matrix(const BondOperator& op, const bond_descriptor& b) const;
   multi_array<std::pair<value_type,bool>,4> local_matrix(const BondOperator& op, const site_descriptor& s1, const site_descriptor& s2) const;
+  nsite_matrix<value_type> local_matrix(const NSiteOperator& op, const nsite_group& p) const;
 
   template <class V, class W> 
   void apply_operator(const std::string& name, bond_descriptor b, const V& x, W& y) const
@@ -205,6 +238,9 @@ public:
 protected:
   void build() const;
   void build_basis() const;
+  void warn_if_cutoff(const nsite_matrix<value_type>& mat, const nsite_group& p) const;
+  void check_sector(const state_type& state, const state_type& newstate,
+                    const std::string& term, const std::vector<std::size_t>& sites) const;
 
   mutable basis_states_type states;
   mutable bloch_basis_states_type bloch_states;
@@ -213,6 +249,10 @@ private:
   Parameters parms;
   mutable bool built_matrix_;
   mutable bool built_basis_;
+  mutable bool warned_cutoff_;
+  // true while build() fills the Hamiltonian; operator_matrix() for
+  // measurements leaves it false
+  mutable bool building_hamiltonian_;
   mutable matrix_type matrix_;
   mutable basis_states_descriptor<short> basis_;
   graph_helper<G> graph_;
@@ -226,8 +266,10 @@ hamiltonian_matrix<M,G>::hamiltonian_matrix(Parameters const& p)
   : parms(p)
   ,  built_matrix_(false)
   ,  built_basis_(false)
+  ,  warned_cutoff_(false)
+  ,  building_hamiltonian_(false)
   ,  graph_(p)
-  ,  model_(graph_,p,is_symbolic<value_type>::type::value)
+  ,  model_(graph_,p,is_symbolic<value_type>::type::value,true)
 {}    
 
 
@@ -265,6 +307,152 @@ multi_array<std::pair<typename hamiltonian_matrix<M,G>::value_type,bool>,4> hami
                                       model_.model().basis().site_basis(stype2),parms);  
 }
 
+template <class M, class G>
+nsite_matrix<typename hamiltonian_matrix<M,G>::value_type> hamiltonian_matrix<M,G>::local_matrix(const NSiteOperator& op, const nsite_group& p) const
+{
+  std::vector<SiteBasisDescriptor<short> > bases;
+  for (std::size_t r=0;r<p.sites.size();++r)
+    bases.push_back(model_.model().basis().site_basis(graph_.site_type(p.sites[r])));
+  return op.template matrix<value_type>(bases,parms);
+}
+
+// A term that changes a quantum number whose range is capped by a parameter
+// (e.g. a boson N with max="Nmax") gives results that depend on that cutoff:
+// entries that would leave the range are dropped. Say so once. Fixed ranges
+// (fermion 0..1) and ranges set by another quantum number (Sz in -S..S) are
+// physical, not a cutoff.
+template <class M, class G>
+void hamiltonian_matrix<M,G>::warn_if_cutoff(const nsite_matrix<value_type>& mat, const nsite_group& p) const
+{
+  if (warned_cutoff_ || mat.nonconserved.empty())
+    return;
+  for (std::size_t r=0;r<p.sites.size();++r) {
+    SiteBasisDescriptor<short> b = model_.model().basis().site_basis(graph_.site_type(p.sites[r]));
+    b.set_parameters(parms);
+    for (std::size_t q=0;q<b.size();++q) {
+      if (!mat.nonconserved.count(b[q].name()) || can_evaluate(b[q].max_expression()))
+        continue;
+      bool set_by_quantumnumber=false;
+      for (std::size_t o=0;o<b.size();++o)
+        if (o!=q && b[q].depends_on(b[o].name()))
+          set_by_quantumnumber=true;
+      if (set_by_quantumnumber)
+        continue;
+      std::cerr << "Warning: an <NSITETERM> changes the total " << b[q].name()
+                << ", whose local range is cut off at " << b[q].name() << " <= "
+                << b[q].max_expression() << " = " << b[q].max() << ". Matrix elements "
+                << "that would exceed the cutoff are dropped, so results depend on it; "
+                << "check convergence in " << b[q].max_expression() << ".\n";
+      warned_cutoff_=true;
+      return;
+    }
+  }
+}
+
+// A term of the Hamiltonian took a basis state to a state that is not in the
+// basis. With momentum sectors this also happens for states whose orbit has
+// zero norm in the sector; those elements are dropped. If instead the term
+// changes a quantum number that the basis fixes (CONSERVED_QUANTUMNUMBERS or a
+// <QN>_total parameter), dropping them would change the spectrum: stop.
+template <class M, class G>
+void hamiltonian_matrix<M,G>::check_sector(const state_type& state, const state_type& newstate,
+                                           const std::string& term, const std::vector<std::size_t>& sites) const
+{
+  const typename basis_descriptor_type::constraints_type& constraints = basis_.get_basis().constraints();
+  for (std::size_t c=0;c<constraints.size();++c) {
+    typename basis_descriptor_type::total_type change;
+    for (std::size_t r=0;r<sites.size();++r) {
+      const std::size_t s=sites[r];
+      const std::size_t k=get_quantumnumber_index(constraints[c].first,basis_.get_site_basis(s));
+      if (k==basis_.get_site_basis(s).size())
+        continue;
+      change += get_quantumnumber(basis_[s][newstate[s]],k) - get_quantumnumber(basis_[s][state[s]],k);
+    }
+    if (change!=typename basis_descriptor_type::total_type(0)) {
+      const std::string& qn=constraints[c].first;
+      std::string value;   // the <CONSTRAINT value=...> of the basis, e.g. Nup_total
+      const typename basis_descriptor_type::unevaluated_constraints_type& all = basis_.get_basis().all_constraints();
+      for (std::size_t a=0;a<all.size();++a)
+        if (all[a].first==qn)
+          value=boost::lexical_cast<std::string>(all[a].second);
+      std::ostringstream msg;
+      msg << term << " on site" << (sites.size()>1 ? "s" : "");
+      for (std::size_t r=0;r<sites.size();++r)
+        msg << " " << sites[r];
+      msg << " changes " << qn << ", which the basis fixes in this sector (" << qn << " = "
+          << value << " = " << constraints[c].second << "). Remove " << qn
+          << " from CONSERVED_QUANTUMNUMBERS and leave " << value << " undefined.";
+      boost::throw_exception(std::runtime_error(msg.str()));
+    }
+  }
+}
+
+// Fill one n-site term on n-site group p. The local table (see nsiteoperator.h)
+// stores each product reordered as O_0 O_1 ... O_{n-1} (role order). Acting on
+// a basis state, O_{n-1} is applied first; each odd O_r picks up the
+// Jordan-Wigner sign (-1)^(number of fermions on sites before p.sites[r]),
+// counted in the state as modified by the operators already applied. This is
+// the rule the bond fill below encodes in closed form for n = 2.
+template <class M, class G> template <class STATES, class V, class W>
+void hamiltonian_matrix<M,G>::apply_operator(const STATES& states, const nsite_matrix<value_type>& mat, const nsite_group& p, const V& x, W& y) const
+{
+  if (!built_basis_)                     // the parity table below reads basis_
+    build_basis();
+  const std::size_t n = p.sites.size();
+  const std::size_t nsites = graph_.num_sites();
+  // fermion parity of every local state of every site
+  std::vector<std::vector<bool> > parity(nsites);
+  for (std::size_t s=0;s<nsites;++s)
+    for (std::size_t k=0;k<basis_[s].size();++k)
+      parity[s].push_back(is_fermionic(model_.model().basis().site_basis(graph_.site_type(s)),basis_[s][k]));
+
+  std::vector<std::size_t> in(n), out(n);
+  std::vector<bool> prefix(nsites+1);
+  for (std::size_t i=0;i<dimension();++i) {         // loop over source states
+    state_type state=states[i];
+    for (std::size_t r=0;r<n;++r)
+      in[r]=state[p.sites[r]];
+    const typename nsite_matrix<value_type>::row_type& row = mat.row(mat.index(in));
+    if (row.empty())
+      continue;
+    prefix[0]=false;                                // parity of sites < s
+    for (std::size_t s=0;s<nsites;++s)
+      prefix[s+1] = prefix[s] != parity[s][state[s]];
+    for (std::size_t e=0;e<row.size();++e) {
+      mat.decode(row[e].first,out);
+      state_type newstate=state;
+      for (std::size_t r=0;r<n;++r)
+        newstate[p.sites[r]]=out[r];
+      std::complex<double> phase;
+      std::size_t j;
+      boost::tie(j,phase) = states.index_and_phase(newstate);
+      if (j>=dimension()) {
+        if (building_hamiltonian_)
+          check_sector(state,newstate,"<NSITETERM> of type "+boost::lexical_cast<std::string>(p.type),p.sites);
+        continue;
+      }
+      bool f=false;
+      for (std::size_t r=n;r-->0;) {
+        std::size_t s=p.sites[r];
+        if (parity[s][in[r]]!=parity[s][out[r]]) {  // O_r is odd
+          bool before=prefix[s];
+          for (std::size_t q=r+1;q<n;++q)           // already applied O_q
+            if (p.sites[q]<s && parity[p.sites[q]][in[q]]!=parity[p.sites[q]][out[q]])
+              before=!before;
+          if (before)
+            f=!f;
+        }
+      }
+      value_type val=row[e].second;
+      if (f)
+        val=-val;
+      val *= numeric_cast<value_type>(phase * states.normalization(j)/states.normalization(i));
+      y[i] += val*x[j];                   // set matrix element
+      simplify(y[i]);               // optionally simplify a symbolic expression
+    }
+  }
+}
+
 template <class M, class G> template <class STATES, class V, class W>
 void hamiltonian_matrix<M,G>::apply_operator(const STATES& states, const SiteOperator& op, site_descriptor s, const V& x, W& y) const
 {
@@ -285,6 +473,8 @@ void hamiltonian_matrix<M,G>::apply_operator(const STATES& states, const SiteOpe
           y[i] += val*x[j];                   // set matrix element
           simplify(y[i]);               // optionally simplify a symbolic expression
        }
+        else if (building_hamiltonian_)
+          check_sector(state,newstate,"<SITETERM>",std::vector<std::size_t>(1,s));
       }
     }
   }
@@ -337,6 +527,12 @@ void hamiltonian_matrix<M,G>::apply_operator(const STATES& states, const boost::
             val *= numeric_cast<value_type>(phase * states.normalization(j)/states.normalization(i));
             y[i] += val*x[j];                   // set matrix element
             simplify(y[i]);               // optionally simplify a symbolic expression
+          }
+          else if (building_hamiltonian_) {
+            std::vector<std::size_t> sites;
+            sites.push_back(s1);
+            sites.push_back(s2);
+            check_sector(state,newstate,"<BONDTERM>",sites);
           }
         }
       }
@@ -394,6 +590,32 @@ void hamiltonian_matrix<M,G>::apply_operator(const GlobalOperator& op, const V& 
   // loop over bonds
   for (bond_iterator it=graph_.bonds().first; it!=graph_.bonds().second ; ++it) 
       apply_operator(op.bond_term(graph_.bond_type(*it)),*it,x,y);
+
+  // loop over n-site groups (n-site terms). The local table depends only on the
+  // n-site group type and the site types, so build it once per combination: the
+  // expression evaluator is slow.
+  if (graph_.nsite_groups().empty() || !op.has_nsite_terms())
+    return;
+  typedef std::pair<unsigned int,std::vector<unsigned int> > key_type;
+  std::map<key_type,nsite_matrix<value_type> > cache;
+  for (std::size_t q=0;q<graph_.nsite_groups().size();++q) {
+    const nsite_group& p = graph_.nsite_groups()[q];
+    key_type key(p.type,std::vector<unsigned int>());
+    for (std::size_t r=0;r<p.sites.size();++r)
+      key.second.push_back(graph_.site_type(p.sites[r]));
+    typename std::map<key_type,nsite_matrix<value_type> >::iterator it = cache.find(key);
+    if (it==cache.end()) {
+      NSiteOperator term = op.nsite_term(p.type);
+      nsite_matrix<value_type> mat;
+      if (!term.term().empty()) {
+        mat = local_matrix(term,p);
+        warn_if_cutoff(mat,p);
+      }
+      it = cache.insert(std::make_pair(key,mat)).first;
+    }
+    if (it->second.size())
+      apply_operator(it->second,p,x,y);
+  }
 }
 
 
@@ -428,7 +650,16 @@ void hamiltonian_matrix<M,G>::build() const
   Disorder::seed(parms.value_or_default("DISORDER_SEED",0));
   matrix_ = detail::initialized_matrix(matrix_type(),dimension(),dimension());
   built_matrix_ = true;
-  add_operator_matrix(matrix_,model_.model());
+  building_hamiltonian_ = true;
+  try {
+    add_operator_matrix(matrix_,model_.model());
+  }
+  catch (...) {
+    building_hamiltonian_ = false;
+    built_matrix_ = false;
+    throw;
+  }
+  building_hamiltonian_ = false;
 
   //std::cerr << "Time to build matrix: " << t.elapsed() << "\n";
 /*

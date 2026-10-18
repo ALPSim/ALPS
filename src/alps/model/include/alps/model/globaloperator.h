@@ -39,6 +39,13 @@ public:
   const std::vector<BondTermDescriptor>& bond_terms() const { return bondterms_;}
   SiteOperator site_term(unsigned int type=0) const;
   BondOperator bond_term(unsigned int type=0) const;
+
+  // n-site terms (<NSITETERM>), applied to the <NSITE>s of the lattice
+  const std::vector<NSiteTermDescriptor>& nsite_terms() const { return nsiteterms_;}
+  bool has_nsite_terms() const { return !nsiteterms_.empty() || !default_nsiteterm_.term().empty();}
+  // the term for n-site groups of this type; empty term() if there is none
+  NSiteOperator nsite_term(unsigned int type=0) const;
+  boost::optional<Parameters> create_nsite_term(unsigned int type);
   void substitute_operators(const ModelLibrary& m, const Parameters& p);
   boost::optional<Parameters> create_site_term(unsigned int type);
   boost::optional<Parameters> create_bond_term(unsigned int type);
@@ -54,6 +61,10 @@ public:
     for (typename graph_helper<G>::bond_iterator it=l.bonds().first; it != l.bonds().second;++it)
       t.insert(l.bond_type(*it));
     p << create_bond_terms(t);
+    t.clear();
+    for (std::size_t i=0;i<l.nsite_groups().size();++i)
+      t.insert(l.nsite_groups()[i].type);
+    p << create_nsite_terms(t);
     return p;
   }
   
@@ -63,12 +74,15 @@ protected:
 private:
   Parameters create_site_terms(std::set<unsigned int> const&);
   Parameters create_bond_terms(std::set<unsigned int> const&);
+  Parameters create_nsite_terms(std::set<unsigned int> const&);
 
   std::string name_;
   std::vector<SiteTermDescriptor> siteterms_;
   std::vector<BondTermDescriptor> bondterms_;
   DefaultSiteTermDescriptor default_siteterm_;
   DefaultBondTermDescriptor default_bondterm_;
+  std::vector<NSiteTermDescriptor> nsiteterms_;
+  DefaultNSiteTermDescriptor default_nsiteterm_;
 };
 
 

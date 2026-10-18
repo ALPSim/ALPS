@@ -25,6 +25,7 @@
 #include <alps/lattice/coordinate_traits.h>
 #include <alps/lattice/propertymap.h>
 #include <alps/utility/vectorio.hpp>
+#include <alps/lattice/nsite_group.h>
 
 #include <boost/pending/property.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -36,8 +37,11 @@ namespace alps {
 
 // XML I/O for graphs
 
+// If `nsite_groups` is given, they are written as <NSITE> elements in the
+// form read_graph_xml reads back.
 template <class GRAPH>
-inline void write_graph_xml(oxstream& out, const GRAPH& g, const std::string& n="")
+inline void write_graph_xml(oxstream& out, const GRAPH& g, const std::string& n="",
+                            const nsite_group_list* nsite_groups = 0)
 {
   typedef GRAPH graph_type;
   typedef typename boost::graph_traits<graph_type>::vertex_iterator vertex_iterator;
@@ -105,6 +109,13 @@ inline void write_graph_xml(oxstream& out, const GRAPH& g, const std::string& n=
       out << attribute("vector", write_vector(edgevector[*it]));
     out << end_tag("EDGE");
   }
+  if (nsite_groups)
+    for (std::size_t i=0;i<nsite_groups->size();++i) {
+      out << start_tag("NSITE") << attribute("type", (*nsite_groups)[i].type);
+      for (std::size_t j=0;j<(*nsite_groups)[i].sites.size();++j)
+        out << start_tag("SITE") << attribute("id", (*nsite_groups)[i].sites[j]+1) << end_tag("SITE");
+      out << end_tag("NSITE");
+    }
   out << end_tag("GRAPH");
 }
 
@@ -117,8 +128,11 @@ inline std::string read_graph_xml(std::istream& in, GRAPH& g)
   return read_graph_xml(tag,in,g);
 }
 
+// If `nsite_groups` is given, <NSITE> elements are read into it; otherwise
+// they are rejected like any other unknown element.
 template <class GRAPH>
-inline std::string read_graph_xml(const XMLTag& intag, std::istream& p, GRAPH& g)
+inline std::string read_graph_xml(const XMLTag& intag, std::istream& p, GRAPH& g,
+                                  nsite_group_list* nsite_groups = 0)
 {
   typedef GRAPH graph_type;
 
@@ -216,9 +230,16 @@ inline std::string read_graph_xml(const XMLTag& intag, std::istream& p, GRAPH& g
       edgetype[edge]=t;
       edgeindex[edge]=num_edges-1;
     }
+    else if (tag.name=="NSITE" && nsite_groups)
+      nsite_groups->push_back(read_graph_nsite_group_xml(tag,p));
     else
       boost::throw_exception(std::runtime_error("illegal element <" + tag.name + "> in <GRAPH>"));
   }
+  if (nsite_groups)
+    for (std::size_t i=0;i<nsite_groups->size();++i)
+      for (std::size_t j=0;j<(*nsite_groups)[i].sites.size();++j)
+        if ((*nsite_groups)[i].sites[j]>=boost::num_vertices(g))
+          boost::throw_exception(std::runtime_error("<NSITE> refers to a vertex that is not in <GRAPH>"));
   return name;
 }
 

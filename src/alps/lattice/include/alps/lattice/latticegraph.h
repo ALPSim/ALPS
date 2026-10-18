@@ -167,6 +167,69 @@ inline void make_graph_from_lattice(GRAPH& g,const LATTICE& l,
   graphdimension=alps::dimension(l);
 }
 
+namespace detail {
+
+// Only GraphUnitCell can carry n-site groups; other unit cells have none.
+template <class UNITCELL>
+inline std::vector<unitcell_nsite_group> unit_cell_nsite_groups(const UNITCELL&)
+{ return std::vector<unitcell_nsite_group>(); }
+
+inline std::vector<unitcell_nsite_group> unit_cell_nsite_groups(const GraphUnitCell& c)
+{ return c.nsite_groups(); }
+
+} // end namespace detail
+
+// Expand the unit-cell n-site groups over the lattice, using the same offset,
+// boundary and depletion rules as make_graph_from_lattice uses for edges:
+// an n-site group is dropped if any of its sites is off the lattice (open
+// boundaries) or depleted.
+template <class LATTICE>
+inline nsite_group_list make_nsite_groups_from_lattice(const LATTICE& l,
+    DepletionDescriptor depl_desc = DepletionDescriptor ())
+{
+  typedef typename lattice_traits<LATTICE>::unit_cell_type unit_cell_type;
+  typedef typename unit_cell_type::graph_type unit_graph_type;
+  typedef typename lattice_traits<LATTICE>::cell_iterator cell_iterator;
+  typedef typename lattice_traits<LATTICE>::offset_type offset_type;
+
+  nsite_group_list result;
+  std::vector<unitcell_nsite_group> up = detail::unit_cell_nsite_groups(unit_cell(l));
+  if (up.empty())
+    return result;
+
+  const unit_graph_type& ug(graph::graph(unit_cell(l)));
+  uint32_t unit_cell_vertices = num_vertices(ug);
+  Depletion depletion(depl_desc,volume(l) * unit_cell_vertices);
+
+  cell_iterator cit,cend;
+  for (boost::tie(cit,cend)=cells(l); cit != cend ; ++cit) {
+    for (std::size_t q=0;q<up.size();++q) {
+      nsite_group p;
+      p.type = up[q].type;
+      bool keep = true;
+      for (std::size_t r=0;r<up[q].sites.size() && keep;++r) {
+        offset_type off(alps::offset(*cit,l));
+        offset_type shift_by(up[q].sites[r].second.begin(),up[q].sites[r].second.end());
+        if (!alps::shift(off,shift_by,l).first) {
+          keep = false;
+          break;
+        }
+        int index = alps::index(alps::cell(off,l),l)*unit_cell_vertices + up[q].sites[r].first;
+        if (!depletion.exists(index)) {
+          keep = false;
+          break;
+        }
+        p.sites.push_back(depletion.mapped_site(index));
+      }
+      if (keep) {
+        check_distinct_sites(p);
+        result.push_back(p);
+      }
+    }
+  }
+  return result;
+}
+
 template <class LATTICE, class GRAPH> 
 class lattice_graph : public LATTICE
 {
@@ -193,6 +256,7 @@ public:
 
   const graph_type& graph() const { return graph_;}
   graph_type& graph() { return graph_;}
+  const nsite_group_list& nsite_groups() const { return nsite_groups_;}
 
   template<class H>
   typename H::graph_type& graph(H& g) const
@@ -271,6 +335,7 @@ public:
 
 private:
   GRAPH graph_;        
+  nsite_group_list nsite_groups_;
 };
 
 template <class LATTICE, class GRAPH>
@@ -279,6 +344,7 @@ inline lattice_graph<LATTICE,GRAPH>::lattice_graph(const L2& d)
  : LATTICE(d)
 {
   make_graph_from_lattice(graph_,*this,d.depletion());
+  nsite_groups_ = make_nsite_groups_from_lattice(*this,d.depletion());
 }
 
 template <class L, class G>

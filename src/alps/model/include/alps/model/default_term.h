@@ -19,6 +19,7 @@
 
 #include <alps/model/siteterm.h>
 #include <alps/model/bondterm.h>
+#include <alps/model/nsiteoperator.h>
 #include <alps/model/substitute.h>
 
 namespace alps {
@@ -43,6 +44,7 @@ TERM DefaultTermDescriptor<TERM>::get(unsigned int type) const
 
 typedef DefaultTermDescriptor<SiteTermDescriptor> DefaultSiteTermDescriptor;
 typedef DefaultTermDescriptor<BondTermDescriptor> DefaultBondTermDescriptor;
+typedef DefaultTermDescriptor<NSiteTermDescriptor> DefaultNSiteTermDescriptor;
 
 
 

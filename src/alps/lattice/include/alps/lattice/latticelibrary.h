@@ -22,6 +22,7 @@
 #include <alps/lattice/latticegraphdescriptor.h>
 #include <alps/lattice/latticedescriptor.h>
 #include <alps/lattice/graph.h>
+#include <alps/lattice/nsite_group.h>
 #include <alps/parser/xmlstream.h>
 
 #include <fstream>
@@ -49,6 +50,8 @@ public:
   const LatticeGraphDescriptor& lattice_descriptor(const std::string& name) const;
   lattice_type lattice(const std::string& name) const;
   const coordinate_graph_type& graph(const std::string& name) const;
+  // <NSITE>s of the named <GRAPH>; empty if it has none.
+  const nsite_group_list& graph_nsite_groups(const std::string& name) const;
   
   template <class G>
   bool get_graph(G& graph,const std::string& name) const;
@@ -64,6 +67,8 @@ protected:
   UnitCellMap unitcells_;
   LatticeGraphMap latticegraphs_;
   GraphMap graphs_;
+  typedef std::map<std::string,nsite_group_list> NSiteGroupMap;
+  NSiteGroupMap graph_nsite_groups_;
 };
 
 template <class G>

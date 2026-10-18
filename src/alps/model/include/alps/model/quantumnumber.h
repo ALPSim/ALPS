@@ -281,15 +281,27 @@ bool QuantumNumberDescriptor<I>::evaluate(const Parameters& p) const
   max_exp_.partial_evaluate(eval);
   max_exp_.simplify();
   valid_=true;
+  // A single site's range is a half_integer<I> (|value| <= 16383 for short);
+  // unlike totals it cannot be widened without changing the basis type. Warn
+  // once.
+  static bool warned=false;
   if (min_exp_==" - infinity")
     min_ = value_type::min BOOST_PREVENT_MACRO_SUBSTITUTION ();
-  else if (min_exp_.can_evaluate(eval))
-    min_ = alps::evaluate<double>(min_exp_);
+  else if (min_exp_.can_evaluate(eval)) {
+    double x = alps::evaluate<double>(min_exp_);
+    if (!warned)
+      warned = !warn_if_outside_half_integer_range<I>(x, "the minimum of quantum number " + name() + " (" + min_string_ + ")");
+    min_ = x;
+  }
   else valid_=false;
   if (max_exp_=="infinity")
     max_ = value_type::max BOOST_PREVENT_MACRO_SUBSTITUTION ();
-  else if (max_exp_.can_evaluate(eval))
-    max_ = alps::evaluate<double>(max_exp_);
+  else if (max_exp_.can_evaluate(eval)) {
+    double x = alps::evaluate<double>(max_exp_);
+    if (!warned)
+      warned = !warn_if_outside_half_integer_range<I>(x, "the maximum of quantum number " + name() + " (" + max_string_ + ")");
+    max_ = x;
+  }
   else valid_=false;
   if(valid_ && min_>max_)
     boost::throw_exception(std::runtime_error("min > max in QUANTUMNUMBER element"));
