@@ -20,6 +20,7 @@
 #include "types.h"
 #include <boost/assert.hpp>
 #include <alps/osiris/comm.h>
+#include <alps/parameter_input.hpp>
 #include <alps/scheduler/options.h>
 #include <vector>
 #include <utility>
@@ -82,8 +83,7 @@ itime_green_function_t  alps::ImpuritySolver::solve(const itime_green_function_t
   alps::Parameters parms(p);
   std::string basename=parms["BASENAME"];
   //boost::filesystem::remove(basename+".h5");
-  alps::hdf5::archive dumpfile(basename+".h5", "a");
-  dumpfile["/parameters"]<<parms;
+  alps::write_parameter_file(basename+".h5", parms);
   
   std::ostringstream G0_text;
   alps::oxstream G0_xml(G0_text);
@@ -112,8 +112,7 @@ alps::ImpuritySolver::solve_omega(const matsubara_green_function_t& G0_omega, co
   
   std::string basename=parms["BASENAME"];
   //boost::filesystem::remove(basename+".h5");
-  alps::hdf5::archive dumpfile(basename+".h5", "a");
-  dumpfile["/parameters"]<<parms;
+  alps::write_parameter_file(basename+".h5", parms);
   
   std::ostringstream G0_omega_text;
   alps::oxstream G0_omega_xml(G0_omega_text);

@@ -42,6 +42,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - Store parameter values that do not evaluate to a number in HDF5 exactly as written. Previously they were rewritten as partially evaluated expressions (`Hirsch-Fye` became `Hirsch - Fye`, `x*cos(2*pi)` became `x`) and an empty value became `0`.
 - Quote parameter values in text output whenever the unquoted form would not parse back, such as values containing `:`, `,` or `"`, and write empty values instead of omitting them.
 - Rewrite an existing parameter file in its own format, so a text file named `.h5` is no longer replaced by HDF5, and drop parameters that are no longer set from rewritten HDF5 files. Writing parameter text fails, before the file is touched, for values that cannot be read back as text.
+- Run `dmft` with its parameter file in another directory (`dmft runs/parm`). It previously changed into that directory and then failed to create `runs/runs/parm.h5`.
 
 ### Changed
 
