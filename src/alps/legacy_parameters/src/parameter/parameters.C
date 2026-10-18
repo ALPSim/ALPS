@@ -187,17 +187,8 @@ namespace alps {
 
 std::ostream& operator<<(std::ostream& os, const alps::Parameters& p)
 {
-  for (alps::Parameters::const_iterator it = p.begin(); it != p.end(); ++it) {
-    if (it->value().valid()) {
-      std::string s = it->value().c_str();
-      os << it->key() << " = ";
-      if (s.find(' ') != std::string::npos)
-        os << '"' << s << '"';
-      else
-        os << s;
-      os << ";\n";
-    }
-  }
+  for (alps::Parameters::const_iterator it = p.begin(); it != p.end(); ++it)
+    os << *it << "\n";
   return os;
 }
 

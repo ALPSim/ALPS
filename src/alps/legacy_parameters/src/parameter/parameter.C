@@ -16,6 +16,7 @@
 #include <alps/parameter/parameter.h>
 #include <alps/parameter/parameter_p.h>
 #include <boost/throw_exception.hpp>
+#include <cctype>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -104,16 +105,30 @@ void ParameterXMLHandler::text(const std::string& text) {
 
 namespace alps {
 
+namespace {
+
+// The characters ParameterParser accepts in an unquoted value.
+bool needs_quotes(std::string const& s) {
+  if (s.empty()) return true;
+  for (unsigned char c : s)
+    if (!(std::isalnum(c) || c == '#' || (c >= '\'' && c <= '+') ||
+          (c >= '-' && c <= '/') || c == '^' || c == '_'))
+      return true;
+  return false;
+}
+
+}
+
 std::ostream& operator<<(std::ostream& os, const alps::Parameter& p) {
-  if (p.value().valid()) {
-    std::string s = p.value().c_str();
-    os << p.key() << " = ";
-    if (s.find(' ') != std::string::npos)
-      os << '"' << s << '"';
-    else
-      os << s;
-    os << ";";
-  }
+  std::string s = p.value().c_str();
+  os << p.key() << " = ";
+  if (!needs_quotes(s))
+    os << s;
+  else if (s.find('"') == std::string::npos)
+    os << '"' << s << '"';
+  else
+    os << '\'' << s << '\'';
+  os << ";";
   return os;
 }
 
