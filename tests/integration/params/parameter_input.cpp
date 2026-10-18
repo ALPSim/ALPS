@@ -4,6 +4,7 @@
 #include <alps/expression.h>
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/vector.hpp>
+#include <alps/utility/vectorio.hpp>
 #include <gtest/gtest.h>
 #include <alps/testing/temporary_directory.hpp>
 #include <hdf5.h>
@@ -326,6 +327,52 @@ TEST(ParameterInputHdf5, ReadsOnlyTheParametersGroup) {
     alps::params parameters = alps::read_params_file(file.string());
     EXPECT_EQ(parameters.size(), 1u);
     EXPECT_EQ(parameters["L"].cast<int>(), 4);
+}
+
+// Legacy Parameters hold text, so vectors arrive as the text read_vector reads.
+TEST(ParameterInputHdf5, LegacyReaderKeepsVectorsAsText) {
+    alps::testing::TemporaryDirectory dir;
+    auto const file = dir.path() / "solver.in.h5";
+    {
+        alps::hdf5::archive ar(file.string(), "w");
+        ar["/parameters/L"] << 4;
+        ar["/parameters/WEIGHTS"] << std::vector<double>{0.25, 0.75};
+        ar["/parameters/SITES"] << std::vector<int>{1, 2, 3};
+        ar["/parameters/NAMES"] << std::vector<std::string>{"up", "down"};
+    }
+    alps::Parameters parameters = alps::read_parameter_file(file.string());
+    EXPECT_EQ(std::string(parameters["WEIGHTS"].c_str()), "0.25 0.75");
+    EXPECT_EQ(std::string(parameters["SITES"].c_str()), "1 2 3");
+    EXPECT_EQ(std::string(parameters["NAMES"].c_str()), "up down");
+    EXPECT_EQ(alps::read_vector<std::vector<double>>(std::string(parameters["WEIGHTS"].c_str())),
+              (std::vector<double>{0.25, 0.75}));
+}
+
+// HDF5 names cannot hold '/', so keys are encoded on disk and decoded on read.
+TEST(ParameterInputHdf5, KeysWithSlashesRoundTrip) {
+    alps::testing::TemporaryDirectory dir;
+    auto const file = dir.path() / "parm.h5";
+    alps::write_parameter_file(file.string(),
+        make_parameters({{"MEASURE_LOCAL[a/b]", "Sz"}, {"T[x&y]", "1"}, {"L", "4"}}));
+    EXPECT_EQ(values(alps::read_parameter_file(file.string())),
+              (value_map{{"MEASURE_LOCAL[a/b]", "Sz"}, {"T[x&y]", "1"}, {"L", "4"}}));
+    alps::params typed = alps::read_params_file(file.string());
+    EXPECT_EQ(typed["MEASURE_LOCAL[a/b]"].cast<std::string>(), "Sz");
+    EXPECT_EQ(typed["T[x&y]"].cast<int>(), 1);
+    alps::hdf5::archive ar(file.string(), "r");
+    EXPECT_EQ(ar.list_children("/parameters").size(), 3u);
+}
+
+// Files from other tools may hold a raw '&' in a name.
+TEST(ParameterInputHdf5, ReadsRawAmpersandNames) {
+    alps::testing::TemporaryDirectory dir;
+    auto const file = dir.path() / "parm.h5";
+    {
+        alps::hdf5::archive ar(file.string(), "w");
+        ar["/parameters/A&B"] << 2;
+    }
+    EXPECT_EQ(values(alps::read_parameter_file(file.string())), (value_map{{"A&B", "2"}}));
+    EXPECT_EQ(alps::read_params_file(file.string())["A&B"].cast<int>(), 2);
 }
 
 TEST(ParameterInputHdf5, EmptyParametersGroupHasNoParameters) {

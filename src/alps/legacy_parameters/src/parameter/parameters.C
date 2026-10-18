@@ -25,6 +25,8 @@
 #include <alps/expression.h>
 
 #include <alps/hdf5.hpp>
+#include <alps/hdf5/vector.hpp>
+#include <alps/utility/vectorio.hpp>
 
 namespace bs = boost::spirit::classic;
 
@@ -146,16 +148,29 @@ std::variant<int, double, std::string> Parameters::typed_value(const key_type& k
 }
 
 void Parameters::save(hdf5::archive & ar) const {
+    // keys such as MEASURE_LOCAL[a/b] must not become nested groups
     for (const_iterator it = begin(); it != end(); ++it)
-        std::visit([&](auto const& value) { ar << make_pvp(it->key(), value); }, typed_value(it->key()));
+        std::visit([&](auto const& value) { ar << make_pvp(ar.encode_segment(it->key()), value); },
+                   typed_value(it->key()));
 }
 void Parameters::load(hdf5::archive & ar) {
   std::vector<std::string> list = ar.list_children(ar.get_context());
 
   for (std::vector<std::string>::const_iterator it = list.begin(); it != list.end(); ++it) {
     std::string v;
-    ar >> make_pvp(*it, v);
-    operator[](*it) = v;
+    if (ar.is_scalar(*it))
+      ar >> make_pvp(*it, v);
+    else if (ar.is_datatype<std::string>(*it)) {
+      std::vector<std::string> values;
+      ar >> make_pvp(*it, values);
+      v = write_vector(values);
+    } else {
+      // vectors are held as the text read_vector reads
+      std::vector<double> values;
+      ar >> make_pvp(*it, values);
+      v = write_vector(values);
+    }
+    operator[](ar.decode_segment(*it)) = v;
   }
 }
 
