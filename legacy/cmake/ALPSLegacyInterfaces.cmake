@@ -2,10 +2,9 @@
 #
 # Deprecated ALPS 2.x entry points, installed next to ALPSConfig.cmake:
 # UseALPS.cmake, UsePyALPS.cmake and the Makefile fragment include.mk.
-# find_package(ALPS) only records their locations; projects opt in by
-# including them. Everything for these interfaces lives in this directory and
-# tests/cmake/legacy/; removing them later means deleting both, the include in
-# the top-level CMakeLists.txt and the two USE_FILE lines in ALPSConfig.cmake.in.
+# find_package(ALPS) only records their locations, through the generated
+# ALPSLegacyConfig.cmake; projects opt in by including them. Included by
+# legacy/ALPSLegacy.cmake; see legacy/README.md for removal.
 include_guard(GLOBAL)
 
 install(

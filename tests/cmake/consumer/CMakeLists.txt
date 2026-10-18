@@ -49,10 +49,15 @@ else()
   endif()
   set(sdk_mpi_enabled "${ALPS_MPI_ENABLED}")
   get_filename_component(expected_prefix "${ALPS_DIR}/../.." REALPATH)
-  if(NOT EXISTS "${expected_prefix}/include/alps/ngs/detail/export_sim_to_python.hpp"
-     OR NOT EXISTS "${expected_prefix}/include/alps/python/save_observable_to_hdf5.hpp")
-    message(FATAL_ERROR "The SDK must retain public Python compatibility includes")
-  endif()
+  foreach(legacy_header IN ITEMS alps/ngs/detail/export_sim_to_python.hpp
+                                 alps/python/save_observable_to_hdf5.hpp
+                                 alps/legacy/params_path_constructor.ipp)
+    if(ALPS_LEGACY_API AND NOT EXISTS "${expected_prefix}/include/${legacy_header}")
+      message(FATAL_ERROR "The legacy SDK is missing ${legacy_header}")
+    elseif(NOT ALPS_LEGACY_API AND EXISTS "${expected_prefix}/include/${legacy_header}")
+      message(FATAL_ERROR "The SDK must not install retired compatibility includes")
+    endif()
+  endforeach()
   foreach(private_directory IN ITEMS alps/utilities alps/hdf5/include alps/hdf5/src
                                      alps/hdf5/tests alps/params alps/common alps/runtime
                                      alps/fortran/include alps/fortran/src alps/fortran/tests)
@@ -137,6 +142,14 @@ add_contract(numeric numerics.cpp ALPS::numerics)
 add_contract(numeric_io numeric_io.cpp ALPS::numeric_io)
 add_contract(numeric_xml numeric_xml.cpp ALPS::numeric_xml)
 add_contract(parameter_adapters parameter_adapters.cpp ALPS::alps)
+if(ALPS_LEGACY_API)
+  # Deliberately uses the deprecated constructor; see test_sdk_contracts.py.
+  add_contract(legacy_params ../../../legacy/tests/params_path_constructor.cpp ALPS::alps)
+  if(NOT ALPS_SOURCE)
+    set_tests_properties(legacy_params_contract PROPERTIES ENVIRONMENT_MODIFICATION
+      "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
+  endif()
+endif()
 if(EXPECT_SOLVERS)
   get_target_property(maxent_links ALPS::maxent INTERFACE_LINK_LIBRARIES)
   if(maxent_links MATCHES "(^|;)ALPS::alps(;|$)")

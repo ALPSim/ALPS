@@ -39,9 +39,8 @@ set(ALPS_RUNTIME_LIBRARY_DIRS "@PACKAGE_CMAKE_INSTALL_BINDIR@")
 set(ALPS_RUNTIME_TARGETS "@ALPS_SDK_RUNTIME_TARGETS@")
 set(ALPS_DATA_DIR "@PACKAGE_CMAKE_INSTALL_DATADIR@/alps")
 set(ALPS_MPI_ENABLED "@ALPS_ENABLE_MPI@")
-# Deprecated ALPS 2.x entry points; they take effect only when included.
-set(ALPS_USE_FILE "${CMAKE_CURRENT_LIST_DIR}/UseALPS.cmake")
-set(ALPS_PYTHON_USE_FILE "${CMAKE_CURRENT_LIST_DIR}/UsePyALPS.cmake")
+# Deprecated interfaces, present only when the SDK was built with the legacy layer.
+include("${CMAKE_CURRENT_LIST_DIR}/ALPSLegacyConfig.cmake" OPTIONAL)
 # Generated from ALPS_SDK_TARGETS in src/alps/CMakeLists.txt.
 foreach(component IN ITEMS @ALPS_SDK_COMPONENTS@)
   set(ALPS_${component}_FOUND TRUE)

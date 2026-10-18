@@ -15,7 +15,6 @@
 #ifndef ALPS_CONFIG_H
 #define ALPS_CONFIG_H
 
-#cmakedefine ALPS_NGS_USE_NEW_ALEA
 #cmakedefine ALPS_NGS_OPENMPI_ULFM
 
 //
@@ -116,7 +115,7 @@ using boost::uint_fast64_t;
 #include <alps/export.h>
 
 //
-// Enable HDF5 checkpoints: no ALPS checkpoint data is written into XDR files 
+// Enable HDF5 checkpoints: no ALPS checkpoint data is written into XDR files
 // anymore, but they can still be read
 //
 #ifdef ALPS_HAVE_HDF5
