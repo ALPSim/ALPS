@@ -10,7 +10,7 @@ Changes from that ALPS baseline:
 
 - Relocate the headers to this directory and supply a copy of the Boost Software License.
 - Give the Fortran integer and logical types explicit 32-bit and 64-bit widths in `detail/config/fortran.hpp`. ALPS requires the 32-bit LP64 interface with lowercase underscore symbols.
-- Remove 38 headers outside ALPS's transitive include graph, including the Eigen, GLAS, MTL, UMFPACK, Boost.Array, and Boost.MultiArray adapters. Retain includes in every conditional branch, including alternative backend declarations, and the BLAS/LAPACK umbrella headers used by ALPS.
+- Remove 295 headers outside ALPS's transitive include graph, including unused adapters and LAPACK wrappers. ALPS includes specific LAPACK routines or the existing Fortran declarations instead of the LAPACK umbrella headers. Retain includes in every conditional branch, including alternative backend declarations; the BLAS umbrella remains unchanged.
 
 Copyright and license notices remain in the individual headers; the accompanying `LICENSE_1_0.txt` contains the Boost Software License and is installed with the SDK headers.
 
