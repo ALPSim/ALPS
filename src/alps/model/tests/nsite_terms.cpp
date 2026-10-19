@@ -18,9 +18,11 @@
 
 #include <gtest/gtest.h>
 #include <alps/lattice.h>
+#include <alps/expression.h>
 #include <alps/model.h>
 #include <alps/model/hamiltonian_matrix.hpp>
 #include <alps/numeric/matrix.hpp>
+#include <boost/numeric/ublas/matrix_sparse.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -601,6 +603,40 @@ TEST(NSiteHamiltonian, ParametersKeepFullPrecision) {
   std::vector<double> e = spectrum(p);
   const double d = 0.123456789123, t = 0.987654321987;
   EXPECT_NEAR(e[0], d / 2 - std::sqrt(d * d / 4 + t * t), 1e-13);
+}
+
+TEST(NSiteHamiltonian, SymbolicMatrixMatchesNumeric) {
+  // Unset parameters stay symbolic, as in the print_symbolic2 tutorial; this
+  // did not compile while the n-site expansion used Expression * Expression.
+  Files f("<GRAPH name=\"g\" vertices=\"2\"><EDGE source=\"1\" target=\"2\"/>"
+          "<NSITE><SITE id=\"1\"/><SITE id=\"2\"/></NSITE></GRAPH>",
+          "<HAMILTONIAN name=\"m\"><BASIS ref=\"fermion\"/>"
+          "<BONDTERM source=\"i\" target=\"j\">-t*fermion_hop(i,j)</BONDTERM>"
+          "<NSITETERM sites=\"a b\">V*n(a)*n(b)"
+          " + W*(cdag_up(a)*c_up(b)*n_down(b) + cdag_up(b)*c_up(a)*n_down(a))</NSITETERM></HAMILTONIAN>");
+  alps::Parameters p = sector(f.parms(), 1, 1);
+  p["GRAPH"] = "g"; p["MODEL"] = "m";
+  alps::hamiltonian_matrix<boost::numeric::ublas::compressed_matrix<alps::Expression> > hs(p);
+  const boost::numeric::ublas::compressed_matrix<alps::Expression>& s = hs.matrix();
+
+  alps::Parameters values(p);
+  values["t"] = 0.7; values["V"] = 1.9; values["W"] = -0.45;
+  alps::hamiltonian_matrix<alps::numeric::matrix<double> > hn(values);
+  const alps::numeric::matrix<double>& n = hn.matrix();
+
+  ASSERT_EQ(hs.dimension(), hn.dimension());
+  ASSERT_EQ(hs.dimension(), 4u);
+  bool has_v = false, has_w = false;
+  for (std::size_t i = 0; i < hs.dimension(); ++i)
+    for (std::size_t j = 0; j < hs.dimension(); ++j) {
+      alps::Expression e = s(i, j);
+      has_v = has_v || e.depends_on("V");
+      has_w = has_w || e.depends_on("W");
+      EXPECT_NEAR(alps::evaluate<double>(e, alps::expression::ParameterEvaluator<>(values)), n(i, j), 1e-14)
+        << "element (" << i << "," << j << ") = " << e;
+    }
+  EXPECT_TRUE(has_v);
+  EXPECT_TRUE(has_w);
 }
 
 TEST(NSiteHamiltonian, ApplicationsWithoutSupportRefuse) {
