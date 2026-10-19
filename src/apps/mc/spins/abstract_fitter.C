@@ -284,11 +284,7 @@ AbstractFitter::AbstractFitter(const std::string& fit_file_name)
   results_namebase = fit_file_name;
 
   // read the simulation parameter file
-  alps::Parameters fit_param;
-  {
-    std::ifstream in(fit_file_name.c_str());
-    in >> fit_param;
-  }
+  alps::Parameters fit_param = alps::read_parameter_file(fit_file_name);
   // handle the time limit
   long time_limit = static_cast<boost::int64_t>
                (fit_param.value_or_default("TIME_LIMIT",-1l));

@@ -18,6 +18,7 @@
 #include <alps/config.h>
 
 #include <alps/hdf5.hpp>
+#include <alps/parameter_input.hpp>
 
 #include <alps/scheduler/convert.h>
 #include <alps/osiris/xdrdump.h>
@@ -73,11 +74,7 @@ void convert_xml(const std::string& inname)
 
 void convert_params(const std::string& inname)
 {
-  ParameterList list;
-  {
-    std::ifstream in(inname.c_str());
-    in >> list;
-  }
+  ParameterList list = read_parameter_list(inname);
 
   std::string basename = boost::filesystem::path(inname).filename().string();
   std::cout << "Converting parameter file " << inname << " to "

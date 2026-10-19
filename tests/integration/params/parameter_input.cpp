@@ -13,6 +13,7 @@
 #include <fstream>
 #include <iterator>
 #include <map>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <thread>
@@ -639,4 +640,98 @@ TEST(ParameterInputPipeline, TextToHdf5ToTypedSolverInput) {
     EXPECT_EQ(solver["t"].cast<double>(), 0.707106781186547);
     EXPECT_EQ(solver["MU"].cast<double>(), 1.5);
     EXPECT_EQ(solver["NMATSUBARA"].cast<int>(), 250);
+}
+
+// --------------------------------------------------------------------------
+// Several runs and standard input
+
+namespace {
+
+std::vector<value_map> runs(alps::ParameterList const & list) {
+    std::vector<value_map> result;
+    for (alps::Parameters const & p : list)
+        result.push_back(values(p));
+    return result;
+}
+
+}
+
+TEST(ParameterInputList, EachBlockIsARunWithTheParametersBeforeIt) {
+    alps::testing::TemporaryDirectory dir;
+    write_text(dir.path() / "parm", "LATTICE = \"chain lattice\"\nL = 8\n{ T = 0.5 }\n{ T = 1.0 }\nL = 16\n{ T = 2.0 }\n");
+    EXPECT_EQ(runs(alps::read_parameter_list((dir.path() / "parm").string())), (std::vector<value_map>{
+        {{"LATTICE", "chain lattice"}, {"L", "8"}, {"T", "0.5"}},
+        {{"LATTICE", "chain lattice"}, {"L", "8"}, {"T", "1.0"}},
+        {{"LATTICE", "chain lattice"}, {"L", "16"}, {"T", "2.0"}}}));
+}
+
+TEST(ParameterInputList, TextWithoutBlocksIsOneRun) {
+    alps::testing::TemporaryDirectory dir;
+    write_text(dir.path() / "parm", "L = 8\nT = 0.5\n");
+    EXPECT_EQ(runs(alps::read_parameter_list((dir.path() / "parm").string())),
+              (std::vector<value_map>{{{"L", "8"}, {"T", "0.5"}}}));
+}
+
+// As for a single parameter set, text without parameters is rejected.
+TEST(ParameterInputList, RejectsTextWithoutParameters) {
+    alps::testing::TemporaryDirectory dir;
+    write_text(dir.path() / "parm", "// nothing here\n");
+    EXPECT_THROW(alps::read_parameter_list((dir.path() / "parm").string()), std::runtime_error);
+}
+
+TEST(ParameterInputList, Hdf5AndXmlHoldOneRun) {
+    alps::testing::TemporaryDirectory dir;
+    alps::Parameters p = make_parameters({{"L", "8"}, {"SOLVER", "Hirsch-Fye"}});
+    alps::write_parameter_file((dir.path() / "parm.h5").string(), p);
+    EXPECT_EQ(runs(alps::read_parameter_list((dir.path() / "parm.h5").string())),
+              (std::vector<value_map>{values(p)}));
+    write_text(dir.path() / "task.in.xml",
+               "<SIMULATION><PARAMETERS><PARAMETER name=\"L\">8</PARAMETER>"
+               "<PARAMETER name=\"SOLVER\">Hirsch-Fye</PARAMETER></PARAMETERS></SIMULATION>\n");
+    EXPECT_EQ(runs(alps::read_parameter_list((dir.path() / "task.in.xml").string())),
+              (std::vector<value_map>{values(p)}));
+}
+
+TEST(ParameterInputList, MissingFileNamesTheFile) {
+    alps::testing::TemporaryDirectory dir;
+    try {
+        alps::read_parameter_list((dir.path() / "missing").string());
+        FAIL() << "expected an error";
+    } catch (std::runtime_error const & e) {
+        EXPECT_NE(std::string(e.what()).find("missing"), std::string::npos) << e.what();
+    }
+}
+
+TEST(ParameterInputList, MalformedTextThrows) {
+    alps::testing::TemporaryDirectory dir;
+    write_text(dir.path() / "parm", "{ T = 0.5 \n");
+    EXPECT_THROW(alps::read_parameter_list((dir.path() / "parm").string()), std::runtime_error);
+}
+
+TEST(ParameterInputXml, ReadsTheParametersElement) {
+    alps::testing::TemporaryDirectory dir;
+    // The header parameter2xml writes.
+    write_text(dir.path() / "task.XML",
+               "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+               "<?xml-stylesheet type=\"text/xsl\" href=\"ALPS.xsl\"?>\n<SIMULATION>\n<PARAMETERS>\n"
+               "<PARAMETER name=\"LATTICE\">chain lattice</PARAMETER>\n"
+               "<PARAMETER name=\"L\">8</PARAMETER>\n</PARAMETERS>\n</SIMULATION>\n");
+    EXPECT_EQ(values(alps::read_parameter_file((dir.path() / "task.XML").string())),
+              (value_map{{"LATTICE", "chain lattice"}, {"L", "8"}}));
+}
+
+TEST(ParameterInputStream, ReadsParameterText) {
+    std::istringstream in("LATTICE = \"chain lattice\"\nL = 8\n");
+    EXPECT_EQ(values(alps::read_parameter_text(in)), (value_map{{"LATTICE", "chain lattice"}, {"L", "8"}}));
+}
+
+TEST(ParameterInputStream, ReadsRunsLikeAFile) {
+    std::string const text = "L = 8\n{ T = 0.5 }\n{ T = 1.0 }\n";
+    alps::testing::TemporaryDirectory dir;
+    write_text(dir.path() / "parm", text);
+    std::istringstream in(text);
+    EXPECT_EQ(runs(alps::read_parameter_list_text(in)),
+              runs(alps::read_parameter_list((dir.path() / "parm").string())));
+    std::istringstream flat("L = 8\nT = 0.5\n");
+    EXPECT_EQ(runs(alps::read_parameter_list_text(flat)), (std::vector<value_map>{{{"L", "8"}, {"T", "0.5"}}}));
 }

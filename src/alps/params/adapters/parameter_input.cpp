@@ -11,6 +11,8 @@
 
 #include <algorithm>
 #include <cctype>
+#include <iterator>
+#include <sstream>
 #include <stdexcept>
 
 namespace alps {
@@ -39,6 +41,13 @@ namespace alps {
                 boost::throw_exception(std::runtime_error("Cannot open parameter file: " + filename.string()));
         }
 
+        std::string read_file(boost::filesystem::path const & filename) {
+            boost::filesystem::ifstream in(filename, std::ios::binary);
+            if (!in.is_open())
+                boost::throw_exception(std::runtime_error("Cannot open parameter file: " + filename.string()));
+            return std::string(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
+        }
+
         Parameters read_text(boost::filesystem::path const & filename) {
             boost::filesystem::ifstream in(filename);
             if (!in.is_open())
@@ -46,6 +55,39 @@ namespace alps {
             Parameters parameters;
             in >> parameters;
             return parameters;
+        }
+
+        Parameters read_xml(boost::filesystem::path const & filename) {
+            boost::filesystem::ifstream in(filename);
+            if (!in.is_open())
+                boost::throw_exception(std::runtime_error("Cannot open parameter file: " + filename.string()));
+            Parameters parameters;
+            parameters.extract_from_xml(in);
+            return parameters;
+        }
+
+        bool is_xml_name(boost::filesystem::path const & filename) {
+            std::string extension = filename.extension().string();
+            std::transform(extension.begin(), extension.end(), extension.begin(),
+                           [](unsigned char c) { return std::tolower(c); });
+            return extension == ".xml";
+        }
+
+        // Text without { } blocks is one run of its parameters.
+        ParameterList list_from_text(std::string const & text) {
+            ParameterList list;
+            {
+                std::istringstream in(text);
+                in >> list;
+            }
+            if (list.empty()) {
+                std::istringstream in(text);
+                Parameters parameters;
+                in >> parameters;
+                if (!parameters.empty())
+                    list.push_back(parameters);
+            }
+            return list;
         }
 
         // The text grammar reads printable characters only, inside quotes
@@ -66,7 +108,7 @@ namespace alps {
     Parameters read_parameter_file(boost::filesystem::path const & filename) {
         require_readable(filename);
         if (!is_hdf5_file(filename))
-            return read_text(filename);
+            return is_xml_name(filename) ? read_xml(filename) : read_text(filename);
         Parameters parameters;
         hdf5::archive ar(filename, "r");
         ar["/parameters"] >> parameters;
@@ -99,6 +141,25 @@ namespace alps {
                 boost::throw_exception(std::runtime_error("Cannot write parameter file: " + filename.string()));
             out << parameters;
         }
+    }
+
+    ParameterList read_parameter_list(boost::filesystem::path const & filename) {
+        require_readable(filename);
+        if (!is_hdf5_file(filename) && !is_xml_name(filename))
+            return list_from_text(read_file(filename));
+        ParameterList list;
+        list.push_back(read_parameter_file(filename));
+        return list;
+    }
+
+    Parameters read_parameter_text(std::istream & in) {
+        Parameters parameters;
+        in >> parameters;
+        return parameters;
+    }
+
+    ParameterList read_parameter_list_text(std::istream & in) {
+        return list_from_text(std::string(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>()));
     }
 
 }

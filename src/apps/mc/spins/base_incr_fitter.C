@@ -28,11 +28,7 @@ BaseIncrFitter::BaseIncrFitter(const std::string& filename)
     : AbstractFitter(filename)
 {
   exp_results.clear();
-  alps::Parameters sim_param;
-  {
-    std::ifstream in(filename.c_str());
-    in >> sim_param;
-  }
+  alps::Parameters sim_param = alps::read_parameter_file(filename);
   enlarge_trigger_factor = sim_param.value_or_default("ENLARGE_TRIGGER_FACTOR",
                25.0);
   steps_between_baseincr = sim_param.value_or_default("STEPS_BETWEEN_BASEINCR",

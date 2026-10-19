@@ -16,6 +16,7 @@
 #define ALPS_APPLICATIONS_MC_SPIN_FITTER_H_
 
 #include <alps/scheduler.h>
+#include <alps/parameter_input.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>

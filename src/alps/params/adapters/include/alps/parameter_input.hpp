@@ -10,13 +10,16 @@
 
 #include <boost/filesystem/path.hpp>
 
+#include <iosfwd>
+
 namespace alps {
 
     // Applications read and write parameter files only through these
     // functions; the file format is chosen here and nowhere else.
     //
     // A file is read as HDF5 (parameters in the /parameters group) when it
-    // carries the HDF5 signature, and as ALPS parameter text otherwise.
+    // carries the HDF5 signature, from its <PARAMETERS> element when its name
+    // ends in ".xml", and as ALPS parameter text otherwise.
     // Typed text values are read by make_parameters_from_file: expressions
     // such as U/2 are evaluated, other values stay text.
     //
@@ -30,6 +33,16 @@ namespace alps {
 
     ALPS_DECL void write_parameter_file(boost::filesystem::path const & filename,
                                         Parameters const & parameters);
+
+    // A file of several runs. In parameter text each { } block is one run,
+    // with the parameters set before it; text without blocks is one run of
+    // its parameters, and text without parameters is rejected. HDF5 and XML
+    // files hold one run.
+    ALPS_DECL ParameterList read_parameter_list(boost::filesystem::path const & filename);
+
+    // Parameter text that is not in a file, such as standard input.
+    ALPS_DECL Parameters read_parameter_text(std::istream & in);
+    ALPS_DECL ParameterList read_parameter_list_text(std::istream & in);
 
 }
 

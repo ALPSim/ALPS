@@ -15,6 +15,7 @@
 
 #include <alps/hdf5/archive.hpp>
 #include <alps/parameter.h>
+#include <alps/parameter_input.hpp>
 
 #include <boost/filesystem.hpp>
 
@@ -23,8 +24,7 @@
 int main(int argc, char **argv) {
     if (argc < 2)
         throw std::invalid_argument("no name passed");
-    alps::Parameters parms;
-    std::cin >> parms;
+    alps::Parameters parms = alps::read_parameter_text(std::cin);
     if (boost::filesystem::exists(boost::filesystem::path(argv[1])))
         boost::filesystem::remove(boost::filesystem::path(argv[1]));
     alps::hdf5::archive ar(argv[1], "w");
