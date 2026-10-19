@@ -46,6 +46,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - Reject text that is not a number when a typed parameter is read as a number. `"6x"`, `"2*L"`, `"U/2"` and `""` previously became `6`, `2`, `0` and `0` without an error. Decimal text for an integer still gives its integer part (`"4.0"` is 4), and `"1e3"` is now 1000 instead of 1. Booleans accept `true` and `false`; `"true"` was previously false.
 - Run `dmft` with its parameter file in another directory (`dmft runs/parm`). It previously changed into that directory and then failed to create `runs/runs/parm.h5`.
 - Run `SOLVER = interaction` from `dmft`; the solver previously looked for a standalone-format G0 and stopped. Run the built-in `SOLVER = Hirsch-Fye` in the Matsubara loop (`OMEGA_LOOP = 1`), where it previously was handed to the shell as an external program. With `OMEGA_LOOP = 0`, Hirsch-Fye and interaction-expansion solvers, which read G0 only in Matsubara frequencies, are rejected with a message instead of failing during the first iteration.
+- Report `p2h5` input with `{ }` blocks, which it cannot store as one parameter set, by pointing to `parameter2hdf5`, and report parse errors and a missing output name with exit code 1 instead of aborting on an uncaught exception.
 
 ### Changed
 
