@@ -55,8 +55,8 @@ notices when modifying these files.
 | `alea/src/*.cpp` (13 files) | `src/` | Copied unchanged except for the zero-step correction in `propagation.cpp` |
 | `utilities/include/alps/common/view.hpp` | `include/alps/common/view.hpp` | Copied unchanged |
 | `utilities/include/alps/serialization/{core,eigen,util}.hpp` | `include/alps/serialization/` | Copied unchanged, except that `core.hpp` gains an include (see below) |
-| `alea/test/*.cpp` (10 files), `alea/test/dataset.hpp` | `tests/` | Copied with local regression cases in `transform.cpp` |
-| `utilities/include/alps/testing/near.hpp` | `tests/support/alps/testing/near.hpp` in the repository root | Copied unchanged; shared test support |
+| `alea/test/*.cpp` (10 files), `alea/test/dataset.hpp` | `tests/` | Copied with local regression cases in `transform.cpp` and `compare_test.cpp` |
+| `utilities/include/alps/testing/near.hpp` | `tests/support/alps/testing/near.hpp` in the repository root | Adapted to enforce absolute matrix tolerances; shared test support |
 | `COPYRIGHT.TXT`, `LICENSE.TXT`, `ACKNOWLEDGE.TXT` | here | Copied unchanged |
 
 ALPSCore keeps `view.hpp` and the serialization headers in its utilities
@@ -78,6 +78,11 @@ observables. Nonzero steps retain their existing behavior. `propagation.hpp`
 documents this extension. Regression tests check the Jacobian at zero and large
 coordinates and preserve zero variance through identity transformations for
 variance, covariance, autocorrelation and batch results.
+
+The shared `near.hpp` helper now enforces an absolute error bound for each matrix
+entry instead of a relative matrix norm. `compare_test.cpp` adds regression
+coverage; the [test-support README](../../../tests/support/README.md) records
+the adaptation.
 
 Three imported headers relied on their includers for some declarations. Each
 now includes what it needs, so it compiles on its own, and a comment marks the

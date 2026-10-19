@@ -9,11 +9,48 @@
 
 #include <iostream>
 #include <random>
+#include <limits>
 #include <Eigen/Dense>
 
 #include "gtest/gtest.h"
 
 using namespace alps;
+
+// ALPS regression coverage for the helper imported from ALPSCore 7146b9e1.
+TEST(near, matrix_absolute_error)
+{
+    const auto near = [](const auto &a, const auto &b, double tolerance) {
+        return alps::testing::NearPredFormat("a", "b", "tolerance", a, b, tolerance);
+    };
+
+    Eigen::Matrix2d a = Eigen::Matrix2d::Constant(1e10);
+    Eigen::Matrix2d b = a;
+    b(0, 0) += 1.0;
+    EXPECT_FALSE(near(a, b, 0.25)); // Relative comparison would hide this error.
+    EXPECT_TRUE(near(a, b, 1.0));  // The absolute bound is inclusive.
+
+    a.setZero();
+    b.setConstant(0.125);
+    EXPECT_TRUE(near(a, b, 0.125)); // Each entry, not the matrix norm, is bounded.
+    EXPECT_FALSE(near(a, b, 0.0625));
+
+    Eigen::MatrixXd empty(0, 2), same_empty(0, 2), other_empty(2, 0);
+    EXPECT_TRUE(near(empty, same_empty, 0.0));
+    EXPECT_FALSE(near(empty, other_empty, 0.0));
+    EXPECT_FALSE(near(a, Eigen::MatrixXd::Zero(3, 2), 1.0));
+
+    b.setZero();
+    b(0, 0) = std::numeric_limits<double>::quiet_NaN();
+    EXPECT_FALSE(near(a, b, 1.0));
+    b(0, 0) = std::numeric_limits<double>::infinity();
+    EXPECT_FALSE(near(a, b, 1.0));
+
+    Eigen::MatrixXcd complex_a = Eigen::MatrixXcd::Zero(1, 1);
+    Eigen::MatrixXcd complex_b = complex_a;
+    complex_b(0, 0) = std::complex<double>(0.3, 0.4);
+    EXPECT_TRUE(near(complex_a, complex_b, 0.5));
+    EXPECT_FALSE(near(complex_a, complex_b, 0.4));
+}
 
 template <typename Acc>
 class eq_case

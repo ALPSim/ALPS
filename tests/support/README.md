@@ -11,10 +11,15 @@ include path.
 
 ## Copied from ALPSCore
 
-These are copied unchanged from ALPSCore commit
+These are copied from ALPSCore commit
 `7146b9e1f017938a94e5dae35d88467cc5ba7969`. Their notices refer to ALPSCore's top-level
 [`COPYRIGHT.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f017938a94e5dae35d88467cc5ba7969/COPYRIGHT.TXT), [`LICENSE.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f017938a94e5dae35d88467cc5ba7969/LICENSE.TXT)
 and [`ACKNOWLEDGE.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f017938a94e5dae35d88467cc5ba7969/ACKNOWLEDGE.TXT).
+They remain unchanged except for `near.hpp`: its matrix comparison now checks
+the absolute error of every entry, matching its documented tolerance and scalar
+overload, instead of using Eigen's relative `isApprox`. Regression coverage in
+ALEA v2's `compare_test.cpp` includes large values, comparisons to zero, complex
+entries, empty/mismatched shapes and nonfinite errors.
 
 | ALPSCore path | Here |
 | --- | --- |

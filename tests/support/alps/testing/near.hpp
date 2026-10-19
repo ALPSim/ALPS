@@ -59,7 +59,10 @@ template <typename Derived1, typename Derived2>
                << " and\n" << expr2 << " is " << val2.rows() << " x " << val2.cols()
                << "\n";
 
-    if (val1.isApprox(val2, abs_error))
+    // ALPS correction to ALPSCore 7146b9e1: isApprox uses a relative norm.
+    // Match EXPECT_NEAR's absolute bound for every entry (also for complex
+    // values); all() accepts matching empty shapes and rejects NaN errors.
+    if (((val1 - val2).cwiseAbs().array() <= abs_error).all())
         return ::testing::AssertionSuccess();
 
     return ::testing::AssertionFailure()
