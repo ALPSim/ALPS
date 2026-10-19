@@ -5,10 +5,11 @@
 Each case writes an ALPS model (site, bond and n-site terms) to an FCIDUMP
 with alps2fcidump, diagonalises it with PySCF's FCI (pyscf.fci.direct_spin1,
 which fixes (N_alpha, N_beta) like ALPS), and compares the lowest levels with
-ALPS fulldiag in the same sector. Then models that FCIDUMP cannot hold
+ALPS fulldiag in the same sector. That fulldiag run sets FCIDUMP="file",
+which must write the same file. Then models that FCIDUMP cannot hold
 (spins, a Zeeman field, a spin-dependent or a three-body n-site term, and
 singlet pair hopping, whose (pq|rs) lacks the 8-fold symmetry of real
-orbitals) must be refused.
+orbitals) must be refused, by alps2fcidump and by fulldiag with FCIDUMP set.
 """
 import itertools
 import os
@@ -157,14 +158,18 @@ for label, lat, ham, params in cases:
         bad += 1
         continue
     ref = pyscf_levels(path)
-    shutil.rmtree(tmp, ignore_errors=True)
-    run = dict(p, CONSERVED_QUANTUMNUMBERS="Nup,Ndown")
+    # the same model through fulldiag's FCIDUMP parameter
+    param_file = os.path.join(tmp, "FCIDUMP.param")
+    run = dict(p, CONSERVED_QUANTUMNUMBERS="Nup,Ndown", FCIDUMP=param_file)
     run.pop("LATTICE_LIBRARY", None)
     a = np.asarray(alpsrun.run(lat, ham, run)[:len(ref)])
+    same = os.path.exists(param_file) and open(param_file).read() == open(path).read()
+    shutil.rmtree(tmp, ignore_errors=True)
     d = np.max(np.abs(a - ref))
-    bad += d > 1e-9
+    bad += d > 1e-9 or not same
     print(f"{label:46} E0 ALPS {a[0]:15.10f}  PySCF FCI {ref[0]:15.10f}  "
-          f"max|dE| ({len(ref)} levels) {d:.1e}" + ("" if d < 1e-9 else "  <-- FAIL"))
+          f"max|dE| ({len(ref)} levels) {d:.1e}" + ("" if d < 1e-9 else "  <-- FAIL")
+          + ("  FCIDUMP= same" if same else "  FCIDUMP= differs  <-- FAIL"))
 
 for label, lat, ham, params, expect in refused:
     p = dict(params)
@@ -176,6 +181,20 @@ for label, lat, ham, params, expect in refused:
         shutil.rmtree(msg, ignore_errors=True)
     bad += not ok
     print(f"refused: {label:37} " + ("yes" if ok else "NO  <-- FAIL") + f"   [{(msg or '')[:110]}]")
+    # fulldiag with FCIDUMP set must stop with the same reason, writing nothing
+    tmp = tempfile.mkdtemp(prefix="fd_")
+    param_file = os.path.join(tmp, "FCIDUMP")
+    run = dict(p, FCIDUMP=param_file)
+    run.pop("LATTICE_LIBRARY", None)
+    try:
+        alpsrun.run(lat, ham, run)
+        err = None
+    except RuntimeError as e:
+        err = str(e)
+    ok = err is not None and "FCIDUMP: " in err and expect in err and not os.path.exists(param_file)
+    shutil.rmtree(tmp, ignore_errors=True)
+    bad += not ok
+    print(f"   and fulldiag FCIDUMP= {'':23}" + ("yes" if ok else "NO  <-- FAIL"))
 
 print("ALL OK" if not bad else f"{bad} FAILED")
 sys.exit(1 if bad else 0)

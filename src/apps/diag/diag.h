@@ -13,6 +13,7 @@
 /* $Id$ */
 
 #include <alps/model/hamiltonian_matrix.hpp>
+#include <alps/model/fcidump.hpp>
 #include <alps/lattice.h>
 #include <alps/scheduler/diag.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -92,6 +93,21 @@ void DiagMatrix<T,M>::dostep()
 {
   if (this->finished()) 
     return;
+  // FCIDUMP="file": also write the Hamiltonian as FCIDUMP integrals
+  if (this->alps::scheduler::Task::parms.defined("FCIDUMP")) {
+    alps::Parameters p(this->alps::scheduler::Task::parms);
+    if (p.defined("TOTAL_MOMENTUM"))
+      p.erase("TOTAL_MOMENTUM");
+    std::string file = p["FCIDUMP"];
+    try {
+      alps::fcidump::summary s = alps::fcidump::export_fcidump(p, file);
+      std::cerr << "Wrote FCIDUMP " << file << ": " << s.orbitals << " orbitals, NELEC="
+                << s.nelec << ", MS2=" << s.ms2 << "; checked up to " << s.checked
+                << " electrons, max |difference| " << s.worst << "\n";
+    } catch (std::exception& e) {
+      boost::throw_exception(std::runtime_error("FCIDUMP: " + std::string(e.what())));
+    }
+  }
   build_subspaces(this->alps::scheduler::Task::parms["CONSERVED_QUANTUMNUMBERS"]);
   std::vector<total_type> indices(ranges_.size());
   std::vector<std::string> momenta;
