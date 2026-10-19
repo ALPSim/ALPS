@@ -17,6 +17,7 @@
 
 #include "hirschfyesim.h"
 #include <alps/parameter.h>
+#include <alps/input/hirschfye.hpp>
 #include <alps/parameter_input.hpp>
 #include <alps/utilities/copyright.hpp>
 #include <alps/cli.hpp>
@@ -69,9 +70,10 @@ int main(int argc, char** argv)
     alps::Parameters parms = alps::read_parameter_file(infile);
     parms["INFILE"]=infile;
     parms["OUTFILE"]=outfile;
-    int N=(int)parms["NMATSUBARA"];
-    int sites=parms.value_or_default("SITES", 1);
-    int flavors=parms.value_or_default("FLAVORS", 2);
+    const alps::input::hirschfye_input_sizes input = alps::input::read_hirschfye_input_sizes(parms);
+    int N=input.n_matsubara;
+    int sites=input.sites;
+    int flavors=input.flavors;
     
     alps::hdf5::archive ar(infile, "r");
     matsubara_green_function_t g0(N, sites, flavors); g0.read_hdf5(ar, "/G0");

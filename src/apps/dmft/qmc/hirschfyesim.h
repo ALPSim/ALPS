@@ -18,6 +18,7 @@
 #ifndef ALPS_DMFT_HIRSCHFYESIM_H
 #define ALPS_DMFT_HIRSCHFYESIM_H
 
+#include <alps/input/hirschfye.hpp>
 #include "types.h"
 #include "hirschfyeaux.h"
 #include "alps_solver.h"
@@ -67,6 +68,9 @@ class HirschFyeRun : public alps::scheduler::MCRun
 public:
   ///
   HirschFyeRun(const alps::ProcessList&,const alps::Parameters&,int);
+private:
+  HirschFyeRun(const alps::ProcessList&,const alps::Parameters&,int,const alps::input::hirschfye_parameters&);
+public:
   ///store a dump of this simulation
   void save(alps::ODump&) const;
   ///load a previously saved simulation

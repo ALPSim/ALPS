@@ -1,6 +1,7 @@
 // Copyright (C) 2026 by the ALPS collaboration
 // SPDX-License-Identifier: MIT
 #include <alps/input/dmft.hpp>
+#include <alps/input/hirschfye.hpp>
 #include <alps/parameter_input.hpp>
 #include <gtest/gtest.h>
 #include <sstream>
@@ -129,6 +130,36 @@ TEST(DmftInput, ExternalSolverReadsHybridizationOnlyWhenWritten) {
     EXPECT_EQ(delta.h, 0.1);
     EXPECT_EQ(alps::input::read_dmft_max_time(text("MAX_TIME = 30"), 60), 30u);
     EXPECT_EQ(alps::input::read_dmft_max_time(text("N = 1"), 60), 60u);
+}
+
+TEST(HirschFyeInput, ReadsSolverParameters) {
+    std::string const required = "THERMALIZATION = 10\nSWEEPS = 100\nBETA = 8\nN = 16\nU = 2\nTOLERANCE = 1e-6\nNMATSUBARA = 32\n";
+    alps::input::hirschfye_parameters const p = alps::input::read_hirschfye_parameters(text(required));
+    EXPECT_EQ(p.thermalization, 10);
+    EXPECT_EQ(p.sweeps, 100);
+    EXPECT_EQ(p.beta, 8.);
+    EXPECT_EQ(p.n_tau, 16);
+    EXPECT_EQ(p.sites, 1);
+    EXPECT_EQ(p.U, 2.);
+    EXPECT_EQ(p.fourpoint_interval, 1000);
+    EXPECT_FALSE(p.measure_fourpoint);
+    EXPECT_EQ(p.tolerance, 1e-6);
+    EXPECT_EQ(p.max_time, 86400);
+    EXPECT_EQ(p.n_matsubara, 32);
+    EXPECT_THROW(alps::input::read_hirschfye_parameters(text("BETA = 8")), std::runtime_error);
+}
+
+TEST(HirschFyeInput, ResultNeedsSites) {
+    EXPECT_THROW(alps::input::read_hirschfye_result_parameters(text("N = 16\nNMATSUBARA = 32")), std::runtime_error);
+    alps::input::hirschfye_result_parameters const p = alps::input::read_hirschfye_result_parameters(
+        text("N = 16\nNMATSUBARA = 32\nSITES = 1\nOUTFILE = \"out.h5\""));
+    EXPECT_EQ(p.sites, 1);
+    EXPECT_FALSE(p.checkpoint);
+    EXPECT_EQ(p.outfile, std::string("out.h5"));
+    alps::input::hirschfye_input_sizes const sizes = alps::input::read_hirschfye_input_sizes(text("NMATSUBARA = 32"));
+    EXPECT_EQ(sizes.n_matsubara, 32);
+    EXPECT_EQ(sizes.sites, 1);
+    EXPECT_EQ(sizes.flavors, 2);
 }
 
 }

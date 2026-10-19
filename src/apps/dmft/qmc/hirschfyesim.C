@@ -80,25 +80,30 @@ void update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<i
 
 
 HirschFyeRun::HirschFyeRun(const alps::ProcessList& where,const alps::Parameters& p,int node)
+: HirschFyeRun(where,p,node,alps::input::read_hirschfye_parameters(p))
+{}
+
+HirschFyeRun::HirschFyeRun(const alps::ProcessList& where,const alps::Parameters& p,int node,
+                           const alps::input::hirschfye_parameters& input_)
 : alps::scheduler::MCRun(where,p,node),  
 sweeps(0),
-thermalization_sweeps(static_cast<int>(parms["THERMALIZATION"])),
-total_sweeps(static_cast<int>(parms["SWEEPS"])),
-beta(static_cast<double>(parms["BETA"])),
-N(static_cast<int>(parms["N"])),	
-n_site(static_cast<int>(parms.value_or_default("SITES", 1))),	
-u(static_cast<double>(parms["U"])),
+thermalization_sweeps(input_.thermalization),
+total_sweeps(input_.sweeps),
+beta(input_.beta),
+N(input_.n_tau),	
+n_site(input_.sites),	
+u(input_.U),
 N_check(1000), // value is automatically adjusted during the simulation
 check_counter(0),
-fp_interval(static_cast<int>(parms.value_or_default("FOURPOINT_INTERVAL", 1000))),
-measure_fourpoint(static_cast<bool>(parms.value_or_default("MEASURE_FOURPOINT_FUNCTION", false))),
-tolerance(static_cast<double>(parms["TOLERANCE"])),	
+fp_interval(input_.fourpoint_interval),
+measure_fourpoint(input_.measure_fourpoint),
+tolerance(input_.tolerance),	
 Green0_up(N*n_site, N*n_site),
 Green_up(N*n_site, N*n_site),
 Green0_down(N*n_site, N*n_site),
 Green_down(N*n_site, N*n_site),			
 spins(static_cast<int>(N*n_site)),
-max_time(static_cast<int>(parms.value_or_default("MAX_TIME", 86400))),
+max_time(input_.max_time),
 start_time(time(NULL)),
 sign(1),
 bare_green_tau(N+1, n_site, 2),
@@ -107,7 +112,7 @@ green_tau(N+1, n_site, 2)
   std::cout<<"starting Hirsch Fye Simulation."<<std::endl;
   std::cout<<"The Hirsch Fye legacy code is published exclusively for pedagogical purposes."<<std::endl;
   
-  unsigned int n_matsubara=parms["NMATSUBARA"];
+  unsigned int n_matsubara=input_.n_matsubara;
   matsubara_green_function_t bare_green_matsubara(n_matsubara, n_site, 2);
   itime_green_function_t bgf_sc_convention_k(N+1,n_site, 2); //bare green function in k_space
   boost::shared_ptr<FourierTransformer> fourier_ptr;
@@ -299,10 +304,10 @@ void HirschFyeRun::dostep()
 
 
 std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_result() {
-  int N=parms["N"];
-  //double beta=parms["BETA"];
-  int n_matsubara=parms["NMATSUBARA"];
-  int n_site=parms["SITES"];
+  const alps::input::hirschfye_result_parameters input = alps::input::read_hirschfye_result_parameters(parms);
+  int N=input.n_tau;
+  int n_matsubara=input.n_matsubara;
+  int n_site=input.sites;
 
   itime_green_function_t green_result(N+1, n_site, 2); //one site, two spins, n+1 time points including first and last
   matsubara_green_function_t green_result_matsubara(n_matsubara, n_site, 2); //n matsubara frequencies
@@ -313,7 +318,7 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
   std::valarray<double> g_up_mean_vector(G_meas_up.mean());
   std::valarray<double> g_down_mean_vector(G_meas_down.mean());
   
-  if(parms.defined("CHECKPOINT")){
+  if(input.checkpoint){
     alps::Parameters *p=const_cast<alps::Parameters*>(&parms);
     p->erase(std::string("G0(omega)"));
     alps::Parameters::iterator it=p->begin();
@@ -324,7 +329,7 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
       it++;
     }
     std::cout<<"end of sim, checkpointing"<<std::endl;
-    std::string fns=parms["CHECKPOINT"];
+    std::string fns=*input.checkpoint;
     boost::filesystem::path fn(fns);
     checkpoint(fn);
   }
@@ -361,8 +366,8 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
   FourierTransformer::generate_transformer_U(parms, fourier_ptr, densities);
   fourier_ptr->forward_ft(green_result, green_result_matsubara);
   // the hirschfye program writes an output file; inside dmft there is none
-  if (parms.defined("OUTFILE")) {
-    alps::hdf5::archive ar(static_cast<std::string>(parms["OUTFILE"]), "a");
+  if (input.outfile) {
+    alps::hdf5::archive ar(*input.outfile, "a");
     green_result.write_hdf5(ar, "/G_tau");
     green_result_matsubara.write_hdf5(ar, "/G_omega");
   }
