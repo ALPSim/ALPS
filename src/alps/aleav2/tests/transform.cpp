@@ -18,6 +18,32 @@
 #include <iterator>
 #include <iostream>
 
+// ALPS regression coverage added to ALPSCore 7146b9e1's alea/test/transform.cpp.
+TEST(jacobian, rectangular)
+{
+    for (bool transpose : {false, true}) {
+        Eigen::MatrixXd matrix(3, 2);
+        matrix << 1, 2, 3, 4, 5, 6;
+        if (transpose)
+            matrix.transposeInPlace();
+        alps::alea::linear_transformer<double> tf(matrix);
+        ASSERT_EQ(matrix.cols(), tf.in_size());
+        ASSERT_EQ(matrix.rows(), tf.out_size());
+
+        alps::alea::column<double> input = Eigen::VectorXd::Ones(matrix.cols());
+        const Eigen::MatrixXd jac = alps::alea::jacobian<double>(tf, input, 0.5);
+        ASSERT_EQ(matrix.rows(), jac.rows());
+        ASSERT_EQ(matrix.cols(), jac.cols());
+        EXPECT_DOUBLE_EQ(0.0, (jac - matrix).norm());
+
+        alps::alea::mean_acc<double> acc(matrix.cols());
+        acc << input;
+        const auto result = alps::alea::transform(alps::alea::no_prop(), tf, acc.result());
+        ASSERT_EQ(matrix.rows(), result.size());
+        EXPECT_DOUBLE_EQ(0.0, (result.mean() - matrix * input).norm());
+    }
+}
+
 TEST(jacobian, linear)
 {
     Eigen::MatrixXd tfmat = Eigen::MatrixXd::Random(3, 3);

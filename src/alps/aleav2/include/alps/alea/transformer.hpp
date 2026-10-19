@@ -49,9 +49,11 @@ public:
         : mat_(mat)
     { }
 
-    size_t in_size() const { return mat_.rows(); }
+    // ALPS correction to ALPSCore 7146b9e1: a rows-by-cols matrix maps
+    // cols inputs to rows outputs, including rectangular transformations.
+    size_t in_size() const { return mat_.cols(); }
 
-    size_t out_size() const { return mat_.cols(); }
+    size_t out_size() const { return mat_.rows(); }
 
     column<T> operator() (const column<T> &in) const
     {
