@@ -15,6 +15,7 @@
 
 #ifndef FOURIER_TRANSFORM_H
 #define FOURIER_TRANSFORM_H
+#include <alps/input/dmft.hpp>
 #include <complex>
 #include "types.h" // for the multiple_vector_type
 #include "green_function.h" // for the multiple_vector_type
@@ -154,21 +155,23 @@ class FFunctionFourierTransformer:public FourierTransformer
 {
 public:
   FFunctionFourierTransformer(const alps::Parameters& parms)
-    : FourierTransformer((double)parms["BETA"], parms.value_or_default("FLAVORS", 2), 1),
-      epssq_(static_cast<unsigned>(parms.value_or_default("FLAVORS", 2))){
-    if (static_cast<int>(parms.value_or_default("SITES", 1))!=1) 
+    : FourierTransformer(alps::input::read_dmft_fourier_parameters(parms, false, false).beta,
+                         alps::input::read_dmft_sizes(parms).flavors, 1),
+      epssq_(static_cast<unsigned>(alps::input::read_dmft_sizes(parms).flavors)){
+    const alps::input::dmft_fourier_parameters input = alps::input::read_dmft_fourier_parameters(parms, false, false);
+    if (input.sizes.sites!=1) 
       throw std::logic_error("ERROR: FFunctionFourierTransformer : SITES!=1, for cluster fourier transforms please use the cluster version of this framework");
     // NOTE: Delta(i omega_n)=F(-i omega_n)
     //       Delta(i omega_n)= <e> + (<e^2>-<e>^2)/(i omega_n) + ...
     // thus for <e>!=0 the Delta(tau) is divergent
     // NOTE2: although the name says FFunctionFT, it has the proper tail for Delta(i omega_n)
     for(int f=0;f<epssq_.size();++f){
-      if (std::abs(static_cast<double>(parms.value_or_default("EPS_"+boost::lexical_cast<std::string>(f),0.0)))>1e-8) {
-        std::cerr<<"FFunctionFourierTransformer : EPS_"<<f<<"="<<parms["EPS_"+boost::lexical_cast<std::string>(f)]<<"  is non-zero. This causes divergent hybridization function."<<std::endl
+      if (std::abs(input.eps[f])>1e-8) {
+        std::cerr<<"FFunctionFourierTransformer : EPS_"<<f<<"="<<input.eps[f]<<"  is non-zero. This causes divergent hybridization function."<<std::endl
                  <<"  To overcome the problem, shift the energies for density of states such that the 1st moment is zero. Shift the chemical potential accordingly."<<std::endl;
         throw std::logic_error("ERROR: FFunctionFourierTransformer : hybridization function is divergent due to non-zero EPS_i.");
       }
-      epssq_[f]=static_cast<double>(parms.value_or_default("EPSSQ_"+boost::lexical_cast<std::string>(f),1.0));
+      epssq_[f]=input.epssq[f];
       c1_[f][0][0]=epssq_[f];
       c2_[f][0][0]=0;//-(2*epsilonsq_av*mu+mu*mu*mu);
       c3_[f][0][0]=0;

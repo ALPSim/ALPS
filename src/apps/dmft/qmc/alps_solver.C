@@ -15,6 +15,7 @@
 
 /* $Id: alps_solver.C 342 2009-01-28 22:31:54Z fuchs $ */
 
+#include <alps/input/dmft.hpp>
 #include "alps_solver.h"
 #include "xml.h"
 #include "types.h"
@@ -37,7 +38,7 @@ alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, const Pa
 #endif
 	if(is_master()){
     alps::scheduler::NoJobfileOptions opt(1,argv);
-    unsigned int max_time = (unsigned int)(parms.value_or_default("MAX_TIME",DEFAULT_CHECK_TIME));
+    unsigned int max_time = alps::input::read_dmft_max_time(parms, DEFAULT_CHECK_TIME);
     if (max_time < DEFAULT_CHECK_TIME) { opt.checkpoint_time=max_time; opt.max_check_time=max_time; opt.min_check_time=max_time; }
     else {
       unsigned int checks = (max_time + DEFAULT_CHECK_TIME - 1) / DEFAULT_CHECK_TIME;

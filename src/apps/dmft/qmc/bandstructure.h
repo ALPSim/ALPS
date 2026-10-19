@@ -18,6 +18,7 @@
 #include<stdexcept>
 #include<iostream>
 
+#include <alps/input/dmft.hpp>
 #include <alps/parameter.h>
 
 class Bandstructure {
@@ -30,8 +31,8 @@ public:
   void set_parms(alps::Parameters& parms) const;
   
   Bandstructure(const alps::Parameters& parms)
-    : epssq_(static_cast<unsigned>(parms.value_or_default("FLAVORS", 2)),-1.),
-      eps_(static_cast<unsigned>(parms.value_or_default("FLAVORS", 2)),0.)
+    : epssq_(static_cast<unsigned>(alps::input::read_dmft_sizes(parms).flavors),-1.),
+      eps_(static_cast<unsigned>(alps::input::read_dmft_sizes(parms).flavors),0.)
     {}
   
   virtual std::complex<double> HilbertIntegral_PM(const std::complex<double>& zeta_A, const unsigned flavor) const;
@@ -85,12 +86,9 @@ public:
   SemicircleBandstructure(const alps::Parameters& parms, bool verbose=false)
     : Bandstructure(parms)
   {
-    unsigned n_flavor=parms.value_or_default("FLAVORS",2);
-    if (n_flavor%2!=0)
-      throw std::logic_error("SemicircleBandstructure: current implementation does not allow for odd n_flavor.");
-    for(unsigned int f=0; f<n_flavor/2; ++f){
-      std::stringstream t_f; t_f<<"t"<<f;  // flavors (2m) and (2m+1) assumed to have the same bandwidth
-      double t = (parms.defined(t_f.str()) ? static_cast<double>(parms[t_f.str()]) : static_cast<double>(parms["t"]));
+    const std::vector<double> hoppings = alps::input::read_semicircle_hoppings(parms);
+    for(unsigned int f=0; f<hoppings.size(); ++f){
+      double t = hoppings[f];  // flavors (2m) and (2m+1) assumed to have the same bandwidth
       epssq_[2*f]=t*t;   // second moment of the Bethe DOS is t^2 [4t=2W=D]
       epssq_[2*f+1]=t*t;
       if (verbose)
@@ -118,11 +116,11 @@ public:
   // constructor
   SquareLatticeBandstructure(const alps::Parameters & parms, bool verbose=false)
     : Bandstructure(parms),
-      t_(static_cast<double>(parms.value_or_default("t",1.))),
-      tprime_(static_cast<double>(parms.value_or_default("tprime",0.))),
-      L_(static_cast<int>(parms.value_or_default("L",128)))
+      t_(alps::input::read_lattice_hoppings(parms).t),
+      tprime_(alps::input::read_lattice_hoppings(parms).tprime),
+      L_(alps::input::read_lattice_hoppings(parms).L)
   {
-    if (static_cast<int>(parms.value_or_default("FLAVORS",2))!=2)
+    if (alps::input::read_dmft_sizes(parms).flavors!=2)
       throw std::logic_error("TwoDBandstructure: current implementation does not allow for n_flavor!=2.");
     epssq_[0]=4.*(t_*t_ + tprime_*tprime_);
     epssq_[1]=epssq_[0];
@@ -164,12 +162,12 @@ public:
   // constructor
   HexagonalLatticeBandstructure(const alps::Parameters & parms, bool verbose=false)
     : Bandstructure(parms),
-      t_(static_cast<double>(parms.value_or_default("t",1.))),
-      L_(static_cast<int>(parms.value_or_default("L",128)))
+      t_(alps::input::read_lattice_hoppings(parms).t),
+      L_(alps::input::read_lattice_hoppings(parms).L)
   {
-    if (static_cast<double>(parms.value_or_default("tprime",0.))!=0.)
+    if (alps::input::read_lattice_hoppings(parms).tprime!=0.)
       std::cout<<"WARNING: for the hexagonal lattice the parameter 'tprime' is ignored."<<std::endl;
-    if (static_cast<int>(parms.value_or_default("FLAVORS",2))!=2)
+    if (alps::input::read_dmft_sizes(parms).flavors!=2)
       throw std::logic_error("TwoDBandstructure: current implementation does not allow for n_flavor!=2.");
     epssq_[0]=3.*t_*t_;
     epssq_[1]=epssq_[0];

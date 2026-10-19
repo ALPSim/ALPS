@@ -4,7 +4,7 @@
 #include <alps/expression.h>
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/vector.hpp>
-#include <alps/utility/vectorio.hpp>
+#include <alps/utilities/vectorio.hpp>
 #include <gtest/gtest.h>
 #include <alps/testing/temporary_directory.hpp>
 #include <hdf5.h>
