@@ -4,6 +4,10 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ## Unreleased
 
+### Added
+
+- n-site Hamiltonian terms for exact diagonalization (`fulldiag`, `sparsediag`). An `<NSITE>` in a `<UNITCELL>` or `<GRAPH>` lists an ordered group of sites; an `<NSITETERM sites="i j k l">` in a `<HAMILTONIAN>` is applied to every n-site group of its type, with arbitrary operator strings, any number of sites, and fermion signs handled. Terms that leave the `CONSERVED_QUANTUMNUMBERS` sector are refused. A term that changes a quantum number capped by a cutoff parameter, such as a boson `N <= Nmax`, prints a warning that the results depend on the cutoff. Other applications refuse models that combine n-site terms with n-site groups instead of ignoring them. See [the syntax](src/alps/model/docs/nsite_terms.md).
+
 ### Fixed
 
 - Release HDF5 scalar string buffers after reads, including failed conversions, and owned observables when clearing an `ObservableSet`.

@@ -46,8 +46,10 @@ public:
   
 private:
   typedef std::pair<std::string,std::string> string_pair;
-  typedef std::pair<half_integer_type,half_integer_type> half_integer_pair;
-  typedef boost::tuple<half_integer_type,half_integer_type,half_integer_type> half_integer_tuple;
+  // sector totals: as wide as the basis constraints
+  typedef typename basis_descriptor_type::total_type total_type;
+  typedef std::pair<total_type,total_type> half_integer_pair;
+  typedef boost::tuple<total_type,total_type,total_type> half_integer_tuple;
   typedef std::vector<std::pair<string_pair,half_integer_tuple> > QNRangeType;
 
   void build_subspaces(const std::string&);
@@ -91,7 +93,7 @@ void DiagMatrix<T,M>::dostep()
   if (this->finished()) 
     return;
   build_subspaces(this->alps::scheduler::Task::parms["CONSERVED_QUANTUMNUMBERS"]);
-  std::vector<half_integer_type> indices(ranges_.size());
+  std::vector<total_type> indices(ranges_.size());
   std::vector<std::string> momenta;
   if (this->alps::scheduler::Task::parms.value_or_default("TRANSLATION_SYMMETRY",true)) {
     std::vector<vector_type> k = this->translation_momenta();
@@ -166,7 +168,7 @@ void DiagMatrix<T,M>::build_subspaces(const std::string& quantumnumbers)
   // get the range for each unevaluated quantum number      
   alps::basis_states_descriptor<short> basis_(this->basis(),this->graph());
   for (unsigned int i=0;i<constraints.size();++i) {
-    half_integer_tuple qn= boost::make_tuple(half_integer_type(0),half_integer_type(0),half_integer_type(1));
+    half_integer_tuple qn= boost::make_tuple(total_type(0),total_type(0),total_type(1));
     for (unsigned int s=0;s<basis_.size();++s) {
       unsigned int k=alps::get_quantumnumber_index(constraints[i].first,basis_[s].basis());
       boost::get<0>(qn) += basis_[s].basis()[k].global_min();
