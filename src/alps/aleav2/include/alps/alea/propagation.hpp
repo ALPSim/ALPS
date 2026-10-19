@@ -103,6 +103,9 @@ private:
  *
  * where `e[j]` denotes the `j`-th unit vector.  This procedure is exact for
  * linear transformations and biased otherwise.
+ *
+ * ALPS extension to ALPSCore 7146b9e1: a zero `dx` selects a positive step
+ * scaled to `x`, including when automatic propagation sees zero uncertainty.
  */
 template <typename T>
 typename eigen<T>::matrix jacobian(const transformer<T> &f, column<T> x, double dx);

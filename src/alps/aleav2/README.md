@@ -52,7 +52,7 @@ notices when modifying these files.
 | --- | --- | --- |
 | `alea/include/alps/alea.hpp` | `include/alps/alea.hpp` | Copied unchanged |
 | `alea/include/alps/alea/**` | `include/alps/alea/**` | Copied with the local changes listed below; `mpi.hpp` is installed only by MPI builds |
-| `alea/src/*.cpp` (13 files) | `src/` | Copied unchanged |
+| `alea/src/*.cpp` (13 files) | `src/` | Copied unchanged except for the zero-step correction in `propagation.cpp` |
 | `utilities/include/alps/common/view.hpp` | `include/alps/common/view.hpp` | Copied unchanged |
 | `utilities/include/alps/serialization/{core,eigen,util}.hpp` | `include/alps/serialization/` | Copied unchanged, except that `core.hpp` gains an include (see below) |
 | `alea/test/*.cpp` (10 files), `alea/test/dataset.hpp` | `tests/` | Copied with local regression cases in `transform.cpp` |
@@ -71,6 +71,13 @@ The CMake files, `tests/coexistence.cpp` and this README are ALPS's own.
 maps its column count to its row count. The added `jacobian.rectangular` test
 checks both expanding and contracting transformations, their Jacobians and
 transformed means.
+
+`propagation.cpp` supplies a positive, coordinate-scaled finite-difference step
+when `jacobian` receives zero, as automatic propagation does for constant
+observables. Nonzero steps retain their existing behavior. `propagation.hpp`
+documents this extension. Regression tests check the Jacobian at zero and large
+coordinates and preserve zero variance through identity transformations for
+variance, covariance, autocorrelation and batch results.
 
 Three imported headers relied on their includers for some declarations. Each
 now includes what it needs, so it compiles on its own, and a comment marks the

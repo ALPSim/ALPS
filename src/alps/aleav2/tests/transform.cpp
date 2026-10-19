@@ -65,6 +65,18 @@ TEST(jacobian, linear)
     ALPS_EXPECT_NEAR(tfmat, jac, 1e-6);
 }
 
+TEST(jacobian, zero_step)
+{
+    alps::alea::linear_transformer<double> tf(Eigen::Matrix2d::Identity());
+    for (double value : {0.0, 4.0, 1e100}) {
+        alps::alea::column<double> x = Eigen::Vector2d::Constant(value);
+        const Eigen::MatrixXd jac = alps::alea::jacobian<double>(tf, x, 0.0);
+        EXPECT_TRUE(jac.allFinite());
+        // Forward differences at large coordinates lose some relative precision.
+        EXPECT_NEAR(0.0, (jac - Eigen::Matrix2d::Identity()).norm(), 1e-6);
+    }
+}
+
 TEST(types, joinings)
 {
     using alps::alea::internal::joined;
@@ -265,3 +277,23 @@ typedef ::testing::Types<
 
 TYPED_TEST_CASE(twogauss_batched_id_case, batchable);
 TYPED_TEST(twogauss_batched_id_case, test_result) { this->test_result(); }
+
+TYPED_TEST(twogauss_batched_id_case, constant_observable)
+{
+    for (double value : {0.0, 4.0, -8.0}) {
+        TypeParam acc;
+        acc.set_batch_size(4);
+        for (int i = 0; i < 16; ++i)
+            acc << value;
+        const auto input = acc.finalize();
+        ASSERT_DOUBLE_EQ(0.0, input.var()[0]);
+
+        const auto result = alps::alea::transform(alps::alea::linear_prop(),
+                                                  transformer_id<double>(1), input);
+        EXPECT_EQ(input.count(), result.count());
+        EXPECT_DOUBLE_EQ(input.count2(), result.count2());
+        EXPECT_DOUBLE_EQ(value, result.mean()[0]);
+        EXPECT_DOUBLE_EQ(0.0, result.var()[0]);
+        EXPECT_DOUBLE_EQ(0.0, result.stderror()[0]);
+    }
+}

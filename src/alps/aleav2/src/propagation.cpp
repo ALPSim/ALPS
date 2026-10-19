@@ -6,6 +6,9 @@
 #include <alps/alea/propagation.hpp>
 
 #include <iostream>
+#include <algorithm>
+#include <cmath>
+#include <limits>
 
 namespace alps { namespace alea {
 
@@ -14,6 +17,14 @@ typename eigen<T>::matrix jacobian(const transformer<T> &f, column<T> x, double 
 {
     size_t in_size = f.in_size();
     size_t out_size = f.out_size();
+
+    // ALPS correction to ALPSCore 7146b9e1: automatic propagation can pass
+    // zero for a constant observable. Scale its fallback step to the point
+    // so the perturbation remains representable, including at large means.
+    if (dx == 0) {
+        const double scale = x.size() ? std::max(1.0, x.cwiseAbs().maxCoeff()) : 1.0;
+        dx = std::sqrt(std::numeric_limits<double>::epsilon()) * scale;
+    }
 
     typename eigen<T>::matrix result(out_size, in_size);
     for (size_t j = 0; j != in_size; ++j) {
