@@ -1,5 +1,5 @@
 # Copyright (C) 2026 ALPS collaboration. SPDX-License-Identifier: MIT
-# ALPSCore's mc tests, copied unchanged.
+# ALPSCore's mc tests, copied with publication pointers removed.
 foreach(name sum_single timer_in_sim timer check_schedule)
   add_executable(mc_${name} ${name}.cpp)
   target_link_libraries(mc_${name} PRIVATE ALPS::mc)
