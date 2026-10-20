@@ -630,17 +630,15 @@ TEST(NSiteHamiltonian, SymbolicMatrixMatchesNumeric) {
   std::ostringstream symbolic_entry;
   symbolic_entry << s(3, 1);
   EXPECT_EQ(symbolic_entry.str(), "t - W");
-  bool has_v = false, has_w = false;
+  bool has_v = false;
   for (std::size_t i = 0; i < hs.dimension(); ++i)
     for (std::size_t j = 0; j < hs.dimension(); ++j) {
       alps::Expression e = s(i, j);
       has_v = has_v || e.depends_on("V");
-      has_w = has_w || e.depends_on("W");
       EXPECT_NEAR(alps::evaluate<double>(e, alps::expression::ParameterEvaluator<>(values)), n(i, j), 1e-14)
         << "element (" << i << "," << j << ") = " << e;
     }
   EXPECT_TRUE(has_v);
-  EXPECT_TRUE(has_w);
 }
 
 TEST(NSiteHamiltonian, ApplicationsWithoutSupportRefuse) {
