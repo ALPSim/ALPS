@@ -134,6 +134,7 @@ include(cmake/ALPSNumerics.cmake)
 # The bundled XDR implementation is portable and preserves the legacy format.
 # Using it consistently avoids incompatible platform RPC typedefs and ABIs.
 configure_file(cmake/config/config.h.in generated/include/alps/config.h)
+configure_file(cmake/config/config.hpp.in generated/include/alps/config.hpp @ONLY)
 configure_file(cmake/config/version.h.in generated/include/alps/version.h)
 
 file(RELATIVE_PATH _alps_bin_to_lib "${CMAKE_INSTALL_FULL_BINDIR}" "${CMAKE_INSTALL_FULL_LIBDIR}")
