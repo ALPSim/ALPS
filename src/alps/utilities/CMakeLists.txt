@@ -107,7 +107,7 @@ target_sources(alps_utilities PUBLIC
     include/alps/utilities/vmusage.hpp)
 if(ALPS_ENABLE_MPI)
   # ALPSCore's MPI wrapper, its vector reductions and its broadcasts of
-  # containers, copied unchanged except for one local change to the wrapper
+  # containers, with obsolete publication pointers removed and one local change to the wrapper
   # (see README.md). They include <mpi.h>, so only MPI builds install them;
   # ALPSCore's code reaches them only when ALPS_HAVE_MPI is set.
   target_sources(alps_utilities PUBLIC FILE_SET utilities_headers FILES
