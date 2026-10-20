@@ -20,6 +20,13 @@
 #include <alps/ngs/boost_mpi.hpp>
 #include <alps/check_schedule.hpp>
 
+#include <boost/lexical_cast.hpp>
+
+#include <functional>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
 namespace alps {
 
     template<typename Base, typename ScheduleChecker = alps::check_schedule> class mcmpiadapter : public Base {
@@ -64,21 +71,44 @@ namespace alps {
             }
 
             typename Base::results_type collect_results(typename Base::result_names_type const & names) const {
+                // Count, per observable, the ranks holding measurements. The
+                // reductions below are collective, so a rank with no samples
+                // must not skip them while the others enter them: every rank
+                // reaches the same decision from these totals.
+                std::vector<int> local_measured, measured_ranks(names.size());
+                for(typename Base::result_names_type::const_iterator it = names.begin(); it != names.end(); ++it)
+                    #ifdef ALPS_NGS_USE_NEW_ALEA
+                        local_measured.push_back(this->measurements[*it].count() ? 1 : 0);
+                    #else
+                        local_measured.push_back(alps::mcresult(this->measurements[*it]).count() ? 1 : 0);
+                    #endif
+                if (!names.empty())
+                    boost::mpi::all_reduce(communicator, &local_measured.front(), static_cast<int>(names.size()), &measured_ranks.front(), std::plus<int>());
+                std::size_t index = 0;
+                for(typename Base::result_names_type::const_iterator it = names.begin(); it != names.end(); ++it, ++index)
+                    if (measured_ranks[index] != 0 && measured_ranks[index] != communicator.size())
+                        throw std::runtime_error("collect_results: observable " + *it + " was measured on "
+                            + boost::lexical_cast<std::string>(measured_ranks[index]) + " of "
+                            + boost::lexical_cast<std::string>(communicator.size())
+                            + " ranks; every rank must take measurements (did the run stop during thermalization?)");
+
                 typename Base::results_type partial_results;
-                for(typename Base::result_names_type::const_iterator it = names.begin(); it != names.end(); ++it) {
+                index = 0;
+                for(typename Base::result_names_type::const_iterator it = names.begin(); it != names.end(); ++it, ++index) {
+                    const bool measured = measured_ranks[index] != 0;
                     #ifdef ALPS_NGS_USE_NEW_ALEA
                         if (communicator.rank() == 0) {
-                            if (this->measurements[*it].count()) {
+                            if (measured) {
                                 typename Base::observable_collection_type::value_type merged = this->measurements[*it];
                                 merged.collective_merge(communicator, 0);
                                 partial_results.insert(*it, merged.result());
                             } else
                                 partial_results.insert(*it, this->measurements[*it].result());
-                        } else if (this->measurements[*it].count())
+                        } else if (measured)
                             this->measurements[*it].collective_merge(communicator, 0);
                     #else
                         alps::mcresult result(this->measurements[*it]); // TODO: use Base::collect_results
-                        if (result.count())
+                        if (measured)
                             partial_results.insert(*it, result.reduce(communicator, binnumber));
                         else
                             partial_results.insert(*it, result);

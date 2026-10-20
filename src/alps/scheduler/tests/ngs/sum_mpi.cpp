@@ -60,3 +60,44 @@ TEST(ParallelMonteCarloRunner, CollectsAllRanksAndPersistsResults) {
         EXPECT_EQ(restored["VValue"].mean<std::vector<double>>(), vector);
     }
 }
+
+// collect_results() reduces each measured observable collectively. If only
+// some ranks measured, e.g. because the others were still thermalizing when
+// the run stopped, every rank must throw instead of some entering the
+// reduction and hanging.
+TEST(ParallelMonteCarloRunner, ThrowsOnEveryRankWhenOnlySomeRanksMeasured) {
+    boost::mpi::communicator world;
+    ASSERT_GE(world.size(), 2);
+    alps::params parameters;
+    if (world.rank() == 0) {
+        parameters["COUNT"] = 128;
+        parameters["SEED"] = 42;
+    }
+    alps::broadcast(world, parameters);
+    alps::mcmpiadapter<sum_simulation, every_step> simulation(parameters, world);
+    if (world.rank() == 0) {
+        simulation.update();
+        simulation.measure();
+    }
+    EXPECT_THROW(alps::collect_results(simulation), std::runtime_error);
+}
+
+TEST(ParallelMonteCarloRunner, CollectsEmptyResultsWhenNoRankMeasured) {
+    boost::mpi::communicator world;
+    alps::params parameters;
+    if (world.rank() == 0) {
+        parameters["COUNT"] = 128;
+        parameters["SEED"] = 42;
+    }
+    alps::broadcast(world, parameters);
+    alps::mcmpiadapter<sum_simulation, every_step> simulation(parameters, world);
+    const auto results = alps::collect_results(simulation);
+    // With ALPS_NGS_USE_NEW_ALEA only rank 0 receives the results, and count()
+    // of an empty result throws instead of returning 0.
+    if (world.rank() == 0) {
+        EXPECT_TRUE(results.has("SValue"));
+#ifndef ALPS_NGS_USE_NEW_ALEA
+        EXPECT_EQ(results["SValue"].count(), 0u);
+#endif
+    }
+}
