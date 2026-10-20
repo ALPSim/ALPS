@@ -27,21 +27,60 @@
 
 
 
+namespace {
+//gives a parameter its default value if the input does not set it; the
+//description documents the parameter
+template<typename T> void define(alps::params &p, std::string const &name, T const &value, std::string const &){
+  if(!p.defined(name)) p[name]=value;
+}
+}
+
+void MaxEntSimulation::define_parameters(alps::params &p)
+{
+  //data
+  define<std::string>(p, "DATA", "", "file with the data; without it, the data are the parameters X_i and SIGMA_i");
+  define<bool>(p, "DATA_IN_HDF5", false, "read DATA (and COVARIANCE_MATRIX) from an HDF5 file");
+  define<std::string>(p, "COVARIANCE_MATRIX", "", "file with the covariance matrix of the data; replaces SIGMA_i");
+  define<std::string>(p, "DATASPACE", "time", "space of the data: time, frequency or legendre");
+  define<std::string>(p, "KERNEL", "fermionic", "kernel: fermionic, bosonic, anomalous or Boris");
+  define<bool>(p, "PARTICLE_HOLE_SYMMETRY", false, "the data are particle-hole symmetric");
+  define<bool>(p, "ENFORCE_NORMALIZATION", false, "add the normalization as a data point with error SIGMA_NORMALIZATION");
+  if(p.defined("BETA")) define<double>(p, "T", 1./static_cast<double>(p["BETA"]), "temperature; 1/BETA by default");
+  //real-frequency grid
+  if(p.defined("OMEGA_MAX")) define<double>(p, "OMEGA_MIN", -static_cast<double>(p["OMEGA_MAX"]), "lower end of the frequency grid; -OMEGA_MAX by default");
+  define<std::string>(p, "FREQUENCY_GRID", "", "frequency grid: Lorentzian, half Lorentzian, quadratic, log, linear or lin_log");
+  define<double>(p, "CUT", 0.01, "cutoff of the Lorentzian grids");
+  define<double>(p, "SPREAD", 4., "spread of the quadratic grid");
+  define<double>(p, "LOG_MIN", 1.0e-4, "smallest frequency of the logarithmic grid");
+  //default model
+  define<std::string>(p, "DEFAULT_MODEL", "flat", "default model: flat, gaussian, twogaussians, shifted gaussian, double gaussian, general double gaussian, linear rise exp decay, quadratic rise exp decay, or a file name");
+  define<double>(p, "BLOW_UP", 1., "factor by which the default model is widened");
+  define<double>(p, "SHIFT1", 0., "position of the first Gaussian of twogaussians");
+  define<double>(p, "NORM1", 0.5, "weight of the first Gaussian of twogaussians");
+  //iteration and output
+  define<int>(p, "MAX_IT", 1000, "number of iterations of the root finding");
+  define<int>(p, "MAX_TIME", 60, "time limit in seconds");
+  define<int>(p, "SEED", 42, "random seed; accepted for compatibility, MaxEnt draws no random numbers");
+  define<bool>(p, "VERBOSE", false, "print extra information");
+  define<bool>(p, "TEXT_OUTPUT", false, "also write results as text files");
+  define<bool>(p, "SELF", false, "the data are a self-energy");
+}
+
 MaxEntSimulation::MaxEntSimulation(const alps::params &parms,const std::string &outfile)
 : MaxEntHelper(parms)
 , alpha((int)parms["N_ALPHA"])              //This is the # of \alpha parameters that should be tried.
-, norm(parms["NORM"]|1.0)                                             //The integral is normalized to NORM (use e.g. for self-energies
-, max_it(parms["MAX_IT"]|1000)                                       //The number of iterations done in the root finding procedure
+, norm(parms["NORM"])                                                  //The integral is normalized to NORM (use e.g. for self-energies
+, max_it(parms["MAX_IT"])                                       //The number of iterations done in the root finding procedure
 , name(outfile,0,outfile.size()-6)
-, Kernel_type(parms["KERNEL"]|"")
+, Kernel_type(parms["KERNEL"].cast<std::string>())
 , finished(false)
-, verbose(parms["VERBOSE"]|false)
-, text_output(parms["TEXT_OUTPUT"]|false)
-, self(parms["SELF"]|false)
+, verbose(parms["VERBOSE"])
+, text_output(parms["TEXT_OUTPUT"])
+, self(parms["SELF"])
 {
   // Preserve the seed conversion and archive signal setup previously supplied
   // by mcbase, even though deterministic MaxEnt does not consume random values.
-  (void)static_cast<int>(parms["SEED"] | 42);
+  (void)static_cast<int>(parms["SEED"]);
   alps::signal::listen();
   if(norm != 1.) std::cerr<<"WARNING: Redefinition of parameter NORM: Input (and output) data are assumed to be normalized to NORM."<<std::endl;
   const double alpha_min = parms["ALPHA_MIN"];                                          //Smallest value of \alpha that is tried

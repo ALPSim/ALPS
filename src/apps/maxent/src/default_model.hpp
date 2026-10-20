@@ -53,8 +53,8 @@ public:
 //  DefaultModel(const alps::Parameters& p) :
   DefaultModel(const alps::params& p) :
     omega_max(p["OMEGA_MAX"]),
-    omega_min(static_cast<double>(p["OMEGA_MIN"]|(-omega_max))), //we had a 0 here in the bosonic case. That's not a good idea if you're continuing symmetric functions like chi(omega)/omega. Change omega_min to zero manually if you need it.
-    blow_up_(p["BLOW_UP"]|1.)
+    omega_min(static_cast<double>(p["OMEGA_MIN"])), //we had a 0 here in the bosonic case. That's not a good idea if you're continuing symmetric functions like chi(omega)/omega. Change omega_min to zero manually if you need it.
+    blow_up_(p["BLOW_UP"])
   { //std::cout<<"found omega_min: "<<omega_min<<std::endl;
     //std::cout<<"found omega_max: "<<omega_max<<std::endl;
     //std::cout<<"found blowup:    "<<blow_up_<<std::endl;
@@ -137,9 +137,9 @@ public:
 //    TwoGaussians(const alps::Parameters& p) : sigma1(static_cast<double>(p["SIGMA1"])),
     TwoGaussians(const alps::params& p) : sigma1(static_cast<double>(p["SIGMA1"])),
     sigma2(static_cast<double>(p["SIGMA2"])),
-    shift1(static_cast<double>(p["SHIFT1"]|0.0)),
+    shift1(static_cast<double>(p["SHIFT1"])),
     shift2(static_cast<double>(p["SHIFT2"])),
-    norm1(static_cast<double>(p["NORM1"]|0.5)) {}
+    norm1(static_cast<double>(p["NORM1"])) {}
 
     virtual double operator()(const double omega) {
         return norm1*std::exp(-(omega-shift1)*(omega-shift1)/2./sigma1/sigma1)/sqrt(2*boost::math::constants::pi<double>())/sigma1+(1.0-norm1)*std::exp(-(omega-shift2)*(omega-shift2)/2./sigma2/sigma2)/sqrt(2*boost::math::constants::pi<double>())/sigma2;
@@ -238,7 +238,7 @@ public:
       defstream.ignore(1000,'\n'); // Anything beyond is considered as junk
     }
     double omega_max = p["OMEGA_MAX"];
-    double omega_min(static_cast<double>(p["OMEGA_MIN"]|-omega_max)); //we had a 0 here in the bosonic case. That's not a good idea if you're continuing symmetric functions like chi(omega)/omega. Change omega_min to zero manually if you need it.
+    double omega_min(static_cast<double>(p["OMEGA_MIN"])); //we had a 0 here in the bosonic case. That's not a good idea if you're continuing symmetric functions like chi(omega)/omega. Change omega_min to zero manually if you need it.
     //double omega_min = (p["KERNEL"] == "bosonic") ? 0. :
     //     static_cast<double>(p.value_or_default("OMEGA_MIN", -omega_max));
     if (Omega[0]!=omega_min || Omega[Omega.size()-1]!=omega_max){
@@ -343,7 +343,7 @@ private:
 //inline boost::shared_ptr<DefaultModel> make_default_model(const alps::Parameters& parms, std::string const& name)
 inline boost::shared_ptr<DefaultModel> make_default_model(const alps::params& parms, std::string const& name)
 {
-    std::string p_name = parms[name]|"flat";
+    std::string p_name = parms[name].cast<std::string>();
   if (p_name == "flat") {
     if (alps::is_master())
       std::cerr << "Using flat default model" << std::endl;

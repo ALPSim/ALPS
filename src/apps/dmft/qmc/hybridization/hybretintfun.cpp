@@ -19,7 +19,7 @@
 ret_int_fun::ret_int_fun(const alps::params &p):
 green_function<double>(p["N_TAU"]+1, 1, 2)//2 "flavors": K and K'
 {
-  bool use_retarded_interaction=p.defined("RET_INT_K");
+  bool use_retarded_interaction=!p["RET_INT_K"].cast<std::string>().empty();
   if(!use_retarded_interaction) return;
 
   if(!p.defined("N_TAU") || (int)(p["N_TAU"])==0) throw std::invalid_argument("define parameter N_TAU, the number of retarded interaction time slices!");
@@ -46,9 +46,9 @@ if(operator()(0,0)!=0.) throw std::invalid_argument("Problem with retarded inter
 //In  case of text files the file format is index - hyb_1 - hyb2 - hyb3 - ... in columns that go from time=0 to time=beta. Note that
 //the retarded interaction function is in imaginary time and always positive both for negative and positive times. It is also symmetric.
 void ret_int_fun::read_interaction_K_function(const alps::params &p){
-  if(!p.defined("RET_INT_K")) throw(std::invalid_argument(std::string("Parameter RET_INT_K missing, filename for retarded interaction function not specified.")));
+  if(p["RET_INT_K"].cast<std::string>().empty()) throw(std::invalid_argument(std::string("Parameter RET_INT_K missing, filename for retarded interaction function not specified.")));
   std::string fname=p["RET_INT_K"].cast<std::string>();
-  if(p.defined("K_IN_HDF5") && p["K_IN_HDF5"].cast<bool>()){//attempt to read from h5 archive
+  if(p["K_IN_HDF5"].cast<bool>()){//attempt to read from h5 archive
     alps::hdf5::archive ar(fname, alps::hdf5::archive::READ);
     std::vector<double> tmp(ntime());
     ar>>alps::make_pvp("/Ret_int_K",tmp);
