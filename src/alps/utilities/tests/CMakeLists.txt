@@ -39,7 +39,7 @@ target_link_libraries(citations PRIVATE ALPS::utilities)
 alps_add_gtest(citations COMPONENT utilities LABELS citations)
 
 if(ALPS_ENABLE_MPI)
-  # ALPSCore's tests of alps/utilities/mpi.hpp, copied unchanged with their
+  # ALPSCore's tests of alps/utilities/mpi.hpp, copied with publication pointers removed with their
   # helpers. They define main() themselves; the environment tests start and stop
   # MPI inside their single case. mpi_utils_bcast_optional is not ported: it
   # tests ALPSCore's alps/utilities/mpi_optional.hpp, which ALPS does not have.
