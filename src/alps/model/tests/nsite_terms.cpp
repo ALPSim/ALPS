@@ -625,6 +625,11 @@ TEST(NSiteHamiltonian, SymbolicMatrixMatchesNumeric) {
 
   ASSERT_EQ(hs.dimension(), hn.dimension());
   ASSERT_EQ(hs.dimension(), 4u);
+  // The fermionic sign makes this correlated hopping entry t - W.
+  // Check the returned expression without simplifying it in the test.
+  std::ostringstream symbolic_entry;
+  symbolic_entry << s(3, 1);
+  EXPECT_EQ(symbolic_entry.str(), "t - W");
   bool has_v = false, has_w = false;
   for (std::size_t i = 0; i < hs.dimension(); ++i)
     for (std::size_t j = 0; j < hs.dimension(); ++j) {
