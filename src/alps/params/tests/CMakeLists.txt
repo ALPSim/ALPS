@@ -18,7 +18,7 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-# ALPSCore's params tests, copied unchanged.
+# ALPSCore's params tests, copied with publication pointers removed.
 foreach(name serialize_variant dictionary params dots_in_keys params_default_vectors
              params_string_vectors params_formats params_cmdline params_defaulted
              params_has_unused params_origins convenience_params dictval_eq dictionary_eq
