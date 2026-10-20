@@ -34,7 +34,7 @@ else()
     return()
   endif()
   if(EXPECT_APPLICATIONS)
-    find_package(ALPS CONFIG REQUIRED COMPONENTS applications utilities hdf5 params osiris xml cli)
+    find_package(ALPS CONFIG REQUIRED COMPONENTS applications utilities hdf5 params osiris xml cli accumulators)
     set(application_paths "")
     foreach(application IN LISTS ALPS_APPLICATION_TARGETS)
       string(APPEND application_paths "$<TARGET_FILE:${application}>\n")
@@ -42,7 +42,7 @@ else()
     file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/applications-$<CONFIG>.txt"
       CONTENT "${application_paths}")
   else()
-    find_package(ALPS CONFIG REQUIRED COMPONENTS utilities hdf5 params osiris xml cli numerics numeric_io numeric_xml)
+    find_package(ALPS CONFIG REQUIRED COMPONENTS utilities hdf5 params osiris xml cli accumulators numerics numeric_io numeric_xml)
   endif()
   if(EXPECT_SOLVERS)
     find_package(ALPS CONFIG REQUIRED COMPONENTS solvers)
@@ -67,6 +67,8 @@ else()
                                      alps/common/src alps/common/tests alps/runtime
                                      alps/aleav2/include alps/aleav2/src alps/aleav2/tests
                                      alps/gf/include alps/gf/src alps/gf/tests
+                                     alps/accumulators/include alps/accumulators/src
+                                     alps/accumulators/tests
                                      alps/fortran/include alps/fortran/src alps/fortran/tests)
     if(EXISTS "${expected_prefix}/include/${private_directory}")
       message(FATAL_ERROR "The SDK installs a module's private layout: ${private_directory}")
@@ -184,6 +186,8 @@ foreach(component IN ITEMS xml cli)
   add_component_contract(${component} ${component}.cpp
     "ALPS::alps|ALPS::params|ALPS::hdf5|HDF5::|MPI::|${numerical_dependencies}")
 endforeach()
+add_component_contract(accumulators accumulators.cpp
+  "ALPS::alps|${numerical_dependencies}${serial_dependencies}")
 add_contract(sdk main.cpp ALPS::alps)
 add_contract(numeric numerics.cpp ALPS::numerics)
 add_contract(numeric_io numeric_io.cpp ALPS::numeric_io)
@@ -193,9 +197,13 @@ if(TARGET ALPS::aleav2)
   add_component_contract(aleav2 aleav2.cpp "ALPS::alps|${numerical_dependencies}")
   add_header_contract(aleav2)
 endif()
+add_header_contract(accumulators)
+add_header_contract(configuration ONLY "^alps/config\\.hpp$")
 add_header_contract(hdf5 ONLY "^alps/hdf5/boost_optional\\.hpp$")
+add_header_contract(numerics
+  ONLY "^alps/numeric/(boost_array_functions|check_size|inf|rectangularize|scalar|vector_functions)\\.hpp$")
 if(sdk_mpi_enabled)
-  add_header_contract(utilities ONLY "^alps/utilities/mpi\\.hpp$")
+  add_header_contract(utilities ONLY "^alps/utilities/(boost_)?mpi\\.hpp$")
 endif()
 if(TARGET ALPS::gf)
   add_component_contract(gf gf.cpp "ALPS::alps|${numerical_dependencies}")
@@ -227,7 +235,7 @@ if(NOT ALPS_SOURCE)
 endif()
 if(NOT ALPS_SOURCE)
   set_tests_properties(sdk_contract sdk_resources numeric_contract numeric_io_contract numeric_xml_contract utilities_contract hdf5_contract
-    params_contract osiris_contract xml_contract cli_contract parameter_adapters_contract PROPERTIES ENVIRONMENT_MODIFICATION
+    params_contract osiris_contract xml_contract cli_contract accumulators_contract parameter_adapters_contract PROPERTIES ENVIRONMENT_MODIFICATION
     "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
   if(ALPS_LEGACY_API)
     set_tests_properties(legacy_spellings_contract PROPERTIES ENVIRONMENT_MODIFICATION

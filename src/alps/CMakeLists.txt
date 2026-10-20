@@ -121,6 +121,7 @@ target_sources(alps_configuration INTERFACE
   FILE_SET HEADERS
   BASE_DIRS "${PROJECT_BINARY_DIR}/generated/include"
   FILES "${PROJECT_BINARY_DIR}/generated/include/alps/config.h"
+        "${PROJECT_BINARY_DIR}/generated/include/alps/config.hpp"
         "${PROJECT_BINARY_DIR}/generated/include/alps/version.h"
         "${PROJECT_BINARY_DIR}/generated/include/alps/export.h")
 
@@ -175,10 +176,10 @@ foreach(module IN ITEMS containers utilities cli numerics ietl solvers xml plott
   add_subdirectory(${module})
 endforeach()
 target_link_libraries(alps PUBLIC ALPS::utilities ALPS::osiris ALPS::hdf5 ALPS::params
-                                  ALPS::xml ALPS::cli)
+                                  ALPS::xml ALPS::cli ALPS::accumulators)
 
 target_link_libraries(alps_headers INTERFACE alps_configuration
-  "$<COMPILE_ONLY:ALPS::utilities;ALPS::osiris;ALPS::hdf5;ALPS::params;ALPS::xml;ALPS::cli;ALPS::numerics;ALPS::numeric_io;ALPS::numeric_xml;ALPS::solver_headers>")
+  "$<COMPILE_ONLY:ALPS::utilities;ALPS::osiris;ALPS::hdf5;ALPS::params;ALPS::xml;ALPS::cli;ALPS::accumulators;ALPS::numerics;ALPS::numeric_io;ALPS::numeric_xml;ALPS::solver_headers>")
 if(ALPS_ENABLE_OPENMP)
   target_link_libraries(alps_headers INTERFACE "$<COMPILE_ONLY:OpenMP::OpenMP_CXX>")
 endif()
@@ -186,7 +187,7 @@ endif()
 # The one list of SDK targets. ALPSConfig.cmake derives its component names and
 # runtime targets from it, so adding a module here is the only edit needed.
 set(ALPS_SDK_TARGETS alps alps_utilities alps_hdf5 alps_params alps_osiris
-                     alps_xml alps_cli alps_headers alps_configuration
+                     alps_xml alps_cli alps_accumulators alps_headers alps_configuration
                      alps_containers alps_numerics alps_numeric_io alps_numeric_xml alps_solver_headers)
 set(sdk_components "")
 set(sdk_runtime_targets "")

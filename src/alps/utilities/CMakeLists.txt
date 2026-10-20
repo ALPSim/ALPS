@@ -96,10 +96,12 @@ target_sources(alps_utilities PUBLIC
     include/alps/utilities/vectorio.hpp
     include/alps/utilities/vmusage.hpp)
 if(ALPS_ENABLE_MPI)
-  # ALPSCore's MPI wrapper, copied with one local change (see README.md). It
-  # includes <mpi.h>, so only MPI builds install it; ALPSCore's code reaches it
-  # only when ALPS_HAVE_MPI is set.
+  # ALPSCore's MPI wrapper and its vector reductions, copied unchanged except
+  # for one local change to the wrapper (see README.md). They include <mpi.h>,
+  # so only MPI builds install them; ALPSCore's code reaches them only when
+  # ALPS_HAVE_MPI is set.
   target_sources(alps_utilities PUBLIC FILE_SET utilities_headers FILES
+    include/alps/utilities/boost_mpi.hpp
     include/alps/utilities/mpi.hpp)
 endif()
 

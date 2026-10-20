@@ -1083,10 +1083,6 @@ namespace alps {
                 using alps::numeric::acos;                                                                                                                  \
                 using std::atan;                                                                                                                            \
                 using alps::numeric::atan;                                                                                                                  \
-                using boost::numeric::operators::operator+;                                                                                                 \
-                using boost::numeric::operators::operator-;                                                                                                 \
-                using boost::numeric::operators::operator*;                                                                                                 \
-                using boost::numeric::operators::operator/;                                                                                                 \
                 using alps::numeric::operator+;                                                                                                             \
                 using alps::numeric::operator-;                                                                                                             \
                 using alps::numeric::operator*;                                                                                                             \
