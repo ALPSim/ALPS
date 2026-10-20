@@ -47,9 +47,12 @@ else()
   if(EXPECT_SOLVERS)
     find_package(ALPS CONFIG REQUIRED COMPONENTS solvers)
   endif()
-  # ALEA v2 is built only with Eigen; an SDK that installed it must also provide it.
+  # ALEA v2 and GF are built only with Eigen; an SDK that installed one must provide it.
   if(EXISTS "${ALPS_DIR}/ALPSAleav2Targets.cmake")
     find_package(ALPS CONFIG REQUIRED COMPONENTS aleav2)
+  endif()
+  if(EXISTS "${ALPS_DIR}/ALPSGfTargets.cmake")
+    find_package(ALPS CONFIG REQUIRED COMPONENTS gf)
   endif()
   set(sdk_mpi_enabled "${ALPS_MPI_ENABLED}")
   get_filename_component(expected_prefix "${ALPS_DIR}/../.." REALPATH)
@@ -65,6 +68,7 @@ else()
                                      alps/common/include alps/common/src alps/common/tests
                                      alps/runtime
                                      alps/aleav2/include alps/aleav2/src alps/aleav2/tests
+                                     alps/gf/include alps/gf/src alps/gf/tests
                                      alps/accumulators/include alps/accumulators/src
                                      alps/accumulators/tests
                                      alps/fortran/include alps/fortran/src alps/fortran/tests)
@@ -208,6 +212,16 @@ if(sdk_mpi_enabled)
 else()
   add_header_contract(utilities ONLY "^alps/(utilities/(deprecated|fs/[a-z_]+)|testing/fp_compare)\\.hpp$")
 endif()
+if(TARGET ALPS::gf)
+  add_component_contract(gf gf.cpp "ALPS::alps|${numerical_dependencies}")
+  # As src/alps/gf/README.md advises; alps/gf/flagcheck.hpp warns otherwise.
+  target_compile_definitions(gf_contract PRIVATE
+    "$<IF:$<CONFIG:Debug>,ALPS_GF_DEBUG,BOOST_DISABLE_ASSERTS>")
+  # As in ALPSCore, the mesh/ headers and mpi_bcast.hpp are parts of others.
+  add_header_contract(gf EXCLUDE "^alps/gf/(mesh/|mpi_bcast\\.hpp$)")
+  target_compile_definitions(gf_header_contract PRIVATE
+    "$<IF:$<CONFIG:Debug>,ALPS_GF_DEBUG,BOOST_DISABLE_ASSERTS>")
+endif()
 # Code written against 3.0.0 builds unchanged while the legacy layer is installed.
 if(ALPS_LEGACY_API)
   add_contract(legacy_spellings legacy_spellings.cpp "ALPS::utilities;ALPS::cli;ALPS::numerics")
@@ -234,8 +248,10 @@ if(NOT ALPS_SOURCE)
     set_tests_properties(legacy_spellings_contract PROPERTIES ENVIRONMENT_MODIFICATION
       "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
   endif()
-  if(TARGET ALPS::aleav2)
-    set_tests_properties(aleav2_contract PROPERTIES ENVIRONMENT_MODIFICATION
-      "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
-  endif()
+  foreach(component IN ITEMS aleav2 gf)
+    if(TARGET ALPS::${component})
+      set_tests_properties(${component}_contract PROPERTIES ENVIRONMENT_MODIFICATION
+        "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
+    endif()
+  endforeach()
 endif()

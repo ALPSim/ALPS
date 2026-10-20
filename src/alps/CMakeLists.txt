@@ -125,11 +125,54 @@ target_sources(alps_configuration INTERFACE
         "${PROJECT_BINARY_DIR}/generated/include/alps/version.h"
         "${PROJECT_BINARY_DIR}/generated/include/alps/export.h")
 
+# Some components copied from ALPSCore need Eigen, which the rest of ALPS does
+# not. They are built only when Eigen 3.3 or newer is found. The lookup names no
+# version: Eigen 5's version file rejects a "3.3" request, and Eigen 3's rejects
+# a range reaching past 3.x. ALPSConfig.cmake repeats it for consumers.
+set_property(GLOBAL PROPERTY ALPS_EIGEN_COMPONENT_NAMES aleav2 gf)
+find_package(Eigen3 CONFIG QUIET)
+if(Eigen3_FOUND AND NOT Eigen3_VERSION VERSION_LESS 3.3)
+  set(ALPS_HAVE_EIGEN TRUE)
+else()
+  set(ALPS_HAVE_EIGEN FALSE)
+  message(STATUS "Eigen 3.3 or newer not found: ALPS::aleav2 and ALPS::gf are not built")
+endif()
+
+# Install a component copied from ALPSCore with its own export, ALPS<Name>Targets,
+# so that only consumers asking for it need Eigen, and with ALPSCore's notices.
+function(alps_install_alpscore_component target component)
+  string(SUBSTRING "${component}" 0 1 initial)
+  string(TOUPPER "${initial}" initial)
+  string(SUBSTRING "${component}" 1 -1 rest)
+  set(export "ALPS${initial}${rest}Targets")
+  get_target_property(header_sets ${target} INTERFACE_HEADER_SETS)
+  set(header_install_args "")
+  foreach(header_set IN LISTS header_sets)
+    list(APPEND header_install_args FILE_SET ${header_set}
+      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT headers)
+  endforeach()
+  install(TARGETS ${target} EXPORT ${export}
+    RUNTIME_DEPENDENCY_SET alps_runtime
+    COMPONENT libraries
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    ${header_install_args})
+  install(EXPORT ${export}
+    NAMESPACE ALPS::
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/alps
+    COMPONENT build)
+  install(FILES COPYRIGHT.TXT LICENSE.TXT
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/alps/licenses/${component}
+    COMPONENT libraries)
+  set_property(GLOBAL APPEND PROPERTY ALPS_EIGEN_COMPONENTS ${component})
+endfunction()
+
 # Filesystem ownership follows scientific responsibilities. Some modules still
 # contribute to libalps until their dependency cycles have been disentangled.
 foreach(module IN ITEMS containers utilities cli numerics ietl solvers xml plotting
                         legacy_parameters expression graph lattice model random
-                        osiris hdf5 numeric_io numeric_xml params alea aleav2 accumulators mc scheduler parapack fortran)
+                        osiris hdf5 numeric_io numeric_xml params alea aleav2 gf accumulators mc scheduler parapack fortran)
   add_subdirectory(${module})
 endforeach()
 target_link_libraries(alps PUBLIC ALPS::utilities ALPS::osiris ALPS::hdf5 ALPS::params

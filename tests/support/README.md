@@ -24,7 +24,7 @@ entries, empty/mismatched shapes and nonfinite errors.
 | --- | --- |
 | `utilities/include/alps/utilities/gtest_par_xml_output.hpp` | `alps/utilities/gtest_par_xml_output.hpp` |
 | `utilities/src/gtest_par_xml_output.cpp` | `src/` |
-| `utilities/include/alps/testing/near.hpp` | `alps/testing/near.hpp`, used by the ALEA tests |
+| `utilities/include/alps/testing/near.hpp` | `alps/testing/near.hpp`, used by the ALEA and GF tests |
 | `utilities/include/alps/testing/unique_file.hpp`, `utilities/src/unique_file.cpp` | `alps/testing/unique_file.hpp`, `src/unique_file.cpp`, used by the accumulators tests |
 
 `alps_add_mpi_gtest(... OWN_MAIN)` links `gtest_par_xml_output`, which ALPSCore's

@@ -384,6 +384,14 @@ inline alps::expression::Expression<T> operator+(const alps::expression::Express
 }
 
 template<class T>
+inline alps::expression::Expression<T> operator*(const alps::expression::Expression<T>& ex1, const alps::expression::Expression<T>& ex2)
+{
+  alps::expression::Expression<T> ex(ex1);
+  ex *= ex2;
+  return ex;
+}
+
+template<class T>
 inline std::istream& operator>>(std::istream& is, alps::expression::Expression<T>& e)
 {
   std::string s;

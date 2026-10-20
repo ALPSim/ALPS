@@ -17,6 +17,7 @@
 #include <alps/expression.h>
 #include <gtest/gtest.h>
 #include <cmath>
+#include <complex>
 #include <vector>
 
 namespace {
@@ -58,6 +59,27 @@ INSTANTIATE_TEST_SUITE_P(
                       Evaluation{"L^2", 100}, Evaluation{"(L+1)^3", 1331},
                       Evaluation{"(L+1)^-1*5", 5. / 11}, Evaluation{"sqrt(3.33)", std::sqrt(3.33)},
                       Evaluation{"L*T", 1}, Evaluation{"2*Pi*L", 20 * std::acos(-1.)}));
+
+template<class T>
+class ExpressionMultiplication : public ::testing::Test {};
+using ExpressionValueTypes = ::testing::Types<double, std::complex<double>>;
+TYPED_TEST_SUITE(ExpressionMultiplication, ExpressionValueTypes);
+
+TYPED_TEST(ExpressionMultiplication, MultipliesSymbolicSumsWithoutChangingOperands) {
+  using Expression = alps::expression::Expression<TypeParam>;
+  const Expression lhs("L+1"), rhs("T-2");
+  const Expression product = lhs * rhs;
+  EXPECT_EQ(lhs, Expression("L+1"));
+  EXPECT_EQ(rhs, Expression("T-2"));
+  EXPECT_TRUE(product.depends_on("L"));
+  EXPECT_TRUE(product.depends_on("T"));
+
+  auto params = parameters();
+  EXPECT_NEAR(std::abs(product.value(params) - TypeParam(-20.9)), 0., 1e-13);
+  params["L"] = 3;
+  params["T"] = 5;
+  EXPECT_NEAR(std::abs(product.value(params) - TypeParam(12)), 0., 1e-13);
+}
 
 TEST(Expression, RejectsUnresolvedSelfReference) {
   const auto params = parameters();

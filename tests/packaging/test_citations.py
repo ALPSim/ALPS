@@ -50,7 +50,7 @@ class CitationTests(unittest.TestCase):
     def test_imported_publication_guidance_is_removed(self):
         # Extend this list when an import lands; do not scan immutable fixtures
         # or ban factual upstream names in provenance and legal notices.
-        roots = ("src/alps/params", "src/alps/accumulators", "src/alps/numerics", "src/alps/aleav2", "src/alps/utilities", "src/alps/hdf5", "tests/support")
+        roots = ("src/alps/gf", "src/alps/params", "src/alps/accumulators", "src/alps/numerics", "src/alps/aleav2", "src/alps/utilities", "src/alps/hdf5", "tests/support")
         for relative in roots:
             self.assertFalse((ROOT / relative / "ACKNOWLEDGE.TXT").exists(), relative)
             for path in (ROOT / relative).rglob("*"):

@@ -20,6 +20,8 @@
 #include <stdexcept>
 #ifdef ALPS_HAVE_MPI
 #include <alps/mcmpiadapter.hpp>
+#include <functional>
+#include <stdexcept>
 using sim_type = alps::mcmpiadapter<HubbardInteractionExpansion>;
 #else
 using sim_type = HubbardInteractionExpansion;
@@ -60,6 +62,13 @@ void alps::solvers::ctint(alps::params const& input, std::string const& output_f
   }
   //run the simulation
   s.run(boost::bind(&stop_requested, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds((int)parms["MAX_TIME"])));
+#ifdef ALPS_HAVE_MPI
+  //a rank that is still thermalizing has no measurements. collect_results
+  //throws if only some ranks have them, but if none has, only rank 0 fails
+  //below while the others wait in the barrier, so check on all ranks here
+  if (boost::mpi::all_reduce(c, s.is_thermalized() ? 1 : 0, std::plus<int>()) < c.size())
+    throw std::runtime_error("interaction: the run ended before every MPI rank finished THERMALIZATION; increase SWEEPS or MAX_TIME");
+#endif
 
   //on the master: collect MC results and store them in file, then postprocess
   if (rank==0){
