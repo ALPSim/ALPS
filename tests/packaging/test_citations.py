@@ -44,7 +44,7 @@ class CitationTests(unittest.TestCase):
                 self.assertNotIn("core libraries of the alps", record.get("title", "").lower())
                 self.assertNotIn(record.get("doi", "").lower(), {
                     "10.48550/arxiv.1811.08331", "10.1016/j.cpc.2018.12.022",
-                    "10.1016/j.cpc.2016.06.009",
+                    "10.1016/j.cpc.2016.12.009",
                 })
 
     def test_imported_publication_guidance_is_removed(self):
@@ -52,8 +52,10 @@ class CitationTests(unittest.TestCase):
         # or ban factual upstream names in provenance and legal notices.
         roots = ("src/alps/aleav2", "src/alps/utilities", "src/alps/hdf5", "tests/support")
         for relative in roots:
+            self.assertFalse((ROOT / relative / "ACKNOWLEDGE.TXT").exists(), relative)
             for path in (ROOT / relative).rglob("*"):
-                if path.is_file() and path.suffix in (".hpp", ".h", ".cpp", ".c", ".md"):
+                if path.is_file() and (path.suffix in (".hpp", ".h", ".cpp", ".c", ".md")
+                                       or path.name == "CMakeLists.txt"):
                     with self.subTest(path=path.relative_to(ROOT)):
                         text = path.read_text(encoding="utf-8")
                         self.assertNotIn("For use in publications, see", text)
