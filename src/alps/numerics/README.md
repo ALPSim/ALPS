@@ -10,17 +10,16 @@ unchanged. They are copied from ALPSCore commit
 `7146b9e1f017938a94e5dae35d88467cc5ba7969` (`utilities/include/alps/numeric/`).
 Their notices refer to ALPSCore's top-level
 [`COPYRIGHT.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f017938a94e5dae35d88467cc5ba7969/COPYRIGHT.TXT),
-[`LICENSE.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f017938a94e5dae35d88467cc5ba7969/LICENSE.TXT)
-and
-[`ACKNOWLEDGE.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f017938a94e5dae35d88467cc5ba7969/ACKNOWLEDGE.TXT).
+[`LICENSE.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f017938a94e5dae35d88467cc5ba7969/LICENSE.TXT).
+Publication pointers have been removed from imported comments.
 
 | Header | Relationship |
 | --- | --- |
-| `boost_array_functions.hpp` | Copied unchanged |
-| `check_size.hpp` | Copied unchanged |
+| `boost_array_functions.hpp` | Copied |
+| `check_size.hpp` | Copied |
 | `inf.hpp` | Copied; one line changed for C++20 (see below) |
-| `rectangularize.hpp` | Copied unchanged |
-| `scalar.hpp` | Copied unchanged |
+| `rectangularize.hpp` | Copied |
+| `scalar.hpp` | Copied |
 | `vector_functions.hpp` | ALPSCore's version, which replaced ALPS's; ALPS additions at the end (see below) |
 
 ALPSCore's accumulators use all of them. `boost_array_functions.hpp` gives

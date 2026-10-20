@@ -61,7 +61,7 @@ Publication pointers in imported comments have been removed.
 It includes `<mpi.h>`, so only MPI builds install it. In ALPSCore, ALEA, the
 Green's functions, parameters and Monte Carlo code all use it, so it lives here
 rather than with one module. `boost_mpi.hpp`, from the same commit and copied
-unchanged, adds its `std::vector` reductions, which ALPSCore's accumulators use.
+with publication pointers removed, adds its `std::vector` reductions, which ALPSCore's accumulators use.
 
 Its names share namespace `alps::mpi` with ALPS's `<alps/ngs/mpi.hpp>`, without
 overlapping; `utilities_mpi_coexistence` uses both in one program. Its

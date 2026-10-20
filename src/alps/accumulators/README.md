@@ -42,20 +42,17 @@ The value types the accumulators are compiled for come from
 ## Provenance
 
 The imported revision is under the MIT license in [LICENSE.TXT](LICENSE.TXT).
-Every imported file refers to [COPYRIGHT.TXT](COPYRIGHT.TXT),
-[LICENSE.TXT](LICENSE.TXT) and [ACKNOWLEDGE.TXT](ACKNOWLEDGE.TXT), which are
-ALPSCore's top-level files, copied unchanged. The SDK installs them under
-`share/alps/licenses/accumulators/`. Keep the notices when modifying these files.
+The imported copyright and license notices are retained in [COPYRIGHT.TXT](COPYRIGHT.TXT) and [LICENSE.TXT](LICENSE.TXT). The SDK installs both under `share/alps/licenses/accumulators/`. Publication pointers in imported comments have been removed; the source relationships below refer to the remaining code.
 
 | ALPSCore path | Here | Relationship |
 | --- | --- | --- |
-| `accumulators/include/alps/accumulators.hpp` | `include/alps/accumulators.hpp` | Copied unchanged |
-| `accumulators/include/alps/accumulators/**` | `include/alps/accumulators/**` | Copied unchanged, except that `convergence.hpp` and `feature/binning_analysis.hpp` gain includes (see below) |
-| `accumulators/src/*.cpp`, `accumulators/src/feature/*.cpp` (11 files) | `src/`, `src/feature/` | Copied unchanged, except `mpi.cpp` (see below) |
-| `accumulators/test/*.cpp` (31 files), `accumulators/test/accumulator_generator.hpp` | `tests/` | Copied unchanged, except two include lines (see below) |
-| `utilities/test/vector_comparison_predicates.hpp` | `tests/vector_comparison_predicates.hpp` | Copied unchanged |
-| `utilities/include/alps/testing/unique_file.hpp`, `utilities/src/unique_file.cpp` | `tests/support/` in the repository root | Copied unchanged; shared test support |
-| `COPYRIGHT.TXT`, `LICENSE.TXT`, `ACKNOWLEDGE.TXT` | here | Copied unchanged |
+| `accumulators/include/alps/accumulators.hpp` | `include/alps/accumulators.hpp` | Copied |
+| `accumulators/include/alps/accumulators/**` | `include/alps/accumulators/**` | Copied, except that `convergence.hpp` and `feature/binning_analysis.hpp` gain includes (see below) |
+| `accumulators/src/*.cpp`, `accumulators/src/feature/*.cpp` (11 files) | `src/`, `src/feature/` | Copied, except `mpi.cpp` (see below) |
+| `accumulators/test/*.cpp` (31 files), `accumulators/test/accumulator_generator.hpp` | `tests/` | Copied, except two include lines (see below) |
+| `utilities/test/vector_comparison_predicates.hpp` | `tests/vector_comparison_predicates.hpp` | Copied |
+| `utilities/include/alps/testing/unique_file.hpp`, `utilities/src/unique_file.cpp` | `tests/support/` in the repository root | Copied; shared test support |
+| `COPYRIGHT.TXT`, `LICENSE.TXT` | here | Copied |
 
 Not copied:
 
@@ -126,11 +123,3 @@ the first.
   use the jackknife.
 - `float` accumulators lose the mean and error after about 10⁶ samples.
 - `FullBinningAccumulator`s cannot be merged.
-
-## Citing
-
-ALPSCore's [ACKNOWLEDGE.TXT](ACKNOWLEDGE.TXT) asks publications that use the ALPS
-Core Libraries to cite M. Wallerberger et al., "Updated Core Libraries of the
-ALPS Project", [arXiv:1811.08331](https://arxiv.org/abs/1811.08331) (2018),
-alongside the ALPS paper. The ALPS citation catalog lists it under the
-`accumulators` component.

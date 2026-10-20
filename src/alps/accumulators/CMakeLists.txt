@@ -97,7 +97,7 @@ target_sources(alps_accumulators PUBLIC
     include/alps/accumulators/parameter.hpp
     include/alps/accumulators/wrapper_set.hpp
     include/alps/accumulators/wrappers.hpp)
-install(FILES ACKNOWLEDGE.TXT COPYRIGHT.TXT LICENSE.TXT
+install(FILES COPYRIGHT.TXT LICENSE.TXT
   DESTINATION ${CMAKE_INSTALL_DATADIR}/alps/licenses/accumulators
   COMPONENT libraries)
 
