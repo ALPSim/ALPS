@@ -29,17 +29,14 @@ ALPS's own files here:
 ## Provenance
 
 The imported revision is under the MIT license in [LICENSE.TXT](LICENSE.TXT).
-Every imported file refers to [COPYRIGHT.TXT](COPYRIGHT.TXT),
-[LICENSE.TXT](LICENSE.TXT) and [ACKNOWLEDGE.TXT](ACKNOWLEDGE.TXT), which are
-ALPSCore's top-level files, copied unchanged. Keep the notices when modifying
-these files.
+The imported copyright and license notices are retained in [COPYRIGHT.TXT](COPYRIGHT.TXT) and [LICENSE.TXT](LICENSE.TXT). The SDK installs both under `share/alps/licenses/mc/`. Publication pointers in imported comments have been removed; the source relationships below refer to the remaining code.
 
 | ALPSCore path | Here | Relationship |
 | --- | --- | --- |
-| `mc/include/alps/mc/*.hpp` (6 files) | `include/alps/mc/` | Copied unchanged, except that `mcbase.hpp` gains a virtual destructor (see below) |
-| `mc/src/*.cpp` (3 files) | `src/` | Copied unchanged |
-| `mc/test/*.cpp` (9 files) | `tests/` | Copied unchanged |
-| `COPYRIGHT.TXT`, `LICENSE.TXT`, `ACKNOWLEDGE.TXT` | here | Copied unchanged |
+| `mc/include/alps/mc/*.hpp` (6 files) | `include/alps/mc/` | Copied, except that `mcbase.hpp` gains a virtual destructor (see below) |
+| `mc/src/*.cpp` (3 files) | `src/` | Copied |
+| `mc/test/*.cpp` (9 files) | `tests/` | Copied |
+| `COPYRIGHT.TXT`, `LICENSE.TXT` | here | Copied |
 
 Not copied: ALPSCore's build files and `alps-mc.pc.in`. The CMake files and
 this README are ALPS's own.

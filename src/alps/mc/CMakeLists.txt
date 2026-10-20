@@ -21,7 +21,7 @@ target_sources(alps_mc PUBLIC
     include/alps/mc/stop_callback.hpp
     # ALPS's addition
     include/alps/progress_callback.hpp)
-install(FILES ACKNOWLEDGE.TXT COPYRIGHT.TXT LICENSE.TXT
+install(FILES COPYRIGHT.TXT LICENSE.TXT
   DESTINATION "${CMAKE_INSTALL_DATADIR}/alps/licenses/mc" COMPONENT libraries)
 
 # Public Python integration spellings survive the move to Python ownership.
