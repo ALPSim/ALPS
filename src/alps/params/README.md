@@ -107,7 +107,7 @@ notices when modifying these files.
 | `params/include/alps/params/*.hpp` (10 files) | `include/alps/params/` | Copied, except that three headers gain includes (see below) |
 | `params/src/*.cpp` (4 files) | `src/` | Copied, except `params.cpp` (see below) |
 | `params/test/*.cpp` (22 files), `params_test_support.hpp`, `dict_values_test.hpp` | `tests/` | Copied |
-| `common/deps/iniparser/` | `iniparser/` | Copied, without its `CMakeLists.txt` |
+| `common/deps/iniparser/src/`, `LICENSE`, `AUTHORS` | `iniparser/` | Copied; upstream build instructions and FAQs for files outside this integration are omitted |
 | `COPYRIGHT.TXT`, `LICENSE.TXT` | here | Copied |
 
 Not copied: the retired tests in `params/test/old/`, the two scripts that
