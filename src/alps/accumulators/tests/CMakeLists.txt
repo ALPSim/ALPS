@@ -1,5 +1,5 @@
 # Copyright (C) 2026 ALPS collaboration. SPDX-License-Identifier: MIT
-# ALPSCore's accumulators tests, copied unchanged, and ALPS's own
+# ALPSCore's accumulators tests, copied with publication pointers removed, and ALPS's own
 # ar1_calibration. The legacy_alea/ and legacy_accumulator/ directories hold
 # older NGS tests and are not built.
 foreach(name testharness assign_acc get_results add_accumulators count divide_accumulators
