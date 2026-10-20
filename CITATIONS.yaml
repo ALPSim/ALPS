@@ -17,14 +17,6 @@ components:
     name: ALPS libraries
     algorithm: []
     implementation: []
-  aleav2:
-    name: ALPS Core Libraries ALEA statistics
-    algorithm: []
-    implementation: [wallerberger2018alpscore]
-  gf:
-    name: ALPS Core Libraries Green's functions
-    algorithm: []
-    implementation: [wallerberger2018alpscore]
   scheduler:
     name: ALPS parallel Monte Carlo scheduler
     algorithm: []
