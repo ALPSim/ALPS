@@ -98,6 +98,7 @@ TEST(MaxEnt, LinearGridAndStopCallbacks) {
     ar << alps::make_pvp("/Error", errors);
   }
   std::remove(out_h5.c_str());
+  MaxEntSimulation::define_parameters(p);
 
   {
     MaxEntSimulation sim(p, out_h5);

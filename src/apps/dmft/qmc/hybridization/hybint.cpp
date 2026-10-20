@@ -20,10 +20,10 @@ interaction_matrix::interaction_matrix(const alps::params &p){
   n_orbitals_=p["N_ORBITALS"];
   val_.resize(n_orbitals_*n_orbitals_,0.);
   //if the parameter U_MATRIX is defined: read in the U_MATRIX from file
-  if(p.defined("U_MATRIX")){
+  if(!p["U_MATRIX"].cast<std::string>().empty()){
     if(p.defined("U") && !global_mpi_rank){ std::cout << "Warning::parameter U_MATRIX defined, ignoring parameter U" << std::flush << std::endl; };
     std::string ufilename=p["U_MATRIX"].cast<std::string>();
-    if(p.defined("UMATRIX_IN_HDF5") && p["UMATRIX_IN_HDF5"].cast<bool>()){//attempt to read from h5 archive
+    if(p["UMATRIX_IN_HDF5"].cast<bool>()){//attempt to read from h5 archive
       alps::hdf5::archive ar(ufilename, alps::hdf5::archive::READ);
       ar>>alps::make_pvp("/Umatrix",val_);
     }
@@ -41,7 +41,7 @@ interaction_matrix::interaction_matrix(const alps::params &p){
   }else{
     if(!p.defined("U")) throw std::invalid_argument("please specify either U (and, optionally, U' and J) or a file U_MATRIX in your parameter file");
     double U=(double)(p["U"]);
-    double J=(double)(p["J"]|0.);
+    double J=(double)(p["J"]);
     double Uprime = (p["U'"]|(U-2*J));
     assemble(U, Uprime, J);
   }

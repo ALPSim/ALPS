@@ -29,7 +29,7 @@ K_(p){
   segments_.resize(n_orbitals_);
   zero_order_orbital_occupied_.resize(n_orbitals_,false);
 //    std::cerr << " done\n";
-  use_retarded_interaction_=p.defined("RET_INT_K");
+  use_retarded_interaction_=!p["RET_INT_K"].cast<std::string>().empty();
   if(use_retarded_interaction_){
     double Kp0=K_.interpolate_deriv(0.0);//K'(0^+)
     U_.apply_shift(-2.*Kp0); //apply static shift caused by the retarded interaction

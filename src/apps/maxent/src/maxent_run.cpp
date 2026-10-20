@@ -24,8 +24,10 @@ bool stop_requested(boost::posix_time::ptime const& end_time) {
 }
 }
 
-void alps::solvers::maxent(alps::params const& parms, std::string const& output_file) {
+void alps::solvers::maxent(alps::params const& input, std::string const& output_file) {
+  alps::params parms(input);
+  MaxEntSimulation::define_parameters(parms);
   MaxEntSimulation simulation(parms, output_file);
   simulation.run(boost::bind(&stop_requested, boost::posix_time::second_clock::local_time()
-      + boost::posix_time::seconds(static_cast<int>(parms["MAX_TIME"] | 60))));
+      + boost::posix_time::seconds(static_cast<int>(parms["MAX_TIME"]))));
 }
