@@ -34,6 +34,9 @@ class CitationTests(unittest.TestCase):
     def test_current_catalog_excludes_alpscore_papers(self):
         # Scientific policy applies to the active catalog, not frozen result
         # snapshots or factual provenance of imported library code.
+        for component in ("aleav2", "gf", "accumulators", "params", "mc"):
+            self.assertNotIn(component, self.policy["components"])
+        self.assertNotIn("ALPS Core Libraries paper", (ROOT / "CHANGELOG.md").read_text())
         for key, record in self.references.items():
             with self.subTest(reference=key):
                 self.assertNotIn("alpscore", key.lower())
