@@ -11,10 +11,10 @@
 
 /* $Id$ */
 
-#include <alps/utility/cli.hpp>
+#include <alps/cli.hpp>
 #include <alps/model.h>
 #include <alps/lattice.h>
-#include <alps/utility/copyright.hpp>
+#include <alps/utilities/copyright.hpp>
 #include <alps/xml.h>
 #include <cstring>
 #include <iostream>

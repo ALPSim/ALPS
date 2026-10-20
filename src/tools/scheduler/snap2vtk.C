@@ -24,7 +24,7 @@
 #include <boost/math/constants/constants.hpp>
 #include <alps/osiris.h>
 #include <alps/scheduler/types.h>
-#include <alps/utility/vectorio.hpp>
+#include <alps/utilities/vectorio.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/regex.hpp>

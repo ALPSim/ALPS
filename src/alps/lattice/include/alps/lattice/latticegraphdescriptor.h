@@ -26,7 +26,7 @@
 #include <alps/lattice/hypercubic.h>
 #include <alps/lattice/coordinatelattice.h>
 #include <alps/lattice/coordinategraph.h>
-#include <alps/utility/vectorio.hpp>
+#include <alps/utilities/vectorio.hpp>
 
 #include <iostream>
 

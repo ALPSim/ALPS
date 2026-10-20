@@ -13,7 +13,7 @@
 
 #include <alps/ngs.hpp>
 #include <alps/multi_array.hpp>
-#include <alps/utility/resize.hpp>
+#include <alps/utilities/resize.hpp>
 #include <alps/hdf5/array.hpp>
 #include <alps/ngs/numeric/array.hpp>
 

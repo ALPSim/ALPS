@@ -43,3 +43,34 @@ changes, observable-set count/mean restoration, and all eleven Ising inverse
 temperatures from 0 to 1. Ising checks compare archived values and parameters to
 the simulation, verify finite uncertainties and exact physical bounds, and do
 not introduce probabilistic pass/fail thresholds.
+
+## ALPSCore conformance
+
+Tests ported from ALPSCore 7146b9e1 keep ALPSCore's copyright header and name
+their source and every change in a comment at the top. ALPSCore is MIT
+licensed; its copyright lines are
+"Copyright (C) 2012-18 University of Michigan" and "Copyright (C) 1998-14 ETH
+Zurich", and it asks publications to cite Wallerberger et al.,
+arXiv:1811.08331.
+
+| Test | Source | ALPS changes |
+| --- | --- | --- |
+| `hdf5_attributes` | `hdf5/test/hdf5_attributes.cpp` (with fix c7c64ca0) | ALPS temporary directory; cases for ALPS's `path/@name` spelling, a root-context attribute and deleting attributes |
+| `hdf5_open_strmode` | `hdf5/test/hdf5_open_strmode.cpp` (with fix 33e26902) | ALPS temporary directory; `"wl"` is valid in ALPS, so `"wx"` and `"R"` are the invalid modes; cases for combined letters and the single-letter constructors |
+| `hdf5_native_type` | `hdf5/test/hdf5_native_type.cpp` (with 4daa2da2) | none |
+| `hdf5_boost_optional` | `hdf5/test/hdf5_boost_optional.cpp` (with 7b5b7be5) | ALPS temporary directory; fixed values instead of ALPSCore's `testing::datapoint`; `TYPED_TEST_SUITE`; a case reading into an empty optional |
+| `hdf5_open_intmode` | `hdf5/test/hdf5_open_intmode.cpp` | ALPS temporary directory; the `WRITE|REPLACE` case ALPSCore left commented out is enabled |
+| `hdf5_large_array` | `hdf5/test/hdf5_large_array.cpp` | ALPS temporary directory; registered with `ALPS_BUILD_LARGE_MEMORY_TESTS` (about 4 GiB of memory) |
+| `hdf5_alpscore_fixture` | none; reads `alpscore/archive_7146b9e1.h5`, written by ALPSCore's archive | see [alpscore/README.md](alpscore/README.md) |
+
+Not ported:
+
+- The 13 ALPSCore tests that share a file name with an ALPS test
+  (`bool`, `complex`, `copy`, `exceptions`, `memory`, `misc`, `multiarchive`,
+  `omp`, `pair`, `real_complex_vec`, `replace`, `vecveccplx`, `vecvecdbl`).
+  Both come from the same ALPS 2 programs. ALPSCore's versions mostly print
+  values (0 or 1 assertions each); ALPS's assert them, as listed above.
+- `hdf5_io_types`: ALPS's generated type matrix (`type_check.cpp.in`, 154
+  types with `ALPS_BUILD_EXTENSIVE_TESTS`) covers its type lists.
+- `hdf5_tensor`: ALPS does not take the Eigen tensor adapter.
+

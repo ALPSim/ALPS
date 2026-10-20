@@ -12,7 +12,7 @@
 *
 *****************************************************************************/
 
-#include <alps/utility/vmusage.hpp>
+#include <alps/utilities/vmusage.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
 #include <iostream>

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 #include <alps/ngs/mcoptions.hpp>
 #include <alps/parseargs.hpp>
-#include <alps/utility/cli.hpp>
+#include <alps/cli.hpp>
 #include <stdexcept>
 
 int main() {

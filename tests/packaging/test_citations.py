@@ -31,6 +31,39 @@ class CitationTests(unittest.TestCase):
         for filename, value in (("CITATION.cff", self.cff), ("CITATIONS.yaml", self.policy)):
             (self.root / filename).write_text(yaml.safe_dump(value, allow_unicode=True), encoding="utf-8")
 
+    def test_current_catalog_excludes_alpscore_papers(self):
+        # Scientific policy applies to the active catalog, not frozen result
+        # snapshots or factual provenance of imported library code.
+        for component in ("aleav2", "gf", "accumulators", "params", "mc"):
+            self.assertNotIn(component, self.policy["components"])
+        self.assertNotIn("ALPS Core Libraries paper", (ROOT / "CHANGELOG.md").read_text())
+        for key, record in self.references.items():
+            with self.subTest(reference=key):
+                self.assertNotIn("alpscore", key.lower())
+                self.assertNotIn("alpscore", record.get("title", "").lower())
+                self.assertNotIn("core libraries of the alps", record.get("title", "").lower())
+                self.assertNotIn(record.get("doi", "").lower(), {
+                    "10.48550/arxiv.1811.08331", "10.1016/j.cpc.2018.12.022",
+                    "10.1016/j.cpc.2016.12.009",
+                })
+
+    def test_imported_publication_guidance_is_removed(self):
+        # Extend this list when an import lands; do not scan immutable fixtures
+        # or ban factual upstream names in provenance and legal notices.
+        roots = ("src/alps/aleav2", "src/alps/utilities", "src/alps/hdf5", "tests/support")
+        for relative in roots:
+            self.assertFalse((ROOT / relative / "ACKNOWLEDGE.TXT").exists(), relative)
+            for path in (ROOT / relative).rglob("*"):
+                if path.is_file() and (path.suffix in (".hpp", ".h", ".cpp", ".c", ".md")
+                                       or path.name == "CMakeLists.txt"):
+                    with self.subTest(path=path.relative_to(ROOT)):
+                        text = path.read_text(encoding="utf-8")
+                        self.assertNotIn("For use in publications, see", text)
+                        self.assertNotIn("ACKNOWLEDGE.TXT", text)
+        self.assertFalse((ROOT / "src/alps/aleav2/ACKNOWLEDGE.TXT").exists())
+        self.assertNotIn("ACKNOWLEDGE.TXT",
+                         (ROOT / "src/alps/aleav2/CMakeLists.txt").read_text())
+
     def test_paper_mappings_and_solver_separation(self):
         dmrg = generator.select_references(self.policy, self.framework, "dmrg")
         self.assertEqual(dmrg["algorithm"], ["white1992", "white1993", "schollwock2005", "hallberg2006"])
@@ -234,13 +267,13 @@ class CitationTests(unittest.TestCase):
                                 f"-DALPS_BUILD_APPLICATIONS={'OFF' if mode == 'libraries' else 'ON'}"],
                                check=True, capture_output=True)
                 expected = generator.cpp_data(self.policy, self.references, self.framework)
-                self.assertEqual((build / "generated/include/alps/utility/citations_data.inc").read_text(encoding="utf-8"), expected)
+                self.assertEqual((build / "generated/include/alps/utilities/citations_data.inc").read_text(encoding="utf-8"), expected)
                 prefix = self.root / ("install-" + mode)
                 subprocess.run(["cmake", "--install", str(build), "--prefix", str(prefix), "--component", "libraries"],
                                check=True, capture_output=True)
                 for filename in ("CITATION.cff", "CITATIONS.yaml", "CITATION.md"):
                     self.assertTrue((prefix / "share/alps" / filename).is_file())
-        data = build / "generated/include/alps/utility/citations_data.inc"
+        data = build / "generated/include/alps/utilities/citations_data.inc"
         before = data.read_text(encoding="utf-8")
         self.cff["preferred-citation"]["title"] = "Changed using only the catalog @DO_NOT_REPLACE@"
         self.save()

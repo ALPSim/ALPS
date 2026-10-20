@@ -15,7 +15,7 @@
 #define ALPS_ALEA_MCANALYZE_HPP
 
 #include <alps/config.h>
-#include <alps/utility/resize.hpp>
+#include <alps/utilities/resize.hpp>
 #include <alps/utility/set_zero.hpp>
 #include <alps/numeric/vector_functions.hpp>
 #include <alps/numeric/functional.hpp>
