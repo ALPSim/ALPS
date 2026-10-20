@@ -58,22 +58,19 @@ because CMake includes an installed SDK's headers as system headers.
 ## Provenance
 
 The imported revision is under the MIT license in [LICENSE.TXT](LICENSE.TXT).
-Every imported file refers to [COPYRIGHT.TXT](COPYRIGHT.TXT),
-[LICENSE.TXT](LICENSE.TXT) and [ACKNOWLEDGE.TXT](ACKNOWLEDGE.TXT), which are
-ALPSCore's top-level files, copied unchanged. The SDK installs them under
-`share/alps/licenses/gf/`. Keep the notices when modifying these files.
+The imported copyright and license notices are retained in [COPYRIGHT.TXT](COPYRIGHT.TXT) and [LICENSE.TXT](LICENSE.TXT). The SDK installs both under `share/alps/licenses/gf/`. Publication pointers in imported comments have been removed; the source relationships below refer to the remaining code.
 
 | ALPSCore path | Here | Relationship |
 | --- | --- | --- |
-| `gf/include/alps/gf/**` (18 headers) | `include/alps/gf/**` | Copied unchanged; `mpi_bcast.hpp` is installed only by MPI builds |
-| `gf/src/mesh.cpp` | `src/mesh.cpp` | Copied unchanged |
-| `gf/test/*.cpp`, `gf/test/*.hpp` (30 files) | `tests/` | Copied unchanged |
-| `utilities/include/alps/numeric/tensors.hpp`, `utilities/include/alps/numeric/tensors/*.hpp` (4 headers) | `include/alps/numeric/` | Copied unchanged |
-| `utilities/include/alps/type_traits/{are_all_integrals,common,index_sequence,tuple_traits}.hpp` | `include/alps/type_traits/` | Copied unchanged, except that `index_sequence.hpp` and `tuple_traits.hpp` gain an include (see below) |
-| `hdf5/include/alps/hdf5/tensor.hpp` | `include/alps/hdf5/tensor.hpp` | Copied unchanged |
-| `utilities/include/alps/testing/unique_file.hpp` | `tests/support/alps/testing/unique_file.hpp` | Copied unchanged |
-| `utilities/src/unique_file.cpp` | `tests/support/src/unique_file.cpp` | Copied unchanged |
-| `COPYRIGHT.TXT`, `LICENSE.TXT`, `ACKNOWLEDGE.TXT` | here | Copied unchanged |
+| `gf/include/alps/gf/**` (18 headers) | `include/alps/gf/**` | Copied; `mpi_bcast.hpp` is installed only by MPI builds |
+| `gf/src/mesh.cpp` | `src/mesh.cpp` | Copied |
+| `gf/test/*.cpp`, `gf/test/*.hpp` (30 files) | `tests/` | Copied |
+| `utilities/include/alps/numeric/tensors.hpp`, `utilities/include/alps/numeric/tensors/*.hpp` (4 headers) | `include/alps/numeric/` | Copied |
+| `utilities/include/alps/type_traits/{are_all_integrals,common,index_sequence,tuple_traits}.hpp` | `include/alps/type_traits/` | Copied, except that `index_sequence.hpp` and `tuple_traits.hpp` gain an include (see below) |
+| `hdf5/include/alps/hdf5/tensor.hpp` | `include/alps/hdf5/tensor.hpp` | Copied |
+| `utilities/include/alps/testing/unique_file.hpp` | `tests/support/alps/testing/unique_file.hpp` | Copied |
+| `utilities/src/unique_file.cpp` | `tests/support/src/unique_file.cpp` | Copied |
+| `COPYRIGHT.TXT`, `LICENSE.TXT` | here | Copied |
 
 ALPSCore keeps the tensors and type traits in its utilities module and
 `tensor.hpp` in its HDF5 module. In ALPS only GF uses them, so they live here, at
@@ -104,11 +101,3 @@ The test registration also differs:
   them on `ALPS_TEST_MPI_NPROC` ranks, 1 by default.
 - `gf_check_eigen` has no test cases, so it is compiled but not run.
 - `gf1_print_test`'s `TYPED_TEST_CASE` deprecation warning is silenced.
-
-## Citing
-
-ALPSCore's [ACKNOWLEDGE.TXT](ACKNOWLEDGE.TXT) asks publications that use the ALPS
-Core Libraries to cite M. Wallerberger et al., "Updated Core Libraries of the
-ALPS Project", [arXiv:1811.08331](https://arxiv.org/abs/1811.08331) (2018),
-alongside the ALPS paper. The ALPS citation catalog lists it under the `gf`
-component.
