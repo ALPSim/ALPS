@@ -62,3 +62,37 @@ TEST(ParallelMonteCarloRunner, CollectsAllRanksAndPersistsResults) {
         EXPECT_EQ(restored["VValue"].mean<std::vector<double>>(), vector);
     }
 }
+
+// collect_results() reduces each measured observable collectively. If only
+// some ranks measured, e.g. because the others were still thermalizing when
+// the run stopped, every rank must throw instead of some entering the
+// reduction and hanging.
+TEST(ParallelMonteCarloRunner, ThrowsOnEveryRankWhenOnlySomeRanksMeasured) {
+    alps::mpi::communicator world;
+    ASSERT_GE(world.size(), 2);
+    alps::params parameters;
+    if (world.rank() == 0)
+        parameters.supply("COUNT", "128").supply("SEED", "42");
+    alps::broadcast(world, parameters);
+    alps::mcmpiadapter<sum_simulation, every_step>::define_parameters(parameters);
+    ASSERT_TRUE(parameters.ok());
+    alps::mcmpiadapter<sum_simulation, every_step> simulation(parameters, world, every_step());
+    if (world.rank() == 0) {
+        simulation.update();
+        simulation.measure();
+    }
+    EXPECT_THROW(alps::collect_results(simulation), std::runtime_error);
+}
+
+TEST(ParallelMonteCarloRunner, CollectsEmptyResultsWhenNoRankMeasured) {
+    alps::mpi::communicator world;
+    alps::params parameters;
+    if (world.rank() == 0)
+        parameters.supply("COUNT", "128").supply("SEED", "42");
+    alps::broadcast(world, parameters);
+    alps::mcmpiadapter<sum_simulation, every_step>::define_parameters(parameters);
+    ASSERT_TRUE(parameters.ok());
+    alps::mcmpiadapter<sum_simulation, every_step> simulation(parameters, world, every_step());
+    const auto results = alps::collect_results(simulation);
+    EXPECT_FALSE(results.has("SValue"));
+}
